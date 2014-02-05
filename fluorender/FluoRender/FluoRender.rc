@@ -1,0 +1,114 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON1               ICON                    "FluoRender_icon.ico"
+
+PNG_ICON_LOGO							RCDATA			"logo.png"
+PNG_ICON_LOGO_SNOW						RCDATA			"logo_snow.png"
+PNG_ICON_LOGO_32							RCDATA			"icon_32.png"
+
+PNG_ICON_OPEN_VOLUME			RCDATA			"icon_open_volume.png"
+PNG_ICON_OPEN_PROJECT			RCDATA			"icon_open_project.png"
+PNG_ICON_SAVE_PROJECT			RCDATA			"icon_save_project.png"
+PNG_ICON_NEW_VIEW				RCDATA			"icon_new_view.png"
+PNG_ICON_SHOW_HIDE_UI			RCDATA			"icon_show_hide_ui.png"
+PNG_ICON_OPEN_MESH			RCDATA			"icon_open_mesh.png"
+PNG_ICON_EDIT				RCDATA			"icon_edit.png"
+PNG_ICON_RECORDER				RCDATA			"icon_recorder.png"
+PNG_ICON_SETTINGS				RCDATA			"icon_settings.png"
+PNG_ICON_CHECK_UPDATES			RCDATA			"icon_check_updates.png"
+PNG_ICON_TWITTER				RCDATA			"icon_twitter.png"
+PNG_ICON_FACEBOOK				RCDATA			"icon_facebook.png"
+PNG_ICON_ABOUT				RCDATA			"icon_about.png"
+
+PNG_LISTICON_DELETE		RCDATA			"listicon_delete.png"
+PNG_LISTICON_RENAME		RCDATA			"listicon_rename.png"
+PNG_LISTICON_SAVE			RCDATA			"listicon_save.png"
+PNG_LISTICON_VIEW			RCDATA			"listicon_view.png"
+PNG_LISTICON_DELALL		RCDATA			"listicon_delall.png"
+PNG_LISTICON_TOGGLE		RCDATA			"listicon_toggle.png"
+PNG_LISTICON_GROUP		RCDATA			"listicon_addgroup.png"
+PNG_LISTICON_MGROUP		RCDATA			"listicon_addmgroup.png"
+PNG_LISTICON_BAKE		RCDATA			"listicon_bake.png"
+
+PNG_LISTICON_BRUSHAPPEND		RCDATA			"listicon_brushappend.png"
+PNG_LISTICON_BRUSHDESEL			RCDATA			"listicon_brushdesel.png"
+PNG_LISTICON_BRUSHCLEAR			RCDATA			"listicon_brushclear.png"
+PNG_LISTICON_BRUSHCREATE		RCDATA			"listicon_brushcreate.png"
+PNG_LISTICON_BRUSHDIFFUSE		RCDATA			"listicon_brushdiffuse.png"
+PNG_LISTICON_BRUSHERASE			RCDATA			"listicon_brusherase.png"
+
+PNG_LISTICON_QMARK					RCDATA			"listicon_qmark.png"
+
+PNG_LISTICON_LOCATOR				RCDATA			"listicon_locator.png"
+PNG_LISTICON_ADDRULER				RCDATA			"listicon_addruler.png"
+PNG_LISTICON_RULEREDIT			RCDATA			"listicon_ruleredit.png"
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
