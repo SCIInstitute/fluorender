@@ -1,1 +1,7 @@
 *.svn
+fluorender/FluoRender/FluoRender.opensdf
+fluorender/FluoRender/FluoRender.sdf
+fluorender/FluoRender/FluoRender.vcxproj.user
+fluorender/FluoRender/ipch/
+fluorender/FluoRender/x64
+fluorender/wxWidgets/
