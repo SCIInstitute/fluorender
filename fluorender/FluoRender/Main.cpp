@@ -105,8 +105,8 @@ bool VRenderApp::OnInit()
 		}
 	}
 
-	wxStandardPaths paths;
-	wxString path = paths.GetExecutablePath();
+	//wxStandardPaths paths;
+	wxString path = wxStandardPaths::Get().GetExecutablePath();
 	int sep = path.Find('\\', true);
 	if (sep != wxNOT_FOUND)
 	{
