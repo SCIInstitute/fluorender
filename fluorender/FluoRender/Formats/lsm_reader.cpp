@@ -387,6 +387,10 @@ void LSMReader::ReadLsmInfo(FILE* pfile, unsigned char* pdata, unsigned int size
 					m_max_value = 4095.0;
 					m_scalar_scale = 65535.0 / m_max_value;
 					break;
+				case 3:	//16-bit unsigned integer
+					m_max_value = 65535.0;
+					m_scalar_scale = 1.0;
+					break;
 				default://hopefully not
 					m_max_value = 255.0;
 					m_scalar_scale = 1.0;
@@ -771,6 +775,7 @@ Nrrd* LSMReader::Convert(int t, int c, bool get_max)
 			}
 			break;
 		case 2://16-bit
+		case 3:
 			{
 				unsigned short *val = new (std::nothrow) unsigned short[m_x_size*m_y_size*m_slice_num];
 				ChannelInfo *cinfo = &m_lsm_info[t][c];
