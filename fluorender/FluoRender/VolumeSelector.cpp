@@ -225,12 +225,7 @@ int VolumeSelector::CompAnalysis(double min_voxels, double max_voxels, double th
 	else
 		m_annotations = 0;
 
-	if (m_prog_diag)
-	{
-		m_prog_diag->Update(100);
-		delete m_prog_diag;
-		m_prog_diag = 0;
-	}
+	delete m_prog_diag;
 
 	return return_val;
 }
@@ -891,12 +886,7 @@ int VolumeSelector::NoiseAnalysis(double min_voxels, double max_voxels, double b
 	m_vd->GetVR()->return_label();
 	int return_val = CompIslandCount(min_voxels, max_voxels);
 
-	if (m_prog_diag)
-	{
-		m_prog_diag->Update(100);
-		delete m_prog_diag;
-		m_prog_diag = 0;
-	}
+	delete m_prog_diag;
 
 	return return_val;
 }
@@ -1045,13 +1035,7 @@ void VolumeSelector::NoiseRemoval(int iter, double thresh, int mode)
 
 		m_result_vols.push_back(vd_new);
 	}
-
-	if (m_prog_diag)
-	{
-		m_prog_diag->Update(100);
-		delete m_prog_diag;
-		m_prog_diag = 0;
-	}
+	delete m_prog_diag;
 }
 
 void VolumeSelector::Test()

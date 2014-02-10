@@ -256,7 +256,6 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 		vr_frame->UpdateTree();
 	}
 
-	prog_diag->Update(100);
 	delete prog_diag;
 
 }

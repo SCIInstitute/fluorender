@@ -113,7 +113,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>.\;..\wxWidgets\include;..\wxWidgets\include\msvc;..\teem;..\teem\air;..\teem\hest;..\teem\biff;..\teem\nrrd;..\LibTiff;..\glew;..\Wacom\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;TEEM_32BIT=0;TEEM_DIO=0;TEEM_ENDIAN=1234;TEEM_QNANHIBIT=1;STATIC_COMPILE;_FREE_VERSION_=0;LICENSE_ADDRESS="-1";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;TEEM_32BIT=0;TEEM_DIO=0;TEEM_ENDIAN=1234;TEEM_QNANHIBIT=1;STATIC_COMPILE;_FREE_VERSION_=0;LICENSE_ADDRESS="-1";_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -123,7 +123,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>wxmsw29ud_core.lib;wxmsw29ud_gl.lib;wxbase29ud.lib;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;IPHLPAPI.lib;Ws2_32.lib;odbc32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wxmsw30ud_core.lib;wxmsw30ud_gl.lib;wxbase30ud.lib;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;IPHLPAPI.lib;Ws2_32.lib;odbc32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)_64.exe</OutputFile>
       <AdditionalLibraryDirectories>..\wxWidgets\lib\vc_x64_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -162,7 +162,7 @@
       <Optimization>Full</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>.\;..\wxWidgets\include;..\wxWidgets\include\msvc;..\teem;..\teem\air;..\teem\hest;..\teem\biff;..\teem\nrrd;..\LibTiff;..\glew;..\Wacom\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;TEEM_32BIT=0;TEEM_DIO=0;TEEM_ENDIAN=1234;TEEM_QNANHIBIT=1;STATIC_COMPILE;_FREE_VERSION_=0;LICENSE_ADDRESS="-1";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;TEEM_32BIT=0;TEEM_DIO=0;TEEM_ENDIAN=1234;TEEM_QNANHIBIT=1;STATIC_COMPILE;_FREE_VERSION_=0;LICENSE_ADDRESS="-1";_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>

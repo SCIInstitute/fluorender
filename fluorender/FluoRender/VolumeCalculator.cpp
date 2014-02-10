@@ -336,10 +336,5 @@ void VolumeCalculator::FillHoles()
 			prog_diag->Update(95*(progress+1)/total_prg);
 		}
 	}
-
-	if (prog_diag)
-	{
-		prog_diag->Update(100);
-		delete prog_diag;
-	}
+	delete prog_diag;
 }

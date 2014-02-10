@@ -2,9 +2,12 @@
 #define _TIF_READER_H_
 
 #include <Formats\base_reader.h>
-#include <stdio.h>
+#include <cstdio>
 #include <windows.h>
 #include <vector>
+#include <cstdint>
+#include <fstream>
+#include <iostream>
 #include <tiffio.h>
 
 using namespace std;
@@ -22,6 +25,24 @@ public:
 	void SetTimeId(wstring &id);
 	wstring GetTimeId();
 	void Preprocess();
+	/**
+	 * Finds the number of samples in a pixel of a tiff.
+	 * @param name The name of the tiff file to read;
+	 * @return The number of samples in a pixel.
+	 */
+	uint32_t GetSamplesPerPixel(std::wstring name);
+	/**
+	 * This method swaps the byte order of a short.
+	 * @param num The short to swap byte order.
+	 * @return The short with bytes swapped.
+	 */
+	uint16_t SwapShort(uint16_t num);
+	/**
+	 * This method swaps the byte order of a word.
+	 * @param num The word to swap byte order.
+	 * @return The word with bytes swapped.
+	 */
+	uint32_t SwapWord(uint32_t num);
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
 	int LoadOffset(int offset);

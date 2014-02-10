@@ -5,6 +5,7 @@
 
 wxBitmap* PNG_RES::CreateBitmapFromPngResource(const wxString& t_name)
 {
+	wxLogNull logNo;
 	wxBitmap* r_bitmapPtr = 0;
 
 	char* a_data = 0;

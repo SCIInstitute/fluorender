@@ -886,7 +886,6 @@ void VolumeData::Save(wxString &filename, int mode, bool bake, bool compress)
 				delete [](baked_data->data);
 				nrrdNix(baked_data);
 
-				prg_diag->Update(100);
 				delete prg_diag;
 			}
 			else

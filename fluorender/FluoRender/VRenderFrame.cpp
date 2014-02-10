@@ -797,12 +797,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
 
 		if (enable_4d)
 			m_movie_view->SetMovieType(3);
-
-		if (prg_diag)
-		{
-			prg_diag->Update(100);
-			delete prg_diag;
-		}
+		delete prg_diag;
 	}
 }
 
@@ -888,10 +883,7 @@ void VRenderFrame::LoadMeshes(wxArrayString files, VRenderView* vrv)
 	if (vrv)
 		vrv->InitView(INIT_BOUNDS|INIT_CENTER);
 
-	prg_diag->Update(100);
-	if (prg_diag)
-		delete prg_diag;
-
+	delete prg_diag;
 }
 
 void VRenderFrame::OnOpenMesh(wxCommandEvent& WXUNUSED(event))
@@ -2466,11 +2458,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 	fconfig.Save(os);
 	UpdateList();
 
-	if (prg_diag)
-	{
-		prg_diag->Update(100);
-		delete prg_diag;
-	}
+	delete prg_diag;
 }
 
 void VRenderFrame::OpenProject(wxString& filename)
@@ -3823,12 +3811,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 
 	if (m_movie_view)
 		m_movie_view->SetView(0);
-
-	if (prg_diag)
-	{
-		prg_diag->Update(100);
-		delete prg_diag;
-	}
+	delete prg_diag;
 }
 
 void VRenderFrame::OnSettings(wxCommandEvent& WXUNUSED(event))
