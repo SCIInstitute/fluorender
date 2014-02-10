@@ -26,11 +26,15 @@ public:
 	wstring GetTimeId();
 	void Preprocess();
 	/**
-	 * Finds the number of samples in a pixel of a tiff.
+	 * Finds the tag value given by \@tag of a tiff.
 	 * @param name The name of the tiff file to read;
-	 * @return The number of samples in a pixel.
+	 * @param tag The tag to look for in the header.
+	 * @warn If the result is not 16 or 32 bit int, it is
+	 *       cast into a 32 bit int. Caller must cast it
+	 *       back to correct type, such as float for XResolution.
+	 * @return The value in the header denoted by tag.
 	 */
-	uint32_t GetSamplesPerPixel(std::wstring name);
+	uint32_t GetTiffField(std::wstring name, const int tag);
 	/**
 	 * This method swaps the byte order of a short.
 	 * @param num The short to swap byte order.
@@ -43,6 +47,12 @@ public:
 	 * @return The word with bytes swapped.
 	 */
 	uint32_t SwapWord(uint32_t num);
+	/**
+	 * Determines the number of pages in a tiff.
+	 * @param name The name of the tiff file.
+	 * @return The number of pages in the file.
+	 */
+	uint32_t GetNumTiffPages(std::wstring name);
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
 	int LoadOffset(int offset);
@@ -108,6 +118,36 @@ private:
 
 	//time sequence id
 	wstring m_time_id;
+	/** The tiff tag for subfile type */
+	static const int kSubFileTypeTag = 254;
+	/** The tiff tag for image width */
+	static const int kImageWidthTag = 256;
+	/** The tiff tag for image length */
+	static const int kImageLengthTag = 257;
+	/** The tiff tag for bits per sample */
+	static const int kBitsPerSampleTag = 258;
+	/** The tiff tag for image description */
+	static const int kImageDescriptionTag = 270;
+	/** The tiff tag for strip offsets */
+	static const int kStripOffsetsTag = 273;
+	/** The tiff tag for Samples per pixel */
+	static const int kSamplesPerPixelTag = 277;
+	/** The tiff tag for rows per strip */
+	static const int kRowsPerStripTag = 278;
+	/** The tiff tag for strip bytes count */
+	static const int kStripBytesCountTag = 279;
+	/** The tiff tag for x resolution */
+	static const int kXResolutionTag = 282;
+	/** The tiff tag for y resolution */
+	static const int kYResolutionTag = 283;
+	/** The BYTE type */
+	static const char kByte = 1;
+	/** The SHORT type */
+	static const char kShort = 3;
+	/** The LONG type */
+	static const char kLong = 4;
+	/** The RATIONAL type */
+	static const char kRational = 5;
 
 private:
 	bool IsNewBatchFile(wstring name);

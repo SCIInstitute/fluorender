@@ -252,30 +252,20 @@ void TIFReader::Preprocess()
 		wstring tiff_name = m_4d_seq[m_cur_time].slices[0].slice;
 		if (tiff_name.size()>0)
 		{
-			m_chan_num = GetSamplesPerPixel(tiff_name);
+			m_chan_num = GetTiffField(tiff_name,kSamplesPerPixelTag);
 		}
 		else m_chan_num = 0;
 	}
 	else m_chan_num = 0;
 }
 
-uint32_t TIFReader::GetSamplesPerPixel(std::wstring name) 
+uint32_t TIFReader::GetTiffField(std::wstring name, const int in_tag) 
 {
-	std::string nname;
-	for(int i = 0; i < name.size(); i++) {
-		if (name.at(i) == '\\') {
-			nname.push_back('\\');
-			nname.push_back('\\');
-		} else {
-			nname.push_back(name.at(i));
-		}
-	}
 	std::ifstream is(name, std::ifstream::binary);
 	is.seekg(2,is.beg);
 	uint16_t tiff_num=0;
 	is.read((char*)&tiff_num,sizeof(uint16_t));
-	uint16_t tmp = SwapShort(tiff_num);
-	bool swap =  tmp == 42;
+	bool swap =  SwapShort(tiff_num) == 42;
 	if (tiff_num == 42 || swap) {
 		//find the first IFD block/page
 		is.seekg(4,is.beg);
@@ -294,14 +284,35 @@ uint32_t TIFReader::GetSamplesPerPixel(std::wstring name)
 			//get the tag of entry
 			is.read((char*)&tag,sizeof(uint16_t));
 			if (swap) tag = SwapShort(tag);
-			if (tag == 277) {
-				// This is the samplesperpixel tag, grab and go.
+			if (tag == in_tag) {
+				//find the type
+				is.seekg(ifd_offset+2+12*i+2,is.beg);
+				uint16_t type=0;
+				is.read((char*)&type,sizeof(uint16_t));
+				if (swap) type = SwapShort(type);
+				// This is the correct tag, grab and go.
 				is.seekg(ifd_offset+2+12*i+8,is.beg);
-				uint16_t chan_num=0;
-				is.read((char*)&chan_num,sizeof(uint16_t));
-				if (swap) chan_num = SwapShort(chan_num);
+				uint32_t answer=0;
+				if (type == kByte) {
+					uint8_t value=0;
+					is.read((char*)&value,sizeof(uint8_t));
+					answer = static_cast<uint32_t>(value);
+				} else if (type == kShort) {
+					uint16_t value=0;
+					is.read((char*)&value,sizeof(uint16_t));
+					if (swap) value = SwapShort(value);
+					answer = static_cast<uint32_t>(value);
+				} else if (type == kLong) {
+					uint32_t value=0;
+					is.read((char*)&value,sizeof(uint32_t));
+					if (swap) value = SwapWord(value);
+					answer = value;
+				} else if (type == kRational) {
+					//TODO
+					exit(0);
+				} else { exit(0); }
 				is.close();
-				return chan_num;
+				return answer;
 			}
 		}
 	} 
@@ -560,6 +571,59 @@ bool TIFReader::tif_slice_sort(const SliceInfo& info1, const SliceInfo& info2)
 	return info1.slicenumber < info2.slicenumber;
 }
 
+uint32_t TIFReader::GetNumTiffPages(std::wstring name) 
+{
+	uint32_t count = 0;
+	std::ifstream is(name, std::ifstream::binary);
+	is.seekg(2,is.beg);
+	uint16_t tiff_num=0;
+	is.read((char*)&tiff_num,sizeof(uint16_t));
+	bool swap =  SwapShort(tiff_num) == 42;
+	if (tiff_num == 42 || swap) {
+		//find the first IFD block/page
+		is.seekg(4,is.beg);
+		while (true) {
+			uint32_t ifd_offset=0;
+			is.read((char*)&ifd_offset,sizeof(uint32_t));
+			//go to the first IFD block/page
+			if (swap) ifd_offset = SwapWord(ifd_offset);
+			//stop if there are no more directories/pages
+			if (ifd_offset == 0) break;
+			is.seekg(ifd_offset,is.beg);
+			uint16_t num_entries=0;
+			//how many entries are there?
+			is.read((char*)&num_entries,sizeof(uint16_t));
+			if (swap) num_entries = SwapShort(num_entries);
+			bool thumbnail = false;
+			for(size_t i = 0; i < num_entries; i++) {
+				is.seekg(ifd_offset+2+12*i,is.beg);
+				uint16_t tag=0;
+				//get the tag of entry
+				is.read((char*)&tag,sizeof(uint16_t));
+				if (swap) tag = SwapShort(tag);
+				if (tag == kSubFileTypeTag) {
+					//find the type
+					is.seekg(ifd_offset+2+12*i+2,is.beg);
+					uint16_t type=0;
+					is.read((char*)&type,sizeof(uint16_t));
+					if (swap) type = SwapShort(type);
+					// This is the correct tag, grab and go.
+					is.seekg(ifd_offset+2+12*i+8,is.beg);
+					uint32_t value=0;
+					is.read((char*)&value,sizeof(uint32_t));
+					if (swap) value = SwapWord(value);
+					if (value == 1) thumbnail = true;
+					break;
+				}
+			}
+			if (!thumbnail) count++;
+			is.seekg(ifd_offset+2+12*num_entries,is.beg);
+		} 
+	}
+	is.close();
+	return count;
+}
+
 Nrrd* TIFReader::ReadSingleTiff(std::wstring filename, int c, bool get_max)
 {
 	TIFF* infile = TIFFOpenW(filename.c_str(), "r");
@@ -567,45 +631,26 @@ Nrrd* TIFReader::ReadSingleTiff(std::wstring filename, int c, bool get_max)
 		return 0;
 	int numPages = 0;
 	if (get_max)
-	{
-		do
-		{
-			unsigned int subfiletype = 0;
-			TIFFGetField(infile, TIFFTAG_SUBFILETYPE, &subfiletype);
-			if (subfiletype == 1)	//this is a thumbnail. skip
-				continue;
-			numPages++;
-		}
-		while (TIFFReadDirectory(infile));
-		TIFFClose(infile);
-		infile = TIFFOpenW(filename.c_str(), "r");
-		if (!infile)
-			return 0;
-	}
+		numPages = GetNumTiffPages(filename);
 	else
 		numPages = m_slice_num;
 
-	uint32_t width;
-	uint32_t height;
-	TIFFGetField(infile, TIFFTAG_IMAGEWIDTH, &width);
-	TIFFGetField(infile, TIFFTAG_IMAGELENGTH, &height);
-	uint16 bits;
-	TIFFGetField(infile, TIFFTAG_BITSPERSAMPLE, &bits);
-	uint16 samples;
-	TIFFGetField(infile, TIFFTAG_SAMPLESPERPIXEL, &samples);
+	uint32_t width = GetTiffField(filename,kImageWidthTag);
+	uint32_t height = GetTiffField(filename,kImageLengthTag);
+	uint16 bits = GetTiffField(filename,kBitsPerSampleTag);
+	uint16 samples = GetTiffField(filename,kSamplesPerPixelTag);
 	float x_res = 0.0;
 	float y_res = 0.0;
 	double z_res = 0.0;
 	TIFFGetField(infile, TIFFTAG_XRESOLUTION, &x_res);
 	TIFFGetField(infile, TIFFTAG_YRESOLUTION, &y_res);
-	uint32_t rowsperstrip;
-	TIFFGetField(infile, TIFFTAG_ROWSPERSTRIP, &rowsperstrip);
+	uint32_t rowsperstrip = GetTiffField(filename,kRowsPerStripTag);
 	uint32_t strip_size = rowsperstrip * width * samples * (bits/8);
 	char* img_desc = 0;
 	TIFFGetField(infile, TIFFTAG_IMAGEDESCRIPTION, &img_desc);
 	if (img_desc)
 	{
-		string desc = string ((char*)img_desc);
+		std::string desc = std::string ((char*)img_desc);
 		size_t start = desc.find("spacing=");
 		if (start!=-1)
 		{
