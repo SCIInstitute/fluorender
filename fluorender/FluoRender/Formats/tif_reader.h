@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <fstream>
 #include <iostream>
-#include <tiffio.h>
+#include <stdexcept>
 
 using namespace std;
 
@@ -26,15 +26,46 @@ public:
 	wstring GetTimeId();
 	void Preprocess();
 	/**
-	 * Finds the tag value given by \@tag of a tiff.
-	 * @param name The name of the tiff file to read;
+	 * Finds the tag value given by \@tag of a tiff on the current page.
 	 * @param tag The tag to look for in the header.
-	 * @warn If the result is not 16 or 32 bit int, it is
-	 *       cast into a 32 bit int. Caller must cast it
-	 *       back to correct type, such as float for XResolution.
+	 * @warn If the result is not 8, 16 or 32 bit int, 
+	 *       it will be a data assigned to pointer below.
+	 *       The caller must allocate necessary memory.
+	 * @param pointer The pointer to the longer data (can be null, 
+	 *        and it is not used if expected result is an int).
+	 * @param size The maximum number of bytes to copy into pointer.
+	 * @throws An exception if a tiff is not open.
 	 * @return The value in the header denoted by tag.
 	 */
-	uint32_t GetTiffField(std::wstring name, const int tag);
+	uint32_t GetTiffField(
+		const int tag,
+		void * pointer, size_t size);
+	/**
+	 * Reads a strip of data from a tiff file.
+	 * @param page The page to read from.
+	 * @param strip Which strip to read from the file.
+	 * @param data The location of the buffer to store data.
+	 * @param size The number of bytes to read from the strip.
+	 * @throws An exception if a tiff is not open.
+	 */
+	void GetTiffStrip( 
+		uint32_t page,
+		uint32_t strip,
+		void * data, size_t size);
+	/**
+	 * Opens the tiff stream.
+	 * @param name The filename of the tiff.
+	 * @throws An exception when the opening fails.
+	 */
+	void OpenTiff(std::wstring name);
+	/**
+	 * Closes the tiff stream if it is open.
+	 */
+	void CloseTiff();
+	/**
+	 * Resets the tiff reader to the start of the file.
+	 */
+	void ResetTiff();
 	/**
 	 * This method swaps the byte order of a short.
 	 * @param num The short to swap byte order.
@@ -49,10 +80,10 @@ public:
 	uint32_t SwapWord(uint32_t num);
 	/**
 	 * Determines the number of pages in a tiff.
-	 * @param name The name of the tiff file.
+	 * @throws An exception if a tiff is not open.
 	 * @return The number of pages in the file.
 	 */
-	uint32_t GetNumTiffPages(std::wstring name);
+	uint32_t GetNumTiffPages();
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
 	int LoadOffset(int offset);
@@ -118,6 +149,14 @@ private:
 
 	//time sequence id
 	wstring m_time_id;
+	/** The input stream for reading the tiff */
+	std::ifstream tiff_stream;
+	/** This keeps track of what page we are on in the tiff */
+	uint32_t current_page_;
+	/** This is the offset of the page we are currently on */
+	uint32_t current_offset_;
+	/** Tells us if the data is little endian */
+	bool swap_;
 	/** The tiff tag for subfile type */
 	static const int kSubFileTypeTag = 254;
 	/** The tiff tag for image width */
@@ -140,8 +179,12 @@ private:
 	static const int kXResolutionTag = 282;
 	/** The tiff tag for y resolution */
 	static const int kYResolutionTag = 283;
+	/** The tiff tag number of entries on current page */
+	static const int kNextPageOffsetTag = 500;
 	/** The BYTE type */
 	static const char kByte = 1;
+	/** The ASCII type */
+	static const char kASCII = 2;
 	/** The SHORT type */
 	static const char kShort = 3;
 	/** The LONG type */
