@@ -216,10 +216,8 @@ private:
 
 	static bool tif_sort(const TimeDataInfo& info1, const TimeDataInfo& info2);
 	static bool tif_slice_sort(const SliceInfo& info1, const SliceInfo& info2);
-	//read single tiff file
-	Nrrd* ReadSingleTiff(wstring filename, int c, bool get_max);
-	//read tiff sequence
-	Nrrd* ReadSequenceTiff(vector<SliceInfo> &filelist, int c, bool get_max);
+	//read tiff
+	Nrrd* ReadTiff(vector<SliceInfo> &filelist, int c, bool get_max);
 };
 
 #endif//_TIF_READER_H_

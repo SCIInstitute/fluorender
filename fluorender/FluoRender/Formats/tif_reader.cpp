@@ -577,12 +577,9 @@ Nrrd* TIFReader::Convert(int t, int c, bool get_max)
 
 	Nrrd* data = 0; 
 	TimeDataInfo chan_info = m_4d_seq[t];
-	m_data_name = chan_info.slices[0].slice.substr(chan_info.slices[0].slice.find_last_of(L'\\')+1);
-	if (chan_info.type == 0)	//single file
-		data = ReadSingleTiff(chan_info.slices[0].slice, c, get_max);
-	else	//sequence tiff
-		data = ReadSequenceTiff(chan_info.slices, c, get_max);
-
+	m_data_name = chan_info.slices[0].slice.substr(
+		chan_info.slices[0].slice.find_last_of(L'\\')+1);
+	data = ReadTiff(chan_info.slices, c, get_max);
 	m_cur_time = t;
 	return data;
 }
@@ -622,11 +619,8 @@ uint32_t TIFReader::GetNumTiffPages()
 	return count;
 }
 
-void TIFReader::GetTiffStrip(
-		uint32_t page,
-		uint32_t strip,
-		void * data,
-		uint32_t strip_size) 
+void TIFReader::GetTiffStrip(uint32_t page, uint32_t strip,
+							 void * data, uint32_t strip_size) 
 {
 	//make sure we are on the correct page, 
 	//reset if ahead
@@ -712,219 +706,26 @@ void TIFReader::OpenTiff(std::wstring name)
 
 void TIFReader::CloseTiff() { if (tiff_stream.is_open()) tiff_stream.close(); }
 
-Nrrd* TIFReader::ReadSingleTiff(std::wstring filename, int c, bool get_max)
-{
-	OpenTiff(filename);
-	uint32_t numPages = 0;
-	if (get_max)
-		numPages = GetNumTiffPages();
-	else
-		numPages = m_slice_num;
-
-	uint32_t width = GetTiffField(kImageWidthTag,nullptr,0);
-	uint32_t height = GetTiffField(kImageLengthTag,nullptr,0);
-	uint16 bits = GetTiffField(kBitsPerSampleTag,nullptr,0);
-	uint16 samples = GetTiffField(kSamplesPerPixelTag,nullptr,0);
-	float x_res = 0.0, x_res2 = 0.0;
-	float y_res = 0.0, y_res2 = 0.0;
-	double z_res = 0.0;
-	GetTiffField( kXResolutionTag, &x_res,sizeof(float));
-	GetTiffField( kYResolutionTag, &y_res,sizeof(float));
-	uint32_t rowsperstrip = GetTiffField(kRowsPerStripTag,nullptr,0);
-	uint32_t strip_size = rowsperstrip * width * samples * (bits/8);
-	char desc[256];
-	GetTiffField(kImageDescriptionTag,desc,256);
-	std::string ss = std::string ((char*)desc);
-	size_t start = ss.find("spacing=");
-	if (start!=-1)
-	{
-		string spacing = ss.substr(start+8);
-		size_t end = spacing.find("\n");
-		if (end != -1)
-		{
-			spacing = spacing.substr(0, end);
-			z_res = atof(spacing.c_str());
-		}
-	}
-
-	if (x_res>0.0 && y_res>0.0 && z_res>0.0)
-	{
-		m_xspc = 1.0/x_res;
-		m_yspc = 1.0/y_res;
-		m_zspc = z_res;
-		m_valid_spc = true;
-	}
-	else
-	{
-		m_xspc = 1.0;
-		m_yspc = 1.0;
-		m_zspc = 1.0;
-		m_valid_spc = false;
-	}
-	switch (m_resize_type)
-	{
-	case 0:
-		m_slice_num = numPages;
-		m_x_size = width;
-		m_y_size = height;
-		break;
-	case 1:
-		m_slice_num = numPages;
-		if (m_alignment > 1)
-		{
-			m_x_size = (width/m_alignment+(width%m_alignment?1:0))*m_alignment;
-			m_y_size = (height/m_alignment+(height%m_alignment?1:0))*m_alignment;
-		}
-		break;
-	case 2://not implemented
-		m_slice_num = numPages;
-		m_x_size = width;
-		m_y_size = height;
-		break;
-	}
-	int pagepixels = m_x_size*m_y_size;
-
-	Nrrd *nrrdout = nrrdNew();
-
-	//allocate memory
-	uint16_t *val16 = 0;
-	uint8_t *val8 = 0;
-
-	if (bits == 16)
-	{
-		long long total_size = (long long)m_x_size*(long long)m_y_size*(long long)numPages;
-		val16 = new (std::nothrow) uint16_t[total_size];
-		if (!val16)
-			return 0;
-	}
-	else
-	{
-		long long total_size = (long long)m_x_size*(long long)m_y_size*(long long)numPages;
-		val8 = new (std::nothrow) uint8_t[total_size];
-		if (!val8)
-			return 0;
-	}
-
-	int max_value = 0;
-	bool use_max_value = false;
-
-	void* buf = 0;
-	if (samples > 1)
-		buf = malloc(strip_size);
-
-	for (uint32_t pageindex = 0; pageindex < numPages; pageindex++)
-	{
-		//this is a thumbnail, skip
-		if (GetTiffField(kSubFileTypeTag,nullptr,0) == 1)	
-			continue;
-		uint32_t num_strips = GetTiffField(kStripOffsetsTag,nullptr,kCount);
-		for (uint32_t strip = 0; strip < num_strips; strip++)
-		{
-			long long valindex;
-			int indexinpage;
-			if (bits == 16)
-			{
-				if (samples > 1)
-				{
-					GetTiffStrip(pageindex, strip, buf,strip_size);
-					int num_pixels = strip_size/samples/2;
-					indexinpage = strip*num_pixels;
-					valindex = pageindex*pagepixels + indexinpage;
-					for (int i=0; i<num_pixels; i++)
-					{
-						if (indexinpage++ >= pagepixels)
-							break;
-						memcpy(val16+valindex, (uint16_t*)buf+samples*i+c, sizeof(uint16_t));
-						if (get_max && val16[valindex] > max_value)
-							max_value = val16[valindex];
-					}
-					use_max_value = true;
-				}
-				else
-				{
-					valindex = pageindex*pagepixels + strip*strip_size/2;
-					GetTiffStrip(pageindex, strip, val16+valindex,strip_size);
-				}
-			}
-			else if (bits == 8)
-			{
-				if (samples > 1)
-				{
-					GetTiffStrip(pageindex, strip, buf,strip_size);
-					int num_pixels = strip_size/samples;
-					indexinpage = strip*num_pixels;
-					valindex = pageindex*pagepixels + indexinpage;
-					for (int i=0; i<num_pixels; i++)
-					{
-						if (indexinpage++ >= pagepixels)
-							break;
-						memcpy(val8+valindex, (uint8_t*)buf+samples*i+c, sizeof(uint8_t));
-						valindex++;
-					}
-				}
-				else
-				{
-					valindex = pageindex*pagepixels + strip*strip_size;
-					GetTiffStrip(pageindex, strip, val8+valindex,strip_size);
-				}
-			}
-		}
-	} 
-	
-	if (samples > 1 && buf)
-		free(buf);
-	CloseTiff();
-
-	//write to nrrd
-	if (bits == 8)
-		nrrdWrap(nrrdout, val8, nrrdTypeUChar, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
-	else if (bits == 16)
-		nrrdWrap(nrrdout, val16, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
-	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*numPages);
-	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
-
-	if (bits == 16)
-	{
-		if (get_max)
-		{
-			if (use_max_value)
-				m_max_value = max_value;
-			else
-			{
-				double value;
-				for (int i=0; i<m_slice_num*m_x_size*m_y_size; i++)
-				{
-					value= ((unsigned short*)nrrdout->data)[i];
-					m_max_value = value>m_max_value ? value : m_max_value;
-				}
-			}
-		}
-		if (m_max_value > 0.0)
-			m_scalar_scale = 65535.0 / m_max_value;
-		else
-			m_scalar_scale = 1.0;
-	}
-	else
-		m_max_value = 255.0;
-
-	return nrrdout;
-}
-
-Nrrd* TIFReader::ReadSequenceTiff(std::vector<SliceInfo> &filelist, int c, bool get_max)
+Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist, int c, bool get_max)
 {
 	if (filelist.size()<=0)
 		return 0;
-
-	int numPages = int(filelist.size());
 	wstring filename = filelist[0].slice;
 	OpenTiff(filename.c_str());
+	uint32_t numPages = filelist.size();
+	bool sequence = numPages > 1;
+	if (!sequence) {
+		if (get_max)
+			numPages = GetNumTiffPages();
+		else
+			numPages = m_slice_num;
+	}
 
 	uint32_t width = GetTiffField(kImageWidthTag,nullptr,0);
 	uint32_t height = GetTiffField(kImageLengthTag,nullptr,0);
 	uint16 bits = GetTiffField(kBitsPerSampleTag,nullptr,0);
 	uint16 samples = GetTiffField(kSamplesPerPixelTag,nullptr,0);
+	if (samples == 0 && width > 0 && height > 0) samples = 1;
 	float x_res = 0.0;
 	float y_res = 0.0;
 	double z_res = 0.0;
@@ -987,7 +788,7 @@ Nrrd* TIFReader::ReadSequenceTiff(std::vector<SliceInfo> &filelist, int c, bool 
 	}
 	int pagepixels = m_x_size*m_y_size;
 
-	CloseTiff();
+	if (sequence) CloseTiff();
 
 	Nrrd *nrrdout = nrrdNew();
 
@@ -1013,22 +814,26 @@ Nrrd* TIFReader::ReadSequenceTiff(std::vector<SliceInfo> &filelist, int c, bool 
 	int max_value = 0;
 	bool use_max_value = false;
 
-	uint32_t strip;
 	void* buf = 0;
 	if (samples > 1)
 		buf = malloc(strip_size);
 
-	for (int pageindex=0; pageindex < filelist.size(); pageindex++)
-	{
-		filename = filelist[pageindex].slice;
-		OpenTiff(filename);
+	for (int pageindex=0; pageindex < numPages; pageindex++)
+	{	
+		if (sequence) {
+			filename = filelist[pageindex].slice;
+			OpenTiff(filename);
+		} 
+		//this is a thumbnail, skip
+		if (GetTiffField(kSubFileTypeTag,nullptr,0) == 1) {
+			if (sequence) CloseTiff(); 
+			continue;
+		}
 
-		//get bit info
-		uint16 bits_file = GetTiffField(kBitsPerSampleTag,nullptr,0);
 		uint32_t num_strips = GetTiffField(kStripOffsetsTag, nullptr,kCount);
 
 		//read file
-		for (strip=0; strip<num_strips; strip++)
+		for (uint32_t strip=0; strip<num_strips; strip++)
 		{
 			long long valindex;
 			int indexinpage;
@@ -1036,7 +841,7 @@ Nrrd* TIFReader::ReadSequenceTiff(std::vector<SliceInfo> &filelist, int c, bool 
 			{
 				if (samples > 1)
 				{
-					GetTiffStrip(pageindex, strip, buf,strip_size);
+					GetTiffStrip(sequence?0:pageindex, strip, buf,strip_size);
 					int num_pixels = strip_size/samples/2;
 					indexinpage = strip*num_pixels;
 					valindex = pageindex*pagepixels + indexinpage;
@@ -1053,14 +858,14 @@ Nrrd* TIFReader::ReadSequenceTiff(std::vector<SliceInfo> &filelist, int c, bool 
 				else
 				{
 					valindex = pageindex*pagepixels + strip*strip_size/2;
-					GetTiffStrip(pageindex, strip, val16+valindex,strip_size);
+					GetTiffStrip(sequence?0:pageindex, strip, val16+valindex,strip_size);
 				}
 			}
 			else if (bits == 8)
 			{
 				if (samples > 1)
 				{
-					GetTiffStrip(pageindex, strip, buf,strip_size);
+					GetTiffStrip(sequence?0:pageindex, strip, buf,strip_size);
 					int num_pixels = strip_size/samples;
 					indexinpage = strip*num_pixels;
 					valindex = pageindex*pagepixels + indexinpage;
@@ -1075,27 +880,30 @@ Nrrd* TIFReader::ReadSequenceTiff(std::vector<SliceInfo> &filelist, int c, bool 
 				else
 				{
 					valindex = pageindex*pagepixels + strip*strip_size;
-					GetTiffStrip(pageindex, strip, val8+valindex,strip_size);
+					GetTiffStrip(sequence?0:pageindex, strip, val8+valindex,strip_size);
 				}
 			}
 		}
-		CloseTiff();
+		if (sequence) CloseTiff();
 	}
 
 	if (samples > 1 && buf)
 		free(buf);
-	if (val16) free(val16);
-	if (val8) free(val8);
+	if (!sequence) CloseTiff();
 
 	//write to nrrd
 	if (bits == 8)
-		nrrdWrap(nrrdout, val8, nrrdTypeUChar, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
+		nrrdWrap(nrrdout, val8, nrrdTypeUChar, 3, (size_t)m_x_size, 
+		(size_t)m_y_size, (size_t)numPages);
 	else if (bits == 16)
-		nrrdWrap(nrrdout, val16, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
+		nrrdWrap(nrrdout, val16, nrrdTypeUShort, 3, (size_t)m_x_size, 
+		(size_t)m_y_size, (size_t)numPages);
 	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*numPages);
+	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoMax, m_xspc*m_x_size, 
+		m_yspc*m_y_size, m_zspc*numPages);
 	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
+	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoSize, (size_t)m_x_size, 
+		(size_t)m_y_size, (size_t)numPages);
 
 	if (bits == 16)
 	{
