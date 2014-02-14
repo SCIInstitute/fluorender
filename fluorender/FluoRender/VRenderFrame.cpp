@@ -2789,7 +2789,8 @@ void VRenderFrame::OpenProject(wxString& filename)
 							MSKReader msk_reader;
 							wstring maskname = str.ToStdWstring();
 							msk_reader.SetFile(maskname);
-							Nrrd* mask = msk_reader.Convert(true);
+							BaseReader *br = &msk_reader;
+							Nrrd* mask = br->Convert(true);
 							if (mask)
 								vd->LoadMask(mask);
 						}

@@ -278,16 +278,6 @@ int NRRDReader::LoadOffset(int offset)
 	return result;
 }
 
-Nrrd* NRRDReader::Convert(bool get_max)
-{
-	return Convert(0, 0, get_max);
-}
-
-Nrrd* NRRDReader::Convert(int c, bool get_max)
-{
-	return Convert(0, c, get_max);
-}
-
 Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 {
 	if (t<0 || t>=m_time_num)

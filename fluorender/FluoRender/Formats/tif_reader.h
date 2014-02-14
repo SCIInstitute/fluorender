@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
+#include <algorithm>
 
 using namespace std;
 
@@ -28,30 +29,34 @@ public:
 	/**
 	 * Finds the tag value given by \@tag of a tiff on the current page.
 	 * @param tag The tag to look for in the header.
-	 * @warn If the result is not 8, 16 or 32 bit int, 
+	 * @warn If the result is not expected to be 8, 16 or 32 bit int, 
 	 *       it will be a data assigned to pointer below.
 	 *       The caller must allocate necessary memory.
 	 * @param pointer The pointer to the longer data (can be null, 
 	 *        and it is not used if expected result is an int).
 	 * @param size The maximum number of bytes to copy into pointer.
+	 *        If pointer is null, this parameter is checked to see if
+	 *        we want the value (kValue), count (kCount), or 
+	 *        type (kType) of the @tag provided.
 	 * @throws An exception if a tiff is not open.
 	 * @return The value in the header denoted by tag.
 	 */
 	uint32_t GetTiffField(
 		const int tag,
-		void * pointer, size_t size);
+		void * pointer, uint32_t size);
 	/**
 	 * Reads a strip of data from a tiff file.
 	 * @param page The page to read from.
 	 * @param strip Which strip to read from the file.
 	 * @param data The location of the buffer to store data.
-	 * @param size The number of bytes to read from the strip.
+	 * @param strip_size The uncompressed size.
 	 * @throws An exception if a tiff is not open.
 	 */
 	void GetTiffStrip( 
 		uint32_t page,
 		uint32_t strip,
-		void * data, size_t size);
+		void * data,
+		uint32_t strip_size);
 	/**
 	 * Opens the tiff stream.
 	 * @param name The filename of the tiff.
@@ -84,11 +89,16 @@ public:
 	 * @return The number of pages in the file.
 	 */
 	uint32_t GetNumTiffPages();
+	/**
+	 * Gets the specified offset for the strip offset or count.
+	 * @param tag The tag for either the offset or the count.
+	 * @param strip The strip number to get the correct count/offset.
+	 * @return The count or strip offset determined by @strip.
+	 */
+	uint32_t GetTiffStripOffsetOrCount(uint32_t tag, uint32_t strip);
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
 	int LoadOffset(int offset);
-	Nrrd* Convert(bool get_max);
-	Nrrd* Convert(int c, bool get_max);
 	Nrrd* Convert(int t, int c, bool get_max);
 	wstring GetCurName(int t, int c);
 
@@ -158,39 +168,47 @@ private:
 	/** Tells us if the data is little endian */
 	bool swap_;
 	/** The tiff tag for subfile type */
-	static const int kSubFileTypeTag = 254;
+	static const uint32_t kSubFileTypeTag = 254;
 	/** The tiff tag for image width */
-	static const int kImageWidthTag = 256;
+	static const uint32_t kImageWidthTag = 256;
 	/** The tiff tag for image length */
-	static const int kImageLengthTag = 257;
+	static const uint32_t kImageLengthTag = 257;
 	/** The tiff tag for bits per sample */
-	static const int kBitsPerSampleTag = 258;
+	static const uint32_t kBitsPerSampleTag = 258;
+	/** The tiff tag for compression */
+	static const uint32_t kCompressionTag = 259;
 	/** The tiff tag for image description */
-	static const int kImageDescriptionTag = 270;
+	static const uint32_t kImageDescriptionTag = 270;
 	/** The tiff tag for strip offsets */
-	static const int kStripOffsetsTag = 273;
+	static const uint32_t kStripOffsetsTag = 273;
 	/** The tiff tag for Samples per pixel */
-	static const int kSamplesPerPixelTag = 277;
+	static const uint32_t kSamplesPerPixelTag = 277;
 	/** The tiff tag for rows per strip */
-	static const int kRowsPerStripTag = 278;
+	static const uint32_t kRowsPerStripTag = 278;
 	/** The tiff tag for strip bytes count */
-	static const int kStripBytesCountTag = 279;
+	static const uint32_t kStripBytesCountTag = 279;
 	/** The tiff tag for x resolution */
-	static const int kXResolutionTag = 282;
+	static const uint32_t kXResolutionTag = 282;
 	/** The tiff tag for y resolution */
-	static const int kYResolutionTag = 283;
+	static const uint32_t kYResolutionTag = 283;
 	/** The tiff tag number of entries on current page */
-	static const int kNextPageOffsetTag = 500;
+	static const uint32_t kNextPageOffsetTag = 500;
 	/** The BYTE type */
-	static const char kByte = 1;
+	static const uint8_t kByte = 1;
 	/** The ASCII type */
-	static const char kASCII = 2;
+	static const uint8_t kASCII = 2;
 	/** The SHORT type */
-	static const char kShort = 3;
+	static const uint8_t kShort = 3;
 	/** The LONG type */
-	static const char kLong = 4;
+	static const uint8_t kLong = 4;
 	/** The RATIONAL type */
-	static const char kRational = 5;
+	static const uint8_t kRational = 5;
+	/** Return the value of the tag */
+	static const uint8_t kValue = 0;
+	/** Return the type of the tag */
+	static const uint8_t kType = 1;
+	/** Return the count of the tag */
+	static const uint8_t kCount = 2;
 
 private:
 	bool IsNewBatchFile(wstring name);

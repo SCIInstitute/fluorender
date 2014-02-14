@@ -28,8 +28,8 @@ public:
 	virtual bool GetBatch() = 0;			//get batch mode
 	virtual int LoadBatch(int index) = 0;	//load file for 3D batch mode
 	virtual int LoadOffset(int offset) = 0;	//load offset index for 3D batch
-	virtual Nrrd* Convert(bool get_max) = 0;			//Convert the data to nrrd
-	virtual Nrrd* Convert(int c, bool get_max) = 0;		//convert the specified channel to nrrd
+	virtual Nrrd* Convert(bool get_max);			//Convert the data to nrrd
+	virtual Nrrd* Convert(int c, bool get_max);		//convert the specified channel to nrrd
 	virtual Nrrd* Convert(int t, int c, bool get_max) = 0;//convert the specified channel and time point to nrrd
 	virtual wstring GetCurName(int t, int c) = 0;//for a 4d sequence, get the file name for specified time and channel
 

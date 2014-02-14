@@ -21,8 +21,6 @@ public:
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
 	int LoadOffset(int offset);
-	Nrrd* Convert(bool get_max);
-	Nrrd* Convert(int c, bool get_max);
 	Nrrd* Convert(int t, int c, bool get_max);
 	wstring GetCurName(int t, int c);
 

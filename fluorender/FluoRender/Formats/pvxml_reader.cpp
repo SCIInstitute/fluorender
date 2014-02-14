@@ -518,16 +518,6 @@ double PVXMLReader::GetExcitationWavelength(int chan)
 	return 0.0;
 }
 
-Nrrd *PVXMLReader::Convert(bool get_max)
-{
-	return Convert(0, 0, get_max);
-}
-
-Nrrd *PVXMLReader::Convert(int c, bool get_max)
-{
-	return Convert(0, c, get_max);
-}
-
 Nrrd *PVXMLReader::Convert(int t, int c, bool get_max)
 {
 	Nrrd *data = 0;

@@ -62,16 +62,6 @@ int LBLReader::LoadOffset(int offset)
 	return 0;
 }
 
-Nrrd* LBLReader::Convert(bool get_max)
-{
-	return Convert(0, 0, get_max);
-}
-
-Nrrd* LBLReader::Convert(int c, bool get_max)
-{
-	return Convert(0, c, get_max);
-}
-
 Nrrd* LBLReader::Convert(int t, int c, bool get_max)
 {
 	size_t pos = m_path_name.find_last_of('.');

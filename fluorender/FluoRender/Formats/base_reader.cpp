@@ -183,3 +183,7 @@ void BaseReader::DecodeAcc16(tidata_t cp0, tsize_t cc)
 		} while ((int32) wc > 0);
 	}
 }
+
+Nrrd* BaseReader::Convert(bool get_max) { return Convert(0,get_max); }
+
+Nrrd* BaseReader::Convert(int c, bool get_max) { return Convert(0,c,get_max); }
