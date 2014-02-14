@@ -812,7 +812,6 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist, int c, bool get_max)
 	}
 
 	int max_value = 0;
-	bool use_max_value = false;
 
 	void* buf = 0;
 	if (samples > 1)
@@ -853,7 +852,6 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist, int c, bool get_max)
 						if (get_max && val16[valindex] > max_value)
 							max_value = val16[valindex];
 					}
-					use_max_value = true;
 				}
 				else
 				{
@@ -909,7 +907,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist, int c, bool get_max)
 	{
 		if (get_max)
 		{
-			if (use_max_value)
+			if (samples > 1)
 				m_max_value = max_value;
 			else
 			{
