@@ -15,9 +15,9 @@ TIFReader::TIFReader()
 	m_y_size = 0;
 
 	m_valid_spc = false;
-	m_xspc = 0.0;
-	m_yspc = 0.0;
-	m_zspc = 0.0;
+	m_xspc = 1.0;
+	m_yspc = 1.0;
+	m_zspc = 1.0;
 
 	m_max_value = 0.0;
 	m_scalar_scale = 1.0;
@@ -627,8 +627,7 @@ void TIFReader::GetTiffStrip(uint32_t page, uint32_t strip,
 	if (current_page_ > page) 
 		ResetTiff();
 	// fast forward if we are behind. 
-	while (current_page_ < page) 
-	{
+	while (current_page_ < page) {
 		tiff_stream.seekg(current_offset_,tiff_stream.beg);	
 		if (GetTiffField(kSubFileTypeTag,nullptr,0) != 1) current_page_ ++;
 		current_offset_ = GetTiffField(kNextPageOffsetTag,nullptr,0);
@@ -644,8 +643,7 @@ void TIFReader::GetTiffStrip(uint32_t page, uint32_t strip,
 	uint32_t tmp = GetTiffField(kCompressionTag,nullptr,0);
 	bool isCompressed = tmp == 5;
 	if (isCompressed)
-		LZWDecode((tidata_t)temp, (tidata_t)data, 
-		strip_size);
+		LZWDecode((tidata_t)temp, (tidata_t)data, strip_size);
 	else
 		memcpy(data,temp,byte_count);
 	delete[] temp; 
@@ -656,8 +654,7 @@ uint32_t TIFReader::GetTiffStripOffsetOrCount(uint32_t tag, uint32_t strip)
 	//search for the offset that tells us the byte count for this strip
 	bool isLong = GetTiffField(tag,nullptr,kType) == kLong;
 	uint32_t offset = GetTiffField(tag, nullptr,kValue);
-	if(GetTiffField(tag, nullptr, kCount) > 1) 
-	{
+	if(GetTiffField(tag, nullptr, kCount) > 1) {
 		offset += strip * (isLong?4:2);
 		tiff_stream.seekg(offset, tiff_stream.beg);
 	}
@@ -706,13 +703,13 @@ void TIFReader::OpenTiff(std::wstring name)
 
 void TIFReader::CloseTiff() { if (tiff_stream.is_open()) tiff_stream.close(); }
 
-Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist, int c, bool get_max)
-{
-	if (filelist.size()<=0)
+Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist, 
+						  int c, bool get_max) {
+	uint32_t numPages = static_cast<uint32_t>(filelist.size());
+	if (numPages <= 0)
 		return 0;
 	wstring filename = filelist[0].slice;
 	OpenTiff(filename.c_str());
-	uint32_t numPages = filelist.size();
 	bool sequence = numPages > 1;
 	if (!sequence) {
 		if (get_max)
@@ -726,66 +723,48 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist, int c, bool get_max)
 	uint16 bits = GetTiffField(kBitsPerSampleTag,nullptr,0);
 	uint16 samples = GetTiffField(kSamplesPerPixelTag,nullptr,0);
 	if (samples == 0 && width > 0 && height > 0) samples = 1;
-	float x_res = 0.0;
-	float y_res = 0.0;
-	double z_res = 0.0;
+
+	float x_res = 0.0, y_res = 0.0, z_res = 0.0;
 	GetTiffField(kXResolutionTag,&x_res,sizeof(float));
 	GetTiffField(kYResolutionTag,&y_res,sizeof(float));
 	uint32_t rowsperstrip = GetTiffField(kRowsPerStripTag,nullptr,0);
 	uint32_t strip_size = rowsperstrip * width * samples * (bits/8);
+
 	char img_desc[256];
 	GetTiffField(kImageDescriptionTag, img_desc, 256);
-	if (img_desc)
-	{
+	if (img_desc){
 		string desc = string ((char*)img_desc);
 		size_t start = desc.find("spacing=");
-		if (start!=-1)
-		{
+		if (start!=-1) {
 			string spacing = desc.substr(start+8);
 			size_t end = spacing.find("\n");
 			if (end != -1)
-			{
-				spacing = spacing.substr(0, end);
-				z_res = atof(spacing.c_str());
-			}
+				z_res = static_cast<float>(
+				atof(spacing.substr(0, end).c_str()));
 		}
 	}
 
-	if (x_res>0.0 && y_res>0.0 && z_res>0.0)
-	{
+	if (x_res>0.0 && y_res>0.0 && z_res>0.0) {
 		m_xspc = 1.0/x_res;
 		m_yspc = 1.0/y_res;
 		m_zspc = z_res;
 		m_valid_spc = true;
-	}
-	else
-	{
+	} else {
+		m_valid_spc = false;
 		m_xspc = 1.0;
 		m_yspc = 1.0;
 		m_zspc = 1.0;
-		m_valid_spc = false;
 	}
-	switch (m_resize_type)
-	{
-	case 0:
-		m_slice_num = numPages;
+
+	if (m_resize_type == 1 && m_alignment > 1) {
+		m_x_size = (width/m_alignment+(width%m_alignment?1:0))*m_alignment;
+		m_y_size = (height/m_alignment+(height%m_alignment?1:0))*m_alignment;
+	} else {
 		m_x_size = width;
 		m_y_size = height;
-		break;
-	case 1:
-		m_slice_num = numPages;
-		if (m_alignment > 1)
-		{
-			m_x_size = (width/m_alignment+(width%m_alignment?1:0))*m_alignment;
-			m_y_size = (height/m_alignment+(height%m_alignment?1:0))*m_alignment;
-		}
-		break;
-	case 2://not implemented
-		m_slice_num = numPages;
-		m_x_size = width;
-		m_y_size = height;
-		break;
 	}
+
+	m_slice_num = numPages;
 	int pagepixels = m_x_size*m_y_size;
 
 	if (sequence) CloseTiff();
@@ -793,23 +772,13 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist, int c, bool get_max)
 	Nrrd *nrrdout = nrrdNew();
 
 	//allocate memory
-	uint16 *val16 = 0;
-	uint8_t *val8 = 0;
-
-	if (bits == 16)
-	{
-		long long total_size = (long long)m_x_size*(long long)m_y_size*(long long)numPages;
-		val16 = new (std::nothrow) uint16[total_size];
-		if (!val16)
-			return 0;
-	}
-	else
-	{
-		long long total_size = (long long)m_x_size*(long long)m_y_size*(long long)numPages;
-		val8 = new (std::nothrow) uint8_t[total_size];
-		if (!val8)
-			return 0;
-	}
+	void *val = 0;
+	bool eight_bit = bits == 8;
+	
+	val = malloc((long long)m_x_size * (long long)m_y_size *
+		(long long)numPages * (eight_bit?1:2));
+	if (!val)
+		throw std::runtime_error( "Unable to allocate memory to read TIFF." );
 
 	int max_value = 0;
 
@@ -817,7 +786,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist, int c, bool get_max)
 	if (samples > 1)
 		buf = malloc(strip_size);
 
-	for (int pageindex=0; pageindex < numPages; pageindex++)
+	for (uint32_t pageindex=0; pageindex < numPages; pageindex++)
 	{	
 		if (sequence) {
 			filename = filelist[pageindex].slice;
@@ -836,50 +805,33 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist, int c, bool get_max)
 		{
 			long long valindex;
 			int indexinpage;
-			if (bits == 16)
-			{
-				if (samples > 1)
-				{
-					GetTiffStrip(sequence?0:pageindex, strip, buf,strip_size);
-					int num_pixels = strip_size/samples/2;
-					indexinpage = strip*num_pixels;
-					valindex = pageindex*pagepixels + indexinpage;
-					for (int i=0; i<num_pixels; i++)
-					{
-						if (indexinpage++ >= pagepixels)
-							break;
-						memcpy(val16+valindex, (uint16*)buf+samples*i+c, sizeof(uint16));
-						if (get_max && val16[valindex] > max_value)
-							max_value = val16[valindex];
-					}
+			if (samples > 1) {
+				GetTiffStrip(sequence?0:pageindex, strip, buf,strip_size);
+				int num_pixels = strip_size/samples/(eight_bit?1:2);
+				indexinpage = strip*num_pixels;
+				valindex = pageindex*pagepixels + indexinpage;
+				for (int i=0; i<num_pixels; i++) {
+					if (indexinpage++ >= pagepixels) break;
+					if (eight_bit) 
+						memcpy((uint8_t*)val+valindex, 
+						(uint8_t*)buf+samples*i+c,sizeof(uint8_t));
+					else
+						memcpy((uint16_t*)val+valindex*2, 
+						(uint16_t*)buf+samples*i+c,sizeof(uint16_t));
+					if (!eight_bit && get_max && 
+						*((uint16_t*)val+valindex) > max_value)
+						max_value = *((uint16_t*)val+valindex);
+					if(eight_bit) valindex ++;
 				}
+			} else {
+				valindex = pageindex*pagepixels + 
+					strip*strip_size/(eight_bit?1:2);
+				if (eight_bit) 
+					GetTiffStrip(sequence?0:pageindex, strip, 
+					(uint8_t*)val+valindex,strip_size);
 				else
-				{
-					valindex = pageindex*pagepixels + strip*strip_size/2;
-					GetTiffStrip(sequence?0:pageindex, strip, val16+valindex,strip_size);
-				}
-			}
-			else if (bits == 8)
-			{
-				if (samples > 1)
-				{
-					GetTiffStrip(sequence?0:pageindex, strip, buf,strip_size);
-					int num_pixels = strip_size/samples;
-					indexinpage = strip*num_pixels;
-					valindex = pageindex*pagepixels + indexinpage;
-					for (int i=0; i<num_pixels; i++)
-					{
-						if (indexinpage++ >= pagepixels)
-							break;
-						memcpy(val8+valindex, (uint8_t*)buf+samples*i+c, sizeof(uint8_t));
-						valindex++;
-					}
-				}
-				else
-				{
-					valindex = pageindex*pagepixels + strip*strip_size;
-					GetTiffStrip(sequence?0:pageindex, strip, val8+valindex,strip_size);
-				}
+					GetTiffStrip(sequence?0:pageindex, strip, 
+					(uint16_t*)val+valindex,strip_size);
 			}
 		}
 		if (sequence) CloseTiff();
@@ -890,12 +842,12 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist, int c, bool get_max)
 	if (!sequence) CloseTiff();
 
 	//write to nrrd
-	if (bits == 8)
-		nrrdWrap(nrrdout, val8, nrrdTypeUChar, 3, (size_t)m_x_size, 
-		(size_t)m_y_size, (size_t)numPages);
-	else if (bits == 16)
-		nrrdWrap(nrrdout, val16, nrrdTypeUShort, 3, (size_t)m_x_size, 
-		(size_t)m_y_size, (size_t)numPages);
+	if (eight_bit)
+		nrrdWrap(nrrdout, (uint8_t*)val, nrrdTypeUChar, 
+			 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
+	else
+		nrrdWrap(nrrdout, (uint16_t*)val, nrrdTypeUShort, 
+			 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
 	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
 	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoMax, m_xspc*m_x_size, 
 		m_yspc*m_y_size, m_zspc*numPages);
@@ -903,29 +855,21 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist, int c, bool get_max)
 	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoSize, (size_t)m_x_size, 
 		(size_t)m_y_size, (size_t)numPages);
 
-	if (bits == 16)
-	{
-		if (get_max)
-		{
+	if (!eight_bit) {
+		if (get_max) {
 			if (samples > 1)
 				m_max_value = max_value;
-			else
-			{
+			else {
 				double value;
-				for (int i=0; i<m_slice_num*m_x_size*m_y_size; i++)
-				{
+				for (int i=0; i<m_slice_num*m_x_size*m_y_size; i++) {
 					value= ((unsigned short*)nrrdout->data)[i];
 					m_max_value = value>m_max_value ? value : m_max_value;
 				}
 			}
 		}
-		if (m_max_value > 0.0)
-			m_scalar_scale = 65535.0 / m_max_value;
-		else
-			m_scalar_scale = 1.0;
-	}
-	else
-		m_max_value = 255.0;
+		if (m_max_value > 0.0) m_scalar_scale = 65535.0 / m_max_value;
+		else m_scalar_scale = 1.0;
+	} else m_max_value = 255.0;
 
 	return nrrdout;
 }
