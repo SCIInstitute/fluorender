@@ -970,7 +970,15 @@ void VRenderGLView::DrawVolumes(int peel)
 		m_updating = false;
 		m_force_clear = false;
 		
-		//if (m_interactive)
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame &&
+			vr_frame->GetSettingDlg() &&
+			vr_frame->GetSettingDlg()->GetUpdateOrder() == 1)
+		{
+			if (m_interactive)
+				ClearFinalBuffer();
+		}
+		else
 			ClearFinalBuffer();
 
 		GLboolean bCull = glIsEnabled(GL_CULL_FACE);
@@ -1178,6 +1186,12 @@ void VRenderGLView::DrawVolumes(int peel)
 		if (TextureRenderer::get_start_update_loop() &&
 			TextureRenderer::get_done_update_loop())
 			TextureRenderer::reset_update_loop();
+	}
+
+	if (m_interactive)
+	{
+		m_interactive = false;
+		RefreshGL();
 	}
 }
 
@@ -4161,7 +4175,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		m_obj_transx += trans.x();
 		m_obj_transy += trans.y();
 		m_obj_transz += trans.z();
-		if (m_persp) SetSortBricks();
+		//if (m_persp) SetSortBricks();
 		refresh = true;
 	}
 	if (m_move_left &&
@@ -4182,7 +4196,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		m_obj_transx += trans.x();
 		m_obj_transy += trans.y();
 		m_obj_transz += trans.z();
-		if (m_persp) SetSortBricks();
+		//if (m_persp) SetSortBricks();
 		refresh = true;
 	}
 	if (m_move_right &&
@@ -4202,7 +4216,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		m_obj_transx += trans.x();
 		m_obj_transy += trans.y();
 		m_obj_transz += trans.z();
-		if (m_persp) SetSortBricks();
+		//if (m_persp) SetSortBricks();
 		refresh = true;
 	}
 	if (m_move_up &&
@@ -4222,7 +4236,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		m_obj_transx += trans.x();
 		m_obj_transy += trans.y();
 		m_obj_transz += trans.z();
-		if (m_persp) SetSortBricks();
+		//if (m_persp) SetSortBricks();
 		refresh = true;
 	}
 	if (m_move_down &&
@@ -4298,7 +4312,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		SetFocus();
 		Show(false);
 		Show(true);
-		SetSortBricks();
+		//SetSortBricks();
 		RefreshGL();
 		if (frame && frame->GetStatusBar())
 			frame->GetStatusBar()->PopStatusText();
@@ -5572,7 +5586,7 @@ void VRenderGLView::SetCenter()
 		m_obj_ctry = (y1 + y2) / 2.0;
 		m_obj_ctrz = (z1 + z2) / 2.0;
 
-		SetSortBricks();
+		//SetSortBricks();
 
 		RefreshGL();
 	}
@@ -5608,7 +5622,7 @@ void VRenderGLView::SetScale121()
 	m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
 	m_vrv->m_scale_factor_text->ChangeValue(str);
 
-	SetSortBricks();
+	//SetSortBricks();
 
 	RefreshGL();
 }
@@ -5644,7 +5658,7 @@ void VRenderGLView::SetPersp(bool persp)
 
 		SetRotations(m_rotx, m_roty, m_rotz);
 	}
-	SetSortBricks();
+	//SetSortBricks();
 }
 
 void VRenderGLView::SetFree(bool free)
@@ -5711,13 +5725,13 @@ void VRenderGLView::SetFree(bool free)
 
 		SetRotations(m_rotx, m_roty, m_rotz);
 	}
-	SetSortBricks();
+	//SetSortBricks();
 }
 
 void VRenderGLView::SetAov(double aov)
 {
 	//view has been changed, sort bricks
-	SetSortBricks();
+	//SetSortBricks();
 
 	m_aov = aov;
 	if (m_persp)
@@ -8016,7 +8030,7 @@ Quaternion VRenderGLView::TrackballClip(int p1x, int p1y, int p2x, int p2y)
 void VRenderGLView::Q2A()
 {
 	//view changed, re-sort bricks
-	SetSortBricks();
+	//SetSortBricks();
 
 	m_q.ToEuler(m_rotx, m_roty, m_rotz);
 
@@ -8122,7 +8136,7 @@ void VRenderGLView::Q2A()
 void VRenderGLView::A2Q()
 {
 	//view changed, re-sort bricks
-	SetSortBricks();
+	//SetSortBricks();
 
 	m_q.FromEuler(m_rotx, m_roty, m_rotz);
 
@@ -8379,6 +8393,7 @@ void VRenderGLView::RefreshGL(bool erase, bool start_loop)
 {
 	if (start_loop)
 		StartLoopUpdate();
+	SetSortBricks();
 	Refresh(erase);
 }
 
@@ -9150,13 +9165,13 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			m_int_mode = 8;
 			m_force_clear = true;
 		}
-		SetSortBricks();
+		//SetSortBricks();
 		RefreshGL();
 		return;
 	}
 	if (event.MiddleUp())
 	{
-		SetSortBricks();
+		//SetSortBricks();
 		RefreshGL();
 		return;
 	}
@@ -9178,7 +9193,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				FinishRuler();
 			}
 		}
-		SetSortBricks();
+		//SetSortBricks();
 		RefreshGL();
 		return;
 	}
@@ -9285,7 +9300,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 
 					m_interactive = m_adaptive;
 
-					SetSortBricks();
+					//SetSortBricks();
 					RefreshGL();
 				}
 				if (event.RightIsDown())
@@ -9314,7 +9329,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 
 					m_interactive = m_adaptive;
 
-					SetSortBricks();
+					//SetSortBricks();
 					RefreshGL();
 				}
 			}
@@ -10524,11 +10539,12 @@ wxGLContext* VRenderView::GetContext()
 		return 0;
 }
 
-void VRenderView::RefreshGL()
+void VRenderView::RefreshGL(bool interactive)
 {
 	if (m_glview)
 	{
 		m_glview->m_force_clear = true;
+		m_glview->m_interactive = interactive;
 		m_glview->RefreshGL();
 	}
 }
@@ -10806,7 +10822,7 @@ void VRenderView::OnDepthAttenFactorEdit(wxCommandEvent& event)
 	str.ToDouble(&val);
 	SetFogIntensity(val);
 	m_depth_atten_factor_sldr->SetValue(int(val*100.0));
-	RefreshGL();
+	RefreshGL(true);
 }
 
 void VRenderView::OnDepthAttenReset(wxCommandEvent &event)
@@ -10861,8 +10877,8 @@ void VRenderView::OnScaleFactorEdit(wxCommandEvent& event)
 	{
 		m_scale_factor_sldr->SetValue(val);
 		m_glview->m_scale_factor = val/100.0;
-		m_glview->SetSortBricks();
-		RefreshGL();
+		//m_glview->SetSortBricks();
+		RefreshGL(true);
 	}
 }
 
@@ -10910,7 +10926,7 @@ void VRenderView::UpdateView(bool ui_update)
 	str_val = m_z_rot_text->GetValue();
 	rotz = _wtof(str_val.fn_str());
 	SetRotations(rotx, roty, rotz, ui_update);
-	RefreshGL();
+	RefreshGL(true);
 }
 
 void VRenderView::OnValueEdit(wxCommandEvent& event)
@@ -11162,7 +11178,7 @@ void VRenderView::OnAovText(wxCommandEvent& event)
 		SetAov(val);
 		m_aov_sldr->SetValue(val);
 	}
-	RefreshGL();
+	RefreshGL(true);
 }
 
 void VRenderView::OnFreeChk(wxCommandEvent& event)

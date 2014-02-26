@@ -74,7 +74,7 @@ public:
 	~AdjustView();
 
 	//refresh
-	void RefreshVRenderViews();
+	void RefreshVRenderViews(bool interactive=false);
 	//get settings
 	void GetSettings();
 	//disable/enable

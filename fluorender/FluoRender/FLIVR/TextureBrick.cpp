@@ -29,6 +29,7 @@
 #include <math.h>
 
 #include <FLIVR/TextureBrick.h>
+#include <FLIVR/TextureRenderer.h>
 #include <FLIVR/Utils.h>
 #include <utility>
 #include <iostream>
@@ -256,7 +257,10 @@ namespace FLIVR
 		}
 		up.normalize();
 		right = Cross(vdir, up);
-		for (double t = tmax; t >= tmin; t -= dt)
+		bool order = TextureRenderer::get_update_order();
+		for (double t = order?tmin:tmax;
+			order?(t <= tmax):(t >= tmin);
+			t += order?dt:-dt)
 		{
 			// we compute polys back to front
 			// find intersections

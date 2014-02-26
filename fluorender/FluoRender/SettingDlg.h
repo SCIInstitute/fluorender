@@ -103,6 +103,8 @@ public:
 	void SetForceBrickSize(int val) {m_force_brick_size = val;}
 	int GetResponseTime() {return m_up_time;}
 	void SetResponseTime(int val) {m_up_time = val;}
+	int GetUpdateOrder() {return m_update_order;}
+	void SetUpdateOrder(int val) {m_update_order = val;}
 	//point volume mode
 	int GetPointVolumeMode() {return m_point_volume_mode;}
 	void SetPointVolumeMode(int mode) {m_point_volume_mode = mode;}
@@ -152,6 +154,7 @@ private:
 							//it's the user setting
 							//final value is determined by both reading from the card and this value
 	int m_up_time;			//response time in ms
+	int m_update_order;		//0:back-to-front; 1:front-to-back
 	//point volume mode
 	int m_point_volume_mode;
 	//ruler use transfer function

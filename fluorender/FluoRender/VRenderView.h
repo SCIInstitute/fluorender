@@ -1040,7 +1040,7 @@ public:
 	wxGLContext* GetContext();
 
 	//refresh glview
-	void RefreshGL();
+	void RefreshGL(bool intactive=false);
 
 	//movie export
 	//get frame info

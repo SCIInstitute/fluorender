@@ -150,9 +150,9 @@ void PVXMLReader::Preprocess()
 	m_yspc = m_yspc==0.0?1.0:m_yspc;
 	m_zspc = m_zspc==0.0?1.0:m_zspc;
 
-	m_x_size = (m_x_max - m_x_min) / m_xspc;
-	m_y_size = (m_y_max - m_y_min) / m_yspc;
-	m_slice_num = (m_z_max - m_z_min) / m_zspc;
+	m_x_size = int((m_x_max - m_x_min) / m_xspc + 0.5);
+	m_y_size = int((m_y_max - m_y_min) / m_yspc + 0.5);
+	m_slice_num = int((m_z_max - m_z_min) / m_zspc + 0.5);
 
 	for (i=0; i<(int)m_pvxml_info.size(); i++)
 	{
@@ -163,9 +163,9 @@ void PVXMLReader::Preprocess()
 			for (k=0; k<(int)sequence_info->frames.size(); k++)
 			{
 				FrameInfo *frame_info = &((sequence_info->frames)[k]);
-				frame_info->x = int((frame_info->x_start - m_x_min) / m_xspc);
-				frame_info->y = int((frame_info->y_start - m_y_min) / m_yspc);
-				frame_info->z = int((frame_info->z_start - m_z_min) / m_zspc);
+				frame_info->x = int((frame_info->x_start - m_x_min) / m_xspc + 0.5);
+				frame_info->y = int((frame_info->y_start - m_y_min) / m_yspc + 0.5);
+				frame_info->z = int((frame_info->z_start - m_z_min) / m_zspc + 0.5);
 			}
 		}
 	}
@@ -571,13 +571,13 @@ Nrrd *PVXMLReader::Convert(int t, int c, bool get_max)
 						delete []pbyData;
 
 					//copy frame val to val
-					long long index = m_x_size*m_y_size*frame_info->z + m_x_size*frame_info->y + frame_info->x;
-					long frame_index = frame_info->x_size*(frame_info->y_size-1);//flip
+					long long index = m_x_size*m_y_size*frame_info->z + m_x_size*(m_y_size-frame_info->y-frame_info->y_size) + frame_info->x;
+					long frame_index = 0;
 					for (k=0; k<frame_info->y_size; k++)
 					{
 						memcpy((void*)(val+index), (void*)(frame_val+frame_index), frame_info->x_size*sizeof(unsigned short));
 						index += m_x_size;
-						frame_index -= frame_info->x_size;
+						frame_index += frame_info->x_size;
 					}
 				}
 

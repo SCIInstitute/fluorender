@@ -67,7 +67,7 @@ public:
 	int GetSelType();
 	VolumeData* GetVolumeData();
 	MeshData* GetMeshData();
-	void RefreshVRenderViews();
+	void RefreshVRenderViews(bool interactive=false);
 
 	bool GetChannLink()
 	{

@@ -211,7 +211,10 @@ namespace FLIVR
 		{
 		case TextureRenderer::MODE_OVER:
 			glBlendEquation(GL_FUNC_ADD);
-			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			if (TextureRenderer::get_update_order() == 0)
+				glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			else if (TextureRenderer::get_update_order() == 1)
+				glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
 			break;
 		case TextureRenderer::MODE_MIP:
 			glBlendEquation(GL_MAX);
@@ -433,7 +436,7 @@ namespace FLIVR
 		}
 
 		if (TextureRenderer::mem_swap_ &&
-			TextureRenderer::cur_brick_num_ >= TextureRenderer::total_brick_num_)
+			TextureRenderer::cur_brick_num_ == TextureRenderer::total_brick_num_)
 		{
 			TextureRenderer::done_update_loop_ = true;
 			TextureRenderer::clear_chan_buffer_ = true;
@@ -456,7 +459,10 @@ namespace FLIVR
 
 		//reset blending
 		glBlendEquation(GL_FUNC_ADD);
-		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		if (TextureRenderer::get_update_order() == 0)
+			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		else if (TextureRenderer::get_update_order() == 1)
+			glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
 		glDisable(GL_BLEND);
 
 		//output
@@ -590,7 +596,10 @@ namespace FLIVR
 			glBindTexture(GL_TEXTURE_2D, blend_tex_id_);
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 			glEnable(GL_BLEND);
-			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			if (TextureRenderer::get_update_order() == 0)
+				glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			else if (TextureRenderer::get_update_order() == 1)
+				glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
 
 			if (noise_red_ && colormap_mode_!=2)
 			{
@@ -870,7 +879,10 @@ namespace FLIVR
 				glPushMatrix();
 				glLoadIdentity();
 				//blend
-				glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+				if (TextureRenderer::get_update_order() == 0)
+					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+				else if (TextureRenderer::get_update_order() == 1)
+					glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
 				//draw
 				glBegin(GL_QUADS);
 				{
@@ -1003,7 +1015,10 @@ namespace FLIVR
 			}
 			(*result)[i]->set_d(d);
 		}
-		std::sort((*result).begin(), (*result).end(), TextureBrick::sort_asc);
+		if (TextureRenderer::get_update_order() == 0)
+			std::sort((*result).begin(), (*result).end(), TextureBrick::sort_asc);
+		else if (TextureRenderer::get_update_order() == 1)
+			std::sort((*result).begin(), (*result).end(), TextureBrick::sort_dsc);
 		vr_list_[0]->tex_->reset_sort_bricks();
 
 		//duplicate result into other quota-bricks

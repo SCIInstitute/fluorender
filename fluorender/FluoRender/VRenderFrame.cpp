@@ -1458,7 +1458,7 @@ void VRenderFrame::OnSelection(int type,
 		m_aui_mgr.Update();
 		break;
 	case 2:	//volume
-		if (vd)
+		if (vd && vd->GetDisp())
 		{
 			m_volume_prop->SetVolumeData(vd);
 			m_volume_prop->SetGroup(group);
@@ -1475,24 +1475,35 @@ void VRenderFrame::OnSelection(int type,
 				wxString(UITEXT_PROPERTIES)+wxString(" - ")+vd->GetName());
 			m_aui_mgr.Update();
 			m_cur_sel_vol = m_data_mgr.GetVolumeIndex(vd->GetName());
-		}
 
-		for (int i=0; i<(int)m_vrv_list.size(); i++)
+			for (int i=0; i<(int)m_vrv_list.size(); i++)
+			{
+				VRenderView* vrv = m_vrv_list[i];
+				if (!vrv)
+					continue;
+				vrv->m_glview->m_cur_vol = vd;
+			}
+
+			if (m_volume_prop)
+				m_volume_prop->Show(true);
+			if (m_mesh_prop)
+				m_mesh_prop->Show(false);
+			if (m_mesh_manip)
+				m_mesh_manip->Show(false);
+			if (m_annotation_prop)
+				m_annotation_prop->Show(false);
+		}
+		else
 		{
-			VRenderView* vrv = m_vrv_list[i];
-			if (!vrv)
-				continue;
-			vrv->m_glview->m_cur_vol = vd;
+			if (m_volume_prop)
+				m_volume_prop->Show(false);
+			if (m_mesh_prop)
+				m_mesh_prop->Show(false);
+			if (m_mesh_manip)
+				m_mesh_manip->Show(false);
+			if (m_annotation_prop)
+				m_annotation_prop->Show(false);
 		}
-
-		if (m_volume_prop && vd)
-			m_volume_prop->Show(true);
-		if (m_mesh_prop)
-			m_mesh_prop->Show(false);
-		if (m_mesh_manip)
-			m_mesh_manip->Show(false);
-		if (m_annotation_prop)
-			m_annotation_prop->Show(false);
 		break;
 	case 3:	//mesh
 		if (md)
@@ -1604,12 +1615,12 @@ void VRenderFrame::OnSelection(int type,
 	}
 }
 
-void VRenderFrame::RefreshVRenderViews(bool tree)
+void VRenderFrame::RefreshVRenderViews(bool tree, bool interactive)
 {
 	for (int i=0 ; i<(int)m_vrv_list.size() ; i++)
 	{
 		if (m_vrv_list[i])
-			m_vrv_list[i]->RefreshGL();
+			m_vrv_list[i]->RefreshGL(interactive);
 	}
 
 	//incase volume color changes
@@ -3904,6 +3915,7 @@ void VRenderFrame::SetTextureRendererSettings()
 		TextureRenderer::set_large_data_size(m_setting_dlg->GetLargeDataSize());
 		TextureRenderer::set_force_brick_size(m_setting_dlg->GetForceBrickSize());
 		TextureRenderer::set_up_time(m_setting_dlg->GetResponseTime());
+		TextureRenderer::set_update_order(m_setting_dlg->GetUpdateOrder());
 	}
 }
 

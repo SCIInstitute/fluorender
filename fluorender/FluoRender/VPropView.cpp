@@ -688,11 +688,11 @@ VolumeData* VPropView::GetVolumeData()
 	return m_vd;
 }
 
-void VPropView::RefreshVRenderViews(bool tree)
+void VPropView::RefreshVRenderViews(bool tree, bool interactive)
 {
 	VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
 	if (vrender_frame)
-		vrender_frame->RefreshVRenderViews(tree);
+		vrender_frame->RefreshVRenderViews(tree, interactive);
 }
 
 void VPropView::InitVRenderViews(unsigned int type)
@@ -758,7 +758,7 @@ void VPropView::OnGammaText(wxCommandEvent& event)
 	else if (m_vd)
 		m_vd->Set3DGamma(val);
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(false, true);
 }
 
 void VPropView::OnBoundaryChange(wxScrollEvent & event)
@@ -782,7 +782,7 @@ void VPropView::OnBoundaryText(wxCommandEvent& event)
 	else if (m_vd)
 		m_vd->SetBoundary(val);
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(false, true);
 }
 
 //2
@@ -807,7 +807,7 @@ void VPropView::OnContrastText(wxCommandEvent& event)
 	else if (m_vd)
 		m_vd->SetOffset(val);
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(false, true);
 }
 
 void VPropView::OnLeftThreshChange(wxScrollEvent &event)
@@ -840,7 +840,7 @@ void VPropView::OnLeftThreshText(wxCommandEvent &event)
 	else if (m_vd)
 		m_vd->SetLeftThresh(val);
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(false, true);
 }
 
 void VPropView::OnRightThreshChange(wxScrollEvent & event)
@@ -875,7 +875,7 @@ void VPropView::OnRightThreshText(wxCommandEvent &event)
 		else if (m_vd)
 			m_vd->SetRightThresh(val);
 
-		RefreshVRenderViews();
+		RefreshVRenderViews(false, true);
 	}
 }
 
@@ -912,7 +912,7 @@ void VPropView::OnLuminanceText(wxCommandEvent &event)
 		m_lumi_change = true;
 	}
 
-	RefreshVRenderViews(true);
+	RefreshVRenderViews(true, true);
 }
 
 //shadow
@@ -976,7 +976,7 @@ void VPropView::OnShadowText(wxCommandEvent &event)
 			m_vd->SetShadowParams(val);
 	}
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(false, true);
 }
 
 void VPropView::OnHiShadingChange(wxScrollEvent &event)
@@ -999,7 +999,7 @@ void VPropView::OnHiShadingText(wxCommandEvent &event)
 	else if (m_vd)
 		m_vd->SetHiShading(val);
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(false, true);
 }
 
 //4
@@ -1066,7 +1066,7 @@ void VPropView::OnAlphaText(wxCommandEvent& event)
 	else if (m_vd)
 		m_vd->SetAlpha(val);
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(false, true);
 }
 
 void VPropView::OnSampleChange(wxScrollEvent & event)
@@ -1104,7 +1104,7 @@ void VPropView::OnSampleText(wxCommandEvent& event)
 			m_vd->SetSampleRate(srate);
 	}
 	
-	RefreshVRenderViews();
+	RefreshVRenderViews(false, true);
 }
 
 //5
@@ -1128,7 +1128,7 @@ void VPropView::OnLowShadingText(wxCommandEvent &event)
 	else if (m_vd)
 		m_vd->SetLowShading(val);
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(false, true);
 }
 
 void VPropView::OnShadingEnable(wxCommandEvent &event)
@@ -1239,7 +1239,7 @@ void VPropView::OnColormapHighValueText(wxCommandEvent &event)
 			m_vd->SetColormapValues(low, val);
 		}
 
-		RefreshVRenderViews();
+		RefreshVRenderViews(false, true);
 	}
 }
 
@@ -1276,7 +1276,7 @@ void VPropView::OnColormapLowValueText(wxCommandEvent &event)
 		m_vd->SetColormapValues(val, high);
 	}
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(false, true);
 }
 
 //6

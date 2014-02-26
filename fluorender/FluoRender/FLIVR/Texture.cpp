@@ -116,7 +116,10 @@ namespace FLIVR
 				}
 				bricks_[i]->set_d(d);
 			}
-			std::sort(bricks_.begin(), bricks_.end(), TextureBrick::sort_asc);
+			if (TextureRenderer::get_update_order() == 0)
+				std::sort(bricks_.begin(), bricks_.end(), TextureBrick::sort_asc);
+			else if (TextureRenderer::get_update_order() == 1)
+				std::sort(bricks_.begin(), bricks_.end(), TextureBrick::sort_dsc);
 
 			sort_bricks_ = false;
 		}
@@ -191,7 +194,10 @@ namespace FLIVR
 				}
 				quota_bricks_[i]->set_d(d);
 			}
-			std::sort(quota_bricks_.begin(), quota_bricks_.end(), TextureBrick::sort_asc);
+			if (TextureRenderer::get_update_order() == 0)
+				std::sort(quota_bricks_.begin(), quota_bricks_.end(), TextureBrick::sort_asc);
+			else if (TextureRenderer::get_update_order() == 1)
+				std::sort(quota_bricks_.begin(), quota_bricks_.end(), TextureBrick::sort_dsc);
 
 			sort_bricks_ = false;
 		}

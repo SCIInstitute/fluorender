@@ -417,10 +417,10 @@ void ClippingView::SetDataManager(DataManager* mgr)
 	m_mgr = mgr;
 }
 
-void ClippingView::RefreshVRenderViews()
+void ClippingView::RefreshVRenderViews(bool interactive)
 {
 	VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
-	vrender_frame->RefreshVRenderViews();
+	vrender_frame->RefreshVRenderViews(false, interactive);
 }
 
 void ClippingView::GetSettings()
@@ -839,7 +839,7 @@ void ClippingView::OnX1ClipEdit(wxCommandEvent &event)
 			}
 		}
 	}
-	RefreshVRenderViews();
+	RefreshVRenderViews(true);
 }
 
 void ClippingView::OnX2ClipChange(wxScrollEvent &event)
@@ -950,7 +950,7 @@ void ClippingView::OnX2ClipEdit(wxCommandEvent &event)
 		}
 	}
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(true);
 }
 
 void ClippingView::OnY1ClipChange(wxScrollEvent &event)
@@ -1055,7 +1055,7 @@ void ClippingView::OnY1ClipEdit(wxCommandEvent &event)
 		}
 	}
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(true);
 }
 
 void ClippingView::OnY2ClipChange(wxScrollEvent &event)
@@ -1166,7 +1166,7 @@ void ClippingView::OnY2ClipEdit(wxCommandEvent &event)
 		}
 	}
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(true);
 }
 
 void ClippingView::OnZ1ClipChange(wxScrollEvent &event)
@@ -1270,7 +1270,7 @@ void ClippingView::OnZ1ClipEdit(wxCommandEvent &event)
 		}
 	}
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(true);
 }
 
 void ClippingView::OnZ2ClipChange(wxScrollEvent &event)
@@ -1381,7 +1381,7 @@ void ClippingView::OnZ2ClipEdit(wxCommandEvent &event)
 		}
 	}
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(true);
 }
 
 void ClippingView::OnIdle(wxIdleEvent &event)

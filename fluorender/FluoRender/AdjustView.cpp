@@ -250,10 +250,10 @@ AdjustView::~AdjustView()
 {
 }
 
-void AdjustView::RefreshVRenderViews()
+void AdjustView::RefreshVRenderViews(bool interactive)
 {
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	vr_frame->RefreshVRenderViews();
+	vr_frame->RefreshVRenderViews(false, interactive);
 }
 
 void AdjustView::GetSettings()
@@ -493,7 +493,7 @@ void AdjustView::OnRGammaText(wxCommandEvent& event)
 		if (m_link_group && m_group)
 			m_group->SetGammaAll(gamma);
 
-		RefreshVRenderViews();
+		RefreshVRenderViews(true);
 	}
 }
 
@@ -560,7 +560,7 @@ void AdjustView::OnGGammaText(wxCommandEvent& event)
 		if (m_link_group && m_group)
 			m_group->SetGammaAll(gamma);
 
-		RefreshVRenderViews();
+		RefreshVRenderViews(true);
 	}
 }
 
@@ -627,7 +627,7 @@ void AdjustView::OnBGammaText(wxCommandEvent& event)
 		if (m_link_group && m_group)
 			m_group->SetGammaAll(gamma);
 
-		RefreshVRenderViews();
+		RefreshVRenderViews(true);
 	}
 }
 
@@ -695,7 +695,7 @@ void AdjustView::OnRBrightnessText(wxCommandEvent& event)
 		if (m_link_group && m_group)
 			m_group->SetBrightnessAll(brightness);
 
-		RefreshVRenderViews();
+		RefreshVRenderViews(true);
 	}
 }
 
@@ -762,7 +762,7 @@ void AdjustView::OnGBrightnessText(wxCommandEvent& event)
 		if (m_link_group && m_group)
 			m_group->SetBrightnessAll(brightness);
 
-		RefreshVRenderViews();
+		RefreshVRenderViews(true);
 	}
 }
 
@@ -829,7 +829,7 @@ void AdjustView::OnBBrightnessText(wxCommandEvent& event)
 		if (m_link_group && m_group)
 			m_group->SetBrightnessAll(brightness);
 
-		RefreshVRenderViews();
+		RefreshVRenderViews(true);
 	}
 }
 
@@ -896,7 +896,7 @@ void AdjustView::OnRHdrText(wxCommandEvent &event)
 		if (m_link_group && m_group)
 			m_group->SetHdrAll(hdr);
 
-		RefreshVRenderViews();
+		RefreshVRenderViews(true);
 	}
 }
 
@@ -963,7 +963,7 @@ void AdjustView::OnGHdrText(wxCommandEvent &event)
 		if (m_link_group && m_group)
 			m_group->SetHdrAll(hdr);
 
-		RefreshVRenderViews();
+		RefreshVRenderViews(true);
 	}
 }
 
@@ -1030,7 +1030,7 @@ void AdjustView::OnBHdrText(wxCommandEvent &event)
 		if (m_link_group && m_group)
 			m_group->SetHdrAll(hdr);
 
-		RefreshVRenderViews();
+		RefreshVRenderViews(true);
 	}
 }
 

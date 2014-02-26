@@ -88,7 +88,7 @@ public:
 
 	void SetVolumeData(VolumeData* vd);
 	VolumeData* GetVolumeData();
-	void RefreshVRenderViews(bool tree=false);
+	void RefreshVRenderViews(bool tree=false, bool interactive=false);
 	void InitVRenderViews(unsigned int type);
 
 	//sync group

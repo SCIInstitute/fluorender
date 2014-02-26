@@ -481,6 +481,7 @@ void SettingDlg::GetSettings()
 	m_large_data_size = 1000.0;
 	m_force_brick_size = 128;
 	m_up_time = 100;
+	m_update_order = 0;
 	m_point_volume_mode = 0;
 	m_ruler_use_transf = false;
 	m_ruler_time_dep = true;
@@ -611,6 +612,12 @@ void SettingDlg::GetSettings()
 		fconfig.Read("up time", &m_up_time);
 	}
 	EnableStreaming(m_mem_swap);
+	//update order
+	if (fconfig.Exists("/update order"))
+	{
+		fconfig.SetPath("/update order");
+		fconfig.Read("value", &m_update_order);
+	}
 	//point volume mode
 	if (fconfig.Exists("/point volume mode"))
 	{
@@ -755,6 +762,10 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("large data size", m_large_data_size);
 	fconfig.Write("force brick size", m_force_brick_size);
 	fconfig.Write("up time", m_up_time);
+
+	//update order
+	fconfig.SetPath("/update order");
+	fconfig.Write("value", m_update_order);
 
 	//point volume mode
 	fconfig.SetPath("/point volume mode");

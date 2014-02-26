@@ -65,6 +65,7 @@ namespace FLIVR
 	BrickQueue TextureRenderer::brick_queue_(15);
 	int TextureRenderer::quota_bricks_ = 0;
 	Point TextureRenderer::quota_center_;
+	int TextureRenderer::update_order_ = 0;
 
 	TextureRenderer::TextureRenderer(Texture* tex)
 		:

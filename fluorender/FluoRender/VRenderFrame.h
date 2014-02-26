@@ -139,7 +139,7 @@ public:
 	vector <VRenderView*>* GetViewList();
 	VRenderView* GetView(int index);
 	VRenderView* GetView(wxString& name);
-	void RefreshVRenderViews(bool tree=false);
+	void RefreshVRenderViews(bool tree=false, bool interactive=false);
 	void DeleteVRenderView(int i);
 	void DeleteVRenderView(wxString &name);
 

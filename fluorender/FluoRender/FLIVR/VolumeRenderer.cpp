@@ -510,7 +510,10 @@ namespace FLIVR
 		{
 		case MODE_OVER:
 			glBlendEquation(GL_FUNC_ADD);
-			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			if (update_order_ == 0)
+				glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			else if (update_order_ == 1)
+				glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
 			break;
 		case MODE_MIP:
 			glBlendEquation(GL_MAX);
@@ -834,7 +837,7 @@ namespace FLIVR
 		}
 
 		if (mem_swap_ &&
-			cur_brick_num_ >= total_brick_num_)
+			cur_brick_num_ == total_brick_num_)
 			done_update_loop_ = true;
 		if (mem_swap_ &&
 			cur_chan_brick_num_ == (*bricks).size())
