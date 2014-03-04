@@ -7,3 +7,7 @@ fluorender/FluoRender/x64
 fluorender/wxWidgets/
 fluorender/FluoRender/FluoRender.suo
 .DS_Store
+*.cmake
+Makefile
+CMakeCache.txt
+CMakeFiles

@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <math.h>
 #include <assert.h>
 
-#include <FLIVR/Utils.h>
+#include "Utils.h"
 
 namespace FLIVR
 {

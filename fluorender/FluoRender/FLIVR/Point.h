@@ -29,7 +29,7 @@
 #ifndef SLIVR_Point_h
 #define SLIVR_Point_h
 
-#include <FLIVR/Utils.h>
+#include "Utils.h"
 
 #include <string>
 #include <iosfwd>

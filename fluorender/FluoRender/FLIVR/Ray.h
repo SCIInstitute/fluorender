@@ -29,8 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef SLIVR_Ray_h
 #define SLIVR_Ray_h
 
-#include <FLIVR/Point.h>
-#include <FLIVR/Vector.h>
+#include "Point.h"
+#include "Vector.h"
 
 namespace FLIVR
 {

@@ -30,8 +30,8 @@
 #define TextureRenderer_h
 
 #include <nrrd.h>
-#include <FLIVR/TextureBrick.h>
-#include <FLIVR/Texture.h>
+#include "TextureBrick.h"
+#include "Texture.h"
 
 namespace FLIVR
 {

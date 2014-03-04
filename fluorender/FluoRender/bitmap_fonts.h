@@ -15,7 +15,7 @@
 #include <windows.h>
 #endif
 
-#include <GL/gl.h>
+#include OPEN_GL_HEADER 
 
 /*
  * The bitmap font structure

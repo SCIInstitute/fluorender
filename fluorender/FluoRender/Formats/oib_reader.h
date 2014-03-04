@@ -2,10 +2,10 @@
 #define _OIB_READER_H_
 
 #include <stdio.h>
-#include <windows.h>
-#include <ole2.h>
+//#include <windows.h>
+//#include <ole2.h>
 #include <vector>
-#include <Formats\base_reader.h>
+#include "base_reader.h"
 
 using namespace std;
 

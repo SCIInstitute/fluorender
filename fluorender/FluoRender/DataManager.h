@@ -1,33 +1,34 @@
-#include <GL\glew.h>
+#include <GL/glew.h>
 #include "bitmap_fonts.h"
 #include <vector>
-#include <hash_map>
+#include <ext/hash_map>
 #include <string.h>
 #include <tiffio.h>
-#include <FLIVR\BBox.h>
-#include <FLIVR\Color.h>
-#include <FLIVR\Point.h>
-#include <FLIVR\MeshRenderer.h>
-#include <FLIVR\VolumeRenderer.h>
-#include <wx\wfstream.h>
-#include <wx\fileconf.h>
-#include <Formats\base_reader.h>
-#include <Formats\oib_reader.h>
-#include <Formats\oif_reader.h>
-#include <Formats\nrrd_reader.h>
-#include <Formats\tif_reader.h>
-#include <Formats\nrrd_writer.h>
-#include <Formats\tif_writer.h>
-#include <Formats\msk_reader.h>
-#include <Formats\msk_writer.h>
-#include <Formats\lsm_reader.h>
-#include <Formats\lbl_reader.h>
-#include <Formats\pvxml_reader.h>
+#include "FLIVR/BBox.h"
+#include "FLIVR/Color.h"
+#include "FLIVR/Point.h"
+#include "FLIVR/MeshRenderer.h"
+#include "FLIVR/VolumeRenderer.h"
+#include <wx/wfstream.h>
+#include <wx/fileconf.h>
+#include "Formats/base_reader.h"
+#include "Formats/oib_reader.h"
+#include "Formats/oif_reader.h"
+#include "Formats/nrrd_reader.h"
+#include "Formats/tif_reader.h"
+#include "Formats/nrrd_writer.h"
+#include "Formats/tif_writer.h"
+#include "Formats/msk_reader.h"
+#include "Formats/msk_writer.h"
+#include "Formats/lsm_reader.h"
+#include "Formats/lbl_reader.h"
+#include "Formats/pvxml_reader.h"
 
 #ifndef _DATAMANAGER_H_
 #define _DATAMANAGER_H_
 
 using namespace std;
+using namespace __gnu_cxx;
 using namespace FLIVR;
 
 #define DATA_VOLUME			1
