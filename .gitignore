@@ -1,4 +1,5 @@
 *.svn
+*.a
 fluorender/FluoRender/FluoRender.opensdf
 fluorender/FluoRender/FluoRender.sdf
 fluorender/FluoRender/FluoRender.vcxproj.user
