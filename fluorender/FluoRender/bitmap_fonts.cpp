@@ -108,10 +108,9 @@ void renderText( float x, float y, BitmapFontType fontType, const char *string )
 
 	const BitmapFontData* font = getBitmapFontDataByType( fontType );
 	const unsigned char* face;
-	unsigned char *c = '\0';
 	unsigned char *str_temp = (unsigned char*) string;
 
-	for( c = str_temp; *c != '\0'; ++c )
+	for(unsigned char * c = str_temp; *c != '\0'; ++c )
 	{
 		// Find the character face that we want to draw.
 		face = font->Characters[*c-1];
@@ -128,10 +127,9 @@ double renderTextLen(BitmapFontType fontType, const char *string )
 	double length = 0.0;
 	const BitmapFontData* font = getBitmapFontDataByType( fontType );
 	const unsigned char* face;
-	unsigned char *c = '\0';
 	unsigned char *str_temp = (unsigned char*) string;
 
-	for( c = str_temp; *c != '\0'; ++c )
+	for(unsigned char * c = str_temp; *c != '\0'; ++c )
 	{
 		// Find the character face that we want to draw.
 		face = font->Characters[*c-1];

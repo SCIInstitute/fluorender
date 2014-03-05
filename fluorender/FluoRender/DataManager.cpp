@@ -1,5 +1,5 @@
 #include "DataManager.h"
-#include <nrrd.h>
+#include "teem/Nrrd/nrrd.h"
 #include <wx/msgdlg.h>
 #include <wx/progdlg.h>
 #include <wx/wfstream.h>
@@ -132,9 +132,12 @@ VolumeData::VolumeData(VolumeData &copy)
 	//layer properties
 	type = 2;//volume
 	SetName(copy.GetName()+wxString::Format("_%d", m_dup_counter));
-	SetGamma(copy.GetGamma());
-	SetBrightness(copy.GetBrightness());
-	SetHdr(copy.GetHdr());
+        FLIVR::Color col = copy.GetGamma();
+	SetGamma(col);
+        col = copy.GetBrightness();
+	SetBrightness(col);
+        col = copy.GetHdr();
+	SetHdr(col);
 	SetSyncR(copy.GetSyncR());
 	SetSyncG(copy.GetSyncG());
 	SetSyncB(copy.GetSyncB());
@@ -2904,7 +2907,7 @@ TraceGroup::TraceGroup()
 
 TraceGroup::~TraceGroup()
 {
-	hash_map<unsigned int, Trace*>::iterator trace_iter;
+	unordered_map <unsigned int, Trace*>::iterator trace_iter;
 	for (trace_iter=m_traces.begin(); trace_iter!=m_traces.end(); trace_iter++)
 	{
 		Trace* trace = trace_iter->second;
@@ -2916,7 +2919,7 @@ TraceGroup::~TraceGroup()
 
 Trace* TraceGroup::GetTrace(unsigned int id)
 {
-	hash_map<unsigned int, Trace*>::iterator trace_iter;
+	unordered_map <unsigned int, Trace*>::iterator trace_iter;
 	trace_iter = m_traces.find(id);
 	if (trace_iter != m_traces.end())
 		return trace_iter->second;
@@ -2939,7 +2942,7 @@ void TraceGroup::AddID(unsigned int id)
 	m_ids.insert(pair<unsigned int, unsigned int>(id, id));
 }
 
-hash_map<unsigned int, unsigned int>* TraceGroup::GetIDs()
+unordered_map <unsigned int, unsigned int>* TraceGroup::GetIDs()
 {
 	return &m_ids;
 }
@@ -3034,7 +3037,7 @@ void TraceGroup::Draw()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-	hash_map<unsigned int, unsigned int>::iterator id_iter;
+	unordered_map <unsigned int, unsigned int>::iterator id_iter;
 
 	for (id_iter=m_ids.begin(); id_iter!=m_ids.end(); id_iter++)
 	{

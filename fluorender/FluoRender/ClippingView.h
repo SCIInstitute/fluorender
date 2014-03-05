@@ -1,8 +1,8 @@
 #include "DataManager.h"
-#include <wx\wx.h>
-#include <wx\panel.h>
-#include <wx\slider.h>
-#include <wx\spinbutt.h>
+#include <wx/wx.h>
+#include <wx/panel.h>
+#include <wx/slider.h>
+#include <wx/spinbutt.h>
 
 
 #ifndef _CLIPPINGVIEW_H_

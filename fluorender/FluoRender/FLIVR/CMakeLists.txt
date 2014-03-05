@@ -6,7 +6,6 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/teem/Air)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/teem/Hest)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/teem/Nrrd)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/glew)
-include_directories(${FluoRender_SOURCE_DIR}/fluorender/Wacom/Include)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/LibTiff)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender)
 

@@ -29,11 +29,11 @@
 #ifndef SLIVR_MultiVolumeRenderer_h
 #define SLIVR_MultiVolumeRenderer_h
 
-#include <GL\glew.h>
-#include <FLIVR\BBox.h>
-#include <FLIVR\Plane.h>
-#include <FLIVR\Texture.h>
-#include <FLIVR\VolumeRenderer.h>
+#include "GL/glew.h"
+#include "BBox.h"
+#include "Plane.h"
+#include "Texture.h"
+#include "VolumeRenderer.h"
 #include <vector>
 
 using namespace std;

@@ -54,11 +54,11 @@ void TraceListCtrl::Update(VRenderView* vrv)
 
 	DeleteAllItems();
 
-	hash_map<unsigned int, unsigned int>* ids = traces->GetIDs();
+	unordered_map <unsigned int, unsigned int>* ids = traces->GetIDs();
 	if (!ids)
 		return;
 
-	hash_map<unsigned int, unsigned int>::iterator id_iter;
+	unordered_map <unsigned int, unsigned int>::iterator id_iter;
 	for (id_iter=ids->begin(); id_iter!=ids->end(); id_iter++)
 	{
 		Trace* trace = traces->GetTrace(id_iter->second);

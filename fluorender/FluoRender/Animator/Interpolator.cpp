@@ -1,4 +1,4 @@
-#include <Animator\Interpolator.h>
+#include "Interpolator.h"
 #include "utility.h"
 
 int Interpolator::m_id = 0;

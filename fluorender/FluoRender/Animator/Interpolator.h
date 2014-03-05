@@ -3,11 +3,11 @@
 
 #include <vector>
 #include <string>
-#include <Animator\FlKey.h>
-#include <Animator\FlKeyDouble.h>
-#include <Animator\FlKeyQuaternion.h>
-#include <Animator\FlKeyBoolean.h>
-#include <FLIVR\Quaternion.h>
+#include "FlKey.h"
+#include "FlKeyDouble.h"
+#include "FlKeyQuaternion.h"
+#include "FlKeyBoolean.h"
+#include "Quaternion.h"
 
 using namespace std;
 using namespace FLIVR;

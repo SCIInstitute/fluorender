@@ -1,5 +1,6 @@
 #include "ClippingView.h"
 #include "VRenderFrame.h"
+#include "compatibility.h"
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(ClippingView, wxPanel)
@@ -455,17 +456,17 @@ void ClippingView::GetSettings()
 	m_z2_clip_sldr->SetRange(resz_n, resz);
 	//text range
 	wxIntegerValidator<int>* vald_i;
-	if (vald_i = (wxIntegerValidator<int>*)m_x1_clip_text->GetValidator())
+	if ((vald_i = (wxIntegerValidator<int>*)m_x1_clip_text->GetValidator()))
 		vald_i->SetRange(0, int(resx));
-	if (vald_i = (wxIntegerValidator<int>*)m_x2_clip_text->GetValidator())
+	if ((vald_i = (wxIntegerValidator<int>*)m_x2_clip_text->GetValidator()))
 		vald_i->SetRange(0, int(resx));
-	if (vald_i = (wxIntegerValidator<int>*)m_y1_clip_text->GetValidator())
+	if ((vald_i = (wxIntegerValidator<int>*)m_y1_clip_text->GetValidator()))
 		vald_i->SetRange(0, int(resy));
-	if (vald_i = (wxIntegerValidator<int>*)m_y2_clip_text->GetValidator())
+	if ((vald_i = (wxIntegerValidator<int>*)m_y2_clip_text->GetValidator()))
 		vald_i->SetRange(0, int(resy));
-	if (vald_i = (wxIntegerValidator<int>*)m_z1_clip_text->GetValidator())
+	if ((vald_i = (wxIntegerValidator<int>*)m_z1_clip_text->GetValidator()))
 		vald_i->SetRange(0, int(resz));
-	if (vald_i = (wxIntegerValidator<int>*)m_z2_clip_text->GetValidator())
+	if ((vald_i = (wxIntegerValidator<int>*)m_z2_clip_text->GetValidator()))
 		vald_i->SetRange(0, int(resz));
 
 	//clip distance
@@ -1616,7 +1617,7 @@ void ClippingView::OnZRotEdit(wxCommandEvent &event)
 void ClippingView::OnXRotSpinUp(wxSpinEvent& event)
 {
 	wxString str_val = m_x_rot_text->GetValue();
-	double val = _wtof(str_val.fn_str()) + 1.0;
+	double val = WSTOD(str_val.fn_str()) + 1.0;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);
@@ -1626,7 +1627,7 @@ void ClippingView::OnXRotSpinUp(wxSpinEvent& event)
 void ClippingView::OnXRotSpinDown(wxSpinEvent& event)
 {
 	wxString str_val = m_x_rot_text->GetValue();
-	double val = _wtof(str_val.fn_str()) - 1.0;
+	double val = WSTOD(str_val.fn_str()) - 1.0;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);
@@ -1636,7 +1637,7 @@ void ClippingView::OnXRotSpinDown(wxSpinEvent& event)
 void ClippingView::OnYRotSpinUp(wxSpinEvent& event)
 {
 	wxString str_val = m_y_rot_text->GetValue();
-	double val = _wtof(str_val.fn_str()) + 1.0;
+	double val = WSTOD(str_val.fn_str()) + 1.0;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);
@@ -1646,7 +1647,7 @@ void ClippingView::OnYRotSpinUp(wxSpinEvent& event)
 void ClippingView::OnYRotSpinDown(wxSpinEvent& event)
 {
 	wxString str_val = m_y_rot_text->GetValue();
-	double val = _wtof(str_val.fn_str()) - 1.0;
+	double val = WSTOD(str_val.fn_str()) - 1.0;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);
@@ -1656,7 +1657,7 @@ void ClippingView::OnYRotSpinDown(wxSpinEvent& event)
 void ClippingView::OnZRotSpinUp(wxSpinEvent& event)
 {
 	wxString str_val = m_z_rot_text->GetValue();
-	double val = _wtof(str_val.fn_str()) + 1.0;
+	double val = WSTOD(str_val.fn_str()) + 1.0;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);
@@ -1666,7 +1667,7 @@ void ClippingView::OnZRotSpinUp(wxSpinEvent& event)
 void ClippingView::OnZRotSpinDown(wxSpinEvent& event)
 {
 	wxString str_val = m_z_rot_text->GetValue();
-	double val = _wtof(str_val.fn_str()) - 1.0;
+	double val = WSTOD(str_val.fn_str()) - 1.0;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);

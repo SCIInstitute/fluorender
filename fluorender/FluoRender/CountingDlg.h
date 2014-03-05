@@ -1,7 +1,7 @@
 #ifndef _COUNTINGDLG_H_
 #define _COUNTINGDLG_H_
 
-#include <wx\wx.h>
+#include <wx/wx.h>
 
 class VRenderView;
 class VolumeData;

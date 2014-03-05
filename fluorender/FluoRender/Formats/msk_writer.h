@@ -1,7 +1,7 @@
 #ifndef _MSK_WRITER_H_
 #define _MSK_WRITER_H_
 
-#include <Formats\base_writer.h>
+#include <base_writer.h>
 
 class MSKWriter : public BaseWriter
 {

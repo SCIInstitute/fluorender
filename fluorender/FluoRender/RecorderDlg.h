@@ -1,5 +1,5 @@
-#include <wx\wx.h>
-#include <wx\listctrl.h>
+#include <wx/wx.h>
+#include <wx/listctrl.h>
 #include <vector>
 
 #ifndef _RECORDERDLG_H_

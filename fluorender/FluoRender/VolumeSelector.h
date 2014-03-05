@@ -1,11 +1,11 @@
 #include "DataManager.h"
 #include <wx/progdlg.h>
-#include <hash_map>
+#include <unordered_map>
 
 #ifndef _VOLUMESELECTOR_H_
 #define _VOLUMESELECTOR_H_
 
-using namespace stdext;
+//using namespace stdext;
 
 class VolumeSelector
 {
@@ -122,7 +122,7 @@ private:
 		Vector acc_pos;
 		double acc_int;
 	};
-	hash_map<unsigned int, Component> m_comps;
+	unordered_map <unsigned int, Component> m_comps;
 	double m_min_voxels, m_max_voxels;
 
 	//exported volumes

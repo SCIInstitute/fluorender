@@ -1,10 +1,10 @@
 #include "DataManager.h"
 #include "VRenderView.h"
-#include <wx\wx.h>
-#include <wx\panel.h>
-#include <wx\glcanvas.h>
-#include <wx\clrpicker.h>
-#include <wx\slider.h>
+#include <wx/wx.h>
+#include <wx/panel.h>
+#include <wx/glcanvas.h>
+#include <wx/clrpicker.h>
+#include <wx/slider.h>
 
 #ifndef _MPROPVIEW_H_
 #define _MPROPVIEW_H_

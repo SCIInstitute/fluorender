@@ -93,6 +93,7 @@ void APropView::OnMemoUpdateBtn(wxCommandEvent& event)
 	if (m_ann)
 	{
 		wxString memo = m_memo_text->GetValue();
-		m_ann->SetMemo(memo.ToStdString());
+                std::string str = memo.ToStdString();
+		m_ann->SetMemo(str);
 	}
 }

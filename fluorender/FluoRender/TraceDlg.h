@@ -1,5 +1,5 @@
-#include <wx\wx.h>
-#include <wx\listctrl.h>
+#include <wx/wx.h>
+#include <wx/listctrl.h>
 
 #ifndef _TRACEDLG_H_
 #define _TRACEDLG_H_

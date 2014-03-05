@@ -1,7 +1,7 @@
 #include "DataManager.h"
-#include <wx\wx.h>
-#include <wx\panel.h>
-#include <wx\spinbutt.h>
+#include <wx/wx.h>
+#include <wx/panel.h>
+#include <wx/spinbutt.h>
 
 #ifndef _MMANIPULATOR_H_
 #define _MMANIPULATOR_H_

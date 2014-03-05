@@ -431,7 +431,7 @@ nrrdPad_va(Nrrd *nout, const Nrrd *nin,
   strcpy(buff1, "");
   for (ai=0; ai<nin->dim; ai++) {
     sprintf(buff2, "%s[" _AIR_PTRDIFF_T_CNV "," _AIR_PTRDIFF_T_CNV "]", 
-            (ai ? "x" : ""), min[ai], max[ai]);
+            (ai ? "x" : ""), (int)min[ai], (int)max[ai]);
     strcat(buff1, buff2);
   }
   if (nrrdBoundaryPad == boundary) {

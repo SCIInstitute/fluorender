@@ -12,3 +12,4 @@ fluorender/FluoRender/FluoRender.suo
 Makefile
 CMakeCache.txt
 CMakeFiles
+*.swp

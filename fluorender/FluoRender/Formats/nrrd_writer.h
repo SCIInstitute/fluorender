@@ -1,7 +1,7 @@
 #ifndef _NRRD_WRITER_H_
 #define _NRRD_WRITER_H_
 
-#include <Formats\base_writer.h>
+#include <base_writer.h>
 
 class NRRDWriter : public BaseWriter
 {

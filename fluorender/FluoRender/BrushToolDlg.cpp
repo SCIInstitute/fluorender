@@ -1,7 +1,7 @@
 #include "BrushToolDlg.h"
 #include "VRenderFrame.h"
 #include <wx/valnum.h>
-#include <Formats\png_resource.h>
+#include "Formats/png_resource.h"
 
 BEGIN_EVENT_TABLE(BrushToolDlg, wxPanel)
 	//paint tools
@@ -1189,7 +1189,8 @@ void BrushToolDlg::OnCalcSub(wxCommandEvent &event)
 		for (int i=0; i<vr_frame->GetViewNum(); i++)
 		{
 			VRenderView* vrv = vr_frame->GetView(i);
-			if (vrv && vrv->GetVolumeData(m_vol1->GetName()))
+                        wxString str = m_vol1->GetName();
+			if (vrv && vrv->GetVolumeData(str))
 			{
 				m_cur_view = vrv;
 				break;
@@ -1220,7 +1221,8 @@ void BrushToolDlg::OnCalcAdd(wxCommandEvent &event)
 		for (int i=0; i<vr_frame->GetViewNum(); i++)
 		{
 			VRenderView* vrv = vr_frame->GetView(i);
-			if (vrv && vrv->GetVolumeData(m_vol1->GetName()))
+                        wxString str = m_vol1->GetName();
+			if (vrv && vrv->GetVolumeData(str))
 			{
 				m_cur_view = vrv;
 				break;
@@ -1251,7 +1253,8 @@ void BrushToolDlg::OnCalcDiv(wxCommandEvent &event)
 		for (int i=0; i<vr_frame->GetViewNum(); i++)
 		{
 			VRenderView* vrv = vr_frame->GetView(i);
-			if (vrv && vrv->GetVolumeData(m_vol1->GetName()))
+                        wxString str = m_vol1->GetName();
+			if (vrv && vrv->GetVolumeData(str))
 			{
 				m_cur_view = vrv;
 				break;
@@ -1282,7 +1285,8 @@ void BrushToolDlg::OnCalcIsc(wxCommandEvent &event)
 		for (int i=0; i<vr_frame->GetViewNum(); i++)
 		{
 			VRenderView* vrv = vr_frame->GetView(i);
-			if (vrv && vrv->GetVolumeData(m_vol1->GetName()))
+                        wxString str = m_vol1->GetName();
+			if (vrv && vrv->GetVolumeData(str))
 			{
 				m_cur_view = vrv;
 				break;
@@ -1314,7 +1318,8 @@ void BrushToolDlg::OnCalcFill(wxCommandEvent &event)
 		for (int i=0; i<vr_frame->GetViewNum(); i++)
 		{
 			VRenderView* vrv = vr_frame->GetView(i);
-			if (vrv && vrv->GetVolumeData(m_vol1->GetName()))
+                        wxString str = m_vol1->GetName();
+			if (vrv && vrv->GetVolumeData(str))
 			{
 				m_cur_view = vrv;
 				break;

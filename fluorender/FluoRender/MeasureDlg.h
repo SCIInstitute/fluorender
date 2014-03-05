@@ -1,5 +1,5 @@
-#include <wx\wx.h>
-#include <wx\listctrl.h>
+#include <wx/wx.h>
+#include <wx/listctrl.h>
 
 #ifndef _MEASUREDLG_H_
 #define _MEASUREDLG_H_

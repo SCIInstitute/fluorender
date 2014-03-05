@@ -2,7 +2,7 @@
 #define _PVXML_READER_H_
 
 #include <vector>
-#include <Formats\base_reader.h>
+#include <base_reader.h>
 
 using namespace std;
 class wxXmlNode;

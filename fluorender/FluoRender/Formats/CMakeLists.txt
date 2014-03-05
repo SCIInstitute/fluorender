@@ -2,6 +2,7 @@
 
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/LibTiff)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender)
 
 add_library(LibFormats 	base_reader.cpp
 			lbl_reader.cpp

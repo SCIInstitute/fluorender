@@ -5314,8 +5314,8 @@ void VRenderGLView::Run4DScript(wxString scriptname)
 					if (!mask_data) break;
 					unsigned int* label_data = (unsigned int*)(label_nrrd->data);
 					if (!label_data) break;
-					hash_map<unsigned int, Lbl>sel_labels;
-					hash_map<unsigned int, Lbl>::iterator label_iter;
+					unordered_map <unsigned int, Lbl>sel_labels;
+					unordered_map <unsigned int, Lbl>::iterator label_iter;
 					for (ii=0; ii<nx; ii++)
 					for (jj=0; jj<ny; jj++)
 					for (kk=0; kk<nz; kk++)
@@ -5368,7 +5368,7 @@ void VRenderGLView::Run4DScript(wxString scriptname)
 					{
 						m_trace_group->ClearIDs();
 						m_trace_group->SetCurTime(m_tseq_cur_num);
-						hash_map<unsigned int, Lbl>::iterator id_iter;
+						unordered_map <unsigned int, Lbl>::iterator id_iter;
 						for (id_iter=sel_labels.begin(); id_iter!=sel_labels.end(); id_iter++)
 							if (id_iter->second.size >= (unsigned int)slimit)
 								m_trace_group->AddID(id_iter->second.id);

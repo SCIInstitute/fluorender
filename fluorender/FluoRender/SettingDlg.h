@@ -1,4 +1,4 @@
-#include <wx\wx.h>
+#include <wx/wx.h>
 
 #ifndef _SETTINGDLG_H_
 #define _SETTINGDLG_H_

@@ -2,8 +2,7 @@
 #define _OIB_READER_H_
 
 #include <stdio.h>
-//#include <windows.h>
-//#include <ole2.h>
+#include "../compatibility.h"
 #include <vector>
 #include "base_reader.h"
 
@@ -102,10 +101,11 @@ private:
 	static bool oib_sort(const TimeDataInfo& info1, const TimeDataInfo& info2);
 	void ReadSingleOib();
 	void ReadSequenceOib();
-	void ReadStream(IStorage *pStg, wstring &stream_name);
-	void ReadOibInfo(BYTE* pbyData, ULONG size);
-	void ReadOif(BYTE* pbyData, ULONG size);
-	void ReadTiff(BYTE* pbyData, unsigned short *val, int z);
+        //TODO
+	//void ReadStream(IStorage *pStg, wstring &stream_name);
+	//void ReadOibInfo(BYTE* pbyData, ULONG size);
+	//void ReadOif(BYTE* pbyData, ULONG size);
+	//void ReadTiff(BYTE* pbyData, unsigned short *val, int z);
 };
 
 #endif//_OIB_READER_H_

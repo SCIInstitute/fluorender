@@ -1,7 +1,8 @@
-#include <wx\wx.h>
-#include <wx\panel.h>
-#include <wx\spinbutt.h>
-#include <wx\clrpicker.h>
+#include <wx/wx.h>
+#include <wx/panel.h>
+#include <wx/spinbutt.h>
+#include <wx/clrpicker.h>
+#include "compatibility.h"
 
 #ifndef _VMovieView_H_
 #define _VMovieView_H_
@@ -69,11 +70,11 @@ public:
 	}
 	int GetStartTime()
 	{
-		return int(_wtof(m_time_start_text->GetValue().fn_str()));
+		return int(WSTOD(m_time_start_text->GetValue().fn_str()));
 	}
 	int GetEndTime()
 	{
-		return int(_wtof(m_time_end_text->GetValue().fn_str()));
+		return int(WSTOD(m_time_end_text->GetValue().fn_str()));
 	}
 	int GetMovieType()
 	{

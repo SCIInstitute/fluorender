@@ -20,7 +20,7 @@
 #include "MeasureDlg.h"
 #include "TraceDlg.h"
 #include "Tester.h"
-#include <Animator\Interpolator.h>
+#include "Animator/Interpolator.h"
 
 #include <wx/wx.h>
 #include <wx/aui/aui.h>

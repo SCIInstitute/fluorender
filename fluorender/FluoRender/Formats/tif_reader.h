@@ -1,9 +1,9 @@
 #ifndef _TIF_READER_H_
 #define _TIF_READER_H_
 
-#include <Formats\base_reader.h>
+#include <base_reader.h>
 #include <cstdio>
-#include <windows.h>
+//#include <windows.h>
 #include <vector>
 #include <cstdint>
 #include <fstream>

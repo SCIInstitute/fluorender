@@ -296,7 +296,7 @@ int VolumeSelector::CompIslandCount(double min_voxels, double max_voxels)
 		}
 	}
 
-	hash_map <unsigned int, Component> :: const_iterator comp_iter;
+	unordered_map <unsigned int, Component> :: const_iterator comp_iter;
 	//second pass: combine components and remove islands
 	//update mask
 	Nrrd* mask_nrrd = m_vd->GetMask();
@@ -350,7 +350,7 @@ int VolumeSelector::CompIslandCount(double min_voxels, double max_voxels)
 
 bool VolumeSelector::SearchComponentList(unsigned int cval, Vector &pos, double intensity)
 {
-	hash_map <unsigned int, Component> :: iterator comp_iter;
+	unordered_map <unsigned int, Component> :: iterator comp_iter;
 	comp_iter = m_comps.find(cval);
 	if (comp_iter != m_comps.end())
 	{
@@ -394,7 +394,7 @@ void VolumeSelector::CompExportMultiChann(bool select)
 	if (!data_mvd || (select&&!data_mvd_mask) || !data_mvd_label) return;
 
 	i = 1;
-	hash_map <unsigned int, Component> :: const_iterator comp_iter;
+	unordered_map <unsigned int, Component> :: const_iterator comp_iter;
 	for (comp_iter=m_comps.begin(); comp_iter!=m_comps.end(); comp_iter++)
 	{
 		if (comp_iter->second.counter<m_min_voxels ||
@@ -783,7 +783,7 @@ void VolumeSelector::GenerateAnnotations(bool use_sel)
 	double total_int = 0.0;
 
 	int i = 1;
-	hash_map <unsigned int, Component> :: const_iterator comp_iter;
+	unordered_map <unsigned int, Component> :: const_iterator comp_iter;
 	for (comp_iter=m_comps.begin(); comp_iter!=m_comps.end(); comp_iter++)
 	{
 		if (comp_iter->second.counter<m_min_voxels ||
@@ -1065,7 +1065,7 @@ void VolumeSelector::Test()
 		value = m_comps.size();
 		fwrite(&value, sizeof(int), 1, pfile);
 
-		hash_map <unsigned int, Component> :: const_iterator comp_iter;
+		unordered_map <unsigned int, Component> :: const_iterator comp_iter;
 		for (comp_iter=m_comps.begin(); comp_iter!=m_comps.end(); comp_iter++)
 		{
 			value = comp_iter->second.counter;

@@ -1,15 +1,15 @@
 #include "DataManager.h"
-#include <wx\wx.h>
-#include <wx\panel.h>
-#include <wx\glcanvas.h>
-#include <wx\clrpicker.h>
-#include <wx\slider.h>
+#include <wx/wx.h>
+#include <wx/panel.h>
+#include <wx/glcanvas.h>
+#include <wx/clrpicker.h>
+#include <wx/slider.h>
 
-#include <FLIVR\Color.h>
-#include <FLIVR\VolumeRenderer.h>
-#include <FLIVR\BBox.h>
-#include <FLIVR\Point.h>
-#include <FLIVR\MultiVolumeRenderer.h>
+#include "FLIVR/Color.h"
+#include "FLIVR/VolumeRenderer.h"
+#include "FLIVR/BBox.h"
+#include "FLIVR/Point.h"
+#include "FLIVR/MultiVolumeRenderer.h"
 
 
 #ifndef _VPROPVIEW_H_

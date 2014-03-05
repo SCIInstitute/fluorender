@@ -1,4 +1,4 @@
-#include <Formats\base_reader.h>
+#include "base_reader.h"
 
 int BaseReader::LZWDecode(tidata_t tif, tidata_t op0, tsize_t occ0)
 {

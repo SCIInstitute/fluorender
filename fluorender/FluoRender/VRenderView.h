@@ -3,24 +3,24 @@
 #include "VolumeSelector.h"
 #include "VolumeCalculator.h"
 
-#include <FLIVR\Color.h>
-#include <FLIVR\ShaderProgram.h>
-#include <FLIVR\BBox.h>
-#include <FLIVR\MultiVolumeRenderer.h>
-#include <FLIVR\Quaternion.h>
-#include <FLIVR\ImgShader.h>
-#include <FLIVR\PaintShader.h>
+#include "FLIVR/Color.h"
+#include "FLIVR/ShaderProgram.h"
+#include "FLIVR/BBox.h"
+#include "FLIVR/MultiVolumeRenderer.h"
+#include "FLIVR/Quaternion.h"
+#include "FLIVR/ImgShader.h"
+#include "FLIVR/PaintShader.h"
 
-#include <wx\wx.h>
-#include <wx\clrpicker.h>
-#include <wx\spinbutt.h>
-#include <wx\glcanvas.h>
-#include <wx\event.h>
+#include <wx/wx.h>
+#include <wx/clrpicker.h>
+#include <wx/spinbutt.h>
+#include <wx/glcanvas.h>
+#include <wx/event.h>
 
 #include <vector>
 #include <stdarg.h>
-#include <wintab.h>
-#include <nv\timer.h>
+//#include <wintab.h>
+#include "nv/timer.h"
 
 #ifndef _VRENDERVIEW_H_
 #define _VRENDERVIEW_H_
@@ -714,8 +714,8 @@ private:
 	nv::Timer *goTimer;
 
 	//wacom support
-	HCTX m_hTab;
-	LOGCONTEXTA m_lc;
+	//HCTX m_hTab;
+	//LOGCONTEXTA m_lc;
 	double m_pressure;
 
 	//for selection
@@ -741,7 +741,7 @@ private:
 
 private:
 	//wacom tablet
-	HCTX TabletInit(HWND hWnd);
+	//HCTX TabletInit(HWND hWnd);
 
 	void DrawBounds();
 	void DrawGrid();

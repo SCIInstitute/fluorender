@@ -1,7 +1,7 @@
 #include <GL/glew.h>
 #include "bitmap_fonts.h"
 #include <vector>
-#include <ext/hash_map>
+#include <unordered_map>
 #include <string.h>
 #include <tiffio.h>
 #include "FLIVR/BBox.h"
@@ -28,7 +28,6 @@
 #define _DATAMANAGER_H_
 
 using namespace std;
-using namespace __gnu_cxx;
 using namespace FLIVR;
 
 #define DATA_VOLUME			1
@@ -830,7 +829,7 @@ public:
 	void ClearIDs();
 	void SetCurTime(int time);
 	void AddID(unsigned int id);
-	hash_map<unsigned int, unsigned int>* GetIDs();
+	unordered_map <unsigned int, unsigned int>* GetIDs();
 
 	int Load(wxString &filename);
 	void Draw();
@@ -841,9 +840,9 @@ private:
 	wxString m_data_path;
 	//for selective drawing
 	int m_cur_time;
-	hash_map<unsigned int, unsigned int> m_ids;
+	unordered_map <unsigned int, unsigned int> m_ids;
 
-	hash_map<unsigned int, Trace*> m_traces;
+	unordered_map <unsigned int, Trace*> m_traces;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

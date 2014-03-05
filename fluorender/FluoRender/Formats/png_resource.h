@@ -2,7 +2,7 @@
 #define PNG_RESOURCE_H
 
 #include <wx/wx.h>
-#include <windows.h>
+#include "../compatibility.h"
 
 namespace PNG_RES
 {

@@ -1,5 +1,5 @@
-#include <wx\wx.h>
-#include <wx\html\htmlwin.h>
+#include <wx/wx.h>
+#include <wx/html/htmlwin.h>
 
 #ifndef _HELPDLG_H_
 #define _HELPDLG_H_

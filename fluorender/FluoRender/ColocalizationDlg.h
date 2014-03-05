@@ -1,7 +1,7 @@
 #ifndef _COLOCALIZATIONDLG_H_
 #define _COLOCALIZATIONDLG_H_
 
-#include <wx\wx.h>
+#include <wx/wx.h>
 
 class VRenderView;
 class VolumeData;
