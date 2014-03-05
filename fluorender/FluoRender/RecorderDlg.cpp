@@ -163,9 +163,12 @@ void KeyListCtrl::UpdateText()
 		int interp = interpolator->GetKeyType(i);
 		string desc = interpolator->GetKeyDesc(i);
 		
-		SetText(i, 0, wxString::Format("%d", id));
-		SetText(i, 1, wxString::Format("%d", time));
-		SetText(i, 2, wxString::Format("%d", duration));
+                wxString wx_id = wxString::Format("%d", id);
+                wxString wx_time = wxString::Format("%d", time);
+                wxString wx_duration = wxString::Format("%d", duration);
+		SetText(i, 0, wx_id);
+		SetText(i, 1, wx_time);
+		SetText(i, 2, wx_duration);
 		str = interp==0?"Linear":"Smooth";
 		SetText(i, 3, str);
 		str = desc;
@@ -1040,7 +1043,7 @@ void RecorderDlg::OnPlay(wxCommandEvent &event)
 		{
 			wxString new_folder;
 			new_folder = filename + "_project";
-			CreateDirectory(new_folder.fn_str(), NULL);
+			CREATE_DIR(new_folder.fn_str());
 			wxString prop_file = new_folder + "/" + fopendlg->GetFilename() + "_project.vrp";
 			vr_frame->SaveProject(prop_file);
 		}

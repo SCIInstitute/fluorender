@@ -8,6 +8,8 @@
 #include <ole2.h>
 #define WSTOD(s)                                _wtof(s)
 #define WSTOI(s)                                _wtoi(s)
+#define CREATE_DIR(f)                           CreateDirectory(f, NULL)
+#define SSCANF(a,b,c,d,e,f)                     sscanf_s(a,b,c,d,e,f)
 //#define GET_WM_ACTIVATE_STATE(wp, lp)           LOWORD(wp)
 //#define GET_WM_COMMAND_ID(wp, lp)               LOWORD(wp)
 //#define GET_WM_COMMAND_HWND(wp, lp)             (HWND)(lp)
@@ -20,6 +22,8 @@
 #define WSTOD(s)                                   atof(s)
 #define WSTOI(s)                                   atoi(s)
 #define DWORD                                      unsigned int
+#define CREATE_DIR(f)                              mkdir(f, S_IRWXU | S_IRGRP | S_IXGRP)
+#define SSCANF(a,b,c,d,e,f)                        sscanf(a,b,c,d,e,f)
 //#define GET_WM_ACTIVATE_STATE(wp, lp)               (wp)
 //#define GET_WM_COMMAND_ID(wp, lp)                   (wp)
 //#define GET_WM_COMMAND_HWND(wp, lp)                 (HWND)LOWORD(lp)

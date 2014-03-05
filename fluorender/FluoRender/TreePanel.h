@@ -1,5 +1,6 @@
 #include <wx/wx.h>
 #include <wx/treectrl.h>
+#include "compatibility.h"
 
 #ifndef _TREEPANEL_H_
 #define _TREEPANEL_H_

@@ -5,7 +5,7 @@
 
 #define SETTING_FILE_NAME "fluorender.set"
 
-enum BitmapFontType;
+//enum BitmapFontType;
 class SettingDlg : public wxPanel
 {
 	enum

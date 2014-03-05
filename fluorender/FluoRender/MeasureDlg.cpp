@@ -4,7 +4,7 @@
 #include <wx/valnum.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
-#include <Formats\png_resource.h>
+#include "Formats/png_resource.h"
 #include "ruler.xpm"
 #include <sstream>
 #include <fstream>
@@ -115,8 +115,9 @@ void RulerListCtrl::Update(VRenderView* vrv)
 			points += ", ";
 			points += wxString::Format("(%.0f, %.0f, %.0f)", p->x(), p->y(), p->z());
 		}
+                wxString str = ruler->GetDelInfoValues(", ");
 		Append(ruler->GetName(), ruler->GetLength(), unit,
-			ruler->GetAngle(), points, ruler->GetTimeDep(), ruler->GetTime(), ruler->GetDelInfoValues(", "));
+			ruler->GetAngle(), points, ruler->GetTimeDep(), ruler->GetTime(), str);
 	}
 
 	long item = GetItemCount() - 1;

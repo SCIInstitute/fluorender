@@ -2,6 +2,7 @@
 #include <wx/wx.h>
 #include <wx/panel.h>
 #include <wx/spinbutt.h>
+#include "compatibility.h"
 
 #ifndef _MMANIPULATOR_H_
 #define _MMANIPULATOR_H_

@@ -1,5 +1,5 @@
 /* XPM */
-static char * tick_xpm[] = {
+const static char * tick_xpm[] = {
 "16 16 32 1",
 " 	c None",
 ".	c #FFFFFF",

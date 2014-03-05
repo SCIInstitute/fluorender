@@ -1,7 +1,7 @@
 #include "Tester.h"
 #include "VRenderFrame.h"
 
-#include <Formats\tif_reader.h>
+#include "Formats/tif_reader.h"
 
 BEGIN_EVENT_TABLE(TesterDlg, wxDialog)
 	//sliders

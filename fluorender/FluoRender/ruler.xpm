@@ -1,5 +1,5 @@
 /* XPM */
-static char * ruler_xpm[] = {
+const static char * ruler_xpm[] = {
 "16 16 56 1",
 " 	c None",
 ".	c #EBBA4E",
