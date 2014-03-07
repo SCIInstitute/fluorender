@@ -26,11 +26,13 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#include <GL\glew.h>
-#include <FLIVR\ShaderProgram.h>
-#include <FLIVR\Utils.h>
+#include "GL/glew.h"
+#include "ShaderProgram.h"
+#include "Utils.h"
+#include "../compatibility.h"
 #include <time.h>
 #include <iostream>
+#include <cfloat>
 
 using std::string;
 
@@ -92,7 +94,7 @@ namespace FLIVR
 			non_2_textures_ = GLEW_ARB_texture_non_power_of_two!=0;
 
 			//random numbers
-			srand((unsigned int)_time32(NULL));
+			srand((unsigned int)TIME(NULL));
 
 			init_ = true;
 		}

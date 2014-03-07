@@ -49,7 +49,7 @@ DataTreeCtrl::DataTreeCtrl(
    images->Add(icons[0]);
    images->Add(icons[1]);
    AssignImageList(images);
-   SetDoubleBuffered(true);
+   SetDoubleBuffered(true); 
 }
 
 DataTreeCtrl::~DataTreeCtrl()

@@ -204,7 +204,7 @@ namespace FLIVR
 	{
 		//cor_up_time_ = speed;
 		if (speed < 10) speed = 10;
-		cor_up_time_ = unsigned long(log10(1000.0/speed)*up_time_);
+		cor_up_time_ = (unsigned long)(log10(1000.0/speed)*up_time_);
 	}
 
 	//number of bricks rendered before time is up

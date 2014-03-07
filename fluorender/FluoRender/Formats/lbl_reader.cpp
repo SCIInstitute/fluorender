@@ -1,4 +1,4 @@
-#include <Formats\lbl_reader.h>
+#include "lbl_reader.h"
 #include <sstream>
 
 LBLReader::LBLReader()
@@ -97,7 +97,7 @@ Nrrd* LBLReader::Convert(int t, int c, bool get_max)
 
 	if (nrrdLoad(output, str.c_str(), NULL))
 	{
-		delete []output->data;
+		//delete []output->data;
 		nrrdNix(output);
 		return 0;
 	}

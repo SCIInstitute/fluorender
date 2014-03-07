@@ -269,7 +269,7 @@ _nrrdFormatPNG_read(FILE *file, Nrrd *nrrd, NrrdIoState *nio) {
     ndim = 3; nsize[0] = 4; nsize[1] = width; nsize[2] = height;
     break;
   case PNG_COLOR_TYPE_PALETTE:
-    /* TODO: merge this with the outer switch, needs to be tested */
+    /* ToDo: merge this with the outer switch, needs to be tested */
     channels = png_get_channels(png, info);
     if (channels < 2) {
       ndim = 2; nsize[0] = width; nsize[1] = height;

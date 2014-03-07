@@ -33,7 +33,7 @@
 #include <FLIVR/ShaderProgram.h>
 #include <FLIVR/TextureBrick.h>
 #include "utility.h"
-#include "windows.h"
+#include "../compatibility.h"
 
 namespace FLIVR
 {
@@ -754,7 +754,7 @@ namespace FLIVR
 			//comment off when debug_ds
 			if (mem_swap_)
 			{
-				DWORD rn_time = GetTickCount();
+				uint32_t rn_time = GET_TICK_COUNT();
 				if (rn_time - st_time_ > get_up_time())
 					break;
 			}
@@ -830,7 +830,7 @@ namespace FLIVR
 			////this is for debug_ds, comment when done
 			//if (mem_swap_)
 			//{
-			//	DWORD rn_time = GetTickCount();
+			//	uint32_t rn_time = GET_TICK_COUNT();
 			//	if (rn_time - st_time_ > get_up_time())
 			//		break;
 			//}

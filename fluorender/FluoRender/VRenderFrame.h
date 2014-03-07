@@ -21,6 +21,7 @@
 #include "TraceDlg.h"
 #include "Tester.h"
 #include "Animator/Interpolator.h"
+#include "compatibility.h"
 
 #include <wx/wx.h>
 #include <wx/aui/aui.h>

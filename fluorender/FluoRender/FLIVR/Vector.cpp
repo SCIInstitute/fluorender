@@ -40,7 +40,7 @@ namespace FLIVR
 	string Vector::get_string() const
 	{
 		char buf[100];
-		sprintf_s(buf, 100, "[%g, %g, %g]", x_, y_, z_);
+		sprintf(buf, "[%10.4g, %10.4g, %10.4g]", x_, y_, z_);
 		return buf;
 	}
 

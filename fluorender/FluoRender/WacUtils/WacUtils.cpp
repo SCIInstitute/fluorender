@@ -46,7 +46,7 @@ WTQUEUESIZESET gpWTQueueSizeSet = NULL;
 WTDATAPEEK gpWTDataPeek = NULL;
 WTPACKETSGET gpWTPacketsGet = NULL;
 
-// TODO - add more wintab32 function pointers as needed
+// ToDo - add more wintab32 function pointers as needed
 
 char* pszProgramName = NULL;
 
@@ -94,7 +94,7 @@ BOOL LoadWintab( void )
 	GETPROCADDRESS( WTPACKETSGET, WTPacketsGet );
 
 
-	// TODO - don't forget to NULL out pointers in UnloadWintab().
+	// ToDo - don't forget to NULL out pointers in UnloadWintab().
 	return TRUE;
 }
 

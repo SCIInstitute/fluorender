@@ -743,7 +743,7 @@ void VMovieView::OnRun(wxCommandEvent& event)
 				{
 					wxString new_folder;
 					new_folder = filename + "_project";
-					CreateDirectory(new_folder.fn_str(), NULL);
+					CREATE_DIR(new_folder.fn_str());
 					wxString prop_file = new_folder + "/" + fopendlg->GetFilename() + "_project.vrp";
 					vr_frame->SaveProject(prop_file);
 				}
@@ -876,7 +876,6 @@ void VMovieView::OnFrameCheck(wxCommandEvent& event)
 					w = vrv->GetGLSize().x;
 					h = vrv->GetGLSize().y;
 					int size;
-					x, y;
 					if (w > h)
 					{
 						size = h;
@@ -923,7 +922,6 @@ void VMovieView::OnResetFrame(wxCommandEvent& event)
 			w = vrv->GetGLSize().x;
 			h = vrv->GetGLSize().y;
 			int size;
-			x, y;
 			if (w > h)
 			{
 				size = h;
