@@ -200,7 +200,7 @@ void MManipulator::OnSpinUp(wxSpinEvent& event)
 	if (text_ctrl)
 	{
 		wxString str_val = text_ctrl->GetValue();
-		wxString str = wxString::Format("%.3f", WSTOD(str_val.fn_str())+1.0);
+		wxString str = wxString::Format("%.3f", STOD(str_val.fn_str())+1.0);
 		text_ctrl->SetValue(str);
 		UpdateData();
 	}
@@ -243,7 +243,7 @@ void MManipulator::OnSpinDown(wxSpinEvent& event)
 	if (text_ctrl)
 	{
 		wxString str_val = text_ctrl->GetValue();
-		wxString str = wxString::Format("%.3f", WSTOD(str_val.fn_str())-1.0);
+		wxString str = wxString::Format("%.3f", STOD(str_val.fn_str())-1.0);
 		text_ctrl->SetValue(str);
 		UpdateData();
 	}
@@ -256,27 +256,27 @@ void MManipulator::UpdateData()
 
 	double x, y, z;
 	wxString str = m_x_trans_text->GetValue();
-	x = WSTOD(str.fn_str());
+	x = STOD(str.fn_str());
 	str = m_y_trans_text->GetValue();
-	y = WSTOD(str.fn_str());
+	y = STOD(str.fn_str());
 	str = m_z_trans_text->GetValue();
-	z = WSTOD(str.fn_str());
+	z = STOD(str.fn_str());
 	m_md->SetTranslation(x, y, z);
 
 	str = m_x_rot_text->GetValue();
-	x = WSTOD(str.fn_str());
+	x = STOD(str.fn_str());
 	str = m_y_rot_text->GetValue();
-	y = WSTOD(str.fn_str());
+	y = STOD(str.fn_str());
 	str = m_z_rot_text->GetValue();
-	z = WSTOD(str.fn_str());
+	z = STOD(str.fn_str());
 	m_md->SetRotation(x, y, z);
 
 	str = m_x_scl_text->GetValue();
-	x = WSTOD(str.fn_str());
+	x = STOD(str.fn_str());
 	str = m_y_scl_text->GetValue();
-	y = WSTOD(str.fn_str());
+	y = STOD(str.fn_str());
 	str = m_z_scl_text->GetValue();
-	z = WSTOD(str.fn_str());
+	z = STOD(str.fn_str());
 	m_md->SetScaling(x, y, z);
 
 	RefreshVRenderViews();
@@ -320,7 +320,7 @@ void MManipulator::OnValueEnter(wxCommandEvent& event)
 	if (text_ctrl)
 	{
 		wxString str_val = text_ctrl->GetValue();
-		wxString str = wxString::Format("%.3f", WSTOD(str_val.fn_str()));
+		wxString str = wxString::Format("%.3f", STOD(str_val.fn_str()));
 		text_ctrl->SetValue(str);
 		UpdateData();
 	}

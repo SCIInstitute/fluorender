@@ -1,4 +1,5 @@
-#include "Formats/oib_reader.h"
+#include "oib_reader.h"
+#include "../compatibility.h"
 #include <algorithm>
 
 OIBReader::OIBReader()
@@ -54,7 +55,12 @@ void OIBReader::Preprocess()
    m_oib_info.clear();
 
    //separate path and name
-   size_t pos = m_path_name.find_last_of(L'\\');
+#ifdef _WIN32
+   wchar_t slash = L'\\';
+#else
+   wchar_t slash = L'/';
+#endif
+   size_t pos = m_path_name.find_last_of(slash);
    if (pos == -1)
       return;
    wstring path = m_path_name.substr(0, pos+1);
@@ -69,7 +75,7 @@ void OIBReader::Preprocess()
       size_t j;
       for (j=begin+id_len; j<name.size(); j++)
       {
-         WCHAR c = name[j];
+         wchar_t c = name[j];
          if (iswdigit(c))
             t_num.push_back(c);
          else break;
@@ -87,52 +93,19 @@ void OIBReader::Preprocess()
    else
    {
       //search time sequence files
-      wstring search_str = path + name.substr(0, begin+id_len) +
-         L"*" + name.substr(end);
-      WIN32_FIND_DATAW FindFileData;
-      HANDLE hFind;
-      hFind = FindFirstFileW(search_str.c_str(), &FindFileData);
-      if (hFind != INVALID_HANDLE_VALUE)
-      {
+      std::vector<std::wstring> list;
+      int tmp = 0;
+      FIND_FILES(path,L".oib",list,tmp,name.substr(0,begin+id_len+1));
+      for(int i = 0; i < list.size(); i++) {
+         size_t start_idx = list.at(i).find(m_time_id) + id_len;
+         size_t end_idx   = list.at(i).find(L".oib");
+         size_t size = end_idx - start_idx;
+         std::wstring fileno = list.at(i).substr(start_idx, size);
          TimeDataInfo info;
-         wstring str = FindFileData.cFileName;
-         wstring t_num;
-         size_t j;
-         for (j=begin+id_len; j<str.size(); j++)
-         {
-            WCHAR c = str[j];
-            if (iswdigit(c))
-               t_num.push_back(c);
-            else break;
-         }
-         if (t_num.size() > 0)
-            info.filenumber = _wtoi(t_num.c_str());
-         else
-            info.filenumber = 0;
-         info.filename = path + str;
+         info.filenumber = WSTOI(fileno);
+         info.filename = list.at(i);
          m_oib_info.push_back(info);
-
-         while (FindNextFileW(hFind, &FindFileData) != 0)
-         {
-            TimeDataInfo info;
-            str = FindFileData.cFileName;
-            t_num.clear();
-            for (j=begin+id_len; j<str.size(); j++)
-            {
-               WCHAR c = str[j];
-               if (iswdigit(c))
-                  t_num.push_back(c);
-               else break;
-            }
-            if (t_num.size() > 0)
-               info.filenumber = _wtoi(t_num.c_str());
-            else
-               info.filenumber = 0;
-            info.filename = path + str;
-            m_oib_info.push_back(info);
-         }
       }
-      FindClose(hFind);
 
       if (m_oib_info.size() > 0)
       {
@@ -161,7 +134,7 @@ bool OIBReader::oib_sort(const TimeDataInfo& info1, const TimeDataInfo& info2)
 
 void OIBReader::ReadSingleOib()
 {
-   //read the current file info
+   /*//read the current file info //TODO
    //storage
    IStorage *pStg = NULL;
    //open
@@ -188,11 +161,12 @@ void OIBReader::ReadSingleOib()
 
    //release
    if (pStg)
-      pStg->Release();
+      pStg->Release();*/
 }
 
 void OIBReader::ReadSequenceOib()
 {
+   /* TODO
    for (int i=0; i<(int)m_oib_info.size(); i++)
    {
       wstring path_name = m_oib_info[i].filename;
@@ -229,7 +203,7 @@ void OIBReader::ReadSequenceOib()
       //release
       if (pStg)
          pStg->Release();
-   }
+   }*/
 }
 
 void OIBReader::SetSliceSeq(bool ss)
@@ -257,32 +231,14 @@ void OIBReader::SetBatch(bool batch)
    if (batch)
    {
       //read the directory info
-      wstring search_path = m_path_name.substr(0, m_path_name.find_last_of(L'\\')) + L'\\';
-      wstring search_str = search_path + L"*.oib";
-      WIN32_FIND_DATAW FindFileData;
-      HANDLE hFind;
-      hFind = FindFirstFileW(search_str.c_str(), &FindFileData);
-      if (hFind != INVALID_HANDLE_VALUE)
-      {
-         int cnt = 0;
-         m_batch_list.clear();
-         wstring name = search_path + FindFileData.cFileName;
-         m_batch_list.push_back(name);
-         if (name == m_path_name)
-            m_cur_batch = cnt;
-         cnt++;
-
-         while (FindNextFileW(hFind, &FindFileData) != 0)
-         {
-            name = search_path + FindFileData.cFileName;
-            m_batch_list.push_back(name);
-            if (name == m_path_name)
-               m_cur_batch = cnt;
-            cnt++;
-         }
-      }
-      FindClose(hFind);
-
+#ifdef _WIN32
+   wchar_t slash = L'\\';
+#else
+   wchar_t slash = L'/';
+#endif
+      wstring search_path = m_path_name.substr(0,
+            m_path_name.find_last_of(slash)) + slash;
+      FIND_FILES(search_path,L".oib",m_batch_list,m_cur_batch);
       m_batch = true;
    }
    else
@@ -430,9 +386,14 @@ m_oib_info[m_oib_t].substgname = name;
 }
 else if (oneline.substr(line_size-3, 3) == L"tif")
 {
+#ifdef _WIN32
+   wchar_t slash = L'\\';
+#else
+   wchar_t slash = L'/';
+#endif
    size_t pos1 = oneline.find(L'=');
-   size_t pos2 = oneline.find_last_of(L'/');
-   pos2 = pos2==-1?oneline.find_last_of(L'\\'):pos2;
+   size_t pos2 = oneline.find_last_of(slash);
+   pos2 = pos2==-1?oneline.find_last_of(slash):pos2;
    if (pos1!=-1 && pos2!=-1)
    {
       wstring stream_name;
@@ -774,108 +735,108 @@ Nrrd *OIBReader::Convert(int t, int c, bool get_max)
    Nrrd *data = 0;
    int sl_num = 0;
    /*
-   if (t>=0 && t<m_time_num &&
-         c>=0 && c<m_chan_num &&
-         m_slice_num > 0 &&
-         m_x_size > 0 &&
-         m_y_size > 0)
-   {
+      if (t>=0 && t<m_time_num &&
+      c>=0 && c<m_chan_num &&
+      m_slice_num > 0 &&
+      m_x_size > 0 &&
+      m_y_size > 0)
+      {
       wstring path_name = m_type==0?m_path_name:m_oib_info[t].filename;
 
-      //main storage
-      IStorage *pStg = NULL;
-      //open
-      if (StgOpenStorageEx(path_name.c_str(),
-               STGM_DIRECT|STGM_READ|STGM_SHARE_DENY_WRITE,
-               STGFMT_STORAGE, 0, NULL, NULL, IID_IStorage,
-               (void**)&pStg) == S_OK)
-      {
-         wstring substg_name = m_type==0?m_substg_name:m_oib_info[t].substgname;
+   //main storage
+   IStorage *pStg = NULL;
+   //open
+   if (StgOpenStorageEx(path_name.c_str(),
+   STGM_DIRECT|STGM_READ|STGM_SHARE_DENY_WRITE,
+   STGFMT_STORAGE, 0, NULL, NULL, IID_IStorage,
+   (void**)&pStg) == S_OK)
+   {
+   wstring substg_name = m_type==0?m_substg_name:m_oib_info[t].substgname;
 
-         //substorage
-         IStorage *pSubStg = NULL;
-         if (pStg->OpenStorage(substg_name.c_str(),
-                  NULL, STGM_DIRECT|STGM_READ|STGM_SHARE_EXCLUSIVE,
-                  NULL, 0, &pSubStg) == S_OK)
-         {
-            //allocate memory for nrrd
-            unsigned short *val = new (std::nothrow) unsigned short[m_x_size*m_y_size*m_slice_num];
+   //substorage
+   IStorage *pSubStg = NULL;
+   if (pStg->OpenStorage(substg_name.c_str(),
+   NULL, STGM_DIRECT|STGM_READ|STGM_SHARE_EXCLUSIVE,
+   NULL, 0, &pSubStg) == S_OK)
+   {
+   //allocate memory for nrrd
+   unsigned short *val = new (std::nothrow) unsigned short[m_x_size*m_y_size*m_slice_num];
 
-            //read the channel
-            ChannelInfo *cinfo = &m_oib_info[t].dataset[c];
-            int i;
-            for (i=0; i<int(cinfo->size()); i++)
-            {
-               //for each slice in the channel
-               IStream *pStm = NULL;
-               BYTE *pbyData = 0;
+   //read the channel
+   ChannelInfo *cinfo = &m_oib_info[t].dataset[c];
+   int i;
+   for (i=0; i<int(cinfo->size()); i++)
+   {
+   //for each slice in the channel
+   IStream *pStm = NULL;
+   BYTE *pbyData = 0;
 
-               //open stream
-               if (pSubStg->OpenStream((*cinfo)[i].stream_name.c_str(),
-                        NULL, STGM_DIRECT|STGM_READ|STGM_SHARE_EXCLUSIVE,
-                        0, &pStm) == S_OK)
-               {
-                  //stream info
-                  STATSTG statStg;
-                  //get stream info
-                  if (pStm->Stat(&statStg, STATFLAG_NONAME) == S_OK)
-                  {
-                     //allocate memory
-                     pbyData = new BYTE[statStg.cbSize.u.LowPart];
-                     //read stream
-                     if (pStm->Read(pbyData, statStg.cbSize.u.LowPart, NULL) == S_OK)
-                     {
-                        //copy tiff to val
-                        ReadTiff(pbyData, val, i);
+   //open stream
+   if (pSubStg->OpenStream((*cinfo)[i].stream_name.c_str(),
+   NULL, STGM_DIRECT|STGM_READ|STGM_SHARE_EXCLUSIVE,
+   0, &pStm) == S_OK)
+   {
+   //stream info
+   STATSTG statStg;
+   //get stream info
+   if (pStm->Stat(&statStg, STATFLAG_NONAME) == S_OK)
+   {
+   //allocate memory
+   pbyData = new BYTE[statStg.cbSize.u.LowPart];
+   //read stream
+   if (pStm->Read(pbyData, statStg.cbSize.u.LowPart, NULL) == S_OK)
+   {
+   //copy tiff to val
+   ReadTiff(pbyData, val, i);
 
-                        //increase
-                        sl_num++;
-                     }
-                  }
-               }
-
-               //release
-               if (pStm)
-                  pStm->Release();
-               if (pbyData)
-                  delete []pbyData;
-            }
-
-            //create nrrd
-            if (val && sl_num == m_slice_num)
-            {
-               //ok
-               data = nrrdNew();
-               nrrdWrap(data, val, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-               nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-               nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
-               nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-               nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-            }
-            else
-            {
-               //something is wrong
-               if (val)
-                  delete []val;
-            }
-         }
-
-         //release substorage
-         if (pSubStg)
-            pSubStg->Release();
-      }
-
-      //release
-      if (pStg)
-         pStg->Release();
+   //increase
+   sl_num++;
+   }
+   }
    }
 
-   if (m_max_value > 0.0)
-      m_scalar_scale = 65535.0 / m_max_value;
+   //release
+   if (pStm)
+   pStm->Release();
+   if (pbyData)
+   delete []pbyData;
+   }
 
-   m_cur_time = t;
-   */
-   return data;
+   //create nrrd
+   if (val && sl_num == m_slice_num)
+   {
+   //ok
+   data = nrrdNew();
+   nrrdWrap(data, val, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+   nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
+   nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
+   nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+   nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+}
+else
+{
+   //something is wrong
+   if (val)
+      delete []val;
+}
+}
+
+//release substorage
+if (pSubStg)
+pSubStg->Release();
+}
+
+//release
+if (pStg)
+pStg->Release();
+}
+
+if (m_max_value > 0.0)
+m_scalar_scale = 65535.0 / m_max_value;
+
+m_cur_time = t;
+*/
+return data;
 }
 
 wstring OIBReader::GetCurName(int t, int c)
@@ -883,137 +844,137 @@ wstring OIBReader::GetCurName(int t, int c)
    return m_type==0?wstring(L""):m_oib_info[t].filename;
 }
 /*
-void OIBReader::ReadTiff(BYTE *pbyData, unsigned short *val, int z)
-{
+   void OIBReader::ReadTiff(BYTE *pbyData, unsigned short *val, int z)
+   {
    if (*((unsigned int*)pbyData) != 0x002A4949)
-      return;
+   return;
 
    int compression = 0;
    unsigned int offset = 0;
-   //directory offset
-   offset = *((unsigned int*)(pbyData+4));
-   //the directory
-   //entry number
-   int entry_num = *((unsigned short*)(pbyData+offset));
-   //strip info
-   int strips = 0;
-   int rows = 0;
-   vector <unsigned int> strip_offsets;
-   vector <unsigned int> strip_bytes;
-   //get strip info
-   unsigned int s_num1 = 0;
-   unsigned int s_num2 = 0;
-   for (int i=0; i<entry_num; i++)
+//directory offset
+offset = *((unsigned int*)(pbyData+4));
+//the directory
+//entry number
+int entry_num = *((unsigned short*)(pbyData+offset));
+//strip info
+int strips = 0;
+int rows = 0;
+vector <unsigned int> strip_offsets;
+vector <unsigned int> strip_bytes;
+//get strip info
+unsigned int s_num1 = 0;
+unsigned int s_num2 = 0;
+for (int i=0; i<entry_num; i++)
+{
+//read each entry (12 bytes)
+unsigned short tag = *((unsigned short*)(pbyData+offset+2+12*i));
+switch (tag)
+{
+case 0x0103:  //259, compression
+{
+unsigned short value;
+value = *((unsigned short*)(pbyData+offset+2+12*i+8));
+compression = value<<16>>16;
+}
+break;
+case 0x0111:  //strip offsets
+{
+unsigned short type = *((unsigned short*)(pbyData+offset+2+12*i+2));
+//number of values
+s_num1 = *((unsigned int*)(pbyData+offset+2+12*i+4));
+unsigned int entry_offset = 0;
+entry_offset = *((unsigned int*)(pbyData+offset+2+12*i+8));
+for (int j=0; j<int(s_num1); j++)
+{
+if (type == 3)
+{
+//unsigned short
+unsigned short value;
+value = *((unsigned short*)(pbyData+entry_offset+2*j));
+strip_offsets.push_back((unsigned int)value);
+}
+else if (type == 4)
+{
+//unsigned int
+unsigned int value;
+value = *((unsigned int*)(pbyData+entry_offset+4*j));
+strip_offsets.push_back(value);
+}
+}
+}
+break;
+case 0x0116:  //rows per strip
+{
+unsigned short type = *((unsigned short*)(pbyData+offset+2+12*i+2));
+if (type == 3)
+{
+//unsigned short
+unsigned short value;
+value = *((unsigned short*)(pbyData+offset+2+12*i+8));
+rows = value;
+}
+else if (type == 4)
+{
+   //unsigned int
+   unsigned int value;
+   value = *((unsigned int*)(pbyData+offset+2+12*i+8));
+   rows = value;
+}
+}
+break;
+case 0x0117:  //strip byte counts
+{
+   unsigned short type = *((unsigned short*)(pbyData+offset+2+12*i+2));
+   //number of values
+   s_num2 = *((unsigned int*)(pbyData+offset+2+12*i+4));
+   unsigned int entry_offset = 0;
+   entry_offset = *((unsigned int*)(pbyData+offset+2+12*i+8));
+   for (int j=0; j<int(s_num2); j++)
    {
-      //read each entry (12 bytes)
-      unsigned short tag = *((unsigned short*)(pbyData+offset+2+12*i));
-      switch (tag)
+      if (type == 3)
       {
-      case 0x0103:  //259, compression
-         {
-            unsigned short value;
-            value = *((unsigned short*)(pbyData+offset+2+12*i+8));
-            compression = value<<16>>16;
-         }
-         break;
-      case 0x0111:  //strip offsets
-         {
-            unsigned short type = *((unsigned short*)(pbyData+offset+2+12*i+2));
-            //number of values
-            s_num1 = *((unsigned int*)(pbyData+offset+2+12*i+4));
-            unsigned int entry_offset = 0;
-            entry_offset = *((unsigned int*)(pbyData+offset+2+12*i+8));
-            for (int j=0; j<int(s_num1); j++)
-            {
-               if (type == 3)
-               {
-                  //unsigned short
-                  unsigned short value;
-                  value = *((unsigned short*)(pbyData+entry_offset+2*j));
-                  strip_offsets.push_back((unsigned int)value);
-               }
-               else if (type == 4)
-               {
-                  //unsigned int
-                  unsigned int value;
-                  value = *((unsigned int*)(pbyData+entry_offset+4*j));
-                  strip_offsets.push_back(value);
-               }
-            }
-         }
-         break;
-      case 0x0116:  //rows per strip
-         {
-            unsigned short type = *((unsigned short*)(pbyData+offset+2+12*i+2));
-            if (type == 3)
-            {
-               //unsigned short
-               unsigned short value;
-               value = *((unsigned short*)(pbyData+offset+2+12*i+8));
-               rows = value;
-            }
-            else if (type == 4)
-            {
-               //unsigned int
-               unsigned int value;
-               value = *((unsigned int*)(pbyData+offset+2+12*i+8));
-               rows = value;
-            }
-         }
-         break;
-      case 0x0117:  //strip byte counts
-         {
-            unsigned short type = *((unsigned short*)(pbyData+offset+2+12*i+2));
-            //number of values
-            s_num2 = *((unsigned int*)(pbyData+offset+2+12*i+4));
-            unsigned int entry_offset = 0;
-            entry_offset = *((unsigned int*)(pbyData+offset+2+12*i+8));
-            for (int j=0; j<int(s_num2); j++)
-            {
-               if (type == 3)
-               {
-                  //unsigned short
-                  unsigned short value;
-                  value = *((unsigned short*)(pbyData+entry_offset+2*j));
-                  strip_bytes.push_back((unsigned int)value);
-               }
-               else if (type == 4)
-               {
-                  //unsigned int
-                  unsigned int value;
-                  value = *((unsigned int*)(pbyData+entry_offset+4*j));
-                  strip_bytes.push_back(value);
-               }
-            }
-         }
-         break;
-      case 0x0119:  //max sample value
-         {
-            unsigned short value;
-            value = *((unsigned short*)(pbyData+offset+2+12*i+8));
-            if ((double)value > m_max_value)
-               m_max_value = (double)value;
-         }
-         break;
+         //unsigned short
+         unsigned short value;
+         value = *((unsigned short*)(pbyData+entry_offset+2*j));
+         strip_bytes.push_back((unsigned int)value);
+      }
+      else if (type == 4)
+      {
+         //unsigned int
+         unsigned int value;
+         value = *((unsigned int*)(pbyData+entry_offset+4*j));
+         strip_bytes.push_back(value);
       }
    }
-   //read strips
-   if (s_num1 == s_num2 &&
-         strip_offsets.size() == s_num1 &&
-         strip_bytes.size() == s_num2)
-   {
-      strips = s_num1;
+}
+break;
+case 0x0119:  //max sample value
+{
+   unsigned short value;
+   value = *((unsigned short*)(pbyData+offset+2+12*i+8));
+   if ((double)value > m_max_value)
+      m_max_value = (double)value;
+}
+break;
+}
+}
+//read strips
+if (s_num1 == s_num2 &&
+      strip_offsets.size() == s_num1 &&
+      strip_bytes.size() == s_num2)
+{
+   strips = s_num1;
 
-      unsigned int val_pos = z*m_x_size*m_y_size;
-      for (int i=0; i<strips; i++)
-      {
-         unsigned int data_pos = strip_offsets[i];
-         unsigned int data_size = strip_bytes[i];
-         if (compression == 1)//no copmression
-            memcpy((void*)(val+val_pos), (void*)(pbyData+data_pos), data_size);
-         else if (compression == 5)
-            LZWDecode((tidata_t)(pbyData+data_pos), (tidata_t)(val+val_pos), m_x_size*rows*2);
-         val_pos += rows*m_x_size;
-      }
+   unsigned int val_pos = z*m_x_size*m_y_size;
+   for (int i=0; i<strips; i++)
+   {
+      unsigned int data_pos = strip_offsets[i];
+      unsigned int data_size = strip_bytes[i];
+      if (compression == 1)//no copmression
+         memcpy((void*)(val+val_pos), (void*)(pbyData+data_pos), data_size);
+      else if (compression == 5)
+         LZWDecode((tidata_t)(pbyData+data_pos), (tidata_t)(val+val_pos), m_x_size*rows*2);
+      val_pos += rows*m_x_size;
    }
+}
 }*/

@@ -10938,11 +10938,11 @@ void VRenderView::UpdateView(bool ui_update)
 {
    double rotx, roty, rotz;
    wxString str_val = m_x_rot_text->GetValue();
-   rotx = WSTOD(str_val.fn_str());
+   rotx = STOD(str_val.fn_str());
    str_val = m_y_rot_text->GetValue();
-   roty = WSTOD(str_val.fn_str());
+   roty = STOD(str_val.fn_str());
    str_val = m_z_rot_text->GetValue();
-   rotz = WSTOD(str_val.fn_str());
+   rotz = STOD(str_val.fn_str());
    SetRotations(rotx, roty, rotz, ui_update);
    RefreshGL(true);
 }
@@ -11049,7 +11049,7 @@ void VRenderView::OnRotLockCheck(wxCommandEvent& event)
 void VRenderView::OnXRotSpinUp(wxSpinEvent& event)
 {
    wxString str_val = m_x_rot_text->GetValue();
-   int value = WSTOI(str_val.fn_str())+1;
+   int value = STOI(str_val.fn_str())+1;
    value = value>360?value-360:value;
    wxString str = wxString::Format("%.1f", double(value));
    m_x_rot_text->SetValue(str);
@@ -11058,7 +11058,7 @@ void VRenderView::OnXRotSpinUp(wxSpinEvent& event)
 void VRenderView::OnXRotSpinDown(wxSpinEvent& event)
 {
    wxString str_val = m_x_rot_text->GetValue();
-   int value = WSTOI(str_val.fn_str())-1;
+   int value = STOI(str_val.fn_str())-1;
    value = value<0?value+360:value;
    wxString str = wxString::Format("%.1f", double(value));
    m_x_rot_text->SetValue(str);
@@ -11067,7 +11067,7 @@ void VRenderView::OnXRotSpinDown(wxSpinEvent& event)
 void VRenderView::OnYRotSpinUp(wxSpinEvent& event)
 {
    wxString str_val = m_y_rot_text->GetValue();
-   int value = WSTOI(str_val.fn_str())+1;
+   int value = STOI(str_val.fn_str())+1;
    value = value>360?value-360:value;
    wxString str = wxString::Format("%.1f", double(value));
    m_y_rot_text->SetValue(str);
@@ -11076,7 +11076,7 @@ void VRenderView::OnYRotSpinUp(wxSpinEvent& event)
 void VRenderView::OnYRotSpinDown(wxSpinEvent& event)
 {
    wxString str_val = m_y_rot_text->GetValue();
-   int value = WSTOI(str_val.fn_str())-1;
+   int value = STOI(str_val.fn_str())-1;
    value = value<0?value+360:value;
    wxString str = wxString::Format("%.1f", double(value));
    m_y_rot_text->SetValue(str);
@@ -11085,7 +11085,7 @@ void VRenderView::OnYRotSpinDown(wxSpinEvent& event)
 void VRenderView::OnZRotSpinUp(wxSpinEvent& event)
 {
    wxString str_val = m_z_rot_text->GetValue();
-   int value = WSTOI(str_val.fn_str())+1;
+   int value = STOI(str_val.fn_str())+1;
    value = value>360?value-360:value;
    wxString str = wxString::Format("%.1f", double(value));
    m_z_rot_text->SetValue(str);
@@ -11094,7 +11094,7 @@ void VRenderView::OnZRotSpinUp(wxSpinEvent& event)
 void VRenderView::OnZRotSpinDown(wxSpinEvent& event)
 {
    wxString str_val = m_z_rot_text->GetValue();
-   int value = WSTOI(str_val.fn_str())-1;
+   int value = STOI(str_val.fn_str())-1;
    value = value<0?value+360:value;
    wxString str = wxString::Format("%.1f", double(value));
    m_z_rot_text->SetValue(str);

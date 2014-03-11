@@ -8,4 +8,4 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/teem/Nrrd)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/glew)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/LibTiff)
 
-add_library( LibNV Timer.cpp)
+add_library( NV Timer.cpp)

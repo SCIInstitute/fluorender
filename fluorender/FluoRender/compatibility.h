@@ -1,5 +1,6 @@
 /**
  * This file is used for compatibility across windows and mac/linux platforms.
+ * This is specific to FLuoRender Code.
  * @author Brig Bagley
  * @version 4 March 2014
  */
@@ -11,6 +12,8 @@
 #include <pktdef.h>
 #define WSTOD(s)                                _wtof(s)
 #define WSTOI(s)                                _wtoi(s)
+#define STOD(s)                                 _atof(s)
+#define STOI(s)                                 _atoi(s)
 #define CREATE_DIR(f)                           CreateDirectory(f, NULL)
 #define SPRINTF                                 sprintf_s
 #define SSCANF                                  scanf_s
@@ -20,31 +23,23 @@
 #define STRNCPY(a,b,c,d)                        strncpy_s(a,b,c,d)
 #define TIME                                    _time32
 
-#ifndef WFOPEN__
-#define WFOPEN__
-#define WFOPEN                                  _wfopen_s
-#endif
-
-#ifndef FOPEN__
-#define FOPEN__
-#define FOPEN                                   fopen_s
-#endif
-
-#ifndef GET_TICK_COUNT__
-#define GET_TICK_COUNT__
-uint32_t GET_TICK_COUNT() { return GetTickCount(); }
-#endif
-
-#ifndef FIND_FILES__
-#define FIND_FILES__
+#ifndef CROSS_FUNCTIONS__
+#define CROSS_FUNCTIONS__
 #include <vector>
+
+#define ws2s
+#define FOPEN                                   fopen_s
+#define WFOPEN                                  _wfopen_s
+
+uint32_t GET_TICK_COUNT() { return GetTickCount(); }
+
 void FIND_FILES(std::wstring m_path_name,
       std::wstring search_ext,
       std::vector<std::wstring> &m_batch_list,
-      int &m_cur_batch) {
+      int &m_cur_batch, std::wstring regex = L"") {
    std::wstring search_path = m_path_name.substr(0,
          m_path_name.find_last_of(L'\\')) + L'\\';
-   std::wstring search_str = L"*" + search_ext;
+   std::wstring search_str = regex + L"*" + search_ext;
    WIN32_FIND_DATAW FindFileData;
    HANDLE hFind;
    hFind = FindFirstFileW(search_str.c_str(), &FindFileData);
@@ -82,8 +77,6 @@ void FIND_FILES(std::wstring m_path_name,
 
 #include <cstdlib>
 #include <cstdio>
-#define WSTOD(s)                                   atof(s)
-#define WSTOI(s)                                   atoi(s)
 #define DWORD                                      unsigned int
 #define CREATE_DIR(f)                              mkdir(f, S_IRWXU | S_IRGRP | S_IXGRP)
 #define SetDoubleBuffered(t)
@@ -94,14 +87,29 @@ void FIND_FILES(std::wstring m_path_name,
 #define STRCAT(a,b,c)                              strcat(a,c)
 #define STRNCPY(a,b,c,d)                           strncpy(a,c,d)
 #define TIME                                       time
+#define TIFFOpenW(a,b)                             TIFFOpen(ws2s(a).c_str(),b)
+#define swprintf_s                                 swprintf
 
-#ifndef FIND_FILES__
-#define FIND_FILES__
+#ifndef CROSS_FUNCTIONS__
+#define CROSS_FUNCTIONS__
 #include <dirent.h>
 #include <string>
 #include <vector>
 #include <codecvt>
 #include <iostream>
+#include <sys/time.h>
+
+typedef union _LARGE_INTEGER {
+   struct {
+      DWORD LowPart;
+      long HighPart;
+   };
+   struct {
+      DWORD LowPart;
+      long HighPart;
+   } u;
+   long long QuadPart;
+} LARGE_INTEGER, *PLARGE_INTEGER;
 
 std::wstring s2ws(std::string& str) {
    typedef std::codecvt_utf8<wchar_t> convert_typeX;
@@ -118,7 +126,7 @@ std::string ws2s(std::wstring& str) {
 void FIND_FILES(std::wstring m_path_name,
       std::wstring search_ext,
       std::vector<std::wstring> &m_batch_list,
-      int &m_cur_batch) {
+      int &m_cur_batch, std::wstring regex = L"") {
    std::wstring search_path = m_path_name.substr(0,m_path_name.find_last_of(L'/')) + L'/';
    std::wstring search_str(L".txt");
    DIR* dir;
@@ -128,7 +136,8 @@ void FIND_FILES(std::wstring m_path_name,
       m_batch_list.clear();
       while((ent = readdir(dir)) != NULL) {
          //check if it contains the string.
-         if (strstr(ent->d_name,ws2s(search_str).c_str())) {
+         if (strstr(ent->d_name,ws2s(search_str).c_str()) && 
+               strstr(ent->d_name,ws2s(regex).c_str())) {
             std::string ss = ent->d_name;
             std::wstring f = s2ws(ss);
             std::wstring name = search_path + f;
@@ -140,33 +149,29 @@ void FIND_FILES(std::wstring m_path_name,
       }
    }
 }
-#endif
 
-#ifndef WFOPEN__
-#define WFOPEN__
 FILE* WFOPEN(FILE ** fp, const wchar_t* filename, const wchar_t* mode) {
    *fp = fopen((const char*)filename,(const char*)mode);
    return *fp;
 }
-#endif
 
-#ifndef FOPEN__
-#define FOPEN__
 FILE* FOPEN(FILE ** fp, const char* filename, const char* mode) {
    *fp = fopen(filename,mode);
    return *fp;
 }
-#endif
 
-#ifndef GET_TICK_COUNT__
-#define GET_TICK_COUNT__
-#include <sys/time.h>
 uint32_t GET_TICK_COUNT() {
    struct timeval ts;
    gettimeofday(&ts, NULL);
    return ts.tv_sec * 1000 + ts.tv_usec / 1000;
 }
+
 #endif
+
+#define WSTOD(s)                                   atof(ws2s(s).c_str())
+#define WSTOI(s)                                   atoi(ws2s(s).c_str())
+#define STOD(s)                                    atof(s)
+#define STOI(s)                                    atoi(s)
 
 #ifdef _LINUX
 #endif

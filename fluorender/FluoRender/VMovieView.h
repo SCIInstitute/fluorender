@@ -70,11 +70,11 @@ public:
 	}
 	int GetStartTime()
 	{
-		return int(WSTOD(m_time_start_text->GetValue().fn_str()));
+		return int(STOD(m_time_start_text->GetValue().fn_str()));
 	}
 	int GetEndTime()
 	{
-		return int(WSTOD(m_time_end_text->GetValue().fn_str()));
+		return int(STOD(m_time_end_text->GetValue().fn_str()));
 	}
 	int GetMovieType()
 	{

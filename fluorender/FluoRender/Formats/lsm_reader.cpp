@@ -295,7 +295,12 @@ void LSMReader::Preprocess()
    fclose(pfile);
 
    m_cur_time = 0;
-   m_data_name = m_path_name.substr(m_path_name.find_last_of(L'\\')+1);
+#ifdef _WIN32
+   wchar_t slash = L'\\';
+#else
+   wchar_t slash = L'/';
+#endif
+   m_data_name = m_path_name.substr(m_path_name.find_last_of(slash)+1);
 }
 
 void LSMReader::ReadLsmInfo(FILE* pfile, unsigned char* pdata, unsigned int size)

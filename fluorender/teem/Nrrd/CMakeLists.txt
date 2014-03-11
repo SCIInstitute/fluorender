@@ -4,7 +4,7 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/teem/Biff)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/teem/Nrrd)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/teem/Air)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/teem/Hest)
-add_library(LibTeemNrrd	accessors.c 
+add_library(TeemNrrd	accessors.c 
 			apply1D.c
 			apply2D.c
 			arith.c

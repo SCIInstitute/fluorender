@@ -12,45 +12,45 @@ using namespace std;
 
 string GetAddress()
 {
-	string result = "";
+   string result = "";
 
-	PIP_ADAPTER_INFO pAdapterInfo;
-	PIP_ADAPTER_INFO pAdapter = NULL;
-	DWORD dwRetVal = 0;
+   PIP_ADAPTER_INFO pAdapterInfo;
+   PIP_ADAPTER_INFO pAdapter = NULL;
+   DWORD dwRetVal = 0;
 
-	ULONG ulOutBufLen = sizeof (IP_ADAPTER_INFO);
-	pAdapterInfo = (IP_ADAPTER_INFO *) MALLOC(sizeof (IP_ADAPTER_INFO));
-	if (pAdapterInfo == NULL)
-		return result;
+   ULONG ulOutBufLen = sizeof (IP_ADAPTER_INFO);
+   pAdapterInfo = (IP_ADAPTER_INFO *) MALLOC(sizeof (IP_ADAPTER_INFO));
+   if (pAdapterInfo == NULL)
+      return result;
 
-	if (GetAdaptersInfo(pAdapterInfo, &ulOutBufLen) == ERROR_BUFFER_OVERFLOW)
-	{
-		FREE(pAdapterInfo);
-		pAdapterInfo = (IP_ADAPTER_INFO *) MALLOC(ulOutBufLen);
-		if (pAdapterInfo == NULL)
-			return result;
-	}
+   if (GetAdaptersInfo(pAdapterInfo, &ulOutBufLen) == ERROR_BUFFER_OVERFLOW)
+   {
+      FREE(pAdapterInfo);
+      pAdapterInfo = (IP_ADAPTER_INFO *) MALLOC(ulOutBufLen);
+      if (pAdapterInfo == NULL)
+         return result;
+   }
 
-	stringstream ss;
+   stringstream ss;
 
-	if ((dwRetVal = GetAdaptersInfo(pAdapterInfo, &ulOutBufLen)) == NO_ERROR)
-	{
-		pAdapter = pAdapterInfo;
-		while (pAdapter)
-		{
-			ss << pAdapter->Description << "\n";
-			for (UINT i = 0; i < pAdapter->AddressLength; i++)
-				ss << (int)pAdapter->Address[i];
-			ss << "\n";
-			pAdapter = pAdapter->Next;
-		}
-	}
+   if ((dwRetVal = GetAdaptersInfo(pAdapterInfo, &ulOutBufLen)) == NO_ERROR)
+   {
+      pAdapter = pAdapterInfo;
+      while (pAdapter)
+      {
+         ss << pAdapter->Description << "\n";
+         for (UINT i = 0; i < pAdapter->AddressLength; i++)
+            ss << (int)pAdapter->Address[i];
+         ss << "\n";
+         pAdapter = pAdapter->Next;
+      }
+   }
 
-	if (pAdapterInfo)
-		FREE(pAdapterInfo);
+   if (pAdapterInfo)
+      FREE(pAdapterInfo);
 
-	result = ss.str();
+   result = ss.str();
 
-	return result;
+   return result;
 }
 

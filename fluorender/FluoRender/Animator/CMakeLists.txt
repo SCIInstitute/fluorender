@@ -9,4 +9,4 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/glew)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/LibTiff)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender)
 
-add_library( LibAnimator Interpolator.cpp)
+add_library( Animator Interpolator.cpp)

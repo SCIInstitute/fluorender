@@ -334,11 +334,11 @@ void VMovieView::OnStartAngleEditing(wxCommandEvent& event)
 	if (m_init)
 	{
 		wxString str = m_angle_start_text->GetValue();
-		double start_angle = -fabs(WSTOD(str.fn_str()));
+		double start_angle = -fabs(STOD(str.fn_str()));
 		str = m_angle_end_text->GetValue();
-		double end_angle = WSTOD(str.fn_str());
+		double end_angle = STOD(str.fn_str());
 		str = m_step_text->GetValue();
-		double step = WSTOD(str.fn_str());
+		double step = STOD(str.fn_str());
 		int frames = CalcFrames(step, start_angle, end_angle);
 		str = wxString::Format("%d", frames);
 		m_frames_text->ChangeValue(str);
@@ -360,11 +360,11 @@ void VMovieView::OnEndAngleEditing(wxCommandEvent& event)
 	if (m_init)
 	{
 		wxString str = m_angle_start_text->GetValue();
-		double start_angle = -fabs(WSTOD(str.fn_str()));
+		double start_angle = -fabs(STOD(str.fn_str()));
 		str = m_angle_end_text->GetValue();
-		double end_angle = WSTOD(str.fn_str());
+		double end_angle = STOD(str.fn_str());
 		str = m_step_text->GetValue();
-		double step = WSTOD(str.fn_str());
+		double step = STOD(str.fn_str());
 		int frames = CalcFrames(step, start_angle, end_angle);
 		str = wxString::Format("%d", frames);
 		m_frames_text->ChangeValue(str);
@@ -380,11 +380,11 @@ void VMovieView::OnFramesEditing(wxCommandEvent& event)
 	if (m_init)
 	{
 		wxString str = m_angle_start_text->GetValue();
-		double start_angle = -fabs(WSTOD(str.fn_str()));
+		double start_angle = -fabs(STOD(str.fn_str()));
 		str = m_angle_end_text->GetValue();
-		double end_angle = WSTOD(str.fn_str());
+		double end_angle = STOD(str.fn_str());
 		str = m_frames_text->GetValue();
-		int frames = WSTOI(str.fn_str());
+		int frames = STOI(str.fn_str());
 		if (frames <= 0)
 			frames = 1;
 		double step = CalcStep(frames, start_angle, end_angle);
@@ -404,11 +404,11 @@ void VMovieView::OnStepEditing(wxCommandEvent& event)
 	if (m_init)
 	{
 		wxString str = m_angle_start_text->GetValue();
-		double start_angle = -fabs(WSTOD(str.fn_str()));
+		double start_angle = -fabs(STOD(str.fn_str()));
 		str = m_angle_end_text->GetValue();
-		double end_angle = WSTOD(str.fn_str());
+		double end_angle = STOD(str.fn_str());
 		str = m_step_text->GetValue();
-		double step = WSTOD(str.fn_str());
+		double step = STOD(str.fn_str());
 		if (step < 0.01)
 			step = 0.01;
 		int frames = CalcFrames(step, start_angle, end_angle);
@@ -556,11 +556,11 @@ void VMovieView::OnPrev(wxCommandEvent& event)
 	bool rewind;
 
 	str = m_angle_start_text->GetValue();
-	start_angle = -fabs(WSTOD(str.fn_str()));
+	start_angle = -fabs(STOD(str.fn_str()));
 	str = m_angle_end_text->GetValue();
-	end_angle = WSTOD(str.fn_str());
+	end_angle = STOD(str.fn_str());
 	str = m_step_text->GetValue();
-	step = WSTOD(str.fn_str());
+	step = STOD(str.fn_str());
 	if (step < 0.01)
 		step = 0.01;
 	if (m_x_rd->GetValue())
@@ -679,11 +679,11 @@ void VMovieView::OnRun(wxCommandEvent& event)
 	bool rewind;
 
 	str = m_angle_start_text->GetValue();
-	start_angle = -fabs(WSTOD(str.fn_str()));
+	start_angle = -fabs(STOD(str.fn_str()));
 	str = m_angle_end_text->GetValue();
-	end_angle = WSTOD(str.fn_str());
+	end_angle = STOD(str.fn_str());
 	str = m_step_text->GetValue();
-	step = WSTOD(str.fn_str());
+	step = STOD(str.fn_str());
 	if (step < 0.01)
 		step = 0.01;
 	if (m_x_rd->GetValue())
@@ -961,13 +961,13 @@ void VMovieView::OnFrameEditing(wxCommandEvent& event)
 			wxString temp;
 
 			temp = m_center_x_text->GetValue();
-			x = WSTOI(temp.fn_str());
+			x = STOI(temp.fn_str());
 			temp = m_center_y_text->GetValue();
-			y = WSTOI(temp.fn_str());
+			y = STOI(temp.fn_str());
 			temp = m_width_text->GetValue();
-			w = WSTOI(temp.fn_str());
+			w = STOI(temp.fn_str());
 			temp = m_height_text->GetValue();
-			h = WSTOI(temp.fn_str());
+			h = STOI(temp.fn_str());
 
 			vrv->SetFrame(int(x-w/2.0+0.5), int(y-h/2.0+0.5), w, h);
 			if (vrv->GetFrameEnabled())
@@ -999,7 +999,7 @@ void VMovieView::OnFrameSpinUp(wxSpinEvent& event)
 	{
 		wxString str_val = text_ctrl->GetValue();
 		char str[256];
-		sprintf(str, "%d", WSTOI(str_val.fn_str())+1);
+		sprintf(str, "%d", STOI(str_val.fn_str())+1);
 		text_ctrl->SetValue(str);
 		wxCommandEvent e;
 		OnFrameEditing(e);
@@ -1029,7 +1029,7 @@ void VMovieView::OnFrameSpinDown(wxSpinEvent& event)
 	{
 		wxString str_val = text_ctrl->GetValue();
 		char str[256];
-		sprintf(str, "%d", WSTOI(str_val.fn_str())-1);
+		sprintf(str, "%d", STOI(str_val.fn_str())-1);
 		text_ctrl->SetValue(str);
 		wxCommandEvent e;
 		OnFrameEditing(e);

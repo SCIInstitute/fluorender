@@ -1,4 +1,5 @@
-#include <Formats\tif_writer.h>
+#include "tif_writer.h"
+#include "../compatibility.h"
 #include <tiffio.h>
 #include <sstream>
 
@@ -85,7 +86,7 @@ void TIFWriter::SaveSingleFile(wstring filename)
 		buf8 = (uint8*)_TIFFmalloc(width*sizeof(uint8)*samples);
 	}
 
-	TIFF* outfile = TIFFOpenW(filename.c_str(), "wb");
+	TIFF* outfile = TIFFOpenW(filename, "wb");
 	for (int i=0; i<numPages; i++)
 	{
 		TIFFSetField(outfile, TIFFTAG_IMAGEWIDTH, width);
@@ -181,7 +182,7 @@ void TIFWriter::SaveSequence(wstring filename)
 		swprintf_s(format, 32, L"%%0%dd", ndigit);
 		swprintf_s(fileindex, 32, format, i+1);
 		wstring pagefilename = filename + fileindex + L".tif";
-		TIFF* outfile = TIFFOpenW(pagefilename.c_str(), "wb");
+		TIFF* outfile = TIFFOpenW(pagefilename, "wb");
 
 		TIFFSetField(outfile, TIFFTAG_IMAGEWIDTH, width);
 		TIFFSetField(outfile, TIFFTAG_IMAGELENGTH, height);

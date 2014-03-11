@@ -37,7 +37,8 @@ link_directories(${FluoRender_SOURCE_DIR}/fluorender/teem/Nrrd)
 link_directories(${FluoRender_SOURCE_DIR}/fluorender/teem/Hest)
 link_directories(${FluoRender_SOURCE_DIR}/fluorender/teem/Air)
 
-add_library(LibMain   AdjustView.cpp
+add_library(Main   
+   AdjustView.cpp
    APropView.cpp
    bitmap_fonts.cpp
    BrushToolDlg.cpp
@@ -58,7 +59,6 @@ add_library(LibMain   AdjustView.cpp
    Tester.cpp
    TraceDlg.cpp
    TreePanel.cpp
-   utility.cpp
    VMovieView.cpp
    VolumeCalculator.cpp
    VolumeSelector.cpp
@@ -70,46 +70,46 @@ add_executable(FluoRender Main.cpp)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    # Mac OS X
-target_link_libraries(FluoRender  LibMain
-   LibTeemAir
-   LibTeemHest
-   LibTeemBiff
-   LibTeemNrrd
-   LibGlew
-   LibAnimator
-   LibConverters
-   LibFLIVR
-   LibFormats
-   LibNV
+target_link_libraries(FluoRender  Main
+   TeemAir
+   TeemHest
+   TeemBiff
+   TeemNrrd
+   Glew
+   Animator
+   Converters
+   FLIVR
+   Formats
+   NV
    ${wxWidgets_LIBRARIES})
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
    # Linux 
-target_link_libraries(FluoRender  LibMain
-   LibTeemAir
-   LibTeemHest
-   LibTeemBiff
-   LibTeemNrrd
-   LibGlew
-   LibAnimator
-   LibConverters
-   LibFLIVR
-   LibFormats
-   LibNV
+target_link_libraries(FluoRender  Main
+   TeemAir
+   TeemHest
+   TeemBiff
+   TeemNrrd
+   Glew
+   Animator
+   Converters
+   FLIVR
+   Formats
+   NV
    ${wxWidgets_LIBRARIES})
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
    # Windows
-target_link_libraries(FluoRender  LibMain
-   LibTeemAir
-   LibTeemHest
-   LibTeemBiff
-   LibTeemNrrd
-   LibGlew
-   LibAnimator
-   LibConverters
-   LibFLIVR
-   LibFormats
-   LibNV
-   LibWacUtils
+target_link_libraries(FluoRender  Main
+   TeemAir
+   TeemHest
+   TeemBiff
+   TeemNrrd
+   Glew
+   Animator
+   Converters
+   FLIVR
+   Formats
+   NV
+   WacUtils
    ${wxWidgets_LIBRARIES})
 endif()
 

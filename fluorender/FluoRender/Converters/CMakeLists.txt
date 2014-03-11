@@ -10,4 +10,4 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/LibTiff)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FLIVR)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender)
 
-add_library( LibConverters VolumeMeshConv.cpp)
+add_library( Converters VolumeMeshConv.cpp)

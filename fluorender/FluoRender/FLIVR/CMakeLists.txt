@@ -9,7 +9,7 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/glew)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/LibTiff)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender)
 
-add_library( LibFLIVR 	BBox.cpp
+add_library( FLIVR 	BBox.cpp
 			Color.cpp
 			glm.cpp
 			ImgShader.cpp
