@@ -81,7 +81,9 @@ target_link_libraries(FluoRender  Main
    FLIVR
    Formats
    NV
-   ${wxWidgets_LIBRARIES})
+   ${wxWidgets_LIBRARIES}
+   ${OPENGL_LIBRARIES}
+   ${GLUT_LIBRARY})
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
    # Linux 
 target_link_libraries(FluoRender  Main
@@ -95,7 +97,9 @@ target_link_libraries(FluoRender  Main
    FLIVR
    Formats
    NV
-   ${wxWidgets_LIBRARIES})
+   ${wxWidgets_LIBRARIES}
+   ${OPENGL_LIBRARIES}
+   ${GLUT_LIBRARY})
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
    # Windows
 target_link_libraries(FluoRender  Main
@@ -110,6 +114,8 @@ target_link_libraries(FluoRender  Main
    Formats
    NV
    WacUtils
-   ${wxWidgets_LIBRARIES})
+   ${wxWidgets_LIBRARIES}
+   ${OPENGL_LIBRARIES}
+   ${GLUT_LIBRARY})
 endif()
 
