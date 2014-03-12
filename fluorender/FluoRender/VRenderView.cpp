@@ -32,7 +32,7 @@ wxGLContext* sharedContext,
 const wxPoint& pos,
 const wxSize& size,
 long style) :
-wxGLCanvas(parent, id, pos, size, style),
+wxGLCanvas(parent, id, NULL, pos, size, style),
 //public
 //capture modes
 m_capture(false),
