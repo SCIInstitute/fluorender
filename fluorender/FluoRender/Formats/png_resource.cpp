@@ -9,7 +9,7 @@ wxBitmap* PNG_RES::CreateBitmapFromPngResource(const wxString& t_name)
    wxBitmap* r_bitmapPtr = 0;
 
    char* a_data = 0;
-   DWORD a_dataSize = 0;
+   unsigned int a_dataSize = 0;
 
    if(LoadDataFromResource(a_data, a_dataSize, t_name))
    {
@@ -19,7 +19,7 @@ wxBitmap* PNG_RES::CreateBitmapFromPngResource(const wxString& t_name)
    return r_bitmapPtr;
 }
 
-bool PNG_RES::LoadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxString& t_name)
+bool PNG_RES::LoadDataFromResource(char*& t_data, unsigned int& t_dataSize, const wxString& t_name)
 {
    bool     r_result    = false;
    /*HGLOBAL  a_resHandle = 0; TODO
@@ -42,7 +42,7 @@ bool PNG_RES::LoadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxStr
    return r_result;
 }
 
-wxBitmap* PNG_RES::GetBitmapFromMemory(const char* t_data, const DWORD t_size)
+wxBitmap* PNG_RES::GetBitmapFromMemory(const char* t_data, const unsigned int t_size)
 {
    wxMemoryInputStream a_is(t_data, t_size);
    return new wxBitmap(wxImage(a_is, wxBITMAP_TYPE_PNG, -1), -1);

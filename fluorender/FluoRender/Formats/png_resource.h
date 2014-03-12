@@ -7,8 +7,8 @@
 namespace PNG_RES
 {
 	wxBitmap* CreateBitmapFromPngResource(const wxString& t_name);
-	bool LoadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxString& t_name);
-	wxBitmap* GetBitmapFromMemory(const char* t_data, const DWORD t_size);
+	bool LoadDataFromResource(char*& t_data, unsigned int& t_dataSize, const wxString& t_name);
+	wxBitmap* GetBitmapFromMemory(const char* t_data, const unsigned int t_size);
 
 }
 

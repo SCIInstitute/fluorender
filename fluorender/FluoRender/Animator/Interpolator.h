@@ -7,7 +7,7 @@
 #include "FlKeyDouble.h"
 #include "FlKeyQuaternion.h"
 #include "FlKeyBoolean.h"
-#include "Quaternion.h"
+#include "../FLIVR/Quaternion.h"
 
 using namespace std;
 using namespace FLIVR;

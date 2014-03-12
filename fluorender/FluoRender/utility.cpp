@@ -1,17 +1,17 @@
 #include "utility.h"
 #include <math.h>
 
-inline double d2r(double d)
+double d2r(double d)
 {
 	return d*0.017453292519943295769236907684886;
 }
 
-inline double r2d(double r)
+double r2d(double r)
 {
 	return r*57.295779513082320876798154814105;
 }
 
-inline void sinCos(double *returnSin, double *returnCos, double theta)
+void sinCos(double *returnSin, double *returnCos, double theta)
 {
 	// For simplicity, we'll just use the normal trig functions.
 	// Note that on some platforms we may be able to do better
@@ -20,7 +20,7 @@ inline void sinCos(double *returnSin, double *returnCos, double theta)
 	*returnCos = cos(theta);
 }
 
-inline unsigned int bit_reverse(unsigned int v)
+unsigned int bit_reverse(unsigned int v)
 {
 	unsigned int c; // reverse 32-bit value, 8 bits at time 
 
@@ -33,7 +33,7 @@ inline unsigned int bit_reverse(unsigned int v)
 	return c;
 }
 
-inline unsigned int reverse_bit(unsigned int val, unsigned int len)
+unsigned int reverse_bit(unsigned int val, unsigned int len)
 {
 	unsigned int res = val;
 	int s = len - 1;
@@ -50,7 +50,7 @@ inline unsigned int reverse_bit(unsigned int val, unsigned int len)
 	return res;
 }
 
-inline float nCr(int n,int r)
+float nCr(int n,int r)
 {
 	if (n<r||n<0||r<0)
 		return 0;

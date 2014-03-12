@@ -2600,7 +2600,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
          TextureRenderer::get_start_update_loop() &&
          !TextureRenderer::get_done_update_loop())
    {
-      DWORD rn_time = GET_TICK_COUNT();
+      unsigned int rn_time = GET_TICK_COUNT();
       if (rn_time - TextureRenderer::get_st_time() >
             TextureRenderer::get_up_time())
          return;
@@ -2796,7 +2796,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
          TextureRenderer::get_start_update_loop() &&
          !TextureRenderer::get_done_update_loop())
    {
-      DWORD rn_time = GET_TICK_COUNT();
+      unsigned int rn_time = GET_TICK_COUNT();
       if (rn_time - TextureRenderer::get_st_time() >
             TextureRenderer::get_up_time())
          return;
@@ -3115,7 +3115,7 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
          TextureRenderer::get_start_update_loop() &&
          !TextureRenderer::get_done_update_loop())
    {
-      DWORD rn_time = GET_TICK_COUNT();
+      unsigned int rn_time = GET_TICK_COUNT();
       if (rn_time - TextureRenderer::get_st_time() >
             TextureRenderer::get_up_time())
          return;
@@ -3378,7 +3378,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
          TextureRenderer::get_start_update_loop() &&
          !TextureRenderer::get_done_update_loop())
    {
-      DWORD rn_time = GET_TICK_COUNT();
+      unsigned int rn_time = GET_TICK_COUNT();
       if (rn_time - TextureRenderer::get_st_time() >
             TextureRenderer::get_up_time())
          return;

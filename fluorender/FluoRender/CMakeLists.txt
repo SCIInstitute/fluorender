@@ -9,11 +9,11 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/teem/Nrrd)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/glew)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/glew/GL)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/LibTiff)
-include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Animator)
-include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Converters)
-include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/FLIVR)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Formats)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Animators)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/NV)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/FLIVR)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Converters)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    # Mac OS X
@@ -50,6 +50,7 @@ add_library(Main
    DragDrop.cpp
    HelpDlg.cpp
    ListPanel.cpp
+   Main.cpp
    MeasureDlg.cpp
    MManipulator.cpp
    MPropView.cpp
@@ -59,6 +60,7 @@ add_library(Main
    Tester.cpp
    TraceDlg.cpp
    TreePanel.cpp
+   utility.cpp
    VMovieView.cpp
    VolumeCalculator.cpp
    VolumeSelector.cpp

@@ -7,7 +7,7 @@ set(ARCHITECTURE 64 CACHE PATH "The architecture to build -- 32 or 64")
 project ( FluoRender )
 
 set(wxWidgets_CONFIGURATION mswu)
-find_package(wxWidgets COMPONENTS core base aui gl media html xrc xml net adv REQUIRED)
+find_package(wxWidgets COMPONENTS core base aui html xrc xml net adv gl REQUIRED)
 include(${wxWidgets_USE_FILE})
 
 find_package(OpenGL REQUIRED)
@@ -52,7 +52,7 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 set(CFLAGS "-fPIC")
-set(CXXFLAGS "-fPIC -I/usr/local/lib/wx/include/osx_cocoa-unicode-3.0 -I/usr/local/include/wx-3.0 -D_FILE_OFFSET_BITS=64 -DWXUSINGDLL -D__WXMAC__ -D__WXOSX__ -D__WXOSX_COCOA__")
+set(CXXFLAGS "-fPIC")
 
 if(${ARCHITECTURE} MATCHES 64)
    set(ARCH_FLAGS "-m64 -arch x86_64")

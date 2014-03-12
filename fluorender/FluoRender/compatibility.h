@@ -4,36 +4,37 @@
  * @author Brig Bagley
  * @version 4 March 2014
  */
-#ifdef _WIN32
-#include "WacUtils/WacUtils.h"
+#ifndef __COMPATIBILITY_H__
+#define __COMPATIBILITY_H__
+
+#ifdef _WIN32 //WINDOWS ONLY
+
 #include <windows.h>
 #include <ole2.h>
 #include <wintab.h>
 #include <pktdef.h>
+#include "WacUtils/WacUtils.h"
 #define WSTOD(s)                                _wtof(s)
 #define WSTOI(s)                                _wtoi(s)
 #define STOD(s)                                 _atof(s)
 #define STOI(s)                                 _atoi(s)
-#define CREATE_DIR(f)                           CreateDirectory(f, NULL)
 #define SPRINTF                                 sprintf_s
 #define SSCANF                                  scanf_s
 #define STRDUP                                  _strdup
 #define STRCPY(a,b,c)                           strcpy_s(a,b,c)
 #define STRCAT(a,b,c)                           strcat_s(a,b,c)
 #define STRNCPY(a,b,c,d)                        strncpy_s(a,b,c,d)
-#define TIME                                    _time32
-
-#ifndef CROSS_FUNCTIONS__
-#define CROSS_FUNCTIONS__
-#include <vector>
-
 #define ws2s
 #define FOPEN                                   fopen_s
 #define WFOPEN                                  _wfopen_s
 
-uint32_t GET_TICK_COUNT() { return GetTickCount(); }
+inline time_t TIME(time_t* n) { return _time32(n); }
 
-void FIND_FILES(std::wstring m_path_name,
+inline int CREATE_DIR(const char *f) { return CreateDirectory(f,NULL); }
+
+inline uint32_t GET_TICK_COUNT() { return GetTickCount(); }
+
+inline void FIND_FILES(std::wstring m_path_name,
       std::wstring search_ext,
       std::vector<std::wstring> &m_batch_list,
       int &m_cur_batch, std::wstring regex = L"") {
@@ -64,21 +65,16 @@ void FIND_FILES(std::wstring m_path_name,
    }
    FindClose(hFind);
 }
-#endif
 
-//#define GET_WM_ACTIVATE_STATE(wp, lp)           LOWORD(wp)
-//#define GET_WM_COMMAND_ID(wp, lp)               LOWORD(wp)
-//#define GET_WM_COMMAND_HWND(wp, lp)             (HWND)(lp)
-//#define GET_WM_COMMAND_CMD(wp, lp)              HIWORD(wp)
-//#define FORWARD_WM_COMMAND(hwnd, id, hwndCtl, codeNotify, fn) \
-//   (void)(fn)((hwnd), WM_COMMAND, MAKEWPARAM((UINT)(id),(UINT)(codeNotify)), (LPARAM)(HWND)(hwndCtl))
-/* -------------------------------------------------------------------------- */
-#else
+#else // MAC OSX or LINUX
 
-#include <cstdlib>
-#include <cstdio>
-#define DWORD                                      unsigned int
-#define CREATE_DIR(f)                              mkdir(f, S_IRWXU | S_IRGRP | S_IXGRP)
+#include <vector>
+#include <codecvt>
+#include <iostream>
+#include <dirent.h>
+#include <sys/time.h>
+#include <sys/stat.h>
+
 #define SetDoubleBuffered(t)
 #define SPRINTF                                    sprintf
 #define SSCANF                                     scanf
@@ -86,44 +82,42 @@ void FIND_FILES(std::wstring m_path_name,
 #define STRCPY(a,b,c)                              strcpy(a,c)
 #define STRCAT(a,b,c)                              strcat(a,c)
 #define STRNCPY(a,b,c,d)                           strncpy(a,c,d)
-#define TIME                                       time
 #define TIFFOpenW(a,b)                             TIFFOpen(ws2s(a).c_str(),b)
 #define swprintf_s                                 swprintf
+#define WSTOD(s)                                   atof(ws2s(s).c_str())
+#define WSTOI(s)                                   atoi(ws2s(s).c_str())
+#define STOD(s)                                    atof(s)
+#define STOI(s)                                    atoi(s)
 
-#ifndef CROSS_FUNCTIONS__
-#define CROSS_FUNCTIONS__
-#include <dirent.h>
-#include <string>
-#include <vector>
-#include <codecvt>
-#include <iostream>
-#include <sys/time.h>
+inline time_t TIME(time_t* n) { return time(n); }
+
+inline int CREATE_DIR(const char *f) { return mkdir(f, S_IRWXU | S_IRGRP | S_IXGRP); }
 
 typedef union _LARGE_INTEGER {
    struct {
-      DWORD LowPart;
+      unsigned int LowPart;
       long HighPart;
    };
    struct {
-      DWORD LowPart;
+      unsigned int LowPart;
       long HighPart;
    } u;
    long long QuadPart;
 } LARGE_INTEGER, *PLARGE_INTEGER;
 
-std::wstring s2ws(std::string& str) {
+inline std::wstring s2ws(const std::string& str) {
    typedef std::codecvt_utf8<wchar_t> convert_typeX;
    std::wstring_convert<convert_typeX, wchar_t> converterX;
    return converterX.from_bytes(str);
 }
 
-std::string ws2s(std::wstring& str) {
+inline std::string ws2s(const std::wstring& str) {
    typedef std::codecvt_utf8<wchar_t> convert_typeX;
    std::wstring_convert<convert_typeX, wchar_t> converterX;
    return converterX.to_bytes(str);
 }
 
-void FIND_FILES(std::wstring m_path_name,
+inline void FIND_FILES(std::wstring m_path_name,
       std::wstring search_ext,
       std::vector<std::wstring> &m_batch_list,
       int &m_cur_batch, std::wstring regex = L"") {
@@ -136,7 +130,7 @@ void FIND_FILES(std::wstring m_path_name,
       m_batch_list.clear();
       while((ent = readdir(dir)) != NULL) {
          //check if it contains the string.
-         if (strstr(ent->d_name,ws2s(search_str).c_str()) && 
+         if (strstr(ent->d_name,ws2s(search_str).c_str()) &&
                strstr(ent->d_name,ws2s(regex).c_str())) {
             std::string ss = ent->d_name;
             std::wstring f = s2ws(ss);
@@ -150,40 +144,29 @@ void FIND_FILES(std::wstring m_path_name,
    }
 }
 
-FILE* WFOPEN(FILE ** fp, const wchar_t* filename, const wchar_t* mode) {
-   *fp = fopen((const char*)filename,(const char*)mode);
+inline FILE* WFOPEN(FILE ** fp, const wchar_t* filename, const wchar_t* mode) {
+   *fp = fopen(ws2s(std::wstring(filename)).c_str(),ws2s(std::wstring(mode)).c_str());
    return *fp;
 }
 
-FILE* FOPEN(FILE ** fp, const char* filename, const char* mode) {
+inline FILE* FOPEN(FILE ** fp, const char* filename, const char* mode) {
    *fp = fopen(filename,mode);
    return *fp;
 }
 
-uint32_t GET_TICK_COUNT() {
+inline uint32_t GET_TICK_COUNT() {
    struct timeval ts;
    gettimeofday(&ts, NULL);
    return ts.tv_sec * 1000 + ts.tv_usec / 1000;
 }
 
-#endif
-
-#define WSTOD(s)                                   atof(ws2s(s).c_str())
-#define WSTOI(s)                                   atoi(ws2s(s).c_str())
-#define STOD(s)                                    atof(s)
-#define STOI(s)                                    atoi(s)
-
+//LINUX SPECIFIC
 #ifdef _LINUX
 #endif
-
+//MAC OSX SPECIFIC
 #ifdef _DARWIN
 #endif
 
-//#define GET_WM_ACTIVATE_STATE(wp, lp)               (wp)
-//#define GET_WM_COMMAND_ID(wp, lp)                   (wp)
-//#define GET_WM_COMMAND_HWND(wp, lp)                 (HWND)LOWORD(lp)
-//#define GET_WM_COMMAND_CMD(wp, lp)                  HIWORD(lp)
-//#define FORWARD_WM_COMMAND(hwnd, id, hwndCtl, codeNotify, fn) \
-//   (void)(fn)((hwnd), WM_COMMAND, (WPARAM)(int)(id), MAKELPARAM((UINT)(hwndCtl), (codeNotify)))
-/* -------------------------------------------------------------------------- */
-#endif
+#endif //END_IF_DEF__WIN32__
+
+#endif //END__COMPATIBILITY_H__

@@ -7,4 +7,3 @@ rm -rf Makefile */Makefile */*/Makefile */*/*/Makefile */*/*/*/Makefile
 rm -rf CMakeFiles */CMakeFiles */*/CMakeFiles */*/*/CMakeFiles */*/*/*/CMakeFiles
 rm -rf CMakeCache.txt */CMakeCache.txt */*/CMakeCache.txt */*/*/CMakeCache.txt */*/*/*/CMakeCache.txt
 
-cmake . ; make

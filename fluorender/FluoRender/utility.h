@@ -5,11 +5,11 @@
 #define PI 3.1415926535897932384626433832795
 #define EPS 1e-6
 
-extern inline double d2r(double d);
+double d2r(double d);
 
-extern inline double r2d(double r);
+double r2d(double r);
 
-extern inline void sinCos(double *returnSin, double *returnCos, double theta);
+void sinCos(double *returnSin, double *returnCos, double theta);
 
 static const unsigned char BitReverseTable256[] =  
 { 
@@ -31,10 +31,10 @@ static const unsigned char BitReverseTable256[] =
 	0x0F, 0x8F, 0x4F, 0xCF, 0x2F, 0xAF, 0x6F, 0xEF, 0x1F, 0x9F, 0x5F, 0xDF, 0x3F, 0xBF, 0x7F, 0xFF 
 }; 
 
-extern inline unsigned int bit_reverse(unsigned int v);
+unsigned int bit_reverse(unsigned int v);
 
-extern inline unsigned int reverse_bit(unsigned int val, unsigned int len);
+unsigned int reverse_bit(unsigned int val, unsigned int len);
 
-extern inline float nCr(int n,int r);
+float nCr(int n,int r);
 
 #endif//_UTILITY_H_
