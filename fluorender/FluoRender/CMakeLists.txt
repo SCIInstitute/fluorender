@@ -68,7 +68,7 @@ add_library(Main
    VRenderFrame.cpp
    VRenderView.cpp )
 
-add_executable(FluoRender Main.cpp)
+add_executable(FluoRender Main)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    # Mac OS X

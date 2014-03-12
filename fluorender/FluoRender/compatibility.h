@@ -14,19 +14,53 @@
 #include <wintab.h>
 #include <pktdef.h>
 #include "WacUtils/WacUtils.h"
-#define WSTOD(s)                                _wtof(s)
-#define WSTOI(s)                                _wtoi(s)
-#define STOD(s)                                 _atof(s)
-#define STOI(s)                                 _atoi(s)
-#define SPRINTF                                 sprintf_s
-#define SSCANF                                  scanf_s
-#define STRDUP                                  _strdup
-#define STRCPY(a,b,c)                           strcpy_s(a,b,c)
-#define STRCAT(a,b,c)                           strcat_s(a,b,c)
-#define STRNCPY(a,b,c,d)                        strncpy_s(a,b,c,d)
-#define ws2s
-#define FOPEN                                   fopen_s
-#define WFOPEN                                  _wfopen_s
+#include <stdarg.h>
+
+inline std::wstring ws2s(std::wstring s) { return s; }
+
+inline int SSCANF(const char* buf, const*fmt, ...){
+   va_list args;
+   va_start(args,fmt);
+   int r = vsscanf_s(buf,fmt,args);
+   va_end(args);
+   return r;
+}
+
+inline errno_t FOPEN(FILE** fp, const char *fname, const char* mode) {
+   fopen_s(fp,fname,mode);
+}
+
+inline errno_t WFOPEN(FILE** fp, const wchar_t* fname, const wchar_t* mode) {
+   _wfopen_s(fp,fname,mode);
+}
+
+inline errno_t STRCPY(char* d, size_t n, const char* s) { return strcpy_s(d,n,s); }
+
+inline errno_t STRNCPY(char* d, size_t n, const char* s, size_t x) { 
+   return strncpy_s(d,n,s,x); 
+}
+
+inline errno_t STRCAT(char * d, size_t n, const char* s) { 
+   return strcat(d,n,s);
+}
+
+inline char* STRDUP(const char* s) { return _strdup(s); }
+
+inline int SPRINTF(char* buf, size_t n, const char * fmt, ...) {
+   va_list args;
+   va_start(args,fmt);
+   int r = vsprintf_s(buf,n,fmt,args);
+   va_end(args);
+   return r;
+}
+
+inline int WSTOI(std::wstring s) { return _wtoi(s.c_str()); }
+
+inline double WSTOD(std::wstring s) { return _wtof(s.c_str()); }
+
+inline int STOI(const char * s) { return _atoi(s); }
+
+inline double STOD(const char * s) { return _atof(s); }
 
 inline time_t TIME(time_t* n) { return _time32(n); }
 
@@ -74,20 +108,69 @@ inline void FIND_FILES(std::wstring m_path_name,
 #include <dirent.h>
 #include <sys/time.h>
 #include <sys/stat.h>
+#include <../LibTiff/tiffio.h>
 
-#define SetDoubleBuffered(t)
-#define SPRINTF                                    sprintf
-#define SSCANF                                     scanf
-#define STRDUP                                     strdup
-#define STRCPY(a,b,c)                              strcpy(a,c)
-#define STRCAT(a,b,c)                              strcat(a,c)
-#define STRNCPY(a,b,c,d)                           strncpy(a,c,d)
-#define TIFFOpenW(a,b)                             TIFFOpen(ws2s(a).c_str(),b)
-#define swprintf_s                                 swprintf
-#define WSTOD(s)                                   atof(ws2s(s).c_str())
-#define WSTOI(s)                                   atoi(ws2s(s).c_str())
-#define STOD(s)                                    atof(s)
-#define STOI(s)                                    atoi(s)
+inline std::wstring s2ws(const std::string& str) {
+   typedef std::codecvt_utf8<wchar_t> convert_typeX;
+   std::wstring_convert<convert_typeX, wchar_t> converterX;
+   return converterX.from_bytes(str);
+}
+
+inline std::string ws2s(const std::wstring& str) {
+   typedef std::codecvt_utf8<wchar_t> convert_typeX;
+   std::wstring_convert<convert_typeX, wchar_t> converterX;
+   return converterX.to_bytes(str);
+}
+
+inline int SSCANF(const char* buf, const char* fmt, ...){
+   va_list args;
+   va_start(args,fmt);
+   int r = vsscanf(buf,fmt,args);
+   va_end(args);
+   return r;
+}
+
+inline int swprintf_s(wchar_t *buf, size_t n, const wchar_t* fmt, ...) {
+   va_list args;
+   va_start(args,fmt);
+   int r = vswprintf(buf,n,fmt,args);
+   va_end(args);
+   return r;
+}
+
+inline void SetDoubleBuffered(bool) {};
+
+inline char* STRCPY(char* d, size_t n, const char* s) { return strncpy(d,s,n-1); }
+
+inline char* STRNCPY(char* d, size_t n, const char* s, size_t x) { 
+   return strncpy(d,s,n-1); 
+}
+
+inline char* STRCAT(char * d, size_t n, const char* s) { 
+   return strncat(d,s,n-strlen(d)-1);
+}
+
+inline char* STRDUP(const char* s) { return strdup(s); }
+
+inline TIFF* TIFFOpenW(std::wstring fname, const char* opt) {
+   return TIFFOpen(ws2s(fname).c_str(),opt);
+}
+
+inline int SPRINTF(char* buf, size_t n, const char * fmt, ...) {
+   va_list args;
+   va_start(args,fmt);
+   int r = vsprintf(buf,fmt,args);
+   va_end(args);
+   return r;
+}
+
+inline int WSTOI(std::wstring s) { return atoi(ws2s(s).c_str()); }
+
+inline double WSTOD(std::wstring s) { return atof(ws2s(s).c_str()); }
+
+inline int STOI(const char * s) { return atoi(s); }
+
+inline double STOD(const char * s) { return atof(s); }
 
 inline time_t TIME(time_t* n) { return time(n); }
 
@@ -104,18 +187,6 @@ typedef union _LARGE_INTEGER {
    } u;
    long long QuadPart;
 } LARGE_INTEGER, *PLARGE_INTEGER;
-
-inline std::wstring s2ws(const std::string& str) {
-   typedef std::codecvt_utf8<wchar_t> convert_typeX;
-   std::wstring_convert<convert_typeX, wchar_t> converterX;
-   return converterX.from_bytes(str);
-}
-
-inline std::string ws2s(const std::wstring& str) {
-   typedef std::codecvt_utf8<wchar_t> convert_typeX;
-   std::wstring_convert<convert_typeX, wchar_t> converterX;
-   return converterX.to_bytes(str);
-}
 
 inline void FIND_FILES(std::wstring m_path_name,
       std::wstring search_ext,
@@ -145,7 +216,8 @@ inline void FIND_FILES(std::wstring m_path_name,
 }
 
 inline FILE* WFOPEN(FILE ** fp, const wchar_t* filename, const wchar_t* mode) {
-   *fp = fopen(ws2s(std::wstring(filename)).c_str(),ws2s(std::wstring(mode)).c_str());
+   *fp = fopen(ws2s(std::wstring(filename)).c_str(),
+         ws2s(std::wstring(mode)).c_str());
    return *fp;
 }
 

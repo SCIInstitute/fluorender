@@ -570,7 +570,7 @@ void VolumeSelector::CompExportRandomColor(VolumeData* vd_r,
    if (!data_vd_b) return;
 
    if (hide)
-      m_randv = int((double)rand()/(RAND_MAX+1)*900+100);
+      m_randv = int((double)rand()/(RAND_MAX)*900+100);
    //populate the data
    int ii, jj, kk;
    for (ii=0; ii<res_x; ii++)

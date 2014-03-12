@@ -7785,27 +7785,27 @@ void VRenderGLView::DrawColormap()
       //text color
       glColor3d(m_bg_color_inv.r(), m_bg_color_inv.g(), m_bg_color_inv.b());
       //value 1
-      SPRINTF(str, "%d", 0);
+      SPRINTF(str, 32, "%d", 0);
       beginRenderText(nx, ny);
       renderText(0.052*m_frame_w+m_frame_x, ny-0.1*m_frame_h-m_frame_y-offset, BITMAP_FONT_TYPE_HELVETICA_12, str);
       endRenderText();
       //value 2
-      SPRINTF(str, "%d", int(m_value_2*max_val));
+      SPRINTF(str, 32, "%d", int(m_value_2*max_val));
       beginRenderText(nx, ny);
       renderText(0.052*m_frame_w+m_frame_x, ny-(0.1+0.4*m_value_2)*m_frame_h-m_frame_y-offset, BITMAP_FONT_TYPE_HELVETICA_12, str);
       endRenderText();
       //value 4
-      SPRINTF(str, "%d", int(m_value_4*max_val));
+      SPRINTF(str, 32, "%d", int(m_value_4*max_val));
       beginRenderText(nx, ny);
       renderText(0.052*m_frame_w+m_frame_x, ny-(0.1+0.4*m_value_4)*m_frame_h-m_frame_y-offset, BITMAP_FONT_TYPE_HELVETICA_12, str);
       endRenderText();
       //value 6
-      SPRINTF(str, "%d", int(m_value_6*max_val));
+      SPRINTF(str, 32, "%d", int(m_value_6*max_val));
       beginRenderText(nx, ny);
       renderText(0.052*m_frame_w+m_frame_x, ny-(0.1+0.4*m_value_6)*m_frame_h-m_frame_y-offset, BITMAP_FONT_TYPE_HELVETICA_12, str);
       endRenderText();
       //value 7
-      SPRINTF(str, "%d", int(max_val));
+      SPRINTF(str, 32, "%d", int(max_val));
       beginRenderText(nx, ny);
       renderText(0.052*m_frame_w+m_frame_x, ny-0.5*m_frame_h-m_frame_y-offset, BITMAP_FONT_TYPE_HELVETICA_12, str);
       endRenderText();
@@ -7847,27 +7847,27 @@ void VRenderGLView::DrawColormap()
       //text color
       glColor3d(m_bg_color_inv.r(), m_bg_color_inv.g(), m_bg_color_inv.b());
       //value 1
-      SPRINTF(str, "%d", 0);
+      SPRINTF(str, 32, "%d", 0);
       beginRenderText(nx, ny);
       renderText(0.052*nx, 0.9*ny-offset, BITMAP_FONT_TYPE_HELVETICA_12, str);
       endRenderText();
       //value 2
-      SPRINTF(str, "%d", int(m_value_2*max_val));
+      SPRINTF(str, 32, "%d", int(m_value_2*max_val));
       beginRenderText(nx, ny);
       renderText(0.052*nx, (0.9-0.4*m_value_2)*ny-offset, BITMAP_FONT_TYPE_HELVETICA_12, str);
       endRenderText();
       //value 4
-      SPRINTF(str, "%d", int(m_value_4*max_val));
+      SPRINTF(str, 32, "%d", int(m_value_4*max_val));
       beginRenderText(nx, ny);
       renderText(0.052*nx, (0.9-0.4*m_value_4)*ny-offset, BITMAP_FONT_TYPE_HELVETICA_12, str);
       endRenderText();
       //value 6
-      SPRINTF(str, "%d", int(m_value_6*max_val));
+      SPRINTF(str, 32, "%d", int(m_value_6*max_val));
       beginRenderText(nx, ny);
       renderText(0.052*nx, (0.9-0.4*m_value_6)*ny-offset, BITMAP_FONT_TYPE_HELVETICA_12, str);
       endRenderText();
       //value 7
-      SPRINTF(str, "%d", int(max_val));
+      SPRINTF(str, 32, "%d", int(max_val));
       beginRenderText(nx, ny);
       renderText(0.052*nx, 0.5*ny-offset, BITMAP_FONT_TYPE_HELVETICA_12, str);
       endRenderText();
@@ -7891,7 +7891,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
    char str[128];
    if (TextureRenderer::get_mem_swap())
    {
-      SPRINTF(str, 
+      SPRINTF(str, 128, 
             "FPS: %.2f, Bricks: %d, Quota: %d, Int: %s, Time: %lu",
             fps_>=0.0&&fps_<300.0?fps_:0.0,
             TextureRenderer::get_finished_bricks(),
@@ -7913,7 +7913,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
       //  << "\n";
    }
    else
-      SPRINTF(str, "FPS: %.2f", fps_>=0.0&&fps_<300.0?fps_:0.0);
+      SPRINTF(str, 128, "FPS: %.2f", fps_>=0.0&&fps_<300.0?fps_:0.0);
    beginRenderText(nx, ny);
    renderText(10, 20, BITMAP_FONT_TYPE_HELVETICA_12, str);
    endRenderText();
@@ -7925,7 +7925,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
       if ((m_cur_vol && GetPointVolumeBox(p, mouse_pos.x, mouse_pos.y, m_cur_vol)>0.0) ||
             GetPointPlane(p, mouse_pos.x, mouse_pos.y)>0.0)
       {
-         SPRINTF(str, "T: %d  X: %.2f  Y: %.2f  Z: %.2f", m_tseq_cur_num, p.x(), p.y(), p.z());
+         SPRINTF(str, 128, "T: %d  X: %.2f  Y: %.2f  Z: %.2f", m_tseq_cur_num, p.x(), p.y(), p.z());
          beginRenderText(nx, ny);
          renderText(10, 40, BITMAP_FONT_TYPE_HELVETICA_12, str);
          endRenderText();
@@ -7933,7 +7933,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
    }
    else
    {
-      SPRINTF(str, "T: %d", m_tseq_cur_num);
+      SPRINTF(str, 128, "T: %d", m_tseq_cur_num);
       beginRenderText(nx, ny);
       renderText(10, 40, BITMAP_FONT_TYPE_HELVETICA_12, str);
       endRenderText();
@@ -7943,7 +7943,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
    {
       if (m_vol_method == VOL_METHOD_MULTI && m_mvr)
       {
-         SPRINTF(str, "SLICES: %d", m_mvr->get_slice_num());
+         SPRINTF(str, 128, "SLICES: %d", m_mvr->get_slice_num());
          beginRenderText(nx, ny);
          renderText(10, 35, BITMAP_FONT_TYPE_HELVETICA_12, str);
          endRenderText();
@@ -7955,7 +7955,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
             VolumeData* vd = m_vd_pop_list[i];
             if (vd && vd->GetVR())
             {
-               SPRINTF(str, "SLICES_%d: %d", i+1, vd->GetVR()->get_slice_num());
+               SPRINTF(str, 128, "SLICES_%d: %d", i+1, vd->GetVR()->get_slice_num());
                beginRenderText(nx, ny);
                renderText(10, 35+15*i, BITMAP_FONT_TYPE_HELVETICA_12, str);
                endRenderText();
