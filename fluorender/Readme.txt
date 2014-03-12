@@ -1,13 +1,14 @@
-To build FluoRender, download the latest source code of WxWidgets (MSW). Copy the WxWidgets project folder {usually named [wxWidgets-(version number)]} into the same directory of this Readme file, and rename it [wxWidgets] (delete the version number). Compile it using VisualStudio. Go to .\wxWidgets\build\msw\, and type in the following command to build wxWidgets.
+To build FluoRender:
+12 March 2014
 
-Replace libtiff headers.
+1) Download the latest wxWidgets (currently 3.0.0).
+2) Install the headers and libraries to your system.
+3) In the main directory, (only clean.sh, CMakeLists.txt, and fluorender folder),
+   type "ccmake ." to configure build properties.
+4) If all properties are set as desired, type "cmake ." . 
+5) If cmake generated Makefiles successfully, type "make" .
 
-Search for and set this value:
-#define STRIPCHOP_DEFAULT 0
+Using cmake, you can generate XCode (MacOS X) and MS Visual Studio (Windows)
+project files. Simply type "cmake" to find the proper options.
 
-64-bit Release compile: nmake -f makefile.vc BUILD=release TARGET_CPU=AMD64
-64-bit Debug compile: nmake -f makefile.vc BUILD=debug TARGET_CPU=AMD64
-32-bit Release compile: nmake -f makefile.vc BUILD=release
-32-bit Debug compile: nmake -f makefile.vc BUILD=debug
-
-Then go to .\FluoRender\ and open the FluoRender VisualStudio Solution file (FluoRender.sln) to build.
+If there are any problems, email: fluorender@sci.utah.edu
