@@ -11,7 +11,6 @@ find_package(wxWidgets COMPONENTS core base aui html xrc xml net adv gl REQUIRED
 include(${wxWidgets_USE_FILE})
 
 find_package(OpenGL REQUIRED)
-find_package(GLUT REQUIRED)
 
 #temporary solution for wxWidgets linking "ambiguous" errors
 add_definitions(-D_WCHAR_H_CPLUSPLUS_98_CONFORMANCE_)

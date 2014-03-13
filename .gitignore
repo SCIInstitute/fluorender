@@ -13,3 +13,11 @@ Makefile
 CMakeCache.txt
 CMakeFiles
 *.swp
+*user
+*.vcxproj
+*.filters
+*.sdf
+*.sln
+*.opensdf
+Win32
+*.dir
