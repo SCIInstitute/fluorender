@@ -56,21 +56,15 @@ set(CXXFLAGS "-fPIC")
 
 if(${ARCHITECTURE} MATCHES 64)
    set(ARCH_FLAGS "-m64 -arch x86_64")
-   add_definitions(-DTEEM_32BIT=0)
    set(CMAKE_C_FLAGS "${ARCH_FLAGS} ${CFLAGS}")
    set(CMAKE_CXX_FLAGS "${ARCH_FLAGS} ${CXXFLAGS} ${CXX_11_FLAG}")
    set(LDFLAGS "${ARCH_FLAGS} ${CXX_11_FLAG}")
 else()
    set(ARCH_FLAGS "-m32 -arch i386")
-   add_definitions(-DTEEM_32BIT=1)
    set(CMAKE_C_FLAGS "${ARCH_FLAGS} ${CFLAGS}" )
    set(CMAKE_CXX_FLAGS "${ARCH_FLAGS} ${CXXFLAGS} ${CXX_11_FLAG}")
    set(LDFLAGS "${ARCH_FLAGS} ${CXX_11_FLAG}")
 endif()
-
-add_definitions(-DTEEM_DIO=0)
-add_definitions(-DTEEM_ENDIAN=1234)
-add_definitions(-DTEEM_QNANHIBIT=1)
 
 subdirs ( fluorender )
 
