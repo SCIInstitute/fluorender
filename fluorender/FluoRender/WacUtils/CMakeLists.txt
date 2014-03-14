@@ -9,4 +9,4 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/glew)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/Wacom/Include)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/LibTiff)
 
-add_library( LibWacUtils WacUtils.cpp)
+add_library( WacUtils WacUtils.cpp)

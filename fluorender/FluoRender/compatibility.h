@@ -23,11 +23,13 @@
 #include <sys/types.h>
 #include <ctype.h>
 #include <wx/wx.h>
+#include "../LibTiff/tiffio.h"
 #include "WacUtils/WacUtils.h"
 
-inline std::wstring ws2s(std::wstring s) { return s; }
-
+#define FSEEK64     _fseeki64
 #define SSCANF		sscanf
+
+inline std::wstring ws2s(std::wstring s) { return s; }
 
 inline TIFF* TIFFOpenW(std::wstring fname, const char* opt) {
    return TIFFOpenW(fname.c_str(),opt);
@@ -119,7 +121,10 @@ inline void FIND_FILES(std::wstring m_path_name,
 #include <dirent.h>
 #include <sys/time.h>
 #include <sys/stat.h>
-#include <../LibTiff/tiffio.h>
+#include "../LibTiff/tiffio.h"
+
+//POSSIBLE TODO if fseek64 is different than fseek
+#define FSEEK64     fseek
 
 inline std::wstring s2ws(const std::string& str) {
    typedef std::codecvt_utf8<wchar_t> convert_typeX;

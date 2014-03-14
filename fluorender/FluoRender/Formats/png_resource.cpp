@@ -22,7 +22,8 @@ wxBitmap* PNG_RES::CreateBitmapFromPngResource(const wxString& t_name)
 bool PNG_RES::LoadDataFromResource(char*& t_data, unsigned int& t_dataSize, const wxString& t_name)
 {
    bool     r_result    = false;
-   /*HGLOBAL  a_resHandle = 0; TODO
+#ifdef _WIN32 //TODO
+   HGLOBAL  a_resHandle = 0;
    HRSRC    a_resource;
 
    a_resource = FindResource(0, t_name.fn_str(), RT_RCDATA);
@@ -37,8 +38,7 @@ bool PNG_RES::LoadDataFromResource(char*& t_data, unsigned int& t_dataSize, cons
          r_result = true;
       }
    }
-   */
-
+#endif
    return r_result;
 }
 

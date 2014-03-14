@@ -717,8 +717,8 @@ Nrrd* LSMReader::Convert(int t, int c, bool get_max)
             ChannelInfo *cinfo = &m_lsm_info[t][c];
             for (i=0; i<(int)cinfo->size(); i++)
             {
-               if (m_l4gb? //TODO may cause problems
-                     fseek(pfile, ((uint64_t((*cinfo)[i].offset_high))<<32)+(*cinfo)[i].offset, SEEK_SET)==0:
+               if (m_l4gb?  
+                     FSEEK64(pfile, ((uint64_t((*cinfo)[i].offset_high))<<32)+(*cinfo)[i].offset, SEEK_SET)==0:
                      fseek(pfile, (*cinfo)[i].offset, SEEK_SET)==0)
                {
                   unsigned int val_pos = m_x_size*m_y_size*i;
@@ -752,7 +752,7 @@ Nrrd* LSMReader::Convert(int t, int c, bool get_max)
             for (i=0; i<(int)cinfo->size(); i++)
             {
                if (m_l4gb?
-                     fseek(pfile, ((uint64_t((*cinfo)[i].offset_high))<<32)+(*cinfo)[i].offset, SEEK_SET)==0:
+                     FSEEK64(pfile, ((uint64_t((*cinfo)[i].offset_high))<<32)+(*cinfo)[i].offset, SEEK_SET)==0:
                      fseek(pfile, (*cinfo)[i].offset, SEEK_SET)==0)
                {
                   unsigned int val_pos = m_x_size*m_y_size*i;
