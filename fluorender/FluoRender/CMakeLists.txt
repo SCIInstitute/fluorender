@@ -50,7 +50,6 @@ add_library(Main
    DragDrop.cpp
    HelpDlg.cpp
    ListPanel.cpp
-   Main.cpp
    MeasureDlg.cpp
    MManipulator.cpp
    MPropView.cpp
@@ -68,10 +67,11 @@ add_library(Main
    VRenderFrame.cpp
    VRenderView.cpp )
 
-add_executable(FluoRender Main)
-
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    # Mac OS X
+   include(BundleUtilities)
+   add_executable(FluoRender MACOSX_BUNDLE Main.cpp)
+
 target_link_libraries(FluoRender  Main
    TeemAir
    TeemHest
@@ -88,6 +88,8 @@ target_link_libraries(FluoRender  Main
    ${GLUT_LIBRARY})
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
    # Linux 
+add_executable(FluoRender Main)
+
 target_link_libraries(FluoRender  Main
    TeemAir
    TeemHest
@@ -104,6 +106,8 @@ target_link_libraries(FluoRender  Main
    ${GLUT_LIBRARY})
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
    # Windows
+add_executable(FluoRender Main)
+
 target_link_libraries(FluoRender  Main
    TeemAir
    TeemHest

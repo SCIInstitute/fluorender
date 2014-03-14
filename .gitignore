@@ -36,3 +36,7 @@ fluorender/FluoRender/NV/Release
 fluorender/FluoRender/FLIVR/Release
 fluorender/FluoRender/Formats/Release
 *.stackdump
+bin
+FluoRender.build
+CMakeScripts
+*.xcodeproj

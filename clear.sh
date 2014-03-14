@@ -1,7 +1,5 @@
 #!/bin/bash
 
-make clean
-rm -rf clean
 rm -rf *.cmake */*.cmake */*/*.cmake */*/*/*.cmake */*/*/*/*.cmake
 rm -rf Makefile */Makefile */*/Makefile */*/*/Makefile */*/*/*/Makefile
 rm -rf CMakeFiles */CMakeFiles */*/CMakeFiles */*/*/CMakeFiles */*/*/*/CMakeFiles

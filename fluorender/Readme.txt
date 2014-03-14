@@ -11,6 +11,10 @@ OSX/Linux Installation
 
    * Build from the source as recommended from the docs/*/install.txt files, "*" based on your environment.
 
+   * A Known working "configure" command for OS X 10.9 is :
+     
+     ../configure --enable-unicode --enable-debug --with-opengl --with-macosx-sdk=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk --with-macosx-version-min=10.8 --with-osx_cocoa  -with-libjpeg=builtin -with-libpng=builtin -with-zlib=builtin -with-expat=builtin  -with-regex=builtin -with-libtiff=builtin
+
 3) In the main FluoRender directory, (containing "CMakeLists.txt" & "fluorender" folder):
 
    * Type "ccmake ." to configure build properties.
