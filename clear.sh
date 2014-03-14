@@ -1,7 +1,10 @@
 #!/bin/bash
 
-rm -rf *.cmake */*.cmake */*/*.cmake */*/*/*.cmake */*/*/*/*.cmake
-rm -rf Makefile */Makefile */*/Makefile */*/*/Makefile */*/*/*/Makefile
-rm -rf CMakeFiles */CMakeFiles */*/CMakeFiles */*/*/CMakeFiles */*/*/*/CMakeFiles
-rm -rf CMakeCache.txt */CMakeCache.txt */*/CMakeCache.txt */*/*/CMakeCache.txt */*/*/*/CMakeCache.txt
+FILE=.gitignore
 
+while read CMD; do
+   if [ "$CMD" != "*.svn" -a "$CMD" != ".git" ]; then
+      echo "rm -rf $CMD"
+      rm -rf $CMD
+   fi
+done < "$FILE"
