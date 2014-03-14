@@ -12,7 +12,7 @@
 
 ---------------------------------------------------------------------------- */
 
-#include <WacUtils\WacUtils.h>
+#include <WacUtils.h>
 
 #ifdef WACOM_DEBUG
 

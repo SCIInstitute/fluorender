@@ -9,29 +9,36 @@
 
 #ifdef _WIN32 //WINDOWS ONLY
 
+#include <cstdlib>
+#include <cstdio>
+#include <cstdarg>
+#include <cstdint>
+#include <string>
+#include <vector>
 #include <windows.h>
 #include <ole2.h>
 #include <wintab.h>
 #include <pktdef.h>
+#include <time.h>
+#include <sys/types.h>
+#include <ctype.h>
+#include <wx/wx.h>
 #include "WacUtils/WacUtils.h"
-#include <stdarg.h>
 
 inline std::wstring ws2s(std::wstring s) { return s; }
 
-inline int SSCANF(const char* buf, const*fmt, ...){
-   va_list args;
-   va_start(args,fmt);
-   int r = vsscanf_s(buf,fmt,args);
-   va_end(args);
-   return r;
+#define SSCANF		sscanf
+
+inline TIFF* TIFFOpenW(std::wstring fname, const char* opt) {
+   return TIFFOpenW(fname.c_str(),opt);
 }
 
 inline errno_t FOPEN(FILE** fp, const char *fname, const char* mode) {
-   fopen_s(fp,fname,mode);
+   return fopen_s(fp,fname,mode);
 }
 
 inline errno_t WFOPEN(FILE** fp, const wchar_t* fname, const wchar_t* mode) {
-   _wfopen_s(fp,fname,mode);
+   return _wfopen_s(fp,fname,mode);
 }
 
 inline errno_t STRCPY(char* d, size_t n, const char* s) { return strcpy_s(d,n,s); }
@@ -41,7 +48,7 @@ inline errno_t STRNCPY(char* d, size_t n, const char* s, size_t x) {
 }
 
 inline errno_t STRCAT(char * d, size_t n, const char* s) { 
-   return strcat(d,n,s);
+   return strcat_s(d,n,s);
 }
 
 inline char* STRDUP(const char* s) { return _strdup(s); }
@@ -58,13 +65,17 @@ inline int WSTOI(std::wstring s) { return _wtoi(s.c_str()); }
 
 inline double WSTOD(std::wstring s) { return _wtof(s.c_str()); }
 
-inline int STOI(const char * s) { return _atoi(s); }
+inline int STOI(const char * s) { return atoi(s); }
+inline int STOI(const wxChar * s) { return _wtoi(s); }
+inline int STOI(wxChar * s) { return _wtoi(s); }
 
-inline double STOD(const char * s) { return _atof(s); }
+inline double STOD(const char * s) { return atof(s); }
+inline double STOD(wxChar * s) { return _wtof(s); }
+inline double STOD(const wxChar * s) { return _wtof(s); }
 
-inline time_t TIME(time_t* n) { return _time32(n); }
+inline time_t TIME(time_t* n) { return _time32((__time32_t*)n); }
 
-inline int CREATE_DIR(const char *f) { return CreateDirectory(f,NULL); }
+inline int CREATE_DIR(const wchar_t *f) { return CreateDirectory(f,NULL); }
 
 inline uint32_t GET_TICK_COUNT() { return GetTickCount(); }
 
