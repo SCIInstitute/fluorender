@@ -3,13 +3,14 @@
 
 #include <wx/wx.h>
 #include "../compatibility.h"
+#include "wx/mstream.h"
 
-namespace PNG_RES
+#define wxGetBitmapFromMemory(name) _wxGetBitmapFromMemory(name ## _png, sizeof(name ## _png))
+
+inline wxBitmap _wxGetBitmapFromMemory(const unsigned char *data, int length)
 {
-	wxBitmap* CreateBitmapFromPngResource(const wxString& t_name);
-	bool LoadDataFromResource(char*& t_data, unsigned int& t_dataSize, const wxString& t_name);
-	wxBitmap* GetBitmapFromMemory(const char* t_data, const unsigned int t_size);
-
+      wxMemoryInputStream is(data, length);
+         return wxBitmap(wxImage(is, wxBITMAP_TYPE_ANY, -1), -1);
 }
 
 #endif//PNG_RESOURCE_H

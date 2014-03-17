@@ -1,27 +1,24 @@
 //#include "Check.h"
+#include <cstdio>
+#include <iostream>
 #include <wx/wx.h>
 #include <wx/cmdline.h>
 #include <wx/stdpaths.h>
-//#include <wx/registry.h>
+#include <wx/filefn.h>
 #include "VRenderFrame.h"
+#include "compatibility.h"
 // -- application --
-
-using namespace std;
 
 class VRenderApp : public wxApp
 {
    public:
-      bool OnInit();
+      virtual bool OnInit();
       void OnInitCmdLine(wxCmdLineParser& parser);
       bool OnCmdLineParsed(wxCmdLineParser& parser);
 
    private:
       wxArrayString m_files;
       int m_file_num;
-      wxString m_address;
-
-      bool CheckAddress();
-      bool CheckTime();
 };
 
 static const wxCmdLineEntryDesc g_cmdLineDesc [] =
@@ -33,119 +30,51 @@ static const wxCmdLineEntryDesc g_cmdLineDesc [] =
 
 DECLARE_APP(VRenderApp)
 IMPLEMENT_APP(VRenderApp)
-/*
-   bool VRenderApp::CheckAddress()
-   {
-   string license_address;
-   string str_address = GetAddress();
-   m_address = str_address;
-#ifdef LICENSE_ADDRESS
-license_address = LICENSE_ADDRESS;
-if (license_address.compare("-1") == 0)
-return true;
-#endif
-#if !_FREE_VERSION_
-istringstream ss(str_address);
-string str;
-while (getline(ss, str))
-{
-if (str.compare(license_address) == 0)
-return true;
-}
-return false;
-#endif
-return true;
-}
- */
-bool VRenderApp::CheckTime()
-{
-#ifdef _WIN32
-   bool rvalue = false;
-   long cur_time = wxGetUTCTime();
-   wxRegKey *key = new wxRegKey(wxRegKey::HKCU, "System\\Time_Log");
-   if (key->Exists())
-   {
-      long first_t, last_t;
-      key->QueryValue("first_t", &first_t);
-      key->QueryValue("last_t", &last_t);
-      if (cur_time < last_t)
-         rvalue = false;
-      else if (cur_time > first_t+604800)
-      {
-         key->SetValue("last_t", cur_time);
-         rvalue = false;
-      }
-      else
-      {
-         key->SetValue("last_t", cur_time);
-         rvalue = true;
-      }
-   }
-   else
-   {
-      if (key->Create())
-      {
-         key->SetValue("first_t", cur_time);
-         key->SetValue("last_t", cur_time);
-      }
-      rvalue = true;
-   }
-   delete key;
-   return rvalue;
-#else
-   return true;
-#endif
-}
 
 bool VRenderApp::OnInit()
-{
-   int free_version = 1;// _FREE_VERSION_;
-   /*
-   if (!CheckAddress())
-   {
-      if (!CheckTime())
-      {
-         wxMessageBox("This is the version with limited functions.");
-         free_version = 1;
-      }
-   } */
-
-   //wxStandardPaths paths;
-   wxString path = wxStandardPaths::Get().GetExecutablePath();
-   int sep = path.Find('\\', true);
-   if (sep != wxNOT_FOUND)
-   {
-      sep++;
-      path = path.Left(sep);
-   }
-   ::wxSetWorkingDirectory(path);
-
+{/*
+#ifdef _WIN32
+#include <direct.h>
+#define GetCurrentDir _getcwd
+#else
+#include <unistd.h>
+#define GetCurrentDir getcwd
+#endif
+char cpath[FILENAME_MAX];
+GetCurrentDir(cpath, sizeof(cpath));
+std::cout << cpath << "\n\n\n" << std::endl;
+   //std::wcout << wxGetCwd().ToStdWstring() << "\n\n\n" << std::endl;
+   ::wxSetWorkingDirectory(wxString(s2ws(std::string(cpath))));
+   std::cout << "TEST!  " << std::endl;
+  */
    // call default behaviour (mandatory)
    if (!wxApp::OnInit())
       return false;
 
+   std::cout << "TEST2!  " << std::endl;
    //add png handler
    wxImage::AddHandler(new wxPNGHandler);
 
    //the frame
-   wxFrame* frame = new VRenderFrame(NULL,
-         wxID_ANY,
-         wxString(FLUORENDER_TITLE)+
-         wxString(" ")+
-         (free_version?wxString("Version"):
-          wxString(FLUORENDER_TITLE_EXTRA))+
-         wxString(" ")+
-         wxString(VERSION_MAJOR_TAG)+
-         wxString(".")+
-         wxString(VERSION_MINOR_TAG),
+   std::string title =  std::string(FLUORENDER_TITLE) + std::string(" ") +
+      std::string(VERSION_MAJOR_TAG) +  std::string(".") +
+      std::string(VERSION_MINOR_TAG);
+   std::cout << "TEST3!  " << title << std::endl;
+   wxString tmp = wxString(s2ws(title));
+   wxFrame* frame = new VRenderFrame(
+         NULL,
+         -1,
+         tmp,
          wxDefaultPosition,
-         wxSize(1024,768),
-         free_version);
-   ((VRenderFrame*)frame)->SetAddress(m_address);
+         wxSize(1024,768),1);
+   std::cout << "TEST4!  " << std::endl;
    SetTopWindow(frame);
+   std::cout << "TEST5!  " << std::endl;
    frame->Show();
+   std::cout << "TEST6!  " << std::endl;
    if (m_file_num>0)
       ((VRenderFrame*)frame)->StartupLoad(m_files);
+   std::cout << "TEST7!  " << std::endl;
 
    return true;
 }

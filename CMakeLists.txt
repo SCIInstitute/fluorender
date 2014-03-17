@@ -2,9 +2,31 @@
 
 cmake_minimum_required ( VERSION 2.6 )
 
+project ( FluoRender )
+
 set(ARCHITECTURE 64 CACHE PATH "The architecture to build -- 32 or 64")
 
-project ( FluoRender )
+set(CMAKE_BUILD_TYPE "Debug")
+
+if(${ARCHITECTURE} MATCHES "64")
+   if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+      add_definitions(-DFLUORENDER_TITLE="FluoRender 64bit Debug")
+   else()
+      add_definitions(-DFLUORENDER_TITLE="FluoRender 64bit")
+   endif()
+else()
+   if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+      add_definitions(-DFLUORENDER_TITLE="FluoRender 32bit Debug")
+   else()
+      add_definitions(-DFLUORENDER_TITLE="FluoRender 32bit")
+   endif()
+endif()
+
+add_definitions(-DVERSION_MAJOR=2)
+add_definitions(-DVERSION_MINOR=14)
+add_definitions(-DVERSION_MAJOR_TAG="2")
+add_definitions(-DVERSION_MINOR_TAG="14")
+add_definitions(-DVERSION_COPYRIGHT="January 2014")
 
 set(wxWidgets_CONFIGURATION mswu)
 find_package(wxWidgets COMPONENTS core base aui html xrc xml net adv gl REQUIRED)

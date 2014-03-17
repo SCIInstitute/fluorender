@@ -4,6 +4,18 @@
 #include "cross.xpm"
 #include "Formats/png_resource.h"
 
+//resources
+#include "img/listicon_addgroup.h"
+#include "img/listicon_addmgroup.h"
+#include "img/listicon_brushappend.h"
+#include "img/listicon_brushclear.h"
+#include "img/listicon_brushcreate.h"
+#include "img/listicon_brushdiffuse.h"
+#include "img/listicon_brushdesel.h"
+#include "img/listicon_brusherase.h"
+#include "img/listicon_delete.h"
+#include "img/listicon_toggle.h"
+
 BEGIN_EVENT_TABLE(DataTreeCtrl, wxTreeCtrl)
 EVT_CONTEXT_MENU(DataTreeCtrl::OnContextMenu)
 EVT_MENU(ID_ToggleDisp, DataTreeCtrl::OnToggleDisp)
@@ -1885,39 +1897,39 @@ TreePanel::TreePanel(wxWindow* frame,
    m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
          wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER);
    m_toolbar->AddTool(ID_ToggleView, "Toggle View",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_LISTICON_TOGGLE"),
+         wxGetBitmapFromMemory(listicon_toggle),
          "Toggle the visibility of current selection");
    m_toolbar->AddTool(ID_AddGroup, "Add Group",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_LISTICON_GROUP"),
+         wxGetBitmapFromMemory(listicon_addgroup),
          "Add a volume data group to the selected view");
    m_toolbar->AddTool(ID_AddMGroup, "Add Mesh Group",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_LISTICON_MGROUP"),
+         wxGetBitmapFromMemory(listicon_addmgroup),
          "Add a mesh data group to the selected view");
    m_toolbar->AddTool(ID_RemoveData, "Delete",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_LISTICON_DELETE"),
+         wxGetBitmapFromMemory(listicon_delete),
          "Delete current selection");
    m_toolbar->AddSeparator();
    m_toolbar->AddCheckTool(ID_BrushAppend, "Highlight",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_LISTICON_BRUSHAPPEND"),
+         wxGetBitmapFromMemory(listicon_brushappend),
          wxNullBitmap,
          "Highlight structures by painting on the render view (hold Shift)");
    m_toolbar->AddCheckTool(ID_BrushDiffuse, "Diffuse",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_LISTICON_BRUSHDIFFUSE"),
+         wxGetBitmapFromMemory(listicon_brushdiffuse),
          wxNullBitmap,
          "Diffuse highlighted structures by painting (hold Z)");
    m_toolbar->AddCheckTool(ID_BrushDesel, "Reset",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_LISTICON_BRUSHDESEL"),
+         wxGetBitmapFromMemory(listicon_brushdesel),
          wxNullBitmap,
          "Reset highlighted structures by painting (hold X)");
    m_toolbar->AddTool(ID_BrushClear, "Reset All",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_LISTICON_BRUSHCLEAR"),
+         wxGetBitmapFromMemory(listicon_brushclear),
          "Reset all highlighted structures");
    m_toolbar->AddSeparator();
    m_toolbar->AddTool(ID_BrushErase, "Erase",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_LISTICON_BRUSHERASE"),
+         wxGetBitmapFromMemory(listicon_brusherase),
          "Erase highlighted structures");
    m_toolbar->AddTool(ID_BrushCreate, "Extract",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_LISTICON_BRUSHCREATE"),
+         wxGetBitmapFromMemory(listicon_brushcreate),
          "Extract highlighted structures out and create a new volume");
    m_toolbar->Realize();
 

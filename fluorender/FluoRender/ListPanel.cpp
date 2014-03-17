@@ -3,6 +3,14 @@
 #include "VRenderFrame.h"
 #include "Formats/png_resource.h"
 
+//resources
+#include "img/listicon_bake.h"
+#include "img/listicon_delall.h"
+#include "img/listicon_delete.h"
+#include "img/listicon_save.h"
+#include "img/listicon_rename.h"
+#include "img/listicon_view.h"
+
 BEGIN_EVENT_TABLE(DataListCtrl, wxListCtrl)
 EVT_LIST_ITEM_ACTIVATED(wxID_ANY, DataListCtrl::OnAct)
 EVT_LIST_ITEM_SELECTED(wxID_ANY, DataListCtrl::OnSelect)
@@ -815,22 +823,22 @@ ListPanel::ListPanel(wxWindow *frame,
    m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
          wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER);
    m_toolbar->AddTool(ID_AddToView, "Add to View",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_LISTICON_VIEW"),
+         wxGetBitmapFromMemory(listicon_view),
          "Add: Add the selected dataset to render view");
    m_toolbar->AddTool(ID_Rename, "Rename",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_LISTICON_RENAME"),
+         wxGetBitmapFromMemory(listicon_rename),
          "Rename: Rename the selected dataset");
    m_toolbar->AddTool(ID_Save, "Save As",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_LISTICON_SAVE"),
+         wxGetBitmapFromMemory(listicon_save),
          "Save: Save the selected volume dataset");
    m_toolbar->AddTool(ID_Bake, "Bake",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_LISTICON_BAKE"),
+         wxGetBitmapFromMemory(listicon_bake),
          "Bake: Apply the volume properties and save");
    m_toolbar->AddTool(ID_Delete, "Delete",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_LISTICON_DELETE"),
+         wxGetBitmapFromMemory(listicon_delete),
          "Delete: Delete the selected dataset");
    m_toolbar->AddTool(ID_DeleteAll, "Delete All",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_LISTICON_DELALL"),
+         wxGetBitmapFromMemory(listicon_delall),
          "Delete All: Delete all datasets");
    m_toolbar->Realize();
 

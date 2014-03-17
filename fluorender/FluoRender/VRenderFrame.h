@@ -33,34 +33,12 @@
 
 using namespace std;
 
-#ifdef _WIN64
-#ifdef _DEBUG
-#define FLUORENDER_TITLE	"FluoRender 64bit Debug"
-#else
-#define FLUORENDER_TITLE	"FluoRender 64bit"
-#endif
-#else
-#ifdef _DEBUG
-#define FLUORENDER_TITLE	"FluoRender 32bit Debug"
-#else
-#define FLUORENDER_TITLE	"FluoRender 32bit"
-#endif
-#endif
-
-#define FLUORENDER_TITLE_EXTRA	"(Exp Edition)"
-
-#define VERSION_MAJOR	2
-#define VERSION_MINOR	14
-#define VERSION_MAJOR_TAG	"2"
-#define VERSION_MINOR_TAG	"14"
-#define VERSION_COPYRIGHT	"January 2014"
-#define VERSION_CONTACT		"http://www.sci.utah.edu/software/46-documentation/137-fluorender.html?start=8"
-#define VERSION_AUTHORS		"    Yong Wan, Hideo Otsuna,\nChuck Hansen, Chi-Bin Chien\n      @The University of Utah"
-#define VERSION_UPDATES		"http://www.sci.utah.edu/releases/fluorender_v2.14/"
-
-#define HELP_MOVIE	"http://www.sci.utah.edu/software/46-documentation/137-fluorender.html.html?start=1/#MovieExport"
-#define BATCH_INFO	"http://www.sci.utah.edu/software/46-documentation/137-fluorender.html?start=5/#3D_Macros"
-#define HELP_PAINT	"http://www.sci.utah.edu/software/46-documentation/137-fluorender.html.html?start=1/#volume_edit"
+#define VERSION_CONTACT "http://www.sci.utah.edu/software/46-documentation/137-fluorender.html?start=8"
+#define VERSION_AUTHORS "    Yong Wan, Hideo Otsuna,\nChuck Hansen, Chi-Bin Chien,\nBrig Bagley\n      @The University of Utah"
+#define VERSION_UPDATES "http://www.sci.utah.edu/releases/fluorender_v2.14/"
+#define HELP_MOVIE "http://www.sci.utah.edu/software/46-documentation/137-fluorender.html.html?start=1/#MovieExport"
+#define BATCH_INFO "http://www.sci.utah.edu/software/46-documentation/137-fluorender.html?start=5/#3D_Macros"
+#define HELP_PAINT "http://www.sci.utah.edu/software/46-documentation/137-fluorender.html.html?start=1/#volume_edit"
 
 #define UITEXT_DATAVIEW		"Datasets"
 #define UITEXT_TREEVIEW		"Workspace"

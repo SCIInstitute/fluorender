@@ -15,6 +15,7 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Animators)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/NV)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/FLIVR)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Converters)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/img)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
    # Windows
@@ -27,7 +28,9 @@ endif()
 
 file(GLOB src *.cpp)
 file(GLOB hdr *.h)
-file(GLOB rsc *.xpm)
+file(GLOB rsc img/*.xpm)
+
+file(GLOB pngs img/*.h)
 
 file(GLOB ani_src Animator/*.cpp)
 file(GLOB ani_hdr Animator/*.h)
@@ -51,7 +54,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    # Mac OS X
    include(BundleUtilities)
    add_executable(FluoRender MACOSX_BUNDLE 
-      ${src} ${hdr} ${rsc} 
+      ${src} ${hdr} ${rsc} ${pngs} 
       ${ani_src} ${ani_hdr} 
       ${cvt_src} ${cvt_hdr} 
       ${fli_src} ${fli_hdr} 
@@ -63,7 +66,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
    # Linux 
    add_executable(FluoRender 
-      ${src} ${hdr} ${rsc} 
+      ${src} ${hdr} ${rsc} ${pngs}
       ${ani_src} ${ani_hdr} 
       ${cvt_src} ${cvt_hdr} 
       ${fli_src} ${fli_hdr} 
@@ -73,7 +76,7 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
    # Windows
    add_executable(FluoRender 
-      ${src} ${hdr} ${rsc} 
+      ${src} ${hdr} ${rsc} ${pngs}
       ${ani_src} ${ani_hdr} 
       ${cvt_src} ${cvt_hdr} 
       ${fli_src} ${fli_hdr} 

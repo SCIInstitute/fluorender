@@ -9,8 +9,29 @@
 #include "Formats/msk_writer.h"
 #include "Formats/msk_reader.h"
 #include "Converters/VolumeMeshConv.h"
+#include "compatibility.h"
+#include <cstdio>
+#include <iostream>
 #include <sstream>
 #include <cctype>
+
+//resources
+#include "img/icon_32.h"
+#include "img/icon_open_volume.h"
+#include "img/icon_open_project.h"
+#include "img/icon_save_project.h"
+#include "img/icon_new_view.h"
+#include "img/icon_show_hide_ui.h"
+#include "img/icon_open_mesh.h"
+#include "img/icon_edit.h"
+#include "img/icon_recorder.h"
+#include "img/icon_settings.h"
+#include "img/icon_check_updates.h"
+#include "img/icon_facebook.h"
+#include "img/icon_twitter.h"
+#include "img/icon_about.h"
+#include "img/logo_snow.h"
+#include "img/logo.h"
 
 BEGIN_EVENT_TABLE(VRenderFrame, wxFrame)
 EVT_MENU(wxID_EXIT, VRenderFrame::OnExit)
@@ -81,12 +102,13 @@ VRenderFrame::VRenderFrame(wxWindow* parent,
    m_ui_state(true),
    m_free_version(free_version!=0)
 {
+   std::cout << "TEST RENDERFRAME" << std::endl;
    // tell wxAuiManager to manage this frame
    m_aui_mgr.SetManagedWindow(this);
 
    // set frame icon
    wxIcon icon;
-   icon.CopyFromBitmap(*PNG_RES::CreateBitmapFromPngResource("PNG_ICON_LOGO_32"));
+   icon.CopyFromBitmap(wxGetBitmapFromMemory(icon_32));
    SetIcon(icon);
 
    // create the main toolbar
@@ -132,34 +154,34 @@ VRenderFrame::VRenderFrame(wxWindow* parent,
    //build the main toolbar
    //add tools
    m_main_tb->AddTool(ID_OpenVolume, "Open Volume",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_ICON_OPEN_VOLUME"), wxNullBitmap, wxITEM_NORMAL,
+         wxGetBitmapFromMemory(icon_open_volume), wxNullBitmap, wxITEM_NORMAL,
          "Open Volume: Open single or multiple volume data file(s)",
          "Open Volume: Open single or multiple volume data file(s)");
    m_main_tb->AddTool(ID_OpenProject, "Open Project",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_ICON_OPEN_PROJECT"), wxNullBitmap, wxITEM_NORMAL,
+         wxGetBitmapFromMemory(icon_open_project), wxNullBitmap, wxITEM_NORMAL,
          "Open Project: Open a saved project",
          "Open Project: Open a saved project");
    m_main_tb->AddTool(ID_SaveProject, "Save Project",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_ICON_SAVE_PROJECT"), wxNullBitmap, wxITEM_NORMAL,
+         wxGetBitmapFromMemory(icon_save_project), wxNullBitmap, wxITEM_NORMAL,
          "Save Project: Save current work as a project",
          "Save Project: Save current work as a project");
    m_main_tb->AddSeparator();
    m_main_tb->AddTool(ID_ViewNew, "New View",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_ICON_NEW_VIEW"), wxNullBitmap, wxITEM_NORMAL,
+         wxGetBitmapFromMemory(icon_new_view), wxNullBitmap, wxITEM_NORMAL,
          "New View: Create a new render viewport",
          "New View: Create a new render viewport");
    m_main_tb->AddTool(ID_ShowHideUI, "Show/Hide UI",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_ICON_SHOW_HIDE_UI"), wxNullBitmap, wxITEM_DROPDOWN,
+         wxGetBitmapFromMemory(icon_show_hide_ui), wxNullBitmap, wxITEM_DROPDOWN,
          "Show/Hide UI: Show or hide all control panels",
          "Show/Hide UI: Show or hide all control panels");
    m_main_tb->SetDropdownMenu(ID_ShowHideUI, m_tb_menu_ui);
    m_main_tb->AddSeparator();
    m_main_tb->AddTool(ID_OpenMesh, "Open Mesh",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_ICON_OPEN_MESH"), wxNullBitmap, wxITEM_NORMAL,
+         wxGetBitmapFromMemory(icon_open_mesh), wxNullBitmap, wxITEM_NORMAL,
          "Open Mesh: Open single or multiple mesh file(s)",
          "Open Mesh: Open single or multiple mesh file(s)");
    m_main_tb->AddTool(ID_PaintTool, "Edit",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_ICON_EDIT"), wxNullBitmap,
+         wxGetBitmapFromMemory(icon_edit), wxNullBitmap,
          m_free_version?wxITEM_NORMAL:wxITEM_DROPDOWN,
          "Edit: Tools for editing volume data",
          "Edit: Tools for editing volume data");
@@ -167,30 +189,30 @@ VRenderFrame::VRenderFrame(wxWindow* parent,
    {
       m_main_tb->SetDropdownMenu(ID_PaintTool, m_tb_menu_edit);
       m_main_tb->AddTool(ID_Recorder, "Recorder",
-            *PNG_RES::CreateBitmapFromPngResource("PNG_ICON_RECORDER"), wxNullBitmap, wxITEM_NORMAL,
+            wxGetBitmapFromMemory(icon_recorder), wxNullBitmap, wxITEM_NORMAL,
             "Recorder: Record actions by key frames and play back",
             "Recorder: Record actions by key frames and play back");
    }
    m_main_tb->AddSeparator();
    m_main_tb->AddTool(ID_Settings, "Settings",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_ICON_SETTINGS"), wxNullBitmap, wxITEM_NORMAL,
+         wxGetBitmapFromMemory(icon_settings), wxNullBitmap, wxITEM_NORMAL,
          "Settings: Settings of FluoRender",
          "Settings: Settings of FluoRender");
    m_main_tb->AddStretchableSpace();
    m_main_tb->AddTool(ID_CheckUpdates, "Update",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_ICON_CHECK_UPDATES"), wxNullBitmap, wxITEM_NORMAL,
+         wxGetBitmapFromMemory(icon_check_updates), wxNullBitmap, wxITEM_NORMAL,
          "Update: Check if there is a new release",
          "Update: Check if there is a new release (requires Internet connection)");
    m_main_tb->AddTool(ID_Facebook, "Facebook",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_ICON_FACEBOOK"), wxNullBitmap, wxITEM_NORMAL,
+         wxGetBitmapFromMemory(icon_facebook), wxNullBitmap, wxITEM_NORMAL,
          "Facebook: FluoRender's facebook page",
          "Facebook:FluoRender's facebook page (requires Internet connection)");
    m_main_tb->AddTool(ID_Twitter, "Twitter",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_ICON_TWITTER"), wxNullBitmap, wxITEM_NORMAL,
+         wxGetBitmapFromMemory(icon_twitter), wxNullBitmap, wxITEM_NORMAL,
          "Twitter: Follow FluoRender on Twitter",
          "Twitter: Follow FluoRender on Twitter (requires Internet connection)");
    m_main_tb->AddTool(ID_Info, "About",
-         *PNG_RES::CreateBitmapFromPngResource("PNG_ICON_ABOUT"), wxNullBitmap, wxITEM_NORMAL,
+         wxGetBitmapFromMemory(icon_about), wxNullBitmap, wxITEM_NORMAL,
          "About: FluoRender information",
          "About: FluoRender information");
 
@@ -430,8 +452,8 @@ VRenderFrame::VRenderFrame(wxWindow* parent,
 
    CreateStatusBar();
    GetStatusBar()->SetStatusText(
-         wxString(FLUORENDER_TITLE)+
-         wxString(" started normally."));
+                                 wxString(s2ws(std::string(FLUORENDER_TITLE)))+
+         wxString(L" started normally."));
 }
 
 VRenderFrame::~VRenderFrame()
@@ -941,9 +963,9 @@ void VRenderFrame::OnInfo(wxCommandEvent& WXUNUSED(event))
    wxAboutDialogInfo info;
    wxIcon icon;
    if (psJan!=wxNOT_FOUND || psDec!=wxNOT_FOUND)
-      icon.CopyFromBitmap(*PNG_RES::CreateBitmapFromPngResource("PNG_ICON_LOGO_SNOW"));
+      icon.CopyFromBitmap(wxGetBitmapFromMemory(logo_snow));
    else
-      icon.CopyFromBitmap(*PNG_RES::CreateBitmapFromPngResource("PNG_ICON_LOGO"));
+      icon.CopyFromBitmap(wxGetBitmapFromMemory(logo));
    info.SetIcon(icon);
    info.SetName(FLUORENDER_TITLE);
    info.SetVersion(wxString::Format("%d.%d", VERSION_MAJOR, VERSION_MINOR));
