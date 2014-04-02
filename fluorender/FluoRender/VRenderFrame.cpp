@@ -84,23 +84,21 @@ bool VRenderFrame::m_save_compress = true;
 bool VRenderFrame::m_vrp_embed = false;
 bool VRenderFrame::m_save_project = false;
 
-VRenderFrame::VRenderFrame(wxWindow* parent,
-      wxWindowID id,
+VRenderFrame::VRenderFrame(
+      wxFrame* frame,
       const wxString& title,
-      const wxPoint& pos,
-      const wxSize& size,
-      int free_version,
-      long style)
-: wxFrame(parent, id, title, pos, size, style),
-   m_tree_panel(0),
-   m_list_panel(0),
-   m_movie_view(0),
-   m_prop_panel(0),
-   m_cur_sel_type(-1),
-   m_cur_sel_vol(-1),
-   m_cur_sel_mesh(-1),
-   m_ui_state(true),
-   m_free_version(free_version!=0)
+      int x, int y,
+      int w, int h)
+: wxFrame(frame, wxID_ANY, title, wxPoint(x, y), wxSize(w, h),wxDEFAULT_FRAME_STYLE),
+m_tree_panel(0),
+m_list_panel(0),
+m_movie_view(0),
+m_prop_panel(0),
+m_ui_state(true),
+m_cur_sel_type(-1),
+m_cur_sel_vol(-1),
+m_cur_sel_mesh(-1),
+m_free_version(true)
 {
    std::cout << "TEST RENDERFRAME" << std::endl;
    // tell wxAuiManager to manage this frame
@@ -449,11 +447,12 @@ VRenderFrame::VRenderFrame(wxWindow* parent,
 
    //drop target
    SetDropTarget(new DnDFile(this));
-
-   CreateStatusBar();
-   GetStatusBar()->SetStatusText(
-                                 wxString(s2ws(std::string(FLUORENDER_TITLE)))+
-         wxString(L" started normally."));
+    
+#if wxUSE_STATUSBAR
+   CreateStatusBar(2);
+   GetStatusBar()->SetStatusText(wxString(FLUORENDER_TITLE)+
+                                 wxString(" started normally."));
+#endif // wxUSE_STATUSBAR
 }
 
 VRenderFrame::~VRenderFrame()

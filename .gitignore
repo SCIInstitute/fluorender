@@ -43,6 +43,7 @@ fluorender/FluoRender/Release
 fluorender/FluoRender/FluoRender.rc
 fluorender/FluoRender/FluoRender.aps
 fluorender/FluoRender/*.build
+fluorender/FluoRender/Makefile
 fluorender/FluoRender/Converters/CMakeFiles
 fluorender/FluoRender/Converters/filters
 fluorender/FluoRender/Converters/vcxproj

@@ -94,13 +94,10 @@ class VRenderFrame: public wxFrame
 	};
 
 public:
-	VRenderFrame(wxWindow* parent,
-				wxWindowID id,
-				const wxString& title,
-				const wxPoint& pos = wxDefaultPosition,
-				const wxSize& size = wxDefaultSize,
-				int free_version=0,
-				long style = wxDEFAULT_FRAME_STYLE | wxSUNKEN_BORDER);
+	VRenderFrame(wxFrame* frame,
+                 const wxString& title,
+                 int x, int y,
+                 int w, int h);
 	~VRenderFrame();
 
 	TreePanel *GetTree();

@@ -59,14 +59,13 @@ std::cout << cpath << "\n\n\n" << std::endl;
    std::string title =  std::string(FLUORENDER_TITLE) + std::string(" ") +
       std::string(VERSION_MAJOR_TAG) +  std::string(".") +
       std::string(VERSION_MINOR_TAG);
-   std::cout << "TEST3!  " << title << std::endl;
-   wxString tmp = wxString(s2ws(title));
+    std::cout << "TEST3!  " << title << std::endl;
+    //MyFrame *frame0 = new MyFrame((wxFrame *) NULL,
+   //                              wxString("Text wxWidgets sample"), 50, 50, 700, 550);
    wxFrame* frame = new VRenderFrame(
-         NULL,
-         -1,
-         tmp,
-         wxDefaultPosition,
-         wxSize(1024,768),1);
+         (wxFrame*) NULL,
+         wxString(title),
+         50,50,1024,768);
    std::cout << "TEST4!  " << std::endl;
    SetTopWindow(frame);
    std::cout << "TEST5!  " << std::endl;

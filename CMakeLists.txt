@@ -56,7 +56,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    add_definitions(-D_DARWIN)
    set (CXX_11_FLAG "-std=c++0x")
    set(CFLAGS "-fPIC")
-   set(CXXFLAGS "-fPIC")
+   set(CXXFLAGS "-fPIC -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk -mmacosx-version-min=10.9")
 
 elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    # Linux or Windows
