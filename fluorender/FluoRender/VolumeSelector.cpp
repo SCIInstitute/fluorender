@@ -18,8 +18,8 @@ VolumeSelector::VolumeSelector() :
    m_use_brush_size2(false),
    m_edge_detect(false),
    m_hidden_removal(false),
-   m_ortho(true),
    m_use2d(true),
+   m_ortho(true),
    m_w2d(0.0),
    m_iter_label(1),
    m_label_thresh(0.0),
@@ -312,7 +312,6 @@ int VolumeSelector::CompIslandCount(double min_voxels, double max_voxels)
          {
             int index = nx*ny*k + nx*j + i;
             unsigned int label_value = label_data[index];
-            unsigned char mask_value = mask_data[index];
             if (label_value>0)
             {
                comp_iter = m_comps.find(label_value);
@@ -701,7 +700,6 @@ int VolumeSelector::ProcessSel(double thresh)
    //find center
    int res_x, res_y, res_z;
    double spc_x, spc_y, spc_z;
-   int bits = 8;
    m_vd->GetResolution(res_x, res_y, res_z);
    m_vd->GetSpacings(spc_x, spc_y, spc_z);
 
@@ -951,7 +949,6 @@ void VolumeSelector::NoiseRemoval(int iter, double thresh, int mode)
       //create new volume
       int res_x, res_y, res_z;
       double spc_x, spc_y, spc_z;
-      int bits = 8;
       m_vd->GetResolution(res_x, res_y, res_z);
       m_vd->GetSpacings(spc_x, spc_y, spc_z);
       VolumeData* vd_new = new VolumeData();

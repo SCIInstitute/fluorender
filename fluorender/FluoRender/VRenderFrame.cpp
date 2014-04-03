@@ -718,7 +718,6 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
             "Reading and processing selected volume data. Please wait.",
             100, 0, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
 
-      int cur_num = 0;
       m_data_mgr.SetSliceSequence(m_sliceSequence);
       m_data_mgr.SetCompression(m_compression);
       m_data_mgr.SetSkipBrick(m_skip_brick);
@@ -935,8 +934,8 @@ void VRenderFrame::OnOrganize(wxCommandEvent& WXUNUSED(event))
    int view_num = m_vrv_list.size();
    if (view_num>1)
    {
-      int col_num = ceil(sqrt(double(view_num)));
-      int row_num = ceil(double(view_num)/double(col_num));
+      //int col_num = ceil(sqrt(double(view_num)));
+      //int row_num = ceil(double(view_num)/double(col_num));
       for (int i=0 ; i<view_num ; i++)
       {
          m_aui_mgr.GetPane(m_vrv_list[i]->GetName()).Float();
@@ -2508,7 +2507,6 @@ void VRenderFrame::OpenProject(wxString& filename)
 {
    m_data_mgr.SetProjectPath(filename);
 
-   bool dec_sample = false;
    int i, j, k;
    //clear
    m_data_mgr.ClearAll();
@@ -2889,7 +2887,7 @@ void VRenderFrame::OpenProject(wxString& filename)
                   if (fconfig.Read("lighting", &lighting))
                      md->SetLighting(lighting);
                   double shine, alpha;
-                  float r, g, b;
+                  float r=0.0f, g=0.0f, b=0.0f;
                   if (fconfig.Read("ambient", &str))
                      SSCANF(str.c_str(), "%f%f%f", &r, &g, &b);
                   Color amb(r, g, b);

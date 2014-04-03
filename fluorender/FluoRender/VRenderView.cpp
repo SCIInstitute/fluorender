@@ -8486,7 +8486,6 @@ double VRenderGLView::GetPointVolume(Point& mp, int mx, int my,
    Point hit;
    double max_int = 0.0;
    double alpha = 0.0;
-   int index = 0;
    double value = 0.0;
    vector<Plane*> *planes = 0;
    double mspc = 1.0;

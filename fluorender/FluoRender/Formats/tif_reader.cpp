@@ -58,7 +58,7 @@ void TIFReader::SetFile(wstring &file)
 
 void TIFReader::Preprocess()
 {
-   int i, j;
+    int i;
 
    m_4d_seq.clear();
 
@@ -80,16 +80,16 @@ void TIFReader::Preprocess()
    if (begin != -1)
    {
       wstring t_num;
-      size_t j;
-      for (j=begin+id_len; j<name.size(); j++)
+      size_t k;
+      for (k=begin+id_len; k<name.size(); k++)
       {
-         wchar_t c = name[j];
+         wchar_t c = name[k];
          if (iswdigit(c))
             t_num.push_back(c);
          else break;
       }
       if (t_num.size() > 0)
-         end = j;
+         end = k;
       else
          begin = -1;
    }

@@ -5,15 +5,13 @@ To build FluoRender:
 OSX/Linux Installation
 --------------------------------------------------------------------------------------------------
 
-1) Download the latest wxWidgets (currently 3.0.0).
+1) Download and install "Homebrew", found at "http://brew.sh"
 
-2) Install the headers and libraries to your system.
+2) Install WxWidgets using Homebrew.
+  
+   * Type "brew install wxwidgets"
 
-   * Build from the source as recommended from the docs/*/install.txt files, "*" based on your environment.
-
-   * A Known working "configure" command for OS X 10.9 is :
-     
-     ../configure --enable-unicode --enable-debug --with-opengl --with-macosx-sdk=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk --with-macosx-version-min=10.8 --with-osx_cocoa  -with-libjpeg=builtin -with-libpng=builtin -with-zlib=builtin -with-expat=builtin  -with-regex=builtin -with-libtiff=builtin
+   * You may need root pivileges to link the libraries if brew asks you to.
 
 3) In the main FluoRender directory, (containing "CMakeLists.txt" & "fluorender" folder):
 
@@ -24,6 +22,10 @@ OSX/Linux Installation
 5) If cmake generated Makefiles successfully, type "make" .
 
 Using cmake, you can generate XCode (MacOS X). Simply type "cmake" to find the proper options.
+
+   * Type "cmake -G Xcode"
+
+   * You may need to clear old cmake files. Type "./clear.sh" to remove unneccessary files. 
 
 --------------------------------------------------------------------------------------------------
 Windows Installation
@@ -37,7 +39,7 @@ Windows Installation
 
     - Compile using Visual Studio (C:/wxWidgets-3.0.0/build/msw/wx_vc7.sln)
 
-2) You will need to add lines to C:/Program Files (x86)/CMake X.X/chare/cmake-x.x/Modules (x's are your version) 
+2) You will need to add lines to C:/Program Files (x86)/CMake X.X/share/cmake-x.x/Modules (x's are your version) 
     for wxWidgets 3.0.
 
    - Starting about line 277, you will have listed a few sets of library versions to 

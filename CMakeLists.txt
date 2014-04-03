@@ -40,11 +40,71 @@ add_definitions(-D_WCHAR_H_CPLUSPLUS_98_CONFORMANCE_)
 #static compile
 add_definitions(-DSTATIC_COMPILE)
 
+#teem required definitions
+add_definitions(-DTEEM_DIO=0)
+add_definitions(-DTEEM_ENDIAN=1234)
+add_definitions(-DTEEM_QNANHIBIT=1)
+
 #output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+#includes
+include_directories(${FluoRender_SOURCE_DIR}/fluorender)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/teem)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/teem/Biff)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/teem/Air)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/teem/Hest)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/teem/Nrrd)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/glew)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/glew/GL)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/LibTiff)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Formats)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Animators)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/NV)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/FLIVR)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Converters)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/img)
+
+#sources
+file(GLOB src fluorender/FluoRender/*.cpp)
+file(GLOB hdr fluorender/FluoRender/*.h)
+file(GLOB rsc fluorender/FluoRender/img/*.xpm)
+
+file(GLOB pngs fluorender/FluoRender/img/*.h)
+
+file(GLOB ani_src fluorender/FluoRender/Animator/*.cpp)
+file(GLOB ani_hdr fluorender/FluoRender/Animator/*.h)
+
+file(GLOB cvt_src fluorender/FluoRender/Converters/*.cpp)
+file(GLOB cvt_hdr fluorender/FluoRender/Converters/*.h)
+
+file(GLOB fli_src fluorender/FluoRender/FLIVR/*.cpp)
+file(GLOB fli_hdr fluorender/FluoRender/FLIVR/*.h)
+
+file(GLOB fmt_src fluorender/FluoRender/Formats/*.cpp)
+file(GLOB fmt_hdr fluorender/FluoRender/Formats/*.h)
+
+file(GLOB nv_src fluorender/FluoRender/NV/*.cpp)
+file(GLOB nv_hdr fluorender/FluoRender/NV/*.h)
+
+file(GLOB gl_srcs fluorender/glew/*.c)
+file(GLOB gl_hdrs1 fluorender/glew/*.h)
+file(GLOB gl_hdrs2 fluorender/glew/GL/*.h)
+
+file(GLOB airsrc fluorender/teem/Air/*.c)
+file(GLOB airhdr fluorender/teem/Air/*.h)
+file(GLOB hestsrc fluorender/teem/Hest/*.c)
+file(GLOB hesthdr fluorender/teem/Hest/*.h)
+file(GLOB biffsrc fluorender/teem/Biff/*.c)
+file(GLOB biffhdr fluorender/teem/Biff/*.h)
+file(GLOB nrrdsrc fluorender/teem/Nrrd/*.c)
+file(GLOB nrrdhdr fluorender/teem/Nrrd/*.h)
+
+
+#platform specific rules
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    # Mac OS X
    if(NOT OPEN_GL_HEADER_LOC)
@@ -56,7 +116,19 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    add_definitions(-D_DARWIN)
    set (CXX_11_FLAG "-std=c++0x")
    set(CFLAGS "-fPIC")
-   set(CXXFLAGS "-fPIC -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk -mmacosx-version-min=10.9")
+   set(CXXFLAGS "-fPIC")
+   include(BundleUtilities)
+   add_executable(FluoRender MACOSX_BUNDLE
+      ${src} ${hdr} ${rsc} ${pngs}
+      ${ani_src} ${ani_hdr}
+      ${cvt_src} ${cvt_hdr}
+      ${fli_src} ${fli_hdr}
+      ${fmt_src} ${fmt_hdr}
+      ${nv_src} ${nv_hdr}
+      ${gl_srcs} ${gl_hdrs1} ${gl_hdrs2}
+      ${airsrc} ${hestsrc} ${nrrdsrc} ${biffsrc}
+      ${airhdr} ${hesthdr} ${nrrdhdr} ${biffhdr}
+      ${wac_src} ${wac_hdr})
 
 elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    # Linux or Windows
@@ -72,6 +144,17 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       set (CXX_11_FLAG "-std=c++0x")
       set(CFLAGS "-fPIC")
       set(CXXFLAGS "-fPIC")
+      add_executable(FluoRender
+         ${src} ${hdr} ${rsc} ${pngs}
+         ${ani_src} ${ani_hdr}
+         ${cvt_src} ${cvt_hdr}
+         ${fli_src} ${fli_hdr}
+         ${fmt_src} ${fmt_hdr}
+         ${nv_src} ${nv_hdr}
+         ${gl_srcs} ${gl_hdrs1} ${gl_hdrs2}
+         ${airsrc} ${hestsrc} ${nrrdsrc} ${biffsrc}
+         ${airhdr} ${hesthdr} ${nrrdhdr} ${biffhdr}
+         ${wac_src} ${wac_hdr})
    endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
    # windows
    if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
@@ -80,10 +163,25 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       add_definitions(-DSEQAN_C++11_STANDARD=ON)
       set(CFLAGS "")
       set(CXXFLAGS "")
+      include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/WacUtils)
+      include_directories(${FluoRender_SOURCE_DIR}/fluorender/Wacom/Include)
+      file(GLOB wac_src WacUtils/*.cpp)
+      file(GLOB wac_hdr WacUtils/*.h)
+      add_executable(FluoRender WIN32
+         ${src} ${hdr} ${rsc} ${pngs}
+         ${ani_src} ${ani_hdr}
+         ${cvt_src} ${cvt_hdr}
+         ${fli_src} ${fli_hdr}
+         ${fmt_src} ${fmt_hdr}
+         ${nv_src} ${nv_hdr}
+         ${gl_srcs} ${gl_hdrs1} ${gl_hdrs2}
+         ${airsrc} ${hestsrc} ${nrrdsrc} ${biffsrc}
+         ${airhdr} ${hesthdr} ${nrrdhdr} ${biffhdr}
+         ${wac_src} ${wac_hdr})
    endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif()
 
-
+#architecture specific rules
 if(${ARCHITECTURE} MATCHES 64)
    if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
       set(ARCH_FLAGS "-m64 -arch x86_64")
@@ -102,5 +200,7 @@ else()
    set(LDFLAGS "${ARCH_FLAGS} ${CXX_11_FLAG}")
 endif()
 
-subdirs ( fluorender )
-
+#link the libraries
+target_link_libraries(FluoRender
+   ${wxWidgets_LIBRARIES}
+   ${OPENGL_LIBRARIES})

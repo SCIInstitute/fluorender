@@ -57,7 +57,7 @@ DataListCtrl::~DataListCtrl()
 
 void DataListCtrl::Append(int type, wxString name, wxString path)
 {
-   long tmp;
+   long tmp = 0;
    if (type == DATA_VOLUME)
       tmp = InsertItem(GetItemCount(), "Volume");
    else if (type == DATA_MESH)
@@ -317,8 +317,8 @@ void DataListCtrl::OnAddToView(wxCommandEvent& event)
 {
    int menu_index = event.GetId() - Menu_View_start;
    int num = GetSelectedItemCount();
-   VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-   bool view_empty = true;
+   //VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+   //bool view_empty = true;
 
    if (num > 0)
    {

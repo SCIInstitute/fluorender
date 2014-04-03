@@ -270,7 +270,7 @@ void LSMReader::Preprocess()
             }
             m_lsm_info.push_back(dinfo);
          }
-         int slice = (cnt_image-1) % m_slice_num;
+         //int slice = (cnt_image-1) % m_slice_num;
          for (i=0; i<m_chan_num; i++)
          {
             SliceInfo sinfo;

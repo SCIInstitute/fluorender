@@ -31,13 +31,6 @@
 
 using namespace nv;
 
-
-//
-// Global consts
-//
-
-const LARGE_INTEGER gcLargeIntZero = {0, 0};
-
 // ----------------------------------------------------------------------------
 // Timer class
 //

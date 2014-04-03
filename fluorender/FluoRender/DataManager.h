@@ -129,7 +129,7 @@ class VolumeData : public TreeLayer
 public:
 	VolumeData();
 	VolumeData(VolumeData &copy);
-	~VolumeData();
+	virtual ~VolumeData();
 
 	//duplication
 	bool GetDup();
@@ -451,7 +451,7 @@ class MeshData : public TreeLayer
 {
 public:
 	MeshData();
-	~MeshData();
+	virtual ~MeshData();
 
 	wxString GetPath();
 	BBox GetBounds();
@@ -571,7 +571,7 @@ class Annotations : public TreeLayer
 {
 public:
 	Annotations();
-	~Annotations();
+	virtual ~Annotations();
 
 	//reset counter
 	static void ResetID()
@@ -656,7 +656,7 @@ class Ruler : public TreeLayer
 {
 public:
 	Ruler();
-	~Ruler();
+	virtual ~Ruler();
 
 	//reset counter
 	static void ResetID()
@@ -806,7 +806,7 @@ class TraceGroup : public TreeLayer
 {
 public:
 	TraceGroup();
-	~TraceGroup();
+	virtual ~TraceGroup();
 
 	//reset counter
 	static void ResetID()
@@ -850,7 +850,7 @@ class DataGroup : public TreeLayer
 {
 public:
 	DataGroup();
-	~DataGroup();
+	virtual ~DataGroup();
 
 	//reset counter
 	static void ResetID()
@@ -979,7 +979,7 @@ class MeshGroup : public TreeLayer
 {
 public:
 	MeshGroup();
-	~MeshGroup();
+	virtual ~MeshGroup();
 
 	//counter
 	static void ResetID()

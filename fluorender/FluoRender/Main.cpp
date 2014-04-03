@@ -40,9 +40,8 @@ bool VRenderApp::OnInit()
 #include <unistd.h>
 #define GetCurrentDir getcwd
 #endif
-    char cpath[FILENAME_MAX];
-    GetCurrentDir(cpath, sizeof(cpath));
-    std::cout << cpath << "\n\n\n" << std::endl;
+   char cpath[FILENAME_MAX];
+   GetCurrentDir(cpath, sizeof(cpath));
    ::wxSetWorkingDirectory(wxString(s2ws(std::string(cpath))));
    // call default behaviour (mandatory)
    if (!wxApp::OnInit())

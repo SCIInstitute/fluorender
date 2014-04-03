@@ -115,7 +115,7 @@ namespace FLIVR
             unsigned int i) :
           nx(x), ny(y),
          nz(z), nb(b), id(i),
-         brick(0), textype(f), comp(c),
+         brick(0), comp(c), textype(f),
          delayed_del(false)
       {}
    };

@@ -451,7 +451,6 @@ void OIFReader::ReadOif()
 void OIFReader::ReadOifLine(wstring oneline)
 {
    //process
-   size_t line_size = oneline.size();
    if (oneline.substr(0, 6) == L"[Axis ")
    {
       axis_num++;

@@ -944,7 +944,7 @@ void BrushToolDlg::OnNRAnalyzeBtn(wxCommandEvent &event)
       wxString str = m_nr_size_text->GetValue();
       str.ToDouble(&max_voxels);
 
-      int comps = m_cur_view->NoiseAnalysis(0.0, max_voxels, m_dft_ca_thresh);
+      //int comps = m_cur_view->NoiseAnalysis(0.0, max_voxels, m_dft_ca_thresh);
       m_cur_view->RefreshGL();
       //m_ca_comps_text->SetValue(wxString::Format("%d", comps));
    }
