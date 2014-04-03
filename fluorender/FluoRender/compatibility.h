@@ -30,6 +30,7 @@
 #define SSCANF		sscanf
 
 inline std::wstring ws2s(std::wstring s) { return s; }
+inline std::string s2ws(std::string s) { return s; }
 
 inline TIFF* TIFFOpenW(std::wstring fname, const char* opt) {
    return TIFFOpenW(fname.c_str(),opt);
