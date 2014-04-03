@@ -89,9 +89,9 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
    m_dft_gm_falloff(0.0),
    m_dft_scl_falloff(0.0),
    m_dft_scl_translate(0.0),
-   m_dft_ca_thresh(0.0),
    m_dft_ca_min(0.0),
    m_dft_ca_max(0.0),
+   m_dft_ca_thresh(0.0),
    m_dft_nr_thresh(0.0),
    m_dft_nr_size(0.0)
 {

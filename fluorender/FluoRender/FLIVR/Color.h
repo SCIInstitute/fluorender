@@ -137,7 +137,6 @@ namespace FLIVR
 
 		inline void rand()
 		{
-			double g = 0.618033988749895;
 			double hue = (double)::rand()/(RAND_MAX) * 360.0;
 			Color color(HSVColor(hue, 1.0, 1.0));
 			r_ = color.r();

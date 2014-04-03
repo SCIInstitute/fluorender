@@ -113,9 +113,9 @@ namespace FLIVR
             int y, int z,
             int b, GLenum f,
             unsigned int i) :
-         comp(c), nx(x), ny(y),
+          nx(x), ny(y),
          nz(z), nb(b), id(i),
-         brick(0), textype(f),
+         brick(0), textype(f), comp(c),
          delayed_del(false)
       {}
    };

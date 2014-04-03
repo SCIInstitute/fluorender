@@ -100,7 +100,6 @@ m_cur_sel_vol(-1),
 m_cur_sel_mesh(-1),
 m_free_version(true)
 {
-   std::cout << "TEST RENDERFRAME" << std::endl;
    // tell wxAuiManager to manage this frame
    m_aui_mgr.SetManagedWindow(this);
 

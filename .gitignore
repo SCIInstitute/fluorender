@@ -1,3 +1,5 @@
+*.set
+*.dft
 *.a
 .DS_Store
 *.cmake
