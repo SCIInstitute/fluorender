@@ -352,7 +352,7 @@ void OIBReader::ReadStream(IStorage *pStg, wstring &stream_name)
       delete []pbyData;
 }
 
-void OIBReader::ReadOibInfo(BYTE* pbyData, ULONG size)
+void OIBReader::ReadOibInfo(uint8_t* pbyData, size_t size)
 {
    if (!pbyData || !size)
       return;
@@ -521,7 +521,7 @@ void OIBReader::ReadOibInfo(BYTE* pbyData, ULONG size)
    }
 }
 
-void OIBReader::ReadOif(BYTE *pbyData, ULONG size)
+void OIBReader::ReadOif(uint8_t *pbyData, size_t size)
 {
    if (!pbyData || !size)
       return;
