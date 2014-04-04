@@ -9,6 +9,7 @@
 
 inline wxBitmap _wxGetBitmapFromMemory(const unsigned char *data, int length)
 {
+	  wxLogNull logNo;
       wxMemoryInputStream is(data, length);
          return wxBitmap(wxImage(is, wxBITMAP_TYPE_ANY, -1), -1);
 }

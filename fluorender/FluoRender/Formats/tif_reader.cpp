@@ -98,7 +98,7 @@ void TIFReader::Preprocess()
    {
       TimeDataInfo info;
       SliceInfo sliceinfo;
-      sliceinfo.slice = name;  //temporary name
+      sliceinfo.slice = path + name;  //temporary name
       sliceinfo.slicenumber = 0;
       info.slices.push_back(sliceinfo);
       info.filenumber = 0;
@@ -109,10 +109,11 @@ void TIFReader::Preprocess()
    {
       //search time sequence files
       std::vector< std::wstring> list;
-      FIND_FILES(path,L".tif",list, m_cur_time,name.substr(0,begin + id_len + 1 ));
+      FIND_FILES(path,L".tif",list, m_cur_time,path + name.substr(0,begin + id_len ));
+	  begin += path.length();
       for(size_t f = 0; f < list.size(); f++) {
          TimeDataInfo inf;
-         std::wstring str = list.at(0);
+         std::wstring str = list.at(f);
          std::wstring t_num;
          size_t j;
          for(j = begin+id_len;j<str.size();j++)
@@ -132,60 +133,60 @@ void TIFReader::Preprocess()
          inf.slices.push_back(sliceinfo);
          m_4d_seq.push_back(inf);
       }
-      if (m_4d_seq.size() > 0)
-         std::sort(m_4d_seq.begin(), m_4d_seq.end(), TIFReader::tif_sort);
+   }
+	if (m_4d_seq.size() > 0)
+		std::sort(m_4d_seq.begin(), m_4d_seq.end(), TIFReader::tif_sort);
 
-      //build 3d slice sequence
-      for (int t=0; t<(int)m_4d_seq.size(); t++)
-      {
-         wstring slice_str = m_4d_seq[t].slices[0].slice;
+	//build 3d slice sequence
+	for (int t=0; t<(int)m_4d_seq.size(); t++)
+	{
+		wstring slice_str = m_4d_seq[t].slices[0].slice;
 
-         if (m_slice_seq)
-         {
-            //extract common string in name
-            size_t pos2 = slice_str.find_last_of(L'.');
-            size_t begin2 = 0;
-            size_t end2 = -1;
-            for (i=int(pos2)-1; i>=0; i--)
-            {
-               if (iswdigit(slice_str[i]) && end2==-1)
-                  end2 = i;
-               if (!iswdigit(slice_str[i]) && end2!=-1)
-               {
-                  begin2 = i;
-                  break;
-               }
-            }
-            if (end2!=-1)
-            {
-               //search slice sequence
-               std::vector<std::wstring> list;
-               FIND_FILES(path,L".tif",list,m_cur_time,slice_str.substr(0, begin2+1));
-               m_4d_seq[t].type = 1;
-               for(size_t f = 0; f < list.size(); f++) {
-                  size_t start_idx = begin2+1;
-                  size_t end_idx   = list.at(i).find(L".tif");
-                  size_t size = end_idx - start_idx;
-                  std::wstring fileno = list.at(i).substr(start_idx, size);
-                  SliceInfo slice;
-                  slice.slice = list.at(f);
-                  slice.slicenumber = WSTOI(fileno);
-                  m_4d_seq[t].slices.push_back(slice);
-               }
-               if (m_4d_seq[t].slices.size() > 0)
-                  std::sort(m_4d_seq[t].slices.begin(),
-                        m_4d_seq[t].slices.end(),
-                        TIFReader::tif_slice_sort);
-            }
-         }
-         else
-         {
-            m_4d_seq[t].type = 0;
-            m_4d_seq[t].slices[0].slice = path + slice_str;
-            if (m_4d_seq[t].slices[0].slice == m_path_name)
-               m_cur_time = t;
-         }
-      }
+		if (m_slice_seq)
+		{
+		//extract common string in name
+		size_t pos2 = slice_str.find_last_of(L'.');
+		size_t begin2 = 0;
+		size_t end2 = -1;
+		for (i=int(pos2)-1; i>=0; i--)
+		{
+			if (iswdigit(slice_str[i]) && end2==-1)
+				end2 = i;
+			if (!iswdigit(slice_str[i]) && end2!=-1)
+			{
+				begin2 = i;
+				break;
+			}
+		}
+		if (end2!=-1)
+		{
+			//search slice sequence
+			std::vector<std::wstring> list;
+			FIND_FILES(path,L".tif",list,m_cur_time,slice_str.substr(0, begin2+1));
+			m_4d_seq[t].type = 1;
+			for(size_t f = 0; f < list.size(); f++) {
+				size_t start_idx = begin2+1;
+				size_t end_idx   = list.at(f).find(L".tif");
+				size_t size = end_idx - start_idx;
+				std::wstring fileno = list.at(f).substr(start_idx, size);
+				SliceInfo slice;
+				slice.slice = list.at(f);
+				slice.slicenumber = WSTOI(fileno);
+				m_4d_seq[t].slices.push_back(slice);
+			}
+			if (m_4d_seq[t].slices.size() > 0)
+				std::sort(m_4d_seq[t].slices.begin(),
+					m_4d_seq[t].slices.end(),
+					TIFReader::tif_slice_sort);
+		}
+		}
+		else
+		{
+		m_4d_seq[t].type = 0;
+		m_4d_seq[t].slices[0].slice = slice_str;
+		if (m_4d_seq[t].slices[0].slice == m_path_name)
+			m_cur_time = t;
+		}
    }
 
    //get time number and channel number
