@@ -165,8 +165,8 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       set(CXXFLAGS "")
       include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/WacUtils)
       include_directories(${FluoRender_SOURCE_DIR}/fluorender/Wacom/Include)
-      file(GLOB wac_src WacUtils/*.cpp)
-      file(GLOB wac_hdr WacUtils/*.h)
+      file(GLOB wac_src fluorender/FluoRender/WacUtils/*.cpp)
+      file(GLOB wac_hdr fluorender/FluoRender/WacUtils/*.h)
       add_executable(FluoRender WIN32
          ${src} ${hdr} ${rsc} ${pngs}
          ${ani_src} ${ani_hdr}
