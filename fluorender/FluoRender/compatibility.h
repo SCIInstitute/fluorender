@@ -27,7 +27,7 @@
 #include "WacUtils/WacUtils.h"
 
 #define FSEEK64     _fseeki64
-#define SSCANF		sscanf
+#define SSCANF    sscanf
 
 inline std::wstring ws2s(std::wstring s) { return s; }
 inline std::string s2ws(std::string s) { return s; }
@@ -46,11 +46,11 @@ inline errno_t WFOPEN(FILE** fp, const wchar_t* fname, const wchar_t* mode) {
 
 inline errno_t STRCPY(char* d, size_t n, const char* s) { return strcpy_s(d,n,s); }
 
-inline errno_t STRNCPY(char* d, size_t n, const char* s, size_t x) { 
-   return strncpy_s(d,n,s,x); 
+inline errno_t STRNCPY(char* d, size_t n, const char* s, size_t x) {
+   return strncpy_s(d,n,s,x);
 }
 
-inline errno_t STRCAT(char * d, size_t n, const char* s) { 
+inline errno_t STRCAT(char * d, size_t n, const char* s) {
    return strcat_s(d,n,s);
 }
 
@@ -88,7 +88,7 @@ inline void FIND_FILES(std::wstring m_path_name,
       int &m_cur_batch, std::wstring regex = L"") {
    std::wstring search_path = m_path_name.substr(0,
          m_path_name.find_last_of(L'\\')) + L'\\';
-   std::wstring search_str = regex + L"*" + search_ext;
+   std::wstring search_str = search_path + regex + L"*" + search_ext;
    WIN32_FIND_DATAW FindFileData;
    HANDLE hFind;
    hFind = FindFirstFileW(search_str.c_str(), &FindFileData);
@@ -159,11 +159,11 @@ inline void SetDoubleBuffered(bool) {};
 
 inline char* STRCPY(char* d, size_t n, const char* s) { return strncpy(d,s,n-1); }
 
-inline char* STRNCPY(char* d, size_t n, const char* s, size_t x) { 
-   return strncpy(d,s,n-1); 
+inline char* STRNCPY(char* d, size_t n, const char* s, size_t x) {
+   return strncpy(d,s,n-1);
 }
 
-inline char* STRCAT(char * d, size_t n, const char* s) { 
+inline char* STRCAT(char * d, size_t n, const char* s) {
    return strncat(d,s,n-strlen(d)-1);
 }
 
@@ -210,19 +210,29 @@ inline void FIND_FILES(std::wstring m_path_name,
       std::vector<std::wstring> &m_batch_list,
       int &m_cur_batch, std::wstring regex = L"") {
    std::wstring search_path = m_path_name.substr(0,m_path_name.find_last_of(L'/')) + L'/';
-   std::wstring search_str(L".txt");
+   std::wstring regex_min;
+   if(regex.find(search_path) != std::string::npos)
+      regex_min = regex.substr(search_path.length(),regex.length() - search_path.length());
+   else
+      regex_min = regex;
    DIR* dir;
    struct dirent *ent;
    if ((dir = opendir(ws2s(search_path).c_str())) != NULL) {
       int cnt = 0;
       m_batch_list.clear();
       while((ent = readdir(dir)) != NULL) {
+         std::string file(ent->d_name);
+         std::wstring wfile = s2ws(file);
          //check if it contains the string.
-         if (strstr(ent->d_name,ws2s(search_str).c_str()) &&
-               strstr(ent->d_name,ws2s(regex).c_str())) {
+         if (wfile.find(search_ext) != std::string::npos &&
+               wfile.find(regex_min) != std::string::npos) {
             std::string ss = ent->d_name;
             std::wstring f = s2ws(ss);
-            std::wstring name = search_path + f;
+            std::wstring name;
+            if(f.find(search_path) == std::string::npos)
+               name = search_path + f;
+            else
+               name = f;
             m_batch_list.push_back(name);
             if (name == m_path_name)
                m_cur_batch = cnt;

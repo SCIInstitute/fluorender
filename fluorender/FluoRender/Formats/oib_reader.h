@@ -101,10 +101,12 @@ class OIBReader : public BaseReader
       static bool oib_sort(const TimeDataInfo& info1, const TimeDataInfo& info2);
       void ReadSingleOib();
       void ReadSequenceOib();
+#ifdef WIN32
       void ReadStream(IStorage *pStg, wstring &stream_name);
-      void ReadOibInfo(BYTE* pbyData, ULONG size);
-      void ReadOif(BYTE* pbyData, ULONG size);
-      void ReadTiff(BYTE* pbyData, unsigned short *val, int z);
+      void ReadOibInfo(uint8_t* pbyData, size_t size);
+      void ReadOif(uint8_t* pbyData, size_t size);
+      void ReadTiff(uint8_t* pbyData, unsigned short *val, int z);
+#endif
 };
 
 #endif//_OIB_READER_H_
