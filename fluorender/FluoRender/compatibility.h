@@ -89,6 +89,8 @@ inline void FIND_FILES(std::wstring m_path_name,
    std::wstring search_path = m_path_name.substr(0,
          m_path_name.find_last_of(L'\\')) + L'\\';
    std::wstring search_str = regex + L"*" + search_ext;
+   if (std::string::npos == search_str.find(m_path_name))
+	   search_str = m_path_name + search_str;
    WIN32_FIND_DATAW FindFileData;
    HANDLE hFind;
    hFind = FindFirstFileW(search_str.c_str(), &FindFileData);
