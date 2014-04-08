@@ -32,6 +32,7 @@
 #include "img/icon_about.h"
 #include "img/logo_snow.h"
 #include "img/logo.h"
+#include "img/icon_measure.h"
 
 BEGIN_EVENT_TABLE(VRenderFrame, wxFrame)
 EVT_MENU(wxID_EXIT, VRenderFrame::OnExit)
@@ -186,7 +187,7 @@ m_free_version(true)
     //   {
     m_main_tb->AddTool(ID_Measure, "Measurement...",
                        //TODO make a new icon for this.
-                       wxGetBitmapFromMemory(icon_recorder), wxNullBitmap, wxITEM_NORMAL,
+                       wxGetBitmapFromMemory(icon_measure), wxNullBitmap, wxITEM_NORMAL,
                            "Show rulers dialog", "Show rulers dialog");
       m_main_tb->SetDropdownMenu(ID_PaintTool, m_tb_menu_edit);
       m_main_tb->AddTool(ID_Recorder, "Recorder",
