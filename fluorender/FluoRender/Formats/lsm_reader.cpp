@@ -730,7 +730,7 @@ Nrrd* LSMReader::Convert(int t, int c, bool get_max)
                      fread(tif, sizeof(unsigned char), (*cinfo)[i].size, pfile);
                      LZWDecode(tif, val+val_pos, (*cinfo)[i].size);
                      for (j=0; j<m_y_size; j++)
-                        DecodeAcc8(val+val_pos+j*m_x_size, m_x_size);
+                        DecodeAcc8(val+val_pos+j*m_x_size, m_x_size,1);
                      delete []tif;
                   }
                }
@@ -764,7 +764,7 @@ Nrrd* LSMReader::Convert(int t, int c, bool get_max)
                      fread(tif, sizeof(unsigned char), (*cinfo)[i].size, pfile);
                      LZWDecode(tif, (tidata_t)(val+val_pos), (*cinfo)[i].size);
                      for (j=0; j<m_y_size; j++)
-                        DecodeAcc16((tidata_t)(val+val_pos+j*m_x_size), m_x_size);
+                        DecodeAcc16((tidata_t)(val+val_pos+j*m_x_size), m_x_size,1);
                      delete []tif;
                   }
                }

@@ -565,9 +565,22 @@ void TIFReader::GetTiffStrip(uint32_t page, uint32_t strip,
    tiff_stream.read((char*)temp,byte_count);
    //get compression tag, decompress if necessary
    uint32_t tmp = GetTiffField(kCompressionTag,nullptr,0);
+   uint16_t prediction = GetTiffField(kPredictionTag,nullptr,0);
+   bool eight_bits = 8 == GetTiffField(kBitsPerSampleTag,nullptr,0);
+    uint32_t bits = GetTiffField(kSamplesPerPixelTag,nullptr,0);
+   tsize_t stride = (GetTiffField(kPlanarConfigurationTag,nullptr,0) == 2)?1:bits;
+   uint32_t rows_per_strip = GetTiffField(kRowsPerStripTag,nullptr,0);
    bool isCompressed = tmp == 5;
-   if (isCompressed)
-      LZWDecode((tidata_t)temp, (tidata_t)data, strip_size);
+    if (isCompressed) {
+        LZWDecode((tidata_t)temp, (tidata_t)data, strip_size);
+        if (prediction == 2) {
+        for (size_t j=0; j < rows_per_strip; j++)
+            if (eight_bits)
+                DecodeAcc8((tidata_t)data+j*m_x_size*bits, m_x_size*bits,stride);
+            else
+                DecodeAcc16((tidata_t)data+j*m_x_size*bits*2, m_x_size*bits*2,stride);
+        }
+    }
    else
       memcpy(data,temp,byte_count);
    delete[] temp;

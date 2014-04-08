@@ -523,7 +523,7 @@ class VRenderGLView: public wxGLCanvas
          //multivolume
          MultiVolumeRenderer* m_mvr;
          //fisrt volume data in the depth groups
-         VolumeData* m_first_depth_vd;
+         //VolumeData* m_first_depth_vd;
          //initializaion
          bool m_initialized;
          bool m_init_view;

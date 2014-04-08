@@ -31,6 +31,7 @@
 #include "Utils.h"
 #include "../compatibility.h"
 #include <time.h>
+#include <cstdio>
 #include <iostream>
 #include <cfloat>
 
@@ -81,14 +82,17 @@ namespace FLIVR
 			GLint texSize;
 			glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &texSize);
 			max_texture_size_ = texSize;
-
+#ifdef _WIN32
 			const GLubyte* strRenderer=0;
 			if ((strRenderer=glGetString(GL_RENDERER)))
 			{
 				string str = (char*)strRenderer;
 				if (str.find("FirePro") != string::npos)
+#endif
 					glPixelTransferf(GL_RED_BIAS, FLT_MIN);//for AMD FirePro cards
+#ifdef _WIN32
 			}
+#endif
 
 			// Check for non-power-of-two texture support.
 			non_2_textures_ = GLEW_ARB_texture_non_power_of_two!=0;

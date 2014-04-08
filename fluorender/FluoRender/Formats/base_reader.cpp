@@ -1,3 +1,27 @@
+/*
+ * Copyright (c) 1988-1997 Sam Leffler
+ * Copyright (c) 1991-1997 Silicon Graphics, Inc.
+ *
+ * Permission to use, copy, modify, distribute, and sell this software and
+ * its documentation for any purpose is hereby granted without fee, provided
+ * that (i) the above copyright notices and this permission notice appear in
+ * all copies of the software and related documentation, and (ii) the names of
+ * Sam Leffler and Silicon Graphics may not be used in any advertising or
+ * publicity relating to the software without the specific, prior written
+ * permission of Sam Leffler and Silicon Graphics.
+ *
+ * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
+ * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * IN NO EVENT SHALL SAM LEFFLER OR SILICON GRAPHICS BE LIABLE FOR
+ * ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND,
+ * OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+ * WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF
+ * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+ * OF THIS SOFTWARE.
+ */
+
 #include "base_reader.h"
 
 int BaseReader::LZWDecode(tidata_t tif, tidata_t op0, tsize_t occ0)
@@ -149,39 +173,67 @@ int BaseReader::LZWDecode(tidata_t tif, tidata_t op0, tsize_t occ0)
 	return (1);
 }
 
-void BaseReader::DecodeAcc8(tidata_t cp0, tsize_t cc)
+void BaseReader::DecodeAcc8(tidata_t cp0, tsize_t cc, tsize_t stride)
 {
-	tsize_t stride = 1;
-
-	char* cp = (char*) cp0;
-	if (cc > stride)
-	{
-		cc -= stride;
-
-		do
-		{
-			REPEAT4(stride, cp[stride] =
-				(char) (cp[stride] + *cp); cp++)
-			cc -= stride;
-		} while ((int32) cc > 0);
-	}
+    char* cp = (char*) cp0;
+    if((cc%stride)!=0) return;
+    if (cc > stride) {
+        /*
+         * Pipeline the most common cases.
+         */
+        if (stride == 3)  {
+            unsigned int cr = cp[0];
+            unsigned int cg = cp[1];
+            unsigned int cb = cp[2];
+            cc -= 3;
+            cp += 3;
+            while (cc>0) {
+                cp[0] = (char) (cr += cp[0]);
+                cp[1] = (char) (cg += cp[1]);
+                cp[2] = (char) (cb += cp[2]);
+                cc -= 3;
+                cp += 3;
+            }
+        } else if (stride == 4)  {
+            unsigned int cr = cp[0];
+            unsigned int cg = cp[1];
+            unsigned int cb = cp[2];
+            unsigned int ca = cp[3];
+            cc -= 4;
+            cp += 4;
+            while (cc>0) {
+                cp[0] = (char) (cr += cp[0]);
+                cp[1] = (char) (cg += cp[1]);
+                cp[2] = (char) (cb += cp[2]);
+                cp[3] = (char) (ca += cp[3]);
+                cc -= 4;
+                cp += 4;
+            }
+        } else  {
+            cc -= stride;
+            do {
+                REPEAT4(stride, cp[stride] =
+                        (char) (cp[stride] + *cp); cp++)
+                cc -= stride;
+            } while (cc>0);
+        }
+    }
 }
 
-void BaseReader::DecodeAcc16(tidata_t cp0, tsize_t cc)
+void BaseReader::DecodeAcc16(tidata_t cp0, tsize_t cc, tsize_t stride)
 {
-	tsize_t stride = 1;
-	uint16* wp = (uint16*) cp0;
-	tsize_t wc = cc / 2;
-
-	if (wc > stride)
-	{
-		wc -= stride;
-		do
-		{
-			REPEAT4(stride, wp[stride] += wp[0]; wp++)
-			wc -= stride;
-		} while ((int32) wc > 0);
-	}
+    uint16* wp = (uint16*) cp0;
+    tsize_t wc = cc / 2;
+    
+    if((cc%(2*stride))!=0) return;
+    
+    if (wc > stride) {
+        wc -= stride;
+        do {
+            REPEAT4(stride, wp[stride] += wp[0]; wp++)
+            wc -= stride;
+        } while (wc > 0);
+    }
 }
 
 Nrrd* BaseReader::Convert(bool get_max) { return Convert(0,get_max); }

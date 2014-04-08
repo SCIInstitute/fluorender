@@ -58,6 +58,7 @@ namespace FLIVR
 
 #define IMG_SHADER_CODE_BRIGHTNESS_CONTRAST_HDR \
 	"// IMG_SHADER_CODE_BRIGHTNESS_CONTRAST_HDR\n" \
+    "#version 120\n"\
 	"uniform vec4 loc0; //(r_gamma, g_gamma, b_gamma, 1.0)\n" \
 	"uniform vec4 loc1; //(r_brightness, g_brightness, b_brightness, 1.0)\n" \
 	"uniform vec4 loc2; //(r_hdr, g_hdr, b_hdr, 0.0)\n" \

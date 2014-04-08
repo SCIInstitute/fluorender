@@ -77,6 +77,8 @@ Windows Installation
          - You may need to right-click FluoRender project on the left to "Set as StarUp Project" for it to run.
 
          - You may also need to add additional dependencies in the FluoRender properties.
+    
+    * NOTE: There are known issues with rendering XML stitched TIFF files when in "Debug" Configuration.
 
 
 --------------------------------------------------------------------------------------------------

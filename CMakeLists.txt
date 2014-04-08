@@ -67,6 +67,11 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/NV)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/FLIVR)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Converters)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/img)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/glm)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/glm/detail)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/glm/gtc)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/glm/gtx)
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/glm/virtrev)
 
 #sources
 file(GLOB src fluorender/FluoRender/*.cpp)
@@ -103,6 +108,9 @@ file(GLOB biffhdr fluorender/teem/Biff/*.h)
 file(GLOB nrrdsrc fluorender/teem/Nrrd/*.c)
 file(GLOB nrrdhdr fluorender/teem/Nrrd/*.h)
 
+file(GLOB glm1 fluorender/glm/*.hpp)
+file(GLOB glm2 fluorender/glm/*/*.hpp)
+
 
 #platform specific rules
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -128,6 +136,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       ${gl_srcs} ${gl_hdrs1} ${gl_hdrs2}
       ${airsrc} ${hestsrc} ${nrrdsrc} ${biffsrc}
       ${airhdr} ${hesthdr} ${nrrdhdr} ${biffhdr}
+      ${glm1} ${glm2}
       ${wac_src} ${wac_hdr})
 
 elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -154,6 +163,7 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
          ${gl_srcs} ${gl_hdrs1} ${gl_hdrs2}
          ${airsrc} ${hestsrc} ${nrrdsrc} ${biffsrc}
          ${airhdr} ${hesthdr} ${nrrdhdr} ${biffhdr}
+         ${glm1} ${glm2}
          ${wac_src} ${wac_hdr})
    endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
    # windows
@@ -180,6 +190,7 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
          ${gl_srcs} ${gl_hdrs1} ${gl_hdrs2}
          ${airsrc} ${hestsrc} ${nrrdsrc} ${biffsrc}
          ${airhdr} ${hesthdr} ${nrrdhdr} ${biffhdr}
+         ${glm1} ${glm2}
          ${wac_src} ${wac_hdr})
    endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif()
