@@ -95,6 +95,11 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
    //populated lists of data
    m_vd_pop_dirty(true),
    m_md_pop_dirty(true),
+   //ruler type
+   m_ruler_type(0),
+   m_editing_ruler_point(0),
+   //traces
+   m_trace_group(0),
    //multivolume
    m_mvr(0),
    //initializaion
@@ -137,8 +142,8 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
    m_tex_temp(0),
    //shading (shadow) overlay
    m_fbo_ol1(0),
-   m_tex_ol1(0),
    m_fbo_ol2(0),
+   m_tex_ol1(0),
    m_tex_ol2(0),
    //paint buffer
    m_fbo_paint(0),
@@ -228,20 +233,20 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
    //paint brush presssure
    m_use_pres(false),
    m_on_press(false),
-   m_pressure(0.0),
 #ifdef _WIN32
    m_hTab(0),
 #endif
-   //selection
-   m_pick(false),
    //paint stroke radius
-   m_use_brush_radius2(true),
    m_brush_radius1(10),
    m_brush_radius2(30),
+   m_use_brush_radius2(true),
    //paint stroke spacing
    m_brush_spacing(0.1),
    //clipping plane rotations
    m_rotx_cl(0), m_roty_cl(0), m_rotz_cl(0),
+   m_pressure(0.0),
+   //selection
+   m_pick(false),
    m_draw_mask(true),
    //move view
    m_move_left(false),
@@ -253,12 +258,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
    m_tseq_backward(false),
    //move clip
    m_clip_up(false),
-   m_clip_down(false),
-   //ruler type
-   m_ruler_type(0),
-   m_editing_ruler_point(0),
-   //traces
-   m_trace_group(0)
+   m_clip_down(false)
 {
    //create context
    if (sharedContext)
@@ -9753,8 +9753,8 @@ VRenderView::VRenderView(wxWindow* frame,
       const wxPoint& pos,
       const wxSize& size,
       long style) :
-   m_frame(frame),
    wxPanel(parent, id, pos, size, style),
+   m_frame(frame),
    m_draw_clip(false),
    m_use_dft_settings(false)
 {

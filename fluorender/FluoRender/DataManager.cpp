@@ -657,30 +657,31 @@ Nrrd* VolumeData::GetMask()
 double VolumeData::GetOriginalValue(int i, int j, int k)
 {
 	Nrrd* data = m_tex->get_nrrd(0);
-	if (!data) return 0.0;
-
-	int bits = data->type;
-	int nx = int(data->axis[0].size);
-	int ny = int(data->axis[1].size);
-	int nz = int(data->axis[2].size);
-
-	if (i<0 || i>=nx || j<0 || j>=ny || k<0 || k>=nz)
-		return 0.0;
-
-	if (bits == nrrdTypeUChar)
-	{
-		long long index = long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j) + long long(i);
-		uint8 old_value = ((uint8*)(data->data))[index];
-		return double(old_value)/255.0;
-	}
-	else if (bits == nrrdTypeUShort)
-	{
-		long long index = long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j) + long long(i);
-		uint16 old_value = ((uint16*)(data->data))[index];
-		return double(old_value)*m_scalar_scale/65535.0;
-	}
-
-	return 0.0;
+    if (!data) return 0.0;
+    
+    int bits = data->type;
+    uint64_t nx = (uint64_t)(data->axis[0].size);
+    uint64_t ny = (uint64_t)(data->axis[1].size);
+    uint64_t nz = (uint64_t)(data->axis[2].size);
+    
+    if (i<0 || i>=nx || j<0 || j>=ny || k<0 || k>=nz)
+        return 0.0;
+    uint64_t ii = i, jj = j, kk = k;
+    
+    if (bits == nrrdTypeUChar)
+    {
+        uint64_t index = (nx)*(ny)*(kk) + (nx)*(jj) + (ii);
+        uint8 old_value = ((uint8*)(data->data))[index];
+        return double(old_value)/255.0;
+    }
+    else if (bits == nrrdTypeUShort)
+    {
+        uint64_t index = (nx)*(ny)*(kk) + (nx)*(jj) + (ii);
+        uint16 old_value = ((uint16*)(data->data))[index];
+        return double(old_value)*m_scalar_scale/65535.0;
+    }
+    
+    return 0.0;
 }
 
 double VolumeData::GetTransferedValue(int i, int j, int k)
@@ -688,17 +689,17 @@ double VolumeData::GetTransferedValue(int i, int j, int k)
 	Nrrd* data = m_tex->get_nrrd(0);
 	if (!data) return 0.0;
 
-	int bits = data->type;
-	int nx = int(data->axis[0].size);
-	int ny = int(data->axis[1].size);
-	int nz = int(data->axis[2].size);
-
+    int bits = data->type;
+    uint64_t nx = (uint64_t)(data->axis[0].size);
+    uint64_t ny = (uint64_t)(data->axis[1].size);
+    uint64_t nz = (uint64_t)(data->axis[2].size);
 	if (i<0 || i>=nx || j<0 || j>=ny || k<0 || k>=nz)
 		return 0.0;
+    uint64_t ii = i, jj = j, kk = k;
 
 	if (bits == nrrdTypeUChar)
 	{
-		long long index = long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j) + long long(i);
+		uint64_t index = nx*ny*kk + nx*jj + ii;
 		uint8 old_value = ((uint8*)(data->data))[index];
 		double gm = 0.0;
 		double new_value = double(old_value)/255.0;
@@ -708,17 +709,17 @@ double VolumeData::GetTransferedValue(int i, int j, int k)
 			j>0 && j<ny-1 &&
 			k>0 && k<nz-1)
 		{
-			double v1 = ((uint8*)(data->data))[long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j) + long long(i-1)];
-			double v2 = ((uint8*)(data->data))[long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j) + long long(i+1)];
-			double v3 = ((uint8*)(data->data))[long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j-1) + long long(i)];
-			double v4 = ((uint8*)(data->data))[long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j+1) + long long(i)];
-			double v5 = ((uint8*)(data->data))[long long(nx)*long long(ny)*long long(k-1) + long long(nx)*long long(j) + long long(i)];
-			double v6 = ((uint8*)(data->data))[long long(nx)*long long(ny)*long long(k+1) + long long(nx)*long long(j) + long long(i)];
-			double normal_x, normal_y, normal_z;
-			normal_x = (v2 - v1) / 255.0;
-			normal_y = (v4 - v3) / 255.0;
-			normal_z = (v6 - v5) / 255.0;
-			gm = sqrt(normal_x*normal_x + normal_y*normal_y + normal_z*normal_z)*0.53;
+			double v1 = ((uint8*)(data->data))[nx*ny*kk + nx*jj + ii-1];
+            double v2 = ((uint8*)(data->data))[nx*ny*kk + nx*jj + ii+1];
+            double v3 = ((uint8*)(data->data))[nx*ny*kk + nx*(jj-1) + ii];
+            double v4 = ((uint8*)(data->data))[nx*ny*kk + nx*(jj+1) + ii];
+            double v5 = ((uint8*)(data->data))[nx*ny*(kk-1) + nx*jj + ii];
+            double v6 = ((uint8*)(data->data))[nx*ny*(kk+1) + nx*jj + ii];
+            double normal_x, normal_y, normal_z;
+            normal_x = (v2 - v1) / 255.0;
+            normal_y = (v4 - v3) / 255.0;
+            normal_z = (v6 - v5) / 255.0;
+            gm = sqrt(normal_x*normal_x + normal_y*normal_y + normal_z*normal_z)*0.53;
 		}
 		if (new_value<m_lo_thresh-m_sw ||
 			new_value>m_hi_thresh+m_sw ||
@@ -741,28 +742,28 @@ double VolumeData::GetTransferedValue(int i, int j, int k)
 	}
 	else if (bits == nrrdTypeUShort)
 	{
-		long long index = long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j) + long long(i);
-		uint16 old_value = ((uint16*)(data->data))[index];
-		double gm = 0.0;
-		double new_value = double(old_value)*m_scalar_scale/65535.0;
-		if (m_vr->get_inversion())
-			new_value = 1.0-new_value;
-		if (i>0 && i<nx-1 &&
-			j>0 && j<ny-1 &&
-			k>0 && k<nz-1)
-		{
-			double v1 = ((uint16*)(data->data))[long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j) + long long(i-1)];
-			double v2 = ((uint16*)(data->data))[long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j) + long long(i+1)];
-			double v3 = ((uint16*)(data->data))[long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j-1) + long long(i)];
-			double v4 = ((uint16*)(data->data))[long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j+1) + long long(i)];
-			double v5 = ((uint16*)(data->data))[long long(nx)*long long(ny)*long long(k-1) + long long(nx)*long long(j) + long long(i)];
-			double v6 = ((uint16*)(data->data))[long long(nx)*long long(ny)*long long(k+1) + long long(nx)*long long(j) + long long(i)];
-			double normal_x, normal_y, normal_z;
-			normal_x = (v2 - v1)*m_scalar_scale/65535.0;
-			normal_y = (v4 - v3)*m_scalar_scale/65535.0;
-			normal_z = (v6 - v5)*m_scalar_scale/65535.0;
-			gm = sqrt(normal_x*normal_x + normal_y*normal_y + normal_z*normal_z)*0.53;
-		}
+		uint64_t index = nx*ny*kk + nx*jj + ii;
+        uint16 old_value = ((uint16*)(data->data))[index];
+        double gm = 0.0;
+        double new_value = double(old_value)*m_scalar_scale/65535.0;
+        if (m_vr->get_inversion())
+            new_value = 1.0-new_value;
+        if (ii>0 && ii<nx-1 &&
+            jj>0 && jj<ny-1 &&
+            kk>0 && kk<nz-1)
+        {
+            double v1 = ((uint8*)(data->data))[nx*ny*kk + nx*jj + ii-1];
+            double v2 = ((uint8*)(data->data))[nx*ny*kk + nx*jj + ii+1];
+            double v3 = ((uint8*)(data->data))[nx*ny*kk + nx*(jj-1) + ii];
+            double v4 = ((uint8*)(data->data))[nx*ny*kk + nx*(jj+1) + ii];
+            double v5 = ((uint8*)(data->data))[nx*ny*(kk-1) + nx*jj + ii];
+            double v6 = ((uint8*)(data->data))[nx*ny*(kk+1) + nx*jj + ii];
+            double normal_x, normal_y, normal_z;
+            normal_x = (v2 - v1)*m_scalar_scale/65535.0;
+            normal_y = (v4 - v3)*m_scalar_scale/65535.0;
+            normal_z = (v6 - v5)*m_scalar_scale/65535.0;
+            gm = sqrt(normal_x*normal_x + normal_y*normal_y + normal_z*normal_z)*0.53;
+        }
 		if (new_value<m_lo_thresh-m_sw ||
 			new_value>m_hi_thresh+m_sw ||
 			gm<m_gm_thresh)
@@ -883,7 +884,6 @@ void VolumeData::Save(wxString &filename, int mode, bool bake, bool compress)
 				writer->Save(filename.ToStdWstring(), mode);
 
 				//free memory
-				delete [](baked_data->data);
 				nrrdNix(baked_data);
 
 				prg_diag->Update(100);
@@ -1594,7 +1594,7 @@ void VolumeData::GetClipDistance(int &distx, int &disty, int &distz)
 //randomize color
 void VolumeData::RandomizeColor()
 {
-	double hue = (double)rand()/(RAND_MAX+1) * 360.0;
+	double hue = (double)rand()/(RAND_MAX) * 360.0;
 	Color color(HSVColor(hue, 1.0, 1.0));
 	SetColor(color);
 }
@@ -1612,17 +1612,17 @@ bool VolumeData::GetLegend()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 MeshData::MeshData() :
-m_mr(0),
 m_data(0),
+m_mr(0),
+m_center(0.0, 0.0, 0.0),
+m_disp(true),
+m_draw_bounds(false),
 m_light(true),
 m_mat_amb(0.5, 0.5, 0.5),
 m_mat_diff(1.0, 0.0, 0.0),
 m_mat_spec(0.2, 0.2, 0.2),
 m_mat_shine(30.0),
 m_mat_alpha(1.0),
-m_disp(true),
-m_draw_bounds(false),
-m_center(0.0, 0.0, 0.0),
 m_shadow(true),
 m_shadow_darkness(0.6),
 m_enable_limit(false),
@@ -2154,7 +2154,7 @@ void MeshData::GetScaling(double &x, double &y, double &z)
 //randomize color
 void MeshData::RandomizeColor()
 {
-	double hue = (double)rand()/(RAND_MAX+1) * 360.0;
+	double hue = (double)rand()/(RAND_MAX) * 360.0;
 	Color color(HSVColor(hue, 1.0, 1.0));
 	SetColor(color, MESH_COLOR_DIFF);
 }
@@ -2206,7 +2206,7 @@ AText::AText()
 {
 }
 
-AText::AText(string &str, Point &pos)
+AText::AText(const string &str, const Point &pos)
 {
 	m_txt = str;
 	m_pos = pos;
@@ -2226,17 +2226,17 @@ Point AText::GetPos()
 	return m_pos;
 }
 
-void AText::SetText(string &str)
+void AText::SetText(string str)
 {
 	m_txt = str;
 }
 
-void AText::SetPos(Point &pos)
+void AText::SetPos(Point pos)
 {
 	m_pos = pos;
 }
 
-void AText::SetInfo(string &str)
+void AText::SetInfo(string str)
 {
 	m_info = str;
 }
@@ -3037,7 +3037,8 @@ int TraceGroup::Load(wxString &filename)
 	int result = 1;
 	m_data_path = filename;
 
-	ifstream ifs(m_data_path.ToStdWstring(), ios::in|ios::binary);
+	std::string str = m_data_path.ToStdString();
+    ifstream ifs(str,ios::in|ios::binary);
 	if (ifs.bad())
 		return 0;
 
@@ -3569,7 +3570,7 @@ void DataGroup::RandomizeColor()
 		VolumeData* vd = GetVolumeData(i);
 		if (vd)
 		{
-			double hue = (double)rand()/(RAND_MAX+1) * 360.0;
+			double hue = (double)rand()/(RAND_MAX) * 360.0;
 			Color color(HSVColor(hue, 1.0, 1.0));
 			vd->SetColor(color);
 		}
@@ -3599,7 +3600,7 @@ void MeshGroup::RandomizeColor()
 		MeshData* md = GetMeshData(i);
 		if (md)
 		{
-			double hue = (double)rand()/(RAND_MAX+1) * 360.0;
+			double hue = (double)rand()/(RAND_MAX) * 360.0;
 			Color color(HSVColor(hue, 1.0, 1.0));
 			md->SetColor(color, MESH_COLOR_DIFF);
 		}
@@ -3608,7 +3609,6 @@ void MeshGroup::RandomizeColor()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 DataManager::DataManager() :
-m_use_defaults(true),
 m_vol_exb(0.0),
 m_vol_gam(1.0),
 m_vol_of1(1.0),
@@ -3630,9 +3630,10 @@ m_vol_esh(true),
 m_vol_inv(false),
 m_vol_mip(false),
 m_vol_nrd(false),
-m_vol_test_wiref(false),
 m_vol_shw(false),
 m_vol_swi(0.0),
+m_vol_test_wiref(false),
+m_use_defaults(true),
 m_override_vox(true)
 {
 	wxFileInputStream is(DEFAULT_SETTINGS_FILE);
@@ -3908,13 +3909,16 @@ int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_
 			{
 				//mask
 				MSKReader msk_reader;
-				msk_reader.SetFile(reader->GetPathName());
-				Nrrd* mask = msk_reader.Convert(t_num>=0?t_num:reader->GetCurTime(), i, true);
+				std::wstring str = reader->GetPathName();
+                msk_reader.SetFile(str);
+                Nrrd* mask = msk_reader.Convert(t_num>=0?t_num:reader->GetCurTime(), i, true);
 				if (mask)
 					vd->LoadMask(mask);
 				//label mask
 				LBLReader lbl_reader;
-				lbl_reader.SetFile(reader->GetPathName());
+                str = reader->GetPathName();
+                lbl_reader.SetFile(str);
+
 				Nrrd* label = lbl_reader.Convert(t_num>=0?t_num:reader->GetCurTime(), i, true);
 				if (label)
 					vd->LoadLabel(label);
@@ -3943,23 +3947,30 @@ int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_
 
 		//get excitation wavelength
 		double wavelength = reader->GetExcitationWavelength(i);
-		if (wavelength > 0.0)
-			vd->SetColor(GetWavelengthColor(wavelength));
+        if (wavelength > 0.0) {
+            FLIVR::Color col = GetWavelengthColor(wavelength);
+            vd->SetColor(col);
+        }
 		else
 		{
-			if (chan == 1)
-				vd->SetColor(Color(1.0, 1.0, 1.0));
-			else
-			{
-				if (i == 0)
-					vd->SetColor(Color(1.0, 0.0, 0.0));
-				else if (i == 1)
-					vd->SetColor(Color(0.0, 1.0, 0.0));
-				else if (i == 2)
-					vd->SetColor(Color(0.0, 0.0, 1.0));
-				else
-					vd->SetColor(Color(1.0, 1.0, 1.0));
-			}
+            FLIVR::Color white = Color(1.0, 1.0, 1.0);
+            FLIVR::Color red   = Color(1.0, 0.0, 0.0);
+            FLIVR::Color green = Color(0.0, 1.0, 0.0);
+            FLIVR::Color blue  = Color(0.0, 0.0, 1.0);
+            if (chan == 1) {
+                vd->SetColor(white);
+            }
+            else
+            {
+                if (i == 0)
+                    vd->SetColor(red);
+                else if (i == 1)
+                    vd->SetColor(green);
+                else if (i == 2)
+                    vd->SetColor(blue);
+                else
+                    vd->SetColor(white);
+            }
 		}
 
 	}

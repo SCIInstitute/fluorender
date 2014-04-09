@@ -13,8 +13,8 @@ MManipulator::MManipulator(wxWindow* frame, wxWindow* parent,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-m_frame(frame),
 wxPanel(parent, id, pos, size, style, name),
+m_frame(frame),
 m_md(0)
 {
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);

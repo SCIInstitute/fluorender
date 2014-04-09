@@ -69,7 +69,7 @@ namespace FLIVR
 		double get_lo_thresh();
 		void set_hi_thresh(double thresh);
 		double get_hi_thresh();
-		void set_color(Color &color);
+		void set_color(Color color);
 		Color get_color();
 		Color get_mask_color();
 		void set_mask_thresh(double thresh);

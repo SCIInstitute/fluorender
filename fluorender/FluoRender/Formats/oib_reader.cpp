@@ -740,8 +740,6 @@ double OIBReader::GetExcitationWavelength(int chan)
 Nrrd *OIBReader::Convert(int t, int c, bool get_max)
 {
    Nrrd *data = 0;
-   int sl_num = 0;
-   //TODO
 #ifdef _WIN32
    if (t>=0 && t<m_time_num &&
          c>=0 && c<m_chan_num &&

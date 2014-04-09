@@ -298,13 +298,13 @@ class VRenderGLView: public wxGLCanvas
 
          //gamma settings
          Color GetGamma() {return m_gamma;}
-         void SetGamma(Color &gamma) {m_gamma = gamma;}
+         void SetGamma(Color gamma) {m_gamma = gamma;}
          //brightness adjustment
          Color GetBrightness() {return m_brightness;}
-         void SetBrightness(Color &brightness) {m_brightness = brightness;}
+         void SetBrightness(Color brightness) {m_brightness = brightness;}
          //hdr settings
          Color GetHdr() {return m_hdr;}
-         void SetHdr(Color &hdr) {m_hdr = hdr;}
+         void SetHdr(Color hdr) {m_hdr = hdr;}
          //sync values
          bool GetSyncR() {return m_sync_r;}
          void SetSyncR(bool sync_r) {m_sync_r = sync_r;}

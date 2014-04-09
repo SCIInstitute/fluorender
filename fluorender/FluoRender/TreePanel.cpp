@@ -1887,8 +1887,8 @@ TreePanel::TreePanel(wxWindow* frame,
       const wxSize& size,
       long style,
       const wxString& name) :
-   m_frame(frame),
-   wxPanel(parent, id, pos, size, style, name)
+wxPanel(parent, id, pos, size, style, name),
+m_frame(frame)
 {
    //create data tree
    m_datatree = new DataTreeCtrl(frame, this, wxID_ANY);

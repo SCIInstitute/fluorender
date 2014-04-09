@@ -246,7 +246,7 @@ namespace FLIVR
 		return hi_thresh_;
 	}
 
-	void VolumeRenderer::set_color(Color &color)
+	void VolumeRenderer::set_color(Color color)
 	{
 		color_ = color;
 

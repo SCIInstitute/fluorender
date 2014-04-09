@@ -53,9 +53,9 @@ VMovieView::VMovieView(wxWindow* frame,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-m_frame(frame),
 wxPanel(parent, id, pos, size, style, name),
 m_init(false),
+m_frame(frame),
 m_rewind(false),
 m_reset_time_frame(1),
 m_prev_frame(0)

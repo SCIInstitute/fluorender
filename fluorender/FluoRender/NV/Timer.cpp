@@ -36,8 +36,9 @@ using namespace nv;
 // Global consts
 //
 
-const LARGE_INTEGER gcLargeIntZero = {0, 0};
-
+#ifdef _WIN32
+const LARGE_INTEGER gcLargeIntZero = {{0, 0}};
+#endif
 // ----------------------------------------------------------------------------
 // Timer class
 //

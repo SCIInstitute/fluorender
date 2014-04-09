@@ -37,17 +37,18 @@ using namespace std;
 namespace FLIVR
 {
 	Texture::Texture()
-		: nx_(0),
+    :
+        sort_bricks_(true),
+        nx_(0),
 		ny_(0),
 		nz_(0),
-		nc_(0),
+        nc_(0),
+        nmask_(-1),
+        nlabel_(-1),
 		vmin_(0.0),
 		vmax_(0.0),
 		gmin_(0.0),
 		gmax_(0.0),
-		nmask_(-1),
-		nlabel_(-1),
-		sort_bricks_(true),
 		use_priority_(false),
 		n_p0_(0)
 	{

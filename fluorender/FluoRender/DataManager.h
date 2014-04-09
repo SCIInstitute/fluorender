@@ -8,7 +8,7 @@
 #include "FLIVR/Color.h"
 #include "FLIVR/Point.h"
 #include "FLIVR/MeshRenderer.h"
-#include "FLIVR\VolumeRenderer.h"
+#include "FLIVR/VolumeRenderer.h"
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
 #include "Formats/base_reader.h"
@@ -64,19 +64,19 @@ public:
 
 	//layer adjustment
 	//gamma
-	Color GetGamma()
+	const Color GetGamma()
 	{return m_gamma;}
-	void SetGamma(Color &gamma)
+	void SetGamma(Color gamma)
 	{m_gamma = gamma;}
 	//brightness
-	Color GetBrightness()
+	const Color GetBrightness()
 	{return m_brightness;}
-	void SetBrightness(Color &brightness)
+	void SetBrightness(Color brightness)
 	{m_brightness = brightness;}
 	//hdr settings
-	Color GetHdr()
+	const Color GetHdr()
 	{return m_hdr;}
-	void SetHdr(Color &hdr)
+	void SetHdr(Color hdr)
 	{m_hdr = hdr;}
 	//sync values
 	bool GetSyncR()
@@ -549,14 +549,14 @@ class AText
 {
 public:
 	AText();
-	AText(string &str, Point &pos);
+	AText(const string &str, const Point &pos);
 	~AText();
 
 	string GetText();
 	Point GetPos();
-	void SetText(string &str);
-	void SetPos(Point &pos);
-	void SetInfo(string &str);
+	void SetText(string str);
+	void SetPos(Point pos);
+	void SetInfo(string str);
 
 	friend class Annotations;
 

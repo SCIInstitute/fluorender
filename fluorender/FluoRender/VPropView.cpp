@@ -82,14 +82,14 @@ VPropView::VPropView(wxWindow* frame,
    wxPanel(parent, id, pos, size,style, name),
    m_frame(frame),
    m_vd(0),
-   m_space_x_text(0),
-   m_space_y_text(0),
-   m_space_z_text(0),
    m_lumi_change(false),
    m_sync_group(false),
    m_group(0),
    m_vrv(0),
-   m_max_val(255.0)
+   m_max_val(255.0),
+   m_space_x_text(0),
+   m_space_y_text(0),
+   m_space_z_text(0)
 {
    wxBoxSizer* sizer_all = new wxBoxSizer(wxVERTICAL);
    wxBoxSizer* sizer_sliders = new wxBoxSizer(wxHORIZONTAL);
@@ -107,7 +107,7 @@ VPropView::VPropView(wxWindow* frame,
    wxBoxSizer* sizer_r3 = new wxBoxSizer(wxHORIZONTAL);
    wxBoxSizer* sizer_r4 = new wxBoxSizer(wxHORIZONTAL);
    wxBoxSizer* sizer_r5 = new wxBoxSizer(wxHORIZONTAL);
-   wxBoxSizer* sizer_r6 = new wxBoxSizer(wxHORIZONTAL);
+   //wxBoxSizer* sizer_r6 = new wxBoxSizer(wxHORIZONTAL);
 
    wxBoxSizer* sizer_b = new wxBoxSizer(wxHORIZONTAL);
 

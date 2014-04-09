@@ -124,7 +124,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    add_definitions(-D_DARWIN)
    set (CXX_11_FLAG "-std=c++0x")
    set(CFLAGS "-fPIC")
-   set(CXXFLAGS "-fPIC")
+   set(CXXFLAGS "-fPIC -Wno-unused-private-field")
    include(BundleUtilities)
    set(ICON_FILE_PATH "fluorender/FluoRender/img/FluoRender_icon.gif")
    #add_resource("fluorender/FluoRender/img/FluoRender_icon.gif")
@@ -157,7 +157,7 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       add_definitions(-D_LINUX)
       set (CXX_11_FLAG "-std=c++0x")
       set(CFLAGS "-fPIC")
-      set(CXXFLAGS "-fPIC")
+      set(CXXFLAGS "-fPIC -Wno-unused-private-field")
       add_executable(FluoRender
          ${src} ${hdr} ${rsc} ${pngs}
          ${ani_src} ${ani_hdr}
