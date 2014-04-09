@@ -183,18 +183,16 @@ m_free_version(true)
          m_free_version?wxITEM_NORMAL:wxITEM_DROPDOWN,
          "Edit: Tools for editing volume data",
          "Edit: Tools for editing volume data");
-//   if (!m_free_version)
-    //   {
+#ifndef _WIN32
     m_main_tb->AddTool(ID_Measure, "Measurement...",
-                       //TODO make a new icon for this.
-                       wxGetBitmapFromMemory(icon_measure), wxNullBitmap, wxITEM_NORMAL,
-                           "Show rulers dialog", "Show rulers dialog");
+         wxGetBitmapFromMemory(icon_measure), wxNullBitmap, wxITEM_NORMAL,
+         "Show rulers dialog", "Show rulers dialog");
+#endif
       m_main_tb->SetDropdownMenu(ID_PaintTool, m_tb_menu_edit);
       m_main_tb->AddTool(ID_Recorder, "Recorder",
             wxGetBitmapFromMemory(icon_recorder), wxNullBitmap, wxITEM_NORMAL,
             "Recorder: Record actions by key frames and play back",
             "Recorder: Record actions by key frames and play back");
-//   }
    m_main_tb->AddSeparator();
    m_main_tb->AddTool(ID_Settings, "Settings",
          wxGetBitmapFromMemory(icon_settings), wxNullBitmap, wxITEM_NORMAL,
