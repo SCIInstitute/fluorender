@@ -429,11 +429,13 @@ class VRenderGLView: public wxGLCanvas
          void DrawRulers();
          vector<Ruler*>* GetRulerList();
 
-         //traces
-         TraceGroup* GetTraceGroup();
-         int LoadTraceGroup(wxString filename);
-         void ExportTrace(wxString filename, unsigned int id);
-         void DrawTraces();
+	//traces
+	TraceGroup* GetTraceGroup();
+	void CreateTraceGroup();
+	int LoadTraceGroup(wxString filename);
+	void ExportTrace(wxString filename, unsigned int id);
+	void DrawTraces();
+	void GetTraces();
 
    public:
          //script run
@@ -816,11 +818,6 @@ class VRenderGLView: public wxGLCanvas
          void PreDraw();
          void PostDraw();
 
-         struct Lbl
-         {
-            unsigned int id;
-            unsigned int size;
-         };
          //run 4d script
          void Run4DScript(wxString scriptname);
 
@@ -1318,19 +1315,23 @@ class VRenderView: public wxPanel
       if (m_glview) return m_glview->GetRulerList(); else return 0;
    }
 
-   //traces
-   TraceGroup* GetTraceGroup()
-   {
-      if (m_glview) return m_glview->GetTraceGroup(); else return 0;
-   }
-   int LoadTraceGroup(wxString filename)
-   {
-      if (m_glview) return m_glview->LoadTraceGroup(filename); else return 0;
-   }
-   void ExportTrace(wxString filename, unsigned int id)
-   {
-      if (m_glview) m_glview->ExportTrace(filename, id);
-   }
+	//traces
+	void CreateTraceGroup()
+	{
+		if (m_glview) m_glview->CreateTraceGroup();
+	}
+	TraceGroup* GetTraceGroup()
+	{
+		if (m_glview) return m_glview->GetTraceGroup(); else return 0;
+	}
+	int LoadTraceGroup(wxString filename)
+	{
+		if (m_glview) return m_glview->LoadTraceGroup(filename); else return 0;
+	}
+	void ExportTrace(wxString filename, unsigned int id)
+	{
+		if (m_glview) m_glview->ExportTrace(filename, id);
+	}
 
    public:
    wxWindow* m_frame;

@@ -8,7 +8,7 @@
 #include "FLIVR/Color.h"
 #include "FLIVR/Point.h"
 #include "FLIVR/MeshRenderer.h"
-#include "FLIVR/VolumeRenderer.h"
+#include "FLIVR\VolumeRenderer.h"
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
 #include "Formats/base_reader.h"
@@ -757,50 +757,52 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class Trace;
-class TraceGroup;
-class Cell
+//tags
+#define TAG_CELL		1
+#define TAG_EDGE		2
+#define TAG_VERT		3
+#define TAG_CMAP		4
+#define TAG_FRAM		5
+
+//label is used in render view
+struct Lbl
 {
-public:
-	Cell();
-	Cell(unsigned int id,
-		 int time,
-		 int size,
-		 Point& p);
-	~Cell();
-
-	friend class Trace;
-	friend class TraceGroup;
-
-	unsigned int GetID() {return m_id;}
-	int GetTime() {return m_time;}
-	int GetSize() {return m_size;}
-	Point GetCenter() {return m_center;}
-
-private:
-	unsigned int m_id;
-	int m_time;
-	int m_size;
-	Point m_center;
+	unsigned int id;
+	unsigned int size;
 };
 
-class Trace
+//a vertex in the map contains a cell and in/out edges
+struct Vertex
 {
-public:
-	Trace();
-	~Trace();
+	unsigned int id;
+	unsigned int vsize;
+	Point center;
 
-	friend class TraceGroup;
+	vector<unsigned int> out_ids;
+	vector<unsigned int> in_ids;
 
-	unsigned int GetID() {return m_id;}
-	unsigned int GetNumCells() {return m_cells.size();}
-	Cell GetCell(int index) {return m_cells[index];}
-	void Draw();
-
-private:
-	unsigned int m_id;
-	vector<Cell> m_cells;
+	int Read(ifstream &ifs);
 };
+
+typedef unordered_map<unsigned int, Vertex> CellMap;
+typedef unordered_map<unsigned int, Vertex>::iterator CellMapIter;
+
+//a frame contains a cell map
+struct Frame
+{
+	unsigned int id;
+	CellMap cell_map;
+
+	int Read(ifstream &ifs);
+	int ReadCellMap(ifstream &ifs);
+};
+
+//frame list
+typedef unordered_map<unsigned int, Frame> FrameList;
+typedef unordered_map<unsigned int, Frame>::iterator FrameIter;
+//id list
+typedef unordered_map<unsigned int, unsigned int> IDMap;
+typedef unordered_map<unsigned int, unsigned int>::iterator IDMapIter;
 
 class TraceGroup : public TreeLayer
 {
@@ -823,26 +825,36 @@ public:
 	}
 
 	wxString GetPath() {return m_data_path;}
-	unsigned int GetNumTraces() {return m_traces.size();}
-	Trace* GetTrace(unsigned int id);
-	//for selective drawing
-	void ClearIDs();
 	void SetCurTime(int time);
+	void SetPrvTime(int time);
+	//ghost num
+	void SetGhostNum(int num) {m_ghost_num = num;}
+	int GetGhostNum() {return m_ghost_num;}
+
+	//for selective drawing
+	void ClearIDMap();
 	void AddID(unsigned int id);
-	unordered_map <unsigned int, unsigned int>* GetIDs();
+	void SetIDMap(unordered_map<unsigned int, Lbl> &sel_labels);
+	IDMap *GetIDMap();
+	bool FindID(unsigned int id);
 
 	int Load(wxString &filename);
 	void Draw();
-	void ExportTrace(wxString filename, unsigned int id);
 
 private:
 	static int m_num;
 	wxString m_data_path;
 	//for selective drawing
 	int m_cur_time;
-	unordered_map <unsigned int, unsigned int> m_ids;
+	int m_prv_time;
+	int m_ghost_num;
 
-	unordered_map <unsigned int, Trace*> m_traces;
+	FrameList m_frame_list;
+	IDMap m_id_map;
+
+private:
+	//reading functions
+	unsigned char ReadTag(ifstream &ifs);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

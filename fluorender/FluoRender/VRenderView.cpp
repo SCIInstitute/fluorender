@@ -5377,7 +5377,6 @@ void VRenderGLView::Run4DScript(wxString scriptname)
                //process trace data
                if (m_trace_group)
                {
-                  m_trace_group->ClearIDs();
                   m_trace_group->SetCurTime(m_tseq_cur_num);
                   unordered_map <unsigned int, Lbl>::iterator id_iter;
                   for (id_iter=sel_labels.begin(); id_iter!=sel_labels.end(); id_iter++)
@@ -8990,6 +8989,12 @@ TraceGroup* VRenderGLView::GetTraceGroup()
    return m_trace_group;
 }
 
+void VRenderGLView::CreateTraceGroup()
+{
+	if (!m_trace_group)
+		m_trace_group = new TraceGroup;
+}
+
 int VRenderGLView::LoadTraceGroup(wxString filename)
 {
    if (m_trace_group)
@@ -9003,7 +9008,6 @@ void VRenderGLView::ExportTrace(wxString filename, unsigned int id)
 {
    if (!m_trace_group)
       return;
-   m_trace_group->ExportTrace(filename, id);
 }
 
 void VRenderGLView::DrawTraces()
@@ -9011,6 +9015,62 @@ void VRenderGLView::DrawTraces()
    if (!m_trace_group)
       return;
    m_trace_group->Draw();
+}
+
+void VRenderGLView::GetTraces()
+{
+	if (!m_trace_group)
+		return;
+
+	int ii, jj, kk;
+	int nx, ny, nz;
+	//return current mask (into system memory)
+	if (!m_cur_vol) return;
+	m_cur_vol->GetVR()->return_mask();
+	m_cur_vol->GetResolution(nx, ny, nz);
+	//find labels in the old that are selected by the current mask
+	Texture* tex = m_cur_vol->GetTexture();
+	if (!tex) return;
+	Nrrd* mask_nrrd = tex->get_nrrd(tex->nmask());
+	if (!mask_nrrd) return;
+	Nrrd* label_nrrd = tex->get_nrrd(tex->nlabel());
+	if(!label_nrrd) return;
+	unsigned char* mask_data = (unsigned char*)(mask_nrrd->data);
+	if (!mask_data) return;
+	unsigned int* label_data = (unsigned int*)(label_nrrd->data);
+	if (!label_data) return;
+	unordered_map<unsigned int, Lbl> sel_labels;
+	unordered_map<unsigned int, Lbl>::iterator label_iter;
+	for (ii=0; ii<nx; ii++)
+	for (jj=0; jj<ny; jj++)
+	for (kk=0; kk<nz; kk++)
+	{
+		int index = nx*ny*kk + nx*jj + ii;
+		unsigned int label_value = label_data[index];
+		if (mask_data[index] && label_value)
+		{
+			label_iter = sel_labels.find(label_value);
+			if (label_iter == sel_labels.end())
+			{
+				Lbl lbl;
+				lbl.id = label_value;
+				lbl.size = 1;
+				sel_labels.insert(pair<unsigned int, Lbl>(label_value, lbl));
+			}
+			else
+				label_iter->second.size++;
+		}
+	}
+
+	//create id list
+	m_trace_group->SetCurTime(m_tseq_cur_num);
+	m_trace_group->SetPrvTime(m_tseq_cur_num);
+	m_trace_group->SetIDMap(sel_labels);
+
+	//add traces to trace dialog
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (m_vrv && vr_frame && vr_frame->GetTraceDlg())
+		vr_frame->GetTraceDlg()->GetSettings(m_vrv);
 }
 
 /*WXLRESULT VRenderGLView::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
