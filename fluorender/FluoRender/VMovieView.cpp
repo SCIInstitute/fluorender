@@ -83,11 +83,11 @@ m_prev_frame(0)
 
 	//1st line
 	st = new wxStaticText(this, 0, "Capture view:",
-		wxDefaultPosition, wxSize(80, 20));
+		wxDefaultPosition, wxSize(120, 20));
 	m_views_cmb = new wxComboBox(this, ID_ViewsCombo, "",
-		wxDefaultPosition, wxSize(120, 20), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, wxSize(120, 30), 0, NULL, wxCB_READONLY);
 	m_help_btn = new wxButton(this, ID_HelpBtn, "?",
-		wxDefaultPosition, wxSize(20, 20));
+		wxDefaultPosition, wxSize(25, 25));
 	sizer_1->Add(5, 5, 0);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_views_cmb, 0, wxALIGN_CENTER);
@@ -131,11 +131,11 @@ m_prev_frame(0)
 
 	//3rd line
 	st = new wxStaticText(this, 0, "Rotation axis:",
-		wxDefaultPosition, wxSize(85, 20));
+		wxDefaultPosition, wxSize(115, 20));
 	m_x_rd = new wxRadioButton(this, ID_XRd, "X",
-		wxDefaultPosition, wxSize(80, 20), wxRB_GROUP);
+		wxDefaultPosition, wxSize(40, 20), wxRB_GROUP);
 	m_y_rd = new wxRadioButton(this, ID_YRd, "Y",
-		wxDefaultPosition, wxSize(60, 20)/*, wxRB_GROUP*/);
+		wxDefaultPosition, wxSize(40, 20)/*, wxRB_GROUP*/);
 	m_x_rd->SetValue(false);
 	m_y_rd->SetValue(true);
 	m_rewind_chk = new wxCheckBox(this, ID_RewindChk, "Rewind");
@@ -147,77 +147,71 @@ m_prev_frame(0)
 
 	//4th line
 	st = new wxStaticText(this, 0, "minus (-)",
-		wxDefaultPosition, wxSize(50, 15));
-	sizer_4->Add(80, 5, 0);
+		wxDefaultPosition, wxSize(65, 15));
+	sizer_4->Add(95, 5, 0);
 	sizer_4->Add(st, 0, wxALIGN_BOTTOM);
 	st = new wxStaticText(this, 0, "current",
-		wxDefaultPosition, wxSize(40, 15));
-	sizer_4->Add(5, 5, 0);
+		wxDefaultPosition, wxSize(55, 15));
 	sizer_4->Add(st, 0, wxALIGN_BOTTOM);
 	st = new wxStaticText(this, 0, "plus (+)",
-		wxDefaultPosition, wxSize(40, 15));
-	sizer_4->Add(5, 5, 0);
+		wxDefaultPosition, wxSize(65, 15));
 	sizer_4->Add(st, 0, wxALIGN_BOTTOM);
 
 	//5th line
 	st = new wxStaticText(this, 0, "Rotation Deg.:",
-		wxDefaultPosition, wxSize(85, 20));
+		wxDefaultPosition, wxSize(100, 20));
 	m_angle_start_text = new wxTextCtrl(this, ID_AngleStartText, "0",
-		wxDefaultPosition, wxSize(30, 20), 0, vald_int);
-	sizer_5->Add(5, 5, 0);
+		wxDefaultPosition, wxSize(55, 20), 0, vald_int);
 	sizer_5->Add(st, 0, wxALIGN_CENTER);
 	sizer_5->Add(m_angle_start_text, 0, wxALIGN_CENTER);
 	st = new wxStaticText(this, 0, "    0",
-		wxDefaultPosition, wxSize(30, 20));
+		wxDefaultPosition, wxSize(65, 20));
 	m_angle_end_text = new wxTextCtrl(this, ID_AngleEndText, "360",
-		wxDefaultPosition, wxSize(30, 20), 0, vald_int);
+		wxDefaultPosition, wxSize(55, 20), 0, vald_int);
 	m_prev_btn = new wxButton(this, ID_PrevBtn, "Preview",
-		wxDefaultPosition, wxSize(60, 20));
-	sizer_5->Add(20, 5, 0);
+		wxDefaultPosition, wxSize(70, 20));
 	sizer_5->Add(st, 0, wxALIGN_CENTER);
-	sizer_5->Add(20, 5, 0);
 	sizer_5->Add(m_angle_end_text, 0, wxALIGN_CENTER);
-	sizer_5->Add(10, 5, 0);
+	sizer_5->Add(5, 5, 0);
 	sizer_5->Add(m_prev_btn, 0, wxALIGN_CENTER);
 
 	//6th line
+	sizer_6->Add(10, 5, 0);
 	st = new wxStaticText(this, 0, "Deg./Frame:",
 		wxDefaultPosition, wxSize(85, 20));
 	m_step_text = new wxTextCtrl(this, ID_StepText, "1",
-		wxDefaultPosition, wxSize(30, 20), 0, vald_int);
-	sizer_6->Add(5, 5, 0);
+		wxDefaultPosition, wxSize(55, 20), 0, vald_int);
 	sizer_6->Add(st, 0, wxALIGN_CENTER);
+	sizer_6->Add(5, 5, 0);
 	sizer_6->Add(m_step_text, 0, wxALIGN_CENTER);
 	st = new wxStaticText(this, 0, "Frames:",
-		wxDefaultPosition, wxSize(40, 20));
+		wxDefaultPosition, wxSize(65, 20));
 	m_frames_text = new wxTextCtrl(this, ID_FramesText, "360",
-		wxDefaultPosition, wxSize(30, 20), 0, vald_int);
+		wxDefaultPosition, wxSize(55, 20), 0, vald_int);
 	m_stop_btn = new wxButton(this, ID_StopBtn, "Stop",
-		wxDefaultPosition, wxSize(60, 20));
-	sizer_6->Add(30, 5, 0);
-	sizer_6->Add(st, 0, wxALIGN_CENTER);
+		wxDefaultPosition, wxSize(70, 20));
+	sizer_6->Add(st, 0, wxALIGN_RIGHT);
 	sizer_6->Add(m_frames_text, 0, wxALIGN_CENTER);
-	sizer_6->Add(10, 5, 0);
+	sizer_6->Add(5, 5, 0);
 	sizer_6->Add(m_stop_btn, 0, wxALIGN_CENTER);
 
 	//6.5
-	st = new wxStaticText(this, 0, "Time:   from:",
+	st = new wxStaticText(this, 0, "Time from:",
 		wxDefaultPosition, wxSize(85, 20));
 	m_time_start_text = new wxTextCtrl(this, ID_TimeStartText, "1",
-		wxDefaultPosition, wxSize(30, 20));
-	sizer_6_5->Add(5, 5, 0);
+		wxDefaultPosition, wxSize(55, 20));
+	sizer_6_5->Add(15, 5, 0);
 	sizer_6_5->Add(st, 0, wxALIGN_CENTER);
 	sizer_6_5->Add(m_time_start_text, 0, wxALIGN_CENTER);
 	st = new wxStaticText(this, 0, "to:",
-		wxDefaultPosition, wxSize(40, 20));
+		wxDefaultPosition, wxSize(65, 20));
 	m_time_end_text = new wxTextCtrl(this, ID_TimeEndText, "1",
-		wxDefaultPosition, wxSize(30, 20));
-	sizer_6_5->Add(30, 5, 0);
-	sizer_6_5->Add(st, 0, wxALIGN_CENTER);
+		wxDefaultPosition, wxSize(55, 20));
+	sizer_6_5->Add(st, 0, wxALIGN_RIGHT);
 	sizer_6_5->Add(m_time_end_text, 0, wxALIGN_CENTER);
 	m_run_btn = new wxButton(this, ID_RunBtn, "Save...",
-		wxDefaultPosition, wxSize(60, 20));
-	sizer_6_5->Add(10, 5, 0);
+		wxDefaultPosition, wxSize(80, 20));
+	sizer_6_5->Add(5, 5, 0);
 	sizer_6_5->Add(m_run_btn, 0, wxALIGN_CENTER);
 
 	//7th line
@@ -228,10 +222,10 @@ m_prev_frame(0)
 
 	//8th line
 	st = new wxStaticText(this, 0, "Enable cropping:",
-		wxDefaultPosition, wxSize(90, 20));
+		wxDefaultPosition, wxSize(110, 20));
 	m_frame_chk = new wxCheckBox(this, ID_FrameChk, "");
 	m_reset_btn = new wxButton(this, ID_ResetBtn, "Reset cropping",
-		wxDefaultPosition, wxSize(85, 20));
+		wxDefaultPosition, wxSize(110, 20));
 	sizer_8->Add(5, 5, 0);
 	sizer_8->Add(st, 0, wxALIGN_CENTER);
 	sizer_8->Add(m_frame_chk, 0, wxALIGN_CENTER);

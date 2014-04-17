@@ -159,7 +159,7 @@ private:
 	//color
 	//wxColourPickerCtrl *m_color_picker;
 	wxTextCtrl *m_color_text;
-	wxButton *m_color_btn;
+	wxColourPickerCtrl *m_color_btn;
 	//space
 	wxTextCtrl *m_space_x_text;
 	wxTextCtrl *m_space_y_text;
@@ -238,7 +238,7 @@ private:
 	void OnColorChange(wxColor c);
 	void OnColorTextChange(wxCommandEvent& event);
 	void OnColorTextFocus(wxCommandEvent& event);
-	void OnColorBtn(wxCommandEvent &event);
+	void OnColorBtn(wxColourPickerEvent& event);
 	//spacings
 	void OnSpaceText(wxCommandEvent& event);
 	//scale bar

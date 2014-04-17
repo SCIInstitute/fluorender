@@ -226,15 +226,15 @@ m_free_version(true)
 
    //create list view
    m_list_panel = new ListPanel(this, this, wxID_ANY,
-         wxDefaultPosition, wxSize(300, 300));
+         wxDefaultPosition, wxSize(350, 300));
 
    //create tree view
    m_tree_panel = new TreePanel(this, this, wxID_ANY,
-         wxDefaultPosition, wxSize(300, 300));
+         wxDefaultPosition, wxSize(350, 300));
 
    //create movie view
    m_movie_view = new VMovieView(this, this, wxID_ANY,
-         wxDefaultPosition, wxSize(300, 300));
+         wxDefaultPosition, wxSize(350, 300));
 
    //create prop panel
    m_prop_panel = new wxPanel(this, wxID_ANY,
@@ -252,12 +252,12 @@ m_free_version(true)
 
    //clipping view
    m_clip_view = new ClippingView(this, this, wxID_ANY,
-         wxDefaultPosition, wxSize(100, 700));
+         wxDefaultPosition, wxSize(130, 700));
    m_clip_view->SetDataManager(&m_data_mgr);
 
    //adjust view
    m_adjust_view = new AdjustView(this, this, wxID_ANY,
-         wxDefaultPosition, wxSize(110, 700));
+         wxDefaultPosition, wxSize(130, 700));
 
    //settings dialog
    m_setting_dlg = new SettingDlg(this, this);
@@ -329,16 +329,29 @@ m_free_version(true)
          Name("m_main_tb").Caption("Toolbar").CaptionVisible(false).
          MinSize(wxSize(-1, 49)).MaxSize(wxSize(-1, 50)).
          Top().CloseButton(false).Layer(4));
+#ifdef _WIN32
    m_aui_mgr.AddPane(m_list_panel, wxAuiPaneInfo().
          Name("m_list_panel").Caption(UITEXT_DATAVIEW).
-         Left().CloseButton(true).FloatingSize(wxSize(300, 300)).Layer(3));
+         Left().CloseButton(true).FloatingSize(wxSize(350, 300)).Layer(3));
    m_aui_mgr.AddPane(m_tree_panel, wxAuiPaneInfo().
          Name("m_tree_panel").Caption(UITEXT_TREEVIEW).
-         Left().CloseButton(true).FloatingSize(wxSize(300, 300)).Layer(3));
+         Left().CloseButton(true).FloatingSize(wxSize(350, 300)).Layer(3));
    m_aui_mgr.AddPane(m_movie_view, wxAuiPaneInfo().
          Name("m_movie_view").Caption(UITEXT_MAKEMOVIE).
-         Left().CloseButton(true).MinSize(wxSize(300, 300)).
-         FloatingSize(wxSize(300, 300)).Layer(3));
+         Left().CloseButton(true).MinSize(wxSize(350, 300)).
+         FloatingSize(wxSize(350, 300)).Layer(3));
+#else
+    m_aui_mgr.AddPane(m_movie_view, wxAuiPaneInfo().
+                      Name("m_movie_view").Caption(UITEXT_MAKEMOVIE).
+                      Left().CloseButton(true).MinSize(wxSize(350, 300)).
+                      FloatingSize(wxSize(350, 300)).Layer(3));
+    m_aui_mgr.AddPane(m_tree_panel, wxAuiPaneInfo().
+                      Name("m_tree_panel").Caption(UITEXT_TREEVIEW).
+                      Left().CloseButton(true).FloatingSize(wxSize(350, 300)).Layer(3));
+    m_aui_mgr.AddPane(m_list_panel, wxAuiPaneInfo().
+                      Name("m_list_panel").Caption(UITEXT_DATAVIEW).
+                      Left().CloseButton(true).FloatingSize(wxSize(350, 300)).Layer(3));
+#endif
    m_aui_mgr.AddPane(m_prop_panel, wxAuiPaneInfo().
          Name("m_prop_panel").Caption(UITEXT_PROPERTIES).
          Bottom().CloseButton(true).MinSize(wxSize(300, 150)).

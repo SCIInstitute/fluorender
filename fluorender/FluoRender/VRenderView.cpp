@@ -9815,7 +9815,7 @@ void VRenderView::CreateBar()
       break;
    }
    m_capture_btn = new wxButton(this, ID_CaptureBtn, "Capture",
-         wxDefaultPosition, wxSize(60, 20));
+         wxDefaultPosition, wxSize(80, 20));
    st1 = new wxStaticText(this, 0, "Background:");
    m_bg_color_picker = new wxColourPickerCtrl(this, ID_BgColorPicker, *wxBLACK,
          wxDefaultPosition, wxDefaultSize/*wxSize(40, 20)*/);
@@ -9840,7 +9840,7 @@ void VRenderView::CreateBar()
          wxIdleEventHandler(VRenderView::OnAovSldrIdle),
          NULL, this);
    m_aov_text = new wxTextCtrl(this, ID_AovText, "",
-         wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+         wxDefaultPosition, wxSize(60, 20), 0, vald_int);
    m_aov_text->ChangeValue(GetPersp()?wxString::Format("%d", int(GetAov())):"Ortho");
    m_free_chk = new wxCheckBox(this, ID_FreeChk, "FreeFly",
          wxDefaultPosition, wxSize(-1, 20));
@@ -9881,7 +9881,7 @@ void VRenderView::CreateBar()
    m_depth_atten_factor_sldr = new wxSlider(this, ID_DepthAttenFactorSldr, 0, 0, 100,
          wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL|wxSL_INVERSE);
    m_depth_atten_reset_btn = new wxButton(this, ID_DepthAttenResetBtn, "Reset",
-         wxDefaultPosition, wxSize(40, 20));
+         wxDefaultPosition, wxSize(60, 20));
    m_depth_atten_factor_text = new wxTextCtrl(this, ID_DepthAttenFactorText, "0.0",
          wxDefaultPosition, wxSize(40, 20), 0, vald_fp2);
    sizer_v_3->Add(5, 10, 0);
@@ -9895,13 +9895,13 @@ void VRenderView::CreateBar()
    wxBoxSizer* sizer_v_4 = new wxBoxSizer(wxVERTICAL);
    st1 = new wxStaticText(this, 0, "Zoom:\n");
    m_center_btn = new wxButton(this, ID_CenterBtn, "Center",
-         wxDefaultPosition, wxSize(40, 20));
+         wxDefaultPosition, wxSize(65, 20));
    m_scale_121_btn = new wxButton(this, ID_Scale121Btn, "1:1",
          wxDefaultPosition, wxSize(40, 20));
    m_scale_factor_sldr = new wxSlider(this, ID_ScaleFactorSldr, 100, 50, 999,
          wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
    m_scale_reset_btn = new wxButton(this, ID_ScaleResetBtn, "Reset",
-         wxDefaultPosition, wxSize(40, 20));
+         wxDefaultPosition, wxSize(60, 20));
    m_scale_factor_text = new wxTextCtrl(this, ID_ScaleFactorText, "100",
          wxDefaultPosition, wxSize(40, 20), 0, vald_int);
    m_scale_factor_spin = new wxSpinButton(this, ID_ScaleFactorSpin,
@@ -9924,31 +9924,31 @@ void VRenderView::CreateBar()
    wxBoxSizer* sizer_h_2 = new wxBoxSizer(wxHORIZONTAL);
    m_rot_link_chk = new wxCheckBox(this, ID_RotLinkChk, "Link");
    m_rot_reset_btn = new wxButton(this, ID_RotResetBtn, "Reset to 0",
-         wxDefaultPosition, wxSize(65, 20));
+         wxDefaultPosition, wxSize(85, 20));
    st1 = new wxStaticText(this, 0, "X:");
    m_x_rot_sldr = new wxSlider(this, ID_XRotSldr, 0, 0, 360,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_x_rot_text = new wxTextCtrl(this, ID_XRotText, "0.0",
-         wxDefaultPosition, wxSize(40,20), 0, vald_fp1);
+         wxDefaultPosition, wxSize(60,20), 0, vald_fp1);
    m_x_rot_spin = new wxSpinButton(this, ID_XRotSpin,
          wxDefaultPosition, wxSize(20, 20), wxSP_HORIZONTAL);
    st2 = new wxStaticText(this, 0, "Y:");
    m_y_rot_sldr = new wxSlider(this, ID_YRotSldr, 0, 0, 360,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_y_rot_text = new wxTextCtrl(this, ID_YRotText, "0.0",
-         wxDefaultPosition, wxSize(40,20), 0, vald_fp1);
+         wxDefaultPosition, wxSize(60,20), 0, vald_fp1);
    m_y_rot_spin = new wxSpinButton(this, ID_YRotSpin,
          wxDefaultPosition, wxSize(20, 20), wxSP_HORIZONTAL);
    st3 = new wxStaticText(this, 0, "Z:");
    m_z_rot_sldr = new wxSlider(this, ID_ZRotSldr, 0, 0, 360,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_z_rot_text = new wxTextCtrl(this, ID_ZRotText, "0.0",
-         wxDefaultPosition, wxSize(40,20), 0, vald_fp1);
+         wxDefaultPosition, wxSize(60,20), 0, vald_fp1);
    m_z_rot_spin = new wxSpinButton(this, ID_ZRotSpin,
          wxDefaultPosition, wxSize(20, 20), wxSP_HORIZONTAL);
    m_rot_lock_chk = new wxCheckBox(this, ID_RotLockChk, "45 Increments");
    m_default_btn = new wxButton(this, ID_DefaultBtn, "Save as Default",
-         wxDefaultPosition, wxSize(95, 20));
+         wxDefaultPosition, wxSize(115, 20));
    sizer_h_2->Add(m_rot_link_chk, 0, wxALIGN_CENTER);
    sizer_h_2->Add(m_rot_reset_btn, 0, wxALIGN_CENTER);
    sizer_h_2->Add(5, 5, 0);

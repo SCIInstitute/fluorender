@@ -86,7 +86,7 @@ m_link_z(false)
 	//set sero rotation for clipping planes
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	m_set_zero_btn = new wxButton(this, ID_SetZeroBtn, "Align to View",
-		wxDefaultPosition, wxSize(85, 22));
+		wxDefaultPosition, wxSize(100, 22));
 	sizer_2->Add(5, 5, 0);
 	sizer_2->Add(m_set_zero_btn, 0, wxALIGN_CENTER);
 

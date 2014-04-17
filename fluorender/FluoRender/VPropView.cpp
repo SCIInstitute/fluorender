@@ -45,7 +45,7 @@ EVT_TEXT(ID_ColormapLowValueText, VPropView::OnColormapLowValueText)
 //6
 //color
 EVT_TEXT(ID_ColorText, VPropView::OnColorTextChange)
-EVT_BUTTON(ID_ColorBtn, VPropView::OnColorBtn)
+EVT_COLOURPICKER_CHANGED(ID_ColorBtn, VPropView::OnColorBtn)
 //spacings
 EVT_TEXT(ID_SpaceXText, VPropView::OnSpaceText)
 EVT_TEXT(ID_SpaceYText, VPropView::OnSpaceText)
@@ -137,11 +137,11 @@ VPropView::VPropView(wxWindow* frame,
    sizer_l1->Add(st, 0, wxALIGN_CENTER);
    //extract boundary
    st = new wxStaticText(this, 0, "Extract Boundary:",
-         wxDefaultPosition, wxSize(110, 20), wxALIGN_RIGHT);
+         wxDefaultPosition, wxSize(140, 20), wxALIGN_RIGHT);
    m_boundary_sldr = new wxSlider(this, ID_BoundarySldr, 0, 0, 1000,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_boundary_text = new wxTextCtrl(this, ID_BoundaryText, "0.0000",
-         wxDefaultPosition, wxSize(40, 20), 0, vald_fp4);
+         wxDefaultPosition, wxSize(60, 20), 0, vald_fp4);
    sizer_r1->Add(st, 0, wxALIGN_CENTER);
    sizer_r1->Add(m_boundary_text, 0, wxALIGN_CENTER);
    sizer_r1->Add(m_boundary_sldr, 1, wxEXPAND|wxALIGN_CENTER);
@@ -159,15 +159,15 @@ VPropView::VPropView(wxWindow* frame,
    sizer_l2->Add(st, 0, wxALIGN_CENTER);
    //thresholds
    m_threh_st = new wxStaticText(this, 0, "Threshold:",
-         wxDefaultPosition, wxSize(110, 20), wxALIGN_RIGHT);
+         wxDefaultPosition, wxSize(140, 20), wxALIGN_RIGHT);
    m_left_thresh_sldr = new wxSlider(this, ID_LeftThreshSldr, 5, 0, 255,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_left_thresh_text = new wxTextCtrl(this, ID_LeftThreshText, "5",
-         wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+         wxDefaultPosition, wxSize(60, 20), 0, vald_int);
    m_right_thresh_sldr = new wxSlider(this, ID_RightThreshSldr, 230, 0, 255,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_right_thresh_text = new wxTextCtrl(this, ID_RightThreshText, "230",
-         wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+         wxDefaultPosition, wxSize(60, 20), 0, vald_int);
    sizer_r2->Add(m_threh_st, 0, wxALIGN_CENTER);
    sizer_r2->Add(m_left_thresh_text, 0, wxALIGN_CENTER);
    sizer_r2->Add(m_left_thresh_sldr, 1, wxEXPAND|wxALIGN_CENTER);
@@ -185,24 +185,22 @@ VPropView::VPropView(wxWindow* frame,
    sizer_l3->Add(m_luminance_sldr, 1, wxEXPAND|wxALIGN_CENTER, 0);
    sizer_l3->Add(m_luminance_text, 0, wxALIGN_CENTER, 0);
    sizer_l3->Add(st, 0, wxALIGN_CENTER, 0);
-   //shadow
-   m_shadow_chk = new wxCheckBox(this, ID_ShadowChk, "Shadow / Light",
-         wxDefaultPosition, wxSize(105, 20), wxALIGN_RIGHT);
-   st = new wxStaticText(this, 0, ":",
-         wxDefaultPosition, wxSize(5, 20), wxALIGN_RIGHT);
+    //shadow
+    sizer_r3->Add(10,5,0);
+   m_shadow_chk = new wxCheckBox(this, ID_ShadowChk, "Shadow / Light:",
+         wxDefaultPosition, wxSize(130, 20), wxALIGN_RIGHT);
    m_shadow_sldr = new wxSlider(this, ID_ShadowSldr, 0, 0, 100,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_shadow_text = new wxTextCtrl(this, ID_ShadowText, "0.00",
-         wxDefaultPosition, wxSize(40, 20), 0, vald_fp2);
+         wxDefaultPosition, wxSize(60, 20), 0, vald_fp2);
    sizer_r3->Add(m_shadow_chk, 0, wxALIGN_CENTER);
-   sizer_r3->Add(st, 0, wxALIGN_CENTER);
    sizer_r3->Add(m_shadow_text, 0, wxALIGN_CENTER);
    sizer_r3->Add(m_shadow_sldr, 1, wxEXPAND|wxALIGN_CENTER);
    //highlight
    m_hi_shading_sldr = new wxSlider(this, ID_HiShadingSldr, 0, 0, 100,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_hi_shading_text = new wxTextCtrl(this, ID_HiShadingText, "0.00",
-         wxDefaultPosition, wxSize(40, 20), 0, vald_fp2);
+         wxDefaultPosition, wxSize(60, 20), 0, vald_fp2);
    sizer_r3->Add(m_hi_shading_text, 0, wxALIGN_CENTER);
    sizer_r3->Add(m_hi_shading_sldr, 1, wxEXPAND|wxALIGN_CENTER);
 
@@ -222,11 +220,11 @@ VPropView::VPropView(wxWindow* frame,
    sizer_l4->Add(m_alpha_chk, 0, wxALIGN_CENTER);
    //sample rate
    st = new wxStaticText(this, 0, "Sample Rate:",
-         wxDefaultPosition, wxSize(110, 20), wxALIGN_RIGHT);
+         wxDefaultPosition, wxSize(140, 20), wxALIGN_RIGHT);
    m_sample_sldr = new wxSlider(this, ID_SampleSldr, 10, 0, 50,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_sample_text = new wxTextCtrl(this, ID_SampleText, "1.0",
-         wxDefaultPosition, wxSize(40, 20), 0, vald_fp1);
+         wxDefaultPosition, wxSize(60, 20), 0, vald_fp1);
    sizer_r4->Add(st, 0, wxALIGN_CENTER);
    sizer_r4->Add(m_sample_text, 0, wxALIGN_CENTER);
    sizer_r4->Add(m_sample_sldr, 1, wxEXPAND|wxALIGN_CENTER);
@@ -245,24 +243,19 @@ VPropView::VPropView(wxWindow* frame,
    sizer_l5->Add(m_low_shading_text, 0, wxALIGN_CENTER);
    sizer_l5->Add(st, 0, wxALIGN_CENTER);
    sizer_l5->Add(m_shading_enable_chk, 0, wxALIGN_CENTER);
-   //colormap
-   m_colormap_enable_chk = new wxCheckBox(this, ID_ColormapEnableChk, "Colormap",
-         wxDefaultPosition, wxSize(105, 20), wxALIGN_RIGHT);
-   st = new wxStaticText(this, 0, ":",
-         wxDefaultPosition, wxSize(5, 20), wxALIGN_RIGHT);
+    //colormap
+    sizer_r5->Add(10,5,0);
+   m_colormap_enable_chk = new wxCheckBox(this, ID_ColormapEnableChk, "Colormap: Low (B)",
+         wxDefaultPosition, wxSize(140, 20), wxALIGN_RIGHT);
    sizer_r5->Add(m_colormap_enable_chk, 0, wxALIGN_CENTER);
-   sizer_r5->Add(st, 0, wxALIGN_CENTER);
-   st = new wxStaticText(this, 0, "Low (B)");
-   sizer_r5->Add(5, 5, 0);
-   sizer_r5->Add(st, 0, wxALIGN_CENTER);
    m_colormap_low_value_text = new wxTextCtrl(this, ID_ColormapLowValueText, "0",
-         wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+         wxDefaultPosition, wxSize(50, 20), 0, vald_int);
    sizer_r5->Add(m_colormap_low_value_text, 0, wxALIGN_CENTER);
    m_colormap_low_value_sldr = new wxSlider(this, ID_ColormapLowValueSldr, 0, 0, 255,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    sizer_r5->Add(m_colormap_low_value_sldr, 1, wxEXPAND|wxALIGN_CENTER);
    m_colormap_high_value_text = new wxTextCtrl(this, ID_ColormapHighValueText, "255",
-         wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+         wxDefaultPosition + wxPoint(10,0), wxSize(50, 20), 0, vald_int);
    sizer_r5->Add(m_colormap_high_value_text, 0, wxALIGN_CENTER);
    m_colormap_high_value_sldr = new wxSlider(this, ID_ColormapHighValueSldr, 255, 0, 255,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
@@ -293,13 +286,13 @@ VPropView::VPropView(wxWindow* frame,
    //color
    st = new wxStaticText(this, 0, "Color:");
    m_color_text = new wxTextCtrl(this, ID_ColorText, "255 , 255 , 255",
-         wxDefaultPosition, wxSize(80, 20));
+         wxDefaultPosition, wxSize(110, 20));
    m_color_text->Connect(ID_ColorText, wxEVT_LEFT_DCLICK,
          wxCommandEventHandler(VPropView::OnColorTextFocus),
          NULL, this);
-   m_color_btn = new wxButton(this, ID_ColorBtn, wxEmptyString,
-         wxDefaultPosition, wxSize(20, 20));
-   m_color_btn->SetBackgroundColour(wxColor(255, 255, 255));
+   m_color_btn = new wxColourPickerCtrl(this, ID_ColorBtn, *wxRED,
+         wxDefaultPosition, wxDefaultSize);
+    
    sizer_b->Add(10, 5, 0);
    sizer_b->Add(st, 0, wxALIGN_CENTER, 0);
    sizer_b->Add(m_color_text, 0, wxALIGN_CENTER, 0);
@@ -308,21 +301,21 @@ VPropView::VPropView(wxWindow* frame,
    //x
    st = new wxStaticText(this, 0, "X:");
    m_space_x_text = new wxTextCtrl(this, ID_SpaceXText, "1.000",
-         wxDefaultPosition, wxSize(35, 20), 0, vald_fp3);
+         wxDefaultPosition, wxSize(45, 20), 0, vald_fp3);
    sizer_b->Add(10, 5, 0);
    sizer_b->Add(st, 0, wxALIGN_CENTER);
    sizer_b->Add(m_space_x_text, 0, wxALIGN_CENTER);
    //y
    st = new wxStaticText(this, 0, "Y:");
    m_space_y_text = new wxTextCtrl(this, ID_SpaceYText, "1.000",
-         wxDefaultPosition, wxSize(35, 20), 0, vald_fp3);
+         wxDefaultPosition, wxSize(45, 20), 0, vald_fp3);
    sizer_b->Add(5, 5, 0);
    sizer_b->Add(st, 0, wxALIGN_CENTER);
    sizer_b->Add(m_space_y_text, 0, wxALIGN_CENTER);
    //z
    st = new wxStaticText(this, 0, "Z:");
    m_space_z_text = new wxTextCtrl(this, ID_SpaceZText, "1.000",
-         wxDefaultPosition, wxSize(35, 20), 0, vald_fp3);
+         wxDefaultPosition, wxSize(45, 20), 0, vald_fp3);
    sizer_b->Add(5, 5, 0);
    sizer_b->Add(st, 0, wxALIGN_CENTER);
    sizer_b->Add(m_space_z_text, 0, wxALIGN_CENTER);
@@ -335,7 +328,7 @@ VPropView::VPropView(wxWindow* frame,
    m_scale_text = new wxTextCtrl(this, ID_ScaleText, "",
          wxDefaultPosition, wxSize(35, 20), 0, vald_int);
    m_scale_cmb = new wxComboBox(this, ID_ScaleCmb, "",
-         wxDefaultPosition, wxSize(50, 20), 0, NULL, wxCB_READONLY);
+         wxDefaultPosition, wxSize(50, 30), 0, NULL, wxCB_READONLY);
    m_scale_cmb->Append("nm");
    m_scale_cmb->Append(L"\u03BCm");
    m_scale_cmb->Append("mm");
@@ -388,9 +381,9 @@ VPropView::VPropView(wxWindow* frame,
    sizer_b->Add(m_depth_chk, 0, wxALIGN_CENTER, 0);
    //buttons
    m_reset_default = new wxButton(this, ID_ResetDefault, "Reset",
-         wxDefaultPosition, wxSize(45, 20));
+         wxDefaultPosition, wxSize(55, 20));
    m_save_default = new wxButton(this, ID_SaveDefault, "Save as Default",
-         wxDefaultPosition, wxSize(95, 20));
+         wxDefaultPosition, wxSize(115, 20));
    sizer_b->Add(m_reset_default, 0, wxALIGN_CENTER);
    sizer_b->Add(m_save_default, 0, wxALIGN_CENTER);
 
@@ -481,7 +474,7 @@ void VPropView::GetSettings()
          (unsigned char)(c.b()*255+0.5));
    m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
             wxc.Red(), wxc.Green(), wxc.Blue()));
-   m_color_btn->SetBackgroundColour(wxc);
+    m_color_btn->SetColour(wxc);
    //alpha
    if ((vald_i = (wxIntegerValidator<unsigned int>*)m_alpha_text->GetValidator()))
       vald_i->SetRange(0, int(m_max_val));
@@ -1417,31 +1410,21 @@ void VPropView::OnColorTextChange(wxCommandEvent& event)
       wxString new_str = wxString::Format("%d , %d , %d",
             wxc.Red(), wxc.Green(), wxc.Blue());
       if (str != new_str)
-         m_color_text->ChangeValue(new_str);
-      m_color_btn->SetBackgroundColour(wxc);
+          m_color_text->ChangeValue(new_str);
+       m_color_btn->SetColour(wxc);
 
       OnColorChange(wxc);
    }
 }
 
-void VPropView::OnColorBtn(wxCommandEvent &event)
+void VPropView::OnColorBtn(wxColourPickerEvent& event)
 {
-   wxColor wxc = m_color_btn->GetBackgroundColour();
-   wxColourData data;
-   data.SetColour(wxc);
-   wxColourDialog dialog(this, &data);
-
-   if (dialog.ShowModal() == wxID_OK)
-   {
-      wxColourData retData = dialog.GetColourData();
-      wxc = retData.GetColour();
+   wxColor wxc = event.GetColour();
 
       m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
                wxc.Red(), wxc.Green(), wxc.Blue()));
-      m_color_btn->SetBackgroundColour(wxc);
 
       OnColorChange(wxc);
-   }
 }
 
 void VPropView::OnColorTextFocus(wxCommandEvent& event)
@@ -2172,8 +2155,8 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
          (unsigned char)(color.g()*255),
          (unsigned char)(color.b()*255));
    m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
-            wxc.Red(), wxc.Green(), wxc.Blue()));
-   m_color_btn->SetBackgroundColour(wxc);
+                                              wxc.Red(), wxc.Green(), wxc.Blue()));
+    m_color_btn->SetColour(wxc);
    //colormap low value
    dval = mgr->m_vol_lcm;
    ival = int(dval*m_max_val+0.5);
