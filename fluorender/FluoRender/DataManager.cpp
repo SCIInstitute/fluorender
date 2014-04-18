@@ -1727,7 +1727,12 @@ int MeshData::Load(GLMmodel* mesh)
 int MeshData::Load(wxString &filename)
 {
 	m_data_path = filename;
-	m_name = m_data_path.Mid(m_data_path.Find('\\', true)+1);
+#ifdef _WIN32
+    wxChar slash = '\\';
+#else
+    wxChar slash = '/';
+#endif
+	m_name = m_data_path.Mid(m_data_path.Find(slash, true)+1);
 
 	if (m_data)
 		delete m_data;
@@ -3790,7 +3795,12 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 void DataManager::SetProjectPath(wxString path)
 {
 	m_prj_path.Clear();
-	int sep = path.Find('\\', true);
+#ifdef _WIN32
+    wxChar slash = '\\';
+#else
+    wxChar slash = '/';
+#endif
+	int sep = path.Find(slash, true);
 	if (sep != wxNOT_FOUND)
 		m_prj_path = path.Left(sep);
 }

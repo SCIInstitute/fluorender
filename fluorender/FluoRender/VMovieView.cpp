@@ -713,7 +713,7 @@ void VMovieView::OnRun(wxCommandEvent& event)
 			int rval = fopendlg->ShowModal();
 			if (rval == wxID_OK)
 			{
-				wxString filename = fopendlg->GetDirectory() + "\\" + fopendlg->GetFilename();
+				wxString filename = fopendlg->GetPath();
 				switch (m_movie_type)
 				{
 				case 1:

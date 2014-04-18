@@ -485,7 +485,7 @@ m_view(0)
 	wxBoxSizer *group1 = new wxBoxSizer(wxHORIZONTAL);
 	wxStaticText* st = new wxStaticText(this, wxID_ANY, "Automatic Keys:");
 	m_auto_key_cmb = new wxComboBox(this, ID_AutoKeyCmb, "",
-		wxDefaultPosition, wxSize(200, 20), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, wxSize(200, 30), 0, NULL, wxCB_READONLY);
 	m_auto_key_cmb->Append("Channel combination nC1");
 	m_auto_key_cmb->Append("Channel combination nC2");
 	m_auto_key_cmb->Append("Channel combination nC3");
@@ -1033,7 +1033,7 @@ void RecorderDlg::OnPlay(wxCommandEvent &event)
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		wxString filename = fopendlg->GetDirectory() + "\\" + fopendlg->GetFilename();
+		wxString filename = fopendlg->GetPath();
 		int begin_frame = int(interpolator->GetFirstT());
 		int end_frame = int(interpolator->GetLastT());
 		m_view->SetParamCapture(filename, begin_frame, end_frame, false);

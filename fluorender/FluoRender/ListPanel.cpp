@@ -417,7 +417,7 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 
          if (rval == wxID_OK)
          {
-            wxString filename = fopendlg->GetDirectory() + "\\" + fopendlg->GetFilename();
+             wxString filename = fopendlg->GetPath();
 
             VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
             if (vr_frame)
@@ -444,7 +444,7 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 
          if (rval == wxID_OK)
          {
-            wxString filename = fopendlg->GetDirectory() + "\\" + fopendlg->GetFilename();
+            wxString filename = fopendlg->GetPath();
 
             VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
             if(vr_frame)
@@ -471,7 +471,7 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 
          if (rval == wxID_OK)
          {
-            wxString filename = fopendlg->GetDirectory() + "\\" + fopendlg->GetFilename();
+            wxString filename = fopendlg->GetPath();
 
             VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
             if(vr_frame)
@@ -511,7 +511,7 @@ void DataListCtrl::OnBake(wxCommandEvent& event)
 
       if (rval == wxID_OK)
       {
-         wxString filename = fopendlg->GetDirectory() + "\\" + fopendlg->GetFilename();
+         wxString filename = fopendlg->GetPath();
 
          VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
          if (vr_frame)

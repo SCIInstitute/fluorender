@@ -126,11 +126,11 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    set(CFLAGS "-fPIC")
    set(CXXFLAGS "-fPIC -Wno-unused-private-field")
    include(BundleUtilities)
-   set(ICON_FILE_PATH "fluorender/FluoRender/img/FluoRender_icon.gif")
+   set(ICON_FILE_PATH "fluorender/FluoRender/img/FluoRender_icon.icns")
    #add_resource("fluorender/FluoRender/img/FluoRender_icon.gif")
    SET( MACOSX_BUNDLE_ICON_FILE ${ICON_FILE_PATH} )
    SET_SOURCE_FILES_PROPERTIES(${ICON_FILE_PATH} PROPERTIES 
-                                   MACOSX_PACKAGE_LOCATION Resources)
+      MACOSX_BUNDLE_LOCATION Resources)
    add_executable(FluoRender MACOSX_BUNDLE
       ${src} ${hdr} ${rsc} ${pngs}
       ${ani_src} ${ani_hdr}

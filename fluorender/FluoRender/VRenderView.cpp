@@ -4403,8 +4403,13 @@ void VRenderGLView::Set3DBatCapture(wxString &cap_file, int begin_frame, int end
 
    if (!m_cap_file.IsEmpty() && m_total_frames>1)
    {
-      wxString path = m_cap_file;
-      int sep = path.Find('\\', true);
+       wxString path = m_cap_file;
+#ifdef _WIN32
+       wchar_t slash = '\\';
+#else
+       wchar_t slash = '/';
+#endif
+      int sep = path.Find(slash, true);
       if (sep != wxNOT_FOUND)
       {
          sep++;
@@ -4680,8 +4685,13 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
          //run script
          if (m_run_script && run_script)
          {
+#ifdef _WIN32
+             wchar_t slash = '\\';
+#else
+             wchar_t slash = '/';
+#endif
             wxString pathname = reader->GetPathName();
-            int pos = pathname.Find('\\', true);
+            int pos = pathname.Find(slash, true);
             wxString scriptname = pathname.Left(pos+1) + "script_4d.txt";
             if (wxFileExists(scriptname))
             {
@@ -4873,8 +4883,13 @@ void VRenderGLView::PreDraw()
                   //run script
                   if (m_run_script)
                   {
+#ifdef _WIN32
+                      wchar_t slash = '\\';
+#else
+                      wchar_t slash = '/';
+#endif
                      wxString pathname = reader->GetPathName();
-                     int pos = pathname.Find('\\', true);
+                     int pos = pathname.Find(slash, true);
                      wxString scriptname = pathname.Left(pos+1) + "script_4d.txt";
                      if (wxFileExists(scriptname))
                      {
@@ -5046,8 +5061,13 @@ void VRenderGLView::PreDraw()
                m_cur_angle += m_end_angle>m_cur_angle?m_step:-m_step;
                if (!m_cap_file.IsEmpty() && m_total_frames>1)
                {
-                  wxString path = m_cap_file;
-                  int sep = path.Find('\\', true);
+                   wxString path = m_cap_file;
+#ifdef _WIN32
+                   wchar_t slash = '\\';
+#else
+                   wchar_t slash = '/';
+#endif
+                  int sep = path.Find(slash, true);
                   if (sep != wxNOT_FOUND)
                   {
                      sep++;
@@ -5130,8 +5150,13 @@ void VRenderGLView::PostDraw()
       if (m_capture_bat && m_total_frames>1)
       {
          wxString path = m_cap_file;
-         wxString name = m_cap_file;
-         int sep = path.Find('\\', true);
+          wxString name = m_cap_file;
+#ifdef _WIN32
+          wchar_t slash = '\\';
+#else
+          wchar_t slash = '/';
+#endif
+         int sep = path.Find(slash, true);
          if (sep != wxNOT_FOUND)
          {
             sep++;
@@ -5272,10 +5297,15 @@ void VRenderGLView::Run4DScript(wxString scriptname)
                fconfig.Read("compress", &compression, false);
                fconfig.Read("savepath", &pathname, "");
                str = pathname;
-               size_t pos = 0;
+                size_t pos = 0;
+#ifdef _WIN32
+                wxString slash = "\\";
+#else
+                wxString slash = "/";
+#endif
                do
                {
-                  pos = pathname.find("\\", pos);
+                  pos = pathname.find(slash, pos);
                   if (pos == wxNOT_FOUND)
                      break;
                   pos++;
@@ -5393,10 +5423,15 @@ void VRenderGLView::Run4DScript(wxString scriptname)
             {
                fconfig.Read("savepath", &pathname, "");
                str = pathname;
-               size_t pos = 0;
+                size_t pos = 0;
+#ifdef _WIN32
+                wxString slash = "\\";
+#else
+                wxString slash = "/";
+#endif
                do
                {
-                  pos = pathname.find("\\", pos);
+                  pos = pathname.find(slash, pos);
                   if (pos == wxNOT_FOUND)
                      break;
                   pos++;
@@ -5444,10 +5479,15 @@ void VRenderGLView::Run4DScript(wxString scriptname)
                fconfig.Read("compress", &compression, false);
                fconfig.Read("savepath", &pathname, "");
                str = pathname;
-               size_t pos = 0;
+                size_t pos = 0;
+#ifdef _WIN32
+                wxString slash = "\\";
+#else
+                wxString slash = "/";
+#endif
                do
                {
-                  pos = pathname.find("\\", pos);
+                  pos = pathname.find(slash, pos);
                   if (pos == wxNOT_FOUND)
                      break;
                   pos++;
