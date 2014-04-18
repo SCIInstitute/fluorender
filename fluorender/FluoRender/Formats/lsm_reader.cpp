@@ -54,7 +54,7 @@ void LSMReader::SetFile(wstring &file)
 void LSMReader::Preprocess()
 {
    FILE* pfile = 0;
-   if (WFOPEN(&pfile, m_path_name.c_str(), L"rb") != 0)
+   if (WFOPEN(&pfile, m_path_name.c_str(), L"rb") == 0)
       return;
 
    m_lsm_info.clear();
@@ -695,7 +695,7 @@ Nrrd* LSMReader::Convert(int t, int c, bool get_max)
 {
    Nrrd *data = 0;
    FILE* pfile = 0;
-   if (WFOPEN(&pfile, m_path_name.c_str(), L"rb") != 0)
+   if (WFOPEN(&pfile, m_path_name.c_str(), L"rb") == 0)
       return 0;
 
    int i, j;
