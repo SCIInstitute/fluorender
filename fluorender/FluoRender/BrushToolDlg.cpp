@@ -219,7 +219,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
    //brush size 2
    wxBoxSizer *sizer12_3 = new wxBoxSizer(wxHORIZONTAL);
    m_brush_size2_chk = new wxCheckBox(this, ID_BrushSize2Chk, "GrowSize",
-         wxDefaultPosition, wxSize(70, 20), wxALIGN_RIGHT);
+         wxDefaultPosition, wxSize(90, 20), wxALIGN_RIGHT);
    st = new wxStaticText(this, 0, ":",
          wxDefaultPosition, wxSize(5, 20), wxALIGN_RIGHT);
    m_brush_size2_sldr = new wxSlider(this, ID_BrushSize2Sldr, 30, 1, 300,
