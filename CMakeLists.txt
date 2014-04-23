@@ -6,7 +6,7 @@ project ( FluoRender )
 
 set(ARCHITECTURE 64 CACHE PATH "The architecture to build -- 32 or 64")
 
-set(CMAKE_BUILD_TYPE "Debug")
+set(CMAKE_BUILD_TYPE "Debug" CACHE PATH "Debug or Release Configuration")
 
 if(${ARCHITECTURE} MATCHES "64")
    if(${CMAKE_BUILD_TYPE} MATCHES "Debug")

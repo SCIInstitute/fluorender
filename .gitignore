@@ -155,3 +155,4 @@ fluorender/glew/*.vcxproj
 fluorender/glew/*.cmake
 fluorender/glew/*.build
 *.svn
+fluorender/Images.xcassets
