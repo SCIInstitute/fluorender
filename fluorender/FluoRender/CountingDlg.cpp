@@ -133,7 +133,12 @@ CountingDlg::~CountingDlg()
 //load default
 void CountingDlg::LoadDefault()
 {
-	wxFileInputStream is("default_brush_settings.dft");
+#ifdef _DARWIN
+    wxString dft = "FluoRender.app/Contents/Resources/default_brush_settings.dft";
+#else
+    wxString dft = "default_brush_settings.dft";
+#endif
+	wxFileInputStream is(dft);
 	if (!is.IsOk())
 		return;
 	wxFileConfig fconfig(is);

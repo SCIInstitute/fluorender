@@ -1153,16 +1153,26 @@ void AdjustView::OnSaveDefault(wxCommandEvent &event)
 	m_dft_gamma = Color(dft_r_gamma, dft_g_gamma, dft_b_gamma);
 	m_dft_brightness = Color(dft_r_brightness, dft_g_brightness, dft_b_brightness);
 	m_dft_hdr = Color(dft_r_hdr, dft_g_hdr, dft_b_hdr);
-
-	wxFileOutputStream os("default_2d_adjustment_settings.dft");
+#ifdef _DARWIN
+    wxString dft = "FluoRender.app/Contents/Resources/default_2d_adjustment_settings.dft";
+#else
+    wxString dft = "default_2d_adjustment_settings.dft";
+#endif
+	wxFileOutputStream os(dft);
 	fconfig.Save(os);
 }
 
 void AdjustView::LoadSettings()
 {
-	wxFileInputStream is("default_2d_adjustment_settings.dft");
+#ifdef _DARWIN
+    wxString dft = "FluoRender.app/Contents/Resources/default_2d_adjustment_settings.dft";
+#else
+    wxString dft = "default_2d_adjustment_settings.dft";
+#endif
+    
+	wxFileInputStream is(dft);
 	if (!is.IsOk())
-		return;
+        return;
 	wxFileConfig fconfig(is);
 
 	wxString sVal;

@@ -2040,8 +2040,12 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
    double swi = val;
    fconfig.Write("shadow_intensity", swi);
    mgr->m_vol_swi = swi;
-
-   wxFileOutputStream os(DEFAULT_SETTINGS_FILE);
+#ifdef _DARWIN
+    wxString dft = "FluoRender.app/Contents/Resources/default_volume_settings.dft";
+#else
+    wxString dft = "default_volume_settings.dft";
+#endif
+   wxFileOutputStream os(dft);
    fconfig.Save(os);
 }
 

@@ -1025,15 +1025,24 @@ void BrushToolDlg::SaveDefault()
    fconfig.Write("nr_thresh", m_dft_nr_thresh);
    //nr_size
    fconfig.Write("nr_size", m_dft_nr_size);
-
-   wxFileOutputStream os("default_brush_settings.dft");
+#ifdef _DARWIN
+    wxString dft = "FluoRender.app/Contents/Resources/default_brush_settings.dft";
+#else
+    wxString dft = "default_brush_settings.dft";
+#endif
+   wxFileOutputStream os(dft);
    fconfig.Save(os);
 }
 
 //load default
 void BrushToolDlg::LoadDefault()
 {
-   wxFileInputStream is("default_brush_settings.dft");
+#ifdef _DARWIN
+    wxString dft = "FluoRender.app/Contents/Resources/default_brush_settings.dft";
+#else
+    wxString dft = "default_brush_settings.dft";
+#endif
+   wxFileInputStream is(dft);
    if (!is.IsOk())
       return;
    wxFileConfig fconfig(is);

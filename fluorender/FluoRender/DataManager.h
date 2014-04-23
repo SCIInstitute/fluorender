@@ -41,8 +41,6 @@ using namespace FLIVR;
 #define LOAD_TYPE_LSM		5
 #define LOAD_TYPE_PVXML		6
 
-#define DEFAULT_SETTINGS_FILE	"default_volume_settings.dft"
-
 class TreeLayer
 {
 public:

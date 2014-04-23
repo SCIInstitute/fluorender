@@ -2004,7 +2004,12 @@ void VRenderGLView::NoiseRemoval(int iter, double thresh)
 //load default
 void VRenderGLView::LoadDefaultBrushSettings()
 {
-   wxFileInputStream is("default_brush_settings.dft");
+#ifdef _DARWIN
+    wxString dft = "FluoRender.app/Contents/Resources/default_brush_settings.dft";
+#else
+    wxString dft = "default_brush_settings.dft";
+#endif
+   wxFileInputStream is(dft);
    if (!is.IsOk())
       return;
    wxFileConfig fconfig(is);
@@ -11377,19 +11382,30 @@ void VRenderView::OnSaveDefault(wxCommandEvent &event)
    GetCenters(x, y, z);
    str = wxString::Format("%f %f %f", x, y, z);
    fconfig.Write("center", str);
-
-   wxFileOutputStream os("default_view_settings.dft");
+#ifdef _DARWIN
+    wxString dft = "FluoRender.app/Contents/Resources/default_view_settings.dft";
+#else
+    wxString dft = "default_view_settings.dft";
+#endif
+   wxFileOutputStream os(dft);
    fconfig.Save(os);
 }
 
 void VRenderView::LoadSettings()
 {
-   wxFileInputStream is("default_view_settings.dft");
-   if (!is.IsOk())
-   {
-      UpdateView();
-      return;
-   }
+#ifdef _DARWIN
+    wxString dft = "FluoRender.app/Contents/Resources/default_view_settings.dft";
+#else
+    wxString dft = "default_view_settings.dft";
+#endif
+    
+    wxFileInputStream is(dft);
+    
+    if (!is.IsOk()) {
+        UpdateView();
+        return;
+    }
+    
    wxFileConfig fconfig(is);
 
    bool bVal;
