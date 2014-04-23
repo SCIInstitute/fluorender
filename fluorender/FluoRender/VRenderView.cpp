@@ -2005,7 +2005,12 @@ void VRenderGLView::NoiseRemoval(int iter, double thresh)
 void VRenderGLView::LoadDefaultBrushSettings()
 {
 #ifdef _DARWIN
-    wxString dft = "FluoRender.app/Contents/Resources/default_brush_settings.dft";
+    wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/default_brush_settings.dft";
+    std::ifstream tmp(dft);
+    if (!tmp.good())
+        dft = "FluoRender.app/Contents/Resources/default_brush_settings.dft";
+    else
+        tmp.close();
 #else
     wxString dft = "default_brush_settings.dft";
 #endif
@@ -11383,7 +11388,10 @@ void VRenderView::OnSaveDefault(wxCommandEvent &event)
    str = wxString::Format("%f %f %f", x, y, z);
    fconfig.Write("center", str);
 #ifdef _DARWIN
-    wxString dft = "FluoRender.app/Contents/Resources/default_view_settings.dft";
+    wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/";
+    mkdir(dft,0777);
+    chmod(dft,0777);
+    dft = dft + "default_view_settings.dft";
 #else
     wxString dft = "default_view_settings.dft";
 #endif
@@ -11394,7 +11402,13 @@ void VRenderView::OnSaveDefault(wxCommandEvent &event)
 void VRenderView::LoadSettings()
 {
 #ifdef _DARWIN
-    wxString dft = "FluoRender.app/Contents/Resources/default_view_settings.dft";
+    
+    wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/default_view_settings.dft";
+    std::ifstream tmp(dft);
+    if (!tmp.good())
+        dft = "FluoRender.app/Contents/Resources/default_view_settings.dft";
+    else
+        tmp.close();
 #else
     wxString dft = "default_view_settings.dft";
 #endif

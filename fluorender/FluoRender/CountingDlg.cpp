@@ -134,7 +134,13 @@ CountingDlg::~CountingDlg()
 void CountingDlg::LoadDefault()
 {
 #ifdef _DARWIN
-    wxString dft = "FluoRender.app/Contents/Resources/default_brush_settings.dft";
+    
+    wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/default_brush_settings.dft";
+    std::ifstream tmp(dft);
+    if (!tmp.good())
+        dft = "FluoRender.app/Contents/Resources/default_brush_settings.dft";
+    else
+        tmp.close();
 #else
     wxString dft = "default_brush_settings.dft";
 #endif

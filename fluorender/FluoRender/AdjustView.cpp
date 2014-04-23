@@ -1154,7 +1154,10 @@ void AdjustView::OnSaveDefault(wxCommandEvent &event)
 	m_dft_brightness = Color(dft_r_brightness, dft_g_brightness, dft_b_brightness);
 	m_dft_hdr = Color(dft_r_hdr, dft_g_hdr, dft_b_hdr);
 #ifdef _DARWIN
-    wxString dft = "FluoRender.app/Contents/Resources/default_2d_adjustment_settings.dft";
+    wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/";
+    mkdir(dft,0777);
+    chmod(dft,0777);
+    dft = dft + "default_2d_adjustment_settings.dft";
 #else
     wxString dft = "default_2d_adjustment_settings.dft";
 #endif
@@ -1165,7 +1168,12 @@ void AdjustView::OnSaveDefault(wxCommandEvent &event)
 void AdjustView::LoadSettings()
 {
 #ifdef _DARWIN
-    wxString dft = "FluoRender.app/Contents/Resources/default_2d_adjustment_settings.dft";
+    wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/default_2d_adjustment_settings.dft";
+    std::ifstream tmp(dft);
+    if (!tmp.good())
+        dft = "FluoRender.app/Contents/Resources/default_2d_adjustment_settings.dft";
+    else
+        tmp.close();
 #else
     wxString dft = "default_2d_adjustment_settings.dft";
 #endif

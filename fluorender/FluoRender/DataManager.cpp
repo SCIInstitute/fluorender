@@ -3642,7 +3642,13 @@ m_use_defaults(true),
 m_override_vox(true)
 {
 #ifdef _DARWIN
-    wxString dft = "FluoRender.app/Contents/Resources/default_volume_settings.dft";
+    
+    wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/default_volume_settings.dft";
+    std::ifstream tmp(dft);
+    if (!tmp.good())
+        dft = "FluoRender.app/Contents/Resources/default_volume_settings.dft";
+    else
+        tmp.close();
 #else
     wxString dft = "default_volume_settings.dft";
 #endif

@@ -1026,7 +1026,10 @@ void BrushToolDlg::SaveDefault()
    //nr_size
    fconfig.Write("nr_size", m_dft_nr_size);
 #ifdef _DARWIN
-    wxString dft = "FluoRender.app/Contents/Resources/default_brush_settings.dft";
+    wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/";
+    mkdir(dft,0777);
+    chmod(dft,0777);
+    dft = dft + "default_brush_settings.dft";
 #else
     wxString dft = "default_brush_settings.dft";
 #endif
@@ -1038,7 +1041,13 @@ void BrushToolDlg::SaveDefault()
 void BrushToolDlg::LoadDefault()
 {
 #ifdef _DARWIN
-    wxString dft = "FluoRender.app/Contents/Resources/default_brush_settings.dft";
+    
+    wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/default_brush_settings.dft";
+    std::ifstream tmp(dft);
+    if (!tmp.good())
+        dft = "FluoRender.app/Contents/Resources/default_brush_settings.dft";
+    else
+        tmp.close();
 #else
     wxString dft = "default_brush_settings.dft";
 #endif
