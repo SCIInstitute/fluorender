@@ -156,3 +156,8 @@ fluorender/glew/*.cmake
 fluorender/glew/*.build
 *.svn
 fluorender/Images.xcassets
+FluoRender.aps
+FluoRender.rc
+Thumbs.db
+fluorender/FluoRender/img/Thumbs.db
+resource.h
