@@ -31,6 +31,7 @@ add_definitions(-DVERSION_COPYRIGHT="January 2014")
 set(wxWidgets_CONFIGURATION mswu)
 find_package(wxWidgets COMPONENTS core base aui html xrc xml net adv gl REQUIRED)
 include(${wxWidgets_USE_FILE})
+set(wxWidgets_USE_STATIC ON)
 
 find_package(OpenGL REQUIRED)
 
@@ -126,7 +127,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    set(CFLAGS "-fPIC")
    set(CXXFLAGS "-fPIC -Wno-unused-private-field")
    include(BundleUtilities)
-   set(ICON_FILE_PATH "fluorender/FluoRender/img/FluoRender_icon.icns")
+   set(ICON_FILE_PATH "FluoRender_icon")
    #add_resource("fluorender/FluoRender/img/FluoRender_icon.gif")
    SET( MACOSX_BUNDLE_ICON_FILE ${ICON_FILE_PATH} )
    SET_SOURCE_FILES_PROPERTIES(${ICON_FILE_PATH} PROPERTIES 

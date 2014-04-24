@@ -33,18 +33,23 @@ RulerListCtrl::RulerListCtrl(
 {
    wxListItem itemCol;
    itemCol.SetText("ID");
-   this->InsertColumn(0, itemCol);
+    this->InsertColumn(0, itemCol);
+    SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
    itemCol.SetText("Length");
-   this->InsertColumn(1, itemCol);
+    this->InsertColumn(1, itemCol);
+    SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
    itemCol.SetText("Angle");
-   this->InsertColumn(2, itemCol);
+    this->InsertColumn(2, itemCol);
+    SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);
    itemCol.SetText("Start/End Points (X, Y, Z)");
    this->InsertColumn(3, itemCol);
    SetColumnWidth(3, wxLIST_AUTOSIZE_USEHEADER);
    itemCol.SetText("Time");
-   this->InsertColumn(4, itemCol);
+    this->InsertColumn(4, itemCol);
+    SetColumnWidth(4, wxLIST_AUTOSIZE_USEHEADER);
    itemCol.SetText("Volumes");
-   this->InsertColumn(5, itemCol);
+    this->InsertColumn(5, itemCol);
+    SetColumnWidth(5, wxLIST_AUTOSIZE_USEHEADER);
 
    m_images = new wxImageList(16, 16, true);
    wxIcon icon = wxIcon(ruler_xpm);

@@ -6154,6 +6154,7 @@ void VRenderGLView::RemoveVolumeData(wxString &name)
             {
                m_layer_list.erase(m_layer_list.begin()+i);
                m_vd_pop_dirty = true;
+                m_cur_vol = NULL;
                return;
             }
          }
@@ -6167,7 +6168,8 @@ void VRenderGLView::RemoveVolumeData(wxString &name)
                if (vd && vd->GetName() == name)
                {
                   group->RemoveVolumeData(j);
-                  m_vd_pop_dirty = true;
+                   m_vd_pop_dirty = true;
+                   m_cur_vol = NULL;
                   return;
                }
             }

@@ -35,14 +35,19 @@ m_dragging_to_item(-1)
 	wxListItem itemCol;
 	itemCol.SetText("ID");
 	this->InsertColumn(0, itemCol);
+    SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
 	itemCol.SetText("Frame");
 	this->InsertColumn(1, itemCol);
+    SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
 	itemCol.SetText("Inbetweens");
 	this->InsertColumn(2, itemCol);
+    SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);
 	itemCol.SetText("Interpolation");
 	this->InsertColumn(3, itemCol);
+    SetColumnWidth(3, wxLIST_AUTOSIZE_USEHEADER);
 	itemCol.SetText("Description");
 	this->InsertColumn(4, itemCol);
+    SetColumnWidth(4, wxLIST_AUTOSIZE_USEHEADER);
 
 	m_images = new wxImageList(16, 16, true);
 	wxIcon icon = wxIcon(key_xpm);

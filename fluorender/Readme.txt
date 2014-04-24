@@ -2,14 +2,16 @@ To build FluoRender:
 13 March 2014
 
 --------------------------------------------------------------------------------------------------
-OSX/Linux Installation
+OSX Installation
 --------------------------------------------------------------------------------------------------
 
 1) Download and install "Homebrew", found at "http://brew.sh"
 
 2) Install WxWidgets using Homebrew.
+
+   * Type "brew edit wxmac" and change "--enable-shared" to "--disable-shared"
   
-   * Type "brew install wxwidgets"
+   * Type "brew install --build-from-source --devel wxwidgets"
 
    * You may need root pivileges to link the libraries if brew asks you to.
 
