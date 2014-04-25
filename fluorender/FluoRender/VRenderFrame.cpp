@@ -178,15 +178,16 @@ m_free_version(true)
          wxGetBitmapFromMemory(icon_open_mesh), wxNullBitmap, wxITEM_NORMAL,
          "Open Mesh: Open single or multiple mesh file(s)",
          "Open Mesh: Open single or multiple mesh file(s)");
-   m_main_tb->AddTool(ID_PaintTool, "Edit",
-         wxGetBitmapFromMemory(icon_edit), wxNullBitmap,
-         m_free_version?wxITEM_NORMAL:wxITEM_DROPDOWN,
-         "Edit: Tools for editing volume data",
-         "Edit: Tools for editing volume data");
 #ifndef _WIN32
     m_main_tb->AddTool(ID_Measure, "Measurement...",
          wxGetBitmapFromMemory(icon_measure), wxNullBitmap, wxITEM_NORMAL,
          "Show rulers dialog", "Show rulers dialog");
+#else
+    m_main_tb->AddTool(ID_PaintTool, "Edit",
+                       wxGetBitmapFromMemory(icon_edit), wxNullBitmap,
+                       m_free_version?wxITEM_NORMAL:wxITEM_DROPDOWN,
+                       "Edit: Tools for editing volume data",
+                       "Edit: Tools for editing volume data");
 #endif
       m_main_tb->SetDropdownMenu(ID_PaintTool, m_tb_menu_edit);
       m_main_tb->AddTool(ID_Recorder, "Recorder",

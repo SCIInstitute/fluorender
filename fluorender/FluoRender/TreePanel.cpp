@@ -1908,6 +1908,7 @@ m_frame(frame)
    m_toolbar->AddTool(ID_RemoveData, "Delete",
          wxGetBitmapFromMemory(listicon_delete),
          "Delete current selection");
+#ifdef _WIN32
    m_toolbar->AddSeparator();
    m_toolbar->AddCheckTool(ID_BrushAppend, "Highlight",
          wxGetBitmapFromMemory(listicon_brushappend),
@@ -1931,6 +1932,7 @@ m_frame(frame)
    m_toolbar->AddTool(ID_BrushCreate, "Extract",
          wxGetBitmapFromMemory(listicon_brushcreate),
          "Extract highlighted structures out and create a new volume");
+#endif
    m_toolbar->Realize();
 
    //organize positions
