@@ -3,9 +3,9 @@ ver_minor=14
 [gm\ calculation]
 mode=2
 [peeling\ layers]
-value=2
+value=1
 [micro\ blend]
-mode=1
+mode=0
 [save\ project]
 mode=1
 [realtime\ compress]
@@ -13,9 +13,9 @@ mode=0
 [mouse\ int]
 mode=1
 [dir\ shadow]
-mode=1
-x=-1
-y=1.22465e-016
+mode=0
+x=0
+y=0
 [test\ mode]
 speed=0
 param=0
@@ -37,8 +37,19 @@ value=0
 value=1
 [run\ script]
 value=0
+[text\ font]
+value=3
 [memory\ settings]
-mem\ swap=1
+mem\ swap=0
 graphics\ mem=1000
-large\ data\ size=100
+large\ data\ size=1000
 force\ brick\ size=128
+up\ time=100
+[point\ volume\ mode]
+value=0
+[ruler\ use\ transf]
+value=0
+[ruler\ time\ dependent]
+value=1
+[update\ order]
+value=0
