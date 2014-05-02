@@ -47,7 +47,7 @@ GLboolean glmLoadTGA(TextureImage *texture, char *filename,GLuint *textureID)   
    GLuint    type=GL_RGBA;                // Set The Default GL Mode To RBGA (32 BPP)
 
    FILE *file;
-   if (FOPEN(&file, filename, "rb")==0)          // Open The TGA File
+   if (!FOPEN(&file, filename, "rb"))          // Open The TGA File
       return false;
 
    if(  file==NULL ||                    // Does File Even Exist?
@@ -364,7 +364,7 @@ static GLvoid glmReadMTL(GLMmodel* model, char* name)
    STRCAT(filename, size_fn, name);
    free(dir);
 
-   if (FOPEN(&file, filename, "rb")==0)
+   if (!FOPEN(&file, filename, "rb"))
       return;
    free(filename);
 
@@ -544,7 +544,7 @@ static GLvoid glmWriteMTL(GLMmodel* model, char* modelpath, char* mtllibname)
    free(dir);
 
    /* open the file */
-   if (FOPEN(&file, filename, "wt")==0)
+   if (!FOPEN(&file, filename, "wt"))
       return;
    free(filename);
 
@@ -1671,7 +1671,7 @@ GLMmodel* glmReadOBJ(const char* filename)
    FILE* file;
 
    /* open the file */
-   if (FOPEN(&file, filename, "rb")==0)
+   if (!FOPEN(&file, filename, "rb"))
       return 0;
 
    //find file size
@@ -1802,7 +1802,7 @@ GLvoid glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode)
 
 
    /* open the file */
-   if (FOPEN(&file, filename, "wt")==0)
+   if (!FOPEN(&file, filename, "wt"))
       return;
 
    /* spit out a header */
@@ -2167,7 +2167,7 @@ GLubyte* glmReadPPM(char* filename, int* width, int* height)
    unsigned char* image;
    char head[70];          /* max line <= 70 in PPM (per spec). */
 
-   if (FOPEN(&fp, filename, "rb")==0)
+   if (!FOPEN(&fp, filename, "rb"))
       return NULL;
 
    /* grab first two chars of the file and make sure that it has the

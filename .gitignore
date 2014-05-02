@@ -1,3 +1,7 @@
+*.aps
+*.rc
+*.ico
+resource*
 *.set
 *.dft
 *.a

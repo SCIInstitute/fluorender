@@ -36,12 +36,14 @@ inline TIFF* TIFFOpenW(std::wstring fname, const char* opt) {
    return TIFFOpenW(fname.c_str(),opt);
 }
 
-inline errno_t FOPEN(FILE** fp, const char *fname, const char* mode) {
-   return fopen_s(fp,fname,mode);
+inline FILE* FOPEN(FILE** fp, const char *fname, const char* mode) {
+    fopen_s(fp,fname,mode);
+	return *fp;
 }
 
-inline errno_t WFOPEN(FILE** fp, const wchar_t* fname, const wchar_t* mode) {
-   return _wfopen_s(fp,fname,mode);
+inline FILE* WFOPEN(FILE** fp, const wchar_t* fname, const wchar_t* mode) {
+   _wfopen_s(fp,fname,mode);
+   return *fp;
 }
 
 inline errno_t STRCPY(char* d, size_t n, const char* s) { return strcpy_s(d,n,s); }
