@@ -243,7 +243,7 @@ public:
 	{ m_address = address; }
 	//get free version
 	bool GetFreeVersion()
-	{ return m_free_version; }
+	{ return false; }
 
 	//tex renderer settings
 	void SetTextureRendererSettings();

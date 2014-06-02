@@ -282,7 +282,7 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
    int data_size = m_slice_num * m_x_size * m_y_size;
    if (output->type == nrrdTypeUShort)
       data_size *= 2;
-   output->data = new unsigned char[data_size];
+    output->data = new unsigned char[data_size];
 
    if (nrrdLoad(output, str.c_str(), NULL))
    {
@@ -290,14 +290,27 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
       nrrdNix(output);
       return 0;
    }
-
+    // turn signed into unsigned
+    if (output->type == nrrdTypeChar) {
+        for (i=0; i<m_slice_num*m_x_size*m_y_size; i++)
+            ((unsigned char*)output->data)[i] =
+            static_cast<unsigned char>(((char*)output->data)[i]+128);
+        output->type = nrrdTypeChar;
+    }
+    // turn signed into unsigned
+    if (output->type == nrrdTypeShort) {
+        for (i=0; i<m_slice_num*m_x_size*m_y_size; i++)
+            ((unsigned short*)output->data)[i] =
+            static_cast<unsigned short>(((short*)output->data)[i]+32768);
+        output->type = nrrdTypeUShort;
+    }
    m_max_value = 0.0;
    //find max value
    if (output->type == nrrdTypeUChar)
    {
       //8 bit
       m_max_value = 255.0;
-      m_scalar_scale = 1.0;
+       m_scalar_scale = 1.0;
    }
    else if (output->type == nrrdTypeUShort)
    {
@@ -311,7 +324,6 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
             m_max_value = value>m_max_value ? value : m_max_value;
          }
       }
-
       if (m_max_value > 0.0)
          m_scalar_scale = 65535.0 / m_max_value;
       else

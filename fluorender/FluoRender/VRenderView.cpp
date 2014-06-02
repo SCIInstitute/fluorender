@@ -27,10 +27,11 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
       wxWindow* parent,
       wxWindowID id,
       wxGLContext* sharedContext,
+      int * attribList,
       const wxPoint& pos,
       const wxSize& size,
       long style) :
-   wxGLCanvas(parent, id, NULL, pos, size, style),
+   wxGLCanvas(parent, id, attribList, pos, size, style),
    //public
    //capture modes
    m_capture(false),
