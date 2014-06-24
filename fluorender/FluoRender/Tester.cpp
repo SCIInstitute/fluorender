@@ -1,7 +1,7 @@
 #include "Tester.h"
 #include "VRenderFrame.h"
 
-#include <Formats\tif_reader.h>
+#include "Formats/tif_reader.h"
 
 BEGIN_EVENT_TABLE(TesterDlg, wxDialog)
 	//sliders
@@ -25,11 +25,11 @@ TesterDlg::TesterDlg(wxWindow *frame, wxWindow *parent)
 		   wxDefaultPosition, wxSize(600, 600),
 		   wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER|
 		   wxMAXIMIZE_BOX|wxMINIMIZE_BOX),
-m_frame(frame),
 m_p1(1.0),
 m_p2(0.0),
 m_p3(0.0),
-m_p4(0.0)
+m_p4(0.0),
+m_frame(frame)
 {
 /*	wxStaticText *st;
 

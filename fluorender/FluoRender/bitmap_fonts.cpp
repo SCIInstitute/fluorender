@@ -1,5 +1,27 @@
 #include "bitmap_fonts.h"
 
+/* The font structure: */
+char literal[] = "-misc-fixed-medium-r-normal--13-120-75-75-C-80-iso8859-1";
+const BitmapFontData FontFixed8x13 = { literal, 93, 13, Fixed8x13_Character_Map, -1.0f, 2.0f };
+
+char literal0[] = "-misc-fixed-medium-r-normal--15-140-75-75-C-90-iso8859-1";
+const BitmapFontData FontFixed9x15 = { literal0, 93, 15, Fixed9x15_Character_Map, -1.0f, 3.0f };
+
+char literal1[] = "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1";
+const BitmapFontData FontHelvetica10 = { literal1, 93, 13, Helvetica10_Character_Map, -1.0f, 2.0f };
+
+char literal2[] = "-adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1";
+const BitmapFontData FontHelvetica12 = { literal2, 93, 15, Helvetica12_Character_Map, -1.0f, 3.0f };
+
+char literal3[] = "-adobe-helvetica-medium-r-normal--18-180-75-75-p-98-iso8859-1";
+const BitmapFontData FontHelvetica18 = { literal3, 93, 22, Helvetica18_Character_Map, -1.0f, 4.0f };
+
+char literal4[] = "-adobe-times-medium-r-normal--10-100-75-75-p-54-iso8859-1";
+const BitmapFontData FontTimesRoman10 = { literal4, 93, 13, TimesRoman10_Character_Map, 0.0f, 3.0f };
+
+char literal5[] = "-adobe-times-medium-r-normal--24-240-75-75-p-124-iso8859-1";
+const BitmapFontData FontTimesRoman24 = { literal5, 93, 28, TimesRoman24_Character_Map, -1.0f, 6.0f };
+
 //-----------------------------------------------------------------------------
 // Name: getBitmapFontDataByType()
 // Desc: Matches a BitmapFontType with a BitmapFontData structure pointer.
@@ -108,10 +130,9 @@ void renderText( float x, float y, BitmapFontType fontType, const char *string )
 
 	const BitmapFontData* font = getBitmapFontDataByType( fontType );
 	const unsigned char* face;
-	unsigned char *c = '\0';
 	unsigned char *str_temp = (unsigned char*) string;
 
-	for( c = str_temp; *c != '\0'; ++c )
+	for(unsigned char * c = str_temp; *c != '\0'; ++c )
 	{
 		// Find the character face that we want to draw.
 		face = font->Characters[*c-1];
@@ -128,10 +149,9 @@ double renderTextLen(BitmapFontType fontType, const char *string )
 	double length = 0.0;
 	const BitmapFontData* font = getBitmapFontDataByType( fontType );
 	const unsigned char* face;
-	unsigned char *c = '\0';
 	unsigned char *str_temp = (unsigned char*) string;
 
-	for( c = str_temp; *c != '\0'; ++c )
+	for(unsigned char * c = str_temp; *c != '\0'; ++c )
 	{
 		// Find the character face that we want to draw.
 		face = font->Characters[*c-1];

@@ -49,11 +49,11 @@ namespace FLIVR
 		fog_(fog),
 		peel_(peel),
 		clip_(clip),
-		program_(0),
 		hiqual_(hiqual),
 		mask_(mask),
 		color_mode_(color_mode),
-		solid_(solid)
+        solid_(solid),
+        program_(0)
 	{
 	}
 

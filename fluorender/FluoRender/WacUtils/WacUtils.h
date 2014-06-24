@@ -46,7 +46,7 @@ typedef BOOL ( API * WTQUEUESIZESET ) ( HCTX, int );
 typedef int  ( API * WTDATAPEEK ) ( HCTX, UINT, UINT, int, LPVOID, LPINT);
 typedef int  ( API * WTPACKETSGET ) (HCTX, int, LPVOID);
 
-// TODO - add more wintab32 function defs as needed
+// ToDo - add more wintab32 function defs as needed
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -70,7 +70,7 @@ extern WTQUEUESIZESET gpWTQueueSizeSet;
 extern WTDATAPEEK gpWTDataPeek;
 extern WTPACKETSGET gpWTPacketsGet;
 
-// TODO - add more wintab32 function pointers as needed
+// ToDo - add more wintab32 function pointers as needed
 
 //////////////////////////////////////////////////////////////////////////////
 BOOL LoadWintab( void );

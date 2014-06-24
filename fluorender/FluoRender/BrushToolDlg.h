@@ -1,4 +1,4 @@
-#include <wx\wx.h>
+#include <wx/wx.h>
 
 #ifndef _BRUSHTOOLDLG_H_
 #define _BRUSHTOOLDLG_H_

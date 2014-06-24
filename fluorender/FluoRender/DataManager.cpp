@@ -1,5 +1,5 @@
 #include "DataManager.h"
-#include <nrrd.h>
+#include "teem/Nrrd/nrrd.h"
 #include <wx/msgdlg.h>
 #include <wx/progdlg.h>
 #include <wx/wfstream.h>
@@ -657,30 +657,31 @@ Nrrd* VolumeData::GetMask()
 double VolumeData::GetOriginalValue(int i, int j, int k)
 {
 	Nrrd* data = m_tex->get_nrrd(0);
-	if (!data) return 0.0;
-
-	int bits = data->type;
-	int nx = int(data->axis[0].size);
-	int ny = int(data->axis[1].size);
-	int nz = int(data->axis[2].size);
-
-	if (i<0 || i>=nx || j<0 || j>=ny || k<0 || k>=nz)
-		return 0.0;
-
-	if (bits == nrrdTypeUChar)
-	{
-		long long index = long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j) + long long(i);
-		uint8 old_value = ((uint8*)(data->data))[index];
-		return double(old_value)/255.0;
-	}
-	else if (bits == nrrdTypeUShort)
-	{
-		long long index = long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j) + long long(i);
-		uint16 old_value = ((uint16*)(data->data))[index];
-		return double(old_value)*m_scalar_scale/65535.0;
-	}
-
-	return 0.0;
+    if (!data) return 0.0;
+    
+    int bits = data->type;
+    uint64_t nx = (uint64_t)(data->axis[0].size);
+    uint64_t ny = (uint64_t)(data->axis[1].size);
+    uint64_t nz = (uint64_t)(data->axis[2].size);
+    
+    if (i<0 || i>=nx || j<0 || j>=ny || k<0 || k>=nz)
+        return 0.0;
+    uint64_t ii = i, jj = j, kk = k;
+    
+    if (bits == nrrdTypeUChar)
+    {
+        uint64_t index = (nx)*(ny)*(kk) + (nx)*(jj) + (ii);
+        uint8 old_value = ((uint8*)(data->data))[index];
+        return double(old_value)/255.0;
+    }
+    else if (bits == nrrdTypeUShort)
+    {
+        uint64_t index = (nx)*(ny)*(kk) + (nx)*(jj) + (ii);
+        uint16 old_value = ((uint16*)(data->data))[index];
+        return double(old_value)*m_scalar_scale/65535.0;
+    }
+    
+    return 0.0;
 }
 
 double VolumeData::GetTransferedValue(int i, int j, int k)
@@ -688,17 +689,17 @@ double VolumeData::GetTransferedValue(int i, int j, int k)
 	Nrrd* data = m_tex->get_nrrd(0);
 	if (!data) return 0.0;
 
-	int bits = data->type;
-	int nx = int(data->axis[0].size);
-	int ny = int(data->axis[1].size);
-	int nz = int(data->axis[2].size);
-
+    int bits = data->type;
+    uint64_t nx = (uint64_t)(data->axis[0].size);
+    uint64_t ny = (uint64_t)(data->axis[1].size);
+    uint64_t nz = (uint64_t)(data->axis[2].size);
 	if (i<0 || i>=nx || j<0 || j>=ny || k<0 || k>=nz)
 		return 0.0;
+    uint64_t ii = i, jj = j, kk = k;
 
 	if (bits == nrrdTypeUChar)
 	{
-		long long index = long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j) + long long(i);
+		uint64_t index = nx*ny*kk + nx*jj + ii;
 		uint8 old_value = ((uint8*)(data->data))[index];
 		double gm = 0.0;
 		double new_value = double(old_value)/255.0;
@@ -708,17 +709,17 @@ double VolumeData::GetTransferedValue(int i, int j, int k)
 			j>0 && j<ny-1 &&
 			k>0 && k<nz-1)
 		{
-			double v1 = ((uint8*)(data->data))[long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j) + long long(i-1)];
-			double v2 = ((uint8*)(data->data))[long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j) + long long(i+1)];
-			double v3 = ((uint8*)(data->data))[long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j-1) + long long(i)];
-			double v4 = ((uint8*)(data->data))[long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j+1) + long long(i)];
-			double v5 = ((uint8*)(data->data))[long long(nx)*long long(ny)*long long(k-1) + long long(nx)*long long(j) + long long(i)];
-			double v6 = ((uint8*)(data->data))[long long(nx)*long long(ny)*long long(k+1) + long long(nx)*long long(j) + long long(i)];
-			double normal_x, normal_y, normal_z;
-			normal_x = (v2 - v1) / 255.0;
-			normal_y = (v4 - v3) / 255.0;
-			normal_z = (v6 - v5) / 255.0;
-			gm = sqrt(normal_x*normal_x + normal_y*normal_y + normal_z*normal_z)*0.53;
+			double v1 = ((uint8*)(data->data))[nx*ny*kk + nx*jj + ii-1];
+            double v2 = ((uint8*)(data->data))[nx*ny*kk + nx*jj + ii+1];
+            double v3 = ((uint8*)(data->data))[nx*ny*kk + nx*(jj-1) + ii];
+            double v4 = ((uint8*)(data->data))[nx*ny*kk + nx*(jj+1) + ii];
+            double v5 = ((uint8*)(data->data))[nx*ny*(kk-1) + nx*jj + ii];
+            double v6 = ((uint8*)(data->data))[nx*ny*(kk+1) + nx*jj + ii];
+            double normal_x, normal_y, normal_z;
+            normal_x = (v2 - v1) / 255.0;
+            normal_y = (v4 - v3) / 255.0;
+            normal_z = (v6 - v5) / 255.0;
+            gm = sqrt(normal_x*normal_x + normal_y*normal_y + normal_z*normal_z)*0.53;
 		}
 		if (new_value<m_lo_thresh-m_sw ||
 			new_value>m_hi_thresh+m_sw ||
@@ -741,28 +742,28 @@ double VolumeData::GetTransferedValue(int i, int j, int k)
 	}
 	else if (bits == nrrdTypeUShort)
 	{
-		long long index = long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j) + long long(i);
-		uint16 old_value = ((uint16*)(data->data))[index];
-		double gm = 0.0;
-		double new_value = double(old_value)*m_scalar_scale/65535.0;
-		if (m_vr->get_inversion())
-			new_value = 1.0-new_value;
-		if (i>0 && i<nx-1 &&
-			j>0 && j<ny-1 &&
-			k>0 && k<nz-1)
-		{
-			double v1 = ((uint16*)(data->data))[long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j) + long long(i-1)];
-			double v2 = ((uint16*)(data->data))[long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j) + long long(i+1)];
-			double v3 = ((uint16*)(data->data))[long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j-1) + long long(i)];
-			double v4 = ((uint16*)(data->data))[long long(nx)*long long(ny)*long long(k) + long long(nx)*long long(j+1) + long long(i)];
-			double v5 = ((uint16*)(data->data))[long long(nx)*long long(ny)*long long(k-1) + long long(nx)*long long(j) + long long(i)];
-			double v6 = ((uint16*)(data->data))[long long(nx)*long long(ny)*long long(k+1) + long long(nx)*long long(j) + long long(i)];
-			double normal_x, normal_y, normal_z;
-			normal_x = (v2 - v1)*m_scalar_scale/65535.0;
-			normal_y = (v4 - v3)*m_scalar_scale/65535.0;
-			normal_z = (v6 - v5)*m_scalar_scale/65535.0;
-			gm = sqrt(normal_x*normal_x + normal_y*normal_y + normal_z*normal_z)*0.53;
-		}
+		uint64_t index = nx*ny*kk + nx*jj + ii;
+        uint16 old_value = ((uint16*)(data->data))[index];
+        double gm = 0.0;
+        double new_value = double(old_value)*m_scalar_scale/65535.0;
+        if (m_vr->get_inversion())
+            new_value = 1.0-new_value;
+        if (ii>0 && ii<nx-1 &&
+            jj>0 && jj<ny-1 &&
+            kk>0 && kk<nz-1)
+        {
+            double v1 = ((uint8*)(data->data))[nx*ny*kk + nx*jj + ii-1];
+            double v2 = ((uint8*)(data->data))[nx*ny*kk + nx*jj + ii+1];
+            double v3 = ((uint8*)(data->data))[nx*ny*kk + nx*(jj-1) + ii];
+            double v4 = ((uint8*)(data->data))[nx*ny*kk + nx*(jj+1) + ii];
+            double v5 = ((uint8*)(data->data))[nx*ny*(kk-1) + nx*jj + ii];
+            double v6 = ((uint8*)(data->data))[nx*ny*(kk+1) + nx*jj + ii];
+            double normal_x, normal_y, normal_z;
+            normal_x = (v2 - v1)*m_scalar_scale/65535.0;
+            normal_y = (v4 - v3)*m_scalar_scale/65535.0;
+            normal_z = (v6 - v5)*m_scalar_scale/65535.0;
+            gm = sqrt(normal_x*normal_x + normal_y*normal_y + normal_z*normal_z)*0.53;
+        }
 		if (new_value<m_lo_thresh-m_sw ||
 			new_value>m_hi_thresh+m_sw ||
 			gm<m_gm_thresh)
@@ -883,9 +884,9 @@ void VolumeData::Save(wxString &filename, int mode, bool bake, bool compress)
 				writer->Save(filename.ToStdWstring(), mode);
 
 				//free memory
-				delete [](baked_data->data);
 				nrrdNix(baked_data);
 
+				prg_diag->Update(100);
 				delete prg_diag;
 			}
 			else
@@ -1593,7 +1594,7 @@ void VolumeData::GetClipDistance(int &distx, int &disty, int &distz)
 //randomize color
 void VolumeData::RandomizeColor()
 {
-	double hue = (double)rand()/(RAND_MAX+1) * 360.0;
+	double hue = (double)rand()/(RAND_MAX) * 360.0;
 	Color color(HSVColor(hue, 1.0, 1.0));
 	SetColor(color);
 }
@@ -1611,17 +1612,17 @@ bool VolumeData::GetLegend()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 MeshData::MeshData() :
-m_mr(0),
 m_data(0),
+m_mr(0),
+m_center(0.0, 0.0, 0.0),
+m_disp(true),
+m_draw_bounds(false),
 m_light(true),
 m_mat_amb(0.5, 0.5, 0.5),
 m_mat_diff(1.0, 0.0, 0.0),
 m_mat_spec(0.2, 0.2, 0.2),
 m_mat_shine(30.0),
 m_mat_alpha(1.0),
-m_disp(true),
-m_draw_bounds(false),
-m_center(0.0, 0.0, 0.0),
 m_shadow(true),
 m_shadow_darkness(0.6),
 m_enable_limit(false),
@@ -1726,7 +1727,12 @@ int MeshData::Load(GLMmodel* mesh)
 int MeshData::Load(wxString &filename)
 {
 	m_data_path = filename;
-	m_name = m_data_path.Mid(m_data_path.Find('\\', true)+1);
+#ifdef _WIN32
+    wxChar slash = '\\';
+#else
+    wxChar slash = '/';
+#endif
+	m_name = m_data_path.Mid(m_data_path.Find(slash, true)+1);
 
 	if (m_data)
 		delete m_data;
@@ -2153,7 +2159,7 @@ void MeshData::GetScaling(double &x, double &y, double &z)
 //randomize color
 void MeshData::RandomizeColor()
 {
-	double hue = (double)rand()/(RAND_MAX+1) * 360.0;
+	double hue = (double)rand()/(RAND_MAX) * 360.0;
 	Color color(HSVColor(hue, 1.0, 1.0));
 	SetColor(color, MESH_COLOR_DIFF);
 }
@@ -2205,7 +2211,7 @@ AText::AText()
 {
 }
 
-AText::AText(string &str, Point &pos)
+AText::AText(const string &str, const Point &pos)
 {
 	m_txt = str;
 	m_pos = pos;
@@ -2225,17 +2231,17 @@ Point AText::GetPos()
 	return m_pos;
 }
 
-void AText::SetText(string &str)
+void AText::SetText(string str)
 {
 	m_txt = str;
 }
 
-void AText::SetPos(Point &pos)
+void AText::SetPos(Point pos)
 {
 	m_pos = pos;
 }
 
-void AText::SetInfo(string &str)
+void AText::SetInfo(string str)
 {
 	m_info = str;
 }
@@ -2819,76 +2825,91 @@ wxString Ruler::GetDelInfoValues(wxString del)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Cell::Cell()
+int Vertex::Read(ifstream &ifs)
 {
-	m_id = 0;
-	m_time = 0;
-	m_size = 0;
-}
+	if (ifs.bad())
+		return 0;
 
-Cell::Cell(unsigned int id,
-		   int time,
-		   int size,
-		   Point& p)
-{
-	m_id = id;
-	m_time = time;
-	m_size = size;
-	m_center = p;
-}
+	unsigned char tag;
+	ifs.read((char*)(&tag), sizeof(tag));
+	if (tag != TAG_VERT)
+		return 0;
 
-Cell::~Cell()
-{
-}
+	//cell
+	ifs.read((char*)(&tag), sizeof(tag));
+	if (tag != TAG_CELL)
+		return 0;
+	//id
+	ifs.read((char*)(&id), sizeof(id));
+	ifs.read((char*)(&vsize), sizeof(vsize));
+	double x, y, z;
+	ifs.read((char*)(&x), sizeof(double));
+	ifs.read((char*)(&y), sizeof(double));
+	ifs.read((char*)(&z), sizeof(double));
+	center = Point(x, y, z);
 
-Trace::Trace()
-{
-	m_id = 0;
-}
-
-Trace::~Trace()
-{
-}
-
-void Trace::Draw()
-{
-	if (!m_cells.size())
-		return;
-
-	GLfloat psize;
-	glGetFloatv(GL_POINT_SIZE, &psize);
-	glPointSize(2.0f);
-	glLineWidth(1.0f);
-	double hue = m_id % 360;
-	Color c(HSVColor(hue, 1.0, 1.0));
-	glColor3d(c.r(), c.g(), c.b());
-
-	int i;
-	Point p;
-	if (m_cells.size() == 1)
+	//out edges (ids)
+	ifs.read((char*)(&tag), sizeof(tag));
+	if (tag != TAG_EDGE)
+		return 0;
+	unsigned int num = 0;
+	ifs.read((char*)(&num), sizeof(num));
+	unsigned int tempi;
+	for (unsigned int i=0; i<num; ++i)
 	{
-		p = m_cells[0].m_center;
-		glBegin(GL_POINTS);
-		glVertex3d(p.x(), p.y(), p.z());
-		glEnd();
+		ifs.read((char*)(&tempi), sizeof(tempi));
+		out_ids.push_back(tempi);
 	}
-	else
+	//in edges (ids)
+	ifs.read((char*)(&tag), sizeof(tag));
+	if (tag != TAG_EDGE)
+		return 0;
+	ifs.read((char*)(&num), sizeof(num));
+	for (unsigned int i=0; i<num; ++i)
 	{
-		glBegin(GL_LINE_STRIP);
-		for (i=0; i<(int)m_cells.size(); i++)
-		{
-			if (i>0 && m_cells[i].m_time>m_cells[i-1].m_time+1)
-			{
-				glEnd();
-				glBegin(GL_LINE_STRIP);
-			}
-			p = m_cells[i].m_center;
-			glVertex3d(p.x(), p.y(), p.z());
-		}
-		glEnd();
+		ifs.read((char*)(&tempi), sizeof(tempi));
+		in_ids.push_back(tempi);
 	}
 
-	glPointSize(psize);
+	return 1;
+}
+
+int Frame::ReadCellMap(ifstream &ifs)
+{
+	if (ifs.bad())
+		return 0;
+
+	unsigned char tag = 0;
+	ifs.read((char*)(&tag), sizeof(tag));
+	if (tag != TAG_CMAP)
+		return 0;
+
+	unsigned int num = 0;
+	ifs.read((char*)(&num), sizeof(num));
+
+	for (unsigned int i=0; i<num; i++)
+	{
+		Vertex vertex;
+		if (vertex.Read(ifs))
+			cell_map.insert(pair<unsigned int, Vertex>(vertex.id, vertex));
+		else
+			return 0;
+	}
+
+	return 1;
+}
+
+int Frame::Read(ifstream &ifs)
+{
+	if (ifs.bad())
+		return 0;
+
+	//id
+	ifs.read((char*)(&id), sizeof(id));
+	//cell map
+	if (!ReadCellMap(ifs))
+		return 0;
+	return 1;
 }
 
 int TraceGroup::m_num = 0;
@@ -2897,36 +2918,18 @@ TraceGroup::TraceGroup()
 	type = 8;//traces
 	m_num++;
 	m_name = wxString::Format("Traces %d", m_num);
-
-	//selective drawing
 	m_cur_time = -1;
+	m_prv_time = -1;
+	m_ghost_num = 10;
 }
 
 TraceGroup::~TraceGroup()
 {
-	hash_map<unsigned int, Trace*>::iterator trace_iter;
-	for (trace_iter=m_traces.begin(); trace_iter!=m_traces.end(); trace_iter++)
-	{
-		Trace* trace = trace_iter->second;
-		if (trace)
-			delete trace;
-	}
-	m_traces.clear();
 }
 
-Trace* TraceGroup::GetTrace(unsigned int id)
+void TraceGroup::ClearIDMap()
 {
-	hash_map<unsigned int, Trace*>::iterator trace_iter;
-	trace_iter = m_traces.find(id);
-	if (trace_iter != m_traces.end())
-		return trace_iter->second;
-	else
-		return 0;
-}
-
-void TraceGroup::ClearIDs()
-{
-	m_ids.clear();
+	m_id_map.clear();
 }
 
 void TraceGroup::SetCurTime(int time)
@@ -2934,99 +2937,152 @@ void TraceGroup::SetCurTime(int time)
 	m_cur_time = time;
 }
 
-void TraceGroup::AddID(unsigned int id)
+void TraceGroup::SetPrvTime(int time)
 {
-	m_ids.insert(pair<unsigned int, unsigned int>(id, id));
+	m_prv_time = time;
 }
 
-hash_map<unsigned int, unsigned int>* TraceGroup::GetIDs()
+void TraceGroup::AddID(unsigned int id)
 {
-	return &m_ids;
+	m_id_map.insert(pair<unsigned int, unsigned int>(id, id));
+}
+
+//sel_labels: ids from previous time point
+//m_prv_time: previous time value
+//m_id_map: ids of current time point that are linked to previous
+//m_cur_time: current time value
+//time values are check with frame ids in the frame list
+void TraceGroup::SetIDMap(unordered_map<unsigned int, Lbl> &sel_labels)
+{
+	m_id_map.clear();
+	unordered_map<unsigned int, Lbl>::iterator label_iter;
+
+	//why does the time not change?
+	//because I just want to find out the current selection
+	if (m_prv_time == m_cur_time)
+	{
+		//copy sel_labels to m_id_map
+		for (label_iter = sel_labels.begin();
+			label_iter != sel_labels.end();
+			++label_iter)
+		{
+			unsigned int id = label_iter->second.id;
+			m_id_map.insert(pair<unsigned int, unsigned int>(id, id));
+		}
+		return;
+	}
+
+	//get two cell maps
+	CellMap *cell_map1 = 0;
+	CellMap *cell_map2 = 0;
+	FrameIter frame_iter;
+	frame_iter = m_frame_list.find((unsigned int)m_prv_time);
+	if (frame_iter == m_frame_list.end())
+		return;
+	cell_map1 = &(frame_iter->second.cell_map);
+	frame_iter = m_frame_list.find((unsigned int)m_cur_time);
+	if (frame_iter == m_frame_list.end())
+		return;
+	cell_map2 = &(frame_iter->second.cell_map);
+
+	//decide which side to go
+	bool out_edge = m_prv_time < m_cur_time;
+	unsigned int id = 0;
+	CellMapIter cell_map_iter;
+	vector<unsigned int> *id_list = 0;
+	unsigned int i = 0;
+	//go through sel_labels
+	for (label_iter = sel_labels.begin();
+		label_iter != sel_labels.end();
+		++label_iter)
+	{
+		id = label_iter->second.id;
+		//find id in cell map 1
+		cell_map_iter = cell_map1->find(id);
+		if (cell_map_iter == cell_map1->end())
+			continue;
+		//get correct id list
+		id_list = out_edge?&(cell_map_iter->second.out_ids):
+			&(cell_map_iter->second.in_ids);
+		for (i=0; i<id_list->size(); ++i)
+		{
+			id = (*id_list)[i];
+			//add to id map
+			m_id_map.insert(pair<unsigned int, unsigned int>(id, id));
+		}
+	}
+}
+
+IDMap* TraceGroup::GetIDMap()
+{
+	return &m_id_map;
+}
+
+bool TraceGroup::FindID(unsigned int id)
+{
+	IDMapIter iter = m_id_map.find(id);
+	return (iter != m_id_map.end());
+}
+
+unsigned char TraceGroup::ReadTag(ifstream &ifs)
+{
+	if (ifs.bad())
+		return 0;
+
+	unsigned char tag;
+	ifs.read((char*)(&tag), sizeof(tag));
+	if (ifs)
+		return tag;
+	else
+		return 0;
 }
 
 int TraceGroup::Load(wxString &filename)
 {
+	int result = 1;
 	m_data_path = filename;
 
-	ifstream file(m_data_path.ToStdWstring(), ios::in|ios::binary);
-	if (file.bad())
+	std::string str = m_data_path.ToStdString();
+    ifstream ifs(str,ios::in|ios::binary);
+	if (ifs.bad())
 		return 0;
 
 	char cheader[17];
-	file.read(cheader, 16);
+	ifs.read(cheader, 16);
 	cheader[16] = 0;
 	string header = cheader;
-	if (header != "FluoRender trace")
+	if (header != "FluoRender links")
 		return 0;
 
-	unsigned int num_trace;
-	file.read((char*)(&num_trace), sizeof(num_trace));
-
+	unsigned int num;
+	ifs.read((char*)(&num), sizeof(num));
 	//clear existing
-	m_traces.clear();
-
+	m_frame_list.clear();
 	//read new
-	unsigned int num_cell;
-	unsigned int id;
-	int time, size;
-	Point p;
-	double px, py, pz;
-	unsigned int i, j;
-	for (i=0; i<num_trace; i++)
+	for (unsigned int i=0; i<num; ++i)
 	{
-		Trace* trace = new Trace;
-
-		file.read((char*)(&id), sizeof(id));
-		trace->m_id = id;
-
-		file.read((char*)(&num_cell), sizeof(num_cell));
-		for (j=0; j<num_cell; j++)
+		//tag: frame
+		if (ReadTag(ifs) != TAG_FRAM)
 		{
-			file.read((char*)(&id), sizeof(id));
-			file.read((char*)(&time), sizeof(time));
-			file.read((char*)(&size), sizeof(size));
-			file.read((char*)(&px), sizeof(px));
-			file.read((char*)(&py), sizeof(py));
-			file.read((char*)(&pz), sizeof(pz));
-			p = Point(px, py, pz);
-			Cell cell(id, time, size, p);
-			trace->m_cells.push_back(cell);
+			result = 0;
+			break;
 		}
 
-		m_traces.insert(pair<unsigned int, Trace*>(trace->m_id, trace));
+		Frame frame;
+		if (frame.Read(ifs))
+			m_frame_list.insert(pair<unsigned int, Frame>(frame.id,frame));
 	}
 
-	file.close();
-	return 1;
-}
+	ifs.close();
 
-void TraceGroup::ExportTrace(wxString filename, unsigned int id)
-{
-	Trace* trace = GetTrace(id);
-	if (trace)
-	{
-		wxFileOutputStream fos(filename);
-		if (!fos.Ok())
-			return;
-		wxTextOutputStream tos(fos);
-
-		tos << "ID:\t" << id << "\n";
-		tos << "Time Point\tX1\tY1\tZ1\n";
-
-		Point p;
-		int t;
-		for (int i=0; i<(int)trace->GetNumCells(); i++)
-		{
-			t = trace->GetCell(i).GetTime();
-			p = trace->GetCell(i).GetCenter();
-
-			tos << t << "\t" << p.x() << "\t" << p.y() << "\t" << p.z() << "\n";
-		}
-	}
+	return result;
 }
 
 void TraceGroup::Draw()
 {
+	if (m_ghost_num <= 0)
+		return;
+
 	glPushAttrib( GL_TEXTURE_BIT | GL_DEPTH_TEST | GL_LIGHTING | GL_COLOR_BUFFER_BIT);
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);
@@ -3034,13 +3090,131 @@ void TraceGroup::Draw()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-	hash_map<unsigned int, unsigned int>::iterator id_iter;
-
-	for (id_iter=m_ids.begin(); id_iter!=m_ids.end(); id_iter++)
+	vector<CellMap*> ghosts;
+	unsigned int gstart, gend;
+	unsigned int cur_ghost = 0;
+	gstart = m_cur_time<=m_ghost_num?0:m_cur_time-m_ghost_num;
+	gend = m_cur_time+m_ghost_num;
+	FrameIter frame_iter;
+	for (unsigned int i=gstart; i<=gend; ++i)
 	{
-		Trace* trace = GetTrace(id_iter->second);
-		if (trace)
-			trace->Draw();
+		frame_iter = m_frame_list.find(i);
+		if (frame_iter != m_frame_list.end())
+		{
+			ghosts.push_back(&(frame_iter->second.cell_map));
+			if (frame_iter->second.id == m_cur_time)
+				cur_ghost = ghosts.size()-1;
+		}
+	}
+
+	if (ghosts.size() > 0)
+	{
+		//
+		IDMapIter id_map_iter;
+		unsigned int id, id2;
+		CellMap *cell_map1 = 0;
+		CellMap *cell_map2 = 0;
+		CellMapIter cell_map_iter1, cell_map_iter2;
+		Vertex *vertex1 = 0;
+		Vertex *vertex2 = 0;
+		IDMap id_map_temp1, id_map_temp2;
+
+		glBegin(GL_LINES);
+
+		id_map_temp1 = m_id_map;
+
+		if (m_cur_time >= m_prv_time)
+		{
+			//after
+			for (int i=cur_ghost; i<int(cur_ghost+m_ghost_num); ++i)
+			{
+				//after
+				if (i>=0 && i+1<ghosts.size())
+				{
+					cell_map1 = ghosts[i];
+					cell_map2 = ghosts[i+1];
+
+					for (id_map_iter = id_map_temp1.begin();
+						id_map_iter != id_map_temp1.end(); ++id_map_iter)
+					{
+						id = id_map_iter->second;
+						Color c(HSVColor(id%360, 1.0, 0.6));
+						glColor3d(c.r(), c.g(), c.b());
+
+						cell_map_iter1 = cell_map1->find(id);
+						if (cell_map_iter1 != cell_map1->end())
+						{
+							vertex1 = &(cell_map_iter1->second);
+							for (unsigned int i=0; i<vertex1->out_ids.size(); ++i)
+							{
+								id2 = vertex1->out_ids[i];
+								cell_map_iter2 = cell_map2->find(id2);
+								if (cell_map_iter2 != cell_map2->end())
+								{
+									vertex2 = &(cell_map_iter2->second);
+									id_map_temp2.insert(pair<unsigned int, unsigned int>(id2, id2));
+									glVertex3d(vertex1->center.x(),
+										vertex1->center.y(),
+										vertex1->center.z());
+									glVertex3d(vertex2->center.x(),
+										vertex2->center.y(),
+										vertex2->center.z());
+								}
+							}
+						}
+					}
+				}
+				id_map_temp1 = id_map_temp2;
+				id_map_temp2.clear();
+			}
+		}
+		else if (m_cur_time < m_prv_time)
+		{
+			//before
+			for (int i=cur_ghost; i>int(cur_ghost-m_ghost_num); --i)
+			{
+				//before
+				if (i-1>=0 && i<ghosts.size())
+				{
+					cell_map1 = ghosts[i];
+					cell_map2 = ghosts[i-1];
+
+					for (id_map_iter = id_map_temp1.begin();
+						id_map_iter != id_map_temp1.end(); ++id_map_iter)
+					{
+						id = id_map_iter->second;
+						Color c(HSVColor(id%360, 1.0, 1.0));
+						glColor3d(c.r(), c.g(), c.b());
+
+						cell_map_iter1 = cell_map1->find(id);
+						if (cell_map_iter1 != cell_map1->end())
+						{
+							vertex1 = &(cell_map_iter1->second);
+							for (unsigned int i=0; i<vertex1->in_ids.size(); ++i)
+							{
+								id2 = vertex1->in_ids[i];
+								cell_map_iter2 = cell_map2->find(id2);
+								if (cell_map_iter2 != cell_map2->end())
+								{
+									vertex2 = &(cell_map_iter2->second);
+									id_map_temp2.insert(pair<unsigned int, unsigned int>(id2, id2));
+									glVertex3d(vertex1->center.x(),
+										vertex1->center.y(),
+										vertex1->center.z());
+									glVertex3d(vertex2->center.x(),
+										vertex2->center.y(),
+										vertex2->center.z());
+								}
+							}
+						}
+					}
+				}
+				id_map_temp1 = id_map_temp2;
+				id_map_temp2.clear();
+			}
+		}
+
+		glEnd();
 	}
 
 	glPopAttrib();
@@ -3401,7 +3575,7 @@ void DataGroup::RandomizeColor()
 		VolumeData* vd = GetVolumeData(i);
 		if (vd)
 		{
-			double hue = (double)rand()/(RAND_MAX+1) * 360.0;
+			double hue = (double)rand()/(RAND_MAX) * 360.0;
 			Color color(HSVColor(hue, 1.0, 1.0));
 			vd->SetColor(color);
 		}
@@ -3431,7 +3605,7 @@ void MeshGroup::RandomizeColor()
 		MeshData* md = GetMeshData(i);
 		if (md)
 		{
-			double hue = (double)rand()/(RAND_MAX+1) * 360.0;
+			double hue = (double)rand()/(RAND_MAX) * 360.0;
 			Color color(HSVColor(hue, 1.0, 1.0));
 			md->SetColor(color, MESH_COLOR_DIFF);
 		}
@@ -3440,7 +3614,6 @@ void MeshGroup::RandomizeColor()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 DataManager::DataManager() :
-m_use_defaults(true),
 m_vol_exb(0.0),
 m_vol_gam(1.0),
 m_vol_of1(1.0),
@@ -3462,12 +3635,24 @@ m_vol_esh(true),
 m_vol_inv(false),
 m_vol_mip(false),
 m_vol_nrd(false),
-m_vol_test_wiref(false),
 m_vol_shw(false),
 m_vol_swi(0.0),
+m_vol_test_wiref(false),
+m_use_defaults(true),
 m_override_vox(true)
 {
-	wxFileInputStream is(DEFAULT_SETTINGS_FILE);
+#ifdef _DARWIN
+    
+    wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/default_volume_settings.dft";
+    std::ifstream tmp(dft);
+    if (!tmp.good())
+        dft = "FluoRender.app/Contents/Resources/default_volume_settings.dft";
+    else
+        tmp.close();
+#else
+    wxString dft = "default_volume_settings.dft";
+#endif
+	wxFileInputStream is(dft);
 	if (!is.IsOk())
 		return;
 	wxFileConfig fconfig(is);
@@ -3621,7 +3806,12 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 void DataManager::SetProjectPath(wxString path)
 {
 	m_prj_path.Clear();
-	int sep = path.Find('\\', true);
+#ifdef _WIN32
+    wxChar slash = '\\';
+#else
+    wxChar slash = '/';
+#endif
+	int sep = path.Find(slash, true);
 	if (sep != wxNOT_FOUND)
 		m_prj_path = path.Left(sep);
 }
@@ -3740,13 +3930,16 @@ int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_
 			{
 				//mask
 				MSKReader msk_reader;
-				msk_reader.SetFile(reader->GetPathName());
-				Nrrd* mask = msk_reader.Convert(t_num>=0?t_num:reader->GetCurTime(), i, true);
+				std::wstring str = reader->GetPathName();
+                msk_reader.SetFile(str);
+                Nrrd* mask = msk_reader.Convert(t_num>=0?t_num:reader->GetCurTime(), i, true);
 				if (mask)
 					vd->LoadMask(mask);
 				//label mask
 				LBLReader lbl_reader;
-				lbl_reader.SetFile(reader->GetPathName());
+                str = reader->GetPathName();
+                lbl_reader.SetFile(str);
+
 				Nrrd* label = lbl_reader.Convert(t_num>=0?t_num:reader->GetCurTime(), i, true);
 				if (label)
 					vd->LoadLabel(label);
@@ -3775,23 +3968,30 @@ int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_
 
 		//get excitation wavelength
 		double wavelength = reader->GetExcitationWavelength(i);
-		if (wavelength > 0.0)
-			vd->SetColor(GetWavelengthColor(wavelength));
+        if (wavelength > 0.0) {
+            FLIVR::Color col = GetWavelengthColor(wavelength);
+            vd->SetColor(col);
+        }
 		else
 		{
-			if (chan == 1)
-				vd->SetColor(Color(1.0, 1.0, 1.0));
-			else
-			{
-				if (i == 0)
-					vd->SetColor(Color(1.0, 0.0, 0.0));
-				else if (i == 1)
-					vd->SetColor(Color(0.0, 1.0, 0.0));
-				else if (i == 2)
-					vd->SetColor(Color(0.0, 0.0, 1.0));
-				else
-					vd->SetColor(Color(1.0, 1.0, 1.0));
-			}
+            FLIVR::Color white = Color(1.0, 1.0, 1.0);
+            FLIVR::Color red   = Color(1.0, 0.0, 0.0);
+            FLIVR::Color green = Color(0.0, 1.0, 0.0);
+            FLIVR::Color blue  = Color(0.0, 0.0, 1.0);
+            if (chan == 1) {
+                vd->SetColor(white);
+            }
+            else
+            {
+                if (i == 0)
+                    vd->SetColor(red);
+                else if (i == 1)
+                    vd->SetColor(green);
+                else if (i == 2)
+                    vd->SetColor(blue);
+                else
+                    vd->SetColor(white);
+            }
 		}
 
 	}

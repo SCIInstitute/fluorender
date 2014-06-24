@@ -11,11 +11,9 @@
 #ifndef _BITMAP_FONTS_H_
 #define _BITMAP_FONTS_H_
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
+#include "compatibility.h"
 
-#include <GL/gl.h>
+#include OPEN_GL_HEADER_LOC
 
 /*
  * The bitmap font structure
@@ -152,7 +150,8 @@ static const GLubyte* Fixed8x13_Character_Map[] = {Fixed8x13_Character_042,Fixed
    Fixed8x13_Character_042,Fixed8x13_Character_042,Fixed8x13_Character_042,Fixed8x13_Character_042,Fixed8x13_Character_042,NULL};
 
 /* The font structure: */
-const BitmapFontData FontFixed8x13 = { "-misc-fixed-medium-r-normal--13-120-75-75-C-80-iso8859-1", 93, 13, Fixed8x13_Character_Map, -1.0f, 2.0f };
+extern char literal[]; 
+extern const BitmapFontData FontFixed8x13;
 
 static const GLubyte Fixed9x15_Character_032[] = {  9,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}; /* blank */
 static const GLubyte Fixed9x15_Character_097[] = {  9,  0,  0,  0,  0,  0,  0,122,  0,134,  0,130,  0,126,  0,  2,  0,  2,  0,124,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}; /* "a" */
@@ -263,7 +262,8 @@ static const GLubyte* Fixed9x15_Character_Map[] = {Fixed9x15_Character_042,Fixed
    Fixed9x15_Character_042,Fixed9x15_Character_042,Fixed9x15_Character_042,Fixed9x15_Character_042,Fixed9x15_Character_042,NULL};
 
 /* The font structure: */
-const BitmapFontData FontFixed9x15 = { "-misc-fixed-medium-r-normal--15-140-75-75-C-90-iso8859-1", 93, 15, Fixed9x15_Character_Map, -1.0f, 3.0f };
+extern char literal0[]; 
+extern const BitmapFontData FontFixed9x15;
 
 static const GLubyte Helvetica10_Character_032[] = {  3,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}; /* " " */
 static const GLubyte Helvetica10_Character_097[] = {  5,  0,  0,104,144,144,112, 16,224,  0,  0,  0,  0,  0}; /* "a" */
@@ -374,7 +374,8 @@ static const GLubyte* Helvetica10_Character_Map[] = {Helvetica10_Character_042,H
  Helvetica10_Character_042,Helvetica10_Character_042,Helvetica10_Character_042,Helvetica10_Character_042,Helvetica10_Character_042,Helvetica10_Character_042,Helvetica10_Character_042,Helvetica10_Character_042,Helvetica10_Character_042,Helvetica10_Character_042,Helvetica10_Character_042,Helvetica10_Character_042,Helvetica10_Character_042,Helvetica10_Character_042,Helvetica10_Character_042,Helvetica10_Character_042,Helvetica10_Character_042,Helvetica10_Character_042,Helvetica10_Character_042,Helvetica10_Character_042,Helvetica10_Character_042,Helvetica10_Character_042,Helvetica10_Character_042,NULL};
 
 /* The font structure: */
-const BitmapFontData FontHelvetica10 = { "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1", 93, 13, Helvetica10_Character_Map, -1.0f, 2.0f };
+extern char literal1[];
+extern const BitmapFontData FontHelvetica10;
 
 static const GLubyte Helvetica12_Character_032[] = {  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}; /* " " */
 static const GLubyte Helvetica12_Character_097[] = {  7,  0,  0,  0,116,136,136,120,  8,136,112,  0,  0,  0,  0,  0}; /* "a" */
@@ -486,7 +487,8 @@ static const GLubyte* Helvetica12_Character_Map[] = {Helvetica12_Character_042,H
  Helvetica12_Character_042,Helvetica12_Character_042,Helvetica12_Character_042,Helvetica12_Character_042,Helvetica12_Character_042,Helvetica12_Character_042,Helvetica12_Character_042,Helvetica12_Character_042,Helvetica12_Character_042,Helvetica12_Character_042,Helvetica12_Character_042,Helvetica12_Character_042,Helvetica12_Character_042,Helvetica12_Character_042,Helvetica12_Character_042,Helvetica12_Character_042,Helvetica12_Character_042,Helvetica12_Character_042,Helvetica12_Character_042,Helvetica12_Character_042,Helvetica12_Character_042,Helvetica12_Character_042,Helvetica12_Character_042,NULL};
 
 /* The font structure: */
-const BitmapFontData FontHelvetica12 = { "-adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1", 93, 15, Helvetica12_Character_Map, -1.0f, 3.0f };
+extern char literal2[];
+extern const BitmapFontData FontHelvetica12;
 
 static const GLubyte Helvetica18_Character_032[] = {  5,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}; /* " " */
 static const GLubyte Helvetica18_Character_097[] = {  9,  0,  0,  0,  0,  0,  0,  0,  0,118,  0,238,  0,198,  0,198,  0,230,  0,126,  0, 14,  0,198,  0,238,  0,124,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}; /* "a" */
@@ -598,7 +600,8 @@ static const GLubyte* Helvetica18_Character_Map[] = {Helvetica18_Character_042,H
  Helvetica18_Character_042,Helvetica18_Character_042,Helvetica18_Character_042,Helvetica18_Character_042,Helvetica18_Character_042,Helvetica18_Character_042,Helvetica18_Character_042,Helvetica18_Character_042,Helvetica18_Character_042,Helvetica18_Character_042,Helvetica18_Character_042,Helvetica18_Character_042,Helvetica18_Character_042,Helvetica18_Character_042,Helvetica18_Character_042,Helvetica18_Character_042,Helvetica18_Character_042,Helvetica18_Character_042,Helvetica18_Character_042,Helvetica18_Character_042,Helvetica18_Character_042,Helvetica18_Character_042,Helvetica18_Character_042,NULL};
 
 /* The font structure: */
-const BitmapFontData FontHelvetica18 = { "-adobe-helvetica-medium-r-normal--18-180-75-75-p-98-iso8859-1", 93, 22, Helvetica18_Character_Map, -1.0f, 4.0f };
+extern char literal3[];
+extern const BitmapFontData FontHelvetica18;
 
 static const GLubyte TimesRoman10_Character_032[] = {  2,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}; /* " " */
 static const GLubyte TimesRoman10_Character_097[] = {  4,  0,  0,  0,224,160, 96, 32,192,  0,  0,  0,  0,  0}; /* "a" */
@@ -710,7 +713,8 @@ TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042
 TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,TimesRoman10_Character_042,NULL};
 
 /* The font structure: */
-const BitmapFontData FontTimesRoman10 = { "-adobe-times-medium-r-normal--10-100-75-75-p-54-iso8859-1", 93, 13, TimesRoman10_Character_Map, 0.0f, 3.0f };
+extern char literal4[];
+extern const BitmapFontData FontTimesRoman10;
 
 static const GLubyte TimesRoman24_Character_032[] = {  6,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}; /* " " */
 static const GLubyte TimesRoman24_Character_097[] = { 11,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,113,128,251,  0,199,  0,195,  0,195,  0, 99,  0, 59,  0, 15,  0,  3,  0, 99,  0,103,  0, 62,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}; /* "a" */
@@ -822,7 +826,8 @@ TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042
 TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,TimesRoman24_Character_042,NULL};
 
 /* The font structure: */
-const BitmapFontData FontTimesRoman24 = { "-adobe-times-medium-r-normal--24-240-75-75-p-124-iso8859-1", 93, 28, TimesRoman24_Character_Map, -1.0f, 6.0f };
+extern char literal5[];
+extern const BitmapFontData FontTimesRoman24;
 
 enum BitmapFontType
 {

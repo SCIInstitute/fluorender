@@ -1,11 +1,11 @@
-#include <wx\wx.h>
+#include <wx/wx.h>
 
 #ifndef _SETTINGDLG_H_
 #define _SETTINGDLG_H_
 
 #define SETTING_FILE_NAME "fluorender.set"
 
-enum BitmapFontType;
+//enum BitmapFontType;
 class SettingDlg : public wxPanel
 {
 	enum

@@ -1,15 +1,15 @@
 #include "DataManager.h"
-#include <wx\wx.h>
-#include <wx\panel.h>
-#include <wx\glcanvas.h>
-#include <wx\clrpicker.h>
-#include <wx\slider.h>
+#include <wx/wx.h>
+#include <wx/panel.h>
+#include <wx/glcanvas.h>
+#include <wx/clrpicker.h>
+#include <wx/slider.h>
 
-#include <FLIVR\Color.h>
-#include <FLIVR\VolumeRenderer.h>
-#include <FLIVR\BBox.h>
-#include <FLIVR\Point.h>
-#include <FLIVR\MultiVolumeRenderer.h>
+#include "FLIVR/Color.h"
+#include "FLIVR/VolumeRenderer.h"
+#include "FLIVR/BBox.h"
+#include "FLIVR/Point.h"
+#include "FLIVR/MultiVolumeRenderer.h"
 
 
 #ifndef _VPROPVIEW_H_
@@ -159,7 +159,7 @@ private:
 	//color
 	//wxColourPickerCtrl *m_color_picker;
 	wxTextCtrl *m_color_text;
-	wxButton *m_color_btn;
+	wxColourPickerCtrl *m_color_btn;
 	//space
 	wxTextCtrl *m_space_x_text;
 	wxTextCtrl *m_space_y_text;
@@ -238,7 +238,7 @@ private:
 	void OnColorChange(wxColor c);
 	void OnColorTextChange(wxCommandEvent& event);
 	void OnColorTextFocus(wxCommandEvent& event);
-	void OnColorBtn(wxCommandEvent &event);
+	void OnColorBtn(wxColourPickerEvent& event);
 	//spacings
 	void OnSpaceText(wxCommandEvent& event);
 	//scale bar

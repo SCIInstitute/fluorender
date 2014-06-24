@@ -35,14 +35,19 @@ m_dragging_to_item(-1)
 	wxListItem itemCol;
 	itemCol.SetText("ID");
 	this->InsertColumn(0, itemCol);
+    SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
 	itemCol.SetText("Frame");
 	this->InsertColumn(1, itemCol);
+    SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
 	itemCol.SetText("Inbetweens");
 	this->InsertColumn(2, itemCol);
+    SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);
 	itemCol.SetText("Interpolation");
 	this->InsertColumn(3, itemCol);
+    SetColumnWidth(3, wxLIST_AUTOSIZE_USEHEADER);
 	itemCol.SetText("Description");
 	this->InsertColumn(4, itemCol);
+    SetColumnWidth(4, wxLIST_AUTOSIZE_USEHEADER);
 
 	m_images = new wxImageList(16, 16, true);
 	wxIcon icon = wxIcon(key_xpm);
@@ -163,9 +168,12 @@ void KeyListCtrl::UpdateText()
 		int interp = interpolator->GetKeyType(i);
 		string desc = interpolator->GetKeyDesc(i);
 		
-		SetText(i, 0, wxString::Format("%d", id));
-		SetText(i, 1, wxString::Format("%d", time));
-		SetText(i, 2, wxString::Format("%d", duration));
+                wxString wx_id = wxString::Format("%d", id);
+                wxString wx_time = wxString::Format("%d", time);
+                wxString wx_duration = wxString::Format("%d", duration);
+		SetText(i, 0, wx_id);
+		SetText(i, 1, wx_time);
+		SetText(i, 2, wx_duration);
 		str = interp==0?"Linear":"Smooth";
 		SetText(i, 3, str);
 		str = desc;
@@ -482,7 +490,7 @@ m_view(0)
 	wxBoxSizer *group1 = new wxBoxSizer(wxHORIZONTAL);
 	wxStaticText* st = new wxStaticText(this, wxID_ANY, "Automatic Keys:");
 	m_auto_key_cmb = new wxComboBox(this, ID_AutoKeyCmb, "",
-		wxDefaultPosition, wxSize(200, 20), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, wxSize(200, 30), 0, NULL, wxCB_READONLY);
 	m_auto_key_cmb->Append("Channel combination nC1");
 	m_auto_key_cmb->Append("Channel combination nC2");
 	m_auto_key_cmb->Append("Channel combination nC3");
@@ -1030,7 +1038,7 @@ void RecorderDlg::OnPlay(wxCommandEvent &event)
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		wxString filename = fopendlg->GetDirectory() + "\\" + fopendlg->GetFilename();
+		wxString filename = fopendlg->GetPath();
 		int begin_frame = int(interpolator->GetFirstT());
 		int end_frame = int(interpolator->GetLastT());
 		m_view->SetParamCapture(filename, begin_frame, end_frame, false);
@@ -1040,7 +1048,7 @@ void RecorderDlg::OnPlay(wxCommandEvent &event)
 		{
 			wxString new_folder;
 			new_folder = filename + "_project";
-			CreateDirectory(new_folder.fn_str(), NULL);
+			CREATE_DIR(new_folder.fn_str());
 			wxString prop_file = new_folder + "/" + fopendlg->GetFilename() + "_project.vrp";
 			vr_frame->SaveProject(prop_file);
 		}

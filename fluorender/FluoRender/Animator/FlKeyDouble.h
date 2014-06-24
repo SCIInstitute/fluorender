@@ -1,7 +1,7 @@
 #ifndef _FLKEY_DOUBLE_H_
 #define _FLKEY_DOUBLE_H_
 
-#include <Animator\FlKey.h>
+#include "FlKey.h"
 
 class FlKeyDouble : public FlKey
 {

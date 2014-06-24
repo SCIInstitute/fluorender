@@ -1,28 +1,28 @@
-#include <GL\glew.h>
+#include <GL/glew.h>
 #include "bitmap_fonts.h"
 #include <vector>
-#include <hash_map>
+#include <unordered_map>
 #include <string.h>
 #include <tiffio.h>
-#include <FLIVR\BBox.h>
-#include <FLIVR\Color.h>
-#include <FLIVR\Point.h>
-#include <FLIVR\MeshRenderer.h>
-#include <FLIVR\VolumeRenderer.h>
-#include <wx\wfstream.h>
-#include <wx\fileconf.h>
-#include <Formats\base_reader.h>
-#include <Formats\oib_reader.h>
-#include <Formats\oif_reader.h>
-#include <Formats\nrrd_reader.h>
-#include <Formats\tif_reader.h>
-#include <Formats\nrrd_writer.h>
-#include <Formats\tif_writer.h>
-#include <Formats\msk_reader.h>
-#include <Formats\msk_writer.h>
-#include <Formats\lsm_reader.h>
-#include <Formats\lbl_reader.h>
-#include <Formats\pvxml_reader.h>
+#include "FLIVR/BBox.h"
+#include "FLIVR/Color.h"
+#include "FLIVR/Point.h"
+#include "FLIVR/MeshRenderer.h"
+#include "FLIVR/VolumeRenderer.h"
+#include <wx/wfstream.h>
+#include <wx/fileconf.h>
+#include "Formats/base_reader.h"
+#include "Formats/oib_reader.h"
+#include "Formats/oif_reader.h"
+#include "Formats/nrrd_reader.h"
+#include "Formats/tif_reader.h"
+#include "Formats/nrrd_writer.h"
+#include "Formats/tif_writer.h"
+#include "Formats/msk_reader.h"
+#include "Formats/msk_writer.h"
+#include "Formats/lsm_reader.h"
+#include "Formats/lbl_reader.h"
+#include "Formats/pvxml_reader.h"
 
 #ifndef _DATAMANAGER_H_
 #define _DATAMANAGER_H_
@@ -40,8 +40,6 @@ using namespace FLIVR;
 #define LOAD_TYPE_OIF		4
 #define LOAD_TYPE_LSM		5
 #define LOAD_TYPE_PVXML		6
-
-#define DEFAULT_SETTINGS_FILE	"default_volume_settings.dft"
 
 class TreeLayer
 {
@@ -64,19 +62,19 @@ public:
 
 	//layer adjustment
 	//gamma
-	Color GetGamma()
+	const Color GetGamma()
 	{return m_gamma;}
-	void SetGamma(Color &gamma)
+	void SetGamma(Color gamma)
 	{m_gamma = gamma;}
 	//brightness
-	Color GetBrightness()
+	const Color GetBrightness()
 	{return m_brightness;}
-	void SetBrightness(Color &brightness)
+	void SetBrightness(Color brightness)
 	{m_brightness = brightness;}
 	//hdr settings
-	Color GetHdr()
+	const Color GetHdr()
 	{return m_hdr;}
-	void SetHdr(Color &hdr)
+	void SetHdr(Color hdr)
 	{m_hdr = hdr;}
 	//sync values
 	bool GetSyncR()
@@ -129,7 +127,7 @@ class VolumeData : public TreeLayer
 public:
 	VolumeData();
 	VolumeData(VolumeData &copy);
-	~VolumeData();
+	virtual ~VolumeData();
 
 	//duplication
 	bool GetDup();
@@ -451,7 +449,7 @@ class MeshData : public TreeLayer
 {
 public:
 	MeshData();
-	~MeshData();
+	virtual ~MeshData();
 
 	wxString GetPath();
 	BBox GetBounds();
@@ -549,14 +547,14 @@ class AText
 {
 public:
 	AText();
-	AText(string &str, Point &pos);
+	AText(const string &str, const Point &pos);
 	~AText();
 
 	string GetText();
 	Point GetPos();
-	void SetText(string &str);
-	void SetPos(Point &pos);
-	void SetInfo(string &str);
+	void SetText(string str);
+	void SetPos(Point pos);
+	void SetInfo(string str);
 
 	friend class Annotations;
 
@@ -571,7 +569,7 @@ class Annotations : public TreeLayer
 {
 public:
 	Annotations();
-	~Annotations();
+	virtual ~Annotations();
 
 	//reset counter
 	static void ResetID()
@@ -656,7 +654,7 @@ class Ruler : public TreeLayer
 {
 public:
 	Ruler();
-	~Ruler();
+	virtual ~Ruler();
 
 	//reset counter
 	static void ResetID()
@@ -757,56 +755,58 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class Trace;
-class TraceGroup;
-class Cell
+//tags
+#define TAG_CELL		1
+#define TAG_EDGE		2
+#define TAG_VERT		3
+#define TAG_CMAP		4
+#define TAG_FRAM		5
+
+//label is used in render view
+struct Lbl
 {
-public:
-	Cell();
-	Cell(unsigned int id,
-		 int time,
-		 int size,
-		 Point& p);
-	~Cell();
-
-	friend class Trace;
-	friend class TraceGroup;
-
-	unsigned int GetID() {return m_id;}
-	int GetTime() {return m_time;}
-	int GetSize() {return m_size;}
-	Point GetCenter() {return m_center;}
-
-private:
-	unsigned int m_id;
-	int m_time;
-	int m_size;
-	Point m_center;
+	unsigned int id;
+	unsigned int size;
 };
 
-class Trace
+//a vertex in the map contains a cell and in/out edges
+struct Vertex
 {
-public:
-	Trace();
-	~Trace();
+	unsigned int id;
+	unsigned int vsize;
+	Point center;
 
-	friend class TraceGroup;
+	vector<unsigned int> out_ids;
+	vector<unsigned int> in_ids;
 
-	unsigned int GetID() {return m_id;}
-	unsigned int GetNumCells() {return m_cells.size();}
-	Cell GetCell(int index) {return m_cells[index];}
-	void Draw();
-
-private:
-	unsigned int m_id;
-	vector<Cell> m_cells;
+	int Read(ifstream &ifs);
 };
+
+typedef unordered_map<unsigned int, Vertex> CellMap;
+typedef unordered_map<unsigned int, Vertex>::iterator CellMapIter;
+
+//a frame contains a cell map
+struct Frame
+{
+	unsigned int id;
+	CellMap cell_map;
+
+	int Read(ifstream &ifs);
+	int ReadCellMap(ifstream &ifs);
+};
+
+//frame list
+typedef unordered_map<unsigned int, Frame> FrameList;
+typedef unordered_map<unsigned int, Frame>::iterator FrameIter;
+//id list
+typedef unordered_map<unsigned int, unsigned int> IDMap;
+typedef unordered_map<unsigned int, unsigned int>::iterator IDMapIter;
 
 class TraceGroup : public TreeLayer
 {
 public:
 	TraceGroup();
-	~TraceGroup();
+	virtual ~TraceGroup();
 
 	//reset counter
 	static void ResetID()
@@ -823,26 +823,36 @@ public:
 	}
 
 	wxString GetPath() {return m_data_path;}
-	unsigned int GetNumTraces() {return m_traces.size();}
-	Trace* GetTrace(unsigned int id);
-	//for selective drawing
-	void ClearIDs();
 	void SetCurTime(int time);
+	void SetPrvTime(int time);
+	//ghost num
+	void SetGhostNum(int num) {m_ghost_num = num;}
+	int GetGhostNum() {return m_ghost_num;}
+
+	//for selective drawing
+	void ClearIDMap();
 	void AddID(unsigned int id);
-	hash_map<unsigned int, unsigned int>* GetIDs();
+	void SetIDMap(unordered_map<unsigned int, Lbl> &sel_labels);
+	IDMap *GetIDMap();
+	bool FindID(unsigned int id);
 
 	int Load(wxString &filename);
 	void Draw();
-	void ExportTrace(wxString filename, unsigned int id);
 
 private:
 	static int m_num;
 	wxString m_data_path;
 	//for selective drawing
 	int m_cur_time;
-	hash_map<unsigned int, unsigned int> m_ids;
+	int m_prv_time;
+	int m_ghost_num;
 
-	hash_map<unsigned int, Trace*> m_traces;
+	FrameList m_frame_list;
+	IDMap m_id_map;
+
+private:
+	//reading functions
+	unsigned char ReadTag(ifstream &ifs);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -850,7 +860,7 @@ class DataGroup : public TreeLayer
 {
 public:
 	DataGroup();
-	~DataGroup();
+	virtual ~DataGroup();
 
 	//reset counter
 	static void ResetID()
@@ -979,7 +989,7 @@ class MeshGroup : public TreeLayer
 {
 public:
 	MeshGroup();
-	~MeshGroup();
+	virtual ~MeshGroup();
 
 	//counter
 	static void ResetID()

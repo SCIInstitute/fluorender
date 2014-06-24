@@ -1,5 +1,5 @@
-#include <wx\wx.h>
-#include <wx\listctrl.h>
+#include <wx/wx.h>
+#include <wx/listctrl.h>
 
 #ifndef _TRACEDLG_H_
 #define _TRACEDLG_H_
@@ -53,7 +53,10 @@ public:
 	enum
 	{
 		ID_LoadTraceText = wxID_HIGHEST+2201,
-		ID_LoadTraceBtn
+		ID_LoadTraceBtn,
+		ID_GhostNumSldr,
+		ID_GhostNumText,
+		ID_GhostUpdateBtn
 	};
 
 	TraceDlg(wxWindow* frame,
@@ -75,9 +78,16 @@ private:
 	//load trace
 	wxTextCtrl* m_load_trace_text;
 	wxButton* m_load_trace_btn;
+	//ghost num
+	wxSlider* m_ghost_num_sldr;
+	wxTextCtrl* m_ghost_num_text;
+	wxButton* m_ghost_update_btn;
 
 private:
 	void OnLoadTrace(wxCommandEvent& event);
+	void OnGhostNumChange(wxScrollEvent &event);
+	void OnGhostNumText(wxCommandEvent &event);
+	void OnGhostUpdate(wxCommandEvent& event);
 
 	DECLARE_EVENT_TABLE();
 };

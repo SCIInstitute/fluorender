@@ -33,7 +33,7 @@
 #include <FLIVR/ShaderProgram.h>
 #include <FLIVR/TextureBrick.h>
 #include "utility.h"
-#include "windows.h"
+#include "../compatibility.h"
 
 namespace FLIVR
 {
@@ -246,7 +246,7 @@ namespace FLIVR
 		return hi_thresh_;
 	}
 
-	void VolumeRenderer::set_color(Color &color)
+	void VolumeRenderer::set_color(Color color)
 	{
 		color_ = color;
 
@@ -496,7 +496,7 @@ namespace FLIVR
 		size.reserve(num_slices_*6);
 
 		//--------------------------------------------------------------------------
-		int nb0 = (*bricks)[0]->nc();
+		//int nb0 = (*bricks)[0]->nc();
 
 		bool use_fog = glIsEnabled(GL_FOG)!=0 && colormap_mode_!=2;
 		GLfloat clear_color[4];
@@ -754,7 +754,7 @@ namespace FLIVR
 			//comment off when debug_ds
 			if (mem_swap_)
 			{
-				DWORD rn_time = GetTickCount();
+				uint32_t rn_time = GET_TICK_COUNT();
 				if (rn_time - st_time_ > get_up_time())
 					break;
 			}
@@ -830,7 +830,7 @@ namespace FLIVR
 			////this is for debug_ds, comment when done
 			//if (mem_swap_)
 			//{
-			//	DWORD rn_time = GetTickCount();
+			//	uint32_t rn_time = GET_TICK_COUNT();
 			//	if (rn_time - st_time_ > get_up_time())
 			//		break;
 			//}
@@ -1511,7 +1511,7 @@ namespace FLIVR
 			//load the texture
 			if (type == 0)
 				load_brick(0, 0, bricks, i, GL_NEAREST, compression_);
-			if (has_mask) GLuint mask_id = load_brick_mask(bricks, i);
+			//if (has_mask) GLuint mask_id = load_brick_mask(bricks, i);
 			GLuint label_id = load_brick_label(bricks, i);
 
 			//draw each slice

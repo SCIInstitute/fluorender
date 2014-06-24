@@ -1,9 +1,9 @@
 #ifndef _TIF_READER_H_
 #define _TIF_READER_H_
 
-#include <Formats\base_reader.h>
+#include <base_reader.h>
 #include <cstdio>
-#include <windows.h>
+//#include <windows.h>
 #include <vector>
 #include <cstdint>
 #include <fstream>
@@ -177,6 +177,10 @@ private:
 	static const uint32_t kBitsPerSampleTag = 258;
 	/** The tiff tag for compression */
 	static const uint32_t kCompressionTag = 259;
+	/** The tiff tag for decode prediction */
+	static const uint32_t kPredictionTag = 317;
+	/** The tiff tag for planar configuration */
+	static const uint32_t kPlanarConfigurationTag = 284;
 	/** The tiff tag for image description */
 	static const uint32_t kImageDescriptionTag = 270;
 	/** The tiff tag for strip offsets */

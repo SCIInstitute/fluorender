@@ -1,4 +1,4 @@
-#include <wx\wx.h>
+#include <wx/wx.h>
 
 #ifndef _CONVERTDLG_H_
 #define _CONVERTDLG_H_

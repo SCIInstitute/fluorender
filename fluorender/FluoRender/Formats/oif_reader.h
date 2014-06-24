@@ -1,9 +1,9 @@
 #ifndef _OIF_READER_H_
 #define _OIF_READER_H_
 
-#include <Formats\base_reader.h>
+#include <base_reader.h>
 #include <stdio.h>
-#include <windows.h>
+//#include <windows.h>
 #include <vector>
 #include <fstream>
 #include <iostream>

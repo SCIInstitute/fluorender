@@ -1,5 +1,5 @@
-#include <wx\wx.h>
-#include <FLIVR\Color.h>
+#include <wx/wx.h>
+#include "FLIVR/Color.h"
 
 #ifndef _NOISECANCELLINGDLG_H_
 #define _NOISECANCELLINGDLG_H_

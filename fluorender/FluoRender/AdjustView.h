@@ -1,8 +1,8 @@
 #include "DataManager.h"
 #include "VRenderView.h"
-#include <wx\wx.h>
-#include <wx\panel.h>
-#include <wx\slider.h>
+#include <wx/wx.h>
+#include <wx/panel.h>
+#include <wx/slider.h>
 
 #ifndef _ADJUSTVIEW_H_
 #define _ADJUSTVIEW_H_

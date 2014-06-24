@@ -29,8 +29,8 @@
 #ifndef _QUATERNION_H_
 #define _QUATERNION_H_
 
-#include <FLIVR\Vector.h>
-#include <utility.h>
+#include "Vector.h"
+#include "../utility.h"
 #include <math.h>
 
 #pragma warning (disable : 4521 4522)
@@ -107,34 +107,34 @@ public:
 		w = 1;
 	}
 
-	Quaternion operator+(Quaternion& q)
+	Quaternion operator+(const Quaternion& q) const
 	{
 		return Quaternion(x + q.x, y + q.y, z + q.z, w + q.w);
 	}
 
-	Quaternion& operator+=(Quaternion& q)
+	Quaternion& operator+=(const Quaternion& q)
 	{
 		x+=q.x; y+=q.y; z+=q.z; w+=q.w;
 		return *this;
 	}
 
-	Quaternion operator-(Quaternion& q)
+	Quaternion operator-(const Quaternion& q)const 
 	{
 		return Quaternion(x - q.x, y - q.y, z - q.z, w + q.w);
 	}
 
-	Quaternion& operator-=(Quaternion& q)
+	Quaternion& operator-=(const Quaternion& q)
 	{
 		x-=q.x; y-=q.y; z-=q.z; w+=q.w;
 		return *this;
 	}
 
-	Quaternion operator-()
+	Quaternion operator-()const 
 	{
 		return Quaternion(-x, -y, -z, w);
 	}
 
-	Quaternion operator*(Quaternion& q)
+	Quaternion operator*(const Quaternion& q)const 
 	{
 		return Quaternion(
 			w*q.x + x*q.w + y*q.z - z*q.y,
@@ -143,7 +143,7 @@ public:
 			w*q.w - x*q.x - y*q.y - z*q.z);
 	}
 
-	Quaternion& operator*=(Quaternion& q)
+	Quaternion& operator*=(const Quaternion& q)
 	{
 		double x0, y0, z0, w0;
 		x0 = w*q.x + x*q.w + y*q.z - z*q.y;
@@ -154,18 +154,18 @@ public:
 		return *this;
 	}
 
-	Quaternion operator*(double s)
+	Quaternion operator*(const double s)const 
 	{
 		return Quaternion(x*s, y*s, z*s, w*s);
 	}
 
-	Quaternion& operator*=(double s)
+	Quaternion& operator*=(const double s)
 	{
 		x*=s; y*=s; z*=s; w*=s;
 		return *this;
 	}
 
-	bool operator==(Quaternion& q)
+	bool operator==(const Quaternion& q)const 
 	{
 		return (x==q.x && y==q.y && z==q.z && w==q.w);
 	}
@@ -315,7 +315,7 @@ inline Quaternion Slerp(Quaternion& a, Quaternion& b, double t)
 inline Quaternion NLerp(Quaternion& a, Quaternion& b, double w2)
 {
 	double w1 = 1.0 - w2;
-	Quaternion q = a*w1 + b*w2;
+	Quaternion q = (a*w1) + (b*w2);
 	q.Normalize();
 	return q;
 }

@@ -1,29 +1,30 @@
-#include <Formats\oib_reader.h>
+#include "oib_reader.h"
+#include "../compatibility.h"
 #include <algorithm>
 
 OIBReader::OIBReader()
 {
-	m_time_num = 0;
-	m_cur_time = -1;
-	m_chan_num = 0;
-	m_slice_num = 0;
-	m_x_size = 0;
-	m_y_size = 0;
+   m_time_num = 0;
+   m_cur_time = -1;
+   m_chan_num = 0;
+   m_slice_num = 0;
+   m_x_size = 0;
+   m_y_size = 0;
 
-	m_valid_spc = false;
-	m_xspc = 0.0;
-	m_yspc = 0.0;
-	m_zspc = 0.0;
+   m_valid_spc = false;
+   m_xspc = 0.0;
+   m_yspc = 0.0;
+   m_zspc = 0.0;
 
-	m_max_value = 0.0;
-	m_scalar_scale = 1.0;
+   m_max_value = 0.0;
+   m_scalar_scale = 1.0;
 
-	m_batch = false;
-	m_cur_batch = -1;
+   m_batch = false;
+   m_cur_batch = -1;
 
-	m_time_id = L"_T";
-	m_type = 0;
-	m_oib_t = 0;
+   m_time_id = L"_T";
+   m_type = 0;
+   m_oib_t = 0;
 }
 
 OIBReader::~OIBReader()
@@ -32,325 +33,286 @@ OIBReader::~OIBReader()
 
 void OIBReader::SetFile(string &file)
 {
-	if (!file.empty())
-	{
-		if (!m_path_name.empty())
-			m_path_name.clear();
-		m_path_name.assign(file.length(), L' ');
-		copy(file.begin(), file.end(), m_path_name.begin());
-	}
-	m_id_string = m_path_name;
+   if (!file.empty())
+   {
+      if (!m_path_name.empty())
+         m_path_name.clear();
+      m_path_name.assign(file.length(), L' ');
+      copy(file.begin(), file.end(), m_path_name.begin());
+   }
+   m_id_string = m_path_name;
 }
 
 void OIBReader::SetFile(wstring &file)
 {
-	m_path_name = file;
-	m_id_string = m_path_name;
+   m_path_name = file;
+   m_id_string = m_path_name;
 }
 
 void OIBReader::Preprocess()
 {
-	m_type = 0;
-	m_oib_info.clear();
+   m_type = 0;
+   m_oib_info.clear();
 
-	//separate path and name
-	size_t pos = m_path_name.find_last_of(L'\\');
-	if (pos == -1)
-		return;
-	wstring path = m_path_name.substr(0, pos+1);
-	wstring name = m_path_name.substr(pos+1);
-	//extract time sequence string
-	size_t begin = name.find(m_time_id);
-	size_t end = -1;
-	size_t id_len = m_time_id.size();
-	if (begin != -1)
-	{
-		wstring t_num;
-		size_t j;
-		for (j=begin+id_len; j<name.size(); j++)
-		{
-			WCHAR c = name[j];
-			if (iswdigit(c))
-				t_num.push_back(c);
-			else break;
-		}
-		if (t_num.size() > 0)
-			end = j;
-		else
-			begin = -1;
-	}
+   //separate path and name
+#ifdef _WIN32
+   wchar_t slash = L'\\';
+#else
+   wchar_t slash = L'/';
+#endif
+   size_t pos = m_path_name.find_last_of(slash);
+   if (pos == -1)
+      return;
+   wstring path = m_path_name.substr(0, pos+1);
+   wstring name = m_path_name.substr(pos+1);
+   //extract time sequence string
+   size_t begin = name.find(m_time_id);
+   size_t end = -1;
+   size_t id_len = m_time_id.size();
+   if (begin != -1)
+   {
+      wstring t_num;
+      size_t j;
+      for (j=begin+id_len; j<name.size(); j++)
+      {
+         wchar_t c = name[j];
+         if (iswdigit(c))
+            t_num.push_back(c);
+         else break;
+      }
+      if (t_num.size() > 0)
+         end = j;
+      else
+         begin = -1;
+   }
 
-	if (begin == -1)
-	{
-		ReadSingleOib();
-	}
-	else
-	{
-		//search time sequence files
-		wstring search_str = path + name.substr(0, begin+id_len) +
-			L"*" + name.substr(end);
-		WIN32_FIND_DATAW FindFileData;
-		HANDLE hFind;
-		hFind = FindFirstFileW(search_str.c_str(), &FindFileData);
-		if (hFind != INVALID_HANDLE_VALUE)
-		{
-			TimeDataInfo info;
-			wstring str = FindFileData.cFileName;
-			wstring t_num;
-			size_t j;
-			for (j=begin+id_len; j<str.size(); j++)
-			{
-				WCHAR c = str[j];
-				if (iswdigit(c))
-					t_num.push_back(c);
-				else break;
-			}
-			if (t_num.size() > 0)
-				info.filenumber = _wtoi(t_num.c_str());
-			else
-				info.filenumber = 0;
-			info.filename = path + str;
-			m_oib_info.push_back(info);
+   if (begin == -1)
+   {
+      ReadSingleOib();
+   }
+   else
+   {
+      //search time sequence files
+      std::vector<std::wstring> list;
+      int tmp = 0;
+      FIND_FILES(path,L".oib",list,tmp,name.substr(0,begin+id_len+1));
+      for(int i = 0; i < list.size(); i++) {
+         size_t start_idx = list.at(i).find(m_time_id) + id_len;
+         size_t end_idx   = list.at(i).find(L".oib");
+         size_t size = end_idx - start_idx;
+         std::wstring fileno = list.at(i).substr(start_idx, size);
+         TimeDataInfo info;
+         info.filenumber = WSTOI(fileno);
+         info.filename = list.at(i);
+         m_oib_info.push_back(info);
+      }
 
-			while (FindNextFileW(hFind, &FindFileData) != 0)
-			{
-				TimeDataInfo info;
-				str = FindFileData.cFileName;
-				t_num.clear();
-				for (j=begin+id_len; j<str.size(); j++)
-				{
-					WCHAR c = str[j];
-					if (iswdigit(c))
-						t_num.push_back(c);
-					else break;
-				}
-				if (t_num.size() > 0)
-					info.filenumber = _wtoi(t_num.c_str());
-				else
-					info.filenumber = 0;
-				info.filename = path + str;
-				m_oib_info.push_back(info);
-			}
-		}
-		FindClose(hFind);
+      if (m_oib_info.size() > 0)
+      {
+         m_type = 1;
+         std::sort(m_oib_info.begin(), m_oib_info.end(), OIBReader::oib_sort);
+         ReadSequenceOib();
+      }
+      else
+      {
+         m_oib_info.clear();
+         ReadSingleOib();
+      }
+   }
 
-		if (m_oib_info.size() > 0)
-		{
-			m_type = 1;
-			std::sort(m_oib_info.begin(), m_oib_info.end(), OIBReader::oib_sort);
-			ReadSequenceOib();
-		}
-		else
-		{
-			m_oib_info.clear();
-			ReadSingleOib();
-		}
-	}
-
-	m_time_num = int(m_oib_info.size());
-	if (m_type == 0)
-		m_cur_time = 0;
-	m_chan_num = m_time_num>0?int(m_oib_info[0].dataset.size()):0;
-	m_slice_num = m_chan_num>0?int(m_oib_info[0].dataset[0].size()):0;
+   m_time_num = int(m_oib_info.size());
+   if (m_type == 0)
+      m_cur_time = 0;
+   m_chan_num = m_time_num>0?int(m_oib_info[0].dataset.size()):0;
+   m_slice_num = m_chan_num>0?int(m_oib_info[0].dataset[0].size()):0;
 }
 
 bool OIBReader::oib_sort(const TimeDataInfo& info1, const TimeDataInfo& info2)
 {
-	return info1.filenumber < info2.filenumber;
+   return info1.filenumber < info2.filenumber;
 }
 
 void OIBReader::ReadSingleOib()
 {
-	//read the current file info
-	//storage
-	IStorage *pStg = NULL;
-	//open
-	if (StgOpenStorageEx(m_path_name.c_str(),
-		STGM_DIRECT|STGM_READ|STGM_SHARE_DENY_WRITE,
-		STGFMT_STORAGE, 0, NULL, NULL, IID_IStorage,
-		(void**)&pStg) == S_OK)
-	{
-		//enumerate
-		IEnumSTATSTG *pEnum = NULL;
-		if (pStg->EnumElements(0, NULL, 0, &pEnum) == S_OK)
-		{
-			STATSTG statStg;
-			while (pEnum->Next(1, &statStg, NULL) == S_OK)
-			{
-				if (statStg.type == STGTY_STREAM)
-				{
-					wstring stream_name(statStg.pwcsName);
-					ReadStream(pStg, stream_name);
-				}
-			}
-		}
-	}
+   //TODO
+#ifdef _WIN32
+   //read the current file info
+   //storage
+   IStorage *pStg = NULL;
+   //open
+   if (StgOpenStorageEx(m_path_name.c_str(),
+            STGM_DIRECT|STGM_READ|STGM_SHARE_DENY_WRITE,
+            STGFMT_STORAGE, 0, NULL, NULL, IID_IStorage,
+            (void**)&pStg) == S_OK)
+   {
+      //enumerate
+      IEnumSTATSTG *pEnum = NULL;
+      if (pStg->EnumElements(0, NULL, 0, &pEnum) == S_OK)
+      {
+         STATSTG statStg;
+         while (pEnum->Next(1, &statStg, NULL) == S_OK)
+         {
+            if (statStg.type == STGTY_STREAM)
+            {
+               wstring stream_name(statStg.pwcsName);
+               ReadStream(pStg, stream_name);
+            }
+         }
+      }
+   }
 
-	//release
-	if (pStg)
-		pStg->Release();
+   //release
+   if (pStg)
+      pStg->Release();
+#endif
 }
 
 void OIBReader::ReadSequenceOib()
 {
-	for (int i=0; i<(int)m_oib_info.size(); i++)
-	{
-		wstring path_name = m_oib_info[i].filename;
+   // TODO
+#ifdef _WIN32
+   for (int i=0; i<(int)m_oib_info.size(); i++)
+   {
+      wstring path_name = m_oib_info[i].filename;
 
-		if (path_name == m_path_name)
-			m_cur_time = i;
+      if (path_name == m_path_name)
+         m_cur_time = i;
 
-		//read the current file info
-		//storage
-		IStorage *pStg = NULL;
-		//open
-		if (StgOpenStorageEx(path_name.c_str(),
-			STGM_DIRECT|STGM_READ|STGM_SHARE_DENY_WRITE,
-			STGFMT_STORAGE, 0, NULL, NULL, IID_IStorage,
-			(void**)&pStg) == S_OK)
-		{
-			//enumerate
-			IEnumSTATSTG *pEnum = NULL;
-			if (pStg->EnumElements(0, NULL, 0, &pEnum) == S_OK)
-			{
-				STATSTG statStg;
-				while (pEnum->Next(1, &statStg, NULL) == S_OK)
-				{
-					if (statStg.type == STGTY_STREAM)
-					{
-						wstring stream_name(statStg.pwcsName);
-						m_oib_t = i;
-						ReadStream(pStg, stream_name);
-					}
-				}
-			}
-		}
+      //read the current file info
+      //storage
+      IStorage *pStg = NULL;
+      //open
+      if (StgOpenStorageEx(path_name.c_str(),
+               STGM_DIRECT|STGM_READ|STGM_SHARE_DENY_WRITE,
+               STGFMT_STORAGE, 0, NULL, NULL, IID_IStorage,
+               (void**)&pStg) == S_OK)
+      {
+         //enumerate
+         IEnumSTATSTG *pEnum = NULL;
+         if (pStg->EnumElements(0, NULL, 0, &pEnum) == S_OK)
+         {
+            STATSTG statStg;
+            while (pEnum->Next(1, &statStg, NULL) == S_OK)
+            {
+               if (statStg.type == STGTY_STREAM)
+               {
+                  wstring stream_name(statStg.pwcsName);
+                  m_oib_t = i;
+                  ReadStream(pStg, stream_name);
+               }
+            }
+         }
+      }
 
-		//release
-		if (pStg)
-			pStg->Release();
-	}
+      //release
+      if (pStg)
+         pStg->Release();
+   }
+#endif
 }
 
 void OIBReader::SetSliceSeq(bool ss)
 {
-	//do nothing
+   //do nothing
 }
 
 bool OIBReader::GetSliceSeq()
 {
-	return false;
+   return false;
 }
 
 void OIBReader::SetTimeId(wstring &id)
 {
-	m_time_id = id;
+   m_time_id = id;
 }
 
 wstring OIBReader::GetTimeId()
 {
-	return m_time_id;
+   return m_time_id;
 }
 
 void OIBReader::SetBatch(bool batch)
 {
-	if (batch)
-	{
-		//read the directory info
-		wstring search_path = m_path_name.substr(0, m_path_name.find_last_of(L'\\')) + L'\\';
-		wstring search_str = search_path + L"*.oib";
-		WIN32_FIND_DATAW FindFileData;
-		HANDLE hFind;
-		hFind = FindFirstFileW(search_str.c_str(), &FindFileData);
-		if (hFind != INVALID_HANDLE_VALUE)
-		{
-			int cnt = 0;
-			m_batch_list.clear();
-			wstring name = search_path + FindFileData.cFileName;
-			m_batch_list.push_back(name);
-			if (name == m_path_name)
-				m_cur_batch = cnt;
-			cnt++;
-
-			while (FindNextFileW(hFind, &FindFileData) != 0)
-			{
-				name = search_path + FindFileData.cFileName;
-				m_batch_list.push_back(name);
-				if (name == m_path_name)
-					m_cur_batch = cnt;
-				cnt++;
-			}
-		}
-		FindClose(hFind);
-
-		m_batch = true;
-	}
-	else
-		m_batch = false;
+   if (batch)
+   {
+      //read the directory info
+#ifdef _WIN32
+      wchar_t slash = L'\\';
+#else
+      wchar_t slash = L'/';
+#endif
+      wstring search_path = m_path_name.substr(0,
+            m_path_name.find_last_of(slash)) + slash;
+      FIND_FILES(search_path,L".oib",m_batch_list,m_cur_batch);
+      m_batch = true;
+   }
+   else
+      m_batch = false;
 }
 
 int OIBReader::LoadBatch(int index)
 {
-	int result = -1;
-	if (index>=0 && index<(int)m_batch_list.size())
-	{
-		m_path_name = m_batch_list[index];
-		Preprocess();
-		result = index;
-		m_cur_batch = result;
-	}
-	else
-		result = -1;
+   int result = -1;
+   if (index>=0 && index<(int)m_batch_list.size())
+   {
+      m_path_name = m_batch_list[index];
+      Preprocess();
+      result = index;
+      m_cur_batch = result;
+   }
+   else
+      result = -1;
 
-	return result;
+   return result;
 }
 
 int OIBReader::LoadOffset(int offset)
 {
-	int result = m_cur_batch + offset;
+   int result = m_cur_batch + offset;
 
-	if (offset > 0)
-	{
-		if (result<(int)m_batch_list.size())
-		{
-			m_path_name = m_batch_list[result];
-			Preprocess();
-			m_cur_batch = result;
-		}
-		else if (m_cur_batch<(int)m_batch_list.size()-1)
-		{
-			result = (int)m_batch_list.size()-1;
-			m_path_name = m_batch_list[result];
-			Preprocess();
-			m_cur_batch = result;
-		}
-		else
-			result = -1;
-	}
-	else if (offset < 0)
-	{
-		if (result >= 0)
-		{
-			m_path_name = m_batch_list[result];
-			Preprocess();
-			m_cur_batch = result;
-		}
-		else if (m_cur_batch > 0)
-		{
-			result = 0;
-			m_path_name = m_batch_list[result];
-			Preprocess();
-			m_cur_batch = result;
-		}
-		else
-			result = -1;
-	}
-	else
-		result = -1;
+   if (offset > 0)
+   {
+      if (result<(int)m_batch_list.size())
+      {
+         m_path_name = m_batch_list[result];
+         Preprocess();
+         m_cur_batch = result;
+      }
+      else if (m_cur_batch<(int)m_batch_list.size()-1)
+      {
+         result = (int)m_batch_list.size()-1;
+         m_path_name = m_batch_list[result];
+         Preprocess();
+         m_cur_batch = result;
+      }
+      else
+         result = -1;
+   }
+   else if (offset < 0)
+   {
+      if (result >= 0)
+      {
+         m_path_name = m_batch_list[result];
+         Preprocess();
+         m_cur_batch = result;
+      }
+      else if (m_cur_batch > 0)
+      {
+         result = 0;
+         m_path_name = m_batch_list[result];
+         Preprocess();
+         m_cur_batch = result;
+      }
+      else
+         result = -1;
+   }
+   else
+      result = -1;
 
-	return result;
+   return result;
 }
 
+#ifdef _WIN32 //TODO
 void OIBReader::ReadStream(IStorage *pStg, wstring &stream_name)
 {
 	IStream *pStm = NULL;
@@ -758,130 +720,132 @@ void OIBReader::ReadOif(BYTE *pbyData, ULONG size)
 		m_zspc = 1.0;
 	}
 }
+#endif
 
 double OIBReader::GetExcitationWavelength(int chan)
 {
-	for (int i=0; i<(int)m_excitation_wavelength_list.size(); i++)
-	{
-		if (m_excitation_wavelength_list[i].chan_num == chan)
-			return m_excitation_wavelength_list[i].wavelength;
-	}
-	return 0.0;
+   for (int i=0; i<(int)m_excitation_wavelength_list.size(); i++)
+   {
+      if (m_excitation_wavelength_list[i].chan_num == chan)
+         return m_excitation_wavelength_list[i].wavelength;
+   }
+   return 0.0;
 }
 
 Nrrd *OIBReader::Convert(int t, int c, bool get_max)
 {
-	Nrrd *data = 0;
-	int sl_num = 0;
+    Nrrd *data = 0;
+#ifdef _WIN32
+   int sl_num = 0;
+   if (t>=0 && t<m_time_num &&
+         c>=0 && c<m_chan_num &&
+         m_slice_num > 0 &&
+         m_x_size > 0 &&
+         m_y_size > 0)
+   {
+      wstring path_name = m_type==0?m_path_name:m_oib_info[t].filename;
 
-	if (t>=0 && t<m_time_num &&
-		c>=0 && c<m_chan_num &&
-		m_slice_num > 0 &&
-		m_x_size > 0 &&
-		m_y_size > 0)
-	{
-		wstring path_name = m_type==0?m_path_name:m_oib_info[t].filename;
+      //main storage
+      IStorage *pStg = NULL;
+      //open
+      if (StgOpenStorageEx(path_name.c_str(),
+               STGM_DIRECT|STGM_READ|STGM_SHARE_DENY_WRITE,
+               STGFMT_STORAGE, 0, NULL, NULL, IID_IStorage,
+               (void**)&pStg) == S_OK)
+      {
+         wstring substg_name = m_type==0?m_substg_name:m_oib_info[t].substgname;
 
-		//main storage
-		IStorage *pStg = NULL;
-		//open
-		if (StgOpenStorageEx(path_name.c_str(),
-			STGM_DIRECT|STGM_READ|STGM_SHARE_DENY_WRITE,
-			STGFMT_STORAGE, 0, NULL, NULL, IID_IStorage,
-			(void**)&pStg) == S_OK)
-		{
-			wstring substg_name = m_type==0?m_substg_name:m_oib_info[t].substgname;
+         //substorage
+         IStorage *pSubStg = NULL;
+         if (pStg->OpenStorage(substg_name.c_str(),
+                  NULL, STGM_DIRECT|STGM_READ|STGM_SHARE_EXCLUSIVE,
+                  NULL, 0, &pSubStg) == S_OK)
+         {
+            //allocate memory for nrrd
+            unsigned short *val = new (std::nothrow) unsigned short[m_x_size*m_y_size*m_slice_num];
 
-			//substorage
-			IStorage *pSubStg = NULL;
-			if (pStg->OpenStorage(substg_name.c_str(),
-				NULL, STGM_DIRECT|STGM_READ|STGM_SHARE_EXCLUSIVE,
-				NULL, 0, &pSubStg) == S_OK)
-			{
-				//allocate memory for nrrd
-				unsigned short *val = new (std::nothrow) unsigned short[m_x_size*m_y_size*m_slice_num];
+            //read the channel
+            ChannelInfo *cinfo = &m_oib_info[t].dataset[c];
+            int i;
+            for (i=0; i<int(cinfo->size()); i++)
+            {
+               //for each slice in the channel
+               IStream *pStm = NULL;
+               BYTE *pbyData = 0;
 
-				//read the channel
-				ChannelInfo *cinfo = &m_oib_info[t].dataset[c];
-				int i;
-				for (i=0; i<int(cinfo->size()); i++)
-				{
-					//for each slice in the channel
-					IStream *pStm = NULL;
-					BYTE *pbyData = 0;
+               //open stream
+               if (pSubStg->OpenStream((*cinfo)[i].stream_name.c_str(),
+                        NULL, STGM_DIRECT|STGM_READ|STGM_SHARE_EXCLUSIVE,
+                        0, &pStm) == S_OK)
+               {
+                  //stream info
+                  STATSTG statStg;
+                  //get stream info
+                  if (pStm->Stat(&statStg, STATFLAG_NONAME) == S_OK)
+                  {
+                     //allocate memory
+                     pbyData = new BYTE[statStg.cbSize.u.LowPart];
+                     //read stream
+                     if (pStm->Read(pbyData, statStg.cbSize.u.LowPart, NULL) == S_OK)
+                     {
+                        //copy tiff to val
+                        ReadTiff(pbyData, val, i);
 
-					//open stream
-					if (pSubStg->OpenStream((*cinfo)[i].stream_name.c_str(),
-						NULL, STGM_DIRECT|STGM_READ|STGM_SHARE_EXCLUSIVE,
-						0, &pStm) == S_OK)
-					{
-						//stream info
-						STATSTG statStg;
-						//get stream info
-						if (pStm->Stat(&statStg, STATFLAG_NONAME) == S_OK)
-						{
-							//allocate memory
-							pbyData = new BYTE[statStg.cbSize.u.LowPart];
-							//read stream
-							if (pStm->Read(pbyData, statStg.cbSize.u.LowPart, NULL) == S_OK)
-							{
-								//copy tiff to val
-								ReadTiff(pbyData, val, i);
+                        //increase
+                        sl_num++;
+                     }
+                  }
+               }
 
-								//increase
-								sl_num++;
-							}
-						}
-					}
+               //release
+               if (pStm)
+                  pStm->Release();
+               if (pbyData)
+                  delete []pbyData;
+            }
 
-					//release
-					if (pStm)
-						pStm->Release();
-					if (pbyData)
-						delete []pbyData;
-				}
+            //create nrrd
+            if (val && sl_num == m_slice_num)
+            {
+               //ok
+               data = nrrdNew();
+               nrrdWrap(data, val, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+               nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
+               nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
+               nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+               nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+            }
+            else
+            {
+               //something is wrong
+               if (val)
+                  delete []val;
+            }
+         }
 
-				//create nrrd
-				if (val && sl_num == m_slice_num)
-				{
-					//ok
-					data = nrrdNew();
-					nrrdWrap(data, val, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-					nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-					nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
-					nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-					nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-				}
-				else
-				{
-					//something is wrong
-					if (val)
-						delete []val;
-				}
-			}
+         //release substorage
+         if (pSubStg)
+            pSubStg->Release();
+      }
 
-			//release substorage
-			if (pSubStg)
-				pSubStg->Release();
-		}
+      //release
+      if (pStg)
+         pStg->Release();
+   }
 
-		//release
-		if (pStg)
-			pStg->Release();
-	}
+   if (m_max_value > 0.0)
+      m_scalar_scale = 65535.0 / m_max_value;
 
-	if (m_max_value > 0.0)
-		m_scalar_scale = 65535.0 / m_max_value;
-
-	m_cur_time = t;
-	return data;
+   m_cur_time = t;
+#endif
+   return data;
 }
 
 wstring OIBReader::GetCurName(int t, int c)
 {
-	return m_type==0?wstring(L""):m_oib_info[t].filename;
+   return m_type==0?wstring(L""):m_oib_info[t].filename;
 }
-
+#ifdef _WIN32
 void OIBReader::ReadTiff(BYTE *pbyData, unsigned short *val, int z)
 {
 	if (*((unsigned int*)pbyData) != 0x002A4949)
@@ -1016,3 +980,5 @@ void OIBReader::ReadTiff(BYTE *pbyData, unsigned short *val, int z)
 		}
 	}
 }
+
+#endif

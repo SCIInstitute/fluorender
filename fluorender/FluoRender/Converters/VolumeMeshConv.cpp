@@ -1,6 +1,7 @@
-#include <Converters\VolumeMeshConv.h>
-#include <Converters\MCTable.h>
-#include <FLIVR\Utils.h>
+#include "VolumeMeshConv.h"
+#include "MCTable.h"
+#include "../FLIVR/Utils.h"
+#include "../compatibility.h"
 
 double VolumeMeshConv::m_sw = 0.0;
 
@@ -131,7 +132,7 @@ void VolumeMeshConv::Convert()
 
 	//add default group
 	GLMgroup* group = new GLMgroup;
-	group->name = _strdup("default");
+	group->name = STRDUP("default");
 	group->material = 0;
 	group->numtriangles = 0;
 	group->triangles = 0;

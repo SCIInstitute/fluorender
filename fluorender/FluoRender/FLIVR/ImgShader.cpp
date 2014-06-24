@@ -55,9 +55,12 @@ namespace FLIVR
 	"	b.z = b.z>1.0?1.0/(2.0-b.z):loc1.z;\n" \
 	"	gl_FragColor = pow(c, loc0)*b;\n" \
 	"}\n"
-
+#ifndef _WIN32
+    #define IMG_SHADER_CODE_BRIGHTNESS_CONTRAST_HDR IMG_SHADER_CODE_BRIGHTNESS_CONTRAST
+#else
 #define IMG_SHADER_CODE_BRIGHTNESS_CONTRAST_HDR \
 	"// IMG_SHADER_CODE_BRIGHTNESS_CONTRAST_HDR\n" \
+    "#version 120\n"\
 	"uniform vec4 loc0; //(r_gamma, g_gamma, b_gamma, 1.0)\n" \
 	"uniform vec4 loc1; //(r_brightness, g_brightness, b_brightness, 1.0)\n" \
 	"uniform vec4 loc2; //(r_hdr, g_hdr, b_hdr, 0.0)\n" \
@@ -86,7 +89,7 @@ namespace FLIVR
 	"	vec4 c_avg = 0.25*c_avg_1+0.3*c_avg_2+0.25*c_avg_3+0.1*c_avg_4+0.1*c_avg_5;\n" \
 	"	gl_FragColor = c*(vec4(1.0)-loc2)+loc2*c_avg;\n" \
 	"}\n"
-
+#endif
 #define IMG_SHADER_CODE_GRADIENT_MAP \
 	"// IMG_SHADER_CODE_GRADIENT_MAP\n" \
 	"uniform vec4 loc0; //(lo, hi, hi-lo, alpha) \n" \

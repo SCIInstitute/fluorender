@@ -2,7 +2,7 @@
 #include "VRenderFrame.h"
 #include "DataManager.h"
 #include <wx/valnum.h>
-#include <Converters\VolumeMeshConv.h>
+#include "Converters/VolumeMeshConv.h"
 
 BEGIN_EVENT_TABLE(ConvertDlg, wxPanel)
 	//convert from volume to mesh

@@ -26,7 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#include <FLIVR\MeshRenderer.h>
+#include "MeshRenderer.h"
 #include <iostream>
 
 namespace FLIVR

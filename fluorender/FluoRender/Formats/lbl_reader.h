@@ -1,7 +1,7 @@
 #ifndef _LBL_READER_H_
 #define _LBL_READER_H_
 
-#include <Formats\base_reader.h>
+#include <base_reader.h>
 
 using namespace std;
 

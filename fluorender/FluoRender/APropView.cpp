@@ -12,8 +12,8 @@ APropView::APropView(wxWindow* frame, wxWindow* parent,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-m_frame(frame),
 wxPanel(parent, id, pos, size, style, name),
+m_frame(frame),
 m_ann(0),
 m_vrv(0)
 {
@@ -93,6 +93,7 @@ void APropView::OnMemoUpdateBtn(wxCommandEvent& event)
 	if (m_ann)
 	{
 		wxString memo = m_memo_text->GetValue();
-		m_ann->SetMemo(memo.ToStdString());
+                std::string str = memo.ToStdString();
+		m_ann->SetMemo(str);
 	}
 }

@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <FLIVR/Point.h>
-#include <FLIVR/Vector.h>
+#include "Point.h"
+#include "Vector.h"
 #include <iostream>
 
 using std::cerr;
@@ -40,7 +40,7 @@ namespace FLIVR
 	string Point::get_string() const
 	{
 		char buf[100];
-		sprintf_s(buf, 100, "[%g, %g, %g]", x_, y_, z_);
+		sprintf(buf, "[%10.3g, %10.3g, %10.3g]", x_, y_, z_);
 		return buf;
 	}
 

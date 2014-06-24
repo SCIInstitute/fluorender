@@ -1,8 +1,8 @@
 #ifndef _FLKEY_QUATERNION_H_
 #define _FLKEY_QUATERNION_H_
 
-#include <Animator\FlKey.h>
-#include <FLIVR\Quaternion.h>
+#include "FlKey.h"
+#include "../FLIVR/Quaternion.h"
 
 using namespace FLIVR;
 

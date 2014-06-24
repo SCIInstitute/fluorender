@@ -29,10 +29,10 @@
 #ifndef SLIVR_MeshRenderer_h
 #define SLIVR_MeshRenderer_h
 
-#include <FLIVR\ShaderProgram.h>
-#include <FLIVR\MshShader.h>
-#include <FLIVR\glm.h>
-#include <FLIVR\Plane.h>
+#include "ShaderProgram.h"
+#include "MshShader.h"
+#include "glm.h"
+#include "Plane.h"
 #include <vector>
 
 using namespace std;

@@ -204,7 +204,7 @@ namespace FLIVR
 	{
 		//cor_up_time_ = speed;
 		if (speed < 10) speed = 10;
-		cor_up_time_ = unsigned long(log10(1000.0/speed)*up_time_);
+		cor_up_time_ = (unsigned long)(log10(1000.0/speed)*up_time_);
 	}
 
 	//number of bricks rendered before time is up
@@ -490,8 +490,6 @@ namespace FLIVR
 		else //idx == -1
 		{
 			////! try again to find the matching texture object
-			double new_size = double(nx*ny*nz*nb)/1e6;
-
 			unsigned int tex_id;
 			glGenTextures(1, (GLuint*)&tex_id);
 
@@ -588,8 +586,6 @@ namespace FLIVR
 		} 
 		else //idx == -1
 		{
-			//GLenum error = glGetError();
-			double new_size = double(nx*ny*nz*nb)/1e6;
 			unsigned int tex_id;
 			glGenTextures(1, (GLuint*)&tex_id);
 			tex_pool_.push_back(TexParam(c, nx, ny, nz, nb, textype, tex_id));

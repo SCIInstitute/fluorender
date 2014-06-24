@@ -1,8 +1,8 @@
 #include "SettingDlg.h"
 #include "VRenderFrame.h"
 #include "VRenderView.h"
-#include <wx\valnum.h>
-#include <wx\notebook.h>
+#include <wx/valnum.h>
+#include <wx/notebook.h>
 
 BEGIN_EVENT_TABLE(SettingDlg, wxPanel)
 	EVT_BUTTON(ID_SaveBtn, SettingDlg::OnSave)

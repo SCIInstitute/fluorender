@@ -1,7 +1,7 @@
 #ifndef _TIF_WRITER_H_
 #define _TIF_WRITER_H_
 
-#include <Formats\base_writer.h>
+#include <base_writer.h>
 
 class TIFWriter : public BaseWriter
 {

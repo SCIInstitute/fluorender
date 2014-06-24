@@ -1,4 +1,4 @@
-#include <Formats\msk_reader.h>
+#include "msk_reader.h"
 #include <sstream>
 
 MSKReader::MSKReader()
@@ -97,7 +97,7 @@ Nrrd* MSKReader::Convert(int t, int c, bool get_max)
 
 	if (nrrdLoad(output, str.c_str(), NULL))
 	{
-		delete []output->data;
+		//delete []output->data;
 		nrrdNix(output);
 		return 0;
 	}

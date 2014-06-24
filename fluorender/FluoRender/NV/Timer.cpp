@@ -20,6 +20,7 @@
 //
 
 #include "Timer.h"
+#include "../compatibility.h"
 
 #include <assert.h>
 
@@ -35,8 +36,9 @@ using namespace nv;
 // Global consts
 //
 
-const LARGE_INTEGER gcLargeIntZero = {0, 0};
-
+#ifdef _WIN32
+const LARGE_INTEGER gcLargeIntZero = {{0, 0}};
+#endif
 // ----------------------------------------------------------------------------
 // Timer class
 //
@@ -47,13 +49,13 @@ const LARGE_INTEGER gcLargeIntZero = {0, 0};
 
 // Default constructor
 //
-Timer::Timer(unsigned int nBoxFilterSize)
+Timer::Timer(unsigned int nBoxFilterSize) :
 #ifdef _WIN32
-: _nStartCount(gcLargeIntZero)
+  _nStartCount(gcLargeIntZero)
 , _nStopCount(gcLargeIntZero)
-, _nFrequency(gcLargeIntZero)
+, _nFrequency(gcLargeIntZero) ,
 #endif
-, _nLastPeriod(0.0)
+  _nLastPeriod(0.0)
 , _nSum(0.0)
 , _nBoxFilterSize(nBoxFilterSize)
 , _iFilterPosition(0)
