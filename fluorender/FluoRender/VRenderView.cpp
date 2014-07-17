@@ -284,7 +284,6 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
    }
 #endif
    LoadDefaultBrushSettings();
-
 }
 
 #ifdef _WIN32
