@@ -121,7 +121,7 @@ inline void FIND_FILES(std::wstring m_path_name,
 #else // MAC OSX or LINUX
 
 #include <vector>
-#include <codecvt>
+//#include <codecvt>
 #include <iostream>
 #include <dirent.h>
 #include <sys/time.h>
@@ -132,15 +132,11 @@ inline void FIND_FILES(std::wstring m_path_name,
 #define FSEEK64     fseek
 
 inline std::wstring s2ws(const std::string& str) {
-   typedef std::codecvt_utf8<wchar_t> convert_typeX;
-   std::wstring_convert<convert_typeX, wchar_t> converterX;
-   return converterX.from_bytes(str);
+    return std::wstring( str.begin(), str.end() );
 }
 
 inline std::string ws2s(const std::wstring& str) {
-   typedef std::codecvt_utf8<wchar_t> convert_typeX;
-   std::wstring_convert<convert_typeX, wchar_t> converterX;
-   return converterX.to_bytes(str);
+    return std::string( str.begin(), str.end() );
 }
 
 inline int SSCANF(const char* buf, const char* fmt, ...){
