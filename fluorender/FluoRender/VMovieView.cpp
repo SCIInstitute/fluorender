@@ -85,7 +85,7 @@ m_prev_frame(0)
 	st = new wxStaticText(this, 0, "Capture view:",
 		wxDefaultPosition, wxSize(120, 20));
 	m_views_cmb = new wxComboBox(this, ID_ViewsCombo, "",
-		wxDefaultPosition, wxSize(120, 30), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, wxSize(120, -1), 0, NULL, wxCB_READONLY);
 	m_help_btn = new wxButton(this, ID_HelpBtn, "?",
 		wxDefaultPosition, wxSize(25, 25));
 	sizer_1->Add(5, 5, 0);

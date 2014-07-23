@@ -259,8 +259,8 @@ void KeyListCtrl::OnSelection(wxListEvent &event)
 		//add interpolation combo
 		GetSubItemRect(item, 3, rect);
 		str = GetText(item, 3);
-		m_interpolation_cmb->SetPosition(rect.GetTopLeft());
-		m_interpolation_cmb->SetSize(rect.GetSize());
+		m_interpolation_cmb->SetPosition(rect.GetTopLeft()-wxSize(0,5));
+		m_interpolation_cmb->SetSize(wxSize(rect.GetSize().GetWidth(),-1));
 		int sel = 0;
 		if (str == "Linear")
 			sel = 0;
