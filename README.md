@@ -60,7 +60,7 @@ We recommend building FluoRender outside of the source tree. <br/>
 
     * Be sure to compile the same configuration (Debug/Release) as you do for FluoRender below.
 
-3) You will need to add lines to C:/Program Files (x86)/CMake X.X/share/cmake-x.x/Modules (x's are your version) 
+3) You will need to add lines to C:/Program Files (x86)/CMake X.X/share/cmake-x.x/Modules/FindwxWidgets.cmake (x's are your version) 
     for wxWidgets 3.0.
 
     * Starting about line 277, you will have listed a few sets of library versions to search for like "wxbase29${_UCD}${_DBG}"
