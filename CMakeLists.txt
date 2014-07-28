@@ -34,6 +34,8 @@ include(${wxWidgets_USE_FILE})
 set(wxWidgets_USE_STATIC ON)
 
 find_package(OpenGL REQUIRED)
+find_package(Boost REQUIRED)
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
 
 #temporary solution for wxWidgets linking "ambiguous" errors
 add_definitions(-D_WCHAR_H_CPLUSPLUS_98_CONFORMANCE_)
@@ -125,7 +127,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    add_definitions(-D_DARWIN)
    #set (CXX_11_FLAG "-stdlib=libc++")
    set(CFLAGS "-fPIC")
-   set(CXXFLAGS "-fPIC -Wno-unused-private-field")
+   set(CXXFLAGS "-fPIC ")
    include(BundleUtilities)
    set(ICON_FILE_PATH "FluoRender_icon")
    #add_resource("fluorender/FluoRender/img/FluoRender_icon.gif")
@@ -223,4 +225,5 @@ endif()
 #link the libraries
 target_link_libraries(FluoRender
    ${wxWidgets_LIBRARIES}
-   ${OPENGL_LIBRARIES})
+   ${OPENGL_LIBRARIES}
+   ${Boost_LIBRARIES})

@@ -2952,10 +2952,10 @@ void TraceGroup::AddID(unsigned int id)
 //m_id_map: ids of current time point that are linked to previous
 //m_cur_time: current time value
 //time values are check with frame ids in the frame list
-void TraceGroup::SetIDMap(unordered_map<unsigned int, Lbl> &sel_labels)
+void TraceGroup::SetIDMap(boost::unordered_map<unsigned int, Lbl> &sel_labels)
 {
 	m_id_map.clear();
-	unordered_map<unsigned int, Lbl>::iterator label_iter;
+	boost::unordered_map<unsigned int, Lbl>::iterator label_iter;
 
 	//why does the time not change?
 	//because I just want to find out the current selection
@@ -3043,7 +3043,7 @@ int TraceGroup::Load(wxString &filename)
 	m_data_path = filename;
 
 	std::string str = m_data_path.ToStdString();
-    ifstream ifs(str,ios::in|ios::binary);
+	std::ifstream ifs(str.c_str(),ios::in|ios::binary);
 	if (ifs.bad())
 		return 0;
 

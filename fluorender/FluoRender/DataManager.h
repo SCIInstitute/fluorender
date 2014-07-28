@@ -1,7 +1,7 @@
 #include <GL/glew.h>
 #include "bitmap_fonts.h"
 #include <vector>
-#include <unordered_map>
+#include <boost/unordered_map.hpp>
 #include <string.h>
 #include <tiffio.h>
 #include "FLIVR/BBox.h"
@@ -782,8 +782,8 @@ struct Vertex
 	int Read(ifstream &ifs);
 };
 
-typedef unordered_map<unsigned int, Vertex> CellMap;
-typedef unordered_map<unsigned int, Vertex>::iterator CellMapIter;
+typedef boost::unordered_map<unsigned int, Vertex> CellMap;
+typedef boost::unordered_map<unsigned int, Vertex>::iterator CellMapIter;
 
 //a frame contains a cell map
 struct Frame
@@ -796,11 +796,11 @@ struct Frame
 };
 
 //frame list
-typedef unordered_map<unsigned int, Frame> FrameList;
-typedef unordered_map<unsigned int, Frame>::iterator FrameIter;
+typedef boost::unordered_map<unsigned int, Frame> FrameList;
+typedef boost::unordered_map<unsigned int, Frame>::iterator FrameIter;
 //id list
-typedef unordered_map<unsigned int, unsigned int> IDMap;
-typedef unordered_map<unsigned int, unsigned int>::iterator IDMapIter;
+typedef boost::unordered_map<unsigned int, unsigned int> IDMap;
+typedef boost::unordered_map<unsigned int, unsigned int>::iterator IDMapIter;
 
 class TraceGroup : public TreeLayer
 {
@@ -832,7 +832,7 @@ public:
 	//for selective drawing
 	void ClearIDMap();
 	void AddID(unsigned int id);
-	void SetIDMap(unordered_map<unsigned int, Lbl> &sel_labels);
+	void SetIDMap(boost::unordered_map<unsigned int, Lbl> &sel_labels);
 	IDMap *GetIDMap();
 	bool FindID(unsigned int id);
 
