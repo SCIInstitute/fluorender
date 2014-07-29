@@ -3,13 +3,7 @@
 
 #include <base_reader.h>
 #include <cstdio>
-//#include <windows.h>
 #include <vector>
-#ifdef _DARWIN
-#include <tr1/cstdint>
-#else
-#include <cstdint>
-#endif
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
