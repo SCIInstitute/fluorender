@@ -2741,9 +2741,10 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
    glEnable(GL_TEXTURE_2D);
    glBindTexture(GL_TEXTURE_2D, tex);
    //build mipmap
+#ifndef _DARWIN
    glGenerateMipmap(GL_TEXTURE_2D);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-   //
+#endif
    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
    glEnable(GL_BLEND);
    if (m_vol_method == VOL_METHOD_COMP)
@@ -3060,9 +3061,10 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
    glEnable(GL_TEXTURE_2D);
    glBindTexture(GL_TEXTURE_2D, tex);
    //build mipmap
+#ifndef _DARWIN
    glGenerateMipmap(GL_TEXTURE_2D);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-   //
+#endif
    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
    glEnable(GL_BLEND);
    if (m_vol_method == VOL_METHOD_COMP)
@@ -3781,9 +3783,10 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
    glEnable(GL_TEXTURE_2D);
    glBindTexture(GL_TEXTURE_2D, use_tex_wt2?m_tex_wt2:m_tex);
    //build mipmap
+#ifndef _DARWIN
    glGenerateMipmap(GL_TEXTURE_2D);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-   //
+#endif
    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
    glEnable(GL_BLEND);
    if (m_vol_method == VOL_METHOD_COMP)
@@ -5365,8 +5368,8 @@ void VRenderGLView::Run4DScript(wxString scriptname)
                if (!mask_data) break;
                unsigned int* label_data = (unsigned int*)(label_nrrd->data);
                if (!label_data) break;
-               unordered_map <unsigned int, Lbl>sel_labels;
-               unordered_map <unsigned int, Lbl>::iterator label_iter;
+			   boost::unordered_map <unsigned int, Lbl>sel_labels;
+               boost::unordered_map <unsigned int, Lbl>::iterator label_iter;
                for (ii=0; ii<nx; ii++)
                   for (jj=0; jj<ny; jj++)
                      for (kk=0; kk<nz; kk++)
@@ -5418,7 +5421,7 @@ void VRenderGLView::Run4DScript(wxString scriptname)
                if (m_trace_group)
                {
                   m_trace_group->SetCurTime(m_tseq_cur_num);
-                  unordered_map <unsigned int, Lbl>::iterator id_iter;
+                  boost::unordered_map <unsigned int, Lbl>::iterator id_iter;
                   for (id_iter=sel_labels.begin(); id_iter!=sel_labels.end(); id_iter++)
                      if (id_iter->second.size >= (unsigned int)slimit)
                         m_trace_group->AddID(id_iter->second.id);
@@ -9091,8 +9094,8 @@ void VRenderGLView::GetTraces()
 	if (!mask_data) return;
 	unsigned int* label_data = (unsigned int*)(label_nrrd->data);
 	if (!label_data) return;
-	unordered_map<unsigned int, Lbl> sel_labels;
-	unordered_map<unsigned int, Lbl>::iterator label_iter;
+	boost::unordered_map<unsigned int, Lbl> sel_labels;
+	boost::unordered_map<unsigned int, Lbl>::iterator label_iter;
 	for (ii=0; ii<nx; ii++)
 	for (jj=0; jj<ny; jj++)
 	for (kk=0; kk<nz; kk++)

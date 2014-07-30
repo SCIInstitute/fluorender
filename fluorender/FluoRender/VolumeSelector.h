@@ -1,6 +1,6 @@
 #include "DataManager.h"
 #include <wx/progdlg.h>
-#include <unordered_map>
+#include <boost/unordered_map.hpp>
 
 #ifndef _VOLUMESELECTOR_H_
 #define _VOLUMESELECTOR_H_
@@ -122,7 +122,7 @@ private:
 		Vector acc_pos;
 		double acc_int;
 	};
-	unordered_map <unsigned int, Component> m_comps;
+	boost::unordered_map <unsigned int, Component> m_comps;
 	double m_min_voxels, m_max_voxels;
 
 	//exported volumes

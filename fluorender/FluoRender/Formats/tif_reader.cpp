@@ -201,10 +201,10 @@ void TIFReader::Preprocess()
       if (tiff_name.size()>0)
       {
          OpenTiff(tiff_name);
-         m_chan_num = GetTiffField(kSamplesPerPixelTag,nullptr,0);
+         m_chan_num = GetTiffField(kSamplesPerPixelTag,NULL,0);
          if (m_chan_num == 0 &&
-               GetTiffField(kImageWidthTag,nullptr,0) > 0&&
-               GetTiffField(kImageLengthTag,nullptr,0) > 0) {
+               GetTiffField(kImageWidthTag,NULL,0) > 0&&
+               GetTiffField(kImageLengthTag,NULL,0) > 0) {
             m_chan_num = 1;
          }
          CloseTiff();
@@ -534,8 +534,8 @@ uint32_t TIFReader::GetNumTiffPages()
    ResetTiff();
    while (true) {
       // count it if it's not a thumbnail
-      if (GetTiffField(kSubFileTypeTag,nullptr,0) != 1) count++;
-      current_offset_ = GetTiffField(kNextPageOffsetTag,nullptr,0);
+      if (GetTiffField(kSubFileTypeTag,NULL,0) != 1) count++;
+      current_offset_ = GetTiffField(kNextPageOffsetTag,NULL,0);
       if (current_offset_ == 0) break;
    }
    current_offset_ = save_offset;
@@ -553,8 +553,8 @@ void TIFReader::GetTiffStrip(uint32_t page, uint32_t strip,
    // fast forward if we are behind.
    while (current_page_ < page) {
       tiff_stream.seekg(current_offset_,tiff_stream.beg);
-      if (GetTiffField(kSubFileTypeTag,nullptr,0) != 1) current_page_ ++;
-      current_offset_ = GetTiffField(kNextPageOffsetTag,nullptr,0);
+      if (GetTiffField(kSubFileTypeTag,NULL,0) != 1) current_page_ ++;
+      current_offset_ = GetTiffField(kNextPageOffsetTag,NULL,0);
    }
    //get the byte count and the strip offset to read data from.
    uint32_t byte_count = GetTiffStripOffsetOrCount(kStripBytesCountTag,strip);
@@ -564,12 +564,12 @@ void TIFReader::GetTiffStrip(uint32_t page, uint32_t strip,
    char *temp = new char[byte_count];
    tiff_stream.read((char*)temp,byte_count);
    //get compression tag, decompress if necessary
-   uint32_t tmp = GetTiffField(kCompressionTag,nullptr,0);
-   uint16_t prediction = GetTiffField(kPredictionTag,nullptr,0);
-   bool eight_bits = 8 == GetTiffField(kBitsPerSampleTag,nullptr,0);
-    uint32_t bits = GetTiffField(kSamplesPerPixelTag,nullptr,0);
-   tsize_t stride = (GetTiffField(kPlanarConfigurationTag,nullptr,0) == 2)?1:bits;
-   uint32_t rows_per_strip = GetTiffField(kRowsPerStripTag,nullptr,0);
+   uint32_t tmp = GetTiffField(kCompressionTag,NULL,0);
+   uint16_t prediction = GetTiffField(kPredictionTag,NULL,0);
+   bool eight_bits = 8 == GetTiffField(kBitsPerSampleTag,NULL,0);
+    uint32_t bits = GetTiffField(kSamplesPerPixelTag,NULL,0);
+   tsize_t stride = (GetTiffField(kPlanarConfigurationTag,NULL,0) == 2)?1:bits;
+   uint32_t rows_per_strip = GetTiffField(kRowsPerStripTag,NULL,0);
    bool isCompressed = tmp == 5;
     if (isCompressed) {
         LZWDecode((tidata_t)temp, (tidata_t)data, strip_size);
@@ -589,9 +589,9 @@ void TIFReader::GetTiffStrip(uint32_t page, uint32_t strip,
 uint32_t TIFReader::GetTiffStripOffsetOrCount(uint32_t tag, uint32_t strip)
 {
    //search for the offset that tells us the byte count for this strip
-   bool isLong = GetTiffField(tag,nullptr,kType) == kLong;
-   uint32_t offset = GetTiffField(tag, nullptr,kValue);
-   if(GetTiffField(tag, nullptr, kCount) > 1) {
+   bool isLong = GetTiffField(tag,NULL,kType) == kLong;
+   uint32_t offset = GetTiffField(tag, NULL,kValue);
+   if(GetTiffField(tag, NULL, kCount) > 1) {
       offset += strip * (isLong?4:2);
       tiff_stream.seekg(offset, tiff_stream.beg);
    }
@@ -623,7 +623,7 @@ void TIFReader::ResetTiff()
 void TIFReader::OpenTiff(std::wstring name)
 {
    //open the stream
-   tiff_stream.open(ws2s(name), std::ifstream::binary);
+   tiff_stream.open((ws2s(name)).c_str(), std::ifstream::binary);
    if (!tiff_stream.is_open())
       throw std::runtime_error( "Unable to open TIFF File for reading." );
    tiff_stream.seekg(2,tiff_stream.beg);
@@ -655,16 +655,16 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
          numPages = m_slice_num;
    }
 
-   uint32_t width = GetTiffField(kImageWidthTag,nullptr,0);
-   uint32_t height = GetTiffField(kImageLengthTag,nullptr,0);
-   uint16 bits = GetTiffField(kBitsPerSampleTag,nullptr,0);
-   uint16 samples = GetTiffField(kSamplesPerPixelTag,nullptr,0);
+   uint32_t width = GetTiffField(kImageWidthTag,NULL,0);
+   uint32_t height = GetTiffField(kImageLengthTag,NULL,0);
+   uint16 bits = GetTiffField(kBitsPerSampleTag,NULL,0);
+   uint16 samples = GetTiffField(kSamplesPerPixelTag,NULL,0);
    if (samples == 0 && width > 0 && height > 0) samples = 1;
 
    float x_res = 0.0, y_res = 0.0, z_res = 0.0;
    GetTiffField(kXResolutionTag,&x_res,sizeof(float));
    GetTiffField(kYResolutionTag,&y_res,sizeof(float));
-   uint32_t rowsperstrip = GetTiffField(kRowsPerStripTag,nullptr,0);
+   uint32_t rowsperstrip = GetTiffField(kRowsPerStripTag,NULL,0);
    uint32_t strip_size = rowsperstrip * width * samples * (bits/8);
 
    char img_desc[256];
@@ -730,12 +730,12 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
          OpenTiff(filename);
       }
       //this is a thumbnail, skip
-      if (GetTiffField(kSubFileTypeTag,nullptr,0) == 1) {
+      if (GetTiffField(kSubFileTypeTag,NULL,0) == 1) {
          if (sequence) CloseTiff();
          continue;
       }
 
-      uint32_t num_strips = GetTiffField(kStripOffsetsTag, nullptr,kCount);
+      uint32_t num_strips = GetTiffField(kStripOffsetsTag, NULL,kCount);
 
       //read file
       for (uint32_t strip=0; strip<num_strips; strip++)

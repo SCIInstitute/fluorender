@@ -3,9 +3,7 @@
 
 #include <base_reader.h>
 #include <cstdio>
-//#include <windows.h>
 #include <vector>
-#include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
