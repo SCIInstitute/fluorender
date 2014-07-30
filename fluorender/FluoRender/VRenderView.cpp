@@ -2741,9 +2741,10 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
    glEnable(GL_TEXTURE_2D);
    glBindTexture(GL_TEXTURE_2D, tex);
    //build mipmap
+#ifndef _DARWIN
    glGenerateMipmap(GL_TEXTURE_2D);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-   //
+#endif
    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
    glEnable(GL_BLEND);
    if (m_vol_method == VOL_METHOD_COMP)
@@ -3060,9 +3061,10 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
    glEnable(GL_TEXTURE_2D);
    glBindTexture(GL_TEXTURE_2D, tex);
    //build mipmap
+#ifndef _DARWIN
    glGenerateMipmap(GL_TEXTURE_2D);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-   //
+#endif
    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
    glEnable(GL_BLEND);
    if (m_vol_method == VOL_METHOD_COMP)
@@ -3781,9 +3783,10 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
    glEnable(GL_TEXTURE_2D);
    glBindTexture(GL_TEXTURE_2D, use_tex_wt2?m_tex_wt2:m_tex);
    //build mipmap
+#ifndef _DARWIN
    glGenerateMipmap(GL_TEXTURE_2D);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-   //
+#endif
    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
    glEnable(GL_BLEND);
    if (m_vol_method == VOL_METHOD_COMP)
