@@ -30,6 +30,7 @@ TIFReader::TIFReader()
 
    current_page_ = current_offset_ = 0;
    swap_ = false;
+   isBig_ = false;
 }
 
 TIFReader::~TIFReader()
@@ -214,27 +215,42 @@ void TIFReader::Preprocess()
    else m_chan_num = 0;
 }
 
-uint32_t TIFReader::GetTiffField(
-      const int in_tag, void * buf, uint32_t size)
+uint64_t TIFReader::GetTiffField(
+      const uint64_t in_tag, void * buf, uint64_t size)
 {
    if (!tiff_stream.is_open())
       throw std::runtime_error( "TIFF File not open for reading." );
    //go to the current IFD block/page
    tiff_stream.seekg(current_offset_,tiff_stream.beg);
-   uint16_t num_entries=0;
+   uint64_t num_entries=0;
    //how many entries are there?
-   tiff_stream.read((char*)&num_entries,sizeof(uint16_t));
-   if (swap_) num_entries = SwapShort(num_entries);
+   if (isBig_) {
+	  tiff_stream.read((char*)&num_entries,sizeof(uint64_t));
+	  if (swap_) num_entries = SwapLong(num_entries);
+   } else {
+	  uint16_t temp;
+	  tiff_stream.read((char*)&temp,sizeof(uint16_t));
+	  if (swap_) temp = SwapShort(temp);
+	  num_entries = static_cast<uint64_t>(temp);
+   }
    //if we simply want the next page offset, get that and return.
+   char start_off = 2, multiplier = 12;
+   if (isBig_) { start_off = 8; multiplier = 20; }
+   tiff_stream.seekg(current_offset_+start_off+multiplier*num_entries,tiff_stream.beg);
    if (in_tag == kNextPageOffsetTag) {
-      uint32_t next_offset = 0;
-      tiff_stream.seekg(current_offset_+2+12*num_entries,tiff_stream.beg);
-      tiff_stream.read((char*)&next_offset,sizeof(uint32_t));
-      return swap_?SwapWord(next_offset):next_offset;
+	   if (isBig_) {
+		  uint64_t next_offset = 0;
+		  tiff_stream.read((char*)&next_offset,sizeof(uint64_t));
+		  return swap_?SwapLong(next_offset):next_offset;
+	   } else {
+		  uint32_t next_offset = 0;
+		  tiff_stream.read((char*)&next_offset,sizeof(uint32_t));
+		  return static_cast<uint64_t>(swap_?SwapWord(next_offset):next_offset);
+	   }
    }
    //go through all of the entries to find the one we want
    for(size_t i = 0; i < num_entries; i++) {
-      tiff_stream.seekg(current_offset_+2+12*i,tiff_stream.beg);
+      tiff_stream.seekg(current_offset_+start_off+multiplier*i,tiff_stream.beg);
       uint16_t tag=0;
       //get the tag of entry
       tiff_stream.read((char*)&tag,sizeof(uint16_t));
@@ -242,49 +258,102 @@ uint32_t TIFReader::GetTiffField(
       // This is the correct tag, grab and go.
       if (tag == in_tag) {
          //find the type
-         tiff_stream.seekg(current_offset_+2+12*i+2,tiff_stream.beg);
+         tiff_stream.seekg(current_offset_+start_off+multiplier*i+2,tiff_stream.beg);
          uint16_t type=0;
          tiff_stream.read((char*)&type,sizeof(uint16_t));
          if (swap_) type = SwapShort(type);
-         if (!buf && size == kType) return static_cast<uint32_t>(type);
+         if (!buf && size == kType) return static_cast<uint64_t>(type);
          //find the count
-         tiff_stream.seekg(current_offset_+2+12*i+4,tiff_stream.beg);
-         uint32_t cnt = 0;
-         tiff_stream.read((char*)&cnt,sizeof(uint32_t));
-         if (swap_) cnt = SwapWord(cnt);
+         tiff_stream.seekg(current_offset_+start_off+multiplier*i+4,tiff_stream.beg);
+         uint64_t cnt = 0;
+		 if(isBig_) {
+			 tiff_stream.read((char*)&cnt,sizeof(uint64_t));
+			 if (swap_) cnt = SwapLong(cnt);
+		 } else {
+			 uint32_t tmp = 0;
+			 tiff_stream.read((char*)&tmp,sizeof(uint32_t));
+			 if (swap_) tmp = SwapWord(tmp);
+			 cnt = static_cast<uint64_t>(tmp);
+		 }
          if (!buf && size == kCount) return cnt;
          //now get the value (different for different types.)
-         tiff_stream.seekg(current_offset_+2+12*i+8,tiff_stream.beg);
-         uint32_t answer=0;
+		 char off2 = isBig_?12:8;
+		 uint64_t addr = current_offset_+start_off+multiplier*i+off2;
+		 if ( size == kValueAddress) return addr;
+         tiff_stream.seekg(addr,tiff_stream.beg);
+         uint64_t answer=0;
          if (type == kByte) {
             uint8_t value=0;
             tiff_stream.read((char*)&value,sizeof(uint8_t));
-            answer = static_cast<uint32_t>(value);
+            answer = static_cast<uint64_t>(value);
          } else if (type == kASCII) {
             if (cnt > 1) {
-               tiff_stream.read((char*)&answer,sizeof(uint32_t));
-               answer = swap_?SwapWord(answer):answer;
-               tiff_stream.seekg(answer,tiff_stream.beg);
+				if(isBig_) {
+				   tiff_stream.read((char*)&answer,sizeof(uint64_t));
+				   answer = swap_?SwapLong(answer):answer;
+				} else {
+				   uint32_t tmp;
+				   tiff_stream.read((char*)&tmp,sizeof(uint32_t));
+				   answer = static_cast<uint64_t>(swap_?SwapWord(tmp):tmp);
+				}
+				tiff_stream.seekg(answer,tiff_stream.beg);
             }
             //read the the string
             tiff_stream.read((char*)buf,min(size,cnt));
-         } else if (type == kLong || cnt > 1) {
+         } else if (type == kLong) {
             uint32_t value=0;
-            tiff_stream.read((char*)&value,sizeof(uint32_t));
-            if (swap_) value = SwapWord(value);
-            answer = value;
-            if (in_tag == kBitsPerSampleTag) {
-               tiff_stream.seekg(value,tiff_stream.beg);
-               uint16_t value1=0;
-               tiff_stream.read((char*)&value1,sizeof(uint16_t));
-               if (swap_) value1 = SwapShort(value1);
-               answer = value1;
+            if (cnt > (isBig_?2:1) && size != kOffset) {
+			   if (isBig_) {
+				  tiff_stream.read((char*)&answer,sizeof(uint64_t));
+                  if (swap_) answer = SwapLong(answer);
+                  tiff_stream.seekg(answer,tiff_stream.beg);
+                  tiff_stream.read((char*)&value,sizeof(uint32_t));
+                  if (swap_) value = SwapWord(value);
+			   } else {
+                  tiff_stream.read((char*)&value,sizeof(uint32_t));
+                  if (swap_) value = SwapWord(value);
+                  tiff_stream.seekg(value,tiff_stream.beg);
+                  tiff_stream.read((char*)&value,sizeof(uint32_t));
+                  if (swap_) value = SwapWord(value);
+			   }
+            } else {
+               tiff_stream.read((char*)&value,sizeof(uint32_t));
+               if (swap_) value = SwapWord(value);
+			}
+            answer = static_cast<uint64_t>(value);
+		 } else if (type == kLong8) {
+            if (cnt > 1 && size != kOffset) {
+               tiff_stream.read((char*)&answer,sizeof(uint64_t));
+               if (swap_) answer = SwapLong(answer);
+               tiff_stream.seekg(answer,tiff_stream.beg);
+               tiff_stream.read((char*)&answer,sizeof(uint64_t));
+               if (swap_) answer = SwapLong(answer);
+               return answer;
             }
+            tiff_stream.read((char*)&answer,sizeof(uint64_t));
+            if (swap_) answer = SwapLong(answer);
          } else if (type == kShort) {
             uint16_t value=0;
+			uint32_t value2=0;
+            if (cnt > (isBig_?4:2) && size != kOffset) {
+			   if (isBig_) {
+				  tiff_stream.read((char*)&answer,sizeof(uint64_t));
+                  if (swap_) answer = SwapLong(answer);
+                  tiff_stream.seekg(answer,tiff_stream.beg);
+                  tiff_stream.read((char*)&value,sizeof(uint16_t));
+                  if (swap_) value = SwapShort(value);
+			   } else {
+                  tiff_stream.read((char*)&value2,sizeof(uint32_t));
+                  if (swap_) value2 = SwapWord(value2);
+                  tiff_stream.seekg(value2,tiff_stream.beg);
+                  tiff_stream.read((char*)&value,sizeof(uint16_t));
+                  if (swap_) value = SwapShort(value);
+			   }
+               return static_cast<uint64_t>(value);
+            }
             tiff_stream.read((char*)&value,sizeof(uint16_t));
             if (swap_) value = SwapShort(value);
-            answer = static_cast<uint32_t>(value);
+            answer = static_cast<uint64_t>(value);
          } else if (type == kRational) {
             //get the two values in the data to make a float.
             uint32_t value=0;
@@ -301,9 +370,8 @@ uint32_t TIFReader::GetTiffField(
                static_cast<float>(den);
             memcpy(buf,&rat,min((size_t)size,sizeof(float)));
             return 0;
-         } else {
+		 } else {
             std::cerr << "Unhandled TIFF Tag type" << std::endl;
-            exit(0);
          }
          return answer;
       }
@@ -318,6 +386,18 @@ uint16_t TIFReader::SwapShort(uint16_t num) {
 uint32_t TIFReader::SwapWord(uint32_t num) {
    return ((num & 0x000000FF) << 24) | ((num & 0xFF000000) >> 24) |
       ((num & 0x0000FF00) << 8)  | ((num & 0x00FF0000) >> 8);
+}
+
+uint64_t TIFReader::SwapLong(uint64_t num) {
+   return 
+	   ((num & 0x00000000000000FF) << 56) | 
+	   ((num & 0xFF00000000000000) >> 56) |
+	   ((num & 0x000000000000FF00) << 40)  | 
+	   ((num & 0x00FF000000000000) >> 40)  |
+	   ((num & 0x0000000000FF0000) << 24) | 
+	   ((num & 0x0000FF0000000000) >> 24) |
+	   ((num & 0x00000000FF000000) << 8)  | 
+	   ((num & 0x000000FF00000000) >> 8);
 }
 
 void TIFReader::SetSliceSeq(bool ss)
@@ -526,11 +606,11 @@ bool TIFReader::tif_slice_sort(const SliceInfo& info1, const SliceInfo& info2)
    return info1.slicenumber < info2.slicenumber;
 }
 
-uint32_t TIFReader::GetNumTiffPages()
+uint64_t TIFReader::GetNumTiffPages()
 {
-   uint32_t count = 0;
-   uint32_t save_offset = current_offset_;
-   uint32_t save_page = current_page_;
+   uint64_t count = 0;
+   uint64_t save_offset = current_offset_;
+   uint64_t save_page = current_page_;
    ResetTiff();
    while (true) {
       // count it if it's not a thumbnail
@@ -543,8 +623,8 @@ uint32_t TIFReader::GetNumTiffPages()
    return count;
 }
 
-void TIFReader::GetTiffStrip(uint32_t page, uint32_t strip,
-      void * data, uint32_t strip_size)
+void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
+      void * data, uint64_t strip_size)
 {
    //make sure we are on the correct page,
    //reset if ahead
@@ -557,19 +637,19 @@ void TIFReader::GetTiffStrip(uint32_t page, uint32_t strip,
       current_offset_ = GetTiffField(kNextPageOffsetTag,NULL,0);
    }
    //get the byte count and the strip offset to read data from.
-   uint32_t byte_count = GetTiffStripOffsetOrCount(kStripBytesCountTag,strip);
+   uint64_t byte_count = GetTiffStripOffsetOrCount(kStripBytesCountTag,strip);
    tiff_stream.seekg(GetTiffStripOffsetOrCount(
             kStripOffsetsTag,strip),tiff_stream.beg);
    //actually read the data now
    char *temp = new char[byte_count];
    tiff_stream.read((char*)temp,byte_count);
    //get compression tag, decompress if necessary
-   uint32_t tmp = GetTiffField(kCompressionTag,NULL,0);
-   uint16_t prediction = GetTiffField(kPredictionTag,NULL,0);
+   uint64_t tmp = GetTiffField(kCompressionTag,NULL,0);
+   uint64_t prediction = GetTiffField(kPredictionTag,NULL,0);
    bool eight_bits = 8 == GetTiffField(kBitsPerSampleTag,NULL,0);
-    uint32_t bits = GetTiffField(kSamplesPerPixelTag,NULL,0);
+   uint64_t bits = GetTiffField(kSamplesPerPixelTag,NULL,0);
    tsize_t stride = (GetTiffField(kPlanarConfigurationTag,NULL,0) == 2)?1:bits;
-   uint32_t rows_per_strip = GetTiffField(kRowsPerStripTag,NULL,0);
+   uint64_t rows_per_strip = GetTiffField(kRowsPerStripTag,NULL,0);
    bool isCompressed = tmp == 5;
     if (isCompressed) {
         LZWDecode((tidata_t)temp, (tidata_t)data, strip_size);
@@ -586,25 +666,47 @@ void TIFReader::GetTiffStrip(uint32_t page, uint32_t strip,
    delete[] temp;
 }
 
-uint32_t TIFReader::GetTiffStripOffsetOrCount(uint32_t tag, uint32_t strip)
+uint64_t TIFReader::GetTiffStripOffsetOrCount(uint64_t tag, uint64_t strip)
 {
    //search for the offset that tells us the byte count for this strip
-   bool isLong = GetTiffField(tag,NULL,kType) == kLong;
-   uint32_t offset = GetTiffField(tag, NULL,kValue);
-   if(GetTiffField(tag, NULL, kCount) > 1) {
-      offset += strip * (isLong?4:2);
-      tiff_stream.seekg(offset, tiff_stream.beg);
+   uint64_t type = GetTiffField(tag,NULL,kType);
+   switch (type) {
+   case kLong8:
+	   type = 8;
+	   break;
+   case kLong: 
+	   type = 4;
+	   break;
+   default:
+	   type = 2;
+	   break;
    }
-   else return offset;
-   uint32_t value = 0;
-   if (isLong) {
-      uint32_t tmp = 0;
-      tiff_stream.read((char*)&tmp,sizeof(uint32_t));
-      value = (swap_)?SwapWord(tmp):tmp;
+   uint64_t offset = GetTiffField(tag, NULL,kOffset);
+   uint64_t address = GetTiffField(tag, NULL,kValueAddress);
+   uint64_t cnt = GetTiffField(tag, NULL, kCount);
+   // if the values do not fit into the tag data, jump to them
+   if (cnt * type > (isBig_?8:4)) {
+      tiff_stream.seekg(offset+type*strip, tiff_stream.beg);
    } else {
-      uint16_t tmp = 0;
-      tiff_stream.read((char*)&tmp,sizeof(uint16_t));
-      value = (swap_)?SwapShort(tmp):tmp;
+	  //otherwise, return the value of interest within the tag
+      tiff_stream.seekg(address+type*strip, tiff_stream.beg);
+   }
+   uint64_t value = 0;
+   uint32_t tmp = 0;
+   uint16_t tmp2 = 0;
+   switch (type) {
+   case kLong8:
+      tiff_stream.read((char*)&value,sizeof(uint64_t));
+      value = (swap_)?SwapLong(value):value;
+	  break;
+   case kLong: 
+      tiff_stream.read((char*)&tmp,sizeof(uint32_t));
+      value = static_cast<uint64_t>((swap_)?SwapWord(tmp):tmp);
+	  break;
+   default:
+      tiff_stream.read((char*)&tmp2,sizeof(uint16_t));
+      value = static_cast<uint64_t>((swap_)?SwapShort(tmp2):tmp2);
+	  break;
    }
    return value;
 }
@@ -614,9 +716,17 @@ void TIFReader::ResetTiff()
    if (!tiff_stream.is_open())
       throw std::runtime_error( "TIFF file not open for reading." );
    //find the first IFD block/page
-   tiff_stream.seekg(4,tiff_stream.beg);
-   tiff_stream.read((char*)&current_offset_,sizeof(uint32_t));
-   if (swap_) current_offset_ = SwapWord(current_offset_);
+   if(!isBig_){
+	   tiff_stream.seekg(4,tiff_stream.beg);
+	   uint32_t temp;
+	   tiff_stream.read((char*)&temp,sizeof(uint32_t));
+	   if (swap_) temp = SwapWord(temp);
+	   current_offset_ = static_cast<uint64_t>(temp);
+   } else {
+	   tiff_stream.seekg(8,tiff_stream.beg);
+	   tiff_stream.read((char*)&current_offset_,sizeof(uint64_t));
+	   if (swap_) current_offset_ = SwapLong(current_offset_);
+   }
    current_page_ = 0;
 }
 
@@ -629,9 +739,11 @@ void TIFReader::OpenTiff(std::wstring name)
    tiff_stream.seekg(2,tiff_stream.beg);
    uint16_t tiff_num=0;
    tiff_stream.read((char*)&tiff_num,sizeof(uint16_t));
-   swap_ =  SwapShort(tiff_num) == 42;
+   swap_ =  SwapShort(tiff_num) == kRegularTiff;
+   swap_ |=  SwapShort(tiff_num) == kBigTiff;
+   isBig_ = (SwapShort(tiff_num) == kBigTiff) || (tiff_num == kBigTiff);
    // make sure this is a proper tiff and set the state.
-   if (tiff_num == 42 || swap_) {
+   if (isBig_ || tiff_num == kRegularTiff || swap_) {
       ResetTiff();
    } else {
       throw std::runtime_error( "TIFF file formatted incorrectly. Wrong Type." );
@@ -642,7 +754,7 @@ void TIFReader::CloseTiff() { if (tiff_stream.is_open()) tiff_stream.close(); }
 
 Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
       int c, bool get_max) {
-   uint32_t numPages = static_cast<uint32_t>(filelist.size());
+   uint64_t numPages = static_cast<uint64_t>(filelist.size());
    if (numPages <= 0)
       return 0;
    wstring filename = filelist[0].slice;
@@ -655,17 +767,17 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
          numPages = m_slice_num;
    }
 
-   uint32_t width = GetTiffField(kImageWidthTag,NULL,0);
-   uint32_t height = GetTiffField(kImageLengthTag,NULL,0);
-   uint16 bits = GetTiffField(kBitsPerSampleTag,NULL,0);
-   uint16 samples = GetTiffField(kSamplesPerPixelTag,NULL,0);
+   uint64_t width = GetTiffField(kImageWidthTag,NULL,0);
+   uint64_t height = GetTiffField(kImageLengthTag,NULL,0);
+   uint64_t bits = GetTiffField(kBitsPerSampleTag,NULL,0);
+   uint64_t samples = GetTiffField(kSamplesPerPixelTag,NULL,0);
    if (samples == 0 && width > 0 && height > 0) samples = 1;
 
    float x_res = 0.0, y_res = 0.0, z_res = 0.0;
    GetTiffField(kXResolutionTag,&x_res,sizeof(float));
    GetTiffField(kYResolutionTag,&y_res,sizeof(float));
-   uint32_t rowsperstrip = GetTiffField(kRowsPerStripTag,NULL,0);
-   uint32_t strip_size = rowsperstrip * width * samples * (bits/8);
+   uint64_t rowsperstrip = GetTiffField(kRowsPerStripTag,NULL,0);
+   uint64_t strip_size = rowsperstrip * width * samples * (bits/8);
 
    char img_desc[256];
    GetTiffField(kImageDescriptionTag, img_desc, 256);
@@ -723,7 +835,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
    if (samples > 1)
       buf = malloc(strip_size);
 
-   for (uint32_t pageindex=0; pageindex < numPages; pageindex++)
+   for (uint64_t pageindex=0; pageindex < numPages; pageindex++)
    {
       if (sequence) {
          filename = filelist[pageindex].slice;
@@ -735,10 +847,10 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
          continue;
       }
 
-      uint32_t num_strips = GetTiffField(kStripOffsetsTag, NULL,kCount);
+      uint64_t num_strips = GetTiffField(kStripOffsetsTag, NULL,kCount);
 
       //read file
-      for (uint32_t strip=0; strip<num_strips; strip++)
+      for (uint64_t strip=0; strip<num_strips; strip++)
       {
          long long valindex;
          int indexinpage;

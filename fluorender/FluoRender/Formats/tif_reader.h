@@ -8,6 +8,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <algorithm>
+#include <stdint.h>
 
 using namespace std;
 
@@ -39,9 +40,9 @@ public:
 	 * @throws An exception if a tiff is not open.
 	 * @return The value in the header denoted by tag.
 	 */
-	uint32_t GetTiffField(
-		const int tag,
-		void * pointer, uint32_t size);
+	uint64_t GetTiffField(
+		const uint64_t tag,
+		void * pointer, uint64_t size);
 	/**
 	 * Reads a strip of data from a tiff file.
 	 * @param page The page to read from.
@@ -51,10 +52,10 @@ public:
 	 * @throws An exception if a tiff is not open.
 	 */
 	void GetTiffStrip( 
-		uint32_t page,
-		uint32_t strip,
+		uint64_t page,
+		uint64_t strip,
 		void * data,
-		uint32_t strip_size);
+		uint64_t strip_size);
 	/**
 	 * Opens the tiff stream.
 	 * @param name The filename of the tiff.
@@ -82,18 +83,24 @@ public:
 	 */
 	uint32_t SwapWord(uint32_t num);
 	/**
+	 * This method swaps the byte order of a 8byte number.
+	 * @param num The 8byte to swap byte order.
+	 * @return The 8byte with bytes swapped.
+	 */
+	uint64_t SwapLong(uint64_t num);
+	/**
 	 * Determines the number of pages in a tiff.
 	 * @throws An exception if a tiff is not open.
 	 * @return The number of pages in the file.
 	 */
-	uint32_t GetNumTiffPages();
+	uint64_t GetNumTiffPages();
 	/**
 	 * Gets the specified offset for the strip offset or count.
 	 * @param tag The tag for either the offset or the count.
 	 * @param strip The strip number to get the correct count/offset.
 	 * @return The count or strip offset determined by @strip.
 	 */
-	uint32_t GetTiffStripOffsetOrCount(uint32_t tag, uint32_t strip);
+	uint64_t GetTiffStripOffsetOrCount(uint64_t tag, uint64_t strip);
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
 	int LoadOffset(int offset);
@@ -122,6 +129,7 @@ public:
 private:
 	wstring m_path_name;
 	wstring m_data_name;
+	bool isBig_;
 
 	struct SliceInfo
 	{
@@ -160,41 +168,41 @@ private:
 	/** The input stream for reading the tiff */
 	std::ifstream tiff_stream;
 	/** This keeps track of what page we are on in the tiff */
-	uint32_t current_page_;
+	uint64_t current_page_;
 	/** This is the offset of the page we are currently on */
-	uint32_t current_offset_;
+	uint64_t current_offset_;
 	/** Tells us if the data is little endian */
 	bool swap_;
 	/** The tiff tag for subfile type */
-	static const uint32_t kSubFileTypeTag = 254;
+	static const uint64_t kSubFileTypeTag = 254;
 	/** The tiff tag for image width */
-	static const uint32_t kImageWidthTag = 256;
+	static const uint64_t kImageWidthTag = 256;
 	/** The tiff tag for image length */
-	static const uint32_t kImageLengthTag = 257;
+	static const uint64_t kImageLengthTag = 257;
 	/** The tiff tag for bits per sample */
-	static const uint32_t kBitsPerSampleTag = 258;
+	static const uint64_t kBitsPerSampleTag = 258;
 	/** The tiff tag for compression */
-	static const uint32_t kCompressionTag = 259;
+	static const uint64_t kCompressionTag = 259;
 	/** The tiff tag for decode prediction */
-	static const uint32_t kPredictionTag = 317;
+	static const uint64_t kPredictionTag = 317;
 	/** The tiff tag for planar configuration */
-	static const uint32_t kPlanarConfigurationTag = 284;
+	static const uint64_t kPlanarConfigurationTag = 284;
 	/** The tiff tag for image description */
-	static const uint32_t kImageDescriptionTag = 270;
+	static const uint64_t kImageDescriptionTag = 270;
 	/** The tiff tag for strip offsets */
-	static const uint32_t kStripOffsetsTag = 273;
+	static const uint64_t kStripOffsetsTag = 273;
 	/** The tiff tag for Samples per pixel */
-	static const uint32_t kSamplesPerPixelTag = 277;
+	static const uint64_t kSamplesPerPixelTag = 277;
 	/** The tiff tag for rows per strip */
-	static const uint32_t kRowsPerStripTag = 278;
+	static const uint64_t kRowsPerStripTag = 278;
 	/** The tiff tag for strip bytes count */
-	static const uint32_t kStripBytesCountTag = 279;
+	static const uint64_t kStripBytesCountTag = 279;
 	/** The tiff tag for x resolution */
-	static const uint32_t kXResolutionTag = 282;
+	static const uint64_t kXResolutionTag = 282;
 	/** The tiff tag for y resolution */
-	static const uint32_t kYResolutionTag = 283;
+	static const uint64_t kYResolutionTag = 283;
 	/** The tiff tag number of entries on current page */
-	static const uint32_t kNextPageOffsetTag = 500;
+	static const uint64_t kNextPageOffsetTag = 500;
 	/** The BYTE type */
 	static const uint8_t kByte = 1;
 	/** The ASCII type */
@@ -205,12 +213,24 @@ private:
 	static const uint8_t kLong = 4;
 	/** The RATIONAL type */
 	static const uint8_t kRational = 5;
+	/** The TIFF_LONG8 type (unsigned 8-byte int)*/
+	static const uint8_t kLong8 = 16;
+	/** The TIFF_SLONG8 type (signed 8-byte int)*/
+	static const uint8_t kSLong8 = 17;
+	/** The TIFF_IFD8 type (unsigned 8-byte IFD offset)*/
+	static const uint8_t kIFD8 = 18;
+	/** Return the offset/value of the tag */
+	static const uint8_t kOffset = 4;
 	/** Return the value of the tag */
-	static const uint8_t kValue = 0;
+	static const uint8_t kValueAddress = 3;
 	/** Return the type of the tag */
 	static const uint8_t kType = 1;
 	/** Return the count of the tag */
 	static const uint8_t kCount = 2;
+	/** This is a regular TIF */
+	static const uint8_t kRegularTiff = 42;
+	/** This is a Big TIF */
+	static const uint8_t kBigTiff = 43;
 
 private:
 	bool IsNewBatchFile(wstring name);

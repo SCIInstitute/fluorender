@@ -24,6 +24,7 @@
 #include "compatibility.h"
 
 #include <wx/wx.h>
+#include <wx/menu.h>
 #include <wx/aui/aui.h>
 
 #include <vector>
@@ -248,11 +249,19 @@ public:
 	//tex renderer settings
 	void SetTextureRendererSettings();
 
+	//quit option
+	void OnQuit(wxCommandEvent& WXUNUSED(event))
+	{ Close(true); }
+
 private:
 	wxAuiManager m_aui_mgr;
 	wxMenu* m_tb_menu_ui;
 	wxMenu* m_tb_menu_edit;
 	wxToolBar* m_main_tb;
+	//main top menu
+	wxMenuBar* m_top_menu;
+	wxMenu* m_top_file;
+
 	TreePanel *m_tree_panel;
 	ListPanel *m_list_panel;
 	VMovieView* m_movie_view;

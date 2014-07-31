@@ -18,6 +18,7 @@
 //resources
 #include "img/icon_32.h"
 #include "img/icon_open_volume.h"
+#include "img/icon_open_volume_mini.h"
 #include "img/icon_open_project.h"
 #include "img/icon_save_project.h"
 #include "img/icon_new_view.h"
@@ -469,6 +470,18 @@ m_free_version(true)
    GetStatusBar()->SetStatusText(wxString(FLUORENDER_TITLE)+
                                  wxString(" started normally."));
 #endif // wxUSE_STATUSBAR
+
+   //main top menu
+   m_top_menu = new wxMenuBar;
+   m_top_file = new wxMenu;
+   wxMenuItem *vol = new wxMenuItem(m_top_file,ID_OpenVolume, wxT("Open &Volume"));
+   vol->SetBitmap(wxGetBitmapFromMemory(icon_open_volume_mini));
+   m_top_file->Append(vol);
+   wxMenuItem *quit = new wxMenuItem(m_top_file, wxID_EXIT);
+   quit->SetBitmap(wxArtProvider::GetBitmap(wxART_QUIT));
+   m_top_file->Append(quit);
+   m_top_menu->Append(m_top_file,wxT("&File"));
+   SetMenuBar(m_top_menu);
 }
 
 VRenderFrame::~VRenderFrame()
