@@ -92,6 +92,7 @@ class VRenderFrame: public wxFrame
 		ID_Facebook,
 		ID_Twitter,
 		ID_Info,
+		ID_ShowHideToolbar
 	};
 
 public:
@@ -261,6 +262,9 @@ private:
 	//main top menu
 	wxMenuBar* m_top_menu;
 	wxMenu* m_top_file;
+	wxMenu* m_top_tools;
+	wxMenu* m_top_window;
+	wxMenu* m_top_help;
 
 	TreePanel *m_tree_panel;
 	ListPanel *m_list_panel;
@@ -351,6 +355,7 @@ private:
 	void OnFacebook(wxCommandEvent& WXUNUSED(event));
 	void OnTwitter(wxCommandEvent& WXUNUSED(event));
 	void OnShowHideUI(wxCommandEvent& WXUNUSED(event));
+	void OnShowHideToolbar(wxCommandEvent& WXUNUSED(event));
 	void OnShowHideView(wxCommandEvent &event);
 
 	//panes
