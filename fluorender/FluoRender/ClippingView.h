@@ -178,6 +178,11 @@ private:
 	//z2
 	wxSlider *m_z2_clip_sldr;
 	wxTextCtrl *m_z2_clip_text;
+	//slider and bar sizes
+	static const size_t kClipSize = 450;
+	static const size_t kBarSize  = kClipSize - 20;
+	//highlighters
+	wxStaticText * m_xBar, * m_yBar, * m_zBar;
 
 	//linkers
 	wxCheckBox *m_link_x_chk;
