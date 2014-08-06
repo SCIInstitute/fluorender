@@ -5,6 +5,16 @@
 #include <wx/utils.h>
 #include <wx/valnum.h>
 #include <algorithm>
+#include "png_resource.h"
+#include "layers.h"
+#include "depth.h"
+#include "axis.h"
+#include "info.h"
+#include "legend.h"
+#include "interpolate.h"
+#include "freefly.h"
+#include "camera.h"
+#include "composite.h"
 
 int VRenderView::m_id = 1;
 ImgShaderFactory VRenderGLView::m_img_shader_factory;
@@ -5717,7 +5727,7 @@ void VRenderGLView::SetPersp(bool persp)
       wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
       m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
       m_vrv->m_scale_factor_text->ChangeValue(str);
-      m_vrv->m_free_chk->SetValue(false);
+      m_vrv->m_options_toolbar2->ToggleTool(VRenderView::ID_FreeChk,false);
 
       SetRotations(m_rotx, m_roty, m_rotz);
    }
@@ -5727,8 +5737,8 @@ void VRenderGLView::SetPersp(bool persp)
 void VRenderGLView::SetFree(bool free)
 {
    m_free = free;
-   if (m_vrv->m_free_chk->GetValue() != m_free)
-      m_vrv->m_free_chk->SetValue(m_free);
+   if (m_vrv->m_options_toolbar2->GetToolState(VRenderView::ID_FreeChk) != m_free)
+      m_vrv->m_options_toolbar2->ToggleTool(VRenderView::ID_FreeChk,m_free);
    if (free)
    {
       m_persp = true;
@@ -5812,19 +5822,19 @@ void VRenderGLView::SetVolMethod(int method)
    m_vol_method = method;
 
    //ui
-   m_vrv->m_volume_seq_rd->SetValue(false);
-   m_vrv->m_volume_multi_rd->SetValue(false);
-   m_vrv->m_volume_comp_rd->SetValue(false);
+   m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_VolumeSeqRd,false);
+   m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_VolumeMultiRd,false);
+   m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_VolumeCompRd,false);
    switch (m_vol_method)
    {
    case VOL_METHOD_SEQ:
-      m_vrv->m_volume_seq_rd->SetValue(true);
+	  m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_VolumeSeqRd,true);
       break;
    case VOL_METHOD_MULTI:
-      m_vrv->m_volume_multi_rd->SetValue(true);
+	  m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_VolumeMultiRd,true);
       break;
    case VOL_METHOD_COMP:
-      m_vrv->m_volume_comp_rd->SetValue(true);
+	  m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_VolumeCompRd,true);
       break;
    }
 }
@@ -7206,7 +7216,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
       //y2 = (p4, p5, p7, p6)
       if (m_clip_mask & 8)
       {
-         glColor4d(0.5, 1.0, 1.0, plane_trans);
+         glColor4d(1.0, 1.0, 0.5, plane_trans);
          glBegin(GL_QUADS);
          glVertex3f(p4.x(), p4.y(), p4.z());
          glVertex3f(p5.x(), p5.y(), p5.z());
@@ -7248,7 +7258,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
       //z2 = (p5, p1, p3, p7)
       if (m_clip_mask & 32)
       {
-         glColor4d(1.0, 1.0, 0.5, plane_trans);
+         glColor4d(0.5, 1.0, 1.0, plane_trans);
          glBegin(GL_QUADS);
          glVertex3f(p5.x(), p5.y(), p5.z());
          glVertex3f(p1.x(), p1.y(), p1.z());
@@ -9753,18 +9763,18 @@ void VRenderGLView::GetFrame(int &x, int &y, int &w, int &h)
 
 BEGIN_EVENT_TABLE(VRenderView, wxPanel)
 //bar top
-EVT_RADIOBUTTON(ID_VolumeSeqRd, VRenderView::OnVolumeMethodCheck)
-EVT_RADIOBUTTON(ID_VolumeMultiRd, VRenderView::OnVolumeMethodCheck)
-EVT_RADIOBUTTON(ID_VolumeCompRd, VRenderView::OnVolumeMethodCheck)
+EVT_TOOL(ID_VolumeSeqRd, VRenderView::OnVolumeMethodCheck)
+EVT_TOOL(ID_VolumeMultiRd, VRenderView::OnVolumeMethodCheck)
+EVT_TOOL(ID_VolumeCompRd, VRenderView::OnVolumeMethodCheck)
 EVT_BUTTON(ID_CaptureBtn, VRenderView::OnCapture)
 EVT_COLOURPICKER_CHANGED(ID_BgColorPicker, VRenderView::OnBgColorChange)
-EVT_CHECKBOX(ID_CamCtrChk, VRenderView::OnCamCtrCheck)
-EVT_CHECKBOX(ID_FpsChk, VRenderView::OnFpsCheck)
-EVT_CHECKBOX(ID_LegendChk, VRenderView::OnLegendCheck)
-EVT_CHECKBOX(ID_IntpChk, VRenderView::OnIntpCheck)
+EVT_TOOL(ID_CamCtrChk, VRenderView::OnCamCtrCheck)
+EVT_TOOL(ID_FpsChk, VRenderView::OnFpsCheck)
+EVT_TOOL(ID_LegendChk, VRenderView::OnLegendCheck)
+EVT_TOOL(ID_IntpChk, VRenderView::OnIntpCheck)
 EVT_COMMAND_SCROLL(ID_AovSldr, VRenderView::OnAovChange)
 EVT_TEXT(ID_AovText, VRenderView::OnAovText)
-EVT_CHECKBOX(ID_FreeChk, VRenderView::OnFreeChk)
+EVT_TOOL(ID_FreeChk, VRenderView::OnFreeChk)
 //bar left
 EVT_CHECKBOX(ID_DepthAttenChk, VRenderView::OnDepthAttenCheck)
 EVT_COMMAND_SCROLL(ID_DepthAttenFactorSldr, VRenderView::OnDepthAttenFactorChange)
@@ -9847,86 +9857,110 @@ void VRenderView::CreateBar()
    wxStaticText *st1, *st2, *st3;
 
    //bar top///////////////////////////////////////////////////
+   //toolbar 1
+   m_options_toolbar = new wxToolBar(this,wxID_ANY);
    wxBoxSizer* sizer_h_1 = new wxBoxSizer(wxHORIZONTAL);
-   m_volume_seq_rd = new wxRadioButton(this, ID_VolumeSeqRd, "Layered",
-         wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-   m_volume_multi_rd = new wxRadioButton(this, ID_VolumeMultiRd, "Depth",
-         wxDefaultPosition, wxDefaultSize);
-   m_volume_comp_rd = new wxRadioButton(this, ID_VolumeCompRd, "Composite",
-         wxDefaultPosition, wxDefaultSize);
-   m_volume_seq_rd->SetValue(false);
-   m_volume_multi_rd->SetValue(false);
-   m_volume_comp_rd->SetValue(false);
+   //add the options
+   m_options_toolbar->AddRadioTool(ID_VolumeSeqRd,"Layered",
+	   wxGetBitmapFromMemory(layers),wxNullBitmap,"Render View as Layers",
+	   "Render View as Layers");
+   m_options_toolbar->AddRadioTool(ID_VolumeMultiRd,"Depth",
+	   wxGetBitmapFromMemory(depth),wxNullBitmap,"Render View by Depth",
+	   "Render View by Depth");
+   m_options_toolbar->AddRadioTool(ID_VolumeCompRd,"Composite",
+	   wxGetBitmapFromMemory(composite),wxNullBitmap,
+	   "Render View as a Composite of Colors",
+	   "Render View as a Composite of Colors");
+
+   m_options_toolbar->ToggleTool(ID_VolumeSeqRd,false);
+   m_options_toolbar->ToggleTool(ID_VolumeMultiRd,false);
+   m_options_toolbar->ToggleTool(ID_VolumeCompRd,false);
    switch (m_glview->GetVolMethod())
    {
    case VOL_METHOD_SEQ:
-      m_volume_seq_rd->SetValue(true);
+   m_options_toolbar->ToggleTool(ID_VolumeSeqRd,true);
       break;
    case VOL_METHOD_MULTI:
-      m_volume_multi_rd->SetValue(true);
+   m_options_toolbar->ToggleTool(ID_VolumeMultiRd,true);
       break;
    case VOL_METHOD_COMP:
-      m_volume_comp_rd->SetValue(true);
+   m_options_toolbar->ToggleTool(ID_VolumeCompRd,true);
       break;
-   }
-   m_capture_btn = new wxButton(this, ID_CaptureBtn, "Capture",
-         wxDefaultPosition, wxSize(80, 20));
-   st1 = new wxStaticText(this, 0, "Background:");
-   m_bg_color_picker = new wxColourPickerCtrl(this, ID_BgColorPicker, *wxBLACK,
-         wxDefaultPosition, wxDefaultSize/*wxSize(40, 20)*/);
-   m_cam_ctr_chk = new wxCheckBox(this, ID_CamCtrChk, "Center",
-         wxDefaultPosition, wxSize(-1, 20));
-   m_cam_ctr_chk->SetValue(false);
-   m_fps_chk = new wxCheckBox(this, ID_FpsChk, "Info.",
-         wxDefaultPosition, wxSize(-1, 20));
-   m_fps_chk->SetValue(false);
-   m_legend_chk = new wxCheckBox(this, ID_LegendChk, "Legend",
-         wxDefaultPosition, wxSize(-1, 20));
-   m_legend_chk->SetValue(false);
-   m_intp_chk = new wxCheckBox(this, ID_IntpChk, "Intrp.",
-         wxDefaultPosition, wxSize(-1, 20));
-   m_intp_chk->SetValue(true);
+   }   
+   //camera
+   m_options_toolbar->AddSeparator();
+   wxButton * cam = new wxButton(m_options_toolbar, ID_CaptureBtn, "Capture");
+   cam->SetBitmap(wxGetBitmapFromMemory(camera));
+   m_options_toolbar->AddControl(cam);
+   m_options_toolbar->AddSeparator();
+   
+   m_options_toolbar->AddCheckTool(ID_CamCtrChk,"Axis",
+	   wxGetBitmapFromMemory(axis),wxNullBitmap,
+	   "Toggle View of the Center Axis",
+	   "Toggle View of the Center Axis");
+   m_options_toolbar->ToggleTool(ID_CamCtrChk,false);
+
+   m_options_toolbar->AddCheckTool(ID_FpsChk,"Info",
+	   wxGetBitmapFromMemory(info),wxNullBitmap,
+	   "Toggle View of FPS and Mouse Position",
+	   "Toggle View of FPS and Mouse Position");
+   m_options_toolbar->ToggleTool(ID_FpsChk,false);
+   
+   m_options_toolbar->AddCheckTool(ID_LegendChk,"Legend",
+	   wxGetBitmapFromMemory(legend),wxNullBitmap,
+	   "Toggle View of the Legend",
+	   "Toggle View of the Legend");
+   m_options_toolbar->ToggleTool(ID_LegendChk,false);
+   
+   m_options_toolbar->AddCheckTool(ID_IntpChk,"Interpolate",
+	   wxGetBitmapFromMemory(interpolate),wxNullBitmap,
+	   "Interpolates between data when checked.",
+	   "Interpolates between data when checked.");
+   m_options_toolbar->ToggleTool(ID_IntpChk,false);
+
+   m_options_toolbar->Realize();
+
    //angle of view
-   st2 = new wxStaticText(this, 0, "V. AOV:");
-   m_aov_sldr = new wxSlider(this, ID_AovSldr, 45, 10, 100,
-         wxDefaultPosition, wxSize(120, 20), wxSL_HORIZONTAL);
+   m_options_toolbar2 = new wxToolBar(this, wxID_ANY);
+   st2 = new wxStaticText(m_options_toolbar2, wxID_ANY, "V. AOV:");
+   m_aov_sldr = new wxSlider(m_options_toolbar2, ID_AovSldr, 45, 10, 100,
+         wxDefaultPosition, wxSize(200, 20), wxSL_HORIZONTAL);
    m_aov_sldr->SetValue(GetPersp()?GetAov():10);
    m_aov_sldr->Connect(wxID_ANY, wxEVT_IDLE,
          wxIdleEventHandler(VRenderView::OnAovSldrIdle),
          NULL, this);
-   m_aov_text = new wxTextCtrl(this, ID_AovText, "",
+   m_aov_text = new wxTextCtrl(m_options_toolbar2, ID_AovText, "",
          wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-   m_aov_text->ChangeValue(GetPersp()?wxString::Format("%d", int(GetAov())):"Ortho");
-   m_free_chk = new wxCheckBox(this, ID_FreeChk, "FreeFly",
-         wxDefaultPosition, wxSize(-1, 20));
+   m_aov_text->ChangeValue(GetPersp()?wxString::Format("%d", 
+	   int(GetAov())):"Ortho");
+   m_options_toolbar2->AddControl(st2);
+   m_options_toolbar2->AddControl(m_aov_sldr);
+   m_options_toolbar2->AddControl(m_aov_text);
+
+   m_options_toolbar2->AddCheckTool(ID_FreeChk,"Free Fly",
+	   wxGetBitmapFromMemory(freefly),wxNullBitmap,
+	   "Change the camera to a 'Free-Fly' Mode",
+	   "Change the camera to a 'Free-Fly' Mode");
+
    if (GetFree())
-      m_free_chk->SetValue(true);
+	m_options_toolbar2->ToggleTool(ID_FreeChk,true);
    else
-      m_free_chk->SetValue(false);
-   //
-   sizer_h_1->Add(10, 5, 0);
-   sizer_h_1->Add(m_volume_seq_rd, 0, wxALIGN_CENTER, 0);
-   sizer_h_1->Add(m_volume_multi_rd, 0, wxALIGN_CENTER, 0);
-   sizer_h_1->Add(m_volume_comp_rd, 0, wxALIGN_CENTER, 0);
-   sizer_h_1->Add(10, 5, 0);
-   sizer_h_1->Add(m_capture_btn, 0, wxALIGN_CENTER, 0);
-   sizer_h_1->Add(10, 5, 0);
-   sizer_h_1->Add(st1, 0, wxALIGN_CENTER, 0);
-   sizer_h_1->Add(m_bg_color_picker, 0, wxALIGN_CENTER, 0);
-   sizer_h_1->Add(10, 5, 0);
-   sizer_h_1->Add(m_cam_ctr_chk, 0, wxALIGN_CENTER);
-   sizer_h_1->Add(5, 5, 0);
-   sizer_h_1->Add(m_fps_chk, 0, wxALIGN_CENTER);
-   sizer_h_1->Add(5, 5, 0);
-   sizer_h_1->Add(m_legend_chk, 0, wxALIGN_CENTER);
-   sizer_h_1->Add(5, 5, 0);
-   sizer_h_1->Add(m_intp_chk, 0, wxALIGN_CENTER);
-   sizer_h_1->Add(5, 5, 0);
-   sizer_h_1->Add(st2, 0, wxALIGN_CENTER, 0);
-   sizer_h_1->Add(m_aov_sldr, 0, wxALIGN_CENTER);
-   sizer_h_1->Add(m_aov_text, 0, wxALIGN_CENTER);
-   sizer_h_1->Add(5, 5, 0);
-   sizer_h_1->Add(m_free_chk, 0, wxALIGN_CENTER);
+	m_options_toolbar2->ToggleTool(ID_FreeChk,false);
+   
+   m_options_toolbar2->AddSeparator();
+   //background option
+   st1 = new wxStaticText(m_options_toolbar2, wxID_ANY, "Background:");
+   m_bg_color_picker = new wxColourPickerCtrl(m_options_toolbar2, 
+	   ID_BgColorPicker);
+   m_options_toolbar2->AddControl(st1);
+   m_options_toolbar2->AddControl(m_bg_color_picker);
+
+   m_options_toolbar2->Realize();
+
+   //add the toolbars and other options in order
+   sizer_h_1->Add(m_options_toolbar,0,wxALIGN_CENTER|wxEXPAND);
+   sizer_h_1->AddStretchSpacer();
+   sizer_h_1->Add(m_options_toolbar2,0,wxALIGN_CENTER|wxEXPAND);
 
    //bar left///////////////////////////////////////////////////
    wxBoxSizer* sizer_v_3 = new wxBoxSizer(wxVERTICAL);
@@ -9942,7 +9976,7 @@ void VRenderView::CreateBar()
    sizer_v_3->Add(5, 10, 0);
    sizer_v_3->Add(st1, 0, wxALIGN_CENTER);
    sizer_v_3->Add(m_depth_atten_chk, 0, wxALIGN_CENTER);
-   sizer_v_3->Add(m_depth_atten_factor_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+   sizer_v_3->Add(m_depth_atten_factor_sldr, 1, wxALIGN_CENTER);
    sizer_v_3->Add(m_depth_atten_reset_btn, 0, wxALIGN_CENTER);
    sizer_v_3->Add(m_depth_atten_factor_text, 0, wxALIGN_CENTER);
 
@@ -9965,7 +9999,7 @@ void VRenderView::CreateBar()
    sizer_v_4->Add(st1, 0, wxALIGN_CENTER);
    sizer_v_4->Add(m_center_btn, 0, wxALIGN_CENTER);
    sizer_v_4->Add(m_scale_121_btn, 0, wxALIGN_CENTER);
-   sizer_v_4->Add(m_scale_factor_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+   sizer_v_4->Add(m_scale_factor_sldr, 1, wxALIGN_CENTER);
    sizer_v_4->Add(m_scale_factor_spin, 0, wxALIGN_CENTER);
    sizer_v_4->Add(m_scale_reset_btn, 0, wxALIGN_CENTER);
    sizer_v_4->Add(m_scale_factor_text, 0, wxALIGN_CENTER);
@@ -10026,7 +10060,7 @@ void VRenderView::CreateBar()
    sizer_h_2->Add(5, 5, 0);
    sizer_h_2->Add(m_default_btn, 0, wxALIGN_CENTER);
 
-   sizer_v->Add(sizer_h_1, 0, wxEXPAND);
+   sizer_v->Add(sizer_h_1, 0, wxEXPAND|wxBOTTOM,3);
    sizer_v->Add(sizer_m, 1, wxEXPAND);
    sizer_v->Add(sizer_h_2, 0, wxEXPAND);
 
@@ -11225,26 +11259,30 @@ void VRenderView::OnBgColorChange(wxColourPickerEvent& event)
 
 void VRenderView::OnCamCtrCheck(wxCommandEvent& event)
 {
-   m_glview->m_draw_camctr = m_cam_ctr_chk->GetValue();
+   m_glview->m_draw_camctr = 
+	   m_options_toolbar->GetToolState(ID_CamCtrChk);
    RefreshGL();
 }
 
 void VRenderView::OnFpsCheck(wxCommandEvent& event)
 {
-   m_glview->m_draw_info = m_fps_chk->GetValue();
+   m_glview->m_draw_info = 
+	   m_options_toolbar->GetToolState(ID_FpsChk);
    m_glview->m_draw_coord = m_glview->m_draw_info;
    RefreshGL();
 }
 
 void VRenderView::OnLegendCheck(wxCommandEvent& event)
 {
-   m_glview->m_draw_legend = m_legend_chk->GetValue();
+   m_glview->m_draw_legend = 
+	   m_options_toolbar->GetToolState(ID_LegendChk);
    RefreshGL();
 }
 
 void VRenderView::OnIntpCheck(wxCommandEvent& event)
 {
-   m_glview->SetIntp(m_intp_chk->GetValue());
+   m_glview->SetIntp(
+	   m_options_toolbar->GetToolState(ID_IntpChk));
    RefreshGL();
 }
 
@@ -11315,8 +11353,8 @@ void VRenderView::OnAovText(wxCommandEvent& event)
 
 void VRenderView::OnFreeChk(wxCommandEvent& event)
 {
-   if (m_free_chk->GetValue())
-      SetFree(true);
+   if (m_options_toolbar2->GetToolState(ID_FreeChk))
+      SetFree(true); 
    else
    {
       SetFree(false);
@@ -11336,11 +11374,11 @@ void VRenderView::OnSaveDefault(wxCommandEvent &event)
 
    //render modes
    bool bVal;
-   bVal = m_volume_seq_rd->GetValue();
+   bVal = m_options_toolbar->GetToolState(ID_VolumeSeqRd);
    fconfig.Write("volume_seq_rd", bVal);
-   bVal = m_volume_multi_rd->GetValue();
+   bVal = m_options_toolbar->GetToolState(ID_VolumeMultiRd);
    fconfig.Write("volume_multi_rd", bVal);
-   bVal = m_volume_comp_rd->GetValue();
+   bVal = m_options_toolbar->GetToolState(ID_VolumeCompRd);
    fconfig.Write("volume_comp_rd", bVal);
    //background color
    wxColor cVal;
@@ -11348,15 +11386,15 @@ void VRenderView::OnSaveDefault(wxCommandEvent &event)
    str = wxString::Format("%d %d %d", cVal.Red(), cVal.Green(), cVal.Blue());
    fconfig.Write("bg_color_picker", str);
    //camera center
-   bVal = m_cam_ctr_chk->GetValue();
+   bVal = m_options_toolbar->GetToolState(ID_CamCtrChk);
    fconfig.Write("cam_ctr_chk", bVal);
    //camctr size
    fconfig.Write("camctr_size", m_glview->m_camctr_size);
    //fps
-   bVal = m_fps_chk->GetValue();
+   bVal = m_options_toolbar->GetToolState(ID_FpsChk);
    fconfig.Write("fps_chk", bVal);
    //interpolation
-   bVal = m_intp_chk->GetValue();
+   bVal = m_options_toolbar->GetToolState(ID_IntpChk);
    fconfig.Write("intp_chk", bVal);
    //selection
    bVal = m_glview->m_draw_legend;
@@ -11367,7 +11405,7 @@ void VRenderView::OnSaveDefault(wxCommandEvent &event)
    //ortho/persp
    fconfig.Write("persp", m_glview->m_persp);
    fconfig.Write("aov", m_glview->m_aov);
-   bVal = m_free_chk->GetValue();
+   bVal = m_options_toolbar2->GetToolState(ID_FreeChk);
    fconfig.Write("free_rd", bVal);
    //rotations
    str = m_x_rot_text->GetValue();
@@ -11431,19 +11469,19 @@ void VRenderView::LoadSettings()
    double dVal;
    if (fconfig.Read("volume_seq_rd", &bVal))
    {
-      m_volume_seq_rd->SetValue(bVal);
+      m_options_toolbar->ToggleTool(ID_VolumeSeqRd,bVal);
       if (bVal)
          SetVolMethod(VOL_METHOD_SEQ);
    }
    if (fconfig.Read("volume_multi_rd", &bVal))
    {
-      m_volume_multi_rd->SetValue(bVal);
+      m_options_toolbar->ToggleTool(ID_VolumeMultiRd,bVal);
       if (bVal)
          SetVolMethod(VOL_METHOD_MULTI);
    }
    if (fconfig.Read("volume_comp_rd", &bVal))
    {
-      m_volume_comp_rd->SetValue(bVal);
+      m_options_toolbar->ToggleTool(ID_VolumeCompRd,bVal);
       if (bVal)
          SetVolMethod(VOL_METHOD_COMP);
    }
@@ -11459,7 +11497,7 @@ void VRenderView::LoadSettings()
    }
    if (fconfig.Read("cam_ctr_chk", &bVal))
    {
-      m_cam_ctr_chk->SetValue(bVal);
+      m_options_toolbar->ToggleTool(ID_CamCtrChk,bVal);
       m_glview->m_draw_camctr = bVal;
    }
    if (fconfig.Read("camctr_size", &dVal))
@@ -11468,18 +11506,18 @@ void VRenderView::LoadSettings()
    }
    if (fconfig.Read("fps_chk", &bVal))
    {
-      m_fps_chk->SetValue(bVal);
+      m_options_toolbar->ToggleTool(ID_FpsChk,bVal);
       m_glview->m_draw_info = bVal;
       m_glview->m_draw_coord = bVal;
    }
    if (fconfig.Read("intp_chk", &bVal))
    {
-      m_intp_chk->SetValue(bVal);
+      m_options_toolbar->ToggleTool(ID_IntpChk,bVal);
       m_glview->SetIntp(bVal);
    }
    if (fconfig.Read("legend_chk", &bVal))
    {
-      m_legend_chk->SetValue(bVal);
+      m_options_toolbar->ToggleTool(ID_LegendChk,bVal);
       m_glview->m_draw_legend = bVal;
    }
    if (fconfig.Read("mouse_focus", &bVal))
@@ -11499,7 +11537,7 @@ void VRenderView::LoadSettings()
    }
    if (fconfig.Read("free_rd", &bVal))
    {
-      m_free_chk->SetValue(bVal);
+      m_options_toolbar2->ToggleTool(ID_FreeChk,bVal);
       if (bVal)
          SetFree(true);
    }

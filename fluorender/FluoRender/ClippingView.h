@@ -79,33 +79,33 @@ public:
 	}
 	bool GetXLink()
 	{
-		return m_link_x_chk->GetValue();
+		return m_check_tb->GetToolState(ID_LinkXChk);
 	}
 	bool GetYLink()
 	{
-		return m_link_y_chk->GetValue();
+		return m_check_tb->GetToolState(ID_LinkYChk);
 	}
 	bool GetZLink()
 	{
-		return m_link_z_chk->GetValue();
+		return m_check_tb->GetToolState(ID_LinkZChk);
 	}
 	void SetXLink(bool link)
 	{
-		m_link_x_chk->SetValue(link);
+		m_check_tb->ToggleTool(ID_LinkXChk,link);
 		m_link_x = link;
 		wxCommandEvent ev;
 		OnLinkXCheck(ev);
 	}
 	void SetYLink(bool link)
 	{
-		m_link_y_chk->SetValue(link);
+		m_check_tb->ToggleTool(ID_LinkYChk,link);
 		m_link_y = link;
 		wxCommandEvent ev;
 		OnLinkYCheck(ev);
 	}
 	void SetZLink(bool link)
 	{
-		m_link_z_chk->SetValue(link);
+		m_check_tb->ToggleTool(ID_LinkZChk,link);
 		m_link_z  = link;
 		wxCommandEvent ev;
 		OnLinkZCheck(ev);
@@ -179,15 +179,12 @@ private:
 	wxSlider *m_z2_clip_sldr;
 	wxTextCtrl *m_z2_clip_text;
 	//slider and bar sizes
-	static const size_t kClipSize = 450;
+	static const size_t kClipSize = 400;
 	static const size_t kBarSize  = kClipSize - 20;
 	//highlighters
 	wxStaticText * m_xBar, * m_yBar, * m_zBar;
 
-	//linkers
-	wxCheckBox *m_link_x_chk;
-	wxCheckBox *m_link_y_chk;
-	wxCheckBox *m_link_z_chk;
+	wxToolBar * m_check_tb;
 
 	//buttons
 	wxButton *m_yz_clip_btn;

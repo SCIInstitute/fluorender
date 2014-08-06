@@ -47,6 +47,19 @@
 #include "img/logo.h"
 #include "img/icon_measure.h"
 
+
+#include "img/camera.h"
+#include "img/align.h"
+#include "img/center.h"
+#include "img/composite.h"
+#include "img/depth.h"
+#include "img/layers.h"
+#include "img/link.h"
+#include "img/measure.h"
+#include "img/ratio.h"
+#include "img/refresh.h"
+#include "img/unlink.h"
+
 BEGIN_EVENT_TABLE(VRenderFrame, wxFrame)
 EVT_MENU(wxID_EXIT, VRenderFrame::OnExit)
 EVT_MENU(ID_ViewNew, VRenderFrame::OnNewView)
@@ -3420,17 +3433,17 @@ void VRenderFrame::OpenProject(wxString& filename)
             if (fconfig.Read("draw_camctr", &bVal))
             {
                vrv->m_glview->m_draw_camctr = bVal;
-               vrv->m_cam_ctr_chk->SetValue(bVal);
+               vrv->m_options_toolbar->ToggleTool(VRenderView::ID_CamCtrChk,bVal);
             }
             if (fconfig.Read("draw_fps", &bVal))
             {
                vrv->m_glview->m_draw_info = bVal;
-               vrv->m_fps_chk->SetValue(bVal);
+               vrv->m_options_toolbar->ToggleTool(VRenderView::ID_FpsChk,bVal);
             }
             if (fconfig.Read("draw_legend", &bVal))
             {
                vrv->m_glview->m_draw_legend = bVal;
-               vrv->m_legend_chk->SetValue(bVal);
+               vrv->m_options_toolbar->ToggleTool(VRenderView::ID_LegendChk,bVal);
             }
 
             //camera

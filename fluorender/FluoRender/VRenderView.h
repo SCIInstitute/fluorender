@@ -854,6 +854,7 @@ class VRenderGLView: public wxGLCanvas
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class VRenderView: public wxPanel
 {
+   public:
    enum
    {
       ID_VolumeSeqRd = wxID_HIGHEST+1001,
@@ -893,7 +894,6 @@ class VRenderView: public wxPanel
       ID_FreeChk
    };
 
-   public:
    VRenderView(wxWindow* frame,
          wxWindow* parent,
          wxWindowID id,
@@ -1343,18 +1343,11 @@ class VRenderView: public wxPanel
 
    //top bar///////////////////////////////////////////////////
    wxPanel* m_panel_1;
-   wxRadioButton *m_volume_seq_rd;
-   wxRadioButton *m_volume_multi_rd;
-   wxRadioButton *m_volume_comp_rd;
-   wxButton *m_capture_btn;
    wxColourPickerCtrl *m_bg_color_picker;
-   wxCheckBox *m_cam_ctr_chk;
-   wxCheckBox *m_fps_chk;
-   wxCheckBox *m_legend_chk;
-   wxCheckBox *m_intp_chk;
    wxSlider* m_aov_sldr;
    wxTextCtrl* m_aov_text;
-   wxCheckBox* m_free_chk;
+   wxToolBar * m_options_toolbar;
+   wxToolBar * m_options_toolbar2;
 
    //bottom bar///////////////////////////////////////////////////
    wxPanel* m_panel_2;
