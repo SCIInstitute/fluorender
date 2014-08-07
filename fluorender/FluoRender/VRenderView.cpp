@@ -10048,7 +10048,7 @@ void VRenderView::CreateBar()
 
    //angle of view
    m_options_toolbar2 = new wxToolBar(this, wxID_ANY);
-   st2 = new wxStaticText(m_options_toolbar2, wxID_ANY, "V. AOV:");
+   st2 = new wxStaticText(m_options_toolbar2, wxID_ANY, "Perspective Angle:");
    m_aov_sldr = new wxSlider(m_options_toolbar2, ID_AovSldr, 45, 10, 100,
          wxDefaultPosition, wxSize(200, 20), wxSL_HORIZONTAL);
    m_aov_sldr->SetValue(GetPersp()?GetAov():10);
@@ -10062,6 +10062,8 @@ void VRenderView::CreateBar()
    m_options_toolbar2->AddControl(st2);
    m_options_toolbar2->AddControl(m_aov_sldr);
    m_options_toolbar2->AddControl(m_aov_text);
+   st2 = new wxStaticText(m_options_toolbar2, wxID_ANY, "    Free-Fly");
+   m_options_toolbar2->AddControl(st2);
 
    m_options_toolbar2->AddCheckTool(ID_FreeChk,"Free Fly",
 	   wxGetBitmapFromMemory(freefly),wxNullBitmap,
@@ -10110,17 +10112,17 @@ void VRenderView::CreateBar()
    wxBoxSizer* sizer_v_4 = new wxBoxSizer(wxVERTICAL);
    st1 = new wxStaticText(this, 0, "Zoom:\n");
    m_center_btn = new wxButton(this, ID_CenterBtn, "Center",
-         wxDefaultPosition, wxSize(65, 20));
+         wxDefaultPosition, wxSize(50, 20));
    m_scale_121_btn = new wxButton(this, ID_Scale121Btn, "1:1",
-         wxDefaultPosition, wxSize(40, 20));
+         wxDefaultPosition, wxSize(50, 20));
    m_scale_factor_sldr = new wxSlider(this, ID_ScaleFactorSldr, 100, 50, 999,
          wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
    m_scale_reset_btn = new wxButton(this, ID_ScaleResetBtn, "Reset",
-         wxDefaultPosition, wxSize(60, 20));
+         wxDefaultPosition, wxSize(50, 20));
    m_scale_factor_text = new wxTextCtrl(this, ID_ScaleFactorText, "100",
-         wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+         wxDefaultPosition, wxSize(50, 20), 0, vald_int);
    m_scale_factor_spin = new wxSpinButton(this, ID_ScaleFactorSpin,
-         wxDefaultPosition, wxSize(40, 20));
+         wxDefaultPosition, wxSize(50, 20));
    sizer_v_4->Add(5, 10, 0);
    sizer_v_4->Add(st1, 0, wxALIGN_CENTER);
    sizer_v_4->Add(m_center_btn, 0, wxALIGN_CENTER);
