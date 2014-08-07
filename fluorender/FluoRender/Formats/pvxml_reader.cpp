@@ -28,6 +28,11 @@ PVXMLReader::PVXMLReader()
    m_batch = false;
    m_cur_batch = -1;
 
+	//falgs for flipping
+	m_user_flip_x = 0;
+	m_user_flip_y = 0;
+	m_flip_x = false;
+	m_flip_y = false;
 }
 
 PVXMLReader::~PVXMLReader()
@@ -169,6 +174,14 @@ void PVXMLReader::Preprocess()
    m_y_size = int((m_y_max - m_y_min) / m_yspc + 0.5);
    m_slice_num = int((m_z_max - m_z_min) / m_zspc + 0.5);
 
+	if (m_user_flip_y == 1 ||
+		m_user_flip_y == 0)
+		m_flip_y = false;
+	else if (m_user_flip_y == -1)
+		m_flip_y = true;
+	int y0;
+	bool firsty = true;
+	bool flipy = false;
    for (i=0; i<(int)m_pvxml_info.size(); i++)
    {
       TimeDataInfo* time_data_info = &(m_pvxml_info[i]);
@@ -181,9 +194,27 @@ void PVXMLReader::Preprocess()
             frame_info->x = int((frame_info->x_start - m_x_min) / m_xspc + 0.5);
             frame_info->y = int((frame_info->y_start - m_y_min) / m_yspc + 0.5);
             frame_info->z = int((frame_info->z_start - m_z_min) / m_zspc + 0.5);
-         }
-      }
-   }
+				if (m_user_flip_y==0 && !flipy)
+				{
+					if (firsty)
+					{
+						y0 = frame_info->y;
+						firsty = false;
+					}
+					else
+					{
+						if (frame_info->y > y0+int(frame_info->y_size*0.1))
+						{
+							m_flip_y = true;
+							flipy = true;
+						}
+						else if (frame_info->y < y0-int(frame_info->y_size*0.1))
+							flipy = true;
+					}
+				}
+			}
+		}
+	}
 }
 
 void PVXMLReader::ReadSystemConfig(wxXmlNode* systemNode)
@@ -569,11 +600,16 @@ Nrrd *PVXMLReader::Convert(int t, int c, bool get_max)
                //copy frame val to val
                long long index = m_x_size*m_y_size*frame_info->z + m_x_size*(m_y_size-frame_info->y-frame_info->y_size) + frame_info->x;
                long frame_index = 0;
-               for (k=0; k<frame_info->y_size; k++)
-               {
-                  memcpy((void*)(val+index), (void*)(frame_val+frame_index), frame_info->x_size*sizeof(unsigned short));
-                  index += m_x_size;
-                  frame_index += frame_info->x_size;
+					if (m_flip_y)
+						frame_index = frame_info->x_size * (frame_info->y_size-1);
+					for (k=0; k<frame_info->y_size; k++)
+					{
+						memcpy((void*)(val+index), (void*)(frame_val+frame_index), frame_info->x_size*sizeof(unsigned short));
+						index += m_x_size;
+						if (m_flip_y)
+							frame_index -= frame_info->x_size;
+						else
+							frame_index += frame_info->x_size;
                }
             }
 

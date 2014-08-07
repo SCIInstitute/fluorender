@@ -45,6 +45,9 @@ public:
 	int GetBatchNum() {return (int)m_batch_list.size();}
 	int GetCurBatch() {return m_cur_batch;}
 
+	//flipping
+	void SetFlipX(int flip) {m_user_flip_x = flip;}
+	void SetFlipY(int flip) {m_user_flip_y = flip;}
 private:
 	wstring m_path_name;
 	wstring m_data_name;
@@ -124,6 +127,13 @@ private:
 	//time sequence id
 	wstring m_time_id;
 
+	//user setting for flipping
+	//0:auto; -1:flip; 1:no flip
+	int m_user_flip_x;
+	int m_user_flip_y;
+	//actual flags for flipping
+	bool m_flip_x;
+	bool m_flip_y;
 private:
 	void ReadSystemConfig(wxXmlNode *systemNode);
 	void UpdateStateShard(wxXmlNode *stateNode);
