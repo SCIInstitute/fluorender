@@ -89,6 +89,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
    m_dft_gm_falloff(0.0),
    m_dft_scl_falloff(0.0),
    m_dft_scl_translate(0.0),
+   m_dft_ca_falloff(1.0),
    m_dft_ca_min(0.0),
    m_dft_ca_max(0.0),
    m_dft_ca_thresh(0.0),
@@ -322,7 +323,10 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
    m_ca_volume_text = new wxTextCtrl(this, ID_CAVolumeText, "0",
          wxDefaultPosition, wxSize(70, 20), wxTE_READONLY);
    sizer13_3->Add(m_ca_volume_text, 0, wxALIGN_CENTER);
-   //export
+	m_ca_size_map_chk = new wxCheckBox(this, ID_CASizeMapChk, "Size-Color",
+		wxDefaultPosition, wxSize(75, 20));
+	sizer13_3->Add(m_ca_size_map_chk, 0, wxALIGN_CENTER);   
+    //export
    wxBoxSizer *sizer13_4 = new wxBoxSizer(wxHORIZONTAL);
    sizer13_4->AddStretchSpacer();
    st = new wxStaticText(this, 0, "Export:  ");
@@ -867,8 +871,9 @@ void BrushToolDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
       str = m_ca_max_text->GetValue();
       str.ToDouble(&max_voxels);
       bool ignore_max = m_ca_ignore_max_chk->GetValue();
+	  bool size_map = m_ca_size_map_chk->GetValue();
 
-      int comps = m_cur_view->CompAnalysis(min_voxels, ignore_max?-1.0:max_voxels, m_dft_ca_thresh, select, true);
+	  int comps = m_cur_view->CompAnalysis(min_voxels, ignore_max?-1.0:max_voxels, m_dft_ca_thresh, m_dft_ca_falloff, select, true, size_map);
       int volume = m_cur_view->GetVolumeSelector()->GetVolumeNum();
       //change mask threshold
       VolumeData* sel_vol = 0;
@@ -944,7 +949,7 @@ void BrushToolDlg::OnNRAnalyzeBtn(wxCommandEvent &event)
       wxString str = m_nr_size_text->GetValue();
       str.ToDouble(&max_voxels);
 
-      //int comps = m_cur_view->NoiseAnalysis(0.0, max_voxels, m_dft_ca_thresh);
+      int comps = m_cur_view->NoiseAnalysis(0.0, max_voxels, m_dft_ca_thresh);
       m_cur_view->RefreshGL();
       //m_ca_comps_text->SetValue(wxString::Format("%d", comps));
    }
@@ -1020,6 +1025,10 @@ void BrushToolDlg::SaveDefault()
    fconfig.Write("ca_ignore_max", m_ca_ignore_max_chk->GetValue());
    //thresh
    fconfig.Write("ca_thresh", m_dft_ca_thresh);
+	//falloff
+	fconfig.Write("ca_falloff", m_dft_ca_falloff);
+	//size map
+	fconfig.Write("ca_size_map", m_ca_size_map_chk->GetValue());	
    //noise removal
    //nr thresh
    fconfig.Write("nr_thresh", m_dft_nr_thresh);
@@ -1169,6 +1178,11 @@ void BrushToolDlg::LoadDefault()
       m_ca_thresh_sldr->SetRange(0, int(m_max_value*10.0));
       m_ca_thresh_text->SetValue(str);
    }
+	//falloff
+	fconfig.Read("ca_falloff", &m_dft_ca_falloff);
+	//size map
+	if (fconfig.Read("ca_size_map", &bval))
+		m_ca_size_map_chk->SetValue(bval);   
    //nr thresh
    fconfig.Read("nr_thresh", &m_dft_nr_thresh);
    //nr size

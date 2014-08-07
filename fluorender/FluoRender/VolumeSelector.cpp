@@ -23,6 +23,7 @@ VolumeSelector::VolumeSelector() :
    m_w2d(0.0),
    m_iter_label(1),
    m_label_thresh(0.0),
+m_label_falloff(1.0),
    m_min_voxels(0.0),
    m_max_voxels(0.0),
    m_annotations(0),
@@ -33,7 +34,8 @@ VolumeSelector::VolumeSelector() :
    m_ca_volume(0),
    m_randv(113),
    m_ps(false),
-   m_ps_size(0.0)
+   m_ps_size(0.0),
+m_size_map(false)
 {
 }
 
@@ -156,12 +158,12 @@ void VolumeSelector::Label(int mode)
    m_vd->AddEmptyLabel(label_mode);
 
    //apply ids to the label volume
-   m_vd->DrawLabel(0, mode, m_label_thresh);
+	m_vd->DrawLabel(0, mode, m_label_thresh, m_label_falloff);
 
    //filter the label volume by maximum intensity filtering
    for (int i=0; i<m_iter_label; i++)
    {
-      m_vd->DrawLabel(1, mode, m_label_thresh);
+		m_vd->DrawLabel(1, mode, m_label_thresh, m_label_falloff);
       if (m_prog_diag)
       {
          m_progress++;
@@ -170,10 +172,11 @@ void VolumeSelector::Label(int mode)
    }
 }
 
-int VolumeSelector::CompAnalysis(double min_voxels, double max_voxels, double thresh, bool select, bool gen_ann)
+int VolumeSelector::CompAnalysis(double min_voxels, double max_voxels, double thresh, double falloff, bool select, bool gen_ann)
 {
    int return_val = 0;
    m_label_thresh = thresh;
+	m_label_falloff = falloff;
    if (!m_vd)
       return return_val;
 
@@ -195,9 +198,6 @@ int VolumeSelector::CompAnalysis(double min_voxels, double max_voxels, double th
       m_vd->GetResolution(nx, ny, nz);
       m_iter_label = Max(nx, Max(ny, nz));
       m_total_pr = m_iter_label+nx*2;
-      Label(0);
-      m_vd->GetVR()->return_label();
-      return_val = CompIslandCount(min_voxels, max_voxels);
    }
    else
    {
@@ -215,21 +215,112 @@ int VolumeSelector::CompAnalysis(double min_voxels, double max_voxels, double th
 
       m_vd->DrawMask(0, 5, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       //next do the same as when it's selected by brush
+   }
       Label(0);
       m_vd->GetVR()->return_label();
       return_val = CompIslandCount(min_voxels, max_voxels);
-   }
+
 
    if (gen_ann)
       GenerateAnnotations(use_sel);
    else
       m_annotations = 0;
 
-   delete m_prog_diag;
+	if (m_size_map)
+		SetLabelBySize();
+
+	if (m_prog_diag)
+	{
+		m_prog_diag->Update(100);
+		delete m_prog_diag;
+		m_prog_diag = 0;
+	}
 
    return return_val;
 }
+int VolumeSelector::SetLabelBySize()
+{
+	int return_val = 0;
+	if (!m_vd)
+		return 0;
+	//get label data
+	Texture* tex = m_vd->GetTexture();
+	if (!tex)
+		return 0;
+	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
+	if (!nrrd_label)
+		return 0;
+	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	if (!data_label)
+		return 0;
 
+	//determine range first
+	unsigned int min_size = 0;
+	unsigned int max_size = 0;
+	unsigned int counter;
+	hash_map<unsigned int, Component>::iterator comp_iter;
+	for (comp_iter=m_comps.begin();
+		comp_iter!=m_comps.end();
+		++comp_iter)
+	{
+		counter = comp_iter->second.counter;
+		if (counter<m_min_voxels ||
+			(m_max_voxels<0.0?false:
+			(counter>m_max_voxels)))
+			continue;
+		if (comp_iter == m_comps.begin())
+		{
+			min_size = counter;
+			max_size = counter;
+		}
+		else
+		{
+			min_size = counter<min_size?counter:min_size;
+			max_size = counter>max_size?counter:max_size;
+		}
+	}
+
+	//parse label data and change values
+	int nx, ny, nz;
+	m_vd->GetResolution(nx, ny, nz);
+
+	int i, j, k;
+	int index;
+	unsigned int id;
+	for (i=0; i<nx; ++i)
+	for (j=0; j<ny; ++j)
+	for (k=0; k<nz; ++k)
+	{
+		index = nx*ny*k + nx*j + i;
+		id = data_label[index];
+		if (id > 0)
+		{
+			comp_iter = m_comps.find(id);
+			if (comp_iter != m_comps.end())
+			{
+				counter = comp_iter->second.counter;
+				if (counter >= min_size &&
+					counter <= max_size)
+				{
+					//calculate color
+					if (max_size > min_size)
+						data_label[index] = 
+							unsigned int(240.0-
+							double(counter-min_size)/
+							double(max_size-min_size)*
+							239.0);
+					else
+						data_label[index] = 1;
+					continue;
+				}
+			}
+
+			data_label[index] = 0;
+		}
+	}
+
+	return return_val;
+}
 int VolumeSelector::CompIslandCount(double min_voxels, double max_voxels)
 {
    m_min_voxels = min_voxels;
@@ -312,6 +403,7 @@ int VolumeSelector::CompIslandCount(double min_voxels, double max_voxels)
          {
             int index = nx*ny*k + nx*j + i;
             unsigned int label_value = label_data[index];
+			unsigned char mask_value = mask_data[index];
             if (label_value>0)
             {
                comp_iter = m_comps.find(label_value);
@@ -706,7 +798,7 @@ int VolumeSelector::ProcessSel(double thresh)
    m_ps_size = 0.0;
    double nw = 0.0;
    double w;
-   Point sump;
+   Point sump(0.0, 0.0, 0.0);
    double value;
    int ii, jj, kk;
    int index;
@@ -732,7 +824,8 @@ int VolumeSelector::ProcessSel(double thresh)
          }
 
    //clear data_mvd_mask
-   memset(data_mvd_mask, 0, res_x*res_y*res_z*(nrrd_mvd->type == nrrdTypeUChar?1:2));
+	size_t set_num = res_x*res_y*res_z;
+	memset(data_mvd_mask, 0, set_num);
 
    if (nw > 0.0)
    {
@@ -775,6 +868,8 @@ void VolumeSelector::GenerateAnnotations(bool use_sel)
    m_annotations = new Annotations();
    int nx, ny, nz;
    m_vd->GetResolution(nx, ny, nz);
+	double spcx, spcy, spcz;
+	m_vd->GetSpacings(spcx, spcy, spcz);
 
    double mul = 255.0;
    if (m_vd->GetTexture()->get_nrrd(0)->type == nrrdTypeUChar)
@@ -797,16 +892,16 @@ void VolumeSelector::GenerateAnnotations(bool use_sel)
             nz==0?0.0:1.0/nz);
       double intensity = mul * comp_iter->second.acc_int / comp_iter->second.counter;
       total_int += intensity;
-      std::string str_info = wxString::Format("%d\t%d",
-            comp_iter->second.counter, int(intensity+0.5)).ToStdString();
-      std::string str = str_id.ToStdString();
-      FLIVR::Point p(pos);
-      m_annotations->AddText(str, p, str_info);
+		wxString str_info = wxString::Format("%d\t%f\t%d",
+			comp_iter->second.counter,
+			double(comp_iter->second.counter)*(spcx*spcy*spcz),
+			int(intensity+0.5));
+		m_annotations->AddText(str_id.ToStdString(), Point(pos), str_info.ToStdString());
    }
 
    m_annotations->SetVolume(m_vd);
    m_annotations->SetTransform(m_vd->GetTexture()->transform());
-   wxString info_meaning = "SIZE\tAVG_VALUE";
+	wxString info_meaning = "VOX_SIZE\tVOLUME\tAVG_VALUE";
    m_annotations->SetInfoMeaning(info_meaning);
 
    //memo
@@ -818,6 +913,8 @@ void VolumeSelector::GenerateAnnotations(bool use_sel)
    memo += "\nSettings:\n";
    double threshold = m_label_thresh * m_vd->GetMaxValue();
    memo += "Threshold: " + wxString::Format("%f", threshold) + "\n";
+	double falloff = m_label_falloff * m_vd->GetMaxValue();
+	memo += "Falloff: " + wxString::Format("%f", falloff) + "\n";
    wxString str;
    if (use_sel)
       str = "Yes";

@@ -5,6 +5,7 @@
 #include <wx/utils.h>
 #include <wx/valnum.h>
 #include <algorithm>
+#include "GL/mywgl.h"
 #include "png_resource.h"
 #include "layers.h"
 #include "depth.h"
@@ -36,12 +37,15 @@ END_EVENT_TABLE()
 VRenderGLView::VRenderGLView(wxWindow* frame,
       wxWindow* parent,
       wxWindowID id,
+	  //const int* attriblist, //TODO! This is for openGL 3.2 support on OSX!
+      //const int* contextattriblist,
       wxGLContext* sharedContext,
       int * attribList,
       const wxPoint& pos,
       const wxSize& size,
       long style) :
    wxGLCanvas(parent, id, attribList, pos, size, style),
+   //wxGLCanvas(parent, id, attriblist, contextattriblist, pos, size, style),
    //public
    //capture modes
    m_capture(false),
@@ -55,11 +59,12 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
    m_end_frame(0),
    //counters
    m_tseq_cur_num(0),
+   m_tseq_prv_num(0),
    m_bat_cur_num(0),
    m_param_cur_num(0),
    m_total_frames(0),
    //hud
-   m_updating(false),
+   m_updating(true),
    m_draw_annotations(true),
    m_draw_camctr(false),
    m_camctr_size(2.0),
@@ -269,7 +274,11 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
    m_tseq_backward(false),
    //move clip
    m_clip_up(false),
-   m_clip_down(false)
+   m_clip_down(false),
+   //full cell
+   m_cell_full(false),
+   //link cells
+   m_cell_link(false),
 {
    //create context
    if (sharedContext)
@@ -1211,6 +1220,10 @@ void VRenderGLView::DrawVolumes(int peel)
 
 void VRenderGLView::DrawAnnotations(bool persp)
 {
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	BitmapFontType font = BITMAP_FONT_TYPE_HELVETICA_12;
+	if (vr_frame->GetSettingDlg())
+		font = (BitmapFontType)vr_frame->GetSettingDlg()->GetTextFont();
    int i;
    for (i=0; i<(int)m_layer_list.size(); i++)
    {
@@ -1220,6 +1233,8 @@ void VRenderGLView::DrawAnnotations(bool persp)
       {
       case 4://annotation layer
          Annotations* ann = (Annotations*)m_layer_list[i];
+		 if (!ann) continue;
+		 ann->SetFont(font);
          if (ann->GetDisp())
             ann->Draw(persp);
          break;
@@ -1826,7 +1841,8 @@ void VRenderGLView::Label()
 }
 
 //remove noise
-int VRenderGLView::CompAnalysis(double min_voxels, double max_voxels, double thresh, bool select, bool gen_ann)
+int VRenderGLView::CompAnalysis(double min_voxels, double max_voxels,
+	double thresh, double falloff, bool select, bool gen_ann, bool size_map)
 {
    int return_val = 0;
 
@@ -1848,12 +1864,16 @@ int VRenderGLView::CompAnalysis(double min_voxels, double max_voxels, double thr
 
       m_selector.Set2DMask(m_tex_paint);
       m_selector.Set2DWeight(m_tex_final, glIsTexture(m_tex_wt2)?m_tex_wt2:m_tex);
-      return_val = m_selector.CompAnalysis(min_voxels, max_voxels, thresh, select, gen_ann);
+		m_selector.SetSizeMap(size_map);
+		return_val = m_selector.CompAnalysis(min_voxels, max_voxels, thresh, falloff, select, gen_ann);
 
       glPopMatrix();
    }
-   else
-      return_val = m_selector.CompAnalysis(min_voxels, max_voxels, thresh, select, gen_ann);
+	else
+	{
+		m_selector.SetSizeMap(size_map);
+		return_val = m_selector.CompAnalysis(min_voxels, max_voxels, thresh, falloff, select, gen_ann);
+	}
 
    Annotations* ann = m_selector.GetAnnotations();
    if (ann)
@@ -4335,6 +4355,32 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
    if (m_clip_down &&
          !wxGetKeyState(wxKeyCode('w')))
       m_clip_down = false;
+	//cell full
+	if (!m_cell_full &&
+		wxGetKeyState(wxKeyCode('f')))
+	{
+		m_cell_full = true;
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame && vr_frame->GetTraceDlg())
+			vr_frame->GetTraceDlg()->CellFull();
+		refresh = true;
+	}
+	if (m_cell_full &&
+		!wxGetKeyState(wxKeyCode('f')))
+		m_cell_full = false;
+	//cell link
+	if (!m_cell_link &&
+		wxGetKeyState(wxKeyCode('l')))
+	{
+		m_cell_link = true;
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame && vr_frame->GetTraceDlg())
+			vr_frame->GetTraceDlg()->CellLink(false);
+		refresh = true;
+	}
+	if (m_cell_link &&
+		!wxGetKeyState(wxKeyCode('l')))
+		m_cell_link = false;
 
    //forced refresh
    if (wxGetKeyState(WXK_F5))
@@ -4448,6 +4494,7 @@ void VRenderGLView::Set4DSeqCapture(wxString &cap_file, int begin_frame, int end
 {
    m_cap_file = cap_file;
    m_tseq_cur_num = begin_frame;
+	m_tseq_prv_num = begin_frame;
    m_begin_frame = begin_frame;
    m_end_frame = end_frame;
    m_capture_tsequ = true;
@@ -4944,6 +4991,7 @@ void VRenderGLView::PreDraw()
             if (m_4d_rewind && !m_run_script)
             {
                m_tseq_cur_num = m_begin_frame;
+			   m_tseq_prv_num = m_begin_frame;
             }
             else
             {
@@ -4953,7 +5001,11 @@ void VRenderGLView::PreDraw()
             }
          }
          else
-            m_tseq_cur_num++;
+
+			{
+				m_tseq_prv_num = m_tseq_cur_num;
+				m_tseq_cur_num++;
+			}
 
          if (!m_capture && !m_run_script)
          {
@@ -5337,7 +5389,7 @@ void VRenderGLView::Run4DScript(wxString scriptname)
                      wxMkdir(str);
                } while (true);
 
-               CompAnalysis(0.0, size, thresh, false, false);
+			   CompAnalysis(0.0, size, thresh, 1.0, false, false, false);
                Calculate(6, "", false);
                VolumeData* vd = m_calculator.GetResult();
                if (vd)
@@ -5400,6 +5452,22 @@ void VRenderGLView::Run4DScript(wxString scriptname)
                               label_iter->second.size++;
                         }
                      }
+				 //clean label list according to the size limit
+				 label_iter = sel_labels.begin();
+				 while (label_iter != sel_labels.end())
+				 {
+					if (label_iter->second.size < (unsigned int)slimit)
+			 			label_iter = sel_labels.erase(label_iter);
+			 		else
+			 			++label_iter;
+				 }
+				 if (m_trace_group)
+				 {
+				 	//create new id list
+				 	m_trace_group->SetCurTime(m_tseq_cur_num);
+				 	m_trace_group->SetPrvTime(m_tseq_prv_num);
+				 	m_trace_group->SetIDMap(sel_labels);
+				 }
                //load and replace the label
                BaseReader* reader = m_cur_vol->GetReader();
                if (!reader) break;
@@ -5421,21 +5489,18 @@ void VRenderGLView::Run4DScript(wxString scriptname)
                      {
                         int index = nx*ny*kk + nx*jj + ii;
                         unsigned int label_value = label_data[index];
-                        label_iter = sel_labels.find(label_value);
-                        if (label_iter != sel_labels.end() &&
-                              label_iter->second.size >= (unsigned int)slimit)
-                           mask_data[index] = 255;
-                     }
-
-               //process trace data
-               if (m_trace_group)
-               {
-                  m_trace_group->SetCurTime(m_tseq_cur_num);
-                  boost::unordered_map <unsigned int, Lbl>::iterator id_iter;
-                  for (id_iter=sel_labels.begin(); id_iter!=sel_labels.end(); id_iter++)
-                     if (id_iter->second.size >= (unsigned int)slimit)
-                        m_trace_group->AddID(id_iter->second.id);
-               }
+						if (m_trace_group)
+						{
+							if (m_trace_group->FindID(label_value))
+								mask_data[index] = 255;
+						}
+						else
+						{
+							label_iter = sel_labels.find(label_value);
+							if (label_iter != sel_labels.end())
+								mask_data[index] = 255;
+						}
+					}
 
                //add traces to trace dialog
                VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
@@ -6167,7 +6232,6 @@ void VRenderGLView::RemoveVolumeData(wxString &name)
             {
                m_layer_list.erase(m_layer_list.begin()+i);
                m_vd_pop_dirty = true;
-                m_cur_vol = NULL;
                return;
             }
          }
@@ -6182,7 +6246,6 @@ void VRenderGLView::RemoveVolumeData(wxString &name)
                {
                   group->RemoveVolumeData(j);
                    m_vd_pop_dirty = true;
-                   m_cur_vol = NULL;
                   return;
                }
             }
@@ -8467,6 +8530,7 @@ void VRenderGLView::HaltLoopUpdate()
 //new function to refresh
 void VRenderGLView::RefreshGL(bool erase, bool start_loop)
 {
+   m_updating = true;
    if (start_loop)
       StartLoopUpdate();
    SetSortBricks();
@@ -9032,10 +9096,15 @@ void VRenderGLView::DrawRulers()
    if (nx <= 0 || ny <= 0)
       return;
 
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	BitmapFontType font = BITMAP_FONT_TYPE_HELVETICA_12;
+	if (vr_frame->GetSettingDlg())
+		font = (BitmapFontType)vr_frame->GetSettingDlg()->GetTextFont();
    for (int i=0; i<(int)m_ruler_list.size(); i++)
    {
       Ruler* ruler = m_ruler_list[i];
       if (!ruler) continue;
+		ruler->SetFont(font);
       if (!ruler->GetTimeDep() ||
             (ruler->GetTimeDep() &&
              ruler->GetTime() == m_tseq_cur_num))
@@ -9069,6 +9138,13 @@ int VRenderGLView::LoadTraceGroup(wxString filename)
    return m_trace_group->Load(filename);
 }
 
+int VRenderGLView::SaveTraceGroup(wxString filename)
+{
+	if (m_trace_group)
+		return m_trace_group->Save(filename);
+	else
+		return 0;
+}
 void VRenderGLView::ExportTrace(wxString filename, unsigned int id)
 {
    if (!m_trace_group)
@@ -9077,9 +9153,31 @@ void VRenderGLView::ExportTrace(wxString filename, unsigned int id)
 
 void VRenderGLView::DrawTraces()
 {
-   if (!m_trace_group)
-      return;
-   m_trace_group->Draw();
+	if (!m_trace_group)
+		return;
+	
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	BitmapFontType font = BITMAP_FONT_TYPE_HELVETICA_12;
+	if (vr_frame->GetSettingDlg())
+	{
+		font = (BitmapFontType)vr_frame->GetSettingDlg()->GetTextFont();
+		m_trace_group->SetFont(font);
+	}
+
+	//get correct scale
+	glMatrixMode(GL_MODELVIEW_MATRIX);
+	glPushMatrix();
+	if (m_cur_vol)
+	{
+		double spcx, spcy, spcz;
+		m_cur_vol->GetSpacings(spcx, spcy, spcz);
+		glScaled(spcx, spcy, spcz);
+	}
+
+	m_trace_group->Draw();
+
+	glMatrixMode(GL_MODELVIEW_MATRIX);
+	glPopMatrix();
 }
 
 void VRenderGLView::GetTraces()
@@ -9120,11 +9218,20 @@ void VRenderGLView::GetTraces()
 				Lbl lbl;
 				lbl.id = label_value;
 				lbl.size = 1;
+				lbl.center = Point(ii, jj, kk);
 				sel_labels.insert(pair<unsigned int, Lbl>(label_value, lbl));
 			}
 			else
+			{
 				label_iter->second.size++;
-		}
+				label_iter->second.center += Point(ii, jj, kk);
+			}
+	}
+	//calculate center
+	for (label_iter=sel_labels.begin(); label_iter!=sel_labels.end(); ++label_iter)
+	{
+		if (label_iter->second.size > 0)
+			label_iter->second.center /= label_iter->second.size;
 	}
 
 	//create id list
@@ -9828,6 +9935,24 @@ VRenderView::VRenderView(wxWindow* frame,
 
    //render view/////////////////////////////////////////////////
    m_glview = new VRenderGLView(frame, this, wxID_ANY, sharedContext);
+	//int attriblist[] = {WX_GL_MIN_RED, 8, //TODO!!! This is where the call to the altered wxWidget context attribute list happens
+	//					WX_GL_MIN_GREEN, 8,
+	//					WX_GL_MIN_BLUE, 8,
+	//					WX_GL_MIN_ALPHA, 8,
+	//					0};
+	//int contextattriblist[] = {	WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+	//							WGL_CONTEXT_MINOR_VERSION_ARB, 0,
+	//							//WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_ES_PROFILE_BIT_EXT,
+	//							//WGL_DRAW_TO_WINDOW_ARB, 1,
+	//							//WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
+	//							//WGL_RED_BITS_ARB, 10,
+	//							//WGL_GREEN_BITS_ARB, 10,
+	//							//WGL_BLUE_BITS_ARB, 10,
+	//							//WGL_ALPHA_BITS_ARB, 2,
+	//							//WGL_DOUBLE_BUFFER_ARB, 1,
+	//							0};
+
+	//m_glview = new VRenderGLView(frame, this, wxID_ANY, NULL, NULL, sharedContext);
    m_glview->SetCanFocus(false);
 
    CreateBar();

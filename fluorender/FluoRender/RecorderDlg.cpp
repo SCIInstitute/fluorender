@@ -168,9 +168,9 @@ void KeyListCtrl::UpdateText()
 		int interp = interpolator->GetKeyType(i);
 		string desc = interpolator->GetKeyDesc(i);
 		
-                wxString wx_id = wxString::Format("%d", id);
-                wxString wx_time = wxString::Format("%d", time);
-                wxString wx_duration = wxString::Format("%d", duration);
+        wxString wx_id = wxString::Format("%d", id);
+        wxString wx_time = wxString::Format("%d", time);
+        wxString wx_duration = wxString::Format("%d", duration);
 		SetText(i, 0, wx_id);
 		SetText(i, 1, wx_time);
 		SetText(i, 2, wx_duration);

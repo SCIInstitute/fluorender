@@ -7,6 +7,8 @@
 #include "utility.h"
 #include <sstream>
 #include <fstream>
+#include <algorithm>
+#include <set>
 
 #ifdef _WIN32
 #  undef min
@@ -1161,10 +1163,10 @@ void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 //draw label (create the label)
 //type: 0-initialize; 1-maximum intensity filtering
 //mode: 0-normal; 1-posterized; 2-copy values; 3-poster, copy
-void VolumeData::DrawLabel(int type, int mode, double thresh)
+void VolumeData::DrawLabel(int type, int mode, double thresh, double gm_falloff)
 {
 	if (m_vr)
-		m_vr->draw_label(type, mode, thresh);
+		m_vr->draw_label(type, mode, thresh, gm_falloff);
 }
 
 //calculation
@@ -2257,6 +2259,8 @@ Annotations::Annotations()
 	m_vd = 0;
 	m_disp = true;
 	m_memo_ro = false;
+	//font
+	m_font = BITMAP_FONT_TYPE_HELVETICA_12;
 }
 
 Annotations::~Annotations()
@@ -2369,7 +2373,7 @@ void Annotations::Draw(bool persp)
 				if (!persp && (pos.z()>=0.0 || pos.z()<=-1.0))
 					continue;
 				renderText(pos.x()+1.0, 1.0-pos.y(),
-					BITMAP_FONT_TYPE_HELVETICA_12,
+					m_font,
 					atext->m_txt.c_str());
 			}
 		}
@@ -2507,22 +2511,15 @@ void Annotations::Save(wxString &filename)
 	tos << "Display: " << m_disp << "\n";
 	tos << "Memo:\n" << m_memo << "\n";
 	tos << "Memo Update: " << m_memo_ro << "\n";
-	if (m_vd)
-		tos << "Volume: " << m_vd->GetName() << "\n";
-	if (m_tform)
+if (m_vd)
 	{
-		tos << "Transform:\n";
-		for (int i=0; i<4; i++)
-		{
-			for (int j=0; j<4; j++)
-			{
-				tos << m_tform->get_mat_val(i, j);
-				if (j < 3)
-					tos << "\t";
-			}
-			tos << "\n";
-		}
+		tos << "Volume: " << m_vd->GetName() << "\n";
+		tos << "Voxel size (X Y Z):\n";
+		double spcx, spcy, spcz;
+		m_vd->GetSpacings(spcx, spcy, spcz);
+		tos << spcx << "\t" << spcy << "\t" << spcz << "\n";
 	}
+
 
 	tos << "\nComponents:\n";
 	tos << "ID\tX\tY\tZ\t" << m_info_meaning << "\n\n";
@@ -2645,6 +2642,9 @@ Ruler::Ruler()
 	//time-dependent
 	m_time_dep = false;
 	m_time = 0;
+
+	//font
+	m_font = BITMAP_FONT_TYPE_HELVETICA_12;
 }
 
 Ruler::~Ruler()
@@ -2762,7 +2762,25 @@ void Ruler::Draw(bool persp, double asp)
 	glGetDoublev(GL_PROJECTION_MATRIX, matrix);
 	p.set(matrix);
 
+	double width = 1;
+	switch (m_font)
+	{
+	case BITMAP_FONT_TYPE_HELVETICA_10:
+	case BITMAP_FONT_TYPE_HELVETICA_12:
+	case BITMAP_FONT_TYPE_TIMES_ROMAN_10:
+		width = 1;
+		break;
+	case BITMAP_FONT_TYPE_HELVETICA_18:
+		width = 2;
+		break;
+	case BITMAP_FONT_TYPE_TIMES_ROMAN_24:
+		width = 3;
+		break;
+	}
+	glLineWidth(GLfloat(width));
 	beginRenderText(2, 2, true);
+	double dx = 0.01*width/asp;
+	double dy = 0.01*width;
 	for (int i=0; i<(int)m_ruler.size(); i++)
 	{
 		Point p1, p2;
@@ -2775,14 +2793,14 @@ void Ruler::Draw(bool persp, double asp)
 			(!persp && (p2.z()>=0.0 || p2.z()<=-1.0)))
 			continue;
 		glBegin(GL_LINE_LOOP);
-			glVertex2d(p2.x()+1.0-0.01/asp, 0.99-p2.y());
-			glVertex2d(p2.x()+1.0+0.01/asp, 0.99-p2.y());
-			glVertex2d(p2.x()+1.0+0.01/asp, 1.01-p2.y());
-			glVertex2d(p2.x()+1.0-0.01/asp, 1.01-p2.y());
+			glVertex2d(p2.x()+1.0-dx, 1.0-dy-p2.y());
+			glVertex2d(p2.x()+1.0+dx, 1.0-dy-p2.y());
+			glVertex2d(p2.x()+1.0+dx, 1.0+dy-p2.y());
+			glVertex2d(p2.x()+1.0-dx, 1.0+dy-p2.y());
 		glEnd();
 		if (i+1 == m_ruler.size())
 			renderText(p2.x()+1.02, 1.01-p2.y(),
-			BITMAP_FONT_TYPE_HELVETICA_12,
+			m_font,
 			m_name.To8BitData().data());
 		if (m_ruler_type==2 && i==0)
 		{
@@ -2807,6 +2825,7 @@ void Ruler::Draw(bool persp, double asp)
 		}
 	}
 	endRenderText();
+	glLineWidth(1.0f);
 }
 
 wxString Ruler::GetDelInfoValues(wxString del)
@@ -2873,7 +2892,87 @@ int Vertex::Read(ifstream &ifs)
 
 	return 1;
 }
+int Vertex::Write(ofstream &ofs)
+{
+	if (ofs.bad())
+		return 0;
 
+	//tag vertex
+	unsigned char tag = TAG_VERT;
+	ofs.write(reinterpret_cast<const char*>(&tag),
+		sizeof(unsigned char));
+
+	//cell
+	//tag cell
+	tag = TAG_CELL;
+	ofs.write(reinterpret_cast<const char*>(&tag),
+		sizeof(unsigned char));
+	//id etc
+	ofs.write(reinterpret_cast<const char*>(&id),
+		sizeof(unsigned int));
+	ofs.write(reinterpret_cast<const char*>(&vsize),
+		sizeof(unsigned int));
+	double x, y, z;
+	x = center.x();
+	y = center.y();
+	z = center.z();
+	ofs.write(reinterpret_cast<const char*>(&x),
+		sizeof(double));
+	ofs.write(reinterpret_cast<const char*>(&y),
+		sizeof(double));
+	ofs.write(reinterpret_cast<const char*>(&z),
+		sizeof(double));
+
+	//out edges
+	unsigned int num = 0;
+	unsigned int id = 0;
+	//tag edge
+	tag = TAG_EDGE;
+	ofs.write(reinterpret_cast<const char*>(&tag),
+		sizeof(unsigned char));
+	//num
+	num = (unsigned int)out_ids.size();
+	ofs.write(reinterpret_cast<const char*>(&num),
+		sizeof(unsigned int));
+	//id
+	for (unsigned int i=0; i<num; ++i)
+	{
+		id = out_ids[i];
+		ofs.write(reinterpret_cast<const char*>(&id),
+			sizeof(unsigned int));
+	}
+	//in edges
+	//tag edge
+	tag = TAG_EDGE;
+	ofs.write(reinterpret_cast<const char*>(&tag),
+		sizeof(unsigned char));
+	//num
+	num = (unsigned int)in_ids.size();
+	ofs.write(reinterpret_cast<const char*>(&num),
+		sizeof(unsigned int));
+	//id
+	for (unsigned int i=0; i<num; ++i)
+	{
+		id = in_ids[i];
+		ofs.write(reinterpret_cast<const char*>(&id),
+			sizeof(unsigned int));
+	}
+
+	return 1;
+}
+
+int Frame::Read(ifstream &ifs)
+{
+	if (ifs.bad())
+		return 0;
+
+	//id
+	ifs.read((char*)(&id), sizeof(id));
+	//cell map
+	if (!ReadCellMap(ifs))
+		return 0;
+	return 1;
+}
 int Frame::ReadCellMap(ifstream &ifs)
 {
 	if (ifs.bad())
@@ -2899,19 +2998,43 @@ int Frame::ReadCellMap(ifstream &ifs)
 	return 1;
 }
 
-int Frame::Read(ifstream &ifs)
+int Frame::Write(ofstream &ofs)
 {
-	if (ifs.bad())
+	if (ofs.bad())
 		return 0;
 
 	//id
-	ifs.read((char*)(&id), sizeof(id));
+	ofs.write(reinterpret_cast<const char*>(&id),
+		sizeof(unsigned int));
 	//cell map
-	if (!ReadCellMap(ifs))
+	if (!WriteCellMap(ofs))
 		return 0;
 	return 1;
 }
+int Frame::WriteCellMap(ofstream &ofs)
+{
+	if (ofs.bad())
+		return 0;
 
+	//tag
+	unsigned char tag = TAG_CMAP;
+	ofs.write(reinterpret_cast<const char*>(&tag),
+		sizeof(unsigned char));
+
+	//num
+	unsigned int num = cell_map.size();
+	ofs.write(reinterpret_cast<const char*>(&num),
+		sizeof(unsigned int));
+
+	//vertices
+	for (CellMapIter iter = cell_map.begin();
+		iter != cell_map.end(); ++iter)
+	{
+		iter->second.Write(ofs);
+	}
+
+	return 1;
+}
 int TraceGroup::m_num = 0;
 TraceGroup::TraceGroup()
 {
@@ -2921,6 +3044,10 @@ TraceGroup::TraceGroup()
 	m_cur_time = -1;
 	m_prv_time = -1;
 	m_ghost_num = 10;
+	m_cell_size = 20;
+
+	//font
+	m_font = BITMAP_FONT_TYPE_HELVETICA_12;
 }
 
 TraceGroup::~TraceGroup()
@@ -2937,14 +3064,23 @@ void TraceGroup::SetCurTime(int time)
 	m_cur_time = time;
 }
 
+int TraceGroup::GetCurTime()
+{
+	return m_cur_time;
+}
 void TraceGroup::SetPrvTime(int time)
 {
 	m_prv_time = time;
 }
 
-void TraceGroup::AddID(unsigned int id)
+int TraceGroup::GetPrvTime()
 {
-	m_id_map.insert(pair<unsigned int, unsigned int>(id, id));
+	return m_prv_time;
+}
+
+void TraceGroup::AddID(Lbl lbl)
+{
+	m_id_map.insert(pair<unsigned int, Lbl>(lbl.id, lbl));
 }
 
 //sel_labels: ids from previous time point
@@ -2967,7 +3103,8 @@ void TraceGroup::SetIDMap(boost::unordered_map<unsigned int, Lbl> &sel_labels)
 			++label_iter)
 		{
 			unsigned int id = label_iter->second.id;
-			m_id_map.insert(pair<unsigned int, unsigned int>(id, id));
+			if (label_iter->second.size > (unsigned int)m_cell_size)
+				m_id_map.insert(pair<unsigned int, Lbl>(id, label_iter->second));
 		}
 		return;
 	}
@@ -2988,7 +3125,7 @@ void TraceGroup::SetIDMap(boost::unordered_map<unsigned int, Lbl> &sel_labels)
 	//decide which side to go
 	bool out_edge = m_prv_time < m_cur_time;
 	unsigned int id = 0;
-	CellMapIter cell_map_iter;
+	CellMapIter cell_map_iter1, cell_map_iter2;
 	vector<unsigned int> *id_list = 0;
 	unsigned int i = 0;
 	//go through sel_labels
@@ -2997,18 +3134,29 @@ void TraceGroup::SetIDMap(boost::unordered_map<unsigned int, Lbl> &sel_labels)
 		++label_iter)
 	{
 		id = label_iter->second.id;
+		if (label_iter->second.size <= (unsigned int)m_cell_size)
+			continue;
 		//find id in cell map 1
-		cell_map_iter = cell_map1->find(id);
-		if (cell_map_iter == cell_map1->end())
+		cell_map_iter1 = cell_map1->find(id);
+		if (cell_map_iter1 == cell_map1->end())
 			continue;
 		//get correct id list
-		id_list = out_edge?&(cell_map_iter->second.out_ids):
-			&(cell_map_iter->second.in_ids);
+		id_list = out_edge?&(cell_map_iter1->second.out_ids):
+			&(cell_map_iter1->second.in_ids);
 		for (i=0; i<id_list->size(); ++i)
 		{
 			id = (*id_list)[i];
 			//add to id map
-			m_id_map.insert(pair<unsigned int, unsigned int>(id, id));
+			lbl.id = id;
+			lbl.size = 0;
+			lbl.center = Point();
+			cell_map_iter2 = cell_map2->find(id);
+			if (cell_map_iter2 != cell_map2->end())
+			{
+				lbl.size = cell_map_iter2->second.vsize;
+				lbl.center = cell_map_iter2->second.center;
+			}
+			m_id_map.insert(pair<unsigned int, Lbl>(id, lbl));
 		}
 	}
 }
@@ -3023,7 +3171,179 @@ bool TraceGroup::FindID(unsigned int id)
 	IDMapIter iter = m_id_map.find(id);
 	return (iter != m_id_map.end());
 }
+//find id in frame list
+bool TraceGroup::FindIDInFrame(unsigned int id, int time, Vertex &vertex)
+{
+	//get current frame
+	FrameIter frame_iter = m_frame_list.find((unsigned int)time);
+	if (frame_iter == m_frame_list.end())
+		return false;
+	CellMap *cell_map = &(frame_iter->second.cell_map);
+	CellMapIter cell_map_iter = cell_map->find(id);
+	if (cell_map_iter == cell_map->end())
+		return false;
+	vertex = cell_map_iter->second;
+	return true;
+}
 
+//modifications
+//link two vertices
+bool TraceGroup::LinkVertices(unsigned int id1, int time1,
+							  unsigned int id2, int time2,
+							  bool exclusive)
+{
+	//check validity
+	if (time2!=time1+1 && time2!=time1-1)
+		return false;//not consecutive frames
+
+	FrameIter frame_iter;
+	CellMap* cell_map;
+	CellMapIter cell_map_iter;
+	//get selected vertex in current frame
+	frame_iter = m_frame_list.find((unsigned int)time1);
+	if (frame_iter == m_frame_list.end())
+		return false;
+	cell_map = &(frame_iter->second.cell_map);
+	cell_map_iter = cell_map->find(id1);
+	if (cell_map_iter == cell_map->end())
+		return false;
+	Vertex* vertex1 = &(cell_map_iter->second);
+	//get selected vertex in previous frame
+	frame_iter = m_frame_list.find((unsigned int)time2);
+	if (frame_iter == m_frame_list.end())
+		return false;
+	cell_map = &(frame_iter->second.cell_map);
+	cell_map_iter = cell_map->find(id2);
+	if (cell_map_iter == cell_map->end())
+		return false;
+	Vertex* vertex2 = &(cell_map_iter->second);
+
+	//add id to each other
+	if (time2 == time1+1)
+	{
+		if (exclusive)
+		{
+			vertex1->out_ids.clear();
+			vertex2->in_ids.clear();
+		}
+		//vertex1: add id2 to out ids
+		vertex1->out_ids.push_back(id2);
+		//vertex2: add id1 to in ids
+		vertex2->in_ids.push_back(id1);
+	}
+	else if (time2 == time1-1)
+	{
+		if (exclusive)
+		{
+			vertex1->in_ids.clear();
+			vertex2->out_ids.clear();
+		}
+		//vertex1: add id2 to in ids
+		vertex1->in_ids.push_back(id2);
+		//vertex2: add id1 to out ids
+		vertex2->out_ids.push_back(id1);
+	}
+
+	return true;
+}
+
+bool TraceGroup::UnlinkVertices(unsigned int id1, int time1,
+								unsigned int id2, int time2)
+{
+	//check validity
+	if (time2!=time1+1 && time2!=time1-1)
+		return false;//not consecutive frames
+
+	FrameIter frame_iter;
+	CellMap* cell_map;
+	CellMapIter cell_map_iter;
+	//get selected vertex in current frame
+	frame_iter = m_frame_list.find((unsigned int)time1);
+	if (frame_iter == m_frame_list.end())
+		return false;
+	cell_map = &(frame_iter->second.cell_map);
+	cell_map_iter = cell_map->find(id1);
+	if (cell_map_iter == cell_map->end())
+		return false;
+	Vertex* vertex1 = &(cell_map_iter->second);
+	//get selected vertex in previous frame
+	frame_iter = m_frame_list.find((unsigned int)time2);
+	if (frame_iter == m_frame_list.end())
+		return false;
+	cell_map = &(frame_iter->second.cell_map);
+	cell_map_iter = cell_map->find(id2);
+	if (cell_map_iter == cell_map->end())
+		return false;
+	Vertex* vertex2 = &(cell_map_iter->second);
+
+	//delete from each other
+	vector<unsigned int>::iterator id_iter;
+	if (time2 == time1+1)
+	{
+		//vertex1: find id2 in out ids
+		id_iter = find(vertex1->out_ids.begin(),
+			vertex1->out_ids.end(), id2);
+		if (id_iter != vertex1->out_ids.end())
+			vertex1->out_ids.erase(id_iter);
+		//vertex2: find id1 in in ids
+		id_iter = find(vertex2->in_ids.begin(),
+			vertex2->in_ids.end(), id1);
+		if (id_iter != vertex2->in_ids.end())
+			vertex2->in_ids.erase(id_iter);
+	}
+	else if (time2 == time1-1)
+	{
+		//vertex1: find id2 in in ids
+		id_iter = find(vertex1->in_ids.begin(),
+			vertex1->in_ids.end(), id2);
+		if (id_iter != vertex1->in_ids.end())
+			vertex1->in_ids.erase(id_iter);
+		//vertex2: find id1 in out ids
+		id_iter = find(vertex2->out_ids.begin(),
+			vertex2->out_ids.end(), id1);
+		if (id_iter != vertex2->out_ids.end())
+			vertex2->out_ids.erase(id_iter);
+	}
+
+	return true;
+}
+
+bool TraceGroup::AddVertex(int time, unsigned int id,
+	unsigned int vsize, Point& center)
+{
+	FrameIter frame_iter;
+	CellMap* cell_map;
+	CellMapIter cell_map_iter;
+
+	//get cell map
+	frame_iter = m_frame_list.find((unsigned int)time);
+	if (frame_iter == m_frame_list.end())
+		cell_map = &(AddFrame(time)->cell_map);
+	else
+		cell_map = &(frame_iter->second.cell_map);
+
+	//create vertex
+	Vertex vert;
+	vert.id = id;
+	vert.vsize = vsize;
+	vert.center = center;
+	cell_map->insert(pair<unsigned int, Vertex>(id, vert));
+
+	return true;
+}
+
+Frame* TraceGroup::AddFrame(int time)
+{
+	Frame frame;
+	frame.id = (unsigned int)time;
+	FrameIter frame_iter;
+	m_frame_list.insert(pair<unsigned int, Frame>((unsigned int)time, frame));
+	frame_iter = m_frame_list.find((unsigned int)time);
+	if (frame_iter != m_frame_list.end())
+		return &(frame_iter->second);
+	else
+		return 0;
+}
 unsigned char TraceGroup::ReadTag(ifstream &ifs)
 {
 	if (ifs.bad())
@@ -3077,13 +3397,67 @@ int TraceGroup::Load(wxString &filename)
 
 	return result;
 }
+void TraceGroup::WriteTag(ofstream&ofs, unsigned char tag)
+{
+	if (ofs.bad())
+		return;
 
+	ofs.write(reinterpret_cast<const char*>(&tag), sizeof(unsigned char));
+}
+
+int TraceGroup::Save(wxString &filename)
+{
+	int result = 1;
+	m_data_path = filename;
+
+	ofstream ofs(m_data_path.ToStdWstring(), ios::out|ios::binary);
+	if (ofs.bad())
+		return 0;
+
+	//header
+	string header = "FluoRender links";
+	ofs.write(header.c_str(), header.size());
+
+	//number of frames
+	unsigned int num = (unsigned int)m_frame_list.size();
+	ofs.write(reinterpret_cast<const char*>(&num), sizeof(num));
+
+	//write each frame
+	for (FrameIter iter = m_frame_list.begin();
+		iter != m_frame_list.end(); ++iter)
+	{
+		WriteTag(ofs, TAG_FRAM);
+
+		//write frame
+		iter->second.Write(ofs);
+	}
+
+	ofs.close();
+	return result;
+}
 void TraceGroup::Draw()
 {
 	if (m_ghost_num <= 0)
 		return;
 
-	glPushAttrib( GL_TEXTURE_BIT | GL_DEPTH_TEST | GL_LIGHTING | GL_COLOR_BUFFER_BIT);
+	glPushAttrib( GL_TEXTURE_BIT | GL_DEPTH_TEST |
+		GL_LIGHTING | GL_COLOR_BUFFER_BIT | GL_LINE_BIT);
+	double width = 1;
+	switch (m_font)
+	{
+	case BITMAP_FONT_TYPE_HELVETICA_10:
+	case BITMAP_FONT_TYPE_HELVETICA_12:
+	case BITMAP_FONT_TYPE_TIMES_ROMAN_10:
+		width = 1;
+		break;
+	case BITMAP_FONT_TYPE_HELVETICA_18:
+		width = 2;
+		break;
+	case BITMAP_FONT_TYPE_TIMES_ROMAN_24:
+		width = 3;
+		break;
+	}
+	glLineWidth(GLfloat(width));
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);
 	glEnable(GL_DEPTH_TEST);
@@ -3118,7 +3492,7 @@ void TraceGroup::Draw()
 		Vertex *vertex1 = 0;
 		Vertex *vertex2 = 0;
 		IDMap id_map_temp1, id_map_temp2;
-
+		Lbl lbl;
 		glBegin(GL_LINES);
 
 		id_map_temp1 = m_id_map;
@@ -3137,8 +3511,8 @@ void TraceGroup::Draw()
 					for (id_map_iter = id_map_temp1.begin();
 						id_map_iter != id_map_temp1.end(); ++id_map_iter)
 					{
-						id = id_map_iter->second;
-						Color c(HSVColor(id%360, 1.0, 0.6));
+						id = id_map_iter->second.id;
+						Color c(HSVColor(id%360, 1.0, 0.9));
 						glColor3d(c.r(), c.g(), c.b());
 
 						cell_map_iter1 = cell_map1->find(id);
@@ -3152,7 +3526,10 @@ void TraceGroup::Draw()
 								if (cell_map_iter2 != cell_map2->end())
 								{
 									vertex2 = &(cell_map_iter2->second);
-									id_map_temp2.insert(pair<unsigned int, unsigned int>(id2, id2));
+									lbl.id = id2;
+									lbl.size = vertex2->vsize;
+									lbl.center = vertex2->center;
+									id_map_temp2.insert(pair<unsigned int, Lbl>(id2, lbl));
 									glVertex3d(vertex1->center.x(),
 										vertex1->center.y(),
 										vertex1->center.z());
@@ -3182,8 +3559,8 @@ void TraceGroup::Draw()
 					for (id_map_iter = id_map_temp1.begin();
 						id_map_iter != id_map_temp1.end(); ++id_map_iter)
 					{
-						id = id_map_iter->second;
-						Color c(HSVColor(id%360, 1.0, 1.0));
+						id = id_map_iter->second.id;
+						Color c(HSVColor(id%360, 1.0, 0.9));
 						glColor3d(c.r(), c.g(), c.b());
 
 						cell_map_iter1 = cell_map1->find(id);
@@ -3197,7 +3574,10 @@ void TraceGroup::Draw()
 								if (cell_map_iter2 != cell_map2->end())
 								{
 									vertex2 = &(cell_map_iter2->second);
-									id_map_temp2.insert(pair<unsigned int, unsigned int>(id2, id2));
+									lbl.id = id2;
+									lbl.size = vertex2->vsize;
+									lbl.center = vertex2->center;
+									id_map_temp2.insert(pair<unsigned int, Lbl>(id2, lbl));
 									glVertex3d(vertex1->center.x(),
 										vertex1->center.y(),
 										vertex1->center.z());
@@ -3219,7 +3599,75 @@ void TraceGroup::Draw()
 
 	glPopAttrib();
 }
+//pattern search
+bool TraceGroup::FindPattern(int type, unsigned int id, int time)
+{
+	FrameIter frame_iter = m_frame_list.find(time);
+	if (frame_iter == m_frame_list.end())
+		return false;
+	
+	Patterns patterns;
+	patterns.div = 0;
+	patterns.conv = 0;
 
+	CellMap* cell_map;
+	CellMapIter cell_map_iter;
+	set<unsigned int> id_list1, id_list2;
+	set<unsigned int>::iterator id_list_iter;
+	id_list1.insert(id);
+	Vertex* vertex;
+	unsigned int i;
+	while (frame_iter != m_frame_list.end())
+	{
+		cell_map = &(frame_iter->second.cell_map);
+
+		for (id_list_iter = id_list1.begin();
+			id_list_iter != id_list1.end();
+			++id_list_iter)
+		{
+			cell_map_iter = cell_map->find(*id_list_iter);
+			if (cell_map_iter != cell_map->end())
+			{
+				vertex = &(cell_map_iter->second);
+				for (i=0; i<vertex->out_ids.size(); ++i)
+					id_list2.insert(vertex->out_ids[i]);
+			}
+		}
+
+		//determine pattern
+		switch (type)
+		{
+		case 1:
+			if (id_list2.size() > 2)
+				return false;
+			if (id_list1.size() == 1 &&
+				id_list2.size() == 2)
+				patterns.div = patterns.div?0:1;
+			if (id_list1.size() == 2 &&
+				id_list2.size() == 1)
+				if (patterns.div)
+					return true;
+			break;
+		case 2:
+			if (id_list1.size() == 1 &&
+				id_list2.size() > 1)
+				return true;
+			break;
+		}
+
+		//copy list2 to list1
+		id_list1.clear();
+		for (id_list_iter = id_list2.begin();
+			id_list_iter != id_list2.end();
+			++id_list_iter)
+			id_list1.insert(*id_list_iter);
+		id_list2.clear();
+		
+		//next frame
+		++frame_iter;
+	}
+	return false;
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int DataGroup::m_num = 0;
 DataGroup::DataGroup()
@@ -3893,7 +4341,11 @@ int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_
 		else if (type == LOAD_TYPE_LSM)
 			reader = new LSMReader();
 		else if (type == LOAD_TYPE_PVXML)
+		{
 			reader = new PVXMLReader();
+			((PVXMLReader*)reader)->SetFlipX(m_pvxml_flip_x);
+			((PVXMLReader*)reader)->SetFlipY(m_pvxml_flip_y);
+		}
 
 		m_reader_list.push_back(reader);
 		wstring str_w = pathname.ToStdWstring();

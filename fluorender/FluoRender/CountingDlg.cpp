@@ -248,7 +248,7 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 		str.ToDouble(&max_voxels);
 		bool ignore_max = m_ca_ignore_max_chk->GetValue();
 
-		int comps = m_view->CompAnalysis(min_voxels, ignore_max?-1.0:max_voxels, m_dft_thresh, select, true);
+		int comps = m_view->CompAnalysis(min_voxels, ignore_max?-1.0:max_voxels, m_dft_thresh, 1.0, select, true, false);
 		int volume = m_view->GetVolumeSelector()->GetVolumeNum();
 		//change mask threshold
 		VolumeData* sel_vol = 0;

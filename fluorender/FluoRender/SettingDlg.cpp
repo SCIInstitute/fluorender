@@ -485,6 +485,8 @@ void SettingDlg::GetSettings()
 	m_point_volume_mode = 0;
 	m_ruler_use_transf = false;
 	m_ruler_time_dep = true;
+	m_pvxml_flip_x = false;
+	m_pvxml_flip_y = false;
 
 	wxFileInputStream is(SETTING_FILE_NAME);
 	if (!is.IsOk())
@@ -636,6 +638,13 @@ void SettingDlg::GetSettings()
 		fconfig.SetPath("/ruler time dep");
 		fconfig.Read("value", &m_ruler_time_dep);
 	}
+	//flags for pvxml flipping
+	if (fconfig.Exists("/pvxml flip"))
+	{
+		fconfig.SetPath("/pvxml flip");
+		fconfig.Read("x", &m_pvxml_flip_x);
+		fconfig.Read("y", &m_pvxml_flip_y);
+	}
 
 	UpdateUI();
 }
@@ -778,6 +787,11 @@ void SettingDlg::SaveSettings()
 	//ruler time dependent
 	fconfig.SetPath("/ruler time dependent");
 	fconfig.Write("value", m_ruler_time_dep);
+
+	//flags for flipping pvxml
+	fconfig.SetPath("/pvxml flip");
+	fconfig.Write("x", m_pvxml_flip_x);
+	fconfig.Write("y", m_pvxml_flip_y);
 
 	wxFileOutputStream os(SETTING_FILE_NAME);
 	fconfig.Save(os);

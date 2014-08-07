@@ -1,4 +1,3 @@
-//#include "Check.h"
 #include <cstdio>
 #include <iostream>
 #include <wx/wx.h>

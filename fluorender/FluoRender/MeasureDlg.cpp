@@ -120,17 +120,16 @@ void RulerListCtrl::Update(VRenderView* vrv)
       if (num_points > 0)
       {
          p = ruler->GetPoint(0);
-         points += wxString::Format("(%.0f, %.0f, %.0f)", p->x(), p->y(), p->z());
-      }
-      if (num_points > 1)
-      {
-         p = ruler->GetPoint(num_points - 1);
-         points += ", ";
-         points += wxString::Format("(%.0f, %.0f, %.0f)", p->x(), p->y(), p->z());
-      }
-      wxString str = ruler->GetDelInfoValues(", ");
-      Append(ruler->GetName(), ruler->GetLength(), unit,
-            ruler->GetAngle(), points, ruler->GetTimeDep(), ruler->GetTime(), str);
+			points += wxString::Format("(%.2f, %.2f, %.2f)", p->x(), p->y(), p->z());
+		}
+		if (num_points > 1)
+		{
+			p = ruler->GetPoint(num_points - 1);
+			points += ", ";
+			points += wxString::Format("(%.2f, %.2f, %.2f)", p->x(), p->y(), p->z());
+		}
+		Append(ruler->GetName(), ruler->GetLength(), unit,
+			ruler->GetAngle(), points, ruler->GetTimeDep(), ruler->GetTime(), ruler->GetDelInfoValues(", "));
    }
 
    long item = GetItemCount() - 1;
@@ -251,13 +250,13 @@ void RulerListCtrl::Export(wxString filename)
          if (num_points > 0)
          {
             p = ruler->GetPoint(0);
-            str += wxString::Format("%.0f\t%.0f\t%.0f", p->x(), p->y(), p->z());
+			str += wxString::Format("%.2f\t%.2f\t%.2f", p->x(), p->y(), p->z());
          }
          if (num_points > 1)
          {
             p = ruler->GetPoint(num_points - 1);
             str += "\t";
-            str += wxString::Format("%.0f\t%.0f\t%.0f", p->x(), p->y(), p->z());
+			str += wxString::Format("%.2f\t%.2f\t%.2f", p->x(), p->y(), p->z());
          }
          tos << str << "\t";
          if (ruler->GetTimeDep())
@@ -394,7 +393,7 @@ void MeasureDlg::GetSettings(VRenderView* vrv)
       m_toolbar->ToggleTool(ID_RulerEditBtn, false);
 
       int int_mode = m_view->m_glview->GetIntMode();
-      if (int_mode == 5)
+		if (int_mode == 5 || int_mode == 7)
       {
          int ruler_type = m_view->GetRulerType();
          if (ruler_type == 0)

@@ -311,6 +311,8 @@ m_free_version(true)
    m_vrv_list[0]->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
    m_time_id = m_setting_dlg->GetTimeId();
    m_data_mgr.SetOverrideVox(m_setting_dlg->GetOverrideVox());
+	m_data_mgr.SetPvxmlFlipX(m_setting_dlg->GetPvxmlFlipX());
+	m_data_mgr.SetPvxmlFlipY(m_setting_dlg->GetPvxmlFlipY());
    VolumeRenderer::set_soft_threshold(m_setting_dlg->GetSoftThreshold());
    MultiVolumeRenderer::set_soft_threshold(m_setting_dlg->GetSoftThreshold());
    TreeLayer::SetSoftThreshsold(m_setting_dlg->GetSoftThreshold());
@@ -443,7 +445,7 @@ m_free_version(true)
    m_aui_mgr.GetPane(m_measure_dlg).Hide();
    //trace dialog
    m_aui_mgr.AddPane(m_trace_dlg, wxAuiPaneInfo().
-         Name("m_trace_dlg").Caption("Traces").
+         Name("m_trace_dlg").Caption("Cell Tracking").
          Dockable(false).CloseButton(true));
    m_aui_mgr.GetPane(m_trace_dlg).Float();
    m_aui_mgr.GetPane(m_trace_dlg).Hide();
@@ -953,8 +955,10 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
                vrv->AddVolumeData(vd);
                vd_sel = vd;
 
-               if (vd->GetReader() && vd->GetReader()->GetTimeNum()>1)
+               if (vd->GetReader() && vd->GetReader()->GetTimeNum()>1){
+				  vrv->m_glview->m_tseq_cur_num = vd->GetReader()->GetCurTime();
                   enable_4d = true;
+				}
             }
          }
       }
@@ -1085,13 +1089,9 @@ void VRenderFrame::OnOrganize(wxCommandEvent& WXUNUSED(event))
    int view_num = m_vrv_list.size();
    if (view_num>1)
    {
-      //int col_num = ceil(sqrt(double(view_num)));
-      //int row_num = ceil(double(view_num)/double(col_num));
       for (int i=0 ; i<view_num ; i++)
       {
          m_aui_mgr.GetPane(m_vrv_list[i]->GetName()).Float();
-         //BestSize(int(double(w)/double(col_num)),
-         //int(double(h)/double(row_num)));
       }
       m_aui_mgr.Update();
    }

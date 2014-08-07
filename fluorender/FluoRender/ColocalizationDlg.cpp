@@ -241,6 +241,7 @@ void ColocalizationDlg::OnColocalizationBtn(wxCommandEvent &event)
 		str.ToLong(&ival);
 	double max_voxels = ival;
 	double thresh = 0.0;
+	double falloff = 1.0;
 
 	//save masks
 	m_vol_a->GetVR()->return_mask();
@@ -248,13 +249,13 @@ void ColocalizationDlg::OnColocalizationBtn(wxCommandEvent &event)
 
 	//volume a
 	m_view->GetVolumeSelector()->SetVolume(m_vol_a);
-	m_view->CompAnalysis(min_voxels, max_voxels, thresh, select, true);
+	m_view->CompAnalysis(min_voxels, max_voxels, thresh, falloff, select, true, false);
 
 	m_view->m_glview->ForceDraw();
 
 	//volume b
 	m_view->GetVolumeSelector()->SetVolume(m_vol_b);
-	m_view->CompAnalysis(min_voxels, max_voxels, thresh, select, true);
+	m_view->CompAnalysis(min_voxels, max_voxels, thresh, falloff, select, true, false);
 
 	m_view->m_glview->ForceDraw();
 
@@ -270,7 +271,7 @@ void ColocalizationDlg::OnColocalizationBtn(wxCommandEvent &event)
 	{
 		select = false;
 		m_view->GetVolumeSelector()->SetVolume(vd);
-		m_view->CompAnalysis(min_voxels, max_voxels, thresh, select, true);
+		m_view->CompAnalysis(min_voxels, max_voxels, thresh, falloff, select, true, false);
 	}
 
 }
