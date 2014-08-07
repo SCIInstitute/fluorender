@@ -1,0 +1,5 @@
+[tasks]
+tasknum=1
+[tasks/task0]
+type=random_colors
+savepath=D:\\DATA\\brainbow_4d\\labels_03_tracked_3d\\

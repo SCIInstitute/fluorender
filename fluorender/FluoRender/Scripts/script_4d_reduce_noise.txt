@@ -1,0 +1,9 @@
+[tasks]
+tasknum=1
+[tasks/task0]
+type=noise_reduction
+threshold=0.5
+voxelsize=500
+format=0
+compress=0
+savepath=D:\\DATA\\ScriptTest\\noise\\
