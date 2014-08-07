@@ -278,7 +278,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
    //full cell
    m_cell_full(false),
    //link cells
-   m_cell_link(false),
+   m_cell_link(false)
 {
    //create context
    if (sharedContext)
@@ -9226,6 +9226,7 @@ void VRenderGLView::GetTraces()
 				label_iter->second.size++;
 				label_iter->second.center += Point(ii, jj, kk);
 			}
+		}
 	}
 	//calculate center
 	for (label_iter=sel_labels.begin(); label_iter!=sel_labels.end(); ++label_iter)

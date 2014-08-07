@@ -343,7 +343,7 @@ namespace FLIVR
 
       int quota_bricks_chan = vr_list_[0]->get_quota_bricks_chan();
       vector<TextureBrick*> *bs = 0;
-      FLIVR::Point pt = TextureRenderer::get_quota_center();
+      FLIVR::Point pt = TextureRenderer::quota_center_;
       if (TextureRenderer::mem_swap_ &&
             TextureRenderer::interactive_)
          //bs = vr_list_[0]->tex_->get_closest_bricks(
@@ -822,11 +822,12 @@ namespace FLIVR
             glEnd();
 
             //release depth texture for rendering shadows
-            if (colormap_mode_ == 2)
-               vr_list_[tn]->release_texture(4, GL_TEXTURE_2D);
+			//release depth texture for rendering shadows
+			if (colormap_mode_ == 2)
+				vr_list_[tn]->release_texture(4, GL_TEXTURE_2D);
 
-            if (TextureRenderer::mem_swap_ && i==0)
-               TextureRenderer::set_finished_bricks(TextureRenderer::get_finished_bricks()+1);
+			if (TextureRenderer::mem_swap_ && i==0)
+				TextureRenderer::finished_bricks_++;
          }
          k += poly[i];
 

@@ -3,6 +3,7 @@
 #include <wx/listctrl.h>
 #include "teem/Nrrd/nrrd.h"
 #include <vector>
+#include <boost/unordered_map.hpp>
 
 #ifndef _TRACEDLG_H_
 #define _TRACEDLG_H_

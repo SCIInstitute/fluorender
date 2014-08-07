@@ -844,8 +844,8 @@ void TraceDlg::CellFull()
 	unsigned int max_size = slimit;
 	vd->GetResolution(nx, ny, nz);
 	unsigned int id;
-	hash_map<unsigned int, Lbl> id_list;
-	hash_map<unsigned int, Lbl>::iterator id_iter;
+	boost::unordered_map<unsigned int, Lbl> id_list;
+	boost::unordered_map<unsigned int, Lbl>::iterator id_iter;
 	for (i=0; i<nx; ++i)
 	for (j=0; j<ny; ++j)
 	for (k=0; k<nz; ++k)

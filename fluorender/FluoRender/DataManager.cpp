@@ -3128,6 +3128,7 @@ void TraceGroup::SetIDMap(boost::unordered_map<unsigned int, Lbl> &sel_labels)
 	CellMapIter cell_map_iter1, cell_map_iter2;
 	vector<unsigned int> *id_list = 0;
 	unsigned int i = 0;
+	Lbl lbl;
 	//go through sel_labels
 	for (label_iter = sel_labels.begin();
 		label_iter != sel_labels.end();

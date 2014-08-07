@@ -804,6 +804,7 @@ struct Vertex
 	vector<unsigned int> in_ids;
 
 	int Read(ifstream &ifs);
+	int Write(ofstream &ofs);
 };
 
 typedef boost::unordered_map<unsigned int, Vertex> CellMap;
@@ -827,8 +828,8 @@ struct Frame
 typedef boost::unordered_map<unsigned int, Frame> FrameList;
 typedef boost::unordered_map<unsigned int, Frame>::iterator FrameIter;
 //id list
-typedef boost::unordered_map<unsigned int, unsigned int> IDMap;
-typedef boost::unordered_map<unsigned int, unsigned int>::iterator IDMapIter;
+typedef boost::unordered_map<unsigned int, Lbl> IDMap;
+typedef boost::unordered_map<unsigned int, Lbl>::iterator IDMapIter;
 
 class TraceGroup : public TreeLayer
 {
@@ -865,7 +866,7 @@ public:
 	//for selective drawing
 	void ClearIDMap();
 	void AddID(Lbl lbl);
-	void SetIDMap(hash_map<unsigned int, Lbl> &sel_labels);
+	void SetIDMap(boost::unordered_map<unsigned int, Lbl> &sel_labels);
 	IDMap *GetIDMap();
 	bool FindID(unsigned int id);
 	//in frame list

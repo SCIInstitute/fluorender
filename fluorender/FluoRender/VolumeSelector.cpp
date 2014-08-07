@@ -23,7 +23,7 @@ VolumeSelector::VolumeSelector() :
    m_w2d(0.0),
    m_iter_label(1),
    m_label_thresh(0.0),
-m_label_falloff(1.0),
+   m_label_falloff(1.0),
    m_min_voxels(0.0),
    m_max_voxels(0.0),
    m_annotations(0),
@@ -258,7 +258,7 @@ int VolumeSelector::SetLabelBySize()
 	unsigned int min_size = 0;
 	unsigned int max_size = 0;
 	unsigned int counter;
-	hash_map<unsigned int, Component>::iterator comp_iter;
+	boost::unordered_map<unsigned int, Component>::iterator comp_iter;
 	for (comp_iter=m_comps.begin();
 		comp_iter!=m_comps.end();
 		++comp_iter)
