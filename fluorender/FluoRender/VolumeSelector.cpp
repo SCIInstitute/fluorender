@@ -305,9 +305,9 @@ int VolumeSelector::SetLabelBySize()
 					//calculate color
 					if (max_size > min_size)
 						data_label[index] = 
-							unsigned int(240.0-
-							double(counter-min_size)/
-							double(max_size-min_size)*
+							(unsigned int)(240.0-
+							(double)(counter-min_size)/
+							(double)(max_size-min_size)*
 							239.0);
 					else
 						data_label[index] = 1;

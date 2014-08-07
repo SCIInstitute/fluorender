@@ -61,8 +61,8 @@ RulerListCtrl::~RulerListCtrl()
 {
 }
 
-void RulerListCtrl::Append(wxString name, double length, wxString unit,
-      double angle, wxString points, bool time_dep, int time, wxString &extra)
+void RulerListCtrl::Append(wxString name, double length, wxString &unit,
+      double angle, wxString &points, bool time_dep, int time, wxString extra)
 {
    long tmp = InsertItem(GetItemCount(), name, 0);
    wxString str = wxString::Format("%.2f", length) + unit;

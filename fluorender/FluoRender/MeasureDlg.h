@@ -19,9 +19,9 @@ class RulerListCtrl : public wxListCtrl
             long style=wxLC_REPORT|wxLC_SINGLE_SEL);
       ~RulerListCtrl();
 
-      void Append(wxString name, double length, wxString unit,
-            double angle, wxString points, bool time_dep, int time,
-            wxString &extra);
+      void Append(wxString name, double length, wxString &unit,
+            double angle, wxString &points, bool time_dep, int time,
+            wxString extra);
       void Update(VRenderView* vrv=0);
 
       void DeleteSelection();

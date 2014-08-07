@@ -589,7 +589,7 @@ public:
 	string GetTextText(int index);
 	Point GetTextPos(int index);
 	string GetTextInfo(int index);
-	void AddText(string &str, Point &pos, string &info);
+	void AddText(std::string str, Point pos, std::string info);
 	void SetTransform(Transform *tform);
 	void SetVolume(VolumeData* vd);
 	VolumeData* GetVolume();

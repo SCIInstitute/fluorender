@@ -2306,7 +2306,7 @@ string Annotations::GetTextInfo(int index)
 	return "";
 }
 
-void Annotations::AddText(string &str, Point &pos, string &info)
+void Annotations::AddText(std::string str, Point pos, std::string info)
 {
 	AText* atext = new AText(str, pos);
 	atext->SetInfo(info);
@@ -3411,7 +3411,7 @@ int TraceGroup::Save(wxString &filename)
 	int result = 1;
 	m_data_path = filename;
 
-	ofstream ofs(m_data_path.ToStdWstring(), ios::out|ios::binary);
+	std::ofstream ofs(ws2s(m_data_path.ToStdWstring()).c_str(), ios::out|ios::binary);
 	if (ofs.bad())
 		return 0;
 
