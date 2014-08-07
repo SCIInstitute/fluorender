@@ -61,6 +61,7 @@ public:
 		ID_CAAnnotationsBtn,
 		ID_CACompsText,
 		ID_CAVolumeText,
+		ID_CASizeMapChk,
 		//noise removal
 		ID_NRSizeSldr,
 		ID_NRSizeText,
@@ -104,6 +105,8 @@ public:
 	void SetDftCAMax(double max) {m_dft_ca_max = max;}
 	double GetDftCAThresh() {return m_dft_ca_thresh;}
 	void SetDftCAThresh(double thresh) {m_dft_ca_thresh = thresh;}
+	double GetDftCAFalloff() {return m_dft_ca_falloff;}
+	void SetDftCAFalloff(double falloff) {m_dft_ca_falloff = falloff;}
 	double GetDftNRThresh() {return m_dft_nr_thresh;}
 	void SetDftNRThresh(double thresh) {m_dft_nr_thresh = thresh;}
 	double GetDftNRSize() {return m_dft_nr_size;}
@@ -132,6 +135,7 @@ private:
 	double m_dft_ca_min;
 	double m_dft_ca_max;
 	double m_dft_ca_thresh;
+	double m_dft_ca_falloff;
 	double m_dft_nr_thresh;
 	double m_dft_nr_size;
 
@@ -177,6 +181,7 @@ private:
 	wxButton *m_ca_annotations_btn;
 	wxTextCtrl *m_ca_comps_text;
 	wxTextCtrl *m_ca_volume_text;
+	wxCheckBox *m_ca_size_map_chk;
 	//noise removal
 	wxSlider *m_nr_size_sldr;
 	wxTextCtrl *m_nr_size_text;

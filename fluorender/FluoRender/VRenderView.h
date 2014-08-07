@@ -56,6 +56,8 @@ class VRenderGLView: public wxGLCanvas
       VRenderGLView(wxWindow* frame,
             wxWindow* parent,
             wxWindowID id,
+			//const int* attriblist, //TODO for 3.2 OpenGL on OSX
+			//const int* contextattriblist,
             wxGLContext* sharedContext=0,
             int * attribList=NULL,
             const wxPoint& pos=wxDefaultPosition,
@@ -347,7 +349,7 @@ class VRenderGLView: public wxGLCanvas
          //label volumes in current view
          void Label();
          //noise removal
-         int CompAnalysis(double min_voxels, double max_voxels, double thresh, bool select, bool gen_ann);
+		 int CompAnalysis(double min_voxels, double max_voxels, double thresh, double falloff, bool select, bool gen_ann, bool size_map);
          void CompExport(int mode, bool select);//mode: 0-multi channels; 1-random colors
          void ShowAnnotations();
          int NoiseAnalysis(double min_voxels, double max_voxels, double thresh);
@@ -434,6 +436,7 @@ class VRenderGLView: public wxGLCanvas
 	TraceGroup* GetTraceGroup();
 	void CreateTraceGroup();
 	int LoadTraceGroup(wxString filename);
+	int SaveTraceGroup(wxString filename);
 	void ExportTrace(wxString filename, unsigned int id);
 	void DrawTraces();
 	void GetTraces();
@@ -453,6 +456,7 @@ class VRenderGLView: public wxGLCanvas
          int m_end_frame;
          //counters
          int m_tseq_cur_num;
+		 int m_tseq_prv_num;
          int m_bat_cur_num;
          int m_param_cur_num;
          int m_total_frames;
@@ -740,6 +744,10 @@ class VRenderGLView: public wxGLCanvas
          //move clip
          bool m_clip_up;
          bool m_clip_down;
+		 //full cell
+		 bool m_cell_full;
+		 //link cell
+		 bool m_cell_link;
 
          //predraw in streaming mode
          bool m_pre_draw;
@@ -1185,8 +1193,15 @@ class VRenderView: public wxPanel
    void Label()
    {if (m_glview) m_glview->Label();}
    //remove noise
-   int CompAnalysis(double min_voxels, double max_voxels, double thresh, bool select, bool gen_ann)
-   {if (m_glview) return m_glview->CompAnalysis(min_voxels, max_voxels, thresh, select, gen_ann); else return 0;}
+
+   int CompAnalysis(double min_voxels, double max_voxels, double thresh, 
+ 					double falloff, bool select, bool gen_ann, bool size_map)
+   {
+		if (m_glview) 
+			return m_glview->CompAnalysis(min_voxels, max_voxels, thresh, falloff, select, gen_ann, size_map); 
+		else 
+			return 0;
+   }
    void CompExport(int mode, bool select)
    {if (m_glview) m_glview->CompExport(mode, select);}
    void ShowAnnotations()
@@ -1328,6 +1343,10 @@ class VRenderView: public wxPanel
 	int LoadTraceGroup(wxString filename)
 	{
 		if (m_glview) return m_glview->LoadTraceGroup(filename); else return 0;
+	}
+	int SaveTraceGroup(wxString filename)
+	{
+		if (m_glview) return m_glview->SaveTraceGroup(filename); else return 0;
 	}
 	void ExportTrace(wxString filename, unsigned int id)
 	{

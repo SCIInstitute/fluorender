@@ -114,6 +114,11 @@ public:
 	//ruler time dependent
 	bool GetRulerTimeDep() {return m_ruler_time_dep;}
 	void SetRulerTimeDep(bool val) {m_ruler_time_dep = val;}
+	//flags for pvxml flipping
+	bool GetPvxmlFlipX() {return m_pvxml_flip_x;}
+	void SetPvxmlFlipX(bool flip) {m_pvxml_flip_x = flip;}
+	bool GetPvxmlFlipY() {return m_pvxml_flip_y;}
+	void SetPvxmlFlipY(bool flip) {m_pvxml_flip_y = flip;}
 
 private:
 	wxWindow* m_frame;
@@ -161,6 +166,9 @@ private:
 	bool m_ruler_use_transf;
 	//ruler time dependent
 	bool m_ruler_time_dep;
+	//flip pvxml frame
+	bool m_pvxml_flip_x;
+	bool m_pvxml_flip_y;
 
 private:
 	//save project

@@ -48,6 +48,9 @@ public:
 	//select both
 	void SetSelectBoth(bool value) {m_select_multi = value?2:0;}
 	bool GetSelectBoth() {return m_select_multi==2;}
+	//size map
+	void SetSizeMap(bool size_map) {m_size_map = size_map;}
+	bool GetSizeMap() {return m_size_map;}
 
 	//modes
 	void SetMode(int mode) {m_mode = mode;}
@@ -59,7 +62,7 @@ public:
 	void Select(double radius);
 	//mode: 0-nomral; 1-posterized
 	void Label(int mode=0);
-	int CompAnalysis(double min_voxels, double max_voxels, double thresh, bool select, bool gen_ann);
+	int CompAnalysis(double min_voxels, double max_voxels, double thresh, double falloff, bool select, bool gen_ann);
 	int NoiseAnalysis(double min_voxels, double max_voxels, double bins, double thresh);
 	int CompIslandCount(double min_voxels, double max_voxels);
 	void CompExportMultiChann(bool select);
@@ -118,7 +121,7 @@ private:
 	struct Component
 	{
 		unsigned int id;
-		int counter;
+		unsigned int counter;
 		Vector acc_pos;
 		double acc_int;
 	};
