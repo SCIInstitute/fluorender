@@ -434,17 +434,28 @@ namespace FLIVR
 			break;
 		case 3:	//sharpening filter
 			{
-				double p = 0.012221;
-				size = p*zoom;
-				size = Clamp(size, 0.0, 0.25);
+				//double p = 0.012221;
+				//size = p*zoom;
+				//size = Clamp(size, 0.0, 0.25);
+				double sf11 = sqrt(tex_w*tex_w + tex_h*tex_h)/vs;
+				size = zoom / sf11 / 10.0;
+				size = size<1.0?0.0:size;
+				size = Clamp(size, 0.0, 0.5);
 			}
 			break;
+		case 4:	//blur filter
+			{
+				double sf11 = sqrt(tex_w*tex_w + tex_h*tex_h)/vs;
+				size = zoom / sf11 / 2.0;
+				size = size<1.0?0.5:size;
+				size = Clamp(size, 0.5, 2.5);
+			}
 		}
 
 		//adjusting for screen size
-		double af = vs/800.0;
+		//double af = vs/800.0;
 
-		return size*af;
+		return size;
 	}
 
 	//darw
@@ -496,7 +507,7 @@ namespace FLIVR
 		size.reserve(num_slices_*6);
 
 		//--------------------------------------------------------------------------
-		//int nb0 = (*bricks)[0]->nc();
+		int nb0 = (*bricks)[0]->nc();
 
 		bool use_fog = glIsEnabled(GL_FOG)!=0 && colormap_mode_!=2;
 		GLfloat clear_color[4];
@@ -927,7 +938,7 @@ namespace FLIVR
 				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 				img_shader = 
-					m_img_shader_factory.shader(IMG_SHDR_FILTER_SMOOTH_MIN);
+					m_img_shader_factory.shader(IMG_SHDR_FILTER_BLUR);
 				if (img_shader)
 				{
 					if (!img_shader->valid())
@@ -936,8 +947,8 @@ namespace FLIVR
 					}
 					img_shader->bind();
 				}
-				filter_size_min_ = CalcFilterSize(1, w, h, tex_->nx(), tex_->ny(), zoom, sfactor_);
-				img_shader->setLocalParam(0, filter_size_min_/w2, filter_size_min_/h2, 0.5, 0.0);
+				filter_size_min_ = CalcFilterSize(4, w, h, tex_->nx(), tex_->ny(), zoom, sfactor_);
+				img_shader->setLocalParam(0, filter_size_min_/w2, filter_size_min_/h2, 1.0/w2, 1.0/h2);
 
 				glBegin(GL_QUADS);
 				{
@@ -953,39 +964,6 @@ namespace FLIVR
 				glEnd();
 				if (img_shader && img_shader->valid())
 					img_shader->release();
-
-				//
-				glBindFramebuffer(GL_FRAMEBUFFER, blend_framebuffer_); 
-
-				glBindTexture(GL_TEXTURE_2D, filter_tex_id_);
-				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-				img_shader = 
-					m_img_shader_factory.shader(IMG_SHDR_FILTER_SMOOTH_MAX);
-				if (img_shader)
-				{
-					if (!img_shader->valid())
-					{
-						img_shader->create();
-					}
-					img_shader->bind();
-				}
-				filter_size_max_ = CalcFilterSize(2, w, h, tex_->nx(), tex_->ny(), zoom, sfactor_);
-				img_shader->setLocalParam(0, filter_size_max_/w, filter_size_max_/h, 1.0, 0.0);
-				glBegin(GL_QUADS);
-				{
-					glTexCoord2f(0.0, 0.0);
-					glVertex3f(-1, -1, 0.0);
-					glTexCoord2f(1.0, 0.0);
-					glVertex3f(1, -1, 0.0);
-					glTexCoord2f(1.0, 1.0);
-					glVertex3f(1, 1, 0.0);
-					glTexCoord2f(0.0, 1.0);
-					glVertex3f(-1, 1, 0.0);
-				}
-				glEnd();
-				if (img_shader && img_shader->valid())
-					img_shader->release();
-				///////////////////////////////////////////////////////////////////////////
 			}
 
 			//go back to normal
@@ -995,7 +973,10 @@ namespace FLIVR
 
 			glViewport(vp[0], vp[1], vp[2], vp[3]);
 
-			glBindTexture(GL_TEXTURE_2D, blend_tex_id_);
+			if (noise_red_ && colormap_mode_!=2)
+				glBindTexture(GL_TEXTURE_2D, filter_tex_id_);
+			else
+				glBindTexture(GL_TEXTURE_2D, blend_tex_id_);
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 			if (noise_red_ && colormap_mode_!=2)
@@ -1398,7 +1379,7 @@ namespace FLIVR
 	//generate the labeling assuming the mask is already generated
 	//type: 0-initialization; 1-maximum intensity filtering
 	//mode: 0-normal; 1-posterized; 2-copy values; 3-poster, copy
-	void VolumeRenderer::draw_label(int type, int mode, double thresh)
+	void VolumeRenderer::draw_label(int type, int mode, double thresh, double gm_falloff)
 	{
 		vector<TextureBrick*> *bricks = tex_->get_bricks();
 		if (!bricks || bricks->size() == 0)
@@ -1442,8 +1423,7 @@ namespace FLIVR
 			seg_shader->bind();
 		}
 
-		if (type == 0)
-		{
+
 			//set uniforms
 			//set up shading
 			double mat[16];
@@ -1467,9 +1447,11 @@ namespace FLIVR
 			seg_shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
 			seg_shader->setLocalParam(3, 1.0/gamma3d_, gm_thresh_, offset_, sw_);
 			seg_shader->setLocalParam(6, color_.r(), color_.g(), color_.b(), 0.0);
-		}
 
-		seg_shader->setLocalParam(7, thresh, 0.0, 0.0, 0.0);
+		if (type == 0)			seg_shader->setLocalParam(7, thresh, 0.0, 0.0, 0.0);
+		else if (type == 1)
+			//loc7: (initial thresh, gm_gaussian_falloff, scalar_gaussian_falloff, scalar_translate)
+			seg_shader->setLocalParam(7, 1.0, gm_falloff, 0.0, 0.0);
 
 		////////////////////////////////////////////////////////
 		// render bricks
@@ -1498,7 +1480,7 @@ namespace FLIVR
 					b->nz(), 0.0f);//{nx, ny, nz, 0.0}
 				break;
 			case 1://maximum filter
-				seg_shader->setLocalParam(0, 
+				seg_shader->setLocalParam(4, 
 					1.0/b->nx(),
 					1.0/b->ny(),
 					1.0/b->nz(), 0.0f);//{1/spcx, 1/spcy, 1/spcz, 0.0}
@@ -1509,9 +1491,8 @@ namespace FLIVR
 			glViewport(0, 0, b->nx(), b->ny());
 
 			//load the texture
-			if (type == 0)
-				load_brick(0, 0, bricks, i, GL_NEAREST, compression_);
-			//if (has_mask) GLuint mask_id = load_brick_mask(bricks, i);
+			load_brick(0, 0, bricks, i, GL_NEAREST, compression_);
+			if (has_mask) GLuint mask_id = load_brick_mask(bricks, i);
 			GLuint label_id = load_brick_label(bricks, i);
 
 			//draw each slice

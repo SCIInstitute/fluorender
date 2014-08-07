@@ -55,12 +55,9 @@ namespace FLIVR
 	"	b.z = b.z>1.0?1.0/(2.0-b.z):loc1.z;\n" \
 	"	gl_FragColor = pow(c, loc0)*b;\n" \
 	"}\n"
-#ifndef _WIN32
-    #define IMG_SHADER_CODE_BRIGHTNESS_CONTRAST_HDR IMG_SHADER_CODE_BRIGHTNESS_CONTRAST
-#else
+
 #define IMG_SHADER_CODE_BRIGHTNESS_CONTRAST_HDR \
 	"// IMG_SHADER_CODE_BRIGHTNESS_CONTRAST_HDR\n" \
-    "#version 120\n"\
 	"uniform vec4 loc0; //(r_gamma, g_gamma, b_gamma, 1.0)\n" \
 	"uniform vec4 loc1; //(r_brightness, g_brightness, b_brightness, 1.0)\n" \
 	"uniform vec4 loc2; //(r_hdr, g_hdr, b_hdr, 0.0)\n" \
@@ -89,7 +86,7 @@ namespace FLIVR
 	"	vec4 c_avg = 0.25*c_avg_1+0.3*c_avg_2+0.25*c_avg_3+0.1*c_avg_4+0.1*c_avg_5;\n" \
 	"	gl_FragColor = c*(vec4(1.0)-loc2)+loc2*c_avg;\n" \
 	"}\n"
-#endif
+
 #define IMG_SHADER_CODE_GRADIENT_MAP \
 	"// IMG_SHADER_CODE_GRADIENT_MAP\n" \
 	"uniform vec4 loc0; //(lo, hi, hi-lo, alpha) \n" \
@@ -109,8 +106,8 @@ namespace FLIVR
 	"	gl_FragColor = vec4(color.rgb*color.a, color.a);\n" \
 	"}\n"
 
-#define IMG_SHADER_CODE_FILTER_SMOOTH_MIN \
-	"// IMG_SHADER_CODE_FILTER_SMOOTH_MIN\n" \
+#define IMG_SHADER_CODE_FILTER_MIN \
+	"// IMG_SHADER_CODE_FILTER_MIN\n" \
 	"uniform vec4 loc0; //(width, height, thresh, 0.0)\n" \
 	"uniform sampler2D tex0;\n" \
 	"\n" \
@@ -142,8 +139,8 @@ namespace FLIVR
 	"	gl_FragColor = c;\n" \
 	"}\n"
 
-#define IMG_SHADER_CODE_FILTER_SMOOTH_MAX \
-	"// IMG_SHADER_CODE_FILTER_SMOOTH_MAX\n" \
+#define IMG_SHADER_CODE_FILTER_MAX \
+	"// IMG_SHADER_CODE_FILTER_MAX\n" \
 	"uniform vec4 loc0; //(width, height, scale, 0.0)\n" \
 	"uniform sampler2D tex0;\n" \
 	"\n" \
@@ -171,6 +168,28 @@ namespace FLIVR
 	"	gl_FragColor = c;\n" \
 	"}\n"
 
+#define IMG_SHADER_CODE_FILTER_BLUR \
+	"// IMG_SHADER_CODE_FILTER_BLUR\n" \
+	"uniform vec4 loc0; //(width, height, dx, dy)\n" \
+	"uniform sampler2D tex0;\n" \
+	"\n" \
+	"void main()\n" \
+	"{\n" \
+	"	vec4 t = gl_TexCoord[0];\n" \
+	"	vec4 c = texture2D(tex0, t.xy);\n" \
+	"	vec4 c1 = texture2D(tex0, vec2(t.x-0.70711*loc0.x, t.y-0.70711*loc0.y));\n" \
+	"	vec4 c2 = texture2D(tex0, vec2(t.x, t.y-loc0.y));\n" \
+	"	vec4 c3 = texture2D(tex0, vec2(t.x+0.70711*loc0.x, t.y-0.70711*loc0.y));\n" \
+	"	vec4 c4 = texture2D(tex0, vec2(t.x-loc0.x, t.y));\n" \
+	"	vec4 c5 = texture2D(tex0, vec2(t.x+loc0.x, t.y));\n" \
+	"	vec4 c6 = texture2D(tex0, vec2(t.x-0.70711*loc0.x, t.y+0.70711*loc0.y));\n" \
+	"	vec4 c7 = texture2D(tex0, vec2(t.x, t.y+loc0.y));\n" \
+	"	vec4 c8 = texture2D(tex0, vec2(t.x+0.70711*loc0.x, t.y+0.70711*loc0.y));\n" \
+	"	//float x = avg(c.x, c1.x, c2.x, c3.x, c4.x, c5.x, c6.x, c7.x, c8.x).x;\n" \
+	"	//float y = avg(c.y, c1.y, c2.y, c3.y, c4.y, c5.y, c6.y, c7.y, c8.y).y;\n" \
+	"	//float z = avg(c.z, c1.z, c2.z, c3.z, c4.z, c5.z, c6.z, c7.z, c8.z).z;\n" \
+	"	gl_FragColor = (c1+c2+c3+c4+c5+c6+c7+c8)/8.0;\n" \
+	"}\n"
 #define IMG_SHADER_CODE_FILTER_SHARPEN \
 	"// IMG_SHADER_CODE_FILTER_SHARPEN\n" \
 	"uniform vec4 loc0; //(width, height, 0.0, 0.0)\n" \
@@ -375,11 +394,11 @@ namespace FLIVR
 		case IMG_SHDR_GRADIENT_MAP:
 			z << IMG_SHADER_CODE_GRADIENT_MAP;
 			break;
-		case IMG_SHDR_FILTER_SMOOTH_MIN:
-			z << IMG_SHADER_CODE_FILTER_SMOOTH_MIN;
+		case IMG_SHDR_FILTER_BLUR:
+			z << IMG_SHADER_CODE_FILTER_BLUR;
 			break;
-		case IMG_SHDR_FILTER_SMOOTH_MAX:
-			z << IMG_SHADER_CODE_FILTER_SMOOTH_MAX;
+		case IMG_SHDR_FILTER_MAX:
+			z << IMG_SHADER_CODE_FILTER_MAX;
 			break;
 		case IMG_SHDR_FILTER_SHARPEN:
 			z << IMG_SHADER_CODE_FILTER_SHARPEN;

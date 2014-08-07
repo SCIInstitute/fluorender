@@ -127,6 +127,9 @@ namespace FLIVR
 			break;
 		}
 
+		//functions
+		if (clip_)
+			z << VOL_CLIP_FUNC;
 		//the common head
 		z << VOL_HEAD;
 
@@ -143,7 +146,7 @@ namespace FLIVR
 
 		//head for clipping planes
 		if (clip_)
-			z << VOL_HEAD_CLIP;
+			z << VOL_HEAD_CLIP_FUNC;
 
 		// Set up light variables and input parameters.
 		z << VOL_HEAD_LIT;

@@ -138,7 +138,7 @@ namespace FLIVR
 		//generate the labeling assuming the mask is already generated
 		//type: 0-initialization; 1-maximum intensity filtering
 		//mode: 0-normal; 1-posterized
-		void draw_label(int type, int mode, double thresh); 
+		void draw_label(int type, int mode, double thresh, double gm_falloff);
 
 		//calculation
 		void calculate(int type, VolumeRenderer* vr_a, VolumeRenderer* vr_b);
@@ -244,7 +244,6 @@ namespace FLIVR
 			double zoom, double sf);	//type - 1:min filter
 										//		 2:max filter
 										//		 3:sharpening
-
 	};
 
 } // End namespace FLIVR

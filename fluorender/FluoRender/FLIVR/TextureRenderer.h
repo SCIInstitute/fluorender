@@ -183,19 +183,16 @@ namespace FLIVR
             done_update_loop_ = false;}
             static void reset_update_loop() {start_update_loop_ = false;}
             static bool get_done_update_loop() {return done_update_loop_;}
-            static void set_done_update_loop(bool b) {done_update_loop_ = b;}
             static bool get_start_update_loop() {return start_update_loop_;}
             static bool get_done_current_chan() {return done_current_chan_;}
             static void reset_done_current_chan()
             {done_current_chan_ = false; cur_chan_brick_num_ = 0;
                save_final_buffer_ = true; clear_chan_buffer_ = true;}
                static int get_cur_chan_brick_num() {return cur_chan_brick_num_;}
-               static int get_cur_brick_num() {return cur_brick_num_;}
                static void set_total_brick_num(int num) {total_brick_num_ = num; cur_brick_num_ = 0;}
                static int get_total_brick_num() {return total_brick_num_;}
                static void reset_clear_chan_buffer() {clear_chan_buffer_ = false;}
                static bool get_clear_chan_buffer() {return clear_chan_buffer_;}
-               static void set_clear_chan_buffer(bool b) {clear_chan_buffer_ = b;}
                static void reset_save_final_buffer() {save_final_buffer_ = false;}
                static bool get_save_final_buffer() {return save_final_buffer_;}
                //set start time
@@ -214,7 +211,6 @@ namespace FLIVR
                //number of bricks rendered before time is up
                static void reset_finished_bricks();
                static int get_finished_bricks() {return finished_bricks_;}
-               static void set_finished_bricks(int i) {finished_bricks_ = i;}
                static int get_finished_bricks_max();
                static int get_est_bricks(int mode);
                static int get_queue_last() {return brick_queue_.GetLast();}
@@ -226,7 +222,6 @@ namespace FLIVR
                int get_quota_bricks_chan() {return quota_bricks_chan_;}
                //quota center
                static void set_qutoa_center(Point &point) {quota_center_ = point;}
-               static Point get_quota_center() {return quota_center_; }
                //update order
                static void set_update_order(int val) {update_order_ = val;}
                static int get_update_order() {return update_order_;}

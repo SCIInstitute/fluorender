@@ -150,6 +150,7 @@ inline Point::Point(const Point& p)
 
 inline Point::Point()
 {
+	x_=y_=z_=0.0;
 }
 
 

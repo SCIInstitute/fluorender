@@ -83,6 +83,10 @@ namespace FLIVR
 	"uniform vec4 loc8;//(weight_2d, post_bins, 0, 0)\n" \
 	"\n"
 
+#define SEG_UNIFORMS_PARAM_MEASURE \
+	"//SEG_UNIFORMS_PARAM_MEASURE\n" \
+	"uniform vec4 loc9;//(value_var_foff, angle_var_foff, 0, 0)\n" \
+	"\n"
 #define SEG_TAIL \
 	"//SEG_TAIL\n" \
 	"}\n"
@@ -182,6 +186,8 @@ namespace FLIVR
 	"		if (any(greaterThan(ray, vec3(1.0))) ||\n" \
 	"				any(lessThan(ray, vec3(0.0))))\n" \
 	"			break;\n" \
+	"		if (vol_clip_func(vec4(ray, 1.0)))\n" \
+	"			break;\n" \
 	"		v.x = texture3D(tex0, ray).x;\n" \
 	"		v.y = length(vol_grad_func(vec4(ray, 1.0), loc4).xyz);\n" \
 	"		cray = vol_trans_sin_color_l(v);\n" \
@@ -213,6 +219,8 @@ namespace FLIVR
 	"		ray += step;\n" \
 	"		if (any(greaterThan(ray, vec3(1.0))) ||\n" \
 	"				any(lessThan(ray, vec3(0.0))))\n" \
+	"			break;\n" \
+	"		if (vol_clip_func(vec4(ray, 1.0)))\n" \
 	"			break;\n" \
 	"		v.x = texture3D(tex0, ray).x;\n" \
 	"		v.y = length(vol_grad_func(vec4(ray, 1.0), loc4).xyz);\n" \
@@ -343,21 +351,38 @@ namespace FLIVR
 	"	}\n" \
 	"\n"
 
+#define VOL_MEASURE_GM_LOOKUP \
+	"	//VOL_MEASURE_GM_LOOKUP\n" \
+	"	w = vol_grad_func(gl_TexCoord[0], loc4);\n" \
+	"	n.xyz = clamp(normalize(w.xyz), vec3(0.0), vec3(1.0));\n" \
+	"	v.y = length(w.xyz);\n" \
+	"	v.y = 0.5 * (loc2.x<0.0?(1.0+v.y*loc2.x):v.y*loc2.x);\n" \
+	"\n"
+
 #define SEG_BODY_LABEL_MAX_FILTER \
 	"	//SEG_BODY_LABEL_MAX_FILTER\n" \
 	"	uint int_val = texture(tex3, t.stp).x;\n" \
 	"	if (int_val == uint(0))\n" \
-	"	{\n" \
-	"		PixelColor = uint(0);\n" \
-	"		return;\n" \
-	"	}\n" \
+	"		discard;\n" \
+	"	vec3 nb;\n" \
+	"	vec3 max_nb = t.stp;\n" \
+	"	uint m;\n" \
 	"	for (int i=-1; i<2; i++)\n" \
 	"	for (int j=-1; j<2; j++)\n" \
 	"	for (int k=-1; k<2; k++)\n" \
 	"	{\n" \
-	"		vec3 nb = vec3(t.s+float(i)*loc0.x, t.t+float(j)*loc0.y, t.p+float(k)*loc0.z);\n" \
-	"		int_val = max(int_val, texture(tex3, nb).x);\n" \
+	"		if (k==0 && (i!=0 || j!=0))\n" \
+	"			continue;\n" \
+	"		nb = vec3(t.s+float(i)*loc4.x, t.t+float(j)*loc4.y, t.p+float(k)*loc4.z);\n" \
+	"		m = texture(tex3, nb).x;\n" \
+	"		if (m > int_val)\n" \
+	"		{\n" \
+	"			int_val = m;\n" \
+	"			max_nb = nb;\n" \
+	"		}\n" \
 	"	}\n" \
+	"	if (texture(tex0, max_nb).x+loc7.y < texture(tex0, t.stp).x)\n" \
+	"		discard;\n" \
 	"	PixelColor = int_val;\n" \
 	"\n"
 
@@ -461,11 +486,15 @@ namespace FLIVR
 			break;
 		case LBL_SHDR_MIF:
 			z << VOL_VERSION_130;
-			z << SEG_UNIFORMS_LABEL_MIF;
+
+			z << VOL_UNIFORMS_COMMON;
+			z << VOL_UNIFORMS_SIN_COLOR;
 			z << VOL_UNIFORMS_LABEL;
 			if (paint_mode_==1)
 				z << VOL_UNIFORMS_MASK;
 			z << SEG_UNIFORMS_LABEL_OUTPUT;
+			z << SEG_UNIFORMS_PARAMS;
+			z << SEG_UNIFORMS_PARAM_MEASURE;
 			break;
 		case FLT_SHDR_NR:
 			z << VOL_UNIFORMS_COMMON;
@@ -494,7 +523,7 @@ namespace FLIVR
 
 		//head for clipping planes
 		if (paint_mode_!=6 && clip_)
-			z << VOL_HEAD_CLIP;
+			z << VOL_HEAD_CLIP_FUNC;
 
 		if (paint_mode_ == 6)
 		{
@@ -613,10 +642,17 @@ namespace FLIVR
 				}
 				break;
 			case LBL_SHDR_MIF:
-				if (paint_mode_==0 || paint_mode_==2)
+				//if (paint_mode_==0 || paint_mode_==2)
+				//	z << SEG_BODY_LABEL_MAX_FILTER;
+				//else if (paint_mode_==1 || paint_mode_==3)
+				//	z << SEG_BODY_LABEL_MIF_POSTER;
+				z << VOL_HEAD_LIT;
+				z << VOL_DATA_VOLUME_LOOKUP_130;
+				z << VOL_MEASURE_GM_LOOKUP;
+				z << VOL_TRANSFER_FUNCTION_SIN_COLOR_L;
+				//z << SEG_BODY_DB_GROW_MEASURE;
+				//z << SEG_BODY_DB_GROW_STOP_FUNC_MEASURE;
 					z << SEG_BODY_LABEL_MAX_FILTER;
-				else if (paint_mode_==1 || paint_mode_==3)
-					z << SEG_BODY_LABEL_MIF_POSTER;
 				break;
 			case FLT_SHDR_NR:
 				z << FLT_BODY_NR;

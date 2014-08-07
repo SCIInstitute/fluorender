@@ -344,8 +344,8 @@ namespace FLIVR
       int quota_bricks_chan = vr_list_[0]->get_quota_bricks_chan();
       vector<TextureBrick*> *bs = 0;
       FLIVR::Point pt = TextureRenderer::get_quota_center();
-      if (TextureRenderer::get_mem_swap() &&
-            TextureRenderer::get_interactive())
+      if (TextureRenderer::mem_swap_ &&
+            TextureRenderer::interactive_)
          //bs = vr_list_[0]->tex_->get_closest_bricks(
          //TextureRenderer::quota_center_,
          //quota_bricks_chan, false,
@@ -360,17 +360,17 @@ namespace FLIVR
       {
          for (unsigned int i=0; i < bs->size(); i++)
          {
-            if (TextureRenderer::get_mem_swap())
+            if (TextureRenderer::mem_swap_)
             {
                uint32_t rn_time = GET_TICK_COUNT();
-               if (rn_time - TextureRenderer::get_st_time() > TextureRenderer::get_up_time())
+               if (rn_time - TextureRenderer::st_time_ > TextureRenderer::get_up_time())
                   break;
             }
 
             TextureBrick* b = (*bs)[i];
-            if (TextureRenderer::get_mem_swap() &&
-                  TextureRenderer::get_start_update_loop() &&
-                  !TextureRenderer::get_done_update_loop())
+            if (TextureRenderer::mem_swap_ &&
+                  TextureRenderer::start_update_loop_ &&
+                  !TextureRenderer::done_update_loop_)
             {
                if (b->drawn(0))
                   continue;
@@ -378,14 +378,14 @@ namespace FLIVR
 
             if (!vr_list_[0]->test_against_view(b->bbox()))// Clip against view
             {
-               if (TextureRenderer::get_mem_swap() &&
-                     TextureRenderer::get_start_update_loop() &&
-                     !TextureRenderer::get_done_update_loop())
+               if (TextureRenderer::mem_swap_ &&
+                     TextureRenderer::start_update_loop_ &&
+                     !TextureRenderer::done_update_loop_)
                {
                   for (unsigned int j=0; j<vr_list_.size(); j++)
                   {
                      vector<TextureBrick*>* bs_tmp = 0;
-                     if (TextureRenderer::get_interactive())
+                     if (TextureRenderer::interactive_)
                         //bs_tmp = vr_list_[j]->tex_->get_closest_bricks(
                         //TextureRenderer::quota_center_,
                         //quota_bricks_chan, false,
@@ -435,12 +435,13 @@ namespace FLIVR
          }
       }
 
-      if (TextureRenderer::get_mem_swap() &&
-            TextureRenderer::get_cur_brick_num() == TextureRenderer::get_total_brick_num())
-      {
-         TextureRenderer::set_done_update_loop(true);
-         TextureRenderer::set_clear_chan_buffer(true);
-      }
+
+		if (TextureRenderer::mem_swap_ &&
+			TextureRenderer::cur_brick_num_ == TextureRenderer::total_brick_num_)
+		{
+			TextureRenderer::done_update_loop_ = true;
+			TextureRenderer::clear_chan_buffer_ = true;
+		}
 
       // Undo transform.
       glPopMatrix();
@@ -524,7 +525,7 @@ namespace FLIVR
             glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
             img_shader = vr_list_[0]->
-               m_img_shader_factory.shader(IMG_SHDR_FILTER_SMOOTH_MIN);
+               m_img_shader_factory.shader(IMG_SHDR_FILTER_BLUR);
             if (img_shader)
             {
                if (!img_shader->valid())
@@ -534,41 +535,8 @@ namespace FLIVR
                img_shader->bind();
             }
             filter_size_min_ = vr_list_[0]->
-               CalcFilterSize(1, w, h, res_.x(), res_.y(), zoom, sfactor_);
-            img_shader->setLocalParam(0, filter_size_min_/w2, filter_size_min_/h2, 0.4, 0.0);
-            glBegin(GL_QUADS);
-            {
-               glTexCoord2f(0.0, 0.0);
-               glVertex3f(-1, -1, 0.0);
-               glTexCoord2f(1.0, 0.0);
-               glVertex3f(1, -1, 0.0);
-               glTexCoord2f(1.0, 1.0);
-               glVertex3f(1, 1, 0.0);
-               glTexCoord2f(0.0, 1.0);
-               glVertex3f(-1, 1, 0.0);
-            }
-            glEnd();
-            if (img_shader && img_shader->valid())
-               img_shader->release();
-
-            //
-            glBindFramebuffer(GL_FRAMEBUFFER, blend_framebuffer_);
-
-            glBindTexture(GL_TEXTURE_2D, filter_tex_id_);
-            glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-            img_shader = vr_list_[0]->
-               m_img_shader_factory.shader(IMG_SHDR_FILTER_SMOOTH_MAX);
-            if (img_shader)
-            {
-               if (!img_shader->valid())
-               {
-                  img_shader->create();
-               }
-               img_shader->bind();
-            }
-            filter_size_max_ = vr_list_[0]->
-               CalcFilterSize(2, w, h, res_.x(), res_.y(), zoom, sfactor_);
-            img_shader->setLocalParam(0, filter_size_max_/w, filter_size_max_/h, 1.0, 0.0);
+					CalcFilterSize(4, w, h, res_.x(), res_.y(), zoom, sfactor_);
+				img_shader->setLocalParam(0, filter_size_min_/w2, filter_size_min_/h2, 1.0/w2, 1.0/h2);
             glBegin(GL_QUADS);
             {
                glTexCoord2f(0.0, 0.0);
@@ -593,7 +561,11 @@ namespace FLIVR
 
          glViewport(vp[0], vp[1], vp[2], vp[3]);
 
-         glBindTexture(GL_TEXTURE_2D, blend_tex_id_);
+
+			if (noise_red_ && colormap_mode_!=2)
+				glBindTexture(GL_TEXTURE_2D, filter_tex_id_);
+			else
+				glBindTexture(GL_TEXTURE_2D, blend_tex_id_);
          glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
          glEnable(GL_BLEND);
          if (TextureRenderer::get_update_order() == 0)
@@ -798,8 +770,8 @@ namespace FLIVR
             }
 
             vector<TextureBrick*> *bs = 0;
-            if (TextureRenderer::get_mem_swap() &&
-                  TextureRenderer::get_interactive())
+            if (TextureRenderer::mem_swap_ &&
+                  TextureRenderer::interactive_)
                //bs = vr_list_[tn]->tex_->get_closest_bricks(
                //TextureRenderer::quota_center_,
                //quota_bricks_chan, false,
@@ -813,9 +785,9 @@ namespace FLIVR
 
             if ((*bs)[bi]->get_priority()>0)
             {
-               if (TextureRenderer::get_mem_swap() &&
-                     TextureRenderer::get_start_update_loop() &&
-                     !TextureRenderer::get_done_update_loop())
+               if (TextureRenderer::mem_swap_ &&
+                     TextureRenderer::start_update_loop_ &&
+                     !TextureRenderer::done_update_loop_)
                {
                   if (!(*bs)[bi]->drawn(0))
                      (*bs)[bi]->set_drawn(0, true);
@@ -853,7 +825,7 @@ namespace FLIVR
             if (colormap_mode_ == 2)
                vr_list_[tn]->release_texture(4, GL_TEXTURE_2D);
 
-            if (TextureRenderer::get_mem_swap() && i==0)
+            if (TextureRenderer::mem_swap_ && i==0)
                TextureRenderer::set_finished_bricks(TextureRenderer::get_finished_bricks()+1);
          }
          k += poly[i];
@@ -903,7 +875,7 @@ namespace FLIVR
          }
       }
 
-      //if (TextureRenderer::get_mem_swap())
+      //if (TextureRenderer::mem_swap_)
       //  TextureRenderer::finished_bricks_ += (int)vr_list_.size();
    }
 

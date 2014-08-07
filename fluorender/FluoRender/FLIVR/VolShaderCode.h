@@ -151,6 +151,30 @@ namespace FLIVR
 	"	}\n" \
 	"\n"
 
+#define VOL_HEAD_CLIP_FUNC \
+	"	if (vol_clip_func(t))\n" \
+	"	{\n" \
+	"		discard;\n" \
+	"		return;\n" \
+	"	}\n" \
+	"\n"
+
+#define VOL_CLIP_FUNC \
+	"//VOL_CLIP_FUNC\n" \
+	"bool vol_clip_func(vec4 t)\n" \
+	"{\n" \
+	"	vec4 brickt = matrix2 * t;\n" \
+	"	if (dot(brickt.xyz, loc10.xyz)+loc10.w < 0.0 ||\n" \
+	"		dot(brickt.xyz, loc11.xyz)+loc11.w < 0.0 ||\n" \
+	"		dot(brickt.xyz, loc12.xyz)+loc12.w < 0.0 ||\n" \
+	"		dot(brickt.xyz, loc13.xyz)+loc13.w < 0.0 ||\n" \
+	"		dot(brickt.xyz, loc14.xyz)+loc14.w < 0.0 ||\n" \
+	"		dot(brickt.xyz, loc15.xyz)+loc15.w < 0.0)\n" \
+	"		return true;\n" \
+	"	else\n" \
+	"		return false;\n" \
+	"}\n" \
+	"\n"
 #define VOL_HEAD_LIT \
 	"	//VOL_HEAD_LIT\n" \
 	"	vec4 l = loc0; // {lx, ly, lz, alpha}\n" \
@@ -559,9 +583,9 @@ namespace FLIVR
 	"		return;\n" \
 	"	}\n" \
 	"	uint label = texture(tex3, t.stp).x; //get mask value\n" \
-	"	vec4 sel = vec4(0.0,\n" \
-	"					0.0,\n" \
-	"					0.0, 0.0);\n" \
+	"	vec4 sel = vec4(1.0-loc6.x,\n" \
+	"					1.0-loc6.y,\n" \
+	"					1.0-loc6.z, 1.0);\n" \
 	"	float hue, p2, p3;\n" \
 	"	if (label > uint(0))\n" \
 	"	{\n" \
