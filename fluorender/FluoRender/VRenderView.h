@@ -1367,11 +1367,13 @@ class VRenderView: public wxPanel
    wxTextCtrl* m_aov_text;
    wxToolBar * m_options_toolbar;
    wxToolBar * m_options_toolbar2;
+   wxToolBar * m_left_toolbar;
+   wxToolBar * m_right_toolbar2;
+   wxToolBar * m_lower_toolbar;
 
    //bottom bar///////////////////////////////////////////////////
    wxPanel* m_panel_2;
    wxCheckBox *m_rot_link_chk;
-   wxButton *m_rot_reset_btn;
    wxSpinButton* m_x_rot_spin;
    wxSlider *m_x_rot_sldr;
    wxTextCtrl *m_x_rot_text;
@@ -1381,23 +1383,20 @@ class VRenderView: public wxPanel
    wxSlider *m_z_rot_sldr;
    wxTextCtrl *m_z_rot_text;
    wxSpinButton* m_z_rot_spin;
-   wxCheckBox* m_rot_lock_chk;
-   wxButton *m_default_btn;
 
    //left bar///////////////////////////////////////////////////
    wxPanel* m_panel_3;
-   wxCheckBox *m_depth_atten_chk;
    wxSlider *m_depth_atten_factor_sldr;
-   wxButton *m_depth_atten_reset_btn;
+   wxToolBar *m_depth_atten_reset_btn;
    wxTextCtrl *m_depth_atten_factor_text;
 
    //right bar///////////////////////////////////////////////////
    wxPanel* m_panel_4;
-   wxButton *m_center_btn;
-   wxButton *m_scale_121_btn;
+   wxToolBar *m_center_btn;
+   wxToolBar *m_scale_121_btn;
    wxSlider *m_scale_factor_sldr;
    wxTextCtrl *m_scale_factor_text;
-   wxButton *m_scale_reset_btn;
+   wxToolBar *m_scale_reset_btn;
    wxSpinButton* m_scale_factor_spin;
 
    //draw clip

@@ -16,6 +16,11 @@
 #include "freefly.h"
 #include "camera.h"
 #include "composite.h"
+#include "refresh.h"
+#include "measure.h"
+#include "ratio.h"
+#include "center.h"
+#include "listicon_save.h"
 
 int VRenderView::m_id = 1;
 ImgShaderFactory VRenderGLView::m_img_shader_factory;
@@ -9884,28 +9889,28 @@ EVT_COMMAND_SCROLL(ID_AovSldr, VRenderView::OnAovChange)
 EVT_TEXT(ID_AovText, VRenderView::OnAovText)
 EVT_TOOL(ID_FreeChk, VRenderView::OnFreeChk)
 //bar left
-EVT_CHECKBOX(ID_DepthAttenChk, VRenderView::OnDepthAttenCheck)
+EVT_TOOL(ID_DepthAttenChk, VRenderView::OnDepthAttenCheck)
 EVT_COMMAND_SCROLL(ID_DepthAttenFactorSldr, VRenderView::OnDepthAttenFactorChange)
 EVT_TEXT(ID_DepthAttenFactorText, VRenderView::OnDepthAttenFactorEdit)
-EVT_BUTTON(ID_DepthAttenResetBtn, VRenderView::OnDepthAttenReset)
+EVT_TOOL(ID_DepthAttenResetBtn, VRenderView::OnDepthAttenReset)
 //bar right
-EVT_BUTTON(ID_CenterBtn, VRenderView::OnCenter)
-EVT_BUTTON(ID_Scale121Btn, VRenderView::OnScale121)
+EVT_TOOL(ID_CenterBtn, VRenderView::OnCenter)
+EVT_TOOL(ID_Scale121Btn, VRenderView::OnScale121)
 EVT_COMMAND_SCROLL(ID_ScaleFactorSldr, VRenderView::OnScaleFactorChange)
 EVT_TEXT(ID_ScaleFactorText, VRenderView::OnScaleFactorEdit)
-EVT_BUTTON(ID_ScaleResetBtn, VRenderView::OnScaleReset)
+EVT_TOOL(ID_ScaleResetBtn, VRenderView::OnScaleReset)
 EVT_SPIN_UP(ID_ScaleFactorSpin, VRenderView::OnScaleFactorSpinDown)
 EVT_SPIN_DOWN(ID_ScaleFactorSpin, VRenderView::OnScaleFactorSpinUp)
 //bar bottom
 EVT_CHECKBOX(ID_RotLinkChk, VRenderView::OnRotLink)
-EVT_BUTTON(ID_RotResetBtn, VRenderView::OnRotReset)
+EVT_TOOL(ID_RotResetBtn, VRenderView::OnRotReset)
 EVT_TEXT(ID_XRotText, VRenderView::OnValueEdit)
 EVT_TEXT(ID_YRotText, VRenderView::OnValueEdit)
 EVT_TEXT(ID_ZRotText, VRenderView::OnValueEdit)
 EVT_COMMAND_SCROLL(ID_XRotSldr, VRenderView::OnXRotScroll)
 EVT_COMMAND_SCROLL(ID_YRotSldr, VRenderView::OnYRotScroll)
 EVT_COMMAND_SCROLL(ID_ZRotSldr, VRenderView::OnZRotScroll)
-EVT_CHECKBOX(ID_RotLockChk, VRenderView::OnRotLockCheck)
+EVT_TOOL(ID_RotLockChk, VRenderView::OnRotLockCheck)
 //spin buttons
 EVT_SPIN_UP(ID_XRotSpin, VRenderView::OnXRotSpinUp)
 EVT_SPIN_DOWN(ID_XRotSpin, VRenderView::OnXRotSpinDown)
@@ -9914,7 +9919,7 @@ EVT_SPIN_DOWN(ID_YRotSpin, VRenderView::OnYRotSpinDown)
 EVT_SPIN_UP(ID_ZRotSpin, VRenderView::OnZRotSpinUp)
 EVT_SPIN_DOWN(ID_ZRotSpin, VRenderView::OnZRotSpinDown)
 //reset
-EVT_BUTTON(ID_DefaultBtn, VRenderView::OnSaveDefault)
+EVT_TOOL(ID_DefaultBtn, VRenderView::OnSaveDefault)
 
 EVT_KEY_DOWN(VRenderView::OnKeyDown)
 END_EVENT_TABLE()
@@ -10092,45 +10097,66 @@ void VRenderView::CreateBar()
 
    //bar left///////////////////////////////////////////////////
    wxBoxSizer* sizer_v_3 = new wxBoxSizer(wxVERTICAL);
-   st1 = new wxStaticText(this, 0, "Depth\nInt:\n");
-   m_depth_atten_chk = new wxCheckBox(this, ID_DepthAttenChk, "");
-   m_depth_atten_chk->SetValue(true);
+   m_left_toolbar = new wxToolBar(this, wxID_ANY);
+   m_left_toolbar->AddCheckTool(ID_DepthAttenChk,"Depth Interval",
+	   wxGetBitmapFromMemory(measure),wxNullBitmap,
+	   "Enable adjustment of the Depth Attenuation Interval",
+	   "Enable adjustment of the Depth Attenuation Interval");
+   m_left_toolbar->ToggleTool(ID_DepthAttenChk, true);
    m_depth_atten_factor_sldr = new wxSlider(this, ID_DepthAttenFactorSldr, 0, 0, 100,
          wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL|wxSL_INVERSE);
-   m_depth_atten_reset_btn = new wxButton(this, ID_DepthAttenResetBtn, "Reset",
-         wxDefaultPosition, wxSize(60, 20));
+   m_depth_atten_factor_sldr->Disable();
+   m_depth_atten_reset_btn = new wxToolBar(this, wxID_ANY);
+   m_depth_atten_reset_btn->AddTool(ID_DepthAttenResetBtn, "Reset",
+	   wxGetBitmapFromMemory(refresh),
+	   "Reset Depth Attenuation Interval");
+   m_depth_atten_reset_btn->Realize();
    m_depth_atten_factor_text = new wxTextCtrl(this, ID_DepthAttenFactorText, "0.0",
          wxDefaultPosition, wxSize(40, 20), 0, vald_fp2);
-   sizer_v_3->Add(5, 10, 0);
-   sizer_v_3->Add(st1, 0, wxALIGN_CENTER);
-   sizer_v_3->Add(m_depth_atten_chk, 0, wxALIGN_CENTER);
+   m_depth_atten_factor_text->Disable();
+
+   m_left_toolbar->Realize();
+   
+   sizer_v_3->AddSpacer(50);
+   sizer_v_3->Add(m_left_toolbar, 0, wxALIGN_CENTER);
    sizer_v_3->Add(m_depth_atten_factor_sldr, 1, wxALIGN_CENTER);
-   sizer_v_3->Add(m_depth_atten_reset_btn, 0, wxALIGN_CENTER);
    sizer_v_3->Add(m_depth_atten_factor_text, 0, wxALIGN_CENTER);
+   sizer_v_3->Add(m_depth_atten_reset_btn, 0, wxALIGN_CENTER);
+   sizer_v_3->AddSpacer(50);
 
    //bar right///////////////////////////////////////////////////
    wxBoxSizer* sizer_v_4 = new wxBoxSizer(wxVERTICAL);
-   st1 = new wxStaticText(this, 0, "Zoom:\n");
-   m_center_btn = new wxButton(this, ID_CenterBtn, "Center",
-         wxDefaultPosition, wxSize(50, 20));
-   m_scale_121_btn = new wxButton(this, ID_Scale121Btn, "1:1",
-         wxDefaultPosition, wxSize(50, 20));
+   st1 = new wxStaticText(this, 0, " Zoom",wxDefaultPosition,wxSize(35,-1));
+   m_center_btn = new wxToolBar(this, wxID_ANY);
+   m_center_btn->AddTool(ID_CenterBtn, "Center",
+         wxGetBitmapFromMemory(center),
+		 "Center the Data on the Render View");
+   m_center_btn->Realize();
+   m_scale_121_btn = new wxToolBar(this, wxID_ANY);
+   m_scale_121_btn->AddTool(ID_Scale121Btn, "1 to 1",
+         wxGetBitmapFromMemory(ratio),
+		 "Auto-size the data to a 1:1 ratio");
+   m_scale_121_btn->Realize();
    m_scale_factor_sldr = new wxSlider(this, ID_ScaleFactorSldr, 100, 50, 999,
          wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
-   m_scale_reset_btn = new wxButton(this, ID_ScaleResetBtn, "Reset",
-         wxDefaultPosition, wxSize(50, 20));
+   m_scale_reset_btn = new wxToolBar(this, wxID_ANY);
+   m_scale_reset_btn->AddTool(ID_ScaleResetBtn, "Reset",
+         wxGetBitmapFromMemory(refresh),
+		 "Reset the Zoom");
+   m_scale_reset_btn->Realize();
    m_scale_factor_text = new wxTextCtrl(this, ID_ScaleFactorText, "100",
-         wxDefaultPosition, wxSize(50, 20), 0, vald_int);
+         wxDefaultPosition, wxSize(30, 20), 0, vald_int);
    m_scale_factor_spin = new wxSpinButton(this, ID_ScaleFactorSpin,
-         wxDefaultPosition, wxSize(50, 20));
-   sizer_v_4->Add(5, 10, 0);
+         wxDefaultPosition, wxSize(30, 20));
+   sizer_v_4->AddSpacer(50);
    sizer_v_4->Add(st1, 0, wxALIGN_CENTER);
    sizer_v_4->Add(m_center_btn, 0, wxALIGN_CENTER);
    sizer_v_4->Add(m_scale_121_btn, 0, wxALIGN_CENTER);
    sizer_v_4->Add(m_scale_factor_sldr, 1, wxALIGN_CENTER);
    sizer_v_4->Add(m_scale_factor_spin, 0, wxALIGN_CENTER);
-   sizer_v_4->Add(m_scale_reset_btn, 0, wxALIGN_CENTER);
    sizer_v_4->Add(m_scale_factor_text, 0, wxALIGN_CENTER);
+   sizer_v_4->Add(m_scale_reset_btn, 0, wxALIGN_CENTER);
+   sizer_v_4->AddSpacer(50);
 
    //middle sizer
    sizer_m->Add(sizer_v_3, 0, wxEXPAND);
@@ -10139,54 +10165,60 @@ void VRenderView::CreateBar()
 
    //bar bottom///////////////////////////////////////////////////
    wxBoxSizer* sizer_h_2 = new wxBoxSizer(wxHORIZONTAL);
-   m_rot_link_chk = new wxCheckBox(this, ID_RotLinkChk, "Link");
-   m_rot_reset_btn = new wxButton(this, ID_RotResetBtn, "Reset to 0",
-         wxDefaultPosition, wxSize(85, 20));
+   m_lower_toolbar = new wxToolBar(this,wxID_ANY);
+   //m_rot_link_chk = new wxCheckBox(this, ID_RotLinkChk, "");
    st1 = new wxStaticText(this, 0, "X:");
    m_x_rot_sldr = new wxSlider(this, ID_XRotSldr, 0, 0, 360,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_x_rot_text = new wxTextCtrl(this, ID_XRotText, "0.0",
-         wxDefaultPosition, wxSize(60,20), 0, vald_fp1);
+         wxDefaultPosition, wxSize(40,20), 0, vald_fp1);
    m_x_rot_spin = new wxSpinButton(this, ID_XRotSpin,
          wxDefaultPosition, wxSize(20, 20), wxSP_HORIZONTAL);
    st2 = new wxStaticText(this, 0, "Y:");
    m_y_rot_sldr = new wxSlider(this, ID_YRotSldr, 0, 0, 360,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_y_rot_text = new wxTextCtrl(this, ID_YRotText, "0.0",
-         wxDefaultPosition, wxSize(60,20), 0, vald_fp1);
+         wxDefaultPosition, wxSize(40,20), 0, vald_fp1);
    m_y_rot_spin = new wxSpinButton(this, ID_YRotSpin,
          wxDefaultPosition, wxSize(20, 20), wxSP_HORIZONTAL);
    st3 = new wxStaticText(this, 0, "Z:");
    m_z_rot_sldr = new wxSlider(this, ID_ZRotSldr, 0, 0, 360,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_z_rot_text = new wxTextCtrl(this, ID_ZRotText, "0.0",
-         wxDefaultPosition, wxSize(60,20), 0, vald_fp1);
+         wxDefaultPosition, wxSize(40,20), 0, vald_fp1);
    m_z_rot_spin = new wxSpinButton(this, ID_ZRotSpin,
          wxDefaultPosition, wxSize(20, 20), wxSP_HORIZONTAL);
-   m_rot_lock_chk = new wxCheckBox(this, ID_RotLockChk, "45 Increments");
-   m_default_btn = new wxButton(this, ID_DefaultBtn, "Save as Default",
-         wxDefaultPosition, wxSize(115, 20));
-   sizer_h_2->Add(m_rot_link_chk, 0, wxALIGN_CENTER);
-   sizer_h_2->Add(m_rot_reset_btn, 0, wxALIGN_CENTER);
+
+   m_lower_toolbar->AddCheckTool(ID_RotLockChk, "45 Angles",
+	   wxGetBitmapFromMemory(depth), wxNullBitmap,
+	   "Confine all angles to 45 Degrees",
+	   "Confine all angles to 45 Degrees");
+   m_lower_toolbar->AddTool(ID_RotResetBtn,"Reset",
+	   wxGetBitmapFromMemory(refresh),
+	   "Reset Rotations");
+   m_lower_toolbar->AddTool(ID_DefaultBtn,"Save",
+	   wxGetBitmapFromMemory(listicon_save),
+	   "Save as Default Rotation");
+   m_lower_toolbar->Realize();
+   
+   sizer_h_2->AddSpacer(50);
+   sizer_h_2->Add(st1, 0, wxALIGN_CENTER);
+   sizer_h_2->Add(m_x_rot_sldr, 1, wxALIGN_CENTER);
+   sizer_h_2->Add(m_x_rot_spin, 0, wxALIGN_CENTER);
+   sizer_h_2->Add(m_x_rot_text, 0, wxALIGN_CENTER);
    sizer_h_2->Add(5, 5, 0);
-   sizer_h_2->Add(st1, 0, wxALIGN_CENTER, 0);
-   sizer_h_2->Add(m_x_rot_sldr, 1, wxEXPAND|wxALIGN_CENTER, 0);
-   sizer_h_2->Add(m_x_rot_spin, 0, wxALIGN_CENTER, 0);
-   sizer_h_2->Add(m_x_rot_text, 0, wxALIGN_CENTER, 0);
+   sizer_h_2->Add(st2, 0, wxALIGN_CENTER);
+   sizer_h_2->Add(m_y_rot_sldr, 1, wxALIGN_CENTER);
+   sizer_h_2->Add(m_y_rot_spin, 0, wxALIGN_CENTER);
+   sizer_h_2->Add(m_y_rot_text, 0, wxALIGN_CENTER);
    sizer_h_2->Add(5, 5, 0);
-   sizer_h_2->Add(st2, 0, wxALIGN_CENTER, 0);
-   sizer_h_2->Add(m_y_rot_sldr, 1, wxEXPAND|wxALIGN_CENTER, 0);
-   sizer_h_2->Add(m_y_rot_spin, 0, wxALIGN_CENTER, 0);
-   sizer_h_2->Add(m_y_rot_text, 0, wxALIGN_CENTER, 0);
+   sizer_h_2->Add(st3, 0, wxALIGN_CENTER);
+   sizer_h_2->Add(m_z_rot_sldr, 1, wxALIGN_CENTER);
+   sizer_h_2->Add(m_z_rot_spin, 0, wxALIGN_CENTER);
+   sizer_h_2->Add(m_z_rot_text, 0, wxALIGN_CENTER);
    sizer_h_2->Add(5, 5, 0);
-   sizer_h_2->Add(st3, 0, wxALIGN_CENTER, 0);
-   sizer_h_2->Add(m_z_rot_sldr, 1, wxEXPAND|wxALIGN_CENTER, 0);
-   sizer_h_2->Add(m_z_rot_spin, 0, wxALIGN_CENTER, 0);
-   sizer_h_2->Add(m_z_rot_text, 0, wxALIGN_CENTER, 0);
-   sizer_h_2->Add(5, 5, 0);
-   sizer_h_2->Add(m_rot_lock_chk, 0, wxALIGN_CENTER, 0);
-   sizer_h_2->Add(5, 5, 0);
-   sizer_h_2->Add(m_default_btn, 0, wxALIGN_CENTER);
+   sizer_h_2->Add(m_lower_toolbar, 0, wxALIGN_CENTER);
+   sizer_h_2->AddSpacer(50);
 
    sizer_v->Add(sizer_h_1, 0, wxEXPAND|wxBOTTOM,3);
    sizer_v->Add(sizer_m, 1, wxEXPAND);
@@ -10789,8 +10821,8 @@ void VRenderView::SetFog(bool b)
 {
    if (m_glview)
       m_glview->SetFog(b);
-   if (m_depth_atten_chk)
-      m_depth_atten_chk->SetValue(b);
+   if (m_left_toolbar)
+      m_left_toolbar->ToggleTool(ID_DepthAttenChk, b);
 }
 
 bool VRenderView::GetFog()
@@ -11086,7 +11118,7 @@ void VRenderView::OnCapture(wxCommandEvent& event)
 //bar left
 void VRenderView::OnDepthAttenCheck(wxCommandEvent& event)
 {
-   if (m_depth_atten_chk->GetValue())
+   if (m_left_toolbar->GetToolState(ID_DepthAttenChk))
    {
       SetFog(true);
       m_depth_atten_factor_sldr->Enable();
@@ -11294,7 +11326,7 @@ void VRenderView::OnZRotScroll(wxScrollEvent& event)
 
 void VRenderView::OnRotLockCheck(wxCommandEvent& event)
 {
-   if (m_rot_lock_chk->GetValue())
+   if (m_lower_toolbar->GetToolState(ID_RotLockChk))
    {
       m_glview->SetRotLock(true);
       //sliders
@@ -11544,7 +11576,7 @@ void VRenderView::OnSaveDefault(wxCommandEvent &event)
    fconfig.Write("z_rot", str);
    fconfig.Write("rot_lock", m_glview->GetRotLock());
    //depth atten
-   bVal = m_depth_atten_chk->GetValue();
+   bVal = m_left_toolbar->GetToolState(ID_DepthAttenChk);
    fconfig.Write("depth_atten_chk", bVal);
    str = m_depth_atten_factor_text->GetValue();
    fconfig.Write("depth_atten_factor_text", str);
@@ -11686,7 +11718,7 @@ void VRenderView::LoadSettings()
    }
    if (fconfig.Read("rot_lock", &bVal))
    {
-      m_rot_lock_chk->SetValue(bVal);
+	  m_lower_toolbar->ToggleTool(ID_RotLockChk,bVal);
       m_glview->SetRotLock(bVal);
    }
    UpdateView();  //for rotations
@@ -11700,7 +11732,7 @@ void VRenderView::LoadSettings()
    }
    if (fconfig.Read("depth_atten_chk", &bVal))
    {
-      m_depth_atten_chk->SetValue(bVal);
+	  m_left_toolbar->ToggleTool(ID_DepthAttenChk,bVal);
       if (bVal)
          SetFog(true);
       else
