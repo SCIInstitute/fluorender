@@ -2,14 +2,16 @@
 #include "VRenderFrame.h"
 #include "compatibility.h"
 #include <wx/valnum.h>
+#include "png_resource.h"
 #include "img/link.h"
 #include "img/unlink.h"
 #include "img/refresh.h"
 #include "img/align.h"
-#include "png_resource.h"
+#include "img/link_text.h"
+#include "img/unlink_text.h"
 
 BEGIN_EVENT_TABLE(ClippingView, wxPanel)
-	EVT_CHECKBOX(ID_LinkChannelsChk, ClippingView::OnLinkChannelsCheck)
+	EVT_TOOL(ID_LinkChannelsChk, ClippingView::OnLinkChannelsCheck)
 	EVT_BUTTON(ID_SetZeroBtn, ClippingView::OnSetZeroBtn)
 	EVT_BUTTON(ID_RotResetBtn, ClippingView::OnRotResetBtn)
 	EVT_BUTTON(ID_ClipResetBtn, ClippingView::OnClipResetBtn)
@@ -82,8 +84,13 @@ m_link_z(false)
 
 	//sync channels 1
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_link_channels = new wxCheckBox(this, ID_LinkChannelsChk, "Sync All Chan.");
-	m_link_channels->SetValue(false);
+	m_link_channels = new wxToolBar(this,wxID_ANY);
+	m_link_channels->AddCheckTool(ID_LinkChannelsChk, "Sync All Chan.",
+		wxGetBitmapFromMemory(unlink_text), wxNullBitmap,
+		"Link all data channels to this cropping",
+		"Link all data channels to this cropping");
+	m_link_channels->ToggleTool(ID_LinkChannelsChk,false);
+	m_link_channels->Realize();
 	sizer_1->Add(5, 5, 0);
 	sizer_1->Add(m_link_channels, 0, wxALIGN_CENTER, 0);
 
@@ -363,7 +370,7 @@ m_link_z(false)
 	//v
 	wxBoxSizer *sizer_v = new wxBoxSizer(wxVERTICAL);
 	sizer_v->Add(10, 10, 0);
-	sizer_v->Add(sizer_1, 0, wxALIGN_LEFT);
+	sizer_v->Add(sizer_1, 0, wxALIGN_CENTER);
 	sizer_v->Add(5, 5, 0);
 	sizer_v->Add(sizer_2, 0, wxALIGN_CENTER);
 	sizer_v->Add(5, 5, 0);
@@ -403,6 +410,17 @@ ClippingView::~ClippingView()
 {
 }
 
+void ClippingView::SetChannLink(bool chann)
+{
+	m_link_channels->ToggleTool(ID_LinkChannelsChk,chann);
+	if(chann)
+		m_link_channels->SetToolNormalBitmap(ID_LinkChannelsChk,
+			wxGetBitmapFromMemory(link_text));
+	else
+		m_link_channels->SetToolNormalBitmap(ID_LinkChannelsChk,
+			wxGetBitmapFromMemory(unlink_text));
+
+}
 int ClippingView::GetSelType()
 {
 	return m_sel_type;
@@ -607,10 +625,12 @@ void ClippingView::GetSettings()
 
 void ClippingView::OnLinkChannelsCheck(wxCommandEvent &event)
 {
-	if (m_link_channels->GetValue())
+	if (m_link_channels->GetToolState(ID_LinkChannelsChk))
 	{
 		if (!m_mgr)
 			return;
+		m_link_channels->SetToolNormalBitmap(ID_LinkChannelsChk,
+			wxGetBitmapFromMemory(link_text));
 
 		wxString str;
 		//x1
@@ -668,6 +688,9 @@ void ClippingView::OnLinkChannelsCheck(wxCommandEvent &event)
 		RefreshVRenderViews();
 
 	}
+	else
+		m_link_channels->SetToolNormalBitmap(ID_LinkChannelsChk,
+			wxGetBitmapFromMemory(unlink_text));
 }
 
 void ClippingView::OnClipResetBtn(wxCommandEvent &event)
@@ -729,7 +752,7 @@ void ClippingView::OnClipResetBtn(wxCommandEvent &event)
 	m_z2_clip_text->SetValue(wxString::Format("%d", resz));
 
 	//link
-	if (m_link_channels->GetValue())
+	if (m_link_channels->GetToolState(ID_LinkChannelsChk))
 	{
 		if (m_mgr)
 		{
@@ -839,7 +862,7 @@ void ClippingView::OnX1ClipEdit(wxCommandEvent &event)
 		plane->ChangePlane(Point(val2, 0.0, 0.0), Vector(-1.0, 0.0, 0.0));
 	}
 
-	if (m_link_channels->GetValue())
+	if (m_link_channels->GetToolState(ID_LinkChannelsChk))
 	{
 		if (m_mgr)
 		{
@@ -955,7 +978,7 @@ void ClippingView::OnX2ClipEdit(wxCommandEvent &event)
 		plane->ChangePlane(Point(val2, 0.0, 0.0), Vector(1.0, 0.0, 0.0));
 	}
 
-	if (m_link_channels->GetValue())
+	if (m_link_channels->GetToolState(ID_LinkChannelsChk))
 	{
 		if (m_mgr)
 		{
@@ -1063,7 +1086,7 @@ void ClippingView::OnY1ClipEdit(wxCommandEvent &event)
 		plane->ChangePlane(Point(0.0, val2, 0.0), Vector(0.0, -1.0, 0.0));
 	}
 
-	if (m_link_channels->GetValue())
+	if (m_link_channels->GetToolState(ID_LinkChannelsChk))
 	{
 		if (m_mgr)
 		{
@@ -1179,7 +1202,7 @@ void ClippingView::OnY2ClipEdit(wxCommandEvent &event)
 		plane->ChangePlane(Point(0.0, val2, 0.0), Vector(0.0, 1.0, 0.0));
 	}
 
-	if (m_link_channels->GetValue())
+	if (m_link_channels->GetToolState(ID_LinkChannelsChk))
 	{
 		if (m_mgr)
 		{
@@ -1287,7 +1310,7 @@ void ClippingView::OnZ1ClipEdit(wxCommandEvent &event)
 		plane->ChangePlane(Point(0.0, 0.0, val2), Vector(0.0, 0.0, -1.0));
 	}
 
-	if (m_link_channels->GetValue())
+	if (m_link_channels->GetToolState(ID_LinkChannelsChk))
 	{
 		if (m_mgr)
 		{
@@ -1403,7 +1426,7 @@ void ClippingView::OnZ2ClipEdit(wxCommandEvent &event)
 		plane->ChangePlane(Point(0.0, 0.0, val2), Vector(0.0, 0.0, 1.0));
 	}
 
-	if (m_link_channels->GetValue())
+	if (m_link_channels->GetToolState(ID_LinkChannelsChk))
 	{
 		if (m_mgr)
 		{
@@ -1769,7 +1792,7 @@ void ClippingView::OnSliderRClick(wxCommandEvent& event)
 	//good rate
 	if (m_vd->GetSampleRate()<2.0)
 		m_vd->SetSampleRate(2.0);
-	if (m_link_channels->GetValue())
+	if (m_link_channels->GetToolState(ID_LinkChannelsChk))
 	{
 		if (m_mgr)
 		{
