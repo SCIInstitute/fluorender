@@ -9513,7 +9513,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
                   m_vrv->m_z_rot_sldr->SetValue(int(m_rotz));
 
                m_interactive = m_adaptive;
-
+			   
                if (m_linked_rot)
                {
                   VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
@@ -9522,12 +9522,11 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
                      for (int i=0; i<vr_frame->GetViewNum(); i++)
                      {
                         VRenderView* view = vr_frame->GetView(i);
-                        if (view && view->m_glview &&
-                              view->m_glview!=this &&
-                              view->m_glview->m_linked_rot)
+                        if (view && view->m_glview)
                         {
-                           view->m_glview->SetRotations(m_rotx, m_roty, m_rotz, true, false);
-                           view->RefreshGL();
+                           view->m_glview->SetRotations(
+							   m_rotx, m_roty, m_rotz, true, false);
+						   view->m_glview->OnDraw(wxPaintEvent());
                         }
                      }
                   }
@@ -9902,7 +9901,6 @@ EVT_TOOL(ID_ScaleResetBtn, VRenderView::OnScaleReset)
 EVT_SPIN_UP(ID_ScaleFactorSpin, VRenderView::OnScaleFactorSpinDown)
 EVT_SPIN_DOWN(ID_ScaleFactorSpin, VRenderView::OnScaleFactorSpinUp)
 //bar bottom
-EVT_CHECKBOX(ID_RotLinkChk, VRenderView::OnRotLink)
 EVT_TOOL(ID_RotResetBtn, VRenderView::OnRotReset)
 EVT_TEXT(ID_XRotText, VRenderView::OnValueEdit)
 EVT_TEXT(ID_YRotText, VRenderView::OnValueEdit)
@@ -10166,7 +10164,6 @@ void VRenderView::CreateBar()
    //bar bottom///////////////////////////////////////////////////
    wxBoxSizer* sizer_h_2 = new wxBoxSizer(wxHORIZONTAL);
    m_lower_toolbar = new wxToolBar(this,wxID_ANY);
-   //m_rot_link_chk = new wxCheckBox(this, ID_RotLinkChk, "");
    st1 = new wxStaticText(this, 0, "X:");
    m_x_rot_sldr = new wxSlider(this, ID_XRotSldr, 0, 0, 360,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
@@ -11260,30 +11257,25 @@ void VRenderView::OnValueEdit(wxCommandEvent& event)
    UpdateView(false);
 }
 
-void VRenderView::OnRotLink(wxCommandEvent& event)
+void VRenderView::OnRotLink(bool b)
 {
-   if (m_rot_link_chk->GetValue())
+   m_glview->m_linked_rot = true;
+   double rotx, roty, rotz;
+   m_glview->GetRotations(rotx, roty, rotz);
+   VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+   if (vr_frame)
    {
-      m_glview->m_linked_rot = true;
-      double rotx, roty, rotz;
-      m_glview->GetRotations(rotx, roty, rotz);
-      VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-      if (vr_frame)
+      for (int i=0; i<vr_frame->GetViewNum(); i++)
       {
-         for (int i=0; i<vr_frame->GetViewNum(); i++)
+         VRenderView* view = vr_frame->GetView(i);
+         if (view)
          {
-            VRenderView* view = vr_frame->GetView(i);
-            if (view)
-            {
-               view->m_glview->m_linked_rot = true;
-               view->m_rot_link_chk->SetValue(true);
-               view->m_glview->SetRotations(rotx, roty, rotz);
-            }
+            view->m_glview->m_linked_rot = b;
+            view->m_glview->SetRotations(rotx, roty, rotz);
+            view->m_glview->RefreshGL();
          }
       }
    }
-   else
-      m_glview->m_linked_rot = false;
 }
 
 void VRenderView::OnRotReset(wxCommandEvent &event)

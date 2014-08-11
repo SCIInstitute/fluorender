@@ -27,6 +27,8 @@ class SettingDlg : public wxPanel
 		ID_ShadowDirText,
 		//gradient background
 		ID_GradBgChk,
+		//link rotations
+		ID_RotLinkChk,
 		//override vox
 		ID_OverrideVoxChk,
 		//wavelength to color
@@ -188,6 +190,9 @@ private:
 	wxTextCtrl *m_shadow_dir_text;
 	//gradient background
 	wxCheckBox *m_grad_bg_chk;
+	//rotations link
+	
+   wxCheckBox *m_rot_link_chk;
 	//override vox
 	wxCheckBox *m_override_vox_chk;
 	//wavelength to color
@@ -248,6 +253,8 @@ private:
 	void OnShadowDirEdit(wxCommandEvent &event);
 	//gradient background
 	void OnGradBgCheck(wxCommandEvent &event);
+	//link rotations
+    void OnRotLink(wxCommandEvent& event);
 	//override vox
 	void OnOverrideVoxCheck(wxCommandEvent &event);
 	//wavelength color

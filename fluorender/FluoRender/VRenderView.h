@@ -431,6 +431,9 @@ class VRenderGLView: public wxGLCanvas
          void AddPaintRulerPoint();
          void DrawRulers();
          vector<Ruler*>* GetRulerList();
+		 //public mouse
+		 
+         void OnMouse(wxMouseEvent& event);
 
 	//traces
 	TraceGroup* GetTraceGroup();
@@ -849,7 +852,6 @@ class VRenderGLView: public wxGLCanvas
          //system call
          void OnDraw(wxPaintEvent& event);
          void OnResize(wxSizeEvent& event);
-         void OnMouse(wxMouseEvent& event);
          void OnIdle(wxIdleEvent& event);
          void OnKeyDown(wxKeyEvent& event);
          //WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
@@ -960,6 +962,8 @@ class VRenderView: public wxPanel
    void OrganizeLayers();
    //randomize color
    void RandomizeColor();
+   //rotation linking
+   void OnRotLink(bool b);
 
    //trim volume data with meshes
    //void TrimData(int type=SEG_MTHD_BOTH);
@@ -1373,7 +1377,6 @@ class VRenderView: public wxPanel
 
    //bottom bar///////////////////////////////////////////////////
    wxPanel* m_panel_2;
-   wxCheckBox *m_rot_link_chk;
    wxSpinButton* m_x_rot_spin;
    wxSlider *m_x_rot_sldr;
    wxTextCtrl *m_x_rot_text;
@@ -1447,7 +1450,6 @@ class VRenderView: public wxPanel
    void OnScaleFactorSpinUp(wxSpinEvent& event);
    void OnScaleFactorSpinDown(wxSpinEvent& event);
    //bar bottom
-   void OnRotLink(wxCommandEvent &event);
    void OnRotReset(wxCommandEvent &event);
    void OnValueEdit(wxCommandEvent& event);
    void OnXRotScroll(wxScrollEvent &event);
