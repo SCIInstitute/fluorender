@@ -12,7 +12,6 @@
 #include "axis.h"
 #include "info.h"
 #include "legend.h"
-#include "interpolate.h"
 #include "freefly.h"
 #include "camera.h"
 #include "composite.h"
@@ -2720,7 +2719,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
       if (vd->GetVR())
          vd->GetVR()->set_depth_peel(peel);
       vd->SetStreamMode(0);
-      vd->Draw(!m_persp, m_interactive, m_scale_factor, m_intp);
+      vd->Draw(!m_persp, m_interactive, m_scale_factor);
    }
 
    if (vd->GetShadow())
@@ -2967,7 +2966,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
          vd->SetEnableAlpha(false);
       //draw
       vd->SetStreamMode(1);
-      vd->Draw(!m_persp, m_interactive, m_scale_factor, m_intp);
+      vd->Draw(!m_persp, m_interactive, m_scale_factor);
       //
       if (color_mode == 1)
       {
@@ -3182,7 +3181,7 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
    vd->SetMode(2);
    int colormode = vd->GetColormapMode();
    vd->SetStreamMode(2);
-   vd->Draw(!m_persp, m_interactive, m_scale_factor, m_intp);
+   vd->Draw(!m_persp, m_interactive, m_scale_factor);
    vd->RestoreMode();
    vd->SetColormapMode(colormode);
 
@@ -3497,7 +3496,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
       vd->Set2dDmap(m_tex_ol1);
       //draw
       vd->SetStreamMode(3);
-      vd->Draw(!m_persp, m_interactive, m_scale_factor, m_intp);
+      vd->Draw(!m_persp, m_interactive, m_scale_factor);
       //restore
       vd->RestoreMode();
       vd->SetColormapMode(colormode);
@@ -9891,7 +9890,6 @@ EVT_TOOL(ID_ScaleBar, VRenderView::OnScaleBar)
 EVT_TEXT(ID_ScaleText, VRenderView::OnScaleTextEditing)
 EVT_COMBOBOX(ID_ScaleCmb, VRenderView::OnScaleTextEditing)
 //other tools
-EVT_TOOL(ID_IntpChk, VRenderView::OnIntpCheck)
 EVT_COMMAND_SCROLL(ID_AovSldr, VRenderView::OnAovChange)
 EVT_TEXT(ID_AovText, VRenderView::OnAovText)
 EVT_TOOL(ID_FreeChk, VRenderView::OnFreeChk)
@@ -10074,13 +10072,6 @@ void VRenderView::CreateBar()
 
    m_options_toolbar->AddControl(m_scale_text);
    m_options_toolbar->AddControl(m_scale_cmb);
-   m_options_toolbar->AddSeparator();
-   
-   m_options_toolbar->AddCheckTool(ID_IntpChk,"Interpolate",
-	   wxGetBitmapFromMemory(interpolate),wxNullBitmap,
-	   "Interpolates between data when checked.",
-	   "Interpolates between data when checked.");
-   m_options_toolbar->ToggleTool(ID_IntpChk,false);
 
    m_options_toolbar->Realize();
 
@@ -11541,13 +11532,6 @@ void VRenderView::OnScaleBar(wxCommandEvent& event)
    RefreshGL();
 }
 
-void VRenderView::OnIntpCheck(wxCommandEvent& event)
-{
-   m_glview->SetIntp(
-	   m_options_toolbar->GetToolState(ID_IntpChk));
-   RefreshGL();
-}
-
 void VRenderView::OnAovSldrIdle(wxIdleEvent& event)
 {
    if (m_glview->m_capture)
@@ -11655,9 +11639,6 @@ void VRenderView::OnSaveDefault(wxCommandEvent &event)
    //fps
    bVal = m_options_toolbar->GetToolState(ID_FpsChk);
    fconfig.Write("fps_chk", bVal);
-   //interpolation
-   bVal = m_options_toolbar->GetToolState(ID_IntpChk);
-   fconfig.Write("intp_chk", bVal);
    //selection
    bVal = m_glview->m_draw_legend;
    fconfig.Write("legend_chk", bVal);
@@ -11771,11 +11752,6 @@ void VRenderView::LoadSettings()
       m_options_toolbar->ToggleTool(ID_FpsChk,bVal);
       m_glview->m_draw_info = bVal;
       m_glview->m_draw_coord = bVal;
-   }
-   if (fconfig.Read("intp_chk", &bVal))
-   {
-      m_options_toolbar->ToggleTool(ID_IntpChk,bVal);
-      m_glview->SetIntp(bVal);
    }
    if (fconfig.Read("legend_chk", &bVal))
    {

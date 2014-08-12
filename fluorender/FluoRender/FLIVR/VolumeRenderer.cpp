@@ -76,6 +76,8 @@ namespace FLIVR
 		colormap_mode_(0),
 		//solid
 		solid_(false),
+		//interpolate
+		interpolate_(true),
 		//adaptive
 		adaptive_(true),
 		//clipping planes
@@ -130,6 +132,8 @@ namespace FLIVR
 		colormap_mode_(copy.colormap_mode_),
 		//solid
 		solid_(copy.solid_),
+		//interpolate
+		interpolate_(copy.interpolate_),
 		//adaptive
 		adaptive_(copy.adaptive_),
 		//depth peel
@@ -366,6 +370,11 @@ namespace FLIVR
 	{
 		return &planes_;
 	}
+	
+	//interpolation
+	bool VolumeRenderer::get_interpolate() {return interpolate_; }
+
+	void VolumeRenderer::set_interpolate(bool b) { interpolate_ = b;}
 
 	//calculating scaling factor, etc
 	//calculate scaling factor according to viewport and texture size
@@ -460,16 +469,16 @@ namespace FLIVR
 
 	//darw
 	void VolumeRenderer::draw(bool draw_wireframe_p, bool interactive_mode_p,
-		bool orthographic_p, double zoom, bool intp, int mode)
+		bool orthographic_p, double zoom, int mode)
 	{
-		draw_volume(interactive_mode_p, orthographic_p, zoom, intp, mode);
+		draw_volume(interactive_mode_p, orthographic_p, zoom, mode);
 		if(draw_wireframe_p)
 			draw_wireframe(orthographic_p);
 	}
 
 	void VolumeRenderer::draw_volume(bool interactive_mode_p,
 		bool orthographic_p,
-		double zoom, bool intp,
+		double zoom,
 		int mode)
 	{
 		if (!tex_)
@@ -799,7 +808,7 @@ namespace FLIVR
 
 			if (vertex.size() == 0) continue;
 			GLint filter;
-			if (intp)
+			if (interpolate_)
 				filter = GL_LINEAR;
 			else
 				filter = GL_NEAREST;

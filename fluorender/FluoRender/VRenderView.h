@@ -900,7 +900,6 @@ class VRenderView: public wxPanel
       ID_ScaleBar,
 	  ID_ScaleText,
       ID_ScaleCmb,
-      ID_IntpChk,
       ID_DefaultBtn,
       ID_AovSldr,
       ID_AovText,
@@ -1439,7 +1438,6 @@ class VRenderView: public wxPanel
    void OnScaleTextEditing(wxCommandEvent& event);
    void OnScaleUnitSelected(wxCommandEvent& event);
 
-   void OnIntpCheck(wxCommandEvent& event);
    void OnAovSldrIdle(wxIdleEvent& event);
    void OnAovChange(wxScrollEvent& event);
    void OnAovText(wxCommandEvent &event);

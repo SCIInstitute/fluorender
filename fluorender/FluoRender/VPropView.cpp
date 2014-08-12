@@ -4,6 +4,8 @@
 #include <wx/fileconf.h>
 #include <wx/colordlg.h>
 #include <wx/valnum.h>
+#include "png_resource.h"
+#include "interpolate.h"
 
 BEGIN_EVENT_TABLE(VPropView, wxPanel)
 //1
@@ -52,6 +54,8 @@ EVT_TEXT(ID_SpaceYText, VPropView::OnSpaceText)
 EVT_TEXT(ID_SpaceZText, VPropView::OnSpaceText)
 //legend
 EVT_CHECKBOX(ID_LegendChk, VPropView::OnLegendCheck)
+//interpolate
+EVT_TOOL(ID_InterpolateChk, VPropView::OnInterpolateCheck)
 //sync within group
 EVT_CHECKBOX(ID_SyncGroupChk, VPropView::OnSyncGroupCheck)
 //save default
@@ -323,6 +327,15 @@ VPropView::VPropView(wxWindow* frame,
 
    //stretcher
    sizer_b->AddStretchSpacer(1);
+   //interpolation
+   m_options_toolbar = new wxToolBar(this,wxID_ANY);
+   m_options_toolbar->AddCheckTool(ID_InterpolateChk,"Interpolate",
+   wxGetBitmapFromMemory(interpolate),wxNullBitmap,
+    "Interpolates between data when checked.",
+    "Interpolates between data when checked.");
+   m_options_toolbar->ToggleTool(ID_InterpolateChk,true);
+   m_options_toolbar->Realize();
+   sizer_b->Add(m_options_toolbar, 0, wxALIGN_CENTER);
    //inversion
    m_inv_chk = new wxCheckBox(this, ID_InvChk, ":Inv",
          wxDefaultPosition, wxDefaultSize);
@@ -522,6 +535,9 @@ void VPropView::GetSettings()
 
    //legend
    m_legend_chk->SetValue(m_vd->GetLegend());
+
+   //interpolate
+   m_options_toolbar->ToggleTool(ID_InterpolateChk,m_vd->GetInterpolate());
 
    //sync group
    if (m_group)
@@ -1574,6 +1590,18 @@ void VPropView::OnLegendCheck(wxCommandEvent& event)
    RefreshVRenderViews();
 }
 
+//interpolation
+void VPropView::OnInterpolateCheck(wxCommandEvent& event)
+{
+   bool inv = m_options_toolbar->GetToolState(ID_InterpolateChk);
+   if (m_sync_group && m_group)
+      m_group->SetInterpolate(inv);
+   else if (m_vd)
+      m_vd->SetInterpolate(inv);
+
+   RefreshVRenderViews();
+}
+
 //sync within group
 void VPropView::OnSyncGroupCheck(wxCommandEvent& event)
 {
@@ -1771,6 +1799,10 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
    bool shading = m_shading_enable_chk->GetValue();
    fconfig.Write("enable_shading", shading);
    mgr->m_vol_esh = shading;
+   //inversion
+   bool interp = m_options_toolbar->GetToolState(ID_InterpolateChk);
+   fconfig.Write("enable_interp", interp);
+   mgr->m_vol_interp = interp;
    //inversion
    bool inv = m_inv_chk->GetValue();
    fconfig.Write("enable_inv", inv);

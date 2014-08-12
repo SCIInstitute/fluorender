@@ -59,6 +59,7 @@ class VPropView: public wxPanel
 		ID_LuminanceSldr,
 		ID_LuminanceText,
 		ID_LegendChk,
+		ID_InterpolateChk,
 		ID_SyncGroupChk,
 		ID_SaveDefault,
 		ID_ResetDefault,
@@ -177,6 +178,8 @@ private:
 	//Depth
 	wxCheckBox *m_depth_chk;
 	//legend
+	wxToolBar *m_options_toolbar;
+	//toolbar options
 	wxCheckBox *m_legend_chk;
 	//sync
 	wxCheckBox *m_sync_group_chk;
@@ -234,6 +237,8 @@ private:
 	void OnSpaceText(wxCommandEvent& event);
 	//legend
 	void OnLegendCheck(wxCommandEvent& event);
+	//interpolate
+	void OnInterpolateCheck(wxCommandEvent& event);
 	//sync within group
 	void OnSyncGroupCheck(wxCommandEvent& event);
 	//save as default

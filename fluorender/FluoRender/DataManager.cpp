@@ -118,6 +118,8 @@ VolumeData::VolumeData()
 
 	//legend
 	m_legend = true;
+	//interpolate
+	m_interpolate = true;
 
 	//valid brick number
 	m_brick_num = 0;
@@ -228,6 +230,9 @@ VolumeData::VolumeData(VolumeData &copy)
 
 	//legend
 	m_legend = true;
+
+	//interpolate
+	m_interpolate = copy.m_interpolate;
 
 	//valid brick number
 	m_brick_num = 0;
@@ -1100,13 +1105,13 @@ Texture* VolumeData::GetTexture()
 }
 
 //draw volume
-void VolumeData::Draw(bool ortho, bool interactive, double zoom, bool intp)
+void VolumeData::Draw(bool ortho, bool interactive, double zoom)
 {
 	glPushMatrix();
 	glScalef(m_sclx, m_scly, m_sclz);
 	if (m_vr)
 	{
-		m_vr->draw(m_test_wiref, interactive, ortho, zoom, intp, m_stream_mode);
+		m_vr->draw(m_test_wiref, interactive, ortho, zoom, m_stream_mode);
 	}
 	if (m_draw_bounds)
 		DrawBounds();
@@ -1612,6 +1617,18 @@ bool VolumeData::GetLegend()
 	return m_legend;
 }
 
+//interpolate
+void VolumeData::SetInterpolate(bool val)
+{
+	if (m_vr)
+		m_vr->set_interpolate(val);
+	m_interpolate = val;
+}
+
+bool VolumeData::GetInterpolate()
+{
+	return m_interpolate;
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 MeshData::MeshData() :
 m_data(0),
@@ -3993,6 +4010,16 @@ void DataGroup::SetNR(bool val)
 			vd->SetNR(val);
 	}
 }
+//inversion
+void DataGroup::SetInterpolate(bool mode)
+{
+	for (int i=0; i<GetVolumeNum(); i++)
+	{
+		VolumeData* vd = GetVolumeData(i);
+		if (vd)
+			vd->SetInterpolate(mode);
+	}
+}
 
 //inversion
 void DataGroup::SetInvert(bool mode)
@@ -4081,6 +4108,7 @@ m_vol_lcm(0.0),
 m_vol_hcm(1.0),
 m_vol_eap(true),
 m_vol_esh(true),
+m_vol_interp(true),
 m_vol_inv(false),
 m_vol_mip(false),
 m_vol_nrd(false),
@@ -4145,6 +4173,8 @@ m_override_vox(true)
 		m_vol_eap = bval;
 	if (fconfig.Read("enable_shading", &bval))
 		m_vol_esh = bval;
+	if (fconfig.Read("enable_interp", &bval))
+		m_vol_interp = bval;
 	if (fconfig.Read("enable_inv", &bval))
 		m_vol_inv = bval;
 	if (fconfig.Read("enable_mip", &bval))
@@ -4240,6 +4270,8 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 			vd->SetShading(false);
 		vd->SetMode(m_vol_mip?1:0);
 		vd->SetNR(m_vol_nrd);
+		//inversion
+		vd->SetInterpolate(m_vol_interp);
 		//inversion
 		vd->SetInvert(m_vol_inv);
 
