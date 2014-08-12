@@ -311,6 +311,7 @@ namespace FLIVR
 
                //compute view
                Ray compute_view();
+			   Ray compute_snapview(double snap);
                double compute_rate_scale();
 
                //brick distance sort

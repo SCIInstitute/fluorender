@@ -476,6 +476,7 @@ namespace FLIVR
 			return;
 
 		Ray view_ray = compute_view();
+		Ray snapview = compute_snapview(0.1);
 
 		vector<TextureBrick*> *bricks = 0;
 		if (mem_swap_ && interactive_)
@@ -795,7 +796,7 @@ namespace FLIVR
 			vertex.clear();
 			texcoord.clear();
 			size.clear();
-			b->compute_polygons(view_ray, dt, vertex, texcoord, size);
+			b->compute_polygons(snapview, dt, vertex, texcoord, size);
 
 			if (vertex.size() == 0) continue;
 			GLint filter;

@@ -338,6 +338,43 @@ namespace FLIVR
 		return Ray(p, v);
 	}
 
+	Ray TextureRenderer::compute_snapview(double snap)
+	{
+		Transform *field_trans = tex_->transform();
+		double mvmat[16];
+		glGetDoublev(GL_MODELVIEW_MATRIX, mvmat);
+		
+		//snap
+		Vector vd;
+		if (snap>0.0 && snap<0.5)
+		{
+			double vdx = -mvmat[2];
+			double vdy = -mvmat[6];
+			double vdz = -mvmat[10];
+			double vdx_abs = fabs(vdx);
+			double vdy_abs = fabs(vdy);
+			double vdz_abs = fabs(vdz);
+			if (vdx_abs<snap/2.0) vdx = 0.0;
+			else if (vdx_abs<snap) vdx = (vdx_abs-snap/2.0)*2.0*vdx/vdx_abs;
+			if (vdy_abs<snap/2.0) vdy = 0.0;
+			else if (vdy_abs<snap) vdy = (vdy_abs-snap/2.0)*2.0*vdy/vdy_abs;
+			if (vdz_abs<snap/2.0) vdz = 0.0;
+			else if (vdz_abs<snap) vdz = (vdz_abs-snap/2.0)*2.0*vdz/vdz_abs;
+			vd = Vector(vdx, vdy, vdz);
+			vd.normalize();
+		}
+		else
+			vd = Vector(-mvmat[2], -mvmat[6], -mvmat[10]);
+
+		// index space view direction
+		Vector v = field_trans->project(vd);
+		v.safe_normalize();
+		Transform mv;
+		mv.set_trans(mvmat);
+		Point p = field_trans->unproject(mv.unproject(Point(0,0,0)));
+		return Ray(p, v);
+	}
+
 	double TextureRenderer::compute_rate_scale()
 	{
 		Transform *field_trans = tex_->transform();
