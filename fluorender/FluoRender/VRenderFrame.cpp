@@ -280,7 +280,7 @@ m_free_version(true)
 
    //clipping view
    m_clip_view = new ClippingView(this, this, wxID_ANY,
-         wxDefaultPosition, wxSize(130, 700));
+         wxDefaultPosition, wxSize(130,700));
    m_clip_view->SetDataManager(&m_data_mgr);
 
    //adjust view

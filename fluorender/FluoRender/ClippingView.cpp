@@ -95,12 +95,13 @@ m_link_z(false)
 	sizer_1->Add(m_link_channels, 0, wxALIGN_CENTER, 0);
 
 	wxStaticText* st_cb = 0;
-	int slider_size = this->GetSize().GetHeight() / 2;
+	int slider_size = 350;
 
 	//sliders for clipping planes
 	//x
 	wxBoxSizer* sizer_cx = new wxBoxSizer(wxVERTICAL);
 	wxPanel * xpanel = new wxPanel(this);
+	xpanel->SetMinSize(wxSize(43,350));
 	st = new wxStaticText(this, 0, "X");
 	m_x1_clip_sldr = new wxSlider(xpanel, ID_X1ClipSldr, 0, 0, 512,
 		wxPoint(0,0), wxSize(20,slider_size), wxSL_VERTICAL);
@@ -122,7 +123,7 @@ m_link_z(false)
 	sizer_cx->Add(m_x1_clip_text, 0, wxALIGN_CENTER, 0);
 	sizer_cx->Add(5, 5, 0);
 	sizer_cx->Add(st_cb, 0, wxEXPAND);
-	sizer_cx->Add(xpanel, 1, wxEXPAND);
+	sizer_cx->Add(xpanel, 0, wxALIGN_CENTER);
 	st_cb = new wxStaticText(this, 0, "",
 		wxDefaultPosition, wxSize(5, 5));
 	st_cb->SetBackgroundColour(wxColor(255, 128, 255));
@@ -133,6 +134,7 @@ m_link_z(false)
 	//y
 	wxBoxSizer* sizer_cy = new wxBoxSizer(wxVERTICAL);
 	wxPanel * ypanel = new wxPanel(this);
+	ypanel->SetMinSize(wxSize(43,350));
 	st = new wxStaticText(this, 0, "Y");
 	m_y1_clip_sldr = new wxSlider(ypanel, ID_Y1ClipSldr, 0, 0, 512,
 		wxPoint(0,0),  wxSize(20,slider_size), wxSL_VERTICAL);
@@ -154,7 +156,7 @@ m_link_z(false)
 	sizer_cy->Add(m_y1_clip_text, 0, wxALIGN_CENTER, 0);
 	sizer_cy->Add(5, 5, 0);
 	sizer_cy->Add(st_cb, 0, wxEXPAND);
-	sizer_cy->Add(ypanel, 1, wxEXPAND);
+	sizer_cy->Add(ypanel, 0, wxALIGN_CENTER);
 	st_cb = new wxStaticText(this, 0, "",
 		wxDefaultPosition, wxSize(5, 5));
 	st_cb->SetBackgroundColour(wxColor(255, 255, 128));
@@ -166,6 +168,7 @@ m_link_z(false)
 	//z
 	wxBoxSizer* sizer_cz = new wxBoxSizer(wxVERTICAL);
 	wxPanel * zpanel = new wxPanel(this);
+	zpanel->SetMinSize(wxSize(43,350));
 	st = new wxStaticText(this, 0, "Z");
 	m_z1_clip_sldr = new wxSlider(zpanel, ID_Z1ClipSldr, 0, 0, 512,
 		wxPoint(0,0),  wxSize(20,slider_size), wxSL_VERTICAL);
@@ -187,7 +190,7 @@ m_link_z(false)
 	sizer_cz->Add(m_z1_clip_text, 0, wxALIGN_CENTER, 0);
 	sizer_cz->Add(5, 5, 0);
 	sizer_cz->Add(st_cb, 0, wxEXPAND);
-	sizer_cz->Add(zpanel, 1, wxEXPAND);
+	sizer_cz->Add(zpanel, 0, wxALIGN_CENTER);
 	st_cb = new wxStaticText(this, 0, "",
 		wxDefaultPosition, wxSize(5, 5));
 	st_cb->SetBackgroundColour(wxColor(128, 255, 255));
