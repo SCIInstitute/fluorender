@@ -21,6 +21,9 @@
 #include "ratio.h"
 #include "center.h"
 #include "listicon_save.h"
+#include "scale.h"
+#include "scale_text.h"
+#include "scale_text_off.h"
 
 int VRenderView::m_id = 1;
 ImgShaderFactory VRenderGLView::m_img_shader_factory;
@@ -96,9 +99,9 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
    m_sb_height(0.0),
    //ortho size
    m_ortho_left(0.0),
-   m_ortho_right(0.0),
+   m_ortho_right(1.0),
    m_ortho_bottom(0.0),
-   m_ortho_top(0.0),
+   m_ortho_top(1.0),
    //scale factor
    m_scale_factor(1.0),
    m_scale_factor_saved(1.0),
@@ -9883,6 +9886,11 @@ EVT_COLOURPICKER_CHANGED(ID_BgColorPicker, VRenderView::OnBgColorChange)
 EVT_TOOL(ID_CamCtrChk, VRenderView::OnCamCtrCheck)
 EVT_TOOL(ID_FpsChk, VRenderView::OnFpsCheck)
 EVT_TOOL(ID_LegendChk, VRenderView::OnLegendCheck)
+//scale bar
+EVT_TOOL(ID_ScaleBar, VRenderView::OnScaleBar)
+EVT_TEXT(ID_ScaleText, VRenderView::OnScaleTextEditing)
+EVT_COMBOBOX(ID_ScaleCmb, VRenderView::OnScaleTextEditing)
+//other tools
 EVT_TOOL(ID_IntpChk, VRenderView::OnIntpCheck)
 EVT_COMMAND_SCROLL(ID_AovSldr, VRenderView::OnAovChange)
 EVT_TEXT(ID_AovText, VRenderView::OnAovText)
@@ -9932,7 +9940,8 @@ VRenderView::VRenderView(wxWindow* frame,
    wxPanel(parent, id, pos, size, style),
    m_frame(frame),
    m_draw_clip(false),
-   m_use_dft_settings(false)
+   m_use_dft_settings(false),
+   m_draw_scalebar(kOff)
 {
    wxString name = wxString::Format("Render View:%d", m_id++);
    this->SetName(name);
@@ -9960,6 +9969,12 @@ VRenderView::VRenderView(wxWindow* frame,
    m_glview->SetCanFocus(false);
 
    CreateBar();
+   if (m_glview) {
+	   m_glview->SetSBText(wxString::Format("50 %c%c", 131, 'm'));
+	   m_glview->m_sb_num = "50";
+	   m_glview->m_sb_unit = 0;
+	   m_glview->SetScaleBarLen(1.);
+   }
    LoadSettings();
 }
 
@@ -10040,6 +10055,26 @@ void VRenderView::CreateBar()
 	   "Toggle View of the Legend",
 	   "Toggle View of the Legend");
    m_options_toolbar->ToggleTool(ID_LegendChk,false);
+   m_options_toolbar->AddSeparator();
+   
+   //scale bar
+   m_options_toolbar->AddTool(ID_ScaleBar,"Scale Bar",
+	   wxGetBitmapFromMemory(scale_text_off),
+	   "Toggle Scalebar Options (Off, On, On with text)");
+   m_scale_text = new wxTextCtrl(m_options_toolbar, ID_ScaleText, "50",
+         wxDefaultPosition, wxSize(35, 20), 0, vald_int);
+   m_scale_text->Disable();
+   m_scale_cmb = new wxComboBox(m_options_toolbar, ID_ScaleCmb, "",
+         wxDefaultPosition, wxSize(50, 30), 0, NULL, wxCB_READONLY);
+   m_scale_cmb->Append("nm");
+   m_scale_cmb->Append(L"\u03BCm");
+   m_scale_cmb->Append("mm");
+   m_scale_cmb->Select(1);
+   m_scale_cmb->Disable();
+
+   m_options_toolbar->AddControl(m_scale_text);
+   m_options_toolbar->AddControl(m_scale_cmb);
+   m_options_toolbar->AddSeparator();
    
    m_options_toolbar->AddCheckTool(ID_IntpChk,"Interpolate",
 	   wxGetBitmapFromMemory(interpolate),wxNullBitmap,
@@ -10365,8 +10400,12 @@ DataGroup* VRenderView::GetGroup(wxString &name)
 
 DataGroup* VRenderView::AddVolumeData(VolumeData* vd, wxString group_name)
 {
-   if (m_glview)
+   if (m_glview) {
+	  double val = 50.;
+	  m_scale_text->GetValue().ToDouble(&val);
+	  m_glview->SetScaleBarLen(val);
       return m_glview->AddVolumeData(vd, group_name);
+   }
    else
       return 0;
 }
@@ -11428,6 +11467,77 @@ void VRenderView::OnLegendCheck(wxCommandEvent& event)
 {
    m_glview->m_draw_legend = 
 	   m_options_toolbar->GetToolState(ID_LegendChk);
+   RefreshGL();
+}
+
+void VRenderView::OnScaleTextEditing(wxCommandEvent& event) {
+      wxString str, num_text, unit_text;
+      num_text = m_scale_text->GetValue();
+      str = num_text + " ";
+      switch (m_scale_cmb->GetSelection())
+      {
+      case 0:
+         unit_text = "nm";
+         break;
+      case 1:
+      default:
+         unit_text = wxString::Format("%c%c", 131, 'm');
+         break;
+      case 2:
+         unit_text = "mm";
+         break;
+      }
+      str += unit_text;
+	  if (m_glview) {
+		  m_glview->SetSBText(str);
+		  m_glview->m_sb_num = num_text;
+		  m_glview->m_sb_unit = m_scale_cmb->GetSelection();
+	  }
+	  RefreshGL();
+}
+
+void VRenderView::OnScaleUnitSelected(wxCommandEvent& event) {
+}
+
+void VRenderView::OnScaleBar(wxCommandEvent& event)
+{
+	switch (m_draw_scalebar) {
+	case kOff:
+		m_draw_scalebar = kOn;
+		m_glview->m_disp_scale_bar = true;
+		m_glview->m_disp_scale_bar_text = false;
+		m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
+			   wxGetBitmapFromMemory(scale));
+		m_scale_text->Disable();
+		m_scale_cmb->Disable();
+		if (m_glview) m_glview->EnableScaleBar();
+		if (m_glview) m_glview->DisableSBText();
+		break;
+	case kOn:
+		m_draw_scalebar = kText;
+		m_glview->m_disp_scale_bar = true;
+		m_glview->m_disp_scale_bar_text = true;
+		m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
+			   wxGetBitmapFromMemory(scale_text));
+		m_scale_text->Enable();
+		m_scale_cmb->Enable();
+		if (m_glview) m_glview->EnableSBText();
+		if (m_glview) m_glview->EnableScaleBar();
+		break;
+	case kText:
+		m_draw_scalebar = kOff;
+		m_glview->m_disp_scale_bar = false;
+		m_glview->m_disp_scale_bar_text = false;
+		m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
+			   wxGetBitmapFromMemory(scale_text_off));
+		m_scale_text->Disable();
+		m_scale_cmb->Disable();
+		if (m_glview) m_glview->DisableScaleBar();
+		if (m_glview) m_glview->DisableSBText();
+		break;
+	default:
+		break;
+	}
    RefreshGL();
 }
 

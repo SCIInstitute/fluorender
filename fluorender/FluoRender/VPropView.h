@@ -58,10 +58,6 @@ class VPropView: public wxPanel
 		ID_SpaceZText,
 		ID_LuminanceSldr,
 		ID_LuminanceText,
-		ID_ScaleChk,
-		ID_ScaleText,
-		ID_ScaleCmb,
-		ID_ScaleTextChk,
 		ID_LegendChk,
 		ID_SyncGroupChk,
 		ID_SaveDefault,
@@ -180,11 +176,6 @@ private:
 	wxCheckBox *m_nr_chk;
 	//Depth
 	wxCheckBox *m_depth_chk;
-	//scale bar
-	wxCheckBox *m_scale_chk;
-	wxTextCtrl *m_scale_text;
-	wxComboBox *m_scale_cmb;
-	wxCheckBox *m_scale_te_chk;
 	//legend
 	wxCheckBox *m_legend_chk;
 	//sync
@@ -241,11 +232,6 @@ private:
 	void OnColorBtn(wxColourPickerEvent& event);
 	//spacings
 	void OnSpaceText(wxCommandEvent& event);
-	//scale bar
-	void OnScaleCheck(wxCommandEvent& event);
-	void OnScaleTextCheck(wxCommandEvent& event);
-	void OnScaleTextEditing(wxCommandEvent& event);
-	void OnScaleUnitSelected(wxCommandEvent& event);
 	//legend
 	void OnLegendCheck(wxCommandEvent& event);
 	//sync within group

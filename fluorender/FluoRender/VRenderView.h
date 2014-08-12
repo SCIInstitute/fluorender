@@ -897,6 +897,9 @@ class VRenderView: public wxPanel
       ID_CamCtrChk,
       ID_FpsChk,
       ID_LegendChk,
+      ID_ScaleBar,
+	  ID_ScaleText,
+      ID_ScaleCmb,
       ID_IntpChk,
       ID_DefaultBtn,
       ID_AovSldr,
@@ -1148,18 +1151,8 @@ class VRenderView: public wxPanel
       else return wxSize(0, 0);
    }
    //scale bar
-   void EnableScaleBar() {if (m_glview) m_glview->EnableScaleBar();}
-   void DisableScaleBar() {if (m_glview) m_glview->DisableScaleBar();}
-   void EnableSBText() {if (m_glview) m_glview->EnableSBText();}
-   void DisableSBText() {if (m_glview) m_glview->DisableSBText();}
    void SetScaleBarLen(double len)
    {if (m_glview) m_glview->SetScaleBarLen(len);}
-   void SetSBText(wxString text)
-   {if (m_glview) m_glview->SetSBText(text);}
-   void SetSbNumText(wxString text)
-   {if (m_glview) m_glview->m_sb_num = text;}
-   void SetSbUnitSel(int sel)
-   {if (m_glview) m_glview->m_sb_unit = sel;}
 
    //set dirty
    void SetVolPopDirty()
@@ -1374,6 +1367,9 @@ class VRenderView: public wxPanel
    wxToolBar * m_left_toolbar;
    wxToolBar * m_right_toolbar2;
    wxToolBar * m_lower_toolbar;
+	//scale bar
+	wxTextCtrl *m_scale_text;
+	wxComboBox *m_scale_cmb;
 
    //bottom bar///////////////////////////////////////////////////
    wxPanel* m_panel_2;
@@ -1405,6 +1401,14 @@ class VRenderView: public wxPanel
    //draw clip
    bool m_draw_clip;
 
+   //draw scalebar
+   enum SCALEBAR_STATE {
+	   kOn,
+	   kOff,
+	   kText
+   };
+   SCALEBAR_STATE m_draw_scalebar;
+
    bool m_use_dft_settings;
    double m_dft_x_rot;
    double m_dft_y_rot;
@@ -1431,6 +1435,10 @@ class VRenderView: public wxPanel
    void OnCamCtrCheck(wxCommandEvent& event);
    void OnFpsCheck(wxCommandEvent& event);
    void OnLegendCheck(wxCommandEvent& event);
+   void OnScaleBar(wxCommandEvent& event);
+   void OnScaleTextEditing(wxCommandEvent& event);
+   void OnScaleUnitSelected(wxCommandEvent& event);
+
    void OnIntpCheck(wxCommandEvent& event);
    void OnAovSldrIdle(wxIdleEvent& event);
    void OnAovChange(wxScrollEvent& event);
