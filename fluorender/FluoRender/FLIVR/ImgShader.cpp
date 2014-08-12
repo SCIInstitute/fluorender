@@ -186,7 +186,7 @@ namespace FLIVR
 	"	vec4 c7 = texture2D(tex0, vec2(t.x, t.y+loc0.y));\n" \
 	"	vec4 c8 = texture2D(tex0, vec2(t.x+0.70711*loc0.x, t.y+0.70711*loc0.y));\n" \
 	"	//float x = avg(c.x, c1.x, c2.x, c3.x, c4.x, c5.x, c6.x, c7.x, c8.x).x;\n" \
-	"	//float y = avg(c.y, c1.y, c2.y, c3.y, c4.y, c5.y, c6.y, c7.y, c8.y).y;\n" \
+	"	//float y = avg(c.y, c1.y, c2.y, c3.y, c4.y, c5.y, c6.y, c7.y , c8.y).y;\n" \
 	"	//float z = avg(c.z, c1.z, c2.z, c3.z, c4.z, c5.z, c6.z, c7.z, c8.z).z;\n" \
 	"	gl_FragColor = (c1+c2+c3+c4+c5+c6+c7+c8)/8.0;\n" \
 	"}\n"
@@ -208,7 +208,6 @@ namespace FLIVR
 	"	vec4 c7 = texture2D(tex0, vec2(t.x, t.y+loc0.y));\n" \
 	"	vec4 c8 = texture2D(tex0, vec2(t.x+0.70711*loc0.x, t.y+0.70711*loc0.y));\n" \
 	"	c = c*9.0 - (c1+c2+c3+c4+c5+c6+c7+c8);\n" \
-	"	c = clamp(c, 0.0, 1.0);\n" \
 	"	gl_FragColor = c;\n" \
 	"}\n"
 
