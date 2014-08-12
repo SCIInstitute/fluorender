@@ -10002,6 +10002,8 @@ void VRenderView::CreateBar()
    //toolbar 1
    m_options_toolbar = new wxToolBar(this,wxID_ANY);
    wxBoxSizer* sizer_h_1 = new wxBoxSizer(wxHORIZONTAL);
+   //the spacer
+   wxStaticText * stb;
    //add the options
    m_options_toolbar->AddRadioTool(ID_VolumeSeqRd,"Layered",
 	   wxGetBitmapFromMemory(layers),wxNullBitmap,"Render View as Layers",
@@ -10017,6 +10019,12 @@ void VRenderView::CreateBar()
    m_options_toolbar->ToggleTool(ID_VolumeSeqRd,false);
    m_options_toolbar->ToggleTool(ID_VolumeMultiRd,false);
    m_options_toolbar->ToggleTool(ID_VolumeCompRd,false);
+   stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
+	   wxDefaultPosition, wxSize(5,5));
+   stb->SetBackgroundColour(wxColour(128,128,128));
+   m_options_toolbar->AddSeparator();
+   m_options_toolbar->AddControl(stb);
+   m_options_toolbar->AddSeparator();
    switch (m_glview->GetVolMethod())
    {
    case VOL_METHOD_SEQ:
@@ -10030,10 +10038,14 @@ void VRenderView::CreateBar()
       break;
    }   
    //camera
-   m_options_toolbar->AddSeparator();
    wxButton * cam = new wxButton(m_options_toolbar, ID_CaptureBtn, "Capture");
    cam->SetBitmap(wxGetBitmapFromMemory(camera));
    m_options_toolbar->AddControl(cam);
+   stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
+	   wxDefaultPosition, wxSize(5,5));
+   stb->SetBackgroundColour(wxColour(128,128,128));
+   m_options_toolbar->AddSeparator();
+   m_options_toolbar->AddControl(stb);
    m_options_toolbar->AddSeparator();
    
    m_options_toolbar->AddCheckTool(ID_CamCtrChk,"Axis",
@@ -10053,6 +10065,11 @@ void VRenderView::CreateBar()
 	   "Toggle View of the Legend",
 	   "Toggle View of the Legend");
    m_options_toolbar->ToggleTool(ID_LegendChk,false);
+   stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
+	   wxDefaultPosition, wxSize(5,5));
+   stb->SetBackgroundColour(wxColour(128,128,128));
+   m_options_toolbar->AddSeparator();
+   m_options_toolbar->AddControl(stb);
    m_options_toolbar->AddSeparator();
    
    //scale bar
@@ -10103,7 +10120,11 @@ void VRenderView::CreateBar()
 	m_options_toolbar2->ToggleTool(ID_FreeChk,true);
    else
 	m_options_toolbar2->ToggleTool(ID_FreeChk,false);
-   
+   stb = new wxStaticText(m_options_toolbar2, wxID_ANY, "",
+	   wxDefaultPosition, wxSize(5,5));
+   stb->SetBackgroundColour(wxColour(128,128,128));
+   m_options_toolbar2->AddSeparator();
+   m_options_toolbar2->AddControl(stb);
    m_options_toolbar2->AddSeparator();
    //background option
    st1 = new wxStaticText(m_options_toolbar2, wxID_ANY, "Background:");
@@ -10115,9 +10136,11 @@ void VRenderView::CreateBar()
    m_options_toolbar2->Realize();
 
    //add the toolbars and other options in order
+   sizer_h_1->AddSpacer(40);
    sizer_h_1->Add(m_options_toolbar,0,wxALIGN_CENTER|wxEXPAND);
    sizer_h_1->AddStretchSpacer();
    sizer_h_1->Add(m_options_toolbar2,0,wxALIGN_CENTER|wxEXPAND);
+   sizer_h_1->AddSpacer(40);
 
    //bar left///////////////////////////////////////////////////
    wxBoxSizer* sizer_v_3 = new wxBoxSizer(wxVERTICAL);
@@ -10224,7 +10247,7 @@ void VRenderView::CreateBar()
 	   "Save as Default Rotation");
    m_lower_toolbar->Realize();
    
-   sizer_h_2->AddSpacer(50);
+   sizer_h_2->AddSpacer(40);
    sizer_h_2->Add(st1, 0, wxALIGN_CENTER);
    sizer_h_2->Add(m_x_rot_sldr, 1, wxALIGN_CENTER);
    sizer_h_2->Add(m_x_rot_spin, 0, wxALIGN_CENTER);
@@ -10241,7 +10264,7 @@ void VRenderView::CreateBar()
    sizer_h_2->Add(m_z_rot_text, 0, wxALIGN_CENTER);
    sizer_h_2->Add(5, 5, 0);
    sizer_h_2->Add(m_lower_toolbar, 0, wxALIGN_CENTER);
-   sizer_h_2->AddSpacer(50);
+   sizer_h_2->AddSpacer(40);
 
    sizer_v->Add(sizer_h_1, 0, wxEXPAND|wxBOTTOM,3);
    sizer_v->Add(sizer_m, 1, wxEXPAND);
