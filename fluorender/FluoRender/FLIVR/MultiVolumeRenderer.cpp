@@ -188,7 +188,7 @@ namespace FLIVR
             diag.y()/res_.y(),
             diag.z()/res_.z());
       double dt = cell_diag.length()/
-         vr_list_[0]->compute_rate_scale()/rate;
+         vr_list_[0]->compute_rate_scale(snapview.direction())/rate;
       num_slices_ = (int)(diag.length()/dt);
 
       vector<double> vertex;
@@ -1027,7 +1027,7 @@ namespace FLIVR
             diag.y()/res_.y(),
             diag.z()/res_.z());
       double dt = cell_diag.length()/
-         vr_list_[0]->compute_rate_scale()/rate;
+         vr_list_[0]->compute_rate_scale(view_ray.direction())/rate;
       num_slices_ = (int)(diag.length()/dt);
 
       vector<double> vertex;

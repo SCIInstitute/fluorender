@@ -476,7 +476,7 @@ namespace FLIVR
 			return;
 
 		Ray view_ray = compute_view();
-		Ray snapview = compute_snapview(0.1);
+		Ray snapview = compute_snapview(0.4);
 
 		vector<TextureBrick*> *bricks = 0;
 		if (mem_swap_ && interactive_)
@@ -497,7 +497,7 @@ namespace FLIVR
 			diag.x() / tex_->nx(),
 			diag.y() / tex_->ny(),
 			diag.z() / tex_->nz());
-		double dt = cell_diag.length()/compute_rate_scale()/rate;
+		double dt = cell_diag.length()/compute_rate_scale(snapview.direction())/rate;
 		num_slices_ = (int)(diag.length()/dt);
 
 		vector<double> vertex;
@@ -1055,7 +1055,7 @@ namespace FLIVR
 		Vector cell_diag(diag.x()/tex_->nx(),
 			diag.y()/tex_->ny(),
 			diag.z()/tex_->nz());
-		double dt = cell_diag.length()/compute_rate_scale()/rate;
+		double dt = cell_diag.length()/compute_rate_scale(view_ray.direction())/rate;
 		num_slices_ = (int)(diag.length()/dt);
 
 		vector<double> vertex;

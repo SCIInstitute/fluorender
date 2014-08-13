@@ -361,7 +361,7 @@ namespace FLIVR
 			if (vdz_abs<snap/2.0) vdz = 0.0;
 			else if (vdz_abs<snap) vdz = (vdz_abs-snap/2.0)*2.0*vdz/vdz_abs;
 			vd = Vector(vdx, vdy, vdz);
-			vd.normalize();
+			vd.safe_normalize();
 		}
 		else
 			vd = Vector(-mvmat[2], -mvmat[6], -mvmat[10]);
@@ -375,19 +375,19 @@ namespace FLIVR
 		return Ray(p, v);
 	}
 
-	double TextureRenderer::compute_rate_scale()
+	double TextureRenderer::compute_rate_scale(Vector v)
 	{
-		Transform *field_trans = tex_->transform();
+		//Transform *field_trans = tex_->transform();
 		double spcx, spcy, spcz;
 		tex_->get_spacings(spcx, spcy, spcz);
 		double z_factor = spcz/Max(spcx, spcy);
 		Vector n(double(tex_->nx())/double(tex_->nz()), 
 			double(tex_->ny())/double(tex_->nz()), 
 			z_factor>1.0&&z_factor<100.0?sqrt(z_factor):1.0);
-		double mvmat[16];
-		glGetDoublev(GL_MODELVIEW_MATRIX, mvmat);
-		Vector v = field_trans->project(Vector(-mvmat[2], -mvmat[6], -mvmat[10]));
-		v.safe_normalize();
+		//double mvmat[16];
+		//glGetDoublev(GL_MODELVIEW_MATRIX, mvmat);
+		//Vector v = field_trans->project(Vector(-mvmat[2], -mvmat[6], -mvmat[10]));
+		//v.safe_normalize();
 
 		double e = 0.0001;
 		double a, b, c;
