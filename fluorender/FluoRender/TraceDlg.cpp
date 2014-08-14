@@ -360,6 +360,8 @@ m_prv_time(-1)
 	wxBoxSizer* sizer_34 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "ID edit tools:",
 		wxDefaultPosition, wxSize(130, 20));
+	m_cell_new_id_text = new wxTextCtrl(this, ID_CellNewIDText, "",
+		wxDefaultPosition, wxSize(80, 23));
 	m_cell_modify_btn = new wxButton(this, ID_CellModifyBtn, "Start Editing",
 		wxDefaultPosition, wxSize(80, 23));
 	m_cell_new_id_btn = new wxButton(this, ID_CellNewIDBtn, "New ID",
@@ -368,8 +370,9 @@ m_prv_time(-1)
 		wxDefaultPosition, wxSize(80, 23));
 	sizer_34->Add(5, 5);
 	sizer_34->Add(st, 0, wxALIGN_CENTER);
-	sizer_34->Add(m_cell_modify_btn, 0, wxALIGN_CENTER);
+	sizer_34->Add(m_cell_new_id_text, 0, wxALIGN_CENTER);
 	sizer_34->Add(10, 23);
+	sizer_34->Add(m_cell_modify_btn, 0, wxALIGN_CENTER);
 	sizer_34->Add(m_cell_new_id_btn, 0, wxALIGN_CENTER);
 	sizer_34->Add(m_cell_combine_id_btn, 0, wxALIGN_CENTER);
 	//magic tool
@@ -906,7 +909,10 @@ void TraceDlg::CellLink(bool exclusive)
 		return;
 	TraceGroup* trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
+	{
 		m_view->CreateTraceGroup();
+		trace_group = m_view->GetTraceGroup();
+	}
 
 	//get selections
 	long item;
@@ -1013,7 +1019,10 @@ void TraceDlg::OnCellUnlink(wxCommandEvent &event)
 		return;
 	TraceGroup* trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
+	{
 		m_view->CreateTraceGroup();
+		trace_group = m_view->GetTraceGroup();
+	}
 
 	//get selections
 	long item;
@@ -1082,7 +1091,11 @@ void TraceDlg::OnCellNewID(wxCommandEvent &event)
 	//trace group
 	TraceGroup *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
-		return;
+	{
+		m_view->CreateTraceGroup();
+		trace_group = m_view->GetTraceGroup();
+	}
+
 	//get current mask
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
@@ -1106,38 +1119,46 @@ void TraceDlg::OnCellNewID(wxCommandEvent &event)
 	//get ID of current masked region
 	int i, j, k;
 	int nx, ny, nz;
-	unsigned long long index;
-	unsigned int id_init = 0;
 	vd->GetResolution(nx, ny, nz);
-	for (i=0; i<nx; ++i)
-	for (j=0; j<ny; ++j)
-	for (k=0; k<nz; ++k)
+	unsigned long long index;
+	unsigned long id_init = 0;
+	wxString str = m_cell_new_id_text->GetValue();
+	str.ToULong(&id_init);
+	if (id_init == 0)
 	{
-		index = nx*ny*k + nx*j + i;
-		if (data_mask[index] &&
-			data_label[index])
+		for (i=0; i<nx; ++i)
+		for (j=0; j<ny; ++j)
+		for (k=0; k<nz; ++k)
 		{
-			id_init = data_label[index];
-			i = nx;
-			j = ny;
-			k = nz;
+			index = nx*ny*k + nx*j + i;
+			if (data_mask[index] &&
+				data_label[index])
+			{
+				id_init = data_label[index];
+				i = nx;
+				j = ny;
+				k = nz;
+			}
 		}
 	}
+
 	//generate a unique ID
 	int time = m_view->m_glview->m_tseq_cur_num;
 	Vertex vertex;
-	while (trace_group->FindIDInFrame(id_init, time, vertex))
-		id_init -= 180;
 	if (id_init == 0)
-		return;
+		id_init = UINT_MAX;
+	else
+	{
+		while (trace_group->FindIDInFrame(id_init, time, vertex))
+			id_init -= 180;
+	}
 	//update label volume, set mask region to the new ID
 	for (i=0; i<nx; ++i)
 	for (j=0; j<ny; ++j)
 	for (k=0; k<nz; ++k)
 	{
 		index = nx*ny*k + nx*j + i;
-		if (data_mask[index] &&
-			data_label[index])
+		if (data_mask[index])
 			data_label[index] = id_init;
 	}
 	//invalidate label mask in gpu

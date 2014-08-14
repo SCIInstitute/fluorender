@@ -72,6 +72,7 @@ public:
 		ID_CellLinkBtn,
 		ID_CellExclusiveLinkBtn,
 		ID_CellUnlinkBtn,
+		ID_CellNewIDText,
 		ID_CellModifyBtn,
 		ID_CellNewIDBtn,
 		ID_CellCombineIDBtn,
@@ -149,6 +150,7 @@ private:
 	wxButton* m_cell_exclusive_link_btn;
 	wxButton* m_cell_unlink_btn;
 	//ID edit controls
+	wxTextCtrl* m_cell_new_id_text;
 	wxButton* m_cell_modify_btn;
 	wxButton* m_cell_new_id_btn;
 	wxButton* m_cell_combine_id_btn;

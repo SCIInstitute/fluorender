@@ -5595,6 +5595,43 @@ void VRenderGLView::Run4DScript(wxString scriptname)
                   }
                }
             }
+			else if (str == "prepare_tracking")
+			{
+				wxString path = "";
+				fconfig.Read("savepath", &pathname, "");
+				str = pathname;
+				size_t pos = 0;
+#ifdef _WIN32
+                wxString slash = "\\";
+#else
+                wxString slash = "/";
+#endif
+				do
+				{
+					pos = pathname.find(slash, pos);
+					if (pos == wxNOT_FOUND)
+						break;
+					pos++;
+					str = pathname.Left(pos);
+					if (path == "")
+						path = str;
+					if (!wxDirExists(str))
+						wxMkdir(str);
+				} while (true);
+
+				if (wxDirExists(path))
+				{
+					VolumeData* vd = m_selector.GetVolume();
+					if (vd)
+					{
+						str = pathname +
+							wxString::Format(format, m_tseq_cur_num) + ".tif";
+						vd->AddEmptyMask();
+						vd->AddEmptyLabel();
+						vd->Save(str, 0, false, false);
+					}
+				}
+			}
          }
       }
    }

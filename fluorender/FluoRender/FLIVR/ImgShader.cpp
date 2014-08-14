@@ -208,7 +208,7 @@ namespace FLIVR
 	"	vec4 c7 = texture2D(tex0, vec2(t.x, t.y+loc0.y));\n" \
 	"	vec4 c8 = texture2D(tex0, vec2(t.x+0.70711*loc0.x, t.y+0.70711*loc0.y));\n" \
 	"	c = c*9.0 - (c1+c2+c3+c4+c5+c6+c7+c8);\n" \
-	"	c = clamp(c, 0.0, 1.0);\n" \
+	"	//c = clamp(c, 0.0, 1.0);\n" \
 	"	gl_FragColor = c;\n" \
 	"}\n"
 

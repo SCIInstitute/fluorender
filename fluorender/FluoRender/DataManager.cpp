@@ -3175,6 +3175,8 @@ bool TraceGroup::FindID(unsigned int id)
 //find id in frame list
 bool TraceGroup::FindIDInFrame(unsigned int id, int time, Vertex &vertex)
 {
+	if (m_frame_list.empty())
+		return false;
 	//get current frame
 	FrameIter frame_iter = m_frame_list.find((unsigned int)time);
 	if (frame_iter == m_frame_list.end())
