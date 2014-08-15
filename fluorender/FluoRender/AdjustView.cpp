@@ -61,6 +61,7 @@ m_dft_sync_r(false),
 m_dft_sync_g(false),
 m_dft_sync_b(false)
 {
+	this->SetSize(75,-1);
 	//validator: floating point 2
 	wxFloatingPointValidator<double> vald_fp2(2);
 	//validator: integer
@@ -106,14 +107,14 @@ m_dft_sync_b(false)
 	//fourth line: sliders
 	wxBoxSizer *sizer_h_3 = new wxBoxSizer(wxHORIZONTAL);
 	m_r_gamma_sldr = new wxSlider(this, ID_RGammaSldr, 100, 10, 400,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
+		wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
 	sizer_h_3->Add(m_r_gamma_sldr, 1, wxEXPAND|wxALIGN_CENTER);
 	m_r_brightness_sldr = new wxSlider(this, ID_RBrightnessSldr, 0, -256, 256,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
+		wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
 	sizer_h_3->Add(m_r_brightness_sldr, 1, wxEXPAND|wxALIGN_CENTER);
     
 	m_r_hdr_sldr = new wxSlider(this, ID_RHdrSldr, 0, 0, 100,
-                                wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
+                                wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
 #ifdef _WIN32
 	sizer_h_3->Add(m_r_hdr_sldr, 1, wxEXPAND|wxALIGN_CENTER);
 #else
@@ -165,13 +166,13 @@ m_dft_sync_b(false)
 	//9th line: sliders
 	wxBoxSizer *sizer_h_7 = new wxBoxSizer(wxHORIZONTAL);
 	m_g_gamma_sldr = new wxSlider(this, ID_GGammaSldr, 100, 10, 400,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
+		wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
 	sizer_h_7->Add(m_g_gamma_sldr, 1, wxEXPAND|wxALIGN_CENTER);
 	m_g_brightness_sldr = new wxSlider(this, ID_GBrightnessSldr, 0, -256, 256,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
+		wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
 	sizer_h_7->Add(m_g_brightness_sldr, 1, wxEXPAND|wxALIGN_CENTER);
 	m_g_hdr_sldr = new wxSlider(this, ID_GHdrSldr, 0, 0, 100,
-                                wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
+                                wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
 #ifdef _WIN32
 	sizer_h_7->Add(m_g_hdr_sldr, 1, wxEXPAND|wxALIGN_CENTER);
 #else
@@ -223,13 +224,13 @@ m_dft_sync_b(false)
 	//14th line: sliders
 	wxBoxSizer *sizer_h_11 = new wxBoxSizer(wxHORIZONTAL);
 	m_b_gamma_sldr = new wxSlider(this, ID_BGammaSldr, 100, 10, 400,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
+		wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
 	sizer_h_11->Add(m_b_gamma_sldr, 1, wxEXPAND|wxALIGN_CENTER);
 	m_b_brightness_sldr = new wxSlider(this, ID_BBrightnessSldr, 0, -256, 256,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
+		wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
 	sizer_h_11->Add(m_b_brightness_sldr, 1, wxEXPAND|wxALIGN_CENTER);
 	m_b_hdr_sldr = new wxSlider(this, ID_BHdrSldr, 0, 0, 100,
-                                wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
+                                wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
 #ifdef _WIN32
 	sizer_h_11->Add(m_b_hdr_sldr, 1, wxEXPAND|wxALIGN_CENTER);
 #else

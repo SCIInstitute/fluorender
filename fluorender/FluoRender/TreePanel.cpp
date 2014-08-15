@@ -280,14 +280,11 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
             menu.Append(ID_RemoveData, "Delete");
             menu.Append(ID_AddDataGroup, "Add Volume Group");
             menu.Append(ID_Edit, "Edit...");
-            if (!((VRenderFrame*)m_frame)->GetFreeVersion())
-            {
-               menu.Append(ID_Measurement, "Measurement...");
-               menu.Append(ID_NoiseCancelling, "Noise Reduction...");
-               menu.Append(ID_Counting, "Counting and Volume...");
-               menu.Append(ID_Colocalization, "Colocalization Analysis...");
-               menu.Append(ID_RandomizeColor, "Randomize Colors");
-            }
+            menu.Append(ID_Measurement, "Measurement...");
+            menu.Append(ID_NoiseCancelling, "Noise Reduction...");
+            menu.Append(ID_Counting, "Counting and Volume...");
+            menu.Append(ID_Colocalization, "Colocalization Analysis...");
+            menu.Append(ID_RandomizeColor, "Randomize Colors");
             break;
          case 3:  //mesh data
             menu.Append(ID_ToggleDisp, "Toggle Visibility");

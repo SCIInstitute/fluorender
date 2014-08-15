@@ -4,7 +4,6 @@
 #include <wx/slider.h>
 #include <wx/spinbutt.h>
 
-
 #ifndef _CLIPPINGVIEW_H_
 #define _CLIPPINGVIEW_H_
 
@@ -71,12 +70,9 @@ public:
 
 	bool GetChannLink()
 	{
-		return m_link_channels->GetValue();
+		return m_link_channels->GetToolState(ID_LinkChannelsChk);
 	}
-	void SetChannLink(bool chann)
-	{
-		m_link_channels->SetValue(chann);
-	}
+	void SetChannLink(bool chann);
 	bool GetXLink()
 	{
 		return m_check_tb->GetToolState(ID_LinkXChk);
@@ -142,7 +138,7 @@ private:
 	bool m_link_z;
 
 	//1st line
-	wxCheckBox *m_link_channels;
+	wxToolBar *m_link_channels;
 	wxButton *m_clip_reset_btn;
 	//fix plane rotations
 	wxButton *m_set_zero_btn;
@@ -178,9 +174,6 @@ private:
 	//z2
 	wxSlider *m_z2_clip_sldr;
 	wxTextCtrl *m_z2_clip_text;
-	//slider and bar sizes
-	static const size_t kClipSize = 400;
-	static const size_t kBarSize  = kClipSize - 20;
 	//highlighters
 	wxStaticText * m_xBar, * m_yBar, * m_zBar;
 

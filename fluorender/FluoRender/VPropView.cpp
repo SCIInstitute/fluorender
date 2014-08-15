@@ -4,6 +4,8 @@
 #include <wx/fileconf.h>
 #include <wx/colordlg.h>
 #include <wx/valnum.h>
+#include "png_resource.h"
+#include "interpolate.h"
 
 BEGIN_EVENT_TABLE(VPropView, wxPanel)
 //1
@@ -50,13 +52,10 @@ EVT_COLOURPICKER_CHANGED(ID_ColorBtn, VPropView::OnColorBtn)
 EVT_TEXT(ID_SpaceXText, VPropView::OnSpaceText)
 EVT_TEXT(ID_SpaceYText, VPropView::OnSpaceText)
 EVT_TEXT(ID_SpaceZText, VPropView::OnSpaceText)
-//scale bar
-EVT_CHECKBOX(ID_ScaleChk, VPropView::OnScaleCheck)
-EVT_CHECKBOX(ID_ScaleTextChk, VPropView::OnScaleTextCheck)
-EVT_TEXT(ID_ScaleText, VPropView::OnScaleTextEditing)
-EVT_COMBOBOX(ID_ScaleCmb, VPropView::OnScaleUnitSelected)
 //legend
 EVT_CHECKBOX(ID_LegendChk, VPropView::OnLegendCheck)
+//interpolate
+EVT_TOOL(ID_InterpolateChk, VPropView::OnInterpolateCheck)
 //sync within group
 EVT_CHECKBOX(ID_SyncGroupChk, VPropView::OnSyncGroupCheck)
 //save default
@@ -320,28 +319,6 @@ VPropView::VPropView(wxWindow* frame,
    sizer_b->Add(st, 0, wxALIGN_CENTER);
    sizer_b->Add(m_space_z_text, 0, wxALIGN_CENTER);
 
-   //scale bar
-   m_scale_chk = new wxCheckBox(this, ID_ScaleChk, "SclBar:",
-         wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-   m_scale_te_chk = new wxCheckBox(this, ID_ScaleTextChk, "Text:",
-         wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-   m_scale_text = new wxTextCtrl(this, ID_ScaleText, "",
-         wxDefaultPosition, wxSize(35, 20), 0, vald_int);
-   m_scale_cmb = new wxComboBox(this, ID_ScaleCmb, "",
-         wxDefaultPosition, wxSize(50, 30), 0, NULL, wxCB_READONLY);
-   m_scale_cmb->Append("nm");
-   m_scale_cmb->Append(L"\u03BCm");
-   m_scale_cmb->Append("mm");
-   m_scale_cmb->Select(1);
-   sizer_b->Add(10, 5, 0);
-   sizer_b->Add(m_scale_chk, 0, wxALIGN_CENTER);
-   sizer_b->Add(5, 5, 0);
-   sizer_b->Add(m_scale_te_chk, 0, wxALIGN_CENTER);
-   sizer_b->Add(5, 5, 0);
-   sizer_b->Add(m_scale_text, 0, wxALIGN_CENTER);
-   sizer_b->Add(5, 5, 0);
-   sizer_b->Add(m_scale_cmb, 0, wxALIGN_CENTER);
-
    //legend
    m_legend_chk = new wxCheckBox(this, ID_LegendChk, "Legend:",
          wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
@@ -350,6 +327,15 @@ VPropView::VPropView(wxWindow* frame,
 
    //stretcher
    sizer_b->AddStretchSpacer(1);
+   //interpolation
+   m_options_toolbar = new wxToolBar(this,wxID_ANY);
+   m_options_toolbar->AddCheckTool(ID_InterpolateChk,"Interpolate",
+   wxGetBitmapFromMemory(interpolate),wxNullBitmap,
+    "Interpolates between data when checked.",
+    "Interpolates between data when checked.");
+   m_options_toolbar->ToggleTool(ID_InterpolateChk,true);
+   m_options_toolbar->Realize();
+   sizer_b->Add(m_options_toolbar, 0, wxALIGN_CENTER);
    //inversion
    m_inv_chk = new wxCheckBox(this, ID_InvChk, ":Inv",
          wxDefaultPosition, wxDefaultSize);
@@ -547,35 +533,11 @@ void VPropView::GetSettings()
    str = wxString::Format("%.3f", spcz);
    m_space_z_text->ChangeValue(str);
 
-   //scale bar
-   VRenderFrame *frame = (VRenderFrame*)m_frame;
-   if (frame && frame->GetViewList()->size() > 0)
-   {
-      VRenderView* vrv = (*frame->GetViewList())[0];
-      if (vrv)
-      {
-         m_scale_cmb->Select(vrv->m_glview->m_sb_unit);
-         m_scale_text->ChangeValue(vrv->m_glview->m_sb_num);
-         bool scale_check = vrv->m_glview->m_disp_scale_bar;
-         m_scale_chk->SetValue(scale_check);
-         m_scale_te_chk->SetValue(vrv->m_glview->m_disp_scale_bar_text);
-         if (scale_check)
-         {
-            m_scale_te_chk->Enable();
-            m_scale_text->Enable();
-            m_scale_cmb->Enable();
-         }
-         else
-         {
-            m_scale_te_chk->Disable();
-            m_scale_text->Disable();
-            m_scale_cmb->Disable();
-         }
-      }
-   }
-
    //legend
    m_legend_chk->SetValue(m_vd->GetLegend());
+
+   //interpolate
+   m_options_toolbar->ToggleTool(ID_InterpolateChk,m_vd->GetInterpolate());
 
    //sync group
    if (m_group)
@@ -1619,204 +1581,23 @@ void VPropView::OnSpaceText(wxCommandEvent& event)
       InitVRenderViews(INIT_BOUNDS|INIT_CENTER);
 }
 
-void VPropView::OnScaleCheck(wxCommandEvent& event)
-{
-   VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-   if (!vr_frame)
-      return;
-
-   if (m_scale_chk->GetValue())
-   {
-      wxString str, num_text, unit_text;
-      num_text = m_scale_text->GetValue();
-      double len;
-      num_text.ToDouble(&len);
-      str = num_text + " ";
-      switch (m_scale_cmb->GetSelection())
-      {
-      case 0:
-         unit_text = "nm";
-         break;
-      case 1:
-      default:
-         unit_text = wxString::Format("%c%c", 131, 'm');
-         break;
-      case 2:
-         unit_text = "mm";
-         break;
-      }
-      str += unit_text;
-      for (int i=0; i<(int)vr_frame->GetViewList()->size(); i++)
-      {
-         VRenderView *vrv = (*vr_frame->GetViewList())[i];
-         if (vrv)
-         {
-            vrv->SetScaleBarLen(len);
-            vrv->SetSBText(str);
-            vrv->EnableScaleBar();
-            vrv->SetSbNumText(num_text);
-            vrv->SetSbUnitSel(m_scale_cmb->GetSelection());
-         }
-      }
-      m_scale_te_chk->Enable();
-      m_scale_text->Enable();
-      m_scale_cmb->Enable();
-   }
-   else
-   {
-      for (int i=0; i<(int)vr_frame->GetViewList()->size(); i++)
-      {
-         VRenderView *vrv = (*vr_frame->GetViewList())[i];
-         if (vrv)
-         {
-            vrv->DisableScaleBar();
-         }
-      }
-      m_scale_te_chk->Disable();
-      m_scale_text->Disable();
-      m_scale_cmb->Disable();
-   }
-
-   RefreshVRenderViews();
-}
-
-void VPropView::OnScaleTextCheck(wxCommandEvent& event)
-{
-   VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-   if (!vr_frame)
-      return;
-
-   if (m_scale_te_chk->GetValue())
-   {
-      wxString str, num_text, unit_text;
-      num_text = m_scale_text->GetValue();
-      str = num_text + " ";
-      switch (m_scale_cmb->GetSelection())
-      {
-      case 0:
-         unit_text = "nm";
-         break;
-      case 1:
-      default:
-         unit_text = wxString::Format("%c%c", 131, 'm');
-         break;
-      case 2:
-         unit_text = "mm";
-         break;
-      }
-      str += unit_text;
-
-      for (int i=0; i<(int)vr_frame->GetViewList()->size(); i++)
-      {
-         VRenderView *vrv = (*vr_frame->GetViewList())[i];
-         if (vrv)
-         {
-            vrv->SetSBText(str);
-            vrv->EnableSBText();
-            vrv->SetSbNumText(num_text);
-            vrv->SetSbUnitSel(m_scale_cmb->GetSelection());
-         }
-      }
-   }
-   else
-   {
-      for (int i=0; i<(int)vr_frame->GetViewList()->size(); i++)
-      {
-         VRenderView *vrv = (*vr_frame->GetViewList())[i];
-         if (vrv)
-         {
-            vrv->DisableSBText();
-         }
-      }
-   }
-
-   RefreshVRenderViews();
-}
-
-void VPropView::OnScaleTextEditing(wxCommandEvent& event)
-{
-   if (!m_scale_text)
-      return;
-   VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-   if (!vr_frame)
-      return;
-
-   wxString str, num_text, unit_text;
-   num_text = m_scale_text->GetValue();
-   double len;
-   num_text.ToDouble(&len);
-   str = num_text + " ";
-   switch (m_scale_cmb->GetSelection())
-   {
-   case 0:
-      unit_text = "nm";
-      break;
-   case 1:
-   default:
-      unit_text = wxString::Format("%c%c", 131, 'm');
-      break;
-   case 2:
-      unit_text = "mm";
-      break;
-   }
-   str += unit_text;
-   for (int i=0; i<(int)vr_frame->GetViewList()->size(); i++)
-   {
-      VRenderView *vrv = (*vr_frame->GetViewList())[i];
-      if (vrv)
-      {
-         vrv->SetScaleBarLen(len);
-         vrv->SetSBText(str);
-         vrv->SetSbNumText(num_text);
-         vrv->SetSbUnitSel(m_scale_cmb->GetSelection());
-      }
-   }
-
-   RefreshVRenderViews();
-}
-
-void VPropView::OnScaleUnitSelected(wxCommandEvent& event)
-{
-   VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-   if (!vr_frame)
-      return;
-
-   wxString str, num_text, unit_text;
-   num_text = m_scale_text->GetValue();
-   str = num_text + " ";
-   switch (m_scale_cmb->GetSelection())
-   {
-   case 0:
-      unit_text = "nm";
-      break;
-   case 1:
-   default:
-      unit_text = wxString::Format("%c%c", 131, 'm');
-      break;
-   case 2:
-      unit_text = "mm";
-      break;
-   }
-   str += unit_text;
-   for (int i=0; i<(int)vr_frame->GetViewList()->size(); i++)
-   {
-      VRenderView *vrv = (*vr_frame->GetViewList())[i];
-      if (vrv)
-      {
-         vrv->SetSBText(str);
-         vrv->SetSbNumText(num_text);
-         vrv->SetSbUnitSel(m_scale_cmb->GetSelection());
-      }
-   }
-
-   RefreshVRenderViews();
-}
-
 //legend
 void VPropView::OnLegendCheck(wxCommandEvent& event)
 {
    if (m_vd)
       m_vd->SetLegend(m_legend_chk->GetValue());
+
+   RefreshVRenderViews();
+}
+
+//interpolation
+void VPropView::OnInterpolateCheck(wxCommandEvent& event)
+{
+   bool inv = m_options_toolbar->GetToolState(ID_InterpolateChk);
+   if (m_sync_group && m_group)
+      m_group->SetInterpolate(inv);
+   else if (m_vd)
+      m_vd->SetInterpolate(inv);
 
    RefreshVRenderViews();
 }
@@ -2018,6 +1799,10 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
    bool shading = m_shading_enable_chk->GetValue();
    fconfig.Write("enable_shading", shading);
    mgr->m_vol_esh = shading;
+   //inversion
+   bool interp = m_options_toolbar->GetToolState(ID_InterpolateChk);
+   fconfig.Write("enable_interp", interp);
+   mgr->m_vol_interp = interp;
    //inversion
    bool inv = m_inv_chk->GetValue();
    fconfig.Write("enable_inv", inv);

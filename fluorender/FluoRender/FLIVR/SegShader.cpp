@@ -517,6 +517,13 @@ namespace FLIVR
 			z << VOL_GRAD_COMPUTE_FUNC;
 			z << VOL_TRANSFER_FUNCTION_SIN_COLOR_L_FUNC;
 		}
+		else if (type_==LBL_SHDR_MIF)
+		{
+			z << VOL_GRAD_COMPUTE_FUNC;
+		}
+
+		if (paint_mode_!=6 && clip_)
+			z << VOL_CLIP_FUNC;
 
 		//the common head
 		z << VOL_HEAD;

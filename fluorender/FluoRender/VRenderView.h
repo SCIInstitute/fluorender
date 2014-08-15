@@ -431,6 +431,9 @@ class VRenderGLView: public wxGLCanvas
          void AddPaintRulerPoint();
          void DrawRulers();
          vector<Ruler*>* GetRulerList();
+		 //public mouse
+		 
+         void OnMouse(wxMouseEvent& event);
 
 	//traces
 	TraceGroup* GetTraceGroup();
@@ -849,7 +852,6 @@ class VRenderGLView: public wxGLCanvas
          //system call
          void OnDraw(wxPaintEvent& event);
          void OnResize(wxSizeEvent& event);
-         void OnMouse(wxMouseEvent& event);
          void OnIdle(wxIdleEvent& event);
          void OnKeyDown(wxKeyEvent& event);
          //WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
@@ -895,7 +897,9 @@ class VRenderView: public wxPanel
       ID_CamCtrChk,
       ID_FpsChk,
       ID_LegendChk,
-      ID_IntpChk,
+      ID_ScaleBar,
+	  ID_ScaleText,
+      ID_ScaleCmb,
       ID_DefaultBtn,
       ID_AovSldr,
       ID_AovText,
@@ -960,6 +964,8 @@ class VRenderView: public wxPanel
    void OrganizeLayers();
    //randomize color
    void RandomizeColor();
+   //rotation linking
+   void OnRotLink(bool b);
 
    //trim volume data with meshes
    //void TrimData(int type=SEG_MTHD_BOTH);
@@ -1144,18 +1150,8 @@ class VRenderView: public wxPanel
       else return wxSize(0, 0);
    }
    //scale bar
-   void EnableScaleBar() {if (m_glview) m_glview->EnableScaleBar();}
-   void DisableScaleBar() {if (m_glview) m_glview->DisableScaleBar();}
-   void EnableSBText() {if (m_glview) m_glview->EnableSBText();}
-   void DisableSBText() {if (m_glview) m_glview->DisableSBText();}
    void SetScaleBarLen(double len)
    {if (m_glview) m_glview->SetScaleBarLen(len);}
-   void SetSBText(wxString text)
-   {if (m_glview) m_glview->SetSBText(text);}
-   void SetSbNumText(wxString text)
-   {if (m_glview) m_glview->m_sb_num = text;}
-   void SetSbUnitSel(int sel)
-   {if (m_glview) m_glview->m_sb_unit = sel;}
 
    //set dirty
    void SetVolPopDirty()
@@ -1367,11 +1363,15 @@ class VRenderView: public wxPanel
    wxTextCtrl* m_aov_text;
    wxToolBar * m_options_toolbar;
    wxToolBar * m_options_toolbar2;
+   wxToolBar * m_left_toolbar;
+   wxToolBar * m_right_toolbar2;
+   wxToolBar * m_lower_toolbar;
+	//scale bar
+	wxTextCtrl *m_scale_text;
+	wxComboBox *m_scale_cmb;
 
    //bottom bar///////////////////////////////////////////////////
    wxPanel* m_panel_2;
-   wxCheckBox *m_rot_link_chk;
-   wxButton *m_rot_reset_btn;
    wxSpinButton* m_x_rot_spin;
    wxSlider *m_x_rot_sldr;
    wxTextCtrl *m_x_rot_text;
@@ -1381,27 +1381,32 @@ class VRenderView: public wxPanel
    wxSlider *m_z_rot_sldr;
    wxTextCtrl *m_z_rot_text;
    wxSpinButton* m_z_rot_spin;
-   wxCheckBox* m_rot_lock_chk;
-   wxButton *m_default_btn;
 
    //left bar///////////////////////////////////////////////////
    wxPanel* m_panel_3;
-   wxCheckBox *m_depth_atten_chk;
    wxSlider *m_depth_atten_factor_sldr;
-   wxButton *m_depth_atten_reset_btn;
+   wxToolBar *m_depth_atten_reset_btn;
    wxTextCtrl *m_depth_atten_factor_text;
 
    //right bar///////////////////////////////////////////////////
    wxPanel* m_panel_4;
-   wxButton *m_center_btn;
-   wxButton *m_scale_121_btn;
+   wxToolBar *m_center_btn;
+   wxToolBar *m_scale_121_btn;
    wxSlider *m_scale_factor_sldr;
    wxTextCtrl *m_scale_factor_text;
-   wxButton *m_scale_reset_btn;
+   wxToolBar *m_scale_reset_btn;
    wxSpinButton* m_scale_factor_spin;
 
    //draw clip
    bool m_draw_clip;
+
+   //draw scalebar
+   enum SCALEBAR_STATE {
+	   kOn,
+	   kOff,
+	   kText
+   };
+   SCALEBAR_STATE m_draw_scalebar;
 
    bool m_use_dft_settings;
    double m_dft_x_rot;
@@ -1429,7 +1434,10 @@ class VRenderView: public wxPanel
    void OnCamCtrCheck(wxCommandEvent& event);
    void OnFpsCheck(wxCommandEvent& event);
    void OnLegendCheck(wxCommandEvent& event);
-   void OnIntpCheck(wxCommandEvent& event);
+   void OnScaleBar(wxCommandEvent& event);
+   void OnScaleTextEditing(wxCommandEvent& event);
+   void OnScaleUnitSelected(wxCommandEvent& event);
+
    void OnAovSldrIdle(wxIdleEvent& event);
    void OnAovChange(wxScrollEvent& event);
    void OnAovText(wxCommandEvent &event);
@@ -1448,7 +1456,6 @@ class VRenderView: public wxPanel
    void OnScaleFactorSpinUp(wxSpinEvent& event);
    void OnScaleFactorSpinDown(wxSpinEvent& event);
    //bar bottom
-   void OnRotLink(wxCommandEvent &event);
    void OnRotReset(wxCommandEvent &event);
    void OnValueEdit(wxCommandEvent& event);
    void OnXRotScroll(wxScrollEvent &event);

@@ -186,7 +186,7 @@ public:
 	int GetCurTime();
 
 	//draw volume
-	void Draw(bool otho = false, bool intactive = false, double zoom = 1.0, bool intp = true);
+	void Draw(bool otho = false, bool intactive = false, double zoom = 1.0);
 	void DrawBounds();
 	//draw mask (create the mask)
 	//type: 0-initial; 1-diffusion-based growing
@@ -322,9 +322,12 @@ public:
 
 	//randomize color
 	void RandomizeColor();
-
+	//legend
 	void SetLegend(bool val);
 	bool GetLegend();
+	//interpolate
+	void SetInterpolate(bool val);
+	bool GetInterpolate();
 
 	//number of valid bricks
 	void SetBrickNum(int num) {m_brick_num = num;}
@@ -427,6 +430,8 @@ private:
 
 	//shown in legend
 	bool m_legend;
+	//interpolate
+	bool m_interpolate;
 
 	//valid brick number
 	int m_brick_num;
@@ -1029,6 +1034,7 @@ public:
 	void SetShadowParams(double val);
 	void SetMode(int mode);
 	void SetNR(bool val);
+    void SetInterpolate(bool mode);
 	void SetInvert(bool mode);
 
 	//blend mode
@@ -1255,6 +1261,7 @@ public:
 	double m_vol_hcm;	//colormap high value
 	bool m_vol_eap;		//enable alpha
 	bool m_vol_esh;		//enable_shading
+	bool m_vol_interp;	//enable interpolation
 	bool m_vol_inv;		//enable inversion
 	bool m_vol_mip;		//enable_mip
 	bool m_vol_nrd;		//noise reduction
