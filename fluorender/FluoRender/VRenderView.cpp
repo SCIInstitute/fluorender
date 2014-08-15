@@ -10955,7 +10955,7 @@ void VRenderView::RefreshGL(bool interactive)
    if (m_glview)
    {
       m_glview->m_force_clear = true;
-      m_glview->m_interactive = interactive;
+      m_glview->m_interactive = interactive && m_glview->m_adaptive;
       m_glview->RefreshGL();
    }
 }
