@@ -469,9 +469,15 @@ void TraceDlg::GetSettings(VRenderView* vrv)
 	TraceGroup* trace_group = m_view->GetTraceGroup();
 	if (trace_group)
 	{
-		m_load_trace_text->SetValue(trace_group->GetPath());
+		wxString str = trace_group->GetPath();
+		if (!str.empty())
+			m_load_trace_text->SetValue(str);
+		else
+			m_load_trace_text->SetValue("Link map created but not saved");
 		UpdateList();
 	}
+	else
+		m_load_trace_text->SetValue("No Link map");
 }
 
 VRenderView* TraceDlg::GetView()

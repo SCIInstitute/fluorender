@@ -4737,6 +4737,7 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
          frame < start_frame)
       return;
 
+   m_tseq_prv_num = m_tseq_cur_num;
    m_tseq_cur_num = frame;
    VRenderFrame* vframe = (VRenderFrame*)m_frame;
    if (vframe && vframe->GetSettingDlg())

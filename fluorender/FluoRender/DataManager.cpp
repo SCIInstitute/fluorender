@@ -3513,12 +3513,11 @@ void TraceGroup::Draw()
 		Vertex *vertex2 = 0;
 		IDMap id_map_temp1, id_map_temp2;
 		Lbl lbl;
-		glBegin(GL_LINES);
 
 		id_map_temp1 = m_id_map;
 
-		if (m_cur_time >= m_prv_time)
-		{
+		//if (m_cur_time >= m_prv_time)
+		glBegin(GL_LINES);
 			//after
 			for (int i=cur_ghost; i<int(cur_ghost+m_ghost_num); ++i)
 			{
@@ -3564,9 +3563,12 @@ void TraceGroup::Draw()
 				id_map_temp1 = id_map_temp2;
 				id_map_temp2.clear();
 			}
-		}
-		else if (m_cur_time < m_prv_time)
-		{
+		glEnd();
+
+		id_map_temp1 = m_id_map;
+		id_map_temp2.clear();
+		glBegin(GL_LINES);
+		//else if (m_cur_time < m_prv_time)
 			//before
 			for (int i=cur_ghost; i>int(cur_ghost-m_ghost_num); --i)
 			{
@@ -3612,8 +3614,6 @@ void TraceGroup::Draw()
 				id_map_temp1 = id_map_temp2;
 				id_map_temp2.clear();
 			}
-		}
-
 		glEnd();
 	}
 
