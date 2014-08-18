@@ -751,6 +751,8 @@ class VRenderGLView: public wxGLCanvas
 		 bool m_cell_full;
 		 //link cell
 		 bool m_cell_link;
+		 //new cell id
+		 bool m_cell_new_id;
 
          //predraw in streaming mode
          bool m_pre_draw;

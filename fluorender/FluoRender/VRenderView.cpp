@@ -285,7 +285,9 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
    //full cell
    m_cell_full(false),
    //link cells
-   m_cell_link(false)
+   m_cell_link(false),
+   //new cell id
+   m_cell_new_id(false)
 {
    //create context
    if (sharedContext)
@@ -4362,6 +4364,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
    if (m_clip_down &&
          !wxGetKeyState(wxKeyCode('w')))
       m_clip_down = false;
+
 	//cell full
 	if (!m_cell_full &&
 		wxGetKeyState(wxKeyCode('f')))
@@ -4388,6 +4391,19 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 	if (m_cell_link &&
 		!wxGetKeyState(wxKeyCode('l')))
 		m_cell_link = false;
+	//new cell id
+	if (!m_cell_new_id &&
+		wxGetKeyState(wxKeyCode('n')))
+	{
+		m_cell_new_id = true;
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame && vr_frame->GetTraceDlg())
+			vr_frame->GetTraceDlg()->CellNewID();
+		refresh = true;
+	}
+	if (m_cell_new_id &&
+		!wxGetKeyState(wxKeyCode('n')))
+		m_cell_new_id = false;
 
    //forced refresh
    if (wxGetKeyState(WXK_F5))

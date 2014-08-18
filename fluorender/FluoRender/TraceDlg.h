@@ -100,6 +100,7 @@ public:
 	void CellUpdate();
 	void CellFull();
 	void CellLink(bool exclusive);
+	void CellNewID();
 
 private:
 	typedef struct
