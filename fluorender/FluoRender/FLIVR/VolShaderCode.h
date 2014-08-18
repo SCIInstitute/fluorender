@@ -586,6 +586,14 @@ namespace FLIVR
 	"	vec4 sel = vec4(1.0-loc6.x,\n" \
 	"					1.0-loc6.y,\n" \
 	"					1.0-loc6.z, 1.0);\n" \
+	"	if (sel.x==sel.y && sel.y==sel.z)\n" \
+	"		sel = vec4(0.5, 1.0, 0.5, 1.0);\n" \
+	"	else\n" \
+	"	{\n" \
+	"		if (sel.x == 0.0) sel.x = 0.5;\n" \
+	"		if (sel.y == 0.0) sel.y = 0.5;\n" \
+	"		if (sel.z == 0.0) sel.z = 0.5;\n" \
+	"	}\n" \
 	"	float hue, p2, p3;\n" \
 	"	if (label > uint(0))\n" \
 	"	{\n" \
