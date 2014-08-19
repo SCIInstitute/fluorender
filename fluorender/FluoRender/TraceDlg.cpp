@@ -1054,9 +1054,9 @@ void TraceDlg::CellNewID()
 	vd->GetResolution(nx, ny, nz);
 	unsigned long long index;
 	unsigned long id_init = 0;
-	wxString str = m_cell_new_id_text->GetValue();
-	str.ToULong(&id_init);
-	if (id_init == 0)
+	wxString str_id = m_cell_new_id_text->GetValue();
+	str_id.ToULong(&id_init);
+	if (str_id!="0" && id_init==0)
 	{
 		for (i=0; i<nx; ++i)
 		for (j=0; j<ny; ++j)
@@ -1078,7 +1078,10 @@ void TraceDlg::CellNewID()
 	int time = m_view->m_glview->m_tseq_cur_num;
 	Vertex vertex;
 	if (id_init == 0)
-		id_init = UINT_MAX;
+	{
+		if (str_id!="0")
+			id_init = UINT_MAX;
+	}
 	else
 	{
 		while (trace_group->FindIDInFrame(id_init, time, vertex))
