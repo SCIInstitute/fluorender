@@ -168,24 +168,8 @@ private:
 	wxSlider *m_colormap_low_value_sldr;
 	wxTextCtrl *m_colormap_low_value_text;
 
-	//bottom line
-	//invert
-	wxCheckBox *m_inv_chk;
-	//MIP
-	wxCheckBox *m_mip_chk;
-	//Noise reduction
-	wxCheckBox *m_nr_chk;
-	//Depth
-	wxCheckBox *m_depth_chk;
-	//legend
+	//buttons
 	wxToolBar *m_options_toolbar;
-	//toolbar options
-	wxCheckBox *m_legend_chk;
-	//sync
-	wxCheckBox *m_sync_group_chk;
-	//default
-	wxButton *m_save_default;
-	wxButton *m_reset_default;
 
 private:
 	void GetSettings();

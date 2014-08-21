@@ -266,7 +266,7 @@ m_free_version(true)
 
    //create prop panel
    m_prop_panel = new wxPanel(this, wxID_ANY,
-         wxDefaultPosition, wxSize(1100, 150), 0, "PropPanel");
+         wxDefaultPosition, wxSize(1100, -1), 0, "PropPanel");
    //prop panel chidren
    m_prop_sizer = new wxBoxSizer(wxHORIZONTAL);
    m_volume_prop = new VPropView(this, m_prop_panel, wxID_ANY);

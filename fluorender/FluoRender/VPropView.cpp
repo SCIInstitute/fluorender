@@ -6,6 +6,9 @@
 #include <wx/valnum.h>
 #include "png_resource.h"
 #include "interpolate.h"
+#include "refresh.h"
+#include "listicon_save.h"
+#include "legend.h"
 
 BEGIN_EVENT_TABLE(VPropView, wxPanel)
 //1
@@ -53,22 +56,22 @@ EVT_TEXT(ID_SpaceXText, VPropView::OnSpaceText)
 EVT_TEXT(ID_SpaceYText, VPropView::OnSpaceText)
 EVT_TEXT(ID_SpaceZText, VPropView::OnSpaceText)
 //legend
-EVT_CHECKBOX(ID_LegendChk, VPropView::OnLegendCheck)
-//interpolate
+EVT_TOOL(ID_LegendChk, VPropView::OnLegendCheck)
+//EVT_TOOL
 EVT_TOOL(ID_InterpolateChk, VPropView::OnInterpolateCheck)
 //sync within group
-EVT_CHECKBOX(ID_SyncGroupChk, VPropView::OnSyncGroupCheck)
+EVT_TOOL(ID_SyncGroupChk, VPropView::OnSyncGroupCheck)
 //save default
-EVT_BUTTON(ID_SaveDefault, VPropView::OnSaveDefault)
-EVT_BUTTON(ID_ResetDefault, VPropView::OnResetDefault)
+EVT_TOOL(ID_SaveDefault, VPropView::OnSaveDefault)
+EVT_TOOL(ID_ResetDefault, VPropView::OnResetDefault)
 //inversion
-EVT_CHECKBOX(ID_InvChk, VPropView::OnInvCheck)
+EVT_TOOL(ID_InvChk, VPropView::OnInvCheck)
 //MIP
-EVT_CHECKBOX(ID_MipChk, VPropView::OnMIPCheck)
+EVT_TOOL(ID_MipChk, VPropView::OnMIPCheck)
 //noise reduction
-EVT_CHECKBOX(ID_NRChk, VPropView::OnNRCheck)
+EVT_TOOL(ID_NRChk, VPropView::OnNRCheck)
 //depth mode
-EVT_CHECKBOX(ID_DepthChk, VPropView::OnDepthCheck)
+EVT_TOOL(ID_DepthChk, VPropView::OnDepthCheck)
 END_EVENT_TABLE()
 
 VPropView::VPropView(wxWindow* frame,
@@ -90,25 +93,25 @@ VPropView::VPropView(wxWindow* frame,
    m_space_y_text(0),
    m_space_z_text(0)
 {
-   wxBoxSizer* sizer_all = new wxBoxSizer(wxVERTICAL);
-   wxBoxSizer* sizer_sliders = new wxBoxSizer(wxHORIZONTAL);
-   wxBoxSizer* sizer_sl_left = new wxBoxSizer(wxVERTICAL);
-   wxBoxSizer* sizer_sl_righ = new wxBoxSizer(wxVERTICAL);
+   wxBoxSizer* sizer_all = new wxBoxSizer(wxHORIZONTAL);
+   wxBoxSizer* sizer_left = new wxBoxSizer(wxVERTICAL);
+   wxBoxSizer* sizer_middle = new wxBoxSizer(wxVERTICAL);
+   wxBoxSizer* sizer_right = new wxBoxSizer(wxVERTICAL);
 
    wxBoxSizer* sizer_l1 = new wxBoxSizer(wxHORIZONTAL);
    wxBoxSizer* sizer_l2 = new wxBoxSizer(wxHORIZONTAL);
    wxBoxSizer* sizer_l3 = new wxBoxSizer(wxHORIZONTAL);
    wxBoxSizer* sizer_l4 = new wxBoxSizer(wxHORIZONTAL);
-   wxBoxSizer* sizer_l5 = new wxBoxSizer(wxHORIZONTAL);
+
+   wxBoxSizer* sizer_m1 = new wxBoxSizer(wxHORIZONTAL);
+   wxBoxSizer* sizer_m2 = new wxBoxSizer(wxHORIZONTAL);
+   wxBoxSizer* sizer_m3 = new wxBoxSizer(wxHORIZONTAL);
+   wxBoxSizer* sizer_m4 = new wxBoxSizer(wxHORIZONTAL);
 
    wxBoxSizer* sizer_r1 = new wxBoxSizer(wxHORIZONTAL);
    wxBoxSizer* sizer_r2 = new wxBoxSizer(wxHORIZONTAL);
    wxBoxSizer* sizer_r3 = new wxBoxSizer(wxHORIZONTAL);
    wxBoxSizer* sizer_r4 = new wxBoxSizer(wxHORIZONTAL);
-   wxBoxSizer* sizer_r5 = new wxBoxSizer(wxHORIZONTAL);
-   //wxBoxSizer* sizer_r6 = new wxBoxSizer(wxHORIZONTAL);
-
-   wxBoxSizer* sizer_b = new wxBoxSizer(wxHORIZONTAL);
 
    wxStaticText* st = 0;
 
@@ -123,42 +126,115 @@ VPropView::VPropView(wxWindow* frame,
    //validator: integer
    wxIntegerValidator<unsigned int> vald_int;
 
-   //1st line
+   //left side///////////////////////////////////////////////////
    //gamma
-   st = new wxStaticText(this, 0, ":Gamma",
-         wxDefaultPosition, wxSize(110, 20));
+   st = new wxStaticText(this, 0, "Gamma:",
+         wxDefaultPosition, wxSize(75, -1));
    m_gamma_sldr = new wxSlider(this, ID_GammaSldr, 100, 10, 400,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_INVERSE);
    m_gamma_text = new wxTextCtrl(this, ID_GammaText, "1.00",
          wxDefaultPosition, wxSize(40, 20), 0, vald_fp2);
-   sizer_l1->Add(m_gamma_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+   sizer_l1->Add(st, 0, wxALIGN_LEFT);
    sizer_l1->Add(m_gamma_text, 0, wxALIGN_CENTER);
-   sizer_l1->Add(st, 0, wxALIGN_CENTER);
-   //extract boundary
-   st = new wxStaticText(this, 0, "Extract Boundary:",
-         wxDefaultPosition, wxSize(140, 20), wxALIGN_RIGHT);
-   m_boundary_sldr = new wxSlider(this, ID_BoundarySldr, 0, 0, 1000,
-         wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-   m_boundary_text = new wxTextCtrl(this, ID_BoundaryText, "0.0000",
-         wxDefaultPosition, wxSize(60, 20), 0, vald_fp4);
-   sizer_r1->Add(st, 0, wxALIGN_CENTER);
-   sizer_r1->Add(m_boundary_text, 0, wxALIGN_CENTER);
-   sizer_r1->Add(m_boundary_sldr, 1, wxEXPAND|wxALIGN_CENTER);
-
-   //2nd line
+   sizer_l1->Add(m_gamma_sldr, 1, wxEXPAND|wxALIGN_CENTER);
    //saturation point
-   st = new wxStaticText(this, 0, ":Saturation Point",
-         wxDefaultPosition, wxSize(110, 20));
+   st = new wxStaticText(this, 0, "Saturation Point:",
+         wxDefaultPosition, wxSize(75, -1));
    m_contrast_sldr = new wxSlider(this, ID_ContrastSldr, 255, 0, 255,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_contrast_text = new wxTextCtrl(this, ID_ContrastText, "50",
          wxDefaultPosition, wxSize(40, 20), 0, vald_int);
-   sizer_l2->Add(m_contrast_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+   sizer_l2->Add(st, 0, wxALIGN_LEFT);
    sizer_l2->Add(m_contrast_text, 0, wxALIGN_CENTER);
-   sizer_l2->Add(st, 0, wxALIGN_CENTER);
+   sizer_l2->Add(m_contrast_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+   //luminance
+   st = new wxStaticText(this, 0, "Luminance:",
+         wxDefaultPosition, wxSize(75, -1));
+   m_luminance_sldr = new wxSlider(this, ID_LuminanceSldr, 128, 0, 255,
+         wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+   m_luminance_text = new wxTextCtrl(this, ID_LuminanceText, "128",
+         wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+   sizer_l3->Add(st, 0, wxALIGN_LEFT, 0);
+   sizer_l3->Add(m_luminance_text, 0, wxALIGN_CENTER, 0);
+   sizer_l3->Add(m_luminance_sldr, 1, wxEXPAND|wxALIGN_CENTER, 0);
+   //alpha
+   m_alpha_chk = new wxCheckBox(this, ID_AlphaChk, "Alpha:",
+         wxDefaultPosition, wxSize(75, -1));
+   m_alpha_sldr = new wxSlider(this, ID_AlphaSldr, 127, 0, 255,
+         wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+   m_alpha_text = new wxTextCtrl(this, ID_Alpha_Text, "127",
+         wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+   sizer_l4->Add(m_alpha_chk, 0, wxALIGN_LEFT);
+   sizer_l4->Add(m_alpha_text, 0, wxALIGN_CENTER);
+   sizer_l4->Add(m_alpha_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+   //middle///////////////////////////////////////////////////
+   //shading
+   m_low_shading_sldr = new wxSlider(this, ID_LowShadingSldr, 0, 0, 200,
+         wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+   m_low_shading_text = new wxTextCtrl(this, ID_LowShadingText, "0.00",
+         wxDefaultPosition, wxSize(40, 20), 0, vald_fp2);
+   m_shading_enable_chk = new wxCheckBox(this, ID_ShadingEnableChk, "Shading:",
+         wxDefaultPosition, wxSize(75, -1));
+   sizer_m1->Add(m_shading_enable_chk, 0, wxALIGN_LEFT);
+   sizer_m1->Add(m_low_shading_text, 0, wxALIGN_CENTER);
+   sizer_m1->Add(m_low_shading_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+   //shadow
+   m_shadow_chk = new wxCheckBox(this, ID_ShadowChk, "Shadow:",
+         wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
+   m_shadow_sldr = new wxSlider(this, ID_ShadowSldr, 0, 0, 100,
+         wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+   m_shadow_text = new wxTextCtrl(this, ID_ShadowText, "0.00",
+         wxDefaultPosition, wxSize(40, 20), 0, vald_fp2);
+   sizer_m2->Add(m_shadow_chk, 0, wxALIGN_LEFT);
+   sizer_m2->Add(m_shadow_text, 0, wxALIGN_CENTER);
+   sizer_m2->Add(m_shadow_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+   //highlight
+   st = new wxStaticText(this, 0, "Light:",
+         wxDefaultPosition, wxSize(75, -1));
+   m_hi_shading_sldr = new wxSlider(this, ID_HiShadingSldr, 0, 0, 100,
+         wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+   m_hi_shading_text = new wxTextCtrl(this, ID_HiShadingText, "0.00",
+         wxDefaultPosition, wxSize(40, 20), 0, vald_fp2);
+   sizer_m3->Add(st, 0, wxALIGN_LEFT);
+   sizer_m3->Add(m_hi_shading_text, 0, wxALIGN_CENTER);
+   sizer_m3->Add(m_hi_shading_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+   //colormap
+   m_colormap_enable_chk = new wxCheckBox(this, ID_ColormapEnableChk, 
+	   "Colormap: Low (B)",
+         wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
+   sizer_m4->Add(m_colormap_enable_chk, 0, wxALIGN_CENTER);
+   m_colormap_low_value_text = new wxTextCtrl(this, 
+	   ID_ColormapLowValueText, "0",
+         wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+   sizer_m4->Add(m_colormap_low_value_text, 0, wxALIGN_CENTER);
+   m_colormap_low_value_sldr = new wxSlider(this, 
+	   ID_ColormapLowValueSldr, 0, 0, 255,
+         wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+   sizer_m4->Add(m_colormap_low_value_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+   m_colormap_high_value_text = new wxTextCtrl(this, 
+	   ID_ColormapHighValueText, "255",
+         wxDefaultPosition + wxPoint(10,0), wxSize(40, 20), 0, vald_int);
+   sizer_m4->Add(m_colormap_high_value_text, 0, wxALIGN_CENTER);
+   m_colormap_high_value_sldr = new wxSlider(this, 
+	   ID_ColormapHighValueSldr, 255, 0, 255,
+         wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+   sizer_m4->Add(m_colormap_high_value_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+   st = new wxStaticText(this, 0, "High (R)");
+   sizer_m4->Add(st, 0, wxALIGN_CENTER);
+   //right///////////////////////////////////////////////////
+   //extract boundary
+   st = new wxStaticText(this, 0, "Extract Boundary:",
+         wxDefaultPosition, wxSize(100, -1), wxALIGN_LEFT);
+   m_boundary_sldr = new wxSlider(this, ID_BoundarySldr, 0, 0, 1000,
+         wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+   m_boundary_text = new wxTextCtrl(this, ID_BoundaryText, "0.0000",
+         wxDefaultPosition, wxSize(60, 20), 0, vald_fp4);
+   sizer_r1->Add(st, 0, wxALIGN_LEFT);
+   sizer_r1->Add(m_boundary_text, 0, wxALIGN_CENTER);
+   sizer_r1->Add(m_boundary_sldr, 1, wxEXPAND|wxALIGN_CENTER);
    //thresholds
    m_threh_st = new wxStaticText(this, 0, "Threshold:",
-         wxDefaultPosition, wxSize(140, 20), wxALIGN_RIGHT);
+         wxDefaultPosition, wxSize(100, -1), wxALIGN_LEFT);
    m_left_thresh_sldr = new wxSlider(this, ID_LeftThreshSldr, 5, 0, 255,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_left_thresh_text = new wxTextCtrl(this, ID_LeftThreshText, "5",
@@ -167,215 +243,127 @@ VPropView::VPropView(wxWindow* frame,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_right_thresh_text = new wxTextCtrl(this, ID_RightThreshText, "230",
          wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-   sizer_r2->Add(m_threh_st, 0, wxALIGN_CENTER);
+   sizer_r2->Add(m_threh_st, 0, wxALIGN_LEFT);
    sizer_r2->Add(m_left_thresh_text, 0, wxALIGN_CENTER);
    sizer_r2->Add(m_left_thresh_sldr, 1, wxEXPAND|wxALIGN_CENTER);
    sizer_r2->Add(m_right_thresh_text, 0, wxALIGN_CENTER);
    sizer_r2->Add(m_right_thresh_sldr,1, wxEXPAND|wxALIGN_CENTER);
-
-   //3rd line
-   //luminance
-   st = new wxStaticText(this, 0, ":Luminance",
-         wxDefaultPosition, wxSize(110, 20));
-   m_luminance_sldr = new wxSlider(this, ID_LuminanceSldr, 128, 0, 255,
-         wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-   m_luminance_text = new wxTextCtrl(this, ID_LuminanceText, "128",
-         wxDefaultPosition, wxSize(40, 20), 0, vald_int);
-   sizer_l3->Add(m_luminance_sldr, 1, wxEXPAND|wxALIGN_CENTER, 0);
-   sizer_l3->Add(m_luminance_text, 0, wxALIGN_CENTER, 0);
-   sizer_l3->Add(st, 0, wxALIGN_CENTER, 0);
-    //shadow
-    sizer_r3->Add(10,5,0);
-   m_shadow_chk = new wxCheckBox(this, ID_ShadowChk, "Shadow / Light:",
-         wxDefaultPosition, wxSize(130, 20), wxALIGN_RIGHT);
-   m_shadow_sldr = new wxSlider(this, ID_ShadowSldr, 0, 0, 100,
-         wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-   m_shadow_text = new wxTextCtrl(this, ID_ShadowText, "0.00",
-         wxDefaultPosition, wxSize(60, 20), 0, vald_fp2);
-   sizer_r3->Add(m_shadow_chk, 0, wxALIGN_CENTER);
-   sizer_r3->Add(m_shadow_text, 0, wxALIGN_CENTER);
-   sizer_r3->Add(m_shadow_sldr, 1, wxEXPAND|wxALIGN_CENTER);
-   //highlight
-   m_hi_shading_sldr = new wxSlider(this, ID_HiShadingSldr, 0, 0, 100,
-         wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-   m_hi_shading_text = new wxTextCtrl(this, ID_HiShadingText, "0.00",
-         wxDefaultPosition, wxSize(60, 20), 0, vald_fp2);
-   sizer_r3->Add(m_hi_shading_text, 0, wxALIGN_CENTER);
-   sizer_r3->Add(m_hi_shading_sldr, 1, wxEXPAND|wxALIGN_CENTER);
-
-   //4th line
-   //alpha
-   st = new wxStaticText(this, 0, ":",
-         wxDefaultPosition, wxSize(5, 20));
-   m_alpha_chk = new wxCheckBox(this, ID_AlphaChk, "Alpha",
-         wxDefaultPosition, wxSize(105, 20));
-   m_alpha_sldr = new wxSlider(this, ID_AlphaSldr, 127, 0, 255,
-         wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-   m_alpha_text = new wxTextCtrl(this, ID_Alpha_Text, "127",
-         wxDefaultPosition, wxSize(40, 20), 0, vald_int);
-   sizer_l4->Add(m_alpha_sldr, 1, wxEXPAND|wxALIGN_CENTER);
-   sizer_l4->Add(m_alpha_text, 0, wxALIGN_CENTER);
-   sizer_l4->Add(st, 0, wxALIGN_CENTER);
-   sizer_l4->Add(m_alpha_chk, 0, wxALIGN_CENTER);
    //sample rate
    st = new wxStaticText(this, 0, "Sample Rate:",
-         wxDefaultPosition, wxSize(140, 20), wxALIGN_RIGHT);
+         wxDefaultPosition, wxSize(100, -1), wxALIGN_LEFT);
    m_sample_sldr = new wxSlider(this, ID_SampleSldr, 10, 0, 50,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_sample_text = new wxTextCtrl(this, ID_SampleText, "1.0",
          wxDefaultPosition, wxSize(60, 20), 0, vald_fp1);
-   sizer_r4->Add(st, 0, wxALIGN_CENTER);
-   sizer_r4->Add(m_sample_text, 0, wxALIGN_CENTER);
-   sizer_r4->Add(m_sample_sldr, 1, wxEXPAND|wxALIGN_CENTER);
-
-   //5th line
-   //shading
-   m_low_shading_sldr = new wxSlider(this, ID_LowShadingSldr, 0, 0, 200,
-         wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-   m_low_shading_text = new wxTextCtrl(this, ID_LowShadingText, "0.00",
-         wxDefaultPosition, wxSize(40, 20), 0, vald_fp2);
-   st = new wxStaticText(this, 0, ":",
-         wxDefaultPosition, wxSize(5, 20));
-   m_shading_enable_chk = new wxCheckBox(this, ID_ShadingEnableChk, "Shading",
-         wxDefaultPosition, wxSize(105, 20));
-   sizer_l5->Add(m_low_shading_sldr, 1, wxEXPAND|wxALIGN_CENTER);
-   sizer_l5->Add(m_low_shading_text, 0, wxALIGN_CENTER);
-   sizer_l5->Add(st, 0, wxALIGN_CENTER);
-   sizer_l5->Add(m_shading_enable_chk, 0, wxALIGN_CENTER);
-    //colormap
-    sizer_r5->Add(10,5,0);
-   m_colormap_enable_chk = new wxCheckBox(this, ID_ColormapEnableChk, "Colormap: Low (B)",
-         wxDefaultPosition, wxSize(140, 20), wxALIGN_RIGHT);
-   sizer_r5->Add(m_colormap_enable_chk, 0, wxALIGN_CENTER);
-   m_colormap_low_value_text = new wxTextCtrl(this, ID_ColormapLowValueText, "0",
-         wxDefaultPosition, wxSize(50, 20), 0, vald_int);
-   sizer_r5->Add(m_colormap_low_value_text, 0, wxALIGN_CENTER);
-   m_colormap_low_value_sldr = new wxSlider(this, ID_ColormapLowValueSldr, 0, 0, 255,
-         wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-   sizer_r5->Add(m_colormap_low_value_sldr, 1, wxEXPAND|wxALIGN_CENTER);
-   m_colormap_high_value_text = new wxTextCtrl(this, ID_ColormapHighValueText, "255",
-         wxDefaultPosition + wxPoint(10,0), wxSize(50, 20), 0, vald_int);
-   sizer_r5->Add(m_colormap_high_value_text, 0, wxALIGN_CENTER);
-   m_colormap_high_value_sldr = new wxSlider(this, ID_ColormapHighValueSldr, 255, 0, 255,
-         wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-   sizer_r5->Add(m_colormap_high_value_sldr, 1, wxEXPAND|wxALIGN_CENTER);
-   st = new wxStaticText(this, 0, "High (R)");
-   sizer_r5->Add(st, 0, wxALIGN_CENTER);
-
-   //6th line
-   //left sliders
-   sizer_sl_left->Add(sizer_l1, 0, wxEXPAND|wxALIGN_CENTER);
-   sizer_sl_left->Add(sizer_l2, 0, wxEXPAND|wxALIGN_CENTER);
-   sizer_sl_left->Add(sizer_l3, 0, wxEXPAND|wxALIGN_CENTER);
-   sizer_sl_left->Add(sizer_l4, 0, wxEXPAND|wxALIGN_CENTER);
-   sizer_sl_left->Add(sizer_l5, 0, wxEXPAND|wxALIGN_CENTER);
-
-   //right sliders
-   sizer_sl_righ->Add(sizer_r1, 0, wxEXPAND|wxALIGN_CENTER);
-   sizer_sl_righ->Add(sizer_r2, 0, wxEXPAND|wxALIGN_CENTER);
-   sizer_sl_righ->Add(sizer_r3, 0, wxEXPAND|wxALIGN_CENTER);
-   sizer_sl_righ->Add(sizer_r4, 0, wxEXPAND|wxALIGN_CENTER);
-   sizer_sl_righ->Add(sizer_r5, 0, wxEXPAND|wxALIGN_CENTER);
-
-   //all sliders
-   sizer_sliders->Add(sizer_sl_left, 1, wxEXPAND|wxALIGN_CENTER);
-   sizer_sliders->Add(sizer_sl_righ, 1, wxEXPAND|wxALIGN_CENTER);
-
-   //bottom line
+   sizer_r3->Add(st, 0, wxALIGN_LEFT);
+   sizer_r3->Add(m_sample_text, 0, wxALIGN_CENTER);
+   sizer_r3->Add(m_sample_sldr, 1, wxEXPAND|wxALIGN_CENTER);
    //color
-   st = new wxStaticText(this, 0, "Color:");
+   st = new wxStaticText(this, 0, "Color:",
+         wxDefaultPosition, wxSize(-1, -1), wxALIGN_LEFT);
    m_color_text = new wxTextCtrl(this, ID_ColorText, "255 , 255 , 255",
-         wxDefaultPosition, wxSize(110, 20));
+         wxDefaultPosition, wxSize(0, 20));
    m_color_text->Connect(ID_ColorText, wxEVT_LEFT_DCLICK,
          wxCommandEventHandler(VPropView::OnColorTextFocus),
          NULL, this);
    m_color_btn = new wxColourPickerCtrl(this, ID_ColorBtn, *wxRED,
-         wxDefaultPosition, wxDefaultSize);
-    
-   sizer_b->Add(10, 5, 0);
-   sizer_b->Add(st, 0, wxALIGN_CENTER, 0);
-   sizer_b->Add(m_color_text, 0, wxALIGN_CENTER, 0);
-   sizer_b->Add(m_color_btn, 0, wxALIGN_CENTER, 0);
-   //spaceings
+         wxDefaultPosition, wxSize(75,-1));
+   sizer_r4->Add(st, 0, wxALIGN_CENTER, 0);
+   sizer_r4->Add(m_color_btn, 0, wxALIGN_CENTER, 0);
+   //spacings
    //x
-   st = new wxStaticText(this, 0, "X:");
+   st = new wxStaticText(this, 0, "Spacing: X:");
    m_space_x_text = new wxTextCtrl(this, ID_SpaceXText, "1.000",
          wxDefaultPosition, wxSize(45, 20), 0, vald_fp3);
-   sizer_b->Add(10, 5, 0);
-   sizer_b->Add(st, 0, wxALIGN_CENTER);
-   sizer_b->Add(m_space_x_text, 0, wxALIGN_CENTER);
+   sizer_r4->Add(10, 5, 0);
+   sizer_r4->Add(st, 0, wxALIGN_CENTER);
+   sizer_r4->Add(m_space_x_text, 0, wxALIGN_CENTER);
    //y
    st = new wxStaticText(this, 0, "Y:");
    m_space_y_text = new wxTextCtrl(this, ID_SpaceYText, "1.000",
          wxDefaultPosition, wxSize(45, 20), 0, vald_fp3);
-   sizer_b->Add(5, 5, 0);
-   sizer_b->Add(st, 0, wxALIGN_CENTER);
-   sizer_b->Add(m_space_y_text, 0, wxALIGN_CENTER);
+   sizer_r4->Add(5, 5, 0);
+   sizer_r4->Add(st, 0, wxALIGN_CENTER);
+   sizer_r4->Add(m_space_y_text, 0, wxALIGN_CENTER);
    //z
    st = new wxStaticText(this, 0, "Z:");
    m_space_z_text = new wxTextCtrl(this, ID_SpaceZText, "1.000",
          wxDefaultPosition, wxSize(45, 20), 0, vald_fp3);
-   sizer_b->Add(5, 5, 0);
-   sizer_b->Add(st, 0, wxALIGN_CENTER);
-   sizer_b->Add(m_space_z_text, 0, wxALIGN_CENTER);
-
+   sizer_r4->Add(5, 5, 0);
+   sizer_r4->Add(st, 0, wxALIGN_CENTER);
+   sizer_r4->Add(m_space_z_text, 0, wxALIGN_CENTER);
    //legend
-   m_legend_chk = new wxCheckBox(this, ID_LegendChk, "Legend:",
-         wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-   sizer_b->Add(10, 5, 0);
-   sizer_b->Add(m_legend_chk, 0, wxALIGN_CENTER);
-
-   //stretcher
-   sizer_b->AddStretchSpacer(1);
-   //interpolation
    m_options_toolbar = new wxToolBar(this,wxID_ANY);
+   m_options_toolbar->AddCheckTool(ID_LegendChk,"Legend",
+   wxGetBitmapFromMemory(legend),wxNullBitmap,
+    "Enable Legend for this channel.",
+    "Enable Legend for this channel.");
+   m_options_toolbar->ToggleTool(ID_LegendChk,true);
+   //interpolation
    m_options_toolbar->AddCheckTool(ID_InterpolateChk,"Interpolate",
    wxGetBitmapFromMemory(interpolate),wxNullBitmap,
     "Interpolates between data when checked.",
     "Interpolates between data when checked.");
    m_options_toolbar->ToggleTool(ID_InterpolateChk,true);
-   m_options_toolbar->Realize();
-   sizer_b->Add(m_options_toolbar, 0, wxALIGN_CENTER);
    //inversion
-   m_inv_chk = new wxCheckBox(this, ID_InvChk, ":Inv",
-         wxDefaultPosition, wxDefaultSize);
-   sizer_b->Add(m_inv_chk, 0, wxALIGN_CENTER, 0);
-   VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-   if (vr_frame && vr_frame->GetFreeVersion())
-      m_inv_chk->Hide();
+   m_options_toolbar->AddCheckTool(ID_InvChk,"Inversion",
+   wxGetBitmapFromMemory(listicon_save),wxNullBitmap,
+    "Inverts data values when checked.",
+    "Inverts data values when checked.");
+   m_options_toolbar->ToggleTool(ID_InvChk,false);
    //MIP
-   m_mip_chk = new wxCheckBox(this, ID_MipChk, ":MIP",
-         wxDefaultPosition, wxDefaultSize);
-   sizer_b->Add(m_mip_chk, 0, wxALIGN_CENTER, 0);
+   m_options_toolbar->AddCheckTool(ID_MipChk,"MIP",
+   wxGetBitmapFromMemory(refresh),wxNullBitmap,
+    "Enable Maximum Intensity Projection.",
+    "Enable Maximum Intensity Projection.");
+   m_options_toolbar->ToggleTool(ID_MipChk,false);
    //noise reduction
-   m_nr_chk = new wxCheckBox(this, ID_NRChk, ":Smoothing",
-         wxDefaultPosition, wxDefaultSize);
-   sizer_b->Add(5, 5, 0);
-   sizer_b->Add(m_nr_chk, 0, wxALIGN_CENTER, 0);
-   //group
-   st = new wxStaticText(this, 0, "Group:");
+   m_options_toolbar->AddCheckTool(ID_NRChk,"Smoothing",
+   wxGetBitmapFromMemory(legend),wxNullBitmap,
+    "Enable Data Smoothing.",
+    "Enable Data Smoothing.");
+   m_options_toolbar->ToggleTool(ID_NRChk,false);
    //sync group
-   m_sync_group_chk = new wxCheckBox(this, ID_SyncGroupChk, "Sync");
-   sizer_b->Add(10, 5, 0);
-   sizer_b->Add(st, 0, wxALIGN_CENTER);
-   sizer_b->Add(5, 5, 0);
-   sizer_b->Add(m_sync_group_chk, 0, wxALIGN_CENTER);
+   m_options_toolbar->AddCheckTool(ID_SyncGroupChk,"Group Sync",
+   wxGetBitmapFromMemory(interpolate),wxNullBitmap,
+    "Sync this channel with others in its group.",
+    "Sync this channel with others in its group.");
+   m_options_toolbar->ToggleTool(ID_SyncGroupChk,false);
    //depth mode
-   m_depth_chk = new wxCheckBox(this, ID_DepthChk, "Depth",
-         wxDefaultPosition, wxDefaultSize);
-   sizer_b->Add(5, 5, 0);
-   sizer_b->Add(m_depth_chk, 0, wxALIGN_CENTER, 0);
+   m_options_toolbar->AddCheckTool(ID_DepthChk,"Depth Mode",
+   wxGetBitmapFromMemory(listicon_save),wxNullBitmap,
+    "Enable Depth Mode.",
+    "Enable Depth Mode.");
+   m_options_toolbar->ToggleTool(ID_DepthChk,false);
    //buttons
-   m_reset_default = new wxButton(this, ID_ResetDefault, "Reset",
-         wxDefaultPosition, wxSize(55, 20));
-   m_save_default = new wxButton(this, ID_SaveDefault, "Save as Default",
-         wxDefaultPosition, wxSize(115, 20));
-   sizer_b->Add(m_reset_default, 0, wxALIGN_CENTER);
-   sizer_b->Add(m_save_default, 0, wxALIGN_CENTER);
-
-   sizer_all->Add(sizer_sliders, 0, wxEXPAND);
-   sizer_all->Add(sizer_b, 0, wxEXPAND);
-
+   m_options_toolbar->AddTool(ID_ResetDefault,"Reset",
+	   wxGetBitmapFromMemory(refresh),
+	   "Reset Properties");
+   m_options_toolbar->AddTool(ID_SaveDefault,"Save",
+	   wxGetBitmapFromMemory(listicon_save),
+	   "Save as Default Properties");
+   m_options_toolbar->Realize();
+   sizer_r4->Add(m_options_toolbar, 0, wxALIGN_CENTER);
+   //ADD COLUMNS//////////////////////////////////////
+   //left
+   sizer_left->Add(sizer_l1, 0, wxEXPAND|wxALIGN_CENTER);
+   sizer_left->Add(sizer_l2, 0, wxEXPAND|wxALIGN_CENTER);
+   sizer_left->Add(sizer_l3, 0, wxEXPAND|wxALIGN_CENTER);
+   sizer_left->Add(sizer_l4, 0, wxEXPAND|wxALIGN_CENTER);
+   //middle
+   sizer_middle->Add(sizer_m1, 0, wxEXPAND|wxALIGN_CENTER);
+   sizer_middle->Add(sizer_m2, 0, wxEXPAND|wxALIGN_CENTER);
+   sizer_middle->Add(sizer_m3, 0, wxEXPAND|wxALIGN_CENTER);
+   sizer_middle->Add(sizer_m4, 0, wxEXPAND|wxALIGN_CENTER);
+   //right
+   sizer_right->Add(sizer_r1, 0, wxEXPAND|wxALIGN_CENTER);
+   sizer_right->Add(sizer_r2, 0, wxEXPAND|wxALIGN_CENTER);
+   sizer_right->Add(sizer_r3, 0, wxEXPAND|wxALIGN_CENTER);
+   sizer_right->Add(sizer_r4, 0, wxEXPAND|wxALIGN_CENTER);
+   //ADD ALL TOGETHER
+   sizer_all->Add(sizer_left, 1, wxEXPAND);
+   sizer_all->Add(sizer_middle, 1, wxEXPAND);
+   sizer_all->Add(sizer_right, 1, wxEXPAND);
    SetSizer(sizer_all);
    Layout();
 }
@@ -534,7 +522,7 @@ void VPropView::GetSettings()
    m_space_z_text->ChangeValue(str);
 
    //legend
-   m_legend_chk->SetValue(m_vd->GetLegend());
+   m_options_toolbar->ToggleTool(ID_LegendChk,m_vd->GetLegend());
 
    //interpolate
    m_options_toolbar->ToggleTool(ID_InterpolateChk,m_vd->GetInterpolate());
@@ -542,7 +530,7 @@ void VPropView::GetSettings()
    //sync group
    if (m_group)
       m_sync_group = m_group->GetVolumeSyncProp();
-   m_sync_group_chk->SetValue(m_sync_group);
+   m_options_toolbar->ToggleTool(ID_SyncGroupChk,m_sync_group);
 
    //colormap
    double low, high;
@@ -571,13 +559,13 @@ void VPropView::GetSettings()
 
    //inversion
    bool inv = m_vd->GetInvert();
-   m_inv_chk->SetValue(inv);
+   m_options_toolbar->ToggleTool(ID_InvChk,inv);
 
    //MIP
    int mode = m_vd->GetMode();
    if (mode == 1)
    {
-      m_mip_chk->SetValue(true);
+      m_options_toolbar->ToggleTool(ID_MipChk,true);
       m_alpha_sldr->Disable();
       m_alpha_text->Disable();
       m_right_thresh_sldr->Disable();
@@ -598,7 +586,7 @@ void VPropView::GetSettings()
    }
    else
    {
-      m_mip_chk->SetValue(false);
+	  m_options_toolbar->ToggleTool(ID_MipChk,false);
       if (alpha)
       {
          m_alpha_sldr->Enable();
@@ -620,14 +608,14 @@ void VPropView::GetSettings()
 
    //noise reduction
    bool nr = m_vd->GetNR();
-   m_nr_chk->SetValue(nr);
+   m_options_toolbar->ToggleTool(ID_NRChk,nr);
 
    //blend mode
    int blend_mode = m_vd->GetBlendMode();
    if (blend_mode == 2)
-      m_depth_chk->SetValue(true);
+	  m_options_toolbar->ToggleTool(ID_DepthChk,true);
    else
-      m_depth_chk->SetValue(false);
+	  m_options_toolbar->ToggleTool(ID_DepthChk,false);
 
    Layout();
 }
@@ -672,7 +660,7 @@ void VPropView::SetGroup(DataGroup* group)
    if (m_group)
    {
       m_sync_group = m_group->GetVolumeSyncProp();
-      m_sync_group_chk->SetValue(m_sync_group);
+	  m_options_toolbar->ToggleTool(ID_SyncGroupChk,m_sync_group);
    }
 }
 
@@ -1396,7 +1384,7 @@ void VPropView::OnColorTextFocus(wxCommandEvent& event)
 
 void VPropView::OnInvCheck(wxCommandEvent &event)
 {
-   bool inv = m_inv_chk->GetValue();
+   bool inv = m_options_toolbar->GetToolState(ID_InvChk);
    if (m_sync_group && m_group)
       m_group->SetInvert(inv);
    else if (m_vd)
@@ -1407,7 +1395,7 @@ void VPropView::OnInvCheck(wxCommandEvent &event)
 
 void VPropView::OnMIPCheck(wxCommandEvent &event)
 {
-   int val = m_mip_chk->GetValue()?1:0;
+   int val = m_options_toolbar->GetToolState(ID_MipChk)?1:0;
 
    if (val==1)
    {
@@ -1420,7 +1408,7 @@ void VPropView::OnMIPCheck(wxCommandEvent &event)
             if (vrv && vrv->GetVolMethod()==VOL_METHOD_MULTI)
             {
                ::wxMessageBox("MIP is not supported in Depth mode.");
-               m_mip_chk->SetValue(false);
+               m_options_toolbar->ToggleTool(ID_MipChk,false);
                return;
             }
          }
@@ -1477,7 +1465,7 @@ void VPropView::OnMIPCheck(wxCommandEvent &event)
 //noise reduction
 void VPropView::OnNRCheck(wxCommandEvent &event)
 {
-   bool val = m_nr_chk->GetValue();
+   bool val = m_options_toolbar->GetToolState(ID_NRChk);
 
    if (m_vrv && m_vrv->GetVolMethod()==VOL_METHOD_MULTI)
    {
@@ -1504,7 +1492,7 @@ void VPropView::OnNRCheck(wxCommandEvent &event)
 //depth mode
 void VPropView::OnDepthCheck(wxCommandEvent &event)
 {
-   bool val = m_depth_chk->GetValue();
+   bool val = m_options_toolbar->GetToolState(ID_DepthChk);
 
    if (val)
    {
@@ -1584,8 +1572,9 @@ void VPropView::OnSpaceText(wxCommandEvent& event)
 //legend
 void VPropView::OnLegendCheck(wxCommandEvent& event)
 {
+   bool leg = m_options_toolbar->GetToolState(ID_LegendChk);
    if (m_vd)
-      m_vd->SetLegend(m_legend_chk->GetValue());
+      m_vd->SetLegend(leg);
 
    RefreshVRenderViews();
 }
@@ -1605,7 +1594,7 @@ void VPropView::OnInterpolateCheck(wxCommandEvent& event)
 //sync within group
 void VPropView::OnSyncGroupCheck(wxCommandEvent& event)
 {
-   m_sync_group = m_sync_group_chk->GetValue();
+   m_sync_group = m_options_toolbar->GetToolState(ID_SyncGroupChk);
    if (m_group)
       m_group->SetVolumeSyncProp(m_sync_group);
 
@@ -1680,13 +1669,13 @@ void VPropView::OnSyncGroupCheck(wxCommandEvent& event)
       dVal = double(iVal)/m_max_val;
       m_group->SetColormapValues(-1, dVal);
       //inversion
-      bVal = m_inv_chk->GetValue();
+      bVal = m_options_toolbar->GetToolState(ID_InvChk);
       m_group->SetInvert(bVal);
       //MIP
-      bVal = m_mip_chk->GetValue();
+      bVal = m_options_toolbar->GetToolState(ID_MipChk);
       m_group->SetMode(bVal?1:0);
       //noise reduction
-      bVal = m_nr_chk->GetValue();
+      bVal = m_options_toolbar->GetToolState(ID_InvChk);
       m_group->SetNR(bVal);
    }
 
@@ -1804,15 +1793,15 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
    fconfig.Write("enable_interp", interp);
    mgr->m_vol_interp = interp;
    //inversion
-   bool inv = m_inv_chk->GetValue();
+   bool inv = m_options_toolbar->GetToolState(ID_InvChk);
    fconfig.Write("enable_inv", inv);
    mgr->m_vol_inv = inv;
    //enable mip
-   bool mip = m_mip_chk->GetValue();
+   bool mip = m_options_toolbar->GetToolState(ID_MipChk);
    fconfig.Write("enable_mip", mip);
    mgr->m_vol_mip = mip;
    //noise reduction
-   bool nrd = m_nr_chk->GetValue();
+   bool nrd = m_options_toolbar->GetToolState(ID_NRChk);
    fconfig.Write("noise_rd", nrd);
    mgr->m_vol_nrd = nrd;
    //shadow
@@ -1986,21 +1975,21 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
       m_vd->SetShading(bval);
    //inversion
    bval = mgr->m_vol_inv;
-   m_inv_chk->SetValue(bval);
+   m_options_toolbar->ToggleTool(ID_InvChk,bval);
    if (m_sync_group && m_group)
       m_group->SetInvert(bval);
    else
       m_vd->SetInvert(bval);
    //enable mip
    bval = mgr->m_vol_mip;
-   m_mip_chk->SetValue(bval);
+   m_options_toolbar->ToggleTool(ID_MipChk,bval);
    if (m_sync_group && m_group)
       m_group->SetMode(bval?1:0);
    else
       m_vd->SetMode(bval?1:0);
    //noise reduction
    bval = mgr->m_vol_nrd;
-   m_nr_chk->SetValue(bval);
+   m_options_toolbar->ToggleTool(ID_NRChk,bval);
    if (m_sync_group && m_group)
       m_group->SetNR(bval);
    else
