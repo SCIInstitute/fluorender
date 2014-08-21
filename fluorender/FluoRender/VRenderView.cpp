@@ -1841,6 +1841,21 @@ void VRenderGLView::Segment()
       m_selector.Select(m_brush_radius2-m_brush_radius1);
 
    glPopMatrix();
+
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetTraceDlg())
+	{
+	   if (m_selector.GetMode() == 1 || m_selector.GetMode() == 2)
+	   {
+		   vr_frame->GetTraceDlg()->CellExclusiveID(1);
+		   vr_frame->GetTraceDlg()->CellLink(true);
+	   }
+	   else if (m_selector.GetMode() == 3)
+	   {
+		   vr_frame->GetTraceDlg()->CellExclusiveID(0);
+		   vr_frame->GetTraceDlg()->CellLink(true);
+	   }
+	}
 }
 
 //label volumes in current view

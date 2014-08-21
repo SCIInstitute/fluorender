@@ -657,6 +657,7 @@ void TraceDlg::OnCompClear(wxCommandEvent &event)
 	if (frame && frame->GetTree())
 		frame->GetTree()->BrushClear();
 	CellUpdate();
+	m_trace_list_prev->DeleteAllItems();
 }
 
 void TraceDlg::OnCompFull(wxCommandEvent &event)
@@ -1124,6 +1125,177 @@ void TraceDlg::CellNewID()
 	CellUpdate();
 	//update view
 	m_view->RefreshGL();
+}
+
+void TraceDlg::CellExclusiveID(int mode)
+{
+	if (!m_view)
+		return;
+
+	//trace group
+	TraceGroup *trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+	{
+		m_view->CreateTraceGroup();
+		trace_group = m_view->GetTraceGroup();
+	}
+
+	//get current mask
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+	Nrrd* nrrd_mask = vd->GetMask();
+	if (!nrrd_mask)
+		return;
+	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
+	if (!data_mask)
+		return;
+	//get current label
+	Texture* tex = vd->GetTexture();
+	if (!tex)
+		return;
+	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
+	if (!nrrd_label)
+		return;
+	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	if (!data_label)
+		return;
+	//get ID of current masked region
+	int i, j, k;
+	int nx, ny, nz;
+	vd->GetResolution(nx, ny, nz);
+	unsigned long long index;
+	unsigned long id_init = 0;
+	wxString str_id = m_cell_new_id_text->GetValue();
+	str_id.ToULong(&id_init);
+	if (str_id!="0" && id_init==0)
+	{
+		for (i=0; i<nx; ++i)
+		for (j=0; j<ny; ++j)
+		for (k=0; k<nz; ++k)
+		{
+			index = nx*ny*k + nx*j + i;
+			if (data_mask[index] &&
+				data_label[index])
+			{
+				id_init = data_label[index];
+				i = nx;
+				j = ny;
+				k = nz;
+			}
+		}
+	}
+
+	//generate a unique ID
+	int time = m_view->m_glview->m_tseq_cur_num;
+	Vertex vertex;
+	if (id_init == 0)
+	{
+		if (str_id!="0")
+			id_init = UINT_MAX;
+	}
+	//else
+	//{
+	//	while (trace_group->FindIDInFrame(id_init, time, vertex))
+	//		id_init -= 180;
+	//}
+
+	Lbl label;
+	label.id = id_init;
+	label.size = 0;
+	//update label volume, set mask region to the new ID
+	for (i=0; i<nx; ++i)
+	for (j=0; j<ny; ++j)
+	for (k=0; k<nz; ++k)
+	{
+		index = nx*ny*k + nx*j + i;
+		if (data_mask[index])
+		{
+			if (mode == 0)
+				data_label[index] = id_init;
+			else if (mode == 1)
+			{
+				if (data_label[index] == 0)
+					data_label[index] = id_init;
+			}
+			label.size++;
+			label.center += Point(i, j, k);
+		}
+		else if (data_label[index] == id_init)
+		{
+			if (mode == 0)
+				data_label[index] = 0;
+		}
+	}
+	if (label.size > 0)
+		label.center /= label.size;
+	trace_group->AddVertex(time, label.id, label.size, label.center);
+
+	//invalidate label mask in gpu
+	vd->GetVR()->clear_tex_pool();
+	//save label mask to disk
+	BaseReader* reader = vd->GetReader();
+	if (reader)
+	{
+		wxString data_name = reader->GetCurName(time, vd->GetCurChannel());
+		wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
+		MSKWriter msk_writer;
+		msk_writer.SetData(nrrd_label);
+		msk_writer.Save(label_name.ToStdWstring(), 1);
+	}
+
+	CellUpdate();
+	//update view
+	m_view->RefreshGL();
+
+}
+
+void TraceDlg::CellAppendID(vector<unsigned int> &id_list)
+{
+	if (!m_view)
+		return;
+
+	//get current mask
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+	Nrrd* nrrd_mask = vd->GetMask();
+	if (!nrrd_mask)
+		return;
+	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
+	if(!data_mask)
+		return;
+	//get current label
+	Texture* tex = vd->GetTexture();
+	if (!tex)
+		return;
+	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
+	if (!nrrd_label)
+		return;
+	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	if (!data_label)
+		return;
+	//select append
+	int i, j, k;
+	int nx, ny, nz;
+	unsigned long long index;
+	vd->GetResolution(nx, ny, nz);
+	for (i=0; i<nx; ++i)
+	for (j=0; j<ny; ++j)
+	for (k=0; k<nz; ++k)
+	{
+		index = nx*ny*k + nx*j + i;
+		if (find(id_list.begin(), id_list.end(), data_label[index])!=id_list.end())
+			data_mask[index] = 255;
+		//if (data_label[index] == id)
+		//{
+		//	data_mask[index] = 255;
+		//}
+	}
+	//invalidate label mask in gpu
+	vd->GetVR()->clear_tex_pool();
+	//update view
+	CellUpdate();
 }
 
 void TraceDlg::OnCellLink(wxCommandEvent &event)
@@ -1594,10 +1766,33 @@ void TraceDlg::OnCellCombineID(wxCommandEvent &event)
 void TraceDlg::OnCellPrev(wxCommandEvent &event)
 {
 	if (m_view)
+	{
 		m_view->Set4DSeqFrame(m_view->m_glview->m_tseq_cur_num-1, true);
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vr_frame && vr_frame->GetMovieView())
 			vr_frame->GetMovieView()->SetTimeFrame(m_view->m_glview->m_tseq_cur_num);
+	}
+	//if (m_trace_list_curr->GetItemCount() == 0 &&
+	//	m_trace_list_prev->GetItemCount() > 0)
+	//{
+	//	long item = -1;
+	//	wxString id_str;
+	//	unsigned long id;
+	//	vector<unsigned int> id_list;
+	//	for (;;)
+	//	{
+	//		item = m_trace_list_prev->GetNextItem(item,
+	//			wxLIST_NEXT_ALL,
+	//			wxLIST_STATE_DONTCARE);
+	//		if (item != -1)
+	//		{
+	//			id_str = m_trace_list_prev->GetText(item, 0);
+	//			id_str.ToULong(&id);
+	//			id_list.push_back(id);
+	//		}
+	//	}
+	//	CellAppendID(id_list);
+	//}
 }
 
 void TraceDlg::OnCellNext(wxCommandEvent &event)
@@ -1609,5 +1804,26 @@ void TraceDlg::OnCellNext(wxCommandEvent &event)
 		if (vr_frame && vr_frame->GetMovieView())
 			vr_frame->GetMovieView()->SetTimeFrame(m_view->m_glview->m_tseq_cur_num);
 	}
+	//if (m_trace_list_curr->GetItemCount() == 0 &&
+	//	m_trace_list_prev->GetItemCount() > 0)
+	//{
+	//	long item = -1;
+	//	wxString id_str;
+	//	unsigned long id;
+	//	vector<unsigned int> id_list;
+	//	for (;;)
+	//	{
+	//		item = m_trace_list_prev->GetNextItem(item,
+	//			wxLIST_NEXT_ALL,
+	//			wxLIST_STATE_DONTCARE);
+	//		if (item != -1)
+	//		{
+	//			id_str = m_trace_list_prev->GetText(item, 0);
+	//			id_str.ToULong(&id);
+	//			id_list.push_back(id);
+	//		}
+	//	}
+	//	CellAppendID(id_list);
+	//}
 }
 

@@ -101,6 +101,11 @@ public:
 	void CellFull();
 	void CellLink(bool exclusive);
 	void CellNewID();
+	//assign exclusive ID to selection
+	//mode: how to deal with conflicts
+	//0--
+	void CellExclusiveID(int mode);
+	void CellAppendID(vector<unsigned int> &id_list);
 
 private:
 	typedef struct
