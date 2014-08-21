@@ -11306,9 +11306,9 @@ void VRenderView::OnRotLink(bool b)
 
 void VRenderView::OnRotReset(wxCommandEvent &event)
 {
-   m_x_rot_sldr->SetThumbPosition(m_x_rot_sldr->GetRange()/2);
-   m_y_rot_sldr->SetThumbPosition(m_y_rot_sldr->GetRange()/2);
-   m_z_rot_sldr->SetThumbPosition(m_z_rot_sldr->GetRange()/2);
+   m_x_rot_sldr->SetThumbPosition(m_x_rot_sldr->GetRange()/2 - 30);
+   m_y_rot_sldr->SetThumbPosition(m_y_rot_sldr->GetRange()/2 - 30);
+   m_z_rot_sldr->SetThumbPosition(m_z_rot_sldr->GetRange()/2 - 30);
    m_x_rot_text->ChangeValue("0.0");
    m_y_rot_text->ChangeValue("0.0");
    m_z_rot_text->ChangeValue("0.0");
