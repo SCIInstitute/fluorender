@@ -10976,7 +10976,7 @@ void VRenderView::ResetID()
 wxGLContext* VRenderView::GetContext()
 {
    if (m_glview)
-      return m_glview->GetContext();
+      return m_glview->m_glRC/*GetContext()*/;
    else
       return 0;
 }
