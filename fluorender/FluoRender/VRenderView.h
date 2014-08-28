@@ -1361,7 +1361,7 @@ class VRenderView: public wxPanel
    wxSlider* m_aov_sldr;
    wxTextCtrl* m_aov_text;
    wxToolBar * m_options_toolbar;
-   wxToolBar * m_options_toolbar2;
+   //wxToolBar * m_options_toolbar2;
    wxToolBar * m_left_toolbar;
    wxToolBar * m_right_toolbar2;
    wxToolBar * m_lower_toolbar;

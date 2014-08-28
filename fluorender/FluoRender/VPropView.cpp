@@ -184,9 +184,9 @@ VPropView::VPropView(wxWindow* frame,
    sizer_l4->Add(m_alpha_sldr, 1, wxEXPAND|wxALIGN_CENTER);
    sizer_l4->Add(m_alpha_text, 0, wxALIGN_CENTER);
    sizer_l4->Add(new wxStaticText(this, 0 , " : ", 
-	   wxDefaultPosition,wxSize(8,-1)), 0, wxALIGN_CENTER);
+	   wxDefaultPosition,wxSize(13,-1)), 0, wxALIGN_CENTER);
    sizer_l4->Add(m_alpha_tool, 0, wxALIGN_CENTER);
-   sizer_l4->Add(35,10,0);
+   sizer_l4->Add(30,10,0);
    //shading
    m_low_shading_sldr = new wxSlider(this, ID_LowShadingSldr, 0, 0, 200,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
@@ -202,13 +202,13 @@ VPropView::VPropView(wxWindow* frame,
    sizer_l5->Add(m_low_shading_sldr, 1, wxEXPAND|wxALIGN_CENTER);
    sizer_l5->Add(m_low_shading_text, 0, wxALIGN_CENTER);
    sizer_l5->Add(new wxStaticText(this, 0 , " : ", 
-	   wxDefaultPosition,wxSize(8,-1)), 0, wxALIGN_CENTER);
+	   wxDefaultPosition,wxSize(13,-1)), 0, wxALIGN_CENTER);
    sizer_l5->Add(m_shade_tool, 0, wxALIGN_CENTER);
-   sizer_l5->Add(35,10,0);
+   sizer_l5->Add(30,10,0);
    //middle///////////////////////////////////////////////////
    //extract boundary
    st = new wxStaticText(this, 0, "Extract Boundary : ",
-         wxDefaultPosition, wxSize(105, -1), wxALIGN_RIGHT);
+         wxDefaultPosition, wxSize(127, -1), wxALIGN_RIGHT);
    m_boundary_sldr = new wxSlider(this, ID_BoundarySldr, 0, 0, 1000,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_boundary_text = new wxTextCtrl(this, ID_BoundaryText, "0.0000",
@@ -218,7 +218,7 @@ VPropView::VPropView(wxWindow* frame,
    sizer_m1->Add(m_boundary_sldr, 1, wxEXPAND|wxALIGN_CENTER);
    //thresholds
    m_threh_st = new wxStaticText(this, 0, "Threshold : ",
-         wxDefaultPosition, wxSize(105, -1), wxALIGN_RIGHT);
+         wxDefaultPosition, wxSize(127, -1), wxALIGN_RIGHT);
    m_left_thresh_sldr = new wxSlider(this, ID_LeftThreshSldr, 5, 0, 255,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_left_thresh_text = new wxTextCtrl(this, ID_LeftThreshText, "5",
@@ -247,7 +247,7 @@ VPropView::VPropView(wxWindow* frame,
    m_shadow_tool->ToggleTool(ID_ShadowChk,false);
    m_shadow_tool->Realize();
    st = new wxStaticText(this, 0, "Light /",
-         wxDefaultPosition, wxSize(38, -1), wxALIGN_RIGHT);
+         wxDefaultPosition, wxSize(50, -1), wxALIGN_RIGHT);
    m_shadow_sldr = new wxSlider(this, ID_ShadowSldr, 0, 0, 100,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_shadow_text = new wxTextCtrl(this, ID_ShadowText, "0.00",
@@ -255,7 +255,7 @@ VPropView::VPropView(wxWindow* frame,
    sizer_m3->Add(st, 0, wxALIGN_CENTER);
    sizer_m3->Add(m_shadow_tool, 0, wxALIGN_CENTER);
    st = new wxStaticText(this, 0, " : ",
-         wxDefaultPosition, wxSize(10, -1), wxALIGN_CENTER);
+         wxDefaultPosition, wxSize(20, -1), wxALIGN_CENTER);
    sizer_m3->Add(st, 0, wxALIGN_CENTER);
    sizer_m3->Add(m_hi_shading_text, 0, wxALIGN_CENTER);
    sizer_m3->Add(m_hi_shading_sldr, 1, wxEXPAND|wxALIGN_CENTER);
@@ -263,7 +263,7 @@ VPropView::VPropView(wxWindow* frame,
    sizer_m3->Add(m_shadow_sldr, 1, wxEXPAND|wxALIGN_CENTER);
    //sample rate
    st = new wxStaticText(this, 0, "Sample Rate : ",
-         wxDefaultPosition, wxSize(105, -1), wxALIGN_RIGHT);
+         wxDefaultPosition, wxSize(127, -1), wxALIGN_RIGHT);
    m_sample_sldr = new wxSlider(this, ID_SampleSldr, 10, 0, 50,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_sample_text = new wxTextCtrl(this, ID_SampleText, "1.0",
@@ -279,10 +279,10 @@ VPropView::VPropView(wxWindow* frame,
     "Enables Color Map Editing.");
    m_colormap_tool->ToggleTool(ID_ColormapEnableChk,false);
    m_colormap_tool->Realize();
-   sizer_m5->Add(38,50,0);
+   sizer_m5->Add(50,50,0);
    sizer_m5->Add(m_colormap_tool, 0, wxALIGN_CENTER);
    st = new wxStaticText(this, 0, " : ",
-         wxDefaultPosition, wxSize(10, -1), wxALIGN_CENTER);
+         wxDefaultPosition, wxSize(20, -1), wxALIGN_CENTER);
    sizer_m5->Add(st, 0, wxALIGN_CENTER);
    m_colormap_low_value_text = new wxTextCtrl(this, 
 	   ID_ColormapLowValueText, "0",
@@ -364,23 +364,20 @@ VPropView::VPropView(wxWindow* frame,
    sizer_r2->AddStretchSpacer();
    st = new wxStaticText(this, 0, "X:");
    sizer_r2->Add(st, 0, wxALIGN_CENTER);
-   sizer_r2->Add(5, 5, 0);
    sizer_r2->Add(m_space_x_text, 0, wxALIGN_CENTER);
    //y
    st = new wxStaticText(this, 0, "Y:");
    m_space_y_text = new wxTextCtrl(this, ID_SpaceYText, "1.000",
          wxDefaultPosition, wxSize(45, 20), 0, vald_fp3);
-   sizer_r2->Add(5, 5, 0);
+   sizer_r2->Add(3, 5, 0);
    sizer_r2->Add(st, 0, wxALIGN_CENTER);
-   sizer_r2->Add(5, 5, 0);
    sizer_r2->Add(m_space_y_text, 0, wxALIGN_CENTER);
    //z
    st = new wxStaticText(this, 0, "Z:");
    m_space_z_text = new wxTextCtrl(this, ID_SpaceZText, "1.000",
          wxDefaultPosition, wxSize(45, 20), 0, vald_fp3);
-   sizer_r2->Add(5, 5, 0);
+   sizer_r2->Add(3, 5, 0);
    sizer_r2->Add(st, 0, wxALIGN_CENTER);
-   sizer_r2->Add(5, 5, 0);
    sizer_r2->Add(m_space_z_text, 0, wxALIGN_CENTER);
    //color
    st = new wxStaticText(this, 0, "Color:",
@@ -399,7 +396,6 @@ VPropView::VPropView(wxWindow* frame,
    wxToolBar * tmp= new wxToolBar(this, wxID_ANY);
    tmp->AddTool(wxID_ANY, "FluoRender (c) 2014",
          wxGetBitmapFromMemory(logo_small),"FluoRender (c) 2014");
-   tmp->AddStretchableSpace();
    sizer_r4->Add(tmp, 0, wxALIGN_CENTER);
    tmp->Realize();
 

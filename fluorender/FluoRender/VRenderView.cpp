@@ -5799,7 +5799,7 @@ void VRenderGLView::SetPersp(bool persp)
       wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
       m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
       m_vrv->m_scale_factor_text->ChangeValue(str);
-      m_vrv->m_options_toolbar2->ToggleTool(VRenderView::ID_FreeChk,false);
+      m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_FreeChk,false);
 
       SetRotations(m_rotx, m_roty, m_rotz);
    }
@@ -5809,8 +5809,8 @@ void VRenderGLView::SetPersp(bool persp)
 void VRenderGLView::SetFree(bool free)
 {
    m_free = free;
-   if (m_vrv->m_options_toolbar2->GetToolState(VRenderView::ID_FreeChk) != m_free)
-      m_vrv->m_options_toolbar2->ToggleTool(VRenderView::ID_FreeChk,m_free);
+   if (m_vrv->m_options_toolbar->GetToolState(VRenderView::ID_FreeChk) != m_free)
+      m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_FreeChk,m_free);
    if (free)
    {
       m_persp = true;
@@ -9985,8 +9985,10 @@ void VRenderView::CreateBar()
    //toolbar 1
    m_options_toolbar = new wxToolBar(this,wxID_ANY);
    wxBoxSizer* sizer_h_1 = new wxBoxSizer(wxHORIZONTAL);
+#ifndef _DARWIN
    //the spacer
    wxStaticText * stb;
+#endif
    //add the options
    m_options_toolbar->AddRadioTool(ID_VolumeSeqRd,"Layered",
 	   wxGetBitmapFromMemory(layers),wxNullBitmap,"Render View as Layers",
@@ -10002,12 +10004,14 @@ void VRenderView::CreateBar()
    m_options_toolbar->ToggleTool(ID_VolumeSeqRd,false);
    m_options_toolbar->ToggleTool(ID_VolumeMultiRd,false);
    m_options_toolbar->ToggleTool(ID_VolumeCompRd,false);
-   stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
-	   wxDefaultPosition, wxSize(5,5));
-   stb->SetBackgroundColour(wxColour(128,128,128));
-   m_options_toolbar->AddSeparator();
-   m_options_toolbar->AddControl(stb);
-   m_options_toolbar->AddSeparator();
+	m_options_toolbar->AddSeparator();
+#ifndef _DARWIN
+	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
+						   wxDefaultPosition, wxSize(5,5));
+	stb->SetBackgroundColour(wxColour(128,128,128));
+	m_options_toolbar->AddControl(stb);
+	m_options_toolbar->AddSeparator();
+#endif
    switch (m_glview->GetVolMethod())
    {
    case VOL_METHOD_SEQ:
@@ -10024,12 +10028,14 @@ void VRenderView::CreateBar()
    wxButton * cam = new wxButton(m_options_toolbar, ID_CaptureBtn, "Capture");
    cam->SetBitmap(wxGetBitmapFromMemory(camera));
    m_options_toolbar->AddControl(cam);
-   stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
-	   wxDefaultPosition, wxSize(5,5));
-   stb->SetBackgroundColour(wxColour(128,128,128));
-   m_options_toolbar->AddSeparator();
-   m_options_toolbar->AddControl(stb);
-   m_options_toolbar->AddSeparator();
+	m_options_toolbar->AddSeparator();
+#ifndef _DARWIN
+	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
+						   wxDefaultPosition, wxSize(5,5));
+	stb->SetBackgroundColour(wxColour(128,128,128));
+	m_options_toolbar->AddControl(stb);
+	m_options_toolbar->AddSeparator();
+#endif
    
    m_options_toolbar->AddCheckTool(ID_CamCtrChk,"Axis",
 	   wxGetBitmapFromMemory(axis),wxNullBitmap,
@@ -10048,12 +10054,14 @@ void VRenderView::CreateBar()
 	   "Toggle View of the Legend",
 	   "Toggle View of the Legend");
    m_options_toolbar->ToggleTool(ID_LegendChk,false);
-   stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
-	   wxDefaultPosition, wxSize(5,5));
-   stb->SetBackgroundColour(wxColour(128,128,128));
-   m_options_toolbar->AddSeparator();
-   m_options_toolbar->AddControl(stb);
-   m_options_toolbar->AddSeparator();
+	m_options_toolbar->AddSeparator();
+#ifndef _DARWIN
+	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
+						   wxDefaultPosition, wxSize(5,5));
+	stb->SetBackgroundColour(wxColour(128,128,128));
+	m_options_toolbar->AddControl(stb);
+	m_options_toolbar->AddSeparator();
+#endif
    
    //scale bar
    m_options_toolbar->AddTool(ID_ScaleBar,"Scale Bar",
@@ -10073,57 +10081,59 @@ void VRenderView::CreateBar()
    m_options_toolbar->AddControl(m_scale_text);
    m_options_toolbar->AddControl(m_scale_cmb);
 
-   m_options_toolbar->Realize();
-
+   //m_options_toolbar->Realize();
+	m_options_toolbar->AddStretchableSpace();
    //angle of view
-   m_options_toolbar2 = new wxToolBar(this, wxID_ANY);
-   st2 = new wxStaticText(m_options_toolbar2, wxID_ANY, "Perspective Angle:");
-   m_aov_sldr = new wxSlider(m_options_toolbar2, ID_AovSldr, 45, 10, 100,
+   //m_options_toolbar2 = new wxToolBar(this, wxID_ANY);
+   st2 = new wxStaticText(m_options_toolbar, wxID_ANY, "Perspective Angle:");
+   m_aov_sldr = new wxSlider(m_options_toolbar, ID_AovSldr, 45, 10, 100,
          wxDefaultPosition, wxSize(200, 20), wxSL_HORIZONTAL);
    m_aov_sldr->SetValue(GetPersp()?GetAov():10);
    m_aov_sldr->Connect(wxID_ANY, wxEVT_IDLE,
          wxIdleEventHandler(VRenderView::OnAovSldrIdle),
          NULL, this);
-   m_aov_text = new wxTextCtrl(m_options_toolbar2, ID_AovText, "",
+   m_aov_text = new wxTextCtrl(m_options_toolbar, ID_AovText, "",
          wxDefaultPosition, wxSize(60, 20), 0, vald_int);
    m_aov_text->ChangeValue(GetPersp()?wxString::Format("%d", 
 	   int(GetAov())):"Ortho");
-   m_options_toolbar2->AddControl(st2);
-   m_options_toolbar2->AddControl(m_aov_sldr);
-   m_options_toolbar2->AddControl(m_aov_text);
-   st2 = new wxStaticText(m_options_toolbar2, wxID_ANY, "    Free-Fly:  ");
-   m_options_toolbar2->AddControl(st2);
+   m_options_toolbar->AddControl(st2);
+   m_options_toolbar->AddControl(m_aov_sldr);
+   m_options_toolbar->AddControl(m_aov_text);
+   st2 = new wxStaticText(m_options_toolbar, wxID_ANY, "    Free-Fly:  ");
+   m_options_toolbar->AddControl(st2);
 
-   m_options_toolbar2->AddCheckTool(ID_FreeChk,"Free Fly",
+   m_options_toolbar->AddCheckTool(ID_FreeChk,"Free Fly",
 	   wxGetBitmapFromMemory(freefly),wxNullBitmap,
 	   "Change the camera to a 'Free-Fly' Mode",
 	   "Change the camera to a 'Free-Fly' Mode");
 
    if (GetFree())
-	m_options_toolbar2->ToggleTool(ID_FreeChk,true);
+	m_options_toolbar->ToggleTool(ID_FreeChk,true);
    else
-	m_options_toolbar2->ToggleTool(ID_FreeChk,false);
-   stb = new wxStaticText(m_options_toolbar2, wxID_ANY, "",
-	   wxDefaultPosition, wxSize(5,5));
-   stb->SetBackgroundColour(wxColour(128,128,128));
-   m_options_toolbar2->AddSeparator();
-   m_options_toolbar2->AddControl(stb);
-   m_options_toolbar2->AddSeparator();
+	   m_options_toolbar->ToggleTool(ID_FreeChk,false);
+	m_options_toolbar->AddSeparator();
+#ifndef _DARWIN
+	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
+						   wxDefaultPosition, wxSize(5,5));
+	stb->SetBackgroundColour(wxColour(128,128,128));
+	m_options_toolbar->AddControl(stb);
+	m_options_toolbar->AddSeparator();
+#endif
    //background option
-   st1 = new wxStaticText(m_options_toolbar2, wxID_ANY, "Background:  ");
-   m_bg_color_picker = new wxColourPickerCtrl(m_options_toolbar2, 
+   st1 = new wxStaticText(m_options_toolbar, wxID_ANY, "Background:  ");
+   m_bg_color_picker = new wxColourPickerCtrl(m_options_toolbar, 
 	   ID_BgColorPicker);
-   m_options_toolbar2->AddControl(st1);
-   m_options_toolbar2->AddControl(m_bg_color_picker);
+   m_options_toolbar->AddControl(st1);
+   m_options_toolbar->AddControl(m_bg_color_picker);
 
-   m_options_toolbar2->Realize();
+   m_options_toolbar->Realize();
 
    //add the toolbars and other options in order
    sizer_h_1->AddSpacer(40);
-   sizer_h_1->Add(m_options_toolbar,0,wxALIGN_CENTER|wxEXPAND);
-   sizer_h_1->AddStretchSpacer();
-   sizer_h_1->Add(m_options_toolbar2,0,wxALIGN_CENTER|wxEXPAND);
-   sizer_h_1->AddSpacer(40);
+   sizer_h_1->Add(m_options_toolbar,1,wxALIGN_CENTER|wxEXPAND);
+   //sizer_h_1->AddStretchSpacer();
+   //sizer_h_1->Add(m_options_toolbar2,0,wxALIGN_CENTER|wxEXPAND);
+   sizer_h_1->AddSpacer(35);
 
    //bar left///////////////////////////////////////////////////
    wxBoxSizer* sizer_v_3 = new wxBoxSizer(wxVERTICAL);
@@ -10200,17 +10210,17 @@ void VRenderView::CreateBar()
    m_x_rot_sldr = new wxScrollBar(this, ID_XRotSldr);
    m_x_rot_sldr->SetScrollbar(150,60,360,15);
    m_x_rot_text = new wxTextCtrl(this, ID_XRotText, "0.0",
-         wxDefaultPosition, wxSize(40,20), 0, vald_fp1);
+         wxDefaultPosition, wxSize(45,20), 0, vald_fp1);
    st2 = new wxStaticText(this, 0, "Y:");
    m_y_rot_sldr = new wxScrollBar(this, ID_YRotSldr);
    m_y_rot_sldr->SetScrollbar(150,60,360,15);
    m_y_rot_text = new wxTextCtrl(this, ID_YRotText, "0.0",
-         wxDefaultPosition, wxSize(40,20), 0, vald_fp1);
+         wxDefaultPosition, wxSize(45,20), 0, vald_fp1);
    st3 = new wxStaticText(this, 0, "Z:");
    m_z_rot_sldr = new wxScrollBar(this, ID_ZRotSldr);
    m_z_rot_sldr->SetScrollbar(150,60,360,15);
    m_z_rot_text = new wxTextCtrl(this, ID_ZRotText, "0.0",
-         wxDefaultPosition, wxSize(40,20), 0, vald_fp1);
+         wxDefaultPosition, wxSize(45,20), 0, vald_fp1);
 
    m_lower_toolbar->AddCheckTool(ID_RotLockChk, "45 Angles",
 	   wxGetBitmapFromMemory(depth), wxNullBitmap,
@@ -10239,8 +10249,11 @@ void VRenderView::CreateBar()
    sizer_h_2->Add(5, 5, 0);
    sizer_h_2->Add(m_lower_toolbar, 0, wxALIGN_CENTER);
    sizer_h_2->AddSpacer(40);
-
-   sizer_v->Add(sizer_h_1, 0, wxEXPAND|wxBOTTOM,3);
+#ifndef _DARWIN
+	sizer_v->Add(sizer_h_1, 0, wxEXPAND|wxBOTTOM,3);
+#else
+	sizer_v->Add(sizer_h_1, 0, wxEXPAND);
+#endif
    sizer_v->Add(sizer_m, 1, wxEXPAND);
    sizer_v->Add(sizer_h_2, 0, wxEXPAND);
 
@@ -11607,7 +11620,7 @@ void VRenderView::OnAovText(wxCommandEvent& event)
 
 void VRenderView::OnFreeChk(wxCommandEvent& event)
 {
-   if (m_options_toolbar2->GetToolState(ID_FreeChk))
+   if (m_options_toolbar->GetToolState(ID_FreeChk))
       SetFree(true); 
    else
    {
@@ -11656,7 +11669,7 @@ void VRenderView::OnSaveDefault(wxCommandEvent &event)
    //ortho/persp
    fconfig.Write("persp", m_glview->m_persp);
    fconfig.Write("aov", m_glview->m_aov);
-   bVal = m_options_toolbar2->GetToolState(ID_FreeChk);
+   bVal = m_options_toolbar->GetToolState(ID_FreeChk);
    fconfig.Write("free_rd", bVal);
    //rotations
    str = m_x_rot_text->GetValue();
@@ -11783,7 +11796,7 @@ void VRenderView::LoadSettings()
    }
    if (fconfig.Read("free_rd", &bVal))
    {
-      m_options_toolbar2->ToggleTool(ID_FreeChk,bVal);
+      m_options_toolbar->ToggleTool(ID_FreeChk,bVal);
       if (bVal)
          SetFree(true);
    }
