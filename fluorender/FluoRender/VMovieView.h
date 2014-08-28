@@ -160,6 +160,9 @@ private:
 	void Get3DFrames();
 
 private:
+	wxWindow* CreateSimplePage(wxWindow *parent);
+	wxWindow* CreateAdvancedPage(wxWindow *parent);
+	wxWindow* CreateCroppingPage(wxWindow *parent);
 	void Init();
 
 	//left column
