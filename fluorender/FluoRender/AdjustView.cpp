@@ -4,6 +4,8 @@
 #include "png_resource.h"
 #include "img/listicon_save.h"
 #include "img/refresh.h"
+#include "img/link.h"
+#include "img/unlink.h"
 
 BEGIN_EVENT_TABLE(AdjustView, wxPanel)
 	//set gamme
@@ -32,9 +34,9 @@ BEGIN_EVENT_TABLE(AdjustView, wxPanel)
 	EVT_BUTTON(ID_GResetBtn, AdjustView::OnGReset)
 	EVT_BUTTON(ID_BResetBtn, AdjustView::OnBReset)
 	//set sync
-	EVT_CHECKBOX(ID_SyncRChk, AdjustView::OnSyncRCheck)
-	EVT_CHECKBOX(ID_SyncGChk, AdjustView::OnSyncGCheck)
-	EVT_CHECKBOX(ID_SyncBChk, AdjustView::OnSyncBCheck)
+	EVT_TOOL(ID_SyncRChk, AdjustView::OnSyncRCheck)
+	EVT_TOOL(ID_SyncGChk, AdjustView::OnSyncGCheck)
+	EVT_TOOL(ID_SyncBChk, AdjustView::OnSyncBCheck)
 	//set default
 	EVT_BUTTON(ID_DefaultBtn, AdjustView::OnSaveDefault)
 END_EVENT_TABLE()
@@ -95,12 +97,19 @@ m_dft_sync_b(false)
 
 	//second line: red
 	wxBoxSizer *sizer_h_2 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Red:",
+	m_sync_r_chk = new wxToolBar(this, wxID_ANY);
+	st = new wxStaticText(m_sync_r_chk, 0, "Red:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
-	sizer_h_2->Add(st, 1, wxEXPAND|wxALIGN_CENTER);
-	m_sync_r_chk = new wxCheckBox(this, ID_SyncRChk, "Link");
-	sizer_h_2->Add(m_sync_r_chk, 1, wxEXPAND|wxALIGN_CENTER);
+	m_sync_r_chk->AddControl(st);
+	m_sync_r_chk->AddStretchableSpace();
+	m_sync_r_chk->AddCheckTool(ID_SyncRChk, "Link",
+		wxGetBitmapFromMemory(unlink), wxNullBitmap,
+		"Link Red Properties with Linked Green or Blue",
+		"Link Red Properties with Linked Green or Blue");
+	sizer_h_2->Add(m_sync_r_chk, 1, wxEXPAND|wxALIGN_RIGHT);
+	m_sync_r_chk->Realize();
 	sizer_v->Add(sizer_h_2, 0, wxEXPAND);
+	sizer_v->Add(3,3,0);
 
 	//third line: red bar
 	st = new wxStaticText(this, 0, "", wxDefaultPosition, wxSize(5,5));
@@ -128,7 +137,7 @@ m_dft_sync_b(false)
 	//fifth line: reset buttons
 #ifndef _DARWIN
 	m_r_reset_btn = new wxButton(this, ID_RResetBtn, "Reset",
-								 wxDefaultPosition, wxSize(30, 20));
+								 wxDefaultPosition, wxSize(30, 22));
 #else
 	m_r_reset_btn = new wxButton(this, ID_RResetBtn, "Reset",
 								 wxDefaultPosition, wxSize(30, 30));
@@ -160,12 +169,19 @@ m_dft_sync_b(false)
 
 	//7th line: green
 	wxBoxSizer *sizer_h_6 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Green:",
+	m_sync_g_chk = new wxToolBar(this, wxID_ANY);
+	st = new wxStaticText(m_sync_g_chk, 0, "Green:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
-	sizer_h_6->Add(st, 1, wxEXPAND|wxALIGN_CENTER);
-	m_sync_g_chk = new wxCheckBox(this, ID_SyncGChk, "Link");
-	sizer_h_6->Add(m_sync_g_chk, 1, wxEXPAND|wxALIGN_CENTER);
+	m_sync_g_chk->AddControl(st);
+	m_sync_g_chk->AddStretchableSpace();
+	m_sync_g_chk->AddCheckTool(ID_SyncGChk, "Link",
+		wxGetBitmapFromMemory(unlink), wxNullBitmap,
+		"Link Green Properties with Linked Red or Blue",
+		"Link Green Properties with Linked Red or Blue");
+	sizer_h_6->Add(m_sync_g_chk, 1, wxEXPAND|wxALIGN_RIGHT);
+	m_sync_g_chk->Realize();
 	sizer_v->Add(sizer_h_6, 0, wxEXPAND);
+	sizer_v->Add(3,3,0);
 
 	//8th line: green bar
 	st = new wxStaticText(this, 0, "", wxDefaultPosition, wxSize(5, 5));
@@ -192,7 +208,7 @@ m_dft_sync_b(false)
 	//10th line: reset buttons
 #ifndef _DARWIN
 	m_g_reset_btn = new wxButton(this, ID_GResetBtn, "Reset",
-								 wxDefaultPosition, wxSize(30, 20));
+								 wxDefaultPosition, wxSize(30, 22));
 #else
 	m_g_reset_btn = new wxButton(this, ID_GResetBtn, "Reset",
 								 wxDefaultPosition, wxSize(30, 30));
@@ -224,12 +240,19 @@ m_dft_sync_b(false)
 
 	//12th line: blue
 	wxBoxSizer *sizer_h_10 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Blue:",
+	m_sync_b_chk = new wxToolBar(this, wxID_ANY);
+	st = new wxStaticText(m_sync_b_chk, 0, "Blue:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
-	sizer_h_10->Add(st, 1, wxEXPAND|wxALIGN_CENTER);
-	m_sync_b_chk = new wxCheckBox(this, ID_SyncBChk, "Link");
-	sizer_h_10->Add(m_sync_b_chk, 1, wxEXPAND|wxALIGN_CENTER);
+	m_sync_b_chk->AddControl(st);
+	m_sync_b_chk->AddStretchableSpace();
+	m_sync_b_chk->AddCheckTool(ID_SyncBChk, "Link",
+		wxGetBitmapFromMemory(unlink), wxNullBitmap,
+		"Link Blue Properties with Linked Red or Green",
+		"Link Blue Properties with Linked Red or Green");
+	sizer_h_10->Add(m_sync_b_chk, 1, wxEXPAND|wxALIGN_RIGHT);
+	m_sync_b_chk->Realize();
 	sizer_v->Add(sizer_h_10, 0, wxEXPAND);
+	sizer_v->Add(3,3,0);
 
 	//13th line:blue bar
 	st = new wxStaticText(this, 0, "", wxDefaultPosition, wxSize(5, 5));
@@ -257,7 +280,7 @@ m_dft_sync_b(false)
 	//15th line: reset buttons
 #ifndef _DARWIN
 	m_b_reset_btn = new wxButton(this, ID_BResetBtn, "Reset",
-								 wxDefaultPosition, wxSize(30, 20));
+								 wxDefaultPosition, wxSize(30, 22));
 #else
 	m_b_reset_btn = new wxButton(this, ID_BResetBtn, "Reset",
 								 wxDefaultPosition, wxSize(30, 30));
@@ -287,7 +310,7 @@ m_dft_sync_b(false)
 	//17th line: default button
 #ifndef _DARWIN
 	m_dft_btn = new wxButton(this, ID_DefaultBtn, "Save as Default",
-							 wxDefaultPosition, wxSize(95, 20));
+							 wxDefaultPosition, wxSize(95, 22));
 #else
 	m_dft_btn = new wxButton(this, ID_DefaultBtn, "Set Default",
 							 wxDefaultPosition, wxSize(95, 30));
@@ -387,7 +410,9 @@ void AdjustView::GetSettings()
 	if (m_type == 1 || m_type == 2 || m_type == 5)
 	{
 		//red
-		m_sync_r_chk->SetValue(sync_r);
+		m_sync_r_chk->ToggleTool(ID_SyncRChk,sync_r);
+		m_sync_r_chk->SetToolNormalBitmap(ID_SyncRChk,
+			sync_r?wxGetBitmapFromMemory(link):wxGetBitmapFromMemory(unlink));
 		m_sync_r = sync_r;
 		m_r_gamma_sldr->SetValue(Gamma2UIP(r_gamma));
 		m_r_brightness_sldr->SetValue(Brightness2UIP(r_brightness));
@@ -396,7 +421,9 @@ void AdjustView::GetSettings()
 		m_r_brightness_text->ChangeValue(wxString::Format("%d", Brightness2UIP(r_brightness)));
 		m_r_hdr_text->ChangeValue(wxString::Format("%.2f", r_hdr));
 		//green
-		m_sync_g_chk->SetValue(sync_g);
+		m_sync_g_chk->ToggleTool(ID_SyncGChk,sync_g);
+		m_sync_g_chk->SetToolNormalBitmap(ID_SyncGChk,
+			sync_g?wxGetBitmapFromMemory(link):wxGetBitmapFromMemory(unlink));
 		m_sync_g = sync_g;
 		m_g_gamma_sldr->SetValue(Gamma2UIP(g_gamma));
 		m_g_brightness_sldr->SetValue(Brightness2UIP(g_brightness));
@@ -405,7 +432,9 @@ void AdjustView::GetSettings()
 		m_g_brightness_text->ChangeValue(wxString::Format("%d", int(g_brightness)));
 		m_g_hdr_text->ChangeValue(wxString::Format("%.2f", g_hdr));
 		//blue
-		m_sync_b_chk->SetValue(sync_b);
+		m_sync_b_chk->ToggleTool(ID_SyncBChk,sync_b);
+		m_sync_b_chk->SetToolNormalBitmap(ID_SyncBChk,
+			sync_b?wxGetBitmapFromMemory(link):wxGetBitmapFromMemory(unlink));
 		m_sync_b = sync_b;
 		m_b_gamma_sldr->SetValue(Gamma2UIP(b_gamma));
 		m_b_brightness_sldr->SetValue(Brightness2UIP(b_brightness));
@@ -1093,7 +1122,9 @@ void AdjustView::OnBHdrText(wxCommandEvent &event)
 
 void AdjustView::OnSyncRCheck(wxCommandEvent &event)
 {
-	m_sync_r = m_sync_r_chk->GetValue();
+	m_sync_r = m_sync_r_chk->GetToolState(ID_SyncRChk);
+	m_sync_r_chk->SetToolNormalBitmap(ID_SyncRChk,
+			m_sync_r?wxGetBitmapFromMemory(link):wxGetBitmapFromMemory(unlink));
 	switch (m_type)
 	{
 	case 1://view
@@ -1117,7 +1148,9 @@ void AdjustView::OnSyncRCheck(wxCommandEvent &event)
 
 void AdjustView::OnSyncGCheck(wxCommandEvent &event)
 {
-	m_sync_g = m_sync_g_chk->GetValue();
+	m_sync_g = m_sync_g_chk->GetToolState(ID_SyncGChk);
+	m_sync_g_chk->SetToolNormalBitmap(ID_SyncGChk,
+			m_sync_g?wxGetBitmapFromMemory(link):wxGetBitmapFromMemory(unlink));
 	switch (m_type)
 	{
 	case 1://view
@@ -1141,7 +1174,9 @@ void AdjustView::OnSyncGCheck(wxCommandEvent &event)
 
 void AdjustView::OnSyncBCheck(wxCommandEvent &event)
 {
-	m_sync_b = m_sync_b_chk->GetValue();
+	m_sync_b = m_sync_b_chk->GetToolState(ID_SyncBChk);
+	m_sync_b_chk->SetToolNormalBitmap(ID_SyncBChk,
+			m_sync_b?wxGetBitmapFromMemory(link):wxGetBitmapFromMemory(unlink));
 	switch (m_type)
 	{
 	case 1://view
@@ -1172,7 +1207,7 @@ void AdjustView::OnSaveDefault(wxCommandEvent &event)
 	double dft_r_hdr, dft_g_hdr, dft_b_hdr;
 
 	//red
-	fconfig.Write("sync_r_chk", m_sync_r_chk->GetValue());
+	fconfig.Write("sync_r_chk", m_sync_r_chk->GetToolState(ID_SyncRChk));
 	str = m_r_gamma_text->GetValue();
 	str.ToDouble(&dft_r_gamma);
 	fconfig.Write("r_gamma_text", dft_r_gamma);
@@ -1184,7 +1219,7 @@ void AdjustView::OnSaveDefault(wxCommandEvent &event)
 	fconfig.Write("r_hdr_text", dft_r_hdr);
 
 	//green
-	fconfig.Write("sync_g_chk", m_sync_g_chk->GetValue());
+	fconfig.Write("sync_g_chk", m_sync_g_chk->GetToolState(ID_SyncGChk));
 	str = m_g_gamma_text->GetValue();
 	str.ToDouble(&dft_g_gamma);
 	fconfig.Write("g_gamma_text", dft_g_gamma);
@@ -1196,7 +1231,7 @@ void AdjustView::OnSaveDefault(wxCommandEvent &event)
 	fconfig.Write("g_hdr_text", dft_g_hdr);
 
 	//blue
-	fconfig.Write("sync_b_chk", m_sync_b_chk->GetValue());
+	fconfig.Write("sync_b_chk", m_sync_b_chk->GetToolState(ID_SyncBChk));
 	str = m_b_gamma_text->GetValue();
 	str.ToDouble(&dft_b_gamma);
 	fconfig.Write("b_gamma_text", dft_b_gamma);
@@ -1362,21 +1397,21 @@ void AdjustView::ChangeBHdr(double hdr_b)
 
 void AdjustView::ChangeRSync(bool sync_r)
 {
-	m_sync_r_chk->SetValue(sync_r);
+	m_sync_r_chk->ToggleTool(ID_SyncRChk,sync_r);
 	wxCommandEvent event;
 	OnSyncRCheck(event);
 }
 
 void AdjustView::ChangeGSync(bool sync_g)
 {
-	m_sync_g_chk->SetValue(sync_g);
+	m_sync_g_chk->ToggleTool(ID_SyncGChk,sync_g);
 	wxCommandEvent event;
 	OnSyncGCheck(event);
 }
 
 void AdjustView::ChangeBSync(bool sync_b)
 {
-	m_sync_b_chk->SetValue(sync_b);
+	m_sync_b_chk->ToggleTool(ID_SyncBChk,sync_b);
 	wxCommandEvent event;
 	OnSyncBCheck(event);
 }
