@@ -174,6 +174,8 @@ private:
 	//z2
 	wxSlider *m_z2_clip_sldr;
 	wxTextCtrl *m_z2_clip_text;
+	//keep 1 panel for sizing reasons
+	wxPanel * m_xpanel;
 	//highlighters
 	wxStaticText * m_xBar, * m_yBar, * m_zBar;
 

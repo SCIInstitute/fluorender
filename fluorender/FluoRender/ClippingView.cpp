@@ -95,21 +95,19 @@ m_link_z(false)
 	sizer_1->Add(m_link_channels, 0, wxALIGN_CENTER, 0);
 
 	wxStaticText* st_cb = 0;
-	int slider_size = 350;
 
 	//sliders for clipping planes
 	//x
 	wxBoxSizer* sizer_cx = new wxBoxSizer(wxVERTICAL);
-	wxPanel * xpanel = new wxPanel(this);
-	xpanel->SetMinSize(wxSize(43,350));
+	m_xpanel = new wxPanel(this);
 	st = new wxStaticText(this, 0, "X");
-	m_x1_clip_sldr = new wxSlider(xpanel, ID_X1ClipSldr, 0, 0, 512,
-		wxPoint(0,0), wxSize(20,slider_size), wxSL_VERTICAL);
-	m_xBar = new wxStaticText(xpanel, 0, "",
+	m_x1_clip_sldr = new wxSlider(m_xpanel, ID_X1ClipSldr, 0, 0, 512,
+		wxPoint(0,0), wxSize(20,-1), wxSL_VERTICAL);
+	m_xBar = new wxStaticText(m_xpanel, 0, "",
 		wxPoint(20,10), wxSize(3, m_x1_clip_sldr->GetSize().GetHeight() - 20));
 	m_xBar->SetBackgroundColour(wxColor(255, 128, 128));
-	m_x2_clip_sldr = new wxSlider(xpanel, ID_X2ClipSldr, 512, 0, 512,
-		wxPoint(23,0), wxSize(20,slider_size), wxSL_VERTICAL);
+	m_x2_clip_sldr = new wxSlider(m_xpanel, ID_X2ClipSldr, 512, 0, 512,
+		wxPoint(23,0), wxSize(20,-1), wxSL_VERTICAL);
 	m_x1_clip_text = new wxTextCtrl(this, ID_X1ClipText, "0",
 		wxDefaultPosition, wxSize(34, 20), 0, vald_int);
 	st_cb = new wxStaticText(this, 0, "",
@@ -123,7 +121,7 @@ m_link_z(false)
 	sizer_cx->Add(m_x1_clip_text, 0, wxALIGN_CENTER, 0);
 	sizer_cx->Add(5, 5, 0);
 	sizer_cx->Add(st_cb, 0, wxEXPAND);
-	sizer_cx->Add(xpanel, 0, wxALIGN_CENTER);
+	sizer_cx->Add(m_xpanel, 1, wxALIGN_CENTER, 0);
 	st_cb = new wxStaticText(this, 0, "",
 		wxDefaultPosition, wxSize(5, 5));
 	st_cb->SetBackgroundColour(wxColor(255, 128, 255));
@@ -134,15 +132,14 @@ m_link_z(false)
 	//y
 	wxBoxSizer* sizer_cy = new wxBoxSizer(wxVERTICAL);
 	wxPanel * ypanel = new wxPanel(this);
-	ypanel->SetMinSize(wxSize(43,350));
 	st = new wxStaticText(this, 0, "Y");
 	m_y1_clip_sldr = new wxSlider(ypanel, ID_Y1ClipSldr, 0, 0, 512,
-		wxPoint(0,0),  wxSize(20,slider_size), wxSL_VERTICAL);
+		wxPoint(0,0),  wxSize(20,-1), wxSL_VERTICAL);
 	m_yBar = new wxStaticText(ypanel, 0, "",
 		wxPoint(20,10), wxSize(3, m_x1_clip_sldr->GetSize().GetHeight() - 20));
 	m_yBar->SetBackgroundColour(wxColor(128, 255, 128));
 	m_y2_clip_sldr = new wxSlider(ypanel, ID_Y2ClipSldr, 512, 0, 512,
-		wxPoint(23,0),  wxSize(20,slider_size), wxSL_VERTICAL);
+		wxPoint(23,0),  wxSize(20,-1), wxSL_VERTICAL);
 	m_y1_clip_text = new wxTextCtrl(this, ID_Y1ClipText, "0",
 		wxDefaultPosition, wxSize(34, 20), 0, vald_int);
 	st_cb = new wxStaticText(this, 0, "",
@@ -156,7 +153,7 @@ m_link_z(false)
 	sizer_cy->Add(m_y1_clip_text, 0, wxALIGN_CENTER, 0);
 	sizer_cy->Add(5, 5, 0);
 	sizer_cy->Add(st_cb, 0, wxEXPAND);
-	sizer_cy->Add(ypanel, 0, wxALIGN_CENTER);
+	sizer_cy->Add(ypanel, 1, wxALIGN_CENTER, 0);
 	st_cb = new wxStaticText(this, 0, "",
 		wxDefaultPosition, wxSize(5, 5));
 	st_cb->SetBackgroundColour(wxColor(255, 255, 128));
@@ -164,19 +161,17 @@ m_link_z(false)
 	sizer_cy->Add(5, 5, 0);
 	sizer_cy->Add(m_y2_clip_text, 0, wxALIGN_CENTER, 0);
 
-
 	//z
 	wxBoxSizer* sizer_cz = new wxBoxSizer(wxVERTICAL);
 	wxPanel * zpanel = new wxPanel(this);
-	zpanel->SetMinSize(wxSize(43,350));
 	st = new wxStaticText(this, 0, "Z");
 	m_z1_clip_sldr = new wxSlider(zpanel, ID_Z1ClipSldr, 0, 0, 512,
-		wxPoint(0,0),  wxSize(20,slider_size), wxSL_VERTICAL);
+		wxPoint(0,0),  wxSize(20,-1), wxSL_VERTICAL);
 	m_zBar = new wxStaticText(zpanel, 0, "",
 		wxPoint(20,10), wxSize(3, m_x1_clip_sldr->GetSize().GetHeight() - 20));
 	m_zBar->SetBackgroundColour(wxColor(128, 128, 255));
 	m_z2_clip_sldr = new wxSlider(zpanel, ID_Z2ClipSldr, 512, 0, 512,
-		wxPoint(23,0),  wxSize(20,slider_size), wxSL_VERTICAL);
+		wxPoint(23,0),  wxSize(20,-1), wxSL_VERTICAL);
 	m_z1_clip_text = new wxTextCtrl(this, ID_Z1ClipText, "0",
 		wxDefaultPosition, wxSize(34, 20), 0, vald_int);
 	st_cb = new wxStaticText(this, 0, "",
@@ -190,7 +185,7 @@ m_link_z(false)
 	sizer_cz->Add(m_z1_clip_text, 0, wxALIGN_CENTER, 0);
 	sizer_cz->Add(5, 5, 0);
 	sizer_cz->Add(st_cb, 0, wxEXPAND);
-	sizer_cz->Add(zpanel, 0, wxALIGN_CENTER);
+	sizer_cz->Add(zpanel, 1, wxALIGN_CENTER, 0);
 	st_cb = new wxStaticText(this, 0, "",
 		wxDefaultPosition, wxSize(5, 5));
 	st_cb->SetBackgroundColour(wxColor(128, 255, 255));
@@ -261,6 +256,7 @@ m_link_z(false)
 		wxGetBitmapFromMemory(unlink),
 		wxNullBitmap,"Lock Z Planes");
 	m_check_tb->Realize();
+	sizer_3->Add(5,5,0);
 	sizer_3->Add(m_check_tb, 1, wxALIGN_TOP|wxSHRINK );
 
 	//clip buttons 4
@@ -375,9 +371,9 @@ m_link_z(false)
 	sizer_v->Add(10, 10, 0);
 	sizer_v->Add(sizer_1, 0, wxALIGN_CENTER);
 	sizer_v->Add(5, 5, 0);
-	sizer_v->Add(sizer_2, 0, wxALIGN_CENTER);
+	sizer_v->Add(sizer_2, 1, wxEXPAND);
 	sizer_v->Add(5, 5, 0);
-	sizer_v->Add(sizer_3, 0, wxALIGN_CENTER|wxSHRINK);
+	sizer_v->Add(sizer_3, 0, wxALIGN_CENTER|wxEXPAND);
 	sizer_v->AddSpacer(5);
 	sizer_v->Add(new wxStaticText(this,0,
 		"Set Clip Slab Width"), 0, wxALIGN_CENTER);
@@ -1482,6 +1478,40 @@ void ClippingView::OnIdle(wxIdleEvent &event)
 {
 	if (!IsShown())
 		return;
+	int sz = m_xpanel->GetSize().GetHeight();
+	if (m_x1_clip_sldr->GetSize().GetHeight() != sz) {
+		m_x1_clip_sldr->SetSize(20,sz);
+		m_x2_clip_sldr->SetSize(20,sz);
+		m_y1_clip_sldr->SetSize(20,sz);
+		m_y2_clip_sldr->SetSize(20,sz);
+		m_z1_clip_sldr->SetSize(20,sz);
+		m_z2_clip_sldr->SetSize(20,sz);
+		int barsize = sz - 20;
+		//x
+		int mx = m_x1_clip_sldr->GetMax();
+		int v1 = m_x1_clip_sldr->GetValue();
+		int v2 = m_x2_clip_sldr->GetValue();
+		double clipSz = ((double)(v2 - v1))/((double)mx);
+		double pct = ((double)v1)/((double)mx);
+		m_xBar->SetPosition(wxPoint(20,10+pct*barsize));
+		m_xBar->SetSize(wxSize(3,barsize*clipSz));
+		//y
+		mx = m_y1_clip_sldr->GetMax();
+		v1 = m_y1_clip_sldr->GetValue();
+		v2 = m_y2_clip_sldr->GetValue();
+		clipSz = ((double)(v2 - v1))/((double)mx);
+		pct = ((double)v1)/((double)mx);
+		m_yBar->SetPosition(wxPoint(20,10+pct*barsize));
+		m_yBar->SetSize(wxSize(3,barsize*clipSz));
+		//z
+		mx = m_z1_clip_sldr->GetMax();
+		v1 = m_z1_clip_sldr->GetValue();
+		v2 = m_z2_clip_sldr->GetValue();
+		clipSz = ((double)(v2 - v1))/((double)mx);
+		pct = ((double)v1)/((double)mx);
+		m_zBar->SetPosition(wxPoint(20,10+pct*barsize));
+		m_zBar->SetSize(wxSize(3,barsize*clipSz));
+	}
 
 	int i;
 	VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
