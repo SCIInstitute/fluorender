@@ -9516,7 +9516,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
                         {
                            view->m_glview->SetRotations(
 							   m_rotx, m_roty, m_rotz, true, false);
-						   view->m_glview->OnDraw(wxPaintEvent());
+							wxPaintEvent evt;
+						   view->m_glview->OnDraw(evt);
                         }
                      }
                   }
