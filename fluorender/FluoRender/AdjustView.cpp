@@ -1,6 +1,9 @@
 #include "AdjustView.h"
 #include "VRenderFrame.h"
 #include <wx/valnum.h>
+#include "png_resource.h"
+#include "img/listicon_save.h"
+#include "img/refresh.h"
 
 BEGIN_EVENT_TABLE(AdjustView, wxPanel)
 	//set gamme
@@ -123,8 +126,14 @@ m_dft_sync_b(false)
 	sizer_v->Add(sizer_h_3, 1, wxEXPAND);
 
 	//fifth line: reset buttons
+#ifndef _DARWIN
 	m_r_reset_btn = new wxButton(this, ID_RResetBtn, "Reset",
-		wxDefaultPosition, wxSize(30, 20));
+								 wxDefaultPosition, wxSize(30, 20));
+#else
+	m_r_reset_btn = new wxButton(this, ID_RResetBtn, "Reset",
+								 wxDefaultPosition, wxSize(30, 30));
+#endif
+	m_r_reset_btn->SetBitmap(wxGetBitmapFromMemory(refresh));
 	sizer_v->Add(m_r_reset_btn, 0, wxEXPAND);
 
 	//6th line: input boxes
@@ -181,8 +190,14 @@ m_dft_sync_b(false)
 	sizer_v->Add(sizer_h_7, 1, wxEXPAND);
 
 	//10th line: reset buttons
+#ifndef _DARWIN
 	m_g_reset_btn = new wxButton(this, ID_GResetBtn, "Reset",
-		wxDefaultPosition, wxSize(30, 20));
+								 wxDefaultPosition, wxSize(30, 20));
+#else
+	m_g_reset_btn = new wxButton(this, ID_GResetBtn, "Reset",
+								 wxDefaultPosition, wxSize(30, 30));
+#endif
+	m_g_reset_btn->SetBitmap(wxGetBitmapFromMemory(refresh));
 	sizer_v->Add(m_g_reset_btn, 0, wxEXPAND);
 
 	//11th line: input boxes
@@ -240,8 +255,14 @@ m_dft_sync_b(false)
     
 
 	//15th line: reset buttons
+#ifndef _DARWIN
 	m_b_reset_btn = new wxButton(this, ID_BResetBtn, "Reset",
-		wxDefaultPosition, wxSize(30, 20));
+								 wxDefaultPosition, wxSize(30, 20));
+#else
+	m_b_reset_btn = new wxButton(this, ID_BResetBtn, "Reset",
+								 wxDefaultPosition, wxSize(30, 30));
+#endif
+	m_b_reset_btn->SetBitmap(wxGetBitmapFromMemory(refresh));
 	sizer_v->Add(m_b_reset_btn, 0, wxEXPAND);
 
 	//16th line: input boxes
@@ -264,8 +285,14 @@ m_dft_sync_b(false)
 	sizer_v->Add(sizer_h_13, 0, wxEXPAND);
 
 	//17th line: default button
+#ifndef _DARWIN
 	m_dft_btn = new wxButton(this, ID_DefaultBtn, "Save as Default",
-		wxDefaultPosition, wxSize(95, 20));
+							 wxDefaultPosition, wxSize(95, 20));
+#else
+	m_dft_btn = new wxButton(this, ID_DefaultBtn, "Set Default",
+							 wxDefaultPosition, wxSize(95, 30));
+#endif
+	m_dft_btn->SetBitmap(wxGetBitmapFromMemory(listicon_save));
 	sizer_v->Add(m_dft_btn, 0, wxEXPAND);
 
 	SetSizer(sizer_v);

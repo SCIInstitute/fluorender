@@ -212,7 +212,7 @@ VPropView::VPropView(wxWindow* frame,
    m_boundary_sldr = new wxSlider(this, ID_BoundarySldr, 0, 0, 1000,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_boundary_text = new wxTextCtrl(this, ID_BoundaryText, "0.0000",
-         wxDefaultPosition, wxSize(45, 20), 0, vald_fp4);
+         wxDefaultPosition, wxSize(50, 20), 0, vald_fp4);
    sizer_m1->Add(st, 0, wxALIGN_CENTER);
    sizer_m1->Add(m_boundary_text, 0, wxALIGN_CENTER);
    sizer_m1->Add(m_boundary_sldr, 1, wxEXPAND|wxALIGN_CENTER);
@@ -222,11 +222,11 @@ VPropView::VPropView(wxWindow* frame,
    m_left_thresh_sldr = new wxSlider(this, ID_LeftThreshSldr, 5, 0, 255,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_left_thresh_text = new wxTextCtrl(this, ID_LeftThreshText, "5",
-         wxDefaultPosition, wxSize(45, 20), 0, vald_int);
+         wxDefaultPosition, wxSize(50, 20), 0, vald_int);
    m_right_thresh_sldr = new wxSlider(this, ID_RightThreshSldr, 230, 0, 255,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_right_thresh_text = new wxTextCtrl(this, ID_RightThreshText, "230",
-         wxDefaultPosition, wxSize(45, 20), 0, vald_int);
+         wxDefaultPosition, wxSize(50, 20), 0, vald_int);
    sizer_m2->Add(m_threh_st, 0, wxALIGN_CENTER);
    sizer_m2->Add(m_left_thresh_text, 0, wxALIGN_CENTER);
    sizer_m2->Add(m_left_thresh_sldr, 1, wxEXPAND|wxALIGN_CENTER);
@@ -237,7 +237,7 @@ VPropView::VPropView(wxWindow* frame,
    m_hi_shading_sldr = new wxSlider(this, ID_HiShadingSldr, 0, 0, 100,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_hi_shading_text = new wxTextCtrl(this, ID_HiShadingText, "0.00",
-         wxDefaultPosition, wxSize(45, 20), 0, vald_fp2);
+         wxDefaultPosition, wxSize(50, 20), 0, vald_fp2);
    //shadow
    m_shadow_tool = new wxToolBar(this,wxID_ANY);
    m_shadow_tool->AddCheckTool(ID_ShadowChk,"Shadow",
@@ -251,11 +251,11 @@ VPropView::VPropView(wxWindow* frame,
    m_shadow_sldr = new wxSlider(this, ID_ShadowSldr, 0, 0, 100,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_shadow_text = new wxTextCtrl(this, ID_ShadowText, "0.00",
-         wxDefaultPosition, wxSize(45, 20), 0, vald_fp2);
+         wxDefaultPosition, wxSize(50, 20), 0, vald_fp2);
    sizer_m3->Add(st, 0, wxALIGN_CENTER);
    sizer_m3->Add(m_shadow_tool, 0, wxALIGN_CENTER);
    st = new wxStaticText(this, 0, " : ",
-         wxDefaultPosition, wxSize(20, -1), wxALIGN_CENTER);
+         wxDefaultPosition, wxSize(20, -1), wxALIGN_RIGHT);
    sizer_m3->Add(st, 0, wxALIGN_CENTER);
    sizer_m3->Add(m_hi_shading_text, 0, wxALIGN_CENTER);
    sizer_m3->Add(m_hi_shading_sldr, 1, wxEXPAND|wxALIGN_CENTER);
@@ -267,7 +267,7 @@ VPropView::VPropView(wxWindow* frame,
    m_sample_sldr = new wxSlider(this, ID_SampleSldr, 10, 0, 50,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_sample_text = new wxTextCtrl(this, ID_SampleText, "1.0",
-         wxDefaultPosition, wxSize(45, 20), 0, vald_fp1);
+         wxDefaultPosition, wxSize(50, 20), 0, vald_fp1);
    sizer_m4->Add(st, 0, wxALIGN_CENTER);
    sizer_m4->Add(m_sample_text, 0, wxALIGN_CENTER);
    sizer_m4->Add(m_sample_sldr, 1, wxEXPAND|wxALIGN_CENTER);
@@ -282,11 +282,11 @@ VPropView::VPropView(wxWindow* frame,
    sizer_m5->Add(50,50,0);
    sizer_m5->Add(m_colormap_tool, 0, wxALIGN_CENTER);
    st = new wxStaticText(this, 0, " : ",
-         wxDefaultPosition, wxSize(20, -1), wxALIGN_CENTER);
+         wxDefaultPosition, wxSize(20, -1), wxALIGN_RIGHT);
    sizer_m5->Add(st, 0, wxALIGN_CENTER);
    m_colormap_low_value_text = new wxTextCtrl(this, 
 	   ID_ColormapLowValueText, "0",
-         wxDefaultPosition, wxSize(45, 20), 0, vald_int);
+         wxDefaultPosition, wxSize(50, 20), 0, vald_int);
    sizer_m5->Add(m_colormap_low_value_text, 0, wxALIGN_CENTER);
    m_colormap_low_value_sldr = new wxSlider(this, 
 	   ID_ColormapLowValueSldr, 0, 0, 255,
@@ -294,7 +294,7 @@ VPropView::VPropView(wxWindow* frame,
    sizer_m5->Add(m_colormap_low_value_sldr, 1, wxEXPAND|wxALIGN_CENTER);
    m_colormap_high_value_text = new wxTextCtrl(this, 
 	   ID_ColormapHighValueText, "255",
-         wxDefaultPosition + wxPoint(10,0), wxSize(45, 20), 0, vald_int);
+         wxDefaultPosition + wxPoint(10,0), wxSize(50, 20), 0, vald_int);
    sizer_m5->Add(m_colormap_high_value_text, 0, wxALIGN_CENTER);
    m_colormap_high_value_sldr = new wxSlider(this, 
 	   ID_ColormapHighValueSldr, 255, 0, 255,

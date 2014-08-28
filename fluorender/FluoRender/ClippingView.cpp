@@ -289,8 +289,13 @@ m_link_z(false)
 	
 	//reset clipping 6
 	wxBoxSizer* sizer_6 = new wxBoxSizer(wxHORIZONTAL);
+#ifndef _DARWIN
 	m_clip_reset_btn = new wxButton(this, ID_ClipResetBtn, "Reset Clips",
-		wxDefaultPosition, wxSize(120, 22));
+									wxDefaultPosition, wxSize(120, 22));
+#else
+	m_clip_reset_btn = new wxButton(this, ID_ClipResetBtn, "Reset Clips",
+									wxDefaultPosition, wxSize(125, 30));
+#endif
 	m_clip_reset_btn->SetBitmap(wxGetBitmapFromMemory(refresh));
 	sizer_6->Add(5, 5, 0);
 	sizer_6->Add(m_clip_reset_btn, 0, wxALIGN_CENTER);
@@ -298,16 +303,26 @@ m_link_z(false)
 	//rotations
 	//set sero rotation for clipping planes 7
 	wxBoxSizer* sizer_7 = new wxBoxSizer(wxHORIZONTAL);
+#ifndef _DARWIN
 	m_set_zero_btn = new wxButton(this, ID_SetZeroBtn, "Align to View",
-		wxDefaultPosition, wxSize(120, 22));
+								  wxDefaultPosition, wxSize(120, 22));
+#else
+	m_set_zero_btn = new wxButton(this, ID_SetZeroBtn, "Align to View",
+								  wxDefaultPosition, wxSize(125, 30));
+#endif
 	m_set_zero_btn->SetBitmap(wxGetBitmapFromMemory(align));
 	sizer_7->Add(5, 5, 0);
 	sizer_7->Add(m_set_zero_btn, 0, wxALIGN_CENTER);
 
 	//reset rotations 8
 	wxBoxSizer* sizer_8 = new wxBoxSizer(wxHORIZONTAL);
+#ifndef _DARWIN
 	m_rot_reset_btn = new wxButton(this, ID_RotResetBtn, "Reset to 0",
-		wxDefaultPosition, wxSize(120, 22));
+								   wxDefaultPosition, wxSize(120, 22));
+#else
+	m_rot_reset_btn = new wxButton(this, ID_RotResetBtn, "Reset to 0",
+								   wxDefaultPosition, wxSize(125, 30));
+#endif
 	m_rot_reset_btn->SetBitmap(wxGetBitmapFromMemory(refresh));
 	sizer_8->Add(5, 5, 0);
 	sizer_8->Add(m_rot_reset_btn, 0, wxALIGN_CENTER);
