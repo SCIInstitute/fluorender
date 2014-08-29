@@ -43,7 +43,7 @@ using namespace std;
 
 #define UITEXT_DATAVIEW		"Datasets"
 #define UITEXT_TREEVIEW		"Workspace"
-#define UITEXT_MAKEMOVIE	"Export"
+#define UITEXT_MAKEMOVIE	"Record/Export"
 #define UITEXT_ADJUST		"Output Adjustments"
 #define UITEXT_CLIPPING		"Clipping Planes"
 #define UITEXT_PROPERTIES	"Properties"
@@ -254,6 +254,9 @@ public:
 	void OnQuit(wxCommandEvent& WXUNUSED(event))
 	{ Close(true); }
 
+public: //public so export window can see it and set it. 
+	RecorderDlg* m_recorder_dlg;
+
 private:
 	wxAuiManager m_aui_mgr;
 	wxMenu* m_tb_menu_ui;
@@ -281,7 +284,6 @@ private:
 	CountingDlg* m_counting_dlg;
 	ConvertDlg* m_convert_dlg;
 	ColocalizationDlg* m_colocalization_dlg;
-	RecorderDlg* m_recorder_dlg;
 	MeasureDlg* m_measure_dlg;
 	TraceDlg* m_trace_dlg;
 	//prop panel children

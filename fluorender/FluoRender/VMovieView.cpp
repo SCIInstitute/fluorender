@@ -3,6 +3,9 @@
 #include <wx/aboutdlg.h>
 #include <wx/valnum.h>
 #include <wx/notebook.h>
+#include "png_resource.h"
+#include "img/listicon_save.h"
+#include "img/refresh.h"
 
 BEGIN_EVENT_TABLE(VMovieView, wxPanel)
 	//left column
@@ -56,7 +59,6 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	wxStaticText *st = 0;
 
 	//sizers
-	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* sizer_2_5 = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
@@ -65,24 +67,9 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	wxBoxSizer* sizer_6 = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* sizer_6_5 = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* sizer_7 = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer* sizer_8 = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer* sizer_9 = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer* sizer_10 = new wxBoxSizer(wxHORIZONTAL);
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 
-	//1st line
-	st = new wxStaticText(page, 0, "Capture view:",
-		wxDefaultPosition, wxSize(120, 20));
-	m_views_cmb = new wxComboBox(page, ID_ViewsCombo, "",
-		wxDefaultPosition, wxSize(120, -1), 0, NULL, wxCB_READONLY);
-	m_help_btn = new wxButton(page, ID_HelpBtn, "?",
-		wxDefaultPosition, wxSize(25, 25));
-	sizer_1->Add(5, 5, 0);
-	sizer_1->Add(st, 0, wxALIGN_CENTER);
-	sizer_1->Add(m_views_cmb, 0, wxALIGN_CENTER);
-	sizer_1->Add(60, 5, 0);
-	sizer_1->Add(m_help_btn, 0, wxALIGN_CENTER);
 
 	//2nd line
 	m_mt_3d_rot_rd = new wxRadioButton(page, ID_Mt3dRotRd, "3D Rot.",
@@ -209,13 +196,53 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 		wxDefaultPosition, wxSize(60, 20));
 	sizer_7->Add(160, 5, 0);
 	sizer_7->Add(m_reset_angle_btn, 0, wxALIGN_CENTER);
+	
+	sizer_v->Add(sizer_2, 1, wxEXPAND);
+	sizer_v->Add(sizer_2_5, 1, wxEXPAND);
+	sizer_v->Add(sizer_3, 1, wxEXPAND);
+	sizer_v->Add(sizer_4, 0, wxEXPAND);
+	sizer_v->Add(sizer_5, 1, wxEXPAND);
+	sizer_v->Add(sizer_6, 1, wxEXPAND);
+	sizer_v->Add(sizer_6_5, 1, wxEXPAND);
+	sizer_v->Add(sizer_7, 1, wxEXPAND);
+	sizer_v->AddStretchSpacer();
 
+	page->SetSizer(sizer_v);
+	return page;
+}
+
+wxWindow* VMovieView::CreateAdvancedPage(wxWindow *parent) {
+	wxPanel *page = new wxPanel(parent);
+	//vertical sizer
+	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
+    RecorderDlg * recorder = new RecorderDlg(m_frame, page);
+	(reinterpret_cast<VRenderFrame*>(m_frame))->m_recorder_dlg = recorder;
+	sizer_v->Add(recorder,0,wxEXPAND);
+	page->SetSizer(sizer_v);
+	return page;
+}
+
+wxWindow* VMovieView::CreateCroppingPage(wxWindow *parent) {
+	wxPanel *page = new wxPanel(parent);
+	
+	//validator: integer
+	wxIntegerValidator<unsigned int> vald_int;
+
+	wxStaticText *st = 0;
+
+	//sizers
+	wxBoxSizer* sizer_8 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer_9 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer_10 = new wxBoxSizer(wxHORIZONTAL);
+	//vertical sizer
+	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	//8th line
 	st = new wxStaticText(page, 0, "Enable cropping:",
 		wxDefaultPosition, wxSize(110, 20));
 	m_frame_chk = new wxCheckBox(page, ID_FrameChk, "");
-	m_reset_btn = new wxButton(page, ID_ResetBtn, "Reset cropping",
-		wxDefaultPosition, wxSize(110, 20));
+	m_reset_btn = new wxButton(page, ID_ResetBtn, "Reset",
+		wxDefaultPosition, wxSize(110, 22));
+	m_reset_btn->SetBitmap(wxGetBitmapFromMemory(refresh));
 	sizer_8->Add(5, 5, 0);
 	sizer_8->Add(st, 0, wxALIGN_CENTER);
 	sizer_8->Add(m_frame_chk, 0, wxALIGN_CENTER);
@@ -264,30 +291,13 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	sizer_10->Add(m_height_text, 0, wxALIGN_CENTER);
 	sizer_10->Add(m_height_spin, 0, wxALIGN_CENTER);
 
-	sizer_v->Add(sizer_1, 1, wxEXPAND);
-	sizer_v->Add(sizer_2, 1, wxEXPAND);
-	sizer_v->Add(sizer_2_5, 1, wxEXPAND);
-	sizer_v->Add(sizer_3, 1, wxEXPAND);
-	sizer_v->Add(sizer_4, 0, wxEXPAND);
-	sizer_v->Add(sizer_5, 1, wxEXPAND);
-	sizer_v->Add(sizer_6, 1, wxEXPAND);
-	sizer_v->Add(sizer_6_5, 1, wxEXPAND);
-	sizer_v->Add(sizer_7, 1, wxEXPAND);
-	sizer_v->Add(10, 10, 0);
 	sizer_v->Add(sizer_8, 1, wxEXPAND);
 	sizer_v->Add(sizer_9, 1, wxEXPAND);
 	sizer_v->Add(sizer_10, 1, wxEXPAND);
+	sizer_v->AddStretchSpacer();
 
 	page->SetSizer(sizer_v);
 	return page;
-}
-
-wxWindow* VMovieView::CreateAdvancedPage(wxWindow *parent) {
-	return NULL;
-}
-
-wxWindow* VMovieView::CreateCroppingPage(wxWindow *parent) {
-	return NULL;
 
 }
 
@@ -309,11 +319,50 @@ m_prev_frame(0)
 	//notebook
 	wxNotebook *notebook = new wxNotebook(this, wxID_ANY);
 	notebook->AddPage(CreateSimplePage(notebook), "Basic");
+	notebook->AddPage(CreateAdvancedPage(notebook), "Advanced");
+	notebook->AddPage(CreateCroppingPage(notebook), "Cropping");
+	
+	//renderview selector
+	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
+	wxStaticText * st = new wxStaticText(this, 0, "Capture view:",
+		wxDefaultPosition, wxSize(120, 20));
+	m_views_cmb = new wxComboBox(this, ID_ViewsCombo, "",
+		wxDefaultPosition, wxSize(120, -1), 0, NULL, wxCB_READONLY);
+	m_help_btn = new wxButton(this, ID_HelpBtn, "?",
+		wxDefaultPosition, wxSize(25, 25));
+
+	//the play/rewind/slider/save
+	wxBoxSizer *sizerH = new wxBoxSizer(wxHORIZONTAL);
+	wxButton * m_play_btn = new wxButton(this, ID_PrevBtn, "|>",
+		wxDefaultPosition, wxSize(22, 22));
+	sizerH->Add(m_play_btn, 0, wxEXPAND|wxALIGN_CENTER);
+	wxButton * m_rewind_btn = new wxButton(this, wxID_ANY, "<<",
+		wxDefaultPosition, wxSize(22, 22));
+	sizerH->Add(m_rewind_btn, 0, wxEXPAND|wxALIGN_CENTER);
+	wxSlider * m_progress_slider = new wxSlider(this, wxID_ANY, 0, 0, 360);
+	sizerH->Add(m_progress_slider, 1, wxEXPAND|wxALIGN_CENTER);
+	wxTextCtrl * m_progress_text = new wxTextCtrl(this, wxID_ANY, "0.00",
+		wxDefaultPosition,wxSize(50, -1));
+	sizerH->Add(m_progress_text, 0, wxEXPAND|wxALIGN_CENTER);
+	wxButton * m_save_btn = new wxButton(this, ID_RunBtn, "Save...",
+		wxDefaultPosition, wxSize(80, 22));
+	m_save_btn->SetBitmap(wxGetBitmapFromMemory(listicon_save));
+	sizerH->Add(m_save_btn, 0, wxEXPAND|wxALIGN_CENTER);
+	
+
+	sizer_1->Add(5, 5, 0);
+	sizer_1->Add(st, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_views_cmb, 0, wxALIGN_CENTER);
+	sizer_1->Add(60, 5, 0);
+	sizer_1->Add(m_help_btn, 0, wxALIGN_CENTER);
+
 	
 	//interface
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(notebook, 1, wxEXPAND);
-	sizerV->Add(10, 10);
+	sizerV->AddStretchSpacer();
+	sizerV->Add(sizer_1, 0, wxEXPAND);
+	sizerV->Add(sizerH,0,wxEXPAND);
 	SetSizerAndFit(sizerV);
 	Layout();
 	Init();

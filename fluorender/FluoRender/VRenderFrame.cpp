@@ -217,10 +217,10 @@ m_free_version(true)
                        "Edit: Tools for editing volume data");
     m_main_tb->SetDropdownMenu(ID_PaintTool, m_tb_menu_edit);
 #endif
-    m_main_tb->AddTool(ID_Recorder, "Recorder",
-            wxGetBitmapFromMemory(icon_recorder), wxNullBitmap, wxITEM_NORMAL,
-            "Recorder: Record actions by key frames and play back",
-            "Recorder: Record actions by key frames and play back");
+    //m_main_tb->AddTool(ID_Recorder, "Recorder",
+    //        wxGetBitmapFromMemory(icon_recorder), wxNullBitmap, wxITEM_NORMAL,
+    //        "Recorder: Record actions by key frames and play back",
+    //        "Recorder: Record actions by key frames and play back");
    m_main_tb->AddSeparator();
    m_main_tb->AddTool(ID_Settings, "Settings",
          wxGetBitmapFromMemory(icon_settings), wxNullBitmap, wxITEM_NORMAL,
@@ -260,7 +260,7 @@ m_free_version(true)
    m_tree_panel = new TreePanel(this, this, wxID_ANY,
          wxDefaultPosition, wxSize(350, 300));
 
-   //create movie view
+   //create movie view (sets the m_recorder_dlg)
    m_movie_view = new VMovieView(this, this, wxID_ANY,
          wxDefaultPosition, wxSize(350, 300));
 
@@ -334,7 +334,7 @@ m_free_version(true)
    m_colocalization_dlg = new ColocalizationDlg(this, this);
 
    //recorder dialog
-   m_recorder_dlg = new RecorderDlg(this, this);
+   //m_recorder_dlg = new RecorderDlg(this, this);
 
    //measure dialog
    m_measure_dlg = new MeasureDlg(this, this);
@@ -432,11 +432,11 @@ m_free_version(true)
    m_aui_mgr.GetPane(m_colocalization_dlg).Float();
    m_aui_mgr.GetPane(m_colocalization_dlg).Hide();
    //recorder dialog
-   m_aui_mgr.AddPane(m_recorder_dlg, wxAuiPaneInfo().
+/*   m_aui_mgr.AddPane(m_recorder_dlg, wxAuiPaneInfo().
          Name("m_recorder_dlg").Caption("Recorder").
          Dockable(false).CloseButton(true));
    m_aui_mgr.GetPane(m_recorder_dlg).Float();
-   m_aui_mgr.GetPane(m_recorder_dlg).Hide();
+   m_aui_mgr.GetPane(m_recorder_dlg).Hide()*/;
    //measure dialog
    m_aui_mgr.AddPane(m_measure_dlg, wxAuiPaneInfo().
          Name("m_measure_dlg").Caption("Measurement").
@@ -536,9 +536,9 @@ m_free_version(true)
    m_top_tools->Append(m);
    m = new wxMenuItem(m_top_tools,ID_Colocalization, wxT("Colocalization &Analysis..."));
    m_top_tools->Append(m);
-   m = new wxMenuItem(m_top_tools,ID_Recorder, wxT("&Recorder..."));
-   m->SetBitmap(wxGetBitmapFromMemory(icon_recorder_mini));
-   m_top_tools->Append(m);
+   //m = new wxMenuItem(m_top_tools,ID_Recorder, wxT("&Recorder..."));
+   //m->SetBitmap(wxGetBitmapFromMemory(icon_recorder_mini));
+   //m_top_tools->Append(m);
    m = new wxMenuItem(m_top_tools,ID_Convert, wxT("Con&vert..."));
    m_top_tools->Append(m);
    m_top_tools->Append(wxID_SEPARATOR);
