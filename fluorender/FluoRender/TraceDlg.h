@@ -141,6 +141,7 @@ private:
 	wxSlider* m_ghost_num_sldr;
 	wxTextCtrl* m_ghost_num_text;
 	//edit tools
+	wxCheckBox* m_manual_assist_check;
 	//cell size filter
 	wxSlider* m_cell_size_sldr;
 	wxTextCtrl* m_cell_size_text;
