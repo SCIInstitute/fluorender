@@ -66,6 +66,7 @@ public:
 		ID_SaveasTraceBtn,
 		ID_GhostNumSldr,
 		ID_GhostNumText,
+		ID_ManualAssistCheck,
 		ID_CellSizeSldr,
 		ID_CellSizeText,
 		ID_CellUpdateBtn,
@@ -96,6 +97,9 @@ public:
 	void GetSettings(VRenderView* vrv);
 	VRenderView* GetView();
 	void UpdateList();
+
+	//manual assist
+	bool GetManualAssist() {return m_manual_assist;}
 	//cell operations
 	void CellUpdate();
 	void CellFull();
@@ -126,6 +130,9 @@ private:
 	//time sequence setting
 	int m_cur_time;
 	int m_prv_time;
+
+	//enable manual assist
+	bool m_manual_assist;
 
 	//ui
 	//list ctrl
@@ -190,6 +197,8 @@ private:
 	//ghost number
 	void OnGhostNumChange(wxScrollEvent &event);
 	void OnGhostNumText(wxCommandEvent &event);
+	//manual tracking assistant
+	void OnManualAssistCheck(wxCommandEvent &event);
 	//cell size filter
 	void OnCellSizeChange(wxScrollEvent &event);
 	void OnCellSizeText(wxCommandEvent &event);

@@ -1843,7 +1843,8 @@ void VRenderGLView::Segment()
    glPopMatrix();
 
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetTraceDlg())
+	if (vr_frame && vr_frame->GetTraceDlg() &&
+		vr_frame->GetTraceDlg()->GetManualAssist())
 	{
 	   if (m_selector.GetMode() == 1 || m_selector.GetMode() == 2)
 	   {
