@@ -5869,7 +5869,7 @@ void VRenderGLView::SetPersp(bool persp)
       wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
       m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
       m_vrv->m_scale_factor_text->ChangeValue(str);
-      m_vrv->m_options_toolbar2->ToggleTool(VRenderView::ID_FreeChk,false);
+      m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_FreeChk,false);
 
       SetRotations(m_rotx, m_roty, m_rotz);
    }
@@ -5879,8 +5879,8 @@ void VRenderGLView::SetPersp(bool persp)
 void VRenderGLView::SetFree(bool free)
 {
    m_free = free;
-   if (m_vrv->m_options_toolbar2->GetToolState(VRenderView::ID_FreeChk) != m_free)
-      m_vrv->m_options_toolbar2->ToggleTool(VRenderView::ID_FreeChk,m_free);
+   if (m_vrv->m_options_toolbar->GetToolState(VRenderView::ID_FreeChk) != m_free)
+      m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_FreeChk,m_free);
    if (free)
    {
       m_persp = true;
@@ -9567,22 +9567,10 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 
                wxString str = wxString::Format("%.1f", m_rotx);
                m_vrv->m_x_rot_text->ChangeValue(str);
-               if (m_rot_lock)
-                  m_vrv->m_x_rot_sldr->SetValue(int(m_rotx/45.0));
-               else
-                  m_vrv->m_x_rot_sldr->SetValue(int(m_rotx));
                str = wxString::Format("%.1f", m_roty);
                m_vrv->m_y_rot_text->ChangeValue(str);
-               if (m_rot_lock)
-                  m_vrv->m_y_rot_sldr->SetValue(int(m_roty/45.0));
-               else
-                  m_vrv->m_y_rot_sldr->SetValue(int(m_roty));
                str = wxString::Format("%.1f", m_rotz);
                m_vrv->m_z_rot_text->ChangeValue(str);
-               if (m_rot_lock)
-                  m_vrv->m_z_rot_sldr->SetValue(int(m_rotz/45.0));
-               else
-                  m_vrv->m_z_rot_sldr->SetValue(int(m_rotz));
 
                m_interactive = m_adaptive;
 			   
@@ -9598,7 +9586,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
                         {
                            view->m_glview->SetRotations(
 							   m_rotx, m_roty, m_rotz, true, false);
-						   view->m_glview->OnDraw(wxPaintEvent());
+							wxPaintEvent evt;
+						   view->m_glview->OnDraw(evt);
                         }
                      }
                   }
@@ -9875,19 +9864,16 @@ void VRenderGLView::SetRotations(double rotx, double roty, double rotz, bool ui_
    Quaternion up(0.0, 1.0, 0.0, 0.0);
    Quaternion up2 = (-m_q) * up * m_q;
    m_up = Vector(up2.x, up2.y, up2.z);
-
-   if (m_rot_lock)
-   {
-      m_vrv->m_x_rot_sldr->SetValue(int(m_rotx/45.0));
-      m_vrv->m_y_rot_sldr->SetValue(int(m_roty/45.0));
-      m_vrv->m_z_rot_sldr->SetValue(int(m_rotz/45.0));
-   }
-   else
-   {
-      m_vrv->m_x_rot_sldr->SetValue(int(m_rotx));
-      m_vrv->m_y_rot_sldr->SetValue(int(m_roty));
-      m_vrv->m_z_rot_sldr->SetValue(int(m_rotz));
-   }
+   
+   //double dval = m_rot_lock?(((int)(m_rotx/45.0))*45):m_rotx;
+   //wxString str = wxString::Format("%.1f", dval);
+   //m_vrv->m_x_rot_text->SetValue(str);
+   //dval = m_rot_lock?(((int)(m_roty/45.0))*45):m_roty;
+   //str = wxString::Format("%.1f", dval);
+   //m_vrv->m_y_rot_text->SetValue(str);
+   //dval = m_rot_lock?(((int)(m_rotz/45.0))*45):m_rotz;
+   //str = wxString::Format("%.1f", dval);
+   //m_vrv->m_z_rot_text->SetValue(str);
 
    if (ui_update)
    {
@@ -9985,13 +9971,8 @@ EVT_COMMAND_SCROLL(ID_XRotSldr, VRenderView::OnXRotScroll)
 EVT_COMMAND_SCROLL(ID_YRotSldr, VRenderView::OnYRotScroll)
 EVT_COMMAND_SCROLL(ID_ZRotSldr, VRenderView::OnZRotScroll)
 EVT_TOOL(ID_RotLockChk, VRenderView::OnRotLockCheck)
-//spin buttons
-EVT_SPIN_UP(ID_XRotSpin, VRenderView::OnXRotSpinUp)
-EVT_SPIN_DOWN(ID_XRotSpin, VRenderView::OnXRotSpinDown)
-EVT_SPIN_UP(ID_YRotSpin, VRenderView::OnYRotSpinUp)
-EVT_SPIN_DOWN(ID_YRotSpin, VRenderView::OnYRotSpinDown)
-EVT_SPIN_UP(ID_ZRotSpin, VRenderView::OnZRotSpinUp)
-EVT_SPIN_DOWN(ID_ZRotSpin, VRenderView::OnZRotSpinDown)
+//timer
+EVT_TIMER(ID_RotateTimer, VRenderView::OnTimer)
 //reset
 EVT_TOOL(ID_DefaultBtn, VRenderView::OnSaveDefault)
 
@@ -10009,7 +9990,8 @@ VRenderView::VRenderView(wxWindow* frame,
    m_frame(frame),
    m_draw_clip(false),
    m_use_dft_settings(false),
-   m_draw_scalebar(kOff)
+   m_draw_scalebar(kOff),
+   m_timer(this,ID_RotateTimer)
 {
    wxString name = wxString::Format("Render View:%d", m_id++);
    this->SetName(name);
@@ -10035,7 +10017,6 @@ VRenderView::VRenderView(wxWindow* frame,
 
 	//m_glview = new VRenderGLView(frame, this, wxID_ANY, NULL, NULL, sharedContext);
    m_glview->SetCanFocus(false);
-
    CreateBar();
    if (m_glview) {
 	   m_glview->SetSBText(wxString::Format("50 %c%c", 131, 'm'));
@@ -10044,6 +10025,8 @@ VRenderView::VRenderView(wxWindow* frame,
 	   m_glview->SetScaleBarLen(1.);
    }
    LoadSettings();
+   m_x_rotating = m_y_rotating = m_z_rotating = false;
+   m_timer.Start(50);
 }
 
 VRenderView::~VRenderView()
@@ -10072,8 +10055,10 @@ void VRenderView::CreateBar()
    //toolbar 1
    m_options_toolbar = new wxToolBar(this,wxID_ANY);
    wxBoxSizer* sizer_h_1 = new wxBoxSizer(wxHORIZONTAL);
+#ifndef _DARWIN
    //the spacer
    wxStaticText * stb;
+#endif
    //add the options
    m_options_toolbar->AddRadioTool(ID_VolumeSeqRd,"Layered",
 	   wxGetBitmapFromMemory(layers),wxNullBitmap,"Render View as Layers",
@@ -10089,12 +10074,14 @@ void VRenderView::CreateBar()
    m_options_toolbar->ToggleTool(ID_VolumeSeqRd,false);
    m_options_toolbar->ToggleTool(ID_VolumeMultiRd,false);
    m_options_toolbar->ToggleTool(ID_VolumeCompRd,false);
-   stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
-	   wxDefaultPosition, wxSize(5,5));
-   stb->SetBackgroundColour(wxColour(128,128,128));
-   m_options_toolbar->AddSeparator();
-   m_options_toolbar->AddControl(stb);
-   m_options_toolbar->AddSeparator();
+	m_options_toolbar->AddSeparator();
+#ifndef _DARWIN
+	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
+						   wxDefaultPosition, wxSize(5,5));
+	stb->SetBackgroundColour(wxColour(128,128,128));
+	m_options_toolbar->AddControl(stb);
+	m_options_toolbar->AddSeparator();
+#endif
    switch (m_glview->GetVolMethod())
    {
    case VOL_METHOD_SEQ:
@@ -10111,12 +10098,14 @@ void VRenderView::CreateBar()
    wxButton * cam = new wxButton(m_options_toolbar, ID_CaptureBtn, "Capture");
    cam->SetBitmap(wxGetBitmapFromMemory(camera));
    m_options_toolbar->AddControl(cam);
-   stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
-	   wxDefaultPosition, wxSize(5,5));
-   stb->SetBackgroundColour(wxColour(128,128,128));
-   m_options_toolbar->AddSeparator();
-   m_options_toolbar->AddControl(stb);
-   m_options_toolbar->AddSeparator();
+	m_options_toolbar->AddSeparator();
+#ifndef _DARWIN
+	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
+						   wxDefaultPosition, wxSize(5,5));
+	stb->SetBackgroundColour(wxColour(128,128,128));
+	m_options_toolbar->AddControl(stb);
+	m_options_toolbar->AddSeparator();
+#endif
    
    m_options_toolbar->AddCheckTool(ID_CamCtrChk,"Axis",
 	   wxGetBitmapFromMemory(axis),wxNullBitmap,
@@ -10135,12 +10124,14 @@ void VRenderView::CreateBar()
 	   "Toggle View of the Legend",
 	   "Toggle View of the Legend");
    m_options_toolbar->ToggleTool(ID_LegendChk,false);
-   stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
-	   wxDefaultPosition, wxSize(5,5));
-   stb->SetBackgroundColour(wxColour(128,128,128));
-   m_options_toolbar->AddSeparator();
-   m_options_toolbar->AddControl(stb);
-   m_options_toolbar->AddSeparator();
+	m_options_toolbar->AddSeparator();
+#ifndef _DARWIN
+	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
+						   wxDefaultPosition, wxSize(5,5));
+	stb->SetBackgroundColour(wxColour(128,128,128));
+	m_options_toolbar->AddControl(stb);
+	m_options_toolbar->AddSeparator();
+#endif
    
    //scale bar
    m_options_toolbar->AddTool(ID_ScaleBar,"Scale Bar",
@@ -10160,57 +10151,59 @@ void VRenderView::CreateBar()
    m_options_toolbar->AddControl(m_scale_text);
    m_options_toolbar->AddControl(m_scale_cmb);
 
-   m_options_toolbar->Realize();
-
+   //m_options_toolbar->Realize();
+	m_options_toolbar->AddStretchableSpace();
    //angle of view
-   m_options_toolbar2 = new wxToolBar(this, wxID_ANY);
-   st2 = new wxStaticText(m_options_toolbar2, wxID_ANY, "Perspective Angle:");
-   m_aov_sldr = new wxSlider(m_options_toolbar2, ID_AovSldr, 45, 10, 100,
+   //m_options_toolbar2 = new wxToolBar(this, wxID_ANY);
+   st2 = new wxStaticText(m_options_toolbar, wxID_ANY, "Perspective Angle:");
+   m_aov_sldr = new wxSlider(m_options_toolbar, ID_AovSldr, 45, 10, 100,
          wxDefaultPosition, wxSize(200, 20), wxSL_HORIZONTAL);
    m_aov_sldr->SetValue(GetPersp()?GetAov():10);
    m_aov_sldr->Connect(wxID_ANY, wxEVT_IDLE,
          wxIdleEventHandler(VRenderView::OnAovSldrIdle),
          NULL, this);
-   m_aov_text = new wxTextCtrl(m_options_toolbar2, ID_AovText, "",
+   m_aov_text = new wxTextCtrl(m_options_toolbar, ID_AovText, "",
          wxDefaultPosition, wxSize(60, 20), 0, vald_int);
    m_aov_text->ChangeValue(GetPersp()?wxString::Format("%d", 
 	   int(GetAov())):"Ortho");
-   m_options_toolbar2->AddControl(st2);
-   m_options_toolbar2->AddControl(m_aov_sldr);
-   m_options_toolbar2->AddControl(m_aov_text);
-   st2 = new wxStaticText(m_options_toolbar2, wxID_ANY, "    Free-Fly");
-   m_options_toolbar2->AddControl(st2);
+   m_options_toolbar->AddControl(st2);
+   m_options_toolbar->AddControl(m_aov_sldr);
+   m_options_toolbar->AddControl(m_aov_text);
+   st2 = new wxStaticText(m_options_toolbar, wxID_ANY, "    Free-Fly:  ");
+   m_options_toolbar->AddControl(st2);
 
-   m_options_toolbar2->AddCheckTool(ID_FreeChk,"Free Fly",
+   m_options_toolbar->AddCheckTool(ID_FreeChk,"Free Fly",
 	   wxGetBitmapFromMemory(freefly),wxNullBitmap,
 	   "Change the camera to a 'Free-Fly' Mode",
 	   "Change the camera to a 'Free-Fly' Mode");
 
    if (GetFree())
-	m_options_toolbar2->ToggleTool(ID_FreeChk,true);
+	m_options_toolbar->ToggleTool(ID_FreeChk,true);
    else
-	m_options_toolbar2->ToggleTool(ID_FreeChk,false);
-   stb = new wxStaticText(m_options_toolbar2, wxID_ANY, "",
-	   wxDefaultPosition, wxSize(5,5));
-   stb->SetBackgroundColour(wxColour(128,128,128));
-   m_options_toolbar2->AddSeparator();
-   m_options_toolbar2->AddControl(stb);
-   m_options_toolbar2->AddSeparator();
+	   m_options_toolbar->ToggleTool(ID_FreeChk,false);
+	m_options_toolbar->AddSeparator();
+#ifndef _DARWIN
+	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
+						   wxDefaultPosition, wxSize(5,5));
+	stb->SetBackgroundColour(wxColour(128,128,128));
+	m_options_toolbar->AddControl(stb);
+	m_options_toolbar->AddSeparator();
+#endif
    //background option
-   st1 = new wxStaticText(m_options_toolbar2, wxID_ANY, "Background:");
-   m_bg_color_picker = new wxColourPickerCtrl(m_options_toolbar2, 
+   st1 = new wxStaticText(m_options_toolbar, wxID_ANY, "Background:  ");
+   m_bg_color_picker = new wxColourPickerCtrl(m_options_toolbar, 
 	   ID_BgColorPicker);
-   m_options_toolbar2->AddControl(st1);
-   m_options_toolbar2->AddControl(m_bg_color_picker);
+   m_options_toolbar->AddControl(st1);
+   m_options_toolbar->AddControl(m_bg_color_picker);
 
-   m_options_toolbar2->Realize();
+   m_options_toolbar->Realize();
 
    //add the toolbars and other options in order
    sizer_h_1->AddSpacer(40);
-   sizer_h_1->Add(m_options_toolbar,0,wxALIGN_CENTER|wxEXPAND);
-   sizer_h_1->AddStretchSpacer();
-   sizer_h_1->Add(m_options_toolbar2,0,wxALIGN_CENTER|wxEXPAND);
-   sizer_h_1->AddSpacer(40);
+   sizer_h_1->Add(m_options_toolbar,1,wxALIGN_CENTER|wxEXPAND);
+   //sizer_h_1->AddStretchSpacer();
+   //sizer_h_1->Add(m_options_toolbar2,0,wxALIGN_CENTER|wxEXPAND);
+   sizer_h_1->AddSpacer(35);
 
    //bar left///////////////////////////////////////////////////
    wxBoxSizer* sizer_v_3 = new wxBoxSizer(wxVERTICAL);
@@ -10284,26 +10277,20 @@ void VRenderView::CreateBar()
    wxBoxSizer* sizer_h_2 = new wxBoxSizer(wxHORIZONTAL);
    m_lower_toolbar = new wxToolBar(this,wxID_ANY);
    st1 = new wxStaticText(this, 0, "X:");
-   m_x_rot_sldr = new wxSlider(this, ID_XRotSldr, 0, 0, 360,
-         wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+   m_x_rot_sldr = new wxScrollBar(this, ID_XRotSldr);
+   m_x_rot_sldr->SetScrollbar(150,60,360,15);
    m_x_rot_text = new wxTextCtrl(this, ID_XRotText, "0.0",
-         wxDefaultPosition, wxSize(40,20), 0, vald_fp1);
-   m_x_rot_spin = new wxSpinButton(this, ID_XRotSpin,
-         wxDefaultPosition, wxSize(20, 20), wxSP_HORIZONTAL);
+         wxDefaultPosition, wxSize(45,20), 0, vald_fp1);
    st2 = new wxStaticText(this, 0, "Y:");
-   m_y_rot_sldr = new wxSlider(this, ID_YRotSldr, 0, 0, 360,
-         wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+   m_y_rot_sldr = new wxScrollBar(this, ID_YRotSldr);
+   m_y_rot_sldr->SetScrollbar(150,60,360,15);
    m_y_rot_text = new wxTextCtrl(this, ID_YRotText, "0.0",
-         wxDefaultPosition, wxSize(40,20), 0, vald_fp1);
-   m_y_rot_spin = new wxSpinButton(this, ID_YRotSpin,
-         wxDefaultPosition, wxSize(20, 20), wxSP_HORIZONTAL);
+         wxDefaultPosition, wxSize(45,20), 0, vald_fp1);
    st3 = new wxStaticText(this, 0, "Z:");
-   m_z_rot_sldr = new wxSlider(this, ID_ZRotSldr, 0, 0, 360,
-         wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+   m_z_rot_sldr = new wxScrollBar(this, ID_ZRotSldr);
+   m_z_rot_sldr->SetScrollbar(150,60,360,15);
    m_z_rot_text = new wxTextCtrl(this, ID_ZRotText, "0.0",
-         wxDefaultPosition, wxSize(40,20), 0, vald_fp1);
-   m_z_rot_spin = new wxSpinButton(this, ID_ZRotSpin,
-         wxDefaultPosition, wxSize(20, 20), wxSP_HORIZONTAL);
+         wxDefaultPosition, wxSize(45,20), 0, vald_fp1);
 
    m_lower_toolbar->AddCheckTool(ID_RotLockChk, "45 Angles",
 	   wxGetBitmapFromMemory(depth), wxNullBitmap,
@@ -10320,23 +10307,23 @@ void VRenderView::CreateBar()
    sizer_h_2->AddSpacer(40);
    sizer_h_2->Add(st1, 0, wxALIGN_CENTER);
    sizer_h_2->Add(m_x_rot_sldr, 1, wxALIGN_CENTER);
-   sizer_h_2->Add(m_x_rot_spin, 0, wxALIGN_CENTER);
    sizer_h_2->Add(m_x_rot_text, 0, wxALIGN_CENTER);
    sizer_h_2->Add(5, 5, 0);
    sizer_h_2->Add(st2, 0, wxALIGN_CENTER);
    sizer_h_2->Add(m_y_rot_sldr, 1, wxALIGN_CENTER);
-   sizer_h_2->Add(m_y_rot_spin, 0, wxALIGN_CENTER);
    sizer_h_2->Add(m_y_rot_text, 0, wxALIGN_CENTER);
    sizer_h_2->Add(5, 5, 0);
    sizer_h_2->Add(st3, 0, wxALIGN_CENTER);
    sizer_h_2->Add(m_z_rot_sldr, 1, wxALIGN_CENTER);
-   sizer_h_2->Add(m_z_rot_spin, 0, wxALIGN_CENTER);
    sizer_h_2->Add(m_z_rot_text, 0, wxALIGN_CENTER);
    sizer_h_2->Add(5, 5, 0);
    sizer_h_2->Add(m_lower_toolbar, 0, wxALIGN_CENTER);
    sizer_h_2->AddSpacer(40);
-
-   sizer_v->Add(sizer_h_1, 0, wxEXPAND|wxBOTTOM,3);
+#ifndef _DARWIN
+	sizer_v->Add(sizer_h_1, 0, wxEXPAND|wxBOTTOM,3);
+#else
+	sizer_v->Add(sizer_h_1, 0, wxEXPAND);
+#endif
    sizer_v->Add(sizer_m, 1, wxEXPAND);
    sizer_v->Add(sizer_h_2, 0, wxEXPAND);
 
@@ -11403,9 +11390,9 @@ void VRenderView::OnRotLink(bool b)
 
 void VRenderView::OnRotReset(wxCommandEvent &event)
 {
-   m_x_rot_sldr->SetValue(0);
-   m_y_rot_sldr->SetValue(0);
-   m_z_rot_sldr->SetValue(0);
+   m_x_rot_sldr->SetThumbPosition(m_x_rot_sldr->GetRange()/2 - 30);
+   m_y_rot_sldr->SetThumbPosition(m_y_rot_sldr->GetRange()/2 - 30);
+   m_z_rot_sldr->SetThumbPosition(m_z_rot_sldr->GetRange()/2 - 30);
    m_x_rot_text->ChangeValue("0.0");
    m_y_rot_text->ChangeValue("0.0");
    m_z_rot_text->ChangeValue("0.0");
@@ -11414,115 +11401,126 @@ void VRenderView::OnRotReset(wxCommandEvent &event)
    if (m_glview->m_mouse_focus)
       m_glview->SetFocus();
 }
+//timer used for rotation scrollbars
+void VRenderView::OnTimer(wxTimerEvent& event) {
+	wxString str;
+    bool lock = m_lower_toolbar->GetToolState(ID_RotLockChk);
+    double rotx, roty, rotz;
+    m_glview->GetRotations(rotx, roty, rotz);
+	//the X bar positions
+	int pos = m_x_rot_sldr->GetThumbPosition ();
+	int mid = m_x_rot_sldr->GetRange() / 2 - 30;
+	rotx = lock?(((int)((rotx + (pos - mid))/45))*45):(rotx + (pos - mid) / 10.);
+	if (rotx < 360.) rotx +=360.;
+	if (rotx > 360.) rotx -=360.;
+	str = wxString::Format("%.1f", rotx);
+	if ((std::abs(pos - mid) > 1)) {
+		if (!m_x_rotating) {
+			m_x_rot_sldr->SetThumbPosition ((mid + pos) / 2. + 0.5);
+		}
+		m_x_rot_text->SetValue(str);
+	}
+	//the Y bar positions
+	pos = m_y_rot_sldr->GetThumbPosition ();
+	roty = lock?(((int)((roty + (pos - mid))/45))*45):(roty + (pos - mid) / 10.);
+	if (roty < 360.) roty +=360.;
+	if (roty > 360.) roty -=360.;
+	str = wxString::Format("%.1f", roty);
+	if ((std::abs(pos - mid) > 1)) {
+		if (!m_y_rotating) {
+			m_y_rot_sldr->SetThumbPosition ((mid + pos) / 2. + 0.5);
+		}
+		m_y_rot_text->SetValue(str);
+	}
+	//the Z bar positions
+	pos = m_z_rot_sldr->GetThumbPosition ();
+	rotz = lock?(((int)((rotz + (pos - mid))/45))*45):(rotz + (pos - mid) / 10.);
+	if (rotz < 360.) rotz +=360.;
+	if (rotz > 360.) rotz -=360.;
+	str = wxString::Format("%.1f", rotz);
+	if ((std::abs(pos - mid) > 1)) {
+		if (!m_z_rotating) {
+			m_z_rot_sldr->SetThumbPosition ((mid + pos) / 2. + 0.5);
+		}
+		m_z_rot_text->SetValue(str);
+	}
+}
 
 void VRenderView::OnXRotScroll(wxScrollEvent& event)
 {
-   int val = event.GetPosition();
-   double dval = m_glview->GetRotLock()?val*45.0:val;
-   wxString str = wxString::Format("%.1f", dval);
-   m_x_rot_text->SetValue(str);
+   bool lock = m_lower_toolbar->GetToolState(ID_RotLockChk);
+   wxString str;
+   double rotx, roty, rotz;
+   m_glview->GetRotations(rotx, roty, rotz);
+   if (event.GetEventType() == wxEVT_SCROLL_THUMBTRACK )
+      m_x_rotating = true;
+   else if (event.GetEventType() == wxEVT_SCROLL_THUMBRELEASE  )
+      m_x_rotating = false;
+   else if (event.GetEventType() == wxEVT_SCROLL_LINEDOWN) {
+	   str = wxString::Format("%.1f", lock?(rotx + 45):(rotx + 1));
+	   m_x_rot_text->SetValue(str);
+   } else if (event.GetEventType() == wxEVT_SCROLL_LINEUP) {
+	   str = wxString::Format("%.1f", lock?(rotx - 45):(rotx - 1));
+	   m_x_rot_text->SetValue(str);
+   }
 }
 
 void VRenderView::OnYRotScroll(wxScrollEvent& event)
 {
-   int val = event.GetPosition();
-   double dval = m_glview->GetRotLock()?val*45.0:val;
-   wxString str = wxString::Format("%.1f", dval);
-   m_y_rot_text->SetValue(str);
+   bool lock = m_lower_toolbar->GetToolState(ID_RotLockChk);
+   wxString str;
+   double rotx, roty, rotz;
+   m_glview->GetRotations(rotx, roty, rotz);
+   if (event.GetEventType() == wxEVT_SCROLL_THUMBTRACK )
+      m_y_rotating = true;
+   else if (event.GetEventType() == wxEVT_SCROLL_THUMBRELEASE  )
+      m_y_rotating = false;
+   else if (event.GetEventType() == wxEVT_SCROLL_LINEDOWN) {
+	   str = wxString::Format("%.1f", lock?(roty + 45):(roty + 1));
+	   m_y_rot_text->SetValue(str);
+   } else if (event.GetEventType() == wxEVT_SCROLL_LINEUP) {
+	   str = wxString::Format("%.1f", lock?(roty - 45):(roty - 1));
+	   m_y_rot_text->SetValue(str);
+   }
 }
 
 void VRenderView::OnZRotScroll(wxScrollEvent& event)
 {
-   int val = event.GetPosition();
-   double dval = m_glview->GetRotLock()?val*45.0:val;
-   wxString str = wxString::Format("%.1f", dval);
-   m_z_rot_text->SetValue(str);
+   bool lock = m_lower_toolbar->GetToolState(ID_RotLockChk);
+   wxString str;
+   double rotx, roty, rotz;
+   m_glview->GetRotations(rotx, roty, rotz);
+   if (event.GetEventType() == wxEVT_SCROLL_THUMBTRACK )
+      m_z_rotating = true;
+   else if (event.GetEventType() == wxEVT_SCROLL_THUMBRELEASE  )
+      m_z_rotating = false;
+   else if (event.GetEventType() == wxEVT_SCROLL_LINEDOWN) {
+	   str = wxString::Format("%.1f", lock?(rotz + 45):(rotz + 1));
+	   m_z_rot_text->SetValue(str);
+   } else if (event.GetEventType() == wxEVT_SCROLL_LINEUP) {
+	   str = wxString::Format("%.1f", lock?(rotz - 45):(rotz - 1));
+	   m_z_rot_text->SetValue(str);
+   }
 }
 
 void VRenderView::OnRotLockCheck(wxCommandEvent& event)
 {
-   if (m_lower_toolbar->GetToolState(ID_RotLockChk))
-   {
-      m_glview->SetRotLock(true);
-      //sliders
-      m_x_rot_sldr->SetRange(0, 8);
-      m_y_rot_sldr->SetRange(0, 8);
-      m_z_rot_sldr->SetRange(0, 8);
-      double rotx, roty, rotz;
-      m_glview->GetRotations(rotx, roty, rotz);
-      m_x_rot_sldr->SetValue(int(rotx/45.0));
-      m_y_rot_sldr->SetValue(int(roty/45.0));
-      m_z_rot_sldr->SetValue(int(rotz/45.0));
+   bool lock = m_lower_toolbar->GetToolState(ID_RotLockChk);
+   double rotx, roty, rotz;
+   m_glview->GetRotations(rotx, roty, rotz);
+   if (lock) {
+	   rotx = (((int)(rotx/45))*45);
+	   roty = (((int)(roty/45))*45);
+	   rotz = (((int)(rotz/45))*45);
    }
-   else
-   {
-      m_glview->SetRotLock(false);
-      //sliders
-      m_x_rot_sldr->SetRange(0, 360);
-      m_y_rot_sldr->SetRange(0, 360);
-      m_z_rot_sldr->SetRange(0, 360);
-      double rotx, roty, rotz;
-      m_glview->GetRotations(rotx, roty, rotz);
-      m_x_rot_sldr->SetValue(int(rotx));
-      m_y_rot_sldr->SetValue(int(roty));
-      m_z_rot_sldr->SetValue(int(rotz));
-   }
-}
-
-void VRenderView::OnXRotSpinUp(wxSpinEvent& event)
-{
-   wxString str_val = m_x_rot_text->GetValue();
-   int value = STOI(str_val.fn_str())+1;
-   value = value>360?value-360:value;
-   wxString str = wxString::Format("%.1f", double(value));
+   m_glview->SetRotLock(lock);
+   wxString str = wxString::Format("%.1f", rotx);
    m_x_rot_text->SetValue(str);
-}
-
-void VRenderView::OnXRotSpinDown(wxSpinEvent& event)
-{
-   wxString str_val = m_x_rot_text->GetValue();
-   int value = STOI(str_val.fn_str())-1;
-   value = value<0?value+360:value;
-   wxString str = wxString::Format("%.1f", double(value));
-   m_x_rot_text->SetValue(str);
-}
-
-void VRenderView::OnYRotSpinUp(wxSpinEvent& event)
-{
-   wxString str_val = m_y_rot_text->GetValue();
-   int value = STOI(str_val.fn_str())+1;
-   value = value>360?value-360:value;
-   wxString str = wxString::Format("%.1f", double(value));
+   str = wxString::Format("%.1f", roty);
    m_y_rot_text->SetValue(str);
-}
-
-void VRenderView::OnYRotSpinDown(wxSpinEvent& event)
-{
-   wxString str_val = m_y_rot_text->GetValue();
-   int value = STOI(str_val.fn_str())-1;
-   value = value<0?value+360:value;
-   wxString str = wxString::Format("%.1f", double(value));
-   m_y_rot_text->SetValue(str);
-}
-
-void VRenderView::OnZRotSpinUp(wxSpinEvent& event)
-{
-   wxString str_val = m_z_rot_text->GetValue();
-   int value = STOI(str_val.fn_str())+1;
-   value = value>360?value-360:value;
-   wxString str = wxString::Format("%.1f", double(value));
+   str = wxString::Format("%.1f", rotz);
    m_z_rot_text->SetValue(str);
 }
-
-void VRenderView::OnZRotSpinDown(wxSpinEvent& event)
-{
-   wxString str_val = m_z_rot_text->GetValue();
-   int value = STOI(str_val.fn_str())-1;
-   value = value<0?value+360:value;
-   wxString str = wxString::Format("%.1f", double(value));
-   m_z_rot_text->SetValue(str);
-}
-
 //top
 void VRenderView::OnBgColorChange(wxColourPickerEvent& event)
 {
@@ -11692,7 +11690,7 @@ void VRenderView::OnAovText(wxCommandEvent& event)
 
 void VRenderView::OnFreeChk(wxCommandEvent& event)
 {
-   if (m_options_toolbar2->GetToolState(ID_FreeChk))
+   if (m_options_toolbar->GetToolState(ID_FreeChk))
       SetFree(true); 
    else
    {
@@ -11741,7 +11739,7 @@ void VRenderView::OnSaveDefault(wxCommandEvent &event)
    //ortho/persp
    fconfig.Write("persp", m_glview->m_persp);
    fconfig.Write("aov", m_glview->m_aov);
-   bVal = m_options_toolbar2->GetToolState(ID_FreeChk);
+   bVal = m_options_toolbar->GetToolState(ID_FreeChk);
    fconfig.Write("free_rd", bVal);
    //rotations
    str = m_x_rot_text->GetValue();
@@ -11868,7 +11866,7 @@ void VRenderView::LoadSettings()
    }
    if (fconfig.Read("free_rd", &bVal))
    {
-      m_options_toolbar2->ToggleTool(ID_FreeChk,bVal);
+      m_options_toolbar->ToggleTool(ID_FreeChk,bVal);
       if (bVal)
          SetFree(true);
    }

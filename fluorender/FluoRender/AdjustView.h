@@ -207,7 +207,7 @@ private:
 	bool m_dft_sync_b;
 
 	//sync red
-	wxCheckBox *m_sync_r_chk;
+	wxToolBar *m_sync_r_chk;
 	//red sliders
 	wxSlider *m_r_gamma_sldr;
 	wxSlider *m_r_brightness_sldr;
@@ -221,7 +221,7 @@ private:
 	wxTextCtrl *m_r_hdr_text;
 
 	//sync green
-	wxCheckBox *m_sync_g_chk;
+	wxToolBar *m_sync_g_chk;
 	//green sliders
 	wxSlider *m_g_gamma_sldr;
 	wxSlider *m_g_brightness_sldr;
@@ -235,7 +235,7 @@ private:
 	wxTextCtrl *m_g_hdr_text;
 
 	//sync blue
-	wxCheckBox *m_sync_b_chk;
+	wxToolBar *m_sync_b_chk;
 	//blue sliders
 	wxSlider *m_b_gamma_sldr;
 	wxSlider *m_b_brightness_sldr;

@@ -135,7 +135,7 @@ private:
 
 	//4th line
 	//alpha
-	wxCheckBox *m_alpha_chk;
+	wxToolBar *m_alpha_tool;
 	wxSlider *m_alpha_sldr;
 	wxTextCtrl* m_alpha_text;
 	//sample rate
@@ -146,11 +146,11 @@ private:
 	//shading
 	wxSlider *m_low_shading_sldr;
 	wxTextCtrl *m_low_shading_text;
-	wxCheckBox *m_shading_enable_chk;
+	wxToolBar *m_shade_tool;
 	//shadow
 	wxSlider *m_shadow_sldr;
 	wxTextCtrl *m_shadow_text;
-	wxCheckBox *m_shadow_chk;
+	wxToolBar *m_shadow_tool;
 
 	//6th line
 	//color
@@ -162,30 +162,14 @@ private:
 	wxTextCtrl *m_space_y_text;
 	wxTextCtrl *m_space_z_text;
 	//colormap
-	wxCheckBox *m_colormap_enable_chk;
+	wxToolBar *m_colormap_tool;
 	wxSlider *m_colormap_high_value_sldr;
 	wxTextCtrl *m_colormap_high_value_text;
 	wxSlider *m_colormap_low_value_sldr;
 	wxTextCtrl *m_colormap_low_value_text;
 
-	//bottom line
-	//invert
-	wxCheckBox *m_inv_chk;
-	//MIP
-	wxCheckBox *m_mip_chk;
-	//Noise reduction
-	wxCheckBox *m_nr_chk;
-	//Depth
-	wxCheckBox *m_depth_chk;
-	//legend
+	//buttons
 	wxToolBar *m_options_toolbar;
-	//toolbar options
-	wxCheckBox *m_legend_chk;
-	//sync
-	wxCheckBox *m_sync_group_chk;
-	//default
-	wxButton *m_save_default;
-	wxButton *m_reset_default;
 
 private:
 	void GetSettings();
