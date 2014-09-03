@@ -3347,7 +3347,11 @@ bool TraceGroup::AddVertex(int time, unsigned int id,
 	vert.id = id;
 	vert.vsize = vsize;
 	vert.center = center;
-	cell_map->insert(pair<unsigned int, Vertex>(id, vert));
+	cell_map_iter = cell_map->find(id);
+	if (cell_map_iter == cell_map->end())
+		cell_map->insert(pair<unsigned int, Vertex>(id, vert));
+	else
+		cell_map_iter->second = vert;
 
 	return true;
 }

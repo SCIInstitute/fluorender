@@ -103,11 +103,11 @@ public:
 	//cell operations
 	void CellUpdate();
 	void CellFull();
-	void CellLink(bool exclusive);
+	void CellLink(bool exclusive, bool idid=false);
 	void CellNewID();
 	//assign exclusive ID to selection
 	//mode: how to deal with conflicts
-	//0--
+	//0--delete; 1--select
 	void CellExclusiveID(int mode);
 	void CellAppendID(vector<unsigned int> &id_list);
 

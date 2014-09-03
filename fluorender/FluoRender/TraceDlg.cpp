@@ -935,7 +935,7 @@ void TraceDlg::CellFull()
 	CellUpdate();
 }
 
-void TraceDlg::CellLink(bool exclusive)
+void TraceDlg::CellLink(bool exclusive, bool idid)
 {
 	if (!m_view)
 		return;
@@ -1030,7 +1030,15 @@ void TraceDlg::CellLink(bool exclusive)
 		for (j=0; j<list_prv.size(); ++j)
 		{
 			unsigned int id2 = list_prv[j].id;
-			trace_group->LinkVertices(id1, m_cur_time, id2, m_prv_time, exclusive);
+			if (idid)
+			{
+				if (id1 == id2)
+					trace_group->LinkVertices(id1, m_cur_time, id2, m_prv_time, exclusive);
+			}
+			else
+			{
+				trace_group->LinkVertices(id1, m_cur_time, id2, m_prv_time, exclusive);
+			}
 		}
 	}
 }
@@ -1231,19 +1239,32 @@ void TraceDlg::CellExclusiveID(int mode)
 		if (data_mask[index])
 		{
 			if (mode == 0)
-				data_label[index] = id_init;
+			{
+				if (data_label[index] == id_init)
+				{
+					label.size++;
+					label.center += Point(i, j, k);
+				}
+			}
 			else if (mode == 1)
 			{
 				if (data_label[index] == 0)
+				{
 					data_label[index] = id_init;
+					label.size++;
+					label.center += Point(i, j, k);
+				}
 			}
-			label.size++;
-			label.center += Point(i, j, k);
 		}
 		else if (data_label[index] == id_init)
 		{
 			if (mode == 0)
 				data_label[index] = 0;
+			else if (mode == 1)
+			{
+				label.size++;
+				label.center += Point(i, j, k);
+			}
 		}
 	}
 	if (label.size > 0)

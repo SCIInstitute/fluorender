@@ -1849,12 +1849,12 @@ void VRenderGLView::Segment()
 	   if (m_selector.GetMode() == 1 || m_selector.GetMode() == 2)
 	   {
 		   vr_frame->GetTraceDlg()->CellExclusiveID(1);
-		   vr_frame->GetTraceDlg()->CellLink(true);
+		   vr_frame->GetTraceDlg()->CellLink(true, true);
 	   }
 	   else if (m_selector.GetMode() == 3)
 	   {
 		   vr_frame->GetTraceDlg()->CellExclusiveID(0);
-		   vr_frame->GetTraceDlg()->CellLink(true);
+		   vr_frame->GetTraceDlg()->CellLink(true, true);
 	   }
 	}
 }
