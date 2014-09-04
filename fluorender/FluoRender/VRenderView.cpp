@@ -23,6 +23,7 @@
 #include "scale.h"
 #include "scale_text.h"
 #include "scale_text_off.h"
+#include "gear_45.h"
 
 int VRenderView::m_id = 1;
 ImgShaderFactory VRenderGLView::m_img_shader_factory;
@@ -9974,7 +9975,7 @@ EVT_COMMAND_SCROLL(ID_ZRotSldr, VRenderView::OnZRotScroll)
 EVT_TOOL(ID_RotLockChk, VRenderView::OnRotLockCheck)
 //timer
 EVT_TIMER(ID_RotateTimer, VRenderView::OnTimer)
-//reset
+//save default
 EVT_TOOL(ID_DefaultBtn, VRenderView::OnSaveDefault)
 
 EVT_KEY_DOWN(VRenderView::OnKeyDown)
@@ -10197,6 +10198,10 @@ void VRenderView::CreateBar()
    m_options_toolbar->AddControl(st1);
    m_options_toolbar->AddControl(m_bg_color_picker);
 
+   m_options_toolbar->AddTool(ID_DefaultBtn,"Save",
+	   wxGetBitmapFromMemory(listicon_save),
+	   "Save as Default Render View Settings");
+
    m_options_toolbar->Realize();
 
    //add the toolbars and other options in order
@@ -10293,19 +10298,20 @@ void VRenderView::CreateBar()
    m_z_rot_text = new wxTextCtrl(this, ID_ZRotText, "0.0",
          wxDefaultPosition, wxSize(45,20), 0, vald_fp1);
 
-   m_lower_toolbar->AddCheckTool(ID_RotLockChk, "45 Angles",
-	   wxGetBitmapFromMemory(depth), wxNullBitmap,
+   m_rot_lock_btn = new wxToolBar(this, wxID_ANY);
+   m_rot_lock_btn->AddCheckTool(ID_RotLockChk, "45 Angles",
+	   wxGetBitmapFromMemory(gear_45), wxNullBitmap,
 	   "Confine all angles to 45 Degrees",
 	   "Confine all angles to 45 Degrees");
+   m_rot_lock_btn->Realize();
+
    m_lower_toolbar->AddTool(ID_RotResetBtn,"Reset",
 	   wxGetBitmapFromMemory(refresh),
 	   "Reset Rotations");
-   m_lower_toolbar->AddTool(ID_DefaultBtn,"Save",
-	   wxGetBitmapFromMemory(listicon_save),
-	   "Save as Default Rotation");
    m_lower_toolbar->Realize();
    
    sizer_h_2->AddSpacer(40);
+   sizer_h_2->Add(m_rot_lock_btn, 0, wxALIGN_CENTER);
    sizer_h_2->Add(st1, 0, wxALIGN_CENTER);
    sizer_h_2->Add(m_x_rot_sldr, 1, wxALIGN_CENTER);
    sizer_h_2->Add(m_x_rot_text, 0, wxALIGN_CENTER);
@@ -11405,7 +11411,7 @@ void VRenderView::OnRotReset(wxCommandEvent &event)
 //timer used for rotation scrollbars
 void VRenderView::OnTimer(wxTimerEvent& event) {
 	wxString str;
-    bool lock = m_lower_toolbar->GetToolState(ID_RotLockChk);
+    bool lock = m_rot_lock_btn->GetToolState(ID_RotLockChk);
     double rotx, roty, rotz;
     m_glview->GetRotations(rotx, roty, rotz);
 	//the X bar positions
@@ -11449,7 +11455,7 @@ void VRenderView::OnTimer(wxTimerEvent& event) {
 
 void VRenderView::OnXRotScroll(wxScrollEvent& event)
 {
-   bool lock = m_lower_toolbar->GetToolState(ID_RotLockChk);
+   bool lock = m_rot_lock_btn->GetToolState(ID_RotLockChk);
    wxString str;
    double rotx, roty, rotz;
    m_glview->GetRotations(rotx, roty, rotz);
@@ -11468,7 +11474,7 @@ void VRenderView::OnXRotScroll(wxScrollEvent& event)
 
 void VRenderView::OnYRotScroll(wxScrollEvent& event)
 {
-   bool lock = m_lower_toolbar->GetToolState(ID_RotLockChk);
+   bool lock = m_rot_lock_btn->GetToolState(ID_RotLockChk);
    wxString str;
    double rotx, roty, rotz;
    m_glview->GetRotations(rotx, roty, rotz);
@@ -11487,7 +11493,7 @@ void VRenderView::OnYRotScroll(wxScrollEvent& event)
 
 void VRenderView::OnZRotScroll(wxScrollEvent& event)
 {
-   bool lock = m_lower_toolbar->GetToolState(ID_RotLockChk);
+   bool lock = m_rot_lock_btn->GetToolState(ID_RotLockChk);
    wxString str;
    double rotx, roty, rotz;
    m_glview->GetRotations(rotx, roty, rotz);
@@ -11506,7 +11512,7 @@ void VRenderView::OnZRotScroll(wxScrollEvent& event)
 
 void VRenderView::OnRotLockCheck(wxCommandEvent& event)
 {
-   bool lock = m_lower_toolbar->GetToolState(ID_RotLockChk);
+   bool lock = m_rot_lock_btn->GetToolState(ID_RotLockChk);
    double rotx, roty, rotz;
    m_glview->GetRotations(rotx, roty, rotz);
    if (lock) {
@@ -11891,7 +11897,7 @@ void VRenderView::LoadSettings()
    }
    if (fconfig.Read("rot_lock", &bVal))
    {
-	  m_lower_toolbar->ToggleTool(ID_RotLockChk,bVal);
+	  m_rot_lock_btn->ToggleTool(ID_RotLockChk,bVal);
       m_glview->SetRotLock(bVal);
    }
    UpdateView();  //for rotations
