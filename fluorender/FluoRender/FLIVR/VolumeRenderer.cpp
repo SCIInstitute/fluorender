@@ -738,6 +738,9 @@ namespace FLIVR
 			shader->setLocalParam(6, colormap_low_value_, colormap_hi_value_,
 				colormap_hi_value_-colormap_low_value_, 0.0);
 			break;
+		case 2://depth map
+			shader->setLocalParam(6, color_.r(), color_.g(), color_.b(), 0.0);
+			break;
 		}
 
 		//setup depth peeling

@@ -3512,6 +3512,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
       vd->SetMode(0);
       vd->SetColormapMode(2);
       vd->Set2dDmap(m_tex_ol1);
+	  vd->SetMaskMode(0);
       //draw
       vd->SetStreamMode(3);
       vd->Draw(!m_persp, m_interactive, m_scale_factor);
