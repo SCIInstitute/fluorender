@@ -11911,11 +11911,18 @@ void VRenderView::LoadSettings()
    }
    if (fconfig.Read("depth_atten_chk", &bVal))
    {
-	  m_left_toolbar->ToggleTool(ID_DepthAttenChk,bVal);
-      if (bVal)
-         SetFog(true);
-      else
-         SetFog(false);
+	  //m_left_toolbar->ToggleTool(ID_DepthAttenChk,bVal);
+      SetFog(bVal);
+	  if (bVal)
+	  {
+		  m_depth_atten_factor_sldr->Enable();
+		  m_depth_atten_factor_text->Enable();
+	  }
+	  else
+	  {
+		  m_depth_atten_factor_sldr->Disable();
+		  m_depth_atten_factor_text->Disable();
+	  }
    }
    if (fconfig.Read("depth_atten_factor_text", &str))
    {
