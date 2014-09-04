@@ -11556,6 +11556,8 @@ void VRenderView::OnLegendCheck(wxCommandEvent& event)
 void VRenderView::OnScaleTextEditing(wxCommandEvent& event) {
       wxString str, num_text, unit_text;
       num_text = m_scale_text->GetValue();
+	  double len;
+	  num_text.ToDouble(&len);
       str = num_text + " ";
       switch (m_scale_cmb->GetSelection())
       {
@@ -11572,6 +11574,7 @@ void VRenderView::OnScaleTextEditing(wxCommandEvent& event) {
       }
       str += unit_text;
 	  if (m_glview) {
+		  m_glview->SetScaleBarLen(len);
 		  m_glview->SetSBText(str);
 		  m_glview->m_sb_num = num_text;
 		  m_glview->m_sb_unit = m_scale_cmb->GetSelection();
