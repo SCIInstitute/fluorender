@@ -17,6 +17,7 @@
 #include <wx/spinbutt.h>
 #include <wx/glcanvas.h>
 #include <wx/event.h>
+#include <wx/timer.h>
 
 #include <vector>
 #include <stdarg.h>
@@ -882,9 +883,7 @@ class VRenderView: public wxPanel
       ID_XRotSldr,
       ID_YRotSldr,
       ID_ZRotSldr,
-      ID_XRotSpin,
-      ID_YRotSpin,
-      ID_ZRotSpin,
+	  ID_RotateTimer,
       ID_RotLockChk,
       ID_DepthAttenChk,
       ID_DepthAttenFactorSldr,
@@ -1364,7 +1363,7 @@ class VRenderView: public wxPanel
    wxSlider* m_aov_sldr;
    wxTextCtrl* m_aov_text;
    wxToolBar * m_options_toolbar;
-   wxToolBar * m_options_toolbar2;
+   //wxToolBar * m_options_toolbar2;
    wxToolBar * m_left_toolbar;
    wxToolBar * m_right_toolbar2;
    wxToolBar * m_lower_toolbar;
@@ -1374,15 +1373,14 @@ class VRenderView: public wxPanel
 
    //bottom bar///////////////////////////////////////////////////
    wxPanel* m_panel_2;
-   wxSpinButton* m_x_rot_spin;
-   wxSlider *m_x_rot_sldr;
+   wxScrollBar *m_x_rot_sldr;
    wxTextCtrl *m_x_rot_text;
-   wxSlider *m_y_rot_sldr;
+   wxScrollBar *m_y_rot_sldr;
    wxTextCtrl *m_y_rot_text;
-   wxSpinButton* m_y_rot_spin;
-   wxSlider *m_z_rot_sldr;
+   wxScrollBar *m_z_rot_sldr;
    wxTextCtrl *m_z_rot_text;
-   wxSpinButton* m_z_rot_spin;
+   wxTimer m_timer;
+   bool m_x_rotating, m_y_rotating, m_z_rotating;
 
    //left bar///////////////////////////////////////////////////
    wxPanel* m_panel_3;
@@ -1464,18 +1462,12 @@ class VRenderView: public wxPanel
    void OnYRotScroll(wxScrollEvent &event);
    void OnZRotScroll(wxScrollEvent &event);
    void OnRotLockCheck(wxCommandEvent& event);
-   //spin buttons
-   void OnXRotSpinUp(wxSpinEvent& event);
-   void OnXRotSpinDown(wxSpinEvent& event);
-   void OnYRotSpinUp(wxSpinEvent& event);
-   void OnYRotSpinDown(wxSpinEvent& event);
-   void OnZRotSpinUp(wxSpinEvent& event);
-   void OnZRotSpinDown(wxSpinEvent& event);
 
    void OnSaveDefault(wxCommandEvent &event);
 
    void OnKeyDown(wxKeyEvent& event);
-
+   //idle
+   void OnTimer(wxTimerEvent& event);
 
    DECLARE_EVENT_TABLE();
 

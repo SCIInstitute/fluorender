@@ -266,7 +266,7 @@ m_free_version(true)
 
    //create prop panel
    m_prop_panel = new wxPanel(this, wxID_ANY,
-         wxDefaultPosition, wxSize(1100, 150), 0, "PropPanel");
+         wxDefaultPosition, wxDefaultSize, 0, "PropPanel");
    //prop panel chidren
    m_prop_sizer = new wxBoxSizer(wxHORIZONTAL);
    m_volume_prop = new VPropView(this, m_prop_panel, wxID_ANY);
@@ -384,16 +384,16 @@ m_free_version(true)
 #endif
    m_aui_mgr.AddPane(m_prop_panel, wxAuiPaneInfo().
          Name("m_prop_panel").Caption(UITEXT_PROPERTIES).
-         Bottom().CloseButton(true).MinSize(wxSize(300, 150)).
-         FloatingSize(wxSize(1100, 150)).Layer(2));
+         Bottom().CloseButton(true).MinSize(wxSize(300, 130)).
+         FloatingSize(wxSize(1100, 130)).Layer(2));
    m_aui_mgr.AddPane(m_adjust_view, wxAuiPaneInfo().
          Name("m_adjust_view").Caption(UITEXT_ADJUST).
          Left().CloseButton(true).MinSize(wxSize(110, 700)).
          FloatingSize(wxSize(110, 700)).Layer(1));
    m_aui_mgr.AddPane(m_clip_view, wxAuiPaneInfo().
          Name("m_clip_view").Caption(UITEXT_CLIPPING).
-         Right().CloseButton(true).MinSize(wxSize(100, 700)).
-         FloatingSize(wxSize(100, 700)).Layer(1));
+         Right().CloseButton(true).MinSize(wxSize(130, 700)).
+         FloatingSize(wxSize(130, 700)).Layer(1));
    m_aui_mgr.AddPane(vrv, wxAuiPaneInfo().
          Name(vrv->GetName()).Caption(vrv->GetName()).
          Dockable(true).CloseButton(false).
