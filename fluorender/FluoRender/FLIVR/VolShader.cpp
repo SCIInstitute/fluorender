@@ -96,6 +96,7 @@ namespace FLIVR
 			z << VOL_UNIFORMS_COLORMAP;
 			break;
 		case 2://depth map
+			z << VOL_UNIFORMS_SIN_COLOR;
 			z << VOL_UNIFORMS_DEPTHMAP;
 			break;
 		}

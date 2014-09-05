@@ -1381,6 +1381,7 @@ class VRenderView: public wxPanel
    wxTextCtrl *m_z_rot_text;
    wxTimer m_timer;
    bool m_x_rotating, m_y_rotating, m_z_rotating;
+   wxToolBar *m_rot_lock_btn;
 
    //left bar///////////////////////////////////////////////////
    wxPanel* m_panel_3;
