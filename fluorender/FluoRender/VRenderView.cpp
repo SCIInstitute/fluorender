@@ -2812,7 +2812,11 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
 
    //2d adjustment
    FragmentProgram* img_shader =
-      m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+#ifdef _DARWIN
+      m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST);
+#else
+	  m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+#endif
    if (img_shader)
    {
       if (!img_shader->valid())
@@ -3131,8 +3135,12 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
    glDisable(GL_LIGHTING);
 
    //2d adjustment
-   img_shader =
-      m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+	img_shader =
+#ifdef _DARWIN
+	m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST);
+#else
+	m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+#endif
    if (img_shader)
    {
       if (!img_shader->valid())
@@ -3854,8 +3862,12 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
    glDisable(GL_LIGHTING);
 
    //2d adjustment
-   FragmentProgram* img_shader =
-      m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+	FragmentProgram* img_shader =
+#ifdef _DARWIN
+	m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST);
+#else
+	m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+#endif
    if (img_shader)
    {
       if (!img_shader->valid())
