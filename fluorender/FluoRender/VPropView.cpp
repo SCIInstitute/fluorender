@@ -19,6 +19,7 @@
 #include "mip.h"
 #include "depth.h"
 #include "sync_group.h"
+#include "save_settings.h"
 
 BEGIN_EVENT_TABLE(VPropView, wxPanel)
 //1
@@ -349,8 +350,8 @@ VPropView::VPropView(wxWindow* frame,
 	   wxGetBitmapFromMemory(refresh),
 	   "Reset Properties");
    m_options_toolbar->AddTool(ID_SaveDefault,"Save",
-	   wxGetBitmapFromMemory(listicon_save),
-	   "Save as Default Properties");
+	   wxGetBitmapFromMemory(save_settings),
+	   "Set as default settings");
    sizer_r1->AddStretchSpacer();
    sizer_r1->Add(m_options_toolbar, 0, wxALIGN_CENTER);
    sizer_r1->AddStretchSpacer();

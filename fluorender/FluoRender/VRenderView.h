@@ -1350,6 +1350,10 @@ class VRenderView: public wxPanel
 		if (m_glview) m_glview->ExportTrace(filename, id);
 	}
 
+	//bit mask for items to save
+	bool m_default_saved;
+	void SaveDefault(unsigned int mask = 0xffffffff);
+
    public:
    wxWindow* m_frame;
    static int m_id;
