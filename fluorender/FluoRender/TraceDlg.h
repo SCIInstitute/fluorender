@@ -77,6 +77,7 @@ public:
 		ID_CellModifyBtn,
 		ID_CellNewIDBtn,
 		ID_CellCombineIDBtn,
+		ID_CellMagic0Btn,
 		ID_CellMagic1Btn,
 		ID_CellMagic2Btn,
 		ID_CellMagic3Btn,
@@ -111,6 +112,11 @@ public:
 	void CellExclusiveID(int mode);
 	void CellAppendID(vector<unsigned int> &id_list);
 
+	//measurement
+	void Measure();
+	void OutputMeasureResult(wxString &str);
+	void SaveMeasureResult(wxString &filename);
+
 private:
 	typedef struct
 	{
@@ -119,6 +125,18 @@ private:
 		int surface_num;
 		int contact_num;
 	} comp_info;
+
+	typedef struct
+	{
+		unsigned int id;
+		unsigned int total_num;
+		double mean;
+		double variance;
+		double m2;
+		double min;
+		double max;
+	} measure_info;
+	vector<measure_info> m_info_list;
 
 	wxWindow* m_frame;
 	//current view
@@ -169,6 +187,7 @@ private:
 	wxButton* m_cell_new_id_btn;
 	wxButton* m_cell_combine_id_btn;
 	//magic tool
+	wxButton* m_cell_magic0_btn;
 	wxButton* m_cell_magic1_btn;
 	wxButton* m_cell_magic2_btn;
 	wxButton* m_cell_magic3_btn;
@@ -217,6 +236,7 @@ private:
 	void OnCellNewID(wxCommandEvent& event);
 	void OnCellCombineID(wxCommandEvent& event);
 	//magic tool
+	void OnCellMagic0Btn(wxCommandEvent& event);
 	void OnCellMagic1Btn(wxCommandEvent& event);
 	void OnCellMagic2Btn(wxCommandEvent& event);
 	void OnCellMagic3Btn(wxCommandEvent& event);

@@ -3,7 +3,10 @@
 #include "VRenderView.h"
 #include <wx/valnum.h>
 #include <wx/clipbrd.h>
+#include <wx/wfstream.h>
+#include <wx/txtstrm.h>
 #include <set>
+#include <limits>
 
 BEGIN_EVENT_TABLE(TraceListCtrl, wxListCtrl)
 	EVT_KEY_DOWN(TraceListCtrl::OnKeyDown)
@@ -246,6 +249,7 @@ BEGIN_EVENT_TABLE(TraceDlg, wxPanel)
 	EVT_BUTTON(ID_CellNewIDBtn, TraceDlg::OnCellNewID)
 	EVT_BUTTON(ID_CellCombineIDBtn, TraceDlg::OnCellCombineID)
 	//magic tool
+	EVT_BUTTON(ID_CellMagic0Btn, TraceDlg::OnCellMagic0Btn)
 	EVT_BUTTON(ID_CellMagic1Btn, TraceDlg::OnCellMagic1Btn)
 	EVT_BUTTON(ID_CellMagic2Btn, TraceDlg::OnCellMagic2Btn)
 	EVT_BUTTON(ID_CellMagic3Btn, TraceDlg::OnCellMagic3Btn)
@@ -388,6 +392,8 @@ m_manual_assist(false)
 	wxBoxSizer* sizer_36 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Magic happens:",
 		wxDefaultPosition, wxSize(130, 20));
+	m_cell_magic0_btn = new wxButton(this, ID_CellMagic0Btn, "Measure",
+		wxDefaultPosition, wxSize(80, 23));
 	m_cell_magic1_btn = new wxButton(this, ID_CellMagic1Btn, "Diamond",
 		wxDefaultPosition, wxSize(80, 23));
 	m_cell_magic2_btn = new wxButton(this, ID_CellMagic2Btn, "Diverge",
@@ -396,7 +402,8 @@ m_manual_assist(false)
 		wxDefaultPosition, wxSize(80, 23));
 	sizer_36->Add(5, 5);
 	sizer_36->Add(st, 0, wxALIGN_CENTER);
-	sizer_36->Add(90, 23);
+	sizer_36->Add(m_cell_magic0_btn, 0, wxALIGN_CENTER);
+	sizer_36->Add(10, 23);
 	sizer_36->Add(m_cell_magic1_btn, 0, wxALIGN_CENTER);
 	sizer_36->Add(m_cell_magic2_btn, 0, wxALIGN_CENTER);
 	sizer_36->Add(m_cell_magic3_btn, 0, wxALIGN_CENTER);
@@ -689,12 +696,18 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 	if (!m_view)
 		return;
 
+	bool get_all = false;
+	unsigned long ival = 0;
 	//get id
 	wxString str = m_comp_id_text->GetValue();
-	unsigned long ival;
-	str.ToULong(&ival);
-	if (ival == 0)
-		return;
+	if (str.Lower() == "all")
+		get_all = true;
+	else
+	{
+		str.ToULong(&ival);
+		if (ival == 0)
+			return;
+	}
 
 	unsigned int id = ival;
 	//get current mask
@@ -727,9 +740,19 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 	for (k=0; k<nz; ++k)
 	{
 		index = nx*ny*k + nx*j + i;
-		if (data_label[index] == id)
+		if (get_all)
 		{
-			data_mask[index] = 255;
+			if (data_label[index])
+			{
+				data_mask[index] = 255;
+			}
+		}
+		else
+		{
+			if (data_label[index] == id)
+			{
+				data_mask[index] = 255;
+			}
 		}
 	}
 	//invalidate label mask in gpu
@@ -1424,6 +1447,26 @@ void TraceDlg::OnCellNewID(wxCommandEvent &event)
 }
 
 //magic
+void TraceDlg::OnCellMagic0Btn(wxCommandEvent &event)
+{
+	Measure();
+	wxString str;
+	OutputMeasureResult(str);
+	m_stat_text->SetValue(str);
+	wxFileDialog *fopendlg = new wxFileDialog(
+		this, "Save results", "", "",
+		"Text file (*.txt)|*.txt",
+		wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+	int rval = fopendlg->ShowModal();
+	if (rval == wxID_OK)
+	{
+		wxString filename = fopendlg->GetPath();
+		SaveMeasureResult(filename);
+	}
+	if (fopendlg)
+		delete fopendlg;
+}
+
 void TraceDlg::OnCellMagic1Btn(wxCommandEvent &event)
 {
 	Test2(1);
@@ -1437,6 +1480,142 @@ void TraceDlg::OnCellMagic2Btn(wxCommandEvent &event)
 void TraceDlg::OnCellMagic3Btn(wxCommandEvent &event)
 {
 	Test1();
+}
+
+void TraceDlg::Measure()
+{
+	if (!m_view)
+		return;
+
+	//get data
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+	Texture* tex = vd->GetTexture();
+	if (!tex)
+		return;
+	Nrrd* nrrd_data = tex->get_nrrd(0);
+	if (!nrrd_data)
+		return;
+	int bits = nrrd_data->type;
+	void* data_data = nrrd_data->data;
+	if (!data_data)
+		return;
+	//get mask
+	Nrrd* nrrd_mask = vd->GetMask();
+	if (!nrrd_mask)
+		return;
+	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
+	if (!data_mask)
+		return;
+	//get label
+	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
+	if (!nrrd_label)
+		return;
+	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	if (!data_label)
+		return;
+
+	//clear list and start calculating
+	m_info_list.clear();
+	int ilist;
+	int found;
+	int i, j, k;
+	int nx, ny, nz;
+	unsigned long long index;
+	unsigned int id;
+	double value;
+	double delta;
+	vd->GetResolution(nx, ny, nz);
+	for (i=0; i<nx; ++i)
+	for (j=0; j<ny; ++j)
+	for (k=0; k<nz; ++k)
+	{
+		index = nx*ny*k + nx*j + i;
+		if (data_mask[index] &&
+			data_label[index])
+		{
+			id = data_label[index];
+			if (bits == nrrdTypeUChar)
+				value = ((unsigned char*)data_data)[index];
+			else if (bits == nrrdTypeUShort)
+				value = ((unsigned short*)data_data)[index];
+
+			//find in list
+			found = -1;
+			for (ilist=0; ilist<(int)m_info_list.size(); ++ilist)
+			{
+				if (m_info_list[ilist].id == id)
+				{
+					found = ilist;
+					break;
+				}
+			}
+			if (found == -1)
+			{
+				//not found
+				measure_info info;
+				info.id = id;
+				info.total_num = 1;
+				info.mean = 0.0;
+				info.variance = 0.0;
+				info.m2 = 0.0;
+				delta = value - info.mean;
+				info.mean += delta / info.total_num;
+				info.m2 += delta * (value - info.mean);
+				info.min = value;
+				info.max = value;
+				m_info_list.push_back(info);
+			}
+			else
+			{
+				m_info_list[found].total_num++;
+				delta = value - m_info_list[found].mean;
+				m_info_list[found].mean += delta / m_info_list[found].total_num;
+				m_info_list[found].m2 += delta * (value - m_info_list[found].mean);
+				m_info_list[found].min = value<m_info_list[found].min?value:m_info_list[found].min;
+				m_info_list[found].max = value>m_info_list[found].max?value:m_info_list[found].max;
+			}
+		}
+	}
+
+	for (i=0; i<(int)m_info_list.size(); ++i)
+	{
+		if (m_info_list[i].total_num > 0)
+			m_info_list[i].variance = sqrt(m_info_list[found].m2 / (m_info_list[found].total_num - 1));
+	}
+}
+
+void TraceDlg::OutputMeasureResult(wxString &str)
+{
+	str = "Statistics on the selection:\n";
+	str += "ID\tTotalN\tMean\tVariance\tMinimum\tMaximum\n";
+	for (int i=0; i<(int)m_info_list.size(); ++i)
+	{
+		str += wxString::Format("%u\t", m_info_list[i].id);
+		str += wxString::Format("%u\t", m_info_list[i].total_num);
+		str += wxString::Format("%.2f\t", m_info_list[i].mean);
+		str += wxString::Format("%.2f\t", m_info_list[i].variance);
+		str += wxString::Format("%.2f\t", m_info_list[i].min);
+		str += wxString::Format("%.2f\n", m_info_list[i].max);
+	}
+	
+}
+
+void TraceDlg::SaveMeasureResult(wxString &filename)
+{
+	if (m_info_list.empty())
+		return;
+
+	wxFileOutputStream fos(filename);
+	if (!fos.Ok())
+		return;
+	wxTextOutputStream tos(fos);
+
+	wxString str;
+	OutputMeasureResult(str);
+
+	tos << str;
 }
 
 void TraceDlg::Test1()
