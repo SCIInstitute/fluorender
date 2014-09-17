@@ -971,8 +971,6 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
       if (vrv)
          vrv->InitView(INIT_BOUNDS|INIT_CENTER);
 
-      if (enable_4d)
-         m_movie_view->SetMovieType(3);
       delete prg_diag;
    }
 }
@@ -2552,16 +2550,16 @@ void VRenderFrame::SaveProject(wxString& filename)
    //movie view
    fconfig.SetPath("/movie_panel");
    fconfig.Write("views_cmb", m_movie_view->m_views_cmb->GetCurrentSelection());
-   fconfig.Write("movie_type", m_movie_view->GetMovieType());
-   fconfig.Write("frame_range", m_movie_view->m_time_sldr->GetMax());
-   fconfig.Write("time_frame", m_movie_view->m_time_sldr->GetValue());
+   fconfig.Write("rot_check", m_movie_view->m_rot_chk->GetValue());
+   fconfig.Write("frame_range", m_movie_view->m_progress_sldr->GetMax());
+   fconfig.Write("time_frame", m_movie_view->m_progress_sldr->GetValue());
    fconfig.Write("x_rd", m_movie_view->m_x_rd->GetValue());
    fconfig.Write("y_rd", m_movie_view->m_y_rd->GetValue());
-   fconfig.Write("angle_start_text", m_movie_view->m_angle_start_text->GetValue());
-   fconfig.Write("angle_end_text", m_movie_view->m_angle_end_text->GetValue());
-   fconfig.Write("rewind_chk", m_movie_view->m_rewind_chk->GetValue());
-   fconfig.Write("step_text", m_movie_view->m_step_text->GetValue());
-   fconfig.Write("frames_text", m_movie_view->m_frames_text->GetValue());
+   fconfig.Write("z_rd", m_movie_view->m_z_rd->GetValue());
+   fconfig.Write("angle_start_text", m_movie_view->m_degree_start->GetValue());
+   fconfig.Write("angle_end_text", m_movie_view->m_degree_end->GetValue());
+   fconfig.Write("step_text", m_movie_view->m_movie_time->GetValue());
+   fconfig.Write("frames_text", m_movie_view->m_fps_text->GetValue());
    fconfig.Write("frame_chk", m_movie_view->m_frame_chk->GetValue());
    fconfig.Write("center_x_text", m_movie_view->m_center_x_text->GetValue());
    fconfig.Write("center_y_text", m_movie_view->m_center_y_text->GetValue());
@@ -3634,10 +3632,6 @@ void VRenderFrame::OpenProject(wxString& filename)
          m_mov_view = iVal;
          vrv = (*GetViewList())[m_mov_view];
       }
-      if (fconfig.Read("movie_type", &iVal))
-      {
-         m_movie_view->SetMovieType(iVal);
-      }
       if (fconfig.Read("time_frame", &iVal))
       {
          m_movie_view->SetTimeFrame(iVal);
@@ -3658,27 +3652,22 @@ void VRenderFrame::OpenProject(wxString& filename)
       }
       if (fconfig.Read("angle_start_text", &sVal))
       {
-         m_movie_view->m_angle_start_text->SetValue(sVal);
+         m_movie_view->m_degree_start->SetValue(sVal);
          m_mov_angle_start = sVal;
       }
       if (fconfig.Read("angle_end_text", &sVal))
       {
-         m_movie_view->m_angle_end_text->SetValue(sVal);
+         m_movie_view->m_degree_end->SetValue(sVal);
          m_mov_angle_end = sVal;
-      }
-      if (fconfig.Read("rewind_chk", &bVal))
-      {
-         m_movie_view->m_rewind_chk->SetValue(bVal);
-         m_mov_rewind = bVal;
       }
       if (fconfig.Read("step_text", &sVal))
       {
-         m_movie_view->m_step_text->SetValue(sVal);
+         m_movie_view->m_movie_time->SetValue(sVal);
          m_mov_step = sVal;
       }
       if (fconfig.Read("frames_text", &sVal))
       {
-         m_movie_view->m_frames_text->SetValue(sVal);
+         m_movie_view->m_fps_text->SetValue(sVal);
          m_mov_frames = sVal;
       }
       if (fconfig.Read("frame_chk", &bVal))

@@ -256,6 +256,7 @@ public:
 
 public: //public so export window can see it and set it. 
 	RecorderDlg* m_recorder_dlg;
+	VMovieView* m_movie_view;
 
 private:
 	wxAuiManager m_aui_mgr;
@@ -271,7 +272,6 @@ private:
 
 	TreePanel *m_tree_panel;
 	ListPanel *m_list_panel;
-	VMovieView* m_movie_view;
 	vector <VRenderView*> m_vrv_list;
 	DataManager m_data_mgr;
 	wxPanel *m_prop_panel;

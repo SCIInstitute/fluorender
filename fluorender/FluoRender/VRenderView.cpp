@@ -4188,7 +4188,12 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
       refresh = true;
       start_loop = false;
    }
-
+   VMovieView * mv = 0;
+   if (m_vrv) {
+	  VRenderFrame* fr = (VRenderFrame*)m_vrv->m_frame;
+	  if (fr)
+		mv = fr->GetMovieView();
+   }
    if (m_capture_rotat ||
          m_capture_tsequ ||
          m_capture_param ||
@@ -4198,7 +4203,9 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
       if (TextureRenderer::get_mem_swap() &&
             TextureRenderer::get_done_update_loop())
          m_pre_draw = true;
-   }
+	  mv->SetProgress((m_cur_angle  - m_init_angle) / (m_end_angle - m_init_angle));
+   } else if (mv->m_running) 
+	   mv->MovieDone();
 
    wxPoint mouse_pos = wxGetMousePosition();
    wxRect view_reg = GetScreenRect();
@@ -4427,7 +4434,17 @@ void VRenderGLView::Set3DRotCapture(double start_angle,
 {
    double x, y, z;
    GetRotations(x, y, z);
-
+   
+	//remove the chance of the x/y/z angles being outside 360.
+   while (x > 360.)  x -=360.;
+   while (x < -360.) x +=360.;
+   while (y > 360.)  y -=360.;
+   while (y < -360.) y +=360.;
+   while (z > 360.)  z -=360.;
+   while (z < -360.) z +=360.;
+   if (360. - std::abs(x) < 0.001) x = 0.;
+   if (360. - std::abs(y) < 0.001) y = 0.;
+   if (360. - std::abs(z) < 0.001) z = 0.;
    m_step = step;
    m_total_frames = frames;
    m_rot_axis = rot_axis;
@@ -4439,33 +4456,34 @@ void VRenderGLView::Set3DRotCapture(double start_angle,
    switch (m_rot_axis)
    {
    case 1: //X
-      m_init_angle = x;
+	  if (start_angle==0.) {
+		m_init_angle = x;
+        m_end_angle = x + end_angle;
+	  }
       m_cur_angle = x;
-      m_start_angle = x + start_angle;
-      m_end_angle = x + end_angle;
+      m_start_angle = x;
       break;
    case 2: //Y
-      m_init_angle = y;
+	  if (start_angle==0.) {
+		m_init_angle = y;
+        m_end_angle = y + end_angle;
+	  }
       m_cur_angle = y;
-      m_start_angle = y + start_angle;
-      m_end_angle = y + end_angle;
+      m_start_angle = y;
       break;
    case 3: //Z
-      m_init_angle = z;
+	  if (start_angle==0.) {
+		m_init_angle = z;
+        m_end_angle = z + end_angle;
+	  }
       m_cur_angle = z;
-      m_start_angle = z + start_angle;
-      m_end_angle = z + end_angle;
+      m_start_angle = z;
       break;
    }
-
    m_capture = true;
    m_capture_rotat = true;
    m_capture_rotate_over = false;
-
-   if (m_start_angle == m_cur_angle)
-      m_stages = 1;
-   else
-      m_stages = 0;
+   m_stages = 0;
 }
 
 void VRenderGLView::Set3DBatCapture(wxString &cap_file, int begin_frame, int end_frame)
@@ -5007,19 +5025,10 @@ void VRenderGLView::PreDraw()
                   m_capture = false;
             }
          }
-         else
-
-			{
-				m_tseq_prv_num = m_tseq_cur_num;
-				m_tseq_cur_num++;
-			}
-
-         if (!m_capture && !m_run_script)
-         {
-            VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-            if (vr_frame && vr_frame->GetMovieView())
-               vr_frame->GetMovieView()->ResetAngle();
-         }
+         else{
+			m_tseq_prv_num = m_tseq_cur_num;
+			m_tseq_cur_num++;
+		}
       }
 
       //if rotation movie is set
@@ -5053,7 +5062,7 @@ void VRenderGLView::PreDraw()
          }
          else if (m_stages==1)
          {
-            if (fabs(m_cur_angle-m_end_angle) < m_step)
+            if (fabs(m_cur_angle-m_end_angle) < m_step/2.)
             {
                if (m_rewind)
                   m_stages = 2;
