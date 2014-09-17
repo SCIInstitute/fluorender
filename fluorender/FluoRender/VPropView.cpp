@@ -302,31 +302,25 @@ VPropView::VPropView(wxWindow* frame,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    sizer_m5->Add(m_colormap_high_value_sldr, 1, wxEXPAND|wxALIGN_CENTER);
    //right ///////////////////////////////////////////////////
-   //legend
    m_options_toolbar = new wxToolBar(this,wxID_ANY);
-   m_options_toolbar->AddCheckTool(ID_LegendChk,"Legend",
-   wxGetBitmapFromMemory(legend),wxNullBitmap,
-    "Enable Legend for this channel.",
-    "Enable Legend for this channel.");
-   m_options_toolbar->ToggleTool(ID_LegendChk,true);
-   //interpolation
-   m_options_toolbar->AddCheckTool(ID_InterpolateChk,"Interpolate",
-   wxGetBitmapFromMemory(interpolate),wxNullBitmap,
-    "Interpolates between data when checked.",
-    "Interpolates between data when checked.");
-   m_options_toolbar->ToggleTool(ID_InterpolateChk,true);
-   //inversion
-   m_options_toolbar->AddCheckTool(ID_InvChk,"Inversion",
-   wxGetBitmapFromMemory(invert),wxNullBitmap,
-    "Inverts data values when checked.",
-    "Inverts data values when checked.");
-   m_options_toolbar->ToggleTool(ID_InvChk,false);
    //MIP
    m_options_toolbar->AddCheckTool(ID_MipChk,"MIP",
    wxGetBitmapFromMemory(mip),wxNullBitmap,
     "Enable Maximum Intensity Projection.",
     "Enable Maximum Intensity Projection.");
    m_options_toolbar->ToggleTool(ID_MipChk,false);
+   //inversion
+   m_options_toolbar->AddCheckTool(ID_InvChk,"Inversion",
+   wxGetBitmapFromMemory(invert),wxNullBitmap,
+    "Inverts data values when checked.",
+    "Inverts data values when checked.");
+   m_options_toolbar->ToggleTool(ID_InvChk,false);
+   //interpolation
+   m_options_toolbar->AddCheckTool(ID_InterpolateChk,"Interpolate",
+   wxGetBitmapFromMemory(interpolate),wxNullBitmap,
+    "Interpolates between data when checked.",
+    "Interpolates between data when checked.");
+   m_options_toolbar->ToggleTool(ID_InterpolateChk,true);
    //noise reduction
    m_options_toolbar->AddCheckTool(ID_NRChk,"Smoothing",
    wxGetBitmapFromMemory(smooth),wxNullBitmap,
@@ -345,6 +339,12 @@ VPropView::VPropView(wxWindow* frame,
     "Enable Depth Mode.",
     "Enable Depth Mode.");
    m_options_toolbar->ToggleTool(ID_DepthChk,false);
+   //legend
+   m_options_toolbar->AddCheckTool(ID_LegendChk,"Legend",
+   wxGetBitmapFromMemory(legend),wxNullBitmap,
+    "Enable Legend for this channel.",
+    "Enable Legend for this channel.");
+   m_options_toolbar->ToggleTool(ID_LegendChk,true);
    //buttons
    m_options_toolbar->AddTool(ID_ResetDefault,"Reset",
 	   wxGetBitmapFromMemory(refresh),
