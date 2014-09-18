@@ -466,6 +466,7 @@ void VMovieView::OnPrev(wxCommandEvent& event)
 
 	int begin_frame = STOD(m_time_start_text->GetValue().fn_str());
 	int end_frame = STOD(m_time_end_text->GetValue().fn_str());
+	begin_frame += (end_frame - begin_frame) * pcnt + 1;
 
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
@@ -498,7 +499,7 @@ void VMovieView::OnPrev(wxCommandEvent& event)
 				vrv->Get4DSeqFrames(first, sec, tmp);
 				if (sec - first > 0) {
 					vrv->Set4DSeqCapture(str_null, begin_frame, 
-						end_frame, false);
+						end_frame, true);
 				} else {
 					vrv->Set3DBatCapture(str_null, begin_frame, 
 						end_frame);
@@ -678,6 +679,7 @@ void VMovieView::OnRewind(wxCommandEvent& event)
 		VRenderView* vrv = vr_frame->GetView(str);
 		if (vrv) {
 			vrv->ResetMovieAngle();
+			vrv->Set4DSeqFrame(0 ,true);
 		}
 	}
 	SetProgress(0.);
@@ -903,9 +905,9 @@ void VMovieView::Get4DFrames()
 			vrv->Get4DSeqFrames(start_frame, end_frame, cur_frame);
 			m_progress_sldr->SetRange(start_frame, end_frame);
 			m_progress_sldr->SetValue(cur_frame);
-			m_progress_text->SetValue(wxString::Format("%.2f", cur_frame));
-			m_time_start_text->SetValue(wxString::Format("%d", start_frame));
-			m_time_end_text->SetValue(wxString::Format("%d", end_frame));
+			m_progress_text->ChangeValue(wxString::Format("%.2f", cur_frame));
+			m_time_start_text->ChangeValue(wxString::Format("%d", start_frame));
+			m_time_end_text->ChangeValue(wxString::Format("%d", end_frame));
 		}
 	}
 }
@@ -926,9 +928,9 @@ void VMovieView::Get3DFrames()
 			vrv->Get3DBatFrames(start_frame, end_frame, cur_frame);
 			m_progress_sldr->SetRange(start_frame, end_frame);
 			m_progress_sldr->SetValue(cur_frame);
-			m_progress_text->SetValue(wxString::Format("%.2f", cur_frame));
-			m_time_start_text->SetValue(wxString::Format("%d", start_frame));
-			m_time_end_text->SetValue(wxString::Format("%d", end_frame));
+			m_progress_text->ChangeValue(wxString::Format("%.2f", cur_frame));
+			m_time_start_text->ChangeValue(wxString::Format("%d", start_frame));
+			m_time_end_text->ChangeValue(wxString::Format("%d", end_frame));
 		}
 	}
 }
@@ -951,7 +953,7 @@ void VMovieView::OnTimeChange(wxScrollEvent &event)
 	double pcnt = (((double)frame)/360.);
 	double movie_time = STOD(m_movie_time->GetValue().fn_str());
 	wxString str = wxString::Format("%.2f",(pcnt * movie_time));
-	m_progress_text->SetValue(str);
+	m_progress_text->ChangeValue(str);
 	int start_time = STOI(m_time_start_text->GetValue().fn_str());
 	int end_time = STOI(m_time_end_text->GetValue().fn_str());
 	int time = end_time - start_time;
@@ -1009,7 +1011,7 @@ void VMovieView::SetTimeFrame(int frame)
 	double movie_time = STOD(m_movie_time->GetValue().fn_str());
 
 	movie_time = movie_time * frame / time;
-	m_progress_text->SetValue(wxString::Format("%.2f", movie_time));
+	m_progress_text->ChangeValue(wxString::Format("%.2f", movie_time));
 }
 
 void VMovieView::OnTimeEnter(wxCommandEvent& event)
@@ -1075,6 +1077,20 @@ void VMovieView::OnRotateChecked(wxCommandEvent& event) {
 }
 
 void VMovieView::OnSequenceChecked(wxCommandEvent& event) {
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+	{
+		VRenderView* vrv = vr_frame->GetView(m_views_cmb->GetValue());
+		if (vrv)
+		{
+			int first, sec, tmp;
+			vrv->Get4DSeqFrames(first, sec, tmp);
+			if (sec - first == 0)
+				vrv->Get3DBatFrames(first, sec, tmp);
+			m_time_start_text->SetValue(wxString::Format("%d",first));
+			m_time_end_text->SetValue(wxString::Format("%d",sec));
+		}
+	}
 	if (m_seq_chk->GetValue())
 		EnableTime();
 	else
@@ -1093,5 +1109,5 @@ void VMovieView::SetProgress(double pcnt) {
 	m_progress_sldr->SetValue(pcnt * 360.);
 	double movie_time = STOD(m_movie_time->GetValue().fn_str());
 	wxString st = wxString::Format("%.2f",(pcnt*movie_time));
-	m_progress_text->SetValue(st);
+	m_progress_text->ChangeValue(st);
 }

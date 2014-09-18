@@ -4203,8 +4203,13 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
       if (TextureRenderer::get_mem_swap() &&
             TextureRenderer::get_done_update_loop())
          m_pre_draw = true;
-	  mv->SetProgress((m_cur_angle  - m_init_angle) / (m_end_angle - m_init_angle));
-   } else if (mv->m_running) 
+	  double val = (m_cur_angle  - m_init_angle) / 
+		  (m_end_angle - m_init_angle);
+	  if (!m_capture_rotat)
+		  val = (m_tseq_cur_num - m_begin_frame) / 
+			(double)(m_end_frame - m_begin_frame);
+	  mv->SetProgress(val);
+   } else 
 	   mv->MovieDone();
 
    wxPoint mouse_pos = wxGetMousePosition();
