@@ -647,7 +647,7 @@ void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
    if (swap_ && !eight_bits) {
 	   short * temp2 = reinterpret_cast<short*>(temp);
 	   for (size_t sh = 0; sh < byte_count / 2; sh++)
-		   SwapWord(temp2[sh]);
+		   temp2[sh] = SwapShort(temp2[sh]);
    }
    //get compression tag, decompress if necessary
    uint64_t tmp = GetTiffField(kCompressionTag,NULL,0);
