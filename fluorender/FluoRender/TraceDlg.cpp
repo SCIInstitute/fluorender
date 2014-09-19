@@ -1541,6 +1541,8 @@ void TraceDlg::Measure()
 			else if (bits == nrrdTypeUShort)
 				value = ((unsigned short*)data_data)[index];
 
+			if (value <= 1.0)
+				continue;
 			//find in list
 			found = -1;
 			for (ilist=0; ilist<(int)m_info_list.size(); ++ilist)
@@ -1582,14 +1584,14 @@ void TraceDlg::Measure()
 	for (i=0; i<(int)m_info_list.size(); ++i)
 	{
 		if (m_info_list[i].total_num > 0)
-			m_info_list[i].variance = sqrt(m_info_list[found].m2 / (m_info_list[found].total_num - 1));
+			m_info_list[i].variance = sqrt(m_info_list[i].m2 / (m_info_list[i].total_num - 1));
 	}
 }
 
 void TraceDlg::OutputMeasureResult(wxString &str)
 {
 	str = "Statistics on the selection:\n";
-	str += "ID\tTotalN\tMean\tVariance\tMinimum\tMaximum\n";
+	str += "ID\tTotalN\tMean\tSigma\tMinimum\tMaximum\n";
 	for (int i=0; i<(int)m_info_list.size(); ++i)
 	{
 		str += wxString::Format("%u\t", m_info_list[i].id);

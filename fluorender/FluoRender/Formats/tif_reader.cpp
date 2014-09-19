@@ -642,11 +642,16 @@ void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
             kStripOffsetsTag,strip),tiff_stream.beg);
    //actually read the data now
    char *temp = new char[byte_count];
-   tiff_stream.read((char*)temp,byte_count);
+   tiff_stream.read((char*)temp,byte_count);   
+   bool eight_bits = 8 == GetTiffField(kBitsPerSampleTag,NULL,0);
+   if (swap_ && !eight_bits) {
+	   short * temp2 = reinterpret_cast<short*>(temp);
+	   for (size_t sh = 0; sh < byte_count / 2; sh++)
+		   temp2[sh] = SwapShort(temp2[sh]);
+   }
    //get compression tag, decompress if necessary
    uint64_t tmp = GetTiffField(kCompressionTag,NULL,0);
    uint64_t prediction = GetTiffField(kPredictionTag,NULL,0);
-   bool eight_bits = 8 == GetTiffField(kBitsPerSampleTag,NULL,0);
    uint64_t bits = GetTiffField(kSamplesPerPixelTag,NULL,0);
    tsize_t stride = (GetTiffField(kPlanarConfigurationTag,NULL,0) == 2)?1:bits;
    uint64_t rows_per_strip = GetTiffField(kRowsPerStripTag,NULL,0);
