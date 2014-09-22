@@ -126,7 +126,7 @@ private:
 		int contact_num;
 	} comp_info;
 
-	typedef struct
+	struct measure_info
 	{
 		unsigned int id;
 		unsigned int total_num;
@@ -135,7 +135,10 @@ private:
 		double m2;
 		double min;
 		double max;
-	} measure_info;
+
+		static bool cmp_id(const measure_info info1, const measure_info info2)
+		{ return info1.id < info2.id; }
+	};
 	vector<measure_info> m_info_list;
 
 	wxWindow* m_frame;

@@ -4395,7 +4395,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
          !wxGetKeyState(wxKeyCode('w')))
       m_clip_down = false;
 
-	//cell full
+/*	//cell full
 	if (!m_cell_full &&
 		wxGetKeyState(wxKeyCode('f')))
 	{
@@ -4434,7 +4434,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 	if (m_cell_new_id &&
 		!wxGetKeyState(wxKeyCode('n')))
 		m_cell_new_id = false;
-
+*/
    //forced refresh
    if (wxGetKeyState(WXK_F5))
    {
