@@ -2,6 +2,8 @@
 #include <wx/panel.h>
 #include <wx/spinbutt.h>
 #include <wx/clrpicker.h>
+#include <wx/notebook.h>
+#include "RecorderDlg.h"
 #include "compatibility.h"
 
 #ifndef _VMovieView_H_
@@ -117,6 +119,9 @@ private:
     wxTimer m_timer;
 	wxString m_filename;
 	bool m_running, m_record, m_save_tiffs;
+	RecorderDlg * m_advanced_movie;
+	wxNotebook * m_notebook;
+	int m_current_page;
 
 private:
 	void GetSettings(int view=0);

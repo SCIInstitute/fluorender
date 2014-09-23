@@ -3,7 +3,6 @@
 #include <tiffio.h>
 #include <wx/aboutdlg.h>
 #include <wx/valnum.h>
-#include <wx/notebook.h>
 #include "png_resource.h"
 #include "img/listicon_save.h"
 #include "img/refresh.h"
@@ -152,9 +151,10 @@ wxWindow* VMovieView::CreateAdvancedPage(wxWindow *parent) {
 	wxPanel *page = new wxPanel(parent);
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
-    RecorderDlg * recorder = new RecorderDlg(m_frame, page);
-	(reinterpret_cast<VRenderFrame*>(m_frame))->m_recorder_dlg = recorder;
-	sizer_v->Add(recorder,0,wxEXPAND);
+    m_advanced_movie = new RecorderDlg(m_frame, page);
+	(reinterpret_cast<VRenderFrame*>(m_frame))->m_recorder_dlg 
+		= m_advanced_movie;
+	sizer_v->Add(m_advanced_movie,0,wxEXPAND);
 	page->SetSizer(sizer_v);
 	return page;
 }
@@ -251,14 +251,15 @@ m_slider_pause_pos(0),
 m_starting_rot(0.),
 m_timer(this,ID_Timer),
 m_running(false),
-m_record(false)
+m_record(false),
+m_current_page(0)
 {
 	
 	//notebook
-	wxNotebook *notebook = new wxNotebook(this, wxID_ANY);
-	notebook->AddPage(CreateSimplePage(notebook), "Basic");
-	notebook->AddPage(CreateAdvancedPage(notebook), "Advanced");
-	notebook->AddPage(CreateCroppingPage(notebook), "Cropping");
+	m_notebook = new wxNotebook(this, wxID_ANY);
+	m_notebook->AddPage(CreateSimplePage(m_notebook), "Basic");
+	m_notebook->AddPage(CreateAdvancedPage(m_notebook), "Advanced");
+	m_notebook->AddPage(CreateCroppingPage(m_notebook), "Cropping");
 	
 	//renderview selector
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
@@ -311,7 +312,7 @@ m_record(false)
 	
 	//interface
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
-	sizerV->Add(notebook, 1, wxEXPAND);
+	sizerV->Add(m_notebook, 1, wxEXPAND);
 	sizerV->AddStretchSpacer();
 	sizerV->Add(sizer_1, 0, wxEXPAND);
 	sizerV->Add(sizerH,0,wxEXPAND);
@@ -453,6 +454,18 @@ void VMovieView::OnTimer(wxTimerEvent& event) {
 
 void VMovieView::OnPrev(wxCommandEvent& event)
 {
+	//advanced options
+	int page = m_notebook->GetSelection();
+	if (page <= 1) m_current_page = page;
+	if (m_current_page == 1) {
+		if (!m_running)
+			m_advanced_movie->Play();
+		else 
+			m_advanced_movie->Stop();
+		m_running = !m_running;
+		return;
+	}
+	//basic options
 	if (m_running) {
 		OnStop(wxCommandEvent());
 		return;
@@ -560,6 +573,17 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent)
 
 void VMovieView::OnRun(wxCommandEvent& event)
 {
+	//advanced options
+	int page = m_notebook->GetSelection();
+	if (page <= 1) m_current_page = page;
+	if (m_current_page == 1) {
+		if (!m_running)
+			m_advanced_movie->Save();
+		else 
+			m_advanced_movie->Stop();
+		m_running = !m_running;
+		return;
+	}
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Save Movie Sequence", 
 		"", "", "*.tif", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
@@ -580,6 +604,8 @@ void VMovieView::OnRun(wxCommandEvent& event)
 
 void VMovieView::OnStop(wxCommandEvent& event)
 {
+	m_advanced_movie->Stop();
+	//basic options
 	m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
 	m_timer.Stop();
 	m_running = false;
@@ -588,6 +614,7 @@ void VMovieView::OnStop(wxCommandEvent& event)
 
 void VMovieView::OnRewind(wxCommandEvent& event)
 {
+	m_advanced_movie->Rewind();
 	OnStop(wxCommandEvent());
 	SetProgress(0.);
 	SetRendering(0.);

@@ -471,10 +471,6 @@ BEGIN_EVENT_TABLE(RecorderDlg, wxPanel)
 	EVT_BUTTON(ID_InsKeyBtn, RecorderDlg::OnInsKey)
 	EVT_BUTTON(ID_DelKeyBtn, RecorderDlg::OnDelKey)
 	EVT_BUTTON(ID_DelAllBtn, RecorderDlg::OnDelAll)
-	EVT_BUTTON(ID_PreviewBtn, RecorderDlg::OnPreview)
-	EVT_BUTTON(ID_ResetBtn, RecorderDlg::OnReset)
-	EVT_BUTTON(ID_PlayBtn, RecorderDlg::OnPlay)
-	EVT_BUTTON(ID_StopBtn, RecorderDlg::OnStop)
 END_EVENT_TABLE()
 
 RecorderDlg::RecorderDlg(wxWindow* frame, wxWindow* parent)
@@ -543,20 +539,6 @@ m_view(0)
 	group3->Add(5, 5);
 	group3->Add(m_del_all_btn, 0, wxALIGN_CENTER);
 
-	//play buttons
-	m_preview_btn = new wxButton(this, ID_PreviewBtn, "Preview");
-	m_stop_btn    = new wxButton(this, ID_StopBtn,    "Stop");
-	m_reset_btn   = new wxButton(this, ID_ResetBtn,   "Reset");
-	m_play_btn    = new wxButton(this, ID_PlayBtn,    "Save...");
-
-	group4->Add(m_preview_btn, 0, wxALIGN_CENTER);
-	group4->Add(5, 5);
-	group4->Add(m_stop_btn, 0, wxALIGN_CENTER);
-	group4->Add(5, 5);
-	group4->Add(m_reset_btn, 0, wxALIGN_CENTER);
-	group4->Add(5, 5);
-	group4->Add(m_play_btn, 0, wxALIGN_CENTER);
-
 	//all controls
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(10, 5);
@@ -566,8 +548,6 @@ m_view(0)
 	sizerV->Add(10, 5);
 	sizerV->Add(group3, 0, wxEXPAND);
 	sizerV->Add(5, 5);
-	sizerV->Add(group4, 0, wxEXPAND);
-	sizerV->Add(10, 5);
 
 	SetSizer(sizerV);
 	Layout();
