@@ -65,22 +65,7 @@ public:
 	void AddView(wxString view);
 	void DeleteView(wxString view);
 	void SetView(int index);
-
 	void SetTimeFrame(int frame);
-	int GetProgress()
-	{
-		return m_progress_sldr->GetValue();
-	}
-	int GetStartTime()
-	{
-		return int(STOD(m_time_start_text->GetValue().fn_str()));
-	}
-	int GetEndTime()
-	{
-		return int(STOD(m_time_end_text->GetValue().fn_str()));
-	}
-	void MovieDone();
-	void SetProgress(double pcnt);
 
 public:
 	//controls
@@ -123,7 +108,6 @@ public:
 	wxTextCtrl *m_height_text;
 	wxSpinButton* m_height_spin;
 
-	bool m_running;
 
 
 private:
@@ -131,6 +115,8 @@ private:
 	int m_slider_pause_pos, m_last_frame;
 	double m_starting_rot;
     wxTimer m_timer;
+	wxString m_filename;
+	bool m_running, m_record, m_save_tiffs;
 
 private:
 	void GetSettings(int view=0);
@@ -138,6 +124,13 @@ private:
 	void EnableRot();
 	void DisableTime();
 	void EnableTime();
+
+	//set the renderview and progress bars/text
+	void SetRendering(double pcnt);
+	void SetProgress(double pcnt);
+
+	//write frames to file
+	void WriteFrameToFile();
 
 	//4d movie slider
 	void Get4DFrames();

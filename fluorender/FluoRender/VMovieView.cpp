@@ -1,5 +1,6 @@
 #include "VMovieView.h"
 #include "VRenderFrame.h"
+#include <tiffio.h>
 #include <wx/aboutdlg.h>
 #include <wx/valnum.h>
 #include <wx/notebook.h>
@@ -245,11 +246,12 @@ VMovieView::VMovieView(wxWindow* frame,
 	long style,
 	const wxString& name) :
 wxPanel(parent, id, pos, size, style, name),
-m_running(false),
 m_frame(frame),
 m_slider_pause_pos(0),
 m_starting_rot(0.),
-m_timer(this,ID_Timer)
+m_timer(this,ID_Timer),
+m_running(false),
+m_record(false)
 {
 	
 	//notebook
@@ -325,8 +327,7 @@ VMovieView::~VMovieView()
 void VMovieView::OnViewSelected(wxCommandEvent& event)
 {
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
+	if (vr_frame) {
 		vr_frame->m_mov_view = m_views_cmb->GetCurrentSelection();
 		GetSettings(vr_frame->m_mov_view);
 	}
@@ -335,8 +336,7 @@ void VMovieView::OnViewSelected(wxCommandEvent& event)
 void VMovieView::GetSettings(int view)
 {
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
+	if (vr_frame) {
 		m_views_cmb->SetSelection(vr_frame->m_mov_view);
 		if (vr_frame->m_mov_axis == 1)
 			m_x_rd->SetValue(true);
@@ -352,19 +352,18 @@ void VMovieView::GetSettings(int view)
 			m_fps_text->SetValue(vr_frame->m_mov_frames);
 
 		VRenderView* vrv = (*vr_frame->GetViewList())[view];
-		if (vrv)
-		{
-			if (vrv->GetFrameEnabled())
-			{
+		if (vrv) {
+			if (vrv->GetFrameEnabled()) {
 				m_frame_chk->SetValue(true);
 				int x, y, w, h;
 				vrv->GetFrame(x, y, w, h);
-				m_center_x_text->SetValue(wxString::Format("%d", int(x+w/2.0+0.5)));
-				m_center_y_text->SetValue(wxString::Format("%d", int(y+h/2.0+0.5)));
+				m_center_x_text->SetValue(wxString::Format("%d", 
+					int(x+w/2.0+0.5)));
+				m_center_y_text->SetValue(wxString::Format("%d", 
+					int(y+h/2.0+0.5)));
 				m_width_text->SetValue(wxString::Format("%d", w));
 				m_height_text->SetValue(wxString::Format("%d", h));
-			}
-			else
+			}else
 				m_frame_chk->SetValue(false);
 		}
 	}
@@ -373,17 +372,13 @@ void VMovieView::GetSettings(int view)
 void VMovieView::Init()
 {
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
+	if (vr_frame) {
 		int i=0;
 		m_views_cmb->Clear();
-		for (i=0 ; i<vr_frame->GetViewNum(); i++)
-		{
+		for (i=0 ; i<vr_frame->GetViewNum(); i++) {
 			VRenderView* vrv = vr_frame->GetView(i);
 			if (vrv && m_views_cmb)
-			{
 				m_views_cmb->Append(vrv->GetName());
-			}
 		}
 		if (i)
 			m_views_cmb->Select(0);
@@ -414,63 +409,52 @@ void VMovieView::DeleteView(wxString view)
 void VMovieView::SetView(int index)
 {
 	if (m_views_cmb)
-	{
 		m_views_cmb->SetSelection(index);
-	}
 }
 
+void VMovieView::SetTimeFrame(int frame)
+{
+	return;
+	int start_time = STOI(m_time_start_text->GetValue().fn_str());
+	int end_time = STOI(m_time_end_text->GetValue().fn_str());
+	int time = end_time - start_time;
+
+	double slider_pos = 360. * (frame - start_time) / (double)time;
+	m_progress_sldr->SetValue(slider_pos);
+	double text_pos;
+	double movie_time = STOD(m_movie_time->GetValue().fn_str());
+
+	movie_time = movie_time * (frame - start_time) / (double)time;
+	m_progress_text->ChangeValue(wxString::Format("%.2f", movie_time));
+}
 
 void VMovieView::OnTimer(wxTimerEvent& event) {
+	//get all of the progress info
 	double time, len, degrees;
 	long fps;
 	m_progress_text->GetValue().ToDouble(&time);
 	m_movie_time->GetValue().ToDouble(&len);
 	m_fps_text->GetValue().ToLong(&fps);
+	//move forward in time (limits FPS usability to 100 FPS)
 	time+=0.01;
+	//frame only increments when time passes a whole number
 	int frame = fps * time;
+	SetProgress(time/len);
 	//update the rendering frame since we have advanced.
 	if (frame != m_last_frame) {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame) {
-		VRenderView* vrv = 
-			vr_frame->GetView(m_views_cmb->GetValue());
-		if (vrv) {
-			if (m_rot_chk) {
-				int rot_axis = 1;
-				double x,y,z;
-				if (m_x_rd->GetValue())
-					rot_axis = 1;
-				if (m_y_rd->GetValue())
-					rot_axis = 2;
-				if (m_z_rd->GetValue())
-					rot_axis = 3;
-				vrv->GetRotations(x,y,z);
-				m_degree_end->GetValue().ToDouble(&degrees);
-				double deg = m_starting_rot + degrees * time/len;
-				switch (rot_axis) {
-				case 1:
-					vrv->SetRotations(deg,y,z); break;
-				case 2:
-					vrv->SetRotations(x,deg,z); break;
-				case 3:
-					vrv->SetRotations(x,y,deg); break;
-				}
-				vrv->RefreshGL(false);
-			}
-		}
+		if (m_record)
+			WriteFrameToFile(); 
+		SetRendering(time/len);
+		m_last_frame = frame;
 	}
-	}
-	m_last_frame = frame;
-	SetProgress(time/len);
-	if (time/len >= 1.) OnStop(wxCommandEvent());
+	if (time/len >= 1.) 
+		OnStop(wxCommandEvent());
 }
 
 void VMovieView::OnPrev(wxCommandEvent& event)
 {
 	if (m_running) {
-		m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
 		OnStop(wxCommandEvent());
-		m_running = false;
 		return;
 	}
 	m_running = true;
@@ -515,129 +499,7 @@ void VMovieView::OnPrev(wxCommandEvent& event)
 			}
 		}
 	}
-
-
-
-
-
-
-
-
-
-
-
-	return;
-
-
-
-
-
-
-
-	wxString str;
-	double end_angle;
-	double movie_time;
-
-	str = m_degree_end->GetValue();
-	end_angle = STOD(str.fn_str());
-	str = m_movie_time->GetValue();
-	movie_time = STOD(str.fn_str());
-	//account for current position on the slider.
-	m_slider_pause_pos = m_progress_sldr->GetValue();
-	double pcnt = static_cast<double>(m_slider_pause_pos) / 360.;
-	end_angle *= (1.-pcnt);
-
-
-	if (movie_time < 0.01)
-		movie_time = 0.01;
-	if (m_x_rd->GetValue())
-		rot_axis = 1;
-	if (m_y_rd->GetValue())
-		rot_axis = 2;
-	if (m_z_rd->GetValue())
-		rot_axis = 3;
-	int frames = STOD(m_fps_text->GetValue().fn_str());
-	if (frames < 1) {
-		m_fps_text->SetValue("1");
-		frames = 1;
-	}
-	int f_tot = (frames * movie_time), len = 1;
-	while (f_tot >= 10) {
-		f_tot /= 10;
-		len++;
-	}
-	movie_time *= (1. - pcnt);
-
-	int begin_frame = STOD(m_time_start_text->GetValue().fn_str());
-	int end_frame = STOD(m_time_end_text->GetValue().fn_str());
-	if (begin_frame == end_frame) {
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
-		{
-			VRenderView* vrv = vr_frame->GetView(m_views_cmb->GetValue());
-			if (vrv)
-			{
-				int first, sec, tmp;
-				vrv->Get4DSeqFrames(first, sec, tmp);
-				if (sec - first == 0) {
-					vrv->Get3DBatFrames(first, sec, tmp);
-					if (sec - first == 0) {
-						m_seq_chk->SetValue(false);
-						OnSequenceChecked(wxCommandEvent());
-					}
-				}
-				if(end_frame < sec) 
-					end_frame++;
-				else 
-					begin_frame--;
-				m_time_start_text->SetValue(wxString::Format("%d",begin_frame));
-				m_time_end_text->SetValue(wxString::Format("%d",end_frame));
-			}
-		}
-	}
-	if (m_slider_pause_pos != 0)
-		begin_frame += (end_frame - begin_frame) * pcnt + 1;
-
-	if (vr_frame)
-	{
-		str = m_views_cmb->GetValue();
-		VRenderView* vrv = vr_frame->GetView(str);
-		if (vrv)
-		{
-			if (m_slider_pause_pos == 0) {
-				double x,y,z;
-				vrv->GetRotations(x,y,z);
-				if (rot_axis == 1)
-					m_starting_rot = x;
-				else if(rot_axis == 2)
-					m_starting_rot = y;
-				else
-					m_starting_rot = z;
-				while(m_starting_rot > 360.) m_starting_rot -= 360.;
-				while(m_starting_rot < -360.) m_starting_rot += 360.;
-				if (360. - std::abs(m_starting_rot) < 0.001) m_starting_rot = 0.;
-			}
-			wxString str_null = "";
-			if (m_rot_chk->GetValue()) {
-				vrv->Set3DRotCapture(m_slider_pause_pos, end_angle, 
-					(end_angle) / (frames * movie_time),
-					(frames * movie_time), rot_axis, str_null, false, len);
-			} 
-			if(m_seq_chk->GetValue()) {
-				int first, sec, tmp;
-				vrv->Get4DSeqFrames(first, sec, tmp);
-				if (sec - first > 0) {
-					vrv->Set4DSeqCapture(str_null, begin_frame, 
-						end_frame, true);
-				} else {
-					vrv->Set3DBatCapture(str_null, begin_frame, 
-						end_frame);
-				}
-			}
-		}
-	}
 }
-
 //ch1
 void VMovieView::OnCh1Check(wxCommandEvent &event)
 {
@@ -645,8 +507,7 @@ void VMovieView::OnCh1Check(wxCommandEvent &event)
 	if (ch1)
 		VRenderFrame::SetCompression(ch1->GetValue());
 }
-
-//embde project
+//embed project
 void VMovieView::OnChEmbedCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch_embed = (wxCheckBox*)event.GetEventObject();
@@ -699,85 +560,22 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent)
 
 void VMovieView::OnRun(wxCommandEvent& event)
 {
-	SetProgress(0.);
-	wxString str;
-	double end_angle;
-	double step;
-	int rot_axis = 2;
-
-	str = m_degree_end->GetValue();
-	end_angle = STOD(str.fn_str());
-	str = m_movie_time->GetValue();
-	step = STOD(str.fn_str());
-	if (step < 0.01)
-		step = 0.01;
-	if (m_x_rd->GetValue())
-		rot_axis = 1;
-	if (m_y_rd->GetValue())
-		rot_axis = 2;
-	if (m_z_rd->GetValue())
-		rot_axis = 3;
-	int frames = STOD(m_fps_text->GetValue().fn_str());
-	int f_tot = (frames * step), len = 1;
-	while (f_tot > 10) {
-		f_tot /= 10;
-		len++;
+	wxFileDialog *fopendlg = new wxFileDialog(
+		this, "Save Movie Sequence", 
+		"", "", "*.tif", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+	fopendlg->SetExtraControlCreator(CreateExtraCaptureControl);
+	int rval = fopendlg->ShowModal();
+	if (rval == wxID_OK) {
+		m_filename = fopendlg->GetPath();
+		wxString tmp = m_filename.SubString(m_filename.Len()-4,
+			m_filename.Len()-1);
+		m_save_tiffs = tmp.IsSameAs(wxString(".tif"));
+		m_filename = m_filename.SubString(0,m_filename.Len()-5);
+		OnRewind(wxCommandEvent());
+		m_record = true;
 	}
-
-	int begin_frame = STOD(m_time_start_text->GetValue().fn_str());
-	int end_frame = STOD(m_time_end_text->GetValue().fn_str());
-
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		if (vr_frame->GetSettingDlg())
-			VRenderFrame::SetSaveProject(vr_frame->GetSettingDlg()->GetProjSave());
-
-		str = m_views_cmb->GetValue();
-		VRenderView* vrv = vr_frame->GetView(str);
-		if (vrv)
-		{
-			wxFileDialog *fopendlg = new wxFileDialog(
-				this, "Save Movie Sequence", 
-				"", "", "*.tif", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
-			fopendlg->SetExtraControlCreator(CreateExtraCaptureControl);
-
-			int rval = fopendlg->ShowModal();
-			if (rval == wxID_OK)
-			{
-				wxString filename = fopendlg->GetPath();
-				if (m_rot_chk->GetValue()) {
-					vrv->Set3DRotCapture(0, end_angle, 
-					(end_angle) / (frames * step),
-					(frames * step), rot_axis, filename, false, len);
-				} 
-				if(m_seq_chk->GetValue()) {
-					int first, sec, tmp;
-					vrv->Get4DSeqFrames(first, sec, tmp);
-					if (sec - first > 0) {
-						vrv->Set4DSeqCapture(filename, begin_frame, 
-							end_frame, false);
-					} else {
-						vrv->Set3DBatCapture(filename, begin_frame, 
-							end_frame);
-					}
-				}
-
-				if (vr_frame->GetSettingDlg() &&
-					vr_frame->GetSettingDlg()->GetProjSave())
-				{
-					wxString new_folder;
-					new_folder = filename + "_project";
-					CREATE_DIR(new_folder.fn_str());
-					wxString prop_file = new_folder + "/" + 
-						fopendlg->GetFilename() + "_project.vrp";
-					vr_frame->SaveProject(prop_file);
-				}
-			}
-
-			delete fopendlg;
-		}
-	}
+	delete fopendlg;
+	OnPrev(wxCommandEvent());
 }
 
 void VMovieView::OnStop(wxCommandEvent& event)
@@ -785,44 +583,16 @@ void VMovieView::OnStop(wxCommandEvent& event)
 	m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
 	m_timer.Stop();
 	m_running = false;
+	m_record = false;
 }
 
 void VMovieView::OnRewind(wxCommandEvent& event)
 {
-	m_running = false;
-	m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
 	OnStop(wxCommandEvent());
 	SetProgress(0.);
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame) {
-		VRenderView* vrv = 
-			vr_frame->GetView(m_views_cmb->GetValue());
-		if (vrv) {
-			if (m_rot_chk) {
-				int rot_axis = 1;
-				double x,y,z;
-				if (m_x_rd->GetValue())
-					rot_axis = 1;
-				if (m_y_rd->GetValue())
-					rot_axis = 2;
-				if (m_z_rd->GetValue())
-					rot_axis = 3;
-				vrv->GetRotations(x,y,z);
-				switch (rot_axis) {
-				case 1:
-					vrv->SetRotations(m_starting_rot,y,z); break;
-				case 2:
-					vrv->SetRotations(x,m_starting_rot,z); break;
-				case 3:
-					vrv->SetRotations(x,y,m_starting_rot); break;
-				}
-				vrv->RefreshGL(false);
-			}
-		}
-	}
+	SetRendering(0.);
 }
 
-//
 void VMovieView::OnFrameCheck(wxCommandEvent& event)
 {
 	wxString str;
@@ -1086,6 +856,10 @@ void VMovieView::OnTimeChange(wxScrollEvent &event)
 {
 	int frame = event.GetPosition();
 	double pcnt = (((double)frame)/360.);
+	SetRendering(pcnt);
+}
+
+void VMovieView::SetRendering(double pcnt) {
 	double movie_time = STOD(m_movie_time->GetValue().fn_str());
 	wxString str = wxString::Format("%.2f",(pcnt * movie_time));
 	m_progress_text->ChangeValue(str);
@@ -1134,21 +908,6 @@ void VMovieView::OnTimeChange(wxScrollEvent &event)
 	}
 }
 
-void VMovieView::SetTimeFrame(int frame)
-{
-	int start_time = STOI(m_time_start_text->GetValue().fn_str());
-	int end_time = STOI(m_time_end_text->GetValue().fn_str());
-	int time = end_time - start_time;
-
-	double slider_pos = 360. * (frame - start_time) / (double)time;
-	m_progress_sldr->SetValue(slider_pos);
-	double text_pos;
-	double movie_time = STOD(m_movie_time->GetValue().fn_str());
-
-	movie_time = movie_time * (frame - start_time) / (double)time;
-	m_progress_text->ChangeValue(wxString::Format("%.2f", movie_time));
-}
-
 void VMovieView::OnTimeEnter(wxCommandEvent& event)
 {
 	wxString str = m_progress_text->GetValue();
@@ -1159,49 +918,7 @@ void VMovieView::OnTimeEnter(wxCommandEvent& event)
 	str.ToDouble(&movie_time);
 	double pcnt = (iVal / movie_time);
 	m_progress_sldr->SetValue(360. * pcnt);
-
-	int start_time = STOI(m_time_start_text->GetValue().fn_str());
-	int end_time = STOI(m_time_end_text->GetValue().fn_str());
-	int time = end_time - start_time;
-	time = start_time + time * pcnt;
-
-	str = m_views_cmb->GetValue();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		VRenderView* vrv = vr_frame->GetView(str);
-		if (vrv)
-		{
-			if(m_seq_chk->GetValue()) {
-				int first, sec, tmp;
-				vrv->Get4DSeqFrames(first, sec, tmp);
-				if (sec - first > 0) {
-					vrv->Set4DSeqFrame(time ,true);
-				} else {
-					vrv->Set3DBatFrame(time);
-				}
-			}
-			if (m_rot_chk->GetValue()) {
-				double x,y,z,val;
-				vrv->GetRotations(x,y,z);
-				if (m_x_rd->GetValue())
-					val = x;
-				if (m_y_rd->GetValue())
-					val = y;
-				if (m_z_rd->GetValue())
-					val = z;
-				double deg = STOD(m_degree_end->GetValue().fn_str());
-				val = m_starting_rot + pcnt * deg;
-				if (m_x_rd->GetValue())
-					vrv->SetRotations(val,y,z);
-				if (m_y_rd->GetValue())
-					vrv->SetRotations(x,val,z);
-				if (m_z_rd->GetValue())
-					vrv->SetRotations(x,y,val);
-				vrv->RefreshGL(false);
-			}
-		}
-	}
+	SetRendering(pcnt);
 }
 
 void VMovieView::OnRotateChecked(wxCommandEvent& event) {
@@ -1232,17 +949,69 @@ void VMovieView::OnSequenceChecked(wxCommandEvent& event) {
 		DisableTime();
 }
 
-void VMovieView::MovieDone() { 
-	if (m_running) {
-		SetProgress(1.);
-		OnPrev(wxCommandEvent()); 
-	}
-}
-
 void VMovieView::SetProgress(double pcnt) {
 	pcnt = std::abs(pcnt);
 	m_progress_sldr->SetValue(pcnt * 360.);
 	double movie_time = STOD(m_movie_time->GetValue().fn_str());
 	wxString st = wxString::Format("%.2f",(pcnt*movie_time));
 	m_progress_text->ChangeValue(st);
+}
+
+void VMovieView::WriteFrameToFile() {
+	wxString outputfilename = wxString::Format("%s%d%s",m_filename,
+		m_last_frame,".tif");
+    //capture
+    int x, y, w, h;
+	VRenderView* vrv;
+	wxString str = m_views_cmb->GetValue();
+
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame) {
+		vrv = vr_frame->GetView(str);
+		if (!vrv) return;
+	}
+
+    if (m_frame_chk->GetValue())
+		vrv->GetFrame(x,y,w,h);
+    else {
+        x = 0;
+        y = 0;
+        w = vrv->GetGLSize().x;
+        h = vrv->GetGLSize().y;
+    }
+	int chann = 3; //RGB or RGBA
+    glPixelStorei(GL_PACK_ROW_LENGTH, w);
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    unsigned char *image = new unsigned char[w*h*chann];
+    glReadBuffer(GL_FRONT);
+    glReadPixels(x, y, w, h, chann==3?GL_RGB:GL_RGBA, GL_UNSIGNED_BYTE, image);
+    glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+    string str_fn = outputfilename.ToStdString();
+    TIFF *out = TIFFOpen(str_fn.c_str(), "wb");
+    if (!out) return;
+    TIFFSetField(out, TIFFTAG_IMAGEWIDTH, w);
+    TIFFSetField(out, TIFFTAG_IMAGELENGTH, h);
+    TIFFSetField(out, TIFFTAG_SAMPLESPERPIXEL, chann);
+    TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, 8);
+    TIFFSetField(out, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
+    TIFFSetField(out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+    TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+    if (VRenderFrame::GetCompression())
+        TIFFSetField(out, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
+
+    tsize_t linebytes = chann * w;
+    unsigned char *buf = NULL;
+    buf = (unsigned char *)_TIFFmalloc(linebytes);
+    TIFFSetField(out, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(out, 0));
+    for (uint32 row = 0; row < (uint32)h; row++)
+    {
+        memcpy(buf, &image[(h-row-1)*linebytes], linebytes);// check the index here, and figure out why not using h*linebytes
+        if (TIFFWriteScanline(out, buf, row, 0) < 0)
+        break;
+    }
+    TIFFClose(out);
+    if (buf)
+        _TIFFfree(buf);
+    if (image)
+        delete []image;
 }

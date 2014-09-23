@@ -3631,12 +3631,6 @@ void VRenderFrame::OpenProject(wxString& filename)
          m_mov_view = iVal;
          vrv = (*GetViewList())[m_mov_view];
       }
-      if (fconfig.Read("time_frame", &iVal))
-      {
-         m_movie_view->SetTimeFrame(iVal);
-         if (vrv)
-            vrv->Set4DSeqFrame(iVal ,false);
-      }
       if (fconfig.Read("x_rd", &bVal))
       {
          m_movie_view->m_x_rd->SetValue(bVal);
