@@ -21,7 +21,6 @@ class VMovieView : public wxPanel
 		ID_XRd,
 		ID_YRd,
 		ID_ZRd,
-		ID_DegreeStartText,
 		ID_DegreeEndText,
 
 		//movie time
@@ -49,7 +48,8 @@ class VMovieView : public wxPanel
 		ID_WidthText,
 		ID_HeightText,
 		ID_WidthSpin,
-		ID_HeightSpin
+		ID_HeightSpin,
+		ID_Timer
 	};
 
 public:
@@ -105,7 +105,6 @@ public:
 	wxRadioButton *m_y_rd;
 	wxRadioButton *m_z_rd;
 
-	wxTextCtrl *m_degree_start;
 	wxTextCtrl *m_degree_end;
 
 	wxTextCtrl *m_movie_time;
@@ -129,8 +128,9 @@ public:
 
 private:
 	wxWindow* m_frame;
-	int m_slider_pause_pos;
+	int m_slider_pause_pos, m_last_frame;
 	double m_starting_rot;
+    wxTimer m_timer;
 
 private:
 	void GetSettings(int view=0);
@@ -180,6 +180,9 @@ private:
 	//checkboxes
 	void OnSequenceChecked(wxCommandEvent& event);
 	void OnRotateChecked(wxCommandEvent& event);
+
+    //timer for playback.
+    void OnTimer(wxTimerEvent& event);
 
 	DECLARE_EVENT_TABLE();
 };

@@ -39,6 +39,8 @@ BEGIN_EVENT_TABLE(VMovieView, wxPanel)
 	EVT_SPIN_DOWN(ID_CenterYSpin, VMovieView::OnFrameSpinDown)
 	EVT_SPIN_DOWN(ID_WidthSpin, VMovieView::OnFrameSpinDown)
 	EVT_SPIN_DOWN(ID_HeightSpin, VMovieView::OnFrameSpinDown)
+//timer
+    EVT_TIMER(ID_Timer, VMovieView::OnTimer)
 END_EVENT_TABLE()
 
 wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
@@ -90,7 +92,7 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	m_z_rd = new wxRadioButton(page,ID_ZRd,"Z",wxDefaultPosition, wxSize(30,22));
 	m_x_rd->SetValue(true);
 
-	m_degree_end = new wxTextCtrl(page, ID_DegreeStartText, "360",
+	m_degree_end = new wxTextCtrl(page, ID_DegreeEndText, "360",
 		wxDefaultPosition,wxSize(50,-1));
 	st2 = new wxStaticText(page,wxID_ANY, "Degrees",
 		wxDefaultPosition,wxSize(60,-1));
@@ -246,7 +248,8 @@ wxPanel(parent, id, pos, size, style, name),
 m_running(false),
 m_frame(frame),
 m_slider_pause_pos(0),
-m_starting_rot(0.)
+m_starting_rot(0.),
+m_timer(this,ID_Timer)
 {
 	
 	//notebook
@@ -341,8 +344,6 @@ void VMovieView::GetSettings(int view)
 			m_y_rd->SetValue(true);
 		else if (vr_frame->m_mov_axis ==3)
 			m_z_rd->SetValue(true);
-		if (vr_frame->m_mov_angle_start != "")
-			m_degree_start->SetValue(vr_frame->m_mov_angle_start);
 		if (vr_frame->m_mov_angle_end != "")
 			m_degree_end->SetValue(vr_frame->m_mov_angle_end);
 		if (vr_frame->m_mov_step != "")
@@ -419,6 +420,51 @@ void VMovieView::SetView(int index)
 }
 
 
+void VMovieView::OnTimer(wxTimerEvent& event) {
+	double time, len, degrees;
+	long fps;
+	m_progress_text->GetValue().ToDouble(&time);
+	m_movie_time->GetValue().ToDouble(&len);
+	m_fps_text->GetValue().ToLong(&fps);
+	time+=0.01;
+	int frame = fps * time;
+	//update the rendering frame since we have advanced.
+	if (frame != m_last_frame) {
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame) {
+		VRenderView* vrv = 
+			vr_frame->GetView(m_views_cmb->GetValue());
+		if (vrv) {
+			if (m_rot_chk) {
+				int rot_axis = 1;
+				double x,y,z;
+				if (m_x_rd->GetValue())
+					rot_axis = 1;
+				if (m_y_rd->GetValue())
+					rot_axis = 2;
+				if (m_z_rd->GetValue())
+					rot_axis = 3;
+				vrv->GetRotations(x,y,z);
+				m_degree_end->GetValue().ToDouble(&degrees);
+				double deg = m_starting_rot + degrees * time/len;
+				switch (rot_axis) {
+				case 1:
+					vrv->SetRotations(deg,y,z); break;
+				case 2:
+					vrv->SetRotations(x,deg,z); break;
+				case 3:
+					vrv->SetRotations(x,y,deg); break;
+				}
+				vrv->RefreshGL(false);
+			}
+		}
+	}
+	}
+	m_last_frame = frame;
+	SetProgress(time/len);
+	if (time/len >= 1.) OnStop(wxCommandEvent());
+}
+
 void VMovieView::OnPrev(wxCommandEvent& event)
 {
 	if (m_running) {
@@ -427,12 +473,70 @@ void VMovieView::OnPrev(wxCommandEvent& event)
 		m_running = false;
 		return;
 	}
-	m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
 	m_running = true;
+	m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
+	int slider_pos = m_progress_sldr->GetValue();
+	if (slider_pos < 360 && slider_pos > 0) {
+		m_timer.Start(10);
+		return; 
+	}
+	
+	m_slider_pause_pos = 0;
+	SetProgress(0.);
+	m_last_frame = 0;
+	m_timer.Start(10);
+	
+	int rot_axis = 1;
+	if (m_x_rd->GetValue())
+		rot_axis = 1;
+	if (m_y_rd->GetValue())
+		rot_axis = 2;
+	if (m_z_rd->GetValue())
+		rot_axis = 3;
+
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame){
+		wxString str = m_views_cmb->GetValue();
+		VRenderView* vrv = vr_frame->GetView(str);
+		if (vrv) {
+			if (m_slider_pause_pos == 0) {
+				double x,y,z;
+				vrv->GetRotations(x,y,z);
+				if (rot_axis == 1)
+					m_starting_rot = x;
+				else if(rot_axis == 2)
+					m_starting_rot = y;
+				else
+					m_starting_rot = z;
+				while(m_starting_rot > 360.) m_starting_rot -= 360.;
+				while(m_starting_rot < -360.) m_starting_rot += 360.;
+				if (360. - std::abs(m_starting_rot) < 0.001) 
+					m_starting_rot = 0.;
+			}
+		}
+	}
+
+
+
+
+
+
+
+
+
+
+
+	return;
+
+
+
+
+
+
+
 	wxString str;
 	double end_angle;
 	double movie_time;
-	int rot_axis = 2;
 
 	str = m_degree_end->GetValue();
 	end_angle = STOD(str.fn_str());
@@ -440,10 +544,6 @@ void VMovieView::OnPrev(wxCommandEvent& event)
 	movie_time = STOD(str.fn_str());
 	//account for current position on the slider.
 	m_slider_pause_pos = m_progress_sldr->GetValue();
-	if (m_slider_pause_pos == 360) {
-		m_slider_pause_pos = 0;
-		SetProgress(0.);
-	}
 	double pcnt = static_cast<double>(m_slider_pause_pos) / 360.;
 	end_angle *= (1.-pcnt);
 
@@ -457,6 +557,10 @@ void VMovieView::OnPrev(wxCommandEvent& event)
 	if (m_z_rd->GetValue())
 		rot_axis = 3;
 	int frames = STOD(m_fps_text->GetValue().fn_str());
+	if (frames < 1) {
+		m_fps_text->SetValue("1");
+		frames = 1;
+	}
 	int f_tot = (frames * movie_time), len = 1;
 	while (f_tot >= 10) {
 		f_tot /= 10;
@@ -466,9 +570,34 @@ void VMovieView::OnPrev(wxCommandEvent& event)
 
 	int begin_frame = STOD(m_time_start_text->GetValue().fn_str());
 	int end_frame = STOD(m_time_end_text->GetValue().fn_str());
-	begin_frame += (end_frame - begin_frame) * pcnt + 1;
+	if (begin_frame == end_frame) {
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame)
+		{
+			VRenderView* vrv = vr_frame->GetView(m_views_cmb->GetValue());
+			if (vrv)
+			{
+				int first, sec, tmp;
+				vrv->Get4DSeqFrames(first, sec, tmp);
+				if (sec - first == 0) {
+					vrv->Get3DBatFrames(first, sec, tmp);
+					if (sec - first == 0) {
+						m_seq_chk->SetValue(false);
+						OnSequenceChecked(wxCommandEvent());
+					}
+				}
+				if(end_frame < sec) 
+					end_frame++;
+				else 
+					begin_frame--;
+				m_time_start_text->SetValue(wxString::Format("%d",begin_frame));
+				m_time_end_text->SetValue(wxString::Format("%d",end_frame));
+			}
+		}
+	}
+	if (m_slider_pause_pos != 0)
+		begin_frame += (end_frame - begin_frame) * pcnt + 1;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 	{
 		str = m_views_cmb->GetValue();
@@ -653,16 +782,9 @@ void VMovieView::OnRun(wxCommandEvent& event)
 
 void VMovieView::OnStop(wxCommandEvent& event)
 {
-	wxString str;
-
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		str = m_views_cmb->GetValue();
-		VRenderView* vrv = vr_frame->GetView(str);
-		if (vrv)
-			vrv->StopMovie();
-	}
+	m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
+	m_timer.Stop();
+	m_running = false;
 }
 
 void VMovieView::OnRewind(wxCommandEvent& event)
@@ -670,19 +792,34 @@ void VMovieView::OnRewind(wxCommandEvent& event)
 	m_running = false;
 	m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
 	OnStop(wxCommandEvent());
-	wxString str;
-
+	SetProgress(0.);
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		str = m_views_cmb->GetValue();
-		VRenderView* vrv = vr_frame->GetView(str);
+	if (vr_frame) {
+		VRenderView* vrv = 
+			vr_frame->GetView(m_views_cmb->GetValue());
 		if (vrv) {
-			vrv->ResetMovieAngle();
-			vrv->Set4DSeqFrame(0 ,true);
+			if (m_rot_chk) {
+				int rot_axis = 1;
+				double x,y,z;
+				if (m_x_rd->GetValue())
+					rot_axis = 1;
+				if (m_y_rd->GetValue())
+					rot_axis = 2;
+				if (m_z_rd->GetValue())
+					rot_axis = 3;
+				vrv->GetRotations(x,y,z);
+				switch (rot_axis) {
+				case 1:
+					vrv->SetRotations(m_starting_rot,y,z); break;
+				case 2:
+					vrv->SetRotations(x,m_starting_rot,z); break;
+				case 3:
+					vrv->SetRotations(x,y,m_starting_rot); break;
+				}
+				vrv->RefreshGL(false);
+			}
 		}
 	}
-	SetProgress(0.);
 }
 
 //
@@ -871,7 +1008,6 @@ void VMovieView::DisableRot()
 	m_x_rd->Disable();
 	m_y_rd->Disable();
 	m_z_rd->Disable();
-	m_degree_start->Disable();
 	m_degree_end->Disable();
 }
 
@@ -880,7 +1016,6 @@ void VMovieView::EnableRot()
 	m_x_rd->Enable();
 	m_y_rd->Enable();
 	m_z_rd->Enable();
-	m_degree_start->Enable();
 	m_degree_end->Enable();
 }
 
@@ -1005,12 +1140,12 @@ void VMovieView::SetTimeFrame(int frame)
 	int end_time = STOI(m_time_end_text->GetValue().fn_str());
 	int time = end_time - start_time;
 
-	double slider_pos = 360. * frame / time;
+	double slider_pos = 360. * (frame - start_time) / (double)time;
 	m_progress_sldr->SetValue(slider_pos);
 	double text_pos;
 	double movie_time = STOD(m_movie_time->GetValue().fn_str());
 
-	movie_time = movie_time * frame / time;
+	movie_time = movie_time * (frame - start_time) / (double)time;
 	m_progress_text->ChangeValue(wxString::Format("%.2f", movie_time));
 }
 
