@@ -577,7 +577,7 @@ void VMovieView::OnRun(wxCommandEvent& event)
 	int page = m_notebook->GetSelection();
 	if (page <= 1) m_current_page = page;
 	if (m_current_page == 1) {
-		if (!m_running)
+		if (!running)
 			m_advanced_movie->Save();
 		else 
 			m_advanced_movie->Stop();
