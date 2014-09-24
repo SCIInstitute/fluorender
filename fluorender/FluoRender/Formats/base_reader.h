@@ -3,6 +3,7 @@
 
 #include <string>
 #include <nrrd.h>
+#include <vector>
 
 using namespace std;
 
@@ -27,7 +28,7 @@ public:
 	virtual void SetBatch(bool batch) = 0;	//set batch mode
 	virtual bool GetBatch() = 0;			//get batch mode
 	virtual int LoadBatch(int index) = 0;	//load file for 3D batch mode
-	virtual int LoadOffset(int offset) = 0;	//load offset index for 3D batch
+	virtual int LoadOffset(int offset);	//load offset index for 3D batch
 	virtual Nrrd* Convert(bool get_max);			//Convert the data to nrrd
 	virtual Nrrd* Convert(int c, bool get_max);		//convert the specified channel to nrrd
 	virtual Nrrd* Convert(int t, int c, bool get_max) = 0;//convert the specified channel and time point to nrrd
@@ -92,6 +93,13 @@ protected:
 	int m_resize_type;		//0: no resizing; 1: padding; 2: resampling
 	int m_resample_type;	//0: nearest neighbour; 1: linear
 	int m_alignment;		//padding alignment
+
+	//3d batch
+	bool m_batch;
+	vector<wstring> m_batch_list;
+	int m_cur_batch;
+	
+	wstring m_path_name;
 
 	//all the decoding stuff
 	#define MAXCODE(n)	((1L<<(n))-1)

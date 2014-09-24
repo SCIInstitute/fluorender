@@ -20,7 +20,6 @@ public:
 	void Preprocess();
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
-	int LoadOffset(int offset);
 	Nrrd* Convert(int t, int c, bool get_max);
 	wstring GetCurName(int t, int c);
 
@@ -42,9 +41,6 @@ public:
 	bool GetBatch() {return false;}
 	int GetBatchNum() {return 0;}
 	int GetCurBatch() {return 0;}
-
-private:
-	wstring m_path_name;
 };
 
 #endif//_LBL_READER_H_

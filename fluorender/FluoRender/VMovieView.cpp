@@ -480,6 +480,7 @@ void VMovieView::OnPrev(wxCommandEvent& event)
 	
 	m_slider_pause_pos = 0;
 	SetProgress(0.);
+	SetRendering(0.);
 	m_last_frame = 0;
 	m_timer.Start(10);
 	
@@ -577,7 +578,7 @@ void VMovieView::OnRun(wxCommandEvent& event)
 	int page = m_notebook->GetSelection();
 	if (page <= 1) m_current_page = page;
 	if (m_current_page == 1) {
-		if (!running)
+		if (!m_running)
 			m_advanced_movie->Save();
 		else 
 			m_advanced_movie->Stop();
@@ -892,7 +893,7 @@ void VMovieView::SetRendering(double pcnt) {
 	m_progress_text->ChangeValue(str);
 	int start_time = STOI(m_time_start_text->GetValue().fn_str());
 	int end_time = STOI(m_time_end_text->GetValue().fn_str());
-	int time = end_time - start_time;
+	int time = end_time - start_time + 1;
 	time = start_time + time * pcnt;
 
 	str = m_views_cmb->GetValue();

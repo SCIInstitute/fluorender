@@ -23,7 +23,6 @@ public:
 	void Preprocess();
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
-	int LoadOffset(int offset);
 	Nrrd* Convert(int t, int c, bool get_max);
 	wstring GetCurName(int t, int c);
 
@@ -47,7 +46,6 @@ public:
 	int GetCurBatch() {return m_cur_batch;}
 
 private:
-	wstring m_path_name;
 	wstring m_data_name;
 
 	//4d sequence
@@ -58,11 +56,6 @@ private:
 	};
 	vector<TimeDataInfo> m_4d_seq;
 	int m_cur_time;
-
-	//3d batch
-	bool m_batch;
-	vector<wstring> m_batch_list;
-	int m_cur_batch;
 
 	int m_time_num;
 	int m_chan_num;
