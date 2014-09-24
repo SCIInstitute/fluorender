@@ -4744,7 +4744,7 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
    int start_frame, end_frame, cur_frame;
    Get4DSeqFrames(start_frame, end_frame, cur_frame);
    if (frame > end_frame ||
-         frame < start_frame)
+         frame < start_frame || cur_frame == frame)
       return;
 
    m_tseq_cur_num = frame;
