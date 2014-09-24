@@ -1109,6 +1109,10 @@ class VRenderView: public wxPanel
       if (m_glview)
          m_glview->SetParamCapture(cap_file, begin_frame, end_frame, rewind);
    }
+   void SetParams(double p) {
+      if (m_glview)
+         m_glview->SetParams(p);
+   }
    //reset & stop
    void ResetMovieAngle()
    {

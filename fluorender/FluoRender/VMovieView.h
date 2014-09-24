@@ -114,7 +114,7 @@ public:
 
 private:
 	wxWindow* m_frame;
-	int m_slider_pause_pos, m_last_frame;
+	int m_last_frame;
 	double m_starting_rot;
     wxTimer m_timer;
 	wxString m_filename;
