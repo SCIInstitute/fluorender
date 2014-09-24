@@ -249,3 +249,5 @@ int BaseReader::LoadOffset(int offset)
    m_cur_batch = result;
    return result;
 }
+
+int BaseReader::GetOffset() { return m_cur_batch; }

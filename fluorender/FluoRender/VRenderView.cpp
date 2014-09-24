@@ -4854,6 +4854,7 @@ void VRenderGLView::Set3DBatFrame(int offset)
       if (vd && vd->GetReader())
       {
          BaseReader* reader = vd->GetReader();
+		 if (reader->GetOffset() == offset) return;
          bool found = false;
          for (j=0; j<(int)reader_list.size(); j++)
          {
