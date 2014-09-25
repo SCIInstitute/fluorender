@@ -5,11 +5,13 @@
 
 #include "FLIVR/Color.h"
 #include "FLIVR/ShaderProgram.h"
+#include "FLIVR/KernelProgram.h"
 #include "FLIVR/BBox.h"
 #include "FLIVR/MultiVolumeRenderer.h"
 #include "FLIVR/Quaternion.h"
 #include "FLIVR/ImgShader.h"
 #include "FLIVR/PaintShader.h"
+#include "FLIVR/VolKernel.h"
 #include "compatibility.h"
 
 #include <wx/wx.h>

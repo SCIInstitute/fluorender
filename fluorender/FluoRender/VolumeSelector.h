@@ -1,4 +1,5 @@
 #include "DataManager.h"
+#include "FLIVR\VolKernel.h"
 #include <wx/progdlg.h>
 #include <boost/unordered_map.hpp>
 
@@ -152,6 +153,9 @@ private:
 	bool m_ps;
 	Point m_ps_center;
 	double m_ps_size;
+
+	//cl kernel
+	static VolKernelFactory m_vol_kernel_factory;
 
 private:
 	bool SearchComponentList(unsigned int cval, Vector &pos, double intensity);
