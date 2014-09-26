@@ -1,5 +1,4 @@
 #include "KernelProgram.h"
-#include <CL\cl_gl.h>
 #include <Windows.h>
 
 namespace FLIVR
@@ -120,10 +119,32 @@ namespace FLIVR
 		if (!valid())
 			return;
 
-		cl_int err = clEnqueueNDRangeKernel(queue_, kernel_, dim, NULL, &global_size,
+		cl_int err;
+		glFinish();
+		unsigned int i;
+		for (i=0; i<arg_list_.size(); ++i)
+		{
+			if (arg_list_[i].size == 0)
+			{
+				err = clEnqueueAcquireGLObjects(queue_, 1, &(arg_list_[i].buffer), 0, NULL, NULL);
+				if (err < 0)
+					return;
+			}
+		}
+		err = clEnqueueNDRangeKernel(queue_, kernel_, dim, NULL, &global_size,
 			&local_size, 0, NULL, NULL);
 		if (err < 0)
 			return;
+		for (i=0; i<arg_list_.size(); ++i)
+		{
+			if (arg_list_[i].size == 0)
+			{
+				err = clEnqueueReleaseGLObjects(queue_, 1, &(arg_list_[i].buffer), 0, NULL, NULL);
+				if (err < 0)
+					return;
+			}
+		}
+		clFinish(queue_);
 	}
 
 	void KernelProgram::setKernelArg(int i, cl_mem_flags flag, size_t size, void* data)
@@ -148,6 +169,38 @@ namespace FLIVR
 		{
 			err = clSetKernelArg(kernel_, i, size, NULL);
 		}
+	}
+
+	void KernelProgram::setKernelArgTex2D(int i, cl_mem_flags flag, GLenum texture_target, GLuint texture)
+	{
+		cl_int err;
+		cl_mem tex_buffer = clCreateFromGLTexture2D(context_, flag, texture_target, 0, texture, &err);
+		if (err < 0)
+			return;
+		Argument arg;
+		arg.index = i;
+		arg.size = 0;
+		arg.buffer = tex_buffer;
+		arg_list_.push_back(arg);
+		err = clSetKernelArg(kernel_, i, sizeof(cl_mem), &tex_buffer);
+		if (err < 0)
+			return;
+	}
+
+	void KernelProgram::setKernelArgTex3D(int i, cl_mem_flags flag, GLenum texture_target, GLuint texture)
+	{
+		cl_int err;
+		cl_mem tex_buffer = clCreateFromGLTexture3D(context_, flag, texture_target, 0, texture, &err);
+		if (err < 0)
+			return;
+		Argument arg;
+		arg.index = i;
+		arg.size = 0;
+		arg.buffer = tex_buffer;
+		arg_list_.push_back(arg);
+		err = clSetKernelArg(kernel_, i, sizeof(cl_mem), &tex_buffer);
+		if (err < 0)
+			return;
 	}
 
 	void KernelProgram::readBuffer(int index, void* data)

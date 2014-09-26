@@ -1,7 +1,9 @@
 #ifndef KernelProgram_h
 #define KernelProgram_h
 
+#include <GL/glew.h>
 #include <CL/cl.h>
+#include <CL/cl_gl.h>
 #include <string>
 #include <vector>
 
@@ -20,6 +22,8 @@ namespace FLIVR
 		void execute(cl_uint, size_t, size_t);
 
 		void setKernelArg(int, cl_mem_flags, size_t, void*);
+		void setKernelArgTex2D(int, cl_mem_flags, GLenum, GLuint);
+		void setKernelArgTex3D(int, cl_mem_flags, GLenum, GLuint);
 		void readBuffer(int, void*);
 
 		//initialization
