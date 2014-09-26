@@ -3,8 +3,6 @@
 #include "utility.h"
 #include <wx/wx.h>
 
-VolKernelFactory VolumeSelector::m_vol_kernel_factory;
-
 VolumeSelector::VolumeSelector() :
    m_vd(0),
    m_2d_mask(0),

@@ -144,6 +144,8 @@ namespace FLIVR
 		//mode: 0-normal; 1-posterized
 		void draw_label(int type, int mode, double thresh, double gm_falloff);
 
+		void exec_cl();
+
 		//calculation
 		void calculate(int type, VolumeRenderer* vr_a, VolumeRenderer* vr_b);
 

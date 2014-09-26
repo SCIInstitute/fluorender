@@ -79,6 +79,18 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/glm/gtc)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/glm/gtx)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/glm/virtrev)
 
+#OpenCL for Windows
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+	include_directories(${FluoRender_SOURCE_DIR}/fluorender/OpenCL/include)
+	if(${ARCHITECTURE} MATCHES "64")
+		set(OPEN_CL_LIBS ${FluoRender_SOURCE_DIR}/fluorender/OpenCL/lib/x86_64/OpenCL.lib)
+	else()
+		set(OPEN_CL_LIBS ${FluoRender_SOURCE_DIR}/fluorender/OpenCL/lib/x86/OpenCL.lib)
+	endif()
+endif()
+
+
+
 #sources
 file(GLOB src fluorender/FluoRender/*.cpp)
 file(GLOB hdr fluorender/FluoRender/*.h)
@@ -229,4 +241,5 @@ endif()
 target_link_libraries(FluoRender
    ${wxWidgets_LIBRARIES}
    ${OPENGL_LIBRARIES}
-   ${Boost_LIBRARIES})
+   ${Boost_LIBRARIES}
+   ${OPEN_CL_LIBS})
