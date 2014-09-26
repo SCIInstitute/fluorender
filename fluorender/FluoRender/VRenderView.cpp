@@ -11585,8 +11585,6 @@ void VRenderView::OnScaleTextEditing(wxCommandEvent& event) {
 	  double len;
 	  num_text.ToDouble(&len);
       str = num_text + " ";
-	  double len;
-	  num_text.ToDouble(&len);
       switch (m_scale_cmb->GetSelection())
       {
       case 0:
