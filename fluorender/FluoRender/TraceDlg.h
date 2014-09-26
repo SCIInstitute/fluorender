@@ -66,15 +66,18 @@ public:
 		ID_SaveasTraceBtn,
 		ID_GhostNumSldr,
 		ID_GhostNumText,
+		ID_ManualAssistCheck,
 		ID_CellSizeSldr,
 		ID_CellSizeText,
 		ID_CellUpdateBtn,
 		ID_CellLinkBtn,
 		ID_CellExclusiveLinkBtn,
 		ID_CellUnlinkBtn,
+		ID_CellNewIDText,
 		ID_CellModifyBtn,
 		ID_CellNewIDBtn,
 		ID_CellCombineIDBtn,
+		ID_CellMagic0Btn,
 		ID_CellMagic1Btn,
 		ID_CellMagic2Btn,
 		ID_CellMagic3Btn,
@@ -95,10 +98,24 @@ public:
 	void GetSettings(VRenderView* vrv);
 	VRenderView* GetView();
 	void UpdateList();
+
+	//manual assist
+	bool GetManualAssist() {return m_manual_assist;}
 	//cell operations
 	void CellUpdate();
 	void CellFull();
-	void CellLink(bool exclusive);
+	void CellLink(bool exclusive, bool idid=false);
+	void CellNewID();
+	//assign exclusive ID to selection
+	//mode: how to deal with conflicts
+	//0--delete; 1--select
+	void CellExclusiveID(int mode);
+	void CellAppendID(vector<unsigned int> &id_list);
+
+	//measurement
+	void Measure();
+	void OutputMeasureResult(wxString &str);
+	void SaveMeasureResult(wxString &filename);
 
 private:
 	typedef struct
@@ -108,6 +125,21 @@ private:
 		int surface_num;
 		int contact_num;
 	} comp_info;
+
+	struct measure_info
+	{
+		unsigned int id;
+		unsigned int total_num;
+		double mean;
+		double variance;
+		double m2;
+		double min;
+		double max;
+
+		static bool cmp_id(const measure_info info1, const measure_info info2)
+		{ return info1.id < info2.id; }
+	};
+	vector<measure_info> m_info_list;
 
 	wxWindow* m_frame;
 	//current view
@@ -119,6 +151,9 @@ private:
 	//time sequence setting
 	int m_cur_time;
 	int m_prv_time;
+
+	//enable manual assist
+	bool m_manual_assist;
 
 	//ui
 	//list ctrl
@@ -134,6 +169,7 @@ private:
 	wxSlider* m_ghost_num_sldr;
 	wxTextCtrl* m_ghost_num_text;
 	//edit tools
+	wxCheckBox* m_manual_assist_check;
 	//cell size filter
 	wxSlider* m_cell_size_sldr;
 	wxTextCtrl* m_cell_size_text;
@@ -149,10 +185,12 @@ private:
 	wxButton* m_cell_exclusive_link_btn;
 	wxButton* m_cell_unlink_btn;
 	//ID edit controls
+	wxTextCtrl* m_cell_new_id_text;
 	wxButton* m_cell_modify_btn;
 	wxButton* m_cell_new_id_btn;
 	wxButton* m_cell_combine_id_btn;
 	//magic tool
+	wxButton* m_cell_magic0_btn;
 	wxButton* m_cell_magic1_btn;
 	wxButton* m_cell_magic2_btn;
 	wxButton* m_cell_magic3_btn;
@@ -181,6 +219,8 @@ private:
 	//ghost number
 	void OnGhostNumChange(wxScrollEvent &event);
 	void OnGhostNumText(wxCommandEvent &event);
+	//manual tracking assistant
+	void OnManualAssistCheck(wxCommandEvent &event);
 	//cell size filter
 	void OnCellSizeChange(wxScrollEvent &event);
 	void OnCellSizeText(wxCommandEvent &event);
@@ -199,6 +239,7 @@ private:
 	void OnCellNewID(wxCommandEvent& event);
 	void OnCellCombineID(wxCommandEvent& event);
 	//magic tool
+	void OnCellMagic0Btn(wxCommandEvent& event);
 	void OnCellMagic1Btn(wxCommandEvent& event);
 	void OnCellMagic2Btn(wxCommandEvent& event);
 	void OnCellMagic3Btn(wxCommandEvent& event);

@@ -752,6 +752,8 @@ class VRenderGLView: public wxGLCanvas
 		 bool m_cell_full;
 		 //link cell
 		 bool m_cell_link;
+		 //new cell id
+		 bool m_cell_new_id;
 
          //predraw in streaming mode
          bool m_pre_draw;
@@ -1352,6 +1354,10 @@ class VRenderView: public wxPanel
 		if (m_glview) m_glview->ExportTrace(filename, id);
 	}
 
+	//bit mask for items to save
+	bool m_default_saved;
+	void SaveDefault(unsigned int mask = 0xffffffff);
+
    public:
    wxWindow* m_frame;
    static int m_id;
@@ -1383,6 +1389,7 @@ class VRenderView: public wxPanel
    wxTextCtrl *m_z_rot_text;
    wxTimer m_timer;
    bool m_x_rotating, m_y_rotating, m_z_rotating;
+   wxToolBar *m_rot_lock_btn;
 
    //left bar///////////////////////////////////////////////////
    wxPanel* m_panel_3;

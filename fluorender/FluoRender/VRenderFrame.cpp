@@ -614,6 +614,17 @@ void VRenderFrame::OnExit(wxCommandEvent& WXUNUSED(event))
 void VRenderFrame::OnClose(wxCloseEvent &event)
 {
    m_setting_dlg->SaveSettings();
+	bool vrv_saved = false;
+   for (unsigned int i=0; i<m_vrv_list.size(); ++i)
+	{
+		if (m_vrv_list[i]->m_default_saved)
+		{
+			vrv_saved = true;
+			break;
+		}
+	}
+   if (!vrv_saved)
+		m_vrv_list[0]->SaveDefault(0xaff);
    event.Skip();
 }
 

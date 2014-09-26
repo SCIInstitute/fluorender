@@ -311,7 +311,8 @@ namespace FLIVR
 
                //compute view
                Ray compute_view();
-               double compute_rate_scale();
+			   Ray compute_snapview(double snap);
+               double compute_rate_scale(Vector v);
 
                //brick distance sort
                static bool brick_sort(const BrickDist& bd1, const BrickDist& bd2);

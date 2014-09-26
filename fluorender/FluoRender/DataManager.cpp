@@ -3192,6 +3192,8 @@ bool TraceGroup::FindID(unsigned int id)
 //find id in frame list
 bool TraceGroup::FindIDInFrame(unsigned int id, int time, Vertex &vertex)
 {
+	if (m_frame_list.empty())
+		return false;
 	//get current frame
 	FrameIter frame_iter = m_frame_list.find((unsigned int)time);
 	if (frame_iter == m_frame_list.end())
@@ -3345,7 +3347,11 @@ bool TraceGroup::AddVertex(int time, unsigned int id,
 	vert.id = id;
 	vert.vsize = vsize;
 	vert.center = center;
-	cell_map->insert(pair<unsigned int, Vertex>(id, vert));
+	cell_map_iter = cell_map->find(id);
+	if (cell_map_iter == cell_map->end())
+		cell_map->insert(pair<unsigned int, Vertex>(id, vert));
+	else
+		cell_map_iter->second = vert;
 
 	return true;
 }
@@ -3511,12 +3517,11 @@ void TraceGroup::Draw()
 		Vertex *vertex2 = 0;
 		IDMap id_map_temp1, id_map_temp2;
 		Lbl lbl;
-		glBegin(GL_LINES);
 
 		id_map_temp1 = m_id_map;
 
-		if (m_cur_time >= m_prv_time)
-		{
+		//if (m_cur_time >= m_prv_time)
+		glBegin(GL_LINES);
 			//after
 			for (int i=cur_ghost; i<int(cur_ghost+m_ghost_num); ++i)
 			{
@@ -3562,9 +3567,12 @@ void TraceGroup::Draw()
 				id_map_temp1 = id_map_temp2;
 				id_map_temp2.clear();
 			}
-		}
-		else if (m_cur_time < m_prv_time)
-		{
+		glEnd();
+
+		id_map_temp1 = m_id_map;
+		id_map_temp2.clear();
+		glBegin(GL_LINES);
+		//else if (m_cur_time < m_prv_time)
 			//before
 			for (int i=cur_ghost; i>int(cur_ghost-m_ghost_num); --i)
 			{
@@ -3610,8 +3618,6 @@ void TraceGroup::Draw()
 				id_map_temp1 = id_map_temp2;
 				id_map_temp2.clear();
 			}
-		}
-
 		glEnd();
 	}
 

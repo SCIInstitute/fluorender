@@ -485,6 +485,7 @@ namespace FLIVR
 			return;
 
 		Ray view_ray = compute_view();
+		Ray snapview = compute_snapview(0.4);
 
 		vector<TextureBrick*> *bricks = 0;
 		if (mem_swap_ && interactive_)
@@ -505,7 +506,7 @@ namespace FLIVR
 			diag.x() / tex_->nx(),
 			diag.y() / tex_->ny(),
 			diag.z() / tex_->nz());
-		double dt = cell_diag.length()/compute_rate_scale()/rate;
+		double dt = cell_diag.length()/compute_rate_scale(snapview.direction())/rate;
 		num_slices_ = (int)(diag.length()/dt);
 
 		vector<double> vertex;
@@ -737,6 +738,9 @@ namespace FLIVR
 			shader->setLocalParam(6, colormap_low_value_, colormap_hi_value_,
 				colormap_hi_value_-colormap_low_value_, 0.0);
 			break;
+		case 2://depth map
+			shader->setLocalParam(6, color_.r(), color_.g(), color_.b(), 0.0);
+			break;
 		}
 
 		//setup depth peeling
@@ -804,7 +808,7 @@ namespace FLIVR
 			vertex.clear();
 			texcoord.clear();
 			size.clear();
-			b->compute_polygons(view_ray, dt, vertex, texcoord, size);
+			b->compute_polygons(snapview, dt, vertex, texcoord, size);
 
 			if (vertex.size() == 0) continue;
 			GLint filter;
@@ -1063,7 +1067,7 @@ namespace FLIVR
 		Vector cell_diag(diag.x()/tex_->nx(),
 			diag.y()/tex_->ny(),
 			diag.z()/tex_->nz());
-		double dt = cell_diag.length()/compute_rate_scale()/rate;
+		double dt = cell_diag.length()/compute_rate_scale(view_ray.direction())/rate;
 		num_slices_ = (int)(diag.length()/dt);
 
 		vector<double> vertex;

@@ -338,19 +338,59 @@ namespace FLIVR
 		return Ray(p, v);
 	}
 
-	double TextureRenderer::compute_rate_scale()
+	Ray TextureRenderer::compute_snapview(double snap)
 	{
 		Transform *field_trans = tex_->transform();
+		double mvmat[16];
+		glGetDoublev(GL_MODELVIEW_MATRIX, mvmat);
+		
+		//snap
+		Vector vd;
+		if (snap>0.0 && snap<0.5)
+		{
+			double vdx = -mvmat[2];
+			double vdy = -mvmat[6];
+			double vdz = -mvmat[10];
+			double vdx_abs = fabs(vdx);
+			double vdy_abs = fabs(vdy);
+			double vdz_abs = fabs(vdz);
+			//if (vdx_abs < snap) vdx = 0.0;
+			//if (vdy_abs < snap) vdy = 0.0;
+			//if (vdz_abs < snap) vdz = 0.0;
+			if (vdx_abs<snap-0.1) vdx = 0.0;
+			else if (vdx_abs<snap) vdx = (vdx_abs-snap+0.1)*snap*10.0*vdx/vdx_abs;
+			if (vdy_abs<snap-0.1) vdy = 0.0;
+			else if (vdy_abs<snap) vdy = (vdy_abs-snap+0.1)*snap*10.0*vdy/vdy_abs;
+			if (vdz_abs<snap-0.1) vdz = 0.0;
+			else if (vdz_abs<snap) vdz = (vdz_abs-snap+0.1)*snap*10.0*vdz/vdz_abs;
+			vd = Vector(vdx, vdy, vdz);
+			vd.safe_normalize();
+		}
+		else
+			vd = Vector(-mvmat[2], -mvmat[6], -mvmat[10]);
+
+		// index space view direction
+		Vector v = field_trans->project(vd);
+		v.safe_normalize();
+		Transform mv;
+		mv.set_trans(mvmat);
+		Point p = field_trans->unproject(mv.unproject(Point(0,0,0)));
+		return Ray(p, v);
+	}
+
+	double TextureRenderer::compute_rate_scale(Vector v)
+	{
+		//Transform *field_trans = tex_->transform();
 		double spcx, spcy, spcz;
 		tex_->get_spacings(spcx, spcy, spcz);
 		double z_factor = spcz/Max(spcx, spcy);
 		Vector n(double(tex_->nx())/double(tex_->nz()), 
 			double(tex_->ny())/double(tex_->nz()), 
 			z_factor>1.0&&z_factor<100.0?sqrt(z_factor):1.0);
-		double mvmat[16];
-		glGetDoublev(GL_MODELVIEW_MATRIX, mvmat);
-		Vector v = field_trans->project(Vector(-mvmat[2], -mvmat[6], -mvmat[10]));
-		v.safe_normalize();
+		//double mvmat[16];
+		//glGetDoublev(GL_MODELVIEW_MATRIX, mvmat);
+		//Vector v = field_trans->project(Vector(-mvmat[2], -mvmat[6], -mvmat[10]));
+		//v.safe_normalize();
 
 		double e = 0.0001;
 		double a, b, c;

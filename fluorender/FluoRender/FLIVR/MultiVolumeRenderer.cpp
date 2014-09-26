@@ -177,6 +177,7 @@ namespace FLIVR
          return;
 
       Ray view_ray = vr_list_[0]->compute_view();
+	  Ray snapview = vr_list_[0]->compute_snapview(0.4);
 
       set_interactive_mode(adaptive_ && interactive_mode_p);
 
@@ -187,7 +188,7 @@ namespace FLIVR
             diag.y()/res_.y(),
             diag.z()/res_.z());
       double dt = cell_diag.length()/
-         vr_list_[0]->compute_rate_scale()/rate;
+         vr_list_[0]->compute_rate_scale(snapview.direction())/rate;
       num_slices_ = (int)(diag.length()/dt);
 
       vector<double> vertex;
@@ -406,7 +407,7 @@ namespace FLIVR
             vertex.clear();
             texcoord.clear();
             size.clear();
-            b->compute_polygons(view_ray, dt, vertex, texcoord, size);
+            b->compute_polygons(snapview, dt, vertex, texcoord, size);
             if (vertex.size() == 0) { continue; }
             shader->setLocalParam(4, 1.0/b->nx(), 1.0/b->ny(), 1.0/b->nz(), 1.0/rate);
 
@@ -1026,7 +1027,7 @@ namespace FLIVR
             diag.y()/res_.y(),
             diag.z()/res_.z());
       double dt = cell_diag.length()/
-         vr_list_[0]->compute_rate_scale()/rate;
+         vr_list_[0]->compute_rate_scale(view_ray.direction())/rate;
       num_slices_ = (int)(diag.length()/dt);
 
       vector<double> vertex;

@@ -356,6 +356,7 @@ namespace FLIVR
 	"	//VOL_TRANSFER_FUNCTION_SIN_COLOR_SOLID\n" \
 	"	vec4 c;\n" \
 	"	float tf_alp = 0.0;\n" \
+	"	float alpha = 0.0;\n" \
 	"	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;\n" \
 	"	if (v.x<loc2.z-loc3.w || v.x>loc2.w+loc3.w || v.y<loc3.y)\n" \
 	"		c = vec4(0.0, 0.0, 0.0, 1.0);\n" \
@@ -373,6 +374,7 @@ namespace FLIVR
 	"	//VOL_TRANSFER_FUNCTION_SIN_COLOR_L\n" \
 	"	vec4 c;\n" \
 	"	float tf_alp = 0.0;\n" \
+	"	float alpha = 0.0;\n" \
 	"	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;\n" \
 	"	if (v.x<loc2.z-loc3.w || v.x>loc2.w+loc3.w || v.y<loc3.y)\n" \
 	"		c = vec4(0.0);\n" \
@@ -411,6 +413,7 @@ namespace FLIVR
 	"	//VOL_TRANSFER_FUNCTION_COLORMAP\n" \
 	"	vec4 c;\n" \
 	"	float tf_alp = 0.0;\n" \
+	"	float alpha = 0.0;\n" \
 	"	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;\n" \
 	"	if (v.x<loc2.z-loc3.w || v.x>loc2.w+loc3.w || v.y<loc3.y)\n" \
 	"		c = vec4(0.0);\n" \
@@ -434,6 +437,7 @@ namespace FLIVR
 	"	//VOL_TRANSFER_FUNCTION_COLORMAP_SOLID\n" \
 	"	vec4 c;\n" \
 	"	float tf_alp = 0.0;\n" \
+	"	float alpha = 0.0;\n" \
 	"	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;\n" \
 	"	if (v.x<loc2.z-loc3.w || v.x>loc2.w+loc3.w || v.y<loc3.y)\n" \
 	"		c = vec4(0.0, 0.0, 0.0, 1.0);\n" \
@@ -456,6 +460,7 @@ namespace FLIVR
 	"	//VOL_TRANSFER_FUNCTION_DEPTHMAP\n" \
 	"	vec4 c;\n" \
 	"	float tf_alp = 0.0;\n" \
+	"	float alpha = 0.0;\n" \
 	"	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;\n" \
 	"	if (v.x<loc2.z-loc3.w || v.x>loc2.w+loc3.w || v.y<loc3.y)\n" \
 	"		c = vec4(0.0);\n" \
@@ -586,6 +591,14 @@ namespace FLIVR
 	"	vec4 sel = vec4(1.0-loc6.x,\n" \
 	"					1.0-loc6.y,\n" \
 	"					1.0-loc6.z, 1.0);\n" \
+	"	//if (sel.x==sel.y && sel.y==sel.z)\n" \
+	"	//	sel = vec4(0.5, 1.0, 0.5, 1.0);\n" \
+	"	//else\n" \
+	"	//{\n" \
+	"	//	if (sel.x == 0.0) sel.x = 0.5;\n" \
+	"	//	if (sel.y == 0.0) sel.y = 0.5;\n" \
+	"	//	if (sel.z == 0.0) sel.z = 0.5;\n" \
+	"	//}\n" \
 	"	float hue, p2, p3;\n" \
 	"	if (label > uint(0))\n" \
 	"	{\n" \

@@ -2,7 +2,7 @@
 #include "VRenderFrame.h"
 #include <wx/valnum.h>
 #include "png_resource.h"
-#include "img/listicon_save.h"
+#include "img/save_settings.h"
 #include "img/refresh.h"
 #include "img/link.h"
 #include "img/unlink.h"
@@ -309,13 +309,13 @@ m_dft_sync_b(false)
 
 	//17th line: default button
 #ifndef _DARWIN
-	m_dft_btn = new wxButton(this, ID_DefaultBtn, "Save as Default",
+	m_dft_btn = new wxButton(this, ID_DefaultBtn, "Set Default",
 							 wxDefaultPosition, wxSize(95, 22));
 #else
 	m_dft_btn = new wxButton(this, ID_DefaultBtn, "Set Default",
 							 wxDefaultPosition, wxSize(95, 30));
 #endif
-	m_dft_btn->SetBitmap(wxGetBitmapFromMemory(listicon_save));
+	m_dft_btn->SetBitmap(wxGetBitmapFromMemory(save_settings));
 	sizer_v->Add(m_dft_btn, 0, wxEXPAND);
 
 	SetSizer(sizer_v);
