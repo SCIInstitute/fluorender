@@ -217,10 +217,10 @@ m_free_version(true)
                        "Edit: Tools for editing volume data");
     m_main_tb->SetDropdownMenu(ID_PaintTool, m_tb_menu_edit);
 #endif
-    m_main_tb->AddTool(ID_Recorder, "Recorder",
-            wxGetBitmapFromMemory(icon_recorder), wxNullBitmap, wxITEM_NORMAL,
-            "Recorder: Record actions by key frames and play back",
-            "Recorder: Record actions by key frames and play back");
+    //m_main_tb->AddTool(ID_Recorder, "Recorder",
+    //        wxGetBitmapFromMemory(icon_recorder), wxNullBitmap, wxITEM_NORMAL,
+    //        "Recorder: Record actions by key frames and play back",
+    //        "Recorder: Record actions by key frames and play back");
    m_main_tb->AddSeparator();
    m_main_tb->AddTool(ID_Settings, "Settings",
          wxGetBitmapFromMemory(icon_settings), wxNullBitmap, wxITEM_NORMAL,
@@ -260,7 +260,7 @@ m_free_version(true)
    m_tree_panel = new TreePanel(this, this, wxID_ANY,
          wxDefaultPosition, wxSize(350, 300));
 
-   //create movie view
+   //create movie view (sets the m_recorder_dlg)
    m_movie_view = new VMovieView(this, this, wxID_ANY,
          wxDefaultPosition, wxSize(350, 300));
 
@@ -334,7 +334,7 @@ m_free_version(true)
    m_colocalization_dlg = new ColocalizationDlg(this, this);
 
    //recorder dialog
-   m_recorder_dlg = new RecorderDlg(this, this);
+   //m_recorder_dlg = new RecorderDlg(this, this);
 
    //measure dialog
    m_measure_dlg = new MeasureDlg(this, this);
@@ -432,11 +432,11 @@ m_free_version(true)
    m_aui_mgr.GetPane(m_colocalization_dlg).Float();
    m_aui_mgr.GetPane(m_colocalization_dlg).Hide();
    //recorder dialog
-   m_aui_mgr.AddPane(m_recorder_dlg, wxAuiPaneInfo().
+/*   m_aui_mgr.AddPane(m_recorder_dlg, wxAuiPaneInfo().
          Name("m_recorder_dlg").Caption("Recorder").
          Dockable(false).CloseButton(true));
    m_aui_mgr.GetPane(m_recorder_dlg).Float();
-   m_aui_mgr.GetPane(m_recorder_dlg).Hide();
+   m_aui_mgr.GetPane(m_recorder_dlg).Hide()*/;
    //measure dialog
    m_aui_mgr.AddPane(m_measure_dlg, wxAuiPaneInfo().
          Name("m_measure_dlg").Caption("Measurement").
@@ -536,9 +536,9 @@ m_free_version(true)
    m_top_tools->Append(m);
    m = new wxMenuItem(m_top_tools,ID_Colocalization, wxT("Colocalization &Analysis..."));
    m_top_tools->Append(m);
-   m = new wxMenuItem(m_top_tools,ID_Recorder, wxT("&Recorder..."));
-   m->SetBitmap(wxGetBitmapFromMemory(icon_recorder_mini));
-   m_top_tools->Append(m);
+   //m = new wxMenuItem(m_top_tools,ID_Recorder, wxT("&Recorder..."));
+   //m->SetBitmap(wxGetBitmapFromMemory(icon_recorder_mini));
+   //m_top_tools->Append(m);
    m = new wxMenuItem(m_top_tools,ID_Convert, wxT("Con&vert..."));
    m_top_tools->Append(m);
    m_top_tools->Append(wxID_SEPARATOR);
@@ -982,8 +982,6 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
       if (vrv)
          vrv->InitView(INIT_BOUNDS|INIT_CENTER);
 
-      if (enable_4d)
-         m_movie_view->SetMovieType(3);
       delete prg_diag;
    }
 }
@@ -2563,16 +2561,15 @@ void VRenderFrame::SaveProject(wxString& filename)
    //movie view
    fconfig.SetPath("/movie_panel");
    fconfig.Write("views_cmb", m_movie_view->m_views_cmb->GetCurrentSelection());
-   fconfig.Write("movie_type", m_movie_view->GetMovieType());
-   fconfig.Write("frame_range", m_movie_view->m_time_sldr->GetMax());
-   fconfig.Write("time_frame", m_movie_view->m_time_sldr->GetValue());
+   fconfig.Write("rot_check", m_movie_view->m_rot_chk->GetValue());
+   fconfig.Write("frame_range", m_movie_view->m_progress_sldr->GetMax());
+   fconfig.Write("time_frame", m_movie_view->m_progress_sldr->GetValue());
    fconfig.Write("x_rd", m_movie_view->m_x_rd->GetValue());
    fconfig.Write("y_rd", m_movie_view->m_y_rd->GetValue());
-   fconfig.Write("angle_start_text", m_movie_view->m_angle_start_text->GetValue());
-   fconfig.Write("angle_end_text", m_movie_view->m_angle_end_text->GetValue());
-   fconfig.Write("rewind_chk", m_movie_view->m_rewind_chk->GetValue());
-   fconfig.Write("step_text", m_movie_view->m_step_text->GetValue());
-   fconfig.Write("frames_text", m_movie_view->m_frames_text->GetValue());
+   fconfig.Write("z_rd", m_movie_view->m_z_rd->GetValue());
+   fconfig.Write("angle_end_text", m_movie_view->m_degree_end->GetValue());
+   fconfig.Write("step_text", m_movie_view->m_movie_time->GetValue());
+   fconfig.Write("frames_text", m_movie_view->m_fps_text->GetValue());
    fconfig.Write("frame_chk", m_movie_view->m_frame_chk->GetValue());
    fconfig.Write("center_x_text", m_movie_view->m_center_x_text->GetValue());
    fconfig.Write("center_y_text", m_movie_view->m_center_y_text->GetValue());
@@ -3645,16 +3642,6 @@ void VRenderFrame::OpenProject(wxString& filename)
          m_mov_view = iVal;
          vrv = (*GetViewList())[m_mov_view];
       }
-      if (fconfig.Read("movie_type", &iVal))
-      {
-         m_movie_view->SetMovieType(iVal);
-      }
-      if (fconfig.Read("time_frame", &iVal))
-      {
-         m_movie_view->SetTimeFrame(iVal);
-         if (vrv)
-            vrv->Set4DSeqFrame(iVal ,false);
-      }
       if (fconfig.Read("x_rd", &bVal))
       {
          m_movie_view->m_x_rd->SetValue(bVal);
@@ -3667,29 +3654,19 @@ void VRenderFrame::OpenProject(wxString& filename)
          if (bVal)
             m_mov_axis = 2;
       }
-      if (fconfig.Read("angle_start_text", &sVal))
-      {
-         m_movie_view->m_angle_start_text->SetValue(sVal);
-         m_mov_angle_start = sVal;
-      }
       if (fconfig.Read("angle_end_text", &sVal))
       {
-         m_movie_view->m_angle_end_text->SetValue(sVal);
+         m_movie_view->m_degree_end->SetValue(sVal);
          m_mov_angle_end = sVal;
-      }
-      if (fconfig.Read("rewind_chk", &bVal))
-      {
-         m_movie_view->m_rewind_chk->SetValue(bVal);
-         m_mov_rewind = bVal;
       }
       if (fconfig.Read("step_text", &sVal))
       {
-         m_movie_view->m_step_text->SetValue(sVal);
+         m_movie_view->m_movie_time->SetValue(sVal);
          m_mov_step = sVal;
       }
       if (fconfig.Read("frames_text", &sVal))
       {
-         m_movie_view->m_frames_text->SetValue(sVal);
+         m_movie_view->m_fps_text->SetValue(sVal);
          m_mov_frames = sVal;
       }
       if (fconfig.Read("frame_chk", &bVal))

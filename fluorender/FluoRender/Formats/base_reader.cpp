@@ -239,3 +239,15 @@ void BaseReader::DecodeAcc16(tidata_t cp0, tsize_t cc, tsize_t stride)
 Nrrd* BaseReader::Convert(bool get_max) { return Convert(0,get_max); }
 
 Nrrd* BaseReader::Convert(int c, bool get_max) { return Convert(0,c,get_max); }
+
+int BaseReader::LoadOffset(int offset)
+{
+   if (m_batch_list.size() <=1) return -1; 
+   int result = offset % m_batch_list.size();
+   m_path_name = m_batch_list[result];
+   Preprocess();
+   m_cur_batch = result;
+   return result;
+}
+
+int BaseReader::GetOffset() { return m_cur_batch; }

@@ -87,10 +87,6 @@ class RecorderDlg : public wxPanel
          ID_DelKeyBtn,
          ID_InsKeyBtn,
          ID_DelAllBtn,
-         ID_PreviewBtn,
-         ID_ResetBtn,
-         ID_PlayBtn,
-         ID_StopBtn,
          ID_AutoKeyCmb,
          ID_AutoKeyBtn
       };
@@ -105,6 +101,11 @@ class RecorderDlg : public wxPanel
       void UpdateList()
       { m_keylist->Update(); }
       void SetSelection(int index);
+	  void Save() { OnPlay(wxCommandEvent()); }
+	  void Rewind() { OnReset(wxCommandEvent()); }
+	  void Stop() { OnStop(wxCommandEvent()); }
+	  void Play() { OnPreview(wxCommandEvent()); }
+
 
    private:
       wxWindow* m_frame;
@@ -131,14 +132,6 @@ class RecorderDlg : public wxPanel
       wxButton *m_del_key_btn;
       //delete all keys
       wxButton *m_del_all_btn;
-      //preview
-      wxButton *m_preview_btn;
-      //reset
-      wxButton *m_reset_btn;
-      //play
-      wxButton *m_play_btn;
-      //stop
-      wxButton *m_stop_btn;
 
    private:
       //insert/append key
