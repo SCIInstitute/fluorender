@@ -103,7 +103,6 @@ public:
 	uint64_t GetTiffStripOffsetOrCount(uint64_t tag, uint64_t strip);
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
-	int LoadOffset(int offset);
 	Nrrd* Convert(int t, int c, bool get_max);
 	wstring GetCurName(int t, int c);
 
@@ -127,7 +126,6 @@ public:
 	int GetCurBatch() {return m_cur_batch;}
 
 private:
-	wstring m_path_name;
 	wstring m_data_name;
 	bool isBig_;
 
@@ -143,11 +141,6 @@ private:
 		vector<SliceInfo> slices;
 	};
 	vector<TimeDataInfo> m_4d_seq;
-
-	//3d batch
-	bool m_batch;
-	vector<wstring> m_batch_list;
-	int m_cur_batch;
 
 	bool m_slice_seq;
 	int m_time_num;

@@ -796,6 +796,9 @@ struct Lbl
 	unsigned int id;
 	unsigned int size;
 	Point center;
+
+	static bool cmp_id(const Lbl lbl1, const Lbl lbl2)
+	{ return lbl1.id < lbl2.id; }
 };
 
 //a vertex in the map contains a cell and in/out edges

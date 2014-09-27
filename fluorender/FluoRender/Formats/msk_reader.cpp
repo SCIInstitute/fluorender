@@ -57,11 +57,6 @@ int MSKReader::LoadBatch(int index)
 	return 0;
 }
 
-int MSKReader::LoadOffset(int offset)
-{
-	return 0;
-}
-
 Nrrd* MSKReader::Convert(int t, int c, bool get_max)
 {
 	size_t pos = m_path_name.find_last_of('.');

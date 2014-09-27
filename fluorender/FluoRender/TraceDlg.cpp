@@ -86,9 +86,17 @@ void TraceListCtrl::Update(VRenderView* vrv)
 		return;
 
 	IDMapIter id_iter;
+	vector<Lbl> lbl_list;
 	for (id_iter=ids->begin(); id_iter!=ids->end(); ++id_iter)
 	{
-		unsigned int id = id_iter->second.id;
+		lbl_list.push_back(id_iter->second);
+	}
+
+	std::sort(lbl_list.begin(), lbl_list.end(), Lbl::cmp_id);
+
+	for (unsigned int i=0; i<lbl_list.size(); ++i)
+	{
+		unsigned int id = lbl_list[i].id;
 		double hue = id % 360;
 		Color c(HSVColor(hue, 1.0, 1.0));
 		wxColor color(c.r()*255, c.g()*255, c.b()*255);
@@ -99,8 +107,8 @@ void TraceListCtrl::Update(VRenderView* vrv)
 		if (traces->FindIDInFrame(id, time, vertex))
 			size = vertex.vsize;
 		else
-			size = id_iter->second.size;
-		center = id_iter->second.center;
+			size = lbl_list[i].size;
+		center = lbl_list[i].center;
 		Append(id, color, size,
 			center.x(), center.y(), center.z());
 	}
@@ -1586,6 +1594,8 @@ void TraceDlg::Measure()
 		if (m_info_list[i].total_num > 0)
 			m_info_list[i].variance = sqrt(m_info_list[i].m2 / (m_info_list[i].total_num - 1));
 	}
+
+	std::sort(m_info_list.begin(), m_info_list.end(), measure_info::cmp_id);
 }
 
 void TraceDlg::OutputMeasureResult(wxString &str)

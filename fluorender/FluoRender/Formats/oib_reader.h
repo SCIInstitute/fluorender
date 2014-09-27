@@ -22,8 +22,7 @@ class OIBReader : public BaseReader
       wstring GetTimeId();
       void Preprocess();
       void SetBatch(bool batch);
-      int LoadBatch(int index);
-      int LoadOffset(int offset);
+	  int LoadBatch(int index);
       Nrrd* Convert(int t, int c, bool get_max);
       wstring GetCurName(int t, int c);
 
@@ -47,7 +46,6 @@ class OIBReader : public BaseReader
       int GetCurBatch() {return m_cur_batch;}
 
    private:
-      wstring m_path_name;
       wstring m_data_name;
       wstring m_oif_name;
       wstring m_substg_name;
@@ -69,11 +67,6 @@ class OIBReader : public BaseReader
       };
       vector<TimeDataInfo> m_oib_info;      // time data form the complete oib dataset
       int m_oib_t;  //current time point in oib info for reading
-
-      //3d batch
-      bool m_batch;
-      vector<wstring> m_batch_list;
-      int m_cur_batch;
 
       int m_time_num;
       int m_cur_time;

@@ -94,6 +94,7 @@ namespace FLIVR
    class VolShaderFactory;
    class SegShaderFactory;
    class VolCalShaderFactory;
+   class VolKernelFactory;
 
    struct TexParam
    {
@@ -255,6 +256,8 @@ namespace FLIVR
                static SegShaderFactory seg_shader_factory_;
                //shader for calculation
                static VolCalShaderFactory cal_shader_factory_;
+			   //kernel for calculation
+			   static VolKernelFactory vol_kernel_factory_;
 
                //3d frame buffer object for mask
                GLuint fbo_mask_;

@@ -437,6 +437,7 @@ void VRenderGLView::Init()
    {
       SetCurrent(*m_glRC);
       ShaderProgram::init_shaders_supported();
+	  KernelProgram::init_kernels_supported();
 
       VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
       if (vr_frame) vr_frame->SetTextureRendererSettings();
@@ -4220,7 +4221,6 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
       refresh = true;
       start_loop = false;
    }
-
    if (m_capture_rotat ||
          m_capture_tsequ ||
          m_capture_param ||
@@ -4239,218 +4239,217 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
       UpdateBrushState();
    }
 
-   //draw_mask
-   if (wxGetKeyState(wxKeyCode('V')) &&
-         m_draw_mask)
+   wxWindow *window = wxWindow::FindFocus();
+   if (window)
    {
-      m_draw_mask = false;
-      refresh = true;
-   }
-   if (!wxGetKeyState(wxKeyCode('V')) &&
-         !m_draw_mask)
-   {
-      m_draw_mask = true;
-      refresh = true;
-   }
+	   VRenderFrame* frame = (VRenderFrame*)m_frame;
+	   //draw_mask
+	   if (wxGetKeyState(wxKeyCode('V')) &&
+			 m_draw_mask)
+	   {
+		  m_draw_mask = false;
+		  refresh = true;
+	   }
+	   if (!wxGetKeyState(wxKeyCode('V')) &&
+			 !m_draw_mask)
+	   {
+		  m_draw_mask = true;
+		  refresh = true;
+	   }
 
-   //move view
-   //left
-   if (!m_move_left &&
-         wxGetKeyState(WXK_CONTROL) &&
-         wxGetKeyState(WXK_LEFT))
-   {
-      m_move_left = true;
+	   //move view
+	   //left
+	   if (!m_move_left &&
+			 wxGetKeyState(WXK_CONTROL) &&
+			 wxGetKeyState(WXK_LEFT))
+	   {
+		  m_move_left = true;
 
-      m_head = Vector(-m_transx, -m_transy, -m_transz);
-      m_head.normalize();
-      Vector side = Cross(m_up, m_head);
-      Vector trans = -(side*(int(0.8*(m_ortho_right-m_ortho_left))));
-      m_obj_transx += trans.x();
-      m_obj_transy += trans.y();
-      m_obj_transz += trans.z();
-      //if (m_persp) SetSortBricks();
-      refresh = true;
-   }
-   if (m_move_left &&
-         (!wxGetKeyState(WXK_CONTROL) ||
-          !wxGetKeyState(WXK_LEFT)))
-      m_move_left = false;
-   //right
-   if (!m_move_right &&
-         wxGetKeyState(WXK_CONTROL) &&
-         wxGetKeyState(WXK_RIGHT))
-   {
-      m_move_right = true;
+		  m_head = Vector(-m_transx, -m_transy, -m_transz);
+		  m_head.normalize();
+		  Vector side = Cross(m_up, m_head);
+		  Vector trans = -(side*(int(0.8*(m_ortho_right-m_ortho_left))));
+		  m_obj_transx += trans.x();
+		  m_obj_transy += trans.y();
+		  m_obj_transz += trans.z();
+		  //if (m_persp) SetSortBricks();
+		  refresh = true;
+	   }
+	   if (m_move_left &&
+			 (!wxGetKeyState(WXK_CONTROL) ||
+			  !wxGetKeyState(WXK_LEFT)))
+		  m_move_left = false;
+	   //right
+	   if (!m_move_right &&
+			 wxGetKeyState(WXK_CONTROL) &&
+			 wxGetKeyState(WXK_RIGHT))
+	   {
+		  m_move_right = true;
 
-      m_head = Vector(-m_transx, -m_transy, -m_transz);
-      m_head.normalize();
-      Vector side = Cross(m_up, m_head);
-      Vector trans = side*(int(0.8*(m_ortho_right-m_ortho_left)));
-      m_obj_transx += trans.x();
-      m_obj_transy += trans.y();
-      m_obj_transz += trans.z();
-      //if (m_persp) SetSortBricks();
-      refresh = true;
-   }
-   if (m_move_right &&
-         (!wxGetKeyState(WXK_CONTROL) ||
-          !wxGetKeyState(WXK_RIGHT)))
-      m_move_right = false;
-   //up
-   if (!m_move_up &&
-         wxGetKeyState(WXK_CONTROL) &&
-         wxGetKeyState(WXK_UP))
-   {
-      m_move_up = true;
+		  m_head = Vector(-m_transx, -m_transy, -m_transz);
+		  m_head.normalize();
+		  Vector side = Cross(m_up, m_head);
+		  Vector trans = side*(int(0.8*(m_ortho_right-m_ortho_left)));
+		  m_obj_transx += trans.x();
+		  m_obj_transy += trans.y();
+		  m_obj_transz += trans.z();
+		  //if (m_persp) SetSortBricks();
+		  refresh = true;
+	   }
+	   if (m_move_right &&
+			 (!wxGetKeyState(WXK_CONTROL) ||
+			  !wxGetKeyState(WXK_RIGHT)))
+		  m_move_right = false;
+	   //up
+	   if (!m_move_up &&
+			 wxGetKeyState(WXK_CONTROL) &&
+			 wxGetKeyState(WXK_UP))
+	   {
+		  m_move_up = true;
 
-      m_head = Vector(-m_transx, -m_transy, -m_transz);
-      m_head.normalize();
-      Vector trans = -m_up*(int(0.8*(m_ortho_top-m_ortho_bottom)));
-      m_obj_transx += trans.x();
-      m_obj_transy += trans.y();
-      m_obj_transz += trans.z();
-      //if (m_persp) SetSortBricks();
-      refresh = true;
-   }
-   if (m_move_up &&
-         (!wxGetKeyState(WXK_CONTROL) ||
-          !wxGetKeyState(WXK_UP)))
-      m_move_up = false;
-   //down
-   if (!m_move_down &&
-         wxGetKeyState(WXK_CONTROL) &&
-         wxGetKeyState(WXK_DOWN))
-   {
-      m_move_down = true;
+		  m_head = Vector(-m_transx, -m_transy, -m_transz);
+		  m_head.normalize();
+		  Vector trans = -m_up*(int(0.8*(m_ortho_top-m_ortho_bottom)));
+		  m_obj_transx += trans.x();
+		  m_obj_transy += trans.y();
+		  m_obj_transz += trans.z();
+		  //if (m_persp) SetSortBricks();
+		  refresh = true;
+	   }
+	   if (m_move_up &&
+			 (!wxGetKeyState(WXK_CONTROL) ||
+			  !wxGetKeyState(WXK_UP)))
+		  m_move_up = false;
+	   //down
+	   if (!m_move_down &&
+			 wxGetKeyState(WXK_CONTROL) &&
+			 wxGetKeyState(WXK_DOWN))
+	   {
+		  m_move_down = true;
 
-      m_head = Vector(-m_transx, -m_transy, -m_transz);
-      m_head.normalize();
-      Vector trans = m_up*(int(0.8*(m_ortho_top-m_ortho_bottom)));
-      m_obj_transx += trans.x();
-      m_obj_transy += trans.y();
-      m_obj_transz += trans.z();
-      //if (m_persp) SetSortBricks();
-      refresh = true;
-   }
-   if (m_move_down &&
-         (!wxGetKeyState(WXK_CONTROL) ||
-          !wxGetKeyState(WXK_DOWN)))
-      m_move_down = false;
+		  m_head = Vector(-m_transx, -m_transy, -m_transz);
+		  m_head.normalize();
+		  Vector trans = m_up*(int(0.8*(m_ortho_top-m_ortho_bottom)));
+		  m_obj_transx += trans.x();
+		  m_obj_transy += trans.y();
+		  m_obj_transz += trans.z();
+		  //if (m_persp) SetSortBricks();
+		  refresh = true;
+	   }
+	   if (m_move_down &&
+			 (!wxGetKeyState(WXK_CONTROL) ||
+			  !wxGetKeyState(WXK_DOWN)))
+		  m_move_down = false;
 
-   //move time sequence
-   //forward
-   if (!m_tseq_forward &&
-         wxGetKeyState(wxKeyCode('d')))
-   {
-      m_tseq_forward = true;
-      Set4DSeqFrame(m_tseq_cur_num+1, true);
-      VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-      if (vr_frame && vr_frame->GetMovieView())
-         vr_frame->GetMovieView()->SetTimeFrame(m_tseq_cur_num);
-      refresh = true;
-   }
-   if (m_tseq_forward &&
-         !wxGetKeyState(wxKeyCode('d')))
-      m_tseq_forward = false;
-   //backforward
-   if (!m_tseq_backward &&
-         wxGetKeyState(wxKeyCode('a')))
-   {
-      m_tseq_backward = true;
-      Set4DSeqFrame(m_tseq_cur_num-1, true);
-      VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-      if (vr_frame && vr_frame->GetMovieView())
-         vr_frame->GetMovieView()->SetTimeFrame(m_tseq_cur_num);
-      refresh = true;
-   }
-   if (m_tseq_backward &&
-         !wxGetKeyState(wxKeyCode('a')))
-      m_tseq_backward = false;
+	   //move time sequence
+	   //forward
+	   if (!m_tseq_forward &&
+			 wxGetKeyState(wxKeyCode('d')))
+	   {
+		  m_tseq_forward = true;
+		  Set4DSeqFrame(m_tseq_cur_num+1, true);
+		  if (frame && frame->GetMovieView())
+			 frame->GetMovieView()->SetTimeFrame(m_tseq_cur_num);
+		  refresh = true;
+	   }
+	   if (m_tseq_forward &&
+			 !wxGetKeyState(wxKeyCode('d')))
+		  m_tseq_forward = false;
+	   //backforward
+	   if (!m_tseq_backward &&
+			 wxGetKeyState(wxKeyCode('a')))
+	   {
+		  m_tseq_backward = true;
+		  Set4DSeqFrame(m_tseq_cur_num-1, true);
+		  if (frame && frame->GetMovieView())
+			 frame->GetMovieView()->SetTimeFrame(m_tseq_cur_num);
+		  refresh = true;
+	   }
+	   if (m_tseq_backward &&
+			 !wxGetKeyState(wxKeyCode('a')))
+		  m_tseq_backward = false;
 
-   //move clip
-   //up
-   if (!m_clip_up &&
-         wxGetKeyState(wxKeyCode('s')))
-   {
-      m_clip_up = true;
-      VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-      if (vr_frame && vr_frame->GetClippingView())
-         vr_frame->GetClippingView()->MoveLinkedClippingPlanes(1);
-      refresh = true;
-   }
-   if (m_clip_up &&
-         !wxGetKeyState(wxKeyCode('s')))
-      m_clip_up = false;
-   //down
-   if (!m_clip_down &&
-         wxGetKeyState(wxKeyCode('w')))
-   {
-      m_clip_down = true;
-      VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-      if (vr_frame && vr_frame->GetClippingView())
-         vr_frame->GetClippingView()->MoveLinkedClippingPlanes(0);
-      refresh = true;
-   }
-   if (m_clip_down &&
-         !wxGetKeyState(wxKeyCode('w')))
-      m_clip_down = false;
+	   //move clip
+	   //up
+	   if (!m_clip_up &&
+			 wxGetKeyState(wxKeyCode('s')))
+	   {
+		  m_clip_up = true;
+		  if (frame && frame->GetClippingView())
+			 frame->GetClippingView()->MoveLinkedClippingPlanes(1);
+		  refresh = true;
+	   }
+	   if (m_clip_up &&
+			 !wxGetKeyState(wxKeyCode('s')))
+		  m_clip_up = false;
+	   //down
+	   if (!m_clip_down &&
+			 wxGetKeyState(wxKeyCode('w')))
+	   {
+		  m_clip_down = true;
+		  if (frame && frame->GetClippingView())
+			 frame->GetClippingView()->MoveLinkedClippingPlanes(0);
+		  refresh = true;
+	   }
+	   if (m_clip_down &&
+			 !wxGetKeyState(wxKeyCode('w')))
+		  m_clip_down = false;
 
-	//cell full
-	if (!m_cell_full &&
-		wxGetKeyState(wxKeyCode('f')))
-	{
-		m_cell_full = true;
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame && vr_frame->GetTraceDlg())
-			vr_frame->GetTraceDlg()->CellFull();
-		refresh = true;
-	}
-	if (m_cell_full &&
-		!wxGetKeyState(wxKeyCode('f')))
-		m_cell_full = false;
-	//cell link
-	if (!m_cell_link &&
-		wxGetKeyState(wxKeyCode('l')))
-	{
-		m_cell_link = true;
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame && vr_frame->GetTraceDlg())
-			vr_frame->GetTraceDlg()->CellLink(false);
-		refresh = true;
-	}
-	if (m_cell_link &&
-		!wxGetKeyState(wxKeyCode('l')))
-		m_cell_link = false;
-	//new cell id
-	if (!m_cell_new_id &&
-		wxGetKeyState(wxKeyCode('n')))
-	{
-		m_cell_new_id = true;
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame && vr_frame->GetTraceDlg())
-			vr_frame->GetTraceDlg()->CellNewID();
-		refresh = true;
-	}
-	if (m_cell_new_id &&
-		!wxGetKeyState(wxKeyCode('n')))
-		m_cell_new_id = false;
+		//cell full
+		if (!m_cell_full &&
+			wxGetKeyState(wxKeyCode('f')))
+		{
+			m_cell_full = true;
+			if (frame && frame->GetTraceDlg())
+				frame->GetTraceDlg()->CellFull();
+			refresh = true;
+		}
+		if (m_cell_full &&
+			!wxGetKeyState(wxKeyCode('f')))
+			m_cell_full = false;
+		//cell link
+		if (!m_cell_link &&
+			wxGetKeyState(wxKeyCode('l')))
+		{
+			m_cell_link = true;
+			if (frame && frame->GetTraceDlg())
+				frame->GetTraceDlg()->CellLink(false);
+			refresh = true;
+		}
+		if (m_cell_link &&
+			!wxGetKeyState(wxKeyCode('l')))
+			m_cell_link = false;
+		//new cell id
+		if (!m_cell_new_id &&
+			wxGetKeyState(wxKeyCode('n')))
+		{
+			m_cell_new_id = true;
+			if (frame && frame->GetTraceDlg())
+				frame->GetTraceDlg()->CellNewID();
+			refresh = true;
+		}
+		if (m_cell_new_id &&
+			!wxGetKeyState(wxKeyCode('n')))
+			m_cell_new_id = false;
 
-   //forced refresh
-   if (wxGetKeyState(WXK_F5))
-   {
-      m_updating = true;
-      VRenderFrame* frame = (VRenderFrame*)m_frame;
-      if (frame && frame->GetStatusBar())
-         frame->GetStatusBar()->PushStatusText("Forced Refresh");
-      SetFocus();
-      Show(false);
-      Show(true);
-      //SetSortBricks();
-      RefreshGL();
-      if (frame && frame->GetStatusBar())
-         frame->GetStatusBar()->PopStatusText();
+	   //forced refresh
+	   if (wxGetKeyState(WXK_F5))
+	   {
+		  m_updating = true;
+		  if (frame && frame->GetStatusBar())
+			 frame->GetStatusBar()->PushStatusText("Forced Refresh");
+		  SetFocus();
+		  Show(false);
+		  Show(true);
+		  //SetSortBricks();
+		  RefreshGL();
+		  if (frame && frame->GetStatusBar())
+			 frame->GetStatusBar()->PopStatusText();
+		  return;
+	   }
    }
-   else if (refresh)
+   
+   if (refresh)
    {
       m_updating = true;
       RefreshGL(ref_stat, start_loop);
@@ -4473,7 +4472,17 @@ void VRenderGLView::Set3DRotCapture(double start_angle,
 {
    double x, y, z;
    GetRotations(x, y, z);
-
+   
+	//remove the chance of the x/y/z angles being outside 360.
+   while (x > 360.)  x -=360.;
+   while (x < -360.) x +=360.;
+   while (y > 360.)  y -=360.;
+   while (y < -360.) y +=360.;
+   while (z > 360.)  z -=360.;
+   while (z < -360.) z +=360.;
+   if (360. - std::abs(x) < 0.001) x = 0.;
+   if (360. - std::abs(y) < 0.001) y = 0.;
+   if (360. - std::abs(z) < 0.001) z = 0.;
    m_step = step;
    m_total_frames = frames;
    m_rot_axis = rot_axis;
@@ -4485,33 +4494,34 @@ void VRenderGLView::Set3DRotCapture(double start_angle,
    switch (m_rot_axis)
    {
    case 1: //X
-      m_init_angle = x;
+	  if (start_angle==0.) {
+		m_init_angle = x;
+        m_end_angle = x + end_angle;
+	  }
       m_cur_angle = x;
-      m_start_angle = x + start_angle;
-      m_end_angle = x + end_angle;
+      m_start_angle = x;
       break;
    case 2: //Y
-      m_init_angle = y;
+	  if (start_angle==0.) {
+		m_init_angle = y;
+        m_end_angle = y + end_angle;
+	  }
       m_cur_angle = y;
-      m_start_angle = y + start_angle;
-      m_end_angle = y + end_angle;
+      m_start_angle = y;
       break;
    case 3: //Z
-      m_init_angle = z;
+	  if (start_angle==0.) {
+		m_init_angle = z;
+        m_end_angle = z + end_angle;
+	  }
       m_cur_angle = z;
-      m_start_angle = z + start_angle;
-      m_end_angle = z + end_angle;
+      m_start_angle = z;
       break;
    }
-
    m_capture = true;
    m_capture_rotat = true;
    m_capture_rotate_over = false;
-
-   if (m_start_angle == m_cur_angle)
-      m_stages = 1;
-   else
-      m_stages = 0;
+   m_stages = 0;
 }
 
 void VRenderGLView::Set3DBatCapture(wxString &cap_file, int begin_frame, int end_frame)
@@ -4547,7 +4557,7 @@ void VRenderGLView::Set4DSeqCapture(wxString &cap_file, int begin_frame, int end
 {
    m_cap_file = cap_file;
    m_tseq_cur_num = begin_frame;
-	m_tseq_prv_num = begin_frame;
+   m_tseq_prv_num = begin_frame;
    m_begin_frame = begin_frame;
    m_end_frame = end_frame;
    m_capture_tsequ = true;
@@ -4780,7 +4790,7 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
    int start_frame, end_frame, cur_frame;
    Get4DSeqFrames(start_frame, end_frame, cur_frame);
    if (frame > end_frame ||
-         frame < start_frame)
+         frame < start_frame || cur_frame == frame)
       return;
 
    m_tseq_prv_num = m_tseq_cur_num;
@@ -4891,6 +4901,7 @@ void VRenderGLView::Set3DBatFrame(int offset)
       if (vd && vd->GetReader())
       {
          BaseReader* reader = vd->GetReader();
+		 if (reader->GetOffset() == offset) return;
          bool found = false;
          for (j=0; j<(int)reader_list.size(); j++)
          {
@@ -5054,19 +5065,10 @@ void VRenderGLView::PreDraw()
                   m_capture = false;
             }
          }
-         else
-
-			{
-				m_tseq_prv_num = m_tseq_cur_num;
-				m_tseq_cur_num++;
-			}
-
-         if (!m_capture && !m_run_script)
-         {
-            VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-            if (vr_frame && vr_frame->GetMovieView())
-               vr_frame->GetMovieView()->ResetAngle();
-         }
+         else{
+			m_tseq_prv_num = m_tseq_cur_num;
+			m_tseq_cur_num++;
+		}
       }
 
       //if rotation movie is set
@@ -5100,7 +5102,7 @@ void VRenderGLView::PreDraw()
          }
          else if (m_stages==1)
          {
-            if (fabs(m_cur_angle-m_end_angle) < m_step)
+            if (fabs(m_cur_angle-m_end_angle) < m_step/2.)
             {
                if (m_rewind)
                   m_stages = 2;
@@ -11600,6 +11602,7 @@ void VRenderView::OnScaleTextEditing(wxCommandEvent& event) {
 	  if (m_glview) {
 		  m_glview->SetScaleBarLen(len);
 		  m_glview->SetSBText(str);
+		  m_glview->SetScaleBarLen(len);
 		  m_glview->m_sb_num = num_text;
 		  m_glview->m_sb_unit = m_scale_cmb->GetSelection();
 	  }

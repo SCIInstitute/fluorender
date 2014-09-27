@@ -22,7 +22,6 @@ public:
 	void Preprocess();
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
-	int LoadOffset(int offset);
 	Nrrd* Convert(int t, int c, bool get_max);
 	wstring GetCurName(int t, int c);
 
@@ -49,7 +48,6 @@ public:
 	void SetFlipX(int flip) {m_user_flip_x = flip;}
 	void SetFlipY(int flip) {m_user_flip_y = flip;}
 private:
-	wstring m_path_name;
 	wstring m_data_name;
 
 	struct ChannelInfo
@@ -108,11 +106,6 @@ private:
 	int m_time_num;
 	int m_cur_time;
 	int m_chan_num;
-
-	//3d batch
-	bool m_batch;
-	vector<wstring> m_batch_list;
-	int m_cur_batch;
 
 	int m_slice_num;
 	int m_x_size;

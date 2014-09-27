@@ -4,29 +4,32 @@ cmake_minimum_required ( VERSION 2.6 )
 
 project ( FluoRender )
 
-set(ARCHITECTURE 64 CACHE PATH "The architecture to build -- 32 or 64")
 
-set(CMAKE_BUILD_TYPE "Debug" CACHE PATH "Debug or Release Configuration")
-
-if(${ARCHITECTURE} MATCHES "64")
-   if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-      add_definitions(-DFLUORENDER_TITLE="FluoRender 64bit Debug")
-   else()
-      add_definitions(-DFLUORENDER_TITLE="FluoRender 64bit")
-   endif()
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+   # Mac OS X
+   set(ARCHITECTURE 64)
 else()
-   if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-      add_definitions(-DFLUORENDER_TITLE="FluoRender 32bit Debug")
+   # Windows
+   if(${CMAKE_SIZEOF_VOID_P} MATCHES "8")
+     set(ARCHITECTURE 64)
    else()
-      add_definitions(-DFLUORENDER_TITLE="FluoRender 32bit")
+     set(ARCHITECTURE 32)
    endif()
 endif()
+
+if(${ARCHITECTURE} MATCHES "64")
+      add_definitions(-DFLUORENDER_ARCH="64bit")
+else()
+      add_definitions(-DFLUORENDER_ARCH="32bit")
+endif()
+
+add_definitions(-DFLUORENDER_TITLE="FluoRender")
 
 add_definitions(-DVERSION_MAJOR=2)
 add_definitions(-DVERSION_MINOR=14)
 add_definitions(-DVERSION_MAJOR_TAG="2")
 add_definitions(-DVERSION_MINOR_TAG="14")
-add_definitions(-DVERSION_COPYRIGHT="January 2014")
+add_definitions(-DVERSION_COPYRIGHT="August 2014")
 
 set(wxWidgets_CONFIGURATION mswu)
 find_package(wxWidgets COMPONENTS core base aui html xrc xml net adv gl REQUIRED)
@@ -75,6 +78,18 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/glm/detail)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/glm/gtc)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/glm/gtx)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/glm/virtrev)
+
+#OpenCL for Windows
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+	include_directories(${FluoRender_SOURCE_DIR}/fluorender/OpenCL/include)
+	if(${ARCHITECTURE} MATCHES "64")
+		set(OPEN_CL_LIBS ${FluoRender_SOURCE_DIR}/fluorender/OpenCL/lib/x86_64/OpenCL.lib)
+	else()
+		set(OPEN_CL_LIBS ${FluoRender_SOURCE_DIR}/fluorender/OpenCL/lib/x86/OpenCL.lib)
+	endif()
+endif()
+
+
 
 #sources
 file(GLOB src fluorender/FluoRender/*.cpp)
@@ -226,4 +241,5 @@ endif()
 target_link_libraries(FluoRender
    ${wxWidgets_LIBRARIES}
    ${OPENGL_LIBRARIES}
-   ${Boost_LIBRARIES})
+   ${Boost_LIBRARIES}
+   ${OPEN_CL_LIBS})

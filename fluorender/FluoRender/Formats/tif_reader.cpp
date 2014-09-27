@@ -522,52 +522,6 @@ int TIFReader::LoadBatch(int index)
    return result;
 }
 
-int TIFReader::LoadOffset(int offset)
-{
-   int result = m_cur_batch + offset;
-
-   if (offset > 0)
-   {
-      if (result<(int)m_batch_list.size())
-      {
-         m_path_name = m_batch_list[result];
-         Preprocess();
-         m_cur_batch = result;
-      }
-      else if (m_cur_batch<(int)m_batch_list.size()-1)
-      {
-         result = (int)m_batch_list.size()-1;
-         m_path_name = m_batch_list[result];
-         Preprocess();
-         m_cur_batch = result;
-      }
-      else
-         result = -1;
-   }
-   else if (offset < 0)
-   {
-      if (result >= 0)
-      {
-         m_path_name = m_batch_list[result];
-         Preprocess();
-         m_cur_batch = result;
-      }
-      else if (m_cur_batch > 0)
-      {
-         result = 0;
-         m_path_name = m_batch_list[result];
-         Preprocess();
-         m_cur_batch = result;
-      }
-      else
-         result = -1;
-   }
-   else
-      result = -1;
-
-   return result;
-}
-
 Nrrd* TIFReader::Convert(int t, int c, bool get_max)
 {
    if (t<0 || t>=m_time_num ||
@@ -642,7 +596,7 @@ void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
             kStripOffsetsTag,strip),tiff_stream.beg);
    //actually read the data now
    char *temp = new char[byte_count];
-   tiff_stream.read((char*)temp,byte_count);   
+   tiff_stream.read((char*)temp,byte_count);
    bool eight_bits = 8 == GetTiffField(kBitsPerSampleTag,NULL,0);
    if (swap_ && !eight_bits) {
 	   short * temp2 = reinterpret_cast<short*>(temp);

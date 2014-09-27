@@ -35,19 +35,19 @@ m_dragging_to_item(-1)
 	wxListItem itemCol;
 	itemCol.SetText("ID");
 	this->InsertColumn(0, itemCol);
-    SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
+    SetColumnWidth(0, 40);
 	itemCol.SetText("Frame");
 	this->InsertColumn(1, itemCol);
-    SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
+    SetColumnWidth(1, 60);
 	itemCol.SetText("Inbetweens");
 	this->InsertColumn(2, itemCol);
-    SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);
+    SetColumnWidth(2, 80);
 	itemCol.SetText("Interpolation");
 	this->InsertColumn(3, itemCol);
-    SetColumnWidth(3, wxLIST_AUTOSIZE_USEHEADER);
+    SetColumnWidth(3, 80);
 	itemCol.SetText("Description");
 	this->InsertColumn(4, itemCol);
-    SetColumnWidth(4, wxLIST_AUTOSIZE_USEHEADER);
+    SetColumnWidth(4, 80);
 
 	m_images = new wxImageList(16, 16, true);
 	wxIcon icon = wxIcon(key_xpm);
@@ -471,17 +471,13 @@ BEGIN_EVENT_TABLE(RecorderDlg, wxPanel)
 	EVT_BUTTON(ID_InsKeyBtn, RecorderDlg::OnInsKey)
 	EVT_BUTTON(ID_DelKeyBtn, RecorderDlg::OnDelKey)
 	EVT_BUTTON(ID_DelAllBtn, RecorderDlg::OnDelAll)
-	EVT_BUTTON(ID_PreviewBtn, RecorderDlg::OnPreview)
-	EVT_BUTTON(ID_ResetBtn, RecorderDlg::OnReset)
-	EVT_BUTTON(ID_PlayBtn, RecorderDlg::OnPlay)
-	EVT_BUTTON(ID_StopBtn, RecorderDlg::OnStop)
 END_EVENT_TABLE()
 
 RecorderDlg::RecorderDlg(wxWindow* frame, wxWindow* parent)
 : wxPanel(parent, wxID_ANY,
 wxPoint(500, 150), wxSize(450, 600),
 0, "RecorderDlg"),
-m_frame(parent),
+m_frame(frame),
 m_view(0)
 {
 	//validator: integer
@@ -490,14 +486,13 @@ m_view(0)
 	wxBoxSizer *group1 = new wxBoxSizer(wxHORIZONTAL);
 	wxStaticText* st = new wxStaticText(this, wxID_ANY, "Automatic Keys:");
 	m_auto_key_cmb = new wxComboBox(this, ID_AutoKeyCmb, "",
-		wxDefaultPosition, wxSize(200, 30), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, wxSize(180, 30), 0, NULL, wxCB_READONLY);
 	m_auto_key_cmb->Append("Channel combination nC1");
 	m_auto_key_cmb->Append("Channel combination nC2");
 	m_auto_key_cmb->Append("Channel combination nC3");
 	m_auto_key_cmb->Select(1);
 	m_auto_key_btn = new wxButton(this, ID_AutoKeyBtn, "Generate",
 		wxDefaultPosition, wxSize(75, 23));
-	group1->Add(5, 5);
 	group1->Add(st, 0, wxALIGN_CENTER);
 	group1->Add(5, 5);
 	group1->Add(m_auto_key_cmb, 0, wxALIGN_CENTER);
@@ -516,61 +511,43 @@ m_view(0)
 	wxBoxSizer *group3 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, wxID_ANY, "Default:");
 	m_duration_text = new wxTextCtrl(this, ID_DurationText, "30",
-		wxDefaultPosition, wxSize(50, 23), 0, vald_int);
+		wxDefaultPosition, wxSize(40, 23), 0, vald_int);
 	m_interpolation_cmb = new wxComboBox(this, ID_InterpolationCmb, "",
 		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
 	m_interpolation_cmb->Append("Linear");
 	m_interpolation_cmb->Append("Smooth");
 	m_interpolation_cmb->Select(0);
-	m_reset_btn = new wxButton(this, ID_ResetBtn, "Reset",
-		wxDefaultPosition, wxSize(75, 23));
-	m_stop_btn = new wxButton(this, ID_StopBtn, "Stop",
-		wxDefaultPosition, wxSize(75, 23));
-	group3->Add(5, 5);
+
+	//key buttons
+	wxBoxSizer *group4 = new wxBoxSizer(wxHORIZONTAL);
+	m_set_key_btn = new wxButton(this, ID_SetKeyBtn, "Add",
+		wxDefaultPosition, wxSize(60, 23));
+	m_del_key_btn = new wxButton(this, ID_DelKeyBtn, "Delete",
+		wxDefaultPosition, wxSize(60, 23));
+	m_del_all_btn = new wxButton(this, ID_DelAllBtn, "Del. All",
+		wxDefaultPosition, wxSize(60, 23));
+
 	group3->Add(st, 0, wxALIGN_CENTER);
 	group3->Add(5, 5);
 	group3->Add(m_duration_text, 0, wxALIGN_CENTER);
 	group3->Add(5, 5);
 	group3->Add(m_interpolation_cmb, 0, wxALIGN_CENTER);
 	group3->AddStretchSpacer(1);
-	group3->Add(m_reset_btn, 0, wxALIGN_CENTER);
+	group3->Add(m_set_key_btn, 0, wxALIGN_CENTER);
 	group3->Add(5, 5);
-	group3->Add(m_stop_btn, 0, wxALIGN_CENTER);
-
-	//key buttons
-	wxBoxSizer *group4 = new wxBoxSizer(wxHORIZONTAL);
-	m_set_key_btn = new wxButton(this, ID_SetKeyBtn, "Add",
-		wxDefaultPosition, wxSize(75, 23));
-	m_del_key_btn = new wxButton(this, ID_DelKeyBtn, "Delete",
-		wxDefaultPosition, wxSize(75, 23));
-	m_del_all_btn = new wxButton(this, ID_DelAllBtn, "Del. All",
-		wxDefaultPosition, wxSize(75, 23));
-	group4->Add(m_set_key_btn, 0, wxALIGN_CENTER);
-	group4->Add(5, 5);
-	group4->Add(m_del_key_btn, 0, wxALIGN_CENTER);
-	group4->Add(5, 5);
-	group4->Add(m_del_all_btn, 0, wxALIGN_CENTER);
-	group4->AddStretchSpacer(1);
-	//play buttons
-	m_preview_btn = new wxButton(this, ID_PreviewBtn, "Preview",
-		wxDefaultPosition, wxSize(75, 23));
-	m_play_btn = new wxButton(this, ID_PlayBtn, "Save...",
-		wxDefaultPosition, wxSize(75, 23));
-	group4->Add(m_preview_btn, 0, wxALIGN_CENTER);
-	group4->Add(5, 5);
-	group4->Add(m_play_btn, 0, wxALIGN_CENTER);
+	group3->Add(m_del_key_btn, 0, wxALIGN_CENTER);
+	group3->Add(5, 5);
+	group3->Add(m_del_all_btn, 0, wxALIGN_CENTER);
 
 	//all controls
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
-	sizerV->Add(10, 10);
+	sizerV->Add(10, 5);
 	sizerV->Add(group1, 0, wxEXPAND);
-	sizerV->Add(10, 10);
+	sizerV->Add(10, 5);
 	sizerV->Add(group2, 1, wxEXPAND);
-	sizerV->Add(10, 20);
+	sizerV->Add(10, 5);
 	sizerV->Add(group3, 0, wxEXPAND);
 	sizerV->Add(5, 5);
-	sizerV->Add(group4, 0, wxEXPAND);
-	sizerV->Add(10, 10);
 
 	SetSizer(sizerV);
 	Layout();
