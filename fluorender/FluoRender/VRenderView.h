@@ -391,6 +391,9 @@ class VRenderGLView: public wxGLCanvas
          //select group
          void SetSelectGroup(bool value);
          bool GetSelectGroup();
+		 //estimate threshold
+		 void SetEstimateThresh(bool value);
+		 bool GetEstimateThresh();
          //select both
          void SetSelectBoth(bool value);
          bool GetSelectBoth();
@@ -1274,6 +1277,11 @@ class VRenderView: public wxPanel
    { if (m_glview) m_glview->SetSelectGroup(value); }
    bool GetSelectGroup()
    { if (m_glview) return m_glview->GetSelectGroup(); else return false;}
+   //estimate threshold
+   void SetEstimateThresh(bool value)
+   { if (m_glview) m_glview->SetEstimateThresh(value);}
+   bool GetEstimateThresh()
+   { if (m_glview) return m_glview->GetEstimateThresh(); else return false;}
    //select a and b
    void SetSelectBoth(bool value)
    { if (m_glview) m_glview->SetSelectBoth(value); }

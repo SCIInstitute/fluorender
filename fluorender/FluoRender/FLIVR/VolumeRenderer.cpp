@@ -37,6 +37,9 @@
 #include "utility.h"
 #include "../compatibility.h"
 
+#include <fstream>
+#include <iostream>
+
 namespace FLIVR
 {
 #ifdef _WIN32
@@ -1149,8 +1152,11 @@ namespace FLIVR
 	//hr_mode (hidden removal): 0-none; 1-ortho; 2-persp
 	void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 		double ini_thresh, double gm_falloff, double scl_falloff,
-		double scl_translate, double w2d, double bins, bool orthographic_p)
+		double scl_translate, double w2d, double bins, bool orthographic_p,
+		bool estimate)
 	{
+		if (estimate && type==0)
+			est_thresh_ = 0.0;
 		bool use_2d = glIsTexture(tex_2d_weight1_)&&
 			glIsTexture(tex_2d_weight2_)?true:false;
 
@@ -1348,6 +1354,14 @@ namespace FLIVR
 					z);
 				draw_slices(double(z+0.5) / double(b->nz()));
 			}
+
+			//test cl
+			if (estimate && type == 0)
+			{
+				double temp = calc_hist_3d(vd_id, mask_id, b->nx(), b->ny(), b->nz());
+				est_thresh_ = max(est_thresh_, temp);
+			}
+
 		}
 
 		glViewport(vp[0], vp[1], vp[2], vp[3]);
@@ -1390,6 +1404,7 @@ namespace FLIVR
 
 		//enable depth test
 		glEnable(GL_DEPTH_TEST);
+
 	}
 
 	//generate the labeling assuming the mask is already generated
@@ -1558,8 +1573,80 @@ namespace FLIVR
 		glEnable(GL_DEPTH_TEST);
 	}
 
-	void VolumeRenderer::exec_cl()
+	double VolumeRenderer::calc_hist_3d(GLuint data_id, GLuint mask_id,
+		size_t brick_x, size_t brick_y, size_t brick_z)
 	{
+		double result = 0.0;
+		KernelProgram* kernel = vol_kernel_factory_.kernel(KERNEL_HIST_3D);
+		if (kernel)
+		{
+			if (!kernel->valid())
+			{
+				string name = "hist_3d";
+				kernel->create(name);
+			}
+			kernel->setKernelArgTex3D(0, CL_MEM_READ_ONLY, data_id);
+			kernel->setKernelArgTex3D(1, CL_MEM_READ_ONLY, mask_id);
+			unsigned int hist_size = 256;
+			if (tex_ && tex_->get_nrrd(0))
+			{
+				if (tex_->get_nrrd(0)->type == nrrdTypeUChar)
+					hist_size = 256;
+				else if (tex_->get_nrrd(0)->type == nrrdTypeUShort)
+					hist_size = 65536;
+			}
+			float* hist = new float[hist_size];
+			for (int i=0; i<hist_size; ++i)
+			{
+				hist[i] = 0.0;
+			}
+			kernel->setKernelArgBuf(2, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, hist_size*sizeof(float), hist);
+			kernel->setKernelArgConst(3, sizeof(unsigned int), (void*)(&hist_size));
+			size_t global_size[3] = {brick_x, brick_y, brick_z};
+			size_t local_size[3] = {1, 1, 1};
+			kernel->execute(3, global_size, local_size);
+			kernel->readBuffer(2, hist);
+			//analyze hist
+			for (int i=hist_size-1; i>0; --i)
+			{
+				if (hist[i] > hist[i-1])
+				{
+					result = double(i)/double(hist_size-1);
+					break;
+				}
+			}
+			//save hist
+			ofstream outfile;
+			outfile.open("E:\\hist.txt");
+			for (int i=0; i<hist_size; ++i)
+			{
+				float value = hist[i];
+				outfile << value << "\n";
+			}
+			outfile.close();
+			delete []hist;
+		}
+		return result;
+/*		//test for cl
+		KernelProgram* test_kernel = vol_kernel_factory_.kernel();
+		if (test_kernel)
+		{
+			if (!test_kernel->valid())
+			test_kernel->create();
+			float data[64];
+			float sum[2];
+			for (int i=0; i<64; i++)
+				data[i] = float(i);
+			test_kernel->setKernelArg(0, CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR, 64*sizeof(float), data);
+			test_kernel->setKernelArg(1, 0, 4*sizeof(float), NULL);
+			test_kernel->setKernelArg(2, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, 2*sizeof(float), sum);
+			test_kernel->execute(1, 8, 4);
+			test_kernel->readBuffer(2, sum);
+			float s1 = sum[0];
+			float s2 = sum[1];
+			wxMessageBox(wxString::Format("%f\t%f", s1, s2));
+		}
+*/
 	}
 
 	//calculation
