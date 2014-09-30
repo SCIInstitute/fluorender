@@ -1859,6 +1859,10 @@ void VRenderGLView::Segment()
 		   vr_frame->GetTraceDlg()->CellLink(true, true);
 	   }
 	}
+	if (vr_frame && vr_frame->GetBrushToolDlg())
+	{
+		vr_frame->GetBrushToolDlg()->GetSettings(m_vrv);
+	}
 }
 
 //label volumes in current view

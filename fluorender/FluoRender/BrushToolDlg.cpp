@@ -496,6 +496,7 @@ void BrushToolDlg::GetSettings(VRenderView* vrv)
 
    //selection strength
    dval = vrv->GetBrushSclTranslate();
+   m_dft_scl_translate = dval;
    m_brush_scl_translate_sldr->SetValue(int(dval*1000.0+0.5));
    m_brush_scl_translate_text->ChangeValue(wxString::Format("%.2f", dval));
    //2d influence

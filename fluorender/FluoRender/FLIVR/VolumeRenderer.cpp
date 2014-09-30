@@ -1587,13 +1587,13 @@ namespace FLIVR
 			}
 			kernel->setKernelArgTex3D(0, CL_MEM_READ_ONLY, data_id);
 			kernel->setKernelArgTex3D(1, CL_MEM_READ_ONLY, mask_id);
-			unsigned int hist_size = 256;
+			unsigned int hist_size = 64;
 			if (tex_ && tex_->get_nrrd(0))
 			{
 				if (tex_->get_nrrd(0)->type == nrrdTypeUChar)
-					hist_size = 256;
+					hist_size = 64;
 				else if (tex_->get_nrrd(0)->type == nrrdTypeUShort)
-					hist_size = 65536;
+					hist_size = 1024;
 			}
 			float* hist = new float[hist_size];
 			for (int i=0; i<hist_size; ++i)
@@ -1607,23 +1607,23 @@ namespace FLIVR
 			kernel->execute(3, global_size, local_size);
 			kernel->readBuffer(2, hist);
 			//analyze hist
-			for (int i=hist_size-1; i>0; --i)
+			for (int i=hist_size-2; i>0; --i)
 			{
-				if (hist[i] > hist[i-1])
+				if (hist[i] > 100 && hist[i] > hist[i-1])
 				{
 					result = double(i)/double(hist_size-1);
 					break;
 				}
 			}
-			//save hist
-			ofstream outfile;
-			outfile.open("E:\\hist.txt");
-			for (int i=0; i<hist_size; ++i)
-			{
-				float value = hist[i];
-				outfile << value << "\n";
-			}
-			outfile.close();
+			////save hist
+			//ofstream outfile;
+			//outfile.open("E:\\hist.txt");
+			//for (int i=0; i<hist_size; ++i)
+			//{
+			//	float value = hist[i];
+			//	outfile << value << "\n";
+			//}
+			//outfile.close();
 			delete []hist;
 		}
 		return result;
