@@ -531,7 +531,7 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent) {
 void VMovieView::OnRun(wxCommandEvent& event) {
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Save Movie Sequence", 
-		"", "", "*.tif", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+		"", "", "*.tif,*.mov", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 	fopendlg->SetExtraControlCreator(CreateExtraCaptureControl);
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK) {

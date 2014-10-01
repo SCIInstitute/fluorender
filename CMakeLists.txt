@@ -79,6 +79,10 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/glm/gtc)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/glm/gtx)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/glm/virtrev)
 
+#ffmpeg
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/ffmpeg_include)
+file(GLOB ffmpeg_LIBRARIES fluorender/ffmpeg_lib/*)
+
 #sources
 file(GLOB src fluorender/FluoRender/*.cpp)
 file(GLOB hdr fluorender/FluoRender/*.h)
@@ -229,4 +233,5 @@ endif()
 target_link_libraries(FluoRender
    ${wxWidgets_LIBRARIES}
    ${OPENGL_LIBRARIES}
-   ${Boost_LIBRARIES})
+   ${Boost_LIBRARIES}
+   ${ffmpeg_LIBRARIES})
