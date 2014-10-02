@@ -529,18 +529,37 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent) {
 }
 
 void VMovieView::OnRun(wxCommandEvent& event) {
+	wxString str = m_views_cmb->GetValue();
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (!vr_frame) return; 
+	VRenderView* vrv = vr_frame->GetView(str);
+	if (!vrv) return;
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Save Movie Sequence", 
-		"", "", "*.tif,*.mov", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+		"", "output", "MOV file (*.mov)|*.mov|TIF files (*.tif)|*.tif", 
+		wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 	fopendlg->SetExtraControlCreator(CreateExtraCaptureControl);
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK) {
-		m_filename = fopendlg->GetPath();
-		wxString tmp = m_filename.SubString(m_filename.Len()-4,
-			m_filename.Len()-1);
-		m_save_tiffs = tmp.IsSameAs(wxString(".tif"));
-		m_filename = m_filename.SubString(0,m_filename.Len()-5);
 		OnRewind(wxCommandEvent());
+		m_filename = fopendlg->GetPath();
+		filetype_ = m_filename.SubString(m_filename.Len()-4,
+			m_filename.Len()-1);
+		if(filetype_.IsSameAs(wxString(".mov"))) {
+			int x, y, w, h;
+			if (m_frame_chk->GetValue())
+				vrv->GetFrame(x,y,w,h);
+			else {
+				x = 0;
+				y = 0;
+				w = vrv->GetGLSize().x;
+				h = vrv->GetGLSize().y;
+			}
+			long fps;
+			m_fps_text->GetValue().ToLong(&fps);
+			encoder_.open(m_filename.ToStdString(),w,h,fps);
+		}
+		m_filename = m_filename.SubString(0,m_filename.Len()-5);
 		m_record = true;
 	}
 	delete fopendlg;
@@ -552,6 +571,7 @@ void VMovieView::OnStop(wxCommandEvent& event) {
 	m_timer.Stop();
 	m_running = false;
 	m_record = false;
+	encoder_.close();
 }
 
 void VMovieView::OnRewind(wxCommandEvent& event){
@@ -915,6 +935,16 @@ void VMovieView::WriteFrameToFile() {
     glReadPixels(x, y, w, h, chann==3?GL_RGB:GL_RGBA, GL_UNSIGNED_BYTE, image);
     glPixelStorei(GL_PACK_ROW_LENGTH, 0);
     string str_fn = outputfilename.ToStdString();
+	if (filetype_.IsSameAs(".mov")) {
+		//flip vertically 
+		unsigned char *flip = new unsigned char[w*h*chann];
+		for(size_t yy = 0; yy < h; yy++)
+			memcpy(flip + yy * 3 * w, image + 3 * w * (h - yy - 1),w * 3);
+		bool worked = encoder_.set_frame_rgb_data(flip);
+		worked = encoder_.write_video_frame(m_last_frame);
+		delete flip;
+		return;
+	}
     TIFF *out = TIFFOpen(str_fn.c_str(), "wb");
     if (!out) return;
     TIFFSetField(out, TIFFTAG_IMAGEWIDTH, w);

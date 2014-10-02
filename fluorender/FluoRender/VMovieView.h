@@ -3,8 +3,10 @@
 #include <wx/spinbutt.h>
 #include <wx/clrpicker.h>
 #include <wx/notebook.h>
+#include <cstring>
 #include "RecorderDlg.h"
 #include "compatibility.h"
+#include "QVideoEncoder.h"
 
 #ifndef _VMovieView_H_
 #define _VMovieView_H_
@@ -118,10 +120,12 @@ private:
 	double m_starting_rot;
     wxTimer m_timer;
 	wxString m_filename;
-	bool m_running, m_record, m_save_tiffs;
+	bool m_running, m_record;
 	RecorderDlg * m_advanced_movie;
 	wxNotebook * m_notebook;
 	int m_current_page;
+	QVideoEncoder encoder_;
+	wxString filetype_;
 
 private:
 	void GetSettings(int view=0);

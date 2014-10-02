@@ -4,6 +4,8 @@ cmake_minimum_required ( VERSION 2.6 )
 
 project ( FluoRender )
 
+cmake_policy(SET CMP0043 NEW)
+
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    # Mac OS X
@@ -81,7 +83,8 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/glm/virtrev)
 
 #ffmpeg
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/ffmpeg_include)
-file(GLOB ffmpeg_LIBRARIES fluorender/ffmpeg_lib/*)
+file(GLOB ffmpeg_LIBRARIES fluorender/ffmpeg_lib/*.lib)
+add_definitions(-D__STDC_CONSTANT_MACROS)
 
 #sources
 file(GLOB src fluorender/FluoRender/*.cpp)
@@ -188,6 +191,7 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       add_definitions(-DSEQAN_C++11_STANDARD=ON)
       add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
       add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
+      add_definitions(-Dinline=__inline)
       add_definitions("/wd4273")
       set(CFLAGS "")
       set(CXXFLAGS "/EHsc")
