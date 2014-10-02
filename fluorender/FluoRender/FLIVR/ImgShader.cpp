@@ -83,8 +83,12 @@ namespace FLIVR
 	"	c_avg_4 = c/pow(c_avg_4, loc0);\n" \
 	"	c_avg_5 = c/pow(c_avg_5, loc0);\n" \
 	"	c *= b;\n" \
-	"	vec4 c_avg = 0.25*c_avg_1+0.3*c_avg_2+0.25*c_avg_3+0.1*c_avg_4+0.1*c_avg_5;\n" \
-	"	gl_FragColor = c*(vec4(1.0)-loc2)+loc2*c_avg;\n" \
+	"	vec4 c_avg = 1.0*c_avg_1+0.6*c_avg_2+0.4*c_avg_3+0.2*c_avg_4+0.1*c_avg_5;\n" \
+	"	vec4 unit = vec4(1.0);\n" \
+	"	c = c*(unit-loc2)+loc2*c_avg;\n" \
+	"	//gl_FragColor = vec4(1.0/(c.x+1.0));\n" \
+	"	//gl_FragColor.a = c.a;\n" \
+	"	gl_FragColor = c*(unit-loc2)+loc2*(unit-unit/(c+unit));\n" \
 	"}\n"
 
 #define IMG_SHADER_CODE_GRADIENT_MAP \
@@ -357,6 +361,28 @@ namespace FLIVR
 	"	gl_FragColor = vec4(c.rgb,alpha);\n" \
 	"}\n"
 
+#define IMG_SHADER_CODE_BLEND_BRIGHT_BACKGROUND_HDR\
+	"// IMG_SHADER_CODE_BLEND_BRIGHT_BACKGROUND_HDR\n" \
+	"uniform vec4 loc0; //(r_gamma, g_gamma, b_gamma, 1.0)\n" \
+	"uniform vec4 loc1; //(r_brightness, g_brightness, b_brightness, 1.0)\n" \
+	"uniform vec4 loc2; //(r_hdr, g_hdr, b_hdr, 0.0)\n" \
+	"uniform sampler2D tex0;\n" \
+	"\n" \
+	"void main()\n" \
+	"{\n" \
+	"	vec4 t = gl_TexCoord[0];\n" \
+	"	vec4 c = texture2D(tex0, t.xy);\n" \
+	"	float alpha = clamp(c.a, 0.0, 1.0);\n" \
+	"	alpha = clamp(2.0*alpha - alpha*alpha, 0.0, 1.0);\n" \
+	"	vec4 b = loc1;\n" \
+	"	b.x = b.x>1.0?1.0/(2.0-b.x):loc1.x;\n" \
+	"	b.y = b.y>1.0?1.0/(2.0-b.y):loc1.y;\n" \
+	"	b.z = b.z>1.0?1.0/(2.0-b.z):loc1.z;\n" \
+	"	c = pow(c, loc0)*b;\n" \
+	"	vec4 unit = vec4(1.0);\n" \
+	"	gl_FragColor = c*(unit-loc2)+loc2*(unit-unit/(c+unit));\n" \
+	"	gl_FragColor.a = alpha;\n" \
+	"}\n"
 
 	ImgShader::ImgShader(int type) : 
 	type_(type),
@@ -416,6 +442,10 @@ namespace FLIVR
 			break;
 		case IMG_SHDR_BLEND_BRIGHT_BACKGROUND:
 			z << IMG_SHADER_CODE_BLEND_BRIGHT_BACKGROUND;
+			break;
+		case IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR:
+			z << IMG_SHADER_CODE_BLEND_BRIGHT_BACKGROUND_HDR;
+			break;
 		}
 
 		s = z.str();

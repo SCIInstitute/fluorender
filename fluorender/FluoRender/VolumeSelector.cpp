@@ -99,7 +99,7 @@ void VolumeSelector::Select(double radius)
       if (m_scl_falloff > 0.0)
          scl_falloff = m_scl_falloff;
       else
-         scl_falloff = 0.01;
+         scl_falloff = 0.008;
    }
    else
    {
@@ -111,7 +111,7 @@ void VolumeSelector::Select(double radius)
       if (m_gm_falloff > 0.0)
          gm_falloff = m_gm_falloff;
       else
-         gm_falloff = 0.01;
+         gm_falloff = 0.004;
    }
    else
       gm_falloff = 0.0;
