@@ -228,7 +228,9 @@ void PVXMLReader::UpdateStateShard(wxXmlNode *stateNode)
    wxXmlNode *child = stateNode->GetChildren();
    while (child)
    {
-      if (child->GetName() == "Key")
+	   wxString child_name = child->GetName();
+      if (child_name == "Key" ||
+		  child_name == "PVStateValue")
          ReadKey(child);
       child = child->GetNext();
    }
@@ -288,7 +290,10 @@ void PVXMLReader::ReadKey(wxXmlNode* keyNode)
                strValue.ToDouble(&dval))
             m_current_state.pos_z += dval;
       }
-
+   }
+   else if (strKey == "positionCurrent")
+   {
+	   ReadIndexedKey(keyNode, strKey);
    }
    else if (strKey == "zDevice")
    {
@@ -315,11 +320,83 @@ void PVXMLReader::ReadKey(wxXmlNode* keyNode)
       strValue.ToDouble(&dval);
       m_current_state.mpp_y = dval;
    }
+   else if (strKey == "micronsPerPixel")
+   {
+	   ReadIndexedKey(keyNode, strKey);
+   }
    else if (strKey == "bitDepth")
    {
       strValue.ToLong(&ival);
       m_current_state.bit_depth = ival;
    }
+}
+
+void PVXMLReader::ReadIndexedKey(wxXmlNode* keyNode, wxString &key)
+{
+	double dval;
+
+	if (key == "positionCurrent")
+	{
+		wxXmlNode *child = keyNode->GetChildren();
+		while (child)
+		{
+			wxString child_name = child->GetName();
+			if (child_name == "SubindexedValues")
+			{
+				wxString strIndex = child->GetAttribute("index");
+				wxXmlNode *gchild = child->GetChildren();
+				while (gchild)
+				{
+					wxString strSubIndex = gchild->GetAttribute("subindex");
+					wxString strValue = gchild->GetAttribute("value");
+					if (strSubIndex == "0")
+					{
+						if (strIndex == "XAxis")
+						{
+							strValue.ToDouble(&dval);
+							m_current_state.pos_x = dval;
+						}
+						else if (strIndex == "YAxis")
+						{
+							strValue.ToDouble(&dval);
+							m_current_state.pos_y = dval;
+						}
+						else if (strIndex == "ZAxis")
+						{
+							strValue.ToDouble(&dval);
+							m_current_state.pos_z = dval;
+						}
+					}
+					gchild = gchild->GetNext();
+				}
+			}
+			child = child->GetNext();
+		}
+	}
+	else if (key == "micronsPerPixel")
+	{
+		wxXmlNode *child = keyNode->GetChildren();
+		while (child)
+		{
+			wxString child_name = child->GetName();
+			if (child_name == "IndexedValue")
+			{
+				wxString strIndex = child->GetAttribute("index");
+				wxString strValue = child->GetAttribute("value");
+				if (strIndex == "XAxis")
+				{
+					strValue.ToDouble(&dval);
+					m_current_state.mpp_x = dval;
+				}
+				else if (strIndex == "YAxis")
+				{
+					strValue.ToDouble(&dval);
+					m_current_state.mpp_y = dval;
+				}
+			}
+			child = child->GetNext();
+		}
+	}
 }
 
 void PVXMLReader::ReadSequence(wxXmlNode* seqNode)

@@ -6,6 +6,7 @@
 
 using namespace std;
 class wxXmlNode;
+class wxString;
 
 class PVXMLReader : public BaseReader
 {
@@ -131,6 +132,7 @@ private:
 	void ReadSystemConfig(wxXmlNode *systemNode);
 	void UpdateStateShard(wxXmlNode *stateNode);
 	void ReadKey(wxXmlNode *keyNode);
+	void ReadIndexedKey(wxXmlNode *keyNode, wxString &key);
 	void ReadSequence(wxXmlNode *seqNode);
 	void ReadFrame(wxXmlNode *frameNode);
 	void ReadTiff(char* pbyData, unsigned short *val);
