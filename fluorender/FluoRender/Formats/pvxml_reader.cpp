@@ -3,6 +3,17 @@
 #include "../compatibility.h"
 #include <fstream>
 #include <iostream>
+#include <limits>
+
+//! Workaround for compatibility with other libraries
+#ifdef max
+#undef max
+#endif
+
+//! Workaround for compatibility with other libraries
+#ifdef min
+#undef min
+#endif
 
 PVXMLReader::PVXMLReader()
 {
@@ -75,6 +86,10 @@ void PVXMLReader::Preprocess()
    m_slice_num = 0;
    m_chan_num = 0;
    m_max_value = 0.0;
+
+   //min/max
+   m_x_min = m_y_min = m_z_min = std::numeric_limits<double>::max();
+   m_x_max = m_y_max = m_z_max = -std::numeric_limits<double>::max();
 
 #ifdef _WIN32
    wchar_t slash = L'\\';
@@ -450,6 +465,14 @@ void PVXMLReader::ReadFrame(wxXmlNode* frameNode)
    long ival;
    FrameInfo frame_info;
 
+   //save these values before update
+   double x_min = m_x_min;
+   double x_max = m_x_max;
+   double y_min = m_y_min;
+   double y_max = m_y_max;
+   double z_min = m_z_min;
+   double z_max = m_z_max;
+
    wxXmlNode *child = frameNode->GetChildren();
    while (child)
    {
@@ -474,6 +497,16 @@ void PVXMLReader::ReadFrame(wxXmlNode* frameNode)
    frame_info.x_start = m_current_state.pos_x;
    frame_info.y_start = m_current_state.pos_y;
    frame_info.z_start = m_current_state.pos_z;
+   double pos_x = m_current_state.pos_x;
+   double pos_y = m_current_state.pos_y;
+   double pos_z = m_current_state.pos_z;
+   m_x_min = pos_x<m_x_min?pos_x:m_x_min;
+   m_x_max = pos_x>m_x_max?pos_x:m_x_max;
+   m_y_min = pos_y<m_y_min?pos_y:m_y_min;
+   m_y_max = pos_y>m_y_max?pos_y:m_y_max;
+   m_z_min = pos_z<m_z_min?pos_z:m_z_min;
+   m_z_max = pos_z>m_z_max?pos_z:m_z_max;
+
    if (m_seq_zpos != 0.0)
    {
       double spc = fabs(frame_info.z_start - m_seq_zpos);
@@ -495,9 +528,12 @@ void PVXMLReader::ReadFrame(wxXmlNode* frameNode)
    }
 
    if (!m_pvxml_info.size() ||
-         (m_pvxml_info.back().size() &&
-          m_current_state.grid_index<=
-          m_pvxml_info.back().back().grid_index))
+         (pos_x>=x_min &&
+		  pos_x<=x_max &&
+		  pos_y>=y_min &&
+		  pos_y<=y_max &&
+		  pos_z>=z_min &&
+		  pos_z<=z_max))
    {
       TimeDataInfo info_new;
       m_pvxml_info.push_back(info_new);
