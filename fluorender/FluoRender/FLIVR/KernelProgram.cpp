@@ -147,6 +147,20 @@ namespace FLIVR
 		clFinish(queue_);
 	}
 
+	bool KernelProgram::matchArg(Argument* arg, unsigned int& arg_index)
+	{
+		for (unsigned int i=0; i<arg_list_.size(); ++i)
+		{
+			if (arg_list_[i].index == arg->index &&
+				arg_list_[i].size == arg->size)
+			{
+				arg_index = i;
+				return true;
+			}
+		}
+		return false;
+	}
+
 	void KernelProgram::setKernelArgConst(int i, size_t size, void* data)
 	{
 		cl_int err;
@@ -165,15 +179,24 @@ namespace FLIVR
 
 		if (data)
 		{
-			cl_mem buffer = clCreateBuffer(context_, flag, size, data, &err);
-			if (err != CL_SUCCESS)
-				return;
 			Argument arg;
 			arg.index = i;
 			arg.size = size;
-			arg.buffer = buffer;
-			arg_list_.push_back(arg);
-			err = clSetKernelArg(kernel_, i, sizeof(cl_mem), &buffer);
+			unsigned int index;
+
+			if (matchArg(&arg, index))
+			{
+				arg.buffer = arg_list_[index].buffer;
+			}
+			else
+			{
+				cl_mem buffer = clCreateBuffer(context_, flag, size, data, &err);
+				if (err != CL_SUCCESS)
+					return;
+				arg.buffer = buffer;
+				arg_list_.push_back(arg);
+			}
+			err = clSetKernelArg(kernel_, i, sizeof(cl_mem), &(arg.buffer));
 			if (err != CL_SUCCESS)
 				return;
 		}
@@ -188,15 +211,24 @@ namespace FLIVR
 	void KernelProgram::setKernelArgTex2D(int i, cl_mem_flags flag, GLuint texture)
 	{
 		cl_int err;
-		cl_mem tex_buffer = clCreateFromGLTexture2D(context_, flag, GL_TEXTURE_2D, 0, texture, &err);
-		if (err != CL_SUCCESS)
-			return;
 		Argument arg;
 		arg.index = i;
 		arg.size = 0;
-		arg.buffer = tex_buffer;
-		arg_list_.push_back(arg);
-		err = clSetKernelArg(kernel_, i, sizeof(cl_mem), &tex_buffer);
+		unsigned int index;
+
+		if (matchArg(&arg, index))
+		{
+			arg.buffer = arg_list_[index].buffer;
+		}
+		else
+		{
+			cl_mem tex_buffer = clCreateFromGLTexture2D(context_, flag, GL_TEXTURE_2D, 0, texture, &err);
+			if (err != CL_SUCCESS)
+				return;
+			arg.buffer = tex_buffer;
+			arg_list_.push_back(arg);
+		}
+		err = clSetKernelArg(kernel_, i, sizeof(cl_mem), &(arg.buffer));
 		if (err != CL_SUCCESS)
 			return;
 	}
@@ -204,15 +236,24 @@ namespace FLIVR
 	void KernelProgram::setKernelArgTex3D(int i, cl_mem_flags flag, GLuint texture)
 	{
 		cl_int err;
-		cl_mem tex_buffer = clCreateFromGLTexture3D(context_, flag, GL_TEXTURE_3D, 0, texture, &err);
-		if (err != CL_SUCCESS)
-			return;
 		Argument arg;
 		arg.index = i;
 		arg.size = 0;
-		arg.buffer = tex_buffer;
-		arg_list_.push_back(arg);
-		err = clSetKernelArg(kernel_, i, sizeof(cl_mem), &tex_buffer);
+		unsigned int index;
+
+		if (matchArg(&arg, index))
+		{
+			arg.buffer = arg_list_[index].buffer;
+		}
+		else
+		{
+			cl_mem tex_buffer = clCreateFromGLTexture3D(context_, flag, GL_TEXTURE_3D, 0, texture, &err);
+			if (err != CL_SUCCESS)
+				return;
+			arg.buffer = tex_buffer;
+			arg_list_.push_back(arg);
+		}
+		err = clSetKernelArg(kernel_, i, sizeof(cl_mem), &(arg.buffer));
 		if (err != CL_SUCCESS)
 			return;
 	}

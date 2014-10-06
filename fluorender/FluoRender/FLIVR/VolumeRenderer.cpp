@@ -455,7 +455,7 @@ namespace FLIVR
 				double sf11 = sqrt(tex_w*tex_w + tex_h*tex_h)/vs;
 				size = zoom / sf11 / 10.0;
 				size = size<1.0?0.0:size;
-				size = Clamp(size, 0.0, 0.5);
+				size = Clamp(size, 0.0, 0.3);
 			}
 			break;
 		case 4:	//blur filter
@@ -463,7 +463,7 @@ namespace FLIVR
 				double sf11 = sqrt(tex_w*tex_w + tex_h*tex_h)/vs;
 				size = zoom / sf11 / 2.0;
 				size = size<1.0?0.5:size;
-				size = Clamp(size, 0.5, 2.5);
+				size = Clamp(size, 0.5, 1.0);
 			}
 		}
 

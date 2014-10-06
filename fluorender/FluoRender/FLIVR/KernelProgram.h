@@ -21,6 +21,13 @@ namespace FLIVR
 
 		void execute(cl_uint, size_t*, size_t*);
 
+		typedef struct
+		{
+			cl_uint index;
+			size_t size;
+			cl_mem buffer;
+		} Argument;
+		bool matchArg(Argument*, unsigned int&);
 		void setKernelArgConst(int, size_t, void*);
 		void setKernelArgBuf(int, cl_mem_flags, size_t, void*);
 		void setKernelArgTex2D(int, cl_mem_flags, GLuint);
@@ -39,12 +46,6 @@ namespace FLIVR
 		cl_command_queue queue_;
 
 		//memory object to release
-		typedef struct
-		{
-			cl_uint index;
-			size_t size;
-			cl_mem buffer;
-		} Argument;
 		std::vector<Argument> arg_list_;
 
 		static bool init_;
