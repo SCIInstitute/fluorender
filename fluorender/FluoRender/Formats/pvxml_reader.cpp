@@ -75,6 +75,7 @@ void PVXMLReader::Preprocess()
    m_slice_num = 0;
    m_chan_num = 0;
    m_max_value = 0.0;
+   m_seq_boxes.clear();
 
 #ifdef _WIN32
    wchar_t slash = L'\\';
@@ -401,6 +402,7 @@ void PVXMLReader::ReadIndexedKey(wxXmlNode* keyNode, wxString &key)
 
 void PVXMLReader::ReadSequence(wxXmlNode* seqNode)
 {
+   m_new_seq = true;
    m_seq_slice_num = 0;
    m_seq_zspc = FLT_MAX;
    m_seq_zpos = 0.0;
@@ -494,14 +496,33 @@ void PVXMLReader::ReadFrame(wxXmlNode* frameNode)
       m_max_value = ival>m_max_value?ival:m_max_value;
    }
 
-   if (!m_pvxml_info.size() ||
-         (m_pvxml_info.back().size() &&
-          m_current_state.grid_index<=
-          m_pvxml_info.back().back().grid_index))
+   if (m_new_seq)
    {
-      TimeDataInfo info_new;
-      m_pvxml_info.push_back(info_new);
+	   SeqBox sb;
+	   sb.x_min = frame_info.x_start;
+	   sb.x_max = sb.x_min + frame_info.x_size * m_current_state.mpp_x;
+	   sb.y_min = frame_info.y_start;
+	   sb.y_max = sb.y_min + frame_info.y_size * m_current_state.mpp_y;
+	   bool overlap = false;
+	   for (unsigned int i=0; i<m_seq_boxes.size(); ++i)
+	   {
+		   if (sb.overlaps(m_seq_boxes[i]))
+		   {
+			   overlap = true;
+			   m_seq_boxes.clear();
+			   break;
+		   }
+	   }
+	   m_seq_boxes.push_back(sb);
+
+	   if (!m_pvxml_info.size() || overlap)
+	   {
+		  TimeDataInfo info_new;
+		  m_pvxml_info.push_back(info_new);
+	   }
+	   m_new_seq = false;
    }
+
    TimeDataInfo* time_data_info = &(m_pvxml_info.back());
    if (time_data_info)
    {
