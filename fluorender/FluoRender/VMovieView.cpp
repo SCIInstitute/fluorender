@@ -13,6 +13,7 @@
 BEGIN_EVENT_TABLE(VMovieView, wxPanel)
 	//time sequence
 	EVT_CHECKBOX(ID_SeqChk, VMovieView::OnSequenceChecked)
+	EVT_BUTTON(ID_CurrentFrameBtn, VMovieView::OnUpFrame)
 	//rotations
 	EVT_CHECKBOX(ID_RotChk, VMovieView::OnRotateChecked)
 	//fps, view combo, help
@@ -62,23 +63,32 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	m_seq_chk = new wxCheckBox(page,ID_SeqChk,
 		"Time Sequence / Batch");
-	st = new wxStaticText(page,wxID_ANY, "Start Time: ",
-		wxDefaultPosition,wxSize(60,-1));
 	m_time_start_text = new wxTextCtrl(page, ID_TimeStartText, "1",
-		wxDefaultPosition,wxSize(50,-1));
+		wxDefaultPosition,wxSize(30,-1));
 	m_time_end_text = new wxTextCtrl(page, ID_TimeEndText, "10",
-		wxDefaultPosition,wxSize(50,-1));
+		wxDefaultPosition,wxSize(30,-1));
 	st2 = new wxStaticText(page,wxID_ANY, "End Time: ",
 		wxDefaultPosition,wxSize(60,-1));
 	//sizer 1
 	sizer_1->Add(m_seq_chk, 0, wxALIGN_CENTER);
+	sizer_1->AddStretchSpacer();
+	st = new wxStaticText(page,wxID_ANY, "Increment Time");
+	sizer_1->Add(st, 0, wxALIGN_CENTER);
+	sizer_1->Add(5,5,0);
 	//sizer 2
+	st = new wxStaticText(page,wxID_ANY, "Start Time: ",
+		wxDefaultPosition,wxSize(60,-1));
 	sizer_2->Add(20,5,0);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_time_start_text, 0, wxALIGN_CENTER);
 	sizer_2->Add(10,5,0);
 	sizer_2->Add(st2, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_time_end_text, 0, wxALIGN_CENTER);
+	m_inc_time_btn = new wxButton(page, ID_CurrentFrameBtn, "0",
+		wxDefaultPosition, wxSize(45, 25));
+	sizer_2->AddStretchSpacer();
+	sizer_2->Add(m_inc_time_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(5,15,0);
 	//rotations
 	m_rot_chk = new wxCheckBox(page,ID_RotChk,
 		"Rotation");
@@ -123,10 +133,6 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	sizer_7->Add(st2, 0, wxALIGN_CENTER);
 	//all sizers
 	sizer_v->Add(5, 15, 0);
-	sizer_v->Add(sizer_1, 0, wxEXPAND);
-	sizer_v->Add(5, 5, 0);
-	sizer_v->Add(sizer_2, 0, wxEXPAND);
-	sizer_v->Add(5, 20, 0);
 	sizer_v->Add(sizer_3, 0, wxEXPAND);
 	sizer_v->Add(5, 5, 0);
 	sizer_v->Add(sizer_4, 0, wxEXPAND);
@@ -135,6 +141,10 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	sizer_v->Add(5, 5, 0);
 	sizer_v->Add(sizer_6, 0, wxEXPAND);
 	sizer_v->Add(5, 20, 0);
+	sizer_v->Add(sizer_1, 0, wxEXPAND);
+	sizer_v->Add(5, 5, 0);
+	sizer_v->Add(sizer_2, 0, wxEXPAND);
+	sizer_v->Add(5, 40, 0);
 	sizer_v->Add(sizer_7, 0, wxEXPAND);
 	sizer_v->AddStretchSpacer();
 	//set the page
@@ -798,17 +808,29 @@ void VMovieView::Get3DFrames() {
 void VMovieView::DisableTime() {
 	m_time_start_text->Disable();
 	m_time_end_text->Disable();
+	m_inc_time_btn->Disable();
 }
 
 void VMovieView::EnableTime() {
 	m_time_start_text->Enable();
 	m_time_end_text->Enable();
+	m_inc_time_btn->Enable();
 }
 
 void VMovieView::OnTimeChange(wxScrollEvent &event) {
 	int frame = event.GetPosition();
 	double pcnt = (((double)frame)/360.);
 	SetRendering(pcnt);
+
+	int start_time = STOI(m_time_start_text->GetValue().fn_str());
+	int end_time = STOI(m_time_end_text->GetValue().fn_str());
+	int time = end_time - start_time + 1;
+	m_inc_time_btn->SetLabel(wxString::Format("%d",(int)(time*pcnt)));
+
+	double movie_time;
+	m_movie_time->GetValue().ToDouble(&movie_time);
+	wxString st = wxString::Format("%.2f",(pcnt*movie_time));
+	m_progress_text->ChangeValue(st);
 }
 
 void VMovieView::SetRendering(double pcnt) {
@@ -873,6 +895,11 @@ void VMovieView::OnTimeEnter(wxCommandEvent& event) {
 	double pcnt = (iVal / movie_time);
 	m_progress_sldr->SetValue(360. * pcnt);
 	SetRendering(pcnt);
+
+	int start_time = STOI(m_time_start_text->GetValue().fn_str());
+	int end_time = STOI(m_time_end_text->GetValue().fn_str());
+	int time = end_time - start_time + 1;
+	m_inc_time_btn->SetLabel(wxString::Format("%d",(int)(time*pcnt)));
 }
 
 void VMovieView::OnRotateChecked(wxCommandEvent& event) {
@@ -972,4 +999,16 @@ void VMovieView::WriteFrameToFile() {
         _TIFFfree(buf);
     if (image)
         delete []image;
+}
+
+void VMovieView::OnUpFrame(wxCommandEvent& event) {
+	int start_time = STOI(m_time_start_text->GetValue().fn_str());
+	int end_time = STOI(m_time_end_text->GetValue().fn_str());
+	int current_time = STOI(m_inc_time_btn->GetLabel().fn_str())+1;
+	if (current_time > end_time) current_time = start_time;
+	int time = end_time - start_time + 1;
+	double pcnt = (double)current_time / (double) time;
+	m_inc_time_btn->SetLabel(wxString::Format("%d",current_time));
+	SetProgress(pcnt);
+	SetRendering(pcnt);
 }
