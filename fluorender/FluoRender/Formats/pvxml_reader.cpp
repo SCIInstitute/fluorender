@@ -476,6 +476,7 @@ void PVXMLReader::ReadFrame(wxXmlNode* frameNode)
    frame_info.x_start = m_current_state.pos_x;
    frame_info.y_start = m_current_state.pos_y;
    frame_info.z_start = m_current_state.pos_z;
+
    if (m_seq_zpos != 0.0)
    {
       double spc = fabs(frame_info.z_start - m_seq_zpos);
