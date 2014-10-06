@@ -6,6 +6,7 @@
 
 using namespace std;
 class wxXmlNode;
+class wxString;
 
 class PVXMLReader : public BaseReader
 {
@@ -97,6 +98,37 @@ private:
 	StateShard m_current_state;
 	vector<StateShard> m_state_shard_stack;
 
+	//struct for sequence bbox
+	struct SeqBox
+	{
+		double x_min;
+		double x_max;
+		double y_min;
+		double y_max;
+
+		bool overlaps(const SeqBox& sb) const
+		{
+			double ix_min = sb.x_min>x_min?sb.x_min:x_min;
+			double ix_max = sb.x_max<x_max?sb.x_max:x_max;
+			if (ix_min >= ix_max)
+				return false;
+			double iy_min = sb.y_min>y_min?sb.y_min:y_min;
+			double iy_max = sb.y_max<y_max?sb.y_max:y_max;
+			if (iy_min >= iy_max)
+				return false;
+			return ((ix_max-ix_min)*(iy_max-iy_min)/(x_max-x_min)/(y_max-y_min))>=0.9;
+		}
+		void extend(const SeqBox& sb)
+		{
+			x_min = sb.x_min<x_min?sb.x_min:x_min;
+			x_max = sb.x_max>x_max?sb.x_max:x_max;
+			y_min = sb.y_min<y_min?sb.y_min:y_min;
+			y_max = sb.y_max>y_max?sb.y_max:y_max;
+		}
+	};
+	vector<SeqBox> m_seq_boxes;
+	bool m_new_seq;//starts a new sequence
+
 	double m_x_min, m_y_min, m_z_min;
 	double m_x_max, m_y_max, m_z_max;
 	int m_seq_slice_num;
@@ -131,6 +163,7 @@ private:
 	void ReadSystemConfig(wxXmlNode *systemNode);
 	void UpdateStateShard(wxXmlNode *stateNode);
 	void ReadKey(wxXmlNode *keyNode);
+	void ReadIndexedKey(wxXmlNode *keyNode, wxString &key);
 	void ReadSequence(wxXmlNode *seqNode);
 	void ReadFrame(wxXmlNode *frameNode);
 	void ReadTiff(char* pbyData, unsigned short *val);
