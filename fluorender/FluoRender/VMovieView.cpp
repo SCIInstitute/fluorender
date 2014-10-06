@@ -13,6 +13,7 @@
 BEGIN_EVENT_TABLE(VMovieView, wxPanel)
 	//time sequence
 	EVT_CHECKBOX(ID_SeqChk, VMovieView::OnSequenceChecked)
+	EVT_BUTTON(ID_CurrentFrameBtn, VMovieView::OnUpFrame)
 	//rotations
 	EVT_CHECKBOX(ID_RotChk, VMovieView::OnRotateChecked)
 	//fps, view combo, help
@@ -62,23 +63,32 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	m_seq_chk = new wxCheckBox(page,ID_SeqChk,
 		"Time Sequence / Batch");
-	st = new wxStaticText(page,wxID_ANY, "Start Time: ",
-		wxDefaultPosition,wxSize(60,-1));
 	m_time_start_text = new wxTextCtrl(page, ID_TimeStartText, "1",
-		wxDefaultPosition,wxSize(50,-1));
+		wxDefaultPosition,wxSize(30,-1));
 	m_time_end_text = new wxTextCtrl(page, ID_TimeEndText, "10",
-		wxDefaultPosition,wxSize(50,-1));
+		wxDefaultPosition,wxSize(30,-1));
 	st2 = new wxStaticText(page,wxID_ANY, "End Time: ",
 		wxDefaultPosition,wxSize(60,-1));
 	//sizer 1
 	sizer_1->Add(m_seq_chk, 0, wxALIGN_CENTER);
+	sizer_1->AddStretchSpacer();
+	st = new wxStaticText(page,wxID_ANY, "Increment Time");
+	sizer_1->Add(st, 0, wxALIGN_CENTER);
+	sizer_1->Add(5,5,0);
 	//sizer 2
+	st = new wxStaticText(page,wxID_ANY, "Start Time: ",
+		wxDefaultPosition,wxSize(60,-1));
 	sizer_2->Add(20,5,0);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_time_start_text, 0, wxALIGN_CENTER);
 	sizer_2->Add(10,5,0);
 	sizer_2->Add(st2, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_time_end_text, 0, wxALIGN_CENTER);
+	m_inc_time_btn = new wxButton(page, ID_CurrentFrameBtn, "0",
+		wxDefaultPosition, wxSize(45, 25));
+	sizer_2->AddStretchSpacer();
+	sizer_2->Add(m_inc_time_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(5,15,0);
 	//rotations
 	m_rot_chk = new wxCheckBox(page,ID_RotChk,
 		"Rotation");
@@ -123,10 +133,6 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	sizer_7->Add(st2, 0, wxALIGN_CENTER);
 	//all sizers
 	sizer_v->Add(5, 15, 0);
-	sizer_v->Add(sizer_1, 0, wxEXPAND);
-	sizer_v->Add(5, 5, 0);
-	sizer_v->Add(sizer_2, 0, wxEXPAND);
-	sizer_v->Add(5, 20, 0);
 	sizer_v->Add(sizer_3, 0, wxEXPAND);
 	sizer_v->Add(5, 5, 0);
 	sizer_v->Add(sizer_4, 0, wxEXPAND);
@@ -135,6 +141,10 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	sizer_v->Add(5, 5, 0);
 	sizer_v->Add(sizer_6, 0, wxEXPAND);
 	sizer_v->Add(5, 20, 0);
+	sizer_v->Add(sizer_1, 0, wxEXPAND);
+	sizer_v->Add(5, 5, 0);
+	sizer_v->Add(sizer_2, 0, wxEXPAND);
+	sizer_v->Add(5, 40, 0);
 	sizer_v->Add(sizer_7, 0, wxEXPAND);
 	sizer_v->AddStretchSpacer();
 	//set the page
@@ -529,18 +539,37 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent) {
 }
 
 void VMovieView::OnRun(wxCommandEvent& event) {
+	wxString str = m_views_cmb->GetValue();
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (!vr_frame) return; 
+	VRenderView* vrv = vr_frame->GetView(str);
+	if (!vrv) return;
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Save Movie Sequence", 
-		"", "", "*.tif", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+		"", "output", "MOV file (*.mov)|*.mov|TIF files (*.tif)|*.tif", 
+		wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 	fopendlg->SetExtraControlCreator(CreateExtraCaptureControl);
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK) {
-		m_filename = fopendlg->GetPath();
-		wxString tmp = m_filename.SubString(m_filename.Len()-4,
-			m_filename.Len()-1);
-		m_save_tiffs = tmp.IsSameAs(wxString(".tif"));
-		m_filename = m_filename.SubString(0,m_filename.Len()-5);
 		OnRewind(wxCommandEvent());
+		m_filename = fopendlg->GetPath();
+		filetype_ = m_filename.SubString(m_filename.Len()-4,
+			m_filename.Len()-1);
+		if(filetype_.IsSameAs(wxString(".mov"))) {
+			int x, y, w, h;
+			if (m_frame_chk->GetValue())
+				vrv->GetFrame(x,y,w,h);
+			else {
+				x = 0;
+				y = 0;
+				w = vrv->GetGLSize().x;
+				h = vrv->GetGLSize().y;
+			}
+			long fps;
+			m_fps_text->GetValue().ToLong(&fps);
+			encoder_.open(m_filename.ToStdString(),w,h,fps);
+		}
+		m_filename = m_filename.SubString(0,m_filename.Len()-5);
 		m_record = true;
 	}
 	delete fopendlg;
@@ -552,6 +581,7 @@ void VMovieView::OnStop(wxCommandEvent& event) {
 	m_timer.Stop();
 	m_running = false;
 	m_record = false;
+	encoder_.close();
 }
 
 void VMovieView::OnRewind(wxCommandEvent& event){
@@ -778,17 +808,29 @@ void VMovieView::Get3DFrames() {
 void VMovieView::DisableTime() {
 	m_time_start_text->Disable();
 	m_time_end_text->Disable();
+	m_inc_time_btn->Disable();
 }
 
 void VMovieView::EnableTime() {
 	m_time_start_text->Enable();
 	m_time_end_text->Enable();
+	m_inc_time_btn->Enable();
 }
 
 void VMovieView::OnTimeChange(wxScrollEvent &event) {
 	int frame = event.GetPosition();
 	double pcnt = (((double)frame)/360.);
 	SetRendering(pcnt);
+
+	int start_time = STOI(m_time_start_text->GetValue().fn_str());
+	int end_time = STOI(m_time_end_text->GetValue().fn_str());
+	int time = end_time - start_time + 1;
+	m_inc_time_btn->SetLabel(wxString::Format("%d",(int)(time*pcnt)));
+
+	double movie_time;
+	m_movie_time->GetValue().ToDouble(&movie_time);
+	wxString st = wxString::Format("%.2f",(pcnt*movie_time));
+	m_progress_text->ChangeValue(st);
 }
 
 void VMovieView::SetRendering(double pcnt) {
@@ -853,6 +895,11 @@ void VMovieView::OnTimeEnter(wxCommandEvent& event) {
 	double pcnt = (iVal / movie_time);
 	m_progress_sldr->SetValue(360. * pcnt);
 	SetRendering(pcnt);
+
+	int start_time = STOI(m_time_start_text->GetValue().fn_str());
+	int end_time = STOI(m_time_end_text->GetValue().fn_str());
+	int time = end_time - start_time + 1;
+	m_inc_time_btn->SetLabel(wxString::Format("%d",(int)(time*pcnt)));
 }
 
 void VMovieView::OnRotateChecked(wxCommandEvent& event) {
@@ -915,6 +962,16 @@ void VMovieView::WriteFrameToFile() {
     glReadPixels(x, y, w, h, chann==3?GL_RGB:GL_RGBA, GL_UNSIGNED_BYTE, image);
     glPixelStorei(GL_PACK_ROW_LENGTH, 0);
     string str_fn = outputfilename.ToStdString();
+	if (filetype_.IsSameAs(".mov")) {
+		//flip vertically 
+		unsigned char *flip = new unsigned char[w*h*chann];
+		for(size_t yy = 0; yy < h; yy++)
+			memcpy(flip + yy * 3 * w, image + 3 * w * (h - yy - 1),w * 3);
+		bool worked = encoder_.set_frame_rgb_data(flip);
+		worked = encoder_.write_video_frame(m_last_frame);
+		delete flip;
+		return;
+	}
     TIFF *out = TIFFOpen(str_fn.c_str(), "wb");
     if (!out) return;
     TIFFSetField(out, TIFFTAG_IMAGEWIDTH, w);
@@ -942,4 +999,16 @@ void VMovieView::WriteFrameToFile() {
         _TIFFfree(buf);
     if (image)
         delete []image;
+}
+
+void VMovieView::OnUpFrame(wxCommandEvent& event) {
+	int start_time = STOI(m_time_start_text->GetValue().fn_str());
+	int end_time = STOI(m_time_end_text->GetValue().fn_str());
+	int current_time = STOI(m_inc_time_btn->GetLabel().fn_str())+1;
+	if (current_time > end_time) current_time = start_time;
+	int time = end_time - start_time + 1;
+	double pcnt = (double)current_time / (double) time;
+	m_inc_time_btn->SetLabel(wxString::Format("%d",current_time));
+	SetProgress(pcnt);
+	SetRendering(pcnt);
 }

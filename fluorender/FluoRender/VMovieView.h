@@ -3,8 +3,10 @@
 #include <wx/spinbutt.h>
 #include <wx/clrpicker.h>
 #include <wx/notebook.h>
+#include <cstring>
 #include "RecorderDlg.h"
 #include "compatibility.h"
+#include "QVideoEncoder.h"
 
 #ifndef _VMovieView_H_
 #define _VMovieView_H_
@@ -17,6 +19,7 @@ class VMovieView : public wxPanel
 		ID_SeqChk,
 		ID_TimeStartText,
 		ID_TimeEndText,
+		ID_CurrentFrameBtn,
 
 		//rotations
 		ID_RotChk,
@@ -85,8 +88,8 @@ public:
 	wxCheckBox *m_seq_chk;
 	wxTextCtrl *m_time_start_text;
 	wxTextCtrl *m_time_end_text;
+	wxButton *m_inc_time_btn;
 
-	
 	wxCheckBox *m_rot_chk;
 	wxRadioButton *m_x_rd;
 	wxRadioButton *m_y_rd;
@@ -118,10 +121,12 @@ private:
 	double m_starting_rot;
     wxTimer m_timer;
 	wxString m_filename;
-	bool m_running, m_record, m_save_tiffs;
+	bool m_running, m_record;
 	RecorderDlg * m_advanced_movie;
 	wxNotebook * m_notebook;
 	int m_current_page;
+	QVideoEncoder encoder_;
+	wxString filetype_;
 
 private:
 	void GetSettings(int view=0);
@@ -174,6 +179,7 @@ private:
 	//time slider
 	void OnTimeChange(wxScrollEvent &event);
 	void OnTimeEnter(wxCommandEvent& event);
+	void OnUpFrame(wxCommandEvent& event);
 
 	//checkboxes
 	void OnSequenceChecked(wxCommandEvent& event);
