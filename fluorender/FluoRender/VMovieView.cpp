@@ -4,12 +4,7 @@
 #include <wx/aboutdlg.h>
 #include <wx/valnum.h>
 #include "png_resource.h"
-#include "img/listicon_save.h"
-#include "img/refresh.h"
-#include "img/play.h"
-#include "img/rewind.h"
-#include "img/fastforward.h"
-#include "img/pause.h"
+#include "img/icons.h"
 
 BEGIN_EVENT_TABLE(VMovieView, wxPanel)
 	//time sequence
@@ -93,8 +88,8 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 		wxDefaultPosition, wxSize(25, 25));
 	m_time_current_text = new wxTextCtrl(page, ID_CurrentTimeText, "0",
 		wxDefaultPosition,wxSize(35,-1));
-	m_inc_time_btn->SetBitmap(wxGetBitmapFromMemory(fastforward));
-	m_dec_time_btn->SetBitmap(wxGetBitmapFromMemory(rewind));
+	m_inc_time_btn->SetBitmap(wxGetBitmapFromMemory(plus));
+	m_dec_time_btn->SetBitmap(wxGetBitmapFromMemory(minus));
 	sizer_2->AddStretchSpacer();
 	sizer_2->Add(m_dec_time_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(5,15,0);
@@ -196,7 +191,7 @@ wxWindow* VMovieView::CreateCroppingPage(wxWindow *parent) {
 	m_frame_chk = new wxCheckBox(page, ID_FrameChk, "");
 	m_reset_btn = new wxButton(page, ID_ResetBtn, "Reset",
 		wxDefaultPosition, wxSize(110, 22));
-	m_reset_btn->SetBitmap(wxGetBitmapFromMemory(refresh));
+	m_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	sizer_8->Add(5, 5, 0);
 	sizer_8->Add(st, 0, wxALIGN_CENTER);
 	sizer_8->Add(m_frame_chk, 0, wxALIGN_CENTER);
@@ -773,6 +768,7 @@ void VMovieView::DisableRot() {
 	m_y_rd->Disable();
 	m_z_rd->Disable();
 	m_degree_end->Disable();
+	m_rot_chk->SetValue(false);
 }
 
 void VMovieView::EnableRot() {
@@ -780,6 +776,7 @@ void VMovieView::EnableRot() {
 	m_y_rd->Enable();
 	m_z_rd->Enable();
 	m_degree_end->Enable();
+	m_rot_chk->SetValue(true);
 }
 
 void VMovieView::OnHelpBtn(wxCommandEvent &event) {
@@ -826,14 +823,27 @@ void VMovieView::DisableTime() {
 	m_inc_time_btn->Disable();
 	m_dec_time_btn->Disable();
 	m_time_current_text->Disable();
+	m_seq_chk->SetValue(false);
 }
 
 void VMovieView::EnableTime() {
+	wxString str = m_views_cmb->GetValue();
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (!vr_frame) return;
+	VRenderView* vrv = vr_frame->GetView(str);
+	if (!vrv) return;
+	int first, sec, tmp;
+	vrv->Get4DSeqFrames(first, sec, tmp);
+	if (sec - first == 0)
+		vrv->Get3DBatFrames(first, sec, tmp);
+	m_time_start_text->SetValue(wxString::Format("%d",first));
+	m_time_end_text->SetValue(wxString::Format("%d",sec));
 	m_time_start_text->Enable();
 	m_time_end_text->Enable();
 	m_inc_time_btn->Enable();
 	m_dec_time_btn->Enable();
 	m_time_current_text->Enable();
+	m_seq_chk->SetValue(true);
 }
 
 void VMovieView::OnTimeChange(wxScrollEvent &event) {
@@ -931,17 +941,6 @@ void VMovieView::OnRotateChecked(wxCommandEvent& event) {
 }
 
 void VMovieView::OnSequenceChecked(wxCommandEvent& event) {
-	wxString str = m_views_cmb->GetValue();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
-	VRenderView* vrv = vr_frame->GetView(str);
-	if (!vrv) return;
-	int first, sec, tmp;
-	vrv->Get4DSeqFrames(first, sec, tmp);
-	if (sec - first == 0)
-		vrv->Get3DBatFrames(first, sec, tmp);
-	m_time_start_text->SetValue(wxString::Format("%d",first));
-	m_time_end_text->SetValue(wxString::Format("%d",sec));
 	if (m_seq_chk->GetValue())
 		EnableTime();
 	else

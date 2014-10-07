@@ -73,6 +73,10 @@ public:
 	void DeleteView(wxString view);
 	void SetView(int index);
 	void SetTimeFrame(int frame);
+	void DisableRot();
+	void EnableRot();
+	void DisableTime();
+	void EnableTime();
 
 public:
 	//controls
@@ -134,10 +138,6 @@ private:
 
 private:
 	void GetSettings(int view=0);
-	void DisableRot();
-	void EnableRot();
-	void DisableTime();
-	void EnableTime();
 
 	//set the renderview and progress bars/text
 	void SetRendering(double pcnt);

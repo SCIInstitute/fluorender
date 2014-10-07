@@ -3,12 +3,7 @@
 #include "compatibility.h"
 #include <wx/valnum.h>
 #include "png_resource.h"
-#include "img/link.h"
-#include "img/unlink.h"
-#include "img/refresh.h"
-#include "img/align.h"
-#include "img/link_text.h"
-#include "img/unlink_text.h"
+#include "img/icons.h"
 
 BEGIN_EVENT_TABLE(ClippingView, wxPanel)
 	EVT_TOOL(ID_LinkChannelsChk, ClippingView::OnLinkChannelsCheck)
@@ -296,7 +291,7 @@ m_link_z(false)
 	m_clip_reset_btn = new wxButton(this, ID_ClipResetBtn, "Reset Clips",
 									wxDefaultPosition, wxSize(125, 30));
 #endif
-	m_clip_reset_btn->SetBitmap(wxGetBitmapFromMemory(refresh));
+	m_clip_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	sizer_6->Add(5, 5, 0);
 	sizer_6->Add(m_clip_reset_btn, 0, wxALIGN_CENTER);
 
@@ -323,7 +318,7 @@ m_link_z(false)
 	m_rot_reset_btn = new wxButton(this, ID_RotResetBtn, "Reset to 0",
 								   wxDefaultPosition, wxSize(125, 30));
 #endif
-	m_rot_reset_btn->SetBitmap(wxGetBitmapFromMemory(refresh));
+	m_rot_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	sizer_8->Add(5, 5, 0);
 	sizer_8->Add(m_rot_reset_btn, 0, wxALIGN_CENTER);
 
