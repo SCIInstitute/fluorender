@@ -149,6 +149,17 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/img)
 file(GLOB pngs fluorender/FluoRender/img/*.h)
 add_library(IMAGES_OBJ OBJECT  ${pngs})
 
+#OpenCL
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/OpenCL/include)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+	if(${ARCHITECTURE} MATCHES 64)
+		file(GLOB OpenCL_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/OpenCL/lib/x86_64/*.lib)
+	endif()
+	if(${ARCHITECTURE} MATCHES 32)
+		file(GLOB OpenCL_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/OpenCL/lib/x86/*.lib)
+	endif()
+endif()
+
 #other sources
 file(GLOB src fluorender/FluoRender/*.cpp)
 file(GLOB hdr fluorender/FluoRender/*.h)
@@ -275,7 +286,8 @@ target_link_libraries(FluoRender
    ${wxWidgets_LIBRARIES}
    ${OPENGL_LIBRARIES}
    ${Boost_LIBRARIES}
-   ${ffmpeg_LIBRARIES})
+   ${ffmpeg_LIBRARIES}
+   ${OpenCL_LIBRARIES})
    
 #post build DLL copy
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
