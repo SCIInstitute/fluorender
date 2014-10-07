@@ -103,6 +103,8 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/ffmpeg_include)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	file(GLOB ffmpeg_LIBRARIES fluorender/ffmpeg_lib/*.lib)
 	add_definitions(-D__STDC_CONSTANT_MACROS)
+else()
+	file(GLOB ffmpeg_LIBRARIES fluorender/ffmpeg_lib/*.a)
 endif()
 
 #FluoRender
