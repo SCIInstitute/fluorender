@@ -7,23 +7,7 @@
 #include <algorithm>
 #include "GL/mywgl.h"
 #include "png_resource.h"
-#include "layers.h"
-#include "depth.h"
-#include "axis.h"
-#include "info.h"
-#include "legend.h"
-#include "freefly.h"
-#include "camera.h"
-#include "composite.h"
-#include "refresh.h"
-#include "measure.h"
-#include "ratio.h"
-#include "center.h"
-#include "save_settings.h"
-#include "scale.h"
-#include "scale_text.h"
-#include "scale_text_off.h"
-#include "gear_45.h"
+#include "img/icons.h"
 
 int VRenderView::m_id = 1;
 ImgShaderFactory VRenderGLView::m_img_shader_factory;
@@ -10235,7 +10219,7 @@ void VRenderView::CreateBar()
    wxBoxSizer* sizer_v_3 = new wxBoxSizer(wxVERTICAL);
    m_left_toolbar = new wxToolBar(this, wxID_ANY);
    m_left_toolbar->AddCheckTool(ID_DepthAttenChk,"Depth Interval",
-	   wxGetBitmapFromMemory(measure),wxNullBitmap,
+	   wxGetBitmapFromMemory(no_depth_atten),wxNullBitmap,
 	   "Enable adjustment of the Depth Attenuation Interval",
 	   "Enable adjustment of the Depth Attenuation Interval");
    m_left_toolbar->ToggleTool(ID_DepthAttenChk, true);
@@ -10244,7 +10228,7 @@ void VRenderView::CreateBar()
    m_depth_atten_factor_sldr->Disable();
    m_depth_atten_reset_btn = new wxToolBar(this, wxID_ANY);
    m_depth_atten_reset_btn->AddTool(ID_DepthAttenResetBtn, "Reset",
-	   wxGetBitmapFromMemory(refresh),
+	   wxGetBitmapFromMemory(reset),
 	   "Reset Depth Attenuation Interval");
    m_depth_atten_reset_btn->Realize();
    m_depth_atten_factor_text = new wxTextCtrl(this, ID_DepthAttenFactorText, "0.0",
@@ -10277,7 +10261,7 @@ void VRenderView::CreateBar()
          wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
    m_scale_reset_btn = new wxToolBar(this, wxID_ANY);
    m_scale_reset_btn->AddTool(ID_ScaleResetBtn, "Reset",
-         wxGetBitmapFromMemory(refresh),
+         wxGetBitmapFromMemory(reset),
 		 "Reset the Zoom");
    m_scale_reset_btn->Realize();
    m_scale_factor_text = new wxTextCtrl(this, ID_ScaleFactorText, "100",
@@ -10326,7 +10310,7 @@ void VRenderView::CreateBar()
    m_rot_lock_btn->Realize();
 
    m_lower_toolbar->AddTool(ID_RotResetBtn,"Reset",
-	   wxGetBitmapFromMemory(refresh),
+	   wxGetBitmapFromMemory(reset),
 	   "Reset Rotations");
    m_lower_toolbar->Realize();
    
@@ -11257,12 +11241,16 @@ void VRenderView::OnDepthAttenCheck(wxCommandEvent& event)
       SetFog(true);
       m_depth_atten_factor_sldr->Enable();
       m_depth_atten_factor_text->Enable();
+	  m_left_toolbar->SetToolNormalBitmap (ID_DepthAttenChk,
+		   wxGetBitmapFromMemory(depth_atten));
    }
    else
    {
       SetFog(false);
       m_depth_atten_factor_sldr->Disable();
       m_depth_atten_factor_text->Disable();
+	  m_left_toolbar->SetToolNormalBitmap (ID_DepthAttenChk,
+		   wxGetBitmapFromMemory(no_depth_atten));
    }
 
    RefreshGL();

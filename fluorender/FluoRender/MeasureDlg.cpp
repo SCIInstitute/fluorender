@@ -10,12 +10,7 @@
 #include "ruler.xpm"
 
 //resources
-#include "img/listicon_delall.h"
-#include "img/listicon_delete.h"
-#include "img/listicon_save.h"
-#include "img/listicon_locator.h"
-#include "img/listicon_addruler.h"
-#include "img/listicon_ruleredit.h"
+#include "img/icons.h"
 
 BEGIN_EVENT_TABLE(RulerListCtrl, wxListCtrl)
 EVT_KEY_DOWN(RulerListCtrl::OnKeyDown)

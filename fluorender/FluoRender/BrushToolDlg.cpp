@@ -4,13 +4,7 @@
 #include "Formats/png_resource.h"
 
 //resources
-#include "img/listicon_brushappend.h"
-#include "img/listicon_brushclear.h"
-#include "img/listicon_brushcreate.h"
-#include "img/listicon_brushdesel.h"
-#include "img/listicon_brushdiffuse.h"
-#include "img/listicon_brusherase.h"
-#include "img/listicon_qmark.h"
+#include "img/icons.h"
 
 BEGIN_EVENT_TABLE(BrushToolDlg, wxPanel)
 //paint tools

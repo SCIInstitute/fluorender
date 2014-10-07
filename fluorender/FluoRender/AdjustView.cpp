@@ -2,10 +2,7 @@
 #include "VRenderFrame.h"
 #include <wx/valnum.h>
 #include "png_resource.h"
-#include "img/save_settings.h"
-#include "img/refresh.h"
-#include "img/link.h"
-#include "img/unlink.h"
+#include "img/icons.h"
 
 BEGIN_EVENT_TABLE(AdjustView, wxPanel)
 	//set gamme
@@ -142,7 +139,7 @@ m_dft_sync_b(false)
 	m_r_reset_btn = new wxButton(this, ID_RResetBtn, "Reset",
 								 wxDefaultPosition, wxSize(30, 30));
 #endif
-	m_r_reset_btn->SetBitmap(wxGetBitmapFromMemory(refresh));
+	m_r_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	sizer_v->Add(m_r_reset_btn, 0, wxEXPAND);
 
 	//6th line: input boxes
@@ -213,7 +210,7 @@ m_dft_sync_b(false)
 	m_g_reset_btn = new wxButton(this, ID_GResetBtn, "Reset",
 								 wxDefaultPosition, wxSize(30, 30));
 #endif
-	m_g_reset_btn->SetBitmap(wxGetBitmapFromMemory(refresh));
+	m_g_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	sizer_v->Add(m_g_reset_btn, 0, wxEXPAND);
 
 	//11th line: input boxes
@@ -285,7 +282,7 @@ m_dft_sync_b(false)
 	m_b_reset_btn = new wxButton(this, ID_BResetBtn, "Reset",
 								 wxDefaultPosition, wxSize(30, 30));
 #endif
-	m_b_reset_btn->SetBitmap(wxGetBitmapFromMemory(refresh));
+	m_b_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	sizer_v->Add(m_b_reset_btn, 0, wxEXPAND);
 
 	//16th line: input boxes
