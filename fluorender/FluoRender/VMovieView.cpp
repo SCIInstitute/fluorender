@@ -351,7 +351,7 @@ void VMovieView::GetSettings(int view) {
 	if (vr_frame->m_mov_step != "")
 		m_movie_time->SetValue(vr_frame->m_mov_step);
 	if (vr_frame->m_mov_frames != "")
-		m_fps_text->SetValue(vr_frame->m_mov_frames);
+		m_fps_text->ChangeValue(vr_frame->m_mov_frames);
 
 	if (vrv->GetFrameEnabled()) {
 		m_frame_chk->SetValue(true);
@@ -405,12 +405,12 @@ void VMovieView::SetView(int index) {
 }
 
 void VMovieView::SetTimeFrame(int frame) {
-	m_last_frame = frame;
 	int start_time = STOI(m_time_start_text->GetValue().fn_str());
 	int end_time = STOI(m_time_end_text->GetValue().fn_str());
 	int time = end_time - start_time;
 
 	double pcnt = (double)(std::min(frame,end_time)) / (double)time;
+	m_time_current_text->ChangeValue(wxString::Format("%d",frame));
 	SetProgress(pcnt);
 	SetRendering(pcnt);
 }
@@ -429,7 +429,11 @@ void VMovieView::OnTimer(wxTimerEvent& event) {
 	SetProgress(time/len);
 	//update the rendering frame since we have advanced.
 	if (frame != m_last_frame) {
-		m_time_current_text->SetValue(wxString::Format("%d",frame));
+		int start_time = STOI(m_time_start_text->GetValue().fn_str());
+		int end_time = STOI(m_time_end_text->GetValue().fn_str());
+		int tot_time = end_time - start_time + 1;
+		m_time_current_text->ChangeValue(wxString::Format("%d",
+			((int)(start_time + tot_time * time/len))));
 		if (m_record)
 			WriteFrameToFile(); 
 		SetRendering(time/len);
@@ -601,7 +605,7 @@ void VMovieView::OnRewind(wxCommandEvent& event){
 	if (!vrv) return;
 	vrv->SetParams(0.);
 	OnStop(wxCommandEvent());
-	m_time_current_text->SetValue(wxString::Format("%d",0));
+	m_time_current_text->ChangeValue(wxString::Format("%d",0));
 	SetProgress(0.);
 	SetRendering(0.);
 }
@@ -836,8 +840,8 @@ void VMovieView::EnableTime() {
 	vrv->Get4DSeqFrames(first, sec, tmp);
 	if (sec - first == 0)
 		vrv->Get3DBatFrames(first, sec, tmp);
-	m_time_start_text->SetValue(wxString::Format("%d",first));
-	m_time_end_text->SetValue(wxString::Format("%d",sec));
+	m_time_start_text->ChangeValue(wxString::Format("%d",first));
+	m_time_end_text->ChangeValue(wxString::Format("%d",sec));
 	m_time_start_text->Enable();
 	m_time_end_text->Enable();
 	m_inc_time_btn->Enable();
@@ -851,11 +855,12 @@ void VMovieView::OnTimeChange(wxScrollEvent &event) {
 	int frame = event.GetPosition();
 	double pcnt = (((double)frame)/360.);
 	SetRendering(pcnt);
-
+	
 	int start_time = STOI(m_time_start_text->GetValue().fn_str());
 	int end_time = STOI(m_time_end_text->GetValue().fn_str());
 	int time = end_time - start_time + 1;
-	m_time_current_text->SetValue(wxString::Format("%d",(int)(time*pcnt)));
+	m_time_current_text->ChangeValue(wxString::Format("%d",
+		start_time + time * pcnt));
 
 	double movie_time;
 	m_movie_time->GetValue().ToDouble(&movie_time);
@@ -926,11 +931,12 @@ void VMovieView::OnTimeEnter(wxCommandEvent& event) {
 	double pcnt = (iVal / movie_time);
 	m_progress_sldr->SetValue(360. * pcnt);
 	SetRendering(pcnt);
-
+	
 	int start_time = STOI(m_time_start_text->GetValue().fn_str());
 	int end_time = STOI(m_time_end_text->GetValue().fn_str());
 	int time = end_time - start_time + 1;
-	m_time_current_text->SetValue(wxString::Format("%d",(int)(time*pcnt)));
+	m_time_current_text->ChangeValue(wxString::Format("%d",
+		start_time + time * pcnt));
 }
 
 void VMovieView::OnRotateChecked(wxCommandEvent& event) {
@@ -1029,7 +1035,7 @@ void VMovieView::OnUpFrame(wxCommandEvent& event) {
 	if (current_time > end_time) current_time = start_time;
 	int time = end_time - start_time + 1;
 	double pcnt = (double)current_time / (double) time;
-	m_time_current_text->SetValue(wxString::Format("%d",current_time));
+	m_time_current_text->ChangeValue(wxString::Format("%d",current_time));
 	SetProgress(pcnt);
 	SetRendering(pcnt);
 }
@@ -1042,7 +1048,7 @@ void VMovieView::OnDownFrame(wxCommandEvent& event) {
 	if (current_time < start_time) current_time = end_time;
 	int time = end_time - start_time + 1;
 	double pcnt = (double)current_time / (double) time;
-	m_time_current_text->SetValue(wxString::Format("%d",current_time));
+	m_time_current_text->ChangeValue(wxString::Format("%d",current_time));
 	SetProgress(pcnt);
 	SetRendering(pcnt);
 }
