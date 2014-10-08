@@ -104,7 +104,8 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	file(GLOB ffmpeg_LIBRARIES fluorender/ffmpeg_lib/*.lib)
 	add_definitions(-D__STDC_CONSTANT_MACROS)
 else()
-	file(GLOB ffmpeg_LIBRARIES fluorender/ffmpeg_lib/*.a)
+	file(GLOB ffmpeg_LIBRARIES fluorender/ffmpeg_lib/*.a
+				   fluorender/ffmpeg_lib/*.dylib)
 endif()
 
 #FluoRender
