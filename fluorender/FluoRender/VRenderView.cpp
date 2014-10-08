@@ -6648,69 +6648,6 @@ void VRenderGLView::MoveLayerinView(wxString &src_name, wxString &dst_name)
    m_md_pop_dirty = true;
 }
 
-void VRenderGLView::ShowAll()
-{
-	for (unsigned int i=0; i<m_layer_list.size(); ++i)
-	{
-		if (!m_layer_list[i]) continue;
-
-		switch (m_layer_list[i]->IsA())
-		{
-		case 2://volume
-			{
-				VolumeData* vd = (VolumeData*)m_layer_list[i];
-				if (vd)
-					vd->SetDisp(true);
-			}
-			break;
-		case 3://mesh
-			{
-				MeshData* md = (MeshData*)m_layer_list[i];
-				if (md)
-					md->SetDisp(true);
-			}
-			break;
-		case 4://annotation
-			{
-				Annotations* ann = (Annotations*)m_layer_list[i];
-				if (ann)
-					ann->SetDisp(true);
-			}
-			break;
-		case 5:
-			{
-				DataGroup* group = (DataGroup*)m_layer_list[i];
-				if (group)
-				{
-					for (unsigned int j=0; j<group->GetVolumeNum(); ++j)
-					{
-						VolumeData* vd = group->GetVolumeData(j);
-						if (vd)
-							vd->SetDisp(true);
-					}
-				}
-			}
-			break;
-		case 6://mesh group
-			{
-				MeshGroup* group = (MeshGroup*)m_layer_list[i];
-				if (group)
-				{
-					for (unsigned int j=0; j<group->GetMeshNum(); ++j)
-					{
-						MeshData* md = group->GetMeshData(j);
-						if (md)
-							md->SetDisp(true);
-					}
-				}
-			}
-			break;
-		}
-	}
-	m_vd_pop_dirty = true;
-	m_md_pop_dirty = true;
-}
-
 //move layer (volume) of the same level within the given group
 //source is after the destination
 void VRenderGLView::MoveLayerinGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
