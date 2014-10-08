@@ -7494,11 +7494,11 @@ void VRenderGLView::DrawFrame()
    //draw frame
    glColor3d(1.0f, 1.0f, 0.0f);
    glBegin(GL_LINE_STRIP);
-   glVertex2d(m_frame_x, m_frame_y);
-   glVertex2d(m_frame_x+m_frame_w, m_frame_y);
-   glVertex2d(m_frame_x+m_frame_w, m_frame_y+m_frame_h);
-   glVertex2d(m_frame_x, m_frame_y+m_frame_h);
-   glVertex2d(m_frame_x, m_frame_y);
+   glVertex2d(m_frame_x-1, m_frame_y-1);
+   glVertex2d(m_frame_x+m_frame_w+1, m_frame_y-1);
+   glVertex2d(m_frame_x+m_frame_w+1, m_frame_y+m_frame_h+1);
+   glVertex2d(m_frame_x-1, m_frame_y+m_frame_h+1);
+   glVertex2d(m_frame_x-1, m_frame_y-1);
    glEnd();
 
    glPopAttrib();
@@ -10026,8 +10026,6 @@ VRenderView::VRenderView(wxWindow* frame,
    CreateBar();
    if (m_glview) {
 	   m_glview->SetSBText(wxString::Format("50 %c%c", 131, 'm'));
-	   m_glview->m_sb_num = "50";
-	   m_glview->m_sb_unit = 0;
 	   m_glview->SetScaleBarLen(1.);
    }
    LoadSettings();
@@ -11609,10 +11607,10 @@ void VRenderView::OnScaleBar(wxCommandEvent& event)
 		m_glview->m_disp_scale_bar_text = false;
 		m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
 			   wxGetBitmapFromMemory(scale));
-		m_scale_text->Disable();
+		m_scale_text->Enable();
 		m_scale_cmb->Disable();
-		if (m_glview) m_glview->EnableScaleBar();
 		if (m_glview) m_glview->DisableSBText();
+		if (m_glview) m_glview->EnableScaleBar();
 		break;
 	case kOn:
 		m_draw_scalebar = kText;

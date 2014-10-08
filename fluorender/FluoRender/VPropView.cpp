@@ -159,7 +159,7 @@ VPropView::VPropView(wxWindow* frame,
    //alpha
    m_alpha_tool = new wxToolBar(this,wxID_ANY);
    m_alpha_tool->AddCheckTool(ID_AlphaChk,"Alpha",
-   wxGetBitmapFromMemory(alpha),wxNullBitmap,
+   wxGetBitmapFromMemory(alpha), wxNullBitmap,
     "Enables Alpha Editing.",
     "Enables Alpha Editing.");
    m_alpha_tool->ToggleTool(ID_AlphaChk,true);
@@ -181,7 +181,7 @@ VPropView::VPropView(wxWindow* frame,
          wxDefaultPosition, wxSize(40, 20), 0, vald_fp2);
    m_shade_tool = new wxToolBar(this,wxID_ANY);
    m_shade_tool->AddCheckTool(ID_ShadingEnableChk,"Shading",
-   wxGetBitmapFromMemory(shade),wxNullBitmap,
+   wxGetBitmapFromMemory(shade), wxNullBitmap,
     "Enables Shading Editing.",
     "Enables Shading Editing.");
    m_shade_tool->ToggleTool(ID_ShadingEnableChk,true);
@@ -382,7 +382,12 @@ VPropView::VPropView(wxWindow* frame,
    // FluoRender Image (rows 4-5)
    wxToolBar * tmp= new wxToolBar(this, wxID_ANY);
    tmp->AddTool(wxID_ANY, "FluoRender (c) 2014",
-         wxGetBitmapFromMemory(logo_small),"FluoRender (c) 2014");
+         wxGetBitmapFromMemory(logo_small),
+		 wxGetBitmapFromMemory(logo_small),
+		 wxITEM_NORMAL,
+		 "FluoRender (c) 2014",
+		 "FluoRender (c) 2014");
+   tmp->Disable();
    sizer_r4->Add(tmp, 0, wxALIGN_CENTER);
    tmp->Realize();
 
