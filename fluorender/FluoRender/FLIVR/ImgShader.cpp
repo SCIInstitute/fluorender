@@ -83,11 +83,9 @@ namespace FLIVR
 	"	c_avg_4 = c/pow(c_avg_4, loc0);\n" \
 	"	c_avg_5 = c/pow(c_avg_5, loc0);\n" \
 	"	c *= b;\n" \
-	"	vec4 c_avg = 1.0*c_avg_1+0.6*c_avg_2+0.4*c_avg_3+0.2*c_avg_4+0.1*c_avg_5;\n" \
+	"	vec4 c_avg = 0.43*c_avg_1+0.26*c_avg_2+0.17*c_avg_3+0.1*c_avg_4+0.04*c_avg_5;\n" \
 	"	vec4 unit = vec4(1.0);\n" \
 	"	c = c*(unit-loc2)+loc2*c_avg;\n" \
-	"	//gl_FragColor = vec4(1.0/(c.x+1.0));\n" \
-	"	//gl_FragColor.a = c.a;\n" \
 	"	gl_FragColor = c*(unit-loc2)+loc2*(unit-unit/(c+unit));\n" \
 	"}\n"
 
