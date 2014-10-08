@@ -105,6 +105,7 @@ class VRenderGLView: public wxGLCanvas
       void RemoveGroup(wxString &name);
       //isolate
       void Isolate(int type, wxString name);
+	  void ShowAll();
       //move
       void MoveLayerinView(wxString &src_name, wxString &dst_name);
       //move volume
@@ -949,6 +950,7 @@ class VRenderView: public wxPanel
    void RemoveAnnotations(wxString &name);
    void RemoveGroup(wxString &name);
    void Isolate(int type, wxString name);
+   void ShowAll();
    //move
    void MoveLayerinView(wxString &src_name, wxString &dst_name);
    //move volume
