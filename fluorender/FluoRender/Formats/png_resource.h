@@ -5,7 +5,7 @@
 #include "../compatibility.h"
 #include "wx/mstream.h"
 
-#define wxGetBitmapFromMemory(name) _wxGetBitmapFromMemory(name ## _png, sizeof(name ## _png))
+#define wxGetBitmapFromMemory(name) _wxGetBitmapFromMemory(icons::name ## _png, sizeof(icons::name ## _png))
 
 inline wxBitmap _wxGetBitmapFromMemory(const unsigned char *data, int length)
 {

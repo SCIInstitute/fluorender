@@ -4,12 +4,7 @@
 #include "Formats/png_resource.h"
 
 //resources
-#include "img/listicon_bake.h"
-#include "img/listicon_delall.h"
-#include "img/listicon_delete.h"
-#include "img/listicon_save.h"
-#include "img/listicon_rename.h"
-#include "img/listicon_view.h"
+#include "img/icons.h"
 
 BEGIN_EVENT_TABLE(DataListCtrl, wxListCtrl)
 EVT_LIST_ITEM_ACTIVATED(wxID_ANY, DataListCtrl::OnAct)

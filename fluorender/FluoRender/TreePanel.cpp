@@ -5,16 +5,7 @@
 #include "Formats/png_resource.h"
 
 //resources
-#include "img/listicon_addgroup.h"
-#include "img/listicon_addmgroup.h"
-#include "img/listicon_brushappend.h"
-#include "img/listicon_brushclear.h"
-#include "img/listicon_brushcreate.h"
-#include "img/listicon_brushdiffuse.h"
-#include "img/listicon_brushdesel.h"
-#include "img/listicon_brusherase.h"
-#include "img/listicon_delete.h"
-#include "img/listicon_toggle.h"
+#include "img/icons.h"
 
 BEGIN_EVENT_TABLE(DataTreeCtrl, wxTreeCtrl)
 EVT_CONTEXT_MENU(DataTreeCtrl::OnContextMenu)

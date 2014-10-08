@@ -146,8 +146,9 @@ add_library(CONVERTERS_OBJ OBJECT
 
 #images
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/img)
-file(GLOB pngs fluorender/FluoRender/img/*.h)
-add_library(IMAGES_OBJ OBJECT  ${pngs})
+file(GLOB pngs_hdr fluorender/FluoRender/img/*.h)
+file(GLOB pngs_src fluorender/FluoRender/img/*.cpp)
+add_library(IMAGES_OBJ OBJECT  ${pngs_hdr} ${pngs_src})
 
 #OpenCL
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/OpenCL/include)

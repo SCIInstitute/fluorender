@@ -4,16 +4,14 @@
 #include <wx/aboutdlg.h>
 #include <wx/valnum.h>
 #include "png_resource.h"
-#include "img/listicon_save.h"
-#include "img/refresh.h"
-#include "img/play.h"
-#include "img/rewind.h"
-#include "img/pause.h"
+#include "img/icons.h"
 
 BEGIN_EVENT_TABLE(VMovieView, wxPanel)
 	//time sequence
 	EVT_CHECKBOX(ID_SeqChk, VMovieView::OnSequenceChecked)
-	EVT_BUTTON(ID_CurrentFrameBtn, VMovieView::OnUpFrame)
+	EVT_BUTTON(ID_IncTimeBtn, VMovieView::OnUpFrame)
+	EVT_BUTTON(ID_DecTimeBtn, VMovieView::OnDownFrame)
+	EVT_TEXT(ID_CurrentTimeText, VMovieView::OnTimeText)
 	//rotations
 	EVT_CHECKBOX(ID_RotChk, VMovieView::OnRotateChecked)
 	//fps, view combo, help
@@ -72,9 +70,9 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	//sizer 1
 	sizer_1->Add(m_seq_chk, 0, wxALIGN_CENTER);
 	sizer_1->AddStretchSpacer();
-	st = new wxStaticText(page,wxID_ANY, "Increment Time");
+	st = new wxStaticText(page,wxID_ANY, "Current Time");
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
-	sizer_1->Add(5,5,0);
+	sizer_1->Add(20,5,0);
 	//sizer 2
 	st = new wxStaticText(page,wxID_ANY, "Start Time: ",
 		wxDefaultPosition,wxSize(60,-1));
@@ -84,9 +82,19 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	sizer_2->Add(10,5,0);
 	sizer_2->Add(st2, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_time_end_text, 0, wxALIGN_CENTER);
-	m_inc_time_btn = new wxButton(page, ID_CurrentFrameBtn, "0",
-		wxDefaultPosition, wxSize(45, 25));
+	m_inc_time_btn = new wxButton(page, ID_IncTimeBtn, "",
+		wxDefaultPosition, wxSize(25, 25));
+	m_dec_time_btn = new wxButton(page, ID_DecTimeBtn, "",
+		wxDefaultPosition, wxSize(25, 25));
+	m_time_current_text = new wxTextCtrl(page, ID_CurrentTimeText, "0",
+		wxDefaultPosition,wxSize(35,-1));
+	m_inc_time_btn->SetBitmap(wxGetBitmapFromMemory(plus));
+	m_dec_time_btn->SetBitmap(wxGetBitmapFromMemory(minus));
 	sizer_2->AddStretchSpacer();
+	sizer_2->Add(m_dec_time_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(5,15,0);
+	sizer_2->Add(m_time_current_text, 0, wxALIGN_CENTER);
+	sizer_2->Add(5,15,0);
 	sizer_2->Add(m_inc_time_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(5,15,0);
 	//rotations
@@ -97,7 +105,7 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	m_x_rd = new wxRadioButton(page,ID_XRd,"X",wxDefaultPosition, wxSize(30,22));
 	m_y_rd = new wxRadioButton(page,ID_YRd,"Y",wxDefaultPosition, wxSize(30,22));
 	m_z_rd = new wxRadioButton(page,ID_ZRd,"Z",wxDefaultPosition, wxSize(30,22));
-	m_x_rd->SetValue(true);
+	m_y_rd->SetValue(true);
 	//degrees
 	m_degree_end = new wxTextCtrl(page, ID_DegreeEndText, "360",
 		wxDefaultPosition,wxSize(50,-1));
@@ -144,7 +152,7 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	sizer_v->Add(sizer_1, 0, wxEXPAND);
 	sizer_v->Add(5, 5, 0);
 	sizer_v->Add(sizer_2, 0, wxEXPAND);
-	sizer_v->Add(5, 40, 0);
+	sizer_v->Add(5, 20, 0);
 	sizer_v->Add(sizer_7, 0, wxEXPAND);
 	sizer_v->AddStretchSpacer();
 	//set the page
@@ -183,7 +191,7 @@ wxWindow* VMovieView::CreateCroppingPage(wxWindow *parent) {
 	m_frame_chk = new wxCheckBox(page, ID_FrameChk, "");
 	m_reset_btn = new wxButton(page, ID_ResetBtn, "Reset",
 		wxDefaultPosition, wxSize(110, 22));
-	m_reset_btn->SetBitmap(wxGetBitmapFromMemory(refresh));
+	m_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	sizer_8->Add(5, 5, 0);
 	sizer_8->Add(st, 0, wxALIGN_CENTER);
 	sizer_8->Add(m_frame_chk, 0, wxALIGN_CENTER);
@@ -421,6 +429,7 @@ void VMovieView::OnTimer(wxTimerEvent& event) {
 	SetProgress(time/len);
 	//update the rendering frame since we have advanced.
 	if (frame != m_last_frame) {
+		m_time_current_text->SetValue(wxString::Format("%d",frame));
 		if (m_record)
 			WriteFrameToFile(); 
 		SetRendering(time/len);
@@ -592,6 +601,7 @@ void VMovieView::OnRewind(wxCommandEvent& event){
 	if (!vrv) return;
 	vrv->SetParams(0.);
 	OnStop(wxCommandEvent());
+	m_time_current_text->SetValue(wxString::Format("%d",0));
 	SetProgress(0.);
 	SetRendering(0.);
 }
@@ -758,6 +768,7 @@ void VMovieView::DisableRot() {
 	m_y_rd->Disable();
 	m_z_rd->Disable();
 	m_degree_end->Disable();
+	m_rot_chk->SetValue(false);
 }
 
 void VMovieView::EnableRot() {
@@ -765,6 +776,7 @@ void VMovieView::EnableRot() {
 	m_y_rd->Enable();
 	m_z_rd->Enable();
 	m_degree_end->Enable();
+	m_rot_chk->SetValue(true);
 }
 
 void VMovieView::OnHelpBtn(wxCommandEvent &event) {
@@ -809,15 +821,33 @@ void VMovieView::DisableTime() {
 	m_time_start_text->Disable();
 	m_time_end_text->Disable();
 	m_inc_time_btn->Disable();
+	m_dec_time_btn->Disable();
+	m_time_current_text->Disable();
+	m_seq_chk->SetValue(false);
 }
 
 void VMovieView::EnableTime() {
+	wxString str = m_views_cmb->GetValue();
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (!vr_frame) return;
+	VRenderView* vrv = vr_frame->GetView(str);
+	if (!vrv) return;
+	int first, sec, tmp;
+	vrv->Get4DSeqFrames(first, sec, tmp);
+	if (sec - first == 0)
+		vrv->Get3DBatFrames(first, sec, tmp);
+	m_time_start_text->SetValue(wxString::Format("%d",first));
+	m_time_end_text->SetValue(wxString::Format("%d",sec));
 	m_time_start_text->Enable();
 	m_time_end_text->Enable();
 	m_inc_time_btn->Enable();
+	m_dec_time_btn->Enable();
+	m_time_current_text->Enable();
+	m_seq_chk->SetValue(true);
 }
 
 void VMovieView::OnTimeChange(wxScrollEvent &event) {
+	if(m_running) return;
 	int frame = event.GetPosition();
 	double pcnt = (((double)frame)/360.);
 	SetRendering(pcnt);
@@ -825,7 +855,7 @@ void VMovieView::OnTimeChange(wxScrollEvent &event) {
 	int start_time = STOI(m_time_start_text->GetValue().fn_str());
 	int end_time = STOI(m_time_end_text->GetValue().fn_str());
 	int time = end_time - start_time + 1;
-	m_inc_time_btn->SetLabel(wxString::Format("%d",(int)(time*pcnt)));
+	m_time_current_text->SetValue(wxString::Format("%d",(int)(time*pcnt)));
 
 	double movie_time;
 	m_movie_time->GetValue().ToDouble(&movie_time);
@@ -886,6 +916,7 @@ void VMovieView::SetRendering(double pcnt) {
 }
 
 void VMovieView::OnTimeEnter(wxCommandEvent& event) {
+	if(m_running) return;
 	wxString str = m_progress_text->GetValue();
 	double iVal;
 	str.ToDouble(&iVal);
@@ -899,7 +930,7 @@ void VMovieView::OnTimeEnter(wxCommandEvent& event) {
 	int start_time = STOI(m_time_start_text->GetValue().fn_str());
 	int end_time = STOI(m_time_end_text->GetValue().fn_str());
 	int time = end_time - start_time + 1;
-	m_inc_time_btn->SetLabel(wxString::Format("%d",(int)(time*pcnt)));
+	m_time_current_text->SetValue(wxString::Format("%d",(int)(time*pcnt)));
 }
 
 void VMovieView::OnRotateChecked(wxCommandEvent& event) {
@@ -910,17 +941,6 @@ void VMovieView::OnRotateChecked(wxCommandEvent& event) {
 }
 
 void VMovieView::OnSequenceChecked(wxCommandEvent& event) {
-	wxString str = m_views_cmb->GetValue();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
-	VRenderView* vrv = vr_frame->GetView(str);
-	if (!vrv) return;
-	int first, sec, tmp;
-	vrv->Get4DSeqFrames(first, sec, tmp);
-	if (sec - first == 0)
-		vrv->Get3DBatFrames(first, sec, tmp);
-	m_time_start_text->SetValue(wxString::Format("%d",first));
-	m_time_end_text->SetValue(wxString::Format("%d",sec));
 	if (m_seq_chk->GetValue())
 		EnableTime();
 	else
@@ -1002,13 +1022,41 @@ void VMovieView::WriteFrameToFile() {
 }
 
 void VMovieView::OnUpFrame(wxCommandEvent& event) {
+	if(m_running) return;
 	int start_time = STOI(m_time_start_text->GetValue().fn_str());
 	int end_time = STOI(m_time_end_text->GetValue().fn_str());
-	int current_time = STOI(m_inc_time_btn->GetLabel().fn_str())+1;
+	int current_time = STOI(m_time_current_text->GetValue().fn_str())+1;
 	if (current_time > end_time) current_time = start_time;
 	int time = end_time - start_time + 1;
 	double pcnt = (double)current_time / (double) time;
-	m_inc_time_btn->SetLabel(wxString::Format("%d",current_time));
+	m_time_current_text->SetValue(wxString::Format("%d",current_time));
+	SetProgress(pcnt);
+	SetRendering(pcnt);
+}
+
+void VMovieView::OnDownFrame(wxCommandEvent& event) {
+	if(m_running) return;
+	int start_time = STOI(m_time_start_text->GetValue().fn_str());
+	int end_time = STOI(m_time_end_text->GetValue().fn_str());
+	int current_time = STOI(m_time_current_text->GetValue().fn_str())-1;
+	if (current_time < start_time) current_time = end_time;
+	int time = end_time - start_time + 1;
+	double pcnt = (double)current_time / (double) time;
+	m_time_current_text->SetValue(wxString::Format("%d",current_time));
+	SetProgress(pcnt);
+	SetRendering(pcnt);
+}
+
+
+void VMovieView::OnTimeText(wxCommandEvent& event) {
+	if(m_running) return;
+	int start_time = STOI(m_time_start_text->GetValue().fn_str());
+	int end_time = STOI(m_time_end_text->GetValue().fn_str());
+	int current_time = STOI(m_time_current_text->GetValue().fn_str());
+	if (current_time < start_time) current_time = end_time;
+	if (current_time > end_time) current_time = start_time;
+	int time = end_time - start_time + 1;
+	double pcnt = (double)current_time / (double) time;
 	SetProgress(pcnt);
 	SetRendering(pcnt);
 }

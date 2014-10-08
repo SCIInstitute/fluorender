@@ -19,7 +19,9 @@ class VMovieView : public wxPanel
 		ID_SeqChk,
 		ID_TimeStartText,
 		ID_TimeEndText,
-		ID_CurrentFrameBtn,
+		ID_IncTimeBtn,
+		ID_DecTimeBtn,
+		ID_CurrentTimeText,
 
 		//rotations
 		ID_RotChk,
@@ -71,6 +73,10 @@ public:
 	void DeleteView(wxString view);
 	void SetView(int index);
 	void SetTimeFrame(int frame);
+	void DisableRot();
+	void EnableRot();
+	void DisableTime();
+	void EnableTime();
 
 public:
 	//controls
@@ -89,6 +95,8 @@ public:
 	wxTextCtrl *m_time_start_text;
 	wxTextCtrl *m_time_end_text;
 	wxButton *m_inc_time_btn;
+	wxButton *m_dec_time_btn;
+	wxTextCtrl *m_time_current_text;
 
 	wxCheckBox *m_rot_chk;
 	wxRadioButton *m_x_rd;
@@ -130,10 +138,6 @@ private:
 
 private:
 	void GetSettings(int view=0);
-	void DisableRot();
-	void EnableRot();
-	void DisableTime();
-	void EnableTime();
 
 	//set the renderview and progress bars/text
 	void SetRendering(double pcnt);
@@ -180,6 +184,8 @@ private:
 	void OnTimeChange(wxScrollEvent &event);
 	void OnTimeEnter(wxCommandEvent& event);
 	void OnUpFrame(wxCommandEvent& event);
+	void OnDownFrame(wxCommandEvent& event);
+	void OnTimeText(wxCommandEvent& event);
 
 	//checkboxes
 	void OnSequenceChecked(wxCommandEvent& event);
