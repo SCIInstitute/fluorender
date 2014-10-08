@@ -105,7 +105,7 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	m_x_rd = new wxRadioButton(page,ID_XRd,"X",wxDefaultPosition, wxSize(30,22));
 	m_y_rd = new wxRadioButton(page,ID_YRd,"Y",wxDefaultPosition, wxSize(30,22));
 	m_z_rd = new wxRadioButton(page,ID_ZRd,"Z",wxDefaultPosition, wxSize(30,22));
-	m_x_rd->SetValue(true);
+	m_y_rd->SetValue(true);
 	//degrees
 	m_degree_end = new wxTextCtrl(page, ID_DegreeEndText, "360",
 		wxDefaultPosition,wxSize(50,-1));

@@ -447,6 +447,7 @@ MeshData* ClippingView::GetMeshData()
 
 void ClippingView::SetVolumeData(VolumeData* vd)
 {
+	if (!vd) return;
 	m_vd = vd;
 	m_sel_type = 2;
 	GetSettings();
@@ -454,6 +455,7 @@ void ClippingView::SetVolumeData(VolumeData* vd)
 
 void ClippingView::SetMeshData(MeshData* md)
 {
+	if (!md) return;
 	m_md = md;
 	m_sel_type = 3;
 	GetSettings();

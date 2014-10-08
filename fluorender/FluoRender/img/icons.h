@@ -3,8 +3,8 @@ public:
 /* align.png - 1470 bytes */
 const static unsigned char align_png[1470];
 
-/* alpha.png - 678 bytes */
-const static unsigned char alpha_png[678];
+/* alpha.png - 366 bytes */
+const static unsigned char alpha_png[366];
 
 /* axis.png - 557 bytes */
 const static unsigned char axis_png[577];
@@ -120,12 +120,6 @@ const static unsigned char icon_twitter_mini_png[896];
 /* info.png - 1262 bytes */
 const static unsigned char info_png[1262];
 
-/* interpolate.png - 320 bytes */
-const static unsigned char interpolate_png[320];
-
-/* invert.png - 467 bytes */
-const static unsigned char invert_png[467];
-
 /* layers.png - 16600 bytes */
 const static unsigned char layers_png[16600];
 
@@ -213,8 +207,8 @@ const static unsigned char mip_png[436];
 /* no_depth_atten.png - 16600 bytes */
 const static unsigned char no_depth_atten_png[16600];
 
-/* palette.png - 1374 bytes */
-const static unsigned char palette_png[1374];
+/* palette.png - 412 bytes */
+const static unsigned char palette_png[412];
 
 /* pause.png - 1389 bytes */
 const static unsigned char pause_png[1389];
@@ -249,14 +243,11 @@ const static unsigned char scale_text_png[484];
 /* scale_text_off.png - 1365 bytes */
 const static unsigned char scale_text_off_png[1365];
 
-/* shade.png - 1046 bytes */
-const static unsigned char shade_png[1046];
+/* shade.png - 497 bytes */
+const static unsigned char shade_png[497];
 
-/* shadow.png - 1034 bytes */
-const static unsigned char shadow_png[1034];
-
-/* smooth.png - 705 bytes */
-const static unsigned char smooth_png[705];
+/* shadow.png - 390 bytes */
+const static unsigned char shadow_png[390];
 
 /* sync_group.png - 913 bytes */
 const static unsigned char sync_group_png[913];
@@ -266,4 +257,13 @@ const static unsigned char unlink_png[1503];
 
 /* unlink_text.png - 765 bytes */
 const static unsigned char unlink_text_png[765];
+
+/* invert.png - 16600 bytes */
+const static unsigned char invert_png[16600];
+
+/* interpolate.png - 16600 bytes */
+const static unsigned char interpolate_png[16600];
+
+/* smooth.png - 16600 bytes */
+const static unsigned char smooth_png[16600];
 };

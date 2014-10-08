@@ -2420,7 +2420,7 @@ void VRenderGLView::DrawFinalBuffer()
 
    //2d adjustment
    FragmentProgram* img_shader =
-      m_img_shader_factory.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND);
+      m_img_shader_factory.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
    if (img_shader)
    {
       if (!img_shader->valid())
@@ -2429,6 +2429,9 @@ void VRenderGLView::DrawFinalBuffer()
       }
       img_shader->bind();
    }
+   img_shader->setLocalParam(0, m_gamma.r(), m_gamma.g(), m_gamma.b(), 1.0);
+   img_shader->setLocalParam(1, m_brightness.r(), m_brightness.g(), m_brightness.b(), 1.0);
+   img_shader->setLocalParam(2, m_hdr.r(), m_hdr.g(), m_hdr.b(), 0.0);
    //2d adjustment
 
    glMatrixMode(GL_PROJECTION);
@@ -4222,218 +4225,217 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
       UpdateBrushState();
    }
 
-   //draw_mask
-   if (wxGetKeyState(wxKeyCode('V')) &&
-         m_draw_mask)
+   wxWindow *window = wxWindow::FindFocus();
+   if (window)
    {
-      m_draw_mask = false;
-      refresh = true;
-   }
-   if (!wxGetKeyState(wxKeyCode('V')) &&
-         !m_draw_mask)
-   {
-      m_draw_mask = true;
-      refresh = true;
-   }
+	   VRenderFrame* frame = (VRenderFrame*)m_frame;
+	   //draw_mask
+	   if (wxGetKeyState(wxKeyCode('V')) &&
+			 m_draw_mask)
+	   {
+		  m_draw_mask = false;
+		  refresh = true;
+	   }
+	   if (!wxGetKeyState(wxKeyCode('V')) &&
+			 !m_draw_mask)
+	   {
+		  m_draw_mask = true;
+		  refresh = true;
+	   }
 
-   //move view
-   //left
-   if (!m_move_left &&
-         wxGetKeyState(WXK_CONTROL) &&
-         wxGetKeyState(WXK_LEFT))
-   {
-      m_move_left = true;
+	   //move view
+	   //left
+	   if (!m_move_left &&
+			 wxGetKeyState(WXK_CONTROL) &&
+			 wxGetKeyState(WXK_LEFT))
+	   {
+		  m_move_left = true;
 
-      m_head = Vector(-m_transx, -m_transy, -m_transz);
-      m_head.normalize();
-      Vector side = Cross(m_up, m_head);
-      Vector trans = -(side*(int(0.8*(m_ortho_right-m_ortho_left))));
-      m_obj_transx += trans.x();
-      m_obj_transy += trans.y();
-      m_obj_transz += trans.z();
-      //if (m_persp) SetSortBricks();
-      refresh = true;
-   }
-   if (m_move_left &&
-         (!wxGetKeyState(WXK_CONTROL) ||
-          !wxGetKeyState(WXK_LEFT)))
-      m_move_left = false;
-   //right
-   if (!m_move_right &&
-         wxGetKeyState(WXK_CONTROL) &&
-         wxGetKeyState(WXK_RIGHT))
-   {
-      m_move_right = true;
+		  m_head = Vector(-m_transx, -m_transy, -m_transz);
+		  m_head.normalize();
+		  Vector side = Cross(m_up, m_head);
+		  Vector trans = -(side*(int(0.8*(m_ortho_right-m_ortho_left))));
+		  m_obj_transx += trans.x();
+		  m_obj_transy += trans.y();
+		  m_obj_transz += trans.z();
+		  //if (m_persp) SetSortBricks();
+		  refresh = true;
+	   }
+	   if (m_move_left &&
+			 (!wxGetKeyState(WXK_CONTROL) ||
+			  !wxGetKeyState(WXK_LEFT)))
+		  m_move_left = false;
+	   //right
+	   if (!m_move_right &&
+			 wxGetKeyState(WXK_CONTROL) &&
+			 wxGetKeyState(WXK_RIGHT))
+	   {
+		  m_move_right = true;
 
-      m_head = Vector(-m_transx, -m_transy, -m_transz);
-      m_head.normalize();
-      Vector side = Cross(m_up, m_head);
-      Vector trans = side*(int(0.8*(m_ortho_right-m_ortho_left)));
-      m_obj_transx += trans.x();
-      m_obj_transy += trans.y();
-      m_obj_transz += trans.z();
-      //if (m_persp) SetSortBricks();
-      refresh = true;
-   }
-   if (m_move_right &&
-         (!wxGetKeyState(WXK_CONTROL) ||
-          !wxGetKeyState(WXK_RIGHT)))
-      m_move_right = false;
-   //up
-   if (!m_move_up &&
-         wxGetKeyState(WXK_CONTROL) &&
-         wxGetKeyState(WXK_UP))
-   {
-      m_move_up = true;
+		  m_head = Vector(-m_transx, -m_transy, -m_transz);
+		  m_head.normalize();
+		  Vector side = Cross(m_up, m_head);
+		  Vector trans = side*(int(0.8*(m_ortho_right-m_ortho_left)));
+		  m_obj_transx += trans.x();
+		  m_obj_transy += trans.y();
+		  m_obj_transz += trans.z();
+		  //if (m_persp) SetSortBricks();
+		  refresh = true;
+	   }
+	   if (m_move_right &&
+			 (!wxGetKeyState(WXK_CONTROL) ||
+			  !wxGetKeyState(WXK_RIGHT)))
+		  m_move_right = false;
+	   //up
+	   if (!m_move_up &&
+			 wxGetKeyState(WXK_CONTROL) &&
+			 wxGetKeyState(WXK_UP))
+	   {
+		  m_move_up = true;
 
-      m_head = Vector(-m_transx, -m_transy, -m_transz);
-      m_head.normalize();
-      Vector trans = -m_up*(int(0.8*(m_ortho_top-m_ortho_bottom)));
-      m_obj_transx += trans.x();
-      m_obj_transy += trans.y();
-      m_obj_transz += trans.z();
-      //if (m_persp) SetSortBricks();
-      refresh = true;
-   }
-   if (m_move_up &&
-         (!wxGetKeyState(WXK_CONTROL) ||
-          !wxGetKeyState(WXK_UP)))
-      m_move_up = false;
-   //down
-   if (!m_move_down &&
-         wxGetKeyState(WXK_CONTROL) &&
-         wxGetKeyState(WXK_DOWN))
-   {
-      m_move_down = true;
+		  m_head = Vector(-m_transx, -m_transy, -m_transz);
+		  m_head.normalize();
+		  Vector trans = -m_up*(int(0.8*(m_ortho_top-m_ortho_bottom)));
+		  m_obj_transx += trans.x();
+		  m_obj_transy += trans.y();
+		  m_obj_transz += trans.z();
+		  //if (m_persp) SetSortBricks();
+		  refresh = true;
+	   }
+	   if (m_move_up &&
+			 (!wxGetKeyState(WXK_CONTROL) ||
+			  !wxGetKeyState(WXK_UP)))
+		  m_move_up = false;
+	   //down
+	   if (!m_move_down &&
+			 wxGetKeyState(WXK_CONTROL) &&
+			 wxGetKeyState(WXK_DOWN))
+	   {
+		  m_move_down = true;
 
-      m_head = Vector(-m_transx, -m_transy, -m_transz);
-      m_head.normalize();
-      Vector trans = m_up*(int(0.8*(m_ortho_top-m_ortho_bottom)));
-      m_obj_transx += trans.x();
-      m_obj_transy += trans.y();
-      m_obj_transz += trans.z();
-      //if (m_persp) SetSortBricks();
-      refresh = true;
-   }
-   if (m_move_down &&
-         (!wxGetKeyState(WXK_CONTROL) ||
-          !wxGetKeyState(WXK_DOWN)))
-      m_move_down = false;
+		  m_head = Vector(-m_transx, -m_transy, -m_transz);
+		  m_head.normalize();
+		  Vector trans = m_up*(int(0.8*(m_ortho_top-m_ortho_bottom)));
+		  m_obj_transx += trans.x();
+		  m_obj_transy += trans.y();
+		  m_obj_transz += trans.z();
+		  //if (m_persp) SetSortBricks();
+		  refresh = true;
+	   }
+	   if (m_move_down &&
+			 (!wxGetKeyState(WXK_CONTROL) ||
+			  !wxGetKeyState(WXK_DOWN)))
+		  m_move_down = false;
 
-   //move time sequence
-   //forward
-   if (!m_tseq_forward &&
-         wxGetKeyState(wxKeyCode('d')))
-   {
-      m_tseq_forward = true;
-      Set4DSeqFrame(m_tseq_cur_num+1, true);
-      VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-      if (vr_frame && vr_frame->GetMovieView())
-         vr_frame->GetMovieView()->SetTimeFrame(m_tseq_cur_num);
-      refresh = true;
-   }
-   if (m_tseq_forward &&
-         !wxGetKeyState(wxKeyCode('d')))
-      m_tseq_forward = false;
-   //backforward
-   if (!m_tseq_backward &&
-         wxGetKeyState(wxKeyCode('a')))
-   {
-      m_tseq_backward = true;
-      Set4DSeqFrame(m_tseq_cur_num-1, true);
-      VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-      if (vr_frame && vr_frame->GetMovieView())
-         vr_frame->GetMovieView()->SetTimeFrame(m_tseq_cur_num);
-      refresh = true;
-   }
-   if (m_tseq_backward &&
-         !wxGetKeyState(wxKeyCode('a')))
-      m_tseq_backward = false;
+	   //move time sequence
+	   //forward
+	   if (!m_tseq_forward &&
+			 wxGetKeyState(wxKeyCode('d')))
+	   {
+		  m_tseq_forward = true;
+		  Set4DSeqFrame(m_tseq_cur_num+1, true);
+		  if (frame && frame->GetMovieView())
+			 frame->GetMovieView()->SetTimeFrame(m_tseq_cur_num);
+		  refresh = true;
+	   }
+	   if (m_tseq_forward &&
+			 !wxGetKeyState(wxKeyCode('d')))
+		  m_tseq_forward = false;
+	   //backforward
+	   if (!m_tseq_backward &&
+			 wxGetKeyState(wxKeyCode('a')))
+	   {
+		  m_tseq_backward = true;
+		  Set4DSeqFrame(m_tseq_cur_num-1, true);
+		  if (frame && frame->GetMovieView())
+			 frame->GetMovieView()->SetTimeFrame(m_tseq_cur_num);
+		  refresh = true;
+	   }
+	   if (m_tseq_backward &&
+			 !wxGetKeyState(wxKeyCode('a')))
+		  m_tseq_backward = false;
 
-   //move clip
-   //up
-   if (!m_clip_up &&
-         wxGetKeyState(wxKeyCode('s')))
-   {
-      m_clip_up = true;
-      VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-      if (vr_frame && vr_frame->GetClippingView())
-         vr_frame->GetClippingView()->MoveLinkedClippingPlanes(1);
-      refresh = true;
-   }
-   if (m_clip_up &&
-         !wxGetKeyState(wxKeyCode('s')))
-      m_clip_up = false;
-   //down
-   if (!m_clip_down &&
-         wxGetKeyState(wxKeyCode('w')))
-   {
-      m_clip_down = true;
-      VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-      if (vr_frame && vr_frame->GetClippingView())
-         vr_frame->GetClippingView()->MoveLinkedClippingPlanes(0);
-      refresh = true;
-   }
-   if (m_clip_down &&
-         !wxGetKeyState(wxKeyCode('w')))
-      m_clip_down = false;
+	   //move clip
+	   //up
+	   if (!m_clip_up &&
+			 wxGetKeyState(wxKeyCode('s')))
+	   {
+		  m_clip_up = true;
+		  if (frame && frame->GetClippingView())
+			 frame->GetClippingView()->MoveLinkedClippingPlanes(1);
+		  refresh = true;
+	   }
+	   if (m_clip_up &&
+			 !wxGetKeyState(wxKeyCode('s')))
+		  m_clip_up = false;
+	   //down
+	   if (!m_clip_down &&
+			 wxGetKeyState(wxKeyCode('w')))
+	   {
+		  m_clip_down = true;
+		  if (frame && frame->GetClippingView())
+			 frame->GetClippingView()->MoveLinkedClippingPlanes(0);
+		  refresh = true;
+	   }
+	   if (m_clip_down &&
+			 !wxGetKeyState(wxKeyCode('w')))
+		  m_clip_down = false;
 
-/*	//cell full
-	if (!m_cell_full &&
-		wxGetKeyState(wxKeyCode('f')))
-	{
-		m_cell_full = true;
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame && vr_frame->GetTraceDlg())
-			vr_frame->GetTraceDlg()->CellFull();
-		refresh = true;
-	}
-	if (m_cell_full &&
-		!wxGetKeyState(wxKeyCode('f')))
-		m_cell_full = false;
-	//cell link
-	if (!m_cell_link &&
-		wxGetKeyState(wxKeyCode('l')))
-	{
-		m_cell_link = true;
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame && vr_frame->GetTraceDlg())
-			vr_frame->GetTraceDlg()->CellLink(false);
-		refresh = true;
-	}
-	if (m_cell_link &&
-		!wxGetKeyState(wxKeyCode('l')))
-		m_cell_link = false;
-	//new cell id
-	if (!m_cell_new_id &&
-		wxGetKeyState(wxKeyCode('n')))
-	{
-		m_cell_new_id = true;
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame && vr_frame->GetTraceDlg())
-			vr_frame->GetTraceDlg()->CellNewID();
-		refresh = true;
-	}
-	if (m_cell_new_id &&
-		!wxGetKeyState(wxKeyCode('n')))
-		m_cell_new_id = false;
-*/
-   //forced refresh
-   if (wxGetKeyState(WXK_F5))
-   {
-      m_updating = true;
-      VRenderFrame* frame = (VRenderFrame*)m_frame;
-      if (frame && frame->GetStatusBar())
-         frame->GetStatusBar()->PushStatusText("Forced Refresh");
-      SetFocus();
-      Show(false);
-      Show(true);
-      //SetSortBricks();
-      RefreshGL();
-      if (frame && frame->GetStatusBar())
-         frame->GetStatusBar()->PopStatusText();
+		//cell full
+		if (!m_cell_full &&
+			wxGetKeyState(wxKeyCode('f')))
+		{
+			m_cell_full = true;
+			if (frame && frame->GetTraceDlg())
+				frame->GetTraceDlg()->CellFull();
+			refresh = true;
+		}
+		if (m_cell_full &&
+			!wxGetKeyState(wxKeyCode('f')))
+			m_cell_full = false;
+		//cell link
+		if (!m_cell_link &&
+			wxGetKeyState(wxKeyCode('l')))
+		{
+			m_cell_link = true;
+			if (frame && frame->GetTraceDlg())
+				frame->GetTraceDlg()->CellLink(false);
+			refresh = true;
+		}
+		if (m_cell_link &&
+			!wxGetKeyState(wxKeyCode('l')))
+			m_cell_link = false;
+		//new cell id
+		if (!m_cell_new_id &&
+			wxGetKeyState(wxKeyCode('n')))
+		{
+			m_cell_new_id = true;
+			if (frame && frame->GetTraceDlg())
+				frame->GetTraceDlg()->CellNewID();
+			refresh = true;
+		}
+		if (m_cell_new_id &&
+			!wxGetKeyState(wxKeyCode('n')))
+			m_cell_new_id = false;
+
+	   //forced refresh
+	   if (wxGetKeyState(WXK_F5))
+	   {
+		  m_updating = true;
+		  if (frame && frame->GetStatusBar())
+			 frame->GetStatusBar()->PushStatusText("Forced Refresh");
+		  SetFocus();
+		  Show(false);
+		  Show(true);
+		  //SetSortBricks();
+		  RefreshGL();
+		  if (frame && frame->GetStatusBar())
+			 frame->GetStatusBar()->PopStatusText();
+		  return;
+	   }
    }
-   else if (refresh)
+   
+   if (refresh)
    {
       m_updating = true;
       RefreshGL(ref_stat, start_loop);
@@ -6567,6 +6569,69 @@ void VRenderGLView::MoveLayerinView(wxString &src_name, wxString &dst_name)
    m_md_pop_dirty = true;
 }
 
+void VRenderGLView::ShowAll()
+{
+	for (unsigned int i=0; i<m_layer_list.size(); ++i)
+	{
+		if (!m_layer_list[i]) continue;
+
+		switch (m_layer_list[i]->IsA())
+		{
+		case 2://volume
+			{
+				VolumeData* vd = (VolumeData*)m_layer_list[i];
+				if (vd)
+					vd->SetDisp(true);
+			}
+			break;
+		case 3://mesh
+			{
+				MeshData* md = (MeshData*)m_layer_list[i];
+				if (md)
+					md->SetDisp(true);
+			}
+			break;
+		case 4://annotation
+			{
+				Annotations* ann = (Annotations*)m_layer_list[i];
+				if (ann)
+					ann->SetDisp(true);
+			}
+			break;
+		case 5:
+			{
+				DataGroup* group = (DataGroup*)m_layer_list[i];
+				if (group)
+				{
+					for (unsigned int j=0; j<group->GetVolumeNum(); ++j)
+					{
+						VolumeData* vd = group->GetVolumeData(j);
+						if (vd)
+							vd->SetDisp(true);
+					}
+				}
+			}
+			break;
+		case 6://mesh group
+			{
+				MeshGroup* group = (MeshGroup*)m_layer_list[i];
+				if (group)
+				{
+					for (unsigned int j=0; j<group->GetMeshNum(); ++j)
+					{
+						MeshData* md = group->GetMeshData(j);
+						if (md)
+							md->SetDisp(true);
+					}
+				}
+			}
+			break;
+		}
+	}
+	m_vd_pop_dirty = true;
+	m_md_pop_dirty = true;
+}
+
 //move layer (volume) of the same level within the given group
 //source is after the destination
 void VRenderGLView::MoveLayerinGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
@@ -7494,11 +7559,11 @@ void VRenderGLView::DrawFrame()
    //draw frame
    glColor3d(1.0f, 1.0f, 0.0f);
    glBegin(GL_LINE_STRIP);
-   glVertex2d(m_frame_x, m_frame_y);
-   glVertex2d(m_frame_x+m_frame_w, m_frame_y);
-   glVertex2d(m_frame_x+m_frame_w, m_frame_y+m_frame_h);
-   glVertex2d(m_frame_x, m_frame_y+m_frame_h);
-   glVertex2d(m_frame_x, m_frame_y);
+   glVertex2d(m_frame_x-1, m_frame_y-1);
+   glVertex2d(m_frame_x+m_frame_w+1, m_frame_y-1);
+   glVertex2d(m_frame_x+m_frame_w+1, m_frame_y+m_frame_h+1);
+   glVertex2d(m_frame_x-1, m_frame_y+m_frame_h+1);
+   glVertex2d(m_frame_x-1, m_frame_y-1);
    glEnd();
 
    glPopAttrib();
@@ -10026,8 +10091,6 @@ VRenderView::VRenderView(wxWindow* frame,
    CreateBar();
    if (m_glview) {
 	   m_glview->SetSBText(wxString::Format("50 %c%c", 131, 'm'));
-	   m_glview->m_sb_num = "50";
-	   m_glview->m_sb_unit = 0;
 	   m_glview->SetScaleBarLen(1.);
    }
    LoadSettings();
@@ -10555,6 +10618,12 @@ void VRenderView::Isolate(int type, wxString name)
 {
    if (m_glview)
       m_glview->Isolate(type, name);
+}
+
+void VRenderView::ShowAll()
+{
+	if (m_glview)
+		m_glview->ShowAll();
 }
 
 //move
@@ -11609,10 +11678,10 @@ void VRenderView::OnScaleBar(wxCommandEvent& event)
 		m_glview->m_disp_scale_bar_text = false;
 		m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
 			   wxGetBitmapFromMemory(scale));
-		m_scale_text->Disable();
+		m_scale_text->Enable();
 		m_scale_cmb->Disable();
-		if (m_glview) m_glview->EnableScaleBar();
 		if (m_glview) m_glview->DisableSBText();
+		if (m_glview) m_glview->EnableScaleBar();
 		break;
 	case kOn:
 		m_draw_scalebar = kText;

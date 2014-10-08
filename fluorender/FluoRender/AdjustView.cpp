@@ -541,7 +541,7 @@ void AdjustView::OnRGammaText(wxCommandEvent& event)
 		}
 	}
 
-	if (m_glview)
+	if (m_glview && m_type==1)
 	{
 		Color gamma = m_glview->GetGamma();
 		GammaUI2(val, gamma[0]);
@@ -576,8 +576,8 @@ void AdjustView::OnRGammaText(wxCommandEvent& event)
 		if (m_link_group && m_group)
 			m_group->SetGammaAll(gamma);
 
-		RefreshVRenderViews(true);
 	}
+	RefreshVRenderViews(true);
 }
 
 void AdjustView::OnGGammaChange(wxScrollEvent & event)
@@ -608,7 +608,7 @@ void AdjustView::OnGGammaText(wxCommandEvent& event)
 		}
 	}
 
-	if (m_glview)
+	if (m_glview && m_type==1)
 	{
 		Color gamma = m_glview->GetGamma();
 		GammaUI2(val, gamma[1]);
@@ -643,8 +643,8 @@ void AdjustView::OnGGammaText(wxCommandEvent& event)
 		if (m_link_group && m_group)
 			m_group->SetGammaAll(gamma);
 
-		RefreshVRenderViews(true);
 	}
+	RefreshVRenderViews(true);
 }
 
 void AdjustView::OnBGammaChange(wxScrollEvent & event)
@@ -675,7 +675,7 @@ void AdjustView::OnBGammaText(wxCommandEvent& event)
 		}
 	}
 
-	if (m_glview)
+	if (m_glview && m_type==1)
 	{
 		Color gamma = m_glview->GetGamma();
 		GammaUI2(val, gamma[2]);
@@ -710,8 +710,8 @@ void AdjustView::OnBGammaText(wxCommandEvent& event)
 		if (m_link_group && m_group)
 			m_group->SetGammaAll(gamma);
 
-		RefreshVRenderViews(true);
 	}
+	RefreshVRenderViews(true);
 }
 
 //brightness
@@ -743,7 +743,7 @@ void AdjustView::OnRBrightnessText(wxCommandEvent& event)
 		}
 	}
 
-	if (m_glview)
+	if (m_glview && m_type==1)
 	{
 		Color brightness = m_glview->GetBrightness();
 		BrightnessUI2(val, brightness[0]);
@@ -778,8 +778,8 @@ void AdjustView::OnRBrightnessText(wxCommandEvent& event)
 		if (m_link_group && m_group)
 			m_group->SetBrightnessAll(brightness);
 
-		RefreshVRenderViews(true);
 	}
+	RefreshVRenderViews(true);
 }
 
 void AdjustView::OnGBrightnessChange(wxScrollEvent & event)
@@ -810,7 +810,7 @@ void AdjustView::OnGBrightnessText(wxCommandEvent& event)
 		}
 	}
 
-	if (m_glview)
+	if (m_glview && m_type==1)
 	{
 		Color brightness = m_glview->GetBrightness();
 		BrightnessUI2(val, brightness[1]);
@@ -845,8 +845,8 @@ void AdjustView::OnGBrightnessText(wxCommandEvent& event)
 		if (m_link_group && m_group)
 			m_group->SetBrightnessAll(brightness);
 
-		RefreshVRenderViews(true);
 	}
+	RefreshVRenderViews(true);
 }
 
 void AdjustView::OnBBrightnessChange(wxScrollEvent & event)
@@ -877,7 +877,7 @@ void AdjustView::OnBBrightnessText(wxCommandEvent& event)
 		}
 	}
 
-	if (m_glview)
+	if (m_glview && m_type==1)
 	{
 		Color brightness = m_glview->GetBrightness();
 		BrightnessUI2(val, brightness[2]);
@@ -912,8 +912,8 @@ void AdjustView::OnBBrightnessText(wxCommandEvent& event)
 		if (m_link_group && m_group)
 			m_group->SetBrightnessAll(brightness);
 
-		RefreshVRenderViews(true);
 	}
+	RefreshVRenderViews(true);
 }
 
 void AdjustView::OnRHdrChange(wxScrollEvent &event)
@@ -944,7 +944,7 @@ void AdjustView::OnRHdrText(wxCommandEvent &event)
 		}
 	}
 
-	if (m_glview)
+	if (m_glview && m_type==1)
 	{
 		Color hdr = m_glview->GetHdr();
 		HdrUI2(val, hdr[0]);
@@ -979,8 +979,8 @@ void AdjustView::OnRHdrText(wxCommandEvent &event)
 		if (m_link_group && m_group)
 			m_group->SetHdrAll(hdr);
 
-		RefreshVRenderViews(true);
 	}
+	RefreshVRenderViews(true);
 }
 
 void AdjustView::OnGHdrChange(wxScrollEvent &event)
@@ -1011,7 +1011,7 @@ void AdjustView::OnGHdrText(wxCommandEvent &event)
 		}
 	}
 
-	if (m_glview)
+	if (m_glview && m_type==1)
 	{
 		Color hdr = m_glview->GetHdr();
 		HdrUI2(val, hdr[1]);
@@ -1046,8 +1046,8 @@ void AdjustView::OnGHdrText(wxCommandEvent &event)
 		if (m_link_group && m_group)
 			m_group->SetHdrAll(hdr);
 
-		RefreshVRenderViews(true);
 	}
+	RefreshVRenderViews(true);
 }
 
 void AdjustView::OnBHdrChange(wxScrollEvent &event)
@@ -1078,7 +1078,7 @@ void AdjustView::OnBHdrText(wxCommandEvent &event)
 		}
 	}
 
-	if (m_glview)
+	if (m_glview && m_type==1)
 	{
 		Color hdr = m_glview->GetHdr();
 		HdrUI2(val, hdr[2]);
@@ -1113,8 +1113,8 @@ void AdjustView::OnBHdrText(wxCommandEvent &event)
 		if (m_link_group && m_group)
 			m_group->SetHdrAll(hdr);
 
-		RefreshVRenderViews(true);
 	}
+	RefreshVRenderViews(true);
 }
 
 void AdjustView::OnSyncRCheck(wxCommandEvent &event)
