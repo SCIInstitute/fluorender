@@ -417,7 +417,7 @@ void VMovieView::SetTimeFrame(int frame) {
 
 void VMovieView::OnTimer(wxTimerEvent& event) {
 	//get all of the progress info
-	double time, len, degrees;
+	double time, len;
 	long fps;
 	m_progress_text->GetValue().ToDouble(&time);
 	m_movie_time->GetValue().ToDouble(&len);
@@ -435,13 +435,16 @@ void VMovieView::OnTimer(wxTimerEvent& event) {
 		SetRendering(time/len);
 		m_last_frame = frame;
 	}
-	if (time/len >= 1.) 
-		OnStop(wxCommandEvent());
+	if (time/len >= 1.) {
+		wxCommandEvent e;
+		OnStop(e);
+	}
 }
 
 void VMovieView::OnPrev(wxCommandEvent& event) {
 	if (m_running) {
-		OnStop(wxCommandEvent());
+		wxCommandEvent e;
+		OnStop(e);
 		return;
 	}
 	m_running = true;
@@ -560,7 +563,8 @@ void VMovieView::OnRun(wxCommandEvent& event) {
 	fopendlg->SetExtraControlCreator(CreateExtraCaptureControl);
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK) {
-		OnRewind(wxCommandEvent());
+		wxCommandEvent e;
+		OnRewind(e);
 		m_filename = fopendlg->GetPath();
 		filetype_ = m_filename.SubString(m_filename.Len()-4,
 			m_filename.Len()-1);
@@ -582,7 +586,8 @@ void VMovieView::OnRun(wxCommandEvent& event) {
 		m_record = true;
 	}
 	delete fopendlg;
-	OnPrev(wxCommandEvent());
+	wxCommandEvent e;
+	OnPrev(e);
 }
 
 void VMovieView::OnStop(wxCommandEvent& event) {
@@ -600,7 +605,8 @@ void VMovieView::OnRewind(wxCommandEvent& event){
 	VRenderView* vrv = vr_frame->GetView(str);
 	if (!vrv) return;
 	vrv->SetParams(0.);
-	OnStop(wxCommandEvent());
+	wxCommandEvent e;
+	OnStop(e);
 	m_time_current_text->SetValue(wxString::Format("%d",0));
 	SetProgress(0.);
 	SetRendering(0.);
@@ -870,7 +876,6 @@ void VMovieView::SetRendering(double pcnt) {
 	VRenderView* vrv = vr_frame->GetView(str);
 	if (!vrv) return;
 	//advanced options
-	int page = m_notebook->GetSelection();
 	if (m_current_page == 1) {
 		Interpolator *interpolator = vr_frame->GetInterpolator();
 		if (!interpolator)

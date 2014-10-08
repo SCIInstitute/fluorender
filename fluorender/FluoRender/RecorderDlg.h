@@ -101,10 +101,22 @@ class RecorderDlg : public wxPanel
       void UpdateList()
       { m_keylist->Update(); }
       void SetSelection(int index);
-	  void Save() { OnPlay(wxCommandEvent()); }
-	  void Rewind() { OnReset(wxCommandEvent()); }
-	  void Stop() { OnStop(wxCommandEvent()); }
-	  void Play() { OnPreview(wxCommandEvent()); }
+	  void Save() { 
+		wxCommandEvent e;
+		OnPlay(e); 
+	  }
+	  void Rewind() { 
+		wxCommandEvent e;
+		OnReset(e); 
+	  }
+	  void Stop() { 
+		wxCommandEvent e;
+		OnStop(e); 
+	  }
+	  void Play() { 
+		wxCommandEvent e;
+		OnPreview(e); 
+	  }
 
 
    private:
