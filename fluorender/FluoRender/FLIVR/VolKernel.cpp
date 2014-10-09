@@ -33,8 +33,30 @@ namespace FLIVR
 	"	}\n" \
 	"}\n"
 
+#define KERNEL_HIST_3D_CODE \
+	"//KERNEL_HIST_3D_CODE\n" \
+	"const sampler_t samp =\n" \
+	"	CLK_NORMALIZED_COORDS_FALSE|\n" \
+	"	CLK_ADDRESS_REPEAT|\n" \
+	"	CLK_FILTER_NEAREST;\n" \
+	"__kernel void hist_3d(image3d_t data,\n" \
+	"	image3d_t mask, __global float* hist,\n" \
+	"	__const int hist_size)\n" \
+	"{\n" \
+	"	int4 coord = (int4)(get_global_id(0),\n" \
+	"		get_global_id(1), get_global_id(2), 1);\n" \
+	"	float4 mask_value = read_imagef(mask, samp, coord);\n" \
+	"	if (mask_value.x > 0.0)\n" \
+	"	{\n" \
+	"		float4 data_value = read_imagef(data, samp, coord);\n" \
+	"		int index = (int)(data_value.x*hist_size);\n" \
+	"		hist[index] += 1.0;\n" \
+	"	}\n" \
+	"}\n" \
+	"\n"
 
-	VolKernel::VolKernel() :
+	VolKernel::VolKernel(int type) :
+		type_(type),
 		program_(0)
 	{
 	}
@@ -56,7 +78,15 @@ namespace FLIVR
 	{
 		ostringstream z;
 
-		z << KERNEL_TEST_CODE;
+		switch (type_)
+		{
+		case KERNEL_TEST:
+			z << KERNEL_TEST_CODE;
+			break;
+		case KERNEL_HIST_3D:
+			z << KERNEL_HIST_3D_CODE;
+			break;
+		}
 
 		s = z.str();
 		return true;
@@ -75,11 +105,11 @@ namespace FLIVR
 		}
 	}
 
-	KernelProgram* VolKernelFactory::kernel()
+	KernelProgram* VolKernelFactory::kernel(int type)
 	{
 		if (prev_kernel_ >= 0)
 		{
-			if (kernels_[prev_kernel_]->match())
+			if (kernels_[prev_kernel_]->match(type))
 			{
 				return kernels_[prev_kernel_]->program();
 			}
@@ -87,14 +117,14 @@ namespace FLIVR
 
 		for (unsigned int i=0; i<kernels_.size(); ++i)
 		{
-			if (kernels_[i]->match())
+			if (kernels_[i]->match(type))
 			{
 				prev_kernel_ = i;
 				return kernels_[i]->program();
 			}
 		}
 
-		VolKernel* k = new VolKernel();
+		VolKernel* k = new VolKernel(type);
 		if (!k->create())
 		{
 			delete k;

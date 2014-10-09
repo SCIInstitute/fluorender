@@ -84,6 +84,12 @@ public:
 	void GenerateAnnotations(bool use_sel);
 	Annotations* GetAnnotations();
 
+	//estimate threshold
+	void SetEstimateThreshold(bool value)
+	{m_estimate_threshold = value;}
+	bool GetEstimateThreshold()
+	{return m_estimate_threshold;}
+
 	//Test functions
 	void Test();
 
@@ -152,6 +158,8 @@ private:
 	bool m_ps;
 	Point m_ps_center;
 	double m_ps_size;
+
+	bool m_estimate_threshold;
 
 private:
 	bool SearchComponentList(unsigned int cval, Vector &pos, double intensity);

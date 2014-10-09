@@ -15,15 +15,23 @@ namespace FLIVR
 		KernelProgram(const std::string& source);
 		~KernelProgram();
 
-		bool create();
+		bool create(std::string &name);
 		bool valid();
 		void destroy();
 
-		void execute(cl_uint, size_t, size_t);
+		void execute(cl_uint, size_t*, size_t*);
 
-		void setKernelArg(int, cl_mem_flags, size_t, void*);
-		void setKernelArgTex2D(int, cl_mem_flags, GLenum, GLuint);
-		void setKernelArgTex3D(int, cl_mem_flags, GLenum, GLuint);
+		typedef struct
+		{
+			cl_uint index;
+			size_t size;
+			cl_mem buffer;
+		} Argument;
+		bool matchArg(Argument*, unsigned int&);
+		void setKernelArgConst(int, size_t, void*);
+		void setKernelArgBuf(int, cl_mem_flags, size_t, void*);
+		void setKernelArgTex2D(int, cl_mem_flags, GLuint);
+		void setKernelArgTex3D(int, cl_mem_flags, GLuint);
 		void readBuffer(int, void*);
 
 		//initialization
@@ -38,12 +46,6 @@ namespace FLIVR
 		cl_command_queue queue_;
 
 		//memory object to release
-		typedef struct
-		{
-			cl_uint index;
-			size_t size;
-			cl_mem buffer;
-		} Argument;
 		std::vector<Argument> arg_list_;
 
 		static bool init_;

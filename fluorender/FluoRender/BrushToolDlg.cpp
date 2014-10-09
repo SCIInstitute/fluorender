@@ -4,13 +4,7 @@
 #include "Formats/png_resource.h"
 
 //resources
-#include "img/listicon_brushappend.h"
-#include "img/listicon_brushclear.h"
-#include "img/listicon_brushcreate.h"
-#include "img/listicon_brushdesel.h"
-#include "img/listicon_brushdiffuse.h"
-#include "img/listicon_brusherase.h"
-#include "img/listicon_qmark.h"
+#include "img/icons.h"
 
 BEGIN_EVENT_TABLE(BrushToolDlg, wxPanel)
 //paint tools
@@ -36,6 +30,8 @@ EVT_CHECKBOX(ID_BrushEdgeDetectChk, BrushToolDlg::OnBrushEdgeDetectChk)
 EVT_CHECKBOX(ID_BrushHiddenRemovalChk, BrushToolDlg::OnBrushHiddenRemovalChk)
 //select group
 EVT_CHECKBOX(ID_BrushSelectGroupChk, BrushToolDlg::OnBrushSelectGroupChk)
+//estimate thresh
+EVT_CHECKBOX(ID_EstimateThreshChk, BrushToolDlg::OnEstimateThreshChk)
 //brush properties
 //brush size 1
 EVT_COMMAND_SCROLL(ID_BrushSize1Sldr, BrushToolDlg::OnBrushSize1Change)
@@ -156,11 +152,15 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
          wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
    m_select_group_chk = new wxCheckBox(this, ID_BrushSelectGroupChk, "Select Group:",
          wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+   m_estimate_thresh_chk = new wxCheckBox(this, ID_EstimateThreshChk, "Auto Thresh:",
+	   wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
    sizer11_1->Add(m_edge_detect_chk, 0, wxALIGN_CENTER);
    sizer11_1->Add(5, 5);
    sizer11_1->Add(m_hidden_removal_chk, 0, wxALIGN_CENTER);
    sizer11_1->Add(5, 5);
    sizer11_1->Add(m_select_group_chk, 0, wxALIGN_CENTER);
+   sizer11_1->Add(5, 5);
+   sizer11_1->Add(m_estimate_thresh_chk, 0, wxALIGN_CENTER);
    //threshold4
    wxBoxSizer *sizer11_2 = new wxBoxSizer(wxHORIZONTAL);
    st = new wxStaticText(this, 0, "Threshold:",
@@ -490,6 +490,7 @@ void BrushToolDlg::GetSettings(VRenderView* vrv)
 
    //selection strength
    dval = vrv->GetBrushSclTranslate();
+   m_dft_scl_translate = dval;
    m_brush_scl_translate_sldr->SetValue(int(dval*1000.0+0.5));
    m_brush_scl_translate_text->ChangeValue(wxString::Format("%.2f", dval));
    //2d influence
@@ -505,6 +506,9 @@ void BrushToolDlg::GetSettings(VRenderView* vrv)
    //select group
    bval = vrv->GetSelectGroup();
    m_select_group_chk->SetValue(bval);
+   //estimate threshold
+   bval = vrv->GetEstimateThresh();
+   m_estimate_thresh_chk->SetValue(bval);
 
    //size1
    dval = vrv->GetBrushSize1();
@@ -731,6 +735,16 @@ void BrushToolDlg::OnBrushSelectGroupChk(wxCommandEvent &event)
    //set select group
    if (m_cur_view)
       m_cur_view->SetSelectGroup(select_group);
+}
+
+//estimate threshold
+void BrushToolDlg::OnEstimateThreshChk(wxCommandEvent &event)
+{
+	bool value = m_estimate_thresh_chk->GetValue();
+
+	//
+	if (m_cur_view)
+		m_cur_view->SetEstimateThresh(value);
 }
 
 //brush size 1

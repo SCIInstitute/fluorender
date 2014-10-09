@@ -5,21 +5,7 @@
 #include <wx/colordlg.h>
 #include <wx/valnum.h>
 #include "png_resource.h"
-#include "interpolate.h"
-#include "refresh.h"
-#include "listicon_save.h"
-#include "legend.h"
-#include "logo_small.h"
-#include "alpha.h"
-#include "shade.h"
-#include "shadow.h"
-#include "palette.h"
-#include "smooth.h"
-#include "invert.h"
-#include "mip.h"
-#include "depth.h"
-#include "sync_group.h"
-#include "save_settings.h"
+#include "img/icons.h"
 
 BEGIN_EVENT_TABLE(VPropView, wxPanel)
 //1
@@ -173,7 +159,7 @@ VPropView::VPropView(wxWindow* frame,
    //alpha
    m_alpha_tool = new wxToolBar(this,wxID_ANY);
    m_alpha_tool->AddCheckTool(ID_AlphaChk,"Alpha",
-   wxGetBitmapFromMemory(alpha),wxNullBitmap,
+   wxGetBitmapFromMemory(alpha), wxNullBitmap,
     "Enables Alpha Editing.",
     "Enables Alpha Editing.");
    m_alpha_tool->ToggleTool(ID_AlphaChk,true);
@@ -195,7 +181,7 @@ VPropView::VPropView(wxWindow* frame,
          wxDefaultPosition, wxSize(40, 20), 0, vald_fp2);
    m_shade_tool = new wxToolBar(this,wxID_ANY);
    m_shade_tool->AddCheckTool(ID_ShadingEnableChk,"Shading",
-   wxGetBitmapFromMemory(shade),wxNullBitmap,
+   wxGetBitmapFromMemory(shade), wxNullBitmap,
     "Enables Shading Editing.",
     "Enables Shading Editing.");
    m_shade_tool->ToggleTool(ID_ShadingEnableChk,true);
@@ -347,7 +333,7 @@ VPropView::VPropView(wxWindow* frame,
    m_options_toolbar->ToggleTool(ID_LegendChk,true);
    //buttons
    m_options_toolbar->AddTool(ID_ResetDefault,"Reset",
-	   wxGetBitmapFromMemory(refresh),
+	   wxGetBitmapFromMemory(reset),
 	   "Reset Properties");
    m_options_toolbar->AddTool(ID_SaveDefault,"Save",
 	   wxGetBitmapFromMemory(save_settings),
@@ -396,7 +382,12 @@ VPropView::VPropView(wxWindow* frame,
    // FluoRender Image (rows 4-5)
    wxToolBar * tmp= new wxToolBar(this, wxID_ANY);
    tmp->AddTool(wxID_ANY, "FluoRender (c) 2014",
-         wxGetBitmapFromMemory(logo_small),"FluoRender (c) 2014");
+         wxGetBitmapFromMemory(logo_small),
+		 wxGetBitmapFromMemory(logo_small),
+		 wxITEM_NORMAL,
+		 "FluoRender (c) 2014",
+		 "FluoRender (c) 2014");
+   tmp->Disable();
    sizer_r4->Add(tmp, 0, wxALIGN_CENTER);
    tmp->Realize();
 

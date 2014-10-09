@@ -7,23 +7,7 @@
 #include <algorithm>
 #include "GL/mywgl.h"
 #include "png_resource.h"
-#include "layers.h"
-#include "depth.h"
-#include "axis.h"
-#include "info.h"
-#include "legend.h"
-#include "freefly.h"
-#include "camera.h"
-#include "composite.h"
-#include "refresh.h"
-#include "measure.h"
-#include "ratio.h"
-#include "center.h"
-#include "save_settings.h"
-#include "scale.h"
-#include "scale_text.h"
-#include "scale_text_off.h"
-#include "gear_45.h"
+#include "img/icons.h"
 
 int VRenderView::m_id = 1;
 ImgShaderFactory VRenderGLView::m_img_shader_factory;
@@ -1859,6 +1843,10 @@ void VRenderGLView::Segment()
 		   vr_frame->GetTraceDlg()->CellLink(true, true);
 	   }
 	}
+	if (vr_frame && vr_frame->GetBrushToolDlg())
+	{
+		vr_frame->GetBrushToolDlg()->GetSettings(m_vrv);
+	}
 }
 
 //label volumes in current view
@@ -2249,6 +2237,17 @@ bool VRenderGLView::GetSelectGroup()
    return m_selector.GetSelectGroup();
 }
 
+//estimate threshold
+void VRenderGLView::SetEstimateThresh(bool value)
+{
+	m_selector.SetEstimateThreshold(value);
+}
+
+bool VRenderGLView::GetEstimateThresh()
+{
+	return m_selector.GetEstimateThreshold();
+}
+
 //select both
 void VRenderGLView::SetSelectBoth(bool value)
 {
@@ -2437,7 +2436,7 @@ void VRenderGLView::DrawFinalBuffer()
 
    //2d adjustment
    FragmentProgram* img_shader =
-      m_img_shader_factory.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND);
+      m_img_shader_factory.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
    if (img_shader)
    {
       if (!img_shader->valid())
@@ -2446,6 +2445,9 @@ void VRenderGLView::DrawFinalBuffer()
       }
       img_shader->bind();
    }
+   img_shader->setLocalParam(0, m_gamma.r(), m_gamma.g(), m_gamma.b(), 1.0);
+   img_shader->setLocalParam(1, m_brightness.r(), m_brightness.g(), m_brightness.b(), 1.0);
+   img_shader->setLocalParam(2, m_hdr.r(), m_hdr.g(), m_hdr.b(), 0.0);
    //2d adjustment
 
    glMatrixMode(GL_PROJECTION);
@@ -6550,6 +6552,69 @@ void VRenderGLView::Isolate(int type, wxString name)
    m_md_pop_dirty = true;
 }
 
+void VRenderGLView::ShowAll()
+{
+	for (unsigned int i=0; i<m_layer_list.size(); ++i)
+	{
+		if (!m_layer_list[i]) continue;
+
+		switch (m_layer_list[i]->IsA())
+		{
+		case 2://volume
+			{
+				VolumeData* vd = (VolumeData*)m_layer_list[i];
+				if (vd)
+					vd->SetDisp(true);
+			}
+			break;
+		case 3://mesh
+			{
+				MeshData* md = (MeshData*)m_layer_list[i];
+				if (md)
+					md->SetDisp(true);
+			}
+			break;
+		case 4://annotation
+			{
+				Annotations* ann = (Annotations*)m_layer_list[i];
+				if (ann)
+					ann->SetDisp(true);
+			}
+			break;
+		case 5:
+			{
+				DataGroup* group = (DataGroup*)m_layer_list[i];
+				if (group)
+				{
+					for (unsigned int j=0; j<group->GetVolumeNum(); ++j)
+					{
+						VolumeData* vd = group->GetVolumeData(j);
+						if (vd)
+							vd->SetDisp(true);
+					}
+				}
+			}
+			break;
+		case 6://mesh group
+			{
+				MeshGroup* group = (MeshGroup*)m_layer_list[i];
+				if (group)
+				{
+					for (unsigned int j=0; j<group->GetMeshNum(); ++j)
+					{
+						MeshData* md = group->GetMeshData(j);
+						if (md)
+							md->SetDisp(true);
+					}
+				}
+			}
+			break;
+		}
+	}
+	m_vd_pop_dirty = true;
+	m_md_pop_dirty = true;
+}
+
 //move layer of the same level within this view
 //source is after the destination
 void VRenderGLView::MoveLayerinView(wxString &src_name, wxString &dst_name)
@@ -7510,11 +7575,11 @@ void VRenderGLView::DrawFrame()
    //draw frame
    glColor3d(1.0f, 1.0f, 0.0f);
    glBegin(GL_LINE_STRIP);
-   glVertex2d(m_frame_x, m_frame_y);
-   glVertex2d(m_frame_x+m_frame_w, m_frame_y);
-   glVertex2d(m_frame_x+m_frame_w, m_frame_y+m_frame_h);
-   glVertex2d(m_frame_x, m_frame_y+m_frame_h);
-   glVertex2d(m_frame_x, m_frame_y);
+   glVertex2d(m_frame_x-1, m_frame_y-1);
+   glVertex2d(m_frame_x+m_frame_w+1, m_frame_y-1);
+   glVertex2d(m_frame_x+m_frame_w+1, m_frame_y+m_frame_h+1);
+   glVertex2d(m_frame_x-1, m_frame_y+m_frame_h+1);
+   glVertex2d(m_frame_x-1, m_frame_y-1);
    glEnd();
 
    glPopAttrib();
@@ -10042,8 +10107,6 @@ VRenderView::VRenderView(wxWindow* frame,
    CreateBar();
    if (m_glview) {
 	   m_glview->SetSBText(wxString::Format("50 %c%c", 131, 'm'));
-	   m_glview->m_sb_num = "50";
-	   m_glview->m_sb_unit = 0;
 	   m_glview->SetScaleBarLen(1.);
    }
    LoadSettings();
@@ -10235,7 +10298,7 @@ void VRenderView::CreateBar()
    wxBoxSizer* sizer_v_3 = new wxBoxSizer(wxVERTICAL);
    m_left_toolbar = new wxToolBar(this, wxID_ANY);
    m_left_toolbar->AddCheckTool(ID_DepthAttenChk,"Depth Interval",
-	   wxGetBitmapFromMemory(measure),wxNullBitmap,
+	   wxGetBitmapFromMemory(no_depth_atten),wxNullBitmap,
 	   "Enable adjustment of the Depth Attenuation Interval",
 	   "Enable adjustment of the Depth Attenuation Interval");
    m_left_toolbar->ToggleTool(ID_DepthAttenChk, true);
@@ -10244,7 +10307,7 @@ void VRenderView::CreateBar()
    m_depth_atten_factor_sldr->Disable();
    m_depth_atten_reset_btn = new wxToolBar(this, wxID_ANY);
    m_depth_atten_reset_btn->AddTool(ID_DepthAttenResetBtn, "Reset",
-	   wxGetBitmapFromMemory(refresh),
+	   wxGetBitmapFromMemory(reset),
 	   "Reset Depth Attenuation Interval");
    m_depth_atten_reset_btn->Realize();
    m_depth_atten_factor_text = new wxTextCtrl(this, ID_DepthAttenFactorText, "0.0",
@@ -10277,7 +10340,7 @@ void VRenderView::CreateBar()
          wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
    m_scale_reset_btn = new wxToolBar(this, wxID_ANY);
    m_scale_reset_btn->AddTool(ID_ScaleResetBtn, "Reset",
-         wxGetBitmapFromMemory(refresh),
+         wxGetBitmapFromMemory(reset),
 		 "Reset the Zoom");
    m_scale_reset_btn->Realize();
    m_scale_factor_text = new wxTextCtrl(this, ID_ScaleFactorText, "100",
@@ -10326,7 +10389,7 @@ void VRenderView::CreateBar()
    m_rot_lock_btn->Realize();
 
    m_lower_toolbar->AddTool(ID_RotResetBtn,"Reset",
-	   wxGetBitmapFromMemory(refresh),
+	   wxGetBitmapFromMemory(reset),
 	   "Reset Rotations");
    m_lower_toolbar->Realize();
    
@@ -10571,6 +10634,12 @@ void VRenderView::Isolate(int type, wxString name)
 {
    if (m_glview)
       m_glview->Isolate(type, name);
+}
+
+void VRenderView::ShowAll()
+{
+	if (m_glview)
+		m_glview->ShowAll();
 }
 
 //move
@@ -11257,12 +11326,16 @@ void VRenderView::OnDepthAttenCheck(wxCommandEvent& event)
       SetFog(true);
       m_depth_atten_factor_sldr->Enable();
       m_depth_atten_factor_text->Enable();
+	  m_left_toolbar->SetToolNormalBitmap (ID_DepthAttenChk,
+		   wxGetBitmapFromMemory(depth_atten));
    }
    else
    {
       SetFog(false);
       m_depth_atten_factor_sldr->Disable();
       m_depth_atten_factor_text->Disable();
+	  m_left_toolbar->SetToolNormalBitmap (ID_DepthAttenChk,
+		   wxGetBitmapFromMemory(no_depth_atten));
    }
 
    RefreshGL();
@@ -11621,10 +11694,10 @@ void VRenderView::OnScaleBar(wxCommandEvent& event)
 		m_glview->m_disp_scale_bar_text = false;
 		m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
 			   wxGetBitmapFromMemory(scale));
-		m_scale_text->Disable();
+		m_scale_text->Enable();
 		m_scale_cmb->Disable();
-		if (m_glview) m_glview->EnableScaleBar();
 		if (m_glview) m_glview->DisableSBText();
+		if (m_glview) m_glview->EnableScaleBar();
 		break;
 	case kOn:
 		m_draw_scalebar = kText;

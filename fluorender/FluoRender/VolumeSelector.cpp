@@ -10,7 +10,7 @@ VolumeSelector::VolumeSelector() :
    m_2d_weight2(0),
    m_iter_num(20),
    m_mode(0),
-   m_use2d(true),
+   m_use2d(false),
    m_ini_thresh(0.0),
    m_gm_falloff(0.0),
    m_scl_falloff(0.0),
@@ -35,7 +35,8 @@ VolumeSelector::VolumeSelector() :
    m_randv(113),
    m_ps(false),
    m_ps_size(0.0),
-m_size_map(false)
+   m_size_map(false),
+   m_estimate_threshold(false)
 {
 }
 
@@ -98,7 +99,7 @@ void VolumeSelector::Select(double radius)
       if (m_scl_falloff > 0.0)
          scl_falloff = m_scl_falloff;
       else
-         scl_falloff = 0.01;
+         scl_falloff = 0.008;
    }
    else
    {
@@ -110,7 +111,7 @@ void VolumeSelector::Select(double radius)
       if (m_gm_falloff > 0.0)
          gm_falloff = m_gm_falloff;
       else
-         gm_falloff = 0.01;
+         gm_falloff = 0.004;
    }
    else
       gm_falloff = 0.0;
@@ -127,27 +128,14 @@ void VolumeSelector::Select(double radius)
 
    //initialization
    int hr_mode = m_hidden_removal?(m_ortho?1:2):0;
+   if (m_estimate_threshold)
+   {
+		m_vd->DrawMask(0, m_mode, hr_mode, 0.0, gm_falloff, scl_falloff, 0.0, m_w2d, 0.0, false, true);
+		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
+		ini_thresh = m_vd->GetEstThresh() * m_vd->GetScalarScale();
+		m_scl_translate = ini_thresh;
+   }
    m_vd->DrawMask(0, m_mode, hr_mode, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
-
-  // //test for cl
-  // KernelProgram* test_kernel = m_vol_kernel_factory.kernel();
-  // if (test_kernel)
-  // {
-	 //  if (!test_kernel->valid())
-		//test_kernel->create();
-	 //  float data[64];
-	 //  float sum[2];
-	 //  for (int i=0; i<64; i++)
-		//   data[i] = float(i);
-	 //  test_kernel->setKernelArg(0, CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR, 64*sizeof(float), data);
-	 //  test_kernel->setKernelArg(1, 0, 4*sizeof(float), NULL);
-	 //  test_kernel->setKernelArg(2, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, 2*sizeof(float), sum);
-	 //  test_kernel->execute(1, 8, 4);
-	 //  test_kernel->readBuffer(2, sum);
-	 //  float s1 = sum[0];
-	 //  float s2 = sum[1];
-	 //  wxMessageBox(wxString::Format("%f\t%f", s1, s2));
-  // }
 
    //grow the selection when paint mode is select, append, erase, or invert
    if (m_mode==1 ||

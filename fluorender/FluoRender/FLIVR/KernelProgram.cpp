@@ -25,11 +25,11 @@ namespace FLIVR
 		cl_platform_id platform;
 
 		err = clGetPlatformIDs(1, &platform, NULL);
-		if (err < 0)
+		if (err != CL_SUCCESS)
 			return;
 
 		err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device_, NULL);
-		if (err < 0)
+		if (err != CL_SUCCESS)
 			return;
 
 		cl_context_properties properties[] =
@@ -40,7 +40,7 @@ namespace FLIVR
 			0
 		};
 		context_ = clCreateContext(properties, 1, &device_, NULL, NULL, &err);
-		if (err < 0)
+		if (err != CL_SUCCESS)
 			return;
 
 		init_ = true;
@@ -57,7 +57,7 @@ namespace FLIVR
 		init_ = false;
 	}
 
-	bool KernelProgram::create()
+	bool KernelProgram::create(std::string &name)
 	{
 		cl_int err;
 		const char *c_source[1];
@@ -65,13 +65,13 @@ namespace FLIVR
 		size_t program_size = source_.size();
 		program_ = clCreateProgramWithSource(context_, 1,
 			c_source, &program_size, &err);
-		if (err < 0)
+		if (err != CL_SUCCESS)
 		{
 			return false;
 		}
 
 		err = clBuildProgram(program_, 0, NULL, NULL, NULL, NULL);
-		if (err < 0)
+		if (err != CL_SUCCESS)
 		{
 			char *program_log;
 			size_t log_size;
@@ -85,14 +85,14 @@ namespace FLIVR
 			return false;
 		}
 
-		kernel_ = clCreateKernel(program_, "add_numbers", &err);
-		if (err < 0)
+		kernel_ = clCreateKernel(program_, name.c_str(), &err);
+		if (err != CL_SUCCESS)
 		{
 			return false;
 		}
 
 		queue_ = clCreateCommandQueue(context_, device_, 0, &err);
-		if (err < 0)
+		if (err != CL_SUCCESS)
 		{
 			return false;
 		}
@@ -114,7 +114,7 @@ namespace FLIVR
 		clReleaseProgram(program_);
 	}
 
-	void KernelProgram::execute(cl_uint dim, size_t global_size, size_t local_size)
+	void KernelProgram::execute(cl_uint dim, size_t *global_size, size_t *local_size)
 	{
 		if (!valid())
 			return;
@@ -127,79 +127,134 @@ namespace FLIVR
 			if (arg_list_[i].size == 0)
 			{
 				err = clEnqueueAcquireGLObjects(queue_, 1, &(arg_list_[i].buffer), 0, NULL, NULL);
-				if (err < 0)
+				if (err != CL_SUCCESS)
 					return;
 			}
 		}
-		err = clEnqueueNDRangeKernel(queue_, kernel_, dim, NULL, &global_size,
-			&local_size, 0, NULL, NULL);
-		if (err < 0)
+		err = clEnqueueNDRangeKernel(queue_, kernel_, dim, NULL, global_size,
+			local_size, 0, NULL, NULL);
+		if (err != CL_SUCCESS)
 			return;
 		for (i=0; i<arg_list_.size(); ++i)
 		{
 			if (arg_list_[i].size == 0)
 			{
 				err = clEnqueueReleaseGLObjects(queue_, 1, &(arg_list_[i].buffer), 0, NULL, NULL);
-				if (err < 0)
+				if (err != CL_SUCCESS)
 					return;
 			}
 		}
 		clFinish(queue_);
 	}
 
-	void KernelProgram::setKernelArg(int i, cl_mem_flags flag, size_t size, void* data)
+	bool KernelProgram::matchArg(Argument* arg, unsigned int& arg_index)
+	{
+		for (unsigned int i=0; i<arg_list_.size(); ++i)
+		{
+			if (arg_list_[i].index == arg->index &&
+				arg_list_[i].size == arg->size)
+			{
+				arg_index = i;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void KernelProgram::setKernelArgConst(int i, size_t size, void* data)
+	{
+		cl_int err;
+
+		if (!data)
+			return;
+
+		err = clSetKernelArg(kernel_, i, size, data);
+		if (err != CL_SUCCESS)
+			return;
+	}
+
+	void KernelProgram::setKernelArgBuf(int i, cl_mem_flags flag, size_t size, void* data)
 	{
 		cl_int err;
 
 		if (data)
 		{
-			cl_mem buffer = clCreateBuffer(context_, flag, size, data, &err);
-			if (err < 0)
-				return;
 			Argument arg;
 			arg.index = i;
 			arg.size = size;
-			arg.buffer = buffer;
-			arg_list_.push_back(arg);
-			err = clSetKernelArg(kernel_, i, sizeof(cl_mem), &buffer);
-			if (err < 0)
+			unsigned int index;
+
+			if (matchArg(&arg, index))
+			{
+				arg.buffer = arg_list_[index].buffer;
+			}
+			else
+			{
+				cl_mem buffer = clCreateBuffer(context_, flag, size, data, &err);
+				if (err != CL_SUCCESS)
+					return;
+				arg.buffer = buffer;
+				arg_list_.push_back(arg);
+			}
+			err = clSetKernelArg(kernel_, i, sizeof(cl_mem), &(arg.buffer));
+			if (err != CL_SUCCESS)
 				return;
 		}
 		else
 		{
 			err = clSetKernelArg(kernel_, i, size, NULL);
+			if (err != CL_SUCCESS)
+				return;
 		}
 	}
 
-	void KernelProgram::setKernelArgTex2D(int i, cl_mem_flags flag, GLenum texture_target, GLuint texture)
+	void KernelProgram::setKernelArgTex2D(int i, cl_mem_flags flag, GLuint texture)
 	{
 		cl_int err;
-		cl_mem tex_buffer = clCreateFromGLTexture2D(context_, flag, texture_target, 0, texture, &err);
-		if (err < 0)
-			return;
 		Argument arg;
 		arg.index = i;
 		arg.size = 0;
-		arg.buffer = tex_buffer;
-		arg_list_.push_back(arg);
-		err = clSetKernelArg(kernel_, i, sizeof(cl_mem), &tex_buffer);
-		if (err < 0)
+		unsigned int index;
+
+		if (matchArg(&arg, index))
+		{
+			arg.buffer = arg_list_[index].buffer;
+		}
+		else
+		{
+			cl_mem tex_buffer = clCreateFromGLTexture2D(context_, flag, GL_TEXTURE_2D, 0, texture, &err);
+			if (err != CL_SUCCESS)
+				return;
+			arg.buffer = tex_buffer;
+			arg_list_.push_back(arg);
+		}
+		err = clSetKernelArg(kernel_, i, sizeof(cl_mem), &(arg.buffer));
+		if (err != CL_SUCCESS)
 			return;
 	}
 
-	void KernelProgram::setKernelArgTex3D(int i, cl_mem_flags flag, GLenum texture_target, GLuint texture)
+	void KernelProgram::setKernelArgTex3D(int i, cl_mem_flags flag, GLuint texture)
 	{
 		cl_int err;
-		cl_mem tex_buffer = clCreateFromGLTexture3D(context_, flag, texture_target, 0, texture, &err);
-		if (err < 0)
-			return;
 		Argument arg;
 		arg.index = i;
 		arg.size = 0;
-		arg.buffer = tex_buffer;
-		arg_list_.push_back(arg);
-		err = clSetKernelArg(kernel_, i, sizeof(cl_mem), &tex_buffer);
-		if (err < 0)
+		unsigned int index;
+
+		if (matchArg(&arg, index))
+		{
+			arg.buffer = arg_list_[index].buffer;
+		}
+		else
+		{
+			cl_mem tex_buffer = clCreateFromGLTexture3D(context_, flag, GL_TEXTURE_3D, 0, texture, &err);
+			if (err != CL_SUCCESS)
+				return;
+			arg.buffer = tex_buffer;
+			arg_list_.push_back(arg);
+		}
+		err = clSetKernelArg(kernel_, i, sizeof(cl_mem), &(arg.buffer));
+		if (err != CL_SUCCESS)
 			return;
 	}
 
@@ -221,7 +276,7 @@ namespace FLIVR
 			cl_int err;
 			err = clEnqueueReadBuffer(queue_, arg.buffer, CL_TRUE, 0,
 				arg.size, data, 0, NULL, NULL);
-			if (err < 0)
+			if (err != CL_SUCCESS)
 				return;
 		}
 	}

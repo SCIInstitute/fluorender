@@ -5,21 +5,13 @@
 #include "Formats/png_resource.h"
 
 //resources
-#include "img/listicon_addgroup.h"
-#include "img/listicon_addmgroup.h"
-#include "img/listicon_brushappend.h"
-#include "img/listicon_brushclear.h"
-#include "img/listicon_brushcreate.h"
-#include "img/listicon_brushdiffuse.h"
-#include "img/listicon_brushdesel.h"
-#include "img/listicon_brusherase.h"
-#include "img/listicon_delete.h"
-#include "img/listicon_toggle.h"
+#include "img/icons.h"
 
 BEGIN_EVENT_TABLE(DataTreeCtrl, wxTreeCtrl)
 EVT_CONTEXT_MENU(DataTreeCtrl::OnContextMenu)
 EVT_MENU(ID_ToggleDisp, DataTreeCtrl::OnToggleDisp)
 EVT_MENU(ID_Isolate, DataTreeCtrl::OnIsolate)
+EVT_MENU(ID_ShowAll, DataTreeCtrl::OnShowAll)
 EVT_MENU(ID_RemoveData, DataTreeCtrl::OnRemoveData)
 EVT_MENU(ID_CloseView, DataTreeCtrl::OnCloseView)
 EVT_MENU(ID_ManipulateData, DataTreeCtrl::OnManipulateData)
@@ -277,6 +269,7 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
          case 2:  //volume data
             menu.Append(ID_ToggleDisp, "Toggle Visibility");
             menu.Append(ID_Isolate, "Isolate");
+			menu.Append(ID_ShowAll, "Show All");
             menu.Append(ID_RemoveData, "Delete");
             menu.Append(ID_AddDataGroup, "Add Volume Group");
             menu.Append(ID_Edit, "Edit...");
@@ -289,6 +282,7 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
          case 3:  //mesh data
             menu.Append(ID_ToggleDisp, "Toggle Visibility");
             menu.Append(ID_Isolate, "Isolate");
+			menu.Append(ID_ShowAll, "Show All");
             menu.Append(ID_RemoveData, "Delete");
             menu.Append(ID_ManipulateData, "Manipulate");
             menu.Append(ID_AddMeshGroup, "Add Mesh Group");
@@ -380,6 +374,64 @@ void DataTreeCtrl::OnIsolate(wxCommandEvent& event)
       if (vrv)
       {
          vrv->Isolate(item_type, itemname);
+         vrv->RefreshGL();
+         vr_frame->UpdateTreeIcons();
+      }
+   }
+}
+
+void DataTreeCtrl::OnShowAll(wxCommandEvent& event)
+{
+	if (m_fixed)
+		return;
+
+   wxTreeItemId sel_item = GetSelection();
+   VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+
+   if (sel_item.IsOk() && vr_frame)
+   {
+      wxString viewname = "";
+      wxString itemname = "";
+      int item_type = 0;
+
+      LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
+      if (item_data)
+      {
+         item_type = item_data->type;
+         itemname = GetItemText(sel_item);
+         wxTreeItemId par_item = GetItemParent(sel_item);
+         if (par_item.IsOk())
+         {
+            LayerInfo* par_data = (LayerInfo*)GetItemData(par_item);
+            if (par_data)
+            {
+               if (par_data->type == 1)
+               {
+                  //view
+                  viewname = GetItemText(par_item);
+               }
+               else if (par_data->type == 5 ||
+                     par_data->type == 6)
+               {
+                  wxTreeItemId gpar_item = GetItemParent(par_item);
+                  if (gpar_item.IsOk())
+                  {
+                     LayerInfo* gpar_data = (LayerInfo*)GetItemData(gpar_item);
+                     if (gpar_data && gpar_data->type==1)
+                     {
+                        //view
+                        viewname = GetItemText(gpar_item);
+                     }
+                  }
+               }
+            }
+         }
+      }
+
+      VRenderView* vrv = vr_frame->GetView(viewname);
+      if (vrv)
+      {
+         vrv->ShowAll();
          vrv->RefreshGL();
          vr_frame->UpdateTreeIcons();
       }
@@ -837,8 +889,15 @@ void DataTreeCtrl::UpdateSelection()
          switch (item_data->type)
          {
          case 0://root
+			 vr_frame->OnSelection(0);
+			 break;
          case 1://view
-            vr_frame->OnSelection(0);
+            //vr_frame->OnSelection(0);
+			{
+				wxString str = GetItemText(sel_item);
+				VRenderView* vrv = vr_frame->GetView(str);
+				vr_frame->OnSelection(1, vrv, 0, 0, 0);
+			}
             break;
          case 2://volume data
             {

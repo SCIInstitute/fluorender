@@ -25,6 +25,7 @@ class DataTreeCtrl: public wxTreeCtrl
 		ID_TreeCtrl = wxID_HIGHEST+501,
 		ID_ToggleDisp,
 		ID_Isolate,
+		ID_ShowAll,
 		ID_RemoveData,
 		ID_CloseView,
 		ID_ManipulateData,
@@ -118,6 +119,7 @@ private:
 
 	void OnToggleDisp(wxCommandEvent& event);
 	void OnIsolate(wxCommandEvent& event);
+	void OnShowAll(wxCommandEvent& event);
 	void OnRemoveData(wxCommandEvent& event);
 	void OnCloseView(wxCommandEvent& event);
 	void OnManipulateData(wxCommandEvent& event);

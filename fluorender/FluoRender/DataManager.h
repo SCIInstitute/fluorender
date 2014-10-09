@@ -194,7 +194,7 @@ public:
 	//hr_mode (hidden removal): 0-none; 1-ortho; 2-persp
 	void DrawMask(int type, int paint_mode, int hr_mode,
 		double ini_thresh, double gm_falloff, double scl_falloff, double scl_translate,
-		double w2d, double bins, bool ortho = false);
+		double w2d, double bins, bool ortho=false, bool estimate=false);
 	//draw label (create the label)
 	//type: 0-initialize; 1-maximum intensity filtering
 	//mode: 0-normal; 1-posterized, 2-copy values
@@ -333,6 +333,9 @@ public:
 	void SetBrickNum(int num) {m_brick_num = num;}
 	int GetBrickNum() {return m_brick_num;}
 
+	//estimated threshold
+	double GetEstThresh() {return m_est_thresh;}
+
 private:
 	//duplication indicator and counter
 	bool m_dup;
@@ -435,6 +438,9 @@ private:
 
 	//valid brick number
 	int m_brick_num;
+
+	//estimated threshold
+	double m_est_thresh;
 
 private:
 	//label functions

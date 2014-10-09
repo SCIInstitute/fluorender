@@ -16,49 +16,7 @@
 #include <cctype>
 
 //resources
-#include "img/icon_32.h"
-#include "img/icon_open_volume.h"
-#include "img/icon_open_volume_mini.h"
-#include "img/icon_open_project.h"
-#include "img/icon_open_project_mini.h"
-#include "img/icon_save_project.h"
-#include "img/icon_save_project_mini.h"
-#include "img/icon_new_view.h"
-#include "img/icon_new_view_mini.h"
-#include "img/icon_show_hide_ui.h"
-#include "img/icon_show_hide_ui_mini.h"
-#include "img/icon_open_mesh.h"
-#include "img/icon_open_mesh_mini.h"
-#include "img/icon_edit.h"
-#include "img/icon_edit_mini.h"
-#include "img/icon_recorder.h"
-#include "img/icon_recorder_mini.h"
-#include "img/icon_settings.h"
-#include "img/icon_settings_mini.h"
-#include "img/icon_check_updates.h"
-#include "img/icon_check_updates_mini.h"
-#include "img/icon_facebook.h"
-#include "img/icon_facebook_mini.h"
-#include "img/icon_twitter.h"
-#include "img/icon_twitter_mini.h"
-#include "img/icon_about.h"
-#include "img/icon_about_mini.h"
-#include "img/logo_snow.h"
-#include "img/logo.h"
-#include "img/icon_measure.h"
-
-
-#include "img/camera.h"
-#include "img/align.h"
-#include "img/center.h"
-#include "img/composite.h"
-#include "img/depth.h"
-#include "img/layers.h"
-#include "img/link.h"
-#include "img/measure.h"
-#include "img/ratio.h"
-#include "img/refresh.h"
-#include "img/unlink.h"
+#include "img/icons.h"
 
 BEGIN_EVENT_TABLE(VRenderFrame, wxFrame)
 EVT_MENU(wxID_EXIT, VRenderFrame::OnExit)
@@ -981,7 +939,10 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
 
       if (vrv)
          vrv->InitView(INIT_BOUNDS|INIT_CENTER);
-
+	  if (enable_4d) {
+			m_movie_view->EnableTime();
+			m_movie_view->DisableRot();
+	  }
       delete prg_diag;
    }
 }

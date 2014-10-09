@@ -7,7 +7,7 @@ value=2
 [micro\ blend]
 mode=0
 [save\ project]
-mode=0
+mode=1
 [realtime\ compress]
 mode=0
 [mouse\ int]
@@ -24,7 +24,7 @@ wiref=0
 c1=3
 c2=2
 c3=1
-c4=3
+c4=4
 [time\ id]
 value=_T
 [grad\ bg]
@@ -34,22 +34,25 @@ value=1
 [soft\ threshold]
 value=0
 [save\ cmp]
-value=1
+value=0
 [run\ script]
 value=0
 [text\ font]
-value=5
+value=3
 [memory\ settings]
-mem\ swap=1
-graphics\ mem=3900
+mem\ swap=0
+graphics\ mem=3500
 large\ data\ size=10
 force\ brick\ size=64
-up\ time=90
+up\ time=100
 [update\ order]
 value=0
 [point\ volume\ mode]
-value=2
+value=1
 [ruler\ use\ transf]
 value=0
 [ruler\ time\ dependent]
 value=1
+[pvxml\ flip]
+x=0
+y=0
