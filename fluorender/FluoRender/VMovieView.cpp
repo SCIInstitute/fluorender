@@ -83,9 +83,9 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	sizer_2->Add(st2, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_time_end_text, 0, wxALIGN_CENTER);
 	m_inc_time_btn = new wxButton(page, ID_IncTimeBtn, "",
-		wxDefaultPosition, wxSize(25, 25));
+		wxDefaultPosition, wxSize(30, 30));
 	m_dec_time_btn = new wxButton(page, ID_DecTimeBtn, "",
-		wxDefaultPosition, wxSize(25, 25));
+		wxDefaultPosition, wxSize(30, 30));
 	m_time_current_text = new wxTextCtrl(page, ID_CurrentTimeText, "0",
 		wxDefaultPosition,wxSize(35,-1));
 	m_inc_time_btn->SetBitmap(wxGetBitmapFromMemory(plus));
@@ -140,7 +140,7 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	sizer_7->Add(5, 5, 0);
 	sizer_7->Add(st2, 0, wxALIGN_CENTER);
 	//all sizers
-	sizer_v->Add(5, 15, 0);
+	sizer_v->Add(5, 5, 0);
 	sizer_v->Add(sizer_3, 0, wxEXPAND);
 	sizer_v->Add(5, 5, 0);
 	sizer_v->Add(sizer_4, 0, wxEXPAND);
@@ -148,11 +148,11 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	sizer_v->Add(sizer_5, 0, wxEXPAND);
 	sizer_v->Add(5, 5, 0);
 	sizer_v->Add(sizer_6, 0, wxEXPAND);
-	sizer_v->Add(5, 20, 0);
+	sizer_v->Add(5, 10, 0);
 	sizer_v->Add(sizer_1, 0, wxEXPAND);
 	sizer_v->Add(5, 5, 0);
 	sizer_v->Add(sizer_2, 0, wxEXPAND);
-	sizer_v->Add(5, 20, 0);
+	sizer_v->Add(5, 10, 0);
 	sizer_v->Add(sizer_7, 0, wxEXPAND);
 	sizer_v->AddStretchSpacer();
 	//set the page
@@ -190,7 +190,7 @@ wxWindow* VMovieView::CreateCroppingPage(wxWindow *parent) {
 		wxDefaultPosition, wxSize(110, 20));
 	m_frame_chk = new wxCheckBox(page, ID_FrameChk, "");
 	m_reset_btn = new wxButton(page, ID_ResetBtn, "Reset",
-		wxDefaultPosition, wxSize(110, 22));
+		wxDefaultPosition, wxSize(110, 30));
 	m_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	sizer_8->Add(5, 5, 0);
 	sizer_8->Add(st, 0, wxALIGN_CENTER);
@@ -285,11 +285,11 @@ m_current_page(0) {
 	//the play/rewind/slider/save
 	wxBoxSizer *sizerH = new wxBoxSizer(wxHORIZONTAL);
 	m_play_btn = new wxButton(this, ID_PlayPause, "",
-		wxDefaultPosition, wxSize(22, 22));
+		wxDefaultPosition, wxSize(30, 30));
 	m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
 	sizerH->Add(m_play_btn, 0, wxEXPAND|wxALIGN_CENTER);
 	m_rewind_btn = new wxButton(this, ID_Rewind, "",
-		wxDefaultPosition, wxSize(22, 22));
+		wxDefaultPosition, wxSize(30, 30));
 	m_rewind_btn->SetBitmap(wxGetBitmapFromMemory(rewind));
 	sizerH->Add(m_rewind_btn, 0, wxEXPAND|wxALIGN_CENTER);
 	m_progress_sldr = new wxSlider(this, ID_ProgressSldr, 0, 0, 360);
@@ -302,7 +302,7 @@ m_current_page(0) {
 	sizerH->Add(5, 5, 0);
 	sizerH->Add(st3, 0, wxALIGN_CENTER);
 	m_save_btn = new wxButton(this, ID_SaveMovie, "Save...",
-		wxDefaultPosition, wxSize(80, 22));
+		wxDefaultPosition, wxSize(80, 30));
 	m_save_btn->SetBitmap(wxGetBitmapFromMemory(listicon_save));
 	sizerH->Add(m_save_btn, 0, wxEXPAND|wxALIGN_CENTER);
 	//add all the lines
