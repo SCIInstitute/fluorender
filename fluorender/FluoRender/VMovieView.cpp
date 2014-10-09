@@ -588,8 +588,11 @@ void VMovieView::OnRun(wxCommandEvent& event) {
 		}
 		m_filename = m_filename.SubString(0,m_filename.Len()-5);
 		m_record = true;
+		delete fopendlg;
+	} else {
+		delete fopendlg;
+		return;
 	}
-	delete fopendlg;
 	wxCommandEvent e;
 	OnPrev(e);
 }
