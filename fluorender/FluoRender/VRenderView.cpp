@@ -3880,19 +3880,19 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
       img_shader->bind();
    }
    Color gamma, brightness, hdr;
-   if (m_vol_method == VOL_METHOD_MULTI)
-   {
-      gamma = m_gamma;
-      brightness = m_brightness;
-      hdr = m_hdr;
-   }
-   else
-   {
+   //if (m_vol_method == VOL_METHOD_MULTI)
+   //{
+   //   gamma = m_gamma;
+   //   brightness = m_brightness;
+   //   hdr = m_hdr;
+   //}
+   //else
+   //{
       VolumeData* vd = list[0];
       gamma = vd->GetGamma();
       brightness = vd->GetBrightness();
       hdr = vd->GetHdr();
-   }
+   //}
    img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
    img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
    img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
