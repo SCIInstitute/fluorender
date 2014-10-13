@@ -1,3 +1,30 @@
+/*
+For more information, please see: http://software.sci.utah.edu
+
+The MIT License
+
+Copyright (c) 2014 Scientific Computing and Imaging Institute,
+University of Utah.
+
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+*/
 #include "VRenderFrame.h"
 #include "DragDrop.h"
 #include <wx/artprov.h>
@@ -128,7 +155,7 @@ m_free_version(true)
          "Show counting dialog");
    m_tb_menu_edit->Append(ID_Measure, "Measurement...",
          "Show rulers dialog");
-   m_tb_menu_edit->Append(ID_Trace, "Trace...",
+   m_tb_menu_edit->Append(ID_Trace, "Tracking...",
          "Show trace dialog");
    m_tb_menu_edit->Append(ID_Colocalization, "Colocalization Analysis...",
          "Show colocalization analysis dialog");
@@ -403,7 +430,7 @@ m_free_version(true)
    m_aui_mgr.GetPane(m_measure_dlg).Hide();
    //trace dialog
    m_aui_mgr.AddPane(m_trace_dlg, wxAuiPaneInfo().
-         Name("m_trace_dlg").Caption("Cell Tracking").
+         Name("m_trace_dlg").Caption("Tracking").
          Dockable(false).CloseButton(true));
    m_aui_mgr.GetPane(m_trace_dlg).Float();
    m_aui_mgr.GetPane(m_trace_dlg).Hide();
@@ -481,6 +508,7 @@ m_free_version(true)
    quit->SetBitmap(wxArtProvider::GetBitmap(wxART_QUIT));
    m_top_file->Append(quit);
    //tool options
+#ifdef _WIN32
    m = new wxMenuItem(m_top_tools,ID_PaintTool, wxT("&Edit Paintbrush..."));
    m->SetBitmap(wxGetBitmapFromMemory(icon_edit_mini));
    m_top_tools->Append(m);
@@ -488,15 +516,18 @@ m_free_version(true)
    m_top_tools->Append(m);
    m = new wxMenuItem(m_top_tools,ID_Counting, wxT("&Counting and Volume..."));
    m_top_tools->Append(m);
+#endif
    m = new wxMenuItem(m_top_tools,ID_Measure, wxT("&Measurement Tool..."));
-   m_top_tools->Append(m);
-   m = new wxMenuItem(m_top_tools,ID_Trace, wxT("&Trace..."));
+	m_top_tools->Append(m);
+#ifdef _WIN32
+   m = new wxMenuItem(m_top_tools,ID_Trace, wxT("&Tracking..."));
    m_top_tools->Append(m);
    m = new wxMenuItem(m_top_tools,ID_Colocalization, wxT("Colocalization &Analysis..."));
    m_top_tools->Append(m);
    //m = new wxMenuItem(m_top_tools,ID_Recorder, wxT("&Recorder..."));
    //m->SetBitmap(wxGetBitmapFromMemory(icon_recorder_mini));
    //m_top_tools->Append(m);
+#endif
    m = new wxMenuItem(m_top_tools,ID_Convert, wxT("Con&vert..."));
    m_top_tools->Append(m);
    m_top_tools->Append(wxID_SEPARATOR);

@@ -1,4 +1,32 @@
-﻿#include "VRenderView.h"
+/*
+For more information, please see: http://software.sci.utah.edu
+
+The MIT License
+
+Copyright (c) 2014 Scientific Computing and Imaging Institute,
+University of Utah.
+
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+*/
+
+#include "VRenderView.h"
 #include "VRenderFrame.h"
 #include "bitmap_fonts.h"
 #include <tiffio.h>
@@ -421,7 +449,6 @@ void VRenderGLView::Init()
    {
       SetCurrent(*m_glRC);
       ShaderProgram::init_shaders_supported();
-	  KernelProgram::init_kernels_supported();
 
       VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
       if (vr_frame) vr_frame->SetTextureRendererSettings();
@@ -1843,10 +1870,6 @@ void VRenderGLView::Segment()
 		   vr_frame->GetTraceDlg()->CellLink(true, true);
 	   }
 	}
-	if (vr_frame && vr_frame->GetBrushToolDlg())
-	{
-		vr_frame->GetBrushToolDlg()->GetSettings(m_vrv);
-	}
 }
 
 //label volumes in current view
@@ -2235,17 +2258,6 @@ void VRenderGLView::SetSelectGroup(bool value)
 bool VRenderGLView::GetSelectGroup()
 {
    return m_selector.GetSelectGroup();
-}
-
-//estimate threshold
-void VRenderGLView::SetEstimateThresh(bool value)
-{
-	m_selector.SetEstimateThreshold(value);
-}
-
-bool VRenderGLView::GetEstimateThresh()
-{
-	return m_selector.GetEstimateThreshold();
 }
 
 //select both
@@ -3880,19 +3892,10 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
       img_shader->bind();
    }
    Color gamma, brightness, hdr;
-   //if (m_vol_method == VOL_METHOD_MULTI)
-   //{
-   //   gamma = m_gamma;
-   //   brightness = m_brightness;
-   //   hdr = m_hdr;
-   //}
-   //else
-   //{
-      VolumeData* vd = list[0];
-      gamma = vd->GetGamma();
-      brightness = vd->GetBrightness();
-      hdr = vd->GetHdr();
-   //}
+   VolumeData* vd = list[0];
+   gamma = vd->GetGamma();
+   brightness = vd->GetBrightness();
+	hdr = vd->GetHdr();
    img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
    img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
    img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
@@ -6552,6 +6555,39 @@ void VRenderGLView::Isolate(int type, wxString name)
    m_md_pop_dirty = true;
 }
 
+//move layer of the same level within this view
+//source is after the destination
+void VRenderGLView::MoveLayerinView(wxString &src_name, wxString &dst_name)
+{
+   int i, src_index;
+   TreeLayer* src = 0;
+   for (i=0; i<(int)m_layer_list.size(); i++)
+   {
+      if (m_layer_list[i] && m_layer_list[i]->GetName() == src_name)
+      {
+         src = m_layer_list[i];
+         src_index = i;
+         m_layer_list.erase(m_layer_list.begin()+i);
+         break;
+      }
+   }
+   if (!src)
+      return;
+   for (i=0; i<(int)m_layer_list.size(); i++)
+   {
+      if (m_layer_list[i] && m_layer_list[i]->GetName() == dst_name)
+      {
+         if (i>=src_index)
+            m_layer_list.insert(m_layer_list.begin()+i+1, src);
+         else
+            m_layer_list.insert(m_layer_list.begin()+i, src);
+         break;
+      }
+   }
+   m_vd_pop_dirty = true;
+   m_md_pop_dirty = true;
+}
+
 void VRenderGLView::ShowAll()
 {
 	for (unsigned int i=0; i<m_layer_list.size(); ++i)
@@ -6613,39 +6649,6 @@ void VRenderGLView::ShowAll()
 	}
 	m_vd_pop_dirty = true;
 	m_md_pop_dirty = true;
-}
-
-//move layer of the same level within this view
-//source is after the destination
-void VRenderGLView::MoveLayerinView(wxString &src_name, wxString &dst_name)
-{
-   int i, src_index;
-   TreeLayer* src = 0;
-   for (i=0; i<(int)m_layer_list.size(); i++)
-   {
-      if (m_layer_list[i] && m_layer_list[i]->GetName() == src_name)
-      {
-         src = m_layer_list[i];
-         src_index = i;
-         m_layer_list.erase(m_layer_list.begin()+i);
-         break;
-      }
-   }
-   if (!src)
-      return;
-   for (i=0; i<(int)m_layer_list.size(); i++)
-   {
-      if (m_layer_list[i] && m_layer_list[i]->GetName() == dst_name)
-      {
-         if (i>=src_index)
-            m_layer_list.insert(m_layer_list.begin()+i+1, src);
-         else
-            m_layer_list.insert(m_layer_list.begin()+i, src);
-         break;
-      }
-   }
-   m_vd_pop_dirty = true;
-   m_md_pop_dirty = true;
 }
 
 //move layer (volume) of the same level within the given group

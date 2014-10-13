@@ -27,7 +27,6 @@ bin
 FluoRender.build
 CMakeScripts
 *.xcodeproj
-lib
 ipch
 Debug
 Release

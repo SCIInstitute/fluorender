@@ -1,3 +1,30 @@
+/*
+For more information, please see: http://software.sci.utah.edu
+
+The MIT License
+
+Copyright (c) 2014 Scientific Computing and Imaging Institute,
+University of Utah.
+
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+*/
 #include "RecorderDlg.h"
 #include "VRenderFrame.h"
 #include <wx/artprov.h>
@@ -509,11 +536,11 @@ m_view(0)
 
 	//default duration
 	wxBoxSizer *group3 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, wxID_ANY, "Default:");
+	st = new wxStaticText(this, wxID_ANY, "Default:",wxDefaultPosition,wxSize(50,-1));
 	m_duration_text = new wxTextCtrl(this, ID_DurationText, "30",
-		wxDefaultPosition, wxSize(40, 23), 0, vald_int);
+		wxDefaultPosition, wxSize(30, 23), 0, vald_int);
 	m_interpolation_cmb = new wxComboBox(this, ID_InterpolationCmb, "",
-		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, wxSize(65,-1), 0, NULL, wxCB_READONLY);
 	m_interpolation_cmb->Append("Linear");
 	m_interpolation_cmb->Append("Smooth");
 	m_interpolation_cmb->Select(0);
@@ -521,9 +548,9 @@ m_view(0)
 	//key buttons
 	wxBoxSizer *group4 = new wxBoxSizer(wxHORIZONTAL);
 	m_set_key_btn = new wxButton(this, ID_SetKeyBtn, "Add",
-		wxDefaultPosition, wxSize(60, 23));
+		wxDefaultPosition, wxSize(50, 23));
 	m_del_key_btn = new wxButton(this, ID_DelKeyBtn, "Delete",
-		wxDefaultPosition, wxSize(60, 23));
+		wxDefaultPosition, wxSize(55, 23));
 	m_del_all_btn = new wxButton(this, ID_DelAllBtn, "Del. All",
 		wxDefaultPosition, wxSize(60, 23));
 
