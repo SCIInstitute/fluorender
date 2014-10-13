@@ -424,7 +424,7 @@ m_manual_assist(false)
 	sizer_35->Add(m_cell_new_id_btn, 0, wxALIGN_CENTER);
 	sizer_35->Add(m_cell_combine_id_btn, 0, wxALIGN_CENTER);
 	//magic tool
-	/*wxBoxSizer* sizer_36 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer_36 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Magic happens:",
 		wxDefaultPosition, wxSize(130, 20));
 	m_cell_magic0_btn = new wxButton(this, ID_CellMagic0Btn, "Measure",
@@ -441,14 +441,14 @@ m_manual_assist(false)
 	sizer_36->Add(10, 23);
 	sizer_36->Add(m_cell_magic1_btn, 0, wxALIGN_CENTER);
 	sizer_36->Add(m_cell_magic2_btn, 0, wxALIGN_CENTER);
-	sizer_36->Add(m_cell_magic3_btn, 0, wxALIGN_CENTER);*/
+	sizer_36->Add(m_cell_magic3_btn, 0, wxALIGN_CENTER);
 	//
 	sizer_3->Add(sizer_31, 0, wxEXPAND);
 	sizer_3->Add(sizer_32, 0, wxEXPAND);
 	sizer_3->Add(sizer_33, 0, wxEXPAND);
 	sizer_3->Add(sizer_34, 0, wxEXPAND);
 	sizer_3->Add(sizer_35, 0, wxEXPAND);
-	//sizer_3->Add(sizer_36, 0, wxEXPAND);
+	sizer_3->Add(sizer_36, 0, wxEXPAND);
 
 	//lists
 	wxBoxSizer *sizer_4 = new wxStaticBoxSizer(
@@ -479,13 +479,13 @@ m_manual_assist(false)
 	sizer_4->Add(sizer_42, 1, wxEXPAND);
 
 	//stats text
-	/*wxBoxSizer *sizer_5 = new wxStaticBoxSizer(
+	wxBoxSizer *sizer_5 = new wxStaticBoxSizer(
 		new wxStaticBox(this, wxID_ANY, "Output"),
 		wxVERTICAL);
 	m_stat_text = new wxTextCtrl(this, ID_StatText, "",
 		wxDefaultPosition, wxSize(-1, 100), wxTE_MULTILINE);
 	m_stat_text->SetEditable(false);
-	sizer_5->Add(m_stat_text, 1, wxEXPAND);*/
+	sizer_5->Add(m_stat_text, 1, wxEXPAND);
 
 	//all controls
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
@@ -498,7 +498,7 @@ m_manual_assist(false)
 	sizerV->Add(10, 10);
 	sizerV->Add(sizer_4, 1, wxEXPAND);
 	sizerV->Add(10, 10);
-	//sizerV->Add(sizer_5, 0, wxEXPAND);
+	sizerV->Add(sizer_5, 0, wxEXPAND);
 
 	SetSizer(sizerV);
 	Layout();

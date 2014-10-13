@@ -2260,6 +2260,17 @@ bool VRenderGLView::GetSelectGroup()
    return m_selector.GetSelectGroup();
 }
 
+//estimate threshold
+void VRenderGLView::SetEstimateThresh(bool value)
+{
+	m_selector.SetEstimateThreshold(value);
+}
+
+bool VRenderGLView::GetEstimateThresh()
+{
+	return m_selector.GetEstimateThreshold();
+}
+
 //select both
 void VRenderGLView::SetSelectBoth(bool value)
 {
