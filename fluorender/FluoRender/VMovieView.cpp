@@ -896,7 +896,7 @@ void VMovieView::OnTimeChange(wxScrollEvent &event) {
 	int end_time = STOI(m_time_end_text->GetValue().fn_str());
 	int time = end_time - start_time + 1;
 	m_time_current_text->ChangeValue(wxString::Format("%d",
-		start_time + time * pcnt));
+		(int)(start_time + time * pcnt)));
 
 	double movie_time;
 	m_movie_time->GetValue().ToDouble(&movie_time);
@@ -971,7 +971,7 @@ void VMovieView::OnTimeEnter(wxCommandEvent& event) {
 	int end_time = STOI(m_time_end_text->GetValue().fn_str());
 	int time = end_time - start_time + 1;
 	m_time_current_text->ChangeValue(wxString::Format("%d",
-		start_time + time * pcnt));
+		(int)(start_time + time * pcnt)));
 }
 
 void VMovieView::OnRotateChecked(wxCommandEvent& event) {
