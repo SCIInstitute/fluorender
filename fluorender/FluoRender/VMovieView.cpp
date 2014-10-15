@@ -494,6 +494,7 @@ void VMovieView::OnPrev(wxCommandEvent& event) {
 	SetProgress(0.);
 	SetRendering(0.);
 	m_last_frame = 0;
+	m_prev_time = -1;
 	m_timer.Start(10);
 	//advanced options
 	int page = m_notebook->GetSelection();
@@ -896,7 +897,7 @@ void VMovieView::OnTimeChange(wxScrollEvent &event) {
 	int end_time = STOI(m_time_end_text->GetValue().fn_str());
 	int time = end_time - start_time + 1;
 	m_time_current_text->ChangeValue(wxString::Format("%d",
-		start_time + time * pcnt));
+		int(start_time + time * pcnt)));
 
 	double movie_time;
 	m_movie_time->GetValue().ToDouble(&movie_time);
@@ -929,7 +930,9 @@ void VMovieView::SetRendering(double pcnt) {
 		int first, sec, tmp;
 		vrv->Get4DSeqFrames(first, sec, tmp);
 		if (sec - first > 0) {
-			vrv->Set4DSeqFrame(time ,true);
+			if (m_prev_time != time)
+				vrv->Set4DSeqFrame(time ,true);
+			m_prev_time = time;
 		} else {
 			vrv->Set3DBatFrame(time);
 		}
@@ -971,7 +974,7 @@ void VMovieView::OnTimeEnter(wxCommandEvent& event) {
 	int end_time = STOI(m_time_end_text->GetValue().fn_str());
 	int time = end_time - start_time + 1;
 	m_time_current_text->ChangeValue(wxString::Format("%d",
-		start_time + time * pcnt));
+		int(start_time + time * pcnt)));
 }
 
 void VMovieView::OnRotateChecked(wxCommandEvent& event) {

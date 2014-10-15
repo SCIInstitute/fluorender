@@ -449,6 +449,7 @@ void VRenderGLView::Init()
    {
       SetCurrent(*m_glRC);
       ShaderProgram::init_shaders_supported();
+	  KernelProgram::init_kernels_supported();
 
       VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
       if (vr_frame) vr_frame->SetTextureRendererSettings();
@@ -1869,6 +1870,10 @@ void VRenderGLView::Segment()
 		   vr_frame->GetTraceDlg()->CellExclusiveID(0);
 		   vr_frame->GetTraceDlg()->CellLink(true, true);
 	   }
+	}
+	if (vr_frame && vr_frame->GetBrushToolDlg())
+	{
+		vr_frame->GetBrushToolDlg()->GetSettings(m_vrv);
 	}
 }
 
@@ -4803,64 +4808,68 @@ void VRenderGLView::Get4DSeqFrames(int &start_frame, int &end_frame, int &cur_fr
 
 void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 {
-   int start_frame, end_frame, cur_frame;
-   Get4DSeqFrames(start_frame, end_frame, cur_frame);
-   if (frame > end_frame ||
-         frame < start_frame || cur_frame == frame)
-      return;
+	int start_frame, end_frame, cur_frame;
+	Get4DSeqFrames(start_frame, end_frame, cur_frame);
+	if (frame > end_frame ||
+		frame < start_frame)
+		return;
 
-   m_tseq_prv_num = m_tseq_cur_num;
-   m_tseq_cur_num = frame;
-   VRenderFrame* vframe = (VRenderFrame*)m_frame;
-   if (vframe && vframe->GetSettingDlg())
-      m_run_script = vframe->GetSettingDlg()->GetRunScript();
+	m_tseq_prv_num = m_tseq_cur_num;
+	m_tseq_cur_num = frame;
+	VRenderFrame* vframe = (VRenderFrame*)m_frame;
+	if (vframe && vframe->GetSettingDlg())
+		m_run_script = vframe->GetSettingDlg()->GetRunScript();
 
-   for (int i=0; i<(int)m_vd_pop_list.size(); i++)
-   {
-      VolumeData* vd = m_vd_pop_list[i];
-      if (vd && vd->GetReader())
-      {
-         BaseReader* reader = vd->GetReader();
+	for (int i=0; i<(int)m_vd_pop_list.size(); i++)
+	{
+		VolumeData* vd = m_vd_pop_list[i];
+		if (vd && vd->GetReader())
+		{
+			BaseReader* reader = vd->GetReader();
 
-         double spcx, spcy, spcz;
-         vd->GetSpacings(spcx, spcy, spcz);
+			if (cur_frame != frame)
+			{
 
-         Nrrd* data = reader->Convert(frame, vd->GetCurChannel(), false);
-         if (!vd->Replace(data, false))
-            continue;
+				double spcx, spcy, spcz;
+				vd->GetSpacings(spcx, spcy, spcz);
 
-         vd->SetCurTime(reader->GetCurTime());
-         vd->SetSpacings(spcx, spcy, spcz);
+				Nrrd* data = reader->Convert(frame, vd->GetCurChannel(), false);
+				if (!vd->Replace(data, false))
+					continue;
 
-         //run script
-         if (m_run_script && run_script)
-         {
+				vd->SetCurTime(reader->GetCurTime());
+				vd->SetSpacings(spcx, spcy, spcz);
+
+				//update rulers
+				if (vframe && vframe->GetMeasureDlg())
+					vframe->GetMeasureDlg()->UpdateList();
+
+				if (vd->GetVR())
+					vd->GetVR()->clear_tex_pool();
+			}
+
+			//run script
+			if (m_run_script && run_script)
+			{
 #ifdef _WIN32
-             wchar_t slash = '\\';
+				wchar_t slash = '\\';
 #else
-             wchar_t slash = '/';
+				wchar_t slash = '/';
 #endif
-            wxString pathname = reader->GetPathName();
-            int pos = pathname.Find(slash, true);
-            wxString scriptname = pathname.Left(pos+1) + "script_4d.txt";
-            if (wxFileExists(scriptname))
-            {
-               m_selector.SetVolume(vd);
-               m_calculator.SetVolumeA(vd);
-               m_cur_vol = vd;
-               Run4DScript(scriptname);
-            }
-         }
-
-         //update rulers
-         if (vframe && vframe->GetMeasureDlg())
-            vframe->GetMeasureDlg()->UpdateList();
-
-         if (vd->GetVR())
-            vd->GetVR()->clear_tex_pool();
-      }
-   }
-   RefreshGL();
+				wxString pathname = reader->GetPathName();
+				int pos = pathname.Find(slash, true);
+				wxString scriptname = pathname.Left(pos+1) + "script_4d.txt";
+				if (wxFileExists(scriptname))
+				{
+					m_selector.SetVolume(vd);
+					m_calculator.SetVolumeA(vd);
+					m_cur_vol = vd;
+					Run4DScript(scriptname);
+				}
+			}
+		}
+	}
+	RefreshGL();
 }
 
 void VRenderGLView::Get3DBatFrames(int &start_frame, int &end_frame, int &cur_frame)
