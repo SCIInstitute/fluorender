@@ -326,12 +326,7 @@ static char* glmDirName(char* path)
    dir = STRDUP(path);
 
     i = (int)strlen(dir);
-#ifdef _WIN32
-    wchar_t slash = '\\';
-#else
-    wchar_t slash = '/';
-#endif
-   while (dir[i+1]!=slash && i>0)
+   while (dir[i+1]!=GETSLASH() && i>0)
       i--;
 
    STRNCPY(s, sizeof(s), dir, i+2);

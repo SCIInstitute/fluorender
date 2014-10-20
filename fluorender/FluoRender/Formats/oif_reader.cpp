@@ -67,25 +67,15 @@ void OIFReader::SetFile(std::string &file)
       m_path_name.assign(file.length(), L' ');
       copy(file.begin(), file.end(), m_path_name.begin());
 
-#ifdef _WIN32
-      wchar_t slash = L'\\';
-#else
-      wchar_t slash = L'/';
-#endif
-      m_data_name = m_path_name.substr(m_path_name.find_last_of(slash)+1);
+      m_data_name = m_path_name.substr(m_path_name.find_last_of(GETSLASH())+1);
    }
    m_id_string = m_path_name;
 }
 
 void OIFReader::SetFile(wstring &file)
 {
-#ifdef _WIN32
-   wchar_t slash = L'\\';
-#else
-   wchar_t slash = L'/';
-#endif
    m_path_name = file;
-   m_data_name = m_path_name.substr(m_path_name.find_last_of(slash)+1);
+   m_data_name = m_path_name.substr(m_path_name.find_last_of(GETSLASH())+1);
    m_id_string = m_path_name;
 }
 
@@ -94,13 +84,8 @@ void OIFReader::Preprocess()
    m_type = 0;
    m_oif_info.clear();
 
-#ifdef _WIN32
-   wchar_t slash = L'\\';
-#else
-   wchar_t slash = L'/';
-#endif
    //separate path and name
-   size_t pos = m_path_name.find_last_of(slash);
+   size_t pos = m_path_name.find_last_of(GETSLASH());
    if (pos == -1)
       return;
    wstring path = m_path_name.substr(0, pos+1);
@@ -229,12 +214,7 @@ void OIFReader::SetBatch(bool batch)
    if (batch)
    {
       //read the directory info
-#ifdef _WIN32
-      wchar_t slash = L'\\';
-#else
-      wchar_t slash = L'/';
-#endif
-      wstring search_path = m_path_name.substr(0, m_path_name.find_last_of(slash)) + slash;
+      wstring search_path = m_path_name.substr(0, m_path_name.find_last_of(GETSLASH())) + GETSLASH();
       FIND_FILES(search_path,L".oif",m_batch_list,m_cur_batch);
       m_batch = true;
    }

@@ -80,12 +80,7 @@ void NRRDReader::Preprocess()
    m_4d_seq.clear();
 
    //separate path and name
-#ifdef _WIN32
-   wchar_t slash = L'\\';
-#else
-   wchar_t slash = L'/';
-#endif
-   size_t pos = m_path_name.find_last_of(slash);
+   size_t pos = m_path_name.find_last_of(GETSLASH());
    if (pos == -1)
       return;
    wstring path = m_path_name.substr(0, pos+1);
@@ -183,12 +178,7 @@ void NRRDReader::SetBatch(bool batch)
    if (batch)
    {
       //read the directory info
-#ifdef _WIN32
-      wchar_t slash = L'\\';
-#else
-      wchar_t slash = L'/';
-#endif
-      wstring search_path = m_path_name.substr(0, m_path_name.find_last_of(slash)) + slash;
+      wstring search_path = m_path_name.substr(0, m_path_name.find_last_of(GETSLASH())) + GETSLASH();
       wstring search_str = search_path + L".nrrd";
       FIND_FILES(search_path,L".nrrd",m_batch_list,m_cur_batch,L"");
       m_batch = true;
@@ -220,12 +210,7 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 
    int i;
 
-#ifdef _WIN32
-   wchar_t slash = L'\\';
-#else
-   wchar_t slash = L'/';
-#endif
-   m_data_name = m_4d_seq[t].filename.substr(m_4d_seq[t].filename.find_last_of(slash)+1);
+   m_data_name = m_4d_seq[t].filename.substr(m_4d_seq[t].filename.find_last_of(GETSLASH())+1);
 
    Nrrd *output = nrrdNew();
    NrrdIoState *nio = nrrdIoStateNew();

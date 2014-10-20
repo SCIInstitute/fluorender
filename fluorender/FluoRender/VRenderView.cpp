@@ -4541,12 +4541,7 @@ void VRenderGLView::Set3DBatCapture(wxString &cap_file, int begin_frame, int end
    if (!m_cap_file.IsEmpty() && m_total_frames>1)
    {
        wxString path = m_cap_file;
-#ifdef _WIN32
-       wchar_t slash = '\\';
-#else
-       wchar_t slash = '/';
-#endif
-      int sep = path.Find(slash, true);
+      int sep = path.Find(GETSLASH(), true);
       if (sep != wxNOT_FOUND)
       {
          sep++;
@@ -4824,13 +4819,8 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
          //run script
          if (m_run_script && run_script)
          {
-#ifdef _WIN32
-             wchar_t slash = '\\';
-#else
-             wchar_t slash = '/';
-#endif
             wxString pathname = reader->GetPathName();
-            int pos = pathname.Find(slash, true);
+            int pos = pathname.Find(GETSLASH(), true);
             wxString scriptname = pathname.Left(pos+1) + "script_4d.txt";
             if (wxFileExists(scriptname))
             {
@@ -5023,13 +5013,8 @@ void VRenderGLView::PreDraw()
                   //run script
                   if (m_run_script)
                   {
-#ifdef _WIN32
-                      wchar_t slash = '\\';
-#else
-                      wchar_t slash = '/';
-#endif
                      wxString pathname = reader->GetPathName();
-                     int pos = pathname.Find(slash, true);
+                     int pos = pathname.Find(GETSLASH(), true);
                      wxString scriptname = pathname.Left(pos+1) + "script_4d.txt";
                      if (wxFileExists(scriptname))
                      {
@@ -5198,12 +5183,7 @@ void VRenderGLView::PreDraw()
                if (!m_cap_file.IsEmpty() && m_total_frames>1)
                {
                    wxString path = m_cap_file;
-#ifdef _WIN32
-                   wchar_t slash = '\\';
-#else
-                   wchar_t slash = '/';
-#endif
-                  int sep = path.Find(slash, true);
+                  int sep = path.Find(GETSLASH(), true);
                   if (sep != wxNOT_FOUND)
                   {
                      sep++;
@@ -5286,13 +5266,8 @@ void VRenderGLView::PostDraw()
       if (m_capture_bat && m_total_frames>1)
       {
          wxString path = m_cap_file;
-          wxString name = m_cap_file;
-#ifdef _WIN32
-          wchar_t slash = '\\';
-#else
-          wchar_t slash = '/';
-#endif
-         int sep = path.Find(slash, true);
+         wxString name = m_cap_file;
+         int sep = path.Find(GETSLASH(), true);
          if (sep != wxNOT_FOUND)
          {
             sep++;

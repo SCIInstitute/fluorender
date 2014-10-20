@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <stdio.h>
 #include "../compatibility.h"
 #include <vector>
+#include "pole/pole.h"
 #include "base_reader.h"
 
 using namespace std;
@@ -121,12 +122,10 @@ class OIBReader : public BaseReader
       static bool oib_sort(const TimeDataInfo& info1, const TimeDataInfo& info2);
       void ReadSingleOib();
       void ReadSequenceOib();
-#ifdef WIN32
-	void ReadStream(IStorage *pStg, wstring &stream_name);
-	void ReadOibInfo(BYTE* pbyData, ULONG size);
-	void ReadOif(BYTE* pbyData, ULONG size);
-	void ReadTiff(BYTE* pbyData, unsigned short *val, int z);
-#endif
+	void ReadStream(POLE::Storage &pStg, wstring &stream_name);
+	void ReadOibInfo(unsigned char* pbyData, size_t size);
+	void ReadOif(unsigned char* pbyData, size_t size);
+	void ReadTiff(unsigned char* pbyData, unsigned short *val, int z);
 };
 
 #endif//_OIB_READER_H_

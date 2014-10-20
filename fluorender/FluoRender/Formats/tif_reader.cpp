@@ -90,13 +90,8 @@ void TIFReader::Preprocess()
 
    m_4d_seq.clear();
 
-#ifdef _WIN32
-   wchar_t slash = L'\\';
-#else
-   wchar_t slash = L'/';
-#endif
    //separate path and name
-   size_t pos = m_path_name.find_last_of(slash);
+   size_t pos = m_path_name.find_last_of(GETSLASH());
    if (pos == -1)
       return;
    wstring path = m_path_name.substr(0, pos+1);
@@ -450,15 +445,10 @@ wstring TIFReader::GetTimeId()
 
 void TIFReader::SetBatch(bool batch)
 {
-#ifdef _WIN32
-   wchar_t slash = L'\\';
-#else
-   wchar_t slash = L'/';
-#endif
    if (batch)
    {
       //separate path and name
-      size_t pos = m_path_name.find_last_of(slash);
+      size_t pos = m_path_name.find_last_of(GETSLASH());
       if (pos == -1)
          return;
       wstring path = m_path_name.substr(0, pos+1);
@@ -555,15 +545,10 @@ Nrrd* TIFReader::Convert(int t, int c, bool get_max)
          c<0 || c>=m_chan_num)
       return 0;
 
-#ifdef _WIN32
-   wchar_t slash = L'\\';
-#else
-   wchar_t slash = L'/';
-#endif
    Nrrd* data = 0;
    TimeDataInfo chan_info = m_4d_seq[t];
    m_data_name = chan_info.slices[0].slice.substr(
-         chan_info.slices[0].slice.find_last_of(slash)+1);
+         chan_info.slices[0].slice.find_last_of(GETSLASH())+1);
    data = ReadTiff(chan_info.slices, c, get_max);
    m_cur_time = t;
    return data;

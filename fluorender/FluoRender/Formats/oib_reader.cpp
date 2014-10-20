@@ -82,12 +82,7 @@ void OIBReader::Preprocess()
    m_oib_info.clear();
 
    //separate path and name
-#ifdef _WIN32
-   wchar_t slash = L'\\';
-#else
-   wchar_t slash = L'/';
-#endif
-   size_t pos = m_path_name.find_last_of(slash);
+   size_t pos = m_path_name.find_last_of(GETSLASH());
    if (pos == -1)
       return;
    wstring path = m_path_name.substr(0, pos+1);
@@ -161,81 +156,49 @@ bool OIBReader::oib_sort(const TimeDataInfo& info1, const TimeDataInfo& info2)
 
 void OIBReader::ReadSingleOib()
 {
-   //TODO
-#ifdef _WIN32
    //read the current file info
    //storage
-   IStorage *pStg = NULL;
+   POLE::Storage pStg(ws2s(m_path_name).c_str()); 
    //open
-   if (StgOpenStorageEx(m_path_name.c_str(),
-            STGM_DIRECT|STGM_READ|STGM_SHARE_DENY_WRITE,
-            STGFMT_STORAGE, 0, NULL, NULL, IID_IStorage,
-            (void**)&pStg) == S_OK)
-   {
+   if (pStg.open()) {
       //enumerate
-      IEnumSTATSTG *pEnum = NULL;
-      if (pStg->EnumElements(0, NULL, 0, &pEnum) == S_OK)
-      {
-         STATSTG statStg;
-         while (pEnum->Next(1, &statStg, NULL) == S_OK)
-         {
-            if (statStg.type == STGTY_STREAM)
-            {
-               wstring stream_name(statStg.pwcsName);
-               ReadStream(pStg, stream_name);
-            }
-         }
-      }
+	  std::list<std::string> entries = 
+		  pStg.entries();
+	  for(std::list<std::string>::iterator it = entries.begin();
+		  it != entries.end(); ++it) {
+			  if (!pStg.isDirectory(*it))
+				ReadStream(pStg,s2ws(*it));
+	  }
    }
-
    //release
-   if (pStg)
-      pStg->Release();
-#endif
+   pStg.close();
 }
 
 void OIBReader::ReadSequenceOib()
 {
-   // TODO
-#ifdef _WIN32
    for (int i=0; i<(int)m_oib_info.size(); i++)
    {
       wstring path_name = m_oib_info[i].filename;
 
       if (path_name == m_path_name)
          m_cur_time = i;
-
-      //read the current file info
-      //storage
-      IStorage *pStg = NULL;
-      //open
-      if (StgOpenStorageEx(path_name.c_str(),
-               STGM_DIRECT|STGM_READ|STGM_SHARE_DENY_WRITE,
-               STGFMT_STORAGE, 0, NULL, NULL, IID_IStorage,
-               (void**)&pStg) == S_OK)
-      {
-         //enumerate
-         IEnumSTATSTG *pEnum = NULL;
-         if (pStg->EnumElements(0, NULL, 0, &pEnum) == S_OK)
-         {
-            STATSTG statStg;
-            while (pEnum->Next(1, &statStg, NULL) == S_OK)
-            {
-               if (statStg.type == STGTY_STREAM)
-               {
-                  wstring stream_name(statStg.pwcsName);
+	  
+	   //storage
+	   POLE::Storage pStg("temp_storage.txt"); 
+	   //open
+	   if (pStg.open()) {
+		  //enumerate
+		  std::list<std::string> streams = 
+			  pStg.GetAllStreams(ws2s(path_name));
+		  for(std::list<std::string>::iterator it = streams.begin();
+			  it != streams.end(); ++it) {
                   m_oib_t = i;
-                  ReadStream(pStg, stream_name);
-               }
-            }
-         }
-      }
-
-      //release
-      if (pStg)
-         pStg->Release();
+				  ReadStream(pStg,s2ws(*it));
+		  }
+	   }
+	   //release
+	   pStg.close();
    }
-#endif
 }
 
 void OIBReader::SetSliceSeq(bool ss)
@@ -263,13 +226,8 @@ void OIBReader::SetBatch(bool batch)
    if (batch)
    {
       //read the directory info
-#ifdef _WIN32
-      wchar_t slash = L'\\';
-#else
-      wchar_t slash = L'/';
-#endif
       wstring search_path = m_path_name.substr(0,
-            m_path_name.find_last_of(slash)) + slash;
+            m_path_name.find_last_of(GETSLASH())) + GETSLASH();
       FIND_FILES(search_path,L".oib",m_batch_list,m_cur_batch);
       m_batch = true;
    }
@@ -293,53 +251,43 @@ int OIBReader::LoadBatch(int index)
    return result;
 }
 
-#ifdef _WIN32 //TODO
-void OIBReader::ReadStream(IStorage *pStg, wstring &stream_name)
+void OIBReader::ReadStream(POLE::Storage &pStg, wstring &stream_name)
 {
-	IStream *pStm = NULL;
-	BYTE *pbyData = 0;
+	POLE::Stream pStm(&pStg,ws2s(stream_name));
+	unsigned char *pbyData = 0;
 
 	//open
-	if (pStg->OpenStream(stream_name.c_str(),
-		NULL, STGM_DIRECT|STGM_READ|STGM_SHARE_EXCLUSIVE,
-		0, &pStm) == S_OK)
+	if (!pStm.eof() && !pStm.fail())
 	{
 		//get stream size
-		STATSTG statStg;
-		//get info
-		if (pStm->Stat(&statStg, STATFLAG_NONAME) == S_OK)
-		{
-			//allocate
-			pbyData = new BYTE[statStg.cbSize.u.LowPart];
-			//read
-			if (pStm->Read(pbyData, statStg.cbSize.u.LowPart, NULL) == S_OK)
-			{
-				//read oib info
-				if (stream_name == wstring(L"OibInfo.txt"))
-					ReadOibInfo(pbyData, statStg.cbSize.u.LowPart);
-				else
-				{
-					if (m_type==0 || (m_type==1 && m_oib_t==0))
-						ReadOif(pbyData, statStg.cbSize.u.LowPart);
-				}
+		size_t sz = pStm.size();
+		//allocate 
+		pbyData = new unsigned char[sz];
+		if (!pbyData) return;
+		//read
+		if (pStm.read(pbyData,sz)) {
+			//read oib info
+			if (stream_name == wstring(L"OibInfo.txt")) {
+				ReadOibInfo(pbyData, sz);
+			} else {
+				if (m_type==0 || (m_type==1 && m_oib_t==0))
+					ReadOif(pbyData, sz);
 			}
 		}
 	}
 
 	//release
-	if (pStm)
-		pStm->Release();
 	if (pbyData)
-		delete []pbyData;
+		delete[] pbyData;
 }
 
-void OIBReader::ReadOibInfo(BYTE* pbyData, ULONG size)
+void OIBReader::ReadOibInfo(unsigned char* pbyData, size_t size)
 {
 	if (!pbyData || !size)
 		return;
-	WCHAR* data = (WCHAR*)pbyData;
+	wchar_t * data = (wchar_t *)pbyData;
 
-	ULONG i = 1;
+	size_t i = 1;
 	wstring oneline;
 
 	while (i<size/2)
@@ -497,7 +445,7 @@ void OIBReader::ReadOibInfo(BYTE* pbyData, ULONG size)
 	}
 }
 
-void OIBReader::ReadOif(BYTE *pbyData, ULONG size)
+void OIBReader::ReadOif(unsigned char *pbyData, size_t size)
 {
 	if (!pbyData || !size)
 		return;
@@ -510,9 +458,9 @@ void OIBReader::ReadOif(BYTE *pbyData, ULONG size)
 	m_yspc = 0.0;
 	m_zspc = 0.0;
 
-	WCHAR* data = (WCHAR*)pbyData;
+	wchar_t* data = (wchar_t*)pbyData;
 
-	ULONG i = 1;
+	size_t i = 1;
 	wstring oneline;
 
 	//axis info
@@ -701,7 +649,6 @@ void OIBReader::ReadOif(BYTE *pbyData, ULONG size)
 		m_zspc = 1.0;
 	}
 }
-#endif
 
 double OIBReader::GetExcitationWavelength(int chan)
 {
@@ -716,7 +663,6 @@ double OIBReader::GetExcitationWavelength(int chan)
 Nrrd *OIBReader::Convert(int t, int c, bool get_max)
 {
     Nrrd *data = 0;
-#ifdef _WIN32
    int sl_num = 0;
    if (t>=0 && t<m_time_num &&
          c>=0 && c<m_chan_num &&
@@ -818,7 +764,6 @@ Nrrd *OIBReader::Convert(int t, int c, bool get_max)
       m_scalar_scale = 65535.0 / m_max_value;
 
    m_cur_time = t;
-#endif
    return data;
 }
 
@@ -826,8 +771,8 @@ wstring OIBReader::GetCurName(int t, int c)
 {
    return m_type==0?wstring(L""):m_oib_info[t].filename;
 }
-#ifdef _WIN32
-void OIBReader::ReadTiff(BYTE *pbyData, unsigned short *val, int z)
+
+void OIBReader::ReadTiff(unsigned char *pbyData, unsigned short *val, int z)
 {
 	if (*((unsigned int*)pbyData) != 0x002A4949)
 		return;
@@ -961,5 +906,3 @@ void OIBReader::ReadTiff(BYTE *pbyData, unsigned short *val, int z)
 		}
 	}
 }
-
-#endif
