@@ -688,10 +688,10 @@ Nrrd *OIBReader::Convert(int t, int c, bool get_max)
 			if (pStg.isDirectory(*it)) {
 				std::list<std::string> streams =  pStg.GetAllStreams(*it);
 				size_t num = 0;
-				streams.sort();
+				ChannelInfo *cinfo = &m_oib_info[t].dataset[c];
 				for(std::list<std::string>::iterator its = streams.begin();
 						its != streams.end(); ++its) {
-
+					if (num >= cinfo->size()) break;
 					//fix the stream name
 					std::string name = (*it) + "/" + 
 						(*its).substr((*it).size(),(*its).size() - (*it).size());
