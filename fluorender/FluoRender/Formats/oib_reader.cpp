@@ -693,8 +693,7 @@ Nrrd *OIBReader::Convert(int t, int c, bool get_max)
 						its != streams.end(); ++its) {
 					if (num >= cinfo->size()) break;
 					//fix the stream name
-					std::string name = (*it) + "/" + 
-						(*its).substr((*it).size(),(*its).size() - (*it).size());
+					std::string name = (*it) + "/" + (*cinfo)[num].stream_name;
 					  
 					POLE::Stream pStm(&pStg,name);
 
