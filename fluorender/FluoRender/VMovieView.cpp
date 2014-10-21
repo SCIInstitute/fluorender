@@ -491,24 +491,6 @@ void VMovieView::OnPrev(wxCommandEvent& event) {
 	VRenderView* vrv = vr_frame->GetView(str);
 	if (!vrv) return;
 	
-	SetProgress(0.);
-	SetRendering(0.);
-	m_last_frame = 0;
-	m_timer.Start(10);
-	//advanced options
-	int page = m_notebook->GetSelection();
-	if (page <= 1) m_current_page = page;
-	if (m_current_page == 1) {
-		long fps;
-		m_fps_text->GetValue().ToLong(&fps);
-		Interpolator *interpolator = vr_frame->GetInterpolator();
-		if (!interpolator)
-			return;
-		int frames = int(interpolator->GetLastT());
-		double runtime = (double)frames/(double)fps;
-		m_movie_time->ChangeValue(wxString::Format("%.2f",runtime));
-		return;
-	}
 	//basic options
 	int rot_axis = 1;
 	if (m_x_rd->GetValue())
@@ -530,6 +512,24 @@ void VMovieView::OnPrev(wxCommandEvent& event) {
 	while(m_starting_rot < -360.) m_starting_rot += 360.;
 	if (360. - std::abs(m_starting_rot) < 0.001) 
 		m_starting_rot = 0.;
+	//advanced options
+	int page = m_notebook->GetSelection();
+	if (page <= 1) m_current_page = page;
+	if (m_current_page == 1) {
+		long fps;
+		m_fps_text->GetValue().ToLong(&fps);
+		Interpolator *interpolator = vr_frame->GetInterpolator();
+		if (!interpolator)
+			return;
+		int frames = int(interpolator->GetLastT());
+		double runtime = (double)frames/(double)fps;
+		m_movie_time->ChangeValue(wxString::Format("%.2f",runtime));
+		return;
+	}
+	SetProgress(0.);
+	SetRendering(0.);
+	m_last_frame = 0;
+	m_timer.Start(10);
 }
 //ch1
 void VMovieView::OnCh1Check(wxCommandEvent &event) {
@@ -947,9 +947,9 @@ void VMovieView::SetRendering(double pcnt) {
 		val = m_starting_rot + pcnt * deg;
 		if (m_x_rd->GetValue())
 			vrv->SetRotations(val,y,z);
-		if (m_y_rd->GetValue())
+		else if (m_y_rd->GetValue())
 			vrv->SetRotations(x,val,z);
-		if (m_z_rd->GetValue())
+		else if (m_z_rd->GetValue())
 			vrv->SetRotations(x,y,val);
 		vrv->RefreshGL(false);
 	}
