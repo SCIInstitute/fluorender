@@ -135,7 +135,7 @@ public:
 
 	wxTextCtrl *m_degree_end;
 
-	wxTextCtrl *m_movie_time;
+	static wxTextCtrl *m_movie_time;
 	wxTextCtrl *m_bitrate_text;
 
 	//cropping
@@ -152,8 +152,8 @@ public:
 	wxTextCtrl *m_height_text;
 	wxSpinButton* m_height_spin;
 
-	wxTextCtrl *m_estimated_size_text;
-	size_t m_Mbitrate;
+	static wxTextCtrl *m_estimated_size_text;
+	static double m_Mbitrate;
 
 private:
 	wxWindow* m_frame;
@@ -208,6 +208,10 @@ private:
 
 	//help
 	void OnHelpBtn(wxCommandEvent& event);
+    void OnMovieQuality(wxCommandEvent &event);
+	void OnCh1Check(wxCommandEvent &event);
+	void OnChEmbedCheck(wxCommandEvent &event);
+	static wxWindow* CreateExtraCaptureControl(wxWindow* parent);
 
 	//time slider
 	void OnTimeChange(wxScrollEvent &event);
@@ -236,12 +240,8 @@ public:
 	wxFileDialog(parent, title, defaultdir,
 		dftfile, wildcard, style),
 		m_mv(parent) {}
-	static wxWindow* CreateExtraCaptureControl(wxWindow* parent);
 	void AddOptions();
 	
-	void OnCh1Check(wxCommandEvent &event);
-    void OnMovieQuality(wxCommandEvent &event);
-	void OnChEmbedCheck(wxCommandEvent &event);
 
 	enum
 	{

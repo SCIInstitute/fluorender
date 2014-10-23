@@ -69,6 +69,10 @@ BEGIN_EVENT_TABLE(VMovieView, wxPanel)
     EVT_TIMER(ID_Timer, VMovieView::OnTimer)
 END_EVENT_TABLE()
 
+double VMovieView::m_Mbitrate = 1;
+wxTextCtrl * VMovieView::m_estimated_size_text = 0;
+wxTextCtrl * VMovieView::m_movie_time = 0;
+
 wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	wxPanel *page = new wxPanel(parent);
 	
@@ -286,7 +290,6 @@ VMovieView::VMovieView(wxWindow* frame,
 	long style,
 	const wxString& name) :
 wxPanel(parent, id, pos, size, style, name),
-m_Mbitrate(1),
 m_frame(frame),
 m_starting_rot(0.),
 m_timer(this,ID_Timer),
@@ -542,11 +545,11 @@ void VMovieView::OnRun(wxCommandEvent& event) {
 	if (!vr_frame) return; 
 	VRenderView* vrv = vr_frame->GetView(str);
 	if (!vrv) return;
-	MyFileDialog *fopendlg = new MyFileDialog(
+	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Save Movie Sequence", 
 		"", "output", "MOV file (*.mov)|*.mov|TIF files (*.tif)|*.tif", 
 		wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
-	fopendlg->AddOptions();
+	fopendlg->SetExtraControlCreator(CreateExtraCaptureControl);
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK) {
 		wxCommandEvent e;
@@ -566,8 +569,6 @@ void VMovieView::OnRun(wxCommandEvent& event) {
 			}
 			long fps;
 			m_fps_text->GetValue().ToLong(&fps);
-			long bitrate;
-			m_bitrate_text->GetValue().ToLong(&bitrate);
 			encoder_.open(m_filename.ToStdString(),w,h,fps,
 				m_Mbitrate*1000000);
 		}
@@ -1060,24 +1061,28 @@ void VMovieView::OnTimeText(wxCommandEvent& event) {
 }
 
 //ch1
-void MyFileDialog::OnCh1Check(wxCommandEvent &event) {
-	VRenderFrame::SetCompression(m_ch1->GetValue());
+void VMovieView::OnCh1Check(wxCommandEvent &event) {
+	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
+	if (ch1)
+		VRenderFrame::SetCompression(ch1->GetValue());
 }
 //movie quality
-void MyFileDialog::OnMovieQuality(wxCommandEvent &event) {
-	size_t Mbitrate = STOI(m_bitrate_text->GetValue().fn_str());
-	m_mv->m_Mbitrate = Mbitrate;
-	size_t size = Mbitrate * STOI(
-		m_mv->m_movie_time->GetValue().fn_str()) / 8.;
-	m_estimated_size_text->SetValue(wxString::Format("%f MB", size));
+void VMovieView::OnMovieQuality(wxCommandEvent &event) {
+	m_Mbitrate = STOD(((wxTextCtrl*)event.GetEventObject())
+		->GetValue().fn_str());
+	double size = m_Mbitrate * STOD(
+		m_movie_time->GetValue().fn_str()) / 8.;
+	m_estimated_size_text->SetValue(wxString::Format("%.2f", size));
 }
 //embed project
-void MyFileDialog::OnChEmbedCheck(wxCommandEvent &event) {
-	VRenderFrame::SetEmbedProject(m_ch_embed->GetValue());
+void VMovieView::OnChEmbedCheck(wxCommandEvent &event) {
+	wxCheckBox* ch_embed = (wxCheckBox*)event.GetEventObject();
+	if (ch_embed)
+		VRenderFrame::SetEmbedProject(ch_embed->GetValue());
 }
 
-wxWindow* MyFileDialog::CreateExtraCaptureControl(wxWindow* parent) {
-	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(400, 90));
+wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent) {
+	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(600, 90));
 
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
@@ -1087,54 +1092,58 @@ wxWindow* MyFileDialog::CreateExtraCaptureControl(wxWindow* parent) {
 	//compressed TIFF
 	wxStaticText *tiffopts = new wxStaticText(panel,wxID_ANY, "TIFF Options: ",
 		wxDefaultPosition,wxSize(100,-1));
-	wxCheckBox *m_ch1 = new wxCheckBox(panel, ID_CompressChk,
+	wxCheckBox *ch1 = new wxCheckBox(panel, wxID_HIGHEST+3004,
 		"Lempel-Ziv-Welch Compression");
-	m_ch1->Connect(ID_CompressChk, wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(MyFileDialog::OnCh1Check), NULL, panel);
-	if (m_ch1)
-		m_ch1->SetValue(VRenderFrame::GetCompression());
+	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(VMovieView::OnCh1Check), NULL, panel);
+	if (ch1)
+		ch1->SetValue(VRenderFrame::GetCompression());
 	line1->Add(tiffopts, 0, wxALIGN_CENTER);
-	line1->Add(m_ch1, 0, wxALIGN_CENTER);
+	line1->Add(ch1, 0, wxALIGN_CENTER);
 	// movie quality
 	//bitrate
 	wxStaticText *MOVopts = new wxStaticText(panel,wxID_ANY, "MOV Options: ",
 		wxDefaultPosition,wxSize(100,-1));
-	wxTextCtrl *m_bitrate_text = new wxTextCtrl(panel, ID_BitrateText, "1",
-		wxDefaultPosition,wxSize(30,-1));
-	m_bitrate_text->Connect(m_bitrate_text->GetId(), wxEVT_TEXT ,
-		wxCommandEventHandler(MyFileDialog::OnMovieQuality), NULL, panel);
+	wxTextCtrl *bitrate_text = new wxTextCtrl(panel, wxID_ANY, "1.0",
+		wxDefaultPosition,wxSize(60,-1));
+	bitrate_text->Connect(bitrate_text->GetId(), wxEVT_TEXT ,
+		wxCommandEventHandler(VMovieView::OnMovieQuality), NULL, panel);
 	wxStaticText *st = new wxStaticText(panel,wxID_ANY, "Bitrate:",
 		wxDefaultPosition,wxSize(40,-1));
-	wxStaticText *st2 = new wxStaticText(panel, wxID_ANY, "Mb/s         Estimated size: ",
-		wxDefaultPosition, wxSize(150, -1));
-	//wxTextCtrl *m_estimated_size_text = new wxTextCtrl(panel, ID_BitrateText, "0.25",
-	//	wxDefaultPosition,wxSize(30,-1));
-	//m_estimated_size_text->Disable();
+	wxStaticText *st2 = new wxStaticText(panel, wxID_ANY, "Mb/s (MAX ~ 20 Mb/s)     Estimated size:",
+		wxDefaultPosition, wxSize(230, -1));
+	m_estimated_size_text = new wxTextCtrl(panel, ID_BitrateText, "0.25",
+		wxDefaultPosition,wxSize(60,-1));
+	m_estimated_size_text->Disable();
+	m_Mbitrate = STOD(bitrate_text->GetValue().fn_str());
+	double size = m_Mbitrate * STOI(
+		m_movie_time->GetValue().fn_str()) / 8.;
+	m_estimated_size_text->SetValue(wxString::Format("%.2f", size));
 	
 	line2->Add(MOVopts, 0, wxALIGN_CENTER);
 	line2->Add(st, 0, wxALIGN_CENTER);
 	line2->Add(5,5, wxALIGN_CENTER);
-	line2->Add(m_bitrate_text, 0, wxALIGN_CENTER);
+	line2->Add(bitrate_text, 0, wxALIGN_CENTER);
 	line2->Add(5,5, wxALIGN_CENTER);
 	line2->Add(st2, 0, wxALIGN_CENTER);
-	//line2->Add(m_estimated_size_text, 0, wxALIGN_CENTER);
-	//st2 = new wxStaticText(panel, wxID_ANY, "MB",
-	//	wxDefaultPosition, wxSize(20, -1));
-	//line2->Add(5,5, wxALIGN_CENTER);
-	//line2->Add(st2, 0, wxALIGN_CENTER);
+	line2->Add(m_estimated_size_text, 0, wxALIGN_CENTER);
+	st2 = new wxStaticText(panel, wxID_ANY, "MB",
+		wxDefaultPosition, wxSize(20, -1));
+	line2->Add(5,5, wxALIGN_CENTER);
+	line2->Add(st2, 0, wxALIGN_CENTER);
 	//copy all files check box
-	wxCheckBox *m_ch_embed;
+	wxCheckBox *ch_embed;
 	if (VRenderFrame::GetSaveProject()) {
-		m_ch_embed = new wxCheckBox(panel, ID_EmbedChk,
+		ch_embed = new wxCheckBox(panel, wxID_HIGHEST+3005,
 			"Embed all files in the project folder");
-		m_ch_embed->Connect(ID_EmbedChk, wxEVT_COMMAND_CHECKBOX_CLICKED,
-			wxCommandEventHandler(MyFileDialog::OnChEmbedCheck), NULL, panel);
-		m_ch_embed->SetValue(VRenderFrame::GetEmbedProject());
+		ch_embed->Connect(ch_embed->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+			wxCommandEventHandler(VMovieView::OnChEmbedCheck), NULL, panel);
+		ch_embed->SetValue(VRenderFrame::GetEmbedProject());
 	}
 	//group
-	if (VRenderFrame::GetSaveProject() && m_ch_embed) {
+	if (VRenderFrame::GetSaveProject() && ch_embed) {
 		wxBoxSizer *line3 = new wxBoxSizer(wxHORIZONTAL);
-		line3->Add(m_ch_embed, 0, wxALIGN_CENTER);
+		line3->Add(ch_embed, 0, wxALIGN_CENTER);
 		group1->Add(line3);
 		group1->Add(5,5, wxALIGN_CENTER);
 	}
@@ -1145,8 +1154,4 @@ wxWindow* MyFileDialog::CreateExtraCaptureControl(wxWindow* parent) {
 	panel->Layout();
 
 	return panel;
-}
-
-void MyFileDialog::AddOptions() {
-	SetExtraControlCreator(CreateExtraCaptureControl);
 }
