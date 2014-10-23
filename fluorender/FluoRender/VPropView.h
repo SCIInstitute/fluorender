@@ -98,7 +98,8 @@ class VPropView: public wxPanel
 		ID_InvChk,
 		ID_MipChk,
 		ID_NRChk,
-		ID_DepthChk
+		ID_DepthChk,
+		ID_FluoRender
 };
 
 public:
@@ -263,6 +264,7 @@ private:
 	void OnNRCheck(wxCommandEvent &event);
 	//depth omde
 	void OnDepthCheck(wxCommandEvent &event);
+	void OnFluoRender(wxCommandEvent &event);
 
 	DECLARE_EVENT_TABLE();
 };

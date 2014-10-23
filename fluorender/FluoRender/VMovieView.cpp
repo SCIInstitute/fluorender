@@ -1087,7 +1087,7 @@ wxWindow* MyFileDialog::CreateExtraCaptureControl(wxWindow* parent) {
 	//compressed TIFF
 	wxStaticText *tiffopts = new wxStaticText(panel,wxID_ANY, "TIFF Options: ",
 		wxDefaultPosition,wxSize(100,-1));
-	m_ch1 = new wxCheckBox(panel, ID_CompressChk,
+	wxCheckBox *m_ch1 = new wxCheckBox(panel, ID_CompressChk,
 		"Lempel-Ziv-Welch Compression");
 	m_ch1->Connect(ID_CompressChk, wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(MyFileDialog::OnCh1Check), NULL, panel);
@@ -1099,7 +1099,7 @@ wxWindow* MyFileDialog::CreateExtraCaptureControl(wxWindow* parent) {
 	//bitrate
 	wxStaticText *MOVopts = new wxStaticText(panel,wxID_ANY, "MOV Options: ",
 		wxDefaultPosition,wxSize(100,-1));
-	m_bitrate_text = new wxTextCtrl(panel, ID_BitrateText, "1",
+	wxTextCtrl *m_bitrate_text = new wxTextCtrl(panel, ID_BitrateText, "1",
 		wxDefaultPosition,wxSize(30,-1));
 	m_bitrate_text->Connect(m_bitrate_text->GetId(), wxEVT_TEXT ,
 		wxCommandEventHandler(MyFileDialog::OnMovieQuality), NULL, panel);
@@ -1107,9 +1107,9 @@ wxWindow* MyFileDialog::CreateExtraCaptureControl(wxWindow* parent) {
 		wxDefaultPosition,wxSize(40,-1));
 	wxStaticText *st2 = new wxStaticText(panel, wxID_ANY, "Mb/s         Estimated size: ",
 		wxDefaultPosition, wxSize(150, -1));
-	m_estimated_size_text = new wxTextCtrl(panel, ID_BitrateText, "0.25",
-		wxDefaultPosition,wxSize(30,-1));
-	m_estimated_size_text->Disable();
+	//wxTextCtrl *m_estimated_size_text = new wxTextCtrl(panel, ID_BitrateText, "0.25",
+	//	wxDefaultPosition,wxSize(30,-1));
+	//m_estimated_size_text->Disable();
 	
 	line2->Add(MOVopts, 0, wxALIGN_CENTER);
 	line2->Add(st, 0, wxALIGN_CENTER);
@@ -1117,12 +1117,13 @@ wxWindow* MyFileDialog::CreateExtraCaptureControl(wxWindow* parent) {
 	line2->Add(m_bitrate_text, 0, wxALIGN_CENTER);
 	line2->Add(5,5, wxALIGN_CENTER);
 	line2->Add(st2, 0, wxALIGN_CENTER);
-	line2->Add(m_estimated_size_text, 0, wxALIGN_CENTER);
-	st2 = new wxStaticText(panel, wxID_ANY, "MB",
-		wxDefaultPosition, wxSize(20, -1));
-	line2->Add(5,5, wxALIGN_CENTER);
-	line2->Add(st2, 0, wxALIGN_CENTER);
+	//line2->Add(m_estimated_size_text, 0, wxALIGN_CENTER);
+	//st2 = new wxStaticText(panel, wxID_ANY, "MB",
+	//	wxDefaultPosition, wxSize(20, -1));
+	//line2->Add(5,5, wxALIGN_CENTER);
+	//line2->Add(st2, 0, wxALIGN_CENTER);
 	//copy all files check box
+	wxCheckBox *m_ch_embed;
 	if (VRenderFrame::GetSaveProject()) {
 		m_ch_embed = new wxCheckBox(panel, ID_EmbedChk,
 			"Embed all files in the project folder");
@@ -1147,6 +1148,5 @@ wxWindow* MyFileDialog::CreateExtraCaptureControl(wxWindow* parent) {
 }
 
 void MyFileDialog::AddOptions() {
-	//SetExtraControlCreator(reinterpret_cast<ExtraControlCreatorFunction>
-		//(&MyFileDialog::CreateExtraCaptureControl));
+	SetExtraControlCreator(CreateExtraCaptureControl);
 }

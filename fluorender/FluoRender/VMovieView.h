@@ -236,7 +236,7 @@ public:
 	wxFileDialog(parent, title, defaultdir,
 		dftfile, wildcard, style),
 		m_mv(parent) {}
-	wxWindow* CreateExtraCaptureControl(wxWindow* parent);
+	static wxWindow* CreateExtraCaptureControl(wxWindow* parent);
 	void AddOptions();
 	
 	void OnCh1Check(wxCommandEvent &event);
