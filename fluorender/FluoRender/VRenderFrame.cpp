@@ -809,7 +809,6 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
    if (m_setting_dlg)
       m_compression = m_setting_dlg->GetRealtimeCompress();
     
-#ifdef _WIN32
     wxFileDialog *fopendlg = new wxFileDialog(
          this, "Choose the volume data file", "", "",
          "All Supported|*.tif;*.tiff;*.oib;*.oif;*.lsm;*.xml;*.nrrd|"\
@@ -819,16 +818,6 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
          "Zeiss Laser Scanning Microscope (*.lsm)|*.lsm|"\
          "Prairie View XML (*.xml)|*.xml|"\
          "Nrrd files (*.nrrd)|*.nrrd", wxFD_OPEN|wxFD_MULTIPLE);
-#else
-    wxFileDialog *fopendlg = new wxFileDialog(
-         this, "Choose the volume data file", "", "",
-         "All Supported|*.tif;*.tiff;*.oif;*.lsm;*.xml;*.nrrd|"\
-         "Tiff Files (*.tif, *.tiff)|*.tif;*.tiff|"\
-         "Olympus Original Imaging Format (*.oif)|*.oif|"\
-         "Zeiss Laser Scanning Microscope (*.lsm)|*.lsm|"\
-         "Prairie View XML (*.xml)|*.xml|"\
-         "Nrrd files (*.nrrd)|*.nrrd", wxFD_OPEN|wxFD_MULTIPLE);
-#endif
    fopendlg->SetExtraControlCreator(CreateExtraControlVolume);
 
    int rval = fopendlg->ShowModal();

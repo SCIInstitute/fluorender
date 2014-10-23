@@ -375,13 +375,13 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	//combo box line
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_wav_color1_cmb = new wxComboBox(page, ID_WavColor1Cmb, "",
-		wxDefaultPosition, wxSize(70, 23), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, wxSize(75, 23), 0, NULL, wxCB_READONLY);
 	m_wav_color2_cmb = new wxComboBox(page, ID_WavColor2Cmb, "",
-		wxDefaultPosition, wxSize(70, 23), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, wxSize(75, 23), 0, NULL, wxCB_READONLY);
 	m_wav_color3_cmb = new wxComboBox(page, ID_WavColor3Cmb, "",
-		wxDefaultPosition, wxSize(70, 23), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, wxSize(75, 23), 0, NULL, wxCB_READONLY);
 	m_wav_color4_cmb = new wxComboBox(page, ID_WavColor4Cmb, "",
-		wxDefaultPosition, wxSize(70, 23), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, wxSize(75, 23), 0, NULL, wxCB_READONLY);
 	//1
 	m_wav_color1_cmb->Append("Red");
 	m_wav_color1_cmb->Append("Green");
@@ -406,43 +406,43 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	m_wav_color4_cmb->Append("Blue");
 	m_wav_color4_cmb->Append("Purple");
 	m_wav_color4_cmb->Append("White");
-	sizer2_1->Add(30, 20);
+	sizer2_1->Add(35, 20);
 	sizer2_1->Add(m_wav_color1_cmb);
-	sizer2_1->Add(20, 20);
+	sizer2_1->Add(25, 20);
 	sizer2_1->Add(m_wav_color2_cmb);
-	sizer2_1->Add(20, 20);
+	sizer2_1->Add(25, 20);
 	sizer2_1->Add(m_wav_color3_cmb);
-	sizer2_1->Add(20, 20);
+	sizer2_1->Add(25, 20);
 	sizer2_1->Add(m_wav_color4_cmb);
 	sizer2_1->Add(30, 20);
 	//static text line
 	wxBoxSizer *sizer2_2 = new wxBoxSizer(wxHORIZONTAL);
 	sizer2_2->Add(10, 20);
-	st = new wxStaticText(page, 0, "350", wxDefaultPosition, wxSize(25, 20));
+	st = new wxStaticText(page, 0, "350", wxDefaultPosition, wxSize(30, 20));
 	sizer2_2->Add(st);
 	sizer2_2->Add(20, 20);
-	st = new wxStaticText(page, 0, "--", wxDefaultPosition, wxSize(25, 20));
+	st = new wxStaticText(page, 0, "--", wxDefaultPosition, wxSize(30, 20));
 	sizer2_2->Add(st);
 	sizer2_2->Add(20, 20);
-	st = new wxStaticText(page, 0, "450\n480\n488", wxDefaultPosition, wxSize(25, 50));
+	st = new wxStaticText(page, 0, "450\n480\n488", wxDefaultPosition, wxSize(30, 50));
 	sizer2_2->Add(st);
 	sizer2_2->Add(20, 20);
-	st = new wxStaticText(page, 0, "--", wxDefaultPosition, wxSize(25, 20));
+	st = new wxStaticText(page, 0, "--", wxDefaultPosition, wxSize(30, 20));
 	sizer2_2->Add(st);
 	sizer2_2->Add(20, 20);
-	st = new wxStaticText(page, 0, "543\n568", wxDefaultPosition, wxSize(25, 30));
+	st = new wxStaticText(page, 0, "543\n568", wxDefaultPosition, wxSize(30, 35));
 	sizer2_2->Add(st);
 	sizer2_2->Add(20, 20);
-	st = new wxStaticText(page, 0, "--", wxDefaultPosition, wxSize(25, 20));
+	st = new wxStaticText(page, 0, "--", wxDefaultPosition, wxSize(30, 20));
 	sizer2_2->Add(st);
 	sizer2_2->Add(20, 20);
-	st = new wxStaticText(page, 0, "633", wxDefaultPosition, wxSize(25, 20));
+	st = new wxStaticText(page, 0, "633", wxDefaultPosition, wxSize(30, 20));
 	sizer2_2->Add(st);
 	sizer2_2->Add(20, 20);
-	st = new wxStaticText(page, 0, "--", wxDefaultPosition, wxSize(25, 20));
+	st = new wxStaticText(page, 0, "--", wxDefaultPosition, wxSize(30, 20));
 	sizer2_2->Add(st);
 	sizer2_2->Add(20, 20);
-	st = new wxStaticText(page, 0, "700", wxDefaultPosition, wxSize(25, 20));
+	st = new wxStaticText(page, 0, "700", wxDefaultPosition, wxSize(30, 20));
 	sizer2_2->Add(st);
 	group2->Add(10, 5);
 	group2->Add(sizer2_1, 0);
