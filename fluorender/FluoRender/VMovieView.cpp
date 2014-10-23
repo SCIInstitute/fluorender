@@ -308,15 +308,15 @@ m_current_page(0) {
 		wxDefaultPosition,wxSize(30, -1));
 	//other
 	m_views_cmb = new wxComboBox(this, ID_ViewsCombo, "",
-		wxDefaultPosition, wxSize(100, -1), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, wxSize(120, -1), 0, NULL, wxCB_READONLY);
 	m_help_btn = new wxButton(this, ID_HelpBtn, "?",
 		wxDefaultPosition, wxSize(25, 25));
 	//sizer 1
 	sizer_1->Add(5, 5, 0);
 	wxStaticText * st = new wxStaticText(this, wxID_ANY, "FPS:",
-		wxDefaultPosition, wxSize(25, -1));
+		wxDefaultPosition, wxSize(30, -1));
 	wxStaticText * st2 = new wxStaticText(this, wxID_ANY, "Capture:",
-		wxDefaultPosition,wxSize(50,-1));
+		wxDefaultPosition,wxSize(60,-1));
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_fps_text, 0, wxALIGN_CENTER);
 	sizer_1->AddStretchSpacer();
@@ -1105,15 +1105,15 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent) {
 	wxStaticText *MOVopts = new wxStaticText(panel,wxID_ANY, "MOV Options: ",
 		wxDefaultPosition,wxSize(100,-1));
 	wxTextCtrl *bitrate_text = new wxTextCtrl(panel, wxID_ANY, "1.0",
-		wxDefaultPosition,wxSize(60,-1));
+		wxDefaultPosition,wxSize(50,-1));
 	bitrate_text->Connect(bitrate_text->GetId(), wxEVT_TEXT ,
 		wxCommandEventHandler(VMovieView::OnMovieQuality), NULL, panel);
 	wxStaticText *st = new wxStaticText(panel,wxID_ANY, "Bitrate:",
-		wxDefaultPosition,wxSize(40,-1));
-	wxStaticText *st2 = new wxStaticText(panel, wxID_ANY, "Mb/s (MAX ~ 20 Mb/s)     Estimated size:",
-		wxDefaultPosition, wxSize(230, -1));
+		wxDefaultPosition,wxSize(50,-1));
+	wxStaticText *st2 = new wxStaticText(panel, wxID_ANY, "Mb/s (MAX ~ 20 Mb/s)    Estimated size:",
+		wxDefaultPosition, wxSize(260, -1));
 	m_estimated_size_text = new wxTextCtrl(panel, ID_BitrateText, "0.25",
-		wxDefaultPosition,wxSize(60,-1));
+		wxDefaultPosition,wxSize(50,-1));
 	m_estimated_size_text->Disable();
 	m_Mbitrate = STOD(bitrate_text->GetValue().fn_str());
 	double size = m_Mbitrate * STOI(
@@ -1128,7 +1128,7 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent) {
 	line2->Add(st2, 0, wxALIGN_CENTER);
 	line2->Add(m_estimated_size_text, 0, wxALIGN_CENTER);
 	st2 = new wxStaticText(panel, wxID_ANY, "MB",
-		wxDefaultPosition, wxSize(20, -1));
+		wxDefaultPosition, wxSize(30, -1));
 	line2->Add(5,5, wxALIGN_CENTER);
 	line2->Add(st2, 0, wxALIGN_CENTER);
 	//copy all files check box
