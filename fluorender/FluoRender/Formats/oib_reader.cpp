@@ -290,7 +290,7 @@ void OIBReader::ReadOibInfo(unsigned char* pbyData, size_t size)
 {
 	if (!pbyData || !size)
 		return;
-	wchar_t * data = (wchar_t *)pbyData;
+	uint16_t * data = (uint16_t *)pbyData;
 
 	size_t i = 1;
 	wstring oneline;
@@ -463,7 +463,7 @@ void OIBReader::ReadOif(unsigned char *pbyData, size_t size)
 	m_yspc = 0.0;
 	m_zspc = 0.0;
 
-	wchar_t* data = (wchar_t*)pbyData;
+	uint16_t* data = (uint16_t*)pbyData;
 
 	size_t i = 1;
 	wstring oneline;
@@ -606,7 +606,7 @@ void OIBReader::ReadOif(unsigned char *pbyData, size_t size)
 			!max_size.empty() &&
 			!start_pos.empty() &&
 			!end_pos.empty())
-		{
+		{ 
 			//calculate
 			double spc = 0.0;
 			double dmax = WSTOD(max_size.c_str());
