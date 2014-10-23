@@ -1090,8 +1090,8 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent) {
 	wxBoxSizer *line2 = new wxBoxSizer(wxHORIZONTAL);
 
 	//compressed TIFF
-	wxStaticText *tiffopts = new wxStaticText(panel,wxID_ANY, "TIFF Options: ",
-		wxDefaultPosition,wxSize(100,-1));
+	wxStaticText *tiffopts = new wxStaticText(panel,wxID_ANY, "TIFF Options:",
+		wxDefaultPosition,wxSize(95,-1));
 	wxCheckBox *ch1 = new wxCheckBox(panel, wxID_HIGHEST+3004,
 		"Lempel-Ziv-Welch Compression");
 	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
@@ -1102,19 +1102,21 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent) {
 	line1->Add(ch1, 0, wxALIGN_CENTER);
 	// movie quality
 	//bitrate
-	wxStaticText *MOVopts = new wxStaticText(panel,wxID_ANY, "MOV Options: ",
-		wxDefaultPosition,wxSize(100,-1));
+	wxStaticText *MOVopts = new wxStaticText(panel,wxID_ANY, "MOV Options:",
+		wxDefaultPosition,wxSize(95,-1));
 	wxTextCtrl *bitrate_text = new wxTextCtrl(panel, wxID_ANY, "1.0",
 		wxDefaultPosition,wxSize(50,-1));
 	bitrate_text->Connect(bitrate_text->GetId(), wxEVT_TEXT ,
 		wxCommandEventHandler(VMovieView::OnMovieQuality), NULL, panel);
 	wxStaticText *st = new wxStaticText(panel,wxID_ANY, "Bitrate:",
 		wxDefaultPosition,wxSize(50,-1));
-	wxStaticText *st2 = new wxStaticText(panel, wxID_ANY, "Mb/s (MAX ~ 20 Mb/s)    Estimated size:",
-		wxDefaultPosition, wxSize(260, -1));
+	wxStaticText *st2 = new wxStaticText(panel, wxID_ANY, "Mb/s (0 - 20 Mb/s)",
+		wxDefaultPosition, wxSize(140, -1));
+	wxStaticText *st3 = new wxStaticText(panel, wxID_ANY, "Estimated size:",
+		wxDefaultPosition, wxSize(110, -1));
 	m_estimated_size_text = new wxTextCtrl(panel, ID_BitrateText, "0.25",
 		wxDefaultPosition,wxSize(50,-1));
-	m_estimated_size_text->Disable();
+	m_estimated_size_text->Disable();   
 	m_Mbitrate = STOD(bitrate_text->GetValue().fn_str());
 	double size = m_Mbitrate * STOI(
 		m_movie_time->GetValue().fn_str()) / 8.;
@@ -1126,6 +1128,8 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent) {
 	line2->Add(bitrate_text, 0, wxALIGN_CENTER);
 	line2->Add(5,5, wxALIGN_CENTER);
 	line2->Add(st2, 0, wxALIGN_CENTER);
+	line2->AddStretchSpacer();
+	line2->Add(st3, 0, wxALIGN_CENTER);
 	line2->Add(m_estimated_size_text, 0, wxALIGN_CENTER);
 	st2 = new wxStaticText(panel, wxID_ANY, "MB",
 		wxDefaultPosition, wxSize(30, -1));
