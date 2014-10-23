@@ -1,31 +1,4 @@
 /*
-For more information, please see: http://software.sci.utah.edu
-
-The MIT License
-
-Copyright (c) 2014 Scientific Computing and Imaging Institute,
-University of Utah.
-
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-*/
-/*
  * Copyright (c) 2003 Fabrice Bellard
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -89,7 +62,8 @@ QVideoEncoder::QVideoEncoder() {
 	valid_ = false;
 }
 
-bool QVideoEncoder::open(std::string f, size_t w, size_t h, size_t fps) {
+bool QVideoEncoder::open(std::string f, size_t w, size_t h, 
+	size_t fps, size_t bitrate) {
 	output_stream_.frame = 0;
 	output_stream_.next_pts = 0;
 	output_stream_.samples_count = 0;
@@ -107,7 +81,7 @@ bool QVideoEncoder::open(std::string f, size_t w, size_t h, size_t fps) {
 	width_ = ((size_t)(w/16))*16;
 	height_ = ((size_t)(h/16))*16;
 	fps_ = fps;
-	bitrate_ = ((size_t)(3 * width_ * height_)/1000)*10000;
+	bitrate_ = bitrate;
 	gop_ = 12;
     ffmpeg::avformat_alloc_output_context2(
 		&format_context_, NULL, NULL, filename_.c_str());

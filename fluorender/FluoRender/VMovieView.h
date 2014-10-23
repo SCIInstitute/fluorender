@@ -60,6 +60,9 @@ class VMovieView : public wxPanel
 		//movie time
 		ID_MovieTimeText,
 
+		//bit rate
+		ID_BitrateText,
+
 		//fps, view combo, help
 		ID_FPS_Text,
 		ID_ViewsCombo = wxID_HIGHEST+701,
@@ -133,6 +136,7 @@ public:
 	wxTextCtrl *m_degree_end;
 
 	wxTextCtrl *m_movie_time;
+	wxTextCtrl *m_bitrate_text;
 
 	//cropping
 	wxCheckBox *m_frame_chk;
@@ -148,7 +152,8 @@ public:
 	wxTextCtrl *m_height_text;
 	wxSpinButton* m_height_spin;
 
-
+	wxTextCtrl *m_estimated_size_text;
+	size_t m_Mbitrate;
 
 private:
 	wxWindow* m_frame;
@@ -186,9 +191,6 @@ private:
 	void Init();
 
 	//left column
-	void OnCh1Check(wxCommandEvent &event);
-	void OnChEmbedCheck(wxCommandEvent &event);
-	static wxWindow* CreateExtraCaptureControl(wxWindow* parent);
 	void OnRun(wxCommandEvent& event);
 	void OnPrev(wxCommandEvent& event);
 	void OnStop(wxCommandEvent& event);
@@ -222,6 +224,38 @@ private:
     void OnTimer(wxTimerEvent& event);
 
 	DECLARE_EVENT_TABLE();
+};
+
+// this class allows option altering in the dialog.
+class MyFileDialog : public wxFileDialog
+{
+public:
+	MyFileDialog(VMovieView * parent, const wxString &title,
+		const wxString& defaultdir, const wxString &dftfile,
+		const wxString& wildcard, long style) :
+	wxFileDialog(parent, title, defaultdir,
+		dftfile, wildcard, style),
+		m_mv(parent) {}
+	wxWindow* CreateExtraCaptureControl(wxWindow* parent);
+	void AddOptions();
+	
+	void OnCh1Check(wxCommandEvent &event);
+    void OnMovieQuality(wxCommandEvent &event);
+	void OnChEmbedCheck(wxCommandEvent &event);
+
+	enum
+	{
+		ID_BitrateText,
+		ID_EstSizeText,
+		ID_CompressChk,
+		ID_EmbedChk,
+	};
+
+	VMovieView * m_mv;
+	wxTextCtrl * m_bitrate_text;
+	wxTextCtrl * m_estimated_size_text;
+	wxCheckBox * m_ch_embed;
+	wxCheckBox * m_ch1;
 };
 
 #endif//_VMovieView_H_
