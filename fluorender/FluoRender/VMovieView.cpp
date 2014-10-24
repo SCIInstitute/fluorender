@@ -531,7 +531,6 @@ void VMovieView::OnPrev(wxCommandEvent& event) {
 		int frames = int(interpolator->GetLastT());
 		double runtime = (double)frames/(double)fps;
 		m_movie_time->ChangeValue(wxString::Format("%.2f",runtime));
-		return;
 	}
 	SetProgress(0.);
 	SetRendering(0.);
