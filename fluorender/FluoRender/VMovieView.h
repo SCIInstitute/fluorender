@@ -230,32 +230,4 @@ private:
 	DECLARE_EVENT_TABLE();
 };
 
-// this class allows option altering in the dialog.
-class MyFileDialog : public wxFileDialog
-{
-public:
-	MyFileDialog(VMovieView * parent, const wxString &title,
-		const wxString& defaultdir, const wxString &dftfile,
-		const wxString& wildcard, long style) :
-	wxFileDialog(parent, title, defaultdir,
-		dftfile, wildcard, style),
-		m_mv(parent) {}
-	void AddOptions();
-	
-
-	enum
-	{
-		ID_BitrateText,
-		ID_EstSizeText,
-		ID_CompressChk,
-		ID_EmbedChk,
-	};
-
-	VMovieView * m_mv;
-	wxTextCtrl * m_bitrate_text;
-	wxTextCtrl * m_estimated_size_text;
-	wxCheckBox * m_ch_embed;
-	wxCheckBox * m_ch1;
-};
-
 #endif//_VMovieView_H_
