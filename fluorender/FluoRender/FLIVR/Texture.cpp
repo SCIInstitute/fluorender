@@ -31,6 +31,8 @@
 #include <FLIVR/TextureRenderer.h>
 #include <FLIVR/Utils.h>
 #include <algorithm>
+#include <inttypes.h>
+
 
 using namespace std;
 

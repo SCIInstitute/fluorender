@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "msk_writer.h"
 #include <sstream>
+#include <inttypes.h>
 
 MSKWriter::MSKWriter()
 {

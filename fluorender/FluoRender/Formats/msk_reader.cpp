@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "msk_reader.h"
 #include <sstream>
+#include <inttypes.h>
 
 MSKReader::MSKReader()
 {

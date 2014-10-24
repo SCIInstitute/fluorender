@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "Interpolator.h"
 #include "../utility.h"
+#include <inttypes.h>
 
 int Interpolator::m_id = 0;
 

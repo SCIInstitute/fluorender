@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "lbl_reader.h"
 #include <sstream>
+#include <inttypes.h>
 
 LBLReader::LBLReader()
 {
