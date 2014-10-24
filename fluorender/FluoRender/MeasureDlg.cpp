@@ -257,7 +257,7 @@ void RulerListCtrl::Export(wxString filename)
 
       tos << "ID\tLength(" << unit << ")\tAngle(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
 
-      for (int i=0; i<ruler_list->size(); i++)
+      for (size_t i=0; i<ruler_list->size(); i++)
       {
          ruler = (*ruler_list)[i];
          if (!ruler) continue;

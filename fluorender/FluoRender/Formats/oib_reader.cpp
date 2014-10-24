@@ -82,13 +82,13 @@ void OIBReader::Preprocess()
    m_oib_info.clear();
 
    //separate path and name
-   size_t pos = m_path_name.find_last_of(GETSLASH());
+   int64_t pos = m_path_name.find_last_of(GETSLASH());
    if (pos == -1)
       return;
    wstring path = m_path_name.substr(0, pos+1);
    wstring name = m_path_name.substr(pos+1);
    //extract time sequence string
-   size_t begin = name.find(m_time_id);
+   int64_t begin = name.find(m_time_id);
    size_t end = -1;
    size_t id_len = m_time_id.size();
    if (begin != -1)
@@ -118,7 +118,7 @@ void OIBReader::Preprocess()
       std::vector<std::wstring> list;
       int tmp = 0;
       FIND_FILES(path,L".oib",list,tmp,name.substr(0,begin+id_len+1));
-      for(int i = 0; i < list.size(); i++) {
+      for(size_t i = 0; i < list.size(); i++) {
          size_t start_idx = list.at(i).find(m_time_id) + id_len;
          size_t end_idx   = list.at(i).find(L".oib");
          size_t size = end_idx - start_idx;
@@ -326,8 +326,8 @@ void OIBReader::ReadOibInfo(unsigned char* pbyData, size_t size)
 			}
 			else if (oneline.substr(line_size-3, 3) == L"tif")
 			{
-				size_t pos1 = oneline.find(L'=');
-				size_t pos2 = oneline.find_last_of(L'/');
+				int64_t pos1 = oneline.find(L'=');
+				int64_t pos2 = oneline.find_last_of(L'/');
 				pos2 = pos2==-1?oneline.find_last_of(L'\\'):pos2;
 				if (pos1!=-1 && pos2!=-1)
 				{
@@ -337,8 +337,8 @@ void OIBReader::ReadOibInfo(unsigned char* pbyData, size_t size)
 					file_name = oneline.substr(oneline.find_first_not_of(L' ', pos2+1));
 
 					//interpret file_name
-					size_t pos;
-					size_t pos_ = file_name.find_last_of(L'_');
+					int64_t pos;
+					int64_t pos_ = file_name.find_last_of(L'_');
 					if (pos_!=-1)
 					{
 						size_t j;
@@ -491,7 +491,6 @@ void OIBReader::ReadOif(unsigned char *pbyData, size_t size)
 		else
 		{
 			//process
-			size_t line_size = oneline.size();
 			if (oneline.substr(0, 6) == L"[Axis ")
 			{
 				axis_num++;
@@ -614,19 +613,19 @@ void OIBReader::ReadOif(unsigned char *pbyData, size_t size)
 				spc= fabs((WSTOD(end_pos.c_str())-
 					WSTOD(start_pos.c_str())))/
 					dmax;
-			if (pix_unit.find(L"nm")!=-1)
+			if ((int64_t)pix_unit.find(L"nm")!=-1)
 				spc /= 1000.0;
-			if (axis_code.find(L"X")!=-1)
+			if ((int64_t)axis_code.find(L"X")!=-1)
 			{
 				m_x_size = WSTOI(max_size.c_str());
 				m_xspc = spc;
 			}
-			else if (axis_code.find(L"Y")!=-1)
+			else if ((int64_t)axis_code.find(L"Y")!=-1)
 			{
 				m_y_size = WSTOI(max_size.c_str());
 				m_yspc = spc;
 			}
-			else if (axis_code.find(L"Z")!=-1)
+			else if ((int64_t)axis_code.find(L"Z")!=-1)
 				m_zspc = spc;
 
 			axis_code.clear();

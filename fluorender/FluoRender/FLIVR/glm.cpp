@@ -91,7 +91,7 @@ GLboolean glmLoadTGA(TextureImage *texture, char *filename,GLuint *textureID)   
       return false;                    // Return False
    }
 
-   for(GLuint i=0; i<int(imageSize); i+=bytesPerPixel)    // Loop Through The Image Data
+   for(GLuint i=0; i<imageSize; i+=bytesPerPixel)    // Loop Through The Image Data
    {                            // Swaps The 1st And 3rd Bytes ('R'ed and 'B'lue)
       temp=texture->imageData[i];              // Temporarily Store The Value At Image Data 'i'
       texture->imageData[i] = texture->imageData[i + 2];  // Set The 1st Byte To The Value Of The 3rd Byte

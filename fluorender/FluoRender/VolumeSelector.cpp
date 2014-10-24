@@ -37,7 +37,8 @@ VolumeSelector::VolumeSelector() :
    m_2d_weight2(0),
    m_iter_num(20),
    m_mode(0),
-   m_use2d(true),
+m_use2d(true),
+   m_size_map(false),
    m_ini_thresh(0.0),
    m_gm_falloff(0.0),
    m_scl_falloff(0.0),
@@ -61,8 +62,7 @@ VolumeSelector::VolumeSelector() :
    m_ca_volume(0),
    m_randv(113),
    m_ps(false),
-   m_ps_size(0.0),
-m_size_map(false)
+   m_ps_size(0.0)
 {
 }
 
@@ -430,7 +430,6 @@ int VolumeSelector::CompIslandCount(double min_voxels, double max_voxels)
          {
             int index = nx*ny*k + nx*j + i;
             unsigned int label_value = label_data[index];
-			unsigned char mask_value = mask_data[index];
             if (label_value>0)
             {
                comp_iter = m_comps.find(label_value);

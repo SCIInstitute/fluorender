@@ -508,7 +508,7 @@ TraceDlg::~TraceDlg()
 {
 	if (m_mask)
 	{
-		delete [] m_mask->data;
+		delete [] reinterpret_cast<char*>(m_mask->data);
 		nrrdNix(m_mask);
 	}
 }
@@ -934,7 +934,6 @@ void TraceDlg::CellFull()
 	int i, j, k;
 	int nx, ny, nz;
 	unsigned long long index;
-	unsigned int max_size = slimit;
 	vd->GetResolution(nx, ny, nz);
 	unsigned int id;
 	boost::unordered_map<unsigned int, Lbl> id_list;

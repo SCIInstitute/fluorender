@@ -694,9 +694,9 @@ double VolumeData::GetOriginalValue(int i, int j, int k)
     if (!data) return 0.0;
     
     int bits = data->type;
-    uint64_t nx = (uint64_t)(data->axis[0].size);
-    uint64_t ny = (uint64_t)(data->axis[1].size);
-    uint64_t nz = (uint64_t)(data->axis[2].size);
+    int64_t nx = (int64_t)(data->axis[0].size);
+    int64_t ny = (int64_t)(data->axis[1].size);
+    int64_t nz = (int64_t)(data->axis[2].size);
     
     if (i<0 || i>=nx || j<0 || j>=ny || k<0 || k>=nz)
         return 0.0;
@@ -724,12 +724,12 @@ double VolumeData::GetTransferedValue(int i, int j, int k)
 	if (!data) return 0.0;
 
     int bits = data->type;
-    uint64_t nx = (uint64_t)(data->axis[0].size);
-    uint64_t ny = (uint64_t)(data->axis[1].size);
-    uint64_t nz = (uint64_t)(data->axis[2].size);
+    int64_t nx = (int64_t)(data->axis[0].size);
+    int64_t ny = (int64_t)(data->axis[1].size);
+    int64_t nz = (int64_t)(data->axis[2].size);
 	if (i<0 || i>=nx || j<0 || j>=ny || k<0 || k>=nz)
 		return 0.0;
-    uint64_t ii = i, jj = j, kk = k;
+    int64_t ii = i, jj = j, kk = k;
 
 	if (bits == nrrdTypeUChar)
 	{
@@ -2703,7 +2703,7 @@ int Ruler::GetNumPoint()
 
 Point *Ruler::GetPoint(int index)
 {
-	if (index>=0 && index<m_ruler.size())
+	if (index>=0 && (size_t)index<m_ruler.size())
 		return &(m_ruler[index]);
 	else
 		return 0;
@@ -2820,6 +2820,8 @@ void Ruler::Draw(bool persp, double asp)
 	case BITMAP_FONT_TYPE_TIMES_ROMAN_24:
 		width = 3;
 		break;
+	default: 
+		break;
 	}
 	glLineWidth(GLfloat(width));
 	beginRenderText(2, 2, true);
@@ -2842,7 +2844,7 @@ void Ruler::Draw(bool persp, double asp)
 			glVertex2d(p2.x()+1.0+dx, 1.0+dy-p2.y());
 			glVertex2d(p2.x()+1.0-dx, 1.0+dy-p2.y());
 		glEnd();
-		if (i+1 == m_ruler.size())
+		if (i+1 == (int64_t)m_ruler.size())
 			renderText(p2.x()+1.02, 1.01-p2.y(),
 			m_font,
 			m_name.To8BitData().data());
@@ -2876,7 +2878,7 @@ wxString Ruler::GetDelInfoValues(wxString del)
 {
 	wxString output;
 
-	for (int i=0; i<m_info_values.length(); i++)
+	for (size_t i=0; i<m_info_values.length(); i++)
 	{
 		if (m_info_values[i] == '\t')
 			output += del;
@@ -3507,6 +3509,8 @@ void TraceGroup::Draw()
 	case BITMAP_FONT_TYPE_TIMES_ROMAN_24:
 		width = 3;
 		break;
+	default:
+		break;
 	}
 	glLineWidth(GLfloat(width));
 	glDisable(GL_TEXTURE_2D);
@@ -3527,7 +3531,7 @@ void TraceGroup::Draw()
 		if (frame_iter != m_frame_list.end())
 		{
 			ghosts.push_back(&(frame_iter->second.cell_map));
-			if (frame_iter->second.id == m_cur_time)
+			if (frame_iter->second.id == (size_t)m_cur_time)
 				cur_ghost = ghosts.size()-1;
 		}
 	}
@@ -3550,7 +3554,7 @@ void TraceGroup::Draw()
 		//if (m_cur_time >= m_prv_time)
 		glBegin(GL_LINES);
 			//after
-			for (int i=cur_ghost; i<int(cur_ghost+m_ghost_num); ++i)
+			for (size_t i=cur_ghost; i<(cur_ghost+m_ghost_num); ++i)
 			{
 				//after
 				if (i>=0 && i+1<ghosts.size())
@@ -3601,7 +3605,7 @@ void TraceGroup::Draw()
 		glBegin(GL_LINES);
 		//else if (m_cur_time < m_prv_time)
 			//before
-			for (int i=cur_ghost; i>int(cur_ghost-m_ghost_num); --i)
+			for (size_t i=cur_ghost; i>(cur_ghost-m_ghost_num); --i)
 			{
 				//before
 				if (i-1>=0 && i<ghosts.size())
@@ -4320,12 +4324,7 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 void DataManager::SetProjectPath(wxString path)
 {
 	m_prj_path.Clear();
-#ifdef _WIN32
-    wxChar slash = '\\';
-#else
-    wxChar slash = '/';
-#endif
-	int sep = path.Find(slash, true);
+	int sep = path.Find(GETSLASH(), true);
 	if (sep != wxNOT_FOUND)
 		m_prj_path = path.Left(sep);
 }

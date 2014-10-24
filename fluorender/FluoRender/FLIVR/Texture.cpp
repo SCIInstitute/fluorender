@@ -135,7 +135,7 @@ namespace FLIVR
 		{
 			quota_bricks_.clear();
 			unsigned int i;
-			if (quota >= bricks_.size())
+			if (quota >= (int64_t)bricks_.size())
 				quota = int(bricks_.size());
 			else
 			{
@@ -157,7 +157,7 @@ namespace FLIVR
 				}
 				else
 					quota_bricks_.push_back(bricks_[i]);
-				if (quota_bricks_.size() == quota)
+				if (quota_bricks_.size() == (size_t)quota)
 					break;
 			}
 

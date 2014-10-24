@@ -1079,7 +1079,7 @@ void VRenderGLView::DrawVolumes(int peel)
                         vd_index = cur_index - count/2 - 1;
                      count++;
                      if (vd_index<0 ||
-                           vd_index>=m_vd_pop_list.size())
+                           (size_t)vd_index>=m_vd_pop_list.size())
                         continue;
                      vd = m_vd_pop_list[vd_index];
                      int brick_num = vd->GetBrickNum();
@@ -4044,7 +4044,7 @@ void VRenderGLView::UpdateBrushState()
             !wxGetKeyState(wxKeyCode('Z')) &&
             !wxGetKeyState(wxKeyCode('X')))
       {
-         if (wxGetMouseState().LeftDown())
+         if (wxGetMouseState().LeftIsDown())
             Segment();
          if (m_int_mode == 7)
             m_int_mode = 5;
@@ -5408,15 +5408,10 @@ void VRenderGLView::Run4DScript(wxString scriptname)
                fconfig.Read("compress", &compression, false);
                fconfig.Read("savepath", &pathname, "");
                str = pathname;
-                size_t pos = 0;
-#ifdef _WIN32
-                wxString slash = "\\";
-#else
-                wxString slash = "/";
-#endif
+                int64_t pos = 0;
                do
                {
-                  pos = pathname.find(slash, pos);
+                  pos = pathname.find(GETSLASH(), pos);
                   if (pos == wxNOT_FOUND)
                      break;
                   pos++;
@@ -5547,15 +5542,10 @@ void VRenderGLView::Run4DScript(wxString scriptname)
             {
                fconfig.Read("savepath", &pathname, "");
                str = pathname;
-                size_t pos = 0;
-#ifdef _WIN32
-                wxString slash = "\\";
-#else
-                wxString slash = "/";
-#endif
+                int64_t pos = 0;
                do
                {
-                  pos = pathname.find(slash, pos);
+                  pos = pathname.find(GETSLASH(), pos);
                   if (pos == wxNOT_FOUND)
                      break;
                   pos++;
@@ -5603,15 +5593,10 @@ void VRenderGLView::Run4DScript(wxString scriptname)
                fconfig.Read("compress", &compression, false);
                fconfig.Read("savepath", &pathname, "");
                str = pathname;
-                size_t pos = 0;
-#ifdef _WIN32
-                wxString slash = "\\";
-#else
-                wxString slash = "/";
-#endif
+                int64_t pos = 0;
                do
                {
-                  pos = pathname.find(slash, pos);
+                  pos = pathname.find(GETSLASH(), pos);
                   if (pos == wxNOT_FOUND)
                      break;
                   pos++;
@@ -5636,15 +5621,10 @@ void VRenderGLView::Run4DScript(wxString scriptname)
 				wxString path = "";
 				fconfig.Read("savepath", &pathname, "");
 				str = pathname;
-				size_t pos = 0;
-#ifdef _WIN32
-                wxString slash = "\\";
-#else
-                wxString slash = "/";
-#endif
+				int64_t pos = 0;
 				do
 				{
-					pos = pathname.find(slash, pos);
+					pos = pathname.find(GETSLASH(), pos);
 					if (pos == wxNOT_FOUND)
 						break;
 					pos++;
@@ -6597,7 +6577,7 @@ void VRenderGLView::ShowAll()
 				DataGroup* group = (DataGroup*)m_layer_list[i];
 				if (group)
 				{
-					for (unsigned int j=0; j<group->GetVolumeNum(); ++j)
+					for (int j=0; j<group->GetVolumeNum(); ++j)
 					{
 						VolumeData* vd = group->GetVolumeData(j);
 						if (vd)
@@ -6611,7 +6591,7 @@ void VRenderGLView::ShowAll()
 				MeshGroup* group = (MeshGroup*)m_layer_list[i];
 				if (group)
 				{
-					for (unsigned int j=0; j<group->GetMeshNum(); ++j)
+					for (int j=0; j<group->GetMeshNum(); ++j)
 					{
 						MeshData* md = group->GetMeshData(j);
 						if (md)
@@ -10046,11 +10026,11 @@ VRenderView::VRenderView(wxWindow* frame,
       const wxSize& size,
       long style) :
    wxPanel(parent, id, pos, size, style),
-   m_frame(frame),
-   m_draw_clip(false),
-   m_draw_scalebar(kOff),
-   m_timer(this,ID_RotateTimer),
    m_default_saved(false),
+   m_frame(frame),
+   m_timer(this,ID_RotateTimer),
+   m_draw_clip(false), 
+   m_draw_scalebar(kOff),
    m_use_dft_settings(false),
    m_dft_x_rot(0.0),
    m_dft_y_rot(0.0),

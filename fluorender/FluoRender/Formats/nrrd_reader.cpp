@@ -80,13 +80,13 @@ void NRRDReader::Preprocess()
    m_4d_seq.clear();
 
    //separate path and name
-   size_t pos = m_path_name.find_last_of(GETSLASH());
+   int64_t pos = m_path_name.find_last_of(GETSLASH());
    if (pos == -1)
       return;
    wstring path = m_path_name.substr(0, pos+1);
    wstring name = m_path_name.substr(pos+1);
    //generate search name for time sequence
-   size_t begin = name.find(m_time_id);
+   int64_t begin = name.find(m_time_id);
    size_t end = -1;
    size_t id_len = m_time_id.size();
    wstring t_num;
@@ -121,7 +121,7 @@ void NRRDReader::Preprocess()
       std::vector<std::wstring> list;
       int tmp = 0;
       FIND_FILES(path,L".nrrd",list,tmp,name.substr(0,begin+id_len+1));
-      for(int i = 0; i < list.size(); i++) {
+      for(size_t i = 0; i < list.size(); i++) {
          size_t start_idx = list.at(i).find(m_time_id) + id_len;
          size_t end_idx   = list.at(i).find(L".nrrd");
          size_t size = end_idx - start_idx;

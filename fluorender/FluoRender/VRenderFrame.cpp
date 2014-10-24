@@ -103,9 +103,9 @@ VRenderFrame::VRenderFrame(
       int x, int y,
       int w, int h)
 : wxFrame(frame, wxID_ANY, title, wxPoint(x, y), wxSize(w, h),wxDEFAULT_FRAME_STYLE),
+m_movie_view(0),
 m_tree_panel(0),
 m_list_panel(0),
-m_movie_view(0),
 m_prop_panel(0),
 m_ui_state(true),
 m_cur_sel_type(-1),
@@ -2085,12 +2085,7 @@ void VRenderFrame::SaveProject(wxString& filename)
             wxString new_folder;
             new_folder = filename + "_files";
             CREATE_DIR(new_folder.fn_str());
-#ifdef _WIN32
-             wxString slash = "\\";
-#else
-             wxString slash = "/";
-#endif
-            str = new_folder + slash + vd->GetName() + ".tif";
+            str = new_folder + GETSLASH() + vd->GetName() + ".tif";
             vd->Save(str, 0, false, VRenderFrame::GetCompression());
             fconfig.Write("path", str);
          }
@@ -2229,13 +2224,8 @@ void VRenderFrame::SaveProject(wxString& filename)
          {
             wxString new_folder;
             new_folder = filename + "_files";
-             CREATE_DIR(new_folder.fn_str());
-#ifdef _WIN32
-             wxString slash = "\\";
-#else
-             wxString slash = "/";
-#endif
-            str = new_folder + slash + vd->GetName() + ".msk";
+			CREATE_DIR(new_folder.fn_str());
+            str = new_folder + GETSLASH() + vd->GetName() + ".msk";
             MSKWriter msk_writer;
             msk_writer.SetData(mask);
             msk_writer.SetSpacings(resx, resy, resz);
@@ -2261,13 +2251,8 @@ void VRenderFrame::SaveProject(wxString& filename)
          {
             wxString new_folder;
             new_folder = filename + "_files";
-             CREATE_DIR(new_folder.fn_str());
-#ifdef _WIN32
-             wxString slash = "\\";
-#else
-             wxString slash = "/";
-#endif
-            str = new_folder + slash + md->GetName() + ".obj";
+			CREATE_DIR(new_folder.fn_str());
+            str = new_folder + GETSLASH() + md->GetName() + ".obj";
             md->Save(str);
          }
          str = wxString::Format("/data/mesh/%d", i);
@@ -2335,13 +2320,8 @@ void VRenderFrame::SaveProject(wxString& filename)
          {
             wxString new_folder;
             new_folder = filename + "_files";
-             CREATE_DIR(new_folder.fn_str());
-#ifdef _WIN32
-             wxString slash = "\\";
-#else
-             wxString slash = "/";
-#endif
-            str = new_folder + slash + ann->GetName() + ".txt";
+			CREATE_DIR(new_folder.fn_str());
+            str = new_folder + GETSLASH() + ann->GetName() + ".txt";
             ann->Save(str);
          }
          str = wxString::Format("/data/annotations/%d", i);

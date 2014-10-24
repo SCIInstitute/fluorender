@@ -985,7 +985,7 @@ void VMovieView::WriteFrameToFile() {
 	if (filetype_.IsSameAs(".mov")) {
 		//flip vertically 
 		unsigned char *flip = new unsigned char[w*h*chann];
-		for(size_t yy = 0; yy < h; yy++)
+		for(size_t yy = 0; yy < (size_t)h; yy++)
 			memcpy(flip + yy * 3 * w, image + 3 * w * (h - yy - 1),w * 3);
 		bool worked = encoder_.set_frame_rgb_data(flip);
 		worked = encoder_.write_video_frame(m_last_frame);

@@ -164,7 +164,7 @@ void TIFWriter::SaveSequence(wstring filename)
 	if (!m_data || !m_data->data || m_data->dim!=3)
 		return;
 
-	size_t pos = filename.find_last_of(L'.');
+	int64_t pos = filename.find_last_of(L'.');
 	if (pos != -1)
 		filename = filename.substr(0, pos);
 

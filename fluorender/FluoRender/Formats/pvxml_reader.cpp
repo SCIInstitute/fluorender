@@ -95,7 +95,7 @@ void PVXMLReader::Preprocess()
    m_seq_boxes.clear();
 
    //separate path and name
-   size_t pos = m_path_name.find_last_of(GETSLASH());
+   int64_t pos = m_path_name.find_last_of(GETSLASH());
    if (pos == -1)
       return;
    wstring path = m_path_name.substr(0, pos+1);
@@ -629,7 +629,7 @@ Nrrd *PVXMLReader::Convert(int t, int c, bool get_max)
          {
             FrameInfo *frame_info = &((sequence_info->frames)[j]);
 
-            if (c >= frame_info->channels.size())
+            if ((size_t)c >= frame_info->channels.size())
                continue;
 
             long frame_size = frame_info->x_size * frame_info->y_size;

@@ -517,7 +517,6 @@ namespace FLIVR
 		size.reserve(num_slices_*6);
 
 		//--------------------------------------------------------------------------
-		int nb0 = (*bricks)[0]->nc();
 
 		bool use_fog = glIsEnabled(GL_FOG)!=0 && colormap_mode_!=2;
 		GLfloat clear_color[4];
@@ -864,7 +863,7 @@ namespace FLIVR
 			cur_brick_num_ == total_brick_num_)
 			done_update_loop_ = true;
 		if (mem_swap_ &&
-			cur_chan_brick_num_ == (*bricks).size())
+			(size_t)cur_chan_brick_num_ == (*bricks).size())
 		{
 			done_current_chan_ = true;
 			clear_chan_buffer_ = true;
@@ -1505,7 +1504,6 @@ namespace FLIVR
 
 			//load the texture
 			load_brick(0, 0, bricks, i, GL_NEAREST, compression_);
-			if (has_mask) GLuint mask_id = load_brick_mask(bricks, i);
 			GLuint label_id = load_brick_label(bricks, i);
 
 			//draw each slice

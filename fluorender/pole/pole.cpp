@@ -1896,9 +1896,9 @@ StreamIO::StreamIO( StorageIO* s, DirEntry* e)
 :   io(s),
     entryIdx(io->dirtree->indexOf(e)),
     fullName(),
-    blocks(),
     eof(false),
     fail(false),
+    blocks(),
     m_pos(0),
     cache_data(new unsigned char[CACHEBUFSIZE]),        
     cache_size(0),         // indicating an empty cache

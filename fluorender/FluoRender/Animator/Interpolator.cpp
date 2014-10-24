@@ -118,7 +118,7 @@ double Interpolator::GetLastT()
 
 FlKeyGroup* Interpolator::GetKeyGroup(int index)
 {
-	if (index>=0 && index<m_key_list.size())
+	if (index>=0 && (size_t)index<m_key_list.size())
 		return m_key_list[index];
 	else
 		return 0;
@@ -126,7 +126,7 @@ FlKeyGroup* Interpolator::GetKeyGroup(int index)
 
 int Interpolator::GetKeyIndex(int id)
 {
-	for (int i=0; i<m_key_list.size(); i++)
+	for (size_t i=0; i<m_key_list.size(); i++)
 	{
 		FlKeyGroup *group = m_key_list[i];
 		if (group && group->id==id)
@@ -151,7 +151,7 @@ int Interpolator::GetKeyIndexFromTime(double t)
 
 int Interpolator::GetKeyID(int index)
 {
-	if (index>=0 && index<m_key_list.size())
+	if (index>=0 && (size_t)index<m_key_list.size())
 		return m_key_list[index]->id;
 	else
 		return 0;
@@ -159,7 +159,7 @@ int Interpolator::GetKeyID(int index)
 
 double Interpolator::GetKeyTime(int index)
 {
-	if (index>=0 && index<m_key_list.size())
+	if (index>=0 && (size_t)index<m_key_list.size())
 		return m_key_list[index]->t;
 	else
 		return 0.0;
@@ -167,7 +167,7 @@ double Interpolator::GetKeyTime(int index)
 
 double Interpolator::GetKeyDuration(int index)
 {
-	if (index>0 && index<m_key_list.size())
+	if (index>0 && (size_t)index<m_key_list.size())
 	{
 		double t0 = m_key_list[index-1]->t;
 		double t1 = m_key_list[index]->t;
@@ -179,7 +179,7 @@ double Interpolator::GetKeyDuration(int index)
 
 int Interpolator::GetKeyType(int index)
 {
-	if (index>=0 && index<m_key_list.size())
+	if (index>=0 && (size_t)index<m_key_list.size())
 		return m_key_list[index]->type;
 	else
 		return 0;
@@ -187,7 +187,7 @@ int Interpolator::GetKeyType(int index)
 
 string Interpolator::GetKeyDesc(int index)
 {
-	if (index>=0 && index<m_key_list.size())
+	if (index>=0 && (size_t)index<m_key_list.size())
 		return m_key_list[index]->desc;
 	else
 		return "";
@@ -196,7 +196,7 @@ string Interpolator::GetKeyDesc(int index)
 //modify
 void Interpolator::Clear()
 {
-	for (int i=0; i<(int)m_key_list.size(); i++)
+	for (size_t i=0; i<m_key_list.size(); i++)
 	{
 		FlKeyGroup *group = m_key_list[i];
 		if (!group) continue;
@@ -372,7 +372,7 @@ bool Interpolator::GetDouble(KeyCode keycode, double t, double &dval)
 
 	if (g1==-1 && g2>-1)
 	{
-		if (g2 == m_key_list.size()-1)
+		if (g2 == (int64_t)m_key_list.size()-1)
 			return StepDouble(keycode, m_key_list[g2], dval);
 		else
 			return LinearDouble(keycode, m_key_list[g2], m_key_list[g2+1], t, dval);
@@ -464,7 +464,7 @@ bool Interpolator::GetQuaternion(KeyCode keycode, double t, Quaternion &qval)
 
 	if (g1==-1 && g2>-1)
 	{
-		if (g2 == m_key_list.size()-1)
+		if (g2 == (int64_t)m_key_list.size()-1)
 			return StepQuaternion(keycode, m_key_list[g2], qval);
 		else
 			return LinearQuaternion(keycode, m_key_list[g2], m_key_list[g2+1], t, qval);
