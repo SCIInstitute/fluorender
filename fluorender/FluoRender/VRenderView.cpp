@@ -1,4 +1,32 @@
-﻿#include "VRenderView.h"
+/*
+For more information, please see: http://software.sci.utah.edu
+
+The MIT License
+
+Copyright (c) 2014 Scientific Computing and Imaging Institute,
+University of Utah.
+
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+*/
+
+#include "VRenderView.h"
 #include "VRenderFrame.h"
 #include "bitmap_fonts.h"
 #include <tiffio.h>
@@ -3880,19 +3908,10 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
       img_shader->bind();
    }
    Color gamma, brightness, hdr;
-   if (m_vol_method == VOL_METHOD_MULTI)
-   {
-      gamma = m_gamma;
-      brightness = m_brightness;
-      hdr = m_hdr;
-   }
-   else
-   {
-      VolumeData* vd = list[0];
-      gamma = vd->GetGamma();
-      brightness = vd->GetBrightness();
-      hdr = vd->GetHdr();
-   }
+   VolumeData* vd = list[0];
+   gamma = vd->GetGamma();
+   brightness = vd->GetBrightness();
+	hdr = vd->GetHdr();
    img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
    img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
    img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
@@ -4789,64 +4808,68 @@ void VRenderGLView::Get4DSeqFrames(int &start_frame, int &end_frame, int &cur_fr
 
 void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 {
-   int start_frame, end_frame, cur_frame;
-   Get4DSeqFrames(start_frame, end_frame, cur_frame);
-   if (frame > end_frame ||
-         frame < start_frame || cur_frame == frame)
-      return;
+	int start_frame, end_frame, cur_frame;
+	Get4DSeqFrames(start_frame, end_frame, cur_frame);
+	if (frame > end_frame ||
+		frame < start_frame)
+		return;
 
-   m_tseq_prv_num = m_tseq_cur_num;
-   m_tseq_cur_num = frame;
-   VRenderFrame* vframe = (VRenderFrame*)m_frame;
-   if (vframe && vframe->GetSettingDlg())
-      m_run_script = vframe->GetSettingDlg()->GetRunScript();
+	m_tseq_prv_num = m_tseq_cur_num;
+	m_tseq_cur_num = frame;
+	VRenderFrame* vframe = (VRenderFrame*)m_frame;
+	if (vframe && vframe->GetSettingDlg())
+		m_run_script = vframe->GetSettingDlg()->GetRunScript();
 
-   for (int i=0; i<(int)m_vd_pop_list.size(); i++)
-   {
-      VolumeData* vd = m_vd_pop_list[i];
-      if (vd && vd->GetReader())
-      {
-         BaseReader* reader = vd->GetReader();
+	for (int i=0; i<(int)m_vd_pop_list.size(); i++)
+	{
+		VolumeData* vd = m_vd_pop_list[i];
+		if (vd && vd->GetReader())
+		{
+			BaseReader* reader = vd->GetReader();
 
-         double spcx, spcy, spcz;
-         vd->GetSpacings(spcx, spcy, spcz);
+			if (cur_frame != frame)
+			{
 
-         Nrrd* data = reader->Convert(frame, vd->GetCurChannel(), false);
-         if (!vd->Replace(data, false))
-            continue;
+				double spcx, spcy, spcz;
+				vd->GetSpacings(spcx, spcy, spcz);
 
-         vd->SetCurTime(reader->GetCurTime());
-         vd->SetSpacings(spcx, spcy, spcz);
+				Nrrd* data = reader->Convert(frame, vd->GetCurChannel(), false);
+				if (!vd->Replace(data, false))
+					continue;
 
-         //run script
-         if (m_run_script && run_script)
-         {
+				vd->SetCurTime(reader->GetCurTime());
+				vd->SetSpacings(spcx, spcy, spcz);
+
+				//update rulers
+				if (vframe && vframe->GetMeasureDlg())
+					vframe->GetMeasureDlg()->UpdateList();
+
+				if (vd->GetVR())
+					vd->GetVR()->clear_tex_pool();
+			}
+
+			//run script
+			if (m_run_script && run_script)
+			{
 #ifdef _WIN32
-             wchar_t slash = '\\';
+				wchar_t slash = '\\';
 #else
-             wchar_t slash = '/';
+				wchar_t slash = '/';
 #endif
-            wxString pathname = reader->GetPathName();
-            int pos = pathname.Find(slash, true);
-            wxString scriptname = pathname.Left(pos+1) + "script_4d.txt";
-            if (wxFileExists(scriptname))
-            {
-               m_selector.SetVolume(vd);
-               m_calculator.SetVolumeA(vd);
-               m_cur_vol = vd;
-               Run4DScript(scriptname);
-            }
-         }
-
-         //update rulers
-         if (vframe && vframe->GetMeasureDlg())
-            vframe->GetMeasureDlg()->UpdateList();
-
-         if (vd->GetVR())
-            vd->GetVR()->clear_tex_pool();
-      }
-   }
-   RefreshGL();
+				wxString pathname = reader->GetPathName();
+				int pos = pathname.Find(slash, true);
+				wxString scriptname = pathname.Left(pos+1) + "script_4d.txt";
+				if (wxFileExists(scriptname))
+				{
+					m_selector.SetVolume(vd);
+					m_calculator.SetVolumeA(vd);
+					m_cur_vol = vd;
+					Run4DScript(scriptname);
+				}
+			}
+		}
+	}
+	RefreshGL();
 }
 
 void VRenderGLView::Get3DBatFrames(int &start_frame, int &end_frame, int &cur_frame)
@@ -6552,6 +6575,39 @@ void VRenderGLView::Isolate(int type, wxString name)
    m_md_pop_dirty = true;
 }
 
+//move layer of the same level within this view
+//source is after the destination
+void VRenderGLView::MoveLayerinView(wxString &src_name, wxString &dst_name)
+{
+   int i, src_index;
+   TreeLayer* src = 0;
+   for (i=0; i<(int)m_layer_list.size(); i++)
+   {
+      if (m_layer_list[i] && m_layer_list[i]->GetName() == src_name)
+      {
+         src = m_layer_list[i];
+         src_index = i;
+         m_layer_list.erase(m_layer_list.begin()+i);
+         break;
+      }
+   }
+   if (!src)
+      return;
+   for (i=0; i<(int)m_layer_list.size(); i++)
+   {
+      if (m_layer_list[i] && m_layer_list[i]->GetName() == dst_name)
+      {
+         if (i>=src_index)
+            m_layer_list.insert(m_layer_list.begin()+i+1, src);
+         else
+            m_layer_list.insert(m_layer_list.begin()+i, src);
+         break;
+      }
+   }
+   m_vd_pop_dirty = true;
+   m_md_pop_dirty = true;
+}
+
 void VRenderGLView::ShowAll()
 {
 	for (unsigned int i=0; i<m_layer_list.size(); ++i)
@@ -6613,39 +6669,6 @@ void VRenderGLView::ShowAll()
 	}
 	m_vd_pop_dirty = true;
 	m_md_pop_dirty = true;
-}
-
-//move layer of the same level within this view
-//source is after the destination
-void VRenderGLView::MoveLayerinView(wxString &src_name, wxString &dst_name)
-{
-   int i, src_index;
-   TreeLayer* src = 0;
-   for (i=0; i<(int)m_layer_list.size(); i++)
-   {
-      if (m_layer_list[i] && m_layer_list[i]->GetName() == src_name)
-      {
-         src = m_layer_list[i];
-         src_index = i;
-         m_layer_list.erase(m_layer_list.begin()+i);
-         break;
-      }
-   }
-   if (!src)
-      return;
-   for (i=0; i<(int)m_layer_list.size(); i++)
-   {
-      if (m_layer_list[i] && m_layer_list[i]->GetName() == dst_name)
-      {
-         if (i>=src_index)
-            m_layer_list.insert(m_layer_list.begin()+i+1, src);
-         else
-            m_layer_list.insert(m_layer_list.begin()+i, src);
-         break;
-      }
-   }
-   m_vd_pop_dirty = true;
-   m_md_pop_dirty = true;
 }
 
 //move layer (volume) of the same level within the given group

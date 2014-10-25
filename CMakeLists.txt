@@ -1,4 +1,32 @@
-#This is an initial CMake configuration file for FluoRender
+#/*
+#For more information, please see: http://software.sci.utah.edu
+#
+#The MIT License
+#
+#Copyright (c) 2014 Scientific Computing and Imaging Institute,
+#University of Utah.
+#
+#
+#Permission is hereby granted, free of charge, to any person obtaining a
+#copy of this software and associated documentation files (the "Software"),
+#to deal in the Software without restriction, including without limitation
+#the rights to use, copy, modify, merge, publish, distribute, sublicense,
+#and/or sell copies of the Software, and to permit persons to whom the
+#Software is furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included
+#in all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+#OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+#THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+#DEALINGS IN THE SOFTWARE.
+#*/
+
+#This is an CMake configuration file for FluoRender
 
 cmake_minimum_required ( VERSION 2.6 )
 
@@ -99,10 +127,13 @@ add_library(GLEW_OBJ OBJECT
       ${gl_srcs} ${gl_hdrs1} ${gl_hdrs2})
 
 #ffmpeg
-include_directories(${FluoRender_SOURCE_DIR}/fluorender/ffmpeg_include)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-	file(GLOB ffmpeg_LIBRARIES fluorender/ffmpeg_lib/*.lib)
-	add_definitions(-D__STDC_CONSTANT_MACROS)
+  include_directories(${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/Win64/include)
+  file(GLOB ffmpeg_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/Win64/lib/*.lib)
+  add_definitions(-D__STDC_CONSTANT_MACROS)
+else()
+  include_directories(${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/OSX/include)
+  file(GLOB ffmpeg_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/OSX/lib/*.a)
 endif()
 
 #FluoRender
@@ -271,7 +302,10 @@ if(${ARCHITECTURE} MATCHES 64)
    add_definitions(-DTEEM_32BIT=0)
    set(CMAKE_C_FLAGS "${ARCH_FLAGS} ${CFLAGS}")
    set(CMAKE_CXX_FLAGS "${ARCH_FLAGS} ${CXXFLAGS} ${CXX_11_FLAG}")
-   set(LDFLAGS "${ARCH_FLAGS} ${CXX_11_FLAG}")
+   set(CMAKE_EXE_LINKER_FLAGS "${ARCH_FLAGS} ${CXX_11_FLAG}")
+   if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lbz2 -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration")
+   endif()
 else()
    if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
       set(ARCH_FLAGS "-m32 -arch i386")
@@ -279,15 +313,18 @@ else()
    add_definitions(-DTEEM_32BIT=1)
    set(CMAKE_C_FLAGS "${ARCH_FLAGS} ${CFLAGS}" )
    set(CMAKE_CXX_FLAGS "${ARCH_FLAGS} ${CXXFLAGS} ${CXX_11_FLAG}")
-   set(LDFLAGS "${ARCH_FLAGS} ${CXX_11_FLAG}")
+   set(CMAKE_EXE_LINKER_FLAGS "${ARCH_FLAGS} ${CXX_11_FLAG}")
+   if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lbz2 -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration")
+   endif()
 endif()
 
 #link the libraries
 target_link_libraries(FluoRender
+   ${ffmpeg_LIBRARIES}
    ${wxWidgets_LIBRARIES}
    ${OPENGL_LIBRARIES}
    ${Boost_LIBRARIES}
-   ${ffmpeg_LIBRARIES}
    ${OpenCL_LIBRARIES})
    
 #post build DLL copy
