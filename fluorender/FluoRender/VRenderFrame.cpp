@@ -770,7 +770,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 
    //empty brick skipping
    wxCheckBox* ch3 = new wxCheckBox(panel, wxID_HIGHEST+3006,
-         "Skip empty bricks during rendering (loading will longer time)");
+         "Skip empty bricks during rendering (loading takes longer time)");
    ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
          wxCommandEventHandler(VRenderFrame::OnCh3Check), NULL, panel);
    ch3->SetValue(m_skip_brick);
@@ -807,7 +807,10 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 {
    if (m_setting_dlg)
+   {
       m_compression = m_setting_dlg->GetRealtimeCompress();
+	  m_skip_brick = m_setting_dlg->GetSkipBricks();
+   }
     
 #ifdef _WIN32
     wxFileDialog *fopendlg = new wxFileDialog(
@@ -843,6 +846,7 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
       if (m_setting_dlg)
       {
          m_setting_dlg->SetRealtimeCompress(m_compression);
+		 m_setting_dlg->SetSkipBricks(m_skip_brick);
          m_setting_dlg->UpdateUI();
       }
    }
@@ -951,6 +955,8 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
 
                if (chan_num >=0 && chan_num <3)
                   vd->SetColor(color);
+			   else
+				   vd->RandomizeColor();
 
                vrv->AddVolumeData(vd);
                vd_sel = vd;

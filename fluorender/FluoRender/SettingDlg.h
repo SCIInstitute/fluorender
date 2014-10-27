@@ -96,6 +96,8 @@ public:
 	bool GetProjSave() {return m_prj_save;}
 	bool GetRealtimeCompress() {return m_realtime_compress;}
 	void SetRealtimeCompress(bool val) {m_realtime_compress = val;}
+	bool GetSkipBricks() {return m_skip_bricks;}
+	void SetSkipBricks(bool val) {m_skip_bricks = val;}
 	bool GetTestMode(int type);	//type	1:speed test
 								//		2:parameter test
 								//		3:wireframe mode
@@ -158,6 +160,7 @@ private:
 							//4-pre-calculated 4 samples (removed);
 	bool m_prj_save;		//save project automatically
 	bool m_realtime_compress;//real time compress
+	bool m_skip_bricks;		//skip empty bricks
 	bool m_test_speed;		//test fps
 	bool m_test_param;		//using parameter test window
 	bool m_test_wiref;		//draw wireframe of volumes
