@@ -502,6 +502,7 @@ void SettingDlg::GetSettings()
 	m_gmc_mode = 2;
 	m_prj_save = false;
 	m_realtime_compress = false;
+	m_skip_bricks = false;
 	m_test_speed = false;
 	m_test_param = false;
 	m_test_wiref = false;
@@ -567,6 +568,12 @@ void SettingDlg::GetSettings()
 	{
 		fconfig.SetPath("/realtime compress");
 		fconfig.Read("mode", &m_realtime_compress, false);
+	}
+	//skip empty bricks
+	if (fconfig.Exists("/skip bricks"))
+	{
+		fconfig.SetPath("/skip bricks");
+		fconfig.Read("mode", &m_skip_bricks, false);
 	}
 	//mouse interactions
 	if (fconfig.Exists("/mouse int"))
@@ -768,6 +775,9 @@ void SettingDlg::SaveSettings()
 
 	fconfig.SetPath("/realtime compress");
 	fconfig.Write("mode", m_realtime_compress);
+
+	fconfig.SetPath("/skip bricks");
+	fconfig.Write("mode", m_skip_bricks);
 
 	fconfig.SetPath("/mouse int");
 	fconfig.Write("mode", m_mouse_int);

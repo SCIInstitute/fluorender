@@ -3795,6 +3795,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
    if (m_mvr->get_vr_num()<=0)
       return;
    m_mvr->set_depth_peel(peel);
+   m_mvr->set_colormap_mode_single();
 
    int nx, ny;
    nx = GetSize().x;
@@ -11122,7 +11123,7 @@ void VRenderView::OnVolumeMethodCheck(wxCommandEvent& event)
       break;
    }
 
-   int new_mode = GetVolMethod();
+/*   int new_mode = GetVolMethod();
 
    if (new_mode == VOL_METHOD_MULTI &&
          (old_mode == VOL_METHOD_SEQ || old_mode == VOL_METHOD_COMP))
@@ -11248,7 +11249,7 @@ void VRenderView::OnVolumeMethodCheck(wxCommandEvent& event)
       }
 
       vr_frame->GetTree()->UpdateSelection();
-   }
+   }*/
 
    RefreshGL();
 }
