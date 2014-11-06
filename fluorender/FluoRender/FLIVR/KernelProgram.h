@@ -9,6 +9,7 @@
 
 namespace FLIVR
 {
+	class VolKernel;
 	class KernelProgram
 	{
 	public:
@@ -38,6 +39,8 @@ namespace FLIVR
 		static void init_kernels_supported();
 		static bool init();
 		static void clear();
+
+		friend class VolKernel;
 
 	protected:
 		std::string source_;

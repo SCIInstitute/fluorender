@@ -631,7 +631,13 @@ void TraceDlg::OnSaveTrace(wxCommandEvent& event)
 	if (!m_view) return;
 
 	wxString filename = m_load_trace_text->GetValue();
-	m_view->SaveTraceGroup(filename);
+	if (filename == "")
+	{
+		wxCommandEvent e;
+		OnSaveasTrace(e);
+	}
+	else
+		m_view->SaveTraceGroup(filename);
 }
 
 void TraceDlg::OnSaveasTrace(wxCommandEvent& event)
