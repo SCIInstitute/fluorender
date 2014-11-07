@@ -7,8 +7,9 @@
 
 namespace FLIVR
 {
-#define KERNEL_TEST	0
+#define KERNEL_STRING	0
 #define KERNEL_HIST_3D	1
+#define KERNEL_TEST		2
 
 	class KernelProgram;
 
@@ -19,11 +20,14 @@ namespace FLIVR
 		~VolKernel();
 
 		bool create();
+		bool create(std::string &s);
 
 		inline int type() {return type_;}
 
 		inline bool match(int type)
 		{ return (type == type_); }
+
+		inline bool match(std::string &s);
 
 		inline KernelProgram* program()
 		{ return program_; }
@@ -43,6 +47,7 @@ namespace FLIVR
 		~VolKernelFactory();
 
 		KernelProgram* kernel(int type = 0);
+		KernelProgram* kernel(std::string &s);
 
 	protected:
 		std::vector<VolKernel*> kernels_;

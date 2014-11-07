@@ -74,6 +74,18 @@ namespace FLIVR
 		return true;
 	}
 
+	bool VolKernel::create(std::string &s)
+	{
+		program_ = new KernelProgram(s);
+		return true;
+	}
+
+	inline bool VolKernel::match(std::string &s)
+	{
+		return (type_ == KERNEL_STRING &&
+			s == program_->source_);
+	}
+
 	bool VolKernel::emit(string& s)
 	{
 		ostringstream z;
@@ -130,6 +142,31 @@ namespace FLIVR
 			delete k;
 			return 0;
 		}
+		kernels_.push_back(k);
+		prev_kernel_ = int(kernels_.size())-1;
+		return k->program();
+	}
+
+	KernelProgram* VolKernelFactory::kernel(std::string &s)
+	{
+		if (prev_kernel_ >= 0)
+		{
+			if (kernels_[prev_kernel_]->match(s))
+			{
+				return kernels_[prev_kernel_]->program();
+			}
+		}
+
+		for (unsigned int i=0; i<kernels_.size(); ++i)
+		{
+			if (kernels_[i]->match(s))
+			{
+				prev_kernel_ = i;
+				return kernels_[i]->program();
+			}
+		}
+
+		VolKernel* k = new VolKernel(KERNEL_STRING);
 		kernels_.push_back(k);
 		prev_kernel_ = int(kernels_.size())-1;
 		return k->program();
