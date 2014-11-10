@@ -41,7 +41,11 @@ public:
 	{
 		ID_KernelFileTxt,
 		ID_BrowseBtn,
-		ID_KernelEditStc
+		ID_SaveBtn,
+		ID_SaveAsBtn,
+		ID_ExecuteBtn,
+		ID_KernelEditStc,
+		ID_OutputTxt
 	};
 
 	OclDlg(wxWindow* frame,
@@ -55,12 +59,22 @@ private:
 	//ui
 	wxTextCtrl* m_kernel_file_txt;
 	wxButton* m_browse_btn;
+	wxButton* m_save_btn;
+	wxButton* m_saveas_btn;
+	wxButton* m_execute_btn;
+	wxTextCtrl* m_output_txt;
 
 	//stc
 	wxStyledTextCtrl* m_kernel_edit_stc;
+    int m_LineNrID;
+    int m_DividerID;
+    int m_FoldingID;
 
 private:
 	void OnBrowseBtn(wxCommandEvent& event);
+	void OnSaveBtn(wxCommandEvent& event);
+	void OnSaveAsBtn(wxCommandEvent& event);
+	void OnExecuteBtn(wxCommandEvent& event);
 
 	DECLARE_EVENT_TABLE();
 };

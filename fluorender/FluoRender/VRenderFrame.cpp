@@ -67,6 +67,7 @@ EVT_MENU(ID_Convert, VRenderFrame::OnConvert)
 EVT_MENU(ID_Recorder, VRenderFrame::OnRecorder)
 EVT_MENU(ID_Measure, VRenderFrame::OnMeasure)
 EVT_MENU(ID_Trace, VRenderFrame::OnTrace)
+EVT_MENU(ID_Ocl, VRenderFrame::OnOcl)
 EVT_MENU(ID_Twitter, VRenderFrame::OnTwitter)
 EVT_MENU(ID_Facebook, VRenderFrame::OnFacebook)
 EVT_MENU(ID_ShowHideUI, VRenderFrame::OnShowHideUI)
@@ -161,6 +162,8 @@ m_free_version(true)
          "Show colocalization analysis dialog");
    m_tb_menu_edit->Append(ID_Convert, "Convert...",
          "Show dialog for converting data");
+   m_tb_menu_edit->Append(ID_Ocl, "OpenCL Kernel Editor...",
+	     "Show OpenCL kernel editor window");
    //build the main toolbar
    //add tools
    m_main_tb->AddTool(ID_OpenVolume, "Open Volume",
@@ -327,6 +330,9 @@ m_free_version(true)
    //trace dialog
    m_trace_dlg = new TraceDlg(this, this);
 
+   //ocl dialog
+   m_ocl_dlg = new OclDlg(this, this);
+
    //help dialog
    m_help_dlg = new HelpDlg(this, this);
    //m_help_dlg->LoadPage("C:\\!wanyong!\\TEMP\\wxHtmlWindow.htm");
@@ -434,6 +440,12 @@ m_free_version(true)
          Dockable(false).CloseButton(true));
    m_aui_mgr.GetPane(m_trace_dlg).Float();
    m_aui_mgr.GetPane(m_trace_dlg).Hide();
+   //ocl fialog
+   m_aui_mgr.AddPane(m_ocl_dlg, wxAuiPaneInfo().
+	   Name("m_ocl_dlg").Caption("OpenCL Kernel Editor").
+	   Dockable(false).CloseButton(true));
+   m_aui_mgr.GetPane(m_ocl_dlg).Float();
+   m_aui_mgr.GetPane(m_ocl_dlg).Hide();
    //settings
    m_aui_mgr.AddPane(m_setting_dlg, wxAuiPaneInfo().
          Name("m_setting_dlg").Caption("Settings").
@@ -529,6 +541,8 @@ m_free_version(true)
    //m_top_tools->Append(m);
 #endif
    m = new wxMenuItem(m_top_tools,ID_Convert, wxT("Con&vert..."));
+   m_top_tools->Append(m);
+   m = new wxMenuItem(m_top_tools, ID_Ocl, wxT("&OpenCL Kernel Editor..."));
    m_top_tools->Append(m);
    m_top_tools->Append(wxID_SEPARATOR);
    m = new wxMenuItem(m_top_tools,ID_Settings, wxT("&Settings..."));
@@ -4161,6 +4175,13 @@ void VRenderFrame::OnTrace(wxCommandEvent& WXUNUSED(event))
    m_aui_mgr.GetPane(m_trace_dlg).Show();
    m_aui_mgr.GetPane(m_trace_dlg).Float();
    m_aui_mgr.Update();
+}
+
+void VRenderFrame::OnOcl(wxCommandEvent& WXUNUSED(event))
+{
+	m_aui_mgr.GetPane(m_ocl_dlg).Show();
+	m_aui_mgr.GetPane(m_ocl_dlg).Float();
+	m_aui_mgr.Update();
 }
 
 void VRenderFrame::OnFacebook(wxCommandEvent& WXUNUSED(event))

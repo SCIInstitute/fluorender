@@ -46,6 +46,7 @@ DEALINGS IN THE SOFTWARE.
 #include "RecorderDlg.h"
 #include "MeasureDlg.h"
 #include "TraceDlg.h"
+#include "OclDlg.h"
 #include "Tester.h"
 #include "Animator/Interpolator.h"
 #include "compatibility.h"
@@ -106,6 +107,7 @@ class VRenderFrame: public wxFrame
 		ID_Recorder,
 		ID_Measure,
 		ID_Trace,
+		ID_Ocl,
 		ID_Settings,
 		//UI menu
 		ID_UIListView,
@@ -213,6 +215,9 @@ public:
 	//trace dialog
 	TraceDlg* GetTraceDlg()
 	{ return m_trace_dlg; }
+	//ocl dialog
+	OclDlg* GetOclDlg()
+	{ return m_ocl_dlg; }
 
 	//selection
 	int GetCurSelType()
@@ -313,6 +318,7 @@ private:
 	ColocalizationDlg* m_colocalization_dlg;
 	MeasureDlg* m_measure_dlg;
 	TraceDlg* m_trace_dlg;
+	OclDlg* m_ocl_dlg;
 	//prop panel children
 	wxBoxSizer* m_prop_sizer;
 	VPropView* m_volume_prop;
@@ -407,6 +413,7 @@ private:
 	void OnColocalization(wxCommandEvent& WXUNUSED(event));
 	void OnMeasure(wxCommandEvent& WXUNUSED(event));
 	void OnTrace(wxCommandEvent& WXUNUSED(event));
+	void OnOcl(wxCommandEvent& WXUNUSED(event));
 
 	void OnDraw(wxPaintEvent& event);
 	void OnKeyDown(wxKeyEvent& event);
