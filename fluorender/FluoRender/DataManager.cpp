@@ -4489,6 +4489,10 @@ int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_
             FLIVR::Color col = GetWavelengthColor(wavelength);
             vd->SetColor(col);
         }
+		else if (wavelength < 0.) {
+            FLIVR::Color white = Color(1.0, 1.0, 1.0);
+			vd->SetColor(white);
+		}
 		else
 		{
             FLIVR::Color white = Color(1.0, 1.0, 1.0);

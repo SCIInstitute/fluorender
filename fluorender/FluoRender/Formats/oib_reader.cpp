@@ -572,6 +572,7 @@ void OIBReader::ReadOif(unsigned char *pbyData, size_t size)
 			}
 			if (oneline.substr(0, 9) == L"[Channel ")
 			{
+				light_type.clear();
 				chan_num++;
 			}
 			else
@@ -581,8 +582,19 @@ void OIBReader::ReadOif(unsigned char *pbyData, size_t size)
 					size_t pos = oneline.find(L'=');
 					wstring str1 = oneline.substr(0, oneline.find_last_not_of(L' ', pos));
 					wstring str2 = oneline.substr(oneline.find_first_not_of(L' ', pos+1));
-
-					if (str1 == L"ExcitationWavelength")
+					wstring str3 = L"Transmitted Light";
+					if (str1 == L"LightType") {
+						light_type = str2;
+						if (light_type.find(str3) != wstring::npos) {
+							for (int i = m_excitation_wavelength_list.size() - 1; i >= 0; i--) {
+								if (m_excitation_wavelength_list.at(i).chan_num == cur_chan) {
+									m_excitation_wavelength_list.at(i).wavelength = -1;
+									break;
+								}
+							}
+						}
+					}
+					else if (str1 == L"ExcitationWavelength")
 					{
 						if (cur_chan != chan_num)
 						{
@@ -590,6 +602,8 @@ void OIBReader::ReadOif(unsigned char *pbyData, size_t size)
 							WavelengthInfo info;
 							info.chan_num = cur_chan;
 							info.wavelength = WSTOD(str2.c_str());
+							if (light_type == L"Transmitted Light")
+								info.wavelength = -1;
 							m_excitation_wavelength_list.push_back(info);
 						}
 					}

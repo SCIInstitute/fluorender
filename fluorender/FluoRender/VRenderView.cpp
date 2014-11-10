@@ -10195,7 +10195,9 @@ void VRenderView::CreateBar()
    m_options_toolbar->AddControl(m_scale_cmb);
 
    //m_options_toolbar->Realize();
+#ifndef _DARWIN
 	m_options_toolbar->AddStretchableSpace();
+#endif
    //angle of view
    //m_options_toolbar2 = new wxToolBar(this, wxID_ANY);
    st2 = new wxStaticText(m_options_toolbar, wxID_ANY, "Perspective Angle:");

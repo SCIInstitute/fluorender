@@ -211,7 +211,9 @@ m_free_version(true)
          wxGetBitmapFromMemory(icon_settings), wxNullBitmap, wxITEM_NORMAL,
          "Settings: Settings of FluoRender",
          "Settings: Settings of FluoRender");
+#ifdef _WIN32
    m_main_tb->AddStretchableSpace();
+#endif
    m_main_tb->AddTool(ID_CheckUpdates, "Update",
          wxGetBitmapFromMemory(icon_check_updates), wxNullBitmap, wxITEM_NORMAL,
          "Update: Check if there is a new release",

@@ -77,6 +77,7 @@ class OIBReader : public BaseReader
       wstring m_data_name;
       wstring m_oif_name;
       wstring m_substg_name;
+	wstring light_type;
 
       int m_type;  //0-time data in a single file; 1-time data in a file sequence
       struct SliceInfo

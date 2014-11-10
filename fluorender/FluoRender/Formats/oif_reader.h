@@ -131,6 +131,7 @@ private:
 	wstring max_size;
 	wstring start_pos;
 	wstring end_pos;
+	wstring light_type;
 
 	//time sequence id
 	wstring m_time_id;
