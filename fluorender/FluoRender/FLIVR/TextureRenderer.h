@@ -161,6 +161,9 @@ namespace FLIVR
          // Returns true if it is visible.
          bool test_against_view(const BBox &bbox, bool use_ex=false);
 
+		 //exposed load brick
+		 GLint load_brick_cl(int c, vector<TextureBrick*> *b, int i);
+
          //memory swap
          static void set_mem_swap(bool val) {mem_swap_ = val;}
          static bool get_mem_swap() {return mem_swap_;}
@@ -227,7 +230,10 @@ namespace FLIVR
                static void set_update_order(int val) {update_order_ = val;}
                static int get_update_order() {return update_order_;}
 
-      protected:
+			   //kernel for calculation
+			   static VolKernelFactory vol_kernel_factory_;
+
+	  protected:
                struct BrickDist
                {
                   unsigned int index;    //index of the brick in current tex pool
@@ -256,8 +262,6 @@ namespace FLIVR
                static SegShaderFactory seg_shader_factory_;
                //shader for calculation
                static VolCalShaderFactory cal_shader_factory_;
-			   //kernel for calculation
-			   static VolKernelFactory vol_kernel_factory_;
 
                //3d frame buffer object for mask
                GLuint fbo_mask_;

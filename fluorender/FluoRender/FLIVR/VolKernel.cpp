@@ -167,6 +167,11 @@ namespace FLIVR
 		}
 
 		VolKernel* k = new VolKernel(KERNEL_STRING);
+		if (!k->create(s))
+		{
+			delete k;
+			return 0;
+		}
 		kernels_.push_back(k);
 		prev_kernel_ = int(kernels_.size())-1;
 		return k->program();

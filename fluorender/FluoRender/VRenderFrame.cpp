@@ -1429,6 +1429,7 @@ void VRenderFrame::UpdateTree(wxString name)
                   GetBrushToolDlg()->GetSettings(vrv);
                   GetMeasureDlg()->GetSettings(vrv);
                   GetTraceDlg()->GetSettings(vrv);
+				  GetOclDlg()->GetSettings(vrv);
                }
             }
             break;
@@ -1502,6 +1503,7 @@ void VRenderFrame::UpdateTree(wxString name)
                      GetBrushToolDlg()->GetSettings(vrv);
                      GetMeasureDlg()->GetSettings(vrv);
                      GetTraceDlg()->GetSettings(vrv);
+					 GetOclDlg()->GetSettings(vrv);
                   }
                }
                if (name == group->GetName())

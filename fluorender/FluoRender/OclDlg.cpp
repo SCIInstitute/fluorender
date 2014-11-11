@@ -31,6 +31,8 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 
+#pragma OPENCL EXTENSION cl_khr_3d_image_writes : enable
+
 BEGIN_EVENT_TABLE(OclDlg, wxPanel)
 	EVT_BUTTON(ID_BrowseBtn, OclDlg::OnBrowseBtn)
 	EVT_BUTTON(ID_SaveBtn, OclDlg::OnSaveBtn)
@@ -78,7 +80,7 @@ m_view(0)
 
 	//output
 	m_output_txt = new wxTextCtrl(this, ID_OutputTxt, "",
-		wxDefaultPosition, wxSize(-1, 100), wxTE_READONLY);
+		wxDefaultPosition, wxSize(-1, 100), wxTE_READONLY|wxTE_MULTILINE);
 
 	//
     m_LineNrID = 0;
@@ -140,6 +142,17 @@ OclDlg::~OclDlg()
 {
 }
 
+void OclDlg::GetSettings(VRenderView* vrv)
+{
+	if (!vrv) return;
+	m_view = vrv;
+}
+
+VRenderView* OclDlg::GetView()
+{
+	return m_view;
+}
+
 void OclDlg::OnBrowseBtn(wxCommandEvent& event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
@@ -169,4 +182,112 @@ void OclDlg::OnSaveAsBtn(wxCommandEvent& event)
 
 void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 {
+	m_output_txt->SetValue("");
+
+	if (!m_view)
+		return;
+
+	//currently, this is expected to be a convolution/filering kernel
+	//get cl code
+	wxString code = m_kernel_edit_stc->GetText();
+
+	//get volume currently selected
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+	VolumeRenderer* vr = vd->GetVR();
+	if (!vr)
+		return;
+	Texture* tex = vd->GetTexture();
+	if (!tex)
+		return;
+
+	//result
+	int res_x, res_y, res_z;
+	double spc_x, spc_y, spc_z;
+	vd->GetResolution(res_x, res_y, res_z);
+	vd->GetSpacings(spc_x, spc_y, spc_z);
+	VolumeData* vd_r = new VolumeData();
+	vd_r->AddEmptyData(8,
+		res_x, res_y, res_z,
+		spc_x, spc_y, spc_z);
+	vd_r->SetSpcFromFile(true);
+	wxString name = vd->GetName();
+	vd_r->SetName(name+"_CL");
+	Texture* tex_r = vd_r->GetTexture();
+	if (!tex_r)
+		return;
+	Nrrd* nrrd_r = tex_r->get_nrrd(0);
+	if (!nrrd_r)
+		return;
+	void *result = nrrd_r->data;
+	if (!result)
+		return;
+
+	//get bricks
+	vector<TextureBrick*> *bricks = tex->get_bricks();
+	if (!bricks || bricks->size() == 0)
+		return;
+
+	//execute for each brick
+	TextureBrick *b, *b_r;
+	for (unsigned int i=0; i<bricks->size(); ++i)
+	{
+		b = (*bricks)[i];
+		GLint data_id = vr->load_brick_cl(0, bricks, i);
+		KernelProgram* kernel = VolumeRenderer::vol_kernel_factory_.kernel(code.ToStdString());
+		if (kernel)
+		{
+			(*m_output_txt) << "OpenCL kernel created.\n";
+			ExecuteKernel(kernel, data_id, result, res_x, res_y, res_z);
+		}
+		else
+			(*m_output_txt) << "Fail to create OpenCL kernel.\n";
+	}
+
+	//add result for rendering
+	vd_r->GetVR()->return_volume();
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+	{
+		vr_frame->GetDataManager()->AddVolumeData(vd_r);
+		m_view->AddVolumeData(vd_r);
+		vd->SetDisp(false);
+		vr_frame->UpdateList();
+		vr_frame->UpdateTree(vd_r->GetName());
+		m_view->RefreshGL();
+	}
+}
+
+int OclDlg::ExecuteKernel(KernelProgram* kernel, GLuint data_id, void* result,
+		size_t brick_x, size_t brick_y, size_t brick_z)
+{
+	if (!kernel)
+		return 0;
+
+	if (!kernel->valid())
+	{
+		string name = "main";
+		if (kernel->create(name))
+			(*m_output_txt) << "Kernel program compiled successfully.\n";
+		else
+		{
+			(*m_output_txt) << "Kernel program failed to compile.\n";
+			(*m_output_txt) << kernel->getInfo() << "\n";
+		}
+	}
+	//textures
+	kernel->setKernelArgTex3D(0, CL_MEM_READ_ONLY, data_id);
+	size_t result_size = brick_x*brick_y*brick_z*sizeof(unsigned char);
+	kernel->setKernelArgBuf(1, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, result_size, result);
+	kernel->setKernelArgConst(2, sizeof(unsigned int), (void*)(&brick_x));
+	kernel->setKernelArgConst(3, sizeof(unsigned int), (void*)(&brick_y));
+	kernel->setKernelArgConst(4, sizeof(unsigned int), (void*)(&brick_z));
+	//execute
+	size_t global_size[3] = {brick_x, brick_y, brick_z};
+	size_t local_size[3] = {1, 1, 1};
+	kernel->execute(3, global_size, local_size);
+	kernel->readBuffer(1, result);
+
+	return 0;
 }

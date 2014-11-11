@@ -26,8 +26,11 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "DataManager.h"
+#include <FLIVR/KernelProgram.h>
+#include <FLIVR/VolKernel.h>
 #include <wx/wx.h>
 #include <wx/stc/stc.h>
+#include <string>
 
 #ifndef _OCLDLG_H_
 #define _OCLDLG_H_
@@ -52,6 +55,9 @@ public:
 		wxWindow* parent);
 	~OclDlg();
 
+	void GetSettings(VRenderView* vrv);
+	VRenderView* GetView();
+
 private:
 	wxWindow* m_frame;
 	VRenderView* m_view;
@@ -71,6 +77,11 @@ private:
     int m_FoldingID;
 
 private:
+	int ExecuteKernel(KernelProgram* kernel,
+		GLuint data_id, void* result,
+		size_t brick_x, size_t brick_y,
+		size_t brick_z);
+
 	void OnBrowseBtn(wxCommandEvent& event);
 	void OnSaveBtn(wxCommandEvent& event);
 	void OnSaveAsBtn(wxCommandEvent& event);
