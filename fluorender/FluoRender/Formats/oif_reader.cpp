@@ -505,7 +505,7 @@ void OIFReader::ReadOifLine(wstring oneline)
          wstring str2 = oneline.substr(oneline.find_first_not_of(L' ', pos+1));
 		 wstring str3 = L"Transmitted Light";
 		 if (str1 == L"LightType") {
-			 light_type == str2;
+			 light_type = str2;
 			 if (light_type.find(str3) != wstring::npos) {
 				 for (int i = m_excitation_wavelength_list.size() -1; i >=0; i--) {
 					 if (m_excitation_wavelength_list.at(i).chan_num == cur_chan) {
