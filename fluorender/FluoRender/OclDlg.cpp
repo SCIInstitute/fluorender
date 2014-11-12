@@ -246,7 +246,7 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 	}
 
 	//add result for rendering
-	vd_r->GetVR()->return_volume();
+	//vd_r->GetVR()->return_volume();
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 	{
