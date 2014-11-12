@@ -1773,12 +1773,7 @@ int MeshData::Load(GLMmodel* mesh)
 int MeshData::Load(wxString &filename)
 {
 	m_data_path = filename;
-#ifdef _WIN32
-    wxChar slash = '\\';
-#else
-    wxChar slash = '/';
-#endif
-	m_name = m_data_path.Mid(m_data_path.Find(slash, true)+1);
+	m_name = m_data_path.Mid(m_data_path.Find(GETSLASH(), true)+1);
 
 	if (m_data)
 		delete m_data;
