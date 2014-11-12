@@ -319,7 +319,7 @@ m_manual_assist(false)
 		wxDefaultPosition, wxSize(60, 23));
 	m_save_trace_btn = new wxButton(this, ID_SaveTraceBtn, "Save",
 		wxDefaultPosition, wxSize(60, 23));
-	m_saveas_trace_btn = new wxButton(this, ID_SaveasTraceBtn, "Save As...",
+	m_saveas_trace_btn = new wxButton(this, ID_SaveasTraceBtn, "Save As",
 		wxDefaultPosition, wxSize(60, 23));
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);

@@ -40,6 +40,9 @@ namespace FLIVR
 		static bool init();
 		static void clear();
 
+		//info
+		std::string &getInfo();
+
 		friend class VolKernel;
 
 	protected:
@@ -47,6 +50,8 @@ namespace FLIVR
 		cl_program program_;
 		cl_kernel kernel_;
 		cl_command_queue queue_;
+
+		std::string info_;
 
 		//memory object to release
 		std::vector<Argument> arg_list_;

@@ -71,6 +71,7 @@ namespace FLIVR
 		}
 
 		err = clBuildProgram(program_, 0, NULL, NULL, NULL, NULL);
+		info_.clear();
 		if (err != CL_SUCCESS)
 		{
 			char *program_log;
@@ -81,6 +82,7 @@ namespace FLIVR
 			program_log[log_size] = '\0';
 			clGetProgramBuildInfo(program_, device_, CL_PROGRAM_BUILD_LOG,
 				log_size+1, program_log, NULL);
+			info_ = program_log;
 			delete []program_log;
 			return false;
 		}
@@ -279,5 +281,10 @@ namespace FLIVR
 			if (err != CL_SUCCESS)
 				return;
 		}
+	}
+
+	std::string& KernelProgram::getInfo()
+	{
+		return info_;
 	}
 }
