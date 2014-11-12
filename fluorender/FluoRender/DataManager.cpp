@@ -3557,7 +3557,7 @@ void TraceGroup::Draw()
 			for (size_t i=cur_ghost; i<(cur_ghost+m_ghost_num); ++i)
 			{
 				//after
-				if (i>=0 && i+1<ghosts.size())
+				if (i+1<ghosts.size())
 				{
 					cell_map1 = ghosts[i];
 					cell_map2 = ghosts[i+1];
@@ -3608,7 +3608,7 @@ void TraceGroup::Draw()
 			for (size_t i=cur_ghost; i>(cur_ghost-m_ghost_num); --i)
 			{
 				//before
-				if (i-1>=0 && i<ghosts.size())
+				if ((int)i-1>=0 && i<ghosts.size())
 				{
 					cell_map1 = ghosts[i];
 					cell_map2 = ghosts[i-1];

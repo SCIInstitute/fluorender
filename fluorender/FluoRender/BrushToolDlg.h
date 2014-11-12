@@ -215,7 +215,7 @@ private:
 	wxButton *m_nr_analyze_btn;
 	wxButton *m_nr_remove_btn;
 	//help button
-	wxButton* m_help_btn;
+	//wxButton* m_help_btn;
 
 	//calculations
 	//operands

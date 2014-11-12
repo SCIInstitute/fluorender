@@ -110,8 +110,8 @@ m_prop_panel(0),
 m_ui_state(true),
 m_cur_sel_type(-1),
 m_cur_sel_vol(-1),
-m_cur_sel_mesh(-1),
-m_free_version(true)
+m_cur_sel_mesh(-1)//,
+//m_free_version(true)
 {
    // tell wxAuiManager to manage this frame
    m_aui_mgr.SetManagedWindow(this);

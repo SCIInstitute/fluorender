@@ -226,7 +226,6 @@ namespace FLIVR
                static void set_update_order(int val) {update_order_ = val;}
                static int get_update_order() {return update_order_;}
 
-      protected:
                struct BrickDist
                {
                   unsigned int index;    //index of the brick in current tex pool

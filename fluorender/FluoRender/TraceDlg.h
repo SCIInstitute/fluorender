@@ -58,7 +58,8 @@ public:
 
 	void Append(unsigned int id, wxColor color,
 		int size, double cx, double cy, double cz);
-	void Update(VRenderView* vrv=0);
+    using wxListCtrl::Update;
+	void Update(VRenderView* vrv);
 	void DeleteSelection();
 	void DeleteAll();
 	wxString GetText(long item, int col);
@@ -69,7 +70,6 @@ public:
 	friend class TraceDlg;
 
 private:
-	wxWindow* m_frame;
 	VRenderView *m_view;
 
 private:
@@ -217,10 +217,10 @@ private:
 	wxButton* m_cell_new_id_btn;
 	wxButton* m_cell_combine_id_btn;
 	//magic tool
-	wxButton* m_cell_magic0_btn;
+	/*wxButton* m_cell_magic0_btn;
 	wxButton* m_cell_magic1_btn;
 	wxButton* m_cell_magic2_btn;
-	wxButton* m_cell_magic3_btn;
+	wxButton* m_cell_magic3_btn;*/
 	//time controls
 	wxButton* m_cell_prev_btn;
 	wxButton* m_cell_next_btn;

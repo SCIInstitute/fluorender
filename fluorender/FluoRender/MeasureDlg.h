@@ -49,7 +49,8 @@ class RulerListCtrl : public wxListCtrl
       void Append(wxString name, double length, wxString &unit,
             double angle, wxString &points, bool time_dep, int time,
             wxString extra);
-      void Update(VRenderView* vrv=0);
+      using wxListCtrl::Update;
+      void Update(VRenderView* vrv);
 
       void DeleteSelection();
       void DeleteAll(bool cur_time=true);
@@ -59,7 +60,7 @@ class RulerListCtrl : public wxListCtrl
       friend class MeasureDlg;
 
    private:
-      wxWindow* m_frame;
+      //wxWindow* m_frame;
       VRenderView *m_view;
       wxImageList *m_images;
 

@@ -356,7 +356,7 @@ private:
 	//mac address
 	wxString m_address;
 	//free version
-	bool m_free_version;
+	//bool m_free_version;
 
 private:
 	//views

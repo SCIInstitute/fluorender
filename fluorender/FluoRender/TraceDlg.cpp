@@ -49,8 +49,8 @@ TraceListCtrl::TraceListCtrl(
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
-wxListCtrl(parent, id, pos, size, style),
-	m_frame(frame)
+wxListCtrl(parent, id, pos, size, style)//,
+	//m_frame(frame)
 {
 	wxListItem itemCol;
 	itemCol.SetText("ID");

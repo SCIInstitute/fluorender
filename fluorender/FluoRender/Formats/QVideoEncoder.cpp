@@ -366,7 +366,8 @@ int QVideoEncoder::write_frame(const ffmpeg::AVRational *time_base,
 /* Prepare a dummy image. */
 void QVideoEncoder::fill_yuv_image(int64_t frame_index) {
 	ffmpeg::AVFrame *pict = output_stream_.frame;
-    size_t x, y, i, ret;
+    size_t x, y, i;
+    int ret;
     /* when we pass a frame to the encoder, it may keep a reference to it
      * internally;
      * make sure we do not overwrite it here
