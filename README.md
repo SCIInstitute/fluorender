@@ -15,7 +15,7 @@ If you use FluoRender in work that leads to published research, we humbly ask th
 
 Building FluoRender
 ========
-Requirements: Git, CMake, wxWidgets 3.0, boost<br/>
+Requirements: Git, CMake, wxWidgets 3.*, boost<br/>
 We recommend building FluoRender outside of the source tree. <br/>
 
 <h4>OSX</h4> 
@@ -56,9 +56,9 @@ We recommend building FluoRender outside of the source tree. <br/>
 
    * You may need to clear old cmake files. Type <code>./clear.sh</code> to remove unneccessary files.<br/> 
 
-<h4>OSX</h4> 
+<h4>Windows</h4> 
 
-1) Download the latest wxWidgets (currently 3.0.2 at http://www.wxwidgets.org/).
+1) Download the latest wxWidgets (currently 3.* at http://www.wxwidgets.org/).
 
 2) Install the headers and libraries to your system.
 
@@ -80,7 +80,7 @@ We recommend building FluoRender outside of the source tree. <br/>
    
    * Starting about line 277, you will have listed a few sets of library versions to search for like "wxbase29${_UCD}${_DBG}" <br/>
    
-   * In 4 places, you will need to add above each line with a "29" a new line that is exactly the same, but with a "30" instead. <br/>
+   * In 4 places, you will need to add above each line with a "29" a new line that is exactly the same, but with a "30" instead, assuming your version of wxWidgets is 3.0.*). <br/>
 
 5) In the main FluoRender directory, (containing "CMakeLists.txt" & "fluorender" folder):
 
