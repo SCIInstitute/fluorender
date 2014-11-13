@@ -82,6 +82,9 @@ private:
 		size_t brick_x, size_t brick_y,
 		size_t brick_z);
 
+	void median_filter(void* data, void* result,
+		int brick_x, int brick_y, int brick_z);
+
 	void OnBrowseBtn(wxCommandEvent& event);
 	void OnSaveBtn(wxCommandEvent& event);
 	void OnSaveAsBtn(wxCommandEvent& event);

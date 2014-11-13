@@ -30,8 +30,9 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderView.h"
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
+#include <boost/chrono.hpp>
 
-#pragma OPENCL EXTENSION cl_khr_3d_image_writes : enable
+using namespace boost::chrono;
 
 BEGIN_EVENT_TABLE(OclDlg, wxPanel)
 	EVT_BUTTON(ID_BrowseBtn, OclDlg::OnBrowseBtn)
@@ -245,6 +246,13 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 			(*m_output_txt) << "Fail to create OpenCL kernel.\n";
 	}
 
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
+	median_filter(tex->get_nrrd(0)->data, result,
+		res_x, res_y, res_z);
+	high_resolution_clock::time_point t2 = high_resolution_clock::now();
+	duration<double> time_span = duration_cast<duration<double>>(t2-t1);
+	(*m_output_txt) << "CPU time: " << time_span.count() << " sec.\n";
+
 	//add result for rendering
 	//vd_r->GetVR()->return_volume();
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
@@ -286,8 +294,70 @@ int OclDlg::ExecuteKernel(KernelProgram* kernel, GLuint data_id, void* result,
 	//execute
 	size_t global_size[3] = {brick_x, brick_y, brick_z};
 	size_t local_size[3] = {1, 1, 1};
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	kernel->execute(3, global_size, local_size);
+	high_resolution_clock::time_point t2 = high_resolution_clock::now();
+	duration<double> time_span = duration_cast<duration<double>>(t2-t1);
+	(*m_output_txt) << "OpenCL time: " << time_span.count() << " sec.\n";
 	kernel->readBuffer(1, result);
 
 	return 0;
 }
+
+void OclDlg::median_filter(void* data, void* result,
+	int brick_x, int brick_y, int brick_z)
+{
+	int kx = 3;
+	int ky = 3;
+	int kz = 3;
+
+	for (int bi=0; bi<brick_x; ++bi)
+	for (int bj=0; bj<brick_y; ++bj)
+	for (int bk=0; bk<brick_z; ++bk)
+	{
+		unsigned int index = brick_x*brick_y*bk +
+			brick_x*bj + bi;
+		unsigned char* rvalue = new unsigned char[kx*ky*kz];
+		int id = 0;
+		int c;
+		unsigned char temp;
+		for (int i=0; i<kx; ++i)
+		for (int j=0; j<ky; ++j)
+		for (int k=0; k<kz; ++k)
+		{
+			int cx = bi+i-kx/2;
+			int cy = bj+j-ky/2;
+			int cz = bk+k-kz/2;
+			if (cx < 0) cx = 0;
+			if (cx >= brick_x) cx = brick_x-1;
+			if (cy < 0) cy = 0;
+			if (cy >= brick_y) cy = brick_y-1;
+			if (cz < 0) cz = 0;
+			if (cz >= brick_z) cz = brick_z-1;
+
+			unsigned int kc = brick_x*brick_y*cz +
+				brick_x*cy + cx;
+			unsigned char dvalue = ((unsigned char*)data)[index];
+			rvalue[id] = dvalue;
+			if (id > 0)
+			{
+				c = id;
+				while (c > 0)
+				{
+					if (rvalue[c] < rvalue[c-1])
+					{
+						temp = rvalue[c];
+						rvalue[c] = rvalue[c-1];
+						rvalue[c-1] = temp;
+					}
+					else break;
+					c--;
+				}
+			}
+			id++;
+		}
+		((unsigned char*)result)[index] = rvalue[kx*ky*kz/2-1];
+		delete []rvalue;
+	}
+}
+
