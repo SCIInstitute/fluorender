@@ -1793,7 +1793,7 @@ namespace FLIVR
 			int nb = (*bricks)[i]->nb(c);
 			GLenum format;
 			if (nb < 3)
-				format = GL_LUMINANCE;
+				format = GL_RED;
 			else
 				format = GL_RGBA;
 
@@ -1847,7 +1847,7 @@ namespace FLIVR
 
 			GLenum type = (*bricks)[i]->tex_type(c);
 			void* data = (*bricks)[i]->tex_data(c);
-			glGetTexImage(GL_TEXTURE_3D, 0, GL_LUMINANCE,
+			glGetTexImage(GL_TEXTURE_3D, 0, GL_RED,
 				type, data);
 
 			glPixelStorei(GL_PACK_ROW_LENGTH, 0);

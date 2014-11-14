@@ -82,7 +82,17 @@ private:
 		size_t brick_x, size_t brick_y,
 		size_t brick_z);
 
+	void copy_filter(void* data, void* result,
+		int brick_x, int brick_y, int brick_z);
+	void box_filter(void* data, void* result,
+		int brick_x, int brick_y, int brick_z);
+	void gauss_filter(void* data, void* result,
+		int brick_x, int brick_y, int brick_z);
 	void median_filter(void* data, void* result,
+		int brick_x, int brick_y, int brick_z);
+	void min_filter(void* data, void* result,
+		int brick_x, int brick_y, int brick_z);
+	void max_filter(void* data, void* result,
 		int brick_x, int brick_y, int brick_z);
 
 	void OnBrowseBtn(wxCommandEvent& event);

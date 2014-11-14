@@ -3,14 +3,17 @@
 #define KZ 3
 float gauss(int i, int j, int k)
 {
-	return 1.0/(KX*KY*KZ);
+	//2*sigma*sigma
+	float s = 10;
+	float r = i*i+j*j+k*k;
+	return exp(-r/s)/pow(3.1415*s, 1.5);
 }
 const sampler_t samp =
 	CLK_NORMALIZED_COORDS_FALSE|
 	CLK_ADDRESS_REPEAT|
 	CLK_FILTER_NEAREST;
 __kernel void main(
-	__global read_only image3d_t data,
+	read_only image3d_t data,
 	__global unsigned char* result,
 	unsigned int x,
 	unsigned int y,
@@ -29,7 +32,7 @@ __kernel void main(
 				coord.y+(j-KY/2),
 				coord.z+(k-KZ/2), 1);
 		dvalue = read_imagef(data, samp, kc);
-		rvalue += gauss(i, j, k) * dvalue.x;
+		rvalue += gauss(i-KX/2, j-KY/2, k-KZ/2) * dvalue.x;
 	}
 	unsigned int index = x*y*coord.z + x*coord.y + coord.x;
 	result[index] = rvalue*255.0;

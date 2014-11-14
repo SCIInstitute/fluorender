@@ -6,7 +6,7 @@ const sampler_t samp =
 	CLK_ADDRESS_REPEAT|
 	CLK_FILTER_NEAREST;
 __kernel void main(
-	__global read_only image3d_t data,
+	read_only image3d_t data,
 	__global unsigned char* result,
 	unsigned int x,
 	unsigned int y,

@@ -1,22 +1,22 @@
 #define KX 3
 #define KY 3
 #define KZ 3
-const float krn[KX*KY*KZ] =
-{1.0/9.0, 1.0/9.0, 1.0/9.0,
- 1.0/9.0, 1.0/9.0, 1.0/9.0,
- 1.0/9.0, 1.0/9.0, 1.0/9.0,
- 1.0/9.0, 1.0/9.0, 1.0/9.0,
- 1.0/9.0, 1.0/9.0, 1.0/9.0,
- 1.0/9.0, 1.0/9.0, 1.0/9.0,
- 1.0/9.0, 1.0/9.0, 1.0/9.0,
- 1.0/9.0, 1.0/9.0, 1.0/9.0,
- 1.0/9.0, 1.0/9.0, 1.0/9.0};
+__constant float krn[KX*KY*KZ] =
+{-1, 2, -1,
+ 2, -4, 2,
+ -1, 2, -1,
+ 2, -4, 2,
+ -4, 8, -4,
+ 2, -4, 2,
+ -1, 2, -1,
+ 2, -4, 2,
+ -1, 2, -1};
 const sampler_t samp =
 	CLK_NORMALIZED_COORDS_FALSE|
 	CLK_ADDRESS_REPEAT|
 	CLK_FILTER_NEAREST;
 __kernel void main(
-	__global read_only image3d_t data,
+	read_only image3d_t data,
 	__global unsigned char* result,
 	unsigned int x,
 	unsigned int y,
