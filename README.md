@@ -32,6 +32,8 @@ We recommend building FluoRender outside of the source tree. <br/>
    
    * Note the location of the wxWidget directories for ccmake.
 
+   * If you choose to build from source, a working configuration call is : <code>../configure --disable-shared --enable-macosx_arch=x86_64 --enable-unicode --with-osx_cocoa --enable-debug</code> In ccmake, you can set the <code>wxrc</code> and <code>wx-config</code> executables generated from the source build.
+
 3) Download and include boost.
 
    * Download boost(http://www.boost.org/users/download/#live) and extract onto your machine.
