@@ -353,7 +353,8 @@ int OclDlg::ExecuteKernel(KernelProgram* kernel, GLuint data_id, void* result,
 	kernel->execute(3, global_size, local_size);
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	duration<double> time_span = duration_cast<duration<double>>(t2-t1);
-	(*m_output_txt) << "OpenCL time: " << time_span.count() << " sec.\n";
+	wxString stime = wxString::Format("%.4f", time_span.count());
+	(*m_output_txt) << "OpenCL time: " << stime << " sec.\n";
 	kernel->readBuffer(1, result);
 
 	return 0;
