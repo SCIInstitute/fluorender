@@ -175,10 +175,33 @@ void OclDlg::OnBrowseBtn(wxCommandEvent& event)
 
 void OclDlg::OnSaveBtn(wxCommandEvent& event)
 {
+	wxString filename = m_kernel_file_txt->GetValue();
+	if (filename == "")
+	{
+		wxCommandEvent e;
+		OnSaveAsBtn(e);
+	}
+	else
+		m_kernel_edit_stc->SaveFile(filename);
 }
 
 void OclDlg::OnSaveAsBtn(wxCommandEvent& event)
 {
+	wxFileDialog *fopendlg = new wxFileDialog(
+		this, "Choose the FluoRender link data file", 
+		"", "", "*.fll", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+
+	int rval = fopendlg->ShowModal();
+	if (rval == wxID_OK)
+	{
+		wxString filename = fopendlg->GetPath();
+		rval = m_kernel_edit_stc->SaveFile(filename);
+		if (rval)
+			m_kernel_file_txt->SetValue(filename);
+	}
+
+	if (fopendlg)
+		delete fopendlg;
 }
 
 void OclDlg::OnExecuteBtn(wxCommandEvent& event)
@@ -226,8 +249,14 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 		return;
 
 	//get bricks
-	vector<TextureBrick*> *bricks = tex->get_bricks();
+	Ray view_ray(Point(0,0,0), Vector(1,0,0));
+	tex->set_sort_bricks();
+	vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray);
 	if (!bricks || bricks->size() == 0)
+		return;
+	tex_r->set_sort_bricks();
+	vector<TextureBrick*> *bricks_r = tex_r->get_sorted_bricks(view_ray);
+	if (!bricks_r || bricks_r->size() == 0)
 		return;
 
 	//execute for each brick
@@ -235,12 +264,38 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 	for (unsigned int i=0; i<bricks->size(); ++i)
 	{
 		b = (*bricks)[i];
+		b_r = (*bricks_r)[i];
 		GLint data_id = vr->load_brick_cl(0, bricks, i);
 		KernelProgram* kernel = VolumeRenderer::vol_kernel_factory_.kernel(code.ToStdString());
 		if (kernel)
 		{
 			(*m_output_txt) << "OpenCL kernel created.\n";
-			ExecuteKernel(kernel, data_id, result, res_x, res_y, res_z);
+			if (bricks->size()==1)
+				ExecuteKernel(kernel, data_id, result, res_x, res_y, res_z);
+			else
+			{
+				int brick_x = b->nx();
+				int brick_y = b->ny();
+				int brick_z = b->nz();
+				unsigned char* bresult = new unsigned char[brick_x*brick_y*brick_z];
+				ExecuteKernel(kernel, data_id, bresult, brick_x, brick_y, brick_z);
+				//copy data back
+				unsigned char* ptr_br = bresult;
+				unsigned char* ptr_z = (unsigned char*)(b_r->tex_data(0));
+				unsigned char* ptr_y;
+				for (int bk=0; bk<brick_z; ++bk)
+				{
+					ptr_y = ptr_z;
+					for (int bj=0; bj<brick_y; ++bj)
+					{
+						memcpy(ptr_y, ptr_br, brick_x);
+						ptr_y += res_x;
+						ptr_br += brick_x;
+					}
+					ptr_z += res_x*res_y;
+				}
+				delete []bresult;
+			}
 		}
 		else
 			(*m_output_txt) << "Fail to create OpenCL kernel.\n";
