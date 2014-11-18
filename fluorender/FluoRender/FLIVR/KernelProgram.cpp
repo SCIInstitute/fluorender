@@ -210,6 +210,46 @@ namespace FLIVR
 		}
 	}
 
+	void KernelProgram::setKernelArgBufWrite(int i, cl_mem_flags flag, size_t size, void* data)
+	{
+		cl_int err;
+
+		if (data)
+		{
+			Argument arg;
+			arg.index = i;
+			arg.size = size;
+			unsigned int index;
+
+			if (matchArg(&arg, index))
+			{
+				arg.buffer = arg_list_[index].buffer;
+				clReleaseMemObject(arg_list_[index].buffer);
+				arg.buffer = clCreateBuffer(context_, flag, size, data, &err);
+				if (err != CL_SUCCESS)
+					return;
+			}
+			else
+			{
+				cl_mem buffer = clCreateBuffer(context_, flag, size, data, &err);
+				if (err != CL_SUCCESS)
+					return;
+				arg.buffer = buffer;
+				arg_list_.push_back(arg);
+			}
+
+			err = clSetKernelArg(kernel_, i, sizeof(cl_mem), &(arg.buffer));
+			if (err != CL_SUCCESS)
+				return;
+		}
+		else
+		{
+			err = clSetKernelArg(kernel_, i, size, NULL);
+			if (err != CL_SUCCESS)
+				return;
+		}
+	}
+
 	void KernelProgram::setKernelArgTex2D(int i, cl_mem_flags flag, GLuint texture)
 	{
 		cl_int err;
@@ -280,6 +320,31 @@ namespace FLIVR
 				arg.size, data, 0, NULL, NULL);
 			if (err != CL_SUCCESS)
 				return;
+		}
+	}
+
+	void KernelProgram::writeBuffer(int index, void* pattern,
+		size_t pattern_size, size_t offset, size_t size)
+	{
+		bool found = false;
+		unsigned int i;
+		for (i=0; i<arg_list_.size(); ++i)
+		{
+			if (arg_list_[i].index == index)
+			{
+				found = true;
+				break;
+			}
+		}
+		if (found)
+		{
+			//not supported for 1.1
+			//Argument arg = arg_list_[i];
+			//cl_int err;
+			//err = clEnqueueFillBuffer(queue_, arg.buffer, pattern,
+			//	pattern_size, offset, size, 0, NULL, NULL);
+			//if (err != CL_SUCCESS)
+			//	return;
 		}
 	}
 

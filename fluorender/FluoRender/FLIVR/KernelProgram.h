@@ -31,9 +31,11 @@ namespace FLIVR
 		bool matchArg(Argument*, unsigned int&);
 		void setKernelArgConst(int, size_t, void*);
 		void setKernelArgBuf(int, cl_mem_flags, size_t, void*);
+		void setKernelArgBufWrite(int, cl_mem_flags, size_t, void*);
 		void setKernelArgTex2D(int, cl_mem_flags, GLuint);
 		void setKernelArgTex3D(int, cl_mem_flags, GLuint);
 		void readBuffer(int, void*);
+		void writeBuffer(int, void*, size_t, size_t, size_t);
 
 		//initialization
 		static void init_kernels_supported();
