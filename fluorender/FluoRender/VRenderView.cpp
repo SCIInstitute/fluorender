@@ -58,7 +58,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
       wxWindow* parent,
       wxWindowID id,
 	  const int* attriblist,
-      const int *contextAttribs,
+      const int32_t *contextAttribs,
       wxGLContext* sharedContext,
       int * attribList,
       const wxPoint& pos,
@@ -10045,15 +10045,31 @@ VRenderView::VRenderView(wxWindow* frame,
 
    //render view/////////////////////////////////////////////////
    //m_glview = new VRenderGLView(frame, this, wxID_ANY, sharedContext);
-	int attriblist[] = {//WX_GL_MIN_RED, 8, //TODO!!! This is where the call to the altered wxWidget context attribute list happens
+	int32_t attriblist[] = {//WX_GL_MIN_RED, 8, //TODO!!! This is where the call to the altered wxWidget context attribute list happens
 						//WX_GL_MIN_GREEN, 8,
 						//WX_GL_MIN_BLUE, 8,
 						//WX_GL_MIN_ALPHA, 8,
+#ifdef _WIN32
 						WGL_CONTEXT_MAJOR_VERSION_ARB , 3,
 					    WGL_CONTEXT_MINOR_VERSION_ARB, 0,
 						//0x2094, //WGL_CONTEXT_FLAGS_ARB           
 						WGL_CONTEXT_PROFILE_MASK_ARB,
 						WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
+#else
+//these are the apple constants for the context options.
+#ifndef kCGLPFAOpenGLProfile
+#define kCGLPFAOpenGLProfile 99
+#endif
+#ifndef kCGLOGLPVersion_Legacy
+#define kCGLOGLPVersion_Legacy 0x1000
+#endif
+#ifndef kCGLOGLPVersion_3_2_Core
+#define kCGLOGLPVersion_3_2_Core 0x3200
+#endif
+
+						kCGLPFAOpenGLProfile,
+						kCGLOGLPVersion_Legacy,
+#endif
 						//WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
 						//WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_ES_PROFILE_BIT_EXT,
 						//WGL_DRAW_TO_WINDOW_ARB, 1,
