@@ -10066,9 +10066,12 @@ VRenderView::VRenderView(wxWindow* frame,
 #ifndef kCGLOGLPVersion_3_2_Core
 #define kCGLOGLPVersion_3_2_Core 0x3200
 #endif
+#ifndef kCGLOGLPVersion_3_0_Core
+#define kCGLOGLPVersion_3_0_Core 0x3000
+#endif
 
 						kCGLPFAOpenGLProfile,
-						kCGLOGLPVersion_Legacy,
+						kCGLOGLPVersion_3_0_Core,
 #endif
 						//WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
 						//WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_ES_PROFILE_BIT_EXT,
