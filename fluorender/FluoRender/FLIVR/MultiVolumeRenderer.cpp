@@ -191,11 +191,9 @@ namespace FLIVR
          vr_list_[0]->compute_rate_scale(snapview.direction())/rate;
       num_slices_ = (int)(diag.length()/dt);
 
-      vector<double> vertex;
-      vector<double> texcoord;
-      vector<int> size;
-      vertex.reserve(num_slices_*6);
-      texcoord.reserve(num_slices_*6);
+      vector<float> vertex;
+      vector<uint32_t> size;
+      vertex.reserve(num_slices_*12);
       size.reserve(num_slices_*6);
 
       //--------------------------------------------------------------------------
@@ -335,11 +333,11 @@ namespace FLIVR
       // render bricks
       // Set up transform
       Transform *tform = vr_list_[0]->tex_->transform();
-      double mvmat[16];
+      float mvmat[16];
       tform->get_trans(mvmat);
       glMatrixMode(GL_MODELVIEW);
       glPushMatrix();
-      glMultMatrixd(mvmat);
+      glMultMatrixf(mvmat);
       float matrix[16];
 
       int quota_bricks_chan = vr_list_[0]->get_quota_bricks_chan();
@@ -405,9 +403,8 @@ namespace FLIVR
                continue;
             }
             vertex.clear();
-            texcoord.clear();
             size.clear();
-            b->compute_polygons(snapview, dt, vertex, texcoord, size);
+            b->compute_polygons(snapview, dt, vertex, size);
             if (vertex.size() == 0) { continue; }
             shader->setLocalParam(4, 1.0/b->nx(), 1.0/b->ny(), 1.0/b->nz(), 1.0/rate);
 
@@ -431,7 +428,7 @@ namespace FLIVR
             matrix[15] = 1.0f;
             shader->setLocalParamMatrix(2, matrix);
 
-            draw_polygons_vol(vertex, texcoord, size, use_fog!=0, view_ray,
+            draw_polygons_vol(vertex, size, use_fog!=0, view_ray,
                   shader, i, orthographic_p, w2, h2, intp, quota_bricks_chan);
          }
       }
@@ -625,9 +622,8 @@ namespace FLIVR
    }
 
    void MultiVolumeRenderer::draw_polygons_vol(
-         vector<double>& vertex,
-         vector<double>& texcoord,
-         vector<int>& poly,
+         vector<float>& vertex,
+         vector<uint32_t>& poly,
          bool fog,
          Ray &view_ray,
          FragmentProgram* shader,
@@ -806,14 +802,14 @@ namespace FLIVR
             {
                for(int j=0; j<poly[i]; j++)
                {
-                  double* t = &texcoord[(k+j)*3];
-                  double* v = &vertex[(k+j)*3];
+                  float* t = &vertex[(k+j)*3+3];
+                  float* v = &vertex[(k+j)*3];
                   if (glMultiTexCoord3f)
                   {
                      glMultiTexCoord3d(GL_TEXTURE0, t[0], t[1], t[2]);
                      if(fog)
                      {
-                        double vz = mvmat[2]*v[0] + mvmat[6]*v[1] + mvmat[10]*v[2] + mvmat[14];
+                        float vz = mvmat[2]*v[0] + mvmat[6]*v[1] + mvmat[10]*v[2] + mvmat[14];
                         glMultiTexCoord3d(GL_TEXTURE1, -vz, 0.0, 0.0);
                      }
                   }
@@ -1030,11 +1026,9 @@ namespace FLIVR
          vr_list_[0]->compute_rate_scale(view_ray.direction())/rate;
       num_slices_ = (int)(diag.length()/dt);
 
-      vector<double> vertex;
-      vector<double> texcoord;
-      vector<int> size;
-      vertex.reserve(num_slices_*6);
-      texcoord.reserve(num_slices_*6);
+      vector<float> vertex;
+      vector<uint32_t> size;
+      vertex.reserve(num_slices_*12);
       size.reserve(num_slices_*6);
 
       //--------------------------------------------------------------------------
@@ -1107,12 +1101,11 @@ namespace FLIVR
             glColor4d(0.4, 0.4, 0.4, 1.0);
 
             vertex.clear();
-            texcoord.clear();
             size.clear();
 
             // Scale out dt such that the slices are artificially further apart.
-            b->compute_polygons(view_ray, dt * 10, vertex, texcoord, size);
-            vr_list_[0]->draw_polygons_wireframe(vertex, texcoord, size, false);
+            b->compute_polygons(view_ray, dt * 10, vertex, size);
+            vr_list_[0]->draw_polygons_wireframe(vertex, size, false);
          }
       }
 

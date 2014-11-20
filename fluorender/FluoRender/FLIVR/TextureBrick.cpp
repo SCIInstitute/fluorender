@@ -179,16 +179,16 @@ z
    }
 
    // compute polygon of edge plane intersections
-   void TextureBrick::compute_polygon(Ray& view, double t,
-         vector<double>& vertex, vector<double>& texcoord,
-         vector<int>& size)
+   void TextureBrick::compute_polygon(Ray& view, float t,
+         vector<float>& vertex, 
+         vector<uint32_t>& size)
    {
-      compute_polygons(view, t, t, 1.0, vertex, texcoord, size);
+      compute_polygons(view, t, t, 1.0, vertex, size);
    }
 
-   void TextureBrick::compute_polygons(Ray& view, double dt,
-         vector<double>& vertex, vector<double>& texcoord,
-         vector<int>& size)
+   void TextureBrick::compute_polygons(Ray& view, float dt,
+         vector<float>& vertex, 
+         vector<uint32_t>& size)
    {
       Point corner[8];
       corner[0] = bbox_.min();
@@ -200,12 +200,12 @@ z
       corner[6] = Point(bbox_.max().x(), bbox_.max().y(), bbox_.min().z());
       corner[7] = bbox_.max();
 
-      double tmin = Dot(corner[0] - view.origin(), view.direction());
-      double tmax = tmin;
-      int maxi = 0;
-      for (int i=1; i<8; i++)
+      float tmin = Dot(corner[0] - view.origin(), view.direction());
+      float tmax = tmin;
+      uint32_t maxi = 0;
+      for (uint32_t i=1; i<8; i++)
       {
-         double t = Dot(corner[i] - view.origin(), view.direction());
+         float t = Dot(corner[i] - view.origin(), view.direction());
          tmin = Min(t, tmin);
          if (t > tmax) { maxi = i; tmax = t; }
       }
@@ -213,12 +213,12 @@ z
       // Make all of the slices consistent by offsetting them to a fixed
       // position in space (the origin).  This way they are consistent
       // between bricks and don't change with camera zoom.
-      double tanchor = Dot(corner[maxi], view.direction());
-      double tanchor0 = floor(tanchor/dt)*dt;
-      double tanchordiff = tanchor - tanchor0;
+      float tanchor = Dot(corner[maxi], view.direction());
+      float tanchor0 = floor(tanchor/dt)*dt;
+      float tanchordiff = tanchor - tanchor0;
       tmax -= tanchordiff;
 
-      compute_polygons(view, tmin, tmax, dt, vertex, texcoord, size);
+      compute_polygons(view, tmin, tmax, dt, vertex, size);
    }
 
    // compute polygon list of edge plane intersections
@@ -228,13 +228,13 @@ z
    // The representation returned is not efficient, but it appears a
    // typical rendering only contains about 1k triangles.
    void TextureBrick::compute_polygons(Ray& view,
-         double tmin, double tmax, double dt,
-         vector<double>& vertex, vector<double>& texcoord,
-         vector<int>& size)
+         float tmin, float tmax, float dt,
+         vector<float>& vertex,
+         vector<uint32_t>& index)
    {
       Vector vv[12], tt[12]; // temp storage for vertices and texcoords
 
-      int k = 0, degree = 0;
+      uint32_t degree = 0;
 
       // find up and right vectors
       Vector vdir = view.direction();
@@ -258,7 +258,8 @@ z
       up.normalize();
       right = Cross(vdir, up);
       bool order = TextureRenderer::get_update_order();
-      for (double t = order?tmin:tmax;
+	  size_t vert_count = 0;
+      for (float t = order?tmin:tmax;
             order?(t <= tmax):(t >= tmin);
             t += order?dt:-dt)
       {
@@ -285,60 +286,50 @@ z
          }
 
          if (degree < 3 || degree >6) continue;
+		 bool sorted = degree > 3;
+		 uint32_t idx[6];
+		 if (sorted) {
+			// compute centroids
+			Vector vc(0.0, 0.0, 0.0), tc(0.0, 0.0, 0.0);
+			for (int j=0; j<degree; j++)
+			{
+				vc += vv[j]; tc += tt[j];
+			}
+			vc /= (float)degree; tc /= (float)degree;
 
-         if (degree > 3)
-         {
-            // compute centroids
-            Vector vc(0.0, 0.0, 0.0), tc(0.0, 0.0, 0.0);
-            for (int j=0; j<degree; j++)
-            {
-               vc += vv[j]; tc += tt[j];
-            }
-            vc /= (double)degree; tc /= (double)degree;
+			// sort vertices
+			float pa[6];
+			for (uint32_t i=0; i<degree; i++)
+			{
+				float vx = Dot(vv[i] - vc, right);
+				float vy = Dot(vv[i] - vc, up);
 
-            // sort vertices
-            int idx[6];
-            double pa[6];
-            for (int i=0; i<degree; i++)
-            {
-               double vx = Dot(vv[i] - vc, right);
-               double vy = Dot(vv[i] - vc, up);
-
-               // compute pseudo-angle
-               pa[i] = vy / (fabs(vx) + fabs(vy));
-               if (vx < 0.0) pa[i] = 2.0 - pa[i];
-               else if (vy < 0.0) pa[i] = 4.0 + pa[i];
-               // init idx
-               idx[i] = i;
-            }
-            Sort(pa, idx, degree);
-
-            // output polygon
-            for (int j=0; j<degree; j++)
-            {
-               vertex.push_back(vv[idx[j]].x());
-               vertex.push_back(vv[idx[j]].y());
-               vertex.push_back(vv[idx[j]].z());
-               texcoord.push_back(tt[idx[j]].x());
-               texcoord.push_back(tt[idx[j]].y());
-               texcoord.push_back(tt[idx[j]].z());
-            }
-         }
-         else if (degree == 3)
-         {
-            // output a single triangle
-            for (int j=0; j<degree; j++)
-            {
-               vertex.push_back(vv[j].x());
-               vertex.push_back(vv[j].y());
-               vertex.push_back(vv[j].z());
-               texcoord.push_back(tt[j].x());
-               texcoord.push_back(tt[j].y());
-               texcoord.push_back(tt[j].z());
-            }
-         }
-         k += degree;
-         size.push_back(degree);
+				// compute pseudo-angle
+				pa[i] = vy / (fabs(vx) + fabs(vy));
+				if (vx < 0.0) pa[i] = 2.0 - pa[i];
+				else if (vy < 0.0) pa[i] = 4.0 + pa[i];
+				// init idx
+				idx[i] = i;
+			}
+			Sort(pa, idx, degree);
+		 }
+        // save all of the indices
+		for(uint32_t j = 1; j < degree - 1; j++) {
+			index.push_back(vert_count);
+			index.push_back(vert_count+j);
+			index.push_back(vert_count+j+1);
+		}
+        // save all of the verts
+        for (uint32_t j=0; j<degree; j++)
+        {
+            vertex.push_back((sorted?vv[idx[j]]:vv[j]).x());
+            vertex.push_back((sorted?vv[idx[j]]:vv[j]).y());
+            vertex.push_back((sorted?vv[idx[j]]:vv[j]).z());
+            vertex.push_back((sorted?tt[idx[j]]:tt[j]).x());
+            vertex.push_back((sorted?tt[idx[j]]:tt[j]).y());
+            vertex.push_back((sorted?tt[idx[j]]:tt[j]).z());
+			vert_count++;
+        }
       }
    }
 

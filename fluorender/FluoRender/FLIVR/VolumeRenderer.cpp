@@ -509,11 +509,9 @@ namespace FLIVR
 		double dt = cell_diag.length()/compute_rate_scale(snapview.direction())/rate;
 		num_slices_ = (int)(diag.length()/dt);
 
-		vector<double> vertex;
-		vector<double> texcoord;
-		vector<int> size;
-		vertex.reserve(num_slices_*6);
-		texcoord.reserve(num_slices_*6);
+		vector<float> vertex;
+		vector<uint32_t> size;
+		vertex.reserve(num_slices_*12);
 		size.reserve(num_slices_*6);
 
 		//--------------------------------------------------------------------------
@@ -805,9 +803,8 @@ namespace FLIVR
 			}
 
 			vertex.clear();
-			texcoord.clear();
 			size.clear();
-			b->compute_polygons(snapview, dt, vertex, texcoord, size);
+			b->compute_polygons(snapview, dt, vertex, size);
 
 			if (vertex.size() == 0) continue;
 			GLint filter;
@@ -845,7 +842,7 @@ namespace FLIVR
 			matrix[15] = 1.0f;
 			shader->setLocalParamMatrix(2, matrix);
 
-			draw_polygons(vertex, texcoord, size, use_fog, shader);
+			draw_polygons(vertex, size, use_fog, shader);
 
 			if (mem_swap_)
 				finished_bricks_++;
@@ -1048,11 +1045,11 @@ namespace FLIVR
 	{
 		Ray view_ray = compute_view();
 		Transform *tform = tex_->transform();
-		double mvmat[16];
+		float mvmat[16];
 		tform->get_trans(mvmat);
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
-		glMultMatrixd(mvmat);
+		glMultMatrixf(mvmat);
 		glEnable(GL_DEPTH_TEST);
 		GLboolean lighting = glIsEnabled(GL_LIGHTING);
 		glDisable(GL_LIGHTING);
@@ -1061,19 +1058,17 @@ namespace FLIVR
 		glDisable(GL_FOG);
 		vector<TextureBrick*> *bricks = tex_->get_sorted_bricks(view_ray, orthographic_p);
 
-		double rate = imode_ ? irate_ : sampling_rate_;
+		float rate = imode_ ? irate_ : sampling_rate_;
 		Vector diag = tex_->bbox()->diagonal();
 		Vector cell_diag(diag.x()/tex_->nx(),
 			diag.y()/tex_->ny(),
 			diag.z()/tex_->nz());
-		double dt = cell_diag.length()/compute_rate_scale(view_ray.direction())/rate;
+		float dt = cell_diag.length()/compute_rate_scale(view_ray.direction())/rate;
 		num_slices_ = (int)(diag.length()/dt);
 
-		vector<double> vertex;
-		vector<double> texcoord;
-		vector<int> size;
-		vertex.reserve(num_slices_*6);
-		texcoord.reserve(num_slices_*6);
+		vector<float> vertex;
+		vector<uint32_t> size;
+		vertex.reserve(num_slices_*12);
 		size.reserve(num_slices_*6);
 
 		if (bricks)
@@ -1125,12 +1120,11 @@ namespace FLIVR
 				glColor4d(0.4, 0.4, 0.4, 1.0);
 
 				vertex.clear();
-				texcoord.clear();
 				size.clear();
 
 				// Scale out dt such that the slices are artificially further apart.
-				b->compute_polygons(view_ray, dt * 10, vertex, texcoord, size);
-				draw_polygons_wireframe(vertex, texcoord, size, false);
+				b->compute_polygons(view_ray, dt * 10, vertex, size);
+				draw_polygons_wireframe(vertex, size, false);
 			}
 		}
 

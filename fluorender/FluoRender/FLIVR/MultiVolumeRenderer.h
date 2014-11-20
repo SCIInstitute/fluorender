@@ -140,9 +140,8 @@ namespace FLIVR
 		static double sw_;
 
 		void draw_polygons_vol(
-			vector<double>& vertex,
-			vector<double>& texcoord,
-			vector<int>& poly,
+			vector<float>& vertex,
+			vector<uint32_t>& poly,
 			bool fog,
 			Ray &view_ray,
 			FragmentProgram *shader,
