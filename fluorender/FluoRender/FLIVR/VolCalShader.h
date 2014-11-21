@@ -43,7 +43,7 @@ namespace FLIVR
 	#define CAL_APPLYMASKINV2	7	//apply the inverted mask
 	#define CAL_INTERSECTION_WITH_MASK	8	//minimum of two with mask
 
-	class FragmentProgram;
+	class ShaderProgram;
 
 	class VolCalShader
 	{
@@ -60,14 +60,14 @@ namespace FLIVR
 			return (type_ == type);
 		}
 
-		inline FragmentProgram* program() { return program_; }
+		inline ShaderProgram* program() { return program_; }
 
 	protected:
 		bool emit(std::string& s);
 
 		int type_;
 
-		FragmentProgram* program_;
+		ShaderProgram* program_;
 	};
 
 	class VolCalShaderFactory
@@ -76,7 +76,7 @@ namespace FLIVR
 		VolCalShaderFactory();
 		~VolCalShaderFactory();
 
-		FragmentProgram* shader(int type);
+		ShaderProgram* shader(int type);
 
 	protected:
 		std::vector<VolCalShader*> shader_;

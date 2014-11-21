@@ -311,7 +311,7 @@ namespace FLIVR
 
       //--------------------------------------------------------------------------
       // Set up shaders
-      FragmentProgram* shader = 0;
+      ShaderProgram* shader = 0;
       shader = VolumeRenderer::vol_shader_factory_.shader(
             vr_list_[0]->tex_->nc(),
             use_shading, use_fog!=0,
@@ -485,7 +485,7 @@ namespace FLIVR
          glPushMatrix();
          glLoadIdentity();
 
-         FragmentProgram* img_shader = 0;
+         ShaderProgram* img_shader = 0;
 
          if (noise_red_ && colormap_mode_!=2)
          {
@@ -626,7 +626,7 @@ namespace FLIVR
          vector<uint32_t>& poly,
          bool fog,
          Ray &view_ray,
-         FragmentProgram* shader,
+         ShaderProgram* shader,
          int bi, bool orthographic_p,
          int w, int h, bool intp,
          int quota_bricks_chan)

@@ -397,7 +397,7 @@ namespace FLIVR
 	{
 		string s;
 		if (emit(s)) return true;
-		program_ = new FragmentProgram(s);
+		program_ = new ShaderProgram(s);
 		return false;
 	}
 
@@ -464,7 +464,7 @@ namespace FLIVR
 		}
 	}
 
-	FragmentProgram*
+	ShaderProgram*
 		ImgShaderFactory::shader(int type)
 	{
 		if(prev_shader_ >= 0)

@@ -918,7 +918,7 @@ namespace FLIVR
 	void TextureRenderer::draw_polygons(vector<float>& vertex,
 		vector<uint32_t>& triangle_verts, 
 		bool fog,
-		FragmentProgram* shader)
+		ShaderProgram* shader)
 	{
 		//link to the new data
 		glBindBuffer(GL_ARRAY_BUFFER, m_slices_vbo);

@@ -35,7 +35,7 @@
 namespace FLIVR
 {
 
-	class FragmentProgram;
+	class ShaderProgram;
 
 	class MshShader
 	{
@@ -56,7 +56,7 @@ namespace FLIVR
 					tex_ == tex); 
 		}
 
-		inline FragmentProgram* program() { return program_; }
+		inline ShaderProgram* program() { return program_; }
 
 	protected:
 		bool emit(std::string& s);
@@ -65,7 +65,7 @@ namespace FLIVR
 		int peel_;	//0:no peeling; 1:peel positive; 2:peel both; -1:peel negative
 		bool tex_;
 
-		FragmentProgram* program_;
+		ShaderProgram* program_;
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -75,7 +75,7 @@ namespace FLIVR
 		MshShaderFactory();
 		~MshShaderFactory();
 
-		FragmentProgram* shader(bool fog, int peel, bool tex);
+		ShaderProgram* shader(bool fog, int peel, bool tex);
 
 	protected:
 		std::vector<MshShader*> shader_;

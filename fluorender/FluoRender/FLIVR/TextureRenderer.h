@@ -90,7 +90,7 @@ namespace FLIVR
          int m_pos;
    };
 
-   class FragmentProgram;
+   class ShaderProgram;
    class VolShaderFactory;
    class SegShaderFactory;
    class VolCalShaderFactory;
@@ -336,7 +336,7 @@ namespace FLIVR
                void draw_polygons(vector<float>& vertex, 
                      vector<uint32_t>& poly,
                      bool fog,
-                     FragmentProgram *shader = 0);
+                     ShaderProgram *shader = 0);
                void draw_polygons_wireframe(vector<float>& vertex, 
                      vector<uint32_t>& poly,
                      bool fog);

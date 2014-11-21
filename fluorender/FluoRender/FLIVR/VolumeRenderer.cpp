@@ -32,7 +32,6 @@
 #include <FLIVR/VolCalShader.h>
 #include <FLIVR/ShaderProgram.h>
 #include <FLIVR/TextureBrick.h>
-#include <FLIVR/VtxShader.h>
 #include "utility.h"
 #include "../compatibility.h"
 
@@ -47,7 +46,6 @@ namespace FLIVR
 	SegShaderFactory TextureRenderer::seg_shader_factory_;
 	VolCalShaderFactory TextureRenderer::cal_shader_factory_;
 	ImgShaderFactory VolumeRenderer::m_img_shader_factory;
-	VtxShaderFactory VolumeRenderer::m_vtx_shader_factory;
 	double VolumeRenderer::sw_ = 0.0;
 
 	VolumeRenderer::VolumeRenderer(Texture* tex,
@@ -688,8 +686,7 @@ namespace FLIVR
 
 		//--------------------------------------------------------------------------
 		// Set up shaders
-		VertexProgram* vtx_shader = 0;
-		FragmentProgram* shader = 0;
+		ShaderProgram* shader = 0;
 		//create/bind
 		shader = vol_shader_factory_.shader(
 			tex_->nc(),
@@ -703,21 +700,9 @@ namespace FLIVR
 				shader->create();
 			shader->bind();
 		}
-		vtx_shader = 
-			m_vtx_shader_factory.shader(VTX_SHDR_GENERIC);
-		if (vtx_shader) {
-			if (!vtx_shader->valid())
-				vtx_shader->create();
-			vtx_shader->bind();
-		}
 
 		//set uniforms
 		//set up shading
-		float mat[16];
-		glGetFloatv(GL_PROJECTION_MATRIX, mat);
-		vtx_shader->setLocalParamMatrix(0,mat);
-		glGetFloatv(GL_MODELVIEW_MATRIX, mat);
-		vtx_shader->setLocalParamMatrix(1,mat);
 		Vector light = view_ray.direction();
 		light.safe_normalize();
 		shader->setLocalParam(0, light.x(), light.y(), light.z(), alpha_);
@@ -919,7 +904,7 @@ namespace FLIVR
 			glPushMatrix();
 			glLoadIdentity();
 
-			FragmentProgram* img_shader = 0;
+			ShaderProgram* img_shader = 0;
 
 			if (noise_red_ && colormap_mode_!=2)
 			{
@@ -1173,7 +1158,7 @@ namespace FLIVR
 		//--------------------------------------------------------------------------
 		// Set up shaders
 		//seg shader
-		FragmentProgram* seg_shader = 0;
+		ShaderProgram* seg_shader = 0;
 
 		switch (type)
 		{
@@ -1416,7 +1401,7 @@ namespace FLIVR
 		//--------------------------------------------------------------------------
 		// Set up shaders
 		//seg shader
-		FragmentProgram* seg_shader = 0;
+		ShaderProgram* seg_shader = 0;
 
 		switch (type)
 		{
@@ -1582,7 +1567,7 @@ namespace FLIVR
 		//--------------------------------------------------------------------------
 		// Set up shaders
 		//calculate shader
-		FragmentProgram* cal_shader = cal_shader_factory_.shader(type);
+		ShaderProgram* cal_shader = cal_shader_factory_.shader(type);
 
 		if (cal_shader)
 		{

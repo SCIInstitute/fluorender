@@ -144,7 +144,7 @@ namespace FLIVR
 	{
 		string s;
 		if (emit(s)) return true;
-		program_ = new FragmentProgram(s);
+		program_ = new ShaderProgram(s);
 		return false;
 	}
 
@@ -223,7 +223,7 @@ namespace FLIVR
 			delete shader_[i];
 	}
 
-	FragmentProgram* MshShaderFactory::shader(bool fog, int peel, bool tex)
+	ShaderProgram* MshShaderFactory::shader(bool fog, int peel, bool tex)
 	{
 		if(prev_shader_ >= 0)
 		{

@@ -34,7 +34,6 @@
 #include "Texture.h"
 #include "TextureRenderer.h"
 #include "ImgShader.h"
-#include "VtxShader.h"
 
 namespace FLIVR
 {
@@ -222,7 +221,6 @@ namespace FLIVR
 		bool label_;
 		//smooth filter
 		static ImgShaderFactory m_img_shader_factory;
-		static VtxShaderFactory m_vtx_shader_factory;
 
 		//noise reduction
 		bool noise_red_;

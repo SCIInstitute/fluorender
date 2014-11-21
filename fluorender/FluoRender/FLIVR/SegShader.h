@@ -41,7 +41,7 @@ namespace FLIVR
 #define LBL_SHDR_MIF		4	//maximum intensity filtering
 #define FLT_SHDR_NR			5	//remove noise
 
-	class FragmentProgram;
+	class ShaderProgram;
 
 	class SegShader
 	{
@@ -74,7 +74,7 @@ namespace FLIVR
 				hiqual_ == hiqual);
 		}
 
-		inline FragmentProgram* program() { return program_; }
+		inline ShaderProgram* program() { return program_; }
 
 	protected:
 		bool emit(std::string& s);
@@ -88,7 +88,7 @@ namespace FLIVR
 		bool clip_;
 		bool hiqual_;
 
-		FragmentProgram* program_;
+		ShaderProgram* program_;
 	};
 
 	class SegShaderFactory
@@ -97,7 +97,7 @@ namespace FLIVR
 		SegShaderFactory();
 		~SegShaderFactory();
 
-		FragmentProgram* shader(int type, int paint_mode, int hr_mode,
+		ShaderProgram* shader(int type, int paint_mode, int hr_mode,
 			bool use_2d, bool shading, int peel, bool clip, bool hiqual);
 
 	protected:
