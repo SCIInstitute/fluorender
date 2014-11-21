@@ -79,6 +79,8 @@ namespace FLIVR
 			mask_ == 4)
 			z << VOL_VERSION_130;
 
+		//z << VOL_INPUTS;
+
 		//the common uniforms
 		z << VOL_UNIFORMS_COMMON;
 

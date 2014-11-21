@@ -29,8 +29,12 @@
 namespace FLIVR
 {
 #define VOL_VERSION_130 \
-	"#version 130\n"\
+	"#version 330\n"\
 	"\n"
+
+#define VOL_INPUTS \
+	"in vec3 OutVertex;\n" \
+	"in vec3 OutTexture;\n" 
 
 #define VOL_UNIFORMS_COMMON \
 	"// VOL_UNIFORMS_COMMON\n" \
@@ -100,7 +104,7 @@ namespace FLIVR
 	"//VOL_HEAD\n" \
 	"void main()\n" \
 	"{\n" \
-	"	vec4 t = gl_TexCoord[0];\n" \
+	"	vec4 t = OutVertex;\n" \
 	"\n"
 
 #define VOL_HEAD_2DMAP_LOC \
@@ -132,7 +136,7 @@ namespace FLIVR
 	"	fp.y = gl_Fog.start;\n" \
 	"	fp.z = gl_Fog.end;\n" \
 	"	fp.w = gl_Fog.scale;\n" \
-	"	vec4 tf = gl_TexCoord[1];\n" \
+	"	vec4 tf = OutTexture;\n" \
 	"	vec4 fctmp;\n" \
 	"\n"
 
@@ -207,17 +211,17 @@ namespace FLIVR
 	"	n = vec4(0.0); \n" \
 	"	w = vec4(0.0);\n" \
 	"	w.x = dir.x; \n" \
-	"	p = clamp(gl_TexCoord[0] + w, 0.0, 1.0); \n" \
+	"	p = clamp(OutVertex + w, 0.0, 1.0); \n" \
 	"	r = texture3D(tex0, p.stp); \n" \
 	"	n.x = v.x - r.x; \n" \
 	"	w = vec4(0.0); \n" \
 	"	w.y = dir.y; \n" \
-	"	p = clamp(gl_TexCoord[0] + w, 0.0, 1.0); \n" \
+	"	p = clamp(OutVertex + w, 0.0, 1.0); \n" \
 	"	r = texture3D(tex0, p.stp); \n" \
 	"	n.y = v.y - r.x; \n" \
 	"	w = vec4(0.0); \n" \
 	"	w.z = dir.x<dir.z?dir.x:dir.z; \n" \
-	"	p = clamp(gl_TexCoord[0] + w, 0.0, 1.0); \n" \
+	"	p = clamp(OutVertex + w, 0.0, 1.0); \n" \
 	"	r = texture3D(tex0, p.stp); \n" \
 	"	n.z = v.z - r.x; \n" \
 	"	w.x = dot(n.xxx, vec3(tmat[0].x, tmat[1].x, tmat[2].x)); \n" \
@@ -237,26 +241,26 @@ namespace FLIVR
 	"	n = vec4(0.0); \n" \
 	"	w = vec4(0.0);\n" \
 	"	w.x = dir.x; \n" \
-	"	p = clamp(gl_TexCoord[0] + w, 0.0, 1.0); \n" \
+	"	p = clamp(OutVertex + w, 0.0, 1.0); \n" \
 	"	r = texture3D(tex0, p.stp); \n" \
 	"	n.x = r.x + n.x; \n" \
-	"	p = clamp(gl_TexCoord[0] - w, 0.0, 1.0); \n" \
+	"	p = clamp(OutVertex - w, 0.0, 1.0); \n" \
 	"	r = texture3D(tex0, p.stp); \n" \
 	"	n.x = r.x - n.x; \n" \
 	"	w = vec4(0.0); \n" \
 	"	w.y = dir.y; \n" \
-	"	p = clamp(gl_TexCoord[0] + w, 0.0, 1.0); \n" \
+	"	p = clamp(OutVertex + w, 0.0, 1.0); \n" \
 	"	r = texture3D(tex0, p.stp); \n" \
 	"	n.y = r.x + n.y; \n" \
-	"	p = clamp(gl_TexCoord[0] - w, 0.0, 1.0); \n" \
+	"	p = clamp(OutVertex - w, 0.0, 1.0); \n" \
 	"	r = texture3D(tex0, p.stp); \n" \
 	"	n.y = r.x - n.y; \n" \
 	"	w = vec4(0.0); \n" \
 	"	w.z = dir.x<dir.z?dir.x:dir.z; \n" \
-	"	p = clamp(gl_TexCoord[0] + w, 0.0, 1.0); \n" \
+	"	p = clamp(OutVertex + w, 0.0, 1.0); \n" \
 	"	r = texture3D(tex0, p.stp); \n" \
 	"	n.z = r.x + n.z; \n" \
-	"	p = clamp(gl_TexCoord[0] - w, 0.0, 1.0); \n" \
+	"	p = clamp(OutVertex - w, 0.0, 1.0); \n" \
 	"	r = texture3D(tex0, p.stp); \n" \
 	"	n.z = r.x - n.z; \n" \
 	"	w.x = dot(n.xxx, vec3(tmat[0].x, tmat[1].x, tmat[2].x)); \n" \
