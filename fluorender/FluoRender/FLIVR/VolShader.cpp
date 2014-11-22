@@ -68,10 +68,10 @@ namespace FLIVR
 
 	bool VolShader::create()
 	{
-		string s1,s2;
-		if (emit_f(s1)) return true;
-		if (emit_v(s2)) return true;
-		program_ = new ShaderProgram(s2,s1);
+		string fs,vs;
+		if (emit_f(fs)) return true;
+		if (emit_v(vs)) return true;
+		program_ = new ShaderProgram(vs,fs);
 		return false;
 	}
 	
@@ -307,6 +307,7 @@ namespace FLIVR
 
 		//output
 		s = z.str();
+		//s = DEFAULT_FRAGMENT_CODE;
 		return false;
 	}
 

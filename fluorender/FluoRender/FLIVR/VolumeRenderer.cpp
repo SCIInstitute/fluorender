@@ -703,6 +703,13 @@ namespace FLIVR
 
 		//set uniforms
 		//set up shading
+		float mat[16];
+		glGetFloatv(GL_PROJECTION_MATRIX, mat);
+		//send the matrices down if possible
+		shader->setLocalParamMatrix(0, mat);
+		glGetFloatv(GL_MODELVIEW_MATRIX, mat);
+		shader->setLocalParamMatrix(1, mat);
+		//set the light
 		Vector light = view_ray.direction();
 		light.safe_normalize();
 		shader->setLocalParam(0, light.x(), light.y(), light.z(), alpha_);

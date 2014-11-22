@@ -28,6 +28,10 @@
 
 namespace FLIVR
 {
+#define DEFAULT_FRAGMENT_CODE \
+	"void main() {\n" \
+	"    gl_FragColor = vec4(1,1,1,1);\n" \
+	"}\n" 
 #define VOL_VERSION_130 \
 	"#version 130\n"\
 	"\n"
