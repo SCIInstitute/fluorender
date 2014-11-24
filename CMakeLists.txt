@@ -86,11 +86,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 #wxWidgets
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
    include_directories(${FluoRender_SOURCE_DIR}/fluorender/wxWidgets/include)
-   #include_directories(${FluoRender_SOURCE_DIR}/fluorender/wxWidgets/lib/vc_x64_lib/mswud)
+   include_directories(${FluoRender_SOURCE_DIR}/fluorender/wxWidgets/lib/vc_x64_lib/mswud)
    file(GLOB wxWidgets_LIBRARIES fluorender/wxWidgets/lib/vc_x64_lib/*.lib)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 set(wxWidgets_USE_STATIC ON)
+add_definitions(-DUNICODE)
+add_definitions(-D_UNICODE)
 #solution for wxWidgets linking "ambiguous" errors
 add_definitions(-D_WCHAR_H_CPLUSPLUS_98_CONFORMANCE_)
 
@@ -98,6 +100,11 @@ add_definitions(-D_WCHAR_H_CPLUSPLUS_98_CONFORMANCE_)
 find_package(OpenGL REQUIRED)
 
 #Boost
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+   set(Boost_INCLUDE_DIR ${FluoRender_SOURCE_DIR}/fluorender/boost/msw)
+   set(Boost_DIR ${FluoRender_SOURCE_DIR}/fluorender/boost/msw)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+endif()
 find_package(Boost REQUIRED)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
 
