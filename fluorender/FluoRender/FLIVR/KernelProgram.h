@@ -26,6 +26,7 @@ namespace FLIVR
 		{
 			cl_uint index;
 			size_t size;
+			GLuint texture;
 			cl_mem buffer;
 		} Argument;
 		bool matchArg(Argument*, unsigned int&);

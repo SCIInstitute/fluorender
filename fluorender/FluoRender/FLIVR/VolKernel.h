@@ -46,6 +46,9 @@ namespace FLIVR
 		VolKernelFactory();
 		~VolKernelFactory();
 
+		void clean();
+		void remove(KernelProgram* kernel);
+
 		KernelProgram* kernel(int type = 0);
 		KernelProgram* kernel(std::string &s);
 

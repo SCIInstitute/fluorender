@@ -219,33 +219,15 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
 		return;
+	bool dup = true;
+	wxString vd_name = vd->GetName();
+	if (vd_name.Find("_CL") != wxNOT_FOUND)
+		dup = false;
 	VolumeRenderer* vr = vd->GetVR();
 	if (!vr)
 		return;
 	Texture* tex = vd->GetTexture();
 	if (!tex)
-		return;
-
-	//result
-	int res_x, res_y, res_z;
-	double spc_x, spc_y, spc_z;
-	vd->GetResolution(res_x, res_y, res_z);
-	vd->GetSpacings(spc_x, spc_y, spc_z);
-	VolumeData* vd_r = new VolumeData();
-	vd_r->AddEmptyData(8,
-		res_x, res_y, res_z,
-		spc_x, spc_y, spc_z);
-	vd_r->SetSpcFromFile(true);
-	wxString name = vd->GetName();
-	vd_r->SetName(name+"_CL");
-	Texture* tex_r = vd_r->GetTexture();
-	if (!tex_r)
-		return;
-	Nrrd* nrrd_r = tex_r->get_nrrd(0);
-	if (!nrrd_r)
-		return;
-	void *result = nrrd_r->data;
-	if (!result)
 		return;
 
 	//get bricks
@@ -254,17 +236,50 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 	vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray);
 	if (!bricks || bricks->size() == 0)
 		return;
-	tex_r->set_sort_bricks();
-	vector<TextureBrick*> *bricks_r = tex_r->get_sorted_bricks(view_ray);
-	if (!bricks_r || bricks_r->size() == 0)
-		return;
+
+	int res_x, res_y, res_z;
+	vd->GetResolution(res_x, res_y, res_z);
 
 	//execute for each brick
 	TextureBrick *b, *b_r;
+	vector<TextureBrick*> *bricks_r;
+	VolumeData* vd_r;
+	void *result;
+
+	if (dup)
+	{
+		//result
+		double spc_x, spc_y, spc_z;
+		vd->GetSpacings(spc_x, spc_y, spc_z);
+		vd_r = new VolumeData();
+		vd_r->AddEmptyData(8,
+			res_x, res_y, res_z,
+			spc_x, spc_y, spc_z);
+		vd_r->SetSpcFromFile(true);
+		wxString name = vd->GetName();
+		vd_r->SetName(name+"_CL");
+		Texture* tex_r = vd_r->GetTexture();
+		if (!tex_r)
+			return;
+		Nrrd* nrrd_r = tex_r->get_nrrd(0);
+		if (!nrrd_r)
+			return;
+		result = nrrd_r->data;
+		if (!result)
+			return;
+
+		tex_r->set_sort_bricks();
+		bricks_r = tex_r->get_sorted_bricks(view_ray);
+		if (!bricks_r || bricks_r->size() == 0)
+			return;
+	}
+	else
+		result = tex->get_nrrd(0)->data;
+
 	for (unsigned int i=0; i<bricks->size(); ++i)
 	{
 		b = (*bricks)[i];
-		b_r = (*bricks_r)[i];
+		if (dup) b_r = (*bricks_r)[i];
 		GLint data_id = vr->load_brick_cl(0, bricks, i);
 		KernelProgram* kernel = VolumeRenderer::vol_kernel_factory_.kernel(code.ToStdString());
 		if (kernel)
@@ -281,7 +296,11 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 				ExecuteKernel(kernel, data_id, bresult, brick_x, brick_y, brick_z);
 				//copy data back
 				unsigned char* ptr_br = bresult;
-				unsigned char* ptr_z = (unsigned char*)(b_r->tex_data(0));
+				unsigned char* ptr_z;
+				if (dup)
+					ptr_z = (unsigned char*)(b_r->tex_data(0));
+				else
+					ptr_z = (unsigned char*)(b->tex_data(0));
 				unsigned char* ptr_y;
 				for (int bk=0; bk<brick_z; ++bk)
 				{
@@ -299,6 +318,8 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 		}
 		else
 			(*m_output_txt) << "Fail to create OpenCL kernel.\n";
+		//this is a problem needs to be solved
+		VolumeRenderer::vol_kernel_factory_.clean();
 	}
 
 	//high_resolution_clock::time_point t1 = high_resolution_clock::now();
@@ -309,17 +330,23 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 	//(*m_output_txt) << "CPU time: " << time_span.count() << " sec.\n";
 
 	//add result for rendering
-	//vd_r->GetVR()->return_volume();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (dup)
 	{
-		vr_frame->GetDataManager()->AddVolumeData(vd_r);
-		m_view->AddVolumeData(vd_r);
-		vd->SetDisp(false);
-		vr_frame->UpdateList();
-		vr_frame->UpdateTree(vd_r->GetName());
-		m_view->RefreshGL();
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame)
+		{
+			vr_frame->GetDataManager()->AddVolumeData(vd_r);
+			m_view->AddVolumeData(vd_r);
+			vd->SetDisp(false);
+			vr_frame->UpdateList();
+			vr_frame->UpdateTree(vd_r->GetName());
+		}
 	}
+	else
+	{
+		vd->GetVR()->clear_tex_pool();
+	}
+	m_view->RefreshGL();
 }
 
 int OclDlg::ExecuteKernel(KernelProgram* kernel, GLuint data_id, void* result,

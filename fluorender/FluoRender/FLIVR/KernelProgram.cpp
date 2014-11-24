@@ -154,7 +154,8 @@ namespace FLIVR
 		for (unsigned int i=0; i<arg_list_.size(); ++i)
 		{
 			if (arg_list_[i].index == arg->index &&
-				arg_list_[i].size == arg->size)
+				arg_list_[i].size == arg->size &&
+				arg_list_[i].texture == arg->texture)
 			{
 				arg_index = i;
 				return true;
@@ -184,6 +185,7 @@ namespace FLIVR
 			Argument arg;
 			arg.index = i;
 			arg.size = size;
+			arg.texture = 0;
 			unsigned int index;
 
 			if (matchArg(&arg, index))
@@ -219,6 +221,7 @@ namespace FLIVR
 			Argument arg;
 			arg.index = i;
 			arg.size = size;
+			arg.texture = 0;
 			unsigned int index;
 
 			if (matchArg(&arg, index))
@@ -256,6 +259,7 @@ namespace FLIVR
 		Argument arg;
 		arg.index = i;
 		arg.size = 0;
+		arg.texture = texture;
 		unsigned int index;
 
 		if (matchArg(&arg, index))
@@ -281,6 +285,7 @@ namespace FLIVR
 		Argument arg;
 		arg.index = i;
 		arg.size = 0;
+		arg.texture = texture;
 		unsigned int index;
 
 		if (matchArg(&arg, index))

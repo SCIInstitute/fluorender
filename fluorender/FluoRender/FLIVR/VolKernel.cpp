@@ -111,10 +111,17 @@ namespace FLIVR
 
 	VolKernelFactory::~VolKernelFactory()
 	{
+		clean();
+	}
+
+	void VolKernelFactory::clean()
+	{
 		for (unsigned int i=0; i<kernels_.size(); ++i)
 		{
 			delete kernels_[i];
 		}
+		kernels_.clear();
+		prev_kernel_ = -1;
 	}
 
 	KernelProgram* VolKernelFactory::kernel(int type)

@@ -1272,7 +1272,7 @@ void SettingDlg::OnLargeDataEdit(wxCommandEvent &event)
 	wxString str = m_large_data_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	if (val<=0.0)
+	if (val<0.0)
 		return;
 	m_large_data_sldr->SetValue(int(val/10.0));
 	m_large_data_size = val;
