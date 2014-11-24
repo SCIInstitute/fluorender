@@ -84,9 +84,12 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BUILD_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 #wxWidgets
-set(wxWidgets_CONFIGURATION mswu)
-find_package(wxWidgets COMPONENTS core base aui html xrc xml net adv gl REQUIRED)
-include(${wxWidgets_USE_FILE})
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+   include_directories(${FluoRender_SOURCE_DIR}/fluorender/wxWidgets/include)
+   #include_directories(${FluoRender_SOURCE_DIR}/fluorender/wxWidgets/lib/vc_x64_lib/mswud)
+   file(GLOB wxWidgets_LIBRARIES fluorender/wxWidgets/lib/vc_x64_lib/*.lib)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+endif()
 set(wxWidgets_USE_STATIC ON)
 #solution for wxWidgets linking "ambiguous" errors
 add_definitions(-D_WCHAR_H_CPLUSPLUS_98_CONFORMANCE_)
@@ -278,7 +281,7 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	  add_library(WACUTILS_OBJ OBJECT
 			     ${wac_src} ${wac_hdr})
       add_executable(FluoRender WIN32
-          ${src} ${hdr} ${rsc}
+          	  ${src} ${hdr} ${rsc}
 		  $<TARGET_OBJECTS:IMAGES_OBJ>
 		  $<TARGET_OBJECTS:CONVERTERS_OBJ>
 		  $<TARGET_OBJECTS:FLIVR_OBJ>
@@ -286,7 +289,7 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 		  $<TARGET_OBJECTS:NV_OBJ>
 		  $<TARGET_OBJECTS:FORMATS_OBJ>
 		  $<TARGET_OBJECTS:GLEW_OBJ>
-          $<TARGET_OBJECTS:POLE_OBJ>
+          	  $<TARGET_OBJECTS:POLE_OBJ>
 		  $<TARGET_OBJECTS:TEEM_OBJ>
 		  $<TARGET_OBJECTS:WACUTILS_OBJ>)
    endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
