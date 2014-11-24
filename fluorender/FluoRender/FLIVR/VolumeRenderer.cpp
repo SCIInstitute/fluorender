@@ -1621,29 +1621,10 @@ namespace FLIVR
 			//	outfile << value << "\n";
 			//}
 			//outfile.close();
-			//delete []hist;
+
+			delete []hist;
 		}
 		return result;
-/*		//test for cl
-		KernelProgram* test_kernel = vol_kernel_factory_.kernel();
-		if (test_kernel)
-		{
-			if (!test_kernel->valid())
-			test_kernel->create();
-			float data[64];
-			float sum[2];
-			for (int i=0; i<64; i++)
-				data[i] = float(i);
-			test_kernel->setKernelArg(0, CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR, 64*sizeof(float), data);
-			test_kernel->setKernelArg(1, 0, 4*sizeof(float), NULL);
-			test_kernel->setKernelArg(2, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, 2*sizeof(float), sum);
-			test_kernel->execute(1, 8, 4);
-			test_kernel->readBuffer(2, sum);
-			float s1 = sum[0];
-			float s2 = sum[1];
-			wxMessageBox(wxString::Format("%f\t%f", s1, s2));
-		}
-*/
 	}
 
 	//calculation
