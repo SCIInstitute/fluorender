@@ -85,6 +85,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 #wxWidgets
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+   #merge the core library parts into one
+   MESSAGE(STATUS "Merging library parts due to GIT size limit...")
+   EXECUTE_PROCESS(COMMAND ${FluoRender_SOURCE_DIR}/fluorender/wxWidgets/lib/vc_x64_lib/merge_lib.bat
+		   WORKING_DIRECTORY ${FluoRender_SOURCE_DIR}/fluorender/wxWidgets/lib/vc_x64_lib 
+		   OUTPUT_VARIABLE out2)
+   message(STATUS "output: ${out2}")
    include_directories(${FluoRender_SOURCE_DIR}/fluorender/wxWidgets/include)
    include_directories(${FluoRender_SOURCE_DIR}/fluorender/wxWidgets/lib/vc_x64_lib/mswud)
    file(GLOB wxWidgets_LIBRARIES fluorender/wxWidgets/lib/vc_x64_lib/*.lib)
