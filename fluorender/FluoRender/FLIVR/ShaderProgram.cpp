@@ -46,7 +46,7 @@ namespace FLIVR
 	int ShaderProgram::max_texture_size_ = 64;
 
 	ShaderProgram::ShaderProgram(const string& frag_shader) :
-	id_(0), vert_shader_(VTX_SHADER_CODE_GENERIC), frag_shader_(frag_shader)
+	id_(0), vert_shader_(""), frag_shader_(frag_shader)
 	{
 	}
 	ShaderProgram::ShaderProgram(const string& vert_shader, const string& frag_shader) :
@@ -151,11 +151,12 @@ namespace FLIVR
 			GLint shader_status[1];
 			char shader_log[1000];
 			GLint shader_length[1];
+			bool attach_vert = true;
 			glGetShaderiv(v_shader, GL_COMPILE_STATUS, shader_status);
 			if (shader_status[0] == GL_FALSE) {
 				glGetShaderInfoLog(v_shader, sizeof(shader_log), shader_length, shader_log);
 				std::cerr << "Error compiling vertex shader: " << shader_log << std::endl;
-				return true;
+				attach_vert = false;
 			}
 			
 			// set the source code and compile the shader // fragment
@@ -164,15 +165,18 @@ namespace FLIVR
 			glCompileShader(f_shader);
 
 			// check the compilation of the shader
+			bool attach_frag = true;
 			glGetShaderiv(f_shader, GL_COMPILE_STATUS, shader_status);
 			if (shader_status[0] == GL_FALSE) {
 				glGetShaderInfoLog(f_shader, sizeof(shader_log), shader_length, shader_log);
 				std::cerr << "Error compiling fragment shader: " << shader_log << std::endl;
-				return true;
+				attach_frag = false;
 			}
 
-			glAttachShader(id_, v_shader);
-			glAttachShader(id_, f_shader);
+			if (attach_vert)
+				glAttachShader(id_, v_shader);
+			if (attach_frag)
+				glAttachShader(id_, f_shader);
 
 			//link time
 			glLinkProgram(id_);

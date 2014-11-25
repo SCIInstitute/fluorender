@@ -32,30 +32,6 @@
 #include <string>
 
 
-#define VTX_SHADER_CODE_GENERIC \
-	"#version 130\n" \
-	"void main() {\n" \
-	"   gl_Position = ftransform();//ARB compatiblity only\n" \
-	"}\n" 
-
-
-#define VTX_SHADER_CODE_CORE_PROFILE \
-	"//VERTEX SHADER\n" \
-	"uniform mat4 matrix0; //projection matrix\n" \
-	"uniform mat4 matrix1; //modelview matrix\n" \
-	"attribute vec3 InVertex;  //w will be set to 1.0 automatically\n" \
-	"attribute vec3 InTexCoord0\n" \
-	"out vec3 OutVertex;\n" \
-	"out vec3 OutTexture;\n" \
-	"//-------------------\n" \
-	"void main()\n" \
-	"{\n" \
-	"	gl_Position = matrix0 * matrix1 * vec4(InVertex,1.);\n" \
-	"	OutTexture = InTexCoord0;\n" \
-	"	OutVertex  = InVertex;\n" \
-	"}\n" 
-
-
 namespace FLIVR
 {
 
