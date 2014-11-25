@@ -25,7 +25,6 @@ FluoRender.build
 CMakeScripts
 *.xcodeproj
 ipch
-Debug
 Release
 fluorender/wxWidgets/lib/vc_x64_lib/wxmsw30ud_core.lib
 fluorender/CMakeFiles
