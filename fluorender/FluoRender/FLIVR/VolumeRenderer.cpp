@@ -1597,18 +1597,22 @@ namespace FLIVR
 			}
 			float* hist = new float[hist_size];
 			memset(hist, 0, hist_size*sizeof(float));
-			kernel->setKernelArgBufWrite(2, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, hist_size*sizeof(float), hist);
+			kernel->setKernelArgBuf(2, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, hist_size*sizeof(float), hist);
 			kernel->setKernelArgConst(3, sizeof(unsigned int), (void*)(&hist_size));
 			size_t global_size[3] = {brick_x, brick_y, brick_z};
 			size_t local_size[3] = {1, 1, 1};
 			kernel->execute(3, global_size, local_size);
 			kernel->readBuffer(2, hist);
 			//analyze hist
-			for (int i=hist_size-2; i>0; --i)
+			int i;
+			float sum = 0;
+			for (i=0; i<hist_size; ++i)
+				sum += hist[i];
+			for (i=hist_size-1; i>0; --i)
 			{
-				if (hist[i] > 100 && hist[i] > hist[i-1])
+				if (hist[i] > sum/hist_size && hist[i] > hist[i-1])
 				{
-					result = double(i)/double(hist_size-1);
+					result = double(i)/double(hist_size);
 					break;
 				}
 			}
@@ -1623,8 +1627,9 @@ namespace FLIVR
 			//outfile.close();
 
 			delete []hist;
+			VolumeRenderer::vol_kernel_factory_.clean();
 		}
-		return result;
+		return result/2.0;
 	}
 
 	//calculation

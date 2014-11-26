@@ -49,7 +49,7 @@ namespace FLIVR
 	"	if (mask_value.x > 0.0)\n" \
 	"	{\n" \
 	"		float4 data_value = read_imagef(data, samp, coord);\n" \
-	"		int index = (int)(data_value.x*hist_size);\n" \
+	"		int index = (int)(data_value.x*(hist_size-1));\n" \
 	"		hist[index] += 1.0;\n" \
 	"	}\n" \
 	"}\n" \

@@ -39,6 +39,7 @@ BEGIN_EVENT_TABLE(OclDlg, wxPanel)
 	EVT_BUTTON(ID_SaveBtn, OclDlg::OnSaveBtn)
 	EVT_BUTTON(ID_SaveAsBtn, OclDlg::OnSaveAsBtn)
 	EVT_BUTTON(ID_ExecuteBtn, OclDlg::OnExecuteBtn)
+	EVT_LIST_ITEM_SELECTED(ID_KernelList, OclDlg::OnKernelListSelected)
 END_EVENT_TABLE()
 
 OclDlg::OclDlg(wxWindow* frame,
@@ -83,7 +84,11 @@ m_view(0)
 	m_output_txt = new wxTextCtrl(this, ID_OutputTxt, "",
 		wxDefaultPosition, wxSize(-1, 100), wxTE_READONLY|wxTE_MULTILINE);
 
-	//
+	//list
+	m_kernel_list = new wxListCtrl(this, ID_KernelList,
+		wxDefaultPosition, wxDefaultSize, wxLC_LIST);
+
+	//stc
     m_LineNrID = 0;
     m_DividerID = 1;
     m_FoldingID = 2;
@@ -124,6 +129,11 @@ m_view(0)
     m_kernel_edit_stc->MarkerDefine (wxSTC_MARKNUM_FOLDERMIDTAIL, wxSTC_MARK_EMPTY,     wxT("BLACK"), wxT("BLACK"));
     m_kernel_edit_stc->MarkerDefine (wxSTC_MARKNUM_FOLDERTAIL,    wxSTC_MARK_EMPTY,     wxT("BLACK"), wxT("BLACK"));
 
+	//sizer
+	wxBoxSizer *sizer_3 = new wxBoxSizer(wxHORIZONTAL);
+	sizer_3->Add(m_kernel_list, 0, wxEXPAND);
+	sizer_3->Add(m_kernel_edit_stc, 1, wxEXPAND);
+
 	//all controls
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(10, 10);
@@ -131,9 +141,9 @@ m_view(0)
 	sizerV->Add(10, 10);
 	sizerV->Add(sizer_2, 0, wxEXPAND);
 	sizerV->Add(10, 10);
-	sizerV->Add(m_kernel_edit_stc, 1, wxEXPAND);
+	sizerV->Add(sizer_3, 4, wxEXPAND);
 	sizerV->Add(10, 10);
-	sizerV->Add(m_output_txt, 0, wxEXPAND);
+	sizerV->Add(m_output_txt, 1, wxEXPAND);
 
 	SetSizer(sizerV);
 	Layout();
@@ -147,6 +157,8 @@ void OclDlg::GetSettings(VRenderView* vrv)
 {
 	if (!vrv) return;
 	m_view = vrv;
+
+	AddKernelsToList();
 }
 
 VRenderView* OclDlg::GetView()
@@ -243,7 +255,7 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 	//execute for each brick
 	TextureBrick *b, *b_r;
 	vector<TextureBrick*> *bricks_r;
-	VolumeData* vd_r;
+	VolumeData* vd_r = 0;
 	void *result;
 
 	if (dup)
@@ -276,6 +288,7 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 	else
 		result = tex->get_nrrd(0)->data;
 
+	bool kernel_exe = true;
 	for (unsigned int i=0; i<bricks->size(); ++i)
 	{
 		b = (*bricks)[i];
@@ -286,14 +299,16 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 		{
 			(*m_output_txt) << "OpenCL kernel created.\n";
 			if (bricks->size()==1)
-				ExecuteKernel(kernel, data_id, result, res_x, res_y, res_z);
+				kernel_exe = ExecuteKernel(kernel, data_id, result, res_x, res_y, res_z);
 			else
 			{
 				int brick_x = b->nx();
 				int brick_y = b->ny();
 				int brick_z = b->nz();
 				unsigned char* bresult = new unsigned char[brick_x*brick_y*brick_z];
-				ExecuteKernel(kernel, data_id, bresult, brick_x, brick_y, brick_z);
+				kernel_exe = ExecuteKernel(kernel, data_id, bresult, brick_x, brick_y, brick_z);
+				if (!kernel_exe)
+					break;
 				//copy data back
 				unsigned char* ptr_br = bresult;
 				unsigned char* ptr_z;
@@ -317,7 +332,11 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 			}
 		}
 		else
+		{
 			(*m_output_txt) << "Fail to create OpenCL kernel.\n";
+			kernel_exe = false;
+			break;
+		}
 		//this is a problem needs to be solved
 		VolumeRenderer::vol_kernel_factory_.clean();
 	}
@@ -329,6 +348,12 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 	//duration<double> time_span = duration_cast<duration<double>>(t2-t1);
 	//(*m_output_txt) << "CPU time: " << time_span.count() << " sec.\n";
 
+	if (!kernel_exe)
+	{
+		if (dup && vd_r)
+			delete vd_r;
+		return;
+	}
 	//add result for rendering
 	if (dup)
 	{
@@ -349,11 +374,11 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 	m_view->RefreshGL();
 }
 
-int OclDlg::ExecuteKernel(KernelProgram* kernel, GLuint data_id, void* result,
+bool OclDlg::ExecuteKernel(KernelProgram* kernel, GLuint data_id, void* result,
 		size_t brick_x, size_t brick_y, size_t brick_z)
 {
 	if (!kernel)
-		return 0;
+		return false;
 
 	if (!kernel->valid())
 	{
@@ -364,6 +389,7 @@ int OclDlg::ExecuteKernel(KernelProgram* kernel, GLuint data_id, void* result,
 		{
 			(*m_output_txt) << "Kernel program failed to compile.\n";
 			(*m_output_txt) << kernel->getInfo() << "\n";
+			return false;
 		}
 	}
 	//textures
@@ -376,15 +402,45 @@ int OclDlg::ExecuteKernel(KernelProgram* kernel, GLuint data_id, void* result,
 	//execute
 	size_t global_size[3] = {brick_x, brick_y, brick_z};
 	size_t local_size[3] = {1, 1, 1};
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
+	//high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	kernel->execute(3, global_size, local_size);
-	high_resolution_clock::time_point t2 = high_resolution_clock::now();
-	duration<double> time_span = duration_cast<duration<double>>(t2-t1);
-	wxString stime = wxString::Format("%.4f", time_span.count());
-	(*m_output_txt) << "OpenCL time: " << stime << " sec.\n";
+	//high_resolution_clock::time_point t2 = high_resolution_clock::now();
+	//duration<double> time_span = duration_cast<duration<double>>(t2-t1);
+	//wxString stime = wxString::Format("%.4f", time_span.count());
+	//(*m_output_txt) << "OpenCL time: " << stime << " sec.\n";
 	kernel->readBuffer(1, result);
 
-	return 0;
+	return true;
+}
+
+void OclDlg::AddKernelsToList()
+{
+	m_kernel_list->DeleteAllItems();
+
+	wxString file = wxFindFirstFile("CL_code\\*.cl");
+	while (!file.empty())
+	{
+		file = file.AfterFirst('\\');
+		file = file.BeforeFirst('.');
+		m_kernel_list->InsertItem(m_kernel_list->GetItemCount(), file);
+		file = wxFindNextFile();
+	}
+}
+
+void OclDlg::OnKernelListSelected(wxListEvent& event)
+{
+   long item = m_kernel_list->GetNextItem(-1,
+         wxLIST_NEXT_ALL,
+         wxLIST_STATE_SELECTED);
+
+   if (item != -1)
+   {
+      wxString file = m_kernel_list->GetItemText(item);
+	  file = "CL_code\\" + file + ".cl";
+		m_kernel_edit_stc->LoadFile(file);
+		m_kernel_edit_stc->EmptyUndoBuffer();
+		m_kernel_file_txt->SetValue(file);
+   }
 }
 
 void OclDlg::copy_filter(void* data, void* result,

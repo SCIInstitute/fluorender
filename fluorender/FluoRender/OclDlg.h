@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/VolKernel.h>
 #include <wx/wx.h>
 #include <wx/stc/stc.h>
+#include <wx/listctrl.h>
 #include <string>
 
 #ifndef _OCLDLG_H_
@@ -47,6 +48,7 @@ public:
 		ID_SaveBtn,
 		ID_SaveAsBtn,
 		ID_ExecuteBtn,
+		ID_KernelList,
 		ID_KernelEditStc,
 		ID_OutputTxt
 	};
@@ -70,14 +72,20 @@ private:
 	wxButton* m_execute_btn;
 	wxTextCtrl* m_output_txt;
 
+	//list
+	wxListCtrl* m_kernel_list;
+
 	//stc
 	wxStyledTextCtrl* m_kernel_edit_stc;
+
+
     int m_LineNrID;
     int m_DividerID;
     int m_FoldingID;
 
 private:
-	int ExecuteKernel(KernelProgram* kernel,
+	void AddKernelsToList();
+	bool ExecuteKernel(KernelProgram* kernel,
 		GLuint data_id, void* result,
 		size_t brick_x, size_t brick_y,
 		size_t brick_z);
@@ -99,6 +107,7 @@ private:
 	void OnSaveBtn(wxCommandEvent& event);
 	void OnSaveAsBtn(wxCommandEvent& event);
 	void OnExecuteBtn(wxCommandEvent& event);
+	void OnKernelListSelected(wxListEvent& event);
 
 	DECLARE_EVENT_TABLE();
 };
