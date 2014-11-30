@@ -417,6 +417,7 @@ void OclDlg::AddKernelsToList()
 {
 	m_kernel_list->DeleteAllItems();
 
+	wxLogNull logNo;
 	wxString file = wxFindFirstFile("CL_code\\*.cl");
 	while (!file.empty())
 	{
