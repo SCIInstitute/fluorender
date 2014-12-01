@@ -94,6 +94,9 @@ public:
 		ID_GhostNumSldr,
 		ID_GhostNumText,
 		ID_ManualAssistCheck,
+		ID_AddLabelBtn,
+		ID_AnalyzeBtn,
+		ID_SaveAnalyzeBtn,
 		ID_CellSizeSldr,
 		ID_CellSizeText,
 		ID_CellUpdateBtn,
@@ -196,6 +199,9 @@ private:
 	wxSlider* m_ghost_num_sldr;
 	wxTextCtrl* m_ghost_num_text;
 	//edit tools
+	wxButton* m_add_label_btn;
+	wxButton* m_analyze_btn;
+	wxButton* m_save_analyze_btn;
 	wxCheckBox* m_manual_assist_check;
 	//cell size filter
 	wxSlider* m_cell_size_sldr;
@@ -247,6 +253,9 @@ private:
 	void OnGhostNumChange(wxScrollEvent &event);
 	void OnGhostNumText(wxCommandEvent &event);
 	//manual tracking assistant
+	void OnAddLabel(wxCommandEvent &event);
+	void OnAnalyze(wxCommandEvent &event);
+	void OnSaveAnalyze(wxCommandEvent &event);
 	void OnManualAssistCheck(wxCommandEvent &event);
 	//cell size filter
 	void OnCellSizeChange(wxScrollEvent &event);

@@ -160,6 +160,8 @@ void VolumeSelector::Select(double radius)
 		m_vd->DrawMask(0, m_mode, hr_mode, 0.0, gm_falloff, scl_falloff, 0.0, m_w2d, 0.0, false, true);
 		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
 		ini_thresh = m_vd->GetEstThresh() * m_vd->GetScalarScale();
+		if (m_iter_num>BRUSH_TOOL_ITER_WEAK)
+			ini_thresh /= 2.0;
 		m_scl_translate = ini_thresh;
    }
    m_vd->DrawMask(0, m_mode, hr_mode, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);

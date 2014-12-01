@@ -98,7 +98,7 @@ void VolumeCalculator::Calculate(int type)
       CreateVolumeResult1();
       if (!m_vd_r)
          return;
-      FillHoles();
+      FillHoles(m_threshold);
       return;
    }
 }
@@ -203,7 +203,7 @@ void VolumeCalculator::CreateVolumeResult2()
 }
 
 //fill holes
-void VolumeCalculator::FillHoles()
+void VolumeCalculator::FillHoles(double thresh)
 {
    if (!m_vd_a || !m_vd_r)
       return;
@@ -254,7 +254,7 @@ void VolumeCalculator::FillHoles()
                value_a = ((unsigned char*)data_a)[index];
             else if (nrrd_a->type == nrrdTypeUShort)
                value_a = (unsigned char)((double)(((unsigned short*)data_a)[index])*m_vd_a->GetScalarScale()/257.0);
-            if (value_a)
+            if (value_a > thresh*255)
             {
                bbox.extend(Point(i, j, k));
                ((unsigned char*)data_r)[index] = 255;
@@ -267,7 +267,12 @@ void VolumeCalculator::FillHoles()
       }
    }
 
+   double dx = (bbox.max()-bbox.min()).x()/10.0;
+   double dy = (bbox.max()-bbox.min()).y()/10.0;
+   double dz = (bbox.max()-bbox.min()).z()/30.0;
+
    //second pass: fill holes
+   bool found_n, found_p;
    for (i=int(bbox.min().x()); i<=int(bbox.max().x()); i++)
    {
       for (j=int(bbox.min().y()); j<=int(bbox.max().y()); j++)
@@ -281,79 +286,106 @@ void VolumeCalculator::FillHoles()
                int si;
                //search -X
                int s_n_x = i;
-               while (s_n_x >= int(bbox.min().x()))
+			   found_n = false;
+               while (s_n_x >= int(bbox.min().x() &&
+				      s_n_x >= int(i-dx)))
                {
                   si = nx*ny*k + nx*j + s_n_x;
                   if (((unsigned char*)data_r)[si])
+				  {
+					  found_n = true;
                      break;
+				  }
                   s_n_x--;
                }
                //search +X
                int s_p_x = i;
-               while (s_p_x <= int(bbox.max().x()))
+			   found_p = false;
+               while (s_p_x <= int(bbox.max().x() &&
+				      s_p_x <= int(i+dx)))
                {
                   si = nx*ny*k + nx*j + s_p_x;
                   if (((unsigned char*)data_r)[si])
+				  {
+					  found_p = true;
                      break;
+				  }
                   s_p_x++;
                }
                //found X direction?
-               if (s_n_x >= int(bbox.min().x()) &&
-                     s_p_x <= int(bbox.max().x()))
+               if (found_n && found_p)
                {
                   ((unsigned char*)data_r)[index] = 255;
                   continue;
                }
                //search -Y
                int s_n_y = j;
-               while (s_n_y >= int(bbox.min().y()))
+			   found_n = false;
+               while (s_n_y >= int(bbox.min().y()) &&
+				      s_n_y >= int(j-dy))
                {
                   si = nx*ny*k + nx*s_n_y + i;
                   if (((unsigned char*)data_r)[si])
+				  {
+					  found_n = true;
                      break;
+				  }
                   s_n_y--;
                }
                //search +Y
                int s_p_y = j;
-               while (s_p_y <= int(bbox.max().y()))
+			   found_p = false;
+               while (s_p_y <= int(bbox.max().y()) &&
+				      s_p_y <= int(j+dy))
                {
                   si = nx*ny*k + nx*s_p_y + i;
                   if (((unsigned char*)data_r)[si])
+				  {
+					  found_p = true;
                      break;
+				  }
                   s_p_y++;
                }
                //found Y direction?
-               if (s_n_y >= int(bbox.min().y()) &&
-                     s_p_y <= int(bbox.max().y()))
+               if (found_n && found_p)
                {
                   ((unsigned char*)data_r)[index] = 255;
                   continue;
                }
-               /*//search -Z
+               //search -Z
                  int s_n_z = k;
-                 while (s_n_z >= int(bbox.min().z()))
+				 found_n = false;
+                 while (s_n_z >= int(bbox.min().z()) &&
+					    s_n_z >= int(k-dz))
                  {
                  si = nx*ny*s_n_z + nx*j + i;
                  if (((unsigned char*)data_r)[si])
+				 {
+					 found_n = true;
                  break;
+				 }
                  s_n_z--;
                  }
                //search +Z
                int s_p_z = k;
-               while (s_p_z <= int(bbox.max().z()))
+			   found_p = false;
+               while (s_p_z <= int(bbox.max().z()) &&
+				      s_p_z <= int(k+dz))
                {
                si = nx*ny*s_p_z + nx*j + i;
                if (((unsigned char*)data_r)[si])
+			   {
+				   found_p = true;
                break;
+			   }
                s_p_z++;
                }
                //found Z direction?
-               if (s_n_z >= int(bbox.min().z()) &&
-               s_p_z <= int(bbox.max().z()))
+               if (found_p && found_n)
                {
                ((unsigned char*)data_r)[index] = 255;
                continue;
-               }*/
+               }
             }
          }
 

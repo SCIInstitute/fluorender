@@ -1629,7 +1629,7 @@ namespace FLIVR
 			delete []hist;
 			VolumeRenderer::vol_kernel_factory_.clean();
 		}
-		return result/2.0;
+		return result;
 	}
 
 	//calculation

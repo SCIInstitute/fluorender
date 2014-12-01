@@ -2104,7 +2104,10 @@ void VRenderGLView::LoadDefaultBrushSettings()
    if (fconfig.Read("brush_scl_falloff", &val))
       m_selector.SetBrushSclFalloff(val);
    if (fconfig.Read("brush_scl_translate", &val))
+   {
       m_selector.SetBrushSclTranslate(val);
+	  m_calculator.SetThreshold(val);
+   }
    //edge detect
    if (fconfig.Read("edge_detect", &bval))
       m_selector.SetEdgeDetect(bval);
@@ -2215,6 +2218,7 @@ int VRenderGLView::GetBrushIteration()
 void VRenderGLView::SetBrushSclTranslate(double val)
 {
    m_selector.SetBrushSclTranslate(val);
+   m_calculator.SetThreshold(val);
 }
 
 double VRenderGLView::GetBrushSclTranslate()

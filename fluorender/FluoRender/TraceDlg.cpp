@@ -268,6 +268,9 @@ BEGIN_EVENT_TABLE(TraceDlg, wxPanel)
 	EVT_COMMAND_SCROLL(ID_CellSizeSldr, TraceDlg::OnCellSizeChange)
 	EVT_TEXT(ID_CellSizeText, TraceDlg::OnCellSizeText)
 	//manual assist
+	EVT_BUTTON(ID_AddLabelBtn, TraceDlg::OnAddLabel)
+	EVT_BUTTON(ID_AnalyzeBtn, TraceDlg::OnAnalyze)
+	EVT_BUTTON(ID_SaveAnalyzeBtn, TraceDlg::OnSaveAnalyze)
 	EVT_CHECKBOX(ID_ManualAssistCheck, TraceDlg::OnManualAssistCheck)
 	//component tools
 	EVT_BUTTON(ID_CompClearBtn, TraceDlg::OnCompClear)
@@ -343,12 +346,24 @@ m_manual_assist(false)
 
 	//edit tools
 	wxBoxSizer *sizer_3 = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, "Edit"),
+		new wxStaticBox(this, wxID_ANY, "Analyze && Validate"),
 		wxVERTICAL);
-	//manual assist
+	//first row
 	wxBoxSizer* sizer_31 = new wxBoxSizer(wxHORIZONTAL);
-	m_manual_assist_check = new wxCheckBox(this, ID_ManualAssistCheck, "Manual tracking assistance",
+	m_add_label_btn = new wxButton(this, ID_AddLabelBtn, "Add Label",
+		wxDefaultPosition, wxSize(80, 23));
+	m_analyze_btn = new wxButton(this, ID_AnalyzeBtn, "Analyze",
+		wxDefaultPosition, wxSize(80, 23));
+	m_save_analyze_btn = new wxButton(this, ID_SaveAnalyzeBtn, "Save Analy.",
+		wxDefaultPosition, wxSize(80, 23));
+	m_manual_assist_check = new wxCheckBox(this, ID_ManualAssistCheck, "Manual Tracking Assist.",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
+	sizer_31->AddStretchSpacer();
+	sizer_31->Add(m_add_label_btn, 0, wxALIGN_CENTER);
+	sizer_31->Add(5, 5);
+	sizer_31->Add(m_analyze_btn, 0, wxALIGN_CENTER);
+	sizer_31->Add(5, 5);
+	sizer_31->Add(m_save_analyze_btn, 0, wxALIGN_CENTER);
 	sizer_31->Add(5, 5);
 	sizer_31->Add(m_manual_assist_check, 0, wxALIGN_CENTER);
 	//cell size filter
@@ -444,11 +459,13 @@ m_manual_assist(false)
 	sizer_36->Add(m_cell_magic3_btn, 0, wxALIGN_CENTER);
 	//
 	sizer_3->Add(sizer_31, 0, wxEXPAND);
+	sizer_3->Add(10, 10);
 	sizer_3->Add(sizer_32, 0, wxEXPAND);
 	sizer_3->Add(sizer_33, 0, wxEXPAND);
 	sizer_3->Add(sizer_34, 0, wxEXPAND);
 	sizer_3->Add(sizer_35, 0, wxEXPAND);
 	sizer_3->Add(sizer_36, 0, wxEXPAND);
+	sizer_3->Hide(sizer_36);
 
 	//lists
 	wxBoxSizer *sizer_4 = new wxStaticBoxSizer(
@@ -709,6 +726,48 @@ void TraceDlg::OnCellSizeText(wxCommandEvent &event)
 			trace_group->SetCellSize(ival);
 		}
 	}
+}
+
+//add label
+void TraceDlg::OnAddLabel(wxCommandEvent &event)
+{
+	if (!m_view)
+		return;
+
+	//get data
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+	vd->AddEmptyMask();
+	vd->AddEmptyLabel();
+}
+
+void TraceDlg::OnAnalyze(wxCommandEvent &event)
+{
+	Measure();
+	wxString str;
+	OutputMeasureResult(str);
+	m_stat_text->SetValue(str);
+}
+
+void TraceDlg::OnSaveAnalyze(wxCommandEvent &event)
+{
+	Measure();
+	wxString str;
+	OutputMeasureResult(str);
+	m_stat_text->SetValue(str);
+	wxFileDialog *fopendlg = new wxFileDialog(
+		this, "Save results", "", "",
+		"Text file (*.txt)|*.txt",
+		wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+	int rval = fopendlg->ShowModal();
+	if (rval == wxID_OK)
+	{
+		wxString filename = fopendlg->GetPath();
+		SaveMeasureResult(filename);
+	}
+	if (fopendlg)
+		delete fopendlg;
 }
 
 //manual tracking assist

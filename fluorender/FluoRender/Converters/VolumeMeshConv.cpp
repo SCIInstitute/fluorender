@@ -60,6 +60,8 @@ VolumeMeshConv::VolumeMeshConv() :
 	m_mesh->texcoords = 0;
 	m_mesh->numfacetnorms = 0;
 	m_mesh->facetnorms = 0;
+	m_mesh->numlines = 0;
+	m_mesh->lines = 0;
 	m_mesh->numtriangles = 0;
 	m_mesh->triangles = 0;
 	m_mesh->nummaterials = 0;

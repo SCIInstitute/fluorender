@@ -226,7 +226,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
          new wxStaticBox(this, wxID_ANY, "Brush Properties"),
          wxVERTICAL);
    wxBoxSizer *sizer12_1 = new wxBoxSizer(wxHORIZONTAL);
-   st = new wxStaticText(this, 0, "Brush sizes can be also set with mouse wheel in painting mode.");
+   st = new wxStaticText(this, 0, "Brush sizes can also be set with mouse wheel in painting mode.");
    sizer12_1->Add(5, 5);
    sizer12_1->Add(st, 0, wxALIGN_CENTER);
    //brush size 1
@@ -247,7 +247,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
    //brush size 2
    wxBoxSizer *sizer12_3 = new wxBoxSizer(wxHORIZONTAL);
    m_brush_size2_chk = new wxCheckBox(this, ID_BrushSize2Chk, "GrowSize",
-         wxDefaultPosition, wxSize(90, 20), wxALIGN_RIGHT);
+         wxDefaultPosition, wxSize(70, 20), wxALIGN_RIGHT);
    st = new wxStaticText(this, 0, ":",
          wxDefaultPosition, wxSize(5, 20), wxALIGN_RIGHT);
    m_brush_size2_sldr = new wxSlider(this, ID_BrushSize2Sldr, 30, 1, 300,
@@ -285,12 +285,18 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
    sizer12_4->Add(15, 15);
    sizer12_4->Add(m_brush_iterss_rb, 0, wxALIGN_CENTER);
    //sizer12
-   sizer12->Add(sizer12_1, 0, wxEXPAND|wxALIGN_CENTER);
+   sizer12->Add(sizer12_4, 0, wxEXPAND|wxALIGN_CENTER);
    sizer12->Add(5, 5);
    sizer12->Add(sizer12_2, 0, wxEXPAND|wxALIGN_CENTER);
    sizer12->Add(sizer12_3, 0, wxEXPAND|wxALIGN_CENTER);
    sizer12->Add(5, 5);
-   sizer12->Add(sizer12_4, 0, wxEXPAND|wxALIGN_CENTER);
+   sizer12->Add(sizer12_1, 0, wxEXPAND|wxALIGN_CENTER);
+
+   //group1
+   group1->Add(m_toolbar, 0, wxEXPAND);
+   group1->Add(5, 5);
+   group1->Add(sizer11, 0, wxEXPAND|wxALIGN_CENTER);
+   group1->Add(sizer12, 0, wxEXPAND|wxALIGN_CENTER);
 
    //component analyzer
    wxBoxSizer *sizer13 = new wxStaticBoxSizer(
@@ -403,23 +409,10 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
    sizer14->Add(sizer14_1, 0, wxEXPAND|wxALIGN_CENTER);
    sizer14->Add(sizer14_2, 0, wxEXPAND|wxALIGN_CENTER);
 
-   //group1
-   group1->Add(m_toolbar, 0, wxEXPAND);
-   group1->Add(5, 5);
-   group1->Add(sizer11, 0, wxEXPAND|wxALIGN_CENTER);
-   group1->Add(sizer12, 0, wxEXPAND|wxALIGN_CENTER);
-   group1->Add(sizer13, 0, wxEXPAND|wxALIGN_CENTER);
-   group1->Add(sizer14, 0, wxEXPAND|wxALIGN_CENTER);
-   if (((VRenderFrame*)m_frame)->GetFreeVersion())
-   {
-      group1->Hide(sizer13);
-      group1->Hide(sizer14);
-   }
-
    //group 2
    //calculations
    wxBoxSizer* group2 = new wxStaticBoxSizer(
-         new wxStaticBox(this, wxID_ANY, "Calculations"),
+         new wxStaticBox(this, wxID_ANY, "Analysis"),
          wxVERTICAL);
    //operand A
    wxBoxSizer *sizer21 = new wxBoxSizer(wxHORIZONTAL);
@@ -448,7 +441,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
          new wxStaticBox(this, wxID_ANY,
             "Single-valued Operators (Require A)"), wxVERTICAL);
    //sizer23
-   m_calc_fill_btn = new wxButton(this, ID_CalcFillBtn, "Fill Holes",
+   m_calc_fill_btn = new wxButton(this, ID_CalcFillBtn, "Consolidate Voxels",
          wxDefaultPosition, wxDefaultSize);
    sizer23->Add(m_calc_fill_btn, 0, wxEXPAND|wxALIGN_CENTER);
    //two operators
@@ -461,13 +454,17 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
          wxDefaultPosition, wxSize(50, 25));
    m_calc_div_btn = new wxButton(this, ID_CalcDivBtn, "Divide",
          wxDefaultPosition, wxSize(50, 25));
-   m_calc_isc_btn = new wxButton(this, ID_CalcIscBtn, "AND",
+   m_calc_isc_btn = new wxButton(this, ID_CalcIscBtn, "Colocalize",
          wxDefaultPosition, wxSize(50, 25));
    sizer24->Add(m_calc_sub_btn, 1, wxEXPAND|wxALIGN_CENTER);
    sizer24->Add(m_calc_add_btn, 1, wxEXPAND|wxALIGN_CENTER);
    sizer24->Add(m_calc_div_btn, 1, wxEXPAND|wxALIGN_CENTER);
    sizer24->Add(m_calc_isc_btn, 1, wxEXPAND|wxALIGN_CENTER);
    //group
+   group2->Add(5, 5);
+   group2->Add(sizer13, 0, wxEXPAND|wxALIGN_CENTER);
+   group2->Add(5, 5);
+   group2->Add(sizer14, 0, wxEXPAND|wxALIGN_CENTER);
    group2->Add(5, 5);
    group2->Add(sizer21, 0, wxEXPAND|wxALIGN_CENTER);
    group2->Add(5, 5);

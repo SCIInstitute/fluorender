@@ -148,16 +148,16 @@ m_free_version(true)
    m_tb_menu_ui->Check(ID_UIPropView, true);
    //create the menu for edit/convert
    m_tb_menu_edit = new wxMenu;
-   m_tb_menu_edit->Append(ID_PaintTool, "Edit...",
-         "Show edit tools for volume data");
-   m_tb_menu_edit->Append(ID_NoiseCancelling, "Noise Reduction...",
-         "Show noise cancelling dialog");
-   m_tb_menu_edit->Append(ID_Counting, "Counting and Volume...",
-         "Show counting dialog");
+   m_tb_menu_edit->Append(ID_PaintTool, "Analyze...",
+         "Show analysis tools for volume data");
    m_tb_menu_edit->Append(ID_Measure, "Measurement...",
          "Show rulers dialog");
    m_tb_menu_edit->Append(ID_Trace, "Tracking...",
          "Show trace dialog");
+   m_tb_menu_edit->Append(ID_NoiseCancelling, "Noise Reduction...",
+         "Show noise cancelling dialog");
+   m_tb_menu_edit->Append(ID_Counting, "Counting and Volume...",
+         "Show counting dialog");
    m_tb_menu_edit->Append(ID_Colocalization, "Colocalization Analysis...",
          "Show colocalization analysis dialog");
    m_tb_menu_edit->Append(ID_Convert, "Convert...",
@@ -168,69 +168,65 @@ m_free_version(true)
    //add tools
    m_main_tb->AddTool(ID_OpenVolume, "Open Volume",
          wxGetBitmapFromMemory(icon_open_volume), wxNullBitmap, wxITEM_NORMAL,
-         "Open Volume: Open single or multiple volume data file(s)",
-         "Open Volume: Open single or multiple volume data file(s)");
+         "Open single or multiple volume data file(s)",
+         "Open single or multiple volume data file(s)");
    m_main_tb->AddTool(ID_OpenProject, "Open Project",
          wxGetBitmapFromMemory(icon_open_project), wxNullBitmap, wxITEM_NORMAL,
-         "Open Project: Open a saved project",
-         "Open Project: Open a saved project");
+         "Open a saved project",
+         "Open a saved project");
    m_main_tb->AddTool(ID_SaveProject, "Save Project",
          wxGetBitmapFromMemory(icon_save_project), wxNullBitmap, wxITEM_NORMAL,
-         "Save Project: Save current work as a project",
-         "Save Project: Save current work as a project");
+         "Save current work as a project",
+         "Save current work as a project");
    m_main_tb->AddSeparator();
    m_main_tb->AddTool(ID_ViewNew, "New View",
          wxGetBitmapFromMemory(icon_new_view), wxNullBitmap, wxITEM_NORMAL,
-         "New View: Create a new render viewport",
-         "New View: Create a new render viewport");
+         "Create a new render viewport",
+         "Create a new render viewport");
    m_main_tb->AddTool(ID_ShowHideUI, "Show/Hide UI",
          wxGetBitmapFromMemory(icon_show_hide_ui), wxNullBitmap, wxITEM_DROPDOWN,
-         "Show/Hide UI: Show or hide all control panels",
-         "Show/Hide UI: Show or hide all control panels");
+         "Show or hide all control panels",
+         "Show or hide all control panels");
    m_main_tb->SetDropdownMenu(ID_ShowHideUI, m_tb_menu_ui);
    m_main_tb->AddSeparator();
    m_main_tb->AddTool(ID_OpenMesh, "Open Mesh",
          wxGetBitmapFromMemory(icon_open_mesh), wxNullBitmap, wxITEM_NORMAL,
-         "Open Mesh: Open single or multiple mesh file(s)",
-         "Open Mesh: Open single or multiple mesh file(s)");
+         "Open single or multiple mesh file(s)",
+         "Open single or multiple mesh file(s)");
 #ifndef _WIN32
     m_main_tb->AddTool(ID_Measure, "Measurement...",
          wxGetBitmapFromMemory(icon_measure), wxNullBitmap, wxITEM_NORMAL,
          "Show rulers dialog", "Show rulers dialog");
 #else
-    m_main_tb->AddTool(ID_PaintTool, "Edit",
+    m_main_tb->AddTool(ID_PaintTool, "Analyze",
                        wxGetBitmapFromMemory(icon_edit), wxNullBitmap,
                        wxITEM_DROPDOWN,
-                       "Edit: Tools for editing volume data",
-                       "Edit: Tools for editing volume data");
+                       "Tools for analyzing selected channel",
+                       "Tools for analyzing selected channel");
     m_main_tb->SetDropdownMenu(ID_PaintTool, m_tb_menu_edit);
 #endif
-    //m_main_tb->AddTool(ID_Recorder, "Recorder",
-    //        wxGetBitmapFromMemory(icon_recorder), wxNullBitmap, wxITEM_NORMAL,
-    //        "Recorder: Record actions by key frames and play back",
-    //        "Recorder: Record actions by key frames and play back");
    m_main_tb->AddSeparator();
    m_main_tb->AddTool(ID_Settings, "Settings",
          wxGetBitmapFromMemory(icon_settings), wxNullBitmap, wxITEM_NORMAL,
-         "Settings: Settings of FluoRender",
-         "Settings: Settings of FluoRender");
+         "Settings of FluoRender",
+         "Settings of FluoRender");
    m_main_tb->AddStretchableSpace();
    m_main_tb->AddTool(ID_CheckUpdates, "Update",
          wxGetBitmapFromMemory(icon_check_updates), wxNullBitmap, wxITEM_NORMAL,
-         "Update: Check if there is a new release",
-         "Update: Check if there is a new release (requires Internet connection)");
+         "Check if there is a new release",
+         "Check if there is a new release (requires Internet connection)");
    m_main_tb->AddTool(ID_Facebook, "Facebook",
          wxGetBitmapFromMemory(icon_facebook), wxNullBitmap, wxITEM_NORMAL,
-         "Facebook: FluoRender's facebook page",
-         "Facebook:FluoRender's facebook page (requires Internet connection)");
+         "FluoRender's facebook page",
+         "FluoRender's facebook page (requires Internet connection)");
    m_main_tb->AddTool(ID_Twitter, "Twitter",
          wxGetBitmapFromMemory(icon_twitter), wxNullBitmap, wxITEM_NORMAL,
-         "Twitter: Follow FluoRender on Twitter",
-         "Twitter: Follow FluoRender on Twitter (requires Internet connection)");
+         "Follow FluoRender on Twitter",
+         "Follow FluoRender on Twitter (requires Internet connection)");
    m_main_tb->AddTool(ID_Info, "About",
          wxGetBitmapFromMemory(icon_about), wxNullBitmap, wxITEM_NORMAL,
-         "About: FluoRender information",
-         "About: FluoRender information");
+         "FluoRender information",
+         "FluoRender information");
 
    m_main_tb->Realize();
 
@@ -521,24 +517,21 @@ m_free_version(true)
    m_top_file->Append(quit);
    //tool options
 #ifdef _WIN32
-   m = new wxMenuItem(m_top_tools,ID_PaintTool, wxT("&Edit Paintbrush..."));
+   m = new wxMenuItem(m_top_tools,ID_PaintTool, wxT("&Analysis Tools..."));
    m->SetBitmap(wxGetBitmapFromMemory(icon_edit_mini));
+   m_top_tools->Append(m);
+#endif
+   m = new wxMenuItem(m_top_tools,ID_Measure, wxT("&Measurement Tool..."));
+   m_top_tools->Append(m);
+#ifdef _WIN32
+   m = new wxMenuItem(m_top_tools,ID_Trace, wxT("&Tracking..."));
    m_top_tools->Append(m);
    m = new wxMenuItem(m_top_tools,ID_NoiseCancelling, wxT("&Noise Reduction..."));
    m_top_tools->Append(m);
    m = new wxMenuItem(m_top_tools,ID_Counting, wxT("&Counting and Volume..."));
    m_top_tools->Append(m);
-#endif
-   m = new wxMenuItem(m_top_tools,ID_Measure, wxT("&Measurement Tool..."));
-	m_top_tools->Append(m);
-#ifdef _WIN32
-   m = new wxMenuItem(m_top_tools,ID_Trace, wxT("&Tracking..."));
-   m_top_tools->Append(m);
    m = new wxMenuItem(m_top_tools,ID_Colocalization, wxT("Colocalization &Analysis..."));
    m_top_tools->Append(m);
-   //m = new wxMenuItem(m_top_tools,ID_Recorder, wxT("&Recorder..."));
-   //m->SetBitmap(wxGetBitmapFromMemory(icon_recorder_mini));
-   //m_top_tools->Append(m);
 #endif
    m = new wxMenuItem(m_top_tools,ID_Convert, wxT("Con&vert..."));
    m_top_tools->Append(m);
@@ -886,7 +879,8 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
    {
       prg_diag = new wxProgressDialog(
             "FluoRender: Loading volume data...",
-            "Reading and processing selected volume data. Please wait.",
+            "FluoRender: Loading volume data...\n" \
+            "To visualize large data, please enable streaming in the Settings.",
             100, 0, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
 
       m_data_mgr.SetSliceSequence(m_sliceSequence);
@@ -901,7 +895,8 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
       for (j=0; j<(int)files.Count(); j++)
       {
          prg_diag->Update(90*(j+1)/(int)files.Count(),
-               "FluoRender: Loading volume data...");
+               "FluoRender: Loading volume data...\n" \
+			   "To visualize large data, please enable streaming in the Settings.");
 
          int ch_num = 0;
          wxString filename = files[j];
