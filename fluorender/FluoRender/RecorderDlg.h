@@ -166,7 +166,7 @@ class RecorderDlg : public wxPanel
       //set key
       wxButton *m_set_key_btn;
       //insert key
-      wxButton *m_insert_key_btn;
+      //wxButton *m_insert_key_btn;
       //delete key
       wxButton *m_del_key_btn;
       //delete all keys

@@ -546,7 +546,7 @@ m_view(0)
 	m_interpolation_cmb->Select(0);
 
 	//key buttons
-	wxBoxSizer *group4 = new wxBoxSizer(wxHORIZONTAL);
+	//wxBoxSizer *group4 = new wxBoxSizer(wxHORIZONTAL);
 	m_set_key_btn = new wxButton(this, ID_SetKeyBtn, "Add",
 		wxDefaultPosition, wxSize(50, 23));
 	m_del_key_btn = new wxButton(this, ID_DelKeyBtn, "Delete",

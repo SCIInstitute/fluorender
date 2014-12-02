@@ -46,8 +46,8 @@ wxPoint(500, 150), wxSize(400, 150),
 0, "CountingDlg"),
 m_frame(parent),
 m_view(0),
-m_group(0),
-m_vol(0),
+//m_group(0),
+//m_vol(0),
 m_max_value(255.0),
 m_dft_thresh(0.0)
 {

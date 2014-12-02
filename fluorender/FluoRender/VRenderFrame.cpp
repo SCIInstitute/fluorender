@@ -104,15 +104,15 @@ VRenderFrame::VRenderFrame(
       int x, int y,
       int w, int h)
 : wxFrame(frame, wxID_ANY, title, wxPoint(x, y), wxSize(w, h),wxDEFAULT_FRAME_STYLE),
+m_movie_view(0),
 m_tree_panel(0),
 m_list_panel(0),
-m_movie_view(0),
 m_prop_panel(0),
 m_ui_state(true),
 m_cur_sel_type(-1),
 m_cur_sel_vol(-1),
-m_cur_sel_mesh(-1),
-m_free_version(true)
+m_cur_sel_mesh(-1)//,
+//m_free_version(true)
 {
    // tell wxAuiManager to manage this frame
    m_aui_mgr.SetManagedWindow(this);
@@ -152,7 +152,7 @@ m_free_version(true)
          "Show analysis tools for volume data");
    m_tb_menu_edit->Append(ID_Measure, "Measurement...",
          "Show rulers dialog");
-   m_tb_menu_edit->Append(ID_Trace, "Tracking...",
+   m_tb_menu_edit->Append(ID_Trace, "Components && Tracking...",
          "Show trace dialog");
    m_tb_menu_edit->Append(ID_NoiseCancelling, "Noise Reduction...",
          "Show noise cancelling dialog");
@@ -210,7 +210,9 @@ m_free_version(true)
          wxGetBitmapFromMemory(icon_settings), wxNullBitmap, wxITEM_NORMAL,
          "Settings of FluoRender",
          "Settings of FluoRender");
+#ifdef _WIN32
    m_main_tb->AddStretchableSpace();
+#endif
    m_main_tb->AddTool(ID_CheckUpdates, "Update",
          wxGetBitmapFromMemory(icon_check_updates), wxNullBitmap, wxITEM_NORMAL,
          "Check if there is a new release",
@@ -390,7 +392,7 @@ m_free_version(true)
    //dialogs
    //brush tool dialog
    m_aui_mgr.AddPane(m_brush_tool_dlg, wxAuiPaneInfo().
-         Name("m_brush_tool_dlg").Caption("Edit").
+         Name("m_brush_tool_dlg").Caption("Analyze").
          Dockable(false).CloseButton(true));
    m_aui_mgr.GetPane(m_brush_tool_dlg).Float();
    m_aui_mgr.GetPane(m_brush_tool_dlg).Hide();
@@ -432,7 +434,7 @@ m_free_version(true)
    m_aui_mgr.GetPane(m_measure_dlg).Hide();
    //trace dialog
    m_aui_mgr.AddPane(m_trace_dlg, wxAuiPaneInfo().
-         Name("m_trace_dlg").Caption("Tracking").
+         Name("m_trace_dlg").Caption("Components & Tracking").
          Dockable(false).CloseButton(true));
    m_aui_mgr.GetPane(m_trace_dlg).Float();
    m_aui_mgr.GetPane(m_trace_dlg).Hide();
@@ -524,7 +526,7 @@ m_free_version(true)
    m = new wxMenuItem(m_top_tools,ID_Measure, wxT("&Measurement Tool..."));
    m_top_tools->Append(m);
 #ifdef _WIN32
-   m = new wxMenuItem(m_top_tools,ID_Trace, wxT("&Tracking..."));
+   m = new wxMenuItem(m_top_tools,ID_Trace, wxT("Components && &Tracking..."));
    m_top_tools->Append(m);
    m = new wxMenuItem(m_top_tools,ID_NoiseCancelling, wxT("&Noise Reduction..."));
    m_top_tools->Append(m);
@@ -819,7 +821,6 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 	  m_skip_brick = m_setting_dlg->GetSkipBricks();
    }
     
-#ifdef _WIN32
     wxFileDialog *fopendlg = new wxFileDialog(
          this, "Choose the volume data file", "", "",
          "All Supported|*.tif;*.tiff;*.oib;*.oif;*.lsm;*.xml;*.nrrd|"\
@@ -829,16 +830,6 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
          "Zeiss Laser Scanning Microscope (*.lsm)|*.lsm|"\
          "Prairie View XML (*.xml)|*.xml|"\
          "Nrrd files (*.nrrd)|*.nrrd", wxFD_OPEN|wxFD_MULTIPLE);
-#else
-    wxFileDialog *fopendlg = new wxFileDialog(
-         this, "Choose the volume data file", "", "",
-         "All Supported|*.tif;*.tiff;*.oif;*.lsm;*.xml;*.nrrd|"\
-         "Tiff Files (*.tif, *.tiff)|*.tif;*.tiff|"\
-         "Olympus Original Imaging Format (*.oif)|*.oif|"\
-         "Zeiss Laser Scanning Microscope (*.lsm)|*.lsm|"\
-         "Prairie View XML (*.xml)|*.xml|"\
-         "Nrrd files (*.nrrd)|*.nrrd", wxFD_OPEN|wxFD_MULTIPLE);
-#endif
    fopendlg->SetExtraControlCreator(CreateExtraControlVolume);
 
    int rval = fopendlg->ShowModal();
@@ -879,7 +870,6 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
    {
       prg_diag = new wxProgressDialog(
             "FluoRender: Loading volume data...",
-            "FluoRender: Loading volume data...\n" \
             "To visualize large data, please enable streaming in the Settings.",
             100, 0, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
 
@@ -895,7 +885,6 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
       for (j=0; j<(int)files.Count(); j++)
       {
          prg_diag->Update(90*(j+1)/(int)files.Count(),
-               "FluoRender: Loading volume data...\n" \
 			   "To visualize large data, please enable streaming in the Settings.");
 
          int ch_num = 0;
@@ -2113,12 +2102,7 @@ void VRenderFrame::SaveProject(wxString& filename)
             wxString new_folder;
             new_folder = filename + "_files";
             CREATE_DIR(new_folder.fn_str());
-#ifdef _WIN32
-             wxString slash = "\\";
-#else
-             wxString slash = "/";
-#endif
-            str = new_folder + slash + vd->GetName() + ".tif";
+            str = new_folder + GETSLASH() + vd->GetName() + ".tif";
             vd->Save(str, 0, false, VRenderFrame::GetCompression());
             fconfig.Write("path", str);
          }
@@ -2258,12 +2242,7 @@ void VRenderFrame::SaveProject(wxString& filename)
             wxString new_folder;
             new_folder = filename + "_files";
              CREATE_DIR(new_folder.fn_str());
-#ifdef _WIN32
-             wxString slash = "\\";
-#else
-             wxString slash = "/";
-#endif
-            str = new_folder + slash + vd->GetName() + ".msk";
+            str = new_folder + GETSLASH() + vd->GetName() + ".msk";
             MSKWriter msk_writer;
             msk_writer.SetData(mask);
             msk_writer.SetSpacings(resx, resy, resz);
@@ -2290,12 +2269,7 @@ void VRenderFrame::SaveProject(wxString& filename)
             wxString new_folder;
             new_folder = filename + "_files";
              CREATE_DIR(new_folder.fn_str());
-#ifdef _WIN32
-             wxString slash = "\\";
-#else
-             wxString slash = "/";
-#endif
-            str = new_folder + slash + md->GetName() + ".obj";
+            str = new_folder + GETSLASH() + md->GetName() + ".obj";
             md->Save(str);
          }
          str = wxString::Format("/data/mesh/%d", i);
@@ -2364,12 +2338,7 @@ void VRenderFrame::SaveProject(wxString& filename)
             wxString new_folder;
             new_folder = filename + "_files";
              CREATE_DIR(new_folder.fn_str());
-#ifdef _WIN32
-             wxString slash = "\\";
-#else
-             wxString slash = "/";
-#endif
-            str = new_folder + slash + ann->GetName() + ".txt";
+            str = new_folder + GETSLASH() + ann->GetName() + ".txt";
             ann->Save(str);
          }
          str = wxString::Format("/data/annotations/%d", i);

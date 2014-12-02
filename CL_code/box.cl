@@ -21,9 +21,10 @@ __kernel void main(
 	int4 kc;
 	float4 dvalue;
 	float rvalue = 0.0;
-	for (int i=0; i<KX; ++i)
-	for (int j=0; j<KY; ++j)
-	for (int k=0; k<KZ; ++k)
+	int i, j, k;
+	for (i=0; i<KX; ++i)
+	for (j=0; j<KY; ++j)
+	for (k=0; k<KZ; ++k)
 	{
 		kc = (int4)(coord.x+(i-KX/2),
 				coord.y+(j-KY/2),
@@ -32,5 +33,5 @@ __kernel void main(
 		rvalue += box(i, j, k) * dvalue.x;
 	}
 	unsigned int index = x*y*coord.z + x*coord.y + coord.x;
-	result[index] = rvalue*255.0;
+	result[index] = clamp(rvalue, 0.0, 1.0)*255.0;
 }

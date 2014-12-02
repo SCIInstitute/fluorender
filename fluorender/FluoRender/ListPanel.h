@@ -125,7 +125,7 @@ class ListPanel : public wxPanel
    void SetSelection(int type, wxString &name);
 
    private:
-   wxWindow* m_frame;
+   //wxWindow* m_frame;
    DataListCtrl *m_datalist;
    wxToolBar *m_toolbar;
 

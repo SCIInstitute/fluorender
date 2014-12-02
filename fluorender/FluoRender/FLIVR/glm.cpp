@@ -91,7 +91,7 @@ GLboolean glmLoadTGA(TextureImage *texture, char *filename,GLuint *textureID)   
       return false;                    // Return False
    }
 
-   for(GLuint i=0; i<int(imageSize); i+=bytesPerPixel)    // Loop Through The Image Data
+   for(GLuint i=0; i<imageSize; i+=bytesPerPixel)    // Loop Through The Image Data
    {                            // Swaps The 1st And 3rd Bytes ('R'ed and 'B'lue)
       temp=texture->imageData[i];              // Temporarily Store The Value At Image Data 'i'
       texture->imageData[i] = texture->imageData[i + 2];  // Set The 1st Byte To The Value Of The 3rd Byte
@@ -326,12 +326,7 @@ static char* glmDirName(char* path)
    dir = STRDUP(path);
 
     i = (int)strlen(dir);
-#ifdef _WIN32
-    wchar_t slash = '\\';
-#else
-    wchar_t slash = '/';
-#endif
-   while (dir[i+1]!=slash && i>0)
+   while (dir[i+1]!=GETSLASH() && i>0)
       i--;
 
    STRNCPY(s, sizeof(s), dir, i+2);

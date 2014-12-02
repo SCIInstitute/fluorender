@@ -3,9 +3,6 @@ build64
 *.aps
 *.rc
 resource*
-*.set
-*.dft
-*.a
 .DS_Store
 *.cmake
 Makefile

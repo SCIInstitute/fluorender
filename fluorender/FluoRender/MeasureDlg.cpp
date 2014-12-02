@@ -50,8 +50,8 @@ RulerListCtrl::RulerListCtrl(
       const wxPoint& pos,
       const wxSize& size,
       long style) :
-   wxListCtrl(parent, id, pos, size, style),
-   m_frame(frame)
+   wxListCtrl(parent, id, pos, size, style)//,
+   //m_frame(frame)
 {
    wxListItem itemCol;
    itemCol.SetText("ID");
@@ -101,7 +101,7 @@ void RulerListCtrl::Append(wxString name, double length, wxString &unit,
    SetItem(tmp, 5, extra);
 }
 
-void RulerListCtrl::Update(VRenderView* vrv)
+void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 {
    if (vrv)
       m_view = vrv;
@@ -181,7 +181,7 @@ void RulerListCtrl::DeleteSelection()
                delete ruler;
             }
          }
-         Update();
+         UpdateRulers();
          m_view->RefreshGL();
       }
    }
@@ -220,7 +220,7 @@ void RulerListCtrl::DeleteAll(bool cur_time)
          ruler_list->clear();
       }
 
-      Update();
+      UpdateRulers();
       m_view->RefreshGL();
    }
 }
@@ -257,7 +257,7 @@ void RulerListCtrl::Export(wxString filename)
 
       tos << "ID\tLength(" << unit << ")\tAngle(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
 
-      for (int i=0; i<ruler_list->size(); i++)
+      for (size_t i=0; i<ruler_list->size(); i++)
       {
          ruler = (*ruler_list)[i];
          if (!ruler) continue;
@@ -460,7 +460,7 @@ VRenderView* MeasureDlg::GetView()
 void MeasureDlg::UpdateList()
 {
    if (!m_view) return;
-   m_rulerlist->Update(m_view);
+   m_rulerlist->UpdateRulers(m_view);
 }
 
 void MeasureDlg::OnNewLocator(wxCommandEvent& event)

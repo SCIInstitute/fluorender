@@ -718,7 +718,7 @@ class VRenderGLView: public wxGLCanvas
          bool m_sync_b;
 
          //volume color map
-         double m_value_1;
+         //double m_value_1;
          Color m_color_1;
          double m_value_2;
          Color m_color_2;
@@ -730,7 +730,7 @@ class VRenderGLView: public wxGLCanvas
          Color m_color_5;
          double m_value_6;
          Color m_color_6;
-         double m_value_7;
+         //double m_value_7;
          Color m_color_7;
 
          //paint brush use pressure

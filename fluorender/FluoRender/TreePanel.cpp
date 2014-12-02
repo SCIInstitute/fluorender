@@ -299,7 +299,7 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 			menu.Append(ID_ShowAll, "Show All");
             menu.Append(ID_RemoveData, "Delete");
             menu.Append(ID_AddDataGroup, "Add Volume Group");
-            menu.Append(ID_Edit, "Edit...");
+            menu.Append(ID_Edit, "Analyze...");
             menu.Append(ID_Measurement, "Measurement...");
             menu.Append(ID_NoiseCancelling, "Noise Reduction...");
             menu.Append(ID_Counting, "Counting and Volume...");

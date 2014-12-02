@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "lbl_reader.h"
 #include <sstream>
+#include <inttypes.h>
 
 LBLReader::LBLReader()
 {
@@ -86,7 +87,7 @@ int LBLReader::LoadBatch(int index)
 
 Nrrd* LBLReader::Convert(int t, int c, bool get_max)
 {
-   size_t pos = m_path_name.find_last_of('.');
+   int64_t pos = m_path_name.find_last_of('.');
    if (pos == -1)
       return 0;
    wstring str_name = m_path_name.substr(0, pos);

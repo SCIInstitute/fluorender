@@ -49,8 +49,8 @@ TraceListCtrl::TraceListCtrl(
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
-wxListCtrl(parent, id, pos, size, style),
-	m_frame(frame)
+wxListCtrl(parent, id, pos, size, style)//,
+	//m_frame(frame)
 {
 	wxListItem itemCol;
 	itemCol.SetText("ID");
@@ -97,7 +97,7 @@ void TraceListCtrl::Append(unsigned int id, wxColor color,
 	SetItemBackgroundColour(tmp, color);
 }
 
-void TraceListCtrl::Update(VRenderView* vrv)
+void TraceListCtrl::UpdateTraces(VRenderView* vrv)
 {
 	if (vrv)
 		m_view = vrv;
@@ -525,7 +525,7 @@ TraceDlg::~TraceDlg()
 {
 	if (m_mask)
 	{
-		delete [] m_mask->data;
+		delete [] reinterpret_cast<char*>(m_mask->data);
 		nrrdNix(m_mask);
 	}
 }
@@ -618,7 +618,7 @@ void TraceDlg::UpdateList()
 		else
 			m_cell_time_prev_st->SetLabel("\tPrevious T");
 	}
-	m_trace_list_curr->Update(m_view);
+	m_trace_list_curr->UpdateTraces(m_view);
 	Layout();
 }
 
@@ -999,7 +999,6 @@ void TraceDlg::CellFull()
 	int i, j, k;
 	int nx, ny, nz;
 	unsigned long long index;
-	unsigned int max_size = slimit;
 	vd->GetResolution(nx, ny, nz);
 	unsigned int id;
 	boost::unordered_map<unsigned int, Lbl> id_list;

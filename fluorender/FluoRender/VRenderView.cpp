@@ -252,7 +252,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
    m_sync_g(false),
    m_sync_b(false),
    //volume color map
-   m_value_1(0.0),
+   //m_value_1(0.0),
    m_color_1(Color(0.0, 0.0, 1.0)),
    m_value_2(0.0),
    m_color_2(Color(0.0, 0.0, 1.0)),
@@ -264,7 +264,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
    m_color_5(Color(1.0, 1.0, 0.0)),
    m_value_6(1.0),
    m_color_6(Color(1.0, 0.0, 0.0)),
-   m_value_7(1.0),
+   //m_value_7(1.0),
    m_color_7(Color(1.0, 0.0, 0.0)),
    //paint brush presssure
    m_use_pres(false),
@@ -1080,7 +1080,7 @@ void VRenderGLView::DrawVolumes(int peel)
                         vd_index = cur_index - count/2 - 1;
                      count++;
                      if (vd_index<0 ||
-                           vd_index>=m_vd_pop_list.size())
+                           (size_t)vd_index>=m_vd_pop_list.size())
                         continue;
                      vd = m_vd_pop_list[vd_index];
                      int brick_num = vd->GetBrickNum();
@@ -4065,7 +4065,7 @@ void VRenderGLView::UpdateBrushState()
             !wxGetKeyState(wxKeyCode('Z')) &&
             !wxGetKeyState(wxKeyCode('X')))
       {
-         if (wxGetMouseState().LeftDown())
+         if (wxGetMouseState().LeftIsDown())
             Segment();
          if (m_int_mode == 7)
             m_int_mode = 5;
@@ -4562,12 +4562,7 @@ void VRenderGLView::Set3DBatCapture(wxString &cap_file, int begin_frame, int end
    if (!m_cap_file.IsEmpty() && m_total_frames>1)
    {
        wxString path = m_cap_file;
-#ifdef _WIN32
-       wchar_t slash = '\\';
-#else
-       wchar_t slash = '/';
-#endif
-      int sep = path.Find(slash, true);
+      int sep = path.Find(GETSLASH(), true);
       if (sep != wxNOT_FOUND)
       {
          sep++;
@@ -4856,13 +4851,8 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 			//run script
 			if (m_run_script && run_script)
 			{
-#ifdef _WIN32
-				wchar_t slash = '\\';
-#else
-				wchar_t slash = '/';
-#endif
 				wxString pathname = reader->GetPathName();
-				int pos = pathname.Find(slash, true);
+            int pos = pathname.Find(GETSLASH(), true);
 				wxString scriptname = pathname.Left(pos+1) + "script_4d.txt";
 				if (wxFileExists(scriptname))
 				{
@@ -5048,13 +5038,8 @@ void VRenderGLView::PreDraw()
                   //run script
                   if (m_run_script)
                   {
-#ifdef _WIN32
-                      wchar_t slash = '\\';
-#else
-                      wchar_t slash = '/';
-#endif
                      wxString pathname = reader->GetPathName();
-                     int pos = pathname.Find(slash, true);
+                     int pos = pathname.Find(GETSLASH(), true);
                      wxString scriptname = pathname.Left(pos+1) + "script_4d.txt";
                      if (wxFileExists(scriptname))
                      {
@@ -5223,12 +5208,7 @@ void VRenderGLView::PreDraw()
                if (!m_cap_file.IsEmpty() && m_total_frames>1)
                {
                    wxString path = m_cap_file;
-#ifdef _WIN32
-                   wchar_t slash = '\\';
-#else
-                   wchar_t slash = '/';
-#endif
-                  int sep = path.Find(slash, true);
+                  int sep = path.Find(GETSLASH(), true);
                   if (sep != wxNOT_FOUND)
                   {
                      sep++;
@@ -5312,12 +5292,7 @@ void VRenderGLView::PostDraw()
       {
          wxString path = m_cap_file;
           wxString name = m_cap_file;
-#ifdef _WIN32
-          wchar_t slash = '\\';
-#else
-          wchar_t slash = '/';
-#endif
-         int sep = path.Find(slash, true);
+         int sep = path.Find(GETSLASH(), true);
          if (sep != wxNOT_FOUND)
          {
             sep++;
@@ -5458,15 +5433,10 @@ void VRenderGLView::Run4DScript(wxString scriptname)
                fconfig.Read("compress", &compression, false);
                fconfig.Read("savepath", &pathname, "");
                str = pathname;
-                size_t pos = 0;
-#ifdef _WIN32
-                wxString slash = "\\";
-#else
-                wxString slash = "/";
-#endif
+                int64_t pos = 0;
                do
                {
-                  pos = pathname.find(slash, pos);
+                  pos = pathname.find(GETSLASH(), pos);
                   if (pos == wxNOT_FOUND)
                      break;
                   pos++;
@@ -5597,15 +5567,10 @@ void VRenderGLView::Run4DScript(wxString scriptname)
             {
                fconfig.Read("savepath", &pathname, "");
                str = pathname;
-                size_t pos = 0;
-#ifdef _WIN32
-                wxString slash = "\\";
-#else
-                wxString slash = "/";
-#endif
+                int64_t pos = 0;
                do
                {
-                  pos = pathname.find(slash, pos);
+                  pos = pathname.find(GETSLASH(), pos);
                   if (pos == wxNOT_FOUND)
                      break;
                   pos++;
@@ -5653,15 +5618,10 @@ void VRenderGLView::Run4DScript(wxString scriptname)
                fconfig.Read("compress", &compression, false);
                fconfig.Read("savepath", &pathname, "");
                str = pathname;
-                size_t pos = 0;
-#ifdef _WIN32
-                wxString slash = "\\";
-#else
-                wxString slash = "/";
-#endif
+                int64_t pos = 0;
                do
                {
-                  pos = pathname.find(slash, pos);
+                  pos = pathname.find(GETSLASH(), pos);
                   if (pos == wxNOT_FOUND)
                      break;
                   pos++;
@@ -5686,15 +5646,10 @@ void VRenderGLView::Run4DScript(wxString scriptname)
 				wxString path = "";
 				fconfig.Read("savepath", &pathname, "");
 				str = pathname;
-				size_t pos = 0;
-#ifdef _WIN32
-                wxString slash = "\\";
-#else
-                wxString slash = "/";
-#endif
+				int64_t pos = 0;
 				do
 				{
-					pos = pathname.find(slash, pos);
+					pos = pathname.find(GETSLASH(), pos);
 					if (pos == wxNOT_FOUND)
 						break;
 					pos++;
@@ -6647,7 +6602,7 @@ void VRenderGLView::ShowAll()
 				DataGroup* group = (DataGroup*)m_layer_list[i];
 				if (group)
 				{
-					for (unsigned int j=0; j<group->GetVolumeNum(); ++j)
+					for (int j=0; j<group->GetVolumeNum(); ++j)
 					{
 						VolumeData* vd = group->GetVolumeData(j);
 						if (vd)
@@ -6661,7 +6616,7 @@ void VRenderGLView::ShowAll()
 				MeshGroup* group = (MeshGroup*)m_layer_list[i];
 				if (group)
 				{
-					for (unsigned int j=0; j<group->GetMeshNum(); ++j)
+					for (int j=0; j<group->GetMeshNum(); ++j)
 					{
 						MeshData* md = group->GetMeshData(j);
 						if (md)
@@ -10096,11 +10051,11 @@ VRenderView::VRenderView(wxWindow* frame,
       const wxSize& size,
       long style) :
    wxPanel(parent, id, pos, size, style),
-   m_frame(frame),
-   m_draw_clip(false),
-   m_draw_scalebar(kOff),
-   m_timer(this,ID_RotateTimer),
    m_default_saved(false),
+   m_frame(frame),
+   m_timer(this,ID_RotateTimer),
+   m_draw_clip(false), 
+   m_draw_scalebar(kOff),
    m_use_dft_settings(false),
    m_dft_x_rot(0.0),
    m_dft_y_rot(0.0),
@@ -10265,7 +10220,9 @@ void VRenderView::CreateBar()
    m_options_toolbar->AddControl(m_scale_cmb);
 
    //m_options_toolbar->Realize();
+#ifndef _DARWIN
 	m_options_toolbar->AddStretchableSpace();
+#endif
    //angle of view
    //m_options_toolbar2 = new wxToolBar(this, wxID_ANY);
    st2 = new wxStaticText(m_options_toolbar, wxID_ANY, "Perspective Angle:");

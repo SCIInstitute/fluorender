@@ -80,18 +80,13 @@ void NRRDReader::Preprocess()
    m_4d_seq.clear();
 
    //separate path and name
-#ifdef _WIN32
-   wchar_t slash = L'\\';
-#else
-   wchar_t slash = L'/';
-#endif
-   size_t pos = m_path_name.find_last_of(slash);
+   int64_t pos = m_path_name.find_last_of(GETSLASH());
    if (pos == -1)
       return;
    wstring path = m_path_name.substr(0, pos+1);
    wstring name = m_path_name.substr(pos+1);
    //generate search name for time sequence
-   size_t begin = name.find(m_time_id);
+   int64_t begin = name.find(m_time_id);
    size_t end = -1;
    size_t id_len = m_time_id.size();
    wstring t_num;
@@ -126,7 +121,7 @@ void NRRDReader::Preprocess()
       std::vector<std::wstring> list;
       int tmp = 0;
       FIND_FILES(path,L".nrrd",list,tmp,name.substr(0,begin+id_len+1));
-      for(int i = 0; i < list.size(); i++) {
+      for(size_t i = 0; i < list.size(); i++) {
          size_t start_idx = list.at(i).find(m_time_id) + id_len;
          size_t end_idx   = list.at(i).find(L".nrrd");
          size_t size = end_idx - start_idx;
@@ -183,12 +178,7 @@ void NRRDReader::SetBatch(bool batch)
    if (batch)
    {
       //read the directory info
-#ifdef _WIN32
-      wchar_t slash = L'\\';
-#else
-      wchar_t slash = L'/';
-#endif
-      wstring search_path = m_path_name.substr(0, m_path_name.find_last_of(slash)) + slash;
+      wstring search_path = m_path_name.substr(0, m_path_name.find_last_of(GETSLASH())) + GETSLASH();
       wstring search_str = search_path + L".nrrd";
       FIND_FILES(search_path,L".nrrd",m_batch_list,m_cur_batch,L"");
       m_batch = true;
@@ -220,12 +210,7 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 
    int i;
 
-#ifdef _WIN32
-   wchar_t slash = L'\\';
-#else
-   wchar_t slash = L'/';
-#endif
-   m_data_name = m_4d_seq[t].filename.substr(m_4d_seq[t].filename.find_last_of(slash)+1);
+   m_data_name = m_4d_seq[t].filename.substr(m_4d_seq[t].filename.find_last_of(GETSLASH())+1);
 
    Nrrd *output = nrrdNew();
    NrrdIoState *nio = nrrdIoStateNew();

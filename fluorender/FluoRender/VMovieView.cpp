@@ -69,6 +69,10 @@ BEGIN_EVENT_TABLE(VMovieView, wxPanel)
     EVT_TIMER(ID_Timer, VMovieView::OnTimer)
 END_EVENT_TABLE()
 
+double VMovieView::m_Mbitrate = 1;
+wxTextCtrl * VMovieView::m_estimated_size_text = 0;
+wxTextCtrl * VMovieView::m_movie_time = 0;
+
 wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	wxPanel *page = new wxPanel(parent);
 	
@@ -155,11 +159,11 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	sizer_6->Add(m_z_rd, 0, wxALIGN_CENTER);
 	//movie length
 	st = new wxStaticText(page,wxID_ANY, "Movie Length: ",
-		wxDefaultPosition,wxSize(100,-1));
+		wxDefaultPosition,wxSize(85,-1));
 	st2 = new wxStaticText(page,wxID_ANY, "seconds",
 		wxDefaultPosition,wxSize(60,-1));
 	m_movie_time = new wxTextCtrl(page, ID_MovieTimeText, "5",
-		wxDefaultPosition,wxSize(50,-1));
+		wxDefaultPosition,wxSize(40,-1));
 	//sizer 7
 	sizer_7->AddStretchSpacer();
 	sizer_7->Add(st, 0, wxALIGN_CENTER);
@@ -299,16 +303,28 @@ m_current_page(0) {
 	m_notebook->AddPage(CreateCroppingPage(m_notebook), "Cropping");
 	//renderview selector
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
-	wxStaticText * st = new wxStaticText(this, 0, "Capture view:",
-		wxDefaultPosition, wxSize(80, 20));
-	wxStaticText * st2 = new wxStaticText(this, 0, "FPS:",
-		wxDefaultPosition, wxSize(30, 20));
-	m_fps_text = new wxTextCtrl(this, ID_FPS_Text, "20",
+	//FPS
+	m_fps_text = new wxTextCtrl(this, ID_FPS_Text, "30",
 		wxDefaultPosition,wxSize(30, -1));
+	//other
 	m_views_cmb = new wxComboBox(this, ID_ViewsCombo, "",
-		wxDefaultPosition, wxSize(110, -1), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, wxSize(120, -1), 0, NULL, wxCB_READONLY);
 	m_help_btn = new wxButton(this, ID_HelpBtn, "?",
 		wxDefaultPosition, wxSize(25, 25));
+	//sizer 1
+	sizer_1->Add(5, 5, 0);
+	wxStaticText * st = new wxStaticText(this, wxID_ANY, "FPS:",
+		wxDefaultPosition, wxSize(30, -1));
+	wxStaticText * st2 = new wxStaticText(this, wxID_ANY, "Capture:",
+		wxDefaultPosition,wxSize(60,-1));
+	sizer_1->Add(st, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_fps_text, 0, wxALIGN_CENTER);
+	sizer_1->AddStretchSpacer();
+	sizer_1->Add(st2, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_views_cmb, 0, wxALIGN_CENTER);
+	sizer_1->Add(5, 5, 0);
+	sizer_1->Add(m_help_btn, 0, wxALIGN_CENTER);
+
 	//the play/rewind/slider/save
 	wxBoxSizer *sizerH = new wxBoxSizer(wxHORIZONTAL);
 	m_play_btn = new wxButton(this, ID_PlayPause, "",
@@ -332,16 +348,7 @@ m_current_page(0) {
 		wxDefaultPosition, wxSize(80, 30));
 	m_save_btn->SetBitmap(wxGetBitmapFromMemory(listicon_save));
 	sizerH->Add(m_save_btn, 0, wxEXPAND|wxALIGN_CENTER);
-	//add all the lines
-	sizer_1->Add(5, 5, 0);
-	sizer_1->Add(st2, 0, wxALIGN_CENTER);
-	sizer_1->Add(5, 5, 0);
-	sizer_1->Add(m_fps_text, 0, wxALIGN_CENTER);
-	sizer_1->Add(15, 5, 0);
-	sizer_1->Add(st, 0, wxALIGN_CENTER);
-	sizer_1->Add(m_views_cmb, 0, wxALIGN_CENTER);
-	sizer_1->AddStretchSpacer();
-	sizer_1->Add(m_help_btn, 0, wxALIGN_CENTER);//interface
+	//interface
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(m_notebook, 1, wxEXPAND);
 	sizerV->AddStretchSpacer();
@@ -491,25 +498,6 @@ void VMovieView::OnPrev(wxCommandEvent& event) {
 	VRenderView* vrv = vr_frame->GetView(str);
 	if (!vrv) return;
 	
-	SetProgress(0.);
-	SetRendering(0.);
-	m_last_frame = 0;
-	m_prev_time = -1;
-	m_timer.Start(10);
-	//advanced options
-	int page = m_notebook->GetSelection();
-	if (page <= 1) m_current_page = page;
-	if (m_current_page == 1) {
-		long fps;
-		m_fps_text->GetValue().ToLong(&fps);
-		Interpolator *interpolator = vr_frame->GetInterpolator();
-		if (!interpolator)
-			return;
-		int frames = int(interpolator->GetLastT());
-		double runtime = (double)frames/(double)fps;
-		m_movie_time->ChangeValue(wxString::Format("%.2f",runtime));
-		return;
-	}
 	//basic options
 	int rot_axis = 1;
 	if (m_x_rd->GetValue())
@@ -531,55 +519,23 @@ void VMovieView::OnPrev(wxCommandEvent& event) {
 	while(m_starting_rot < -360.) m_starting_rot += 360.;
 	if (360. - std::abs(m_starting_rot) < 0.001) 
 		m_starting_rot = 0.;
-}
-//ch1
-void VMovieView::OnCh1Check(wxCommandEvent &event) {
-	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
-	if (ch1)
-		VRenderFrame::SetCompression(ch1->GetValue());
-}
-//embed project
-void VMovieView::OnChEmbedCheck(wxCommandEvent &event) {
-	wxCheckBox* ch_embed = (wxCheckBox*)event.GetEventObject();
-	if (ch_embed)
-		VRenderFrame::SetEmbedProject(ch_embed->GetValue());
-}
-
-wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent) {
-	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(400, 90));
-
-	wxBoxSizer *group1 = new wxStaticBoxSizer(
-		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
-
-	//compressed
-	wxCheckBox* ch1 = new wxCheckBox(panel, wxID_HIGHEST+3004,
-		"Lempel-Ziv-Welch Compression");
-	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VMovieView::OnCh1Check), NULL, panel);
-	if (ch1)
-		ch1->SetValue(VRenderFrame::GetCompression());
-
-	//copy all files check box
-	wxCheckBox* ch_embed = 0;
-	if (VRenderFrame::GetSaveProject()) {
-		ch_embed = new wxCheckBox(panel, wxID_HIGHEST+3005,
-			"Embed all files in the project folder");
-		ch_embed->Connect(ch_embed->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-			wxCommandEventHandler(VMovieView::OnChEmbedCheck), NULL, panel);
-		ch_embed->SetValue(VRenderFrame::GetEmbedProject());
+	//advanced options
+	int page = m_notebook->GetSelection();
+	if (page <= 1) m_current_page = page;
+	if (m_current_page == 1) {
+		long fps;
+		m_fps_text->GetValue().ToLong(&fps);
+		Interpolator *interpolator = vr_frame->GetInterpolator();
+		if (!interpolator)
+			return;
+		int frames = int(interpolator->GetLastT());
+		double runtime = (double)frames/(double)fps;
+		m_movie_time->ChangeValue(wxString::Format("%.2f",runtime));
 	}
-	//group
-	group1->Add(10, 10);
-	group1->Add(ch1);
-	group1->Add(10, 10);
-	if (VRenderFrame::GetSaveProject() && ch_embed) {
-		group1->Add(ch_embed);
-		group1->Add(10, 10);
-	}
-	panel->SetSizer(group1);
-	panel->Layout();
-
-	return panel;
+	SetProgress(0.);
+	SetRendering(0.);
+	m_last_frame = 0;
+	m_timer.Start(10);
 }
 
 void VMovieView::OnRun(wxCommandEvent& event) {
@@ -612,7 +568,8 @@ void VMovieView::OnRun(wxCommandEvent& event) {
 			}
 			long fps;
 			m_fps_text->GetValue().ToLong(&fps);
-			encoder_.open(m_filename.ToStdString(),w,h,fps);
+			encoder_.open(m_filename.ToStdString(),w,h,fps,
+				m_Mbitrate*1000000);
 		}
 		m_filename = m_filename.SubString(0,m_filename.Len()-5);
 		m_record = true;
@@ -897,7 +854,7 @@ void VMovieView::OnTimeChange(wxScrollEvent &event) {
 	int end_time = STOI(m_time_end_text->GetValue().fn_str());
 	int time = end_time - start_time + 1;
 	m_time_current_text->ChangeValue(wxString::Format("%d",
-		int(start_time + time * pcnt)));
+		(int)(start_time + time * pcnt)));
 
 	double movie_time;
 	m_movie_time->GetValue().ToDouble(&movie_time);
@@ -930,9 +887,7 @@ void VMovieView::SetRendering(double pcnt) {
 		int first, sec, tmp;
 		vrv->Get4DSeqFrames(first, sec, tmp);
 		if (sec - first > 0) {
-			if (m_prev_time != time)
-				vrv->Set4DSeqFrame(time ,true);
-			m_prev_time = time;
+			vrv->Set4DSeqFrame(time ,true);
 		} else {
 			vrv->Set3DBatFrame(time);
 		}
@@ -950,9 +905,9 @@ void VMovieView::SetRendering(double pcnt) {
 		val = m_starting_rot + pcnt * deg;
 		if (m_x_rd->GetValue())
 			vrv->SetRotations(val,y,z);
-		if (m_y_rd->GetValue())
+		else if (m_y_rd->GetValue())
 			vrv->SetRotations(x,val,z);
-		if (m_z_rd->GetValue())
+		else if (m_z_rd->GetValue())
 			vrv->SetRotations(x,y,val);
 		vrv->RefreshGL(false);
 	}
@@ -974,7 +929,7 @@ void VMovieView::OnTimeEnter(wxCommandEvent& event) {
 	int end_time = STOI(m_time_end_text->GetValue().fn_str());
 	int time = end_time - start_time + 1;
 	m_time_current_text->ChangeValue(wxString::Format("%d",
-		int(start_time + time * pcnt)));
+		(int)(start_time + time * pcnt)));
 }
 
 void VMovieView::OnRotateChecked(wxCommandEvent& event) {
@@ -1029,7 +984,7 @@ void VMovieView::WriteFrameToFile() {
 	if (filetype_.IsSameAs(".mov")) {
 		//flip vertically 
 		unsigned char *flip = new unsigned char[w*h*chann];
-		for(size_t yy = 0; yy < h; yy++)
+		for(size_t yy = 0; yy < (size_t)h; yy++)
 			memcpy(flip + yy * 3 * w, image + 3 * w * (h - yy - 1),w * 3);
 		bool worked = encoder_.set_frame_rgb_data(flip);
 		worked = encoder_.write_video_frame(m_last_frame);
@@ -1091,7 +1046,6 @@ void VMovieView::OnDownFrame(wxCommandEvent& event) {
 	SetRendering(pcnt);
 }
 
-
 void VMovieView::OnTimeText(wxCommandEvent& event) {
 	if(m_running) return;
 	int start_time = STOI(m_time_start_text->GetValue().fn_str());
@@ -1103,4 +1057,104 @@ void VMovieView::OnTimeText(wxCommandEvent& event) {
 	double pcnt = (double)current_time / (double) time;
 	SetProgress(pcnt);
 	SetRendering(pcnt);
+}
+
+//ch1
+void VMovieView::OnCh1Check(wxCommandEvent &event) {
+	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
+	if (ch1)
+		VRenderFrame::SetCompression(ch1->GetValue());
+}
+//movie quality
+void VMovieView::OnMovieQuality(wxCommandEvent &event) {
+	m_Mbitrate = STOD(((wxTextCtrl*)event.GetEventObject())
+		->GetValue().fn_str());
+	double size = m_Mbitrate * STOD(
+		m_movie_time->GetValue().fn_str()) / 8.;
+	m_estimated_size_text->SetValue(wxString::Format("%.2f", size));
+}
+//embed project
+void VMovieView::OnChEmbedCheck(wxCommandEvent &event) {
+	wxCheckBox* ch_embed = (wxCheckBox*)event.GetEventObject();
+	if (ch_embed)
+		VRenderFrame::SetEmbedProject(ch_embed->GetValue());
+}
+
+wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent) {
+	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(600, 90));
+
+	wxBoxSizer *group1 = new wxStaticBoxSizer(
+		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
+	wxBoxSizer *line1 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *line2 = new wxBoxSizer(wxHORIZONTAL);
+
+	//compressed TIFF
+	wxStaticText *tiffopts = new wxStaticText(panel,wxID_ANY, "TIFF Options:",
+		wxDefaultPosition,wxSize(95,-1));
+	wxCheckBox *ch1 = new wxCheckBox(panel, wxID_HIGHEST+3004,
+		"Lempel-Ziv-Welch Compression");
+	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(VMovieView::OnCh1Check), NULL, panel);
+	if (ch1)
+		ch1->SetValue(VRenderFrame::GetCompression());
+	line1->Add(tiffopts, 0, wxALIGN_CENTER);
+	line1->Add(ch1, 0, wxALIGN_CENTER);
+	// movie quality
+	//bitrate
+	wxStaticText *MOVopts = new wxStaticText(panel,wxID_ANY, "MOV Options:",
+		wxDefaultPosition,wxSize(95,-1));
+	wxTextCtrl *bitrate_text = new wxTextCtrl(panel, wxID_ANY, "1.0",
+		wxDefaultPosition,wxSize(50,-1));
+	bitrate_text->Connect(bitrate_text->GetId(), wxEVT_TEXT ,
+		wxCommandEventHandler(VMovieView::OnMovieQuality), NULL, panel);
+	wxStaticText *st = new wxStaticText(panel,wxID_ANY, "Bitrate:",
+		wxDefaultPosition,wxSize(50,-1));
+	wxStaticText *st2 = new wxStaticText(panel, wxID_ANY, "Mb/s (0 - 20 Mb/s)",
+		wxDefaultPosition, wxSize(140, -1));
+	wxStaticText *st3 = new wxStaticText(panel, wxID_ANY, "Estimated size:",
+		wxDefaultPosition, wxSize(110, -1));
+	m_estimated_size_text = new wxTextCtrl(panel, ID_BitrateText, "0.25",
+		wxDefaultPosition,wxSize(50,-1));
+	m_estimated_size_text->Disable();   
+	m_Mbitrate = STOD(bitrate_text->GetValue().fn_str());
+	double size = m_Mbitrate * STOI(
+		m_movie_time->GetValue().fn_str()) / 8.;
+	m_estimated_size_text->SetValue(wxString::Format("%.2f", size));
+	
+	line2->Add(MOVopts, 0, wxALIGN_CENTER);
+	line2->Add(st, 0, wxALIGN_CENTER);
+	line2->Add(5,5, wxALIGN_CENTER);
+	line2->Add(bitrate_text, 0, wxALIGN_CENTER);
+	line2->Add(5,5, wxALIGN_CENTER);
+	line2->Add(st2, 0, wxALIGN_CENTER);
+	line2->AddStretchSpacer();
+	line2->Add(st3, 0, wxALIGN_CENTER);
+	line2->Add(m_estimated_size_text, 0, wxALIGN_CENTER);
+	st2 = new wxStaticText(panel, wxID_ANY, "MB",
+		wxDefaultPosition, wxSize(30, -1));
+	line2->Add(5,5, wxALIGN_CENTER);
+	line2->Add(st2, 0, wxALIGN_CENTER);
+	//copy all files check box
+	wxCheckBox *ch_embed;
+	if (VRenderFrame::GetSaveProject()) {
+		ch_embed = new wxCheckBox(panel, wxID_HIGHEST+3005,
+			"Embed all files in the project folder");
+		ch_embed->Connect(ch_embed->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+			wxCommandEventHandler(VMovieView::OnChEmbedCheck), NULL, panel);
+		ch_embed->SetValue(VRenderFrame::GetEmbedProject());
+	}
+	//group
+	if (VRenderFrame::GetSaveProject() && ch_embed) {
+		wxBoxSizer *line3 = new wxBoxSizer(wxHORIZONTAL);
+		line3->Add(ch_embed, 0, wxALIGN_CENTER);
+		group1->Add(line3);
+		group1->Add(5,5, wxALIGN_CENTER);
+	}
+	group1->Add(line1);
+	group1->Add(5,5, wxALIGN_CENTER);
+	group1->Add(line2);
+	panel->SetSizer(group1);
+	panel->Layout();
+
+	return panel;
 }

@@ -56,8 +56,15 @@ DEALINGS IN THE SOFTWARE.
 #define FSEEK64     _fseeki64
 #define SSCANF    sscanf
 
-inline std::wstring ws2s(std::wstring s) { return s; }
-inline std::string s2ws(std::string s) { return s; }
+inline wchar_t GETSLASH() { return L'\\'; }
+
+inline std::wstring s2ws(const std::string& str) {
+    return std::wstring( str.begin(), str.end() );
+}
+
+inline std::string ws2s(const std::wstring& str) {
+    return std::string( str.begin(), str.end() );
+}
 
 inline TIFF* TIFFOpenW(std::wstring fname, const char* opt) {
    return TIFFOpenW(fname.c_str(),opt);
@@ -148,15 +155,15 @@ inline void FIND_FILES(std::wstring m_path_name,
 #else // MAC OSX or LINUX
 
 #include <vector>
-//#include <codecvt>
 #include <iostream>
 #include <dirent.h>
 #include <sys/time.h>
 #include <sys/stat.h>
 #include "../LibTiff/tiffio.h"
 
-//POSSIBLE TODO if fseek64 is different than fseek
 #define FSEEK64     fseek
+
+inline wchar_t GETSLASH() { return L'/'; }
 
 inline std::wstring s2ws(const std::string& str) {
     return std::wstring( str.begin(), str.end() );

@@ -200,8 +200,8 @@ void OclDlg::OnSaveBtn(wxCommandEvent& event)
 void OclDlg::OnSaveAsBtn(wxCommandEvent& event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
-		this, "Choose the FluoRender link data file", 
-		"", "", "*.fll", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+		this, "Choose an OpenCL kernel file", 
+		"", "", "OpenCL kernel file|*.cl;*.txt", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)

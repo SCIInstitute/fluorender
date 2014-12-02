@@ -45,8 +45,8 @@ NoiseCancellingDlg::NoiseCancellingDlg(wxWindow *frame, wxWindow *parent)
 			0, "NoiseCancellingDlg"),
 			m_frame(parent),
 			m_view(0),
-			m_group(0),
-			m_vol(0),
+			//m_group(0),
+			//m_vol(0),
 			m_max_value(255.0),
 			m_dft_thresh(0.0),
 			m_previewed(false)

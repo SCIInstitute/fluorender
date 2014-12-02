@@ -58,7 +58,7 @@ public:
 
 	void Append(unsigned int id, wxColor color,
 		int size, double cx, double cy, double cz);
-	void Update(VRenderView* vrv=0);
+	void UpdateTraces(VRenderView* vrv=0);
 	void DeleteSelection();
 	void DeleteAll();
 	wxString GetText(long item, int col);
@@ -69,7 +69,6 @@ public:
 	friend class TraceDlg;
 
 private:
-	wxWindow* m_frame;
 	VRenderView *m_view;
 
 private:

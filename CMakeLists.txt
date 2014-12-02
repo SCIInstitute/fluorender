@@ -85,7 +85,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 #wxWidgets
 set(wxWidgets_CONFIGURATION mswu)
-find_package(wxWidgets COMPONENTS core base aui html xrc xml net adv gl REQUIRED)
+find_package(wxWidgets COMPONENTS core base aui html xrc xml net adv gl stc scintilla REQUIRED)
 include(${wxWidgets_USE_FILE})
 set(wxWidgets_USE_STATIC ON)
 #solution for wxWidgets linking "ambiguous" errors
@@ -95,8 +95,11 @@ add_definitions(-D_WCHAR_H_CPLUSPLUS_98_CONFORMANCE_)
 find_package(OpenGL REQUIRED)
 
 #Boost
-find_package(Boost REQUIRED)
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
+set(Boost_USE_STATIC_LIBS        ON) # only find static libs
+set(Boost_USE_MULTITHREADED      ON)
+set(Boost_USE_STATIC_RUNTIME    OFF)
+find_package(Boost COMPONENTS system chrono REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
 
 #teem
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/teem)
@@ -125,6 +128,12 @@ file(GLOB gl_hdrs1 fluorender/glew/*.h)
 file(GLOB gl_hdrs2 fluorender/glew/GL/*.h)
 add_library(GLEW_OBJ OBJECT
       ${gl_srcs} ${gl_hdrs1} ${gl_hdrs2})
+
+#pole
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/pole)
+file(GLOB pole_srcs fluorender/pole/pole.cpp)
+file(GLOB pole_hdrs fluorender/pole/pole.h)
+add_library(POLE_OBJ OBJECT ${pole_srcs} ${pole_hdrs})
 
 #ffmpeg
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
@@ -224,6 +233,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       $<TARGET_OBJECTS:NV_OBJ>
       $<TARGET_OBJECTS:FORMATS_OBJ>
       $<TARGET_OBJECTS:GLEW_OBJ>
+      $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>)
 
 elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -249,6 +259,7 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 		  $<TARGET_OBJECTS:NV_OBJ>
 		  $<TARGET_OBJECTS:FORMATS_OBJ>
 		  $<TARGET_OBJECTS:GLEW_OBJ>
+          $<TARGET_OBJECTS:POLE_OBJ>
 		  $<TARGET_OBJECTS:TEEM_OBJ>)
    endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
    # windows
@@ -289,6 +300,7 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 		  $<TARGET_OBJECTS:NV_OBJ>
 		  $<TARGET_OBJECTS:FORMATS_OBJ>
 		  $<TARGET_OBJECTS:GLEW_OBJ>
+          $<TARGET_OBJECTS:POLE_OBJ>
 		  $<TARGET_OBJECTS:TEEM_OBJ>
 		  $<TARGET_OBJECTS:WACUTILS_OBJ>)
    endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")

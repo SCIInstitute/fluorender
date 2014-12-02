@@ -62,12 +62,12 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
-#define VERSION_CONTACT "http://www.sci.utah.edu/software/46-documentation/137-fluorender.html?start=8"
+#define VERSION_CONTACT "http://www.sci.utah.edu/software/fluorender.html"
 #define VERSION_AUTHORS "    Yong Wan, Hideo Otsuna,\nChuck Hansen, Chi-Bin Chien,\nBrig Bagley\n      @The University of Utah"
 #define VERSION_UPDATES "http://www.sci.utah.edu/releases/fluorender_v2.14/"
-#define HELP_MOVIE "http://www.sci.utah.edu/software/46-documentation/137-fluorender.html.html?start=1/#MovieExport"
-#define BATCH_INFO "http://www.sci.utah.edu/software/46-documentation/137-fluorender.html?start=5/#3D_Macros"
-#define HELP_PAINT "http://www.sci.utah.edu/software/46-documentation/137-fluorender.html.html?start=1/#volume_edit"
+#define HELP_MOVIE "http://www.sci.utah.edu/releases/fluorender_v2.9.0/FluoRender_Manual.pdf"
+#define BATCH_INFO "http://www.sci.utah.edu/releases/fluorender_v2.9.0/FluoRender_Manual.pdf"
+#define HELP_PAINT "http://www.sci.utah.edu/releases/fluorender_v2.9.0/FluoRender_Manual.pdf"
 
 #define UITEXT_DATAVIEW		"Datasets"
 #define UITEXT_TREEVIEW		"Workspace"
@@ -362,7 +362,7 @@ private:
 	//mac address
 	wxString m_address;
 	//free version
-	bool m_free_version;
+	//bool m_free_version;
 
 private:
 	//views

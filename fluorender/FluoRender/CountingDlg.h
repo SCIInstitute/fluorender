@@ -66,9 +66,9 @@ private:
 	//current view
 	VRenderView *m_view;
 	//current group
-	DataGroup *m_group;
+	//DataGroup *m_group;
 	//current volume
-	VolumeData *m_vol;
+	//VolumeData *m_vol;
 
 	//max volume value
 	double m_max_value;

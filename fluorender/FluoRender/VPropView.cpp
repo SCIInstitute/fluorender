@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
+#include <wx/aboutdlg.h>
 #include <wx/colordlg.h>
 #include <wx/valnum.h>
 #include "png_resource.h"
@@ -96,6 +97,7 @@ EVT_TOOL(ID_MipChk, VPropView::OnMIPCheck)
 EVT_TOOL(ID_NRChk, VPropView::OnNRCheck)
 //depth mode
 EVT_TOOL(ID_DepthChk, VPropView::OnDepthCheck)
+EVT_TOOL(ID_FluoRender, VPropView::OnFluoRender)
 END_EVENT_TABLE()
 
 VPropView::VPropView(wxWindow* frame,
@@ -407,14 +409,13 @@ VPropView::VPropView(wxWindow* frame,
    sizer_r3->Add(m_color_text, 0, wxALIGN_CENTER, 0);
    sizer_r3->Add(m_color_btn, 1, wxALIGN_CENTER, 0);
    // FluoRender Image (rows 4-5)
-   wxToolBar * tmp= new wxToolBar(this, wxID_ANY);
-   tmp->AddTool(wxID_ANY, "FluoRender (c) 2014",
+   wxToolBar * tmp= new wxToolBar(this, ID_FluoRender);
+   tmp->AddTool(ID_FluoRender, "FluoRender (c) 2014",
          wxGetBitmapFromMemory(logo_small),
 		 wxGetBitmapFromMemory(logo_small),
 		 wxITEM_NORMAL,
 		 "FluoRender (c) 2014",
 		 "FluoRender (c) 2014");
-   tmp->Disable();
    sizer_r4->Add(tmp, 0, wxALIGN_CENTER);
    tmp->Realize();
 
@@ -1562,6 +1563,27 @@ void VPropView::OnNRCheck(wxCommandEvent &event)
    }
 
    RefreshVRenderViews();
+}
+
+void VPropView::OnFluoRender(wxCommandEvent &event) {
+	
+   wxString time = wxNow();
+   int psJan = time.Find("Jan");
+   int psDec = time.Find("Dec");
+
+   wxAboutDialogInfo info;
+   wxIcon icon;
+   if (psJan!=wxNOT_FOUND || psDec!=wxNOT_FOUND)
+      icon.CopyFromBitmap(wxGetBitmapFromMemory(logo_snow));
+   else
+      icon.CopyFromBitmap(wxGetBitmapFromMemory(logo));
+   info.SetIcon(icon);
+   info.SetName(FLUORENDER_TITLE);
+   info.SetVersion(wxString::Format("%d.%d", VERSION_MAJOR, VERSION_MINOR));
+   info.SetCopyright(VERSION_COPYRIGHT);
+   info.SetWebSite(VERSION_CONTACT, "Contact Info");
+   info.SetDescription(VERSION_AUTHORS);
+   wxAboutBox(info);
 }
 
 //depth mode

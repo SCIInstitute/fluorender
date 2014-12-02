@@ -74,12 +74,7 @@ void PVXMLReader::SetFile(string &file)
          m_path_name.clear();
       m_path_name.assign(file.length(), L' ');
       copy(file.begin(), file.end(), m_path_name.begin());
-#ifdef _WIN32
-   wchar_t slash = L'\\';
-#else
-   wchar_t slash = L'/';
-#endif
-      m_data_name = m_path_name.substr(m_path_name.find_last_of(slash)+1);
+      m_data_name = m_path_name.substr(m_path_name.find_last_of(GETSLASH())+1);
    }
    m_id_string = m_path_name;
 }
@@ -87,12 +82,7 @@ void PVXMLReader::SetFile(string &file)
 void PVXMLReader::SetFile(wstring &file)
 {
    m_path_name = file;
-#ifdef _WIN32
-   wchar_t slash = L'\\';
-#else
-   wchar_t slash = L'/';
-#endif
-   m_data_name = m_path_name.substr(m_path_name.find_last_of(slash)+1);
+   m_data_name = m_path_name.substr(m_path_name.find_last_of(GETSLASH())+1);
    m_id_string = m_path_name;
 }
 
@@ -104,13 +94,8 @@ void PVXMLReader::Preprocess()
    m_max_value = 0.0;
    m_seq_boxes.clear();
 
-#ifdef _WIN32
-   wchar_t slash = L'\\';
-#else
-   wchar_t slash = L'/';
-#endif
    //separate path and name
-   size_t pos = m_path_name.find_last_of(slash);
+   int64_t pos = m_path_name.find_last_of(GETSLASH());
    if (pos == -1)
       return;
    wstring path = m_path_name.substr(0, pos+1);
@@ -588,15 +573,10 @@ wstring PVXMLReader::GetTimeId()
 
 void PVXMLReader::SetBatch(bool batch)
 {
-#ifdef _WIN32
-   wchar_t slash = L'\\';
-#else
-   wchar_t slash = L'/';
-#endif
    if (batch)
    {
       //read the directory info
-      wstring search_path = m_path_name.substr(0, m_path_name.find_last_of(slash)) + slash;
+      wstring search_path = m_path_name.substr(0, m_path_name.find_last_of(GETSLASH())) + GETSLASH();
       FIND_FILES(search_path,L".oib",m_batch_list,m_cur_batch);
       m_batch = true;
    }
@@ -649,7 +629,7 @@ Nrrd *PVXMLReader::Convert(int t, int c, bool get_max)
          {
             FrameInfo *frame_info = &((sequence_info->frames)[j]);
 
-            if (c >= frame_info->channels.size())
+            if ((size_t)c >= frame_info->channels.size())
                continue;
 
             long frame_size = frame_info->x_size * frame_info->y_size;

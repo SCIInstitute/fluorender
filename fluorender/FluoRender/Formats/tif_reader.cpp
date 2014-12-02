@@ -90,19 +90,14 @@ void TIFReader::Preprocess()
 
    m_4d_seq.clear();
 
-#ifdef _WIN32
-   wchar_t slash = L'\\';
-#else
-   wchar_t slash = L'/';
-#endif
    //separate path and name
-   size_t pos = m_path_name.find_last_of(slash);
+   int64_t pos = m_path_name.find_last_of(GETSLASH());
    if (pos == -1)
       return;
    wstring path = m_path_name.substr(0, pos+1);
    wstring name = m_path_name.substr(pos+1);
    //extract time sequence string
-   size_t begin = name.find(m_time_id);
+   int64_t begin = name.find(m_time_id);
    size_t end = -1;
    size_t id_len = m_time_id.size();
    if (begin != -1)
@@ -175,7 +170,7 @@ void TIFReader::Preprocess()
          //extract common string in name
          size_t pos2 = slice_str.find_last_of(L'.');
          size_t begin2 = 0;
-         size_t end2 = -1;
+         int64_t end2 = -1;
          for (i=int(pos2)-1; i>=0; i--)
          {
             if (iswdigit(slice_str[i]) && end2==-1)
@@ -450,15 +445,10 @@ wstring TIFReader::GetTimeId()
 
 void TIFReader::SetBatch(bool batch)
 {
-#ifdef _WIN32
-   wchar_t slash = L'\\';
-#else
-   wchar_t slash = L'/';
-#endif
    if (batch)
    {
       //separate path and name
-      size_t pos = m_path_name.find_last_of(slash);
+      int64_t pos = m_path_name.find_last_of(GETSLASH());
       if (pos == -1)
          return;
       wstring path = m_path_name.substr(0, pos+1);
@@ -487,7 +477,7 @@ bool TIFReader::IsBatchFileIdentical(wstring name1, wstring name2)
 {
    if (m_4d_seq.size() > 1)
    {
-      size_t pos = name1.find(m_time_id);
+      int64_t pos = name1.find(m_time_id);
       if (pos == -1)
          return false;
       wstring find_str = name1.substr(0, pos+2);
@@ -499,9 +489,9 @@ bool TIFReader::IsBatchFileIdentical(wstring name1, wstring name2)
    }
    else if (m_slice_seq)
    {
-      size_t pos = name1.find_last_of(L'.');
-      size_t begin = -1;
-      size_t end = -1;
+      int64_t pos = name1.find_last_of(L'.');
+      int64_t begin = -1;
+      int64_t end = -1;
       for (int i=int(pos)-1; i>=0; i--)
       {
          if (iswdigit(name1[i]) && end==-1 && begin==-1)
@@ -555,15 +545,10 @@ Nrrd* TIFReader::Convert(int t, int c, bool get_max)
          c<0 || c>=m_chan_num)
       return 0;
 
-#ifdef _WIN32
-   wchar_t slash = L'\\';
-#else
-   wchar_t slash = L'/';
-#endif
    Nrrd* data = 0;
    TimeDataInfo chan_info = m_4d_seq[t];
    m_data_name = chan_info.slices[0].slice.substr(
-         chan_info.slices[0].slice.find_last_of(slash)+1);
+         chan_info.slices[0].slice.find_last_of(GETSLASH())+1);
    data = ReadTiff(chan_info.slices, c, get_max);
    m_cur_time = t;
    return data;
@@ -571,7 +556,7 @@ Nrrd* TIFReader::Convert(int t, int c, bool get_max)
 
 wstring TIFReader::GetCurName(int t, int c)
 {
-   if (t>=0 && t<m_4d_seq.size())
+   if (t>=0 && t<(int64_t)m_4d_seq.size())
       return (m_4d_seq[t].slices)[0].slice;
    else
       return L"";
@@ -767,16 +752,14 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 
    char img_desc[256];
    GetTiffField(kImageDescriptionTag, img_desc, 256);
-   if (img_desc){
-      string desc = string ((char*)img_desc);
-      size_t start = desc.find("spacing=");
-      if (start!=-1) {
-         string spacing = desc.substr(start+8);
-         size_t end = spacing.find("\n");
-         if (end != -1)
-            z_res = static_cast<float>(
-                  atof(spacing.substr(0, end).c_str()));
-      }
+   string desc = string ((char*)img_desc);
+   int64_t start = desc.find("spacing=");
+   if (start!=-1) {
+      string spacing = desc.substr(start+8);
+      int64_t end = spacing.find("\n");
+      if (end != -1)
+         z_res = static_cast<float>(
+          atof(spacing.substr(0, end).c_str()));
    }
 
    if (x_res>0.0 && y_res>0.0 && z_res>0.0) {

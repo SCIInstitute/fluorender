@@ -1,12 +1,7 @@
 #define KX 3
 #define KY 3
 #define KZ 3
-#define MAX 3
-float sharp(int i, int j, int k)
-{
-	int d = abs(i) + abs(j) + abs(k);
-	return pow(2.0, MAX-d)*(d%2?-1:1);
-}
+#define MAX 0.03
 const sampler_t samp =
 	CLK_NORMALIZED_COORDS_FALSE|
 	CLK_ADDRESS_REPEAT|
@@ -23,16 +18,29 @@ __kernel void main(
 	int4 kc;
 	float4 dvalue;
 	float rvalue = 0.0;
-	for (int i=0; i<KX; ++i)
-	for (int j=0; j<KY; ++j)
-	for (int k=0; k<KZ; ++k)
+	int i, j, k;
+	dvalue = read_imagef(data, samp, coord);
+	float cvalue = dvalue.x;
+	for (i=0; i<KX; ++i)
+	for (j=0; j<KY; ++j)
+	for (k=0; k<KZ; ++k)
 	{
 		kc = (int4)(coord.x+(i-KX/2),
 				coord.y+(j-KY/2),
 				coord.z+(k-KZ/2), 1);
 		dvalue = read_imagef(data, samp, kc);
-		rvalue += sharp(i-KX/2, j-KY/2, k-KZ/2) * dvalue.x;
+		rvalue += fabs(dvalue.x-cvalue);
 	}
 	unsigned int index = x*y*coord.z + x*coord.y + coord.x;
-	result[index] = rvalue*255.0;
+	rvalue /= KX*KY*KZ;
+	if (rvalue > MAX)
+		rvalue = 1.0;
+	else
+	{
+		rvalue -= MAX;
+		rvalue *= rvalue;
+		rvalue = -rvalue/0.01;
+		rvalue = exp(rvalue);
+	}
+	result[index] = clamp(cvalue*rvalue, 0.0, 1.0)*255.0;
 }

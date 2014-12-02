@@ -82,18 +82,13 @@ void OIBReader::Preprocess()
    m_oib_info.clear();
 
    //separate path and name
-#ifdef _WIN32
-   wchar_t slash = L'\\';
-#else
-   wchar_t slash = L'/';
-#endif
-   size_t pos = m_path_name.find_last_of(slash);
+   int64_t pos = m_path_name.find_last_of(GETSLASH());
    if (pos == -1)
       return;
    wstring path = m_path_name.substr(0, pos+1);
    wstring name = m_path_name.substr(pos+1);
    //extract time sequence string
-   size_t begin = name.find(m_time_id);
+   int64_t begin = name.find(m_time_id);
    size_t end = -1;
    size_t id_len = m_time_id.size();
    if (begin != -1)
@@ -123,7 +118,7 @@ void OIBReader::Preprocess()
       std::vector<std::wstring> list;
       int tmp = 0;
       FIND_FILES(path,L".oib",list,tmp,name.substr(0,begin+id_len+1));
-      for(int i = 0; i < list.size(); i++) {
+      for(size_t i = 0; i < list.size(); i++) {
          size_t start_idx = list.at(i).find(m_time_id) + id_len;
          size_t end_idx   = list.at(i).find(L".oib");
          size_t size = end_idx - start_idx;
@@ -161,81 +156,54 @@ bool OIBReader::oib_sort(const TimeDataInfo& info1, const TimeDataInfo& info2)
 
 void OIBReader::ReadSingleOib()
 {
-   //TODO
-#ifdef _WIN32
    //read the current file info
    //storage
-   IStorage *pStg = NULL;
+   POLE::Storage pStg(ws2s(m_path_name).c_str()); 
    //open
-   if (StgOpenStorageEx(m_path_name.c_str(),
-            STGM_DIRECT|STGM_READ|STGM_SHARE_DENY_WRITE,
-            STGFMT_STORAGE, 0, NULL, NULL, IID_IStorage,
-            (void**)&pStg) == S_OK)
-   {
+   if (pStg.open()) {
       //enumerate
-      IEnumSTATSTG *pEnum = NULL;
-      if (pStg->EnumElements(0, NULL, 0, &pEnum) == S_OK)
-      {
-         STATSTG statStg;
-         while (pEnum->Next(1, &statStg, NULL) == S_OK)
-         {
-            if (statStg.type == STGTY_STREAM)
-            {
-               wstring stream_name(statStg.pwcsName);
-               ReadStream(pStg, stream_name);
-            }
-         }
-      }
+	  std::list<std::string> entries = 
+		  pStg.entries();
+	  for(std::list<std::string>::iterator it = entries.begin();
+		  it != entries.end(); ++it) {
+		  if (!pStg.isDirectory(*it)) {
+			std::wstring st = s2ws(*it);
+			ReadStream(pStg,st);
+		  }
+	  }
    }
-
    //release
-   if (pStg)
-      pStg->Release();
-#endif
+   pStg.close();
 }
 
 void OIBReader::ReadSequenceOib()
 {
-   // TODO
-#ifdef _WIN32
    for (int i=0; i<(int)m_oib_info.size(); i++)
    {
       wstring path_name = m_oib_info[i].filename;
 
       if (path_name == m_path_name)
          m_cur_time = i;
-
-      //read the current file info
-      //storage
-      IStorage *pStg = NULL;
-      //open
-      if (StgOpenStorageEx(path_name.c_str(),
-               STGM_DIRECT|STGM_READ|STGM_SHARE_DENY_WRITE,
-               STGFMT_STORAGE, 0, NULL, NULL, IID_IStorage,
-               (void**)&pStg) == S_OK)
-      {
-         //enumerate
-         IEnumSTATSTG *pEnum = NULL;
-         if (pStg->EnumElements(0, NULL, 0, &pEnum) == S_OK)
-         {
-            STATSTG statStg;
-            while (pEnum->Next(1, &statStg, NULL) == S_OK)
-            {
-               if (statStg.type == STGTY_STREAM)
-               {
-                  wstring stream_name(statStg.pwcsName);
+	  
+	   //storage
+	   POLE::Storage pStg("temp_storage.txt"); 
+	   //open
+	   if (pStg.open()) {
+		  //enumerate
+		  std::list<std::string> entries = 
+			  pStg.entries();
+		  for(std::list<std::string>::iterator it = entries.begin();
+			  it != entries.end(); ++it) {
                   m_oib_t = i;
-                  ReadStream(pStg, stream_name);
-               }
-            }
-         }
-      }
-
-      //release
-      if (pStg)
-         pStg->Release();
+			  if (!pStg.isDirectory(*it)) {
+				  std::wstring st = s2ws(*it);
+				  ReadStream(pStg,st);
+			  }
+		  }
+	   }
+	   //release
+	   pStg.close();
    }
-#endif
 }
 
 void OIBReader::SetSliceSeq(bool ss)
@@ -263,13 +231,8 @@ void OIBReader::SetBatch(bool batch)
    if (batch)
    {
       //read the directory info
-#ifdef _WIN32
-      wchar_t slash = L'\\';
-#else
-      wchar_t slash = L'/';
-#endif
       wstring search_path = m_path_name.substr(0,
-            m_path_name.find_last_of(slash)) + slash;
+            m_path_name.find_last_of(GETSLASH())) + GETSLASH();
       FIND_FILES(search_path,L".oib",m_batch_list,m_cur_batch);
       m_batch = true;
    }
@@ -293,53 +256,43 @@ int OIBReader::LoadBatch(int index)
    return result;
 }
 
-#ifdef _WIN32 //TODO
-void OIBReader::ReadStream(IStorage *pStg, wstring &stream_name)
+void OIBReader::ReadStream(POLE::Storage &pStg, wstring &stream_name)
 {
-	IStream *pStm = NULL;
-	BYTE *pbyData = 0;
+	POLE::Stream pStm(&pStg,ws2s(stream_name));
+	unsigned char *pbyData = 0;
 
 	//open
-	if (pStg->OpenStream(stream_name.c_str(),
-		NULL, STGM_DIRECT|STGM_READ|STGM_SHARE_EXCLUSIVE,
-		0, &pStm) == S_OK)
+	if (!pStm.eof() && !pStm.fail())
 	{
 		//get stream size
-		STATSTG statStg;
-		//get info
-		if (pStm->Stat(&statStg, STATFLAG_NONAME) == S_OK)
-		{
-			//allocate
-			pbyData = new BYTE[statStg.cbSize.u.LowPart];
-			//read
-			if (pStm->Read(pbyData, statStg.cbSize.u.LowPart, NULL) == S_OK)
-			{
-				//read oib info
-				if (stream_name == wstring(L"OibInfo.txt"))
-					ReadOibInfo(pbyData, statStg.cbSize.u.LowPart);
-				else
-				{
-					if (m_type==0 || (m_type==1 && m_oib_t==0))
-						ReadOif(pbyData, statStg.cbSize.u.LowPart);
-				}
+		size_t sz = pStm.size();
+		//allocate 
+		pbyData = new unsigned char[sz];
+		if (!pbyData) return;
+		//read
+		if (pStm.read(pbyData,sz)) {
+			//read oib info
+			if (stream_name == wstring(L"OibInfo.txt")) {
+				ReadOibInfo(pbyData, sz);
+			} else {
+				if (m_type==0 || (m_type==1 && m_oib_t==0))
+					ReadOif(pbyData, sz);
 			}
 		}
 	}
 
 	//release
-	if (pStm)
-		pStm->Release();
 	if (pbyData)
-		delete []pbyData;
+		delete[] pbyData;
 }
 
-void OIBReader::ReadOibInfo(BYTE* pbyData, ULONG size)
+void OIBReader::ReadOibInfo(unsigned char* pbyData, size_t size)
 {
 	if (!pbyData || !size)
 		return;
-	WCHAR* data = (WCHAR*)pbyData;
+	uint16_t * data = (uint16_t *)pbyData;
 
-	ULONG i = 1;
+	size_t i = 1;
 	wstring oneline;
 
 	while (i<size/2)
@@ -373,8 +326,8 @@ void OIBReader::ReadOibInfo(BYTE* pbyData, ULONG size)
 			}
 			else if (oneline.substr(line_size-3, 3) == L"tif")
 			{
-				size_t pos1 = oneline.find(L'=');
-				size_t pos2 = oneline.find_last_of(L'/');
+				int64_t pos1 = oneline.find(L'=');
+				int64_t pos2 = oneline.find_last_of(L'/');
 				pos2 = pos2==-1?oneline.find_last_of(L'\\'):pos2;
 				if (pos1!=-1 && pos2!=-1)
 				{
@@ -384,8 +337,8 @@ void OIBReader::ReadOibInfo(BYTE* pbyData, ULONG size)
 					file_name = oneline.substr(oneline.find_first_not_of(L' ', pos2+1));
 
 					//interpret file_name
-					size_t pos;
-					size_t pos_ = file_name.find_last_of(L'_');
+					int64_t pos;
+					int64_t pos_ = file_name.find_last_of(L'_');
 					if (pos_!=-1)
 					{
 						size_t j;
@@ -406,7 +359,7 @@ void OIBReader::ReadOibInfo(BYTE* pbyData, ULONG size)
 								else
 									break;
 							}
-							num_c = _wtoi(wstr.c_str());
+							num_c = WSTOI(wstr.c_str());
 							wstr.clear();
 						}
 						//read z number 'Z'
@@ -420,7 +373,7 @@ void OIBReader::ReadOibInfo(BYTE* pbyData, ULONG size)
 								else
 									break;
 							}
-							num_z = _wtoi(wstr.c_str());
+							num_z = WSTOI(wstr.c_str());
 							wstr.clear();
 						}
 						//read time number 'T'
@@ -434,7 +387,7 @@ void OIBReader::ReadOibInfo(BYTE* pbyData, ULONG size)
 								else
 									break;
 							}
-							num_t = _wtoi(wstr.c_str());
+							num_t = WSTOI(wstr.c_str());
 							wstr.clear();
 						}
 						//read lambda number 'L'
@@ -448,7 +401,7 @@ void OIBReader::ReadOibInfo(BYTE* pbyData, ULONG size)
 								else
 									break;
 							}
-							num_l = _wtoi(wstr.c_str());
+							num_l = WSTOI(wstr.c_str());
 							wstr.clear();
 						}
 
@@ -497,7 +450,7 @@ void OIBReader::ReadOibInfo(BYTE* pbyData, ULONG size)
 	}
 }
 
-void OIBReader::ReadOif(BYTE *pbyData, ULONG size)
+void OIBReader::ReadOif(unsigned char *pbyData, size_t size)
 {
 	if (!pbyData || !size)
 		return;
@@ -510,9 +463,9 @@ void OIBReader::ReadOif(BYTE *pbyData, ULONG size)
 	m_yspc = 0.0;
 	m_zspc = 0.0;
 
-	WCHAR* data = (WCHAR*)pbyData;
+	uint16_t* data = (uint16_t*)pbyData;
 
-	ULONG i = 1;
+	size_t i = 1;
 	wstring oneline;
 
 	//axis info
@@ -538,7 +491,6 @@ void OIBReader::ReadOif(BYTE *pbyData, ULONG size)
 		else
 		{
 			//process
-			size_t line_size = oneline.size();
 			if (oneline.substr(0, 6) == L"[Axis ")
 			{
 				axis_num++;
@@ -620,6 +572,7 @@ void OIBReader::ReadOif(BYTE *pbyData, ULONG size)
 			}
 			if (oneline.substr(0, 9) == L"[Channel ")
 			{
+				light_type.clear();
 				chan_num++;
 			}
 			else
@@ -629,15 +582,28 @@ void OIBReader::ReadOif(BYTE *pbyData, ULONG size)
 					size_t pos = oneline.find(L'=');
 					wstring str1 = oneline.substr(0, oneline.find_last_not_of(L' ', pos));
 					wstring str2 = oneline.substr(oneline.find_first_not_of(L' ', pos+1));
-
-					if (str1 == L"ExcitationWavelength")
+					wstring str3 = L"Transmitted Light";
+					if (str1 == L"LightType") {
+						light_type = str2;
+						if (light_type.find(str3) != wstring::npos) {
+							for (int i = m_excitation_wavelength_list.size() - 1; i >= 0; i--) {
+								if (m_excitation_wavelength_list.at(i).chan_num == cur_chan) {
+									m_excitation_wavelength_list.at(i).wavelength = -1;
+									break;
+								}
+							}
+						}
+					}
+					else if (str1 == L"ExcitationWavelength")
 					{
 						if (cur_chan != chan_num)
 						{
 							cur_chan = chan_num;
 							WavelengthInfo info;
 							info.chan_num = cur_chan;
-							info.wavelength = _wtof(str2.c_str());
+							info.wavelength = WSTOD(str2.c_str());
+							if (light_type == L"Transmitted Light")
+								info.wavelength = -1;
 							m_excitation_wavelength_list.push_back(info);
 						}
 					}
@@ -653,27 +619,27 @@ void OIBReader::ReadOif(BYTE *pbyData, ULONG size)
 			!max_size.empty() &&
 			!start_pos.empty() &&
 			!end_pos.empty())
-		{
+		{ 
 			//calculate
 			double spc = 0.0;
-			double dmax = _wtof(max_size.c_str());
+			double dmax = WSTOD(max_size.c_str());
 			if (dmax > 0.0)
-				spc= fabs((_wtof(end_pos.c_str())-
-					_wtof(start_pos.c_str())))/
+				spc= fabs((WSTOD(end_pos.c_str())-
+					WSTOD(start_pos.c_str())))/
 					dmax;
-			if (pix_unit.find(L"nm")!=-1)
+			if ((int64_t)pix_unit.find(L"nm")!=-1)
 				spc /= 1000.0;
-			if (axis_code.find(L"X")!=-1)
+			if ((int64_t)axis_code.find(L"X")!=-1)
 			{
-				m_x_size = _wtoi(max_size.c_str());
+				m_x_size = WSTOI(max_size.c_str());
 				m_xspc = spc;
 			}
-			else if (axis_code.find(L"Y")!=-1)
+			else if ((int64_t)axis_code.find(L"Y")!=-1)
 			{
-				m_y_size = _wtoi(max_size.c_str());
+				m_y_size = WSTOI(max_size.c_str());
 				m_yspc = spc;
 			}
-			else if (axis_code.find(L"Z")!=-1)
+			else if ((int64_t)axis_code.find(L"Z")!=-1)
 				m_zspc = spc;
 
 			axis_code.clear();
@@ -701,7 +667,6 @@ void OIBReader::ReadOif(BYTE *pbyData, ULONG size)
 		m_zspc = 1.0;
 	}
 }
-#endif
 
 double OIBReader::GetExcitationWavelength(int chan)
 {
@@ -715,8 +680,7 @@ double OIBReader::GetExcitationWavelength(int chan)
 
 Nrrd *OIBReader::Convert(int t, int c, bool get_max)
 {
-    Nrrd *data = 0;
-#ifdef _WIN32
+   Nrrd *data = 0;
    int sl_num = 0;
    if (t>=0 && t<m_time_num &&
          c>=0 && c<m_chan_num &&
@@ -724,110 +688,97 @@ Nrrd *OIBReader::Convert(int t, int c, bool get_max)
          m_x_size > 0 &&
          m_y_size > 0)
    {
-      wstring path_name = m_type==0?m_path_name:m_oib_info[t].filename;
+	   unsigned char *pbyData = 0;
+       wstring path_name = m_type==0?m_path_name:m_oib_info[t].filename;
+	   //storage
+	   POLE::Storage pStg(ws2s(path_name).c_str()); 
+	   //open
+	   if (pStg.open()) {
+		  //allocate memory for nrrd
+		  unsigned short *val = new (std::nothrow) unsigned short[
+			  m_x_size*m_y_size*m_slice_num];
+		  //enumerate
+		  std::list<std::string> entries = 
+			  pStg.entries();
+		  for(std::list<std::string>::iterator it = entries.begin();
+			  it != entries.end(); ++it) {
+			if (pStg.isDirectory(*it)) {
+				std::list<std::string> streams =  pStg.GetAllStreams(*it);
+				size_t num = 0;
+				ChannelInfo *cinfo = &m_oib_info[t].dataset[c];
+				for(std::list<std::string>::iterator its = streams.begin();
+						its != streams.end(); ++its) {
+					if (num >= cinfo->size()) break;
+					//fix the stream name
+					std::string str_name = ws2s((*cinfo)[num].stream_name);
+					std::string name = (*it) + std::string("/") + str_name;
+					  
+					POLE::Stream pStm(&pStg,name);
 
-      //main storage
-      IStorage *pStg = NULL;
-      //open
-      if (StgOpenStorageEx(path_name.c_str(),
-               STGM_DIRECT|STGM_READ|STGM_SHARE_DENY_WRITE,
-               STGFMT_STORAGE, 0, NULL, NULL, IID_IStorage,
-               (void**)&pStg) == S_OK)
-      {
-         wstring substg_name = m_type==0?m_substg_name:m_oib_info[t].substgname;
+					//open
+					if (!pStm.eof() && !pStm.fail())
+					{
+						//get stream size
+						size_t sz = pStm.size();
+						//allocate 
+						pbyData = new unsigned char[sz];
+						if (!pbyData) 
+							return NULL;
+						//read
+						if (pStm.read(pbyData,sz)) {
+									
+							//copy tiff to val
+							ReadTiff(pbyData, val, num);
 
-         //substorage
-         IStorage *pSubStg = NULL;
-         if (pStg->OpenStorage(substg_name.c_str(),
-                  NULL, STGM_DIRECT|STGM_READ|STGM_SHARE_EXCLUSIVE,
-                  NULL, 0, &pSubStg) == S_OK)
-         {
-            //allocate memory for nrrd
-            unsigned short *val = new (std::nothrow) unsigned short[m_x_size*m_y_size*m_slice_num];
+							//increase
+							sl_num++;
+						}
+					}
 
-            //read the channel
-            ChannelInfo *cinfo = &m_oib_info[t].dataset[c];
-            int i;
-            for (i=0; i<int(cinfo->size()); i++)
-            {
-               //for each slice in the channel
-               IStream *pStm = NULL;
-               BYTE *pbyData = 0;
+					//release
+					if (pbyData)
+						delete[] pbyData;
+					num++;
+				 }
+			  }
+		   }
 
-               //open stream
-               if (pSubStg->OpenStream((*cinfo)[i].stream_name.c_str(),
-                        NULL, STGM_DIRECT|STGM_READ|STGM_SHARE_EXCLUSIVE,
-                        0, &pStm) == S_OK)
-               {
-                  //stream info
-                  STATSTG statStg;
-                  //get stream info
-                  if (pStm->Stat(&statStg, STATFLAG_NONAME) == S_OK)
-                  {
-                     //allocate memory
-                     pbyData = new BYTE[statStg.cbSize.u.LowPart];
-                     //read stream
-                     if (pStm->Read(pbyData, statStg.cbSize.u.LowPart, NULL) == S_OK)
-                     {
-                        //copy tiff to val
-                        ReadTiff(pbyData, val, i);
+			//create nrrd
+			if (val && sl_num == m_slice_num)
+			{
+				//ok
+				data = nrrdNew();
+				nrrdWrap(data, val, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, 
+					(size_t)m_slice_num);
+				nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
+				nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, 
+					m_zspc*m_slice_num);
+				nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+				nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size,
+					(size_t)m_y_size, (size_t)m_slice_num);
+			} else {
+				//something is wrong
+				if (val)
+					delete []val;
+			}
+			//release
+			pStg.close();
+	  }
+    }
 
-                        //increase
-                        sl_num++;
-                     }
-                  }
-               }
+	if (m_max_value > 0.0)
+		m_scalar_scale = 65535.0 / m_max_value;
 
-               //release
-               if (pStm)
-                  pStm->Release();
-               if (pbyData)
-                  delete []pbyData;
-            }
-
-            //create nrrd
-            if (val && sl_num == m_slice_num)
-            {
-               //ok
-               data = nrrdNew();
-               nrrdWrap(data, val, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-               nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-               nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
-               nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-               nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-            }
-            else
-            {
-               //something is wrong
-               if (val)
-                  delete []val;
-            }
-         }
-
-         //release substorage
-         if (pSubStg)
-            pSubStg->Release();
-      }
-
-      //release
-      if (pStg)
-         pStg->Release();
-   }
-
-   if (m_max_value > 0.0)
-      m_scalar_scale = 65535.0 / m_max_value;
-
-   m_cur_time = t;
-#endif
-   return data;
+	m_cur_time = t;
+	return data;
 }
 
 wstring OIBReader::GetCurName(int t, int c)
 {
    return m_type==0?wstring(L""):m_oib_info[t].filename;
 }
-#ifdef _WIN32
-void OIBReader::ReadTiff(BYTE *pbyData, unsigned short *val, int z)
+
+void OIBReader::ReadTiff(unsigned char *pbyData, unsigned short *val, int z)
 {
 	if (*((unsigned int*)pbyData) != 0x002A4949)
 		return;
@@ -961,5 +912,3 @@ void OIBReader::ReadTiff(BYTE *pbyData, unsigned short *val, int z)
 		}
 	}
 }
-
-#endif

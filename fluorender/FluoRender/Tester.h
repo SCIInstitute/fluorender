@@ -89,7 +89,7 @@ public:
 	wxButton *m_b1_btn;
 
 private:
-	wxWindow* m_frame;
+	//wxWindow* m_frame;
 
 	//sliders
 	void OnP1Change(wxScrollEvent &event);

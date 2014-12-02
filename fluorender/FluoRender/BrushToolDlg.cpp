@@ -112,10 +112,10 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
    m_dft_gm_falloff(0.0),
    m_dft_scl_falloff(0.0),
    m_dft_scl_translate(0.0),
-   m_dft_ca_falloff(1.0),
    m_dft_ca_min(0.0),
    m_dft_ca_max(0.0),
    m_dft_ca_thresh(0.0),
+   m_dft_ca_falloff(1.0),
    m_dft_nr_thresh(0.0),
    m_dft_nr_size(0.0)
 {
@@ -478,7 +478,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
    wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
    sizerV->Add(10, 10);
    sizerV->Add(group1, 0, wxEXPAND);
-   sizerV->Add(10, 20);
+   sizerV->Add(10, 5);
    sizerV->Add(group2, 0, wxEXPAND);
 
    SetSizerAndFit(sizerV);
@@ -987,7 +987,7 @@ void BrushToolDlg::OnNRAnalyzeBtn(wxCommandEvent &event)
       wxString str = m_nr_size_text->GetValue();
       str.ToDouble(&max_voxels);
 
-      int comps = m_cur_view->NoiseAnalysis(0.0, max_voxels, m_dft_ca_thresh);
+      //int comps = m_cur_view->NoiseAnalysis(0.0, max_voxels, m_dft_ca_thresh);
       m_cur_view->RefreshGL();
       //m_ca_comps_text->SetValue(wxString::Format("%d", comps));
    }
