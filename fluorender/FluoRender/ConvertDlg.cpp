@@ -108,7 +108,7 @@ wxPanel(parent, wxID_ANY,
 	m_cnv_vol_mesh_selected_chk->SetValue(true);
 	m_cnv_vol_mesh_weld_chk = new wxCheckBox(this, ID_CnvVolMeshWeldChk, "Weld vertices",
 		wxDefaultPosition, wxSize(-1, 23));
-	m_cnv_vol_mesh_weld_chk->SetValue(true);
+	m_cnv_vol_mesh_weld_chk->SetValue(false);
 	sizer14->Add(m_cnv_vol_mesh_usetransf_chk, 0, wxALIGN_CENTER);
 	sizer14->Add(m_cnv_vol_mesh_selected_chk, 0, wxALIGN_CENTER);
 	sizer14->Add(m_cnv_vol_mesh_weld_chk, 0, wxALIGN_CENTER);

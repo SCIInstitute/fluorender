@@ -449,6 +449,7 @@ void VRenderGLView::Init()
    {
       SetCurrent(*m_glRC);
       ShaderProgram::init_shaders_supported();
+	  KernelProgram::init_kernels_supported();
 
       VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
       if (vr_frame) vr_frame->SetTextureRendererSettings();
@@ -1870,6 +1871,10 @@ void VRenderGLView::Segment()
 		   vr_frame->GetTraceDlg()->CellLink(true, true);
 	   }
 	}
+	if (vr_frame && vr_frame->GetBrushToolDlg())
+	{
+		vr_frame->GetBrushToolDlg()->GetSettings(m_vrv);
+	}
 }
 
 //label volumes in current view
@@ -2099,7 +2104,10 @@ void VRenderGLView::LoadDefaultBrushSettings()
    if (fconfig.Read("brush_scl_falloff", &val))
       m_selector.SetBrushSclFalloff(val);
    if (fconfig.Read("brush_scl_translate", &val))
+   {
       m_selector.SetBrushSclTranslate(val);
+	  m_calculator.SetThreshold(val);
+   }
    //edge detect
    if (fconfig.Read("edge_detect", &bval))
       m_selector.SetEdgeDetect(bval);
@@ -2210,6 +2218,7 @@ int VRenderGLView::GetBrushIteration()
 void VRenderGLView::SetBrushSclTranslate(double val)
 {
    m_selector.SetBrushSclTranslate(val);
+   m_calculator.SetThreshold(val);
 }
 
 double VRenderGLView::GetBrushSclTranslate()
@@ -2258,6 +2267,17 @@ void VRenderGLView::SetSelectGroup(bool value)
 bool VRenderGLView::GetSelectGroup()
 {
    return m_selector.GetSelectGroup();
+}
+
+//estimate threshold
+void VRenderGLView::SetEstimateThresh(bool value)
+{
+	m_selector.SetEstimateThreshold(value);
+}
+
+bool VRenderGLView::GetEstimateThresh()
+{
+	return m_selector.GetEstimateThreshold();
 }
 
 //select both
@@ -3779,6 +3799,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
    if (m_mvr->get_vr_num()<=0)
       return;
    m_mvr->set_depth_peel(peel);
+   m_mvr->set_colormap_mode_single();
 
    int nx, ny;
    nx = GetSize().x;
@@ -4787,59 +4808,63 @@ void VRenderGLView::Get4DSeqFrames(int &start_frame, int &end_frame, int &cur_fr
 
 void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 {
-   int start_frame, end_frame, cur_frame;
-   Get4DSeqFrames(start_frame, end_frame, cur_frame);
-   if (frame > end_frame ||
-         frame < start_frame || cur_frame == frame)
-      return;
+	int start_frame, end_frame, cur_frame;
+	Get4DSeqFrames(start_frame, end_frame, cur_frame);
+	if (frame > end_frame ||
+		frame < start_frame)
+		return;
 
-   m_tseq_prv_num = m_tseq_cur_num;
-   m_tseq_cur_num = frame;
-   VRenderFrame* vframe = (VRenderFrame*)m_frame;
-   if (vframe && vframe->GetSettingDlg())
-      m_run_script = vframe->GetSettingDlg()->GetRunScript();
+	m_tseq_prv_num = m_tseq_cur_num;
+	m_tseq_cur_num = frame;
+	VRenderFrame* vframe = (VRenderFrame*)m_frame;
+	if (vframe && vframe->GetSettingDlg())
+		m_run_script = vframe->GetSettingDlg()->GetRunScript();
 
-   for (int i=0; i<(int)m_vd_pop_list.size(); i++)
-   {
-      VolumeData* vd = m_vd_pop_list[i];
-      if (vd && vd->GetReader())
-      {
-         BaseReader* reader = vd->GetReader();
+	for (int i=0; i<(int)m_vd_pop_list.size(); i++)
+	{
+		VolumeData* vd = m_vd_pop_list[i];
+		if (vd && vd->GetReader())
+		{
+			BaseReader* reader = vd->GetReader();
 
-         double spcx, spcy, spcz;
-         vd->GetSpacings(spcx, spcy, spcz);
+			if (cur_frame != frame)
+			{
 
-         Nrrd* data = reader->Convert(frame, vd->GetCurChannel(), false);
-         if (!vd->Replace(data, false))
-            continue;
+				double spcx, spcy, spcz;
+				vd->GetSpacings(spcx, spcy, spcz);
 
-         vd->SetCurTime(reader->GetCurTime());
-         vd->SetSpacings(spcx, spcy, spcz);
+				Nrrd* data = reader->Convert(frame, vd->GetCurChannel(), false);
+				if (!vd->Replace(data, false))
+					continue;
 
-         //run script
-         if (m_run_script && run_script)
-         {
-            wxString pathname = reader->GetPathName();
+				vd->SetCurTime(reader->GetCurTime());
+				vd->SetSpacings(spcx, spcy, spcz);
+
+				//update rulers
+				if (vframe && vframe->GetMeasureDlg())
+					vframe->GetMeasureDlg()->UpdateList();
+
+				if (vd->GetVR())
+					vd->GetVR()->clear_tex_pool();
+			}
+
+			//run script
+			if (m_run_script && run_script)
+			{
+				wxString pathname = reader->GetPathName();
             int pos = pathname.Find(GETSLASH(), true);
-            wxString scriptname = pathname.Left(pos+1) + "script_4d.txt";
-            if (wxFileExists(scriptname))
-            {
-               m_selector.SetVolume(vd);
-               m_calculator.SetVolumeA(vd);
-               m_cur_vol = vd;
-               Run4DScript(scriptname);
-            }
-         }
-
-         //update rulers
-         if (vframe && vframe->GetMeasureDlg())
-            vframe->GetMeasureDlg()->UpdateList();
-
-         if (vd->GetVR())
-            vd->GetVR()->clear_tex_pool();
-      }
-   }
-   RefreshGL();
+				wxString scriptname = pathname.Left(pos+1) + "script_4d.txt";
+				if (wxFileExists(scriptname))
+				{
+					m_selector.SetVolume(vd);
+					m_calculator.SetVolumeA(vd);
+					m_cur_vol = vd;
+					Run4DScript(scriptname);
+				}
+			}
+		}
+	}
+	RefreshGL();
 }
 
 void VRenderGLView::Get3DBatFrames(int &start_frame, int &end_frame, int &cur_frame)
@@ -5266,7 +5291,7 @@ void VRenderGLView::PostDraw()
       if (m_capture_bat && m_total_frames>1)
       {
          wxString path = m_cap_file;
-         wxString name = m_cap_file;
+          wxString name = m_cap_file;
          int sep = path.Find(GETSLASH(), true);
          if (sep != wxNOT_FOUND)
          {
@@ -11059,7 +11084,7 @@ void VRenderView::OnVolumeMethodCheck(wxCommandEvent& event)
       break;
    }
 
-   int new_mode = GetVolMethod();
+/*   int new_mode = GetVolMethod();
 
    if (new_mode == VOL_METHOD_MULTI &&
          (old_mode == VOL_METHOD_SEQ || old_mode == VOL_METHOD_COMP))
@@ -11185,7 +11210,7 @@ void VRenderView::OnVolumeMethodCheck(wxCommandEvent& event)
       }
 
       vr_frame->GetTree()->UpdateSelection();
-   }
+   }*/
 
    RefreshGL();
 }

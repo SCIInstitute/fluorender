@@ -39,6 +39,9 @@ public:
 	void SetVolumeA(VolumeData *vd);
 	void SetVolumeB(VolumeData *vd);
 
+	void SetThreshold(double thresh)
+	{ m_threshold = thresh; }
+
 	VolumeData* GetVolumeA();
 	VolumeData* GetVolumeB();
 	VolumeData* GetResult();
@@ -62,12 +65,14 @@ private:
 				//8:intersection with masks if available
 				//9:fill holes
 
+	double m_threshold;
+
 private:
 	void CreateVolumeResult1();//create the resulting volume from one input
 	void CreateVolumeResult2();//create the resulting volume from two inputs
 
 	//fill holes
-	void FillHoles();
+	void FillHoles(double thresh);
 };
 
 #endif//_VOLUMECALCULATOR_H_

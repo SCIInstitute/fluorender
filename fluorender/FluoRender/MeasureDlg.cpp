@@ -101,7 +101,7 @@ void RulerListCtrl::Append(wxString name, double length, wxString &unit,
    SetItem(tmp, 5, extra);
 }
 
-void RulerListCtrl::Update(VRenderView* vrv)
+void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 {
    if (vrv)
       m_view = vrv;
@@ -181,7 +181,7 @@ void RulerListCtrl::DeleteSelection()
                delete ruler;
             }
          }
-         Update();
+         UpdateRulers();
          m_view->RefreshGL();
       }
    }
@@ -220,7 +220,7 @@ void RulerListCtrl::DeleteAll(bool cur_time)
          ruler_list->clear();
       }
 
-      Update();
+      UpdateRulers();
       m_view->RefreshGL();
    }
 }
@@ -460,7 +460,7 @@ VRenderView* MeasureDlg::GetView()
 void MeasureDlg::UpdateList()
 {
    if (!m_view) return;
-   m_rulerlist->Update(m_view);
+   m_rulerlist->UpdateRulers(m_view);
 }
 
 void MeasureDlg::OnNewLocator(wxCommandEvent& event)

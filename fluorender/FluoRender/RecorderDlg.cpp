@@ -510,7 +510,7 @@ m_view(0)
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 	wxStaticText* st = 0;
-	/*wxBoxSizer *group1 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *group1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, wxID_ANY, "Automatic Keys:");
 	m_auto_key_cmb = new wxComboBox(this, ID_AutoKeyCmb, "",
 		wxDefaultPosition, wxSize(180, 30), 0, NULL, wxCB_READONLY);
@@ -524,7 +524,7 @@ m_view(0)
 	group1->Add(5, 5);
 	group1->Add(m_auto_key_cmb, 0, wxALIGN_CENTER);
 	group1->Add(5, 5);
-	group1->Add(m_auto_key_btn, 0, wxALIGN_CENTER);*/
+	group1->Add(m_auto_key_btn, 0, wxALIGN_CENTER);
 
 	//list
 	wxBoxSizer *group2 = new wxBoxSizer(wxVERTICAL);
@@ -568,8 +568,8 @@ m_view(0)
 
 	//all controls
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
-	/*sizerV->Add(10, 5);
-	sizerV->Add(group1, 0, wxEXPAND);*/
+	sizerV->Add(10, 5);
+	sizerV->Add(group1, 0, wxEXPAND);
 	sizerV->Add(10, 5);
 	sizerV->Add(group2, 1, wxEXPAND);
 	sizerV->Add(10, 5);

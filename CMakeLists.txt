@@ -85,7 +85,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 #wxWidgets
 set(wxWidgets_CONFIGURATION mswu)
-find_package(wxWidgets COMPONENTS core base aui html xrc xml net adv gl REQUIRED)
+find_package(wxWidgets COMPONENTS core base aui html xrc xml net adv gl stc scintilla REQUIRED)
 include(${wxWidgets_USE_FILE})
 set(wxWidgets_USE_STATIC ON)
 #solution for wxWidgets linking "ambiguous" errors
@@ -95,8 +95,11 @@ add_definitions(-D_WCHAR_H_CPLUSPLUS_98_CONFORMANCE_)
 find_package(OpenGL REQUIRED)
 
 #Boost
-find_package(Boost REQUIRED)
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
+set(Boost_USE_STATIC_LIBS        ON) # only find static libs
+set(Boost_USE_MULTITHREADED      ON)
+set(Boost_USE_STATIC_RUNTIME    OFF)
+find_package(Boost COMPONENTS system chrono REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
 
 #teem
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/teem)
@@ -186,6 +189,17 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/img)
 file(GLOB pngs_hdr fluorender/FluoRender/img/*.h)
 file(GLOB pngs_src fluorender/FluoRender/img/*.cpp)
 add_library(IMAGES_OBJ OBJECT  ${pngs_hdr} ${pngs_src})
+
+#OpenCL
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/OpenCL/include)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+	if(${ARCHITECTURE} MATCHES 64)
+		file(GLOB OpenCL_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/OpenCL/lib/x86_64/*.lib)
+	endif()
+	if(${ARCHITECTURE} MATCHES 32)
+		file(GLOB OpenCL_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/OpenCL/lib/x86/*.lib)
+	endif()
+endif()
 
 #other sources
 file(GLOB src fluorender/FluoRender/*.cpp)
@@ -322,7 +336,8 @@ target_link_libraries(FluoRender
    ${ffmpeg_LIBRARIES}
    ${wxWidgets_LIBRARIES}
    ${OPENGL_LIBRARIES}
-   ${Boost_LIBRARIES})
+   ${Boost_LIBRARIES}
+   ${OpenCL_LIBRARIES})
    
 #post build DLL copy
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")

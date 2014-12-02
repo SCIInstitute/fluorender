@@ -82,6 +82,7 @@ namespace FLIVR
 			GLint texSize;
 			glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &texSize);
 			max_texture_size_ = texSize;
+
 #ifdef _WIN32
 			const GLubyte* strRenderer=0;
 			if ((strRenderer=glGetString(GL_RENDERER)))

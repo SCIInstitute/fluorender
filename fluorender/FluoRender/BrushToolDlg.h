@@ -63,6 +63,8 @@ public:
 		ID_BrushHiddenRemovalChk,
 		//select group
 		ID_BrushSelectGroupChk,
+		//estimate threshold
+		ID_EstimateThreshChk,
 		//brush properties
 		//brush size 1
 		ID_BrushSize1Sldr,
@@ -180,6 +182,8 @@ private:
 	wxCheckBox* m_hidden_removal_chk;
 	//group selection
 	wxCheckBox* m_select_group_chk;
+	//estimate threshold
+	wxCheckBox* m_estimate_thresh_chk;
 	//2d influence
 	wxSlider* m_brush_2dinfl_sldr;
 	wxTextCtrl* m_brush_2dinfl_text;
@@ -254,6 +258,8 @@ private:
 	void OnBrushEdgeDetectChk(wxCommandEvent &event);
 	//hidden removal
 	void OnBrushHiddenRemovalChk(wxCommandEvent &event);
+	//estimate thresh
+	void OnEstimateThreshChk(wxCommandEvent &event);
 	//select group
 	void OnBrushSelectGroupChk(wxCommandEvent &event);
 	//brush properties

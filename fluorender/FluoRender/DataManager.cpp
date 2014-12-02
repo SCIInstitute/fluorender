@@ -1179,7 +1179,7 @@ void VolumeData::DrawBounds()
 //hr_mode (hidden removal): 0-none; 1-ortho; 2-persp
 void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 						  double ini_thresh, double gm_falloff, double scl_falloff, double scl_translate,
-						  double w2d, double bins, bool ortho)
+						  double w2d, double bins, bool ortho, bool estimate)
 {
 	glPushMatrix();
 	glScalef(m_sclx, m_scly, m_sclz);
@@ -1187,7 +1187,9 @@ void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 	{
 		m_vr->set_2d_mask(m_2d_mask);
 		m_vr->set_2d_weight(m_2d_weight1, m_2d_weight2);
-		m_vr->draw_mask(type, paint_mode, hr_mode, ini_thresh, gm_falloff, scl_falloff, scl_translate, w2d, bins, ortho);
+		m_vr->draw_mask(type, paint_mode, hr_mode, ini_thresh, gm_falloff, scl_falloff, scl_translate, w2d, bins, ortho, estimate);
+		if (estimate)
+			m_est_thresh = m_vr->get_estimated_thresh();
 	}
 	glPopMatrix();
 }

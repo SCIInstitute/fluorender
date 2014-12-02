@@ -67,6 +67,7 @@ EVT_MENU(ID_Convert, VRenderFrame::OnConvert)
 EVT_MENU(ID_Recorder, VRenderFrame::OnRecorder)
 EVT_MENU(ID_Measure, VRenderFrame::OnMeasure)
 EVT_MENU(ID_Trace, VRenderFrame::OnTrace)
+EVT_MENU(ID_Ocl, VRenderFrame::OnOcl)
 EVT_MENU(ID_Twitter, VRenderFrame::OnTwitter)
 EVT_MENU(ID_Facebook, VRenderFrame::OnFacebook)
 EVT_MENU(ID_ShowHideUI, VRenderFrame::OnShowHideUI)
@@ -147,89 +148,87 @@ m_cur_sel_mesh(-1)//,
    m_tb_menu_ui->Check(ID_UIPropView, true);
    //create the menu for edit/convert
    m_tb_menu_edit = new wxMenu;
-   m_tb_menu_edit->Append(ID_PaintTool, "Edit...",
-         "Show edit tools for volume data");
+   m_tb_menu_edit->Append(ID_PaintTool, "Analyze...",
+         "Show analysis tools for volume data");
+   m_tb_menu_edit->Append(ID_Measure, "Measurement...",
+         "Show rulers dialog");
+   m_tb_menu_edit->Append(ID_Trace, "Components && Tracking...",
+         "Show trace dialog");
    m_tb_menu_edit->Append(ID_NoiseCancelling, "Noise Reduction...",
          "Show noise cancelling dialog");
    m_tb_menu_edit->Append(ID_Counting, "Counting and Volume...",
          "Show counting dialog");
-   m_tb_menu_edit->Append(ID_Measure, "Measurement...",
-         "Show rulers dialog");
-   m_tb_menu_edit->Append(ID_Trace, "Tracking...",
-         "Show trace dialog");
    m_tb_menu_edit->Append(ID_Colocalization, "Colocalization Analysis...",
          "Show colocalization analysis dialog");
    m_tb_menu_edit->Append(ID_Convert, "Convert...",
          "Show dialog for converting data");
+   m_tb_menu_edit->Append(ID_Ocl, "OpenCL Kernel Editor...",
+	     "Show OpenCL kernel editor window");
    //build the main toolbar
    //add tools
    m_main_tb->AddTool(ID_OpenVolume, "Open Volume",
          wxGetBitmapFromMemory(icon_open_volume), wxNullBitmap, wxITEM_NORMAL,
-         "Open Volume: Open single or multiple volume data file(s)",
-         "Open Volume: Open single or multiple volume data file(s)");
+         "Open single or multiple volume data file(s)",
+         "Open single or multiple volume data file(s)");
    m_main_tb->AddTool(ID_OpenProject, "Open Project",
          wxGetBitmapFromMemory(icon_open_project), wxNullBitmap, wxITEM_NORMAL,
-         "Open Project: Open a saved project",
-         "Open Project: Open a saved project");
+         "Open a saved project",
+         "Open a saved project");
    m_main_tb->AddTool(ID_SaveProject, "Save Project",
          wxGetBitmapFromMemory(icon_save_project), wxNullBitmap, wxITEM_NORMAL,
-         "Save Project: Save current work as a project",
-         "Save Project: Save current work as a project");
+         "Save current work as a project",
+         "Save current work as a project");
    m_main_tb->AddSeparator();
    m_main_tb->AddTool(ID_ViewNew, "New View",
          wxGetBitmapFromMemory(icon_new_view), wxNullBitmap, wxITEM_NORMAL,
-         "New View: Create a new render viewport",
-         "New View: Create a new render viewport");
+         "Create a new render viewport",
+         "Create a new render viewport");
    m_main_tb->AddTool(ID_ShowHideUI, "Show/Hide UI",
          wxGetBitmapFromMemory(icon_show_hide_ui), wxNullBitmap, wxITEM_DROPDOWN,
-         "Show/Hide UI: Show or hide all control panels",
-         "Show/Hide UI: Show or hide all control panels");
+         "Show or hide all control panels",
+         "Show or hide all control panels");
    m_main_tb->SetDropdownMenu(ID_ShowHideUI, m_tb_menu_ui);
    m_main_tb->AddSeparator();
    m_main_tb->AddTool(ID_OpenMesh, "Open Mesh",
          wxGetBitmapFromMemory(icon_open_mesh), wxNullBitmap, wxITEM_NORMAL,
-         "Open Mesh: Open single or multiple mesh file(s)",
-         "Open Mesh: Open single or multiple mesh file(s)");
+         "Open single or multiple mesh file(s)",
+         "Open single or multiple mesh file(s)");
 #ifndef _WIN32
     m_main_tb->AddTool(ID_Measure, "Measurement...",
          wxGetBitmapFromMemory(icon_measure), wxNullBitmap, wxITEM_NORMAL,
          "Show rulers dialog", "Show rulers dialog");
 #else
-    m_main_tb->AddTool(ID_PaintTool, "Edit",
+    m_main_tb->AddTool(ID_PaintTool, "Analyze",
                        wxGetBitmapFromMemory(icon_edit), wxNullBitmap,
                        wxITEM_DROPDOWN,
-                       "Edit: Tools for editing volume data",
-                       "Edit: Tools for editing volume data");
+                       "Tools for analyzing selected channel",
+                       "Tools for analyzing selected channel");
     m_main_tb->SetDropdownMenu(ID_PaintTool, m_tb_menu_edit);
 #endif
-    //m_main_tb->AddTool(ID_Recorder, "Recorder",
-    //        wxGetBitmapFromMemory(icon_recorder), wxNullBitmap, wxITEM_NORMAL,
-    //        "Recorder: Record actions by key frames and play back",
-    //        "Recorder: Record actions by key frames and play back");
    m_main_tb->AddSeparator();
    m_main_tb->AddTool(ID_Settings, "Settings",
          wxGetBitmapFromMemory(icon_settings), wxNullBitmap, wxITEM_NORMAL,
-         "Settings: Settings of FluoRender",
-         "Settings: Settings of FluoRender");
+         "Settings of FluoRender",
+         "Settings of FluoRender");
 #ifdef _WIN32
    m_main_tb->AddStretchableSpace();
 #endif
    m_main_tb->AddTool(ID_CheckUpdates, "Update",
          wxGetBitmapFromMemory(icon_check_updates), wxNullBitmap, wxITEM_NORMAL,
-         "Update: Check if there is a new release",
-         "Update: Check if there is a new release (requires Internet connection)");
+         "Check if there is a new release",
+         "Check if there is a new release (requires Internet connection)");
    m_main_tb->AddTool(ID_Facebook, "Facebook",
          wxGetBitmapFromMemory(icon_facebook), wxNullBitmap, wxITEM_NORMAL,
-         "Facebook: FluoRender's facebook page",
-         "Facebook:FluoRender's facebook page (requires Internet connection)");
+         "FluoRender's facebook page",
+         "FluoRender's facebook page (requires Internet connection)");
    m_main_tb->AddTool(ID_Twitter, "Twitter",
          wxGetBitmapFromMemory(icon_twitter), wxNullBitmap, wxITEM_NORMAL,
-         "Twitter: Follow FluoRender on Twitter",
-         "Twitter: Follow FluoRender on Twitter (requires Internet connection)");
+         "Follow FluoRender on Twitter",
+         "Follow FluoRender on Twitter (requires Internet connection)");
    m_main_tb->AddTool(ID_Info, "About",
          wxGetBitmapFromMemory(icon_about), wxNullBitmap, wxITEM_NORMAL,
-         "About: FluoRender information",
-         "About: FluoRender information");
+         "FluoRender information",
+         "FluoRender information");
 
    m_main_tb->Realize();
 
@@ -329,6 +328,9 @@ m_cur_sel_mesh(-1)//,
    //trace dialog
    m_trace_dlg = new TraceDlg(this, this);
 
+   //ocl dialog
+   m_ocl_dlg = new OclDlg(this, this);
+
    //help dialog
    m_help_dlg = new HelpDlg(this, this);
    //m_help_dlg->LoadPage("C:\\!wanyong!\\TEMP\\wxHtmlWindow.htm");
@@ -390,7 +392,7 @@ m_cur_sel_mesh(-1)//,
    //dialogs
    //brush tool dialog
    m_aui_mgr.AddPane(m_brush_tool_dlg, wxAuiPaneInfo().
-         Name("m_brush_tool_dlg").Caption("Edit").
+         Name("m_brush_tool_dlg").Caption("Analyze").
          Dockable(false).CloseButton(true));
    m_aui_mgr.GetPane(m_brush_tool_dlg).Float();
    m_aui_mgr.GetPane(m_brush_tool_dlg).Hide();
@@ -432,10 +434,16 @@ m_cur_sel_mesh(-1)//,
    m_aui_mgr.GetPane(m_measure_dlg).Hide();
    //trace dialog
    m_aui_mgr.AddPane(m_trace_dlg, wxAuiPaneInfo().
-         Name("m_trace_dlg").Caption("Tracking").
+         Name("m_trace_dlg").Caption("Components & Tracking").
          Dockable(false).CloseButton(true));
    m_aui_mgr.GetPane(m_trace_dlg).Float();
    m_aui_mgr.GetPane(m_trace_dlg).Hide();
+   //ocl fialog
+   m_aui_mgr.AddPane(m_ocl_dlg, wxAuiPaneInfo().
+	   Name("m_ocl_dlg").Caption("OpenCL Kernel Editor").
+	   Dockable(false).CloseButton(true));
+   m_aui_mgr.GetPane(m_ocl_dlg).Float();
+   m_aui_mgr.GetPane(m_ocl_dlg).Hide();
    //settings
    m_aui_mgr.AddPane(m_setting_dlg, wxAuiPaneInfo().
          Name("m_setting_dlg").Caption("Settings").
@@ -511,26 +519,25 @@ m_cur_sel_mesh(-1)//,
    m_top_file->Append(quit);
    //tool options
 #ifdef _WIN32
-   m = new wxMenuItem(m_top_tools,ID_PaintTool, wxT("&Edit Paintbrush..."));
+   m = new wxMenuItem(m_top_tools,ID_PaintTool, wxT("&Analysis Tools..."));
    m->SetBitmap(wxGetBitmapFromMemory(icon_edit_mini));
+   m_top_tools->Append(m);
+#endif
+   m = new wxMenuItem(m_top_tools,ID_Measure, wxT("&Measurement Tool..."));
+   m_top_tools->Append(m);
+#ifdef _WIN32
+   m = new wxMenuItem(m_top_tools,ID_Trace, wxT("Components && &Tracking..."));
    m_top_tools->Append(m);
    m = new wxMenuItem(m_top_tools,ID_NoiseCancelling, wxT("&Noise Reduction..."));
    m_top_tools->Append(m);
    m = new wxMenuItem(m_top_tools,ID_Counting, wxT("&Counting and Volume..."));
    m_top_tools->Append(m);
-#endif
-   m = new wxMenuItem(m_top_tools,ID_Measure, wxT("&Measurement Tool..."));
-	m_top_tools->Append(m);
-#ifdef _WIN32
-   m = new wxMenuItem(m_top_tools,ID_Trace, wxT("&Tracking..."));
-   m_top_tools->Append(m);
    m = new wxMenuItem(m_top_tools,ID_Colocalization, wxT("Colocalization &Analysis..."));
    m_top_tools->Append(m);
-   //m = new wxMenuItem(m_top_tools,ID_Recorder, wxT("&Recorder..."));
-   //m->SetBitmap(wxGetBitmapFromMemory(icon_recorder_mini));
-   //m_top_tools->Append(m);
 #endif
    m = new wxMenuItem(m_top_tools,ID_Convert, wxT("Con&vert..."));
+   m_top_tools->Append(m);
+   m = new wxMenuItem(m_top_tools, ID_Ocl, wxT("&OpenCL Kernel Editor..."));
    m_top_tools->Append(m);
    m_top_tools->Append(wxID_SEPARATOR);
    m = new wxMenuItem(m_top_tools,ID_Settings, wxT("&Settings..."));
@@ -772,7 +779,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 
    //empty brick skipping
    wxCheckBox* ch3 = new wxCheckBox(panel, wxID_HIGHEST+3006,
-         "Skip empty bricks during rendering (loading will longer time)");
+         "Skip empty bricks during rendering (loading takes longer time)");
    ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
          wxCommandEventHandler(VRenderFrame::OnCh3Check), NULL, panel);
    ch3->SetValue(m_skip_brick);
@@ -809,7 +816,10 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 {
    if (m_setting_dlg)
+   {
       m_compression = m_setting_dlg->GetRealtimeCompress();
+	  m_skip_brick = m_setting_dlg->GetSkipBricks();
+   }
     
     wxFileDialog *fopendlg = new wxFileDialog(
          this, "Choose the volume data file", "", "",
@@ -834,6 +844,7 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
       if (m_setting_dlg)
       {
          m_setting_dlg->SetRealtimeCompress(m_compression);
+		 m_setting_dlg->SetSkipBricks(m_skip_brick);
          m_setting_dlg->UpdateUI();
       }
    }
@@ -859,7 +870,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
    {
       prg_diag = new wxProgressDialog(
             "FluoRender: Loading volume data...",
-            "Reading and processing selected volume data. Please wait.",
+            "To visualize large data, please enable streaming in the Settings.",
             100, 0, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
 
       m_data_mgr.SetSliceSequence(m_sliceSequence);
@@ -874,7 +885,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
       for (j=0; j<(int)files.Count(); j++)
       {
          prg_diag->Update(90*(j+1)/(int)files.Count(),
-               "FluoRender: Loading volume data...");
+			   "To visualize large data, please enable streaming in the Settings.");
 
          int ch_num = 0;
          wxString filename = files[j];
@@ -942,6 +953,8 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
 
                if (chan_num >=0 && chan_num <3)
                   vd->SetColor(color);
+			   else
+				   vd->RandomizeColor();
 
                vrv->AddVolumeData(vd);
                vd_sel = vd;
@@ -1400,6 +1413,7 @@ void VRenderFrame::UpdateTree(wxString name)
                   GetBrushToolDlg()->GetSettings(vrv);
                   GetMeasureDlg()->GetSettings(vrv);
                   GetTraceDlg()->GetSettings(vrv);
+				  GetOclDlg()->GetSettings(vrv);
                }
             }
             break;
@@ -1473,6 +1487,7 @@ void VRenderFrame::UpdateTree(wxString name)
                      GetBrushToolDlg()->GetSettings(vrv);
                      GetMeasureDlg()->GetSettings(vrv);
                      GetTraceDlg()->GetSettings(vrv);
+					 GetOclDlg()->GetSettings(vrv);
                   }
                }
                if (name == group->GetName())
@@ -2226,7 +2241,7 @@ void VRenderFrame::SaveProject(wxString& filename)
          {
             wxString new_folder;
             new_folder = filename + "_files";
-			CREATE_DIR(new_folder.fn_str());
+             CREATE_DIR(new_folder.fn_str());
             str = new_folder + GETSLASH() + vd->GetName() + ".msk";
             MSKWriter msk_writer;
             msk_writer.SetData(mask);
@@ -2253,7 +2268,7 @@ void VRenderFrame::SaveProject(wxString& filename)
          {
             wxString new_folder;
             new_folder = filename + "_files";
-			CREATE_DIR(new_folder.fn_str());
+             CREATE_DIR(new_folder.fn_str());
             str = new_folder + GETSLASH() + md->GetName() + ".obj";
             md->Save(str);
          }
@@ -2322,7 +2337,7 @@ void VRenderFrame::SaveProject(wxString& filename)
          {
             wxString new_folder;
             new_folder = filename + "_files";
-			CREATE_DIR(new_folder.fn_str());
+             CREATE_DIR(new_folder.fn_str());
             str = new_folder + GETSLASH() + ann->GetName() + ".txt";
             ann->Save(str);
          }
@@ -4126,6 +4141,13 @@ void VRenderFrame::OnTrace(wxCommandEvent& WXUNUSED(event))
    m_aui_mgr.GetPane(m_trace_dlg).Show();
    m_aui_mgr.GetPane(m_trace_dlg).Float();
    m_aui_mgr.Update();
+}
+
+void VRenderFrame::OnOcl(wxCommandEvent& WXUNUSED(event))
+{
+	m_aui_mgr.GetPane(m_ocl_dlg).Show();
+	m_aui_mgr.GetPane(m_ocl_dlg).Float();
+	m_aui_mgr.Update();
 }
 
 void VRenderFrame::OnFacebook(wxCommandEvent& WXUNUSED(event))

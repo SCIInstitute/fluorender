@@ -138,9 +138,6 @@ m_vrv(0)
 	group1->Add(sizer_5, 0, wxALIGN_CENTER);
 	group1->Add(sizer_6, 0, wxALIGN_CENTER);
 
-	sizer_v1->Add(sizer_1, 0, wxALIGN_LEFT);
-	sizer_v1->Add(sizer_2, 0, wxALIGN_LEFT);
-	sizer_v1->Add(sizer_3, 0, wxALIGN_LEFT);
 	sizer_v1->Add(group1, 0, wxALIGN_LEFT);
 
 	wxBoxSizer* sizer_v2 = new wxBoxSizer(wxVERTICAL);
@@ -171,6 +168,9 @@ m_vrv(0)
 	sizer_8->Add(m_size_text, 0, wxALIGN_CENTER);
 
 	sizer_v2->Add(5,5);
+	sizer_v2->Add(sizer_1, 0, wxALIGN_LEFT);
+	sizer_v2->Add(sizer_2, 0, wxALIGN_LEFT);
+	sizer_v2->Add(sizer_3, 0, wxALIGN_LEFT);
 	sizer_v2->Add(sizer_7, 0, wxALIGN_LEFT);
 	sizer_v2->Add(sizer_8, 0, wxALIGN_LEFT);
 

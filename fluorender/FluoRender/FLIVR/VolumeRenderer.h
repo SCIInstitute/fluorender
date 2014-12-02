@@ -138,11 +138,14 @@ namespace FLIVR
 		//hr_mode (hidden removal): 0-none; 1-ortho; 2-persp
 		void draw_mask(int type, int paint_mode, int hr_mode,
 			double ini_thresh, double gm_falloff, double scl_falloff,
-			double scl_translate, double w2d, double bins, bool ortho);
+			double scl_translate, double w2d, double bins, bool ortho,
+			bool estimate);
 		//generate the labeling assuming the mask is already generated
 		//type: 0-initialization; 1-maximum intensity filtering
 		//mode: 0-normal; 1-posterized
 		void draw_label(int type, int mode, double thresh, double gm_falloff);
+
+		double calc_hist_3d(GLuint, GLuint, size_t, size_t, size_t);
 
 		//calculation
 		void calculate(int type, VolumeRenderer* vr_a, VolumeRenderer* vr_b);
@@ -179,6 +182,10 @@ namespace FLIVR
 		{if (mode>=0 && mode<TEXTURE_RENDER_MODES) return done_loop_[mode]; else return false;}
 		void set_done_loop(bool done)
 		{for (int i=0; i<TEXTURE_RENDER_MODES; i++) done_loop_[i] = done;}
+
+		//estimated threshold
+		double get_estimated_thresh()
+		{ return est_thresh_; }
 
 		friend class MultiVolumeRenderer;
 
@@ -241,6 +248,9 @@ namespace FLIVR
 
 		//done loop
 		bool done_loop_[TEXTURE_RENDER_MODES];
+
+		//estimated threshold
+		double est_thresh_;
 
 		//calculating scaling factor, etc
 		double CalcScaleFactor(double w, double h, double tex_w, double tex_h, double zoom);

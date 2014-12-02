@@ -165,6 +165,7 @@ private:
 	RecorderDlg * m_advanced_movie;
 	wxNotebook * m_notebook;
 	int m_current_page;
+	int m_prev_time;
 	QVideoEncoder encoder_;
 	wxString filetype_;
 
