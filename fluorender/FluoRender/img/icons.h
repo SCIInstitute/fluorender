@@ -48,8 +48,8 @@ const static unsigned char icon_check_updates_png[4044];
 /* icon_check_updates_mini.png - 817 bytes */
 const static unsigned char icon_check_updates_mini_png[817];
 
-/* icon_edit.png - 2832 bytes */
-const static unsigned char icon_edit_png[2832];
+/* icon_edit.png - 17941 bytes */
+const static unsigned char icon_edit_png[17941];
 
 /* icon_edit_mini.png - 806 bytes */
 const static unsigned char icon_edit_mini_png[806];
