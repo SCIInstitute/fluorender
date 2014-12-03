@@ -42,5 +42,5 @@ __kernel void main(
 		rvalue = -rvalue/0.01;
 		rvalue = exp(rvalue);
 	}
-	result[index] = clamp(cvalue*rvalue, 0.0, 1.0)*255.0;
+	result[index] = clamp(cvalue*rvalue, 0.0f, 1.0f)*255.0;
 }

@@ -1,9 +1,12 @@
 #define KX 3
 #define KY 3
 #define KZ 3
-float box(int i, int j, int k)
+float gauss(int i, int j, int k)
 {
-	return 1.0/(KX*KY*KZ);
+	//2*sigma*sigma
+	float s = 10;
+	float r = i*i+j*j+k*k;
+	return exp(-r/s)/pow(3.1415*s, 1.5);
 }
 const sampler_t samp =
 	CLK_NORMALIZED_COORDS_FALSE|
@@ -21,17 +24,16 @@ __kernel void main(
 	int4 kc;
 	float4 dvalue;
 	float rvalue = 0.0;
-	int i, j, k;
-	for (i=0; i<KX; ++i)
-	for (j=0; j<KY; ++j)
-	for (k=0; k<KZ; ++k)
+	for (int i=0; i<KX; ++i)
+	for (int j=0; j<KY; ++j)
+	for (int k=0; k<KZ; ++k)
 	{
 		kc = (int4)(coord.x+(i-KX/2),
 				coord.y+(j-KY/2),
 				coord.z+(k-KZ/2), 1);
 		dvalue = read_imagef(data, samp, kc);
-		rvalue += box(i, j, k) * dvalue.x;
+		rvalue += gauss(i-KX/2, j-KY/2, k-KZ/2) * dvalue.x;
 	}
 	unsigned int index = x*y*coord.z + x*coord.y + coord.x;
-	result[index] = clamp(rvalue, 0.0f, 1.0f)*255.0;
+	result[index] = rvalue*255.0;
 }

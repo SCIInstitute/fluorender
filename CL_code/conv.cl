@@ -39,5 +39,5 @@ __kernel void main(
 		rvalue += krn[KX*KY*k+KX*j+i] * dvalue.x;
 	}
 	unsigned int index = x*y*coord.z + x*coord.y + coord.x;
-	result[index] = clamp(rvalue, 0.0, 1.0)*255.0;
+	result[index] = clamp(rvalue, 0.0f, 1.0f)*255.0;
 }
