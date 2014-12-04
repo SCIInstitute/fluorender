@@ -3602,7 +3602,7 @@ void TraceGroup::Draw()
 		glBegin(GL_LINES);
 		//else if (m_cur_time < m_prv_time)
 			//before
-			for (size_t i=cur_ghost; i>(cur_ghost-m_ghost_num); --i)
+			for (size_t i=cur_ghost; i>gstart; --i)
 			{
 				//before
 				if ((int)i-1>=0 && i<ghosts.size())
