@@ -28,9 +28,17 @@
 
 namespace FLIVR
 {
+#define DEFAULT_FRAGMENT_CODE \
+	"void main() {\n" \
+	"    gl_FragColor = vec4(1,1,1,1);\n" \
+	"}\n" 
 #define VOL_VERSION_130 \
 	"#version 130\n"\
 	"\n"
+
+#define VOL_INPUTS \
+	"in vec3 OutVertex;" \
+	"in vec3 OutTexture;\n;"
 
 #define VOL_UNIFORMS_COMMON \
 	"// VOL_UNIFORMS_COMMON\n" \

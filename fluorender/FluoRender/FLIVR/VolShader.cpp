@@ -39,11 +39,41 @@ using std::ostringstream;
 
 namespace FLIVR
 {
+#define CORE_PROFILE_VTX_SHADER 1
+
+#define VTX_SHADER_CODE_GENERIC \
+	"//#version 150\n" \
+	"void main() {\n" \
+	"   gl_Position = ftransform();//ARB compatiblity only\n" \
+	"   gl_TexCoord[0] = gl_MultiTexCoord0;\n" \
+	"   gl_TexCoord[1] = gl_MultiTexCoord1;\n" \
+	"   //gl_Position = gl_Vertex;\n" \
+	"}\n" 
+
+
+#define VTX_SHADER_CODE_CORE_PROFILE \
+	"//VERTEX SHADER\n" \
+	"uniform mat4 matrix0; //projection matrix\n" \
+	"uniform mat4 matrix1; //modelview matrix\n" \
+	"attribute vec3 InVertex;  //w will be set to 1.0 automatically\n" \
+	"attribute vec3 InTexCoord0\n" \
+	"out vec3 OutVertex;\n" \
+	"out vec3 OutTexture;\n" \
+	"//-------------------\n" \
+	"void main()\n" \
+	"{\n" \
+	"	gl_Position = matrix0 * matrix1 * vec4(InVertex,1.);\n" \
+	"	OutTexture = InTexCoord0;\n" \
+	"	OutVertex  = InVertex;\n" \
+	"}\n" 
+
+
 	VolShader::VolShader(int channels,
 						bool shading, bool fog,
 						int peel, bool clip,
 						bool hiqual, int mask,
-						int color_mode, bool solid)
+						int color_mode, bool solid,
+						int vertex_shader)
 		: channels_(channels),
 		shading_(shading),
 		fog_(fog),
@@ -53,6 +83,7 @@ namespace FLIVR
 		mask_(mask),
 		color_mode_(color_mode),
         solid_(solid),
+		vertex_type_(vertex_shader),
         program_(0)
 	{
 	}
@@ -64,13 +95,28 @@ namespace FLIVR
 
 	bool VolShader::create()
 	{
-		string s;
-		if (emit(s)) return true;
-		program_ = new FragmentProgram(s);
+		string fs,vs;
+		if (emit_f(fs)) return true;
+		if (emit_v(vs)) return true;
+		program_ = new ShaderProgram(vs,fs);
+		return false;
+	}
+	
+	bool VolShader::emit_v(string& s)
+	{
+		ostringstream z;
+		switch (vertex_type_) {
+		case 0:
+			z << VTX_SHADER_CODE_GENERIC;
+			break;
+		case CORE_PROFILE_VTX_SHADER:
+			z << VTX_SHADER_CODE_CORE_PROFILE;
+		}
+		s = z.str();
 		return false;
 	}
 
-	bool VolShader::emit(string& s)
+	bool VolShader::emit_f(string& s)
 	{
 		ostringstream z;
 
@@ -78,6 +124,8 @@ namespace FLIVR
 		if (mask_ == 3 ||
 			mask_ == 4)
 			z << VOL_VERSION_130;
+
+		z << VOL_INPUTS;
 
 		//the common uniforms
 		z << VOL_UNIFORMS_COMMON;
@@ -286,6 +334,7 @@ namespace FLIVR
 
 		//output
 		s = z.str();
+		//s = DEFAULT_FRAGMENT_CODE;
 		return false;
 	}
 
@@ -302,11 +351,12 @@ namespace FLIVR
 		}
 	}
 
-	FragmentProgram* VolShaderFactory::shader(int channels, 
+	ShaderProgram* VolShaderFactory::shader(int channels, 
 								bool shading, bool fog, 
 								int peel, bool clip,
 								bool hiqual, int mask,
-								int color_mode, bool solid)
+								int color_mode, bool solid, 
+								int vertex_shader)
 	{
 		if(prev_shader_ >= 0)
 		{
@@ -314,7 +364,7 @@ namespace FLIVR
 				shading, fog,
 				peel, clip,
 				hiqual, mask,
-				color_mode, solid))
+				color_mode, solid,vertex_shader))
 			{
 				return shader_[prev_shader_]->program();
 			}
@@ -325,7 +375,7 @@ namespace FLIVR
 				shading, fog,
 				peel, clip,
 				hiqual, mask,
-				color_mode, solid))
+				color_mode, solid,vertex_shader))
 			{
 				prev_shader_ = i;
 				return shader_[i]->program();
@@ -336,7 +386,8 @@ namespace FLIVR
 									shading, fog,
 									peel, clip,
 									hiqual, mask,
-									color_mode, solid);
+									color_mode, solid,
+									vertex_shader);
 		if(s->create())
 		{
 			delete s;

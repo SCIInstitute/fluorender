@@ -140,12 +140,11 @@ namespace FLIVR
 		static double sw_;
 
 		void draw_polygons_vol(
-			vector<double>& vertex,
-			vector<double>& texcoord,
-			vector<int>& poly,
+			vector<float>& vertex,
+			vector<uint32_t>& poly,
 			bool fog,
 			Ray &view_ray,
-			FragmentProgram *shader,
+			ShaderProgram *shader,
 			int bi, bool orthographic_p,
 			int w, int h, bool intp,
 			int quota_bricks_chan);

@@ -66,6 +66,8 @@ namespace FLIVR
 	int TextureRenderer::quota_bricks_ = 0;
 	Point TextureRenderer::quota_center_;
 	int TextureRenderer::update_order_ = 0;
+	GLuint TextureRenderer::m_slices_vbo = 0;
+	GLuint TextureRenderer::m_slices_ibo = 0;
 
 	TextureRenderer::TextureRenderer(Texture* tex)
 		:
@@ -90,6 +92,8 @@ namespace FLIVR
 		blend_num_bits_(32),
 		clear_pool_(false)
 	{
+		glGenBuffers(1, &m_slices_vbo);
+		glGenBuffers(1, &m_slices_ibo);
 	}
 
 	TextureRenderer::TextureRenderer(const TextureRenderer& copy)
@@ -115,6 +119,8 @@ namespace FLIVR
 		blend_num_bits_(copy.blend_num_bits_),
 		clear_pool_(copy.clear_pool_)
 	{
+		glGenBuffers(1, &m_slices_vbo);
+		glGenBuffers(1, &m_slices_ibo);
 	}
 
 	TextureRenderer::~TextureRenderer()
@@ -909,47 +915,47 @@ namespace FLIVR
 		glEnd();
 	}
 
-	void TextureRenderer::draw_polygons(vector<double>& vertex, 
-		vector<double>& texcoord,
-		vector<int>& poly, 
+	void TextureRenderer::draw_polygons(vector<float>& vertex,
+		vector<uint32_t>& triangle_verts, 
 		bool fog,
-		FragmentProgram* shader)
+		ShaderProgram* shader)
 	{
-		double mvmat[16];
-		if(fog)
-		{
-			glGetDoublev(GL_MODELVIEW_MATRIX, mvmat);
-		}
+		//link to the new data
+		glBindBuffer(GL_ARRAY_BUFFER, m_slices_vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_slices_ibo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t)*triangle_verts.size(), 
+			&triangle_verts[0], GL_DYNAMIC_DRAW);
+		
+		//now draw it
+		glBindBuffer(GL_ARRAY_BUFFER, m_slices_vbo);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glVertexPointer (3, GL_FLOAT, 6*sizeof(float), 0);
+		glTexCoordPointer(3, GL_FLOAT, 6*sizeof(float), (const GLvoid *)12);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_slices_ibo);
+		glDrawElements(GL_TRIANGLES, triangle_verts.size(), GL_UNSIGNED_INT, 0);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		glDisableClientState(GL_VERTEX_ARRAY);
+		
+		//now draw it
+		/*glBindBuffer(GL_ARRAY_BUFFER, m_slices_vbo);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)12);
 
-		for(unsigned int i=0, k=0; i<poly.size(); i++)
-		{
-			glBegin(GL_POLYGON);
-			{
-				for(int j=0; j<poly[i]; j++) 
-				{
-					double* t = &texcoord[(k+j)*3];
-					double* v = &vertex[(k+j)*3];
-					if (glMultiTexCoord3d) 
-					{
-						glMultiTexCoord3d(GL_TEXTURE0, t[0], t[1], t[2]);
-						if(fog) 
-						{
-							double vz = mvmat[2]*v[0] + mvmat[6]*v[1] + mvmat[10]*v[2] + mvmat[14];
-							glMultiTexCoord3d(GL_TEXTURE1, -vz, 0.0, 0.0);
-						}
-					}
-					glVertex3d(v[0], v[1], v[2]);
-				}
-			}
-			glEnd();
-
-			k += poly[i];
-		}
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_slices_ibo);
+		glDrawElements(GL_TRIANGLES, triangle_verts.size(), GL_UNSIGNED_INT, 0);
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
+		//unbind
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);*/
 	}
 
-	void TextureRenderer::draw_polygons_wireframe(vector<double>& vertex,
-		vector<double>& texcoord,
-		vector<int>& poly,
+	void TextureRenderer::draw_polygons_wireframe(vector<float>& vertex,
+		vector<uint32_t>& poly,
 		bool fog)
 	{
 		for(unsigned int i=0, k=0; i<poly.size(); i++)
@@ -958,7 +964,7 @@ namespace FLIVR
 			{
 				for(int j=0; j<poly[i]; j++)
 				{
-					double* v = &vertex[(k+j)*3];
+					float* v = &vertex[(k+j)*3];
 					glVertex3d(v[0], v[1], v[2]);
 				}
 			}

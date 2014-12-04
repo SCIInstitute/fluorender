@@ -1625,7 +1625,7 @@ void VRenderGLView::PaintStroke()
    else
    {
       //paint shader
-      FragmentProgram* paint_shader =
+      ShaderProgram* paint_shader =
          m_paint_shader_factory.shader();
       if (paint_shader)
       {
@@ -2449,7 +2449,7 @@ void VRenderGLView::DrawFinalBuffer()
    glDisable(GL_LIGHTING);
 
    //2d adjustment
-   FragmentProgram* img_shader =
+   ShaderProgram* img_shader =
       m_img_shader_factory.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
    if (img_shader)
    {
@@ -2828,7 +2828,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
    glDisable(GL_LIGHTING);
 
    //2d adjustment
-   FragmentProgram* img_shader =
+   ShaderProgram* img_shader =
 #ifdef _DARWIN
       m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST);
 #else
@@ -2900,7 +2900,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
    bool shadow = vd->GetShadow();
    int color_mode = vd->GetColormapMode();
    bool enable_alpha = vd->GetEnableAlpha();
-   FragmentProgram* img_shader = 0;
+   ShaderProgram* img_shader = 0;
 
    if (do_mip)
    {
@@ -3349,7 +3349,7 @@ void VRenderGLView::DrawOLShadowsMesh(GLuint tex_depth, double darkness)
    glDisable(GL_LIGHTING);
 
    //2d adjustment
-   FragmentProgram* img_shader =
+   ShaderProgram* img_shader =
       m_img_shader_factory.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
    if (img_shader)
    {
@@ -3644,7 +3644,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
       glDisable(GL_LIGHTING);
 
       //2d adjustment
-      FragmentProgram* img_shader =
+      ShaderProgram* img_shader =
          m_img_shader_factory.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
       if (img_shader)
       {
@@ -3879,7 +3879,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
    glDisable(GL_LIGHTING);
 
    //2d adjustment
-	FragmentProgram* img_shader =
+	ShaderProgram* img_shader =
 #ifdef _DARWIN
 	m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST);
 #else

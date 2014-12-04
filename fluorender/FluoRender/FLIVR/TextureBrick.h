@@ -36,6 +36,7 @@
 
 #include <vector>
 #include <nrrd.h>
+#include <stdint.h>
 
 namespace FLIVR {
 
@@ -124,15 +125,15 @@ namespace FLIVR {
 		virtual GLenum tex_type(int c);
 		virtual void* tex_data(int c);
 
-		void compute_polygons(Ray& view, double tmin, double tmax, double dt,
-			vector<double>& vertex, vector<double>& texcoord,
-			vector<int>& size);
-		void compute_polygons(Ray& view, double dt,
-			vector<double>& vertex, vector<double>& texcoord,
-			vector<int>& size);
-		void compute_polygon(Ray& view, double t,
-			vector<double>& vertex, vector<double>& texcoord,
-			vector<int>& size);
+		void compute_polygons(Ray& view, float tmin, float tmax, float dt,
+			vector<float>& vertex, 
+			vector<uint32_t>& size);
+		void compute_polygons(Ray& view, float dt,
+			vector<float>& vertex, 
+			vector<uint32_t>& size);
+		void compute_polygon(Ray& view, float t,
+			vector<float>& vertex, 
+			vector<uint32_t>& size);
 		
 		//set d
 		void set_d(double d) { d_ = d; }

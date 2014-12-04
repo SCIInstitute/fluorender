@@ -452,7 +452,7 @@ namespace FLIVR
 	{
 		string s;
 		if (emit(s)) return true;
-		program_ = new FragmentProgram(s);
+		program_ = new ShaderProgram(s);
 		return false;
 	}
 
@@ -686,7 +686,7 @@ namespace FLIVR
 		}
 	}
 
-	FragmentProgram* SegShaderFactory::shader(int type, int paint_mode, int hr_mode,
+	ShaderProgram* SegShaderFactory::shader(int type, int paint_mode, int hr_mode,
 		bool use_2d, bool shading, int peel, bool clip, bool hiqual)
 	{
 		if(prev_shader_ >= 0)

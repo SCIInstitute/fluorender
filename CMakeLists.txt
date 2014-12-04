@@ -84,10 +84,22 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BUILD_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 #wxWidgets
-set(wxWidgets_CONFIGURATION mswu)
-find_package(wxWidgets COMPONENTS core base aui html xrc xml net adv gl REQUIRED)
-include(${wxWidgets_USE_FILE})
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+   #merge the core library parts into one
+   MESSAGE(STATUS "Merging library parts due to GIT size limit...")
+   EXECUTE_PROCESS(COMMAND ${FluoRender_SOURCE_DIR}/fluorender/wxWidgets/lib/vc_x64_lib/merge_lib.bat
+		   WORKING_DIRECTORY ${FluoRender_SOURCE_DIR}/fluorender/wxWidgets/lib/vc_x64_lib 
+		   OUTPUT_VARIABLE out2)
+   message(STATUS "output: ${out2}")
+   include_directories(${FluoRender_SOURCE_DIR}/fluorender/wxWidgets/include)
+   include_directories(${FluoRender_SOURCE_DIR}/fluorender/wxWidgets/lib/vc_x64_lib/mswud)
+   file(GLOB wxWidgets_LIBRARIES fluorender/wxWidgets/lib/vc_x64_lib/*.lib)
+   set(wxWidgets_LIBRARIES "${wxWidgets_LIBRARIES};winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib")
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+endif()
 set(wxWidgets_USE_STATIC ON)
+add_definitions(-DUNICODE)
+add_definitions(-D_UNICODE)
 #solution for wxWidgets linking "ambiguous" errors
 add_definitions(-D_WCHAR_H_CPLUSPLUS_98_CONFORMANCE_)
 
@@ -95,6 +107,11 @@ add_definitions(-D_WCHAR_H_CPLUSPLUS_98_CONFORMANCE_)
 find_package(OpenGL REQUIRED)
 
 #Boost
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+   set(Boost_INCLUDE_DIR ${FluoRender_SOURCE_DIR}/fluorender/boost/msw)
+   set(Boost_DIR ${FluoRender_SOURCE_DIR}/fluorender/boost/msw)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+endif()
 find_package(Boost REQUIRED)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
 
@@ -278,7 +295,7 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	  add_library(WACUTILS_OBJ OBJECT
 			     ${wac_src} ${wac_hdr})
       add_executable(FluoRender WIN32
-          ${src} ${hdr} ${rsc}
+          	  ${src} ${hdr} ${rsc}
 		  $<TARGET_OBJECTS:IMAGES_OBJ>
 		  $<TARGET_OBJECTS:CONVERTERS_OBJ>
 		  $<TARGET_OBJECTS:FLIVR_OBJ>
@@ -286,7 +303,7 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 		  $<TARGET_OBJECTS:NV_OBJ>
 		  $<TARGET_OBJECTS:FORMATS_OBJ>
 		  $<TARGET_OBJECTS:GLEW_OBJ>
-          $<TARGET_OBJECTS:POLE_OBJ>
+          	  $<TARGET_OBJECTS:POLE_OBJ>
 		  $<TARGET_OBJECTS:TEEM_OBJ>
 		  $<TARGET_OBJECTS:WACUTILS_OBJ>)
    endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
