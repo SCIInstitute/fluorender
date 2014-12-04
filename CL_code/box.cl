@@ -9,7 +9,7 @@ const sampler_t samp =
 	CLK_NORMALIZED_COORDS_FALSE|
 	CLK_ADDRESS_REPEAT|
 	CLK_FILTER_NEAREST;
-__kernel void main(
+__kernel void kernel_main(
 	read_only image3d_t data,
 	__global unsigned char* result,
 	unsigned int x,

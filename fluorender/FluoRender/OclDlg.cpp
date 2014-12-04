@@ -382,7 +382,7 @@ bool OclDlg::ExecuteKernel(KernelProgram* kernel, GLuint data_id, void* result,
 
 	if (!kernel->valid())
 	{
-		string name = "main";
+		string name = "kernel_main";
 		if (kernel->create(name))
 			(*m_output_txt) << "Kernel program compiled successfully.\n";
 		else
