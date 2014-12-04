@@ -402,12 +402,12 @@ bool OclDlg::ExecuteKernel(KernelProgram* kernel, GLuint data_id, void* result,
 	//execute
 	size_t global_size[3] = {brick_x, brick_y, brick_z};
 	size_t local_size[3] = {1, 1, 1};
-	//high_resolution_clock::time_point t1 = high_resolution_clock::now();
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	kernel->execute(3, global_size, local_size);
-	//high_resolution_clock::time_point t2 = high_resolution_clock::now();
-	//duration<double> time_span = duration_cast<duration<double>>(t2-t1);
-	//wxString stime = wxString::Format("%.4f", time_span.count());
-	//(*m_output_txt) << "OpenCL time: " << stime << " sec.\n";
+	high_resolution_clock::time_point t2 = high_resolution_clock::now();
+	duration<double> time_span = duration_cast<duration<double>>(t2-t1);
+	wxString stime = wxString::Format("%.4f", time_span.count());
+	(*m_output_txt) << "OpenCL time: " << stime << " sec.\n";
 	kernel->readBuffer(1, result);
 
 	return true;

@@ -233,8 +233,8 @@ void VolumeCalculator::FillHoles(double thresh)
    m_vd_a->GetResolution(nx, ny, nz);
 
    wxProgressDialog *prog_diag = new wxProgressDialog(
-         "FluoRender: Filling holes...",
-         "Filling... Please wait.",
+         "FluoRender: Voxel Consolidation",
+         "Consolidating... Please wait.",
          100, 0,
          wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
    int progress = 0;
@@ -267,9 +267,9 @@ void VolumeCalculator::FillHoles(double thresh)
       }
    }
 
-   double dx = (bbox.max()-bbox.min()).x()/10.0;
-   double dy = (bbox.max()-bbox.min()).y()/10.0;
-   double dz = (bbox.max()-bbox.min()).z()/30.0;
+   double dx = (bbox.max()-bbox.min()).x()/2.0;
+   double dy = (bbox.max()-bbox.min()).y()/2.0;
+   double dz = (bbox.max()-bbox.min()).z();
 
    //second pass: fill holes
    bool found_n, found_p;
@@ -287,8 +287,8 @@ void VolumeCalculator::FillHoles(double thresh)
                //search -X
                int s_n_x = i;
 			   found_n = false;
-               while (s_n_x >= int(bbox.min().x() &&
-				      s_n_x >= int(i-dx)))
+               while (s_n_x >= int(bbox.min().x()) &&
+				      s_n_x >= int(i-dx))
                {
                   si = nx*ny*k + nx*j + s_n_x;
                   if (((unsigned char*)data_r)[si])
@@ -301,8 +301,8 @@ void VolumeCalculator::FillHoles(double thresh)
                //search +X
                int s_p_x = i;
 			   found_p = false;
-               while (s_p_x <= int(bbox.max().x() &&
-				      s_p_x <= int(i+dx)))
+               while (s_p_x <= int(bbox.max().x()) &&
+				      s_p_x <= int(i+dx))
                {
                   si = nx*ny*k + nx*j + s_p_x;
                   if (((unsigned char*)data_r)[si])
@@ -313,9 +313,9 @@ void VolumeCalculator::FillHoles(double thresh)
                   s_p_x++;
                }
                //found X direction?
-               if (found_n && found_p)
+               if (!found_n || !found_p)
                {
-                  ((unsigned char*)data_r)[index] = 255;
+                  //((unsigned char*)data_r)[index] = 255;
                   continue;
                }
                //search -Y
@@ -347,9 +347,9 @@ void VolumeCalculator::FillHoles(double thresh)
                   s_p_y++;
                }
                //found Y direction?
-               if (found_n && found_p)
+               if (!found_n || !found_p)
                {
-                  ((unsigned char*)data_r)[index] = 255;
+                  //((unsigned char*)data_r)[index] = 255;
                   continue;
                }
                //search -Z
@@ -384,7 +384,7 @@ void VolumeCalculator::FillHoles(double thresh)
                if (found_p && found_n)
                {
                ((unsigned char*)data_r)[index] = 255;
-               continue;
+               //continue;
                }
             }
          }

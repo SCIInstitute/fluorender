@@ -1683,7 +1683,7 @@ void TraceDlg::Measure()
 	for (i=0; i<(int)m_info_list.size(); ++i)
 	{
 		if (m_info_list[i].total_num > 0)
-			m_info_list[i].variance = sqrt(m_info_list[i].m2 / (m_info_list[i].total_num - 1));
+			m_info_list[i].variance = sqrt(m_info_list[i].m2 / (m_info_list[i].total_num));
 	}
 
 	std::sort(m_info_list.begin(), m_info_list.end(), measure_info::cmp_id);
