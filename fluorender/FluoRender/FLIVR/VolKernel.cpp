@@ -1,8 +1,8 @@
 #include <string>
 #include <sstream>
 #include <iostream>
-#include <FLIVR\VolKernel.h>
-#include <FLIVR\KernelProgram.h>
+#include <FLIVR/VolKernel.h>
+#include <FLIVR/KernelProgram.h>
 
 using std::string;
 using std::vector;
@@ -154,7 +154,7 @@ namespace FLIVR
 		return k->program();
 	}
 
-	KernelProgram* VolKernelFactory::kernel(std::string &s)
+	KernelProgram* VolKernelFactory::kernel(std::string s)
 	{
 		if (prev_kernel_ >= 0)
 		{

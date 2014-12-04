@@ -233,7 +233,7 @@ namespace FLIVR
 			   //kernel for calculation
 			   static VolKernelFactory vol_kernel_factory_;
 
-	  protected:
+	  public:
                struct BrickDist
                {
                   unsigned int index;    //index of the brick in current tex pool

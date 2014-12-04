@@ -50,7 +50,7 @@ namespace FLIVR
 		void remove(KernelProgram* kernel);
 
 		KernelProgram* kernel(int type = 0);
-		KernelProgram* kernel(std::string &s);
+		KernelProgram* kernel(std::string s);
 
 	protected:
 		std::vector<VolKernel*> kernels_;

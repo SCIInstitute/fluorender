@@ -1,5 +1,7 @@
 #include "KernelProgram.h"
+#ifdef _WIN32
 #include <Windows.h>
+#endif
 
 namespace FLIVR
 {
@@ -34,8 +36,10 @@ namespace FLIVR
 
 		cl_context_properties properties[] =
 		{
+#ifdef _WIN32
 			CL_GL_CONTEXT_KHR, (cl_context_properties)wglGetCurrentContext(),
 			CL_WGL_HDC_KHR, (cl_context_properties)wglGetCurrentDC(),
+#endif
 			CL_CONTEXT_PLATFORM, (cl_context_properties)platform,
 			0
 		};
