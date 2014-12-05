@@ -842,6 +842,12 @@ void VMovieView::EnableTime() {
 	m_dec_time_btn->Enable();
 	m_time_current_text->Enable();
 	m_seq_chk->SetValue(true);
+
+	wxString fps_str = m_fps_text->GetValue();
+	unsigned long fps;
+	fps_str.ToULong(&fps);
+	unsigned int mov_len = (sec-first+1)/fps + 1;
+	m_movie_time->SetValue(wxString::Format("%d", mov_len));
 }
 
 void VMovieView::OnTimeChange(wxScrollEvent &event) {

@@ -5035,20 +5035,20 @@ void VRenderGLView::PreDraw()
                   vd->SetCurTime(reader->GetCurTime());
                   vd->SetSpacings(spcx, spcy, spcz);
 
-                  //run script
-                  if (m_run_script)
-                  {
-                     wxString pathname = reader->GetPathName();
-                     int pos = pathname.Find(GETSLASH(), true);
-                     wxString scriptname = pathname.Left(pos+1) + "script_4d.txt";
-                     if (wxFileExists(scriptname))
-                     {
-                        m_selector.SetVolume(vd);
-                        m_calculator.SetVolumeA(vd);
-                        m_cur_vol = vd;
-                        Run4DScript(scriptname);
-                     }
-                  }
+                  ////run script
+                  //if (m_run_script)
+                  //{
+                  //   wxString pathname = reader->GetPathName();
+                  //   int pos = pathname.Find(GETSLASH(), true);
+                  //   wxString scriptname = pathname.Left(pos+1) + "script_4d.txt";
+                  //   if (wxFileExists(scriptname))
+                  //   {
+                  //      m_selector.SetVolume(vd);
+                  //      m_calculator.SetVolumeA(vd);
+                  //      m_cur_vol = vd;
+                  //      Run4DScript(scriptname);
+                  //   }
+                  //}
 
                   //update rulers
                   VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
