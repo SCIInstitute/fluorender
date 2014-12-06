@@ -92,6 +92,8 @@ public:
 		ID_SaveasTraceBtn,
 		ID_GhostNumSldr,
 		ID_GhostNumText,
+		ID_GhostShowTailChk,
+		ID_GhostShowLeadChk,
 		ID_ManualAssistCheck,
 		ID_AddLabelBtn,
 		ID_AnalyzeBtn,
@@ -184,6 +186,10 @@ private:
 	//enable manual assist
 	bool m_manual_assist;
 
+	//show trace
+	//bool m_ghost_show_tail;
+	//bool m_ghost_show_lead;
+
 	//ui
 	//list ctrl
 	TraceListCtrl *m_trace_list_curr;
@@ -197,6 +203,8 @@ private:
 	//ghost num
 	wxSlider* m_ghost_num_sldr;
 	wxTextCtrl* m_ghost_num_text;
+	wxCheckBox* m_ghost_show_tail_chk;
+	wxCheckBox* m_ghost_show_lead_chk;
 	//edit tools
 	wxButton* m_add_label_btn;
 	wxButton* m_analyze_btn;
@@ -251,6 +259,8 @@ private:
 	//ghost number
 	void OnGhostNumChange(wxScrollEvent &event);
 	void OnGhostNumText(wxCommandEvent &event);
+	void OnGhostShowTail(wxCommandEvent &event);
+	void OnGhostShowLead(wxCommandEvent &event);
 	//manual tracking assistant
 	void OnAddLabel(wxCommandEvent &event);
 	void OnAnalyze(wxCommandEvent &event);

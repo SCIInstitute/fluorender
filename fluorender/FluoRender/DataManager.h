@@ -900,6 +900,10 @@ public:
 	//ghost num
 	void SetGhostNum(int num) {m_ghost_num = num;}
 	int GetGhostNum() {return m_ghost_num;}
+	void SetDrawTail(bool draw) {m_draw_tail = draw;}
+	bool GetDrawTail() {return m_draw_tail;}
+	void SetDrawLead(bool draw) {m_draw_lead = draw;}
+	bool GetDrawLead() {return m_draw_lead;}
 	//cells size filter
 	void SetCellSize(int size) {m_cell_size = size;}
 	int GetSizeSize() {return m_cell_size;}
@@ -954,6 +958,8 @@ private:
 	int m_cur_time;
 	int m_prv_time;
 	int m_ghost_num;
+	bool m_draw_tail;
+	bool m_draw_lead;
 	int m_cell_size;
 
 	FrameList m_frame_list;

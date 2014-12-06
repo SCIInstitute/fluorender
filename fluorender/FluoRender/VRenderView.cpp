@@ -4840,27 +4840,27 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 				vd->SetCurTime(reader->GetCurTime());
 				vd->SetSpacings(spcx, spcy, spcz);
 
+				//run script
+				if (m_run_script && run_script)
+				{
+					wxString pathname = reader->GetPathName();
+					int pos = pathname.Find(GETSLASH(), true);
+					wxString scriptname = pathname.Left(pos+1) + "script_4d.txt";
+					if (wxFileExists(scriptname))
+					{
+						m_selector.SetVolume(vd);
+						m_calculator.SetVolumeA(vd);
+						m_cur_vol = vd;
+						Run4DScript(scriptname);
+					}
+				}
+
 				//update rulers
 				if (vframe && vframe->GetMeasureDlg())
 					vframe->GetMeasureDlg()->UpdateList();
 
 				if (vd->GetVR())
 					vd->GetVR()->clear_tex_pool();
-			}
-
-			//run script
-			if (m_run_script && run_script)
-			{
-				wxString pathname = reader->GetPathName();
-            int pos = pathname.Find(GETSLASH(), true);
-				wxString scriptname = pathname.Left(pos+1) + "script_4d.txt";
-				if (wxFileExists(scriptname))
-				{
-					m_selector.SetVolume(vd);
-					m_calculator.SetVolumeA(vd);
-					m_cur_vol = vd;
-					Run4DScript(scriptname);
-				}
 			}
 		}
 	}

@@ -3087,6 +3087,8 @@ TraceGroup::TraceGroup()
 	m_cur_time = -1;
 	m_prv_time = -1;
 	m_ghost_num = 10;
+	m_draw_tail = true;
+	m_draw_lead = false;
 	m_cell_size = 20;
 
 	//font
@@ -3533,7 +3535,7 @@ void TraceGroup::Draw()
 		}
 	}
 
-	if (ghosts.size() > 0)
+	if (ghosts.size() > 0 && (m_draw_tail || m_draw_lead))
 	{
 		//
 		IDMapIter id_map_iter;
@@ -3548,8 +3550,9 @@ void TraceGroup::Draw()
 
 		id_map_temp1 = m_id_map;
 
-		//if (m_cur_time >= m_prv_time)
-		glBegin(GL_LINES);
+		if (m_draw_lead)
+		{
+			glBegin(GL_LINES);
 			//after
 			for (size_t i=cur_ghost; i<(cur_ghost+m_ghost_num); ++i)
 			{
@@ -3595,12 +3598,14 @@ void TraceGroup::Draw()
 				id_map_temp1 = id_map_temp2;
 				id_map_temp2.clear();
 			}
-		glEnd();
+			glEnd();
+		}
 
-		id_map_temp1 = m_id_map;
-		id_map_temp2.clear();
-		glBegin(GL_LINES);
-		//else if (m_cur_time < m_prv_time)
+		if (m_draw_tail)
+		{
+			id_map_temp1 = m_id_map;
+			id_map_temp2.clear();
+			glBegin(GL_LINES);
 			//before
 			for (size_t i=cur_ghost; i>gstart; --i)
 			{
@@ -3646,7 +3651,8 @@ void TraceGroup::Draw()
 				id_map_temp1 = id_map_temp2;
 				id_map_temp2.clear();
 			}
-		glEnd();
+			glEnd();
+		}
 	}
 
 	glPopAttrib();

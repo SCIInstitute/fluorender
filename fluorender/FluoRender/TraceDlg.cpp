@@ -267,6 +267,8 @@ BEGIN_EVENT_TABLE(TraceDlg, wxPanel)
 	EVT_TEXT(ID_GhostNumText, TraceDlg::OnGhostNumText)
 	EVT_COMMAND_SCROLL(ID_CellSizeSldr, TraceDlg::OnCellSizeChange)
 	EVT_TEXT(ID_CellSizeText, TraceDlg::OnCellSizeText)
+	EVT_CHECKBOX(ID_GhostShowTailChk, TraceDlg::OnGhostShowTail)
+	EVT_CHECKBOX(ID_GhostShowLeadChk, TraceDlg::OnGhostShowLead)
 	//manual assist
 	EVT_BUTTON(ID_AddLabelBtn, TraceDlg::OnAddLabel)
 	EVT_BUTTON(ID_AnalyzeBtn, TraceDlg::OnAnalyze)
@@ -333,16 +335,24 @@ m_manual_assist(false)
 
 	//ghost num
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Ghost num:",
+	st = new wxStaticText(this, 0, "Ghosts:",
 		wxDefaultPosition, wxSize(70, 20));
+	m_ghost_show_tail_chk = new wxCheckBox(this, ID_GhostShowTailChk, "Tail",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
 	m_ghost_num_sldr = new wxSlider(this, ID_GhostNumSldr, 10, 0, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_ghost_num_text = new wxTextCtrl(this, ID_GhostNumText, "10",
 		wxDefaultPosition, wxSize(60, 23), 0, vald_int);
+	m_ghost_show_lead_chk = new wxCheckBox(this, ID_GhostShowLeadChk, "Lead",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
 	sizer_2->Add(5, 5);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_ghost_show_tail_chk, 0, wxALIGN_CENTER);
+	sizer_2->Add(5, 5);
 	sizer_2->Add(m_ghost_num_sldr, 1, wxEXPAND|wxALIGN_CENTER);
 	sizer_2->Add(m_ghost_num_text, 0, wxALIGN_CENTER);
+	sizer_2->Add(5, 5);
+	sizer_2->Add(m_ghost_show_lead_chk, 0, wxALIGN_CENTER);
 
 	//edit tools
 	wxBoxSizer *sizer_3 = new wxStaticBoxSizer(
@@ -544,6 +554,12 @@ void TraceDlg::GetSettings(VRenderView* vrv)
 		else
 			m_load_trace_text->SetValue("Link map created but not saved");
 		UpdateList();
+
+		int ghost_num = trace_group->GetGhostNum();
+		m_ghost_num_text->ChangeValue(wxString::Format("%d", ghost_num));
+		m_ghost_num_sldr->SetValue(ghost_num);
+		m_ghost_show_tail_chk->SetValue(trace_group->GetDrawTail());
+		m_ghost_show_lead_chk->SetValue(trace_group->GetDrawLead());
 	}
 	else
 		m_load_trace_text->SetValue("No Link map");
@@ -698,6 +714,36 @@ void TraceDlg::OnGhostNumText(wxCommandEvent &event)
 		if (trace_group)
 		{
 			trace_group->SetGhostNum(ival);
+			m_view->RefreshGL();
+		}
+	}
+}
+
+void TraceDlg::OnGhostShowTail(wxCommandEvent &event)
+{
+	bool show = m_ghost_show_tail_chk->GetValue();
+	
+	if (m_view)
+	{
+		TraceGroup* trace_group = m_view->GetTraceGroup();
+		if (trace_group)
+		{
+			trace_group->SetDrawTail(show);
+			m_view->RefreshGL();
+		}
+	}
+}
+
+void TraceDlg::OnGhostShowLead(wxCommandEvent &event)
+{
+	bool show = m_ghost_show_lead_chk->GetValue();
+	
+	if (m_view)
+	{
+		TraceGroup* trace_group = m_view->GetTraceGroup();
+		if (trace_group)
+		{
+			trace_group->SetDrawLead(show);
 			m_view->RefreshGL();
 		}
 	}
