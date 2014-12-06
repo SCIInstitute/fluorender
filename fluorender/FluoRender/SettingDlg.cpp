@@ -299,7 +299,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	sizer2_2->Add(m_large_data_text, 0, wxALIGN_CENTER);
 	sizer2_2->Add(st);
 	wxBoxSizer *sizer2_3 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Block Size:",
+	st = new wxStaticText(page, 0, "Brick Size:",
 		wxDefaultPosition, wxSize(110, -1));
 	sizer2_3->Add(st);
 	m_block_size_sldr = new wxSlider(page, ID_BlockSizeSldr, 7, 4, 11,
@@ -336,10 +336,12 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	group2->Add(sizer2_4, 0, wxEXPAND);
 	group2->Add(10, 5);
 	st = new wxStaticText(page, 0,
+		"Note:\n"\
 		"Data streaming allows rendering datasets of much larger size than available\n"\
-		"graphics memory. Datasets are divided into small blocks. Then, these blocks\n"\
-		"are loaded into graphics memory and rendered in sequence.\n"\
-		"Restart is needed for the settings to take effect.");
+		"graphics memory. Datasets are divided into small bricks. The bricks are loaded\n"\
+		"into graphics memory and sequentially rendered. Restart is needed for the bricking\n"\
+		"to take effect. Some analysis features may not work in streaming mode. Disable\n"\
+		"streaming if this happens.");
 	group2->Add(st);
 	group2->Add(10, 5);
 
@@ -748,6 +750,7 @@ void SettingDlg::UpdateUI()
 	m_run_script_chk->SetValue(m_run_script);
 	//memory settings
 	m_streaming_chk->SetValue(m_mem_swap);
+	EnableStreaming(m_mem_swap);
 	m_graphics_mem_text->SetValue(wxString::Format("%d", (int)m_graphics_mem));
 	m_large_data_text->SetValue(wxString::Format("%d", (int)m_large_data_size));
 	m_block_size_text->SetValue(wxString::Format("%d", m_force_brick_size));
@@ -1084,6 +1087,12 @@ void SettingDlg::EnableStreaming(bool enable)
 		m_block_size_text->Disable();
 		m_response_time_sldr->Disable();
 		m_response_time_text->Disable();
+	}
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+	{
+		vr_frame->SetTextureRendererSettings();
+		vr_frame->RefreshVRenderViews();
 	}
 }
 

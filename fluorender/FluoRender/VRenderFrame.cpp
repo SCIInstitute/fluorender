@@ -111,8 +111,8 @@ m_prop_panel(0),
 m_ui_state(true),
 m_cur_sel_type(-1),
 m_cur_sel_vol(-1),
-m_cur_sel_mesh(-1)//,
-//m_free_version(true)
+m_cur_sel_mesh(-1),
+m_setting_dlg(0)
 {
    // tell wxAuiManager to manage this frame
    m_aui_mgr.SetManagedWindow(this);
@@ -2072,6 +2072,16 @@ void VRenderFrame::SaveProject(wxString& filename)
          100, 0, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
 
    wxString str;
+
+   //save streaming mode
+	fconfig.SetPath("/memory settings");
+	fconfig.Write("mem swap", m_setting_dlg->GetMemSwap());
+	fconfig.Write("graphics mem", m_setting_dlg->GetGraphicsMem());
+	fconfig.Write("large data size", m_setting_dlg->GetLargeDataSize());
+	fconfig.Write("force brick size", m_setting_dlg->GetForceBrickSize());
+	fconfig.Write("up time", m_setting_dlg->GetResponseTime());
+	fconfig.Write("update order", m_setting_dlg->GetUpdateOrder());
+
    //save data list
    //volume
    fconfig.SetPath("/data/volume");
@@ -2702,6 +2712,34 @@ void VRenderFrame::OpenProject(wxString& filename)
          "FluoRender: Loading project...",
          "Reading project file. Please wait.",
          100, 0, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
+
+   //read streaming mode
+   if (fconfig.Exists("/memory settings"))
+   {
+	   fconfig.SetPath("/memory settings");
+	   bool mem_swap = false;
+	   fconfig.Read("mem swap", &mem_swap);
+	   double graphics_mem = 1000.0;
+	   fconfig.Read("graphics mem", &graphics_mem);
+	   double large_data_size = 1000.0;
+	   fconfig.Read("large data size", &large_data_size);
+	   int force_brick_size = 128;
+	   fconfig.Read("force brick size", &force_brick_size);
+	   int up_time = 100;
+	   fconfig.Read("up time", &up_time);
+	   int update_order = 0;
+	   fconfig.Read("update order", &update_order);
+
+	   m_setting_dlg->SetMemSwap(mem_swap);
+	   m_setting_dlg->SetGraphicsMem(graphics_mem);
+	   m_setting_dlg->SetLargeDataSize(large_data_size);
+	   m_setting_dlg->SetForceBrickSize(force_brick_size);
+	   m_setting_dlg->SetResponseTime(up_time);
+	   m_setting_dlg->SetUpdateOrder(update_order);
+	   m_setting_dlg->UpdateUI();
+
+	   SetTextureRendererSettings();
+   }
 
    //read data list
    //volume
@@ -4086,33 +4124,33 @@ void VRenderFrame::ShowColocalizationDlg()
 
 void VRenderFrame::SetTextureRendererSettings()
 {
-   TextureRenderer::set_mem_swap(m_setting_dlg->GetMemSwap());
-   if (TextureRenderer::get_mem_limit() == 0.0)
-   {
-      bool use_mem_limit = false;
-      GLenum error = glGetError();
-      GLint mem_info[4] = {0, 0, 0, 0};
-      glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, mem_info);
-      error = glGetError();
-      if (error == GL_INVALID_ENUM)
-      {
-         glGetIntegerv(GL_TEXTURE_FREE_MEMORY_ATI, mem_info);
-         error = glGetError();
-         if (error == GL_INVALID_ENUM)
-            use_mem_limit = true;
-      }
-      if (m_setting_dlg->GetGraphicsMem() > mem_info[0]/1024.0)
-         use_mem_limit = true;
-      TextureRenderer::set_use_mem_limit(use_mem_limit);
-      TextureRenderer::set_mem_limit(use_mem_limit?
-            m_setting_dlg->GetGraphicsMem():mem_info[0]/1024.0);
-      TextureRenderer::set_available_mem(use_mem_limit?
-            m_setting_dlg->GetGraphicsMem():mem_info[0]/1024.0);
-      TextureRenderer::set_large_data_size(m_setting_dlg->GetLargeDataSize());
-      TextureRenderer::set_force_brick_size(m_setting_dlg->GetForceBrickSize());
-      TextureRenderer::set_up_time(m_setting_dlg->GetResponseTime());
-      TextureRenderer::set_update_order(m_setting_dlg->GetUpdateOrder());
-   }
+	if (!m_setting_dlg)
+		return;
+
+	TextureRenderer::set_mem_swap(m_setting_dlg->GetMemSwap());
+	bool use_mem_limit = false;
+	GLenum error = glGetError();
+	GLint mem_info[4] = {0, 0, 0, 0};
+	glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, mem_info);
+	error = glGetError();
+	if (error == GL_INVALID_ENUM)
+	{
+		glGetIntegerv(GL_TEXTURE_FREE_MEMORY_ATI, mem_info);
+		error = glGetError();
+		if (error == GL_INVALID_ENUM)
+			use_mem_limit = true;
+	}
+	if (m_setting_dlg->GetGraphicsMem() > mem_info[0]/1024.0)
+		use_mem_limit = true;
+	TextureRenderer::set_use_mem_limit(use_mem_limit);
+	TextureRenderer::set_mem_limit(use_mem_limit?
+		m_setting_dlg->GetGraphicsMem():mem_info[0]/1024.0);
+	TextureRenderer::set_available_mem(use_mem_limit?
+		m_setting_dlg->GetGraphicsMem():mem_info[0]/1024.0);
+	TextureRenderer::set_large_data_size(m_setting_dlg->GetLargeDataSize());
+	TextureRenderer::set_force_brick_size(m_setting_dlg->GetForceBrickSize());
+	TextureRenderer::set_up_time(m_setting_dlg->GetResponseTime());
+	TextureRenderer::set_update_order(m_setting_dlg->GetUpdateOrder());
 }
 
 void VRenderFrame::OnConvert(wxCommandEvent& WXUNUSED(event))
