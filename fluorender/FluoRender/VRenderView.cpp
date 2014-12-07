@@ -2108,6 +2108,9 @@ void VRenderGLView::LoadDefaultBrushSettings()
       m_selector.SetBrushSclTranslate(val);
 	  m_calculator.SetThreshold(val);
    }
+   //auto thresh
+   if (fconfig.Read("auto_thresh", &bval))
+	   m_selector.SetEstimateThreshold(bval);
    //edge detect
    if (fconfig.Read("edge_detect", &bval))
       m_selector.SetEdgeDetect(bval);

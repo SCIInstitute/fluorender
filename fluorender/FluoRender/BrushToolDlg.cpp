@@ -173,21 +173,21 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
          wxVERTICAL);
    //stop at boundary
    wxBoxSizer *sizer11_1 = new wxBoxSizer(wxHORIZONTAL);
+   m_estimate_thresh_chk = new wxCheckBox(this, ID_EstimateThreshChk, "Auto Thresh:",
+	   wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
    m_edge_detect_chk = new wxCheckBox(this, ID_BrushEdgeDetectChk, "Edge Detect:",
          wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
    m_hidden_removal_chk = new wxCheckBox(this, ID_BrushHiddenRemovalChk, "Visible Only:",
          wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
    m_select_group_chk = new wxCheckBox(this, ID_BrushSelectGroupChk, "Select Group:",
          wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-   m_estimate_thresh_chk = new wxCheckBox(this, ID_EstimateThreshChk, "Auto Thresh:",
-	   wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+   sizer11_1->Add(m_estimate_thresh_chk, 0, wxALIGN_CENTER);
+   sizer11_1->Add(5, 5);
    sizer11_1->Add(m_edge_detect_chk, 0, wxALIGN_CENTER);
    sizer11_1->Add(5, 5);
    sizer11_1->Add(m_hidden_removal_chk, 0, wxALIGN_CENTER);
    sizer11_1->Add(5, 5);
    sizer11_1->Add(m_select_group_chk, 0, wxALIGN_CENTER);
-   sizer11_1->Add(5, 5);
-   sizer11_1->Add(m_estimate_thresh_chk, 0, wxALIGN_CENTER);
    //threshold4
    wxBoxSizer *sizer11_2 = new wxBoxSizer(wxHORIZONTAL);
    st = new wxStaticText(this, 0, "Threshold:",
@@ -1023,6 +1023,8 @@ void BrushToolDlg::SaveDefault()
    fconfig.Write("brush_gm_falloff", m_dft_gm_falloff);
    fconfig.Write("brush_scl_falloff", m_dft_scl_falloff);
    fconfig.Write("brush_scl_translate", m_dft_scl_translate);
+   //auto thresh
+   fconfig.Write("auto_thresh", m_estimate_thresh_chk->GetValue());
    //edge detect
    fconfig.Write("edge_detect", m_edge_detect_chk->GetValue());
    //hidden removal
@@ -1118,6 +1120,9 @@ void BrushToolDlg::LoadDefault()
       m_brush_scl_translate_sldr->SetRange(0, int(m_max_value*10.0));
       m_brush_scl_translate_text->SetValue(str);
    }
+   //auto thresh
+   if (fconfig.Read("auto_thresh", &bval))
+	   m_estimate_thresh_chk->SetValue(bval);
    //edge detect
    if (fconfig.Read("edge_detect", &bval))
       m_edge_detect_chk->SetValue(bval);

@@ -154,7 +154,7 @@ void VolumeSelector::Select(double radius)
 
    //initialization
    int hr_mode = m_hidden_removal?(m_ortho?1:2):0;
-   if (m_estimate_threshold)
+   if ((m_mode==1 || m_mode==2) && m_estimate_threshold)
    {
 		m_vd->DrawMask(0, m_mode, hr_mode, 0.0, gm_falloff, scl_falloff, 0.0, m_w2d, 0.0, false, true);
 		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
