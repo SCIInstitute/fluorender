@@ -191,14 +191,16 @@ file(GLOB pngs_src fluorender/FluoRender/img/*.cpp)
 add_library(IMAGES_OBJ OBJECT  ${pngs_hdr} ${pngs_src})
 
 #OpenCL
-include_directories(${FluoRender_SOURCE_DIR}/fluorender/OpenCL/include)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-	if(${ARCHITECTURE} MATCHES 64)
-		file(GLOB OpenCL_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/OpenCL/lib/x86_64/*.lib)
-	endif()
-	if(${ARCHITECTURE} MATCHES 32)
-		file(GLOB OpenCL_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/OpenCL/lib/x86/*.lib)
-	endif()
+  include_directories(${FluoRender_SOURCE_DIR}/fluorender/OpenCL/include)
+  if(${ARCHITECTURE} MATCHES 64)
+    file(GLOB OPENCL_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/OpenCL/lib/x86_64/*.lib)
+  elseif(${ARCHITECTURE} MATCHES 32)
+    file(GLOB OPENCL_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/OpenCL/lib/x86/*.lib)
+  endif()
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  find_package(OpenCL REQUIRED)
+  include_directories( ${OPENCL_INCLUDE_DIR})
 endif()
 
 #other sources
@@ -337,13 +339,18 @@ target_link_libraries(FluoRender
    ${wxWidgets_LIBRARIES}
    ${OPENGL_LIBRARIES}
    ${Boost_LIBRARIES}
-   ${OpenCL_LIBRARIES})
+   ${OPENCL_LIBRARIES})
    
 #post build DLL copy
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	file(GLOB ffmpeg_DLLS fluorender/bin/*.dll)
-	add_custom_command(TARGET FluoRender POST_BUILD
+	add_custom_command(TARGET FluoRender PRE_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_directory  
 		"${FluoRender_SOURCE_DIR}/fluorender/bin"
 		$<TARGET_FILE_DIR:FluoRender>)
 endif()
+#copy openCL examples to the binary directory
+add_custom_command(TARGET FluoRender PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory 
+  "${FluoRender_SOURCE_DIR}/CL_code"
+  $<TARGET_FILE_DIR:FluoRender>)

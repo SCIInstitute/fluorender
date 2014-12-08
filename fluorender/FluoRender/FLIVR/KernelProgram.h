@@ -2,8 +2,14 @@
 #define KernelProgram_h
 
 #include <GL/glew.h>
+#ifdef _WIN32
 #include <CL/cl.h>
 #include <CL/cl_gl.h>
+#endif
+#ifdef _DARWIN
+#include <OpenCL/cl.h>
+#include <OpenCL/cl_gl.h>
+#endif
 #include <string>
 #include <vector>
 

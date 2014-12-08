@@ -1,5 +1,7 @@
 #include "KernelProgram.h"
+#ifdef _WIN32
 #include <Windows.h>
+#endif
 
 namespace FLIVR
 {
@@ -34,12 +36,17 @@ namespace FLIVR
 
 		cl_context_properties properties[] =
 		{
+#ifdef _WIN32
 			CL_GL_CONTEXT_KHR, (cl_context_properties)wglGetCurrentContext(),
 			CL_WGL_HDC_KHR, (cl_context_properties)wglGetCurrentDC(),
+#endif
+#ifdef _DARWIN
+			CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE, (cl_context_properties) kCGLShareGroup, 
+#endif
 			CL_CONTEXT_PLATFORM, (cl_context_properties)platform,
 			0
 		};
-		context_ = clCreateContext(properties, 1, &device_, NULL, NULL, &err);
+	    context_ = clCreateContext(properties, 1, &device_, NULL, NULL, &err);
 		if (err != CL_SUCCESS)
 			return;
 
