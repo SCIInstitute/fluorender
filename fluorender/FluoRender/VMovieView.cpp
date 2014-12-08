@@ -459,7 +459,7 @@ void VMovieView::OnTimer(wxTimerEvent& event) {
 	//move forward in time (limits FPS usability to 100 FPS)
 	time+=0.01;
 	//frame only increments when time passes a whole number
-	int frame = fps * time;
+	int frame = int(fps * time + 0.5);
 	SetProgress(time/len);
 	//update the rendering frame since we have advanced.
 	if (frame != m_last_frame) {
@@ -468,7 +468,7 @@ void VMovieView::OnTimer(wxTimerEvent& event) {
 		int end_time = STOI(m_time_end_text->GetValue().fn_str());
 		int tot_time = end_time - start_time + 1;
 		m_time_current_text->ChangeValue(wxString::Format("%d",
-			((int)(start_time + tot_time * time/len))));
+			((int)(start_time + tot_time * time/len + 0.5))));
 		if (m_record)
 			WriteFrameToFile(); 
 		SetRendering(time/len);
@@ -843,7 +843,10 @@ void VMovieView::EnableTime() {
 	m_time_current_text->Enable();
 	m_seq_chk->SetValue(true);
 
-	unsigned int mov_len = sec-first+1;
+	wxString fps_str = m_fps_text->GetValue();
+	unsigned long fps;
+	fps_str.ToULong(&fps);
+	unsigned int mov_len = (sec-first+1)/fps + 1;
 	m_movie_time->SetValue(wxString::Format("%d", mov_len));
 }
 
