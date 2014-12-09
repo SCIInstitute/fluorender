@@ -160,6 +160,7 @@ private:
 	int m_last_frame;
 	double m_starting_rot;
     wxTimer m_timer;
+	double m_cur_time;
 	wxString m_filename;
 	bool m_running, m_record;
 	RecorderDlg * m_advanced_movie;
@@ -177,7 +178,7 @@ private:
 	void SetProgress(double pcnt);
 
 	//write frames to file
-	void WriteFrameToFile();
+	void WriteFrameToFile(int total_frames);
 
 	//4d movie slider
 	void Get4DFrames();

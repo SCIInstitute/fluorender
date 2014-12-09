@@ -295,7 +295,8 @@ m_starting_rot(0.),
 m_timer(this,ID_Timer),
 m_running(false),
 m_record(false),
-m_current_page(0) {
+m_current_page(0),
+m_cur_time(0.0) {
 	//notebook
 	m_notebook = new wxNotebook(this, wxID_ANY);
 	m_notebook->AddPage(CreateSimplePage(m_notebook), "Basic");
@@ -451,16 +452,16 @@ void VMovieView::SetTimeFrame(int frame) {
 
 void VMovieView::OnTimer(wxTimerEvent& event) {
 	//get all of the progress info
-	double time, len;
+	double len;
 	long fps;
-	m_progress_text->GetValue().ToDouble(&time);
+	//m_progress_text->GetValue().ToDouble(&time);
 	m_movie_time->GetValue().ToDouble(&len);
 	m_fps_text->GetValue().ToLong(&fps);
 	//move forward in time (limits FPS usability to 100 FPS)
-	time+=0.01;
+	m_cur_time += 1.0/double(fps);
 	//frame only increments when time passes a whole number
-	int frame = int(fps * time + 0.5);
-	SetProgress(time/len);
+	int frame = int(fps * m_cur_time + 0.5);
+	SetProgress(m_cur_time/len);
 	//update the rendering frame since we have advanced.
 	if (frame != m_last_frame) {
 		m_last_frame = frame;
@@ -468,12 +469,12 @@ void VMovieView::OnTimer(wxTimerEvent& event) {
 		int end_time = STOI(m_time_end_text->GetValue().fn_str());
 		int tot_time = end_time - start_time + 1;
 		m_time_current_text->ChangeValue(wxString::Format("%d",
-			((int)(start_time + tot_time * time/len + 0.5))));
+			((int)(start_time + tot_time * m_cur_time/len + 0.5))));
 		if (m_record)
-			WriteFrameToFile(); 
-		SetRendering(time/len);
+			WriteFrameToFile(int(fps*len+0.5));
+		SetRendering(m_cur_time/len);
 	}
-	if (time/len >= 1.) {
+	if (m_cur_time >= len) {
 		wxCommandEvent e;
 		OnStop(e);
 	}
@@ -488,8 +489,10 @@ void VMovieView::OnPrev(wxCommandEvent& event) {
 	m_running = true;
 	m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
 	int slider_pos = m_progress_sldr->GetValue();
+	long fps;
+	m_fps_text->GetValue().ToLong(&fps);
 	if (slider_pos < 360 && slider_pos > 0) {
-		m_timer.Start(10);
+		m_timer.Start(int(1000.0/double(fps)+0.5));
 		return; 
 	}
 	wxString str = m_views_cmb->GetValue();
@@ -523,8 +526,6 @@ void VMovieView::OnPrev(wxCommandEvent& event) {
 	int page = m_notebook->GetSelection();
 	if (page <= 1) m_current_page = page;
 	if (m_current_page == 1) {
-		long fps;
-		m_fps_text->GetValue().ToLong(&fps);
 		Interpolator *interpolator = vr_frame->GetInterpolator();
 		if (!interpolator)
 			return;
@@ -535,7 +536,7 @@ void VMovieView::OnPrev(wxCommandEvent& event) {
 	SetProgress(0.);
 	SetRendering(0.);
 	m_last_frame = -1;
-	m_timer.Start(10);
+	m_timer.Start(int(1000.0/double(fps)+0.5));
 }
 
 void VMovieView::OnRun(wxCommandEvent& event) {
@@ -864,7 +865,8 @@ void VMovieView::OnTimeChange(wxScrollEvent &event) {
 
 	double movie_time;
 	m_movie_time->GetValue().ToDouble(&movie_time);
-	wxString st = wxString::Format("%.2f",(pcnt*movie_time));
+	m_cur_time = pcnt*movie_time;
+	wxString st = wxString::Format("%.2f",m_cur_time);
 	m_progress_text->ChangeValue(st);
 }
 
@@ -921,13 +923,13 @@ void VMovieView::SetRendering(double pcnt) {
 
 void VMovieView::OnTimeEnter(wxCommandEvent& event) {
 	if(m_running) return;
-	wxString str = m_progress_text->GetValue();
-	double iVal;
-	str.ToDouble(&iVal);
-	str = m_movie_time->GetValue();
+	//wxString str = m_progress_text->GetValue();
+	//double iVal;
+	//str.ToDouble(&iVal);
+	wxString str = m_movie_time->GetValue();
 	double movie_time;
 	str.ToDouble(&movie_time);
-	double pcnt = (iVal / movie_time);
+	double pcnt = (m_cur_time / movie_time);
 	m_progress_sldr->SetValue(360. * pcnt);
 	SetRendering(pcnt);
 	
@@ -956,17 +958,21 @@ void VMovieView::SetProgress(double pcnt) {
 	pcnt = std::abs(pcnt);
 	m_progress_sldr->SetValue(pcnt * 360.);
 	double movie_time = STOD(m_movie_time->GetValue().fn_str());
-	wxString st = wxString::Format("%.2f",(pcnt*movie_time));
+	m_cur_time = pcnt*movie_time;
+	wxString st = wxString::Format("%.2f", m_cur_time);
 	m_progress_text->ChangeValue(st);
 }
 
-void VMovieView::WriteFrameToFile() {
+void VMovieView::WriteFrameToFile(int total_frames) {
 	wxString str = m_views_cmb->GetValue();
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (!vr_frame) return; 
 	VRenderView* vrv = vr_frame->GetView(str);
 	if (!vrv) return;
-	wxString outputfilename = wxString::Format("%s%d%s",m_filename,
+	wxString s_length = wxString::Format("%d", total_frames);
+	int length = s_length.Length();
+	wxString format = wxString::Format("_%%0%dd", length);
+	wxString outputfilename = wxString::Format("%s"+format+"%s",m_filename,
 		m_last_frame,".tif");
     //capture
     int x, y, w, h;
