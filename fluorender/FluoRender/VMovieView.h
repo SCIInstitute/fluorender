@@ -102,11 +102,13 @@ public:
 	void AddView(wxString view);
 	void DeleteView(wxString view);
 	void SetView(int index);
-	void SetTimeFrame(int frame);
 	void DisableRot();
 	void EnableRot();
 	void DisableTime();
 	void EnableTime();
+
+	void UpFrame();
+	void DownFrame();
 
 public:
 	//controls
