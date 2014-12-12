@@ -439,17 +439,6 @@ void VMovieView::SetView(int index) {
 		m_views_cmb->SetSelection(index);
 }
 
-void VMovieView::SetTimeFrame(int frame) {
-	int start_time = STOI(m_time_start_text->GetValue().fn_str());
-	int end_time = STOI(m_time_end_text->GetValue().fn_str());
-	int time = end_time - start_time;
-
-	double pcnt = (double)(std::min(frame,end_time)) / (double)time;
-	m_time_current_text->ChangeValue(wxString::Format("%d",frame));
-	SetProgress(pcnt);
-	SetRendering(pcnt);
-}
-
 void VMovieView::OnTimer(wxTimerEvent& event) {
 	//get all of the progress info
 	double len;
@@ -851,6 +840,34 @@ void VMovieView::EnableTime() {
 	m_movie_time->SetValue(wxString::Format("%d", mov_len));
 }
 
+void VMovieView::UpFrame()
+{
+	if(m_running) return;
+	int start_time = STOI(m_time_start_text->GetValue().fn_str());
+	int end_time = STOI(m_time_end_text->GetValue().fn_str());
+	int current_time = STOI(m_time_current_text->GetValue().fn_str())+1;
+	if (current_time > end_time) current_time = start_time;
+	int time = end_time - start_time + 1;
+	double pcnt = (double)current_time / (double) time;
+	m_time_current_text->ChangeValue(wxString::Format("%d",current_time));
+	SetProgress(pcnt);
+	SetRendering(pcnt);
+}
+
+void VMovieView::DownFrame()
+{
+	if(m_running) return;
+	int start_time = STOI(m_time_start_text->GetValue().fn_str());
+	int end_time = STOI(m_time_end_text->GetValue().fn_str());
+	int current_time = STOI(m_time_current_text->GetValue().fn_str())-1;
+	if (current_time < start_time) current_time = end_time;
+	int time = end_time - start_time + 1;
+	double pcnt = (double)current_time / (double) time;
+	m_time_current_text->ChangeValue(wxString::Format("%d",current_time));
+	SetProgress(pcnt);
+	SetRendering(pcnt);
+}
+
 void VMovieView::OnTimeChange(wxScrollEvent &event) {
 	if(m_running) return;
 	int frame = event.GetPosition();
@@ -1033,29 +1050,11 @@ void VMovieView::WriteFrameToFile(int total_frames) {
 }
 
 void VMovieView::OnUpFrame(wxCommandEvent& event) {
-	if(m_running) return;
-	int start_time = STOI(m_time_start_text->GetValue().fn_str());
-	int end_time = STOI(m_time_end_text->GetValue().fn_str());
-	int current_time = STOI(m_time_current_text->GetValue().fn_str())+1;
-	if (current_time > end_time) current_time = start_time;
-	int time = end_time - start_time + 1;
-	double pcnt = (double)current_time / (double) time;
-	m_time_current_text->ChangeValue(wxString::Format("%d",current_time));
-	SetProgress(pcnt);
-	SetRendering(pcnt);
+	UpFrame();
 }
 
 void VMovieView::OnDownFrame(wxCommandEvent& event) {
-	if(m_running) return;
-	int start_time = STOI(m_time_start_text->GetValue().fn_str());
-	int end_time = STOI(m_time_end_text->GetValue().fn_str());
-	int current_time = STOI(m_time_current_text->GetValue().fn_str())-1;
-	if (current_time < start_time) current_time = end_time;
-	int time = end_time - start_time + 1;
-	double pcnt = (double)current_time / (double) time;
-	m_time_current_text->ChangeValue(wxString::Format("%d",current_time));
-	SetProgress(pcnt);
-	SetRendering(pcnt);
+	DownFrame();
 }
 
 void VMovieView::OnTimeText(wxCommandEvent& event) {

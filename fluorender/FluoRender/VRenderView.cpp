@@ -4263,14 +4263,12 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 
    wxPoint mouse_pos = wxGetMousePosition();
    wxRect view_reg = GetScreenRect();
-   if (view_reg.Contains(mouse_pos))
-   {
-      UpdateBrushState();
-   }
 
    wxWindow *window = wxWindow::FindFocus();
-   if (window)
+   if (window && view_reg.Contains(mouse_pos))
    {
+      UpdateBrushState();
+
 	   VRenderFrame* frame = (VRenderFrame*)m_frame;
 	   //draw_mask
 	   if (wxGetKeyState(wxKeyCode('V')) &&
@@ -4376,9 +4374,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			 wxGetKeyState(wxKeyCode('d')))
 	   {
 		  m_tseq_forward = true;
-		  Set4DSeqFrame(m_tseq_cur_num+1, true);
 		  if (frame && frame->GetMovieView())
-			 frame->GetMovieView()->SetTimeFrame(m_tseq_cur_num);
+			 frame->GetMovieView()->UpFrame();
 		  refresh = true;
 	   }
 	   if (m_tseq_forward &&
@@ -4389,9 +4386,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			 wxGetKeyState(wxKeyCode('a')))
 	   {
 		  m_tseq_backward = true;
-		  Set4DSeqFrame(m_tseq_cur_num-1, true);
 		  if (frame && frame->GetMovieView())
-			 frame->GetMovieView()->SetTimeFrame(m_tseq_cur_num);
+			 frame->GetMovieView()->DownFrame();
 		  refresh = true;
 	   }
 	   if (m_tseq_backward &&

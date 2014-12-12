@@ -2133,65 +2133,15 @@ void TraceDlg::OnCellCombineID(wxCommandEvent &event)
 
 void TraceDlg::OnCellPrev(wxCommandEvent &event)
 {
-	if (m_view)
-	{
-		m_view->Set4DSeqFrame(m_view->m_glview->m_tseq_cur_num-1, true);
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame && vr_frame->GetMovieView())
-			vr_frame->GetMovieView()->SetTimeFrame(m_view->m_glview->m_tseq_cur_num);
-	}
-	//if (m_trace_list_curr->GetItemCount() == 0 &&
-	//	m_trace_list_prev->GetItemCount() > 0)
-	//{
-	//	long item = -1;
-	//	wxString id_str;
-	//	unsigned long id;
-	//	vector<unsigned int> id_list;
-	//	for (;;)
-	//	{
-	//		item = m_trace_list_prev->GetNextItem(item,
-	//			wxLIST_NEXT_ALL,
-	//			wxLIST_STATE_DONTCARE);
-	//		if (item != -1)
-	//		{
-	//			id_str = m_trace_list_prev->GetText(item, 0);
-	//			id_str.ToULong(&id);
-	//			id_list.push_back(id);
-	//		}
-	//	}
-	//	CellAppendID(id_list);
-	//}
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetMovieView())
+		vr_frame->GetMovieView()->DownFrame();
 }
 
 void TraceDlg::OnCellNext(wxCommandEvent &event)
 {
-	if (m_view)
-	{
-		m_view->Set4DSeqFrame(m_view->m_glview->m_tseq_cur_num+1, true);
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame && vr_frame->GetMovieView())
-			vr_frame->GetMovieView()->SetTimeFrame(m_view->m_glview->m_tseq_cur_num);
-	}
-	//if (m_trace_list_curr->GetItemCount() == 0 &&
-	//	m_trace_list_prev->GetItemCount() > 0)
-	//{
-	//	long item = -1;
-	//	wxString id_str;
-	//	unsigned long id;
-	//	vector<unsigned int> id_list;
-	//	for (;;)
-	//	{
-	//		item = m_trace_list_prev->GetNextItem(item,
-	//			wxLIST_NEXT_ALL,
-	//			wxLIST_STATE_DONTCARE);
-	//		if (item != -1)
-	//		{
-	//			id_str = m_trace_list_prev->GetText(item, 0);
-	//			id_str.ToULong(&id);
-	//			id_list.push_back(id);
-	//		}
-	//	}
-	//	CellAppendID(id_list);
-	//}
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetMovieView())
+		vr_frame->GetMovieView()->UpFrame();
 }
 
