@@ -326,7 +326,7 @@ VPropView::VPropView(wxWindow* frame,
    m_options_toolbar->ToggleTool(ID_MipChk,false);
    //inversion
    m_options_toolbar->AddCheckTool(ID_InvChk,"Inversion",
-   wxGetBitmapFromMemory(invert),wxNullBitmap,
+   wxGetBitmapFromMemory(invert_off),wxNullBitmap,
     "Inverts data values when checked.",
     "Inverts data values when checked.");
    m_options_toolbar->ToggleTool(ID_InvChk,false);
@@ -338,7 +338,7 @@ VPropView::VPropView(wxWindow* frame,
    m_options_toolbar->ToggleTool(ID_InterpolateChk,true);
    //noise reduction
    m_options_toolbar->AddCheckTool(ID_NRChk,"Smoothing",
-   wxGetBitmapFromMemory(smooth),wxNullBitmap,
+   wxGetBitmapFromMemory(smooth_off),wxNullBitmap,
     "Enable Data Smoothing.",
     "Enable Data Smoothing.");
    m_options_toolbar->ToggleTool(ID_NRChk,false);
@@ -350,7 +350,7 @@ VPropView::VPropView(wxWindow* frame,
    m_options_toolbar->ToggleTool(ID_SyncGroupChk,false);
    //depth mode
    m_options_toolbar->AddCheckTool(ID_DepthChk,"Depth Mode",
-   wxGetBitmapFromMemory(depth),wxNullBitmap,
+   wxGetBitmapFromMemory(depth_off),wxNullBitmap,
     "Enable Depth Mode.",
     "Enable Depth Mode.");
    m_options_toolbar->ToggleTool(ID_DepthChk,false);
@@ -1461,6 +1461,13 @@ void VPropView::OnColorTextFocus(wxCommandEvent& event)
 void VPropView::OnInvCheck(wxCommandEvent &event)
 {
    bool inv = m_options_toolbar->GetToolState(ID_InvChk);
+   if(inv) 
+	 m_options_toolbar->SetToolNormalBitmap(ID_InvChk, 
+	 wxGetBitmapFromMemory(invert));
+   else
+	 m_options_toolbar->SetToolNormalBitmap(ID_InvChk, 
+	 wxGetBitmapFromMemory(invert_off));
+
    if (m_sync_group && m_group)
       m_group->SetInvert(inv);
    else if (m_vd)
@@ -1542,6 +1549,12 @@ void VPropView::OnMIPCheck(wxCommandEvent &event)
 void VPropView::OnNRCheck(wxCommandEvent &event)
 {
    bool val = m_options_toolbar->GetToolState(ID_NRChk);
+   if(val) 
+	 m_options_toolbar->SetToolNormalBitmap(ID_NRChk, 
+	 wxGetBitmapFromMemory(smooth));
+   else
+	 m_options_toolbar->SetToolNormalBitmap(ID_NRChk, 
+	 wxGetBitmapFromMemory(smooth_off));
 
    if (m_vrv && m_vrv->GetVolMethod()==VOL_METHOD_MULTI)
    {
@@ -1590,6 +1603,10 @@ void VPropView::OnFluoRender(wxCommandEvent &event) {
 void VPropView::OnDepthCheck(wxCommandEvent &event)
 {
    bool val = m_options_toolbar->GetToolState(ID_DepthChk);
+   if(val) 
+	 m_options_toolbar->SetToolNormalBitmap(ID_DepthChk, wxGetBitmapFromMemory(depth));
+   else
+	 m_options_toolbar->SetToolNormalBitmap(ID_DepthChk, wxGetBitmapFromMemory(depth_off));
 
    if (val)
    {
@@ -1680,6 +1697,12 @@ void VPropView::OnLegendCheck(wxCommandEvent& event)
 void VPropView::OnInterpolateCheck(wxCommandEvent& event)
 {
    bool inv = m_options_toolbar->GetToolState(ID_InterpolateChk);
+   if(inv) 
+	 m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk, 
+	 wxGetBitmapFromMemory(interpolate));
+   else
+	 m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk, 
+	 wxGetBitmapFromMemory(interpolate_off));
    if (m_sync_group && m_group)
       m_group->SetInterpolate(inv);
    else if (m_vd)
