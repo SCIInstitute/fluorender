@@ -8,7 +8,9 @@ namespace FLIVR
 	bool KernelProgram::init_ = false;
 	cl_device_id KernelProgram::device_ = 0;
 	cl_context KernelProgram::context_ = 0;
+#ifdef _DARWIN
     CGLContextObj KernelProgram::gl_context_ = 0;
+#endif
 	KernelProgram::KernelProgram(const std::string& source) :
 	source_(source), program_(0), kernel_(0), queue_(0)
 	{

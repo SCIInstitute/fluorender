@@ -132,8 +132,8 @@ m_view(0)
     m_kernel_edit_stc->StyleSetBold(wxSTC_C_WORD2, true);
     m_kernel_edit_stc->StyleSetBold(wxSTC_C_COMMENTDOCKEYWORD, true);
     // a sample list of keywords, I haven't included them all to keep it short...
-    m_kernel_edit_stc->SetKeyWords(0, wxT("return for while break continue"));
-    m_kernel_edit_stc->SetKeyWords(1, wxT("const int float void char double"));
+    m_kernel_edit_stc->SetKeyWords(0, wxT("return for while break continue __kernel kernel_main __global"));
+    m_kernel_edit_stc->SetKeyWords(1, wxT("const int float void char double unsigned int4 float4 signed"));
 	m_kernel_edit_stc->SetMarginType (m_FoldingID, wxSTC_MARGIN_SYMBOL);
 	m_kernel_edit_stc->SetMarginMask (m_FoldingID, wxSTC_MASK_FOLDERS);
 	m_kernel_edit_stc->StyleSetBackground (m_FoldingID, *wxWHITE);
@@ -227,8 +227,12 @@ void OclDlg::OnSaveAsBtn(wxCommandEvent& event)
 	{
 		wxString filename = fopendlg->GetPath();
 		rval = m_kernel_edit_stc->SaveFile(filename);
-		if (rval)
+		if (rval) {
 			m_kernel_file_txt->SetValue(filename);
+			filename = filename.AfterLast(GETSLASH());
+			filename = filename.BeforeFirst('.');
+	        m_kernel_list->InsertItem(m_kernel_list->GetItemCount(), filename);
+		}
 	}
 
 	if (fopendlg)
