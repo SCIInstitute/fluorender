@@ -9,6 +9,8 @@
 #ifdef _DARWIN
 #include <OpenCL/cl.h>
 #include <OpenCL/cl_gl.h>
+#include <OpenCL/cl_gl_ext.h>
+#include <OpenGL/CGLCurrent.h>
 #endif
 #include <string>
 #include <vector>
@@ -53,7 +55,9 @@ namespace FLIVR
 		std::string &getInfo();
 
 		friend class VolKernel;
-
+#ifdef _DARWIN
+        static CGLContextObj gl_context_;
+#endif
 	protected:
 		std::string source_;
 		cl_program program_;

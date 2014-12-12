@@ -8,7 +8,7 @@ namespace FLIVR
 	bool KernelProgram::init_ = false;
 	cl_device_id KernelProgram::device_ = 0;
 	cl_context KernelProgram::context_ = 0;
-
+    CGLContextObj KernelProgram::gl_context_ = 0;
 	KernelProgram::KernelProgram(const std::string& source) :
 	source_(source), program_(0), kernel_(0), queue_(0)
 	{
@@ -33,7 +33,9 @@ namespace FLIVR
 		err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device_, NULL);
 		if (err != CL_SUCCESS)
 			return;
-
+#ifdef _DARWIN
+        gl_context_ =CGLGetCurrentContext();
+#endif
 		cl_context_properties properties[] =
 		{
 #ifdef _WIN32
@@ -41,7 +43,8 @@ namespace FLIVR
 			CL_WGL_HDC_KHR, (cl_context_properties)wglGetCurrentDC(),
 #endif
 #ifdef _DARWIN
-			CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE, (cl_context_properties) kCGLShareGroup, 
+			CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE,
+            (cl_context_properties) CGLGetShareGroup( gl_context_),
 #endif
 			CL_CONTEXT_PLATFORM, (cl_context_properties)platform,
 			0

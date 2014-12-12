@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <boost/chrono.hpp>
+#include "compatibility.h"
 
 using namespace boost::chrono;
 
@@ -45,7 +46,7 @@ END_EVENT_TABLE()
 OclDlg::OclDlg(wxWindow* frame,
 wxWindow* parent) :
 wxPanel(parent, wxID_ANY,
-wxPoint(500, 150), wxSize(500, 600),
+wxPoint(500, 150), wxSize(550, 600),
 0, "OclDlg"),
 m_frame(parent),
 m_view(0)
@@ -58,11 +59,11 @@ m_view(0)
 	m_kernel_file_txt = new wxTextCtrl(this, ID_KernelFileTxt, "",
 		wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
 	m_browse_btn = new wxButton(this, ID_BrowseBtn, "Browse",
-		wxDefaultPosition, wxSize(60, 23));
+		wxDefaultPosition, wxSize(70, 23));
 	m_save_btn = new wxButton(this, ID_SaveBtn, "Save",
-		wxDefaultPosition, wxSize(60, 23));
+		wxDefaultPosition, wxSize(70, 23));
 	m_saveas_btn = new wxButton(this, ID_SaveAsBtn, "Save As",
-		wxDefaultPosition, wxSize(60, 23));
+		wxDefaultPosition, wxSize(70, 23));
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_kernel_file_txt, 1, wxEXPAND|wxALIGN_CENTER);
@@ -86,8 +87,11 @@ m_view(0)
 
 	//list
 	m_kernel_list = new wxListCtrl(this, ID_KernelList,
-		wxDefaultPosition, wxDefaultSize, wxLC_LIST);
-
+		wxDefaultPosition, wxSize(-1,-1), wxLC_REPORT|wxLC_SINGLE_SEL);
+    wxListItem itemCol;
+    itemCol.SetText("Kernel File");
+    m_kernel_list->InsertColumn(0, itemCol);
+    m_kernel_list->SetColumnWidth(0, 100);
 	//stc
     m_LineNrID = 0;
     m_DividerID = 1;
@@ -111,12 +115,25 @@ m_view(0)
     m_kernel_edit_stc->StyleSetForeground(wxSTC_STYLE_LASTPREDEFINED + 1, *wxBLACK);
     m_kernel_edit_stc->StyleSetSizeFractional(wxSTC_STYLE_LASTPREDEFINED + 1,
             (m_kernel_edit_stc->StyleGetSizeFractional(wxSTC_STYLE_DEFAULT)*4)/5);
-    //// default fonts for all styles!
-    //int Nr;
-    //for (Nr = 0; Nr < wxSTC_STYLE_LASTPREDEFINED; Nr++) {
-    //    wxFont font (10, wxMODERN, wxNORMAL, wxNORMAL);
-    //    m_kernel_edit_stc->StyleSetFont (Nr, font);
-    //}
+    m_kernel_edit_stc->SetWrapMode (wxSTC_WRAP_WORD); // other choice is wxSCI_WRAP_NONE
+    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_STRING,            wxColour(150,0,0));
+    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_PREPROCESSOR,      wxColour(165,105,0));
+    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_IDENTIFIER,        wxColour(40,0,60));
+    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_NUMBER,            wxColour(0,150,0));
+    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_CHARACTER,         wxColour(150,0,0));
+    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_WORD,              wxColour(0,0,150));
+    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_WORD2,             wxColour(0,150,0));
+    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_COMMENT,           wxColour(150,150,150));
+    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_COMMENTLINE,       wxColour(150,150,150));
+    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_COMMENTDOC,        wxColour(150,150,150));
+    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_COMMENTDOCKEYWORD, wxColour(0,0,200));
+    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_COMMENTDOCKEYWORDERROR, wxColour(0,0,200));
+    m_kernel_edit_stc->StyleSetBold(wxSTC_C_WORD, true);
+    m_kernel_edit_stc->StyleSetBold(wxSTC_C_WORD2, true);
+    m_kernel_edit_stc->StyleSetBold(wxSTC_C_COMMENTDOCKEYWORD, true);
+    // a sample list of keywords, I haven't included them all to keep it short...
+    m_kernel_edit_stc->SetKeyWords(0, wxT("return for while break continue"));
+    m_kernel_edit_stc->SetKeyWords(1, wxT("const int float void char double"));
 	m_kernel_edit_stc->SetMarginType (m_FoldingID, wxSTC_MARGIN_SYMBOL);
 	m_kernel_edit_stc->SetMarginMask (m_FoldingID, wxSTC_MASK_FOLDERS);
 	m_kernel_edit_stc->StyleSetBackground (m_FoldingID, *wxWHITE);
@@ -131,7 +148,9 @@ m_view(0)
 
 	//sizer
 	wxBoxSizer *sizer_3 = new wxBoxSizer(wxHORIZONTAL);
-	sizer_3->Add(m_kernel_list, 0, wxEXPAND);
+    sizer_3->Add(m_kernel_list, 0, wxEXPAND);
+    wxStaticText * separator = new wxStaticText(this,0,"",wxDefaultPosition,wxSize(5,-1));
+    sizer_3->Add(separator,0,wxEXPAND);
 	sizer_3->Add(m_kernel_edit_stc, 1, wxEXPAND);
 
 	//all controls
@@ -219,7 +238,9 @@ void OclDlg::OnSaveAsBtn(wxCommandEvent& event)
 void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 {
 	m_output_txt->SetValue("");
-
+#ifdef _DARWIN
+    CGLSetCurrentContext(KernelProgram::gl_context_);
+#endif
 	if (!m_view)
 		return;
 
@@ -378,7 +399,7 @@ bool OclDlg::ExecuteKernel(KernelProgram* kernel, GLuint data_id, void* result,
 		size_t brick_x, size_t brick_y, size_t brick_z)
 {
 	if (!kernel)
-		return false;
+        return false;
 
 	if (!kernel->valid())
 	{
@@ -416,12 +437,12 @@ bool OclDlg::ExecuteKernel(KernelProgram* kernel, GLuint data_id, void* result,
 void OclDlg::AddKernelsToList()
 {
 	m_kernel_list->DeleteAllItems();
-
+    wxString loc = wxString("CL_code") + GETSLASH() + wxString("*.cl");
 	wxLogNull logNo;
-	wxString file = wxFindFirstFile("CL_code\\*.cl");
+	wxString file = wxFindFirstFile(loc);
 	while (!file.empty())
 	{
-		file = file.AfterFirst('\\');
+		file = file.AfterFirst(GETSLASH());
 		file = file.BeforeFirst('.');
 		m_kernel_list->InsertItem(m_kernel_list->GetItemCount(), file);
 		file = wxFindNextFile();
@@ -437,7 +458,7 @@ void OclDlg::OnKernelListSelected(wxListEvent& event)
    if (item != -1)
    {
       wxString file = m_kernel_list->GetItemText(item);
-	  file = "CL_code\\" + file + ".cl";
+	  file = "CL_code" + wxString(GETSLASH()) + file + ".cl";
 		m_kernel_edit_stc->LoadFile(file);
 		m_kernel_edit_stc->EmptyUndoBuffer();
 		m_kernel_file_txt->SetValue(file);
