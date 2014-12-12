@@ -243,7 +243,9 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 {
 	m_output_txt->SetValue("");
 #ifdef _DARWIN
-    CGLSetCurrentContext(KernelProgram::gl_context_);
+    CGLContextObj ctx = CGLGetCurrentContext();
+    if (ctx != KernelProgram::gl_context_)
+        CGLSetCurrentContext(KernelProgram::gl_context_);
 #endif
 	if (!m_view)
 		return;

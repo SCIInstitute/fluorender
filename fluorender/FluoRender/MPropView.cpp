@@ -77,7 +77,7 @@ m_vrv(0)
 	wxIntegerValidator<unsigned int> vald_int;
 
 	st = new wxStaticText(this, 0, " Transparency: ",
-		wxDefaultPosition, wxSize(80, 20));
+		wxDefaultPosition, wxSize(100, 20));
 	m_alpha_sldr = new wxSlider(this, ID_alpha_sldr, 255, 0, 255, 
 		wxDefaultPosition, wxSize(200, 20), wxSL_HORIZONTAL);
 	m_alpha_text = new wxTextCtrl(this, ID_alpha_text, "1.00",
@@ -88,7 +88,7 @@ m_vrv(0)
 	sizer_1->Add(m_alpha_text, 0, wxALIGN_CENTER, 0);
 
 	m_shadow_chk = new wxCheckBox(this, ID_shadow_chk, "Shadow: ",
-		wxDefaultPosition, wxSize(80, 20));
+		wxDefaultPosition, wxSize(100, 20));
 	m_shadow_sldr = new wxSlider(this, ID_shadow_sldr, 60, 0, 100,
 		wxDefaultPosition, wxSize(200, 20), wxSL_HORIZONTAL);
 	m_shadow_text = new wxTextCtrl(this, ID_shadow_text, "0.60",
@@ -108,35 +108,32 @@ m_vrv(0)
 		wxVERTICAL);
 
 	st = new wxStaticText(this, 0, " Diffuse Color: ",
-		wxDefaultPosition, wxSize(100, 20));
+		wxDefaultPosition, wxSize(110, 20));
 	m_diff_picker = new wxColourPickerCtrl(this, ID_diff_picker, *wxWHITE, 
-		wxDefaultPosition, wxSize(180, 20), wxCLRP_USE_TEXTCTRL);
-	sizer_4->Add(20, 5, 0);
-	sizer_4->Add(st, 0, wxALIGN_CENTER, 0);
+		wxDefaultPosition, wxSize(180, 30));
+	sizer_4->Add(st, 0, wxALIGN_LEFT, 0);
 	sizer_4->Add(m_diff_picker, 0, wxALIGN_CENTER, 0);
 
 	st = new wxStaticText(this, 0, " Specular Color: ",
-		wxDefaultPosition, wxSize(100, 20));
+		wxDefaultPosition, wxSize(110, 20));
 	m_spec_picker = new wxColourPickerCtrl(this, ID_spec_picker, *wxWHITE, 
-		wxDefaultPosition, wxSize(180, 20), wxCLRP_USE_TEXTCTRL);
-	sizer_5->Add(20, 5, 0);
-	sizer_5->Add(st, 0, wxALIGN_CENTER, 0);
+		wxDefaultPosition, wxSize(180, 30));
+	sizer_5->Add(st, 0, wxALIGN_LEFT, 0);
 	sizer_5->Add(m_spec_picker, 0, wxALIGN_CENTER, 0);
 
 	st = new wxStaticText(this, 0, " Shininess: ",
-		wxDefaultPosition, wxSize(80, 20));
+		wxDefaultPosition, wxSize(100, 20));
 	m_shine_sldr = new wxSlider(this, ID_shine_sldr, 30, 0, 128, 
 		wxDefaultPosition, wxSize(200, 20), wxSL_HORIZONTAL);
 	m_shine_text = new wxTextCtrl(this, ID_shine_text, "30",
 		wxDefaultPosition, wxSize(50, 20), 0, vald_int);
-	sizer_6->Add(20, 5, 0);
 	sizer_6->Add(st, 0, wxALIGN_CENTER, 0);
 	sizer_6->Add(m_shine_sldr, 0, wxALIGN_CENTER, 0);
 	sizer_6->Add(m_shine_text, 0, wxALIGN_CENTER, 0);
 
-	group1->Add(sizer_4, 0, wxALIGN_CENTER);
-	group1->Add(sizer_5, 0, wxALIGN_CENTER);
-	group1->Add(sizer_6, 0, wxALIGN_CENTER);
+	group1->Add(sizer_4, 0, wxALIGN_LEFT);
+	group1->Add(sizer_5, 0, wxALIGN_LEFT);
+	group1->Add(sizer_6, 0, wxALIGN_LEFT);
 
 	sizer_v1->Add(group1, 0, wxALIGN_LEFT);
 
@@ -144,7 +141,7 @@ m_vrv(0)
 
 	wxBoxSizer* sizer_7 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, " Scaling: ",
-		wxDefaultPosition, wxSize(80, 20));
+		wxDefaultPosition, wxSize(100, 20));
 	m_scale_sldr = new wxSlider(this, ID_scale_sldr, 100, 50, 200, 
 		wxDefaultPosition, wxSize(200, 20), wxSL_HORIZONTAL);
 	m_scale_text = new wxTextCtrl(this, ID_scale_text, "1.00",
@@ -157,7 +154,7 @@ m_vrv(0)
 	//size limiter
 	wxBoxSizer* sizer_8 = new wxBoxSizer(wxHORIZONTAL);
 	m_size_chk = new wxCheckBox(this, ID_size_chk, " Size limit: ",
-		wxDefaultPosition, wxSize(80, 20));
+		wxDefaultPosition, wxSize(100, 20));
 	m_size_sldr = new wxSlider(this, ID_size_sldr, 50, 0, 250,
 		wxDefaultPosition, wxSize(200, 20), wxSL_HORIZONTAL);
 	m_size_text = new wxTextCtrl(this, ID_size_text, "50",

@@ -299,12 +299,14 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 			menu.Append(ID_ShowAll, "Show All");
             menu.Append(ID_RemoveData, "Delete");
             menu.Append(ID_AddDataGroup, "Add Volume Group");
+#ifdef _WIN32
             menu.Append(ID_Edit, "Analyze...");
-            menu.Append(ID_Measurement, "Measurement...");
             menu.Append(ID_NoiseCancelling, "Noise Reduction...");
             menu.Append(ID_Counting, "Counting and Volume...");
             menu.Append(ID_Colocalization, "Colocalization Analysis...");
+#endif
             menu.Append(ID_RandomizeColor, "Randomize Colors");
+            menu.Append(ID_Measurement, "Measurement...");
             break;
          case 3:  //mesh data
             menu.Append(ID_ToggleDisp, "Toggle Visibility");

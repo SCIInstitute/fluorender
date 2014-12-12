@@ -359,4 +359,4 @@ add_custom_command(TARGET FluoRender PRE_BUILD
 add_custom_command(TARGET FluoRender PRE_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/CL_code"
-  "${CMAKE_BUILD_DIR}/CL_code")
+  "${CMAKE_BINARY_DIR}/CL_code")
