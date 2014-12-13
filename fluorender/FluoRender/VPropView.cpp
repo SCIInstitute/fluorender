@@ -1585,7 +1585,7 @@ void VPropView::OnFluoRender(wxCommandEvent &event) {
    int psJan = time.Find("Jan");
    int psDec = time.Find("Dec");
     wxDialog* d = new wxDialog(this,wxID_ANY,"About FluoRender",wxDefaultPosition,
-                               wxSize(540,200),wxCLOSE_BOX );
+                               wxSize(540,210),wxDEFAULT_DIALOG_STYLE );
     wxBoxSizer * main = new wxBoxSizer(wxHORIZONTAL);
     wxBoxSizer * left = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer * right = new wxBoxSizer(wxVERTICAL);
@@ -1601,24 +1601,24 @@ void VPropView::OnFluoRender(wxCommandEvent &event) {
     //right
     wxStaticText *txt = new wxStaticText(d,wxID_ANY,FLUORENDER_TITLE,
                                         wxDefaultPosition,wxSize(-1,-1));
-    wxFont font = wxFont(20,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTSIZE_LARGE);
+    wxFont font = wxFont(15,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
     txt->SetFont(font);
     right->Add(txt,0,wxEXPAND);
     txt = new wxStaticText(d,wxID_ANY,"Version: " +
                            wxString::Format("%d.%d", VERSION_MAJOR, VERSION_MINOR),
                                          wxDefaultPosition,wxSize(-1,-1));
-    font = wxFont(14,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTSIZE_LARGE);
+    font = wxFont(12,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
     txt->SetFont(font);
     right->Add(txt,0,wxEXPAND | wxALIGN_RIGHT);
     txt = new wxStaticText(d,wxID_ANY,wxString("Copyright (c) ") + VERSION_COPYRIGHT,
                            wxDefaultPosition,wxSize(-1,-1));
-    font = wxFont(13,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTSIZE_LARGE);
+    font = wxFont(11,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
     txt->SetFont(font);
     right->Add(txt,0,wxEXPAND | wxALIGN_RIGHT);
-    right->Add(5,5,0);
+    right->Add(3,5,0);
     txt = new wxStaticText(d,wxID_ANY,VERSION_AUTHORS,
-                           wxDefaultPosition,wxSize(-1,83));
-    font = wxFont(12,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTSIZE_LARGE);
+                           wxDefaultPosition,wxSize(-1,90));
+    font = wxFont(10,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
     txt->SetFont(font);
     right->Add(txt,0,wxEXPAND | wxALIGN_RIGHT);
     wxHyperlinkCtrl* hyp = new wxHyperlinkCtrl(d,wxID_ANY,"Contact Info",
@@ -1630,7 +1630,6 @@ void VPropView::OnFluoRender(wxCommandEvent &event) {
     main->Add(left,0,wxEXPAND);
     main->Add(right,0,wxEXPAND);
     d->SetSizer(main);
-    d->Center();
     d->ShowModal();
 }
 
