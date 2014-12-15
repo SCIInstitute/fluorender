@@ -244,13 +244,13 @@ const static unsigned char rewind_png[16443];
 const static unsigned char save_settings_png[16830];
 
 /* scale.png - 312 bytes */
-const static unsigned char scale_png[312];
+const static unsigned char scale_png[16146];
 
 /* scale_text.png - 484 bytes */
-const static unsigned char scale_text_png[484];
+const static unsigned char scale_text_png[17358];
 
 /* scale_text_off.png - 1365 bytes */
-const static unsigned char scale_text_off_png[1365];
+const static unsigned char scale_text_off_png[16910];
 
 /* shade.png - 497 bytes */
 const static unsigned char shade_png[497];

@@ -9941,8 +9941,6 @@ void VRenderView::CreateBar()
    m_options_toolbar->AddControl(st2);
    m_options_toolbar->AddControl(m_aov_sldr);
    m_options_toolbar->AddControl(m_aov_text);
-   st2 = new wxStaticText(m_options_toolbar, wxID_ANY, "    Free-Fly:  ");
-   m_options_toolbar->AddControl(st2);
 
    m_options_toolbar->AddCheckTool(ID_FreeChk,"Free Fly",
 	   wxGetBitmapFromMemory(freefly),wxNullBitmap,
