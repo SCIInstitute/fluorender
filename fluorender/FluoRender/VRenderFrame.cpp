@@ -977,6 +977,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
 	  if (enable_4d) {
 			m_movie_view->EnableTime();
 			m_movie_view->DisableRot();
+			m_movie_view->SetCurrentTime(vrv->m_glview->m_tseq_cur_num);
 	  }
       delete prg_diag;
    }

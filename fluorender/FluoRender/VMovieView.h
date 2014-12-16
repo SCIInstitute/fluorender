@@ -109,6 +109,7 @@ public:
 
 	void UpFrame();
 	void DownFrame();
+	void SetCurrentTime(size_t t);
 
 public:
 	//controls
