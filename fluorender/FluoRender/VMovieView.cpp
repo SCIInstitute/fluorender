@@ -1057,6 +1057,12 @@ void VMovieView::OnDownFrame(wxCommandEvent& event) {
 	DownFrame();
 }
 
+void VMovieView::SetCurrentTime(size_t t) {
+	m_time_current_text->SetValue(wxString::Format(wxT("%i"),(int)t));
+	wxCommandEvent e;
+	OnTimeText(e);
+}
+
 void VMovieView::OnTimeText(wxCommandEvent& event) {
 	if(m_running) return;
 	int start_time = STOI(m_time_start_text->GetValue().fn_str());
