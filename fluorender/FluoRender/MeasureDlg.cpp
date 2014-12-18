@@ -95,15 +95,14 @@ void RulerListCtrl::Append(wxString name, double length, wxString &unit,
    SetItem(tmp, 2, str);
     SetColumnWidth(2, wxLIST_AUTOSIZE);
    SetItem(tmp, 3, points);
-   SetColumnWidth(3, wxLIST_AUTOSIZE_USEHEADER);
    if (time_dep)
       str = wxString::Format("%d", time);
    else
       str = "N/A";
    SetItem(tmp, 4, str);
-    SetColumnWidth(4, wxLIST_AUTOSIZE);
+    SetColumnWidth(4, wxLIST_AUTOSIZE_USEHEADER);
    SetItem(tmp, 5, extra);
-    SetColumnWidth(5, wxLIST_AUTOSIZE);
+    SetColumnWidth(5, wxLIST_AUTOSIZE_USEHEADER);
 }
 
 void RulerListCtrl::UpdateRulers(VRenderView* vrv)
