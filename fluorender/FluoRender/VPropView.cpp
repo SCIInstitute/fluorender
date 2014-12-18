@@ -1357,6 +1357,26 @@ void VPropView::OnColorTextChange(wxCommandEvent& event)
       wxc = wxColor(255, 255, 255);
       filled = 3;
    }
+   else if (str == "c" || str == "C")
+   {
+      wxc = wxColor(0, 255, 255);
+      filled = 3;
+   }
+   else if (str == "m" || str == "M")
+   {
+      wxc = wxColor(255, 0, 255);
+      filled = 3;
+   }
+   else if (str == "y" || str == "Y")
+   {
+      wxc = wxColor(255, 255, 0);
+      filled = 3;
+   }
+   else if (str == "k" || str == "K")
+   {
+      wxc = wxColor(0, 0, 0);
+      filled = 3;
+   }
    else if (str == "p" || str == "P")
    {
       wxc = wxColor(255, 0, 255);
