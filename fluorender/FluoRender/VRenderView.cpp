@@ -11468,15 +11468,23 @@ void VRenderView::OnAovChange(wxScrollEvent& event)
 void VRenderView::OnAovText(wxCommandEvent& event)
 {
    wxString str = m_aov_text->GetValue();
+   if (str == "Ortho")
+   {
+      SetPersp(false);
+      m_aov_sldr->SetValue(10);
+	  RefreshGL(true);
+      return;
+   }
    long val;
-   str.ToLong(&val);
-   if (val == 0 || val == 10)
+   if (!str.ToLong(&val))
+	   return;
+   if (val ==0 || val == 10)
    {
       SetPersp(false);
       m_aov_text->ChangeValue("Ortho");
       m_aov_sldr->SetValue(10);
    }
-   else if (val <= 10)
+   else if (val < 10)
    {
       return;
    }
