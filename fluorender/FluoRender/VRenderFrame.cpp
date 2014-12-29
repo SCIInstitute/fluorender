@@ -70,6 +70,7 @@ EVT_MENU(ID_Trace, VRenderFrame::OnTrace)
 EVT_MENU(ID_Ocl, VRenderFrame::OnOcl)
 EVT_MENU(ID_Twitter, VRenderFrame::OnTwitter)
 EVT_MENU(ID_Facebook, VRenderFrame::OnFacebook)
+EVT_MENU(ID_Manual, VRenderFrame::OnManual)
 EVT_MENU(ID_ShowHideUI, VRenderFrame::OnShowHideUI)
 EVT_MENU(ID_ShowHideToolbar, VRenderFrame::OnShowHideToolbar)
 //ui menu events
@@ -582,6 +583,8 @@ m_setting_dlg(0)
    m_top_help->Append(m);
    m = new wxMenuItem(m_top_help,ID_Facebook, wxT("&Facebook"));
    m->SetBitmap(wxGetBitmapFromMemory(icon_facebook_mini));
+   m_top_help->Append(m);
+   m = new wxMenuItem(m_top_help,ID_Manual, wxT("&Online Manual"));
    m_top_help->Append(m);
    m = new wxMenuItem(m_top_help,ID_Info, wxT("&About FluoRender..."));
    m->SetBitmap(wxGetBitmapFromMemory(icon_about_mini));
@@ -4192,6 +4195,11 @@ void VRenderFrame::OnOcl(wxCommandEvent& WXUNUSED(event))
 void VRenderFrame::OnFacebook(wxCommandEvent& WXUNUSED(event))
 {
    ::wxLaunchDefaultBrowser("http://www.facebook.com/fluorender");
+}
+
+void VRenderFrame::OnManual(wxCommandEvent& WXUNUSED(event))
+{
+   ::wxLaunchDefaultBrowser(HELP_MOVIE);
 }
 
 void VRenderFrame::OnTwitter(wxCommandEvent& WXUNUSED(event))

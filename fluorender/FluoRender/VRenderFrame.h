@@ -64,10 +64,22 @@ using namespace std;
 
 #define VERSION_CONTACT "http://www.sci.utah.edu/software/fluorender.html"
 #define VERSION_AUTHORS "Yong Wan\nHideo Otsun\nChuck Hansen\nChi-Bin Chien\nBrig Bagley\n@The University of Utah"
-#define VERSION_UPDATES "http://www.sci.utah.edu/releases/fluorender_v2.14/"
-#define HELP_MOVIE "http://www.sci.utah.edu/releases/fluorender_v2.9.0/FluoRender_Manual.pdf"
-#define BATCH_INFO "http://www.sci.utah.edu/releases/fluorender_v2.9.0/FluoRender_Manual.pdf"
-#define HELP_PAINT "http://www.sci.utah.edu/releases/fluorender_v2.9.0/FluoRender_Manual.pdf"
+#define VERSION_UPDATES "http://www.sci.utah.edu/releases/fluorender_v" \
+	               VERSION_MAJOR_TAG \
+				   "." \
+				   VERSION_MINOR_TAG \
+				   "/"
+#define HELP_MOVIE "http://www.sci.utah.edu/releases/fluorender_v"\
+	               VERSION_MAJOR_TAG \
+				   "." \
+				   VERSION_MINOR_TAG \
+				   "/FluoRender" \
+	               VERSION_MAJOR_TAG \
+				   "." \
+				   VERSION_MINOR_TAG \
+				   "_Manual.pdf"
+#define BATCH_INFO HELP_MOVIE
+#define HELP_PAINT HELP_MOVIE
 
 #define UITEXT_DATAVIEW		"Datasets"
 #define UITEXT_TREEVIEW		"Workspace"
@@ -119,6 +131,7 @@ class VRenderFrame: public wxFrame
 		//right aligned items
 		ID_CheckUpdates,
 		ID_Facebook,
+		ID_Manual,
 		ID_Twitter,
 		ID_Info,
 		ID_ShowHideToolbar
@@ -388,6 +401,7 @@ private:
 	void OnCheckUpdates(wxCommandEvent& WXUNUSED(event));
 	void OnInfo(wxCommandEvent& WXUNUSED(event));
 	void OnFacebook(wxCommandEvent& WXUNUSED(event));
+	void OnManual(wxCommandEvent& WXUNUSED(event));
 	void OnTwitter(wxCommandEvent& WXUNUSED(event));
 	void OnShowHideUI(wxCommandEvent& WXUNUSED(event));
 	void OnShowHideToolbar(wxCommandEvent& WXUNUSED(event));
