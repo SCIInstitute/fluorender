@@ -258,6 +258,8 @@ namespace FLIVR
 
 #define SEG_BODY_DB_GROW_STOP_FUNC \
 	"	//SEG_BODY_DB_GROW_STOP_FUNC\n" \
+	"	if (c.x == 0.0)\n" \
+	"		discard;\n" \
 	"	v.x = c.x>1.0?1.0:c.x;\n" \
 	"	float stop = \n" \
 	"		(loc7.y>0.0?(v.y>sqrt(loc7.y)*2.12?0.0:exp(-v.y*v.y/loc7.y)):1.0)*\n" \

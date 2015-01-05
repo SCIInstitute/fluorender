@@ -130,6 +130,14 @@ namespace FLIVR
       return num_slices_;
    }
 
+   void MultiVolumeRenderer::set_colormap_mode_single()
+   {
+	   if (vr_list_.size() == 1)
+		colormap_mode_ = vr_list_[0]->colormap_mode_;
+	   else
+		colormap_mode_ = 0;
+   }
+
    //manages volume renderers for rendering
    void MultiVolumeRenderer::add_vr(VolumeRenderer* vr)
    {
@@ -730,19 +738,19 @@ namespace FLIVR
             double spcx, spcy, spcz;
             vr_list_[tn]->tex_->get_spacings(spcx, spcy, spcz);
             shader->setLocalParam(5, spcx, spcy, spcz, 1.0);
-            //switch (vr_list_[tn]->colormap_mode_)
-            //{
-            //case 0://normal
+            switch (colormap_mode_)
+            {
+            case 0://normal
             shader->setLocalParam(6, vr_list_[tn]->color_.r(),
                   vr_list_[tn]->color_.g(),
                   vr_list_[tn]->color_.b(), 0.0);
-            //  break;
-            //case 1://colormap
-            //  shader->setLocalParam(6, vr_list_[tn]->colormap_low_value_,
-            //    vr_list_[tn]->colormap_hi_value_,
-            //    vr_list_[tn]->colormap_hi_value_-vr_list_[tn]->colormap_low_value_, 0.0);
-            //  break;
-            //}
+              break;
+            case 1://colormap
+              shader->setLocalParam(6, vr_list_[tn]->colormap_low_value_,
+                vr_list_[tn]->colormap_hi_value_,
+                vr_list_[tn]->colormap_hi_value_-vr_list_[tn]->colormap_low_value_, 0.0);
+              break;
+            }
 
             double abcd[4];
             vr_list_[tn]->planes_[0]->get(abcd);

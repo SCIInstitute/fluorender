@@ -1179,7 +1179,7 @@ void VolumeData::DrawBounds()
 //hr_mode (hidden removal): 0-none; 1-ortho; 2-persp
 void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 						  double ini_thresh, double gm_falloff, double scl_falloff, double scl_translate,
-						  double w2d, double bins, bool ortho)
+						  double w2d, double bins, bool ortho, bool estimate)
 {
 	glPushMatrix();
 	glScalef(m_sclx, m_scly, m_sclz);
@@ -1187,7 +1187,9 @@ void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 	{
 		m_vr->set_2d_mask(m_2d_mask);
 		m_vr->set_2d_weight(m_2d_weight1, m_2d_weight2);
-		m_vr->draw_mask(type, paint_mode, hr_mode, ini_thresh, gm_falloff, scl_falloff, scl_translate, w2d, bins, ortho);
+		m_vr->draw_mask(type, paint_mode, hr_mode, ini_thresh, gm_falloff, scl_falloff, scl_translate, w2d, bins, ortho, estimate);
+		if (estimate)
+			m_est_thresh = m_vr->get_estimated_thresh();
 	}
 	glPopMatrix();
 }
@@ -3085,6 +3087,8 @@ TraceGroup::TraceGroup()
 	m_cur_time = -1;
 	m_prv_time = -1;
 	m_ghost_num = 10;
+	m_draw_tail = true;
+	m_draw_lead = false;
 	m_cell_size = 20;
 
 	//font
@@ -3531,7 +3535,7 @@ void TraceGroup::Draw()
 		}
 	}
 
-	if (ghosts.size() > 0)
+	if (ghosts.size() > 0 && (m_draw_tail || m_draw_lead))
 	{
 		//
 		IDMapIter id_map_iter;
@@ -3546,8 +3550,9 @@ void TraceGroup::Draw()
 
 		id_map_temp1 = m_id_map;
 
-		//if (m_cur_time >= m_prv_time)
-		glBegin(GL_LINES);
+		if (m_draw_lead)
+		{
+			glBegin(GL_LINES);
 			//after
 			for (size_t i=cur_ghost; i<(cur_ghost+m_ghost_num); ++i)
 			{
@@ -3593,14 +3598,16 @@ void TraceGroup::Draw()
 				id_map_temp1 = id_map_temp2;
 				id_map_temp2.clear();
 			}
-		glEnd();
+			glEnd();
+		}
 
-		id_map_temp1 = m_id_map;
-		id_map_temp2.clear();
-		glBegin(GL_LINES);
-		//else if (m_cur_time < m_prv_time)
+		if (m_draw_tail)
+		{
+			id_map_temp1 = m_id_map;
+			id_map_temp2.clear();
+			glBegin(GL_LINES);
 			//before
-			for (size_t i=cur_ghost; i>(cur_ghost-m_ghost_num); --i)
+			for (size_t i=cur_ghost; i>gstart; --i)
 			{
 				//before
 				if ((int)i-1>=0 && i<ghosts.size())
@@ -3644,7 +3651,8 @@ void TraceGroup::Draw()
 				id_map_temp1 = id_map_temp2;
 				id_map_temp2.clear();
 			}
-		glEnd();
+			glEnd();
+		}
 	}
 
 	glPopAttrib();

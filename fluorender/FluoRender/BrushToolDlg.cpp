@@ -57,6 +57,8 @@ EVT_CHECKBOX(ID_BrushEdgeDetectChk, BrushToolDlg::OnBrushEdgeDetectChk)
 EVT_CHECKBOX(ID_BrushHiddenRemovalChk, BrushToolDlg::OnBrushHiddenRemovalChk)
 //select group
 EVT_CHECKBOX(ID_BrushSelectGroupChk, BrushToolDlg::OnBrushSelectGroupChk)
+//estimate thresh
+EVT_CHECKBOX(ID_EstimateThreshChk, BrushToolDlg::OnEstimateThreshChk)
 //brush properties
 //brush size 1
 EVT_COMMAND_SCROLL(ID_BrushSize1Sldr, BrushToolDlg::OnBrushSize1Change)
@@ -171,12 +173,16 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
          wxVERTICAL);
    //stop at boundary
    wxBoxSizer *sizer11_1 = new wxBoxSizer(wxHORIZONTAL);
+   m_estimate_thresh_chk = new wxCheckBox(this, ID_EstimateThreshChk, "Auto Thresh:",
+	   wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
    m_edge_detect_chk = new wxCheckBox(this, ID_BrushEdgeDetectChk, "Edge Detect:",
          wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
    m_hidden_removal_chk = new wxCheckBox(this, ID_BrushHiddenRemovalChk, "Visible Only:",
          wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
    m_select_group_chk = new wxCheckBox(this, ID_BrushSelectGroupChk, "Select Group:",
          wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+   sizer11_1->Add(m_estimate_thresh_chk, 0, wxALIGN_CENTER);
+   sizer11_1->Add(5, 5);
    sizer11_1->Add(m_edge_detect_chk, 0, wxALIGN_CENTER);
    sizer11_1->Add(5, 5);
    sizer11_1->Add(m_hidden_removal_chk, 0, wxALIGN_CENTER);
@@ -220,7 +226,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
          new wxStaticBox(this, wxID_ANY, "Brush Properties"),
          wxVERTICAL);
    wxBoxSizer *sizer12_1 = new wxBoxSizer(wxHORIZONTAL);
-   st = new wxStaticText(this, 0, "Brush sizes can be also set with mouse wheel in painting mode.");
+   st = new wxStaticText(this, 0, "Brush sizes can also be set with mouse wheel in painting mode.");
    sizer12_1->Add(5, 5);
    sizer12_1->Add(st, 0, wxALIGN_CENTER);
    //brush size 1
@@ -241,7 +247,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
    //brush size 2
    wxBoxSizer *sizer12_3 = new wxBoxSizer(wxHORIZONTAL);
    m_brush_size2_chk = new wxCheckBox(this, ID_BrushSize2Chk, "GrowSize",
-         wxDefaultPosition, wxSize(90, 20), wxALIGN_RIGHT);
+         wxDefaultPosition, wxSize(70, 20), wxALIGN_RIGHT);
    st = new wxStaticText(this, 0, ":",
          wxDefaultPosition, wxSize(5, 20), wxALIGN_RIGHT);
    m_brush_size2_sldr = new wxSlider(this, ID_BrushSize2Sldr, 30, 1, 300,
@@ -279,12 +285,18 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
    sizer12_4->Add(15, 15);
    sizer12_4->Add(m_brush_iterss_rb, 0, wxALIGN_CENTER);
    //sizer12
-   sizer12->Add(sizer12_1, 0, wxEXPAND|wxALIGN_CENTER);
+   sizer12->Add(sizer12_4, 0, wxEXPAND|wxALIGN_CENTER);
    sizer12->Add(5, 5);
    sizer12->Add(sizer12_2, 0, wxEXPAND|wxALIGN_CENTER);
    sizer12->Add(sizer12_3, 0, wxEXPAND|wxALIGN_CENTER);
    sizer12->Add(5, 5);
-   sizer12->Add(sizer12_4, 0, wxEXPAND|wxALIGN_CENTER);
+   sizer12->Add(sizer12_1, 0, wxEXPAND|wxALIGN_CENTER);
+
+   //group1
+   group1->Add(m_toolbar, 0, wxEXPAND);
+   group1->Add(5, 5);
+   group1->Add(sizer11, 0, wxEXPAND|wxALIGN_CENTER);
+   group1->Add(sizer12, 0, wxEXPAND|wxALIGN_CENTER);
 
    //component analyzer
    wxBoxSizer *sizer13 = new wxStaticBoxSizer(
@@ -397,23 +409,10 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
    sizer14->Add(sizer14_1, 0, wxEXPAND|wxALIGN_CENTER);
    sizer14->Add(sizer14_2, 0, wxEXPAND|wxALIGN_CENTER);
 
-   //group1
-   group1->Add(m_toolbar, 0, wxEXPAND);
-   group1->Add(5, 5);
-   group1->Add(sizer11, 0, wxEXPAND|wxALIGN_CENTER);
-   group1->Add(sizer12, 0, wxEXPAND|wxALIGN_CENTER);
-   group1->Add(sizer13, 0, wxEXPAND|wxALIGN_CENTER);
-   group1->Add(sizer14, 0, wxEXPAND|wxALIGN_CENTER);
-   if (((VRenderFrame*)m_frame)->GetFreeVersion())
-   {
-      group1->Hide(sizer13);
-      group1->Hide(sizer14);
-   }
-
    //group 2
    //calculations
    wxBoxSizer* group2 = new wxStaticBoxSizer(
-         new wxStaticBox(this, wxID_ANY, "Calculations"),
+         new wxStaticBox(this, wxID_ANY, "Analysis"),
          wxVERTICAL);
    //operand A
    wxBoxSizer *sizer21 = new wxBoxSizer(wxHORIZONTAL);
@@ -442,7 +441,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
          new wxStaticBox(this, wxID_ANY,
             "Single-valued Operators (Require A)"), wxVERTICAL);
    //sizer23
-   m_calc_fill_btn = new wxButton(this, ID_CalcFillBtn, "Fill Holes",
+   m_calc_fill_btn = new wxButton(this, ID_CalcFillBtn, "Consolidate Voxels",
          wxDefaultPosition, wxDefaultSize);
    sizer23->Add(m_calc_fill_btn, 0, wxEXPAND|wxALIGN_CENTER);
    //two operators
@@ -455,13 +454,17 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
          wxDefaultPosition, wxSize(50, 25));
    m_calc_div_btn = new wxButton(this, ID_CalcDivBtn, "Divide",
          wxDefaultPosition, wxSize(50, 25));
-   m_calc_isc_btn = new wxButton(this, ID_CalcIscBtn, "AND",
+   m_calc_isc_btn = new wxButton(this, ID_CalcIscBtn, "Colocalize",
          wxDefaultPosition, wxSize(50, 25));
    sizer24->Add(m_calc_sub_btn, 1, wxEXPAND|wxALIGN_CENTER);
    sizer24->Add(m_calc_add_btn, 1, wxEXPAND|wxALIGN_CENTER);
    sizer24->Add(m_calc_div_btn, 1, wxEXPAND|wxALIGN_CENTER);
    sizer24->Add(m_calc_isc_btn, 1, wxEXPAND|wxALIGN_CENTER);
    //group
+   group2->Add(5, 5);
+   group2->Add(sizer13, 0, wxEXPAND|wxALIGN_CENTER);
+   group2->Add(5, 5);
+   group2->Add(sizer14, 0, wxEXPAND|wxALIGN_CENTER);
    group2->Add(5, 5);
    group2->Add(sizer21, 0, wxEXPAND|wxALIGN_CENTER);
    group2->Add(5, 5);
@@ -475,7 +478,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
    wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
    sizerV->Add(10, 10);
    sizerV->Add(group1, 0, wxEXPAND);
-   sizerV->Add(10, 20);
+   sizerV->Add(10, 5);
    sizerV->Add(group2, 0, wxEXPAND);
 
    SetSizerAndFit(sizerV);
@@ -511,6 +514,7 @@ void BrushToolDlg::GetSettings(VRenderView* vrv)
 
    //selection strength
    dval = vrv->GetBrushSclTranslate();
+   m_dft_scl_translate = dval;
    m_brush_scl_translate_sldr->SetValue(int(dval*1000.0+0.5));
    m_brush_scl_translate_text->ChangeValue(wxString::Format("%.2f", dval));
    //2d influence
@@ -526,6 +530,9 @@ void BrushToolDlg::GetSettings(VRenderView* vrv)
    //select group
    bval = vrv->GetSelectGroup();
    m_select_group_chk->SetValue(bval);
+   //estimate threshold
+   bval = vrv->GetEstimateThresh();
+   m_estimate_thresh_chk->SetValue(bval);
 
    //size1
    dval = vrv->GetBrushSize1();
@@ -752,6 +759,16 @@ void BrushToolDlg::OnBrushSelectGroupChk(wxCommandEvent &event)
    //set select group
    if (m_cur_view)
       m_cur_view->SetSelectGroup(select_group);
+}
+
+//estimate threshold
+void BrushToolDlg::OnEstimateThreshChk(wxCommandEvent &event)
+{
+	bool value = m_estimate_thresh_chk->GetValue();
+
+	//
+	if (m_cur_view)
+		m_cur_view->SetEstimateThresh(value);
 }
 
 //brush size 1
@@ -1006,6 +1023,8 @@ void BrushToolDlg::SaveDefault()
    fconfig.Write("brush_gm_falloff", m_dft_gm_falloff);
    fconfig.Write("brush_scl_falloff", m_dft_scl_falloff);
    fconfig.Write("brush_scl_translate", m_dft_scl_translate);
+   //auto thresh
+   fconfig.Write("auto_thresh", m_estimate_thresh_chk->GetValue());
    //edge detect
    fconfig.Write("edge_detect", m_edge_detect_chk->GetValue());
    //hidden removal
@@ -1101,6 +1120,9 @@ void BrushToolDlg::LoadDefault()
       m_brush_scl_translate_sldr->SetRange(0, int(m_max_value*10.0));
       m_brush_scl_translate_text->SetValue(str);
    }
+   //auto thresh
+   if (fconfig.Read("auto_thresh", &bval))
+	   m_estimate_thresh_chk->SetValue(bval);
    //edge detect
    if (fconfig.Read("edge_detect", &bval))
       m_edge_detect_chk->SetValue(bval);

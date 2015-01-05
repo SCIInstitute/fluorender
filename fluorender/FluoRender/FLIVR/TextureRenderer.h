@@ -94,6 +94,7 @@ namespace FLIVR
    class VolShaderFactory;
    class SegShaderFactory;
    class VolCalShaderFactory;
+   class VolKernelFactory;
 
    struct TexParam
    {
@@ -159,6 +160,9 @@ namespace FLIVR
          // PROJECTION matrices to determine if it is within the viewport.
          // Returns true if it is visible.
          bool test_against_view(const BBox &bbox, bool use_ex=false);
+
+		 //exposed load brick
+		 GLint load_brick_cl(int c, vector<TextureBrick*> *b, int i);
 
          //memory swap
          static void set_mem_swap(bool val) {mem_swap_ = val;}
@@ -226,6 +230,10 @@ namespace FLIVR
                static void set_update_order(int val) {update_order_ = val;}
                static int get_update_order() {return update_order_;}
 
+			   //kernel for calculation
+			   static VolKernelFactory vol_kernel_factory_;
+
+	  public:
                struct BrickDist
                {
                   unsigned int index;    //index of the brick in current tex pool

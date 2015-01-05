@@ -102,11 +102,14 @@ public:
 	void AddView(wxString view);
 	void DeleteView(wxString view);
 	void SetView(int index);
-	void SetTimeFrame(int frame);
 	void DisableRot();
 	void EnableRot();
 	void DisableTime();
 	void EnableTime();
+
+	void UpFrame();
+	void DownFrame();
+	void SetCurrentTime(size_t t);
 
 public:
 	//controls
@@ -160,11 +163,13 @@ private:
 	int m_last_frame;
 	double m_starting_rot;
     wxTimer m_timer;
+	double m_cur_time;
 	wxString m_filename;
 	bool m_running, m_record;
 	RecorderDlg * m_advanced_movie;
 	wxNotebook * m_notebook;
 	int m_current_page;
+	int m_prev_time;
 	QVideoEncoder encoder_;
 	wxString filetype_;
 
@@ -176,7 +181,7 @@ private:
 	void SetProgress(double pcnt);
 
 	//write frames to file
-	void WriteFrameToFile();
+	void WriteFrameToFile(int total_frames);
 
 	//4d movie slider
 	void Get4DFrames();

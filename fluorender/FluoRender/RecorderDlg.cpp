@@ -568,8 +568,8 @@ m_view(0)
 
 	//all controls
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
-	/*sizerV->Add(10, 5);
-	sizerV->Add(group1, 0, wxEXPAND);*/
+	//sizerV->Add(10, 5);
+	//sizerV->Add(group1, 0, wxEXPAND);
 	sizerV->Add(10, 5);
 	sizerV->Add(group2, 1, wxEXPAND);
 	sizerV->Add(10, 5);

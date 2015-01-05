@@ -49,8 +49,7 @@ class RulerListCtrl : public wxListCtrl
       void Append(wxString name, double length, wxString &unit,
             double angle, wxString &points, bool time_dep, int time,
             wxString extra);
-      using wxListCtrl::Update;
-      void Update(VRenderView* vrv);
+      void UpdateRulers(VRenderView* vrv=0);
 
       void DeleteSelection();
       void DeleteAll(bool cur_time=true);

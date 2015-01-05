@@ -65,10 +65,10 @@ endif()
 add_definitions(-DFLUORENDER_TITLE="FluoRender")
 
 add_definitions(-DVERSION_MAJOR=2)
-add_definitions(-DVERSION_MINOR=14)
+add_definitions(-DVERSION_MINOR=15)
 add_definitions(-DVERSION_MAJOR_TAG="2")
-add_definitions(-DVERSION_MINOR_TAG="14")
-add_definitions(-DVERSION_COPYRIGHT="August 2014")
+add_definitions(-DVERSION_MINOR_TAG="15")
+add_definitions(-DVERSION_COPYRIGHT="December 2014")
 
 #static compile
 add_definitions(-DSTATIC_COMPILE)
@@ -107,13 +107,11 @@ add_definitions(-D_WCHAR_H_CPLUSPLUS_98_CONFORMANCE_)
 find_package(OpenGL REQUIRED)
 
 #Boost
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-   set(Boost_INCLUDE_DIR ${FluoRender_SOURCE_DIR}/fluorender/boost/msw)
-   set(Boost_DIR ${FluoRender_SOURCE_DIR}/fluorender/boost/msw)
-elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-endif()
-find_package(Boost REQUIRED)
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
+set(Boost_USE_STATIC_LIBS        ON) # only find static libs
+set(Boost_USE_MULTITHREADED      ON)
+set(Boost_USE_STATIC_RUNTIME    OFF)
+find_package(Boost COMPONENTS system chrono REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
 
 #teem
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/teem)
@@ -203,6 +201,19 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/img)
 file(GLOB pngs_hdr fluorender/FluoRender/img/*.h)
 file(GLOB pngs_src fluorender/FluoRender/img/*.cpp)
 add_library(IMAGES_OBJ OBJECT  ${pngs_hdr} ${pngs_src})
+
+#OpenCL
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  include_directories(${FluoRender_SOURCE_DIR}/fluorender/OpenCL/include)
+  if(${ARCHITECTURE} MATCHES 64)
+    file(GLOB OPENCL_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/OpenCL/lib/x86_64/*.lib)
+  elseif(${ARCHITECTURE} MATCHES 32)
+    file(GLOB OPENCL_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/OpenCL/lib/x86/*.lib)
+  endif()
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  find_package(OpenCL REQUIRED)
+  include_directories( ${OPENCL_INCLUDE_DIR})
+endif()
 
 #other sources
 file(GLOB src fluorender/FluoRender/*.cpp)
@@ -319,7 +330,7 @@ if(${ARCHITECTURE} MATCHES 64)
    set(CMAKE_CXX_FLAGS "${ARCH_FLAGS} ${CXXFLAGS} ${CXX_11_FLAG}")
    set(CMAKE_EXE_LINKER_FLAGS "${ARCH_FLAGS} ${CXX_11_FLAG}")
    if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lbz2 -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration")
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lbz2 -framework OpenCL -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration")
    endif()
 else()
    if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
@@ -339,13 +350,25 @@ target_link_libraries(FluoRender
    ${ffmpeg_LIBRARIES}
    ${wxWidgets_LIBRARIES}
    ${OPENGL_LIBRARIES}
-   ${Boost_LIBRARIES})
+   ${Boost_LIBRARIES}
+   ${OPENCL_LIBRARIES})
    
 #post build DLL copy
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	file(GLOB ffmpeg_DLLS fluorender/bin/*.dll)
-	add_custom_command(TARGET FluoRender POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_directory  
-		"${FluoRender_SOURCE_DIR}/fluorender/bin"
-		$<TARGET_FILE_DIR:FluoRender>)
+	foreach (f ${ffmpeg_DLLS})
+		add_custom_command(TARGET FluoRender PRE_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy  
+			${f}
+			$<TARGET_FILE_DIR:FluoRender>)
+	endforeach()
 endif()
+#copy openCL examples to the binary directory
+add_custom_command(TARGET FluoRender PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  "${FluoRender_SOURCE_DIR}/CL_code"
+  "$<TARGET_FILE_DIR:FluoRender>/CL_code")
+add_custom_command(TARGET FluoRender PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  "${FluoRender_SOURCE_DIR}/CL_code"
+  "${CMAKE_BINARY_DIR}/CL_code")

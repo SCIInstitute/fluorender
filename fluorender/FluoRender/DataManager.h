@@ -221,7 +221,7 @@ public:
 	//hr_mode (hidden removal): 0-none; 1-ortho; 2-persp
 	void DrawMask(int type, int paint_mode, int hr_mode,
 		double ini_thresh, double gm_falloff, double scl_falloff, double scl_translate,
-		double w2d, double bins, bool ortho = false);
+		double w2d, double bins, bool ortho=false, bool estimate=false);
 	//draw label (create the label)
 	//type: 0-initialize; 1-maximum intensity filtering
 	//mode: 0-normal; 1-posterized, 2-copy values
@@ -360,6 +360,9 @@ public:
 	void SetBrickNum(int num) {m_brick_num = num;}
 	int GetBrickNum() {return m_brick_num;}
 
+	//estimated threshold
+	double GetEstThresh() {return m_est_thresh;}
+
 private:
 	//duplication indicator and counter
 	bool m_dup;
@@ -462,6 +465,9 @@ private:
 
 	//valid brick number
 	int m_brick_num;
+
+	//estimated threshold
+	double m_est_thresh;
 
 private:
 	//label functions
@@ -894,6 +900,10 @@ public:
 	//ghost num
 	void SetGhostNum(int num) {m_ghost_num = num;}
 	int GetGhostNum() {return m_ghost_num;}
+	void SetDrawTail(bool draw) {m_draw_tail = draw;}
+	bool GetDrawTail() {return m_draw_tail;}
+	void SetDrawLead(bool draw) {m_draw_lead = draw;}
+	bool GetDrawLead() {return m_draw_lead;}
 	//cells size filter
 	void SetCellSize(int size) {m_cell_size = size;}
 	int GetSizeSize() {return m_cell_size;}
@@ -948,6 +958,8 @@ private:
 	int m_cur_time;
 	int m_prv_time;
 	int m_ghost_num;
+	bool m_draw_tail;
+	bool m_draw_lead;
 	int m_cell_size;
 
 	FrameList m_frame_list;

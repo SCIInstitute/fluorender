@@ -63,7 +63,7 @@ wxPanel(parent, wxID_ANY,
 	//threshold slider and text
 	wxBoxSizer *sizer11 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Threshold:",
-		wxDefaultPosition, wxSize(75, 23));
+		wxDefaultPosition, wxSize(100, 23));
 	m_cnv_vol_mesh_thresh_sldr = new wxSlider(this, ID_CnvVolMeshThreshSldr, 30, 1, 99,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_cnv_vol_mesh_thresh_text = new wxTextCtrl(this, ID_CnvVolMeshThreshText, "0.30",
@@ -76,7 +76,7 @@ wxPanel(parent, wxID_ANY,
 	//downsampling slider and text
 	wxBoxSizer *sizer12 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Downsmp. XY:",
-		wxDefaultPosition, wxSize(75, 23));
+		wxDefaultPosition, wxSize(100, 23));
 	m_cnv_vol_mesh_downsample_sldr = new wxSlider(this, ID_CnvVolMeshDownsampleSldr, 2, 1, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_cnv_vol_mesh_downsample_text = new wxTextCtrl(this, ID_CnvVolMeshDownsampleText, "2",
@@ -89,7 +89,7 @@ wxPanel(parent, wxID_ANY,
 	//downsampling in z slider and text
 	wxBoxSizer *sizer13 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Downsmp. Z:",
-		wxDefaultPosition, wxSize(75, 23));
+		wxDefaultPosition, wxSize(100, 23));
 	m_cnv_vol_mesh_downsample_z_sldr = new wxSlider(this, ID_CnvVolMeshDownsampleZSldr, 1, 1, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_cnv_vol_mesh_downsample_z_text = new wxTextCtrl(this, ID_CnvVolMeshDownsampleZText, "1",
@@ -108,7 +108,7 @@ wxPanel(parent, wxID_ANY,
 	m_cnv_vol_mesh_selected_chk->SetValue(true);
 	m_cnv_vol_mesh_weld_chk = new wxCheckBox(this, ID_CnvVolMeshWeldChk, "Weld vertices",
 		wxDefaultPosition, wxSize(-1, 23));
-	m_cnv_vol_mesh_weld_chk->SetValue(true);
+	m_cnv_vol_mesh_weld_chk->SetValue(false);
 	sizer14->Add(m_cnv_vol_mesh_usetransf_chk, 0, wxALIGN_CENTER);
 	sizer14->Add(m_cnv_vol_mesh_selected_chk, 0, wxALIGN_CENTER);
 	sizer14->Add(m_cnv_vol_mesh_weld_chk, 0, wxALIGN_CENTER);

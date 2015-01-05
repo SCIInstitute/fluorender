@@ -58,8 +58,7 @@ public:
 
 	void Append(unsigned int id, wxColor color,
 		int size, double cx, double cy, double cz);
-    using wxListCtrl::Update;
-	void Update(VRenderView* vrv);
+	void UpdateTraces(VRenderView* vrv=0);
 	void DeleteSelection();
 	void DeleteAll();
 	wxString GetText(long item, int col);
@@ -93,7 +92,12 @@ public:
 		ID_SaveasTraceBtn,
 		ID_GhostNumSldr,
 		ID_GhostNumText,
+		ID_GhostShowTailChk,
+		ID_GhostShowLeadChk,
 		ID_ManualAssistCheck,
+		ID_AddLabelBtn,
+		ID_AnalyzeBtn,
+		ID_SaveAnalyzeBtn,
 		ID_CellSizeSldr,
 		ID_CellSizeText,
 		ID_CellUpdateBtn,
@@ -182,6 +186,10 @@ private:
 	//enable manual assist
 	bool m_manual_assist;
 
+	//show trace
+	//bool m_ghost_show_tail;
+	//bool m_ghost_show_lead;
+
 	//ui
 	//list ctrl
 	TraceListCtrl *m_trace_list_curr;
@@ -195,7 +203,12 @@ private:
 	//ghost num
 	wxSlider* m_ghost_num_sldr;
 	wxTextCtrl* m_ghost_num_text;
+	wxCheckBox* m_ghost_show_tail_chk;
+	wxCheckBox* m_ghost_show_lead_chk;
 	//edit tools
+	wxButton* m_add_label_btn;
+	wxButton* m_analyze_btn;
+	wxButton* m_save_analyze_btn;
 	wxCheckBox* m_manual_assist_check;
 	//cell size filter
 	wxSlider* m_cell_size_sldr;
@@ -217,10 +230,10 @@ private:
 	wxButton* m_cell_new_id_btn;
 	wxButton* m_cell_combine_id_btn;
 	//magic tool
-	/*wxButton* m_cell_magic0_btn;
+	wxButton* m_cell_magic0_btn;
 	wxButton* m_cell_magic1_btn;
 	wxButton* m_cell_magic2_btn;
-	wxButton* m_cell_magic3_btn;*/
+	wxButton* m_cell_magic3_btn;
 	//time controls
 	wxButton* m_cell_prev_btn;
 	wxButton* m_cell_next_btn;
@@ -246,7 +259,12 @@ private:
 	//ghost number
 	void OnGhostNumChange(wxScrollEvent &event);
 	void OnGhostNumText(wxCommandEvent &event);
+	void OnGhostShowTail(wxCommandEvent &event);
+	void OnGhostShowLead(wxCommandEvent &event);
 	//manual tracking assistant
+	void OnAddLabel(wxCommandEvent &event);
+	void OnAnalyze(wxCommandEvent &event);
+	void OnSaveAnalyze(wxCommandEvent &event);
 	void OnManualAssistCheck(wxCommandEvent &event);
 	//cell size filter
 	void OnCellSizeChange(wxScrollEvent &event);

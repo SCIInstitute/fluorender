@@ -87,21 +87,25 @@ void RulerListCtrl::Append(wxString name, double length, wxString &unit,
       double angle, wxString &points, bool time_dep, int time, wxString extra)
 {
    long tmp = InsertItem(GetItemCount(), name, 0);
+    SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
    wxString str = wxString::Format("%.2f", length) + unit;
    SetItem(tmp, 1, str);
+    SetColumnWidth(1, wxLIST_AUTOSIZE);
    str = wxString::Format("%.1f", angle) + "Deg";
    SetItem(tmp, 2, str);
+    SetColumnWidth(2, wxLIST_AUTOSIZE);
    SetItem(tmp, 3, points);
-   SetColumnWidth(3, wxLIST_AUTOSIZE);
    if (time_dep)
       str = wxString::Format("%d", time);
    else
       str = "N/A";
    SetItem(tmp, 4, str);
+    SetColumnWidth(4, wxLIST_AUTOSIZE_USEHEADER);
    SetItem(tmp, 5, extra);
+    SetColumnWidth(5, wxLIST_AUTOSIZE_USEHEADER);
 }
 
-void RulerListCtrl::Update(VRenderView* vrv)
+void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 {
    if (vrv)
       m_view = vrv;
@@ -181,7 +185,7 @@ void RulerListCtrl::DeleteSelection()
                delete ruler;
             }
          }
-         Update();
+         UpdateRulers();
          m_view->RefreshGL();
       }
    }
@@ -220,7 +224,7 @@ void RulerListCtrl::DeleteAll(bool cur_time)
          ruler_list->clear();
       }
 
-      Update();
+      UpdateRulers();
       m_view->RefreshGL();
    }
 }
@@ -460,7 +464,7 @@ VRenderView* MeasureDlg::GetView()
 void MeasureDlg::UpdateList()
 {
    if (!m_view) return;
-   m_rulerlist->Update(m_view);
+   m_rulerlist->UpdateRulers(m_view);
 }
 
 void MeasureDlg::OnNewLocator(wxCommandEvent& event)

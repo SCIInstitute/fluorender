@@ -1,0 +1,5 @@
+[tasks]
+tasknum=1
+[tasks/task0]
+type=prepare_tracking
+savepath=D:\\DATA\\ScriptTest\\Channels\\

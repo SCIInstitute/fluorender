@@ -448,6 +448,7 @@ void VRenderGLView::Init()
    {
       SetCurrent(*m_glRC);
       ShaderProgram::init_shaders_supported();
+	  KernelProgram::init_kernels_supported();
 
       VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
       if (vr_frame) vr_frame->SetTextureRendererSettings();
@@ -1872,6 +1873,10 @@ void VRenderGLView::Segment()
 		   vr_frame->GetTraceDlg()->CellLink(true, true);
 	   }
 	}
+	if (vr_frame && vr_frame->GetBrushToolDlg())
+	{
+		vr_frame->GetBrushToolDlg()->GetSettings(m_vrv);
+	}
 }
 
 //label volumes in current view
@@ -2101,7 +2106,13 @@ void VRenderGLView::LoadDefaultBrushSettings()
    if (fconfig.Read("brush_scl_falloff", &val))
       m_selector.SetBrushSclFalloff(val);
    if (fconfig.Read("brush_scl_translate", &val))
+   {
       m_selector.SetBrushSclTranslate(val);
+	  m_calculator.SetThreshold(val);
+   }
+   //auto thresh
+   if (fconfig.Read("auto_thresh", &bval))
+	   m_selector.SetEstimateThreshold(bval);
    //edge detect
    if (fconfig.Read("edge_detect", &bval))
       m_selector.SetEdgeDetect(bval);
@@ -2212,6 +2223,7 @@ int VRenderGLView::GetBrushIteration()
 void VRenderGLView::SetBrushSclTranslate(double val)
 {
    m_selector.SetBrushSclTranslate(val);
+   m_calculator.SetThreshold(val);
 }
 
 double VRenderGLView::GetBrushSclTranslate()
@@ -2260,6 +2272,17 @@ void VRenderGLView::SetSelectGroup(bool value)
 bool VRenderGLView::GetSelectGroup()
 {
    return m_selector.GetSelectGroup();
+}
+
+//estimate threshold
+void VRenderGLView::SetEstimateThresh(bool value)
+{
+	m_selector.SetEstimateThreshold(value);
+}
+
+bool VRenderGLView::GetEstimateThresh()
+{
+	return m_selector.GetEstimateThreshold();
 }
 
 //select both
@@ -3781,6 +3804,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
    if (m_mvr->get_vr_num()<=0)
       return;
    m_mvr->set_depth_peel(peel);
+   m_mvr->set_colormap_mode_single();
 
    int nx, ny;
    nx = GetSize().x;
@@ -4241,14 +4265,12 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 
    wxPoint mouse_pos = wxGetMousePosition();
    wxRect view_reg = GetScreenRect();
-   if (view_reg.Contains(mouse_pos))
-   {
-      UpdateBrushState();
-   }
 
    wxWindow *window = wxWindow::FindFocus();
-   if (window)
+   if (window && view_reg.Contains(mouse_pos))
    {
+      UpdateBrushState();
+
 	   VRenderFrame* frame = (VRenderFrame*)m_frame;
 	   //draw_mask
 	   if (wxGetKeyState(wxKeyCode('V')) &&
@@ -4354,9 +4376,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			 wxGetKeyState(wxKeyCode('d')))
 	   {
 		  m_tseq_forward = true;
-		  Set4DSeqFrame(m_tseq_cur_num+1, true);
 		  if (frame && frame->GetMovieView())
-			 frame->GetMovieView()->SetTimeFrame(m_tseq_cur_num);
+			 frame->GetMovieView()->UpFrame();
 		  refresh = true;
 	   }
 	   if (m_tseq_forward &&
@@ -4367,9 +4388,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			 wxGetKeyState(wxKeyCode('a')))
 	   {
 		  m_tseq_backward = true;
-		  Set4DSeqFrame(m_tseq_cur_num-1, true);
 		  if (frame && frame->GetMovieView())
-			 frame->GetMovieView()->SetTimeFrame(m_tseq_cur_num);
+			 frame->GetMovieView()->DownFrame();
 		  refresh = true;
 	   }
 	   if (m_tseq_backward &&
@@ -4495,7 +4515,7 @@ void VRenderGLView::Set3DRotCapture(double start_angle,
    m_rot_axis = rot_axis;
    m_cap_file = cap_file;
    m_rewind = rewind;
-   m_fr_length = len;
+   //m_fr_length = len;
 
    m_movie_seq = 0;
    switch (m_rot_axis)
@@ -4553,6 +4573,9 @@ void VRenderGLView::Set3DBatCapture(wxString &cap_file, int begin_frame, int end
       wxString new_folder = path + m_bat_folder + "_folder";
       CREATE_DIR(new_folder.fn_str());
    }
+
+   //wxString s_fr_length = wxString ::Format("%d", end_frame);
+   //m_fr_length = (int)s_fr_length.length();
 }
 
 void VRenderGLView::Set4DSeqCapture(wxString &cap_file, int begin_frame, int end_frame, bool rewind)
@@ -4569,6 +4592,9 @@ void VRenderGLView::Set4DSeqCapture(wxString &cap_file, int begin_frame, int end
    VRenderFrame* vframe = (VRenderFrame*)m_frame;
    if (vframe && vframe->GetSettingDlg())
       m_run_script = vframe->GetSettingDlg()->GetRunScript();
+
+   //wxString s_fr_length = wxString ::Format("%d", end_frame);
+   //m_fr_length = (int)s_fr_length.length();
 }
 
 void VRenderGLView::SetParamCapture(wxString &cap_file, int begin_frame, int end_frame, bool rewind)
@@ -4582,8 +4608,8 @@ void VRenderGLView::SetParamCapture(wxString &cap_file, int begin_frame, int end
    m_movie_seq = begin_frame;
    m_4d_rewind = rewind;
 
-   wxString s_fr_length = wxString ::Format("%d", end_frame);
-   m_fr_length = (int)s_fr_length.length();
+   //wxString s_fr_length = wxString ::Format("%d", end_frame);
+   //m_fr_length = (int)s_fr_length.length();
 }
 
 void VRenderGLView::SetParams(double t)
@@ -4789,59 +4815,66 @@ void VRenderGLView::Get4DSeqFrames(int &start_frame, int &end_frame, int &cur_fr
 
 void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 {
-   int start_frame, end_frame, cur_frame;
-   Get4DSeqFrames(start_frame, end_frame, cur_frame);
-   if (frame > end_frame ||
-         frame < start_frame || cur_frame == frame)
-      return;
+	int start_frame, end_frame, cur_frame;
+	Get4DSeqFrames(start_frame, end_frame, cur_frame);
+	if (frame > end_frame ||
+		frame < start_frame)
+		return;
 
-   m_tseq_prv_num = m_tseq_cur_num;
-   m_tseq_cur_num = frame;
-   VRenderFrame* vframe = (VRenderFrame*)m_frame;
-   if (vframe && vframe->GetSettingDlg())
-      m_run_script = vframe->GetSettingDlg()->GetRunScript();
+	m_tseq_prv_num = m_tseq_cur_num;
+	m_tseq_cur_num = frame;
+	VRenderFrame* vframe = (VRenderFrame*)m_frame;
+	if (vframe && vframe->GetSettingDlg())
+		m_run_script = vframe->GetSettingDlg()->GetRunScript();
 
-   for (int i=0; i<(int)m_vd_pop_list.size(); i++)
-   {
-      VolumeData* vd = m_vd_pop_list[i];
-      if (vd && vd->GetReader())
-      {
-         BaseReader* reader = vd->GetReader();
+	for (int i=0; i<(int)m_vd_pop_list.size(); i++)
+	{
+		VolumeData* vd = m_vd_pop_list[i];
+		if (vd && vd->GetReader())
+		{
+			BaseReader* reader = vd->GetReader();
 
-         double spcx, spcy, spcz;
-         vd->GetSpacings(spcx, spcy, spcz);
+			bool clear_pool = false;
+			if (cur_frame != frame)
+			{
+				double spcx, spcy, spcz;
+				vd->GetSpacings(spcx, spcy, spcz);
 
-         Nrrd* data = reader->Convert(frame, vd->GetCurChannel(), false);
-         if (!vd->Replace(data, false))
-            continue;
+				Nrrd* data = reader->Convert(frame, vd->GetCurChannel(), false);
+				if (!vd->Replace(data, false))
+					continue;
 
-         vd->SetCurTime(reader->GetCurTime());
-         vd->SetSpacings(spcx, spcy, spcz);
+				vd->SetCurTime(reader->GetCurTime());
+				vd->SetSpacings(spcx, spcy, spcz);
 
-         //run script
-         if (m_run_script && run_script)
-         {
-            wxString pathname = reader->GetPathName();
-            int pos = pathname.Find(GETSLASH(), true);
-            wxString scriptname = pathname.Left(pos+1) + "script_4d.txt";
-            if (wxFileExists(scriptname))
-            {
-               m_selector.SetVolume(vd);
-               m_calculator.SetVolumeA(vd);
-               m_cur_vol = vd;
-               Run4DScript(scriptname);
-            }
-         }
+				//update rulers
+				if (vframe && vframe->GetMeasureDlg())
+					vframe->GetMeasureDlg()->UpdateList();
 
-         //update rulers
-         if (vframe && vframe->GetMeasureDlg())
-            vframe->GetMeasureDlg()->UpdateList();
+				clear_pool = true;
+			}
 
-         if (vd->GetVR())
-            vd->GetVR()->clear_tex_pool();
-      }
-   }
-   RefreshGL();
+			//run script
+			if (m_run_script && run_script)
+			{
+				wxString pathname = reader->GetPathName();
+				int pos = pathname.Find(GETSLASH(), true);
+				wxString scriptname = pathname.Left(pos+1) + "script_4d.txt";
+				if (wxFileExists(scriptname))
+				{
+					m_selector.SetVolume(vd);
+					m_calculator.SetVolumeA(vd);
+					m_cur_vol = vd;
+					Run4DScript(scriptname);
+					clear_pool = true;
+				}
+			}
+
+			if (clear_pool && vd->GetVR())
+				vd->GetVR()->clear_tex_pool();
+		}
+	}
+	RefreshGL();
 }
 
 void VRenderGLView::Get3DBatFrames(int &start_frame, int &end_frame, int &cur_frame)
@@ -4978,278 +5011,6 @@ void VRenderGLView::PreDraw()
       else
          return;
    }
-
-   //if capture a sequence of images
-   if (m_capture && (m_capture_tsequ || m_capture_rotat || m_capture_param))
-   {
-      //if time sequence data are presented
-      if (m_capture && m_capture_tsequ)
-      {
-         int fail_num = 0;
-
-         if (m_tseq_cur_num <= m_end_frame)
-         {
-            for (int i=0; i<(int)m_vd_pop_list.size(); i++)
-            {
-               VolumeData* vd = m_vd_pop_list[i];
-               if (vd && vd->GetReader())
-               {
-                  BaseReader* reader = vd->GetReader();
-
-                  wxString s_fr_length = wxString ::Format("%d", reader->GetTimeNum());
-                  m_fr_length = (int)s_fr_length.length()>m_fr_length?(int)s_fr_length.length():m_fr_length;
-
-                  double spcx, spcy, spcz;
-                  vd->GetSpacings(spcx, spcy, spcz);
-
-                  Nrrd* data = reader->Convert(m_tseq_cur_num, vd->GetCurChannel(), false);
-                  if (!vd->Replace(data, false))
-                  {
-                     fail_num++;
-                     continue;
-                  }
-
-                  vd->SetCurTime(reader->GetCurTime());
-                  vd->SetSpacings(spcx, spcy, spcz);
-
-                  //run script
-                  if (m_run_script)
-                  {
-                     wxString pathname = reader->GetPathName();
-                     int pos = pathname.Find(GETSLASH(), true);
-                     wxString scriptname = pathname.Left(pos+1) + "script_4d.txt";
-                     if (wxFileExists(scriptname))
-                     {
-                        m_selector.SetVolume(vd);
-                        m_calculator.SetVolumeA(vd);
-                        m_cur_vol = vd;
-                        Run4DScript(scriptname);
-                     }
-                  }
-
-                  //update rulers
-                  VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-                  if (vr_frame && vr_frame->GetMeasureDlg())
-                     vr_frame->GetMeasureDlg()->UpdateList();
-
-                  if (vd->GetVR())
-                     vd->GetVR()->clear_tex_pool();
-               }
-            }
-
-            VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-            if (vr_frame && vr_frame->GetMovieView())
-               vr_frame->GetMovieView()->SetTimeFrame(m_tseq_cur_num);
-         }
-
-         if (fail_num == (int)m_vd_pop_list.size() ||
-               m_tseq_cur_num > m_end_frame)
-         {
-            if (m_4d_rewind && !m_run_script)
-            {
-               m_tseq_cur_num = m_begin_frame;
-			   m_tseq_prv_num = m_begin_frame;
-            }
-            else
-            {
-               m_capture_tsequ = false;
-               if (!m_capture_rotat && !m_capture_param)
-                  m_capture = false;
-            }
-         }
-         else{
-			m_tseq_prv_num = m_tseq_cur_num;
-			m_tseq_cur_num++;
-		}
-      }
-
-      //if rotation movie is set
-      if (m_capture && m_capture_rotat)
-      {
-         if (m_stages==0) //moving to start
-         {
-            if (fabs(m_cur_angle-m_start_angle) < m_step)
-            {
-               m_stages = 1;
-            }
-            else
-            {
-               m_cur_angle += m_start_angle>m_cur_angle?m_step:-m_step;
-               double rotx, roty, rotz;
-               GetRotations(rotx, roty, rotz);
-               switch (m_rot_axis)
-               {
-               case 1: //X
-                  SetRotations(m_cur_angle, roty, rotz);
-                  break;
-               case 2: //Y
-                  SetRotations(rotx, m_cur_angle, rotz);
-                  break;
-               case 3: //Z
-                  SetRotations(rotx, roty, m_cur_angle);
-                  break;
-               }
-            }
-
-         }
-         else if (m_stages==1)
-         {
-            if (fabs(m_cur_angle-m_end_angle) < m_step/2.)
-            {
-               if (m_rewind)
-                  m_stages = 2;
-               else
-               {
-                  if (m_capture_tsequ)
-                     m_stages = 2;
-                  else
-                     m_capture_rotat = false;
-                  m_capture_rotate_over = true;
-               }
-            }
-            else
-            {
-               m_cur_angle += m_end_angle>m_cur_angle?m_step:-m_step;
-               double rotx, roty, rotz;
-               GetRotations(rotx, roty, rotz);
-               switch (m_rot_axis)
-               {
-               case 1: //X
-                  SetRotations(m_cur_angle, roty, rotz);
-                  break;
-               case 2: //Y
-                  SetRotations(rotx, m_cur_angle, rotz);
-                  break;
-               case 3: //Z
-                  SetRotations(rotx, roty, m_cur_angle);
-                  break;
-               }
-            }
-         }
-         else if (m_stages==2)
-         {
-            if (fabs(m_cur_angle-m_init_angle) < m_step)
-            {
-               if (m_capture_tsequ)
-                  m_stages = 0;
-               else
-                  m_capture_rotat = false;
-               m_capture_rotate_over = true;
-            }
-            else
-            {
-               m_cur_angle += m_init_angle>m_cur_angle?m_step:-m_step;
-               double rotx, roty, rotz;
-               GetRotations(rotx, roty, rotz);
-               switch (m_rot_axis)
-               {
-               case 1: //X
-                  SetRotations(m_cur_angle, roty, rotz);
-                  break;
-               case 2: //Y
-                  SetRotations(rotx, m_cur_angle, rotz);
-                  break;
-               case 3: //Z
-                  SetRotations(rotx, roty, m_cur_angle);
-                  break;
-               }
-            }
-         }
-      }
-
-      if (!m_capture_tsequ && m_capture_rotate_over)
-      {
-         if (!m_capture_bat)
-         {
-            m_capture = false;
-            m_capture_rotat = false;
-         }
-         else
-         {
-            if (m_bat_cur_num < m_end_frame)
-            {
-               Set3DBatFrame(1);
-               m_bat_cur_num++;
-
-               //reset
-               m_capture = true;
-               m_capture_rotat = true;
-               m_capture_rotate_over = false;
-               m_movie_seq = m_begin_frame;
-               m_cur_angle = m_init_angle;
-               if (m_start_angle == m_cur_angle)
-                  m_stages = 1;
-               else
-                  m_stages = 0;
-               m_cur_angle += m_end_angle>m_cur_angle?m_step:-m_step;
-               if (!m_cap_file.IsEmpty() && m_total_frames>1)
-               {
-                   wxString path = m_cap_file;
-                  int sep = path.Find(GETSLASH(), true);
-                  if (sep != wxNOT_FOUND)
-                  {
-                     sep++;
-                     path = path.Left(sep);
-                  }
-
-                  wxString new_folder = path + m_bat_folder + "_folder";
-                  CREATE_DIR(new_folder.fn_str());
-               }
-
-               //reset rotation
-               double rotx, roty, rotz;
-               GetRotations(rotx, roty, rotz);
-
-               switch (m_rot_axis)
-               {
-               case 1:  //x
-                  SetRotations(m_cur_angle, roty, rotz);
-                  break;
-               case 2:  //y
-                  SetRotations(rotx, m_cur_angle, rotz);
-                  break;
-               case 3:  //z
-                  SetRotations(rotx, roty, m_cur_angle);
-                  break;
-               }
-
-               VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-               if (vr_frame && vr_frame->GetMovieView())
-                  vr_frame->GetMovieView()->SetTimeFrame(m_bat_cur_num);
-            }
-            else
-            {
-               m_capture = false;
-               m_capture_rotat = false;
-            }
-         }
-      }
-
-      //if recording parameters
-      if (m_capture && m_capture_param)
-      {
-         if (m_param_cur_num <= m_end_frame)
-         {
-            //change settings
-            SetParams(m_param_cur_num);
-
-            m_param_cur_num++;
-         }
-         else
-         {
-            if (m_4d_rewind)
-            {
-               m_param_cur_num = m_begin_frame;
-            }
-            else
-            {
-               m_capture_param = false;
-               if (!m_capture_rotat && !m_capture_tsequ)
-                  m_capture = false;
-            }
-         }
-      }
-   }
 }
 
 void VRenderGLView::PostDraw()
@@ -5264,51 +5025,6 @@ void VRenderGLView::PostDraw()
    if (m_capture && !m_cap_file.IsEmpty())
    {
       wxString outputfilename = m_cap_file;
-
-      if (m_capture_bat && m_total_frames>1)
-      {
-         wxString path = m_cap_file;
-         wxString name = m_cap_file;
-         int sep = path.Find(GETSLASH(), true);
-         if (sep != wxNOT_FOUND)
-         {
-            sep++;
-            name = path.Right(path.Length() - sep);
-            path = path.Left(sep);
-         }
-
-         outputfilename = path + m_bat_folder +
-            "_folder\\" + name;
-      }
-
-      if (m_capture_rotat || m_capture_tsequ || m_capture_param)
-      {
-         int i = outputfilename.Find('.', true);
-         if (i != wxNOT_FOUND)
-         {
-            outputfilename.Remove(i);
-            wxString seq;
-            wxString format;
-            format = wxString::Format("_%%0%dd", m_fr_length);
-            seq = wxString::Format(format, m_movie_seq);
-            if (m_capture_bat && m_total_frames==1)
-               seq = wxString::Format(format, m_bat_cur_num);
-            outputfilename.Append(seq);
-            outputfilename.Append(".tif");
-         }
-         else
-         {
-            wxString seq;
-            wxString format;
-            format = wxString::Format("_%%0%dd", m_fr_length);
-            seq = wxString::Format(format, m_movie_seq);
-            if (m_capture_bat && m_total_frames==1)
-               seq = wxString::Format(format, m_bat_cur_num);
-            outputfilename.Append(seq);
-            outputfilename.Append(".tif");
-         }
-         m_movie_seq++;
-      }
 
       //capture
       int x, y, w, h;
@@ -5364,10 +5080,7 @@ void VRenderGLView::PostDraw()
       if (image)
          delete []image;
 
-      if (!m_capture_rotat && !m_capture_tsequ && !m_capture_param)
-      {
-         m_capture = false;
-      }
+      m_capture = false;
    }
 }
 
@@ -5382,8 +5095,6 @@ void VRenderGLView::Run4DScript(wxString scriptname)
    int i;
    wxString str;
    wxString pathname;
-   wxString format;
-   format = wxString::Format("_T%%0%dd", m_fr_length);
 
    //tasks
    if (fconfig.Exists("/tasks"))
@@ -5427,6 +5138,10 @@ void VRenderGLView::Run4DScript(wxString scriptname)
                VolumeData* vd = m_calculator.GetResult();
                if (vd)
                {
+				  int time_num = vd->GetReader()->GetTimeNum();
+				  wxString format = wxString::Format("%d", time_num);
+				  m_fr_length = format.Length();
+				  format = wxString::Format("_T%%0%dd", m_fr_length);
                   str = pathname + vd->GetName() +
                      wxString::Format(format, m_tseq_cur_num) + ".tif";
                   vd->Save(str, mode, bake, compression);
@@ -5577,6 +5292,10 @@ void VRenderGLView::Run4DScript(wxString scriptname)
                   VolumeData* vd = (*vol_list)[ii];
                   if (vd)
                   {
+					 int time_num = vd->GetReader()->GetTimeNum();
+					 wxString format = wxString::Format("%d", time_num);
+					 m_fr_length = format.Length();
+					 format = wxString::Format("_T%%0%dd", m_fr_length);
                      str = pathname +
                         wxString::Format(format, m_tseq_cur_num) +
                         wxString::Format("_COMP%d", ii+1) + ".tif";
@@ -5612,6 +5331,10 @@ void VRenderGLView::Run4DScript(wxString scriptname)
                   VolumeData* vd = m_selector.GetVolume();
                   if (vd)
                   {
+					 int time_num = vd->GetReader()->GetTimeNum();
+					 wxString format = wxString::Format("%d", time_num);
+					 m_fr_length = format.Length();
+					 format = wxString::Format("_T%%0%dd", m_fr_length);
                      str = pathname + vd->GetName() +
                         wxString::Format(format, m_tseq_cur_num) + ".tif";
                      vd->Save(str, mode, bake, compression);
@@ -5642,6 +5365,10 @@ void VRenderGLView::Run4DScript(wxString scriptname)
 					VolumeData* vd = m_selector.GetVolume();
 					if (vd)
 					{
+						int time_num = vd->GetReader()->GetTimeNum();
+						wxString format = wxString::Format("%d", time_num);
+						m_fr_length = format.Length();
+						format = wxString::Format("_T%%0%dd", m_fr_length);
 						str = pathname +
 							wxString::Format(format, m_tseq_cur_num) + ".tif";
 						vd->AddEmptyMask();
@@ -10235,8 +9962,6 @@ void VRenderView::CreateBar()
    m_options_toolbar->AddControl(st2);
    m_options_toolbar->AddControl(m_aov_sldr);
    m_options_toolbar->AddControl(m_aov_text);
-   st2 = new wxStaticText(m_options_toolbar, wxID_ANY, "    Free-Fly:  ");
-   m_options_toolbar->AddControl(st2);
 
    m_options_toolbar->AddCheckTool(ID_FreeChk,"Free Fly",
 	   wxGetBitmapFromMemory(freefly),wxNullBitmap,
@@ -11071,16 +10796,34 @@ void VRenderView::OnVolumeMethodCheck(wxCommandEvent& event)
    {
    case ID_VolumeSeqRd:
       SetVolMethod(VOL_METHOD_SEQ);
+	   m_options_toolbar->SetToolNormalBitmap(
+	     ID_VolumeSeqRd, wxGetBitmapFromMemory(layers));
+	   m_options_toolbar->SetToolNormalBitmap(
+	     ID_VolumeMultiRd, wxGetBitmapFromMemory(depth_off));
+	   m_options_toolbar->SetToolNormalBitmap(
+	     ID_VolumeCompRd, wxGetBitmapFromMemory(composite_off));
       break;
    case ID_VolumeMultiRd:
       SetVolMethod(VOL_METHOD_MULTI);
+	   m_options_toolbar->SetToolNormalBitmap(
+	     ID_VolumeSeqRd, wxGetBitmapFromMemory(layers_off));
+	   m_options_toolbar->SetToolNormalBitmap(
+	     ID_VolumeMultiRd, wxGetBitmapFromMemory(depth));
+	   m_options_toolbar->SetToolNormalBitmap(
+	     ID_VolumeCompRd, wxGetBitmapFromMemory(composite_off));
       break;
    case ID_VolumeCompRd:
       SetVolMethod(VOL_METHOD_COMP);
+	   m_options_toolbar->SetToolNormalBitmap(
+	     ID_VolumeSeqRd, wxGetBitmapFromMemory(layers_off));
+	   m_options_toolbar->SetToolNormalBitmap(
+	     ID_VolumeMultiRd, wxGetBitmapFromMemory(depth_off));
+	   m_options_toolbar->SetToolNormalBitmap(
+	     ID_VolumeCompRd, wxGetBitmapFromMemory(composite));
       break;
    }
 
-   int new_mode = GetVolMethod();
+/*   int new_mode = GetVolMethod();
 
    if (new_mode == VOL_METHOD_MULTI &&
          (old_mode == VOL_METHOD_SEQ || old_mode == VOL_METHOD_COMP))
@@ -11206,7 +10949,7 @@ void VRenderView::OnVolumeMethodCheck(wxCommandEvent& event)
       }
 
       vr_frame->GetTree()->UpdateSelection();
-   }
+   }*/
 
    RefreshGL();
 }
@@ -11746,15 +11489,23 @@ void VRenderView::OnAovChange(wxScrollEvent& event)
 void VRenderView::OnAovText(wxCommandEvent& event)
 {
    wxString str = m_aov_text->GetValue();
+   if (str == "Ortho")
+   {
+      SetPersp(false);
+      m_aov_sldr->SetValue(10);
+	  RefreshGL(true);
+      return;
+   }
    long val;
-   str.ToLong(&val);
-   if (val == 0 || val == 10)
+   if (!str.ToLong(&val))
+	   return;
+   if (val ==0 || val == 10)
    {
       SetPersp(false);
       m_aov_text->ChangeValue("Ortho");
       m_aov_sldr->SetValue(10);
    }
-   else if (val <= 10)
+   else if (val < 10)
    {
       return;
    }
@@ -11943,20 +11694,41 @@ void VRenderView::LoadSettings()
    if (fconfig.Read("volume_seq_rd", &bVal))
    {
       m_options_toolbar->ToggleTool(ID_VolumeSeqRd,bVal);
-      if (bVal)
+      if (bVal) {
          SetVolMethod(VOL_METHOD_SEQ);
+		   m_options_toolbar->SetToolNormalBitmap(
+			 ID_VolumeSeqRd, wxGetBitmapFromMemory(layers));
+		   m_options_toolbar->SetToolNormalBitmap(
+			 ID_VolumeMultiRd, wxGetBitmapFromMemory(depth_off));
+		   m_options_toolbar->SetToolNormalBitmap(
+			 ID_VolumeCompRd, wxGetBitmapFromMemory(composite_off));
+	  }
    }
    if (fconfig.Read("volume_multi_rd", &bVal))
    {
       m_options_toolbar->ToggleTool(ID_VolumeMultiRd,bVal);
-      if (bVal)
+      if (bVal) {
          SetVolMethod(VOL_METHOD_MULTI);
+		   m_options_toolbar->SetToolNormalBitmap(
+			 ID_VolumeSeqRd, wxGetBitmapFromMemory(layers_off));
+		   m_options_toolbar->SetToolNormalBitmap(
+			 ID_VolumeMultiRd, wxGetBitmapFromMemory(depth));
+		   m_options_toolbar->SetToolNormalBitmap(
+			 ID_VolumeCompRd, wxGetBitmapFromMemory(composite_off));
+	  }
    }
    if (fconfig.Read("volume_comp_rd", &bVal))
    {
       m_options_toolbar->ToggleTool(ID_VolumeCompRd,bVal);
-      if (bVal)
+      if (bVal) {
          SetVolMethod(VOL_METHOD_COMP);
+		   m_options_toolbar->SetToolNormalBitmap(
+			 ID_VolumeSeqRd, wxGetBitmapFromMemory(layers_off));
+		   m_options_toolbar->SetToolNormalBitmap(
+			 ID_VolumeMultiRd, wxGetBitmapFromMemory(depth_off));
+		   m_options_toolbar->SetToolNormalBitmap(
+			 ID_VolumeCompRd, wxGetBitmapFromMemory(composite));
+	  }
    }
    wxString str;
    if (fconfig.Read("bg_color_picker", &str))

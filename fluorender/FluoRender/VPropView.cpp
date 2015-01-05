@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/aboutdlg.h>
 #include <wx/colordlg.h>
 #include <wx/valnum.h>
+#include <wx/hyperlink.h>
 #include "png_resource.h"
 #include "img/icons.h"
 
@@ -326,7 +327,7 @@ VPropView::VPropView(wxWindow* frame,
    m_options_toolbar->ToggleTool(ID_MipChk,false);
    //inversion
    m_options_toolbar->AddCheckTool(ID_InvChk,"Inversion",
-   wxGetBitmapFromMemory(invert),wxNullBitmap,
+   wxGetBitmapFromMemory(invert_off),wxNullBitmap,
     "Inverts data values when checked.",
     "Inverts data values when checked.");
    m_options_toolbar->ToggleTool(ID_InvChk,false);
@@ -338,7 +339,7 @@ VPropView::VPropView(wxWindow* frame,
    m_options_toolbar->ToggleTool(ID_InterpolateChk,true);
    //noise reduction
    m_options_toolbar->AddCheckTool(ID_NRChk,"Smoothing",
-   wxGetBitmapFromMemory(smooth),wxNullBitmap,
+   wxGetBitmapFromMemory(smooth_off),wxNullBitmap,
     "Enable Data Smoothing.",
     "Enable Data Smoothing.");
    m_options_toolbar->ToggleTool(ID_NRChk,false);
@@ -350,7 +351,7 @@ VPropView::VPropView(wxWindow* frame,
    m_options_toolbar->ToggleTool(ID_SyncGroupChk,false);
    //depth mode
    m_options_toolbar->AddCheckTool(ID_DepthChk,"Depth Mode",
-   wxGetBitmapFromMemory(depth),wxNullBitmap,
+   wxGetBitmapFromMemory(depth_off),wxNullBitmap,
     "Enable Depth Mode.",
     "Enable Depth Mode.");
    m_options_toolbar->ToggleTool(ID_DepthChk,false);
@@ -1356,6 +1357,26 @@ void VPropView::OnColorTextChange(wxCommandEvent& event)
       wxc = wxColor(255, 255, 255);
       filled = 3;
    }
+   else if (str == "c" || str == "C")
+   {
+      wxc = wxColor(0, 255, 255);
+      filled = 3;
+   }
+   else if (str == "m" || str == "M")
+   {
+      wxc = wxColor(255, 0, 255);
+      filled = 3;
+   }
+   else if (str == "y" || str == "Y")
+   {
+      wxc = wxColor(255, 255, 0);
+      filled = 3;
+   }
+   else if (str == "k" || str == "K")
+   {
+      wxc = wxColor(0, 0, 0);
+      filled = 3;
+   }
    else if (str == "p" || str == "P")
    {
       wxc = wxColor(255, 0, 255);
@@ -1461,6 +1482,13 @@ void VPropView::OnColorTextFocus(wxCommandEvent& event)
 void VPropView::OnInvCheck(wxCommandEvent &event)
 {
    bool inv = m_options_toolbar->GetToolState(ID_InvChk);
+   if(inv) 
+	 m_options_toolbar->SetToolNormalBitmap(ID_InvChk, 
+	 wxGetBitmapFromMemory(invert));
+   else
+	 m_options_toolbar->SetToolNormalBitmap(ID_InvChk, 
+	 wxGetBitmapFromMemory(invert_off));
+
    if (m_sync_group && m_group)
       m_group->SetInvert(inv);
    else if (m_vd)
@@ -1542,6 +1570,12 @@ void VPropView::OnMIPCheck(wxCommandEvent &event)
 void VPropView::OnNRCheck(wxCommandEvent &event)
 {
    bool val = m_options_toolbar->GetToolState(ID_NRChk);
+   if(val) 
+	 m_options_toolbar->SetToolNormalBitmap(ID_NRChk, 
+	 wxGetBitmapFromMemory(smooth));
+   else
+	 m_options_toolbar->SetToolNormalBitmap(ID_NRChk, 
+	 wxGetBitmapFromMemory(smooth_off));
 
    if (m_vrv && m_vrv->GetVolMethod()==VOL_METHOD_MULTI)
    {
@@ -1570,26 +1604,63 @@ void VPropView::OnFluoRender(wxCommandEvent &event) {
    wxString time = wxNow();
    int psJan = time.Find("Jan");
    int psDec = time.Find("Dec");
-
-   wxAboutDialogInfo info;
-   wxIcon icon;
-   if (psJan!=wxNOT_FOUND || psDec!=wxNOT_FOUND)
-      icon.CopyFromBitmap(wxGetBitmapFromMemory(logo_snow));
-   else
-      icon.CopyFromBitmap(wxGetBitmapFromMemory(logo));
-   info.SetIcon(icon);
-   info.SetName(FLUORENDER_TITLE);
-   info.SetVersion(wxString::Format("%d.%d", VERSION_MAJOR, VERSION_MINOR));
-   info.SetCopyright(VERSION_COPYRIGHT);
-   info.SetWebSite(VERSION_CONTACT, "Contact Info");
-   info.SetDescription(VERSION_AUTHORS);
-   wxAboutBox(info);
+    wxDialog* d = new wxDialog(this,wxID_ANY,"About FluoRender",wxDefaultPosition,
+                               wxSize(540,210),wxDEFAULT_DIALOG_STYLE );
+    wxBoxSizer * main = new wxBoxSizer(wxHORIZONTAL);
+    wxBoxSizer * left = new wxBoxSizer(wxVERTICAL);
+    wxBoxSizer * right = new wxBoxSizer(wxVERTICAL);
+    //left
+    // FluoRender Image (rows 4-5)
+    wxToolBar * logo= new wxToolBar(d, wxID_ANY);
+    if (psJan!=wxNOT_FOUND || psDec!=wxNOT_FOUND)
+        logo->AddTool(wxID_ANY, "", wxGetBitmapFromMemory(logo_snow));
+    else
+        logo->AddTool(wxID_ANY, "", wxGetBitmapFromMemory(logo));
+    logo->Realize();
+    left->Add(logo,0,wxEXPAND);
+    //right
+    wxStaticText *txt = new wxStaticText(d,wxID_ANY,FLUORENDER_TITLE,
+                                        wxDefaultPosition,wxSize(-1,-1));
+    wxFont font = wxFont(15,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
+    txt->SetFont(font);
+    right->Add(txt,0,wxEXPAND);
+    txt = new wxStaticText(d,wxID_ANY,"Version: " +
+                           wxString::Format("%d.%d", VERSION_MAJOR, VERSION_MINOR),
+                                         wxDefaultPosition,wxSize(-1,-1));
+    font = wxFont(12,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
+    txt->SetFont(font);
+    right->Add(txt,0,wxEXPAND | wxALIGN_RIGHT);
+    txt = new wxStaticText(d,wxID_ANY,wxString("Copyright (c) ") + VERSION_COPYRIGHT,
+                           wxDefaultPosition,wxSize(-1,-1));
+    font = wxFont(11,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
+    txt->SetFont(font);
+    right->Add(txt,0,wxEXPAND | wxALIGN_RIGHT);
+    right->Add(3,5,0);
+    txt = new wxStaticText(d,wxID_ANY,VERSION_AUTHORS,
+                           wxDefaultPosition,wxSize(-1,90));
+    font = wxFont(10,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
+    txt->SetFont(font);
+    right->Add(txt,0,wxEXPAND | wxALIGN_RIGHT);
+    wxHyperlinkCtrl* hyp = new wxHyperlinkCtrl(d,wxID_ANY,"Contact Info",
+                                               VERSION_CONTACT,
+                                               wxDefaultPosition,wxSize(-1,-1));
+    right->Add(hyp,0,wxEXPAND);
+    right->AddStretchSpacer();
+    //put together
+    main->Add(left,0,wxEXPAND);
+    main->Add(right,0,wxEXPAND);
+    d->SetSizer(main);
+    d->ShowModal();
 }
 
 //depth mode
 void VPropView::OnDepthCheck(wxCommandEvent &event)
 {
    bool val = m_options_toolbar->GetToolState(ID_DepthChk);
+   if(val) 
+	 m_options_toolbar->SetToolNormalBitmap(ID_DepthChk, wxGetBitmapFromMemory(depth));
+   else
+	 m_options_toolbar->SetToolNormalBitmap(ID_DepthChk, wxGetBitmapFromMemory(depth_off));
 
    if (val)
    {
@@ -1680,6 +1751,12 @@ void VPropView::OnLegendCheck(wxCommandEvent& event)
 void VPropView::OnInterpolateCheck(wxCommandEvent& event)
 {
    bool inv = m_options_toolbar->GetToolState(ID_InterpolateChk);
+   if(inv) 
+	 m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk, 
+	 wxGetBitmapFromMemory(interpolate));
+   else
+	 m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk, 
+	 wxGetBitmapFromMemory(interpolate_off));
    if (m_sync_group && m_group)
       m_group->SetInterpolate(inv);
    else if (m_vd)

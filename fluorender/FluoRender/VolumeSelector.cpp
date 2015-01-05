@@ -37,7 +37,7 @@ VolumeSelector::VolumeSelector() :
    m_2d_weight2(0),
    m_iter_num(20),
    m_mode(0),
-m_use2d(true),
+   m_use2d(false),
    m_size_map(false),
    m_ini_thresh(0.0),
    m_gm_falloff(0.0),
@@ -62,7 +62,7 @@ m_use2d(true),
    m_ca_volume(0),
    m_randv(113),
    m_ps(false),
-   m_ps_size(0.0)
+   m_estimate_threshold(false)
 {
 }
 
@@ -125,7 +125,7 @@ void VolumeSelector::Select(double radius)
       if (m_scl_falloff > 0.0)
          scl_falloff = m_scl_falloff;
       else
-         scl_falloff = 0.01;
+         scl_falloff = 0.008;
    }
    else
    {
@@ -137,7 +137,7 @@ void VolumeSelector::Select(double radius)
       if (m_gm_falloff > 0.0)
          gm_falloff = m_gm_falloff;
       else
-         gm_falloff = 0.01;
+         gm_falloff = 0.004;
    }
    else
       gm_falloff = 0.0;
@@ -147,13 +147,22 @@ void VolumeSelector::Select(double radius)
    {
       m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
       m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
-      m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
+      //m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
    }
    else if (m_mode == 6)
       m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
 
    //initialization
    int hr_mode = m_hidden_removal?(m_ortho?1:2):0;
+   if ((m_mode==1 || m_mode==2) && m_estimate_threshold)
+   {
+		m_vd->DrawMask(0, m_mode, hr_mode, 0.0, gm_falloff, scl_falloff, 0.0, m_w2d, 0.0, false, true);
+		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
+		ini_thresh = m_vd->GetEstThresh() * m_vd->GetScalarScale();
+		if (m_iter_num>BRUSH_TOOL_ITER_WEAK)
+			ini_thresh /= 2.0;
+		m_scl_translate = ini_thresh;
+   }
    m_vd->DrawMask(0, m_mode, hr_mode, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
 
    //grow the selection when paint mode is select, append, erase, or invert

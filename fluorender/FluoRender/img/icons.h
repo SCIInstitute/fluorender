@@ -18,8 +18,14 @@ const static unsigned char center_png[1571];
 /* composite.png - 16600 bytes */
 const static unsigned char composite_png[16600];
 
+/* composite_off.png - 17042 bytes */
+const static unsigned char composite_off_png[17042];
+
 /* depth.png - 16600 bytes */
 const static unsigned char depth_png[16600];
+
+/* depth.png - 17042 bytes */
+const static unsigned char depth_off_png[17042];
 
 /* depth_atten.png - 16600 bytes */
 const static unsigned char depth_atten_png[16600];
@@ -48,8 +54,8 @@ const static unsigned char icon_check_updates_png[4044];
 /* icon_check_updates_mini.png - 817 bytes */
 const static unsigned char icon_check_updates_mini_png[817];
 
-/* icon_edit.png - 2832 bytes */
-const static unsigned char icon_edit_png[2832];
+/* icon_edit.png - 17941 bytes */
+const static unsigned char icon_edit_png[17941];
 
 /* icon_edit_mini.png - 806 bytes */
 const static unsigned char icon_edit_mini_png[806];
@@ -122,6 +128,9 @@ const static unsigned char info_png[1262];
 
 /* layers.png - 16600 bytes */
 const static unsigned char layers_png[16600];
+
+/* layers_off.png - 16600 bytes */
+const static unsigned char layers_off_png[17042];
 
 /* legend.png - 1142 bytes */
 const static unsigned char legend_png[1142];
@@ -235,13 +244,13 @@ const static unsigned char rewind_png[16443];
 const static unsigned char save_settings_png[16830];
 
 /* scale.png - 312 bytes */
-const static unsigned char scale_png[312];
+const static unsigned char scale_png[16146];
 
 /* scale_text.png - 484 bytes */
-const static unsigned char scale_text_png[484];
+const static unsigned char scale_text_png[17358];
 
 /* scale_text_off.png - 1365 bytes */
-const static unsigned char scale_text_off_png[1365];
+const static unsigned char scale_text_off_png[16910];
 
 /* shade.png - 497 bytes */
 const static unsigned char shade_png[497];
@@ -258,12 +267,22 @@ const static unsigned char unlink_png[1503];
 /* unlink_text.png - 765 bytes */
 const static unsigned char unlink_text_png[765];
 
-/* invert.png - 16600 bytes */
-const static unsigned char invert_png[16600];
+/* invert.png - 15224 bytes */
+const static unsigned char invert_png[15224];
 
-/* interpolate.png - 16600 bytes */
-const static unsigned char interpolate_png[16600];
+/* invert_off_png.png - 15199 bytes */
+const static unsigned char invert_off_png[15199];
 
-/* smooth.png - 16600 bytes */
-const static unsigned char smooth_png[16600];
+/* interpolate.png - 15013 bytes */
+const static unsigned char interpolate_png[15013];
+
+/* interpolate_off.png - 14998 bytes */
+const static unsigned char interpolate_off_png[14998];
+
+/* smooth.png - 15326 bytes */
+const static unsigned char smooth_png[15326];
+
+/* smooth_off.png - 14747 bytes */
+const static unsigned char smooth_off_png[14747];
+
 };

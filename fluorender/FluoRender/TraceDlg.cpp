@@ -97,7 +97,7 @@ void TraceListCtrl::Append(unsigned int id, wxColor color,
 	SetItemBackgroundColour(tmp, color);
 }
 
-void TraceListCtrl::Update(VRenderView* vrv)
+void TraceListCtrl::UpdateTraces(VRenderView* vrv)
 {
 	if (vrv)
 		m_view = vrv;
@@ -267,7 +267,12 @@ BEGIN_EVENT_TABLE(TraceDlg, wxPanel)
 	EVT_TEXT(ID_GhostNumText, TraceDlg::OnGhostNumText)
 	EVT_COMMAND_SCROLL(ID_CellSizeSldr, TraceDlg::OnCellSizeChange)
 	EVT_TEXT(ID_CellSizeText, TraceDlg::OnCellSizeText)
+	EVT_CHECKBOX(ID_GhostShowTailChk, TraceDlg::OnGhostShowTail)
+	EVT_CHECKBOX(ID_GhostShowLeadChk, TraceDlg::OnGhostShowLead)
 	//manual assist
+	EVT_BUTTON(ID_AddLabelBtn, TraceDlg::OnAddLabel)
+	EVT_BUTTON(ID_AnalyzeBtn, TraceDlg::OnAnalyze)
+	EVT_BUTTON(ID_SaveAnalyzeBtn, TraceDlg::OnSaveAnalyze)
 	EVT_CHECKBOX(ID_ManualAssistCheck, TraceDlg::OnManualAssistCheck)
 	//component tools
 	EVT_BUTTON(ID_CompClearBtn, TraceDlg::OnCompClear)
@@ -319,7 +324,7 @@ m_manual_assist(false)
 		wxDefaultPosition, wxSize(60, 23));
 	m_save_trace_btn = new wxButton(this, ID_SaveTraceBtn, "Save",
 		wxDefaultPosition, wxSize(60, 23));
-	m_saveas_trace_btn = new wxButton(this, ID_SaveasTraceBtn, "Save As...",
+	m_saveas_trace_btn = new wxButton(this, ID_SaveasTraceBtn, "Save As",
 		wxDefaultPosition, wxSize(60, 23));
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
@@ -330,25 +335,45 @@ m_manual_assist(false)
 
 	//ghost num
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Ghost num:",
+	st = new wxStaticText(this, 0, "Ghosts:",
 		wxDefaultPosition, wxSize(70, 20));
+	m_ghost_show_tail_chk = new wxCheckBox(this, ID_GhostShowTailChk, "Tail",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
 	m_ghost_num_sldr = new wxSlider(this, ID_GhostNumSldr, 10, 0, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_ghost_num_text = new wxTextCtrl(this, ID_GhostNumText, "10",
 		wxDefaultPosition, wxSize(60, 23), 0, vald_int);
+	m_ghost_show_lead_chk = new wxCheckBox(this, ID_GhostShowLeadChk, "Lead",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
 	sizer_2->Add(5, 5);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_ghost_show_tail_chk, 0, wxALIGN_CENTER);
+	sizer_2->Add(5, 5);
 	sizer_2->Add(m_ghost_num_sldr, 1, wxEXPAND|wxALIGN_CENTER);
 	sizer_2->Add(m_ghost_num_text, 0, wxALIGN_CENTER);
+	sizer_2->Add(5, 5);
+	sizer_2->Add(m_ghost_show_lead_chk, 0, wxALIGN_CENTER);
 
 	//edit tools
 	wxBoxSizer *sizer_3 = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, "Edit"),
+		new wxStaticBox(this, wxID_ANY, "Analyze && Validate"),
 		wxVERTICAL);
-	//manual assist
+	//first row
 	wxBoxSizer* sizer_31 = new wxBoxSizer(wxHORIZONTAL);
-	m_manual_assist_check = new wxCheckBox(this, ID_ManualAssistCheck, "Manual tracking assistance",
+	m_add_label_btn = new wxButton(this, ID_AddLabelBtn, "Add Label",
+		wxDefaultPosition, wxSize(80, 23));
+	m_analyze_btn = new wxButton(this, ID_AnalyzeBtn, "Analyze",
+		wxDefaultPosition, wxSize(80, 23));
+	m_save_analyze_btn = new wxButton(this, ID_SaveAnalyzeBtn, "Save Analy.",
+		wxDefaultPosition, wxSize(80, 23));
+	m_manual_assist_check = new wxCheckBox(this, ID_ManualAssistCheck, "Manual Tracking Assist.",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
+	sizer_31->AddStretchSpacer();
+	sizer_31->Add(m_add_label_btn, 0, wxALIGN_CENTER);
+	sizer_31->Add(5, 5);
+	sizer_31->Add(m_analyze_btn, 0, wxALIGN_CENTER);
+	sizer_31->Add(5, 5);
+	sizer_31->Add(m_save_analyze_btn, 0, wxALIGN_CENTER);
 	sizer_31->Add(5, 5);
 	sizer_31->Add(m_manual_assist_check, 0, wxALIGN_CENTER);
 	//cell size filter
@@ -424,7 +449,7 @@ m_manual_assist(false)
 	sizer_35->Add(m_cell_new_id_btn, 0, wxALIGN_CENTER);
 	sizer_35->Add(m_cell_combine_id_btn, 0, wxALIGN_CENTER);
 	//magic tool
-	/*wxBoxSizer* sizer_36 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer_36 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Magic happens:",
 		wxDefaultPosition, wxSize(130, 20));
 	m_cell_magic0_btn = new wxButton(this, ID_CellMagic0Btn, "Measure",
@@ -441,14 +466,16 @@ m_manual_assist(false)
 	sizer_36->Add(10, 23);
 	sizer_36->Add(m_cell_magic1_btn, 0, wxALIGN_CENTER);
 	sizer_36->Add(m_cell_magic2_btn, 0, wxALIGN_CENTER);
-	sizer_36->Add(m_cell_magic3_btn, 0, wxALIGN_CENTER);*/
+	sizer_36->Add(m_cell_magic3_btn, 0, wxALIGN_CENTER);
 	//
 	sizer_3->Add(sizer_31, 0, wxEXPAND);
+	sizer_3->Add(10, 10);
 	sizer_3->Add(sizer_32, 0, wxEXPAND);
 	sizer_3->Add(sizer_33, 0, wxEXPAND);
 	sizer_3->Add(sizer_34, 0, wxEXPAND);
 	sizer_3->Add(sizer_35, 0, wxEXPAND);
-	//sizer_3->Add(sizer_36, 0, wxEXPAND);
+	sizer_3->Add(sizer_36, 0, wxEXPAND);
+	sizer_3->Hide(sizer_36);
 
 	//lists
 	wxBoxSizer *sizer_4 = new wxStaticBoxSizer(
@@ -479,13 +506,13 @@ m_manual_assist(false)
 	sizer_4->Add(sizer_42, 1, wxEXPAND);
 
 	//stats text
-	/*wxBoxSizer *sizer_5 = new wxStaticBoxSizer(
+	wxBoxSizer *sizer_5 = new wxStaticBoxSizer(
 		new wxStaticBox(this, wxID_ANY, "Output"),
 		wxVERTICAL);
 	m_stat_text = new wxTextCtrl(this, ID_StatText, "",
 		wxDefaultPosition, wxSize(-1, 100), wxTE_MULTILINE);
 	m_stat_text->SetEditable(false);
-	sizer_5->Add(m_stat_text, 1, wxEXPAND);*/
+	sizer_5->Add(m_stat_text, 1, wxEXPAND);
 
 	//all controls
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
@@ -498,7 +525,7 @@ m_manual_assist(false)
 	sizerV->Add(10, 10);
 	sizerV->Add(sizer_4, 1, wxEXPAND);
 	sizerV->Add(10, 10);
-	//sizerV->Add(sizer_5, 0, wxEXPAND);
+	sizerV->Add(sizer_5, 0, wxEXPAND);
 
 	SetSizer(sizerV);
 	Layout();
@@ -527,6 +554,12 @@ void TraceDlg::GetSettings(VRenderView* vrv)
 		else
 			m_load_trace_text->SetValue("Link map created but not saved");
 		UpdateList();
+
+		int ghost_num = trace_group->GetGhostNum();
+		m_ghost_num_text->ChangeValue(wxString::Format("%d", ghost_num));
+		m_ghost_num_sldr->SetValue(ghost_num);
+		m_ghost_show_tail_chk->SetValue(trace_group->GetDrawTail());
+		m_ghost_show_lead_chk->SetValue(trace_group->GetDrawLead());
 	}
 	else
 		m_load_trace_text->SetValue("No Link map");
@@ -601,7 +634,7 @@ void TraceDlg::UpdateList()
 		else
 			m_cell_time_prev_st->SetLabel("\tPrevious T");
 	}
-	m_trace_list_curr->Update(m_view);
+	m_trace_list_curr->UpdateTraces(m_view);
 	Layout();
 }
 
@@ -631,7 +664,13 @@ void TraceDlg::OnSaveTrace(wxCommandEvent& event)
 	if (!m_view) return;
 
 	wxString filename = m_load_trace_text->GetValue();
-	m_view->SaveTraceGroup(filename);
+	if (filename == "")
+	{
+		wxCommandEvent e;
+		OnSaveasTrace(e);
+	}
+	else
+		m_view->SaveTraceGroup(filename);
 }
 
 void TraceDlg::OnSaveasTrace(wxCommandEvent& event)
@@ -680,6 +719,36 @@ void TraceDlg::OnGhostNumText(wxCommandEvent &event)
 	}
 }
 
+void TraceDlg::OnGhostShowTail(wxCommandEvent &event)
+{
+	bool show = m_ghost_show_tail_chk->GetValue();
+	
+	if (m_view)
+	{
+		TraceGroup* trace_group = m_view->GetTraceGroup();
+		if (trace_group)
+		{
+			trace_group->SetDrawTail(show);
+			m_view->RefreshGL();
+		}
+	}
+}
+
+void TraceDlg::OnGhostShowLead(wxCommandEvent &event)
+{
+	bool show = m_ghost_show_lead_chk->GetValue();
+	
+	if (m_view)
+	{
+		TraceGroup* trace_group = m_view->GetTraceGroup();
+		if (trace_group)
+		{
+			trace_group->SetDrawLead(show);
+			m_view->RefreshGL();
+		}
+	}
+}
+
 //cell size filter
 void TraceDlg::OnCellSizeChange(wxScrollEvent &event)
 {
@@ -703,6 +772,48 @@ void TraceDlg::OnCellSizeText(wxCommandEvent &event)
 			trace_group->SetCellSize(ival);
 		}
 	}
+}
+
+//add label
+void TraceDlg::OnAddLabel(wxCommandEvent &event)
+{
+	if (!m_view)
+		return;
+
+	//get data
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+	vd->AddEmptyMask();
+	vd->AddEmptyLabel();
+}
+
+void TraceDlg::OnAnalyze(wxCommandEvent &event)
+{
+	Measure();
+	wxString str;
+	OutputMeasureResult(str);
+	m_stat_text->SetValue(str);
+}
+
+void TraceDlg::OnSaveAnalyze(wxCommandEvent &event)
+{
+	Measure();
+	wxString str;
+	OutputMeasureResult(str);
+	m_stat_text->SetValue(str);
+	wxFileDialog *fopendlg = new wxFileDialog(
+		this, "Save results", "", "",
+		"Text file (*.txt)|*.txt",
+		wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+	int rval = fopendlg->ShowModal();
+	if (rval == wxID_OK)
+	{
+		wxString filename = fopendlg->GetPath();
+		SaveMeasureResult(filename);
+	}
+	if (fopendlg)
+		delete fopendlg;
 }
 
 //manual tracking assist
@@ -1618,7 +1729,7 @@ void TraceDlg::Measure()
 	for (i=0; i<(int)m_info_list.size(); ++i)
 	{
 		if (m_info_list[i].total_num > 0)
-			m_info_list[i].variance = sqrt(m_info_list[i].m2 / (m_info_list[i].total_num - 1));
+			m_info_list[i].variance = sqrt(m_info_list[i].m2 / (m_info_list[i].total_num));
 	}
 
 	std::sort(m_info_list.begin(), m_info_list.end(), measure_info::cmp_id);
@@ -2022,65 +2133,15 @@ void TraceDlg::OnCellCombineID(wxCommandEvent &event)
 
 void TraceDlg::OnCellPrev(wxCommandEvent &event)
 {
-	if (m_view)
-	{
-		m_view->Set4DSeqFrame(m_view->m_glview->m_tseq_cur_num-1, true);
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame && vr_frame->GetMovieView())
-			vr_frame->GetMovieView()->SetTimeFrame(m_view->m_glview->m_tseq_cur_num);
-	}
-	//if (m_trace_list_curr->GetItemCount() == 0 &&
-	//	m_trace_list_prev->GetItemCount() > 0)
-	//{
-	//	long item = -1;
-	//	wxString id_str;
-	//	unsigned long id;
-	//	vector<unsigned int> id_list;
-	//	for (;;)
-	//	{
-	//		item = m_trace_list_prev->GetNextItem(item,
-	//			wxLIST_NEXT_ALL,
-	//			wxLIST_STATE_DONTCARE);
-	//		if (item != -1)
-	//		{
-	//			id_str = m_trace_list_prev->GetText(item, 0);
-	//			id_str.ToULong(&id);
-	//			id_list.push_back(id);
-	//		}
-	//	}
-	//	CellAppendID(id_list);
-	//}
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetMovieView())
+		vr_frame->GetMovieView()->DownFrame();
 }
 
 void TraceDlg::OnCellNext(wxCommandEvent &event)
 {
-	if (m_view)
-	{
-		m_view->Set4DSeqFrame(m_view->m_glview->m_tseq_cur_num+1, true);
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame && vr_frame->GetMovieView())
-			vr_frame->GetMovieView()->SetTimeFrame(m_view->m_glview->m_tseq_cur_num);
-	}
-	//if (m_trace_list_curr->GetItemCount() == 0 &&
-	//	m_trace_list_prev->GetItemCount() > 0)
-	//{
-	//	long item = -1;
-	//	wxString id_str;
-	//	unsigned long id;
-	//	vector<unsigned int> id_list;
-	//	for (;;)
-	//	{
-	//		item = m_trace_list_prev->GetNextItem(item,
-	//			wxLIST_NEXT_ALL,
-	//			wxLIST_STATE_DONTCARE);
-	//		if (item != -1)
-	//		{
-	//			id_str = m_trace_list_prev->GetText(item, 0);
-	//			id_str.ToULong(&id);
-	//			id_list.push_back(id);
-	//		}
-	//	}
-	//	CellAppendID(id_list);
-	//}
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetMovieView())
+		vr_frame->GetMovieView()->UpFrame();
 }
 

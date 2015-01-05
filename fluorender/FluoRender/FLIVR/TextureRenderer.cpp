@@ -488,6 +488,225 @@ namespace FLIVR
 		return !(overx || overy || overz || underx || undery || underz);
 	}
 
+	//exposed load brick
+	GLint TextureRenderer::load_brick_cl(int c, vector<TextureBrick*> *bricks, int bindex)
+	{
+		GLint result = -1;
+		if (clear_pool_) clear_tex_pool();
+		TextureBrick* brick = (*bricks)[bindex];
+		int nb = brick->nb(c);
+		int nx = brick->nx();
+		int ny = brick->ny();
+		int nz = brick->nz();
+		GLenum textype = brick->tex_type(c);
+		int idx = -1;
+		for(unsigned int i = 0; i < tex_pool_.size() && idx < 0; i++)
+		{
+			if(tex_pool_[i].brick == brick
+				&& glIsTexture(tex_pool_[i].id))
+			{
+				//found!
+				idx = i;
+			}
+		}
+		if(idx != -1) 
+		{
+			result = tex_pool_[idx].id;
+		}
+		else //idx == -1
+		{
+			// allocate new object
+			unsigned int tex_id;
+			glGenTextures(1, (GLuint*)&tex_id);
+
+			// create new entry
+			tex_pool_.push_back(TexParam(c, nx, ny, nz, nb, textype, tex_id));
+			idx = int(tex_pool_.size())-1;
+
+			tex_pool_[idx].brick = brick;
+			tex_pool_[idx].comp = c;
+			result = tex_pool_[idx].id;
+
+			// download texture data
+			glPixelStorei(GL_UNPACK_ROW_LENGTH, brick->sx());
+			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, brick->sy());
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+			if (ShaderProgram::shaders_supported())
+			{
+				GLenum format;
+				GLint internal_format;
+				if (nb < 3)
+				{
+					internal_format = (brick->tex_type(c)==GL_SHORT||
+						brick->tex_type(c)==GL_UNSIGNED_SHORT)?
+						GL_R16:GL_R8;
+					format = GL_RED;
+				}
+				if (glTexImage3D)
+				{
+					glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format,
+						brick->tex_type(c), 0);
+					glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, nx, ny, nz, format,
+						brick->tex_type(c), brick->tex_data(c));
+				}
+			}
+
+			glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+		}
+
+		return result;
+	}
+
+	GLint TextureRenderer::load_brick(int unit, int c,
+		vector<TextureBrick*> *bricks, int bindex,
+		GLint filter, bool compression, int mode)
+	{
+		GLint result = -1;
+
+		if (clear_pool_) clear_tex_pool();
+		TextureBrick* brick = (*bricks)[bindex];
+		int idx;
+
+		if (c < 0 || c >= TEXTURE_MAX_COMPONENTS)
+			return 0;
+		if (brick->ntype(c) != TextureBrick::TYPE_INT)
+			return 0;
+
+		glActiveTexture(GL_TEXTURE0+unit);
+
+		int nb = brick->nb(c);
+		int nx = brick->nx();
+		int ny = brick->ny();
+		int nz = brick->nz();
+		GLenum textype = brick->tex_type(c);
+
+		//! Try to find the existing texture in tex_pool_, for this brick.
+		idx = -1;
+		for(unsigned int i = 0; i < tex_pool_.size() && idx < 0; i++)
+		{
+			if(tex_pool_[i].id != 0
+				&& tex_pool_[i].brick == brick
+				&& tex_pool_[i].comp == c
+				&& nx == tex_pool_[i].nx
+				&& ny == tex_pool_[i].ny
+				&& nz == tex_pool_[i].nz
+				&& nb == tex_pool_[i].nb
+				&& textype == tex_pool_[i].textype
+				&& glIsTexture(tex_pool_[i].id))
+			{
+				//found!
+				idx = i;
+			}
+		}
+
+		if(idx != -1) 
+		{
+			//! The texture object was located, bind it.
+			// bind texture object
+			glBindTexture(GL_TEXTURE_3D, tex_pool_[idx].id);
+			result = tex_pool_[idx].id;
+			// set interpolation method
+			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, filter);
+			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, filter);
+		} 
+		else //idx == -1
+		{
+			//see if it needs to free some memory
+			if (mem_swap_)
+				check_swap_memory(brick, c);
+
+			// allocate new object
+			unsigned int tex_id;
+			glGenTextures(1, (GLuint*)&tex_id);
+
+			// create new entry
+			tex_pool_.push_back(TexParam(c, nx, ny, nz, nb, textype, tex_id));
+			idx = int(tex_pool_.size())-1;
+
+			tex_pool_[idx].brick = brick;
+			tex_pool_[idx].comp = c;
+			// bind texture object
+			glBindTexture(GL_TEXTURE_3D, tex_pool_[idx].id);
+			result = tex_pool_[idx].id;
+			// set border behavior
+			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+			// set interpolation method
+			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, filter);
+			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, filter);
+
+			// download texture data
+			glPixelStorei(GL_UNPACK_ROW_LENGTH, brick->sx());
+			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, brick->sy());
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+			if (ShaderProgram::shaders_supported())
+			{
+				GLenum format;
+				GLint internal_format;
+				if (nb < 3)
+				{
+					if (compression && GLEW_ARB_texture_compression_rgtc &&
+						brick->ntype(c)==TextureBrick::TYPE_INT)
+						internal_format = GL_COMPRESSED_RED;
+					else
+						internal_format = (brick->tex_type(c)==GL_SHORT||
+							brick->tex_type(c)==GL_UNSIGNED_SHORT)?
+							GL_R16:GL_R8;
+					format = GL_RED;
+				}
+				else
+				{
+					if (compression && GLEW_ARB_texture_compression_rgtc &&
+						brick->ntype(c)==TextureBrick::TYPE_INT)
+						internal_format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+					else
+						internal_format = (brick->tex_type(c)==GL_SHORT||
+							brick->tex_type(c)==GL_UNSIGNED_SHORT)?
+							GL_RGBA16UI:GL_RGBA8UI;
+					format = GL_RGBA;
+				}
+
+				if (glTexImage3D)
+				{
+					glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format,
+						brick->tex_type(c), 0);
+					glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, nx, ny, nz, format,
+						brick->tex_type(c), brick->tex_data(c));
+					if (mem_swap_)
+					{
+						double new_mem = brick->nx()*brick->ny()*brick->nz()*brick->nb(c)/1.04e6;
+						available_mem_ -= new_mem;
+					}
+				}
+			}
+
+			glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+		}
+
+		if (mem_swap_ &&
+			start_update_loop_ &&
+			!done_update_loop_)
+		{
+			if (!brick->drawn(mode))
+			{
+				brick->set_drawn(mode, true);
+				cur_brick_num_++;
+				cur_chan_brick_num_++;
+			}
+		}
+
+		glActiveTexture(GL_TEXTURE0);
+
+		return result;
+	}
+
 	//search for or create the mask texture in the texture pool
 	GLint TextureRenderer::load_brick_mask(vector<TextureBrick*> *bricks, int bindex, GLint filter, bool compression, int unit)
 	{
@@ -563,9 +782,8 @@ namespace FLIVR
 
 			if (ShaderProgram::shaders_supported())
 			{
-				//GLint internal_format = compression?GL_COMPRESSED_RED_RGTC1:GL_LUMINANCE;
-				GLint internal_format = GL_LUMINANCE;
-				GLenum format = (nb == 1 ? GL_LUMINANCE : GL_RGBA);
+				GLint internal_format = GL_R8;
+				GLenum format = (nb == 1 ? GL_RED : GL_RGBA);
 				if (glTexImage3D)
 				{
 					glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format,
@@ -756,153 +974,6 @@ namespace FLIVR
 			if (use_mem_limit_)
 				available_mem_ = est_avlb_mem;
 		}
-	}
-
-	GLint TextureRenderer::load_brick(int unit, int c,
-		vector<TextureBrick*> *bricks, int bindex,
-		GLint filter, bool compression, int mode)
-	{
-		GLint result = -1;
-
-		if (clear_pool_) clear_tex_pool();
-		TextureBrick* brick = (*bricks)[bindex];
-		int idx;
-
-		if (c < 0 || c >= TEXTURE_MAX_COMPONENTS)
-			return 0;
-		if (brick->ntype(c) != TextureBrick::TYPE_INT)
-			return 0;
-
-		glActiveTexture(GL_TEXTURE0+unit);
-
-		int nb = brick->nb(c);
-		int nx = brick->nx();
-		int ny = brick->ny();
-		int nz = brick->nz();
-		GLenum textype = brick->tex_type(c);
-
-		//! Try to find the existing texture in tex_pool_, for this brick.
-		idx = -1;
-		for(unsigned int i = 0; i < tex_pool_.size() && idx < 0; i++)
-		{
-			if(tex_pool_[i].id != 0
-				&& tex_pool_[i].brick == brick
-				&& tex_pool_[i].comp == c
-				&& nx == tex_pool_[i].nx
-				&& ny == tex_pool_[i].ny
-				&& nz == tex_pool_[i].nz
-				&& nb == tex_pool_[i].nb
-				&& textype == tex_pool_[i].textype
-				&& glIsTexture(tex_pool_[i].id))
-			{
-				//found!
-				idx = i;
-			}
-		}
-
-		if(idx != -1) 
-		{
-			//! The texture object was located, bind it.
-			// bind texture object
-			glBindTexture(GL_TEXTURE_3D, tex_pool_[idx].id);
-			result = tex_pool_[idx].id;
-			// set interpolation method
-			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, filter);
-			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, filter);
-		} 
-		else //idx == -1
-		{
-			//see if it needs to free some memory
-			if (mem_swap_)
-				check_swap_memory(brick, c);
-
-			// allocate new object
-			unsigned int tex_id;
-			glGenTextures(1, (GLuint*)&tex_id);
-
-			// create new entry
-			tex_pool_.push_back(TexParam(c, nx, ny, nz, nb, textype, tex_id));
-			idx = int(tex_pool_.size())-1;
-
-			tex_pool_[idx].brick = brick;
-			tex_pool_[idx].comp = c;
-			// bind texture object
-			glBindTexture(GL_TEXTURE_3D, tex_pool_[idx].id);
-			result = tex_pool_[idx].id;
-			// set border behavior
-			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-			// set interpolation method
-			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, filter);
-			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, filter);
-
-			// download texture data
-			glPixelStorei(GL_UNPACK_ROW_LENGTH, brick->sx());
-			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, brick->sy());
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-			if (ShaderProgram::shaders_supported())
-			{
-				GLenum format;
-				GLint internal_format;
-				if (nb < 3)
-				{
-					if (compression && GLEW_ARB_texture_compression_rgtc &&
-						brick->ntype(c)==TextureBrick::TYPE_INT)
-						internal_format = GL_COMPRESSED_RED_RGTC1;
-					else
-						internal_format = (brick->tex_type(c)==GL_SHORT||
-							brick->tex_type(c)==GL_UNSIGNED_SHORT)?
-							GL_LUMINANCE16:GL_LUMINANCE8;
-					format = GL_LUMINANCE;
-				}
-				else
-				{
-					if (compression && GLEW_ARB_texture_compression_rgtc &&
-						brick->ntype(c)==TextureBrick::TYPE_INT)
-						internal_format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-					else
-						internal_format = (brick->tex_type(c)==GL_SHORT||
-							brick->tex_type(c)==GL_UNSIGNED_SHORT)?
-							GL_RGBA16UI:GL_RGBA8UI;
-					format = GL_RGBA;
-				}
-
-				if (glTexImage3D)
-				{
-					glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format,
-						brick->tex_type(c), 0);
-					glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, nx, ny, nz, format,
-						brick->tex_type(c), brick->tex_data(c));
-					if (mem_swap_)
-					{
-						double new_mem = brick->nx()*brick->ny()*brick->nz()*brick->nb(c)/1.04e6;
-						available_mem_ -= new_mem;
-					}
-				}
-			}
-
-			glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-		}
-
-		if (mem_swap_ &&
-			start_update_loop_ &&
-			!done_update_loop_)
-		{
-			if (!brick->drawn(mode))
-			{
-				brick->set_drawn(mode, true);
-				cur_brick_num_++;
-				cur_chan_brick_num_++;
-			}
-		}
-
-		glActiveTexture(GL_TEXTURE0);
-
-		return result;
 	}
 
 	void TextureRenderer::draw_slices(double d)
