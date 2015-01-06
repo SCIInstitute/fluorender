@@ -57,10 +57,9 @@ END_EVENT_TABLE()
 VRenderGLView::VRenderGLView(wxWindow* frame,
       wxWindow* parent,
       wxWindowID id,
-	  const int* attriblist,
+	  const int32_t* attriblist,
       const int32_t *contextAttribs,
       wxGLContext* sharedContext,
-      int * attribList,
       const wxPoint& pos,
       const wxSize& size,
       long style) :
