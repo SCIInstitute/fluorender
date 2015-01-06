@@ -4,7 +4,6 @@
 // Author:      Julian Smart
 // Modified by:
 // Created:     04/01/98
-// RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
@@ -31,9 +30,7 @@ public:
     virtual bool SetCurrent(const wxGLCanvas& win) const;
 
     HGLRC GetGLRC() const { return m_glContext; }
-
 	static const int* m_glContextAttribs;
-
 protected:
     HGLRC m_glContext;
 
@@ -52,7 +49,7 @@ public:
     wxGLCanvas(wxWindow *parent,
                wxWindowID id = wxID_ANY,
                const int *attribList = NULL,
-			   const int *contextAttribs = NULL,
+               const int *contextAttribList = NULL,
                const wxPoint& pos = wxDefaultPosition,
                const wxSize& size = wxDefaultSize,
                long style = 0,
@@ -66,8 +63,10 @@ public:
                 long style = 0,
                 const wxString& name = wxGLCanvasName,
                 const int *attribList = NULL,
-				const int *contextAttribs = NULL,
+                const int *contextAttribList = NULL,
                 const wxPalette& palette = wxNullPalette);
+	void wxGLCanvas::GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd);
+	PIXELFORMATDESCRIPTOR m_pfd;
 
     virtual ~wxGLCanvas();
 

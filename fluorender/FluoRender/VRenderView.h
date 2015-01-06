@@ -86,10 +86,9 @@ class VRenderGLView: public wxGLCanvas
       VRenderGLView(wxWindow* frame,
             wxWindow* parent,
             wxWindowID id,
-			//const int* attriblist, //TODO for 3.2 OpenGL on OSX
-			//const int* contextattriblist,
+			const int* attriblist = NULL,
+			const int* contextattriblist = NULL,
             wxGLContext* sharedContext=0,
-            int * attribList=NULL,
             const wxPoint& pos=wxDefaultPosition,
             const wxSize& size=wxDefaultSize,
             long style=0);

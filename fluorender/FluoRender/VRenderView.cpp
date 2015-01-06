@@ -57,15 +57,13 @@ END_EVENT_TABLE()
 VRenderGLView::VRenderGLView(wxWindow* frame,
       wxWindow* parent,
       wxWindowID id,
-	  //const int* attriblist, //TODO! This is for openGL 3.2 support on OSX!
-      //const int* contextattriblist,
+	  const int* attriblist, 
+      const int* contextattriblist,
       wxGLContext* sharedContext,
-      int * attribList,
       const wxPoint& pos,
       const wxSize& size,
       long style) :
-   wxGLCanvas(parent, id, attribList, pos, size, style),
-   //wxGLCanvas(parent, id, attriblist, contextattriblist, pos, size, style),
+   wxGLCanvas(parent, id, attriblist, contextattriblist, pos, size, style),
    //public
    //capture modes
    m_capture(false),
@@ -9769,7 +9767,7 @@ VRenderView::VRenderView(wxWindow* frame,
    this->SetName(name);
 
    //render view/////////////////////////////////////////////////
-   m_glview = new VRenderGLView(frame, this, wxID_ANY, sharedContext);
+   m_glview = new VRenderGLView(frame, this, wxID_ANY, NULL, NULL, sharedContext);
 	//int attriblist[] = {WX_GL_MIN_RED, 8, //TODO!!! This is where the call to the altered wxWidget context attribute list happens
 	//					WX_GL_MIN_GREEN, 8,
 	//					WX_GL_MIN_BLUE, 8,
