@@ -37,8 +37,8 @@ namespace FLIVR
 	"\n"
 
 #define VOL_INPUTS \
-	"in vec3 OutVertex;" \
-	"in vec3 OutTexture;\n;"
+	"//in vec3 OutVertex;\n" \
+	"//in vec3 OutTexture;\n"
 
 #define VOL_UNIFORMS_COMMON \
 	"// VOL_UNIFORMS_COMMON\n" \

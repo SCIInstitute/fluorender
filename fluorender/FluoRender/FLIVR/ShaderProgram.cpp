@@ -142,17 +142,18 @@ namespace FLIVR
 			if (v_shader == 0 || f_shader == 0) return true;
 
 			// set the source code and compile the shader // vertex
-			const char *source[1];
-			source[0] = vert_shader_.c_str();
+			const char *v_source[1], *f_source[1];
+			v_source[0] = vert_shader_.c_str();
             GLint lengths[1];
-			glShaderSource(v_shader, 1, source, lengths);
+			lengths[0] = (int)std::strlen(v_source[0]);
+			glShaderSource(v_shader, 1, v_source, lengths);
 			glCompileShader(v_shader);
 
 			// check the compilation of the shader
 			GLint shader_status[1];
 			char shader_log[1000];
 			GLint shader_length[1];
-			bool attach_vert = true;
+			bool attach_vert = strcmp(*v_source,"") != 0;
 			glGetShaderiv(v_shader, GL_COMPILE_STATUS, shader_status);
 			if (shader_status[0] == GL_FALSE) {
 				glGetShaderInfoLog(v_shader, sizeof(shader_log), shader_length, shader_log);
@@ -161,8 +162,9 @@ namespace FLIVR
 			}
 			
 			// set the source code and compile the shader // fragment
-			source[0] = frag_shader_.c_str();
-			glShaderSource(f_shader, 1, source, lengths);
+			f_source[0] = frag_shader_.c_str();
+			lengths[0] = (int)std::strlen(f_source[0]);
+			glShaderSource(f_shader, 1, f_source, lengths);
 			glCompileShader(f_shader);
 
 			// check the compilation of the shader

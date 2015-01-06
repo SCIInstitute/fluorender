@@ -84,19 +84,14 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BUILD_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 #wxWidgets
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-   #merge the core library parts into one
-   MESSAGE(STATUS "Merging library parts due to GIT size limit...")
-   EXECUTE_PROCESS(COMMAND ${FluoRender_SOURCE_DIR}/fluorender/wxWidgets/lib/vc_x64_lib/merge_lib.bat
-		   WORKING_DIRECTORY ${FluoRender_SOURCE_DIR}/fluorender/wxWidgets/lib/vc_x64_lib 
-		   OUTPUT_VARIABLE out2)
-   message(STATUS "output: ${out2}")
-   include_directories(${FluoRender_SOURCE_DIR}/fluorender/wxWidgets/include)
-   include_directories(${FluoRender_SOURCE_DIR}/fluorender/wxWidgets/lib/vc_x64_lib/mswud)
-   file(GLOB wxWidgets_LIBRARIES fluorender/wxWidgets/lib/vc_x64_lib/*.lib)
-   set(wxWidgets_LIBRARIES "${wxWidgets_LIBRARIES};winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib")
-elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+set(wxWidgets_USE_REL_AND_DBG ON)
+if(${CMAKE_BUILD_TYPE} MATCHES "Release")
+	set(wxWidgets_CONFIGURATION mswu)
+elseif(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+	set(wxWidgets_CONFIGURATION mswud)
 endif()
+find_package(wxWidgets COMPONENTS core base aui html xrc xml net adv gl stc scintilla REQUIRED)
+include(${wxWidgets_USE_FILE})
 set(wxWidgets_USE_STATIC ON)
 add_definitions(-DUNICODE)
 add_definitions(-D_UNICODE)
@@ -352,17 +347,26 @@ target_link_libraries(FluoRender
    ${OPENGL_LIBRARIES}
    ${Boost_LIBRARIES}
    ${OPENCL_LIBRARIES})
-   
-#post build DLL copy
+
+#prebuild copies.
+
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-	file(GLOB ffmpeg_DLLS fluorender/bin/*.dll)
-	foreach (f ${ffmpeg_DLLS})
-		add_custom_command(TARGET FluoRender PRE_BUILD
-			COMMAND ${CMAKE_COMMAND} -E copy  
-			${f}
-			$<TARGET_FILE_DIR:FluoRender>)
+    #copy altered windows specific libraries to the wx main lib dir
+	file(GLOB msw_libs ${FluoRender_SOURCE_DIR}/fluorender/wxWidgets/lib/vc_x64_lib/wxmsw30*gl.*)
+	foreach (f ${msw_libs})
+	   add_custom_command(TARGET FluoRender PRE_BUILD
+				COMMAND ${CMAKE_COMMAND} -E copy  
+				${f}
+				${wxWidgets_LIB_DIR})
 	endforeach()
+    #copy altered windows specific headers to the wx main include dir
+	add_custom_command(TARGET FluoRender PRE_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy  
+			${FluoRender_SOURCE_DIR}/fluorender/wxWidgets/include/wx/msw/glcanvas.h
+			${wxWidgets_ROOT_DIR}/include/wx/msw)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
+
 #copy openCL examples to the binary directory
 add_custom_command(TARGET FluoRender PRE_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -372,3 +376,15 @@ add_custom_command(TARGET FluoRender PRE_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/CL_code"
   "${CMAKE_BINARY_DIR}/CL_code")
+   
+#post build DLL copy
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+	file(GLOB ffmpeg_DLLS fluorender/bin/*.dll)
+	foreach (f ${ffmpeg_DLLS})
+		add_custom_command(TARGET FluoRender PRE_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy  
+			${f}
+			$<TARGET_FILE_DIR:FluoRender>)
+	endforeach()
+endif()

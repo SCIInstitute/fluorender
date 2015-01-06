@@ -42,7 +42,7 @@ namespace FLIVR
 #define CORE_PROFILE_VTX_SHADER 1
 
 #define VTX_SHADER_CODE_GENERIC \
-	"//#version 150\n" \
+	"#version 150\n" \
 	"void main() {\n" \
 	"   gl_Position = ftransform();//ARB compatiblity only\n" \
 	"   gl_TexCoord[0] = gl_MultiTexCoord0;\n" \

@@ -456,10 +456,12 @@ void VRenderGLView::Init()
       glViewport(0, 0, (GLint)(GetSize().x), (GLint)(GetSize().y));
       goTimer->start();
       m_initialized = true;
-	  char version[128];
-	  memcpy(version,glGetString(GL_VERSION),strlen((const char*)glGetString(GL_VERSION)));
-	  std::cout << "OpenGL Version: " << version << std::endl;
    }
+   
+   //query the OGL version to determine actual context info
+   char version[128];
+   memcpy(version,glGetString(GL_VERSION),strlen((const char*)glGetString(GL_VERSION)));
+   std::cout << "OpenGL Version: " << version << std::endl;
 }
 
 void VRenderGLView::Clear()
@@ -9771,16 +9773,13 @@ VRenderView::VRenderView(wxWindow* frame,
    this->SetName(name);
 
    //render view/////////////////////////////////////////////////
-   //m_glview = new VRenderGLView(frame, this, wxID_ANY, sharedContext);
-	int32_t attriblist[] = {//WX_GL_MIN_RED, 8, //TODO!!! This is where the call to the altered wxWidget context attribute list happens
-						//WX_GL_MIN_GREEN, 8,
-						//WX_GL_MIN_BLUE, 8,
-						//WX_GL_MIN_ALPHA, 8,
+	int32_t attriblist[] = {
 #ifdef _WIN32
 						WGL_CONTEXT_MAJOR_VERSION_ARB , 3,
 					    WGL_CONTEXT_MINOR_VERSION_ARB, 0,
 						//0x2094, //WGL_CONTEXT_FLAGS_ARB           
 						WGL_CONTEXT_PROFILE_MASK_ARB,
+						//WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
 						WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
 #else
 //these are the apple constants for the context options.
@@ -9800,19 +9799,57 @@ VRenderView::VRenderView(wxWindow* frame,
 						kCGLPFAOpenGLProfile,
 						kCGLOGLPVersion_3_0_Core,
 #endif
-						//WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-						//WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_ES_PROFILE_BIT_EXT,
-						//WGL_DRAW_TO_WINDOW_ARB, 1,
-						//WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
-						//WGL_RED_BITS_ARB, 10,
-						//WGL_GREEN_BITS_ARB, 10,
-						//WGL_BLUE_BITS_ARB, 10,
-						//WGL_ALPHA_BITS_ARB, 2,
-						//WGL_DOUBLE_BUFFER_ARB, 1,
 						0, 0};
+						
+	int32_t pixelAttriblist[] = {
+					WX_GL_MIN_RED, 8,
+					WX_GL_MIN_GREEN, 8,
+					WX_GL_MIN_BLUE, 8,
+					WX_GL_MIN_ALPHA, 8,
+					WX_GL_DOUBLEBUFFER,
+					//WX_GL_SAMPLES,
+					/*WGL_DRAW_TO_WINDOW_ARB,GL_TRUE,
+					WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
+					WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
+					WGL_COLOR_BITS_ARB, 128,
+					WGL_RED_BITS_ARB, 32,
+					WGL_GREEN_BITS_ARB, 32,
+					WGL_BLUE_BITS_ARB, 32,
+					WGL_ALPHA_BITS_ARB, 32,
+					WGL_DEPTH_BITS_ARB, 16,
+					WGL_STENCIL_BITS_ARB, 0,
+					WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
+					WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,*/
+					0, 0 };
 
-   m_glview = new VRenderGLView(frame, this, wxID_ANY, NULL, attriblist, sharedContext);
+   m_glview = new VRenderGLView(frame, this, wxID_ANY, NULL, NULL, sharedContext);
    m_glview->SetCanFocus(false);
+#ifdef _WIN32
+   //example Pixel format descriptor detailing each part
+   //PIXELFORMATDESCRIPTOR pfd = { 
+   // sizeof(PIXELFORMATDESCRIPTOR),  //  size of this pfd  
+   // 1,                     // version number  
+   // PFD_DRAW_TO_WINDOW |   // support window  
+   // PFD_SUPPORT_OPENGL |   // support OpenGL  
+   // PFD_DOUBLEBUFFER,      // double buffered  
+   // PFD_TYPE_RGBA,         // RGBA type  
+   // 24,                    // 24-bit color depth  
+   // 0, 0, 0, 0, 0, 0,      // color bits ignored  
+   // 0,                     // no alpha buffer  
+   // 0,                     // shift bit ignored  
+   // 0,                     // no accumulation buffer  
+   // 0, 0, 0, 0,            // accum bits ignored  
+   // 32,                    // 32-bit z-buffer      
+   // 0,                     // no stencil buffer  
+   // 0,                     // no auxiliary buffer  
+   // PFD_MAIN_PLANE,        // main layer  
+   // 0,                     // reserved  
+   // 0, 0, 0                // layer masks ignored  
+   // }; 
+   PIXELFORMATDESCRIPTOR  pfd;
+   //check ret. this is an error code when the pixel format is invalid.
+   m_glview->GetPixelFormat(&pfd);
+#endif
    CreateBar();
    if (m_glview) {
 	   m_glview->SetSBText(wxString::Format("50 %c%c", 131, 'm'));

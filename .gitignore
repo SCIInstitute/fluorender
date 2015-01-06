@@ -27,6 +27,7 @@ CMakeScripts
 ipch
 Release
 fluorender/wxWidgets/lib/vc_x64_lib/wxmsw30ud_core.lib
+fluorender/wxWidgets/lib/vc_x64_lib/wxmsw30u_core.lib
 fluorender/CMakeFiles
 fluorender/filters
 fluorender/vcxproj

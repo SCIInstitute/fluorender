@@ -65,6 +65,8 @@ public:
                 const int *attribList = NULL,
                 const int *contextAttribList = NULL,
                 const wxPalette& palette = wxNullPalette);
+	void wxGLCanvas::GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd);
+	PIXELFORMATDESCRIPTOR m_pfd;
 
     virtual ~wxGLCanvas();
 
