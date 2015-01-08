@@ -298,7 +298,8 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
    //link cells
    m_cell_link(false),
    //new cell id
-   m_cell_new_id(false)
+   m_cell_new_id(false),
+   m_fsaa(false)
 {
    //create context
    if (sharedContext)
@@ -5385,6 +5386,9 @@ void VRenderGLView::OnDraw(wxPaintEvent& event)
    wxPaintDC dc(this);
    SetCurrent(*m_glRC);
 
+   if (m_fsaa)
+	glEnable(GL_MULTISAMPLE_ARB);
+
    int nx = GetSize().x;
    int ny = GetSize().y;
 
@@ -5459,6 +5463,8 @@ void VRenderGLView::OnDraw(wxPaintEvent& event)
    if (m_resize)
       m_resize = false;
 
+   if (m_fsaa)
+	glDisable(GL_MULTISAMPLE_ARB);
 }
 
 void VRenderGLView::SetRadius(double r)
@@ -9767,25 +9773,18 @@ VRenderView::VRenderView(wxWindow* frame,
    this->SetName(name);
 
    //render view/////////////////////////////////////////////////
-   m_glview = new VRenderGLView(frame, this, wxID_ANY, NULL, NULL, sharedContext);
-	//int attriblist[] = {WX_GL_MIN_RED, 8, //TODO!!! This is where the call to the altered wxWidget context attribute list happens
-	//					WX_GL_MIN_GREEN, 8,
-	//					WX_GL_MIN_BLUE, 8,
-	//					WX_GL_MIN_ALPHA, 8,
-	//					0};
-	//int contextattriblist[] = {	WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-	//							WGL_CONTEXT_MINOR_VERSION_ARB, 0,
-	//							//WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_ES_PROFILE_BIT_EXT,
-	//							//WGL_DRAW_TO_WINDOW_ARB, 1,
-	//							//WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
-	//							//WGL_RED_BITS_ARB, 10,
-	//							//WGL_GREEN_BITS_ARB, 10,
-	//							//WGL_BLUE_BITS_ARB, 10,
-	//							//WGL_ALPHA_BITS_ARB, 2,
-	//							//WGL_DOUBLE_BUFFER_ARB, 1,
-	//							0};
-
-	//m_glview = new VRenderGLView(frame, this, wxID_ANY, NULL, NULL, sharedContext);
+   int attriblist[] =
+	{
+		WX_GL_MIN_RED, 8,
+		WX_GL_MIN_GREEN, 8,
+		WX_GL_MIN_BLUE, 8,
+		WX_GL_MIN_ALPHA, 8,
+		WX_GL_DOUBLEBUFFER,
+		//WX_GL_SAMPLE_BUFFERS, 1,
+		WX_GL_SAMPLES, 16,
+		0
+	};
+   m_glview = new VRenderGLView(frame, this, wxID_ANY, attriblist, NULL, sharedContext);
    m_glview->SetCanFocus(false);
    CreateBar();
    if (m_glview) {

@@ -790,6 +790,9 @@ class VRenderGLView: public wxGLCanvas
          //predraw in streaming mode
          bool m_pre_draw;
 
+		 //FSAA
+		 bool m_fsaa;
+
    private:
 #ifdef _WIN32
          //wacom tablet
@@ -884,6 +887,9 @@ class VRenderGLView: public wxGLCanvas
          double GetPointPlane(Point &mp, int mx, int my, Point *planep=0);
          Point* GetEditingRulerPoint(int mx, int my);
 
+		 void SetFsaa(bool fsaa) {m_fsaa = fsaa;}
+		 bool GetFsaa() {return m_fsaa;}
+
          //system call
          void OnDraw(wxPaintEvent& event);
          void OnResize(wxSizeEvent& event);
@@ -953,6 +959,10 @@ class VRenderView: public wxPanel
 
    //clear layers
    void Clear();
+
+   //FSAA
+   void SetFsaa(bool fsaa) {if (m_glview) m_glview->SetFsaa(fsaa);}
+   bool GetFsaa() {if (m_glview) return m_glview->GetFsaa(); else return false;}
 
    //data management
    int GetAny();
