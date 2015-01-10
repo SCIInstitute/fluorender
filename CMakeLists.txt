@@ -364,6 +364,11 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 			COMMAND ${CMAKE_COMMAND} -E copy  
 			${FluoRender_SOURCE_DIR}/fluorender/wxWidgets/include/wx/msw/glcanvas.h
 			${wxWidgets_ROOT_DIR}/include/wx/msw)
+    #copy altered windows specific sources to the wx main include dir
+	add_custom_command(TARGET FluoRender PRE_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy  
+			${FluoRender_SOURCE_DIR}/fluorender/wxWidgets/src/glcanvas.cpp
+			${wxWidgets_ROOT_DIR}/src/msw)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
