@@ -115,6 +115,9 @@ m_cur_sel_vol(-1),
 m_cur_sel_mesh(-1),
 m_setting_dlg(0)
 {
+   //create this first to read the settings
+   m_setting_dlg = new SettingDlg(this, this);
+
    // tell wxAuiManager to manage this frame
    m_aui_mgr.SetManagedWindow(this);
 
@@ -275,7 +278,6 @@ m_setting_dlg(0)
          wxDefaultPosition, wxSize(130, 700));
 
    //settings dialog
-   m_setting_dlg = new SettingDlg(this, this);
    if (m_setting_dlg->GetTestMode(1))
       m_vrv_list[0]->m_glview->m_test_speed = true;
    if (m_setting_dlg->GetTestMode(3))

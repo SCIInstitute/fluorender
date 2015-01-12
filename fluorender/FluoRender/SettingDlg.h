@@ -150,6 +150,17 @@ public:
 	void SetPvxmlFlipX(bool flip) {m_pvxml_flip_x = flip;}
 	bool GetPvxmlFlipY() {return m_pvxml_flip_y;}
 	void SetPvxmlFlipY(bool flip) {m_pvxml_flip_y = flip;}
+	//pixel format
+	int GetRedBit() {return m_red_bit;}
+	int GetGreenBit() {return m_green_bit;}
+	int GetBlueBit() {return m_blue_bit;}
+	int GetAlphaBit() {return m_alpha_bit;}
+	int GetDepthBit() {return m_depth_bit;}
+	int GetSamples() {return m_samples;}
+	//context attrib
+	int GetGLMajorVer() {return m_gl_major_ver;}
+	int GetGLMinorVer() {return m_gl_minor_ver;}
+	int GetGLProfileMask() {return m_gl_profile_mask;}
 
 private:
 	wxWindow* m_frame;
@@ -201,6 +212,17 @@ private:
 	//flip pvxml frame
 	bool m_pvxml_flip_x;
 	bool m_pvxml_flip_y;
+	//pixel format
+	int m_red_bit;
+	int m_green_bit;
+	int m_blue_bit;
+	int m_alpha_bit;
+	int m_depth_bit;
+	int m_samples;
+	//context attrib
+	int m_gl_major_ver;
+	int m_gl_minor_ver;
+	int m_gl_profile_mask;
 
 private:
 	//save project

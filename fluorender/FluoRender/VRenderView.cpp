@@ -298,8 +298,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
    //link cells
    m_cell_link(false),
    //new cell id
-   m_cell_new_id(false),
-   m_fsaa(false)
+   m_cell_new_id(false)
 {
    //create context
    if (sharedContext)
@@ -5386,9 +5385,6 @@ void VRenderGLView::OnDraw(wxPaintEvent& event)
    wxPaintDC dc(this);
    SetCurrent(*m_glRC);
 
-   if (m_fsaa)
-	glEnable(GL_MULTISAMPLE_ARB);
-
    int nx = GetSize().x;
    int ny = GetSize().y;
 
@@ -5463,8 +5459,6 @@ void VRenderGLView::OnDraw(wxPaintEvent& event)
    if (m_resize)
       m_resize = false;
 
-   if (m_fsaa)
-	glDisable(GL_MULTISAMPLE_ARB);
 }
 
 void VRenderGLView::SetRadius(double r)
@@ -9773,18 +9767,48 @@ VRenderView::VRenderView(wxWindow* frame,
    this->SetName(name);
 
    //render view/////////////////////////////////////////////////
+   int red_bit = 8;
+   int green_bit = 8;
+   int blue_bit = 8;
+   int alpha_bit = 8;
+   int depth_bit = 24;
+   int samples = 0;
+   int gl_major_ver = 4;
+   int gl_minor_ver = 4;
+   int gl_profile_mask = WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
+   VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+   if (vr_frame && vr_frame->GetSettingDlg())
+   {
+	   red_bit = vr_frame->GetSettingDlg()->GetRedBit();
+	   green_bit = vr_frame->GetSettingDlg()->GetGreenBit();
+	   blue_bit = vr_frame->GetSettingDlg()->GetBlueBit();
+	   alpha_bit = vr_frame->GetSettingDlg()->GetAlphaBit();
+	   depth_bit = vr_frame->GetSettingDlg()->GetDepthBit();
+	   samples = vr_frame->GetSettingDlg()->GetSamples();
+	   gl_major_ver = vr_frame->GetSettingDlg()->GetGLMajorVer();
+	   gl_minor_ver = vr_frame->GetSettingDlg()->GetGLMinorVer();
+	   gl_profile_mask = vr_frame->GetSettingDlg()->GetGLProfileMask();
+   }
    int attriblist[] =
 	{
-		WX_GL_MIN_RED, 8,
-		WX_GL_MIN_GREEN, 8,
-		WX_GL_MIN_BLUE, 8,
-		WX_GL_MIN_ALPHA, 8,
+		WX_GL_MIN_RED, red_bit,
+		WX_GL_MIN_GREEN, green_bit,
+		WX_GL_MIN_BLUE, blue_bit,
+		WX_GL_MIN_ALPHA, alpha_bit,
+		WX_GL_DEPTH_SIZE, depth_bit,
 		WX_GL_DOUBLEBUFFER,
-		//WX_GL_SAMPLE_BUFFERS, 1,
-		WX_GL_SAMPLES, 16,
+		WX_GL_SAMPLE_BUFFERS, 1,
+		WX_GL_SAMPLES, samples,
 		0
 	};
-   m_glview = new VRenderGLView(frame, this, wxID_ANY, attriblist, NULL, sharedContext);
+   int contextattriblist[] = 
+   {
+	   WGL_CONTEXT_MAJOR_VERSION_ARB, gl_major_ver,
+	   WGL_CONTEXT_MINOR_VERSION_ARB, gl_minor_ver,
+	   WGL_CONTEXT_PROFILE_MASK_ARB, gl_profile_mask,
+	   0, 0
+   };
+   m_glview = new VRenderGLView(frame, this, wxID_ANY, attriblist, contextattriblist, sharedContext);
    m_glview->SetCanFocus(false);
    CreateBar();
    if (m_glview) {
