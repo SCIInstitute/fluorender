@@ -78,9 +78,9 @@ We recommend building FluoRender outside of the source tree. <br/>
    
    * Note the location of the boost include directory for cmake.
 
-4) You may need to add lines to C:/Program Files (x86)/CMake X.X/share/cmake-x.x/Modules/FindwxWidgets.cmake (x's are your version) for wxWidgets 3.0 if it still complains that you haven't installed wxWidgets.
+4) You may need to add lines to <code>C:\Program Files (x86)\CMake X.X\share\cmake-x.x\Modules\FindwxWidgets.cmake</code> (x's are your version) for wxWidgets 3.* if it still complains that you haven't installed wxWidgets.
    
-   * Starting about line 277, you will have listed a few sets of library versions to search for like "wxbase29${_UCD}${_DBG}" <br/>
+   * Starting about line 277, you will have listed a few sets of library versions to search for like <code>wxbase29${_UCD}${_DBG}</code> <br/>
    
    * In 4 places, you will need to add above each line with a "29" a new line that is exactly the same, but with a "31" instead, assuming your version of wxWidgets is 3.1.*). <br/>
 
