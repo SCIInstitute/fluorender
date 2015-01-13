@@ -87,7 +87,6 @@ class VRenderGLView: public wxGLCanvas
             wxWindow* parent,
             wxWindowID id,
 			const int* attriblist = NULL,
-			const int* contextattriblist = NULL,
             wxGLContext* sharedContext=0,
             const wxPoint& pos=wxDefaultPosition,
             const wxSize& size=wxDefaultSize,

@@ -58,12 +58,11 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
       wxWindow* parent,
       wxWindowID id,
 	  const int* attriblist, 
-      const int* contextattriblist,
       wxGLContext* sharedContext,
       const wxPoint& pos,
       const wxSize& size,
       long style) :
-   wxGLCanvas(parent, id, attriblist, contextattriblist, pos, size, style),
+   wxGLCanvas(parent, id, attriblist, pos, size, style),
    //public
    //capture modes
    m_capture(false),
@@ -9765,27 +9764,19 @@ VRenderView::VRenderView(wxWindow* frame,
 {
    wxString name = wxString::Format("Render View:%d", m_id++);
    this->SetName(name);
+   // this list takes care of both pixel and context attributes (no custom edits of wx is preferred)
+   /*int attriblist[] =
+   WX_GL_MAJOR_VERSION, 3,
+   WX_GL_MINOR_VERSION, 0,
+   WX_GL_MIN_RED, 8,
+   WX_GL_MIN_GREEN, 8,
+   WX_GL_MIN_BLUE, 8,
+   WX_GL_MIN_ALPHA, 8,
+   0, 0
 
+   */
    //render view/////////////////////////////////////////////////
-   m_glview = new VRenderGLView(frame, this, wxID_ANY, NULL, NULL, sharedContext);
-	//int attriblist[] = {WX_GL_MIN_RED, 8, //TODO!!! This is where the call to the altered wxWidget context attribute list happens
-	//					WX_GL_MIN_GREEN, 8,
-	//					WX_GL_MIN_BLUE, 8,
-	//					WX_GL_MIN_ALPHA, 8,
-	//					0};
-	//int contextattriblist[] = {	WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-	//							WGL_CONTEXT_MINOR_VERSION_ARB, 0,
-	//							//WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_ES_PROFILE_BIT_EXT,
-	//							//WGL_DRAW_TO_WINDOW_ARB, 1,
-	//							//WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
-	//							//WGL_RED_BITS_ARB, 10,
-	//							//WGL_GREEN_BITS_ARB, 10,
-	//							//WGL_BLUE_BITS_ARB, 10,
-	//							//WGL_ALPHA_BITS_ARB, 2,
-	//							//WGL_DOUBLE_BUFFER_ARB, 1,
-	//							0};
-
-	//m_glview = new VRenderGLView(frame, this, wxID_ANY, NULL, NULL, sharedContext);
+   m_glview = new VRenderGLView(frame, this, wxID_ANY, NULL, sharedContext);
    m_glview->SetCanFocus(false);
    CreateBar();
    if (m_glview) {

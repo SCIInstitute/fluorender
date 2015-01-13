@@ -350,23 +350,6 @@ target_link_libraries(FluoRender
 
 #prebuild copies.
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    #copy altered windows specific libraries to the wx main lib dir
-	file(GLOB msw_libs ${FluoRender_SOURCE_DIR}/fluorender/wxWidgets/lib/vc_x64_lib/wxmsw30*gl.*)
-	foreach (f ${msw_libs})
-	   add_custom_command(TARGET FluoRender PRE_BUILD
-				COMMAND ${CMAKE_COMMAND} -E copy  
-				${f}
-				${wxWidgets_LIB_DIR})
-	endforeach()
-    #copy altered windows specific headers to the wx main include dir
-	add_custom_command(TARGET FluoRender PRE_BUILD
-			COMMAND ${CMAKE_COMMAND} -E copy  
-			${FluoRender_SOURCE_DIR}/fluorender/wxWidgets/include/wx/msw/glcanvas.h
-			${wxWidgets_ROOT_DIR}/include/wx/msw)
-elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-endif()
-
 #copy openCL examples to the binary directory
 add_custom_command(TARGET FluoRender PRE_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
