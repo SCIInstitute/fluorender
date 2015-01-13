@@ -60,17 +60,17 @@ We recommend building FluoRender outside of the source tree. <br/>
 
 <h4>Windows</h4> 
 
-1) Download the latest wxWidgets (currently 3.* at http://www.wxwidgets.org/).
-
-2) Install the headers and libraries to your system.
-
-   * Download and install using the installer.<br/> 
-  
-   * Compile using Visual Studio (EG Solution file: "C:/wxWidgets-3.0.2/build/msw/wx_vc7.sln")<br/> 
-
-   * Be sure to compile the same configurations (Debug/Release/64bit) you will use for FluoRender below.<br/> 
+1) Clone the latest wxWidgets using GIT (<code>git clone git@github.com:wxWidgets/wxWidgets.git</code>).
    
-   * Note the location of the appropriate wxWidget directories for cmake configuration.
+   * The steps following will assume the wxWidgets repository is at <code>C:\wxWidgets</code>
+
+2) Open a 64 bit Visual Studio 10 command prompt to build wxWidgets.
+
+   * Go to directory <code>C:\wxWidgets\build\msw</code>
+  
+   * Type <code>nmake /f makefile.vc TARGET_CPU=x64 BUILD=Debug</code> to build debug libraries.
+
+   * Type <code>nmake /f makefile.vc TARGET_CPU=x64 BUILD=Release</code> to build release libraries.
    
 3) Download and include boost.
 
@@ -78,32 +78,42 @@ We recommend building FluoRender outside of the source tree. <br/>
    
    * Note the location of the boost include directory for cmake.
 
-4) You may need to add lines to C:/Program Files (x86)/CMake X.X/share/cmake-x.x/Modules/FindwxWidgets.cmake (x's are your version) for wxWidgets 3.0 if it still complains that you haven't installed wxWidgets.
+4) You may need to add lines to <code>C:\Program Files (x86)\CMake X.X\share\cmake-x.x\Modules\FindwxWidgets.cmake</code> (x's are your version) for wxWidgets 3.* if it still complains that you haven't installed wxWidgets.
    
-   * Starting about line 277, you will have listed a few sets of library versions to search for like "wxbase29${_UCD}${_DBG}" <br/>
+   * Starting about line 277, you will have listed a few sets of library versions to search for like <code>wxbase29${_UCD}${_DBG}</code> <br/>
    
-   * In 4 places, you will need to add above each line with a "29" a new line that is exactly the same, but with a "30" instead, assuming your version of wxWidgets is 3.0.*). <br/>
+   * In 4 places, you will need to add above each line with a "29" a new line that is exactly the same, but with a "31" instead, assuming your version of wxWidgets is 3.1.*). <br/>
 
-5) In the main FluoRender directory, (containing "CMakeLists.txt" & "fluorender" folder):
-
-   * Use the C:\Program Files(x86)\CMake2.8\bin\cmake-gui.exe in the CMake install folder to configure build properties. This is where you will add the locations of boost and wxWidgets directories after generation and before configuration. You may need to display advanced options. <br/>
+5) Use the <code>C:\Program Files(x86)\CMake2.8\bin\cmake-gui.exe</code> program to configure build properties and generate your Visual Studio 10 Solution file.
+   
+   * Select your FluoRender source and build directories (create a new folder for building), and add the locations of boost and wxWidgets. <br/>
    	- Choose the FluoRender main folder for source and create a new folder for the build. <br/>
+   	
+   	- Click Configure.  NOTE: You may need to display advanced options to set below options. <br/>
+   	
+   	- Choose the build type <code>CMAKE_BUILD_TYPE</code> to be "Debug" or "Release" <br/>
 
-   	- Click Configure, Edit the values as necessary, then Click Configure & Generate. Be sure to set wxWidgets_LIB_DIR to C:/wxWidgets-3.0.2/lib/vc_x64_lib. Be sure to set wxWidgets_ROOT_DIR to C:/wxWidgets-3.0.2 (assuming these are your wxWidget dirs) and Boost_INCLUDE_DIR to C:/boost_1_55_0 (assuming this is your boost dir). <br/>
+   	- Be sure to set <code>wxWidgets_LIB_DIR</code> to <code>C:\wxWidgets\lib\vc_x64_lib</code>. 
+   	
+   	- Be sure to set <code>wxWidgets_ROOT_DIR</code> to <code>C:\wxWidgets</code>.
+   	
+   	- Be sure to set <code>Boost_INCLUDE_DIR</code> to <code>C:\boost_1_55_0</code> (assuming this is your boost dir). <br/>
+   	
+   	- Click Generate. 
 
    * You may also generate using the command prompt, but you must explicitly type the paths for the cmake command. <br/>
    
     - Open Visual Studio 2010 64 bit Command Prompt. Go to the CMakeLists.txt directory. <br/>
     	
-    - Type <code> cmake -G "Visual Studio 10 Win64" -DwxWidgets_LIB_DIR="C:/wxWidgets-3.0.2/lib/vc_x64_lib" -DwxWidgets_ROOT_DIR="C:/wxWidgets-3.0.2" -DBoost_INCLUDE_DIR="C:/boost_1_55_0" ..</code> in your build directory (again assuming these are your directory locations). <br/>
+    - Type <code> cmake -G "Visual Studio 10 Win64" -DwxWidgets_LIB_DIR="C:\wxWidgets\lib\vc_x64_lib" -DwxWidgets_ROOT_DIR="C:\wxWidgets" -DBoost_INCLUDE_DIR="C:\boost_1_55_0" -DCMAKE_BUILD_TYPE="Debug" ..</code> in your build directory (again assuming these are your directory locations and the build folder is in the FluoRender root directory). <br/>
     	
    * Open the Visual Studio SLN file generated by CMake (found in your "build" directory). <br/>
    
    * Build the solution.<br/>
     	
-    - Visual Studio may not set the correct machine target when building 64 bit. Check Project Properties -> Configuration Properties -> Linker -> Command line. Make sure "Additional Options" should is "/machine:X64" NOT "/machine:X86". <br/>
+    - Visual Studio may not set the correct machine target when building 64 bit. Check Project Properties -> Configuration Properties -> Linker -> Command line. Make sure "Additional Options" should is <code>/machine:X64</code> NOT <code>/machine:X86</code>. <br/>
     	
-    - You may need to right-click FluoRender project on the left to "Set as StarUp Project" for it to run. <br/>
+    - You may need to right-click FluoRender project on the left to "Set as StartUp Project" for it to run. <br/>
 
 Contact
 ========
