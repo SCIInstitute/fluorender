@@ -457,9 +457,9 @@ void VRenderGLView::Init()
    }
    
    //query the OGL version to determine actual context info
-   char version[128];
-   memcpy(version,glGetString(GL_VERSION),strlen((const char*)glGetString(GL_VERSION)));
-   std::cout << "OpenGL Version: " << version << std::endl;
+   char version[16];
+   memcpy(version,glGetString(GL_VERSION),16);
+   m_GLversion = wxString("OpenGL Version: ") + wxString(version);
 }
 
 void VRenderGLView::Clear()
@@ -9770,17 +9770,21 @@ VRenderView::VRenderView(wxWindow* frame,
    wxString name = wxString::Format("Render View:%d", m_id++);
    this->SetName(name);
    // this list takes care of both pixel and context attributes (no custom edits of wx is preferred)
-   /*int attriblist[] =
-   WX_GL_MAJOR_VERSION, 3,
-   WX_GL_MINOR_VERSION, 0,
-   WX_GL_MIN_RED, 8,
-   WX_GL_MIN_GREEN, 8,
-   WX_GL_MIN_BLUE, 8,
-   WX_GL_MIN_ALPHA, 8,
-   0, 0
-
-   */
-   //render view/////////////////////////////////////////////////
+   int attriblist[] = {
+	   //pixel format options need to go first.
+	   WX_GL_MIN_RED, 8,
+	   WX_GL_MIN_GREEN, 8,
+	   WX_GL_MIN_BLUE, 8,
+	   WX_GL_MIN_ALPHA, 8,
+	   //now the context format options.
+	   WX_GL_CORE_PROFILE,
+	   WX_GL_MAJOR_VERSION, 3,
+	   WX_GL_MINOR_VERSION, 0,
+	   0, 0
+   };
+   
+   //render view//////////////////////////////
+   ///////////////////CHANGE NULL TO attriblist to test context/pixel format options.
    m_glview = new VRenderGLView(frame, this, wxID_ANY, NULL, sharedContext);
    m_glview->SetCanFocus(false);
 #ifdef _WIN32
@@ -9807,7 +9811,7 @@ VRenderView::VRenderView(wxWindow* frame,
    // }; 
    PIXELFORMATDESCRIPTOR  pfd;
    //check ret. this is an error code when the pixel format is invalid.
-   m_glview->GetPixelFormat(&pfd);
+   int ret = m_glview->GetPixelFormat(&pfd);
 #endif
    CreateBar();
    if (m_glview) {
@@ -9817,6 +9821,20 @@ VRenderView::VRenderView(wxWindow* frame,
    LoadSettings();
    m_x_rotating = m_y_rotating = m_z_rotating = false;
    m_timer.Start(50);
+}
+
+#ifdef _WIN32
+int VRenderGLView::GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd) {
+    int pixelFormat = ::GetPixelFormat(m_hDC);
+	if (pixelFormat == 0) return GetLastError();
+    pixelFormat = DescribePixelFormat(m_hDC, pixelFormat, sizeof(PIXELFORMATDESCRIPTOR), pfd);
+	if (pixelFormat == 0) return GetLastError();
+	return pixelFormat;
+}
+#endif
+
+wxString VRenderGLView::GetOGLVersion() {
+	return m_GLversion;
 }
 
 VRenderView::~VRenderView()
