@@ -1271,8 +1271,8 @@ void AdjustView::OnSaveDefault(wxCommandEvent &event)
 	m_dft_hdr = Color(dft_r_hdr, dft_g_hdr, dft_b_hdr);
 #ifdef _DARWIN
     wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/";
-    mkdir(dft,0777);
-    chmod(dft,0777);
+    mkdir(dft.c_str(),0777);
+    chmod(dft.c_str(),0777);
     dft = dft + "default_2d_adjustment_settings.dft";
 #else
     wxString dft = "default_2d_adjustment_settings.dft";

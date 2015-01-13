@@ -417,7 +417,7 @@ bool QVideoEncoder::set_frame_rgb_data(unsigned char * data) {
 		3 * width_);
 	//now convert the pixel format
 	uint8_t * inData[] = { aligned_data }; // RGB24 have one plane
-	int inLinesize[] = { 3*width_ }; // RGB stride
+    int inLinesize[] = { (int)(3*width_) }; // RGB stride
     int ret = ffmpeg::av_frame_make_writable(output_stream_.frame);
     if (ret < 0)
         return false;

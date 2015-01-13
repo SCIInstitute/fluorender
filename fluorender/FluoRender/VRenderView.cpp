@@ -57,13 +57,12 @@ END_EVENT_TABLE()
 VRenderGLView::VRenderGLView(wxWindow* frame,
       wxWindow* parent,
       wxWindowID id,
-	  const int32_t* attriblist,
-      const int32_t *contextAttribs,
+      const int* attriblist,
       wxGLContext* sharedContext,
       const wxPoint& pos,
       const wxSize& size,
       long style) :
-   wxGLCanvas(parent, id, attriblist, contextAttribs, pos, size, style),
+   wxGLCanvas(parent, id, attriblist, pos, size, style),
    //public
    //capture modes
    m_capture(false),
@@ -9770,58 +9769,19 @@ VRenderView::VRenderView(wxWindow* frame,
 {
    wxString name = wxString::Format("Render View:%d", m_id++);
    this->SetName(name);
+   // this list takes care of both pixel and context attributes (no custom edits of wx is preferred)
+   /*int attriblist[] =
+   WX_GL_MAJOR_VERSION, 3,
+   WX_GL_MINOR_VERSION, 0,
+   WX_GL_MIN_RED, 8,
+   WX_GL_MIN_GREEN, 8,
+   WX_GL_MIN_BLUE, 8,
+   WX_GL_MIN_ALPHA, 8,
+   0, 0
 
+   */
    //render view/////////////////////////////////////////////////
-	int32_t attriblist[] = {
-#ifdef _WIN32
-						WGL_CONTEXT_MAJOR_VERSION_ARB , 3,
-					    WGL_CONTEXT_MINOR_VERSION_ARB, 0,
-						//0x2094, //WGL_CONTEXT_FLAGS_ARB           
-						WGL_CONTEXT_PROFILE_MASK_ARB,
-						//WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-						WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
-#else
-//these are the apple constants for the context options.
-#ifndef kCGLPFAOpenGLProfile
-#define kCGLPFAOpenGLProfile 99
-#endif
-#ifndef kCGLOGLPVersion_Legacy
-#define kCGLOGLPVersion_Legacy 0x1000
-#endif
-#ifndef kCGLOGLPVersion_3_2_Core
-#define kCGLOGLPVersion_3_2_Core 0x3200
-#endif
-#ifndef kCGLOGLPVersion_3_0_Core
-#define kCGLOGLPVersion_3_0_Core 0x3000
-#endif
-
-						kCGLPFAOpenGLProfile,
-						kCGLOGLPVersion_3_0_Core,
-#endif
-						0, 0};
-						
-	int32_t pixelAttriblist[] = {
-					WX_GL_MIN_RED, 8,
-					WX_GL_MIN_GREEN, 8,
-					WX_GL_MIN_BLUE, 8,
-					WX_GL_MIN_ALPHA, 8,
-					WX_GL_DOUBLEBUFFER,
-					//WX_GL_SAMPLES,
-					/*WGL_DRAW_TO_WINDOW_ARB,GL_TRUE,
-					WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
-					WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
-					WGL_COLOR_BITS_ARB, 128,
-					WGL_RED_BITS_ARB, 32,
-					WGL_GREEN_BITS_ARB, 32,
-					WGL_BLUE_BITS_ARB, 32,
-					WGL_ALPHA_BITS_ARB, 32,
-					WGL_DEPTH_BITS_ARB, 16,
-					WGL_STENCIL_BITS_ARB, 0,
-					WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
-					WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,*/
-					0, 0 };
-
-   m_glview = new VRenderGLView(frame, this, wxID_ANY, NULL, NULL, sharedContext);
+   m_glview = new VRenderGLView(frame, this, wxID_ANY, NULL, sharedContext);
    m_glview->SetCanFocus(false);
 #ifdef _WIN32
    //example Pixel format descriptor detailing each part
@@ -11688,8 +11648,8 @@ void VRenderView::SaveDefault(unsigned int mask)
 
 #ifdef _DARWIN
     wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/";
-    mkdir(dft,0777);
-    chmod(dft,0777);
+    mkdir(dft.c_str(),0777);
+    chmod(dft.c_str(),0777);
     dft = dft + "default_view_settings.dft";
 #else
     wxString dft = "default_view_settings.dft";
@@ -11773,7 +11733,7 @@ void VRenderView::LoadSettings()
    if (fconfig.Read("bg_color_picker", &str))
    {
       int r, g, b;
-      SSCANF(str, "%d%d%d", &r, &g, &b);
+      SSCANF(str.c_str(), "%d%d%d", &r, &g, &b);
       wxColor cVal(r, g, b);
       m_bg_color_picker->SetColour(cVal);
       Color c(r/255.0, g/255.0, b/255.0);
@@ -11877,7 +11837,7 @@ void VRenderView::LoadSettings()
    if (fconfig.Read("center", &str))
    {
       float x, y, z;
-      SSCANF(str, "%f%f%f", &x, &y, &z);
+      SSCANF(str.c_str(), "%f%f%f", &x, &y, &z);
       SetCenters(x, y, z);
    }
 
