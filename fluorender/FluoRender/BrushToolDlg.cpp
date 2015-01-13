@@ -1076,8 +1076,8 @@ void BrushToolDlg::SaveDefault()
    fconfig.Write("nr_size", m_dft_nr_size);
 #ifdef _DARWIN
     wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/";
-    mkdir(dft,0777);
-    chmod(dft,0777);
+    mkdir(dft.c_str(),0777);
+    chmod(dft.c_str(),0777);
     dft = dft + "default_brush_settings.dft";
 #else
     wxString dft = "default_brush_settings.dft";

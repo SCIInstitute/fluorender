@@ -57,8 +57,8 @@ END_EVENT_TABLE()
 VRenderGLView::VRenderGLView(wxWindow* frame,
       wxWindow* parent,
       wxWindowID id,
-	  const int* attriblist, 
-      const int* contextattriblist,
+	  const int32_t* attriblist,
+      const int32_t* contextattriblist,
       wxGLContext* sharedContext,
       const wxPoint& pos,
       const wxSize& size,
@@ -11626,8 +11626,8 @@ void VRenderView::SaveDefault(unsigned int mask)
 
 #ifdef _DARWIN
     wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/";
-    mkdir(dft,0777);
-    chmod(dft,0777);
+    mkdir(dft.c_str(),0777);
+    chmod(dft.c_str(),0777);
     dft = dft + "default_view_settings.dft";
 #else
     wxString dft = "default_view_settings.dft";
@@ -11711,7 +11711,7 @@ void VRenderView::LoadSettings()
    if (fconfig.Read("bg_color_picker", &str))
    {
       int r, g, b;
-      SSCANF(str, "%d%d%d", &r, &g, &b);
+      SSCANF(str.c_str(), "%d%d%d", &r, &g, &b);
       wxColor cVal(r, g, b);
       m_bg_color_picker->SetColour(cVal);
       Color c(r/255.0, g/255.0, b/255.0);
@@ -11815,7 +11815,7 @@ void VRenderView::LoadSettings()
    if (fconfig.Read("center", &str))
    {
       float x, y, z;
-      SSCANF(str, "%f%f%f", &x, &y, &z);
+      SSCANF(str.c_str(), "%f%f%f", &x, &y, &z);
       SetCenters(x, y, z);
    }
 
