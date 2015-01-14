@@ -9766,12 +9766,16 @@ VRenderView::VRenderView(wxWindow* frame,
    this->SetName(name);
    // this list takes care of both pixel and context attributes (no custom edits of wx is preferred)
    /*int attriblist[] =
-   WX_GL_MAJOR_VERSION, 3,
-   WX_GL_MINOR_VERSION, 0,
+   //pixel properties
+   WX_GL_SAMPLES, 4,
    WX_GL_MIN_RED, 8,
    WX_GL_MIN_GREEN, 8,
    WX_GL_MIN_BLUE, 8,
    WX_GL_MIN_ALPHA, 8,
+   // context properties.
+   WX_GL_CORE_PROFILE,
+   WX_GL_MAJOR_VERSION, 3,
+   WX_GL_MINOR_VERSION, 0,
    0, 0
 
    */

@@ -50,7 +50,7 @@ DEALINGS IN THE SOFTWARE.
 #include <sys/types.h>
 #include <ctype.h>
 #include <wx/wx.h>
-#include "../LibTiff/tiffio.h"
+#include "tiffio.h"
 #include "WacUtils/WacUtils.h"
 
 #define FSEEK64     _fseeki64
