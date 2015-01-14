@@ -90,11 +90,12 @@ if(${CMAKE_BUILD_TYPE} MATCHES "Release")
 elseif(${CMAKE_BUILD_TYPE} MATCHES "Debug")
 	set(wxWidgets_CONFIGURATION mswud)
 endif()
-find_package(wxWidgets COMPONENTS core base aui html png xml adv tiff gl stc scintilla REQUIRED)
+find_package(wxWidgets COMPONENTS core base aui html xml adv tiff gl stc scintilla REQUIRED)
 include(${wxWidgets_USE_FILE})
 set(wxWidgets_USE_STATIC ON)
 add_definitions(-DUNICODE)
 add_definitions(-D_UNICODE)
+include_directories(${wxWidgets_ROOT_DIR}/src/tiff/libtiff)
 #solution for wxWidgets linking "ambiguous" errors
 add_definitions(-D_WCHAR_H_CPLUSPLUS_98_CONFORMANCE_)
 #fix the library names for OSX if needed. 
@@ -143,7 +144,6 @@ add_library(TEEM_OBJ OBJECT
 #glew
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/glew)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/glew/GL)
-include_directories(${FluoRender_SOURCE_DIR}/fluorender/LibTiff)
 file(GLOB gl_srcs fluorender/glew/*.c)
 file(GLOB gl_hdrs1 fluorender/glew/*.h)
 file(GLOB gl_hdrs2 fluorender/glew/GL/*.h)

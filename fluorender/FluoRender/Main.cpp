@@ -77,7 +77,7 @@ bool VRenderApp::OnInit()
    //the frame
    std::string title =  std::string(FLUORENDER_TITLE) + std::string(" ") +
       std::string(VERSION_MAJOR_TAG) +  std::string(".") +
-      std::string(VERSION_MINOR_TAG  + std::string(" ") + std::string(FLUORENDER_ARCH));
+      std::string(VERSION_MINOR_TAG);
    wxFrame* frame = new VRenderFrame(
          (wxFrame*) NULL,
          wxString(title),

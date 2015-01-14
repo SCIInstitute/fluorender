@@ -50,7 +50,7 @@ DEALINGS IN THE SOFTWARE.
 #include <sys/types.h>
 #include <ctype.h>
 #include <wx/wx.h>
-#include "../LibTiff/tiffio.h"
+#include "tiffio.h"
 #include "WacUtils/WacUtils.h"
 
 #define FSEEK64     _fseeki64
@@ -159,7 +159,7 @@ inline void FIND_FILES(std::wstring m_path_name,
 #include <dirent.h>
 #include <sys/time.h>
 #include <sys/stat.h>
-#include "../LibTiff/tiffio.h"
+#include "tiffio.h"
 
 #define FSEEK64     fseek
 

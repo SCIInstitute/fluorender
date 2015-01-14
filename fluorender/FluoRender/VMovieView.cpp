@@ -443,7 +443,6 @@ void VMovieView::OnTimer(wxTimerEvent& event) {
 	//get all of the progress info
 	double len;
 	long fps;
-	//m_progress_text->GetValue().ToDouble(&time);
 	m_movie_time->GetValue().ToDouble(&len);
 	m_fps_text->GetValue().ToLong(&fps);
 	//move forward in time (limits FPS usability to 100 FPS)
@@ -453,7 +452,6 @@ void VMovieView::OnTimer(wxTimerEvent& event) {
 	SetProgress(m_cur_time/len);
 	//update the rendering frame since we have advanced.
 	if (frame != m_last_frame) {
-		m_last_frame = frame;
 		int start_time = STOI(m_time_start_text->GetValue().fn_str());
 		int end_time = STOI(m_time_end_text->GetValue().fn_str());
 		int tot_time = end_time - start_time + 1;
@@ -461,9 +459,10 @@ void VMovieView::OnTimer(wxTimerEvent& event) {
 			((int)(start_time + tot_time * m_cur_time/len + 0.5))));
 		if (m_record)
 			WriteFrameToFile(int(fps*len+0.5));
+		m_last_frame = frame;
 		SetRendering(m_cur_time/len);
 	}
-	if (m_cur_time >= len) {
+	if (len - m_cur_time < 0.1/double(fps) || m_cur_time > len) {
 		wxCommandEvent e;
 		OnStop(e);
 	}
@@ -480,7 +479,10 @@ void VMovieView::OnPrev(wxCommandEvent& event) {
 	int slider_pos = m_progress_sldr->GetValue();
 	long fps;
 	m_fps_text->GetValue().ToLong(&fps);
-	if (slider_pos < 360 && slider_pos > 0) {
+	double len;
+	m_movie_time->GetValue().ToDouble(&len);
+	if (slider_pos < 360 && slider_pos > 0 && 
+		!(len - m_cur_time < 0.1/double(fps) || m_cur_time > len)) {
 		m_timer.Start(int(1000.0/double(fps)+0.5));
 		return; 
 	}
@@ -524,7 +526,7 @@ void VMovieView::OnPrev(wxCommandEvent& event) {
 	}
 	SetProgress(0.);
 	SetRendering(0.);
-	m_last_frame = -1;
+	m_last_frame = 0;
 	m_timer.Start(int(1000.0/double(fps)+0.5));
 }
 
