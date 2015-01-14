@@ -32,7 +32,7 @@ We recommend building FluoRender outside of the source tree. <br/>
    
    * <code>cd mybuild</code>
    
-   * <code>../configure --disable-shared --enable-macosx_arch=x86_64 --enable-unicode --with-cocoa --enable-debug</code> 
+   * <code>../configure --disable-shared --enable-macosx_arch=x86_64 --enable-unicode --with-cocoa --enable-debug --with-macosx-version-min=10.9 --enable-stl --enable-std_containers --enable-std_iostreams --enable-std_string --enable-std_string_conv_in_wxstring --with-libpng=sys --with-libtiff=builtin</code> 
    
    * <code>make</code>
 
@@ -48,7 +48,7 @@ We recommend building FluoRender outside of the source tree. <br/>
    
    * <code>cd build</code><br/>
 
-   * <code>cmake -G Xcode -DwxWidgets_LIB_DIR="~/wxWidgets/lib" -DwxWidgets_ROOT_DIR="~/wxWidgets" -DBoost_INCLUDE_DIR="~/boost_1_55_0" -DCMAKE_BUILD_TYPE="Debug" ..</code>
+   * <code>cmake -G Xcode -DwxWidgets_CONFIG_EXECUTABLE="~/wxWidgets/mybuild/wx-config" -DwxWidgets_wxrc_EXECUTABLE="~/wxWidgets/mybuild/utils/wxrc/wxrc" -DwxWidgets_USE_DEBUG=ON -DwxWidgets_ROOT_DIR="~/wxWidgets" -DBoost_INCLUDE_DIR="~/boost_1_55_0" -DCMAKE_BUILD_TYPE="Debug" ..</code>
 
 5) Open the Xcode file generated to build and run FluoRender.
 
