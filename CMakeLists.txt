@@ -90,13 +90,27 @@ if(${CMAKE_BUILD_TYPE} MATCHES "Release")
 elseif(${CMAKE_BUILD_TYPE} MATCHES "Debug")
 	set(wxWidgets_CONFIGURATION mswud)
 endif()
-find_package(wxWidgets COMPONENTS core base aui html xrc png xml net adv gl stc scintilla REQUIRED)
+find_package(wxWidgets COMPONENTS core base aui html png xml adv tiff gl stc scintilla REQUIRED)
 include(${wxWidgets_USE_FILE})
 set(wxWidgets_USE_STATIC ON)
 add_definitions(-DUNICODE)
 add_definitions(-D_UNICODE)
 #solution for wxWidgets linking "ambiguous" errors
 add_definitions(-D_WCHAR_H_CPLUSPLUS_98_CONFORMANCE_)
+#fix the library names for OSX if needed. 
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  foreach(arg ${wxWidgets_LIBRARIES})
+    set(wxlib_out "${wxlib_out} ${arg}")
+  endforeach()
+  string(STRIP ${wxlib_out} wxWidgets_LIBRARIES)
+  string(REGEX REPLACE "libwx_osx_cocoau_png" "libwxtiff"
+                   wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES})
+  string(REGEX REPLACE "libwx_osx_cocoau_tiff" "libwxtiff" 
+                   wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES})
+  string(REGEX REPLACE "libwx_osx_cocoau_scintilla" "libwxscintilla" 
+                   wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES})
+  #message(ERROR "WX_LIBS: ${wxWidgets_LIBRARIES}")
+endif()
 
 #OpenGL
 find_package(OpenGL REQUIRED)
@@ -246,31 +260,13 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       $<TARGET_OBJECTS:TEEM_OBJ>)
 
 elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-   # Linux or Windows
+   #Windows
    if(NOT OPEN_GL_HEADER_LOC)
       add_definitions(-DOPEN_GL_HEADER_LOC=<GL/gl.h>)
    endif()
    if(NOT OPEN_GLU_HEADER_LOC)
       add_definitions(-DOPEN_GLU_HEADER_LOC=<GL/glu.h>)
    endif()
-   # linux
-   if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-      add_definitions(-D_LINUX)
-      #set (CXX_11_FLAG "-stdlib=libc++")
-      set(CFLAGS "-fPIC")
-      set(CXXFLAGS "-fPIC -Wno-unused-private-field")
-      add_executable(FluoRender
-          ${src} ${hdr} ${rsc}
-		  $<TARGET_OBJECTS:IMAGES_OBJ>
-		  $<TARGET_OBJECTS:CONVERTERS_OBJ>
-		  $<TARGET_OBJECTS:FLIVR_OBJ>
-		  $<TARGET_OBJECTS:ANIMATORS_OBJ>
-		  $<TARGET_OBJECTS:NV_OBJ>
-		  $<TARGET_OBJECTS:FORMATS_OBJ>
-		  $<TARGET_OBJECTS:GLEW_OBJ>
-          $<TARGET_OBJECTS:POLE_OBJ>
-		  $<TARGET_OBJECTS:TEEM_OBJ>)
-   endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
    # windows
    if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
       add_definitions(-DWIN32)
@@ -325,7 +321,7 @@ if(${ARCHITECTURE} MATCHES 64)
    set(CMAKE_CXX_FLAGS "${ARCH_FLAGS} ${CXXFLAGS} ${CXX_11_FLAG}")
    set(CMAKE_EXE_LINKER_FLAGS "${ARCH_FLAGS} ${CXX_11_FLAG}")
    if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lbz2 -framework OpenCL -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration")
+      set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib -L/usr/lib ${CMAKE_EXE_LINKER_FLAGS} -lbz2 -framework OpenCL -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration")
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.9 -DWX_PRECOMP -std=c++11 -stdlib=libc++")
    endif()
 else()
@@ -337,6 +333,7 @@ else()
    set(CMAKE_CXX_FLAGS "${ARCH_FLAGS} ${CXXFLAGS} ${CXX_11_FLAG}")
    set(CMAKE_EXE_LINKER_FLAGS "${ARCH_FLAGS} ${CXX_11_FLAG}")
    if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.9 -DWX_PRECOMP -std=c++11 -stdlib=libc++")
       set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/usr/local/lib -L/usr/lib -lbz2 -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration")
    endif()
 endif()
