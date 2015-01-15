@@ -603,7 +603,14 @@ void VPropView::GetSettings()
    m_options_toolbar->ToggleTool(ID_LegendChk,m_vd->GetLegend());
 
    //interpolate
-   m_options_toolbar->ToggleTool(ID_InterpolateChk,m_vd->GetInterpolate());
+   bool interp = m_vd->GetInterpolate();
+   m_options_toolbar->ToggleTool(ID_InterpolateChk, interp);
+   if(interp) 
+	 m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk, 
+	 wxGetBitmapFromMemory(interpolate));
+   else
+	 m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk, 
+	 wxGetBitmapFromMemory(interpolate_off));
 
    //sync group
    if (m_group)
@@ -638,6 +645,12 @@ void VPropView::GetSettings()
    //inversion
    bool inv = m_vd->GetInvert();
    m_options_toolbar->ToggleTool(ID_InvChk,inv);
+   if(inv) 
+	 m_options_toolbar->SetToolNormalBitmap(ID_InvChk, 
+	 wxGetBitmapFromMemory(invert));
+   else
+	 m_options_toolbar->SetToolNormalBitmap(ID_InvChk, 
+	 wxGetBitmapFromMemory(invert_off));
 
    //MIP
    int mode = m_vd->GetMode();
@@ -687,13 +700,25 @@ void VPropView::GetSettings()
    //noise reduction
    bool nr = m_vd->GetNR();
    m_options_toolbar->ToggleTool(ID_NRChk,nr);
+   if(nr) 
+	 m_options_toolbar->SetToolNormalBitmap(ID_NRChk, 
+	 wxGetBitmapFromMemory(smooth));
+   else
+	 m_options_toolbar->SetToolNormalBitmap(ID_NRChk, 
+	 wxGetBitmapFromMemory(smooth_off));
 
    //blend mode
    int blend_mode = m_vd->GetBlendMode();
    if (blend_mode == 2)
+   {
 	  m_options_toolbar->ToggleTool(ID_DepthChk,true);
+	  m_options_toolbar->SetToolNormalBitmap(ID_DepthChk, wxGetBitmapFromMemory(depth));
+   }
    else
+   {
 	  m_options_toolbar->ToggleTool(ID_DepthChk,false);
+	  m_options_toolbar->SetToolNormalBitmap(ID_DepthChk, wxGetBitmapFromMemory(depth_off));
+   }
 
    Layout();
 }
