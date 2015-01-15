@@ -406,6 +406,8 @@ void DataTreeCtrl::OnIsolate(wxCommandEvent& event)
          vrv->RefreshGL();
          vr_frame->UpdateTreeIcons();
       }
+
+	  UpdateSelection();
    }
 }
 
@@ -464,6 +466,8 @@ void DataTreeCtrl::OnShowAll(wxCommandEvent& event)
          vrv->RefreshGL();
          vr_frame->UpdateTreeIcons();
       }
+
+	  UpdateSelection();
    }
 }
 

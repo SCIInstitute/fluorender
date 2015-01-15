@@ -536,7 +536,16 @@ void SettingDlg::GetSettings()
 	m_ruler_time_dep = true;
 	m_pvxml_flip_x = false;
 	m_pvxml_flip_y = false;
-	
+	m_red_bit = 8;
+	m_green_bit = 8;
+	m_blue_bit = 8;
+	m_alpha_bit = 8;
+	m_depth_bit = 24;
+	m_samples = 0;
+	m_gl_major_ver = 4;
+	m_gl_minor_ver = 4;
+	m_gl_profile_mask = 2;
+
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = expath.BeforeLast(GETSLASH(),NULL);
 #ifdef _WIN32
@@ -707,6 +716,25 @@ void SettingDlg::GetSettings()
 		fconfig.Read("x", &m_pvxml_flip_x);
 		fconfig.Read("y", &m_pvxml_flip_y);
 	}
+	//pixel format
+	if (fconfig.Exists("/pixel format"))
+	{
+		fconfig.SetPath("/pixel format");
+		fconfig.Read("red_bit", &m_red_bit);
+		fconfig.Read("green_bit", &m_green_bit);
+		fconfig.Read("blue_bit", &m_blue_bit);
+		fconfig.Read("alpha_bit", &m_alpha_bit);
+		fconfig.Read("depth_bit", &m_depth_bit);
+		fconfig.Read("samples", &m_samples);
+	}
+	//context attrib
+	if (fconfig.Exists("/context attrib"))
+	{
+		fconfig.SetPath("/context attrib");
+		fconfig.Read("gl_major_ver", &m_gl_major_ver);
+		fconfig.Read("gl_minor_ver", &m_gl_minor_ver);
+		fconfig.Read("gl_profile_mask", &m_gl_profile_mask);
+	}
 
 	UpdateUI();
 }
@@ -858,7 +886,22 @@ void SettingDlg::SaveSettings()
 	fconfig.SetPath("/pvxml flip");
 	fconfig.Write("x", m_pvxml_flip_x);
 	fconfig.Write("y", m_pvxml_flip_y);
-	
+
+	//pixel format
+	fconfig.SetPath("/pixel format");
+	fconfig.Write("red_bit", m_red_bit);
+	fconfig.Write("green_bit", m_green_bit);
+	fconfig.Write("blue_bit", m_blue_bit);
+	fconfig.Write("alpha_bit", m_alpha_bit);
+	fconfig.Write("depth_bit", m_depth_bit);
+	fconfig.Write("samples", m_samples);
+
+	//context attrib
+	fconfig.SetPath("/context attrib");
+	fconfig.Write("gl_major_ver", m_gl_major_ver);
+	fconfig.Write("gl_minor_ver", m_gl_minor_ver);
+	fconfig.Write("gl_profile_mask", m_gl_profile_mask);
+
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = expath.BeforeLast(GETSLASH(),NULL);
 #ifdef _WIN32

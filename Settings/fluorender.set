@@ -58,3 +58,14 @@ value=1
 [pvxml\ flip]
 x=0
 y=0
+[pixel\ format]
+red_bit=8
+green_bit=8
+blue_bit=8
+alpha_bit=8
+depth_bit=24
+samples=4
+[context\ attrib]
+gl_major_ver=4
+gl_minor_ver=4
+gl_profile_mask=2

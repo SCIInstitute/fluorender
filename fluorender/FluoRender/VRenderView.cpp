@@ -9763,22 +9763,47 @@ VRenderView::VRenderView(wxWindow* frame,
    wxString name = wxString::Format("Render View:%d", m_id++);
    this->SetName(name);
    // this list takes care of both pixel and context attributes (no custom edits of wx is preferred)
-   /*int attriblist[] =
-   //pixel properties
-   WX_GL_SAMPLES, 4,
-   WX_GL_MIN_RED, 8,
-   WX_GL_MIN_GREEN, 8,
-   WX_GL_MIN_BLUE, 8,
-   WX_GL_MIN_ALPHA, 8,
-   // context properties.
-   WX_GL_CORE_PROFILE,
-   WX_GL_MAJOR_VERSION, 3,
-   WX_GL_MINOR_VERSION, 0,
-   0, 0
-
-   */
    //render view/////////////////////////////////////////////////
-   m_glview = new VRenderGLView(frame, this, wxID_ANY, NULL, sharedContext);
+   int red_bit = 8;
+   int green_bit = 8;
+   int blue_bit = 8;
+   int alpha_bit = 8;
+   int depth_bit = 24;
+   int samples = 0;
+   int gl_major_ver = 4;
+   int gl_minor_ver = 4;
+   int gl_profile_mask = WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
+   VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+   if (vr_frame && vr_frame->GetSettingDlg())
+   {
+	   red_bit = vr_frame->GetSettingDlg()->GetRedBit();
+	   green_bit = vr_frame->GetSettingDlg()->GetGreenBit();
+	   blue_bit = vr_frame->GetSettingDlg()->GetBlueBit();
+	   alpha_bit = vr_frame->GetSettingDlg()->GetAlphaBit();
+	   depth_bit = vr_frame->GetSettingDlg()->GetDepthBit();
+	   samples = vr_frame->GetSettingDlg()->GetSamples();
+	   gl_major_ver = vr_frame->GetSettingDlg()->GetGLMajorVer();
+	   gl_minor_ver = vr_frame->GetSettingDlg()->GetGLMinorVer();
+	   gl_profile_mask = vr_frame->GetSettingDlg()->GetGLProfileMask();
+   }
+   int attriblist[] =
+   {
+   //pixel properties
+   WX_GL_MIN_RED, red_bit,
+   WX_GL_MIN_GREEN, green_bit,
+   WX_GL_MIN_BLUE, blue_bit,
+   WX_GL_MIN_ALPHA, alpha_bit,
+   WX_GL_DEPTH_SIZE, depth_bit,
+   WX_GL_DOUBLEBUFFER,
+   WX_GL_SAMPLE_BUFFERS, 1,
+   WX_GL_SAMPLES, samples,
+   // context properties.
+   //WX_GL_CORE_PROFILE,
+   WX_GL_MAJOR_VERSION, gl_major_ver,
+   WX_GL_MINOR_VERSION, gl_minor_ver,
+   0, 0
+   };
+   m_glview = new VRenderGLView(frame, this, wxID_ANY, attriblist, sharedContext);
    m_glview->SetCanFocus(false);
    CreateBar();
    if (m_glview) {

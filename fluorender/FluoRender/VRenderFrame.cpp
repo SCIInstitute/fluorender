@@ -116,6 +116,9 @@ m_cur_sel_type(-1),
 m_cur_sel_vol(-1),
 m_cur_sel_mesh(-1)
 {
+   //create this first to read the settings
+   m_setting_dlg = new SettingDlg(this, this);
+
    // tell wxAuiManager to manage this frame
    m_aui_mgr.SetManagedWindow(this);
 
@@ -274,7 +277,6 @@ m_cur_sel_mesh(-1)
          wxDefaultPosition, wxSize(130, 700));
 
    //settings dialog
-   m_setting_dlg = new SettingDlg(this, this);
    if (m_setting_dlg->GetTestMode(1))
       m_vrv_list[0]->m_glview->m_test_speed = true;
    if (m_setting_dlg->GetTestMode(3))
@@ -2540,6 +2542,7 @@ void VRenderFrame::SaveProject(wxString& filename)
    fconfig.SetPath("/movie_panel");
    fconfig.Write("views_cmb", m_movie_view->m_views_cmb->GetCurrentSelection());
    fconfig.Write("rot_check", m_movie_view->m_rot_chk->GetValue());
+   fconfig.Write("seq_check", m_movie_view->m_seq_chk->GetValue());
    fconfig.Write("frame_range", m_movie_view->m_progress_sldr->GetMax());
    fconfig.Write("time_frame", m_movie_view->m_progress_sldr->GetValue());
    fconfig.Write("x_rd", m_movie_view->m_x_rd->GetValue());
@@ -3648,6 +3651,20 @@ void VRenderFrame::OpenProject(wxString& filename)
          m_mov_view = iVal;
          vrv = (*GetViewList())[m_mov_view];
       }
+	  if (fconfig.Read("rot_check", &bVal))
+	  {
+		  if (bVal)
+			  m_movie_view->EnableRot();
+		  else
+			  m_movie_view->DisableRot();
+	  }
+	  if (fconfig.Read("seq_check", &bVal))
+	  {
+		  if (bVal)
+			m_movie_view->EnableTime();
+		  else
+			m_movie_view->DisableTime();
+	  }
       if (fconfig.Read("x_rd", &bVal))
       {
          m_movie_view->m_x_rd->SetValue(bVal);
