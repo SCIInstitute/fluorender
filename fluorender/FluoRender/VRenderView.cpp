@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <tiffio.h>
 #include <wx/utils.h>
 #include <wx/valnum.h>
+#include <wx/stdpaths.h>
 #include <algorithm>
 #include "GL/mywgl.h"
 #include "png_resource.h"
@@ -2074,15 +2075,12 @@ void VRenderGLView::NoiseRemoval(int iter, double thresh)
 //load default
 void VRenderGLView::LoadDefaultBrushSettings()
 {
-#ifdef _DARWIN
-    wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/default_brush_settings.dft";
-    std::ifstream tmp(dft);
-    if (!tmp.good())
-        dft = "FluoRender.app/Contents/Resources/default_brush_settings.dft";
-    else
-        tmp.close();
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = expath.BeforeLast(GETSLASH(),NULL);
+#ifdef _WIN32
+    wxString dft = expath + "\\default_brush_settings.dft";
 #else
-    wxString dft = "default_brush_settings.dft";
+    wxString dft = expath + "/../Resources/default_brush_settings.dft";
 #endif
    wxFileInputStream is(dft);
    if (!is.IsOk())
@@ -11618,14 +11616,12 @@ void VRenderView::SaveDefault(unsigned int mask)
 	   str = wxString::Format("%f %f %f", x, y, z);
 	   fconfig.Write("center", str);
    }
-
-#ifdef _DARWIN
-    wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/";
-    mkdir(dft.c_str(),0777);
-    chmod(dft.c_str(),0777);
-    dft = dft + "default_view_settings.dft";
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = expath.BeforeLast(GETSLASH(),NULL);
+#ifdef _WIN32
+    wxString dft = expath + "\\default_brush_settings.dft";
 #else
-    wxString dft = "default_view_settings.dft";
+    wxString dft = expath + "/../Resources/default_brush_settings.dft";
 #endif
    wxFileOutputStream os(dft);
    fconfig.Save(os);
@@ -11640,16 +11636,12 @@ void VRenderView::OnSaveDefault(wxCommandEvent &event)
 
 void VRenderView::LoadSettings()
 {
-#ifdef _DARWIN
-    
-    wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/default_view_settings.dft";
-    std::ifstream tmp(dft);
-    if (!tmp.good())
-        dft = "FluoRender.app/Contents/Resources/default_view_settings.dft";
-    else
-        tmp.close();
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = expath.BeforeLast(GETSLASH(),NULL);
+#ifdef _WIN32
+    wxString dft = expath + "\\default_view_settings.dft";
 #else
-    wxString dft = "default_view_settings.dft";
+    wxString dft = expath + "/../Resources/default_view_settings.dft";
 #endif
     
     wxFileInputStream is(dft);

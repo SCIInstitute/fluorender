@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderView.h"
 #include <wx/valnum.h>
 #include <wx/notebook.h>
+#include <wx/stdpaths.h>
 
 BEGIN_EVENT_TABLE(SettingDlg, wxPanel)
 	EVT_BUTTON(ID_SaveBtn, SettingDlg::OnSave)
@@ -535,8 +536,15 @@ void SettingDlg::GetSettings()
 	m_ruler_time_dep = true;
 	m_pvxml_flip_x = false;
 	m_pvxml_flip_y = false;
-
-	wxFileInputStream is(SETTING_FILE_NAME);
+	
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = expath.BeforeLast(GETSLASH(),NULL);
+#ifdef _WIN32
+    wxString dft = expath + "\\" + SETTING_FILE_NAME;
+#else
+    String dft = expath + "/../Resources/" + SETTING_FILE_NAME;
+#endif
+	wxFileInputStream is(dft);
 	if (!is.IsOk())
 		return;
 	wxFileConfig fconfig(is);
@@ -850,8 +858,15 @@ void SettingDlg::SaveSettings()
 	fconfig.SetPath("/pvxml flip");
 	fconfig.Write("x", m_pvxml_flip_x);
 	fconfig.Write("y", m_pvxml_flip_y);
-
-	wxFileOutputStream os(SETTING_FILE_NAME);
+	
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = expath.BeforeLast(GETSLASH(),NULL);
+#ifdef _WIN32
+    wxString dft = expath + "\\" + SETTING_FILE_NAME;
+#else
+    String dft = expath + "/../Resources/" + SETTING_FILE_NAME;
+#endif
+	wxFileOutputStream os(dft);
 	fconfig.Save(os);
 }
 

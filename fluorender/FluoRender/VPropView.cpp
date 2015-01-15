@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valnum.h>
 #include <wx/hyperlink.h>
 #include "png_resource.h"
+#include <wx/stdpaths.h>
 #include "img/icons.h"
 
 BEGIN_EVENT_TABLE(VPropView, wxPanel)
@@ -1988,13 +1989,12 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
    double swi = val;
    fconfig.Write("shadow_intensity", swi);
    mgr->m_vol_swi = swi;
-#ifdef _DARWIN
-    wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/";
-    mkdir(dft.c_str(),0777);
-    chmod(dft.c_str(),0777);
-    dft = dft + "default_volume_settings.dft";
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = expath.BeforeLast(GETSLASH(),NULL);
+#ifdef _WIN32
+    wxString dft = expath + "\\default_volume_settings.dft";
 #else
-    wxString dft = "default_volume_settings.dft";
+    wxString dft = expath + "/../Resources/default_volume_settings.dft";
 #endif
    wxFileOutputStream os(dft);
    fconfig.Save(os);

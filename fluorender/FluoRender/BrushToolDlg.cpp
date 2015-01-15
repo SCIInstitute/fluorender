@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "BrushToolDlg.h"
 #include "VRenderFrame.h"
 #include <wx/valnum.h>
+#include <wx/stdpaths.h>
 #include "Formats/png_resource.h"
 
 //resources
@@ -1073,14 +1074,12 @@ void BrushToolDlg::SaveDefault()
    //nr thresh
    fconfig.Write("nr_thresh", m_dft_nr_thresh);
    //nr_size
-   fconfig.Write("nr_size", m_dft_nr_size);
-#ifdef _DARWIN
-    wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/";
-    mkdir(dft.c_str(),0777);
-    chmod(dft.c_str(),0777);
-    dft = dft + "default_brush_settings.dft";
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = expath.BeforeLast(GETSLASH(),NULL);
+#ifdef _WIN32
+    wxString dft = expath + "\\default_brush_settings.dft";
 #else
-    wxString dft = "default_brush_settings.dft";
+    wxString dft = expath + "/../Resources/default_brush_settings.dft";
 #endif
    wxFileOutputStream os(dft);
    fconfig.Save(os);
@@ -1089,16 +1088,12 @@ void BrushToolDlg::SaveDefault()
 //load default
 void BrushToolDlg::LoadDefault()
 {
-#ifdef _DARWIN
-    
-    wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/default_brush_settings.dft";
-    std::ifstream tmp(dft);
-    if (!tmp.good())
-        dft = "FluoRender.app/Contents/Resources/default_brush_settings.dft";
-    else
-        tmp.close();
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = expath.BeforeLast(GETSLASH(),NULL);
+#ifdef _WIN32
+    wxString dft = expath + "\\default_brush_settings.dft";
 #else
-    wxString dft = "default_brush_settings.dft";
+    wxString dft = expath + "/../Resources/default_brush_settings.dft";
 #endif
    wxFileInputStream is(dft);
    if (!is.IsOk())
