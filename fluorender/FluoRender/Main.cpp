@@ -68,7 +68,10 @@ bool VRenderApp::OnInit()
 #endif
    char cpath[FILENAME_MAX];
    GetCurrentDir(cpath, sizeof(cpath));
-   ::wxSetWorkingDirectory(wxString(s2ws(std::string(cpath))));
+   //::wxSetWorkingDirectory(wxString(s2ws(std::string(cpath))));
+   wxString pathname = wxStandardPaths::Get().GetExecutablePath();
+   pathname = pathname.BeforeLast(GETSLASH());
+   ::wxSetWorkingDirectory(pathname);
    // call default behaviour (mandatory)
    if (!wxApp::OnInit())
       return false;
