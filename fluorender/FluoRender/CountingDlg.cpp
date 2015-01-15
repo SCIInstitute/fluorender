@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "CountingDlg.h"
 #include "VRenderFrame.h"
 #include <wx/valnum.h>
+#include <wx/stdpaths.h>
 
 BEGIN_EVENT_TABLE(CountingDlg, wxPanel)
 	//component analyzer
@@ -160,16 +161,12 @@ CountingDlg::~CountingDlg()
 //load default
 void CountingDlg::LoadDefault()
 {
-#ifdef _DARWIN
-    
-    wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/default_brush_settings.dft";
-    std::ifstream tmp(dft);
-    if (!tmp.good())
-        dft = "FluoRender.app/Contents/Resources/default_brush_settings.dft";
-    else
-        tmp.close();
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = expath.BeforeLast(GETSLASH(),NULL);
+#ifdef _WIN32
+    wxString dft = expath + "\\default_brush_settings.dft";
 #else
-    wxString dft = "default_brush_settings.dft";
+    wxString dft = expath + "/../Resources/default_brush_settings.dft";
 #endif
 	wxFileInputStream is(dft);
 	if (!is.IsOk())

@@ -50,8 +50,11 @@ DEALINGS IN THE SOFTWARE.
 #include <sys/types.h>
 #include <ctype.h>
 #include <wx/wx.h>
-#include "../LibTiff/tiffio.h"
+#include "tiffio.h"
 #include "WacUtils/WacUtils.h"
+#include <direct.h>
+
+#define GETCURRENTDIR _getcwd
 
 #define FSEEK64     _fseeki64
 #define SSCANF    sscanf
@@ -154,12 +157,15 @@ inline void FIND_FILES(std::wstring m_path_name,
 
 #else // MAC OSX or LINUX
 
-#include <vector>
-#include <iostream>
+#include <unistd.h>
 #include <dirent.h>
 #include <sys/time.h>
 #include <sys/stat.h>
-#include "../LibTiff/tiffio.h"
+#include <vector>
+#include <iostream>
+#include "tiffio.h"
+
+#define GETCURRENTDIR getcwd
 
 #define FSEEK64     fseek
 

@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <tiffio.h>
 #include <wx/utils.h>
 #include <wx/valnum.h>
+#include <wx/stdpaths.h>
 #include <algorithm>
 #include "GL/mywgl.h"
 #include "png_resource.h"
@@ -57,13 +58,12 @@ END_EVENT_TABLE()
 VRenderGLView::VRenderGLView(wxWindow* frame,
       wxWindow* parent,
       wxWindowID id,
-	  const int* attriblist, 
-      const int* contextattriblist,
+	  const int* attriblist,
       wxGLContext* sharedContext,
       const wxPoint& pos,
       const wxSize& size,
       long style) :
-   wxGLCanvas(parent, id, attriblist, contextattriblist, pos, size, style),
+   wxGLCanvas(parent, id, attriblist, pos, size, style),
    //public
    //capture modes
    m_capture(false),
@@ -2075,15 +2075,12 @@ void VRenderGLView::NoiseRemoval(int iter, double thresh)
 //load default
 void VRenderGLView::LoadDefaultBrushSettings()
 {
-#ifdef _DARWIN
-    wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/default_brush_settings.dft";
-    std::ifstream tmp(dft);
-    if (!tmp.good())
-        dft = "FluoRender.app/Contents/Resources/default_brush_settings.dft";
-    else
-        tmp.close();
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = expath.BeforeLast(GETSLASH(),NULL);
+#ifdef _WIN32
+    wxString dft = expath + "\\default_brush_settings.dft";
 #else
-    wxString dft = "default_brush_settings.dft";
+    wxString dft = expath + "/../Resources/default_brush_settings.dft";
 #endif
    wxFileInputStream is(dft);
    if (!is.IsOk())
@@ -9765,7 +9762,7 @@ VRenderView::VRenderView(wxWindow* frame,
 {
    wxString name = wxString::Format("Render View:%d", m_id++);
    this->SetName(name);
-
+   // this list takes care of both pixel and context attributes (no custom edits of wx is preferred)
    //render view/////////////////////////////////////////////////
    int red_bit = 8;
    int green_bit = 8;
@@ -9790,25 +9787,23 @@ VRenderView::VRenderView(wxWindow* frame,
 	   gl_profile_mask = vr_frame->GetSettingDlg()->GetGLProfileMask();
    }
    int attriblist[] =
-	{
-		WX_GL_MIN_RED, red_bit,
-		WX_GL_MIN_GREEN, green_bit,
-		WX_GL_MIN_BLUE, blue_bit,
-		WX_GL_MIN_ALPHA, alpha_bit,
-		WX_GL_DEPTH_SIZE, depth_bit,
-		WX_GL_DOUBLEBUFFER,
-		WX_GL_SAMPLE_BUFFERS, 1,
-		WX_GL_SAMPLES, samples,
-		0
-	};
-   int contextattriblist[] = 
    {
-	   WGL_CONTEXT_MAJOR_VERSION_ARB, gl_major_ver,
-	   WGL_CONTEXT_MINOR_VERSION_ARB, gl_minor_ver,
-	   WGL_CONTEXT_PROFILE_MASK_ARB, gl_profile_mask,
-	   0, 0
+   //pixel properties
+   WX_GL_MIN_RED, red_bit,
+   WX_GL_MIN_GREEN, green_bit,
+   WX_GL_MIN_BLUE, blue_bit,
+   WX_GL_MIN_ALPHA, alpha_bit,
+   WX_GL_DEPTH_SIZE, depth_bit,
+   WX_GL_DOUBLEBUFFER,
+   WX_GL_SAMPLE_BUFFERS, 1,
+   WX_GL_SAMPLES, samples,
+   // context properties.
+   //WX_GL_CORE_PROFILE,
+   WX_GL_MAJOR_VERSION, gl_major_ver,
+   WX_GL_MINOR_VERSION, gl_minor_ver,
+   0, 0
    };
-   m_glview = new VRenderGLView(frame, this, wxID_ANY, attriblist, contextattriblist, sharedContext);
+   m_glview = new VRenderGLView(frame, this, wxID_ANY, attriblist, sharedContext);
    m_glview->SetCanFocus(false);
    CreateBar();
    if (m_glview) {
@@ -10031,7 +10026,7 @@ void VRenderView::CreateBar()
 
    //bar right///////////////////////////////////////////////////
    wxBoxSizer* sizer_v_4 = new wxBoxSizer(wxVERTICAL);
-   st1 = new wxStaticText(this, 0, " Zoom",wxDefaultPosition,wxSize(35,-1));
+   st1 = new wxStaticText(this, 0, " Zoom",wxDefaultPosition,wxSize(45,-1));
    m_center_btn = new wxToolBar(this, wxID_ANY);
    m_center_btn->AddTool(ID_CenterBtn, "Center",
          wxGetBitmapFromMemory(center),
@@ -10788,8 +10783,8 @@ void VRenderView::OnVolumeMethodCheck(wxCommandEvent& event)
    //0 - didn't change
    //1 - to depth mode
    //2 - from depth mode
-   int mode_switch_type = 0;
-   int old_mode = GetVolMethod();
+   //int mode_switch_type = 0;
+   //int old_mode = GetVolMethod();
 
    int sender_id = event.GetId();
    switch (sender_id)
@@ -11646,14 +11641,12 @@ void VRenderView::SaveDefault(unsigned int mask)
 	   str = wxString::Format("%f %f %f", x, y, z);
 	   fconfig.Write("center", str);
    }
-
-#ifdef _DARWIN
-    wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/";
-    mkdir(dft,0777);
-    chmod(dft,0777);
-    dft = dft + "default_view_settings.dft";
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = expath.BeforeLast(GETSLASH(),NULL);
+#ifdef _WIN32
+    wxString dft = expath + "\\default_brush_settings.dft";
 #else
-    wxString dft = "default_view_settings.dft";
+    wxString dft = expath + "/../Resources/default_brush_settings.dft";
 #endif
    wxFileOutputStream os(dft);
    fconfig.Save(os);
@@ -11668,16 +11661,12 @@ void VRenderView::OnSaveDefault(wxCommandEvent &event)
 
 void VRenderView::LoadSettings()
 {
-#ifdef _DARWIN
-    
-    wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/default_view_settings.dft";
-    std::ifstream tmp(dft);
-    if (!tmp.good())
-        dft = "FluoRender.app/Contents/Resources/default_view_settings.dft";
-    else
-        tmp.close();
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = expath.BeforeLast(GETSLASH(),NULL);
+#ifdef _WIN32
+    wxString dft = expath + "\\default_view_settings.dft";
 #else
-    wxString dft = "default_view_settings.dft";
+    wxString dft = expath + "/../Resources/default_view_settings.dft";
 #endif
     
     wxFileInputStream is(dft);
@@ -11734,7 +11723,7 @@ void VRenderView::LoadSettings()
    if (fconfig.Read("bg_color_picker", &str))
    {
       int r, g, b;
-      SSCANF(str, "%d%d%d", &r, &g, &b);
+      SSCANF(str.c_str(), "%d%d%d", &r, &g, &b);
       wxColor cVal(r, g, b);
       m_bg_color_picker->SetColour(cVal);
       Color c(r/255.0, g/255.0, b/255.0);
@@ -11838,7 +11827,7 @@ void VRenderView::LoadSettings()
    if (fconfig.Read("center", &str))
    {
       float x, y, z;
-      SSCANF(str, "%f%f%f", &x, &y, &z);
+      SSCANF(str.c_str(), "%f%f%f", &x, &y, &z);
       SetCenters(x, y, z);
    }
 

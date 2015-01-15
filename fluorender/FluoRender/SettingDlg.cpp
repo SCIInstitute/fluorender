@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderView.h"
 #include <wx/valnum.h>
 #include <wx/notebook.h>
+#include <wx/stdpaths.h>
 
 BEGIN_EVENT_TABLE(SettingDlg, wxPanel)
 	EVT_BUTTON(ID_SaveBtn, SettingDlg::OnSave)
@@ -545,7 +546,14 @@ void SettingDlg::GetSettings()
 	m_gl_minor_ver = 4;
 	m_gl_profile_mask = 2;
 
-	wxFileInputStream is(SETTING_FILE_NAME);
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = expath.BeforeLast(GETSLASH(),NULL);
+#ifdef _WIN32
+    wxString dft = expath + "\\" + SETTING_FILE_NAME;
+#else
+    wxString dft = expath + "/../Resources/" + SETTING_FILE_NAME;
+#endif
+	wxFileInputStream is(dft);
 	if (!is.IsOk())
 		return;
 	wxFileConfig fconfig(is);
@@ -894,7 +902,14 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("gl_minor_ver", m_gl_minor_ver);
 	fconfig.Write("gl_profile_mask", m_gl_profile_mask);
 
-	wxFileOutputStream os(SETTING_FILE_NAME);
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = expath.BeforeLast(GETSLASH(),NULL);
+#ifdef _WIN32
+    wxString dft = expath + "\\" + SETTING_FILE_NAME;
+#else
+    wxString dft = expath + "/../Resources/" + SETTING_FILE_NAME;
+#endif
+	wxFileOutputStream os(dft);
 	fconfig.Save(os);
 }
 

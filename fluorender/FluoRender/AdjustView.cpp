@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "AdjustView.h"
 #include "VRenderFrame.h"
 #include <wx/valnum.h>
+#include <wx/stdpaths.h>
 #include "png_resource.h"
 #include "img/icons.h"
 
@@ -1269,13 +1270,12 @@ void AdjustView::OnSaveDefault(wxCommandEvent &event)
 	m_dft_gamma = Color(dft_r_gamma, dft_g_gamma, dft_b_gamma);
 	m_dft_brightness = Color(dft_r_brightness, dft_g_brightness, dft_b_brightness);
 	m_dft_hdr = Color(dft_r_hdr, dft_g_hdr, dft_b_hdr);
-#ifdef _DARWIN
-    wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/";
-    mkdir(dft,0777);
-    chmod(dft,0777);
-    dft = dft + "default_2d_adjustment_settings.dft";
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = expath.BeforeLast(GETSLASH(),NULL);
+#ifdef _WIN32
+    wxString dft = expath + "\\default_2d_adjustment_settings.dft";
 #else
-    wxString dft = "default_2d_adjustment_settings.dft";
+    wxString dft = expath + "/../Resources/default_2d_adjustment_settings.dft";
 #endif
 	wxFileOutputStream os(dft);
 	fconfig.Save(os);
@@ -1283,15 +1283,12 @@ void AdjustView::OnSaveDefault(wxCommandEvent &event)
 
 void AdjustView::LoadSettings()
 {
-#ifdef _DARWIN
-    wxString dft = wxString(getenv("HOME")) + "/Fluorender.settings/default_2d_adjustment_settings.dft";
-    std::ifstream tmp(dft);
-    if (!tmp.good())
-        dft = "FluoRender.app/Contents/Resources/default_2d_adjustment_settings.dft";
-    else
-        tmp.close();
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = expath.BeforeLast(GETSLASH(),NULL);
+#ifdef _WIN32
+    wxString dft = expath + "\\default_2d_adjustment_settings.dft";
 #else
-    wxString dft = "default_2d_adjustment_settings.dft";
+    wxString dft = expath + "/../Resources/default_2d_adjustment_settings.dft";
 #endif
     
 	wxFileInputStream is(dft);

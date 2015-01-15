@@ -154,7 +154,7 @@ class RecorderDlg : public wxPanel
       //automatic keys
       wxComboBox *m_auto_key_cmb;
       //generate
-      wxButton *m_auto_key_btn;
+      //wxButton *m_auto_key_btn;
 
       //list ctrl
       KeyListCtrl *m_keylist;

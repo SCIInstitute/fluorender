@@ -59,19 +59,9 @@ IMPLEMENT_APP(VRenderApp)
 
 bool VRenderApp::OnInit()
 {
-#ifdef _WIN32
-#include <direct.h>
-#define GetCurrentDir _getcwd
-#else
-#include <unistd.h>
-#define GetCurrentDir getcwd
-#endif
    char cpath[FILENAME_MAX];
-   GetCurrentDir(cpath, sizeof(cpath));
-   //::wxSetWorkingDirectory(wxString(s2ws(std::string(cpath))));
-   wxString pathname = wxStandardPaths::Get().GetExecutablePath();
-   pathname = pathname.BeforeLast(GETSLASH());
-   ::wxSetWorkingDirectory(pathname);
+   GETCURRENTDIR(cpath, sizeof(cpath));
+   ::wxSetWorkingDirectory(wxString(s2ws(std::string(cpath))));
    // call default behaviour (mandatory)
    if (!wxApp::OnInit())
       return false;
@@ -80,7 +70,7 @@ bool VRenderApp::OnInit()
    //the frame
    std::string title =  std::string(FLUORENDER_TITLE) + std::string(" ") +
       std::string(VERSION_MAJOR_TAG) +  std::string(".") +
-      std::string(VERSION_MINOR_TAG  + std::string(" ") + std::string(FLUORENDER_ARCH));
+      std::string(VERSION_MINOR_TAG);
    wxFrame* frame = new VRenderFrame(
          (wxFrame*) NULL,
          wxString(title),

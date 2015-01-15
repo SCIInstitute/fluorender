@@ -105,15 +105,16 @@ VRenderFrame::VRenderFrame(
       int x, int y,
       int w, int h)
 : wxFrame(frame, wxID_ANY, title, wxPoint(x, y), wxSize(w, h),wxDEFAULT_FRAME_STYLE),
+m_mov_view(0),
 m_movie_view(0),
 m_tree_panel(0),
 m_list_panel(0),
 m_prop_panel(0),
+m_setting_dlg(0),
 m_ui_state(true),
 m_cur_sel_type(-1),
 m_cur_sel_vol(-1),
-m_cur_sel_mesh(-1),
-m_setting_dlg(0)
+m_cur_sel_mesh(-1)
 {
    //create this first to read the settings
    m_setting_dlg = new SettingDlg(this, this);
@@ -214,9 +215,7 @@ m_setting_dlg(0)
          wxGetBitmapFromMemory(icon_settings), wxNullBitmap, wxITEM_NORMAL,
          "Settings of FluoRender",
          "Settings of FluoRender");
-#ifdef _WIN32
    m_main_tb->AddStretchableSpace();
-#endif
    m_main_tb->AddTool(ID_CheckUpdates, "Update",
          wxGetBitmapFromMemory(icon_check_updates), wxNullBitmap, wxITEM_NORMAL,
          "Check if there is a new release",
@@ -351,7 +350,6 @@ m_setting_dlg(0)
          Name("m_main_tb").Caption("Toolbar").CaptionVisible(false).
          MinSize(wxSize(-1, 49)).MaxSize(wxSize(-1, 50)).
          Top().CloseButton(false).Layer(4));
-#ifdef _WIN32
    m_aui_mgr.AddPane(m_list_panel, wxAuiPaneInfo().
          Name("m_list_panel").Caption(UITEXT_DATAVIEW).
          Left().CloseButton(true).FloatingSize(wxSize(350, 300)).Layer(3));
@@ -362,18 +360,6 @@ m_setting_dlg(0)
          Name("m_movie_view").Caption(UITEXT_MAKEMOVIE).
          Left().CloseButton(true).MinSize(wxSize(350, 300)).
          FloatingSize(wxSize(350, 300)).Layer(3));
-#else
-    m_aui_mgr.AddPane(m_movie_view, wxAuiPaneInfo().
-                      Name("m_movie_view").Caption(UITEXT_MAKEMOVIE).
-                      Left().CloseButton(true).MinSize(wxSize(350, 300)).
-                      FloatingSize(wxSize(350, 300)).Layer(3));
-    m_aui_mgr.AddPane(m_tree_panel, wxAuiPaneInfo().
-                      Name("m_tree_panel").Caption(UITEXT_TREEVIEW).
-                      Left().CloseButton(true).FloatingSize(wxSize(350, 300)).Layer(3));
-    m_aui_mgr.AddPane(m_list_panel, wxAuiPaneInfo().
-                      Name("m_list_panel").Caption(UITEXT_DATAVIEW).
-                      Left().CloseButton(true).FloatingSize(wxSize(350, 300)).Layer(3));
-#endif
    m_aui_mgr.AddPane(m_prop_panel, wxAuiPaneInfo().
          Name("m_prop_panel").Caption(UITEXT_PROPERTIES).
          Bottom().CloseButton(true).MinSize(wxSize(300, 130)).
