@@ -159,7 +159,7 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	sizer_6->Add(m_z_rd, 0, wxALIGN_CENTER);
 	//movie length
 	st = new wxStaticText(page,wxID_ANY, "Movie Length: ",
-		wxDefaultPosition,wxSize(85,-1));
+		wxDefaultPosition,wxSize(95,-1));
 	st2 = new wxStaticText(page,wxID_ANY, "seconds",
 		wxDefaultPosition,wxSize(60,-1));
 	m_movie_time = new wxTextCtrl(page, ID_MovieTimeText, "5",
@@ -293,10 +293,10 @@ wxPanel(parent, id, pos, size, style, name),
 m_frame(frame),
 m_starting_rot(0.),
 m_timer(this,ID_Timer),
+m_cur_time(0.0),
 m_running(false),
 m_record(false),
-m_current_page(0),
-m_cur_time(0.0) {
+m_current_page(0) {
 	//notebook
 	m_notebook = new wxNotebook(this, wxID_ANY);
 	m_notebook->AddPage(CreateSimplePage(m_notebook), "Basic");

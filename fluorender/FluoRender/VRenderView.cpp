@@ -10003,7 +10003,7 @@ void VRenderView::CreateBar()
 
    //bar right///////////////////////////////////////////////////
    wxBoxSizer* sizer_v_4 = new wxBoxSizer(wxVERTICAL);
-   st1 = new wxStaticText(this, 0, " Zoom",wxDefaultPosition,wxSize(35,-1));
+   st1 = new wxStaticText(this, 0, " Zoom",wxDefaultPosition,wxSize(45,-1));
    m_center_btn = new wxToolBar(this, wxID_ANY);
    m_center_btn->AddTool(ID_CenterBtn, "Center",
          wxGetBitmapFromMemory(center),
@@ -10760,8 +10760,8 @@ void VRenderView::OnVolumeMethodCheck(wxCommandEvent& event)
    //0 - didn't change
    //1 - to depth mode
    //2 - from depth mode
-   int mode_switch_type = 0;
-   int old_mode = GetVolMethod();
+   //int mode_switch_type = 0;
+   //int old_mode = GetVolMethod();
 
    int sender_id = event.GetId();
    switch (sender_id)
