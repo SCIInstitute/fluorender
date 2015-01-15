@@ -1275,10 +1275,6 @@ void AdjustView::OnSaveDefault(wxCommandEvent &event)
 #ifdef _WIN32
     wxString dft = expath + "\\default_2d_adjustment_settings.dft";
 #else
-    //wxString dft = wxStandardPaths::Get().GetDocumentsDir() + "/Fluorender.settings/";
-    //mkdir(dft.c_str(),0777);
-    //chmod(dft.c_str(),0777);
-    //dft = dft + "default_2d_adjustment_settings.dft";
     wxString dft = expath + "/../Resources/default_2d_adjustment_settings.dft";
 #endif
 	wxFileOutputStream os(dft);
@@ -1292,10 +1288,6 @@ void AdjustView::LoadSettings()
 #ifdef _WIN32
     wxString dft = expath + "\\default_2d_adjustment_settings.dft";
 #else
-    //wxString dft = wxStandardPaths::Get().GetDocumentsDir() + "/Fluorender.settings/";
-    //mkdir(dft.c_str(),0777);
-    //chmod(dft.c_str(),0777);
-    //dft = dft + "default_2d_adjustment_settings.dft";
     wxString dft = expath + "/../Resources/default_2d_adjustment_settings.dft";
 #endif
     

@@ -542,7 +542,7 @@ void SettingDlg::GetSettings()
 #ifdef _WIN32
     wxString dft = expath + "\\" + SETTING_FILE_NAME;
 #else
-    String dft = expath + "/../Resources/" + SETTING_FILE_NAME;
+    wxString dft = expath + "/../Resources/" + SETTING_FILE_NAME;
 #endif
 	wxFileInputStream is(dft);
 	if (!is.IsOk())
@@ -864,7 +864,7 @@ void SettingDlg::SaveSettings()
 #ifdef _WIN32
     wxString dft = expath + "\\" + SETTING_FILE_NAME;
 #else
-    String dft = expath + "/../Resources/" + SETTING_FILE_NAME;
+    wxString dft = expath + "/../Resources/" + SETTING_FILE_NAME;
 #endif
 	wxFileOutputStream os(dft);
 	fconfig.Save(os);
