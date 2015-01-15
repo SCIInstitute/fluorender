@@ -346,7 +346,7 @@ target_link_libraries(FluoRender
    ${Boost_LIBRARIES}
    ${OPENCL_LIBRARIES})
 
-#prebuild copies.
+#build OpenCL examples copies.
 
 #copy openCL examples to the binary directory
 add_custom_command(TARGET FluoRender PRE_BUILD
@@ -358,11 +358,22 @@ add_custom_command(TARGET FluoRender PRE_BUILD
   "${FluoRender_SOURCE_DIR}/CL_code"
   "${CMAKE_BINARY_DIR}/CL_code")
    
-#post build DLL copy
+#build DLL copy
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	file(GLOB ffmpeg_DLLS fluorender/bin/*.dll)
 	foreach (f ${ffmpeg_DLLS})
+		add_custom_command(TARGET FluoRender PRE_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy  
+			${f}
+			$<TARGET_FILE_DIR:FluoRender>)
+	endforeach()
+endif()
+   
+#post build setting files copy
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+	file(GLOB settings_files Settings/*)
+	foreach (f ${settings_files})
 		add_custom_command(TARGET FluoRender PRE_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy  
 			${f}
