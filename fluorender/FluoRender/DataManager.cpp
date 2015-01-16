@@ -1790,6 +1790,8 @@ int MeshData::Load(wxString &filename)
 			wxT("OBJ Load Failure"), 
 			wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION);
 		if (dial->ShowModal() == wxID_YES) {
+			if (m_data)
+				delete m_data;
 			m_data = glmReadOBJ(str_fn.c_str(),&no_fail);
 		} else break;
 	}
