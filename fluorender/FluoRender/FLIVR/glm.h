@@ -235,7 +235,7 @@ GLvoid glmClear(GLMmodel* model);
 *
 * filename - name of the file containing the Wavefront .OBJ format data.  
 */
-GLMmodel* glmReadOBJ(const char* filename);
+GLMmodel* glmReadOBJ(const char* filename, bool* no_fail = 0);
 
 /* glmWriteOBJ: Writes a model description in Wavefront .OBJ format to
 * a file.

@@ -343,7 +343,7 @@ static char* glmDirName(char* path)
  * model - properly initialized GLMmodel structure
  * name  - name of the material library
  */
-static GLvoid glmReadMTL(GLMmodel* model, char* name)
+static GLboolean glmReadMTL(GLMmodel* model, char* name)
 {
    FILE* file;
    char* dir;
@@ -360,7 +360,7 @@ static GLvoid glmReadMTL(GLMmodel* model, char* name)
    free(dir);
 
    if (!FOPEN(&file, filename, "rb"))
-      return;
+      return false;
    free(filename);
 
    //find file size
@@ -371,7 +371,7 @@ static GLvoid glmReadMTL(GLMmodel* model, char* name)
    //read file to a string
    char* mtl_content = (char*)malloc(size+1);
    if (!fread(mtl_content, sizeof(char), size, file))
-      return;
+      return false;
    mtl_content[size] = 0;
    /* close the file */
    fclose(file);
@@ -515,6 +515,7 @@ static GLvoid glmReadMTL(GLMmodel* model, char* name)
    }
 
    free(mtl_content);
+   return true;
 }
 
 /* glmWriteMTL: write a wavefront material library file
@@ -598,7 +599,7 @@ char *sgets( char * str, int num, char **input )
  * model - properly initialized GLMmodel structure
  * file  - (fopen'd) file descriptor
  */
-static GLvoid glmFirstPass(GLMmodel* model, char* file)
+static GLboolean glmFirstPass(GLMmodel* model, char* file)
 {
    GLuint numvertices;        /* number of vertices in model */
    GLuint numnormals;         /* number of normals in model */
@@ -608,6 +609,7 @@ static GLvoid glmFirstPass(GLMmodel* model, char* file)
    GLMgroup* group;           /* current group */
    char buf[128];
    char line[2048];
+   bool no_fail = true;
 
    /* make a default group */
    char  tmp[] = "default";
@@ -645,7 +647,7 @@ static GLvoid glmFirstPass(GLMmodel* model, char* file)
             char mtlname[128];
             SSCANF(line, "%s %s", mtlname, mtlname);
             model->mtllibname = STRDUP(mtlname);
-            glmReadMTL(model, mtlname);
+            no_fail &= glmReadMTL(model, mtlname);
          }
          break;
       case 'u':
@@ -700,6 +702,7 @@ static GLvoid glmFirstPass(GLMmodel* model, char* file)
       group->numtriangles = 0;
       group = group->next;
    }
+   return no_fail;
 }
 
 /* glmSecondPass: second pass at a Wavefront OBJ file that gets all
@@ -1660,7 +1663,7 @@ GLvoid glmClear(GLMmodel* model)
  *
  * filename - name of the file containing the Wavefront .OBJ format data.
  */
-GLMmodel* glmReadOBJ(const char* filename)
+GLMmodel* glmReadOBJ(const char* filename, bool *no_fail)
 {
    GLMmodel* model;
    FILE* file;
@@ -1709,7 +1712,8 @@ GLMmodel* glmReadOBJ(const char* filename)
 
    /* make a first pass through the file to get a count of the number
       of vertices, normals, texcoords & triangles */
-   glmFirstPass(model, obj_content);
+   if (!glmFirstPass(model, obj_content))
+	   if(no_fail) *no_fail = false;
 
    /* allocate memory */
    if (model->numvertices)
