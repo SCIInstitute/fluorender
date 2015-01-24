@@ -605,27 +605,7 @@ void VMovieView::OnFrameCheck(wxCommandEvent& event) {
 	if (m_frame_chk->GetValue())
 	{
 		int x, y, w, h;
-		vrv->GetFrame(x, y, w, h);
-		if (w<0||h<0)
-		{
-			w = vrv->GetGLSize().x;
-			h = vrv->GetGLSize().y;
-			int size;
-			if (w > h)
-			{
-				size = h;
-				x = int((w-h)/2.0);
-				y = 0;
-			}
-			else
-			{
-				size = w;
-				x = 0;
-				y = int((h-w)/2.0);
-			}
-			vrv->SetFrame(x, y, size, size);
-
-		}
+		vrv->CalcFrame();
 		vrv->GetFrame(x, y, w, h);
 		m_center_x_text->SetValue(wxString::Format("%d", int(x+w/2.0+0.5)));
 		m_center_y_text->SetValue(wxString::Format("%d", int(y+h/2.0+0.5)));
@@ -646,24 +626,7 @@ void VMovieView::OnResetFrame(wxCommandEvent& event) {
 	VRenderView* vrv = vr_frame->GetView(str);
 	if (!vrv) return;
 	int x, y, w, h;
-
-	w = vrv->GetGLSize().x;
-	h = vrv->GetGLSize().y;
-	int size;
-	if (w > h)
-	{
-		size = h;
-		x = int((w-h)/2.0);
-		y = 0;
-	}
-	else
-	{
-		size = w;
-		x = 0;
-		y = int((h-w)/2.0);
-	}
-	vrv->SetFrame(x, y, size, size);
-
+	vrv->CalcFrame();
 	vrv->GetFrame(x, y, w, h);
 	m_center_x_text->SetValue(wxString::Format("%d", int(x+w/2.0+0.5)));
 	m_center_y_text->SetValue(wxString::Format("%d", int(y+h/2.0+0.5)));

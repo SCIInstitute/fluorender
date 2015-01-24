@@ -318,7 +318,8 @@ class VRenderGLView: public wxGLCanvas
       void DisableFrame() {m_draw_frame = false;};
       void SetFrame(int x, int y, int w, int h) {m_frame_x = x;
          m_frame_y = y; m_frame_w = w; m_frame_h = h;}
-         void GetFrame(int &x, int &y, int &w, int &h);
+      void GetFrame(int &x, int &y, int &w, int &h);
+	  void CalcFrame();
 
          //scale bar
          void EnableScaleBar() {m_disp_scale_bar = true;}
@@ -1175,6 +1176,10 @@ class VRenderView: public wxPanel
    void GetFrame(int &x, int &y, int &w, int &h)
    {
       if (m_glview) m_glview->GetFrame(x, y, w, h);
+   }
+   void CalcFrame()
+   {
+	   if (m_glview) m_glview->CalcFrame();
    }
    bool GetFrameEnabled()
    {

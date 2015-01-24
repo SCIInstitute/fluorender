@@ -9689,6 +9689,100 @@ void VRenderGLView::GetFrame(int &x, int &y, int &w, int &h)
    h = m_frame_h;
 }
 
+void VRenderGLView::CalcFrame()
+{
+	int w, h;
+	w = GetSize().x;
+	h = GetSize().y;
+
+	if (m_cur_vol)
+	{
+		glMatrixMode(GL_MODELVIEW_MATRIX);
+		glPushMatrix();
+		glMatrixMode(GL_PROJECTION_MATRIX);
+		glPushMatrix();
+		//projection
+		HandleProjection(w, h);
+		//Transformation
+		HandleCamera();
+		//translate object
+		glTranslated(m_obj_transx, m_obj_transy, m_obj_transz);
+		//rotate object
+		glRotated(m_obj_rotz+180.0, 0.0, 0.0, 1.0);
+		glRotated(m_obj_roty+180.0, 0.0, 1.0, 0.0);
+		glRotated(m_obj_rotx, 1.0, 0.0, 0.0);
+		//center object
+		glTranslated(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz);
+
+		double matrix[16];
+		Transform mv;
+		Transform pr;
+		glGetDoublev(GL_MODELVIEW_MATRIX, matrix);
+		mv.set(matrix);
+		glGetDoublev(GL_PROJECTION_MATRIX, matrix);
+		pr.set(matrix);
+		glMatrixMode(GL_MODELVIEW_MATRIX);
+		glPopMatrix();
+		glMatrixMode(GL_PROJECTION_MATRIX);
+		glPopMatrix();
+
+		double minx, maxx, miny, maxy;
+		minx = 1.0;
+		maxx = -1.0;
+		miny = 1.0;
+		maxy = -1.0;
+		vector<Point> points;
+		BBox bbox = m_cur_vol->GetBounds();
+		points.push_back(Point(bbox.min().x(), bbox.min().y(), bbox.min().z()));
+		points.push_back(Point(bbox.min().x(), bbox.min().y(), bbox.max().z()));
+		points.push_back(Point(bbox.min().x(), bbox.max().y(), bbox.min().z()));
+		points.push_back(Point(bbox.min().x(), bbox.max().y(), bbox.max().z()));
+		points.push_back(Point(bbox.max().x(), bbox.min().y(), bbox.min().z()));
+		points.push_back(Point(bbox.max().x(), bbox.min().y(), bbox.max().z()));
+		points.push_back(Point(bbox.max().x(), bbox.max().y(), bbox.min().z()));
+		points.push_back(Point(bbox.max().x(), bbox.max().y(), bbox.max().z()));
+
+		Point p;
+		for (unsigned int i=0; i<points.size(); ++i)
+		{
+			p = mv.transform(points[i]);
+			p = pr.transform(p);
+			minx = p.x()<minx?p.x():minx;
+			maxx = p.x()>maxx?p.x():maxx;
+			miny = p.y()<miny?p.y():miny;
+			maxy = p.y()>maxy?p.y():maxy;
+		}
+
+		minx = Clamp(minx, -1.0, 1.0);
+		maxx = Clamp(maxx, -1.0, 1.0);
+		miny = Clamp(miny, -1.0, 1.0);
+		maxy = Clamp(maxy, -1.0, 1.0);
+
+		m_frame_x = int((minx+1.0)*w/2.0+1.0);
+		m_frame_y = int((miny+1.0)*h/2.0+1.0);
+		m_frame_w = int((maxx-minx)*w/2.0-1.0);
+		m_frame_h = int((maxy-miny)*h/2.0-1.0);
+
+	}
+	else
+	{
+		int size;
+		if (w > h)
+		{
+			size = h;
+			m_frame_x = int((w-h)/2.0);
+			m_frame_y = 0;
+		}
+		else
+		{
+			size = w;
+			m_frame_x = 0;
+			m_frame_y = int((h-w)/2.0);
+		}
+		m_frame_w = m_frame_h = size;
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
