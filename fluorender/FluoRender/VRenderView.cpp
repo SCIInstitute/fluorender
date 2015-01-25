@@ -9758,8 +9758,8 @@ void VRenderGLView::CalcFrame()
 		miny = Clamp(miny, -1.0, 1.0);
 		maxy = Clamp(maxy, -1.0, 1.0);
 
-		m_frame_x = int((minx+1.0)*w/2.0+0.5);
-		m_frame_y = int((miny+1.0)*h/2.0+0.5);
+		m_frame_x = int((minx+1.0)*w/2.0+1.0);
+		m_frame_y = int((miny+1.0)*h/2.0+1.0);
 		m_frame_w = int((maxx-minx)*w/2.0-1.5);
 		m_frame_h = int((maxy-miny)*h/2.0-1.5);
 
