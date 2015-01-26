@@ -621,7 +621,6 @@ void RecorderDlg::OnAutoKey(wxCommandEvent &event)
 		break;
 	}
 
-	m_keylist->Update();
 }
 
 void RecorderDlg::OnSetKey(wxCommandEvent &event)
@@ -898,11 +897,17 @@ void RecorderDlg::AutoKeyChanComb(int comb)
 	Interpolator *interpolator = vr_frame->GetInterpolator();
 	if (!interpolator)
 		return;
+
+	wxString str = m_duration_text->GetValue();
+	double duration;
+	str.ToDouble(&duration);
+
 	KeyCode keycode;
 	FlKeyBoolean* flkeyB = 0;
 
 	double t = interpolator->GetLastT();
 	t = t<0.0?0.0:t;
+	if (t>0.0) t += duration;
 
 	int i;
 	int numChan = m_view->GetAllVolumeNum();
@@ -918,7 +923,6 @@ void RecorderDlg::AutoKeyChanComb(int comb)
 
 	do
 	{
-		t += 1.0;
 		interpolator->Begin(t);
 
 		//for all volumes
@@ -937,7 +941,10 @@ void RecorderDlg::AutoKeyChanComb(int comb)
 		}
 
 		interpolator->End();
+		t += duration;
 	} while (GetMask(chan_mask));
+
+	m_keylist->Update();
 }
 
 void RecorderDlg::OnDelKey(wxCommandEvent &event)

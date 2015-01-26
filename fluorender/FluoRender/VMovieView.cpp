@@ -50,6 +50,8 @@ BEGIN_EVENT_TABLE(VMovieView, wxPanel)
 	EVT_COMMAND_SCROLL(ID_ProgressSldr,VMovieView::OnTimeChange)
 	EVT_TEXT(ID_ProgressText, VMovieView::OnTimeEnter)
 	EVT_BUTTON(ID_SaveMovie, VMovieView::OnRun)
+	//auto key
+	EVT_BUTTON(ID_GenKeyBtn, VMovieView::OnGenKey)
 	//cropping
 	EVT_CHECKBOX(ID_FrameChk, VMovieView::OnFrameCheck)
 	EVT_BUTTON(ID_ResetBtn, VMovieView::OnResetFrame)
@@ -203,6 +205,47 @@ wxWindow* VMovieView::CreateAdvancedPage(wxWindow *parent) {
 	return page;
 }
 
+wxWindow* VMovieView::CreateAutoKeyPage(wxWindow *parent) {
+	wxPanel *page = new wxPanel(parent);
+
+	wxStaticText * st = new wxStaticText(page, 0, "Choose an auto key type");
+
+	//list of options
+	m_auto_key_list = new wxListCtrl(page, ID_AutoKeyList,
+		wxDefaultPosition, wxDefaultSize, wxLC_REPORT|wxLC_SINGLE_SEL);
+	wxListItem itemCol;
+	itemCol.SetText("ID");
+	m_auto_key_list->InsertColumn(0, itemCol);
+	itemCol.SetText("Auto Key Type");
+	m_auto_key_list->InsertColumn(1, itemCol);
+	//options
+	//channel comb 1
+	long tmp = m_auto_key_list->InsertItem(0, "1", 0);
+	m_auto_key_list->SetItem(tmp, 1, "Channel combination nC1");
+	tmp = m_auto_key_list->InsertItem(1, "2", 0);
+	m_auto_key_list->SetItem(tmp, 1, "Channel combination nC2");
+	tmp = m_auto_key_list->InsertItem(2, "3", 0);
+	m_auto_key_list->SetItem(tmp, 1, "Channel combination nC3");
+	m_auto_key_list->SetColumnWidth(1, -1);
+	
+	//button
+	m_gen_keys_btn = new wxButton(page, ID_GenKeyBtn, "Generate");
+	
+	//vertical sizer
+	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
+	sizer_v->Add(10, 10, 0);
+	sizer_v->Add(st, 0, wxALIGN_LEFT);
+	sizer_v->Add(10, 10, 0);
+	sizer_v->Add(m_auto_key_list, 1, wxEXPAND);
+	sizer_v->Add(10, 10, 0);
+	sizer_v->Add(m_gen_keys_btn, 0, wxALIGN_RIGHT);
+	sizer_v->Add(10, 10, 0);
+
+	page->SetSizer(sizer_v);
+	return page;
+
+}
+
 wxWindow* VMovieView::CreateCroppingPage(wxWindow *parent) {
 	wxPanel *page = new wxPanel(parent);
 	
@@ -301,6 +344,7 @@ m_current_page(0) {
 	m_notebook = new wxNotebook(this, wxID_ANY);
 	m_notebook->AddPage(CreateSimplePage(m_notebook), "Basic");
 	m_notebook->AddPage(CreateAdvancedPage(m_notebook), "Advanced");
+	m_notebook->AddPage(CreateAutoKeyPage(m_notebook), "Auto Key");
 	m_notebook->AddPage(CreateCroppingPage(m_notebook), "Cropping");
 	//renderview selector
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
@@ -528,6 +572,24 @@ void VMovieView::OnPrev(wxCommandEvent& event) {
 	SetRendering(0.);
 	m_last_frame = 0;
 	m_timer.Start(int(1000.0/double(fps)+0.5));
+}
+
+void VMovieView::OnGenKey(wxCommandEvent& event) {
+   long item = m_auto_key_list->GetNextItem(-1,
+         wxLIST_NEXT_ALL,
+         wxLIST_STATE_SELECTED);
+
+   if (item != -1)
+   {
+	   if (item == 0)
+		   m_advanced_movie->AutoKeyChanComb(1);
+	   else if (item == 1)
+		   m_advanced_movie->AutoKeyChanComb(2);
+	   else if (item == 2)
+		   m_advanced_movie->AutoKeyChanComb(3);
+
+	   m_notebook->SetSelection(1);
+   }
 }
 
 void VMovieView::OnRun(wxCommandEvent& event) {
@@ -865,6 +927,7 @@ void VMovieView::SetRendering(double pcnt) {
 			return;
 		int end_frame = int(interpolator->GetLastT());
 		vrv->SetParams(pcnt * end_frame);
+		vrv->RefreshGL();
 		return;
 	}
 	//basic options

@@ -145,6 +145,7 @@ class RecorderDlg : public wxPanel
 		OnPreview(e); 
 	  }
 
+      void AutoKeyChanComb(int comb);
 
    private:
       wxWindow* m_frame;
@@ -177,7 +178,6 @@ class RecorderDlg : public wxPanel
       void InsertKey(int index, double duration, int interpolation);
       bool MoveOne(vector<bool>& chan_mask, int lv);
       bool GetMask(vector<bool>& chan_mask);
-      void AutoKeyChanComb(int comb);
 
       void OnCh1Check(wxCommandEvent &event);
       static wxWindow* CreateExtraCaptureControl(wxWindow* parent);
