@@ -202,6 +202,7 @@ private:
 	wxWindow* CreateAutoKeyPage(wxWindow *parent);
 	wxWindow* CreateCroppingPage(wxWindow *parent);
 	void Init();
+	void GenKey();
 
 	//left column
 	void OnRun(wxCommandEvent& event);
@@ -227,6 +228,7 @@ private:
 	static wxWindow* CreateExtraCaptureControl(wxWindow* parent);
 
 	//auto key
+	void OnListItemAct(wxListEvent &event);
 	void OnGenKey(wxCommandEvent& event);
 
 	//time slider

@@ -52,6 +52,7 @@ BEGIN_EVENT_TABLE(VMovieView, wxPanel)
 	EVT_BUTTON(ID_SaveMovie, VMovieView::OnRun)
 	//auto key
 	EVT_BUTTON(ID_GenKeyBtn, VMovieView::OnGenKey)
+	EVT_LIST_ITEM_ACTIVATED(ID_AutoKeyList, VMovieView::OnListItemAct)
 	//cropping
 	EVT_CHECKBOX(ID_FrameChk, VMovieView::OnFrameCheck)
 	EVT_BUTTON(ID_ResetBtn, VMovieView::OnResetFrame)
@@ -462,6 +463,25 @@ void VMovieView::Init() {
 	GetSettings(0);
 }
 
+void VMovieView::GenKey()
+{
+   long item = m_auto_key_list->GetNextItem(-1,
+         wxLIST_NEXT_ALL,
+         wxLIST_STATE_SELECTED);
+
+   if (item != -1)
+   {
+	   if (item == 0)
+		   m_advanced_movie->AutoKeyChanComb(1);
+	   else if (item == 1)
+		   m_advanced_movie->AutoKeyChanComb(2);
+	   else if (item == 2)
+		   m_advanced_movie->AutoKeyChanComb(3);
+
+	   m_notebook->SetSelection(1);
+   }
+}
+
 void VMovieView::AddView(wxString view) {
 	if (m_views_cmb)
 		m_views_cmb->Append(view);
@@ -572,24 +592,6 @@ void VMovieView::OnPrev(wxCommandEvent& event) {
 	SetRendering(0.);
 	m_last_frame = 0;
 	m_timer.Start(int(1000.0/double(fps)+0.5));
-}
-
-void VMovieView::OnGenKey(wxCommandEvent& event) {
-   long item = m_auto_key_list->GetNextItem(-1,
-         wxLIST_NEXT_ALL,
-         wxLIST_STATE_SELECTED);
-
-   if (item != -1)
-   {
-	   if (item == 0)
-		   m_advanced_movie->AutoKeyChanComb(1);
-	   else if (item == 1)
-		   m_advanced_movie->AutoKeyChanComb(2);
-	   else if (item == 2)
-		   m_advanced_movie->AutoKeyChanComb(3);
-
-	   m_notebook->SetSelection(1);
-   }
 }
 
 void VMovieView::OnRun(wxCommandEvent& event) {
@@ -893,6 +895,15 @@ void VMovieView::DownFrame()
 	m_time_current_text->ChangeValue(wxString::Format("%d",current_time));
 	SetProgress(pcnt);
 	SetRendering(pcnt);
+}
+
+void VMovieView::OnListItemAct(wxListEvent &event)
+{
+	GenKey();
+}
+
+void VMovieView::OnGenKey(wxCommandEvent& event) {
+	GenKey();
 }
 
 void VMovieView::OnTimeChange(wxScrollEvent &event) {
