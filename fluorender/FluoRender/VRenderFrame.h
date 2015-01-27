@@ -69,7 +69,7 @@ using namespace std;
 				   "." \
 				   VERSION_MINOR_TAG \
 				   "/"
-#define HELP_MOVIE "http://www.sci.utah.edu/releases/fluorender_v"\
+#define HELP_MANUAL "http://www.sci.utah.edu/releases/fluorender_v"\
 	               VERSION_MAJOR_TAG \
 				   "." \
 				   VERSION_MINOR_TAG \
@@ -78,8 +78,17 @@ using namespace std;
 				   "." \
 				   VERSION_MINOR_TAG \
 				   "_Manual.pdf"
-#define BATCH_INFO HELP_MOVIE
-#define HELP_PAINT HELP_MOVIE
+#define HELP_TUTORIAL "http://www.sci.utah.edu/releases/fluorender_v"\
+	               VERSION_MAJOR_TAG \
+				   "." \
+				   VERSION_MINOR_TAG \
+				   "/FluoRender" \
+	               VERSION_MAJOR_TAG \
+				   "." \
+				   VERSION_MINOR_TAG \
+				   "_Tutorials.pdf"
+#define BATCH_INFO HELP_MANUAL
+#define HELP_PAINT HELP_MANUAL
 
 #define UITEXT_DATAVIEW		"Datasets"
 #define UITEXT_TREEVIEW		"Workspace"
@@ -132,6 +141,7 @@ class VRenderFrame: public wxFrame
 		ID_CheckUpdates,
 		ID_Facebook,
 		ID_Manual,
+		ID_Tutorial,
 		ID_Twitter,
 		ID_Info,
 		ID_ShowHideToolbar
@@ -404,6 +414,7 @@ private:
 	void OnCheckUpdates(wxCommandEvent& WXUNUSED(event));
 	void OnFacebook(wxCommandEvent& WXUNUSED(event));
 	void OnManual(wxCommandEvent& WXUNUSED(event));
+    void OnTutorial(wxCommandEvent& WXUNUSED(event));
 	void OnTwitter(wxCommandEvent& WXUNUSED(event));
 	void OnShowHideUI(wxCommandEvent& WXUNUSED(event));
 	void OnShowHideToolbar(wxCommandEvent& WXUNUSED(event));
