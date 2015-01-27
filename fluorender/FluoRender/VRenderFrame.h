@@ -298,6 +298,9 @@ public:
 	//quit option
 	void OnQuit(wxCommandEvent& WXUNUSED(event))
 	{ Close(true); }
+    //show infor function
+    
+    void OnInfo(wxCommandEvent& WXUNUSED(event));
 
 public: //public so export window can see it and set it. 
 	RecorderDlg* m_recorder_dlg;
@@ -399,7 +402,6 @@ private:
 	void OnOpenMesh(wxCommandEvent& WXUNUSED(event));
 	void OnOrganize(wxCommandEvent& WXUNUSED(event));
 	void OnCheckUpdates(wxCommandEvent& WXUNUSED(event));
-	void OnInfo(wxCommandEvent& WXUNUSED(event));
 	void OnFacebook(wxCommandEvent& WXUNUSED(event));
 	void OnManual(wxCommandEvent& WXUNUSED(event));
 	void OnTwitter(wxCommandEvent& WXUNUSED(event));
