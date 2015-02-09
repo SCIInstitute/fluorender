@@ -772,6 +772,10 @@ public:
 	{
 		m_info_names += str;
 	}
+	void SetInfoNames(wxString &str)
+	{
+		m_info_names = str;
+	}
 	wxString &GetInfoNames()
 	{
 		return m_info_names;
@@ -779,6 +783,10 @@ public:
 	void AddInfoValues(wxString &str)
 	{
 		m_info_values += str;
+	}
+	void SetInfoValues(wxString &str)
+	{
+		m_info_values = str;
 	}
 	wxString &GetInfoValues()
 	{
