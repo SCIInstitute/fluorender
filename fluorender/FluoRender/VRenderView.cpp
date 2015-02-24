@@ -1000,7 +1000,9 @@ void VRenderGLView::DrawVolumes(int peel)
    PrepFinalBuffer();
 
    //draw
-   if (m_updating ||
+   if ((m_int_mode!=2 &&
+	   m_int_mode!=7 &&
+	   m_updating) ||
          (!m_drawing_coord &&
           (m_int_mode == 1 ||
            m_int_mode == 3 ||

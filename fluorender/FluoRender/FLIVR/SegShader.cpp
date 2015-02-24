@@ -274,6 +274,7 @@ namespace FLIVR
 	"	vec3 nb;\n" \
 	"	vec3 max_nb = t.stp;\n" \
 	"	float m;\n" \
+	"	float mx;\n" \
 	"	for (int i=-1; i<2; i++)\n"\
 	"	for (int j=-1; j<2; j++)\n"\
 	"	for (int k=-1; k<2; k++)\n"\
@@ -289,7 +290,8 @@ namespace FLIVR
 	"	if (loc7.y>0.0)\n" \
 	"	{\n" \
 	"		m = texture3D(tex0, max_nb).x + loc7.y;\n" \
-	"		if (m < texture3D(tex0, t.stp).x)\n" \
+	"		mx = texture3D(tex0, t.stp).x;\n" \
+	"		if (m < mx || m - mx > 2.0*loc7.y)\n" \
 	"			discard;\n" \
 	"	}\n" \
 	"	gl_FragColor += cc*stop;\n"\
