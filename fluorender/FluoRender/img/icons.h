@@ -168,6 +168,9 @@ const static unsigned char listicon_brushdesel_png[3737];
 /* listicon_brushdiffuse.png - 3702 bytes */
 const static unsigned char listicon_brushdiffuse_png[3702];
 
+/* brush_solid.png - 16598 bytes */
+static const unsigned char listicon_brushsolid_png[16598];
+
 /* listicon_brusherase.png - 3714 bytes */
 const static unsigned char listicon_brusherase_png[3714];
 

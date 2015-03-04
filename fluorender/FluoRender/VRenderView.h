@@ -601,6 +601,7 @@ class VRenderGLView: public wxGLCanvas
          //2-append
          //3-erase
          //4-diffuse
+		 //8-solid
 
          //resizing
          bool m_resize;

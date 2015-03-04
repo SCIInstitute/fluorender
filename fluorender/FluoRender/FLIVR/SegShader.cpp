@@ -549,7 +549,8 @@ namespace FLIVR
 				z << SEG_BODY_INIT_2D_COORD;
 				if (paint_mode_==1 ||
 					paint_mode_==2 ||
-					paint_mode_==4)
+					paint_mode_==4 ||
+					paint_mode_==8)
 					z << SEG_BODY_INIT_CULL;
 				else if (paint_mode_==3)
 					z << SEG_BODY_INIT_CULL_ERASE;
@@ -586,6 +587,8 @@ namespace FLIVR
 				else if (paint_mode_==5)
 					z << SEG_BODY_INIT_BLEND_FLOOD;
 				else if (paint_mode_==7)
+					z << SEG_BODY_INIT_BLEND_ALL;
+				else if (paint_mode_==8)
 					z << SEG_BODY_INIT_BLEND_ALL;
 				else if (paint_mode_==11)
 					z << SEG_BODY_INIT_POSTER;

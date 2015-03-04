@@ -1506,7 +1506,8 @@ void VRenderGLView::DrawBrush()
       int mode = m_selector.GetMode();
 
       if (mode == 1 ||
-            mode == 2)
+            mode == 2 ||
+			mode == 8)
       {
          //draw circle1
          glColor3d(m_bg_color_inv.r(),
@@ -1670,7 +1671,8 @@ void VRenderGLView::PaintStroke()
       paint_shader->setLocalParam(1, nx, ny, 0.0f, 0.0f);
 
       double x, y;
-      double radius1;
+      double radius1 = m_brush_radius1;
+	  double radius2 = m_brush_radius2;
       for (int i=0; i<=repeat; i++)
       {
          x = spx + i*px;
@@ -1683,15 +1685,17 @@ void VRenderGLView::PaintStroke()
          case 4:
             radius1 = 0.0;
             break;
+		 case 8:
+			 radius2 = radius1;
+			 break;
          default:
-            radius1 = m_brush_radius1;
             break;
          }
          //send uniforms to paint shader
          paint_shader->setLocalParam(0,
                x, double(ny)-y,
                radius1*pressure,
-               m_brush_radius2*pressure);
+               radius2*pressure);
          //draw a square
          glBegin(GL_QUADS);
          glTexCoord2f(0.0f, 0.0f);
@@ -9500,7 +9504,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
    {
       if (m_int_mode == 2 || m_int_mode == 7)
       {
-         if (m_use_brush_radius2)
+         if (m_use_brush_radius2 && m_selector.GetMode()!=8)
          {
             double delta = wheel / 100.0;
             m_brush_radius2 += delta;
