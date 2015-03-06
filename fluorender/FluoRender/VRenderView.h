@@ -882,6 +882,7 @@ class VRenderGLView: public wxGLCanvas
          //mode: 0-maximum with original value; 1-maximum with transfered value; 2-accumulated with original value; 3-accumulated with transfered value
          double GetPointVolume(Point &mp, int mx, int my, VolumeData* vd, int mode, bool use_transf, double thresh = 0.5);
          double GetPointVolumeBox(Point &mp, int mx, int my, VolumeData* vd);
+		 double GetPointVolumeBox2(Point &p1, Point &p2, int mx, int my, VolumeData* vd);
          double GetPointPlane(Point &mp, int mx, int my, Point *planep=0);
          Point* GetEditingRulerPoint(int mx, int my);
 

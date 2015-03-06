@@ -306,6 +306,7 @@ void RulerListCtrl::OnKeyDown(wxKeyEvent& event)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 EVT_MENU(ID_LocatorBtn, MeasureDlg::OnNewLocator)
+EVT_MENU(ID_ProbeBtn, MeasureDlg::OnNewProbe)
 EVT_MENU(ID_RulerBtn, MeasureDlg::OnNewRuler)
 EVT_MENU(ID_RulerMPBtn, MeasureDlg::OnNewRulerMP)
 EVT_MENU(ID_RulerEditBtn, MeasureDlg::OnRulerEdit)
@@ -333,6 +334,10 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
          wxGetBitmapFromMemory(listicon_locator),
          wxNullBitmap,
          "Add locators to the render view by clicking");
+   m_toolbar->AddCheckTool(ID_ProbeBtn, "Probe",
+	     wxGetBitmapFromMemory(drill),
+		 wxNullBitmap,
+		 "Add probes to the render view by clicking once");
    m_toolbar->AddCheckTool(ID_RulerBtn, "2pt Ruler",
          wxGetBitmapFromMemory(listicon_addruler),
          wxNullBitmap,
@@ -414,6 +419,7 @@ void MeasureDlg::GetSettings(VRenderView* vrv)
    if (m_view && m_view->m_glview)
    {
       m_toolbar->ToggleTool(ID_LocatorBtn, false);
+	  m_toolbar->ToggleTool(ID_ProbeBtn, false);
       m_toolbar->ToggleTool(ID_RulerBtn, false);
       m_toolbar->ToggleTool(ID_RulerMPBtn, false);
       m_toolbar->ToggleTool(ID_RulerEditBtn, false);
@@ -428,6 +434,8 @@ void MeasureDlg::GetSettings(VRenderView* vrv)
             m_toolbar->ToggleTool(ID_RulerMPBtn, true);
          else if (ruler_type == 2)
             m_toolbar->ToggleTool(ID_LocatorBtn, true);
+		 else if (ruler_type == 3)
+			m_toolbar->ToggleTool(ID_ProbeBtn, true);
       }
       else if (int_mode == 6)
          m_toolbar->ToggleTool(ID_RulerEditBtn, true);
@@ -474,6 +482,7 @@ void MeasureDlg::OnNewLocator(wxCommandEvent& event)
    if (m_toolbar->GetToolState(ID_RulerMPBtn))
       m_view->FinishRuler();
 
+   m_toolbar->ToggleTool(ID_ProbeBtn, false);
    m_toolbar->ToggleTool(ID_RulerBtn, false);
    m_toolbar->ToggleTool(ID_RulerMPBtn, false);
    m_toolbar->ToggleTool(ID_RulerEditBtn, false);
@@ -489,6 +498,29 @@ void MeasureDlg::OnNewLocator(wxCommandEvent& event)
    }
 }
 
+void MeasureDlg::OnNewProbe(wxCommandEvent& event)
+{
+   if (!m_view) return;
+
+   if (m_toolbar->GetToolState(ID_RulerMPBtn))
+      m_view->FinishRuler();
+
+   m_toolbar->ToggleTool(ID_LocatorBtn, false);
+   m_toolbar->ToggleTool(ID_RulerBtn, false);
+   m_toolbar->ToggleTool(ID_RulerMPBtn, false);
+   m_toolbar->ToggleTool(ID_RulerEditBtn, false);
+
+   if (m_toolbar->GetToolState(ID_ProbeBtn))
+   {
+      m_view->SetIntMode(5);
+      m_view->SetRulerType(3);
+   }
+   else
+   {
+      m_view->SetIntMode(1);
+   }
+}
+
 void MeasureDlg::OnNewRuler(wxCommandEvent& event)
 {
    if (!m_view) return;
@@ -497,6 +529,7 @@ void MeasureDlg::OnNewRuler(wxCommandEvent& event)
       m_view->FinishRuler();
 
    m_toolbar->ToggleTool(ID_LocatorBtn, false);
+   m_toolbar->ToggleTool(ID_ProbeBtn, false);
    m_toolbar->ToggleTool(ID_RulerMPBtn, false);
    m_toolbar->ToggleTool(ID_RulerEditBtn, false);
 
@@ -516,6 +549,7 @@ void MeasureDlg::OnNewRulerMP(wxCommandEvent& event)
    if (!m_view) return;
 
    m_toolbar->ToggleTool(ID_LocatorBtn, false);
+   m_toolbar->ToggleTool(ID_ProbeBtn, false);
    m_toolbar->ToggleTool(ID_RulerBtn, false);
    m_toolbar->ToggleTool(ID_RulerEditBtn, false);
 
@@ -539,6 +573,7 @@ void MeasureDlg::OnRulerEdit(wxCommandEvent& event)
       m_view->FinishRuler();
 
    m_toolbar->ToggleTool(ID_LocatorBtn, false);
+   m_toolbar->ToggleTool(ID_ProbeBtn, false);
    m_toolbar->ToggleTool(ID_RulerBtn, false);
    m_toolbar->ToggleTool(ID_RulerMPBtn, false);
 

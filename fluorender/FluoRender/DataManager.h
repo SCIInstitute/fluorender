@@ -805,7 +805,7 @@ public:
 	}
 private:
 	static int m_num;
-	int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator
+	int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe
 	bool m_finished;
 	vector<Point> m_ruler;
 	bool m_disp;

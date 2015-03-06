@@ -80,6 +80,7 @@ class MeasureDlg : public wxPanel
       enum
       {
          ID_LocatorBtn = wxID_HIGHEST+2101,
+		 ID_ProbeBtn,
          ID_RulerBtn,
          ID_RulerMPBtn,
          ID_RulerEditBtn,
@@ -119,6 +120,7 @@ class MeasureDlg : public wxPanel
 
    private:
       void OnNewLocator(wxCommandEvent& event);
+	  void OnNewProbe(wxCommandEvent& event);
       void OnNewRuler(wxCommandEvent& event);
       void OnNewRulerMP(wxCommandEvent& event);
       void OnRulerEdit(wxCommandEvent& event);

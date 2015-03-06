@@ -2758,7 +2758,8 @@ double Ruler::GetAngle()
 {
 	double angle = 0.0;
 
-	if (m_ruler_type == 0)
+	if (m_ruler_type == 0 ||
+		m_ruler_type == 3)
 	{
 		if (m_ruler.size() >= 2)
 		{
@@ -2781,7 +2782,8 @@ bool Ruler::AddPoint(Point &point)
 	if (m_ruler_type == 2 &&
 		m_ruler.size() == 1)
 		return false;
-	else if (m_ruler_type == 0 &&
+	else if ((m_ruler_type == 0 ||
+		m_ruler_type == 3) &&
 		m_ruler.size() == 2)
 		return false;
 	else
@@ -2790,7 +2792,8 @@ bool Ruler::AddPoint(Point &point)
 		if (m_ruler_type == 2 &&
 			m_ruler.size() == 1)
 			m_finished = true;
-		else if (m_ruler_type == 0 &&
+		else if ((m_ruler_type == 0 ||
+			m_ruler_type == 3) &&
 			m_ruler.size() == 2)
 			m_finished = true;
 		return true;

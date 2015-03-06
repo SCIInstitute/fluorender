@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include <algorithm>
+#include <limits>
 #include "GL/mywgl.h"
 #include "png_resource.h"
 #include "img/icons.h"
@@ -1723,7 +1724,7 @@ void VRenderGLView::PaintStroke()
 
    //bind back the window frame buffer
    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+   RefreshGL();
 }
 
 //show the stroke buffer
@@ -3969,11 +3970,17 @@ void VRenderGLView::SetBrush(int mode)
          m_int_mode == 7)
    {
       m_int_mode = 7;
-      m_selector.SetMode(1);
+	  if (m_ruler_type == 3)
+		  m_selector.SetMode(8);
+	  else
+		m_selector.SetMode(1);
    }
    else if (m_int_mode == 8)
    {
-      m_selector.SetMode(1);
+	  if (m_ruler_type == 3)
+		  m_selector.SetMode(8);
+	  else
+		m_selector.SetMode(1);
    }
    else
    {
@@ -8666,6 +8673,120 @@ double VRenderGLView::GetPointVolumeBox(Point &mp, int mx, int my, VolumeData* v
    return mint;
 }
 
+double VRenderGLView::GetPointVolumeBox2(Point &p1, Point &p2, int mx, int my, VolumeData* vd)
+{
+   if (!vd)
+      return -1.0;
+   int nx = GetSize().x;
+   int ny = GetSize().y;
+   if (nx <= 0 || ny <= 0)
+      return -1.0;
+   vector<Plane*> *planes = vd->GetVR()->get_planes();
+   if (planes->size() != 6)
+      return -1.0;
+
+   glMatrixMode(GL_MODELVIEW_MATRIX);
+   glPushMatrix();
+   glMatrixMode(GL_PROJECTION_MATRIX);
+   glPushMatrix();
+   //projection
+   HandleProjection(nx, ny);
+   //Transformation
+   HandleCamera();
+   //translate object
+   glTranslated(m_obj_transx, m_obj_transy, m_obj_transz);
+   //rotate object
+   glRotated(m_obj_rotz+180.0, 0.0, 0.0, 1.0);
+   glRotated(m_obj_roty+180.0, 0.0, 1.0, 0.0);
+   glRotated(m_obj_rotx, 1.0, 0.0, 0.0);
+   //center object
+   glTranslated(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz);
+   //texture transform
+   Transform *tform = vd->GetTexture()->transform();
+   double mat[16];
+   tform->get_trans(mat);
+   glMultMatrixd(mat);
+
+   double matrix[16];
+   Transform mv;
+   Transform p;
+   glGetDoublev(GL_MODELVIEW_MATRIX, matrix);
+   mv.set(matrix);
+   glGetDoublev(GL_PROJECTION_MATRIX, matrix);
+   p.set(matrix);
+
+   double x, y;
+   x = double(mx) * 2.0 / double(nx) - 1.0;
+   y = 1.0 - double(my) * 2.0 / double(ny);
+   p.invert();
+   mv.invert();
+   //transform mp1 and mp2 to object space
+   Point mp1(x, y, 0.0);
+   mp1 = p.transform(mp1);
+   mp1 = mv.transform(mp1);
+   Point mp2(x, y, 1.0);
+   mp2 = p.transform(mp2);
+   mp2 = mv.transform(mp2);
+   Vector ray_d = mp1-mp2;
+   ray_d.normalize();
+   Ray ray(mp1, ray_d);
+   double mint = -1.0;
+   double maxt = std::numeric_limits<double>::max();
+   double t;
+   //for each plane, calculate the intersection point
+   Plane* plane = 0;
+   Point pp;//a point on plane
+   int i, j;
+   bool pp_out;
+   for (i=0; i<6; i++)
+   {
+      plane = (*planes)[i];
+      FLIVR::Vector vec = plane->normal();
+      FLIVR::Point pnt = plane->get_point();
+      if (ray.planeIntersectParameter(vec,pnt, t))
+      {
+         pp = ray.parameter(t);
+
+         pp_out = false;
+         //determine if the point is inside the box
+         for (j=0; j<6; j++)
+         {
+            if (j == i)
+               continue;
+            if ((*planes)[j]->eval_point(pp) < 0)
+            {
+               pp_out = true;
+               break;
+            }
+         }
+
+         if (!pp_out)
+         {
+            if (t > mint)
+            {
+               p1 = pp;
+               mint = t;
+            }
+			if (t < maxt)
+			{
+				p2 = pp;
+				maxt = t;
+			}
+         }
+      }
+   }
+
+   glMatrixMode(GL_MODELVIEW_MATRIX);
+   glPopMatrix();
+   glMatrixMode(GL_PROJECTION_MATRIX);
+   glPopMatrix();
+
+   p1 = tform->transform(p1);
+   p2 = tform->transform(p2);
+
+   return mint;
+}
+
 double VRenderGLView::GetPointPlane(Point &mp, int mx, int my, Point* planep)
 {
    int nx = GetSize().x;
@@ -8843,49 +8964,63 @@ bool VRenderGLView::GetRulerFinished()
 
 void VRenderGLView::AddRulerPoint(int mx, int my)
 {
-   Point p;
+	if (m_ruler_type == 3)
+	{
+		Point p1, p2;
+		Ruler* ruler = new Ruler();
+		ruler->SetRulerType(m_ruler_type);
+		GetPointVolumeBox2(p1, p2, mx, my, m_cur_vol);
+		ruler->AddPoint(p1);
+		ruler->AddPoint(p2);
+		ruler->SetTimeDep(m_ruler_time_dep);
+		ruler->SetTime(m_tseq_cur_num);
+		m_ruler_list.push_back(ruler);
+	}
+	else
+	{
+		Point p;
+		if (m_point_volume_mode)
+		{
+			double t = GetPointVolume(p, mx, my, m_cur_vol,
+				m_point_volume_mode, m_ruler_use_transf);
+			if (t <= 0.0)
+			{
+				t = GetPointPlane(p, mx, my);
+				if (t <= 0.0)
+					return;
+			}
+		}
+		else
+		{
+			double t = GetPointPlane(p, mx, my);
+			if (t <= 0.0)
+				return;
+		}
 
-   if (m_point_volume_mode)
-   {
-      double t = GetPointVolume(p, mx, my, m_cur_vol,
-            m_point_volume_mode, m_ruler_use_transf);
-      if (t <= 0.0)
-      {
-         t = GetPointPlane(p, mx, my);
-         if (t <= 0.0)
-            return;
-      }
-   }
-   else
-   {
-      double t = GetPointPlane(p, mx, my);
-      if (t <= 0.0)
-         return;
-   }
+		bool new_ruler = true;
+		if (m_ruler_list.size())
+		{
+			Ruler* ruler = m_ruler_list[m_ruler_list.size()-1];
+			if (ruler && !ruler->GetFinished())
+			{
+				ruler->AddPoint(p);
+				new_ruler = false;
+			}
+		}
+		if (new_ruler)
+		{
+			Ruler* ruler = new Ruler();
+			ruler->SetRulerType(m_ruler_type);
+			ruler->AddPoint(p);
+			ruler->SetTimeDep(m_ruler_time_dep);
+			ruler->SetTime(m_tseq_cur_num);
+			m_ruler_list.push_back(ruler);
+		}
+	}
 
-   bool new_ruler = true;
-   if (m_ruler_list.size())
-   {
-      Ruler* ruler = m_ruler_list[m_ruler_list.size()-1];
-      if (ruler && !ruler->GetFinished())
-      {
-         ruler->AddPoint(p);
-         new_ruler = false;
-      }
-   }
-   if (new_ruler)
-   {
-      Ruler* ruler = new Ruler();
-      ruler->SetRulerType(m_ruler_type);
-      ruler->AddPoint(p);
-      ruler->SetTimeDep(m_ruler_time_dep);
-      ruler->SetTime(m_tseq_cur_num);
-      m_ruler_list.push_back(ruler);
-   }
-
-   VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-   if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
-      vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
+		vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
 }
 
 void VRenderGLView::AddPaintRulerPoint()
@@ -9252,7 +9387,10 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
          //segment volume, calculate center, add ruler point
          m_paint_enable = true;
          Segment();
-         AddPaintRulerPoint();
+		 if (m_ruler_type == 3)
+			 AddRulerPoint(event.GetX(), event.GetY());
+		 else
+			AddPaintRulerPoint();
          m_int_mode = 8;
          m_force_clear = true;
       }
