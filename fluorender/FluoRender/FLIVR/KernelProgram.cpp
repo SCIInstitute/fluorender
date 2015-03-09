@@ -18,6 +18,7 @@ namespace FLIVR
 
 	KernelProgram::~KernelProgram()
 	{
+		destroy();
 	}
 
 	void KernelProgram::init_kernels_supported()
