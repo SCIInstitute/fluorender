@@ -464,6 +464,7 @@ class VRenderGLView: public wxGLCanvas
          void AddPaintRulerPoint();
          void DrawRulers();
          vector<Ruler*>* GetRulerList();
+		 int RulerProfile(int index);
 		 //public mouse
 		 
          void OnMouse(wxMouseEvent& event);
