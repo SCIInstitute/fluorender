@@ -163,6 +163,10 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
       SetItemState(item, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 }
 
+int RulerListCtrl::GetCurrSelection()
+{
+}
+
 void RulerListCtrl::DeleteSelection()
 {
    if (!m_view) return;
@@ -310,6 +314,7 @@ EVT_MENU(ID_ProbeBtn, MeasureDlg::OnNewProbe)
 EVT_MENU(ID_RulerBtn, MeasureDlg::OnNewRuler)
 EVT_MENU(ID_RulerMPBtn, MeasureDlg::OnNewRulerMP)
 EVT_MENU(ID_RulerEditBtn, MeasureDlg::OnRulerEdit)
+EVT_MENU(ID_ProfileBtn, MeasureDlg::OnProfile)
 EVT_MENU(ID_DeleteBtn, MeasureDlg::OnDelete)
 EVT_MENU(ID_DeleteAllBtn, MeasureDlg::OnDeleteAll)
 EVT_MENU(ID_ExportBtn, MeasureDlg::OnExport)
@@ -350,6 +355,9 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
          wxGetBitmapFromMemory(listicon_ruleredit),
          wxNullBitmap,
          "Select and move ruler points");
+   m_toolbar->AddTool(ID_ProfileBtn, "Profile",
+	     wxGetBitmapFromMemory(prof_curve),
+		 "Generate intensity profile along curve");
    m_toolbar->AddTool(ID_DeleteBtn, "Delete",
          wxGetBitmapFromMemory(listicon_delete),
          "Delete a selected ruler");
@@ -581,6 +589,14 @@ void MeasureDlg::OnRulerEdit(wxCommandEvent& event)
       m_view->SetIntMode(6);
    else
       m_view->SetIntMode(1);
+}
+
+void MeasureDlg::OnProfile(wxCommandEvent& event)
+{
+	if (m_view)
+	{
+		m_view->RulerProfile();
+	}
 }
 
 void MeasureDlg::OnDelete(wxCommandEvent& event)

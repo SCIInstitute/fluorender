@@ -291,4 +291,6 @@ const static unsigned char smooth_off_png[14747];
 /* drill.png - 15753 bytes */
 const static unsigned char drill_png[15753];
 
+/* prof_curve.png - 18610 bytes */
+const static unsigned char prof_curve_png[18610];
 };
