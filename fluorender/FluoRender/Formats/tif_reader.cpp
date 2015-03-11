@@ -188,6 +188,7 @@ void TIFReader::Preprocess()
             std::wstring regex = slice_str.substr(0,begin2+1);
             FIND_FILES(path,L".tif",list,m_cur_time,regex);
             m_4d_seq[t].type = 1;
+			m_4d_seq[t].slices.clear();
             for(size_t f = 0; f < list.size(); f++) {
                size_t start_idx = begin2+1;
                size_t end_idx   = list.at(f).find(L".tif");
@@ -620,7 +621,8 @@ void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
    uint64_t prediction = GetTiffField(kPredictionTag,NULL,0);
    uint64_t bits = GetTiffField(kSamplesPerPixelTag,NULL,0);
    tsize_t stride = (GetTiffField(kPlanarConfigurationTag,NULL,0) == 2)?1:bits;
-   uint64_t rows_per_strip = GetTiffField(kRowsPerStripTag,NULL,0);
+   //uint64_t rows_per_strip = GetTiffField(kRowsPerStripTag,NULL,0);
+   uint64_t rows_per_strip = strip_size / GetTiffField(kImageWidthTag,NULL,0);
    bool isCompressed = tmp == 5;
     if (isCompressed) {
         LZWDecode((tidata_t)temp, (tidata_t)data, strip_size);
@@ -793,8 +795,9 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
    void *val = 0;
    bool eight_bit = bits == 8;
 
-   val = malloc((long long)m_x_size * (long long)m_y_size *
-         (long long)numPages * (eight_bit?1:2));
+   long long total_size = (long long)m_x_size * (long long)m_y_size *
+         (long long)numPages;
+   val = malloc(total_size * (eight_bit?1:2));
    if (!val)
       throw std::runtime_error( "Unable to allocate memory to read TIFF." );
 
@@ -844,12 +847,18 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
          } else {
             valindex = pageindex*pagepixels +
                strip*strip_size/(eight_bit?1:2);
-            if (eight_bit)
-               GetTiffStrip(sequence?0:pageindex, strip,
-                     (uint8_t*)val+valindex,strip_size);
-            else
-               GetTiffStrip(sequence?0:pageindex, strip,
-                     (uint16_t*)val+valindex,strip_size);
+			uint64_t strip_size_used = strip_size;
+			if (valindex+strip_size >= total_size)
+				strip_size_used = total_size-valindex;
+			if (strip_size_used > 0)
+			{
+				if (eight_bit)
+				   GetTiffStrip(sequence?0:pageindex, strip,
+						 (uint8_t*)val+valindex,strip_size_used);
+				else
+				   GetTiffStrip(sequence?0:pageindex, strip,
+						 (uint16_t*)val+valindex,strip_size_used);
+			}
          }
       }
       if (sequence) CloseTiff();

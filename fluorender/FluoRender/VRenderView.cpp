@@ -9142,7 +9142,7 @@ int VRenderGLView::RulerProfile(int index)
 	dir.normalize();
 
 	//bin number
-	int bins = int(dist/2+0.5);
+	int bins = int(dist/1+0.5);
 	if (bins <= 0) return 0;
 	double bin_dist = dist / bins;
 	vector<ProfileBin>* profile = ruler->GetProfile();
