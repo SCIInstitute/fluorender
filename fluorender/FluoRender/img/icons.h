@@ -39,6 +39,9 @@ const static unsigned char freefly_png[1143];
 /* gear_45.png - 17863 bytes */
 const static unsigned char gear_45_png[17863];
 
+/* icon_16.png - 18975 bytes */
+const static unsigned char icon_16_png[18975];
+
 /* icon_32.png - 15123 bytes */
 const static unsigned char icon_32_png[15123];
 

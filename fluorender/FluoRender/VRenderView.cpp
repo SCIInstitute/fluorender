@@ -9096,6 +9096,100 @@ vector<Ruler*>* VRenderGLView::GetRulerList()
    return &m_ruler_list;
 }
 
+int VRenderGLView::RulerProfile(int index)
+{
+	if (index < 0 ||
+		index >= m_ruler_list.size() ||
+		!m_cur_vol)
+		return 0;
+
+	Ruler* ruler = m_ruler_list[index];
+	if (ruler->GetNumPoint() < 2)
+		return 0;
+
+	VolumeData* vd = m_cur_vol;
+	double spcx, spcy, spcz;
+	vd->GetSpacings(spcx, spcy, spcz);
+	int nx, ny, nz;
+	vd->GetResolution(nx, ny, nz);
+	if (spcx<=0.0 || spcy<=0.0 || spcz<=0.0 ||
+		nx<=0 || ny<=0 || nz<=0)
+		return 0;
+	//get data
+	vd->GetVR()->return_mask();
+	Texture* tex = vd->GetTexture();
+	if (!tex) return 0;
+	Nrrd* nrrd_data = tex->get_nrrd(0);
+	if (!nrrd_data) return 0;
+	void* data = nrrd_data->data;
+	if (!data) return 0;
+	//mask
+	Nrrd* nrrd_mask = tex->get_nrrd(tex->nmask());
+	void* mask = 0;
+	if (nrrd_mask)
+		mask = nrrd_mask->data;
+
+	Point p1, p2;
+	p1 = *(ruler->GetPoint(0));
+	p2 = *(ruler->GetPoint(1));
+	//object space
+	p1 = Point(p1.x()/spcx, p1.y()/spcy, p1.z()/spcz);
+	p2 = Point(p2.x()/spcx, p2.y()/spcy, p2.z()/spcz);
+	Vector dir = p2 - p1;
+	double dist = dir.length();
+	if (dist < EPS)
+		return 0;
+	dir.normalize();
+
+	//bin number
+	int bins = int(dist/2+0.5);
+	if (bins <= 0) return 0;
+	double bin_dist = dist / bins;
+	vector<ProfileBin>* profile = ruler->GetProfile();
+	if (!profile) return 0;
+	profile->clear();
+	profile->reserve(size_t(bins));
+	for (unsigned int b=0; b<bins; ++b)
+		profile->push_back(ProfileBin());
+
+	//go through data
+	if (mask)
+	{
+		int i, j, k;
+		for (i=0; i<nx; ++i)
+		for (j=0; j<ny; ++j)
+		for (k=0; k<nz; ++k)
+		{
+			int index = nx*ny*k + nx*j + i;
+			unsigned char mask_value = ((unsigned char*)mask)[index];
+			if (mask_value)
+			{
+				double intensity = 0.0;
+				if (nrrd_data->type == nrrdTypeUChar)
+					intensity = double(((unsigned char*)data)[index]) / 255.0;
+				else if (nrrd_data->type == nrrdTypeUShort)
+					intensity = double(((unsigned short*)data)[index]) / 65535.0;
+
+				//find bin
+				Point p(i, j, k);
+				Vector pdir = p - p1;
+				double proj = Dot(pdir, dir);
+				int bin_num = int(proj / bin_dist);
+				if (bin_num<0 || bin_num>=bins)
+					continue;
+
+				(*profile)[bin_num].m_pixels++;
+				(*profile)[bin_num].m_accum += intensity;
+			}
+		}
+	}
+	else
+	{
+	}
+
+	return 1;
+}
+
 //traces
 TraceGroup* VRenderGLView::GetTraceGroup()
 {

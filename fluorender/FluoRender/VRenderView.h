@@ -1376,6 +1376,10 @@ class VRenderView: public wxPanel
    {
       if (m_glview) return m_glview->GetRulerList(); else return 0;
    }
+	int RulerProfile(int index)
+	{
+		if (m_glview) return m_glview->RulerProfile(index); else return 0;
+	}
 
 	//traces
 	void CreateTraceGroup()

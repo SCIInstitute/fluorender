@@ -699,6 +699,16 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+class ProfileBin
+{
+public:
+	ProfileBin():
+	m_pixels(0), m_accum(0.0) {}
+	~ProfileBin() {}
+	int m_pixels;
+	double m_accum;
+};
+
 class Ruler : public TreeLayer
 {
 public:
@@ -803,6 +813,13 @@ public:
 	{
 		return m_font;
 	}
+
+	vector<ProfileBin> *GetProfile()
+	{
+		return &m_profile;
+	}
+	void SaveProfile(wxString &filename);
+
 private:
 	static int m_num;
 	int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe
@@ -810,6 +827,8 @@ private:
 	vector<Point> m_ruler;
 	bool m_disp;
 	Transform *m_tform;
+	//a profile
+	vector<ProfileBin> m_profile;
 
 	//time-dependent
 	bool m_time_dep;

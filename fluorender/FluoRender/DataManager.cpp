@@ -2903,6 +2903,10 @@ wxString Ruler::GetDelInfoValues(wxString del)
 	return output;
 }
 
+void Ruler::SaveProfile(wxString &filename)
+{
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int Vertex::Read(ifstream &ifs)
 {

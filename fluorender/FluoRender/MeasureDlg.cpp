@@ -165,6 +165,10 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 
 int RulerListCtrl::GetCurrSelection()
 {
+   long item = GetNextItem(-1,
+         wxLIST_NEXT_ALL,
+         wxLIST_STATE_SELECTED);
+	return int(item);
 }
 
 void RulerListCtrl::DeleteSelection()
@@ -295,6 +299,20 @@ void RulerListCtrl::Export(wxString filename)
             str = "N/A";
          tos << str << "\t";
          tos << ruler->GetInfoValues() << "\n";
+
+		 vector<ProfileBin>* profile = ruler->GetProfile();
+		 if (profile && profile->size())
+		 {
+			 for (size_t j=0; j<profile->size(); ++j)
+			 {
+				 int pixels = (*profile)[j].m_pixels;
+				 if (pixels <= 0)
+					 tos << "0.0\t";
+				 else
+					 tos << (*profile)[j].m_accum / pixels << "\t";
+			 }
+			 tos << "\n";
+		 }
       }
    }
 }
@@ -595,7 +613,7 @@ void MeasureDlg::OnProfile(wxCommandEvent& event)
 {
 	if (m_view)
 	{
-		m_view->RulerProfile();
+		m_view->RulerProfile(m_rulerlist->GetCurrSelection());
 	}
 }
 
