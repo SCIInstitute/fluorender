@@ -554,7 +554,11 @@ void VolumeData::AddEmptyMask()
 	{
 		//add the nrrd data for mask
 		Nrrd *nrrd_mask = nrrdNew();
-		uint8 *val8 = new (std::nothrow) uint8[m_res_x*m_res_y*m_res_z];
+		long long mem_size = (long long)m_res_x*
+			(long long)m_res_y*
+			(long long)m_res_z;
+		//uint8 *val8 = new (std::nothrow) uint8[mem_size];
+		uint8 *val8 = (uint8*)malloc(mem_size*sizeof(uint8));
 		if (!val8)
 		{
 			wxMessageBox("Not enough memory. Please save project and restart.");
@@ -562,7 +566,7 @@ void VolumeData::AddEmptyMask()
 		}
 		double spcx, spcy, spcz;
 		m_tex->get_spacings(spcx, spcy, spcz);
-		memset((void*)val8, 0, sizeof(uint8)*m_res_x*m_res_y*m_res_z);
+		memset((void*)val8, 0, mem_size*sizeof(uint8));
 		nrrdWrap(nrrd_mask, val8, nrrdTypeUChar, 3, (size_t)m_res_x, (size_t)m_res_y, (size_t)m_res_z);
 		nrrdAxisInfoSet(nrrd_mask, nrrdAxisInfoSize, (size_t)m_res_x, (size_t)m_res_y, (size_t)m_res_z);
 		nrrdAxisInfoSet(nrrd_mask, nrrdAxisInfoSpacing, spcx, spcy, spcz);

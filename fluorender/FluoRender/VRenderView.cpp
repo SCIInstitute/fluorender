@@ -9152,6 +9152,7 @@ int VRenderGLView::RulerProfile(int index)
 	for (unsigned int b=0; b<bins; ++b)
 		profile->push_back(ProfileBin());
 
+	long long vol_index;
 	//go through data
 	if (mask)
 	{
@@ -9160,15 +9161,15 @@ int VRenderGLView::RulerProfile(int index)
 		for (j=0; j<ny; ++j)
 		for (k=0; k<nz; ++k)
 		{
-			int index = nx*ny*k + nx*j + i;
-			unsigned char mask_value = ((unsigned char*)mask)[index];
+			vol_index = (long long)nx*ny*k + nx*j + i;
+			unsigned char mask_value = ((unsigned char*)mask)[vol_index];
 			if (mask_value)
 			{
 				double intensity = 0.0;
 				if (nrrd_data->type == nrrdTypeUChar)
-					intensity = double(((unsigned char*)data)[index]) / 255.0;
+					intensity = double(((unsigned char*)data)[vol_index]) / 255.0;
 				else if (nrrd_data->type == nrrdTypeUShort)
-					intensity = double(((unsigned short*)data)[index]) / 65535.0;
+					intensity = double(((unsigned short*)data)[vol_index]) / 65535.0;
 
 				//find bin
 				Point p(i, j, k);
