@@ -2747,11 +2747,29 @@ void Ruler::SetFinished()
 double Ruler::GetLength()
 {
 	double length = 0.0;
+	Point p1, p2;
 
-	for (int i=1; i<(int)m_ruler.size(); i++)
+	for (unsigned int i=1; i<m_ruler.size(); ++i)
 	{
-		Point p1 = m_ruler[i-1];
-		Point p2 = m_ruler[i];
+		p1 = m_ruler[i-1];
+		p2 = m_ruler[i];
+		length += (p2-p1).length();
+	}
+
+	return length;
+}
+
+double Ruler::GetLengthObject(double spcx, double spcy, double spcz)
+{
+	double length = 0.0;
+	Point p1, p2;
+
+	for (unsigned int i=1; i<m_ruler.size(); ++i)
+	{
+		p1 = m_ruler[i-1];
+		p2 = m_ruler[i];
+		p1 = Point(p1.x()/spcx, p1.y()/spcy, p1.z()/spcz);
+		p2 = Point(p2.x()/spcx, p2.y()/spcy, p2.z()/spcz);
 		length += (p2-p1).length();
 	}
 

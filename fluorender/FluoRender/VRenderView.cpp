@@ -9104,7 +9104,7 @@ int VRenderGLView::RulerProfile(int index)
 		return 0;
 
 	Ruler* ruler = m_ruler_list[index];
-	if (ruler->GetNumPoint() < 2)
+	if (ruler->GetNumPoint() < 1)
 		return 0;
 
 	VolumeData* vd = m_cur_vol;
@@ -9129,34 +9129,36 @@ int VRenderGLView::RulerProfile(int index)
 	if (nrrd_mask)
 		mask = nrrd_mask->data;
 
-	Point p1, p2;
-	p1 = *(ruler->GetPoint(0));
-	p2 = *(ruler->GetPoint(1));
-	//object space
-	p1 = Point(p1.x()/spcx, p1.y()/spcy, p1.z()/spcz);
-	p2 = Point(p2.x()/spcx, p2.y()/spcy, p2.z()/spcz);
-	Vector dir = p2 - p1;
-	double dist = dir.length();
-	if (dist < EPS)
-		return 0;
-	dir.normalize();
-
-	//bin number
-	int bins = int(dist/1+0.5);
-	if (bins <= 0) return 0;
-	double bin_dist = dist / bins;
-	vector<ProfileBin>* profile = ruler->GetProfile();
-	if (!profile) return 0;
-	profile->clear();
-	profile->reserve(size_t(bins));
-	for (unsigned int b=0; b<bins; ++b)
-		profile->push_back(ProfileBin());
-
-	long long vol_index;
-	//go through data
-	if (mask)
+	if (ruler->GetRulerType()==3 && mask)
 	{
+		if (ruler->GetNumPoint() < 1)
+			return 0;
+		Point p1, p2;
+		p1 = *(ruler->GetPoint(0));
+		p2 = *(ruler->GetPoint(1));
+		//object space
+		p1 = Point(p1.x()/spcx, p1.y()/spcy, p1.z()/spcz);
+		p2 = Point(p2.x()/spcx, p2.y()/spcy, p2.z()/spcz);
+		Vector dir = p2 - p1;
+		double dist = dir.length();
+		if (dist < EPS)
+			return 0;
+		dir.normalize();
+
+		//bin number
+		int bins = int(dist/1+0.5);
+		if (bins <= 0) return 0;
+		double bin_dist = dist / bins;
+		vector<ProfileBin>* profile = ruler->GetProfile();
+		if (!profile) return 0;
+		profile->clear();
+		profile->reserve(size_t(bins));
+		for (unsigned int b=0; b<bins; ++b)
+			profile->push_back(ProfileBin());
+
 		int i, j, k;
+		long long vol_index;
+		//go through data
 		for (i=0; i<nx; ++i)
 		for (j=0; j<ny; ++j)
 		for (k=0; k<nz; ++k)
@@ -9186,6 +9188,45 @@ int VRenderGLView::RulerProfile(int index)
 	}
 	else
 	{
+		//calculate length in object space
+		double total_length = ruler->GetLengthObject(spcx, spcy, spcz);
+		int bins = int(total_length + 1.0);
+		vector<ProfileBin>* profile = ruler->GetProfile();
+		if (!profile) return 0;
+		profile->clear();
+		profile->reserve(size_t(bins));
+		for (unsigned int b=0; b<bins; ++b)
+			profile->push_back(ProfileBin());
+
+		//sample data through ruler
+		int i, j, k;
+		long long vol_index;
+		if (bins == 1)
+		{
+			Point p = *(ruler->GetPoint(0));
+			//object space
+			p = Point(p.x()/spcx, p.y()/spcy, p.z()/spcz);
+			double intensity = 0.0;
+			i = int(p.x() + 0.5);
+			j = int(p.y() + 0.5);
+			k = int(p.z() + 0.5);
+			if (i>=0 && i<nx && j>=0 && j<ny && k>=0 && k<nz)
+			{
+				vol_index = (long long)nx*ny*k + nx*j + i;
+				if (nrrd_data->type == nrrdTypeUChar)
+					intensity = double(((unsigned char*)data)[vol_index]) / 255.0;
+				else if (nrrd_data->type == nrrdTypeUShort)
+					intensity = double(((unsigned short*)data)[vol_index]) / 65535.0;
+			}
+			(*profile)[0].m_pixels++;
+			(*profile)[0].m_accum += intensity;
+		}
+		else
+		{
+			for (unsigned int pn=0; pn<ruler->GetNumPoint()-1; ++pn)
+			{
+			}
+		}
 	}
 
 	return 1;

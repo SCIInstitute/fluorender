@@ -737,6 +737,7 @@ public:
 	bool GetFinished();
 	void SetFinished();
 	double GetLength();
+	double GetLengthObject(double spcx, double spcy, double spcz);
 	double GetAngle();
 
 	bool AddPoint(Point &point);
