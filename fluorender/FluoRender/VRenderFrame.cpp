@@ -2572,7 +2572,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			 {
 				 Ruler* ruler = (*ruler_list)[ri];
 				 if (!ruler) continue;
-				 fconfig.SetPath(wxString::Format("/views/%d/rulers/%d", i, ri));
+				 fconfig.SetPath(wxString::Format("/views/%d/rulers/%d", i, (int)ri));
 				 fconfig.Write("type", ruler->GetRulerType());
 				 fconfig.Write("display", ruler->GetDisp());
 				 fconfig.Write("transient", ruler->GetTimeDep());
@@ -2584,7 +2584,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 				 {
 					 Point* rp = ruler->GetPoint(rpi);
 					 if (!rp) continue;
-					 fconfig.SetPath(wxString::Format("/views/%d/rulers/%d/points/%d", i, ri, rpi));
+					 fconfig.SetPath(wxString::Format("/views/%d/rulers/%d/points/%d", i, (int)ri, (int)rpi));
 					 fconfig.Write("point", wxString::Format("%f %f %f", rp->x(), rp->y(), rp->z()));
 				 }
 			 }

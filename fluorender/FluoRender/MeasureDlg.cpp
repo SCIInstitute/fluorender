@@ -303,6 +303,7 @@ void RulerListCtrl::Export(wxString filename)
 		 vector<ProfileBin>* profile = ruler->GetProfile();
 		 if (profile && profile->size())
 		 {
+			 tos << ruler->GetInfoProfile() << "\n";
 			 for (size_t j=0; j<profile->size(); ++j)
 			 {
 				 int pixels = (*profile)[j].m_pixels;

@@ -815,6 +815,15 @@ public:
 		return m_font;
 	}
 
+	//profile
+	void SetInfoProfile(wxString &str)
+	{
+		m_info_profile = str;
+	}
+	wxString &GetInfoProfile()
+	{
+		return m_info_profile;
+	}
 	vector<ProfileBin> *GetProfile()
 	{
 		return &m_profile;
@@ -829,6 +838,7 @@ private:
 	bool m_disp;
 	Transform *m_tform;
 	//a profile
+	wxString m_info_profile;
 	vector<ProfileBin> m_profile;
 
 	//time-dependent

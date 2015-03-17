@@ -9128,6 +9128,7 @@ int VRenderGLView::RulerProfile(int index)
 	void* mask = 0;
 	if (nrrd_mask)
 		mask = nrrd_mask->data;
+	double scale = vd->GetScalarScale();
 
 	if (ruler->GetRulerType()==3 && mask)
 	{
@@ -9171,7 +9172,7 @@ int VRenderGLView::RulerProfile(int index)
 				if (nrrd_data->type == nrrdTypeUChar)
 					intensity = double(((unsigned char*)data)[vol_index]) / 255.0;
 				else if (nrrd_data->type == nrrdTypeUShort)
-					intensity = double(((unsigned short*)data)[vol_index]) / 65535.0;
+					intensity = double(((unsigned short*)data)[vol_index]) * scale / 65535.0;
 
 				//find bin
 				Point p(i, j, k);
@@ -9190,45 +9191,95 @@ int VRenderGLView::RulerProfile(int index)
 	{
 		//calculate length in object space
 		double total_length = ruler->GetLengthObject(spcx, spcy, spcz);
-		int bins = int(total_length + 1.0);
+		int bins = int(total_length);
 		vector<ProfileBin>* profile = ruler->GetProfile();
 		if (!profile) return 0;
 		profile->clear();
-		profile->reserve(size_t(bins));
-		for (unsigned int b=0; b<bins; ++b)
-			profile->push_back(ProfileBin());
 
 		//sample data through ruler
 		int i, j, k;
 		long long vol_index;
-		if (bins == 1)
+		Point p;
+		double intensity;
+		if (bins == 0)
 		{
-			Point p = *(ruler->GetPoint(0));
+			//allocate
+			profile->reserve(size_t(1));
+			profile->push_back(ProfileBin());
+
+			p = *(ruler->GetPoint(0));
 			//object space
 			p = Point(p.x()/spcx, p.y()/spcy, p.z()/spcz);
-			double intensity = 0.0;
+			intensity = 0.0;
 			i = int(p.x() + 0.5);
 			j = int(p.y() + 0.5);
 			k = int(p.z() + 0.5);
-			if (i>=0 && i<nx && j>=0 && j<ny && k>=0 && k<nz)
+			if (i>=0 && i<=nx && j>=0 && j<=ny && k>=0 && k<=nz)
 			{
+				if (i==nx) i=nx-1;
+				if (j==ny) j=ny-1;
+				if (k==nz) k=nz-1;
 				vol_index = (long long)nx*ny*k + nx*j + i;
 				if (nrrd_data->type == nrrdTypeUChar)
 					intensity = double(((unsigned char*)data)[vol_index]) / 255.0;
 				else if (nrrd_data->type == nrrdTypeUShort)
-					intensity = double(((unsigned short*)data)[vol_index]) / 65535.0;
+					intensity = double(((unsigned short*)data)[vol_index]) * scale / 65535.0;
 			}
 			(*profile)[0].m_pixels++;
 			(*profile)[0].m_accum += intensity;
 		}
 		else
 		{
+			//allocate
+			profile->reserve(size_t(bins));
+			for (unsigned int b=0; b<bins; ++b)
+				profile->push_back(ProfileBin());
+
+			Point p1, p2;
+			Vector dir;
+			double dist;
+			int total_dist = 0;
 			for (unsigned int pn=0; pn<ruler->GetNumPoint()-1; ++pn)
 			{
+				p1 = *(ruler->GetPoint(pn));
+				p2 = *(ruler->GetPoint(pn+1));
+				//object space
+				p1 = Point(p1.x()/spcx, p1.y()/spcy, p1.z()/spcz);
+				p2 = Point(p2.x()/spcx, p2.y()/spcy, p2.z()/spcz);
+				dir = p2 - p1;
+				dist = dir.length();
+				dir.normalize();
+
+				for (unsigned int dn=0; dn<(unsigned int)(dist+0.5); ++dn)
+				{
+					p = p1 + dir * double(dn);
+					intensity = 0.0;
+					i = int(p.x() + 0.5);
+					j = int(p.y() + 0.5);
+					k = int(p.z() + 0.5);
+					if (i>=0 && i<=nx && j>=0 && j<=ny && k>=0 && k<=nz)
+					{
+						if (i==nx) i=nx-1;
+						if (j==ny) j=ny-1;
+						if (k==nz) k=nz-1;
+						vol_index = (long long)nx*ny*k + nx*j + i;
+						if (nrrd_data->type == nrrdTypeUChar)
+							intensity = double(((unsigned char*)data)[vol_index]) / 255.0;
+						else if (nrrd_data->type == nrrdTypeUShort)
+							intensity = double(((unsigned short*)data)[vol_index]) * scale / 65535.0;
+					}
+					if (total_dist >= bins) break;
+					(*profile)[total_dist].m_pixels++;
+					(*profile)[total_dist].m_accum += intensity;
+					total_dist++;
+				}
 			}
+			if (total_dist < bins)
+				profile->erase(profile->begin()+total_dist, profile->begin()+bins-1);
 		}
 	}
 
+	ruler->SetInfoProfile("Profile of volume "+vd->GetName());
 	return 1;
 }
 
