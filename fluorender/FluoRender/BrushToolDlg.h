@@ -50,6 +50,7 @@ public:
 		ID_BrushErase,
 		ID_BrushClear,
 		ID_BrushCreate,
+		ID_BrushSolid,
 		//selection strength
 		//falloff
 		ID_BrushSclTranslateSldr,
@@ -247,6 +248,7 @@ private:
 	void OnBrushErase(wxCommandEvent& event);
 	void OnBrushClear(wxCommandEvent& event);
 	void OnBrushCreate(wxCommandEvent& event);
+	void OnBrushSolid(wxCommandEvent& event);
 	//selection adjustment
 	//translate
 	void OnBrushSclTranslateChange(wxScrollEvent &event);

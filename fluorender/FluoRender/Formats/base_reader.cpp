@@ -99,7 +99,8 @@ int BaseReader::LZWDecode(tidata_t tif, tidata_t op0, tsize_t occ0)
 
 	while (occ > 0)
 	{
-		NextCode(tif, sp, bp, code, GetNextCode);
+		GetNextCode(sp, bp, code);
+		//NextCode(tif, sp, bp, code, GetNextCode);
 		if (code == CODE_EOI)
 			break;
 		if (code == CODE_CLEAR)
@@ -108,7 +109,8 @@ int BaseReader::LZWDecode(tidata_t tif, tidata_t op0, tsize_t occ0)
 			nbits = BITS_MIN;
 			nbitsmask = MAXCODE(BITS_MIN);
 			maxcodep = sp->dec_codetab + nbitsmask-1;
-			NextCode(tif, sp, bp, code, GetNextCode);
+			GetNextCode(sp, bp, code);
+			//NextCode(tif, sp, bp, code, GetNextCode);
 			if (code == CODE_EOI)
 				break;
 			*op++ = (char)code, occ--;

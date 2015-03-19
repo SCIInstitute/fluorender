@@ -43,6 +43,7 @@ EVT_TOOL(ID_BrushDiffuse, BrushToolDlg::OnBrushDiffuse)
 EVT_TOOL(ID_BrushClear, BrushToolDlg::OnBrushClear)
 EVT_TOOL(ID_BrushErase, BrushToolDlg::OnBrushErase)
 EVT_TOOL(ID_BrushCreate, BrushToolDlg::OnBrushCreate)
+EVT_TOOL(ID_BrushSolid, BrushToolDlg::OnBrushSolid)
 //help
 EVT_TOOL(ID_HelpBtn, BrushToolDlg::OnHelpBtn)
 //selection adjustment
@@ -148,6 +149,10 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
          wxGetBitmapFromMemory(listicon_brushdiffuse),
          wxNullBitmap,
          "Diffuse highlighted structures by painting (hold Z)");
+   m_toolbar->AddCheckTool(ID_BrushSolid, "Solid",
+	     wxGetBitmapFromMemory(listicon_brushsolid),
+		 wxNullBitmap,
+		 "Highlight structures with solid mask");
    m_toolbar->AddCheckTool(ID_BrushDesel, "Unselect",
          wxGetBitmapFromMemory(listicon_brushdesel),
          wxNullBitmap,
@@ -595,6 +600,7 @@ void BrushToolDlg::SelectBrush(int id)
    m_toolbar->ToggleTool(ID_BrushAppend, false);
    m_toolbar->ToggleTool(ID_BrushDiffuse, false);
    m_toolbar->ToggleTool(ID_BrushDesel, false);
+   m_toolbar->ToggleTool(ID_BrushSolid, false);
 
    switch (id)
    {
@@ -607,6 +613,8 @@ void BrushToolDlg::SelectBrush(int id)
    case ID_BrushDesel:
       m_toolbar->ToggleTool(ID_BrushDesel, true);
       break;
+   case ID_BrushSolid:
+	   m_toolbar->ToggleTool(ID_BrushSolid, true);
    }
 }
 
@@ -615,6 +623,7 @@ void BrushToolDlg::OnBrushAppend(wxCommandEvent &event)
 {
    m_toolbar->ToggleTool(ID_BrushDiffuse, false);
    m_toolbar->ToggleTool(ID_BrushDesel, false);
+   m_toolbar->ToggleTool(ID_BrushSolid, false);
 
    VRenderFrame* frame = (VRenderFrame*)m_frame;
    if (frame && frame->GetTree())
@@ -631,6 +640,7 @@ void BrushToolDlg::OnBrushDiffuse(wxCommandEvent &event)
 {
    m_toolbar->ToggleTool(ID_BrushAppend, false);
    m_toolbar->ToggleTool(ID_BrushDesel, false);
+   m_toolbar->ToggleTool(ID_BrushSolid, false);
 
    VRenderFrame* frame = (VRenderFrame*)m_frame;
    if (frame && frame->GetTree())
@@ -643,10 +653,28 @@ void BrushToolDlg::OnBrushDiffuse(wxCommandEvent &event)
    }
 }
 
+void BrushToolDlg::OnBrushSolid(wxCommandEvent &event)
+{
+   m_toolbar->ToggleTool(ID_BrushAppend, false);
+   m_toolbar->ToggleTool(ID_BrushDiffuse, false);
+   m_toolbar->ToggleTool(ID_BrushDesel, false);
+
+   VRenderFrame* frame = (VRenderFrame*)m_frame;
+   if (frame && frame->GetTree())
+   {
+      //if (m_toolbar->GetToolState(ID_BrushSolid))
+      //   frame->GetTree()->SelectBrush(TreePanel::ID_BrushDiffuse);
+      //else
+      //   frame->GetTree()->SelectBrush(0);
+      frame->GetTree()->BrushSolid(m_toolbar->GetToolState(ID_BrushSolid));
+   }
+}
+
 void BrushToolDlg::OnBrushDesel(wxCommandEvent &event)
 {
    m_toolbar->ToggleTool(ID_BrushAppend, false);
    m_toolbar->ToggleTool(ID_BrushDiffuse, false);
+   m_toolbar->ToggleTool(ID_BrushSolid, false);
 
    VRenderFrame* frame = (VRenderFrame*)m_frame;
    if (frame && frame->GetTree())
@@ -671,6 +699,7 @@ void BrushToolDlg::OnBrushErase(wxCommandEvent &event)
    m_toolbar->ToggleTool(ID_BrushAppend, false);
    m_toolbar->ToggleTool(ID_BrushDiffuse, false);
    m_toolbar->ToggleTool(ID_BrushDesel, false);
+   m_toolbar->ToggleTool(ID_BrushSolid, false);
 
    VRenderFrame* frame = (VRenderFrame*)m_frame;
    if (frame && frame->GetTree())
@@ -682,6 +711,7 @@ void BrushToolDlg::OnBrushCreate(wxCommandEvent &event)
    m_toolbar->ToggleTool(ID_BrushAppend, false);
    m_toolbar->ToggleTool(ID_BrushDiffuse, false);
    m_toolbar->ToggleTool(ID_BrushDesel, false);
+   m_toolbar->ToggleTool(ID_BrushSolid, false);
 
    VRenderFrame* frame = (VRenderFrame*)m_frame;
    if (frame && frame->GetTree())

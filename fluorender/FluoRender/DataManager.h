@@ -699,6 +699,16 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+class ProfileBin
+{
+public:
+	ProfileBin():
+	m_pixels(0), m_accum(0.0) {}
+	~ProfileBin() {}
+	int m_pixels;
+	double m_accum;
+};
+
 class Ruler : public TreeLayer
 {
 public:
@@ -727,6 +737,7 @@ public:
 	bool GetFinished();
 	void SetFinished();
 	double GetLength();
+	double GetLengthObject(double spcx, double spcy, double spcz);
 	double GetAngle();
 
 	bool AddPoint(Point &point);
@@ -772,6 +783,10 @@ public:
 	{
 		m_info_names += str;
 	}
+	void SetInfoNames(wxString &str)
+	{
+		m_info_names = str;
+	}
 	wxString &GetInfoNames()
 	{
 		return m_info_names;
@@ -779,6 +794,10 @@ public:
 	void AddInfoValues(wxString &str)
 	{
 		m_info_values += str;
+	}
+	void SetInfoValues(wxString &str)
+	{
+		m_info_values = str;
 	}
 	wxString &GetInfoValues()
 	{
@@ -795,13 +814,32 @@ public:
 	{
 		return m_font;
 	}
+
+	//profile
+	void SetInfoProfile(wxString &str)
+	{
+		m_info_profile = str;
+	}
+	wxString &GetInfoProfile()
+	{
+		return m_info_profile;
+	}
+	vector<ProfileBin> *GetProfile()
+	{
+		return &m_profile;
+	}
+	void SaveProfile(wxString &filename);
+
 private:
 	static int m_num;
-	int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator
+	int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe
 	bool m_finished;
 	vector<Point> m_ruler;
 	bool m_disp;
 	Transform *m_tform;
+	//a profile
+	wxString m_info_profile;
+	vector<ProfileBin> m_profile;
 
 	//time-dependent
 	bool m_time_dep;

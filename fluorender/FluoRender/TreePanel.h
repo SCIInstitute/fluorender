@@ -245,6 +245,7 @@ public:
 	void BrushClear();
 	void BrushErase();
 	void BrushCreate();
+	void BrushSolid(bool state);
 
 private:
 	wxWindow* m_frame;

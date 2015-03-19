@@ -554,7 +554,11 @@ void VolumeData::AddEmptyMask()
 	{
 		//add the nrrd data for mask
 		Nrrd *nrrd_mask = nrrdNew();
-		uint8 *val8 = new (std::nothrow) uint8[m_res_x*m_res_y*m_res_z];
+		long long mem_size = (long long)m_res_x*
+			(long long)m_res_y*
+			(long long)m_res_z;
+		//uint8 *val8 = new (std::nothrow) uint8[mem_size];
+		uint8 *val8 = (uint8*)malloc(mem_size*sizeof(uint8));
 		if (!val8)
 		{
 			wxMessageBox("Not enough memory. Please save project and restart.");
@@ -562,7 +566,7 @@ void VolumeData::AddEmptyMask()
 		}
 		double spcx, spcy, spcz;
 		m_tex->get_spacings(spcx, spcy, spcz);
-		memset((void*)val8, 0, sizeof(uint8)*m_res_x*m_res_y*m_res_z);
+		memset((void*)val8, 0, mem_size*sizeof(uint8));
 		nrrdWrap(nrrd_mask, val8, nrrdTypeUChar, 3, (size_t)m_res_x, (size_t)m_res_y, (size_t)m_res_z);
 		nrrdAxisInfoSet(nrrd_mask, nrrdAxisInfoSize, (size_t)m_res_x, (size_t)m_res_y, (size_t)m_res_z);
 		nrrdAxisInfoSet(nrrd_mask, nrrdAxisInfoSpacing, spcx, spcy, spcz);
@@ -2743,11 +2747,29 @@ void Ruler::SetFinished()
 double Ruler::GetLength()
 {
 	double length = 0.0;
+	Point p1, p2;
 
-	for (int i=1; i<(int)m_ruler.size(); i++)
+	for (unsigned int i=1; i<m_ruler.size(); ++i)
 	{
-		Point p1 = m_ruler[i-1];
-		Point p2 = m_ruler[i];
+		p1 = m_ruler[i-1];
+		p2 = m_ruler[i];
+		length += (p2-p1).length();
+	}
+
+	return length;
+}
+
+double Ruler::GetLengthObject(double spcx, double spcy, double spcz)
+{
+	double length = 0.0;
+	Point p1, p2;
+
+	for (unsigned int i=1; i<m_ruler.size(); ++i)
+	{
+		p1 = m_ruler[i-1];
+		p2 = m_ruler[i];
+		p1 = Point(p1.x()/spcx, p1.y()/spcy, p1.z()/spcz);
+		p2 = Point(p2.x()/spcx, p2.y()/spcy, p2.z()/spcz);
 		length += (p2-p1).length();
 	}
 
@@ -2758,7 +2780,8 @@ double Ruler::GetAngle()
 {
 	double angle = 0.0;
 
-	if (m_ruler_type == 0)
+	if (m_ruler_type == 0 ||
+		m_ruler_type == 3)
 	{
 		if (m_ruler.size() >= 2)
 		{
@@ -2781,7 +2804,8 @@ bool Ruler::AddPoint(Point &point)
 	if (m_ruler_type == 2 &&
 		m_ruler.size() == 1)
 		return false;
-	else if (m_ruler_type == 0 &&
+	else if ((m_ruler_type == 0 ||
+		m_ruler_type == 3) &&
 		m_ruler.size() == 2)
 		return false;
 	else
@@ -2790,7 +2814,8 @@ bool Ruler::AddPoint(Point &point)
 		if (m_ruler_type == 2 &&
 			m_ruler.size() == 1)
 			m_finished = true;
-		else if (m_ruler_type == 0 &&
+		else if ((m_ruler_type == 0 ||
+			m_ruler_type == 3) &&
 			m_ruler.size() == 2)
 			m_finished = true;
 		return true;
@@ -2898,6 +2923,10 @@ wxString Ruler::GetDelInfoValues(wxString del)
 	}
 
 	return output;
+}
+
+void Ruler::SaveProfile(wxString &filename)
+{
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////

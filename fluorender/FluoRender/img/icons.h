@@ -39,8 +39,11 @@ const static unsigned char freefly_png[1143];
 /* gear_45.png - 17863 bytes */
 const static unsigned char gear_45_png[17863];
 
-/* icon_32.png - 15123 bytes */
-const static unsigned char icon_32_png[15123];
+/* icon_16.png - 18975 bytes */
+const static unsigned char icon_16_png[18975];
+
+/* icon_32.png - 20515 bytes */
+const static unsigned char icon_32_png[20515];
 
 /* icon_about.png - 2655 bytes */
 const static unsigned char icon_about_png[2655];
@@ -168,6 +171,9 @@ const static unsigned char listicon_brushdesel_png[3737];
 /* listicon_brushdiffuse.png - 3702 bytes */
 const static unsigned char listicon_brushdiffuse_png[3702];
 
+/* brush_solid.png - 16598 bytes */
+static const unsigned char listicon_brushsolid_png[16598];
+
 /* listicon_brusherase.png - 3714 bytes */
 const static unsigned char listicon_brusherase_png[3714];
 
@@ -285,4 +291,9 @@ const static unsigned char smooth_png[15326];
 /* smooth_off.png - 14747 bytes */
 const static unsigned char smooth_off_png[14747];
 
+/* drill.png - 15753 bytes */
+const static unsigned char drill_png[15753];
+
+/* prof_curve.png - 18610 bytes */
+const static unsigned char prof_curve_png[18610];
 };
