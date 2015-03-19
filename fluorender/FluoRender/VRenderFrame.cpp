@@ -125,7 +125,7 @@ m_cur_sel_mesh(-1)
 
    // set frame icon
    wxIcon icon;
-   icon.CopyFromBitmap(wxGetBitmapFromMemory(icon_16));
+   icon.CopyFromBitmap(wxGetBitmapFromMemory(icon_32));
    SetIcon(icon);
 
    // create the main toolbar
