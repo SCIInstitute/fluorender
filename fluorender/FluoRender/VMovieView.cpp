@@ -797,7 +797,7 @@ void VMovieView::EnableRot() {
 }
 
 void VMovieView::OnHelpBtn(wxCommandEvent &event) {
-	::wxLaunchDefaultBrowser(wxString(HELP_MOVIE) + wxString("#page=40"));
+	::wxLaunchDefaultBrowser(wxString(HELP_MANUAL) + wxString("#page=41"));
 }
 
 void VMovieView::Get4DFrames() {

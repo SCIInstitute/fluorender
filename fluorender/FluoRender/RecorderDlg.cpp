@@ -596,7 +596,7 @@ void RecorderDlg::SetSelection(int index)
 		long item = m_keylist->GetNextItem(-1,
 		wxLIST_NEXT_ALL,
 		wxLIST_STATE_SELECTED);
-		if (index != item)
+		if (index != item && item != -1)
 			m_keylist->SetItemState(index,
 			wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 	}
