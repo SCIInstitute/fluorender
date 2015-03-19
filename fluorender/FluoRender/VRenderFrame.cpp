@@ -2564,6 +2564,34 @@ void VRenderFrame::SaveProject(wxString& filename)
          fconfig.Write("brush_iteration", vrv->GetBrushIteration());
          fconfig.Write("brush_translate", vrv->GetBrushSclTranslate());
          fconfig.Write("w2d", vrv->GetW2d());
+
+		 //rulers
+		 fconfig.SetPath(wxString::Format("/views/%d/rulers", i));
+		 vector<Ruler*>* ruler_list = vrv->GetRulerList();
+		 if (ruler_list && ruler_list->size())
+		 {
+			 fconfig.Write("num", unsigned int(ruler_list->size()));
+			 for (size_t ri=0; ri<ruler_list->size(); ++ri)
+			 {
+				 Ruler* ruler = (*ruler_list)[ri];
+				 if (!ruler) continue;
+				 fconfig.SetPath(wxString::Format("/views/%d/rulers/%d", i, (int)ri));
+				 fconfig.Write("type", ruler->GetRulerType());
+				 fconfig.Write("display", ruler->GetDisp());
+				 fconfig.Write("transient", ruler->GetTimeDep());
+				 fconfig.Write("time", ruler->GetTime());
+				 fconfig.Write("info_names", ruler->GetInfoNames());
+				 fconfig.Write("info_values", ruler->GetInfoValues());
+				 fconfig.Write("num", ruler->GetNumPoint());
+				 for (size_t rpi=0; rpi<ruler->GetNumPoint(); ++rpi)
+				 {
+					 Point* rp = ruler->GetPoint(rpi);
+					 if (!rp) continue;
+					 fconfig.SetPath(wxString::Format("/views/%d/rulers/%d/points/%d", i, (int)ri, (int)rpi));
+					 fconfig.Write("point", wxString::Format("%f %f %f", rp->x(), rp->y(), rp->z()));
+				 }
+			 }
+		 }
       }
    }
    //clipping planes
@@ -2704,6 +2732,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 {
    m_data_mgr.SetProjectPath(filename);
 
+   int iVal;
    int i, j, k;
    //clear
    m_data_mgr.ClearAll();
@@ -3626,6 +3655,54 @@ void VRenderFrame::OpenProject(wxString& filename)
                vrv->SetBrushSclTranslate(dVal);
             if (fconfig.Read("w2d", &dVal))
                vrv->SetW2d(dVal);
+
+			//rulers
+			if (vrv->GetRulerList())
+			{
+				vrv->GetRulerList()->clear();
+				if (fconfig.Exists(wxString::Format("/views/%d/rulers", i)))
+				{
+					fconfig.SetPath(wxString::Format("/views/%d/rulers", i));
+					int rnum = fconfig.Read("num", 0l);
+					for (int ri=0; ri<rnum; ++ri)
+					{
+						if (fconfig.Exists(wxString::Format("/views/%d/rulers/%d", i, ri)))
+						{
+							fconfig.SetPath(wxString::Format("/views/%d/rulers/%d", i, ri));
+							Ruler* ruler = new Ruler();
+							if (fconfig.Read("type", &iVal))
+								ruler->SetRulerType(iVal);
+							if (fconfig.Read("display", &bVal))
+								ruler->SetDisp(bVal);
+							if (fconfig.Read("transient", &bVal))
+								ruler->SetTimeDep(bVal);
+							if (fconfig.Read("time", &iVal))
+								ruler->SetTime(iVal);
+							if (fconfig.Read("info_names", &str))
+								ruler->SetInfoNames(str);
+							if (fconfig.Read("info_values", &str))
+								ruler->SetInfoValues(str);
+							int pnum = fconfig.Read("num", 0l);
+							for (int rpi=0; rpi<pnum; ++rpi)
+							{
+								if (fconfig.Exists(wxString::Format("/views/%d/rulers/%d/points/%d", i, ri, rpi)))
+								{
+									fconfig.SetPath(wxString::Format("/views/%d/rulers/%d/points/%d", i, ri, rpi));
+									if (fconfig.Read("point", &str))
+									{
+										float x, y, z;
+										if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z)){
+											Point point(x,y,z);
+											ruler->AddPoint(point);
+										}
+									}
+								}
+							}
+							vrv->GetRulerList()->push_back(ruler);
+						}
+					}
+				}
+			}
          }
       }
    }
@@ -3969,7 +4046,6 @@ void VRenderFrame::OpenProject(wxString& filename)
    if (fconfig.Exists("/interpolator"))
    {
       wxString str;
-      int iVal;
       wxString sVal;
       double dVal;
 

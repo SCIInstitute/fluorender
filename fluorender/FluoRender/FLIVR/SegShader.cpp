@@ -274,6 +274,7 @@ namespace FLIVR
 	"	vec3 nb;\n" \
 	"	vec3 max_nb = t.stp;\n" \
 	"	float m;\n" \
+	"	float mx;\n" \
 	"	for (int i=-1; i<2; i++)\n"\
 	"	for (int j=-1; j<2; j++)\n"\
 	"	for (int k=-1; k<2; k++)\n"\
@@ -289,7 +290,8 @@ namespace FLIVR
 	"	if (loc7.y>0.0)\n" \
 	"	{\n" \
 	"		m = texture3D(tex0, max_nb).x + loc7.y;\n" \
-	"		if (m < texture3D(tex0, t.stp).x)\n" \
+	"		mx = texture3D(tex0, t.stp).x;\n" \
+	"		if (m < mx || m - mx > 2.0*loc7.y)\n" \
 	"			discard;\n" \
 	"	}\n" \
 	"	gl_FragColor += cc*stop;\n"\
@@ -547,7 +549,8 @@ namespace FLIVR
 				z << SEG_BODY_INIT_2D_COORD;
 				if (paint_mode_==1 ||
 					paint_mode_==2 ||
-					paint_mode_==4)
+					paint_mode_==4 ||
+					paint_mode_==8)
 					z << SEG_BODY_INIT_CULL;
 				else if (paint_mode_==3)
 					z << SEG_BODY_INIT_CULL_ERASE;
@@ -584,6 +587,8 @@ namespace FLIVR
 				else if (paint_mode_==5)
 					z << SEG_BODY_INIT_BLEND_FLOOD;
 				else if (paint_mode_==7)
+					z << SEG_BODY_INIT_BLEND_ALL;
+				else if (paint_mode_==8)
 					z << SEG_BODY_INIT_BLEND_ALL;
 				else if (paint_mode_==11)
 					z << SEG_BODY_INIT_POSTER;

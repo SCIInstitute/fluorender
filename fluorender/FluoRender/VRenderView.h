@@ -464,6 +464,7 @@ class VRenderGLView: public wxGLCanvas
          void AddPaintRulerPoint();
          void DrawRulers();
          vector<Ruler*>* GetRulerList();
+		 int RulerProfile(int index);
 		 //public mouse
 		 
          void OnMouse(wxMouseEvent& event);
@@ -601,6 +602,7 @@ class VRenderGLView: public wxGLCanvas
          //2-append
          //3-erase
          //4-diffuse
+		 //8-solid
 
          //resizing
          bool m_resize;
@@ -881,6 +883,7 @@ class VRenderGLView: public wxGLCanvas
          //mode: 0-maximum with original value; 1-maximum with transfered value; 2-accumulated with original value; 3-accumulated with transfered value
          double GetPointVolume(Point &mp, int mx, int my, VolumeData* vd, int mode, bool use_transf, double thresh = 0.5);
          double GetPointVolumeBox(Point &mp, int mx, int my, VolumeData* vd);
+		 double GetPointVolumeBox2(Point &p1, Point &p2, int mx, int my, VolumeData* vd);
          double GetPointPlane(Point &mp, int mx, int my, Point *planep=0);
          Point* GetEditingRulerPoint(int mx, int my);
 
@@ -1373,6 +1376,10 @@ class VRenderView: public wxPanel
    {
       if (m_glview) return m_glview->GetRulerList(); else return 0;
    }
+	int RulerProfile(int index)
+	{
+		if (m_glview) return m_glview->RulerProfile(index); else return 0;
+	}
 
 	//traces
 	void CreateTraceGroup()

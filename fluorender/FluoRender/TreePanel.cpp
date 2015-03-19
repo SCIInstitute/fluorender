@@ -2424,6 +2424,47 @@ void TreePanel::BrushDiffuse()
    }
 }
 
+void TreePanel::BrushSolid(bool state)
+{
+   m_toolbar->ToggleTool(ID_BrushAppend, false);
+   m_toolbar->ToggleTool(ID_BrushDiffuse, false);
+   m_toolbar->ToggleTool(ID_BrushDesel, false);
+
+   if (state)
+   {
+      VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+      if (vr_frame)
+      {
+         for (int i=0; i<vr_frame->GetViewNum(); i++)
+         {
+            VRenderView* vrv = vr_frame->GetView(i);
+            if (vrv)
+            {
+               vrv->SetIntMode(2);
+               vrv->SetPaintMode(8);
+               m_datatree->m_fixed = true;
+            }
+         }
+      }
+   }
+   else
+   {
+      VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+      if (vr_frame)
+      {
+         for (int i=0; i<vr_frame->GetViewNum(); i++)
+         {
+            VRenderView* vrv = vr_frame->GetView(i);
+            if (vrv)
+            {
+               vrv->SetIntMode(1);
+               m_datatree->m_fixed = false;
+            }
+         }
+      }
+   }
+}
+
 void TreePanel::BrushDesel()
 {
    m_toolbar->ToggleTool(ID_BrushAppend, false);

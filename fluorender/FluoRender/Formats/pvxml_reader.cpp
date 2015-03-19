@@ -658,7 +658,7 @@ Nrrd *PVXMLReader::Convert(int t, int c, bool get_max)
                   delete []pbyData;
 
                //copy frame val to val
-               long long index = m_x_size*m_y_size*frame_info->z + m_x_size*(m_y_size-frame_info->y-frame_info->y_size) + frame_info->x;
+               long long index = (long long)m_x_size*m_y_size*frame_info->z + m_x_size*(m_y_size-frame_info->y-frame_info->y_size) + frame_info->x;
                long frame_index = 0;
 					if (m_flip_y)
 						frame_index = frame_info->x_size * (frame_info->y_size-1);

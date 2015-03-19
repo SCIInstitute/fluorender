@@ -51,6 +51,7 @@ class RulerListCtrl : public wxListCtrl
             wxString extra);
       void UpdateRulers(VRenderView* vrv=0);
 
+	  int GetCurrSelection();
       void DeleteSelection();
       void DeleteAll(bool cur_time=true);
 
@@ -80,9 +81,11 @@ class MeasureDlg : public wxPanel
       enum
       {
          ID_LocatorBtn = wxID_HIGHEST+2101,
+		 ID_ProbeBtn,
          ID_RulerBtn,
          ID_RulerMPBtn,
          ID_RulerEditBtn,
+		 ID_ProfileBtn,
          ID_DeleteBtn,
          ID_DeleteAllBtn,
          ID_ExportBtn,
@@ -119,9 +122,11 @@ class MeasureDlg : public wxPanel
 
    private:
       void OnNewLocator(wxCommandEvent& event);
+	  void OnNewProbe(wxCommandEvent& event);
       void OnNewRuler(wxCommandEvent& event);
       void OnNewRulerMP(wxCommandEvent& event);
       void OnRulerEdit(wxCommandEvent& event);
+	  void OnProfile(wxCommandEvent& event);
       void OnDelete(wxCommandEvent& event);
       void OnDeleteAll(wxCommandEvent& event);
       void OnExport(wxCommandEvent& event);

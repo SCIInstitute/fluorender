@@ -646,7 +646,7 @@ namespace FLIVR
 				{
 					if (compression && GLEW_ARB_texture_compression_rgtc &&
 						brick->ntype(c)==TextureBrick::TYPE_INT)
-						internal_format = GL_COMPRESSED_RED;
+						internal_format = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
 					else
 						internal_format = (brick->tex_type(c)==GL_SHORT||
 							brick->tex_type(c)==GL_UNSIGNED_SHORT)?
