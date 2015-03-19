@@ -110,7 +110,6 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
                    wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES})
   string(REGEX REPLACE "libwx_osx_cocoau_scintilla" "libwxscintilla" 
                    wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES})
-  #message(ERROR "WX_LIBS: ${wxWidgets_LIBRARIES}")
 endif()
 
 #OpenGL
@@ -320,10 +319,6 @@ if(${ARCHITECTURE} MATCHES 64)
    set(CMAKE_C_FLAGS "${ARCH_FLAGS} ${CFLAGS}")
    set(CMAKE_CXX_FLAGS "${ARCH_FLAGS} ${CXXFLAGS} ${CXX_11_FLAG}")
    set(CMAKE_EXE_LINKER_FLAGS "${ARCH_FLAGS} ${CXX_11_FLAG}")
-   if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-      set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib -L/usr/lib ${CMAKE_EXE_LINKER_FLAGS} -lbz2 -framework OpenCL -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration")
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.9 -DWX_PRECOMP -std=c++11 -stdlib=libc++")
-   endif()
 else()
    if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
       set(ARCH_FLAGS "-m32 -arch i386")
@@ -332,19 +327,25 @@ else()
    set(CMAKE_C_FLAGS "${ARCH_FLAGS} ${CFLAGS}" )
    set(CMAKE_CXX_FLAGS "${ARCH_FLAGS} ${CXXFLAGS} ${CXX_11_FLAG}")
    set(CMAKE_EXE_LINKER_FLAGS "${ARCH_FLAGS} ${CXX_11_FLAG}")
-   if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.9 -DWX_PRECOMP -std=c++11 -stdlib=libc++")
-      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/usr/local/lib -L/usr/lib -lbz2 -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration")
-   endif()
+endif()
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+   set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib -L/usr/lib ${CMAKE_EXE_LINKER_FLAGS} -lbz2 -framework OpenCL -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration")
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.9 -DWX_PRECOMP -std=c++11 -stdlib=libc++")
+   #make sure png is static linked
+   string(REGEX REPLACE "-lpng" "/usr/local/lib/libpng.a" 
+			wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES})
+   string(REGEX REPLACE "-lpng" "/usr/local/lib/libpng.a" 
+			CMAKE_MAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS})
 endif()
 
 #link the libraries
 target_link_libraries(FluoRender
    ${ffmpeg_LIBRARIES}
-   ${wxWidgets_LIBRARIES}
    ${OPENGL_LIBRARIES}
    ${Boost_LIBRARIES}
-   ${OPENCL_LIBRARIES})
+   ${OPENCL_LIBRARIES}
+   ${wxWidgets_LIBRARIES})
 
 #build OpenCL examples copies.
 
