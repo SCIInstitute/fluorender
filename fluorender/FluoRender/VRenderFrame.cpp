@@ -2570,7 +2570,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 		 vector<Ruler*>* ruler_list = vrv->GetRulerList();
 		 if (ruler_list && ruler_list->size())
 		 {
-			 fconfig.Write("num", unsigned int(ruler_list->size()));
+			 fconfig.Write("num", static_cast<unsigned int>(ruler_list->size()));
 			 for (size_t ri=0; ri<ruler_list->size(); ++ri)
 			 {
 				 Ruler* ruler = (*ruler_list)[ri];

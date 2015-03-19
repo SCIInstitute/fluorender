@@ -9278,8 +9278,9 @@ int VRenderGLView::RulerProfile(int index)
 				profile->erase(profile->begin()+total_dist, profile->begin()+bins-1);
 		}
 	}
-
-	ruler->SetInfoProfile("Profile of volume "+vd->GetName());
+    wxString str("Profile of volume ");
+    str = str + vd->GetName();
+	ruler->SetInfoProfile(str);
 	return 1;
 }
 
