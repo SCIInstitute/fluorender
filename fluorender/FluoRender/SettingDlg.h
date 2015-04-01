@@ -161,6 +161,8 @@ public:
 	int GetGLMajorVer() {return m_gl_major_ver;}
 	int GetGLMinorVer() {return m_gl_minor_ver;}
 	int GetGLProfileMask() {return m_gl_profile_mask;}
+	//cl device
+	int GetCLDeviceID() {return m_cl_device_id;}
 
 private:
 	wxWindow* m_frame;
@@ -223,6 +225,8 @@ private:
 	int m_gl_major_ver;
 	int m_gl_minor_ver;
 	int m_gl_profile_mask;
+	//cl device
+	int m_cl_device_id;
 
 private:
 	//save project

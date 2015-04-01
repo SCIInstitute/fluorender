@@ -1,5 +1,5 @@
 ver_major=2
-ver_minor=15
+ver_minor=15.2
 [gm\ calculation]
 mode=2
 [peeling\ layers]
@@ -69,3 +69,5 @@ samples=4
 gl_major_ver=4
 gl_minor_ver=4
 gl_profile_mask=2
+[cl\ device]
+device_id=0
