@@ -519,7 +519,7 @@ void VRenderGLView::HandleProjection(int nx, int ny, bool restrict)
    else
    {
       glOrtho(m_ortho_left, m_ortho_right, m_ortho_bottom, m_ortho_top,
-            -m_near_clip, m_far_clip);
+            -m_far_clip/100.0, m_far_clip);
    }
 }
 
