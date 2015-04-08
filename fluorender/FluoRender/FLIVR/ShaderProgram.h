@@ -31,13 +31,15 @@
 
 #include <string>
 
+
 namespace FLIVR
 {
 
 	class ShaderProgram
 	{
 	public:
-		ShaderProgram(const std::string& program);
+		ShaderProgram(const std::string& vert_shader,const std::string& frag_shader);
+		ShaderProgram(const std::string& frag_shader);
 		~ShaderProgram();
 
 		unsigned int id();
@@ -61,30 +63,15 @@ namespace FLIVR
 		static bool texture_non_power_of_two();
 		static const int MAX_SHADER_UNIFORMS = 16;
 	protected:
-		unsigned int type_;
 		unsigned int id_;
-		std::string  program_;
+		std::string  vert_shader_;
+		std::string  frag_shader_;
 
 		static bool init_;
 		static bool supported_;
 		static bool non_2_textures_;
 		static int  max_texture_size_;
 	};
-
-	class VertexProgram : public ShaderProgram
-	{
-	public:
-		VertexProgram(const std::string& program);
-		~VertexProgram();
-	};
-
-	class FragmentProgram : public ShaderProgram
-	{
-	public:
-		FragmentProgram(const std::string& program);
-		~FragmentProgram();
-	};
-
 } // end namespace FLIVR
 
 #endif // ShaderProgram_h

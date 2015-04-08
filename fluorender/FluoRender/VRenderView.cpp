@@ -59,7 +59,7 @@ END_EVENT_TABLE()
 VRenderGLView::VRenderGLView(wxWindow* frame,
       wxWindow* parent,
       wxWindowID id,
-	  const int* attriblist,
+      const int* attriblist,
       wxGLContext* sharedContext,
       const wxPoint& pos,
       const wxSize& size,
@@ -456,6 +456,11 @@ void VRenderGLView::Init()
       goTimer->start();
       m_initialized = true;
    }
+   
+   ////query the OGL version to determine actual context info
+   //char version[16];
+   //memcpy(version,glGetString(GL_VERSION),16);
+   //m_GLversion = wxString("OpenGL Version: ") + wxString(version);
 }
 
 void VRenderGLView::Clear()
@@ -1625,7 +1630,7 @@ void VRenderGLView::PaintStroke()
    else
    {
       //paint shader
-      FragmentProgram* paint_shader =
+      ShaderProgram* paint_shader =
          m_paint_shader_factory.shader();
       if (paint_shader)
       {
@@ -2471,7 +2476,7 @@ void VRenderGLView::DrawFinalBuffer()
    glDisable(GL_LIGHTING);
 
    //2d adjustment
-   FragmentProgram* img_shader =
+   ShaderProgram* img_shader =
       m_img_shader_factory.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
    if (img_shader)
    {
@@ -2850,7 +2855,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
    glDisable(GL_LIGHTING);
 
    //2d adjustment
-   FragmentProgram* img_shader =
+   ShaderProgram* img_shader =
 #ifdef _DARWIN
       m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST);
 #else
@@ -2922,7 +2927,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
    bool shadow = vd->GetShadow();
    int color_mode = vd->GetColormapMode();
    bool enable_alpha = vd->GetEnableAlpha();
-   FragmentProgram* img_shader = 0;
+   ShaderProgram* img_shader = 0;
 
    if (do_mip)
    {
@@ -3371,7 +3376,7 @@ void VRenderGLView::DrawOLShadowsMesh(GLuint tex_depth, double darkness)
    glDisable(GL_LIGHTING);
 
    //2d adjustment
-   FragmentProgram* img_shader =
+   ShaderProgram* img_shader =
       m_img_shader_factory.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
    if (img_shader)
    {
@@ -3666,7 +3671,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
       glDisable(GL_LIGHTING);
 
       //2d adjustment
-      FragmentProgram* img_shader =
+      ShaderProgram* img_shader =
          m_img_shader_factory.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
       if (img_shader)
       {
@@ -3902,7 +3907,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
    glDisable(GL_LIGHTING);
 
    //2d adjustment
-	FragmentProgram* img_shader =
+	ShaderProgram* img_shader =
 #ifdef _DARWIN
 	m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST);
 #else
@@ -10230,6 +10235,32 @@ VRenderView::VRenderView(wxWindow* frame,
    };
    m_glview = new VRenderGLView(frame, this, wxID_ANY, attriblist, sharedContext);
    m_glview->SetCanFocus(false);
+#ifdef _WIN32
+   //example Pixel format descriptor detailing each part
+   //PIXELFORMATDESCRIPTOR pfd = { 
+   // sizeof(PIXELFORMATDESCRIPTOR),  //  size of this pfd  
+   // 1,                     // version number  
+   // PFD_DRAW_TO_WINDOW |   // support window  
+   // PFD_SUPPORT_OPENGL |   // support OpenGL  
+   // PFD_DOUBLEBUFFER,      // double buffered  
+   // PFD_TYPE_RGBA,         // RGBA type  
+   // 24,                    // 24-bit color depth  
+   // 0, 0, 0, 0, 0, 0,      // color bits ignored  
+   // 0,                     // no alpha buffer  
+   // 0,                     // shift bit ignored  
+   // 0,                     // no accumulation buffer  
+   // 0, 0, 0, 0,            // accum bits ignored  
+   // 32,                    // 32-bit z-buffer      
+   // 0,                     // no stencil buffer  
+   // 0,                     // no auxiliary buffer  
+   // PFD_MAIN_PLANE,        // main layer  
+   // 0,                     // reserved  
+   // 0, 0, 0                // layer masks ignored  
+   // }; 
+   PIXELFORMATDESCRIPTOR  pfd;
+   //check ret. this is an error code when the pixel format is invalid.
+   int ret = m_glview->GetPixelFormat(&pfd);
+#endif
    CreateBar();
    if (m_glview) {
 	   m_glview->SetSBText(wxString::Format("50 %c%c", 131, 'm'));
@@ -10238,6 +10269,20 @@ VRenderView::VRenderView(wxWindow* frame,
    LoadSettings();
    m_x_rotating = m_y_rotating = m_z_rotating = false;
    m_timer.Start(50);
+}
+
+#ifdef _WIN32
+int VRenderGLView::GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd) {
+    int pixelFormat = ::GetPixelFormat(m_hDC);
+	if (pixelFormat == 0) return GetLastError();
+    pixelFormat = DescribePixelFormat(m_hDC, pixelFormat, sizeof(PIXELFORMATDESCRIPTOR), pfd);
+	if (pixelFormat == 0) return GetLastError();
+	return pixelFormat;
+}
+#endif
+
+wxString VRenderGLView::GetOGLVersion() {
+	return m_GLversion;
 }
 
 VRenderView::~VRenderView()

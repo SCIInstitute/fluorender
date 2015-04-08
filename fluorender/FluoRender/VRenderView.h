@@ -86,13 +86,18 @@ class VRenderGLView: public wxGLCanvas
       VRenderGLView(wxWindow* frame,
             wxWindow* parent,
             wxWindowID id,
-			const int* attriblist = NULL,
+	    const int* attriblist = NULL,
             wxGLContext* sharedContext=0,
             const wxPoint& pos=wxDefaultPosition,
             const wxSize& size=wxDefaultSize,
             long style=0);
       ~VRenderGLView();
 
+	  //for degugging, this allows inspection of the pixel format actually given.
+#ifdef _WIN32
+      int GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd);
+#endif
+      wxString GetOGLVersion();
       //initialization
       void Init();
 
@@ -253,7 +258,6 @@ class VRenderGLView: public wxGLCanvas
       {
          return m_rot_lock;
       }
-
       //camera properties
       bool GetPersp() {return m_persp;}
       void SetPersp(bool persp=true);
@@ -547,6 +551,7 @@ class VRenderGLView: public wxGLCanvas
          bool m_linked_rot;
 
    private:
+	     wxString m_GLversion;
          wxGLContext* m_glRC;
          bool m_sharedRC;
          wxWindow* m_frame;

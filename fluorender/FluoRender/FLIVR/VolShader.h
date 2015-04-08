@@ -37,8 +37,7 @@
 
 namespace FLIVR
 {
-
-	class FragmentProgram;
+	class ShaderProgram;
 
 	class VolShader
 	{
@@ -47,7 +46,8 @@ namespace FLIVR
 				bool shading, bool fog,
 				int peel, bool clip,
 				bool hiqual, int mask,
-				int color_mode, bool solid);
+				int color_mode, bool solid,
+				int vertex_shader = 0);
 		~VolShader();
 
 		bool create();
@@ -66,7 +66,8 @@ namespace FLIVR
 						bool shading, bool fog, 
 						int peel, bool clip,
 						bool hiqual, int mask,
-						int color_mode, bool solid)
+						int color_mode, bool solid,
+						int vertex_shader = 0)
 		{ 
 			return (channels_ == channels &&
 				shading_ == shading && 
@@ -76,13 +77,15 @@ namespace FLIVR
 				hiqual_ == hiqual &&
 				mask_ == mask &&
 				color_mode_ == color_mode &&
-				solid_ == solid); 
+				solid_ == solid &&
+				vertex_type_ == vertex_shader); 
 		}
 
-		inline FragmentProgram* program() { return program_; }
+		inline ShaderProgram* program() { return program_; }
 
 	protected:
-		bool emit(std::string& s);
+		bool emit_f(std::string& s);
+		bool emit_v(std::string& s);
 
 		int channels_;
 		bool shading_;
@@ -94,8 +97,9 @@ namespace FLIVR
 					//3-random color with label, 4-random color with label+mask
 		int color_mode_;//0-normal; 1-rainbow; 2-depth
 		bool solid_;//no transparency
+		int vertex_type_;
 
-		FragmentProgram* program_;
+		ShaderProgram* program_;
 	};
 
 	class VolShaderFactory
@@ -104,11 +108,12 @@ namespace FLIVR
 		VolShaderFactory();
 		~VolShaderFactory();
 
-		FragmentProgram* shader(int channels, 
+		ShaderProgram* shader(int channels, 
 								bool shading, bool fog, 
 								int peel, bool clip,
 								bool hiqual, int mask,
-								int color_mode, bool solid);
+								int color_mode, bool solid, 
+								int vertex_type = 0);
 		//mask: 0-no mask, 1-segmentation mask, 2-labeling mask
 		//color_mode: 0-normal; 1-rainbow; 2-depth
 

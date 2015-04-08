@@ -94,7 +94,7 @@ namespace FLIVR
 		GLint vp[4];
 		glGetIntegerv(GL_VIEWPORT, vp);
 
-		FragmentProgram* shader = 0;
+		ShaderProgram* shader = 0;
 		shader = msh_shader_factory_.shader(use_fog!=0,
 			depth_peel_, tex&&data_->hastexture==GL_TRUE);
 		if (shader)

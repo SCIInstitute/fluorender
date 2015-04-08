@@ -32,7 +32,7 @@
 #include <nrrd.h>
 #include "TextureBrick.h"
 #include "Texture.h"
-
+#include <stdint.h>
 namespace FLIVR
 {
    //a simple fixed-length fifo sequence
@@ -90,7 +90,7 @@ namespace FLIVR
          int m_pos;
    };
 
-   class FragmentProgram;
+   class ShaderProgram;
    class VolShaderFactory;
    class SegShaderFactory;
    class VolCalShaderFactory;
@@ -316,6 +316,9 @@ namespace FLIVR
                double mvmat_[16];
                double prmat_[16];
 
+			   //vertex and index buffer bind points
+			   static GLuint m_slices_vbo, m_slices_ibo;
+
                //compute view
                Ray compute_view();
 			   Ray compute_snapview(double snap);
@@ -338,12 +341,12 @@ namespace FLIVR
                void draw_slices(double d);
 
                //slices
-               void draw_polygons(vector<double>& vertex, vector<double>& texcoord,
-                     vector<int>& poly,
+               void draw_polygons(vector<float>& vertex, 
+                     vector<uint32_t>& poly,
                      bool fog,
-                     FragmentProgram *shader = 0);
-               void draw_polygons_wireframe(vector<double>& vertex, vector<double>& texcoord,
-                     vector<int>& poly,
+                     ShaderProgram *shader = 0);
+               void draw_polygons_wireframe(vector<float>& vertex, 
+                     vector<uint32_t>& poly,
                      bool fog);
 
                //bind 2d mask for segmentation

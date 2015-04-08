@@ -515,11 +515,9 @@ namespace FLIVR
 		double dt = cell_diag.length()/compute_rate_scale(snapview.direction())/rate;
 		num_slices_ = (int)(diag.length()/dt);
 
-		vector<double> vertex;
-		vector<double> texcoord;
-		vector<int> size;
-		vertex.reserve(num_slices_*6);
-		texcoord.reserve(num_slices_*6);
+		vector<float> vertex;
+		vector<uint32_t> size;
+		vertex.reserve(num_slices_*12);
 		size.reserve(num_slices_*6);
 
 		//--------------------------------------------------------------------------
@@ -694,14 +692,14 @@ namespace FLIVR
 
 		//--------------------------------------------------------------------------
 		// Set up shaders
-		FragmentProgram* shader = 0;
+		ShaderProgram* shader = 0;
 		//create/bind
 		shader = vol_shader_factory_.shader(
 			tex_->nc(),
 			shading_, use_fog,
 			depth_peel_, true,
 			hiqual_, ml_mode_,
-			colormap_mode_, solid_);
+			colormap_mode_, solid_, 1);
 		if (shader)
 		{
 			if (!shader->valid())
@@ -711,10 +709,7 @@ namespace FLIVR
 
 		//set uniforms
 		//set up shading
-		double mat[16];
-		glGetDoublev(GL_MODELVIEW_MATRIX, mat);
-		Transform mv;
-		mv.set_trans(mat);
+		//set the light
 		Vector light = view_ray.direction();
 		light.safe_normalize();
 		shader->setLocalParam(0, light.x(), light.y(), light.z(), alpha_);
@@ -778,6 +773,15 @@ namespace FLIVR
 		glMultMatrixd(mvmat);
 		float matrix[16];
 
+		float mat[16];
+		glGetFloatv(GL_PROJECTION_MATRIX, mat);
+		//send the matrices down if possible
+		shader->setLocalParamMatrix(0, mat);
+		glGetFloatv(GL_MODELVIEW_MATRIX, mat);
+		shader->setLocalParamMatrix(1, mat);
+		glGetFloatv(GL_TEXTURE_MATRIX, mat);
+		shader->setLocalParamMatrix(5, mat);
+
 		for (unsigned int i=0; i < bricks->size(); i++)
 		{
 			//comment off when debug_ds
@@ -811,9 +815,8 @@ namespace FLIVR
 			}
 
 			vertex.clear();
-			texcoord.clear();
 			size.clear();
-			b->compute_polygons(snapview, dt, vertex, texcoord, size);
+			b->compute_polygons(snapview, dt, vertex, size);
 
 			if (vertex.size() == 0) continue;
 			GLint filter;
@@ -851,7 +854,7 @@ namespace FLIVR
 			matrix[15] = 1.0f;
 			shader->setLocalParamMatrix(2, matrix);
 
-			draw_polygons(vertex, texcoord, size, use_fog, shader);
+			draw_polygons(vertex, size, use_fog, shader);
 
 			if (mem_swap_)
 				finished_bricks_++;
@@ -917,7 +920,7 @@ namespace FLIVR
 			glPushMatrix();
 			glLoadIdentity();
 
-			FragmentProgram* img_shader = 0;
+			ShaderProgram* img_shader = 0;
 
 			if (noise_red_ && colormap_mode_!=2)
 			{
@@ -954,7 +957,6 @@ namespace FLIVR
 
 				glBindTexture(GL_TEXTURE_2D, blend_tex_id_);
 				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
 				img_shader = 
 					m_img_shader_factory.shader(IMG_SHDR_FILTER_BLUR);
 				if (img_shader)
@@ -1054,11 +1056,11 @@ namespace FLIVR
 	{
 		Ray view_ray = compute_view();
 		Transform *tform = tex_->transform();
-		double mvmat[16];
+		float mvmat[16];
 		tform->get_trans(mvmat);
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
-		glMultMatrixd(mvmat);
+		glMultMatrixf(mvmat);
 		glEnable(GL_DEPTH_TEST);
 		GLboolean lighting = glIsEnabled(GL_LIGHTING);
 		glDisable(GL_LIGHTING);
@@ -1067,19 +1069,17 @@ namespace FLIVR
 		glDisable(GL_FOG);
 		vector<TextureBrick*> *bricks = tex_->get_sorted_bricks(view_ray, orthographic_p);
 
-		double rate = imode_ ? irate_ : sampling_rate_;
+		float rate = imode_ ? irate_ : sampling_rate_;
 		Vector diag = tex_->bbox()->diagonal();
 		Vector cell_diag(diag.x()/tex_->nx(),
 			diag.y()/tex_->ny(),
 			diag.z()/tex_->nz());
-		double dt = cell_diag.length()/compute_rate_scale(view_ray.direction())/rate;
+		float dt = cell_diag.length()/compute_rate_scale(view_ray.direction())/rate;
 		num_slices_ = (int)(diag.length()/dt);
 
-		vector<double> vertex;
-		vector<double> texcoord;
-		vector<int> size;
-		vertex.reserve(num_slices_*6);
-		texcoord.reserve(num_slices_*6);
+		vector<float> vertex;
+		vector<uint32_t> size;
+		vertex.reserve(num_slices_*12);
 		size.reserve(num_slices_*6);
 
 		if (bricks)
@@ -1131,12 +1131,11 @@ namespace FLIVR
 				glColor4d(0.4, 0.4, 0.4, 1.0);
 
 				vertex.clear();
-				texcoord.clear();
 				size.clear();
 
 				// Scale out dt such that the slices are artificially further apart.
-				b->compute_polygons(view_ray, dt * 10, vertex, texcoord, size);
-				draw_polygons_wireframe(vertex, texcoord, size, false);
+				b->compute_polygons(view_ray, dt * 10, vertex, size);
+				draw_polygons_wireframe(vertex, size, false);
 			}
 		}
 
@@ -1178,7 +1177,7 @@ namespace FLIVR
 		//--------------------------------------------------------------------------
 		// Set up shaders
 		//seg shader
-		FragmentProgram* seg_shader = 0;
+		ShaderProgram* seg_shader = 0;
 
 		switch (type)
 		{
@@ -1430,7 +1429,7 @@ namespace FLIVR
 		//--------------------------------------------------------------------------
 		// Set up shaders
 		//seg shader
-		FragmentProgram* seg_shader = 0;
+		ShaderProgram* seg_shader = 0;
 
 		switch (type)
 		{
@@ -1656,7 +1655,7 @@ namespace FLIVR
 		//--------------------------------------------------------------------------
 		// Set up shaders
 		//calculate shader
-		FragmentProgram* cal_shader = cal_shader_factory_.shader(type);
+		ShaderProgram* cal_shader = cal_shader_factory_.shader(type);
 
 		if (cal_shader)
 		{

@@ -34,7 +34,7 @@
 
 namespace FLIVR
 {
-	class FragmentProgram;
+	class ShaderProgram;
 
 	class PaintShader
 	{
@@ -49,12 +49,12 @@ namespace FLIVR
 			return true; 
 		}
 
-		inline FragmentProgram* program() { return program_; }
+		inline ShaderProgram* program() { return program_; }
 
 	protected:
 		bool emit(std::string& s);
 
-		FragmentProgram* program_;
+		ShaderProgram* program_;
 	};
 
 	class PaintShaderFactory
@@ -63,7 +63,7 @@ namespace FLIVR
 		PaintShaderFactory();
 		~PaintShaderFactory();
 
-		FragmentProgram* shader();
+		ShaderProgram* shader();
 
 	protected:
 		std::vector<PaintShader*> shader_;

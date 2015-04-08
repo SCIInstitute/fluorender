@@ -28,9 +28,18 @@
 
 namespace FLIVR
 {
-#define VOL_VERSION_130 \
-	"#version 130\n"\
+#define DEFAULT_FRAGMENT_CODE \
+	"void main() {\n" \
+	"    FragColor = vec4(1,1,1,1);\n" \
+	"}\n" 
+#define VOL_VERSION \
+	"#version 400\n"\
 	"\n"
+
+#define VOL_INPUTS \
+	"in vec3 OutVertex;\n" \
+	"in vec3 OutTexture;\n" \
+	"out vec4 FragColor;\n"
 
 #define VOL_UNIFORMS_COMMON \
 	"// VOL_UNIFORMS_COMMON\n" \
@@ -43,6 +52,8 @@ namespace FLIVR
 	"\n" \
 	"uniform sampler3D tex0;//data volume\n" \
 	"uniform sampler3D tex1;//gm volume\n" \
+	"\n" \
+	"uniform mat4 matrix5;//texture\n" \
 	"\n"
 
 #define VOL_UNIFORMS_MATRICES \
@@ -100,7 +111,11 @@ namespace FLIVR
 	"//VOL_HEAD\n" \
 	"void main()\n" \
 	"{\n" \
-	"	vec4 t = gl_TexCoord[0];\n" \
+	"	vec4 TexCoord = vec4(OutTexture, 1.0);\n" \
+	"	//FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n" \
+	"	//return;\n" \
+	"	vec4 t = TexCoord;\n" \
+	"	//vec4 t = gl_TexCoord[0];\n" \
 	"\n"
 
 #define VOL_HEAD_2DMAP_LOC \
@@ -110,18 +125,18 @@ namespace FLIVR
 
 #define VOL_HEAD_DP_1 \
 	"	//VOL_HEAD_DP_NEG\n" \
-	"	if (texture2D(tex15, fcf).r < gl_FragCoord.z) discard;\n" \
+	"	if (texture(tex15, fcf).r < gl_FragCoord.z) discard;\n" \
 	"\n"
 
 #define VOL_HEAD_DP_2 \
 	"	//VOL_HEAD_DP_POS\n" \
-	"	if (texture2D(tex15, fcf).r > gl_FragCoord.z) discard;\n" \
+	"	if (texture(tex15, fcf).r > gl_FragCoord.z) discard;\n" \
 	"\n"
 
 #define VOL_HEAD_DP_3 \
 	"	//VOL_HEAD_DP_BOTH\n" \
-	"	if (texture2D(tex15, fcf).r < gl_FragCoord.z) discard;\n" \
-	"	else if (texture2D(tex14, fcf).r > gl_FragCoord.z) discard;\n" \
+	"	if (texture(tex15, fcf).r < gl_FragCoord.z) discard;\n" \
+	"	else if (texture(tex14, fcf).r > gl_FragCoord.z) discard;\n" \
 	"\n"
 
 #define VOL_HEAD_FOG \
@@ -146,7 +161,7 @@ namespace FLIVR
 	"		dot(brickt.xyz, loc14.xyz)+loc14.w < 0.0 ||\n" \
 	"		dot(brickt.xyz, loc15.xyz)+loc15.w < 0.0)\n" \
 	"	{\n" \
-	"		discard;//gl_FragColor = vec4(0.0);\n" \
+	"		discard;//FragColor = vec4(0.0);\n" \
 	"		return;\n" \
 	"	}\n" \
 	"\n"
@@ -190,7 +205,7 @@ namespace FLIVR
 
 #define VOL_DATA_VOLUME_LOOKUP \
 	"	//VOL_DATA_VOLUME_LOOKUP\n" \
-	"	vec4 v = texture3D(tex0, t.stp);\n" \
+	"	vec4 v = texture(tex0, t.stp);\n" \
 	"\n"
 
 #define VOL_DATA_VOLUME_LOOKUP_130 \
@@ -202,23 +217,23 @@ namespace FLIVR
 	"	//VOL_GRAD_COMPUTE_LO\n" \
 	"	vec4 dir = loc4; // \n" \
 	"	vec4 r, p; \n" \
-	"	mat4 tmat = gl_TextureMatrixInverseTranspose[0]; \n" \
+	"	mat4 tmat = transpose(inverse(matrix5)); \n" \
 	"	v = vec4(v.x); \n" \
 	"	n = vec4(0.0); \n" \
 	"	w = vec4(0.0);\n" \
 	"	w.x = dir.x; \n" \
-	"	p = clamp(gl_TexCoord[0] + w, 0.0, 1.0); \n" \
-	"	r = texture3D(tex0, p.stp); \n" \
+	"	p = clamp(TexCoord + w, 0.0, 1.0); \n" \
+	"	r = texture(tex0, p.stp); \n" \
 	"	n.x = v.x - r.x; \n" \
 	"	w = vec4(0.0); \n" \
 	"	w.y = dir.y; \n" \
-	"	p = clamp(gl_TexCoord[0] + w, 0.0, 1.0); \n" \
-	"	r = texture3D(tex0, p.stp); \n" \
+	"	p = clamp(TexCoord + w, 0.0, 1.0); \n" \
+	"	r = texture(tex0, p.stp); \n" \
 	"	n.y = v.y - r.x; \n" \
 	"	w = vec4(0.0); \n" \
 	"	w.z = dir.x<dir.z?dir.x:dir.z; \n" \
-	"	p = clamp(gl_TexCoord[0] + w, 0.0, 1.0); \n" \
-	"	r = texture3D(tex0, p.stp); \n" \
+	"	p = clamp(TexCoord + w, 0.0, 1.0); \n" \
+	"	r = texture(tex0, p.stp); \n" \
 	"	n.z = v.z - r.x; \n" \
 	"	w.x = dot(n.xxx, vec3(tmat[0].x, tmat[1].x, tmat[2].x)); \n" \
 	"	w.y = dot(n.yyy, vec3(tmat[0].y, tmat[1].y, tmat[2].y)); \n" \
@@ -232,32 +247,32 @@ namespace FLIVR
 	"	// VOL_GRAD_COMPUTE_HI\n" \
 	"	vec4 dir = loc4;//(1/nx, 1/ny, 1/nz, 1/sample_rate)\n" \
 	"	vec4 r, p; \n" \
-	"	mat4 tmat = gl_TextureMatrixInverseTranspose[0]; \n" \
+	"	mat4 tmat = transpose(inverse(matrix5)); \n" \
 	"	v = vec4(v.x); \n" \
 	"	n = vec4(0.0); \n" \
 	"	w = vec4(0.0);\n" \
 	"	w.x = dir.x; \n" \
-	"	p = clamp(gl_TexCoord[0] + w, 0.0, 1.0); \n" \
-	"	r = texture3D(tex0, p.stp); \n" \
+	"	p = clamp(TexCoord + w, 0.0, 1.0); \n" \
+	"	r = texture(tex0, p.stp); \n" \
 	"	n.x = r.x + n.x; \n" \
-	"	p = clamp(gl_TexCoord[0] - w, 0.0, 1.0); \n" \
-	"	r = texture3D(tex0, p.stp); \n" \
+	"	p = clamp(TexCoord - w, 0.0, 1.0); \n" \
+	"	r = texture(tex0, p.stp); \n" \
 	"	n.x = r.x - n.x; \n" \
 	"	w = vec4(0.0); \n" \
 	"	w.y = dir.y; \n" \
-	"	p = clamp(gl_TexCoord[0] + w, 0.0, 1.0); \n" \
-	"	r = texture3D(tex0, p.stp); \n" \
+	"	p = clamp(TexCoord + w, 0.0, 1.0); \n" \
+	"	r = texture(tex0, p.stp); \n" \
 	"	n.y = r.x + n.y; \n" \
-	"	p = clamp(gl_TexCoord[0] - w, 0.0, 1.0); \n" \
-	"	r = texture3D(tex0, p.stp); \n" \
+	"	p = clamp(TexCoord - w, 0.0, 1.0); \n" \
+	"	r = texture(tex0, p.stp); \n" \
 	"	n.y = r.x - n.y; \n" \
 	"	w = vec4(0.0); \n" \
 	"	w.z = dir.x<dir.z?dir.x:dir.z; \n" \
-	"	p = clamp(gl_TexCoord[0] + w, 0.0, 1.0); \n" \
-	"	r = texture3D(tex0, p.stp); \n" \
+	"	p = clamp(TexCoord + w, 0.0, 1.0); \n" \
+	"	r = texture(tex0, p.stp); \n" \
 	"	n.z = r.x + n.z; \n" \
-	"	p = clamp(gl_TexCoord[0] - w, 0.0, 1.0); \n" \
-	"	r = texture3D(tex0, p.stp); \n" \
+	"	p = clamp(TexCoord - w, 0.0, 1.0); \n" \
+	"	r = texture(tex0, p.stp); \n" \
 	"	n.z = r.x - n.z; \n" \
 	"	w.x = dot(n.xxx, vec3(tmat[0].x, tmat[1].x, tmat[2].x)); \n" \
 	"	w.y = dot(n.yyy, vec3(tmat[0].y, tmat[1].y, tmat[2].y)); \n" \
@@ -272,31 +287,31 @@ namespace FLIVR
 	"vec4 vol_grad_func(vec4 pos, vec4 dir)\n" \
 	"{\n" \
 	"	vec4 r, p;\n" \
-	"	mat4 tmat = gl_TextureMatrixInverseTranspose[0];\n" \
+	"	mat4 tmat = transpose(inverse(matrix5));\n" \
 	"	vec4 n = vec4(0.0);\n" \
 	"	vec4 w = vec4(0.0);\n" \
 	"	w.x = dir.x;\n" \
 	"	p = clamp(pos+w, 0.0, 1.0);\n" \
-	"	r = texture3D(tex0, p.stp);\n" \
+	"	r = texture(tex0, p.stp);\n" \
 	"	n.x = r.x + n.x;\n" \
 	"	p = clamp(pos-w, 0.0, 1.0);\n" \
-	"	r = texture3D(tex0, p.stp);\n" \
+	"	r = texture(tex0, p.stp);\n" \
 	"	n.x = r.x - n.x;\n" \
 	"	w = vec4(0.0);\n" \
 	"	w.y = dir.y;\n" \
 	"	p = clamp(pos+w, 0.0, 1.0);\n" \
-	"	r = texture3D(tex0, p.stp);\n" \
+	"	r = texture(tex0, p.stp);\n" \
 	"	n.y = r.x + n.y;\n" \
 	"	p = clamp(pos-w, 0.0, 1.0);\n" \
-	"	r = texture3D(tex0, p.stp);\n" \
+	"	r = texture(tex0, p.stp);\n" \
 	"	n.y = r.x - n.y;\n" \
 	"	w = vec4(0.0);\n" \
 	"	w.z = dir.x<dir.z?dir.x:dir.z;\n" \
 	"	p = clamp(pos+w, 0.0, 1.0);\n" \
-	"	r = texture3D(tex0, p.stp);\n" \
+	"	r = texture(tex0, p.stp);\n" \
 	"	n.z = r.x + n.z;\n" \
 	"	p = clamp(pos-w, 0.0, 1.0);\n" \
-	"	r = texture3D(tex0, p.stp);\n" \
+	"	r = texture(tex0, p.stp);\n" \
 	"	n.z = r.x - n.z;\n" \
 	"	w.x = dot(n.xxx, vec3(tmat[0].x, tmat[1].x, tmat[2].x)); \n" \
 	"	w.y = dot(n.yyy, vec3(tmat[0].y, tmat[1].y, tmat[2].y)); \n" \
@@ -329,7 +344,7 @@ namespace FLIVR
 
 #define VOL_TEXTURE_GM_LOOKUP \
 	"	//VOL_TEXTURE_GM_LOOKUP\n" \
-	"	v.y = texture3D(tex1, t.stp).x;\n" \
+	"	v.y = texture(tex1, t.stp).x;\n" \
 	"\n"
 
 #define VOL_TRANSFER_FUNCTION_SIN_COLOR \
@@ -491,64 +506,64 @@ namespace FLIVR
 
 #define VOL_RASTER_BLEND \
 	"	//VOL_RASTER_BLEND\n" \
-	"	gl_FragColor = c*l.w; // VOL_RASTER_BLEND\n" \
+	"	FragColor = c*l.w; // VOL_RASTER_BLEND\n" \
 	"\n"
 
 #define VOL_RASTER_BLEND_SOLID \
 	"	//VOL_RASTER_BLEND_SOLID\n" \
-	"	gl_FragColor = c;\n" \
+	"	FragColor = c;\n" \
 	"\n"
 
 #define VOL_RASTER_BLEND_DMAP \
 	"	//VOL_RASTER_BLEND_DMAP\n" \
-	"	//float prevz = texture2D(tex4, fcf).r;\n" \
+	"	//float prevz = texture(tex4, fcf).r;\n" \
 	"	float currz = gl_FragCoord.z;\n" \
 	"	float intpo = (c*l.w).r;\n" \
-	"	//gl_FragColor = vec4(vec3(intpo>0.05?currz:prevz), 1.0);\n" \
+	"	//FragColor = vec4(vec3(intpo>0.05?currz:prevz), 1.0);\n" \
 	"	if (intpo < 0.05) discard;\n" \
-	"	gl_FragColor = vec4(vec3(currz), 1.0);\n" \
+	"	FragColor = vec4(vec3(currz), 1.0);\n" \
 	"\n"
 
 #define VOL_RASTER_BLEND_NOMASK \
 	"	//VOL_RASTER_BLEND_NOMASK\n" \
-	"	vec4 cmask = texture3D(tex2, t.stp); //get mask value\n" \
-	"	gl_FragColor = vec4(1.0-cmask.x)*c*l.w;\n" \
+	"	vec4 cmask = texture(tex2, t.stp); //get mask value\n" \
+	"	FragColor = vec4(1.0-cmask.x)*c*l.w;\n" \
 	"\n"
 
 #define VOL_RASTER_BLEND_NOMASK_SOLID \
 	"	//VOL_RASTER_BLEND_NOMASK_SOLID\n" \
-	"	vec4 cmask = texture3D(tex2, t.stp); //get mask value\n" \
-	"	gl_FragColor = vec4(1.0-cmask.x)*c;\n" \
+	"	vec4 cmask = texture(tex2, t.stp); //get mask value\n" \
+	"	FragColor = vec4(1.0-cmask.x)*c;\n" \
 	"\n"
 
 #define VOL_RASTER_BLEND_NOMASK_DMAP \
 	"	//VOL_RASTER_BLEND_NOMASK_DMAP\n" \
-	"	float prevz = texture2D(tex4, fcf).r;\n" \
+	"	float prevz = texture(tex4, fcf).r;\n" \
 	"	float currz = gl_FragCoord.z;\n" \
-	"	vec4 cmask = texture3D(tex2, t.stp); //get mask value\n" \
+	"	vec4 cmask = texture(tex2, t.stp); //get mask value\n" \
 	"	float intpo = (vec4(1.0-cmask.x)*c*l.w).r;\n" \
-	"	gl_FragColor = vec4(vec3(intpo>0.05?currz:prevz), 1.0);\n" \
+	"	FragColor = vec4(vec3(intpo>0.05?currz:prevz), 1.0);\n" \
 	"\n"
 
 #define VOL_RASTER_BLEND_MASK \
 	"	//VOL_RASTER_BLEND_MASK\n" \
-	"	vec4 cmask = texture3D(tex2, t.stp); //get mask value\n" \
-	"	gl_FragColor = tf_alp*cmask.x<loc6.w?vec4(0.0):vec4(cmask.x)*c*l.w;\n" \
+	"	vec4 cmask = texture(tex2, t.stp); //get mask value\n" \
+	"	FragColor = tf_alp*cmask.x<loc6.w?vec4(0.0):vec4(cmask.x)*c*l.w;\n" \
 	"\n"
 
 #define VOL_RASTER_BLEND_MASK_SOLID \
 	"	//VOL_RASTER_BLEND_MASK_SOLID\n" \
-	"	vec4 cmask = texture3D(tex2, t.stp); //get mask value\n" \
-	"	gl_FragColor = tf_alp*cmask.x<loc6.w?vec4(0.0):vec4(cmask.x)*c;\n" \
+	"	vec4 cmask = texture(tex2, t.stp); //get mask value\n" \
+	"	FragColor = tf_alp*cmask.x<loc6.w?vec4(0.0):vec4(cmask.x)*c;\n" \
 	"\n"
 
 #define VOL_RASTER_BLEND_MASK_DMAP \
 	"	//VOL_RASTER_BLEND_MASK_DMAP\n" \
-	"	float prevz = texture2D(tex4, fcf).r;\n" \
+	"	float prevz = texture(tex4, fcf).r;\n" \
 	"	float currz = gl_FragCoord.z;\n" \
-	"	vec4 cmask = texture3D(tex2, t.stp); //get mask value\n" \
+	"	vec4 cmask = texture(tex2, t.stp); //get mask value\n" \
 	"	float intpo = (vec4(cmask.x)*c*l.w).r;\n" \
-	"	gl_FragColor = vec4(vec3(intpo>0.05?currz:prevz), 1.0);\n" \
+	"	FragColor = vec4(vec3(intpo>0.05?currz:prevz), 1.0);\n" \
 	"\n"
 
 #define VOL_RASTER_BLEND_LABEL \
@@ -576,15 +591,15 @@ namespace FLIVR
 	"		else\n" \
 	"			sel = vec4(1.0, 1.0, p2, 1.0);\n" \
 	"	}\n" \
-	"	gl_FragColor = sel;\n" \
+	"	FragColor = sel;\n" \
 	"\n"
 
 #define VOL_RASTER_BLEND_LABEL_MASK \
 	"	//VOL_RASTER_BLEND_LABEL_MASK\n" \
-	"	vec4 cmask = texture3D(tex2, t.stp); //get mask value\n" \
+	"	vec4 cmask = texture(tex2, t.stp); //get mask value\n" \
 	"	if (cmask.x <= loc6.w)\n" \
 	"	{\n" \
-	"		gl_FragColor = c*l.w;\n" \
+	"		FragColor = c*l.w;\n" \
 	"		return;\n" \
 	"	}\n" \
 	"	uint label = texture(tex3, t.stp).x; //get mask value\n" \
@@ -618,7 +633,7 @@ namespace FLIVR
 	"		else\n" \
 	"			sel = vec4(1.0, 0.0, p2, 1.0);\n" \
 	"	}\n" \
-	"	gl_FragColor = sel*alpha*tf_alp;\n" \
+	"	FragColor = sel*alpha*tf_alp;\n" \
 	"\n"
 
 }//namespace FLIVR

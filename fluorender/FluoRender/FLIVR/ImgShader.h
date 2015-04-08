@@ -47,7 +47,7 @@ namespace FLIVR
 #define IMG_SHDR_BLEND_BRIGHT_BACKGROUND	11
 #define IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR	12
 
-	class FragmentProgram;
+	class ShaderProgram;
 
 	class ImgShader
 	{
@@ -64,14 +64,14 @@ namespace FLIVR
 			return (type_ == type); 
 		}
 
-		inline FragmentProgram* program() { return program_; }
+		inline ShaderProgram* program() { return program_; }
 
 	protected:
 		bool emit(std::string& s);
 
 		int type_;
 
-		FragmentProgram* program_;
+		ShaderProgram* program_;
 	};
 
 	class ImgShaderFactory
@@ -80,7 +80,7 @@ namespace FLIVR
 		ImgShaderFactory();
 		~ImgShaderFactory();
 
-		FragmentProgram* shader(int type);
+		ShaderProgram* shader(int type);
 
 	protected:
 		std::vector<ImgShader*> shader_;
