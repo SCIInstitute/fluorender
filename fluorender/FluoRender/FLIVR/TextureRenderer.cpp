@@ -66,8 +66,6 @@ namespace FLIVR
 	int TextureRenderer::quota_bricks_ = 0;
 	Point TextureRenderer::quota_center_;
 	int TextureRenderer::update_order_ = 0;
-	GLuint TextureRenderer::m_slices_vbo = 0;
-	GLuint TextureRenderer::m_slices_ibo = 0;
 
 	TextureRenderer::TextureRenderer(Texture* tex)
 		:
@@ -119,8 +117,10 @@ namespace FLIVR
 		blend_num_bits_(copy.blend_num_bits_),
 		clear_pool_(copy.clear_pool_)
 	{
+		//buffers
 		glGenBuffers(1, &m_slices_vbo);
 		glGenBuffers(1, &m_slices_ibo);
+		glGenBuffers(1, &m_quad_vbo);
 	}
 
 	TextureRenderer::~TextureRenderer()
@@ -134,6 +134,14 @@ namespace FLIVR
 			glDeleteFramebuffers(1, &filter_buffer_);
 		if (glIsTexture(filter_tex_id_))
 			glDeleteTextures(1, &filter_tex_id_);
+
+		//buffers
+		if (glIsBuffer(m_slices_vbo))
+			glDeleteBuffers(1, &m_slices_vbo);
+		if (glIsBuffer(m_slices_ibo))
+			glDeleteBuffers(1, &m_slices_ibo);
+		if (glIsBuffer(m_quad_vbo))
+			glDeleteBuffers(1, &m_quad_vbo);
 	}
 
 	//set the texture for rendering
@@ -987,28 +995,14 @@ namespace FLIVR
 	}
 
 	void TextureRenderer::draw_polygons(vector<float>& vertex,
-		vector<uint32_t>& triangle_verts, 
-		bool fog,
-		ShaderProgram* shader)
+		vector<uint32_t>& triangle_verts)
 	{
 		//link to the new data
 		glBindBuffer(GL_ARRAY_BUFFER, m_slices_vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_STREAM_DRAW);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_slices_ibo);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t)*triangle_verts.size(), 
-			&triangle_verts[0], GL_DYNAMIC_DRAW);
-		
-		//now draw it
-/*		glBindBuffer(GL_ARRAY_BUFFER, m_slices_vbo);
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glVertexPointer (3, GL_FLOAT, 6*sizeof(float), 0);
-		glTexCoordPointer(3, GL_FLOAT, 6*sizeof(float), (const GLvoid *)12);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_slices_ibo);
-		glDrawElements(GL_TRIANGLES, triangle_verts.size(), GL_UNSIGNED_INT, 0);
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		glDisableClientState(GL_VERTEX_ARRAY);
-		*/
+			&triangle_verts[0], GL_STREAM_DRAW);
 		
 		//now draw it
 		glBindBuffer(GL_ARRAY_BUFFER, m_slices_vbo);
@@ -1027,22 +1021,46 @@ namespace FLIVR
 	}
 
 	void TextureRenderer::draw_polygons_wireframe(vector<float>& vertex,
-		vector<uint32_t>& poly,
-		bool fog)
+		vector<uint32_t>& poly)
 	{
-		for(unsigned int i=0, k=0; i<poly.size(); i++)
-		{
-			glBegin(GL_LINE_LOOP);
-			{
-				for(int j=0; j<poly[i]; j++)
-				{
-					float* v = &vertex[(k+j)*3];
-					glVertex3d(v[0], v[1], v[2]);
-				}
-			}
-			glEnd();
-			k += poly[i];
-		}
+		glBindBuffer(GL_ARRAY_BUFFER, m_slices_vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_STREAM_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_slices_ibo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t)*poly.size(), 
+			&poly[0], GL_STREAM_DRAW);
+
+		//now draw it
+		glBindBuffer(GL_ARRAY_BUFFER, m_slices_vbo);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)12);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_slices_ibo);
+		glDrawElements(GL_LINE_LOOP, poly.size(), GL_UNSIGNED_INT, 0);
+		//for (unsigned int i=0, k=0; i<poly.size(); ++i)
+		//{
+			//glDrawElements(GL_LINE_LOOP, poly[i], GL_UNSIGNED_INT, (const GLvoid*)k);
+			//k += poly[i];
+		//}
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
+		//unbind
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		//for(unsigned int i=0, k=0; i<poly.size(); i++)
+		//{
+		//	glBegin(GL_LINE_LOOP);
+		//	{
+		//		for(int j=0; j<poly[i]; j++)
+		//		{
+		//			float* v = &vertex[(k+j)*3];
+		//			glVertex3d(v[0], v[1], v[2]);
+		//		}
+		//	}
+		//	glEnd();
+		//	k += poly[i];
+		//}
 	}
 
 	//bind 2d mask for segmentation

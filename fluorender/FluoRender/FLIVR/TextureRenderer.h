@@ -317,7 +317,8 @@ namespace FLIVR
                double prmat_[16];
 
 			   //vertex and index buffer bind points
-			   static GLuint m_slices_vbo, m_slices_ibo;
+			   GLuint m_slices_vbo, m_slices_ibo;
+			   GLuint m_quad_vbo;
 
                //compute view
                Ray compute_view();
@@ -342,12 +343,9 @@ namespace FLIVR
 
                //slices
                void draw_polygons(vector<float>& vertex, 
-                     vector<uint32_t>& poly,
-                     bool fog,
-                     ShaderProgram *shader = 0);
+                     vector<uint32_t>& poly);
                void draw_polygons_wireframe(vector<float>& vertex, 
-                     vector<uint32_t>& poly,
-                     bool fog);
+                     vector<uint32_t>& poly);
 
                //bind 2d mask for segmentation
                void bind_2d_mask();

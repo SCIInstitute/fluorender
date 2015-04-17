@@ -1113,7 +1113,7 @@ namespace FLIVR
 
             // Scale out dt such that the slices are artificially further apart.
             b->compute_polygons(view_ray, dt * 10, vertex, size);
-            vr_list_[0]->draw_polygons_wireframe(vertex, size, false);
+            vr_list_[0]->draw_polygons_wireframe(vertex, size);
          }
       }
 

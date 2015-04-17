@@ -854,7 +854,7 @@ namespace FLIVR
 			matrix[15] = 1.0f;
 			shader->setLocalParamMatrix(2, matrix);
 
-			draw_polygons(vertex, size, use_fog, shader);
+			draw_polygons(vertex, size);
 
 			if (mem_swap_)
 				finished_bricks_++;
@@ -1135,7 +1135,7 @@ namespace FLIVR
 
 				// Scale out dt such that the slices are artificially further apart.
 				b->compute_polygons(view_ray, dt * 10, vertex, size);
-				draw_polygons_wireframe(vertex, size, false);
+				draw_polygons_wireframe(vertex, size);
 			}
 		}
 
