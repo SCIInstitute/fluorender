@@ -165,7 +165,7 @@ void VolumeSelector::Select(double radius)
    }
    m_vd->DrawMask(0, m_mode, hr_mode, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
 
-   //grow the selection when paint mode is select, append, erase, or invert
+/*   //grow the selection when paint mode is select, append, erase, or invert
    if (m_mode==1 ||
          m_mode==2 ||
          m_mode==3 ||
@@ -176,7 +176,7 @@ void VolumeSelector::Select(double radius)
       for (int i=0; i<iter; i++)
          m_vd->DrawMask(1, m_mode, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
    }
-
+*/
    if (m_mode == 6)
       m_vd->SetUseMaskThreshold(false);
 }

@@ -38,7 +38,9 @@ namespace FLIVR
 
 #define VOL_INPUTS \
 	"in vec3 OutVertex;\n" \
-	"in vec3 OutTexture;\n" \
+	"in vec3 OutTexture;\n"
+
+#define VOL_OUTPUTS \
 	"out vec4 FragColor;\n"
 
 #define VOL_UNIFORMS_COMMON \
@@ -112,10 +114,7 @@ namespace FLIVR
 	"void main()\n" \
 	"{\n" \
 	"	vec4 TexCoord = vec4(OutTexture, 1.0);\n" \
-	"	//FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n" \
-	"	//return;\n" \
 	"	vec4 t = TexCoord;\n" \
-	"	//vec4 t = gl_TexCoord[0];\n" \
 	"\n"
 
 #define VOL_HEAD_2DMAP_LOC \
@@ -247,7 +246,7 @@ namespace FLIVR
 	"	// VOL_GRAD_COMPUTE_HI\n" \
 	"	vec4 dir = loc4;//(1/nx, 1/ny, 1/nz, 1/sample_rate)\n" \
 	"	vec4 r, p; \n" \
-	"	mat4 tmat = transpose(inverse(matrix5)); \n" \
+	"	//mat4 tmat = transpose(inverse(matrix5)); \n" \
 	"	v = vec4(v.x); \n" \
 	"	n = vec4(0.0); \n" \
 	"	w = vec4(0.0);\n" \
@@ -274,9 +273,12 @@ namespace FLIVR
 	"	p = clamp(TexCoord - w, 0.0, 1.0); \n" \
 	"	r = texture(tex0, p.stp); \n" \
 	"	n.z = r.x - n.z; \n" \
-	"	w.x = dot(n.xxx, vec3(tmat[0].x, tmat[1].x, tmat[2].x)); \n" \
-	"	w.y = dot(n.yyy, vec3(tmat[0].y, tmat[1].y, tmat[2].y)); \n" \
-	"	w.z = dot(n.zzz, vec3(tmat[0].z, tmat[1].z, tmat[2].z)); \n" \
+	"	//w.x = dot(n.xxx, vec3(tmat[0].x, tmat[1].x, tmat[2].x)); \n" \
+	"	//w.y = dot(n.yyy, vec3(tmat[0].y, tmat[1].y, tmat[2].y)); \n" \
+	"	//w.z = dot(n.zzz, vec3(tmat[0].z, tmat[1].z, tmat[2].z)); \n" \
+	"	w.x = n.x; \n" \
+	"	w.y = n.y; \n" \
+	"	w.z = n.z; \n" \
 	"	p.y = length(w.xyz); \n" \
 	"	p.y = 0.5 * (loc2.x<0.0?(1.0+p.y*loc2.x):p.y*loc2.x); \n" \
 	"	n.xyz = w.xyz; \n" \

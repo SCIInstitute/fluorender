@@ -234,6 +234,14 @@ namespace FLIVR
 		}
 	}
 
+	void ShaderProgram::bind_frag_data_location(int color_num, const char* name)
+	{
+		if (shaders_supported())
+		{
+			glBindFragDataLocation(id_, color_num, name);
+		}
+	}
+
 	void ShaderProgram::release ()
 	{
 		if (shaders_supported())

@@ -37,7 +37,6 @@ DEALINGS IN THE SOFTWARE.
 #include "FLIVR/MultiVolumeRenderer.h"
 #include "FLIVR/Quaternion.h"
 #include "FLIVR/ImgShader.h"
-#include "FLIVR/PaintShader.h"
 #include "FLIVR/VolKernel.h"
 #include "compatibility.h"
 
@@ -635,11 +634,11 @@ class VRenderGLView: public wxGLCanvas
          GLuint m_fbo_paint;
          GLuint m_tex_paint;
          bool m_clear_paint;
-         //paint shader
-         static PaintShaderFactory m_paint_shader_factory;
          //depth peeling buffers
          vector<GLuint> m_dp_fbo_list;
          vector<GLuint> m_dp_tex_list;
+		 //vert buffer
+		 GLuint m_quad_vbo/*, m_quad_ibo*/;
 
          //camera controls
          bool m_persp;
@@ -898,6 +897,9 @@ class VRenderGLView: public wxGLCanvas
          void OnIdle(wxIdleEvent& event);
          void OnKeyDown(wxKeyEvent& event);
          //WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
+
+		 //draw quad
+		 void DrawViewQuad();
 
          DECLARE_EVENT_TABLE();
 

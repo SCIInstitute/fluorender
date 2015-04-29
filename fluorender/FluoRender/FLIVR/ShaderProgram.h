@@ -48,6 +48,7 @@ namespace FLIVR
 		void destroy();
 
 		void bind();
+		void bind_frag_data_location(int color_num, const char* name);
 		void release();
 
 		//set vector uniform (4x1)

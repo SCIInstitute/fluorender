@@ -318,7 +318,7 @@ namespace FLIVR
 
 			   //vertex and index buffer bind points
 			   GLuint m_slices_vbo, m_slices_ibo;
-			   GLuint m_quad_vbo;
+			   GLuint m_quad_vbo/*, m_quad_ibo*/;
 
                //compute view
                Ray compute_view();
@@ -339,7 +339,7 @@ namespace FLIVR
                void release_texture(int unit, GLenum target);
 
                //draw slices of the volume
-               void draw_slices(double d);
+               void draw_view_quad(double d=0.0);
 
                //slices
                void draw_polygons(vector<float>& vertex, 

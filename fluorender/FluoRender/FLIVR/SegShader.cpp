@@ -39,6 +39,308 @@ using std::ostringstream;
 
 namespace FLIVR
 {
+#define SEG_OUTPUTS \
+	"//SEG_OUTPUTS\n" \
+	"out vec4 FragColor;\n" \
+	"\n"
+
+#define SEG_VERTEX_CODE_CORE_PROFILE \
+	"//SEG_VERTEX_CODE_CORE_PROFILE\n" \
+	"#version 400\n" \
+	"in vec3 InVertex;\n" \
+	"in vec3 InTexCoord0;\n" \
+	"out vec3 OutVertex;\n" \
+	"out vec3 OutTexture;\n" \
+	"\n" \
+	"void main()\n" \
+	"{\n" \
+	"	gl_Position = vec4(InVertex,1.);\n" \
+	"	OutTexture = InTexCoord0;\n" \
+	"	OutVertex  = InVertex;\n" \
+	"}\n" 
+
+#define SEG_FRAG_CODE_TEST \
+	"#version 400\n" \
+	"in vec3 OutVertex;\n" \
+	"in vec3 OutTexture;\n" \
+	"out vec4 FragColor;\n" \
+	"uniform sampler3D tex0;\n" \
+	"uniform sampler3D tex2;//3d mask volume\n" \
+	"uniform sampler2D tex6;//2d mask\n" \
+	"uniform mat4 matrix0;//modelview matrix\n" \
+	"uniform mat4 matrix1;//projection matrix\n" \
+	"uniform mat4 matrix2;//tex transform for bricking\n" \
+	"void main()\n" \
+	"{\n" \
+	"	vec4 TexCoord = vec4(OutTexture, 1.0);\n" \
+	"	vec4 t = TexCoord;\n" \
+	"	bool discarded = false;\n" \
+	"	vec4 s = matrix1 * matrix0 * matrix2 * t;\n" \
+	"	s = s / s.w;\n" \
+	"	s.xy = s.xy / 2.0 + 0.5;\n" \
+	"	float cmask2d = texture(tex6, s.xy).x;\n" \
+	"	if (cmask2d < 0.95)\n" \
+	"		discarded = true;\n" \
+	"	vec4 v = texture(tex0, OutTexture);\n" \
+	"	if (discarded)\n" \
+	"		FragColor = v;\n" \
+	"	//else FragColor = v;\n" \
+	"}\n"
+
+#define SEG_FRAG_CODE_TEST0 \
+	"#version 400\n" \
+	"\n" \
+	"in vec3 OutVertex;\n" \
+	"in vec3 OutTexture;\n" \
+	"//SEG_OUTPUTS\n" \
+	"out vec4 FragColor;\n" \
+	"\n" \
+	"// VOL_UNIFORMS_COMMON\n" \
+	"uniform vec4 loc0;//(lx, ly, lz, alpha)\n" \
+	"uniform vec4 loc1;//(ka, kd, ks, ns)\n" \
+	"uniform vec4 loc2;//(scalar_scale, gm_scale, left_thresh, right_thresh)\n" \
+	"uniform vec4 loc3;//(gamma, gm_thresh, offset, sw)\n" \
+	"uniform vec4 loc4;//(1/nx, 1/ny, 1/nz, 1/sample_rate)\n" \
+	"uniform vec4 loc5;//(spcx, spcy, spcz, 1.0)\n" \
+	"\n" \
+	"uniform sampler3D tex0;//data volume\n" \
+	"uniform sampler3D tex1;//gm volume\n" \
+	"\n" \
+	"uniform mat4 matrix5;//texture\n" \
+	"\n" \
+	"//VOL_UNIFORMS_SIN_COLOR\n" \
+	"uniform vec4 loc6;//(red, green, blue, mask_threshold)\n" \
+	"\n" \
+	"//VOL_UNIFORMS_MASK\n" \
+	"uniform sampler3D tex2;//3d mask volume\n" \
+	"\n" \
+	"//SEG_UNIFORMS_WMAP_2D\n" \
+	"uniform sampler2D tex4;//2d weight map (after tone mapping)\n" \
+	"uniform sampler2D tex5;//2d weight map (before tone mapping)\n" \
+	"\n" \
+	"//SEG_UNIFORMS_MASK_2D\n" \
+	"uniform sampler2D tex6;//2d mask\n" \
+	"\n" \
+	"//SEG_UNIFORMS_MATRICES\n" \
+	"uniform mat4 matrix0;//modelview matrix\n" \
+	"uniform mat4 matrix1;//projection matrix\n" \
+	"\n" \
+	"// VOL_UNIFORMS_MATRICES\n" \
+	"uniform mat4 matrix2;//tex transform for bricking\n" \
+	"\n" \
+	"//SEG_UNIFORMS_PARAMS\n" \
+	"uniform vec4 loc7;//(ini_thresh, gm_falloff, scl_falloff, scl_translate)\n" \
+	"uniform vec4 loc8;//(weight_2d, post_bins, 0, 0)\n" \
+	"\n" \
+	"//VOL_UNIFORMS_CLIP\n" \
+	"uniform vec4 loc10; //plane0\n" \
+	"uniform vec4 loc11; //plane1\n" \
+	"uniform vec4 loc12; //plane2\n" \
+	"uniform vec4 loc13; //plane3\n" \
+	"uniform vec4 loc14; //plane4\n" \
+	"uniform vec4 loc15; //plane5\n" \
+	"\n" \
+	"//SEG_UNIFORM_MATRICES_INVERSE\n" \
+	"uniform mat4 matrix3;//modelview matrix inverse\n" \
+	"uniform mat4 matrix4;//projection matrix inverse\n" \
+	"\n" \
+	"// VOL_GRAD_COMPUTE_FUNC\n" \
+	"vec4 vol_grad_func(vec4 pos, vec4 dir)\n" \
+	"{\n" \
+	"	vec4 r, p;\n" \
+	"	mat4 tmat = transpose(inverse(matrix5));\n" \
+	"	vec4 n = vec4(0.0);\n" \
+	"	vec4 w = vec4(0.0);\n" \
+	"	w.x = dir.x;\n" \
+	"	p = clamp(pos+w, 0.0, 1.0);\n" \
+	"	r = texture(tex0, p.stp);\n" \
+	"	n.x = r.x + n.x;\n" \
+	"	p = clamp(pos-w, 0.0, 1.0);\n" \
+	"	r = texture(tex0, p.stp);\n" \
+	"	n.x = r.x - n.x;\n" \
+	"	w = vec4(0.0);\n" \
+	"	w.y = dir.y;\n" \
+	"	p = clamp(pos+w, 0.0, 1.0);\n" \
+	"	r = texture(tex0, p.stp);\n" \
+	"	n.y = r.x + n.y;\n" \
+	"	p = clamp(pos-w, 0.0, 1.0);\n" \
+	"	r = texture(tex0, p.stp);\n" \
+	"	n.y = r.x - n.y;\n" \
+	"	w = vec4(0.0);\n" \
+	"	w.z = dir.x<dir.z?dir.x:dir.z;\n" \
+	"	p = clamp(pos+w, 0.0, 1.0);\n" \
+	"	r = texture(tex0, p.stp);\n" \
+	"	n.z = r.x + n.z;\n" \
+	"	p = clamp(pos-w, 0.0, 1.0);\n" \
+	"	r = texture(tex0, p.stp);\n" \
+	"	n.z = r.x - n.z;\n" \
+	"	w.x = dot(n.xxx, vec3(tmat[0].x, tmat[1].x, tmat[2].x)); \n" \
+	"	w.y = dot(n.yyy, vec3(tmat[0].y, tmat[1].y, tmat[2].y)); \n" \
+	"	w.z = 0.3*dot(n.zzz, vec3(tmat[0].z, tmat[1].z, tmat[2].z)); \n" \
+	"	return w;\n" \
+	"}\n" \
+	"//VOL_TRANSFER_FUNCTION_SIN_COLOR_L_FUNC\n" \
+	"vec4 vol_trans_sin_color_l(vec4 v)\n" \
+	"{\n" \
+	"	vec4 c;\n" \
+	"	float tf_alp;\n" \
+	"	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;\n" \
+	"	if (v.x<loc2.z-loc3.w || v.x>loc2.w+loc3.w || v.y<loc3.y)\n" \
+	"		c = vec4(0.0);\n" \
+	"	else\n" \
+	"	{\n" \
+	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
+	"		tf_alp = pow(clamp(v.x/loc3.z,\n" \
+	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0,\n" \
+	"			loc3.x>1.0?0.9999:1.0), loc3.x);\n" \
+	"		c = vec4(tf_alp);\n" \
+	"	}\n" \
+	"	return c;\n" \
+	"}\n" \
+	"\n" \
+	"//VOL_CLIP_FUNC\n" \
+	"bool vol_clip_func(vec4 t)\n" \
+	"{\n" \
+	"	vec4 brickt = matrix2 * t;\n" \
+	"	if (dot(brickt.xyz, loc10.xyz)+loc10.w < 0.0 ||\n" \
+	"		dot(brickt.xyz, loc11.xyz)+loc11.w < 0.0 ||\n" \
+	"		dot(brickt.xyz, loc12.xyz)+loc12.w < 0.0 ||\n" \
+	"		dot(brickt.xyz, loc13.xyz)+loc13.w < 0.0 ||\n" \
+	"		dot(brickt.xyz, loc14.xyz)+loc14.w < 0.0 ||\n" \
+	"		dot(brickt.xyz, loc15.xyz)+loc15.w < 0.0)\n" \
+	"		return true;\n" \
+	"	else\n" \
+	"		return false;\n" \
+	"}\n" \
+	"\n" \
+	"//VOL_HEAD\n" \
+	"void main()\n" \
+	"{\n" \
+	"	vec4 TexCoord = vec4(OutTexture, 1.0);\n" \
+	"	vec4 t = TexCoord;\n" \
+	"\n" \
+	"	FragColor = vec4(1.0);\n" \
+	"	//SEG_BODY_DISCARD_FLAG\n" \
+	"	bool discarded = false;\n" \
+	"\n" \
+	"	//SEG_BODY_INIT_2D_COORD\n" \
+	"	vec4 s = matrix1 * matrix0 * matrix2 * t;\n" \
+	"	s = s / s.w;\n" \
+	"	s.xy = s.xy / 2.0 + 0.5;\n" \
+	"\n" \
+	"	//SEG_BODY_INIT_CULL\n" \
+	"	float cmask2d = texture(tex6, s.xy).x;\n" \
+	"	if (cmask2d < 0.95)\n" \
+	"		discarded = true;\n" \
+	"\n" \
+	"	//VOL_HEAD_LIT\n" \
+	"/*	vec4 l = loc0; // {lx, ly, lz, alpha}\n" \
+	"	vec4 k = loc1; // {ka, kd, ks, ns}\n" \
+	"	k.x = k.x>1.0?log2(3.0-k.x):k.x;\n" \
+	"	vec4 n, w;\n" \
+	"\n" \
+	"	//VOL_DATA_VOLUME_LOOKUP\n" \
+	"	//vec4 v = texture(tex0, t.stp);\n" \
+	"	//vec4 v = vec4(0.5);\n" \
+	"\n" \
+	"	// VOL_GRAD_COMPUTE_HI\n" \
+	"	vec4 dir = loc4;//(1/nx, 1/ny, 1/nz, 1/sample_rate)\n" \
+	"	vec4 r, p; \n" \
+	"	//mat4 tmat = transpose(inverse(matrix5)); \n" \
+	"	v = vec4(v.x); \n" \
+	"	n = vec4(0.0); \n" \
+	"	w = vec4(0.0);\n" \
+	"	w.x = dir.x; \n" \
+	"	p = clamp(TexCoord + w, 0.0, 1.0); \n" \
+	"	r = texture(tex0, p.stp); \n" \
+	"	n.x = r.x + n.x; \n" \
+	"	p = clamp(TexCoord - w, 0.0, 1.0); \n" \
+	"	r = texture(tex0, p.stp); \n" \
+	"	n.x = r.x - n.x; \n" \
+	"	w = vec4(0.0); \n" \
+	"	w.y = dir.y; \n" \
+	"	p = clamp(TexCoord + w, 0.0, 1.0); \n" \
+	"	r = texture(tex0, p.stp); \n" \
+	"	n.y = r.x + n.y; \n" \
+	"	p = clamp(TexCoord - w, 0.0, 1.0); \n" \
+	"	r = texture(tex0, p.stp); \n" \
+	"	n.y = r.x - n.y; \n" \
+	"	w = vec4(0.0); \n" \
+	"	w.z = dir.x<dir.z?dir.x:dir.z; \n" \
+	"	p = clamp(TexCoord + w, 0.0, 1.0); \n" \
+	"	r = texture(tex0, p.stp); \n" \
+	"	n.z = r.x + n.z; \n" \
+	"	p = clamp(TexCoord - w, 0.0, 1.0); \n" \
+	"	r = texture(tex0, p.stp); \n" \
+	"	n.z = r.x - n.z; \n" \
+	"	//w.x = dot(n.xxx, vec3(tmat[0].x, tmat[1].x, tmat[2].x)); \n" \
+	"	//w.y = dot(n.yyy, vec3(tmat[0].y, tmat[1].y, tmat[2].y)); \n" \
+	"	//w.z = dot(n.zzz, vec3(tmat[0].z, tmat[1].z, tmat[2].z)); \n" \
+	"	w.x = n.x; \n" \
+	"	w.y = n.y; \n" \
+	"	w.z = n.z; \n" \
+	"	p.y = length(w.xyz); \n" \
+	"	p.y = 0.5 * (loc2.x<0.0?(1.0+p.y*loc2.x):p.y*loc2.x); \n" \
+	"	n.xyz = w.xyz; \n" \
+	"\n" \
+	"	//VOL_COMPUTED_GM_LOOKUP\n" \
+	"	v.y = p.y;\n" \
+	"*/\n" \
+	"	//VOL_TRANSFER_FUNCTION_SIN_COLOR_L\n" \
+	"/*	vec4 c = vec4(0.5);\n" \
+	"	float tf_alp = 0.0;\n" \
+	"	float alpha = 0.0;\n" \
+	"	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;\n" \
+	"	if (v.x<loc2.z-loc3.w || v.x>loc2.w+loc3.w || v.y<loc3.y)\n" \
+	"		c = vec4(0.0);\n" \
+	"	else\n" \
+	"	{\n" \
+	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
+	"		tf_alp = pow(clamp(v.x/loc3.z,\n" \
+	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0,\n" \
+	"			loc3.x>1.0?0.9999:1.0), loc3.x);\n" \
+	"		c = vec4(tf_alp);\n" \
+	"	}\n" \
+	"\n" \
+	"*/	//SEG_BODY_INIT_BLEND_HR_ORTHO\n" \
+	"	FragColor = texture(tex0, t.stp);\n" \
+	"/*	if (c.x <= loc7.x)\n" \
+	"		discarded = true;\n" \
+	"	vec4 cv = matrix3 * vec4(0.0, 0.0, 1.0, 0.0);\n" \
+	"	vec3 step = cv.xyz;\n" \
+	"	step = normalize(step);\n" \
+	"	step = step * length(step * loc4.xyz);\n" \
+	"	vec3 ray = t.xyz;\n" \
+	"	vec4 cray;\n" \
+	"	bool flag = false;\n" \
+	"	while (true)\n" \
+	"	{\n" \
+	"		ray += step;\n" \
+	"		if (any(greaterThan(ray, vec3(1.0))) ||\n" \
+	"				any(lessThan(ray, vec3(0.0))))\n" \
+	"			break;\n" \
+	"		if (vol_clip_func(vec4(ray, 1.0)))\n" \
+	"			break;\n" \
+	"		v.x = texture(tex0, ray).x;\n" \
+	"		v.y = length(vol_grad_func(vec4(ray, 1.0), loc4).xyz);\n" \
+	"		cray = vol_trans_sin_color_l(v);\n" \
+	"		if (cray.x > loc7.x && flag)\n" \
+	"		{\n" \
+	"			//FragColor = vec4(0.0);\n" \
+	"			discarded = true;\n" \
+	"		}\n" \
+	"		if (cray.x <= loc7.x)\n" \
+	"			flag = true;\n" \
+	"	}\n" \
+	"	FragColor = vec4(1.0);\n" \
+	"\n" \
+	"*/	//SEG_BODY_DISCARD_APPLY\n" \
+	"	if (discarded)\n" \
+	"		FragColor = vec4(0.0);\n" \
+	"\n" \
+	"//SEG_TAIL\n" \
+	"}\n"
+
 #define SEG_UNIFORMS_LABEL_INT \
 	"//SEG_UNIFORMS_LABEL_INT\n" \
 	"uniform vec4 loc9;//(nx, ny, nz, 0)\n" \
@@ -74,7 +376,7 @@ namespace FLIVR
 
 #define SEG_UNIFORMS_LABEL_OUTPUT \
 	"//SEG_UNIFORMS_LABEL_OUTPUT\n" \
-	"out uint PixelColor;\n"\
+	"out uint FragUint;\n"\
 	"\n"
 
 #define SEG_UNIFORMS_PARAMS \
@@ -87,15 +389,27 @@ namespace FLIVR
 	"//SEG_UNIFORMS_PARAM_MEASURE\n" \
 	"uniform vec4 loc9;//(value_var_foff, angle_var_foff, 0, 0)\n" \
 	"\n"
+
 #define SEG_TAIL \
 	"//SEG_TAIL\n" \
 	"}\n"
 
+#define SEG_BODY_DISCARD_FLAG \
+	"	//SEG_BODY_DISCARD_FLAG\n" \
+	"	bool discarded = false;\n" \
+	"\n"
+
+#define SEG_BODY_DISCARD_APPLY \
+	"	//SEG_BODY_DISCARD_APPLY\n" \
+	"	if (discarded)\n" \
+	"		FragColor = vec4(0.0);\n" \
+	"\n"
+
 #define SEG_BODY_WEIGHT \
 	"	//SEG_BODY_WEIGHT\n" \
 	"	vec4 cw2d;\n" \
-	"	vec4 weight1 = texture2D(tex4, s.xy);\n" \
-	"	vec4 weight2 = texture2D(tex5, s.xy);\n" \
+	"	vec4 weight1 = texture(tex4, s.xy);\n" \
+	"	vec4 weight2 = texture(tex5, s.xy);\n" \
 	"	cw2d.x = weight2.x==0.0?0.0:weight1.x/weight2.x;\n" \
 	"	cw2d.y = weight2.y==0.0?0.0:weight1.y/weight2.y;\n" \
 	"	cw2d.z = weight2.z==0.0?0.0:weight1.z/weight2.z;\n" \
@@ -109,7 +423,7 @@ namespace FLIVR
 
 #define SEG_BODY_INIT_CLEAR \
 	"	//SEG_BODY_INIT_CLEAR\n" \
-	"	gl_FragColor = vec4(0.0);\n"\
+	"	FragColor = vec4(0.0);\n"\
 	"\n"
 
 #define SEG_BODY_INIT_2D_COORD \
@@ -121,20 +435,17 @@ namespace FLIVR
 
 #define SEG_BODY_INIT_CULL \
 	"	//SEG_BODY_INIT_CULL\n" \
-	"	float cmask2d = texture2D(tex6, s.xy).x;\n"\
+	"	float cmask2d = texture(tex6, s.xy).x;\n"\
 	"	if (cmask2d < 0.95)\n"\
-	"	{\n"\
-	"		discard;//gl_FragColor = vec4(0.0);\n"\
-	"		return;\n"\
-	"	}\n"\
+	"		discarded = true;\n"\
 	"\n"
 
 #define SEG_BODY_INIT_CULL_ERASE \
 	"	//SEG_BODY_INIT_CULL_ERASE\n" \
-	"	float cmask2d = texture2D(tex6, s.xy).x;\n"\
+	"	float cmask2d = texture(tex6, s.xy).x;\n"\
 	"	if (cmask2d < 0.45)\n"\
 	"	{\n"\
-	"		discard;//gl_FragColor = vec4(0.0);\n"\
+	"		discard;\n"\
 	"		return;\n"\
 	"	}\n"\
 	"\n"
@@ -146,33 +457,33 @@ namespace FLIVR
 
 #define SEG_BODY_INIT_BLEND_APPEND \
 	"	//SEG_BODY_INIT_BLEND_APPEND\n" \
-	"	gl_FragColor = vec4(c.x>0.0?(c.x>loc7.x?1.0:0.0):0.0);\n" \
+	"	FragColor = vec4(c.x>0.0?(c.x>loc7.x?1.0:0.0):0.0);\n" \
 	"\n"
 
 #define SEG_BODY_INIT_BLEND_ERASE \
 	"	//SEG_BODY_INIT_BLEND_ERASE\n" \
-	"	gl_FragColor = vec4(0.0);\n" \
+	"	FragColor = vec4(0.0);\n" \
 	"\n"
 
 #define SEG_BODY_INIT_BLEND_DIFFUSE \
 	"	//SEG_BODY_INIT_BLEND_DIFFUSE\n" \
-	"	gl_FragColor = texture3D(tex2, t.stp);\n" \
+	"	FragColor = texture(tex2, t.stp);\n" \
 	"\n"
 
 #define SEG_BODY_INIT_BLEND_FLOOD \
 	"	//SEG_BODY_INIT_BLEND_FLOOD\n" \
-	"	gl_FragColor = vec4(c.x>0.0?(c.x>loc7.x?1.0:0.0):0.0);\n" \
+	"	FragColor = vec4(c.x>0.0?(c.x>loc7.x?1.0:0.0):0.0);\n" \
 	"\n"
 
 #define SEG_BODY_INIT_BLEND_ALL \
 	"	//SEG_BODY_INIT_BLEND_ALL\n" \
-	"	gl_FragColor = vec4(1.0);\n" \
+	"	FragColor = vec4(1.0);\n" \
 	"\n"
 
 #define SEG_BODY_INIT_BLEND_HR_ORTHO \
 	"	//SEG_BODY_INIT_BLEND_HR_ORTHO\n" \
 	"	if (c.x <= loc7.x)\n" \
-	"		discard;\n" \
+	"		discarded = true;\n" \
 	"	vec4 cv = matrix3 * vec4(0.0, 0.0, 1.0, 0.0);\n" \
 	"	vec3 step = cv.xyz;\n" \
 	"	step = normalize(step);\n" \
@@ -188,18 +499,18 @@ namespace FLIVR
 	"			break;\n" \
 	"		if (vol_clip_func(vec4(ray, 1.0)))\n" \
 	"			break;\n" \
-	"		v.x = texture3D(tex0, ray).x;\n" \
+	"		v.x = texture(tex0, ray).x;\n" \
 	"		v.y = length(vol_grad_func(vec4(ray, 1.0), loc4).xyz);\n" \
 	"		cray = vol_trans_sin_color_l(v);\n" \
 	"		if (cray.x > loc7.x && flag)\n" \
 	"		{\n" \
-	"			gl_FragColor = vec4(0.0);\n" \
-	"			return;\n" \
+	"			//FragColor = vec4(0.0);\n" \
+	"			discarded = true;\n" \
 	"		}\n" \
 	"		if (cray.x <= loc7.x)\n" \
 	"			flag = true;\n" \
 	"	}\n" \
-	"	gl_FragColor = vec4(1.0);\n" \
+	"	FragColor = vec4(1.0);\n" \
 	"\n"
 
 #define SEG_BODY_INIT_BLEND_HR_PERSP \
@@ -222,23 +533,23 @@ namespace FLIVR
 	"			break;\n" \
 	"		if (vol_clip_func(vec4(ray, 1.0)))\n" \
 	"			break;\n" \
-	"		v.x = texture3D(tex0, ray).x;\n" \
+	"		v.x = texture(tex0, ray).x;\n" \
 	"		v.y = length(vol_grad_func(vec4(ray, 1.0), loc4).xyz);\n" \
 	"		cray = vol_trans_sin_color_l(v);\n" \
 	"		if (cray.x > loc7.x && flag)\n" \
 	"		{\n" \
-	"			gl_FragColor = vec4(0.0);\n" \
+	"			FragColor = vec4(0.0);\n" \
 	"			return;\n" \
 	"		}\n" \
 	"		if (cray.x <= loc7.x)\n" \
 	"			flag = true;\n" \
 	"	}\n" \
-	"	gl_FragColor = vec4(1.0);\n" \
+	"	FragColor = vec4(1.0);\n" \
 	"\n"
 
 #define SEG_BODY_INIT_POSTER \
 	"	//SEG_BODY_INIT_POSTER\n" \
-	"	gl_FragColor = vec4(ceil(c.x*loc8.y)/loc8.y);\n" \
+	"	FragColor = vec4(ceil(c.x*loc8.y)/loc8.y);\n" \
 	"\n"
 
 #define SEG_BODY_DB_GROW_2D_COORD \
@@ -246,12 +557,12 @@ namespace FLIVR
 	"	vec4 s = matrix1 * matrix0 * matrix2 * t;\n"\
 	"	s = s / s.w;\n"\
 	"	s.xy = s.xy / 2.0 + 0.5;\n"\
-	"	vec4 cc = texture3D(tex2, t.stp);\n"\
+	"	vec4 cc = texture(tex2, t.stp);\n"\
 	"\n"
 
 #define SEG_BODY_DB_GROW_CULL \
 	"	//SEG_BODY_DB_GROW_CULL\n" \
-	"	float cmask2d = texture2D(tex6, s.xy).x;\n"\
+	"	float cmask2d = texture(tex6, s.xy).x;\n"\
 	"	if (cmask2d < 0.45 /*|| cmask2d > 0.55*/)\n"\
 	"		discard;\n"\
 	"\n"
@@ -270,7 +581,7 @@ namespace FLIVR
 
 #define SEG_BODY_DB_GROW_BLEND_APPEND \
 	"	//SEG_BODY_DB_GROW_BLEND_APPEND\n" \
-	"	gl_FragColor = (1.0-stop) * cc;\n" \
+	"	FragColor = (1.0-stop) * cc;\n" \
 	"	vec3 nb;\n" \
 	"	vec3 max_nb = t.stp;\n" \
 	"	float m;\n" \
@@ -280,7 +591,7 @@ namespace FLIVR
 	"	for (int k=-1; k<2; k++)\n"\
 	"	{\n"\
 	"		nb = vec3(t.s+float(i)*loc4.x, t.t+float(j)*loc4.y, t.p+float(k)*loc4.z);\n"\
-	"		m = texture3D(tex2, nb).x;\n" \
+	"		m = texture(tex2, nb).x;\n" \
 	"		if (m > cc.x)\n" \
 	"		{\n" \
 	"			cc = vec4(m);\n" \
@@ -289,12 +600,12 @@ namespace FLIVR
 	"	}\n"\
 	"	if (loc7.y>0.0)\n" \
 	"	{\n" \
-	"		m = texture3D(tex0, max_nb).x + loc7.y;\n" \
-	"		mx = texture3D(tex0, t.stp).x;\n" \
+	"		m = texture(tex0, max_nb).x + loc7.y;\n" \
+	"		mx = texture(tex0, t.stp).x;\n" \
 	"		if (m < mx || m - mx > 2.0*loc7.y)\n" \
 	"			discard;\n" \
 	"	}\n" \
-	"	gl_FragColor += cc*stop;\n"\
+	"	FragColor += cc*stop;\n"\
 	"\n"
 
 #define SEG_BODY_DB_GROW_BLEND_ERASE0 \
@@ -304,14 +615,14 @@ namespace FLIVR
 	"	for (int k=-1; k<2; k++)\n"\
 	"	{\n"\
 	"		vec3 nb = vec3(t.s+float(i)*loc4.x, t.t+float(j)*loc4.y, t.p+float(k)*loc4.z);\n"\
-	"		cc = vec4(min(cc.x, texture3D(tex2, nb).x));\n"\
+	"		cc = vec4(min(cc.x, texture(tex2, nb).x));\n"\
 	"	}\n"\
-	"	gl_FragColor = cc*clamp(1.0-stop, 0.0, 1.0);\n"\
+	"	FragColor = cc*clamp(1.0-stop, 0.0, 1.0);\n"\
 	"\n"
 
 #define SEG_BODY_DB_GROW_BLEND_ERASE \
 	"	//SEG_BODY_DB_GROW_BLEND_ERASE\n" \
-	"	gl_FragColor = vec4(0.0);\n"\
+	"	FragColor = vec4(0.0);\n"\
 	"\n"
 
 #define SEG_BODY_LABEL_INITIALIZE \
@@ -319,7 +630,7 @@ namespace FLIVR
 	"	vec4 mask = texture(tex2, t.stp)*c.x;\n" \
 	"	if (mask.x == 0.0 || mask.x < loc7.x)\n" \
 	"	{\n" \
-	"		PixelColor = uint(0);\n" \
+	"		FragUint = uint(0);\n" \
 	"		return;\n" \
 	"	}\n" \
 	"\n"
@@ -328,7 +639,7 @@ namespace FLIVR
 	"	//SEG_BODY_LABEL_INIT_ORDER\n" \
 	"	vec3 int_pos = vec3(t.x*loc9.x, t.y*loc9.y, t.z*loc9.z);\n" \
 	"	uint index = uint(int_pos.z*loc9.x*loc9.y+int_pos.y*loc9.x+int_pos.x+1);\n" \
-	"	PixelColor = index;\n" \
+	"	FragUint = index;\n" \
 	"\n"
 
 #define SEG_BODY_LABEL_INIT_COPY \
@@ -340,7 +651,7 @@ namespace FLIVR
 	"	//SEG_BODY_LABEL_INITIALIZE_NOMASK\n" \
 	"	if (c.x ==0.0 || c.x <= loc7.x)\n" \
 	"	{\n" \
-	"		PixelColor = uint(0);\n" \
+	"		FragUint = uint(0);\n" \
 	"		return;\n" \
 	"	}\n" \
 	"\n"
@@ -350,7 +661,7 @@ namespace FLIVR
 	"	vec4 mask = texture(tex2, t.stp);\n" \
 	"	if (mask.x < 0.001)\n" \
 	"	{\n" \
-	"		PixelColor = uint(0);\n" \
+	"		FragUint = uint(0);\n" \
 	"		return;\n" \
 	"	}\n" \
 	"\n"
@@ -387,7 +698,7 @@ namespace FLIVR
 	"	}\n" \
 	"	if (texture(tex0, max_nb).x+loc7.y < texture(tex0, t.stp).x)\n" \
 	"		discard;\n" \
-	"	PixelColor = int_val;\n" \
+	"	FragUint = int_val;\n" \
 	"\n"
 
 #define SEG_BODY_LABEL_MIF_POSTER \
@@ -395,7 +706,7 @@ namespace FLIVR
 	"	uint int_val = texture(tex3, t.stp).x;\n" \
 	"	if (int_val == uint(0))\n" \
 	"	{\n" \
-	"		PixelColor = uint(0);\n" \
+	"		FragUint = uint(0);\n" \
 	"		return;\n" \
 	"	}\n" \
 	"	float cur_val = texture(tex2, t.stp).x;\n" \
@@ -409,13 +720,13 @@ namespace FLIVR
 	"		if (abs(nb_val-cur_val) < 0.001)\n" \
 	"			int_val = max(int_val, texture(tex3, nb).x);\n" \
 	"	}\n" \
-	"	PixelColor = int_val;\n" \
+	"	FragUint = int_val;\n" \
 	"\n"
 
 #define FLT_BODY_NR \
 	"	//FLT_BODY_NR\n" \
-	"	float vc = texture3D(tex0, t.stp).x;\n" \
-	"	float mc = texture3D(tex2, t.stp).x;\n" \
+	"	float vc = texture(tex0, t.stp).x;\n" \
+	"	float mc = texture(tex2, t.stp).x;\n" \
 	"	if (mc < 0.001)\n" \
 	"		discard;\n" \
 	"	float nb_val;\n" \
@@ -425,11 +736,11 @@ namespace FLIVR
 	"	for (int k=-2; k<3; k++)\n" \
 	"	{\n" \
 	"		vec3 nb = vec3(t.s+float(i)*loc4.x, t.t+float(j)*loc4.y, t.p+float(k)*loc4.z);\n" \
-	"		nb_val = texture3D(tex0, nb).x;\n" \
+	"		nb_val = texture(tex0, nb).x;\n" \
 	"		max_val = (nb_val<vc && nb_val>max_val)?nb_val:max_val;\n" \
 	"	}\n" \
 	"	if (max_val > 0.0)\n" \
-	"		gl_FragColor = vec4(max_val);\n" \
+	"		FragColor = vec4(max_val);\n" \
 	"	else\n" \
 	"		discard;\n" \
 	"\n"
@@ -454,9 +765,10 @@ namespace FLIVR
 
 	bool SegShader::create()
 	{
-		string s;
-		if (emit(s)) return true;
-		program_ = new ShaderProgram(s);
+		string vs = SEG_VERTEX_CODE_CORE_PROFILE;
+		string fs;
+		if (emit(fs)) return true;
+		program_ = new ShaderProgram(vs, fs);
 		return false;
 	}
 
@@ -464,11 +776,19 @@ namespace FLIVR
 	{
 		ostringstream z;
 
+		z << SEG_FRAG_CODE_TEST;
+		s = z.str();
+		return false;
+
+		z << VOL_VERSION;
+		z << VOL_INPUTS;
+
 		//uniforms
 		switch (type_)
 		{
 		case SEG_SHDR_INITIALIZE:
 		case SEG_SHDR_DB_GROW:
+			z << SEG_OUTPUTS;
 			z << VOL_UNIFORMS_COMMON;
 			z << VOL_UNIFORMS_SIN_COLOR;
 			z << VOL_UNIFORMS_MASK;
@@ -479,28 +799,26 @@ namespace FLIVR
 			z << SEG_UNIFORMS_PARAMS;
 			break;
 		case LBL_SHDR_INITIALIZE:
-			z << VOL_VERSION;
+			z << SEG_UNIFORMS_LABEL_OUTPUT;
 			z << VOL_UNIFORMS_COMMON;
 			z << VOL_UNIFORMS_SIN_COLOR;
 			z << SEG_UNIFORMS_LABEL_INT;
 			if (use_2d_)
 				z << VOL_UNIFORMS_MASK;
-			z << SEG_UNIFORMS_LABEL_OUTPUT;
 			z << SEG_UNIFORMS_PARAMS;
 			break;
 		case LBL_SHDR_MIF:
-			z << VOL_VERSION;
-
+			z << SEG_UNIFORMS_LABEL_OUTPUT;
 			z << VOL_UNIFORMS_COMMON;
 			z << VOL_UNIFORMS_SIN_COLOR;
 			z << VOL_UNIFORMS_LABEL;
 			if (paint_mode_==1)
 				z << VOL_UNIFORMS_MASK;
-			z << SEG_UNIFORMS_LABEL_OUTPUT;
 			z << SEG_UNIFORMS_PARAMS;
 			z << SEG_UNIFORMS_PARAM_MEASURE;
 			break;
 		case FLT_SHDR_NR:
+			z << SEG_OUTPUTS;
 			z << VOL_UNIFORMS_COMMON;
 			z << VOL_UNIFORMS_MASK;
 			z << SEG_UNIFORMS_MATRICES;
@@ -531,6 +849,8 @@ namespace FLIVR
 
 		//the common head
 		z << VOL_HEAD;
+
+		z << SEG_BODY_DISCARD_FLAG;
 
 		//head for clipping planes
 		if (paint_mode_!=6 && clip_)
@@ -592,6 +912,8 @@ namespace FLIVR
 					z << SEG_BODY_INIT_BLEND_ALL;
 				else if (paint_mode_==11)
 					z << SEG_BODY_INIT_POSTER;
+
+				z << SEG_BODY_DISCARD_APPLY;
 				break;
 			case SEG_SHDR_DB_GROW:
 				z << SEG_BODY_DB_GROW_2D_COORD;

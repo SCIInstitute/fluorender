@@ -122,11 +122,9 @@ namespace FLIVR
 		ostringstream z;
 
 		//version info
-		//if (mask_ == 3 ||
-		//	mask_ == 4)
-			z << VOL_VERSION;
-
+		z << VOL_VERSION;
 		z << VOL_INPUTS;
+		z << VOL_OUTPUTS;
 
 		//the common uniforms
 		z << VOL_UNIFORMS_COMMON;

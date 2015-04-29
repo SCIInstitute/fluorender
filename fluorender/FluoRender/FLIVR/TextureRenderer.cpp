@@ -92,6 +92,8 @@ namespace FLIVR
 	{
 		glGenBuffers(1, &m_slices_vbo);
 		glGenBuffers(1, &m_slices_ibo);
+		glGenBuffers(1, &m_quad_vbo);
+		//glGenBuffers(1, &m_quad_ibo);
 	}
 
 	TextureRenderer::TextureRenderer(const TextureRenderer& copy)
@@ -121,6 +123,7 @@ namespace FLIVR
 		glGenBuffers(1, &m_slices_vbo);
 		glGenBuffers(1, &m_slices_ibo);
 		glGenBuffers(1, &m_quad_vbo);
+		//glGenBuffers(1, &m_quad_ibo);
 	}
 
 	TextureRenderer::~TextureRenderer()
@@ -142,6 +145,8 @@ namespace FLIVR
 			glDeleteBuffers(1, &m_slices_ibo);
 		if (glIsBuffer(m_quad_vbo))
 			glDeleteBuffers(1, &m_quad_vbo);
+		//if (glIsBuffer(m_quad_ibo))
+		//	glDeleteBuffers(1, &m_quad_ibo);
 	}
 
 	//set the texture for rendering
@@ -984,14 +989,27 @@ namespace FLIVR
 		}
 	}
 
-	void TextureRenderer::draw_slices(double d)
+	void TextureRenderer::draw_view_quad(double d)
 	{
-		glBegin(GL_QUADS);
-			glMultiTexCoord3d(GL_TEXTURE0, 0.0, 0.0, d); glVertex2d(-1.0, -1.0);
-			glMultiTexCoord3d(GL_TEXTURE0, 1.0, 0.0, d); glVertex2d(1.0, -1.0);
-			glMultiTexCoord3d(GL_TEXTURE0, 1.0, 1.0, d); glVertex2d(1.0, 1.0);
-			glMultiTexCoord3d(GL_TEXTURE0, 0.0, 1.0, d); glVertex2d(-1.0, 1.0);
-		glEnd();
+		float points[] = {
+			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, float(d),
+			1.0f, -1.0f, 0.0f, 1.0f, 0.0f, float(d),
+			-1.0f, 1.0f, 0.0f, 0.0f, 1.0f, float(d),
+			1.0f, 1.0f, 0.0f, 1.0f, 1.0f, float(d)};
+
+		glBindBuffer(GL_ARRAY_BUFFER, m_quad_vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float)*24, points, GL_STREAM_DRAW);
+
+		glBindBuffer(GL_ARRAY_BUFFER, m_quad_vbo);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)12);
+
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
 	void TextureRenderer::draw_polygons(vector<float>& vertex,

@@ -542,8 +542,9 @@ namespace FLIVR
             }
             filter_size_min_ = vr_list_[0]->
 					CalcFilterSize(4, w, h, res_.x(), res_.y(), zoom, sfactor_);
-				img_shader->setLocalParam(0, filter_size_min_/w2, filter_size_min_/h2, 1.0/w2, 1.0/h2);
-            glBegin(GL_QUADS);
+			img_shader->setLocalParam(0, filter_size_min_/w2, filter_size_min_/h2, 1.0/w2, 1.0/h2);
+			vr_list_[0]->draw_view_quad();
+/*          glBegin(GL_QUADS);
             {
                glTexCoord2f(0.0, 0.0);
                glVertex3f(-1, -1, 0.0);
@@ -555,6 +556,7 @@ namespace FLIVR
                glVertex3f(-1, 1, 0.0);
             }
             glEnd();
+*/
             if (img_shader && img_shader->valid())
                img_shader->release();
             ///////////////////////////////////////////////////////////////////////////
@@ -596,7 +598,8 @@ namespace FLIVR
             img_shader->setLocalParam(0, filter_size_shp_/w, filter_size_shp_/h, 0.0, 0.0);
          }
 
-         glBegin(GL_QUADS);
+		 vr_list_[0]->draw_view_quad();
+/*       glBegin(GL_QUADS);
          {
             glTexCoord2f(0.0, 0.0);
             glVertex3f(-1, -1, 0.0);
@@ -608,7 +611,7 @@ namespace FLIVR
             glVertex3f(-1, 1, 0.0);
          }
          glEnd();
-
+*/
          if (noise_red_ && colormap_mode_!=2)
          {
             if (img_shader && img_shader->valid())
@@ -862,7 +865,8 @@ namespace FLIVR
             else if (TextureRenderer::get_update_order() == 1)
                glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
             //draw
-            glBegin(GL_QUADS);
+			vr_list_[0]->draw_view_quad();
+/*          glBegin(GL_QUADS);
             {
                glTexCoord2d(0.0, 0.0);
                glVertex3d(-1, -1, 0.0);
@@ -874,6 +878,7 @@ namespace FLIVR
                glVertex3d(-1, 1, 0.0);
             }
             glEnd();
+*/
             glMatrixMode(GL_PROJECTION);
             glPopMatrix();
             glMatrixMode(GL_MODELVIEW);

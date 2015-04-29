@@ -970,18 +970,8 @@ namespace FLIVR
 				filter_size_min_ = CalcFilterSize(4, w, h, tex_->nx(), tex_->ny(), zoom, sfactor_);
 				img_shader->setLocalParam(0, filter_size_min_/w2, filter_size_min_/h2, 1.0/w2, 1.0/h2);
 
-				glBegin(GL_QUADS);
-				{
-					glTexCoord2f(0.0, 0.0);
-					glVertex3f(-1, -1, 0.0);
-					glTexCoord2f(1.0, 0.0);
-					glVertex3f(1, -1, 0.0);
-					glTexCoord2f(1.0, 1.0);
-					glVertex3f(1, 1, 0.0);
-					glTexCoord2f(0.0, 1.0);
-					glVertex3f(-1, 1, 0.0);
-				}
-				glEnd();
+				draw_view_quad();
+
 				if (img_shader && img_shader->valid())
 					img_shader->release();
 			}
@@ -1000,39 +990,31 @@ namespace FLIVR
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 			if (noise_red_ && colormap_mode_!=2)
-			{
 				img_shader = 
 					m_img_shader_factory.shader(IMG_SHDR_FILTER_SHARPEN);
-				if (img_shader)
+			else
+				img_shader = 
+				m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+
+			if (img_shader)
+			{
+				if (!img_shader->valid())
 				{
-					if (!img_shader->valid())
-					{
-						img_shader->create();
-					}
-					img_shader->bind();
+					img_shader->create();
 				}
+				img_shader->bind();
+			}
+
+			if (noise_red_ && colormap_mode_!=2)
+			{
 				filter_size_shp_ = CalcFilterSize(3, w, h, tex_->nx(), tex_->ny(), zoom, sfactor_);
 				img_shader->setLocalParam(0, filter_size_shp_/w, filter_size_shp_/h, 0.0, 0.0);
 			}
 
-			glBegin(GL_QUADS);
-			{
-				glTexCoord2f(0.0, 0.0);
-				glVertex3f(-1, -1, 0.0);
-				glTexCoord2f(1.0, 0.0);
-				glVertex3f(1, -1, 0.0);
-				glTexCoord2f(1.0, 1.0);
-				glVertex3f(1, 1, 0.0);
-				glTexCoord2f(0.0, 1.0);
-				glVertex3f(-1, 1, 0.0);
-			}
-			glEnd();
+			draw_view_quad();
 
-			if (noise_red_ && colormap_mode_!=2)
-			{
-				if (img_shader && img_shader->valid())
-					img_shader->release();
-			}
+			if (img_shader && img_shader->valid())
+				img_shader->release();
 
 			if (depth_test) glEnable(GL_DEPTH_TEST);
 			if (lighting) glEnable(GL_LIGHTING);
@@ -1050,6 +1032,7 @@ namespace FLIVR
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		glDisable(GL_BLEND);
+
 	}
 
 	void VolumeRenderer::draw_wireframe(bool orthographic_p)
@@ -1350,7 +1333,7 @@ namespace FLIVR
 					tex_id,
 					0,
 					z);
-				draw_slices(double(z+0.5) / double(b->nz()));
+				draw_view_quad(double(z+0.5) / double(b->nz()));
 			}
 
 			//test cl
@@ -1535,7 +1518,7 @@ namespace FLIVR
 					0,
 					z);
 
-				draw_slices(double(z+0.5) / double(b->nz()));
+				draw_view_quad(double(z+0.5) / double(b->nz()));
 			}
 		}
 
@@ -1723,7 +1706,7 @@ namespace FLIVR
 					tex_id,
 					0,
 					z);
-				draw_slices(double(z+0.5) / double(b->nz()));
+				draw_view_quad(double(z+0.5) / double(b->nz()));
 			}
 		}
 
