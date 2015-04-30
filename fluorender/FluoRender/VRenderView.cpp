@@ -780,12 +780,12 @@ void VRenderGLView::DrawDP()
 			else
 			{
 				glActiveTexture(GL_TEXTURE15);
-				glEnable(GL_TEXTURE_2D);
+				//glEnable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[i-1]);
 				glActiveTexture(GL_TEXTURE0);
 				DrawMeshes(1);
 				glActiveTexture(GL_TEXTURE15);
-				glDisable(GL_TEXTURE_2D);
+				//glDisable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, 0);
 				glActiveTexture(GL_TEXTURE0);
 			}
@@ -805,12 +805,12 @@ void VRenderGLView::DrawDP()
 			{
 				//draw volumes before the depth
 				glActiveTexture(GL_TEXTURE15);
-				glEnable(GL_TEXTURE_2D);
+				//glEnable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[0]);
 				glActiveTexture(GL_TEXTURE0);
 				DrawVolumes(1);
 				glActiveTexture(GL_TEXTURE15);
-				glDisable(GL_TEXTURE_2D);
+				//glDisable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, 0);
 				glActiveTexture(GL_TEXTURE0);
 			}
@@ -820,17 +820,17 @@ void VRenderGLView::DrawDP()
 				{
 					//i == m_peeling_layers == 1
 					glActiveTexture(GL_TEXTURE15);
-					glEnable(GL_TEXTURE_2D);
+					//glEnable(GL_TEXTURE_2D);
 					glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[0]);
 					glActiveTexture(GL_TEXTURE0);
 				}
 				else if (m_peeling_layers == 2)
 				{
 					glActiveTexture(GL_TEXTURE14);
-					glEnable(GL_TEXTURE_2D);
+					//glEnable(GL_TEXTURE_2D);
 					glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[0]);
 					glActiveTexture(GL_TEXTURE15);
-					glEnable(GL_TEXTURE_2D);
+					//glEnable(GL_TEXTURE_2D);
 					glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[1]);
 					glActiveTexture(GL_TEXTURE0);
 				}
@@ -839,33 +839,33 @@ void VRenderGLView::DrawDP()
 					if (i == m_peeling_layers)
 					{
 						glActiveTexture(GL_TEXTURE14);
-						glEnable(GL_TEXTURE_2D);
+						//glEnable(GL_TEXTURE_2D);
 						glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[i-2]);
 						glActiveTexture(GL_TEXTURE15);
-						glEnable(GL_TEXTURE_2D);
+						//glEnable(GL_TEXTURE_2D);
 						glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[i-1]);
 						glActiveTexture(GL_TEXTURE0);
 					}
 					else if (i == 1)
 					{
 						glActiveTexture(GL_TEXTURE14);
-						glEnable(GL_TEXTURE_2D);
+						//glEnable(GL_TEXTURE_2D);
 						glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[0]);
 						glActiveTexture(GL_TEXTURE15);
-						glEnable(GL_TEXTURE_2D);
+						//glEnable(GL_TEXTURE_2D);
 						glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[1]);
 						glActiveTexture(GL_TEXTURE0);
 					}
 					else
 					{
 						glActiveTexture(GL_TEXTURE13);
-						glEnable(GL_TEXTURE_2D);
+						//glEnable(GL_TEXTURE_2D);
 						glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[i-2]);
 						glActiveTexture(GL_TEXTURE14);
-						glEnable(GL_TEXTURE_2D);
+						//glEnable(GL_TEXTURE_2D);
 						glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[i-1]);
 						glActiveTexture(GL_TEXTURE15);
-						glEnable(GL_TEXTURE_2D);
+						//glEnable(GL_TEXTURE_2D);
 						glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[i]);
 						glActiveTexture(GL_TEXTURE0);
 					}
@@ -924,13 +924,13 @@ void VRenderGLView::DrawDP()
 				}
 
 				glActiveTexture(GL_TEXTURE13);
-				glDisable(GL_TEXTURE_2D);
+				//glDisable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, 0);
 				glActiveTexture(GL_TEXTURE14);
-				glDisable(GL_TEXTURE_2D);
+				//glDisable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, 0);
 				glActiveTexture(GL_TEXTURE15);
-				glDisable(GL_TEXTURE_2D);
+				//glDisable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, 0);
 				glActiveTexture(GL_TEXTURE0);
 
@@ -1507,7 +1507,7 @@ void VRenderGLView::DrawBrush()
 		//attributes
 		glPushAttrib(GL_ENABLE_BIT);
 		glDisable(GL_LIGHTING);
-		glDisable(GL_TEXTURE_2D);
+		//glDisable(GL_TEXTURE_2D);
 		glDisable(GL_DEPTH_TEST);
 		GLfloat line_width;
 		glGetFloatv(GL_LINE_WIDTH, &line_width);
@@ -1605,7 +1605,7 @@ void VRenderGLView::PaintStroke()
 	double pressure = m_use_pres?m_pressure:1.0;
 
 	//generate texture and buffer objects
-	glEnable(GL_TEXTURE_2D);
+	//glEnable(GL_TEXTURE_2D);
 	//painting fbo
 	if (!glIsFramebuffer(m_fbo_paint))
 		glGenFramebuffers(1, &m_fbo_paint);
@@ -1649,7 +1649,7 @@ void VRenderGLView::PaintStroke()
 		//bind fbo for final composition
 		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_paint);
 		glActiveTexture(GL_TEXTURE0);
-		glEnable(GL_TEXTURE_2D);
+		//glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, m_tex_paint);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		glDisable(GL_BLEND);
@@ -1733,7 +1733,7 @@ void VRenderGLView::DisplayStroke()
 
 	//draw the final buffer to the windows buffer
 	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_TEXTURE_2D);
+	//glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, m_tex_paint);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	glEnable(GL_BLEND);
@@ -2414,7 +2414,7 @@ void VRenderGLView::PrepFinalBuffer()
 
 	//generate textures & buffer objects
 	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_TEXTURE_2D);
+	//glEnable(GL_TEXTURE_2D);
 	//frame buffer for final
 	if (!glIsFramebuffer(m_fbo_final))
 	{
@@ -2461,7 +2461,7 @@ void VRenderGLView::DrawFinalBuffer()
 
 	//draw the final buffer to the windows buffer
 	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_TEXTURE_2D);
+	//glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, m_tex_final);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glEnable(GL_BLEND);
@@ -2716,7 +2716,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
 			glActiveTexture(GL_TEXTURE0);
-			glEnable(GL_TEXTURE_2D);
+			//glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, m_tex_final);
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 			glDisable(GL_BLEND);
@@ -2785,7 +2785,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
-		glEnable(GL_TEXTURE_2D);
+		//glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, m_tex_temp);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		glDisable(GL_BLEND);
@@ -2822,7 +2822,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
 	}
 
 	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_TEXTURE_2D);
+	//glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, tex);
 	//build mipmap
 #ifndef _DARWIN
@@ -2916,7 +2916,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
 			glActiveTexture(GL_TEXTURE0);
-			glEnable(GL_TEXTURE_2D);
+			//glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, m_tex_final);
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 			glDisable(GL_BLEND);
@@ -3020,7 +3020,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
-		glEnable(GL_TEXTURE_2D);
+		//glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, m_tex_ol1);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		glEnable(GL_BLEND);
@@ -3101,7 +3101,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
-		glEnable(GL_TEXTURE_2D);
+		//glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, m_tex_temp);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		glDisable(GL_BLEND);
@@ -3138,7 +3138,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 	}
 
 	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_TEXTURE_2D);
+	//glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, tex);
 	//build mipmap
 #ifndef _DARWIN
@@ -3226,7 +3226,7 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 	//bind fbo for final composition
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_TEXTURE_2D);
+	//glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, m_tex_ol1);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glEnable(GL_BLEND);
@@ -3338,7 +3338,7 @@ void VRenderGLView::DrawOLShadowsMesh(GLuint tex_depth, double darkness)
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_TEXTURE_2D);
+	//glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, tex_depth);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glDisable(GL_BLEND);
@@ -3387,7 +3387,7 @@ void VRenderGLView::DrawOLShadowsMesh(GLuint tex_depth, double darkness)
 	//bind fbo for final composition
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_TEXTURE_2D);
+	//glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, m_tex_ol2);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glEnable(GL_BLEND);
@@ -3434,10 +3434,10 @@ void VRenderGLView::DrawOLShadowsMesh(GLuint tex_depth, double darkness)
 	}
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	glDisable(GL_TEXTURE_2D);
+	//glDisable(GL_TEXTURE_2D);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	glDisable(GL_TEXTURE_2D);
+	//glDisable(GL_TEXTURE_2D);
 
 	glBlendEquation(GL_FUNC_ADD);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -3619,7 +3619,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		glClearColor(1.0, 1.0, 1.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
-		glEnable(GL_TEXTURE_2D);
+		//glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, m_tex_ol1);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		glDisable(GL_BLEND);
@@ -3663,7 +3663,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		//bind fbo for final composition
 		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 		glActiveTexture(GL_TEXTURE0);
-		glEnable(GL_TEXTURE_2D);
+		//glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, m_tex_ol2);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		glEnable(GL_BLEND);
@@ -3832,7 +3832,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	//bind fbo for final composition
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_final);
 	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_TEXTURE_2D);
+	//glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, use_tex_wt2?m_tex_wt2:m_tex);
 	//build mipmap
 #ifndef _DARWIN
@@ -6826,7 +6826,7 @@ void VRenderGLView::DrawBounds()
 {
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
-	glDisable(GL_TEXTURE_2D);
+	//glDisable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_FOG);
 	glDisable(GL_BLEND);
@@ -6867,7 +6867,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
-	glDisable(GL_TEXTURE_2D);
+	//glDisable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_FOG);
 	glEnable(GL_BLEND);
@@ -7139,7 +7139,7 @@ void VRenderGLView::DrawGrid()
 {
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
-	glDisable(GL_TEXTURE_2D);
+	//glDisable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_FOG);
 	glDisable(GL_BLEND);
@@ -7160,7 +7160,7 @@ void VRenderGLView::DrawCamCtr()
 {
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
-	glDisable(GL_TEXTURE_2D);
+	//glDisable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_FOG);
 	glDisable(GL_BLEND);
@@ -7199,7 +7199,7 @@ void VRenderGLView::DrawFrame()
 
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
-	glDisable(GL_TEXTURE_2D);
+	//glDisable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
 
 	//draw frame
@@ -7244,7 +7244,7 @@ void VRenderGLView::DrawScaleBar()
 
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
-	glDisable(GL_TEXTURE_2D);
+	//glDisable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
 
 	GLfloat line_width;
@@ -7505,7 +7505,7 @@ void VRenderGLView::DrawGradBg()
 
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
-	glDisable(GL_TEXTURE_2D);
+	//glDisable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
 
 	Color color1, color2;
@@ -7652,7 +7652,7 @@ void VRenderGLView::DrawColormap()
 
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
-	glDisable(GL_TEXTURE_2D);
+	//glDisable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
 
 	glEnable(GL_BLEND);

@@ -1000,7 +1000,6 @@ namespace FLIVR
 		glBindBuffer(GL_ARRAY_BUFFER, m_quad_vbo);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float)*24, points, GL_STREAM_DRAW);
 
-		glBindBuffer(GL_ARRAY_BUFFER, m_quad_vbo);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)0);
 		glEnableVertexAttribArray(1);
@@ -1039,13 +1038,13 @@ namespace FLIVR
 	}
 
 	void TextureRenderer::draw_polygons_wireframe(vector<float>& vertex,
-		vector<uint32_t>& poly)
+		vector<uint32_t>& index, vector<uint32_t>& size)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, m_slices_vbo);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_STREAM_DRAW);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_slices_ibo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t)*poly.size(), 
-			&poly[0], GL_STREAM_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t)*index.size(), 
+			&index[0], GL_STREAM_DRAW);
 
 		//now draw it
 		glBindBuffer(GL_ARRAY_BUFFER, m_slices_vbo);
@@ -1055,12 +1054,12 @@ namespace FLIVR
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)12);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_slices_ibo);
-		glDrawElements(GL_LINE_LOOP, poly.size(), GL_UNSIGNED_INT, 0);
-		//for (unsigned int i=0, k=0; i<poly.size(); ++i)
-		//{
-			//glDrawElements(GL_LINE_LOOP, poly[i], GL_UNSIGNED_INT, (const GLvoid*)k);
-			//k += poly[i];
-		//}
+		//glDrawElements(GL_LINE_LOOP, poly.size(), GL_UNSIGNED_INT, 0);
+		for (unsigned int i=0, k=0; i<size.size(); ++i)
+		{
+			glDrawElements(GL_LINE_LOOP, size[i], GL_UNSIGNED_INT, (const GLvoid*)k);
+			k += size[i]*4;
+		}
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
 		//unbind
@@ -1088,7 +1087,7 @@ namespace FLIVR
 		{
 			glActiveTexture(GL_TEXTURE6);
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-			glEnable(GL_TEXTURE_2D);
+			//glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, tex_2d_mask_);
 			glActiveTexture(GL_TEXTURE0);
 		}
@@ -1101,11 +1100,11 @@ namespace FLIVR
 		{
 			glActiveTexture(GL_TEXTURE4);
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-			glEnable(GL_TEXTURE_2D);
+			//glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, tex_2d_weight1_);
 			glActiveTexture(GL_TEXTURE5);
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-			glEnable(GL_TEXTURE_2D);
+			//glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, tex_2d_weight2_);
 			glActiveTexture(GL_TEXTURE0);
 		}
@@ -1118,7 +1117,7 @@ namespace FLIVR
 		{
 			glActiveTexture(GL_TEXTURE4);
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-			glEnable(GL_TEXTURE_2D);
+			//glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, tex_2d_dmap_);
 			glActiveTexture(GL_TEXTURE0);
 		}

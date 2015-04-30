@@ -126,14 +126,9 @@ namespace FLIVR {
 		virtual void* tex_data(int c);
 
 		void compute_polygons(Ray& view, float tmin, float tmax, float dt,
-			vector<float>& vertex, 
-			vector<uint32_t>& size);
+			vector<float>& vertex, vector<uint32_t>& index, vector<uint32_t>& size);
 		void compute_polygons(Ray& view, float dt,
-			vector<float>& vertex, 
-			vector<uint32_t>& size);
-		void compute_polygon(Ray& view, float t,
-			vector<float>& vertex, 
-			vector<uint32_t>& size);
+			vector<float>& vertex, vector<uint32_t>& index, vector<uint32_t>& size);
 		
 		//set d
 		void set_d(double d) { d_ = d; }

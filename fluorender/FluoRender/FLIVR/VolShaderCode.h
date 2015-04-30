@@ -551,6 +551,7 @@ namespace FLIVR
 	"	//VOL_RASTER_BLEND_MASK\n" \
 	"	vec4 cmask = texture(tex2, t.stp); //get mask value\n" \
 	"	FragColor = tf_alp*cmask.x<loc6.w?vec4(0.0):vec4(cmask.x)*c*l.w;\n" \
+	"	//FragColor = t;\n" \
 	"\n"
 
 #define VOL_RASTER_BLEND_MASK_SOLID \

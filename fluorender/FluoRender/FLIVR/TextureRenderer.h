@@ -344,8 +344,9 @@ namespace FLIVR
                //slices
                void draw_polygons(vector<float>& vertex, 
                      vector<uint32_t>& poly);
-               void draw_polygons_wireframe(vector<float>& vertex, 
-                     vector<uint32_t>& poly);
+               void draw_polygons_wireframe(vector<float>& vertex,
+					vector<uint32_t>& index,
+                     vector<uint32_t>& size);
 
                //bind 2d mask for segmentation
                void bind_2d_mask();

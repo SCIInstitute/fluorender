@@ -179,15 +179,8 @@ z
    }
 
    // compute polygon of edge plane intersections
-   void TextureBrick::compute_polygon(Ray& view, float t,
-         vector<float>& vertex, 
-         vector<uint32_t>& size)
-   {
-      compute_polygons(view, t, t, 1.0, vertex, size);
-   }
-
    void TextureBrick::compute_polygons(Ray& view, float dt,
-         vector<float>& vertex, 
+         vector<float>& vertex, vector<uint32_t>& index,
          vector<uint32_t>& size)
    {
       Point corner[8];
@@ -218,7 +211,7 @@ z
       float tanchordiff = tanchor - tanchor0;
       tmax -= tanchordiff;
 
-      compute_polygons(view, tmin, tmax, dt, vertex, size);
+      compute_polygons(view, tmin, tmax, dt, vertex, index, size);
    }
 
    // compute polygon list of edge plane intersections
@@ -229,8 +222,8 @@ z
    // typical rendering only contains about 1k triangles.
    void TextureBrick::compute_polygons(Ray& view,
          float tmin, float tmax, float dt,
-         vector<float>& vertex,
-         vector<uint32_t>& index)
+         vector<float>& vertex, vector<uint32_t>& index,
+		 vector<uint32_t>& size)
    {
       Vector vv[12], tt[12]; // temp storage for vertices and texcoords
 
@@ -330,6 +323,8 @@ z
             vertex.push_back((sorted?tt[idx[j]]:tt[j]).z());
 			vert_count++;
         }
+
+		size.push_back(degree);
       }
    }
 

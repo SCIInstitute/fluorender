@@ -516,6 +516,7 @@ namespace FLIVR
 		num_slices_ = (int)(diag.length()/dt);
 
 		vector<float> vertex;
+		vector<uint32_t> index;
 		vector<uint32_t> size;
 		vertex.reserve(num_slices_*12);
 		size.reserve(num_slices_*6);
@@ -611,7 +612,7 @@ namespace FLIVR
 			}
 
 			glBindTexture(GL_TEXTURE_2D, 0);
-			glDisable(GL_TEXTURE_2D);
+			//glDisable(GL_TEXTURE_2D);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, blend_framebuffer_);
 
@@ -625,7 +626,7 @@ namespace FLIVR
 		glDisable(GL_DEPTH_TEST);
 
 		//enable 3d texture
-		glEnable(GL_TEXTURE_3D);
+		//glEnable(GL_TEXTURE_3D);
 
 		//--------------------------------------------------------------------------
 		// enable data texture unit 0
@@ -815,8 +816,9 @@ namespace FLIVR
 			}
 
 			vertex.clear();
+			index.clear();
 			size.clear();
-			b->compute_polygons(snapview, dt, vertex, size);
+			b->compute_polygons(snapview, dt, vertex, index, size);
 
 			if (vertex.size() == 0) continue;
 			GLint filter;
@@ -854,7 +856,8 @@ namespace FLIVR
 			matrix[15] = 1.0f;
 			shader->setLocalParamMatrix(2, matrix);
 
-			draw_polygons(vertex, size);
+			draw_polygons(vertex, index);
+			glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
 
 			if (mem_swap_)
 				finished_bricks_++;
@@ -910,7 +913,7 @@ namespace FLIVR
 			glDisable(GL_LIGHTING);
 			glDisable(GL_CULL_FACE);
 			glActiveTexture(GL_TEXTURE0);
-			glEnable(GL_TEXTURE_2D);
+			//glEnable(GL_TEXTURE_2D);
 
 			//transformations
 			glMatrixMode(GL_PROJECTION);
@@ -1025,7 +1028,7 @@ namespace FLIVR
 			glMatrixMode(GL_MODELVIEW);
 			glPopMatrix();
 			glBindTexture(GL_TEXTURE_2D, 0);
-			glDisable(GL_TEXTURE_2D);
+			//glDisable(GL_TEXTURE_2D);
 		}
 
 		// Reset the blend functions after MIP
@@ -1047,8 +1050,8 @@ namespace FLIVR
 		glEnable(GL_DEPTH_TEST);
 		GLboolean lighting = glIsEnabled(GL_LIGHTING);
 		glDisable(GL_LIGHTING);
-		glDisable(GL_TEXTURE_3D);
-		glDisable(GL_TEXTURE_2D);
+		//glDisable(GL_TEXTURE_3D);
+		//glDisable(GL_TEXTURE_2D);
 		glDisable(GL_FOG);
 		vector<TextureBrick*> *bricks = tex_->get_sorted_bricks(view_ray, orthographic_p);
 
@@ -1061,20 +1064,22 @@ namespace FLIVR
 		num_slices_ = (int)(diag.length()/dt);
 
 		vector<float> vertex;
+		vector<uint32_t> index;
 		vector<uint32_t> size;
 		vertex.reserve(num_slices_*12);
+		index.reserve(num_slices_*6);
 		size.reserve(num_slices_*6);
 
 		if (bricks)
 		{
 			for (unsigned int i=0; i<bricks->size(); i++)
 			{
-				glColor4d(float(0.8*(i+1.0)/bricks->size()), float(0.8*(i+1.0)/bricks->size()), 0.8f, 1.0f);
+//				glColor4d(float(0.8*(i+1.0)/bricks->size()), float(0.8*(i+1.0)/bricks->size()), 0.8f, 1.0f);
 
 				TextureBrick* b = (*bricks)[i];
 				if (!test_against_view(b->bbox())) continue;
 
-				Point pmin(b->bbox().min());
+/*				Point pmin(b->bbox().min());
 				Point pmax(b->bbox().max());
 				Point corner[8];
 				corner[0] = pmin;
@@ -1112,13 +1117,14 @@ namespace FLIVR
 				glEnd();
 
 				glColor4d(0.4, 0.4, 0.4, 1.0);
-
+*/
 				vertex.clear();
+				index.clear();
 				size.clear();
 
 				// Scale out dt such that the slices are artificially further apart.
-				b->compute_polygons(view_ray, dt * 10, vertex, size);
-				draw_polygons_wireframe(vertex, size);
+				b->compute_polygons(view_ray, dt * 10, vertex, index, size);
+				draw_polygons_wireframe(vertex, index, size);
 			}
 		}
 
@@ -1148,8 +1154,8 @@ namespace FLIVR
 			return;
 
 		glActiveTexture(GL_TEXTURE0);
-		glEnable(GL_TEXTURE_2D);
-		glEnable(GL_TEXTURE_3D);
+		//glEnable(GL_TEXTURE_2D);
+		//glEnable(GL_TEXTURE_3D);
 		//mask frame buffer object
 		if (!glIsFramebuffer(fbo_mask_))
 			glGenFramebuffers(1, &fbo_mask_);
@@ -1398,8 +1404,8 @@ namespace FLIVR
 			return;
 
 		glActiveTexture(GL_TEXTURE0);
-		glEnable(GL_TEXTURE_2D);
-		glEnable(GL_TEXTURE_3D);
+		//glEnable(GL_TEXTURE_2D);
+		//glEnable(GL_TEXTURE_3D);
 		//label frame buffer object
 		if (!glIsFramebuffer(fbo_label_))
 			glGenFramebuffers(1, &fbo_label_);
@@ -1626,8 +1632,8 @@ namespace FLIVR
 		if (vr_b) bricks_b = vr_b->tex_->get_bricks();
 
 		glActiveTexture(GL_TEXTURE0);
-		glEnable(GL_TEXTURE_2D);
-		glEnable(GL_TEXTURE_3D);
+		//glEnable(GL_TEXTURE_2D);
+		//glEnable(GL_TEXTURE_3D);
 		//mask frame buffer object
 		if (!glIsFramebuffer(fbo_label_))
 			glGenFramebuffers(1, &fbo_label_);
@@ -1730,7 +1736,7 @@ namespace FLIVR
 			cal_shader->release();
 
 		glActiveTexture(GL_TEXTURE0);
-		glDisable(GL_TEXTURE_3D);
+		//glDisable(GL_TEXTURE_3D);
 		glBindTexture(GL_TEXTURE_3D, 0);
 		//--------------------------------------------------------------------------
 
@@ -1781,7 +1787,7 @@ namespace FLIVR
 		//release 3d texture
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_3D, 0);
-		glDisable(GL_TEXTURE_3D);
+		//glDisable(GL_TEXTURE_3D);
 	}
 
 	//return the mask volume

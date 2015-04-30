@@ -46,7 +46,7 @@ namespace FLIVR
 
 #define SEG_VERTEX_CODE_CORE_PROFILE \
 	"//SEG_VERTEX_CODE_CORE_PROFILE\n" \
-	"#version 400\n" \
+	"#version 450\n" \
 	"in vec3 InVertex;\n" \
 	"in vec3 InTexCoord0;\n" \
 	"out vec3 OutVertex;\n" \
@@ -60,7 +60,7 @@ namespace FLIVR
 	"}\n" 
 
 #define SEG_FRAG_CODE_TEST \
-	"#version 400\n" \
+	"#version 450\n" \
 	"in vec3 OutVertex;\n" \
 	"in vec3 OutTexture;\n" \
 	"out vec4 FragColor;\n" \
@@ -81,10 +81,10 @@ namespace FLIVR
 	"	float cmask2d = texture(tex6, s.xy).x;\n" \
 	"	if (cmask2d < 0.95)\n" \
 	"		discarded = true;\n" \
-	"	vec4 v = texture(tex0, OutTexture);\n" \
+	"	//vec4 v = texture(tex2, vec3(0.5));\n" \
 	"	if (discarded)\n" \
-	"		FragColor = v;\n" \
-	"	//else FragColor = v;\n" \
+	"		FragColor = v;//ec4(0.0);\n" \
+	"	else FragColor = vec4(1.0);\n" \
 	"}\n"
 
 #define SEG_FRAG_CODE_TEST0 \

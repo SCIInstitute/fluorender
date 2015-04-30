@@ -202,7 +202,7 @@ void beginRenderText( int nWindowWidth, int nWindowHeight, bool blend )
 	// and then disable them.
 	glPushAttrib( GL_TEXTURE_BIT | GL_DEPTH_TEST | GL_LIGHTING | GL_COLOR_BUFFER_BIT);
 
-	glDisable( GL_TEXTURE_2D );
+	//glDisable( GL_TEXTURE_2D );
 	glDisable( GL_DEPTH_TEST );
 	glDisable( GL_LIGHTING );
 	if (blend)

@@ -1914,7 +1914,7 @@ void MeshData::DrawBounds()
 {
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
-	glDisable(GL_TEXTURE_2D);
+	//glDisable(GL_TEXTURE_2D);
 	glDisable(GL_FOG);
 	//glDisable(GL_BLEND);
 	glColor4d(m_mat_diff.r(), m_mat_diff.g(), m_mat_diff.b(), 1.0);
@@ -3555,7 +3555,7 @@ void TraceGroup::Draw()
 		break;
 	}
 	glLineWidth(GLfloat(width));
-	glDisable(GL_TEXTURE_2D);
+	//glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
