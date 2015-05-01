@@ -509,6 +509,7 @@ namespace FLIVR
 #define VOL_RASTER_BLEND \
 	"	//VOL_RASTER_BLEND\n" \
 	"	FragColor = c*l.w; // VOL_RASTER_BLEND\n" \
+	"	//FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n" \
 	"\n"
 
 #define VOL_RASTER_BLEND_SOLID \

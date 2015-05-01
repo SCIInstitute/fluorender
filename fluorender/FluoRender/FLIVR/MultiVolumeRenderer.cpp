@@ -307,7 +307,6 @@ namespace FLIVR
 			}
 
 			glBindTexture(GL_TEXTURE_2D, 0);
-			//glDisable(GL_TEXTURE_2D);
 
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, blend_framebuffer_);
 
@@ -318,14 +317,8 @@ namespace FLIVR
 		}
 
 		//disable depth buffer writing
+		glDisable(GL_DEPTH_TEST);
 		glDepthMask(GL_FALSE);
-
-		//--------------------------------------------------------------------------
-		// enable data texture unit 0
-		glActiveTexture(GL_TEXTURE0);
-
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-		glEnable(GL_TEXTURE_3D);
 
 		//--------------------------------------------------------------------------
 		// Set up shaders
@@ -357,6 +350,15 @@ namespace FLIVR
 		glPushMatrix();
 		glMultMatrixf(mvmat);
 		float matrix[16];
+
+		float mat[16];
+		glGetFloatv(GL_PROJECTION_MATRIX, mat);
+		//send the matrices down if possible
+		shader->setLocalParamMatrix(0, mat);
+		glGetFloatv(GL_MODELVIEW_MATRIX, mat);
+		shader->setLocalParamMatrix(1, mat);
+		glGetFloatv(GL_TEXTURE_MATRIX, mat);
+		shader->setLocalParamMatrix(5, mat);
 
 		int quota_bricks_chan = vr_list_[0]->get_quota_bricks_chan();
 		vector<TextureBrick*> *bs = 0;
@@ -449,9 +451,9 @@ namespace FLIVR
 
 				draw_polygons_vol(vertex, index, size, use_fog!=0, view_ray,
 					shader, i, orthographic_p, w2, h2, intp, quota_bricks_chan);
+				//vr_list_[0]->draw_polygons(vertex, index);
 			}
 		}
-
 
 		if (TextureRenderer::mem_swap_ &&
 			TextureRenderer::cur_brick_num_ == TextureRenderer::total_brick_num_)
@@ -464,6 +466,7 @@ namespace FLIVR
 		glPopMatrix();
 
 		//enable depth buffer writing
+		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 
 		// Release shader.
@@ -473,7 +476,6 @@ namespace FLIVR
 		//release texture
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_3D, 0);
-		//glDisable(GL_TEXTURE_3D);
 
 		//reset blending
 		glBlendEquation(GL_FUNC_ADD);
@@ -493,8 +495,6 @@ namespace FLIVR
 			glDisable(GL_DEPTH_TEST);
 			glDisable(GL_LIGHTING);
 			glDisable(GL_CULL_FACE);
-			glActiveTexture(GL_TEXTURE0);
-			//glEnable(GL_TEXTURE_2D);
 
 			//transformations
 			glMatrixMode(GL_PROJECTION);
@@ -584,14 +584,20 @@ namespace FLIVR
 			{
 				img_shader = vr_list_[0]->
 					m_img_shader_factory.shader(IMG_SHDR_FILTER_SHARPEN);
-				if (img_shader)
-				{
-					if (!img_shader->valid())
-					{
-						img_shader->create();
-					}
-					img_shader->bind();
-				}
+			}
+			else
+				img_shader = vr_list_[0]->
+					m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+
+			if (img_shader)
+			{
+				if (!img_shader->valid())
+					img_shader->create();
+				img_shader->bind();
+			}
+
+			if (noise_red_ && colormap_mode_!=2)
+			{
 				filter_size_shp_ = vr_list_[0]->
 					CalcFilterSize(3, w, h, res_.x(), res_.y(), zoom, sfactor_);
 				img_shader->setLocalParam(0, filter_size_shp_/w, filter_size_shp_/h, 0.0, 0.0);
@@ -599,11 +605,8 @@ namespace FLIVR
 
 			vr_list_[0]->draw_view_quad();
 
-			if (noise_red_ && colormap_mode_!=2)
-			{
-				if (img_shader && img_shader->valid())
-					img_shader->release();
-			}
+			if (img_shader && img_shader->valid())
+				img_shader->release();
 
 			if (depth_test) glEnable(GL_DEPTH_TEST);
 			if (lighting) glEnable(GL_LIGHTING);
@@ -614,7 +617,6 @@ namespace FLIVR
 			glMatrixMode(GL_MODELVIEW);
 			glPopMatrix();
 			glBindTexture(GL_TEXTURE_2D, 0);
-			//glDisable(GL_TEXTURE_2D);
 			glDisable(GL_BLEND);
 		}
 	}
@@ -692,6 +694,7 @@ namespace FLIVR
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_slices_ibo);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t)*index.size(), 
 			&index[0], GL_STREAM_DRAW);
+
 		glBindBuffer(GL_ARRAY_BUFFER, m_slices_vbo);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)0);
@@ -699,6 +702,7 @@ namespace FLIVR
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)12);
 
 		unsigned int location = 0;
+		unsigned int idx_num;
 
 		for(unsigned int i=0, k=0; i<size.size(); i++)
 		{
@@ -717,8 +721,6 @@ namespace FLIVR
 				glBlendFunc(GL_ONE, GL_ONE);
 
 				glUseProgram(shader->id());
-				//glEnable(GL_TEXTURE_3D);
-				//glDisable(GL_TEXTURE_2D);
 			}
 
 			//draw a single slice
@@ -813,29 +815,10 @@ namespace FLIVR
 				vr_list_[tn]->load_brick(0, 0, bs, bi, filter, vr_list_[tn]->compression_);
 
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_slices_ibo);
-				glDrawElements(GL_TRIANGLES, size[i], GL_UNSIGNED_INT, (const GLvoid*)location);
-				location += size[i]*4;
+				idx_num = (size[i]-2)*3;
+				glDrawElements(GL_TRIANGLES, idx_num, GL_UNSIGNED_INT, (const GLvoid*)location);
+				location += idx_num*4;
 
-/*				glBegin(GL_POLYGON);
-				{
-					for(int j=0; j<size[i]; j++)
-					{
-						float* t = &vertex[(k+j)*3+3];
-						float* v = &vertex[(k+j)*3];
-						if (glMultiTexCoord3f)
-						{
-							glMultiTexCoord3d(GL_TEXTURE0, t[0], t[1], t[2]);
-							if(fog)
-							{
-								float vz = mvmat[2]*v[0] + mvmat[6]*v[1] + mvmat[10]*v[2] + mvmat[14];
-								glMultiTexCoord3d(GL_TEXTURE1, -vz, 0.0, 0.0);
-							}
-						}
-						glVertex3d(v[0], v[1], v[2]);
-					}
-				}
-				glEnd();
-*/
 				//release depth texture for rendering shadows
 				if (colormap_mode_ == 2)
 					vr_list_[tn]->release_texture(4, GL_TEXTURE_2D);
@@ -848,9 +831,6 @@ namespace FLIVR
 			if (blend_slices_ && colormap_mode_!=2)
 			{
 				glUseProgram(0);
-				glActiveTexture(GL_TEXTURE0);
-				//glEnable(GL_TEXTURE_2D);
-				//glDisable(GL_TEXTURE_3D);
 
 				//set buffer back
 				glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_id);
@@ -885,6 +865,7 @@ namespace FLIVR
 		//unbind
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
 		//if (TextureRenderer::mem_swap_)
 		//  TextureRenderer::finished_bricks_ += (int)vr_list_.size();
 	}
@@ -1027,6 +1008,7 @@ namespace FLIVR
 			return;
 
 		Ray view_ray = vr_list_[0]->compute_view();
+		Ray snapview = vr_list_[0]->compute_snapview(0.4);
 
 		// Set sampling rate based on interaction.
 		double rate = imode_ ? irate_ : sampling_rate_;
@@ -1035,7 +1017,7 @@ namespace FLIVR
 			diag.y()/res_.y(),
 			diag.z()/res_.z());
 		double dt = cell_diag.length()/
-			vr_list_[0]->compute_rate_scale(view_ray.direction())/rate;
+			vr_list_[0]->compute_rate_scale(snapview.direction())/rate;
 		num_slices_ = (int)(diag.length()/dt);
 
 		vector<float> vertex;
@@ -1058,8 +1040,6 @@ namespace FLIVR
 		glEnable(GL_DEPTH_TEST);
 		GLboolean lighting = glIsEnabled(GL_LIGHTING);
 		glDisable(GL_LIGHTING);
-		//glDisable(GL_TEXTURE_3D);
-		//glDisable(GL_TEXTURE_2D);
 		glDisable(GL_FOG);
 
 		vector<TextureBrick*> *bs = vr_list_[0]->tex_->get_sorted_bricks(view_ray, orthographic_p);
@@ -1068,58 +1048,14 @@ namespace FLIVR
 		{
 			for (unsigned int i=0; i < bs->size(); i++)
 			{
-				glColor4d(0.8*(i+1.0)/bs->size(), 0.8*(i+1.0)/bs->size(), 0.8, 1.0);
-
 				TextureBrick* b = (*bs)[i];
 				if (!vr_list_[0]->test_against_view(b->bbox())) continue; // Clip against view.
-
-				Point ptmin = b->bbox().min();
-				Point ptmax = b->bbox().max();
-				Point &pmin(ptmin);
-				Point &pmax(ptmax);
-				Point corner[8];
-				corner[0] = pmin;
-				corner[1] = Point(pmin.x(), pmin.y(), pmax.z());
-				corner[2] = Point(pmin.x(), pmax.y(), pmin.z());
-				corner[3] = Point(pmin.x(), pmax.y(), pmax.z());
-				corner[4] = Point(pmax.x(), pmin.y(), pmin.z());
-				corner[5] = Point(pmax.x(), pmin.y(), pmax.z());
-				corner[6] = Point(pmax.x(), pmax.y(), pmin.z());
-				corner[7] = pmax;
-
-				glBegin(GL_LINES);
-				{
-					for(int i=0; i<4; i++) {
-						glVertex3d(corner[i].x(), corner[i].y(), corner[i].z());
-						glVertex3d(corner[i+4].x(), corner[i+4].y(), corner[i+4].z());
-					}
-				}
-				glEnd();
-				glBegin(GL_LINE_LOOP);
-				{
-					glVertex3d(corner[0].x(), corner[0].y(), corner[0].z());
-					glVertex3d(corner[1].x(), corner[1].y(), corner[1].z());
-					glVertex3d(corner[3].x(), corner[3].y(), corner[3].z());
-					glVertex3d(corner[2].x(), corner[2].y(), corner[2].z());
-				}
-				glEnd();
-				glBegin(GL_LINE_LOOP);
-				{
-					glVertex3d(corner[4].x(), corner[4].y(), corner[4].z());
-					glVertex3d(corner[5].x(), corner[5].y(), corner[5].z());
-					glVertex3d(corner[7].x(), corner[7].y(), corner[7].z());
-					glVertex3d(corner[6].x(), corner[6].y(), corner[6].z());
-				}
-				glEnd();
-
-				glColor4d(0.4, 0.4, 0.4, 1.0);
 
 				vertex.clear();
 				index.clear();
 				size.clear();
 
-				// Scale out dt such that the slices are artificially further apart.
-				b->compute_polygons(view_ray, dt * 10, vertex, index, size);
+				b->compute_polygons(snapview, dt, vertex, index, size);
 				vr_list_[0]->draw_polygons_wireframe(vertex, index, size);
 			}
 		}

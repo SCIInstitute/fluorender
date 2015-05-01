@@ -519,6 +519,7 @@ namespace FLIVR
 		vector<uint32_t> index;
 		vector<uint32_t> size;
 		vertex.reserve(num_slices_*12);
+		index.reserve(num_slices_*6);
 		size.reserve(num_slices_*6);
 
 		//--------------------------------------------------------------------------
@@ -612,7 +613,6 @@ namespace FLIVR
 			}
 
 			glBindTexture(GL_TEXTURE_2D, 0);
-			//glDisable(GL_TEXTURE_2D);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, blend_framebuffer_);
 
@@ -624,13 +624,6 @@ namespace FLIVR
 
 		//disable depth test
 		glDisable(GL_DEPTH_TEST);
-
-		//enable 3d texture
-		//glEnable(GL_TEXTURE_3D);
-
-		//--------------------------------------------------------------------------
-		// enable data texture unit 0
-		glActiveTexture(GL_TEXTURE0);
 
 		//reassess the mask/label mode
 		//0-normal, 1-render with mask, 2-render with mask excluded
@@ -857,7 +850,6 @@ namespace FLIVR
 			shader->setLocalParamMatrix(2, matrix);
 
 			draw_polygons(vertex, index);
-			glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
 
 			if (mem_swap_)
 				finished_bricks_++;
@@ -912,8 +904,6 @@ namespace FLIVR
 			glDisable(GL_DEPTH_TEST);
 			glDisable(GL_LIGHTING);
 			glDisable(GL_CULL_FACE);
-			glActiveTexture(GL_TEXTURE0);
-			//glEnable(GL_TEXTURE_2D);
 
 			//transformations
 			glMatrixMode(GL_PROJECTION);
@@ -1028,7 +1018,6 @@ namespace FLIVR
 			glMatrixMode(GL_MODELVIEW);
 			glPopMatrix();
 			glBindTexture(GL_TEXTURE_2D, 0);
-			//glDisable(GL_TEXTURE_2D);
 		}
 
 		// Reset the blend functions after MIP
@@ -1041,6 +1030,8 @@ namespace FLIVR
 	void VolumeRenderer::draw_wireframe(bool orthographic_p)
 	{
 		Ray view_ray = compute_view();
+		Ray snapview = compute_snapview(0.4);
+
 		Transform *tform = tex_->transform();
 		float mvmat[16];
 		tform->get_trans(mvmat);
@@ -1050,8 +1041,6 @@ namespace FLIVR
 		glEnable(GL_DEPTH_TEST);
 		GLboolean lighting = glIsEnabled(GL_LIGHTING);
 		glDisable(GL_LIGHTING);
-		//glDisable(GL_TEXTURE_3D);
-		//glDisable(GL_TEXTURE_2D);
 		glDisable(GL_FOG);
 		vector<TextureBrick*> *bricks = tex_->get_sorted_bricks(view_ray, orthographic_p);
 
@@ -1060,7 +1049,7 @@ namespace FLIVR
 		Vector cell_diag(diag.x()/tex_->nx(),
 			diag.y()/tex_->ny(),
 			diag.z()/tex_->nz());
-		float dt = cell_diag.length()/compute_rate_scale(view_ray.direction())/rate;
+		float dt = cell_diag.length()/compute_rate_scale(snapview.direction())/rate;
 		num_slices_ = (int)(diag.length()/dt);
 
 		vector<float> vertex;
@@ -1074,56 +1063,15 @@ namespace FLIVR
 		{
 			for (unsigned int i=0; i<bricks->size(); i++)
 			{
-//				glColor4d(float(0.8*(i+1.0)/bricks->size()), float(0.8*(i+1.0)/bricks->size()), 0.8f, 1.0f);
-
 				TextureBrick* b = (*bricks)[i];
 				if (!test_against_view(b->bbox())) continue;
 
-/*				Point pmin(b->bbox().min());
-				Point pmax(b->bbox().max());
-				Point corner[8];
-				corner[0] = pmin;
-				corner[1] = Point(pmin.x(), pmin.y(), pmax.z());
-				corner[2] = Point(pmin.x(), pmax.y(), pmin.z());
-				corner[3] = Point(pmin.x(), pmax.y(), pmax.z());
-				corner[4] = Point(pmax.x(), pmin.y(), pmin.z());
-				corner[5] = Point(pmax.x(), pmin.y(), pmax.z());
-				corner[6] = Point(pmax.x(), pmax.y(), pmin.z());
-				corner[7] = pmax;
-
-				glBegin(GL_LINES);
-				{
-					for(int i=0; i<4; i++) {
-						glVertex3d(corner[i].x(), corner[i].y(), corner[i].z());
-						glVertex3d(corner[i+4].x(), corner[i+4].y(), corner[i+4].z());
-					}
-				}
-				glEnd();
-				glBegin(GL_LINE_LOOP);
-				{
-					glVertex3d(corner[0].x(), corner[0].y(), corner[0].z());
-					glVertex3d(corner[1].x(), corner[1].y(), corner[1].z());
-					glVertex3d(corner[3].x(), corner[3].y(), corner[3].z());
-					glVertex3d(corner[2].x(), corner[2].y(), corner[2].z());
-				}
-				glEnd();
-				glBegin(GL_LINE_LOOP);
-				{
-					glVertex3d(corner[4].x(), corner[4].y(), corner[4].z());
-					glVertex3d(corner[5].x(), corner[5].y(), corner[5].z());
-					glVertex3d(corner[7].x(), corner[7].y(), corner[7].z());
-					glVertex3d(corner[6].x(), corner[6].y(), corner[6].z());
-				}
-				glEnd();
-
-				glColor4d(0.4, 0.4, 0.4, 1.0);
-*/
 				vertex.clear();
 				index.clear();
 				size.clear();
 
 				// Scale out dt such that the slices are artificially further apart.
-				b->compute_polygons(view_ray, dt * 10, vertex, index, size);
+				b->compute_polygons(snapview, dt * 1, vertex, index, size);
 				draw_polygons_wireframe(vertex, index, size);
 			}
 		}
@@ -1154,8 +1102,6 @@ namespace FLIVR
 			return;
 
 		glActiveTexture(GL_TEXTURE0);
-		//glEnable(GL_TEXTURE_2D);
-		//glEnable(GL_TEXTURE_3D);
 		//mask frame buffer object
 		if (!glIsFramebuffer(fbo_mask_))
 			glGenFramebuffers(1, &fbo_mask_);
@@ -1404,8 +1350,6 @@ namespace FLIVR
 			return;
 
 		glActiveTexture(GL_TEXTURE0);
-		//glEnable(GL_TEXTURE_2D);
-		//glEnable(GL_TEXTURE_3D);
 		//label frame buffer object
 		if (!glIsFramebuffer(fbo_label_))
 			glGenFramebuffers(1, &fbo_label_);
@@ -1632,8 +1576,6 @@ namespace FLIVR
 		if (vr_b) bricks_b = vr_b->tex_->get_bricks();
 
 		glActiveTexture(GL_TEXTURE0);
-		//glEnable(GL_TEXTURE_2D);
-		//glEnable(GL_TEXTURE_3D);
 		//mask frame buffer object
 		if (!glIsFramebuffer(fbo_label_))
 			glGenFramebuffers(1, &fbo_label_);
@@ -1736,7 +1678,6 @@ namespace FLIVR
 			cal_shader->release();
 
 		glActiveTexture(GL_TEXTURE0);
-		//glDisable(GL_TEXTURE_3D);
 		glBindTexture(GL_TEXTURE_3D, 0);
 		//--------------------------------------------------------------------------
 
@@ -1787,7 +1728,6 @@ namespace FLIVR
 		//release 3d texture
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_3D, 0);
-		//glDisable(GL_TEXTURE_3D);
 	}
 
 	//return the mask volume

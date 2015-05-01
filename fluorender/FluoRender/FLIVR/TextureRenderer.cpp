@@ -1014,6 +1014,9 @@ namespace FLIVR
 	void TextureRenderer::draw_polygons(vector<float>& vertex,
 		vector<uint32_t>& triangle_verts)
 	{
+		if (vertex.empty() || triangle_verts.empty())
+			return;
+
 		//link to the new data
 		glBindBuffer(GL_ARRAY_BUFFER, m_slices_vbo);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_STREAM_DRAW);
@@ -1040,6 +1043,10 @@ namespace FLIVR
 	void TextureRenderer::draw_polygons_wireframe(vector<float>& vertex,
 		vector<uint32_t>& index, vector<uint32_t>& size)
 	{
+		if (vertex.empty() || index.empty())
+			return;
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glBindBuffer(GL_ARRAY_BUFFER, m_slices_vbo);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_STREAM_DRAW);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_slices_ibo);
@@ -1054,30 +1061,19 @@ namespace FLIVR
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)12);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_slices_ibo);
-		//glDrawElements(GL_LINE_LOOP, poly.size(), GL_UNSIGNED_INT, 0);
+		unsigned int idx_num;
 		for (unsigned int i=0, k=0; i<size.size(); ++i)
 		{
-			glDrawElements(GL_LINE_LOOP, size[i], GL_UNSIGNED_INT, (const GLvoid*)k);
-			k += size[i]*4;
+			idx_num = (size[i]-2)*3;
+			glDrawElements(GL_TRIANGLES, idx_num, GL_UNSIGNED_INT, (const GLvoid*)k);
+			k += idx_num*4;
 		}
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
 		//unbind
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		//for(unsigned int i=0, k=0; i<poly.size(); i++)
-		//{
-		//	glBegin(GL_LINE_LOOP);
-		//	{
-		//		for(int j=0; j<poly[i]; j++)
-		//		{
-		//			float* v = &vertex[(k+j)*3];
-		//			glVertex3d(v[0], v[1], v[2]);
-		//		}
-		//	}
-		//	glEnd();
-		//	k += poly[i];
-		//}
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
 	//bind 2d mask for segmentation
