@@ -704,7 +704,7 @@ namespace FLIVR
 		unsigned int location = 0;
 		unsigned int idx_num;
 
-		for(unsigned int i=0, k=0; i<size.size(); i++)
+		for(unsigned int i=0; i<size.size(); i++)
 		{
 			double mat[16];
 			glGetDoublev(GL_MODELVIEW_MATRIX, mat);
@@ -817,7 +817,6 @@ namespace FLIVR
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_slices_ibo);
 				idx_num = (size[i]-2)*3;
 				glDrawElements(GL_TRIANGLES, idx_num, GL_UNSIGNED_INT, (const GLvoid*)location);
-				location += idx_num*4;
 
 				//release depth texture for rendering shadows
 				if (colormap_mode_ == 2)
@@ -826,7 +825,7 @@ namespace FLIVR
 				if (TextureRenderer::mem_swap_ && i==0)
 					TextureRenderer::finished_bricks_++;
 			}
-			k += size[i];
+			location += idx_num*4;
 
 			if (blend_slices_ && colormap_mode_!=2)
 			{

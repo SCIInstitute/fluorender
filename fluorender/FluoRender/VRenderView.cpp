@@ -626,7 +626,7 @@ void VRenderGLView::Draw()
 		if (m_use_fog)
 			glDisable(GL_FOG);
 
-/*		if (m_draw_bounds)
+		if (m_draw_bounds)
 			DrawBounds();
 
 		if (m_draw_grid)
@@ -646,7 +646,7 @@ void VRenderGLView::Draw()
 
 		//traces
 		DrawTraces();
-*/
+
 		glPopMatrix();
 	}
 }
@@ -1141,7 +1141,7 @@ void VRenderGLView::DrawVolumes(int peel)
 			}
 		}
 
-		//DrawVolumesComp(m_vd_pop_list, peel);
+		//handle intermixing modes
 		if (m_vol_method == VOL_METHOD_MULTI)
 		{
 			if (TextureRenderer::get_mem_swap() &&
@@ -2716,7 +2716,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
 			glActiveTexture(GL_TEXTURE0);
-			//glEnable(GL_TEXTURE_2D);
+			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, m_tex_final);
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 			glDisable(GL_BLEND);
@@ -3827,7 +3827,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	m_mvr->draw(m_test_wiref, m_interactive, !m_persp, m_scale_factor, m_intp);
 
 	//draw shadows
-//	DrawOLShadows(list, use_tex_wt2?m_tex_wt2:m_tex);
+	DrawOLShadows(list, use_tex_wt2?m_tex_wt2:m_tex);
 
 	//bind fbo for final composition
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_final);
