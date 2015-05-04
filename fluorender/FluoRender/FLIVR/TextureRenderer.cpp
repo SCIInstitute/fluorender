@@ -92,7 +92,9 @@ namespace FLIVR
 	{
 		glGenBuffers(1, &m_slices_vbo);
 		glGenBuffers(1, &m_slices_ibo);
+		glGenVertexArrays(1, &m_slices_vao);
 		glGenBuffers(1, &m_quad_vbo);
+		glGenVertexArrays(1, &m_quad_vao);
 		//glGenBuffers(1, &m_quad_ibo);
 	}
 
@@ -122,7 +124,9 @@ namespace FLIVR
 		//buffers
 		glGenBuffers(1, &m_slices_vbo);
 		glGenBuffers(1, &m_slices_ibo);
+		glGenVertexArrays(1, &m_slices_vao);
 		glGenBuffers(1, &m_quad_vbo);
+		glGenVertexArrays(1, &m_quad_vao);
 		//glGenBuffers(1, &m_quad_ibo);
 	}
 
@@ -143,10 +147,12 @@ namespace FLIVR
 			glDeleteBuffers(1, &m_slices_vbo);
 		if (glIsBuffer(m_slices_ibo))
 			glDeleteBuffers(1, &m_slices_ibo);
+		if (glIsVertexArray(m_slices_vao))
+			glDeleteVertexArrays(1, &m_slices_vao);
 		if (glIsBuffer(m_quad_vbo))
 			glDeleteBuffers(1, &m_quad_vbo);
-		//if (glIsBuffer(m_quad_ibo))
-		//	glDeleteBuffers(1, &m_quad_ibo);
+		if (glIsVertexArray(m_quad_vao))
+			glDeleteVertexArrays(1, &m_quad_vao);
 	}
 
 	//set the texture for rendering
@@ -346,8 +352,12 @@ namespace FLIVR
 	Ray TextureRenderer::compute_view()
 	{
 		Transform *field_trans = tex_->transform();
-		double mvmat[16];
-		glGetDoublev(GL_MODELVIEW_MATRIX, mvmat);
+		double mvmat[16] =
+			{m_mv_mat[0][0], m_mv_mat[0][1], m_mv_mat[0][2], m_mv_mat[0][3],
+			 m_mv_mat[1][0], m_mv_mat[1][1], m_mv_mat[1][2], m_mv_mat[1][3],
+			 m_mv_mat[2][0], m_mv_mat[2][1], m_mv_mat[2][2], m_mv_mat[2][3],
+			 m_mv_mat[3][0], m_mv_mat[3][1], m_mv_mat[3][2], m_mv_mat[3][3]};
+
 		// index space view direction
 		Vector v = field_trans->project(Vector(-mvmat[2], -mvmat[6], -mvmat[10]));
 		v.safe_normalize();
@@ -360,8 +370,11 @@ namespace FLIVR
 	Ray TextureRenderer::compute_snapview(double snap)
 	{
 		Transform *field_trans = tex_->transform();
-		double mvmat[16];
-		glGetDoublev(GL_MODELVIEW_MATRIX, mvmat);
+		double mvmat[16] =
+			{m_mv_mat[0][0], m_mv_mat[0][1], m_mv_mat[0][2], m_mv_mat[0][3],
+			 m_mv_mat[1][0], m_mv_mat[1][1], m_mv_mat[1][2], m_mv_mat[1][3],
+			 m_mv_mat[2][0], m_mv_mat[2][1], m_mv_mat[2][2], m_mv_mat[2][3],
+			 m_mv_mat[3][0], m_mv_mat[3][1], m_mv_mat[3][2], m_mv_mat[3][3]};
 		
 		//snap
 		Vector vd;
@@ -1000,15 +1013,18 @@ namespace FLIVR
 		glBindBuffer(GL_ARRAY_BUFFER, m_quad_vbo);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float)*24, points, GL_STREAM_DRAW);
 
+		glBindVertexArray(m_quad_vao);
+		glBindBuffer(GL_ARRAY_BUFFER, m_quad_vbo);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)0);
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)12);
 
+		//glBindVertexArray(m_quad_vao);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
 	}
 
 	void TextureRenderer::draw_polygons(vector<float>& vertex,
@@ -1024,6 +1040,7 @@ namespace FLIVR
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t)*triangle_verts.size(), 
 			&triangle_verts[0], GL_STREAM_DRAW);
 		
+		glBindVertexArray(m_slices_vao);
 		//now draw it
 		glBindBuffer(GL_ARRAY_BUFFER, m_slices_vbo);
 		glEnableVertexAttribArray(0);
@@ -1038,6 +1055,7 @@ namespace FLIVR
 		//unbind
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
 	}
 
 	void TextureRenderer::draw_polygons_wireframe(vector<float>& vertex,
@@ -1047,13 +1065,14 @@ namespace FLIVR
 			return;
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
 		glBindBuffer(GL_ARRAY_BUFFER, m_slices_vbo);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_STREAM_DRAW);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_slices_ibo);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t)*index.size(), 
 			&index[0], GL_STREAM_DRAW);
 
-		//now draw it
+		glBindVertexArray(m_slices_vao);
 		glBindBuffer(GL_ARRAY_BUFFER, m_slices_vbo);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)0);
@@ -1073,6 +1092,8 @@ namespace FLIVR
 		//unbind
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
@@ -1082,7 +1103,7 @@ namespace FLIVR
 		if (ShaderProgram::shaders_supported() && glActiveTexture)
 		{
 			glActiveTexture(GL_TEXTURE6);
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+//			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 			//glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, tex_2d_mask_);
 			glActiveTexture(GL_TEXTURE0);
@@ -1125,7 +1146,7 @@ namespace FLIVR
 		if (ShaderProgram::shaders_supported() && glActiveTexture)
 		{
 			glActiveTexture(GL_TEXTURE0 + unit);
-			glDisable(taget);
+//			glDisable(taget);
 			glBindTexture(taget, 0);
 			glActiveTexture(GL_TEXTURE0);
 		}

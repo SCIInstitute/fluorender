@@ -213,6 +213,7 @@ public:
 	int GetCurTime();
 
 	//draw volume
+	void SetMatrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat, glm::mat4 &tex_mat);
 	void Draw(bool otho = false, bool intactive = false, double zoom = 1.0);
 	void DrawBounds();
 	//draw mask (create the mask)

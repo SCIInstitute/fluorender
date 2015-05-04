@@ -187,6 +187,10 @@ namespace FLIVR
 		double get_estimated_thresh()
 		{ return est_thresh_; }
 
+		//set matrices
+		void set_matrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat, glm::mat4 &tex_mat)
+		{ m_mv_mat = mv_mat; m_proj_mat = proj_mat; m_tex_mat = tex_mat; }
+
 		friend class MultiVolumeRenderer;
 
 	protected:
@@ -260,6 +264,7 @@ namespace FLIVR
 			double zoom, double sf);	//type - 1:min filter
 										//		 2:max filter
 										//		 3:sharpening
+
 	};
 
 } // End namespace FLIVR

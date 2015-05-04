@@ -52,7 +52,7 @@ namespace FLIVR
 
 
 #define VTX_SHADER_CODE_CORE_PROFILE \
-	"//VERTEX SHADER\n" \
+	"//VTX_SHADER_CODE_CORE_PROFILE\n" \
 	"#version 400\n" \
 	"uniform mat4 matrix0; //projection matrix\n" \
 	"uniform mat4 matrix1; //modelview matrix\n" \
@@ -68,14 +68,27 @@ namespace FLIVR
 	"	OutVertex  = InVertex;\n" \
 	"}\n" 
 
+#define FRG_SHADER_CODE_CORE_PROFILE \
+	"//FRG_SHADER_CODE_CORE_PROFILE\n" \
+	"#version 400\n" \
+	"in vec3 OutVertex;\n" \
+	"in vec3 OutTexCoord;\n" \
+	"out vec4 FragColor;\n" \
+	"\n" \
+	"uniform vec4 loc0;//color\n" \
+	"void main()\n" \
+	"{\n" \
+	"	FragColor = loc0;\n" \
+	"}\n"
 
-	VolShader::VolShader(int channels,
+	VolShader::VolShader(bool poly, int channels,
 						bool shading, bool fog,
 						int peel, bool clip,
 						bool hiqual, int mask,
 						int color_mode, bool solid,
 						int vertex_shader)
-		: channels_(channels),
+		: poly_(poly),
+		channels_(channels),
 		shading_(shading),
 		fog_(fog),
 		peel_(peel),
@@ -120,6 +133,14 @@ namespace FLIVR
 	bool VolShader::emit_f(string& s)
 	{
 		ostringstream z;
+
+		if (poly_)
+		{
+			z << FRG_SHADER_CODE_CORE_PROFILE;
+			//output
+			s = z.str();
+			return false;
+		}
 
 		//version info
 		z << VOL_VERSION;
@@ -333,7 +354,6 @@ namespace FLIVR
 
 		//output
 		s = z.str();
-		//s = DEFAULT_FRAGMENT_CODE;
 		return false;
 	}
 
@@ -350,7 +370,7 @@ namespace FLIVR
 		}
 	}
 
-	ShaderProgram* VolShaderFactory::shader(int channels, 
+	ShaderProgram* VolShaderFactory::shader(bool poly, int channels, 
 								bool shading, bool fog, 
 								int peel, bool clip,
 								bool hiqual, int mask,
@@ -359,7 +379,8 @@ namespace FLIVR
 	{
 		if(prev_shader_ >= 0)
 		{
-			if(shader_[prev_shader_]->match(channels,
+			if(shader_[prev_shader_]->match(
+				poly, channels,
 				shading, fog,
 				peel, clip,
 				hiqual, mask,
@@ -370,7 +391,8 @@ namespace FLIVR
 		}
 		for(unsigned int i=0; i<shader_.size(); i++)
 		{
-			if(shader_[i]->match(channels,
+			if(shader_[i]->match(
+				poly, channels,
 				shading, fog,
 				peel, clip,
 				hiqual, mask,
@@ -381,7 +403,7 @@ namespace FLIVR
 			}
 		}
 
-		VolShader* s = new VolShader(channels,
+		VolShader* s = new VolShader(poly, channels,
 									shading, fog,
 									peel, clip,
 									hiqual, mask,

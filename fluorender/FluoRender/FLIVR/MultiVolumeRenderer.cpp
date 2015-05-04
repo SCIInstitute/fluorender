@@ -324,6 +324,7 @@ namespace FLIVR
 		// Set up shaders
 		ShaderProgram* shader = 0;
 		shader = VolumeRenderer::vol_shader_factory_.shader(
+			false,
 			vr_list_[0]->tex_->nc(),
 			use_shading, use_fog!=0,
 			depth_peel_, true,

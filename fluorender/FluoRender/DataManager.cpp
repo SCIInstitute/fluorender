@@ -37,6 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <fstream>
 #include <algorithm>
 #include <set>
+#include <glm/gtc/matrix_transform.hpp>
 
 #ifdef _WIN32
 #  undef min
@@ -1136,18 +1137,26 @@ Texture* VolumeData::GetTexture()
 	return m_tex;
 }
 
+void VolumeData::SetMatrices(glm::mat4 &mv_mat,
+	glm::mat4 &proj_mat, glm::mat4 &tex_mat)
+{
+	glm::mat4 scale_mv = glm::scale(mv_mat, glm::vec3(m_sclx, m_scly, m_sclz));
+	if (m_vr)
+		m_vr->set_matrices(scale_mv, proj_mat, tex_mat);
+}
+
 //draw volume
 void VolumeData::Draw(bool ortho, bool interactive, double zoom)
 {
-	glPushMatrix();
-	glScalef(m_sclx, m_scly, m_sclz);
+//	glPushMatrix();
+//	glScalef(m_sclx, m_scly, m_sclz);
 	if (m_vr)
 	{
 		m_vr->draw(m_test_wiref, interactive, ortho, zoom, m_stream_mode);
 	}
 	if (m_draw_bounds)
 		DrawBounds();
-	glPopMatrix();
+//	glPopMatrix();
 }
 
 void VolumeData::DrawBounds()
@@ -1186,8 +1195,8 @@ void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 						  double ini_thresh, double gm_falloff, double scl_falloff, double scl_translate,
 						  double w2d, double bins, bool ortho, bool estimate)
 {
-	glPushMatrix();
-	glScalef(m_sclx, m_scly, m_sclz);
+//	glPushMatrix();
+//	glScalef(m_sclx, m_scly, m_sclz);
 	if (m_vr)
 	{
 		m_vr->set_2d_mask(m_2d_mask);
@@ -1196,7 +1205,7 @@ void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 		if (estimate)
 			m_est_thresh = m_vr->get_estimated_thresh();
 	}
-	glPopMatrix();
+//	glPopMatrix();
 }
 
 //draw label (create the label)

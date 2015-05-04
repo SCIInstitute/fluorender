@@ -42,7 +42,7 @@ namespace FLIVR
 	class VolShader
 	{
 	public:
-		VolShader(int channels,
+		VolShader(bool poly, int channels,
 				bool shading, bool fog,
 				int peel, bool clip,
 				bool hiqual, int mask,
@@ -52,6 +52,7 @@ namespace FLIVR
 
 		bool create();
 
+		inline bool poly() {return poly_; }
 		inline int channels() { return channels_; }
 		inline bool shading() { return shading_; }
 		inline bool fog() { return fog_; }
@@ -62,14 +63,15 @@ namespace FLIVR
 		inline int color_mode() {return color_mode_;}
 		inline bool solid() {return solid_;}
 
-		inline bool match(int channels, 
+		inline bool match(bool poly, int channels, 
 						bool shading, bool fog, 
 						int peel, bool clip,
 						bool hiqual, int mask,
 						int color_mode, bool solid,
 						int vertex_shader = 0)
 		{ 
-			return (channels_ == channels &&
+			return (poly_ == poly &&
+				channels_ == channels &&
 				shading_ == shading && 
 				fog_ == fog && 
 				peel_ == peel &&
@@ -87,6 +89,7 @@ namespace FLIVR
 		bool emit_f(std::string& s);
 		bool emit_v(std::string& s);
 
+		bool poly_;
 		int channels_;
 		bool shading_;
 		bool fog_;
@@ -108,12 +111,12 @@ namespace FLIVR
 		VolShaderFactory();
 		~VolShaderFactory();
 
-		ShaderProgram* shader(int channels, 
+		ShaderProgram* shader(bool poly, int channels, 
 								bool shading, bool fog, 
 								int peel, bool clip,
 								bool hiqual, int mask,
 								int color_mode, bool solid, 
-								int vertex_type = 0);
+								int vertex_type);
 		//mask: 0-no mask, 1-segmentation mask, 2-labeling mask
 		//color_mode: 0-normal; 1-rainbow; 2-depth
 

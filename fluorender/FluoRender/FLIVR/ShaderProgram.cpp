@@ -76,12 +76,12 @@ namespace FLIVR
 
 	void ShaderProgram::init_shaders_supported()
 	{
+		glewExperimental = GL_TRUE;
 		if (!init_ && glewInit()==GLEW_OK)
 		{
 			//experimental
-			glewExperimental = GL_TRUE;
 
-			supported_ = GLEW_ARB_shading_language_100 && GLEW_EXT_framebuffer_object && glTexImage3D;
+			supported_ = /*GLEW_ARB_shading_language_100 && GLEW_EXT_framebuffer_object &&*/ glTexImage3D;
 
 			//check max texture size
 			GLint texSize;
@@ -101,7 +101,7 @@ namespace FLIVR
 #endif
 
 			// Check for non-power-of-two texture support.
-			non_2_textures_ = GLEW_ARB_texture_non_power_of_two!=0;
+			non_2_textures_ = true;//GLEW_ARB_texture_non_power_of_two!=0;
 
 			//random numbers
 			srand((unsigned int)TIME(NULL));

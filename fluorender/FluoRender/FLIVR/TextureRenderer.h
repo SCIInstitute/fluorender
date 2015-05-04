@@ -33,6 +33,8 @@
 #include "TextureBrick.h"
 #include "Texture.h"
 #include <stdint.h>
+#include <glm/glm.hpp>
+
 namespace FLIVR
 {
    //a simple fixed-length fifo sequence
@@ -316,9 +318,14 @@ namespace FLIVR
                double mvmat_[16];
                double prmat_[16];
 
+				//opengl matrices
+				glm::mat4 m_mv_mat;
+				glm::mat4 m_proj_mat;
+				glm::mat4 m_tex_mat;
+
 			   //vertex and index buffer bind points
-			   GLuint m_slices_vbo, m_slices_ibo;
-			   GLuint m_quad_vbo/*, m_quad_ibo*/;
+			   GLuint m_slices_vbo, m_slices_ibo, m_slices_vao;
+			   GLuint m_quad_vbo, m_quad_vao;
 
                //compute view
                Ray compute_view();

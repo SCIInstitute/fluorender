@@ -51,6 +51,8 @@ DEALINGS IN THE SOFTWARE.
 #include <stdarg.h>
 #include "nv/timer.h"
 
+#include <glm/glm.hpp>
+
 #ifndef _VRENDERVIEW_H_
 #define _VRENDERVIEW_H_
 
@@ -638,7 +640,7 @@ class VRenderGLView: public wxGLCanvas
          vector<GLuint> m_dp_fbo_list;
          vector<GLuint> m_dp_tex_list;
 		 //vert buffer
-		 GLuint m_quad_vbo/*, m_quad_ibo*/;
+		 GLuint m_quad_vbo, m_quad_vao;
 
          //camera controls
          bool m_persp;
@@ -795,6 +797,11 @@ class VRenderGLView: public wxGLCanvas
 
          //predraw in streaming mode
          bool m_pre_draw;
+
+		 //glm matrices
+		 glm::mat4 m_mv_mat;
+		 glm::mat4 m_proj_mat;
+		 glm::mat4 m_tex_mat;
 
    private:
 #ifdef _WIN32
