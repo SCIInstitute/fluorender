@@ -520,6 +520,8 @@ class VRenderGLView: public wxGLCanvas
          bool m_draw_legend;
          bool m_mouse_focus;
          bool m_test_wiref;
+         bool m_draw_bounds;
+         bool m_draw_grid;
          bool m_draw_rulers;
          //current volume
          VolumeData *m_cur_vol;
@@ -641,6 +643,7 @@ class VRenderGLView: public wxGLCanvas
          vector<GLuint> m_dp_tex_list;
 		 //vert buffer
 		 GLuint m_quad_vbo, m_quad_vao;
+		 GLuint m_misc_vbo, m_misc_ibo, m_misc_vao;
 
          //camera controls
          bool m_persp;
@@ -685,8 +688,6 @@ class VRenderGLView: public wxGLCanvas
 
          //draw controls
          bool m_draw_all;
-         bool m_draw_bounds;
-         bool m_draw_grid;
          int m_draw_type;
          int m_vol_method;
          int m_peeling_layers;
@@ -860,6 +861,8 @@ class VRenderGLView: public wxGLCanvas
          bool GetMeshShadow(double &val);
 
          //painting
+		 void DrawCircle(double cx, double cy,
+			 double radius, Color &color, glm::mat4 &matrix);
          void DrawBrush();
          void PaintStroke();
          void DisplayStroke();

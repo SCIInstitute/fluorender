@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include "GL/mywgl.h"
 #include "png_resource.h"
 #include "img/icons.h"
+#include <glm/gtc/type_ptr.hpp>
 
 int VRenderView::m_id = 1;
 ImgShaderFactory VRenderGLView::m_img_shader_factory;
@@ -419,6 +420,12 @@ VRenderGLView::~VRenderGLView()
 		glDeleteBuffers(1, &m_quad_vbo);
 	if (glIsVertexArray(m_quad_vao))
 		glDeleteVertexArrays(1, &m_quad_vao);
+	if (glIsBuffer(m_misc_vbo))
+		glDeleteBuffers(1, &m_misc_vbo);
+	if (glIsBuffer(m_misc_ibo))
+		glDeleteBuffers(1, &m_misc_ibo);
+	if (glIsVertexArray(m_misc_vao))
+		glDeleteVertexArrays(1, &m_misc_vao);
 
 	if (!m_sharedRC)
 		delete m_glRC;
@@ -462,6 +469,11 @@ void VRenderGLView::Init()
 		goTimer->start();
 		glGenBuffers(1, &m_quad_vbo);
 		m_quad_vao = 0;
+		glGenBuffers(1, &m_misc_vbo);
+		glGenBuffers(1, &m_misc_ibo);
+		glGenVertexArrays(1, &m_misc_vao);
+		//glEnable( GL_MULTISAMPLE );
+
 		m_initialized = true;
 	}
 
@@ -495,11 +507,6 @@ void VRenderGLView::Clear()
 
 void VRenderGLView::HandleProjection(int nx, int ny, bool restrict)
 {
-	//projection
-/*	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	m_proj_mat = glm::mat4(1.0);
-*/
 	if (restrict)
 	{
 		GLint viewport[4];
@@ -528,13 +535,10 @@ void VRenderGLView::HandleProjection(int nx, int ny, bool restrict)
 	}
 	if (m_persp)
 	{
-//		gluPerspective(m_aov, aspect, m_near_clip, m_far_clip);
 		m_proj_mat = glm::perspective(m_aov, aspect, m_near_clip, m_far_clip);
 	}
 	else
 	{
-//		glOrtho(m_ortho_left, m_ortho_right, m_ortho_bottom, m_ortho_top,
-//			-m_far_clip/100.0, m_far_clip);
 		m_proj_mat = glm::ortho(m_ortho_left, m_ortho_right, m_ortho_bottom, m_ortho_top,
 			-m_far_clip/100.0, m_far_clip);
 	}
@@ -552,19 +556,11 @@ void VRenderGLView::HandleCamera()
 	m_transy = pos.y();
 	m_transz = pos.z();
 
-//	glMatrixMode(GL_MODELVIEW);
-//	glLoadIdentity();
 	if (m_free)
-//		gluLookAt(m_transx+m_ctrx, m_transy+m_ctry, m_transz+m_ctrz,
-//		m_ctrx, m_ctry, m_ctrz,
-//		m_up.x(), m_up.y(), m_up.z());
 		m_mv_mat = glm::lookAt(glm::vec3(m_transx+m_ctrx, m_transy+m_ctry, m_transz+m_ctrz),
 		glm::vec3(m_ctrx, m_ctry, m_ctrz),
 		glm::vec3(m_up.x(), m_up.y(), m_up.z()));
 	else
-//		gluLookAt(m_transx, m_transy, m_transz,
-//		0.0, 0.0, 0.0,
-//		m_up.x(), m_up.y(), m_up.z());
 		m_mv_mat = glm::lookAt(glm::vec3(m_transx, m_transy, m_transz),
 		glm::vec3(0.0), glm::vec3(m_up.x(), m_up.y(), m_up.z()));
 }
@@ -577,7 +573,6 @@ void VRenderGLView::Draw()
 
 	// clear color and depth buffers
 	glDrawBuffer(GL_BACK);
-	//glEnable(GL_NORMALIZE);
 	glClearDepth(1.0);
 	glClearColor(m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -594,16 +589,7 @@ void VRenderGLView::Draw()
 
 	if (m_draw_all)
 	{
-/*		glPushMatrix();
-		//translate object
-		glTranslated(m_obj_transx, m_obj_transy, m_obj_transz);
-		//rotate object
-		glRotated(m_obj_rotx, 1.0, 0.0, 0.0);
-		glRotated(m_obj_roty+180.0, 0.0, 1.0, 0.0);
-		glRotated(m_obj_rotz+180.0, 0.0, 0.0, 1.0);
-		//center object
-		glTranslated(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz);
-*/
+		glm::mat4 mv_temp = m_mv_mat;
 		//translate object
 		m_mv_mat = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
 		//rotate object
@@ -627,12 +613,13 @@ void VRenderGLView::Draw()
 			glFogf(GL_FOG_DENSITY, GLfloat(m_fog_intensity));
 		}
 
+		if (m_draw_grid)
+			DrawGrid();
+
 		if (m_draw_clip)
 			DrawClippingPlanes(false, BACK_FACE);
 
 		//setup
-//		glEnable(GL_LIGHTING);
-//		glEnable(GL_LIGHT0);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -649,9 +636,6 @@ void VRenderGLView::Draw()
 		if (m_draw_bounds)
 			DrawBounds();
 
-		if (m_draw_grid)
-			DrawGrid();
-
 		if (m_draw_annotations)
 		{
 //			glColor3d(m_bg_color_inv.r(), m_bg_color_inv.g(), m_bg_color_inv.b());
@@ -667,7 +651,7 @@ void VRenderGLView::Draw()
 		//traces
 		DrawTraces();
 
-//		glPopMatrix();
+		m_mv_mat = mv_temp;
 	}
 }
 
@@ -680,7 +664,6 @@ void VRenderGLView::DrawDP()
 
 	//clear
 	glDrawBuffer(GL_BACK);
-	//glEnable(GL_NORMALIZE);
 	glClearDepth(1.0);
 	glClearColor(m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -737,8 +720,8 @@ void VRenderGLView::DrawDP()
 				glBindTexture(GL_TEXTURE_2D, tex_id);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, nx, ny, 0,
 					GL_DEPTH_COMPONENT, GL_FLOAT, NULL);//GL_RGBA16F
 				glFramebufferTexture2D(GL_FRAMEBUFFER,
@@ -757,8 +740,8 @@ void VRenderGLView::DrawDP()
 				glBindTexture(GL_TEXTURE_2D, tex_id);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, nx, ny, 0,
 					GL_DEPTH_COMPONENT, GL_FLOAT, NULL);//GL_RGBA16F
 				glFramebufferTexture2D(GL_FRAMEBUFFER,
@@ -1497,6 +1480,50 @@ int VRenderGLView::GetPaintMode()
 	return m_selector.GetMode();
 }
 
+void VRenderGLView::DrawCircle(double cx, double cy,
+	double radius, Color &color, glm::mat4 &matrix)
+{
+	int secs = 60;
+	double deg = 0.0;
+
+	vector<float> vertex;
+	vertex.reserve(secs*3);
+
+	for (size_t i=0; i<secs; ++i)
+	{
+		deg = i*2*PI/secs;
+		vertex.push_back(cx + radius*sin(deg));
+		vertex.push_back(cy + radius*cos(deg));
+		vertex.push_back(0.0f);
+	}
+
+	ShaderProgram* shader =
+		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+	if (shader)
+	{
+		if (!shader->valid())
+			shader->create();
+		shader->bind();
+	}
+
+	shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0);
+	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
+	glBindVertexArray(m_misc_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (const GLvoid*)0);
+	glDrawArrays(GL_LINE_LOOP, 0, secs);
+	glDisableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(m_misc_vao);
+
+	if (shader && shader->valid())
+		shader->release();
+}
+
 //draw the brush shape
 void VRenderGLView::DrawBrush()
 {
@@ -1530,23 +1557,23 @@ void VRenderGLView::DrawBrush()
 /*		glPushAttrib(GL_ENABLE_BIT);
 		glDisable(GL_LIGHTING);
 		//glDisable(GL_TEXTURE_2D);
-		glDisable(GL_DEPTH_TEST);
-		GLfloat line_width;
-		glGetFloatv(GL_LINE_WIDTH, &line_width);
+*/		glDisable(GL_DEPTH_TEST);
+		GLfloat line_width = 1.0f;
+//		glGetFloatv(GL_LINE_WIDTH, &line_width);
 
-		int secs = 60;
-		double deg = 0.0;
 		int mode = m_selector.GetMode();
 
 		if (mode == 1 ||
 			mode == 2 ||
 			mode == 8)
 		{
-			//draw circle1
+			glLineWidth(0.5);
+			DrawCircle(cx, cy, m_brush_radius1*pressure,
+				m_bg_color_inv, proj_mat);
+/*			//draw circle1
 			glColor3d(m_bg_color_inv.r(),
 				m_bg_color_inv.g(),
 				m_bg_color_inv.b());
-			glLineWidth(0.5);
 			glBegin(GL_LINE_LOOP);
 			for (i=0; i<secs; i++)
 			{
@@ -1555,14 +1582,17 @@ void VRenderGLView::DrawBrush()
 					cy + m_brush_radius1*pressure*cos(deg));
 			}
 			glEnd();
-		}
+*/		}
 
 		if (mode == 1 ||
 			mode == 2 ||
 			mode == 3 ||
 			mode == 4)
 		{
-			//draw circle2
+			glLineWidth(0.5);
+			DrawCircle(cx, cy, m_brush_radius2*pressure,
+				m_bg_color_inv, proj_mat);
+/*			//draw circle2
 			glColor3d(m_bg_color_inv.r(),
 				m_bg_color_inv.g(),
 				m_bg_color_inv.b());
@@ -1575,9 +1605,9 @@ void VRenderGLView::DrawBrush()
 					cy + m_brush_radius2*pressure*cos(deg));
 			}
 			glEnd();
-		}
+*/		}
 
-		char str[2];
+/*		char str[2];
 		str[1] = 0;
 		switch (mode)
 		{
@@ -1606,10 +1636,11 @@ void VRenderGLView::DrawBrush()
 			endRenderText();
 			break;
 		}
-
-		glPopAttrib();
-		glLineWidth(line_width);
 */
+//		glPopAttrib();
+		glLineWidth(line_width);
+		glEnable(GL_DEPTH_TEST);
+
 /*		glPopMatrix();
 		glMatrixMode(GL_PROJECTION);
 		glPopMatrix();
@@ -1641,8 +1672,8 @@ void VRenderGLView::PaintStroke()
 	glBindTexture(GL_TEXTURE_2D, m_tex_paint);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, nx, ny, 0,
 		GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glFramebufferTexture2D(GL_FRAMEBUFFER,
@@ -2462,8 +2493,8 @@ void VRenderGLView::PrepFinalBuffer()
 		glBindTexture(GL_TEXTURE_2D, m_tex_final);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
 			GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
 		glFramebufferTexture2D(GL_FRAMEBUFFER,
@@ -2586,8 +2617,8 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, int peel, bool ma
 		glBindTexture(GL_TEXTURE_2D, m_tex);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
 			GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
 		glFramebufferTexture2D(GL_FRAMEBUFFER,
@@ -2606,8 +2637,8 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, int peel, bool ma
 			glBindTexture(GL_TEXTURE_2D, m_tex_temp);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
 				GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
 			glFramebufferTexture2D(GL_FRAMEBUFFER,
@@ -2623,8 +2654,8 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, int peel, bool ma
 		glBindTexture(GL_TEXTURE_2D, m_tex_wt2);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
 			GL_RGBA, GL_FLOAT, NULL);
 	}
@@ -2995,8 +3026,8 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 			glBindTexture(GL_TEXTURE_2D, m_tex_ol1);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
 				GL_RGBA, GL_FLOAT, NULL);
 			glFramebufferTexture2D(GL_FRAMEBUFFER,
@@ -3353,8 +3384,8 @@ void VRenderGLView::DrawOLShadowsMesh(GLuint tex_depth, double darkness)
 		glBindTexture(GL_TEXTURE_2D, m_tex_ol2);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
 			GL_RGBA, GL_FLOAT, NULL);
 		glFramebufferTexture2D(GL_FRAMEBUFFER,
@@ -3514,8 +3545,8 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		glBindTexture(GL_TEXTURE_2D, m_tex_ol1);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
 			GL_RGBA, GL_FLOAT, NULL);
 		glFramebufferTexture2D(GL_FRAMEBUFFER,
@@ -3540,10 +3571,10 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		glClear(GL_COLOR_BUFFER_BIT);
 		TextureRenderer::reset_clear_chan_buffer();
 	}
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+//	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glDisable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
+//	glDisable(GL_LIGHTING);
 
 	double shadow_darkness = 0.0;
 
@@ -3599,6 +3630,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 				VolumeRenderer* vr = list[i]->GetVR();
 				if (vr)
 				{
+					list[i]->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 					m_mvr->add_vr(vr);
 					m_mvr->set_sampling_rate(vr->get_sampling_rate());
 					m_mvr->SetNoiseRed(vr->GetNoiseRed());
@@ -3635,8 +3667,8 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 			glBindTexture(GL_TEXTURE_2D, m_tex_ol2);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
 				GL_RGBA, GL_FLOAT, NULL);
 			glFramebufferTexture2D(GL_FRAMEBUFFER,
@@ -3659,10 +3691,10 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		glActiveTexture(GL_TEXTURE0);
 		//glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, m_tex_ol1);
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+//		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		glDisable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_LIGHTING);
+//		glDisable(GL_LIGHTING);
 
 		//2d adjustment
 		ShaderProgram* img_shader =
@@ -3703,11 +3735,11 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		glActiveTexture(GL_TEXTURE0);
 		//glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, m_tex_ol2);
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+//		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ZERO, GL_SRC_COLOR);
 		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_LIGHTING);
+//		glDisable(GL_LIGHTING);
 
 		//2d adjustment
 		img_shader =
@@ -3772,6 +3804,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 			VolumeRenderer* vr = list[i]->GetVR();
 			if (vr)
 			{
+				list[i]->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 				m_mvr->add_vr(vr);
 				m_mvr->set_sampling_rate(vr->get_sampling_rate());
 				m_mvr->SetNoiseRed(vr->GetNoiseRed());
@@ -3808,8 +3841,8 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 		glBindTexture(GL_TEXTURE_2D, m_tex);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
 			GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
 		glFramebufferTexture2D(GL_FRAMEBUFFER,
@@ -3824,8 +3857,8 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 		glBindTexture(GL_TEXTURE_2D, m_tex_wt2);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
 			GL_RGBA, GL_FLOAT, NULL);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
@@ -3877,14 +3910,14 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 #endif
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+//	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glEnable(GL_BLEND);
 	if (m_vol_method == VOL_METHOD_COMP)
 		glBlendFunc(GL_ONE, GL_ONE);
 	else
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
+//	glDisable(GL_LIGHTING);
 
 	//2d adjustment
 	ShaderProgram* img_shader =
@@ -6862,37 +6895,61 @@ void VRenderGLView::InitView(unsigned int type)
 
 void VRenderGLView::DrawBounds()
 {
-	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_LIGHTING);
-	//glDisable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_FOG);
 	glDisable(GL_BLEND);
 
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(m_bounds.min().x(), m_bounds.min().y(), m_bounds.min().z());
-	glVertex3f(m_bounds.max().x(), m_bounds.min().y(), m_bounds.min().z());
-	glVertex3f(m_bounds.max().x(), m_bounds.max().y(), m_bounds.min().z());
-	glVertex3f(m_bounds.min().x(), m_bounds.max().y(), m_bounds.min().z());
-	glEnd();
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(m_bounds.min().x(), m_bounds.min().y(), m_bounds.max().z());
-	glVertex3f(m_bounds.max().x(), m_bounds.min().y(), m_bounds.max().z());
-	glVertex3f(m_bounds.max().x(), m_bounds.max().y(), m_bounds.max().z());
-	glVertex3f(m_bounds.min().x(), m_bounds.max().y(), m_bounds.max().z());
-	glEnd();
-	glBegin(GL_LINES);
-	glVertex3f(m_bounds.min().x(), m_bounds.min().y(), m_bounds.min().z());
-	glVertex3f(m_bounds.min().x(), m_bounds.min().y(), m_bounds.max().z());
-	glVertex3f(m_bounds.max().x(), m_bounds.min().y(), m_bounds.min().z());
-	glVertex3f(m_bounds.max().x(), m_bounds.min().y(), m_bounds.max().z());
-	glVertex3f(m_bounds.max().x(), m_bounds.max().y(), m_bounds.min().z());
-	glVertex3f(m_bounds.max().x(), m_bounds.max().y(), m_bounds.max().z());
-	glVertex3f(m_bounds.min().x(), m_bounds.max().y(), m_bounds.min().z());
-	glVertex3f(m_bounds.min().x(), m_bounds.max().y(), m_bounds.max().z());
-	glEnd();
+	vector<float> vertex;
+	vertex.reserve(16*3);
 
-	glPopAttrib();
+	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.min().z());
+	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.min().z());
+	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.min().z());
+	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.min().z());
+
+	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.max().z());
+	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.max().z());
+	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.max().z());
+	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.max().z());
+
+	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.min().z());
+	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.max().z());
+	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.min().z());
+	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.max().z());
+	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.min().z());
+	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.max().z());
+	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.min().z());
+	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.max().z());
+
+	ShaderProgram* shader =
+		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+	if (shader)
+	{
+		if (!shader->valid())
+			shader->create();
+		shader->bind();
+	}
+	shader->setLocalParam(0, 1.0, 1.0, 1.0, 1.0);
+	glm::mat4 matrix = m_proj_mat * m_mv_mat;
+	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
+	glBindVertexArray(m_misc_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (const GLvoid*)0);
+	glDrawArrays(GL_LINE_LOOP, 0, 4);
+	glDrawArrays(GL_LINE_LOOP, 4, 4);
+	glDrawArrays(GL_LINES, 8, 8);
+	glDisableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(m_misc_vao);
+
+	if (shader && shader->valid())
+		shader->release();
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
 }
 
 void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
@@ -6903,12 +6960,11 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 	if (vr_frame && vr_frame->GetClippingView())
 		link = vr_frame->GetClippingView()->GetChannLink();
 
-	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_LIGHTING);
-	//glDisable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_FOG);
 	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
 	if (face_winding == FRONT_FACE)
 	{
 		glEnable(GL_CULL_FACE);
@@ -6923,8 +6979,15 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		glDisable(GL_CULL_FACE);
 
 	glCullFace(GL_BACK);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+	ShaderProgram* shader =
+		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+	if (shader)
+	{
+		if (!shader->valid())
+			shader->create();
+		shader->bind();
+	}
 
 	for (i=0; i<GetDispVolumeNum(); i++)
 	{
@@ -6969,30 +7032,31 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 			continue;
 
 		//calculate 8 points
-		Point p0, p1, p2, p3, p4, p5, p6, p7;
+//		Point p0, p1, p2, p3, p4, p5, p6, p7;
+		Point pp[8];
 		//p0 = l_x1z1 * py1
-		if (!py1->Intersect(lp_x1z1, lv_x1z1, p0))
+		if (!py1->Intersect(lp_x1z1, lv_x1z1, pp[0]))
 			continue;
 		//p1 = l_x1z2 * py1
-		if (!py1->Intersect(lp_x1z2, lv_x1z2, p1))
+		if (!py1->Intersect(lp_x1z2, lv_x1z2, pp[1]))
 			continue;
 		//p2 = l_x2z1 *py1
-		if (!py1->Intersect(lp_x2z1, lv_x2z1, p2))
+		if (!py1->Intersect(lp_x2z1, lv_x2z1, pp[2]))
 			continue;
 		//p3 = l_x2z2 * py1
-		if (!py1->Intersect(lp_x2z2, lv_x2z2, p3))
+		if (!py1->Intersect(lp_x2z2, lv_x2z2, pp[3]))
 			continue;
 		//p4 = l_x1z1 * py2
-		if (!py2->Intersect(lp_x1z1, lv_x1z1, p4))
+		if (!py2->Intersect(lp_x1z1, lv_x1z1, pp[4]))
 			continue;
 		//p5 = l_x1z2 * py2
-		if (!py2->Intersect(lp_x1z2, lv_x1z2, p5))
+		if (!py2->Intersect(lp_x1z2, lv_x1z2, pp[5]))
 			continue;
 		//p6 = l_x2z1 * py2
-		if (!py2->Intersect(lp_x2z1, lv_x2z1, p6))
+		if (!py2->Intersect(lp_x2z1, lv_x2z1, pp[6]))
 			continue;
 		//p7 = l_x2z2 * py2
-		if (!py2->Intersect(lp_x2z2, lv_x2z2, p7))
+		if (!py2->Intersect(lp_x2z2, lv_x2z2, pp[7]))
 			continue;
 
 		//draw the six planes out of the eight points
@@ -7031,176 +7095,201 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 			continue;
 		double mvmat[16];
 		tform->get_trans(mvmat);
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
 		double sclx, scly, sclz;
 		vd->GetScalings(sclx, scly, sclz);
-		glScalef(sclx, scly, sclz);
-		glMultMatrixd(mvmat);
+		glm::mat4 mv_mat = glm::scale(m_mv_mat,
+			glm::vec3(float(sclx), float(scly), float(sclz)));
+		glm::mat4 mv_mat2 = glm::mat4(
+			mvmat[0], mvmat[4], mvmat[8], mvmat[12],
+			mvmat[1], mvmat[5], mvmat[9], mvmat[13],
+			mvmat[2], mvmat[6], mvmat[10], mvmat[14],
+			mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
+		mv_mat = mv_mat * mv_mat2;
+		glm::mat4 matrix = m_proj_mat * mv_mat;
+		shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+
+		vector<float> vertex;
+		vertex.reserve(8*3);
+		vector<uint32_t> index;
+		index.reserve(6*4*2);
+
+		//vertices
+		for (size_t pi=0; pi<8; ++pi)
+		{
+			vertex.push_back(pp[pi].x());
+			vertex.push_back(pp[pi].y());
+			vertex.push_back(pp[pi].z());
+		}
+		//indices
+		index.push_back(4); index.push_back(0); index.push_back(5); index.push_back(1);
+		index.push_back(4); index.push_back(0); index.push_back(1); index.push_back(5);
+		index.push_back(7); index.push_back(3); index.push_back(6); index.push_back(2);
+		index.push_back(7); index.push_back(3); index.push_back(2); index.push_back(6);
+		index.push_back(1); index.push_back(0); index.push_back(3); index.push_back(2);
+		index.push_back(1); index.push_back(0); index.push_back(2); index.push_back(3);
+		index.push_back(4); index.push_back(5); index.push_back(6); index.push_back(7);
+		index.push_back(4); index.push_back(5); index.push_back(7); index.push_back(6);
+		index.push_back(0); index.push_back(4); index.push_back(2); index.push_back(6);
+		index.push_back(0); index.push_back(4); index.push_back(6); index.push_back(2);
+		index.push_back(5); index.push_back(1); index.push_back(7); index.push_back(3);
+		index.push_back(5); index.push_back(1); index.push_back(3); index.push_back(7);
+
+		glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_misc_ibo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t)*index.size(), &index[0], GL_DYNAMIC_DRAW);
+
+		glBindVertexArray(m_misc_vao);
+		glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (const GLvoid*)0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_misc_ibo);
 
 		//draw
 		//x1 = (p4, p0, p1, p5)
 		if (m_clip_mask & 1)
 		{
-			glColor4d(1.0, 0.5, 0.5, plane_trans);
-			glBegin(GL_QUADS);
-			glVertex3f(p4.x(), p4.y(), p4.z());
-			glVertex3f(p0.x(), p0.y(), p0.z());
-			glVertex3f(p1.x(), p1.y(), p1.z());
-			glVertex3f(p5.x(), p5.y(), p5.z());
-			glEnd();
+			shader->setLocalParam(0, 1.0, 0.5, 0.5, plane_trans);
+			glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)0);
 			if (border)
 			{
-				glColor4d(color.r(), color.g(), color.b(), plane_trans);
-				glBegin(GL_LINE_LOOP);
-				glVertex3f(p4.x(), p4.y(), p4.z());
-				glVertex3f(p0.x(), p0.y(), p0.z());
-				glVertex3f(p1.x(), p1.y(), p1.z());
-				glVertex3f(p5.x(), p5.y(), p5.z());
-				glEnd();
+				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, (const GLvoid*)(4*4));
 			}
 		}
 		//x2 = (p7, p3, p2, p6)
 		if (m_clip_mask & 2)
 		{
-			glColor4d(1.0, 0.5, 1.0, plane_trans);
-			glBegin(GL_QUADS);
-			glVertex3f(p7.x(), p7.y(), p7.z());
-			glVertex3f(p3.x(), p3.y(), p3.z());
-			glVertex3f(p2.x(), p2.y(), p2.z());
-			glVertex3f(p6.x(), p6.y(), p6.z());
-			glEnd();
+			shader->setLocalParam(0, 1.0, 0.5, 1.0, plane_trans);
+			glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(8*4));
 			if (border)
 			{
-				glColor4d(color.r(), color.g(), color.b(), plane_trans);
-				glBegin(GL_LINE_LOOP);
-				glVertex3f(p7.x(), p7.y(), p7.z());
-				glVertex3f(p3.x(), p3.y(), p3.z());
-				glVertex3f(p2.x(), p2.y(), p2.z());
-				glVertex3f(p6.x(), p6.y(), p6.z());
-				glEnd();
+				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, (const GLvoid*)(12*4));
 			}
 		}
 		//y1 = (p1, p0, p2, p3)
 		if (m_clip_mask & 4)
 		{
-			glColor4d(0.5, 1.0, 0.5, plane_trans);
-			glBegin(GL_QUADS);
-			glVertex3f(p1.x(), p1.y(), p1.z());
-			glVertex3f(p0.x(), p0.y(), p0.z());
-			glVertex3f(p2.x(), p2.y(), p2.z());
-			glVertex3f(p3.x(), p3.y(), p3.z());
-			glEnd();
+			shader->setLocalParam(0, 0.5, 1.0, 0.5, plane_trans);
+			glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(16*4));
 			if (border)
 			{
-				glColor4d(color.r(), color.g(), color.b(), plane_trans);
-				glBegin(GL_LINE_LOOP);
-				glVertex3f(p1.x(), p1.y(), p1.z());
-				glVertex3f(p0.x(), p0.y(), p0.z());
-				glVertex3f(p2.x(), p2.y(), p2.z());
-				glVertex3f(p3.x(), p3.y(), p3.z());
-				glEnd();
+				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, (const GLvoid*)(20*4));
 			}
 		}
 		//y2 = (p4, p5, p7, p6)
 		if (m_clip_mask & 8)
 		{
-			glColor4d(1.0, 1.0, 0.5, plane_trans);
-			glBegin(GL_QUADS);
-			glVertex3f(p4.x(), p4.y(), p4.z());
-			glVertex3f(p5.x(), p5.y(), p5.z());
-			glVertex3f(p7.x(), p7.y(), p7.z());
-			glVertex3f(p6.x(), p6.y(), p6.z());
-			glEnd();
+			shader->setLocalParam(0, 1.0, 1.0, 0.5, plane_trans);
+			glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(24*4));
 			if (border)
 			{
-				glColor4d(color.r(), color.g(), color.b(), plane_trans);
-				glBegin(GL_LINE_LOOP);
-				glVertex3f(p4.x(), p4.y(), p4.z());
-				glVertex3f(p5.x(), p5.y(), p5.z());
-				glVertex3f(p7.x(), p7.y(), p7.z());
-				glVertex3f(p6.x(), p6.y(), p6.z());
-				glEnd();
+				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, (const GLvoid*)(28*4));
 			}
 		}
 		//z1 = (p0, p4, p6, p2)
 		if (m_clip_mask & 16)
 		{
-			glColor4d(0.5, 0.5, 1.0, plane_trans);
-			glBegin(GL_QUADS);
-			glVertex3f(p0.x(), p0.y(), p0.z());
-			glVertex3f(p4.x(), p4.y(), p4.z());
-			glVertex3f(p6.x(), p6.y(), p6.z());
-			glVertex3f(p2.x(), p2.y(), p2.z());
-			glEnd();
+			shader->setLocalParam(0, 0.5, 0.5, 1.0, plane_trans);
+			glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(32*4));
 			if (border)
 			{
-				glColor4d(color.r(), color.g(), color.b(), plane_trans);
-				glBegin(GL_LINE_LOOP);
-				glVertex3f(p0.x(), p0.y(), p0.z());
-				glVertex3f(p4.x(), p4.y(), p4.z());
-				glVertex3f(p6.x(), p6.y(), p6.z());
-				glVertex3f(p2.x(), p2.y(), p2.z());
-				glEnd();
+				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, (const GLvoid*)(36*4));
 			}
 		}
 		//z2 = (p5, p1, p3, p7)
 		if (m_clip_mask & 32)
 		{
-			glColor4d(0.5, 1.0, 1.0, plane_trans);
-			glBegin(GL_QUADS);
-			glVertex3f(p5.x(), p5.y(), p5.z());
-			glVertex3f(p1.x(), p1.y(), p1.z());
-			glVertex3f(p3.x(), p3.y(), p3.z());
-			glVertex3f(p7.x(), p7.y(), p7.z());
-			glEnd();
+			shader->setLocalParam(0, 0.5, 1.0, 1.0, plane_trans);
+			glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(40*4));
 			if (border)
 			{
-				glColor4d(color.r(), color.g(), color.b(), plane_trans);
-				glBegin(GL_LINE_LOOP);
-				glVertex3f(p5.x(), p5.y(), p5.z());
-				glVertex3f(p1.x(), p1.y(), p1.z());
-				glVertex3f(p3.x(), p3.y(), p3.z());
-				glVertex3f(p7.x(), p7.y(), p7.z());
-				glEnd();
+				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, (const GLvoid*)(44*4));
 			}
 		}
 
-		glPopMatrix();
+		glDisableVertexAttribArray(0);
+		//unbind
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
 	}
 
-	glPopAttrib();
+	if (shader && shader->valid())
+		shader->release();
+
 	glFrontFace(GL_CCW);
 }
 
 void VRenderGLView::DrawGrid()
 {
-	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_LIGHTING);
-	//glDisable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_FOG);
 	glDisable(GL_BLEND);
 
-	//text color
-	glColor3d(m_bg_color_inv.r(), m_bg_color_inv.g(), m_bg_color_inv.b());
-	glBegin(GL_LINES);
-	glVertex3f(-m_distance, 0.0, 0.0);
-	glVertex3f(m_distance,  0.0, 0.0);
-	glVertex3f(0.0, 0.0, -m_distance);
-	glVertex3f(0.0, 0.0,  m_distance);
-	glEnd();
+	size_t grid_num = 5;
+	size_t line_num = grid_num*2 + 1;
+	size_t i;
+	vector<float> vertex;
+	vertex.reserve(line_num*4*3);
 
-	glPopAttrib();
+	double gap = m_distance / grid_num;
+	for (i=0; i<line_num; ++i)
+	{
+		vertex.push_back(float(-m_distance+gap*i));
+		vertex.push_back(float(0.0));
+		vertex.push_back(float(-m_distance));
+		vertex.push_back(float(-m_distance+gap*i));
+		vertex.push_back(float(0.0));
+		vertex.push_back(float(m_distance));
+	}
+	for (i=0; i<line_num; ++i)
+	{
+		vertex.push_back(float(-m_distance));
+		vertex.push_back(float(0.0));
+		vertex.push_back(float(-m_distance+gap*i));
+		vertex.push_back(float(m_distance));
+		vertex.push_back(float(0.0));
+		vertex.push_back(float(-m_distance+gap*i));
+	}
+
+	ShaderProgram* shader =
+		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+	if (shader)
+	{
+		if (!shader->valid())
+			shader->create();
+		shader->bind();
+	}
+	shader->setLocalParam(0, m_bg_color_inv.r(), m_bg_color_inv.g(), m_bg_color_inv.b(), 1.0);
+	glm::mat4 matrix = m_proj_mat * m_mv_mat;
+	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
+	glBindVertexArray(m_misc_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (const GLvoid*)0);
+	glDrawArrays(GL_LINES, 0, line_num*4);
+	glDisableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(m_misc_vao);
+
+	if (shader && shader->valid())
+		shader->release();
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
 }
 
 void VRenderGLView::DrawCamCtr()
 {
-	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_LIGHTING);
-	//glDisable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_FOG);
 	glDisable(GL_BLEND);
 
 	double len;
@@ -7209,7 +7298,52 @@ void VRenderGLView::DrawCamCtr()
 	else
 		len = fabs(m_camctr_size);
 
-	glBegin(GL_LINES);
+	vector<float> vertex;
+	vertex.reserve(6*3);
+
+	vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(0.0);
+	vertex.push_back(len); vertex.push_back(0.0); vertex.push_back(0.0);
+	vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(0.0);
+	vertex.push_back(0.0); vertex.push_back(len); vertex.push_back(0.0);
+	vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(0.0);
+	vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(len);
+
+	ShaderProgram* shader =
+		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+	if (shader)
+	{
+		if (!shader->valid())
+			shader->create();
+		shader->bind();
+	}
+	glm::mat4 matrix = m_proj_mat * m_mv_mat;
+	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
+	glBindVertexArray(m_misc_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (const GLvoid*)0);
+
+	shader->setLocalParam(0, 1.0, 0.0, 0.0, 1.0);
+	glDrawArrays(GL_LINES, 0, 2);
+	shader->setLocalParam(0, 0.0, 1.0, 0.0, 1.0);
+	glDrawArrays(GL_LINES, 2, 2);
+	shader->setLocalParam(0, 0.0, 0.0, 1.0, 1.0);
+	glDrawArrays(GL_LINES, 4, 2);
+
+	glDisableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(m_misc_vao);
+
+	if (shader && shader->valid())
+		shader->release();
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+
+/*	glBegin(GL_LINES);
 	glColor3d(1.0, 0.0, 0.0);
 	glVertex3d(0.0, 0.0, 0.0);
 	glVertex3d(len, 0.0, 0.0);
@@ -7221,7 +7355,7 @@ void VRenderGLView::DrawCamCtr()
 	glVertex3d(0.0, 0.0, len);
 	glEnd();
 
-	glPopAttrib();
+	glPopAttrib();*/
 }
 
 void VRenderGLView::DrawFrame()

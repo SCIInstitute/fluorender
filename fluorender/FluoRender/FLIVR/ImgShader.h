@@ -48,6 +48,7 @@ namespace FLIVR
 #define IMG_SHDR_BLEND_BRIGHT_BACKGROUND	11
 #define IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR	12
 #define IMG_SHDR_PAINT						13
+#define	IMG_SHDR_DRAW_GEOMETRY				14
 
 	class ShaderProgram;
 
@@ -69,7 +70,8 @@ namespace FLIVR
 		inline ShaderProgram* program() { return program_; }
 
 	protected:
-		bool emit(std::string& s);
+		bool emit_v(std::string& s);
+		bool emit_f(std::string& s);
 
 		int type_;
 

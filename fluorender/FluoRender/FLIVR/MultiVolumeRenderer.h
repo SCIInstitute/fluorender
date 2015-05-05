@@ -140,7 +140,7 @@ namespace FLIVR
 		//soft threshold
 		static double sw_;
 
-		GLuint m_slices_vbo, m_slices_ibo;
+		GLuint m_slices_vbo, m_slices_ibo, m_slices_vao;
 		void draw_polygons_vol(
 			vector<float>& vertex,
 			vector<uint32_t>& index,

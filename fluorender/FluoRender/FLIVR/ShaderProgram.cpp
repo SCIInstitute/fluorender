@@ -202,6 +202,20 @@ namespace FLIVR
 
 			glUseProgram(id_);
 
+			const char *loc_strings[] = {
+				"tex0", "tex1", "tex2", "tex3",
+				"tex4", "tex5", "tex6", "tex7",
+				"tex8", "tex9", "tex10", "tex11",
+				"tex12", "tex13", "tex14", "tex15"};
+
+			int location;
+			for (size_t i=0; i<MAX_SHADER_UNIFORMS; ++i)
+			{
+				location = glGetUniformLocation(id_, loc_strings[i]);
+				if (location != -1)
+					glUniform1i(location, i);
+			}
+
 			return false;
 		}
 		return true;

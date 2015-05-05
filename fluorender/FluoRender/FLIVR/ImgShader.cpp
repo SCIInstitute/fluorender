@@ -53,6 +53,28 @@ namespace FLIVR
 	"	OutVertex = InVertex;\n" \
 	"}\n"
 
+#define IMG_VTX_CODE_DRAW_GEOMETRY \
+	"//IMG_VTX_CODE_DRAW_GEOMETRY\n" \
+	"#version 400\n" \
+	"in vec3 InVertex;\n" \
+	"uniform mat4 matrix0;//transformation\n" \
+	"\n" \
+	"void main()\n" \
+	"{\n" \
+	"	gl_Position = matrix0 * vec4(InVertex, 1.0);\n" \
+	"}\n"
+
+#define IMG_FRG_CODE_DRAW_GEOMETRY \
+	"//IMG_FRG_CODE_DRAW_GEOMETRY\n" \
+	"#version 400\n" \
+	"out vec4 FragColor;\n" \
+	"uniform vec4 loc0;\n" \
+	"\n" \
+	"void main()\n" \
+	"{\n" \
+	"	FragColor = loc0;\n" \
+	"}\n"
+
 #define IMG_SHADER_CODE_TEXTURE_LOOKUP \
 	"#version 400\n" \
 	"in vec3 OutVertex;\n" \
@@ -510,23 +532,56 @@ namespace FLIVR
 		delete program_;
 	}
 
-	bool
-		ImgShader::create()
+	bool ImgShader::create()
 	{
-		string vs = IMG_VERTEX_CODE;
+		string vs;
+		if (emit_v(vs)) return true;
 		string fs;
-		if (emit(fs)) return true;
+		if (emit_f(fs)) return true;
 		program_ = new ShaderProgram(vs, fs);
 		return false;
 	}
 
-	bool
-		ImgShader::emit(string& s)
+	bool ImgShader::emit_v(string& s)
 	{
 		ostringstream z;
 
 		switch (type_)
 		{
+		case IMG_SHDR_DRAW_GEOMETRY:
+			z << IMG_VTX_CODE_DRAW_GEOMETRY;
+			break;
+		case IMG_SHADER_TEXTURE_LOOKUP:
+		case IMG_SHDR_BRIGHTNESS_CONTRAST:
+		case IMG_SHDR_BRIGHTNESS_CONTRAST_HDR:
+		case IMG_SHDR_GRADIENT_MAP:
+		case IMG_SHDR_FILTER_BLUR:
+		case IMG_SHDR_FILTER_MAX:
+		case IMG_SHDR_FILTER_SHARPEN:
+		case IMG_SHDR_DEPTH_TO_OUTLINES:
+		case IMG_SHDR_DEPTH_TO_GRADIENT:
+		case IMG_SHDR_GRADIENT_TO_SHADOW:
+		case IMG_SHDR_GRADIENT_TO_SHADOW_MESH:
+		case IMG_SHDR_BLEND_BRIGHT_BACKGROUND:
+		case IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR:
+		case IMG_SHDR_PAINT:
+		default:
+			z << IMG_VERTEX_CODE;
+		}
+
+		s = z.str();
+		return false;
+	}
+
+	bool ImgShader::emit_f(string& s)
+	{
+		ostringstream z;
+
+		switch (type_)
+		{
+		case IMG_SHDR_DRAW_GEOMETRY:
+			z << IMG_FRG_CODE_DRAW_GEOMETRY;
+			break;
 		case IMG_SHADER_TEXTURE_LOOKUP:
 			z << IMG_SHADER_CODE_TEXTURE_LOOKUP;
 			break;

@@ -594,8 +594,8 @@ namespace FLIVR
 				glBindTexture(GL_TEXTURE_2D, blend_tex_id_);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w2, h2, 0,
 					GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
 				glFramebufferTexture2D(GL_FRAMEBUFFER,
@@ -764,14 +764,14 @@ namespace FLIVR
 		Transform *tform = tex_->transform();
 		double mvmat[16];
 		tform->get_trans(mvmat);
-		glm::mat4 mv_mat = glm::mat4(
+		m_mv_mat2 = glm::mat4(
 			mvmat[0], mvmat[4], mvmat[8], mvmat[12],
 			mvmat[1], mvmat[5], mvmat[9], mvmat[13],
 			mvmat[2], mvmat[6], mvmat[10], mvmat[14],
 			mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
-		mv_mat = m_mv_mat * mv_mat;
+		m_mv_mat2 = m_mv_mat * m_mv_mat2;
 		shader->setLocalParamMatrix(0, glm::value_ptr(m_proj_mat));
-		shader->setLocalParamMatrix(1, glm::value_ptr(mv_mat));
+		shader->setLocalParamMatrix(1, glm::value_ptr(m_mv_mat2));
 		shader->setLocalParamMatrix(5, glm::value_ptr(m_tex_mat));
 
 		for (unsigned int i=0; i < bricks->size(); i++)
@@ -910,8 +910,8 @@ namespace FLIVR
 					glBindTexture(GL_TEXTURE_2D, filter_tex_id_);
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 					glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w2, h2, 0,
 						GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
 				}
@@ -1030,7 +1030,6 @@ namespace FLIVR
 		index.reserve(num_slices_*6);
 		size.reserve(num_slices_*6);
 
-		//--------------------------------------------------------------------------
 		// Set up shaders
 		ShaderProgram* shader = 0;
 		//create/bind
@@ -1053,16 +1052,15 @@ namespace FLIVR
 		Transform *tform = tex_->transform();
 		double mvmat[16];
 		tform->get_trans(mvmat);
-		glm::mat4 mv_mat = glm::mat4(
+		m_mv_mat2 = glm::mat4(
 			mvmat[0], mvmat[4], mvmat[8], mvmat[12],
 			mvmat[1], mvmat[5], mvmat[9], mvmat[13],
 			mvmat[2], mvmat[6], mvmat[10], mvmat[14],
 			mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
-		mv_mat = m_mv_mat * mv_mat;
+		m_mv_mat2 = m_mv_mat * m_mv_mat2;
 		shader->setLocalParamMatrix(0, glm::value_ptr(m_proj_mat));
-		shader->setLocalParamMatrix(1, glm::value_ptr(mv_mat));
+		shader->setLocalParamMatrix(1, glm::value_ptr(m_mv_mat2));
 		shader->setLocalParamMatrix(5, glm::value_ptr(m_tex_mat));
-
 		shader->setLocalParam(0, color_.r(), color_.g(), color_.b(), 1.0);
 
 		if (bricks)
@@ -1107,7 +1105,7 @@ namespace FLIVR
 		if (!bricks || bricks->size() == 0)
 			return;
 
-		glActiveTexture(GL_TEXTURE0);
+		//glActiveTexture(GL_TEXTURE0);
 		//mask frame buffer object
 		if (!glIsFramebuffer(fbo_mask_))
 			glGenFramebuffers(1, &fbo_mask_);
@@ -1148,10 +1146,6 @@ namespace FLIVR
 
 		//set uniforms
 		//set up shading
-		double mat[16];
-		glGetDoublev(GL_MODELVIEW_MATRIX, mat);
-		Transform mv;
-		mv.set_trans(mat);
 		Vector light = compute_view().direction();
 		light.safe_normalize();
 		seg_shader->setLocalParam(0, light.x(), light.y(), light.z(), alpha_);
@@ -1200,44 +1194,21 @@ namespace FLIVR
 		Transform *tform = tex_->transform();
 		double mvmat[16];
 		tform->get_trans(mvmat);
-		glm::mat4 mv_mat = glm::mat4(
+		m_mv_mat2 = glm::mat4(
 			mvmat[0], mvmat[4], mvmat[8], mvmat[12],
 			mvmat[1], mvmat[5], mvmat[9], mvmat[13],
 			mvmat[2], mvmat[6], mvmat[10], mvmat[14],
 			mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
-		mv_mat = m_mv_mat * mv_mat;
-		seg_shader->setLocalParamMatrix(0, glm::value_ptr(mv_mat));
+		m_mv_mat2 = m_mv_mat * m_mv_mat2;
+		seg_shader->setLocalParamMatrix(0, glm::value_ptr(m_mv_mat2));
 		seg_shader->setLocalParamMatrix(1, glm::value_ptr(m_proj_mat));
 		if (hr_mode > 0)
 		{
-			glm::mat4 mv_inv = glm::inverse(mv_mat);
+			glm::mat4 mv_inv = glm::inverse(m_mv_mat2);
 			seg_shader->setLocalParamMatrix(3, glm::value_ptr(mv_inv));
 		}
 
-		//get transformation
-/*		float matrix[16];
-		glGetFloatv(GL_MODELVIEW_MATRIX, matrix);
-		seg_shader->setLocalParamMatrix(0, matrix);
-		glGetFloatv(GL_PROJECTION_MATRIX, matrix);
-		seg_shader->setLocalParamMatrix(1, matrix);
-		if (hr_mode > 0)
-		{
-			double dmatrix[16];
-			Transform mv;
-			glGetDoublev(GL_MODELVIEW_MATRIX, dmatrix);
-			mv.set(dmatrix);
-			mv.invert();
-			mv.get(matrix);
-			seg_shader->setLocalParamMatrix(3, matrix);
-		}
-
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		glLoadIdentity();
-		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
-		glLoadIdentity();
-*/		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_DEPTH_TEST);
 
 		//bind 2d mask texture
 		bind_2d_mask();
@@ -1296,23 +1267,6 @@ namespace FLIVR
 			//draw each slice
 			for (int z=0; z<b->nz(); z++)
 			{
-				double d = double(z+0.5) / double(b->nz());
-				float points[] = {
-					-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, float(d),
-					1.0f, -1.0f, 0.0f, 1.0f, 0.0f, float(d),
-					-1.0f, 1.0f, 0.0f, 0.0f, 1.0f, float(d),
-					1.0f, 1.0f, 0.0f, 1.0f, 1.0f, float(d)};
-
-				glBindBuffer(GL_ARRAY_BUFFER, m_quad_vbo);
-				glBufferData(GL_ARRAY_BUFFER, sizeof(float)*24, points, GL_STREAM_DRAW);
-
-				glBindVertexArray(m_quad_vao);
-				glBindBuffer(GL_ARRAY_BUFFER, m_quad_vbo);
-				glEnableVertexAttribArray(0);
-				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)0);
-				glEnableVertexAttribArray(1);
-				glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)12);
-
 				glFramebufferTexture3D(GL_FRAMEBUFFER, 
 					GL_COLOR_ATTACHMENT0,
 					GL_TEXTURE_3D,
@@ -1320,13 +1274,7 @@ namespace FLIVR
 					0,
 					z);
 
-				glBindVertexArray(m_quad_vao);
-				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-				glDisableVertexAttribArray(0);
-				glDisableVertexAttribArray(1);
-				glBindVertexArray(0);
-
-//				draw_view_quad(double(z+0.5) / double(b->nz()));
+				draw_view_quad(double(z+0.5) / double(b->nz()));
 			}
 
 			//test cl
@@ -1340,12 +1288,6 @@ namespace FLIVR
 
 		glViewport(vp[0], vp[1], vp[2], vp[3]);
 
-/*		glMatrixMode(GL_PROJECTION);
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
-		glPopMatrix();
-		////////////////////////////////////////////////////////
-*/
 		//release 2d mask
 		release_texture(6, GL_TEXTURE_2D);
 		//release 2d weight map
@@ -1357,9 +1299,6 @@ namespace FLIVR
 
 		//release 3d mask
 		release_texture((*bricks)[0]->nmask(), GL_TEXTURE_3D);
-
-		// Undo transform.
-//		glPopMatrix();
 
 		//unbind framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_id);
@@ -1429,10 +1368,6 @@ namespace FLIVR
 
 			//set uniforms
 			//set up shading
-			double mat[16];
-			glGetDoublev(GL_MODELVIEW_MATRIX, mat);
-			Transform mv;
-			mv.set_trans(mat);
 			Vector light = compute_view().direction();
 			light.safe_normalize();
 			seg_shader->setLocalParam(0, light.x(), light.y(), light.z(), alpha_);

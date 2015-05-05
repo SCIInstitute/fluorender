@@ -610,6 +610,19 @@ void Transform::set_trans(double* pmat)
 	inverse_valid=0;
 }
 
+void Transform::set_trans(float* pmat)
+{
+	float* p=pmat;
+	for(int i=0;i<4;i++)
+	{
+		for(int j=0;j<4;j++)
+		{
+			mat[j][i]= *p++;
+		}
+	}
+	inverse_valid=0;
+}
+
 void Transform::load_zero(double m[4][4])
 {
 	m[0][0] = 0.0; m[0][1] = 0.0; m[0][2] = 0.0; m[0][3] = 0.0;

@@ -36,6 +36,7 @@
 #include <FLIVR/SegShader.h>
 #include <FLIVR/VolCalShader.h>
 #include <algorithm>
+#include <glm/gtc/type_ptr.hpp>
 
 using namespace std;
 
@@ -419,10 +420,6 @@ namespace FLIVR
 		Vector n(double(tex_->nx())/double(tex_->nz()), 
 			double(tex_->ny())/double(tex_->nz()), 
 			z_factor>1.0&&z_factor<100.0?sqrt(z_factor):1.0);
-		//double mvmat[16];
-		//glGetDoublev(GL_MODELVIEW_MATRIX, mvmat);
-		//Vector v = field_trans->project(Vector(-mvmat[2], -mvmat[6], -mvmat[10]));
-		//v.safe_normalize();
 
 		double e = 0.0001;
 		double a, b, c;
@@ -482,9 +479,11 @@ namespace FLIVR
 	{
 		if (!use_ex)
 		{
-			glGetDoublev(GL_MODELVIEW_MATRIX, mvmat_);
+			memcpy(mvmat_, glm::value_ptr(m_mv_mat2), 16*sizeof(float));
+			memcpy(prmat_, glm::value_ptr(m_proj_mat), 16*sizeof(float));
+/*			glGetDoublev(GL_MODELVIEW_MATRIX, mvmat_);
 			glGetDoublev(GL_PROJECTION_MATRIX, prmat_);
-		}
+*/		}
 
 		Transform mv;
 		Transform pr;

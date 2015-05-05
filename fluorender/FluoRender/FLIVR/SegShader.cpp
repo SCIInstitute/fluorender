@@ -59,13 +59,13 @@ namespace FLIVR
 	"	OutVertex  = InVertex;\n" \
 	"}\n" 
 
-#define SEG_FRAG_CODE_TEST \
+/*#define SEG_FRAG_CODE_TEST \
 	"#version 400\n" \
 	"in vec3 OutVertex;\n" \
 	"in vec3 OutTexture;\n" \
 	"out vec4 FragColor;\n" \
 	"uniform sampler3D tex0;\n" \
-	"//uniform sampler3D tex2;//3d mask volume\n" \
+	"uniform sampler3D tex2;//3d mask volume\n" \
 	"uniform sampler2D tex6;//2d mask\n" \
 	"uniform mat4 matrix0;//modelview matrix\n" \
 	"uniform mat4 matrix1;//projection matrix\n" \
@@ -85,261 +85,7 @@ namespace FLIVR
 	"	if (discarded)\n" \
 	"		FragColor = v;//ec4(0.0);\n" \
 	"	else FragColor = vec4(1.0);\n" \
-	"}\n"
-
-#define SEG_FRAG_CODE_TEST0 \
-	"#version 400\n" \
-	"\n" \
-	"in vec3 OutVertex;\n" \
-	"in vec3 OutTexture;\n" \
-	"//SEG_OUTPUTS\n" \
-	"out vec4 FragColor;\n" \
-	"\n" \
-	"// VOL_UNIFORMS_COMMON\n" \
-	"uniform vec4 loc0;//(lx, ly, lz, alpha)\n" \
-	"uniform vec4 loc1;//(ka, kd, ks, ns)\n" \
-	"uniform vec4 loc2;//(scalar_scale, gm_scale, left_thresh, right_thresh)\n" \
-	"uniform vec4 loc3;//(gamma, gm_thresh, offset, sw)\n" \
-	"uniform vec4 loc4;//(1/nx, 1/ny, 1/nz, 1/sample_rate)\n" \
-	"uniform vec4 loc5;//(spcx, spcy, spcz, 1.0)\n" \
-	"\n" \
-	"uniform sampler3D tex0;//data volume\n" \
-	"uniform sampler3D tex1;//gm volume\n" \
-	"\n" \
-	"uniform mat4 matrix5;//texture\n" \
-	"\n" \
-	"//VOL_UNIFORMS_SIN_COLOR\n" \
-	"uniform vec4 loc6;//(red, green, blue, mask_threshold)\n" \
-	"\n" \
-	"//VOL_UNIFORMS_MASK\n" \
-	"uniform sampler3D tex2;//3d mask volume\n" \
-	"\n" \
-	"//SEG_UNIFORMS_WMAP_2D\n" \
-	"uniform sampler2D tex4;//2d weight map (after tone mapping)\n" \
-	"uniform sampler2D tex5;//2d weight map (before tone mapping)\n" \
-	"\n" \
-	"//SEG_UNIFORMS_MASK_2D\n" \
-	"uniform sampler2D tex6;//2d mask\n" \
-	"\n" \
-	"//SEG_UNIFORMS_MATRICES\n" \
-	"uniform mat4 matrix0;//modelview matrix\n" \
-	"uniform mat4 matrix1;//projection matrix\n" \
-	"\n" \
-	"// VOL_UNIFORMS_MATRICES\n" \
-	"uniform mat4 matrix2;//tex transform for bricking\n" \
-	"\n" \
-	"//SEG_UNIFORMS_PARAMS\n" \
-	"uniform vec4 loc7;//(ini_thresh, gm_falloff, scl_falloff, scl_translate)\n" \
-	"uniform vec4 loc8;//(weight_2d, post_bins, 0, 0)\n" \
-	"\n" \
-	"//VOL_UNIFORMS_CLIP\n" \
-	"uniform vec4 loc10; //plane0\n" \
-	"uniform vec4 loc11; //plane1\n" \
-	"uniform vec4 loc12; //plane2\n" \
-	"uniform vec4 loc13; //plane3\n" \
-	"uniform vec4 loc14; //plane4\n" \
-	"uniform vec4 loc15; //plane5\n" \
-	"\n" \
-	"//SEG_UNIFORM_MATRICES_INVERSE\n" \
-	"uniform mat4 matrix3;//modelview matrix inverse\n" \
-	"uniform mat4 matrix4;//projection matrix inverse\n" \
-	"\n" \
-	"// VOL_GRAD_COMPUTE_FUNC\n" \
-	"vec4 vol_grad_func(vec4 pos, vec4 dir)\n" \
-	"{\n" \
-	"	vec4 r, p;\n" \
-	"	mat4 tmat = transpose(inverse(matrix5));\n" \
-	"	vec4 n = vec4(0.0);\n" \
-	"	vec4 w = vec4(0.0);\n" \
-	"	w.x = dir.x;\n" \
-	"	p = clamp(pos+w, 0.0, 1.0);\n" \
-	"	r = texture(tex0, p.stp);\n" \
-	"	n.x = r.x + n.x;\n" \
-	"	p = clamp(pos-w, 0.0, 1.0);\n" \
-	"	r = texture(tex0, p.stp);\n" \
-	"	n.x = r.x - n.x;\n" \
-	"	w = vec4(0.0);\n" \
-	"	w.y = dir.y;\n" \
-	"	p = clamp(pos+w, 0.0, 1.0);\n" \
-	"	r = texture(tex0, p.stp);\n" \
-	"	n.y = r.x + n.y;\n" \
-	"	p = clamp(pos-w, 0.0, 1.0);\n" \
-	"	r = texture(tex0, p.stp);\n" \
-	"	n.y = r.x - n.y;\n" \
-	"	w = vec4(0.0);\n" \
-	"	w.z = dir.x<dir.z?dir.x:dir.z;\n" \
-	"	p = clamp(pos+w, 0.0, 1.0);\n" \
-	"	r = texture(tex0, p.stp);\n" \
-	"	n.z = r.x + n.z;\n" \
-	"	p = clamp(pos-w, 0.0, 1.0);\n" \
-	"	r = texture(tex0, p.stp);\n" \
-	"	n.z = r.x - n.z;\n" \
-	"	w.x = dot(n.xxx, vec3(tmat[0].x, tmat[1].x, tmat[2].x)); \n" \
-	"	w.y = dot(n.yyy, vec3(tmat[0].y, tmat[1].y, tmat[2].y)); \n" \
-	"	w.z = 0.3*dot(n.zzz, vec3(tmat[0].z, tmat[1].z, tmat[2].z)); \n" \
-	"	return w;\n" \
-	"}\n" \
-	"//VOL_TRANSFER_FUNCTION_SIN_COLOR_L_FUNC\n" \
-	"vec4 vol_trans_sin_color_l(vec4 v)\n" \
-	"{\n" \
-	"	vec4 c;\n" \
-	"	float tf_alp;\n" \
-	"	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;\n" \
-	"	if (v.x<loc2.z-loc3.w || v.x>loc2.w+loc3.w || v.y<loc3.y)\n" \
-	"		c = vec4(0.0);\n" \
-	"	else\n" \
-	"	{\n" \
-	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
-	"		tf_alp = pow(clamp(v.x/loc3.z,\n" \
-	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0,\n" \
-	"			loc3.x>1.0?0.9999:1.0), loc3.x);\n" \
-	"		c = vec4(tf_alp);\n" \
-	"	}\n" \
-	"	return c;\n" \
-	"}\n" \
-	"\n" \
-	"//VOL_CLIP_FUNC\n" \
-	"bool vol_clip_func(vec4 t)\n" \
-	"{\n" \
-	"	vec4 brickt = matrix2 * t;\n" \
-	"	if (dot(brickt.xyz, loc10.xyz)+loc10.w < 0.0 ||\n" \
-	"		dot(brickt.xyz, loc11.xyz)+loc11.w < 0.0 ||\n" \
-	"		dot(brickt.xyz, loc12.xyz)+loc12.w < 0.0 ||\n" \
-	"		dot(brickt.xyz, loc13.xyz)+loc13.w < 0.0 ||\n" \
-	"		dot(brickt.xyz, loc14.xyz)+loc14.w < 0.0 ||\n" \
-	"		dot(brickt.xyz, loc15.xyz)+loc15.w < 0.0)\n" \
-	"		return true;\n" \
-	"	else\n" \
-	"		return false;\n" \
-	"}\n" \
-	"\n" \
-	"//VOL_HEAD\n" \
-	"void main()\n" \
-	"{\n" \
-	"	vec4 TexCoord = vec4(OutTexture, 1.0);\n" \
-	"	vec4 t = TexCoord;\n" \
-	"\n" \
-	"	FragColor = vec4(1.0);\n" \
-	"	//SEG_BODY_DISCARD_FLAG\n" \
-	"	bool discarded = false;\n" \
-	"\n" \
-	"	//SEG_BODY_INIT_2D_COORD\n" \
-	"	vec4 s = matrix1 * matrix0 * matrix2 * t;\n" \
-	"	s = s / s.w;\n" \
-	"	s.xy = s.xy / 2.0 + 0.5;\n" \
-	"\n" \
-	"	//SEG_BODY_INIT_CULL\n" \
-	"	float cmask2d = texture(tex6, s.xy).x;\n" \
-	"	if (cmask2d < 0.95)\n" \
-	"		discarded = true;\n" \
-	"\n" \
-	"	//VOL_HEAD_LIT\n" \
-	"/*	vec4 l = loc0; // {lx, ly, lz, alpha}\n" \
-	"	vec4 k = loc1; // {ka, kd, ks, ns}\n" \
-	"	k.x = k.x>1.0?log2(3.0-k.x):k.x;\n" \
-	"	vec4 n, w;\n" \
-	"\n" \
-	"	//VOL_DATA_VOLUME_LOOKUP\n" \
-	"	//vec4 v = texture(tex0, t.stp);\n" \
-	"	//vec4 v = vec4(0.5);\n" \
-	"\n" \
-	"	// VOL_GRAD_COMPUTE_HI\n" \
-	"	vec4 dir = loc4;//(1/nx, 1/ny, 1/nz, 1/sample_rate)\n" \
-	"	vec4 r, p; \n" \
-	"	//mat4 tmat = transpose(inverse(matrix5)); \n" \
-	"	v = vec4(v.x); \n" \
-	"	n = vec4(0.0); \n" \
-	"	w = vec4(0.0);\n" \
-	"	w.x = dir.x; \n" \
-	"	p = clamp(TexCoord + w, 0.0, 1.0); \n" \
-	"	r = texture(tex0, p.stp); \n" \
-	"	n.x = r.x + n.x; \n" \
-	"	p = clamp(TexCoord - w, 0.0, 1.0); \n" \
-	"	r = texture(tex0, p.stp); \n" \
-	"	n.x = r.x - n.x; \n" \
-	"	w = vec4(0.0); \n" \
-	"	w.y = dir.y; \n" \
-	"	p = clamp(TexCoord + w, 0.0, 1.0); \n" \
-	"	r = texture(tex0, p.stp); \n" \
-	"	n.y = r.x + n.y; \n" \
-	"	p = clamp(TexCoord - w, 0.0, 1.0); \n" \
-	"	r = texture(tex0, p.stp); \n" \
-	"	n.y = r.x - n.y; \n" \
-	"	w = vec4(0.0); \n" \
-	"	w.z = dir.x<dir.z?dir.x:dir.z; \n" \
-	"	p = clamp(TexCoord + w, 0.0, 1.0); \n" \
-	"	r = texture(tex0, p.stp); \n" \
-	"	n.z = r.x + n.z; \n" \
-	"	p = clamp(TexCoord - w, 0.0, 1.0); \n" \
-	"	r = texture(tex0, p.stp); \n" \
-	"	n.z = r.x - n.z; \n" \
-	"	//w.x = dot(n.xxx, vec3(tmat[0].x, tmat[1].x, tmat[2].x)); \n" \
-	"	//w.y = dot(n.yyy, vec3(tmat[0].y, tmat[1].y, tmat[2].y)); \n" \
-	"	//w.z = dot(n.zzz, vec3(tmat[0].z, tmat[1].z, tmat[2].z)); \n" \
-	"	w.x = n.x; \n" \
-	"	w.y = n.y; \n" \
-	"	w.z = n.z; \n" \
-	"	p.y = length(w.xyz); \n" \
-	"	p.y = 0.5 * (loc2.x<0.0?(1.0+p.y*loc2.x):p.y*loc2.x); \n" \
-	"	n.xyz = w.xyz; \n" \
-	"\n" \
-	"	//VOL_COMPUTED_GM_LOOKUP\n" \
-	"	v.y = p.y;\n" \
-	"*/\n" \
-	"	//VOL_TRANSFER_FUNCTION_SIN_COLOR_L\n" \
-	"/*	vec4 c = vec4(0.5);\n" \
-	"	float tf_alp = 0.0;\n" \
-	"	float alpha = 0.0;\n" \
-	"	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;\n" \
-	"	if (v.x<loc2.z-loc3.w || v.x>loc2.w+loc3.w || v.y<loc3.y)\n" \
-	"		c = vec4(0.0);\n" \
-	"	else\n" \
-	"	{\n" \
-	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
-	"		tf_alp = pow(clamp(v.x/loc3.z,\n" \
-	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0,\n" \
-	"			loc3.x>1.0?0.9999:1.0), loc3.x);\n" \
-	"		c = vec4(tf_alp);\n" \
-	"	}\n" \
-	"\n" \
-	"*/	//SEG_BODY_INIT_BLEND_HR_ORTHO\n" \
-	"	FragColor = texture(tex0, t.stp);\n" \
-	"/*	if (c.x <= loc7.x)\n" \
-	"		discarded = true;\n" \
-	"	vec4 cv = matrix3 * vec4(0.0, 0.0, 1.0, 0.0);\n" \
-	"	vec3 step = cv.xyz;\n" \
-	"	step = normalize(step);\n" \
-	"	step = step * length(step * loc4.xyz);\n" \
-	"	vec3 ray = t.xyz;\n" \
-	"	vec4 cray;\n" \
-	"	bool flag = false;\n" \
-	"	while (true)\n" \
-	"	{\n" \
-	"		ray += step;\n" \
-	"		if (any(greaterThan(ray, vec3(1.0))) ||\n" \
-	"				any(lessThan(ray, vec3(0.0))))\n" \
-	"			break;\n" \
-	"		if (vol_clip_func(vec4(ray, 1.0)))\n" \
-	"			break;\n" \
-	"		v.x = texture(tex0, ray).x;\n" \
-	"		v.y = length(vol_grad_func(vec4(ray, 1.0), loc4).xyz);\n" \
-	"		cray = vol_trans_sin_color_l(v);\n" \
-	"		if (cray.x > loc7.x && flag)\n" \
-	"		{\n" \
-	"			//FragColor = vec4(0.0);\n" \
-	"			discarded = true;\n" \
-	"		}\n" \
-	"		if (cray.x <= loc7.x)\n" \
-	"			flag = true;\n" \
-	"	}\n" \
-	"	FragColor = vec4(1.0);\n" \
-	"\n" \
-	"*/	//SEG_BODY_DISCARD_APPLY\n" \
-	"	if (discarded)\n" \
-	"		FragColor = vec4(0.0);\n" \
-	"\n" \
-	"//SEG_TAIL\n" \
-	"}\n"
+	"}\n"*/
 
 #define SEG_UNIFORMS_LABEL_INT \
 	"//SEG_UNIFORMS_LABEL_INT\n" \
@@ -776,10 +522,10 @@ namespace FLIVR
 	{
 		ostringstream z;
 
-		z << SEG_FRAG_CODE_TEST;
+/*		z << SEG_FRAG_CODE_TEST;
 		s = z.str();
 		return false;
-
+*/
 		z << VOL_VERSION;
 		z << VOL_INPUTS;
 
