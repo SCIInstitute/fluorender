@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <GL/glew.h>
-#include "bitmap_fonts.h"
+#include "compatibility.h"
 #include <vector>
 #include <boost/unordered_map.hpp>
 #include <string.h>
@@ -50,6 +50,7 @@ DEALINGS IN THE SOFTWARE.
 #include "Formats/lsm_reader.h"
 #include "Formats/lbl_reader.h"
 #include "Formats/pvxml_reader.h"
+#include "TextRenderer.h"
 
 #ifndef _DATAMANAGER_H_
 #define _DATAMANAGER_H_
@@ -651,11 +652,11 @@ public:
 	}
 
 	//font type
-	void SetFont(BitmapFontType font)
+	void SetFont(TextRenderer *font)
 	{
 		m_font = font;
 	}
-	BitmapFontType GetFont()
+	TextRenderer* GetFont()
 	{
 		return m_font;
 	}
@@ -693,7 +694,7 @@ private:
 	wxString m_info_meaning;
 
 	//font type
-	BitmapFontType m_font;
+	TextRenderer *m_font;
 private:
 	bool InsideClippingPlanes(Point &pos);
 	AText* GetAText(wxString str);
@@ -807,11 +808,11 @@ public:
 	wxString GetDelInfoValues(wxString del=",");
 
 	//font type
-	void SetFont(BitmapFontType font)
+	void SetFont(TextRenderer *font)
 	{
 		m_font = font;
 	}
-	BitmapFontType GetFont()
+	TextRenderer* GetFont()
 	{
 		return m_font;
 	}
@@ -851,7 +852,7 @@ private:
 	wxString m_info_values;
 
 	//font type
-	BitmapFontType m_font;
+	TextRenderer *m_font;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -972,11 +973,11 @@ public:
 	void Draw();
 
 	//font type
-	void SetFont(BitmapFontType font)
+	void SetFont(TextRenderer *font)
 	{
 		m_font = font;
 	}
-	BitmapFontType GetFont()
+	TextRenderer* GetFont()
 	{
 		return m_font;
 	}
@@ -1005,7 +1006,7 @@ private:
 	IDMap m_id_map;
 
 	//font type
-	BitmapFontType m_font;
+	TextRenderer *m_font;
 private:
 	//reading
 	unsigned char ReadTag(ifstream &ifs);
@@ -1046,7 +1047,7 @@ public:
 	}
 	void InsertVolumeData(int index, VolumeData* vd)
 	{
-		if (m_vd_list.size() > 0)
+		if (!m_vd_list.empty())
 		{
 			if (index>-1 && index<(int)m_vd_list.size())
 				m_vd_list.insert(m_vd_list.begin()+(index+1), vd);

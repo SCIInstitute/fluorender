@@ -223,6 +223,10 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   include_directories( ${OPENCL_INCLUDE_DIR})
 endif()
 
+#freetype
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/freetype/include)
+file(GLOB FREETYPE_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/freetype/lib/*.lib)
+
 #other sources
 file(GLOB src fluorender/FluoRender/*.cpp)
 file(GLOB hdr fluorender/FluoRender/*.h)
@@ -345,6 +349,7 @@ target_link_libraries(FluoRender
    ${OPENGL_LIBRARIES}
    ${Boost_LIBRARIES}
    ${OPENCL_LIBRARIES}
+   ${FREETYPE_LIBRARIES}
    ${wxWidgets_LIBRARIES})
 
 #build OpenCL examples copies.

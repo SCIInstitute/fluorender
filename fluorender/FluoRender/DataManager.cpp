@@ -1148,15 +1148,12 @@ void VolumeData::SetMatrices(glm::mat4 &mv_mat,
 //draw volume
 void VolumeData::Draw(bool ortho, bool interactive, double zoom)
 {
-//	glPushMatrix();
-//	glScalef(m_sclx, m_scly, m_sclz);
 	if (m_vr)
 	{
 		m_vr->draw(m_test_wiref, interactive, ortho, zoom, m_stream_mode);
 	}
 	if (m_draw_bounds)
 		DrawBounds();
-//	glPopMatrix();
 }
 
 void VolumeData::DrawBounds()
@@ -1889,7 +1886,7 @@ MeshRenderer* MeshData::GetMR()
 
 void MeshData::Draw(int peel)
 {
-	if (!m_mr)
+/*	if (!m_mr)
 		return;
 	glPushMatrix();
 	glTranslated(m_trans[0]+m_center.x(), 
@@ -1917,7 +1914,7 @@ void MeshData::Draw(int peel)
 	if (m_draw_bounds && (peel==4 || peel==5))
 		DrawBounds();
 	glPopMatrix();
-}
+*/}
 
 void MeshData::DrawBounds()
 {
@@ -2328,7 +2325,7 @@ Annotations::Annotations()
 	m_disp = true;
 	m_memo_ro = false;
 	//font
-	m_font = BITMAP_FONT_TYPE_HELVETICA_12;
+	//m_font = BITMAP_FONT_TYPE_HELVETICA_12;
 }
 
 Annotations::~Annotations()
@@ -2412,7 +2409,7 @@ void Annotations::Clear()
 //(nx, ny): window size
 void Annotations::Draw(bool persp)
 {
-	double matrix[16];
+/*	double matrix[16];
 	Transform mv;
 	Transform p;
 	glGetDoublev(GL_MODELVIEW_MATRIX, matrix);
@@ -2447,7 +2444,7 @@ void Annotations::Draw(bool persp)
 		}
 	}
 	endRenderText();
-}
+*/}
 
 //memo
 void Annotations::SetMemo(string &memo)
@@ -2712,7 +2709,7 @@ Ruler::Ruler()
 	m_time = 0;
 
 	//font
-	m_font = BITMAP_FONT_TYPE_HELVETICA_12;
+	//m_font = BITMAP_FONT_TYPE_HELVETICA_12;
 }
 
 Ruler::~Ruler()
@@ -2843,7 +2840,7 @@ void Ruler::Clear()
 
 void Ruler::Draw(bool persp, double asp)
 {
-	double matrix[16];
+/*	double matrix[16];
 	Transform mv;
 	Transform p;
 	glGetDoublev(GL_MODELVIEW_MATRIX, matrix);
@@ -2917,7 +2914,7 @@ void Ruler::Draw(bool persp, double asp)
 	}
 	endRenderText();
 	glLineWidth(1.0f);
-}
+*/}
 
 wxString Ruler::GetDelInfoValues(wxString del)
 {
@@ -3144,7 +3141,7 @@ TraceGroup::TraceGroup()
 	m_cell_size = 20;
 
 	//font
-	m_font = BITMAP_FONT_TYPE_HELVETICA_12;
+	//m_font = BITMAP_FONT_TYPE_HELVETICA_12;
 }
 
 TraceGroup::~TraceGroup()
@@ -3541,7 +3538,7 @@ int TraceGroup::Save(wxString &filename)
 }
 void TraceGroup::Draw()
 {
-	if (m_ghost_num <= 0)
+/*	if (m_ghost_num <= 0)
 		return;
 
 	glPushAttrib( GL_TEXTURE_BIT | GL_DEPTH_TEST |
@@ -3708,7 +3705,7 @@ void TraceGroup::Draw()
 	}
 
 	glPopAttrib();
-}
+*/}
 //pattern search
 bool TraceGroup::FindPattern(int type, unsigned int id, int time)
 {

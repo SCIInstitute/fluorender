@@ -116,6 +116,7 @@ namespace FLIVR
 		void get_trans(double*) const;
 		void get_trans(float*) const;
 		void set(double*);
+		void set(float*);
 		void set_trans(double*);
 		void set_trans(float*);
 		void load_identity();

@@ -817,7 +817,7 @@ class VRenderGLView: public wxGLCanvas
          void DrawLegend();
          void DrawName(double x, double y, int nx, int ny,
                wxString name, Color color,
-               BitmapFontType font, double font_height, bool hilighted=false);
+               double font_height, bool hilighted=false);
          char* wxStringToChar(wxString input);
          void DrawFrame();
          void DrawClippingPlanes(bool border, int face_winding);

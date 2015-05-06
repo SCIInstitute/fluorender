@@ -121,8 +121,8 @@ public:
 	bool GetRunScript() {return m_run_script;}
 	void SetRunScript(bool val) {m_run_script = val;}
 	//text font
-	int GetTextFont() {return m_text_font;}
-	void SetTextFont(int font) {m_text_font = font;}
+	int GetTextSize() {return m_text_size;}
+	void SetTextSize(int size) {m_text_size = size;}
 	//memory settings
 	bool GetMemSwap() {return m_mem_swap;}
 	void SetMemSwap(bool val) {m_mem_swap = val;}
@@ -193,7 +193,7 @@ private:
 	double m_soft_threshold;
 	bool m_run_script;
 	//text size
-	int m_text_font;		//text size in viewport
+	int m_text_size;		//text size in viewport
 	//memory limit
 	bool m_mem_swap;		//enable memory swap
 	double m_graphics_mem;	//in MB

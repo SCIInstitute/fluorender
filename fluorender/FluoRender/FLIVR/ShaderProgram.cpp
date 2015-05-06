@@ -155,11 +155,11 @@ namespace FLIVR
 			GLint shader_length[1];
 			bool attach_vert = strcmp(*v_source,"") != 0;
 			glGetShaderiv(v_shader, GL_COMPILE_STATUS, shader_status);
-			//if (shader_status[0] == GL_FALSE) {
+			if (shader_status[0] == GL_FALSE) {
 				glGetShaderInfoLog(v_shader, sizeof(shader_log), shader_length, shader_log);
-			//	std::cerr << "Error compiling vertex shader: " << shader_log << std::endl;
-			//	attach_vert = false;
-			//}
+				std::cerr << "Error compiling vertex shader: " << shader_log << std::endl;
+				attach_vert = false;
+			}
 			
 			// set the source code and compile the shader // fragment
 			f_source[0] = frag_shader_.c_str();
@@ -170,11 +170,11 @@ namespace FLIVR
 			// check the compilation of the shader
 			bool attach_frag = true;
 			glGetShaderiv(f_shader, GL_COMPILE_STATUS, shader_status);
-			//if (shader_status[0] == GL_FALSE) {
+			if (shader_status[0] == GL_FALSE) {
 				glGetShaderInfoLog(f_shader, sizeof(shader_log), shader_length, shader_log);
-			//	std::cerr << "Error compiling fragment shader: " << shader_log << std::endl;
-			//	attach_frag = false;
-			//}
+				std::cerr << "Error compiling fragment shader: " << shader_log << std::endl;
+				attach_frag = false;
+			}
 
 			if (attach_vert)
 				glAttachShader(id_, v_shader);
@@ -184,11 +184,11 @@ namespace FLIVR
 			//link time
 			glLinkProgram(id_);
 			glGetProgramiv(id_, GL_LINK_STATUS, shader_status);
-			//if (shader_status[0] == GL_FALSE) {
+			if (shader_status[0] == GL_FALSE) {
 				glGetProgramInfoLog(id_, sizeof(shader_log), shader_length, shader_log);
-			//	std::cerr << "Error linking shaders: " << shader_log << std::endl;
-			//	return true;
-			//}
+				std::cerr << "Error linking shaders: " << shader_log << std::endl;
+				return true;
+			}
 
 			glValidateProgram(id_);
 		    glGetProgramiv(id_, GL_VALIDATE_STATUS, shader_status);

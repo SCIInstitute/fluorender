@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include "VRenderView.h"
 #include "VRenderFrame.h"
-#include "bitmap_fonts.h"
 #include <tiffio.h>
 #include <wx/utils.h>
 #include <wx/valnum.h>
@@ -1257,7 +1256,7 @@ void VRenderGLView::DrawVolumes(int peel)
 
 void VRenderGLView::DrawAnnotations(bool persp)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+/*	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	BitmapFontType font = BITMAP_FONT_TYPE_HELVETICA_12;
 	if (vr_frame->GetSettingDlg())
 		font = (BitmapFontType)vr_frame->GetSettingDlg()->GetTextFont();
@@ -1277,7 +1276,7 @@ void VRenderGLView::DrawAnnotations(bool persp)
 			break;
 		}
 	}
-}
+*/}
 
 //get populated mesh list
 //stored in m_md_pop_list
@@ -1542,24 +1541,11 @@ void VRenderGLView::DrawBrush()
 
 		//draw the circles
 		//set up the matrices
-/*		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
-		glLoadIdentity();
-		gluOrtho2D(0, (GLint)nx, 0, (GLint)ny);
-
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		glLoadIdentity();
-*/
 		glm::mat4 proj_mat = glm::ortho(float(0), float(nx), float(0), float(ny));
 
 		//attributes
-/*		glPushAttrib(GL_ENABLE_BIT);
-		glDisable(GL_LIGHTING);
-		//glDisable(GL_TEXTURE_2D);
-*/		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_DEPTH_TEST);
 		GLfloat line_width = 1.0f;
-//		glGetFloatv(GL_LINE_WIDTH, &line_width);
 
 		int mode = m_selector.GetMode();
 
@@ -1570,19 +1556,7 @@ void VRenderGLView::DrawBrush()
 			glLineWidth(0.5);
 			DrawCircle(cx, cy, m_brush_radius1*pressure,
 				m_bg_color_inv, proj_mat);
-/*			//draw circle1
-			glColor3d(m_bg_color_inv.r(),
-				m_bg_color_inv.g(),
-				m_bg_color_inv.b());
-			glBegin(GL_LINE_LOOP);
-			for (i=0; i<secs; i++)
-			{
-				deg = i*2*PI/secs;
-				glVertex2f(cx + m_brush_radius1*pressure*sin(deg),
-					cy + m_brush_radius1*pressure*cos(deg));
-			}
-			glEnd();
-*/		}
+		}
 
 		if (mode == 1 ||
 			mode == 2 ||
@@ -1592,20 +1566,7 @@ void VRenderGLView::DrawBrush()
 			glLineWidth(0.5);
 			DrawCircle(cx, cy, m_brush_radius2*pressure,
 				m_bg_color_inv, proj_mat);
-/*			//draw circle2
-			glColor3d(m_bg_color_inv.r(),
-				m_bg_color_inv.g(),
-				m_bg_color_inv.b());
-			glLineWidth(0.5);
-			glBegin(GL_LINE_LOOP);
-			for (i=0; i<secs; i++)
-			{
-				deg = i*2*PI/secs;
-				glVertex2f(cx + m_brush_radius2*pressure*sin(deg),
-					cy + m_brush_radius2*pressure*cos(deg));
-			}
-			glEnd();
-*/		}
+		}
 
 /*		char str[2];
 		str[1] = 0;
@@ -1637,15 +1598,10 @@ void VRenderGLView::DrawBrush()
 			break;
 		}
 */
-//		glPopAttrib();
 		glLineWidth(line_width);
 		glEnable(GL_DEPTH_TEST);
 
-/*		glPopMatrix();
-		glMatrixMode(GL_PROJECTION);
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
-*/	}
+	}
 }
 
 //paint strokes on the paint fbo
@@ -7342,59 +7298,58 @@ void VRenderGLView::DrawCamCtr()
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
-
-/*	glBegin(GL_LINES);
-	glColor3d(1.0, 0.0, 0.0);
-	glVertex3d(0.0, 0.0, 0.0);
-	glVertex3d(len, 0.0, 0.0);
-	glColor3d(0.0, 1.0, 0.0);
-	glVertex3d(0.0, 0.0, 0.0);
-	glVertex3d(0.0, len, 0.0);
-	glColor3d(0.0, 0.0, 1.0);
-	glVertex3d(0.0, 0.0, 0.0);
-	glVertex3d(0.0, 0.0, len);
-	glEnd();
-
-	glPopAttrib();*/
 }
 
 void VRenderGLView::DrawFrame()
 {
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	gluOrtho2D(0, (GLint)GetSize().x, 0, (GLint)GetSize().y);
+	int nx, ny;
+	nx = GetSize().x;
+	ny = GetSize().y;
+	glm::mat4 proj_mat = glm::ortho(float(0), float(nx), float(0), float(ny));
 
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-
-	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_LIGHTING);
-	//glDisable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
+	GLfloat line_width = 1.0f;
+
+	vector<float> vertex;
+	vertex.reserve(4*3);
+
+	vertex.push_back(m_frame_x-1); vertex.push_back(m_frame_y-1); vertex.push_back(0.0);
+	vertex.push_back(m_frame_x+m_frame_w+1); vertex.push_back(m_frame_y-1); vertex.push_back(0.0);
+	vertex.push_back(m_frame_x+m_frame_w+1); vertex.push_back(m_frame_y+m_frame_h+1); vertex.push_back(0.0);
+	vertex.push_back(m_frame_x-1); vertex.push_back(m_frame_y+m_frame_h+1); vertex.push_back(0.0);
+
+	ShaderProgram* shader =
+		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+	if (shader)
+	{
+		if (!shader->valid())
+			shader->create();
+		shader->bind();
+	}
+	shader->setLocalParam(0, 1.0, 1.0, 0.0, 1.0);
+	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 
 	//draw frame
-	glColor3d(1.0f, 1.0f, 0.0f);
-	glBegin(GL_LINE_STRIP);
-	glVertex2d(m_frame_x-1, m_frame_y-1);
-	glVertex2d(m_frame_x+m_frame_w+1, m_frame_y-1);
-	glVertex2d(m_frame_x+m_frame_w+1, m_frame_y+m_frame_h+1);
-	glVertex2d(m_frame_x-1, m_frame_y+m_frame_h+1);
-	glVertex2d(m_frame_x-1, m_frame_y-1);
-	glEnd();
+	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
+	glBindVertexArray(m_misc_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (const GLvoid*)0);
+	glDrawArrays(GL_LINE_LOOP, 0, 4);
+	glDisableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(m_misc_vao);
 
-	glPopAttrib();
+	if (shader && shader->valid())
+		shader->release();
 
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
+	glEnable(GL_DEPTH_TEST);
 }
 
 void VRenderGLView::DrawScaleBar()
 {
-	double offset = 0.0;
+/*	double offset = 0.0;
 	if (m_draw_legend)
 		offset = m_sb_height;
 
@@ -7469,11 +7424,11 @@ void VRenderGLView::DrawScaleBar()
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
-}
+*/}
 
 void VRenderGLView::DrawLegend()
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+/*	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (!vr_frame)
 		return;
 
@@ -7632,14 +7587,14 @@ void VRenderGLView::DrawLegend()
 	}
 
 	m_sb_height = (lines+1)*font_height;
-}
+*/}
 
 void VRenderGLView::DrawName(double x, double y, int nx, int ny,
 	wxString name, Color color,
-	BitmapFontType font, double font_height,
+	double font_height,
 	bool highlighted)
 {
-	//text color
+/*	//text color
 	beginRenderText(nx, ny);
 	glColor4d(m_bg_color_inv.r(), m_bg_color_inv.g(), m_bg_color_inv.b(), 1.0);
 	glBegin(GL_QUADS);
@@ -7663,7 +7618,7 @@ void VRenderGLView::DrawName(double x, double y, int nx, int ny,
 		renderText(x+font_height-1.0, y-0.25*font_height-1.0, font, name.To8BitData().data());
 	}
 	endRenderText();
-}
+*/}
 
 void VRenderGLView::DrawGradBg()
 {
@@ -7741,7 +7696,7 @@ void VRenderGLView::DrawGradBg()
 
 void VRenderGLView::DrawColormap()
 {
-	bool draw = false;
+/*	bool draw = false;
 
 	int num = 0;
 	int vd_index;
@@ -7967,11 +7922,11 @@ void VRenderGLView::DrawColormap()
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
-}
+*/}
 
 void VRenderGLView::DrawInfo(int nx, int ny)
 {
-	//text color
+/*	//text color
 	glColor3d(m_bg_color_inv.r(), m_bg_color_inv.g(), m_bg_color_inv.b());
 
 	double fps_ = 1.0/goTimer->average();
@@ -8050,7 +8005,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 			}
 		}
 	}
-}
+*/}
 
 Quaternion VRenderGLView::Trackball(int p1x, int p1y, int p2x, int p2y)
 {
@@ -9178,7 +9133,7 @@ void VRenderGLView::AddPaintRulerPoint()
 
 void VRenderGLView::DrawRulers()
 {
-	int nx = GetSize().x;
+/*	int nx = GetSize().x;
 	int ny = GetSize().y;
 
 	if (nx <= 0 || ny <= 0)
@@ -9198,7 +9153,7 @@ void VRenderGLView::DrawRulers()
 			ruler->GetTime() == m_tseq_cur_num))
 			ruler->Draw(m_persp, (double)nx / (double)ny);
 	}
-}
+*/}
 
 vector<Ruler*>* VRenderGLView::GetRulerList()
 {
@@ -9429,7 +9384,7 @@ void VRenderGLView::ExportTrace(wxString filename, unsigned int id)
 
 void VRenderGLView::DrawTraces()
 {
-	if (!m_trace_group)
+/*	if (!m_trace_group)
 		return;
 
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
@@ -9454,7 +9409,7 @@ void VRenderGLView::DrawTraces()
 
 	glMatrixMode(GL_MODELVIEW_MATRIX);
 	glPopMatrix();
-}
+*/}
 
 void VRenderGLView::GetTraces()
 {
@@ -10138,34 +10093,25 @@ void VRenderGLView::CalcFrame()
 
 	if (m_cur_vol)
 	{
-		glMatrixMode(GL_MODELVIEW_MATRIX);
-		glPushMatrix();
-		glMatrixMode(GL_PROJECTION_MATRIX);
-		glPushMatrix();
 		//projection
 		HandleProjection(w, h);
 		//Transformation
 		HandleCamera();
-		//translate object
-		glTranslated(m_obj_transx, m_obj_transy, m_obj_transz);
-		//rotate object
-		glRotated(m_obj_rotz+180.0, 0.0, 0.0, 1.0);
-		glRotated(m_obj_roty+180.0, 0.0, 1.0, 0.0);
-		glRotated(m_obj_rotx, 1.0, 0.0, 0.0);
-		//center object
-		glTranslated(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz);
 
-		double matrix[16];
+		glm::mat4 mv_temp;
+		//translate object
+		mv_temp = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
+		//rotate object
+		mv_temp = glm::rotate(mv_temp, float(m_obj_rotx), glm::vec3(1.0, 0.0, 0.0));
+		mv_temp = glm::rotate(mv_temp, float(m_obj_roty+180.0), glm::vec3(0.0, 1.0, 0.0));
+		mv_temp = glm::rotate(mv_temp, float(m_obj_rotz+180.0), glm::vec3(0.0, 0.0, 1.0));
+		//center object
+		mv_temp = glm::translate(mv_temp, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+
 		Transform mv;
 		Transform pr;
-		glGetDoublev(GL_MODELVIEW_MATRIX, matrix);
-		mv.set(matrix);
-		glGetDoublev(GL_PROJECTION_MATRIX, matrix);
-		pr.set(matrix);
-		glMatrixMode(GL_MODELVIEW_MATRIX);
-		glPopMatrix();
-		glMatrixMode(GL_PROJECTION_MATRIX);
-		glPopMatrix();
+		mv.set(glm::value_ptr(mv_temp));
+		pr.set(glm::value_ptr(m_proj_mat));
 
 		double minx, maxx, miny, maxy;
 		minx = 1.0;
@@ -10236,9 +10182,6 @@ void VRenderGLView::DrawViewQuad()
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_quad_vbo);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float)*24, points, GL_STATIC_DRAW);
-		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_quad_ibo);
-		//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t)*6,
-		//	indices, GL_STREAM_DRAW);
 
 		glGenVertexArrays(1, &m_quad_vao);
 		glBindVertexArray(m_quad_vao);
@@ -10253,12 +10196,6 @@ void VRenderGLView::DrawViewQuad()
 	glBindVertexArray(m_quad_vao);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_quad_ibo);
-	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	//glDisableVertexAttribArray(0);
-	//glDisableVertexAttribArray(1);
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////

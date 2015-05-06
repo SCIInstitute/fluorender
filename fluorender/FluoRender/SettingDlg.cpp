@@ -524,7 +524,7 @@ void SettingDlg::GetSettings()
 	m_override_vox = true;
 	m_soft_threshold = 0.0;
 	m_run_script = false;
-	m_text_font = BITMAP_FONT_TYPE_HELVETICA_12;
+	m_text_size = 12;
 	m_mem_swap = false;
 	m_graphics_mem = 1000.0;
 	m_large_data_size = 1000.0;
@@ -668,7 +668,7 @@ void SettingDlg::GetSettings()
 	if (fconfig.Exists("/text font"))
 	{
 		fconfig.SetPath("/text font");
-		fconfig.Read("value", &m_text_font);
+		fconfig.Read("value", &m_text_size);
 	}
 	//memory settings
 	if (fconfig.Exists("/memory settings"))
@@ -788,7 +788,7 @@ void SettingDlg::UpdateUI()
 	m_wav_color3_cmb->Select(m_wav_color3-1);
 	m_wav_color4_cmb->Select(m_wav_color4-1);
 	//font
-	m_font_cmb->Select(m_text_font-3);
+	m_font_cmb->Select(m_text_size);
 	//script
 	m_run_script_chk->SetValue(m_run_script);
 	//memory settings
@@ -863,7 +863,7 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("value", m_run_script);
 
 	fconfig.SetPath("/text font");
-	fconfig.Write("value", m_text_font);
+	fconfig.Write("value", m_text_size);
 
 	//memory settings
 	fconfig.SetPath("/memory settings");
@@ -1395,7 +1395,7 @@ void SettingDlg::OnResponseTimeEdit(wxCommandEvent &event)
 //font
 void SettingDlg::OnFontChange(wxCommandEvent &event)
 {
-	switch (m_font_cmb->GetCurrentSelection())
+/*	switch (m_font_cmb->GetCurrentSelection())
 	{
 	case 0://helvetica 12
 		m_text_font = 3;
@@ -1412,6 +1412,8 @@ void SettingDlg::OnFontChange(wxCommandEvent &event)
 	default:
 		break;
 	}
+*/
+	m_text_size = 12;
 
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)

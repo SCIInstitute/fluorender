@@ -957,7 +957,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
 					else
 						vd->RandomizeColor();
 
-					//vrv->AddVolumeData(vd);
+					vrv->AddVolumeData(vd);
 					vd_sel = vd;
 
 					if (vd->GetReader() && vd->GetReader()->GetTimeNum()>1){
