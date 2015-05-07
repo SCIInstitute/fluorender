@@ -1130,7 +1130,6 @@ void VRenderGLView::DrawVolumes(int peel)
          }
       }
 
-      //DrawVolumesComp(m_vd_pop_list, peel);
       if (m_vol_method == VOL_METHOD_MULTI)
       {
          if (TextureRenderer::get_mem_swap() &&
@@ -1141,7 +1140,7 @@ void VRenderGLView::DrawVolumes(int peel)
             DrawVolumesMulti(m_vd_pop_list, peel);
          //draw masks
          if (m_draw_mask)
-            DrawVolumesComp(m_vd_pop_list, peel, true);
+            DrawVolumesComp(m_vd_pop_list, true, peel);
       }
       else
       {
@@ -1176,10 +1175,10 @@ void VRenderGLView::DrawVolumes(int peel)
                {
                   if (!list.empty())
                   {
-                     DrawVolumesComp(list, peel);
+                     DrawVolumesComp(list, false, peel);
                      //draw masks
                      if (m_draw_mask)
-                        DrawVolumesComp(list, peel, true);
+                        DrawVolumesComp(list, true, peel);
                      list.clear();
                   }
                   DataGroup* group = (DataGroup*)m_layer_list[i];
@@ -1208,10 +1207,10 @@ void VRenderGLView::DrawVolumes(int peel)
                      if (group->GetBlendMode() == VOL_METHOD_MULTI)
                         DrawVolumesMulti(list, peel);
                      else
-                        DrawVolumesComp(list, peel);
+                        DrawVolumesComp(list, false, peel);
                      //draw masks
                      if (m_draw_mask)
-                        DrawVolumesComp(list, peel, true);
+                        DrawVolumesComp(list, true, peel);
                      list.clear();
                   }
                }
@@ -2517,7 +2516,7 @@ void VRenderGLView::DrawFinalBuffer()
 
 //Draw the volmues with compositing
 //peel==true -- depth peeling
-void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, int peel, bool mask)
+void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int peel)
 {
    if (list.size() <= 0)
       return;
@@ -2653,7 +2652,7 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, int peel, bool ma
             if (vd->GetMode() == 1)
                DrawMIP(vd, m_tex, peel);
             else
-               DrawOVER(vd, m_tex, peel);
+               DrawOVER(vd, m_tex, mask, peel);
             vd->SetMaskMode(0);
             m_vol_method = vol_method;
          }
@@ -2685,7 +2684,7 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, int peel, bool ma
             if (vd->GetMode() == 1)
                DrawMIP(vd, tex, peel);
             else
-               DrawOVER(vd, tex, peel);
+               DrawOVER(vd, tex, mask, peel);
          }
          if (tex==m_tex_wt2)
          {
@@ -2698,7 +2697,7 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, int peel, bool ma
    }
 }
 
-void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
+void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, bool mask, int peel)
 {
    bool do_over = true;
    if (TextureRenderer::get_mem_swap() &&
@@ -2709,8 +2708,16 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
       if (rn_time - TextureRenderer::get_st_time() >
             TextureRenderer::get_up_time())
          return;
-      if (vd->GetVR()->get_done_loop(0))
-         do_over = false;
+	  if (mask)
+	  {
+		  if (vd->GetVR()->get_done_loop(4))
+			 do_over = false;
+	  }
+	  else
+	  {
+		  if (vd->GetVR()->get_done_loop(0))
+			 do_over = false;
+	  }
    }
 
    if (do_over)
@@ -2776,7 +2783,10 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
 
       if (vd->GetVR())
          vd->GetVR()->set_depth_peel(peel);
-      vd->SetStreamMode(0);
+	  if (mask)
+		vd->SetStreamMode(4);
+	  else
+		vd->SetStreamMode(0);
       vd->Draw(!m_persp, m_interactive, m_scale_factor);
    }
 
@@ -8379,6 +8389,9 @@ void VRenderGLView::StartLoopUpdate()
 							vd->GetShading())
 							total_num++;
 						if (vd->GetShadow())
+							total_num++;
+						//mask
+						if (vd->GetTexture() && vd->GetTexture()->nmask()!=-1)
 							total_num++;
 					}
 				}

@@ -47,7 +47,7 @@ namespace FLIVR {
 	//which can include mask volumes
 #define TEXTURE_MAX_COMPONENTS	4
 	//these are the render modes used to determine if each mode is drawn
-#define TEXTURE_RENDER_MODES	4
+#define TEXTURE_RENDER_MODES	5
 
 	class TextureBrick
 	{
