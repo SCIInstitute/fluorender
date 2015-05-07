@@ -504,6 +504,19 @@ void VMovieView::SetView(int index) {
 }
 
 void VMovieView::OnTimer(wxTimerEvent& event) {
+	if (TextureRenderer::get_mem_swap() &&
+		TextureRenderer::get_start_update_loop() &&
+		!TextureRenderer::get_done_update_loop())
+	{
+		wxString str = m_views_cmb->GetValue();
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (!vr_frame) return;
+		VRenderView* vrv = vr_frame->GetView(str);
+		if (!vrv) return;
+		vrv->RefreshGL(false, false);
+		return;
+	}
+
 	//get all of the progress info
 	double len;
 	long fps;

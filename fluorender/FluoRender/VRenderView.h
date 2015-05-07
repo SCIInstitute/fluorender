@@ -1110,7 +1110,7 @@ class VRenderView: public wxPanel
    wxGLContext* GetContext();
 
    //refresh glview
-   void RefreshGL(bool intactive=false);
+   void RefreshGL(bool intactive=false, bool start_loop=true);
 
    //movie export
    //get frame info

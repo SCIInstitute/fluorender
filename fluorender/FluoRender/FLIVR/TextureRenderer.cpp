@@ -475,15 +475,10 @@ namespace FLIVR
 
 	}
 
-	bool TextureRenderer::test_against_view(const BBox &bbox, bool use_ex)
+	bool TextureRenderer::test_against_view(const BBox &bbox)
 	{
-		if (!use_ex)
-		{
-			memcpy(mvmat_, glm::value_ptr(m_mv_mat2), 16*sizeof(float));
-			memcpy(prmat_, glm::value_ptr(m_proj_mat), 16*sizeof(float));
-/*			glGetDoublev(GL_MODELVIEW_MATRIX, mvmat_);
-			glGetDoublev(GL_PROJECTION_MATRIX, prmat_);
-*/		}
+		memcpy(mvmat_, glm::value_ptr(m_mv_mat2), 16*sizeof(float));
+		memcpy(prmat_, glm::value_ptr(m_proj_mat), 16*sizeof(float));
 
 		Transform mv;
 		Transform pr;

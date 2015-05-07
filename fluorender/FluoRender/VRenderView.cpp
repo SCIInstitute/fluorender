@@ -8386,6 +8386,23 @@ void VRenderGLView::StartLoopUpdate()
 
 	if (TextureRenderer::get_mem_swap())
 	{
+		int nx = GetSize().x;
+		int ny = GetSize().y;
+		//projection
+		HandleProjection(nx, ny);
+		//Transformation
+		HandleCamera();
+		glm::mat4 mv_temp = m_mv_mat;
+		//translate object
+		m_mv_mat = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
+		//rotate object
+		m_mv_mat = glm::rotate(m_mv_mat, float(m_obj_rotx), glm::vec3(1.0, 0.0, 0.0));
+		m_mv_mat = glm::rotate(m_mv_mat, float(m_obj_roty+180.0), glm::vec3(0.0, 1.0, 0.0));
+		m_mv_mat = glm::rotate(m_mv_mat, float(m_obj_rotz+180.0), glm::vec3(0.0, 0.0, 1.0));
+		//center object
+		m_mv_mat = glm::translate(m_mv_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+		double sclx, scly, sclz;
+
 		PopVolumeList();
 		int total_num = 0;
 		int num_chan;
@@ -8396,10 +8413,17 @@ void VRenderGLView::StartLoopUpdate()
 			VolumeData* vd = m_vd_pop_list[i];
 			if (vd)
 			{
+				vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+
 				num_chan = 0;
 				Texture* tex = vd->GetTexture();
 				if (tex)
 				{
+					Transform *tform = tex->transform();
+					double mvmat[16];
+					tform->get_trans(mvmat);
+					vd->GetVR()->m_mv_mat2 = vd->GetVR()->m_mv_mat * vd->GetVR()->m_mv_mat2;
+
 					vector<TextureBrick*> *bricks = tex->get_bricks();
 					if (!bricks || bricks->size()==0)
 						continue;
@@ -8407,7 +8431,7 @@ void VRenderGLView::StartLoopUpdate()
 					{
 						(*bricks)[j]->set_drawn(false);
 						if ((*bricks)[j]->get_priority()>0 ||
-							!vd->GetVR()->test_against_view((*bricks)[j]->bbox(), true))
+							!vd->GetVR()->test_against_view((*bricks)[j]->bbox()))
 							continue;
 						total_num++;
 						num_chan++;
@@ -11315,13 +11339,13 @@ wxGLContext* VRenderView::GetContext()
 		return 0;
 }
 
-void VRenderView::RefreshGL(bool interactive)
+void VRenderView::RefreshGL(bool interactive, bool start_loop)
 {
 	if (m_glview)
 	{
 		m_glview->m_force_clear = true;
 		m_glview->m_interactive = interactive && m_glview->m_adaptive;
-		m_glview->RefreshGL();
+		m_glview->RefreshGL(false, start_loop);
 	}
 }
 
