@@ -446,13 +446,12 @@ void VRenderGLView::Init()
 {
    if (!m_initialized)
    {
+      VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
       SetCurrent(*m_glRC);
       ShaderProgram::init_shaders_supported();
+	  if (vr_frame && vr_frame->GetSettingDlg()) KernelProgram::set_device_id(vr_frame->GetSettingDlg()->GetCLDeviceID());
 	  KernelProgram::init_kernels_supported();
-
-      VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
       if (vr_frame) vr_frame->SetTextureRendererSettings();
-
       glViewport(0, 0, (GLint)(GetSize().x), (GLint)(GetSize().y));
       goTimer->start();
       m_initialized = true;
@@ -520,7 +519,7 @@ void VRenderGLView::HandleProjection(int nx, int ny, bool restrict)
    else
    {
       glOrtho(m_ortho_left, m_ortho_right, m_ortho_bottom, m_ortho_top,
-            -m_near_clip, m_far_clip);
+            -m_far_clip/100.0, m_far_clip);
    }
 }
 
@@ -11192,13 +11191,13 @@ wxGLContext* VRenderView::GetContext()
       return 0;
 }
 
-void VRenderView::RefreshGL(bool interactive)
+void VRenderView::RefreshGL(bool interactive, bool start_loop)
 {
    if (m_glview)
    {
       m_glview->m_force_clear = true;
       m_glview->m_interactive = interactive && m_glview->m_adaptive;
-      m_glview->RefreshGL();
+      m_glview->RefreshGL(false, start_loop);
    }
 }
 

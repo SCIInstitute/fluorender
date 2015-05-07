@@ -50,6 +50,8 @@ namespace FLIVR
 		static void init_kernels_supported();
 		static bool init();
 		static void clear();
+		static void set_device_id(int id);
+		static std::string& get_device_name();
 
 		//info
 		std::string &getInfo();
@@ -72,6 +74,8 @@ namespace FLIVR
 		static bool init_;
 		static cl_device_id device_;
 		static cl_context context_;
+		static int device_id_;
+		static std::string device_name_;
 	};
 }
 

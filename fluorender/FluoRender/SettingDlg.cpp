@@ -545,6 +545,7 @@ void SettingDlg::GetSettings()
 	m_gl_major_ver = 4;
 	m_gl_minor_ver = 4;
 	m_gl_profile_mask = 2;
+	m_cl_device_id = 0;
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = expath.BeforeLast(GETSLASH(),NULL);
@@ -735,6 +736,12 @@ void SettingDlg::GetSettings()
 		fconfig.Read("gl_minor_ver", &m_gl_minor_ver);
 		fconfig.Read("gl_profile_mask", &m_gl_profile_mask);
 	}
+	//cl device
+	if (fconfig.Exists("/cl device"))
+	{
+		fconfig.SetPath("/cl device");
+		fconfig.Read("device_id", &m_cl_device_id);
+	}
 
 	UpdateUI();
 }
@@ -901,6 +908,10 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("gl_major_ver", m_gl_major_ver);
 	fconfig.Write("gl_minor_ver", m_gl_minor_ver);
 	fconfig.Write("gl_profile_mask", m_gl_profile_mask);
+
+	//cl device
+	fconfig.SetPath("/cl device");
+	fconfig.Write("device_id", m_cl_device_id);
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = expath.BeforeLast(GETSLASH(),NULL);

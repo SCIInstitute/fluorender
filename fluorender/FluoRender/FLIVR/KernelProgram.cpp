@@ -8,6 +8,8 @@ namespace FLIVR
 	bool KernelProgram::init_ = false;
 	cl_device_id KernelProgram::device_ = 0;
 	cl_context KernelProgram::context_ = 0;
+	int KernelProgram::device_id_ = 0;
+	std::string KernelProgram::device_name_;
 #ifdef _DARWIN
     CGLContextObj KernelProgram::gl_context_ = 0;
 #endif
@@ -33,9 +35,18 @@ namespace FLIVR
 		if (err != CL_SUCCESS)
 			return;
 
-		err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device_, NULL);
+		cl_device_id devices[4];
+		cl_uint dev_num = 0;
+		err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 4, devices, &dev_num);
 		if (err != CL_SUCCESS)
 			return;
+		if (device_id_ >=0 && device_id_ < dev_num)
+			device_ = devices[device_id_];
+		else
+			device_ = devices[0];
+		char buffer[10240];
+		clGetDeviceInfo(device_, CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
+		device_name_ = std::string(buffer);
 #ifdef _DARWIN
         gl_context_ =CGLGetCurrentContext();
 #endif
@@ -68,6 +79,16 @@ namespace FLIVR
 	{
 		clReleaseContext(context_);
 		init_ = false;
+	}
+
+	void KernelProgram::set_device_id(int id)
+	{
+		device_id_ = id;
+	}
+
+	std::string& KernelProgram::get_device_name()
+	{
+		return device_name_;
 	}
 
 	bool KernelProgram::create(std::string &name)
