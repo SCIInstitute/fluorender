@@ -446,13 +446,10 @@ namespace FLIVR
 
 	}
 
-	bool TextureRenderer::test_against_view(const BBox &bbox, bool use_ex)
+	bool TextureRenderer::test_against_view(const BBox &bbox)
 	{
-		if (!use_ex)
-		{
-			glGetDoublev(GL_MODELVIEW_MATRIX, mvmat_);
-			glGetDoublev(GL_PROJECTION_MATRIX, prmat_);
-		}
+		glGetDoublev(GL_MODELVIEW_MATRIX, mvmat_);
+		glGetDoublev(GL_PROJECTION_MATRIX, prmat_);
 
 		Transform mv;
 		Transform pr;
@@ -692,6 +689,11 @@ namespace FLIVR
 			{
 				brick->set_drawn(mode, true);
 				cur_brick_num_++;
+				//ostringstream oss;
+				//oss << "cur_brick_num:\t" << cur_brick_num_ << "\t";
+				//oss << "bindex:\t" << bindex << "\t";
+				//oss << "total num:\t" << total_brick_num_ << "\n";
+				//OutputDebugStringA(oss.str().c_str());
 				cur_chan_brick_num_++;
 			}
 		}

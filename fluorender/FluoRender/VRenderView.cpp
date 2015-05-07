@@ -8313,59 +8313,95 @@ bool VRenderGLView::GetIntp()
 //start loop update
 void VRenderGLView::StartLoopUpdate()
 {
-   ////this is for debug_ds, comment when done
-   //if (TextureRenderer::get_mem_swap() &&
-   //  TextureRenderer::get_start_update_loop() &&
-   //  !TextureRenderer::get_done_update_loop())
-   //  return;
+	////this is for debug_ds, comment when done
+	//if (TextureRenderer::get_mem_swap() &&
+	//  TextureRenderer::get_start_update_loop() &&
+	//  !TextureRenderer::get_done_update_loop())
+	//  return;
 
-   if (TextureRenderer::get_mem_swap())
-   {
-      PopVolumeList();
-      int total_num = 0;
-      int num_chan;
-      //reset drawn status for all bricks
-      unsigned int i, j;
-      for (i=0; i<m_vd_pop_list.size(); i++)
-      {
-         VolumeData* vd = m_vd_pop_list[i];
-         if (vd)
-         {
-            num_chan = 0;
-            Texture* tex = vd->GetTexture();
-            if (tex)
-            {
-               vector<TextureBrick*> *bricks = tex->get_bricks();
-               if (!bricks || bricks->size()==0)
-                  continue;
-               for (j=0; j<bricks->size(); j++)
-               {
-                  (*bricks)[j]->set_drawn(false);
-                  if ((*bricks)[j]->get_priority()>0 ||
-                        !vd->GetVR()->test_against_view((*bricks)[j]->bbox(), true))
-                     continue;
-                  total_num++;
-                  num_chan++;
-                  if (vd->GetMode()==1 &&
-                        vd->GetShading())
-                     total_num++;
-                  if (vd->GetShadow())
-                     total_num++;
-               }
-            }
-            vd->SetBrickNum(num_chan);
-            if (vd->GetVR())
-               vd->GetVR()->set_done_loop(false);
-         }
-      }
+	if (TextureRenderer::get_mem_swap())
+	{
+		int nx = GetSize().x;
+		int ny = GetSize().y;
+		glMatrixMode(GL_MODELVIEW_MATRIX);
+		glPushMatrix();
+		glMatrixMode(GL_PROJECTION_MATRIX);
+		glPushMatrix();
+		//projection
+		HandleProjection(nx, ny);
+		//Transformation
+		HandleCamera();
+		//translate object
+		glTranslated(m_obj_transx, m_obj_transy, m_obj_transz);
+		//rotate object
+		glRotated(m_obj_rotz+180.0, 0.0, 0.0, 1.0);
+		glRotated(m_obj_roty+180.0, 0.0, 1.0, 0.0);
+		glRotated(m_obj_rotx, 1.0, 0.0, 0.0);
+		//center object
+		glTranslated(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz);
+		double sclx, scly, sclz;
 
-      if (total_num > 0)
-      {
-         TextureRenderer::set_update_loop();
-         TextureRenderer::set_total_brick_num(total_num);
-         TextureRenderer::reset_done_current_chan();
-      }
-   }
+		PopVolumeList();
+		int total_num = 0;
+		int num_chan;
+		//reset drawn status for all bricks
+		unsigned int i, j;
+		for (i=0; i<m_vd_pop_list.size(); i++)
+		{
+			VolumeData* vd = m_vd_pop_list[i];
+			if (vd)
+			{
+				vd->GetScalings(sclx, scly, sclz);
+				glPushMatrix();
+				glScalef(sclx, scly, sclz);
+
+				num_chan = 0;
+				Texture* tex = vd->GetTexture();
+				if (tex)
+				{
+					Transform *tform = tex->transform();
+					double mvmat[16];
+					tform->get_trans(mvmat);
+					glMultMatrixd(mvmat);
+
+					vector<TextureBrick*> *bricks = tex->get_bricks();
+					if (!bricks || bricks->size()==0)
+						continue;
+					for (j=0; j<bricks->size(); j++)
+					{
+						(*bricks)[j]->set_drawn(false);
+						if ((*bricks)[j]->get_priority()>0 ||
+							!vd->GetVR()->test_against_view((*bricks)[j]->bbox()))
+							continue;
+						total_num++;
+						num_chan++;
+						if (vd->GetMode()==1 &&
+							vd->GetShading())
+							total_num++;
+						if (vd->GetShadow())
+							total_num++;
+					}
+				}
+				vd->SetBrickNum(num_chan);
+				if (vd->GetVR())
+					vd->GetVR()->set_done_loop(false);
+
+				glPopMatrix();
+			}
+		}
+
+		if (total_num > 0)
+		{
+			TextureRenderer::set_update_loop();
+			TextureRenderer::set_total_brick_num(total_num);
+			TextureRenderer::reset_done_current_chan();
+		}
+
+		glMatrixMode(GL_MODELVIEW_MATRIX);
+		glPopMatrix();
+		glMatrixMode(GL_PROJECTION_MATRIX);
+		glPopMatrix();
+	}
 }
 
 //halt loop update
