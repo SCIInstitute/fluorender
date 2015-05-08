@@ -6899,7 +6899,7 @@ void VRenderGLView::DrawBounds()
 	glDrawArrays(GL_LINES, 8, 8);
 	glDisableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(m_misc_vao);
+	glBindVertexArray(0);
 
 	if (shader && shader->valid())
 		shader->release();
@@ -7926,14 +7926,16 @@ void VRenderGLView::DrawColormap()
 
 void VRenderGLView::DrawInfo(int nx, int ny)
 {
-/*	//text color
-	glColor3d(m_bg_color_inv.r(), m_bg_color_inv.g(), m_bg_color_inv.b());
+	float sx, sy;
+	sx = 2.0/nx;
+	sy = 2.0/ny;
+	float px, py;
 
 	double fps_ = 1.0/goTimer->average();
-	char str[128];
+	wxString str;
 	if (TextureRenderer::get_mem_swap())
 	{
-		SPRINTF(str, 128, 
+		str = wxString::Format(
 			"FPS: %.2f, Bricks: %d, Quota: %d, Int: %s, Time: %lu",
 			fps_>=0.0&&fps_<300.0?fps_:0.0,
 			TextureRenderer::get_finished_bricks(),
@@ -7955,10 +7957,13 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 		//  << "\n";
 	}
 	else
-		SPRINTF(str, 128, "FPS: %.2f", fps_>=0.0&&fps_<300.0?fps_:0.0);
-	beginRenderText(nx, ny);
-	renderText(10, 20, BITMAP_FONT_TYPE_HELVETICA_12, str);
-	endRenderText();
+		str = wxString::Format("FPS: %.2f", fps_>=0.0&&fps_<300.0?fps_:0.0);
+	px = 10-nx/2;
+	py = ny/2-20;
+	if (m_text_renderer)
+		m_text_renderer->RenderText(
+		str.ToStdString(), m_bg_color_inv,
+		px*sx, py*sy, sx, sy);
 
 	if (m_draw_coord)
 	{
@@ -7967,28 +7972,38 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 		if ((m_cur_vol && GetPointVolumeBox(p, mouse_pos.x, mouse_pos.y, m_cur_vol)>0.0) ||
 			GetPointPlane(p, mouse_pos.x, mouse_pos.y)>0.0)
 		{
-			SPRINTF(str, 128, "T: %d  X: %.2f  Y: %.2f  Z: %.2f", m_tseq_cur_num, p.x(), p.y(), p.z());
-			beginRenderText(nx, ny);
-			renderText(10, 40, BITMAP_FONT_TYPE_HELVETICA_12, str);
-			endRenderText();
+			str = wxString::Format("T: %d  X: %.2f  Y: %.2f  Z: %.2f",
+				m_tseq_cur_num, p.x(), p.y(), p.z());
+			px = 10-nx/2;
+			py = ny/2-40;
+			if (m_text_renderer)
+				m_text_renderer->RenderText(
+				str.ToStdString(), m_bg_color_inv,
+				px*sx, py*sy, sx, sy);
 		}
 	}
 	else
 	{
-		SPRINTF(str, 128, "T: %d", m_tseq_cur_num);
-		beginRenderText(nx, ny);
-		renderText(10, 40, BITMAP_FONT_TYPE_HELVETICA_12, str);
-		endRenderText();
+		str = wxString::Format("T: %d", m_tseq_cur_num);
+		px = 10-nx/2;
+		py = ny/2-40;
+		if (m_text_renderer)
+			m_text_renderer->RenderText(
+			str.ToStdString(), m_bg_color_inv,
+			px*sx, py*sy, sx, sy);
 	}
 
 	if (m_test_wiref)
 	{
 		if (m_vol_method == VOL_METHOD_MULTI && m_mvr)
 		{
-			SPRINTF(str, 128, "SLICES: %d", m_mvr->get_slice_num());
-			beginRenderText(nx, ny);
-			renderText(10, 35, BITMAP_FONT_TYPE_HELVETICA_12, str);
-			endRenderText();
+			str = wxString::Format("SLICES: %d", m_mvr->get_slice_num());
+			px = 10-nx/2;
+			py = ny/2-60;
+			if (m_text_renderer)
+				m_text_renderer->RenderText(
+				str.ToStdString(), m_bg_color_inv,
+				px*sx, py*sy, sx, sy);
 		}
 		else
 		{
@@ -7997,15 +8012,18 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 				VolumeData* vd = m_vd_pop_list[i];
 				if (vd && vd->GetVR())
 				{
-					SPRINTF(str, 128, "SLICES_%d: %d", i+1, vd->GetVR()->get_slice_num());
-					beginRenderText(nx, ny);
-					renderText(10, 35+15*i, BITMAP_FONT_TYPE_HELVETICA_12, str);
-					endRenderText();
+					str = wxString::Format("SLICES_%d: %d", i+1, vd->GetVR()->get_slice_num());
+					px = 10-nx/2;
+					py = ny/2-(60+15*i);
+					if (m_text_renderer)
+						m_text_renderer->RenderText(
+						str.ToStdString(), m_bg_color_inv,
+						px*sx, py*sy, sx, sy);
 				}
 			}
 		}
 	}
-*/}
+}
 
 Quaternion VRenderGLView::Trackball(int p1x, int p1y, int p2x, int p2y)
 {

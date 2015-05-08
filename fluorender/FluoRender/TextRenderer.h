@@ -64,6 +64,7 @@ private:
 	GLuint m_tex;
 	GLuint m_vbo, m_vao;
 	GLuint m_prog;
+	GLint m_color_loc;
 };
 
 #endif//_TEXTRENDERER_H_

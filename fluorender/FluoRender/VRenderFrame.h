@@ -49,6 +49,7 @@ DEALINGS IN THE SOFTWARE.
 #include "OclDlg.h"
 #include "Tester.h"
 #include "Animator/Interpolator.h"
+#include "TextRenderer.h"
 #include "compatibility.h"
 
 #include <wx/wx.h>
@@ -312,6 +313,8 @@ public:
     
     void OnInfo(wxCommandEvent& WXUNUSED(event));
 
+	TextRenderer* GetTextRenderer();
+
 public: //public so export window can see it and set it. 
 	RecorderDlg* m_recorder_dlg;
 	VMovieView* m_movie_view;
@@ -387,8 +390,9 @@ private:
 
 	//mac address
 	wxString m_address;
-	//free version
-	//bool m_free_version;
+
+	//draw text
+	TextRenderer *m_text_renderer;
 
 private:
 	//views

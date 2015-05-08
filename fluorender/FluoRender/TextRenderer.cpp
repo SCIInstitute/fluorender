@@ -54,6 +54,7 @@ FT_Library TextRenderer::m_ft;
 	"void main(void)\n" \
 	"{\n" \
 	"	FragColor = vec4(1, 1, 1, texture2D(tex, texcoord).r) * color;\n" \
+	"//	FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n" \
 	"}\n"
 
 TextRenderer::TextRenderer(const string &lib_name)
@@ -72,6 +73,8 @@ TextRenderer::TextRenderer(const string &lib_name)
 
 	if (!FT_New_Face(m_ft, lib_name.c_str(), 0, &m_face))
 		m_valid = true;
+
+	FT_Set_Pixel_Sizes(m_face, 0, 14);
 }
 
 TextRenderer::~TextRenderer()
@@ -109,6 +112,16 @@ void TextRenderer::RenderText(string& text, Color &color,
 	GLint loc;
 	if (!m_init_gl)
 	{
+		//texture
+		glActiveTexture(GL_TEXTURE0);
+		glGenTextures(1, &m_tex);
+		glBindTexture(GL_TEXTURE_2D, m_tex);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		//shader
 		m_prog = glCreateProgram();
 		GLuint v_shader, f_shader;
 		v_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -139,9 +152,85 @@ void TextRenderer::RenderText(string& text, Color &color,
 		glDeleteShader(f_shader);
 
 		glUseProgram(m_prog);
-		loc = glGetUniformLocation(m_prog, "tex");
+		GLint loc = glGetUniformLocation(m_prog, "tex");
 		if (loc != -1)
 			glUniform1i(loc, 0);
+		m_color_loc = glGetUniformLocation(m_prog, "color");
+
+		//vertex
+		glGenVertexArrays(1, &m_vao);
+		glBindVertexArray(m_vao);
+		glGenBuffers(1, &m_vbo);
+		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+		m_init_gl = true;
 	}
+
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	//texture
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_tex);
+	//shader
+	glUseProgram(m_prog);
+	glUniform4f(m_color_loc, color.r(), color.g(), color.b(), 1.0f);
+	//vertex
+	glBindVertexArray(m_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+
+	const char *p;
+	for(p = text.c_str(); *p; p++)
+	{
+		if(FT_Load_Char(m_face, *p, FT_LOAD_RENDER))
+			continue;
+
+		FT_GlyphSlot g = m_face->glyph;
+
+		glTexImage2D(
+			GL_TEXTURE_2D,
+			0,
+			GL_RED,
+			g->bitmap.width,
+			g->bitmap.rows,
+			0,
+			GL_RED,
+			GL_UNSIGNED_BYTE,
+			g->bitmap.buffer
+			);
+
+		float x2 = x + g->bitmap_left * sx;
+		float y2 = -y - g->bitmap_top * sy;
+		float w = g->bitmap.width * sx;
+		float h = g->bitmap.rows * sy;
+
+		GLfloat box[4][4] =
+		{
+			{x2,     -y2    , 0, 0},
+			{x2 + w, -y2    , 1, 0},
+			{x2,     -y2 - h, 0, 1},
+			{x2 + w, -y2 - h, 1, 1},
+		};
+
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*16, box, GL_DYNAMIC_DRAW);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+		x += (g->advance.x >> 6) * sx;
+		y += (g->advance.y >> 6) * sy;
+	}
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glUseProgram(0);
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
 }
 
