@@ -525,7 +525,7 @@ namespace FLIVR
 
 		//--------------------------------------------------------------------------
 
-		bool use_fog = glIsEnabled(GL_FOG)!=0 && colormap_mode_!=2;
+		bool use_fog = false;//glIsEnabled(GL_FOG)!=0 && colormap_mode_!=2;
 		GLfloat clear_color[4];
 		glGetFloatv(GL_COLOR_CLEAR_VALUE, clear_color);
 		GLint vp[4];
@@ -894,7 +894,6 @@ namespace FLIVR
 		{
 			//states
 			GLboolean depth_test = glIsEnabled(GL_DEPTH_TEST);
-			GLboolean lighting = glIsEnabled(GL_LIGHTING);
 			GLboolean cull_face = glIsEnabled(GL_CULL_FACE);
 			glDisable(GL_DEPTH_TEST);
 			glDisable(GL_CULL_FACE);
@@ -995,7 +994,6 @@ namespace FLIVR
 				img_shader->release();
 
 			if (depth_test) glEnable(GL_DEPTH_TEST);
-			if (lighting) glEnable(GL_LIGHTING);
 			if (cull_face) glEnable(GL_CULL_FACE);
 
 		}

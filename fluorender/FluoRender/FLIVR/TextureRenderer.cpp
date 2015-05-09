@@ -1014,7 +1014,7 @@ namespace FLIVR
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)12);
 
-		//glBindVertexArray(m_quad_vao);
+//		glBindVertexArray(m_quad_vao);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);

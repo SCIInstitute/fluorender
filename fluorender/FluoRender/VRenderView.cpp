@@ -600,7 +600,7 @@ void VRenderGLView::Draw()
 
 		if (m_use_fog)
 		{
-			glEnable(GL_FOG);
+/*			glEnable(GL_FOG);
 			GLfloat FogCol[3]={0.0, 0.0, 0.0};
 			glFogfv(GL_FOG_COLOR, FogCol);
 			glFogi(GL_FOG_MODE, GL_LINEAR);
@@ -610,7 +610,7 @@ void VRenderGLView::Draw()
 			glFogf(GL_FOG_START, GLfloat(fog_start));
 			glFogf(GL_FOG_END, GLfloat(fog_end));
 			glFogf(GL_FOG_DENSITY, GLfloat(m_fog_intensity));
-		}
+*/		}
 
 		if (m_draw_grid)
 			DrawGrid();
@@ -629,9 +629,9 @@ void VRenderGLView::Draw()
 		if (m_draw_clip)
 			DrawClippingPlanes(true, FRONT_FACE);
 
-		if (m_use_fog)
+/*		if (m_use_fog)
 			glDisable(GL_FOG);
-
+*/
 		if (m_draw_bounds)
 			DrawBounds();
 
@@ -689,7 +689,7 @@ void VRenderGLView::DrawDP()
 		//center object
 		glTranslated(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz);
 
-		if (m_use_fog)
+/*		if (m_use_fog)
 		{
 			glEnable(GL_FOG);
 			float FogCol[3]={0.0, 0.0, 0.0};
@@ -702,7 +702,7 @@ void VRenderGLView::DrawDP()
 			glFogf(GL_FOG_END, fog_end);
 			glFogf(GL_FOG_DENSITY, m_fog_intensity);
 		}
-
+*/
 		if (m_draw_clip)
 			DrawClippingPlanes(true, BACK_FACE);
 
@@ -759,11 +759,10 @@ void VRenderGLView::DrawDP()
 		}
 
 		//setup
-		glDisable(GL_LIGHTING);
 		glDisable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
-		glDisable(GL_FOG);
+//		glDisable(GL_FOG);
 
 		//draw depth values of each layer into the buffers
 		for (i=0; i<m_peeling_layers; i++)
@@ -797,9 +796,9 @@ void VRenderGLView::DrawDP()
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		//setup
-		if (m_use_fog)
+/*		if (m_use_fog)
 			glEnable(GL_FOG);
-
+*/
 		//draw depth peeling
 		for (i=m_peeling_layers; i>=0; i--)
 		{
@@ -897,14 +896,13 @@ void VRenderGLView::DrawDP()
 				//draw meshes
 				glEnable(GL_DEPTH_TEST);
 				glDepthFunc(GL_LEQUAL);
-				glDisable(GL_LIGHTING);
 				glEnable(GL_BLEND);
 				glBlendEquation(GL_FUNC_ADD);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-				if (m_use_fog)
+/*				if (m_use_fog)
 					glEnable(GL_FOG);
-
+*/
 				if (m_peeling_layers == 1)
 					//i == m_peeling_layers == 1
 					DrawMeshes(5);//draw mesh at 15
@@ -946,9 +944,9 @@ void VRenderGLView::DrawDP()
 				DrawOLShadowsMesh(m_dp_tex_list[0], darkness);
 		}
 
-		if (m_use_fog)
+/*		if (m_use_fog)
 			glDisable(GL_FOG);
-
+*/
 		if (m_draw_clip)
 			DrawClippingPlanes(false, FRONT_FACE);
 
@@ -1614,7 +1612,6 @@ void VRenderGLView::PaintStroke()
 	double pressure = m_use_pres?m_pressure:1.0;
 
 	//generate texture and buffer objects
-	//glEnable(GL_TEXTURE_2D);
 	//painting fbo
 	if (!glIsFramebuffer(m_fbo_paint))
 		glGenFramebuffers(1, &m_fbo_paint);
@@ -1658,20 +1655,10 @@ void VRenderGLView::PaintStroke()
 		//bind fbo for final composition
 		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_paint);
 		glActiveTexture(GL_TEXTURE0);
-		//glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, m_tex_paint);
-//		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		glDisable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
-//		glDisable(GL_LIGHTING);
 
-/*		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
-		glLoadIdentity();
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		glLoadIdentity();
-*/
 		double px = double(old_mouse_X-prv_mouse_X);
 		double py = double(old_mouse_Y-prv_mouse_Y);
 		double dist = sqrt(px*px+py*py);
@@ -1718,11 +1705,6 @@ void VRenderGLView::PaintStroke()
 			DrawViewQuad();
 		}
 
-/*		glMatrixMode(GL_PROJECTION);
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
-		glPopMatrix();
-*/
 		//release paint shader
 		if (paint_shader && paint_shader->valid())
 			paint_shader->release();
@@ -1742,21 +1724,11 @@ void VRenderGLView::DisplayStroke()
 
 	//draw the final buffer to the windows buffer
 	glActiveTexture(GL_TEXTURE0);
-	//glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, m_tex_paint);
-//	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST);
-//	glDisable(GL_LIGHTING);
 
-/*	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-*/
 	ShaderProgram* img_shader =
 		m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 	if (img_shader)
@@ -1769,13 +1741,7 @@ void VRenderGLView::DisplayStroke()
 	if (img_shader && img_shader->valid())
 		img_shader->release();
 
-/*	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
-*/
 	glEnable(GL_DEPTH_TEST);
-//	glEnable(GL_LIGHTING);
 }
 
 //set 2d weights
@@ -1790,17 +1756,6 @@ void VRenderGLView::Segment()
 	glViewport(0, 0, (GLint)GetSize().x, (GLint)GetSize().y);
 	HandleCamera();
 
-/*	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	//translate object
-	glTranslated(m_obj_transx, m_obj_transy, m_obj_transz);
-	//rotate object
-	glRotated(m_obj_rotx, 1.0, 0.0, 0.0);
-	glRotated(m_obj_roty+180.0, 0.0, 1.0, 0.0);
-	glRotated(m_obj_rotz+180.0, 0.0, 0.0, 1.0);
-	//center object
-	glTranslated(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz);
-*/
 	//translate object
 	m_mv_mat = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
 	//rotate object
@@ -1878,8 +1833,6 @@ void VRenderGLView::Segment()
 	}
 	else
 		m_selector.Select(m_brush_radius2-m_brush_radius1);
-
-//	glPopMatrix();
 
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetTraceDlg() &&
@@ -2482,14 +2435,11 @@ void VRenderGLView::DrawFinalBuffer()
 
 	//draw the final buffer to the windows buffer
 	glActiveTexture(GL_TEXTURE0);
-	//glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, m_tex_final);
-//	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	//glBlendFunc(GL_ONE, GL_ONE);
 	glDisable(GL_DEPTH_TEST);
-//	glDisable(GL_LIGHTING);
 
 	//2d adjustment
 	ShaderProgram* img_shader =
@@ -2505,20 +2455,8 @@ void VRenderGLView::DrawFinalBuffer()
 	img_shader->setLocalParam(2, m_hdr.r(), m_hdr.g(), m_hdr.b(), 0.0);
 	//2d adjustment
 
-/*	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-*/
 	DrawViewQuad();
 
-/*	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
-*/
 	if (img_shader && img_shader->valid())
 		img_shader->release();
 }
@@ -2737,20 +2675,10 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
 			glActiveTexture(GL_TEXTURE0);
-			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, m_tex_final);
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 			glDisable(GL_BLEND);
 			glDisable(GL_DEPTH_TEST);
-			glDisable(GL_LIGHTING);
 
-/*			glMatrixMode(GL_PROJECTION);
-			glPushMatrix();
-			glLoadIdentity();
-			glMatrixMode(GL_MODELVIEW);
-			glPushMatrix();
-			glLoadIdentity();
-*/
 			img_shader =
 				m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 			if (img_shader)
@@ -2763,11 +2691,6 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
 			if (img_shader && img_shader->valid())
 				img_shader->release();
 
-/*			glMatrixMode(GL_PROJECTION);
-			glPopMatrix();
-			glMatrixMode(GL_MODELVIEW);
-			glPopMatrix();
-*/
 			glBindTexture(GL_TEXTURE_2D, 0);
 			glPopAttrib();
 		}
@@ -2807,20 +2730,10 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
-		//glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, m_tex_temp);
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		glDisable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_LIGHTING);
 
-/*		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
-		glLoadIdentity();
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		glLoadIdentity();
-*/
 		img_shader =
 			m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 		if (img_shader)
@@ -2833,32 +2746,24 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
 		if (img_shader && img_shader->valid())
 			img_shader->release();
 
-/*		glMatrixMode(GL_PROJECTION);
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
-		glPopMatrix();
-*/
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		glPopAttrib();
 	}
 
 	glActiveTexture(GL_TEXTURE0);
-	//glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, tex);
 	//build mipmap
 #ifndef _DARWIN
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 #endif
-//	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glEnable(GL_BLEND);
 	if (m_vol_method == VOL_METHOD_COMP)
 		glBlendFunc(GL_ONE, GL_ONE);
 	else
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST);
-//	glDisable(GL_LIGHTING);
 
 	//2d adjustment
 	img_shader =
@@ -2881,20 +2786,8 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
 	img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
 	//2d adjustment
 
-/*	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-*/
 	DrawViewQuad();
 
-/*	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
-*/
 	if (img_shader && img_shader->valid())
 		img_shader->release();
 }
@@ -2938,20 +2831,10 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
 			glActiveTexture(GL_TEXTURE0);
-			//glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, m_tex_final);
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 			glDisable(GL_BLEND);
 			glDisable(GL_DEPTH_TEST);
-			glDisable(GL_LIGHTING);
 
-/*			glMatrixMode(GL_PROJECTION);
-			glPushMatrix();
-			glLoadIdentity();
-			glMatrixMode(GL_MODELVIEW);
-			glPushMatrix();
-			glLoadIdentity();
-*/
 			img_shader =
 				m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 			if (img_shader)
@@ -2964,11 +2847,6 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 			if (img_shader && img_shader->valid())
 				img_shader->release();
 
-/*			glMatrixMode(GL_PROJECTION);
-			glPopMatrix();
-			glMatrixMode(GL_MODELVIEW);
-			glPopMatrix();
-*/
 			glBindTexture(GL_TEXTURE_2D, 0);
 			glPopAttrib();
 		}
@@ -3014,11 +2892,11 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 		if (vd->GetVR())
 			vd->GetVR()->set_depth_peel(peel);
 		vd->GetVR()->set_shading(false);
-		GLboolean use_fog = glIsEnabled(GL_FOG);
+		GLboolean use_fog = false;//glIsEnabled(GL_FOG);
 		if (color_mode == 1)
 		{
 			vd->SetMode(3);
-			glDisable(GL_FOG);
+//			glDisable(GL_FOG);
 		}
 		else
 			vd->SetMode(1);
@@ -3033,7 +2911,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 		if (color_mode == 1)
 		{
 			vd->RestoreMode();
-			if (use_fog) glEnable(GL_FOG);
+//			if (use_fog) glEnable(GL_FOG);
 			//restore alpha
 			vd->SetEnableAlpha(enable_alpha);
 		}
@@ -3043,13 +2921,10 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
-		//glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, m_tex_ol1);
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		glEnable(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-		glDisable(GL_LIGHTING);
 
 		if (color_mode == 1)
 		{
@@ -3070,13 +2945,6 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 			//2d adjustment
 		}
 
-/*		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
-		glLoadIdentity();
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		glLoadIdentity();
-*/
 		img_shader =
 			m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 		if (img_shader)
@@ -3089,11 +2957,6 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 		if (img_shader && img_shader->valid())
 			img_shader->release();
 
-/*		glMatrixMode(GL_PROJECTION);
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
-		glPopMatrix();
-*/
 		if (color_mode == 1 &&
 			img_shader &&
 			img_shader->valid())
@@ -3124,20 +2987,10 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
-		//glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, m_tex_temp);
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		glDisable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_LIGHTING);
 
-/*		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
-		glLoadIdentity();
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		glLoadIdentity();
-*/
 		img_shader =
 			m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 		if (img_shader)
@@ -3150,32 +3003,24 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 		if (img_shader && img_shader->valid())
 			img_shader->release();
 
-/*		glMatrixMode(GL_PROJECTION);
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
-		glPopMatrix();
-*/
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		glPopAttrib();
 	}
 
 	glActiveTexture(GL_TEXTURE0);
-	//glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, tex);
 	//build mipmap
 #ifndef _DARWIN
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 #endif
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glEnable(GL_BLEND);
 	if (m_vol_method == VOL_METHOD_COMP)
 		glBlendFunc(GL_ONE, GL_ONE);
 	else
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
 
 	//2d adjustment
 	img_shader =
@@ -3250,22 +3095,12 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 	//bind fbo for final composition
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 	glActiveTexture(GL_TEXTURE0);
-	//glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, m_tex_ol1);
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ZERO, GL_SRC_COLOR);
 	//glBlendEquation(GL_MIN);
 	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
 
-/*	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-*/
 	ShaderProgram* img_shader =
 		m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 	if (img_shader)
@@ -3278,11 +3113,6 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 	if (img_shader && img_shader->valid())
 		img_shader->release();
 
-/*	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
-*/
 	glBlendEquation(GL_FUNC_ADD);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 }
@@ -3362,12 +3192,9 @@ void VRenderGLView::DrawOLShadowsMesh(GLuint tex_depth, double darkness)
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glActiveTexture(GL_TEXTURE0);
-	//glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, tex_depth);
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glDisable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
 
 	//2d adjustment
 	ShaderProgram* img_shader =
@@ -3388,20 +3215,8 @@ void VRenderGLView::DrawOLShadowsMesh(GLuint tex_depth, double darkness)
 	img_shader->setLocalParam(1, dir_x, dir_y, 0.0, 0.0);
 	//2d adjustment
 
-/*	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-*/
 	DrawViewQuad();
 
-/*	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
-*/
 	if (img_shader && img_shader->valid())
 	{
 		img_shader->release();
@@ -3411,13 +3226,10 @@ void VRenderGLView::DrawOLShadowsMesh(GLuint tex_depth, double darkness)
 	//bind fbo for final composition
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glActiveTexture(GL_TEXTURE0);
-	//glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, m_tex_ol2);
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ZERO, GL_SRC_COLOR);
 	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
 
 	//2d adjustment
 	img_shader =
@@ -3425,9 +3237,7 @@ void VRenderGLView::DrawOLShadowsMesh(GLuint tex_depth, double darkness)
 	if (img_shader)
 	{
 		if (!img_shader->valid())
-		{
 			img_shader->create();
-		}
 		img_shader->bind();
 	}
 	img_shader->setLocalParam(0, 1.0/nx, 1.0/ny, max(m_scale_factor, 1.0), 0.0);
@@ -3438,35 +3248,20 @@ void VRenderGLView::DrawOLShadowsMesh(GLuint tex_depth, double darkness)
 	glBindTexture(GL_TEXTURE_2D, m_tex_final);
 	//2d adjustment
 
-/*	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-*/
 	DrawViewQuad();
 
-/*	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
-*/
 	if (img_shader && img_shader->valid())
 	{
 		img_shader->release();
 	}
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	//glDisable(GL_TEXTURE_2D);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	//glDisable(GL_TEXTURE_2D);
 
 	glBlendEquation(GL_FUNC_ADD);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_LIGHTING);
 }
 
 void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
@@ -3527,10 +3322,8 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		glClear(GL_COLOR_BUFFER_BIT);
 		TextureRenderer::reset_clear_chan_buffer();
 	}
-//	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glDisable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
-//	glDisable(GL_LIGHTING);
 
 	double shadow_darkness = 0.0;
 
@@ -3645,12 +3438,9 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		glClearColor(1.0, 1.0, 1.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
-		//glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, m_tex_ol1);
-//		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		glDisable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
-//		glDisable(GL_LIGHTING);
 
 		//2d adjustment
 		ShaderProgram* img_shader =
@@ -3669,33 +3459,18 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		img_shader->setLocalParam(1, dir_x, dir_y, 0.0, 0.0);
 		//2d adjustment
 
-/*		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
-		glLoadIdentity();
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		glLoadIdentity();
-*/
 		DrawViewQuad();
 
-/*		glMatrixMode(GL_PROJECTION);
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
-		glPopMatrix();
-*/
 		if (img_shader && img_shader->valid())
 			img_shader->release();
 
 		//bind fbo for final composition
 		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 		glActiveTexture(GL_TEXTURE0);
-		//glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, m_tex_ol2);
-//		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ZERO, GL_SRC_COLOR);
 		glDisable(GL_DEPTH_TEST);
-//		glDisable(GL_LIGHTING);
 
 		//2d adjustment
 		img_shader =
@@ -3712,20 +3487,8 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		glBindTexture(GL_TEXTURE_2D, tex);
 		//2d adjustment
 
-/*		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
-		glLoadIdentity();
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		glLoadIdentity();
-*/
 		DrawViewQuad();
 
-/*		glMatrixMode(GL_PROJECTION);
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
-		glPopMatrix();
-*/
 		if (img_shader && img_shader->valid())
 			img_shader->release();
 	}
@@ -3859,21 +3622,18 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	//bind fbo for final composition
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_final);
 	glActiveTexture(GL_TEXTURE0);
-	//glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, use_tex_wt2?m_tex_wt2:m_tex);
 	//build mipmap
 #ifndef _DARWIN
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 #endif
-//	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glEnable(GL_BLEND);
 	if (m_vol_method == VOL_METHOD_COMP)
 		glBlendFunc(GL_ONE, GL_ONE);
 	else
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST);
-//	glDisable(GL_LIGHTING);
 
 	//2d adjustment
 	ShaderProgram* img_shader =
@@ -3900,20 +3660,8 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
 	//2d adjustment
 
-/*	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-*/
 	DrawViewQuad();
 
-/*	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
-*/
 	if (img_shader && img_shader->valid())
 		img_shader->release();
 
@@ -7631,8 +7379,6 @@ void VRenderGLView::DrawGradBg()
 	glLoadIdentity();
 
 	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_LIGHTING);
-	//glDisable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
 
 	Color color1, color2;

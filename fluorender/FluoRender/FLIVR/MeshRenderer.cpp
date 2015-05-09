@@ -90,7 +90,7 @@ namespace FLIVR
 
 	void MeshRenderer::draw(bool tex, bool list)
 	{
-		GLboolean use_fog = glIsEnabled(GL_FOG);
+		GLboolean use_fog = false;//glIsEnabled(GL_FOG);
 		GLint vp[4];
 		glGetIntegerv(GL_VIEWPORT, vp);
 

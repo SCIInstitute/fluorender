@@ -1919,9 +1919,7 @@ void MeshData::Draw(int peel)
 void MeshData::DrawBounds()
 {
 	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_LIGHTING);
-	//glDisable(GL_TEXTURE_2D);
-	glDisable(GL_FOG);
+//	glDisable(GL_FOG);
 	//glDisable(GL_BLEND);
 	glColor4d(m_mat_diff.r(), m_mat_diff.g(), m_mat_diff.b(), 1.0);
 
