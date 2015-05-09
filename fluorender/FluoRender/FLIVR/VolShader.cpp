@@ -56,8 +56,8 @@ namespace FLIVR
 	"#version 400\n" \
 	"uniform mat4 matrix0; //projection matrix\n" \
 	"uniform mat4 matrix1; //modelview matrix\n" \
-	"in vec3 InVertex;  //w will be set to 1.0 automatically\n" \
-	"in vec3 InTexCoord0;\n" \
+	"layout(location = 0) in vec3 InVertex;  //w will be set to 1.0 automatically\n" \
+	"layout(location = 1) in vec3 InTexCoord0;\n" \
 	"out vec3 OutVertex;\n" \
 	"out vec3 OutTexture;\n" \
 	"//-------------------\n" \

@@ -67,7 +67,7 @@ depth_bit=24
 samples=4
 [context\ attrib]
 gl_major_ver=4
-gl_minor_ver=5
+gl_minor_ver=4
 gl_profile_mask=2
 [cl\ device]
 device_id=0

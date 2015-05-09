@@ -41,8 +41,8 @@ namespace FLIVR
 #define IMG_VERTEX_CODE \
 	"//IMG_VERTEX_CODE\n" \
 	"#version 400\n" \
-	"in vec3 InVertex;\n" \
-	"in vec3 InTexCoord;\n" \
+	"layout(location = 0) in vec3 InVertex;\n" \
+	"layout(location = 1) in vec3 InTexCoord;\n" \
 	"out vec3 OutVertex;\n" \
 	"out vec3 OutTexCoord;\n" \
 	"\n" \
@@ -56,7 +56,7 @@ namespace FLIVR
 #define IMG_VTX_CODE_DRAW_GEOMETRY \
 	"//IMG_VTX_CODE_DRAW_GEOMETRY\n" \
 	"#version 400\n" \
-	"in vec3 InVertex;\n" \
+	"layout(location = 0) in vec3 InVertex;\n" \
 	"uniform mat4 matrix0;//transformation\n" \
 	"\n" \
 	"void main()\n" \

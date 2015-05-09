@@ -47,8 +47,8 @@ namespace FLIVR
 #define SEG_VERTEX_CODE_CORE_PROFILE \
 	"//SEG_VERTEX_CODE_CORE_PROFILE\n" \
 	"#version 400\n" \
-	"in vec3 InVertex;\n" \
-	"in vec3 InTexCoord0;\n" \
+	"layout(location = 0) in vec3 InVertex;\n" \
+	"layout(location = 1) in vec3 InTexCoord0;\n" \
 	"out vec3 OutVertex;\n" \
 	"out vec3 OutTexture;\n" \
 	"\n" \

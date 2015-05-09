@@ -34,7 +34,7 @@ FT_Library TextRenderer::m_ft;
 #define TXT_RENDER_VTX_CODE \
 	"//TXT_RENDER_VTX_CODE\n" \
 	"#version 400\n" \
-	"in vec4 coord;\n" \
+	"layout(location = 0) in vec4 coord;\n" \
 	"out vec2 texcoord;\n" \
 	"\n" \
 	"void main(void)\n" \
