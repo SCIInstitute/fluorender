@@ -144,7 +144,7 @@ namespace FLIVR
 			// set the source code and compile the shader // vertex
 			const char *v_source[1], *f_source[1];
 			v_source[0] = vert_shader_.c_str();
-            GLint lengths[1];
+			GLint lengths[1];
 			lengths[0] = (int)std::strlen(v_source[0]);
 			glShaderSource(v_shader, 1, v_source, lengths);
 			glCompileShader(v_shader);
@@ -160,7 +160,7 @@ namespace FLIVR
 				std::cerr << "Error compiling vertex shader: " << shader_log << std::endl;
 				attach_vert = false;
 			}
-			
+
 			// set the source code and compile the shader // fragment
 			f_source[0] = frag_shader_.c_str();
 			lengths[0] = (int)std::strlen(f_source[0]);
@@ -190,17 +190,9 @@ namespace FLIVR
 				return true;
 			}
 
-			glValidateProgram(id_);
-		    glGetProgramiv(id_, GL_VALIDATE_STATUS, shader_status);
-			if (shader_status[0] == GL_FALSE) {
-			    glGetProgramInfoLog(id_, sizeof(shader_log), shader_length, shader_log);
-				std::cerr << "Invalid shader program: " << shader_log << std::endl;
-				return true;
-		    }
+			glUseProgram(id_);
 
 			//glBindFragDataLocation(id_, 0, "FragColor");
-
-			glUseProgram(id_);
 
 			const char *loc_strings[] = {
 				"tex0", "tex1", "tex2", "tex3",
@@ -215,6 +207,14 @@ namespace FLIVR
 				location = glGetUniformLocation(id_, loc_strings[i]);
 				if (location != -1)
 					glUniform1i(location, i);
+			}
+
+			glValidateProgram(id_);
+			glGetProgramiv(id_, GL_VALIDATE_STATUS, shader_status);
+			if (shader_status[0] == GL_FALSE) {
+				glGetProgramInfoLog(id_, sizeof(shader_log), shader_length, shader_log);
+				std::cerr << "Invalid shader program: " << shader_log << std::endl;
+				return true;
 			}
 
 			return false;

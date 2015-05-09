@@ -934,7 +934,7 @@ namespace FLIVR
 				glClear(GL_COLOR_BUFFER_BIT);
 
 				glBindTexture(GL_TEXTURE_2D, blend_tex_id_);
-				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+//				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 				img_shader = 
 					m_img_shader_factory.shader(IMG_SHDR_FILTER_BLUR);
 				if (img_shader)
