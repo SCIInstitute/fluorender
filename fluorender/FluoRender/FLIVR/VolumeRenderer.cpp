@@ -525,7 +525,7 @@ namespace FLIVR
 
 		//--------------------------------------------------------------------------
 
-		bool use_fog = false;//glIsEnabled(GL_FOG)!=0 && colormap_mode_!=2;
+		bool use_fog = m_use_fog && colormap_mode_!=2;
 		GLfloat clear_color[4];
 		glGetFloatv(GL_COLOR_CLEAR_VALUE, clear_color);
 		GLint vp[4];
@@ -742,6 +742,10 @@ namespace FLIVR
 		//setup depth peeling
 		if (depth_peel_ || colormap_mode_ == 2)
 			shader->setLocalParam(7, 1.0/double(w2), 1.0/double(h2), 0.0, 0.0);
+
+		//fog
+		if (m_use_fog)
+			shader->setLocalParam(8, m_fog_intensity, m_fog_start, m_fog_end, 0.0);
 
 		//set clipping planes
 		double abcd[4];

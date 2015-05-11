@@ -1669,6 +1669,14 @@ bool VolumeData::GetInterpolate()
 {
 	return m_interpolate;
 }
+
+void VolumeData::SetFog(bool use_fog,
+	double fog_intensity, double fog_start, double fog_end)
+{
+	if (m_vr)
+		m_vr->set_fog(use_fog, fog_intensity, fog_start, fog_end);
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 MeshData::MeshData() :
 m_data(0),

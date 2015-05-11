@@ -78,6 +78,11 @@ namespace FLIVR
 	"uniform vec4 loc7;//(1/vx, 1/vy, 0, 0)\n" \
 	"\n"
 
+#define VOL_UNIFORMS_FOG_LOC \
+	"//VOL_UNIFORMS_FOG_LOC\n" \
+	"uniform vec4 loc8;//(int, start, end, 0.0)\n" \
+	"\n"
+
 #define VOL_UNIFORMS_DP \
 	"//VOL_UNIFORMS_DP\n" \
 	"uniform sampler2D tex14;//depth texture 1\n" \
@@ -140,13 +145,13 @@ namespace FLIVR
 
 #define VOL_HEAD_FOG \
 	"	//VOL_HEAD_FOG\n" \
-	"	vec4 fc = gl_Fog.color;\n" \
+	"	vec4 fc = vec4(0.0, 0.0, 0.0, 1.0);\n" \
 	"	vec4 fp;\n" \
-	"	fp.x = gl_Fog.density;\n" \
-	"	fp.y = gl_Fog.start;\n" \
-	"	fp.z = gl_Fog.end;\n" \
-	"	fp.w = gl_Fog.scale;\n" \
-	"	vec4 tf = gl_TexCoord[1];\n" \
+	"	fp.x = loc8.x;\n" \
+	"	fp.y = loc8.y;\n" \
+	"	fp.z = loc8.z;\n" \
+	"	fp.w = -gl_FragCoord.z;\n" \
+	"//	vec4 tf = gl_TexCoord[1];\n" \
 	"	vec4 fctmp;\n" \
 	"\n"
 
@@ -500,8 +505,8 @@ namespace FLIVR
 
 #define VOL_FOG_BODY \
 	"	//VOL_FOG_BODY\n" \
-	"	v.x = fp.z - tf.x;\n" \
-	"	v.x = (1.0 - clamp(v.x * fp.w, 0.0, 1.0))*fp.x;\n" \
+	"	v.x = fp.z - fp.w;\n" \
+	"	v.x = (1.0 - clamp(v.x, 0.0, 1.0))*fp.x;\n" \
 	"	fctmp = c.w * fc;\n" \
 	"	c.xyz = mix(fctmp.xyzz, c.xyzz, (1.0-v.x)).xyz; \n" \
 	"\n"

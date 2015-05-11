@@ -59,7 +59,7 @@ FT_Library TextRenderer::m_ft;
 
 TextRenderer::TextRenderer(const string &lib_name)
 	: m_valid(false),
-	m_size(0),
+	m_size(14),
 	m_init_gl(false),
 	m_tex(0),
 	m_vbo(0),
@@ -74,7 +74,11 @@ TextRenderer::TextRenderer(const string &lib_name)
 	if (!FT_New_Face(m_ft, lib_name.c_str(), 0, &m_face))
 		m_valid = true;
 
-	FT_Set_Pixel_Sizes(m_face, 0, 14);
+	if (m_valid)
+	{
+		FT_Select_Charmap(m_face, FT_ENCODING_UNICODE); 
+		FT_Set_Pixel_Sizes(m_face, 0, m_size);
+	}
 }
 
 TextRenderer::~TextRenderer()
@@ -106,7 +110,7 @@ unsigned int TextRenderer::GetSize()
 		return m_size;
 }
 
-void TextRenderer::RenderText(string& text, Color &color,
+void TextRenderer::RenderText(wstring& text, Color &color,
 	float x, float y, float sx, float sy)
 {
 	GLint loc;
@@ -184,7 +188,7 @@ void TextRenderer::RenderText(string& text, Color &color,
 	glBindVertexArray(m_vao);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
-	const char *p;
+	const wchar_t *p;
 	for(p = text.c_str(); *p; p++)
 	{
 		if(FT_Load_Char(m_face, *p, FT_LOAD_RENDER))
@@ -234,3 +238,17 @@ void TextRenderer::RenderText(string& text, Color &color,
 	glEnable(GL_DEPTH_TEST);
 }
 
+float TextRenderer::RenderTextLen(wstring& text)
+{
+	float len = 0.0f;
+	const wchar_t *p;
+	for(p = text.c_str(); *p; p++)
+	{
+		if(FT_Load_Char(m_face, *p, FT_LOAD_RENDER))
+			continue;
+
+		FT_GlyphSlot g = m_face->glyph;
+		len += g->bitmap.width;
+	}
+	return len;
+}

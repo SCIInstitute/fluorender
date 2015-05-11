@@ -700,6 +700,8 @@ private:
 	//fog
 	bool m_use_fog;
 	double m_fog_intensity;
+	double m_fog_start;
+	double m_fog_end;
 
 	//movie properties
 	double m_init_angle;

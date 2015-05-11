@@ -1,4 +1,4 @@
-/*
+﻿/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -227,6 +227,8 @@ wxGLCanvas(parent, id, attriblist, pos, size, style),
 	//fog
 	m_use_fog(true),
 	m_fog_intensity(0.0),
+	m_fog_start(0.0),
+	m_fog_end(0.0),
 	//movie properties
 	m_init_angle(0.0),
 	m_start_angle(0.0),
@@ -603,11 +605,11 @@ void VRenderGLView::Draw()
 /*			glEnable(GL_FOG);
 			GLfloat FogCol[3]={0.0, 0.0, 0.0};
 			glFogfv(GL_FOG_COLOR, FogCol);
-			glFogi(GL_FOG_MODE, GL_LINEAR);
-			double fog_start = m_distance - m_radius/2.0;
-			fog_start = fog_start<0.0?0.0:fog_start;
-			double fog_end = m_distance + m_radius/4.0;
-			glFogf(GL_FOG_START, GLfloat(fog_start));
+			glFogi(GL_FOG_MODE, GL_LINEAR);*/
+			m_fog_start = m_distance - m_radius/2.0;
+			m_fog_start = m_fog_start<0.0?0.0:m_fog_start;
+			m_fog_end = m_distance + m_radius/4.0;
+/*			glFogf(GL_FOG_START, GLfloat(fog_start));
 			glFogf(GL_FOG_END, GLfloat(fog_end));
 			glFogf(GL_FOG_DENSITY, GLfloat(m_fog_intensity));
 */		}
@@ -1515,7 +1517,7 @@ void VRenderGLView::DrawCircle(double cx, double cy,
 	glDrawArrays(GL_LINE_LOOP, 0, secs);
 	glDisableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(m_misc_vao);
+	glBindVertexArray(0);
 
 	if (shader && shader->valid())
 		shader->release();
@@ -2710,6 +2712,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
 			vd->GetVR()->set_depth_peel(peel);
 		vd->SetStreamMode(0);
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+		vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 		vd->Draw(!m_persp, m_interactive, m_scale_factor);
 	}
 
@@ -2906,6 +2909,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 		//draw
 		vd->SetStreamMode(1);
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+		vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 		vd->Draw(!m_persp, m_interactive, m_scale_factor);
 		//
 		if (color_mode == 1)
@@ -2944,9 +2948,12 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 			img_shader->setLocalParam(0, lo, hi, hi-lo, enable_alpha?0.0:1.0);
 			//2d adjustment
 		}
+		else
+		{
+			img_shader =
+				m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+		}
 
-		img_shader =
-			m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 		if (img_shader)
 		{
 			if (!img_shader->valid())
@@ -3043,20 +3050,8 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 	img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
 	//2d adjustment
 
-/*	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-*/
 	DrawViewQuad();
 
-/*	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
-*/
 	if (img_shader && img_shader->valid())
 		img_shader->release();
 
@@ -3088,6 +3083,7 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 	int colormode = vd->GetColormapMode();
 	vd->SetStreamMode(2);
 	vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+	vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 	vd->Draw(!m_persp, m_interactive, m_scale_factor);
 	vd->RestoreMode();
 	vd->SetColormapMode(colormode);
@@ -3342,6 +3338,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		//draw
 		vd->SetStreamMode(3);
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+		vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 		vd->Draw(!m_persp, m_interactive, m_scale_factor);
 		//restore
 		vd->RestoreMode();
@@ -6982,7 +6979,7 @@ void VRenderGLView::DrawGrid()
 	glDrawArrays(GL_LINES, 0, line_num*4);
 	glDisableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(m_misc_vao);
+	glBindVertexArray(0);
 
 	if (shader && shader->valid())
 		shader->release();
@@ -7039,7 +7036,7 @@ void VRenderGLView::DrawCamCtr()
 
 	glDisableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(m_misc_vao);
+	glBindVertexArray(0);
 
 	if (shader && shader->valid())
 		shader->release();
@@ -7087,7 +7084,7 @@ void VRenderGLView::DrawFrame()
 	glDrawArrays(GL_LINE_LOOP, 0, 4);
 	glDisableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(m_misc_vao);
+	glBindVertexArray(0);
 
 	if (shader && shader->valid())
 		shader->release();
@@ -7097,123 +7094,110 @@ void VRenderGLView::DrawFrame()
 
 void VRenderGLView::DrawScaleBar()
 {
-/*	double offset = 0.0;
+	double offset = 0.0;
 	if (m_draw_legend)
 		offset = m_sb_height;
 
-	BitmapFontType font = BITMAP_FONT_TYPE_HELVETICA_12;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-		font = (BitmapFontType)vr_frame->GetSettingDlg()->GetTextFont();
-
 	int nx = GetSize().x;
 	int ny = GetSize().y;
+	float sx, sy;
+	sx = 2.0/nx;
+	sy = 2.0/ny;
+	float px, py, ph;
 
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	gluOrtho2D(0.0, 1.0, 0.0, 1.0);
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
+	glm::mat4 proj_mat = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f);
 
-	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_LIGHTING);
-	//glDisable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
-
-	GLfloat line_width;
-	glGetFloatv(GL_LINE_WIDTH, &line_width);
-	glLineWidth(5.0);
-	//text color
-	glColor3d(m_bg_color_inv.r(), m_bg_color_inv.g(), m_bg_color_inv.b());
+	glDisable(GL_BLEND);
 
 	double len = m_sb_length / (m_ortho_right-m_ortho_left);
-	double textlen = renderTextLen(font, m_sb_text.To8BitData().data());
+	wstring wsb_text = m_sb_text.ToStdWstring();
+	double textlen = m_text_renderer?
+		m_text_renderer->RenderTextLen(wsb_text):0.0;
+	vector<float> vertex;
+	vertex.reserve(4*3);
+
 	if (m_draw_frame)
 	{
-		glBegin(GL_LINE_STRIP);
-		glVertex2d((0.95*m_frame_w+m_frame_x)/nx, (0.05*m_frame_h+m_frame_y+offset)/ny);
-		glVertex2d((0.95*m_frame_w+m_frame_x)/nx-len, (0.05*m_frame_h+m_frame_y+offset)/ny);
-		glEnd();
+		px = (0.95*m_frame_w+m_frame_x)/nx;
+		py = (0.05*m_frame_h+m_frame_y+offset)/ny;
+		ph = 5.0/ny;
+		vertex.push_back(px); vertex.push_back(py); vertex.push_back(0.0);
+		vertex.push_back(px-len); vertex.push_back(py); vertex.push_back(0.0);
+		vertex.push_back(px); vertex.push_back(py-ph); vertex.push_back(0.0);
+		vertex.push_back(px-len); vertex.push_back(py-ph); vertex.push_back(0.0);
+
 		if (m_disp_scale_bar_text)
 		{
-			beginRenderText(nx, ny);
-			renderText(
-				0.95*m_frame_w+m_frame_x-len*nx/2.0-textlen/2.0,
-				ny-0.065*m_frame_h-m_frame_y-offset,
-				font,
-				m_sb_text.To8BitData().data());
-			endRenderText();
+			px = 0.95*m_frame_w+m_frame_x-(len*nx+textlen+nx)/2.0;
+			py = ny/2.0-ny+0.065*m_frame_h+m_frame_y+offset;
+			if (m_text_renderer)
+				m_text_renderer->RenderText(
+				wsb_text, m_bg_color_inv,
+				px*sx, py*sy, sx, sy);
 		}
 	}
 	else
 	{
-		glBegin(GL_LINE_STRIP);
-		glVertex2d(0.95, 0.05+offset/ny);
-		glVertex2d(0.95-len, 0.05+offset/ny);
-		glEnd();
+		px = 0.95;
+		py = 0.05+offset/ny;
+		ph = 5.0/ny;
+		vertex.push_back(px); vertex.push_back(py); vertex.push_back(0.0);
+		vertex.push_back(px-len); vertex.push_back(py); vertex.push_back(0.0);
+		vertex.push_back(px); vertex.push_back(py-ph); vertex.push_back(0.0);
+		vertex.push_back(px-len); vertex.push_back(py-ph); vertex.push_back(0.0);
+
 		if (m_disp_scale_bar_text)
 		{
-			beginRenderText(nx, ny);
-			renderText(
-				nx*(0.95-len/2.0)-textlen/2.0,
-				0.935*ny-offset,
-				font,
-				m_sb_text.To8BitData().data());
-			endRenderText();
+			px = 0.95*nx-(len*nx+textlen+nx)/2.0;
+			py = ny/2.0-0.935*ny+offset;
+			if (m_text_renderer)
+				m_text_renderer->RenderText(
+				wsb_text, m_bg_color_inv,
+				px*sx, py*sy, sx, sy);
 		}
 	}
 
-	glLineWidth(line_width);
-	glPopAttrib();
+	ShaderProgram* shader =
+		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+	if (shader)
+	{
+		if (!shader->valid())
+			shader->create();
+		shader->bind();
+	}
+	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-*/}
+	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
+	glBindVertexArray(m_misc_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (const GLvoid*)0);
+
+	shader->setLocalParam(0, m_bg_color_inv.r(), m_bg_color_inv.g(), m_bg_color_inv.b(), 1.0);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+	glDisableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	if (shader && shader->valid())
+		shader->release();
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+}
 
 void VRenderGLView::DrawLegend()
 {
-/*	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (!m_text_renderer)
+		return;
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (!vr_frame)
 		return;
 
-	BitmapFontType font = BITMAP_FONT_TYPE_HELVETICA_12;
-	double font_height = 17.0;
-	if (vr_frame->GetSettingDlg())
-	{
-		font = (BitmapFontType)vr_frame->GetSettingDlg()->GetTextFont();
-		switch (font)
-		{
-		case BITMAP_FONT_TYPE_8_BY_13:
-			font_height = 18.0;
-			break;
-		case BITMAP_FONT_TYPE_9_BY_15:
-			font_height = 20.0;
-			break;
-		case BITMAP_FONT_TYPE_HELVETICA_10:
-			font_height = 10.0;
-			break;
-		case BITMAP_FONT_TYPE_HELVETICA_12:
-			font_height = 17.0;
-			break;
-		case BITMAP_FONT_TYPE_HELVETICA_18:
-			font_height = 23.0;
-			break;
-		case BITMAP_FONT_TYPE_TIMES_ROMAN_10:
-			font_height = 15.0;
-			break;
-		case BITMAP_FONT_TYPE_TIMES_ROMAN_24:
-			font_height = 29.0;
-			break;
-		default:
-			font = BITMAP_FONT_TYPE_HELVETICA_12;
-			font_height = 17.0;
-			break;
-		}
-	}
+	double font_height = m_text_renderer->GetSize() + 3.0;
 
 	int nx = GetSize().x;
 	int ny = GetSize().y;
@@ -7227,6 +7211,7 @@ void VRenderGLView::DrawLegend()
 	}
 
 	wxString wxstr;
+	wstring wstr;
 	double length = 0.0;
 	double name_len = 0.0;
 	double gap_width = 15.0;
@@ -7238,7 +7223,8 @@ void VRenderGLView::DrawLegend()
 		if (m_vd_pop_list[i] && m_vd_pop_list[i]->GetLegend())
 		{
 			wxstr = m_vd_pop_list[i]->GetName();
-			name_len = renderTextLen(font, wxstr.To8BitData().data())+font_height;
+			wstr = wxstr.ToStdWstring();
+			name_len = m_text_renderer->RenderTextLen(wstr)+font_height;
 			length += name_len;
 			if (length < double(m_draw_frame?m_frame_w:nx)-gap_width)
 			{
@@ -7256,7 +7242,8 @@ void VRenderGLView::DrawLegend()
 		if (m_md_pop_list[i] && m_md_pop_list[i]->GetLegend())
 		{
 			wxstr = m_md_pop_list[i]->GetName();
-			name_len = renderTextLen(font, wxstr.To8BitData().data())+font_height;
+			wstr = wxstr.ToStdWstring();
+			name_len = m_text_renderer->RenderTextLen(wstr)+font_height;
 			length += name_len;
 			if (length < double(m_draw_frame?m_frame_w:nx)-gap_width)
 			{
@@ -7280,7 +7267,8 @@ void VRenderGLView::DrawLegend()
 		{
 			wxstr = m_vd_pop_list[i]->GetName();
 			xpos = length;
-			name_len = renderTextLen(font, wxstr.To8BitData().data())+font_height;
+			wstr = wxstr.ToStdWstring();
+			name_len = m_text_renderer->RenderTextLen(wstr)+font_height;
 			length += name_len;
 			if (length < double(m_draw_frame?m_frame_w:nx)-gap_width)
 			{
@@ -7299,7 +7287,7 @@ void VRenderGLView::DrawLegend()
 				highlighted = true;
 			DrawName(xpos+xoffset, ny-(lines-cur_line+0.1)*font_height-yoffset,
 				nx, ny, wxstr, m_vd_pop_list[i]->GetColor(),
-				font, font_height, highlighted);
+				font_height, highlighted);
 		}
 	}
 	for (i=0; i<(int)m_md_pop_list.size(); i++)
@@ -7308,7 +7296,8 @@ void VRenderGLView::DrawLegend()
 		{
 			wxstr = m_md_pop_list[i]->GetName();
 			xpos = length;
-			name_len = renderTextLen(font, wxstr.To8BitData().data())+font_height;
+			wstr = wxstr.ToStdWstring();
+			name_len = m_text_renderer->RenderTextLen(wstr)+font_height;
 			length += name_len;
 			if (length < double(m_draw_frame?m_frame_w:nx)-gap_width)
 			{
@@ -7330,56 +7319,101 @@ void VRenderGLView::DrawLegend()
 				vr_frame->GetCurSelMesh()->GetName() == wxstr)
 				highlighted = true;
 			DrawName(xpos+xoffset, ny-(lines-cur_line+0.1)*font_height-yoffset,
-				nx, ny, wxstr, c, font, font_height, highlighted);
+				nx, ny, wxstr, c, font_height, highlighted);
 		}
 	}
 
 	m_sb_height = (lines+1)*font_height;
-*/}
+}
 
-void VRenderGLView::DrawName(double x, double y, int nx, int ny,
+void VRenderGLView::DrawName(
+	double x, double y, int nx, int ny,
 	wxString name, Color color,
 	double font_height,
 	bool highlighted)
 {
-/*	//text color
-	beginRenderText(nx, ny);
-	glColor4d(m_bg_color_inv.r(), m_bg_color_inv.g(), m_bg_color_inv.b(), 1.0);
-	glBegin(GL_QUADS);
-	glVertex2d(x+0.2*font_height-1.0, y-0.2*font_height+1.0);
-	glVertex2d(x+0.8*font_height+1.0, y-0.2*font_height+1.0);
-	glVertex2d(x+0.8*font_height+1.0, y-0.8*font_height-1.0);
-	glVertex2d(x+0.2*font_height-1.0, y-0.8*font_height-1.0);
-	glEnd();
-	glColor4d(color.r(), color.g(), color.b(), 1.0);
-	glBegin(GL_QUADS);
-	glVertex2d(x+0.2*font_height, y-0.2*font_height);
-	glVertex2d(x+0.8*font_height, y-0.2*font_height);
-	glVertex2d(x+0.8*font_height, y-0.8*font_height);
-	glVertex2d(x+0.2*font_height, y-0.8*font_height);
-	glEnd();
-	glColor4d(m_bg_color_inv.r(), m_bg_color_inv.g(), m_bg_color_inv.b(), 1.0);
-	renderText(x+font_height, y-0.25*font_height, font, name.To8BitData().data());
+	float sx, sy;
+	sx = 2.0/nx;
+	sy = 2.0/ny;
+
+	wstring wstr;
+
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+
+	glm::mat4 proj_mat = glm::ortho(0.0f, float(nx), 0.0f, float(ny));
+	vector<float> vertex;
+	vertex.reserve(8*3);
+
+	float px1, py1, px2, py2;
+	px1 = x+0.2*font_height;
+	py1 = ny-y+0.2*font_height;
+	px2 = x+0.8*font_height;
+	py2 = ny-y+0.8*font_height;
+	vertex.push_back(px1-1.0); vertex.push_back(py2+1.0); vertex.push_back(0.0);
+	vertex.push_back(px2+1.0); vertex.push_back(py2+1.0); vertex.push_back(0.0);
+	vertex.push_back(px1-1.0); vertex.push_back(py1-1.0); vertex.push_back(0.0);
+	vertex.push_back(px2+1.0); vertex.push_back(py1-1.0); vertex.push_back(0.0);
+
+	vertex.push_back(px1); vertex.push_back(py2); vertex.push_back(0.0);
+	vertex.push_back(px2); vertex.push_back(py2); vertex.push_back(0.0);
+	vertex.push_back(px1); vertex.push_back(py1); vertex.push_back(0.0);
+	vertex.push_back(px2); vertex.push_back(py1); vertex.push_back(0.0);
+
+	ShaderProgram* shader =
+		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+	if (shader)
+	{
+		if (!shader->valid())
+			shader->create();
+		shader->bind();
+	}
+	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
+	glBindVertexArray(m_misc_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (const GLvoid*)0);
+
+	shader->setLocalParam(0, m_bg_color_inv.r(), m_bg_color_inv.g(), m_bg_color_inv.b(), 1.0);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0);
+	glDrawArrays(GL_TRIANGLE_STRIP, 4, 4);
+
+	glDisableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	if (shader && shader->valid())
+		shader->release();
+
+	px1 = x+font_height-nx/2;
+	py1 = ny/2-y+0.25*font_height;
+	wstr = name.ToStdWstring();
+	m_text_renderer->RenderText(
+		wstr, m_bg_color_inv,
+		px1*sx, py1*sy, sx, sy);
 	if (highlighted)
 	{
-		glColor4d(color.r(), color.g(), color.b(), 1.0);
-		renderText(x+font_height-1.0, y-0.25*font_height-1.0, font, name.To8BitData().data());
+		px1 -= 0.5;
+		py1 += 0.5;
+		m_text_renderer->RenderText(
+			wstr, color,
+			px1*sx, py1*sy, sx, sy);
 	}
-	endRenderText();
-*/}
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+}
 
 void VRenderGLView::DrawGradBg()
 {
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	gluOrtho2D(0.0, 1.0, 0.0, 1.0);
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
+	glm::mat4 proj_mat = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f);
 
-	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
 
 	Color color1, color2;
 	HSVColor hsv_color1(m_bg_color);
@@ -7414,35 +7448,61 @@ void VRenderGLView::DrawGradBg()
 			Min(hsv_color1.val() + 0.5, 1.0)));
 	}
 
-	glBegin(GL_QUAD_STRIP);
-	//color 1
-	glColor3d(m_bg_color.r(), m_bg_color.g(), m_bg_color.b());
-	glVertex2d(0.0, 0.0);
-	glVertex2d(1.0, 0.0);
-	//color 2
-	glColor3d(color1.r(), color1.g(), color1.b());
-	glVertex2d(0.0, 0.3);
-	glVertex2d(1.0, 0.3);
-	//color 3
-	glColor3d(color2.r(), color2.g(), color2.b());
-	glVertex2d(0.0, 0.5);
-	glVertex2d(1.0, 0.5);
-	//color 4
-	glColor3d(m_bg_color.r(), m_bg_color.g(), m_bg_color.b());
-	glVertex2d(0.0, 1.0);
-	glVertex2d(1.0, 1.0);
-	glEnd();
+	vector<float> vertex;
+	vertex.reserve(16*3);
+	vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(0.0);
+	vertex.push_back(m_bg_color.r()); vertex.push_back(m_bg_color.g()); vertex.push_back(m_bg_color.b());
+	vertex.push_back(1.0); vertex.push_back(0.0); vertex.push_back(0.0);
+	vertex.push_back(m_bg_color.r()); vertex.push_back(m_bg_color.g()); vertex.push_back(m_bg_color.b());
+	vertex.push_back(0.0); vertex.push_back(0.3); vertex.push_back(0.0);
+	vertex.push_back(color1.r()); vertex.push_back(color1.g()); vertex.push_back(color1.b());
+	vertex.push_back(1.0); vertex.push_back(0.3); vertex.push_back(0.0);
+	vertex.push_back(color1.r()); vertex.push_back(color1.g()); vertex.push_back(color1.b());
+	vertex.push_back(0.0); vertex.push_back(0.5); vertex.push_back(0.0);
+	vertex.push_back(color2.r()); vertex.push_back(color2.g()); vertex.push_back(color2.b());
+	vertex.push_back(1.0); vertex.push_back(0.5); vertex.push_back(0.0);
+	vertex.push_back(color2.r()); vertex.push_back(color2.g()); vertex.push_back(color2.b());
+	vertex.push_back(0.0); vertex.push_back(1.0); vertex.push_back(0.0);
+	vertex.push_back(m_bg_color.r()); vertex.push_back(m_bg_color.g()); vertex.push_back(m_bg_color.b());
+	vertex.push_back(1.0); vertex.push_back(1.0); vertex.push_back(0.0);
+	vertex.push_back(m_bg_color.r()); vertex.push_back(m_bg_color.g()); vertex.push_back(m_bg_color.b());
 
-	glPopAttrib();
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
+	ShaderProgram* shader =
+		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR3);
+	if (shader)
+	{
+		if (!shader->valid())
+			shader->create();
+		shader->bind();
+	}
+	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
+	glBindVertexArray(m_misc_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)12);
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 8);
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	if (shader && shader->valid())
+		shader->release();
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
 }
 
 void VRenderGLView::DrawColormap()
 {
-/*	bool draw = false;
+	bool draw = false;
 
 	int num = 0;
 	int vd_index;
@@ -7514,161 +7574,211 @@ void VRenderGLView::DrawColormap()
 
 	int nx = GetSize().x;
 	int ny = GetSize().y;
+	float sx, sy;
+	sx = 2.0/nx;
+	sy = 2.0/ny;
 
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	gluOrtho2D(0.0, 1.0, 0.0, 1.0);
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
+	glm::mat4 proj_mat = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f);
 
-	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_LIGHTING);
-	//glDisable(GL_TEXTURE_2D);
-	glDisable(GL_DEPTH_TEST);
+	vector<float> vertex;
+	vertex.reserve(14*7);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	GLfloat line_width;
-	glGetFloatv(GL_LINE_WIDTH, &line_width);
-	glLineWidth(1.0);
-
+	float px, py;
 	//draw colormap
 	if (m_draw_frame)
 	{
-		glBegin(GL_QUAD_STRIP);
-		//color 1
-		glColor4d(m_color_1.r(), m_color_1.g(), m_color_1.b(), enable_alpha?0.0:1.0);
-		glVertex2d((0.01*m_frame_w+m_frame_x)/nx, (0.1*m_frame_h+m_frame_y+offset)/ny);
-		glVertex2d((0.05*m_frame_w+m_frame_x)/nx, (0.1*m_frame_h+m_frame_y+offset)/ny);
-		//color 2
-		glColor4d(m_color_2.r(), m_color_2.g(), m_color_2.b(), enable_alpha?m_value_2:1.0);
-		glVertex2d((0.01*m_frame_w+m_frame_x)/nx, ((0.1+0.4*m_value_2)*m_frame_h+m_frame_y+offset)/ny);
-		glVertex2d((0.05*m_frame_w+m_frame_x)/nx, ((0.1+0.4*m_value_2)*m_frame_h+m_frame_y+offset)/ny);
-		//color 3
-		glColor4d(m_color_3.r(), m_color_3.g(), m_color_3.b(), enable_alpha?m_value_3:1.0);
-		glVertex2d((0.01*m_frame_w+m_frame_x)/nx, ((0.1+0.4*m_value_3)*m_frame_h+m_frame_y+offset)/ny);
-		glVertex2d((0.05*m_frame_w+m_frame_x)/nx, ((0.1+0.4*m_value_3)*m_frame_h+m_frame_y+offset)/ny);
-		//color 4
-		glColor4d(m_color_4.r(), m_color_4.g(), m_color_4.b(), enable_alpha?m_value_4:1.0);
-		glVertex2d((0.01*m_frame_w+m_frame_x)/nx, ((0.1+0.4*m_value_4)*m_frame_h+m_frame_y+offset)/ny);
-		glVertex2d((0.05*m_frame_w+m_frame_x)/nx, ((0.1+0.4*m_value_4)*m_frame_h+m_frame_y+offset)/ny);
-		//color 5
-		glColor4d(m_color_5.r(), m_color_5.g(), m_color_5.b(), enable_alpha?m_value_5:1.0);
-		glVertex2d((0.01*m_frame_w+m_frame_x)/nx, ((0.1+0.4*m_value_5)*m_frame_h+m_frame_y+offset)/ny);
-		glVertex2d((0.05*m_frame_w+m_frame_x)/nx, ((0.1+0.4*m_value_5)*m_frame_h+m_frame_y+offset)/ny);
-		//color 6
-		glColor4d(m_color_6.r(), m_color_6.g(), m_color_6.b(), enable_alpha?m_value_6:1.0);
-		glVertex2f((0.01*m_frame_w+m_frame_x)/nx, ((0.1+0.4*m_value_6)*m_frame_h+m_frame_y+offset)/ny);
-		glVertex2f((0.05*m_frame_w+m_frame_x)/nx, ((0.1+0.4*m_value_6)*m_frame_h+m_frame_y+offset)/ny);
-		//color 7
-		glColor4d(m_color_7.r(), m_color_7.g(), m_color_7.b(), 1.0);
-		glVertex2d((0.01*m_frame_w+m_frame_x)/nx, (0.5*m_frame_h+m_frame_y+offset)/ny);
-		glVertex2d((0.05*m_frame_w+m_frame_x)/nx, (0.5*m_frame_h+m_frame_y+offset)/ny);
-		glEnd();
+		px = (0.01*m_frame_w+m_frame_x)/nx;
+		py = (0.05*m_frame_w+m_frame_x)/nx;
+		vertex.push_back(px); vertex.push_back((0.1*m_frame_h+m_frame_y+offset)/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_1.r()); vertex.push_back(m_color_1.g()); vertex.push_back(m_color_1.b()); vertex.push_back(enable_alpha?0.0:1.0);
+		vertex.push_back(py); vertex.push_back((0.1*m_frame_h+m_frame_y+offset)/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_1.r()); vertex.push_back(m_color_1.g()); vertex.push_back(m_color_1.b()); vertex.push_back(enable_alpha?0.0:1.0);
+		vertex.push_back(px); vertex.push_back(((0.1+0.4*m_value_2)*m_frame_h+m_frame_y+offset)/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_2.r()); vertex.push_back(m_color_2.g()); vertex.push_back(m_color_2.b()); vertex.push_back(enable_alpha?m_value_2:1.0);
+		vertex.push_back(py); vertex.push_back(((0.1+0.4*m_value_2)*m_frame_h+m_frame_y+offset)/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_2.r()); vertex.push_back(m_color_2.g()); vertex.push_back(m_color_2.b()); vertex.push_back(enable_alpha?m_value_2:1.0);
+		vertex.push_back(px); vertex.push_back(((0.1+0.4*m_value_3)*m_frame_h+m_frame_y+offset)/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_3.r()); vertex.push_back(m_color_3.g()); vertex.push_back(m_color_3.b()); vertex.push_back(enable_alpha?m_value_3:1.0);
+		vertex.push_back(py); vertex.push_back(((0.1+0.4*m_value_3)*m_frame_h+m_frame_y+offset)/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_3.r()); vertex.push_back(m_color_3.g()); vertex.push_back(m_color_3.b()); vertex.push_back(enable_alpha?m_value_3:1.0);
+		vertex.push_back(px); vertex.push_back(((0.1+0.4*m_value_4)*m_frame_h+m_frame_y+offset)/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_4.r()); vertex.push_back(m_color_4.g()); vertex.push_back(m_color_4.b()); vertex.push_back(enable_alpha?m_value_4:1.0);
+		vertex.push_back(py); vertex.push_back(((0.1+0.4*m_value_4)*m_frame_h+m_frame_y+offset)/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_4.r()); vertex.push_back(m_color_4.g()); vertex.push_back(m_color_4.b()); vertex.push_back(enable_alpha?m_value_4:1.0);
+		vertex.push_back(px); vertex.push_back(((0.1+0.4*m_value_5)*m_frame_h+m_frame_y+offset)/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_5.r()); vertex.push_back(m_color_5.g()); vertex.push_back(m_color_5.b()); vertex.push_back(enable_alpha?m_value_5:1.0);
+		vertex.push_back(py); vertex.push_back(((0.1+0.4*m_value_5)*m_frame_h+m_frame_y+offset)/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_5.r()); vertex.push_back(m_color_5.g()); vertex.push_back(m_color_5.b()); vertex.push_back(enable_alpha?m_value_5:1.0);
+		vertex.push_back(px); vertex.push_back(((0.1+0.4*m_value_6)*m_frame_h+m_frame_y+offset)/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_6.r()); vertex.push_back(m_color_6.g()); vertex.push_back(m_color_6.b()); vertex.push_back(enable_alpha?m_value_6:1.0);
+		vertex.push_back(py); vertex.push_back(((0.1+0.4*m_value_6)*m_frame_h+m_frame_y+offset)/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_6.r()); vertex.push_back(m_color_6.g()); vertex.push_back(m_color_6.b()); vertex.push_back(enable_alpha?m_value_6:1.0);
+		vertex.push_back(px); vertex.push_back((0.5*m_frame_h+m_frame_y+offset)/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_7.r()); vertex.push_back(m_color_7.g()); vertex.push_back(m_color_7.b()); vertex.push_back(1.0);
+		vertex.push_back(py); vertex.push_back((0.5*m_frame_h+m_frame_y+offset)/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_7.r()); vertex.push_back(m_color_7.g()); vertex.push_back(m_color_7.b()); vertex.push_back(1.0);
 
-		char str[32];
-		//text color
-		glColor3d(m_bg_color_inv.r(), m_bg_color_inv.g(), m_bg_color_inv.b());
-		//value 1
-		SPRINTF(str, 32, "%d", 0);
-		beginRenderText(nx, ny);
-		renderText(0.052*m_frame_w+m_frame_x, ny-0.1*m_frame_h-m_frame_y-offset, BITMAP_FONT_TYPE_HELVETICA_12, str);
-		endRenderText();
-		//value 2
-		SPRINTF(str, 32, "%d", int(m_value_2*max_val));
-		beginRenderText(nx, ny);
-		renderText(0.052*m_frame_w+m_frame_x, ny-(0.1+0.4*m_value_2)*m_frame_h-m_frame_y-offset, BITMAP_FONT_TYPE_HELVETICA_12, str);
-		endRenderText();
-		//value 4
-		SPRINTF(str, 32, "%d", int(m_value_4*max_val));
-		beginRenderText(nx, ny);
-		renderText(0.052*m_frame_w+m_frame_x, ny-(0.1+0.4*m_value_4)*m_frame_h-m_frame_y-offset, BITMAP_FONT_TYPE_HELVETICA_12, str);
-		endRenderText();
-		//value 6
-		SPRINTF(str, 32, "%d", int(m_value_6*max_val));
-		beginRenderText(nx, ny);
-		renderText(0.052*m_frame_w+m_frame_x, ny-(0.1+0.4*m_value_6)*m_frame_h-m_frame_y-offset, BITMAP_FONT_TYPE_HELVETICA_12, str);
-		endRenderText();
-		//value 7
-		SPRINTF(str, 32, "%d", int(max_val));
-		beginRenderText(nx, ny);
-		renderText(0.052*m_frame_w+m_frame_x, ny-0.5*m_frame_h-m_frame_y-offset, BITMAP_FONT_TYPE_HELVETICA_12, str);
-		endRenderText();
+		if (m_text_renderer)
+		{
+			wxString str;
+			wstring wstr;
+
+			//value 1
+			px = 0.052*m_frame_w+m_frame_x-nx/2.0;
+			py = 0.1*m_frame_h+m_frame_y+offset-ny/2.0;
+			str = wxString::Format("%d", 0);
+			wstr = str.ToStdWstring();
+			m_text_renderer->RenderText(
+				wstr, m_bg_color_inv,
+				px*sx, py*sy, sx, sy);
+			//value 2
+			px = 0.052*m_frame_w+m_frame_x-nx/2.0;
+			py = (0.1+0.4*m_value_2)*m_frame_h+m_frame_y+offset-ny/2.0;
+			str = wxString::Format("%d", int(m_value_2*max_val));
+			wstr = str.ToStdWstring();
+			m_text_renderer->RenderText(
+				wstr, m_bg_color_inv,
+				px*sx, py*sy, sx, sy);
+			//value 4
+			px = 0.052*m_frame_w+m_frame_x-nx/2.0;
+			py = (0.1+0.4*m_value_4)*m_frame_h+m_frame_y+offset-ny/2.0;
+			str = wxString::Format("%d", int(m_value_4*max_val));
+			wstr = str.ToStdWstring();
+			m_text_renderer->RenderText(
+				wstr, m_bg_color_inv,
+				px*sx, py*sy, sx, sy);
+			//value 6
+			px = 0.052*m_frame_w+m_frame_x-nx/2.0;
+			py = (0.1+0.4*m_value_6)*m_frame_h+m_frame_y+offset-ny/2.0;
+			str = wxString::Format("%d", int(m_value_6*max_val));
+			wstr = str.ToStdWstring();
+			m_text_renderer->RenderText(
+				wstr, m_bg_color_inv,
+				px*sx, py*sy, sx, sy);
+			//value 7
+			px = 0.052*m_frame_w+m_frame_x-nx/2.0;
+			py = 0.5*m_frame_h+m_frame_y+offset-ny/2.0;
+			str = wxString::Format("%d", int(max_val));
+			wstr = str.ToStdWstring();
+			m_text_renderer->RenderText(
+				wstr, m_bg_color_inv,
+				px*sx, py*sy, sx, sy);
+		}
 	}
 	else
 	{
-		glBegin(GL_QUAD_STRIP);
-		//color 1
-		glColor4d(m_color_1.r(), m_color_1.g(), m_color_1.b(), enable_alpha?0.0:1.0);
-		glVertex2d(0.01, 0.1+offset/ny);
-		glVertex2d(0.05, 0.1+offset/ny);
-		//color 2
-		glColor4d(m_color_2.r(), m_color_2.g(), m_color_2.b(), enable_alpha?m_value_2:1.0);
-		glVertex2d(0.01, 0.1+0.4*m_value_2+offset/ny);
-		glVertex2d(0.05, 0.1+0.4*m_value_2+offset/ny);
-		//color 3
-		glColor4d(m_color_3.r(), m_color_3.g(), m_color_3.b(), enable_alpha?m_value_3:1.0);
-		glVertex2d(0.01, 0.1+0.4*m_value_3+offset/ny);
-		glVertex2d(0.05, 0.1+0.4*m_value_3+offset/ny);
-		//color 4
-		glColor4d(m_color_4.r(), m_color_4.g(), m_color_4.b(), enable_alpha?m_value_4:1.0);
-		glVertex2d(0.01, 0.1+0.4*m_value_4+offset/ny);
-		glVertex2d(0.05, 0.1+0.4*m_value_4+offset/ny);
-		//color 5
-		glColor4d(m_color_5.r(), m_color_5.g(), m_color_5.b(), enable_alpha?m_value_5:1.0);
-		glVertex2d(0.01, 0.1+0.4*m_value_5+offset/ny);
-		glVertex2d(0.05, 0.1+0.4*m_value_5+offset/ny);
-		//color 6
-		glColor4d(m_color_6.r(), m_color_6.g(), m_color_6.b(), enable_alpha?m_value_6:1.0);
-		glVertex2d(0.01, 0.1+0.4*m_value_6+offset/ny);
-		glVertex2d(0.05, 0.1+0.4*m_value_6+offset/ny);
-		//color 7
-		glColor4d(m_color_7.r(), m_color_7.g(), m_color_7.b(), 1.0);
-		glVertex2d(0.01, 0.5+offset/ny);
-		glVertex2d(0.05, 0.5+offset/ny);
-		glEnd();
+		vertex.push_back(0.01); vertex.push_back(0.1+offset/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_1.r()); vertex.push_back(m_color_1.g()); vertex.push_back(m_color_1.b()); vertex.push_back(enable_alpha?0.0:1.0);
+		vertex.push_back(0.05); vertex.push_back(0.1+offset/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_1.r()); vertex.push_back(m_color_1.g()); vertex.push_back(m_color_1.b()); vertex.push_back(enable_alpha?0.0:1.0);
+		vertex.push_back(0.01); vertex.push_back(0.1+0.4*m_value_2+offset/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_2.r()); vertex.push_back(m_color_2.g()); vertex.push_back(m_color_2.b()); vertex.push_back(enable_alpha?m_value_2:1.0);
+		vertex.push_back(0.05); vertex.push_back(0.1+0.4*m_value_2+offset/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_2.r()); vertex.push_back(m_color_2.g()); vertex.push_back(m_color_2.b()); vertex.push_back(enable_alpha?m_value_2:1.0);
+		vertex.push_back(0.01); vertex.push_back(0.1+0.4*m_value_3+offset/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_3.r()); vertex.push_back(m_color_3.g()); vertex.push_back(m_color_3.b()); vertex.push_back(enable_alpha?m_value_3:1.0);
+		vertex.push_back(0.05); vertex.push_back(0.1+0.4*m_value_3+offset/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_3.r()); vertex.push_back(m_color_3.g()); vertex.push_back(m_color_3.b()); vertex.push_back(enable_alpha?m_value_3:1.0);
+		vertex.push_back(0.01); vertex.push_back(0.1+0.4*m_value_4+offset/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_4.r()); vertex.push_back(m_color_4.g()); vertex.push_back(m_color_4.b()); vertex.push_back(enable_alpha?m_value_4:1.0);
+		vertex.push_back(0.05); vertex.push_back(0.1+0.4*m_value_4+offset/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_4.r()); vertex.push_back(m_color_4.g()); vertex.push_back(m_color_4.b()); vertex.push_back(enable_alpha?m_value_4:1.0);
+		vertex.push_back(0.01); vertex.push_back(0.1+0.4*m_value_5+offset/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_5.r()); vertex.push_back(m_color_5.g()); vertex.push_back(m_color_5.b()); vertex.push_back(enable_alpha?m_value_5:1.0);
+		vertex.push_back(0.05); vertex.push_back(0.1+0.4*m_value_5+offset/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_5.r()); vertex.push_back(m_color_5.g()); vertex.push_back(m_color_5.b()); vertex.push_back(enable_alpha?m_value_5:1.0);
+		vertex.push_back(0.01); vertex.push_back(0.1+0.4*m_value_6+offset/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_6.r()); vertex.push_back(m_color_6.g()); vertex.push_back(m_color_6.b()); vertex.push_back(enable_alpha?m_value_6:1.0);
+		vertex.push_back(0.05); vertex.push_back(0.1+0.4*m_value_6+offset/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_6.r()); vertex.push_back(m_color_6.g()); vertex.push_back(m_color_6.b()); vertex.push_back(enable_alpha?m_value_6:1.0);
+		vertex.push_back(0.01); vertex.push_back(0.5+offset/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_7.r()); vertex.push_back(m_color_7.g()); vertex.push_back(m_color_7.b()); vertex.push_back(1.0);
+		vertex.push_back(0.05); vertex.push_back(0.5+offset/ny); vertex.push_back(0.0);
+		vertex.push_back(m_color_7.r()); vertex.push_back(m_color_7.g()); vertex.push_back(m_color_7.b()); vertex.push_back(1.0);
 
-		char str[32];
-		//text color
-		glColor3d(m_bg_color_inv.r(), m_bg_color_inv.g(), m_bg_color_inv.b());
-		//value 1
-		SPRINTF(str, 32, "%d", 0);
-		beginRenderText(nx, ny);
-		renderText(0.052*nx, 0.9*ny-offset, BITMAP_FONT_TYPE_HELVETICA_12, str);
-		endRenderText();
-		//value 2
-		SPRINTF(str, 32, "%d", int(m_value_2*max_val));
-		beginRenderText(nx, ny);
-		renderText(0.052*nx, (0.9-0.4*m_value_2)*ny-offset, BITMAP_FONT_TYPE_HELVETICA_12, str);
-		endRenderText();
-		//value 4
-		SPRINTF(str, 32, "%d", int(m_value_4*max_val));
-		beginRenderText(nx, ny);
-		renderText(0.052*nx, (0.9-0.4*m_value_4)*ny-offset, BITMAP_FONT_TYPE_HELVETICA_12, str);
-		endRenderText();
-		//value 6
-		SPRINTF(str, 32, "%d", int(m_value_6*max_val));
-		beginRenderText(nx, ny);
-		renderText(0.052*nx, (0.9-0.4*m_value_6)*ny-offset, BITMAP_FONT_TYPE_HELVETICA_12, str);
-		endRenderText();
-		//value 7
-		SPRINTF(str, 32, "%d", int(max_val));
-		beginRenderText(nx, ny);
-		renderText(0.052*nx, 0.5*ny-offset, BITMAP_FONT_TYPE_HELVETICA_12, str);
-		endRenderText();
+		if (m_text_renderer)
+		{
+			wxString str;
+			wstring wstr;
+
+			//value 1
+			px = 0.052*nx-nx/2.0;
+			py = ny/2.0-0.9*ny+offset;
+			str = wxString::Format("%d", 0);
+			wstr = str.ToStdWstring();
+			m_text_renderer->RenderText(
+				wstr, m_bg_color_inv,
+				px*sx, py*sy, sx, sy);
+			//value 2
+			px = 0.052*nx-nx/2.0;
+			py = ny/2.0-(0.9-0.4*m_value_2)*ny+offset;
+			str = wxString::Format("%d", int(m_value_2*max_val));
+			wstr = str.ToStdWstring();
+			m_text_renderer->RenderText(
+				wstr, m_bg_color_inv,
+				px*sx, py*sy, sx, sy);
+			//value 4
+			px = 0.052*nx-nx/2.0;
+			py = ny/2.0-(0.9-0.4*m_value_4)*ny+offset;
+			str = wxString::Format("%d", int(m_value_4*max_val));
+			wstr = str.ToStdWstring();
+			m_text_renderer->RenderText(
+				wstr, m_bg_color_inv,
+				px*sx, py*sy, sx, sy);
+			//value 6
+			px = 0.052*nx-nx/2.0;
+			py = ny/2.0-(0.9-0.4*m_value_6)*ny+offset;
+			str = wxString::Format("%d", int(m_value_6*max_val));
+			wstr = str.ToStdWstring();
+			m_text_renderer->RenderText(
+				wstr, m_bg_color_inv,
+				px*sx, py*sy, sx, sy);
+			//value 7
+			px = 0.052*nx-nx/2.0;
+			py = ny/2.0-0.5*ny+offset;
+			str = wxString::Format("%d", int(max_val));
+			wstr = str.ToStdWstring();
+			m_text_renderer->RenderText(
+				wstr, m_bg_color_inv,
+				px*sx, py*sy, sx, sy);
+		}
 	}
 
-	glLineWidth(line_width);
-	glPopAttrib();
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-*/}
+	ShaderProgram* shader =
+		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR4);
+	if (shader)
+	{
+		if (!shader->valid())
+			shader->create();
+		shader->bind();
+	}
+	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
+	glBindVertexArray(m_misc_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7*sizeof(float), (const GLvoid*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7*sizeof(float), (const GLvoid*)12);
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	if (shader && shader->valid())
+		shader->release();
+
+	glEnable(GL_DEPTH_TEST);
+}
 
 void VRenderGLView::DrawInfo(int nx, int ny)
 {
@@ -7704,11 +7814,12 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	}
 	else
 		str = wxString::Format("FPS: %.2f", fps_>=0.0&&fps_<300.0?fps_:0.0);
+	wstring wstr_temp = str.ToStdWstring();
 	px = 10-nx/2;
 	py = ny/2-20;
 	if (m_text_renderer)
 		m_text_renderer->RenderText(
-		str.ToStdString(), m_bg_color_inv,
+		wstr_temp, m_bg_color_inv,
 		px*sx, py*sy, sx, sy);
 
 	if (m_draw_coord)
@@ -7720,22 +7831,24 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 		{
 			str = wxString::Format("T: %d  X: %.2f  Y: %.2f  Z: %.2f",
 				m_tseq_cur_num, p.x(), p.y(), p.z());
+			wstr_temp = str.ToStdWstring();
 			px = 10-nx/2;
 			py = ny/2-40;
 			if (m_text_renderer)
 				m_text_renderer->RenderText(
-				str.ToStdString(), m_bg_color_inv,
+				wstr_temp, m_bg_color_inv,
 				px*sx, py*sy, sx, sy);
 		}
 	}
 	else
 	{
 		str = wxString::Format("T: %d", m_tseq_cur_num);
+		wstr_temp = str.ToStdWstring();
 		px = 10-nx/2;
 		py = ny/2-40;
 		if (m_text_renderer)
 			m_text_renderer->RenderText(
-			str.ToStdString(), m_bg_color_inv,
+			wstr_temp, m_bg_color_inv,
 			px*sx, py*sy, sx, sy);
 	}
 
@@ -7744,11 +7857,12 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 		if (m_vol_method == VOL_METHOD_MULTI && m_mvr)
 		{
 			str = wxString::Format("SLICES: %d", m_mvr->get_slice_num());
+			wstr_temp = str.ToStdWstring();
 			px = 10-nx/2;
 			py = ny/2-60;
 			if (m_text_renderer)
 				m_text_renderer->RenderText(
-				str.ToStdString(), m_bg_color_inv,
+				wstr_temp, m_bg_color_inv,
 				px*sx, py*sy, sx, sy);
 		}
 		else
@@ -7759,11 +7873,12 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 				if (vd && vd->GetVR())
 				{
 					str = wxString::Format("SLICES_%d: %d", i+1, vd->GetVR()->get_slice_num());
+					wstr_temp = str.ToStdWstring();
 					px = 10-nx/2;
 					py = ny/2-(60+15*i);
 					if (m_text_renderer)
 						m_text_renderer->RenderText(
-						str.ToStdString(), m_bg_color_inv,
+						wstr_temp, m_bg_color_inv,
 						px*sx, py*sy, sx, sy);
 				}
 			}
@@ -10130,7 +10245,7 @@ wxPanel(parent, id, pos, size, style),
 #endif
 	CreateBar();
 	if (m_glview) {
-		m_glview->SetSBText(wxString::Format("50 %c%c", 131, 'm'));
+		m_glview->SetSBText("50 µm");
 		m_glview->SetScaleBarLen(1.);
 	}
 	LoadSettings();
@@ -11721,7 +11836,7 @@ void VRenderView::OnScaleTextEditing(wxCommandEvent& event) {
 		break;
 	case 1:
 	default:
-		unit_text = wxString::Format("%c%c", 131, 'm');
+		unit_text = "µm";//wxString::Format("%c%c", 131, 'm');
 		break;
 	case 2:
 		unit_text = "mm";

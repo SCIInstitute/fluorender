@@ -64,6 +64,34 @@ namespace FLIVR
 	"	gl_Position = matrix0 * vec4(InVertex, 1.0);\n" \
 	"}\n"
 
+#define IMG_VTX_CODE_DRAW_GEOMETRY_COLOR3 \
+	"//IMG_VTX_CODE_DRAW_GEOMETRY_COLOR3\n" \
+	"#version 400\n" \
+	"layout(location = 0) in vec3 InVertex;\n" \
+	"layout(location = 1) in vec3 InColor;\n" \
+	"out vec3 OutColor;\n" \
+	"uniform mat4 matrix0;//transformation\n" \
+	"\n" \
+	"void main()\n" \
+	"{\n" \
+	"	gl_Position = matrix0 * vec4(InVertex, 1.0);\n" \
+	"	OutColor = InColor;\n" \
+	"}\n"
+
+#define IMG_VTX_CODE_DRAW_GEOMETRY_COLOR4 \
+	"//IMG_VTX_CODE_DRAW_GEOMETRY_COLOR4\n" \
+	"#version 400\n" \
+	"layout(location = 0) in vec3 InVertex;\n" \
+	"layout(location = 1) in vec4 InColor;\n" \
+	"out vec4 OutColor;\n" \
+	"uniform mat4 matrix0;//transformation\n" \
+	"\n" \
+	"void main()\n" \
+	"{\n" \
+	"	gl_Position = matrix0 * vec4(InVertex, 1.0);\n" \
+	"	OutColor = InColor;\n" \
+	"}\n"
+
 #define IMG_FRG_CODE_DRAW_GEOMETRY \
 	"//IMG_FRG_CODE_DRAW_GEOMETRY\n" \
 	"#version 400\n" \
@@ -73,6 +101,28 @@ namespace FLIVR
 	"void main()\n" \
 	"{\n" \
 	"	FragColor = loc0;\n" \
+	"}\n"
+
+#define IMG_FRG_CODE_DRAW_GEOMETRY_COLOR3 \
+	"//IMG_FRG_CODE_DRAW_GEOMETRY_COLOR3\n" \
+	"#version 400\n" \
+	"in vec3 OutColor;\n" \
+	"out vec4 FragColor;\n" \
+	"\n" \
+	"void main()\n" \
+	"{\n" \
+	"	FragColor = vec4(OutColor, 1.0);\n" \
+	"}\n"
+
+#define IMG_FRG_CODE_DRAW_GEOMETRY_COLOR4 \
+	"//IMG_FRG_CODE_DRAW_GEOMETRY_COLOR4\n" \
+	"#version 400\n" \
+	"in vec4 OutColor;\n" \
+	"out vec4 FragColor;\n" \
+	"\n" \
+	"void main()\n" \
+	"{\n" \
+	"	FragColor = OutColor;\n" \
 	"}\n"
 
 #define IMG_SHADER_CODE_TEXTURE_LOOKUP \
@@ -551,6 +601,12 @@ namespace FLIVR
 		case IMG_SHDR_DRAW_GEOMETRY:
 			z << IMG_VTX_CODE_DRAW_GEOMETRY;
 			break;
+		case IMG_SHDR_DRAW_GEOMETRY_COLOR3:
+			z << IMG_VTX_CODE_DRAW_GEOMETRY_COLOR3;
+			break;
+		case IMG_SHDR_DRAW_GEOMETRY_COLOR4:
+			z << IMG_VTX_CODE_DRAW_GEOMETRY_COLOR4;
+			break;
 		case IMG_SHADER_TEXTURE_LOOKUP:
 		case IMG_SHDR_BRIGHTNESS_CONTRAST:
 		case IMG_SHDR_BRIGHTNESS_CONTRAST_HDR:
@@ -581,6 +637,12 @@ namespace FLIVR
 		{
 		case IMG_SHDR_DRAW_GEOMETRY:
 			z << IMG_FRG_CODE_DRAW_GEOMETRY;
+			break;
+		case IMG_SHDR_DRAW_GEOMETRY_COLOR3:
+			z << IMG_FRG_CODE_DRAW_GEOMETRY_COLOR3;
+			break;
+		case IMG_SHDR_DRAW_GEOMETRY_COLOR4:
+			z << IMG_FRG_CODE_DRAW_GEOMETRY_COLOR4;
 			break;
 		case IMG_SHADER_TEXTURE_LOOKUP:
 			z << IMG_SHADER_CODE_TEXTURE_LOOKUP;

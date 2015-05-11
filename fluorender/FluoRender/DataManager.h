@@ -365,6 +365,9 @@ public:
 	//estimated threshold
 	double GetEstThresh() {return m_est_thresh;}
 
+	//fog
+	void SetFog(bool use_fog, double fog_intensity, double fog_start, double fog_end);
+
 private:
 	//duplication indicator and counter
 	bool m_dup;

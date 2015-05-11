@@ -196,6 +196,10 @@ namespace FLIVR
 			break;
 		}
 
+		//uniform for fog
+		if (fog_)
+			z << VOL_UNIFORMS_FOG_LOC;
+
 		//functions
 		if (clip_)
 			z << VOL_CLIP_FUNC;
