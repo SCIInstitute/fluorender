@@ -834,6 +834,9 @@ private:
 	void DrawGradBg();
 	void DrawInfo(int nx, int ny);
 
+	//depth
+	double CalcZ(double z);
+	void CalcFogRange();
 	//different modes
 	void Draw();//draw volumes only
 	void DrawDP();//draw volumes and meshes with depth peeling

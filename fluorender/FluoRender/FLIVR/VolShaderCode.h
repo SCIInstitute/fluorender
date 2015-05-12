@@ -40,6 +40,9 @@ namespace FLIVR
 	"in vec3 OutVertex;\n" \
 	"in vec3 OutTexture;\n"
 
+#define VOL_INPUTS_FOG \
+	"in vec4 OutFogCoord;\n"
+
 #define VOL_OUTPUTS \
 	"out vec4 FragColor;\n"
 
@@ -145,14 +148,11 @@ namespace FLIVR
 
 #define VOL_HEAD_FOG \
 	"	//VOL_HEAD_FOG\n" \
-	"	vec4 fc = vec4(0.0, 0.0, 0.0, 1.0);\n" \
 	"	vec4 fp;\n" \
 	"	fp.x = loc8.x;\n" \
 	"	fp.y = loc8.y;\n" \
 	"	fp.z = loc8.z;\n" \
-	"	fp.w = -gl_FragCoord.z;\n" \
-	"//	vec4 tf = gl_TexCoord[1];\n" \
-	"	vec4 fctmp;\n" \
+	"	fp.w = abs(OutFogCoord.z/OutFogCoord.w);\n" \
 	"\n"
 
 #define VOL_HEAD_CLIP \
@@ -194,6 +194,7 @@ namespace FLIVR
 	"		return false;\n" \
 	"}\n" \
 	"\n"
+
 #define VOL_HEAD_LIT \
 	"	//VOL_HEAD_LIT\n" \
 	"	vec4 l = loc0; // {lx, ly, lz, alpha}\n" \
@@ -505,16 +506,15 @@ namespace FLIVR
 
 #define VOL_FOG_BODY \
 	"	//VOL_FOG_BODY\n" \
-	"	v.x = fp.z - fp.w;\n" \
-	"	v.x = (1.0 - clamp(v.x, 0.0, 1.0))*fp.x;\n" \
-	"	fctmp = c.w * fc;\n" \
-	"	c.xyz = mix(fctmp.xyzz, c.xyzz, (1.0-v.x)).xyz; \n" \
+	"	v.x = (fp.z-fp.w)/(fp.z-fp.y);\n" \
+	"	v.x = 1.0-clamp(v.x, 0.0, 1.0);\n" \
+	"	v.x = 1.0-exp(-pow(v.x*2.5, 2.0));\n" \
+	"	c.xyz = mix(c.xyz, vec3(0.0), v.x*fp.x); \n" \
 	"\n"
 
 #define VOL_RASTER_BLEND \
 	"	//VOL_RASTER_BLEND\n" \
 	"	FragColor = c*l.w; // VOL_RASTER_BLEND\n" \
-	"	//FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n" \
 	"\n"
 
 #define VOL_RASTER_BLEND_SOLID \

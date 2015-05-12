@@ -566,6 +566,70 @@ void VRenderGLView::HandleCamera()
 		glm::vec3(0.0), glm::vec3(m_up.x(), m_up.y(), m_up.z()));
 }
 
+//depth buffer calculation
+double VRenderGLView::CalcZ(double z)
+{
+	double result = 0.0;
+	if (m_persp)
+	{
+		if (z != 0.0)
+		{
+			result = (m_far_clip+m_near_clip)/(m_far_clip-m_near_clip)/2.0 +
+				(-m_far_clip*m_near_clip)/(m_far_clip-m_near_clip)/z+0.5;
+		}
+	}
+	else
+		result = (z-m_near_clip)/(m_far_clip-m_near_clip);
+	return result;
+}
+
+void VRenderGLView::CalcFogRange()
+{
+	int w, h;
+	w = GetSize().x;
+	h = GetSize().y;
+
+	if (m_cur_vol)
+	{
+		Transform mv;
+		mv.set(glm::value_ptr(m_mv_mat));
+
+		double minz, maxz;
+		minz = numeric_limits<double>::max();
+		maxz = -numeric_limits<double>::max();
+
+		vector<Point> points;
+		BBox bbox = m_cur_vol->GetBounds();
+		points.push_back(Point(bbox.min().x(), bbox.min().y(), bbox.min().z()));
+		points.push_back(Point(bbox.min().x(), bbox.min().y(), bbox.max().z()));
+		points.push_back(Point(bbox.min().x(), bbox.max().y(), bbox.min().z()));
+		points.push_back(Point(bbox.min().x(), bbox.max().y(), bbox.max().z()));
+		points.push_back(Point(bbox.max().x(), bbox.min().y(), bbox.min().z()));
+		points.push_back(Point(bbox.max().x(), bbox.min().y(), bbox.max().z()));
+		points.push_back(Point(bbox.max().x(), bbox.max().y(), bbox.min().z()));
+		points.push_back(Point(bbox.max().x(), bbox.max().y(), bbox.max().z()));
+
+		Point p;
+		for (unsigned int i=0; i<points.size(); ++i)
+		{
+			p = mv.transform(points[i]);
+			minz = p.z()<minz?p.z():minz;
+			maxz = p.z()>maxz?p.z():maxz;
+		}
+
+		minz = fabs(minz);
+		maxz = fabs(maxz);
+		m_fog_start = minz<maxz?minz:maxz;
+		m_fog_end = maxz>minz?maxz:minz;
+	}
+	else
+	{
+		m_fog_start = m_distance - m_radius/2.0;
+		m_fog_start = m_fog_start<0.0?0.0:m_fog_start;
+		m_fog_end = m_distance + m_radius/4.0;
+	}
+}
+
 //draw the volume data only
 void VRenderGLView::Draw()
 {
@@ -601,18 +665,7 @@ void VRenderGLView::Draw()
 		m_mv_mat = glm::translate(m_mv_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
 
 		if (m_use_fog)
-		{
-/*			glEnable(GL_FOG);
-			GLfloat FogCol[3]={0.0, 0.0, 0.0};
-			glFogfv(GL_FOG_COLOR, FogCol);
-			glFogi(GL_FOG_MODE, GL_LINEAR);*/
-			m_fog_start = m_distance - m_radius/2.0;
-			m_fog_start = m_fog_start<0.0?0.0:m_fog_start;
-			m_fog_end = m_distance + m_radius/4.0;
-/*			glFogf(GL_FOG_START, GLfloat(fog_start));
-			glFogf(GL_FOG_END, GLfloat(fog_end));
-			glFogf(GL_FOG_DENSITY, GLfloat(m_fog_intensity));
-*/		}
+			CalcFogRange();
 
 		if (m_draw_grid)
 			DrawGrid();
@@ -631,9 +684,6 @@ void VRenderGLView::Draw()
 		if (m_draw_clip)
 			DrawClippingPlanes(true, FRONT_FACE);
 
-/*		if (m_use_fog)
-			glDisable(GL_FOG);
-*/
 		if (m_draw_bounds)
 			DrawBounds();
 
@@ -2895,27 +2945,27 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 		if (vd->GetVR())
 			vd->GetVR()->set_depth_peel(peel);
 		vd->GetVR()->set_shading(false);
-		GLboolean use_fog = false;//glIsEnabled(GL_FOG);
 		if (color_mode == 1)
 		{
 			vd->SetMode(3);
-//			glDisable(GL_FOG);
+			vd->SetFog(false, m_fog_intensity, m_fog_start, m_fog_end);
 		}
 		else
+		{
 			vd->SetMode(1);
+			vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+		}
 		//turn off alpha
 		if (color_mode == 1)
 			vd->SetEnableAlpha(false);
 		//draw
 		vd->SetStreamMode(1);
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-		vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 		vd->Draw(!m_persp, m_interactive, m_scale_factor);
 		//
 		if (color_mode == 1)
 		{
 			vd->RestoreMode();
-//			if (use_fog) glEnable(GL_FOG);
 			//restore alpha
 			vd->SetEnableAlpha(enable_alpha);
 		}
@@ -3377,6 +3427,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 				if (vr)
 				{
 					list[i]->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+					list[i]->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 					m_mvr->add_vr(vr);
 					m_mvr->set_sampling_rate(vr->get_sampling_rate());
 					m_mvr->SetNoiseRed(vr->GetNoiseRed());
@@ -3521,6 +3572,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 			if (vr)
 			{
 				list[i]->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+				list[i]->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 				m_mvr->add_vr(vr);
 				m_mvr->set_sampling_rate(vr->get_sampling_rate());
 				m_mvr->SetNoiseRed(vr->GetNoiseRed());
@@ -3820,7 +3872,7 @@ void VRenderGLView::Pick()
 
 void VRenderGLView::PickMesh()
 {
-	int i;
+/*	int i;
 	int nx = GetSize().x;
 	int ny = GetSize().y;
 
@@ -3897,7 +3949,7 @@ void VRenderGLView::PickMesh()
 		VRenderFrame* frame = (VRenderFrame*)m_frame;
 		if (frame && frame->GetCurSelType()==3 && frame->GetTree())
 			frame->GetTree()->Select(m_vrv->GetName(), "");
-	}
+	}*/
 }
 
 void VRenderGLView::PickVolume()
@@ -8373,30 +8425,24 @@ double VRenderGLView::GetPointVolume(Point& mp, int mx, int my,
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
-	glMatrixMode(GL_MODELVIEW_MATRIX);
-	glPushMatrix();
-	glMatrixMode(GL_PROJECTION_MATRIX);
-	glPushMatrix();
 	//projection
 	HandleProjection(nx, ny);
 	//Transformation
 	HandleCamera();
+	glm::mat4 mv_temp;
 	//translate object
-	glTranslated(m_obj_transx, m_obj_transy, m_obj_transz);
+	mv_temp = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
 	//rotate object
-	glRotated(m_obj_rotz+180.0, 0.0, 0.0, 1.0);
-	glRotated(m_obj_roty+180.0, 0.0, 1.0, 0.0);
-	glRotated(m_obj_rotx, 1.0, 0.0, 0.0);
+	mv_temp = glm::rotate(mv_temp, float(m_obj_rotz+180.0), glm::vec3(0.0, 0.0, 1.0));
+	mv_temp = glm::rotate(mv_temp, float(m_obj_roty+180.0), glm::vec3(0.0, 1.0, 0.0));
+	mv_temp = glm::rotate(mv_temp, float(m_obj_rotx), glm::vec3(1.0, 0.0, 0.0));
 	//center object
-	glTranslated(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz);
+	mv_temp = glm::translate(mv_temp, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
 
-	double matrix[16];
 	Transform mv;
 	Transform p;
-	glGetDoublev(GL_MODELVIEW_MATRIX, matrix);
-	mv.set(matrix);
-	glGetDoublev(GL_PROJECTION_MATRIX, matrix);
-	p.set(matrix);
+	mv.set(glm::value_ptr(mv_temp));
+	p.set(glm::value_ptr(m_proj_mat));
 
 	double x, y;
 	x = double(mx) * 2.0 / double(nx) - 1.0;
@@ -8410,10 +8456,6 @@ double VRenderGLView::GetPointVolume(Point& mp, int mx, int my,
 	Point mp2(x, y, 1.0);
 	mp2 = p.transform(mp2);
 	mp2 = mv.transform(mp2);
-	glMatrixMode(GL_MODELVIEW_MATRIX);
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION_MATRIX);
-	glPopMatrix();
 
 	//volume res
 	int xx = -1;
@@ -8545,35 +8587,33 @@ double VRenderGLView::GetPointVolumeBox(Point &mp, int mx, int my, VolumeData* v
 	if (planes->size() != 6)
 		return -1.0;
 
-	glMatrixMode(GL_MODELVIEW_MATRIX);
-	glPushMatrix();
-	glMatrixMode(GL_PROJECTION_MATRIX);
-	glPushMatrix();
 	//projection
 	HandleProjection(nx, ny);
 	//Transformation
 	HandleCamera();
+	glm::mat4 mv_temp;
 	//translate object
-	glTranslated(m_obj_transx, m_obj_transy, m_obj_transz);
+	mv_temp = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
 	//rotate object
-	glRotated(m_obj_rotz+180.0, 0.0, 0.0, 1.0);
-	glRotated(m_obj_roty+180.0, 0.0, 1.0, 0.0);
-	glRotated(m_obj_rotx, 1.0, 0.0, 0.0);
+	mv_temp = glm::rotate(mv_temp, float(m_obj_roty+180.0), glm::vec3(0.0, 1.0, 0.0));
+	mv_temp = glm::rotate(mv_temp, float(m_obj_rotz+180.0), glm::vec3(0.0, 0.0, 1.0));
+	mv_temp = glm::rotate(mv_temp, float(m_obj_rotx), glm::vec3(1.0, 0.0, 0.0));
 	//center object
-	glTranslated(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz);
-	//texture transform
+	mv_temp = glm::translate(mv_temp, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
 	Transform *tform = vd->GetTexture()->transform();
-	double mat[16];
-	tform->get_trans(mat);
-	glMultMatrixd(mat);
+	double mvmat[16];
+	tform->get_trans(mvmat);
+	glm::mat4 mv_mat2 = glm::mat4(
+		mvmat[0], mvmat[4], mvmat[8], mvmat[12],
+		mvmat[1], mvmat[5], mvmat[9], mvmat[13],
+		mvmat[2], mvmat[6], mvmat[10], mvmat[14],
+		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
+	mv_temp = mv_temp * mv_mat2;
 
-	double matrix[16];
 	Transform mv;
 	Transform p;
-	glGetDoublev(GL_MODELVIEW_MATRIX, matrix);
-	mv.set(matrix);
-	glGetDoublev(GL_PROJECTION_MATRIX, matrix);
-	p.set(matrix);
+	mv.set(glm::value_ptr(mv_temp));
+	p.set(glm::value_ptr(m_proj_mat));
 
 	double x, y;
 	x = double(mx) * 2.0 / double(nx) - 1.0;
@@ -8629,11 +8669,6 @@ double VRenderGLView::GetPointVolumeBox(Point &mp, int mx, int my, VolumeData* v
 			}
 		}
 	}
-
-	glMatrixMode(GL_MODELVIEW_MATRIX);
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION_MATRIX);
-	glPopMatrix();
 
 	mp = tform->transform(mp);
 

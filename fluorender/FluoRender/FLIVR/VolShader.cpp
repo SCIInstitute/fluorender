@@ -41,16 +41,6 @@ namespace FLIVR
 {
 #define CORE_PROFILE_VTX_SHADER 1
 
-#define VTX_SHADER_CODE_GENERIC \
-	"#version 150\n" \
-	"void main() {\n" \
-	"   gl_Position = ftransform();//ARB compatiblity only\n" \
-	"   gl_TexCoord[0] = gl_MultiTexCoord0;\n" \
-	"   gl_TexCoord[1] = gl_MultiTexCoord1;\n" \
-	"   //gl_Position = gl_Vertex;\n" \
-	"}\n" 
-
-
 #define VTX_SHADER_CODE_CORE_PROFILE \
 	"//VTX_SHADER_CODE_CORE_PROFILE\n" \
 	"#version 400\n" \
@@ -64,6 +54,25 @@ namespace FLIVR
 	"void main()\n" \
 	"{\n" \
 	"	gl_Position = matrix0 * matrix1 * vec4(InVertex,1.);\n" \
+	"	OutTexture = InTexCoord0;\n" \
+	"	OutVertex  = InVertex;\n" \
+	"}\n" 
+
+#define VTX_SHADER_CODE_FOG \
+	"//VTX_SHADER_CODE_FOG\n" \
+	"#version 400\n" \
+	"uniform mat4 matrix0; //projection matrix\n" \
+	"uniform mat4 matrix1; //modelview matrix\n" \
+	"layout(location = 0) in vec3 InVertex;  //w will be set to 1.0 automatically\n" \
+	"layout(location = 1) in vec3 InTexCoord0;\n" \
+	"out vec3 OutVertex;\n" \
+	"out vec3 OutTexture;\n" \
+	"out vec4 OutFogCoord;\n" \
+	"//-------------------\n" \
+	"void main()\n" \
+	"{\n" \
+	"	OutFogCoord = matrix1 * vec4(InVertex,1.);\n" \
+	"	gl_Position = matrix0 * OutFogCoord;\n" \
 	"	OutTexture = InTexCoord0;\n" \
 	"	OutVertex  = InVertex;\n" \
 	"}\n" 
@@ -119,13 +128,11 @@ namespace FLIVR
 	bool VolShader::emit_v(string& s)
 	{
 		ostringstream z;
-		switch (vertex_type_) {
-		case 0:
-			z << VTX_SHADER_CODE_GENERIC;
-			break;
-		case CORE_PROFILE_VTX_SHADER:
+		if (fog_)
+			z << VTX_SHADER_CODE_FOG;
+		else
 			z << VTX_SHADER_CODE_CORE_PROFILE;
-		}
+
 		s = z.str();
 		return false;
 	}
@@ -145,6 +152,8 @@ namespace FLIVR
 		//version info
 		z << VOL_VERSION;
 		z << VOL_INPUTS;
+		if (fog_)
+			z << VOL_INPUTS_FOG;
 		z << VOL_OUTPUTS;
 
 		//the common uniforms

@@ -220,8 +220,10 @@ namespace FLIVR
 		size.reserve(num_slices_*6);
 
 		//--------------------------------------------------------------------------
-		bool use_shading = vr_list_[0]->shading_;
-		GLboolean use_fog = false;//glIsEnabled(GL_FOG) && colormap_mode_!=2;
+		bool use_shading = false;
+		for (size_t i=0; i<vr_list_.size(); ++i)
+			use_shading = use_shading || vr_list_[0]->shading_;
+		bool use_fog = vr_list_[0]->m_use_fog && colormap_mode_!=2;
 		GLfloat clear_color[4];
 		glGetFloatv(GL_COLOR_CLEAR_VALUE, clear_color);
 		GLint vp[4];
@@ -331,7 +333,7 @@ namespace FLIVR
 		shader = VolumeRenderer::vol_shader_factory_.shader(
 			false,
 			vr_list_[0]->tex_->nc(),
-			use_shading, use_fog!=0,
+			use_shading, use_fog,
 			depth_peel_, true,
 			hiqual_, 0,
 			colormap_mode_, false, 1);
@@ -345,6 +347,13 @@ namespace FLIVR
 		//setup depth peeling
 		if (depth_peel_ || colormap_mode_ == 2)
 			shader->setLocalParam(7, 1.0/double(w2), 1.0/double(h2), 0.0, 0.0);
+
+		//fog
+		if (use_fog)
+			shader->setLocalParam(8,
+			vr_list_[0]->m_fog_intensity,
+			vr_list_[0]->m_fog_start,
+			vr_list_[0]->m_fog_end, 0.0);
 
 		//--------------------------------------------------------------------------
 		// render bricks
@@ -452,7 +461,7 @@ namespace FLIVR
 				matrix[15] = 1.0f;
 				shader->setLocalParamMatrix(2, matrix);
 
-				draw_polygons_vol(vertex, index, size, use_fog!=0, view_ray,
+				draw_polygons_vol(vertex, index, size, use_fog, view_ray,
 					shader, i, orthographic_p, w2, h2, intp, quota_bricks_chan);
 			}
 		}
