@@ -973,7 +973,9 @@ public:
 	//i/o
 	int Load(wxString &filename);
 	int Save(wxString &filename);
-	void Draw();
+
+	//draw
+	unsigned int Draw(vector<float> &verts);
 
 	//font type
 	void SetFont(TextRenderer *font)
@@ -1010,6 +1012,7 @@ private:
 
 	//font type
 	TextRenderer *m_font;
+
 private:
 	//reading
 	unsigned char ReadTag(ifstream &ifs);

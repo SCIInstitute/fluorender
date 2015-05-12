@@ -1395,13 +1395,6 @@ namespace FLIVR
 
 		////////////////////////////////////////////////////////
 		// render bricks
-		// Set up transform
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		glLoadIdentity();
-		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
-		glLoadIdentity();
 		glDisable(GL_DEPTH_TEST);
 
 		GLint vp[4];
@@ -1449,11 +1442,6 @@ namespace FLIVR
 				draw_view_quad(double(z+0.5) / double(b->nz()));
 			}
 		}
-
-		glMatrixMode(GL_PROJECTION);
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
-		glPopMatrix();
 
 		glViewport(vp[0], vp[1], vp[2], vp[3]);
 		////////////////////////////////////////////////////////
@@ -1594,15 +1582,6 @@ namespace FLIVR
 			cal_shader->setLocalParam(3, 1.0/gamma3d_, gm_thresh_, offset_, sw_);
 		}
 
-		////////////////////////////////////////////////////////
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		glLoadIdentity();
-		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
-		glLoadIdentity();
-		glDisable(GL_DEPTH_TEST);
-
 		for (unsigned int i=0; i < bricks->size(); i++)
 		{
 			TextureBrick* b = (*bricks)[i];
@@ -1635,12 +1614,6 @@ namespace FLIVR
 				draw_view_quad(double(z+0.5) / double(b->nz()));
 			}
 		}
-
-		glMatrixMode(GL_PROJECTION);
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
-		glPopMatrix();
-		////////////////////////////////////////////////////////
 
 		//release 3d mask
 		release_texture((*bricks)[0]->nmask(), GL_TEXTURE_3D);

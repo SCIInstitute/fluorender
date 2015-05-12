@@ -1588,6 +1588,9 @@ void VRenderGLView::DrawBrush()
 		ny = GetSize().y;
 		double cx = pos1.x;
 		double cy = ny - pos1.y;
+		float sx, sy;
+		sx = 2.0/nx;
+		sy = 2.0/ny;
 
 		//draw the circles
 		//set up the matrices
@@ -1618,36 +1621,27 @@ void VRenderGLView::DrawBrush()
 				m_bg_color_inv, proj_mat);
 		}
 
-/*		char str[2];
-		str[1] = 0;
+		float px, py;
+		px = cx-7-nx/2.0;
+		py = cy-3-ny/2.0;
+		wstring wstr;
 		switch (mode)
 		{
 		case 1:
-			str[0] = 'S';
-			beginRenderText(nx, ny);
-			renderText(int(cx)-7, ny-int(cy)+3, BITMAP_FONT_TYPE_TIMES_ROMAN_24, str);
-			endRenderText();
+			wstr = L"S";
 			break;
 		case 2:
-			str[0] = '+';
-			beginRenderText(nx, ny);
-			renderText(int(cx)-7, ny-int(cy)+3, BITMAP_FONT_TYPE_TIMES_ROMAN_24, str);
-			endRenderText();
+			wstr = L"+";
 			break;
 		case 3:
-			str[0] = '-';
-			beginRenderText(nx, ny);
-			renderText(int(cx)-7, ny-int(cy)+3, BITMAP_FONT_TYPE_TIMES_ROMAN_24, str);
-			endRenderText();
+			wstr = L"-";
 			break;
 		case 4:
-			str[0] = '*';
-			beginRenderText(nx, ny);
-			renderText(int(cx)-7, ny-int(cy)+3, BITMAP_FONT_TYPE_TIMES_ROMAN_24, str);
-			endRenderText();
+			wstr = L"*";
 			break;
 		}
-*/
+		m_text_renderer->RenderText(wstr, m_bg_color_inv, px*sx, py*sy, sx, sy);
+
 		glLineWidth(line_width);
 		glEnable(GL_DEPTH_TEST);
 
@@ -1921,26 +1915,10 @@ int VRenderGLView::CompAnalysis(double min_voxels, double max_voxels,
 
 	if (!select)
 	{
-		glViewport(0, 0, (GLint)GetSize().x, (GLint)GetSize().y);
-		HandleCamera();
-
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		//translate object
-		glTranslated(m_obj_transx, m_obj_transy, m_obj_transz);
-		//rotate object
-		glRotated(m_obj_rotx, 1.0, 0.0, 0.0);
-		glRotated(m_obj_roty+180.0, 0.0, 1.0, 0.0);
-		glRotated(m_obj_rotz+180.0, 0.0, 0.0, 1.0);
-		//center object
-		glTranslated(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz);
-
 		m_selector.Set2DMask(m_tex_paint);
 		m_selector.Set2DWeight(m_tex_final, glIsTexture(m_tex_wt2)?m_tex_wt2:m_tex);
 		m_selector.SetSizeMap(size_map);
 		return_val = m_selector.CompAnalysis(min_voxels, max_voxels, thresh, falloff, select, gen_ann);
-
-		glPopMatrix();
 	}
 	else
 	{
@@ -2054,20 +2032,6 @@ void VRenderGLView::ShowAnnotations()
 int VRenderGLView::NoiseAnalysis(double min_voxels, double max_voxels, double thresh)
 {
 	int return_val = 0;
-
-	glViewport(0, 0, (GLint)GetSize().x, (GLint)GetSize().y);
-	HandleCamera();
-
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	//translate object
-	glTranslated(m_obj_transx, m_obj_transy, m_obj_transz);
-	//rotate object
-	glRotated(m_obj_rotx, 1.0, 0.0, 0.0);
-	glRotated(m_obj_roty+180.0, 0.0, 1.0, 0.0);
-	glRotated(m_obj_rotz+180.0, 0.0, 0.0, 1.0);
-	//center object
-	glTranslated(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz);
 
 	m_selector.Set2DMask(m_tex_paint);
 	m_selector.Set2DWeight(m_tex_final, glIsTexture(m_tex_wt2)?m_tex_wt2:m_tex);
@@ -8332,7 +8296,6 @@ void VRenderGLView::StartLoopUpdate()
 		m_mv_mat = glm::rotate(m_mv_mat, float(m_obj_rotz+180.0), glm::vec3(0.0, 0.0, 1.0));
 		//center object
 		m_mv_mat = glm::translate(m_mv_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
-		double sclx, scly, sclz;
 
 		PopVolumeList();
 		int total_num = 0;
@@ -8687,35 +8650,33 @@ double VRenderGLView::GetPointVolumeBox2(Point &p1, Point &p2, int mx, int my, V
 	if (planes->size() != 6)
 		return -1.0;
 
-	glMatrixMode(GL_MODELVIEW_MATRIX);
-	glPushMatrix();
-	glMatrixMode(GL_PROJECTION_MATRIX);
-	glPushMatrix();
 	//projection
 	HandleProjection(nx, ny);
 	//Transformation
 	HandleCamera();
+	glm::mat4 mv_temp;
 	//translate object
-	glTranslated(m_obj_transx, m_obj_transy, m_obj_transz);
+	mv_temp = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
 	//rotate object
-	glRotated(m_obj_rotz+180.0, 0.0, 0.0, 1.0);
-	glRotated(m_obj_roty+180.0, 0.0, 1.0, 0.0);
-	glRotated(m_obj_rotx, 1.0, 0.0, 0.0);
+	mv_temp = glm::rotate(mv_temp, float(m_obj_roty+180.0), glm::vec3(0.0, 1.0, 0.0));
+	mv_temp = glm::rotate(mv_temp, float(m_obj_rotz+180.0), glm::vec3(0.0, 0.0, 1.0));
+	mv_temp = glm::rotate(mv_temp, float(m_obj_rotx), glm::vec3(1.0, 0.0, 0.0));
 	//center object
-	glTranslated(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz);
-	//texture transform
+	mv_temp = glm::translate(mv_temp, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
 	Transform *tform = vd->GetTexture()->transform();
-	double mat[16];
-	tform->get_trans(mat);
-	glMultMatrixd(mat);
+	double mvmat[16];
+	tform->get_trans(mvmat);
+	glm::mat4 mv_mat2 = glm::mat4(
+		mvmat[0], mvmat[4], mvmat[8], mvmat[12],
+		mvmat[1], mvmat[5], mvmat[9], mvmat[13],
+		mvmat[2], mvmat[6], mvmat[10], mvmat[14],
+		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
+	mv_temp = mv_temp * mv_mat2;
 
-	double matrix[16];
 	Transform mv;
 	Transform p;
-	glGetDoublev(GL_MODELVIEW_MATRIX, matrix);
-	mv.set(matrix);
-	glGetDoublev(GL_PROJECTION_MATRIX, matrix);
-	p.set(matrix);
+	mv.set(glm::value_ptr(mv_temp));
+	p.set(glm::value_ptr(m_proj_mat));
 
 	double x, y;
 	x = double(mx) * 2.0 / double(nx) - 1.0;
@@ -8778,11 +8739,6 @@ double VRenderGLView::GetPointVolumeBox2(Point &p1, Point &p2, int mx, int my, V
 		}
 	}
 
-	glMatrixMode(GL_MODELVIEW_MATRIX);
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION_MATRIX);
-	glPopMatrix();
-
 	p1 = tform->transform(p1);
 	p2 = tform->transform(p2);
 
@@ -8797,30 +8753,24 @@ double VRenderGLView::GetPointPlane(Point &mp, int mx, int my, Point* planep)
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
-	glMatrixMode(GL_MODELVIEW_MATRIX);
-	glPushMatrix();
-	glMatrixMode(GL_PROJECTION_MATRIX);
-	glPushMatrix();
 	//projection
 	HandleProjection(nx, ny);
 	//Transformation
 	HandleCamera();
+	glm::mat4 mv_temp;
 	//translate object
-	glTranslated(m_obj_transx, m_obj_transy, m_obj_transz);
+	mv_temp = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
 	//rotate object
-	glRotated(m_obj_rotz+180.0, 0.0, 0.0, 1.0);
-	glRotated(m_obj_roty+180.0, 0.0, 1.0, 0.0);
-	glRotated(m_obj_rotx, 1.0, 0.0, 0.0);
+	mv_temp = glm::rotate(mv_temp, float(m_obj_roty+180.0), glm::vec3(0.0, 1.0, 0.0));
+	mv_temp = glm::rotate(mv_temp, float(m_obj_rotz+180.0), glm::vec3(0.0, 0.0, 1.0));
+	mv_temp = glm::rotate(mv_temp, float(m_obj_rotx), glm::vec3(1.0, 0.0, 0.0));
 	//center object
-	glTranslated(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz);
+	mv_temp = glm::translate(mv_temp, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
 
-	double matrix[16];
 	Transform mv;
 	Transform p;
-	glGetDoublev(GL_MODELVIEW_MATRIX, matrix);
-	mv.set(matrix);
-	glGetDoublev(GL_PROJECTION_MATRIX, matrix);
-	p.set(matrix);
+	mv.set(glm::value_ptr(mv_temp));
+	p.set(glm::value_ptr(m_proj_mat));
 
 	Vector n(0.0, 0.0, 1.0);
 	Point center(0.0, 0.0, -m_distance);
@@ -8847,11 +8797,6 @@ double VRenderGLView::GetPointPlane(Point &mp, int mx, int my, Point* planep)
 	//transform mp to world space
 	mp = mv.transform(mp);
 
-	glMatrixMode(GL_MODELVIEW_MATRIX);
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION_MATRIX);
-	glPopMatrix();
-
 	return (mp-mp1).length();
 }
 
@@ -8870,30 +8815,24 @@ Point* VRenderGLView::GetEditingRulerPoint(int mx, int my)
 	y = 1.0 - double(my) * 2.0 / double(ny);
 	double aspect = (double)nx / (double)ny;
 
-	glMatrixMode(GL_MODELVIEW_MATRIX);
-	glPushMatrix();
-	glMatrixMode(GL_PROJECTION_MATRIX);
-	glPushMatrix();
 	//projection
 	HandleProjection(nx, ny);
 	//Transformation
 	HandleCamera();
+	glm::mat4 mv_temp;
 	//translate object
-	glTranslated(m_obj_transx, m_obj_transy, m_obj_transz);
+	mv_temp = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
 	//rotate object
-	glRotated(m_obj_rotz+180.0, 0.0, 0.0, 1.0);
-	glRotated(m_obj_roty+180.0, 0.0, 1.0, 0.0);
-	glRotated(m_obj_rotx, 1.0, 0.0, 0.0);
+	mv_temp = glm::rotate(mv_temp, float(m_obj_roty+180.0), glm::vec3(0.0, 1.0, 0.0));
+	mv_temp = glm::rotate(mv_temp, float(m_obj_rotz+180.0), glm::vec3(0.0, 0.0, 1.0));
+	mv_temp = glm::rotate(mv_temp, float(m_obj_rotx), glm::vec3(1.0, 0.0, 0.0));
 	//center object
-	glTranslated(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz);
+	mv_temp = glm::translate(mv_temp, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
 
-	double matrix[16];
 	Transform mv;
 	Transform p;
-	glGetDoublev(GL_MODELVIEW_MATRIX, matrix);
-	mv.set(matrix);
-	glGetDoublev(GL_PROJECTION_MATRIX, matrix);
-	p.set(matrix);
+	mv.set(glm::value_ptr(mv_temp));
+	p.set(glm::value_ptr(m_proj_mat));
 
 	int i, j;
 	Point ptemp;
@@ -8923,11 +8862,6 @@ Point* VRenderGLView::GetEditingRulerPoint(int mx, int my)
 			}
 		}
 	}
-
-	glMatrixMode(GL_MODELVIEW_MATRIX);
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION_MATRIX);
-	glPopMatrix();
 
 	if (found)
 		return point;
@@ -9322,32 +9256,60 @@ void VRenderGLView::ExportTrace(wxString filename, unsigned int id)
 
 void VRenderGLView::DrawTraces()
 {
-/*	if (!m_trace_group)
-		return;
-
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	BitmapFontType font = BITMAP_FONT_TYPE_HELVETICA_12;
-	if (vr_frame->GetSettingDlg())
+	if (m_cur_vol && m_trace_group && m_text_renderer)
 	{
-		font = (BitmapFontType)vr_frame->GetSettingDlg()->GetTextFont();
-		m_trace_group->SetFont(font);
+		vector<float> verts;
+		unsigned int num = m_trace_group->Draw(verts);
+
+		if (!verts.empty())
+		{
+			double width = m_text_renderer->GetSize()/3.0;
+			glEnable(GL_LINE_SMOOTH);
+			glLineWidth(GLfloat(width));
+			glEnable(GL_DEPTH_TEST);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+			double spcx, spcy, spcz;
+			m_cur_vol->GetSpacings(spcx, spcy, spcz);
+			glm::mat4 matrix = glm::scale(m_mv_mat,
+				glm::vec3(float(spcx), float(spcy), float(spcz)));
+			matrix = m_proj_mat*matrix;
+
+			ShaderProgram* shader =
+				m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR3);
+			if (shader)
+			{
+				if (!shader->valid())
+					shader->create();
+				shader->bind();
+			}
+			shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+
+			glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(float)*verts.size(), &verts[0], GL_DYNAMIC_DRAW);
+			glBindVertexArray(m_misc_vao);
+			glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)0);
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)12);
+
+			glDrawArrays(GL_LINES, 0, num);
+
+			glDisableVertexAttribArray(0);
+			glDisableVertexAttribArray(1);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindVertexArray(0);
+
+			if (shader && shader->valid())
+				shader->release();
+
+			glDisable(GL_LINE_SMOOTH);
+			glLineWidth(1.0);
+		}
 	}
-
-	//get correct scale
-	glMatrixMode(GL_MODELVIEW_MATRIX);
-	glPushMatrix();
-	if (m_cur_vol)
-	{
-		double spcx, spcy, spcz;
-		m_cur_vol->GetSpacings(spcx, spcy, spcz);
-		glScaled(spcx, spcy, spcz);
-	}
-
-	m_trace_group->Draw();
-
-	glMatrixMode(GL_MODELVIEW_MATRIX);
-	glPopMatrix();
-*/}
+}
 
 void VRenderGLView::GetTraces()
 {

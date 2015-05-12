@@ -3542,36 +3542,12 @@ int TraceGroup::Save(wxString &filename)
 	ofs.close();
 	return result;
 }
-void TraceGroup::Draw()
-{
-/*	if (m_ghost_num <= 0)
-		return;
 
-	glPushAttrib( GL_TEXTURE_BIT | GL_DEPTH_TEST |
-		GL_LIGHTING | GL_COLOR_BUFFER_BIT | GL_LINE_BIT);
-	double width = 1;
-	switch (m_font)
-	{
-	case BITMAP_FONT_TYPE_HELVETICA_10:
-	case BITMAP_FONT_TYPE_HELVETICA_12:
-	case BITMAP_FONT_TYPE_TIMES_ROMAN_10:
-		width = 1;
-		break;
-	case BITMAP_FONT_TYPE_HELVETICA_18:
-		width = 2;
-		break;
-	case BITMAP_FONT_TYPE_TIMES_ROMAN_24:
-		width = 3;
-		break;
-	default:
-		break;
-	}
-	glLineWidth(GLfloat(width));
-	//glDisable(GL_TEXTURE_2D);
-	glDisable(GL_LIGHTING);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+unsigned int TraceGroup::Draw(vector<float> &verts)
+{
+	unsigned int result = 0;
+	if (m_ghost_num <= 0 || !m_font)
+		return result;
 
 	vector<CellMap*> ghosts;
 	unsigned int gstart, gend;
@@ -3605,9 +3581,11 @@ void TraceGroup::Draw()
 
 		id_map_temp1 = m_id_map;
 
+		verts.reserve(ghosts.size()*3*6*2);
+
 		if (m_draw_lead)
 		{
-			glBegin(GL_LINES);
+//			glBegin(GL_LINES);
 			//after
 			for (size_t i=cur_ghost; i<(cur_ghost+m_ghost_num); ++i)
 			{
@@ -3622,7 +3600,7 @@ void TraceGroup::Draw()
 					{
 						id = id_map_iter->second.id;
 						Color c(HSVColor(id%360, 1.0, 0.9));
-						glColor3d(c.r(), c.g(), c.b());
+//						glColor3d(c.r(), c.g(), c.b());
 
 						cell_map_iter1 = cell_map1->find(id);
 						if (cell_map_iter1 != cell_map1->end())
@@ -3639,12 +3617,25 @@ void TraceGroup::Draw()
 									lbl.size = vertex2->vsize;
 									lbl.center = vertex2->center;
 									id_map_temp2.insert(pair<unsigned int, Lbl>(id2, lbl));
-									glVertex3d(vertex1->center.x(),
+/*									glVertex3d(vertex1->center.x(),
 										vertex1->center.y(),
 										vertex1->center.z());
 									glVertex3d(vertex2->center.x(),
 										vertex2->center.y(),
-										vertex2->center.z());
+										vertex2->center.z());*/
+									verts.push_back(vertex1->center.x());
+									verts.push_back(vertex1->center.y());
+									verts.push_back(vertex1->center.z());
+									verts.push_back(c.r());
+									verts.push_back(c.g());
+									verts.push_back(c.b());
+									verts.push_back(vertex2->center.x());
+									verts.push_back(vertex2->center.y());
+									verts.push_back(vertex2->center.z());
+									verts.push_back(c.r());
+									verts.push_back(c.g());
+									verts.push_back(c.b());
+									result += 2;
 								}
 							}
 						}
@@ -3653,14 +3644,14 @@ void TraceGroup::Draw()
 				id_map_temp1 = id_map_temp2;
 				id_map_temp2.clear();
 			}
-			glEnd();
+//			glEnd();
 		}
 
 		if (m_draw_tail)
 		{
 			id_map_temp1 = m_id_map;
 			id_map_temp2.clear();
-			glBegin(GL_LINES);
+//			glBegin(GL_LINES);
 			//before
 			for (size_t i=cur_ghost; i>gstart; --i)
 			{
@@ -3675,7 +3666,7 @@ void TraceGroup::Draw()
 					{
 						id = id_map_iter->second.id;
 						Color c(HSVColor(id%360, 1.0, 0.9));
-						glColor3d(c.r(), c.g(), c.b());
+//						glColor3d(c.r(), c.g(), c.b());
 
 						cell_map_iter1 = cell_map1->find(id);
 						if (cell_map_iter1 != cell_map1->end())
@@ -3692,12 +3683,25 @@ void TraceGroup::Draw()
 									lbl.size = vertex2->vsize;
 									lbl.center = vertex2->center;
 									id_map_temp2.insert(pair<unsigned int, Lbl>(id2, lbl));
-									glVertex3d(vertex1->center.x(),
+/*									glVertex3d(vertex1->center.x(),
 										vertex1->center.y(),
 										vertex1->center.z());
 									glVertex3d(vertex2->center.x(),
 										vertex2->center.y(),
-										vertex2->center.z());
+										vertex2->center.z());*/
+									verts.push_back(vertex1->center.x());
+									verts.push_back(vertex1->center.y());
+									verts.push_back(vertex1->center.z());
+									verts.push_back(c.r());
+									verts.push_back(c.g());
+									verts.push_back(c.b());
+									verts.push_back(vertex2->center.x());
+									verts.push_back(vertex2->center.y());
+									verts.push_back(vertex2->center.z());
+									verts.push_back(c.r());
+									verts.push_back(c.g());
+									verts.push_back(c.b());
+									result += 2;
 								}
 							}
 						}
@@ -3706,12 +3710,14 @@ void TraceGroup::Draw()
 				id_map_temp1 = id_map_temp2;
 				id_map_temp2.clear();
 			}
-			glEnd();
+//			glEnd();
 		}
 	}
 
-	glPopAttrib();
-*/}
+	return result;
+//	glPopAttrib();
+}
+
 //pattern search
 bool TraceGroup::FindPattern(int type, unsigned int id, int time)
 {
