@@ -44,48 +44,20 @@ namespace FLIVR
 	"out vec4 FragColor;\n" \
 	"\n"
 
-#define SEG_VERTEX_CODE_CORE_PROFILE \
-	"//SEG_VERTEX_CODE_CORE_PROFILE\n" \
+#define SEG_VERTEX_CODE \
+	"//SEG_VERTEX_CODE\n" \
 	"#version 400\n" \
 	"layout(location = 0) in vec3 InVertex;\n" \
-	"layout(location = 1) in vec3 InTexCoord0;\n" \
+	"layout(location = 1) in vec3 InTexture;\n" \
 	"out vec3 OutVertex;\n" \
 	"out vec3 OutTexture;\n" \
 	"\n" \
 	"void main()\n" \
 	"{\n" \
 	"	gl_Position = vec4(InVertex,1.);\n" \
-	"	OutTexture = InTexCoord0;\n" \
+	"	OutTexture = InTexture;\n" \
 	"	OutVertex  = InVertex;\n" \
 	"}\n" 
-
-/*#define SEG_FRAG_CODE_TEST \
-	"#version 400\n" \
-	"in vec3 OutVertex;\n" \
-	"in vec3 OutTexture;\n" \
-	"out vec4 FragColor;\n" \
-	"uniform sampler3D tex0;\n" \
-	"uniform sampler3D tex2;//3d mask volume\n" \
-	"uniform sampler2D tex6;//2d mask\n" \
-	"uniform mat4 matrix0;//modelview matrix\n" \
-	"uniform mat4 matrix1;//projection matrix\n" \
-	"uniform mat4 matrix2;//tex transform for bricking\n" \
-	"void main()\n" \
-	"{\n" \
-	"	vec4 TexCoord = vec4(OutTexture, 1.0);\n" \
-	"	vec4 t = TexCoord;\n" \
-	"	bool discarded = false;\n" \
-	"	vec4 s = matrix1 * matrix0 * matrix2 * t;\n" \
-	"	s = s / s.w;\n" \
-	"	s.xy = s.xy / 2.0 + 0.5;\n" \
-	"	float cmask2d = texture(tex6, s.xy).x;\n" \
-	"	if (cmask2d < 0.95)\n" \
-	"		discarded = true;\n" \
-	"	vec4 v = texture(tex0, vec3(0.5));\n" \
-	"	if (discarded)\n" \
-	"		FragColor = v;//ec4(0.0);\n" \
-	"	else FragColor = vec4(1.0);\n" \
-	"}\n"*/
 
 #define SEG_UNIFORMS_LABEL_INT \
 	"//SEG_UNIFORMS_LABEL_INT\n" \
@@ -414,7 +386,7 @@ namespace FLIVR
 
 #define VOL_MEASURE_GM_LOOKUP \
 	"	//VOL_MEASURE_GM_LOOKUP\n" \
-	"	w = vol_grad_func(gl_TexCoord[0], loc4);\n" \
+	"	w = vol_grad_func(t, loc4);\n" \
 	"	n.xyz = clamp(normalize(w.xyz), vec3(0.0), vec3(1.0));\n" \
 	"	v.y = length(w.xyz);\n" \
 	"	v.y = 0.5 * (loc2.x<0.0?(1.0+v.y*loc2.x):v.y*loc2.x);\n" \
@@ -511,7 +483,7 @@ namespace FLIVR
 
 	bool SegShader::create()
 	{
-		string vs = SEG_VERTEX_CODE_CORE_PROFILE;
+		string vs = SEG_VERTEX_CODE;
 		string fs;
 		if (emit(fs)) return true;
 		program_ = new ShaderProgram(vs, fs);
@@ -522,10 +494,6 @@ namespace FLIVR
 	{
 		ostringstream z;
 
-/*		z << SEG_FRAG_CODE_TEST;
-		s = z.str();
-		return false;
-*/
 		z << VOL_VERSION;
 		z << VOL_INPUTS;
 

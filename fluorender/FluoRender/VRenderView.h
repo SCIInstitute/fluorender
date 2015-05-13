@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include "utility.h"
 #include "VolumeSelector.h"
 #include "VolumeCalculator.h"
+#include "TextRenderer.h"
 
 #include "FLIVR/Color.h"
 #include "FLIVR/ShaderProgram.h"
@@ -854,7 +855,7 @@ private:
 	//4: same as 3 (14, 15)
 	//5: same as 2 (15)
 	//annotation layer
-	void DrawAnnotations(bool persp);
+	void DrawAnnotations();
 	//draw out the framebuffer after composition
 	void PrepFinalBuffer();
 	void ClearFinalBuffer();
@@ -908,9 +909,9 @@ private:
 	//get mouse point in 3D
 	//mode: 0-maximum with original value; 1-maximum with transfered value; 2-accumulated with original value; 3-accumulated with transfered value
 	double GetPointVolume(Point &mp, int mx, int my, VolumeData* vd, int mode, bool use_transf, double thresh = 0.5);
-	double GetPointVolumeBox(Point &mp, int mx, int my, VolumeData* vd);
+	double GetPointVolumeBox(Point &mp, int mx, int my, VolumeData* vd, bool calc_mats=true);
 	double GetPointVolumeBox2(Point &p1, Point &p2, int mx, int my, VolumeData* vd);
-	double GetPointPlane(Point &mp, int mx, int my, Point *planep=0);
+	double GetPointPlane(Point &mp, int mx, int my, Point *planep=0, bool calc_mats=true);
 	Point* GetEditingRulerPoint(int mx, int my);
 
 	//system call

@@ -47,7 +47,7 @@ public:
 	void SetSize(unsigned int size);
 	unsigned int GetSize();
 
-	void RenderText(wstring& text, Color &color,
+	void RenderText(const wstring& text, Color &color,
 		float x, float y, float sx, float sy);
 	float RenderTextLen(wstring& text);
 

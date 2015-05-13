@@ -110,9 +110,12 @@ unsigned int TextRenderer::GetSize()
 		return m_size;
 }
 
-void TextRenderer::RenderText(wstring& text, Color &color,
+void TextRenderer::RenderText(const wstring& text, Color &color,
 	float x, float y, float sx, float sy)
 {
+	if (!m_valid)
+		return;
+
 	GLint loc;
 	if (!m_init_gl)
 	{
@@ -241,6 +244,9 @@ void TextRenderer::RenderText(wstring& text, Color &color,
 float TextRenderer::RenderTextLen(wstring& text)
 {
 	float len = 0.0f;
+	if (!m_valid)
+		return len;
+
 	const wchar_t *p;
 	for(p = text.c_str(); *p; p++)
 	{

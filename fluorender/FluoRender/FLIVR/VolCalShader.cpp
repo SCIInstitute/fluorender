@@ -39,6 +39,25 @@ using std::ostringstream;
 
 namespace FLIVR
 {
+#define CAL_OUTPUTS \
+	"//CAL_OUTPUTS\n" \
+	"out vec4 FragColor;\n" \
+	"\n"
+
+#define CAL_VERTEX_CODE \
+	"//CAL_VERTEX_CODE\n" \
+	"#version 400\n" \
+	"layout(location = 0) in vec3 InVertex;\n" \
+	"layout(location = 1) in vec3 InTexture;\n" \
+	"out vec3 OutVertex;\n" \
+	"out vec3 OutTexture;\n" \
+	"\n" \
+	"void main()\n" \
+	"{\n" \
+	"	gl_Position = vec4(InVertex,1.);\n" \
+	"	OutTexture = InTexture;\n" \
+	"	OutVertex  = InVertex;\n" \
+	"}\n" 
 
 #define CAL_UNIFORMS_COMMON \
 	"//CAL_UNIFORMS_COMMON\n" \
@@ -60,23 +79,23 @@ namespace FLIVR
 	"//CAL_HEAD\n" \
 	"void main()\n" \
 	"{\n" \
-	"	vec4 t = gl_TexCoord[0];//position in the result volume\n" \
+	"	vec4 t = vec4(OutTexture, 1.0);//position in the result volume\n" \
 	"	vec4 t1 = t;//position in the operand A\n" \
 	"	vec4 t2 = t;//position in the operand B\n" \
 	"\n"
 
 #define CAL_TEX_LOOKUP \
 	"	//CAL_TEX_LOOKUP\n" \
-	"	vec4 c1 = texture3D(tex1, t1.stp)*loc0.x;\n" \
-	"	vec4 c2 = texture3D(tex2, t2.stp)*loc0.y;\n" \
+	"	vec4 c1 = texture(tex1, t1.stp)*loc0.x;\n" \
+	"	vec4 c2 = texture(tex2, t2.stp)*loc0.y;\n" \
 	"\n"
 
 #define CAL_TEX_LOOKUP_WITH_MASK \
 	"	//CAL_TEX_LOOKUP_WITH_MASK\n" \
 	"	vec4 c1 = texture3D(tex1, t1.stp)*loc0.x;\n" \
-	"	vec4 m1 = loc0.z>0.0?texture3D(tex3, t1.stp):vec4(1.0);\n" \
-	"	vec4 c2 = texture3D(tex2, t2.stp)*loc0.y;\n" \
-	"	vec4 m2 = loc0.w>0.0?texture3D(tex4, t2.stp):vec4(1.0);\n" \
+	"	vec4 m1 = loc0.z>0.0?texture(tex3, t1.stp):vec4(1.0);\n" \
+	"	vec4 c2 = texture(tex2, t2.stp)*loc0.y;\n" \
+	"	vec4 m2 = loc0.w>0.0?texture(tex4, t2.stp):vec4(1.0);\n" \
 	"\n"
 
 #define CAL_BODY_SUBSTRACTION \
@@ -116,9 +135,9 @@ namespace FLIVR
 	"	vec4 c = vec4(c1.x*(1.0-c2.x));\n" \
 	"\n"
 
-#define CAL_OUTPUT \
-	"	//CAL_OUTPUT\n" \
-	"	gl_FragColor = c;\n" \
+#define CAL_RESULT \
+	"	//CAL_RESULT\n" \
+	"	FragColor = c;\n" \
 	"\n"
 
 #define CAL_TAIL \
@@ -138,15 +157,20 @@ namespace FLIVR
 
 	bool VolCalShader::create()
 	{
-		string s;
-		if (emit(s)) return true;
-		program_ = new ShaderProgram(s);
+		string vs = CAL_VERTEX_CODE;
+		string fs;
+		if (emit(fs)) return true;
+		program_ = new ShaderProgram(vs, fs);
 		return false;
 	}
 
 	bool VolCalShader::emit(string& s)
 	{
 		ostringstream z;
+
+		z << VOL_VERSION;
+		z << VOL_INPUTS;
+		z << CAL_OUTPUTS;
 
 		switch (type_)
 		{
@@ -200,7 +224,7 @@ namespace FLIVR
 			break;
 		}
 
-		z << CAL_OUTPUT;
+		z << CAL_RESULT;
 		z << CAL_TAIL;
 
 		s = z.str();

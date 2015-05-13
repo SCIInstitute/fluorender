@@ -1367,26 +1367,25 @@ namespace FLIVR
 			seg_shader->bind();
 		}
 
+		//set uniforms
+		//set up shading
+		Vector light = compute_view().direction();
+		light.safe_normalize();
+		seg_shader->setLocalParam(0, light.x(), light.y(), light.z(), alpha_);
+		if (shading_)
+			seg_shader->setLocalParam(1, 2.0 - ambient_, diffuse_, specular_, shine_);
+		else
+			seg_shader->setLocalParam(1, 2.0 - ambient_, 0.0, specular_, shine_);
 
-			//set uniforms
-			//set up shading
-			Vector light = compute_view().direction();
-			light.safe_normalize();
-			seg_shader->setLocalParam(0, light.x(), light.y(), light.z(), alpha_);
-			if (shading_)
-				seg_shader->setLocalParam(1, 2.0 - ambient_, diffuse_, specular_, shine_);
-			else
-				seg_shader->setLocalParam(1, 2.0 - ambient_, 0.0, specular_, shine_);
+		//spacings
+		double spcx, spcy, spcz;
+		tex_->get_spacings(spcx, spcy, spcz);
+		seg_shader->setLocalParam(5, spcx, spcy, spcz, 1.0);
 
-			//spacings
-			double spcx, spcy, spcz;
-			tex_->get_spacings(spcx, spcy, spcz);
-			seg_shader->setLocalParam(5, spcx, spcy, spcz, 1.0);
-
-			//transfer function
-			seg_shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
-			seg_shader->setLocalParam(3, 1.0/gamma3d_, gm_thresh_, offset_, sw_);
-			seg_shader->setLocalParam(6, color_.r(), color_.g(), color_.b(), 0.0);
+		//transfer function
+		seg_shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
+		seg_shader->setLocalParam(3, 1.0/gamma3d_, gm_thresh_, offset_, sw_);
+		seg_shader->setLocalParam(6, color_.r(), color_.g(), color_.b(), 0.0);
 
 		if (type == 0)			seg_shader->setLocalParam(7, thresh, 0.0, 0.0, 0.0);
 		else if (type == 1)

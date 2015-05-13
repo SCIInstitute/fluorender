@@ -47,14 +47,14 @@ namespace FLIVR
 	"uniform mat4 matrix0; //projection matrix\n" \
 	"uniform mat4 matrix1; //modelview matrix\n" \
 	"layout(location = 0) in vec3 InVertex;  //w will be set to 1.0 automatically\n" \
-	"layout(location = 1) in vec3 InTexCoord0;\n" \
+	"layout(location = 1) in vec3 InTexture;\n" \
 	"out vec3 OutVertex;\n" \
 	"out vec3 OutTexture;\n" \
 	"//-------------------\n" \
 	"void main()\n" \
 	"{\n" \
 	"	gl_Position = matrix0 * matrix1 * vec4(InVertex,1.);\n" \
-	"	OutTexture = InTexCoord0;\n" \
+	"	OutTexture = InTexture;\n" \
 	"	OutVertex  = InVertex;\n" \
 	"}\n" 
 
@@ -64,7 +64,7 @@ namespace FLIVR
 	"uniform mat4 matrix0; //projection matrix\n" \
 	"uniform mat4 matrix1; //modelview matrix\n" \
 	"layout(location = 0) in vec3 InVertex;  //w will be set to 1.0 automatically\n" \
-	"layout(location = 1) in vec3 InTexCoord0;\n" \
+	"layout(location = 1) in vec3 InTexture;\n" \
 	"out vec3 OutVertex;\n" \
 	"out vec3 OutTexture;\n" \
 	"out vec4 OutFogCoord;\n" \
@@ -73,7 +73,7 @@ namespace FLIVR
 	"{\n" \
 	"	OutFogCoord = matrix1 * vec4(InVertex,1.);\n" \
 	"	gl_Position = matrix0 * OutFogCoord;\n" \
-	"	OutTexture = InTexCoord0;\n" \
+	"	OutTexture = InTexture;\n" \
 	"	OutVertex  = InVertex;\n" \
 	"}\n" 
 

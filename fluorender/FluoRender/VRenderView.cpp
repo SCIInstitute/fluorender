@@ -688,16 +688,10 @@ void VRenderGLView::Draw()
 			DrawBounds();
 
 		if (m_draw_annotations)
-		{
-//			glColor3d(m_bg_color_inv.r(), m_bg_color_inv.g(), m_bg_color_inv.b());
-			DrawAnnotations(m_persp);
-		}
+			DrawAnnotations();
 
 		if (m_draw_rulers)
-		{
-//			glColor3d(m_bg_color_inv.r(), m_bg_color_inv.g(), m_bg_color_inv.b());
 			DrawRulers();
-		}
 
 		//traces
 		DrawTraces();
@@ -755,6 +749,9 @@ void VRenderGLView::DrawDP()
 			glFogf(GL_FOG_DENSITY, m_fog_intensity);
 		}
 */
+		if (m_draw_grid)
+			DrawGrid();
+
 		if (m_draw_clip)
 			DrawClippingPlanes(true, BACK_FACE);
 
@@ -1005,14 +1002,14 @@ void VRenderGLView::DrawDP()
 		if (m_draw_bounds)
 			DrawBounds();
 
-		if (m_draw_grid)
-			DrawGrid();
-
 		if (m_draw_annotations)
-		{
-			glColor3d(m_bg_color_inv.r(), m_bg_color_inv.g(), m_bg_color_inv.b());
-			DrawAnnotations(m_persp);
-		}
+			DrawAnnotations();
+
+		if (m_draw_rulers)
+			DrawRulers();
+
+		//traces
+		DrawTraces();
 
 		glPopMatrix();
 	}
@@ -1173,9 +1170,9 @@ void VRenderGLView::DrawVolumes(int peel)
 				Point p;
 				if (vd && (GetPointVolumeBox(p,
 					GetSize().x/2, GetSize().y/2,
-					vd)>0.0 ||
+					vd, false)>0.0 ||
 					GetPointPlane(p, GetSize().x/2,
-					GetSize().y/2)>0.0))
+					GetSize().y/2, 0, false)>0.0))
 				{
 					int resx, resy, resz;
 					double sclx, scly, sclz;
@@ -1304,29 +1301,65 @@ void VRenderGLView::DrawVolumes(int peel)
 	}
 }
 
-void VRenderGLView::DrawAnnotations(bool persp)
+void VRenderGLView::DrawAnnotations()
 {
-/*	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	BitmapFontType font = BITMAP_FONT_TYPE_HELVETICA_12;
-	if (vr_frame->GetSettingDlg())
-		font = (BitmapFontType)vr_frame->GetSettingDlg()->GetTextFont();
-	int i;
-	for (i=0; i<(int)m_layer_list.size(); i++)
+	if (!m_text_renderer)
+		return;
+
+	int nx, ny;
+	nx = GetSize().x;
+	ny = GetSize().y;
+	float sx, sy;
+	sx = 2.0/nx;
+	sy = 2.0/ny;
+	float px, py;
+
+	Transform mv;
+	Transform p;
+	mv.set(glm::value_ptr(m_mv_mat));
+	p.set(glm::value_ptr(m_proj_mat));
+
+	for (size_t i=0; i<m_layer_list.size(); i++)
 	{
 		if (!m_layer_list[i])
 			continue;
-		switch (m_layer_list[i]->IsA())
+		if (m_layer_list[i]->IsA() == 4)
 		{
-		case 4://annotation layer
 			Annotations* ann = (Annotations*)m_layer_list[i];
 			if (!ann) continue;
-			ann->SetFont(font);
 			if (ann->GetDisp())
-				ann->Draw(persp);
-			break;
+			{
+				string str;
+				Point pos;
+				wstring wstr;
+				for (int j=0; j<ann->GetTextNum(); ++j)
+				{
+					str = ann->GetTextText(j);
+					wstr = s2ws(str);
+					pos = ann->GetTextPos(j);
+					if (!ann->InsideClippingPlanes(pos))
+						continue;
+					pos = ann->GetTextTransformedPos(j);
+					pos = mv.transform(pos);
+					pos = p.transform(pos);
+					if (pos.x() >= -1.0 && pos.x() <= 1.0 &&
+						pos.y() >= -1.0 && pos.y() <= 1.0)
+					{
+						if (m_persp && (pos.z()<=0.0 || pos.z()>=1.0))
+							continue;
+						if (!m_persp && (pos.z()>=0.0 || pos.z()<=-1.0))
+							continue;
+						px = pos.x()*nx/2.0;
+						py = pos.y()*ny/2.0;
+						m_text_renderer->RenderText(
+							wstr, m_bg_color_inv,
+							px*sx, py*sy, sx, sy);
+					}
+				}
+			}
 		}
 	}
-*/}
+}
 
 //get populated mesh list
 //stored in m_md_pop_list
@@ -2037,7 +2070,6 @@ int VRenderGLView::NoiseAnalysis(double min_voxels, double max_voxels, double th
 	m_selector.Set2DWeight(m_tex_final, glIsTexture(m_tex_wt2)?m_tex_wt2:m_tex);
 	return_val = m_selector.NoiseAnalysis(min_voxels, max_voxels, 10.0, thresh);
 
-	glPopMatrix();
 	return return_val;
 }
 
@@ -2371,6 +2403,17 @@ wxString VRenderGLView::Calculate(int type, wxString prev_group, bool add)
 						if (vd_a)
 							vd_a->SetDisp(false);
 					}
+					else if (type==1 ||
+						type==2 ||
+						type==3 ||
+						type==4)
+					{
+						if (vd_a)
+							vd_a->SetDisp(false);
+						VolumeData* vd_b = m_calculator.GetVolumeB();
+						if (vd_b)
+							vd_b->SetDisp(false);
+					}
 					vr_frame->UpdateList();
 					vr_frame->UpdateTree(vd->GetName());
 				}
@@ -2686,7 +2729,6 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
 		{
 			TextureRenderer::reset_save_final_buffer();
 
-			glPushAttrib(GL_ALL_ATTRIB_BITS);
 			glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_temp);
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
@@ -2708,7 +2750,6 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
 				img_shader->release();
 
 			glBindTexture(GL_TEXTURE_2D, 0);
-			glPopAttrib();
 		}
 		//bind the fbo
 		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
@@ -2742,7 +2783,6 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
 
 	if (TextureRenderer::get_mem_swap())
 	{
-		glPushAttrib(GL_ALL_ATTRIB_BITS);
 		//restore m_fbo_temp to m_fbo_final
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -2764,8 +2804,6 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, int peel)
 			img_shader->release();
 
 		glBindTexture(GL_TEXTURE_2D, 0);
-
-		glPopAttrib();
 	}
 
 	glActiveTexture(GL_TEXTURE0);
@@ -2843,7 +2881,6 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 		{
 			TextureRenderer::reset_save_final_buffer();
 
-			glPushAttrib(GL_ALL_ATTRIB_BITS);
 			glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_temp);
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
@@ -2865,7 +2902,6 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 				img_shader->release();
 
 			glBindTexture(GL_TEXTURE_2D, 0);
-			glPopAttrib();
 		}
 
 		if (!glIsFramebuffer(m_fbo_ol1))
@@ -3003,7 +3039,6 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 
 	if (TextureRenderer::get_mem_swap())
 	{
-		glPushAttrib(GL_ALL_ATTRIB_BITS);
 		//restore m_fbo_temp to m_fbo_final
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -3025,8 +3060,6 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 			img_shader->release();
 
 		glBindTexture(GL_TEXTURE_2D, 0);
-
-		glPopAttrib();
 	}
 
 	glActiveTexture(GL_TEXTURE0);
@@ -8538,7 +8571,7 @@ double VRenderGLView::GetPointVolume(Point& mp, int mx, int my,
 		return -1.0;
 }
 
-double VRenderGLView::GetPointVolumeBox(Point &mp, int mx, int my, VolumeData* vd)
+double VRenderGLView::GetPointVolumeBox(Point &mp, int mx, int my, VolumeData* vd, bool calc_mats)
 {
 	if (!vd)
 		return -1.0;
@@ -8550,22 +8583,32 @@ double VRenderGLView::GetPointVolumeBox(Point &mp, int mx, int my, VolumeData* v
 	if (planes->size() != 6)
 		return -1.0;
 
-	//projection
-	HandleProjection(nx, ny);
-	//Transformation
-	HandleCamera();
-	glm::mat4 mv_temp;
-	//translate object
-	mv_temp = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
-	//rotate object
-	mv_temp = glm::rotate(mv_temp, float(m_obj_roty+180.0), glm::vec3(0.0, 1.0, 0.0));
-	mv_temp = glm::rotate(mv_temp, float(m_obj_rotz+180.0), glm::vec3(0.0, 0.0, 1.0));
-	mv_temp = glm::rotate(mv_temp, float(m_obj_rotx), glm::vec3(1.0, 0.0, 0.0));
-	//center object
-	mv_temp = glm::translate(mv_temp, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+	Transform mv;
+	Transform p;
+	glm::mat4 mv_temp = m_mv_mat;
 	Transform *tform = vd->GetTexture()->transform();
 	double mvmat[16];
 	tform->get_trans(mvmat);
+
+	if (calc_mats)
+	{
+		//projection
+		HandleProjection(nx, ny);
+		//Transformation
+		HandleCamera();
+		glm::mat4 mv_temp;
+		//translate object
+		mv_temp = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
+		//rotate object
+		mv_temp = glm::rotate(mv_temp, float(m_obj_roty+180.0), glm::vec3(0.0, 1.0, 0.0));
+		mv_temp = glm::rotate(mv_temp, float(m_obj_rotz+180.0), glm::vec3(0.0, 0.0, 1.0));
+		mv_temp = glm::rotate(mv_temp, float(m_obj_rotx), glm::vec3(1.0, 0.0, 0.0));
+		//center object
+		mv_temp = glm::translate(mv_temp, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+	}
+	else
+		mv_temp = m_mv_mat;
+
 	glm::mat4 mv_mat2 = glm::mat4(
 		mvmat[0], mvmat[4], mvmat[8], mvmat[12],
 		mvmat[1], mvmat[5], mvmat[9], mvmat[13],
@@ -8573,8 +8616,6 @@ double VRenderGLView::GetPointVolumeBox(Point &mp, int mx, int my, VolumeData* v
 		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
 	mv_temp = mv_temp * mv_mat2;
 
-	Transform mv;
-	Transform p;
 	mv.set(glm::value_ptr(mv_temp));
 	p.set(glm::value_ptr(m_proj_mat));
 
@@ -8745,7 +8786,7 @@ double VRenderGLView::GetPointVolumeBox2(Point &p1, Point &p2, int mx, int my, V
 	return mint;
 }
 
-double VRenderGLView::GetPointPlane(Point &mp, int mx, int my, Point* planep)
+double VRenderGLView::GetPointPlane(Point &mp, int mx, int my, Point* planep, bool calc_mats)
 {
 	int nx = GetSize().x;
 	int ny = GetSize().y;
@@ -8753,19 +8794,25 @@ double VRenderGLView::GetPointPlane(Point &mp, int mx, int my, Point* planep)
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
-	//projection
-	HandleProjection(nx, ny);
-	//Transformation
-	HandleCamera();
 	glm::mat4 mv_temp;
-	//translate object
-	mv_temp = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
-	//rotate object
-	mv_temp = glm::rotate(mv_temp, float(m_obj_roty+180.0), glm::vec3(0.0, 1.0, 0.0));
-	mv_temp = glm::rotate(mv_temp, float(m_obj_rotz+180.0), glm::vec3(0.0, 0.0, 1.0));
-	mv_temp = glm::rotate(mv_temp, float(m_obj_rotx), glm::vec3(1.0, 0.0, 0.0));
-	//center object
-	mv_temp = glm::translate(mv_temp, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+
+	if (calc_mats)
+	{
+		//projection
+		HandleProjection(nx, ny);
+		//Transformation
+		HandleCamera();
+		//translate object
+		mv_temp = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
+		//rotate object
+		mv_temp = glm::rotate(mv_temp, float(m_obj_roty+180.0), glm::vec3(0.0, 1.0, 0.0));
+		mv_temp = glm::rotate(mv_temp, float(m_obj_rotz+180.0), glm::vec3(0.0, 0.0, 1.0));
+		mv_temp = glm::rotate(mv_temp, float(m_obj_rotx), glm::vec3(1.0, 0.0, 0.0));
+		//center object
+		mv_temp = glm::translate(mv_temp, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+	}
+	else
+		mv_temp = m_mv_mat;
 
 	Transform mv;
 	Transform p;
@@ -9005,27 +9052,127 @@ void VRenderGLView::AddPaintRulerPoint()
 
 void VRenderGLView::DrawRulers()
 {
-/*	int nx = GetSize().x;
-	int ny = GetSize().y;
-
-	if (nx <= 0 || ny <= 0)
+	if (!m_text_renderer)
 		return;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	BitmapFontType font = BITMAP_FONT_TYPE_HELVETICA_12;
-	if (vr_frame->GetSettingDlg())
-		font = (BitmapFontType)vr_frame->GetSettingDlg()->GetTextFont();
-	for (int i=0; i<(int)m_ruler_list.size(); i++)
+	int nx = GetSize().x;
+	int ny = GetSize().y;
+	float sx, sy;
+	sx = 2.0/nx;
+	sy = 2.0/ny;
+	float w = m_text_renderer->GetSize()/4.0f;
+	float px, py, p2x, p2y;
+
+	vector<float> verts;
+	int vert_num = 0;
+	for (size_t i=0; i<m_ruler_list.size(); ++i)
+		if (m_ruler_list[i])
+			vert_num += m_ruler_list[i]->GetNumPoint();
+	verts.reserve(vert_num*10*3);
+
+	Transform mv;
+	Transform p;
+	mv.set(glm::value_ptr(m_mv_mat));
+	p.set(glm::value_ptr(m_proj_mat));
+	Point p1, p2;
+	unsigned int num = 0;
+
+	for (size_t i=0; i<m_ruler_list.size(); i++)
 	{
 		Ruler* ruler = m_ruler_list[i];
 		if (!ruler) continue;
-		ruler->SetFont(font);
 		if (!ruler->GetTimeDep() ||
 			(ruler->GetTimeDep() &&
 			ruler->GetTime() == m_tseq_cur_num))
-			ruler->Draw(m_persp, (double)nx / (double)ny);
+		{
+			for (size_t j=0; j<ruler->GetNumPoint(); ++j)
+			{
+				p2 = *(ruler->GetPoint(j));
+				p2 = mv.transform(p2);
+				p2 = p.transform(p2);
+				if ((m_persp && (p2.z()<=0.0 || p2.z()>=1.0)) ||
+					(!m_persp && (p2.z()>=0.0 || p2.z()<=-1.0)))
+					continue;
+				px = (p2.x()+1.0)*nx/2.0;
+				py = (p2.y()+1.0)*ny/2.0;
+				verts.push_back(px-w); verts.push_back(py-w); verts.push_back(0.0);
+				verts.push_back(px+w); verts.push_back(py-w); verts.push_back(0.0);
+				verts.push_back(px+w); verts.push_back(py-w); verts.push_back(0.0);
+				verts.push_back(px+w); verts.push_back(py+w); verts.push_back(0.0);
+				verts.push_back(px+w); verts.push_back(py+w); verts.push_back(0.0);
+				verts.push_back(px-w); verts.push_back(py+w); verts.push_back(0.0);
+				verts.push_back(px-w); verts.push_back(py+w); verts.push_back(0.0);
+				verts.push_back(px-w); verts.push_back(py-w); verts.push_back(0.0);
+				num += 8;
+				if (j+1 == ruler->GetNumPoint())
+				{
+					p2x = p2.x()*nx/2.0;
+					p2y = p2.y()*ny/2.0;
+					m_text_renderer->RenderText(
+					ruler->GetName().ToStdWstring(),
+					m_bg_color_inv,
+					(p2x+w)*sx, (p2y+w)*sy, sx, sy);
+				}
+				if (j > 0)
+				{
+					p1 = *(ruler->GetPoint(j-1));
+					p1 = mv.transform(p1);
+					p1 = p.transform(p1);
+					if ((m_persp && (p1.z()<=0.0 || p1.z()>=1.0)) ||
+						(!m_persp && (p1.z()>=0.0 || p1.z()<=-1.0)))
+						continue;
+					verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+					px = (p1.x()+1.0)*nx/2.0;
+					py = (p1.y()+1.0)*ny/2.0;
+					verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+					num += 2;
+				}
+			}
+		}
 	}
-*/}
+
+	if (!verts.empty())
+	{
+		double width = m_text_renderer->GetSize()/3.0;
+		glEnable(GL_LINE_SMOOTH);
+		glLineWidth(GLfloat(width));
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+		glm::mat4 matrix = glm::ortho(float(0), float(nx), float(0), float(ny));
+
+		ShaderProgram* shader =
+			m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+		if (shader)
+		{
+			if (!shader->valid())
+				shader->create();
+			shader->bind();
+		}
+		shader->setLocalParam(0, m_bg_color_inv.r(), m_bg_color_inv.g(), m_bg_color_inv.b(), 1.0);
+		shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+
+		glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float)*verts.size(), &verts[0], GL_DYNAMIC_DRAW);
+		glBindVertexArray(m_misc_vao);
+		glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (const GLvoid*)0);
+
+		glDrawArrays(GL_LINES, 0, num);
+
+		glDisableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+
+		if (shader && shader->valid())
+			shader->release();
+
+		glDisable(GL_LINE_SMOOTH);
+		glLineWidth(1.0);
+	}
+}
 
 vector<Ruler*>* VRenderGLView::GetRulerList()
 {

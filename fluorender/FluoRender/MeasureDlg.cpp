@@ -60,7 +60,7 @@ RulerListCtrl::RulerListCtrl(
    itemCol.SetText("Length");
     this->InsertColumn(1, itemCol);
     SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
-   itemCol.SetText("Angle");
+   itemCol.SetText("Pitch Angle");
     this->InsertColumn(2, itemCol);
     SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);
    itemCol.SetText("Start/End Points (X, Y, Z)");
@@ -267,7 +267,7 @@ void RulerListCtrl::Export(wxString filename)
          break;
       }
 
-      tos << "ID\tLength(" << unit << ")\tAngle(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
+      tos << "ID\tLength(" << unit << ")\tPitch Angle(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
 
       for (size_t i=0; i<ruler_list->size(); i++)
       {

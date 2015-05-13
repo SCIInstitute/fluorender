@@ -50,7 +50,6 @@ DEALINGS IN THE SOFTWARE.
 #include "Formats/lsm_reader.h"
 #include "Formats/lbl_reader.h"
 #include "Formats/pvxml_reader.h"
-#include "TextRenderer.h"
 
 #ifndef _DATAMANAGER_H_
 #define _DATAMANAGER_H_
@@ -631,6 +630,7 @@ public:
 	int GetTextNum();
 	string GetTextText(int index);
 	Point GetTextPos(int index);
+	Point GetTextTransformedPos(int index);
 	string GetTextInfo(int index);
 	void AddText(std::string str, Point pos, std::string info);
 	void SetTransform(Transform *tform);
@@ -638,7 +638,6 @@ public:
 	VolumeData* GetVolume();
 
 	void Clear();
-	void Draw(bool persp);
 
 	//display functions
 	void SetDisp(bool disp)
@@ -654,15 +653,6 @@ public:
 		return m_disp;
 	}
 
-	//font type
-	void SetFont(TextRenderer *font)
-	{
-		m_font = font;
-	}
-	TextRenderer* GetFont()
-	{
-		return m_font;
-	}
 	//memo
 	void SetMemo(string &memo);
 	string &GetMemo();
@@ -677,6 +667,8 @@ public:
 	//info meaning
 	wxString GetInfoMeaning();
 	void SetInfoMeaning(wxString &str);
+
+	bool InsideClippingPlanes(Point &pos);
 
 private:
 	static int m_num;
@@ -696,10 +688,7 @@ private:
 	//atext info meaning
 	wxString m_info_meaning;
 
-	//font type
-	TextRenderer *m_font;
 private:
-	bool InsideClippingPlanes(Point &pos);
 	AText* GetAText(wxString str);
 };
 
@@ -749,7 +738,6 @@ public:
 	void SetTransform(Transform *tform);
 
 	void Clear();
-	void Draw(bool persp, double asp);
 
 	//display functions
 	void SetDisp(bool disp)
@@ -810,16 +798,6 @@ public:
 	}
 	wxString GetDelInfoValues(wxString del=",");
 
-	//font type
-	void SetFont(TextRenderer *font)
-	{
-		m_font = font;
-	}
-	TextRenderer* GetFont()
-	{
-		return m_font;
-	}
-
 	//profile
 	void SetInfoProfile(wxString &str)
 	{
@@ -854,8 +832,6 @@ private:
 	wxString m_info_names;
 	wxString m_info_values;
 
-	//font type
-	TextRenderer *m_font;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -977,16 +953,6 @@ public:
 	//draw
 	unsigned int Draw(vector<float> &verts);
 
-	//font type
-	void SetFont(TextRenderer *font)
-	{
-		m_font = font;
-	}
-	TextRenderer* GetFont()
-	{
-		return m_font;
-	}
-
 	//pattern search
 	typedef struct
 	{
@@ -1009,9 +975,6 @@ private:
 
 	FrameList m_frame_list;
 	IDMap m_id_map;
-
-	//font type
-	TextRenderer *m_font;
 
 private:
 	//reading
