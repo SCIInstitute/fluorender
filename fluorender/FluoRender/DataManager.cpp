@@ -1866,41 +1866,68 @@ MeshRenderer* MeshData::GetMR()
 	return m_mr;
 }
 
+void MeshData::SetMatrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat)
+{
+	if (m_mr)
+	{
+		glm::mat4 mv_temp;
+		mv_temp = glm::translate(
+			mv_mat, glm::vec3(
+		m_trans[0]+m_center.x(),
+		m_trans[1]+m_center.y(),
+		m_trans[2]+m_center.z()));
+		mv_temp = glm::rotate(
+			mv_temp, float(m_rot[0]),
+			glm::vec3(1.0, 0.0, 0.0));
+		mv_temp = glm::rotate(
+			mv_temp, float(m_rot[1]),
+			glm::vec3(0.0, 1.0, 0.0));
+		mv_temp = glm::rotate(
+			mv_temp, float(m_rot[2]),
+			glm::vec3(0.0, 0.0, 1.0));
+		mv_temp = glm::scale(mv_temp,
+			glm::vec3(float(m_scale[0]), float(m_scale[1]), float(m_scale[2])));
+		mv_temp = glm::translate(mv_temp,
+			glm::vec3(-m_center.x(), -m_center.y(), -m_center.z()));
+
+		m_mr->SetMatrices(mv_temp, proj_mat);
+	}
+}
+
 void MeshData::Draw(int peel)
 {
-	/*	if (!m_mr)
-	return;
-	glPushMatrix();
+	if (!m_mr)
+		return;
+
+/*	glPushMatrix();
 	glTranslated(m_trans[0]+m_center.x(), 
-	m_trans[1]+m_center.y(), 
-	m_trans[2]+m_center.z());
+		m_trans[1]+m_center.y(), 
+		m_trans[2]+m_center.z());
 	glRotated(m_rot[0], 1, 0, 0);
 	glRotated(m_rot[1], 0, 1, 0);
 	glRotated(m_rot[2], 0, 0, 1);
 	glScaled(m_scale[0], m_scale[1], m_scale[2]);
 	glTranslated(-m_center.x(), -m_center.y(), -m_center.z());
-
-	if (m_light)
+*/
+/*	if (m_light)
 	{
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-	}
+		glEnable(GL_LIGHTING);
+		glEnable(GL_LIGHT0);
+		glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+	}*/
 	m_mr->set_depth_peel(peel);
-	//glEnable(GL_MULTISAMPLE);
 	m_mr->draw();
-	//glDisable(GL_MULTISAMPLE);
-	if (m_light)
-	glDisable(GL_LIGHTING);
+/*	if (m_light)
+		glDisable(GL_LIGHTING);*/
 
-	if (m_draw_bounds && (peel==4 || peel==5))
-	DrawBounds();
-	glPopMatrix();
-	*/}
+/*	if (m_draw_bounds && (peel==4 || peel==5))
+		DrawBounds();
+	glPopMatrix();*/
+}
 
 void MeshData::DrawBounds()
 {
-	glPushAttrib(GL_ENABLE_BIT);
+/*	glPushAttrib(GL_ENABLE_BIT);
 	//	glDisable(GL_FOG);
 	//glDisable(GL_BLEND);
 	glColor4d(m_mat_diff.r(), m_mat_diff.g(), m_mat_diff.b(), 1.0);
@@ -1934,18 +1961,32 @@ void MeshData::DrawBounds()
 	glLineWidth(1.0);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	glPopAttrib();
+	glPopAttrib();*/
 }
 
 //lighting
 void MeshData::SetLighting(bool bVal)
 {
 	m_light = bVal;
+	if (m_mr) m_mr->set_lighting(m_light);
 }
 
 bool MeshData::GetLighting()
 {
 	return m_light;
+}
+
+//fog
+void MeshData::SetFog(bool bVal,
+	double fog_intensity, double fog_start, double fog_end)
+{
+	m_fog = bVal;
+	if (m_mr) m_mr->set_fog(m_fog, fog_intensity, fog_start, fog_end);
+}
+
+bool MeshData::GetFog()
+{
+	return m_fog;
 }
 
 void MeshData::SetMaterial(Color& amb, Color& diff, Color& spec, 
@@ -1978,7 +2019,6 @@ void MeshData::SetMaterial(Color& amb, Color& diff, Color& spec,
 			m_data->materials[i].ambient[3] = m_mat_alpha;
 			m_data->materials[i].diffuse[3] = m_mat_alpha;
 		}
-		m_mr->update();
 	}
 }
 
@@ -1993,7 +2033,6 @@ void MeshData::SetColor(Color &color, int type)
 			m_data->materials[0].ambient[0] = m_mat_amb.r();
 			m_data->materials[0].ambient[1] = m_mat_amb.g();
 			m_data->materials[0].ambient[2] = m_mat_amb.b();
-			m_mr->update();
 		}
 		break;
 	case MESH_COLOR_DIFF:
@@ -2003,7 +2042,6 @@ void MeshData::SetColor(Color &color, int type)
 			m_data->materials[0].diffuse[0] = m_mat_diff.r();
 			m_data->materials[0].diffuse[1] = m_mat_diff.g();
 			m_data->materials[0].diffuse[2] = m_mat_diff.b();
-			m_mr->update();
 		}
 		break;
 	case MESH_COLOR_SPEC:
@@ -2013,7 +2051,6 @@ void MeshData::SetColor(Color &color, int type)
 			m_data->materials[0].specular[0] = m_mat_spec.r();
 			m_data->materials[0].specular[1] = m_mat_spec.g();
 			m_data->materials[0].specular[2] = m_mat_spec.b();
-			m_mr->update();
 		}
 		break;
 	}
@@ -2028,7 +2065,6 @@ void MeshData::SetFloat(double &value, int type)
 		if (m_data && m_data->materials)
 		{
 			m_data->materials[0].shininess = m_mat_shine;
-			m_mr->update();
 		}
 		break;
 	case MESH_FLOAT_ALPHA:
@@ -2041,8 +2077,8 @@ void MeshData::SetFloat(double &value, int type)
 				m_data->materials[i].diffuse[3] = m_mat_alpha;
 				m_data->materials[i].specular[3] = m_mat_alpha;
 			}
-			m_mr->update();
 		}
+		if (m_mr) m_mr->set_alpha(value);
 		break;
 	}
 

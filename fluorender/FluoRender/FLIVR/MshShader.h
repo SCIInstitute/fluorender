@@ -40,30 +40,36 @@ namespace FLIVR
 	class MshShader
 	{
 	public:
-		MshShader(bool fog, int peel, bool tex);
+		MshShader(int peel, bool tex,
+			bool fog, bool light);
 		~MshShader();
 
 		bool create();
 
-		inline bool fog() { return fog_; }
 		inline int peel() { return peel_; }
 		inline bool tex() { return tex_; }
+		inline bool fog() { return fog_; }
+		inline bool light() { return light_; }
 
-		inline bool match(bool fog, int peel, bool tex)
+		inline bool match(int peel, bool tex,
+			bool fog, bool light)
 		{ 
 			return (fog_ == fog && 
 					peel_ == peel &&
-					tex_ == tex); 
+					tex_ == tex &&
+					light_ == light); 
 		}
 
 		inline ShaderProgram* program() { return program_; }
 
 	protected:
-		bool emit(std::string& s);
+		bool emit_v(std::string& s);
+		bool emit_f(std::string& s);
 
-		bool fog_;
 		int peel_;	//0:no peeling; 1:peel positive; 2:peel both; -1:peel negative
 		bool tex_;
+		bool fog_;
+		bool light_;
 
 		ShaderProgram* program_;
 	};
@@ -75,7 +81,8 @@ namespace FLIVR
 		MshShaderFactory();
 		~MshShaderFactory();
 
-		ShaderProgram* shader(bool fog, int peel, bool tex);
+		ShaderProgram* shader(int peel, bool tex,
+			bool fog, bool light);
 
 	protected:
 		std::vector<MshShader*> shader_;

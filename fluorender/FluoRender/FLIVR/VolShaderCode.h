@@ -32,6 +32,7 @@ namespace FLIVR
 	"void main() {\n" \
 	"    FragColor = vec4(1,1,1,1);\n" \
 	"}\n" 
+
 #define VOL_VERSION \
 	"#version 400\n"\
 	"\n"

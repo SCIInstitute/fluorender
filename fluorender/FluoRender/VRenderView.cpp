@@ -725,15 +725,15 @@ void VRenderGLView::DrawDP()
 
 	if (m_draw_all)
 	{
-		glPushMatrix();
+		glm::mat4 mv_temp = m_mv_mat;
 		//translate object
-		glTranslated(m_obj_transx, m_obj_transy, m_obj_transz);
+		m_mv_mat = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
 		//rotate object
-		glRotated(m_obj_rotz+180.0, 0.0, 0.0, 1.0);
-		glRotated(m_obj_roty+180.0, 0.0, 1.0, 0.0);
-		glRotated(m_obj_rotx, 1.0, 0.0, 0.0);
+		m_mv_mat = glm::rotate(m_mv_mat, float(m_obj_rotx), glm::vec3(1.0, 0.0, 0.0));
+		m_mv_mat = glm::rotate(m_mv_mat, float(m_obj_roty+180.0), glm::vec3(0.0, 1.0, 0.0));
+		m_mv_mat = glm::rotate(m_mv_mat, float(m_obj_rotz+180.0), glm::vec3(0.0, 0.0, 1.0));
 		//center object
-		glTranslated(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz);
+		m_mv_mat = glm::translate(m_mv_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
 
 /*		if (m_use_fog)
 		{
@@ -1011,7 +1011,6 @@ void VRenderGLView::DrawDP()
 		//traces
 		DrawTraces();
 
-		glPopMatrix();
 	}
 
 }
@@ -1028,7 +1027,11 @@ void VRenderGLView::DrawMeshes(int peel)
 		{
 			MeshData* md = (MeshData*)m_layer_list[i];
 			if (md && md->GetDisp())
+			{
+				md->SetMatrices(m_mv_mat, m_proj_mat);
+				md->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 				md->Draw(peel);
+			}
 		}
 		else if (m_layer_list[i]->IsA() == 6)
 		{
@@ -1039,7 +1042,11 @@ void VRenderGLView::DrawMeshes(int peel)
 				{
 					MeshData* md = group->GetMeshData(j);
 					if (md && md->GetDisp())
+					{
+						md->SetMatrices(m_mv_mat, m_proj_mat);
+						md->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 						md->Draw(peel);
+					}
 				}
 			}
 		}

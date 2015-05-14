@@ -108,7 +108,6 @@ GLboolean glmLoadTGA(TextureImage *texture, char *filename,GLuint *textureID)   
    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);  // Linear Filtered
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);  // Linear Filtered
-   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
 
    if (texture[0].bpp==24)                  // Was The TGA 24 Bits
    {
@@ -2064,12 +2063,12 @@ GLvoid glmDraw(GLMmodel* model, GLuint mode, bool ext_color, int limit)
  */
 GLuint glmList(GLMmodel* model, GLuint mode, int limit)
 {
-   GLuint list;
+   GLuint list = 0;
 
-   list = glGenLists(1);
+/*   list = glGenLists(1);
    glNewList(list, GL_COMPILE);
    glmDraw(model, mode, false, limit);
-   glEndList();
+   glEndList();*/
 
    return list;
 }

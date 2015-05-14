@@ -512,12 +512,15 @@ public:
 	MeshRenderer* GetMR();
 
 	//draw
+	void SetMatrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat);
 	void Draw(int peel);
 	void DrawBounds();
 
 	//lighting
 	void SetLighting(bool bVal);
 	bool GetLighting();
+	void SetFog(bool bVal, double fog_intensity, double fog_start, double fog_end);
+	bool GetFog();
 	void SetMaterial(Color& amb, Color& diff, Color& spec, 
 		double shine = 30.0, double alpha = 1.0);
 	void SetColor(Color &color, int type);
@@ -564,6 +567,7 @@ private:
 
 	//lighting
 	bool m_light;
+	bool m_fog;
 	Color m_mat_amb;
 	Color m_mat_diff;
 	Color m_mat_spec;

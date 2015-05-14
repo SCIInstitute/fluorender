@@ -34,6 +34,7 @@
 #include "glm.h"
 #include "Plane.h"
 #include <vector>
+#include <glm/glm.hpp>
 
 using namespace std;
 
@@ -49,7 +50,7 @@ namespace FLIVR
 		~MeshRenderer();
 
 		//draw
-		void draw(bool tex=true, bool list=true);
+		void draw();
 		void update();
 
 		//depth peeling
@@ -64,10 +65,28 @@ namespace FLIVR
 		void set_limit(int val) {limit_ = val;}
 		int get_limit() {return limit_;}
 
+		//matrices
+		void SetMatrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat)
+		{ m_mv_mat = mv_mat; m_proj_mat = proj_mat; }
+
+		//alpha
+		void set_alpha(float alpha)
+		{ alpha_ = alpha; }
+		float get_alpha()
+		{ return alpha_; }
+		//effects
+		void set_lighting(bool val)
+		{ light_ = val; }
+		bool get_lighting()
+		{ return light_; }
+		void set_fog(bool use_fog, double fog_intensity, double fog_start, double fog_end)
+		{ fog_ = use_fog; m_fog_intensity = fog_intensity; m_fog_start = fog_start; m_fog_end = fog_end; }
+		bool get_fog()
+		{ return fog_; }
+
 	protected:
 		//data and display list
 		GLMmodel* data_;
-		GLuint data_list_;
 		//depth peeling
 		int depth_peel_;	//0:no peeling; 1:peel positive; 2:peel both; -1:peel negative
 		//planes
@@ -75,6 +94,20 @@ namespace FLIVR
 		//draw with clipping
 		bool draw_clip_;
 		int limit_;
+		//matrices
+		glm::mat4 m_mv_mat, m_proj_mat;
+		//lighting
+		bool light_;
+		//fog
+		bool fog_;
+		double m_fog_intensity;
+		double m_fog_start;
+		double m_fog_end;
+		float alpha_;
+		//vertex buffer
+		GLuint m_vbo, m_vao;
+		//bool update
+		bool update_;
 
 		static MshShaderFactory msh_shader_factory_;
 	};
