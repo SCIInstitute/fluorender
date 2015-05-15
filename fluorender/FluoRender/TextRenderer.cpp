@@ -66,18 +66,24 @@ TextRenderer::TextRenderer(const string &lib_name)
 	m_vao(0),
 	m_prog(0)
 {
-	if (!m_init && !FT_Init_FreeType(&m_ft))
-		m_init = true;
+	FT_Error err;
+	if (!m_init)
+	{
+		err = FT_Init_FreeType(&m_ft);
+		if (!err)
+			m_init = true;
+	}
 
 	if (!m_init) return;
 
-	if (!FT_New_Face(m_ft, lib_name.c_str(), 0, &m_face))
+	err = FT_New_Face(m_ft, lib_name.c_str(), 0, &m_face);
+	if (!err)
 		m_valid = true;
 
 	if (m_valid)
 	{
-		FT_Select_Charmap(m_face, FT_ENCODING_UNICODE); 
-		FT_Set_Pixel_Sizes(m_face, 0, m_size);
+		err = FT_Select_Charmap(m_face, FT_ENCODING_UNICODE); 
+		err = FT_Set_Pixel_Sizes(m_face, 0, m_size);
 	}
 }
 

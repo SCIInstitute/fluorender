@@ -121,6 +121,8 @@ public:
 	bool GetRunScript() {return m_run_script;}
 	void SetRunScript(bool val) {m_run_script = val;}
 	//text font
+	wxString GetFontFile() { return m_font_file; }
+	void SetFontFile(wxString &file) { m_font_file = file; }
 	int GetTextSize() {return m_text_size;}
 	void SetTextSize(int size) {m_text_size = size;}
 	//memory settings
@@ -193,6 +195,7 @@ private:
 	double m_soft_threshold;
 	bool m_run_script;
 	//text size
+	wxString m_font_file;	//font lib file in the Fonts folder
 	int m_text_size;		//text size in viewport
 	//memory limit
 	bool m_mem_swap;		//enable memory swap

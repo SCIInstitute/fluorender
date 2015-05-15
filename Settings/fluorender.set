@@ -40,6 +40,7 @@ value=0
 [run\ script]
 value=0
 [text\ font]
+file=
 value=14
 [memory\ settings]
 mem\ swap=0

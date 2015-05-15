@@ -526,6 +526,7 @@ void SettingDlg::GetSettings()
 	m_soft_threshold = 0.0;
 	m_run_script = false;
 	m_text_size = 12;
+	m_font_file = "";
 	m_mem_swap = false;
 	m_graphics_mem = 1000.0;
 	m_large_data_size = 1000.0;
@@ -669,6 +670,7 @@ void SettingDlg::GetSettings()
 	if (fconfig.Exists("/text font"))
 	{
 		fconfig.SetPath("/text font");
+		fconfig.Read("file", &m_font_file);
 		fconfig.Read("value", &m_text_size);
 	}
 	//memory settings
@@ -875,6 +877,7 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("value", m_run_script);
 
 	fconfig.SetPath("/text font");
+	fconfig.Write("file", m_font_file);
 	fconfig.Write("value", m_text_size);
 
 	//memory settings

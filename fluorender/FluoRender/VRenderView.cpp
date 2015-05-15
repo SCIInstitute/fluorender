@@ -593,7 +593,7 @@ void VRenderGLView::CalcFogRange()
 	bool use_box = false;
 	if (m_cur_vol)
 	{
-		BBox bbox = m_cur_vol->GetBounds();
+		bbox = m_cur_vol->GetBounds();
 		use_box = true;
 	}
 	else if (!m_md_pop_list.empty())

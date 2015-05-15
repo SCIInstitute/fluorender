@@ -278,7 +278,14 @@ VRenderFrame::VRenderFrame(
 	m_adjust_view = new AdjustView(this, this, wxID_ANY,
 		wxDefaultPosition, wxSize(130, 700));
 
-	m_text_renderer = new TextRenderer();
+	wxString font_file = m_setting_dlg->GetFontFile();
+	if (font_file != "")
+	{
+		font_file = "Fonts/" + font_file;
+		m_text_renderer = new TextRenderer(font_file.ToStdString());
+	}
+	else
+		m_text_renderer = new TextRenderer();
 	m_text_renderer->SetSize(m_setting_dlg->GetTextSize());
 
 	//settings dialog
