@@ -116,10 +116,11 @@ namespace FLIVR
 
 #define MSH_FRAG_UNIFORMS_COLOR \
 	"//MSH_FRAG_UNIFORMS_COLOR\n" \
-	"uniform vec4 loc0;//color\n" \
+	"uniform vec4 loc0;//color\n"
 
 #define MSH_FRAG_UNIFORMS_NOMAT \
 	"//MSH_FRAG_UNIFORMS_NOMAT\n" \
+	"uniform vec4 loc0;//color\n" \
 	"uniform vec4 loc3;//(0, alpha, 0, 0)\n"
 
 #define MSH_FRAG_UNIFORMS_TEX \
@@ -177,7 +178,7 @@ namespace FLIVR
 
 #define MSH_FRAG_BODY_COLOR_OUT \
 	"	// MSH_FRAG_BODY_COLOR_OUT\n" \
-	"	FragColor = vec4(c.xyz, loc3.y);\n"
+	"	FragColor = vec4(c.xyz, c.w*loc3.y);\n"
 
 #define MSH_FRAG_BODY_SIMPLE \
 	"	//MSH_FRAG_BODY_SIMPLE\n" \
@@ -189,14 +190,14 @@ namespace FLIVR
 	"	vec3 eye = vec3(0.0, 0.0, 1.0);\n" \
 	"	vec3 l_dir = vec3(0.0, 0.0, 1.0);\n" \
 	"	vec3 n = normalize(OutNormal);\n" \
-	"	float intensity = max(dot(n, l_dir), 0.0);\n" \
+	"	float intensity = abs(dot(n, l_dir));\n" \
 	"	if (intensity > 0.0)\n" \
 	"	{\n" \
 	"		vec3 h = normalize(l_dir+eye);\n" \
 	"		float intSpec = max(dot(h, n), 0.0);\n" \
 	"		spec = loc2 * pow(intSpec, loc3.x);\n" \
 	"	}\n" \
-	"	c = max(intensity * loc1 + spec, loc0);\n"
+	"	c.xyz = max(intensity * loc1 + spec, loc0).xyz;\n"
 
 #define MSH_FRAG_BODY_TEXTURE \
 	"	//MSH_FRAG_BODY_TEXTURE\n" \
@@ -244,12 +245,7 @@ namespace FLIVR
 		if (light_)
 			z << MSH_VERTEX_INPUTS_N;
 		if (tex_)
-		{
-			if (light_)
-				z << MSH_VERTEX_INPUTS_T2;
-			else
-				z << MSH_VERTEX_INPUTS_T1;
-		}
+			z << MSH_VERTEX_INPUTS_T2;
 		//outputs
 		if (light_)
 			z << MSH_VERTEX_OUTPUTS_N;

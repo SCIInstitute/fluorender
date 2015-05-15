@@ -215,17 +215,24 @@ namespace FLIVR
 					shader->setLocalParam(3, material->shininess, alpha_, 0.0, 0.0);
 				}
 			}
+			else
+			{//color
+				GLMmaterial* material = &data_->materials[group->material];
+				if (material)
+					shader->setLocalParam(0, material->diffuse[0], material->diffuse[1], material->diffuse[2], material->diffuse[3]);
+				else
+					shader->setLocalParam(0, 1.0, 0.0, 0.0, 1.0);//color
+				shader->setLocalParam(3, 0.0, alpha_, 0.0, 0.0);//alpha
+			}
 			if (tex)
 			{
 				GLMmaterial* material = &data_->materials[group->material];
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D,
-					material->textureID);
-			}
-			if (!light_ && !tex)
-			{
-				shader->setLocalParam(0, 1.0, 0.0, 0.0, 1.0);//color
-				shader->setLocalParam(3, 0.0, alpha_, 0.0, 0.0);//alpha
+				if (material)
+				{
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D,
+						material->textureID);
+				}
 			}
 			if (fog_)
 				shader->setLocalParam(8, m_fog_intensity, m_fog_start, m_fog_end, 0.0);

@@ -1659,7 +1659,7 @@ m_data(0),
 	m_disp(true),
 	m_draw_bounds(false),
 	m_light(true),
-	m_mat_amb(0.5, 0.5, 0.5),
+	m_mat_amb(0.3, 0.3, 0.3),
 	m_mat_diff(1.0, 0.0, 0.0),
 	m_mat_spec(0.2, 0.2, 0.2),
 	m_mat_shine(30.0),
@@ -1899,30 +1899,10 @@ void MeshData::Draw(int peel)
 	if (!m_mr)
 		return;
 
-/*	glPushMatrix();
-	glTranslated(m_trans[0]+m_center.x(), 
-		m_trans[1]+m_center.y(), 
-		m_trans[2]+m_center.z());
-	glRotated(m_rot[0], 1, 0, 0);
-	glRotated(m_rot[1], 0, 1, 0);
-	glRotated(m_rot[2], 0, 0, 1);
-	glScaled(m_scale[0], m_scale[1], m_scale[2]);
-	glTranslated(-m_center.x(), -m_center.y(), -m_center.z());
-*/
-/*	if (m_light)
-	{
-		glEnable(GL_LIGHTING);
-		glEnable(GL_LIGHT0);
-		glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-	}*/
+	glDisable(GL_CULL_FACE);
 	m_mr->set_depth_peel(peel);
 	m_mr->draw();
-/*	if (m_light)
-		glDisable(GL_LIGHTING);*/
-
-/*	if (m_draw_bounds && (peel==4 || peel==5))
-		DrawBounds();
-	glPopMatrix();*/
+	glEnable(GL_CULL_FACE);
 }
 
 void MeshData::DrawBounds()
@@ -2245,6 +2225,7 @@ void MeshData::RandomizeColor()
 	double hue = (double)rand()/(RAND_MAX) * 360.0;
 	Color color(HSVColor(hue, 1.0, 1.0));
 	SetColor(color, MESH_COLOR_DIFF);
+	SetColor(color*0.3, MESH_COLOR_AMB);
 }
 
 //shown in legend
@@ -4061,6 +4042,7 @@ void MeshGroup::RandomizeColor()
 			double hue = (double)rand()/(RAND_MAX) * 360.0;
 			Color color(HSVColor(hue, 1.0, 1.0));
 			md->SetColor(color, MESH_COLOR_DIFF);
+			md->SetColor(color*0.3, MESH_COLOR_AMB);
 		}
 	}
 }
