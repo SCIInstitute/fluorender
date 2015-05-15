@@ -279,6 +279,7 @@ VRenderFrame::VRenderFrame(
 		wxDefaultPosition, wxSize(130, 700));
 
 	m_text_renderer = new TextRenderer();
+	m_text_renderer->SetSize(m_setting_dlg->GetTextSize());
 
 	//settings dialog
 	if (m_setting_dlg->GetTestMode(1))
@@ -1142,7 +1143,7 @@ void VRenderFrame::OnInfo(wxCommandEvent& WXUNUSED(event))
 	txt->SetFont(font);
 	right->Add(txt,0,wxEXPAND);
 	txt = new wxStaticText(d,wxID_ANY,"Version: " +
-		wxString::Format("%d.%.1f", VERSION_MAJOR, VERSION_MINOR),
+		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR)),
 		wxDefaultPosition,wxSize(50,-1));
 	font = wxFont(12,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
 	txt->SetFont(font);

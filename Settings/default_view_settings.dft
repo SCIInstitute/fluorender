@@ -14,6 +14,6 @@ x_rot=0
 y_rot=0
 z_rot=0
 depth_atten_chk=0
-depth_atten_factor_text=0.00
+depth_atten_factor_text=0.50
 scale_factor_text=133
 center=0.000000 0.000000 0.000000

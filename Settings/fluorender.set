@@ -1,5 +1,5 @@
 ver_major=2
-ver_minor=15.2
+ver_minor=16
 [gm\ calculation]
 mode=2
 [peeling\ layers]
@@ -40,7 +40,7 @@ value=0
 [run\ script]
 value=0
 [text\ font]
-value=3
+value=14
 [memory\ settings]
 mem\ swap=0
 graphics\ mem=2000

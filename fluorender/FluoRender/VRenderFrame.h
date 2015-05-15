@@ -64,7 +64,7 @@ DEALINGS IN THE SOFTWARE.
 using namespace std;
 
 #define VERSION_CONTACT "http://www.sci.utah.edu/software/fluorender.html"
-#define VERSION_AUTHORS "Yong Wan\nHideo Otsun\nChuck Hansen\nChi-Bin Chien\nBrig Bagley\n@The University of Utah"
+#define VERSION_AUTHORS "Yong Wan\nHideo Otsuna\nChuck Hansen\nChi-Bin Chien\nBrig Bagley\n@The University of Utah"
 #define VERSION_UPDATES "http://www.sci.utah.edu/releases/fluorender_v" \
 	               VERSION_MAJOR_TAG \
 				   "." \
@@ -313,7 +313,8 @@ public:
     
     void OnInfo(wxCommandEvent& WXUNUSED(event));
 
-	TextRenderer* GetTextRenderer();
+	TextRenderer* GetTextRenderer()
+	{ return m_text_renderer; }
 
 public: //public so export window can see it and set it. 
 	RecorderDlg* m_recorder_dlg;

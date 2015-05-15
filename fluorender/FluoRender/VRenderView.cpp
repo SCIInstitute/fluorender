@@ -589,7 +589,26 @@ void VRenderGLView::CalcFogRange()
 	w = GetSize().x;
 	h = GetSize().y;
 
+	BBox bbox;
+	bool use_box = false;
 	if (m_cur_vol)
+	{
+		BBox bbox = m_cur_vol->GetBounds();
+		use_box = true;
+	}
+	else if (!m_md_pop_list.empty())
+	{
+		for (size_t i=0; i<m_md_pop_list.size(); ++i)
+		{
+			if (m_md_pop_list[i]->GetDisp())
+			{
+				bbox.extend(m_md_pop_list[i]->GetBounds());
+				use_box = true;
+			}
+		}
+	}
+
+	if (use_box)
 	{
 		Transform mv;
 		mv.set(glm::value_ptr(m_mv_mat));
@@ -599,7 +618,6 @@ void VRenderGLView::CalcFogRange()
 		maxz = -numeric_limits<double>::max();
 
 		vector<Point> points;
-		BBox bbox = m_cur_vol->GetBounds();
 		points.push_back(Point(bbox.min().x(), bbox.min().y(), bbox.min().z()));
 		points.push_back(Point(bbox.min().x(), bbox.min().y(), bbox.max().z()));
 		points.push_back(Point(bbox.min().x(), bbox.max().y(), bbox.min().z()));
@@ -610,7 +628,7 @@ void VRenderGLView::CalcFogRange()
 		points.push_back(Point(bbox.max().x(), bbox.max().y(), bbox.max().z()));
 
 		Point p;
-		for (unsigned int i=0; i<points.size(); ++i)
+		for (size_t i=0; i<points.size(); ++i)
 		{
 			p = mv.transform(points[i]);
 			minz = p.z()<minz?p.z():minz;
@@ -735,20 +753,10 @@ void VRenderGLView::DrawDP()
 		//center object
 		m_mv_mat = glm::translate(m_mv_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
 
-/*		if (m_use_fog)
-		{
-			glEnable(GL_FOG);
-			float FogCol[3]={0.0, 0.0, 0.0};
-			glFogfv(GL_FOG_COLOR, FogCol);
-			glFogi(GL_FOG_MODE, GL_LINEAR);
-			float fog_start = m_distance - m_radius/2.0;
-			fog_start = fog_start<0.0?0.0:fog_start;
-			float fog_end = m_distance + m_radius/4.0;
-			glFogf(GL_FOG_START, fog_start);
-			glFogf(GL_FOG_END, fog_end);
-			glFogf(GL_FOG_DENSITY, m_fog_intensity);
-		}
-*/
+		bool use_fog_save = m_use_fog;
+		if (m_use_fog)
+			CalcFogRange();
+
 		if (m_draw_grid)
 			DrawGrid();
 
@@ -811,7 +819,7 @@ void VRenderGLView::DrawDP()
 		glDisable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
-//		glDisable(GL_FOG);
+		m_use_fog = false;
 
 		//draw depth values of each layer into the buffers
 		for (i=0; i<m_peeling_layers; i++)
@@ -830,12 +838,10 @@ void VRenderGLView::DrawDP()
 			else
 			{
 				glActiveTexture(GL_TEXTURE15);
-				//glEnable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[i-1]);
 				glActiveTexture(GL_TEXTURE0);
 				DrawMeshes(1);
 				glActiveTexture(GL_TEXTURE15);
-				//glDisable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, 0);
 				glActiveTexture(GL_TEXTURE0);
 			}
@@ -844,10 +850,9 @@ void VRenderGLView::DrawDP()
 		//bind back the framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		//setup
-/*		if (m_use_fog)
-			glEnable(GL_FOG);
-*/
+		//restore fog
+		m_use_fog = use_fog_save;
+
 		//draw depth peeling
 		for (i=m_peeling_layers; i>=0; i--)
 		{
@@ -855,12 +860,10 @@ void VRenderGLView::DrawDP()
 			{
 				//draw volumes before the depth
 				glActiveTexture(GL_TEXTURE15);
-				//glEnable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[0]);
 				glActiveTexture(GL_TEXTURE0);
 				DrawVolumes(1);
 				glActiveTexture(GL_TEXTURE15);
-				//glDisable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, 0);
 				glActiveTexture(GL_TEXTURE0);
 			}
@@ -870,17 +873,14 @@ void VRenderGLView::DrawDP()
 				{
 					//i == m_peeling_layers == 1
 					glActiveTexture(GL_TEXTURE15);
-					//glEnable(GL_TEXTURE_2D);
 					glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[0]);
 					glActiveTexture(GL_TEXTURE0);
 				}
 				else if (m_peeling_layers == 2)
 				{
 					glActiveTexture(GL_TEXTURE14);
-					//glEnable(GL_TEXTURE_2D);
 					glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[0]);
 					glActiveTexture(GL_TEXTURE15);
-					//glEnable(GL_TEXTURE_2D);
 					glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[1]);
 					glActiveTexture(GL_TEXTURE0);
 				}
@@ -889,33 +889,26 @@ void VRenderGLView::DrawDP()
 					if (i == m_peeling_layers)
 					{
 						glActiveTexture(GL_TEXTURE14);
-						//glEnable(GL_TEXTURE_2D);
 						glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[i-2]);
 						glActiveTexture(GL_TEXTURE15);
-						//glEnable(GL_TEXTURE_2D);
 						glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[i-1]);
 						glActiveTexture(GL_TEXTURE0);
 					}
 					else if (i == 1)
 					{
 						glActiveTexture(GL_TEXTURE14);
-						//glEnable(GL_TEXTURE_2D);
 						glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[0]);
 						glActiveTexture(GL_TEXTURE15);
-						//glEnable(GL_TEXTURE_2D);
 						glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[1]);
 						glActiveTexture(GL_TEXTURE0);
 					}
 					else
 					{
 						glActiveTexture(GL_TEXTURE13);
-						//glEnable(GL_TEXTURE_2D);
 						glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[i-2]);
 						glActiveTexture(GL_TEXTURE14);
-						//glEnable(GL_TEXTURE_2D);
 						glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[i-1]);
 						glActiveTexture(GL_TEXTURE15);
-						//glEnable(GL_TEXTURE_2D);
 						glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[i]);
 						glActiveTexture(GL_TEXTURE0);
 					}
@@ -949,9 +942,6 @@ void VRenderGLView::DrawDP()
 				glBlendEquation(GL_FUNC_ADD);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-/*				if (m_use_fog)
-					glEnable(GL_FOG);
-*/
 				if (m_peeling_layers == 1)
 					//i == m_peeling_layers == 1
 					DrawMeshes(5);//draw mesh at 15
@@ -973,13 +963,10 @@ void VRenderGLView::DrawDP()
 				}
 
 				glActiveTexture(GL_TEXTURE13);
-				//glDisable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, 0);
 				glActiveTexture(GL_TEXTURE14);
-				//glDisable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, 0);
 				glActiveTexture(GL_TEXTURE15);
-				//glDisable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, 0);
 				glActiveTexture(GL_TEXTURE0);
 
@@ -993,9 +980,6 @@ void VRenderGLView::DrawDP()
 				DrawOLShadowsMesh(m_dp_tex_list[0], darkness);
 		}
 
-/*		if (m_use_fog)
-			glDisable(GL_FOG);
-*/
 		if (m_draw_clip)
 			DrawClippingPlanes(false, FRONT_FACE);
 
@@ -1010,9 +994,7 @@ void VRenderGLView::DrawDP()
 
 		//traces
 		DrawTraces();
-
 	}
-
 }
 
 //draw meshes
@@ -7270,7 +7252,7 @@ void VRenderGLView::DrawLegend()
 	wstring wstr;
 	double length = 0.0;
 	double name_len = 0.0;
-	double gap_width = 15.0;
+	double gap_width = font_height*1.5;
 	int lines = 0;
 	int i;
 	//first pass
@@ -7838,10 +7820,15 @@ void VRenderGLView::DrawColormap()
 
 void VRenderGLView::DrawInfo(int nx, int ny)
 {
+	if (!m_text_renderer)
+		return;
+
 	float sx, sy;
 	sx = 2.0/nx;
 	sy = 2.0/ny;
 	float px, py;
+	float gapw = m_text_renderer->GetSize();
+	float gaph = gapw*2;
 
 	double fps_ = 1.0/goTimer->average();
 	wxString str;
@@ -7871,12 +7858,11 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	else
 		str = wxString::Format("FPS: %.2f", fps_>=0.0&&fps_<300.0?fps_:0.0);
 	wstring wstr_temp = str.ToStdWstring();
-	px = 10-nx/2;
-	py = ny/2-20;
-	if (m_text_renderer)
-		m_text_renderer->RenderText(
-		wstr_temp, m_bg_color_inv,
-		px*sx, py*sy, sx, sy);
+	px = gapw-nx/2;
+	py = ny/2-gaph/2;
+	m_text_renderer->RenderText(
+	wstr_temp, m_bg_color_inv,
+	px*sx, py*sy, sx, sy);
 
 	if (m_draw_coord)
 	{
@@ -7888,24 +7874,22 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 			str = wxString::Format("T: %d  X: %.2f  Y: %.2f  Z: %.2f",
 				m_tseq_cur_num, p.x(), p.y(), p.z());
 			wstr_temp = str.ToStdWstring();
-			px = 10-nx/2;
-			py = ny/2-40;
-			if (m_text_renderer)
-				m_text_renderer->RenderText(
-				wstr_temp, m_bg_color_inv,
-				px*sx, py*sy, sx, sy);
+			px = gapw-nx/2;
+			py = ny/2-gaph;
+			m_text_renderer->RenderText(
+			wstr_temp, m_bg_color_inv,
+			px*sx, py*sy, sx, sy);
 		}
 	}
 	else
 	{
 		str = wxString::Format("T: %d", m_tseq_cur_num);
 		wstr_temp = str.ToStdWstring();
-		px = 10-nx/2;
-		py = ny/2-40;
-		if (m_text_renderer)
-			m_text_renderer->RenderText(
-			wstr_temp, m_bg_color_inv,
-			px*sx, py*sy, sx, sy);
+		px = gapw-nx/2;
+		py = ny/2-gaph;
+		m_text_renderer->RenderText(
+		wstr_temp, m_bg_color_inv,
+		px*sx, py*sy, sx, sy);
 	}
 
 	if (m_test_wiref)
@@ -7914,12 +7898,11 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 		{
 			str = wxString::Format("SLICES: %d", m_mvr->get_slice_num());
 			wstr_temp = str.ToStdWstring();
-			px = 10-nx/2;
-			py = ny/2-60;
-			if (m_text_renderer)
-				m_text_renderer->RenderText(
-				wstr_temp, m_bg_color_inv,
-				px*sx, py*sy, sx, sy);
+			px = gapw-nx/2;
+			py = ny/2-gaph*1.5;
+			m_text_renderer->RenderText(
+			wstr_temp, m_bg_color_inv,
+			px*sx, py*sy, sx, sy);
 		}
 		else
 		{
@@ -7930,8 +7913,8 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 				{
 					str = wxString::Format("SLICES_%d: %d", i+1, vd->GetVR()->get_slice_num());
 					wstr_temp = str.ToStdWstring();
-					px = 10-nx/2;
-					py = ny/2-(60+15*i);
+					px = gapw-nx/2;
+					py = ny/2-gaph*(3+i)/2;
 					if (m_text_renderer)
 						m_text_renderer->RenderText(
 						wstr_temp, m_bg_color_inv,

@@ -99,16 +99,17 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 
 	//font
 	wxBoxSizer *group2 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Font"), wxVERTICAL);
+		new wxStaticBox(page, wxID_ANY, "Font Size"), wxVERTICAL);
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Choose a font for the text in render views:");
+	st = new wxStaticText(page, 0, "Choose a font size for the text in render views:");
 	m_font_cmb = new wxComboBox(page, ID_FontCmb, "",
 		wxDefaultPosition, wxSize(120, -1), 0, NULL, wxCB_READONLY);
-	m_font_cmb->Append("Helvetica 12");
-	m_font_cmb->Append("Helvetica 18");
-	m_font_cmb->Append("Times Roman 10");
-	m_font_cmb->Append("Times Roman 24");
-	m_font_cmb->Select(0);
+	m_font_cmb->Append("Sans-serif 10");
+	m_font_cmb->Append("Sans-serif 12");
+	m_font_cmb->Append("Sans-serif 14");
+	m_font_cmb->Append("Sans-serif 18");
+	m_font_cmb->Append("Sans-serif 24");
+	m_font_cmb->Select(2);
 	sizer2_1->Add(st);
 	sizer2_1->Add(20, 10);
 	sizer2_1->Add(m_font_cmb);
@@ -788,7 +789,18 @@ void SettingDlg::UpdateUI()
 	m_wav_color3_cmb->Select(m_wav_color3-1);
 	m_wav_color4_cmb->Select(m_wav_color4-1);
 	//font
-	m_font_cmb->Select(m_text_size);
+	int tsize = 1;
+	if (m_text_size < 12)
+		tsize = 0;
+	else if (m_text_size < 14)
+		tsize = 1;
+	else if (m_text_size < 18)
+		tsize = 2;
+	else if (m_text_size < 24)
+		tsize = 3;
+	else
+		tsize = 4;
+	m_font_cmb->Select(tsize);
 	//script
 	m_run_script_chk->SetValue(m_run_script);
 	//memory settings
@@ -1395,29 +1407,32 @@ void SettingDlg::OnResponseTimeEdit(wxCommandEvent &event)
 //font
 void SettingDlg::OnFontChange(wxCommandEvent &event)
 {
-/*	switch (m_font_cmb->GetCurrentSelection())
+	switch (m_font_cmb->GetCurrentSelection())
 	{
-	case 0://helvetica 12
-		m_text_font = 3;
+	case 0://Sans Serif 10
+		m_text_size = 10;
 		break;
-	case 1://helvetica 18
-		m_text_font = 4;
+	case 1://12
+		m_text_size = 12;
 		break;
-	case 2://roman 10
-		m_text_font = 5;
+	case 2://14
+		m_text_size = 14;
 		break;
-	case 3://roman 24
-		m_text_font = 6;
+	case 3://18
+		m_text_size = 18;
+		break;
+	case 4://24
+		m_text_size = 24;
 		break;
 	default:
+		m_text_size = 12;
 		break;
 	}
-*/
-	m_text_size = 12;
 
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 	{
+		vr_frame->GetTextRenderer()->SetSize(m_text_size);
 		for (int i=0 ; i<(int)vr_frame->GetViewList()->size() ; i++)
 		{
 			VRenderView* vrv = (*vr_frame->GetViewList())[i];
