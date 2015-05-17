@@ -55,6 +55,8 @@ namespace FLIVR
 		void setLocalParam(int, double, double, double, double);
 		//set matrix uniform (4x4)
 		void setLocalParamMatrix(int, float*);
+		//set integer
+		void setLocalParamUInt(int, unsigned int);
 
 		// Call init_shaders_supported before shaders_supported queries!
 		static bool init();

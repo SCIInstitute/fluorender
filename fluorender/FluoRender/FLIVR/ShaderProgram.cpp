@@ -297,4 +297,21 @@ namespace FLIVR
 		}
 	}
 
+	void ShaderProgram::setLocalParamUInt(int i, unsigned int value)
+	{
+		if (shaders_supported())
+		{
+			const char *loc_strings[] = {"loci0", "loci1", "loci2", "loci3",
+				"loci4", "loci5", "loci6", "loci7",
+				"loci8", "loci9", "loci10", "loci11",
+				"loci12", "loci13", "loci14", "loci15"};
+
+			int location = glGetUniformLocation(id_, loc_strings[i]);
+			if (location != -1)
+			{
+				glUniform1ui(location, value);
+			}
+		}
+	}
+
 } // end namespace FLIVR

@@ -74,11 +74,6 @@ namespace FLIVR
 			glDeleteVertexArrays(1, &m_vao);
 	}
 
-	void MeshRenderer::update()
-	{
-		update_ = true;
-	}
-
 	//clipping planes
 	void MeshRenderer::set_planes(vector<Plane*> *p)
 	{
@@ -105,6 +100,67 @@ namespace FLIVR
 		return &planes_;
 	}
 
+	void MeshRenderer::update()
+	{
+		bool bnormal = data_->normals;
+		bool btexcoord = data_->texcoords;
+		vector<float> verts;
+
+		GLMgroup* group = data_->groups;
+		GLMtriangle* triangle = 0;
+		while (group)
+		{
+			for (size_t i=0; i<group->numtriangles; ++i)
+			{
+				triangle = &(data_->triangles[group->triangles[i]]);
+				for (size_t j=0; j<3; ++j)
+				{
+					verts.push_back(data_->vertices[3*triangle->vindices[j]]);
+					verts.push_back(data_->vertices[3*triangle->vindices[j]+1]);
+					verts.push_back(data_->vertices[3*triangle->vindices[j]+2]);
+					if (bnormal)
+					{
+						verts.push_back(data_->normals[3*triangle->nindices[j]]);
+						verts.push_back(data_->normals[3*triangle->nindices[j]+1]);
+						verts.push_back(data_->normals[3*triangle->nindices[j]+2]);
+					}
+					if (btexcoord)
+					{
+						verts.push_back(data_->texcoords[2*triangle->tindices[j]]);
+						verts.push_back(data_->texcoords[2*triangle->tindices[j]+1]);
+					}
+				}
+			}
+			group = group->next;
+		}
+
+		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float)*verts.size(), &verts[0], GL_STATIC_DRAW);
+		glBindVertexArray(m_vao);
+		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+		GLsizei stride = sizeof(float)*(3+(bnormal?3:0)+(btexcoord?2:0));
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)0);
+		if (bnormal)
+		{
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)12);
+		}
+		if (btexcoord)
+		{
+			if (bnormal)
+			{
+				glEnableVertexAttribArray(2);
+				glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)24);
+			}
+			else
+			{
+				glEnableVertexAttribArray(1);
+				glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)12);
+			}
+		}
+	}
+
 	void MeshRenderer::draw()
 	{
 		if (!data_ || !data_->vertices || !data_->triangles)
@@ -113,63 +169,7 @@ namespace FLIVR
 		//set up vertex array object
 		if (update_)
 		{
-			bool bnormal = data_->normals;
-			bool btexcoord = data_->texcoords;
-			vector<float> verts;
-
-			GLMgroup* group = data_->groups;
-			GLMtriangle* triangle = 0;
-			while (group)
-			{
-				for (size_t i=0; i<group->numtriangles; ++i)
-				{
-					triangle = &(data_->triangles[group->triangles[i]]);
-					for (size_t j=0; j<3; ++j)
-					{
-						verts.push_back(data_->vertices[3*triangle->vindices[j]]);
-						verts.push_back(data_->vertices[3*triangle->vindices[j]+1]);
-						verts.push_back(data_->vertices[3*triangle->vindices[j]+2]);
-						if (bnormal)
-						{
-							verts.push_back(data_->normals[3*triangle->nindices[j]]);
-							verts.push_back(data_->normals[3*triangle->nindices[j]+1]);
-							verts.push_back(data_->normals[3*triangle->nindices[j]+2]);
-						}
-						if (btexcoord)
-						{
-							verts.push_back(data_->texcoords[2*triangle->tindices[j]]);
-							verts.push_back(data_->texcoords[2*triangle->tindices[j]+1]);
-						}
-					}
-				}
-				group = group->next;
-			}
-
-			glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(float)*verts.size(), &verts[0], GL_STATIC_DRAW);
-			glBindVertexArray(m_vao);
-			glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-			GLsizei stride = sizeof(float)*(3+(bnormal?3:0)+(btexcoord?2:0));
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)0);
-			if (bnormal)
-			{
-				glEnableVertexAttribArray(1);
-				glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)12);
-			}
-			if (btexcoord)
-			{
-				if (bnormal)
-				{
-					glEnableVertexAttribArray(2);
-					glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)24);
-				}
-				else
-				{
-					glEnableVertexAttribArray(1);
-					glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)12);
-				}
-			}
+			update();
 			update_ = false;
 		}
 
@@ -191,7 +191,7 @@ namespace FLIVR
 			}
 
 			//set up shader
-			shader = msh_shader_factory_.shader(
+			shader = msh_shader_factory_.shader(0,
 				depth_peel_, tex, fog_, light_);
 			if (shader)
 			{
@@ -253,6 +253,124 @@ namespace FLIVR
 		//release texture
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	void MeshRenderer::draw_wireframe()
+	{
+		if (!data_ || !data_->vertices || !data_->triangles)
+			return;
+
+		//set up vertex array object
+		if (update_)
+		{
+			update();
+			update_ = false;
+		}
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+		ShaderProgram* shader = 0;
+
+		glBindVertexArray(m_vao);
+		GLMgroup* group = data_->groups;
+		GLint pos = 0;
+		int peel = 0;
+		bool tex = false;
+		bool light = false;
+		
+		//set up shader
+		shader = msh_shader_factory_.shader(0,
+			peel, tex, fog_, light);
+		if (shader)
+		{
+			if (!shader->valid())
+				shader->create();
+			shader->bind();
+		}
+		//uniforms
+		shader->setLocalParamMatrix(0, glm::value_ptr(m_proj_mat));
+		shader->setLocalParamMatrix(1, glm::value_ptr(m_mv_mat));
+		GLMmaterial* material = &data_->materials[0];
+		if (material)
+			shader->setLocalParam(0, material->diffuse[0], material->diffuse[1], material->diffuse[2], material->diffuse[3]);
+		else
+			shader->setLocalParam(0, 1.0, 0.0, 0.0, 1.0);
+		shader->setLocalParam(3, 0.0, 1.0, 0.0, 0.0);//alpha
+		if (fog_)
+			shader->setLocalParam(8, m_fog_intensity, m_fog_start, m_fog_end, 0.0);
+
+
+		while (group)
+		{
+			if (group->numtriangles == 0)
+			{
+				group = group->next;
+				continue;
+			}
+
+			//draw
+			glDrawArrays(GL_TRIANGLES, pos, (GLsizei)(group->numtriangles*3));
+			pos += group->numtriangles*3;
+			group = group->next;
+		}
+		glBindVertexArray(0);
+
+		// Release shader.
+		if (shader && shader->valid())
+			shader->release();
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+
+	void MeshRenderer::draw_integer(unsigned int name)
+	{
+		if (!data_ || !data_->vertices || !data_->triangles)
+			return;
+
+		//set up vertex array object
+		if (update_)
+		{
+			update();
+			update_ = false;
+		}
+
+		ShaderProgram* shader = 0;
+
+		glBindVertexArray(m_vao);
+		GLMgroup* group = data_->groups;
+		GLint pos = 0;
+
+		//set up shader
+		shader = msh_shader_factory_.shader(1,
+			0, false, false, false);
+		if (shader)
+		{
+			if (!shader->valid())
+				shader->create();
+			shader->bind();
+		}
+		//uniforms
+		shader->setLocalParamMatrix(0, glm::value_ptr(m_proj_mat));
+		shader->setLocalParamMatrix(1, glm::value_ptr(m_mv_mat));
+		shader->setLocalParamUInt(0, name);
+
+		while (group)
+		{
+			if (group->numtriangles == 0)
+			{
+				group = group->next;
+				continue;
+			}
+
+			//draw
+			glDrawArrays(GL_TRIANGLES, pos, (GLsizei)(group->numtriangles*3));
+			pos += group->numtriangles*3;
+			group = group->next;
+		}
+		glBindVertexArray(0);
+
+		// Release shader.
+		if (shader && shader->valid())
+			shader->release();
 	}
 
 } // namespace FLIVR

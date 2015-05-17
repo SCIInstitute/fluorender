@@ -1902,46 +1902,25 @@ void MeshData::Draw(int peel)
 	glDisable(GL_CULL_FACE);
 	m_mr->set_depth_peel(peel);
 	m_mr->draw();
+	if (m_draw_bounds && (peel==4 || peel==5))
+		DrawBounds();
 	glEnable(GL_CULL_FACE);
 }
 
 void MeshData::DrawBounds()
 {
-/*	glPushAttrib(GL_ENABLE_BIT);
-	//	glDisable(GL_FOG);
-	//glDisable(GL_BLEND);
-	glColor4d(m_mat_diff.r(), m_mat_diff.g(), m_mat_diff.b(), 1.0);
+	if (!m_mr)
+		return;
 
-	//glBegin(GL_LINE_LOOP);
-	//	glVertex3f(m_bounds.min().x(), m_bounds.min().y(), m_bounds.min().z());
-	//	glVertex3f(m_bounds.max().x(), m_bounds.min().y(), m_bounds.min().z());
-	//	glVertex3f(m_bounds.max().x(), m_bounds.max().y(), m_bounds.min().z());
-	//	glVertex3f(m_bounds.min().x(), m_bounds.max().y(), m_bounds.min().z());
-	//glEnd();
-	//glBegin(GL_LINE_LOOP);
-	//	glVertex3f(m_bounds.min().x(), m_bounds.min().y(), m_bounds.max().z());
-	//	glVertex3f(m_bounds.max().x(), m_bounds.min().y(), m_bounds.max().z());
-	//	glVertex3f(m_bounds.max().x(), m_bounds.max().y(), m_bounds.max().z());
-	//	glVertex3f(m_bounds.min().x(), m_bounds.max().y(), m_bounds.max().z());
-	//glEnd();
-	//glBegin(GL_LINES);
-	//	glVertex3f(m_bounds.min().x(), m_bounds.min().y(), m_bounds.min().z());
-	//	glVertex3f(m_bounds.min().x(), m_bounds.min().y(), m_bounds.max().z());
-	//	glVertex3f(m_bounds.max().x(), m_bounds.min().y(), m_bounds.min().z());
-	//	glVertex3f(m_bounds.max().x(), m_bounds.min().y(), m_bounds.max().z());
-	//	glVertex3f(m_bounds.max().x(), m_bounds.max().y(), m_bounds.min().z());
-	//	glVertex3f(m_bounds.max().x(), m_bounds.max().y(), m_bounds.max().z());
-	//	glVertex3f(m_bounds.min().x(), m_bounds.max().y(), m_bounds.min().z());
-	//	glVertex3f(m_bounds.min().x(), m_bounds.max().y(), m_bounds.max().z());
-	//glEnd();
+	m_mr->draw_wireframe();
+}
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glLineWidth(1.5);
-	m_mr->draw(false, false);
-	glLineWidth(1.0);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+void MeshData::DrawInt(unsigned int name)
+{
+	if (!m_mr)
+		return;
 
-	glPopAttrib();*/
+	m_mr->draw_integer(name);
 }
 
 //lighting
@@ -2247,7 +2226,7 @@ void MeshData::SetLimit(bool bVal)
 		m_mr->set_limit(m_limit);
 	else
 		m_mr->set_limit(-1);
-	m_mr->update();
+//	m_mr->update();
 }
 
 bool MeshData::GetLimit()
@@ -2261,7 +2240,7 @@ void MeshData::SetLimitNumer(int val)
 	if (m_enable_limit)
 	{
 		m_mr->set_limit(val);
-		m_mr->update();
+//		m_mr->update();
 	}
 }
 

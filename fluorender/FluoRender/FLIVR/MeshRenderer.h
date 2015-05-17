@@ -51,6 +51,8 @@ namespace FLIVR
 
 		//draw
 		void draw();
+		void draw_wireframe();
+		void draw_integer(unsigned int name);
 		void update();
 
 		//depth peeling

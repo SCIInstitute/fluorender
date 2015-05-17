@@ -899,7 +899,7 @@ namespace FLIVR
 				if (glTexImage3D)
 				{
 					glTexImage3D(GL_TEXTURE_3D, 0, GL_R32UI, nx, ny, nz, 0, GL_RED_INTEGER,
-					brick->tex_type(c), brick->tex_data(c));
+					brick->tex_type(c), NULL);
 					glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, nx, ny, nz, GL_RED_INTEGER,
 					brick->tex_type(c), brick->tex_data(c));
 				}
@@ -1014,7 +1014,6 @@ namespace FLIVR
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)12);
 
-//		glBindVertexArray(m_quad_vao);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
@@ -1097,8 +1096,6 @@ namespace FLIVR
 		if (ShaderProgram::shaders_supported() && glActiveTexture)
 		{
 			glActiveTexture(GL_TEXTURE6);
-//			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-			//glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, tex_2d_mask_);
 			glActiveTexture(GL_TEXTURE0);
 		}
@@ -1110,12 +1107,8 @@ namespace FLIVR
 		if (ShaderProgram::shaders_supported() && glActiveTexture)
 		{
 			glActiveTexture(GL_TEXTURE4);
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-			//glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, tex_2d_weight1_);
 			glActiveTexture(GL_TEXTURE5);
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-			//glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, tex_2d_weight2_);
 			glActiveTexture(GL_TEXTURE0);
 		}
@@ -1127,8 +1120,6 @@ namespace FLIVR
 		if (ShaderProgram::shaders_supported() && glActiveTexture)
 		{
 			glActiveTexture(GL_TEXTURE4);
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-			//glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, tex_2d_dmap_);
 			glActiveTexture(GL_TEXTURE0);
 		}
@@ -1140,7 +1131,6 @@ namespace FLIVR
 		if (ShaderProgram::shaders_supported() && glActiveTexture)
 		{
 			glActiveTexture(GL_TEXTURE0 + unit);
-//			glDisable(taget);
 			glBindTexture(taget, 0);
 			glActiveTexture(GL_TEXTURE0);
 		}

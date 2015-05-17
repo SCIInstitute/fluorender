@@ -515,6 +515,7 @@ public:
 	void SetMatrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat);
 	void Draw(int peel);
 	void DrawBounds();
+	void DrawInt(unsigned int name);
 
 	//lighting
 	void SetLighting(bool bVal);

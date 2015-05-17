@@ -1385,7 +1385,8 @@ namespace FLIVR
 		seg_shader->setLocalParam(3, 1.0/gamma3d_, gm_thresh_, offset_, sw_);
 		seg_shader->setLocalParam(6, color_.r(), color_.g(), color_.b(), 0.0);
 
-		if (type == 0)			seg_shader->setLocalParam(7, thresh, 0.0, 0.0, 0.0);
+		if (type == 0)
+			seg_shader->setLocalParam(7, thresh, 0.0, 0.0, 0.0);
 		else if (type == 1)
 			//loc7: (initial thresh, gm_gaussian_falloff, scalar_gaussian_falloff, scalar_translate)
 			seg_shader->setLocalParam(7, 1.0, gm_falloff, 0.0, 0.0);

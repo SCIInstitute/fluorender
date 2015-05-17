@@ -180,6 +180,10 @@ wxGLCanvas(parent, id, attriblist, pos, size, style),
 	m_fbo_paint(0),
 	m_tex_paint(0),
 	m_clear_paint(true),
+	//pick buffer
+	m_fbo_pick(0),
+	m_tex_pick(0),
+	m_tex_pick_depth(0),
 	//camera controls
 	m_persp(false),
 	m_free(false),
@@ -384,21 +388,18 @@ VRenderGLView::~VRenderGLView()
 	}
 
 	//delete buffers and textures
-	if (glIsFramebuffer)
-	{
-		if (glIsFramebuffer(m_fbo))
-			glDeleteFramebuffers(1, &m_fbo);
-		if (glIsFramebuffer(m_fbo_final))
-			glDeleteFramebuffers(1, &m_fbo_final);
-		if (glIsFramebuffer(m_fbo_temp))
-			glDeleteFramebuffers(1, &m_fbo_temp);
-		if (glIsFramebuffer(m_fbo_paint))
-			glDeleteFramebuffers(1, &m_fbo_paint);
-		if (glIsFramebuffer(m_fbo_ol1))
-			glDeleteFramebuffers(1, &m_fbo_ol1);
-		if (glIsFramebuffer(m_fbo_ol2))
-			glDeleteFramebuffers(1, &m_fbo_ol2);
-	}
+	if (glIsFramebuffer(m_fbo))
+		glDeleteFramebuffers(1, &m_fbo);
+	if (glIsFramebuffer(m_fbo_final))
+		glDeleteFramebuffers(1, &m_fbo_final);
+	if (glIsFramebuffer(m_fbo_temp))
+		glDeleteFramebuffers(1, &m_fbo_temp);
+	if (glIsFramebuffer(m_fbo_paint))
+		glDeleteFramebuffers(1, &m_fbo_paint);
+	if (glIsFramebuffer(m_fbo_ol1))
+		glDeleteFramebuffers(1, &m_fbo_ol1);
+	if (glIsFramebuffer(m_fbo_ol2))
+		glDeleteFramebuffers(1, &m_fbo_ol2);
 	if (glIsTexture(m_tex))
 		glDeleteTextures(1, &m_tex);
 	if (glIsTexture(m_tex_final))
@@ -422,6 +423,14 @@ VRenderGLView::~VRenderGLView()
 		glDeleteBuffers(1, &m_misc_ibo);
 	if (glIsVertexArray(m_misc_vao))
 		glDeleteVertexArrays(1, &m_misc_vao);
+
+	//pick buffer
+	if (glIsFramebuffer(m_fbo_pick))
+		glDeleteFramebuffers(1, &m_fbo_pick);
+	if (glIsTexture(m_tex_pick))
+		glDeleteTextures(1, &m_tex_pick);
+	if (glIsTexture(m_tex_pick_depth))
+		glDeleteTextures(1, &m_tex_pick_depth);
 
 	if (!m_sharedRC)
 		delete m_glRC;
@@ -3865,75 +3874,93 @@ void VRenderGLView::Pick()
 
 void VRenderGLView::PickMesh()
 {
-/*	int i;
+	int i;
 	int nx = GetSize().x;
 	int ny = GetSize().y;
+	if (nx<=0 || ny<=0)
+		return;
+	wxPoint mouse_pos = ScreenToClient(wxGetMousePosition());
+	if (mouse_pos.x<0 || mouse_pos.x>=nx ||
+		mouse_pos.y<=0 || mouse_pos.y>ny)
+		return;
 
-	//use normal opengl to pick mesh
-	GLuint buffer[512];
-	GLint hits;
-	glSelectBuffer(512, buffer);
-	glRenderMode(GL_SELECT);
-	glInitNames();
-	glPushName(0);
+	//set up fbo
+	GLint cur_framebuffer_id;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &cur_framebuffer_id);
+	if (glIsFramebuffer(m_fbo_pick)!=GL_TRUE)
+	{
+		glGenFramebuffers(1, &m_fbo_pick);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_pick);
+		if (glIsTexture(m_tex_pick)!=GL_TRUE)
+			glGenTextures(1, &m_tex_pick);
+		glBindTexture(GL_TEXTURE_2D, m_tex_pick);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, nx, ny, 0,
+			GL_RED_INTEGER, GL_UNSIGNED_INT, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER,
+			GL_COLOR_ATTACHMENT0,
+			GL_TEXTURE_2D, m_tex_pick, 0);
+		if (glIsTexture(m_tex_pick_depth)!=GL_TRUE)
+			glGenTextures(1, &m_tex_pick_depth);
+		glBindTexture(GL_TEXTURE_2D, m_tex_pick_depth);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, nx, ny, 0,
+			GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		glFramebufferTexture2D(GL_FRAMEBUFFER,
+			GL_DEPTH_ATTACHMENT,
+			GL_TEXTURE_2D, m_tex_pick_depth, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+	if (m_resize)
+	{
+		glBindTexture(GL_TEXTURE_2D, m_tex_pick);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, nx, ny, 0,
+			GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
+		glBindTexture(GL_TEXTURE_2D, m_tex_pick_depth);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, nx, ny, 0,
+			GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 
-	glDisable(GL_DEPTH_TEST);
+	//bind
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_pick);
+	GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClearDepth(1.0);
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-	//projection
-	HandleProjection(nx, ny, true);
-	//Transformation
-	HandleCamera();
-	//draw
-	glPushMatrix();
-	//translate object
-	glTranslated(m_obj_transx, m_obj_transy, m_obj_transz);
-	//rotate object
-	glRotated(m_obj_rotz+180.0, 0.0, 0.0, 1.0);
-	glRotated(m_obj_roty+180.0, 0.0, 1.0, 0.0);
-	glRotated(m_obj_rotx, 1.0, 0.0, 0.0);
-	//center object
-	glTranslated(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz);
-
+	glScissor(mouse_pos.x, ny-mouse_pos.y, 1, 1);
+	glEnable(GL_SCISSOR_TEST);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
 	for (i=0; i<(int)m_md_pop_list.size(); i++)
 	{
 		MeshData* md = m_md_pop_list[i];
 		if (md)
 		{
-			glLoadName(i);
-			md->Draw(0);
+			md->SetMatrices(m_mv_mat, m_proj_mat);
+			md->DrawInt(i+1);
 		}
 	}
+	glDisable(GL_SCISSOR_TEST);
 
-	glPopMatrix();
+	unsigned int choose = 0;
+	glReadPixels(mouse_pos.x, ny-mouse_pos.y, 1, 1, GL_RED_INTEGER,
+		GL_UNSIGNED_INT, (GLvoid*)&choose);
+	glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_id);
 
-	glEnable(GL_DEPTH_TEST);
-
-	//feedback
-	hits = glRenderMode(GL_RENDER);
-	if (hits > 0)
+	if (choose >0 && choose<=(int)m_md_pop_list.size())
 	{
-		int choose = buffer[3];
-		int depth = buffer[1];
-		for (i=1; i<hits; i++)
+		MeshData* md = m_md_pop_list[choose-1];
+		if (md)
 		{
-			if (buffer[i*4+1] < GLuint(depth))
+			VRenderFrame* frame = (VRenderFrame*)m_frame;
+			if (frame && frame->GetTree())
 			{
-				choose = buffer[i*4+3];
-				depth = buffer[i*4+1];
-			}
-		}
-
-		if (choose >=0 && choose<(int)m_md_pop_list.size())
-		{
-			MeshData* md = m_md_pop_list[choose];
-			if (md)
-			{
-				VRenderFrame* frame = (VRenderFrame*)m_frame;
-				if (frame && frame->GetTree())
-				{
-					frame->GetTree()->SetFocus();
-					frame->GetTree()->Select(m_vrv->GetName(), md->GetName());
-				}
+				frame->GetTree()->SetFocus();
+				frame->GetTree()->Select(m_vrv->GetName(), md->GetName());
 			}
 		}
 	}
@@ -3942,7 +3969,7 @@ void VRenderGLView::PickMesh()
 		VRenderFrame* frame = (VRenderFrame*)m_frame;
 		if (frame && frame->GetCurSelType()==3 && frame->GetTree())
 			frame->GetTree()->Select(m_vrv->GetName(), "");
-	}*/
+	}
 }
 
 void VRenderGLView::PickVolume()
