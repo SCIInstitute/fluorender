@@ -38,16 +38,11 @@ DEALINGS IN THE SOFTWARE.
 #include "png_resource.h"
 #include "img/icons.h"
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
 
 int VRenderView::m_id = 1;
 ImgShaderFactory VRenderGLView::m_img_shader_factory;
-//budget_test
-#include <wx/wfstream.h>
-#include <wx/txtstrm.h>
-//wxFileOutputStream fos("budget_test.txt");
-//wxTextOutputStream tos(fos);
-
-#include <glm/gtc/matrix_transform.hpp>
 
 BEGIN_EVENT_TABLE(VRenderGLView, wxGLCanvas)
 	EVT_PAINT(VRenderGLView::OnDraw)
@@ -8606,7 +8601,6 @@ double VRenderGLView::GetPointVolumeBox(Point &mp, int mx, int my, VolumeData* v
 		HandleProjection(nx, ny);
 		//Transformation
 		HandleCamera();
-		glm::mat4 mv_temp;
 		//translate object
 		mv_temp = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
 		//rotate object
@@ -8614,8 +8608,7 @@ double VRenderGLView::GetPointVolumeBox(Point &mp, int mx, int my, VolumeData* v
 		mv_temp = glm::rotate(mv_temp, float(m_obj_rotz+180.0), glm::vec3(0.0, 0.0, 1.0));
 		mv_temp = glm::rotate(mv_temp, float(m_obj_rotx), glm::vec3(1.0, 0.0, 0.0));
 		//center object
-		glm::mat4 mv_temp2 = mv_temp;
-		mv_temp = glm::translate(mv_temp2, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+		mv_temp = glm::translate(mv_temp, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
 	}
 	else
 		mv_temp = m_mv_mat;
