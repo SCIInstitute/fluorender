@@ -803,7 +803,6 @@ namespace FLIVR
 					if (!b->drawn(mode))
 					{
 						b->set_drawn(mode, true);
-						//cur_brick_num_++;
 						cur_chan_brick_num_++;
 					}
 				}
@@ -938,7 +937,6 @@ namespace FLIVR
 				glClear(GL_COLOR_BUFFER_BIT);
 
 				glBindTexture(GL_TEXTURE_2D, blend_tex_id_);
-//				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 				img_shader = 
 					m_img_shader_factory.shader(IMG_SHDR_FILTER_BLUR);
 				if (img_shader)

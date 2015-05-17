@@ -425,10 +425,7 @@ namespace FLIVR
 								bs_tmp = vr_list_[j]->tex_->get_sorted_bricks(
 								view_ray, orthographic_p);
 							if (!(*bs_tmp)[i]->drawn(0))
-							{
 								(*bs_tmp)[i]->set_drawn(0, true);
-								//TextureRenderer::cur_brick_num_++;
-							}
 						}
 					}
 					continue;

@@ -862,9 +862,9 @@ private:
 	void DrawFinalBuffer();
 	//different volume drawing modes
 	void DrawVolumesMulti(vector<VolumeData*> &list, int peel=0);
-	void DrawVolumesComp(vector<VolumeData*> &list, int peel=0, bool mask=false);
+	void DrawVolumesComp(vector<VolumeData*> &list, bool mask=false, int peel=0);
 	void DrawMIP(VolumeData* vd, GLuint tex, int peel=0);
-	void DrawOVER(VolumeData* vd, GLuint tex, int peel=0);
+	void DrawOVER(VolumeData* vd, GLuint tex, bool mask, int peel=0);
 	//overlay passes
 	void DrawOLShading(VolumeData* vd);
 	void DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex);

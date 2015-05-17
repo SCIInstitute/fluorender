@@ -383,7 +383,7 @@ private:
 	//modes (MIP & normal)
 	int m_mode;	//0-normal; 1-MIP; 2-white shading; 3-white mip
 	//modes for streaming
-	int m_stream_mode;	//0-normal; 1-MIP; 2-shading; 3-shadow
+	int m_stream_mode;	//0-normal; 1-MIP; 2-shading; 3-shadow, 4-mask
 
 	//mask mode
 	int m_mask_mode;	//0-normal, 1-render with mask, 2-render with mask excluded,
