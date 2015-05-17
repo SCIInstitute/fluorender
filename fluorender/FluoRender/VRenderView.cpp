@@ -998,6 +998,8 @@ void VRenderGLView::DrawDP()
 
 		//traces
 		DrawTraces();
+
+		m_mv_mat = mv_temp;
 	}
 }
 
