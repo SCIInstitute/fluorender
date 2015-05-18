@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderView.h"
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
+#include <wx/stdpaths.h>
 #include <boost/chrono.hpp>
 #include "compatibility.h"
 
@@ -442,14 +443,17 @@ bool OclDlg::ExecuteKernel(KernelProgram* kernel, GLuint data_id, void* result,
 
 void OclDlg::AddKernelsToList()
 {
+    std::string exePath = wxStandardPaths::Get().GetExecutablePath().ToStdString();
+    exePath = exePath.substr(0,exePath.find_last_of(std::string()+GETSLASH()));
 	m_kernel_list->DeleteAllItems();
-    wxString loc = wxString("CL_code") + GETSLASH() + wxString("*.cl");
+    wxString loc = wxString(exePath) + GETSLASH() + wxString("CL_code") +
+                                       GETSLASH() + wxString("*.cl");
 	wxLogNull logNo;
 	wxString file = wxFindFirstFile(loc);
 	while (!file.empty())
 	{
-		file = file.AfterFirst(GETSLASH());
-		file = file.BeforeFirst('.');
+		file = file.AfterLast(GETSLASH());
+		file = file.BeforeLast('.');
 		m_kernel_list->InsertItem(m_kernel_list->GetItemCount(), file);
 		file = wxFindNextFile();
 	}
@@ -464,7 +468,10 @@ void OclDlg::OnKernelListSelected(wxListEvent& event)
    if (item != -1)
    {
       wxString file = m_kernel_list->GetItemText(item);
-	  file = "CL_code" + wxString(GETSLASH()) + file + ".cl";
+    std::string exePath = wxStandardPaths::Get().GetExecutablePath().ToStdString();
+    exePath = exePath.substr(0,exePath.find_last_of(std::string()+GETSLASH()));
+    file = wxString(exePath) + GETSLASH() + wxString("CL_code") +
+                                       GETSLASH() + file + wxString(".cl");
 		m_kernel_edit_stc->LoadFile(file);
 		m_kernel_edit_stc->EmptyUndoBuffer();
 		m_kernel_file_txt->SetValue(file);

@@ -986,7 +986,7 @@ void VMovieView::SetRendering(double pcnt) {
 			vrv->SetRotations(x,val,z);
 		else if (m_z_rd->GetValue())
 			vrv->SetRotations(x,y,val);
-		vrv->RefreshGL(false);
+		vrv->RefreshGL();
 	}
 }
 
@@ -1222,6 +1222,10 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent) {
 	group1->Add(line1);
 	group1->Add(5,5, wxALIGN_CENTER);
 	group1->Add(line2);
+	wxStaticText *mov_note = new wxStaticText(panel, wxID_ANY,
+		"NOTE: Please make sure that the movie length is greater than 36 frames for correct compression!",
+		wxDefaultPosition, wxSize(-1, -1));
+	group1->Add(mov_note);
 	panel->SetSizer(group1);
 	panel->Layout();
 
