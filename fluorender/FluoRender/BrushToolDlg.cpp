@@ -201,7 +201,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
    m_brush_scl_translate_sldr = new wxSlider(this, ID_BrushSclTranslateSldr, 0, 0, 2550,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_brush_scl_translate_text = new wxTextCtrl(this, ID_BrushSclTranslateText, "0.0",
-         wxDefaultPosition, wxSize(40, 20), 0, vald_fp1);
+         wxDefaultPosition, wxSize(50, 20), 0, vald_fp1);
    sizer11_2->Add(5, 5);
    sizer11_2->Add(st, 0, wxALIGN_CENTER);
    sizer11_2->Add(m_brush_scl_translate_sldr, 1, wxEXPAND|wxALIGN_CENTER);
@@ -238,28 +238,28 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
    //brush size 1
    wxBoxSizer *sizer12_2 = new wxBoxSizer(wxHORIZONTAL);
    st = new wxStaticText(this, 0, "Center Size:",
-         wxDefaultPosition, wxSize(70, 20));
+         wxDefaultPosition, wxSize(80, 20));
    m_brush_size1_sldr = new wxSlider(this, ID_BrushSize1Sldr, 10, 1, 300,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_brush_size1_text = new wxTextCtrl(this, ID_BrushSize1Text, "10",
-         wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+         wxDefaultPosition, wxSize(50, 20), 0, vald_int);
    sizer12_2->Add(5, 5);
    sizer12_2->Add(st, 0, wxALIGN_CENTER);
    sizer12_2->Add(m_brush_size1_sldr, 1, wxEXPAND|wxALIGN_CENTER);
    sizer12_2->Add(m_brush_size1_text, 0, wxALIGN_CENTER);
    st = new wxStaticText(this, 0, "px",
-         wxDefaultPosition, wxSize(15, 15));
+         wxDefaultPosition, wxSize(25, 15));
    sizer12_2->Add(st, 0, wxALIGN_CENTER);
    //brush size 2
    wxBoxSizer *sizer12_3 = new wxBoxSizer(wxHORIZONTAL);
    m_brush_size2_chk = new wxCheckBox(this, ID_BrushSize2Chk, "GrowSize",
-         wxDefaultPosition, wxSize(70, 20), wxALIGN_RIGHT);
+         wxDefaultPosition, wxSize(80, 20), wxALIGN_RIGHT);
    st = new wxStaticText(this, 0, ":",
          wxDefaultPosition, wxSize(5, 20), wxALIGN_RIGHT);
    m_brush_size2_sldr = new wxSlider(this, ID_BrushSize2Sldr, 30, 1, 300,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_brush_size2_text = new wxTextCtrl(this, ID_BrushSize2Text, "30",
-         wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+         wxDefaultPosition, wxSize(50, 20), 0, vald_int);
    m_brush_size2_chk->SetValue(true);
    m_brush_size2_sldr->Enable();
    m_brush_size2_text->Enable();
@@ -268,7 +268,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
    sizer12_3->Add(m_brush_size2_sldr, 1, wxEXPAND|wxALIGN_CENTER);
    sizer12_3->Add(m_brush_size2_text, 0, wxALIGN_CENTER);
    st = new wxStaticText(this, 0, "px",
-         wxDefaultPosition, wxSize(15, 15));
+         wxDefaultPosition, wxSize(25, 15));
    sizer12_3->Add(st, 0, wxALIGN_CENTER);
    //iterations
    wxBoxSizer *sizer12_4 = new wxBoxSizer(wxHORIZONTAL);
@@ -315,7 +315,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
    m_ca_thresh_sldr = new wxSlider(this, ID_CAThreshSldr, 0, 0, 2550,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_ca_thresh_text = new wxTextCtrl(this, ID_CAThreshText, "0.0",
-         wxDefaultPosition, wxSize(40, 20), 0, vald_fp1);
+         wxDefaultPosition, wxSize(50, 20), 0, vald_fp1);
    sizer13_1->Add(st, 0, wxALIGN_CENTER);
    sizer13_1->Add(m_ca_thresh_sldr, 1, wxALIGN_CENTER|wxEXPAND);
    sizer13_1->Add(m_ca_thresh_text, 0, wxALIGN_CENTER);
@@ -325,7 +325,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
    //size of ccl
    wxBoxSizer *sizer13_2 = new wxBoxSizer(wxHORIZONTAL);
    m_ca_select_only_chk = new wxCheckBox(this, ID_CASelectOnlyChk, "Selct. Only",
-         wxDefaultPosition, wxSize(75, 20));
+         wxDefaultPosition, wxSize(90, 20));
    sizer13_2->Add(m_ca_select_only_chk, 0, wxALIGN_CENTER);
    sizer13_2->AddStretchSpacer();
    st = new wxStaticText(this, 0, "Min:",
@@ -400,7 +400,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
    sizer14_1->Add(m_nr_size_sldr, 1, wxALIGN_CENTER|wxEXPAND);
    sizer14_1->Add(m_nr_size_text, 0, wxALIGN_CENTER);
    st = new wxStaticText(this, 0, "vx",
-         wxDefaultPosition, wxSize(15, 15));
+         wxDefaultPosition, wxSize(25, 15));
    sizer14_1->Add(st, 0, wxALIGN_CENTER);
    //buttons
    wxBoxSizer *sizer14_2 = new wxBoxSizer(wxHORIZONTAL);

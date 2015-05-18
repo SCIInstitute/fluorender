@@ -325,7 +325,7 @@ m_manual_assist(false)
 	m_save_trace_btn = new wxButton(this, ID_SaveTraceBtn, "Save",
 		wxDefaultPosition, wxSize(60, 23));
 	m_saveas_trace_btn = new wxButton(this, ID_SaveasTraceBtn, "Save As",
-		wxDefaultPosition, wxSize(60, 23));
+		wxDefaultPosition, wxSize(70, 23));
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_load_trace_text, 1, wxEXPAND|wxALIGN_CENTER);
@@ -365,7 +365,7 @@ m_manual_assist(false)
 	m_analyze_btn = new wxButton(this, ID_AnalyzeBtn, "Analyze",
 		wxDefaultPosition, wxSize(80, 23));
 	m_save_analyze_btn = new wxButton(this, ID_SaveAnalyzeBtn, "Save Analy.",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, wxSize(90, 23));
 	m_manual_assist_check = new wxCheckBox(this, ID_ManualAssistCheck, "Manual Tracking Assist.",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
 	sizer_31->AddStretchSpacer();
@@ -391,17 +391,17 @@ m_manual_assist(false)
 	//selection tools
 	wxBoxSizer* sizer_33 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Selection tools:",
-		wxDefaultPosition, wxSize(130, 20));
+		wxDefaultPosition, wxSize(100, 20));
 	m_comp_id_text = new wxTextCtrl(this, ID_CompIDText, "",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, wxSize(100, 23));
 	m_comp_append_btn = new wxButton(this, ID_CompAppendBtn, "Append",
-		wxDefaultPosition, wxSize(60, 23));
+		wxDefaultPosition, wxSize(75, 23));
 	m_comp_exclusive_btn = new wxButton(this, ID_CompExclusiveBtn, "Exclusive",
-		wxDefaultPosition, wxSize(60, 23));
+		wxDefaultPosition, wxSize(90, 23));
 	m_comp_full_btn = new wxButton(this, ID_CompFullBtn, "Full",
-		wxDefaultPosition, wxSize(60, 23));
+		wxDefaultPosition, wxSize(50, 23));
 	m_comp_clear_btn = new wxButton(this, ID_CompClearBtn, "Clear",
-		wxDefaultPosition, wxSize(60, 23));
+		wxDefaultPosition, wxSize(50, 23));
 	sizer_33->Add(5, 5);
 	sizer_33->Add(st, 0, wxALIGN_CENTER);
 	sizer_33->Add(m_comp_id_text, 0, wxALIGN_CENTER);
@@ -413,15 +413,15 @@ m_manual_assist(false)
 	//ID link controls
 	wxBoxSizer* sizer_34 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "ID link tools:",
-		wxDefaultPosition, wxSize(130, 20));
+		wxDefaultPosition, wxSize(100, 20));
 	m_cell_update_btn = new wxButton(this, ID_CellUpdateBtn, "Add Selected",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, wxSize(100, 23));
 	m_cell_exclusive_link_btn = new wxButton(this, ID_CellExclusiveLinkBtn, "Exclusive Link",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, wxSize(110, 23));
 	m_cell_link_btn = new wxButton(this, ID_CellLinkBtn, "Link IDs",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, wxSize(70, 23));
 	m_cell_unlink_btn = new wxButton(this, ID_CellUnlinkBtn, "Unlink IDs",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, wxSize(90, 23));
 	sizer_34->Add(5, 5);
 	sizer_34->Add(st, 0, wxALIGN_CENTER);
 	sizer_34->Add(m_cell_update_btn, 0, wxALIGN_CENTER);
@@ -432,15 +432,15 @@ m_manual_assist(false)
 	//ID edit controls
 	wxBoxSizer* sizer_35 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "ID edit tools:",
-		wxDefaultPosition, wxSize(130, 20));
+		wxDefaultPosition, wxSize(100, 20));
 	m_cell_new_id_text = new wxTextCtrl(this, ID_CellNewIDText, "",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, wxSize(100, 23));
 	m_cell_modify_btn = new wxButton(this, ID_CellModifyBtn, "Start Editing",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, wxSize(100, 23));
 	m_cell_new_id_btn = new wxButton(this, ID_CellNewIDBtn, "New ID",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, wxSize(70, 23));
 	m_cell_combine_id_btn = new wxButton(this, ID_CellCombineIDBtn, "Combine IDs",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, wxSize(100, 23));
 	sizer_35->Add(5, 5);
 	sizer_35->Add(st, 0, wxALIGN_CENTER);
 	sizer_35->Add(m_cell_new_id_text, 0, wxALIGN_CENTER);
