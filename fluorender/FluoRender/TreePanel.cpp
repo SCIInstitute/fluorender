@@ -299,12 +299,10 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 			menu.Append(ID_ShowAll, "Show All");
             menu.Append(ID_RemoveData, "Delete");
             menu.Append(ID_AddDataGroup, "Add Volume Group");
-#ifdef _WIN32
             menu.Append(ID_Edit, "Analyze...");
             menu.Append(ID_NoiseCancelling, "Noise Reduction...");
             menu.Append(ID_Counting, "Counting and Volume...");
             menu.Append(ID_Colocalization, "Colocalization Analysis...");
-#endif
             menu.Append(ID_RandomizeColor, "Randomize Colors");
             menu.Append(ID_Measurement, "Measurement...");
             break;
@@ -1997,7 +1995,6 @@ m_frame(frame)
    m_toolbar->AddTool(ID_RemoveData, "Delete",
          wxGetBitmapFromMemory(listicon_delete),
          "Delete current selection");
-#ifdef _WIN32
    m_toolbar->AddSeparator();
    m_toolbar->AddCheckTool(ID_BrushAppend, "Highlight",
          wxGetBitmapFromMemory(listicon_brushappend),
@@ -2021,7 +2018,6 @@ m_frame(frame)
    m_toolbar->AddTool(ID_BrushCreate, "Extract",
          wxGetBitmapFromMemory(listicon_brushcreate),
          "Extract highlighted structures out and create a new volume");
-#endif
    m_toolbar->Realize();
 
    //organize positions

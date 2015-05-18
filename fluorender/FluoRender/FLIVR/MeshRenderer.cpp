@@ -44,8 +44,8 @@ namespace FLIVR
 		draw_clip_(false),
 		limit_(-1),
 		light_(true),
-		alpha_(1.0),
 		fog_(false),
+		alpha_(1.0),
 		update_(true)
 	{
 		glGenBuffers(1, &m_vbo);
@@ -58,8 +58,8 @@ namespace FLIVR
 		draw_clip_(copy.draw_clip_),
 		limit_(copy.limit_),
 		light_(copy.light_),
-		alpha_(copy.alpha_),
 		fog_(copy.fog_),
+		alpha_(copy.alpha_),
 		update_(true)
 	{
 		glGenBuffers(1, &m_vbo);

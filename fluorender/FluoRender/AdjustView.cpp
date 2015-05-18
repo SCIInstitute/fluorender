@@ -111,11 +111,7 @@ m_dft_sync_b(false)
 	sizer_h_1->Add(st, 1, wxEXPAND|wxALIGN_CENTER);
 	st = new wxStaticText(this, 0, "Eql.",
                           wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
-#ifdef _WIN32
 	sizer_h_1->Add(st, 1, wxEXPAND|wxALIGN_CENTER);
-#else
-    st->Hide();
-#endif
 	sizer_v->Add(sizer_h_1, 0, wxEXPAND);
 	//space
 	sizer_v->Add(5, 5, 0);
@@ -152,11 +148,8 @@ m_dft_sync_b(false)
     
 	m_r_hdr_sldr = new wxSlider(this, ID_RHdrSldr, 0, 0, 100,
                                 wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
-#ifdef _WIN32
+
 	sizer_h_3->Add(m_r_hdr_sldr, 1, wxEXPAND|wxALIGN_CENTER);
-#else
-    m_r_hdr_sldr->Hide();
-#endif
 	sizer_v->Add(sizer_h_3, 1, wxEXPAND);
 
 	//fifth line: reset buttons
@@ -182,11 +175,7 @@ m_dft_sync_b(false)
 	vald_fp2.SetRange(0.0, 1.0);
 	m_r_hdr_text = new wxTextCtrl(this, ID_RHdrText, "0.00",
                                   wxDefaultPosition, wxSize(30, 20), 0, vald_fp2);
-#ifdef _WIN32
 	sizer_h_5->Add(m_r_hdr_text, 1, wxEXPAND|wxALIGN_CENTER);
-#else
-    m_r_hdr_text->Hide();
-#endif
 	sizer_v->Add(sizer_h_5, 0, wxEXPAND);
 
 	//space
@@ -223,11 +212,7 @@ m_dft_sync_b(false)
 	sizer_h_7->Add(m_g_brightness_sldr, 1, wxEXPAND|wxALIGN_CENTER);
 	m_g_hdr_sldr = new wxSlider(this, ID_GHdrSldr, 0, 0, 100,
                                 wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
-#ifdef _WIN32
 	sizer_h_7->Add(m_g_hdr_sldr, 1, wxEXPAND|wxALIGN_CENTER);
-#else
-    m_g_hdr_sldr->Hide();
-#endif
 	sizer_v->Add(sizer_h_7, 1, wxEXPAND);
 
 	//10th line: reset buttons
@@ -253,11 +238,7 @@ m_dft_sync_b(false)
 	vald_fp2.SetRange(0.0, 1.0);
 	m_g_hdr_text = new wxTextCtrl(this, ID_GHdrText, "0.00",
                                   wxDefaultPosition, wxSize(30, 20), 0, vald_fp2);
-#ifdef _WIN32
 	sizer_h_9->Add(m_g_hdr_text, 1, wxEXPAND|wxALIGN_CENTER);
-#else
-    m_g_hdr_text->Hide();
-#endif
 	sizer_v->Add(sizer_h_9, 0, wxEXPAND);
 
 	//space
@@ -294,11 +275,7 @@ m_dft_sync_b(false)
 	sizer_h_11->Add(m_b_brightness_sldr, 1, wxEXPAND|wxALIGN_CENTER);
 	m_b_hdr_sldr = new wxSlider(this, ID_BHdrSldr, 0, 0, 100,
                                 wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
-#ifdef _WIN32
 	sizer_h_11->Add(m_b_hdr_sldr, 1, wxEXPAND|wxALIGN_CENTER);
-#else
-    m_b_hdr_sldr->Hide();
-#endif
 	sizer_v->Add(sizer_h_11, 1, wxEXPAND);
     
 
@@ -325,11 +302,7 @@ m_dft_sync_b(false)
 	vald_fp2.SetRange(0.0, 1.0);
 	m_b_hdr_text = new wxTextCtrl(this, ID_BHdrText, "0.00",
                                   wxDefaultPosition, wxSize(30, 20), 0, vald_fp2);
-#ifdef _WIN32
 	sizer_h_13->Add(m_b_hdr_text, 1, wxEXPAND|wxALIGN_CENTER);
-#else
-    m_b_hdr_text->Hide();
-#endif
 	sizer_v->Add(sizer_h_13, 0, wxEXPAND);
 
 	//17th line: default button

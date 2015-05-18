@@ -52,7 +52,7 @@ FT_Library TextRenderer::m_ft;
 	"\n" \
 	"void main(void)\n" \
 	"{\n" \
-	"	FragColor = vec4(1, 1, 1, texture2D(tex, texcoord).r) * color;\n" \
+	"	FragColor = vec4(1, 1, 1, texture(tex, texcoord).r) * color;\n" \
 	"//	FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n" \
 	"}\n"
 
@@ -164,7 +164,7 @@ void TextRenderer::RenderText(const wstring& text, Color &color,
 		glDeleteShader(f_shader);
 
 		glUseProgram(m_prog);
-		GLint loc = glGetUniformLocation(m_prog, "tex");
+		loc = glGetUniformLocation(m_prog, "tex");
 		if (loc != -1)
 			glUniform1i(loc, 0);
 		m_color_loc = glGetUniformLocation(m_prog, "color");

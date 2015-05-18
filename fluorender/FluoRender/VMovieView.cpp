@@ -96,11 +96,11 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	m_seq_chk = new wxCheckBox(page,ID_SeqChk,
 		"Time Sequence / Batch");
 	m_time_start_text = new wxTextCtrl(page, ID_TimeStartText, "1",
-		wxDefaultPosition,wxSize(30,-1));
+		wxDefaultPosition,wxSize(35,-1));
 	m_time_end_text = new wxTextCtrl(page, ID_TimeEndText, "10",
-		wxDefaultPosition,wxSize(30,-1));
+		wxDefaultPosition,wxSize(35,-1));
 	st2 = new wxStaticText(page,wxID_ANY, "End Time: ",
-		wxDefaultPosition,wxSize(60,-1));
+		wxDefaultPosition,wxSize(75,-1));
 	//sizer 1
 	sizer_1->Add(m_seq_chk, 0, wxALIGN_CENTER);
 	sizer_1->AddStretchSpacer();
@@ -109,11 +109,11 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	sizer_1->Add(20,5,0);
 	//sizer 2
 	st = new wxStaticText(page,wxID_ANY, "Start Time: ",
-		wxDefaultPosition,wxSize(60,-1));
-	sizer_2->Add(20,5,0);
+		wxDefaultPosition,wxSize(75,-1));
+	sizer_2->Add(5,5,0);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_time_start_text, 0, wxALIGN_CENTER);
-	sizer_2->Add(10,5,0);
+	sizer_2->Add(5,5,0);
 	sizer_2->Add(st2, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_time_end_text, 0, wxALIGN_CENTER);
 	m_inc_time_btn = new wxButton(page, ID_IncTimeBtn, "",

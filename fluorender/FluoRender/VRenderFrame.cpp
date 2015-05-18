@@ -200,18 +200,12 @@ VRenderFrame::VRenderFrame(
 		wxGetBitmapFromMemory(icon_open_mesh), wxNullBitmap, wxITEM_NORMAL,
 		"Open single or multiple mesh file(s)",
 		"Open single or multiple mesh file(s)");
-#ifndef _WIN32
-	m_main_tb->AddTool(ID_Measure, "Measurement...",
-		wxGetBitmapFromMemory(icon_measure), wxNullBitmap, wxITEM_NORMAL,
-		"Show rulers dialog", "Show rulers dialog");
-#else
-	m_main_tb->AddTool(ID_PaintTool, "Analyze",
-		wxGetBitmapFromMemory(icon_edit), wxNullBitmap,
-		wxITEM_DROPDOWN,
-		"Tools for analyzing selected channel",
-		"Tools for analyzing selected channel");
-	m_main_tb->SetDropdownMenu(ID_PaintTool, m_tb_menu_edit);
-#endif
+    m_main_tb->AddTool(ID_PaintTool, "Analyze",
+                       wxGetBitmapFromMemory(icon_edit), wxNullBitmap,
+                       wxITEM_DROPDOWN,
+                       "Tools for analyzing selected channel",
+                       "Tools for analyzing selected channel");
+    m_main_tb->SetDropdownMenu(ID_PaintTool, m_tb_menu_edit);
 	m_main_tb->AddSeparator();
 	m_main_tb->AddTool(ID_Settings, "Settings",
 		wxGetBitmapFromMemory(icon_settings), wxNullBitmap, wxITEM_NORMAL,
@@ -281,7 +275,12 @@ VRenderFrame::VRenderFrame(
 	wxString font_file = m_setting_dlg->GetFontFile();
 	if (font_file != "")
 	{
+#ifdef _WIN32
 		font_file = "Fonts/" + font_file;
+#endif
+#ifdef _DARWIN
+		font_file = "FluoRender.app/Contents/MacOS/Fonts/" + font_file;
+#endif
 		m_text_renderer = new TextRenderer(font_file.ToStdString());
 	}
 	else
@@ -522,14 +521,11 @@ VRenderFrame::VRenderFrame(
 	quit->SetBitmap(wxArtProvider::GetBitmap(wxART_QUIT));
 	m_top_file->Append(quit);
 	//tool options
-#ifdef _WIN32
 	m = new wxMenuItem(m_top_tools,ID_PaintTool, wxT("&Analysis Tools..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_edit_mini));
 	m_top_tools->Append(m);
-#endif
 	m = new wxMenuItem(m_top_tools,ID_Measure, wxT("&Measurement Tool..."));
 	m_top_tools->Append(m);
-#ifdef _WIN32
 	m = new wxMenuItem(m_top_tools,ID_Trace, wxT("Components && &Tracking..."));
 	m_top_tools->Append(m);
 	m = new wxMenuItem(m_top_tools,ID_NoiseCancelling, wxT("&Noise Reduction..."));
@@ -538,7 +534,6 @@ VRenderFrame::VRenderFrame(
 	m_top_tools->Append(m);
 	m = new wxMenuItem(m_top_tools,ID_Colocalization, wxT("Colocalization &Analysis..."));
 	m_top_tools->Append(m);
-#endif
 	m = new wxMenuItem(m_top_tools,ID_Convert, wxT("Con&vert..."));
 	m_top_tools->Append(m);
 	m = new wxMenuItem(m_top_tools, ID_Ocl, wxT("&OpenCL Kernel Editor..."));

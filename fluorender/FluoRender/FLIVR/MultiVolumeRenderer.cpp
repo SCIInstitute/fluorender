@@ -791,7 +791,7 @@ namespace FLIVR
 
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_slices_ibo);
 				idx_num = (size[i]-2)*3;
-				glDrawElements(GL_TRIANGLES, idx_num, GL_UNSIGNED_INT, (const GLvoid*)location);
+				glDrawElements(GL_TRIANGLES, idx_num, GL_UNSIGNED_INT, reinterpret_cast<const GLvoid*>(location));
 
 				//release depth texture for rendering shadows
 				if (colormap_mode_ == 2)

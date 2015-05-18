@@ -510,17 +510,8 @@ void VRenderGLView::Clear()
 	m_layer_list.clear();
 }
 
-void VRenderGLView::HandleProjection(int nx, int ny, bool restrict)
+void VRenderGLView::HandleProjection(int nx, int ny)
 {
-	if (restrict)
-	{
-		GLint viewport[4];
-		glGetIntegerv(GL_VIEWPORT, viewport);
-		gluPickMatrix((GLdouble)old_mouse_X,
-			(GLdouble)(viewport[3]-old_mouse_Y),
-			1.0, 1.0, viewport);
-	}
-
 	double aspect = (double)nx / (double)ny;
 	if (!m_free)
 		m_distance = m_radius/tan(d2r(m_aov/2.0))/m_scale_factor;
@@ -2816,10 +2807,8 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, bool mask, int peel)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex);
 	//build mipmap
-#ifndef _DARWIN
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-#endif
 	glEnable(GL_BLEND);
 	if (m_vol_method == VOL_METHOD_COMP)
 		glBlendFunc(GL_ONE, GL_ONE);
@@ -2829,11 +2818,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, bool mask, int peel)
 
 	//2d adjustment
 	img_shader =
-#ifdef _DARWIN
-		m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST);
-#else
 		m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
-#endif
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -3072,10 +3057,8 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex);
 	//build mipmap
-#ifndef _DARWIN
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-#endif
 	glEnable(GL_BLEND);
 	if (m_vol_method == VOL_METHOD_COMP)
 		glBlendFunc(GL_ONE, GL_ONE);
@@ -3085,11 +3068,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 
 	//2d adjustment
 	img_shader =
-#ifdef _DARWIN
-		m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST);
-#else
 		m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
-#endif
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -3677,10 +3656,8 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, use_tex_wt2?m_tex_wt2:m_tex);
 	//build mipmap
-#ifndef _DARWIN
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-#endif
 	glEnable(GL_BLEND);
 	if (m_vol_method == VOL_METHOD_COMP)
 		glBlendFunc(GL_ONE, GL_ONE);
@@ -3690,11 +3667,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 
 	//2d adjustment
 	ShaderProgram* img_shader =
-#ifdef _DARWIN
-		m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST);
-#else
 		m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
-#endif
 	if (img_shader)
 	{
 		if (!img_shader->valid())

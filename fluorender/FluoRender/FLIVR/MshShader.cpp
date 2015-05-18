@@ -227,9 +227,9 @@ namespace FLIVR
 		int peel, bool tex,
 		bool fog, bool light)
 		: type_(type),
-		fog_(fog),
 		peel_(peel),
 		tex_(tex),
+		fog_(fog),
 		light_(light),
 		program_(0)
 	{}

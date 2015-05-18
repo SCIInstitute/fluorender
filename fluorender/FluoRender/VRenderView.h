@@ -883,7 +883,7 @@ private:
 	void DisplayStroke();
 
 	//handle camera
-	void HandleProjection(int nx, int ny, bool restrict=false);
+	void HandleProjection(int nx, int ny);
 	void HandleCamera();
 	Quaternion Trackball(int p1x, int p1y, int p2x, int p2y);
 	Quaternion TrackballClip(int p1x, int p1y, int p2x, int p2y);

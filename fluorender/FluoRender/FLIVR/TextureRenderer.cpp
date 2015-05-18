@@ -1077,7 +1077,7 @@ namespace FLIVR
 		for (unsigned int i=0, k=0; i<size.size(); ++i)
 		{
 			idx_num = (size[i]-2)*3;
-			glDrawElements(GL_TRIANGLES, idx_num, GL_UNSIGNED_INT, (const GLvoid*)k);
+			glDrawElements(GL_TRIANGLES, idx_num, GL_UNSIGNED_INT, reinterpret_cast<const GLvoid*> (k));
 			k += idx_num*4;
 		}
 		glDisableVertexAttribArray(0);
