@@ -395,7 +395,7 @@ m_manual_assist(false)
 	m_comp_id_text = new wxTextCtrl(this, ID_CompIDText, "",
 		wxDefaultPosition, wxSize(100, 23));
 	m_comp_append_btn = new wxButton(this, ID_CompAppendBtn, "Append",
-		wxDefaultPosition, wxSize(75, 23));
+		wxDefaultPosition, wxSize(80, 23));
 	m_comp_exclusive_btn = new wxButton(this, ID_CompExclusiveBtn, "Exclusive",
 		wxDefaultPosition, wxSize(90, 23));
 	m_comp_full_btn = new wxButton(this, ID_CompFullBtn, "Full",
