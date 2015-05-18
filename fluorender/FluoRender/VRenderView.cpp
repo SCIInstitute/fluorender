@@ -3886,6 +3886,21 @@ void VRenderGLView::PickMesh()
 		mouse_pos.y<=0 || mouse_pos.y>ny)
 		return;
 
+	//projection
+	HandleProjection(nx, ny);
+	//Transformation
+	HandleCamera();
+	//obj
+	glm::mat4 mv_temp = m_mv_mat;
+	//translate object
+	m_mv_mat = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
+	//rotate object
+	m_mv_mat = glm::rotate(m_mv_mat, float(m_obj_rotx), glm::vec3(1.0, 0.0, 0.0));
+	m_mv_mat = glm::rotate(m_mv_mat, float(m_obj_roty+180.0), glm::vec3(0.0, 1.0, 0.0));
+	m_mv_mat = glm::rotate(m_mv_mat, float(m_obj_rotz+180.0), glm::vec3(0.0, 0.0, 1.0));
+	//center object
+	m_mv_mat = glm::translate(m_mv_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+
 	//set up fbo
 	GLint cur_framebuffer_id;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &cur_framebuffer_id);
@@ -3972,6 +3987,7 @@ void VRenderGLView::PickMesh()
 		if (frame && frame->GetCurSelType()==3 && frame->GetTree())
 			frame->GetTree()->Select(m_vrv->GetName(), "");
 	}
+	m_mv_mat = mv_temp;
 }
 
 void VRenderGLView::PickVolume()
