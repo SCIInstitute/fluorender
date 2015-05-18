@@ -40,7 +40,6 @@ namespace FLIVR
 {
 #define IMG_VERTEX_CODE \
 	"//IMG_VERTEX_CODE\n" \
-	"#version 400\n" \
 	"layout(location = 0) in vec3 InVertex;\n" \
 	"layout(location = 1) in vec3 InTexCoord;\n" \
 	"out vec3 OutVertex;\n" \
@@ -55,7 +54,6 @@ namespace FLIVR
 
 #define IMG_VTX_CODE_DRAW_GEOMETRY \
 	"//IMG_VTX_CODE_DRAW_GEOMETRY\n" \
-	"#version 400\n" \
 	"layout(location = 0) in vec3 InVertex;\n" \
 	"uniform mat4 matrix0;//transformation\n" \
 	"\n" \
@@ -66,7 +64,6 @@ namespace FLIVR
 
 #define IMG_VTX_CODE_DRAW_GEOMETRY_COLOR3 \
 	"//IMG_VTX_CODE_DRAW_GEOMETRY_COLOR3\n" \
-	"#version 400\n" \
 	"layout(location = 0) in vec3 InVertex;\n" \
 	"layout(location = 1) in vec3 InColor;\n" \
 	"out vec3 OutColor;\n" \
@@ -80,7 +77,6 @@ namespace FLIVR
 
 #define IMG_VTX_CODE_DRAW_GEOMETRY_COLOR4 \
 	"//IMG_VTX_CODE_DRAW_GEOMETRY_COLOR4\n" \
-	"#version 400\n" \
 	"layout(location = 0) in vec3 InVertex;\n" \
 	"layout(location = 1) in vec4 InColor;\n" \
 	"out vec4 OutColor;\n" \
@@ -94,7 +90,6 @@ namespace FLIVR
 
 #define IMG_FRG_CODE_DRAW_GEOMETRY \
 	"//IMG_FRG_CODE_DRAW_GEOMETRY\n" \
-	"#version 400\n" \
 	"out vec4 FragColor;\n" \
 	"uniform vec4 loc0;\n" \
 	"\n" \
@@ -105,7 +100,6 @@ namespace FLIVR
 
 #define IMG_FRG_CODE_DRAW_GEOMETRY_COLOR3 \
 	"//IMG_FRG_CODE_DRAW_GEOMETRY_COLOR3\n" \
-	"#version 400\n" \
 	"in vec3 OutColor;\n" \
 	"out vec4 FragColor;\n" \
 	"\n" \
@@ -116,7 +110,6 @@ namespace FLIVR
 
 #define IMG_FRG_CODE_DRAW_GEOMETRY_COLOR4 \
 	"//IMG_FRG_CODE_DRAW_GEOMETRY_COLOR4\n" \
-	"#version 400\n" \
 	"in vec4 OutColor;\n" \
 	"out vec4 FragColor;\n" \
 	"\n" \
@@ -126,7 +119,7 @@ namespace FLIVR
 	"}\n"
 
 #define IMG_SHADER_CODE_TEXTURE_LOOKUP \
-	"#version 400\n" \
+	"//IMG_SHADER_CODE_TEXTURE_LOOKUP\n" \
 	"in vec3 OutVertex;\n" \
 	"in vec3 OutTexCoord;\n" \
 	"out vec4 FragColor;\n" \
@@ -142,7 +135,7 @@ namespace FLIVR
 	"}\n"
 
 #define IMG_SHADER_CODE_BRIGHTNESS_CONTRAST \
-	"#version 400\n" \
+	"//IMG_SHADER_CODE_BRIGHTNESS_CONTRAST\n" \
 	"in vec3 OutVertex;\n" \
 	"in vec3 OutTexCoord;\n" \
 	"out vec4 FragColor;\n" \
@@ -164,7 +157,7 @@ namespace FLIVR
 	"}\n"
 
 #define IMG_SHADER_CODE_BRIGHTNESS_CONTRAST_HDR \
-	"#version 400\n" \
+	"//IMG_SHADER_CODE_BRIGHTNESS_CONTRAST_HDR\n" \
 	"in vec3 OutVertex;\n" \
 	"in vec3 OutTexCoord;\n" \
 	"out vec4 FragColor;\n" \
@@ -202,7 +195,7 @@ namespace FLIVR
 	"}\n"
 
 #define IMG_SHADER_CODE_GRADIENT_MAP \
-	"#version 400\n" \
+	"//IMG_SHADER_CODE_GRADIENT_MAP\n" \
 	"in vec3 OutVertex;\n" \
 	"in vec3 OutTexCoord;\n" \
 	"out vec4 FragColor;\n" \
@@ -226,7 +219,7 @@ namespace FLIVR
 	"}\n"
 
 #define IMG_SHADER_CODE_FILTER_MIN \
-	"#version 400\n" \
+	"//IMG_SHADER_CODE_FILTER_MIN\n" \
 	"in vec3 OutVertex;\n" \
 	"in vec3 OutTexCoord;\n" \
 	"out vec4 FragColor;\n" \
@@ -264,7 +257,7 @@ namespace FLIVR
 	"}\n"
 
 #define IMG_SHADER_CODE_FILTER_MAX \
-	"#version 400\n" \
+	"//IMG_SHADER_CODE_FILTER_MAX\n" \
 	"in vec3 OutVertex;\n" \
 	"in vec3 OutTexCoord;\n" \
 	"out vec4 FragColor;\n" \
@@ -298,7 +291,7 @@ namespace FLIVR
 	"}\n"
 
 #define IMG_SHADER_CODE_FILTER_BLUR \
-	"#version 400\n" \
+	"//IMG_SHADER_CODE_FILTER_BLUR\n" \
 	"in vec3 OutVertex;\n" \
 	"in vec3 OutTexCoord;\n" \
 	"out vec4 FragColor;\n" \
@@ -324,7 +317,7 @@ namespace FLIVR
 	"}\n"
 
 #define IMG_SHADER_CODE_FILTER_SHARPEN \
-	"#version 400\n" \
+	"//IMG_SHADER_CODE_FILTER_SHARPEN\n" \
 	"in vec3 OutVertex;\n" \
 	"in vec3 OutTexCoord;\n" \
 	"out vec4 FragColor;\n" \
@@ -350,7 +343,7 @@ namespace FLIVR
 	"}\n"
 
 #define IMG_SHADER_CODE_DEPTH_TO_OUTLINES \
-	"#version 400\n" \
+	"//IMG_SHADER_CODE_DEPTH_TO_OUTLINES\n" \
 	"in vec3 OutVertex;\n" \
 	"in vec3 OutTexCoord;\n" \
 	"out vec4 FragColor;\n" \
@@ -378,7 +371,7 @@ namespace FLIVR
 	"\n"
 
 #define IMG_SHADER_CODE_DEPTH_TO_GRADIENT \
-	"#version 400\n" \
+	"//IMG_SHADER_CODE_DEPTH_TO_GRADIENT\n" \
 	"in vec3 OutVertex;\n" \
 	"in vec3 OutTexCoord;\n" \
 	"out vec4 FragColor;\n" \
@@ -408,7 +401,7 @@ namespace FLIVR
 	"\n"
 
 #define IMG_SHADER_CODE_GRADIENT_TO_SHADOW \
-	"#version 400\n" \
+	"//IMG_SHADER_CODE_GRADIENT_TO_SHADOW\n" \
 	"in vec3 OutVertex;\n" \
 	"in vec3 OutTexCoord;\n" \
 	"out vec4 FragColor;\n" \
@@ -454,7 +447,7 @@ namespace FLIVR
 	"\n"
 
 #define IMG_SHADER_CODE_GRADIENT_TO_SHADOW_MESH \
-	"#version 400\n" \
+	"//IMG_SHADER_CODE_GRADIENT_TO_SHADOW_MESH\n" \
 	"in vec3 OutVertex;\n" \
 	"in vec3 OutTexCoord;\n" \
 	"out vec4 FragColor;\n" \
@@ -501,8 +494,8 @@ namespace FLIVR
 	"}\n" \
 	"\n"
 
-#define IMG_SHADER_CODE_BLEND_BRIGHT_BACKGROUND\
-	"#version 400\n" \
+#define IMG_SHADER_CODE_BLEND_BRIGHT_BACKGROUND \
+	"//IMG_SHADER_CODE_BLEND_BRIGHT_BACKGROUND\n" \
 	"in vec3 OutVertex;\n" \
 	"in vec3 OutTexCoord;\n" \
 	"out vec4 FragColor;\n" \
@@ -520,8 +513,8 @@ namespace FLIVR
 	"	FragColor = vec4(c.rgb,alpha);\n" \
 	"}\n"
 
-#define IMG_SHADER_CODE_BLEND_BRIGHT_BACKGROUND_HDR\
-	"#version 400\n" \
+#define IMG_SHADER_CODE_BLEND_BRIGHT_BACKGROUND_HDR \
+	"//IMG_SHADER_CODE_BLEND_BRIGHT_BACKGROUND_HDR\n" \
 	"in vec3 OutVertex;\n" \
 	"in vec3 OutTexCoord;\n" \
 	"out vec4 FragColor;\n" \
@@ -550,7 +543,7 @@ namespace FLIVR
 	"}\n"
 
 #define PAINT_SHADER_CODE \
-	"#version 400\n" \
+	"//PAINT_SHADER_CODE\n" \
 	"in vec3 OutVertex;\n" \
 	"in vec3 OutTexCoord;\n" \
 	"out vec4 FragColor;\n" \
@@ -596,6 +589,7 @@ namespace FLIVR
 	{
 		ostringstream z;
 
+		z << ShaderProgram::glsl_version_;
 		switch (type_)
 		{
 		case IMG_SHDR_DRAW_GEOMETRY:
@@ -633,6 +627,7 @@ namespace FLIVR
 	{
 		ostringstream z;
 
+		z << ShaderProgram::glsl_version_;
 		switch (type_)
 		{
 		case IMG_SHDR_DRAW_GEOMETRY:

@@ -34,7 +34,6 @@
 
 namespace FLIVR
 {
-
 	class ShaderProgram
 	{
 	public:
@@ -65,6 +64,8 @@ namespace FLIVR
 		static int max_texture_size();
 		static bool texture_non_power_of_two();
 		static const int MAX_SHADER_UNIFORMS = 16;
+		static std::string glsl_version_;
+
 	protected:
 		unsigned int id_;
 		std::string  vert_shader_;
@@ -74,6 +75,8 @@ namespace FLIVR
 		static bool supported_;
 		static bool non_2_textures_;
 		static int  max_texture_size_;
+		static int v_major_;
+		static int v_minor_;
 	};
 } // end namespace FLIVR
 

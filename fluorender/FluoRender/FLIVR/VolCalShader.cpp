@@ -46,7 +46,6 @@ namespace FLIVR
 
 #define CAL_VERTEX_CODE \
 	"//CAL_VERTEX_CODE\n" \
-	"#version 400\n" \
 	"layout(location = 0) in vec3 InVertex;\n" \
 	"layout(location = 1) in vec3 InTexture;\n" \
 	"out vec3 OutVertex;\n" \
@@ -157,7 +156,7 @@ namespace FLIVR
 
 	bool VolCalShader::create()
 	{
-		string vs = CAL_VERTEX_CODE;
+		string vs = ShaderProgram::glsl_version_ + CAL_VERTEX_CODE;
 		string fs;
 		if (emit(fs)) return true;
 		program_ = new ShaderProgram(vs, fs);
@@ -168,7 +167,7 @@ namespace FLIVR
 	{
 		ostringstream z;
 
-		z << VOL_VERSION;
+		z << ShaderProgram::glsl_version_;
 		z << VOL_INPUTS;
 		z << CAL_OUTPUTS;
 

@@ -32,10 +32,12 @@
 #include "../compatibility.h"
 #include <time.h>
 #include <cstdio>
+#include <sstream>
 #include <iostream>
 #include <cfloat>
 
 using std::string;
+using std::ostringstream;
 
 namespace FLIVR
 {
@@ -44,6 +46,9 @@ namespace FLIVR
 	bool ShaderProgram::supported_ = false;
 	bool ShaderProgram::non_2_textures_ = false;
 	int ShaderProgram::max_texture_size_ = 64;
+	int ShaderProgram::v_major_ = 4;
+	int ShaderProgram::v_minor_ = 0;
+	string ShaderProgram::glsl_version_;
 
 	ShaderProgram::ShaderProgram(const string& frag_shader) :
 	id_(0), vert_shader_(""), frag_shader_(frag_shader)
@@ -79,9 +84,14 @@ namespace FLIVR
 		glewExperimental = GL_TRUE;
 		if (!init_ && glewInit()==GLEW_OK)
 		{
-			//experimental
+			//get gl version
+			glGetIntegerv(GL_MAJOR_VERSION, &v_major_);
+			glGetIntegerv(GL_MINOR_VERSION, &v_minor_);
+			ostringstream oss;
+			oss << "#version " << v_major_ << v_minor_ << 0 << "\n";
+			glsl_version_ = oss.str();
 
-			supported_ = /*GLEW_ARB_shading_language_100 && GLEW_EXT_framebuffer_object &&*/ glTexImage3D;
+			supported_ = glTexImage3D;
 
 			//check max texture size
 			GLint texSize;

@@ -33,10 +33,6 @@ namespace FLIVR
 	"    FragColor = vec4(1,1,1,1);\n" \
 	"}\n" 
 
-#define VOL_VERSION \
-	"#version 400\n"\
-	"\n"
-
 #define VOL_INPUTS \
 	"in vec3 OutVertex;\n" \
 	"in vec3 OutTexture;\n"

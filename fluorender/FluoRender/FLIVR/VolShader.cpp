@@ -43,7 +43,6 @@ namespace FLIVR
 
 #define VTX_SHADER_CODE_CORE_PROFILE \
 	"//VTX_SHADER_CODE_CORE_PROFILE\n" \
-	"#version 400\n" \
 	"uniform mat4 matrix0; //projection matrix\n" \
 	"uniform mat4 matrix1; //modelview matrix\n" \
 	"layout(location = 0) in vec3 InVertex;  //w will be set to 1.0 automatically\n" \
@@ -60,7 +59,6 @@ namespace FLIVR
 
 #define VTX_SHADER_CODE_FOG \
 	"//VTX_SHADER_CODE_FOG\n" \
-	"#version 400\n" \
 	"uniform mat4 matrix0; //projection matrix\n" \
 	"uniform mat4 matrix1; //modelview matrix\n" \
 	"layout(location = 0) in vec3 InVertex;  //w will be set to 1.0 automatically\n" \
@@ -79,7 +77,6 @@ namespace FLIVR
 
 #define FRG_SHADER_CODE_CORE_PROFILE \
 	"//FRG_SHADER_CODE_CORE_PROFILE\n" \
-	"#version 400\n" \
 	"in vec3 OutVertex;\n" \
 	"in vec3 OutTexCoord;\n" \
 	"out vec4 FragColor;\n" \
@@ -128,6 +125,7 @@ namespace FLIVR
 	bool VolShader::emit_v(string& s)
 	{
 		ostringstream z;
+		z << ShaderProgram::glsl_version_;
 		if (fog_)
 			z << VTX_SHADER_CODE_FOG;
 		else
@@ -143,6 +141,7 @@ namespace FLIVR
 
 		if (poly_)
 		{
+			z << ShaderProgram::glsl_version_;
 			z << FRG_SHADER_CODE_CORE_PROFILE;
 			//output
 			s = z.str();
@@ -150,7 +149,7 @@ namespace FLIVR
 		}
 
 		//version info
-		z << VOL_VERSION;
+		z << ShaderProgram::glsl_version_;
 		z << VOL_INPUTS;
 		if (fog_)
 			z << VOL_INPUTS_FOG;

@@ -27,13 +27,13 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "TextRenderer.h"
+#include <FLIVR/ShaderProgram.h>
 
 bool TextRenderer::m_init = false;
 FT_Library TextRenderer::m_ft;
 
 #define TXT_RENDER_VTX_CODE \
 	"//TXT_RENDER_VTX_CODE\n" \
-	"#version 400\n" \
 	"layout(location = 0) in vec4 coord;\n" \
 	"out vec2 texcoord;\n" \
 	"\n" \
@@ -45,7 +45,6 @@ FT_Library TextRenderer::m_ft;
 
 #define TXT_RENDER_FRG_CODE \
 	"//TXT_RENDER_FRG_CODE\n" \
-	"#version 400\n" \
 	"in vec2 texcoord;\n" \
 	"out vec4 FragColor;\n" \
 	"uniform sampler2D tex;\n" \
@@ -142,8 +141,8 @@ void TextRenderer::RenderText(const wstring& text, Color &color,
 
 		string v_source_str, f_source_str;
 		const char *v_source[1], *f_source[1];
-		v_source_str = TXT_RENDER_VTX_CODE;
-		f_source_str = TXT_RENDER_FRG_CODE;
+		v_source_str = ShaderProgram::glsl_version_ + TXT_RENDER_VTX_CODE;
+		f_source_str = ShaderProgram::glsl_version_ + TXT_RENDER_FRG_CODE;
 		GLint lengths[1];
 
 		v_source[0] = v_source_str.c_str();

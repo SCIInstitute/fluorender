@@ -253,7 +253,8 @@ namespace FLIVR
 	{
 		ostringstream z;
 
-		z << VOL_VERSION;
+		//z << ShaderProgram::glsl_version_;
+		z << "#version 400\n";
 
 		//inputs
 		z << MSH_VERTEX_INPUTS_V;
@@ -302,7 +303,8 @@ namespace FLIVR
 	{
 		ostringstream z;
 
-		z << VOL_VERSION;
+		//z << ShaderProgram::glsl_version_;
+		z << "#version 400\n";
 
 		if (type_ == 0)
 		{
