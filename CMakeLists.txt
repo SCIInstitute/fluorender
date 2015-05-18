@@ -225,7 +225,11 @@ endif()
 
 #freetype
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/freetype/include)
-file(GLOB FREETYPE_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/freetype/lib/*.lib)
+if (WIN32)
+    file(GLOB FREETYPE_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/freetype/lib/*.lib)
+else()
+    file(GLOB FREETYPE_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/freetype/lib/*.a)
+endif()
 
 #other sources
 file(GLOB src fluorender/FluoRender/*.cpp)

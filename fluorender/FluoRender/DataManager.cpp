@@ -2204,7 +2204,8 @@ void MeshData::RandomizeColor()
 	double hue = (double)rand()/(RAND_MAX) * 360.0;
 	Color color(HSVColor(hue, 1.0, 1.0));
 	SetColor(color, MESH_COLOR_DIFF);
-	SetColor(color*0.3, MESH_COLOR_AMB);
+    Color amb = color * 0.3;
+	SetColor(amb, MESH_COLOR_AMB);
 }
 
 //shown in legend
@@ -4021,7 +4022,8 @@ void MeshGroup::RandomizeColor()
 			double hue = (double)rand()/(RAND_MAX) * 360.0;
 			Color color(HSVColor(hue, 1.0, 1.0));
 			md->SetColor(color, MESH_COLOR_DIFF);
-			md->SetColor(color*0.3, MESH_COLOR_AMB);
+            Color amb = color * 0.3;
+			md->SetColor(amb, MESH_COLOR_AMB);
 		}
 	}
 }

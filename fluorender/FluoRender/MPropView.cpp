@@ -273,7 +273,8 @@ void MPropView::OnDiffChange(wxColourPickerEvent& event)
 	if (m_md)
 	{
 		m_md->SetColor(color, MESH_COLOR_DIFF);
-		m_md->SetColor(color*0.3, MESH_COLOR_AMB);
+        Color amb = color * 0.3;
+		m_md->SetColor(amb, MESH_COLOR_AMB);
 		RefreshVRenderViews(true);
 	}
 }
