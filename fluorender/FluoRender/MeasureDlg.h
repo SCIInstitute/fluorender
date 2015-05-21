@@ -37,6 +37,11 @@ class VRenderView;
 
 class RulerListCtrl : public wxListCtrl
 {
+   enum
+   {
+      ID_NameText = wxID_HIGHEST+2351
+   };
+
    public:
       RulerListCtrl(wxWindow *frame,
             wxWindow* parent,
@@ -57,15 +62,24 @@ class RulerListCtrl : public wxListCtrl
 
       void Export(wxString filename);
 
+      wxString GetText(long item, int col);
+      void SetText(long item, int col, wxString &str);
+
       friend class MeasureDlg;
 
    private:
       //wxWindow* m_frame;
       VRenderView *m_view;
       wxImageList *m_images;
+      wxTextCtrl *m_name_text;
+      long m_editing_item;
 
    private:
       void OnKeyDown(wxKeyEvent& event);
+      void OnSelection(wxListEvent &event);
+      void OnEndSelection(wxListEvent &event);
+      void EndEdit();
+      void OnNameText(wxCommandEvent& event);
 
       DECLARE_EVENT_TABLE()
    protected: //Possible TODO

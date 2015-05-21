@@ -40,7 +40,10 @@ DEALINGS IN THE SOFTWARE.
 #include "img/icons.h"
 
 BEGIN_EVENT_TABLE(RulerListCtrl, wxListCtrl)
-EVT_KEY_DOWN(RulerListCtrl::OnKeyDown)
+	EVT_KEY_DOWN(RulerListCtrl::OnKeyDown)
+	EVT_LIST_ITEM_SELECTED(wxID_ANY, RulerListCtrl::OnSelection)
+	EVT_LIST_ITEM_DESELECTED(wxID_ANY, RulerListCtrl::OnEndSelection)
+	EVT_TEXT(ID_NameText, RulerListCtrl::OnNameText)
 END_EVENT_TABLE()
 
 RulerListCtrl::RulerListCtrl(
@@ -54,9 +57,9 @@ RulerListCtrl::RulerListCtrl(
    //m_frame(frame)
 {
    wxListItem itemCol;
-   itemCol.SetText("ID");
+   itemCol.SetText("Name");
     this->InsertColumn(0, itemCol);
-    SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
+    SetColumnWidth(0, 100);
    itemCol.SetText("Length");
     this->InsertColumn(1, itemCol);
     SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
@@ -77,6 +80,11 @@ RulerListCtrl::RulerListCtrl(
    wxIcon icon = wxIcon(ruler_xpm);
    m_images->Add(icon);
    AssignImageList(m_images, wxIMAGE_LIST_SMALL);
+
+   	//frame edit
+	m_name_text = new wxTextCtrl(this, ID_NameText, "",
+		wxDefaultPosition, wxDefaultSize);
+	m_name_text->Hide();
 }
 
 RulerListCtrl::~RulerListCtrl()
@@ -87,7 +95,7 @@ void RulerListCtrl::Append(wxString name, double length, wxString &unit,
       double angle, wxString &points, bool time_dep, int time, wxString extra)
 {
    long tmp = InsertItem(GetItemCount(), name, 0);
-    SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
+//    SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
    wxString str = wxString::Format("%.2f", length) + unit;
    SetItem(tmp, 1, str);
     SetColumnWidth(1, wxLIST_AUTOSIZE);
@@ -158,9 +166,9 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 			ruler->GetAngle(), points, ruler->GetTimeDep(), ruler->GetTime(), ruler->GetDelInfoValues(", "));
    }
 
-   long item = GetItemCount() - 1;
-   if (item != -1)
-      SetItemState(item, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+   //long item = GetItemCount() - 1;
+   //if (item != -1)
+   //   SetItemState(item, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 }
 
 int RulerListCtrl::GetCurrSelection()
@@ -267,7 +275,7 @@ void RulerListCtrl::Export(wxString filename)
          break;
       }
 
-      tos << "ID\tLength(" << unit << ")\tPitch Angle(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
+      tos << "Name\tLength(" << unit << ")\tPitch Angle(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
 
       for (size_t i=0; i<ruler_list->size(); i++)
       {
@@ -324,6 +332,76 @@ void RulerListCtrl::OnKeyDown(wxKeyEvent& event)
          event.GetKeyCode() == WXK_BACK)
       DeleteSelection();
    event.Skip();
+}
+
+wxString RulerListCtrl::GetText(long item, int col)
+{
+	wxListItem info;
+	info.SetId(item);
+	info.SetColumn(col);
+	info.SetMask(wxLIST_MASK_TEXT);
+	GetItem(info);
+	return info.GetText();
+}
+
+void RulerListCtrl::SetText(long item, int col, wxString &str)
+{
+	wxListItem info;
+	info.SetId(item);
+	info.SetColumn(col);
+	info.SetMask(wxLIST_MASK_TEXT);
+	GetItem(info);
+	info.SetText(str);
+	SetItem(info);
+}
+
+void RulerListCtrl::OnSelection(wxListEvent &event)
+{
+	long item = GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+	m_editing_item = item;
+	if (item != -1)
+	{
+		wxRect rect;
+		wxString str;
+		//add frame text
+		GetSubItemRect(item, 0, rect);
+		str = GetText(item, 0);
+		m_name_text->SetPosition(rect.GetTopLeft());
+		m_name_text->SetSize(rect.GetSize());
+		m_name_text->SetValue(str);
+		m_name_text->Show();
+	}
+}
+
+void RulerListCtrl::EndEdit()
+{
+	m_name_text->Hide();
+	m_editing_item = -1;
+	UpdateRulers();
+}
+
+void RulerListCtrl::OnEndSelection(wxListEvent &event)
+{
+	EndEdit();
+}
+
+void RulerListCtrl::OnNameText(wxCommandEvent& event)
+{
+	if (!m_view)
+		return;
+	if (m_editing_item == -1)
+		return;
+
+	wxString str = m_name_text->GetValue();
+
+	vector<Ruler*>* ruler_list = m_view->GetRulerList();
+	if (!ruler_list) return;
+	Ruler* ruler = (*ruler_list)[m_editing_item];
+	if (!ruler) return;
+	ruler->SetName(str);
+	m_view->RefreshGL();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
