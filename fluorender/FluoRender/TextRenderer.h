@@ -41,14 +41,10 @@ using namespace FLIVR;
 class TextRenderer
 {
 public:
-#ifdef _WIN32
-	TextRenderer(const string &lib_name = "Fonts/FreeSans.ttf");
-#endif
-#ifdef _DARWIN
-	TextRenderer(const string &lib_name = "FluoRender.app/Contents/MacOS/Fonts/FreeSans.ttf");
-#endif
+	TextRenderer(const string &lib_name);
 	~TextRenderer();
 
+	void LoadNewFace(const string &lib_name);
 	void SetSize(unsigned int size);
 	unsigned int GetSize();
 

@@ -75,6 +75,7 @@ class SettingDlg : public wxPanel
 		ID_ResponseTimeText,
 		//font
 		ID_FontCmb,
+		ID_FontSizeCmb,
 		//script
 		ID_RunScriptChk,
 		//save/close
@@ -271,6 +272,7 @@ private:
 	wxTextCtrl *m_response_time_text;
 	//font
 	wxComboBox *m_font_cmb;
+	wxComboBox *m_font_size_cmb;
 	//script
 	wxCheckBox *m_run_script_chk;
 
@@ -333,6 +335,7 @@ private:
 	void OnResponseTimeEdit(wxCommandEvent &event);
 	//font
 	void OnFontChange(wxCommandEvent &event);
+	void OnFontSizeChange(wxCommandEvent &event);
 	//script
 	void OnRunScriptChk(wxCommandEvent &event);
 

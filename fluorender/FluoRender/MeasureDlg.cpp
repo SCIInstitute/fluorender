@@ -44,6 +44,7 @@ BEGIN_EVENT_TABLE(RulerListCtrl, wxListCtrl)
 	EVT_LIST_ITEM_SELECTED(wxID_ANY, RulerListCtrl::OnSelection)
 	EVT_LIST_ITEM_DESELECTED(wxID_ANY, RulerListCtrl::OnEndSelection)
 	EVT_TEXT(ID_NameText, RulerListCtrl::OnNameText)
+	EVT_COLOURPICKER_CHANGED(ID_ColorPicker, RulerListCtrl::OnColorChange)
 END_EVENT_TABLE()
 
 RulerListCtrl::RulerListCtrl(
@@ -60,21 +61,24 @@ RulerListCtrl::RulerListCtrl(
    itemCol.SetText("Name");
     this->InsertColumn(0, itemCol);
     SetColumnWidth(0, 100);
-   itemCol.SetText("Length");
+   itemCol.SetText("Color");
     this->InsertColumn(1, itemCol);
     SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
-   itemCol.SetText("Pitch Angle");
+   itemCol.SetText("Length");
     this->InsertColumn(2, itemCol);
     SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);
+   itemCol.SetText("Pitch Angle");
+    this->InsertColumn(3, itemCol);
+    SetColumnWidth(3, wxLIST_AUTOSIZE_USEHEADER);
    itemCol.SetText("Start/End Points (X, Y, Z)");
-   this->InsertColumn(3, itemCol);
-   SetColumnWidth(3, wxLIST_AUTOSIZE_USEHEADER);
+   this->InsertColumn(4, itemCol);
+   SetColumnWidth(4, wxLIST_AUTOSIZE_USEHEADER);
    itemCol.SetText("Time");
-    this->InsertColumn(4, itemCol);
-    SetColumnWidth(4, wxLIST_AUTOSIZE_USEHEADER);
-   itemCol.SetText("Volumes");
     this->InsertColumn(5, itemCol);
     SetColumnWidth(5, wxLIST_AUTOSIZE_USEHEADER);
+   itemCol.SetText("Volumes");
+    this->InsertColumn(6, itemCol);
+    SetColumnWidth(6, wxLIST_AUTOSIZE_USEHEADER);
 
    m_images = new wxImageList(16, 16, true);
    wxIcon icon = wxIcon(ruler_xpm);
@@ -85,32 +89,37 @@ RulerListCtrl::RulerListCtrl(
 	m_name_text = new wxTextCtrl(this, ID_NameText, "",
 		wxDefaultPosition, wxDefaultSize);
 	m_name_text->Hide();
+	m_color_picker = new wxColourPickerCtrl(this, 
+		ID_ColorPicker);
+	m_color_picker->Hide();
 }
 
 RulerListCtrl::~RulerListCtrl()
 {
 }
 
-void RulerListCtrl::Append(wxString name, double length, wxString &unit,
+void RulerListCtrl::Append(wxString name, wxString &color, double length, wxString &unit,
       double angle, wxString &points, bool time_dep, int time, wxString extra)
 {
    long tmp = InsertItem(GetItemCount(), name, 0);
 //    SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
+   SetItem(tmp, 1, color);
+   SetColumnWidth(1, wxLIST_AUTOSIZE);
    wxString str = wxString::Format("%.2f", length) + unit;
-   SetItem(tmp, 1, str);
-    SetColumnWidth(1, wxLIST_AUTOSIZE);
-   str = wxString::Format("%.1f", angle) + "Deg";
    SetItem(tmp, 2, str);
     SetColumnWidth(2, wxLIST_AUTOSIZE);
-   SetItem(tmp, 3, points);
+   str = wxString::Format("%.1f", angle) + "Deg";
+   SetItem(tmp, 3, str);
+    SetColumnWidth(3, wxLIST_AUTOSIZE);
+   SetItem(tmp, 4, points);
    if (time_dep)
       str = wxString::Format("%d", time);
    else
       str = "N/A";
-   SetItem(tmp, 4, str);
-    SetColumnWidth(4, wxLIST_AUTOSIZE_USEHEADER);
-   SetItem(tmp, 5, extra);
+   SetItem(tmp, 5, str);
     SetColumnWidth(5, wxLIST_AUTOSIZE_USEHEADER);
+   SetItem(tmp, 6, extra);
+    SetColumnWidth(6, wxLIST_AUTOSIZE_USEHEADER);
 }
 
 void RulerListCtrl::UpdateRulers(VRenderView* vrv)
@@ -162,7 +171,15 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 			points += ", ";
 			points += wxString::Format("(%.2f, %.2f, %.2f)", p->x(), p->y(), p->z());
 		}
-		Append(ruler->GetName(), ruler->GetLength(), unit,
+		wxString color;
+		if (ruler->GetUseColor())
+			color = wxString::Format("RGB(%d, %d, %d)",
+			int(ruler->GetColor().r()*255),
+			int(ruler->GetColor().g()*255),
+			int(ruler->GetColor().b()*255));
+		else
+			color = "N/A";
+		Append(ruler->GetName(), color, ruler->GetLength(), unit,
 			ruler->GetAngle(), points, ruler->GetTimeDep(), ruler->GetTime(), ruler->GetDelInfoValues(", "));
    }
 
@@ -275,14 +292,24 @@ void RulerListCtrl::Export(wxString filename)
          break;
       }
 
-      tos << "Name\tLength(" << unit << ")\tPitch Angle(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
+      tos << "Name\tColor\tLength(" << unit << ")\tPitch Angle(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
 
+	  Color color;
       for (size_t i=0; i<ruler_list->size(); i++)
       {
          ruler = (*ruler_list)[i];
          if (!ruler) continue;
 
          tos << ruler->GetName() << "\t";
+		 if (ruler->GetUseColor())
+		 {
+			color = ruler->GetColor();
+			str = wxString::Format("RGB(%d, %d, %d)",
+				int(color.r()*255), int(color.g()*255), int(color.b()*255));
+		 }
+		 else
+			 str = "N/A";
+		 tos << str << "\t";
          str = wxString::Format("%.2f", ruler->GetLength());
          tos << str << "\t";
          str = wxString::Format("%.1f", ruler->GetAngle());
@@ -372,12 +399,33 @@ void RulerListCtrl::OnSelection(wxListEvent &event)
 		m_name_text->SetSize(rect.GetSize());
 		m_name_text->SetValue(str);
 		m_name_text->Show();
+		//add color picker
+		GetSubItemRect(item, 1, rect);
+		m_color_picker->SetPosition(rect.GetTopLeft());
+		m_color_picker->SetSize(rect.GetSize());
+		if (m_view)
+		{
+			vector<Ruler*>* ruler_list = m_view->GetRulerList();
+			Ruler* ruler = (*ruler_list)[m_editing_item];
+			if (ruler)
+			{
+				Color color;
+				if (ruler->GetUseColor())
+				{
+					color = ruler->GetColor();
+					wxColor c(int(color.r()*255.0), int(color.g()*255.0), int(color.b()*255.0));
+					m_color_picker->SetColour(c);
+				}
+			}
+		}
+		m_color_picker->Show();
 	}
 }
 
 void RulerListCtrl::EndEdit()
 {
 	m_name_text->Hide();
+	m_color_picker->Hide();
 	m_editing_item = -1;
 	UpdateRulers();
 }
@@ -401,6 +449,23 @@ void RulerListCtrl::OnNameText(wxCommandEvent& event)
 	Ruler* ruler = (*ruler_list)[m_editing_item];
 	if (!ruler) return;
 	ruler->SetName(str);
+	m_view->RefreshGL();
+}
+
+void RulerListCtrl::OnColorChange(wxColourPickerEvent& event)
+{
+	if (!m_view)
+		return;
+	if (m_editing_item == -1)
+		return;
+
+	wxColor c = event.GetColour();
+	Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
+	vector<Ruler*>* ruler_list = m_view->GetRulerList();
+	if (!ruler_list) return;
+	Ruler* ruler = (*ruler_list)[m_editing_item];
+	if (!ruler) return;
+	ruler->SetColor(color);
 	m_view->RefreshGL();
 }
 

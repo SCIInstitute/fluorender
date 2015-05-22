@@ -73,6 +73,7 @@ BEGIN_EVENT_TABLE(SettingDlg, wxPanel)
 	EVT_TEXT(ID_ResponseTimeText, SettingDlg::OnResponseTimeEdit)
 	//font
 	EVT_COMBOBOX(ID_FontCmb, SettingDlg::OnFontChange)
+	EVT_COMBOBOX(ID_FontSizeCmb, SettingDlg::OnFontSizeChange)
 	//script
 	EVT_CHECKBOX(ID_RunScriptChk, SettingDlg::OnRunScriptChk)
 	//show
@@ -99,22 +100,44 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 
 	//font
 	wxBoxSizer *group2 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Font Size"), wxVERTICAL);
+		new wxStaticBox(page, wxID_ANY, "View Port Font and Size"), wxVERTICAL);
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Choose a font size for the text in render views:");
+	st = new wxStaticText(page, 0, "Font:");
 	m_font_cmb = new wxComboBox(page, ID_FontCmb, "",
-		wxDefaultPosition, wxSize(120, -1), 0, NULL, wxCB_READONLY);
-	m_font_cmb->Append("Sans-serif 10");
-	m_font_cmb->Append("Sans-serif 12");
-	m_font_cmb->Append("Sans-serif 14");
-	m_font_cmb->Append("Sans-serif 18");
-	m_font_cmb->Append("Sans-serif 24");
-	m_font_cmb->Select(2);
+		wxDefaultPosition, wxSize(150, -1), 0, NULL, wxCB_READONLY);
+	//populate fonts
+	std::string exePath = wxStandardPaths::Get().GetExecutablePath().ToStdString();
+	exePath = exePath.substr(0,exePath.find_last_of(std::string()+GETSLASH()));
+	wxString loc = wxString(exePath) + GETSLASH() + wxString("Fonts") +
+		GETSLASH() + wxString("*.ttf");
+	wxLogNull logNo;
+	wxString file = wxFindFirstFile(loc);
+	while (!file.empty())
+	{
+		file = file.AfterLast(GETSLASH());
+		file = file.BeforeLast('.');
+		m_font_cmb->Append(file);
+		file = wxFindNextFile();
+	}
 	sizer2_1->Add(st);
 	sizer2_1->Add(20, 10);
 	sizer2_1->Add(m_font_cmb);
+	sizer2_1->Add(20, 10);
+	st = new wxStaticText(page, 0, "Size:");
+	m_font_size_cmb = new wxComboBox(page, ID_FontSizeCmb, "",
+		wxDefaultPosition, wxSize(50, -1), 0, NULL, wxCB_READONLY);
+	for (int font_size=10; font_size<31; font_size+=2)
+		m_font_size_cmb->Append(wxString::Format("%d", font_size));
+	sizer2_1->Add(st);
+	sizer2_1->Add(20, 10);
+	sizer2_1->Add(m_font_size_cmb);
 	group2->Add(10, 5);
 	group2->Add(sizer2_1, 0, wxEXPAND);
+	group2->Add(10, 5);
+	st = new wxStaticText(page, 0,
+		"Put TrueType font files into the \"Fonts\" folder.\n"\
+		"Restart FluoRender to load new font files.");
+	group2->Add(st);
 	group2->Add(10, 5);
 
 	//script
@@ -791,18 +814,18 @@ void SettingDlg::UpdateUI()
 	m_wav_color3_cmb->Select(m_wav_color3-1);
 	m_wav_color4_cmb->Select(m_wav_color4-1);
 	//font
-	int tsize = 1;
-	if (m_text_size < 12)
-		tsize = 0;
-	else if (m_text_size < 14)
-		tsize = 1;
-	else if (m_text_size < 18)
-		tsize = 2;
-	else if (m_text_size < 24)
-		tsize = 3;
-	else
-		tsize = 4;
-	m_font_cmb->Select(tsize);
+	wxString str = m_font_file.BeforeLast('.');
+	int font_sel = m_font_cmb->FindString(str);
+	if (font_sel != wxNOT_FOUND)
+		m_font_cmb->Select(font_sel);
+	long font_size;
+	for (unsigned int i=0; i<m_font_size_cmb->GetCount(); ++i)
+	{
+		str = m_font_size_cmb->GetString(i);
+		if (str.ToLong(&font_size) &&
+			font_size <= m_text_size)
+			m_font_size_cmb->Select(i);
+	}
 	//script
 	m_run_script_chk->SetValue(m_run_script);
 	//memory settings
@@ -1410,37 +1433,48 @@ void SettingDlg::OnResponseTimeEdit(wxCommandEvent &event)
 //font
 void SettingDlg::OnFontChange(wxCommandEvent &event)
 {
-	switch (m_font_cmb->GetCurrentSelection())
+	wxString str = m_font_cmb->GetValue();
+	if (str != "")
 	{
-	case 0://Sans Serif 10
-		m_text_size = 10;
-		break;
-	case 1://12
-		m_text_size = 12;
-		break;
-	case 2://14
-		m_text_size = 14;
-		break;
-	case 3://18
-		m_text_size = 18;
-		break;
-	case 4://24
-		m_text_size = 24;
-		break;
-	default:
-		m_text_size = 12;
-		break;
-	}
+		m_font_file = str + ".ttf";
+		std::string exePath = wxStandardPaths::Get().GetExecutablePath().ToStdString();
+		exePath = exePath.substr(0,exePath.find_last_of(std::string()+GETSLASH()));
+		std::string loc = exePath + GETSLASH() + wxString("Fonts") +
+			GETSLASH() + str.ToStdString() + ".ttf";
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		vr_frame->GetTextRenderer()->SetSize(m_text_size);
-		for (int i=0 ; i<(int)vr_frame->GetViewList()->size() ; i++)
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame)
 		{
-			VRenderView* vrv = (*vr_frame->GetViewList())[i];
-			if (vrv)
-				vrv->RefreshGL();
+			vr_frame->GetTextRenderer()->LoadNewFace(loc);
+			vr_frame->GetTextRenderer()->SetSize(m_text_size);
+			for (int i=0 ; i<(int)vr_frame->GetViewList()->size() ; i++)
+			{
+				VRenderView* vrv = (*vr_frame->GetViewList())[i];
+				if (vrv)
+					vrv->RefreshGL();
+			}
+		}
+	}
+}
+
+void SettingDlg::OnFontSizeChange(wxCommandEvent &event)
+{
+	wxString str = m_font_size_cmb->GetValue();
+	long size;
+	if (str.ToLong(&size))
+	{
+		m_text_size = size;
+
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame)
+		{
+			vr_frame->GetTextRenderer()->SetSize(m_text_size);
+			for (int i=0 ; i<(int)vr_frame->GetViewList()->size() ; i++)
+			{
+				VRenderView* vrv = (*vr_frame->GetViewList())[i];
+				if (vrv)
+					vrv->RefreshGL();
+			}
 		}
 	}
 }

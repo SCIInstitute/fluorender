@@ -27,11 +27,14 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <wx/wx.h>
 #include <wx/listctrl.h>
+#include <wx/clrpicker.h>
+#include "FLIVR/Color.h"
 
 #ifndef _MEASUREDLG_H_
 #define _MEASUREDLG_H_
 
 using namespace std;
+using namespace FLIVR;
 
 class VRenderView;
 
@@ -39,7 +42,8 @@ class RulerListCtrl : public wxListCtrl
 {
    enum
    {
-      ID_NameText = wxID_HIGHEST+2351
+      ID_NameText = wxID_HIGHEST+2351,
+	  ID_ColorPicker
    };
 
    public:
@@ -51,7 +55,7 @@ class RulerListCtrl : public wxListCtrl
             long style=wxLC_REPORT|wxLC_SINGLE_SEL);
       ~RulerListCtrl();
 
-      void Append(wxString name, double length, wxString &unit,
+      void Append(wxString name, wxString &color, double length, wxString &unit,
             double angle, wxString &points, bool time_dep, int time,
             wxString extra);
       void UpdateRulers(VRenderView* vrv=0);
@@ -72,6 +76,7 @@ class RulerListCtrl : public wxListCtrl
       VRenderView *m_view;
       wxImageList *m_images;
       wxTextCtrl *m_name_text;
+	  wxColourPickerCtrl *m_color_picker;
       long m_editing_item;
 
    private:
@@ -80,6 +85,8 @@ class RulerListCtrl : public wxListCtrl
       void OnEndSelection(wxListEvent &event);
       void EndEdit();
       void OnNameText(wxCommandEvent& event);
+      void OnColorChange(wxColourPickerEvent& event);
+
 
       DECLARE_EVENT_TABLE()
    protected: //Possible TODO

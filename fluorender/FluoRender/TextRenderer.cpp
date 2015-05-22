@@ -98,6 +98,35 @@ TextRenderer::~TextRenderer()
 		glDeleteProgram(m_prog);
 }
 
+void TextRenderer::LoadNewFace(const string &lib_name)
+{
+	FT_Error err;
+	if (!m_init)
+	{
+		err = FT_Init_FreeType(&m_ft);
+		if (!err)
+			m_init = true;
+	}
+
+	if (!m_init) return;
+
+	if (m_valid)
+	{
+		FT_Done_Face(m_face);
+		m_valid = false;
+	}
+
+	err = FT_New_Face(m_ft, lib_name.c_str(), 0, &m_face);
+	if (!err)
+		m_valid = true;
+
+	if (m_valid)
+	{
+		err = FT_Select_Charmap(m_face, FT_ENCODING_UNICODE); 
+		err = FT_Set_Pixel_Sizes(m_face, 0, m_size);
+	}
+}
+
 void TextRenderer::SetSize(unsigned int size)
 {
 	if (!m_valid)

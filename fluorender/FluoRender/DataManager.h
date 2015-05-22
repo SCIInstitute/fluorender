@@ -818,6 +818,14 @@ public:
 	}
 	void SaveProfile(wxString &filename);
 
+	//color
+	void SetColor(Color& color)
+	{ m_color = color; m_use_color = true;}
+	bool GetUseColor()
+	{ return m_use_color; }
+	Color &GetColor()
+	{ return m_color; }
+
 private:
 	static int m_num;
 	int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe
@@ -828,6 +836,9 @@ private:
 	//a profile
 	wxString m_info_profile;
 	vector<ProfileBin> m_profile;
+	//color
+	bool m_use_color;
+	Color m_color;
 
 	//time-dependent
 	bool m_time_dep;

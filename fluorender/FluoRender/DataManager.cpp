@@ -2649,6 +2649,7 @@ Ruler::Ruler()
 	m_tform = 0;
 	m_ruler_type = 0;
 	m_finished = false;
+	m_use_color = false;
 
 	//time-dependent
 	m_time_dep = false;

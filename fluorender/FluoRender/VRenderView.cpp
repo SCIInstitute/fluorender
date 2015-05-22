@@ -9097,7 +9097,9 @@ void VRenderGLView::DrawRulers()
 	mv.set(glm::value_ptr(m_mv_mat));
 	p.set(glm::value_ptr(m_proj_mat));
 	Point p1, p2;
-	unsigned int num = 0;
+	unsigned int num;
+	vector<unsigned int> nums;
+	Color color;
 
 	for (size_t i=0; i<m_ruler_list.size(); i++)
 	{
@@ -9107,6 +9109,11 @@ void VRenderGLView::DrawRulers()
 			(ruler->GetTimeDep() &&
 			ruler->GetTime() == m_tseq_cur_num))
 		{
+			num = 0;
+			if (ruler->GetUseColor())
+				color = ruler->GetColor();
+			else
+				color = m_bg_color_inv;
 			for (size_t j=0; j<ruler->GetNumPoint(); ++j)
 			{
 				p2 = *(ruler->GetPoint(j));
@@ -9132,7 +9139,7 @@ void VRenderGLView::DrawRulers()
 					p2y = p2.y()*ny/2.0;
 					m_text_renderer->RenderText(
 					ruler->GetName().ToStdWstring(),
-					m_bg_color_inv,
+					color,
 					(p2x+w)*sx, (p2y+w)*sy, sx, sy);
 				}
 				if (j > 0)
@@ -9150,6 +9157,7 @@ void VRenderGLView::DrawRulers()
 					num += 2;
 				}
 			}
+			nums.push_back(num);
 		}
 	}
 
@@ -9172,7 +9180,6 @@ void VRenderGLView::DrawRulers()
 				shader->create();
 			shader->bind();
 		}
-		shader->setLocalParam(0, m_bg_color_inv.r(), m_bg_color_inv.g(), m_bg_color_inv.b(), 1.0);
 		shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
@@ -9182,7 +9189,26 @@ void VRenderGLView::DrawRulers()
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (const GLvoid*)0);
 
-		glDrawArrays(GL_LINES, 0, num);
+		GLint pos = 0;
+		size_t j = 0;
+		for (size_t i=0; i<m_ruler_list.size(); i++)
+		{
+			Ruler* ruler = m_ruler_list[i];
+			if (!ruler) continue;
+			if (!ruler->GetTimeDep() ||
+				(ruler->GetTimeDep() &&
+				ruler->GetTime() == m_tseq_cur_num))
+			{
+				num = 0;
+				if (ruler->GetUseColor())
+					color = ruler->GetColor();
+				else
+					color = m_bg_color_inv;
+				shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0);
+				glDrawArrays(GL_LINES, pos, (GLsizei)(nums[j++]));
+				pos += nums[j-1];
+			}
+		}
 
 		glDisableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);

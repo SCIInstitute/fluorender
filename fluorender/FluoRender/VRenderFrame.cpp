@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/aboutdlg.h>
 #include <wx/progdlg.h>
 #include <wx/hyperlink.h>
+#include <wx/stdpaths.h>
 #include "Formats/png_resource.h"
 #include "Formats/msk_writer.h"
 #include "Formats/msk_reader.h"
@@ -273,18 +274,15 @@ VRenderFrame::VRenderFrame(
 		wxDefaultPosition, wxSize(130, 700));
 
 	wxString font_file = m_setting_dlg->GetFontFile();
+	std::string exePath = wxStandardPaths::Get().GetExecutablePath().ToStdString();
+	exePath = exePath.substr(0,exePath.find_last_of(std::string()+GETSLASH()));
 	if (font_file != "")
-	{
-#ifdef _WIN32
-		font_file = "Fonts/" + font_file;
-#endif
-#ifdef _DARWIN
-		font_file = "FluoRender.app/Contents/MacOS/Fonts/" + font_file;
-#endif
-		m_text_renderer = new TextRenderer(font_file.ToStdString());
-	}
+		font_file = wxString(exePath) + GETSLASH() + wxString("Fonts") +
+			GETSLASH() + font_file;
 	else
-		m_text_renderer = new TextRenderer();
+		font_file = wxString(exePath) + GETSLASH() + wxString("Fonts") +
+			GETSLASH() + wxString("FreeSans.ttf");
+	m_text_renderer = new TextRenderer(font_file.ToStdString());
 	m_text_renderer->SetSize(m_setting_dlg->GetTextSize());
 
 	//settings dialog
@@ -2591,12 +2589,16 @@ void VRenderFrame::SaveProject(wxString& filename)
 					Ruler* ruler = (*ruler_list)[ri];
 					if (!ruler) continue;
 					fconfig.SetPath(wxString::Format("/views/%d/rulers/%d", i, (int)ri));
+					fconfig.Write("name", ruler->GetName());
 					fconfig.Write("type", ruler->GetRulerType());
 					fconfig.Write("display", ruler->GetDisp());
 					fconfig.Write("transient", ruler->GetTimeDep());
 					fconfig.Write("time", ruler->GetTime());
 					fconfig.Write("info_names", ruler->GetInfoNames());
 					fconfig.Write("info_values", ruler->GetInfoValues());
+					fconfig.Write("use_color", ruler->GetUseColor());
+					fconfig.Write("color", wxString::Format("%f %f %f",
+						ruler->GetColor().r(), ruler->GetColor().g(), ruler->GetColor().b()));
 					fconfig.Write("num", ruler->GetNumPoint());
 					for (size_t rpi=0; rpi<ruler->GetNumPoint(); ++rpi)
 					{
@@ -3685,6 +3687,8 @@ void VRenderFrame::OpenProject(wxString& filename)
 							{
 								fconfig.SetPath(wxString::Format("/views/%d/rulers/%d", i, ri));
 								Ruler* ruler = new Ruler();
+								if (fconfig.Read("name", &str))
+									ruler->SetName(str);
 								if (fconfig.Read("type", &iVal))
 									ruler->SetRulerType(iVal);
 								if (fconfig.Read("display", &bVal))
@@ -3697,6 +3701,21 @@ void VRenderFrame::OpenProject(wxString& filename)
 									ruler->SetInfoNames(str);
 								if (fconfig.Read("info_values", &str))
 									ruler->SetInfoValues(str);
+								if (fconfig.Read("use_color", &bVal))
+								{
+									if (bVal)
+									{
+										if (fconfig.Read("color", &str))
+										{
+											float r, g, b;
+											if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b))
+											{
+												FLIVR::Color col(r,g,b);
+												ruler->SetColor(col);
+											}
+										}
+									}
+								}
 								int pnum = fconfig.Read("num", 0l);
 								for (int rpi=0; rpi<pnum; ++rpi)
 								{
