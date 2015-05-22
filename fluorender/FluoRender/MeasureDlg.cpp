@@ -124,6 +124,8 @@ void RulerListCtrl::Append(wxString name, wxString &color, double length, wxStri
 
 void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 {
+   m_name_text->Hide();
+   m_color_picker->Hide();
    if (vrv)
       m_view = vrv;
 
@@ -182,10 +184,6 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 		Append(ruler->GetName(), color, ruler->GetLength(), unit,
 			ruler->GetAngle(), points, ruler->GetTimeDep(), ruler->GetTime(), ruler->GetDelInfoValues(", "));
    }
-
-   //long item = GetItemCount() - 1;
-   //if (item != -1)
-   //   SetItemState(item, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 }
 
 int RulerListCtrl::GetCurrSelection()

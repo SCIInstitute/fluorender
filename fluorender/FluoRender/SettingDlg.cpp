@@ -100,7 +100,7 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 
 	//font
 	wxBoxSizer *group2 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "View Port Font and Size"), wxVERTICAL);
+		new wxStaticBox(page, wxID_ANY, "Render View Font and Size"), wxVERTICAL);
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Font:");
 	m_font_cmb = new wxComboBox(page, ID_FontCmb, "",
