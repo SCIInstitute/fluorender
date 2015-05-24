@@ -45,6 +45,8 @@ BEGIN_EVENT_TABLE(RulerListCtrl, wxListCtrl)
 	EVT_LIST_ITEM_DESELECTED(wxID_ANY, RulerListCtrl::OnEndSelection)
 	EVT_TEXT(ID_NameText, RulerListCtrl::OnNameText)
 	EVT_COLOURPICKER_CHANGED(ID_ColorPicker, RulerListCtrl::OnColorChange)
+	EVT_SCROLLWIN(RulerListCtrl::OnScroll)
+	EVT_MOUSEWHEEL(RulerListCtrl::OnScroll)
 END_EVENT_TABLE()
 
 RulerListCtrl::RulerListCtrl(
@@ -420,17 +422,20 @@ void RulerListCtrl::OnSelection(wxListEvent &event)
 	}
 }
 
-void RulerListCtrl::EndEdit()
+void RulerListCtrl::EndEdit(bool update)
 {
-	m_name_text->Hide();
-	m_color_picker->Hide();
-	m_editing_item = -1;
-	UpdateRulers();
+	if (m_name_text->IsShown())
+	{
+		m_name_text->Hide();
+		m_color_picker->Hide();
+		m_editing_item = -1;
+		if (update) UpdateRulers();
+	}
 }
 
 void RulerListCtrl::OnEndSelection(wxListEvent &event)
 {
-	EndEdit();
+	EndEdit(false);
 }
 
 void RulerListCtrl::OnNameText(wxCommandEvent& event)
@@ -465,6 +470,18 @@ void RulerListCtrl::OnColorChange(wxColourPickerEvent& event)
 	if (!ruler) return;
 	ruler->SetColor(color);
 	m_view->RefreshGL();
+}
+
+void RulerListCtrl::OnScroll(wxScrollWinEvent& event)
+{
+	EndEdit(false);
+	event.Skip(true);
+}
+
+void RulerListCtrl::OnScroll(wxMouseEvent& event)
+{
+	EndEdit(false);
+	event.Skip(true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////

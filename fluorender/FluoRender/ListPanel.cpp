@@ -46,6 +46,8 @@ EVT_KEY_DOWN(DataListCtrl::OnKeyDown)
 EVT_KEY_UP(DataListCtrl::OnKeyUp)
 EVT_MOUSE_EVENTS(DataListCtrl::OnMouse)
 EVT_TEXT_ENTER(ID_RenameText, DataListCtrl::OnEndEditName)
+EVT_SCROLLWIN(DataListCtrl::OnScroll)
+EVT_MOUSEWHEEL(DataListCtrl::OnScroll)
 END_EVENT_TABLE()
 
 DataListCtrl::DataListCtrl(
@@ -599,53 +601,64 @@ void DataListCtrl::OnMouse(wxMouseEvent &event)
    event.Skip();
 }
 
-void DataListCtrl::OnEndEditName(wxCommandEvent& event)
+void DataListCtrl::EndEdit(bool update)
 {
-   wxString new_name = m_rename_text->GetValue();
+	if (!m_rename_text->IsShown())
+		return;
 
-   long item = GetNextItem(-1,
-         wxLIST_NEXT_ALL,
-         wxLIST_STATE_SELECTED);
-   VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-   DataManager* mgr = vr_frame?vr_frame->GetDataManager():0;
+	if (update)
+	{
+		wxString new_name = m_rename_text->GetValue();
 
-   if (item != -1 && mgr)
-   {
-      wxString name = GetText(item, 1);
+		long item = GetNextItem(-1,
+			wxLIST_NEXT_ALL,
+			wxLIST_STATE_SELECTED);
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		DataManager* mgr = vr_frame?vr_frame->GetDataManager():0;
 
-      if (new_name != name)
-      {
-         wxString new_name2 = new_name;
-         for (int i=1; mgr->CheckNames(new_name2); i++)
-            new_name2 = new_name+wxString::Format("_%d", i);
+		if (item != -1 && mgr)
+		{
+			wxString name = GetText(item, 1);
+
+			if (new_name != name)
+			{
+				wxString new_name2 = new_name;
+				for (int i=1; mgr->CheckNames(new_name2); i++)
+					new_name2 = new_name+wxString::Format("_%d", i);
 
 
-         if (GetItemText(item) == "Volume")
-         {
-            VolumeData* vd = mgr->GetVolumeData(name);
-            if (vd)
-               vd->SetName(new_name2);
-         }
-         else if (GetItemText(item) == "Mesh")
-         {
-            MeshData* md = mgr->GetMeshData(name);
-            if (md)
-               md->SetName(new_name2);
-         }
-         else if (GetItemText(item) == "Annotations")
-         {
-            Annotations* ann = mgr->GetAnnotations(name);
-            if (ann)
-               ann->SetName(new_name2);
-         }
+				if (GetItemText(item) == "Volume")
+				{
+					VolumeData* vd = mgr->GetVolumeData(name);
+					if (vd)
+						vd->SetName(new_name2);
+				}
+				else if (GetItemText(item) == "Mesh")
+				{
+					MeshData* md = mgr->GetMeshData(name);
+					if (md)
+						md->SetName(new_name2);
+				}
+				else if (GetItemText(item) == "Annotations")
+				{
+					Annotations* ann = mgr->GetAnnotations(name);
+					if (ann)
+						ann->SetName(new_name2);
+				}
 
-         //update ui
-         SetText(item, 1, new_name2);
-         vr_frame->UpdateTree();
-      }
-   }
+				//update ui
+				SetText(item, 1, new_name2);
+				vr_frame->UpdateTree();
+			}
+		}
+	}
 
    m_rename_text->Hide();
+}
+
+void DataListCtrl::OnEndEditName(wxCommandEvent& event)
+{
+	EndEdit();
 }
 
 void DataListCtrl::DeleteSelection()
@@ -813,6 +826,18 @@ void DataListCtrl::DeleteAll()
       vr_frame->UpdateTree();
       vr_frame->RefreshVRenderViews();
    }
+}
+
+void DataListCtrl::OnScroll(wxScrollWinEvent& event)
+{
+	EndEdit(false);
+	event.Skip(true);
+}
+
+void DataListCtrl::OnScroll(wxMouseEvent& event)
+{
+	EndEdit(false);
+	event.Skip(true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////

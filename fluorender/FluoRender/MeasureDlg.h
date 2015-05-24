@@ -80,13 +80,14 @@ class RulerListCtrl : public wxListCtrl
       long m_editing_item;
 
    private:
+      void EndEdit(bool update=true);
       void OnKeyDown(wxKeyEvent& event);
       void OnSelection(wxListEvent &event);
       void OnEndSelection(wxListEvent &event);
-      void EndEdit();
       void OnNameText(wxCommandEvent& event);
       void OnColorChange(wxColourPickerEvent& event);
-
+	  void OnScroll(wxScrollWinEvent& event);
+	  void OnScroll(wxMouseEvent& event);
 
       DECLARE_EVENT_TABLE()
    protected: //Possible TODO

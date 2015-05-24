@@ -78,7 +78,7 @@ class KeyListCtrl : public wxListCtrl
    long m_dragging_to_item;
 
    private:
-   void EndEdit();
+   void EndEdit(bool update=true);
 
    private:
    void OnAct(wxListEvent &event);
@@ -94,6 +94,8 @@ class KeyListCtrl : public wxListCtrl
 
    void OnKeyDown(wxKeyEvent& event);
    void OnKeyUp(wxKeyEvent& event);
+   void OnScroll(wxScrollWinEvent& event);
+   void OnScroll(wxMouseEvent& event);
 
    DECLARE_EVENT_TABLE()
    protected: //Possible TODO

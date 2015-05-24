@@ -42,6 +42,8 @@ BEGIN_EVENT_TABLE(KeyListCtrl, wxListCtrl)
 	EVT_KEY_DOWN(KeyListCtrl::OnKeyDown)
 	EVT_KEY_UP(KeyListCtrl::OnKeyUp)
 	EVT_LIST_BEGIN_DRAG(wxID_ANY, KeyListCtrl::OnBeginDrag)
+	EVT_SCROLLWIN(KeyListCtrl::OnScroll)
+	EVT_MOUSEWHEEL(KeyListCtrl::OnScroll)
 END_EVENT_TABLE()
 
 KeyListCtrl::KeyListCtrl(
@@ -305,19 +307,22 @@ void KeyListCtrl::OnSelection(wxListEvent &event)
 	}
 }
 
-void KeyListCtrl::EndEdit()
+void KeyListCtrl::EndEdit(bool update)
 {
-	m_frame_text->Hide();
-	m_duration_text->Hide();
-	m_interpolation_cmb->Hide();
-	m_description_text->Hide();
-	m_editing_item = -1;
-	UpdateText();
+	if (m_duration_text->IsShown())
+	{
+		m_frame_text->Hide();
+		m_duration_text->Hide();
+		m_interpolation_cmb->Hide();
+		m_description_text->Hide();
+		m_editing_item = -1;
+		if (update) UpdateText();
+	}
 }
 
 void KeyListCtrl::OnEndSelection(wxListEvent &event)
 {
-	EndEdit();
+	EndEdit(false);
 }
 
 void KeyListCtrl::OnFrameText(wxCommandEvent& event)
@@ -488,6 +493,18 @@ void KeyListCtrl::OnEndDrag(wxMouseEvent& event)
 	Disconnect(wxEVT_LEFT_UP, wxMouseEventHandler(KeyListCtrl::OnEndDrag));
 	Disconnect(wxEVT_LEAVE_WINDOW, wxMouseEventHandler(KeyListCtrl::OnEndDrag));
 	m_dragging_to_item = -1;
+}
+
+void KeyListCtrl::OnScroll(wxScrollWinEvent& event)
+{
+	EndEdit(false);
+	event.Skip(true);
+}
+
+void KeyListCtrl::OnScroll(wxMouseEvent& event)
+{
+	EndEdit(false);
+	event.Skip(true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////

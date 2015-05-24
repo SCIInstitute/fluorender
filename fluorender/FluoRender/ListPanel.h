@@ -70,6 +70,7 @@ class DataListCtrl: public wxListCtrl
    void DeleteSelection();
    void DeleteAll();
    void AddToView(int menu_index, long item);
+   void EndEdit(bool update=true);
 
    //
    void OnContextMenu(wxContextMenuEvent &event);
@@ -87,6 +88,8 @@ class DataListCtrl: public wxListCtrl
    void OnKeyUp(wxKeyEvent& event);
    void OnMouse(wxMouseEvent& event);
    void OnEndEditName(wxCommandEvent& event);
+   void OnScroll(wxScrollWinEvent& event);
+   void OnScroll(wxMouseEvent& event);
 
    DECLARE_EVENT_TABLE()
    protected: //Possible TODO
