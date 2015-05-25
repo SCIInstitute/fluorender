@@ -322,7 +322,7 @@ void KeyListCtrl::EndEdit(bool update)
 
 void KeyListCtrl::OnEndSelection(wxListEvent &event)
 {
-	EndEdit(false);
+	EndEdit();
 }
 
 void KeyListCtrl::OnFrameText(wxCommandEvent& event)
@@ -344,8 +344,10 @@ void KeyListCtrl::OnFrameText(wxCommandEvent& event)
 	int index = interpolator->GetKeyIndex(int(id));
 	str = m_frame_text->GetValue();
 	double time;
-	str.ToDouble(&time);
-	interpolator->ChangeTime(index, time);
+	if (str.ToDouble(&time))
+	{
+		interpolator->ChangeTime(index, time);
+	}
 }
 
 void KeyListCtrl::OnDurationText(wxCommandEvent& event)
@@ -367,8 +369,11 @@ void KeyListCtrl::OnDurationText(wxCommandEvent& event)
 	int index = interpolator->GetKeyIndex(int(id));
 	str = m_duration_text->GetValue();
 	double duration;
-	str.ToDouble(&duration);
-	interpolator->ChangeDuration(index, duration);
+	if (str.ToDouble(&duration))
+	{
+		interpolator->ChangeDuration(index, duration);
+		SetText(m_editing_item, 2, str);
+	}
 }
 
 void KeyListCtrl::OnInterpoCmb(wxCommandEvent& event)

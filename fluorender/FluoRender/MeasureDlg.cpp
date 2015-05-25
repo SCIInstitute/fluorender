@@ -452,6 +452,7 @@ void RulerListCtrl::OnNameText(wxCommandEvent& event)
 	Ruler* ruler = (*ruler_list)[m_editing_item];
 	if (!ruler) return;
 	ruler->SetName(str);
+	SetText(m_editing_item, 0, str);
 	m_view->RefreshGL();
 }
 
@@ -469,6 +470,12 @@ void RulerListCtrl::OnColorChange(wxColourPickerEvent& event)
 	Ruler* ruler = (*ruler_list)[m_editing_item];
 	if (!ruler) return;
 	ruler->SetColor(color);
+	wxString str_color;
+	str_color = wxString::Format("RGB(%d, %d, %d)",
+	int(color.r()*255),
+	int(color.g()*255),
+	int(color.b()*255));
+	SetText(m_editing_item, 1, str_color);
 	m_view->RefreshGL();
 }
 
