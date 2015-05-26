@@ -71,6 +71,14 @@ namespace FLIVR
 		std::string  vert_shader_;
 		std::string  frag_shader_;
 
+		//validation
+		bool valid_;
+
+		//locations
+		int loc_ui[MAX_SHADER_UNIFORMS];
+		int loc_vec4[MAX_SHADER_UNIFORMS];
+		int loc_mat4[MAX_SHADER_UNIFORMS];
+
 		static bool init_;
 		static bool supported_;
 		static bool non_2_textures_;
