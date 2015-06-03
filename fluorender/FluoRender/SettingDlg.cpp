@@ -205,7 +205,7 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 		"Number of depth peeling layers for rendering transparent mesh objects.\n"\
 			"Set higher numbers only for complex geometries.\n"\
 			"It slows down the rendering speed.");
-	sizer2_1->Add(m_peeling_layers_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer2_1->Add(m_peeling_layers_sldr, 1, wxEXPAND);
 	sizer2_1->Add(m_peeling_layers_text, 0, wxALIGN_CENTER);
 	group2->Add(10, 5);
 	group2->Add(sizer2_1, 0, wxEXPAND);
@@ -226,7 +226,7 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, 
 		"The direction of the shadows, when shadow is enabled for volume data.");
 	sizer3_1->Add(m_shadow_dir_chk, 0, wxALIGN_CENTER);
-	sizer3_1->Add(m_shadow_dir_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer3_1->Add(m_shadow_dir_sldr, 1, wxEXPAND);
 	sizer3_1->Add(m_shadow_dir_text, 0, wxALIGN_CENTER);
 	group3->Add(10, 5);
 	group3->Add(sizer3_1, 0, wxEXPAND);
@@ -307,7 +307,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 		wxDefaultPosition, wxSize(40, -1), 0, vald_int);
 	st = new wxStaticText(page, 0, "MB",
 		wxDefaultPosition, wxSize(20, -1));
-	sizer2_1->Add(m_graphics_mem_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer2_1->Add(m_graphics_mem_sldr, 1, wxEXPAND);
 	sizer2_1->Add(m_graphics_mem_text, 0, wxALIGN_CENTER);
 	sizer2_1->Add(st);
 	wxBoxSizer *sizer2_2 = new wxBoxSizer(wxHORIZONTAL);
@@ -320,7 +320,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 		wxDefaultPosition, wxSize(40, -1), 0, vald_int);
 	st = new wxStaticText(page, 0, "MB",
 		wxDefaultPosition, wxSize(20, -1));
-	sizer2_2->Add(m_large_data_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer2_2->Add(m_large_data_sldr, 1, wxEXPAND);
 	sizer2_2->Add(m_large_data_text, 0, wxALIGN_CENTER);
 	sizer2_2->Add(st);
 	wxBoxSizer *sizer2_3 = new wxBoxSizer(wxHORIZONTAL);
@@ -333,7 +333,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 		wxDefaultPosition, wxSize(40, -1), 0, vald_int);
 	st = new wxStaticText(page, 0, "vx",
 		wxDefaultPosition, wxSize(20, -1));
-	sizer2_3->Add(m_block_size_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer2_3->Add(m_block_size_sldr, 1, wxEXPAND);
 	sizer2_3->Add(m_block_size_text, 0, wxALIGN_CENTER);
 	sizer2_3->Add(st);
 	wxBoxSizer *sizer2_4 = new wxBoxSizer(wxHORIZONTAL);
@@ -346,7 +346,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 		wxDefaultPosition, wxSize(40, -1), 0, vald_int);
 	st = new wxStaticText(page, 0, "ms",
 		wxDefaultPosition, wxSize(20, -1));
-	sizer2_4->Add(m_response_time_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer2_4->Add(m_response_time_sldr, 1, wxEXPAND);
 	sizer2_4->Add(m_response_time_text, 0, wxALIGN_CENTER);
 	sizer2_4->Add(st);
 	group2->Add(10, 5);
@@ -364,9 +364,9 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 		"Note:\n"\
 		"Data streaming allows rendering datasets of much larger size than available\n"\
 		"graphics memory. Datasets are divided into small bricks. The bricks are loaded\n"\
-		"into graphics memory and sequentially rendered. Restart is needed for the bricking\n"\
-		"to take effect. Some analysis features may not work in streaming mode. Disable\n"\
-		"streaming if this happens.");
+		"into graphics memory and sequentially rendered. Restart is needed for the\n"\
+		"bricking to take effect. Some analysis features may not work in streaming mode.\n"\
+		"Disable streaming if this happens.");
 	group2->Add(st);
 	group2->Add(10, 5);
 
@@ -910,6 +910,7 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("large data size", m_large_data_size);
 	fconfig.Write("force brick size", m_force_brick_size);
 	fconfig.Write("up time", m_up_time);
+	EnableStreaming(m_mem_swap);
 
 	//update order
 	fconfig.SetPath("/update order");

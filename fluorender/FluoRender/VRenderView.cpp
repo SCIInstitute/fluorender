@@ -10634,9 +10634,9 @@ void VRenderView::CreateBar()
 
 	//add the toolbars and other options in order
 	sizer_h_1->AddSpacer(40);
-	sizer_h_1->Add(m_options_toolbar,1,wxALIGN_CENTER|wxEXPAND);
+	sizer_h_1->Add(m_options_toolbar,1,wxEXPAND);
 	//sizer_h_1->AddStretchSpacer();
-	//sizer_h_1->Add(m_options_toolbar2,0,wxALIGN_CENTER|wxEXPAND);
+	//sizer_h_1->Add(m_options_toolbar2,0,wxEXPAND);
 	sizer_h_1->AddSpacer(35);
 
 	//bar left///////////////////////////////////////////////////

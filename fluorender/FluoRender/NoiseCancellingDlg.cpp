@@ -69,7 +69,7 @@ NoiseCancellingDlg::NoiseCancellingDlg(wxWindow *frame, wxWindow *parent)
 	m_preview_btn = new wxButton(this, ID_PreviewBtn, "Preview",
 		wxDefaultPosition, wxSize(70, 23));
 	sizer1->Add(st, 0, wxALIGN_CENTER);
-	sizer1->Add(m_threshold_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer1->Add(m_threshold_sldr, 1, wxEXPAND);
 	sizer1->Add(m_threshold_text, 0, wxALIGN_CENTER);
 	sizer1->Add(5, 5);
 	sizer1->Add(m_preview_btn, 0, wxALIGN_CENTER);
@@ -85,7 +85,7 @@ NoiseCancellingDlg::NoiseCancellingDlg(wxWindow *frame, wxWindow *parent)
 	m_erase_btn = new wxButton(this, ID_EraseBtn, "Erase",
 		wxDefaultPosition, wxSize(70, 23));
 	sizer2->Add(st, 0, wxALIGN_CENTER);
-	sizer2->Add(m_voxel_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer2->Add(m_voxel_sldr, 1, wxEXPAND);
 	sizer2->Add(m_voxel_text, 0, wxALIGN_CENTER);
 	sizer2->Add(5, 5);
 	sizer2->Add(m_erase_btn, 0, wxALIGN_CENTER);

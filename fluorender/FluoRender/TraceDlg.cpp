@@ -328,7 +328,7 @@ m_manual_assist(false)
 		wxDefaultPosition, wxSize(70, 23));
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
-	sizer_1->Add(m_load_trace_text, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_1->Add(m_load_trace_text, 1, wxEXPAND);
 	sizer_1->Add(m_load_trace_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_save_trace_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_saveas_trace_btn, 0, wxALIGN_CENTER);
@@ -349,7 +349,7 @@ m_manual_assist(false)
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_ghost_show_tail_chk, 0, wxALIGN_CENTER);
 	sizer_2->Add(5, 5);
-	sizer_2->Add(m_ghost_num_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_2->Add(m_ghost_num_sldr, 1, wxEXPAND);
 	sizer_2->Add(m_ghost_num_text, 0, wxALIGN_CENTER);
 	sizer_2->Add(5, 5);
 	sizer_2->Add(m_ghost_show_lead_chk, 0, wxALIGN_CENTER);
@@ -386,7 +386,7 @@ m_manual_assist(false)
 		wxDefaultPosition, wxSize(60, 23), 0, vald_int);
 	sizer_32->Add(5, 5);
 	sizer_32->Add(st, 0, wxALIGN_CENTER);
-	sizer_32->Add(m_cell_size_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_32->Add(m_cell_size_sldr, 1, wxEXPAND);
 	sizer_32->Add(m_cell_size_text, 0, wxALIGN_CENTER);
 	//selection tools
 	wxBoxSizer* sizer_33 = new wxBoxSizer(wxHORIZONTAL);
@@ -491,10 +491,10 @@ m_manual_assist(false)
 		wxDefaultPosition, wxSize(80, 23));
 	m_cell_next_btn = new wxButton(this, ID_CellNextBtn, "Forward >",
 		wxDefaultPosition, wxSize(80, 23));
-	sizer_41->Add(m_cell_time_curr_st, 1, wxEXPAND|wxCENTER);
+	sizer_41->Add(m_cell_time_curr_st, 1, wxEXPAND);
 	sizer_41->Add(m_cell_prev_btn, 0, wxALIGN_CENTER);
 	sizer_41->Add(m_cell_next_btn, 0, wxALIGN_CENTER);
-	sizer_41->Add(m_cell_time_prev_st, 1, wxEXPAND|wxCENTER);
+	sizer_41->Add(m_cell_time_prev_st, 1, wxEXPAND);
 	//controls
 	wxBoxSizer* sizer_42 = new wxBoxSizer(wxHORIZONTAL);
 	m_trace_list_curr = new TraceListCtrl(frame, this, wxID_ANY);

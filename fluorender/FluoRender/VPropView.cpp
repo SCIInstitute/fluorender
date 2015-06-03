@@ -164,7 +164,7 @@ VPropView::VPropView(wxWindow* frame,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_INVERSE);
    m_gamma_text = new wxTextCtrl(this, ID_GammaText, "1.00",
          wxDefaultPosition, wxSize(40, 20), 0, vald_fp2);
-   sizer_l1->Add(m_gamma_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+   sizer_l1->Add(m_gamma_sldr, 1, wxEXPAND);
    sizer_l1->Add(m_gamma_text, 0, wxALIGN_CENTER);
    sizer_l1->Add(st, 0, wxALIGN_CENTER);
    //saturation point
@@ -174,7 +174,7 @@ VPropView::VPropView(wxWindow* frame,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_contrast_text = new wxTextCtrl(this, ID_ContrastText, "50",
          wxDefaultPosition, wxSize(40, 20), 0, vald_int);
-   sizer_l2->Add(m_contrast_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+   sizer_l2->Add(m_contrast_sldr, 1, wxEXPAND);
    sizer_l2->Add(m_contrast_text, 0, wxALIGN_CENTER);
    sizer_l2->Add(st, 0, wxALIGN_CENTER);
    //luminance
@@ -184,7 +184,7 @@ VPropView::VPropView(wxWindow* frame,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_luminance_text = new wxTextCtrl(this, ID_LuminanceText, "128",
          wxDefaultPosition, wxSize(40, 20), 0, vald_int);
-   sizer_l3->Add(m_luminance_sldr, 1, wxEXPAND|wxALIGN_CENTER, 0);
+   sizer_l3->Add(m_luminance_sldr, 1, wxEXPAND, 0);
    sizer_l3->Add(m_luminance_text, 0, wxALIGN_CENTER, 0);
    sizer_l3->Add(st, 0, wxALIGN_CENTER, 0);
    //alpha
@@ -199,7 +199,7 @@ VPropView::VPropView(wxWindow* frame,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
    m_alpha_text = new wxTextCtrl(this, ID_Alpha_Text, "127",
          wxDefaultPosition, wxSize(40, 20), 0, vald_int);
-   sizer_l4->Add(m_alpha_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+   sizer_l4->Add(m_alpha_sldr, 1, wxEXPAND);
    sizer_l4->Add(m_alpha_text, 0, wxALIGN_CENTER);
    sizer_l4->Add(new wxStaticText(this, 0 , " : ", 
 	   wxDefaultPosition,wxSize(13,-1)), 0, wxALIGN_CENTER);
@@ -217,7 +217,7 @@ VPropView::VPropView(wxWindow* frame,
     "Enables Shading Editing.");
    m_shade_tool->ToggleTool(ID_ShadingEnableChk,true);
    m_shade_tool->Realize();
-   sizer_l5->Add(m_low_shading_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+   sizer_l5->Add(m_low_shading_sldr, 1, wxEXPAND);
    sizer_l5->Add(m_low_shading_text, 0, wxALIGN_CENTER);
    sizer_l5->Add(new wxStaticText(this, 0 , " : ", 
 	   wxDefaultPosition,wxSize(13,-1)), 0, wxALIGN_CENTER);
@@ -233,7 +233,7 @@ VPropView::VPropView(wxWindow* frame,
          wxDefaultPosition, wxSize(50, 20), 0, vald_fp4);
    sizer_m1->Add(st, 0, wxALIGN_CENTER);
    sizer_m1->Add(m_boundary_text, 0, wxALIGN_CENTER);
-   sizer_m1->Add(m_boundary_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+   sizer_m1->Add(m_boundary_sldr, 1, wxEXPAND);
    //thresholds
    m_threh_st = new wxStaticText(this, 0, "Threshold : ",
          wxDefaultPosition, wxSize(127, -1), wxALIGN_RIGHT);
@@ -247,9 +247,9 @@ VPropView::VPropView(wxWindow* frame,
          wxDefaultPosition, wxSize(50, 20), 0, vald_int);
    sizer_m2->Add(m_threh_st, 0, wxALIGN_CENTER);
    sizer_m2->Add(m_left_thresh_text, 0, wxALIGN_CENTER);
-   sizer_m2->Add(m_left_thresh_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+   sizer_m2->Add(m_left_thresh_sldr, 1, wxEXPAND);
    sizer_m2->Add(m_right_thresh_text, 0, wxALIGN_CENTER);
-   sizer_m2->Add(m_right_thresh_sldr,1, wxEXPAND|wxALIGN_CENTER);
+   sizer_m2->Add(m_right_thresh_sldr,1, wxEXPAND);
    //light/shadow
    //highlight
    m_hi_shading_sldr = new wxSlider(this, ID_HiShadingSldr, 0, 0, 100,
@@ -276,9 +276,9 @@ VPropView::VPropView(wxWindow* frame,
          wxDefaultPosition, wxSize(20, -1), wxALIGN_RIGHT);
    sizer_m3->Add(st, 0, wxALIGN_CENTER);
    sizer_m3->Add(m_hi_shading_text, 0, wxALIGN_CENTER);
-   sizer_m3->Add(m_hi_shading_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+   sizer_m3->Add(m_hi_shading_sldr, 1, wxEXPAND);
    sizer_m3->Add(m_shadow_text, 0, wxALIGN_CENTER);
-   sizer_m3->Add(m_shadow_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+   sizer_m3->Add(m_shadow_sldr, 1, wxEXPAND);
    //sample rate
    st = new wxStaticText(this, 0, "Sample Rate : ",
          wxDefaultPosition, wxSize(127, -1), wxALIGN_RIGHT);
@@ -288,7 +288,7 @@ VPropView::VPropView(wxWindow* frame,
          wxDefaultPosition, wxSize(50, 20), 0, vald_fp1);
    sizer_m4->Add(st, 0, wxALIGN_CENTER);
    sizer_m4->Add(m_sample_text, 0, wxALIGN_CENTER);
-   sizer_m4->Add(m_sample_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+   sizer_m4->Add(m_sample_sldr, 1, wxEXPAND);
    //colormap
    m_colormap_tool = new wxToolBar(this,wxID_ANY);
    m_colormap_tool->AddCheckTool(ID_ColormapEnableChk,"Color Map",
@@ -309,7 +309,7 @@ VPropView::VPropView(wxWindow* frame,
    m_colormap_low_value_sldr = new wxSlider(this, 
 	   ID_ColormapLowValueSldr, 0, 0, 255,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-   sizer_m5->Add(m_colormap_low_value_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+   sizer_m5->Add(m_colormap_low_value_sldr, 1, wxEXPAND);
    m_colormap_high_value_text = new wxTextCtrl(this, 
 	   ID_ColormapHighValueText, "255",
          wxDefaultPosition + wxPoint(10,0), wxSize(50, 20), 0, vald_int);
@@ -317,7 +317,7 @@ VPropView::VPropView(wxWindow* frame,
    m_colormap_high_value_sldr = new wxSlider(this, 
 	   ID_ColormapHighValueSldr, 255, 0, 255,
          wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-   sizer_m5->Add(m_colormap_high_value_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+   sizer_m5->Add(m_colormap_high_value_sldr, 1, wxEXPAND);
    //right ///////////////////////////////////////////////////
    m_options_toolbar = new wxToolBar(this,wxID_ANY);
    //MIP
@@ -423,21 +423,21 @@ VPropView::VPropView(wxWindow* frame,
 
    //ADD COLUMNS//////////////////////////////////////
    //left
-   sizer_left->Add(sizer_l1, 0, wxEXPAND|wxALIGN_CENTER);
-   sizer_left->Add(sizer_l2, 0, wxEXPAND|wxALIGN_CENTER);
-   sizer_left->Add(sizer_l3, 0, wxEXPAND|wxALIGN_CENTER);
-   sizer_left->Add(sizer_l4, 0, wxEXPAND|wxALIGN_CENTER);
-   sizer_left->Add(sizer_l5, 0, wxEXPAND|wxALIGN_CENTER);
+   sizer_left->Add(sizer_l1, 0, wxEXPAND);
+   sizer_left->Add(sizer_l2, 0, wxEXPAND);
+   sizer_left->Add(sizer_l3, 0, wxEXPAND);
+   sizer_left->Add(sizer_l4, 0, wxEXPAND);
+   sizer_left->Add(sizer_l5, 0, wxEXPAND);
    //middle
-   sizer_middle->Add(sizer_m1, 0, wxEXPAND|wxALIGN_CENTER);
-   sizer_middle->Add(sizer_m2, 0, wxEXPAND|wxALIGN_CENTER);
-   sizer_middle->Add(sizer_m3, 0, wxEXPAND|wxALIGN_CENTER);
-   sizer_middle->Add(sizer_m4, 0, wxEXPAND|wxALIGN_CENTER);
-   sizer_middle->Add(sizer_m5, 0, wxEXPAND|wxALIGN_CENTER);
+   sizer_middle->Add(sizer_m1, 0, wxEXPAND);
+   sizer_middle->Add(sizer_m2, 0, wxEXPAND);
+   sizer_middle->Add(sizer_m3, 0, wxEXPAND);
+   sizer_middle->Add(sizer_m4, 0, wxEXPAND);
+   sizer_middle->Add(sizer_m5, 0, wxEXPAND);
    //right
-   sizer_right->Add(sizer_r1, 0, wxEXPAND|wxALIGN_CENTER);
-   sizer_right->Add(sizer_r2, 0, wxEXPAND|wxALIGN_CENTER);
-   sizer_right->Add(sizer_r3, 0, wxEXPAND|wxALIGN_CENTER);
+   sizer_right->Add(sizer_r1, 0, wxEXPAND);
+   sizer_right->Add(sizer_r2, 0, wxEXPAND);
+   sizer_right->Add(sizer_r3, 0, wxEXPAND);
    sizer_right->Add(sizer_r4, 0, wxALIGN_CENTER);
    //ADD ALL TOGETHER
    sizer_all->Add(sizer_left, 1, wxEXPAND);

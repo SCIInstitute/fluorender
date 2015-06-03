@@ -1147,18 +1147,18 @@ void VRenderFrame::OnInfo(wxCommandEvent& WXUNUSED(event))
 		wxDefaultPosition,wxSize(50,-1));
 	font = wxFont(12,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
 	txt->SetFont(font);
-	right->Add(txt,0,wxEXPAND | wxALIGN_RIGHT);
+	right->Add(txt,0,wxEXPAND);
 	txt = new wxStaticText(d,wxID_ANY,wxString("Copyright (c) ") + VERSION_COPYRIGHT,
 		wxDefaultPosition,wxSize(-1,-1));
 	font = wxFont(11,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
 	txt->SetFont(font);
-	right->Add(txt,0,wxEXPAND | wxALIGN_RIGHT);
+	right->Add(txt,0,wxEXPAND);
 	right->Add(3,5,0);
 	txt = new wxStaticText(d,wxID_ANY,VERSION_AUTHORS,
 		wxDefaultPosition,wxSize(-1,90));
 	font = wxFont(10,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
 	txt->SetFont(font);
-	right->Add(txt,0,wxEXPAND | wxALIGN_RIGHT);
+	right->Add(txt,0,wxEXPAND);
 	wxHyperlinkCtrl* hyp = new wxHyperlinkCtrl(d,wxID_ANY,"Contact Info",
 		VERSION_CONTACT,
 		wxDefaultPosition,wxSize(-1,-1));

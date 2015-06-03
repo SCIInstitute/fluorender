@@ -1530,14 +1530,26 @@ namespace FLIVR
 	//calculation
 	void VolumeRenderer::calculate(int type, FLIVR::VolumeRenderer *vr_a, FLIVR::VolumeRenderer *vr_b)
 	{
-		vector<TextureBrick*> *bricks = tex_->get_bricks();
+		//sync sorting
+		Ray view_ray(Point(0.802,0.267,0.534), Vector(0.802,0.267,0.534));
+		tex_->set_sort_bricks();
+		vector<TextureBrick*> *bricks = tex_->get_sorted_bricks(view_ray);
 		if (!bricks || bricks->size() == 0)
 			return;
-		
 		vector<TextureBrick*> *bricks_a = 0;
 		vector<TextureBrick*> *bricks_b = 0;
-		if (vr_a) bricks_a = vr_a->tex_->get_bricks();
-		if (vr_b) bricks_b = vr_b->tex_->get_bricks();
+
+		bricks_a = vr_a->tex_->get_bricks();
+		if (vr_a)
+		{
+			vr_a->tex_->set_sort_bricks();
+			bricks_a = vr_a->tex_->get_sorted_bricks(view_ray);
+		}
+		if (vr_b)
+		{
+			vr_b->tex_->set_sort_bricks();
+			bricks_b = vr_b->tex_->get_sorted_bricks(view_ray);
+		}
 
 		glActiveTexture(GL_TEXTURE0);
 		//mask frame buffer object
@@ -1599,7 +1611,6 @@ namespace FLIVR
 				if (bricks_b)
 					vr_b->load_brick_mask(bricks_b, i, GL_NEAREST, false, 4);
 			}
-
 			//draw each slice
 			for (int z=0; z<b->nz(); z++)
 			{
