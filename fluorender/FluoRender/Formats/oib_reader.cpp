@@ -695,8 +695,9 @@ Nrrd *OIBReader::Convert(int t, int c, bool get_max)
 	   //open
 	   if (pStg.open()) {
 		  //allocate memory for nrrd
-		  unsigned short *val = new (std::nothrow) unsigned short[
-			  m_x_size*m_y_size*m_slice_num];
+		  unsigned long long mem_size = (unsigned long long)m_x_size*
+			  (unsigned long long)m_y_size*(unsigned long long)m_slice_num;
+		  unsigned short *val = new (std::nothrow) unsigned short[mem_size];
 		  //enumerate
 		  std::list<std::string> entries = 
 			  pStg.entries();

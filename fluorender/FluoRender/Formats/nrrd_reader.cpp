@@ -224,6 +224,7 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
    nio = nrrdIoStateNix(nio);
    if (output->dim != 3)
    {
+      delete []output->data;
       nrrdNix(output);
       return 0;
    }
@@ -251,7 +252,7 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 
    if (nrrdLoad(output, str.c_str(), NULL))
    {
-      //delete []output->data;
+      delete []output->data;
       nrrdNix(output);
       return 0;
    }
@@ -304,7 +305,7 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
    }
    else
    {
-      //delete []output->data;
+      delete []output->data;
       nrrdNix(output);
       return 0;
    }

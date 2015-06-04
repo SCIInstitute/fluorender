@@ -74,7 +74,7 @@ namespace FLIVR
 		{
 			if (data_[i])
 			{
-				//delete [] data_[i]->data;
+				delete [] data_[i]->data;
 				nrrdNix(data_[i]);
 			}
 		}
@@ -475,7 +475,7 @@ namespace FLIVR
 		{
 			if (data_[index] && data)
 			{
-				//delete [] data_[index]->data;
+				delete [] data_[index]->data;
 				nrrdNix(data_[index]);
 			}
 

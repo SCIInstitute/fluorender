@@ -460,7 +460,9 @@ void VolumeData::AddEmptyData(int bits,
 	Nrrd *nv = nrrdNew();
 	if (bits == 8)
 	{
-		uint8 *val8 = new (std::nothrow) uint8[nx*ny*nz];
+		unsigned long long mem_size = (unsigned long long)nx*
+			(unsigned long long)ny*(unsigned long long)nz;
+		uint8 *val8 = new (std::nothrow) uint8[mem_size];
 		if (!val8)
 		{
 			wxMessageBox("Not enough memory. Please save project and restart.");
@@ -471,7 +473,9 @@ void VolumeData::AddEmptyData(int bits,
 	}
 	else if (bits == 16)
 	{
-		uint16 *val16 = new (std::nothrow) uint16[nx*ny*nz];
+		unsigned long long mem_size = (unsigned long long)nx*
+			(unsigned long long)ny*(unsigned long long)nz;
+		uint16 *val16 = new (std::nothrow) uint16[mem_size];
 		if (!val16)
 		{
 			wxMessageBox("Not enough memory. Please save project and restart.");
@@ -555,11 +559,9 @@ void VolumeData::AddEmptyMask()
 	{
 		//add the nrrd data for mask
 		Nrrd *nrrd_mask = nrrdNew();
-		long long mem_size = (long long)m_res_x*
-			(long long)m_res_y*
-			(long long)m_res_z;
-		//uint8 *val8 = new (std::nothrow) uint8[mem_size];
-		uint8 *val8 = (uint8*)malloc(mem_size*sizeof(uint8));
+		unsigned long long mem_size = (unsigned long long)m_res_x*
+			(unsigned long long)m_res_y*(unsigned long long)m_res_z;
+		uint8 *val8 = new (std::nothrow) uint8[mem_size];
 		if (!val8)
 		{
 			wxMessageBox("Not enough memory. Please save project and restart.");
@@ -650,7 +652,9 @@ void VolumeData::AddEmptyLabel(int mode)
 	{
 		//add the nrrd data for the labeling mask
 		Nrrd *nrrd_label = nrrdNew();
-		unsigned int *val32 = new (std::nothrow) unsigned int[m_res_x*m_res_y*m_res_z];
+		unsigned long long mem_size = (unsigned long long)m_res_x*
+			(unsigned long long)m_res_y*(unsigned long long)m_res_z;
+		unsigned int *val32 = new (std::nothrow) unsigned int[mem_size];
 		if (!val32)
 		{
 			wxMessageBox("Not enough memory. Please save project and restart.");
@@ -871,7 +875,9 @@ void VolumeData::Save(wxString &filename, int mode, bool bake, bool compress)
 				Nrrd* baked_data = nrrdNew();
 				if (bits == 8)
 				{
-					uint8 *val8 = new (std::nothrow) uint8[nx*ny*nz];
+					unsigned long long mem_size = (unsigned long long)nx*
+						(unsigned long long)ny*(unsigned long long)nz;
+					uint8 *val8 = new (std::nothrow) uint8[mem_size];
 					if (!val8)
 					{
 						wxMessageBox("Not enough memory. Please save project and restart.");
@@ -893,7 +899,9 @@ void VolumeData::Save(wxString &filename, int mode, bool bake, bool compress)
 				}
 				else if (bits == 16)
 				{
-					uint16 *val16 = new (std::nothrow) uint16[nx*ny*nz];
+					unsigned long long mem_size = (unsigned long long)nx*
+						(unsigned long long)ny*(unsigned long long)nz;
+					uint16 *val16 = new (std::nothrow) uint16[mem_size];
 					if (!val16)
 					{
 						wxMessageBox("Not enough memory. Please save project and restart.");
@@ -924,6 +932,7 @@ void VolumeData::Save(wxString &filename, int mode, bool bake, bool compress)
 				writer->Save(filename.ToStdWstring(), mode);
 
 				//free memory
+				delete []baked_data->data;
 				nrrdNix(baked_data);
 
 				prg_diag->Update(100);
