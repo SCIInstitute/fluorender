@@ -252,7 +252,10 @@ public:
 	double GetRightThresh();
 	void SetColor(Color &color, bool update_hsv=true);
 	Color GetColor();
+	void SetMaskColor(Color &color, bool set=true);
 	Color GetMaskColor();
+	bool GetMaskColorSet();
+	void ResetMaskColorSet();
 	Color SetLuminance(double dVal);
 	double GetLuminance();
 	void SetAlpha(double alpha);

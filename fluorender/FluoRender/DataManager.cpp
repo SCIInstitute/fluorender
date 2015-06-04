@@ -1306,12 +1306,32 @@ Color VolumeData::GetColor()
 	return m_color;
 }
 
+void VolumeData::SetMaskColor(Color &color, bool set)
+{
+	if (m_vr)
+		m_vr->set_mask_color(color, set);
+}
+
 Color VolumeData::GetMaskColor()
 {
 	Color result;
 	if (m_vr)
 		result = m_vr->get_mask_color();
 	return result;
+}
+
+bool VolumeData::GetMaskColorSet()
+{
+	if (m_vr)
+		return m_vr->get_mask_color_set();
+	else
+		return false;
+}
+
+void VolumeData::ResetMaskColorSet()
+{
+	if (m_vr)
+		m_vr->reset_mask_color_set();
 }
 
 Color VolumeData::SetLuminance(double dVal)

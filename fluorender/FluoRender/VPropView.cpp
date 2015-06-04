@@ -75,9 +75,11 @@ EVT_TEXT(ID_ColormapHighValueText, VPropView::OnColormapHighValueText)
 EVT_COMMAND_SCROLL(ID_ColormapLowValueSldr, VPropView::OnColormapLowValueChange)
 EVT_TEXT(ID_ColormapLowValueText, VPropView::OnColormapLowValueText)
 //6
-//color
+//color 1
 EVT_TEXT(ID_ColorText, VPropView::OnColorTextChange)
 EVT_COLOURPICKER_CHANGED(ID_ColorBtn, VPropView::OnColorBtn)
+EVT_TEXT(ID_Color2Text, VPropView::OnColor2TextChange)
+EVT_COLOURPICKER_CHANGED(ID_Color2Btn, VPropView::OnColor2Btn)
 //spacings
 EVT_TEXT(ID_SpaceXText, VPropView::OnSpaceText)
 EVT_TEXT(ID_SpaceYText, VPropView::OnSpaceText)
@@ -142,6 +144,7 @@ VPropView::VPropView(wxWindow* frame,
    wxBoxSizer* sizer_r2 = new wxBoxSizer(wxHORIZONTAL);
    wxBoxSizer* sizer_r3 = new wxBoxSizer(wxHORIZONTAL);
    wxBoxSizer* sizer_r4 = new wxBoxSizer(wxHORIZONTAL);
+   wxBoxSizer* sizer_r5 = new wxBoxSizer(wxHORIZONTAL);
 
    wxStaticText* st = 0;
 
@@ -397,9 +400,9 @@ VPropView::VPropView(wxWindow* frame,
    sizer_r2->Add(3, 5, 0);
    sizer_r2->Add(st, 0, wxALIGN_CENTER);
    sizer_r2->Add(m_space_z_text, 0, wxALIGN_CENTER);
-   //color
-   st = new wxStaticText(this, 0, "Color:",
-         wxDefaultPosition, wxSize(-1, -1), wxALIGN_CENTER);
+   //color 1
+   st = new wxStaticText(this, 0, "Pri Color:",
+         wxDefaultPosition, wxSize(60, -1), wxALIGN_CENTER);
    m_color_text = new wxTextCtrl(this, ID_ColorText, "255 , 255 , 255",
          wxDefaultPosition, wxSize(85, 20));
    m_color_text->Connect(ID_ColorText, wxEVT_LEFT_DCLICK,
@@ -410,16 +413,29 @@ VPropView::VPropView(wxWindow* frame,
    sizer_r3->Add(5, 5, 0);
    sizer_r3->Add(m_color_text, 0, wxALIGN_CENTER, 0);
    sizer_r3->Add(m_color_btn, 1, wxALIGN_CENTER, 0);
+   //color 2
+   st = new wxStaticText(this, 0, "Sec Color:",
+         wxDefaultPosition, wxSize(60, -1), wxALIGN_CENTER);
+   m_color2_text = new wxTextCtrl(this, ID_Color2Text, "255 , 255 , 255",
+         wxDefaultPosition, wxSize(85, 20));
+   m_color2_text->Connect(ID_Color2Text, wxEVT_LEFT_DCLICK,
+         wxCommandEventHandler(VPropView::OnColor2TextFocus),
+         NULL, this);
+   m_color2_btn = new wxColourPickerCtrl(this, ID_Color2Btn, *wxRED);
+   sizer_r4->Add(st, 0, wxALIGN_CENTER, 0); 
+   sizer_r4->Add(5, 5, 0);
+   sizer_r4->Add(m_color2_text, 0, wxALIGN_CENTER, 0);
+   sizer_r4->Add(m_color2_btn, 1, wxALIGN_CENTER, 0);
    // FluoRender Image (rows 4-5)
-   wxToolBar * tmp= new wxToolBar(this, ID_FluoRender);
-   tmp->AddTool(ID_FluoRender, "FluoRender (c) 2014",
-         wxGetBitmapFromMemory(logo_small),
-		 wxGetBitmapFromMemory(logo_small),
-		 wxITEM_NORMAL,
-		 "FluoRender (c) 2014",
-		 "FluoRender (c) 2014");
-   sizer_r4->Add(tmp, 0, wxALIGN_CENTER);
-   tmp->Realize();
+   //wxToolBar * tmp= new wxToolBar(this, ID_FluoRender);
+   //tmp->AddTool(ID_FluoRender, "FluoRender (c) 2014",
+   //      wxGetBitmapFromMemory(logo_small),
+		 //wxGetBitmapFromMemory(logo_small),
+		 //wxITEM_NORMAL,
+		 //"FluoRender (c) 2014",
+		 //"FluoRender (c) 2014");
+   //sizer_r5->Add(tmp, 0, wxALIGN_CENTER);
+   //tmp->Realize();
 
    //ADD COLUMNS//////////////////////////////////////
    //left
@@ -438,7 +454,8 @@ VPropView::VPropView(wxWindow* frame,
    sizer_right->Add(sizer_r1, 0, wxEXPAND);
    sizer_right->Add(sizer_r2, 0, wxEXPAND);
    sizer_right->Add(sizer_r3, 0, wxEXPAND);
-   sizer_right->Add(sizer_r4, 0, wxALIGN_CENTER);
+   sizer_right->Add(sizer_r4, 0, wxEXPAND);
+   sizer_right->Add(sizer_r5, 0, wxEXPAND);
    //ADD ALL TOGETHER
    sizer_all->Add(sizer_left, 1, wxEXPAND);
    sizer_all->Add(sizer_middle, 1, wxEXPAND);
@@ -528,6 +545,13 @@ void VPropView::GetSettings()
    m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
             wxc.Red(), wxc.Green(), wxc.Blue()));
     m_color_btn->SetColour(wxc);
+	c = m_vd->GetMaskColor();
+	wxc = wxColor((unsigned char)(c.r()*255+0.5),
+         (unsigned char)(c.g()*255+0.5),
+         (unsigned char)(c.b()*255+0.5));
+   m_color2_text->ChangeValue(wxString::Format("%d , %d , %d",
+            wxc.Red(), wxc.Green(), wxc.Blue()));
+    m_color2_btn->SetColour(wxc);
    //alpha
    if ((vald_i = (wxIntegerValidator<unsigned int>*)m_alpha_text->GetValidator()))
       vald_i->SetRange(0, int(m_max_val));
@@ -1328,166 +1352,214 @@ void VPropView::OnColormapLowValueText(wxCommandEvent &event)
 //6
 void VPropView::OnColorChange(wxColor c)
 {
-   Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
-   if (m_vd)
-   {
-      if (m_lumi_change)
-      {
-         m_vd->SetColor(color, true);
-         m_lumi_change = false;
-      }
-      else
-         m_vd->SetColor(color);
+	Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
+	if (m_vd)
+	{
+		if (m_lumi_change)
+		{
+			m_vd->SetColor(color, true);
+			m_lumi_change = false;
+		}
+		else
+			m_vd->SetColor(color);
 
-      double lum = m_vd->GetLuminance();
-      int ilum = int(lum*m_max_val+0.5);
-      m_luminance_sldr->SetValue(ilum);
-      wxString str = wxString::Format("%d", ilum);
-      m_luminance_text->ChangeValue(str);
+		double lum = m_vd->GetLuminance();
+		int ilum = int(lum*m_max_val+0.5);
+		m_luminance_sldr->SetValue(ilum);
+		wxString str = wxString::Format("%d", ilum);
+		m_luminance_text->ChangeValue(str);
 
-      VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (!m_vd->GetMaskColorSet())
+		{
+			color = m_vd->GetMaskColor();
+			wxColor wxc((unsigned char)(color.r()*255),
+				(unsigned char)(color.g()*255),
+				(unsigned char)(color.b()*255));
+			m_color2_text->ChangeValue(wxString::Format("%d , %d , %d",
+				wxc.Red(), wxc.Green(), wxc.Blue()));
+			m_color2_btn->SetColour(wxc);
+		}
 
-      if (vr_frame)
-      {
-         AdjustView *adjust_view = vr_frame->GetAdjustView();
-         if (adjust_view)
-            adjust_view->UpdateSync();
-      }
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 
-      RefreshVRenderViews(true);
-   }
+		if (vr_frame)
+		{
+			AdjustView *adjust_view = vr_frame->GetAdjustView();
+			if (adjust_view)
+				adjust_view->UpdateSync();
+		}
+
+		RefreshVRenderViews(true);
+	}
+}
+
+void VPropView::OnColor2Change(wxColor c)
+{
+	Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
+	if (m_vd)
+	{
+		m_vd->SetMaskColor(color);
+		RefreshVRenderViews(true);
+	}
+}
+
+int VPropView::GetColorString(wxString& str, wxColor& wxc)
+{
+	int filled = 3;
+	if (str == "a" || str == "A")
+		wxc = wxColor(0, 127, 255);
+	else if (str == "b" || str == "B")
+		wxc = wxColor(0, 0, 255);
+	else if (str == "c" || str == "C")
+		wxc = wxColor(0, 255, 255);
+	else if (str == "d" || str == "D")
+		wxc = wxColor(193, 154, 107);
+	else if (str == "e" || str == "E")
+		wxc = wxColor(80, 200, 120);
+	else if (str == "f" || str == "F")
+		wxc = wxColor(226, 88, 34);
+	else if (str == "g" || str == "G")
+		wxc = wxColor(0, 255, 0);
+	else if (str == "h" || str == "H")
+		wxc = wxColor(70, 255, 0);
+	else if (str == "i" || str == "I")
+		wxc = wxColor(75, 0, 130);
+	else if (str == "j" || str == "J")
+		wxc = wxColor(0, 168, 107);
+	else if (str == "k" || str == "K")
+		wxc = wxColor(0, 0, 0);
+	else if (str == "l" || str == "L")
+		wxc = wxColor(181, 126, 220);
+	else if (str == "m" || str == "M")
+		wxc = wxColor(255, 0, 255);
+	else if (str == "n" || str == "N")
+		wxc = wxColor(0, 0, 128);
+	else if (str == "o" || str == "O")
+		wxc = wxColor(0, 119, 190);
+	else if (str == "p" || str == "P")
+		wxc = wxColor(254, 40, 162);
+	else if (str == "q" || str == "Q")
+		wxc = wxColor(232, 204, 215);
+	else if (str == "r" || str == "R")
+		wxc = wxColor(255, 0, 0);
+	else if (str == "s" || str == "S")
+		wxc = wxColor(236, 213, 64);
+	else if (str == "t" || str == "T")
+		wxc = wxColor(255, 99, 71);
+	else if (str == "u" || str == "U")
+		wxc = wxColor(211, 0, 63);
+	else if (str == "v" || str == "V")
+		wxc = wxColor(143, 0, 255);
+	else if (str == "w" || str == "W")
+		wxc = wxColor(255, 255, 255);
+	else if (str == "x" || str == "X")
+		wxc = wxColor(115, 134, 120);
+	else if (str == "y" || str == "Y")
+		wxc = wxColor(255, 255, 0);
+	else if (str == "z" || str == "Z")
+		wxc = wxColor(57, 167, 142);
+	else
+	{
+		int index = 0;//1-red; 2-green; 3-blue;
+		int state = 0;//0-idle; 1-reading digit; 3-finished
+		wxString sColor;
+		long r = 255;
+		long g = 255;
+		long b = 255;
+		for (unsigned int i=0; i<str.length(); i++)
+		{
+			wxChar c = str[i];
+			if (isdigit(c) || c=='.')
+			{
+				if (state == 0 || state == 3)
+				{
+					sColor += c;
+					index++;
+					state = 1;
+				}
+				else if (state == 1)
+				{
+					sColor += c;
+				}
+
+				if (i == str.length()-1)  //last one
+				{
+					switch (index)
+					{
+					case 1:
+						sColor.ToLong(&r);
+						filled = 1;
+						break;
+					case 2:
+						sColor.ToLong(&g);
+						filled = 2;
+						break;
+					case 3:
+						sColor.ToLong(&b);
+						filled = 3;
+						break;
+					}
+				}
+			}
+			else
+			{
+				if (state == 1)
+				{
+					switch (index)
+					{
+					case 1:
+						sColor.ToLong(&r);
+						filled = 1;
+						break;
+					case 2:
+						sColor.ToLong(&g);
+						filled = 2;
+						break;
+					case 3:
+						sColor.ToLong(&b);
+						filled = 3;
+						break;
+					}
+					state = 3;
+					sColor = "";
+				}
+			}
+		}
+		wxc = wxColor(Clamp(r,0,255), Clamp(g,0,255), Clamp(b,0,255));
+	}
+	return filled;
 }
 
 void VPropView::OnColorTextChange(wxCommandEvent& event)
 {
-   wxColor wxc;
-   int filled = 0;
-   wxString str = m_color_text->GetValue();
-   if (str == "r" || str == "R")
-   {
-      wxc = wxColor(255, 0, 0);
-      filled = 3;
-   }
-   else if (str == "g" || str == "G")
-   {
-      wxc = wxColor(0, 255, 0);
-      filled = 3;
-   }
-   else if (str == "b" || str == "B")
-   {
-      wxc = wxColor(0, 0, 255);
-      filled = 3;
-   }
-   else if (str == "w" || str == "W")
-   {
-      wxc = wxColor(255, 255, 255);
-      filled = 3;
-   }
-   else if (str == "c" || str == "C")
-   {
-      wxc = wxColor(0, 255, 255);
-      filled = 3;
-   }
-   else if (str == "m" || str == "M")
-   {
-      wxc = wxColor(255, 0, 255);
-      filled = 3;
-   }
-   else if (str == "y" || str == "Y")
-   {
-      wxc = wxColor(255, 255, 0);
-      filled = 3;
-   }
-   else if (str == "k" || str == "K")
-   {
-      wxc = wxColor(0, 0, 0);
-      filled = 3;
-   }
-   else if (str == "p" || str == "P")
-   {
-      wxc = wxColor(255, 0, 255);
-      filled = 3;
-   }
-   else
-   {
-      int index = 0;//1-red; 2-green; 3-blue;
-      int state = 0;//0-idle; 1-reading digit; 3-finished
-      wxString sColor;
-      long r = 255;
-      long g = 255;
-      long b = 255;
-      for (unsigned int i=0; i<str.length(); i++)
-      {
-         wxChar c = str[i];
-         if (isdigit(c) || c=='.')
-         {
-            if (state == 0 || state == 3)
-            {
-               sColor += c;
-               index++;
-               state = 1;
-            }
-            else if (state == 1)
-            {
-               sColor += c;
-            }
+	wxString str = m_color_text->GetValue();
+	wxColor wxc;
+	if (GetColorString(str, wxc) == 3)
+	{
+		wxString new_str = wxString::Format("%d , %d , %d",
+			wxc.Red(), wxc.Green(), wxc.Blue());
+		if (str != new_str)
+			m_color_text->ChangeValue(new_str);
+		m_color_btn->SetColour(wxc);
 
-            if (i == str.length()-1)  //last one
-            {
-               switch (index)
-               {
-               case 1:
-                  sColor.ToLong(&r);
-                  filled = 1;
-                  break;
-               case 2:
-                  sColor.ToLong(&g);
-                  filled = 2;
-                  break;
-               case 3:
-                  sColor.ToLong(&b);
-                  filled = 3;
-                  break;
-               }
-            }
-         }
-         else
-         {
-            if (state == 1)
-            {
-               switch (index)
-               {
-               case 1:
-                  sColor.ToLong(&r);
-                  filled = 1;
-                  break;
-               case 2:
-                  sColor.ToLong(&g);
-                  filled = 2;
-                  break;
-               case 3:
-                  sColor.ToLong(&b);
-                  filled = 3;
-                  break;
-               }
-               state = 3;
-               sColor = "";
-            }
-         }
-      }
-      wxc = wxColor(Clamp(r,0,255), Clamp(g,0,255), Clamp(b,0,255));
-   }
+		OnColorChange(wxc);
+	}
+}
 
-   if (filled == 3)
-   {
-      wxString new_str = wxString::Format("%d , %d , %d",
-            wxc.Red(), wxc.Green(), wxc.Blue());
-      if (str != new_str)
-          m_color_text->ChangeValue(new_str);
-       m_color_btn->SetColour(wxc);
+void VPropView::OnColor2TextChange(wxCommandEvent& event)
+{
+	wxString str = m_color2_text->GetValue();
+	wxColor wxc;
+	if (GetColorString(str, wxc) == 3)
+	{
+		wxString new_str = wxString::Format("%d , %d , %d",
+			wxc.Red(), wxc.Green(), wxc.Blue());
+		if (str != new_str)
+			m_color2_text->ChangeValue(new_str);
+		m_color2_btn->SetColour(wxc);
 
-      OnColorChange(wxc);
-   }
+		OnColor2Change(wxc);
+	}
 }
 
 void VPropView::OnColorBtn(wxColourPickerEvent& event)
@@ -1500,9 +1572,24 @@ void VPropView::OnColorBtn(wxColourPickerEvent& event)
       OnColorChange(wxc);
 }
 
+void VPropView::OnColor2Btn(wxColourPickerEvent& event)
+{
+   wxColor wxc = event.GetColour();
+
+      m_color2_text->ChangeValue(wxString::Format("%d , %d , %d",
+               wxc.Red(), wxc.Green(), wxc.Blue()));
+
+      OnColor2Change(wxc);
+}
+
 void VPropView::OnColorTextFocus(wxCommandEvent& event)
 {
    m_color_text->SetSelection(0, -1);
+}
+
+void VPropView::OnColor2TextFocus(wxCommandEvent& event)
+{
+   m_color2_text->SetSelection(0, -1);
 }
 
 void VPropView::OnInvCheck(wxCommandEvent &event)
@@ -2060,19 +2147,6 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
    ival = int(dval*10.0+0.5);
    m_sample_sldr->SetValue(ival);
    m_vd->SetSampleRate(dval);
-   ////x spacing
-   //dval = mgr->m_vol_xsp;
-   //str = wxString::Format("%.3f", dval);
-   //m_space_x_text->ChangeValue(str);
-   ////y spacing
-   //dval = mgr->m_vol_ysp;
-   //str = wxString::Format("%.3f", dval);
-   //m_space_y_text->ChangeValue(str);
-   ////z spacing
-   //dval = mgr->m_vol_zsp;
-   //str = wxString::Format("%.3f", dval);
-   //m_space_z_text->ChangeValue(str);
-   //SetSpacings();
    //luminance
    dval = mgr->m_vol_lum;
    ival = int(dval*m_max_val+0.5);
@@ -2083,13 +2157,21 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
    m_vd->GetHSV(h, s, v);
    HSVColor hsv(h, s, dval);
    Color color(hsv);
+   m_vd->ResetMaskColorSet();
    m_vd->SetColor(color);
    wxColor wxc((unsigned char)(color.r()*255),
          (unsigned char)(color.g()*255),
          (unsigned char)(color.b()*255));
    m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
-                                              wxc.Red(), wxc.Green(), wxc.Blue()));
+         wxc.Red(), wxc.Green(), wxc.Blue()));
     m_color_btn->SetColour(wxc);
+	color = m_vd->GetMaskColor();
+	wxc = wxColor((unsigned char)(color.r()*255),
+         (unsigned char)(color.g()*255),
+         (unsigned char)(color.b()*255));
+   m_color2_text->ChangeValue(wxString::Format("%d , %d , %d",
+         wxc.Red(), wxc.Green(), wxc.Blue()));
+    m_color2_btn->SetColour(wxc);
    //colormap low value
    dval = mgr->m_vol_lcm;
    ival = int(dval*m_max_val+0.5);

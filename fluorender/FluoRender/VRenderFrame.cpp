@@ -2191,6 +2191,10 @@ void VRenderFrame::SaveProject(wxString& filename)
 			vd->GetHSV(hue, sat, val);
 			str = wxString::Format("%f %f %f", hue, sat, val);
 			fconfig.Write("hsv", str);
+			color = vd->GetMaskColor();
+			str = wxString::Format("%f %f %f", color.r(), color.g(), color.b());
+			fconfig.Write("mask_color", str);
+			fconfig.Write("mask_color_set", vd->GetMaskColorSet());
 			fconfig.Write("enable_alpha", vd->GetEnableAlpha());
 			fconfig.Write("alpha", vd->GetAlpha());
 			double amb, diff, spec, shine;
@@ -2919,6 +2923,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 
 						//transfer function
 						double dval;
+						bool bval;
 						if (fconfig.Read("3dgamma", &dval))
 							vd->Set3DGamma(dval);
 						if (fconfig.Read("boundary", &dval))
@@ -2943,7 +2948,17 @@ void VRenderFrame::OpenProject(wxString& filename)
 							if (SSCANF(str.c_str(), "%f%f%f", &hue, &sat, &val))
 								vd->SetHSV(hue, sat, val);
 						}
-						bool bval;
+						if (fconfig.Read("mask_color", &str))
+						{
+							float red, green, blue;
+							if (SSCANF(str.c_str(), "%f%f%f", &red, &green, &blue)){
+								FLIVR::Color col(red,green,blue);
+								if (fconfig.Read("mask_color_set", &bval))
+									vd->SetMaskColor(col, bval);
+								else
+									vd->SetMaskColor(col);
+							}
+						}
 						if (fconfig.Read("enable_alpha", &bval))
 							vd->SetEnableAlpha(bval);
 						if (fconfig.Read("alpha", &dval))

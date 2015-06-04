@@ -71,6 +71,7 @@ namespace FLIVR
 		hi_thresh_(1.0),
 		color_(Color(1.0, 1.0, 1.0)),
 		mask_color_(Color(0.0, 1.0, 0.0)),
+		mask_color_set_(false),
 		mask_thresh_(0.0),
 		alpha_(1.0),
 		//shading
@@ -127,6 +128,7 @@ namespace FLIVR
 		hi_thresh_(copy.hi_thresh_),
 		color_(copy.color_),
 		mask_color_(copy.mask_color_),
+		mask_color_set_(copy.mask_color_set_),
 		mask_thresh_(0.0),
 		alpha_(copy.alpha_),
 		//shading
@@ -261,24 +263,33 @@ namespace FLIVR
 	{
 		color_ = color;
 
-		//generate opposite color for mask
-		HSVColor hsv_color(color_);
-		double h, s, v;
-		if (hsv_color.sat() < 0.2)
-			mask_color_ = Color(0.0, 1.0, 0.0);	//if low saturation, set to green
-		else
+		if (!mask_color_set_)
 		{
-			double h0 = hsv_color.hue();
-			h = h0<30.0?h0-180.0:h0<90.0?h0+120.0:h0<210.0?h0-120.0:h0-180.0;
-			s = 1.0;
-			v = 1.0;
-			mask_color_ = Color(HSVColor(h<0.0?h+360.0:h, s, v));
+			//generate opposite color for mask
+			HSVColor hsv_color(color_);
+			double h, s, v;
+			if (hsv_color.sat() < 0.2)
+				mask_color_ = Color(0.0, 1.0, 0.0);	//if low saturation, set to green
+			else
+			{
+				double h0 = hsv_color.hue();
+				h = h0<30.0?h0-180.0:h0<90.0?h0+120.0:h0<210.0?h0-120.0:h0-180.0;
+				s = 1.0;
+				v = 1.0;
+				mask_color_ = Color(HSVColor(h<0.0?h+360.0:h, s, v));
+			}
 		}
 	}
 
 	Color VolumeRenderer::get_color()
 	{
 		return color_;
+	}
+
+	void VolumeRenderer::set_mask_color(Color color, bool set)
+	{
+		mask_color_ = color;
+		mask_color_set_ = set;
 	}
 
 	Color VolumeRenderer::get_mask_color()
