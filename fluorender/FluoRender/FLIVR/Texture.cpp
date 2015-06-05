@@ -33,28 +33,28 @@
 #include <algorithm>
 #include <inttypes.h>
 
-
 using namespace std;
 
 namespace FLIVR
 {
-	Texture::Texture()
-    :
-        sort_bricks_(true),
-        nx_(0),
-		ny_(0),
-		nz_(0),
-        nc_(0),
-        nmask_(-1),
-        nlabel_(-1),
-		vmin_(0.0),
-		vmax_(0.0),
-		gmin_(0.0),
-		gmax_(0.0),
-		use_priority_(false),
-		n_p0_(0)
+	size_t Texture::mask_undo_num_ = 0;
+	Texture::Texture():
+	sort_bricks_(true),
+	nx_(0),
+	ny_(0),
+	nz_(0),
+	nc_(0),
+	nmask_(-1),
+	nlabel_(-1),
+	vmin_(0.0),
+	vmax_(0.0),
+	gmin_(0.0),
+	gmax_(0.0),
+	use_priority_(false),
+	n_p0_(0),
+	mask_undo_pointer_(-1)
 	{
-		for (int i = 0; i < TEXTURE_MAX_COMPONENTS; i++)
+		for (size_t i = 0; i < TEXTURE_MAX_COMPONENTS; i++)
 		{
 			nb_[i] = 0;
 			data_[i] = 0;
@@ -64,20 +64,30 @@ namespace FLIVR
 
 	Texture::~Texture()
 	{
-		for (int i=0; i<(int)bricks_.size(); i++)
+		for (size_t i=0; i<bricks_.size(); i++)
 		{
 			if (bricks_[i])
 				delete bricks_[i];
 		}
 
+		//mask data now managed by the undos
+		for (size_t i=0; i<mask_undos_.size(); ++i)
+		{
+			if (mask_undos_[i])
+				delete []mask_undos_[i];
+		}
+
+		//release other data
 		for (int i=0; i<TEXTURE_MAX_COMPONENTS; i++)
 		{
 			if (data_[i])
 			{
-				delete [] data_[i]->data;
+				if (ntype_[i]!=TYPE_MASK)
+					delete [] data_[i]->data;
 				nrrdNix(data_[i]);
 			}
 		}
+
 	}
 
 	vector<TextureBrick*>* Texture::get_sorted_bricks(
@@ -475,16 +485,113 @@ namespace FLIVR
 		{
 			if (data_[index] && data)
 			{
-				delete [] data_[index]->data;
+				if (index != nmask_)
+					delete [] data_[index]->data;
 				nrrdNix(data_[index]);
 			}
 
 			data_[index] = data;
 			for (int i=0; i<(int)bricks_.size(); i++)
-			{
 				bricks_[i]->set_nrrd(data, index);
-			}
+
+			//add to undo list
+			if (index==nmask_)
+				set_mask(data->data);
 		}
+	}
+
+	//mask undo management
+	void Texture::trim_mask_undos_head()
+	{
+		//if (
+	}
+
+	void Texture::trim_mask_undos_tail()
+	{
+	}
+
+	void Texture::set_mask(void* mask_data)
+	{
+		if (nmask_<=-1 || mask_undo_num_==0)
+			return;
+
+		if (mask_undo_pointer_>-1 &&
+			mask_undo_pointer_<mask_undos_.size()-1)
+		{
+			mask_undos_.insert(
+				mask_undos_.begin()+mask_undo_pointer_+1,
+				mask_data);
+			mask_undo_pointer_++;
+		}
+		else
+		{
+			mask_undos_.push_back(mask_data);
+			mask_undo_pointer_ = mask_undos_.size()-1;
+		}
+	}
+
+	void Texture::push_mask()
+	{
+		if (nmask_<=-1 || mask_undo_num_==0)
+			return;
+		if (mask_undo_pointer_<0 ||
+			mask_undo_pointer_>mask_undos_.size()-1)
+			return;
+
+		//duplicate at pointer position
+		unsigned long long mem_size = (unsigned long long)nx_*
+			(unsigned long long)ny_*(unsigned long long)nz_;
+		void* new_data = (void*)new (std::nothrow) unsigned char[mem_size];
+		memcpy(new_data, mask_undos_[mask_undo_pointer_], size_t(mem_size));
+		if (mask_undo_pointer_<mask_undos_.size()-1)
+			mask_undos_.insert(
+				mask_undos_.begin()+mask_undo_pointer_+1,
+				new_data);
+		else
+			mask_undos_.push_back(new_data);
+		mask_undo_pointer_++;
+
+		//update mask data
+		nrrdWrap_va(data_[nmask_],
+			mask_undos_[mask_undo_pointer_],
+			nrrdTypeUChar, 3, (size_t)nx_,
+			(size_t)ny_, (size_t)nz_);
+	}
+
+	void Texture:: mask_undos_backward()
+	{
+		if (nmask_<=-1 || mask_undo_num_==0)
+			return;
+		if (mask_undo_pointer_<=0 ||
+			mask_undo_pointer_>mask_undos_.size()-1)
+			return;
+
+		//move pointer
+		mask_undo_pointer_--;
+
+		//update mask data
+		nrrdWrap_va(data_[nmask_],
+			mask_undos_[mask_undo_pointer_],
+			nrrdTypeUChar, 3, (size_t)nx_,
+			(size_t)ny_, (size_t)nz_);
+	}
+
+	void Texture::mask_undos_forward()
+	{
+		if (nmask_<=-1 || mask_undo_num_==0)
+			return;
+		if (mask_undo_pointer_<0 ||
+			mask_undo_pointer_>mask_undos_.size()-2)
+			return;
+
+		//move pointer
+		mask_undo_pointer_++;
+
+		//update mask data
+		nrrdWrap_va(data_[nmask_],
+			mask_undos_[mask_undo_pointer_],
+			nrrdTypeUChar, 3, (size_t)nx_,
+			(size_t)ny_, (size_t)nz_);
 	}
 
 } // namespace FLIVR

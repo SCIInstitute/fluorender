@@ -1116,7 +1116,6 @@ namespace FLIVR
 		if (!bricks || bricks->size() == 0)
 			return;
 
-		//glActiveTexture(GL_TEXTURE0);
 		//mask frame buffer object
 		if (!glIsFramebuffer(fbo_mask_))
 			glGenFramebuffers(1, &fbo_mask_);
@@ -1328,7 +1327,6 @@ namespace FLIVR
 
 		//enable depth test
 		glEnable(GL_DEPTH_TEST);
-
 	}
 
 	//generate the labeling assuming the mask is already generated

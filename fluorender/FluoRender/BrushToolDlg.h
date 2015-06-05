@@ -51,6 +51,8 @@ public:
 		ID_BrushClear,
 		ID_BrushCreate,
 		ID_BrushSolid,
+		ID_BrushUndo,
+		ID_BrushRedo,
 		//selection strength
 		//falloff
 		ID_BrushSclTranslateSldr,
@@ -242,6 +244,8 @@ private:
 	//event handling
 	//paint tools
 	//brush commands
+	void OnBrushUndo(wxCommandEvent& event);
+	void OnBrushRedo(wxCommandEvent& event);
 	void OnBrushAppend(wxCommandEvent& event);
 	void OnBrushDesel(wxCommandEvent& event);
 	void OnBrushDiffuse(wxCommandEvent& event);

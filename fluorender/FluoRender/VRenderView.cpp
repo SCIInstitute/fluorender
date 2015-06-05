@@ -469,7 +469,11 @@ void VRenderGLView::Init()
 		ShaderProgram::init_shaders_supported();
 		if (vr_frame && vr_frame->GetSettingDlg()) KernelProgram::set_device_id(vr_frame->GetSettingDlg()->GetCLDeviceID());
 		KernelProgram::init_kernels_supported();
-		if (vr_frame) vr_frame->SetTextureRendererSettings();
+		if (vr_frame)
+		{
+			vr_frame->SetTextureRendererSettings();
+			vr_frame->SetTextureUndos();
+		}
 		glViewport(0, 0, (GLint)(GetSize().x), (GLint)(GetSize().y));
 		goTimer->start();
 		glGenBuffers(1, &m_quad_vbo);

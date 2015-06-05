@@ -78,6 +78,9 @@ class SettingDlg : public wxPanel
 		ID_FontSizeCmb,
 		//script
 		ID_RunScriptChk,
+		//paint history depth
+		ID_PaintHistDepthSldr,
+		ID_PaintHistDepthText,
 		//save/close
 		ID_SaveBtn,
 		ID_CloseBtn
@@ -121,6 +124,9 @@ public:
 	//run script
 	bool GetRunScript() {return m_run_script;}
 	void SetRunScript(bool val) {m_run_script = val;}
+	//paint history depth
+	bool GetPaintHistDepth() {return m_paint_hist_depth;}
+	void SetPaintHistDepth(int val) {m_paint_hist_depth = val;}
 	//text font
 	wxString GetFontFile() { return m_font_file; }
 	void SetFontFile(wxString &file) { m_font_file = file; }
@@ -231,6 +237,8 @@ private:
 	int m_gl_profile_mask;
 	//cl device
 	int m_cl_device_id;
+	//paint history depth
+	int m_paint_hist_depth;
 
 private:
 	//save project
@@ -252,7 +260,7 @@ private:
 	wxCheckBox *m_grad_bg_chk;
 	//rotations link
 	
-   wxCheckBox *m_rot_link_chk;
+	wxCheckBox *m_rot_link_chk;
 	//override vox
 	wxCheckBox *m_override_vox_chk;
 	//wavelength to color
@@ -275,6 +283,9 @@ private:
 	wxComboBox *m_font_size_cmb;
 	//script
 	wxCheckBox *m_run_script_chk;
+	//history depth
+	wxSlider *m_paint_hist_depth_sldr;
+	wxTextCtrl *m_paint_hist_depth_text;
 
 	//save
 	wxButton *m_save_btn;
@@ -338,6 +349,9 @@ private:
 	void OnFontSizeChange(wxCommandEvent &event);
 	//script
 	void OnRunScriptChk(wxCommandEvent &event);
+	//paint history depth
+	void OnPaintHistDepthChange(wxScrollEvent &event);
+	void OnPaintHistDepthEdit(wxCommandEvent &event);
 
 	DECLARE_EVENT_TABLE();
 };

@@ -101,8 +101,6 @@ void VolumeSelector::Select(double radius)
 {
 	if (!m_vd)
 		return;
-	//if (!glIsTexture(m_2d_mask))
-	//  return;
 
 	//insert the mask volume into m_vd
 	m_vd->AddEmptyMask();
@@ -142,6 +140,10 @@ void VolumeSelector::Select(double radius)
 	else
 		gm_falloff = 0.0;
 
+	if (Texture::mask_undo_num_>0 &&
+		m_vd->GetTexture())
+		m_vd->GetTexture()->push_mask();
+
 	//there is some unknown problem of clearing the mask
 	if (m_mode == 1)
 	{
@@ -179,6 +181,10 @@ void VolumeSelector::Select(double radius)
 
 	if (m_mode == 6)
 		m_vd->SetUseMaskThreshold(false);
+
+	if (Texture::mask_undo_num_>0 &&
+		m_vd->GetVR())
+		m_vd->GetVR()->return_mask();
 }
 
 //mode: 0-normal; 1-posterized; 2-noraml,copy; 3-poster, copy

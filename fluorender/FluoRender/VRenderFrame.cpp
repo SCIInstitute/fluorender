@@ -4291,6 +4291,12 @@ void VRenderFrame::ShowColocalizationDlg()
 	m_aui_mgr.Update();
 }
 
+void VRenderFrame::SetTextureUndos()
+{
+	if (m_setting_dlg)
+		Texture::mask_undo_num_ = (size_t)(m_setting_dlg->GetPaintHistDepth());
+}
+
 void VRenderFrame::SetTextureRendererSettings()
 {
 	if (!m_setting_dlg)
