@@ -125,7 +125,7 @@ public:
 	bool GetRunScript() {return m_run_script;}
 	void SetRunScript(bool val) {m_run_script = val;}
 	//paint history depth
-	bool GetPaintHistDepth() {return m_paint_hist_depth;}
+	int GetPaintHistDepth() {return m_paint_hist_depth;}
 	void SetPaintHistDepth(int val) {m_paint_hist_depth = val;}
 	//text font
 	wxString GetFontFile() { return m_font_file; }

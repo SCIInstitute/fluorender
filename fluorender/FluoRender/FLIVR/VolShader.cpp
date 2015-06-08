@@ -87,24 +87,26 @@ namespace FLIVR
 	"	FragColor = loc0;\n" \
 	"}\n"
 
-	VolShader::VolShader(bool poly, int channels,
-						bool shading, bool fog,
-						int peel, bool clip,
-						bool hiqual, int mask,
-						int color_mode, bool solid,
-						int vertex_shader)
-		: poly_(poly),
-		channels_(channels),
-		shading_(shading),
-		fog_(fog),
-		peel_(peel),
-		clip_(clip),
-		hiqual_(hiqual),
-		mask_(mask),
-		color_mode_(color_mode),
-        solid_(solid),
-		vertex_type_(vertex_shader),
-        program_(0)
+VolShader::VolShader(
+	bool poly, int channels,
+	bool shading, bool fog,
+	int peel, bool clip,
+	bool hiqual, int mask,
+	int color_mode, int colormap,
+	bool solid, int vertex_shader)
+	: poly_(poly),
+	channels_(channels),
+	shading_(shading),
+	fog_(fog),
+	peel_(peel),
+	clip_(clip),
+	hiqual_(hiqual),
+	mask_(mask),
+	color_mode_(color_mode),
+	colormap_(colormap),
+	solid_(solid),
+	vertex_type_(vertex_shader),
+	program_(0)
 	{
 	}
 
@@ -121,7 +123,7 @@ namespace FLIVR
 		program_ = new ShaderProgram(vs,fs);
 		return false;
 	}
-	
+
 	bool VolShader::emit_v(string& s)
 	{
 		ostringstream z;
@@ -133,6 +135,18 @@ namespace FLIVR
 
 		s = z.str();
 		return false;
+	}
+
+	string VolShader::get_colormap_code()
+	{
+		switch (colormap_)
+		{
+		case 0:
+			return string(VOL_COLORMAP_CALC0);
+		case 1:
+			return string(VOL_COLORMAP_CALC1);
+		}
+		return string(VOL_COLORMAP_CALC0);
 	}
 
 	bool VolShader::emit_f(string& s)
@@ -264,9 +278,19 @@ namespace FLIVR
 				break;
 			case 1://colormap
 				if (solid_)
+				{
 					z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID;
+					z << get_colormap_code();
+					z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
+					z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT;
+				}
 				else
+				{
 					z << VOL_TRANSFER_FUNCTION_COLORMAP;
+					z << get_colormap_code();
+					z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
+					z << VOL_TRANSFER_FUNCTION_COLORMAP_RESULT;
+				}
 				break;
 			}
 
@@ -301,9 +325,19 @@ namespace FLIVR
 				break;
 			case 1://colormap
 				if (solid_)
+				{
 					z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID;
+					z << get_colormap_code();
+					z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
+					z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT;
+				}
 				else
+				{
 					z << VOL_TRANSFER_FUNCTION_COLORMAP;
+					z << get_colormap_code();
+					z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
+					z << VOL_TRANSFER_FUNCTION_COLORMAP_RESULT;
+				}
 				break;
 			case 2://depth map
 				z << VOL_TRANSFER_FUNCTION_DEPTHMAP;
@@ -377,17 +411,16 @@ namespace FLIVR
 	VolShaderFactory::~VolShaderFactory()
 	{
 		for(unsigned int i=0; i<shader_.size(); i++)
-		{
 			delete shader_[i];
-		}
 	}
 
-	ShaderProgram* VolShaderFactory::shader(bool poly, int channels, 
-								bool shading, bool fog, 
-								int peel, bool clip,
-								bool hiqual, int mask,
-								int color_mode, bool solid, 
-								int vertex_shader)
+	ShaderProgram* VolShaderFactory::shader(
+		bool poly, int channels,
+		bool shading, bool fog,
+		int peel, bool clip,
+		bool hiqual, int mask,
+		int color_mode, int colormap,
+		bool solid, int vertex_shader)
 	{
 		if(prev_shader_ >= 0)
 		{
@@ -396,7 +429,8 @@ namespace FLIVR
 				shading, fog,
 				peel, clip,
 				hiqual, mask,
-				color_mode, solid,vertex_shader))
+				color_mode, colormap,
+				solid,vertex_shader))
 			{
 				return shader_[prev_shader_]->program();
 			}
@@ -408,7 +442,8 @@ namespace FLIVR
 				shading, fog,
 				peel, clip,
 				hiqual, mask,
-				color_mode, solid,vertex_shader))
+				color_mode, colormap,
+				solid,vertex_shader))
 			{
 				prev_shader_ = i;
 				return shader_[i]->program();
@@ -416,11 +451,11 @@ namespace FLIVR
 		}
 
 		VolShader* s = new VolShader(poly, channels,
-									shading, fog,
-									peel, clip,
-									hiqual, mask,
-									color_mode, solid,
-									vertex_shader);
+			shading, fog,
+			peel, clip,
+			hiqual, mask,
+			color_mode, colormap,
+			solid, vertex_shader);
 		if(s->create())
 		{
 			delete s;

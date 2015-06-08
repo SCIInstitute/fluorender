@@ -129,6 +129,8 @@ public:
 
 	//set the brush icon down
 	void SelectBrush(int id);
+	//update undo status
+	void UpdateUndoRedo();
 
 	//get some default values
 	double GetDftCAMin() {return m_dft_ca_min;}
@@ -146,6 +148,7 @@ public:
 
 	//save default
 	void SaveDefault();
+
 
 private:
 	wxWindow* m_frame;

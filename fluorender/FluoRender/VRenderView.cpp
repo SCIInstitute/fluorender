@@ -481,7 +481,7 @@ void VRenderGLView::Init()
 		glGenBuffers(1, &m_misc_vbo);
 		glGenBuffers(1, &m_misc_ibo);
 		glGenVertexArrays(1, &m_misc_vao);
-		//glEnable( GL_MULTISAMPLE );
+		glEnable( GL_MULTISAMPLE );
 
 		m_initialized = true;
 	}

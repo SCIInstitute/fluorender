@@ -148,8 +148,10 @@ namespace FLIVR
 		{if (index>=0&&index<TEXTURE_MAX_COMPONENTS) return data_[index]; else return 0;}
 		int get_max_tex_comp()
 		{return TEXTURE_MAX_COMPONENTS;}
-		void trim_mask_undos_head();
-		void trim_mask_undos_tail();
+		bool trim_mask_undos_head();
+		bool trim_mask_undos_tail();
+		bool get_undo();
+		bool get_redo();
 		void set_mask(void* mask_data);
 		void push_mask();
 		void mask_undos_forward();

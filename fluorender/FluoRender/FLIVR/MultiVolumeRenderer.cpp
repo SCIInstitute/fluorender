@@ -146,9 +146,15 @@ namespace FLIVR
 	void MultiVolumeRenderer::set_colormap_mode_single()
 	{
 		if (vr_list_.size() == 1)
+		{
 			colormap_mode_ = vr_list_[0]->colormap_mode_;
+			colormap_ = vr_list_[0]->colormap_;
+		}
 		else
+		{
 			colormap_mode_ = 0;
+			colormap_ = 0;
+		}
 	}
 
 	//manages volume renderers for rendering
@@ -336,7 +342,8 @@ namespace FLIVR
 			use_shading, use_fog,
 			depth_peel_, true,
 			hiqual_, 0,
-			colormap_mode_, false, 1);
+			colormap_mode_, colormap_,
+			false, 1);
 		if (shader)
 		{
 			if (!shader->valid())
@@ -998,7 +1005,8 @@ namespace FLIVR
 			false, false,
 			false, false,
 			false, 0,
-			0, false, 1);
+			0, 0,
+			false, 1);
 		if (shader)
 		{
 			if (!shader->valid())

@@ -602,6 +602,7 @@ void BrushToolDlg::GetSettings(VRenderView* vrv)
 		m_ca_thresh_text->ChangeValue(wxString::Format("%.1f", m_dft_ca_thresh*m_max_value));
 	}
 
+	UpdateUndoRedo();
 }
 
 void BrushToolDlg::SelectBrush(int id)
@@ -624,6 +625,22 @@ void BrushToolDlg::SelectBrush(int id)
 		break;
 	case ID_BrushSolid:
 		m_toolbar->ToggleTool(ID_BrushSolid, true);
+	}
+}
+
+void BrushToolDlg::UpdateUndoRedo()
+{
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+	{
+		VolumeData* vd = vr_frame->GetCurSelVol();
+		if (vd && vd->GetTexture())
+		{
+			m_toolbar->EnableTool(ID_BrushUndo,
+				vd->GetTexture()->get_undo());
+			m_toolbar->EnableTool(ID_BrushRedo,
+				vd->GetTexture()->get_redo());
+		}
 	}
 }
 
@@ -739,6 +756,7 @@ void BrushToolDlg::OnBrushUndo(wxCommandEvent &event)
 		sel_vol->GetVR()->clear_tex_pool();
 	}
 	vr_frame->RefreshVRenderViews();
+	UpdateUndoRedo();
 }
 
 void BrushToolDlg::OnBrushRedo(wxCommandEvent &event)
@@ -753,6 +771,7 @@ void BrushToolDlg::OnBrushRedo(wxCommandEvent &event)
 		sel_vol->GetVR()->clear_tex_pool();
 	}
 	vr_frame->RefreshVRenderViews();
+	UpdateUndoRedo();
 }
 
 //selection adjustment

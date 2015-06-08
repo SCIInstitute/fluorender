@@ -292,6 +292,8 @@ public:
 	bool GetColormapDisp();
 	void SetColormapValues(double low, double high);
 	void GetColormapValues(double &low, double &high);
+	void SetColormap(int value);
+	int GetColormap();
 
 	//resolution  scaling and spacing
 	void GetResolution(int &res_x, int &res_y, int &res_z);
@@ -435,6 +437,7 @@ private:
 	bool m_colormap_disp;	//true/false
 	double m_colormap_low_value;
 	double m_colormap_hi_value;
+	int m_colormap;//index to a colormap
 
 	//save the mode for restoring
 	int m_saved_mode;
@@ -1099,6 +1102,7 @@ public:
 	void SetColormapMode(int mode);
 	void SetColormapDisp(bool disp);
 	void SetColormapValues(double low, double high);
+	void SetColormap(int value);
 	void SetShading(bool shading);
 	void SetShadow(bool shadow);
 	void SetShadowParams(double val);

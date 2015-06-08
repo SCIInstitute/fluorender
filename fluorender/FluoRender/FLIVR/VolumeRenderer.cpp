@@ -82,6 +82,7 @@ namespace FLIVR
 		shine_(10.0),
 		//colormap mode
 		colormap_mode_(0),
+		colormap_(0),
 		//solid
 		solid_(false),
 		//interpolate
@@ -139,6 +140,7 @@ namespace FLIVR
 		shine_(copy.shine_),
 		//colormap mode
 		colormap_mode_(copy.colormap_mode_),
+		colormap_(copy.colormap_),
 		//solid
 		solid_(copy.solid_),
 		//interpolate
@@ -701,12 +703,12 @@ namespace FLIVR
 		ShaderProgram* shader = 0;
 		//create/bind
 		shader = vol_shader_factory_.shader(
-			false,
-			tex_->nc(),
+			false, tex_->nc(),
 			shading_, use_fog,
 			depth_peel_, true,
 			hiqual_, ml_mode_,
-			colormap_mode_, solid_, 1);
+			colormap_mode_, colormap_,
+			solid_, 1);
 		if (shader)
 		{
 			if (!shader->valid())
@@ -1047,9 +1049,10 @@ namespace FLIVR
 		shader = vol_shader_factory_.shader(
 			true, 0,
 			false, false,
-			false, false,
+			0, false,
 			false, 0,
-			0, false, 1);
+			0, 0,
+			false, 1);
 		if (shader)
 		{
 			if (!shader->valid())

@@ -129,6 +129,7 @@ VolumeData::VolumeData()
 	m_colormap_disp = false;
 	m_colormap_low_value = 0.0;
 	m_colormap_hi_value = 1.0;
+	m_colormap = 0;
 
 	//blend mode
 	m_blend_mode = 0;
@@ -235,6 +236,7 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_colormap_disp = copy.m_colormap_disp;
 	m_colormap_low_value = copy.m_colormap_low_value;
 	m_colormap_hi_value = copy.m_colormap_hi_value;
+	m_colormap = copy.m_colormap;
 
 	//blend mode
 	m_blend_mode = copy.m_blend_mode;
@@ -1534,6 +1536,18 @@ void VolumeData::GetColormapValues(double &low, double &high)
 {
 	low = m_colormap_low_value;
 	high = m_colormap_hi_value;
+}
+
+void VolumeData::SetColormap(int value)
+{
+	m_colormap = value;
+	if (m_vr)
+		m_vr->set_colormap(m_colormap);
+}
+
+int VolumeData::GetColormap()
+{
+	return m_colormap;
 }
 
 //resolution  scaling and spacing
@@ -3926,6 +3940,16 @@ void DataGroup::SetColormapValues(double low, double high)
 			vd->GetColormapValues(l, h);
 			vd->SetColormapValues(low<0?l:low, high<0?h:high);
 		}
+	}
+}
+
+void DataGroup::SetColormap(int value)
+{
+	for (int i=0; i<GetVolumeNum(); i++)
+	{
+		VolumeData* vd = GetVolumeData(i);
+		if (vd)
+			vd->SetColormap(value);
 	}
 }
 

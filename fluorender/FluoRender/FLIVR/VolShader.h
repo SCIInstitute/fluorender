@@ -46,8 +46,8 @@ namespace FLIVR
 				bool shading, bool fog,
 				int peel, bool clip,
 				bool hiqual, int mask,
-				int color_mode, bool solid,
-				int vertex_shader = 0);
+				int color_mode, int colormap,
+				bool solid, int vertex_shader);
 		~VolShader();
 
 		bool create();
@@ -61,14 +61,15 @@ namespace FLIVR
 		inline bool hiqual() {return hiqual_; }
 		inline int mask() {return mask_;}
 		inline int color_mode() {return color_mode_;}
+		inline int colormap() {return colormap_;}
 		inline bool solid() {return solid_;}
 
-		inline bool match(bool poly, int channels, 
-						bool shading, bool fog, 
+		inline bool match(bool poly, int channels,
+						bool shading, bool fog,
 						int peel, bool clip,
 						bool hiqual, int mask,
-						int color_mode, bool solid,
-						int vertex_shader = 0)
+						int color_mode, int colormap,
+						bool solid, int vertex_shader = 0)
 		{ 
 			return (poly_ == poly &&
 				channels_ == channels &&
@@ -79,6 +80,7 @@ namespace FLIVR
 				hiqual_ == hiqual &&
 				mask_ == mask &&
 				color_mode_ == color_mode &&
+				colormap_ == colormap &&
 				solid_ == solid &&
 				vertex_type_ == vertex_shader); 
 		}
@@ -88,6 +90,7 @@ namespace FLIVR
 	protected:
 		bool emit_f(std::string& s);
 		bool emit_v(std::string& s);
+		std::string get_colormap_code();
 
 		bool poly_;
 		int channels_;
@@ -99,6 +102,7 @@ namespace FLIVR
 		int mask_;	//0-normal, 1-render with mask, 2-render with mask excluded
 					//3-random color with label, 4-random color with label+mask
 		int color_mode_;//0-normal; 1-rainbow; 2-depth
+		int colormap_;//index
 		bool solid_;//no transparency
 		int vertex_type_;
 
@@ -111,12 +115,12 @@ namespace FLIVR
 		VolShaderFactory();
 		~VolShaderFactory();
 
-		ShaderProgram* shader(bool poly, int channels, 
-								bool shading, bool fog, 
+		ShaderProgram* shader(bool poly, int channels,
+								bool shading, bool fog,
 								int peel, bool clip,
 								bool hiqual, int mask,
-								int color_mode, bool solid, 
-								int vertex_type);
+								int color_mode, int colormap,
+								bool solid, int vertex_type);
 		//mask: 0-no mask, 1-segmentation mask, 2-labeling mask
 		//color_mode: 0-normal; 1-rainbow; 2-depth
 

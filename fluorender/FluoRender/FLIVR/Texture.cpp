@@ -501,13 +501,59 @@ namespace FLIVR
 	}
 
 	//mask undo management
-	void Texture::trim_mask_undos_head()
+	bool Texture::trim_mask_undos_head()
 	{
-		//if (
+		if (nmask_<=-1 || mask_undo_num_==0)
+			return true;
+		if (mask_undos_.size() <= mask_undo_num_+1)
+			return true;
+		if (mask_undo_pointer_ == 0)
+			return false;
+		while (mask_undos_.size()>mask_undo_num_+1 &&
+			mask_undo_pointer_>0 &&
+			mask_undo_pointer_<mask_undos_.size())
+		{
+			delete []mask_undos_.front();
+			mask_undos_.erase(mask_undos_.begin());
+			mask_undo_pointer_--;
+		}
+		return true;
 	}
 
-	void Texture::trim_mask_undos_tail()
+	bool Texture::trim_mask_undos_tail()
 	{
+		if (nmask_<=-1 || mask_undo_num_==0)
+			return true;
+		if (mask_undos_.size() <= mask_undo_num_+1)
+			return true;
+		if (mask_undo_pointer_ == mask_undos_.size()-1)
+			return false;
+		while (mask_undos_.size()>mask_undo_num_+1 &&
+			mask_undo_pointer_>=0 &&
+			mask_undo_pointer_<mask_undos_.size()-1)
+		{
+			delete []mask_undos_.back();
+			mask_undos_.pop_back();
+		}
+		return true;
+	}
+
+	bool Texture::get_undo()
+	{
+		if (nmask_<=-1 || mask_undo_num_==0)
+			return false;
+		if (mask_undo_pointer_ <= 0)
+			return false;
+		return true;
+	}
+
+	bool Texture::get_redo()
+	{
+		if (nmask_<=-1 || mask_undo_num_==0)
+			return false;
+		if (mask_undo_pointer_ >= mask_undos_.size()-1)
+			return false;
+		return true;
 	}
 
 	void Texture::set_mask(void* mask_data)
@@ -522,11 +568,14 @@ namespace FLIVR
 				mask_undos_.begin()+mask_undo_pointer_+1,
 				mask_data);
 			mask_undo_pointer_++;
+			if (!trim_mask_undos_head())
+				trim_mask_undos_tail();
 		}
 		else
 		{
 			mask_undos_.push_back(mask_data);
 			mask_undo_pointer_ = mask_undos_.size()-1;
+			trim_mask_undos_head();
 		}
 	}
 
@@ -544,12 +593,20 @@ namespace FLIVR
 		void* new_data = (void*)new (std::nothrow) unsigned char[mem_size];
 		memcpy(new_data, mask_undos_[mask_undo_pointer_], size_t(mem_size));
 		if (mask_undo_pointer_<mask_undos_.size()-1)
+		{
 			mask_undos_.insert(
 				mask_undos_.begin()+mask_undo_pointer_+1,
 				new_data);
+			mask_undo_pointer_++;
+			if (!trim_mask_undos_head())
+				trim_mask_undos_tail();
+		}
 		else
+		{
 			mask_undos_.push_back(new_data);
-		mask_undo_pointer_++;
+			mask_undo_pointer_++;
+			trim_mask_undos_head();
+		}
 
 		//update mask data
 		nrrdWrap_va(data_[nmask_],

@@ -31,6 +31,7 @@
 #include <iostream>
 #include <FLIVR/ImgShader.h>
 #include <FLIVR/ShaderProgram.h>
+#include <FLIVR/VolShaderCode.h>
 
 using std::string;
 using std::vector;
@@ -206,16 +207,16 @@ namespace FLIVR
 	"\n" \
 	"void main()\n" \
 	"{\n" \
-	"	vec4 color;\n" \
+	"	vec4 rb;\n" \
 	"	vec4 t = vec4(OutTexCoord, 1.0);\n" \
 	"	vec4 c = texture(tex0, t.xy);\n" \
-	"	color.a = (loc0.w>0.5?loc0.w:c.x)*c.a;\n" \
-	"	c.w = (c.r + c.g + c.b)/3.0;\n" \
-	"	c.w = (c.w-loc0.x)/loc0.z;\n" \
-	"	color.b = clamp(-4.0*c.w+2.0, 0.0, 1.0);\n" \
-	"	color.g = clamp(c.w<0.5 ? 4.0*c.w : -4.0*c.w+4.0, 0.0, 1.0);\n" \
-	"	color.r = clamp(4.0*c.w - 2.0, 0.0, 1.0);\n" \
-	"	FragColor = vec4(color.rgb*color.a, color.a);\n" \
+	"	rb.a = (loc0.w>0.5?loc0.w:c.x)*c.a;\n" \
+	"	float valu = (c.r + c.g + c.b)/3.0;\n" \
+	"	valu = (valu-loc0.x)/loc0.z;\n" \
+
+#define IMG_SHADER_CODE_GRADIENT_MAP_RESULT \
+	"	//IMG_SHADER_CODE_GRADIENT_MAP_RESULT\n" \
+	"	FragColor = vec4(rb.rgb*rb.a, rb.a);\n" \
 	"}\n"
 
 #define IMG_SHADER_CODE_FILTER_MIN \
@@ -650,6 +651,8 @@ namespace FLIVR
 			break;
 		case IMG_SHDR_GRADIENT_MAP:
 			z << IMG_SHADER_CODE_GRADIENT_MAP;
+			z << VOL_COLORMAP_CALC0;
+			z << IMG_SHADER_CODE_GRADIENT_MAP_RESULT;
 			break;
 		case IMG_SHDR_FILTER_BLUR:
 			z << IMG_SHADER_CODE_FILTER_BLUR;

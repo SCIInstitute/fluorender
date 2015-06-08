@@ -429,6 +429,24 @@ namespace FLIVR
 	"}\n" \
 	"\n"
 
+#define VOL_COMMON_TRANSFER_FUNCTION_CALC \
+	"		//VOL_COMMON_TRANSFER_FUNCTION_CALC\n" \
+	"		tf_alp = pow(clamp(v.x/loc3.z,\n" \
+	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0,\n" \
+	"			loc3.x>1.0?0.9999:1.0), loc3.x);\n"
+
+#define VOL_COLORMAP_CALC0 \
+	"		//VOL_COLORMAP_CALC\n" \
+	"		rb.r = clamp(4.0*valu - 2.0, 0.0, 1.0);\n" \
+	"		rb.g = clamp(valu<0.5 ? 4.0*valu : -4.0*valu+4.0, 0.0, 1.0);\n" \
+	"		rb.b = clamp(-4.0*valu+2.0, 0.0, 1.0);\n"
+
+#define VOL_COLORMAP_CALC1 \
+	"		//VOL_COLORMAP_CALC\n" \
+	"		rb.r = clamp(-4.0*valu+2.0, 0.0, 1.0);\n" \
+	"		rb.g = clamp(valu>0.5 ? 4.0*valu : -4.0*valu+4.0, 0.0, 1.0);\n" \
+	"		rb.b = clamp(4.0*valu - 2.0, 0.0, 1.0);\n"
+
 #define VOL_TRANSFER_FUNCTION_COLORMAP \
 	"	//VOL_TRANSFER_FUNCTION_COLORMAP\n" \
 	"	vec4 c;\n" \
@@ -442,12 +460,9 @@ namespace FLIVR
 	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
 	"		vec4 rb = vec4(0.0);\n" \
 	"		float valu = (v.x-loc6.x)/loc6.z;\n" \
-	"		rb.r = clamp(4.0*valu - 2.0, 0.0, 1.0);\n" \
-	"		rb.g = clamp(valu<0.5 ? 4.0*valu : -4.0*valu+4.0, 0.0, 1.0);\n" \
-	"		rb.b = clamp(-4.0*valu+2.0, 0.0, 1.0);\n" \
-	"		tf_alp = pow(clamp(v.x/loc3.z,\n" \
-	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0,\n" \
-	"			loc3.x>1.0?0.9999:1.0), loc3.x);\n" \
+
+#define VOL_TRANSFER_FUNCTION_COLORMAP_RESULT \
+	"		//VOL_TRANSFER_FUNCTION_COLORMAP_RESULT\n" \
 	"		float alpha = 1.0 - pow(1.0-tf_alp, loc4.w);\n" \
 	"		c = vec4(rb.rgb*alpha*tf_alp, alpha);\n" \
 	"	}\n" \
@@ -466,12 +481,9 @@ namespace FLIVR
 	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
 	"		vec4 rb = vec4(0.0);\n" \
 	"		float valu = (v.x-loc6.x)/loc6.z;\n" \
-	"		rb.r = clamp(4.0*valu - 2.0, 0.0, 1.0);\n" \
-	"		rb.g = clamp(valu<0.5 ? 4.0*valu : -4.0*valu+4.0, 0.0, 1.0);\n" \
-	"		rb.b = clamp(-4.0*valu+2.0, 0.0, 1.0);\n" \
-	"		tf_alp = pow(clamp(v.x/loc3.z,\n" \
-	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0,\n" \
-	"			loc3.x>1.0?0.9999:1.0), loc3.x);\n" \
+
+#define VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT \
+	"		//VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT\n" \
 	"		c = vec4(rb.rgb*tf_alp, 1.0);\n" \
 	"	}\n" \
 	"\n"
