@@ -57,16 +57,25 @@ namespace FLIVR
 	class ImgShader
 	{
 	public:
-		ImgShader(int type);
+		ImgShader(int type, int colormap);
 		~ImgShader();
 
 		bool create();
 
 		inline int type() {return type_;}
+		inline int colormap() {return colormap_;}
 
-		inline bool match(int type)
-		{ 
-			return (type_ == type); 
+		inline bool match(int type, int colormap)
+		{
+			if (type_ == type)
+			{
+				if (type_ == IMG_SHDR_GRADIENT_MAP)
+					return (colormap_==colormap);
+				else
+					return true;
+			}
+			else
+				return false;
 		}
 
 		inline ShaderProgram* program() { return program_; }
@@ -74,8 +83,10 @@ namespace FLIVR
 	protected:
 		bool emit_v(std::string& s);
 		bool emit_f(std::string& s);
+		std::string get_colormap_code();
 
 		int type_;
+		int colormap_;
 
 		ShaderProgram* program_;
 	};
@@ -86,7 +97,7 @@ namespace FLIVR
 		ImgShaderFactory();
 		~ImgShaderFactory();
 
-		ShaderProgram* shader(int type);
+		ShaderProgram* shader(int type, int colormap_=0);
 
 	protected:
 		std::vector<ImgShader*> shader_;

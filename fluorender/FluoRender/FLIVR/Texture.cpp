@@ -334,7 +334,7 @@ namespace FLIVR
 		//further determine the max texture size
 		if (TextureRenderer::get_mem_swap())
 		{
-			double data_size = double(sz_x)*double(sz_y)*double(sz_z)*double(numb[0])/1.04e6;
+			double data_size = double(sz_x)*double(sz_y)*double(sz_z)/1.04e6;
 			if (data_size > TextureRenderer::get_mem_limit() ||
 				data_size > TextureRenderer::get_large_data_size())
 				max_texture_size = TextureRenderer::get_force_brick_size();

@@ -254,18 +254,18 @@ wxGLCanvas(parent, id, attriblist, pos, size, style),
 	m_sync_b(false),
 	//volume color map
 	//m_value_1(0.0),
-	m_color_1(Color(0.0, 0.0, 1.0)),
 	m_value_2(0.0),
-	m_color_2(Color(0.0, 0.0, 1.0)),
 	m_value_3(0.25),
-	m_color_3(Color(0.0, 1.0, 1.0)),
 	m_value_4(0.5),
-	m_color_4(Color(0.0, 1.0, 0.0)),
 	m_value_5(0.75),
-	m_color_5(Color(1.0, 1.0, 0.0)),
 	m_value_6(1.0),
-	m_color_6(Color(1.0, 0.0, 0.0)),
 	//m_value_7(1.0),
+	m_color_1(Color(0.0, 0.0, 1.0)),
+	m_color_2(Color(0.0, 0.0, 1.0)),
+	m_color_3(Color(0.0, 1.0, 1.0)),
+	m_color_4(Color(0.0, 1.0, 0.0)),
+	m_color_5(Color(1.0, 1.0, 0.0)),
+	m_color_6(Color(1.0, 0.0, 0.0)),
 	m_color_7(Color(1.0, 0.0, 0.0)),
 	//paint brush presssure
 	m_use_pres(false),
@@ -2980,7 +2980,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 		{
 			//2d adjustment
 			img_shader =
-				m_img_shader_factory.shader(IMG_SHDR_GRADIENT_MAP);
+				m_img_shader_factory.shader(IMG_SHDR_GRADIENT_MAP, vd->GetColormap());
 			if (img_shader)
 			{
 				if (!img_shader->valid())
@@ -7567,6 +7567,58 @@ void VRenderGLView::DrawGradBg()
 	glEnable(GL_BLEND);
 }
 
+void VRenderGLView::SetColormapColors(int colormap)
+{
+	switch (colormap)
+	{
+	case 0://rainbow
+		m_color_1 = Color(0.0, 0.0, 1.0);
+		m_color_2 = Color(0.0, 0.0, 1.0);
+		m_color_3 = Color(0.0, 1.0, 1.0);
+		m_color_4 = Color(0.0, 1.0, 0.0);
+		m_color_5 = Color(1.0, 1.0, 0.0);
+		m_color_6 = Color(1.0, 0.0, 0.0);
+		m_color_7 = Color(1.0, 0.0, 0.0);
+		break;
+	case 1://reverse rainbow
+		m_color_1 = Color(1.0, 0.0, 0.0);
+		m_color_2 = Color(1.0, 0.0, 0.0);
+		m_color_3 = Color(1.0, 1.0, 0.0);
+		m_color_4 = Color(0.0, 1.0, 0.0);
+		m_color_5 = Color(0.0, 1.0, 1.0);
+		m_color_6 = Color(0.0, 0.0, 1.0);
+		m_color_7 = Color(0.0, 0.0, 1.0);
+		break;
+	case 2://hot
+		m_color_1 = Color(0.0, 0.0, 0.0);
+		m_color_2 = Color(0.0, 0.0, 0.0);
+		m_color_3 = Color(0.5, 0.0, 0.0);
+		m_color_4 = Color(1.0, 0.0, 0.0);
+		m_color_5 = Color(1.0, 1.0, 0.0);
+		m_color_6 = Color(1.0, 1.0, 1.0);
+		m_color_7 = Color(1.0, 1.0, 1.0);
+		break;
+	case 3://cool
+		m_color_1 = Color(0.0, 1.0, 1.0);
+		m_color_2 = Color(0.0, 1.0, 1.0);
+		m_color_3 = Color(0.25, 0.75, 1.0);
+		m_color_4 = Color(0.5, 0.5, 1.0);
+		m_color_5 = Color(0.75, 0.25, 1.0);
+		m_color_6 = Color(1.0, 0.0, 1.0);
+		m_color_7 = Color(1.0, 0.0, 1.0);
+		break;
+	case 4://blue-red
+		m_color_1 = Color(0.25, 0.3, 0.75);
+		m_color_2 = Color(0.25, 0.3, 0.75);
+		m_color_3 = Color(0.475, 0.5, 0.725);
+		m_color_4 = Color(0.7, 0.7, 0.7);
+		m_color_5 = Color(0.7, 0.35, 0.425);
+		m_color_6 = Color(0.7, 0.0, 0.15);
+		m_color_7 = Color(0.7, 0.0, 0.15);
+		break;
+	}
+}
+
 void VRenderGLView::DrawColormap()
 {
 	bool draw = false;
@@ -7603,6 +7655,7 @@ void VRenderGLView::DrawColormap()
 			m_value_5 = (m_value_4+high)/2.0;
 			max_val = vd_view->GetMaxValue();
 			enable_alpha = vd_view->GetEnableAlpha();
+			SetColormapColors(vd_view->GetColormap());
 		}
 	}
 	else if (num > 1)
@@ -7627,6 +7680,7 @@ void VRenderGLView::DrawColormap()
 					m_value_5 = (m_value_4+high)/2.0;
 					max_val = vd_view->GetMaxValue();
 					enable_alpha = vd_view->GetEnableAlpha();
+					SetColormapColors(vd_view->GetColormap());
 				}
 			}
 		}

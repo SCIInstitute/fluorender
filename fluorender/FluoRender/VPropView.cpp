@@ -384,7 +384,7 @@ wxPanel(parent, id, pos, size,style, name),
 	//x
 	st = new wxStaticText(this, 0, "Spacing");
 	m_space_x_text = new wxTextCtrl(this, ID_SpaceXText, "1.000",
-		wxDefaultPosition, wxSize(45, 20), 0, vald_fp3);
+		wxDefaultPosition, wxSize(45, -1), 0, vald_fp3);
 	sizer_r2->Add(st, 0, wxALIGN_CENTER);
 	sizer_r2->AddStretchSpacer();
 	st = new wxStaticText(this, 0, "X:");
@@ -393,14 +393,14 @@ wxPanel(parent, id, pos, size,style, name),
 	//y
 	st = new wxStaticText(this, 0, "Y:");
 	m_space_y_text = new wxTextCtrl(this, ID_SpaceYText, "1.000",
-		wxDefaultPosition, wxSize(45, 20), 0, vald_fp3);
+		wxDefaultPosition, wxSize(45, -1), 0, vald_fp3);
 	sizer_r2->Add(3, 5, 0);
 	sizer_r2->Add(st, 0, wxALIGN_CENTER);
 	sizer_r2->Add(m_space_y_text, 0, wxALIGN_CENTER);
 	//z
 	st = new wxStaticText(this, 0, "Z:");
 	m_space_z_text = new wxTextCtrl(this, ID_SpaceZText, "1.000",
-		wxDefaultPosition, wxSize(45, 20), 0, vald_fp3);
+		wxDefaultPosition, wxSize(45, -1), 0, vald_fp3);
 	sizer_r2->Add(3, 5, 0);
 	sizer_r2->Add(st, 0, wxALIGN_CENTER);
 	sizer_r2->Add(m_space_z_text, 0, wxALIGN_CENTER);
@@ -438,6 +438,9 @@ wxPanel(parent, id, pos, size,style, name),
 	vector<string>colormap_list;
 	colormap_list.push_back("Rainbow");
 	colormap_list.push_back("Reverse Rainbow");
+	colormap_list.push_back("Hot");
+	colormap_list.push_back("Cool");
+	colormap_list.push_back("Diverging");
 	for (size_t i=0; i<colormap_list.size(); ++i)
 		m_colormap_combo->Append(colormap_list[i]);
 	sizer_r5->Add(st, 0, wxALIGN_CENTER, 0);

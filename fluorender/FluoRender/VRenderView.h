@@ -833,6 +833,7 @@ private:
 	char* wxStringToChar(wxString input);
 	void DrawFrame();
 	void DrawClippingPlanes(bool border, int face_winding);
+	void SetColormapColors(int colormap);
 	void DrawColormap();
 	void DrawGradBg();
 	void DrawInfo(int nx, int ny);

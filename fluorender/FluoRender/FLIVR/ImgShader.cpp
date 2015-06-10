@@ -566,8 +566,9 @@ namespace FLIVR
 	"	FragColor.a = FragColor.r>0.1?0.5:0.0;\n" \
 	"}\n"
 
-	ImgShader::ImgShader(int type) : 
+	ImgShader::ImgShader(int type, int colormap) : 
 	type_(type),
+	colormap_(colormap),
 	program_(0)
 	{}
 
@@ -624,6 +625,24 @@ namespace FLIVR
 		return false;
 	}
 
+	string ImgShader::get_colormap_code()
+	{
+		switch (colormap_)
+		{
+		case 0:
+			return string(VOL_COLORMAP_CALC0);
+		case 1:
+			return string(VOL_COLORMAP_CALC1);
+		case 2:
+			return string(VOL_COLORMAP_CALC2);
+		case 3:
+			return string(VOL_COLORMAP_CALC3);
+		case 4:
+			return string(VOL_COLORMAP_CALC4);
+		}
+		return string(VOL_COLORMAP_CALC0);
+	}
+
 	bool ImgShader::emit_f(string& s)
 	{
 		ostringstream z;
@@ -651,7 +670,7 @@ namespace FLIVR
 			break;
 		case IMG_SHDR_GRADIENT_MAP:
 			z << IMG_SHADER_CODE_GRADIENT_MAP;
-			z << VOL_COLORMAP_CALC0;
+			z << get_colormap_code();
 			z << IMG_SHADER_CODE_GRADIENT_MAP_RESULT;
 			break;
 		case IMG_SHDR_FILTER_BLUR:
@@ -707,25 +726,25 @@ namespace FLIVR
 	}
 
 	ShaderProgram*
-		ImgShaderFactory::shader(int type)
+		ImgShaderFactory::shader(int type, int colormap)
 	{
 		if(prev_shader_ >= 0)
 		{
-			if(shader_[prev_shader_]->match(type)) 
+			if(shader_[prev_shader_]->match(type, colormap)) 
 			{
 				return shader_[prev_shader_]->program();
 			}
 		}
 		for(unsigned int i=0; i<shader_.size(); i++)
 		{
-			if(shader_[i]->match(type)) 
+			if(shader_[i]->match(type, colormap)) 
 			{
 				prev_shader_ = i;
 				return shader_[i]->program();
 			}
 		}
 
-		ImgShader* s = new ImgShader(type);
+		ImgShader* s = new ImgShader(type, colormap);
 		if(s->create())
 		{
 			delete s;

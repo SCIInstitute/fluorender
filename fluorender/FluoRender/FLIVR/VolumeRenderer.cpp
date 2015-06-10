@@ -82,6 +82,8 @@ namespace FLIVR
 		shine_(10.0),
 		//colormap mode
 		colormap_mode_(0),
+		colormap_low_value_(0.0),
+		colormap_hi_value_(1.0),
 		colormap_(0),
 		//solid
 		solid_(false),
@@ -140,6 +142,8 @@ namespace FLIVR
 		shine_(copy.shine_),
 		//colormap mode
 		colormap_mode_(copy.colormap_mode_),
+		colormap_low_value_(copy.colormap_low_value_),
+		colormap_hi_value_(copy.colormap_hi_value_),
 		colormap_(copy.colormap_),
 		//solid
 		solid_(copy.solid_),

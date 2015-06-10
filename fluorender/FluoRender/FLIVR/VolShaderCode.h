@@ -436,16 +436,34 @@ namespace FLIVR
 	"			loc3.x>1.0?0.9999:1.0), loc3.x);\n"
 
 #define VOL_COLORMAP_CALC0 \
-	"		//VOL_COLORMAP_CALC\n" \
+	"		//VOL_COLORMAP_CALC0\n" \
 	"		rb.r = clamp(4.0*valu - 2.0, 0.0, 1.0);\n" \
 	"		rb.g = clamp(valu<0.5 ? 4.0*valu : -4.0*valu+4.0, 0.0, 1.0);\n" \
 	"		rb.b = clamp(-4.0*valu+2.0, 0.0, 1.0);\n"
 
 #define VOL_COLORMAP_CALC1 \
-	"		//VOL_COLORMAP_CALC\n" \
+	"		//VOL_COLORMAP_CALC1\n" \
 	"		rb.r = clamp(-4.0*valu+2.0, 0.0, 1.0);\n" \
-	"		rb.g = clamp(valu>0.5 ? 4.0*valu : -4.0*valu+4.0, 0.0, 1.0);\n" \
+	"		rb.g = clamp(valu<0.5 ? 4.0*valu : -4.0*valu+4.0, 0.0, 1.0);\n" \
 	"		rb.b = clamp(4.0*valu - 2.0, 0.0, 1.0);\n"
+
+#define VOL_COLORMAP_CALC2 \
+	"		//VOL_COLORMAP_CALC2\n" \
+	"		rb.r = clamp(2.0*valu, 0.0, 1.0);\n" \
+	"		rb.g = clamp(4.0*valu - 2.0, 0.0, 1.0);\n" \
+	"		rb.b = clamp(4.0*valu - 3.0, 0.0, 1.0);\n"
+
+#define VOL_COLORMAP_CALC3 \
+	"		//VOL_COLORMAP_CALC3\n" \
+	"		rb.r = clamp(valu, 0.0, 1.0);\n" \
+	"		rb.g = clamp(1.0-valu, 0.0, 1.0);\n" \
+	"		rb.b = 1.0;\n"
+
+#define VOL_COLORMAP_CALC4 \
+	"		//VOL_COLORMAP_CALC4\n" \
+	"		rb.r = clamp(valu<0.5?valu*0.9+0.25:0.7, 0.0, 1.0);\n" \
+	"		rb.g = clamp(valu<0.5?valu*0.8+0.3:(1.0-valu)*1.4, 0.0, 1.0);\n" \
+	"		rb.b = clamp(valu<0.5?valu*(-0.1)+0.75:(1.0-valu)*1.1+0.15, 0.0, 1.0);\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP \
 	"	//VOL_TRANSFER_FUNCTION_COLORMAP\n" \
@@ -484,7 +502,7 @@ namespace FLIVR
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT \
 	"		//VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT\n" \
-	"		c = vec4(rb.rgb*tf_alp, 1.0);\n" \
+	"		c = vec4(rb.rgb, 1.0);\n" \
 	"	}\n" \
 	"\n"
 
