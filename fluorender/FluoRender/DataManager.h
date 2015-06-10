@@ -834,7 +834,7 @@ public:
 
 private:
 	static int m_num;
-	int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe
+	int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe; 4: protractor
 	bool m_finished;
 	vector<Point> m_ruler;
 	bool m_disp;
@@ -1331,6 +1331,7 @@ public:
 	double m_vol_ysp;	//y_spacing
 	double m_vol_zsp;	//z_spacing
 	double m_vol_lum;	//luminance
+	int m_vol_cmp;		//colormap
 	double m_vol_lcm;	//colormap low value
 	double m_vol_hcm;	//colormap high value
 	bool m_vol_eap;		//enable alpha

@@ -302,4 +302,7 @@ const static unsigned char undo_png[15940];
 
 /* redo.png - 15953 bytes */
 const static unsigned char redo_png[15953];
+
+/* protractor.png - 16248 bytes */
+const static unsigned char protractor_png[16248];
 };

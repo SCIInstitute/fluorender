@@ -2266,6 +2266,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 
 			//colormap settings
 			fconfig.Write("colormap_mode", vd->GetColormapMode());
+			fconfig.Write("colormap", vd->GetColormap());
 			double low, high;
 			vd->GetColormapValues(low, high);
 			fconfig.Write("colormap_lo_value", low);
@@ -3085,9 +3086,10 @@ void VRenderFrame::OpenProject(wxString& filename)
 							vd->SetSyncB(bVal);
 
 						//colormap settings
-						int mode;
-						if (fconfig.Read("colormap_mode", &mode))
-							vd->SetColormapMode(mode);
+						if (fconfig.Read("colormap_mode", &iVal))
+							vd->SetColormapMode(iVal);
+						if (fconfig.Read("colormap", &iVal))
+							vd->SetColormap(iVal);
 						double low, high;
 						if (fconfig.Read("colormap_lo_value", &low) &&
 							fconfig.Read("colormap_hi_value", &high))
@@ -3099,14 +3101,14 @@ void VRenderFrame::OpenProject(wxString& filename)
 						if (fconfig.Read("inv", &bVal))
 							vd->SetInvert(bVal);
 						//mip enable
-						if (fconfig.Read("mode", &mode))
-							vd->SetMode(mode);
+						if (fconfig.Read("mode", &iVal))
+							vd->SetMode(iVal);
 						//noise reduction
 						if (fconfig.Read("noise_red", &bVal))
 							vd->SetNR(bVal);
 						//depth override
-						if (fconfig.Read("depth_ovrd", &mode))
-							vd->SetBlendMode(mode);
+						if (fconfig.Read("depth_ovrd", &iVal))
+							vd->SetBlendMode(iVal);
 
 						//shadow
 						if (fconfig.Read("shadow", &bVal))

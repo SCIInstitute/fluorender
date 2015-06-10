@@ -9215,6 +9215,32 @@ void VRenderGLView::DrawRulers()
 					num += 2;
 				}
 			}
+			if (ruler->GetRulerType() == 4 &&
+				ruler->GetNumPoint() >= 3)
+			{
+				Point center = *(ruler->GetPoint(1));
+				Vector v1 = *(ruler->GetPoint(0)) - center;
+				Vector v2 = *(ruler->GetPoint(2)) - center;
+				double len = Min(v1.length(), v2.length());
+				if (len > w)
+				{
+					v1.normalize();
+					v2.normalize();
+					p1 = center + v1*w;
+					p1 = mv.transform(p1);
+					p1 = p.transform(p1);
+					px = (p1.x()+1.0)*nx/2.0;
+					py = (p1.y()+1.0)*ny/2.0;
+					verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+					p1 = center + v2*w;
+					p1 = mv.transform(p1);
+					p1 = p.transform(p1);
+					px = (p1.x()+1.0)*nx/2.0;
+					py = (p1.y()+1.0)*ny/2.0;
+					verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+					num += 2;
+				}
+			}
 			nums.push_back(num);
 		}
 	}

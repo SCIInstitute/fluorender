@@ -65,9 +65,9 @@ endif()
 add_definitions(-DFLUORENDER_TITLE="FluoRender")
 
 add_definitions(-DVERSION_MAJOR=2)
-add_definitions(-DVERSION_MINOR=16.1)
+add_definitions(-DVERSION_MINOR=17)
 add_definitions(-DVERSION_MAJOR_TAG="2")
-add_definitions(-DVERSION_MINOR_TAG="16.1")
+add_definitions(-DVERSION_MINOR_TAG="17")
 add_definitions(-DVERSION_COPYRIGHT="June 2015")
 
 #static compile

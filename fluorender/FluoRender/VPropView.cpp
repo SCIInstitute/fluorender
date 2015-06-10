@@ -1958,6 +1958,7 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
 	wxFileConfig fconfig("FluoRender default volume settings");
 	wxString str;
 	double val;
+	int ival;
 	//extract boundary
 	str = m_boundary_text->GetValue();
 	str.ToDouble(&val);
@@ -2032,6 +2033,9 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
 	val /= m_max_val;
 	fconfig.Write("luminance", val);
 	mgr->m_vol_lum = val;
+	//colormap
+	ival = m_colormap_combo->GetCurrentSelection();
+	fconfig.Write("colormap", ival);
 	//colormap low value
 	str = m_colormap_low_value_text->GetValue();
 	str.ToDouble(&val);
@@ -2196,6 +2200,9 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 	m_color2_text->ChangeValue(wxString::Format("%d , %d , %d",
 		wxc.Red(), wxc.Green(), wxc.Blue()));
 	m_color2_btn->SetColour(wxc);
+	//colormap
+	m_colormap_combo->SetSelection(mgr->m_vol_cmp);
+	m_vd->SetColormap(mgr->m_vol_cmp);
 	//colormap low value
 	dval = mgr->m_vol_lcm;
 	ival = int(dval*m_max_val+0.5);

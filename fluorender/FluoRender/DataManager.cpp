@@ -2785,8 +2785,18 @@ double Ruler::GetAngle()
 			angle = angle<0.0?angle+180.0:angle;
 		}
 	}
-	else if (m_ruler_type == 1)
+	else if (m_ruler_type == 4)
 	{
+		if (m_ruler.size() >=3)
+		{
+			Vector v1, v2;
+			v1 = m_ruler[0] - m_ruler[1];
+			v1.normalize();
+			v2 = m_ruler[2] - m_ruler[1];
+			v2.normalize();
+			angle = acos(Dot(v1, v2));
+			angle = r2d(angle);
+		}
 	}
 
 	return angle;
@@ -2801,6 +2811,9 @@ bool Ruler::AddPoint(Point &point)
 		m_ruler_type == 3) &&
 		m_ruler.size() == 2)
 		return false;
+	else if (m_ruler_type == 4 &&
+		m_ruler.size() == 3)
+		return false;
 	else
 	{
 		m_ruler.push_back(point);
@@ -2810,6 +2823,9 @@ bool Ruler::AddPoint(Point &point)
 		else if ((m_ruler_type == 0 ||
 			m_ruler_type == 3) &&
 			m_ruler.size() == 2)
+			m_finished = true;
+		else if (m_ruler_type == 4 &&
+			m_ruler.size() == 3)
 			m_finished = true;
 		return true;
 	}
@@ -4098,6 +4114,7 @@ m_vol_exb(0.0),
 	m_vol_ysp(1.0),
 	m_vol_zsp(2.5),
 	m_vol_lum(1.0),
+	m_vol_cmp(0),
 	m_vol_lcm(0.0),
 	m_vol_hcm(1.0),
 	m_vol_eap(true),
@@ -4125,6 +4142,7 @@ m_vol_exb(0.0),
 	wxFileConfig fconfig(is);
 
 	double val;
+	int ival;
 	if (fconfig.Read("extract_boundary", &val))
 		m_vol_exb = val;
 	if (fconfig.Read("gamma", &val))
@@ -4153,6 +4171,8 @@ m_vol_exb(0.0),
 		m_vol_zsp = val;
 	if (fconfig.Read("luminance", &val))
 		m_vol_lum = val;
+	if (fconfig.Read("colormap", &ival))
+		m_vol_cmp = ival;
 	if (fconfig.Read("colormap_low", &val))
 		m_vol_lcm = val;
 	if (fconfig.Read("colormap_hi", &val))
@@ -4249,6 +4269,7 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 		vd->SetMaterial(m_vol_lsh, diff, spec, m_vol_hsh);
 		if (!vd->GetSpcFromFile())
 			vd->SetSpacings(m_vol_xsp, m_vol_ysp, m_vol_zsp);
+		vd->SetColormap(m_vol_cmp);
 		vd->SetColormapValues(m_vol_lcm, m_vol_hcm);
 
 		vd->SetEnableAlpha(m_vol_eap);
