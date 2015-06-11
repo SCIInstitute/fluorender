@@ -116,9 +116,7 @@ namespace FLIVR
 			{
 				string str = (char*)strRenderer;
 				if (str.find("FirePro") != string::npos)
-#endif
 					glPixelTransferf(GL_RED_BIAS, FLT_MIN);//for AMD FirePro cards
-#ifdef _WIN32
 			}
 #endif
 

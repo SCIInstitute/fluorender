@@ -110,6 +110,8 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
                    wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES})
   string(REGEX REPLACE "libwx_osx_cocoau_scintilla" "libwxscintilla" 
                    wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES})
+  find_package(Freetype REQUIRED)
+  include_directories(${FREETYPE_INCLUDE_DIRS})
 endif()
 
 #OpenGL
@@ -227,8 +229,6 @@ endif()
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/freetype/include)
 if (WIN32)
     file(GLOB FREETYPE_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/freetype/lib/*.lib)
-else()
-    file(GLOB FREETYPE_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/freetype/lib/*.a)
 endif()
 
 #other sources
