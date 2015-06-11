@@ -551,6 +551,9 @@ namespace FLIVR
 #ifdef _WIN32
 			glPixelStorei(GL_UNPACK_ROW_LENGTH, brick->sx());
 			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, brick->sy());
+#else
+			glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
 #endif
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -578,13 +581,17 @@ namespace FLIVR
 						unsigned long long mem_size = (unsigned long long)nx*
 							(unsigned long long)ny*(unsigned long long)nz*nb;
 						unsigned char* temp = new unsigned char[mem_size];
+						unsigned char* tempp = temp;
 						unsigned char* tp = (unsigned char*)(brick->tex_data(c));
+						unsigned char* tp2;
 						for (unsigned int k=0; k<nz; ++k)
 						{
+							tp2 = tp;
 							for (unsigned int j=0; j<ny; ++j)
 							{
-								memcpy(temp, tp, nx*nb);
-								tp += brick->sx()*nb;
+								memcpy(tempp, tp2, nx*nb);
+								tempp += nx*nb;
+								tp2 += brick->sx()*nb;
 							}
 							tp += brick->sx()*brick->sy()*nb;
 						}
@@ -599,8 +606,10 @@ namespace FLIVR
 				}
 			}
 
+#ifdef _WIN32
 			glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
+#endif
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 		}
 
@@ -690,6 +699,9 @@ namespace FLIVR
 #ifdef _WIN32
 			glPixelStorei(GL_UNPACK_ROW_LENGTH, brick->sx());
 			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, brick->sy());
+#else
+			glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
 #endif
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -733,13 +745,17 @@ namespace FLIVR
 						unsigned long long mem_size = (unsigned long long)nx*
 							(unsigned long long)ny*(unsigned long long)nz*nb;
 						unsigned char* temp = new unsigned char[mem_size];
+						unsigned char* tempp = temp;
 						unsigned char* tp = (unsigned char*)(brick->tex_data(c));
+						unsigned char* tp2;
 						for (unsigned int k=0; k<nz; ++k)
 						{
+							tp2 = tp;
 							for (unsigned int j=0; j<ny; ++j)
 							{
-								memcpy(temp, tp, nx*nb);
-								tp += brick->sx()*nb;
+								memcpy(tempp, tp2, nx*nb);
+								tempp += nx*nb;
+								tp2 += brick->sx()*nb;
 							}
 							tp += brick->sx()*brick->sy()*nb;
 						}
@@ -855,6 +871,9 @@ namespace FLIVR
 #ifdef _WIN32
 			glPixelStorei(GL_UNPACK_ROW_LENGTH, brick->sx());
 			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, brick->sy());
+#else
+			glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
 #endif
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -875,13 +894,17 @@ namespace FLIVR
 						unsigned long long mem_size = (unsigned long long)nx*
 							(unsigned long long)ny*(unsigned long long)nz*nb;
 						unsigned char* temp = new unsigned char[mem_size];
+						unsigned char* tempp = temp;
 						unsigned char* tp = (unsigned char*)(brick->tex_data(c));
+						unsigned char* tp2;
 						for (unsigned int k=0; k<nz; ++k)
 						{
+							tp2 = tp;
 							for (unsigned int j=0; j<ny; ++j)
 							{
-								memcpy(temp, tp, nx*nb);
-								tp += brick->sx()*nb;
+								memcpy(tempp, tp2, nx*nb);
+								tempp += nx*nb;
+								tp2 += brick->sx()*nb;
 							}
 							tp += brick->sx()*brick->sy()*nb;
 						}
@@ -978,6 +1001,9 @@ namespace FLIVR
 #ifdef _WIN32
 			glPixelStorei(GL_UNPACK_ROW_LENGTH, brick->sx());
 			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, brick->sy());
+#else
+			glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
 #endif
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
@@ -998,13 +1024,17 @@ namespace FLIVR
 						unsigned long long mem_size = (unsigned long long)nx*
 							(unsigned long long)ny*(unsigned long long)nz*nb;
 						unsigned char* temp = new unsigned char[mem_size];
+						unsigned char* tempp = temp;
 						unsigned char* tp = (unsigned char*)(brick->tex_data(c));
+						unsigned char* tp2;
 						for (unsigned int k=0; k<nz; ++k)
 						{
+							tp2 = tp;
 							for (unsigned int j=0; j<ny; ++j)
 							{
-								memcpy(temp, tp, nx*nb);
-								tp += brick->sx()*nb;
+								memcpy(tempp, tp2, nx*nb);
+								tempp += nx*nb;
+								tp2 += brick->sx()*nb;
 							}
 							tp += brick->sx()*brick->sy()*nb;
 						}
@@ -1023,7 +1053,6 @@ namespace FLIVR
 			glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
 #endif
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 		}
 
 		glActiveTexture(GL_TEXTURE0);
