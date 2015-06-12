@@ -559,7 +559,9 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	m_toolbar->Realize();
 
 	//options
-	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer_1 = new wxStaticBoxSizer(
+		new wxStaticBox(this, wxID_ANY, "Settings"), wxVERTICAL);
+	wxBoxSizer* sizer_11 = new wxBoxSizer(wxHORIZONTAL);
 	m_view_plane_rd = new wxRadioButton(this, ID_ViewPlaneRd, "View Plane",
 		wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 	m_max_intensity_rd = new wxRadioButton(this, ID_MaxIntensityRd, "Maximum Intensity",
@@ -569,26 +571,39 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	m_view_plane_rd->SetValue(false);
 	m_max_intensity_rd->SetValue(true);
 	m_acc_intensity_rd->SetValue(false);
-	sizer_1->Add(10, 10);
-	sizer_1->Add(m_view_plane_rd, 0, wxALIGN_CENTER);
-	sizer_1->Add(10, 10);
-	sizer_1->Add(m_max_intensity_rd, 0, wxALIGN_CENTER);
-	sizer_1->Add(10, 10);
-	sizer_1->Add(m_acc_intensity_rd, 0, wxALIGN_CENTER);
-
+	sizer_11->Add(10, 10);
+	sizer_11->Add(m_view_plane_rd, 0, wxALIGN_CENTER);
+	sizer_11->Add(10, 10);
+	sizer_11->Add(m_max_intensity_rd, 0, wxALIGN_CENTER);
+	sizer_11->Add(10, 10);
+	sizer_11->Add(m_acc_intensity_rd, 0, wxALIGN_CENTER);
 	//more options
-	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer_12 = new wxBoxSizer(wxHORIZONTAL);
 	m_transient_chk = new wxCheckBox(this, ID_TransientChk, "Transient",
 		wxDefaultPosition, wxDefaultSize);
 	m_use_transfer_chk = new wxCheckBox(this, ID_UseTransferChk, "Use Volume Properties",
 		wxDefaultPosition, wxDefaultSize);
-	sizer_2->Add(10, 10);
-	sizer_2->Add(m_transient_chk, 0, wxALIGN_CENTER);
-	sizer_2->Add(10, 10);
-	sizer_2->Add(m_use_transfer_chk, 0, wxALIGN_CENTER);
+	sizer_12->Add(10, 10);
+	sizer_12->Add(m_transient_chk, 0, wxALIGN_CENTER);
+	sizer_12->Add(10, 10);
+	sizer_12->Add(m_use_transfer_chk, 0, wxALIGN_CENTER);
+	//
+	sizer_1->Add(sizer_11, 0, wxEXPAND);
+	sizer_1->Add(10, 10);
+	sizer_1->Add(sizer_12, 0, wxEXPAND);
 
 	//list
 	m_rulerlist = new RulerListCtrl(frame, this, wxID_ANY);
+
+	//notes
+	wxBoxSizer *sizer_2 = new wxStaticBoxSizer(
+		new wxStaticBox(this, wxID_ANY, "N.B."), wxHORIZONTAL);
+	wxStaticText* st = new wxStaticText(this, wxID_ANY,
+		"You can press and hold the Shift key to use the brush tool with\n" \
+		"any of the measurement tools. The measurement point is placed\n" \
+		"at the center of the selected structures automatically.");
+	sizer_2->Add(10, 10);
+	sizer_2->Add(st, 0, wxEXPAND);
 
 	//sizer
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
@@ -597,9 +612,9 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	sizerV->Add(10, 10);
 	sizerV->Add(sizer_1, 0, wxEXPAND);
 	sizerV->Add(10, 10);
-	sizerV->Add(sizer_2, 0, wxEXPAND);
-	sizerV->Add(10, 10);
 	sizerV->Add(m_rulerlist, 1, wxEXPAND);
+	sizerV->Add(10, 10);
+	sizerV->Add(sizer_2, 0, wxEXPAND);
 
 	SetSizer(sizerV);
 	Layout();

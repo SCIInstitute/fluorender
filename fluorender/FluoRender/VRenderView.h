@@ -376,7 +376,8 @@ public:
 	void SetVolumeA(VolumeData* vd);
 	void SetVolumeB(VolumeData* vd);
 	//1-sub;2-add;3-div;4-and;5-new;6-new inv;7-clear
-	wxString Calculate(int type, wxString prev_group="", bool add=true);
+	void Calculate(int type, wxString prev_group="", bool add=true);
+	void CalculateSingle(int type, wxString prev_group, bool add);
 
 	//set 2d weights
 	void Set2dWeights();
@@ -1290,8 +1291,8 @@ public:
 	{if (m_glview) m_glview->SetVolumeA(vd);}
 	void SetVolumeB(VolumeData* vd)
 	{if (m_glview) m_glview->SetVolumeB(vd);}
-	wxString Calculate(int type, wxString prev_group="")
-	{if (m_glview) return m_glview->Calculate(type, prev_group); else return "";}
+	void Calculate(int type, wxString prev_group="")
+	{if (m_glview) return m_glview->Calculate(type, prev_group);}
 
 	//brush properties
 	//use pressure

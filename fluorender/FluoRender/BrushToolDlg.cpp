@@ -194,7 +194,7 @@ BEGIN_EVENT_TABLE(BrushToolDlg, wxPanel)
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 	m_hidden_removal_chk = new wxCheckBox(this, ID_BrushHiddenRemovalChk, "Visible Only:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-	m_select_group_chk = new wxCheckBox(this, ID_BrushSelectGroupChk, "Select Group:",
+	m_select_group_chk = new wxCheckBox(this, ID_BrushSelectGroupChk, "Apply to Group:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 	sizer11_1->Add(m_estimate_thresh_chk, 0, wxALIGN_CENTER);
 	sizer11_1->Add(5, 5);

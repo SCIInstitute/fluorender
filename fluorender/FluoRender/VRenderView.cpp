@@ -1878,7 +1878,7 @@ void VRenderGLView::Segment()
 						m_selector.Select(m_brush_radius2-m_brush_radius1);
 					}
 				}
-				m_selector.Select(m_brush_radius2-m_brush_radius1);
+				m_selector.SetVolume(vd);
 			}
 			else
 				m_selector.Select(m_brush_radius2-m_brush_radius1);
@@ -2320,10 +2320,8 @@ void VRenderGLView::SetVolumeB(VolumeData* vd)
 	m_calculator.SetVolumeB(vd);
 }
 
-wxString VRenderGLView::Calculate(int type, wxString prev_group, bool add)
+void VRenderGLView::CalculateSingle(int type, wxString prev_group, bool add)
 {
-	wxString result = "";
-
 	m_calculator.Calculate(type);
 	VolumeData* vd = m_calculator.GetResult();
 	if (vd)
@@ -2409,7 +2407,6 @@ wxString VRenderGLView::Calculate(int type, wxString prev_group, bool add)
 					vr_frame->UpdateTree(vd->GetName());
 				}
 			}
-			RefreshGL();
 		}
 		else if (type == 7)
 		{
@@ -2422,11 +2419,67 @@ wxString VRenderGLView::Calculate(int type, wxString prev_group, bool add)
 				if (vr_frame)
 					vr_frame->GetPropView()->SetVolumeData(vd_a);
 			}
-			RefreshGL();
 		}
+		RefreshGL();
 	}
+}
 
-	return prev_group;
+void VRenderGLView::Calculate(int type, wxString prev_group, bool add)
+{
+	if (type == 5 ||
+		type == 6 ||
+		type == 7)
+	{
+		vector<VolumeData*> vd_list;
+		if (m_selector.GetSelectGroup())
+		{
+			VolumeData* vd = m_calculator.GetVolumeA();
+			DataGroup* group = 0;
+			if (vd)
+			{
+				for (int i=0; i<GetLayerNum(); i++)
+				{
+					TreeLayer* layer = GetLayer(i);
+					if (layer && layer->IsA()==5)
+					{
+						DataGroup* tmp_group = (DataGroup*)layer;
+						for (int j=0; j<tmp_group->GetVolumeNum(); j++)
+						{
+							VolumeData* tmp_vd = tmp_group->GetVolumeData(j);
+							if (tmp_vd && tmp_vd==vd)
+							{
+								group = tmp_group;
+								break;
+							}
+						}
+					}
+					if (group)
+						break;
+				}
+			}
+			if (group && group->GetVolumeNum()>1)
+			{
+				for (int i=0; i<group->GetVolumeNum(); i++)
+				{
+					VolumeData* tmp_vd = group->GetVolumeData(i);
+					if (tmp_vd && tmp_vd->GetDisp())
+						vd_list.push_back(tmp_vd);
+				}
+				for (size_t i=0; i<vd_list.size(); ++i)
+				{
+					m_calculator.SetVolumeA(vd_list[i]);
+					CalculateSingle(type, prev_group, add);
+				}
+				m_calculator.SetVolumeA(vd);
+			}
+			else
+				CalculateSingle(type, prev_group, add);
+		}
+		else
+			CalculateSingle(type, prev_group, add);
+	}
+	else
+		CalculateSingle(type, prev_group, add);
 }
 
 //draw out the framebuffer after composition
