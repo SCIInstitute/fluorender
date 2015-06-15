@@ -199,6 +199,7 @@ public:
 	VolumeRenderer *GetVR();
 	//texture
 	Texture* GetTexture();
+	void SetTexture();
 
 	//bounding box
 	BBox GetBounds();

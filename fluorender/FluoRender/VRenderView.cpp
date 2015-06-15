@@ -3355,6 +3355,17 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 	if (vlist.empty())
 		return;
 
+	size_t i;
+	bool has_shadow = false;
+	for (i=0; i<vlist.size(); i++)
+	{
+		VolumeData* vd = vlist[i];
+		if (vd)
+			has_shadow = has_shadow || vd->GetShadow();
+	}
+	if (!has_shadow)
+		return;
+
 	if (TextureRenderer::get_mem_swap() &&
 		TextureRenderer::get_start_update_loop() &&
 		!TextureRenderer::get_done_update_loop())
@@ -3442,8 +3453,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		vector<bool> shadings;
 		vector<VolumeData*> list;
 		//geenerate list
-		int i;
-		for (i=0; i<(int)vlist.size(); i++)
+		for (i=0; i<vlist.size(); i++)
 		{
 			VolumeData* vd = vlist[i];
 			if (vd && vd->GetShadow())
@@ -3456,7 +3466,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		if (!list.empty())
 		{
 			m_mvr->clear_vr();
-			for (i=0; i<(int)list.size(); i++)
+			for (i=0; i<list.size(); i++)
 			{
 				VolumeData* vd = list[i];
 				vd->GetVR()->set_shading(false);
@@ -3478,7 +3488,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 			m_mvr->draw(m_test_wiref, m_interactive, !m_persp, m_scale_factor, m_intp);
 			//restore
 			m_mvr->set_colormap_mode(0);
-			for (i=0; i<(int)list.size(); i++)
+			for (i=0; i<list.size(); i++)
 			{
 				VolumeData* vd = list[i];
 				vd->RestoreMode();

@@ -133,7 +133,8 @@ namespace FLIVR
 
 	TextureRenderer::~TextureRenderer()
 	{
-		clear_tex_pool();
+		//clear_tex_pool();
+		clear_tex_current();
 		if (glIsFramebuffer(blend_framebuffer_))
 			glDeleteFramebuffers(1, &blend_framebuffer_);
 		if (glIsTexture(blend_tex_id_))
@@ -161,10 +162,17 @@ namespace FLIVR
 	{
 		if (tex_ != tex) 
 		{
-			tex_ = tex;
 			// new texture, flag existing tex id's for deletion.
-			clear_pool_ = true;
+			//clear_pool_ = true;
+			clear_tex_current();
+			tex->clear_undos();
+			tex_ = tex;
 		}
+	}
+
+	void TextureRenderer::reset_texture()
+	{
+		tex_ = 0;
 	}
 
 	//set blending bits. b>8 means 32bit blending
@@ -188,6 +196,30 @@ namespace FLIVR
 		}
 		tex_pool_.clear();
 		clear_pool_ = false;
+	}
+
+	void TextureRenderer::clear_tex_current()
+	{
+		if (!tex_)
+			return;
+		vector<TextureBrick*>* bricks = tex_->get_bricks();
+		TextureBrick* brick = 0;
+		for (int i=tex_pool_.size()-1; i>=0; --i)
+		{
+			for (size_t j=0; j<bricks->size(); ++j)
+			{
+				brick = (*bricks)[j];
+				if (tex_pool_[i].brick == brick/* &&
+					(tex_pool_[i].comp == 0 ||
+					tex_pool_[i].comp == brick->nmask() ||
+					tex_pool_[i].comp == brick->nlabel())*/)
+				{
+					glDeleteTextures(1, (GLuint*)&tex_pool_[i].id);
+					tex_pool_.erase(tex_pool_.begin()+i);
+					break;
+				}
+			}
+		}
 	}
 
 	//resize the fbo texture

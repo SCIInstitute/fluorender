@@ -156,6 +156,7 @@ namespace FLIVR
 		void push_mask();
 		void mask_undos_forward();
 		void mask_undos_backward();
+		void clear_undos();
 
 		//add one more texture component as the volume mask
 		bool add_empty_mask();

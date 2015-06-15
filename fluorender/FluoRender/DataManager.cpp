@@ -271,10 +271,10 @@ VolumeData::VolumeData(VolumeData &copy)
 
 VolumeData::~VolumeData()
 {
-	if (m_tex && !m_dup)
-		delete m_tex;
 	if (m_vr)
 		delete m_vr;
+	if (m_tex && !m_dup)
+		delete m_tex;
 }
 
 //duplication
@@ -425,17 +425,15 @@ int VolumeData::Replace(VolumeData* data)
 
 	double spcx = 1.0, spcy = 1.0, spcz = 1.0;
 
-	if (m_tex)
+	if (m_tex && m_vr)
 	{
 		m_tex->get_spacings(spcx, spcy, spcz);
+		m_vr->clear_tex_current();
 		delete m_tex;
+		m_vr->reset_texture();
 	}
-	m_tex = new Texture();
-	m_tex->set_use_priority(m_skip_brick);
-	m_tex->build(data->GetTexture()->get_nrrd(0), 0,
-		0, data->GetMaxValue(), 0, 0);
-	m_tex->set_spacings(spcx, spcy, spcz);
-	data->GetTexture()->set_nrrd(0, 0);
+	m_tex = data->GetTexture();
+	data->SetTexture();
 	SetScalarScale(data->GetScalarScale());
 	SetGMScale(data->GetGMScale());
 	SetMaxValue(data->GetMaxValue());
@@ -1146,6 +1144,13 @@ VolumeRenderer *VolumeData::GetVR()
 Texture* VolumeData::GetTexture()
 {
 	return m_tex;
+}
+
+void VolumeData::SetTexture()
+{
+	if (m_vr)
+		m_vr->reset_texture();
+	m_tex = 0;
 }
 
 void VolumeData::SetMatrices(glm::mat4 &mv_mat,

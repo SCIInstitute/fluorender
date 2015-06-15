@@ -140,12 +140,14 @@ namespace FLIVR
 
 		//set the texture for rendering
 		void set_texture(Texture* tex);
+		void reset_texture();
 
 		//set blending bits. b>8 means 32bit blending
 		void set_blend_num_bits(int b);
 
 		//clear the opengl textures from the texture pool
 		void clear_tex_pool();
+		void clear_tex_current();
 
 		//resize the fbo texture
 		void resize();

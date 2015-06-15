@@ -472,9 +472,18 @@ namespace FLIVR
 
 		if (TextureRenderer::mem_swap_ &&
 			TextureRenderer::cur_brick_num_ == TextureRenderer::total_brick_num_)
-		{
 			TextureRenderer::done_update_loop_ = true;
-			TextureRenderer::clear_chan_buffer_ = true;
+		if (TextureRenderer::mem_swap_)
+		{
+			int num = 0;
+			for (size_t i=0; i<vr_list_.size(); ++i)
+				num += vr_list_[i]->tex_->get_bricks()->size();
+			if (TextureRenderer::cur_chan_brick_num_ == num)
+			{
+				TextureRenderer::done_current_chan_ = true;
+				TextureRenderer::clear_chan_buffer_ = true;
+				TextureRenderer::cur_chan_brick_num_ = 0;
+			}
 		}
 
 		//enable depth buffer writing

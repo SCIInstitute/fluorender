@@ -70,12 +70,7 @@ namespace FLIVR
 				delete bricks_[i];
 		}
 
-		//mask data now managed by the undos
-		for (size_t i=0; i<mask_undos_.size(); ++i)
-		{
-			if (mask_undos_[i])
-				delete []mask_undos_[i];
-		}
+		clear_undos();
 
 		//release other data
 		for (int i=0; i<TEXTURE_MAX_COMPONENTS; i++)
@@ -87,7 +82,18 @@ namespace FLIVR
 				nrrdNix(data_[i]);
 			}
 		}
+	}
 
+	void Texture::clear_undos()
+	{
+		//mask data now managed by the undos
+		for (size_t i=0; i<mask_undos_.size(); ++i)
+		{
+			if (mask_undos_[i])
+				delete []mask_undos_[i];
+			mask_undos_.clear();
+			mask_undo_pointer_ = -1;
+		}
 	}
 
 	vector<TextureBrick*>* Texture::get_sorted_bricks(
