@@ -57,7 +57,8 @@ public:
 	wstring GetDataName() {return m_data_name;}
 	int GetTimeNum() {return m_time_num;}
 	int GetCurTime() {return m_cur_time;}
-	int GetChanNum() {return m_chan_num;}
+	int GetChanNum()
+	{if (m_sep_seq) return m_group_num; else return m_chan_num;}
 	double GetExcitationWavelength(int chan);
 	int GetSliceNum() {return m_slice_num;}
 	int GetXSize() {return m_x_size;}
@@ -100,6 +101,7 @@ private:
 	struct SequenceInfo
 	{
 		int grid_index;
+		bool apart;
 		vector<FrameInfo> frames;
 	};
 	typedef vector<SequenceInfo> TimeDataInfo;
@@ -133,17 +135,22 @@ private:
 		double y_min;
 		double y_max;
 
-		bool overlaps(const SeqBox& sb) const
+		double overlaps(const SeqBox& sb) const
 		{
+			double x_apart = 1.0;
+			double y_apart = 1.0;
 			double ix_min = sb.x_min>x_min?sb.x_min:x_min;
 			double ix_max = sb.x_max<x_max?sb.x_max:x_max;
 			if (ix_min >= ix_max)
-				return false;
+				x_apart = (ix_max-ix_min)/(x_max-x_min);
 			double iy_min = sb.y_min>y_min?sb.y_min:y_min;
 			double iy_max = sb.y_max<y_max?sb.y_max:y_max;
 			if (iy_min >= iy_max)
-				return false;
-			return ((ix_max-ix_min)*(iy_max-iy_min)/(x_max-x_min)/(y_max-y_min))>=0.9;
+				y_apart = (iy_max-iy_min)/(y_max-y_min);
+			if (x_apart<0.0 || y_apart<0.0)
+				return x_apart<y_apart?x_apart:y_apart;
+			else
+				return (ix_max-ix_min)*(iy_max-iy_min)/(x_max-x_min)/(y_max-y_min);
 		}
 		void extend(const SeqBox& sb)
 		{
@@ -166,6 +173,9 @@ private:
 	int m_cur_time;
 	int m_chan_num;
 
+	int m_group_num;
+	bool m_sep_seq;//non-overlapping sequences
+
 	int m_slice_num;
 	int m_x_size;
 	int m_y_size;
@@ -186,7 +196,10 @@ private:
 	//actual flags for flipping
 	bool m_flip_x;
 	bool m_flip_y;
+
 private:
+	bool ConvertS(int c, TimeDataInfo* time_data_info, unsigned short *val);
+	bool ConvertN(int c, TimeDataInfo* time_data_info, unsigned short *val);
 	void ReadSystemConfig(wxXmlNode *systemNode);
 	void UpdateStateShard(wxXmlNode *stateNode);
 	void ReadKey(wxXmlNode *keyNode);
