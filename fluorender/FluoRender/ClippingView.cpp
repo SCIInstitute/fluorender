@@ -289,11 +289,11 @@ m_link_z(false)
 		wxDefaultPosition, wxSize(34, 22));
 	m_xy_clip_btn = new wxButton(this, ID_XYClipBtn, "XY",
 		wxDefaultPosition, wxSize(34, 22));
-	sizer_4->Add(m_yz_clip_btn, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_4->Add(m_yz_clip_btn, 1, wxEXPAND);
 	sizer_4->AddSpacer(5);
-	sizer_4->Add(m_xz_clip_btn, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_4->Add(m_xz_clip_btn, 1, wxEXPAND);
 	sizer_4->AddSpacer(5);
-	sizer_4->Add(m_xy_clip_btn, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_4->Add(m_xy_clip_btn, 1, wxEXPAND);
 
 	//clip distance 5
 	wxBoxSizer* sizer_5 = new wxBoxSizer(wxHORIZONTAL);
@@ -303,11 +303,11 @@ m_link_z(false)
 		wxDefaultPosition, wxSize(34, 22), 0, vald_int);
 	m_xy_dist_text = new wxTextCtrl(this, ID_XYDistText, "1",
 		wxDefaultPosition, wxSize(34, 22), 0, vald_int);
-	sizer_5->Add(m_yz_dist_text, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_5->Add(m_yz_dist_text, 1, wxEXPAND);
 	sizer_5->AddSpacer(5);
-	sizer_5->Add(m_xz_dist_text, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_5->Add(m_xz_dist_text, 1, wxEXPAND);
 	sizer_5->AddSpacer(5);
-	sizer_5->Add(m_xy_dist_text, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_5->Add(m_xy_dist_text, 1, wxEXPAND);
 	
 	//reset clipping 6
 	wxBoxSizer* sizer_6 = new wxBoxSizer(wxHORIZONTAL);
@@ -410,7 +410,7 @@ m_link_z(false)
 	sizer_v->Add(5, 5, 0);
 	sizer_v->Add(sizer_2, 1, wxEXPAND);
 	sizer_v->Add(5, 5, 0);
-	sizer_v->Add(sizer_3, 0, wxALIGN_CENTER|wxEXPAND);
+	sizer_v->Add(sizer_3, 0, wxEXPAND);
 	sizer_v->AddSpacer(5);
 	sizer_v->Add(new wxStaticText(this,0,
 		"Set Clip Slab Width"), 0, wxALIGN_CENTER);

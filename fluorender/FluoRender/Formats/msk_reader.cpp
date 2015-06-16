@@ -109,6 +109,7 @@ Nrrd* MSKReader::Convert(int t, int c, bool get_max)
 		(output->type != nrrdTypeChar &&
 		output->type != nrrdTypeUChar))
 	{
+		delete []output->data;
 		nrrdNix(output);
 		return 0;
 	}
@@ -120,7 +121,7 @@ Nrrd* MSKReader::Convert(int t, int c, bool get_max)
 
 	if (nrrdLoad(output, str.c_str(), NULL))
 	{
-		//delete []output->data;
+		delete []output->data;
 		nrrdNix(output);
 		return 0;
 	}

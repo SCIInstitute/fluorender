@@ -689,7 +689,9 @@ Nrrd* LSMReader::Convert(int t, int c, bool get_max)
       {
       case 1://8-bit
          {
-            unsigned char *val = new (std::nothrow) unsigned char[m_x_size*m_y_size*m_slice_num];
+            unsigned long long mem_size = (unsigned long long)m_x_size*
+               (unsigned long long)m_y_size*(unsigned long long)m_slice_num;
+            unsigned char *val = new (std::nothrow) unsigned char[mem_size];
             ChannelInfo *cinfo = &m_lsm_info[t][c];
             for (i=0; i<(int)cinfo->size(); i++)
             {
@@ -723,7 +725,9 @@ Nrrd* LSMReader::Convert(int t, int c, bool get_max)
       case 2://16-bit
       case 3:
          {
-            unsigned short *val = new (std::nothrow) unsigned short[m_x_size*m_y_size*m_slice_num];
+            unsigned long long mem_size = (unsigned long long)m_x_size*
+               (unsigned long long)m_y_size*(unsigned long long)m_slice_num;
+            unsigned short *val = new (std::nothrow) unsigned short[mem_size];
             ChannelInfo *cinfo = &m_lsm_info[t][c];
             for (i=0; i<(int)cinfo->size(); i++)
             {

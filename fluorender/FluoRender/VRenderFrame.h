@@ -305,6 +305,7 @@ public:
 
 	//tex renderer settings
 	void SetTextureRendererSettings();
+	void SetTextureUndos();
 
 	//quit option
 	void OnQuit(wxCommandEvent& WXUNUSED(event))

@@ -51,12 +51,24 @@ namespace FLIVR
 	string ShaderProgram::glsl_version_;
 
 	ShaderProgram::ShaderProgram(const string& frag_shader) :
-	id_(0), vert_shader_(""), frag_shader_(frag_shader)
+	id_(0), vert_shader_(""), frag_shader_(frag_shader), valid_(false)
 	{
+		for (int i=0; i<MAX_SHADER_UNIFORMS; ++i)
+		{
+			loc_ui[i] = -1;
+			loc_vec4[i] = -1;
+			loc_mat4[i] = -1;
+		}
 	}
 	ShaderProgram::ShaderProgram(const string& vert_shader, const string& frag_shader) :
-	id_(0), vert_shader_(vert_shader), frag_shader_(frag_shader)
+	id_(0), vert_shader_(vert_shader), frag_shader_(frag_shader), valid_(false)
 	{
+		for (int i=0; i<MAX_SHADER_UNIFORMS; ++i)
+		{
+			loc_ui[i] = -1;
+			loc_vec4[i] = -1;
+			loc_mat4[i] = -1;
+		}
 	}
 
 	ShaderProgram::~ShaderProgram ()
@@ -71,7 +83,7 @@ namespace FLIVR
 
 	bool ShaderProgram::valid()
 	{
-		return shaders_supported() ? glIsProgram(id_)!=0 : false;
+		return valid_;
 	}
 
 	bool ShaderProgram::init()
@@ -104,9 +116,7 @@ namespace FLIVR
 			{
 				string str = (char*)strRenderer;
 				if (str.find("FirePro") != string::npos)
-#endif
 					glPixelTransferf(GL_RED_BIAS, FLT_MIN);//for AMD FirePro cards
-#ifdef _WIN32
 			}
 #endif
 
@@ -143,6 +153,7 @@ namespace FLIVR
 			// create the GLSL program and attach the shader
 			id_ = glCreateProgram();
 			if (id_ == 0) return true;
+			valid_ = true;
 
 			GLuint v_shader, f_shader;
 			v_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -244,19 +255,7 @@ namespace FLIVR
 	void ShaderProgram::bind ()
 	{
 		if (shaders_supported())
-		{
-			// check to linking of the program
-			GLint program_status[1];
-			glGetProgramiv(id_, GL_LINK_STATUS, program_status);
-			if (program_status[0] == GL_FALSE)
-			{
-				char program_log[1000];
-				glGetInfoLogARB(id_, sizeof(program_log), NULL, program_log);
-				std::cerr << "Invalid shader program: " << program_log << std::endl;
-			}
-
 			glUseProgram(id_);
-		}
 	}
 
 	void ShaderProgram::bind_frag_data_location(int color_num, const char* name)
@@ -284,9 +283,14 @@ namespace FLIVR
 				"loc8", "loc9", "loc10", "loc11",
 				"loc12", "loc13", "loc14", "loc15"};
 
-			int location = glGetUniformLocation(id_, loc_strings[i]);
-			if (location != -1)
-				glUniform4f(location, float(x), float(y), float(z), float(w));
+			if (loc_vec4[i] == -1)
+			{
+				loc_vec4[i] = glGetUniformLocation(id_, loc_strings[i]);
+				if (loc_vec4[i] == -1)
+					loc_vec4[i]--;
+			}
+			if (loc_vec4[i] >=0)
+				glUniform4f(loc_vec4[i], float(x), float(y), float(z), float(w));
 		}
 	}
 
@@ -299,11 +303,14 @@ namespace FLIVR
 				"matrix8", "matrix9", "matrix10", "matrix11",
 				"matrix12", "matrix13", "matrix14", "matrix15"};
 
-			int location = glGetUniformLocation(id_, loc_strings[i]);
-			if (location != -1)
+			if (loc_mat4[i] == -1)
 			{
-				glUniformMatrix4fv(location, 1, false, matrix4);
+				loc_mat4[i] = glGetUniformLocation(id_, loc_strings[i]);
+				if (loc_mat4[i] == -1)
+					loc_mat4[i]--;
 			}
+			if (loc_mat4[i] >= 0)
+				glUniformMatrix4fv(loc_mat4[i], 1, false, matrix4);
 		}
 	}
 
@@ -316,11 +323,14 @@ namespace FLIVR
 				"loci8", "loci9", "loci10", "loci11",
 				"loci12", "loci13", "loci14", "loci15"};
 
-			int location = glGetUniformLocation(id_, loc_strings[i]);
-			if (location != -1)
+			if (loc_ui[i] == -1)
 			{
-				glUniform1ui(location, value);
+				loc_ui[i] = glGetUniformLocation(id_, loc_strings[i]);
+				if (loc_ui[i] == -1)
+					loc_ui[i]--;
 			}
+			if (loc_ui[i] >= 0)
+				glUniform1ui(loc_ui[i], value);
 		}
 	}
 

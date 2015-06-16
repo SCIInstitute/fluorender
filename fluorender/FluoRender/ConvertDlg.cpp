@@ -70,7 +70,7 @@ wxPanel(parent, wxID_ANY,
 		wxDefaultPosition, wxSize(40, 23), 0, vald_fp2);
 	sizer11->Add(st, 0, wxALIGN_CENTER);
 	sizer11->Add(10, 10);
-	sizer11->Add(m_cnv_vol_mesh_thresh_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer11->Add(m_cnv_vol_mesh_thresh_sldr, 1, wxEXPAND);
 	sizer11->Add(m_cnv_vol_mesh_thresh_text, 0, wxALIGN_CENTER);
 	sizer11->Add(15, 15);
 	//downsampling slider and text
@@ -83,7 +83,7 @@ wxPanel(parent, wxID_ANY,
 		wxDefaultPosition, wxSize(40, 23), 0, vald_int);
 	sizer12->Add(st, 0, wxALIGN_CENTER);
 	sizer12->Add(10, 10);
-	sizer12->Add(m_cnv_vol_mesh_downsample_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer12->Add(m_cnv_vol_mesh_downsample_sldr, 1, wxEXPAND);
 	sizer12->Add(m_cnv_vol_mesh_downsample_text, 0, wxALIGN_CENTER);
 	sizer12->Add(15, 15);
 	//downsampling in z slider and text
@@ -96,7 +96,7 @@ wxPanel(parent, wxID_ANY,
 		wxDefaultPosition, wxSize(40, 23), 0, vald_int);
 	sizer13->Add(st, 0, wxALIGN_CENTER);
 	sizer13->Add(10, 10);
-	sizer13->Add(m_cnv_vol_mesh_downsample_z_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer13->Add(m_cnv_vol_mesh_downsample_z_sldr, 1, wxEXPAND);
 	sizer13->Add(m_cnv_vol_mesh_downsample_z_text, 0, wxALIGN_CENTER);
 	sizer13->Add(15, 15);
 	//check options and convert button
@@ -121,15 +121,15 @@ wxPanel(parent, wxID_ANY,
 	
 	//group1
 	group1->Add(5, 5);
-	group1->Add(sizer11, 0, wxEXPAND|wxALIGN_CENTER);
+	group1->Add(sizer11, 0, wxEXPAND);
 	group1->Add(5, 5);
-	group1->Add(sizer12, 0, wxEXPAND|wxALIGN_CENTER);
+	group1->Add(sizer12, 0, wxEXPAND);
 	group1->Add(5, 5);
-	group1->Add(sizer13, 0, wxEXPAND|wxALIGN_CENTER);
+	group1->Add(sizer13, 0, wxEXPAND);
 	group1->Add(5, 5);
-	group1->Add(sizer14, 0, wxEXPAND|wxALIGN_CENTER);
+	group1->Add(sizer14, 0, wxEXPAND);
 	group1->Add(5, 5);
-	group1->Add(sizer15, 0, wxEXPAND|wxALIGN_CENTER);
+	group1->Add(sizer15, 0, wxEXPAND);
 	group1->Add(5, 5);
 
 	//all controls

@@ -111,17 +111,6 @@ namespace FLIVR
 	"//SEG_TAIL\n" \
 	"}\n"
 
-#define SEG_BODY_DISCARD_FLAG \
-	"	//SEG_BODY_DISCARD_FLAG\n" \
-	"	bool discarded = false;\n" \
-	"\n"
-
-#define SEG_BODY_DISCARD_APPLY \
-	"	//SEG_BODY_DISCARD_APPLY\n" \
-	"	if (discarded)\n" \
-	"		FragColor = vec4(0.0);\n" \
-	"\n"
-
 #define SEG_BODY_WEIGHT \
 	"	//SEG_BODY_WEIGHT\n" \
 	"	vec4 cw2d;\n" \
@@ -154,7 +143,7 @@ namespace FLIVR
 	"	//SEG_BODY_INIT_CULL\n" \
 	"	float cmask2d = texture(tex6, s.xy).x;\n"\
 	"	if (cmask2d < 0.95)\n"\
-	"		discarded = true;\n"\
+	"		discard;\n"\
 	"\n"
 
 #define SEG_BODY_INIT_CULL_ERASE \
@@ -200,7 +189,7 @@ namespace FLIVR
 #define SEG_BODY_INIT_BLEND_HR_ORTHO \
 	"	//SEG_BODY_INIT_BLEND_HR_ORTHO\n" \
 	"	if (c.x <= loc7.x)\n" \
-	"		discarded = true;\n" \
+	"		discard;\n" \
 	"	vec4 cv = matrix3 * vec4(0.0, 0.0, 1.0, 0.0);\n" \
 	"	vec3 step = cv.xyz;\n" \
 	"	step = normalize(step);\n" \
@@ -220,10 +209,7 @@ namespace FLIVR
 	"		v.y = length(vol_grad_func(vec4(ray, 1.0), loc4).xyz);\n" \
 	"		cray = vol_trans_sin_color_l(v);\n" \
 	"		if (cray.x > loc7.x && flag)\n" \
-	"		{\n" \
-	"			//FragColor = vec4(0.0);\n" \
-	"			discarded = true;\n" \
-	"		}\n" \
+	"			discard;\n" \
 	"		if (cray.x <= loc7.x)\n" \
 	"			flag = true;\n" \
 	"	}\n" \
@@ -563,8 +549,6 @@ namespace FLIVR
 		//the common head
 		z << VOL_HEAD;
 
-		z << SEG_BODY_DISCARD_FLAG;
-
 		//head for clipping planes
 		if (paint_mode_!=6 && clip_)
 			z << VOL_HEAD_CLIP_FUNC;
@@ -625,8 +609,6 @@ namespace FLIVR
 					z << SEG_BODY_INIT_BLEND_ALL;
 				else if (paint_mode_==11)
 					z << SEG_BODY_INIT_POSTER;
-
-				z << SEG_BODY_DISCARD_APPLY;
 				break;
 			case SEG_SHDR_DB_GROW:
 				z << SEG_BODY_DB_GROW_2D_COORD;

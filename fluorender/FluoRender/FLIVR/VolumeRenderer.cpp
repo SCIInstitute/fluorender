@@ -36,7 +36,6 @@
 #include <FLIVR/VolKernel.h>
 #include "utility.h"
 #include "../compatibility.h"
-
 #include <fstream>
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
@@ -71,6 +70,7 @@ namespace FLIVR
 		hi_thresh_(1.0),
 		color_(Color(1.0, 1.0, 1.0)),
 		mask_color_(Color(0.0, 1.0, 0.0)),
+		mask_color_set_(false),
 		mask_thresh_(0.0),
 		alpha_(1.0),
 		//shading
@@ -81,6 +81,9 @@ namespace FLIVR
 		shine_(10.0),
 		//colormap mode
 		colormap_mode_(0),
+		colormap_low_value_(0.0),
+		colormap_hi_value_(1.0),
+		colormap_(0),
 		//solid
 		solid_(false),
 		//interpolate
@@ -127,6 +130,7 @@ namespace FLIVR
 		hi_thresh_(copy.hi_thresh_),
 		color_(copy.color_),
 		mask_color_(copy.mask_color_),
+		mask_color_set_(copy.mask_color_set_),
 		mask_thresh_(0.0),
 		alpha_(copy.alpha_),
 		//shading
@@ -137,6 +141,9 @@ namespace FLIVR
 		shine_(copy.shine_),
 		//colormap mode
 		colormap_mode_(copy.colormap_mode_),
+		colormap_low_value_(copy.colormap_low_value_),
+		colormap_hi_value_(copy.colormap_hi_value_),
+		colormap_(copy.colormap_),
 		//solid
 		solid_(copy.solid_),
 		//interpolate
@@ -261,24 +268,33 @@ namespace FLIVR
 	{
 		color_ = color;
 
-		//generate opposite color for mask
-		HSVColor hsv_color(color_);
-		double h, s, v;
-		if (hsv_color.sat() < 0.2)
-			mask_color_ = Color(0.0, 1.0, 0.0);	//if low saturation, set to green
-		else
+		if (!mask_color_set_)
 		{
-			double h0 = hsv_color.hue();
-			h = h0<30.0?h0-180.0:h0<90.0?h0+120.0:h0<210.0?h0-120.0:h0-180.0;
-			s = 1.0;
-			v = 1.0;
-			mask_color_ = Color(HSVColor(h<0.0?h+360.0:h, s, v));
+			//generate opposite color for mask
+			HSVColor hsv_color(color_);
+			double h, s, v;
+			if (hsv_color.sat() < 0.2)
+				mask_color_ = Color(0.0, 1.0, 0.0);	//if low saturation, set to green
+			else
+			{
+				double h0 = hsv_color.hue();
+				h = h0<30.0?h0-180.0:h0<90.0?h0+120.0:h0<210.0?h0-120.0:h0-180.0;
+				s = 1.0;
+				v = 1.0;
+				mask_color_ = Color(HSVColor(h<0.0?h+360.0:h, s, v));
+			}
 		}
 	}
 
 	Color VolumeRenderer::get_color()
 	{
 		return color_;
+	}
+
+	void VolumeRenderer::set_mask_color(Color color, bool set)
+	{
+		mask_color_ = color;
+		mask_color_set_ = set;
 	}
 
 	Color VolumeRenderer::get_mask_color()
@@ -690,12 +706,12 @@ namespace FLIVR
 		ShaderProgram* shader = 0;
 		//create/bind
 		shader = vol_shader_factory_.shader(
-			false,
-			tex_->nc(),
+			false, tex_->nc(),
 			shading_, use_fog,
 			depth_peel_, true,
 			hiqual_, ml_mode_,
-			colormap_mode_, solid_, 1);
+			colormap_mode_, colormap_,
+			solid_, 1);
 		if (shader)
 		{
 			if (!shader->valid())
@@ -1036,9 +1052,10 @@ namespace FLIVR
 		shader = vol_shader_factory_.shader(
 			true, 0,
 			false, false,
-			false, false,
+			0, false,
 			false, 0,
-			0, false, 1);
+			0, 0,
+			false, 1);
 		if (shader)
 		{
 			if (!shader->valid())
@@ -1105,7 +1122,6 @@ namespace FLIVR
 		if (!bricks || bricks->size() == 0)
 			return;
 
-		//glActiveTexture(GL_TEXTURE0);
 		//mask frame buffer object
 		if (!glIsFramebuffer(fbo_mask_))
 			glGenFramebuffers(1, &fbo_mask_);
@@ -1317,7 +1333,6 @@ namespace FLIVR
 
 		//enable depth test
 		glEnable(GL_DEPTH_TEST);
-
 	}
 
 	//generate the labeling assuming the mask is already generated
@@ -1530,14 +1545,26 @@ namespace FLIVR
 	//calculation
 	void VolumeRenderer::calculate(int type, FLIVR::VolumeRenderer *vr_a, FLIVR::VolumeRenderer *vr_b)
 	{
-		vector<TextureBrick*> *bricks = tex_->get_bricks();
+		//sync sorting
+		Ray view_ray(Point(0.802,0.267,0.534), Vector(0.802,0.267,0.534));
+		tex_->set_sort_bricks();
+		vector<TextureBrick*> *bricks = tex_->get_sorted_bricks(view_ray);
 		if (!bricks || bricks->size() == 0)
 			return;
-		
 		vector<TextureBrick*> *bricks_a = 0;
 		vector<TextureBrick*> *bricks_b = 0;
-		if (vr_a) bricks_a = vr_a->tex_->get_bricks();
-		if (vr_b) bricks_b = vr_b->tex_->get_bricks();
+
+		bricks_a = vr_a->tex_->get_bricks();
+		if (vr_a)
+		{
+			vr_a->tex_->set_sort_bricks();
+			bricks_a = vr_a->tex_->get_sorted_bricks(view_ray);
+		}
+		if (vr_b)
+		{
+			vr_b->tex_->set_sort_bricks();
+			bricks_b = vr_b->tex_->get_sorted_bricks(view_ray);
+		}
 
 		glActiveTexture(GL_TEXTURE0);
 		//mask frame buffer object
@@ -1599,7 +1626,6 @@ namespace FLIVR
 				if (bricks_b)
 					vr_b->load_brick_mask(bricks_b, i, GL_NEAREST, false, 4);
 			}
-
 			//draw each slice
 			for (int z=0; z<b->nz(); z++)
 			{

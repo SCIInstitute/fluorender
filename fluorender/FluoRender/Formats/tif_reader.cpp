@@ -797,9 +797,11 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
    void *val = 0;
    bool eight_bit = bits == 8;
 
-   long long total_size = (long long)m_x_size * (long long)m_y_size *
-         (long long)numPages;
-   val = malloc(total_size * (eight_bit?1:2));
+   unsigned long long total_size = (unsigned long long)m_x_size*
+	   (unsigned long long)m_y_size*(unsigned long long)numPages;
+   //val = malloc(total_size * (eight_bit?1:2));
+   val = eight_bit?(void*)(new unsigned char[total_size]):
+	   (void*)(new unsigned short[total_size]);
    if (!val)
       throw std::runtime_error( "Unable to allocate memory to read TIFF." );
 

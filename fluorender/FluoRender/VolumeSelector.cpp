@@ -101,8 +101,6 @@ void VolumeSelector::Select(double radius)
 {
 	if (!m_vd)
 		return;
-	//if (!glIsTexture(m_2d_mask))
-	//  return;
 
 	//insert the mask volume into m_vd
 	m_vd->AddEmptyMask();
@@ -142,13 +140,13 @@ void VolumeSelector::Select(double radius)
 	else
 		gm_falloff = 0.0;
 
+	if (Texture::mask_undo_num_>0 &&
+		m_vd->GetTexture())
+		m_vd->GetTexture()->push_mask();
+
 	//there is some unknown problem of clearing the mask
 	if (m_mode == 1)
-	{
 		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
-		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
-		//m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
-	}
 	else if (m_mode == 6)
 		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
 
@@ -179,6 +177,10 @@ void VolumeSelector::Select(double radius)
 
 	if (m_mode == 6)
 		m_vd->SetUseMaskThreshold(false);
+
+	if (Texture::mask_undo_num_>0 &&
+		m_vd->GetVR())
+		m_vd->GetVR()->return_mask();
 }
 
 //mode: 0-normal; 1-posterized; 2-noraml,copy; 3-poster, copy
@@ -1086,7 +1088,9 @@ void VolumeSelector::NoiseRemoval(int iter, double thresh, int mode)
 		VolumeData* vd_new = new VolumeData();
 		//add data and mask
 		Nrrd *nrrd_new = nrrdNew();
-		uint8 *val8 = new (std::nothrow) uint8[res_x*res_y*res_z];
+		unsigned long long mem_size = (unsigned long long)res_x*
+			(unsigned long long)res_y*(unsigned long long)res_z;
+		uint8 *val8 = new (std::nothrow) uint8[mem_size];
 		if (nrrd_mvd->type == nrrdTypeUChar)
 			memcpy(val8, nrrd_mvd->data, res_x*res_y*res_z);
 		else if (nrrd_mvd->type == nrrdTypeUShort)
@@ -1108,7 +1112,7 @@ void VolumeSelector::NoiseRemoval(int iter, double thresh, int mode)
 		vd_new->Load(nrrd_new, str, str);
 		//
 		Nrrd *nrrd_new_mask = nrrdNew();
-		val8 = new (std::nothrow) uint8[res_x*res_y*res_z];
+		val8 = new (std::nothrow) uint8[mem_size];
 		memcpy(val8, nrrd_mvd_mask->data, res_x*res_y*res_z);
 		nrrdWrap(nrrd_new_mask, val8, nrrdTypeUChar, 3, (size_t)res_x, (size_t)res_y, (size_t)res_z);
 		nrrdAxisInfoSet(nrrd_new_mask, nrrdAxisInfoSpacing, spc_x, spc_y, spc_z);

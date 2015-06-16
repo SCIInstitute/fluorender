@@ -67,7 +67,7 @@ m_view(0)
 		wxDefaultPosition, wxSize(70, 23));
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
-	sizer_1->Add(m_kernel_file_txt, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_1->Add(m_kernel_file_txt, 1, wxEXPAND);
 	sizer_1->Add(m_browse_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_save_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_saveas_btn, 0, wxALIGN_CENTER);
@@ -271,7 +271,7 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 		return;
 
 	//get bricks
-	Ray view_ray(Point(0,0,0), Vector(1,0,0));
+	Ray view_ray(Point(0.802,0.267,0.534), Vector(0.802,0.267,0.534));
 	tex->set_sort_bricks();
 	vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray);
 	if (!bricks || bricks->size() == 0)
@@ -312,6 +312,45 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 		bricks_r = tex_r->get_sorted_bricks(view_ray);
 		if (!bricks_r || bricks_r->size() == 0)
 			return;
+
+		if(vd)
+		{
+			//clipping planes
+			vector<Plane*> *planes = vd->GetVR()?vd->GetVR()->get_planes():0;
+			if (planes && vd_r->GetVR())
+				vd_r->GetVR()->set_planes(planes);
+			//transfer function
+			vd_r->Set3DGamma(vd->Get3DGamma());
+			vd_r->SetBoundary(vd->GetBoundary());
+			vd_r->SetOffset(vd->GetOffset());
+			vd_r->SetLeftThresh(vd->GetLeftThresh());
+			vd_r->SetRightThresh(vd->GetRightThresh());
+			FLIVR::Color col = vd->GetColor();
+			vd_r->SetColor(col);
+			vd_r->SetAlpha(vd->GetAlpha());
+			//shading
+			vd_r->SetShading(vd->GetShading());
+			double amb, diff, spec, shine;
+			vd->GetMaterial(amb, diff, spec, shine);
+			vd_r->SetMaterial(amb, diff, spec, shine);
+			//shadow
+			vd_r->SetShadow(vd->GetShadow());
+			double shadow;
+			vd->GetShadowParams(shadow);
+			vd_r->SetShadowParams(shadow);
+			//sample rate
+			vd_r->SetSampleRate(vd->GetSampleRate());
+			//2d adjusts
+			col = vd->GetGamma();
+			vd_r->SetGamma(col);
+			col = vd->GetBrightness();
+			vd_r->SetBrightness(col);
+			col = vd->GetHdr();
+			vd_r->SetHdr(col);
+			vd_r->SetSyncR(vd->GetSyncR());
+			vd_r->SetSyncG(vd->GetSyncG());
+			vd_r->SetSyncB(vd->GetSyncB());
+		}
 	}
 	else
 		result = tex->get_nrrd(0)->data;

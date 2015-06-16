@@ -1147,18 +1147,18 @@ void VRenderFrame::OnInfo(wxCommandEvent& WXUNUSED(event))
 		wxDefaultPosition,wxSize(50,-1));
 	font = wxFont(12,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
 	txt->SetFont(font);
-	right->Add(txt,0,wxEXPAND | wxALIGN_RIGHT);
+	right->Add(txt,0,wxEXPAND);
 	txt = new wxStaticText(d,wxID_ANY,wxString("Copyright (c) ") + VERSION_COPYRIGHT,
 		wxDefaultPosition,wxSize(-1,-1));
 	font = wxFont(11,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
 	txt->SetFont(font);
-	right->Add(txt,0,wxEXPAND | wxALIGN_RIGHT);
+	right->Add(txt,0,wxEXPAND);
 	right->Add(3,5,0);
 	txt = new wxStaticText(d,wxID_ANY,VERSION_AUTHORS,
 		wxDefaultPosition,wxSize(-1,90));
 	font = wxFont(10,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
 	txt->SetFont(font);
-	right->Add(txt,0,wxEXPAND | wxALIGN_RIGHT);
+	right->Add(txt,0,wxEXPAND);
 	wxHyperlinkCtrl* hyp = new wxHyperlinkCtrl(d,wxID_ANY,"Contact Info",
 		VERSION_CONTACT,
 		wxDefaultPosition,wxSize(-1,-1));
@@ -2191,6 +2191,10 @@ void VRenderFrame::SaveProject(wxString& filename)
 			vd->GetHSV(hue, sat, val);
 			str = wxString::Format("%f %f %f", hue, sat, val);
 			fconfig.Write("hsv", str);
+			color = vd->GetMaskColor();
+			str = wxString::Format("%f %f %f", color.r(), color.g(), color.b());
+			fconfig.Write("mask_color", str);
+			fconfig.Write("mask_color_set", vd->GetMaskColorSet());
 			fconfig.Write("enable_alpha", vd->GetEnableAlpha());
 			fconfig.Write("alpha", vd->GetAlpha());
 			double amb, diff, spec, shine;
@@ -2262,6 +2266,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 
 			//colormap settings
 			fconfig.Write("colormap_mode", vd->GetColormapMode());
+			fconfig.Write("colormap", vd->GetColormap());
 			double low, high;
 			vd->GetColormapValues(low, high);
 			fconfig.Write("colormap_lo_value", low);
@@ -2919,6 +2924,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 
 						//transfer function
 						double dval;
+						bool bval;
 						if (fconfig.Read("3dgamma", &dval))
 							vd->Set3DGamma(dval);
 						if (fconfig.Read("boundary", &dval))
@@ -2943,7 +2949,17 @@ void VRenderFrame::OpenProject(wxString& filename)
 							if (SSCANF(str.c_str(), "%f%f%f", &hue, &sat, &val))
 								vd->SetHSV(hue, sat, val);
 						}
-						bool bval;
+						if (fconfig.Read("mask_color", &str))
+						{
+							float red, green, blue;
+							if (SSCANF(str.c_str(), "%f%f%f", &red, &green, &blue)){
+								FLIVR::Color col(red,green,blue);
+								if (fconfig.Read("mask_color_set", &bval))
+									vd->SetMaskColor(col, bval);
+								else
+									vd->SetMaskColor(col);
+							}
+						}
 						if (fconfig.Read("enable_alpha", &bval))
 							vd->SetEnableAlpha(bval);
 						if (fconfig.Read("alpha", &dval))
@@ -3070,9 +3086,10 @@ void VRenderFrame::OpenProject(wxString& filename)
 							vd->SetSyncB(bVal);
 
 						//colormap settings
-						int mode;
-						if (fconfig.Read("colormap_mode", &mode))
-							vd->SetColormapMode(mode);
+						if (fconfig.Read("colormap_mode", &iVal))
+							vd->SetColormapMode(iVal);
+						if (fconfig.Read("colormap", &iVal))
+							vd->SetColormap(iVal);
 						double low, high;
 						if (fconfig.Read("colormap_lo_value", &low) &&
 							fconfig.Read("colormap_hi_value", &high))
@@ -3084,14 +3101,14 @@ void VRenderFrame::OpenProject(wxString& filename)
 						if (fconfig.Read("inv", &bVal))
 							vd->SetInvert(bVal);
 						//mip enable
-						if (fconfig.Read("mode", &mode))
-							vd->SetMode(mode);
+						if (fconfig.Read("mode", &iVal))
+							vd->SetMode(iVal);
 						//noise reduction
 						if (fconfig.Read("noise_red", &bVal))
 							vd->SetNR(bVal);
 						//depth override
-						if (fconfig.Read("depth_ovrd", &mode))
-							vd->SetBlendMode(mode);
+						if (fconfig.Read("depth_ovrd", &iVal))
+							vd->SetBlendMode(iVal);
 
 						//shadow
 						if (fconfig.Read("shadow", &bVal))
@@ -4274,6 +4291,12 @@ void VRenderFrame::ShowColocalizationDlg()
 	m_aui_mgr.GetPane(m_colocalization_dlg).Show();
 	m_aui_mgr.GetPane(m_colocalization_dlg).Float();
 	m_aui_mgr.Update();
+}
+
+void VRenderFrame::SetTextureUndos()
+{
+	if (m_setting_dlg)
+		Texture::mask_undo_num_ = (size_t)(m_setting_dlg->GetPaintHistDepth());
 }
 
 void VRenderFrame::SetTextureRendererSettings()

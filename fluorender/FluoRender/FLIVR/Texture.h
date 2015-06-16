@@ -43,6 +43,7 @@ namespace FLIVR
 	class Texture 
 	{
 	public:
+		static size_t mask_undo_num_;
 		Texture();
 		virtual ~Texture();
 
@@ -147,6 +148,15 @@ namespace FLIVR
 		{if (index>=0&&index<TEXTURE_MAX_COMPONENTS) return data_[index]; else return 0;}
 		int get_max_tex_comp()
 		{return TEXTURE_MAX_COMPONENTS;}
+		bool trim_mask_undos_head();
+		bool trim_mask_undos_tail();
+		bool get_undo();
+		bool get_redo();
+		void set_mask(void* mask_data);
+		void push_mask();
+		void mask_undos_forward();
+		void mask_undos_backward();
+		void clear_undos();
 
 		//add one more texture component as the volume mask
 		bool add_empty_mask();
@@ -204,7 +214,11 @@ namespace FLIVR
 		bool use_priority_;
 		int n_p0_;
 
+		//actual data
 		Nrrd* data_[TEXTURE_MAX_COMPONENTS];
+		//undos for mask
+		vector<void*> mask_undos_;
+		int mask_undo_pointer_;
 	};
 
 } // namespace FLIVR

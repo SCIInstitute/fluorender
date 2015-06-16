@@ -36,14 +36,6 @@ DEALINGS IN THE SOFTWARE.
 #include "FLIVR/Point.h"
 #include "FLIVR/MeshRenderer.h"
 #include "FLIVR/VolumeRenderer.h"
-#include <ciso646>  // detect std::lib
-#ifdef _LIBCPP_VERSION
-// using libc++
-#define HAVE_TYPE_TRAITS
-#else
-// using libstdc++
-#define HAVE_TR1_TYPE_TRAITS
-#endif
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
 #include "Formats/base_reader.h"
@@ -207,6 +199,7 @@ public:
 	VolumeRenderer *GetVR();
 	//texture
 	Texture* GetTexture();
+	void SetTexture();
 
 	//bounding box
 	BBox GetBounds();
@@ -260,7 +253,10 @@ public:
 	double GetRightThresh();
 	void SetColor(Color &color, bool update_hsv=true);
 	Color GetColor();
+	void SetMaskColor(Color &color, bool set=true);
 	Color GetMaskColor();
+	bool GetMaskColorSet();
+	void ResetMaskColorSet();
 	Color SetLuminance(double dVal);
 	double GetLuminance();
 	void SetAlpha(double alpha);
@@ -297,6 +293,8 @@ public:
 	bool GetColormapDisp();
 	void SetColormapValues(double low, double high);
 	void GetColormapValues(double &low, double &high);
+	void SetColormap(int value);
+	int GetColormap();
 
 	//resolution  scaling and spacing
 	void GetResolution(int &res_x, int &res_y, int &res_z);
@@ -440,6 +438,7 @@ private:
 	bool m_colormap_disp;	//true/false
 	double m_colormap_low_value;
 	double m_colormap_hi_value;
+	int m_colormap;//index to a colormap
 
 	//save the mode for restoring
 	int m_saved_mode;
@@ -836,7 +835,7 @@ public:
 
 private:
 	static int m_num;
-	int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe
+	int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe; 4: protractor
 	bool m_finished;
 	vector<Point> m_ruler;
 	bool m_disp;
@@ -1104,6 +1103,7 @@ public:
 	void SetColormapMode(int mode);
 	void SetColormapDisp(bool disp);
 	void SetColormapValues(double low, double high);
+	void SetColormap(int value);
 	void SetShading(bool shading);
 	void SetShadow(bool shadow);
 	void SetShadowParams(double val);
@@ -1332,6 +1332,7 @@ public:
 	double m_vol_ysp;	//y_spacing
 	double m_vol_zsp;	//z_spacing
 	double m_vol_lum;	//luminance
+	int m_vol_cmp;		//colormap
 	double m_vol_lcm;	//colormap low value
 	double m_vol_hcm;	//colormap high value
 	bool m_vol_eap;		//enable alpha

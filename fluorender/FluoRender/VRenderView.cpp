@@ -254,18 +254,18 @@ wxGLCanvas(parent, id, attriblist, pos, size, style),
 	m_sync_b(false),
 	//volume color map
 	//m_value_1(0.0),
-	m_color_1(Color(0.0, 0.0, 1.0)),
 	m_value_2(0.0),
-	m_color_2(Color(0.0, 0.0, 1.0)),
 	m_value_3(0.25),
-	m_color_3(Color(0.0, 1.0, 1.0)),
 	m_value_4(0.5),
-	m_color_4(Color(0.0, 1.0, 0.0)),
 	m_value_5(0.75),
-	m_color_5(Color(1.0, 1.0, 0.0)),
 	m_value_6(1.0),
-	m_color_6(Color(1.0, 0.0, 0.0)),
 	//m_value_7(1.0),
+	m_color_1(Color(0.0, 0.0, 1.0)),
+	m_color_2(Color(0.0, 0.0, 1.0)),
+	m_color_3(Color(0.0, 1.0, 1.0)),
+	m_color_4(Color(0.0, 1.0, 0.0)),
+	m_color_5(Color(1.0, 1.0, 0.0)),
+	m_color_6(Color(1.0, 0.0, 0.0)),
 	m_color_7(Color(1.0, 0.0, 0.0)),
 	//paint brush presssure
 	m_use_pres(false),
@@ -469,7 +469,11 @@ void VRenderGLView::Init()
 		ShaderProgram::init_shaders_supported();
 		if (vr_frame && vr_frame->GetSettingDlg()) KernelProgram::set_device_id(vr_frame->GetSettingDlg()->GetCLDeviceID());
 		KernelProgram::init_kernels_supported();
-		if (vr_frame) vr_frame->SetTextureRendererSettings();
+		if (vr_frame)
+		{
+			vr_frame->SetTextureRendererSettings();
+			vr_frame->SetTextureUndos();
+		}
 		glViewport(0, 0, (GLint)(GetSize().x), (GLint)(GetSize().y));
 		goTimer->start();
 		glGenBuffers(1, &m_quad_vbo);
@@ -477,7 +481,7 @@ void VRenderGLView::Init()
 		glGenBuffers(1, &m_misc_vbo);
 		glGenBuffers(1, &m_misc_ibo);
 		glGenVertexArrays(1, &m_misc_vao);
-		//glEnable( GL_MULTISAMPLE );
+		glEnable( GL_MULTISAMPLE );
 
 		m_initialized = true;
 	}
@@ -1874,7 +1878,7 @@ void VRenderGLView::Segment()
 						m_selector.Select(m_brush_radius2-m_brush_radius1);
 					}
 				}
-				m_selector.Select(m_brush_radius2-m_brush_radius1);
+				m_selector.SetVolume(vd);
 			}
 			else
 				m_selector.Select(m_brush_radius2-m_brush_radius1);
@@ -2316,10 +2320,8 @@ void VRenderGLView::SetVolumeB(VolumeData* vd)
 	m_calculator.SetVolumeB(vd);
 }
 
-wxString VRenderGLView::Calculate(int type, wxString prev_group, bool add)
+void VRenderGLView::CalculateSingle(int type, wxString prev_group, bool add)
 {
-	wxString result = "";
-
 	m_calculator.Calculate(type);
 	VolumeData* vd = m_calculator.GetResult();
 	if (vd)
@@ -2405,7 +2407,6 @@ wxString VRenderGLView::Calculate(int type, wxString prev_group, bool add)
 					vr_frame->UpdateTree(vd->GetName());
 				}
 			}
-			RefreshGL();
 		}
 		else if (type == 7)
 		{
@@ -2418,11 +2419,67 @@ wxString VRenderGLView::Calculate(int type, wxString prev_group, bool add)
 				if (vr_frame)
 					vr_frame->GetPropView()->SetVolumeData(vd_a);
 			}
-			RefreshGL();
 		}
+		RefreshGL();
 	}
+}
 
-	return prev_group;
+void VRenderGLView::Calculate(int type, wxString prev_group, bool add)
+{
+	if (type == 5 ||
+		type == 6 ||
+		type == 7)
+	{
+		vector<VolumeData*> vd_list;
+		if (m_selector.GetSelectGroup())
+		{
+			VolumeData* vd = m_calculator.GetVolumeA();
+			DataGroup* group = 0;
+			if (vd)
+			{
+				for (int i=0; i<GetLayerNum(); i++)
+				{
+					TreeLayer* layer = GetLayer(i);
+					if (layer && layer->IsA()==5)
+					{
+						DataGroup* tmp_group = (DataGroup*)layer;
+						for (int j=0; j<tmp_group->GetVolumeNum(); j++)
+						{
+							VolumeData* tmp_vd = tmp_group->GetVolumeData(j);
+							if (tmp_vd && tmp_vd==vd)
+							{
+								group = tmp_group;
+								break;
+							}
+						}
+					}
+					if (group)
+						break;
+				}
+			}
+			if (group && group->GetVolumeNum()>1)
+			{
+				for (int i=0; i<group->GetVolumeNum(); i++)
+				{
+					VolumeData* tmp_vd = group->GetVolumeData(i);
+					if (tmp_vd && tmp_vd->GetDisp())
+						vd_list.push_back(tmp_vd);
+				}
+				for (size_t i=0; i<vd_list.size(); ++i)
+				{
+					m_calculator.SetVolumeA(vd_list[i]);
+					CalculateSingle(type, prev_group, add);
+				}
+				m_calculator.SetVolumeA(vd);
+			}
+			else
+				CalculateSingle(type, prev_group, add);
+		}
+		else
+			CalculateSingle(type, prev_group, add);
+	}
+	else
+		CalculateSingle(type, prev_group, add);
 }
 
 //draw out the framebuffer after composition
@@ -2976,7 +3033,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 		{
 			//2d adjustment
 			img_shader =
-				m_img_shader_factory.shader(IMG_SHDR_GRADIENT_MAP);
+				m_img_shader_factory.shader(IMG_SHDR_GRADIENT_MAP, vd->GetColormap());
 			if (img_shader)
 			{
 				if (!img_shader->valid())
@@ -3298,6 +3355,17 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 	if (vlist.empty())
 		return;
 
+	size_t i;
+	bool has_shadow = false;
+	for (i=0; i<vlist.size(); i++)
+	{
+		VolumeData* vd = vlist[i];
+		if (vd)
+			has_shadow = has_shadow || vd->GetShadow();
+	}
+	if (!has_shadow)
+		return;
+
 	if (TextureRenderer::get_mem_swap() &&
 		TextureRenderer::get_start_update_loop() &&
 		!TextureRenderer::get_done_update_loop())
@@ -3385,8 +3453,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		vector<bool> shadings;
 		vector<VolumeData*> list;
 		//geenerate list
-		int i;
-		for (i=0; i<(int)vlist.size(); i++)
+		for (i=0; i<vlist.size(); i++)
 		{
 			VolumeData* vd = vlist[i];
 			if (vd && vd->GetShadow())
@@ -3399,7 +3466,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		if (!list.empty())
 		{
 			m_mvr->clear_vr();
-			for (i=0; i<(int)list.size(); i++)
+			for (i=0; i<list.size(); i++)
 			{
 				VolumeData* vd = list[i];
 				vd->GetVR()->set_shading(false);
@@ -3421,7 +3488,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 			m_mvr->draw(m_test_wiref, m_interactive, !m_persp, m_scale_factor, m_intp);
 			//restore
 			m_mvr->set_colormap_mode(0);
-			for (i=0; i<(int)list.size(); i++)
+			for (i=0; i<list.size(); i++)
 			{
 				VolumeData* vd = list[i];
 				vd->RestoreMode();
@@ -7563,6 +7630,58 @@ void VRenderGLView::DrawGradBg()
 	glEnable(GL_BLEND);
 }
 
+void VRenderGLView::SetColormapColors(int colormap)
+{
+	switch (colormap)
+	{
+	case 0://rainbow
+		m_color_1 = Color(0.0, 0.0, 1.0);
+		m_color_2 = Color(0.0, 0.0, 1.0);
+		m_color_3 = Color(0.0, 1.0, 1.0);
+		m_color_4 = Color(0.0, 1.0, 0.0);
+		m_color_5 = Color(1.0, 1.0, 0.0);
+		m_color_6 = Color(1.0, 0.0, 0.0);
+		m_color_7 = Color(1.0, 0.0, 0.0);
+		break;
+	case 1://reverse rainbow
+		m_color_1 = Color(1.0, 0.0, 0.0);
+		m_color_2 = Color(1.0, 0.0, 0.0);
+		m_color_3 = Color(1.0, 1.0, 0.0);
+		m_color_4 = Color(0.0, 1.0, 0.0);
+		m_color_5 = Color(0.0, 1.0, 1.0);
+		m_color_6 = Color(0.0, 0.0, 1.0);
+		m_color_7 = Color(0.0, 0.0, 1.0);
+		break;
+	case 2://hot
+		m_color_1 = Color(0.0, 0.0, 0.0);
+		m_color_2 = Color(0.0, 0.0, 0.0);
+		m_color_3 = Color(0.5, 0.0, 0.0);
+		m_color_4 = Color(1.0, 0.0, 0.0);
+		m_color_5 = Color(1.0, 1.0, 0.0);
+		m_color_6 = Color(1.0, 1.0, 1.0);
+		m_color_7 = Color(1.0, 1.0, 1.0);
+		break;
+	case 3://cool
+		m_color_1 = Color(0.0, 1.0, 1.0);
+		m_color_2 = Color(0.0, 1.0, 1.0);
+		m_color_3 = Color(0.25, 0.75, 1.0);
+		m_color_4 = Color(0.5, 0.5, 1.0);
+		m_color_5 = Color(0.75, 0.25, 1.0);
+		m_color_6 = Color(1.0, 0.0, 1.0);
+		m_color_7 = Color(1.0, 0.0, 1.0);
+		break;
+	case 4://blue-red
+		m_color_1 = Color(0.25, 0.3, 0.75);
+		m_color_2 = Color(0.25, 0.3, 0.75);
+		m_color_3 = Color(0.475, 0.5, 0.725);
+		m_color_4 = Color(0.7, 0.7, 0.7);
+		m_color_5 = Color(0.7, 0.35, 0.425);
+		m_color_6 = Color(0.7, 0.0, 0.15);
+		m_color_7 = Color(0.7, 0.0, 0.15);
+		break;
+	}
+}
+
 void VRenderGLView::DrawColormap()
 {
 	bool draw = false;
@@ -7599,6 +7718,7 @@ void VRenderGLView::DrawColormap()
 			m_value_5 = (m_value_4+high)/2.0;
 			max_val = vd_view->GetMaxValue();
 			enable_alpha = vd_view->GetEnableAlpha();
+			SetColormapColors(vd_view->GetColormap());
 		}
 	}
 	else if (num > 1)
@@ -7623,6 +7743,7 @@ void VRenderGLView::DrawColormap()
 					m_value_5 = (m_value_4+high)/2.0;
 					max_val = vd_view->GetMaxValue();
 					enable_alpha = vd_view->GetEnableAlpha();
+					SetColormapColors(vd_view->GetColormap());
 				}
 			}
 		}
@@ -9157,6 +9278,32 @@ void VRenderGLView::DrawRulers()
 					num += 2;
 				}
 			}
+			if (ruler->GetRulerType() == 4 &&
+				ruler->GetNumPoint() >= 3)
+			{
+				Point center = *(ruler->GetPoint(1));
+				Vector v1 = *(ruler->GetPoint(0)) - center;
+				Vector v2 = *(ruler->GetPoint(2)) - center;
+				double len = Min(v1.length(), v2.length());
+				if (len > w)
+				{
+					v1.normalize();
+					v2.normalize();
+					p1 = center + v1*w;
+					p1 = mv.transform(p1);
+					p1 = p.transform(p1);
+					px = (p1.x()+1.0)*nx/2.0;
+					py = (p1.y()+1.0)*ny/2.0;
+					verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+					p1 = center + v2*w;
+					p1 = mv.transform(p1);
+					p1 = p.transform(p1);
+					px = (p1.x()+1.0)*nx/2.0;
+					py = (p1.y()+1.0)*ny/2.0;
+					verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+					num += 2;
+				}
+			}
 			nums.push_back(num);
 		}
 	}
@@ -10634,9 +10781,9 @@ void VRenderView::CreateBar()
 
 	//add the toolbars and other options in order
 	sizer_h_1->AddSpacer(40);
-	sizer_h_1->Add(m_options_toolbar,1,wxALIGN_CENTER|wxEXPAND);
+	sizer_h_1->Add(m_options_toolbar,1,wxEXPAND);
 	//sizer_h_1->AddStretchSpacer();
-	//sizer_h_1->Add(m_options_toolbar2,0,wxALIGN_CENTER|wxEXPAND);
+	//sizer_h_1->Add(m_options_toolbar2,0,wxEXPAND);
 	sizer_h_1->AddSpacer(35);
 
 	//bar left///////////////////////////////////////////////////

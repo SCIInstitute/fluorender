@@ -71,7 +71,7 @@ m_p4(0.0)//,
 	m_p1_chck = new wxCheckBox(this, ID_P1Check, "",
 		wxDefaultPosition, wxDefaultSize);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
-	sizer_1->Add(m_p1_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_1->Add(m_p1_sldr, 1, wxEXPAND);
 	sizer_1->Add(m_p1_text, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_p1_chck, 0, wxALIGN_CENTER);
 
@@ -86,7 +86,7 @@ m_p4(0.0)//,
 	m_p2_chck = new wxCheckBox(this, ID_P2Check, "",
 		wxDefaultPosition, wxDefaultSize);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
-	sizer_2->Add(m_p2_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_2->Add(m_p2_sldr, 1, wxEXPAND);
 	sizer_2->Add(m_p2_text, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_p2_chck, 0, wxALIGN_CENTER);
 
@@ -101,7 +101,7 @@ m_p4(0.0)//,
 	m_p3_chck = new wxCheckBox(this, ID_P3Check, "",
 		wxDefaultPosition, wxDefaultSize);
 	sizer_3->Add(st, 0, wxALIGN_CENTER);
-	sizer_3->Add(m_p3_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_3->Add(m_p3_sldr, 1, wxEXPAND);
 	sizer_3->Add(m_p3_text, 0, wxALIGN_CENTER);
 	sizer_3->Add(m_p3_chck, 0, wxALIGN_CENTER);
 
@@ -116,7 +116,7 @@ m_p4(0.0)//,
 	m_p4_chck = new wxCheckBox(this, ID_P4Check, "",
 		wxDefaultPosition, wxDefaultSize);
 	sizer_4->Add(st, 0, wxALIGN_CENTER);
-	sizer_4->Add(m_p4_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_4->Add(m_p4_sldr, 1, wxEXPAND);
 	sizer_4->Add(m_p4_text, 0, wxALIGN_CENTER);
 	sizer_4->Add(m_p4_chck, 0, wxALIGN_CENTER);
 

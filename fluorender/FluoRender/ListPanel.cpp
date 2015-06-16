@@ -77,6 +77,7 @@ DataListCtrl::DataListCtrl(
 
 DataListCtrl::~DataListCtrl()
 {
+	delete m_rename_text;
 }
 
 void DataListCtrl::Append(int type, wxString name, wxString path)

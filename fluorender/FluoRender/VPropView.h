@@ -56,7 +56,9 @@ class VPropView: public wxPanel
 		ID_AddTri,
 		ID_Del,
 		ID_ColorText,
+		ID_Color2Text,
 		ID_ColorBtn,
+		ID_Color2Btn,
 		ID_AlphaChk,
 		ID_AlphaSldr,
 		ID_Alpha_Text,
@@ -95,6 +97,7 @@ class VPropView: public wxPanel
 		ID_ColormapHighValueText,
 		ID_ColormapLowValueSldr,
 		ID_ColormapLowValueText,
+		ID_ColormapCombo,
 		ID_InvChk,
 		ID_MipChk,
 		ID_NRChk,
@@ -185,6 +188,8 @@ private:
 	//wxColourPickerCtrl *m_color_picker;
 	wxTextCtrl *m_color_text;
 	wxColourPickerCtrl *m_color_btn;
+	wxTextCtrl *m_color2_text;
+	wxColourPickerCtrl *m_color2_btn;
 	//space
 	wxTextCtrl *m_space_x_text;
 	wxTextCtrl *m_space_y_text;
@@ -195,6 +200,7 @@ private:
 	wxTextCtrl *m_colormap_high_value_text;
 	wxSlider *m_colormap_low_value_sldr;
 	wxTextCtrl *m_colormap_low_value_text;
+	wxComboBox *m_colormap_combo;
 
 	//buttons
 	wxToolBar *m_options_toolbar;
@@ -240,11 +246,17 @@ private:
 	void OnColormapHighValueText(wxCommandEvent &event);
 	void OnColormapLowValueChange(wxScrollEvent &event);
 	void OnColormapLowValueText(wxCommandEvent &event);
+	void OnColormapCombo(wxCommandEvent &event);
 	//6
+	int GetColorString(wxString& str, wxColor& wxc);
 	void OnColorChange(wxColor c);
 	void OnColorTextChange(wxCommandEvent& event);
 	void OnColorTextFocus(wxCommandEvent& event);
 	void OnColorBtn(wxColourPickerEvent& event);
+	void OnColor2Change(wxColor c);
+	void OnColor2TextChange(wxCommandEvent& event);
+	void OnColor2TextFocus(wxCommandEvent& event);
+	void OnColor2Btn(wxColourPickerEvent& event);
 	//spacings
 	void OnSpaceText(wxCommandEvent& event);
 	//legend

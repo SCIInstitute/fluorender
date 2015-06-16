@@ -129,6 +129,7 @@ VolumeData::VolumeData()
 	m_colormap_disp = false;
 	m_colormap_low_value = 0.0;
 	m_colormap_hi_value = 1.0;
+	m_colormap = 0;
 
 	//blend mode
 	m_blend_mode = 0;
@@ -235,6 +236,7 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_colormap_disp = copy.m_colormap_disp;
 	m_colormap_low_value = copy.m_colormap_low_value;
 	m_colormap_hi_value = copy.m_colormap_hi_value;
+	m_colormap = copy.m_colormap;
 
 	//blend mode
 	m_blend_mode = copy.m_blend_mode;
@@ -269,10 +271,10 @@ VolumeData::VolumeData(VolumeData &copy)
 
 VolumeData::~VolumeData()
 {
-	if (m_tex && !m_dup)
-		delete m_tex;
 	if (m_vr)
 		delete m_vr;
+	if (m_tex && !m_dup)
+		delete m_tex;
 }
 
 //duplication
@@ -423,17 +425,15 @@ int VolumeData::Replace(VolumeData* data)
 
 	double spcx = 1.0, spcy = 1.0, spcz = 1.0;
 
-	if (m_tex)
+	if (m_tex && m_vr)
 	{
 		m_tex->get_spacings(spcx, spcy, spcz);
+		m_vr->clear_tex_current();
 		delete m_tex;
+		m_vr->reset_texture();
 	}
-	m_tex = new Texture();
-	m_tex->set_use_priority(m_skip_brick);
-	m_tex->build(data->GetTexture()->get_nrrd(0), 0,
-		0, data->GetMaxValue(), 0, 0);
-	m_tex->set_spacings(spcx, spcy, spcz);
-	data->GetTexture()->set_nrrd(0, 0);
+	m_tex = data->GetTexture();
+	data->SetTexture();
 	SetScalarScale(data->GetScalarScale());
 	SetGMScale(data->GetGMScale());
 	SetMaxValue(data->GetMaxValue());
@@ -460,7 +460,9 @@ void VolumeData::AddEmptyData(int bits,
 	Nrrd *nv = nrrdNew();
 	if (bits == 8)
 	{
-		uint8 *val8 = new (std::nothrow) uint8[nx*ny*nz];
+		unsigned long long mem_size = (unsigned long long)nx*
+			(unsigned long long)ny*(unsigned long long)nz;
+		uint8 *val8 = new (std::nothrow) uint8[mem_size];
 		if (!val8)
 		{
 			wxMessageBox("Not enough memory. Please save project and restart.");
@@ -471,7 +473,9 @@ void VolumeData::AddEmptyData(int bits,
 	}
 	else if (bits == 16)
 	{
-		uint16 *val16 = new (std::nothrow) uint16[nx*ny*nz];
+		unsigned long long mem_size = (unsigned long long)nx*
+			(unsigned long long)ny*(unsigned long long)nz;
+		uint16 *val16 = new (std::nothrow) uint16[mem_size];
 		if (!val16)
 		{
 			wxMessageBox("Not enough memory. Please save project and restart.");
@@ -555,11 +559,9 @@ void VolumeData::AddEmptyMask()
 	{
 		//add the nrrd data for mask
 		Nrrd *nrrd_mask = nrrdNew();
-		long long mem_size = (long long)m_res_x*
-			(long long)m_res_y*
-			(long long)m_res_z;
-		//uint8 *val8 = new (std::nothrow) uint8[mem_size];
-		uint8 *val8 = (uint8*)malloc(mem_size*sizeof(uint8));
+		unsigned long long mem_size = (unsigned long long)m_res_x*
+			(unsigned long long)m_res_y*(unsigned long long)m_res_z;
+		uint8 *val8 = new (std::nothrow) uint8[mem_size];
 		if (!val8)
 		{
 			wxMessageBox("Not enough memory. Please save project and restart.");
@@ -650,7 +652,9 @@ void VolumeData::AddEmptyLabel(int mode)
 	{
 		//add the nrrd data for the labeling mask
 		Nrrd *nrrd_label = nrrdNew();
-		unsigned int *val32 = new (std::nothrow) unsigned int[m_res_x*m_res_y*m_res_z];
+		unsigned long long mem_size = (unsigned long long)m_res_x*
+			(unsigned long long)m_res_y*(unsigned long long)m_res_z;
+		unsigned int *val32 = new (std::nothrow) unsigned int[mem_size];
 		if (!val32)
 		{
 			wxMessageBox("Not enough memory. Please save project and restart.");
@@ -871,7 +875,9 @@ void VolumeData::Save(wxString &filename, int mode, bool bake, bool compress)
 				Nrrd* baked_data = nrrdNew();
 				if (bits == 8)
 				{
-					uint8 *val8 = new (std::nothrow) uint8[nx*ny*nz];
+					unsigned long long mem_size = (unsigned long long)nx*
+						(unsigned long long)ny*(unsigned long long)nz;
+					uint8 *val8 = new (std::nothrow) uint8[mem_size];
 					if (!val8)
 					{
 						wxMessageBox("Not enough memory. Please save project and restart.");
@@ -893,7 +899,9 @@ void VolumeData::Save(wxString &filename, int mode, bool bake, bool compress)
 				}
 				else if (bits == 16)
 				{
-					uint16 *val16 = new (std::nothrow) uint16[nx*ny*nz];
+					unsigned long long mem_size = (unsigned long long)nx*
+						(unsigned long long)ny*(unsigned long long)nz;
+					uint16 *val16 = new (std::nothrow) uint16[mem_size];
 					if (!val16)
 					{
 						wxMessageBox("Not enough memory. Please save project and restart.");
@@ -924,6 +932,7 @@ void VolumeData::Save(wxString &filename, int mode, bool bake, bool compress)
 				writer->Save(filename.ToStdWstring(), mode);
 
 				//free memory
+				delete []baked_data->data;
 				nrrdNix(baked_data);
 
 				prg_diag->Update(100);
@@ -1137,6 +1146,13 @@ Texture* VolumeData::GetTexture()
 	return m_tex;
 }
 
+void VolumeData::SetTexture()
+{
+	if (m_vr)
+		m_vr->reset_texture();
+	m_tex = 0;
+}
+
 void VolumeData::SetMatrices(glm::mat4 &mv_mat,
 	glm::mat4 &proj_mat, glm::mat4 &tex_mat)
 {
@@ -1297,12 +1313,32 @@ Color VolumeData::GetColor()
 	return m_color;
 }
 
+void VolumeData::SetMaskColor(Color &color, bool set)
+{
+	if (m_vr)
+		m_vr->set_mask_color(color, set);
+}
+
 Color VolumeData::GetMaskColor()
 {
 	Color result;
 	if (m_vr)
 		result = m_vr->get_mask_color();
 	return result;
+}
+
+bool VolumeData::GetMaskColorSet()
+{
+	if (m_vr)
+		return m_vr->get_mask_color_set();
+	else
+		return false;
+}
+
+void VolumeData::ResetMaskColorSet()
+{
+	if (m_vr)
+		m_vr->reset_mask_color_set();
 }
 
 Color VolumeData::SetLuminance(double dVal)
@@ -1505,6 +1541,18 @@ void VolumeData::GetColormapValues(double &low, double &high)
 {
 	low = m_colormap_low_value;
 	high = m_colormap_hi_value;
+}
+
+void VolumeData::SetColormap(int value)
+{
+	m_colormap = value;
+	if (m_vr)
+		m_vr->set_colormap(m_colormap);
+}
+
+int VolumeData::GetColormap()
+{
+	return m_colormap;
 }
 
 //resolution  scaling and spacing
@@ -2742,8 +2790,18 @@ double Ruler::GetAngle()
 			angle = angle<0.0?angle+180.0:angle;
 		}
 	}
-	else if (m_ruler_type == 1)
+	else if (m_ruler_type == 4)
 	{
+		if (m_ruler.size() >=3)
+		{
+			Vector v1, v2;
+			v1 = m_ruler[0] - m_ruler[1];
+			v1.normalize();
+			v2 = m_ruler[2] - m_ruler[1];
+			v2.normalize();
+			angle = acos(Dot(v1, v2));
+			angle = r2d(angle);
+		}
 	}
 
 	return angle;
@@ -2758,6 +2816,9 @@ bool Ruler::AddPoint(Point &point)
 		m_ruler_type == 3) &&
 		m_ruler.size() == 2)
 		return false;
+	else if (m_ruler_type == 4 &&
+		m_ruler.size() == 3)
+		return false;
 	else
 	{
 		m_ruler.push_back(point);
@@ -2767,6 +2828,9 @@ bool Ruler::AddPoint(Point &point)
 		else if ((m_ruler_type == 0 ||
 			m_ruler_type == 3) &&
 			m_ruler.size() == 2)
+			m_finished = true;
+		else if (m_ruler_type == 4 &&
+			m_ruler.size() == 3)
 			m_finished = true;
 		return true;
 	}
@@ -3900,6 +3964,16 @@ void DataGroup::SetColormapValues(double low, double high)
 	}
 }
 
+void DataGroup::SetColormap(int value)
+{
+	for (int i=0; i<GetVolumeNum(); i++)
+	{
+		VolumeData* vd = GetVolumeData(i);
+		if (vd)
+			vd->SetColormap(value);
+	}
+}
+
 void DataGroup::SetShading(bool shading)
 {
 	for (int i=0; i<GetVolumeNum(); i++)
@@ -4045,6 +4119,7 @@ m_vol_exb(0.0),
 	m_vol_ysp(1.0),
 	m_vol_zsp(2.5),
 	m_vol_lum(1.0),
+	m_vol_cmp(0),
 	m_vol_lcm(0.0),
 	m_vol_hcm(1.0),
 	m_vol_eap(true),
@@ -4072,6 +4147,7 @@ m_vol_exb(0.0),
 	wxFileConfig fconfig(is);
 
 	double val;
+	int ival;
 	if (fconfig.Read("extract_boundary", &val))
 		m_vol_exb = val;
 	if (fconfig.Read("gamma", &val))
@@ -4100,6 +4176,8 @@ m_vol_exb(0.0),
 		m_vol_zsp = val;
 	if (fconfig.Read("luminance", &val))
 		m_vol_lum = val;
+	if (fconfig.Read("colormap", &ival))
+		m_vol_cmp = ival;
 	if (fconfig.Read("colormap_low", &val))
 		m_vol_lcm = val;
 	if (fconfig.Read("colormap_hi", &val))
@@ -4196,6 +4274,7 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 		vd->SetMaterial(m_vol_lsh, diff, spec, m_vol_hsh);
 		if (!vd->GetSpcFromFile())
 			vd->SetSpacings(m_vol_xsp, m_vol_ysp, m_vol_zsp);
+		vd->SetColormap(m_vol_cmp);
 		vd->SetColormapValues(m_vol_lcm, m_vol_hcm);
 
 		vd->SetEnableAlpha(m_vol_eap);

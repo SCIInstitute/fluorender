@@ -69,7 +69,7 @@ m_dft_thresh(0.0)
 	m_ca_thresh_text = new wxTextCtrl(this, ID_CAThreshText, "0.0",
 		wxDefaultPosition, wxSize(50, 20), 0, vald_fp1);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
-	sizer_1->Add(m_ca_thresh_sldr, 1, wxALIGN_CENTER|wxEXPAND);
+	sizer_1->Add(m_ca_thresh_sldr, 1, wxEXPAND);
 	sizer_1->Add(m_ca_thresh_text, 0, wxALIGN_CENTER);
 	m_ca_analyze_btn = new wxButton(this, ID_CAAnalyzeBtn, "Analyze",
 		wxDefaultPosition, wxSize(-1, 23));
@@ -140,13 +140,13 @@ m_dft_thresh(0.0)
 	//all controls
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(10, 10);
-	sizerV->Add(sizer_1, 0, wxEXPAND|wxALIGN_CENTER);
+	sizerV->Add(sizer_1, 0, wxEXPAND);
 	sizerV->Add(10, 10);
-	sizerV->Add(sizer_2, 0, wxEXPAND|wxALIGN_CENTER);
+	sizerV->Add(sizer_2, 0, wxEXPAND);
 	sizerV->Add(10, 10);
-	sizerV->Add(sizer_3, 0, wxEXPAND|wxALIGN_CENTER);
+	sizerV->Add(sizer_3, 0, wxEXPAND);
 	sizerV->Add(10, 10);
-	sizerV->Add(sizer_4, 0, wxEXPAND|wxALIGN_CENTER);
+	sizerV->Add(sizer_4, 0, wxEXPAND);
 
 	SetSizer(sizerV);
 	Layout();

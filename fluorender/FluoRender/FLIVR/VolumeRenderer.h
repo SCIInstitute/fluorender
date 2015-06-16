@@ -71,7 +71,10 @@ namespace FLIVR
 		double get_hi_thresh();
 		void set_color(Color color);
 		Color get_color();
+		void set_mask_color(Color color, bool set=true);
 		Color get_mask_color();
+		bool get_mask_color_set() {return mask_color_set_; }
+		void reset_mask_color_set() {mask_color_set_ = false;}
 		void set_mask_thresh(double thresh);
 		double get_mask_thresh();
 		void set_alpha(double alpha);
@@ -90,6 +93,8 @@ namespace FLIVR
 		{colormap_mode_ = mode;}
 		void set_colormap_values(double low, double hi)
 		{colormap_low_value_ = low; colormap_hi_value_ = hi;}
+		void set_colormap(int value)
+		{colormap_ = value;}
 
 		//solid
 		void set_solid(bool mode)
@@ -158,10 +163,6 @@ namespace FLIVR
 		//mask and label
 		int get_ml_mode() {return ml_mode_;}
 		void set_ml_mode(int mode) {ml_mode_ = mode;}
-		//bool get_mask() {return mask_;}
-		//void set_mask(bool mask) {mask_ = mask;}
-		//bool get_label() {return label_;}
-		//void set_label(bool label) {label_ = label;}
 
 		//set noise reduction
 		void SetNoiseRed(bool nd) {noise_red_ = nd;}
@@ -208,6 +209,7 @@ namespace FLIVR
 		double hi_thresh_;
 		Color color_;
 		Color mask_color_;
+		bool mask_color_set_;
 		double mask_thresh_;
 		double alpha_;
 		//shading
@@ -217,6 +219,7 @@ namespace FLIVR
 		int colormap_mode_;//0-normal; 1-rainbow; 2-depth
 		double colormap_low_value_;
 		double colormap_hi_value_;
+		int colormap_;
 		//solid
 		bool solid_;
 		//interpolation

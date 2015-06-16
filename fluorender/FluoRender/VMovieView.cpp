@@ -376,16 +376,16 @@ m_current_page(0) {
 	m_play_btn = new wxButton(this, ID_PlayPause, "",
 		wxDefaultPosition, wxSize(30, 30));
 	m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
-	sizerH->Add(m_play_btn, 0, wxEXPAND|wxALIGN_CENTER);
+	sizerH->Add(m_play_btn, 0, wxEXPAND);
 	m_rewind_btn = new wxButton(this, ID_Rewind, "",
 		wxDefaultPosition, wxSize(30, 30));
 	m_rewind_btn->SetBitmap(wxGetBitmapFromMemory(rewind));
-	sizerH->Add(m_rewind_btn, 0, wxEXPAND|wxALIGN_CENTER);
+	sizerH->Add(m_rewind_btn, 0, wxEXPAND);
 	m_progress_sldr = new wxSlider(this, ID_ProgressSldr, 0, 0, 360);
-	sizerH->Add(m_progress_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizerH->Add(m_progress_sldr, 1, wxEXPAND);
 	m_progress_text = new wxTextCtrl(this, ID_ProgressText, "0.00",
 		wxDefaultPosition,wxSize(50, -1));
-	sizerH->Add(m_progress_text, 0, wxEXPAND|wxALIGN_CENTER);
+	sizerH->Add(m_progress_text, 0, wxEXPAND);
 	wxStaticText * st3 = new wxStaticText(this, 0, "s",
 		wxDefaultPosition, wxSize(20, 20));
 	sizerH->Add(5, 5, 0);
@@ -393,7 +393,7 @@ m_current_page(0) {
 	m_save_btn = new wxButton(this, ID_SaveMovie, "Save...",
 		wxDefaultPosition, wxSize(80, 30));
 	m_save_btn->SetBitmap(wxGetBitmapFromMemory(listicon_save));
-	sizerH->Add(m_save_btn, 0, wxEXPAND|wxALIGN_CENTER);
+	sizerH->Add(m_save_btn, 0, wxEXPAND);
 	//interface
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(m_notebook, 1, wxEXPAND);

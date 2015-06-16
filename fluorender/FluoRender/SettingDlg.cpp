@@ -53,7 +53,7 @@ BEGIN_EVENT_TABLE(SettingDlg, wxPanel)
 	//gradient background
 	EVT_CHECKBOX(ID_GradBgChk, SettingDlg::OnGradBgCheck)
 	//link render views rotations
-    EVT_CHECKBOX(ID_RotLinkChk, SettingDlg::OnRotLink)
+	EVT_CHECKBOX(ID_RotLinkChk, SettingDlg::OnRotLink)
 	//override vox
 	EVT_CHECKBOX(ID_OverrideVoxChk, SettingDlg::OnOverrideVoxCheck)
 	//wavelength to color
@@ -76,12 +76,17 @@ BEGIN_EVENT_TABLE(SettingDlg, wxPanel)
 	EVT_COMBOBOX(ID_FontSizeCmb, SettingDlg::OnFontSizeChange)
 	//script
 	EVT_CHECKBOX(ID_RunScriptChk, SettingDlg::OnRunScriptChk)
+	//paint history depth
+	EVT_COMMAND_SCROLL(ID_PaintHistDepthSldr, SettingDlg::OnPaintHistDepthChange)
+	EVT_TEXT(ID_PaintHistDepthText, SettingDlg::OnPaintHistDepthEdit)
 	//show
 	EVT_SHOW(SettingDlg::OnShow)
 END_EVENT_TABLE()
 
 wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 {
+	//validator: integer
+	wxIntegerValidator<unsigned int> vald_int;
 	wxStaticText* st;
 	wxPanel *page = new wxPanel(parent);
 
@@ -154,6 +159,26 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	group3->Add(st);
 	group3->Add(10, 5);
 
+	//paint history depth
+	wxBoxSizer *group4 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "Paint History"), wxVERTICAL);
+	wxBoxSizer *sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
+	m_paint_hist_depth_sldr = new wxSlider(page, ID_PaintHistDepthSldr, 0, 0, 10,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_paint_hist_depth_text = new wxTextCtrl(page, ID_PaintHistDepthText, "0",
+		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+	st = new wxStaticText(page, 0,
+		"The number of undo steps for paint brush selection.\n" \
+		"Set the value to 0 to disable history.\n" \
+		"A value greater than 0 slows down speed and increases memory usage.");
+	sizer4_1->Add(m_paint_hist_depth_sldr, 1, wxEXPAND);
+	sizer4_1->Add(m_paint_hist_depth_text, 0, wxALIGN_CENTER);
+	group4->Add(10, 5);
+	group4->Add(sizer4_1, 0, wxEXPAND);
+	group4->Add(10, 5);
+	group4->Add(st);
+	group4->Add(10, 5);
+
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(10, 10);
 	sizerV->Add(group1, 0, wxEXPAND);
@@ -161,6 +186,8 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	sizerV->Add(group2, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 	sizerV->Add(group3, 0, wxEXPAND);
+	sizerV->Add(10, 10);
+	sizerV->Add(group4, 0, wxEXPAND);
 
 	page->SetSizer(sizerV);
 	return page;
@@ -202,9 +229,9 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	m_peeling_layers_text = new wxTextCtrl(page, ID_PeelingLayersText, "1",
 		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
 	st = new wxStaticText(page, 0,
-		"Number of depth peeling layers for rendering transparent mesh objects.\n"\
-			"Set higher numbers only for complex geometries.\n"\
-			"It slows down the rendering speed.");
+		"The number of depth peeling layers for rendering transparent mesh objects.\n"\
+		"Set higher numbers only for complex geometries.\n"\
+		"It slows down the rendering speed.");
 	sizer2_1->Add(m_peeling_layers_sldr, 1, wxEXPAND);
 	sizer2_1->Add(m_peeling_layers_text, 0, wxALIGN_CENTER);
 	group2->Add(10, 5);
@@ -307,7 +334,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 		wxDefaultPosition, wxSize(40, -1), 0, vald_int);
 	st = new wxStaticText(page, 0, "MB",
 		wxDefaultPosition, wxSize(20, -1));
-	sizer2_1->Add(m_graphics_mem_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer2_1->Add(m_graphics_mem_sldr, 1, wxEXPAND);
 	sizer2_1->Add(m_graphics_mem_text, 0, wxALIGN_CENTER);
 	sizer2_1->Add(st);
 	wxBoxSizer *sizer2_2 = new wxBoxSizer(wxHORIZONTAL);
@@ -320,7 +347,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 		wxDefaultPosition, wxSize(40, -1), 0, vald_int);
 	st = new wxStaticText(page, 0, "MB",
 		wxDefaultPosition, wxSize(20, -1));
-	sizer2_2->Add(m_large_data_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer2_2->Add(m_large_data_sldr, 1, wxEXPAND);
 	sizer2_2->Add(m_large_data_text, 0, wxALIGN_CENTER);
 	sizer2_2->Add(st);
 	wxBoxSizer *sizer2_3 = new wxBoxSizer(wxHORIZONTAL);
@@ -333,7 +360,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 		wxDefaultPosition, wxSize(40, -1), 0, vald_int);
 	st = new wxStaticText(page, 0, "vx",
 		wxDefaultPosition, wxSize(20, -1));
-	sizer2_3->Add(m_block_size_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer2_3->Add(m_block_size_sldr, 1, wxEXPAND);
 	sizer2_3->Add(m_block_size_text, 0, wxALIGN_CENTER);
 	sizer2_3->Add(st);
 	wxBoxSizer *sizer2_4 = new wxBoxSizer(wxHORIZONTAL);
@@ -346,7 +373,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 		wxDefaultPosition, wxSize(40, -1), 0, vald_int);
 	st = new wxStaticText(page, 0, "ms",
 		wxDefaultPosition, wxSize(20, -1));
-	sizer2_4->Add(m_response_time_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer2_4->Add(m_response_time_sldr, 1, wxEXPAND);
 	sizer2_4->Add(m_response_time_text, 0, wxALIGN_CENTER);
 	sizer2_4->Add(st);
 	group2->Add(10, 5);
@@ -364,9 +391,9 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 		"Note:\n"\
 		"Data streaming allows rendering datasets of much larger size than available\n"\
 		"graphics memory. Datasets are divided into small bricks. The bricks are loaded\n"\
-		"into graphics memory and sequentially rendered. Restart is needed for the bricking\n"\
-		"to take effect. Some analysis features may not work in streaming mode. Disable\n"\
-		"streaming if this happens.");
+		"into graphics memory and sequentially rendered. Restart is needed for the\n"\
+		"bricking to take effect. Some analysis features may not work in streaming mode.\n"\
+		"Disable streaming if this happens.");
 	group2->Add(st);
 	group2->Add(10, 5);
 
@@ -571,6 +598,7 @@ void SettingDlg::GetSettings()
 	m_gl_minor_ver = 4;
 	m_gl_profile_mask = 2;
 	m_cl_device_id = 0;
+	m_paint_hist_depth = 0;
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = expath.BeforeLast(GETSLASH(),NULL);
@@ -688,6 +716,12 @@ void SettingDlg::GetSettings()
 	{
 		fconfig.SetPath("/run script");
 		fconfig.Read("value", &m_run_script);
+	}
+	//paint history depth
+	if (fconfig.Exists("/paint history"))
+	{
+		fconfig.SetPath("/paint history");
+		fconfig.Read("value", &m_paint_hist_depth);
 	}
 	//text font
 	if (fconfig.Exists("/text font"))
@@ -828,6 +862,8 @@ void SettingDlg::UpdateUI()
 	}
 	//script
 	m_run_script_chk->SetValue(m_run_script);
+	//paint history depth
+	m_paint_hist_depth_text->SetValue(wxString::Format("%d", m_paint_hist_depth));
 	//memory settings
 	m_streaming_chk->SetValue(m_mem_swap);
 	EnableStreaming(m_mem_swap);
@@ -899,6 +935,9 @@ void SettingDlg::SaveSettings()
 	fconfig.SetPath("/run script");
 	fconfig.Write("value", m_run_script);
 
+	fconfig.SetPath("/paint history");
+	fconfig.Write("value", m_paint_hist_depth);
+
 	fconfig.SetPath("/text font");
 	fconfig.Write("file", m_font_file);
 	fconfig.Write("value", m_text_size);
@@ -910,6 +949,7 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("large data size", m_large_data_size);
 	fconfig.Write("force brick size", m_force_brick_size);
 	fconfig.Write("up time", m_up_time);
+	EnableStreaming(m_mem_swap);
 
 	//update order
 	fconfig.SetPath("/update order");
@@ -1483,4 +1523,24 @@ void SettingDlg::OnFontSizeChange(wxCommandEvent &event)
 void SettingDlg::OnRunScriptChk(wxCommandEvent &event)
 {
 	m_run_script = m_run_script_chk->GetValue();
+}
+
+//paint history depth
+void SettingDlg::OnPaintHistDepthChange(wxScrollEvent &event)
+{
+	int ival = event.GetPosition();
+	wxString str = wxString::Format("%d", ival);
+	m_paint_hist_depth_text->SetValue(str);
+}
+
+void SettingDlg::OnPaintHistDepthEdit(wxCommandEvent &event)
+{
+	wxString str = m_paint_hist_depth_text->GetValue();
+	unsigned long ival;
+	str.ToULong(&ival);
+	m_paint_hist_depth_sldr->SetValue(ival);
+	m_paint_hist_depth = ival;
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+		vr_frame->SetTextureUndos();
 }

@@ -51,6 +51,8 @@ public:
 		ID_BrushClear,
 		ID_BrushCreate,
 		ID_BrushSolid,
+		ID_BrushUndo,
+		ID_BrushRedo,
 		//selection strength
 		//falloff
 		ID_BrushSclTranslateSldr,
@@ -127,6 +129,8 @@ public:
 
 	//set the brush icon down
 	void SelectBrush(int id);
+	//update undo status
+	void UpdateUndoRedo();
 
 	//get some default values
 	double GetDftCAMin() {return m_dft_ca_min;}
@@ -144,6 +148,7 @@ public:
 
 	//save default
 	void SaveDefault();
+
 
 private:
 	wxWindow* m_frame;
@@ -242,6 +247,8 @@ private:
 	//event handling
 	//paint tools
 	//brush commands
+	void OnBrushUndo(wxCommandEvent& event);
+	void OnBrushRedo(wxCommandEvent& event);
 	void OnBrushAppend(wxCommandEvent& event);
 	void OnBrushDesel(wxCommandEvent& event);
 	void OnBrushDiffuse(wxCommandEvent& event);

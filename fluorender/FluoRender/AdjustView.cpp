@@ -105,13 +105,13 @@ m_dft_sync_b(false)
 	wxBoxSizer *sizer_h_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Gam.",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
-	sizer_h_1->Add(st, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_h_1->Add(st, 1, wxEXPAND);
 	st = new wxStaticText(this, 0, "Lum.",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
-	sizer_h_1->Add(st, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_h_1->Add(st, 1, wxEXPAND);
 	st = new wxStaticText(this, 0, "Eql.",
                           wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
-	sizer_h_1->Add(st, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_h_1->Add(st, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_1, 0, wxEXPAND);
 	//space
 	sizer_v->Add(5, 5, 0);
@@ -127,7 +127,7 @@ m_dft_sync_b(false)
 		wxGetBitmapFromMemory(unlink), wxNullBitmap,
 		"Link Red Properties with Linked Green or Blue",
 		"Link Red Properties with Linked Green or Blue");
-	sizer_h_2->Add(m_sync_r_chk, 1, wxEXPAND|wxALIGN_RIGHT);
+	sizer_h_2->Add(m_sync_r_chk, 1, wxEXPAND);
 	m_sync_r_chk->Realize();
 	sizer_v->Add(sizer_h_2, 0, wxEXPAND);
 	sizer_v->Add(3,3,0);
@@ -141,15 +141,15 @@ m_dft_sync_b(false)
 	wxBoxSizer *sizer_h_3 = new wxBoxSizer(wxHORIZONTAL);
 	m_r_gamma_sldr = new wxSlider(this, ID_RGammaSldr, 100, 10, 400,
 		wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
-	sizer_h_3->Add(m_r_gamma_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_h_3->Add(m_r_gamma_sldr, 1, wxEXPAND);
 	m_r_brightness_sldr = new wxSlider(this, ID_RBrightnessSldr, 0, -256, 256,
 		wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
-	sizer_h_3->Add(m_r_brightness_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_h_3->Add(m_r_brightness_sldr, 1, wxEXPAND);
     
 	m_r_hdr_sldr = new wxSlider(this, ID_RHdrSldr, 0, 0, 100,
                                 wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
 
-	sizer_h_3->Add(m_r_hdr_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_h_3->Add(m_r_hdr_sldr, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_3, 1, wxEXPAND);
 
 	//fifth line: reset buttons
@@ -168,14 +168,14 @@ m_dft_sync_b(false)
 	vald_fp2.SetRange(0.0, 10.0);
 	m_r_gamma_text = new wxTextCtrl(this, ID_RGammaText, "1.00",
 		wxDefaultPosition, wxSize(30, 20), 0, vald_fp2);
-	sizer_h_5->Add(m_r_gamma_text, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_h_5->Add(m_r_gamma_text, 1, wxEXPAND);
 	m_r_brightness_text = new wxTextCtrl(this, ID_RBrightnessText, "0",
 		wxDefaultPosition, wxSize(30, 20), 0, vald_int);
-	sizer_h_5->Add(m_r_brightness_text, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_h_5->Add(m_r_brightness_text, 1, wxEXPAND);
 	vald_fp2.SetRange(0.0, 1.0);
 	m_r_hdr_text = new wxTextCtrl(this, ID_RHdrText, "0.00",
                                   wxDefaultPosition, wxSize(30, 20), 0, vald_fp2);
-	sizer_h_5->Add(m_r_hdr_text, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_h_5->Add(m_r_hdr_text, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_5, 0, wxEXPAND);
 
 	//space
@@ -192,7 +192,7 @@ m_dft_sync_b(false)
 		wxGetBitmapFromMemory(unlink), wxNullBitmap,
 		"Link Green Properties with Linked Red or Blue",
 		"Link Green Properties with Linked Red or Blue");
-	sizer_h_6->Add(m_sync_g_chk, 1, wxEXPAND|wxALIGN_RIGHT);
+	sizer_h_6->Add(m_sync_g_chk, 1, wxEXPAND);
 	m_sync_g_chk->Realize();
 	sizer_v->Add(sizer_h_6, 0, wxEXPAND);
 	sizer_v->Add(3,3,0);
@@ -206,13 +206,13 @@ m_dft_sync_b(false)
 	wxBoxSizer *sizer_h_7 = new wxBoxSizer(wxHORIZONTAL);
 	m_g_gamma_sldr = new wxSlider(this, ID_GGammaSldr, 100, 10, 400,
 		wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
-	sizer_h_7->Add(m_g_gamma_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_h_7->Add(m_g_gamma_sldr, 1, wxEXPAND);
 	m_g_brightness_sldr = new wxSlider(this, ID_GBrightnessSldr, 0, -256, 256,
 		wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
-	sizer_h_7->Add(m_g_brightness_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_h_7->Add(m_g_brightness_sldr, 1, wxEXPAND);
 	m_g_hdr_sldr = new wxSlider(this, ID_GHdrSldr, 0, 0, 100,
                                 wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
-	sizer_h_7->Add(m_g_hdr_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_h_7->Add(m_g_hdr_sldr, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_7, 1, wxEXPAND);
 
 	//10th line: reset buttons
@@ -231,14 +231,14 @@ m_dft_sync_b(false)
 	vald_fp2.SetRange(0.0, 10.0);
 	m_g_gamma_text = new wxTextCtrl(this, ID_GGammaText, "1.00",
 		wxDefaultPosition, wxSize(30, 20), 0, vald_fp2);
-	sizer_h_9->Add(m_g_gamma_text, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_h_9->Add(m_g_gamma_text, 1, wxEXPAND);
 	m_g_brightness_text = new wxTextCtrl(this, ID_GBrightnessText, "0",
 		wxDefaultPosition, wxSize(30, 20), 0, vald_int);
-	sizer_h_9->Add(m_g_brightness_text, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_h_9->Add(m_g_brightness_text, 1, wxEXPAND);
 	vald_fp2.SetRange(0.0, 1.0);
 	m_g_hdr_text = new wxTextCtrl(this, ID_GHdrText, "0.00",
                                   wxDefaultPosition, wxSize(30, 20), 0, vald_fp2);
-	sizer_h_9->Add(m_g_hdr_text, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_h_9->Add(m_g_hdr_text, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_9, 0, wxEXPAND);
 
 	//space
@@ -255,7 +255,7 @@ m_dft_sync_b(false)
 		wxGetBitmapFromMemory(unlink), wxNullBitmap,
 		"Link Blue Properties with Linked Red or Green",
 		"Link Blue Properties with Linked Red or Green");
-	sizer_h_10->Add(m_sync_b_chk, 1, wxEXPAND|wxALIGN_RIGHT);
+	sizer_h_10->Add(m_sync_b_chk, 1, wxEXPAND);
 	m_sync_b_chk->Realize();
 	sizer_v->Add(sizer_h_10, 0, wxEXPAND);
 	sizer_v->Add(3,3,0);
@@ -269,13 +269,13 @@ m_dft_sync_b(false)
 	wxBoxSizer *sizer_h_11 = new wxBoxSizer(wxHORIZONTAL);
 	m_b_gamma_sldr = new wxSlider(this, ID_BGammaSldr, 100, 10, 400,
 		wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
-	sizer_h_11->Add(m_b_gamma_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_h_11->Add(m_b_gamma_sldr, 1, wxEXPAND);
 	m_b_brightness_sldr = new wxSlider(this, ID_BBrightnessSldr, 0, -256, 256,
 		wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
-	sizer_h_11->Add(m_b_brightness_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_h_11->Add(m_b_brightness_sldr, 1, wxEXPAND);
 	m_b_hdr_sldr = new wxSlider(this, ID_BHdrSldr, 0, 0, 100,
                                 wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
-	sizer_h_11->Add(m_b_hdr_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_h_11->Add(m_b_hdr_sldr, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_11, 1, wxEXPAND);
     
 
@@ -295,14 +295,14 @@ m_dft_sync_b(false)
 	vald_fp2.SetRange(0.0, 10.0);
 	m_b_gamma_text = new wxTextCtrl(this, ID_BGammaText, "1.00",
 		wxDefaultPosition, wxSize(30, 20), 0, vald_fp2);
-	sizer_h_13->Add(m_b_gamma_text, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_h_13->Add(m_b_gamma_text, 1, wxEXPAND);
 	m_b_brightness_text = new wxTextCtrl(this, ID_BBrightnessText, "0",
 		wxDefaultPosition, wxSize(30, 20), 0, vald_int);
-	sizer_h_13->Add(m_b_brightness_text, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_h_13->Add(m_b_brightness_text, 1, wxEXPAND);
 	vald_fp2.SetRange(0.0, 1.0);
 	m_b_hdr_text = new wxTextCtrl(this, ID_BHdrText, "0.00",
                                   wxDefaultPosition, wxSize(30, 20), 0, vald_fp2);
-	sizer_h_13->Add(m_b_hdr_text, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer_h_13->Add(m_b_hdr_text, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_13, 0, wxEXPAND);
 
 	//17th line: default button

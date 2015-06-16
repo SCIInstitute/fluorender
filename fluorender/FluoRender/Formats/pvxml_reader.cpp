@@ -616,8 +616,9 @@ Nrrd *PVXMLReader::Convert(int t, int c, bool get_max)
          m_y_size>0)
    {
       //allocate memory for nrrd
-      long long total_size = (long long)m_x_size*(long long)m_y_size*(long long)m_slice_num;
-      unsigned short *val = new (std::nothrow) unsigned short[total_size];
+      unsigned long long mem_size = (unsigned long long)m_x_size*
+         (unsigned long long)m_y_size*(unsigned long long)m_slice_num;
+      unsigned short *val = new (std::nothrow) unsigned short[mem_size];
       if (!val) return 0;
 
       TimeDataInfo* time_data_info = &(m_pvxml_info[t]);
@@ -632,7 +633,8 @@ Nrrd *PVXMLReader::Convert(int t, int c, bool get_max)
             if ((size_t)c >= frame_info->channels.size())
                continue;
 
-            long frame_size = frame_info->x_size * frame_info->y_size;
+            unsigned long long frame_size = (unsigned long long)(frame_info->x_size) *
+				(unsigned long long)(frame_info->y_size);
             unsigned short *frame_val = new (std::nothrow) unsigned short[frame_size];
             if (!val) return 0;
 
@@ -658,7 +660,7 @@ Nrrd *PVXMLReader::Convert(int t, int c, bool get_max)
                   delete []pbyData;
 
                //copy frame val to val
-               long long index = (long long)m_x_size*m_y_size*frame_info->z + m_x_size*(m_y_size-frame_info->y-frame_info->y_size) + frame_info->x;
+               unsigned long long index = (unsigned long long)m_x_size*m_y_size*frame_info->z + m_x_size*(m_y_size-frame_info->y-frame_info->y_size) + frame_info->x;
                long frame_index = 0;
 					if (m_flip_y)
 						frame_index = frame_info->x_size * (frame_info->y_size-1);

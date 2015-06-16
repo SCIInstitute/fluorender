@@ -146,9 +146,15 @@ namespace FLIVR
 	void MultiVolumeRenderer::set_colormap_mode_single()
 	{
 		if (vr_list_.size() == 1)
+		{
 			colormap_mode_ = vr_list_[0]->colormap_mode_;
+			colormap_ = vr_list_[0]->colormap_;
+		}
 		else
+		{
 			colormap_mode_ = 0;
+			colormap_ = 0;
+		}
 	}
 
 	//manages volume renderers for rendering
@@ -336,7 +342,8 @@ namespace FLIVR
 			use_shading, use_fog,
 			depth_peel_, true,
 			hiqual_, 0,
-			colormap_mode_, false, 1);
+			colormap_mode_, colormap_,
+			false, 1);
 		if (shader)
 		{
 			if (!shader->valid())
@@ -465,9 +472,18 @@ namespace FLIVR
 
 		if (TextureRenderer::mem_swap_ &&
 			TextureRenderer::cur_brick_num_ == TextureRenderer::total_brick_num_)
-		{
 			TextureRenderer::done_update_loop_ = true;
-			TextureRenderer::clear_chan_buffer_ = true;
+		if (TextureRenderer::mem_swap_)
+		{
+			int num = 0;
+			for (size_t i=0; i<vr_list_.size(); ++i)
+				num += vr_list_[i]->tex_->get_bricks()->size();
+			if (TextureRenderer::cur_chan_brick_num_ == num)
+			{
+				TextureRenderer::done_current_chan_ = true;
+				TextureRenderer::clear_chan_buffer_ = true;
+				TextureRenderer::cur_chan_brick_num_ = 0;
+			}
 		}
 
 		//enable depth buffer writing
@@ -998,7 +1014,8 @@ namespace FLIVR
 			false, false,
 			false, false,
 			false, 0,
-			0, false, 1);
+			0, 0,
+			false, 1);
 		if (shader)
 		{
 			if (!shader->valid())
