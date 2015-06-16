@@ -557,14 +557,14 @@ void PVXMLReader::ReadFrame(wxXmlNode* frameNode)
 		for (unsigned int i=0; i<m_seq_boxes.size(); ++i)
 		{
 			ol_value = sb.overlaps(m_seq_boxes[i]);
+			if (ol_value>=0.0)
+				apart = false;
 			if (ol_value>=0.9)
 			{
 				overlap = true;
 				m_seq_boxes.clear();
 				break;
 			}
-			if (ol_value>=0.0)
-				apart = false;
 		}
 		m_seq_boxes.push_back(sb);
 
@@ -798,6 +798,8 @@ Nrrd *PVXMLReader::Convert(int t, int c, bool get_max)
 			(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
 		unsigned short *val = new (std::nothrow) unsigned short[mem_size];
 		if (!val) return 0;
+
+		//memset(val, 0, sizeof(unsigned short)*mem_size);
 
 		TimeDataInfo* time_data_info = &(m_pvxml_info[t]);
 		
