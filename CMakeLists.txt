@@ -90,12 +90,17 @@ if(${CMAKE_BUILD_TYPE} MATCHES "Release")
 elseif(${CMAKE_BUILD_TYPE} MATCHES "Debug")
 	set(wxWidgets_CONFIGURATION mswud)
 endif()
-find_package(wxWidgets COMPONENTS core base aui html xml adv tiff gl stc scintilla REQUIRED)
+find_package(wxWidgets COMPONENTS core base aui html xml adv gl stc scintilla REQUIRED)
 include(${wxWidgets_USE_FILE})
 set(wxWidgets_USE_STATIC ON)
+if (APPLE)
+   find_package(TIFF REQUIRED)
+   include_directories(${TIFF_INCLUDE_DIR})
+else()
+   include_directories(${wxWidgets_ROOT_DIR}/src/tiff/libtiff)
+endif()
 add_definitions(-DUNICODE)
 add_definitions(-D_UNICODE)
-include_directories(${wxWidgets_ROOT_DIR}/src/tiff/libtiff)
 #solution for wxWidgets linking "ambiguous" errors
 add_definitions(-D_WCHAR_H_CPLUSPLUS_98_CONFORMANCE_)
 #fix the library names for OSX if needed. 
@@ -104,10 +109,6 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(wxlib_out "${wxlib_out} ${arg}")
   endforeach()
   string(STRIP ${wxlib_out} wxWidgets_LIBRARIES)
-  string(REGEX REPLACE "libwx_osx_cocoau_png" "libwxtiff"
-                   wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES})
-  string(REGEX REPLACE "libwx_osx_cocoau_tiff" "libwxtiff" 
-                   wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES})
   string(REGEX REPLACE "libwx_osx_cocoau_scintilla" "libwxscintilla" 
                    wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES})
   find_package(Freetype REQUIRED)
@@ -122,7 +123,7 @@ set(Boost_USE_STATIC_LIBS        ON) # only find static libs
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME    OFF)
 find_package(Boost COMPONENTS system chrono REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${Boost_INCLUDE_DIR})
 
 #teem
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/teem)
@@ -221,14 +222,17 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     file(GLOB OPENCL_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/OpenCL/lib/x86/*.lib)
   endif()
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  find_package(OpenCL REQUIRED)
-  include_directories( ${OPENCL_INCLUDE_DIR})
+  include(${CMAKE_SOURCE_DIR}/FindOpenCL.cmake)
+  include_directories( ${OPENCL_INCLUDE_DIRS})
 endif()
 
 #freetype
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/freetype/include)
 if (WIN32)
     file(GLOB FREETYPE_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/freetype/lib/*.lib)
+else()
+    find_package(Freetype REQUIRED)
+    include_directories(${FREETYPE_INCLUDE_DIRS})
 endif()
 
 #other sources
