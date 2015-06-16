@@ -36,6 +36,14 @@ DEALINGS IN THE SOFTWARE.
 #include "FLIVR/Point.h"
 #include "FLIVR/MeshRenderer.h"
 #include "FLIVR/VolumeRenderer.h"
+#include <ciso646>  // detect std::lib
+#ifdef _LIBCPP_VERSION
+// using libc++
+#define HAVE_TYPE_TRAITS
+#else
+// using libstdc++
+#define HAVE_TR1_TYPE_TRAITS
+#endif
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
 #include "Formats/base_reader.h"

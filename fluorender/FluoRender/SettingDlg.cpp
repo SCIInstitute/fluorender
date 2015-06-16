@@ -205,7 +205,7 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 		"Number of depth peeling layers for rendering transparent mesh objects.\n"\
 			"Set higher numbers only for complex geometries.\n"\
 			"It slows down the rendering speed.");
-	sizer2_1->Add(m_peeling_layers_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer2_1->Add(m_peeling_layers_sldr, 1, wxEXPAND);
 	sizer2_1->Add(m_peeling_layers_text, 0, wxALIGN_CENTER);
 	group2->Add(10, 5);
 	group2->Add(sizer2_1, 0, wxEXPAND);
@@ -226,7 +226,7 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, 
 		"The direction of the shadows, when shadow is enabled for volume data.");
 	sizer3_1->Add(m_shadow_dir_chk, 0, wxALIGN_CENTER);
-	sizer3_1->Add(m_shadow_dir_sldr, 1, wxEXPAND|wxALIGN_CENTER);
+	sizer3_1->Add(m_shadow_dir_sldr, 1, wxEXPAND);
 	sizer3_1->Add(m_shadow_dir_text, 0, wxALIGN_CENTER);
 	group3->Add(10, 5);
 	group3->Add(sizer3_1, 0, wxEXPAND);

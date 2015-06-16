@@ -19,7 +19,7 @@ Requirements
  * CMake 2.6+ (http://www.cmake.org/)
  * wxWidgets (https://github.com/wxWidgets/wxWidgets)
  * Windows 7+ : Visual Studio 2010 
- * OSX 10.7+  : Xcode 4, homebrew, libtiff, libpng, jpeg
+ * OSX 10.9+  : Latest Xcode and command line tools
  * Other platforms may work, but are not officially supported.
  * Boost 1.55.0+ (http://www.boost.org/users/download/#live)
 
@@ -33,13 +33,6 @@ We recommend building FluoRender outside of the source tree. <br/>
    
    * The steps following will assume the wxWidgets root directory is at <code>~/wxWidgets</code>
 
-2) Get the following packages using homebrew:
-   * <code>brew install jpeg</code>
-   
-   * <code>brew install libtiff</code>
-   
-   * <code>brew install libpng</code>
-   
 2) Build wxWidgets from the command line.
    * <code>cd ~/wxWidgets/</code>
    
@@ -47,7 +40,7 @@ We recommend building FluoRender outside of the source tree. <br/>
    
    * <code>cd mybuild</code>
    
-   * <code>../configure --enable-debug --enable-unicode --enable-std_string --enable-display --with-opengl --with-osx_cocoa --with-libjpeg --with-libtiff --without-liblzma --with-libpng --with-zlib --enable-dnd --enable-clipboard --enable-webkit --enable-svg --disable-mediactrl --enable-graphics_ctx --enable-controls --enable-dataviewctrl --with-expat --with-macosx-version-min=YOUR_MAC_VERSION --enable-universal_binary=i386,x86_64 --disable-precomp-headers --disable-monolithic --enable-stl --disable-shared</code> 
+   * <code>../configure --disable-shared --enable-macosx_arch=x86_64 --enable-unicode --with-cocoa --enable-debug --with-macosx-version-min=10.9 --enable-stl --enable-std_containers --enable-std_iostreams --enable-std_string --enable-std_string_conv_in_wxstring --with-libpng --with-libtiff --with-libjpeg</code>
    
    * <code>make</code>
 
