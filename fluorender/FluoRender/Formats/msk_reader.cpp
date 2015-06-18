@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "msk_reader.h"
+#include "../compatibility.h"
 #include <sstream>
 #include <inttypes.h>
 
@@ -94,23 +95,27 @@ Nrrd* MSKReader::Convert(int t, int c, bool get_max)
 	wostringstream strs;
 	strs << str_name /*<< "_t" << t << "_c" << c*/ << ".msk";
 	str_name = strs.str();
+	FILE* msk_file = 0;
+	if (!WFOPEN(&msk_file, str_name.c_str(), L"rb"))
+		return 0;
 
 	Nrrd *output = nrrdNew();
 	NrrdIoState *nio = nrrdIoStateNew();
 	nrrdIoStateSet(nio, nrrdIoStateSkipData, AIR_TRUE);
-	string str;
-	str.assign(str_name.length(), 0);
-	for (int i=0; i<(int)str_name.length(); i++)
-		str[i] = (char)str_name[i];
-	if (nrrdLoad(output, str.c_str(), nio))
+	if (nrrdRead(output, msk_file, nio))
+	{
+		fclose(msk_file);
 		return 0;
+	}
 	nio = nrrdIoStateNix(nio);
+	rewind(msk_file);
 	if (output->dim != 3 ||
 		(output->type != nrrdTypeChar &&
 		output->type != nrrdTypeUChar))
 	{
 		delete []output->data;
 		nrrdNix(output);
+		fclose(msk_file);
 		return 0;
 	}
 	int slice_num = int(output->axis[2].size);
@@ -119,13 +124,15 @@ Nrrd* MSKReader::Convert(int t, int c, bool get_max)
 	int data_size = slice_num * x_size * y_size;
 	output->data = new unsigned char[data_size];
 
-	if (nrrdLoad(output, str.c_str(), NULL))
+	if (nrrdRead(output, msk_file, NULL))
 	{
 		delete []output->data;
 		nrrdNix(output);
+		fclose(msk_file);
 		return 0;
 	}
 
+	fclose(msk_file);
 	return output;
 }
 

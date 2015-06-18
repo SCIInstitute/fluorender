@@ -114,7 +114,7 @@ private:
 	static bool oif_sort(const TimeDataInfo& info1, const TimeDataInfo& info2);
 	void ReadSingleOif();
 	void ReadSequenceOif();
-	void ReadTifSequence(wstring file_name);
+	void ReadTifSequence(wstring file_name, int t=0);
 	void ReadOif();
 	void ReadOifLine(wstring oneline);
 	void ReadTiff(char* pbyData, unsigned short *val, int z);

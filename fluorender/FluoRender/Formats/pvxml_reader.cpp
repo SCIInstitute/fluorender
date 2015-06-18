@@ -672,7 +672,11 @@ bool PVXMLReader::ConvertN(int c, TimeDataInfo* time_data_info, unsigned short *
 
 			//open file
 			ifstream is;
+#ifdef _WIN32
+			is.open(file_name.c_str(), ios::binary);
+#else
 			is.open(ws2s(file_name).c_str(), ios::binary);
+#endif
 			if (is.is_open())
 			{
 				is.seekg(0, ios::end);
@@ -739,7 +743,11 @@ bool PVXMLReader::ConvertS(int c, TimeDataInfo* time_data_info, unsigned short *
 
 				//open file
 				ifstream is;
+#ifdef _WIN32
+				is.open(file_name.c_str(), ios::binary);
+#else
 				is.open(ws2s(file_name).c_str(), ios::binary);
+#endif
 				if (is.is_open())
 				{
 					is.seekg(0, ios::end);

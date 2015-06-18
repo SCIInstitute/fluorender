@@ -708,7 +708,11 @@ void TIFReader::ResetTiff()
 void TIFReader::OpenTiff(std::wstring name)
 {
    //open the stream
+#ifdef _WIN32
+   tiff_stream.open(name.c_str(), std::ifstream::binary);
+#else
    tiff_stream.open((ws2s(name)).c_str(), std::ifstream::binary);
+#endif
    if (!tiff_stream.is_open())
       throw std::runtime_error( "Unable to open TIFF File for reading." );
    tiff_stream.seekg(2,tiff_stream.beg);

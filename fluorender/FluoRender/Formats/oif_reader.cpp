@@ -161,7 +161,7 @@ bool OIFReader::oif_sort(const TimeDataInfo& info1, const TimeDataInfo& info2)
 
 void OIFReader::ReadSingleOif()
 {
-   m_subdir_name = m_path_name + L".files";
+   m_subdir_name = m_path_name + L".files" + GETSLASH();
    std::vector<std::wstring> list;
    int tmp;
    FIND_FILES(m_subdir_name,L".tif",list,tmp);
@@ -175,17 +175,17 @@ void OIFReader::ReadSequenceOif()
    for (int i=0; i<(int)m_oif_info.size(); i++)
    {
       wstring path_name = m_oif_info[i].filename;
-      m_oif_info[i].subdirname = path_name + L".files";
+      m_oif_info[i].subdirname = path_name + L".files" + GETSLASH();
 
       if (path_name == m_path_name)
          m_cur_time = i;
 
-      m_subdir_name = path_name + L".files";
+      m_subdir_name = path_name + L".files" + GETSLASH();
       std::vector<std::wstring> list;
       FIND_FILES(m_subdir_name,L".tif",list,m_oif_t);
       //read file sequence
       for(size_t f = 0; f < list.size(); f++)
-         ReadTifSequence(list.at(f));
+         ReadTifSequence(list.at(f), i);
    }
 }
 
@@ -238,7 +238,7 @@ int OIFReader::LoadBatch(int index)
    return result;
 }
 
-void OIFReader::ReadTifSequence(wstring file_name)
+void OIFReader::ReadTifSequence(wstring file_name, int t)
 {
    size_t line_size = file_name.size();
    if (file_name.substr(line_size-3, 3) == L"tif")
@@ -314,7 +314,7 @@ void OIFReader::ReadTifSequence(wstring file_name)
 
          //add info to the list
          num_c = num_c==-1?0:num_c-1;
-         num_t = num_t==-1?0:num_t-1;
+         num_t = num_t==-1?t:num_t-1;
          num_z = num_z==-1?1:num_z;
          if (num_z > 0)
          {
@@ -333,14 +333,14 @@ void OIFReader::ReadTifSequence(wstring file_name)
             }
             else
             {
-               if (num_t == 0)
+               //if (num_t == 0)
                {
-                  if (int(m_oif_info[m_oif_t].dataset.size()) < num_c+1)
-                     m_oif_info[m_oif_t].dataset.resize(num_c+1);
-                  if (int(m_oif_info[m_oif_t].dataset[num_c].size()) < num_z+1)
-                     m_oif_info[m_oif_t].dataset[num_c].resize(num_z+1);
+                  if (int(m_oif_info[num_t].dataset.size()) < num_c+1)
+                     m_oif_info[num_t].dataset.resize(num_c+1);
+                  if (int(m_oif_info[num_t].dataset[num_c].size()) < num_z+1)
+                     m_oif_info[num_t].dataset[num_c].resize(num_z+1);
                   //add
-                  m_oif_info[m_oif_t].dataset[num_c][num_z] = file_name;
+                  m_oif_info[num_t].dataset[num_c][num_z] = file_name;
                }
             }
          }
@@ -351,7 +351,11 @@ void OIFReader::ReadTifSequence(wstring file_name)
 void OIFReader::ReadOif()
 {
    //read oif file
+#ifdef _WIN32
+   ifstream is(m_path_name.c_str());
+#else
    ifstream is(ws2s(m_path_name).c_str());
+#endif
    wstring oneline;
    if (is.is_open())
    {
@@ -604,7 +608,11 @@ Nrrd* OIFReader::Convert(int t, int c, bool get_max)
 
          //open file
          ifstream is;
+#ifdef _WIN32
+         is.open(file_name.c_str(), ios::binary);
+#else
          is.open(ws2s(file_name).c_str(), ios::binary);
+#endif
          if (is.is_open())
          {
             is.seekg(0, ios::end);

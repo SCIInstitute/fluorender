@@ -1569,7 +1569,8 @@ void ClippingView::OnIdle(wxIdleEvent &event)
 
 	wxPoint pos = wxGetMousePosition();
 	wxRect reg = GetScreenRect();
-	if (reg.Contains(pos))
+	wxWindow *window = wxWindow::FindFocus();
+	if (window && reg.Contains(pos))
 	{
 		if (!m_draw_clip)
 		{

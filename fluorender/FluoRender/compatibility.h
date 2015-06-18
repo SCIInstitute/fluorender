@@ -53,6 +53,7 @@ DEALINGS IN THE SOFTWARE.
 #include "tiffio.h"
 #include "WacUtils/WacUtils.h"
 #include <direct.h>
+#include <codecvt>
 
 #define GETCURRENTDIR _getcwd
 
@@ -61,12 +62,16 @@ DEALINGS IN THE SOFTWARE.
 
 inline wchar_t GETSLASH() { return L'\\'; }
 
-inline std::wstring s2ws(const std::string& str) {
-    return std::wstring( str.begin(), str.end() );
+inline std::wstring s2ws(const std::string& utf8) {
+//    return std::wstring( str.begin(), str.end() );
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
+    return converter.from_bytes(utf8);
 }
 
-inline std::string ws2s(const std::wstring& str) {
-    return std::string( str.begin(), str.end() );
+inline std::string ws2s(const std::wstring& utf16) {
+//    return std::string( str.begin(), str.end() );
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
+    return converter.to_bytes(utf16);
 }
 
 inline TIFF* TIFFOpenW(std::wstring fname, const char* opt) {

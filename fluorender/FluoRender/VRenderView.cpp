@@ -12244,7 +12244,8 @@ void VRenderView::OnAovSldrIdle(wxIdleEvent& event)
 
 	wxPoint pos = wxGetMousePosition();
 	wxRect reg = m_aov_sldr->GetScreenRect();
-	if (reg.Contains(pos))
+	wxWindow *window = wxWindow::FindFocus();
+	if (window && reg.Contains(pos))
 	{
 		if (!m_draw_clip)
 		{

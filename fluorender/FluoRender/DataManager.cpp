@@ -3390,8 +3390,12 @@ int TraceGroup::Load(wxString &filename)
 	int result = 1;
 	m_data_path = filename;
 
-	std::string str = m_data_path.ToStdString();
+	std::wstring str = m_data_path.ToStdWstring();
+#ifdef _WIN32
 	std::ifstream ifs(str.c_str(),ios::in|ios::binary);
+#else
+	std::ifstream ifs(ws2s(str).c_str(),ios::in|ios::binary);
+#endif
 	if (ifs.bad())
 		return 0;
 
@@ -3438,7 +3442,11 @@ int TraceGroup::Save(wxString &filename)
 	int result = 1;
 	m_data_path = filename;
 
+#ifdef _WIN32
+	std::ofstream ofs(m_data_path.ToStdWstring().c_str(), ios::out|ios::binary);
+#else
 	std::ofstream ofs(ws2s(m_data_path.ToStdWstring()).c_str(), ios::out|ios::binary);
+#endif
 	if (ofs.bad())
 		return 0;
 
