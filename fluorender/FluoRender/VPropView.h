@@ -98,6 +98,7 @@ class VPropView: public wxPanel
 		ID_ColormapLowValueSldr,
 		ID_ColormapLowValueText,
 		ID_ColormapCombo,
+		ID_ColormapCombo2,
 		ID_InvChk,
 		ID_MipChk,
 		ID_NRChk,
@@ -201,6 +202,7 @@ private:
 	wxSlider *m_colormap_low_value_sldr;
 	wxTextCtrl *m_colormap_low_value_text;
 	wxComboBox *m_colormap_combo;
+	wxComboBox *m_colormap_combo2;
 
 	//buttons
 	wxToolBar *m_options_toolbar;
@@ -247,6 +249,7 @@ private:
 	void OnColormapLowValueChange(wxScrollEvent &event);
 	void OnColormapLowValueText(wxCommandEvent &event);
 	void OnColormapCombo(wxCommandEvent &event);
+	void OnColormapCombo2(wxCommandEvent &event);
 	//6
 	int GetColorString(wxString& str, wxColor& wxc);
 	void OnColorChange(wxColor c);

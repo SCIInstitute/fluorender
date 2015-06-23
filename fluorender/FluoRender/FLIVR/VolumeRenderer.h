@@ -95,6 +95,8 @@ namespace FLIVR
 		{colormap_low_value_ = low; colormap_hi_value_ = hi;}
 		void set_colormap(int value)
 		{colormap_ = value;}
+		void set_colormap_proj(int value)
+		{colormap_proj_ = value;}
 
 		//solid
 		void set_solid(bool mode)
@@ -220,6 +222,7 @@ namespace FLIVR
 		double colormap_low_value_;
 		double colormap_hi_value_;
 		int colormap_;
+		int colormap_proj_;
 		//solid
 		bool solid_;
 		//interpolation

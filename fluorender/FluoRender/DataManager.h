@@ -294,7 +294,9 @@ public:
 	void SetColormapValues(double low, double high);
 	void GetColormapValues(double &low, double &high);
 	void SetColormap(int value);
+	void SetColormapProj(int value);
 	int GetColormap();
+	int GetColormapProj();
 
 	//resolution  scaling and spacing
 	void GetResolution(int &res_x, int &res_y, int &res_z);
@@ -439,6 +441,7 @@ private:
 	double m_colormap_low_value;
 	double m_colormap_hi_value;
 	int m_colormap;//index to a colormap
+	int m_colormap_proj;//index to a way of projection
 
 	//save the mode for restoring
 	int m_saved_mode;
@@ -1104,6 +1107,7 @@ public:
 	void SetColormapDisp(bool disp);
 	void SetColormapValues(double low, double high);
 	void SetColormap(int value);
+	void SetColormapProj(int value);
 	void SetShading(bool shading);
 	void SetShadow(bool shadow);
 	void SetShadowParams(double val);

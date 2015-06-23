@@ -46,7 +46,7 @@ namespace FLIVR
 				bool shading, bool fog,
 				int peel, bool clip,
 				bool hiqual, int mask,
-				int color_mode, int colormap,
+				int color_mode, int colormap, int colormap_proj,
 				bool solid, int vertex_shader);
 		~VolShader();
 
@@ -62,14 +62,15 @@ namespace FLIVR
 		inline int mask() {return mask_;}
 		inline int color_mode() {return color_mode_;}
 		inline int colormap() {return colormap_;}
+		inline int colormap_proj() {return colormap_proj_;}
 		inline bool solid() {return solid_;}
 
 		inline bool match(bool poly, int channels,
 						bool shading, bool fog,
 						int peel, bool clip,
 						bool hiqual, int mask,
-						int color_mode, int colormap,
-						bool solid, int vertex_shader = 0)
+						int color_mode, int colormap, int colormap_proj,
+						bool solid, int vertex_shader)
 		{ 
 			return (poly_ == poly &&
 				channels_ == channels &&
@@ -81,6 +82,7 @@ namespace FLIVR
 				mask_ == mask &&
 				color_mode_ == color_mode &&
 				colormap_ == colormap &&
+				colormap_proj_ == colormap_proj &&
 				solid_ == solid &&
 				vertex_type_ == vertex_shader); 
 		}
@@ -91,6 +93,7 @@ namespace FLIVR
 		bool emit_f(std::string& s);
 		bool emit_v(std::string& s);
 		std::string get_colormap_code();
+		std::string get_colormap_proj();
 
 		bool poly_;
 		int channels_;
@@ -103,6 +106,7 @@ namespace FLIVR
 					//3-random color with label, 4-random color with label+mask
 		int color_mode_;//0-normal; 1-rainbow; 2-depth
 		int colormap_;//index
+		int colormap_proj_;//projection direction
 		bool solid_;//no transparency
 		int vertex_type_;
 
@@ -119,7 +123,7 @@ namespace FLIVR
 								bool shading, bool fog,
 								int peel, bool clip,
 								bool hiqual, int mask,
-								int color_mode, int colormap,
+								int color_mode, int colormap, int colormap_proj,
 								bool solid, int vertex_type);
 		//mask: 0-no mask, 1-segmentation mask, 2-labeling mask
 		//color_mode: 0-normal; 1-rainbow; 2-depth

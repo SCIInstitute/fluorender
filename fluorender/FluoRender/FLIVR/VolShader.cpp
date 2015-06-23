@@ -92,7 +92,7 @@ VolShader::VolShader(
 	bool shading, bool fog,
 	int peel, bool clip,
 	bool hiqual, int mask,
-	int color_mode, int colormap,
+	int color_mode, int colormap, int colormap_proj,
 	bool solid, int vertex_shader)
 	: poly_(poly),
 	channels_(channels),
@@ -104,6 +104,7 @@ VolShader::VolShader(
 	mask_(mask),
 	color_mode_(color_mode),
 	colormap_(colormap),
+	colormap_proj_(colormap_proj),
 	solid_(solid),
 	vertex_type_(vertex_shader),
 	program_(0)
@@ -153,6 +154,22 @@ VolShader::VolShader(
 			return string(VOL_COLORMAP_CALC4);
 		}
 		return string(VOL_COLORMAP_CALC0);
+	}
+
+	string VolShader::get_colormap_proj()
+	{
+		switch (colormap_proj_)
+		{
+		case 0:
+			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU0);
+		case 1:
+			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU1);
+		case 2:
+			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU2);
+		case 3:
+			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU3);
+		}
+		return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU0);
 	}
 
 	bool VolShader::emit_f(string& s)
@@ -286,6 +303,7 @@ VolShader::VolShader(
 				if (solid_)
 				{
 					z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID;
+					z << get_colormap_proj();
 					z << get_colormap_code();
 					z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
 					z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT;
@@ -293,6 +311,7 @@ VolShader::VolShader(
 				else
 				{
 					z << VOL_TRANSFER_FUNCTION_COLORMAP;
+					z << get_colormap_proj();
 					z << get_colormap_code();
 					z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
 					z << VOL_TRANSFER_FUNCTION_COLORMAP_RESULT;
@@ -333,6 +352,7 @@ VolShader::VolShader(
 				if (solid_)
 				{
 					z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID;
+					z << get_colormap_proj();
 					z << get_colormap_code();
 					z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
 					z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT;
@@ -340,6 +360,7 @@ VolShader::VolShader(
 				else
 				{
 					z << VOL_TRANSFER_FUNCTION_COLORMAP;
+					z << get_colormap_proj();
 					z << get_colormap_code();
 					z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
 					z << VOL_TRANSFER_FUNCTION_COLORMAP_RESULT;
@@ -425,7 +446,7 @@ VolShader::VolShader(
 		bool shading, bool fog,
 		int peel, bool clip,
 		bool hiqual, int mask,
-		int color_mode, int colormap,
+		int color_mode, int colormap, int colormap_proj,
 		bool solid, int vertex_shader)
 	{
 		if(prev_shader_ >= 0)
@@ -435,7 +456,7 @@ VolShader::VolShader(
 				shading, fog,
 				peel, clip,
 				hiqual, mask,
-				color_mode, colormap,
+				color_mode, colormap, colormap_proj,
 				solid,vertex_shader))
 			{
 				return shader_[prev_shader_]->program();
@@ -448,7 +469,7 @@ VolShader::VolShader(
 				shading, fog,
 				peel, clip,
 				hiqual, mask,
-				color_mode, colormap,
+				color_mode, colormap, colormap_proj,
 				solid,vertex_shader))
 			{
 				prev_shader_ = i;
@@ -460,7 +481,7 @@ VolShader::VolShader(
 			shading, fog,
 			peel, clip,
 			hiqual, mask,
-			color_mode, colormap,
+			color_mode, colormap, colormap_proj,
 			solid, vertex_shader);
 		if(s->create())
 		{

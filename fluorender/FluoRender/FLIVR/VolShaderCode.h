@@ -476,8 +476,23 @@ namespace FLIVR
 	"	else\n" \
 	"	{\n" \
 	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
-	"		vec4 rb = vec4(0.0);\n" \
-	"		float valu = (v.x-loc6.x)/loc6.z;\n" \
+	"		vec4 rb = vec4(0.0);\n"
+
+#define VOL_TRANSFER_FUNCTION_COLORMAP_VALU0 \
+	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU\n" \
+	"		float valu = (v.x-loc6.x)/loc6.z;\n"
+
+#define VOL_TRANSFER_FUNCTION_COLORMAP_VALU1 \
+	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_Z\n" \
+	"		float valu = (1.0-t.z-loc6.x)/loc6.z;\n"
+
+#define VOL_TRANSFER_FUNCTION_COLORMAP_VALU2 \
+	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_Z\n" \
+	"		float valu = (1.0-t.y-loc6.x)/loc6.z;\n"
+
+#define VOL_TRANSFER_FUNCTION_COLORMAP_VALU3 \
+	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_Z\n" \
+	"		float valu = (1.0-t.x-loc6.x)/loc6.z;\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_RESULT \
 	"		//VOL_TRANSFER_FUNCTION_COLORMAP_RESULT\n" \
@@ -497,8 +512,7 @@ namespace FLIVR
 	"	else\n" \
 	"	{\n" \
 	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
-	"		vec4 rb = vec4(0.0);\n" \
-	"		float valu = (v.x-loc6.x)/loc6.z;\n" \
+	"		vec4 rb = vec4(0.0);\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT \
 	"		//VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT\n" \

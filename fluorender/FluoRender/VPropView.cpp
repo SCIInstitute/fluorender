@@ -78,6 +78,7 @@ BEGIN_EVENT_TABLE(VPropView, wxPanel)
 	EVT_COMMAND_SCROLL(ID_ColormapLowValueSldr, VPropView::OnColormapLowValueChange)
 	EVT_TEXT(ID_ColormapLowValueText, VPropView::OnColormapLowValueText)
 	EVT_COMBOBOX(ID_ColormapCombo, VPropView::OnColormapCombo)
+	EVT_COMBOBOX(ID_ColormapCombo2, VPropView::OnColormapCombo2)
 	//6
 	//color 1
 	EVT_TEXT(ID_ColorText, VPropView::OnColorTextChange)
@@ -443,9 +444,19 @@ wxPanel(parent, id, pos, size,style, name),
 	colormap_list.push_back("Diverging");
 	for (size_t i=0; i<colormap_list.size(); ++i)
 		m_colormap_combo->Append(colormap_list[i]);
+	m_colormap_combo2 = new wxComboBox(this, ID_ColormapCombo2, "",
+		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
+	vector<string>colormap_list2;
+	colormap_list2.push_back("Intensity");
+	colormap_list2.push_back("Z Value");
+	colormap_list2.push_back("Y Value");
+	colormap_list2.push_back("X Value");
+	for (size_t i=0; i<colormap_list2.size(); ++i)
+		m_colormap_combo2->Append(colormap_list2[i]);
 	sizer_r5->Add(st, 0, wxALIGN_CENTER, 0);
 	sizer_r5->Add(5, 5, 0);
-	sizer_r5->Add(m_colormap_combo, 1, wxALIGN_CENTER, 0);
+	sizer_r5->Add(m_colormap_combo, 0, wxALIGN_CENTER, 0);
+	sizer_r5->Add(m_colormap_combo2, 0, wxALIGN_CENTER, 0);
 
 	//ADD COLUMNS//////////////////////////////////////
 	//left
@@ -673,6 +684,7 @@ void VPropView::GetSettings()
 	m_colormap_high_value_text->ChangeValue(str);
 	//colormap
 	m_colormap_combo->SetSelection(m_vd->GetColormap());
+	m_colormap_combo2->SetSelection(m_vd->GetColormapProj());
 	//mode
 	if (m_vd->GetColormapMode() == 1)
 		m_colormap_tool->ToggleTool(ID_ColormapEnableChk,true);
@@ -1369,6 +1381,18 @@ void VPropView::OnColormapCombo(wxCommandEvent &event)
 		m_group->SetColormap(colormap);
 	else if (m_vd)
 		m_vd->SetColormap(colormap);
+
+	RefreshVRenderViews(false, true);
+}
+
+void VPropView::OnColormapCombo2(wxCommandEvent &event)
+{
+	int colormap_proj = m_colormap_combo2->GetCurrentSelection();
+
+	if (m_sync_group && m_group)
+		m_group->SetColormapProj(colormap_proj);
+	else if (m_vd)
+		m_vd->SetColormapProj(colormap_proj);
 
 	RefreshVRenderViews(false, true);
 }

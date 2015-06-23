@@ -149,11 +149,13 @@ namespace FLIVR
 		{
 			colormap_mode_ = vr_list_[0]->colormap_mode_;
 			colormap_ = vr_list_[0]->colormap_;
+			colormap_proj_ = vr_list_[0]->colormap_proj_;
 		}
 		else
 		{
 			colormap_mode_ = 0;
 			colormap_ = 0;
+			colormap_proj_ = 0;
 		}
 	}
 
@@ -342,7 +344,7 @@ namespace FLIVR
 			use_shading, use_fog,
 			depth_peel_, true,
 			hiqual_, 0,
-			colormap_mode_, colormap_,
+			colormap_mode_, colormap_, colormap_proj_,
 			false, 1);
 		if (shader)
 		{
@@ -1014,7 +1016,7 @@ namespace FLIVR
 			false, false,
 			false, false,
 			false, 0,
-			0, 0,
+			0, 0, 0,
 			false, 1);
 		if (shader)
 		{

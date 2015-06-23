@@ -84,6 +84,7 @@ namespace FLIVR
 		colormap_low_value_(0.0),
 		colormap_hi_value_(1.0),
 		colormap_(0),
+		colormap_proj_(0),
 		//solid
 		solid_(false),
 		//interpolate
@@ -144,6 +145,7 @@ namespace FLIVR
 		colormap_low_value_(copy.colormap_low_value_),
 		colormap_hi_value_(copy.colormap_hi_value_),
 		colormap_(copy.colormap_),
+		colormap_proj_(copy.colormap_proj_),
 		//solid
 		solid_(copy.solid_),
 		//interpolate
@@ -710,7 +712,7 @@ namespace FLIVR
 			shading_, use_fog,
 			depth_peel_, true,
 			hiqual_, ml_mode_,
-			colormap_mode_, colormap_,
+			colormap_mode_, colormap_, colormap_proj_,
 			solid_, 1);
 		if (shader)
 		{
@@ -1054,7 +1056,7 @@ namespace FLIVR
 			false, false,
 			0, false,
 			false, 0,
-			0, 0,
+			0, 0, 0,
 			false, 1);
 		if (shader)
 		{

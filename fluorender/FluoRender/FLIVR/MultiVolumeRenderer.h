@@ -137,6 +137,7 @@ namespace FLIVR
 		//colormap mode
 		int colormap_mode_;//0-normal; 1-rainbow; 2-depth
 		int colormap_;
+		int colormap_proj_;
 
 		//soft threshold
 		static double sw_;
