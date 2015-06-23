@@ -620,11 +620,12 @@ void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
    uint64_t tmp = GetTiffField(kCompressionTag,NULL,0);
    uint64_t prediction = GetTiffField(kPredictionTag,NULL,0);
    uint64_t bits = GetTiffField(kSamplesPerPixelTag,NULL,0);
+   bits = bits==0?1:bits;
    tsize_t stride = (GetTiffField(kPlanarConfigurationTag,NULL,0) == 2)?1:bits;
    //uint64_t rows_per_strip = GetTiffField(kRowsPerStripTag,NULL,0);
    uint64_t rows_per_strip = strip_size /
 	   GetTiffField(kImageWidthTag,NULL,0) /
-	   GetTiffField(kSamplesPerPixelTag,NULL,0);
+	   bits;
    bool isCompressed = tmp == 5;
     if (isCompressed) {
         LZWDecode((tidata_t)temp, (tidata_t)data, strip_size);
