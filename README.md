@@ -19,7 +19,7 @@ Requirements
  * CMake 2.6+ (http://www.cmake.org/)
  * wxWidgets (https://github.com/wxWidgets/wxWidgets)
  * Windows 7+ : Visual Studio 2010 
- * OSX 10.9+  : Latest Xcode and command line tools
+ * OSX 10.9+  : Latest Xcode and command line tools, homebrew
  * Other platforms may work, but are not officially supported.
  * Boost 1.55.0+ (http://www.boost.org/users/download/#live)
 
@@ -52,7 +52,15 @@ We recommend building FluoRender outside of the source tree. <br/>
    
    * The steps following will assume the boost root directory is at <code>~/boost_1_55_0</code> (your version might differ).
 
-4) Get and build FluoRender
+4) Get homebrew, libtiff, and freetype
+
+   * <code>ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"</code>
+   
+   * <code>brew install libtiff</code>
+
+   * <code> brew install freetype</code>
+
+5) Get and build FluoRender
 
    * <code>git clone git@github.com:SCIInstitute/fluorender.git</code><br/>
    
