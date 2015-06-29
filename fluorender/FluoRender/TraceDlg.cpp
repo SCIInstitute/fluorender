@@ -40,6 +40,7 @@ BEGIN_EVENT_TABLE(TraceListCtrl, wxListCtrl)
 	EVT_CONTEXT_MENU(TraceListCtrl::OnContextMenu)
 	EVT_MENU(Menu_ExportText, TraceListCtrl::OnExportSelection)
 	EVT_MENU(Menu_CopyText, TraceListCtrl::OnCopySelection)
+	EVT_MENU(Menu_Delete, TraceListCtrl::OnDeleteSelection)
 END_EVENT_TABLE()
 
 TraceListCtrl::TraceListCtrl(
@@ -49,8 +50,8 @@ TraceListCtrl::TraceListCtrl(
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
-wxListCtrl(parent, id, pos, size, style)//,
-	//m_frame(frame)
+	wxListCtrl(parent, id, pos, size, style),
+	m_type(0)
 {
 	wxListItem itemCol;
 	itemCol.SetText("ID");
@@ -143,19 +144,26 @@ void TraceListCtrl::UpdateTraces(VRenderView* vrv)
 
 void TraceListCtrl::DeleteSelection()
 {
-	if (!m_view) return;
-
-	long item = GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-	if (item != -1)
+	if (m_type == 0)
 	{
-		wxString name = GetItemText(item);
+		wxWindow* parent = GetParent();
+		if (parent)
+			((TraceDlg*)parent)->CompDelete();
 	}
-}
-
-void TraceListCtrl::DeleteAll()
-{
+	else if (m_type == 1)
+	{
+		long item = -1;
+		for (;;)
+		{
+			item = GetNextItem(item,
+				wxLIST_NEXT_ALL,
+				wxLIST_STATE_SELECTED);
+			if (item == -1)
+				break;
+			else
+				DeleteItem(item);
+		}
+	}
 }
 
 wxString TraceListCtrl::GetText(long item, int col)
@@ -228,8 +236,9 @@ void TraceListCtrl::OnContextMenu(wxContextMenuEvent &event)
 		}
 
 		wxMenu menu;
-		menu.Append(Menu_ExportText, "Export as text file");
 		menu.Append(Menu_CopyText, "Copy");
+		menu.Append(Menu_Delete, "Delete");
+		menu.Append(Menu_ExportText, "Export as text file");
 
 		PopupMenu(&menu, point.x, point.y);
 	}
@@ -254,6 +263,11 @@ void TraceListCtrl::OnCopySelection(wxCommandEvent& event)
 			wxTheClipboard->Close();
 		}
 	}
+}
+
+void TraceListCtrl::OnDeleteSelection(wxCommandEvent& event)
+{
+	DeleteSelection();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -498,7 +512,9 @@ m_manual_assist(false)
 	//controls
 	wxBoxSizer* sizer_42 = new wxBoxSizer(wxHORIZONTAL);
 	m_trace_list_curr = new TraceListCtrl(frame, this, wxID_ANY);
+	m_trace_list_curr->m_type = 0;
 	m_trace_list_prev = new TraceListCtrl(frame, this, wxID_ANY);
+	m_trace_list_prev->m_type = 1;
 	sizer_42->Add(m_trace_list_curr, 1, wxEXPAND);
 	sizer_42->Add(m_trace_list_prev, 1, wxEXPAND);
 	//
@@ -823,6 +839,82 @@ void TraceDlg::OnManualAssistCheck(wxCommandEvent &event)
 }
 
 //Component tools
+void TraceDlg::CompDelete()
+{
+	if (!m_view)
+		return;
+
+	long item = -1;
+	wxString str;
+	unsigned long ival;
+	vector<unsigned int> ids;
+	for (;;)
+	{
+		item = m_trace_list_curr->GetNextItem(item,
+				wxLIST_NEXT_ALL,
+				wxLIST_STATE_DONTCARE);
+
+		if (item == -1)
+			break;
+		else if (m_trace_list_curr->
+			GetItemState(item, wxLIST_STATE_SELECTED)
+			== wxLIST_STATE_SELECTED)
+			continue;
+		else
+		{
+			str = m_trace_list_curr->GetItemText(item);
+			if (str.ToULong(&ival) && ival)
+				ids.push_back(ival);
+		}
+	}
+
+	if (ids.empty())
+		return;
+
+	//get current mask
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+	Nrrd* nrrd_mask = vd->GetMask();
+	if (!nrrd_mask)
+		return;
+	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
+	if(!data_mask)
+		return;
+	//get current label
+	Texture* tex = vd->GetTexture();
+	if (!tex)
+		return;
+	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
+	if (!nrrd_label)
+		return;
+	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	if (!data_label)
+		return;
+	//select append
+	int i, j, k;
+	int nx, ny, nz;
+	unsigned long long index;
+	vd->GetResolution(nx, ny, nz);
+	for (i=0; i<nx; ++i)
+	for (j=0; j<ny; ++j)
+	for (k=0; k<nz; ++k)
+	{
+		index = nx*ny*k + nx*j + i;
+		if (find(ids.begin(), ids.end(), data_label[index])
+			!= ids.end())
+		{
+			data_mask[index] = 255;
+		}
+		else
+			data_mask[index] = 0;
+	}
+	//invalidate label mask in gpu
+	vd->GetVR()->clear_tex_pool();
+	//update view
+	CellUpdate();
+}
+
 void TraceDlg::OnCompClear(wxCommandEvent &event)
 {
 	VRenderFrame* frame = (VRenderFrame*)m_frame;

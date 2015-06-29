@@ -44,7 +44,8 @@ class TraceListCtrl : public wxListCtrl
 	enum
 	{
 		Menu_ExportText = wxID_HIGHEST+2251,
-		Menu_CopyText
+		Menu_CopyText,
+		Menu_Delete
 	};
 
 public:
@@ -60,7 +61,6 @@ public:
 		int size, double cx, double cy, double cz);
 	void UpdateTraces(VRenderView* vrv=0);
 	void DeleteSelection();
-	void DeleteAll();
 	wxString GetText(long item, int col);
 
 	//menu operations
@@ -70,12 +70,14 @@ public:
 
 private:
 	VRenderView *m_view;
+	int m_type;//0-current; 1-previous
 
 private:
 	void OnKeyDown(wxKeyEvent& event);
 	void OnContextMenu(wxContextMenuEvent &event);
 	void OnExportSelection(wxCommandEvent& event);
 	void OnCopySelection(wxCommandEvent& event);
+	void OnDeleteSelection(wxCommandEvent& event);
 
 	DECLARE_EVENT_TABLE()
 };
@@ -142,6 +144,7 @@ public:
 	//0--delete; 1--select
 	void CellExclusiveID(int mode);
 	void CellAppendID(vector<unsigned int> &id_list);
+	void CompDelete();
 
 	//measurement
 	void Measure();
