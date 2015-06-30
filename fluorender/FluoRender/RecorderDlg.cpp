@@ -709,6 +709,7 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	FlKeyDouble* flkey = 0;
 	FlKeyQuaternion* flkeyQ = 0;
 	FlKeyBoolean* flkeyB = 0;
+	FlKeyInt* flkeyI = 0;
 
 	double t = interpolator->GetLastT();
 	t = t<0.0?0.0:t+duration;
@@ -841,6 +842,11 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	keycode.l2_name = "scale";
 	flkey = new FlKeyDouble(keycode, scale);
 	interpolator->AddKey(flkey);
+	//intermixing mode
+	int ival = m_view->GetVolMethod();
+	keycode.l2_name = "volmethod";
+	flkeyI = new FlKeyInt(keycode, ival);
+	interpolator->AddKey(flkeyI);
 
 	interpolator->End();
 

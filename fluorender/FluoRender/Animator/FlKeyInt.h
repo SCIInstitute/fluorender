@@ -25,73 +25,37 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _FLKEY_H_
-#define _FLKEY_H_
+#ifndef _FLKEY_INT_H_
+#define _FLKEY_INT_H_
 
-#include <string>
+#include "FlKey.h"
 
-using namespace std;
-
-#define FLKEY_TYPE_DOUBLE	1
-#define FLKEY_TYPE_QUATER	2
-#define FLKEY_TYPE_BOOLEAN	3
-#define FLKEY_TYPE_INT		4
-
-class KeyCode
+class FlKeyInt : public FlKey
 {
 public:
-	int l0;//view: 1
-	string l0_name;//view name
-	int l1;//volume: 2
-	string l1_name;//volume name
-	int l2;//volume property: 0
-	string l2_name;//volume property name
-
-	KeyCode& operator=(const KeyCode& keycode)
+	FlKeyInt()
 	{
-		l0 = keycode.l0;
-		l0_name = keycode.l0_name;
-		l1 = keycode.l1;
-		l1_name = keycode.l1_name;
-		l2 = keycode.l2;
-		l2_name = keycode.l2_name;
-		return *this;
+		m_code.l0 = 0;
+		m_code.l0_name = "";
+		m_code.l1 = 0;
+		m_code.l1_name = "";
+		m_code.l2 = 0;
+		m_code.l2_name = "";
+		m_ival = 0;
 	}
-
-	int operator==(const KeyCode& keycode) const
+	FlKeyInt(KeyCode keycode, int ival)
 	{
-		return l0==keycode.l0 &&
-			l0_name==keycode.l0_name &&
-			l1==keycode.l1 &&
-			l1_name==keycode.l1_name &&
-			l2==keycode.l2 &&
-			l2_name==keycode.l2_name;
+		m_code = keycode;
+		m_ival = ival;
 	}
+	~FlKeyInt() {}
 
-	int operator!=(const KeyCode& keycode) const
-	{
-		return l0!=keycode.l0 ||
-			l0_name!=keycode.l0_name ||
-			l1!=keycode.l1 ||
-			l1_name!=keycode.l1_name ||
-			l2!=keycode.l2 ||
-			l2_name!=keycode.l2_name;
-	}
+	int GetType() {return FLKEY_TYPE_INT;}
+	void SetValue(int ival) {m_ival = ival;}
+	int GetValue() {return m_ival;}
+
+private:
+	int m_ival;
 };
 
-//virtual
-class FlKey
-{
-public:
-	//FlKey();
-	virtual ~FlKey() {};
-
-	virtual int GetType() = 0;
-	KeyCode GetKeyCode()
-	{return m_code;}
-
-protected:
-	KeyCode m_code;
-};
-
-#endif//_FLKEY_H_
+#endif//_FLKEY_INT_H_

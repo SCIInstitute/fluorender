@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include "FlKeyDouble.h"
 #include "FlKeyQuaternion.h"
 #include "FlKeyBoolean.h"
+#include "FlKeyInt.h"
 #include "../FLIVR/Quaternion.h"
 
 using namespace std;
@@ -91,6 +92,7 @@ public:
 	bool GetDouble(KeyCode keycode, double t, double &dval);
 	bool GetQuaternion(KeyCode keycode, double t, Quaternion &qval);
 	bool GetBoolean(KeyCode keycode, double t, bool &bval);
+	bool GetInt(KeyCode keycode, double t, int &ival);
 
 	static int m_id;
 

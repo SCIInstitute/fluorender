@@ -4585,6 +4585,11 @@ void VRenderGLView::SetParams(double t)
 		q.ToEuler(rotx, roty, rotz);
 		SetRotations(rotx, roty, rotz, true);
 	}
+	//intermixing mode
+	keycode.l2_name = "volmethod";
+	int ival;
+	if (interpolator->GetInt(keycode, t, ival))
+		SetVolMethod(ival);
 
 	if (clip_view)
 		clip_view->SetVolumeData(vr_frame->GetCurSelVol());

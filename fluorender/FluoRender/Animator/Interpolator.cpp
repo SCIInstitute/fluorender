@@ -428,6 +428,48 @@ bool Interpolator::GetBoolean(KeyCode keycode, double t, bool &bval)
 	return false;
 }
 
+bool Interpolator::GetInt(KeyCode keycode, double t, int &ival)
+{
+	int g1 = -1;
+	int g2 = -1;
+
+	for (int i=0; i<(int)m_key_list.size(); i++)
+	{
+		if (t > m_key_list[i]->t)
+			g1 = i;
+		else if (t < m_key_list[i]->t)
+		{
+			g2 = i;
+			break;
+		}
+		else
+		{
+			g1 = g2 = i;
+			break;
+		}
+	}
+
+	if (g1 > -1)
+	{
+		FlKey *key = SearchKey(keycode, m_key_list[g1]);
+		if (!key) return false;
+		if (key->GetType() != FLKEY_TYPE_INT)
+			return false;
+		ival = ((FlKeyInt*)key)->GetValue();
+		return true;
+	}
+	else if (g2 > -1)
+	{
+		FlKey *key = SearchKey(keycode, m_key_list[g2]);
+		if (!key) return false;
+		if (key->GetType() != FLKEY_TYPE_INT)
+			return false;
+		ival = ((FlKeyInt*)key)->GetValue();
+		return true;
+	}
+	return false;
+}
+
 bool Interpolator::GetQuaternion(KeyCode keycode, double t, Quaternion &qval)
 {
 	int g1 = -1;
