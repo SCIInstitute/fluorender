@@ -794,7 +794,7 @@ namespace FLIVR
 		m_mv_mat2 = m_mv_mat * m_mv_mat2;
 		shader->setLocalParamMatrix(0, glm::value_ptr(m_proj_mat));
 		shader->setLocalParamMatrix(1, glm::value_ptr(m_mv_mat2));
-		shader->setLocalParamMatrix(5, glm::value_ptr(m_tex_mat));
+		//shader->setLocalParamMatrix(5, glm::value_ptr(m_tex_mat));
 
 		for (unsigned int i=0; i < bricks->size(); i++)
 		{
@@ -807,6 +807,29 @@ namespace FLIVR
 			}
 
 			TextureBrick* b = (*bricks)[i];
+			if (colormap_mode_==1 && colormap_proj_)
+			{
+				BBox bbox = b->bbox();
+				float matrix[16];
+				matrix[0] = float(bbox.max().x()-bbox.min().x());
+				matrix[1] = 0.0f;
+				matrix[2] = 0.0f;
+				matrix[3] = 0.0f;
+				matrix[4] = 0.0f;
+				matrix[5] = float(bbox.max().y()-bbox.min().y());
+				matrix[6] = 0.0f;
+				matrix[7] = 0.0f;
+				matrix[8] = 0.0f;
+				matrix[9] = 0.0f;
+				matrix[10] = float(bbox.max().z()-bbox.min().z());
+				matrix[11] = 0.0f;
+				matrix[12] = float(bbox.min().x());
+				matrix[13] = float(bbox.min().y());
+				matrix[14] = float(bbox.min().z());
+				matrix[15] = 1.0f;
+				shader->setLocalParamMatrix(5, matrix);
+			}
+
 			if (mem_swap_ && start_update_loop_ && !done_update_loop_)
 			{
 				if (b->drawn(mode))

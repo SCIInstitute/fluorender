@@ -219,7 +219,6 @@ namespace FLIVR
 	"	//VOL_GRAD_COMPUTE_LO\n" \
 	"	vec4 dir = loc4; // \n" \
 	"	vec4 r, p; \n" \
-	"	mat4 tmat = transpose(inverse(matrix5)); \n" \
 	"	v = vec4(v.x); \n" \
 	"	n = vec4(0.0); \n" \
 	"	w = vec4(0.0);\n" \
@@ -237,19 +236,14 @@ namespace FLIVR
 	"	p = clamp(TexCoord + w, 0.0, 1.0); \n" \
 	"	r = texture(tex0, p.stp); \n" \
 	"	n.z = v.z - r.x; \n" \
-	"	w.x = dot(n.xxx, vec3(tmat[0].x, tmat[1].x, tmat[2].x)); \n" \
-	"	w.y = dot(n.yyy, vec3(tmat[0].y, tmat[1].y, tmat[2].y)); \n" \
-	"	w.z = dot(n.zzz, vec3(tmat[0].z, tmat[1].z, tmat[2].z)); \n" \
-	"	p.y = length(w.xyz); \n" \
-	"	p.y = 0.87 * (loc2.x<0.0?(1.0+p.y*loc2.x):p.y*loc2.x); \n" \
-	"	n.xyz = w.xyz; \n" \
+	"	p.y = length(n.xyz); \n" \
+	"	p.y = 0.5 * (loc2.x<0.0?(1.0+p.y*loc2.x):p.y*loc2.x); \n" \
 	"\n"
 
 #define VOL_GRAD_COMPUTE_HI \
 	"	// VOL_GRAD_COMPUTE_HI\n" \
 	"	vec4 dir = loc4;//(1/nx, 1/ny, 1/nz, 1/sample_rate)\n" \
 	"	vec4 r, p; \n" \
-	"	//mat4 tmat = transpose(inverse(matrix5)); \n" \
 	"	v = vec4(v.x); \n" \
 	"	n = vec4(0.0); \n" \
 	"	w = vec4(0.0);\n" \
@@ -276,15 +270,8 @@ namespace FLIVR
 	"	p = clamp(TexCoord - w, 0.0, 1.0); \n" \
 	"	r = texture(tex0, p.stp); \n" \
 	"	n.z = r.x - n.z; \n" \
-	"	//w.x = dot(n.xxx, vec3(tmat[0].x, tmat[1].x, tmat[2].x)); \n" \
-	"	//w.y = dot(n.yyy, vec3(tmat[0].y, tmat[1].y, tmat[2].y)); \n" \
-	"	//w.z = dot(n.zzz, vec3(tmat[0].z, tmat[1].z, tmat[2].z)); \n" \
-	"	w.x = n.x; \n" \
-	"	w.y = n.y; \n" \
-	"	w.z = n.z; \n" \
-	"	p.y = length(w.xyz); \n" \
+	"	p.y = length(n.xyz); \n" \
 	"	p.y = 0.5 * (loc2.x<0.0?(1.0+p.y*loc2.x):p.y*loc2.x); \n" \
-	"	n.xyz = w.xyz; \n" \
 	"\n"
 
 #define VOL_GRAD_COMPUTE_FUNC \
@@ -292,7 +279,6 @@ namespace FLIVR
 	"vec4 vol_grad_func(vec4 pos, vec4 dir)\n" \
 	"{\n" \
 	"	vec4 r, p;\n" \
-	"	mat4 tmat = transpose(inverse(matrix5));\n" \
 	"	vec4 n = vec4(0.0);\n" \
 	"	vec4 w = vec4(0.0);\n" \
 	"	w.x = dir.x;\n" \
@@ -317,11 +303,8 @@ namespace FLIVR
 	"	n.z = r.x + n.z;\n" \
 	"	p = clamp(pos-w, 0.0, 1.0);\n" \
 	"	r = texture(tex0, p.stp);\n" \
-	"	n.z = r.x - n.z;\n" \
-	"	w.x = dot(n.xxx, vec3(tmat[0].x, tmat[1].x, tmat[2].x)); \n" \
-	"	w.y = dot(n.yyy, vec3(tmat[0].y, tmat[1].y, tmat[2].y)); \n" \
-	"	w.z = 0.3*dot(n.zzz, vec3(tmat[0].z, tmat[1].z, tmat[2].z)); \n" \
-	"	return w;\n" \
+	"	n.z = 0.3 * (r.x - n.z);\n" \
+	"	return n;\n" \
 	"}\n"
 
 #define VOL_BODY_SHADING \
@@ -484,15 +467,18 @@ namespace FLIVR
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_VALU1 \
 	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_Z\n" \
-	"		float valu = (1.0-t.z-loc6.x)/loc6.z;\n"
+	"		vec4 tt = matrix5 * t;\n" \
+	"		float valu = (1.0-tt.z-loc6.x)/loc6.z;\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_VALU2 \
 	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_Z\n" \
-	"		float valu = (1.0-t.y-loc6.x)/loc6.z;\n"
+	"		vec4 tt = matrix5 * t;\n" \
+	"		float valu = (1.0-tt.y-loc6.x)/loc6.z;\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_VALU3 \
 	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_Z\n" \
-	"		float valu = (1.0-t.x-loc6.x)/loc6.z;\n"
+	"		vec4 tt = matrix5 * t;\n" \
+	"		float valu = (1.0-tt.x-loc6.x)/loc6.z;\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_RESULT \
 	"		//VOL_TRANSFER_FUNCTION_COLORMAP_RESULT\n" \
