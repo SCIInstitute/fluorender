@@ -954,7 +954,10 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 		return;
 	Nrrd* nrrd_mask = vd->GetMask();
 	if (!nrrd_mask)
-		return;
+	{
+		vd->AddEmptyMask();
+		nrrd_mask = vd->GetMask();
+	}
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
 	if(!data_mask)
 		return;
