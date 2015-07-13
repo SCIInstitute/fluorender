@@ -288,6 +288,7 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 		  add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
 		  add_definitions(-Dinline=__inline)
 		  add_definitions("/wd4273")
+		  add_definitions(-D_XKEYCHECK_H)
 		  set(CFLAGS "")
 		  set(CXXFLAGS "/EHsc")
 		  #make sure the reference option is turned off and not incremental build linking
