@@ -874,6 +874,9 @@ void VolumeData::Save(wxString &filename, int mode, bool bake, bool compress)
 				int ny = int(data->axis[1].size);
 				int nz = int(data->axis[2].size);
 
+				//clipping planes
+				vector<Plane*> *planes = m_vr->get_planes();
+
 				Nrrd* baked_data = nrrdNew();
 				if (bits == 8)
 				{
@@ -893,8 +896,24 @@ void VolumeData::Save(wxString &filename, int mode, bool bake, bool compress)
 							for (int k=0; k<nz; k++)
 							{
 								int index = nx*ny*k + nx*j + i;
-								double new_value = GetTransferedValue(i, j, k);
-								val8[index] = uint8(new_value*255.0);
+								bool clipped = false;
+								Point p(double(i) / double(nx),
+									double(j) / double(ny),
+									double(k) / double(nz));
+								for (int pi = 0; pi < 6; ++pi)
+								{
+									if ((*planes)[pi] &&
+										(*planes)[pi]->eval_point(p) < 0.0)
+									{
+										val8[index] = 0;
+										clipped = true;
+									}
+								}
+								if (!clipped)
+								{
+									double new_value = GetTransferedValue(i, j, k);
+									val8[index] = uint8(new_value*255.0);
+								}
 							}
 					}
 					nrrdWrap(baked_data, val8, nrrdTypeUChar, 3, (size_t)nx, (size_t)ny, (size_t)nz);
@@ -917,8 +936,24 @@ void VolumeData::Save(wxString &filename, int mode, bool bake, bool compress)
 							for (int k=0; k<nz; k++)
 							{
 								int index = nx*ny*k + nx*j + i;
-								double new_value = GetTransferedValue(i, j, k);
-								val16[index] = uint16(new_value*65535.0);
+								bool clipped = false;
+								Point p(double(i) / double(nx),
+									double(j) / double(ny),
+									double(k) / double(nz));
+								for (int pi = 0; pi < 6; ++pi)
+								{
+									if ((*planes)[pi] &&
+										(*planes)[pi]->eval_point(p) < 0.0)
+									{
+										val16[index] = 0;
+										clipped = true;
+									}
+								}
+								if (!clipped)
+								{
+									double new_value = GetTransferedValue(i, j, k);
+									val16[index] = uint16(new_value*65535.0);
+								}
 							}
 					}
 					nrrdWrap(baked_data, val16, nrrdTypeUShort, 3, (size_t)nx, (size_t)ny, (size_t)nz);
