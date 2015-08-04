@@ -179,6 +179,13 @@ file(GLOB fmt_hdr fluorender/FluoRender/Formats/*.h)
 add_library(FORMATS_OBJ OBJECT
       ${fmt_src} ${fmt_hdr})
 
+#Tracking
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Tracking)
+file(GLOB trk_src fluorender/FluoRender/Tracking/*.cpp)
+file(GLOB trk_hdr fluorender/FluoRender/Tracking/*.h)
+add_library(TRACKING_OBJ OBJECT
+      ${trk_src} ${trk_hdr})
+
 #Animators
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Animators)
 file(GLOB ani_src fluorender/FluoRender/Animator/*.cpp)
@@ -266,6 +273,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       $<TARGET_OBJECTS:ANIMATORS_OBJ>
       $<TARGET_OBJECTS:NV_OBJ>
       $<TARGET_OBJECTS:FORMATS_OBJ>
+      $<TARGET_OBJECTS:TRACKING_OBJ>
       $<TARGET_OBJECTS:GLEW_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>)
@@ -316,8 +324,9 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 		  $<TARGET_OBJECTS:ANIMATORS_OBJ>
 		  $<TARGET_OBJECTS:NV_OBJ>
 		  $<TARGET_OBJECTS:FORMATS_OBJ>
+		  $<TARGET_OBJECTS:TRACKING_OBJ>
 		  $<TARGET_OBJECTS:GLEW_OBJ>
-          	  $<TARGET_OBJECTS:POLE_OBJ>
+		  $<TARGET_OBJECTS:POLE_OBJ>
 		  $<TARGET_OBJECTS:TEEM_OBJ>
 		  $<TARGET_OBJECTS:WACUTILS_OBJ>)
    endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")

@@ -2915,7 +2915,7 @@ void Ruler::SaveProfile(wxString &filename)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int Vertex::Read(ifstream &ifs)
+/*int Vertex::Read(ifstream &ifs)
 {
 	if (ifs.bad())
 		return 0;
@@ -3105,7 +3105,7 @@ int Frame::WriteCellMap(ofstream &ofs)
 	}
 
 	return 1;
-}
+}*/
 int TraceGroup::m_num = 0;
 TraceGroup::TraceGroup()
 {
@@ -3122,11 +3122,6 @@ TraceGroup::TraceGroup()
 
 TraceGroup::~TraceGroup()
 {
-}
-
-void TraceGroup::ClearIDMap()
-{
-	m_id_map.clear();
 }
 
 void TraceGroup::SetCurTime(int time)
@@ -3146,6 +3141,11 @@ void TraceGroup::SetPrvTime(int time)
 int TraceGroup::GetPrvTime()
 {
 	return m_prv_time;
+}
+
+/*void TraceGroup::ClearIDMap()
+{
+m_id_map.clear();
 }
 
 void TraceGroup::AddID(Lbl lbl)
@@ -3434,6 +3434,14 @@ unsigned char TraceGroup::ReadTag(ifstream &ifs)
 		return 0;
 }
 
+void TraceGroup::WriteTag(ofstream&ofs, unsigned char tag)
+{
+if (ofs.bad())
+return;
+
+ofs.write(reinterpret_cast<const char*>(&tag), sizeof(unsigned char));
+}*/
+
 int TraceGroup::Load(wxString &filename)
 {
 	int result = 1;
@@ -3478,47 +3486,13 @@ int TraceGroup::Load(wxString &filename)
 
 	return result;
 }
-void TraceGroup::WriteTag(ofstream&ofs, unsigned char tag)
-{
-	if (ofs.bad())
-		return;
 
-	ofs.write(reinterpret_cast<const char*>(&tag), sizeof(unsigned char));
-}
-
-int TraceGroup::Save(wxString &filename)
+bool TraceGroup::Save(wxString &filename)
 {
-	int result = 1;
 	m_data_path = filename;
+	FL::TrackMapProcessor tm_processor;
 
-#ifdef _WIN32
-	std::ofstream ofs(m_data_path.ToStdWstring().c_str(), ios::out|ios::binary);
-#else
-	std::ofstream ofs(ws2s(m_data_path.ToStdWstring()).c_str(), ios::out|ios::binary);
-#endif
-	if (ofs.bad())
-		return 0;
-
-	//header
-	string header = "FluoRender links";
-	ofs.write(header.c_str(), header.size());
-
-	//number of frames
-	unsigned int num = (unsigned int)m_frame_list.size();
-	ofs.write(reinterpret_cast<const char*>(&num), sizeof(num));
-
-	//write each frame
-	for (FrameIter iter = m_frame_list.begin();
-		iter != m_frame_list.end(); ++iter)
-	{
-		WriteTag(ofs, TAG_FRAM);
-
-		//write frame
-		iter->second.Write(ofs);
-	}
-
-	ofs.close();
-	return result;
+	return tm_processor.Export(m_track_map, ws2s(m_data_path.ToStdWstring()));
 }
 
 unsigned int TraceGroup::Draw(vector<float> &verts)
@@ -3678,7 +3652,7 @@ unsigned int TraceGroup::Draw(vector<float> &verts)
 }
 
 //pattern search
-bool TraceGroup::FindPattern(int type, unsigned int id, int time)
+/*bool TraceGroup::FindPattern(int type, unsigned int id, int time)
 {
 	FrameIter frame_iter = m_frame_list.find(time);
 	if (frame_iter == m_frame_list.end())
@@ -3745,7 +3719,8 @@ bool TraceGroup::FindPattern(int type, unsigned int id, int time)
 		++frame_iter;
 	}
 	return false;
-}
+}*/
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int DataGroup::m_num = 0;
 DataGroup::DataGroup()

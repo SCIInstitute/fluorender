@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/listctrl.h>
 #include "teem/Nrrd/nrrd.h"
 #include <vector>
-#include <boost/unordered_map.hpp>
 
 #ifndef _TRACEDLG_H_
 #define _TRACEDLG_H_
@@ -248,7 +247,7 @@ private:
 	wxTextCtrl* m_stat_text;
 
 private:
-	void AddLabel(long item, TraceListCtrl* trace_list_ctrl, vector<Lbl> *list);
+//	void AddLabel(long item, TraceListCtrl* trace_list_ctrl, vector<Lbl> *list);
 
 	//tests
 	void Test1();

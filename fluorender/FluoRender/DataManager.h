@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #include <GL/glew.h>
 #include "compatibility.h"
 #include <vector>
-#include <boost/unordered_map.hpp>
 #include <string.h>
 #include <tiffio.h>
 #include "FLIVR/BBox.h"
@@ -50,6 +49,7 @@ DEALINGS IN THE SOFTWARE.
 #include "Formats/lsm_reader.h"
 #include "Formats/lbl_reader.h"
 #include "Formats/pvxml_reader.h"
+#include "Tracking/TrackMap.h"
 
 #ifndef _DATAMANAGER_H_
 #define _DATAMANAGER_H_
@@ -861,62 +861,6 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//tags
-#define TAG_CELL		1
-#define TAG_EDGE		2
-#define TAG_VERT		3
-#define TAG_CMAP		4
-#define TAG_FRAM		5
-
-//label is used in render view
-struct Lbl
-{
-	unsigned int id;
-	unsigned int size;
-	Point center;
-
-	static bool cmp_id(const Lbl lbl1, const Lbl lbl2)
-	{ return lbl1.id < lbl2.id; }
-};
-
-//a vertex in the map contains a cell and in/out edges
-struct Vertex
-{
-	unsigned int id;
-	unsigned int vsize;
-	Point center;
-
-	vector<unsigned int> out_ids;
-	vector<unsigned int> in_ids;
-
-	int Read(ifstream &ifs);
-	int Write(ofstream &ofs);
-};
-
-typedef boost::unordered_map<unsigned int, Vertex> CellMap;
-typedef boost::unordered_map<unsigned int, Vertex>::iterator CellMapIter;
-
-//a frame contains a cell map
-struct Frame
-{
-	unsigned int id;
-	CellMap cell_map;
-
-	//reading
-	int Read(ifstream &ifs);
-	int ReadCellMap(ifstream &ifs);
-	//writing
-	int Write(ofstream &ofs);
-	int WriteCellMap(ofstream &ofs);
-};
-
-//frame list
-typedef boost::unordered_map<unsigned int, Frame> FrameList;
-typedef boost::unordered_map<unsigned int, Frame>::iterator FrameIter;
-//id list
-typedef boost::unordered_map<unsigned int, Lbl> IDMap;
-typedef boost::unordered_map<unsigned int, Lbl>::iterator IDMapIter;
-
 class TraceGroup : public TreeLayer
 {
 public:
@@ -954,39 +898,39 @@ public:
 	int GetSizeSize() {return m_cell_size;}
 
 	//for selective drawing
-	void ClearIDMap();
-	void AddID(Lbl lbl);
-	void SetIDMap(boost::unordered_map<unsigned int, Lbl> &sel_labels);
-	IDMap *GetIDMap();
-	bool FindID(unsigned int id);
-	//in frame list
-	bool FindIDInFrame(unsigned int id, int time, Vertex &vertex);
+//	void ClearIDMap();
+//	void AddID(Lbl lbl);
+//	void SetIDMap(boost::unordered_map<unsigned int, Lbl> &sel_labels);
+//	IDMap *GetIDMap();
+//	bool FindID(unsigned int id);
+//	//in frame list
+//	bool FindIDInFrame(unsigned int id, int time, Vertex &vertex);
 
 	//modifications
-	bool LinkVertices(unsigned int id1, int time1,
-					  unsigned int id2, int time2,
-					  bool exclusive=false);
-	bool UnlinkVertices(unsigned int id1, int time1,
-						unsigned int id2, int time2);
-	bool AddVertex(int time, unsigned int id,
-		unsigned int vsize, Point& center);
-	Frame* AddFrame(int time);
+	//bool LinkVertices(unsigned int id1, int time1,
+	//				  unsigned int id2, int time2,
+	//				  bool exclusive=false);
+	//bool UnlinkVertices(unsigned int id1, int time1,
+	//					unsigned int id2, int time2);
+	//bool AddVertex(int time, unsigned int id,
+	//	unsigned int vsize, Point& center);
+	//Frame* AddFrame(int time);
 
 	//i/o
-	int Load(wxString &filename);
-	int Save(wxString &filename);
+	bool Load(wxString &filename);
+	bool Save(wxString &filename);
 
 	//draw
 	unsigned int Draw(vector<float> &verts);
 
 	//pattern search
-	typedef struct
+/*	typedef struct
 	{
 		int div;
 		int conv;
 	} Patterns;
 	//type: 1-diamond; 2-branching
-	bool FindPattern(int type, unsigned int id, int time);
+	bool FindPattern(int type, unsigned int id, int time);*/
 
 private:
 	static int m_num;
@@ -999,14 +943,14 @@ private:
 	bool m_draw_lead;
 	int m_cell_size;
 
-	FrameList m_frame_list;
-	IDMap m_id_map;
+	FL::TrackMap m_track_map;
+	//IDMap m_id_map;
 
-private:
-	//reading
-	unsigned char ReadTag(ifstream &ifs);
-	//writing
-	void WriteTag(ofstream& ofs, unsigned char tag);
+//private:
+//	//reading
+//	unsigned char ReadTag(ifstream &ifs);
+//	//writing
+//	void WriteTag(ofstream& ofs, unsigned char tag);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
