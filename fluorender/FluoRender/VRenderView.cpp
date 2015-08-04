@@ -5028,82 +5028,82 @@ void VRenderGLView::Run4DScript(wxString scriptname)
 					if (!mask_data) break;
 					unsigned int* label_data = (unsigned int*)(label_nrrd->data);
 					if (!label_data) break;
-					boost::unordered_map <unsigned int, Lbl>sel_labels;
-					boost::unordered_map <unsigned int, Lbl>::iterator label_iter;
+					FL::CellList sel_labels;
+					FL::CellListIter label_iter;
 					for (ii=0; ii<nx; ii++)
-						for (jj=0; jj<ny; jj++)
-							for (kk=0; kk<nz; kk++)
+					for (jj=0; jj<ny; jj++)
+					for (kk=0; kk<nz; kk++)
+					{
+						int index = nx*ny*kk + nx*jj + ii;
+						unsigned int label_value = label_data[index];
+						if (mask_data[index] && label_value)
+						{
+							label_iter = sel_labels.find(label_value);
+							if (label_iter == sel_labels.end())
 							{
-								int index = nx*ny*kk + nx*jj + ii;
-								unsigned int label_value = label_data[index];
-								if (mask_data[index] && label_value)
-								{
-									label_iter = sel_labels.find(label_value);
-									if (label_iter == sel_labels.end())
-									{
-										Lbl lbl;
-										lbl.id = label_value;
-										lbl.size = 1;
-										sel_labels.insert(pair<unsigned int, Lbl>(label_value, lbl));
-									}
-									else
-										label_iter->second.size++;
-								}
+								FL::pCell cell(new FL::Cell(label_value));
+								cell->SetSizeUi(1);
+								sel_labels.insert(pair<unsigned int, FL::pCell>
+									(label_value, cell));
 							}
-							//clean label list according to the size limit
-							label_iter = sel_labels.begin();
-							while (label_iter != sel_labels.end())
-							{
-								if (label_iter->second.size < (unsigned int)slimit)
-									label_iter = sel_labels.erase(label_iter);
-								else
-									++label_iter;
-							}
-							if (m_trace_group)
-							{
-								//create new id list
-								m_trace_group->SetCurTime(m_tseq_cur_num);
-								m_trace_group->SetPrvTime(m_tseq_prv_num);
-								m_trace_group->SetIDMap(sel_labels);
-							}
-							//load and replace the label
-							BaseReader* reader = m_cur_vol->GetReader();
-							if (!reader) break;
-							wxString data_name = reader->GetCurName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
-							wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
-							LBLReader lbl_reader;
-							wstring lblname = label_name.ToStdWstring();
-							lbl_reader.SetFile(lblname);
-							Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
-							if (!label_nrrd_new) break;
-							m_cur_vol->LoadLabel(label_nrrd_new);
-							label_data = (unsigned int*)(label_nrrd_new->data);
-							if (!label_data) break;
-							//update the mask according to the new label
-							memset((void*)mask_data, 0, sizeof(uint8)*nx*ny*nz);
-							for (ii=0; ii<nx; ii++)
-								for (jj=0; jj<ny; jj++)
-									for (kk=0; kk<nz; kk++)
-									{
-										int index = nx*ny*kk + nx*jj + ii;
-										unsigned int label_value = label_data[index];
-										if (m_trace_group)
-										{
-											if (m_trace_group->FindID(label_value))
-												mask_data[index] = 255;
-										}
-										else
-										{
-											label_iter = sel_labels.find(label_value);
-											if (label_iter != sel_labels.end())
-												mask_data[index] = 255;
-										}
-									}
+							else
+								label_iter->second->Inc();
+						}
+					}
+					//clean label list according to the size limit
+					label_iter = sel_labels.begin();
+					while (label_iter != sel_labels.end())
+					{
+						if (label_iter->second->GetSizeUi() < (unsigned int)slimit)
+							label_iter = sel_labels.erase(label_iter);
+						else
+							++label_iter;
+					}
+					if (m_trace_group)
+					{
+						//create new id list
+						m_trace_group->SetCurTime(m_tseq_cur_num);
+						m_trace_group->SetPrvTime(m_tseq_prv_num);
+						m_trace_group->UpdateCellList(sel_labels);
+					}
+					//load and replace the label
+					BaseReader* reader = m_cur_vol->GetReader();
+					if (!reader) break;
+					wxString data_name = reader->GetCurName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
+					wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
+					LBLReader lbl_reader;
+					wstring lblname = label_name.ToStdWstring();
+					lbl_reader.SetFile(lblname);
+					Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
+					if (!label_nrrd_new) break;
+					m_cur_vol->LoadLabel(label_nrrd_new);
+					label_data = (unsigned int*)(label_nrrd_new->data);
+					if (!label_data) break;
+					//update the mask according to the new label
+					memset((void*)mask_data, 0, sizeof(uint8)*nx*ny*nz);
+					for (ii=0; ii<nx; ii++)
+					for (jj=0; jj<ny; jj++)
+					for (kk=0; kk<nz; kk++)
+					{
+						int index = nx*ny*kk + nx*jj + ii;
+						unsigned int label_value = label_data[index];
+						if (m_trace_group)
+						{
+							if (m_trace_group->FindCell(label_value))
+								mask_data[index] = 255;
+						}
+						else
+						{
+							label_iter = sel_labels.find(label_value);
+							if (label_iter != sel_labels.end())
+								mask_data[index] = 255;
+						}
+					}
 
-									//add traces to trace dialog
-									VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-									if (m_vrv && vr_frame && vr_frame->GetTraceDlg())
-										vr_frame->GetTraceDlg()->GetSettings(m_vrv);
+					//add traces to trace dialog
+					VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+					if (m_vrv && vr_frame && vr_frame->GetTraceDlg())
+						vr_frame->GetTraceDlg()->GetSettings(m_vrv);
 				}
 				else if (str == "random_colors")
 				{
@@ -9680,48 +9680,40 @@ void VRenderGLView::GetTraces()
 	if (!mask_data) return;
 	unsigned int* label_data = (unsigned int*)(label_nrrd->data);
 	if (!label_data) return;
-	boost::unordered_map<unsigned int, Lbl> sel_labels;
-	boost::unordered_map<unsigned int, Lbl>::iterator label_iter;
+	FL::CellList sel_labels;
+	FL::CellListIter label_iter;
 	for (ii=0; ii<nx; ii++)
-		for (jj=0; jj<ny; jj++)
-			for (kk=0; kk<nz; kk++)
+	for (jj=0; jj<ny; jj++)
+	for (kk=0; kk<nz; kk++)
+	{
+		int index = nx*ny*kk + nx*jj + ii;
+		unsigned int label_value = label_data[index];
+		if (mask_data[index] && label_value)
+		{
+			label_iter = sel_labels.find(label_value);
+			if (label_iter == sel_labels.end())
 			{
-				int index = nx*ny*kk + nx*jj + ii;
-				unsigned int label_value = label_data[index];
-				if (mask_data[index] && label_value)
-				{
-					label_iter = sel_labels.find(label_value);
-					if (label_iter == sel_labels.end())
-					{
-						Lbl lbl;
-						lbl.id = label_value;
-						lbl.size = 1;
-						lbl.center = Point(ii, jj, kk);
-						sel_labels.insert(pair<unsigned int, Lbl>(label_value, lbl));
-					}
-					else
-					{
-						label_iter->second.size++;
-						label_iter->second.center += Point(ii, jj, kk);
-					}
-				}
+				FL::pCell cell(new FL::Cell(label_value));
+				cell->Inc(ii, jj, kk, 1.0f);
+				sel_labels.insert(pair<unsigned int, FL::pCell>
+					(label_value, cell));
 			}
-			//calculate center
-			for (label_iter=sel_labels.begin(); label_iter!=sel_labels.end(); ++label_iter)
+			else
 			{
-				if (label_iter->second.size > 0)
-					label_iter->second.center /= label_iter->second.size;
+				label_iter->second->Inc(ii, jj, kk, 1.0f);
 			}
+		}
+	}
 
-			//create id list
-			m_trace_group->SetCurTime(m_tseq_cur_num);
-			m_trace_group->SetPrvTime(m_tseq_cur_num);
-			m_trace_group->SetIDMap(sel_labels);
+	//create id list
+	m_trace_group->SetCurTime(m_tseq_cur_num);
+	m_trace_group->SetPrvTime(m_tseq_cur_num);
+	m_trace_group->UpdateCellList(sel_labels);
 
-			//add traces to trace dialog
-			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-			if (m_vrv && vr_frame && vr_frame->GetTraceDlg())
-				vr_frame->GetTraceDlg()->GetSettings(m_vrv);
+	//add traces to trace dialog
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (m_vrv && vr_frame && vr_frame->GetTraceDlg())
+		vr_frame->GetTraceDlg()->GetSettings(m_vrv);
 }
 
 /*WXLRESULT VRenderGLView::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)

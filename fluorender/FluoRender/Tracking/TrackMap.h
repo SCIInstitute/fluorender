@@ -66,6 +66,12 @@ namespace FL
 		bool ResolveGraph(TrackMap& track_map, size_t frame1, size_t frame2);
 
 		bool Export(TrackMap& track_map, std::string &filename);
+		bool Import(TrackMap& track_map, std::string &filename);
+
+		//get mapped cells
+		bool GetMappedCells(TrackMap& track_map,
+			CellList &sel_list1, CellList &sel_list2,
+			size_t frame1, size_t frame2);
 
 	private:
 		float m_contact_thresh;
@@ -98,6 +104,21 @@ namespace FL
 		void WritePoint(std::ofstream& ofs, FLIVR::Point &point);
 		void WriteCell(std::ofstream& ofs, pCell &cell);
 		void WriteVertex(std::ofstream& ofs, pVertex &vertex);
+		//import
+		bool ReadBool(std::ifstream& ifs);
+		unsigned char ReadTag(std::ifstream& ifs);
+		unsigned int ReadUint(std::ifstream& ifs);
+		float ReadFloat(std::ifstream& ifs);
+		FLIVR::Point ReadPoint(std::ifstream& ifs);
+		pCell ReadCell(std::ifstream& ifs, CellList& cell_list);
+		void ReadVertex(std::ifstream& ifs, VertexList& vertex_list, CellList& cell_list);
+		bool AddIntraEdge(IntraGraph& graph,
+			pCell &cell1, pCell &cell2,
+			unsigned int size_ui, float size_f);
+		bool AddInterEdge(InterGraph& graph,
+			pVertex &vertex1, pVertex &vertex2,
+			unsigned int size_ui, float size_f,
+			float dist, unsigned int link);
 	};
 
 	inline void TrackMapProcessor::SetContactThresh(float value)
@@ -151,6 +172,62 @@ namespace FL
 		WritePoint(ofs, cell->GetCenter());
 	}
 
+	inline bool TrackMapProcessor::ReadBool(std::ifstream& ifs)
+	{
+		bool value;
+		ifs.read(reinterpret_cast<char*>(&value), sizeof(bool));
+		return value;
+	}
+
+	inline unsigned char TrackMapProcessor::ReadTag(std::ifstream& ifs)
+	{
+		unsigned char tag;
+		ifs.read(reinterpret_cast<char*>(&tag), sizeof(unsigned char));
+		return tag;
+	}
+
+	inline unsigned int TrackMapProcessor::ReadUint(std::ifstream& ifs)
+	{
+		unsigned int value;
+		ifs.read(reinterpret_cast<char*>(&value), sizeof(unsigned int));
+		return value;
+	}
+
+	inline float TrackMapProcessor::ReadFloat(std::ifstream& ifs)
+	{
+		float value;
+		ifs.read(reinterpret_cast<char*>(&value), sizeof(float));
+		return value;
+	}
+
+	inline FLIVR::Point TrackMapProcessor::ReadPoint(std::ifstream& ifs)
+	{
+		double x, y, z;
+		ifs.read(reinterpret_cast<char*>(&x), sizeof(double));
+		ifs.read(reinterpret_cast<char*>(&y), sizeof(double));
+		ifs.read(reinterpret_cast<char*>(&z), sizeof(double));
+		return FLIVR::Point(x, y, z);
+	}
+
+	inline pCell TrackMapProcessor::ReadCell(std::ifstream& ifs, CellList& cell_list)
+	{
+		pCell cell;
+		if (ReadTag(ifs) != TAG_CELL)
+			return cell;
+		unsigned int id = ReadUint(ifs);
+		if (cell_list.find(id) != cell_list.end())
+			return cell;
+		cell = pCell(new Cell(id));
+		cell->SetSizeUi(ReadUint(ifs));
+		cell->SetSizeF(ReadFloat(ifs));
+		cell->SetExternalUi(ReadUint(ifs));
+		cell->SetExternalF(ReadFloat(ifs));
+		cell->SetCenter(ReadPoint(ifs));
+		cell_list.insert(std::pair<unsigned int, pCell>
+			(id, cell));
+		return cell;
+	}
+
 	class TrackMap
 	{
 	public:
@@ -158,6 +235,7 @@ namespace FL
 		~TrackMap();
 
 		size_t GetFrameNum();
+		void Clear();
 
 	private:
 		//data information
@@ -180,6 +258,18 @@ namespace FL
 	inline size_t TrackMap::GetFrameNum()
 	{
 		return m_frame_num;
+	}
+
+	inline void TrackMap::Clear()
+	{
+		m_cells_list.clear();
+		m_vertices_list.clear();
+		m_intra_graph_list.clear();
+		m_inter_graph_list.clear();
+		m_frame_num = 0;
+		m_size_x = m_size_y = m_size_z = 0;
+		m_data_bits = 8;
+		m_scale = 1.0f;
 	}
 
 }//namespace FL

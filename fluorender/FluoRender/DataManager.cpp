@@ -3143,107 +3143,65 @@ int TraceGroup::GetPrvTime()
 	return m_prv_time;
 }
 
-/*void TraceGroup::ClearIDMap()
+void TraceGroup::ClearCellList()
 {
-m_id_map.clear();
+	m_cell_list.clear();
 }
 
-void TraceGroup::AddID(Lbl lbl)
+void TraceGroup::AddCell(FL::pCell &cell)
 {
-	m_id_map.insert(pair<unsigned int, Lbl>(lbl.id, lbl));
+	m_cell_list.insert(pair<unsigned int, FL::pCell>
+		(cell->Id(), cell));
 }
 
-//sel_labels: ids from previous time point
+//cur_sel_list: ids from previous time point
 //m_prv_time: previous time value
 //m_id_map: ids of current time point that are linked to previous
 //m_cur_time: current time value
 //time values are check with frame ids in the frame list
-void TraceGroup::SetIDMap(boost::unordered_map<unsigned int, Lbl> &sel_labels)
+void TraceGroup::UpdateCellList(FL::CellList &cur_sel_list)
 {
-	m_id_map.clear();
-	boost::unordered_map<unsigned int, Lbl>::iterator label_iter;
+	ClearCellList();
+	FL::CellListIter cell_iter;
 
-	//why does the time not change?
+	//why does not the time change?
 	//because I just want to find out the current selection
 	if (m_prv_time == m_cur_time)
 	{
-		//copy sel_labels to m_id_map
-		for (label_iter = sel_labels.begin();
-			label_iter != sel_labels.end();
-			++label_iter)
+		//copy cur_sel_list to m_cell_list
+		for (cell_iter = cur_sel_list.begin();
+			cell_iter != cur_sel_list.end();
+			++cell_iter)
 		{
-			unsigned int id = label_iter->second.id;
-			if (label_iter->second.size > (unsigned int)m_cell_size)
-				m_id_map.insert(pair<unsigned int, Lbl>(id, label_iter->second));
+			if (cell_iter->second->GetSizeUi() >
+				(unsigned int)m_cell_size)
+				m_cell_list.insert(pair<unsigned int, FL::pCell>
+					(cell_iter->second->Id(), cell_iter->second));
 		}
 		return;
 	}
 
-	//get two cell maps
-	CellMap *cell_map1 = 0;
-	CellMap *cell_map2 = 0;
-	FrameIter frame_iter;
-	frame_iter = m_frame_list.find((unsigned int)m_prv_time);
-	if (frame_iter == m_frame_list.end())
-		return;
-	cell_map1 = &(frame_iter->second.cell_map);
-	frame_iter = m_frame_list.find((unsigned int)m_cur_time);
-	if (frame_iter == m_frame_list.end())
-		return;
-	cell_map2 = &(frame_iter->second.cell_map);
-
-	//decide which side to go
-	bool out_edge = m_prv_time < m_cur_time;
-	unsigned int id = 0;
-	CellMapIter cell_map_iter1, cell_map_iter2;
-	vector<unsigned int> *id_list = 0;
-	unsigned int i = 0;
-	Lbl lbl;
-	//go through sel_labels
-	for (label_iter = sel_labels.begin();
-		label_iter != sel_labels.end();
-		++label_iter)
-	{
-		id = label_iter->second.id;
-		if (label_iter->second.size <= (unsigned int)m_cell_size)
-			continue;
-		//find id in cell map 1
-		cell_map_iter1 = cell_map1->find(id);
-		if (cell_map_iter1 == cell_map1->end())
-			continue;
-		//get correct id list
-		id_list = out_edge?&(cell_map_iter1->second.out_ids):
-			&(cell_map_iter1->second.in_ids);
-		for (i=0; i<id_list->size(); ++i)
-		{
-			id = (*id_list)[i];
-			//add to id map
-			lbl.id = id;
-			lbl.size = 0;
-			lbl.center = Point();
-			cell_map_iter2 = cell_map2->find(id);
-			if (cell_map_iter2 != cell_map2->end())
-			{
-				lbl.size = cell_map_iter2->second.vsize;
-				lbl.center = cell_map_iter2->second.center;
-			}
-			m_id_map.insert(pair<unsigned int, Lbl>(id, lbl));
-		}
-	}
+	//get mapped cells
+	//cur_sel_list -> m_cell_list
+	FL::TrackMapProcessor tm_processor;
+	tm_processor.GetMappedCells(m_track_map,
+		cur_sel_list, m_cell_list,
+		(unsigned int)m_prv_time,
+		(unsigned int)m_cur_time);
 }
 
-IDMap* TraceGroup::GetIDMap()
+FL::CellList &TraceGroup::GetCellList()
 {
-	return &m_id_map;
+	return m_cell_list;
 }
 
-bool TraceGroup::FindID(unsigned int id)
+bool TraceGroup::FindCell(unsigned int id)
 {
-	IDMapIter iter = m_id_map.find(id);
-	return (iter != m_id_map.end());
+	return m_cell_list.find(id) != m_cell_list.end();
 }
+
 //find id in frame list
-bool TraceGroup::FindIDInFrame(unsigned int id, int time, Vertex &vertex)
+/*bool TraceGroup::FindIDInFrame(unsigned int id, int time, Vertex &vertex)
 {
 	if (m_frame_list.empty())
 		return false;
@@ -3442,49 +3400,12 @@ return;
 ofs.write(reinterpret_cast<const char*>(&tag), sizeof(unsigned char));
 }*/
 
-int TraceGroup::Load(wxString &filename)
+bool TraceGroup::Load(wxString &filename)
 {
-	int result = 1;
 	m_data_path = filename;
+	FL::TrackMapProcessor tm_processor;
 
-	std::wstring str = m_data_path.ToStdWstring();
-#ifdef _WIN32
-	std::ifstream ifs(str.c_str(),ios::in|ios::binary);
-#else
-	std::ifstream ifs(ws2s(str).c_str(),ios::in|ios::binary);
-#endif
-	if (ifs.bad())
-		return 0;
-
-	char cheader[17];
-	ifs.read(cheader, 16);
-	cheader[16] = 0;
-	string header = cheader;
-	if (header != "FluoRender links")
-		return 0;
-
-	unsigned int num;
-	ifs.read((char*)(&num), sizeof(num));
-	//clear existing
-	m_frame_list.clear();
-	//read new
-	for (unsigned int i=0; i<num; ++i)
-	{
-		//tag: frame
-		if (ReadTag(ifs) != TAG_FRAM)
-		{
-			result = 0;
-			break;
-		}
-
-		Frame frame;
-		if (frame.Read(ifs))
-			m_frame_list.insert(pair<unsigned int, Frame>(frame.id,frame));
-	}
-
-	ifs.close();
-
-	return result;
+	return tm_processor.Import(m_track_map, ws2s(m_data_path.ToStdWstring()));
 }
 
 bool TraceGroup::Save(wxString &filename)
@@ -3498,7 +3419,7 @@ bool TraceGroup::Save(wxString &filename)
 unsigned int TraceGroup::Draw(vector<float> &verts)
 {
 	unsigned int result = 0;
-	if (m_ghost_num <= 0)
+/*	if (m_ghost_num <= 0)
 		return result;
 
 	vector<CellMap*> ghosts;
@@ -3647,7 +3568,7 @@ unsigned int TraceGroup::Draw(vector<float> &verts)
 			}
 		}
 	}
-
+*/
 	return result;
 }
 

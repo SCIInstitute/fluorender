@@ -72,7 +72,8 @@ namespace FL
 		void SetInterVert(InterVert inter_vert);
 
 		void SetCenter(FLIVR::Point &center);
-		void SetSize(unsigned int size_ui, float size_f);
+		void SetSizeUi(unsigned int size_ui);
+		void SetSizeF(float size_f);
 
 		FLIVR::Point &GetCenter();
 		unsigned int GetSizeUi();
@@ -113,9 +114,13 @@ namespace FL
 		m_center = center;
 	}
 
-	inline void Vertex::SetSize(unsigned int size_ui, float size_f)
+	inline void Vertex::SetSizeUi(unsigned int size_ui)
 	{
 		m_size_ui = size_ui;
+	}
+
+	inline void Vertex::SetSizeF(float size_f)
+	{
 		m_size_f = size_f;
 	}
 

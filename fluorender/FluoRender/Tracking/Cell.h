@@ -78,15 +78,23 @@ namespace FL
 		IntraVert GetIntraVert();
 		void SetIntraVert(IntraVert intra_vert);
 		void Inc(size_t i, size_t j, size_t k, float value);
+		void Inc();
 		void IncExternal(float value);
 		void AddVertex(pVertex &vertex);
 		pwVertex GetVertex();
 
+		//get
 		FLIVR::Point &GetCenter();
 		unsigned int GetSizeUi();
 		float GetSizeF();
 		unsigned int GetExternalUi();
 		float GetExternalF();
+		//set
+		void SetCenter(FLIVR::Point &center);
+		void SetSizeUi(unsigned int size_ui);
+		void SetSizeF(float size_f);
+		void SetExternalUi(unsigned int external_ui);
+		void SetExternalF(float external_f);
 
 	private:
 		unsigned int m_id;
@@ -123,6 +131,11 @@ namespace FL
 			double(j), double(k))) / (m_size_ui + 1));
 		m_size_ui++;
 		m_size_f += value;
+	}
+
+	inline void Cell::Inc()
+	{
+		m_size_ui++;
 	}
 
 	inline void Cell::IncExternal(float value)
@@ -164,6 +177,31 @@ namespace FL
 	inline float Cell::GetExternalF()
 	{
 		return m_external_f;
+	}
+
+	inline void Cell::SetCenter(FLIVR::Point &center)
+	{
+		m_center = center;
+	}
+
+	inline void Cell::SetSizeUi(unsigned int size_ui)
+	{
+		m_size_ui = size_ui;
+	}
+
+	inline void Cell::SetSizeF(float size_f)
+	{
+		m_size_f = size_f;
+	}
+
+	inline void Cell::SetExternalUi(unsigned int external_ui)
+	{
+		m_external_ui = external_ui;
+	}
+
+	inline void Cell::SetExternalF(float external_f)
+	{
+		m_external_f = external_f;
 	}
 
 }//namespace FL

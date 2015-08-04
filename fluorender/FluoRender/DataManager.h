@@ -898,13 +898,13 @@ public:
 	int GetSizeSize() {return m_cell_size;}
 
 	//for selective drawing
-//	void ClearIDMap();
-//	void AddID(Lbl lbl);
-//	void SetIDMap(boost::unordered_map<unsigned int, Lbl> &sel_labels);
-//	IDMap *GetIDMap();
-//	bool FindID(unsigned int id);
-//	//in frame list
-//	bool FindIDInFrame(unsigned int id, int time, Vertex &vertex);
+	void ClearCellList();
+	void AddCell(FL::pCell &cell);
+	void UpdateCellList(FL::CellList &cur_sel_list);
+	FL::CellList &GetCellList();
+	bool FindCell(unsigned int id);
+	//in frame list
+	//bool FindCellInFrame(unsigned int id, int time, Vertex &vertex);
 
 	//modifications
 	//bool LinkVertices(unsigned int id1, int time1,
@@ -944,7 +944,7 @@ private:
 	int m_cell_size;
 
 	FL::TrackMap m_track_map;
-	//IDMap m_id_map;
+	FL::CellList m_cell_list;
 
 //private:
 //	//reading

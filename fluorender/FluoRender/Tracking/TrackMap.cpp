@@ -135,8 +135,8 @@ bool TrackMapProcessor::InitializeFrame(TrackMap& track_map,
 	{
 		pVertex vertex(new Vertex(cell_iterator->second->Id()));
 		vertex->SetCenter(cell_iterator->second->GetCenter());
-		vertex->SetSize(cell_iterator->second->GetSizeUi(),
-			cell_iterator->second->GetSizeF());
+		vertex->SetSizeUi(cell_iterator->second->GetSizeUi());
+		vertex->SetSizeF(cell_iterator->second->GetSizeF());
 		vertex->AddCell(cell_iterator->second);
 		cell_iterator->second->AddVertex(vertex);
 		vertex_list.insert(std::pair<unsigned int, pVertex>
@@ -696,10 +696,11 @@ bool TrackMapProcessor::Export(TrackMap & track_map, std::string &filename)
 		//frame id
 		WriteUint(ofs, i);
 
-		//write each vertex
+		//vertex list
 		VertexList &vertex_list = track_map.m_vertices_list.at(i);
 		//vertex number
 		WriteUint(ofs, vertex_list.size());
+		//write each vertex
 		for (iter = vertex_list.begin();
 			iter != vertex_list.end(); ++iter)
 		{
@@ -760,9 +761,126 @@ bool TrackMapProcessor::Export(TrackMap & track_map, std::string &filename)
 			WriteUint(ofs, inter_graph[*inter_iter].size_ui);
 			WriteFloat(ofs, inter_graph[*inter_iter].size_f);
 			WriteFloat(ofs, inter_graph[*inter_iter].dist);
-			WriteBool(ofs, inter_graph[*inter_iter].link);
+			WriteUint(ofs, inter_graph[*inter_iter].link);
 		}
 	}
+
+	return true;
+}
+
+bool TrackMapProcessor::Import(TrackMap& track_map, std::string &filename)
+{
+	//clear everything
+	track_map.Clear();
+
+	std::ifstream ifs(filename, std::ios::in | std::ios::binary);
+	if (ifs.bad())
+		return false;
+
+	//header
+	char cheader[17];
+	ifs.read(cheader, 16);
+	cheader[16] = 0;
+	std::string header = cheader;
+	if (header != "FluoRender links")
+		return false;
+
+	//number of frames
+	size_t num;
+	ifs.read(reinterpret_cast<char*>(&num), sizeof(num));
+
+	size_t vertex_num;
+	size_t edge_num;
+	unsigned id1, id2;
+	pCell cell1, cell2;
+	CellListIter cell_iter;
+	unsigned int size_ui;
+	float size_f;
+	pVertex vertex1, vertex2;
+	VertexListIter vertex_iter;
+	float dist;
+	unsigned int link;
+	//read each frame
+	for (size_t i = 0; i < num; ++i)
+	{
+		if (ReadTag(ifs) != TAG_FRAM)
+			return false;
+		//frame id
+		ReadUint(ifs);
+
+		//vertex list
+		track_map.m_vertices_list.push_back(VertexList());
+		VertexList &vertex_list = track_map.m_vertices_list.back();
+		//cell list
+		track_map.m_cells_list.push_back(CellList());
+		CellList &cell_list = track_map.m_cells_list.back();
+		//vertex number
+		vertex_num = ReadUint(ifs);
+		//read each vertex
+		for (size_t j = 0; j < vertex_num; ++j)
+			ReadVertex(ifs, vertex_list, cell_list);
+		//intra graph
+		track_map.m_intra_graph_list.push_back(IntraGraph());
+		IntraGraph &intra_graph = track_map.m_intra_graph_list.back();
+		//intra edge num
+		edge_num = ReadUint(ifs);
+		//read each intra edge
+		for (size_t j = 0; j < edge_num; ++j)
+		{
+			if (ReadTag(ifs) != TAG_INTRA_EDGE)
+				return false;
+			//first cell
+			id1 = ReadUint(ifs);
+			cell_iter = cell_list.find(id1);
+			if (cell_iter == cell_list.end())
+				continue;
+			cell1 = cell_iter->second;
+			//second cell
+			id2 = ReadUint(ifs);
+			cell_iter = cell_list.find(id2);
+			if (cell_iter == cell_list.end())
+				continue;
+			cell2 = cell_iter->second;
+			//add edge
+			size_ui = ReadUint(ifs);
+			size_f = ReadFloat(ifs);
+			AddIntraEdge(intra_graph, cell1, cell2,
+				size_ui, size_f);
+		}
+		//inter graph
+		if (i == 0)
+			continue;
+		track_map.m_inter_graph_list.push_back(InterGraph());
+		InterGraph &inter_graph = track_map.m_inter_graph_list.back();
+		//inter edge num
+		edge_num = ReadUint(ifs);
+		//read each inter edge
+		for (size_t j = 0; j < edge_num; ++j)
+		{
+			if (ReadTag(ifs) != TAG_INTER_EDGE)
+				return false;
+			//first vertex
+			id1 = ReadUint(ifs);
+			vertex_iter = vertex_list.find(id1);
+			if (vertex_iter == vertex_list.end())
+				continue;
+			vertex1 = vertex_iter->second;
+			//second vertex
+			id2 = ReadUint(ifs);
+			vertex_iter = vertex_list.find(id2);
+			if (vertex_iter == vertex_list.end())
+				continue;
+			vertex2 = vertex_iter->second;
+			//add edge
+			size_ui = ReadUint(ifs);
+			size_f = ReadFloat(ifs);
+			dist = ReadFloat(ifs);
+			link = ReadUint(ifs);
+			AddInterEdge(inter_graph, vertex1, vertex2,
+				size_ui, size_f, dist, link);
+		}
+	}
+
 	return true;
 }
 
@@ -789,3 +907,163 @@ void TrackMapProcessor::WriteVertex(std::ofstream& ofs, pVertex &vertex)
 	}
 }
 
+void TrackMapProcessor::ReadVertex(std::ifstream& ifs,
+	VertexList& vertex_list, CellList& cell_list)
+{
+	if (ReadTag(ifs) != TAG_VERT)
+		return;
+
+	unsigned int id = ReadUint(ifs);
+	if (vertex_list.find(id) != vertex_list.end())
+		return;
+
+	pVertex vertex;
+	vertex = pVertex(new Vertex(id));
+	vertex->SetSizeUi(ReadUint(ifs));
+	vertex->SetSizeF(ReadFloat(ifs));
+	vertex->SetCenter(ReadPoint(ifs));
+
+	//cell number
+	unsigned int num = ReadUint(ifs);
+	//cells
+	pCell cell;
+	for (unsigned int i = 0; i < num; ++i)
+	{
+		cell = ReadCell(ifs, cell_list);
+		vertex->AddCell(cell);
+		cell->AddVertex(vertex);
+	}
+}
+
+bool TrackMapProcessor::AddIntraEdge(IntraGraph& graph,
+	pCell &cell1, pCell &cell2, unsigned int size_ui, float size_f)
+{
+	IntraVert v1 = cell1->GetIntraVert();
+	IntraVert v2 = cell2->GetIntraVert();
+	if (v1 == IntraGraph::null_vertex())
+	{
+		v1 = boost::add_vertex(graph);
+		graph[v1].id = cell1->Id();
+		graph[v1].cell = cell1;
+		cell1->SetIntraVert(v1);
+	}
+	if (v2 == IntraGraph::null_vertex())
+	{
+		v2 = boost::add_vertex(graph);
+		graph[v2].id = cell2->Id();
+		graph[v2].cell = cell2;
+		cell2->SetIntraVert(v2);
+	}
+
+	std::pair<IntraEdge, bool> e = boost::edge(v1, v2, graph);
+	if (!e.second)
+	{
+		e = boost::add_edge(v1, v2, graph);
+		graph[e.first].size_ui = size_ui;
+		graph[e.first].size_f = size_f;
+	}
+	else
+		return false;
+
+	return true;
+}
+
+bool TrackMapProcessor::AddInterEdge(InterGraph& graph,
+	pVertex &vertex1, pVertex &vertex2,
+	unsigned int size_ui, float size_f,
+	float dist, unsigned int link)
+{
+	InterVert v1 = vertex1->GetInterVert();
+	InterVert v2 = vertex2->GetInterVert();
+	if (v1 == InterGraph::null_vertex())
+	{
+		v1 = boost::add_vertex(graph);
+		graph[v1].id = vertex1->Id();
+		graph[v1].vertex = vertex1;
+		vertex1->SetInterVert(v1);
+	}
+	if (v2 == InterGraph::null_vertex())
+	{
+		v2 = boost::add_vertex(graph);
+		graph[v2].id = vertex2->Id();
+		graph[v2].vertex = vertex2;
+		vertex2->SetInterVert(v2);
+	}
+
+	std::pair<InterEdge, bool> e = boost::edge(v1, v2, graph);
+	if (!e.second)
+	{
+		e = boost::add_edge(v1, v2, graph);
+		graph[e.first].size_ui = size_ui;
+		graph[e.first].size_f = size_f;
+		graph[e.first].dist = dist;
+		graph[e.first].link = link;
+	}
+	else
+		return false;
+
+	return true;
+}
+
+bool TrackMapProcessor::GetMappedCells(TrackMap& track_map,
+	CellList &sel_list1, CellList &sel_list2,
+	size_t frame1, size_t frame2)
+{
+	size_t frame_num = track_map.m_frame_num;
+	if (frame1 >= frame_num ||
+		frame2 >= frame_num ||
+		frame1 == frame2)
+		return false;
+
+	VertexList &vertex_list1 = track_map.m_vertices_list.at(frame1);
+	VertexList &vertex_list2 = track_map.m_vertices_list.at(frame2);
+	CellList &cell_list1 = track_map.m_cells_list.at(frame1);
+	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
+		frame1 > frame2 ? frame2 : frame1);
+	CellListIter sel_iter, cell_iter;
+	pVertex vertex1, vertex2;
+	pCell cell;
+	InterVert v1, v2;
+	std::pair<InterAdjIter, InterAdjIter> adj_verts;
+	InterAdjIter inter_iter;
+	CellBinIter pwcell_iter;
+
+	for (sel_iter = sel_list1.begin();
+		sel_iter != sel_list1.end();
+		++sel_iter)
+	{
+		cell_iter = cell_list1.find(sel_iter->second->Id());
+		if (cell_iter == cell_list1.end())
+			continue;
+		vertex1 = cell_iter->second->GetVertex().lock();
+		if (!vertex1)
+			continue;
+		v1 = vertex1->GetInterVert();
+		if (v1 == InterGraph::null_vertex())
+			continue;
+		adj_verts = boost::adjacent_vertices(v1, inter_graph);
+		//for each adjacent vertex
+		for (inter_iter = adj_verts.first;
+			inter_iter != adj_verts.second;
+			++inter_iter)
+		{
+			v2 = *inter_iter;
+			vertex2 = inter_graph[v2].vertex.lock();
+			if (!vertex2)
+				continue;
+			//store all cells in sel_list2
+			for (pwcell_iter = vertex2->GetCellsBegin();
+				pwcell_iter != vertex2->GetCellsEnd();
+				++pwcell_iter)
+			{
+				cell = pwcell_iter->lock();
+				if (!cell)
+					continue;
+				sel_list2.insert(std::pair<unsigned int, pCell>
+					(cell->Id(), cell));
+			}
+		}
+	}
+
+	return true;
+}
