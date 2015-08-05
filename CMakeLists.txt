@@ -391,6 +391,14 @@ add_custom_command(TARGET FluoRender PRE_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/Fonts"
   "${CMAKE_BINARY_DIR}/Fonts")
+  
+#copy executables (Windows)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+	add_custom_command(TARGET FluoRender PRE_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_directory
+		"${FluoRender_SOURCE_DIR}/Executables"
+		"$<TARGET_FILE_DIR:FluoRender>/Executables")
+endif()
    
 #build DLL copy
 

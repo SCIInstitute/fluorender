@@ -900,6 +900,11 @@ private:
 
 	//run 4d script
 	void Run4DScript(wxString scriptname);
+	void RunNoiseReduction(wxFileConfig &fconfig);
+	void RunSelectionTracking(wxFileConfig &fconfig);
+	void RunRandomColors(wxFileConfig &fconfig);
+	void RunSeparateChannels(wxFileConfig &fconfig);
+	void RunExternalExe(wxFileConfig &fconfig);
 
 	//brush states update
 	void SetBrush(int mode);

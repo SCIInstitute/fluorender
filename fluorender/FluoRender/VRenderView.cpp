@@ -4944,7 +4944,6 @@ void VRenderGLView::Run4DScript(wxString scriptname)
 
 	int i;
 	wxString str;
-	wxString pathname;
 
 	//tasks
 	if (fconfig.Exists("/tasks"))
@@ -4958,278 +4957,276 @@ void VRenderGLView::Run4DScript(wxString scriptname)
 			{
 				fconfig.SetPath(str);
 				fconfig.Read("type", &str, "");
-				if (str=="noise_reduction")
-				{
-					double thresh, size;
-					fconfig.Read("threshold", &thresh, 0.0);
-					fconfig.Read("voxelsize", &size, 0.0);
-					int mode;
-					fconfig.Read("format", &mode, 0);
-					bool bake;
-					fconfig.Read("bake", &bake, false);
-					bool compression;
-					fconfig.Read("compress", &compression, false);
-					fconfig.Read("savepath", &pathname, "");
-					str = pathname;
-					int64_t pos = 0;
-					do
-					{
-						pos = pathname.find(GETSLASH(), pos);
-						if (pos == wxNOT_FOUND)
-							break;
-						pos++;
-						str = pathname.Left(pos);
-						if (!wxDirExists(str))
-							wxMkdir(str);
-					} while (true);
-
-					CompAnalysis(0.0, size, thresh, 1.0, false, false, false);
-					Calculate(6, "", false);
-					VolumeData* vd = m_calculator.GetResult();
-					if (vd)
-					{
-						int time_num = vd->GetReader()->GetTimeNum();
-						wxString format = wxString::Format("%d", time_num);
-						m_fr_length = format.Length();
-						format = wxString::Format("_T%%0%dd", m_fr_length);
-						str = pathname + vd->GetName() +
-							wxString::Format(format, m_tseq_cur_num) + ".tif";
-						vd->Save(str, mode, bake, compression);
-						delete vd;
-					}
-				}
+				if (str == "noise_reduction")
+					RunNoiseReduction(fconfig);
 				else if (str == "selection_tracking")
-				{
-					//read the size threshold
-					int slimit;
-					fconfig.Read("size_limit", &slimit, 0);
-					//current state:
-					//new data has been loaded in system memory
-					//old data is in graphics memory
-					//old mask in system memory is obsolete
-					//new mask is in graphics memory
-					//old label is in system memory
-					//no label in graphics memory
-					//steps:
-					int ii, jj, kk;
-					int nx, ny, nz;
-					//return current mask (into system memory)
-					if (!m_cur_vol) break;
-					m_cur_vol->GetVR()->return_mask();
-					m_cur_vol->GetResolution(nx, ny, nz);
-					//find labels in the old that are selected by the current mask
-					Texture* tex = m_cur_vol->GetTexture();
-					if (!tex) break;
-					Nrrd* mask_nrrd = tex->get_nrrd(tex->nmask());
-					if (!mask_nrrd) break;
-					Nrrd* label_nrrd = tex->get_nrrd(tex->nlabel());
-					if(!label_nrrd) break;
-					unsigned char* mask_data = (unsigned char*)(mask_nrrd->data);
-					if (!mask_data) break;
-					unsigned int* label_data = (unsigned int*)(label_nrrd->data);
-					if (!label_data) break;
-					FL::CellList sel_labels;
-					FL::CellListIter label_iter;
-					for (ii=0; ii<nx; ii++)
-					for (jj=0; jj<ny; jj++)
-					for (kk=0; kk<nz; kk++)
-					{
-						int index = nx*ny*kk + nx*jj + ii;
-						unsigned int label_value = label_data[index];
-						if (mask_data[index] && label_value)
-						{
-							label_iter = sel_labels.find(label_value);
-							if (label_iter == sel_labels.end())
-							{
-								FL::pCell cell(new FL::Cell(label_value));
-								cell->SetSizeUi(1);
-								sel_labels.insert(pair<unsigned int, FL::pCell>
-									(label_value, cell));
-							}
-							else
-								label_iter->second->Inc();
-						}
-					}
-					//clean label list according to the size limit
-					label_iter = sel_labels.begin();
-					while (label_iter != sel_labels.end())
-					{
-						if (label_iter->second->GetSizeUi() < (unsigned int)slimit)
-							label_iter = sel_labels.erase(label_iter);
-						else
-							++label_iter;
-					}
-					if (m_trace_group)
-					{
-						//create new id list
-						m_trace_group->SetCurTime(m_tseq_cur_num);
-						m_trace_group->SetPrvTime(m_tseq_prv_num);
-						m_trace_group->UpdateCellList(sel_labels);
-					}
-					//load and replace the label
-					BaseReader* reader = m_cur_vol->GetReader();
-					if (!reader) break;
-					wxString data_name = reader->GetCurName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
-					wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
-					LBLReader lbl_reader;
-					wstring lblname = label_name.ToStdWstring();
-					lbl_reader.SetFile(lblname);
-					Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
-					if (!label_nrrd_new) break;
-					m_cur_vol->LoadLabel(label_nrrd_new);
-					label_data = (unsigned int*)(label_nrrd_new->data);
-					if (!label_data) break;
-					//update the mask according to the new label
-					memset((void*)mask_data, 0, sizeof(uint8)*nx*ny*nz);
-					for (ii=0; ii<nx; ii++)
-					for (jj=0; jj<ny; jj++)
-					for (kk=0; kk<nz; kk++)
-					{
-						int index = nx*ny*kk + nx*jj + ii;
-						unsigned int label_value = label_data[index];
-						if (m_trace_group)
-						{
-							if (m_trace_group->FindCell(label_value))
-								mask_data[index] = 255;
-						}
-						else
-						{
-							label_iter = sel_labels.find(label_value);
-							if (label_iter != sel_labels.end())
-								mask_data[index] = 255;
-						}
-					}
-
-					//add traces to trace dialog
-					VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-					if (m_vrv && vr_frame && vr_frame->GetTraceDlg())
-						vr_frame->GetTraceDlg()->GetSettings(m_vrv);
-				}
+					RunSelectionTracking(fconfig);
 				else if (str == "random_colors")
-				{
-					fconfig.Read("savepath", &pathname, "");
-					str = pathname;
-					int64_t pos = 0;
-					do
-					{
-						pos = pathname.find(GETSLASH(), pos);
-						if (pos == wxNOT_FOUND)
-							break;
-						pos++;
-						str = pathname.Left(pos);
-						if (!wxDirExists(str))
-							wxMkdir(str);
-					} while (true);
-
-					//current state: see selection_tracking
-					//steps:
-					//load and replace the label
-					BaseReader* reader = m_cur_vol->GetReader();
-					if (!reader) break;
-					wxString data_name = reader->GetCurName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
-					wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
-					LBLReader lbl_reader;
-					wstring lblname = label_name.ToStdWstring();
-					lbl_reader.SetFile(lblname);
-					Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
-					if (!label_nrrd_new) break;
-					m_cur_vol->LoadLabel(label_nrrd_new);
-					//generate RGB volumes
-					m_selector.CompExportRandomColor(0, 0, 0, false, false);
-					vector<VolumeData*> *vol_list = m_selector.GetResultVols();
-					for (int ii=0; ii<(int)vol_list->size(); ii++)
-					{
-						VolumeData* vd = (*vol_list)[ii];
-						if (vd)
-						{
-							int time_num = vd->GetReader()->GetTimeNum();
-							wxString format = wxString::Format("%d", time_num);
-							m_fr_length = format.Length();
-							format = wxString::Format("_T%%0%dd", m_fr_length);
-							str = pathname +
-								wxString::Format(format, m_tseq_cur_num) +
-								wxString::Format("_COMP%d", ii+1) + ".tif";
-							vd->Save(str);
-							delete vd;
-						}
-					}
-				}
+					RunRandomColors(fconfig);
 				else if (str == "separate_channels")
-				{
-					int mode;
-					fconfig.Read("format", &mode, 0);
-					bool bake;
-					fconfig.Read("bake", &bake, false);
-					bool compression;
-					fconfig.Read("compress", &compression, false);
-					fconfig.Read("savepath", &pathname, "");
-					str = pathname;
-					int64_t pos = 0;
-					do
-					{
-						pos = pathname.find(GETSLASH(), pos);
-						if (pos == wxNOT_FOUND)
-							break;
-						pos++;
-						str = pathname.Left(pos);
-						if (!wxDirExists(str))
-							wxMkdir(str);
-					} while (true);
-
-					if (wxDirExists(pathname))
-					{
-						VolumeData* vd = m_selector.GetVolume();
-						if (vd)
-						{
-							int time_num = vd->GetReader()->GetTimeNum();
-							wxString format = wxString::Format("%d", time_num);
-							m_fr_length = format.Length();
-							format = wxString::Format("_T%%0%dd", m_fr_length);
-							str = pathname + vd->GetName() +
-								wxString::Format(format, m_tseq_cur_num) + ".tif";
-							vd->Save(str, mode, bake, compression);
-						}
-					}
-				}
-				else if (str == "prepare_tracking")
-				{
-					wxString path = "";
-					fconfig.Read("savepath", &pathname, "");
-					str = pathname;
-					int64_t pos = 0;
-					do
-					{
-						pos = pathname.find(GETSLASH(), pos);
-						if (pos == wxNOT_FOUND)
-							break;
-						pos++;
-						str = pathname.Left(pos);
-						if (path == "")
-							path = str;
-						if (!wxDirExists(str))
-							wxMkdir(str);
-					} while (true);
-
-					if (wxDirExists(path))
-					{
-						VolumeData* vd = m_selector.GetVolume();
-						if (vd)
-						{
-							int time_num = vd->GetReader()->GetTimeNum();
-							wxString format = wxString::Format("%d", time_num);
-							m_fr_length = format.Length();
-							format = wxString::Format("_T%%0%dd", m_fr_length);
-							str = pathname +
-								wxString::Format(format, m_tseq_cur_num) + ".tif";
-							vd->AddEmptyMask();
-							vd->AddEmptyLabel();
-							vd->Save(str, 0, false, false);
-						}
-					}
-				}
+					RunSeparateChannels(fconfig);
+				else if (str == "external_exe")
+					RunExternalExe(fconfig);
 			}
 		}
 	}
+}
+
+void VRenderGLView::RunNoiseReduction(wxFileConfig &fconfig)
+{
+	wxString str;
+	wxString pathname;
+	double thresh, size;
+	fconfig.Read("threshold", &thresh, 0.0);
+	fconfig.Read("voxelsize", &size, 0.0);
+	int mode;
+	fconfig.Read("format", &mode, 0);
+	bool bake;
+	fconfig.Read("bake", &bake, false);
+	bool compression;
+	fconfig.Read("compress", &compression, false);
+	fconfig.Read("savepath", &pathname, "");
+	str = pathname;
+	int64_t pos = 0;
+	do
+	{
+		pos = pathname.find(GETSLASH(), pos);
+		if (pos == wxNOT_FOUND)
+			break;
+		pos++;
+		str = pathname.Left(pos);
+		if (!wxDirExists(str))
+			wxMkdir(str);
+	} while (true);
+
+	CompAnalysis(0.0, size, thresh, 1.0, false, false, false);
+	Calculate(6, "", false);
+	VolumeData* vd = m_calculator.GetResult();
+	if (vd)
+	{
+		int time_num = vd->GetReader()->GetTimeNum();
+		wxString format = wxString::Format("%d", time_num);
+		m_fr_length = format.Length();
+		format = wxString::Format("_T%%0%dd", m_fr_length);
+		str = pathname + vd->GetName() +
+			wxString::Format(format, m_tseq_cur_num) + ".tif";
+		vd->Save(str, mode, bake, compression);
+		delete vd;
+	}
+}
+
+void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
+{
+	//read the size threshold
+	int slimit;
+	fconfig.Read("size_limit", &slimit, 0);
+	//current state:
+	//new data has been loaded in system memory
+	//old data is in graphics memory
+	//old mask in system memory is obsolete
+	//new mask is in graphics memory
+	//old label is in system memory
+	//no label in graphics memory
+	//steps:
+	int ii, jj, kk;
+	int nx, ny, nz;
+	//return current mask (into system memory)
+	if (!m_cur_vol)
+		return;
+	m_cur_vol->GetVR()->return_mask();
+	m_cur_vol->GetResolution(nx, ny, nz);
+	//find labels in the old that are selected by the current mask
+	Texture* tex = m_cur_vol->GetTexture();
+	if (!tex)
+		return;
+	Nrrd* mask_nrrd = tex->get_nrrd(tex->nmask());
+	if (!mask_nrrd)
+		return;
+	Nrrd* label_nrrd = tex->get_nrrd(tex->nlabel());
+	if (!label_nrrd)
+		return;
+	unsigned char* mask_data = (unsigned char*)(mask_nrrd->data);
+	if (!mask_data)
+		return;
+	unsigned int* label_data = (unsigned int*)(label_nrrd->data);
+	if (!label_data)
+		return;
+	FL::CellList sel_labels;
+	FL::CellListIter label_iter;
+	for (ii = 0; ii<nx; ii++)
+	for (jj = 0; jj<ny; jj++)
+	for (kk = 0; kk<nz; kk++)
+	{
+		int index = nx*ny*kk + nx*jj + ii;
+		unsigned int label_value = label_data[index];
+		if (mask_data[index] && label_value)
+		{
+			label_iter = sel_labels.find(label_value);
+			if (label_iter == sel_labels.end())
+			{
+				FL::pCell cell(new FL::Cell(label_value));
+				cell->SetSizeUi(1);
+				sel_labels.insert(pair<unsigned int, FL::pCell>
+					(label_value, cell));
+			}
+			else
+				label_iter->second->Inc();
+		}
+	}
+	//clean label list according to the size limit
+	label_iter = sel_labels.begin();
+	while (label_iter != sel_labels.end())
+	{
+		if (label_iter->second->GetSizeUi() < (unsigned int)slimit)
+			label_iter = sel_labels.erase(label_iter);
+		else
+			++label_iter;
+	}
+	if (m_trace_group)
+	{
+		//create new id list
+		m_trace_group->SetCurTime(m_tseq_cur_num);
+		m_trace_group->SetPrvTime(m_tseq_prv_num);
+		m_trace_group->UpdateCellList(sel_labels);
+	}
+	//load and replace the label
+	BaseReader* reader = m_cur_vol->GetReader();
+	if (!reader)
+		return;
+	wxString data_name = reader->GetCurName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
+	wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
+	LBLReader lbl_reader;
+	wstring lblname = label_name.ToStdWstring();
+	lbl_reader.SetFile(lblname);
+	Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
+	if (!label_nrrd_new)
+		return;
+	m_cur_vol->LoadLabel(label_nrrd_new);
+	label_data = (unsigned int*)(label_nrrd_new->data);
+	if (!label_data)
+		return;
+	//update the mask according to the new label
+	memset((void*)mask_data, 0, sizeof(uint8)*nx*ny*nz);
+	for (ii = 0; ii<nx; ii++)
+	for (jj = 0; jj<ny; jj++)
+	for (kk = 0; kk<nz; kk++)
+	{
+		int index = nx*ny*kk + nx*jj + ii;
+		unsigned int label_value = label_data[index];
+		if (m_trace_group)
+		{
+			if (m_trace_group->FindCell(label_value))
+				mask_data[index] = 255;
+		}
+		else
+		{
+			label_iter = sel_labels.find(label_value);
+			if (label_iter != sel_labels.end())
+				mask_data[index] = 255;
+		}
+	}
+
+	//add traces to trace dialog
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (m_vrv && vr_frame && vr_frame->GetTraceDlg())
+		vr_frame->GetTraceDlg()->GetSettings(m_vrv);
+}
+
+void VRenderGLView::RunRandomColors(wxFileConfig &fconfig)
+{
+	wxString str, pathname;
+	fconfig.Read("savepath", &pathname, "");
+	str = pathname;
+	int64_t pos = 0;
+	do
+	{
+		pos = pathname.find(GETSLASH(), pos);
+		if (pos == wxNOT_FOUND)
+			break;
+		pos++;
+		str = pathname.Left(pos);
+		if (!wxDirExists(str))
+			wxMkdir(str);
+	} while (true);
+
+	//current state: see selection_tracking
+	//steps:
+	//load and replace the label
+	BaseReader* reader = m_cur_vol->GetReader();
+	if (!reader)
+		return;
+	wxString data_name = reader->GetCurName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
+	wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
+	LBLReader lbl_reader;
+	wstring lblname = label_name.ToStdWstring();
+	lbl_reader.SetFile(lblname);
+	Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
+	if (!label_nrrd_new)
+		return;
+	m_cur_vol->LoadLabel(label_nrrd_new);
+	//generate RGB volumes
+	m_selector.CompExportRandomColor(0, 0, 0, false, false);
+	vector<VolumeData*> *vol_list = m_selector.GetResultVols();
+	for (int ii = 0; ii<(int)vol_list->size(); ii++)
+	{
+		VolumeData* vd = (*vol_list)[ii];
+		if (vd)
+		{
+			int time_num = vd->GetReader()->GetTimeNum();
+			wxString format = wxString::Format("%d", time_num);
+			m_fr_length = format.Length();
+			format = wxString::Format("_T%%0%dd", m_fr_length);
+			str = pathname +
+				wxString::Format(format, m_tseq_cur_num) +
+				wxString::Format("_COMP%d", ii + 1) + ".tif";
+			vd->Save(str);
+			delete vd;
+		}
+	}
+}
+
+void VRenderGLView::RunSeparateChannels(wxFileConfig &fconfig)
+{
+	wxString str, pathname;
+	int mode;
+	fconfig.Read("format", &mode, 0);
+	bool bake;
+	fconfig.Read("bake", &bake, false);
+	bool compression;
+	fconfig.Read("compress", &compression, false);
+	fconfig.Read("savepath", &pathname, "");
+	str = pathname;
+	int64_t pos = 0;
+	do
+	{
+		pos = pathname.find(GETSLASH(), pos);
+		if (pos == wxNOT_FOUND)
+			break;
+		pos++;
+		str = pathname.Left(pos);
+		if (!wxDirExists(str))
+			wxMkdir(str);
+	} while (true);
+
+	if (wxDirExists(pathname))
+	{
+		VolumeData* vd = m_selector.GetVolume();
+		if (vd)
+		{
+			int time_num = vd->GetReader()->GetTimeNum();
+			wxString format = wxString::Format("%d", time_num);
+			m_fr_length = format.Length();
+			format = wxString::Format("_T%%0%dd", m_fr_length);
+			str = pathname + vd->GetName() +
+				wxString::Format(format, m_tseq_cur_num) + ".tif";
+			vd->Save(str, mode, bake, compression);
+		}
+	}
+}
+
+void VRenderGLView::RunExternalExe(wxFileConfig &fconfig)
+{
+
 }
 
 //draw
