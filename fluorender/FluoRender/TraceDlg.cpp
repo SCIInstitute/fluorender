@@ -38,7 +38,6 @@ DEALINGS IN THE SOFTWARE.
 BEGIN_EVENT_TABLE(TraceListCtrl, wxListCtrl)
 	EVT_KEY_DOWN(TraceListCtrl::OnKeyDown)
 	EVT_CONTEXT_MENU(TraceListCtrl::OnContextMenu)
-	EVT_MENU(Menu_ExportText, TraceListCtrl::OnExportSelection)
 	EVT_MENU(Menu_CopyText, TraceListCtrl::OnCopySelection)
 	EVT_MENU(Menu_Delete, TraceListCtrl::OnDeleteSelection)
 END_EVENT_TABLE()
@@ -109,34 +108,23 @@ void TraceListCtrl::UpdateTraces(VRenderView* vrv)
 
 	DeleteAllItems();
 
-	IDMap* ids = traces->GetIDMap();
-	if (!ids)
-		return;
+	FL::CellList sel_cells = traces->GetCellList();
+	FL::CellListIter iter;
 
-	IDMapIter id_iter;
-	vector<Lbl> lbl_list;
-	for (id_iter=ids->begin(); id_iter!=ids->end(); ++id_iter)
+	unsigned int id;
+	Color c;
+	wxColor wxc;
+	int size;
+	Point center;
+
+	for (iter = sel_cells.begin();
+		iter != sel_cells.end(); ++iter)
 	{
-		lbl_list.push_back(id_iter->second);
-	}
-
-	std::sort(lbl_list.begin(), lbl_list.end(), Lbl::cmp_id);
-
-	for (unsigned int i=0; i<lbl_list.size(); ++i)
-	{
-		unsigned int id = lbl_list[i].id;
-		double hue = id % 360;
-		Color c(HSVColor(hue, 1.0, 1.0));
+		id = iter->second->Id();
+		c = HSVColor(id % 360, 1.0, 1.0);
 		wxColor color(c.r()*255, c.g()*255, c.b()*255);
-		int size = 0;
-		Point center;
-		Vertex vertex;
-		int time = m_view->m_glview->m_tseq_cur_num;
-		if (traces->FindIDInFrame(id, time, vertex))
-			size = vertex.vsize;
-		else
-			size = lbl_list[i].size;
-		center = lbl_list[i].center;
+		size = (int)(iter->second->GetSizeUi());
+		center = iter->second->GetCenter();
 		Append(id, color, size,
 			center.x(), center.y(), center.z());
 	}
@@ -176,34 +164,6 @@ wxString TraceListCtrl::GetText(long item, int col)
 	return info.GetText();
 }
 
-void TraceListCtrl::ExportSelection()
-{
-	if (!m_view) return;
-
-	long item = GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-	if (item != -1)
-	{
-		wxString name = GetItemText(item);
-		unsigned long id;
-		name.ToULong(&id);
-
-		wxFileDialog *fdlg = new wxFileDialog(
-			this, "Save the selected trace",
-			"", "", "*.txt", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
-		int rval = fdlg->ShowModal();
-		if (rval == wxID_OK)
-		{
-			wxString filename = fdlg->GetPath();
-			m_view->ExportTrace(filename, id);
-		}
-
-		if (fdlg)
-			delete fdlg;
-	}
-}
-
 void TraceListCtrl::OnKeyDown(wxKeyEvent& event)
 {
 	if (event.GetKeyCode() == WXK_DELETE ||
@@ -238,15 +198,9 @@ void TraceListCtrl::OnContextMenu(wxContextMenuEvent &event)
 		wxMenu menu;
 		menu.Append(Menu_CopyText, "Copy");
 		menu.Append(Menu_Delete, "Delete");
-		menu.Append(Menu_ExportText, "Export as text file");
 
 		PopupMenu(&menu, point.x, point.y);
 	}
-}
-
-void TraceListCtrl::OnExportSelection(wxCommandEvent& event)
-{
-	ExportSelection();
 }
 
 void TraceListCtrl::OnCopySelection(wxCommandEvent& event)
@@ -1064,7 +1018,7 @@ void TraceDlg::OnCellUpdate(wxCommandEvent &event)
 	CellUpdate();
 }
 
-void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, vector<Lbl> *list)
+/*void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, vector<Lbl> *list)
 {
 	wxString str;
 	unsigned long id;
@@ -1086,7 +1040,7 @@ void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, vector<Lbl> *
 	label.size = size;
 	label.center = Point(x, y, z);
 	list->push_back(label);
-}
+}*/
 
 void TraceDlg::CellUpdate()
 {
@@ -1108,7 +1062,7 @@ void TraceDlg::CellUpdate()
 
 void TraceDlg::CellFull()
 {
-	if (!m_view)
+/*	if (!m_view)
 		return;
 
 	//cell size filter
@@ -1195,12 +1149,12 @@ void TraceDlg::CellFull()
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_pool();
 	//update view
-	CellUpdate();
+	CellUpdate();*/
 }
 
 void TraceDlg::CellLink(bool exclusive, bool idid)
 {
-	if (!m_view)
+/*	if (!m_view)
 		return;
 	TraceGroup* trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
@@ -1303,12 +1257,12 @@ void TraceDlg::CellLink(bool exclusive, bool idid)
 				trace_group->LinkVertices(id1, m_cur_time, id2, m_prv_time, exclusive);
 			}
 		}
-	}
+	}*/
 }
 
 void TraceDlg::CellNewID()
 {
-	if (!m_view)
+/*	if (!m_view)
 		return;
 
 	//trace group
@@ -1414,12 +1368,12 @@ void TraceDlg::CellNewID()
 
 	CellUpdate();
 	//update view
-	m_view->RefreshGL();
+	m_view->RefreshGL();*/
 }
 
 void TraceDlg::CellExclusiveID(int mode)
 {
-	if (!m_view)
+/*	if (!m_view)
 		return;
 
 	//trace group
@@ -1550,12 +1504,12 @@ void TraceDlg::CellExclusiveID(int mode)
 	CellUpdate();
 	//update view
 	m_view->RefreshGL();
-
+*/
 }
 
 void TraceDlg::CellAppendID(vector<unsigned int> &id_list)
 {
-	if (!m_view)
+/*	if (!m_view)
 		return;
 
 	//get current mask
@@ -1598,7 +1552,7 @@ void TraceDlg::CellAppendID(vector<unsigned int> &id_list)
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_pool();
 	//update view
-	CellUpdate();
+	CellUpdate();*/
 }
 
 void TraceDlg::OnCellLink(wxCommandEvent &event)
@@ -1613,7 +1567,7 @@ void TraceDlg::OnCellExclusiveLink(wxCommandEvent &event)
 
 void TraceDlg::OnCellUnlink(wxCommandEvent &event)
 {
-	if (!m_view)
+/*	if (!m_view)
 		return;
 	TraceGroup* trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
@@ -1656,12 +1610,12 @@ void TraceDlg::OnCellUnlink(wxCommandEvent &event)
 	{
 		//create vertex
 	}
-	trace_group->UnlinkVertices(id1, m_cur_time, id2, m_prv_time);
+	trace_group->UnlinkVertices(id1, m_cur_time, id2, m_prv_time);*/
 }
 
 void TraceDlg::OnCellModify(wxCommandEvent &event)
 {
-	if (!m_view)
+/*	if (!m_view)
 		return;
 
 	//save current mask
@@ -1678,7 +1632,7 @@ void TraceDlg::OnCellModify(wxCommandEvent &event)
 	//clear current mask
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 	if (frame && frame->GetTree())
-		frame->GetTree()->BrushClear();
+		frame->GetTree()->BrushClear();*/
 }
 
 void TraceDlg::OnCellNewID(wxCommandEvent &event)
@@ -1689,7 +1643,7 @@ void TraceDlg::OnCellNewID(wxCommandEvent &event)
 //magic
 void TraceDlg::OnCellMagic0Btn(wxCommandEvent &event)
 {
-	Measure();
+/*	Measure();
 	wxString str;
 	OutputMeasureResult(str);
 	m_stat_text->SetValue(str);
@@ -1704,7 +1658,7 @@ void TraceDlg::OnCellMagic0Btn(wxCommandEvent &event)
 		SaveMeasureResult(filename);
 	}
 	if (fopendlg)
-		delete fopendlg;
+		delete fopendlg;*/
 }
 
 void TraceDlg::OnCellMagic1Btn(wxCommandEvent &event)
@@ -2071,7 +2025,7 @@ void TraceDlg::Test1()
 
 void TraceDlg::Test2(int type)
 {
-	if (!m_view)
+/*	if (!m_view)
 		return;
 	//trace group
 	TraceGroup *trace_group = m_view->GetTraceGroup();
@@ -2134,12 +2088,12 @@ void TraceDlg::Test2(int type)
 			str += wxString::Format("time: %d\n", time);
 		}
 	}
-	m_stat_text->SetValue(str);
+	m_stat_text->SetValue(str);*/
 }
 
 void TraceDlg::OnCellCombineID(wxCommandEvent &event)
 {
-	if (!m_view)
+/*	if (!m_view)
 		return;
 
 	//cell size filter
@@ -2223,7 +2177,7 @@ void TraceDlg::OnCellCombineID(wxCommandEvent &event)
 	}
 
 	//update view
-	m_view->RefreshGL();
+	m_view->RefreshGL();*/
 }
 
 void TraceDlg::OnCellPrev(wxCommandEvent &event)

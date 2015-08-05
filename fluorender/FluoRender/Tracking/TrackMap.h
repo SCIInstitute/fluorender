@@ -72,6 +72,11 @@ namespace FL
 		bool GetMappedCells(TrackMap& track_map,
 			CellList &sel_list1, CellList &sel_list2,
 			size_t frame1, size_t frame2);
+		//edges (in a vector of drawable)
+		unsigned int GetMappedEdges(TrackMap& track_map,
+			CellList &sel_list1, CellList &sel_list2,
+			std::vector<float> &verts,
+			size_t frame1, size_t frame2);
 
 	private:
 		float m_contact_thresh;

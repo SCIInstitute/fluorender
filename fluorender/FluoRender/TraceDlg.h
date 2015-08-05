@@ -42,8 +42,7 @@ class TraceListCtrl : public wxListCtrl
 {
 	enum
 	{
-		Menu_ExportText = wxID_HIGHEST+2251,
-		Menu_CopyText,
+		Menu_CopyText = wxID_HIGHEST+2251,
 		Menu_Delete
 	};
 
@@ -62,9 +61,6 @@ public:
 	void DeleteSelection();
 	wxString GetText(long item, int col);
 
-	//menu operations
-	void ExportSelection();
-
 	friend class TraceDlg;
 
 private:
@@ -74,7 +70,6 @@ private:
 private:
 	void OnKeyDown(wxKeyEvent& event);
 	void OnContextMenu(wxContextMenuEvent &event);
-	void OnExportSelection(wxCommandEvent& event);
 	void OnCopySelection(wxCommandEvent& event);
 	void OnDeleteSelection(wxCommandEvent& event);
 
@@ -187,10 +182,6 @@ private:
 
 	//enable manual assist
 	bool m_manual_assist;
-
-	//show trace
-	//bool m_ghost_show_tail;
-	//bool m_ghost_show_lead;
 
 	//ui
 	//list ctrl

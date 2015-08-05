@@ -1067,3 +1067,85 @@ bool TrackMapProcessor::GetMappedCells(TrackMap& track_map,
 
 	return true;
 }
+
+unsigned int TrackMapProcessor::GetMappedEdges(TrackMap & track_map,
+	CellList & sel_list1, CellList & sel_list2,
+	std::vector<float>& verts,
+	size_t frame1, size_t frame2)
+{
+	unsigned int result = 0;
+
+	size_t frame_num = track_map.m_frame_num;
+	if (frame1 >= frame_num ||
+		frame2 >= frame_num ||
+		frame1 == frame2)
+		return result;
+
+	VertexList &vertex_list1 = track_map.m_vertices_list.at(frame1);
+	VertexList &vertex_list2 = track_map.m_vertices_list.at(frame2);
+	CellList &cell_list1 = track_map.m_cells_list.at(frame1);
+	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
+		frame1 > frame2 ? frame2 : frame1);
+	CellListIter sel_iter, cell_iter;
+	pVertex vertex1, vertex2;
+	pCell cell;
+	InterVert v1, v2;
+	std::pair<InterAdjIter, InterAdjIter> adj_verts;
+	InterAdjIter inter_iter;
+	CellBinIter pwcell_iter;
+	FLIVR::Color c;
+
+	for (sel_iter = sel_list1.begin();
+	sel_iter != sel_list1.end();
+		++sel_iter)
+	{
+		cell_iter = cell_list1.find(sel_iter->second->Id());
+		if (cell_iter == cell_list1.end())
+			continue;
+		vertex1 = cell_iter->second->GetVertex().lock();
+		if (!vertex1)
+			continue;
+		v1 = vertex1->GetInterVert();
+		if (v1 == InterGraph::null_vertex())
+			continue;
+		adj_verts = boost::adjacent_vertices(v1, inter_graph);
+		//for each adjacent vertex
+		for (inter_iter = adj_verts.first;
+		inter_iter != adj_verts.second;
+			++inter_iter)
+		{
+			v2 = *inter_iter;
+			vertex2 = inter_graph[v2].vertex.lock();
+			if (!vertex2)
+				continue;
+			//store all cells in sel_list2
+			for (pwcell_iter = vertex2->GetCellsBegin();
+			pwcell_iter != vertex2->GetCellsEnd();
+				++pwcell_iter)
+			{
+				cell = pwcell_iter->lock();
+				if (!cell)
+					continue;
+				sel_list2.insert(std::pair<unsigned int, pCell>
+					(cell->Id(), cell));
+				//save to verts
+				c = FLIVR::HSVColor(cell->Id() % 360, 1.0, 0.9);
+				verts.push_back(vertex1->GetCenter().x());
+				verts.push_back(vertex1->GetCenter().y());
+				verts.push_back(vertex1->GetCenter().z());
+				verts.push_back(c.r());
+				verts.push_back(c.g());
+				verts.push_back(c.b());
+				verts.push_back(vertex2->GetCenter().x());
+				verts.push_back(vertex2->GetCenter().y());
+				verts.push_back(vertex2->GetCenter().z());
+				verts.push_back(c.r());
+				verts.push_back(c.g());
+				verts.push_back(c.b());
+				result += 2;
+			}
+		}
+	}
+
+	return result;
+}

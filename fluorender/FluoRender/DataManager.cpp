@@ -2915,197 +2915,6 @@ void Ruler::SaveProfile(wxString &filename)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*int Vertex::Read(ifstream &ifs)
-{
-	if (ifs.bad())
-		return 0;
-
-	unsigned char tag;
-	ifs.read((char*)(&tag), sizeof(tag));
-	if (tag != TAG_VERT)
-		return 0;
-
-	//cell
-	ifs.read((char*)(&tag), sizeof(tag));
-	if (tag != TAG_CELL)
-		return 0;
-	//id
-	ifs.read((char*)(&id), sizeof(id));
-	ifs.read((char*)(&vsize), sizeof(vsize));
-	double x, y, z;
-	ifs.read((char*)(&x), sizeof(double));
-	ifs.read((char*)(&y), sizeof(double));
-	ifs.read((char*)(&z), sizeof(double));
-	center = Point(x, y, z);
-
-	//out edges (ids)
-	ifs.read((char*)(&tag), sizeof(tag));
-	if (tag != TAG_EDGE)
-		return 0;
-	unsigned int num = 0;
-	ifs.read((char*)(&num), sizeof(num));
-	unsigned int tempi;
-	for (unsigned int i=0; i<num; ++i)
-	{
-		ifs.read((char*)(&tempi), sizeof(tempi));
-		out_ids.push_back(tempi);
-	}
-	//in edges (ids)
-	ifs.read((char*)(&tag), sizeof(tag));
-	if (tag != TAG_EDGE)
-		return 0;
-	ifs.read((char*)(&num), sizeof(num));
-	for (unsigned int i=0; i<num; ++i)
-	{
-		ifs.read((char*)(&tempi), sizeof(tempi));
-		in_ids.push_back(tempi);
-	}
-
-	return 1;
-}
-int Vertex::Write(ofstream &ofs)
-{
-	if (ofs.bad())
-		return 0;
-
-	//tag vertex
-	unsigned char tag = TAG_VERT;
-	ofs.write(reinterpret_cast<const char*>(&tag),
-		sizeof(unsigned char));
-
-	//cell
-	//tag cell
-	tag = TAG_CELL;
-	ofs.write(reinterpret_cast<const char*>(&tag),
-		sizeof(unsigned char));
-	//id etc
-	ofs.write(reinterpret_cast<const char*>(&id),
-		sizeof(unsigned int));
-	ofs.write(reinterpret_cast<const char*>(&vsize),
-		sizeof(unsigned int));
-	double x, y, z;
-	x = center.x();
-	y = center.y();
-	z = center.z();
-	ofs.write(reinterpret_cast<const char*>(&x),
-		sizeof(double));
-	ofs.write(reinterpret_cast<const char*>(&y),
-		sizeof(double));
-	ofs.write(reinterpret_cast<const char*>(&z),
-		sizeof(double));
-
-	//out edges
-	unsigned int num = 0;
-	unsigned int id = 0;
-	//tag edge
-	tag = TAG_EDGE;
-	ofs.write(reinterpret_cast<const char*>(&tag),
-		sizeof(unsigned char));
-	//num
-	num = (unsigned int)out_ids.size();
-	ofs.write(reinterpret_cast<const char*>(&num),
-		sizeof(unsigned int));
-	//id
-	for (unsigned int i=0; i<num; ++i)
-	{
-		id = out_ids[i];
-		ofs.write(reinterpret_cast<const char*>(&id),
-			sizeof(unsigned int));
-	}
-	//in edges
-	//tag edge
-	tag = TAG_EDGE;
-	ofs.write(reinterpret_cast<const char*>(&tag),
-		sizeof(unsigned char));
-	//num
-	num = (unsigned int)in_ids.size();
-	ofs.write(reinterpret_cast<const char*>(&num),
-		sizeof(unsigned int));
-	//id
-	for (unsigned int i=0; i<num; ++i)
-	{
-		id = in_ids[i];
-		ofs.write(reinterpret_cast<const char*>(&id),
-			sizeof(unsigned int));
-	}
-
-	return 1;
-}
-
-int Frame::Read(ifstream &ifs)
-{
-	if (ifs.bad())
-		return 0;
-
-	//id
-	ifs.read((char*)(&id), sizeof(id));
-	//cell map
-	if (!ReadCellMap(ifs))
-		return 0;
-	return 1;
-}
-int Frame::ReadCellMap(ifstream &ifs)
-{
-	if (ifs.bad())
-		return 0;
-
-	unsigned char tag = 0;
-	ifs.read((char*)(&tag), sizeof(tag));
-	if (tag != TAG_CMAP)
-		return 0;
-
-	unsigned int num = 0;
-	ifs.read((char*)(&num), sizeof(num));
-
-	for (unsigned int i=0; i<num; i++)
-	{
-		Vertex vertex;
-		if (vertex.Read(ifs))
-			cell_map.insert(pair<unsigned int, Vertex>(vertex.id, vertex));
-		else
-			return 0;
-	}
-
-	return 1;
-}
-
-int Frame::Write(ofstream &ofs)
-{
-	if (ofs.bad())
-		return 0;
-
-	//id
-	ofs.write(reinterpret_cast<const char*>(&id),
-		sizeof(unsigned int));
-	//cell map
-	if (!WriteCellMap(ofs))
-		return 0;
-	return 1;
-}
-int Frame::WriteCellMap(ofstream &ofs)
-{
-	if (ofs.bad())
-		return 0;
-
-	//tag
-	unsigned char tag = TAG_CMAP;
-	ofs.write(reinterpret_cast<const char*>(&tag),
-		sizeof(unsigned char));
-
-	//num
-	unsigned int num = cell_map.size();
-	ofs.write(reinterpret_cast<const char*>(&num),
-		sizeof(unsigned int));
-
-	//vertices
-	for (CellMapIter iter = cell_map.begin();
-		iter != cell_map.end(); ++iter)
-	{
-		iter->second.Write(ofs);
-	}
-
-	return 1;
-}*/
 int TraceGroup::m_num = 0;
 TraceGroup::TraceGroup()
 {
@@ -3379,26 +3188,7 @@ Frame* TraceGroup::AddFrame(int time)
 	else
 		return 0;
 }
-unsigned char TraceGroup::ReadTag(ifstream &ifs)
-{
-	if (ifs.bad())
-		return 0;
-
-	unsigned char tag;
-	ifs.read((char*)(&tag), sizeof(tag));
-	if (ifs)
-		return tag;
-	else
-		return 0;
-}
-
-void TraceGroup::WriteTag(ofstream&ofs, unsigned char tag)
-{
-if (ofs.bad())
-return;
-
-ofs.write(reinterpret_cast<const char*>(&tag), sizeof(unsigned char));
-}*/
+*/
 
 bool TraceGroup::Load(wxString &filename)
 {
@@ -3419,156 +3209,57 @@ bool TraceGroup::Save(wxString &filename)
 unsigned int TraceGroup::Draw(vector<float> &verts)
 {
 	unsigned int result = 0;
-/*	if (m_ghost_num <= 0)
+	size_t frame_num = m_track_map.GetFrameNum();
+	if (m_ghost_num <= 0 ||
+		m_cur_time < 0 ||
+		m_cur_time >= frame_num)
 		return result;
 
-	vector<CellMap*> ghosts;
-	unsigned int gstart, gend;
-	unsigned int cur_ghost = 0;
-	gstart = m_cur_time<=m_ghost_num?0:m_cur_time-m_ghost_num;
-	gend = m_cur_time+m_ghost_num;
-	FrameIter frame_iter;
-	for (unsigned int i=gstart; i<=gend; ++i)
+	//estimate verts size
+	size_t remain_num = frame_num - m_cur_time - 1;
+	size_t ghost_lead, ghost_tail;
+	ghost_lead = m_draw_lead ?
+		(remain_num>m_ghost_num ?
+		m_ghost_num : remain_num) : 0;
+	ghost_tail = m_draw_tail ?
+		(m_cur_time>=m_ghost_num ?
+		m_ghost_num : m_cur_time) : 0;
+	verts.reserve((ghost_lead + ghost_tail) *
+		m_cell_list.size() * 3 * 6 * 3);//1.5 branches each
+
+	FL::CellList temp_sel_list1, temp_sel_list2;
+	FL::TrackMapProcessor tm_processor;
+
+	if (m_draw_lead)
 	{
-		frame_iter = m_frame_list.find(i);
-		if (frame_iter != m_frame_list.end())
+		temp_sel_list1 = m_cell_list;
+		for (size_t i = m_cur_time;
+			i < m_cur_time + ghost_lead; ++i)
 		{
-			ghosts.push_back(&(frame_iter->second.cell_map));
-			if (frame_iter->second.id == (size_t)m_cur_time)
-				cur_ghost = ghosts.size()-1;
+			result += tm_processor.GetMappedEdges(m_track_map,
+				temp_sel_list1, temp_sel_list2,
+				verts, i, i + 1);
+			//swap
+			temp_sel_list1 = temp_sel_list2;
+			temp_sel_list2.clear();
 		}
 	}
 
-	if (ghosts.size() > 0 && (m_draw_tail || m_draw_lead))
+	if (m_draw_tail)
 	{
-		//
-		IDMapIter id_map_iter;
-		unsigned int id, id2;
-		CellMap *cell_map1 = 0;
-		CellMap *cell_map2 = 0;
-		CellMapIter cell_map_iter1, cell_map_iter2;
-		Vertex *vertex1 = 0;
-		Vertex *vertex2 = 0;
-		IDMap id_map_temp1, id_map_temp2;
-		Lbl lbl;
-
-		id_map_temp1 = m_id_map;
-
-		verts.reserve(ghosts.size()*3*6*2);
-
-		if (m_draw_lead)
+		temp_sel_list1 = m_cell_list;
+		for (size_t i = m_cur_time;
+			i > m_cur_time - ghost_tail; --i)
 		{
-			//after
-			for (size_t i=cur_ghost; i<(cur_ghost+m_ghost_num); ++i)
-			{
-				//after
-				if (i+1<ghosts.size())
-				{
-					cell_map1 = ghosts[i];
-					cell_map2 = ghosts[i+1];
-
-					for (id_map_iter = id_map_temp1.begin();
-						id_map_iter != id_map_temp1.end(); ++id_map_iter)
-					{
-						id = id_map_iter->second.id;
-						Color c(HSVColor(id%360, 1.0, 0.9));
-
-						cell_map_iter1 = cell_map1->find(id);
-						if (cell_map_iter1 != cell_map1->end())
-						{
-							vertex1 = &(cell_map_iter1->second);
-							for (unsigned int i=0; i<vertex1->out_ids.size(); ++i)
-							{
-								id2 = vertex1->out_ids[i];
-								cell_map_iter2 = cell_map2->find(id2);
-								if (cell_map_iter2 != cell_map2->end())
-								{
-									vertex2 = &(cell_map_iter2->second);
-									lbl.id = id2;
-									lbl.size = vertex2->vsize;
-									lbl.center = vertex2->center;
-									id_map_temp2.insert(pair<unsigned int, Lbl>(id2, lbl));
-									verts.push_back(vertex1->center.x());
-									verts.push_back(vertex1->center.y());
-									verts.push_back(vertex1->center.z());
-									verts.push_back(c.r());
-									verts.push_back(c.g());
-									verts.push_back(c.b());
-									verts.push_back(vertex2->center.x());
-									verts.push_back(vertex2->center.y());
-									verts.push_back(vertex2->center.z());
-									verts.push_back(c.r());
-									verts.push_back(c.g());
-									verts.push_back(c.b());
-									result += 2;
-								}
-							}
-						}
-					}
-				}
-				id_map_temp1 = id_map_temp2;
-				id_map_temp2.clear();
-			}
-		}
-
-		if (m_draw_tail)
-		{
-			id_map_temp1 = m_id_map;
-			id_map_temp2.clear();
-			//before
-			for (size_t i=cur_ghost; i>gstart; --i)
-			{
-				//before
-				if ((int)i-1>=0 && i<ghosts.size())
-				{
-					cell_map1 = ghosts[i];
-					cell_map2 = ghosts[i-1];
-
-					for (id_map_iter = id_map_temp1.begin();
-						id_map_iter != id_map_temp1.end(); ++id_map_iter)
-					{
-						id = id_map_iter->second.id;
-						Color c(HSVColor(id%360, 1.0, 0.9));
-
-						cell_map_iter1 = cell_map1->find(id);
-						if (cell_map_iter1 != cell_map1->end())
-						{
-							vertex1 = &(cell_map_iter1->second);
-							for (unsigned int i=0; i<vertex1->in_ids.size(); ++i)
-							{
-								id2 = vertex1->in_ids[i];
-								cell_map_iter2 = cell_map2->find(id2);
-								if (cell_map_iter2 != cell_map2->end())
-								{
-									vertex2 = &(cell_map_iter2->second);
-									lbl.id = id2;
-									lbl.size = vertex2->vsize;
-									lbl.center = vertex2->center;
-									id_map_temp2.insert(pair<unsigned int, Lbl>(id2, lbl));
-									verts.push_back(vertex1->center.x());
-									verts.push_back(vertex1->center.y());
-									verts.push_back(vertex1->center.z());
-									verts.push_back(c.r());
-									verts.push_back(c.g());
-									verts.push_back(c.b());
-									verts.push_back(vertex2->center.x());
-									verts.push_back(vertex2->center.y());
-									verts.push_back(vertex2->center.z());
-									verts.push_back(c.r());
-									verts.push_back(c.g());
-									verts.push_back(c.b());
-									result += 2;
-								}
-							}
-						}
-					}
-				}
-				id_map_temp1 = id_map_temp2;
-				id_map_temp2.clear();
-			}
+			result += tm_processor.GetMappedEdges(
+				m_track_map, temp_sel_list1, temp_sel_list2,
+				verts, i, i - 1);
+			//sawp
+			temp_sel_list1 = temp_sel_list2;
+			temp_sel_list2.clear();
 		}
 	}
-*/
+
 	return result;
 }
 

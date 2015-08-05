@@ -9595,6 +9595,7 @@ int VRenderGLView::SaveTraceGroup(wxString filename)
 	else
 		return 0;
 }
+
 void VRenderGLView::ExportTrace(wxString filename, unsigned int id)
 {
 	if (!m_trace_group)

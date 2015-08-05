@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FL_Cell_h
 
 #include <Point.h>
+#include <Color.h>
 #include <boost\shared_ptr.hpp>
 #include <boost\weak_ptr.hpp>
 #include <boost\graph\graph_traits.hpp>

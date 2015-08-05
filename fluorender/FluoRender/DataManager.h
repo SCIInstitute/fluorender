@@ -903,8 +903,6 @@ public:
 	void UpdateCellList(FL::CellList &cur_sel_list);
 	FL::CellList &GetCellList();
 	bool FindCell(unsigned int id);
-	//in frame list
-	//bool FindCellInFrame(unsigned int id, int time, Vertex &vertex);
 
 	//modifications
 	//bool LinkVertices(unsigned int id1, int time1,
