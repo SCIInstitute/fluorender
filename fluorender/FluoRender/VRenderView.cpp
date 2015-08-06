@@ -40,6 +40,7 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
+#include <boost/process.hpp>
 
 int VRenderView::m_id = 1;
 ImgShaderFactory VRenderGLView::m_img_shader_factory;
@@ -5226,7 +5227,27 @@ void VRenderGLView::RunSeparateChannels(wxFileConfig &fconfig)
 
 void VRenderGLView::RunExternalExe(wxFileConfig &fconfig)
 {
-
+	wxString pathname;
+	fconfig.Read("exepath", &pathname);
+	if (!wxFileExists(pathname))
+		return;
+	VolumeData* vd = m_cur_vol;
+	if (!vd)
+		return;
+	BaseReader* reader = vd->GetReader();
+	if (!reader)
+		return;
+	wxString data_name = reader->GetCurName(m_tseq_cur_num, vd->GetCurChannel());
+	
+	vector<string> args;
+	args.push_back(pathname.ToStdString());
+	args.push_back(data_name.ToStdString());
+	boost::process::context ctx;
+	ctx.stdout_behavior = boost::process::silence_stream();
+	boost::process::child c =
+		boost::process::launch(pathname.ToStdString(),
+		args, ctx);
+	c.wait();
 }
 
 //draw
