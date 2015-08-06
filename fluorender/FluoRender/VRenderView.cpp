@@ -435,6 +435,9 @@ VRenderGLView::~VRenderGLView()
 
 	if (!m_sharedRC)
 		delete m_glRC;
+
+	if (m_trace_group)
+		delete m_trace_group;
 }
 
 void VRenderGLView::OnResize(wxSizeEvent& event)
@@ -9602,8 +9605,10 @@ TraceGroup* VRenderGLView::GetTraceGroup()
 
 void VRenderGLView::CreateTraceGroup()
 {
-	if (!m_trace_group)
-		m_trace_group = new TraceGroup;
+	if (m_trace_group)
+		delete m_trace_group;
+
+	m_trace_group = new TraceGroup;
 }
 
 int VRenderGLView::LoadTraceGroup(wxString filename)

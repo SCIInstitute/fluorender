@@ -115,7 +115,9 @@ public:
 		ID_CompFullBtn,
 		ID_CompIDText,
 		ID_CompAppendBtn,
-		ID_CompExclusiveBtn
+		ID_CompExclusiveBtn,
+		ID_GenMapPrg,
+		ID_GenMapBtn
 	};
 
 	TraceDlg(wxWindow* frame,
@@ -144,6 +146,9 @@ public:
 	void Measure();
 	void OutputMeasureResult(wxString &str);
 	void SaveMeasureResult(wxString &filename);
+
+	//automatic tracking
+	void GenMap();
 
 private:
 	typedef struct
@@ -206,6 +211,9 @@ private:
 	//cell size filter
 	wxSlider* m_cell_size_sldr;
 	wxTextCtrl* m_cell_size_text;
+	//auto tracking
+	wxGauge* m_gen_map_prg;
+	wxButton* m_gen_map_btn;
 	//component tools
 	wxButton* m_comp_clear_btn;
 	wxButton* m_comp_full_btn;
@@ -262,6 +270,8 @@ private:
 	//cell size filter
 	void OnCellSizeChange(wxScrollEvent &event);
 	void OnCellSizeText(wxCommandEvent &event);
+	//auto tracking
+	void OnGenMapBtn(wxCommandEvent &event);
 	//component tools
 	void OnCompClear(wxCommandEvent &event);
 	void OnCompFull(wxCommandEvent &event);

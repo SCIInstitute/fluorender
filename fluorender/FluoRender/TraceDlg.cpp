@@ -242,6 +242,8 @@ BEGIN_EVENT_TABLE(TraceDlg, wxPanel)
 	EVT_BUTTON(ID_AnalyzeBtn, TraceDlg::OnAnalyze)
 	EVT_BUTTON(ID_SaveAnalyzeBtn, TraceDlg::OnSaveAnalyze)
 	EVT_CHECKBOX(ID_ManualAssistCheck, TraceDlg::OnManualAssistCheck)
+	//auto tracking
+	EVT_BUTTON(ID_GenMapBtn, TraceDlg::OnGenMapBtn)
 	//component tools
 	EVT_BUTTON(ID_CompClearBtn, TraceDlg::OnCompClear)
 	EVT_BUTTON(ID_CompFullBtn, TraceDlg::OnCompFull)
@@ -323,7 +325,7 @@ m_manual_assist(false)
 	sizer_2->Add(m_ghost_show_lead_chk, 0, wxALIGN_CENTER);
 
 	//edit tools
-	wxBoxSizer *sizer_3 = new wxStaticBoxSizer(
+/*	wxBoxSizer *sizer_3 = new wxStaticBoxSizer(
 		new wxStaticBox(this, wxID_ANY, "Analyze && Validate"),
 		wxVERTICAL);
 	//first row
@@ -444,6 +446,61 @@ m_manual_assist(false)
 	sizer_3->Add(sizer_35, 0, wxEXPAND);
 	sizer_3->Add(sizer_36, 0, wxEXPAND);
 	sizer_3->Hide(sizer_36);
+*/
+	//simple tracking ui
+	wxBoxSizer *sizer_3 = new wxStaticBoxSizer(
+		new wxStaticBox(this, wxID_ANY, "Tools"),
+		wxVERTICAL);
+	//tracking
+	wxBoxSizer* sizer_31 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(this, 0, "Generate new map:",
+		wxDefaultPosition, wxSize(100, 20));
+	m_gen_map_prg = new wxGauge(this, ID_GenMapPrg, 100,
+		wxDefaultPosition, wxSize(-1, 18));
+	m_gen_map_btn = new wxButton(this, ID_GenMapBtn, "Generate",
+		wxDefaultPosition, wxSize(100, 23));
+	sizer_31->Add(5, 5);
+	sizer_31->Add(st, 0, wxALIGN_CENTER);
+	sizer_31->Add(m_gen_map_prg, 1, wxEXPAND);
+	sizer_31->Add(m_gen_map_btn, 0, wxALIGN_CENTER);
+	//selection tools
+	wxBoxSizer* sizer_32 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(this, 0, "Selection tools:",
+		wxDefaultPosition, wxSize(100, 20));
+	m_comp_id_text = new wxTextCtrl(this, ID_CompIDText, "",
+		wxDefaultPosition, wxSize(100, 23));
+	m_comp_append_btn = new wxButton(this, ID_CompAppendBtn, "Append",
+		wxDefaultPosition, wxSize(65, 23));
+	m_comp_exclusive_btn = new wxButton(this, ID_CompExclusiveBtn, "Replace",
+		wxDefaultPosition, wxSize(65, 23));
+	m_comp_full_btn = new wxButton(this, ID_CompFullBtn, "Full Sel",
+		wxDefaultPosition, wxSize(65, 23));
+	m_comp_clear_btn = new wxButton(this, ID_CompClearBtn, "Clear",
+		wxDefaultPosition, wxSize(65, 23));
+	sizer_32->Add(5, 5);
+	sizer_32->Add(st, 0, wxALIGN_CENTER);
+	sizer_32->Add(m_comp_id_text, 0, wxALIGN_CENTER);
+	sizer_32->Add(10, 23);
+	sizer_32->Add(m_comp_append_btn, 0, wxALIGN_CENTER);
+	sizer_32->Add(m_comp_exclusive_btn, 0, wxALIGN_CENTER);
+	sizer_32->Add(m_comp_full_btn, 0, wxALIGN_CENTER);
+	sizer_32->Add(m_comp_clear_btn, 0, wxALIGN_CENTER);
+	//cell size filter
+	wxBoxSizer* sizer_33 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(this, 0, "Component size:",
+		wxDefaultPosition, wxSize(130, 20));
+	m_cell_size_sldr = new wxSlider(this, ID_CellSizeSldr, 20, 0, 100,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_cell_size_text = new wxTextCtrl(this, ID_CellSizeText, "20",
+		wxDefaultPosition, wxSize(60, 23), 0, vald_int);
+	sizer_33->Add(5, 5);
+	sizer_33->Add(st, 0, wxALIGN_CENTER);
+	sizer_33->Add(m_cell_size_sldr, 1, wxEXPAND);
+	sizer_33->Add(m_cell_size_text, 0, wxALIGN_CENTER);
+	//
+	sizer_3->Add(sizer_31, 0, wxEXPAND);
+	sizer_3->Add(sizer_32, 0, wxEXPAND);
+	sizer_3->Add(sizer_33, 0, wxEXPAND);
 
 	//lists
 	wxBoxSizer *sizer_4 = new wxStaticBoxSizer(
@@ -489,9 +546,9 @@ m_manual_assist(false)
 	sizerV->Add(10, 10);
 	sizerV->Add(sizer_1, 0, wxEXPAND);
 	sizerV->Add(10, 10);
-	sizerV->Add(sizer_2, 0, wxEXPAND);
-	sizerV->Add(10, 10);
 	sizerV->Add(sizer_3, 0, wxEXPAND);
+	sizerV->Add(10, 10);
+	sizerV->Add(sizer_2, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 	sizerV->Add(sizer_4, 1, wxEXPAND);
 	sizerV->Add(10, 10);
@@ -535,7 +592,7 @@ void TraceDlg::GetSettings(VRenderView* vrv)
 		m_load_trace_text->SetValue("No Link map");
 
 	//manual tracking assist
-	m_manual_assist_check->SetValue(m_manual_assist);
+//	m_manual_assist_check->SetValue(m_manual_assist);
 }
 
 VRenderView* TraceDlg::GetView()
@@ -742,6 +799,12 @@ void TraceDlg::OnCellSizeText(wxCommandEvent &event)
 			trace_group->SetCellSize(ival);
 		}
 	}
+}
+
+//auto tracking
+void TraceDlg::OnGenMapBtn(wxCommandEvent &event)
+{
+	GenMap();
 }
 
 //add label
@@ -2194,3 +2257,83 @@ void TraceDlg::OnCellNext(wxCommandEvent &event)
 		vr_frame->GetMovieView()->UpFrame();
 }
 
+//auto tracking
+void TraceDlg::GenMap()
+{
+	if (!m_view)
+		return;
+
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+	BaseReader* reader = vd->GetReader();
+	if (!reader)
+		return;
+	LBLReader lbl_reader;
+	m_view->CreateTraceGroup();
+	TraceGroup *trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+		return;
+
+	FL::TrackMap &track_map = trace_group->GetTrackMap();
+	FL::TrackMapProcessor tm_processor;
+	int chan = vd->GetCurChannel();
+	int frames = reader->GetTimeNum();
+	int resx, resy, resz;
+	vd->GetResolution(resx, resy, resz);
+
+	Nrrd* nrrd_data1 = 0;
+	Nrrd* nrrd_data2 = 0;
+	Nrrd* nrrd_label1 = 0;
+	Nrrd* nrrd_label2 = 0;
+
+	tm_processor.SetSizes(track_map,
+		resx, resy, resz);
+	tm_processor.SetContactThresh(0.2f);
+	for (int i = 0; i < frames; ++i)
+	{
+		if (i == 0)
+		{
+			nrrd_data1 = reader->Convert(i, chan, true);
+			lbl_reader.SetFile(reader->GetPathName());
+			nrrd_label1 = lbl_reader.Convert(i, chan, true);
+			tm_processor.InitializeFrame(track_map,
+				nrrd_data1->data, nrrd_label1->data, i);
+		}
+		else
+		{
+			nrrd_data2 = reader->Convert(i, chan, true);
+			lbl_reader.SetFile(reader->GetPathName());
+			nrrd_label2 = lbl_reader.Convert(i, chan, true);
+			tm_processor.InitializeFrame(track_map,
+				nrrd_data2->data, nrrd_label2->data, i);
+
+			//link maps 1 and 2
+			tm_processor.LinkMaps(track_map, i - 1, i,
+				nrrd_data1->data, nrrd_data2->data,
+				nrrd_label1->data, nrrd_label2->data);
+
+			nrrdNuke(nrrd_data1);
+			nrrdNuke(nrrd_label1);
+			nrrd_data1 = nrrd_data2;
+			nrrd_label1 = nrrd_label2;
+		}
+	}
+
+	nrrdNuke(nrrd_data2);
+	nrrdNuke(nrrd_label2);
+
+	//resolve multiple links of single vertex
+	for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
+	{
+		if (tm_processor.ResolveGraph(track_map, fi, fi + 1))
+			printf("Frame %zd and %zd resolved.\n", fi, fi + 1);
+		if (tm_processor.ResolveGraph(track_map, fi, fi - 1))
+			printf("Frame %zd and %zd resolved.\n", fi, fi - 1);
+	}
+
+	//save
+	//if (tm_processor.Export(track_map, outfilename))
+	//	printf("Track map saved.\n");
+
+}

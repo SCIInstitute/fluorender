@@ -881,6 +881,11 @@ public:
 		return m_num;
 	}
 
+	FL::TrackMap &GetTrackMap()
+	{
+		return m_track_map;
+	}
+
 	wxString GetPath() {return m_data_path;}
 	void SetCurTime(int time);
 	int GetCurTime();
