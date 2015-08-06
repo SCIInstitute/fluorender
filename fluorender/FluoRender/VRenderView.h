@@ -492,6 +492,7 @@ public:
 public:
 	//script run
 	bool m_run_script;
+	wxString m_script_file;
 	//capture modes
 	bool m_capture;
 	bool m_capture_rotat;
@@ -899,7 +900,7 @@ private:
 	void PostDraw();
 
 	//run 4d script
-	void Run4DScript(wxString scriptname);
+	void Run4DScript(wxString &scriptname);
 	void RunNoiseReduction(wxFileConfig &fconfig);
 	void RunSelectionTracking(wxFileConfig &fconfig);
 	void RunRandomColors(wxFileConfig &fconfig);

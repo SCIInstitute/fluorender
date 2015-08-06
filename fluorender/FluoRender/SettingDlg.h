@@ -78,6 +78,8 @@ class SettingDlg : public wxPanel
 		ID_FontSizeCmb,
 		//script
 		ID_RunScriptChk,
+		ID_ScriptFileText,
+		ID_ScriptFileBtn,
 		//paint history depth
 		ID_PaintHistDepthSldr,
 		ID_PaintHistDepthText,
@@ -124,6 +126,8 @@ public:
 	//run script
 	bool GetRunScript() {return m_run_script;}
 	void SetRunScript(bool val) {m_run_script = val;}
+	wxString GetScriptFile() { return m_script_file; }
+	void SetScriptFile(wxString &file) { m_script_file = file; }
 	//paint history depth
 	int GetPaintHistDepth() {return m_paint_hist_depth;}
 	void SetPaintHistDepth(int val) {m_paint_hist_depth = val;}
@@ -200,7 +204,9 @@ private:
 	bool m_grad_bg;
 	bool m_override_vox;
 	double m_soft_threshold;
+	//script
 	bool m_run_script;
+	wxString m_script_file;
 	//text size
 	wxString m_font_file;	//font lib file in the Fonts folder
 	int m_text_size;		//text size in viewport
@@ -283,6 +289,8 @@ private:
 	wxComboBox *m_font_size_cmb;
 	//script
 	wxCheckBox *m_run_script_chk;
+	wxTextCtrl *m_script_file_text;
+	wxButton *m_script_file_btn;
 	//history depth
 	wxSlider *m_paint_hist_depth_sldr;
 	wxTextCtrl *m_paint_hist_depth_text;
@@ -326,7 +334,7 @@ private:
 	//gradient background
 	void OnGradBgCheck(wxCommandEvent &event);
 	//link rotations
-    void OnRotLink(wxCommandEvent& event);
+	void OnRotLink(wxCommandEvent& event);
 	//override vox
 	void OnOverrideVoxCheck(wxCommandEvent &event);
 	//wavelength color
@@ -349,6 +357,8 @@ private:
 	void OnFontSizeChange(wxCommandEvent &event);
 	//script
 	void OnRunScriptChk(wxCommandEvent &event);
+	void OnScriptFileEdit(wxCommandEvent &event);
+	void OnScriptFileBtn(wxCommandEvent &event);
 	//paint history depth
 	void OnPaintHistDepthChange(wxScrollEvent &event);
 	void OnPaintHistDepthEdit(wxCommandEvent &event);

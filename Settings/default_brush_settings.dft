@@ -19,4 +19,3 @@ ca_thresh=0.5
 ca_falloff=1
 ca_size_map=0
 nr_thresh=0.05
-nr_size=50

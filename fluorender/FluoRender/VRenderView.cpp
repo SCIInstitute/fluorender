@@ -4676,7 +4676,10 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 	m_tseq_cur_num = frame;
 	VRenderFrame* vframe = (VRenderFrame*)m_frame;
 	if (vframe && vframe->GetSettingDlg())
+	{
 		m_run_script = vframe->GetSettingDlg()->GetRunScript();
+		m_script_file = vframe->GetSettingDlg()->GetScriptFile();
+	}
 
 	for (int i=0; i<(int)m_vd_pop_list.size(); i++)
 	{
@@ -4684,8 +4687,19 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 		if (vd && vd->GetReader())
 		{
 			BaseReader* reader = vd->GetReader();
-
 			bool clear_pool = false;
+
+			if (cur_frame == start_frame &&
+				m_run_script && run_script &&
+				wxFileExists(m_script_file))
+			{
+				m_selector.SetVolume(vd);
+				m_calculator.SetVolumeA(vd);
+				m_cur_vol = vd;
+				Run4DScript(m_script_file);
+				clear_pool = true;
+			}
+
 			if (cur_frame != frame)
 			{
 				double spcx, spcy, spcz;
@@ -4703,20 +4717,15 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 					vframe->GetMeasureDlg()->UpdateList();
 
 				clear_pool = true;
-			}
 
-			//run script
-			if (m_run_script && run_script)
-			{
-				wxString pathname = reader->GetPathName();
-				int pos = pathname.Find(GETSLASH(), true);
-				wxString scriptname = pathname.Left(pos+1) + "script_4d.txt";
-				if (wxFileExists(scriptname))
+				//run script
+				if (m_run_script && run_script &&
+					wxFileExists(m_script_file))
 				{
 					m_selector.SetVolume(vd);
 					m_calculator.SetVolumeA(vd);
 					m_cur_vol = vd;
-					Run4DScript(scriptname);
+					Run4DScript(m_script_file);
 					clear_pool = true;
 				}
 			}
@@ -4936,7 +4945,7 @@ void VRenderGLView::PostDraw()
 }
 
 //run 4d script
-void VRenderGLView::Run4DScript(wxString scriptname)
+void VRenderGLView::Run4DScript(wxString &scriptname)
 {
 	wxFileInputStream is(scriptname);
 	if (!is.IsOk())

@@ -1,5 +1,5 @@
 ver_major=2
-ver_minor=16
+ver_minor=17
 [gm\ calculation]
 mode=2
 [peeling\ layers]
@@ -38,6 +38,9 @@ value=0
 [save\ cmp]
 value=0
 [run\ script]
+value=0
+file=
+[paint\ history]
 value=0
 [text\ font]
 file=FreeSans.ttf

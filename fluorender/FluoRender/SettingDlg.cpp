@@ -76,6 +76,8 @@ BEGIN_EVENT_TABLE(SettingDlg, wxPanel)
 	EVT_COMBOBOX(ID_FontSizeCmb, SettingDlg::OnFontSizeChange)
 	//script
 	EVT_CHECKBOX(ID_RunScriptChk, SettingDlg::OnRunScriptChk)
+	EVT_TEXT(ID_ScriptFileText, SettingDlg::OnScriptFileEdit)
+	EVT_BUTTON(ID_ScriptFileBtn, SettingDlg::OnScriptFileBtn)
 	//paint history depth
 	EVT_COMMAND_SCROLL(ID_PaintHistDepthSldr, SettingDlg::OnPaintHistDepthChange)
 	EVT_TEXT(ID_PaintHistDepthText, SettingDlg::OnPaintHistDepthEdit)
@@ -150,13 +152,20 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 		new wxStaticBox(page, wxID_ANY, "4D Script"), wxVERTICAL);
 	m_run_script_chk = new wxCheckBox(page, ID_RunScriptChk,
 		"Enable execution of a script on 4D data during playback.");
-	st = new wxStaticText(page, 0,
-		"Compose and save the text file \"script_4d.txt\" in the same folder as the\n"\
-		"4D data. See details in the user manual for the syntax of the script.");
+	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Script File:",
+		wxDefaultPosition, wxSize(80, -1));
+	m_script_file_text = new wxTextCtrl(page, ID_ScriptFileText, "",
+		wxDefaultPosition, wxDefaultSize);
+	m_script_file_btn = new wxButton(page, ID_ScriptFileBtn, "Browse...",
+		wxDefaultPosition, wxSize(80, -1));
+	sizer3_1->Add(st, 0, wxALIGN_CENTER);
+	sizer3_1->Add(m_script_file_text, 1, wxEXPAND);
+	sizer3_1->Add(m_script_file_btn, 0, wxALIGN_CENTER);
 	group3->Add(10, 5);
 	group3->Add(m_run_script_chk);
 	group3->Add(10, 5);
-	group3->Add(st);
+	group3->Add(sizer3_1, 0, wxEXPAND);
 	group3->Add(10, 5);
 
 	//paint history depth
@@ -575,6 +584,7 @@ void SettingDlg::GetSettings()
 	m_override_vox = true;
 	m_soft_threshold = 0.0;
 	m_run_script = false;
+	m_script_file = "";
 	m_text_size = 12;
 	m_font_file = "";
 	m_mem_swap = false;
@@ -716,6 +726,7 @@ void SettingDlg::GetSettings()
 	{
 		fconfig.SetPath("/run script");
 		fconfig.Read("value", &m_run_script);
+		fconfig.Read("file", &m_script_file);
 	}
 	//paint history depth
 	if (fconfig.Exists("/paint history"))
@@ -862,6 +873,7 @@ void SettingDlg::UpdateUI()
 	}
 	//script
 	m_run_script_chk->SetValue(m_run_script);
+	m_script_file_text->SetValue(m_script_file);
 	//paint history depth
 	m_paint_hist_depth_text->SetValue(wxString::Format("%d", m_paint_hist_depth));
 	//memory settings
@@ -934,6 +946,7 @@ void SettingDlg::SaveSettings()
 
 	fconfig.SetPath("/run script");
 	fconfig.Write("value", m_run_script);
+	fconfig.Write("file", m_script_file);
 
 	fconfig.SetPath("/paint history");
 	fconfig.Write("value", m_paint_hist_depth);
@@ -1523,6 +1536,28 @@ void SettingDlg::OnFontSizeChange(wxCommandEvent &event)
 void SettingDlg::OnRunScriptChk(wxCommandEvent &event)
 {
 	m_run_script = m_run_script_chk->GetValue();
+}
+
+void SettingDlg::OnScriptFileEdit(wxCommandEvent &event)
+{
+	m_script_file = m_script_file_text->GetValue();
+}
+
+void SettingDlg::OnScriptFileBtn(wxCommandEvent &event)
+{
+	wxFileDialog *fopendlg = new wxFileDialog(
+		this, "Choose a 4D script file", "", "",
+		"4D script file (*.txt)|*.txt",
+		wxFD_OPEN);
+
+	int rval = fopendlg->ShowModal();
+	if (rval == wxID_OK)
+	{
+		m_script_file = fopendlg->GetPath();
+		m_script_file_text->SetValue(m_script_file);
+	}
+
+	delete fopendlg;
 }
 
 //paint history depth
