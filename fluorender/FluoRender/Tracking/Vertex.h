@@ -47,9 +47,17 @@ namespace FL
 		pwVertex vertex;
 	};
 
-	typedef boost::adjacency_list<boost::vecS,
+	//typedef boost::adjacency_list<boost::vecS,
+	//	boost::vecS, boost::undirectedS,
+	//	InterVertexData, InterEdgeData> InterGraph;
+	class InterGraph :
+		public boost::adjacency_list<boost::vecS,
 		boost::vecS, boost::undirectedS,
-		InterVertexData, InterEdgeData> InterGraph;
+		InterVertexData, InterEdgeData>
+	{
+	public:
+		size_t index;
+	};
 	typedef InterGraph::vertex_descriptor InterVert;
 	typedef InterGraph::edge_descriptor InterEdge;
 	typedef boost::graph_traits<InterGraph>::adjacency_iterator InterAdjIter;
@@ -62,14 +70,13 @@ namespace FL
 	{
 	public:
 		Vertex(unsigned int id) :
-			m_id(id), m_size_ui(0), m_size_f(0.0f),
-			m_inter_vert(InterGraph::null_vertex())
+			m_id(id), m_size_ui(0), m_size_f(0.0f)
 		{}
 		~Vertex() {};
 
 		unsigned int Id();
-		InterVert GetInterVert();
-		void SetInterVert(InterVert inter_vert);
+		InterVert GetInterVert(InterGraph& graph);
+		void SetInterVert(InterGraph& graph, InterVert inter_vert);
 
 		void SetCenter(FLIVR::Point &center);
 		void SetSizeUi(unsigned int size_ui);
@@ -90,7 +97,9 @@ namespace FL
 		FLIVR::Point m_center;
 		unsigned int m_size_ui;
 		float m_size_f;
-		InterVert m_inter_vert;
+		typedef boost::unordered_map<unsigned int, InterVert> InterVertList;
+		typedef boost::unordered_map<unsigned int, InterVert>::iterator InterVertListIter;
+		InterVertList m_inter_verts;
 		CellBin m_cells;//children
 	};
 
@@ -99,14 +108,26 @@ namespace FL
 		return m_id;
 	}
 
-	inline InterVert Vertex::GetInterVert()
+	inline InterVert Vertex::GetInterVert(InterGraph& graph)
 	{
-		return m_inter_vert;
+		unsigned int key = graph.index;
+		InterVertListIter iter = m_inter_verts.find(key);
+		if (iter != m_inter_verts.end())
+			return iter->second;
+		else
+			return InterGraph::null_vertex();
 	}
 
-	inline void Vertex::SetInterVert(InterVert inter_vert)
+	inline void Vertex::SetInterVert(InterGraph& graph,
+		InterVert inter_vert)
 	{
-		m_inter_vert = inter_vert;
+		unsigned int key = graph.index;
+		InterVertListIter iter = m_inter_verts.find(key);
+		if (iter != m_inter_verts.end())
+			iter->second = inter_vert;
+		else
+			m_inter_verts.insert(
+				std::pair<unsigned int, InterVert>(key, inter_vert));
 	}
 
 	inline void Vertex::SetCenter(FLIVR::Point &center)

@@ -4692,16 +4692,16 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 			BaseReader* reader = vd->GetReader();
 			bool clear_pool = false;
 
-			if (cur_frame == start_frame &&
-				m_run_script && run_script &&
-				wxFileExists(m_script_file))
-			{
-				m_selector.SetVolume(vd);
-				m_calculator.SetVolumeA(vd);
-				m_cur_vol = vd;
-				Run4DScript(m_script_file);
-				clear_pool = true;
-			}
+			//if (cur_frame == start_frame &&
+			//	m_run_script && run_script &&
+			//	wxFileExists(m_script_file))
+			//{
+			//	m_selector.SetVolume(vd);
+			//	m_calculator.SetVolumeA(vd);
+			//	m_cur_vol = vd;
+			//	Run4DScript(m_script_file);
+			//	clear_pool = true;
+			//}
 
 			if (cur_frame != frame)
 			{
@@ -4721,16 +4721,17 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 
 				clear_pool = true;
 
-				//run script
-				if (m_run_script && run_script &&
-					wxFileExists(m_script_file))
-				{
-					m_selector.SetVolume(vd);
-					m_calculator.SetVolumeA(vd);
-					m_cur_vol = vd;
-					Run4DScript(m_script_file);
-					clear_pool = true;
-				}
+			}
+
+			//run script
+			if (m_run_script && run_script &&
+				wxFileExists(m_script_file))
+			{
+				m_selector.SetVolume(vd);
+				m_calculator.SetVolumeA(vd);
+				m_cur_vol = vd;
+				Run4DScript(m_script_file);
+				clear_pool = true;
 			}
 
 			if (clear_pool && vd->GetVR())

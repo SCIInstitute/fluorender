@@ -670,8 +670,8 @@ void TraceDlg::OnLoadTrace(wxCommandEvent& event)
 	if (!m_view) return;
 
 	wxFileDialog *fopendlg = new wxFileDialog(
-		this, "Choose the FluoRender link data file", 
-		"", "", "*.fll", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
+		this, "Choose a FluoRender track file", 
+		"", "", "*.track", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
@@ -705,8 +705,8 @@ void TraceDlg::OnSaveasTrace(wxCommandEvent& event)
 	if (!m_view) return;
 
 	wxFileDialog *fopendlg = new wxFileDialog(
-		this, "Choose the FluoRender link data file", 
-		"", "", "*.fll", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+		this, "Save a FluoRender track file", 
+		"", "", "*.track", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
@@ -2286,6 +2286,9 @@ void TraceDlg::GenMap()
 	Nrrd* nrrd_data2 = 0;
 	Nrrd* nrrd_label1 = 0;
 	Nrrd* nrrd_label2 = 0;
+	wxString data_name;
+	wxString label_name;
+	wstring lblname;
 
 	tm_processor.SetSizes(track_map,
 		resx, resy, resz);
@@ -2295,7 +2298,10 @@ void TraceDlg::GenMap()
 		if (i == 0)
 		{
 			nrrd_data1 = reader->Convert(i, chan, true);
-			lbl_reader.SetFile(reader->GetPathName());
+			data_name = reader->GetCurName(i, chan);
+			label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
+			lblname = label_name.ToStdWstring();
+			lbl_reader.SetFile(lblname);
 			nrrd_label1 = lbl_reader.Convert(i, chan, true);
 			tm_processor.InitializeFrame(track_map,
 				nrrd_data1->data, nrrd_label1->data, i);
@@ -2303,7 +2309,10 @@ void TraceDlg::GenMap()
 		else
 		{
 			nrrd_data2 = reader->Convert(i, chan, true);
-			lbl_reader.SetFile(reader->GetPathName());
+			data_name = reader->GetCurName(i, chan);
+			label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
+			lblname = label_name.ToStdWstring();
+			lbl_reader.SetFile(lblname);
 			nrrd_label2 = lbl_reader.Convert(i, chan, true);
 			tm_processor.InitializeFrame(track_map,
 				nrrd_data2->data, nrrd_label2->data, i);

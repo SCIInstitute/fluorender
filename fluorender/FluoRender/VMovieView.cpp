@@ -1110,7 +1110,7 @@ void VMovieView::OnDownFrame(wxCommandEvent& event) {
 }
 
 void VMovieView::SetCurrentTime(size_t t) {
-	m_time_current_text->SetValue(wxString::Format(wxT("%i"),(int)t));
+	m_time_current_text->ChangeValue(wxString::Format(wxT("%i"),(int)t));
 	wxCommandEvent e;
 	OnTimeText(e);
 }
