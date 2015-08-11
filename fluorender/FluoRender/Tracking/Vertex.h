@@ -39,6 +39,8 @@ namespace FL
 		float size_f;
 		float dist;
 		unsigned int link;
+		//unsaved, for calculation
+		bool back_link;
 	};
 
 	struct InterVertexData

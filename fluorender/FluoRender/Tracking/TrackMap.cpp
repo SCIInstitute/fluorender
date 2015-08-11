@@ -417,8 +417,6 @@ bool TrackMapProcessor::ResolveGraph(TrackMap& track_map, size_t frame1, size_t 
 	std::pair<IntraEdge, bool> intra_edge;
 	float osizef, c1sizef, c2sizef;
 	size_t i;
-	std::pair<InterEdge, bool> inter_edge, max_edge;
-	float max_size_f;
 
 	//check all vertices in the time frame
 	for (iter = vertex_list1.begin();
@@ -429,7 +427,6 @@ bool TrackMapProcessor::ResolveGraph(TrackMap& track_map, size_t frame1, size_t 
 		v1 = iter->second->GetInterVert(inter_graph);
 		if (v1 == InterGraph::null_vertex())
 			continue;
-		pVertex debug_vt = inter_graph[v1].vertex.lock();
 		adj_verts = boost::adjacent_vertices(v1, inter_graph);
 		//for each adjacent vertex
 		for (inter_iter = adj_verts.first;
@@ -493,32 +490,57 @@ bool TrackMapProcessor::ResolveGraph(TrackMap& track_map, size_t frame1, size_t 
 		for (i = 0; i < cell_bins.size(); ++i)
 			MergeCells(vertex_list2, inter_graph, cell_bins[i]);
 
-		//set flag for link
-		adj_verts = boost::adjacent_vertices(v1, inter_graph);
-		//for each adjacent vertex
-		max_size_f = 0.0f;
-		max_edge.second = false;
-		for (inter_iter = adj_verts.first;
-			inter_iter != adj_verts.second; ++inter_iter)
-		{
-			v2 = *inter_iter;
-			inter_edge = boost::edge(v1, v2, inter_graph);
-			if (inter_edge.second)
-			{
-				pVertex debug_v1 = inter_graph[v1].vertex.lock();
-				pVertex debug_v2 = inter_graph[v2].vertex.lock();
-				if (inter_graph[inter_edge.first].size_f > max_size_f)
-				{
-					max_size_f = inter_graph[inter_edge.first].size_f;
-					max_edge = inter_edge;
-				}
-			}
-		}
-		if (max_edge.second)
-			inter_graph[max_edge.first].link = 1;
+		LinkVertex(iter->second, inter_graph);
 	}
 
 	return true;
+}
+
+bool TrackMapProcessor::LinkVertex(pVertex &vertex, InterGraph &graph)
+{
+	if (!vertex)
+		return false;
+	InterVert v0 = vertex->GetInterVert(graph);
+	if (v0 == InterGraph::null_vertex())
+		return false;
+	InterVert v1;
+	float max_size_f = 0.0f;
+	std::pair<InterEdge, bool> edge, max_edge;
+	max_edge.second = false;
+	std::pair<InterAdjIter, InterAdjIter> adj_verts;
+	std::vector<InterEdge> edges;
+	std::vector<InterEdge>::iterator edge_iter;
+
+	//set flag for link
+	adj_verts = boost::adjacent_vertices(v0, graph);
+	//for each adjacent vertex
+	for (InterAdjIter inter_iter = adj_verts.first;
+	inter_iter != adj_verts.second; ++inter_iter)
+	{
+		v1 = *inter_iter;
+		edge = boost::edge(v0, v1, graph);
+		if (edge.second)
+		{
+			//check back link
+			graph[edge.first].back_link = CheckBackLink(
+				v0, v1, graph);
+			edges.push_back(edge);
+/*			if (graph[edge.first].size_f > max_size_f)
+			{
+				max_size_f = graph[edge.first].size_f;
+				max_edge = edge;
+			}*/
+		}
+	}
+//	if (max_edge.second)
+//		graph[max_edge.first].link = 1;
+
+	return true;
+}
+
+bool TrackMapProcessor::CheckBackLink(InterVert v0, InterVert v1, InterGraph &graph)
+{
+	return false;
 }
 
 bool TrackMapProcessor::EqualCells(pwCell &cell1, pwCell &cell2)
@@ -667,7 +689,6 @@ bool TrackMapProcessor::MergeCells(VertexList& vertex_list,
 					edge_to_remove != edges_to_remove.end();
 						++edge_to_remove)
 					{
-						InterEdge debug_edge = *edge_to_remove;
 						graph.remove_edge(*edge_to_remove);
 					}
 					//remove the vertex from inter graph
@@ -1086,7 +1107,6 @@ bool TrackMapProcessor::GetMappedCells(TrackMap& track_map,
 			++inter_iter)
 		{
 			v2 = *inter_iter;
-			pVertex debug_vt = inter_graph[v2].vertex.lock();
 			//get edge
 			inter_edge = boost::edge(v1, v2, inter_graph);
 			if (!inter_edge.second)

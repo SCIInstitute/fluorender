@@ -68,6 +68,8 @@ namespace FL
 			void *data1, void *data2,
 			void *label1, void *label2);
 		bool ResolveGraph(TrackMap& track_map, size_t frame1, size_t frame2);
+		bool LinkVertex(pVertex &p_vertex, InterGraph &graph);
+		bool CheckBackLink(InterVert v0, InterVert v1, InterGraph &graph);
 
 		bool Export(TrackMap& track_map, std::string &filename);
 		bool Import(TrackMap& track_map, std::string &filename);
