@@ -245,10 +245,10 @@ BEGIN_EVENT_TABLE(TraceDlg, wxPanel)
 	//auto tracking
 	EVT_BUTTON(ID_GenMapBtn, TraceDlg::OnGenMapBtn)
 	//component tools
-	EVT_BUTTON(ID_CompClearBtn, TraceDlg::OnCompClear)
-	EVT_BUTTON(ID_CompFullBtn, TraceDlg::OnCompFull)
 	EVT_BUTTON(ID_CompAppendBtn, TraceDlg::OnCompAppend)
 	EVT_BUTTON(ID_CompExclusiveBtn, TraceDlg::OnCompExclusive)
+	EVT_BUTTON(ID_CompFullBtn, TraceDlg::OnCompFull)
+	EVT_BUTTON(ID_CompClearBtn, TraceDlg::OnCompClear)
 	//ID link controls
 	EVT_BUTTON(ID_CellUpdateBtn, TraceDlg::OnCellUpdate)
 	EVT_BUTTON(ID_CellLinkBtn, TraceDlg::OnCellLink)
@@ -286,7 +286,7 @@ m_manual_assist(false)
 
 	//load trace
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Link map:",
+	st = new wxStaticText(this, 0, "Track map:",
 		wxDefaultPosition, wxSize(70, 20));
 	m_load_trace_text = new wxTextCtrl(this, ID_LoadTraceText, "",
 		wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
@@ -303,26 +303,18 @@ m_manual_assist(false)
 	sizer_1->Add(m_save_trace_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_saveas_trace_btn, 0, wxALIGN_CENTER);
 
-	//ghost num
+	//generate
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Ghosts:",
+	st = new wxStaticText(this, 0, "New map:",
 		wxDefaultPosition, wxSize(70, 20));
-	m_ghost_show_tail_chk = new wxCheckBox(this, ID_GhostShowTailChk, "Tail",
-		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
-	m_ghost_num_sldr = new wxSlider(this, ID_GhostNumSldr, 10, 0, 20,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_ghost_num_text = new wxTextCtrl(this, ID_GhostNumText, "10",
-		wxDefaultPosition, wxSize(60, 23), 0, vald_int);
-	m_ghost_show_lead_chk = new wxCheckBox(this, ID_GhostShowLeadChk, "Lead",
-		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
+	m_gen_map_prg = new wxGauge(this, ID_GenMapPrg, 100,
+		wxDefaultPosition, wxSize(-1, 18));
+	m_gen_map_btn = new wxButton(this, ID_GenMapBtn, "Generate",
+		wxDefaultPosition, wxSize(70, 23));
 	sizer_2->Add(5, 5);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
-	sizer_2->Add(m_ghost_show_tail_chk, 0, wxALIGN_CENTER);
-	sizer_2->Add(5, 5);
-	sizer_2->Add(m_ghost_num_sldr, 1, wxEXPAND);
-	sizer_2->Add(m_ghost_num_text, 0, wxALIGN_CENTER);
-	sizer_2->Add(5, 5);
-	sizer_2->Add(m_ghost_show_lead_chk, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_gen_map_prg, 1, wxEXPAND);
+	sizer_2->Add(m_gen_map_btn, 0, wxALIGN_CENTER);
 
 	//edit tools
 /*	wxBoxSizer *sizer_3 = new wxStaticBoxSizer(
@@ -449,65 +441,73 @@ m_manual_assist(false)
 */
 	//simple tracking ui
 	wxBoxSizer *sizer_3 = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, "Tools"),
+		new wxStaticBox(this, wxID_ANY, "Component Selection Settings"),
 		wxVERTICAL);
-	//tracking
-	wxBoxSizer* sizer_31 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Generate new map:",
-		wxDefaultPosition, wxSize(100, 20));
-	m_gen_map_prg = new wxGauge(this, ID_GenMapPrg, 100,
-		wxDefaultPosition, wxSize(-1, 18));
-	m_gen_map_btn = new wxButton(this, ID_GenMapBtn, "Generate",
-		wxDefaultPosition, wxSize(100, 23));
-	sizer_31->Add(5, 5);
-	sizer_31->Add(st, 0, wxALIGN_CENTER);
-	sizer_31->Add(m_gen_map_prg, 1, wxEXPAND);
-	sizer_31->Add(m_gen_map_btn, 0, wxALIGN_CENTER);
 	//selection tools
-	wxBoxSizer* sizer_32 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer_31 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Selection tools:",
 		wxDefaultPosition, wxSize(100, 20));
 	m_comp_id_text = new wxTextCtrl(this, ID_CompIDText, "",
 		wxDefaultPosition, wxSize(100, 23));
-	m_comp_append_btn = new wxButton(this, ID_CompAppendBtn, "Append",
+	m_comp_full_btn = new wxButton(this, ID_CompFullBtn, "FullCompt",
 		wxDefaultPosition, wxSize(65, 23));
 	m_comp_exclusive_btn = new wxButton(this, ID_CompExclusiveBtn, "Replace",
 		wxDefaultPosition, wxSize(65, 23));
-	m_comp_full_btn = new wxButton(this, ID_CompFullBtn, "Full Sel",
+	m_comp_append_btn = new wxButton(this, ID_CompAppendBtn, "Append",
 		wxDefaultPosition, wxSize(65, 23));
 	m_comp_clear_btn = new wxButton(this, ID_CompClearBtn, "Clear",
 		wxDefaultPosition, wxSize(65, 23));
-	sizer_32->Add(5, 5);
-	sizer_32->Add(st, 0, wxALIGN_CENTER);
-	sizer_32->Add(m_comp_id_text, 0, wxALIGN_CENTER);
-	sizer_32->Add(10, 23);
-	sizer_32->Add(m_comp_append_btn, 0, wxALIGN_CENTER);
-	sizer_32->Add(m_comp_exclusive_btn, 0, wxALIGN_CENTER);
-	sizer_32->Add(m_comp_full_btn, 0, wxALIGN_CENTER);
-	sizer_32->Add(m_comp_clear_btn, 0, wxALIGN_CENTER);
+	sizer_31->Add(5, 5);
+	sizer_31->Add(st, 0, wxALIGN_CENTER);
+	sizer_31->Add(m_comp_id_text, 0, wxALIGN_CENTER);
+	sizer_31->Add(10, 23);
+	sizer_31->Add(m_comp_full_btn, 0, wxALIGN_CENTER);
+	sizer_31->Add(m_comp_exclusive_btn, 0, wxALIGN_CENTER);
+	sizer_31->Add(m_comp_append_btn, 0, wxALIGN_CENTER);
+	sizer_31->Add(m_comp_clear_btn, 0, wxALIGN_CENTER);
 	//cell size filter
-	wxBoxSizer* sizer_33 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer_32 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Component size:",
 		wxDefaultPosition, wxSize(130, 20));
 	m_cell_size_sldr = new wxSlider(this, ID_CellSizeSldr, 20, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_cell_size_text = new wxTextCtrl(this, ID_CellSizeText, "20",
 		wxDefaultPosition, wxSize(60, 23), 0, vald_int);
-	sizer_33->Add(5, 5);
-	sizer_33->Add(st, 0, wxALIGN_CENTER);
-	sizer_33->Add(m_cell_size_sldr, 1, wxEXPAND);
-	sizer_33->Add(m_cell_size_text, 0, wxALIGN_CENTER);
+	sizer_32->Add(5, 5);
+	sizer_32->Add(st, 0, wxALIGN_CENTER);
+	sizer_32->Add(m_cell_size_sldr, 1, wxEXPAND);
+	sizer_32->Add(m_cell_size_text, 0, wxALIGN_CENTER);
 	//
 	sizer_3->Add(sizer_31, 0, wxEXPAND);
 	sizer_3->Add(sizer_32, 0, wxEXPAND);
-	sizer_3->Add(sizer_33, 0, wxEXPAND);
+
+	//ghost num
+	wxBoxSizer* sizer_4 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(this, 0, "Ghosts:",
+		wxDefaultPosition, wxSize(70, 20));
+	m_ghost_show_tail_chk = new wxCheckBox(this, ID_GhostShowTailChk, "Tail",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
+	m_ghost_num_sldr = new wxSlider(this, ID_GhostNumSldr, 10, 0, 20,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_ghost_num_text = new wxTextCtrl(this, ID_GhostNumText, "10",
+		wxDefaultPosition, wxSize(60, 23), 0, vald_int);
+	m_ghost_show_lead_chk = new wxCheckBox(this, ID_GhostShowLeadChk, "Lead",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
+	sizer_4->Add(5, 5);
+	sizer_4->Add(st, 0, wxALIGN_CENTER);
+	sizer_4->Add(m_ghost_show_tail_chk, 0, wxALIGN_CENTER);
+	sizer_4->Add(5, 5);
+	sizer_4->Add(m_ghost_num_sldr, 1, wxEXPAND);
+	sizer_4->Add(m_ghost_num_text, 0, wxALIGN_CENTER);
+	sizer_4->Add(5, 5);
+	sizer_4->Add(m_ghost_show_lead_chk, 0, wxALIGN_CENTER);
 
 	//lists
-	wxBoxSizer *sizer_4 = new wxStaticBoxSizer(
+	wxBoxSizer *sizer_5 = new wxStaticBoxSizer(
 		new wxStaticBox(this, wxID_ANY, "ID Lists"),
 		wxVERTICAL);
 	//titles
-	wxBoxSizer* sizer_41 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer_51 = new wxBoxSizer(wxHORIZONTAL);
 	m_cell_time_curr_st = new wxStaticText(this, 0, "\tCurrent T",
 		wxDefaultPosition, wxDefaultSize);
 	m_cell_time_prev_st = new wxStaticText(this, 0, "\tPrevious T",
@@ -516,43 +516,45 @@ m_manual_assist(false)
 		wxDefaultPosition, wxSize(80, 23));
 	m_cell_next_btn = new wxButton(this, ID_CellNextBtn, "Forward >",
 		wxDefaultPosition, wxSize(80, 23));
-	sizer_41->Add(m_cell_time_curr_st, 1, wxEXPAND);
-	sizer_41->Add(m_cell_prev_btn, 0, wxALIGN_CENTER);
-	sizer_41->Add(m_cell_next_btn, 0, wxALIGN_CENTER);
-	sizer_41->Add(m_cell_time_prev_st, 1, wxEXPAND);
+	sizer_51->Add(m_cell_time_curr_st, 1, wxEXPAND);
+	sizer_51->Add(m_cell_prev_btn, 0, wxALIGN_CENTER);
+	sizer_51->Add(m_cell_next_btn, 0, wxALIGN_CENTER);
+	sizer_51->Add(m_cell_time_prev_st, 1, wxEXPAND);
 	//controls
-	wxBoxSizer* sizer_42 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer_52 = new wxBoxSizer(wxHORIZONTAL);
 	m_trace_list_curr = new TraceListCtrl(frame, this, wxID_ANY);
 	m_trace_list_curr->m_type = 0;
 	m_trace_list_prev = new TraceListCtrl(frame, this, wxID_ANY);
 	m_trace_list_prev->m_type = 1;
-	sizer_42->Add(m_trace_list_curr, 1, wxEXPAND);
-	sizer_42->Add(m_trace_list_prev, 1, wxEXPAND);
+	sizer_52->Add(m_trace_list_curr, 1, wxEXPAND);
+	sizer_52->Add(m_trace_list_prev, 1, wxEXPAND);
 	//
-	sizer_4->Add(sizer_41, 0, wxEXPAND);
-	sizer_4->Add(sizer_42, 1, wxEXPAND);
+	sizer_5->Add(sizer_51, 0, wxEXPAND);
+	sizer_5->Add(sizer_52, 1, wxEXPAND);
 
 	//stats text
-	wxBoxSizer *sizer_5 = new wxStaticBoxSizer(
+	wxBoxSizer *sizer_6 = new wxStaticBoxSizer(
 		new wxStaticBox(this, wxID_ANY, "Output"),
 		wxVERTICAL);
 	m_stat_text = new wxTextCtrl(this, ID_StatText, "",
 		wxDefaultPosition, wxSize(-1, 100), wxTE_MULTILINE);
 	m_stat_text->SetEditable(false);
-	sizer_5->Add(m_stat_text, 1, wxEXPAND);
+	sizer_6->Add(m_stat_text, 1, wxEXPAND);
 
 	//all controls
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(10, 10);
 	sizerV->Add(sizer_1, 0, wxEXPAND);
 	sizerV->Add(10, 10);
-	sizerV->Add(sizer_3, 0, wxEXPAND);
-	sizerV->Add(10, 10);
 	sizerV->Add(sizer_2, 0, wxEXPAND);
 	sizerV->Add(10, 10);
-	sizerV->Add(sizer_4, 1, wxEXPAND);
+	sizerV->Add(sizer_3, 0, wxEXPAND);
 	sizerV->Add(10, 10);
-	sizerV->Add(sizer_5, 0, wxEXPAND);
+	sizerV->Add(sizer_4, 0, wxEXPAND);
+	sizerV->Add(10, 10);
+	sizerV->Add(sizer_5, 1, wxEXPAND);
+	sizerV->Add(10, 10);
+	sizerV->Add(sizer_6, 0, wxEXPAND);
 
 	SetSizer(sizerV);
 	Layout();
@@ -576,7 +578,7 @@ void TraceDlg::GetSettings(VRenderView* vrv)
 	if (trace_group)
 	{
 		wxString str = trace_group->GetPath();
-		if (!str.empty())
+		if (str != "")
 			m_load_trace_text->SetValue(str);
 		else
 			m_load_trace_text->SetValue("Link map created but not saved");
@@ -690,14 +692,17 @@ void TraceDlg::OnSaveTrace(wxCommandEvent& event)
 {
 	if (!m_view) return;
 
-	wxString filename = m_load_trace_text->GetValue();
-	if (filename == "")
+	wxString filename;
+	TraceGroup* trace_group = m_view->GetTraceGroup();
+	if (trace_group)
+		filename = trace_group->GetPath();
+	if (wxFileExists(filename))
+		m_view->SaveTraceGroup(filename);
+	else
 	{
 		wxCommandEvent e;
 		OnSaveasTrace(e);
 	}
-	else
-		m_view->SaveTraceGroup(filename);
 }
 
 void TraceDlg::OnSaveasTrace(wxCommandEvent& event)
@@ -943,7 +948,15 @@ void TraceDlg::OnCompClear(wxCommandEvent &event)
 
 void TraceDlg::OnCompFull(wxCommandEvent &event)
 {
-	CellFull();
+	//get id
+	wxString str = m_comp_id_text->GetValue();
+	if (str.empty())
+		CellFull();
+	else
+	{
+		wxCommandEvent e;
+		OnCompAppend(e);
+	}
 }
 
 void TraceDlg::OnCompAppend(wxCommandEvent &event)
@@ -951,70 +964,74 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 	if (!m_view)
 		return;
 
-	bool get_all = false;
-	unsigned long ival = 0;
 	//get id
 	wxString str = m_comp_id_text->GetValue();
-	if (str.Lower() == "all")
-		get_all = true;
-	else
+	if (!str.empty())
 	{
-		str.ToULong(&ival);
-		if (ival == 0)
-			return;
-	}
-
-	unsigned int id = ival;
-	//get current mask
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	if (!vd)
-		return;
-	Nrrd* nrrd_mask = vd->GetMask();
-	if (!nrrd_mask)
-	{
-		vd->AddEmptyMask();
-		nrrd_mask = vd->GetMask();
-	}
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if(!data_mask)
-		return;
-	//get current label
-	Texture* tex = vd->GetTexture();
-	if (!tex)
-		return;
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
-		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
-		return;
-	//select append
-	int i, j, k;
-	int nx, ny, nz;
-	unsigned long long index;
-	vd->GetResolution(nx, ny, nz);
-	for (i=0; i<nx; ++i)
-	for (j=0; j<ny; ++j)
-	for (k=0; k<nz; ++k)
-	{
-		index = nx*ny*k + nx*j + i;
-		if (get_all)
-		{
-			if (data_label[index])
-			{
-				data_mask[index] = 255;
-			}
-		}
+		bool get_all = false;
+		unsigned long ival = 0;
+		if (str.Lower() == "all")
+			get_all = true;
 		else
 		{
-			if (data_label[index] == id)
+			str.ToULong(&ival);
+			if (ival == 0)
+				return;
+		}
+
+		unsigned int id = ival;
+		//get current mask
+		VolumeData* vd = m_view->m_glview->m_cur_vol;
+		if (!vd)
+			return;
+		Nrrd* nrrd_mask = vd->GetMask();
+		if (!nrrd_mask)
+		{
+			vd->AddEmptyMask();
+			nrrd_mask = vd->GetMask();
+		}
+		unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
+		if(!data_mask)
+			return;
+		//get current label
+		Texture* tex = vd->GetTexture();
+		if (!tex)
+			return;
+		Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
+		if (!nrrd_label)
+			return;
+		unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+		if (!data_label)
+			return;
+		//select append
+		int i, j, k;
+		int nx, ny, nz;
+		unsigned long long index;
+		vd->GetResolution(nx, ny, nz);
+		for (i=0; i<nx; ++i)
+		for (j=0; j<ny; ++j)
+		for (k=0; k<nz; ++k)
+		{
+			index = nx*ny*k + nx*j + i;
+			if (get_all)
 			{
-				data_mask[index] = 255;
+				if (data_label[index])
+				{
+					data_mask[index] = 255;
+				}
+			}
+			else
+			{
+				if (data_label[index] == id)
+				{
+					data_mask[index] = 255;
+				}
 			}
 		}
+		//invalidate label mask in gpu
+		vd->GetVR()->clear_tex_pool();
 	}
-	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_pool();
+
 	//update view
 	CellUpdate();
 }
@@ -1028,49 +1045,50 @@ void TraceDlg::OnCompExclusive(wxCommandEvent &event)
 	wxString str = m_comp_id_text->GetValue();
 	unsigned long ival;
 	str.ToULong(&ival);
-	if (ival == 0)
-		return;
-
-	unsigned int id = ival;
-	//get current mask
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	if (!vd)
-		return;
-	Nrrd* nrrd_mask = vd->GetMask();
-	if (!nrrd_mask)
-		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if(!data_mask)
-		return;
-	//get current label
-	Texture* tex = vd->GetTexture();
-	if (!tex)
-		return;
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
-		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
-		return;
-	//select append
-	int i, j, k;
-	int nx, ny, nz;
-	unsigned long long index;
-	vd->GetResolution(nx, ny, nz);
-	for (i=0; i<nx; ++i)
-	for (j=0; j<ny; ++j)
-	for (k=0; k<nz; ++k)
+	if (ival != 0)
 	{
-		index = nx*ny*k + nx*j + i;
-		if (data_label[index] == id)
+		unsigned int id = ival;
+		//get current mask
+		VolumeData* vd = m_view->m_glview->m_cur_vol;
+		if (!vd)
+			return;
+		Nrrd* nrrd_mask = vd->GetMask();
+		if (!nrrd_mask)
+			return;
+		unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
+		if (!data_mask)
+			return;
+		//get current label
+		Texture* tex = vd->GetTexture();
+		if (!tex)
+			return;
+		Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
+		if (!nrrd_label)
+			return;
+		unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+		if (!data_label)
+			return;
+		//select append
+		int i, j, k;
+		int nx, ny, nz;
+		unsigned long long index;
+		vd->GetResolution(nx, ny, nz);
+		for (i = 0; i < nx; ++i)
+		for (j = 0; j < ny; ++j)
+		for (k = 0; k < nz; ++k)
 		{
-			data_mask[index] = 255;
+			index = nx*ny*k + nx*j + i;
+			if (data_label[index] == id)
+			{
+				data_mask[index] = 255;
+			}
+			else
+				data_mask[index] = 0;
 		}
-		else
-			data_mask[index] = 0;
+		//invalidate label mask in gpu
+		vd->GetVR()->clear_tex_pool();
 	}
-	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_pool();
+
 	//update view
 	CellUpdate();
 }
@@ -1125,7 +1143,7 @@ void TraceDlg::CellUpdate()
 
 void TraceDlg::CellFull()
 {
-/*	if (!m_view)
+	if (!m_view)
 		return;
 
 	//cell size filter
@@ -1158,9 +1176,9 @@ void TraceDlg::CellFull()
 	int nx, ny, nz;
 	unsigned long long index;
 	vd->GetResolution(nx, ny, nz);
-	unsigned int id;
-	boost::unordered_map<unsigned int, Lbl> id_list;
-	boost::unordered_map<unsigned int, Lbl>::iterator id_iter;
+	unsigned int label_value;
+	FL::CellList sel_labels;
+	FL::CellListIter label_iter;
 	for (i=0; i<nx; ++i)
 	for (j=0; j<ny; ++j)
 	for (k=0; k<nz; ++k)
@@ -1169,29 +1187,20 @@ void TraceDlg::CellFull()
 		if (data_mask[index] &&
 			data_label[index])
 		{
-			id = data_label[index];
-			id_iter = id_list.find(id);
-			if (id_iter == id_list.end())
+			label_value = data_label[index];
+			label_iter = sel_labels.find(label_value);
+			if (label_iter == sel_labels.end())
 			{
-				Lbl lbl;
-				lbl.id = id;
-				lbl.size = 1;
-				lbl.center = Point(i, j, k);
-				id_list.insert(pair<unsigned int, Lbl>(id, lbl));
+				FL::pCell cell(new FL::Cell(label_value));
+				cell->Inc(i, j, k, 1.0f);
+				sel_labels.insert(pair<unsigned int, FL::pCell>
+					(label_value, cell));
 			}
 			else
-			{
-				id_iter->second.size++;
-				id_iter->second.center += Point(i, j, k);
-			}
+				label_iter->second->Inc(i, j, k, 1.0f);
 		}
 	}
-	//calculate center
-	for (id_iter=id_list.begin(); id_iter!=id_list.end(); ++id_iter)
-	{
-		if (id_iter->second.size > 0)
-			id_iter->second.center /= id_iter->second.size;
-	}
+
 	//reselect
 	for (i=0; i<nx; ++i)
 	for (j=0; j<ny; ++j)
@@ -1200,10 +1209,10 @@ void TraceDlg::CellFull()
 		index = nx*ny*k + nx*j + i;
 		if (data_label[index])
 		{
-			id = data_label[index];
-			id_iter = id_list.find(id);
-			if (id_iter != id_list.end() &&
-				id_iter->second.size > slimit)
+			label_value = data_label[index];
+			label_iter = sel_labels.find(label_value);
+			if (label_iter != sel_labels.end() &&
+				label_iter->second->GetSizeUi() > slimit)
 				data_mask[index] = 255;
 			else
 				data_mask[index] = 0;
@@ -1212,7 +1221,7 @@ void TraceDlg::CellFull()
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_pool();
 	//update view
-	CellUpdate();*/
+	CellUpdate();
 }
 
 void TraceDlg::CellLink(bool exclusive, bool idid)
@@ -2293,6 +2302,9 @@ void TraceDlg::GenMap()
 	tm_processor.SetSizes(track_map,
 		resx, resy, resz);
 	tm_processor.SetContactThresh(0.2f);
+	float prog_bit = 100.0f / float(frames * 2);
+	float prog = 0.0f;
+	m_gen_map_prg->SetValue(int(prog));
 	for (int i = 0; i < frames; ++i)
 	{
 		if (i == 0)
@@ -2327,6 +2339,8 @@ void TraceDlg::GenMap()
 			nrrd_data1 = nrrd_data2;
 			nrrd_label1 = nrrd_label2;
 		}
+		prog += prog_bit;
+		m_gen_map_prg->SetValue(int(prog));
 	}
 
 	nrrdNuke(nrrd_data2);
@@ -2335,14 +2349,13 @@ void TraceDlg::GenMap()
 	//resolve multiple links of single vertex
 	for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
 	{
-		if (tm_processor.ResolveGraph(track_map, fi, fi + 1))
-			printf("Frame %zd and %zd resolved.\n", fi, fi + 1);
-		if (tm_processor.ResolveGraph(track_map, fi, fi - 1))
-			printf("Frame %zd and %zd resolved.\n", fi, fi - 1);
+		tm_processor.ResolveGraph(track_map, fi, fi + 1);
+		//tm_processor.ResolveGraph(track_map, fi, fi - 1);
+		prog += prog_bit;
+		m_gen_map_prg->SetValue(int(prog));
 	}
 
-	//save
-	//if (tm_processor.Export(track_map, outfilename))
-	//	printf("Track map saved.\n");
+	m_gen_map_prg->SetValue(100);
 
+	GetSettings(m_view);
 }

@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include "CellList.h"
 #include "VertexList.h"
 #include <fstream>
+#include <boost/signals2.hpp>
 
 namespace FL
 {
@@ -41,13 +42,16 @@ namespace FL
 #define TAG_INTER_EDGE	4
 #define TAG_FRAM		5
 
+	typedef boost::signals2::signal<void(int)> SignalProg;
 	class TrackMap;
 	class TrackMapProcessor
 	{
 	public:
 		TrackMapProcessor() :
-		m_contact_thresh(0.2f), m_size_thresh(30.0f) {};
+		m_contact_thresh(0.2f), m_size_thresh(10.0f) {};
 		~TrackMapProcessor() {};
+
+		void ConnectSignalProgress(SignalProg::slot_type func);
 
 		void SetContactThresh(float value);
 		void SetSizeThresh(float value);
@@ -124,7 +128,19 @@ namespace FL
 			pVertex &vertex1, pVertex &vertex2,
 			unsigned int size_ui, float size_f,
 			float dist, unsigned int link);
+
+		//update progress
+		SignalProg m_sig_progress;
+		boost::signals2::connection m_con_progress;
 	};
+
+	inline void TrackMapProcessor::ConnectSignalProgress(
+		SignalProg::slot_type func)
+	{
+		if (m_con_progress.connected())
+			m_con_progress.disconnect();
+		m_con_progress = m_sig_progress.connect(func);
+	}
 
 	inline void TrackMapProcessor::SetContactThresh(float value)
 	{

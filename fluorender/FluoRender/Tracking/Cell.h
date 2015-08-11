@@ -30,11 +30,11 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Point.h>
 #include <Color.h>
-#include <boost\shared_ptr.hpp>
-#include <boost\weak_ptr.hpp>
-#include <boost\graph\graph_traits.hpp>
-#include <boost\graph\adjacency_list.hpp>
-#include <boost\graph\adjacency_iterator.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/adjacency_iterator.hpp>
 
 namespace FL
 {
