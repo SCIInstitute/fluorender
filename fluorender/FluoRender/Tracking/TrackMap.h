@@ -68,8 +68,6 @@ namespace FL
 			void *data1, void *data2,
 			void *label1, void *label2);
 		bool ResolveGraph(TrackMap& track_map, size_t frame1, size_t frame2);
-		bool LinkVertex(pVertex &p_vertex, InterGraph &graph);
-		bool CheckBackLink(InterVert v0, InterVert v1, InterGraph &graph);
 
 		bool Export(TrackMap& track_map, std::string &filename);
 		bool Import(TrackMap& track_map, std::string &filename);
@@ -88,6 +86,7 @@ namespace FL
 		float m_contact_thresh;
 		float m_size_thresh;
 
+		//processing
 		bool CheckCellContact(TrackMap& track_map,
 			pCell &cell, void *data, void *label,
 			size_t ci, size_t cj, size_t ck);
@@ -106,6 +105,10 @@ namespace FL
 		size_t GetBinsCellCount(std::vector<CellBin> &bins);
 		bool MergeCells(VertexList& vertex_list,
 			InterGraph &graph, CellBin &bin);
+		bool LinkVertex(pVertex &p_vertex, InterGraph &graph);
+		unsigned int CheckBackLink(InterVert v0, InterVert v1, InterGraph &graph,
+			unsigned int &bl_size_ui, float &bl_size_f);
+		static bool edge_comp_size(InterEdge edge1, InterEdge edge2, InterGraph& graph);
 
 		//export
 		void WriteBool(std::ofstream& ofs, bool value);

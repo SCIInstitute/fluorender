@@ -26,16 +26,18 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "TrackMap.h"
+#include <functional>
+#include <algorithm>
 
 using namespace FL;
 
 TrackMap::TrackMap() :
-m_frame_num(0),
-m_size_x(0),
-m_size_y(0),
-m_size_z(0),
-m_data_bits(8),
-m_scale(1.0f)
+	m_frame_num(0),
+	m_size_x(0),
+	m_size_y(0),
+	m_size_z(0),
+	m_data_bits(8),
+	m_scale(1.0f)
 {
 }
 
@@ -80,58 +82,58 @@ bool TrackMapProcessor::InitializeFrame(TrackMap& track_map,
 
 	//build cell list
 	for (i = 0; i < nx; ++i)
-	for (j = 0; j < ny; ++j)
-	for (k = 0; k < nz; ++k)
-	{
-		index = nx*ny*k + nx*j + i;
-		label_value = ((unsigned int*)label)[index];
+		for (j = 0; j < ny; ++j)
+			for (k = 0; k < nz; ++k)
+			{
+				index = nx*ny*k + nx*j + i;
+				label_value = ((unsigned int*)label)[index];
 
-		if (!label_value)
-			continue;
+				if (!label_value)
+					continue;
 
-		if (track_map.m_data_bits == 8)
-			data_value = ((unsigned char*)data)[index] / 255.0f;
-		else if (track_map.m_data_bits == 16)
-			data_value = ((unsigned short*)data)[index] * track_map.m_scale / 65535.0f;
+				if (track_map.m_data_bits == 8)
+					data_value = ((unsigned char*)data)[index] / 255.0f;
+				else if (track_map.m_data_bits == 16)
+					data_value = ((unsigned short*)data)[index] * track_map.m_scale / 65535.0f;
 
-		iter = cell_list.find(label_value);
-		if (iter != cell_list.end())
-		{
-			iter->second->Inc(i, j, k, data_value);
-		}
-		else
-		{
-			Cell* cell = new Cell(label_value);
-			cell->Inc(i, j, k, data_value);
-			cell_list.insert(std::pair<unsigned int, pCell>
-				(label_value, pCell(cell)));
-		}
-	}
+				iter = cell_list.find(label_value);
+				if (iter != cell_list.end())
+				{
+					iter->second->Inc(i, j, k, data_value);
+				}
+				else
+				{
+					Cell* cell = new Cell(label_value);
+					cell->Inc(i, j, k, data_value);
+					cell_list.insert(std::pair<unsigned int, pCell>
+						(label_value, pCell(cell)));
+				}
+			}
 
 	//build intra graph
 	for (i = 0; i < nx; ++i)
-	for (j = 0; j < ny; ++j)
-	for (k = 0; k < nz; ++k)
-	{
-		index = nx*ny*k + nx*j + i;
-		label_value = ((unsigned int*)label)[index];
-		if (!label_value)
-			continue;
+		for (j = 0; j < ny; ++j)
+			for (k = 0; k < nz; ++k)
+			{
+				index = nx*ny*k + nx*j + i;
+				label_value = ((unsigned int*)label)[index];
+				if (!label_value)
+					continue;
 
-		iter = cell_list.find(label_value);
-		if (iter != cell_list.end())
-		{
-			CheckCellContact(track_map,
-				iter->second, data, label,
-				i, j, k);
-		}
-	}
+				iter = cell_list.find(label_value);
+				if (iter != cell_list.end())
+				{
+					CheckCellContact(track_map,
+						iter->second, data, label,
+						i, j, k);
+				}
+			}
 
 	//build vertex list
 	track_map.m_vertices_list.push_back(VertexList());
 	VertexList &vertex_list = track_map.m_vertices_list.back();
 	for (CellList::iterator cell_iterator = cell_list.begin();
-		cell_iterator != cell_list.end(); ++cell_iterator)
+	cell_iterator != cell_list.end(); ++cell_iterator)
 	{
 		if (cell_iterator->second->GetSizeF() < m_size_thresh)
 			continue;
@@ -307,42 +309,42 @@ bool TrackMapProcessor::LinkMaps(TrackMap& track_map,
 	VertexListIter iter1, iter2;
 
 	for (i = 0; i < nx; ++i)
-	for (j = 0; j < ny; ++j)
-	for (k = 0; k < nz; ++k)
-	{
-		index = nx*ny*k + nx*j + i;
-		label_value1 = ((unsigned int*)label1)[index];
-		label_value2 = ((unsigned int*)label2)[index];
+		for (j = 0; j < ny; ++j)
+			for (k = 0; k < nz; ++k)
+			{
+				index = nx*ny*k + nx*j + i;
+				label_value1 = ((unsigned int*)label1)[index];
+				label_value2 = ((unsigned int*)label2)[index];
 
-		if (!label_value1 || !label_value2)
-			continue;
+				if (!label_value1 || !label_value2)
+					continue;
 
-		if (track_map.m_data_bits == 8)
-		{
-			data_value1 = ((unsigned char*)data1)[index] / 255.0f;
-			data_value2 = ((unsigned char*)data2)[index] / 255.0f;
-		}
-		else if (track_map.m_data_bits == 16)
-		{
-			data_value1 = ((unsigned short*)data1)[index] * track_map.m_scale / 65535.0f;
-			data_value2 = ((unsigned short*)data2)[index] * track_map.m_scale / 65535.0f;
-		}
+				if (track_map.m_data_bits == 8)
+				{
+					data_value1 = ((unsigned char*)data1)[index] / 255.0f;
+					data_value2 = ((unsigned char*)data2)[index] / 255.0f;
+				}
+				else if (track_map.m_data_bits == 16)
+				{
+					data_value1 = ((unsigned short*)data1)[index] * track_map.m_scale / 65535.0f;
+					data_value2 = ((unsigned short*)data2)[index] * track_map.m_scale / 65535.0f;
+				}
 
-		iter1 = vertex_list1.find(label_value1);
-		iter2 = vertex_list2.find(label_value2);
+				iter1 = vertex_list1.find(label_value1);
+				iter2 = vertex_list2.find(label_value2);
 
-		if (iter1 == vertex_list1.end() ||
-			iter2 == vertex_list2.end())
-			continue;
+				if (iter1 == vertex_list1.end() ||
+					iter2 == vertex_list2.end())
+					continue;
 
-		if (iter1->second->GetSizeF() < m_size_thresh ||
-			iter2->second->GetSizeF() < m_size_thresh)
-			continue;
+				if (iter1->second->GetSizeF() < m_size_thresh ||
+					iter2->second->GetSizeF() < m_size_thresh)
+					continue;
 
-		LinkVertices(inter_graph,
-			iter1->second, iter2->second,
-			std::min(data_value1, data_value2));
-	}
+				LinkVertices(inter_graph,
+					iter1->second, iter2->second,
+					std::min(data_value1, data_value2));
+			}
 
 	return true;
 }
@@ -399,7 +401,7 @@ bool TrackMapProcessor::ResolveGraph(TrackMap& track_map, size_t frame1, size_t 
 	CellList &cell_list2 = track_map.m_cells_list.at(frame2);
 	IntraGraph &intra_graph = track_map.m_intra_graph_list.at(frame2);
 	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
-		frame1>frame2?frame2:frame1);
+		frame1 > frame2 ? frame2 : frame1);
 
 	VertexListIter iter;
 	InterVert v1, v2;
@@ -420,7 +422,7 @@ bool TrackMapProcessor::ResolveGraph(TrackMap& track_map, size_t frame1, size_t 
 
 	//check all vertices in the time frame
 	for (iter = vertex_list1.begin();
-		iter != vertex_list1.end(); ++iter)
+	iter != vertex_list1.end(); ++iter)
 	{
 		cells.clear();
 		cell_bins.clear();
@@ -430,7 +432,7 @@ bool TrackMapProcessor::ResolveGraph(TrackMap& track_map, size_t frame1, size_t 
 		adj_verts = boost::adjacent_vertices(v1, inter_graph);
 		//for each adjacent vertex
 		for (inter_iter = adj_verts.first;
-			inter_iter != adj_verts.second; ++inter_iter)
+		inter_iter != adj_verts.second; ++inter_iter)
 		{
 			v2 = *inter_iter;
 			vertex2 = inter_graph[v2].vertex.lock();
@@ -438,13 +440,13 @@ bool TrackMapProcessor::ResolveGraph(TrackMap& track_map, size_t frame1, size_t 
 				continue;
 			//store all cells in the list temporarily
 			for (pwcell_iter = vertex2->GetCellsBegin();
-				pwcell_iter != vertex2->GetCellsEnd(); ++pwcell_iter)
+			pwcell_iter != vertex2->GetCellsEnd(); ++pwcell_iter)
 				cells.push_back(*pwcell_iter);
 		}
 		//if a cell in the list has contacts that are also in the list,
 		//try to group them
 		for (pwcell_iter = cells.begin();
-			pwcell_iter != cells.end(); ++pwcell_iter)
+		pwcell_iter != cells.end(); ++pwcell_iter)
 		{
 			cell2 = pwcell_iter->lock();
 			if (!cell2)
@@ -459,7 +461,7 @@ bool TrackMapProcessor::ResolveGraph(TrackMap& track_map, size_t frame1, size_t 
 			adj_cells = boost::adjacent_vertices(c2, intra_graph);
 			//for each cell in contact
 			for (intra_iter = adj_cells.first;
-				intra_iter != adj_cells.second; ++intra_iter)
+			intra_iter != adj_cells.second; ++intra_iter)
 			{
 				c2c = *intra_iter;
 				if (FindCellBin(cells, intra_graph[c2c].cell))
@@ -473,8 +475,8 @@ bool TrackMapProcessor::ResolveGraph(TrackMap& track_map, size_t frame1, size_t 
 					if (!cell2c)
 						continue;
 					c2sizef = cell2c->GetSizeF();
-					if (osizef/c1sizef>m_contact_thresh ||
-						osizef/c2sizef>m_contact_thresh)
+					if (osizef / c1sizef > m_contact_thresh ||
+						osizef / c2sizef > m_contact_thresh)
 					{
 						//add both to bin list
 						AddCellBin(cell_bins, *pwcell_iter, intra_graph[c2c].cell);
@@ -509,7 +511,6 @@ bool TrackMapProcessor::LinkVertex(pVertex &vertex, InterGraph &graph)
 	max_edge.second = false;
 	std::pair<InterAdjIter, InterAdjIter> adj_verts;
 	std::vector<InterEdge> edges;
-	std::vector<InterEdge>::iterator edge_iter;
 
 	//set flag for link
 	adj_verts = boost::adjacent_vertices(v0, graph);
@@ -521,26 +522,64 @@ bool TrackMapProcessor::LinkVertex(pVertex &vertex, InterGraph &graph)
 		edge = boost::edge(v0, v1, graph);
 		if (edge.second)
 		{
-			//check back link
-			graph[edge.first].back_link = CheckBackLink(
-				v0, v1, graph);
-			edges.push_back(edge);
-/*			if (graph[edge.first].size_f > max_size_f)
+			if (graph[edge.first].size_f > max_size_f)
 			{
 				max_size_f = graph[edge.first].size_f;
 				max_edge = edge;
-			}*/
+			}
 		}
 	}
-//	if (max_edge.second)
-//		graph[max_edge.first].link = 1;
 
-	return true;
+	if (max_edge.second)
+	{
+		graph[max_edge.first].link = 1;
+		return true;
+	}
+	else
+		return false;
 }
 
-bool TrackMapProcessor::CheckBackLink(InterVert v0, InterVert v1, InterGraph &graph)
+bool TrackMapProcessor::edge_comp_size(InterEdge edge1,
+	InterEdge edge2, InterGraph& graph)
 {
-	return false;
+	return graph[edge1].size_f > graph[edge2].size_f;
+/*	if (graph[edge1].bl_num != graph[edge2].bl_num)
+		return graph[edge1].bl_num < graph[edge2].bl_num;
+	else
+		return graph[edge1].size_f > graph[edge2].size_f;*/
+}
+
+unsigned int TrackMapProcessor::CheckBackLink(InterVert v0,
+	InterVert v1, InterGraph &graph,
+	unsigned int &bl_size_ui, float &bl_size_f)
+{
+	unsigned int result = 0;
+	bl_size_ui = 0;
+	bl_size_f = 0.0f;
+	std::pair<InterAdjIter, InterAdjIter> adj_verts;
+	InterVert bl_vert;
+	std::pair<InterEdge, bool> edge;
+
+	adj_verts = boost::adjacent_vertices(v1, graph);
+	for (InterAdjIter inter_iter = adj_verts.first;
+	inter_iter != adj_verts.second; ++inter_iter)
+	{
+		bl_vert = *inter_iter;
+		if (bl_vert == v0)
+			continue;
+		edge = boost::edge(bl_vert, v1, graph);
+		if (edge.second &&
+			graph[edge.first].link)
+		{
+			bl_size_ui = graph[edge.first].size_ui > bl_size_ui ?
+				graph[edge.first].size_ui : bl_size_ui;
+			bl_size_f = graph[edge.first].size_f > bl_size_f ?
+				graph[edge.first].size_f : bl_size_f;
+			result++;
+		}
+	}
+	
+	return result;
 }
 
 bool TrackMapProcessor::EqualCells(pwCell &cell1, pwCell &cell2)
@@ -753,7 +792,7 @@ bool TrackMapProcessor::Export(TrackMap & track_map, std::string &filename)
 		WriteUint(ofs, vertex_list.size());
 		//write each vertex
 		for (iter = vertex_list.begin();
-			iter != vertex_list.end(); ++iter)
+		iter != vertex_list.end(); ++iter)
 		{
 			vertex = iter->second;
 			WriteVertex(ofs, vertex);
@@ -763,14 +802,14 @@ bool TrackMapProcessor::Export(TrackMap & track_map, std::string &filename)
 		intra_pair = edges(intra_graph);
 		edge_num = 0;
 		for (intra_iter = intra_pair.first;
-			intra_iter != intra_pair.second;
+		intra_iter != intra_pair.second;
 			++intra_iter)
 			edge_num++;
 		//intra edge num
 		WriteUint(ofs, edge_num);
 		//write each intra edge
 		for (intra_iter = intra_pair.first;
-			intra_iter != intra_pair.second;
+		intra_iter != intra_pair.second;
 			++intra_iter)
 		{
 			WriteTag(ofs, TAG_INTRA_EDGE);
@@ -791,14 +830,14 @@ bool TrackMapProcessor::Export(TrackMap & track_map, std::string &filename)
 		inter_pair = boost::edges(inter_graph);
 		edge_num = 0;
 		for (inter_iter = inter_pair.first;
-			inter_iter != inter_pair.second;
+		inter_iter != inter_pair.second;
 			++inter_iter)
 			edge_num++;
 		//inter edge number
 		WriteUint(ofs, edge_num);
 		//write each inter edge
 		for (inter_iter = inter_pair.first;
-			inter_iter != inter_pair.second;
+		inter_iter != inter_pair.second;
 			++inter_iter)
 		{
 			WriteTag(ofs, TAG_INTER_EDGE);
@@ -1088,7 +1127,7 @@ bool TrackMapProcessor::GetMappedCells(TrackMap& track_map,
 	std::pair<InterEdge, bool> inter_edge;
 
 	for (sel_iter = sel_list1.begin();
-		sel_iter != sel_list1.end();
+	sel_iter != sel_list1.end();
 		++sel_iter)
 	{
 		cell_iter = cell_list1.find(sel_iter->second->Id());
@@ -1103,7 +1142,7 @@ bool TrackMapProcessor::GetMappedCells(TrackMap& track_map,
 		adj_verts = boost::adjacent_vertices(v1, inter_graph);
 		//for each adjacent vertex
 		for (inter_iter = adj_verts.first;
-			inter_iter != adj_verts.second;
+		inter_iter != adj_verts.second;
 			++inter_iter)
 		{
 			v2 = *inter_iter;
@@ -1118,7 +1157,7 @@ bool TrackMapProcessor::GetMappedCells(TrackMap& track_map,
 				continue;
 			//store all cells in sel_list2
 			for (pwcell_iter = vertex2->GetCellsBegin();
-				pwcell_iter != vertex2->GetCellsEnd();
+			pwcell_iter != vertex2->GetCellsEnd();
 				++pwcell_iter)
 			{
 				cell = pwcell_iter->lock();

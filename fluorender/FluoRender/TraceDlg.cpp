@@ -2350,7 +2350,7 @@ void TraceDlg::GenMap()
 	for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
 	{
 		tm_processor.ResolveGraph(track_map, fi, fi + 1);
-		//tm_processor.ResolveGraph(track_map, fi, fi - 1);
+		tm_processor.ResolveGraph(track_map, fi, fi - 1);
 		prog += prog_bit;
 		m_gen_map_prg->SetValue(int(prog));
 	}
