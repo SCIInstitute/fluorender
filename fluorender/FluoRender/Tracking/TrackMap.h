@@ -68,6 +68,7 @@ namespace FL
 			void *data1, void *data2,
 			void *label1, void *label2);
 		bool ResolveGraph(TrackMap& track_map, size_t frame1, size_t frame2);
+		bool CheckBranch(TrackMap& track_map, size_t frame1, size_t frame2);
 
 		bool Export(TrackMap& track_map, std::string &filename);
 		bool Import(TrackMap& track_map, std::string &filename);
@@ -105,7 +106,8 @@ namespace FL
 		size_t GetBinsCellCount(std::vector<CellBin> &bins);
 		bool MergeCells(VertexList& vertex_list,
 			InterGraph &graph, CellBin &bin);
-		bool LinkVertex(pVertex &p_vertex, InterGraph &graph);
+		bool LinkVertex(pVertex &vertex, InterGraph &graph);
+		bool UnlinkVertex(InterVert v0, InterGraph &graph);
 		unsigned int CheckBackLink(InterVert v0, InterVert v1, InterGraph &graph,
 			unsigned int &bl_size_ui, float &bl_size_f);
 		static bool edge_comp_size(InterEdge edge1, InterEdge edge2, InterGraph& graph);

@@ -309,42 +309,42 @@ bool TrackMapProcessor::LinkMaps(TrackMap& track_map,
 	VertexListIter iter1, iter2;
 
 	for (i = 0; i < nx; ++i)
-		for (j = 0; j < ny; ++j)
-			for (k = 0; k < nz; ++k)
-			{
-				index = nx*ny*k + nx*j + i;
-				label_value1 = ((unsigned int*)label1)[index];
-				label_value2 = ((unsigned int*)label2)[index];
+	for (j = 0; j < ny; ++j)
+	for (k = 0; k < nz; ++k)
+	{
+		index = nx*ny*k + nx*j + i;
+		label_value1 = ((unsigned int*)label1)[index];
+		label_value2 = ((unsigned int*)label2)[index];
 
-				if (!label_value1 || !label_value2)
-					continue;
+		if (!label_value1 || !label_value2)
+			continue;
 
-				if (track_map.m_data_bits == 8)
-				{
-					data_value1 = ((unsigned char*)data1)[index] / 255.0f;
-					data_value2 = ((unsigned char*)data2)[index] / 255.0f;
-				}
-				else if (track_map.m_data_bits == 16)
-				{
-					data_value1 = ((unsigned short*)data1)[index] * track_map.m_scale / 65535.0f;
-					data_value2 = ((unsigned short*)data2)[index] * track_map.m_scale / 65535.0f;
-				}
+		if (track_map.m_data_bits == 8)
+		{
+			data_value1 = ((unsigned char*)data1)[index] / 255.0f;
+			data_value2 = ((unsigned char*)data2)[index] / 255.0f;
+		}
+		else if (track_map.m_data_bits == 16)
+		{
+			data_value1 = ((unsigned short*)data1)[index] * track_map.m_scale / 65535.0f;
+			data_value2 = ((unsigned short*)data2)[index] * track_map.m_scale / 65535.0f;
+		}
 
-				iter1 = vertex_list1.find(label_value1);
-				iter2 = vertex_list2.find(label_value2);
+		iter1 = vertex_list1.find(label_value1);
+		iter2 = vertex_list2.find(label_value2);
 
-				if (iter1 == vertex_list1.end() ||
-					iter2 == vertex_list2.end())
-					continue;
+		if (iter1 == vertex_list1.end() ||
+			iter2 == vertex_list2.end())
+			continue;
 
-				if (iter1->second->GetSizeF() < m_size_thresh ||
-					iter2->second->GetSizeF() < m_size_thresh)
-					continue;
+		if (iter1->second->GetSizeF() < m_size_thresh ||
+			iter2->second->GetSizeF() < m_size_thresh)
+			continue;
 
-				LinkVertices(inter_graph,
-					iter1->second, iter2->second,
-					std::min(data_value1, data_value2));
-			}
+		LinkVertices(inter_graph,
+			iter1->second, iter2->second,
+			std::min(data_value1, data_value2));
+	}
 
 	return true;
 }
@@ -539,14 +539,88 @@ bool TrackMapProcessor::LinkVertex(pVertex &vertex, InterGraph &graph)
 		return false;
 }
 
+bool TrackMapProcessor::UnlinkVertex(InterVert v0, InterGraph &graph)
+{
+	InterVert v1;
+	std::pair<InterAdjIter, InterAdjIter> adj_verts;
+	std::vector<InterEdge> edges;
+	std::pair<InterEdge, bool> edge;
+	unsigned int bl_size_ui;
+	float bl_size_f;
+
+	adj_verts = boost::adjacent_vertices(v0, graph);
+	for (InterAdjIter inter_iter = adj_verts.first;
+	inter_iter != adj_verts.second; ++inter_iter)
+	{
+		v1 = *inter_iter;
+		edge = boost::edge(v0, v1, graph);
+		if (edge.second &&
+			graph[edge.first].link)
+		{
+			graph[edge.first].bl_num = CheckBackLink(
+				v0, v1, graph, bl_size_ui, bl_size_f);
+			if (graph[edge.first].bl_num)
+			{
+				graph[edge.first].bl_size_ui = bl_size_ui;
+				graph[edge.first].bl_size_f = bl_size_f;
+			}
+			edges.push_back(edge.first);
+		}
+	}
+
+	//sort edges
+	std::sort(edges.begin(), edges.end(),
+		std::bind(edge_comp_size, std::placeholders::_1,
+		std::placeholders::_2, graph));
+
+	for (size_t i = 0; i < edges.size(); ++i)
+	{
+		if (graph[edges[i]].bl_num && i)
+			graph[edges[i]].link = 0;
+	}
+
+	return true;
+}
+
+bool TrackMapProcessor::CheckBranch(TrackMap& track_map, size_t frame1, size_t frame2)
+{
+	if (frame1 >= track_map.m_frame_num ||
+		frame2 >= track_map.m_frame_num ||
+		frame1 == frame2)
+		return false;
+
+	VertexList &vertex_list1 = track_map.m_vertices_list.at(frame1);
+	VertexList &vertex_list2 = track_map.m_vertices_list.at(frame2);
+	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
+		frame1 > frame2 ? frame2 : frame1);
+
+	VertexListIter iter;
+	InterVert v0;
+
+	for (iter = vertex_list1.begin();
+	iter != vertex_list1.end(); ++iter)
+	{
+		v0 = iter->second->GetInterVert(inter_graph);
+		if (v0 == InterGraph::null_vertex())
+		{
+		}
+		else
+		{
+			UnlinkVertex(v0, inter_graph);
+		}
+	}
+
+	return true;
+}
+
 bool TrackMapProcessor::edge_comp_size(InterEdge edge1,
 	InterEdge edge2, InterGraph& graph)
 {
-	return graph[edge1].size_f > graph[edge2].size_f;
-/*	if (graph[edge1].bl_num != graph[edge2].bl_num)
+//	return graph[edge1].size_f > graph[edge2].size_f;
+	if (graph[edge1].bl_num != graph[edge2].bl_num)
 		return graph[edge1].bl_num < graph[edge2].bl_num;
 	else
-		return graph[edge1].size_f > graph[edge2].size_f;*/
+		return graph[edge1].size_f > graph[edge2].size_f;
 }
 
 unsigned int TrackMapProcessor::CheckBackLink(InterVert v0,
@@ -742,7 +816,7 @@ bool TrackMapProcessor::MergeCells(VertexList& vertex_list,
 			}
 
 			//add cell to vertex0
-			vertex0->AddCell(cell);
+			vertex0->AddCell(cell, true);
 			cell->AddVertex(vertex0);
 		}
 	}

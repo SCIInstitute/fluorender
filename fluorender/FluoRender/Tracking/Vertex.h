@@ -92,7 +92,7 @@ namespace FL
 
 		//cells
 		size_t GetCellNum();
-		void AddCell(pCell &cell);
+		void AddCell(pCell &cell, bool inc=false);
 		CellBinIter GetCellsBegin();
 		CellBinIter GetCellsEnd();
 
@@ -154,8 +154,13 @@ namespace FL
 		return m_cells.size();
 	}
 
-	inline void Vertex::AddCell(pCell &cell)
+	inline void Vertex::AddCell(pCell &cell, bool inc)
 	{
+		if (inc)
+		{
+			m_size_ui += cell->GetSizeUi();
+			m_size_f += cell->GetSizeF();
+		}
 		m_cells.push_back(pwCell(cell));
 	}
 
