@@ -25,27 +25,17 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+
+#include "Main.h"
 #include <cstdio>
 #include <iostream>
-#include <wx/wx.h>
 #include <wx/cmdline.h>
 #include <wx/stdpaths.h>
 #include <wx/filefn.h>
 #include "VRenderFrame.h"
 #include "compatibility.h"
-// -- application --
 
-class VRenderApp : public wxApp
-{
-   public:
-      virtual bool OnInit();
-      void OnInitCmdLine(wxCmdLineParser& parser);
-      bool OnCmdLineParsed(wxCmdLineParser& parser);
-
-   private:
-      wxArrayString m_files;
-      int m_file_num;
-};
+IMPLEMENT_APP(VRenderApp)
 
 static const wxCmdLineEntryDesc g_cmdLineDesc [] =
 {
@@ -53,9 +43,6 @@ static const wxCmdLineEntryDesc g_cmdLineDesc [] =
       wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL|wxCMD_LINE_PARAM_MULTIPLE },
    { wxCMD_LINE_NONE }
 };
-
-DECLARE_APP(VRenderApp)
-IMPLEMENT_APP(VRenderApp)
 
 bool VRenderApp::OnInit()
 {

@@ -2302,7 +2302,7 @@ void TraceDlg::GenMap()
 	tm_processor.SetSizes(track_map,
 		resx, resy, resz);
 	tm_processor.SetContactThresh(0.2f);
-	float prog_bit = 100.0f / float(frames * 3);
+	float prog_bit = 100.0f / float(frames * 5);
 	float prog = 0.0f;
 	m_gen_map_prg->SetValue(int(prog));
 	for (int i = 0; i < frames; ++i)
@@ -2341,6 +2341,7 @@ void TraceDlg::GenMap()
 		}
 		prog += prog_bit;
 		m_gen_map_prg->SetValue(int(prog));
+		wxGetApp().Yield();
 	}
 
 	nrrdNuke(nrrd_data2);
@@ -2353,13 +2354,30 @@ void TraceDlg::GenMap()
 		tm_processor.ResolveGraph(track_map, fi, fi - 1);
 		prog += prog_bit;
 		m_gen_map_prg->SetValue(int(prog));
+		wxGetApp().Yield();
 	}
 
 	//check branch
 	for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
 	{
-		tm_processor.CheckBranch(track_map, fi, fi - 1);
-		tm_processor.CheckBranch(track_map, fi, fi + 1);
+		tm_processor.LinkVertices(track_map, fi, fi + 1);
+		tm_processor.LinkVertices(track_map, fi, fi - 1);
+		prog += prog_bit;
+		m_gen_map_prg->SetValue(int(prog));
+		wxGetApp().Yield();
+	}
+	for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
+	{
+		tm_processor.UnlinkVertices(track_map, fi, fi - 1);
+		tm_processor.UnlinkVertices(track_map, fi, fi + 1);
+		prog += prog_bit;
+		m_gen_map_prg->SetValue(int(prog));
+		wxGetApp().Yield();
+	}
+	for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
+	{
+		tm_processor.LinkVertices(track_map, fi, fi + 1);
+		tm_processor.LinkVertices(track_map, fi, fi - 1);
 		prog += prog_bit;
 		m_gen_map_prg->SetValue(int(prog));
 	}
