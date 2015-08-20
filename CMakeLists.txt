@@ -126,6 +126,13 @@ find_package(Boost COMPONENTS system chrono REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
 #teem
+# add zlib
+find_package(ZLIB)
+if (ZLIB_FOUND)
+    add_definitions(-DTEEM_ZLIB=1)
+    include_directories(${ZLIB_INCLUDE_DIRS})
+endif()
+
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/teem)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/teem/Biff)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/teem/Air)
