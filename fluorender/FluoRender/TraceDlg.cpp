@@ -309,11 +309,14 @@ m_manual_assist(false)
 		wxDefaultPosition, wxSize(70, 20));
 	m_gen_map_prg = new wxGauge(this, ID_GenMapPrg, 100,
 		wxDefaultPosition, wxSize(-1, 18));
+	m_gen_map_spin = new wxSpinCtrl(this, ID_GenMapSpin, "3",
+		wxDefaultPosition, wxSize(70, 23));
 	m_gen_map_btn = new wxButton(this, ID_GenMapBtn, "Generate",
 		wxDefaultPosition, wxSize(70, 23));
 	sizer_2->Add(5, 5);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_gen_map_prg, 1, wxEXPAND);
+	sizer_2->Add(m_gen_map_spin, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_gen_map_btn, 0, wxALIGN_CENTER);
 
 	//edit tools
@@ -2299,10 +2302,11 @@ void TraceDlg::GenMap()
 	wxString label_name;
 	wstring lblname;
 
+	size_t iter_num = (size_t)m_gen_map_spin->GetValue();
 	tm_processor.SetSizes(track_map,
 		resx, resy, resz);
 	tm_processor.SetContactThresh(0.2f);
-	float prog_bit = 100.0f / float(frames * 5);
+	float prog_bit = 100.0f / float(frames * (3+iter_num*2));
 	float prog = 0.0f;
 	m_gen_map_prg->SetValue(int(prog));
 	for (int i = 0; i < frames; ++i)
@@ -2366,20 +2370,23 @@ void TraceDlg::GenMap()
 		m_gen_map_prg->SetValue(int(prog));
 		wxGetApp().Yield();
 	}
-	for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
+	for (size_t iteri = 0; iteri < iter_num; ++iteri)
 	{
-		tm_processor.UnlinkVertices(track_map, fi, fi - 1);
-		tm_processor.UnlinkVertices(track_map, fi, fi + 1);
-		prog += prog_bit;
-		m_gen_map_prg->SetValue(int(prog));
-		wxGetApp().Yield();
-	}
-	for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
-	{
-		tm_processor.LinkVertices(track_map, fi, fi + 1);
-		tm_processor.LinkVertices(track_map, fi, fi - 1);
-		prog += prog_bit;
-		m_gen_map_prg->SetValue(int(prog));
+		for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
+		{
+			tm_processor.UnlinkVertices(track_map, fi, fi - 1);
+			tm_processor.UnlinkVertices(track_map, fi, fi + 1);
+			prog += prog_bit;
+			m_gen_map_prg->SetValue(int(prog));
+			wxGetApp().Yield();
+		}
+		for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
+		{
+			tm_processor.LinkVertices(track_map, fi, fi + 1);
+			tm_processor.LinkVertices(track_map, fi, fi - 1);
+			prog += prog_bit;
+			m_gen_map_prg->SetValue(int(prog));
+		}
 	}
 
 	m_gen_map_prg->SetValue(100);

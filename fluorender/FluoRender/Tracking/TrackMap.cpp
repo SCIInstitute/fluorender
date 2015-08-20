@@ -1016,6 +1016,7 @@ bool TrackMapProcessor::Import(TrackMap& track_map, std::string &filename)
 	VertexListIter vertex_iter;
 	float dist;
 	unsigned int link;
+	bool edge_exist;
 	//read each frame
 	for (size_t i = 0; i < num; ++i)
 	{
@@ -1043,25 +1044,29 @@ bool TrackMapProcessor::Import(TrackMap& track_map, std::string &filename)
 		//read each intra edge
 		for (size_t j = 0; j < edge_num; ++j)
 		{
+			edge_exist = true;
 			if (ReadTag(ifs) != TAG_INTRA_EDGE)
 				return false;
 			//first cell
 			id1 = ReadUint(ifs);
 			cell_iter = cell_list.find(id1);
 			if (cell_iter == cell_list.end())
-				continue;
-			cell1 = cell_iter->second;
+				edge_exist = false;
+			else
+				cell1 = cell_iter->second;
 			//second cell
 			id2 = ReadUint(ifs);
 			cell_iter = cell_list.find(id2);
 			if (cell_iter == cell_list.end())
-				continue;
-			cell2 = cell_iter->second;
+				edge_exist = false;
+			else
+				cell2 = cell_iter->second;
 			//add edge
 			size_ui = ReadUint(ifs);
 			size_f = ReadFloat(ifs);
-			AddIntraEdge(intra_graph, cell1, cell2,
-				size_ui, size_f);
+			if (edge_exist)
+				AddIntraEdge(intra_graph, cell1, cell2,
+					size_ui, size_f);
 		}
 		//inter graph
 		if (i == 0)
@@ -1076,27 +1081,31 @@ bool TrackMapProcessor::Import(TrackMap& track_map, std::string &filename)
 		//read each inter edge
 		for (size_t j = 0; j < edge_num; ++j)
 		{
+			edge_exist = true;
 			if (ReadTag(ifs) != TAG_INTER_EDGE)
 				return false;
 			//first vertex
 			id1 = ReadUint(ifs);
 			vertex_iter = vertex_list0.find(id1);
 			if (vertex_iter == vertex_list0.end())
-				continue;
-			vertex1 = vertex_iter->second;
+				edge_exist = false;
+			else
+				vertex1 = vertex_iter->second;
 			//second vertex
 			id2 = ReadUint(ifs);
 			vertex_iter = vertex_list1.find(id2);
 			if (vertex_iter == vertex_list1.end())
-				continue;
-			vertex2 = vertex_iter->second;
+				edge_exist = false;
+			else
+				vertex2 = vertex_iter->second;
 			//add edge
 			size_ui = ReadUint(ifs);
 			size_f = ReadFloat(ifs);
 			dist = ReadFloat(ifs);
 			link = ReadUint(ifs);
-			AddInterEdge(inter_graph, vertex1, vertex2,
-				size_ui, size_f, dist, link);
+			if (edge_exist)
+				AddInterEdge(inter_graph, vertex1, vertex2,
+					size_ui, size_f, dist, link);
 		}
 	}
 

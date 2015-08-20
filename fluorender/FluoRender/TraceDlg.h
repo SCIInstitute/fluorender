@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include "DataManager.h"
 #include <wx/wx.h>
 #include <wx/listctrl.h>
+#include <wx/spinctrl.h>
 #include "teem/Nrrd/nrrd.h"
 #include <vector>
 
@@ -119,6 +120,7 @@ public:
 		ID_CompAppendBtn,
 		ID_CompExclusiveBtn,
 		ID_GenMapPrg,
+		ID_GenMapSpin,
 		ID_GenMapBtn
 	};
 
@@ -215,6 +217,7 @@ private:
 	wxTextCtrl* m_cell_size_text;
 	//auto tracking
 	wxGauge* m_gen_map_prg;
+	wxSpinCtrl* m_gen_map_spin;
 	wxButton* m_gen_map_btn;
 	//component tools
 	wxButton* m_comp_clear_btn;
