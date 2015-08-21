@@ -309,14 +309,22 @@ m_manual_assist(false)
 		wxDefaultPosition, wxSize(70, 20));
 	m_gen_map_prg = new wxGauge(this, ID_GenMapPrg, 100,
 		wxDefaultPosition, wxSize(-1, 18));
-	m_gen_map_spin = new wxSpinCtrl(this, ID_GenMapSpin, "3",
-		wxDefaultPosition, wxSize(70, 23));
-	m_gen_map_btn = new wxButton(this, ID_GenMapBtn, "Generate",
-		wxDefaultPosition, wxSize(70, 23));
 	sizer_2->Add(5, 5);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_gen_map_prg, 1, wxEXPAND);
+	st = new wxStaticText(this, 0, "X",
+		wxDefaultPosition, wxSize(10, -1));
+	m_gen_map_spin = new wxSpinCtrl(this, ID_GenMapSpin, "3",
+		wxDefaultPosition, wxSize(50, 23));
+	sizer_2->Add(10, 10);
+	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_gen_map_spin, 0, wxALIGN_CENTER);
+	st = new wxStaticText(this, 0, "times",
+		wxDefaultPosition, wxSize(40, -1));
+	m_gen_map_btn = new wxButton(this, ID_GenMapBtn, "Generate",
+		wxDefaultPosition, wxSize(70, 23));
+	sizer_2->Add(10, 10);
+	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_gen_map_btn, 0, wxALIGN_CENTER);
 
 	//edit tools
@@ -584,7 +592,7 @@ void TraceDlg::GetSettings(VRenderView* vrv)
 		if (str != "")
 			m_load_trace_text->SetValue(str);
 		else
-			m_load_trace_text->SetValue("Link map created but not saved");
+			m_load_trace_text->SetValue("Track map created but not saved");
 		UpdateList();
 
 		int ghost_num = trace_group->GetGhostNum();
@@ -594,7 +602,7 @@ void TraceDlg::GetSettings(VRenderView* vrv)
 		m_ghost_show_lead_chk->SetValue(trace_group->GetDrawLead());
 	}
 	else
-		m_load_trace_text->SetValue("No Link map");
+		m_load_trace_text->SetValue("No Track map");
 
 	//manual tracking assist
 //	m_manual_assist_check->SetValue(m_manual_assist);
@@ -2287,6 +2295,7 @@ void TraceDlg::GenMap()
 	if (!trace_group)
 		return;
 
+	m_stat_text->SetValue("Generating track map.\n");
 	FL::TrackMap &track_map = trace_group->GetTrackMap();
 	FL::TrackMapProcessor tm_processor;
 	int chan = vd->GetCurChannel();
@@ -2345,6 +2354,7 @@ void TraceDlg::GenMap()
 		}
 		prog += prog_bit;
 		m_gen_map_prg->SetValue(int(prog));
+		(*m_stat_text) << wxString::Format("Time point %d initialized.\n", i);
 		wxGetApp().Yield();
 	}
 
@@ -2358,6 +2368,7 @@ void TraceDlg::GenMap()
 		tm_processor.ResolveGraph(track_map, fi, fi - 1);
 		prog += prog_bit;
 		m_gen_map_prg->SetValue(int(prog));
+		(*m_stat_text) << wxString::Format("Time point %d resolved.\n", fi);
 		wxGetApp().Yield();
 	}
 
@@ -2368,6 +2379,7 @@ void TraceDlg::GenMap()
 		tm_processor.LinkVertices(track_map, fi, fi - 1);
 		prog += prog_bit;
 		m_gen_map_prg->SetValue(int(prog));
+		(*m_stat_text) << wxString::Format("Time point %d linked.\n", fi);
 		wxGetApp().Yield();
 	}
 	for (size_t iteri = 0; iteri < iter_num; ++iteri)
@@ -2378,6 +2390,7 @@ void TraceDlg::GenMap()
 			tm_processor.UnlinkVertices(track_map, fi, fi + 1);
 			prog += prog_bit;
 			m_gen_map_prg->SetValue(int(prog));
+			(*m_stat_text) << wxString::Format("Time point %d unlinked.\n", fi);
 			wxGetApp().Yield();
 		}
 		for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
@@ -2386,6 +2399,8 @@ void TraceDlg::GenMap()
 			tm_processor.LinkVertices(track_map, fi, fi - 1);
 			prog += prog_bit;
 			m_gen_map_prg->SetValue(int(prog));
+			(*m_stat_text) << wxString::Format("Time point %d relinked.\n", fi);
+			wxGetApp().Yield();
 		}
 	}
 

@@ -605,6 +605,9 @@ void VMovieView::OnPrev(wxCommandEvent& event) {
 	SetRendering(0.);
 	m_last_frame = 0;
 	m_timer.Start(int(1000.0/double(fps)+0.5));
+
+	//run script for current frame
+	vrv->m_glview->Run4DScript();
 }
 
 void VMovieView::OnRun(wxCommandEvent& event) {

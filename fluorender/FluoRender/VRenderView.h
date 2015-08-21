@@ -456,6 +456,7 @@ public:
 	//run 4d script
 	void SetRun4DScript(bool runscript) {m_run_script = runscript;}
 	bool GetRun4DScript() {return m_run_script;}
+	void Run4DScript();
 
 	//start loop update
 	void StartLoopUpdate();
@@ -900,7 +901,7 @@ private:
 	void PostDraw();
 
 	//run 4d script
-	void Run4DScript(wxString &scriptname);
+	void Run4DScript(wxString &scriptname, VolumeData* vd);
 	void RunNoiseReduction(wxFileConfig &fconfig);
 	void RunSelectionTracking(wxFileConfig &fconfig);
 	void RunRandomColors(wxFileConfig &fconfig);

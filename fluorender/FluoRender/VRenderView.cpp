@@ -4599,7 +4599,7 @@ void VRenderGLView::SetParams(double t)
 		clip_view->SetVolumeData(vr_frame->GetCurSelVol());
 	if (vr_frame)
 	{
-		vr_frame->UpdateTree();
+		vr_frame->UpdateTree(m_cur_vol->GetName());
 		int index = interpolator->GetKeyIndexFromTime(t);
 		vr_frame->GetRecorderDlg()->SetSelection(index);
 	}
@@ -4692,17 +4692,6 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 			BaseReader* reader = vd->GetReader();
 			bool clear_pool = false;
 
-			//if (cur_frame == start_frame &&
-			//	m_run_script && run_script &&
-			//	wxFileExists(m_script_file))
-			//{
-			//	m_selector.SetVolume(vd);
-			//	m_calculator.SetVolumeA(vd);
-			//	m_cur_vol = vd;
-			//	Run4DScript(m_script_file);
-			//	clear_pool = true;
-			//}
-
 			if (cur_frame != frame)
 			{
 				double spcx, spcy, spcz;
@@ -4719,18 +4708,10 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 				if (vframe && vframe->GetMeasureDlg())
 					vframe->GetMeasureDlg()->UpdateList();
 
-				clear_pool = true;
+				//run script
+				if (run_script)
+					Run4DScript(m_script_file, vd);
 
-			}
-
-			//run script
-			if (m_run_script && run_script &&
-				wxFileExists(m_script_file))
-			{
-				m_selector.SetVolume(vd);
-				m_calculator.SetVolumeA(vd);
-				m_cur_vol = vd;
-				Run4DScript(m_script_file);
 				clear_pool = true;
 			}
 
@@ -4949,8 +4930,17 @@ void VRenderGLView::PostDraw()
 }
 
 //run 4d script
-void VRenderGLView::Run4DScript(wxString &scriptname)
+void VRenderGLView::Run4DScript(wxString &scriptname, VolumeData* vd)
 {
+	if (m_run_script && wxFileExists(m_script_file))
+	{
+		m_selector.SetVolume(vd);
+		m_calculator.SetVolumeA(vd);
+		m_cur_vol = vd;
+	}
+	else
+		return;
+
 	wxFileInputStream is(scriptname);
 	if (!is.IsOk())
 		return;
@@ -8473,6 +8463,16 @@ void VRenderGLView::SetIntp(bool mode)
 bool VRenderGLView::GetIntp()
 {
 	return m_intp;
+}
+
+void VRenderGLView::Run4DScript()
+{
+	for (int i = 0; i < (int)m_vd_pop_list.size(); ++i)
+	{
+		VolumeData* vd = m_vd_pop_list[i];
+		if (vd)
+			Run4DScript(m_script_file, vd);
+	}
 }
 
 //start loop update
