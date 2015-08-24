@@ -479,8 +479,7 @@ bool TrackMapProcessor::ResolveGraph(TrackMap& track_map, size_t frame1, size_t 
 						osizef / c2sizef > m_contact_thresh)
 					{
 						//add both to bin list
-						AddCellBin(cell_bins, *pwcell_iter, intra_graph[c2c].cell);
-						added = true;
+						added = AddCellBin(cell_bins, *pwcell_iter, intra_graph[c2c].cell);
 					}
 				}
 			}
@@ -492,13 +491,14 @@ bool TrackMapProcessor::ResolveGraph(TrackMap& track_map, size_t frame1, size_t 
 		for (i = 0; i < cell_bins.size(); ++i)
 			MergeCells(vertex_list2, cell_bins[i], track_map, frame2);
 
-		//LinkVertex(iter->second, inter_graph);
+		//LinkVertex(iter->second, inter_graph, false);
 	}
 
 	return true;
 }
 
-bool TrackMapProcessor::LinkVertices(TrackMap& track_map, size_t frame1, size_t frame2)
+bool TrackMapProcessor::LinkFrames(TrackMap& track_map,
+	size_t frame1, size_t frame2, bool bl_check)
 {
 	if (frame1 >= track_map.m_frame_num ||
 		frame2 >= track_map.m_frame_num ||
@@ -515,13 +515,13 @@ bool TrackMapProcessor::LinkVertices(TrackMap& track_map, size_t frame1, size_t 
 	for (iter = vertex_list1.begin();
 	iter != vertex_list1.end(); ++iter)
 	{
-		LinkVertex(iter->second, inter_graph);
+		LinkVertex(iter->second, inter_graph, bl_check);
 	}
 
 	return true;
 }
 
-bool TrackMapProcessor::UnlinkVertices(TrackMap& track_map, size_t frame1, size_t frame2)
+bool TrackMapProcessor::UnlinkFrames(TrackMap& track_map, size_t frame1, size_t frame2)
 {
 	if (frame1 >= track_map.m_frame_num ||
 		frame2 >= track_map.m_frame_num ||
@@ -551,7 +551,8 @@ bool TrackMapProcessor::UnlinkVertices(TrackMap& track_map, size_t frame1, size_
 	return true;
 }
 
-bool TrackMapProcessor::LinkVertex(pVertex &vertex, InterGraph &graph)
+bool TrackMapProcessor::LinkVertex(pVertex &vertex,
+	InterGraph &graph, bool bl_check)
 {
 	if (!vertex)
 		return false;
@@ -566,6 +567,8 @@ bool TrackMapProcessor::LinkVertex(pVertex &vertex, InterGraph &graph)
 	unsigned int bl_size_ui;
 	float bl_size_f;
 	bool linked = false;
+	float edge_size, v0_size, v1_size;
+	pVertex edge_vert;
 
 	//set flag for link
 	adj_verts = boost::adjacent_vertices(v0, graph);
@@ -582,13 +585,18 @@ bool TrackMapProcessor::LinkVertex(pVertex &vertex, InterGraph &graph)
 				linked = true;
 				break;
 			}
-			graph[edge.first].bl_num = CheckBackLink(
-				v0, v1, graph, bl_size_ui, bl_size_f);
-			if (graph[edge.first].bl_num)
+
+			if (bl_check)
 			{
-				graph[edge.first].bl_size_ui = bl_size_ui;
-				graph[edge.first].bl_size_f = bl_size_f;
+				graph[edge.first].bl_num = CheckBackLink(
+					v0, v1, graph, bl_size_ui, bl_size_f);
+				if (graph[edge.first].bl_num)
+				{
+					graph[edge.first].bl_size_ui = bl_size_ui;
+					graph[edge.first].bl_size_f = bl_size_f;
+				}
 			}
+
 			edges.push_back(edge.first);
 		}
 	}
@@ -596,10 +604,32 @@ bool TrackMapProcessor::LinkVertex(pVertex &vertex, InterGraph &graph)
 	if (!linked && edges.size())
 	{
 		//sort edges
-		std::sort(edges.begin(), edges.end(),
-			std::bind(edge_comp_size, std::placeholders::_1,
-			std::placeholders::_2, graph));
-		graph[edges[0]].link = 1;
+		if (bl_check)
+		{
+			std::sort(edges.begin(), edges.end(),
+				std::bind(edge_comp_size_bl, std::placeholders::_1,
+				std::placeholders::_2, graph));
+			graph[edges[0]].link = 1;
+		}
+		else
+		{
+			//std::sort(edges.begin(), edges.end(),
+			//	std::bind(edge_comp_size_ol, std::placeholders::_1,
+			//	std::placeholders::_2, graph));
+			for (size_t i = 0; i < edges.size(); ++i)
+			{
+				edge_size = graph[edges[i]].size_f;
+				edge_vert = graph[boost::source(edges[i], graph)].vertex.lock();
+				if (!edge_vert) continue;
+				v0_size = edge_vert->GetSizeF();
+				edge_vert = graph[boost::target(edges[i], graph)].vertex.lock();
+				if (!edge_vert) continue;
+				v1_size = edge_vert->GetSizeF();
+				if (edge_size * 10 > std::min(v0_size, v1_size) &&
+					fabs(v0_size - v1_size) / (v0_size + v1_size) < 0.5f)
+					graph[edges[i]].link = 1;
+			}
+		}
 	}
 
 	return true;
@@ -643,7 +673,7 @@ bool TrackMapProcessor::UnlinkVertex(pVertex &vertex, InterGraph &graph)
 	if (edges.size() > 1)
 		//sort edges
 		std::sort(edges.begin(), edges.end(),
-			std::bind(edge_comp_size, std::placeholders::_1,
+			std::bind(edge_comp_size_bl, std::placeholders::_1,
 			std::placeholders::_2, graph));
 
 	for (size_t i = 1; i < edges.size(); ++i)
@@ -652,10 +682,15 @@ bool TrackMapProcessor::UnlinkVertex(pVertex &vertex, InterGraph &graph)
 	return true;
 }
 
-bool TrackMapProcessor::edge_comp_size(InterEdge edge1,
+bool TrackMapProcessor::edge_comp_size_ol(InterEdge edge1,
 	InterEdge edge2, InterGraph& graph)
 {
-//	return graph[edge1].size_f > graph[edge2].size_f;
+	return graph[edge1].size_f > graph[edge2].size_f;
+}
+
+bool TrackMapProcessor::edge_comp_size_bl(InterEdge edge1,
+	InterEdge edge2, InterGraph& graph)
+{
 	if (graph[edge1].bl_num != graph[edge2].bl_num)
 		return graph[edge1].bl_num < graph[edge2].bl_num;
 	else
@@ -731,22 +766,53 @@ bool TrackMapProcessor::AddCellBin(std::vector<CellBin> &bins, pwCell &cell1, pw
 		found_cell1 = FindCellBin(bins[i], cell1);
 		found_cell2 = FindCellBin(bins[i], cell2);
 		if (found_cell1 && found_cell2)
-			return false;
+			return true;
 		else if (found_cell1 && !found_cell2)
 		{
-			bins[i].push_back(cell2);
-			return true;
+			pCell c2 = cell2.lock();
+			if (!c2) continue;
+			if (GreaterThanCellBin(c2, bins.at(i), cell1))
+			{
+				//adding large to small, check
+				bins[i].push_back(cell2);
+				return true;
+			}
+			else
+				return false;
 		}
 		else if (!found_cell1 && found_cell2)
 		{
-			bins[i].push_back(cell1);
-			return true;
+			pCell c1 = cell1.lock();
+			if (!c1) continue;
+			if (GreaterThanCellBin(c1, bins.at(i), cell2))
+			{
+				bins[i].push_back(cell1);
+				return true;
+			}
+			else
+				return false;
 		}
 	}
 	CellBin bin;
 	bin.push_back(cell1);
 	bin.push_back(cell2);
 	bins.push_back(bin);
+	return true;
+}
+
+bool TrackMapProcessor::GreaterThanCellBin(pCell &cell1, CellBin &bin, pwCell &cell2)
+{
+	pCell bin_cell;
+	for (size_t i = 0; i < bin.size(); ++i)
+	{
+		if (EqualCells(bin[i], cell2))
+			continue;
+		bin_cell = bin[i].lock();
+		if (!bin_cell)
+			continue;
+		if (cell1->GetSizeF() < bin_cell->GetSizeF()*3.0f)
+			return false;
+	}
 	return true;
 }
 

@@ -68,8 +68,8 @@ namespace FL
 			void *data1, void *data2,
 			void *label1, void *label2);
 		bool ResolveGraph(TrackMap& track_map, size_t frame1, size_t frame2);
-		bool LinkVertices(TrackMap& track_map, size_t frame1, size_t frame2);
-		bool UnlinkVertices(TrackMap& track_map, size_t frame1, size_t frame2);
+		bool LinkFrames(TrackMap& track_map, size_t frame1, size_t frame2, bool bl_check = true);
+		bool UnlinkFrames(TrackMap& track_map, size_t frame1, size_t frame2);
 
 		bool Export(TrackMap& track_map, std::string &filename);
 		bool Import(TrackMap& track_map, std::string &filename);
@@ -104,15 +104,17 @@ namespace FL
 			pwCell &cell);
 		bool AddCellBin(std::vector<CellBin> &bins,
 			pwCell &cell1, pwCell &cell2);
+		bool GreaterThanCellBin(pCell &cell1, CellBin &bin, pwCell &cell2);
 		size_t GetBinsCellCount(std::vector<CellBin> &bins);
 		bool MergeCells(VertexList& vertex_list, CellBin &bin,
 			TrackMap& track_map, size_t frame);
 		bool RelinkInterGraph(pVertex &vertex, pVertex &vertex0, InterGraph &graph);
-		bool LinkVertex(pVertex &vertex, InterGraph &graph);
+		bool LinkVertex(pVertex &vertex, InterGraph &graph, bool bl_check = true);
 		bool UnlinkVertex(pVertex &vertex, InterGraph &graph);
 		unsigned int CheckBackLink(InterVert v0, InterVert v1, InterGraph &graph,
 			unsigned int &bl_size_ui, float &bl_size_f);
-		static bool edge_comp_size(InterEdge edge1, InterEdge edge2, InterGraph& graph);
+		static bool edge_comp_size_ol(InterEdge edge1, InterEdge edge2, InterGraph& graph);
+		static bool edge_comp_size_bl(InterEdge edge1, InterEdge edge2, InterGraph& graph);
 
 		//export
 		void WriteBool(std::ofstream& ofs, bool value);

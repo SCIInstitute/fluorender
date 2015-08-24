@@ -314,7 +314,7 @@ m_manual_assist(false)
 	sizer_2->Add(m_gen_map_prg, 1, wxEXPAND);
 	st = new wxStaticText(this, 0, "X",
 		wxDefaultPosition, wxSize(10, -1));
-	m_gen_map_spin = new wxSpinCtrl(this, ID_GenMapSpin, "3",
+	m_gen_map_spin = new wxSpinCtrl(this, ID_GenMapSpin, "1",
 		wxDefaultPosition, wxSize(50, 23));
 	sizer_2->Add(10, 10);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
@@ -2315,7 +2315,7 @@ void TraceDlg::GenMap()
 	tm_processor.SetSizes(track_map,
 		resx, resy, resz);
 	tm_processor.SetContactThresh(0.2f);
-	float prog_bit = 100.0f / float(frames * (3+iter_num*2));
+	float prog_bit = 100.0f / float(frames * (2+iter_num*2));
 	float prog = 0.0f;
 	m_gen_map_prg->SetValue(int(prog));
 	for (int i = 0; i < frames; ++i)
@@ -2373,33 +2373,24 @@ void TraceDlg::GenMap()
 	}
 
 	//check branch
-	for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
-	{
-		tm_processor.LinkVertices(track_map, fi, fi + 1);
-		tm_processor.LinkVertices(track_map, fi, fi - 1);
-		prog += prog_bit;
-		m_gen_map_prg->SetValue(int(prog));
-		(*m_stat_text) << wxString::Format("Time point %d linked.\n", fi);
-		wxGetApp().Yield();
-	}
 	for (size_t iteri = 0; iteri < iter_num; ++iteri)
 	{
 		for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
 		{
-			tm_processor.UnlinkVertices(track_map, fi, fi - 1);
-			tm_processor.UnlinkVertices(track_map, fi, fi + 1);
+			tm_processor.LinkFrames(track_map, fi, fi + 1, false/*iteri != 0*/);
+			//tm_processor.LinkFrames(track_map, fi, fi - 1, false/*iteri != 0*/);
 			prog += prog_bit;
 			m_gen_map_prg->SetValue(int(prog));
-			(*m_stat_text) << wxString::Format("Time point %d unlinked.\n", fi);
+			(*m_stat_text) << wxString::Format("Time point %d linked.\n", fi);
 			wxGetApp().Yield();
 		}
 		for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
 		{
-			tm_processor.LinkVertices(track_map, fi, fi + 1);
-			tm_processor.LinkVertices(track_map, fi, fi - 1);
+			tm_processor.UnlinkFrames(track_map, fi, fi - 1);
+			//tm_processor.UnlinkFrames(track_map, fi, fi + 1);
 			prog += prog_bit;
 			m_gen_map_prg->SetValue(int(prog));
-			(*m_stat_text) << wxString::Format("Time point %d relinked.\n", fi);
+			(*m_stat_text) << wxString::Format("Time point %d unlinked.\n", fi);
 			wxGetApp().Yield();
 		}
 	}
