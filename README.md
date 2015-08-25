@@ -96,6 +96,8 @@ We recommend building FluoRender outside of the source tree. <br/>
    
    * The steps following will assume the boost root directory is at <code>~/boost_1_55_0</code> (your version might differ).
 
+   * In a separate directory, checkout a separate boost process library : <code>git clone git@github.com:basisunus/boost_process.git</code> and merge the contents into the boost directory you built in.
+
 4) You may need to add lines to <code>C:\Program Files (x86)\CMake X.X\share\cmake-x.x\Modules\FindwxWidgets.cmake</code> (x's are your version) for wxWidgets 3.* if it still complains that you haven't installed wxWidgets.
    
    * Starting about line 277, you will have listed a few sets of library versions to search for like <code>wxbase29${_UCD}${_DBG}</code> <br/>
