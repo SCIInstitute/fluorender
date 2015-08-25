@@ -253,8 +253,9 @@ namespace FL
 		cell->SetSizeUi(ReadUint(ifs));
 		cell->SetSizeF(ReadFloat(ifs));
 		cell->SetExternalUi(ReadUint(ifs));
-		cell->SetExternalF(ReadFloat(ifs));
-		cell->SetCenter(ReadPoint(ifs));
+        cell->SetExternalF(ReadFloat(ifs));
+        FLIVR::Point p = ReadPoint(ifs);
+		cell->SetCenter(p);
 		cell_list.insert(std::pair<unsigned int, pCell>
 			(id, cell));
 		return cell;
