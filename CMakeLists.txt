@@ -39,10 +39,10 @@ endif()
 
 project ( FluoRender )
 
-IF(COMMAND cmake_policy)
+IF((COMMAND cmake_policy) AND NOT (CMAKE_MAJOR_VERSION LESS 3))
     CMAKE_POLICY(SET CMP0040 NEW)
     CMAKE_POLICY(SET CMP0043 NEW)
-ENDIF(COMMAND cmake_policy)
+ENDIF()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    # Mac OS X

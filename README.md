@@ -18,7 +18,7 @@ Requirements
  * Git (https://git-scm.com/)
  * CMake 2.6+ (http://www.cmake.org/)
  * wxWidgets (https://github.com/wxWidgets/wxWidgets)
- * Windows 7+ : Visual Studio 2010 
+ * Windows 7+ : Visual Studio 2010 (also tested on Windows 10)
  * OSX 10.9+  : Latest Xcode and command line tools, homebrew
  * Other platforms may work, but are not officially supported.
  * Boost 1.55.0+ (http://www.boost.org/users/download/#live)
@@ -92,7 +92,7 @@ We recommend building FluoRender outside of the source tree. <br/>
 
    * Download boost (http://www.boost.org/users/download/#live) and extract onto your machine.
    
-   * Build boost using <code>bootstrap</code> and <code>./b2</code> in the boost directory in a MSVC 2010 prompt.
+   * Build boost using <code>bootstrap</code> and <code>./b2 --toolset=msvc-10.0 --build-type=complete architecture=x86 address-model=64 stage</code> in the boost directory in a MSVC 2010 prompt. (change the toolset to the version of MSVC you are using, and omit address-model and architecture for 32-bit)
    
    * The steps following will assume the boost root directory is at <code>~/boost_1_55_0</code> (your version might differ).
 
@@ -113,7 +113,7 @@ We recommend building FluoRender outside of the source tree. <br/>
    	
    	- Choose the build type <code>CMAKE_BUILD_TYPE</code> to be "Debug" or "Release" <br/>
 
-   	- Be sure to set <code>wxWidgets_LIB_DIR</code> to <code>C:\wxWidgets\lib\vc_x64_lib</code>. 
+   	- Be sure to set <code>wxWidgets_LIB_DIR</code> to <code>C:\wxWidgets\lib\vc_x64_lib</code>. (this will differ from 32 bit)
    	
    	- Be sure to set <code>wxWidgets_ROOT_DIR</code> to <code>C:\wxWidgets</code>.
    	
