@@ -52,6 +52,8 @@ We recommend building FluoRender outside of the source tree. <br/>
    
    * The steps following will assume the boost root directory is at <code>~/boost_1_55_0</code> (your version might differ).
 
+   * In a separate directory, checkout a separate boost process library : <code>git clone git@github.com:basisunus/boost_process.git</code> and merge the contents into the boost directory you built in.
+
 4) Get homebrew, libtiff, and freetype
 
    * <code>ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"</code>
