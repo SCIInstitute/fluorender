@@ -407,35 +407,37 @@ wxPanel(parent, id, pos, size,style, name),
 	sizer_r2->Add(m_space_z_text, 0, wxALIGN_CENTER);
 	//color 1
 	st = new wxStaticText(this, 0, "Pri Color:",
-		wxDefaultPosition, wxSize(60, -1), wxALIGN_CENTER);
+		wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER);
 	m_color_text = new wxTextCtrl(this, ID_ColorText, "255 , 255 , 255",
 		wxDefaultPosition, wxSize(85, 20));
 	m_color_text->Connect(ID_ColorText, wxEVT_LEFT_DCLICK,
 		wxCommandEventHandler(VPropView::OnColorTextFocus),
 		NULL, this);
-	m_color_btn = new wxColourPickerCtrl(this, ID_ColorBtn, *wxRED);
+    m_color_btn = new wxColourPickerCtrl(this, ID_ColorBtn, *wxRED,
+                                         wxDefaultPosition, wxSize(50, 25));
 	sizer_r3->Add(st, 0, wxALIGN_CENTER, 0); 
 	sizer_r3->Add(5, 5, 0);
 	sizer_r3->Add(m_color_text, 0, wxALIGN_CENTER, 0);
 	sizer_r3->Add(m_color_btn, 1, wxALIGN_CENTER, 0);
 	//color 2
 	st = new wxStaticText(this, 0, "Sec Color:",
-		wxDefaultPosition, wxSize(60, -1), wxALIGN_CENTER);
+		wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER);
 	m_color2_text = new wxTextCtrl(this, ID_Color2Text, "255 , 255 , 255",
 		wxDefaultPosition, wxSize(85, 20));
 	m_color2_text->Connect(ID_Color2Text, wxEVT_LEFT_DCLICK,
 		wxCommandEventHandler(VPropView::OnColor2TextFocus),
 		NULL, this);
-	m_color2_btn = new wxColourPickerCtrl(this, ID_Color2Btn, *wxRED);
+    m_color2_btn = new wxColourPickerCtrl(this, ID_Color2Btn, *wxRED,
+                                          wxDefaultPosition, wxSize(50, 25));
 	sizer_r4->Add(st, 0, wxALIGN_CENTER, 0); 
 	sizer_r4->Add(5, 5, 0);
 	sizer_r4->Add(m_color2_text, 0, wxALIGN_CENTER, 0);
 	sizer_r4->Add(m_color2_btn, 1, wxALIGN_CENTER, 0);
 	// colormap chooser
 	st = new wxStaticText(this, 0, "Color Map:",
-		wxDefaultPosition, wxSize(60, -1), wxALIGN_CENTER);
+		wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER);
 	m_colormap_combo = new wxComboBox(this, ID_ColormapCombo, "",
-		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, wxSize(85, 25), 0, NULL, wxCB_READONLY);
 	vector<string>colormap_list;
 	colormap_list.push_back("Rainbow");
 	colormap_list.push_back("Reverse Rainbow");
@@ -445,7 +447,7 @@ wxPanel(parent, id, pos, size,style, name),
 	for (size_t i=0; i<colormap_list.size(); ++i)
 		m_colormap_combo->Append(colormap_list[i]);
 	m_colormap_combo2 = new wxComboBox(this, ID_ColormapCombo2, "",
-		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, wxSize(85, 25), 0, NULL, wxCB_READONLY);
 	vector<string>colormap_list2;
 	colormap_list2.push_back("Intensity");
 	colormap_list2.push_back("Z Value");

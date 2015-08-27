@@ -1216,7 +1216,8 @@ void TrackMapProcessor::ReadVertex(std::ifstream& ifs,
 	vertex = pVertex(new Vertex(id));
 	vertex->SetSizeUi(ReadUint(ifs));
 	vertex->SetSizeF(ReadFloat(ifs));
-	vertex->SetCenter(ReadPoint(ifs));
+    FLIVR::Point p = ReadPoint(ifs);
+	vertex->SetCenter(p);
 
 	//cell number
 	unsigned int num = ReadUint(ifs);

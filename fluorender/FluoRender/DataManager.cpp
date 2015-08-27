@@ -3194,16 +3194,17 @@ bool TraceGroup::Load(wxString &filename)
 {
 	m_data_path = filename;
 	FL::TrackMapProcessor tm_processor;
-
-	return tm_processor.Import(m_track_map, ws2s(m_data_path.ToStdWstring()));
+    std::string str = ws2s(m_data_path.ToStdWstring());
+	return tm_processor.Import(m_track_map, str);
 }
 
 bool TraceGroup::Save(wxString &filename)
 {
 	m_data_path = filename;
 	FL::TrackMapProcessor tm_processor;
-
-	return tm_processor.Export(m_track_map, ws2s(m_data_path.ToStdWstring()));
+    
+    std::string str = ws2s(m_data_path.ToStdWstring());
+	return tm_processor.Export(m_track_map, str);
 }
 
 unsigned int TraceGroup::Draw(vector<float> &verts)

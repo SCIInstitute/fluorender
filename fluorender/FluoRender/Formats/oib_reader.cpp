@@ -159,7 +159,7 @@ void OIBReader::ReadSingleOib()
    //read the current file info
    //storage
    //use POLE's own function to convert string from wstring
-   POLE::Storage pStg(POLE::UTF16toUTF8(m_path_name).c_str());
+   POLE::Storage pStg(ws2s(m_path_name).c_str());
    //open
    if (pStg.open()) {
       //enumerate
@@ -259,7 +259,7 @@ int OIBReader::LoadBatch(int index)
 
 void OIBReader::ReadStream(POLE::Storage &pStg, wstring &stream_name)
 {
-	POLE::Stream pStm(&pStg, POLE::UTF16toUTF8(stream_name));
+	POLE::Stream pStm(&pStg, ws2s(stream_name));
 	unsigned char *pbyData = 0;
 
 	//open
@@ -692,7 +692,7 @@ Nrrd *OIBReader::Convert(int t, int c, bool get_max)
 	   unsigned char *pbyData = 0;
        wstring path_name = m_type==0?m_path_name:m_oib_info[t].filename;
 	   //storage
-	   POLE::Storage pStg(POLE::UTF16toUTF8(path_name).c_str()); 
+	   POLE::Storage pStg(ws2s(path_name).c_str());
 	   //open
 	   if (pStg.open()) {
 		  //allocate memory for nrrd
@@ -712,7 +712,7 @@ Nrrd *OIBReader::Convert(int t, int c, bool get_max)
 						its != streams.end(); ++its) {
 					if (num >= cinfo->size()) break;
 					//fix the stream name
-					std::string str_name = POLE::UTF16toUTF8((*cinfo)[num].stream_name);
+					std::string str_name = ws2s((*cinfo)[num].stream_name);
 					std::string name = (*it) + std::string("/") + str_name;
 					  
 					POLE::Stream pStm(&pStg,name);
