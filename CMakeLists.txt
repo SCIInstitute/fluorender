@@ -366,6 +366,9 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 			wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES})
    string(REGEX REPLACE "-lpng" "/usr/local/lib/libpng.a" 
 			CMAKE_MAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS})
+   string(REGEX REPLACE "/usr/local/lib/libfreetype.dylib" "/usr/local/lib/libfreetype.a;/usr/local/lib/libpng.a" 
+     FREETYPE_LIBRARIES ${FREETYPE_LIBRARIES})
+   message(STATUS "${FREETYPE_LIBRARIES}")
 endif()
 
 #link the libraries
