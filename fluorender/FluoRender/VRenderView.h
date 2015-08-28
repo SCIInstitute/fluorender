@@ -907,6 +907,7 @@ private:
 	void RunRandomColors(wxFileConfig &fconfig);
 	void RunSeparateChannels(wxFileConfig &fconfig);
 	void RunExternalExe(wxFileConfig &fconfig);
+	void RunFetchMask(wxFileConfig &fconfig);
 
 	//brush states update
 	void SetBrush(int mode);

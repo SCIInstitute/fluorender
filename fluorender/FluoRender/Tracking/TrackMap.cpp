@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "TrackMap.h"
 #include <functional>
 #include <algorithm>
+#include <limits>
 
 using namespace FL;
 
@@ -510,7 +511,6 @@ bool TrackMapProcessor::LinkFrames(TrackMap& track_map,
 		frame1 > frame2 ? frame2 : frame1);
 
 	VertexListIter iter;
-	InterVert v0;
 
 	for (iter = vertex_list1.begin();
 	iter != vertex_list1.end(); ++iter)
@@ -1302,6 +1302,97 @@ bool TrackMapProcessor::AddInterEdge(InterGraph& graph,
 		return false;
 
 	return true;
+}
+
+bool TrackMapProcessor::GetMappedID(TrackMap& track_map,
+	unsigned int id_in, unsigned int& id_out,
+	size_t frame)
+{
+	size_t frame_num = track_map.m_frame_num;
+	if (frame >= frame_num)
+		return false;
+
+	VertexList &vertex_list = track_map.m_vertices_list.at(frame);
+	CellList &cell_list = track_map.m_cells_list.at(frame);
+
+	CellListIter cell_iter;
+	pVertex vertex;
+	cell_iter = cell_list.find(id_in);
+	if (cell_iter == cell_list.end())
+		return false;
+	vertex = cell_iter->second->GetVertex().lock();
+	if (!vertex)
+		return false;
+
+	id_out = vertex->Id();
+	return true;
+}
+
+bool TrackMapProcessor::GetMappedID(TrackMap& track_map,
+	unsigned int id_in, unsigned int& id_out,
+	size_t frame1, size_t frame2)
+{
+	bool result = false;
+	size_t frame_num = track_map.m_frame_num;
+	if (frame1 >= frame_num ||
+		frame2 >= frame_num ||
+		frame1 == frame2)
+		return false;
+
+	CellList &cell_list1 = track_map.m_cells_list.at(frame1);
+	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
+		frame1 > frame2 ? frame2 : frame1);
+	CellListIter cell_iter;
+	pVertex vertex1, vertex2;
+	pCell cell;
+	InterVert v1, v2;
+	std::pair<InterAdjIter, InterAdjIter> adj_verts;
+	InterAdjIter inter_iter;
+	CellBinIter pwcell_iter;
+	std::pair<InterEdge, bool> inter_edge;
+	float in_size;
+	float out_size, min_diff;
+
+	cell_iter = cell_list1.find(id_in);
+	if (cell_iter == cell_list1.end())
+		return false;
+	vertex1 = cell_iter->second->GetVertex().lock();
+	if (!vertex1)
+		return false;
+	in_size = vertex1->GetSizeF();
+	v1 = vertex1->GetInterVert(inter_graph);
+	if (v1 == InterGraph::null_vertex())
+		return false;
+
+	min_diff = std::numeric_limits<float>::max();
+	adj_verts = boost::adjacent_vertices(v1, inter_graph);
+	//for each adjacent vertex
+	for (inter_iter = adj_verts.first;
+	inter_iter != adj_verts.second;
+		++inter_iter)
+	{
+		v2 = *inter_iter;
+		//get edge
+		inter_edge = boost::edge(v1, v2, inter_graph);
+		if (!inter_edge.second)
+			continue;
+		else if (!inter_graph[inter_edge.first].link)
+			continue;
+		vertex2 = inter_graph[v2].vertex.lock();
+		if (!vertex2)
+			continue;
+
+		//find closest size
+		out_size = vertex2->GetSizeF();
+		if (fabs(out_size - in_size) < min_diff)
+		{
+			id_out = vertex2->Id();
+			min_diff = fabs(out_size - in_size);
+			result = true;
+		}
+	}
+
+	return result;
 }
 
 bool TrackMapProcessor::GetMappedCells(TrackMap& track_map,

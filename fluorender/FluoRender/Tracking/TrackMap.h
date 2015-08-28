@@ -74,6 +74,13 @@ namespace FL
 		bool Export(TrackMap& track_map, std::string &filename);
 		bool Import(TrackMap& track_map, std::string &filename);
 
+		//get mapped cell
+		bool GetMappedID(TrackMap& track_map,
+			unsigned int id_in, unsigned int& id_out,
+			size_t frame);
+		bool GetMappedID(TrackMap& track_map,
+			unsigned int id_in, unsigned int& id_out,
+			size_t frame1, size_t frame2);
 		//get mapped cells
 		bool GetMappedCells(TrackMap& track_map,
 			CellList &sel_list1, CellList &sel_list2,

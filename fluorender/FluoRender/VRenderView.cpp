@@ -4971,6 +4971,8 @@ void VRenderGLView::Run4DScript(wxString &scriptname, VolumeData* vd)
 					RunSeparateChannels(fconfig);
 				else if (str == "external_exe")
 					RunExternalExe(fconfig);
+				else if (str == "fetch_mask")
+					RunFetchMask(fconfig);
 			}
 		}
 	}
@@ -5251,6 +5253,31 @@ void VRenderGLView::RunExternalExe(wxFileConfig &fconfig)
 		boost::process::launch(pathname.ToStdString(),
 		args, ctx);
 	c.wait();
+}
+
+void VRenderGLView::RunFetchMask(wxFileConfig &fconfig)
+{
+	//load and replace the mask
+	BaseReader* reader = m_cur_vol->GetReader();
+	if (!reader)
+		return;
+	wxString data_name = reader->GetCurName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
+	wxString mask_name = data_name.Left(data_name.find_last_of('.')) + ".msk";
+	MSKReader msk_reader;
+	wstring mskname = mask_name.ToStdWstring();
+	msk_reader.SetFile(mskname);
+	Nrrd* mask_nrrd_new = msk_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
+	if (mask_nrrd_new)
+		m_cur_vol->LoadMask(mask_nrrd_new);
+
+	//load and replace the label
+	wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
+	LBLReader lbl_reader;
+	wstring lblname = label_name.ToStdWstring();
+	lbl_reader.SetFile(lblname);
+	Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
+	if (label_nrrd_new)
+		m_cur_vol->LoadLabel(label_nrrd_new);
 }
 
 //draw
