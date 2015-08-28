@@ -2,4 +2,5 @@
 tasknum=1
 [tasks/task0]
 type=random_colors
+huemode=0
 savepath=./DATA/colored/

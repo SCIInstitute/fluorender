@@ -493,6 +493,24 @@ bool VolumeSelector::SearchComponentList(unsigned int cval, Vector &pos, double 
 	return false;
 }
 
+double VolumeSelector::HueCalculation(int mode, unsigned int label)
+{
+	double hue = 0.0;
+	switch (mode)
+	{
+	case 0:
+		hue = double(label % 360);
+		break;
+	case 1:
+		hue = double(label % m_randv) / double(m_randv) * 360.0;
+		break;
+	case 2:
+		hue = double(bit_reverse(label) % m_randv) / double(m_randv) * 360.0;
+		break;
+	}
+	return hue;
+}
+
 void VolumeSelector::CompExportMultiChann(bool select)
 {
 	if (!m_vd ||
@@ -609,7 +627,7 @@ void VolumeSelector::CompExportMultiChann(bool select)
 	}
 }
 
-void VolumeSelector::CompExportRandomColor(VolumeData* vd_r,
+void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 	VolumeData* vd_g, VolumeData* vd_b, bool select, bool hide)
 {
 	if (!m_vd ||
@@ -729,9 +747,7 @@ void VolumeSelector::CompExportRandomColor(VolumeData* vd_r,
 							value = double(((unsigned short*)data_mvd)[index]) *
 							m_vd->GetScalarScale() / 65535.0;
 					}
-					//unsigned int rev_value_label = bit_reverse(value_label);
-					unsigned int rev_value_label = value_label;
-					double hue = double(rev_value_label % m_randv) / double(m_randv) * 360.0;
+					double hue = HueCalculation(hmode, value_label);
 					Color color(HSVColor(hue, 1.0, 1.0));
 					//color
 					value = value>1.0?1.0:value;

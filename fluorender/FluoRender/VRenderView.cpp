@@ -1998,7 +1998,7 @@ void VRenderGLView::CompExport(int mode, bool select)
 						vd_b = vd;
 				}
 			}
-			m_selector.CompExportRandomColor(vd_r, vd_g, vd_b, select);
+			m_selector.CompExportRandomColor(1, vd_r, vd_g, vd_b, select);
 		}
 		break;
 	}
@@ -5140,6 +5140,8 @@ void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 
 void VRenderGLView::RunRandomColors(wxFileConfig &fconfig)
 {
+	int hmode;
+	fconfig.Read("huemode", &hmode, 1);
 	wxString str, pathname;
 	fconfig.Read("savepath", &pathname, "");
 	str = pathname;
@@ -5170,15 +5172,15 @@ void VRenderGLView::RunRandomColors(wxFileConfig &fconfig)
 	if (!label_nrrd_new)
 		return;
 	m_cur_vol->LoadLabel(label_nrrd_new);
+	int time_num = m_cur_vol->GetReader()->GetTimeNum();
 	//generate RGB volumes
-	m_selector.CompExportRandomColor(0, 0, 0, false, false);
+	m_selector.CompExportRandomColor(hmode, 0, 0, 0, false, false);
 	vector<VolumeData*> *vol_list = m_selector.GetResultVols();
 	for (int ii = 0; ii<(int)vol_list->size(); ii++)
 	{
 		VolumeData* vd = (*vol_list)[ii];
 		if (vd)
 		{
-			int time_num = vd->GetReader()->GetTimeNum();
 			wxString format = wxString::Format("%d", time_num);
 			m_fr_length = format.Length();
 			format = wxString::Format("_T%%0%dd", m_fr_length);

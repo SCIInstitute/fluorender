@@ -94,7 +94,7 @@ public:
 	int NoiseAnalysis(double min_voxels, double max_voxels, double bins, double thresh);
 	int CompIslandCount(double min_voxels, double max_voxels);
 	void CompExportMultiChann(bool select);
-	void CompExportRandomColor(VolumeData* vd_r, VolumeData* vd_g, VolumeData* vd_b, bool select, bool hide=true);
+	void CompExportRandomColor(int hmode, VolumeData* vd_r, VolumeData* vd_g, VolumeData* vd_b, bool select, bool hide=true);
 	//mode: 0-no duplicate; 1-duplicate
 	void NoiseRemoval(int iter, double thresh, int mode=0);
 	vector<VolumeData*>* GetResultVols();
@@ -190,6 +190,7 @@ private:
 
 private:
 	bool SearchComponentList(unsigned int cval, Vector &pos, double intensity);
+	double HueCalculation(int mode, unsigned int label);
 };
 
 #endif//_VOLUMESELECTOR_H_
