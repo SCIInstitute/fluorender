@@ -54,6 +54,9 @@ namespace FLIVR
 		filter_buffer_resize_(false),
 		filter_buffer_(0),
 		filter_tex_id_(0),
+		blend_fbo_resize_(false),
+		blend_fbo_(0),
+		blend_tex_(0),
 		noise_red_(false),
 		sfactor_(1.0),
 		filter_size_min_(0.0),
@@ -83,6 +86,9 @@ namespace FLIVR
 		filter_buffer_resize_(false),
 		filter_buffer_(0),
 		filter_tex_id_(0),
+		blend_fbo_resize_(false),
+		blend_fbo_(0),
+		blend_tex_(0),
 		noise_red_(false),
 		sfactor_(1.0),
 		filter_size_min_(0.0),
@@ -108,6 +114,20 @@ namespace FLIVR
 			glDeleteBuffers(1, &m_slices_ibo);
 		if (glIsVertexArray(m_slices_vao))
 			glDeleteVertexArrays(1, &m_slices_vao);
+
+		//framebuffers
+		if (glIsFramebuffer(blend_framebuffer_))
+			glDeleteFramebuffers(1, &blend_framebuffer_);
+		if (glIsTexture(blend_tex_id_))
+			glDeleteTextures(1, &blend_tex_id_);
+		if (glIsFramebuffer(filter_buffer_))
+			glDeleteFramebuffers(1, &filter_buffer_);
+		if (glIsTexture(filter_tex_id_))
+			glDeleteTextures(1, &filter_tex_id_);
+		if (glIsFramebuffer(blend_fbo_))
+			glDeleteFramebuffers(1, &blend_fbo_);
+		if (glIsTexture(blend_tex_))
+			glDeleteTextures(1, &blend_tex_);
 	}
 
 	//mode and sampling rate
@@ -276,14 +296,14 @@ namespace FLIVR
 			sfactor_ = sf;
 			blend_framebuffer_resize_ = true;
 			filter_buffer_resize_ = true;
-			vr_list_[0]->blend_framebuffer_resize_ = true;
+			blend_fbo_resize_ = true;
 		}
 		else if (sf==1.0 && sfactor_!=1.0)
 		{
 			sfactor_ = sf;
 			blend_framebuffer_resize_ = true;
 			filter_buffer_resize_ = true;
-			vr_list_[0]->blend_framebuffer_resize_ = true;
+			blend_fbo_resize_ = true;
 		}
 
 		w2 = int(w*sfactor_+0.5);
@@ -652,20 +672,18 @@ namespace FLIVR
 		glGetIntegerv(GL_DRAW_BUFFER, &cur_draw_buffer);
 		GLint cur_read_buffer;
 		glGetIntegerv(GL_READ_BUFFER, &cur_read_buffer);
-		GLuint *blend_fbo = &(vr_list_[0]->blend_framebuffer_);
-		GLuint *blend_tex = &(vr_list_[0]->blend_tex_id_);
 
 		if (blend_slices_ && colormap_mode_!=2)
 		{
 			//check blend buffer
-			if (!glIsFramebuffer(*blend_fbo))
+			if (!glIsFramebuffer(blend_fbo_))
 			{
-				glGenFramebuffers(1, blend_fbo);
-				if (!glIsTexture(*blend_tex))
-					glGenTextures(1, blend_tex);
-				glBindFramebuffer(GL_FRAMEBUFFER, *blend_fbo);
+				glGenFramebuffers(1, &blend_fbo_);
+				if (!glIsTexture(blend_tex_))
+					glGenTextures(1, &blend_tex_);
+				glBindFramebuffer(GL_FRAMEBUFFER, blend_fbo_);
 				// Initialize texture color renderbuffer
-				glBindTexture(GL_TEXTURE_2D, *blend_tex);
+				glBindTexture(GL_TEXTURE_2D, blend_tex_);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -674,14 +692,14 @@ namespace FLIVR
 					GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
 				glFramebufferTexture2D(GL_FRAMEBUFFER,
 					GL_COLOR_ATTACHMENT0,
-					GL_TEXTURE_2D, *blend_tex, 0);
+					GL_TEXTURE_2D, blend_tex_, 0);
 			}
-			if (vr_list_[0]->blend_framebuffer_resize_)
+			if (blend_fbo_resize_)
 			{
-				glBindTexture(GL_TEXTURE_2D, *blend_tex);
+				glBindTexture(GL_TEXTURE_2D, blend_tex_);
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w, h, 0,
 					GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
-				vr_list_[0]->blend_framebuffer_resize_ = false;
+				blend_fbo_resize_ = false;
 			}
 		}
 
@@ -707,12 +725,13 @@ namespace FLIVR
 			if (blend_slices_ && colormap_mode_!=2)
 			{
 				//set blend buffer
-				glBindFramebuffer(GL_FRAMEBUFFER, *blend_fbo);
+				glBindFramebuffer(GL_FRAMEBUFFER, blend_fbo_);
 				glClearColor(clear_color[0], clear_color[1], clear_color[2], clear_color[3]);
 				glClear(GL_COLOR_BUFFER_BIT);
 				glEnable(GL_BLEND);
 				glBlendFunc(GL_ONE, GL_ONE);
 
+				glBindVertexArray(m_slices_vao);
 				glUseProgram(shader->id());
 			}
 
@@ -822,21 +841,30 @@ namespace FLIVR
 
 			if (blend_slices_ && colormap_mode_!=2)
 			{
+				glBindVertexArray(0);
 				glUseProgram(0);
-
 				//set buffer back
 				glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_id);
 				glDrawBuffer(cur_draw_buffer);
 				glReadBuffer(cur_read_buffer);
-				glBindTexture(GL_TEXTURE_2D, *blend_tex);
+				glBindTexture(GL_TEXTURE_2D, blend_tex_);
 				//blend
 				if (TextureRenderer::get_update_order() == 0)
 					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 				else if (TextureRenderer::get_update_order() == 1)
 					glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
 				//draw
+				ShaderProgram* img_shader = vr_list_[0]->
+					m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+				if (img_shader)
+				{
+					if (!img_shader->valid())
+						img_shader->create();
+					img_shader->bind();
+				}
 				vr_list_[0]->draw_view_quad();
-
+				if (img_shader && img_shader->valid())
+					img_shader->release();
 			}
 		}
 

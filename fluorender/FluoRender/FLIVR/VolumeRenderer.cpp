@@ -1019,9 +1019,7 @@ namespace FLIVR
 			if (img_shader)
 			{
 				if (!img_shader->valid())
-				{
 					img_shader->create();
-				}
 				img_shader->bind();
 			}
 

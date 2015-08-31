@@ -111,6 +111,10 @@ namespace FLIVR
 		bool filter_buffer_resize_;
 		GLuint filter_buffer_;
 		GLuint filter_tex_id_;
+		//micro blending
+		bool blend_fbo_resize_;
+		GLuint blend_fbo_;
+		GLuint blend_tex_;
 
 		//scale factor
 		bool noise_red_;
