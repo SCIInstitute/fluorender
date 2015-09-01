@@ -627,7 +627,9 @@ namespace FLIVR
 	"		else\n" \
 	"			sel = vec4(1.0, 1.0, p2, 1.0);\n" \
 	"	}\n" \
-	"	FragColor = sel;\n" \
+	"	sel.xyz = sel.xyz*clamp(1.0-loc1.x, 0.0, 1.0) + loc1.x*sel.xyz*(loc1.y > 0.0?(n.w + n.z):1.0);\n" \
+	"	sel.xyz *= pow(1.0 - loc1.x / 2.0, 2.0) + 1.0;\n" \
+	"	FragColor = sel*l.w;\n" \
 	"\n"
 
 #define VOL_RASTER_BLEND_LABEL_MASK \
@@ -669,7 +671,9 @@ namespace FLIVR
 	"		else\n" \
 	"			sel = vec4(1.0, 0.0, p2, 1.0);\n" \
 	"	}\n" \
-	"	FragColor = sel*alpha*tf_alp;\n" \
+	"	sel.xyz = sel.xyz*clamp(1.0-loc1.x, 0.0, 1.0) + loc1.x*sel.xyz*(loc1.y > 0.0?(n.w + n.z):1.0);\n" \
+	"	sel.xyz *= pow(1.0 - loc1.x / 2.0, 2.0) + 1.0;\n" \
+	"	FragColor = sel*alpha*tf_alp*l.w;\n" \
 	"\n"
 
 }//namespace FLIVR
