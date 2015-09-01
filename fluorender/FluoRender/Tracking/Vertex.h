@@ -48,6 +48,7 @@ namespace FL
 	struct InterVertexData
 	{
 		unsigned int id;
+		unsigned int frame;
 		pwVertex vertex;
 	};
 
@@ -92,6 +93,7 @@ namespace FL
 
 		//cells
 		size_t GetCellNum();
+		bool FindCell(pCell &cell);
 		void AddCell(pCell &cell, bool inc=false);
 		CellBinIter GetCellsBegin();
 		CellBinIter GetCellsEnd();
@@ -154,8 +156,22 @@ namespace FL
 		return m_cells.size();
 	}
 
+	inline bool Vertex::FindCell(pCell &cell)
+	{
+		for (size_t i = 0; i < m_cells.size(); ++i)
+		{
+			pCell c = m_cells[i].lock();
+			if (c && c->Id() == cell->Id())
+				return true;
+		}
+		return false;
+	}
+
 	inline void Vertex::AddCell(pCell &cell, bool inc)
 	{
+		if (FindCell(cell))
+			return;
+
 		if (inc)
 		{
 			m_size_ui += cell->GetSizeUi();

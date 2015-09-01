@@ -683,7 +683,7 @@ void TraceDlg::OnLoadTrace(wxCommandEvent& event)
 	if (!m_view) return;
 
 	wxFileDialog *fopendlg = new wxFileDialog(
-		this, "Choose a FluoRender track file", 
+		m_frame, "Choose a FluoRender track file", 
 		"", "", "*.track", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 
 	int rval = fopendlg->ShowModal();
@@ -721,7 +721,7 @@ void TraceDlg::OnSaveasTrace(wxCommandEvent& event)
 	if (!m_view) return;
 
 	wxFileDialog *fopendlg = new wxFileDialog(
-		this, "Save a FluoRender track file", 
+		m_frame, "Save a FluoRender track file", 
 		"", "", "*.track", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 
 	int rval = fopendlg->ShowModal();
@@ -852,7 +852,7 @@ void TraceDlg::OnSaveAnalyze(wxCommandEvent &event)
 	OutputMeasureResult(str);
 	m_stat_text->SetValue(str);
 	wxFileDialog *fopendlg = new wxFileDialog(
-		this, "Save results", "", "",
+		m_frame, "Save results", "", "",
 		"Text file (*.txt)|*.txt",
 		wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 	int rval = fopendlg->ShowModal();
@@ -1731,7 +1731,7 @@ void TraceDlg::OnCellMagic0Btn(wxCommandEvent &event)
 	OutputMeasureResult(str);
 	m_stat_text->SetValue(str);
 	wxFileDialog *fopendlg = new wxFileDialog(
-		this, "Save results", "", "",
+		m_frame, "Save results", "", "",
 		"Text file (*.txt)|*.txt",
 		wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 	int rval = fopendlg->ShowModal();
@@ -2296,6 +2296,7 @@ void TraceDlg::GenMap()
 		return;
 
 	m_stat_text->SetValue("Generating track map.\n");
+	wxGetApp().Yield();
 	FL::TrackMap &track_map = trace_group->GetTrackMap();
 	FL::TrackMapProcessor tm_processor;
 	int chan = vd->GetCurChannel();
@@ -2368,7 +2369,7 @@ void TraceDlg::GenMap()
 		tm_processor.ResolveGraph(track_map, fi, fi - 1);
 		prog += prog_bit;
 		m_gen_map_prg->SetValue(int(prog));
-		(*m_stat_text) << wxString::Format("Time point %d resolved.\n", fi);
+		(*m_stat_text) << wxString::Format("Time point %d resolved.\n", int(fi));
 		wxGetApp().Yield();
 	}
 
@@ -2377,20 +2378,20 @@ void TraceDlg::GenMap()
 	{
 		for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
 		{
-			tm_processor.LinkFrames(track_map, fi, fi + 1, false/*iteri != 0*/);
-			//tm_processor.LinkFrames(track_map, fi, fi - 1, false/*iteri != 0*/);
+			tm_processor.LinkFrames(track_map, fi, fi + 1, /*false*/iteri != 0);
+			tm_processor.LinkFrames(track_map, fi, fi - 1, /*false*/iteri != 0);
 			prog += prog_bit;
 			m_gen_map_prg->SetValue(int(prog));
-			(*m_stat_text) << wxString::Format("Time point %d linked.\n", fi);
+			(*m_stat_text) << wxString::Format("Time point %d linked.\n", int(fi));
 			wxGetApp().Yield();
 		}
 		for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
 		{
 			tm_processor.UnlinkFrames(track_map, fi, fi - 1);
-			//tm_processor.UnlinkFrames(track_map, fi, fi + 1);
+			tm_processor.UnlinkFrames(track_map, fi, fi + 1);
 			prog += prog_bit;
 			m_gen_map_prg->SetValue(int(prog));
-			(*m_stat_text) << wxString::Format("Time point %d unlinked.\n", fi);
+			(*m_stat_text) << wxString::Format("Time point %d unlinked.\n", int(fi));
 			wxGetApp().Yield();
 		}
 	}

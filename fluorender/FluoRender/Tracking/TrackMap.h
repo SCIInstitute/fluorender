@@ -48,7 +48,7 @@ namespace FL
 	{
 	public:
 		TrackMapProcessor() :
-		m_contact_thresh(0.2f), m_size_thresh(10.0f) {};
+		m_contact_thresh(0.2f), m_size_thresh(20.0f) {};
 		~TrackMapProcessor() {};
 
 		void ConnectSignalProgress(SignalProg::slot_type func);
@@ -104,6 +104,7 @@ namespace FL
 			float contact_value);
 		bool LinkVertices(InterGraph& graph,
 			pVertex &vertex1, pVertex &vertex2,
+			size_t f1, size_t f2,
 			float overlap_value);
 		bool EqualCells(pwCell &cell1, pwCell &cell2);
 		bool FindCellBin(CellBin &bin, pwCell &cell);
@@ -115,7 +116,7 @@ namespace FL
 		size_t GetBinsCellCount(std::vector<CellBin> &bins);
 		bool MergeCells(VertexList& vertex_list, CellBin &bin,
 			TrackMap& track_map, size_t frame);
-		bool RelinkInterGraph(pVertex &vertex, pVertex &vertex0, InterGraph &graph);
+		bool RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size_t frame, InterGraph &graph);
 		bool LinkVertex(pVertex &vertex, InterGraph &graph, bool bl_check = true);
 		bool UnlinkVertex(pVertex &vertex, InterGraph &graph);
 		unsigned int CheckBackLink(InterVert v0, InterVert v1, InterGraph &graph,
@@ -144,6 +145,7 @@ namespace FL
 			unsigned int size_ui, float size_f);
 		bool AddInterEdge(InterGraph& graph,
 			pVertex &vertex1, pVertex &vertex2,
+			size_t f1, size_t f2,
 			unsigned int size_ui, float size_f,
 			float dist, unsigned int link);
 

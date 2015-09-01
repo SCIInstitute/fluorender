@@ -1546,7 +1546,7 @@ void SettingDlg::OnScriptFileEdit(wxCommandEvent &event)
 void SettingDlg::OnScriptFileBtn(wxCommandEvent &event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
-		this, "Choose a 4D script file", "", "",
+		m_frame, "Choose a 4D script file", "", "",
 		"4D script file (*.txt)|*.txt",
 		wxFD_OPEN);
 

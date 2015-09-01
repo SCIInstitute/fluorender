@@ -344,6 +344,7 @@ bool TrackMapProcessor::LinkMaps(TrackMap& track_map,
 
 		LinkVertices(inter_graph,
 			iter1->second, iter2->second,
+			f1, f2,
 			std::min(data_value1, data_value2));
 	}
 
@@ -351,7 +352,8 @@ bool TrackMapProcessor::LinkMaps(TrackMap& track_map,
 }
 
 bool TrackMapProcessor::LinkVertices(InterGraph& graph,
-	pVertex &vertex1, pVertex &vertex2, float overlap_value)
+	pVertex &vertex1, pVertex &vertex2,
+	size_t f1, size_t f2, float overlap_value)
 {
 	InterVert v1 = vertex1->GetInterVert(graph);
 	InterVert v2 = vertex2->GetInterVert(graph);
@@ -359,6 +361,7 @@ bool TrackMapProcessor::LinkVertices(InterGraph& graph,
 	{
 		v1 = boost::add_vertex(graph);
 		graph[v1].id = vertex1->Id();
+		graph[v1].frame = f1;
 		graph[v1].vertex = vertex1;
 		vertex1->SetInterVert(graph, v1);
 	}
@@ -366,6 +369,7 @@ bool TrackMapProcessor::LinkVertices(InterGraph& graph,
 	{
 		v2 = boost::add_vertex(graph);
 		graph[v2].id = vertex2->Id();
+		graph[v2].frame = f2;
 		graph[v2].vertex = vertex2;
 		vertex2->SetInterVert(graph, v2);
 	}
@@ -834,6 +838,8 @@ bool TrackMapProcessor::MergeCells(VertexList& vertex_list, CellBin &bin,
 	pCell cell0, cell;
 	pVertex vertex0, vertex;
 	VertexListIter vert_iter;
+	CellBin cell_list;
+	CellBinIter cell_iter;
 
 	for (size_t i = 0; i < bin.size(); ++i)
 	{
@@ -855,11 +861,17 @@ bool TrackMapProcessor::MergeCells(VertexList& vertex_list, CellBin &bin,
 			{
 				//relink inter graph
 				if (frame > 0)
-					RelinkInterGraph(vertex, vertex0,
+					RelinkInterGraph(vertex, vertex0, frame,
 						track_map.m_inter_graph_list.at(frame-1));
 				if (frame < track_map.m_frame_num-1)
-					RelinkInterGraph(vertex, vertex0,
+					RelinkInterGraph(vertex, vertex0, frame,
 						track_map.m_inter_graph_list.at(frame));
+
+				//collect cells from vertex
+				for (cell_iter = vertex->GetCellsBegin();
+					cell_iter != vertex->GetCellsEnd();
+					++cell_iter)
+					cell_list.push_back(*cell_iter);
 
 				//remove vertex from list
 				vert_iter = vertex_list.find(vertex->Id());
@@ -868,15 +880,26 @@ bool TrackMapProcessor::MergeCells(VertexList& vertex_list, CellBin &bin,
 			}
 
 			//add cell to vertex0
-			vertex0->AddCell(cell, true);
-			cell->AddVertex(vertex0);
+			for (cell_iter = cell_list.begin();
+				cell_iter != cell_list.end();
+				++cell_iter)
+			{
+				cell = (*cell_iter).lock();
+				if (cell)
+				{
+					vertex0->AddCell(cell, true);
+					cell->AddVertex(vertex0);
+				}
+			}
+			//vertex0->AddCell(cell, true);
+			//cell->AddVertex(vertex0);
 		}
 	}
 
 	return true;
 }
 
-bool TrackMapProcessor::RelinkInterGraph(pVertex &vertex, pVertex &vertex0, InterGraph &graph)
+bool TrackMapProcessor::RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size_t frame, InterGraph &graph)
 {
 	InterVert inter_vert, inter_vert0;
 	std::pair<InterAdjIter, InterAdjIter> adj_verts;
@@ -904,6 +927,7 @@ bool TrackMapProcessor::RelinkInterGraph(pVertex &vertex, pVertex &vertex0, Inte
 			{
 				inter_vert0 = boost::add_vertex(graph);
 				graph[inter_vert0].id = vertex0->Id();
+				graph[inter_vert0].frame = frame;
 				graph[inter_vert0].vertex = vertex0;
 				vertex0->SetInterVert(graph, inter_vert0);
 			}
@@ -969,7 +993,7 @@ bool TrackMapProcessor::Export(TrackMap & track_map, std::string &filename)
 	IntraVert intra_vert;
 	InterEdgeIter inter_iter;
 	std::pair<InterEdgeIter, InterEdgeIter> inter_pair;
-	InterVert inter_vert;
+	InterVert inter_vert0, inter_vert1;
 	size_t edge_num;
 	//write each frame
 	for (size_t i = 0; i < num; ++i)
@@ -1033,12 +1057,23 @@ bool TrackMapProcessor::Export(TrackMap & track_map, std::string &filename)
 			++inter_iter)
 		{
 			WriteTag(ofs, TAG_INTER_EDGE);
-			//first vertex
-			inter_vert = boost::source(*inter_iter, inter_graph);
-			WriteUint(ofs, inter_graph[inter_vert].id);
-			//second vertex
-			inter_vert = boost::target(*inter_iter, inter_graph);
-			WriteUint(ofs, inter_graph[inter_vert].id);
+			inter_vert0 = boost::source(*inter_iter, inter_graph);
+			inter_vert1 = boost::target(*inter_iter, inter_graph);
+			if (inter_graph[inter_vert0].frame <
+				inter_graph[inter_vert1].frame)
+			{
+				//first vertex
+				WriteUint(ofs, inter_graph[inter_vert0].id);
+				//second vertex
+				WriteUint(ofs, inter_graph[inter_vert1].id);
+			}
+			else
+			{
+				//first vertex
+				WriteUint(ofs, inter_graph[inter_vert1].id);
+				//second vertex
+				WriteUint(ofs, inter_graph[inter_vert0].id);
+			}
 			//size
 			WriteUint(ofs, inter_graph[*inter_iter].size_ui);
 			WriteFloat(ofs, inter_graph[*inter_iter].size_f);
@@ -1171,7 +1206,7 @@ bool TrackMapProcessor::Import(TrackMap& track_map, std::string &filename)
 			link = ReadUint(ifs);
 			if (edge_exist)
 				AddInterEdge(inter_graph, vertex1, vertex2,
-					size_ui, size_f, dist, link);
+					i-1, i, size_ui, size_f, dist, link);
 		}
 	}
 
@@ -1269,6 +1304,7 @@ bool TrackMapProcessor::AddIntraEdge(IntraGraph& graph,
 
 bool TrackMapProcessor::AddInterEdge(InterGraph& graph,
 	pVertex &vertex1, pVertex &vertex2,
+	size_t f1, size_t f2,
 	unsigned int size_ui, float size_f,
 	float dist, unsigned int link)
 {
@@ -1278,6 +1314,7 @@ bool TrackMapProcessor::AddInterEdge(InterGraph& graph,
 	{
 		v1 = boost::add_vertex(graph);
 		graph[v1].id = vertex1->Id();
+		graph[v1].frame = f1;
 		graph[v1].vertex = vertex1;
 		vertex1->SetInterVert(graph, v1);
 	}
@@ -1285,6 +1322,7 @@ bool TrackMapProcessor::AddInterEdge(InterGraph& graph,
 	{
 		v2 = boost::add_vertex(graph);
 		graph[v2].id = vertex2->Id();
+		graph[v2].frame = f2;
 		graph[v2].vertex = vertex2;
 		vertex2->SetInterVert(graph, v2);
 	}

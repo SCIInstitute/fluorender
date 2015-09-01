@@ -189,7 +189,7 @@ VRenderView* OclDlg::GetView()
 void OclDlg::OnBrowseBtn(wxCommandEvent& event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
-		this, "Choose an OpenCL kernel file", 
+		m_frame, "Choose an OpenCL kernel file", 
 		"", "", "OpenCL kernel file|*.cl;*.txt", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 
 	int rval = fopendlg->ShowModal();
@@ -220,7 +220,7 @@ void OclDlg::OnSaveBtn(wxCommandEvent& event)
 void OclDlg::OnSaveAsBtn(wxCommandEvent& event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
-		this, "Choose an OpenCL kernel file", 
+		m_frame, "Choose an OpenCL kernel file", 
 		"", "", "OpenCL kernel file|*.cl;*.txt", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 
 	int rval = fopendlg->ShowModal();

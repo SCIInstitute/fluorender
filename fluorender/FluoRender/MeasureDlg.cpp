@@ -848,7 +848,7 @@ void MeasureDlg::OnDeleteAll(wxCommandEvent& event)
 void MeasureDlg::OnExport(wxCommandEvent& event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
-		this, "Export rulers", "", "",
+		m_frame, "Export rulers", "", "",
 		"Text file (*.txt)|*.txt",
 		wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 

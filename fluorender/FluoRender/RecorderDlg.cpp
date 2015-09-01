@@ -1070,7 +1070,7 @@ void RecorderDlg::OnPlay(wxCommandEvent &event)
 		return;
 
 	wxFileDialog *fopendlg = new wxFileDialog(
-		this, "Save Movie Sequence", 
+		m_frame, "Save Movie Sequence", 
 		"", "", "*.tif", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 	fopendlg->SetExtraControlCreator(CreateExtraCaptureControl);
 

@@ -617,7 +617,7 @@ void VMovieView::OnRun(wxCommandEvent& event) {
 	VRenderView* vrv = vr_frame->GetView(str);
 	if (!vrv) return;
 	wxFileDialog *fopendlg = new wxFileDialog(
-		this, "Save Movie Sequence", 
+		m_frame, "Save Movie Sequence", 
 		"", "output", "MOV file (*.mov)|*.mov|TIF files (*.tif)|*.tif", 
 		wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 	fopendlg->SetExtraControlCreator(CreateExtraCaptureControl);

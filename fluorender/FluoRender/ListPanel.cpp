@@ -429,7 +429,7 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
       if (GetItemText(item) == "Volume")
       {
          wxFileDialog *fopendlg = new wxFileDialog(
-               this, "Save Volume Data", "", "",
+               m_frame, "Save Volume Data", "", "",
                "Muti-page Tiff file (*.tif, *.tiff)|*.tif;*.tiff|"\
                "Single-page Tiff sequence (*.tif)|*.tif;*.tiff|"\
                "Nrrd file (*.nrrd)|*.nrrd",
@@ -459,7 +459,7 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
       else if (GetItemText(item) == "Mesh")
       {
          wxFileDialog *fopendlg = new wxFileDialog(
-               this, "Save Mesh Data", "", "",
+               m_frame, "Save Mesh Data", "", "",
                "OBJ file (*.obj)|*.obj",
                wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 
@@ -486,7 +486,7 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
       else if (GetItemText(item) == "Annotations")
       {
          wxFileDialog *fopendlg = new wxFileDialog(
-               this, "Save Annotations", "", "",
+               m_frame, "Save Annotations", "", "",
                "Text file (*.txt)|*.txt",
                wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 
@@ -523,7 +523,7 @@ void DataListCtrl::OnBake(wxCommandEvent& event)
       wxString name = GetText(item, 1);
 
       wxFileDialog *fopendlg = new wxFileDialog(
-            this, "Bake Volume Data", "", "",
+            m_frame, "Bake Volume Data", "", "",
             "Muti-page Tiff file (*.tif, *.tiff)|*.tif;*.tiff|"\
             "Single-page Tiff sequence (*.tif)|*.tif;*.tiff|"\
             "Nrrd file (*.nrrd)|*.nrrd",
