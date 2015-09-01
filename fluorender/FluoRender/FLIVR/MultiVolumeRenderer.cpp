@@ -363,7 +363,7 @@ namespace FLIVR
 			vr_list_[0]->tex_->nc(),
 			use_shading, use_fog,
 			depth_peel_, true,
-			hiqual_, 0,
+			hiqual_, vr_list_[0]->ml_mode_,
 			colormap_mode_, colormap_, colormap_proj_,
 			false, 1);
 		if (shader)
@@ -825,6 +825,10 @@ namespace FLIVR
 				else
 					filter = GL_NEAREST;
 				vr_list_[tn]->load_brick(0, 0, bs, bi, filter, vr_list_[tn]->compression_);
+				if (vr_list_[tn]->mask_)
+					vr_list_[tn]->load_brick_mask(bs, bi, filter);
+				if (vr_list_[tn]->label_)
+					vr_list_[tn]->load_brick_label(bs, bi);
 
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_slices_ibo);
 				idx_num = (size[i]-2)*3;
@@ -836,6 +840,12 @@ namespace FLIVR
 
 				if (TextureRenderer::mem_swap_ && i==0)
 					TextureRenderer::finished_bricks_++;
+
+				//release
+				if (vr_list_[tn]->mask_)
+					vr_list_[tn]->release_texture((*bs)[0]->nmask(), GL_TEXTURE_3D);
+				if (vr_list_[tn]->label_)
+					vr_list_[tn]->release_texture((*bs)[0]->nlabel(), GL_TEXTURE_3D);
 			}
 			location += idx_num*4;
 

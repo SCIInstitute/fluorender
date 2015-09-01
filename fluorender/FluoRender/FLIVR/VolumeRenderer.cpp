@@ -929,6 +929,10 @@ namespace FLIVR
 
 		//Release 3d texture
 		release_texture(0, GL_TEXTURE_3D);
+		if (mask_)
+			release_texture((*bricks)[0]->nmask(), GL_TEXTURE_3D);
+		if (label_)
+			release_texture((*bricks)[0]->nlabel(), GL_TEXTURE_3D);
 
 		//enable
 		glEnable(GL_DEPTH_TEST);

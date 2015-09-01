@@ -5014,7 +5014,7 @@ void VRenderGLView::RunNoiseReduction(wxFileConfig &fconfig)
 		wxString format = wxString::Format("%d", time_num);
 		m_fr_length = format.Length();
 		format = wxString::Format("_T%%0%dd", m_fr_length);
-		str = pathname + vd->GetName() +
+		str = pathname +
 			wxString::Format(format, m_tseq_cur_num) + ".tif";
 		vd->Save(str, mode, bake, compression);
 		delete vd;
@@ -5225,7 +5225,7 @@ void VRenderGLView::RunSeparateChannels(wxFileConfig &fconfig)
 			wxString format = wxString::Format("%d", time_num);
 			m_fr_length = format.Length();
 			format = wxString::Format("_T%%0%dd", m_fr_length);
-			str = pathname + vd->GetName() +
+			str = pathname +
 				wxString::Format(format, m_tseq_cur_num) + ".tif";
 			vd->Save(str, mode, bake, compression);
 		}
