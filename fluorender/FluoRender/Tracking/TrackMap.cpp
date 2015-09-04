@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 using namespace FL;
 
 TrackMap::TrackMap() :
+	m_last_op(0),
 	m_frame_num(0),
 	m_size_x(0),
 	m_size_y(0),
@@ -522,6 +523,8 @@ bool TrackMapProcessor::LinkFrames(TrackMap& track_map,
 		LinkVertex(iter->second, inter_graph, bl_check);
 	}
 
+	track_map.m_last_op = 1;
+
 	return true;
 }
 
@@ -551,6 +554,8 @@ bool TrackMapProcessor::UnlinkFrames(TrackMap& track_map, size_t frame1, size_t 
 			UnlinkVertex(iter->second, inter_graph);
 		}
 	}
+
+	track_map.m_last_op = 2;
 
 	return true;
 }
@@ -629,8 +634,8 @@ bool TrackMapProcessor::LinkVertex(pVertex &vertex,
 				edge_vert = graph[boost::target(edges[i], graph)].vertex.lock();
 				if (!edge_vert) continue;
 				v1_size = edge_vert->GetSizeF();
-				if (edge_size * 10 > std::min(v0_size, v1_size) &&
-					fabs(v0_size - v1_size) / (v0_size + v1_size) < 0.5f)
+				if (/*edge_size * 10 > std::min(v0_size, v1_size) &&*/
+					fabs(v0_size - v1_size) / (v0_size + v1_size) < 0.2f)
 					graph[edges[i]].link = 1;
 			}
 		}

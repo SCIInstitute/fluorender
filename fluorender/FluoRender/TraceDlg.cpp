@@ -244,6 +244,7 @@ BEGIN_EVENT_TABLE(TraceDlg, wxPanel)
 	EVT_CHECKBOX(ID_ManualAssistCheck, TraceDlg::OnManualAssistCheck)
 	//auto tracking
 	EVT_BUTTON(ID_GenMapBtn, TraceDlg::OnGenMapBtn)
+	EVT_BUTTON(ID_RefineMapBtn, TraceDlg::OnRefineMapBtn)
 	//component tools
 	EVT_BUTTON(ID_CompAppendBtn, TraceDlg::OnCompAppend)
 	EVT_BUTTON(ID_CompExclusiveBtn, TraceDlg::OnCompExclusive)
@@ -295,7 +296,7 @@ m_manual_assist(false)
 	m_save_trace_btn = new wxButton(this, ID_SaveTraceBtn, "Save",
 		wxDefaultPosition, wxSize(60, 23));
 	m_saveas_trace_btn = new wxButton(this, ID_SaveasTraceBtn, "Save As",
-		wxDefaultPosition, wxSize(70, 23));
+		wxDefaultPosition, wxSize(60, 23));
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_load_trace_text, 1, wxEXPAND);
@@ -314,7 +315,7 @@ m_manual_assist(false)
 	sizer_2->Add(m_gen_map_prg, 1, wxEXPAND);
 	st = new wxStaticText(this, 0, "X",
 		wxDefaultPosition, wxSize(10, -1));
-	m_gen_map_spin = new wxSpinCtrl(this, ID_GenMapSpin, "1",
+	m_gen_map_spin = new wxSpinCtrl(this, ID_GenMapSpin, "3",
 		wxDefaultPosition, wxSize(50, 23));
 	sizer_2->Add(10, 10);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
@@ -322,10 +323,13 @@ m_manual_assist(false)
 	st = new wxStaticText(this, 0, "times",
 		wxDefaultPosition, wxSize(40, -1));
 	m_gen_map_btn = new wxButton(this, ID_GenMapBtn, "Generate",
-		wxDefaultPosition, wxSize(70, 23));
+		wxDefaultPosition, wxSize(60, 23));
+	m_refine_map_btn = new wxButton(this, ID_RefineMapBtn, "Refine",
+		wxDefaultPosition, wxSize(60, 23));
 	sizer_2->Add(10, 10);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_gen_map_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_refine_map_btn, 0, wxALIGN_CENTER);
 
 	//edit tools
 /*	wxBoxSizer *sizer_3 = new wxStaticBoxSizer(
@@ -821,6 +825,11 @@ void TraceDlg::OnCellSizeText(wxCommandEvent &event)
 void TraceDlg::OnGenMapBtn(wxCommandEvent &event)
 {
 	GenMap();
+}
+
+void TraceDlg::OnRefineMapBtn(wxCommandEvent &event)
+{
+	RefineMap();
 }
 
 //add label
@@ -2316,7 +2325,7 @@ void TraceDlg::GenMap()
 	tm_processor.SetSizes(track_map,
 		resx, resy, resz);
 	tm_processor.SetContactThresh(0.2f);
-	float prog_bit = 100.0f / float(frames * (2+iter_num*2));
+	float prog_bit = 100.0f / float(frames * (2+iter_num));
 	float prog = 0.0f;
 	m_gen_map_prg->SetValue(int(prog));
 	for (int i = 0; i < frames; ++i)
@@ -2378,13 +2387,17 @@ void TraceDlg::GenMap()
 	{
 		for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
 		{
-			tm_processor.LinkFrames(track_map, fi, fi + 1, /*false*/iteri != 0);
-			tm_processor.LinkFrames(track_map, fi, fi - 1, /*false*/iteri != 0);
+			tm_processor.LinkFrames(track_map, fi, fi + 1, iteri != 0);
+			tm_processor.LinkFrames(track_map, fi, fi - 1, iteri != 0);
 			prog += prog_bit;
 			m_gen_map_prg->SetValue(int(prog));
 			(*m_stat_text) << wxString::Format("Time point %d linked.\n", int(fi));
 			wxGetApp().Yield();
 		}
+
+		if (++iteri >= iter_num)
+			break;
+
 		for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
 		{
 			tm_processor.UnlinkFrames(track_map, fi, fi - 1);
@@ -2399,4 +2412,73 @@ void TraceDlg::GenMap()
 	m_gen_map_prg->SetValue(100);
 
 	GetSettings(m_view);
+}
+
+#define LINK_FRAMES \
+	for (size_t fi = 0; fi < frames; ++fi) \
+	{ \
+		tm_processor.LinkFrames(track_map, fi, fi + 1, false); \
+		tm_processor.LinkFrames(track_map, fi, fi - 1, false); \
+		prog += prog_bit; \
+		m_gen_map_prg->SetValue(int(prog)); \
+		(*m_stat_text) << wxString::Format("Time point %d linked.\n", int(fi)); \
+		wxGetApp().Yield(); \
+	}
+
+#define UNLINK_FRAMES \
+	for (size_t fi = 0; fi < frames; ++fi) \
+	{ \
+		tm_processor.UnlinkFrames(track_map, fi, fi - 1); \
+		tm_processor.UnlinkFrames(track_map, fi, fi + 1); \
+		prog += prog_bit; \
+		m_gen_map_prg->SetValue(int(prog)); \
+		(*m_stat_text) << wxString::Format("Time point %d unlinked.\n", int(fi)); \
+		wxGetApp().Yield(); \
+	}
+
+void TraceDlg::RefineMap()
+{
+	if (!m_view)
+		return;
+
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+	TraceGroup *trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+		return;
+	m_stat_text->SetValue("Refining track map.\n");
+	wxGetApp().Yield();
+	FL::TrackMap &track_map = trace_group->GetTrackMap();
+	FL::TrackMapProcessor tm_processor;
+	int frames = track_map.GetFrameNum();
+	int resx, resy, resz;
+	vd->GetResolution(resx, resy, resz);
+	size_t iter_num = (size_t)m_gen_map_spin->GetValue();
+	tm_processor.SetSizes(track_map,
+		resx, resy, resz);
+	tm_processor.SetContactThresh(0.2f);
+	float prog_bit = 100.0f / float(frames * iter_num);
+	float prog = 0.0f;
+	m_gen_map_prg->SetValue(int(prog));
+
+	int last_op = track_map.GetLastOp();
+	//check branch
+	for (size_t iteri = 0; iteri < iter_num; ++iteri)
+	{
+		if (last_op == 1)
+			UNLINK_FRAMES
+		else
+			LINK_FRAMES
+
+		if (++iteri >= iter_num)
+			break;
+
+		if (last_op == 1)
+			LINK_FRAMES
+		else
+			UNLINK_FRAMES;
+	}
+
+	m_gen_map_prg->SetValue(100);
 }

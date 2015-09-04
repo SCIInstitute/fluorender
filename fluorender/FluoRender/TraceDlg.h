@@ -121,7 +121,8 @@ public:
 		ID_CompExclusiveBtn,
 		ID_GenMapPrg,
 		ID_GenMapSpin,
-		ID_GenMapBtn
+		ID_GenMapBtn,
+		ID_RefineMapBtn
 	};
 
 	TraceDlg(wxWindow* frame,
@@ -153,6 +154,7 @@ public:
 
 	//automatic tracking
 	void GenMap();
+	void RefineMap();
 
 private:
 	typedef struct
@@ -219,6 +221,7 @@ private:
 	wxGauge* m_gen_map_prg;
 	wxSpinCtrl* m_gen_map_spin;
 	wxButton* m_gen_map_btn;
+	wxButton* m_refine_map_btn;
 	//component tools
 	wxButton* m_comp_clear_btn;
 	wxButton* m_comp_full_btn;
@@ -277,6 +280,7 @@ private:
 	void OnCellSizeText(wxCommandEvent &event);
 	//auto tracking
 	void OnGenMapBtn(wxCommandEvent &event);
+	void OnRefineMapBtn(wxCommandEvent &event);
 	//component tools
 	void OnCompClear(wxCommandEvent &event);
 	void OnCompFull(wxCommandEvent &event);

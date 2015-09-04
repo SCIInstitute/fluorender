@@ -277,9 +277,11 @@ namespace FL
 		~TrackMap();
 
 		size_t GetFrameNum();
+		int GetLastOp();
 		void Clear();
 
 	private:
+		int m_last_op;//1: linking; 2: unlinking;
 		//data information
 		size_t m_frame_num;
 		size_t m_size_x;
@@ -302,6 +304,11 @@ namespace FL
 		return m_frame_num;
 	}
 
+	inline int TrackMap::GetLastOp()
+	{
+		return m_last_op;
+	}
+
 	inline void TrackMap::Clear()
 	{
 		m_cells_list.clear();
@@ -312,6 +319,7 @@ namespace FL
 		m_size_x = m_size_y = m_size_z = 0;
 		m_data_bits = 8;
 		m_scale = 1.0f;
+		m_last_op = 0;
 	}
 
 }//namespace FL
