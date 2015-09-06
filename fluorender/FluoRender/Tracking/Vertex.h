@@ -80,6 +80,7 @@ namespace FL
 		~Vertex() {};
 
 		unsigned int Id();
+		void Id(unsigned int);
 		InterVert GetInterVert(InterGraph& graph);
 		void SetInterVert(InterGraph& graph, InterVert inter_vert);
 
@@ -112,6 +113,11 @@ namespace FL
 	inline unsigned int Vertex::Id()
 	{
 		return m_id;
+	}
+
+	inline void Vertex::Id(unsigned int id)
+	{
+		m_id = id;
 	}
 
 	inline InterVert Vertex::GetInterVert(InterGraph& graph)

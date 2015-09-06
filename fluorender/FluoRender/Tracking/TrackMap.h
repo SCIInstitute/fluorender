@@ -41,6 +41,8 @@ namespace FL
 #define TAG_INTRA_EDGE	3
 #define TAG_INTER_EDGE	4
 #define TAG_FRAM		5
+#define TAG_LAST_OP		6
+#define TAG_NUM			7
 
 	typedef boost::signals2::signal<void(int)> SignalProg;
 	class TrackMap;
@@ -48,7 +50,7 @@ namespace FL
 	{
 	public:
 		TrackMapProcessor() :
-		m_contact_thresh(0.2f), m_size_thresh(20.0f) {};
+		m_contact_thresh(0.4f), m_size_thresh(25.0f) {};
 		~TrackMapProcessor() {};
 
 		void ConnectSignalProgress(SignalProg::slot_type func);
@@ -68,11 +70,13 @@ namespace FL
 			void *data1, void *data2,
 			void *label1, void *label2);
 		bool ResolveGraph(TrackMap& track_map, size_t frame1, size_t frame2);
-		bool LinkFrames(TrackMap& track_map, size_t frame1, size_t frame2, bool bl_check = true);
-		bool UnlinkFrames(TrackMap& track_map, size_t frame1, size_t frame2);
+		bool MatchFrames(TrackMap& track_map, size_t frame1, size_t frame2, bool bl_check = true);
+		bool UnmatchFrames(TrackMap& track_map, size_t frame1, size_t frame2);
 
 		bool Export(TrackMap& track_map, std::string &filename);
 		bool Import(TrackMap& track_map, std::string &filename);
+
+		bool ResetVertexIDs(TrackMap& track_map);
 
 		//get mapped cell
 		bool GetMappedID(TrackMap& track_map,
@@ -91,6 +95,11 @@ namespace FL
 			std::vector<float> &verts,
 			size_t frame1, size_t frame2);
 
+		//modifications
+		bool LinkCells(TrackMap& track_map,
+			CellList &list1, CellList &list2,
+			size_t frame1, size_t frame2, bool exclusive);
+
 	private:
 		float m_contact_thresh;
 		float m_size_thresh;
@@ -106,6 +115,10 @@ namespace FL
 			pVertex &vertex1, pVertex &vertex2,
 			size_t f1, size_t f2,
 			float overlap_value);
+		bool IsolateVertex(InterGraph& graph,
+			pVertex &vertex);
+		bool ForceVertices(InterGraph& graph,
+			pVertex &vertex1, pVertex &vertex2);
 		bool EqualCells(pwCell &cell1, pwCell &cell2);
 		bool FindCellBin(CellBin &bin, pwCell &cell);
 		bool AddCellBin(std::vector<CellBin> &bins,
@@ -117,8 +130,8 @@ namespace FL
 		bool MergeCells(VertexList& vertex_list, CellBin &bin,
 			TrackMap& track_map, size_t frame);
 		bool RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size_t frame, InterGraph &graph);
-		bool LinkVertex(pVertex &vertex, InterGraph &graph, bool bl_check = true);
-		bool UnlinkVertex(pVertex &vertex, InterGraph &graph);
+		bool MatchVertex(pVertex &vertex, InterGraph &graph, bool bl_check = true);
+		bool UnmatchVertex(pVertex &vertex, InterGraph &graph);
 		unsigned int CheckBackLink(InterVert v0, InterVert v1, InterGraph &graph,
 			unsigned int &bl_size_ui, float &bl_size_f);
 		static bool edge_comp_size_ol(InterEdge edge1, InterEdge edge2, InterGraph& graph);
@@ -277,11 +290,11 @@ namespace FL
 		~TrackMap();
 
 		size_t GetFrameNum();
-		int GetLastOp();
+		unsigned int GetLastOp();
 		void Clear();
 
 	private:
-		int m_last_op;//1: linking; 2: unlinking;
+		unsigned int m_last_op;//1: linking; 2: unlinking;
 		//data information
 		size_t m_frame_num;
 		size_t m_size_x;
@@ -304,7 +317,7 @@ namespace FL
 		return m_frame_num;
 	}
 
-	inline int TrackMap::GetLastOp()
+	inline unsigned int TrackMap::GetLastOp()
 	{
 		return m_last_op;
 	}

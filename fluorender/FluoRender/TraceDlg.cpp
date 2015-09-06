@@ -456,7 +456,7 @@ m_manual_assist(false)
 */
 	//simple tracking ui
 	wxBoxSizer *sizer_3 = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, "Component Selection Settings"),
+		new wxStaticBox(this, wxID_ANY, "Component Toolset"),
 		wxVERTICAL);
 	//selection tools
 	wxBoxSizer* sizer_31 = new wxBoxSizer(wxHORIZONTAL);
@@ -492,8 +492,27 @@ m_manual_assist(false)
 	sizer_32->Add(st, 0, wxALIGN_CENTER);
 	sizer_32->Add(m_cell_size_sldr, 1, wxEXPAND);
 	sizer_32->Add(m_cell_size_text, 0, wxALIGN_CENTER);
+	//ID link controls
+	wxBoxSizer* sizer_34 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(this, 0, "ID link tools:",
+		wxDefaultPosition, wxSize(100, 20));
+	//m_cell_update_btn = new wxButton(this, ID_CellUpdateBtn, "Add Selected",
+	//	wxDefaultPosition, wxSize(100, 23));
+	m_cell_exclusive_link_btn = new wxButton(this, ID_CellExclusiveLinkBtn, "Excl. Link",
+		wxDefaultPosition, wxSize(65, 23));
+	m_cell_link_btn = new wxButton(this, ID_CellLinkBtn, "Link IDs",
+		wxDefaultPosition, wxSize(65, 23));
+	m_cell_unlink_btn = new wxButton(this, ID_CellUnlinkBtn, "Unlink IDs",
+		wxDefaultPosition, wxSize(65, 23));
+	sizer_34->Add(5, 5);
+	sizer_34->Add(st, 0, wxALIGN_CENTER);
+	sizer_34->Add(105, 23);
+	sizer_34->Add(m_cell_exclusive_link_btn, 0, wxALIGN_CENTER);
+	sizer_34->Add(m_cell_link_btn, 0, wxALIGN_CENTER);
+	sizer_34->Add(m_cell_unlink_btn, 0, wxALIGN_CENTER);
 	//
 	sizer_3->Add(sizer_31, 0, wxEXPAND);
+	sizer_3->Add(sizer_34, 0, wxEXPAND);
 	sizer_3->Add(sizer_32, 0, wxEXPAND);
 
 	//ghost num
@@ -1119,30 +1138,6 @@ void TraceDlg::OnCellUpdate(wxCommandEvent &event)
 	CellUpdate();
 }
 
-/*void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, vector<Lbl> *list)
-{
-	wxString str;
-	unsigned long id;
-	unsigned long size;
-	double x, y, z;
-	Lbl label;
-
-	str = trace_list_ctrl->GetText(item, 0);
-	str.ToULong(&id);
-	str = trace_list_ctrl->GetText(item, 1);
-	str.ToULong(&size);
-	str = trace_list_ctrl->GetText(item, 2);
-	str.ToDouble(&x);
-	str = trace_list_ctrl->GetText(item, 3);
-	str.ToDouble(&y);
-	str = trace_list_ctrl->GetText(item, 4);
-	str.ToDouble(&z);
-	label.id = id;
-	label.size = size;
-	label.center = Point(x, y, z);
-	list->push_back(label);
-}*/
-
 void TraceDlg::CellUpdate()
 {
 	if (m_view)
@@ -1244,10 +1239,34 @@ void TraceDlg::CellFull()
 	CellUpdate();
 }
 
+void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, FL::CellList &list)
+{
+	wxString str;
+	unsigned long id;
+	unsigned long size;
+	double x, y, z;
+
+	str = trace_list_ctrl->GetText(item, 0);
+	str.ToULong(&id);
+	//str = trace_list_ctrl->GetText(item, 1);
+	//str.ToULong(&size);
+	//str = trace_list_ctrl->GetText(item, 2);
+	//str.ToDouble(&x);
+	//str = trace_list_ctrl->GetText(item, 3);
+	//str.ToDouble(&y);
+	//str = trace_list_ctrl->GetText(item, 4);
+	//str.ToDouble(&z);
+
+	FL::pCell cell(new FL::Cell(id));
+	list.insert(pair<unsigned int, FL::pCell>
+		(id, cell));
+}
+
 void TraceDlg::CellLink(bool exclusive, bool idid)
 {
-/*	if (!m_view)
+	if (!m_view)
 		return;
+
 	TraceGroup* trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 	{
@@ -1258,9 +1277,9 @@ void TraceDlg::CellLink(bool exclusive, bool idid)
 	//get selections
 	long item;
 	//current T
-	vector<Lbl> list_cur;
+	FL::CellList list_cur;
 	//previous T
-	vector<Lbl> list_prv;
+	FL::CellList list_prv;
 	//current list
 	item = -1;
 	while (true)
@@ -1270,7 +1289,7 @@ void TraceDlg::CellLink(bool exclusive, bool idid)
 		if (item == -1)
 			break;
 		else
-			AddLabel(item, m_trace_list_curr, &list_cur);
+			AddLabel(item, m_trace_list_curr, list_cur);
 	}
 	if (list_cur.size() == 0)
 	{
@@ -1282,7 +1301,7 @@ void TraceDlg::CellLink(bool exclusive, bool idid)
 			if (item == -1)
 				break;
 			else
-				AddLabel(item, m_trace_list_curr, &list_cur);
+				AddLabel(item, m_trace_list_curr, list_cur);
 		}
 	}
 	//previous list
@@ -1294,7 +1313,7 @@ void TraceDlg::CellLink(bool exclusive, bool idid)
 		if (item == -1)
 			break;
 		else
-			AddLabel(item, m_trace_list_prev, &list_prv);
+			AddLabel(item, m_trace_list_prev, list_prv);
 	}
 	if (list_prv.size() == 0)
 	{
@@ -1306,14 +1325,14 @@ void TraceDlg::CellLink(bool exclusive, bool idid)
 			if (item == -1)
 				break;
 			else
-				AddLabel(item, m_trace_list_prev, &list_prv);
+				AddLabel(item, m_trace_list_prev, list_prv);
 		}
 	}
 	if (list_cur.size()==0 ||
 		list_prv.size()==0)
 		return;
 
-	//find the two vertices
+/*	//find the two vertices
 	Vertex vert;
 	unsigned int i, j;
 	for (i=0; i<list_cur.size(); ++i)
@@ -1331,9 +1350,11 @@ void TraceDlg::CellLink(bool exclusive, bool idid)
 			//create vertex
 			trace_group->AddVertex(m_prv_time,
 				label.id, label.size, label.center);
-	}
+	}*/
 	//link them
-	for (i=0; i<list_cur.size(); ++i)
+	trace_group->LinkCells(list_cur, list_prv,
+		m_cur_time, m_prv_time, exclusive);
+/*	for (i=0; i<list_cur.size(); ++i)
 	{
 		unsigned int id1 = list_cur[i].id;
 		for (j=0; j<list_prv.size(); ++j)
@@ -2324,7 +2345,7 @@ void TraceDlg::GenMap()
 	size_t iter_num = (size_t)m_gen_map_spin->GetValue();
 	tm_processor.SetSizes(track_map,
 		resx, resy, resz);
-	tm_processor.SetContactThresh(0.2f);
+//	tm_processor.SetContactThresh(0.2f);
 	float prog_bit = 100.0f / float(frames * (2+iter_num));
 	float prog = 0.0f;
 	m_gen_map_prg->SetValue(int(prog));
@@ -2387,8 +2408,8 @@ void TraceDlg::GenMap()
 	{
 		for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
 		{
-			tm_processor.LinkFrames(track_map, fi, fi + 1, iteri != 0);
-			tm_processor.LinkFrames(track_map, fi, fi - 1, iteri != 0);
+			tm_processor.MatchFrames(track_map, fi, fi + 1, iteri != 0);
+			tm_processor.MatchFrames(track_map, fi, fi - 1, iteri != 0);
 			prog += prog_bit;
 			m_gen_map_prg->SetValue(int(prog));
 			(*m_stat_text) << wxString::Format("Time point %d linked.\n", int(fi));
@@ -2400,8 +2421,8 @@ void TraceDlg::GenMap()
 
 		for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
 		{
-			tm_processor.UnlinkFrames(track_map, fi, fi - 1);
-			tm_processor.UnlinkFrames(track_map, fi, fi + 1);
+			tm_processor.UnmatchFrames(track_map, fi, fi - 1);
+			tm_processor.UnmatchFrames(track_map, fi, fi + 1);
 			prog += prog_bit;
 			m_gen_map_prg->SetValue(int(prog));
 			(*m_stat_text) << wxString::Format("Time point %d unlinked.\n", int(fi));
@@ -2417,8 +2438,8 @@ void TraceDlg::GenMap()
 #define LINK_FRAMES \
 	for (size_t fi = 0; fi < frames; ++fi) \
 	{ \
-		tm_processor.LinkFrames(track_map, fi, fi + 1, false); \
-		tm_processor.LinkFrames(track_map, fi, fi - 1, false); \
+		tm_processor.MatchFrames(track_map, fi, fi + 1, false); \
+		tm_processor.MatchFrames(track_map, fi, fi - 1, false); \
 		prog += prog_bit; \
 		m_gen_map_prg->SetValue(int(prog)); \
 		(*m_stat_text) << wxString::Format("Time point %d linked.\n", int(fi)); \
@@ -2428,8 +2449,8 @@ void TraceDlg::GenMap()
 #define UNLINK_FRAMES \
 	for (size_t fi = 0; fi < frames; ++fi) \
 	{ \
-		tm_processor.UnlinkFrames(track_map, fi, fi - 1); \
-		tm_processor.UnlinkFrames(track_map, fi, fi + 1); \
+		tm_processor.UnmatchFrames(track_map, fi, fi - 1); \
+		tm_processor.UnmatchFrames(track_map, fi, fi + 1); \
 		prog += prog_bit; \
 		m_gen_map_prg->SetValue(int(prog)); \
 		(*m_stat_text) << wxString::Format("Time point %d unlinked.\n", int(fi)); \
@@ -2457,12 +2478,12 @@ void TraceDlg::RefineMap()
 	size_t iter_num = (size_t)m_gen_map_spin->GetValue();
 	tm_processor.SetSizes(track_map,
 		resx, resy, resz);
-	tm_processor.SetContactThresh(0.2f);
+//	tm_processor.SetContactThresh(0.2f);
 	float prog_bit = 100.0f / float(frames * iter_num);
 	float prog = 0.0f;
 	m_gen_map_prg->SetValue(int(prog));
 
-	int last_op = track_map.GetLastOp();
+	unsigned int last_op = track_map.GetLastOp();
 	//check branch
 	for (size_t iteri = 0; iteri < iter_num; ++iteri)
 	{

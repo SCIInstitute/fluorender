@@ -254,7 +254,7 @@ private:
 	wxTextCtrl* m_stat_text;
 
 private:
-//	void AddLabel(long item, TraceListCtrl* trace_list_ctrl, vector<Lbl> *list);
+	void AddLabel(long item, TraceListCtrl* trace_list_ctrl, FL::CellList &list);
 
 	//tests
 	void Test1();

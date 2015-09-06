@@ -910,6 +910,8 @@ public:
 	bool FindCell(unsigned int id);
 
 	//modifications
+	bool LinkCells(FL::CellList &list1, FL::CellList &list2,
+		size_t frame1, size_t frame2, bool exclusive);
 	//bool LinkVertices(unsigned int id1, int time1,
 	//				  unsigned int id2, int time2,
 	//				  bool exclusive=false);

@@ -395,6 +395,71 @@ bool TrackMapProcessor::LinkVertices(InterGraph& graph,
 	return true;
 }
 
+bool TrackMapProcessor::IsolateVertex(InterGraph& graph, pVertex &vertex)
+{
+	InterVert v1, v2;
+	std::pair<InterAdjIter, InterAdjIter> adj_verts;
+	InterAdjIter inter_iter;
+	std::pair<InterEdge, bool> edge;
+
+	v1 = vertex->GetInterVert(graph);
+	if (v1 == InterGraph::null_vertex())
+		return false;
+	adj_verts = boost::adjacent_vertices(v1, graph);
+	//for each adjacent vertex
+	for (inter_iter = adj_verts.first;
+	inter_iter != adj_verts.second; ++inter_iter)
+	{
+		v2 = *inter_iter;
+		if (v2 == InterGraph::null_vertex())
+			continue;
+		edge = boost::edge(v1, v2, graph);
+		if (edge.second &&
+			graph[edge.first].link)
+			graph[edge.first].link = 0;
+	}
+
+	return true;
+}
+
+bool TrackMapProcessor::ForceVertices(InterGraph& graph,
+	pVertex &vertex1, pVertex &vertex2)
+{
+	InterVert v1, v2;
+
+	v1 = vertex1->GetInterVert(graph);
+	if (v1 == InterGraph::null_vertex())
+		return false;
+	v2 = vertex2->GetInterVert(graph);
+	if (v2 == InterGraph::null_vertex())
+		return false;
+
+	std::pair<InterEdge, bool> edge;
+	edge = boost::edge(v1, v2, graph);
+	if (!edge.second)
+	{
+		edge = boost::add_edge(v1, v2, graph);
+		graph[edge.first].size_ui = std::max(
+			vertex1->GetSizeUi(), vertex2->GetSizeUi());
+		graph[edge.first].size_f = std::max(
+			vertex1->GetSizeF(), vertex2->GetSizeF());
+		FLIVR::Point p1 = vertex1->GetCenter();
+		FLIVR::Point p2 = vertex2->GetCenter();
+		graph[edge.first].dist = float((p1 - p2).length());
+		graph[edge.first].link = 1;
+	}
+	else
+	{
+		graph[edge.first].size_ui = std::max(
+			vertex1->GetSizeUi(), vertex2->GetSizeUi());
+		graph[edge.first].size_f = std::max(
+			vertex1->GetSizeF(), vertex2->GetSizeF());
+		graph[edge.first].link = 1;
+	}
+
+	return true;
+}
+
 bool TrackMapProcessor::ResolveGraph(TrackMap& track_map, size_t frame1, size_t frame2)
 {
 	if (frame1 >= track_map.m_frame_num ||
@@ -496,14 +561,12 @@ bool TrackMapProcessor::ResolveGraph(TrackMap& track_map, size_t frame1, size_t 
 		//modify vertex list 2 if necessary
 		for (i = 0; i < cell_bins.size(); ++i)
 			MergeCells(vertex_list2, cell_bins[i], track_map, frame2);
-
-		//LinkVertex(iter->second, inter_graph, false);
 	}
 
 	return true;
 }
 
-bool TrackMapProcessor::LinkFrames(TrackMap& track_map,
+bool TrackMapProcessor::MatchFrames(TrackMap& track_map,
 	size_t frame1, size_t frame2, bool bl_check)
 {
 	if (frame1 >= track_map.m_frame_num ||
@@ -519,16 +582,14 @@ bool TrackMapProcessor::LinkFrames(TrackMap& track_map,
 
 	for (iter = vertex_list1.begin();
 	iter != vertex_list1.end(); ++iter)
-	{
-		LinkVertex(iter->second, inter_graph, bl_check);
-	}
+		MatchVertex(iter->second, inter_graph, bl_check);
 
 	track_map.m_last_op = 1;
 
 	return true;
 }
 
-bool TrackMapProcessor::UnlinkFrames(TrackMap& track_map, size_t frame1, size_t frame2)
+bool TrackMapProcessor::UnmatchFrames(TrackMap& track_map, size_t frame1, size_t frame2)
 {
 	if (frame1 >= track_map.m_frame_num ||
 		frame2 >= track_map.m_frame_num ||
@@ -551,7 +612,7 @@ bool TrackMapProcessor::UnlinkFrames(TrackMap& track_map, size_t frame1, size_t 
 		}
 		else
 		{
-			UnlinkVertex(iter->second, inter_graph);
+			UnmatchVertex(iter->second, inter_graph);
 		}
 	}
 
@@ -560,7 +621,7 @@ bool TrackMapProcessor::UnlinkFrames(TrackMap& track_map, size_t frame1, size_t 
 	return true;
 }
 
-bool TrackMapProcessor::LinkVertex(pVertex &vertex,
+bool TrackMapProcessor::MatchVertex(pVertex &vertex,
 	InterGraph &graph, bool bl_check)
 {
 	if (!vertex)
@@ -644,7 +705,7 @@ bool TrackMapProcessor::LinkVertex(pVertex &vertex,
 	return true;
 }
 
-bool TrackMapProcessor::UnlinkVertex(pVertex &vertex, InterGraph &graph)
+bool TrackMapProcessor::UnmatchVertex(pVertex &vertex, InterGraph &graph)
 {
 	if (!vertex)
 		return false;
@@ -987,9 +1048,14 @@ bool TrackMapProcessor::Export(TrackMap & track_map, std::string &filename)
 	std::string header = "FluoRender links";
 	ofs.write(header.c_str(), header.size());
 
+	//last operation
+	WriteTag(ofs, TAG_LAST_OP);
+	WriteUint(ofs, track_map.m_last_op);
+
 	//number of frames
+	WriteTag(ofs, TAG_NUM);
 	size_t num = track_map.m_frame_num;
-	ofs.write(reinterpret_cast<const char*>(&num), sizeof(num));
+	WriteUint(ofs, num);
 
 	VertexListIter iter;
 	pVertex vertex;
@@ -1107,9 +1173,22 @@ bool TrackMapProcessor::Import(TrackMap& track_map, std::string &filename)
 	if (header != "FluoRender links")
 		return false;
 
+	//last operation
+	if (ReadTag(ifs) == TAG_LAST_OP)
+		track_map.m_last_op = ReadUint(ifs);
+	else
+		ifs.seekg(-sizeof(unsigned char), std::ios::cur);
+
 	//number of frames
 	size_t num;
-	ifs.read(reinterpret_cast<char*>(&num), sizeof(num));
+	if (ReadTag(ifs) == TAG_NUM)
+		num = ReadUint(ifs);
+	else
+	{
+		ifs.seekg(-sizeof(unsigned char), std::ios::cur);
+		num = ReadUint(ifs);
+	}
+
 
 	size_t vertex_num;
 	size_t edge_num;
@@ -1216,6 +1295,56 @@ bool TrackMapProcessor::Import(TrackMap& track_map, std::string &filename)
 	}
 
 	track_map.m_frame_num = num;
+	return true;
+}
+
+bool TrackMapProcessor::ResetVertexIDs(TrackMap& track_map)
+{
+	for (size_t fi = 0; fi < track_map.m_frame_num; ++fi)
+	{
+		VertexList &vertex_list = track_map.m_vertices_list.at(fi);
+		for (VertexListIter vertex_iter = vertex_list.begin();
+		vertex_iter != vertex_list.end(); ++vertex_iter)
+		{
+			pVertex vertex = vertex_iter->second;
+			if (vertex->GetCellNum() <= 1)
+				continue;
+			unsigned int max_id = 0;
+			float max_size = 0.0f;
+			for (CellBinIter cell_iter = vertex->GetCellsBegin();
+			cell_iter != vertex->GetCellsEnd(); ++cell_iter)
+			{
+				pCell cell = cell_iter->lock();
+				if (cell)
+				{
+					if (cell->GetSizeF() > max_size)
+					{
+						max_size = cell->GetSizeF();
+						max_id = cell->Id();
+					}
+				}
+			}
+			if (max_id)
+			{
+				vertex->Id(max_id);
+				if (fi > 0)
+				{
+					InterGraph &inter_graph = track_map.m_inter_graph_list.at(fi - 1);
+					InterVert inter_vert = vertex->GetInterVert(inter_graph);
+					if (inter_vert != InterGraph::null_vertex())
+						inter_graph[inter_vert].id = max_id;
+				}
+				if (fi < track_map.m_frame_num - 1)
+				{
+					InterGraph &inter_graph = track_map.m_inter_graph_list.at(fi);
+					InterVert inter_vert = vertex->GetInterVert(inter_graph);
+					if (inter_vert != InterGraph::null_vertex())
+						inter_graph[inter_vert].id = max_id;
+				}
+			}
+		}
+	}
+
 	return true;
 }
 
@@ -1595,4 +1724,77 @@ unsigned int TrackMapProcessor::GetMappedEdges(TrackMap & track_map,
 	}
 
 	return result;
+}
+
+//modifications
+bool TrackMapProcessor::LinkCells(TrackMap& track_map,
+	CellList &list1, CellList &list2,
+	size_t frame1, size_t frame2,
+	bool exclusive)
+{
+	//check validity
+	size_t frame_num = track_map.m_frame_num;
+	if (frame1 >= frame_num ||
+		frame2 >= frame_num || 
+		(frame2 != frame1 + 1 &&
+		frame2 != frame1 - 1))
+		return false;
+
+	VertexList vlist1, vlist2;
+	CellListIter citer1, citer2;
+
+	CellList &cell_list1 = track_map.m_cells_list.at(frame1);
+	CellList &cell_list2 = track_map.m_cells_list.at(frame2);
+	CellListIter cell;
+
+	for (citer1 = list1.begin();
+	citer1 != list1.end(); ++citer1)
+	{
+		cell = cell_list1.find(citer1->second->Id());
+		if (cell == cell_list1.end())
+			continue;
+		pVertex vert1 = cell->second->GetVertex().lock();
+		if (vert1)
+			vlist1.insert(std::pair<unsigned int, pVertex>
+				(vert1->Id(), vert1));
+	}
+	for (citer2 = list2.begin();
+	citer2 != list2.end(); ++citer2)
+	{
+		cell = cell_list2.find(citer2->second->Id());
+		if (cell == cell_list2.end())
+			continue;
+		pVertex vert2 = cell->second->GetVertex().lock();
+		if (vert2)
+			vlist2.insert(std::pair<unsigned int, pVertex>
+				(vert2->Id(), vert2));
+	}
+
+	if (vlist1.size() == 0 ||
+		vlist2.size() == 0)
+		return false;
+
+	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
+		frame1 > frame2 ? frame2 : frame1);
+	
+	VertexListIter viter1, viter2;
+
+	if (exclusive)
+	{
+		for (viter1 = vlist1.begin();
+		viter1 != vlist1.end(); ++viter1)
+			IsolateVertex(inter_graph, viter1->second);
+		for (viter2 = vlist2.begin();
+		viter2 != vlist2.end(); ++viter2)
+			IsolateVertex(inter_graph, viter2->second);
+	}
+
+	for (viter1 = vlist1.begin();
+	viter1 != vlist1.end(); ++viter1)
+	for (viter2 = vlist2.begin();
+	viter2 != vlist2.end(); ++viter2)
+		ForceVertices(inter_graph,
+			viter1->second, viter2->second);
+
+	return true;
 }

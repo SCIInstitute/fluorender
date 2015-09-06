@@ -3024,10 +3024,18 @@ bool TraceGroup::FindCell(unsigned int id)
 		return false;
 	vertex = cell_map_iter->second;
 	return true;
-}
+}*/
 
 //modifications
-//link two vertices
+bool TraceGroup::LinkCells(FL::CellList &list1, FL::CellList &list2,
+	size_t frame1, size_t frame2, bool exclusive)
+{
+	FL::TrackMapProcessor tm_processor;
+	return tm_processor.LinkCells(m_track_map,
+		list1, list2, frame1, frame2, exclusive);
+}
+
+/*//link two vertices
 bool TraceGroup::LinkVertices(unsigned int id1, int time1,
 	unsigned int id2, int time2,
 	bool exclusive)
@@ -3087,7 +3095,7 @@ bool TraceGroup::LinkVertices(unsigned int id1, int time1,
 	return true;
 }
 
-bool TraceGroup::UnlinkVertices(unsigned int id1, int time1,
+/*bool TraceGroup::UnlinkVertices(unsigned int id1, int time1,
 	unsigned int id2, int time2)
 {
 	//check validity
