@@ -1177,7 +1177,7 @@ bool TrackMapProcessor::Import(TrackMap& track_map, std::string &filename)
 	if (ReadTag(ifs) == TAG_LAST_OP)
 		track_map.m_last_op = ReadUint(ifs);
 	else
-		ifs.seekg(-sizeof(unsigned char), std::ios::cur);
+		ifs.unget();
 
 	//number of frames
 	size_t num;
@@ -1185,7 +1185,7 @@ bool TrackMapProcessor::Import(TrackMap& track_map, std::string &filename)
 		num = ReadUint(ifs);
 	else
 	{
-		ifs.seekg(-sizeof(unsigned char), std::ios::cur);
+		ifs.unget();
 		num = ReadUint(ifs);
 	}
 
