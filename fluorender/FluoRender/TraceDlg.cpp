@@ -506,7 +506,7 @@ m_manual_assist(false)
 		wxDefaultPosition, wxSize(65, 23));
 	sizer_34->Add(5, 5);
 	sizer_34->Add(st, 0, wxALIGN_CENTER);
-	sizer_34->Add(105, 23);
+	sizer_34->Add(110, 23);
 	sizer_34->Add(m_cell_exclusive_link_btn, 0, wxALIGN_CENTER);
 	sizer_34->Add(m_cell_link_btn, 0, wxALIGN_CENTER);
 	sizer_34->Add(m_cell_unlink_btn, 0, wxALIGN_CENTER);
