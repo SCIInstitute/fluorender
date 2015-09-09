@@ -28,7 +28,7 @@
 
 #This is an CMake configuration file for FluoRender
 
-cmake_minimum_required ( VERSION 2.6 )
+cmake_minimum_required ( VERSION 2.8.8 )
 
 #for MSVC builds
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
