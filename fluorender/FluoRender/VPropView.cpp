@@ -1016,7 +1016,7 @@ void VPropView::OnLuminanceText(wxCommandEvent &event)
 void VPropView::OnShadowEnable(wxCommandEvent &event)
 {
 	bool shadow = m_shadow_tool->GetToolState(ID_ShadowChk);
-	if (m_vrv && m_vrv->GetVolMethod()==VOL_METHOD_MULTI)
+	/*if (m_vrv && m_vrv->GetVolMethod()==VOL_METHOD_MULTI)
 	{
 		for (int i=0; i<m_vrv->GetAllVolumeNum(); i++)
 		{
@@ -1025,7 +1025,7 @@ void VPropView::OnShadowEnable(wxCommandEvent &event)
 				vd->SetShadow(shadow);
 		}
 	}
-	else
+	else*/
 	{
 		if (m_sync_group && m_group)
 			m_group->SetShadow(shadow);
@@ -1053,7 +1053,7 @@ void VPropView::OnShadowText(wxCommandEvent &event)
 	m_shadow_sldr->SetValue(int(val*100.0+0.5));
 
 	//set shadow darkness
-	if (m_vrv && m_vrv->GetVolMethod()==VOL_METHOD_MULTI)
+/*	if (m_vrv && m_vrv->GetVolMethod()==VOL_METHOD_MULTI)
 	{
 		for (int i=0; i<m_vrv->GetAllVolumeNum(); i++)
 		{
@@ -1062,7 +1062,7 @@ void VPropView::OnShadowText(wxCommandEvent &event)
 				vd->SetShadowParams(val);
 		}
 	}
-	else
+	else*/
 	{
 		if (m_sync_group && m_group)
 			m_group->SetShadowParams(val);

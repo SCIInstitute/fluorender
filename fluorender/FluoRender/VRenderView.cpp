@@ -3361,12 +3361,22 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 
 	size_t i;
 	bool has_shadow = false;
-	for (i=0; i<vlist.size(); i++)
+	vector<int> colormodes;
+	vector<bool> shadings;
+	vector<VolumeData*> list;
+	//geenerate list
+	for (i = 0; i<vlist.size(); i++)
 	{
 		VolumeData* vd = vlist[i];
-		if (vd)
-			has_shadow = has_shadow || vd->GetShadow();
+		if (vd && vd->GetShadow())
+		{
+			colormodes.push_back(vd->GetColormapMode());
+			shadings.push_back(vd->GetVR()->get_shading());
+			list.push_back(vd);
+			has_shadow = true;
+		}
 	}
+
 	if (!has_shadow)
 		return;
 
@@ -3378,8 +3388,8 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		if (rn_time - TextureRenderer::get_st_time() >
 			TextureRenderer::get_up_time())
 			return;
-		if (vlist.size() == 1 && vlist[0]->GetShadow())
-			if (vlist[0]->GetVR()->get_done_loop(3))
+		if (list.size() == 1 && list[0]->GetShadow())
+			if (list[0]->GetVR()->get_done_loop(3))
 				return;
 	}
 
@@ -3428,9 +3438,9 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 
 	double shadow_darkness = 0.0;
 
-	if (vlist.size() == 1 && vlist[0]->GetShadow())
+	if (list.size() == 1 && list[0]->GetShadow())
 	{
-		VolumeData* vd = vlist[0];
+		VolumeData* vd = list[0];
 		//save
 		int colormode = vd->GetColormapMode();
 		bool shading = vd->GetVR()->get_shading();
@@ -3439,6 +3449,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		vd->SetMode(0);
 		vd->SetColormapMode(2);
 		vd->Set2dDmap(m_tex_ol1);
+		int msk_mode = vd->GetMaskMode();
 		vd->SetMaskMode(0);
 		//draw
 		vd->SetStreamMode(3);
@@ -3447,26 +3458,13 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		vd->Draw(!m_persp, m_interactive, m_scale_factor);
 		//restore
 		vd->RestoreMode();
+		vd->SetMaskMode(msk_mode);
 		vd->SetColormapMode(colormode);
 		vd->GetVR()->set_shading(shading);
 		vd->GetShadowParams(shadow_darkness);
 	}
 	else
 	{
-		vector<int> colormodes;
-		vector<bool> shadings;
-		vector<VolumeData*> list;
-		//geenerate list
-		for (i=0; i<vlist.size(); i++)
-		{
-			VolumeData* vd = vlist[i];
-			if (vd && vd->GetShadow())
-			{
-				colormodes.push_back(vd->GetColormapMode());
-				shadings.push_back(vd->GetVR()->get_shading());
-				list.push_back(vd);
-			}
-		}
 		if (!list.empty())
 		{
 			m_mvr->clear_vr();

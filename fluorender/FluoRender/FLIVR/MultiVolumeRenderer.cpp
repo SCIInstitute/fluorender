@@ -250,7 +250,7 @@ namespace FLIVR
 		//--------------------------------------------------------------------------
 		bool use_shading = false;
 		for (size_t i=0; i<vr_list_.size(); ++i)
-			use_shading = use_shading || vr_list_[0]->shading_;
+			use_shading = use_shading || vr_list_[i]->shading_;
 		bool use_fog = vr_list_[0]->m_use_fog && colormap_mode_!=2;
 		GLfloat clear_color[4];
 		glGetFloatv(GL_COLOR_CLEAR_VALUE, clear_color);
@@ -354,6 +354,9 @@ namespace FLIVR
 		//disable depth buffer writing
 		glDisable(GL_DEPTH_TEST);
 		glDepthMask(GL_FALSE);
+
+		for (size_t i = 0; i<vr_list_.size(); ++i)
+			vr_list_[i]->eval_ml_mode();
 
 		//--------------------------------------------------------------------------
 		// Set up shaders

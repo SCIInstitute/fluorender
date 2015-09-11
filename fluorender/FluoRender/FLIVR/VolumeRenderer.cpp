@@ -493,6 +493,68 @@ namespace FLIVR
 	}
 
 	//darw
+	void VolumeRenderer::eval_ml_mode()
+	{
+		//reassess the mask/label mode
+		//0-normal, 1-render with mask, 2-render with mask excluded
+		//3-random color with label, 4-random color with label+mask
+		switch (ml_mode_)
+		{
+		case 0:
+			mask_ = false;
+			label_ = false;
+			break;
+		case 1:
+			if (tex_->nmask() == -1)
+			{
+				mask_ = false;
+				ml_mode_ = 0;
+			}
+			else
+				mask_ = true;
+			label_ = false;
+			break;
+		case 2:
+			if (tex_->nmask() == -1)
+			{
+				mask_ = false;
+				ml_mode_ = 0;
+			}
+			else
+				mask_ = true;
+			label_ = false;
+			break;
+		case 3:
+			if (tex_->nlabel() == -1)
+			{
+				label_ = false;
+				ml_mode_ = 0;
+			}
+			else
+				label_ = true;
+			mask_ = false;
+			break;
+		case 4:
+			if (tex_->nlabel() == -1)
+			{
+				if (tex_->nmask()>-1)
+				{
+					mask_ = true;
+					label_ = false;
+					ml_mode_ = 1;
+				}
+				else
+				{
+					mask_ = label_ = false;
+					ml_mode_ = 0;
+				}
+			}
+			else
+				mask_ = label_ = true;
+			break;
+		}
+	}
+
 	void VolumeRenderer::draw(bool draw_wireframe_p, bool interactive_mode_p,
 		bool orthographic_p, double zoom, int mode)
 	{
@@ -644,64 +706,7 @@ namespace FLIVR
 		//disable depth test
 		glDisable(GL_DEPTH_TEST);
 
-		//reassess the mask/label mode
-		//0-normal, 1-render with mask, 2-render with mask excluded
-		//3-random color with label, 4-random color with label+mask
-		switch (ml_mode_)
-		{
-		case 0:
-			mask_ = false;
-			label_ = false;
-			break;
-		case 1:
-			if (tex_->nmask()==-1)
-			{
-				mask_ = false;
-				ml_mode_ = 0;
-			}
-			else
-				mask_ = true;
-			label_ = false;
-			break;
-		case 2:
-			if (tex_->nmask()==-1)
-			{
-				mask_ = false;
-				ml_mode_ = 0;
-			}
-			else
-				mask_ = true;
-			label_ = false;
-			break;
-		case 3:
-			if (tex_->nlabel()==-1)
-			{
-				label_ = false;
-				ml_mode_ = 0;
-			}
-			else
-				label_ = true;
-			mask_ = false;
-			break;
-		case 4:
-			if (tex_->nlabel()==-1)
-			{
-				if (tex_->nmask()>-1)
-				{
-					mask_ = true;
-					label_ = false;
-					ml_mode_ = 1;
-				}
-				else
-				{
-					mask_ = label_ = false;
-					ml_mode_ = 0;
-				}
-			}
-			else
-				mask_ = label_ = true;
-			break;
-		}
+		eval_ml_mode();
 
 		//--------------------------------------------------------------------------
 		// Set up shaders

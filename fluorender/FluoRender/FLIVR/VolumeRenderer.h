@@ -129,6 +129,7 @@ namespace FLIVR
 		int get_depth_peel() {return depth_peel_;}
 
 		//draw
+		void eval_ml_mode();
 		virtual void draw(bool draw_wireframe_p, 
 			bool interactive_mode_p, 
 			bool orthographic_p = false,
