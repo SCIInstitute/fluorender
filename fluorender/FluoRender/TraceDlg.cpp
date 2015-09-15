@@ -2341,6 +2341,7 @@ void TraceDlg::GenMap()
 	wxString data_name;
 	wxString label_name;
 	wstring lblname;
+	bool file_err = false;
 
 	size_t iter_num = (size_t)m_gen_map_spin->GetValue();
 	tm_processor.SetSizes(track_map,
@@ -2354,22 +2355,42 @@ void TraceDlg::GenMap()
 		if (i == 0)
 		{
 			nrrd_data1 = reader->Convert(i, chan, true);
+			if (!nrrd_data1)
+			{
+				file_err = true;
+				continue;
+			}
 			data_name = reader->GetCurName(i, chan);
 			label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
 			lblname = label_name.ToStdWstring();
 			lbl_reader.SetFile(lblname);
 			nrrd_label1 = lbl_reader.Convert(i, chan, true);
+			if (!nrrd_label1)
+			{
+				file_err = true;
+				continue;
+			}
 			tm_processor.InitializeFrame(track_map,
 				nrrd_data1->data, nrrd_label1->data, i);
 		}
 		else
 		{
 			nrrd_data2 = reader->Convert(i, chan, true);
+			if (!nrrd_data2)
+			{
+				file_err = true;
+				continue;
+			}
 			data_name = reader->GetCurName(i, chan);
 			label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
 			lblname = label_name.ToStdWstring();
 			lbl_reader.SetFile(lblname);
 			nrrd_label2 = lbl_reader.Convert(i, chan, true);
+			if (!nrrd_label2)
+			{
+				file_err = true;
+				continue;
+			}
 			tm_processor.InitializeFrame(track_map,
 				nrrd_data2->data, nrrd_label2->data, i);
 
@@ -2388,6 +2409,9 @@ void TraceDlg::GenMap()
 		(*m_stat_text) << wxString::Format("Time point %d initialized.\n", i);
 		wxGetApp().Yield();
 	}
+
+	if (file_err)
+		(*m_stat_text) << "ERROR! Certain file(s) missing. Check if label files exist.\n";
 
 	nrrdNuke(nrrd_data2);
 	nrrdNuke(nrrd_label2);

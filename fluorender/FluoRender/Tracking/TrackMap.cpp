@@ -927,11 +927,17 @@ bool TrackMapProcessor::MergeCells(VertexList& vertex_list, CellBin &bin,
 			{
 				//relink inter graph
 				if (frame > 0)
-					RelinkInterGraph(vertex, vertex0, frame,
-						track_map.m_inter_graph_list.at(frame-1));
-				if (frame < track_map.m_frame_num-1)
-					RelinkInterGraph(vertex, vertex0, frame,
-						track_map.m_inter_graph_list.at(frame));
+				{
+					InterGraph &graph = track_map.m_inter_graph_list.at(frame - 1);
+					RelinkInterGraph(vertex, vertex0, frame, graph);
+
+				}
+				if (frame < track_map.m_frame_num - 1)
+				{
+					InterGraph &graph = track_map.m_inter_graph_list.at(frame);
+					RelinkInterGraph(vertex, vertex0, frame, graph);
+
+				}
 
 				//collect cells from vertex
 				for (cell_iter = vertex->GetCellsBegin();
@@ -957,8 +963,6 @@ bool TrackMapProcessor::MergeCells(VertexList& vertex_list, CellBin &bin,
 					cell->AddVertex(vertex0);
 				}
 			}
-			//vertex0->AddCell(cell, true);
-			//cell->AddVertex(vertex0);
 		}
 	}
 
@@ -1015,7 +1019,6 @@ bool TrackMapProcessor::RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size
 			}
 			//delete the old edge
 			edges_to_remove.push_back(e.first);
-			//graph.remove_edge(e.first);
 		}
 		//remove edges
 		for (edge_to_remove = edges_to_remove.begin();
@@ -1026,7 +1029,21 @@ bool TrackMapProcessor::RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size
 		}
 		//remove the vertex from inter graph
 		//edges should be removed as well
-		//boost::remove_vertex(inter_vert, graph);
+		boost::remove_vertex(inter_vert, graph);
+	}
+
+	return true;
+}
+
+bool TrackMapProcessor::RemoveVertex(pVertex &vertex, InterGraph &graph, bool check)
+{
+	InterVert v = vertex->GetInterVert(graph);
+	if (v == InterGraph::null_vertex())
+		return false;
+
+	if (check)
+	{
+
 	}
 
 	return true;

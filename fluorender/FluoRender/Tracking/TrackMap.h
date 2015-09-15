@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VertexList.h"
 #include <fstream>
 #include <boost/signals2.hpp>
+#include <deque>
 
 namespace FL
 {
@@ -136,6 +137,8 @@ namespace FL
 			unsigned int &bl_size_ui, float &bl_size_f);
 		static bool edge_comp_size_ol(InterEdge edge1, InterEdge edge2, InterGraph& graph);
 		static bool edge_comp_size_bl(InterEdge edge1, InterEdge edge2, InterGraph& graph);
+		//remove vertex
+		bool RemoveVertex(pVertex &vertex, InterGraph &graph, bool check = false);
 
 		//export
 		void WriteBool(std::ofstream& ofs, bool value);
@@ -304,10 +307,10 @@ namespace FL
 		float m_scale;
 
 		//lists
-		std::vector<CellList> m_cells_list;
-		std::vector<VertexList> m_vertices_list;
-		std::vector<IntraGraph> m_intra_graph_list;
-		std::vector<InterGraph> m_inter_graph_list;
+		std::deque<CellList> m_cells_list;
+		std::deque<VertexList> m_vertices_list;
+		std::deque<IntraGraph> m_intra_graph_list;
+		std::deque<InterGraph> m_inter_graph_list;
 
 		friend class TrackMapProcessor;
 	};

@@ -3438,7 +3438,9 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 
 	double shadow_darkness = 0.0;
 
-	if (list.size() == 1 && list[0]->GetShadow())
+	if (list.empty())
+		;
+	else if (list.size() == 1)
 	{
 		VolumeData* vd = list[0];
 		//save
@@ -3465,40 +3467,37 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 	}
 	else
 	{
-		if (!list.empty())
+		m_mvr->clear_vr();
+		for (i=0; i<list.size(); i++)
 		{
-			m_mvr->clear_vr();
-			for (i=0; i<list.size(); i++)
+			VolumeData* vd = list[i];
+			vd->GetVR()->set_shading(false);
+			vd->SetMode(0);
+			vd->SetColormapMode(2);
+			vd->Set2dDmap(m_tex_ol1);
+			VolumeRenderer* vr = list[i]->GetVR();
+			if (vr)
 			{
-				VolumeData* vd = list[i];
-				vd->GetVR()->set_shading(false);
-				vd->SetMode(0);
-				vd->SetColormapMode(2);
-				vd->Set2dDmap(m_tex_ol1);
-				VolumeRenderer* vr = list[i]->GetVR();
-				if (vr)
-				{
-					list[i]->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-					list[i]->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-					m_mvr->add_vr(vr);
-					m_mvr->set_sampling_rate(vr->get_sampling_rate());
-					m_mvr->SetNoiseRed(vr->GetNoiseRed());
-				}
+				list[i]->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+				list[i]->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+				m_mvr->add_vr(vr);
+				m_mvr->set_sampling_rate(vr->get_sampling_rate());
+				m_mvr->SetNoiseRed(vr->GetNoiseRed());
 			}
-			m_mvr->set_colormap_mode(2);
-			//draw
-			m_mvr->draw(m_test_wiref, m_interactive, !m_persp, m_scale_factor, m_intp);
-			//restore
-			m_mvr->set_colormap_mode(0);
-			for (i=0; i<list.size(); i++)
-			{
-				VolumeData* vd = list[i];
-				vd->RestoreMode();
-				vd->SetColormapMode(colormodes[i]);
-				vd->GetVR()->set_shading(shadings[i]);
-			}
-			list[0]->GetShadowParams(shadow_darkness);
 		}
+		m_mvr->set_colormap_mode(2);
+		//draw
+		m_mvr->draw(m_test_wiref, m_interactive, !m_persp, m_scale_factor, m_intp);
+		//restore
+		m_mvr->set_colormap_mode(0);
+		for (i=0; i<list.size(); i++)
+		{
+			VolumeData* vd = list[i];
+			vd->RestoreMode();
+			vd->SetColormapMode(colormodes[i]);
+			vd->GetVR()->set_shading(shadings[i]);
+		}
+		list[0]->GetShadowParams(shadow_darkness);
 	}
 
 	//

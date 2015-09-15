@@ -52,12 +52,9 @@ namespace FL
 		pwVertex vertex;
 	};
 
-	//typedef boost::adjacency_list<boost::vecS,
-	//	boost::vecS, boost::undirectedS,
-	//	InterVertexData, InterEdgeData> InterGraph;
 	class InterGraph :
-		public boost::adjacency_list<boost::vecS,
-		boost::vecS, boost::undirectedS,
+		public boost::adjacency_list<boost::listS,
+		boost::listS, boost::undirectedS,
 		InterVertexData, InterEdgeData>
 	{
 	public:

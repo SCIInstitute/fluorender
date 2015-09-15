@@ -57,8 +57,8 @@ namespace FL
 		pwCell cell;
 	};
 
-	typedef boost::adjacency_list<boost::vecS,
-		boost::vecS, boost::undirectedS,
+	typedef boost::adjacency_list<boost::listS,
+		boost::listS, boost::undirectedS,
 		IntraCellData, IntraEdgeData> IntraGraph;
 	typedef IntraGraph::vertex_descriptor IntraVert;
 	typedef IntraGraph::edge_descriptor IntraEdge;
