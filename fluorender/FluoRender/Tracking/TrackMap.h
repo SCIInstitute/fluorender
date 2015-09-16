@@ -105,6 +105,8 @@ namespace FL
 		bool UnlinkCells(TrackMap& track_map,
 			CellList &list1, CellList &list2,
 			size_t frame1, size_t frame2);
+		//
+		CellListIter AddCell(TrackMap& track_map, pCell &cell, size_t frame);
 
 	private:
 		float m_contact_thresh;
@@ -124,7 +126,8 @@ namespace FL
 		bool IsolateVertex(InterGraph& graph,
 			pVertex &vertex);
 		bool ForceVertices(InterGraph& graph,
-			pVertex &vertex1, pVertex &vertex2);
+			pVertex &vertex1, pVertex &vertex2,
+			size_t f1, size_t f2);
 		bool UnlinkVertices(InterGraph& graph,
 			pVertex &vertex1, pVertex &vertex2);
 		bool EqualCells(pwCell &cell1, pwCell &cell2);
@@ -300,6 +303,7 @@ namespace FL
 		~TrackMap();
 
 		size_t GetFrameNum();
+		bool ExtendFrameNum(size_t frame);
 		unsigned int GetLastOp();
 		void Clear();
 
@@ -325,6 +329,21 @@ namespace FL
 	inline size_t TrackMap::GetFrameNum()
 	{
 		return m_frame_num;
+	}
+
+	inline bool TrackMap::ExtendFrameNum(size_t frame)
+	{
+		size_t sframe = m_frame_num;
+		for (size_t i = sframe; i <= frame; ++i)
+		{
+			m_cells_list.push_back(CellList());
+			m_vertices_list.push_back(VertexList());
+			m_intra_graph_list.push_back(IntraGraph());
+			if (m_inter_graph_list.size() < frame)
+				m_inter_graph_list.push_back(InterGraph());
+			m_frame_num++;
+		}
+		return frame < m_frame_num;
 	}
 
 	inline unsigned int TrackMap::GetLastOp()

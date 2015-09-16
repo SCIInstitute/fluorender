@@ -423,16 +423,27 @@ bool TrackMapProcessor::IsolateVertex(InterGraph& graph, pVertex &vertex)
 }
 
 bool TrackMapProcessor::ForceVertices(InterGraph& graph,
-	pVertex &vertex1, pVertex &vertex2)
+	pVertex &vertex1, pVertex &vertex2,
+	size_t f1, size_t f2)
 {
-	InterVert v1, v2;
-
-	v1 = vertex1->GetInterVert(graph);
+	InterVert v1 = vertex1->GetInterVert(graph);
+	InterVert v2 = vertex2->GetInterVert(graph);
 	if (v1 == InterGraph::null_vertex())
-		return false;
-	v2 = vertex2->GetInterVert(graph);
+	{
+		v1 = boost::add_vertex(graph);
+		graph[v1].id = vertex1->Id();
+		graph[v1].frame = f1;
+		graph[v1].vertex = vertex1;
+		vertex1->SetInterVert(graph, v1);
+	}
 	if (v2 == InterGraph::null_vertex())
-		return false;
+	{
+		v2 = boost::add_vertex(graph);
+		graph[v2].id = vertex2->Id();
+		graph[v2].frame = f2;
+		graph[v2].vertex = vertex2;
+		vertex2->SetInterVert(graph, v2);
+	}
 
 	std::pair<InterEdge, bool> edge;
 	edge = boost::edge(v1, v2, graph);
@@ -1768,11 +1779,10 @@ bool TrackMapProcessor::LinkCells(TrackMap& track_map,
 	bool exclusive)
 {
 	//check validity
-	size_t frame_num = track_map.m_frame_num;
-	if (frame1 >= frame_num ||
-		frame2 >= frame_num || 
-		(frame2 != frame1 + 1 &&
-		frame2 != frame1 - 1))
+	if ((frame2 != frame1 + 1 &&
+		frame2 != frame1 - 1) ||
+		!track_map.ExtendFrameNum(
+		std::max(frame1, frame2)))
 		return false;
 
 	VertexList vlist1, vlist2;
@@ -1781,13 +1791,15 @@ bool TrackMapProcessor::LinkCells(TrackMap& track_map,
 	CellList &cell_list1 = track_map.m_cells_list.at(frame1);
 	CellList &cell_list2 = track_map.m_cells_list.at(frame2);
 	CellListIter cell;
+	unsigned int cell_id;
 
 	for (citer1 = list1.begin();
 	citer1 != list1.end(); ++citer1)
 	{
-		cell = cell_list1.find(citer1->second->Id());
+		cell_id = citer1->second->Id();
+		cell = cell_list1.find(cell_id);
 		if (cell == cell_list1.end())
-			continue;
+			cell = AddCell(track_map, citer1->second, frame1);
 		pVertex vert1 = cell->second->GetVertex().lock();
 		if (vert1)
 			vlist1.insert(std::pair<unsigned int, pVertex>
@@ -1796,9 +1808,10 @@ bool TrackMapProcessor::LinkCells(TrackMap& track_map,
 	for (citer2 = list2.begin();
 	citer2 != list2.end(); ++citer2)
 	{
-		cell = cell_list2.find(citer2->second->Id());
+		cell_id = citer2->second->Id();
+		cell = cell_list2.find(cell_id);
 		if (cell == cell_list2.end())
-			continue;
+			cell = AddCell(track_map, citer2->second, frame2);
 		pVertex vert2 = cell->second->GetVertex().lock();
 		if (vert2)
 			vlist2.insert(std::pair<unsigned int, pVertex>
@@ -1829,7 +1842,8 @@ bool TrackMapProcessor::LinkCells(TrackMap& track_map,
 	for (viter2 = vlist2.begin();
 	viter2 != vlist2.end(); ++viter2)
 		ForceVertices(inter_graph,
-			viter1->second, viter2->second);
+			viter1->second, viter2->second,
+			frame1, frame2);
 
 	return true;
 }
@@ -1942,4 +1956,23 @@ bool TrackMapProcessor::UnlinkCells(TrackMap& track_map,
 				viter1->second, viter2->second);
 
 	return true;
+}
+
+CellListIter TrackMapProcessor::AddCell(TrackMap& track_map,
+	pCell &cell, size_t frame)
+{
+	CellList &cell_list = track_map.m_cells_list.at(frame);
+	VertexList &vert_list = track_map.m_vertices_list.at(frame);
+
+	pVertex vertex(new Vertex(cell->Id()));
+	vertex->SetCenter(cell->GetCenter());
+	vertex->SetSizeUi(cell->GetSizeUi());
+	vertex->SetSizeF(cell->GetSizeF());
+	vertex->AddCell(cell);
+	cell->AddVertex(vertex);
+	vert_list.insert(std::pair<unsigned int, pVertex>
+		(vertex->Id(), vertex));
+	std::pair<CellListIter, bool> result = cell_list.insert(
+		std::pair<unsigned int, pCell>(cell->Id(), cell));
+	return result.first;
 }
