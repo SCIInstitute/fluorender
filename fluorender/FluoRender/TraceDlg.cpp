@@ -226,48 +226,266 @@ void TraceListCtrl::OnDeleteSelection(wxCommandEvent& event)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(TraceDlg, wxPanel)
+	//map page
 	//load/save trace
 	EVT_BUTTON(ID_LoadTraceBtn, TraceDlg::OnLoadTrace)
 	EVT_BUTTON(ID_SaveTraceBtn, TraceDlg::OnSaveTrace)
 	EVT_BUTTON(ID_SaveasTraceBtn, TraceDlg::OnSaveasTrace)
-	//ghost num
-	EVT_COMMAND_SCROLL(ID_GhostNumSldr, TraceDlg::OnGhostNumChange)
-	EVT_TEXT(ID_GhostNumText, TraceDlg::OnGhostNumText)
-	EVT_COMMAND_SCROLL(ID_CellSizeSldr, TraceDlg::OnCellSizeChange)
-	EVT_TEXT(ID_CellSizeText, TraceDlg::OnCellSizeText)
-	EVT_CHECKBOX(ID_GhostShowTailChk, TraceDlg::OnGhostShowTail)
-	EVT_CHECKBOX(ID_GhostShowLeadChk, TraceDlg::OnGhostShowLead)
-	//manual assist
-	EVT_BUTTON(ID_AddLabelBtn, TraceDlg::OnAddLabel)
-	EVT_BUTTON(ID_AnalyzeBtn, TraceDlg::OnAnalyze)
-	EVT_BUTTON(ID_SaveAnalyzeBtn, TraceDlg::OnSaveAnalyze)
-	EVT_CHECKBOX(ID_ManualAssistCheck, TraceDlg::OnManualAssistCheck)
 	//auto tracking
 	EVT_BUTTON(ID_GenMapBtn, TraceDlg::OnGenMapBtn)
 	EVT_BUTTON(ID_RefineMapBtn, TraceDlg::OnRefineMapBtn)
+	//selection page
 	//component tools
-	EVT_BUTTON(ID_CompAppendBtn, TraceDlg::OnCompAppend)
-	EVT_BUTTON(ID_CompExclusiveBtn, TraceDlg::OnCompExclusive)
+	EVT_TEXT(ID_CompIDText, TraceDlg::OnCompIDText)
+	EVT_BUTTON(ID_CompIDXBtn, TraceDlg::OnCompIDXBtn)
 	EVT_BUTTON(ID_CompFullBtn, TraceDlg::OnCompFull)
+	EVT_BUTTON(ID_CompExclusiveBtn, TraceDlg::OnCompExclusive)
+	EVT_BUTTON(ID_CompAppendBtn, TraceDlg::OnCompAppend)
 	EVT_BUTTON(ID_CompClearBtn, TraceDlg::OnCompClear)
+	//cell size filter
+	EVT_COMMAND_SCROLL(ID_CellSizeSldr, TraceDlg::OnCellSizeChange)
+	EVT_TEXT(ID_CellSizeText, TraceDlg::OnCellSizeText)
+	//link page
+	EVT_TEXT(ID_CompIDText2, TraceDlg::OnCompIDText)
 	//ID link controls
-	EVT_BUTTON(ID_CellUpdateBtn, TraceDlg::OnCellUpdate)
-	EVT_BUTTON(ID_CellLinkBtn, TraceDlg::OnCellLink)
 	EVT_BUTTON(ID_CellExclusiveLinkBtn, TraceDlg::OnCellExclusiveLink)
+	EVT_BUTTON(ID_CellLinkBtn, TraceDlg::OnCellLink)
+	EVT_BUTTON(ID_CellIsolateBtn, TraceDlg::OnCellIsolate)
 	EVT_BUTTON(ID_CellUnlinkBtn, TraceDlg::OnCellUnlink)
+	//manual assist
+	EVT_CHECKBOX(ID_ManualAssistCheck, TraceDlg::OnManualAssistCheck)
+	//modify page
 	//ID edit controls
 	EVT_BUTTON(ID_CellModifyBtn, TraceDlg::OnCellModify)
 	EVT_BUTTON(ID_CellNewIDBtn, TraceDlg::OnCellNewID)
 	EVT_BUTTON(ID_CellCombineIDBtn, TraceDlg::OnCellCombineID)
+	//analysis page
+	EVT_BUTTON(ID_AddLabelBtn, TraceDlg::OnAddLabel)
+	EVT_BUTTON(ID_AnalyzeBtn, TraceDlg::OnAnalyze)
+	EVT_BUTTON(ID_SaveAnalyzeBtn, TraceDlg::OnSaveAnalyze)
 	//magic tool
-	EVT_BUTTON(ID_CellMagic0Btn, TraceDlg::OnCellMagic0Btn)
-	EVT_BUTTON(ID_CellMagic1Btn, TraceDlg::OnCellMagic1Btn)
-	EVT_BUTTON(ID_CellMagic2Btn, TraceDlg::OnCellMagic2Btn)
-	EVT_BUTTON(ID_CellMagic3Btn, TraceDlg::OnCellMagic3Btn)
+	//EVT_BUTTON(ID_CellMagic0Btn, TraceDlg::OnCellMagic0Btn)
+	//EVT_BUTTON(ID_CellMagic1Btn, TraceDlg::OnCellMagic1Btn)
+	//EVT_BUTTON(ID_CellMagic2Btn, TraceDlg::OnCellMagic2Btn)
+	//EVT_BUTTON(ID_CellMagic3Btn, TraceDlg::OnCellMagic3Btn)
+	//ghost num
+	EVT_COMMAND_SCROLL(ID_GhostNumSldr, TraceDlg::OnGhostNumChange)
+	EVT_TEXT(ID_GhostNumText, TraceDlg::OnGhostNumText)
+	EVT_CHECKBOX(ID_GhostShowTailChk, TraceDlg::OnGhostShowTail)
+	EVT_CHECKBOX(ID_GhostShowLeadChk, TraceDlg::OnGhostShowLead)
 	//time controls
 	EVT_BUTTON(ID_CellPrevBtn, TraceDlg::OnCellPrev)
 	EVT_BUTTON(ID_CellNextBtn, TraceDlg::OnCellNext)
 END_EVENT_TABLE()
+
+wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
+{
+	wxPanel *page = new wxPanel(parent);
+
+	wxStaticText *st = 0;
+
+	//load trace
+	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Track map:",
+		wxDefaultPosition, wxSize(70, 20));
+	m_load_trace_text = new wxTextCtrl(page, ID_LoadTraceText, "",
+		wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
+	m_load_trace_btn = new wxButton(page, ID_LoadTraceBtn, "Load",
+		wxDefaultPosition, wxSize(60, 23));
+	m_save_trace_btn = new wxButton(page, ID_SaveTraceBtn, "Save",
+		wxDefaultPosition, wxSize(60, 23));
+	m_saveas_trace_btn = new wxButton(page, ID_SaveasTraceBtn, "Save As",
+		wxDefaultPosition, wxSize(60, 23));
+	sizer_1->Add(5, 5);
+	sizer_1->Add(st, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_load_trace_text, 1, wxEXPAND);
+	sizer_1->Add(m_load_trace_btn, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_save_trace_btn, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_saveas_trace_btn, 0, wxALIGN_CENTER);
+
+	//generate
+	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "New map:",
+		wxDefaultPosition, wxSize(70, 20));
+	m_gen_map_prg = new wxGauge(page, ID_GenMapPrg, 100,
+		wxDefaultPosition, wxSize(-1, 18));
+	sizer_2->Add(5, 5);
+	sizer_2->Add(st, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_gen_map_prg, 1, wxEXPAND);
+	st = new wxStaticText(page, 0, "X",
+		wxDefaultPosition, wxSize(10, -1));
+	m_gen_map_spin = new wxSpinCtrl(page, ID_GenMapSpin, "3",
+		wxDefaultPosition, wxSize(50, 23));
+	sizer_2->Add(10, 10);
+	sizer_2->Add(st, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_gen_map_spin, 0, wxALIGN_CENTER);
+	st = new wxStaticText(page, 0, "times",
+		wxDefaultPosition, wxSize(40, -1));
+	m_gen_map_btn = new wxButton(page, ID_GenMapBtn, "Generate",
+		wxDefaultPosition, wxSize(60, 23));
+	m_refine_map_btn = new wxButton(page, ID_RefineMapBtn, "Refine",
+		wxDefaultPosition, wxSize(60, 23));
+	sizer_2->Add(10, 10);
+	sizer_2->Add(st, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_gen_map_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_refine_map_btn, 0, wxALIGN_CENTER);
+
+	//vertical sizer
+	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer_1, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer_2, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
+
+	//set the page
+	page->SetSizer(sizer_v);
+	return page;
+}
+
+wxWindow* TraceDlg::CreateSelectPage(wxWindow *parent)
+{
+	wxPanel *page = new wxPanel(parent);
+
+	//validator: integer
+	wxIntegerValidator<unsigned int> vald_int;
+	wxStaticText *st = 0;
+
+	//selection tools
+	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Selection tools:",
+		wxDefaultPosition, wxSize(100, 20));
+	m_comp_id_text = new wxTextCtrl(page, ID_CompIDText, "",
+		wxDefaultPosition, wxSize(77, 23));
+	m_comp_id_x_btn = new wxButton(page, ID_CompIDXBtn, "X",
+		wxDefaultPosition, wxSize(23, 23));
+	m_comp_full_btn = new wxButton(page, ID_CompFullBtn, "FullCompt",
+		wxDefaultPosition, wxSize(65, 23));
+	m_comp_exclusive_btn = new wxButton(page, ID_CompExclusiveBtn, "Replace",
+		wxDefaultPosition, wxSize(65, 23));
+	m_comp_append_btn = new wxButton(page, ID_CompAppendBtn, "Append",
+		wxDefaultPosition, wxSize(65, 23));
+	m_comp_clear_btn = new wxButton(page, ID_CompClearBtn, "Clear",
+		wxDefaultPosition, wxSize(65, 23));
+	sizer_1->Add(5, 5);
+	sizer_1->Add(st, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_comp_id_text, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_comp_id_x_btn, 0, wxALIGN_CENTER);
+	sizer_1->Add(10, 23);
+	sizer_1->Add(m_comp_full_btn, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_comp_exclusive_btn, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_comp_append_btn, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_comp_clear_btn, 0, wxALIGN_CENTER);
+	//cell size filter
+	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Component size:",
+		wxDefaultPosition, wxSize(130, 20));
+	m_cell_size_sldr = new wxSlider(page, ID_CellSizeSldr, 20, 0, 100,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_cell_size_text = new wxTextCtrl(page, ID_CellSizeText, "20",
+		wxDefaultPosition, wxSize(60, 23), 0, vald_int);
+	sizer_2->Add(5, 5);
+	sizer_2->Add(st, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_cell_size_sldr, 1, wxEXPAND);
+	sizer_2->Add(m_cell_size_text, 0, wxALIGN_CENTER);
+
+	//vertical sizer
+	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer_1, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer_2, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
+
+	//set the page
+	page->SetSizer(sizer_v);
+	return page;
+}
+
+wxWindow* TraceDlg::CreateLinkPage(wxWindow *parent)
+{
+	wxPanel *page = new wxPanel(parent);
+
+	wxStaticText *st = 0;
+
+	//ID link controls
+	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Selection tools:",
+		wxDefaultPosition, wxSize(100, 20));
+	m_comp_id_text2 = new wxTextCtrl(page, ID_CompIDText2, "",
+		wxDefaultPosition, wxSize(77, 23));
+	m_comp_id_x_btn = new wxButton(page, ID_CompIDXBtn, "X",
+		wxDefaultPosition, wxSize(23, 23));
+	m_comp_append_btn = new wxButton(page, ID_CompAppendBtn, "Append",
+		wxDefaultPosition, wxSize(65, 23));
+	m_comp_clear_btn = new wxButton(page, ID_CompClearBtn, "Clear",
+		wxDefaultPosition, wxSize(65, 23));
+	sizer_1->Add(5, 5);
+	sizer_1->Add(st, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_comp_id_text2, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_comp_id_x_btn, 0, wxALIGN_CENTER);
+	sizer_1->Add(10, 23);
+	sizer_1->Add(m_comp_append_btn, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_comp_clear_btn, 0, wxALIGN_CENTER);
+
+	//assist
+	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
+	m_cell_exclusive_link_btn = new wxButton(page, ID_CellExclusiveLinkBtn, "Excl. Link",
+		wxDefaultPosition, wxSize(65, 23));
+	m_cell_link_btn = new wxButton(page, ID_CellLinkBtn, "Link IDs",
+		wxDefaultPosition, wxSize(65, 23));
+	m_cell_isolate_btn = new wxButton(page, ID_CellIsolateBtn, "Isolate",
+		wxDefaultPosition, wxSize(65, 23));
+	m_cell_unlink_btn = new wxButton(page, ID_CellUnlinkBtn, "Unlink IDs",
+		wxDefaultPosition, wxSize(65, 23));
+	m_manual_assist_check = new wxCheckBox(page, ID_ManualAssistCheck, "Manual Tracking Assist.",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
+	sizer_2->Add(10, 10);
+	sizer_2->Add(m_cell_exclusive_link_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_cell_link_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_cell_isolate_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_cell_unlink_btn, 0, wxALIGN_CENTER);
+	sizer_2->AddStretchSpacer();
+	sizer_2->Add(m_manual_assist_check, 0, wxALIGN_CENTER);
+
+	//vertical sizer
+	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer_1, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer_2, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
+
+	//set the page
+	page->SetSizer(sizer_v);
+	return page;
+}
+
+wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
+{
+	wxPanel *page = new wxPanel(parent);
+
+	//vertical sizer
+	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
+	sizer_v->Add(10, 10);
+
+	//set the page
+	page->SetSizer(sizer_v);
+	return page;
+}
+
+wxWindow* TraceDlg::CreateAnalysisPage(wxWindow *parent)
+{
+	wxPanel *page = new wxPanel(parent);
+
+	//vertical sizer
+	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
+	sizer_v->Add(10, 10);
+
+	//set the page
+	page->SetSizer(sizer_v);
+	return page;
+}
 
 TraceDlg::TraceDlg(wxWindow* frame, wxWindow* parent)
 : wxPanel(parent, wxID_ANY,
@@ -284,53 +502,6 @@ m_manual_assist(false)
 	wxIntegerValidator<unsigned int> vald_int;
 
 	wxStaticText *st = 0;
-
-	//load trace
-	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Track map:",
-		wxDefaultPosition, wxSize(70, 20));
-	m_load_trace_text = new wxTextCtrl(this, ID_LoadTraceText, "",
-		wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
-	m_load_trace_btn = new wxButton(this, ID_LoadTraceBtn, "Load",
-		wxDefaultPosition, wxSize(60, 23));
-	m_save_trace_btn = new wxButton(this, ID_SaveTraceBtn, "Save",
-		wxDefaultPosition, wxSize(60, 23));
-	m_saveas_trace_btn = new wxButton(this, ID_SaveasTraceBtn, "Save As",
-		wxDefaultPosition, wxSize(60, 23));
-	sizer_1->Add(5, 5);
-	sizer_1->Add(st, 0, wxALIGN_CENTER);
-	sizer_1->Add(m_load_trace_text, 1, wxEXPAND);
-	sizer_1->Add(m_load_trace_btn, 0, wxALIGN_CENTER);
-	sizer_1->Add(m_save_trace_btn, 0, wxALIGN_CENTER);
-	sizer_1->Add(m_saveas_trace_btn, 0, wxALIGN_CENTER);
-
-	//generate
-	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "New map:",
-		wxDefaultPosition, wxSize(70, 20));
-	m_gen_map_prg = new wxGauge(this, ID_GenMapPrg, 100,
-		wxDefaultPosition, wxSize(-1, 18));
-	sizer_2->Add(5, 5);
-	sizer_2->Add(st, 0, wxALIGN_CENTER);
-	sizer_2->Add(m_gen_map_prg, 1, wxEXPAND);
-	st = new wxStaticText(this, 0, "X",
-		wxDefaultPosition, wxSize(10, -1));
-	m_gen_map_spin = new wxSpinCtrl(this, ID_GenMapSpin, "3",
-		wxDefaultPosition, wxSize(50, 23));
-	sizer_2->Add(10, 10);
-	sizer_2->Add(st, 0, wxALIGN_CENTER);
-	sizer_2->Add(m_gen_map_spin, 0, wxALIGN_CENTER);
-	st = new wxStaticText(this, 0, "times",
-		wxDefaultPosition, wxSize(40, -1));
-	m_gen_map_btn = new wxButton(this, ID_GenMapBtn, "Generate",
-		wxDefaultPosition, wxSize(60, 23));
-	m_refine_map_btn = new wxButton(this, ID_RefineMapBtn, "Refine",
-		wxDefaultPosition, wxSize(60, 23));
-	sizer_2->Add(10, 10);
-	sizer_2->Add(st, 0, wxALIGN_CENTER);
-	sizer_2->Add(m_gen_map_btn, 0, wxALIGN_CENTER);
-	sizer_2->Add(m_refine_map_btn, 0, wxALIGN_CENTER);
-
 	//edit tools
 /*	wxBoxSizer *sizer_3 = new wxStaticBoxSizer(
 		new wxStaticBox(this, wxID_ANY, "Analyze && Validate"),
@@ -454,69 +625,17 @@ m_manual_assist(false)
 	sizer_3->Add(sizer_36, 0, wxEXPAND);
 	sizer_3->Hide(sizer_36);
 */
-	//simple tracking ui
-	wxBoxSizer *sizer_3 = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, "Component Toolset"),
-		wxVERTICAL);
-	//selection tools
-	wxBoxSizer* sizer_31 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Selection tools:",
-		wxDefaultPosition, wxSize(100, 20));
-	m_comp_id_text = new wxTextCtrl(this, ID_CompIDText, "",
-		wxDefaultPosition, wxSize(100, 23));
-	m_comp_full_btn = new wxButton(this, ID_CompFullBtn, "FullCompt",
-		wxDefaultPosition, wxSize(65, 23));
-	m_comp_exclusive_btn = new wxButton(this, ID_CompExclusiveBtn, "Replace",
-		wxDefaultPosition, wxSize(65, 23));
-	m_comp_append_btn = new wxButton(this, ID_CompAppendBtn, "Append",
-		wxDefaultPosition, wxSize(65, 23));
-	m_comp_clear_btn = new wxButton(this, ID_CompClearBtn, "Clear",
-		wxDefaultPosition, wxSize(65, 23));
-	sizer_31->Add(5, 5);
-	sizer_31->Add(st, 0, wxALIGN_CENTER);
-	sizer_31->Add(m_comp_id_text, 0, wxALIGN_CENTER);
-	sizer_31->Add(10, 23);
-	sizer_31->Add(m_comp_full_btn, 0, wxALIGN_CENTER);
-	sizer_31->Add(m_comp_exclusive_btn, 0, wxALIGN_CENTER);
-	sizer_31->Add(m_comp_append_btn, 0, wxALIGN_CENTER);
-	sizer_31->Add(m_comp_clear_btn, 0, wxALIGN_CENTER);
-	//cell size filter
-	wxBoxSizer* sizer_32 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Component size:",
-		wxDefaultPosition, wxSize(130, 20));
-	m_cell_size_sldr = new wxSlider(this, ID_CellSizeSldr, 20, 0, 100,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cell_size_text = new wxTextCtrl(this, ID_CellSizeText, "20",
-		wxDefaultPosition, wxSize(60, 23), 0, vald_int);
-	sizer_32->Add(5, 5);
-	sizer_32->Add(st, 0, wxALIGN_CENTER);
-	sizer_32->Add(m_cell_size_sldr, 1, wxEXPAND);
-	sizer_32->Add(m_cell_size_text, 0, wxALIGN_CENTER);
-	//ID link controls
-	wxBoxSizer* sizer_34 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "ID link tools:",
-		wxDefaultPosition, wxSize(100, 20));
-	//m_cell_update_btn = new wxButton(this, ID_CellUpdateBtn, "Add Selected",
-	//	wxDefaultPosition, wxSize(100, 23));
-	m_cell_exclusive_link_btn = new wxButton(this, ID_CellExclusiveLinkBtn, "Excl. Link",
-		wxDefaultPosition, wxSize(65, 23));
-	m_cell_link_btn = new wxButton(this, ID_CellLinkBtn, "Link IDs",
-		wxDefaultPosition, wxSize(65, 23));
-	m_cell_unlink_btn = new wxButton(this, ID_CellUnlinkBtn, "Unlink IDs",
-		wxDefaultPosition, wxSize(65, 23));
-	sizer_34->Add(5, 5);
-	sizer_34->Add(st, 0, wxALIGN_CENTER);
-	sizer_34->Add(110, 23);
-	sizer_34->Add(m_cell_exclusive_link_btn, 0, wxALIGN_CENTER);
-	sizer_34->Add(m_cell_link_btn, 0, wxALIGN_CENTER);
-	sizer_34->Add(m_cell_unlink_btn, 0, wxALIGN_CENTER);
-	//
-	sizer_3->Add(sizer_31, 0, wxEXPAND);
-	sizer_3->Add(sizer_34, 0, wxEXPAND);
-	sizer_3->Add(sizer_32, 0, wxEXPAND);
+
+	//notebook
+	m_notebook = new wxNotebook(this, wxID_ANY);
+	m_notebook->AddPage(CreateMapPage(m_notebook), "Track Map");
+	m_notebook->AddPage(CreateSelectPage(m_notebook), "Selection");
+	m_notebook->AddPage(CreateLinkPage(m_notebook), "Linkage");
+	m_notebook->AddPage(CreateModifyPage(m_notebook), "Modify");
+	m_notebook->AddPage(CreateAnalysisPage(m_notebook), "Analysis");
 
 	//ghost num
-	wxBoxSizer* sizer_4 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Ghosts:",
 		wxDefaultPosition, wxSize(70, 20));
 	m_ghost_show_tail_chk = new wxCheckBox(this, ID_GhostShowTailChk, "Tail",
@@ -527,21 +646,21 @@ m_manual_assist(false)
 		wxDefaultPosition, wxSize(60, 23), 0, vald_int);
 	m_ghost_show_lead_chk = new wxCheckBox(this, ID_GhostShowLeadChk, "Lead",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
-	sizer_4->Add(5, 5);
-	sizer_4->Add(st, 0, wxALIGN_CENTER);
-	sizer_4->Add(m_ghost_show_tail_chk, 0, wxALIGN_CENTER);
-	sizer_4->Add(5, 5);
-	sizer_4->Add(m_ghost_num_sldr, 1, wxEXPAND);
-	sizer_4->Add(m_ghost_num_text, 0, wxALIGN_CENTER);
-	sizer_4->Add(5, 5);
-	sizer_4->Add(m_ghost_show_lead_chk, 0, wxALIGN_CENTER);
+	sizer_1->Add(5, 5);
+	sizer_1->Add(st, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_ghost_show_tail_chk, 0, wxALIGN_CENTER);
+	sizer_1->Add(5, 5);
+	sizer_1->Add(m_ghost_num_sldr, 1, wxEXPAND);
+	sizer_1->Add(m_ghost_num_text, 0, wxALIGN_CENTER);
+	sizer_1->Add(5, 5);
+	sizer_1->Add(m_ghost_show_lead_chk, 0, wxALIGN_CENTER);
 
 	//lists
-	wxBoxSizer *sizer_5 = new wxStaticBoxSizer(
+	wxBoxSizer *sizer_2 = new wxStaticBoxSizer(
 		new wxStaticBox(this, wxID_ANY, "ID Lists"),
 		wxVERTICAL);
 	//titles
-	wxBoxSizer* sizer_51 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer_21 = new wxBoxSizer(wxHORIZONTAL);
 	m_cell_time_curr_st = new wxStaticText(this, 0, "\tCurrent T",
 		wxDefaultPosition, wxDefaultSize);
 	m_cell_time_prev_st = new wxStaticText(this, 0, "\tPrevious T",
@@ -550,47 +669,44 @@ m_manual_assist(false)
 		wxDefaultPosition, wxSize(80, 23));
 	m_cell_next_btn = new wxButton(this, ID_CellNextBtn, "Forward >",
 		wxDefaultPosition, wxSize(80, 23));
-	sizer_51->Add(m_cell_time_curr_st, 1, wxEXPAND);
-	sizer_51->Add(m_cell_prev_btn, 0, wxALIGN_CENTER);
-	sizer_51->Add(m_cell_next_btn, 0, wxALIGN_CENTER);
-	sizer_51->Add(m_cell_time_prev_st, 1, wxEXPAND);
+	sizer_21->Add(m_cell_time_curr_st, 1, wxEXPAND);
+	sizer_21->Add(m_cell_prev_btn, 0, wxALIGN_CENTER);
+	sizer_21->Add(m_cell_next_btn, 0, wxALIGN_CENTER);
+	sizer_21->Add(m_cell_time_prev_st, 1, wxEXPAND);
 	//controls
-	wxBoxSizer* sizer_52 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer_22 = new wxBoxSizer(wxHORIZONTAL);
 	m_trace_list_curr = new TraceListCtrl(frame, this, wxID_ANY);
 	m_trace_list_curr->m_type = 0;
 	m_trace_list_prev = new TraceListCtrl(frame, this, wxID_ANY);
 	m_trace_list_prev->m_type = 1;
-	sizer_52->Add(m_trace_list_curr, 1, wxEXPAND);
-	sizer_52->Add(m_trace_list_prev, 1, wxEXPAND);
+	sizer_22->Add(m_trace_list_curr, 1, wxEXPAND);
+	sizer_22->Add(m_trace_list_prev, 1, wxEXPAND);
 	//
-	sizer_5->Add(sizer_51, 0, wxEXPAND);
-	sizer_5->Add(sizer_52, 1, wxEXPAND);
+	sizer_2->Add(sizer_21, 0, wxEXPAND);
+	sizer_2->Add(sizer_22, 1, wxEXPAND);
 
 	//stats text
-	wxBoxSizer *sizer_6 = new wxStaticBoxSizer(
+	wxBoxSizer *sizer_3 = new wxStaticBoxSizer(
 		new wxStaticBox(this, wxID_ANY, "Output"),
 		wxVERTICAL);
 	m_stat_text = new wxTextCtrl(this, ID_StatText, "",
 		wxDefaultPosition, wxSize(-1, 100), wxTE_MULTILINE);
 	m_stat_text->SetEditable(false);
-	sizer_6->Add(m_stat_text, 1, wxEXPAND);
+	sizer_3->Add(m_stat_text, 1, wxEXPAND);
 
 	//all controls
-	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
-	sizerV->Add(10, 10);
-	sizerV->Add(sizer_1, 0, wxEXPAND);
-	sizerV->Add(10, 10);
-	sizerV->Add(sizer_2, 0, wxEXPAND);
-	sizerV->Add(10, 10);
-	sizerV->Add(sizer_3, 0, wxEXPAND);
-	sizerV->Add(10, 10);
-	sizerV->Add(sizer_4, 0, wxEXPAND);
-	sizerV->Add(10, 10);
-	sizerV->Add(sizer_5, 1, wxEXPAND);
-	sizerV->Add(10, 10);
-	sizerV->Add(sizer_6, 0, wxEXPAND);
+	wxBoxSizer *sizer_v = new wxBoxSizer(wxVERTICAL);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(m_notebook, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer_1, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer_2, 1, wxEXPAND);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer_3, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
 
-	SetSizer(sizerV);
+	SetSizer(sizer_v);
 	Layout();
 }
 
@@ -976,6 +1092,28 @@ void TraceDlg::CompDelete()
 	CellUpdate();
 }
 
+void TraceDlg::OnCompIDText(wxCommandEvent &event)
+{
+	if (event.GetId() == ID_CompIDText)
+	{
+		m_comp_id_text2->ChangeValue(
+			m_comp_id_text->GetValue());
+		m_comp_id_text2->SelectNone();
+	}
+	else if (event.GetId() == ID_CompIDText2)
+	{
+		m_comp_id_text->ChangeValue(
+			m_comp_id_text2->GetValue());
+		m_comp_id_text->SelectNone();
+	}
+}
+
+void TraceDlg::OnCompIDXBtn(wxCommandEvent &event)
+{
+	m_comp_id_text->Clear();
+	m_comp_id_text2->Clear();
+}
+
 void TraceDlg::OnCompClear(wxCommandEvent &event)
 {
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
@@ -1133,11 +1271,6 @@ void TraceDlg::OnCompExclusive(wxCommandEvent &event)
 }
 
 //ID link controls
-void TraceDlg::OnCellUpdate(wxCommandEvent &event)
-{
-	CellUpdate();
-}
-
 void TraceDlg::CellUpdate()
 {
 	if (m_view)
@@ -1260,117 +1393,6 @@ void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, FL::CellList 
 	FL::pCell cell(new FL::Cell(id));
 	list.insert(pair<unsigned int, FL::pCell>
 		(id, cell));
-}
-
-void TraceDlg::CellLink(bool exclusive, bool idid)
-{
-	if (!m_view)
-		return;
-
-	TraceGroup* trace_group = m_view->GetTraceGroup();
-	if (!trace_group)
-	{
-		m_view->CreateTraceGroup();
-		trace_group = m_view->GetTraceGroup();
-	}
-
-	//get selections
-	long item;
-	//current T
-	FL::CellList list_cur;
-	//previous T
-	FL::CellList list_prv;
-	//current list
-	item = -1;
-	while (true)
-	{
-		item = m_trace_list_curr->GetNextItem(
-			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-		if (item == -1)
-			break;
-		else
-			AddLabel(item, m_trace_list_curr, list_cur);
-	}
-	if (list_cur.size() == 0)
-	{
-		item = -1;
-		while (true)
-		{
-			item = m_trace_list_curr->GetNextItem(
-				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
-			if (item == -1)
-				break;
-			else
-				AddLabel(item, m_trace_list_curr, list_cur);
-		}
-	}
-	//previous list
-	item = -1;
-	while (true)
-	{
-		item = m_trace_list_prev->GetNextItem(
-			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-		if (item == -1)
-			break;
-		else
-			AddLabel(item, m_trace_list_prev, list_prv);
-	}
-	if (list_prv.size() == 0)
-	{
-		item = -1;
-		while (true)
-		{
-			item = m_trace_list_prev->GetNextItem(
-				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
-			if (item == -1)
-				break;
-			else
-				AddLabel(item, m_trace_list_prev, list_prv);
-		}
-	}
-	if (list_cur.size()==0 ||
-		list_prv.size()==0)
-		return;
-
-/*	//find the two vertices
-	Vertex vert;
-	unsigned int i, j;
-	for (i=0; i<list_cur.size(); ++i)
-	{
-		Lbl label = list_cur[i];
-		if (!trace_group->FindIDInFrame(label.id, m_cur_time, vert))
-			//create vertex
-			trace_group->AddVertex(m_cur_time,
-				label.id, label.size, label.center);
-	}
-	for (i=0; i<list_prv.size(); ++i)
-	{
-		Lbl label = list_prv[i];
-		if (!trace_group->FindIDInFrame(label.id, m_prv_time, vert))
-			//create vertex
-			trace_group->AddVertex(m_prv_time,
-				label.id, label.size, label.center);
-	}*/
-	//link them
-	trace_group->LinkCells(list_cur, list_prv,
-		m_cur_time, m_prv_time, exclusive);
-/*	for (i=0; i<list_cur.size(); ++i)
-	{
-		unsigned int id1 = list_cur[i].id;
-		for (j=0; j<list_prv.size(); ++j)
-		{
-			unsigned int id2 = list_prv[j].id;
-			if (idid)
-			{
-				if (id1 == id2)
-					trace_group->LinkVertices(id1, m_cur_time, id2, m_prv_time, exclusive);
-			}
-			else
-			{
-				trace_group->LinkVertices(id1, m_cur_time, id2, m_prv_time, exclusive);
-			}
-		}
-	}*/
 }
 
 void TraceDlg::CellNewID()
@@ -1668,6 +1690,81 @@ void TraceDlg::CellAppendID(vector<unsigned int> &id_list)
 	CellUpdate();*/
 }
 
+void TraceDlg::CellLink(bool exclusive, bool idid)
+{
+	if (!m_view)
+		return;
+
+	TraceGroup* trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+	{
+		m_view->CreateTraceGroup();
+		trace_group = m_view->GetTraceGroup();
+	}
+
+	//get selections
+	long item;
+	//current T
+	FL::CellList list_cur;
+	//previous T
+	FL::CellList list_prv;
+	//current list
+	item = -1;
+	while (true)
+	{
+		item = m_trace_list_curr->GetNextItem(
+			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		else
+			AddLabel(item, m_trace_list_curr, list_cur);
+	}
+	if (list_cur.size() == 0)
+	{
+		item = -1;
+		while (true)
+		{
+			item = m_trace_list_curr->GetNextItem(
+				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+			if (item == -1)
+				break;
+			else
+				AddLabel(item, m_trace_list_curr, list_cur);
+		}
+	}
+	//previous list
+	item = -1;
+	while (true)
+	{
+		item = m_trace_list_prev->GetNextItem(
+			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		else
+			AddLabel(item, m_trace_list_prev, list_prv);
+	}
+	if (list_prv.size() == 0)
+	{
+		item = -1;
+		while (true)
+		{
+			item = m_trace_list_prev->GetNextItem(
+				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+			if (item == -1)
+				break;
+			else
+				AddLabel(item, m_trace_list_prev, list_prv);
+		}
+	}
+	if (list_cur.size() == 0 ||
+		list_prv.size() == 0)
+		return;
+
+	//link them
+	trace_group->LinkCells(list_cur, list_prv,
+		m_cur_time, m_prv_time, exclusive);
+}
+
 void TraceDlg::OnCellLink(wxCommandEvent &event)
 {
 	CellLink(false);
@@ -1678,52 +1775,122 @@ void TraceDlg::OnCellExclusiveLink(wxCommandEvent &event)
 	CellLink(true);
 }
 
-void TraceDlg::OnCellUnlink(wxCommandEvent &event)
+void TraceDlg::OnCellIsolate(wxCommandEvent &event)
 {
-/*	if (!m_view)
+	if (!m_view)
 		return;
+
 	TraceGroup* trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
-	{
-		m_view->CreateTraceGroup();
-		trace_group = m_view->GetTraceGroup();
-	}
+		return;
 
 	//get selections
 	long item;
-	unsigned long id1 = 0;//current T
-	unsigned long id2 = 0;//previous T
-	wxString str;
+	//current T
+	FL::CellList list_cur;
+
 	//current list
-	item = m_trace_list_curr->GetNextItem(
-		-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-	if (item != -1)
+	item = -1;
+	while (true)
 	{
-		str = m_trace_list_curr->GetText(item, 0);
-		str.ToULong(&id1);
+		item = m_trace_list_curr->GetNextItem(
+			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		else
+			AddLabel(item, m_trace_list_curr, list_cur);
 	}
-	//previous list
-	item = m_trace_list_prev->GetNextItem(
-		-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-	if (item != -1)
+	if (list_cur.size() == 0)
 	{
-		str = m_trace_list_prev->GetText(item, 0);
-		str.ToULong(&id2);
+		item = -1;
+		while (true)
+		{
+			item = m_trace_list_curr->GetNextItem(
+				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+			if (item == -1)
+				break;
+			else
+				AddLabel(item, m_trace_list_curr, list_cur);
+		}
 	}
-	if (id1==0 || id2==0)
+
+	if (list_cur.size() == 0)
 		return;
 
-	//find the two vertices
-	Vertex vert1, vert2;
-	if (!trace_group->FindIDInFrame(id1, m_cur_time, vert1))
+	//isolate
+	trace_group->IsolateCells(list_cur, m_cur_time);
+}
+
+void TraceDlg::OnCellUnlink(wxCommandEvent &event)
+{
+	if (!m_view)
+		return;
+
+	TraceGroup* trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+		return;
+
+	//get selections
+	long item;
+	//current T
+	FL::CellList list_cur;
+	//previous T
+	FL::CellList list_prv;
+	//current list
+	item = -1;
+	while (true)
 	{
-		//create vertex
+		item = m_trace_list_curr->GetNextItem(
+			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		else
+			AddLabel(item, m_trace_list_curr, list_cur);
 	}
-	if (!trace_group->FindIDInFrame(id2, m_prv_time, vert2))
+	if (list_cur.size() == 0)
 	{
-		//create vertex
+		item = -1;
+		while (true)
+		{
+			item = m_trace_list_curr->GetNextItem(
+				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+			if (item == -1)
+				break;
+			else
+				AddLabel(item, m_trace_list_curr, list_cur);
+		}
 	}
-	trace_group->UnlinkVertices(id1, m_cur_time, id2, m_prv_time);*/
+	//previous list
+	item = -1;
+	while (true)
+	{
+		item = m_trace_list_prev->GetNextItem(
+			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		else
+			AddLabel(item, m_trace_list_prev, list_prv);
+	}
+	if (list_prv.size() == 0)
+	{
+		item = -1;
+		while (true)
+		{
+			item = m_trace_list_prev->GetNextItem(
+				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+			if (item == -1)
+				break;
+			else
+				AddLabel(item, m_trace_list_prev, list_prv);
+		}
+	}
+	if (list_cur.size() == 0 ||
+		list_prv.size() == 0)
+		return;
+
+	//unlink them
+	trace_group->UnlinkCells(list_cur, list_prv,
+		m_cur_time, m_prv_time);
 }
 
 void TraceDlg::OnCellModify(wxCommandEvent &event)
@@ -1754,9 +1921,9 @@ void TraceDlg::OnCellNewID(wxCommandEvent &event)
 }
 
 //magic
-void TraceDlg::OnCellMagic0Btn(wxCommandEvent &event)
+/*void TraceDlg::OnCellMagic0Btn(wxCommandEvent &event)
 {
-/*	Measure();
+	Measure();
 	wxString str;
 	OutputMeasureResult(str);
 	m_stat_text->SetValue(str);
@@ -1771,7 +1938,7 @@ void TraceDlg::OnCellMagic0Btn(wxCommandEvent &event)
 		SaveMeasureResult(filename);
 	}
 	if (fopendlg)
-		delete fopendlg;*/
+		delete fopendlg;
 }
 
 void TraceDlg::OnCellMagic1Btn(wxCommandEvent &event)
@@ -1787,7 +1954,7 @@ void TraceDlg::OnCellMagic2Btn(wxCommandEvent &event)
 void TraceDlg::OnCellMagic3Btn(wxCommandEvent &event)
 {
 	Test1();
-}
+}*/
 
 void TraceDlg::Measure()
 {

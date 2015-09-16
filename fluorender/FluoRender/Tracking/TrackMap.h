@@ -100,6 +100,11 @@ namespace FL
 		bool LinkCells(TrackMap& track_map,
 			CellList &list1, CellList &list2,
 			size_t frame1, size_t frame2, bool exclusive);
+		bool IsolateCells(TrackMap& track_map,
+			CellList &list, size_t frame);
+		bool UnlinkCells(TrackMap& track_map,
+			CellList &list1, CellList &list2,
+			size_t frame1, size_t frame2);
 
 	private:
 		float m_contact_thresh;
@@ -119,6 +124,8 @@ namespace FL
 		bool IsolateVertex(InterGraph& graph,
 			pVertex &vertex);
 		bool ForceVertices(InterGraph& graph,
+			pVertex &vertex1, pVertex &vertex2);
+		bool UnlinkVertices(InterGraph& graph,
 			pVertex &vertex1, pVertex &vertex2);
 		bool EqualCells(pwCell &cell1, pwCell &cell2);
 		bool FindCellBin(CellBin &bin, pwCell &cell);

@@ -912,6 +912,9 @@ public:
 	//modifications
 	bool LinkCells(FL::CellList &list1, FL::CellList &list2,
 		size_t frame1, size_t frame2, bool exclusive);
+	bool IsolateCells(FL::CellList &list, size_t frame);
+	bool UnlinkCells(FL::CellList &list1, FL::CellList &list2,
+		size_t frame1, size_t frame2);
 	//bool LinkVertices(unsigned int id1, int time1,
 	//				  unsigned int id2, int time2,
 	//				  bool exclusive=false);
@@ -950,12 +953,6 @@ private:
 
 	FL::TrackMap m_track_map;
 	FL::CellList m_cell_list;
-
-//private:
-//	//reading
-//	unsigned char ReadTag(ifstream &ifs);
-//	//writing
-//	void WriteTag(ofstream& ofs, unsigned char tag);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

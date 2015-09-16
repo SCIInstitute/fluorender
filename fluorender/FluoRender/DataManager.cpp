@@ -3035,6 +3035,21 @@ bool TraceGroup::LinkCells(FL::CellList &list1, FL::CellList &list2,
 		list1, list2, frame1, frame2, exclusive);
 }
 
+bool TraceGroup::IsolateCells(FL::CellList &list, size_t frame)
+{
+	FL::TrackMapProcessor tm_processor;
+	return tm_processor.IsolateCells(m_track_map,
+		list, frame);
+}
+
+bool TraceGroup::UnlinkCells(FL::CellList &list1, FL::CellList &list2,
+	size_t frame1, size_t frame2)
+{
+	FL::TrackMapProcessor tm_processor;
+	return tm_processor.UnlinkCells(m_track_map,
+		list1, list2, frame1, frame2);
+}
+
 /*//link two vertices
 bool TraceGroup::LinkVertices(unsigned int id1, int time1,
 	unsigned int id2, int time2,

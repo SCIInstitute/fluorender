@@ -460,6 +460,24 @@ bool TrackMapProcessor::ForceVertices(InterGraph& graph,
 	return true;
 }
 
+bool TrackMapProcessor::UnlinkVertices(InterGraph& graph,
+	pVertex &vertex1, pVertex &vertex2)
+{
+	InterVert v1, v2;
+
+	v1 = vertex1->GetInterVert(graph);
+	if (v1 == InterGraph::null_vertex())
+		return false;
+	v2 = vertex2->GetInterVert(graph);
+	if (v2 == InterGraph::null_vertex())
+		return false;
+
+	std::pair<InterEdge, bool> edge;
+	edge = boost::edge(v1, v2, graph);
+	if (edge.second)
+		graph[edge.first].link = 0;
+}
+
 bool TrackMapProcessor::ResolveGraph(TrackMap& track_map, size_t frame1, size_t frame2)
 {
 	if (frame1 >= track_map.m_frame_num ||
@@ -1812,6 +1830,116 @@ bool TrackMapProcessor::LinkCells(TrackMap& track_map,
 	viter2 != vlist2.end(); ++viter2)
 		ForceVertices(inter_graph,
 			viter1->second, viter2->second);
+
+	return true;
+}
+
+bool TrackMapProcessor::IsolateCells(TrackMap& track_map,
+	CellList &list, size_t frame)
+{
+	//check validity
+	size_t frame_num = track_map.m_frame_num;
+	if (frame >= frame_num)
+		return false;
+
+	VertexList vlist;
+	CellListIter citer;
+
+	CellList &cell_list = track_map.m_cells_list.at(frame);
+	CellListIter cell;
+
+	for (citer = list.begin();
+	citer != list.end(); ++citer)
+	{
+		cell = cell_list.find(citer->second->Id());
+		if (cell == cell_list.end())
+			continue;
+		pVertex vert = cell->second->GetVertex().lock();
+		if (vert)
+			vlist.insert(std::pair<unsigned int, pVertex>
+				(vert->Id(), vert));
+	}
+
+	if (vlist.size() == 0)
+		return false;
+
+	if (frame > 0)
+	{
+		InterGraph &inter_graph = track_map.m_inter_graph_list.at(frame - 1);
+		VertexListIter viter;
+		for (viter = vlist.begin();
+		viter != vlist.end(); ++viter)
+			IsolateVertex(inter_graph, viter->second);
+	}
+	if (frame < frame_num - 1)
+	{
+		InterGraph &inter_graph = track_map.m_inter_graph_list.at(frame);
+		VertexListIter viter;
+		for (viter = vlist.begin();
+		viter != vlist.end(); ++viter)
+			IsolateVertex(inter_graph, viter->second);
+	}
+
+	return true;
+}
+
+bool TrackMapProcessor::UnlinkCells(TrackMap& track_map,
+	CellList &list1, CellList &list2,
+	size_t frame1, size_t frame2)
+{
+	//check validity
+	size_t frame_num = track_map.m_frame_num;
+	if (frame1 >= frame_num ||
+		frame2 >= frame_num ||
+		(frame2 != frame1 + 1 &&
+			frame2 != frame1 - 1))
+		return false;
+
+	VertexList vlist1, vlist2;
+	CellListIter citer1, citer2;
+
+	CellList &cell_list1 = track_map.m_cells_list.at(frame1);
+	CellList &cell_list2 = track_map.m_cells_list.at(frame2);
+	CellListIter cell;
+
+	for (citer1 = list1.begin();
+	citer1 != list1.end(); ++citer1)
+	{
+		cell = cell_list1.find(citer1->second->Id());
+		if (cell == cell_list1.end())
+			continue;
+		pVertex vert1 = cell->second->GetVertex().lock();
+		if (vert1)
+			vlist1.insert(std::pair<unsigned int, pVertex>
+				(vert1->Id(), vert1));
+	}
+	for (citer2 = list2.begin();
+	citer2 != list2.end(); ++citer2)
+	{
+		cell = cell_list2.find(citer2->second->Id());
+		if (cell == cell_list2.end())
+			continue;
+		pVertex vert2 = cell->second->GetVertex().lock();
+		if (vert2)
+			vlist2.insert(std::pair<unsigned int, pVertex>
+				(vert2->Id(), vert2));
+	}
+
+	if (vlist1.size() == 0 ||
+		vlist2.size() == 0)
+		return false;
+
+	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
+		frame1 > frame2 ? frame2 : frame1);
+
+	VertexListIter viter1, viter2;
+
+	for (viter1 = vlist1.begin();
+	viter1 != vlist1.end(); ++viter1)
+		for (viter2 = vlist2.begin();
+	viter2 != vlist2.end(); ++viter2)
+			UnlinkVertices(inter_graph,
+				viter1->second, viter2->second);
 
 	return true;
 }
