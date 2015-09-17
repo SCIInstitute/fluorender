@@ -256,11 +256,13 @@ BEGIN_EVENT_TABLE(TraceDlg, wxPanel)
 	EVT_CHECKBOX(ID_ManualAssistCheck, TraceDlg::OnManualAssistCheck)
 	//modify page
 	//ID edit controls
-	EVT_BUTTON(ID_CellModifyBtn, TraceDlg::OnCellModify)
+	EVT_BUTTON(ID_CellNewIDXBtn, TraceDlg::OnCellNewIDX)
+	EVT_CHECKBOX(ID_AutoIDChk, TraceDlg::OnAutoIDChk)
 	EVT_BUTTON(ID_CellNewIDBtn, TraceDlg::OnCellNewID)
 	EVT_BUTTON(ID_CellCombineIDBtn, TraceDlg::OnCellCombineID)
+	EVT_BUTTON(ID_CellDivideIDBtn, TraceDlg::OnCellDivideID)
+	EVT_BUTTON(ID_CellSegmentBtn, TraceDlg::OnCellSegment)
 	//analysis page
-	EVT_BUTTON(ID_AddLabelBtn, TraceDlg::OnAddLabel)
 	EVT_BUTTON(ID_AnalyzeBtn, TraceDlg::OnAnalyze)
 	EVT_BUTTON(ID_SaveAnalyzeBtn, TraceDlg::OnSaveAnalyze)
 	//magic tool
@@ -408,7 +410,7 @@ wxWindow* TraceDlg::CreateLinkPage(wxWindow *parent)
 
 	wxStaticText *st = 0;
 
-	//ID link controls
+	//selection
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Selection tools:",
 		wxDefaultPosition, wxSize(100, 20));
@@ -432,7 +434,7 @@ wxWindow* TraceDlg::CreateLinkPage(wxWindow *parent)
 	sizer_1->AddStretchSpacer();
 	sizer_1->Add(m_manual_assist_check, 0, wxALIGN_CENTER);
 
-	//assist
+	//ID link controls
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	m_cell_exclusive_link_btn = new wxButton(page, ID_CellExclusiveLinkBtn, "Excl. Link",
 		wxDefaultPosition, wxSize(65, 23));
@@ -466,8 +468,47 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 {
 	wxPanel *page = new wxPanel(parent);
 
+	wxStaticText *st = 0;
+
+	//ID input
+	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "New ID:",
+		wxDefaultPosition, wxSize(100, 20));
+	m_cell_new_id_text = new wxTextCtrl(page, ID_CellNewIDText, "",
+		wxDefaultPosition, wxSize(77, 23));
+	m_cell_new_id_x_btn = new wxButton(page, ID_CellNewIDXBtn, "X",
+		wxDefaultPosition, wxSize(23, 23));
+	m_auto_id_chk = new wxCheckBox(page, ID_AutoIDChk, "Auto Assign ID");
+	sizer_1->Add(5, 5);
+	sizer_1->Add(st, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_cell_new_id_text, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_cell_new_id_x_btn, 0, wxALIGN_CENTER);
+	sizer_1->AddStretchSpacer();
+	sizer_1->Add(m_auto_id_chk, 0, wxALIGN_CENTER);
+
+	//controls
+	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
+	m_cell_new_id_btn = new wxButton(page, ID_CellNewIDBtn, "Assign New",
+		wxDefaultPosition, wxSize(65, 23));
+	m_cell_combine_id_btn = new wxButton(page, ID_CellCombineIDBtn, "Combine",
+		wxDefaultPosition, wxSize(65, 23));
+	m_cell_divide_id_btn = new wxButton(page, ID_CellDivideIDBtn, "Divide",
+		wxDefaultPosition, wxSize(65, 23));
+	m_cell_segment_btn = new wxButton(page, ID_CellSegmentBtn, "Segment",
+		wxDefaultPosition, wxSize(65, 23));
+	sizer_2->AddStretchSpacer();
+	sizer_2->Add(m_cell_new_id_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_cell_combine_id_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_cell_divide_id_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_cell_segment_btn, 0, wxALIGN_CENTER);
+	sizer_2->AddStretchSpacer();
+
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer_1, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer_2, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 
 	//set the page
@@ -497,135 +538,11 @@ m_view(0),
 m_mask(0),
 m_cur_time(-1),
 m_prv_time(-1),
-m_manual_assist(false)
+m_manual_assist(false),
+m_auto_id(false)
 {
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
-
-	wxStaticText *st = 0;
-	//edit tools
-/*	wxBoxSizer *sizer_3 = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, "Analyze && Validate"),
-		wxVERTICAL);
-	//first row
-	wxBoxSizer* sizer_31 = new wxBoxSizer(wxHORIZONTAL);
-	m_add_label_btn = new wxButton(this, ID_AddLabelBtn, "Add Label",
-		wxDefaultPosition, wxSize(80, 23));
-	m_analyze_btn = new wxButton(this, ID_AnalyzeBtn, "Analyze",
-		wxDefaultPosition, wxSize(80, 23));
-	m_save_analyze_btn = new wxButton(this, ID_SaveAnalyzeBtn, "Save Analy.",
-		wxDefaultPosition, wxSize(90, 23));
-	m_manual_assist_check = new wxCheckBox(this, ID_ManualAssistCheck, "Manual Tracking Assist.",
-		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
-	sizer_31->AddStretchSpacer();
-	sizer_31->Add(m_add_label_btn, 0, wxALIGN_CENTER);
-	sizer_31->Add(5, 5);
-	sizer_31->Add(m_analyze_btn, 0, wxALIGN_CENTER);
-	sizer_31->Add(5, 5);
-	sizer_31->Add(m_save_analyze_btn, 0, wxALIGN_CENTER);
-	sizer_31->Add(5, 5);
-	sizer_31->Add(m_manual_assist_check, 0, wxALIGN_CENTER);
-	//cell size filter
-	wxBoxSizer* sizer_32 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Component size:",
-		wxDefaultPosition, wxSize(130, 20));
-	m_cell_size_sldr = new wxSlider(this, ID_CellSizeSldr, 20, 0, 100,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cell_size_text = new wxTextCtrl(this, ID_CellSizeText, "20",
-		wxDefaultPosition, wxSize(60, 23), 0, vald_int);
-	sizer_32->Add(5, 5);
-	sizer_32->Add(st, 0, wxALIGN_CENTER);
-	sizer_32->Add(m_cell_size_sldr, 1, wxEXPAND);
-	sizer_32->Add(m_cell_size_text, 0, wxALIGN_CENTER);
-	//selection tools
-	wxBoxSizer* sizer_33 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Selection tools:",
-		wxDefaultPosition, wxSize(100, 20));
-	m_comp_id_text = new wxTextCtrl(this, ID_CompIDText, "",
-		wxDefaultPosition, wxSize(100, 23));
-	m_comp_append_btn = new wxButton(this, ID_CompAppendBtn, "Append",
-		wxDefaultPosition, wxSize(80, 23));
-	m_comp_exclusive_btn = new wxButton(this, ID_CompExclusiveBtn, "Exclusive",
-		wxDefaultPosition, wxSize(90, 23));
-	m_comp_full_btn = new wxButton(this, ID_CompFullBtn, "Full",
-		wxDefaultPosition, wxSize(50, 23));
-	m_comp_clear_btn = new wxButton(this, ID_CompClearBtn, "Clear",
-		wxDefaultPosition, wxSize(50, 23));
-	sizer_33->Add(5, 5);
-	sizer_33->Add(st, 0, wxALIGN_CENTER);
-	sizer_33->Add(m_comp_id_text, 0, wxALIGN_CENTER);
-	sizer_33->Add(10, 23);
-	sizer_33->Add(m_comp_append_btn, 0, wxALIGN_CENTER);
-	sizer_33->Add(m_comp_exclusive_btn, 0, wxALIGN_CENTER);
-	sizer_33->Add(m_comp_full_btn, 0, wxALIGN_CENTER);
-	sizer_33->Add(m_comp_clear_btn, 0, wxALIGN_CENTER);
-	//ID link controls
-	wxBoxSizer* sizer_34 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "ID link tools:",
-		wxDefaultPosition, wxSize(100, 20));
-	m_cell_update_btn = new wxButton(this, ID_CellUpdateBtn, "Add Selected",
-		wxDefaultPosition, wxSize(100, 23));
-	m_cell_exclusive_link_btn = new wxButton(this, ID_CellExclusiveLinkBtn, "Exclusive Link",
-		wxDefaultPosition, wxSize(110, 23));
-	m_cell_link_btn = new wxButton(this, ID_CellLinkBtn, "Link IDs",
-		wxDefaultPosition, wxSize(70, 23));
-	m_cell_unlink_btn = new wxButton(this, ID_CellUnlinkBtn, "Unlink IDs",
-		wxDefaultPosition, wxSize(90, 23));
-	sizer_34->Add(5, 5);
-	sizer_34->Add(st, 0, wxALIGN_CENTER);
-	sizer_34->Add(m_cell_update_btn, 0, wxALIGN_CENTER);
-	sizer_34->Add(10, 23);
-	sizer_34->Add(m_cell_exclusive_link_btn, 0, wxALIGN_CENTER);
-	sizer_34->Add(m_cell_link_btn, 0, wxALIGN_CENTER);
-	sizer_34->Add(m_cell_unlink_btn, 0, wxALIGN_CENTER);
-	//ID edit controls
-	wxBoxSizer* sizer_35 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "ID edit tools:",
-		wxDefaultPosition, wxSize(100, 20));
-	m_cell_new_id_text = new wxTextCtrl(this, ID_CellNewIDText, "",
-		wxDefaultPosition, wxSize(100, 23));
-	m_cell_modify_btn = new wxButton(this, ID_CellModifyBtn, "Start Editing",
-		wxDefaultPosition, wxSize(100, 23));
-	m_cell_new_id_btn = new wxButton(this, ID_CellNewIDBtn, "New ID",
-		wxDefaultPosition, wxSize(70, 23));
-	m_cell_combine_id_btn = new wxButton(this, ID_CellCombineIDBtn, "Combine IDs",
-		wxDefaultPosition, wxSize(100, 23));
-	sizer_35->Add(5, 5);
-	sizer_35->Add(st, 0, wxALIGN_CENTER);
-	sizer_35->Add(m_cell_new_id_text, 0, wxALIGN_CENTER);
-	sizer_35->Add(10, 23);
-	sizer_35->Add(m_cell_modify_btn, 0, wxALIGN_CENTER);
-	sizer_35->Add(m_cell_new_id_btn, 0, wxALIGN_CENTER);
-	sizer_35->Add(m_cell_combine_id_btn, 0, wxALIGN_CENTER);
-	//magic tool
-	wxBoxSizer* sizer_36 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Magic happens:",
-		wxDefaultPosition, wxSize(130, 20));
-	m_cell_magic0_btn = new wxButton(this, ID_CellMagic0Btn, "Measure",
-		wxDefaultPosition, wxSize(80, 23));
-	m_cell_magic1_btn = new wxButton(this, ID_CellMagic1Btn, "Diamond",
-		wxDefaultPosition, wxSize(80, 23));
-	m_cell_magic2_btn = new wxButton(this, ID_CellMagic2Btn, "Diverge",
-		wxDefaultPosition, wxSize(80, 23));
-	m_cell_magic3_btn = new wxButton(this, ID_CellMagic3Btn, "Over-S",
-		wxDefaultPosition, wxSize(80, 23));
-	sizer_36->Add(5, 5);
-	sizer_36->Add(st, 0, wxALIGN_CENTER);
-	sizer_36->Add(m_cell_magic0_btn, 0, wxALIGN_CENTER);
-	sizer_36->Add(10, 23);
-	sizer_36->Add(m_cell_magic1_btn, 0, wxALIGN_CENTER);
-	sizer_36->Add(m_cell_magic2_btn, 0, wxALIGN_CENTER);
-	sizer_36->Add(m_cell_magic3_btn, 0, wxALIGN_CENTER);
-	//
-	sizer_3->Add(sizer_31, 0, wxEXPAND);
-	sizer_3->Add(10, 10);
-	sizer_3->Add(sizer_32, 0, wxEXPAND);
-	sizer_3->Add(sizer_33, 0, wxEXPAND);
-	sizer_3->Add(sizer_34, 0, wxEXPAND);
-	sizer_3->Add(sizer_35, 0, wxEXPAND);
-	sizer_3->Add(sizer_36, 0, wxEXPAND);
-	sizer_3->Hide(sizer_36);
-*/
 
 	//notebook
 	m_notebook = new wxNotebook(this, wxID_ANY);
@@ -634,6 +551,8 @@ m_manual_assist(false)
 	m_notebook->AddPage(CreateLinkPage(m_notebook), "Linkage");
 	m_notebook->AddPage(CreateModifyPage(m_notebook), "Modify");
 	m_notebook->AddPage(CreateAnalysisPage(m_notebook), "Analysis");
+
+	wxStaticText *st = 0;
 
 	//ghost num
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
@@ -968,20 +887,7 @@ void TraceDlg::OnRefineMapBtn(wxCommandEvent &event)
 	RefineMap();
 }
 
-//add label
-void TraceDlg::OnAddLabel(wxCommandEvent &event)
-{
-	if (!m_view)
-		return;
-
-	//get data
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	if (!vd)
-		return;
-	vd->AddEmptyMask();
-	vd->AddEmptyLabel();
-}
-
+//analysis
 void TraceDlg::OnAnalyze(wxCommandEvent &event)
 {
 	Measure();
@@ -1633,54 +1539,6 @@ void TraceDlg::CellExclusiveID(int mode)
 
 }
 
-void TraceDlg::CellAppendID(vector<unsigned int> &id_list)
-{
-/*	if (!m_view)
-		return;
-
-	//get current mask
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	if (!vd)
-		return;
-	Nrrd* nrrd_mask = vd->GetMask();
-	if (!nrrd_mask)
-		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if(!data_mask)
-		return;
-	//get current label
-	Texture* tex = vd->GetTexture();
-	if (!tex)
-		return;
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
-		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
-		return;
-	//select append
-	int i, j, k;
-	int nx, ny, nz;
-	unsigned long long index;
-	vd->GetResolution(nx, ny, nz);
-	for (i=0; i<nx; ++i)
-	for (j=0; j<ny; ++j)
-	for (k=0; k<nz; ++k)
-	{
-		index = nx*ny*k + nx*j + i;
-		if (find(id_list.begin(), id_list.end(), data_label[index])!=id_list.end())
-			data_mask[index] = 255;
-		//if (data_label[index] == id)
-		//{
-		//	data_mask[index] = 255;
-		//}
-	}
-	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_pool();
-	//update view
-	CellUpdate();*/
-}
-
 void TraceDlg::CellLink(bool exclusive)
 {
 	if (!m_view)
@@ -1884,31 +1742,119 @@ void TraceDlg::OnCellUnlink(wxCommandEvent &event)
 		m_cur_time, m_prv_time);
 }
 
-void TraceDlg::OnCellModify(wxCommandEvent &event)
+//ID edit controls
+void TraceDlg::OnCellNewIDX(wxCommandEvent &event)
 {
-/*	if (!m_view)
-		return;
+	m_cell_new_id_text->Clear();
+}
 
-	//save current mask
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	if (!vd)
-		return;
-	Nrrd* nrrd = vd->GetMask();
-	if (!nrrd)
-		return;
-	if (!m_mask)
-		m_mask = nrrdNew();
-	nrrdCopy(m_mask, nrrd);
-	
-	//clear current mask
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetTree())
-		frame->GetTree()->BrushClear();*/
+void TraceDlg::OnAutoIDChk(wxCommandEvent &event)
+{
+	m_auto_id = m_auto_id_chk->GetValue();
 }
 
 void TraceDlg::OnCellNewID(wxCommandEvent &event)
 {
 	CellNewID();
+}
+
+void TraceDlg::OnCellCombineID(wxCommandEvent &event)
+{
+	/*	if (!m_view)
+	return;
+
+	//cell size filter
+	wxString str = m_cell_size_text->GetValue();
+	long ival;
+	str.ToLong(&ival);
+	unsigned int slimit = (unsigned int)ival;
+	//trace group
+	TraceGroup *trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+	return;
+	//get current mask
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+	return;
+	Nrrd* nrrd_mask = vd->GetMask();
+	if (!nrrd_mask)
+	return;
+	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
+	if (!data_mask)
+	return;
+	//get current label
+	Texture* tex = vd->GetTexture();
+	if (!tex)
+	return;
+	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
+	if (!nrrd_label)
+	return;
+	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	if (!data_label)
+	return;
+	//get an valid ID from selection
+	int i, j, k;
+	int nx, ny, nz;
+	unsigned long long index;
+	unsigned int id_init = 0;
+	unsigned int max_size = slimit;
+	vd->GetResolution(nx, ny, nz);
+	Vertex vertex;
+	int time = m_view->m_glview->m_tseq_cur_num;
+	for (i=0; i<nx; ++i)
+	for (j=0; j<ny; ++j)
+	for (k=0; k<nz; ++k)
+	{
+	index = nx*ny*k + nx*j + i;
+	if (data_mask[index] &&
+	data_label[index])
+	{
+	if (trace_group->FindIDInFrame(
+	data_label[index], time, vertex))
+	if (vertex.vsize > max_size)
+	{
+	id_init = vertex.id;
+	max_size = vertex.vsize;
+	}
+	}
+	}
+	if (id_init == 0)
+	return;
+	//combine IDs within the masked region
+	for (i=0; i<nx; ++i)
+	for (j=0; j<ny; ++j)
+	for (k=0; k<nz; ++k)
+	{
+	index = nx*ny*k + nx*j + i;
+	if (data_mask[index] &&
+	data_label[index])
+	data_label[index] = id_init;
+	}
+	//invalidate label mask in gpu
+	vd->GetVR()->clear_tex_pool();
+	//save label mask to disk
+	BaseReader* reader = vd->GetReader();
+	if (reader)
+	{
+	wxString data_name = reader->GetCurName(time, vd->GetCurChannel());
+	wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
+	MSKWriter msk_writer;
+	msk_writer.SetData(nrrd_label);
+	msk_writer.Save(label_name.ToStdWstring(), 1);
+	}
+
+	//update view
+	m_view->RefreshGL();*/
+}
+
+void TraceDlg::OnCellDivideID(wxCommandEvent& event)
+{
+
+}
+
+void TraceDlg::OnCellSegment(wxCommandEvent& event)
+{
+
 }
 
 //magic
@@ -2360,95 +2306,6 @@ void TraceDlg::Test2(int type)
 		}
 	}
 	m_stat_text->SetValue(str);*/
-}
-
-void TraceDlg::OnCellCombineID(wxCommandEvent &event)
-{
-/*	if (!m_view)
-		return;
-
-	//cell size filter
-	wxString str = m_cell_size_text->GetValue();
-	long ival;
-	str.ToLong(&ival);
-	unsigned int slimit = (unsigned int)ival;
-	//trace group
-	TraceGroup *trace_group = m_view->GetTraceGroup();
-	if (!trace_group)
-		return;
-	//get current mask
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	if (!vd)
-		return;
-	Nrrd* nrrd_mask = vd->GetMask();
-	if (!nrrd_mask)
-		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
-		return;
-	//get current label
-	Texture* tex = vd->GetTexture();
-	if (!tex)
-		return;
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
-		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
-		return;
-	//get an valid ID from selection
-	int i, j, k;
-	int nx, ny, nz;
-	unsigned long long index;
-	unsigned int id_init = 0;
-	unsigned int max_size = slimit;
-	vd->GetResolution(nx, ny, nz);
-	Vertex vertex;
-	int time = m_view->m_glview->m_tseq_cur_num;
-	for (i=0; i<nx; ++i)
-	for (j=0; j<ny; ++j)
-	for (k=0; k<nz; ++k)
-	{
-		index = nx*ny*k + nx*j + i;
-		if (data_mask[index] &&
-			data_label[index])
-		{
-			if (trace_group->FindIDInFrame(
-				data_label[index], time, vertex))
-				if (vertex.vsize > max_size)
-				{
-					id_init = vertex.id;
-					max_size = vertex.vsize;
-				}
-		}
-	}
-	if (id_init == 0)
-		return;
-	//combine IDs within the masked region
-	for (i=0; i<nx; ++i)
-	for (j=0; j<ny; ++j)
-	for (k=0; k<nz; ++k)
-	{
-		index = nx*ny*k + nx*j + i;
-		if (data_mask[index] &&
-			data_label[index])
-			data_label[index] = id_init;
-	}
-	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_pool();
-	//save label mask to disk
-	BaseReader* reader = vd->GetReader();
-	if (reader)
-	{
-		wxString data_name = reader->GetCurName(time, vd->GetCurChannel());
-		wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
-		MSKWriter msk_writer;
-		msk_writer.SetData(nrrd_label);
-		msk_writer.Save(label_name.ToStdWstring(), 1);
-	}
-
-	//update view
-	m_view->RefreshGL();*/
 }
 
 void TraceDlg::OnCellPrev(wxCommandEvent &event)

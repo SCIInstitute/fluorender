@@ -119,9 +119,12 @@ public:
 		//modify page
 		//ID edit controls
 		ID_CellNewIDText,
-		ID_CellModifyBtn,
+		ID_CellNewIDXBtn,
+		ID_AutoIDChk,
 		ID_CellNewIDBtn,
 		ID_CellCombineIDBtn,
+		ID_CellDivideIDBtn,
+		ID_CellSegmentBtn,
 		//analysis page
 		//edit tools
 		ID_AddLabelBtn,
@@ -154,6 +157,8 @@ public:
 
 	//manual assist
 	bool GetManualAssist() {return m_manual_assist;}
+	//auto id
+	bool GetAutoID() { return m_auto_id; }
 	//cell operations
 	void CellUpdate();
 	void CellFull();
@@ -163,7 +168,6 @@ public:
 	//mode: how to deal with conflicts
 	//0--delete; 1--select
 	void CellExclusiveID(int mode);
-	void CellAppendID(vector<unsigned int> &id_list);
 	void CompDelete();
 
 	//measurement
@@ -214,6 +218,8 @@ private:
 
 	//enable manual assist
 	bool m_manual_assist;
+	//auto id
+	bool m_auto_id;
 
 	//map page
 	//load/save trace
@@ -242,20 +248,23 @@ private:
 	//link page
 	wxTextCtrl* m_comp_id_text2;
 	//same append button from selection page
+	//assist
+	wxCheckBox* m_manual_assist_check;
 	//ID link controls
 	wxButton* m_cell_exclusive_link_btn;
 	wxButton* m_cell_link_btn;
 	wxButton* m_cell_isolate_btn;
 	wxButton* m_cell_unlink_btn;
-	//assist
-	wxCheckBox* m_manual_assist_check;
 
 	//modify page
 	//ID edit controls
 	wxTextCtrl* m_cell_new_id_text;
-	wxButton* m_cell_modify_btn;
+	wxButton* m_cell_new_id_x_btn;
+	wxCheckBox* m_auto_id_chk;
 	wxButton* m_cell_new_id_btn;
 	wxButton* m_cell_combine_id_btn;
+	wxButton* m_cell_divide_id_btn;
+	wxButton* m_cell_segment_btn;
 
 	//analysis page
 	//edit tools
@@ -331,11 +340,13 @@ private:
 	void OnManualAssistCheck(wxCommandEvent &event);
 	//modify page
 	//ID edit controls
-	void OnCellModify(wxCommandEvent& event);
+	void OnCellNewIDX(wxCommandEvent& event);
+	void OnAutoIDChk(wxCommandEvent& event);
 	void OnCellNewID(wxCommandEvent& event);
 	void OnCellCombineID(wxCommandEvent& event);
+	void OnCellDivideID(wxCommandEvent& event);
+	void OnCellSegment(wxCommandEvent& event);
 	//analysis page
-	void OnAddLabel(wxCommandEvent &event);
 	void OnAnalyze(wxCommandEvent &event);
 	void OnSaveAnalyze(wxCommandEvent &event);
 	//magic tool
