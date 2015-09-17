@@ -157,7 +157,7 @@ public:
 	//cell operations
 	void CellUpdate();
 	void CellFull();
-	void CellLink(bool exclusive, bool idid=false);
+	void CellLink(bool exclusive);
 	void CellNewID();
 	//assign exclusive ID to selection
 	//mode: how to deal with conflicts

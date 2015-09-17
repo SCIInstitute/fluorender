@@ -288,8 +288,8 @@ namespace FL
 		cell->SetSizeUi(ReadUint(ifs));
 		cell->SetSizeF(ReadFloat(ifs));
 		cell->SetExternalUi(ReadUint(ifs));
-        cell->SetExternalF(ReadFloat(ifs));
-        FLIVR::Point p = ReadPoint(ifs);
+		cell->SetExternalF(ReadFloat(ifs));
+		FLIVR::Point p = ReadPoint(ifs);
 		cell->SetCenter(p);
 		cell_list.insert(std::pair<unsigned int, pCell>
 			(id, cell));
@@ -340,7 +340,10 @@ namespace FL
 			m_vertices_list.push_back(VertexList());
 			m_intra_graph_list.push_back(IntraGraph());
 			if (m_inter_graph_list.size() < frame)
+			{
 				m_inter_graph_list.push_back(InterGraph());
+				m_inter_graph_list.back().index = m_frame_num;
+			}
 			m_frame_num++;
 		}
 		return frame < m_frame_num;

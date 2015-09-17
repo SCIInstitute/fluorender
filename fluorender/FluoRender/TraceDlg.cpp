@@ -420,6 +420,8 @@ wxWindow* TraceDlg::CreateLinkPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(65, 23));
 	m_comp_clear_btn = new wxButton(page, ID_CompClearBtn, "Clear",
 		wxDefaultPosition, wxSize(65, 23));
+	m_manual_assist_check = new wxCheckBox(page, ID_ManualAssistCheck, "Auto Link",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_comp_id_text2, 0, wxALIGN_CENTER);
@@ -427,6 +429,8 @@ wxWindow* TraceDlg::CreateLinkPage(wxWindow *parent)
 	sizer_1->Add(10, 23);
 	sizer_1->Add(m_comp_append_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_comp_clear_btn, 0, wxALIGN_CENTER);
+	sizer_1->AddStretchSpacer();
+	sizer_1->Add(m_manual_assist_check, 0, wxALIGN_CENTER);
 
 	//assist
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
@@ -438,15 +442,12 @@ wxWindow* TraceDlg::CreateLinkPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(65, 23));
 	m_cell_unlink_btn = new wxButton(page, ID_CellUnlinkBtn, "Unlink IDs",
 		wxDefaultPosition, wxSize(65, 23));
-	m_manual_assist_check = new wxCheckBox(page, ID_ManualAssistCheck, "Manual Tracking Assist.",
-		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
-	sizer_2->Add(10, 10);
+	sizer_2->AddStretchSpacer();
 	sizer_2->Add(m_cell_exclusive_link_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_link_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_isolate_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_unlink_btn, 0, wxALIGN_CENTER);
 	sizer_2->AddStretchSpacer();
-	sizer_2->Add(m_manual_assist_check, 0, wxALIGN_CENTER);
 
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
@@ -744,7 +745,7 @@ void TraceDlg::GetSettings(VRenderView* vrv)
 		m_load_trace_text->SetValue("No Track map");
 
 	//manual tracking assist
-//	m_manual_assist_check->SetValue(m_manual_assist);
+	m_manual_assist_check->SetValue(m_manual_assist);
 }
 
 VRenderView* TraceDlg::GetView()
@@ -1045,8 +1046,7 @@ void TraceDlg::CompDelete()
 		}
 	}
 
-	if (ids.empty())
-		return;
+	bool clear_all = ids.empty();
 
 	//get current mask
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
@@ -1069,20 +1069,18 @@ void TraceDlg::CompDelete()
 	if (!data_label)
 		return;
 	//select append
-	int i, j, k;
 	int nx, ny, nz;
-	unsigned long long index;
 	vd->GetResolution(nx, ny, nz);
-	for (i=0; i<nx; ++i)
-	for (j=0; j<ny; ++j)
-	for (k=0; k<nz; ++k)
+	unsigned long long index;
+	unsigned long long for_size = (unsigned long long)nx *
+		(unsigned long long)ny * (unsigned long long)nz;
+	for (index = 0; index < for_size; ++index)
 	{
-		index = nx*ny*k + nx*j + i;
-		if (find(ids.begin(), ids.end(), data_label[index])
+		if (clear_all)
+			data_mask[index] = 0;
+		else if (find(ids.begin(), ids.end(), data_label[index])
 			!= ids.end())
-		{
 			data_mask[index] = 255;
-		}
 		else
 			data_mask[index] = 0;
 	}
@@ -1181,28 +1179,22 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 		if (!data_label)
 			return;
 		//select append
-		int i, j, k;
 		int nx, ny, nz;
-		unsigned long long index;
 		vd->GetResolution(nx, ny, nz);
-		for (i=0; i<nx; ++i)
-		for (j=0; j<ny; ++j)
-		for (k=0; k<nz; ++k)
+		unsigned long long for_size = (unsigned long long)nx*
+			(unsigned long long)ny * (unsigned long long)nz;
+		for (unsigned long long index = 0;
+		index < for_size; ++index)
 		{
-			index = nx*ny*k + nx*j + i;
 			if (get_all)
 			{
 				if (data_label[index])
-				{
 					data_mask[index] = 255;
-				}
 			}
 			else
 			{
 				if (data_label[index] == id)
-				{
 					data_mask[index] = 255;
-				}
 			}
 		}
 		//invalidate label mask in gpu
@@ -1246,19 +1238,15 @@ void TraceDlg::OnCompExclusive(wxCommandEvent &event)
 		if (!data_label)
 			return;
 		//select append
-		int i, j, k;
 		int nx, ny, nz;
-		unsigned long long index;
 		vd->GetResolution(nx, ny, nz);
-		for (i = 0; i < nx; ++i)
-		for (j = 0; j < ny; ++j)
-		for (k = 0; k < nz; ++k)
+		unsigned long long for_size = (unsigned long long)nx *
+			(unsigned long long)ny * (unsigned long long)nz;
+		unsigned long long index;
+		for (index = 0; index < for_size; ++index)
 		{
-			index = nx*ny*k + nx*j + i;
 			if (data_label[index] == id)
-			{
 				data_mask[index] = 255;
-			}
 			else
 				data_mask[index] = 0;
 		}
@@ -1381,16 +1369,19 @@ void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, FL::CellList 
 
 	str = trace_list_ctrl->GetText(item, 0);
 	str.ToULong(&id);
-	//str = trace_list_ctrl->GetText(item, 1);
-	//str.ToULong(&size);
-	//str = trace_list_ctrl->GetText(item, 2);
-	//str.ToDouble(&x);
-	//str = trace_list_ctrl->GetText(item, 3);
-	//str.ToDouble(&y);
-	//str = trace_list_ctrl->GetText(item, 4);
-	//str.ToDouble(&z);
+	str = trace_list_ctrl->GetText(item, 1);
+	str.ToULong(&size);
+	str = trace_list_ctrl->GetText(item, 2);
+	str.ToDouble(&x);
+	str = trace_list_ctrl->GetText(item, 3);
+	str.ToDouble(&y);
+	str = trace_list_ctrl->GetText(item, 4);
+	str.ToDouble(&z);
 
 	FL::pCell cell(new FL::Cell(id));
+	cell->SetSizeUi(size);
+	cell->SetSizeF(float(size));
+	cell->SetCenter(FLIVR::Point(x, y, z));
 	list.insert(pair<unsigned int, FL::pCell>
 		(id, cell));
 }
@@ -1508,10 +1499,10 @@ void TraceDlg::CellNewID()
 
 void TraceDlg::CellExclusiveID(int mode)
 {
-/*	if (!m_view)
+	if (!m_view)
 		return;
 
-	//trace group
+/*	//trace group
 	TraceGroup *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 	{
@@ -1635,11 +1626,11 @@ void TraceDlg::CellExclusiveID(int mode)
 		msk_writer.SetData(nrrd_label);
 		msk_writer.Save(label_name.ToStdWstring(), 1);
 	}
-
+*/
 	CellUpdate();
 	//update view
 	m_view->RefreshGL();
-*/
+
 }
 
 void TraceDlg::CellAppendID(vector<unsigned int> &id_list)
@@ -1690,7 +1681,7 @@ void TraceDlg::CellAppendID(vector<unsigned int> &id_list)
 	CellUpdate();*/
 }
 
-void TraceDlg::CellLink(bool exclusive, bool idid)
+void TraceDlg::CellLink(bool exclusive)
 {
 	if (!m_view)
 		return;

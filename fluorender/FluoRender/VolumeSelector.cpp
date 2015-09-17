@@ -1111,13 +1111,9 @@ void VolumeSelector::NoiseRemoval(int iter, double thresh, int mode)
 			memcpy(val8, nrrd_mvd->data, res_x*res_y*res_z);
 		else if (nrrd_mvd->type == nrrdTypeUShort)
 		{
-			for (int i=0; i<res_x; i++)
-				for (int j=0; j<res_y; j++)
-					for (int k=0; k<res_z; k++)
-					{
-						int index = res_x*res_y*k + res_x*j + i;
-						val8[index] = uint8(double(((uint16*)nrrd_mvd->data)[index])*m_vd->GetScalarScale()/257.0);
-					}
+			for (unsigned long long index = 0; index < mem_size; ++index)
+				val8[index] = uint8(double(((uint16*)nrrd_mvd->data)[index]) *
+					m_vd->GetScalarScale()/257.0);
 		}
 		nrrdWrap(nrrd_new, val8, nrrdTypeUChar, 3, (size_t)res_x, (size_t)res_y, (size_t)res_z);
 		nrrdAxisInfoSet(nrrd_new, nrrdAxisInfoSpacing, spc_x, spc_y, spc_z);
