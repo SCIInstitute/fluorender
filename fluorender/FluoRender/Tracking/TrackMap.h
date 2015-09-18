@@ -106,7 +106,7 @@ namespace FL
 			CellList &list1, CellList &list2,
 			size_t frame1, size_t frame2);
 		//
-		CellListIter AddCell(TrackMap& track_map, pCell &cell, size_t frame);
+		bool AddCell(TrackMap& track_map, pCell &cell, size_t frame, CellListIter &iter);
 
 	private:
 		float m_contact_thresh;

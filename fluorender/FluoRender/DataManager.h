@@ -175,20 +175,23 @@ public:
 	int Load(Nrrd* data, wxString &name, wxString &path);
 	int Replace(Nrrd* data, bool del_tex);
 	int Replace(VolumeData* data);
+	Nrrd* GetVolume(bool ret);
 	//empty data
 	void AddEmptyData(int bits,
 		int nx, int ny, int nz,
 		double spcx, double spcy, double spcz);
 	//load mask
 	void LoadMask(Nrrd* mask);
-	Nrrd* GetMask();
+	Nrrd* GetMask(bool ret);
 	//empty mask
 	void AddEmptyMask();
 	//load label
 	void LoadLabel(Nrrd* label);
+	Nrrd* GetLabel(bool ret);
 	//empty label
 	//mode: 0-zeros;1-ordered; 2-shuffled
 	void AddEmptyLabel(int mode=0);
+	bool SearchLabel(unsigned int label);
 
 	//save
 	double GetOriginalValue(int i, int j, int k);
@@ -904,25 +907,19 @@ public:
 
 	//for selective drawing
 	void ClearCellList();
-	void AddCell(FL::pCell &cell);
 	void UpdateCellList(FL::CellList &cur_sel_list);
 	FL::CellList &GetCellList();
 	bool FindCell(unsigned int id);
 
 	//modifications
+	bool AddCell(FL::pCell &cell, size_t frame);
 	bool LinkCells(FL::CellList &list1, FL::CellList &list2,
 		size_t frame1, size_t frame2, bool exclusive);
 	bool IsolateCells(FL::CellList &list, size_t frame);
 	bool UnlinkCells(FL::CellList &list1, FL::CellList &list2,
 		size_t frame1, size_t frame2);
-	//bool LinkVertices(unsigned int id1, int time1,
-	//				  unsigned int id2, int time2,
-	//				  bool exclusive=false);
-	//bool UnlinkVertices(unsigned int id1, int time1,
-	//					unsigned int id2, int time2);
 	//bool AddVertex(int time, unsigned int id,
 	//	unsigned int vsize, Point& center);
-	//Frame* AddFrame(int time);
 
 	//i/o
 	bool Load(wxString &filename);

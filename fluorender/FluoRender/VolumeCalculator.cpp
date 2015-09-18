@@ -85,7 +85,7 @@ void VolumeCalculator::Calculate(int type)
    case 5:
    case 6:
    case 7:
-      if (!m_vd_a || !m_vd_a->GetMask())
+      if (!m_vd_a || !m_vd_a->GetMask(false))
          return;
       CreateVolumeResult1();
       if (!m_vd_r)

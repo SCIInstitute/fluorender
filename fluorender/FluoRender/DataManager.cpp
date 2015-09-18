@@ -649,32 +649,20 @@ void VolumeData::AddEmptyLabel(int mode)
 	if (!m_tex || !m_vr)
 		return;
 
+	Nrrd *nrrd_label = 0;
+	unsigned int *val32 = 0;
 	//prepare the texture bricks for the labeling mask
 	if (m_tex->add_empty_label())
 	{
 		//add the nrrd data for the labeling mask
-		Nrrd *nrrd_label = nrrdNew();
+		nrrd_label = nrrdNew();
 		unsigned long long mem_size = (unsigned long long)m_res_x*
 			(unsigned long long)m_res_y*(unsigned long long)m_res_z;
-		unsigned int *val32 = new (std::nothrow) unsigned int[mem_size];
+		val32 = new (std::nothrow) unsigned int[mem_size];
 		if (!val32)
 		{
 			wxMessageBox("Not enough memory. Please save project and restart.");
 			return;
-		}
-
-		//apply values
-		switch (mode)
-		{
-		case 0://zeros
-			memset(val32, 0, sizeof(unsigned int)*m_res_x*m_res_y*m_res_z);
-			break;
-		case 1://ordered
-			SetOrderedID(val32);
-			break;
-		case 2://shuffled
-			SetShuffledID(val32);
-			break;
 		}
 
 		double spcx, spcy, spcz;
@@ -687,14 +675,76 @@ void VolumeData::AddEmptyLabel(int mode)
 
 		m_tex->set_nrrd(nrrd_label, m_tex->nlabel());
 	}
+	else
+	{
+		nrrd_label = m_tex->get_nrrd(m_tex->nlabel());
+		val32 = (unsigned int*)nrrd_label->data;
+	}
+
+	//apply values
+	switch (mode)
+	{
+	case 0://zeros
+		memset(val32, 0, sizeof(unsigned int)*m_res_x*m_res_y*m_res_z);
+		break;
+	case 1://ordered
+		SetOrderedID(val32);
+		break;
+	case 2://shuffled
+		SetShuffledID(val32);
+		break;
+	}
+
 }
 
-Nrrd* VolumeData::GetMask()
+bool VolumeData::SearchLabel(unsigned int label)
+{
+	if (!m_tex)
+		return false;
+
+	Nrrd* nrrd_label = m_tex->get_nrrd(m_tex->nlabel());
+	if (!nrrd_label)
+		return false;
+	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	if (!data_label)
+		return false;
+
+	unsigned long long for_size = (unsigned long long)m_res_x *
+		(unsigned long long)m_res_y * (unsigned long long)m_res_z;
+	for (unsigned long long index = 0; index < for_size; ++index)
+		if (data_label[index] == label)
+			return true;
+	return false;
+}
+
+Nrrd* VolumeData::GetVolume(bool ret)
+{
+	if (m_vr && m_tex)
+	{
+		if (ret) m_vr->return_volume();
+		return m_tex->get_nrrd(m_tex->nmask());
+	}
+
+	return 0;
+}
+
+Nrrd* VolumeData::GetMask(bool ret)
 {
 	if (m_vr && m_tex && m_tex->nmask()!=-1)
 	{
-		m_vr->return_mask();
+		if (ret) m_vr->return_mask();
 		return m_tex->get_nrrd(m_tex->nmask());
+	}
+
+	return 0;
+}
+
+Nrrd* VolumeData::GetLabel(bool ret)
+{
+	if (m_vr && m_tex && m_tex->nlabel() != -1)
+	{
+		if (ret) m_vr->return_label();
+		return m_tex->get_nrrd(m_tex->nlabel());
 	}
 
 	return 0;
@@ -2957,12 +3007,6 @@ void TraceGroup::ClearCellList()
 	m_cell_list.clear();
 }
 
-void TraceGroup::AddCell(FL::pCell &cell)
-{
-	m_cell_list.insert(pair<unsigned int, FL::pCell>
-		(cell->Id(), cell));
-}
-
 //cur_sel_list: ids from previous time point
 //m_prv_time: previous time value
 //m_id_map: ids of current time point that are linked to previous
@@ -3009,24 +3053,14 @@ bool TraceGroup::FindCell(unsigned int id)
 	return m_cell_list.find(id) != m_cell_list.end();
 }
 
-//find id in frame list
-/*bool TraceGroup::FindIDInFrame(unsigned int id, int time, Vertex &vertex)
-{
-	if (m_frame_list.empty())
-		return false;
-	//get current frame
-	FrameIter frame_iter = m_frame_list.find((unsigned int)time);
-	if (frame_iter == m_frame_list.end())
-		return false;
-	CellMap *cell_map = &(frame_iter->second.cell_map);
-	CellMapIter cell_map_iter = cell_map->find(id);
-	if (cell_map_iter == cell_map->end())
-		return false;
-	vertex = cell_map_iter->second;
-	return true;
-}*/
-
 //modifications
+bool TraceGroup::AddCell(FL::pCell &cell, size_t frame)
+{
+	FL::TrackMapProcessor tm_processor;
+	FL::CellListIter iter;
+	return tm_processor.AddCell(m_track_map, cell, frame, iter);
+}
+
 bool TraceGroup::LinkCells(FL::CellList &list1, FL::CellList &list2,
 	size_t frame1, size_t frame2, bool exclusive)
 {

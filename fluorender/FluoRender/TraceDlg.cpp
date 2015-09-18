@@ -488,7 +488,7 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 
 	//controls
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
-	m_cell_new_id_btn = new wxButton(page, ID_CellNewIDBtn, "Assign New",
+	m_cell_new_id_btn = new wxButton(page, ID_CellNewIDBtn, "Assign ID",
 		wxDefaultPosition, wxSize(65, 23));
 	m_cell_combine_id_btn = new wxButton(page, ID_CellCombineIDBtn, "Combine",
 		wxDefaultPosition, wxSize(65, 23));
@@ -958,7 +958,7 @@ void TraceDlg::CompDelete()
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
 		return;
-	Nrrd* nrrd_mask = vd->GetMask();
+	Nrrd* nrrd_mask = vd->GetMask(true);
 	if (!nrrd_mask)
 		return;
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
@@ -1065,11 +1065,11 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 		VolumeData* vd = m_view->m_glview->m_cur_vol;
 		if (!vd)
 			return;
-		Nrrd* nrrd_mask = vd->GetMask();
+		Nrrd* nrrd_mask = vd->GetMask(true);
 		if (!nrrd_mask)
 		{
 			vd->AddEmptyMask();
-			nrrd_mask = vd->GetMask();
+			nrrd_mask = vd->GetMask(false);
 		}
 		unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
 		if(!data_mask)
@@ -1127,7 +1127,7 @@ void TraceDlg::OnCompExclusive(wxCommandEvent &event)
 		VolumeData* vd = m_view->m_glview->m_cur_vol;
 		if (!vd)
 			return;
-		Nrrd* nrrd_mask = vd->GetMask();
+		Nrrd* nrrd_mask = vd->GetMask(true);
 		if (!nrrd_mask)
 			return;
 		unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
@@ -1197,7 +1197,7 @@ void TraceDlg::CellFull()
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
 		return;
-	Nrrd* nrrd_mask = vd->GetMask();
+	Nrrd* nrrd_mask = vd->GetMask(true);
 	if (!nrrd_mask)
 		return;
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
@@ -1294,7 +1294,7 @@ void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, FL::CellList 
 
 void TraceDlg::CellNewID()
 {
-/*	if (!m_view)
+	if (!m_view)
 		return;
 
 	//trace group
@@ -1309,66 +1309,93 @@ void TraceDlg::CellNewID()
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
 		return;
-	Nrrd* nrrd_mask = vd->GetMask();
+	Nrrd* nrrd_mask = vd->GetMask(true);
 	if (!nrrd_mask)
-		return;
+	{
+		vd->AddEmptyMask();
+		nrrd_mask = vd->GetMask(false);
+	}
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
 	if (!data_mask)
 		return;
+
 	//get current label
 	Texture* tex = vd->GetTexture();
 	if (!tex)
 		return;
 	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
 	if (!nrrd_label)
-		return;
+	{
+		vd->AddEmptyLabel();
+		nrrd_label = tex->get_nrrd(tex->nlabel());
+	}
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
 	if (!data_label)
 		return;
-	//get ID of current masked region
-	int i, j, k;
+
 	int nx, ny, nz;
 	vd->GetResolution(nx, ny, nz);
+	unsigned long long for_size = (unsigned long long)nx *
+		(unsigned long long)ny * (unsigned long long)nz;
 	unsigned long long index;
-	unsigned long id_init = 0;
-	wxString str_id = m_cell_new_id_text->GetValue();
-	str_id.ToULong(&id_init);
-	if (str_id!="0" && id_init==0)
+
+	//get ID of currently masked region
+	unsigned long id_str;
+	unsigned long id_vol = 0;
+	bool id_str_empty = false;
+	wxString str = m_cell_new_id_text->GetValue();
+	if (!str.ToULong(&id_str))
 	{
-		for (i=0; i<nx; ++i)
-		for (j=0; j<ny; ++j)
-		for (k=0; k<nz; ++k)
+		id_str_empty = true;
+		for (index = 0; index < for_size; ++index)
 		{
-			index = nx*ny*k + nx*j + i;
 			if (data_mask[index] &&
 				data_label[index])
 			{
-				id_init = data_label[index];
-				i = nx;
-				j = ny;
-				k = nz;
+				id_vol = data_label[index];
+				break;
 			}
 		}
 	}
 
 	//generate a unique ID
-	int time = m_view->m_glview->m_tseq_cur_num;
-	Vertex vertex;
-	if (id_init == 0)
+	unsigned int new_id = 0;
+	unsigned int inc = 0;
+	if (id_str_empty)
 	{
-		if (str_id!="0")
-			id_init = UINT_MAX;
+		if (id_vol)
+		{
+			new_id = id_vol + 180;
+			inc = 360;
+		}
+		else
+		{
+			new_id = 1;
+			inc = 10;
+		}
 	}
 	else
 	{
-		while (trace_group->FindIDInFrame(id_init, time, vertex))
-			id_init -= 180;
+		if (id_str)
+		{
+			new_id = id_str;
+			inc = 360;
+		}
+		else
+		{
+			new_id = 0;
+			inc = 0;
+		}
 	}
+	if (inc)
+		while (vd->SearchLabel(new_id))
+			new_id += inc;
 
-	Lbl label;
-	label.id = id_init;
-	label.size = 0;
 	//update label volume, set mask region to the new ID
+	int i, j, k;
+	FL::pCell cell;
+	if (new_id)
+		cell = FL::pCell(new FL::Cell(new_id));
 	for (i=0; i<nx; ++i)
 	for (j=0; j<ny; ++j)
 	for (k=0; k<nz; ++k)
@@ -1376,14 +1403,15 @@ void TraceDlg::CellNewID()
 		index = nx*ny*k + nx*j + i;
 		if (data_mask[index])
 		{
-			data_label[index] = id_init;
-			label.size++;
-			label.center += Point(i, j, k);
+			data_label[index] = new_id;
+			if (new_id)
+				cell->Inc(i, j, k, 1.0f);
 		}
 	}
-	if (label.size > 0)
-		label.center /= label.size;
-	trace_group->AddVertex(time, label.id, label.size, label.center);
+
+	int frame = m_view->m_glview->m_tseq_cur_num;
+	if (new_id)
+		trace_group->AddCell(cell, frame);
 
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_pool();
@@ -1391,7 +1419,7 @@ void TraceDlg::CellNewID()
 	BaseReader* reader = vd->GetReader();
 	if (reader)
 	{
-		wxString data_name = reader->GetCurName(time, vd->GetCurChannel());
+		wxString data_name = reader->GetCurName(frame, vd->GetCurChannel());
 		wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
 		MSKWriter msk_writer;
 		msk_writer.SetData(nrrd_label);
@@ -1400,15 +1428,15 @@ void TraceDlg::CellNewID()
 
 	CellUpdate();
 	//update view
-	m_view->RefreshGL();*/
+	m_view->RefreshGL();
 }
 
-void TraceDlg::CellExclusiveID(int mode)
+void TraceDlg::CellEraseID()
 {
 	if (!m_view)
 		return;
 
-/*	//trace group
+	//trace group
 	TraceGroup *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 	{
@@ -1416,127 +1444,76 @@ void TraceDlg::CellExclusiveID(int mode)
 		trace_group = m_view->GetTraceGroup();
 	}
 
-	//get current mask
+	//get prev mask
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
 		return;
-	Nrrd* nrrd_mask = vd->GetMask();
+	Nrrd* nrrd_mask = vd->GetMask(false);
 	if (!nrrd_mask)
 		return;
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
 	if (!data_mask)
 		return;
-	//get current label
-	Texture* tex = vd->GetTexture();
-	if (!tex)
-		return;
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
+
+	//get prev label
+	Nrrd* nrrd_label = vd->GetLabel(false);
 	if (!nrrd_label)
 		return;
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
 	if (!data_label)
 		return;
-	//get ID of current masked region
-	int i, j, k;
+
 	int nx, ny, nz;
 	vd->GetResolution(nx, ny, nz);
+	unsigned long long for_size = (unsigned long long)nx *
+		(unsigned long long)ny * (unsigned long long)nz;
 	unsigned long long index;
-	unsigned long id_init = 0;
-	wxString str_id = m_cell_new_id_text->GetValue();
-	str_id.ToULong(&id_init);
-	if (str_id!="0" && id_init==0)
+
+	//find old IDs
+	set<unsigned int> id_list;
+	for (index = 0; index < for_size; ++index)
 	{
-		for (i=0; i<nx; ++i)
-		for (j=0; j<ny; ++j)
-		for (k=0; k<nz; ++k)
-		{
-			index = nx*ny*k + nx*j + i;
-			if (data_mask[index] &&
-				data_label[index])
-			{
-				id_init = data_label[index];
-				i = nx;
-				j = ny;
-				k = nz;
-			}
-		}
+		if (data_mask[index] && data_label[index])
+			id_list.insert(data_label[index]);
 	}
 
-	//generate a unique ID
-	int time = m_view->m_glview->m_tseq_cur_num;
-	Vertex vertex;
-	if (id_init == 0)
+	if (!id_list.empty())
 	{
-		if (str_id!="0")
-			id_init = UINT_MAX;
-	}
-	//else
-	//{
-	//	while (trace_group->FindIDInFrame(id_init, time, vertex))
-	//		id_init -= 180;
-	//}
+		//current mask
+		nrrd_mask = vd->GetMask(true);
+		if (!nrrd_mask)
+			return;
+		data_mask = (unsigned char*)(nrrd_mask->data);
+		if (!data_mask)
+			return;
 
-	Lbl label;
-	label.id = id_init;
-	label.size = 0;
-	//update label volume, set mask region to the new ID
-	for (i=0; i<nx; ++i)
-	for (j=0; j<ny; ++j)
-	for (k=0; k<nz; ++k)
-	{
-		index = nx*ny*k + nx*j + i;
-		if (data_mask[index])
+		for (index = 0; index < for_size; ++index)
 		{
-			if (mode == 0)
-			{
-				if (data_label[index] == id_init)
-				{
-					label.size++;
-					label.center += Point(i, j, k);
-				}
-			}
-			else if (mode == 1)
-			{
-				if (data_label[index] == 0)
-				{
-					data_label[index] = id_init;
-					label.size++;
-					label.center += Point(i, j, k);
-				}
-			}
-		}
-		else if (data_label[index] == id_init)
-		{
-			if (mode == 0)
+			if (data_label[index] &&
+				id_list.find(data_label[index])
+				!= id_list.end() &&
+				!data_mask[index])
 				data_label[index] = 0;
-			else if (mode == 1)
-			{
-				label.size++;
-				label.center += Point(i, j, k);
-			}
+		}
+
+		int frame = m_view->m_glview->m_tseq_cur_num;
+		//invalidate label mask in gpu
+		vd->GetVR()->clear_tex_pool();
+		//save label mask to disk
+		BaseReader* reader = vd->GetReader();
+		if (reader)
+		{
+			wxString data_name = reader->GetCurName(frame, vd->GetCurChannel());
+			wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
+			MSKWriter msk_writer;
+			msk_writer.SetData(nrrd_label);
+			msk_writer.Save(label_name.ToStdWstring(), 1);
 		}
 	}
-	if (label.size > 0)
-		label.center /= label.size;
-	trace_group->AddVertex(time, label.id, label.size, label.center);
 
-	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_pool();
-	//save label mask to disk
-	BaseReader* reader = vd->GetReader();
-	if (reader)
-	{
-		wxString data_name = reader->GetCurName(time, vd->GetCurChannel());
-		wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
-		MSKWriter msk_writer;
-		msk_writer.SetData(nrrd_label);
-		msk_writer.Save(label_name.ToStdWstring(), 1);
-	}
-*/
 	CellUpdate();
 	//update view
 	m_view->RefreshGL();
-
 }
 
 void TraceDlg::CellLink(bool exclusive)
@@ -1913,7 +1890,7 @@ void TraceDlg::Measure()
 	if (!data_data)
 		return;
 	//get mask
-	Nrrd* nrrd_mask = vd->GetMask();
+	Nrrd* nrrd_mask = vd->GetMask(true);
 	if (!nrrd_mask)
 		return;
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
@@ -2044,7 +2021,7 @@ void TraceDlg::Test1()
 	if (!vd)
 		return;
 	//get mask
-	Nrrd* nrrd_mask = vd->GetMask();
+	Nrrd* nrrd_mask = vd->GetMask(true);
 	if (!nrrd_mask)
 		return;
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);

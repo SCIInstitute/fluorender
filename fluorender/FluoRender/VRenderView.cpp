@@ -1909,17 +1909,19 @@ void VRenderGLView::Segment()
 		m_selector.Select(m_brush_radius2-m_brush_radius1);
 
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetTraceDlg() &&
-		vr_frame->GetTraceDlg()->GetManualAssist())
+	if (vr_frame && vr_frame->GetTraceDlg())
 	{
-		if (m_selector.GetMode() == 1 || m_selector.GetMode() == 2)
+		if (vr_frame->GetTraceDlg()->GetAutoID())
 		{
-			vr_frame->GetTraceDlg()->CellExclusiveID(1);
-			vr_frame->GetTraceDlg()->CellLink(true);
+			if (m_selector.GetMode() == 1 || m_selector.GetMode() == 2)
+				vr_frame->GetTraceDlg()->CellNewID();
+			else if (m_selector.GetMode() == 3)
+				vr_frame->GetTraceDlg()->CellEraseID();
 		}
-		else if (m_selector.GetMode() == 3)
+		if (vr_frame->GetTraceDlg()->GetManualAssist())
 		{
-			vr_frame->GetTraceDlg()->CellExclusiveID(0);
+			if (!vr_frame->GetTraceDlg()->GetAutoID())
+				vr_frame->GetTraceDlg()->CellUpdate();
 			vr_frame->GetTraceDlg()->CellLink(true);
 		}
 	}
@@ -2693,9 +2695,8 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 			if (vr_frame &&
 				vr_frame->GetSettingDlg() &&
 				vr_frame->GetSettingDlg()->GetRunScript() &&
-				vd->GetTexture() &&
-				vd->GetTexture()->nmask()!=-1 &&
-				vd->GetTexture()->nlabel()!=-1)
+				vd->GetMask(false) &&
+				vd->GetLabel(false))
 				continue;
 
 			if (vd->GetTexture() && vd->GetTexture()->nmask()!=-1)
@@ -2730,9 +2731,8 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 				if (vr_frame &&
 					vr_frame->GetSettingDlg() &&
 					vr_frame->GetSettingDlg()->GetRunScript() &&
-					vd->GetTexture() &&
-					vd->GetTexture()->nmask()!=-1 &&
-					vd->GetTexture()->nlabel()!=-1)
+					vd->GetMask(false) &&
+					vd->GetLabel(false))
 					vd->SetMaskMode(4);
 
 				if (vd->GetMode() == 1)
@@ -3772,6 +3772,11 @@ void VRenderGLView::SetBrush(int mode)
 {
 	m_prev_focus = FindFocus();
 	SetFocus();
+	bool autoid = false;
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetTraceDlg())
+		autoid = vr_frame->GetTraceDlg()->GetAutoID();
+
 	if (m_int_mode == 5 ||
 		m_int_mode == 7)
 	{
@@ -3791,7 +3796,10 @@ void VRenderGLView::SetBrush(int mode)
 	else
 	{
 		m_int_mode = 2;
-		m_selector.SetMode(mode);
+		if (autoid && mode == 2)
+			m_selector.SetMode(1);
+		else
+			m_selector.SetMode(mode);
 	}
 	m_paint_display = true;
 	m_draw_brush = true;
@@ -5039,13 +5047,10 @@ void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 	m_cur_vol->GetVR()->return_mask();
 	m_cur_vol->GetResolution(nx, ny, nz);
 	//find labels in the old that are selected by the current mask
-	Texture* tex = m_cur_vol->GetTexture();
-	if (!tex)
-		return;
-	Nrrd* mask_nrrd = tex->get_nrrd(tex->nmask());
+	Nrrd* mask_nrrd = m_cur_vol->GetMask(true);
 	if (!mask_nrrd)
 		return;
-	Nrrd* label_nrrd = tex->get_nrrd(tex->nlabel());
+	Nrrd* label_nrrd = m_cur_vol->GetLabel(false);
 	if (!label_nrrd)
 		return;
 	unsigned char* mask_data = (unsigned char*)(mask_nrrd->data);
@@ -5103,8 +5108,12 @@ void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 	lbl_reader.SetFile(lblname);
 	Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
 	if (!label_nrrd_new)
-		return;
-	m_cur_vol->LoadLabel(label_nrrd_new);
+	{
+		m_cur_vol->AddEmptyLabel();
+		label_nrrd_new = m_cur_vol->GetLabel(false);
+	}
+	else
+		m_cur_vol->LoadLabel(label_nrrd_new);
 	label_data = (unsigned int*)(label_nrrd_new->data);
 	if (!label_data)
 		return;
@@ -9730,11 +9739,9 @@ void VRenderGLView::GetTraces()
 	m_cur_vol->GetVR()->return_mask();
 	m_cur_vol->GetResolution(nx, ny, nz);
 	//find labels in the old that are selected by the current mask
-	Texture* tex = m_cur_vol->GetTexture();
-	if (!tex) return;
-	Nrrd* mask_nrrd = tex->get_nrrd(tex->nmask());
+	Nrrd* mask_nrrd = m_cur_vol->GetMask(true);
 	if (!mask_nrrd) return;
-	Nrrd* label_nrrd = tex->get_nrrd(tex->nlabel());
+	Nrrd* label_nrrd = m_cur_vol->GetLabel(false);
 	if(!label_nrrd) return;
 	unsigned char* mask_data = (unsigned char*)(mask_nrrd->data);
 	if (!mask_data) return;

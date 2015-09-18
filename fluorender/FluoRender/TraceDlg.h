@@ -164,10 +164,7 @@ public:
 	void CellFull();
 	void CellLink(bool exclusive);
 	void CellNewID();
-	//assign exclusive ID to selection
-	//mode: how to deal with conflicts
-	//0--delete; 1--select
-	void CellExclusiveID(int mode);
+	void CellEraseID();
 	void CompDelete();
 
 	//measurement

@@ -146,7 +146,10 @@ void VolumeSelector::Select(double radius)
 
 	//there is some unknown problem of clearing the mask
 	if (m_mode == 1)
+	{
 		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
+		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
+	}
 	else if (m_mode == 6)
 		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
 
@@ -428,7 +431,7 @@ int VolumeSelector::CompIslandCount(double min_voxels, double max_voxels)
 	boost::unordered_map <unsigned int, Component> :: const_iterator comp_iter;
 	//second pass: combine components and remove islands
 	//update mask
-	Nrrd* mask_nrrd = m_vd->GetMask();
+	Nrrd* mask_nrrd = m_vd->GetMask(true);
 	if (!mask_nrrd)
 		return 0;
 	unsigned char* mask_data = (unsigned char*)(mask_nrrd->data);
@@ -909,9 +912,8 @@ int VolumeSelector::GetSize(double &s)
 void VolumeSelector::GenerateAnnotations(bool use_sel)
 {
 	if (!m_vd ||
-		!m_vd->GetTexture() ||
-		m_vd->GetTexture()->nmask()==-1 ||
-		m_vd->GetTexture()->nlabel()==-1 ||
+		!m_vd->GetMask(false) ||
+		!m_vd->GetLabel(false) ||
 		m_comps.size()==0)
 	{
 		m_annotations = 0;
@@ -1047,7 +1049,7 @@ int VolumeSelector::NoiseAnalysis(double min_voxels, double max_voxels, double b
 
 void VolumeSelector::NoiseRemoval(int iter, double thresh, int mode)
 {
-	if (!m_vd || !m_vd->GetMask())
+	if (!m_vd || !m_vd->GetMask(false))
 		return;
 
 	m_prog_diag = new wxProgressDialog(

@@ -1799,7 +1799,7 @@ bool TrackMapProcessor::LinkCells(TrackMap& track_map,
 		cell_id = citer1->second->Id();
 		cell = cell_list1.find(cell_id);
 		if (cell == cell_list1.end())
-			cell = AddCell(track_map, citer1->second, frame1);
+			AddCell(track_map, citer1->second, frame1, cell);
 		pVertex vert1 = cell->second->GetVertex().lock();
 		if (vert1)
 			vlist1.insert(std::pair<unsigned int, pVertex>
@@ -1811,7 +1811,7 @@ bool TrackMapProcessor::LinkCells(TrackMap& track_map,
 		cell_id = citer2->second->Id();
 		cell = cell_list2.find(cell_id);
 		if (cell == cell_list2.end())
-			cell = AddCell(track_map, citer2->second, frame2);
+			AddCell(track_map, citer2->second, frame2, cell);
 		pVertex vert2 = cell->second->GetVertex().lock();
 		if (vert2)
 			vlist2.insert(std::pair<unsigned int, pVertex>
@@ -1958,9 +1958,13 @@ bool TrackMapProcessor::UnlinkCells(TrackMap& track_map,
 	return true;
 }
 
-CellListIter TrackMapProcessor::AddCell(TrackMap& track_map,
-	pCell &cell, size_t frame)
+bool TrackMapProcessor::AddCell(TrackMap& track_map,
+	pCell &cell, size_t frame, CellListIter &iter)
 {
+	//check validity
+	if (!track_map.ExtendFrameNum(frame))
+		return false;
+
 	CellList &cell_list = track_map.m_cells_list.at(frame);
 	VertexList &vert_list = track_map.m_vertices_list.at(frame);
 
@@ -1974,5 +1978,6 @@ CellListIter TrackMapProcessor::AddCell(TrackMap& track_map,
 		(vertex->Id(), vertex));
 	std::pair<CellListIter, bool> result = cell_list.insert(
 		std::pair<unsigned int, pCell>(cell->Id(), cell));
-	return result.first;
+	iter = result.first;
+	return true;
 }

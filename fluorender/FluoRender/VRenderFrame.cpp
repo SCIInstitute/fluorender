@@ -2292,7 +2292,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			fconfig.Write("legend", vd->GetLegend());
 
 			//mask
-			Nrrd* mask = vd->GetMask();
+			Nrrd* mask = vd->GetMask(true);
 			str = "";
 			if (mask)
 			{
