@@ -257,6 +257,7 @@ BEGIN_EVENT_TABLE(TraceDlg, wxPanel)
 	//modify page
 	//ID edit controls
 	EVT_BUTTON(ID_CellNewIDXBtn, TraceDlg::OnCellNewIDX)
+	EVT_BUTTON(ID_CompAppend2Btn, TraceDlg::OnCompAppend)
 	EVT_CHECKBOX(ID_AutoIDChk, TraceDlg::OnAutoIDChk)
 	EVT_BUTTON(ID_CellNewIDBtn, TraceDlg::OnCellNewID)
 	EVT_BUTTON(ID_CellCombineIDBtn, TraceDlg::OnCellCombineID)
@@ -478,11 +479,18 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(77, 23));
 	m_cell_new_id_x_btn = new wxButton(page, ID_CellNewIDXBtn, "X",
 		wxDefaultPosition, wxSize(23, 23));
+	m_comp_append2_btn = new wxButton(page, ID_CompAppend2Btn, "Append",
+		wxDefaultPosition, wxSize(65, 23));
+	m_comp_clear_btn = new wxButton(page, ID_CompClearBtn, "Clear",
+		wxDefaultPosition, wxSize(65, 23));
 	m_auto_id_chk = new wxCheckBox(page, ID_AutoIDChk, "Auto Assign ID");
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_cell_new_id_text, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_cell_new_id_x_btn, 0, wxALIGN_CENTER);
+	sizer_1->Add(10, 23);
+	sizer_1->Add(m_comp_append2_btn, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_comp_clear_btn, 0, wxALIGN_CENTER);
 	sizer_1->AddStretchSpacer();
 	sizer_1->Add(m_auto_id_chk, 0, wxALIGN_CENTER);
 
@@ -1046,7 +1054,12 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 		return;
 
 	//get id
-	wxString str = m_comp_id_text->GetValue();
+	wxString str;
+	if (event.GetId() == ID_CompAppend2Btn)
+		str = m_cell_new_id_text->GetValue();
+	else
+		str = m_comp_id_text->GetValue();
+
 	if (!str.empty())
 	{
 		bool get_all = false;

@@ -120,6 +120,7 @@ public:
 		//ID edit controls
 		ID_CellNewIDText,
 		ID_CellNewIDXBtn,
+		ID_CompAppend2Btn,
 		ID_AutoIDChk,
 		ID_CellNewIDBtn,
 		ID_CellCombineIDBtn,
@@ -257,6 +258,7 @@ private:
 	//ID edit controls
 	wxTextCtrl* m_cell_new_id_text;
 	wxButton* m_cell_new_id_x_btn;
+	wxButton* m_comp_append2_btn;
 	wxCheckBox* m_auto_id_chk;
 	wxButton* m_cell_new_id_btn;
 	wxButton* m_cell_combine_id_btn;
