@@ -107,6 +107,7 @@ namespace FL
 			size_t frame1, size_t frame2);
 		//
 		bool AddCell(TrackMap& track_map, pCell &cell, size_t frame, CellListIter &iter);
+		bool CombineCells(TrackMap& track_map, pCell &cell, CellList &list, size_t frame);
 
 	private:
 		float m_contact_thresh;
@@ -147,8 +148,6 @@ namespace FL
 			unsigned int &bl_size_ui, float &bl_size_f);
 		static bool edge_comp_size_ol(InterEdge edge1, InterEdge edge2, InterGraph& graph);
 		static bool edge_comp_size_bl(InterEdge edge1, InterEdge edge2, InterGraph& graph);
-		//remove vertex
-		bool RemoveVertex(pVertex &vertex, InterGraph &graph, bool check = false);
 
 		//export
 		void WriteBool(std::ofstream& ofs, bool value);

@@ -918,8 +918,8 @@ public:
 	bool IsolateCells(FL::CellList &list, size_t frame);
 	bool UnlinkCells(FL::CellList &list1, FL::CellList &list2,
 		size_t frame1, size_t frame2);
-	//bool AddVertex(int time, unsigned int id,
-	//	unsigned int vsize, Point& center);
+	bool CombineCells(FL::pCell &cell, FL::CellList &list,
+		size_t frame);
 
 	//i/o
 	bool Load(wxString &filename);

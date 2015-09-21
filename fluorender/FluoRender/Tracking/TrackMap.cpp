@@ -487,6 +487,8 @@ bool TrackMapProcessor::UnlinkVertices(InterGraph& graph,
 	edge = boost::edge(v1, v2, graph);
 	if (edge.second)
 		graph[edge.first].link = 0;
+
+	return true;
 }
 
 bool TrackMapProcessor::ResolveGraph(TrackMap& track_map, size_t frame1, size_t frame2)
@@ -1059,20 +1061,6 @@ bool TrackMapProcessor::RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size
 		//remove the vertex from inter graph
 		//edges should be removed as well
 		boost::remove_vertex(inter_vert, graph);
-	}
-
-	return true;
-}
-
-bool TrackMapProcessor::RemoveVertex(pVertex &vertex, InterGraph &graph, bool check)
-{
-	InterVert v = vertex->GetInterVert(graph);
-	if (v == InterGraph::null_vertex())
-		return false;
-
-	if (check)
-	{
-
 	}
 
 	return true;
@@ -1979,5 +1967,11 @@ bool TrackMapProcessor::AddCell(TrackMap& track_map,
 	std::pair<CellListIter, bool> result = cell_list.insert(
 		std::pair<unsigned int, pCell>(cell->Id(), cell));
 	iter = result.first;
+	return true;
+}
+
+bool TrackMapProcessor::CombineCells(TrackMap& track_map,
+	pCell &cell, CellList &list, size_t frame)
+{
 	return true;
 }

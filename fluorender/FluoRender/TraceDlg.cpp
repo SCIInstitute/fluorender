@@ -1793,20 +1793,64 @@ void TraceDlg::OnCellCombineID(wxCommandEvent &event)
 	if (!m_view)
 		return;
 
-	//cell size filter
-	wxString str = m_cell_size_text->GetValue();
-	long ival;
-	str.ToLong(&ival);
-	unsigned int slimit = (unsigned int)ival;
 	//trace group
 	TraceGroup *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
+
+	//current T
+	FL::CellList list_cur;
+	//fill current list
+	long item = -1;
+	while (true)
+	{
+		item = m_trace_list_curr->GetNextItem(
+			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		else
+			AddLabel(item, m_trace_list_curr, list_cur);
+	}
+	if (list_cur.empty())
+	{
+		item = -1;
+		while (true)
+		{
+			item = m_trace_list_curr->GetNextItem(
+				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+			if (item == -1)
+				break;
+			else
+				AddLabel(item, m_trace_list_curr, list_cur);
+		}
+	}
+	if (list_cur.size() <= 1)
+		//nothing to combine
+		return;
+
+	//find the largest cell in the list
+	FL::pCell cell;
+	FL::CellListIter cell_iter;
+	for (cell_iter = list_cur.begin();
+	cell_iter != list_cur.end(); ++cell_iter)
+	{
+		if (cell)
+		{
+			if (cell_iter->second->GetSizeUi() >
+				cell->GetSizeUi())
+				cell = cell_iter->second;
+		}
+		else
+			cell = cell_iter->second;
+	}
+	if (!cell)
+		return;
+
 	//get current mask
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
 		return;
-	Nrrd* nrrd_mask = vd->GetMask();
+	Nrrd* nrrd_mask = vd->GetMask(true);
 	if (!nrrd_mask)
 		return;
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
@@ -1822,59 +1866,30 @@ void TraceDlg::OnCellCombineID(wxCommandEvent &event)
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
 	if (!data_label)
 		return;
-	//get an valid ID from selection
-	int i, j, k;
+	//combine IDs
 	int nx, ny, nz;
-	unsigned long long index;
-	unsigned int id_init = 0;
-	unsigned int max_size = slimit;
 	vd->GetResolution(nx, ny, nz);
-	Vertex vertex;
-	int time = m_view->m_glview->m_tseq_cur_num;
-	for (i = 0; i < nx; ++i)
-		for (j = 0; j < ny; ++j)
-			for (k = 0; k<nz; ++k)
-			{
-				index = nx*ny*k + nx*j + i;
-				if (data_mask[index] &&
-					data_label[index])
-				{
-					if (trace_group->FindIDInFrame(
-						data_label[index], time, vertex))
-						if (vertex.vsize > max_size)
-						{
-							id_init = vertex.id;
-							max_size = vertex.vsize;
-						}
-				}
-			}
-	if (id_init == 0)
-		return;
-	//combine IDs within the masked region
-	for (i = 0; i < nx; ++i)
-		for (j = 0; j < ny; ++j)
-			for (k = 0; k < nz; ++k)
-			{
-				index = nx*ny*k + nx*j + i;
-				if (data_mask[index] &&
-					data_label[index])
-					data_label[index] = id_init;
-			}
+	unsigned long long index;
+	unsigned long long for_size = (unsigned long long)nx *
+		(unsigned long long)ny * (unsigned long long)nz;
+	for (index = 0; index < for_size; ++index)
+	{
+		if (!data_mask[index] ||
+			!data_label[index])
+			continue;
+		cell_iter = list_cur.find(data_label[index]);
+		if (cell_iter != list_cur.end())
+			data_label[index] = cell->Id();
+	}
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_pool();
-	//save label mask to disk
-	BaseReader* reader = vd->GetReader();
-	if (reader)
-	{
-		wxString data_name = reader->GetCurName(time, vd->GetCurChannel());
-		wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
-		MSKWriter msk_writer;
-		msk_writer.SetData(nrrd_label);
-		msk_writer.Save(label_name.ToStdWstring(), 1);
-	}
+
+	//modify graphs
+	trace_group->CombineCells(cell, list_cur,
+		m_cur_time);
 
 	//update view
-	m_view->RefreshGL();
+	CellUpdate();
 }
 
 void TraceDlg::OnCellDivideID(wxCommandEvent& event)
