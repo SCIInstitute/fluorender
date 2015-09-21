@@ -123,6 +123,7 @@ public:
 		ID_CompAppend2Btn,
 		ID_AutoIDChk,
 		ID_CellNewIDBtn,
+		ID_CellAppendIDBtn,
 		ID_CellCombineIDBtn,
 		ID_CellDivideIDBtn,
 		ID_CellSegmentBtn,
@@ -164,9 +165,10 @@ public:
 	void CellUpdate();
 	void CellFull();
 	void CellLink(bool exclusive);
-	void CellNewID();
+	void CellNewID(bool append);
 	void CellEraseID();
 	void CompDelete();
+	void CompClear();
 
 	//measurement
 	void Measure();
@@ -261,6 +263,7 @@ private:
 	wxButton* m_comp_append2_btn;
 	wxCheckBox* m_auto_id_chk;
 	wxButton* m_cell_new_id_btn;
+	wxButton* m_cell_append_id_btn;
 	wxButton* m_cell_combine_id_btn;
 	wxButton* m_cell_divide_id_btn;
 	wxButton* m_cell_segment_btn;
@@ -342,6 +345,7 @@ private:
 	void OnCellNewIDX(wxCommandEvent& event);
 	void OnAutoIDChk(wxCommandEvent& event);
 	void OnCellNewID(wxCommandEvent& event);
+	void OnCellAppendID(wxCommandEvent& event);
 	void OnCellCombineID(wxCommandEvent& event);
 	void OnCellDivideID(wxCommandEvent& event);
 	void OnCellSegment(wxCommandEvent& event);

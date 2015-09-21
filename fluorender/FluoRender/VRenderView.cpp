@@ -286,6 +286,7 @@ wxGLCanvas(parent, id, attriblist, pos, size, style),
 	//selection
 	m_pick(false),
 	m_draw_mask(true),
+	m_clear_mask(false),
 	//move view
 	m_move_left(false),
 	m_move_right(false),
@@ -1914,7 +1915,7 @@ void VRenderGLView::Segment()
 		if (vr_frame->GetTraceDlg()->GetAutoID())
 		{
 			if (m_selector.GetMode() == 1 || m_selector.GetMode() == 2)
-				vr_frame->GetTraceDlg()->CellNewID();
+				vr_frame->GetTraceDlg()->CellNewID(false);
 			else if (m_selector.GetMode() == 3)
 				vr_frame->GetTraceDlg()->CellEraseID();
 		}
@@ -4306,12 +4307,24 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		{
 			m_cell_new_id = true;
 			if (frame && frame->GetTraceDlg())
-				frame->GetTraceDlg()->CellNewID();
+				frame->GetTraceDlg()->CellNewID(false);
 			refresh = true;
 		}
 		if (m_cell_new_id &&
 			!wxGetKeyState(wxKeyCode('n')))
 			m_cell_new_id = false;
+		//clear
+		if (wxGetKeyState(wxKeyCode('c')) &&
+			!m_clear_mask)
+		{
+			if (frame && frame->GetTraceDlg())
+				frame->GetTraceDlg()->CompClear();
+			m_clear_mask = true;
+			refresh = true;
+		}
+		if (!wxGetKeyState(wxKeyCode('c')) &&
+			m_clear_mask)
+			m_clear_mask = false;
 
 		//forced refresh
 		if (wxGetKeyState(WXK_F5))

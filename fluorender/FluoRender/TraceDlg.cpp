@@ -36,10 +36,10 @@ DEALINGS IN THE SOFTWARE.
 #include <limits>
 
 BEGIN_EVENT_TABLE(TraceListCtrl, wxListCtrl)
-	EVT_KEY_DOWN(TraceListCtrl::OnKeyDown)
-	EVT_CONTEXT_MENU(TraceListCtrl::OnContextMenu)
-	EVT_MENU(Menu_CopyText, TraceListCtrl::OnCopySelection)
-	EVT_MENU(Menu_Delete, TraceListCtrl::OnDeleteSelection)
+EVT_KEY_DOWN(TraceListCtrl::OnKeyDown)
+EVT_CONTEXT_MENU(TraceListCtrl::OnContextMenu)
+EVT_MENU(Menu_CopyText, TraceListCtrl::OnCopySelection)
+EVT_MENU(Menu_Delete, TraceListCtrl::OnDeleteSelection)
 END_EVENT_TABLE()
 
 TraceListCtrl::TraceListCtrl(
@@ -118,11 +118,11 @@ void TraceListCtrl::UpdateTraces(VRenderView* vrv)
 	Point center;
 
 	for (iter = sel_cells.begin();
-		iter != sel_cells.end(); ++iter)
+	iter != sel_cells.end(); ++iter)
 	{
 		id = iter->second->Id();
 		c = HSVColor(id % 360, 1.0, 1.0);
-		wxColor color(c.r()*255, c.g()*255, c.b()*255);
+		wxColor color(c.r() * 255, c.g() * 255, c.b() * 255);
 		size = (int)(iter->second->GetSizeUi());
 		center = iter->second->GetCenter();
 		Append(id, color, size,
@@ -180,7 +180,7 @@ void TraceListCtrl::OnKeyDown(wxKeyEvent& event)
 
 void TraceListCtrl::OnContextMenu(wxContextMenuEvent &event)
 {
-	if (GetSelectedItemCount()>0)
+	if (GetSelectedItemCount() > 0)
 	{
 		wxPoint point = event.GetPosition();
 		//if from keyboard
@@ -226,59 +226,60 @@ void TraceListCtrl::OnDeleteSelection(wxCommandEvent& event)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(TraceDlg, wxPanel)
-	//map page
-	//load/save trace
-	EVT_BUTTON(ID_LoadTraceBtn, TraceDlg::OnLoadTrace)
-	EVT_BUTTON(ID_SaveTraceBtn, TraceDlg::OnSaveTrace)
-	EVT_BUTTON(ID_SaveasTraceBtn, TraceDlg::OnSaveasTrace)
-	//auto tracking
-	EVT_BUTTON(ID_GenMapBtn, TraceDlg::OnGenMapBtn)
-	EVT_BUTTON(ID_RefineMapBtn, TraceDlg::OnRefineMapBtn)
-	//selection page
-	//component tools
-	EVT_TEXT(ID_CompIDText, TraceDlg::OnCompIDText)
-	EVT_BUTTON(ID_CompIDXBtn, TraceDlg::OnCompIDXBtn)
-	EVT_BUTTON(ID_CompFullBtn, TraceDlg::OnCompFull)
-	EVT_BUTTON(ID_CompExclusiveBtn, TraceDlg::OnCompExclusive)
-	EVT_BUTTON(ID_CompAppendBtn, TraceDlg::OnCompAppend)
-	EVT_BUTTON(ID_CompClearBtn, TraceDlg::OnCompClear)
-	//cell size filter
-	EVT_COMMAND_SCROLL(ID_CellSizeSldr, TraceDlg::OnCellSizeChange)
-	EVT_TEXT(ID_CellSizeText, TraceDlg::OnCellSizeText)
-	//link page
-	EVT_TEXT(ID_CompIDText2, TraceDlg::OnCompIDText)
-	//ID link controls
-	EVT_BUTTON(ID_CellExclusiveLinkBtn, TraceDlg::OnCellExclusiveLink)
-	EVT_BUTTON(ID_CellLinkBtn, TraceDlg::OnCellLink)
-	EVT_BUTTON(ID_CellIsolateBtn, TraceDlg::OnCellIsolate)
-	EVT_BUTTON(ID_CellUnlinkBtn, TraceDlg::OnCellUnlink)
-	//manual assist
-	EVT_CHECKBOX(ID_ManualAssistCheck, TraceDlg::OnManualAssistCheck)
-	//modify page
-	//ID edit controls
-	EVT_BUTTON(ID_CellNewIDXBtn, TraceDlg::OnCellNewIDX)
-	EVT_BUTTON(ID_CompAppend2Btn, TraceDlg::OnCompAppend)
-	EVT_CHECKBOX(ID_AutoIDChk, TraceDlg::OnAutoIDChk)
-	EVT_BUTTON(ID_CellNewIDBtn, TraceDlg::OnCellNewID)
-	EVT_BUTTON(ID_CellCombineIDBtn, TraceDlg::OnCellCombineID)
-	EVT_BUTTON(ID_CellDivideIDBtn, TraceDlg::OnCellDivideID)
-	EVT_BUTTON(ID_CellSegmentBtn, TraceDlg::OnCellSegment)
-	//analysis page
-	EVT_BUTTON(ID_AnalyzeBtn, TraceDlg::OnAnalyze)
-	EVT_BUTTON(ID_SaveAnalyzeBtn, TraceDlg::OnSaveAnalyze)
-	//magic tool
-	//EVT_BUTTON(ID_CellMagic0Btn, TraceDlg::OnCellMagic0Btn)
-	//EVT_BUTTON(ID_CellMagic1Btn, TraceDlg::OnCellMagic1Btn)
-	//EVT_BUTTON(ID_CellMagic2Btn, TraceDlg::OnCellMagic2Btn)
-	//EVT_BUTTON(ID_CellMagic3Btn, TraceDlg::OnCellMagic3Btn)
-	//ghost num
-	EVT_COMMAND_SCROLL(ID_GhostNumSldr, TraceDlg::OnGhostNumChange)
-	EVT_TEXT(ID_GhostNumText, TraceDlg::OnGhostNumText)
-	EVT_CHECKBOX(ID_GhostShowTailChk, TraceDlg::OnGhostShowTail)
-	EVT_CHECKBOX(ID_GhostShowLeadChk, TraceDlg::OnGhostShowLead)
-	//time controls
-	EVT_BUTTON(ID_CellPrevBtn, TraceDlg::OnCellPrev)
-	EVT_BUTTON(ID_CellNextBtn, TraceDlg::OnCellNext)
+//map page
+//load/save trace
+EVT_BUTTON(ID_LoadTraceBtn, TraceDlg::OnLoadTrace)
+EVT_BUTTON(ID_SaveTraceBtn, TraceDlg::OnSaveTrace)
+EVT_BUTTON(ID_SaveasTraceBtn, TraceDlg::OnSaveasTrace)
+//auto tracking
+EVT_BUTTON(ID_GenMapBtn, TraceDlg::OnGenMapBtn)
+EVT_BUTTON(ID_RefineMapBtn, TraceDlg::OnRefineMapBtn)
+//selection page
+//component tools
+EVT_TEXT(ID_CompIDText, TraceDlg::OnCompIDText)
+EVT_BUTTON(ID_CompIDXBtn, TraceDlg::OnCompIDXBtn)
+EVT_BUTTON(ID_CompFullBtn, TraceDlg::OnCompFull)
+EVT_BUTTON(ID_CompExclusiveBtn, TraceDlg::OnCompExclusive)
+EVT_BUTTON(ID_CompAppendBtn, TraceDlg::OnCompAppend)
+EVT_BUTTON(ID_CompClearBtn, TraceDlg::OnCompClear)
+//cell size filter
+EVT_COMMAND_SCROLL(ID_CellSizeSldr, TraceDlg::OnCellSizeChange)
+EVT_TEXT(ID_CellSizeText, TraceDlg::OnCellSizeText)
+//link page
+EVT_TEXT(ID_CompIDText2, TraceDlg::OnCompIDText)
+//ID link controls
+EVT_BUTTON(ID_CellExclusiveLinkBtn, TraceDlg::OnCellExclusiveLink)
+EVT_BUTTON(ID_CellLinkBtn, TraceDlg::OnCellLink)
+EVT_BUTTON(ID_CellIsolateBtn, TraceDlg::OnCellIsolate)
+EVT_BUTTON(ID_CellUnlinkBtn, TraceDlg::OnCellUnlink)
+//manual assist
+EVT_CHECKBOX(ID_ManualAssistCheck, TraceDlg::OnManualAssistCheck)
+//modify page
+//ID edit controls
+EVT_BUTTON(ID_CellNewIDXBtn, TraceDlg::OnCellNewIDX)
+EVT_BUTTON(ID_CompAppend2Btn, TraceDlg::OnCompAppend)
+EVT_CHECKBOX(ID_AutoIDChk, TraceDlg::OnAutoIDChk)
+EVT_BUTTON(ID_CellNewIDBtn, TraceDlg::OnCellNewID)
+EVT_BUTTON(ID_CellAppendIDBtn, TraceDlg::OnCellAppendID)
+EVT_BUTTON(ID_CellCombineIDBtn, TraceDlg::OnCellCombineID)
+EVT_BUTTON(ID_CellDivideIDBtn, TraceDlg::OnCellDivideID)
+EVT_BUTTON(ID_CellSegmentBtn, TraceDlg::OnCellSegment)
+//analysis page
+EVT_BUTTON(ID_AnalyzeBtn, TraceDlg::OnAnalyze)
+EVT_BUTTON(ID_SaveAnalyzeBtn, TraceDlg::OnSaveAnalyze)
+//magic tool
+//EVT_BUTTON(ID_CellMagic0Btn, TraceDlg::OnCellMagic0Btn)
+//EVT_BUTTON(ID_CellMagic1Btn, TraceDlg::OnCellMagic1Btn)
+//EVT_BUTTON(ID_CellMagic2Btn, TraceDlg::OnCellMagic2Btn)
+//EVT_BUTTON(ID_CellMagic3Btn, TraceDlg::OnCellMagic3Btn)
+//ghost num
+EVT_COMMAND_SCROLL(ID_GhostNumSldr, TraceDlg::OnGhostNumChange)
+EVT_TEXT(ID_GhostNumText, TraceDlg::OnGhostNumText)
+EVT_CHECKBOX(ID_GhostShowTailChk, TraceDlg::OnGhostShowTail)
+EVT_CHECKBOX(ID_GhostShowLeadChk, TraceDlg::OnGhostShowLead)
+//time controls
+EVT_BUTTON(ID_CellPrevBtn, TraceDlg::OnCellPrev)
+EVT_BUTTON(ID_CellNextBtn, TraceDlg::OnCellNext)
 END_EVENT_TABLE()
 
 wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
@@ -498,6 +499,8 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	m_cell_new_id_btn = new wxButton(page, ID_CellNewIDBtn, "Assign ID",
 		wxDefaultPosition, wxSize(65, 23));
+	m_cell_append_id_btn = new wxButton(page, ID_CellAppendIDBtn, "Add ID",
+		wxDefaultPosition, wxSize(65, 23));
 	m_cell_combine_id_btn = new wxButton(page, ID_CellCombineIDBtn, "Combine",
 		wxDefaultPosition, wxSize(65, 23));
 	m_cell_divide_id_btn = new wxButton(page, ID_CellDivideIDBtn, "Divide",
@@ -506,6 +509,7 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(65, 23));
 	sizer_2->AddStretchSpacer();
 	sizer_2->Add(m_cell_new_id_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_cell_append_id_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_combine_id_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_divide_id_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_segment_btn, 0, wxALIGN_CENTER);
@@ -538,16 +542,16 @@ wxWindow* TraceDlg::CreateAnalysisPage(wxWindow *parent)
 }
 
 TraceDlg::TraceDlg(wxWindow* frame, wxWindow* parent)
-: wxPanel(parent, wxID_ANY,
-wxPoint(500, 150), wxSize(500, 600),
-0, "TraceDlg"),
-m_frame(parent),
-m_view(0),
-m_mask(0),
-m_cur_time(-1),
-m_prv_time(-1),
-m_manual_assist(false),
-m_auto_id(false)
+	: wxPanel(parent, wxID_ANY,
+		wxPoint(500, 150), wxSize(500, 600),
+		0, "TraceDlg"),
+	m_frame(parent),
+	m_view(0),
+	m_mask(0),
+	m_cur_time(-1),
+	m_prv_time(-1),
+	m_manual_assist(false),
+	m_auto_id(false)
 {
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
@@ -642,7 +646,7 @@ TraceDlg::~TraceDlg()
 {
 	if (m_mask)
 	{
-		delete [] reinterpret_cast<char*>(m_mask->data);
+		delete[] reinterpret_cast<char*>(m_mask->data);
 		nrrdNix(m_mask);
 	}
 }
@@ -717,7 +721,7 @@ void TraceDlg::UpdateList()
 					item_id.ToULong(&id);
 					hue = id % 360;
 					Color c(HSVColor(hue, 1.0, 1.0));
-					wxColor color(c.r()*255, c.g()*255, c.b()*255);
+					wxColor color(c.r() * 255, c.g() * 255, c.b() * 255);
 					item_size.ToLong(&size);
 					item_x.ToDouble(&x);
 					item_y.ToDouble(&y);
@@ -750,8 +754,8 @@ void TraceDlg::OnLoadTrace(wxCommandEvent& event)
 	if (!m_view) return;
 
 	wxFileDialog *fopendlg = new wxFileDialog(
-		m_frame, "Choose a FluoRender track file", 
-		"", "", "*.track", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
+		m_frame, "Choose a FluoRender track file",
+		"", "", "*.track", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
@@ -788,8 +792,8 @@ void TraceDlg::OnSaveasTrace(wxCommandEvent& event)
 	if (!m_view) return;
 
 	wxFileDialog *fopendlg = new wxFileDialog(
-		m_frame, "Save a FluoRender track file", 
-		"", "", "*.track", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+		m_frame, "Save a FluoRender track file",
+		"", "", "*.track", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
@@ -832,7 +836,7 @@ void TraceDlg::OnGhostNumText(wxCommandEvent &event)
 void TraceDlg::OnGhostShowTail(wxCommandEvent &event)
 {
 	bool show = m_ghost_show_tail_chk->GetValue();
-	
+
 	if (m_view)
 	{
 		TraceGroup* trace_group = m_view->GetTraceGroup();
@@ -847,7 +851,7 @@ void TraceDlg::OnGhostShowTail(wxCommandEvent &event)
 void TraceDlg::OnGhostShowLead(wxCommandEvent &event)
 {
 	bool show = m_ghost_show_lead_chk->GetValue();
-	
+
 	if (m_view)
 	{
 		TraceGroup* trace_group = m_view->GetTraceGroup();
@@ -913,7 +917,7 @@ void TraceDlg::OnSaveAnalyze(wxCommandEvent &event)
 	wxFileDialog *fopendlg = new wxFileDialog(
 		m_frame, "Save results", "", "",
 		"Text file (*.txt)|*.txt",
-		wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
@@ -943,8 +947,8 @@ void TraceDlg::CompDelete()
 	for (;;)
 	{
 		item = m_trace_list_curr->GetNextItem(item,
-				wxLIST_NEXT_ALL,
-				wxLIST_STATE_DONTCARE);
+			wxLIST_NEXT_ALL,
+			wxLIST_STATE_DONTCARE);
 
 		if (item == -1)
 			break;
@@ -970,7 +974,7 @@ void TraceDlg::CompDelete()
 	if (!nrrd_mask)
 		return;
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if(!data_mask)
+	if (!data_mask)
 		return;
 	//get current label
 	Texture* tex = vd->GetTexture();
@@ -1004,6 +1008,15 @@ void TraceDlg::CompDelete()
 	CellUpdate();
 }
 
+void TraceDlg::CompClear()
+{
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (frame && frame->GetTree())
+		frame->GetTree()->BrushClear();
+	CellUpdate();
+	m_trace_list_prev->DeleteAllItems();
+}
+
 void TraceDlg::OnCompIDText(wxCommandEvent &event)
 {
 	if (event.GetId() == ID_CompIDText)
@@ -1028,11 +1041,7 @@ void TraceDlg::OnCompIDXBtn(wxCommandEvent &event)
 
 void TraceDlg::OnCompClear(wxCommandEvent &event)
 {
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetTree())
-		frame->GetTree()->BrushClear();
-	CellUpdate();
-	m_trace_list_prev->DeleteAllItems();
+	CompClear();
 }
 
 void TraceDlg::OnCompFull(wxCommandEvent &event)
@@ -1085,7 +1094,7 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 			nrrd_mask = vd->GetMask(false);
 		}
 		unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-		if(!data_mask)
+		if (!data_mask)
 			return;
 		//get current label
 		Texture* tex = vd->GetTexture();
@@ -1214,7 +1223,7 @@ void TraceDlg::CellFull()
 	if (!nrrd_mask)
 		return;
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if(!data_mask)
+	if (!data_mask)
 		return;
 	//get current label
 	Texture* tex = vd->GetTexture();
@@ -1234,45 +1243,45 @@ void TraceDlg::CellFull()
 	unsigned int label_value;
 	FL::CellList sel_labels;
 	FL::CellListIter label_iter;
-	for (i=0; i<nx; ++i)
-	for (j=0; j<ny; ++j)
-	for (k=0; k<nz; ++k)
-	{
-		index = nx*ny*k + nx*j + i;
-		if (data_mask[index] &&
-			data_label[index])
-		{
-			label_value = data_label[index];
-			label_iter = sel_labels.find(label_value);
-			if (label_iter == sel_labels.end())
+	for (i = 0; i < nx; ++i)
+		for (j = 0; j < ny; ++j)
+			for (k = 0; k < nz; ++k)
 			{
-				FL::pCell cell(new FL::Cell(label_value));
-				cell->Inc(i, j, k, 1.0f);
-				sel_labels.insert(pair<unsigned int, FL::pCell>
-					(label_value, cell));
+				index = nx*ny*k + nx*j + i;
+				if (data_mask[index] &&
+					data_label[index])
+				{
+					label_value = data_label[index];
+					label_iter = sel_labels.find(label_value);
+					if (label_iter == sel_labels.end())
+					{
+						FL::pCell cell(new FL::Cell(label_value));
+						cell->Inc(i, j, k, 1.0f);
+						sel_labels.insert(pair<unsigned int, FL::pCell>
+							(label_value, cell));
+					}
+					else
+						label_iter->second->Inc(i, j, k, 1.0f);
+				}
 			}
-			else
-				label_iter->second->Inc(i, j, k, 1.0f);
-		}
-	}
 
 	//reselect
-	for (i=0; i<nx; ++i)
-	for (j=0; j<ny; ++j)
-	for (k=0; k<nz; ++k)
-	{
-		index = nx*ny*k + nx*j + i;
-		if (data_label[index])
-		{
-			label_value = data_label[index];
-			label_iter = sel_labels.find(label_value);
-			if (label_iter != sel_labels.end() &&
-				label_iter->second->GetSizeUi() > slimit)
-				data_mask[index] = 255;
-			else
-				data_mask[index] = 0;
-		}
-	}
+	for (i = 0; i < nx; ++i)
+		for (j = 0; j < ny; ++j)
+			for (k = 0; k<nz; ++k)
+			{
+				index = nx*ny*k + nx*j + i;
+				if (data_label[index])
+				{
+					label_value = data_label[index];
+					label_iter = sel_labels.find(label_value);
+					if (label_iter != sel_labels.end() &&
+						label_iter->second->GetSizeUi() > slimit)
+						data_mask[index] = 255;
+					else
+						data_mask[index] = 0;
+				}
+			}
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_pool();
 	//update view
@@ -1305,7 +1314,7 @@ void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, FL::CellList 
 		(id, cell));
 }
 
-void TraceDlg::CellNewID()
+void TraceDlg::CellNewID(bool append)
 {
 	if (!m_view)
 		return;
@@ -1318,11 +1327,16 @@ void TraceDlg::CellNewID()
 		trace_group = m_view->GetTraceGroup();
 	}
 
-	//get current mask
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
 		return;
-	Nrrd* nrrd_mask = vd->GetMask(true);
+	Nrrd* nrrd_mask = 0;
+	if (m_auto_id)
+		//get prev mask
+		nrrd_mask = vd->GetMask(false);
+	else
+		//get current mask
+		nrrd_mask = vd->GetMask(true);
 	if (!nrrd_mask)
 	{
 		vd->AddEmptyMask();
@@ -1352,7 +1366,7 @@ void TraceDlg::CellNewID()
 		(unsigned long long)ny * (unsigned long long)nz;
 	unsigned long long index;
 
-	//get ID of currently masked region
+	//get ID of currently/previously masked region
 	unsigned long id_str;
 	unsigned long id_vol = 0;
 	bool id_str_empty = false;
@@ -1378,12 +1392,20 @@ void TraceDlg::CellNewID()
 	{
 		if (id_vol)
 		{
-			new_id = id_vol + 180;
-			inc = 360;
+			if (m_auto_id)
+			{
+				new_id = id_vol;
+				inc = 0;
+			}
+			else
+			{
+				new_id = id_vol + 10;
+				inc = 10;
+			}
 		}
 		else
 		{
-			new_id = 1;
+			new_id = 10;
 			inc = 10;
 		}
 	}
@@ -1392,7 +1414,10 @@ void TraceDlg::CellNewID()
 		if (id_str)
 		{
 			new_id = id_str;
-			inc = 360;
+			if (m_auto_id)
+				inc = 0;
+			else
+				inc = 360;
 		}
 		else
 		{
@@ -1404,23 +1429,33 @@ void TraceDlg::CellNewID()
 		while (vd->SearchLabel(new_id))
 			new_id += inc;
 
+	if (m_auto_id)
+	{
+		//get current mask
+		nrrd_mask = vd->GetMask(true);
+		if (!nrrd_mask)
+			return;
+	}
+
 	//update label volume, set mask region to the new ID
 	int i, j, k;
 	FL::pCell cell;
 	if (new_id)
 		cell = FL::pCell(new FL::Cell(new_id));
-	for (i=0; i<nx; ++i)
-	for (j=0; j<ny; ++j)
-	for (k=0; k<nz; ++k)
-	{
-		index = nx*ny*k + nx*j + i;
-		if (data_mask[index])
-		{
-			data_label[index] = new_id;
-			if (new_id)
-				cell->Inc(i, j, k, 1.0f);
-		}
-	}
+	for (i = 0; i < nx; ++i)
+		for (j = 0; j < ny; ++j)
+			for (k = 0; k < nz; ++k)
+			{
+				index = nx*ny*k + nx*j + i;
+				if (data_mask[index])
+				{
+					if (append && data_label[index])
+						continue;
+					data_label[index] = new_id;
+					if (new_id)
+						cell->Inc(i, j, k, 1.0f);
+				}
+			}
 
 	int frame = m_view->m_glview->m_tseq_cur_num;
 	if (new_id)
@@ -1457,10 +1492,10 @@ void TraceDlg::CellEraseID()
 		trace_group = m_view->GetTraceGroup();
 	}
 
-	//get prev mask
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
 		return;
+	//get prev mask
 	Nrrd* nrrd_mask = vd->GetMask(false);
 	if (!nrrd_mask)
 		return;
@@ -1745,13 +1780,18 @@ void TraceDlg::OnAutoIDChk(wxCommandEvent &event)
 
 void TraceDlg::OnCellNewID(wxCommandEvent &event)
 {
-	CellNewID();
+	CellNewID(false);
+}
+
+void TraceDlg::OnCellAppendID(wxCommandEvent &event)
+{
+	CellNewID(true);
 }
 
 void TraceDlg::OnCellCombineID(wxCommandEvent &event)
 {
-	/*	if (!m_view)
-	return;
+	if (!m_view)
+		return;
 
 	//cell size filter
 	wxString str = m_cell_size_text->GetValue();
@@ -1761,27 +1801,27 @@ void TraceDlg::OnCellCombineID(wxCommandEvent &event)
 	//trace group
 	TraceGroup *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
-	return;
+		return;
 	//get current mask
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
-	return;
+		return;
 	Nrrd* nrrd_mask = vd->GetMask();
 	if (!nrrd_mask)
-	return;
+		return;
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
 	if (!data_mask)
-	return;
+		return;
 	//get current label
 	Texture* tex = vd->GetTexture();
 	if (!tex)
-	return;
+		return;
 	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
 	if (!nrrd_label)
-	return;
+		return;
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
 	if (!data_label)
-	return;
+		return;
 	//get an valid ID from selection
 	int i, j, k;
 	int nx, ny, nz;
@@ -1791,50 +1831,50 @@ void TraceDlg::OnCellCombineID(wxCommandEvent &event)
 	vd->GetResolution(nx, ny, nz);
 	Vertex vertex;
 	int time = m_view->m_glview->m_tseq_cur_num;
-	for (i=0; i<nx; ++i)
-	for (j=0; j<ny; ++j)
-	for (k=0; k<nz; ++k)
-	{
-	index = nx*ny*k + nx*j + i;
-	if (data_mask[index] &&
-	data_label[index])
-	{
-	if (trace_group->FindIDInFrame(
-	data_label[index], time, vertex))
-	if (vertex.vsize > max_size)
-	{
-	id_init = vertex.id;
-	max_size = vertex.vsize;
-	}
-	}
-	}
+	for (i = 0; i < nx; ++i)
+		for (j = 0; j < ny; ++j)
+			for (k = 0; k<nz; ++k)
+			{
+				index = nx*ny*k + nx*j + i;
+				if (data_mask[index] &&
+					data_label[index])
+				{
+					if (trace_group->FindIDInFrame(
+						data_label[index], time, vertex))
+						if (vertex.vsize > max_size)
+						{
+							id_init = vertex.id;
+							max_size = vertex.vsize;
+						}
+				}
+			}
 	if (id_init == 0)
-	return;
+		return;
 	//combine IDs within the masked region
-	for (i=0; i<nx; ++i)
-	for (j=0; j<ny; ++j)
-	for (k=0; k<nz; ++k)
-	{
-	index = nx*ny*k + nx*j + i;
-	if (data_mask[index] &&
-	data_label[index])
-	data_label[index] = id_init;
-	}
+	for (i = 0; i < nx; ++i)
+		for (j = 0; j < ny; ++j)
+			for (k = 0; k < nz; ++k)
+			{
+				index = nx*ny*k + nx*j + i;
+				if (data_mask[index] &&
+					data_label[index])
+					data_label[index] = id_init;
+			}
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_pool();
 	//save label mask to disk
 	BaseReader* reader = vd->GetReader();
 	if (reader)
 	{
-	wxString data_name = reader->GetCurName(time, vd->GetCurChannel());
-	wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
-	MSKWriter msk_writer;
-	msk_writer.SetData(nrrd_label);
-	msk_writer.Save(label_name.ToStdWstring(), 1);
+		wxString data_name = reader->GetCurName(time, vd->GetCurChannel());
+		wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
+		MSKWriter msk_writer;
+		msk_writer.SetData(nrrd_label);
+		msk_writer.Save(label_name.ToStdWstring(), 1);
 	}
 
 	//update view
-	m_view->RefreshGL();*/
+	m_view->RefreshGL();
 }
 
 void TraceDlg::OnCellDivideID(wxCommandEvent& event)
@@ -1928,61 +1968,61 @@ void TraceDlg::Measure()
 	double value;
 	double delta;
 	vd->GetResolution(nx, ny, nz);
-	for (i=0; i<nx; ++i)
-	for (j=0; j<ny; ++j)
-	for (k=0; k<nz; ++k)
-	{
-		index = nx*ny*k + nx*j + i;
-		if (data_mask[index] &&
-			data_label[index])
-		{
-			id = data_label[index];
-			if (bits == nrrdTypeUChar)
-				value = ((unsigned char*)data_data)[index];
-			else if (bits == nrrdTypeUShort)
-				value = ((unsigned short*)data_data)[index];
-
-			if (value <= 1.0)
-				continue;
-			//find in list
-			found = -1;
-			for (ilist=0; ilist<(int)m_info_list.size(); ++ilist)
+	for (i = 0; i < nx; ++i)
+		for (j = 0; j < ny; ++j)
+			for (k = 0; k < nz; ++k)
 			{
-				if (m_info_list[ilist].id == id)
+				index = nx*ny*k + nx*j + i;
+				if (data_mask[index] &&
+					data_label[index])
 				{
-					found = ilist;
-					break;
+					id = data_label[index];
+					if (bits == nrrdTypeUChar)
+						value = ((unsigned char*)data_data)[index];
+					else if (bits == nrrdTypeUShort)
+						value = ((unsigned short*)data_data)[index];
+
+					if (value <= 1.0)
+						continue;
+					//find in list
+					found = -1;
+					for (ilist = 0; ilist < (int)m_info_list.size(); ++ilist)
+					{
+						if (m_info_list[ilist].id == id)
+						{
+							found = ilist;
+							break;
+						}
+					}
+					if (found == -1)
+					{
+						//not found
+						measure_info info;
+						info.id = id;
+						info.total_num = 1;
+						info.mean = 0.0;
+						info.variance = 0.0;
+						info.m2 = 0.0;
+						delta = value - info.mean;
+						info.mean += delta / info.total_num;
+						info.m2 += delta * (value - info.mean);
+						info.min = value;
+						info.max = value;
+						m_info_list.push_back(info);
+					}
+					else
+					{
+						m_info_list[found].total_num++;
+						delta = value - m_info_list[found].mean;
+						m_info_list[found].mean += delta / m_info_list[found].total_num;
+						m_info_list[found].m2 += delta * (value - m_info_list[found].mean);
+						m_info_list[found].min = value < m_info_list[found].min ? value : m_info_list[found].min;
+						m_info_list[found].max = value > m_info_list[found].max ? value : m_info_list[found].max;
+					}
 				}
 			}
-			if (found == -1)
-			{
-				//not found
-				measure_info info;
-				info.id = id;
-				info.total_num = 1;
-				info.mean = 0.0;
-				info.variance = 0.0;
-				info.m2 = 0.0;
-				delta = value - info.mean;
-				info.mean += delta / info.total_num;
-				info.m2 += delta * (value - info.mean);
-				info.min = value;
-				info.max = value;
-				m_info_list.push_back(info);
-			}
-			else
-			{
-				m_info_list[found].total_num++;
-				delta = value - m_info_list[found].mean;
-				m_info_list[found].mean += delta / m_info_list[found].total_num;
-				m_info_list[found].m2 += delta * (value - m_info_list[found].mean);
-				m_info_list[found].min = value<m_info_list[found].min?value:m_info_list[found].min;
-				m_info_list[found].max = value>m_info_list[found].max?value:m_info_list[found].max;
-			}
-		}
-	}
 
-	for (i=0; i<(int)m_info_list.size(); ++i)
+	for (i = 0; i < (int)m_info_list.size(); ++i)
 	{
 		if (m_info_list[i].total_num > 0)
 			m_info_list[i].variance = sqrt(m_info_list[i].m2 / (m_info_list[i].total_num));
@@ -1995,7 +2035,7 @@ void TraceDlg::OutputMeasureResult(wxString &str)
 {
 	str = "Statistics on the selection:\n";
 	str += "ID\tTotalN\tMean\tSigma\tMinimum\tMaximum\n";
-	for (int i=0; i<(int)m_info_list.size(); ++i)
+	for (int i = 0; i < (int)m_info_list.size(); ++i)
 	{
 		str += wxString::Format("%u\t", m_info_list[i].id);
 		str += wxString::Format("%u\t", m_info_list[i].total_num);
@@ -2004,7 +2044,7 @@ void TraceDlg::OutputMeasureResult(wxString &str)
 		str += wxString::Format("%.2f\t", m_info_list[i].min);
 		str += wxString::Format("%.2f\n", m_info_list[i].max);
 	}
-	
+
 }
 
 void TraceDlg::SaveMeasureResult(wxString &filename)
@@ -2064,238 +2104,238 @@ void TraceDlg::Test1()
 	unsigned int id;
 	bool surface_vox, contact_vox;
 	vd->GetResolution(nx, ny, nz);
-	for (i=0; i<nx; ++i)
-	for (j=0; j<ny; ++j)
-	for (k=0; k<nz; ++k)
-	{
-		index = nx*ny*k + nx*j + i;
-		if (data_mask[index] &&
-			data_label[index])
-		{
-			id = data_label[index];
-			//determine the numbers
-			if (i==0 || i==nx-1 ||
-				j==0 || j==ny-1 ||
-				k==0 || k==nz-1)
+	for (i = 0; i < nx; ++i)
+		for (j = 0; j < ny; ++j)
+			for (k = 0; k < nz; ++k)
 			{
-				//border voxel
-				surface_vox = true;
-				//determine contact
-				contact_vox = false;
-				if (i>0)
+				index = nx*ny*k + nx*j + i;
+				if (data_mask[index] &&
+					data_label[index])
 				{
-					indexn = index-1;
-					if (data_label[indexn] &&
-						data_label[indexn]!=id)
-						contact_vox = true;
-				}
-				if (!contact_vox && i<nx-1)
-				{
-					indexn = index+1;
-					if (data_label[indexn] &&
-						data_label[indexn]!=id)
-						contact_vox = true;
-				}
-				if (!contact_vox && j>0)
-				{
-					indexn = index-nx;
-					if (data_label[indexn] &&
-						data_label[indexn]!=id)
-						contact_vox = true;
-				}
-				if (!contact_vox && j<ny-1)
-				{
-					indexn = index+nx;
-					if (data_label[indexn] &&
-						data_label[indexn]!=id)
-						contact_vox = true;
-				}
-				if (!contact_vox && k>0)
-				{
-					indexn = index-nx*ny;
-					if (data_label[indexn] &&
-						data_label[indexn]!=id)
-						contact_vox = true;
-				}
-				if (!contact_vox && k<nz-1)
-				{
-					indexn = index+nx*ny;
-					if (data_label[indexn] &&
-						data_label[indexn]!=id)
-						contact_vox = true;
-				}
-			}
-			else
-			{
-				surface_vox = false;
-				contact_vox = false;
-				//i-1
-				indexn = index-1;
-				if (data_label[indexn]==0)
-					surface_vox = true;
-				if (data_label[indexn] &&
-					data_label[indexn]!=id)
-					surface_vox = contact_vox = true;
-				//i+1
-				if (!surface_vox || !contact_vox)
-				{
-					indexn = index+1;
-					if (data_label[indexn]==0)
+					id = data_label[index];
+					//determine the numbers
+					if (i == 0 || i == nx - 1 ||
+						j == 0 || j == ny - 1 ||
+						k == 0 || k == nz - 1)
+					{
+						//border voxel
 						surface_vox = true;
-					if (data_label[indexn] &&
-						data_label[indexn]!=id)
-						surface_vox = contact_vox = true;
-				}
-				//j-1
-				if (!surface_vox || !contact_vox)
-				{
-					indexn = index-nx;
-					if (data_label[indexn]==0)
-						surface_vox = true;
-					if (data_label[indexn] &&
-						data_label[indexn]!=id)
-						surface_vox = contact_vox = true;
-				}
-				//j+1
-				if (!surface_vox || !contact_vox)
-				{
-					indexn = index+nx;
-					if (data_label[indexn]==0)
-						surface_vox = true;
-					if (data_label[indexn] &&
-						data_label[indexn]!=id)
-						surface_vox = contact_vox = true;
-				}
-				//k-1
-				if (!surface_vox || !contact_vox)
-				{
-					indexn = index-nx*ny;
-					if (data_label[indexn]==0)
-						surface_vox = true;
-					if (data_label[indexn] &&
-						data_label[indexn]!=id)
-						surface_vox = contact_vox = true;
-				}
-				//k+1
-				if (!surface_vox || !contact_vox)
-				{
-					indexn = index+nx*ny;
-					if (data_label[indexn]==0)
-						surface_vox = true;
-					if (data_label[indexn] &&
-						data_label[indexn]!=id)
-						surface_vox = contact_vox = true;
-				}
-			}
+						//determine contact
+						contact_vox = false;
+						if (i > 0)
+						{
+							indexn = index - 1;
+							if (data_label[indexn] &&
+								data_label[indexn] != id)
+								contact_vox = true;
+						}
+						if (!contact_vox && i < nx - 1)
+						{
+							indexn = index + 1;
+							if (data_label[indexn] &&
+								data_label[indexn] != id)
+								contact_vox = true;
+						}
+						if (!contact_vox && j > 0)
+						{
+							indexn = index - nx;
+							if (data_label[indexn] &&
+								data_label[indexn] != id)
+								contact_vox = true;
+						}
+						if (!contact_vox && j < ny - 1)
+						{
+							indexn = index + nx;
+							if (data_label[indexn] &&
+								data_label[indexn] != id)
+								contact_vox = true;
+						}
+						if (!contact_vox && k > 0)
+						{
+							indexn = index - nx*ny;
+							if (data_label[indexn] &&
+								data_label[indexn] != id)
+								contact_vox = true;
+						}
+						if (!contact_vox && k < nz - 1)
+						{
+							indexn = index + nx*ny;
+							if (data_label[indexn] &&
+								data_label[indexn] != id)
+								contact_vox = true;
+						}
+					}
+					else
+					{
+						surface_vox = false;
+						contact_vox = false;
+						//i-1
+						indexn = index - 1;
+						if (data_label[indexn] == 0)
+							surface_vox = true;
+						if (data_label[indexn] &&
+							data_label[indexn] != id)
+							surface_vox = contact_vox = true;
+						//i+1
+						if (!surface_vox || !contact_vox)
+						{
+							indexn = index + 1;
+							if (data_label[indexn] == 0)
+								surface_vox = true;
+							if (data_label[indexn] &&
+								data_label[indexn] != id)
+								surface_vox = contact_vox = true;
+						}
+						//j-1
+						if (!surface_vox || !contact_vox)
+						{
+							indexn = index - nx;
+							if (data_label[indexn] == 0)
+								surface_vox = true;
+							if (data_label[indexn] &&
+								data_label[indexn] != id)
+								surface_vox = contact_vox = true;
+						}
+						//j+1
+						if (!surface_vox || !contact_vox)
+						{
+							indexn = index + nx;
+							if (data_label[indexn] == 0)
+								surface_vox = true;
+							if (data_label[indexn] &&
+								data_label[indexn] != id)
+								surface_vox = contact_vox = true;
+						}
+						//k-1
+						if (!surface_vox || !contact_vox)
+						{
+							indexn = index - nx*ny;
+							if (data_label[indexn] == 0)
+								surface_vox = true;
+							if (data_label[indexn] &&
+								data_label[indexn] != id)
+								surface_vox = contact_vox = true;
+						}
+						//k+1
+						if (!surface_vox || !contact_vox)
+						{
+							indexn = index + nx*ny;
+							if (data_label[indexn] == 0)
+								surface_vox = true;
+							if (data_label[indexn] &&
+								data_label[indexn] != id)
+								surface_vox = contact_vox = true;
+						}
+					}
 
-			//update list
-			//find in info list
-			found = -1;
-			for (ilist=0; ilist<(int)info_list.size(); ++ilist)
-			{
-				if (info_list[ilist].id == id)
-				{
-					found = ilist;
-					break;
+					//update list
+					//find in info list
+					found = -1;
+					for (ilist = 0; ilist < (int)info_list.size(); ++ilist)
+					{
+						if (info_list[ilist].id == id)
+						{
+							found = ilist;
+							break;
+						}
+					}
+					if (found == -1)
+					{
+						//not found
+						comp_info info;
+						info.id = id;
+						info.total_num = 1;
+						info.surface_num = surface_vox ? 1 : 0;
+						info.contact_num = contact_vox ? 1 : 0;
+						info_list.push_back(info);
+					}
+					else
+					{
+						//found
+						info_list[found].total_num++;
+						info_list[found].surface_num += surface_vox ? 1 : 0;
+						info_list[found].contact_num += contact_vox ? 1 : 0;
+					}
 				}
 			}
-			if (found == -1)
-			{
-				//not found
-				comp_info info;
-				info.id = id;
-				info.total_num = 1;
-				info.surface_num = surface_vox?1:0;
-				info.contact_num = contact_vox?1:0;
-				info_list.push_back(info);
-			}
-			else
-			{
-				//found
-				info_list[found].total_num++;
-				info_list[found].surface_num += surface_vox?1:0;
-				info_list[found].contact_num += contact_vox?1:0;
-			}
-		}
-	}
 	wxString str = "Statistics on the selection:\n";
-	for (i=0; i<(int)info_list.size(); ++i)
+	for (i = 0; i < (int)info_list.size(); ++i)
 	{
 		str += wxString::Format("ID: %u, ", info_list[i].id);
 		str += wxString::Format("TotalN: %d, ", info_list[i].total_num);
 		str += wxString::Format("SurfaceN: %d, ", info_list[i].surface_num);
 		str += wxString::Format("ContactN: %d, ", info_list[i].contact_num);
-		str += wxString::Format("Ratio: %.2f\n", (double)info_list[i].contact_num/(double)info_list[i].surface_num);
+		str += wxString::Format("Ratio: %.2f\n", (double)info_list[i].contact_num / (double)info_list[i].surface_num);
 	}
 	m_stat_text->SetValue(str);
 }
 
 void TraceDlg::Test2(int type)
 {
-/*	if (!m_view)
-		return;
-	//trace group
-	TraceGroup *trace_group = m_view->GetTraceGroup();
-	if (!trace_group)
-		return;
-	//get data
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	if (!vd)
-		return;
-	//get mask
-	Nrrd* nrrd_mask = vd->GetMask();
-	if (!nrrd_mask)
-		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
-		return;
-	//get label
-	Texture* tex = vd->GetTexture();
-	if (!tex)
-		return;
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
-		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
-		return;
+	/*	if (!m_view)
+			return;
+		//trace group
+		TraceGroup *trace_group = m_view->GetTraceGroup();
+		if (!trace_group)
+			return;
+		//get data
+		VolumeData* vd = m_view->m_glview->m_cur_vol;
+		if (!vd)
+			return;
+		//get mask
+		Nrrd* nrrd_mask = vd->GetMask();
+		if (!nrrd_mask)
+			return;
+		unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
+		if (!data_mask)
+			return;
+		//get label
+		Texture* tex = vd->GetTexture();
+		if (!tex)
+			return;
+		Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
+		if (!nrrd_label)
+			return;
+		unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+		if (!data_label)
+			return;
 
-	//get current selection
-	unsigned long id;
-	wxString str;
-	set<unsigned int> id_list;
-	set<unsigned int>::iterator id_iter;
-	long item = -1;
-	for (;;)
-	{
-		item = m_trace_list_curr->GetNextItem(item,
-			wxLIST_NEXT_ALL,
-			wxLIST_STATE_DONTCARE);
-		if (item != -1)
+		//get current selection
+		unsigned long id;
+		wxString str;
+		set<unsigned int> id_list;
+		set<unsigned int>::iterator id_iter;
+		long item = -1;
+		for (;;)
 		{
-			str = m_trace_list_curr->GetText(item ,0);
-			str.ToULong(&id);
-			id_list.insert(id);
+			item = m_trace_list_curr->GetNextItem(item,
+				wxLIST_NEXT_ALL,
+				wxLIST_STATE_DONTCARE);
+			if (item != -1)
+			{
+				str = m_trace_list_curr->GetText(item ,0);
+				str.ToULong(&id);
+				id_list.insert(id);
+			}
+			else break;
 		}
-		else break;
-	}
-	if (id_list.empty())
-		return;
+		if (id_list.empty())
+			return;
 
-	//search from current frame onward
-	str = "";
-	int time = m_view->m_glview->m_tseq_cur_num;
-	for (id_iter=id_list.begin();
-		id_iter!=id_list.end(); ++id_iter)
-	{
-		id = *id_iter;
-		if (trace_group->FindPattern(type, id, time))
+		//search from current frame onward
+		str = "";
+		int time = m_view->m_glview->m_tseq_cur_num;
+		for (id_iter=id_list.begin();
+			id_iter!=id_list.end(); ++id_iter)
 		{
-			str += wxString::Format("ID: %u, ", id);
-			str += wxString::Format("time: %d\n", time);
+			id = *id_iter;
+			if (trace_group->FindPattern(type, id, time))
+			{
+				str += wxString::Format("ID: %u, ", id);
+				str += wxString::Format("time: %d\n", time);
+			}
 		}
-	}
-	m_stat_text->SetValue(str);*/
+		m_stat_text->SetValue(str);*/
 }
 
 void TraceDlg::OnCellPrev(wxCommandEvent &event)
@@ -2351,8 +2391,8 @@ void TraceDlg::GenMap()
 	size_t iter_num = (size_t)m_gen_map_spin->GetValue();
 	tm_processor.SetSizes(track_map,
 		resx, resy, resz);
-//	tm_processor.SetContactThresh(0.2f);
-	float prog_bit = 100.0f / float(frames * (2+iter_num));
+	//	tm_processor.SetContactThresh(0.2f);
+	float prog_bit = 100.0f / float(frames * (2 + iter_num));
 	float prog = 0.0f;
 	m_gen_map_prg->SetValue(int(prog));
 	for (int i = 0; i < frames; ++i)
@@ -2507,7 +2547,7 @@ void TraceDlg::RefineMap()
 	size_t iter_num = (size_t)m_gen_map_spin->GetValue();
 	tm_processor.SetSizes(track_map,
 		resx, resy, resz);
-//	tm_processor.SetContactThresh(0.2f);
+	//	tm_processor.SetContactThresh(0.2f);
 	float prog_bit = 100.0f / float(frames * iter_num);
 	float prog = 0.0f;
 	m_gen_map_prg->SetValue(int(prog));
@@ -2521,8 +2561,8 @@ void TraceDlg::RefineMap()
 		else
 			LINK_FRAMES
 
-		if (++iteri >= iter_num)
-			break;
+			if (++iteri >= iter_num)
+				break;
 
 		if (last_op == 1)
 			LINK_FRAMES

@@ -789,6 +789,7 @@ private:
 
 	//draw mask
 	bool m_draw_mask;
+	bool m_clear_mask;
 
 	//move view
 	bool m_move_left;
