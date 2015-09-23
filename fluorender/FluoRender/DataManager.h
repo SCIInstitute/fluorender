@@ -760,6 +760,7 @@ public:
 	double GetLength();
 	double GetLengthObject(double spcx, double spcy, double spcz);
 	double GetAngle();
+	void Scale(double spcx, double spcy, double spcz);
 
 	bool AddPoint(Point &point);
 	void SetTransform(Transform *tform);

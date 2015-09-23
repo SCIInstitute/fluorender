@@ -238,8 +238,9 @@ void RulerListCtrl::DeleteAll(bool cur_time)
 			{
 				Ruler* ruler = (*ruler_list)[i];
 				if (ruler &&
-					ruler->GetTimeDep() &&
-					ruler->GetTime() == tseq)
+					((ruler->GetTimeDep() &&
+					ruler->GetTime() == tseq) ||
+					!ruler->GetTimeDep()))
 				{
 					ruler_list->erase(ruler_list->begin()+i);
 					delete ruler;

@@ -2906,6 +2906,12 @@ double Ruler::GetAngle()
 	return angle;
 }
 
+void Ruler::Scale(double spcx, double spcy, double spcz)
+{
+	for (size_t i = 0; i < m_ruler.size(); ++i)
+		m_ruler[i].scale(spcx, spcy, spcz);
+}
+
 bool Ruler::AddPoint(Point &point)
 {
 	if (m_ruler_type == 2 &&
@@ -3100,7 +3106,6 @@ bool TraceGroup::DivideCells(FL::CellList &list, size_t frame)
 
 bool TraceGroup::GetMappedRulers(FL::RulerList &rulers)
 {
-	unsigned int result = 0;
 	size_t frame_num = m_track_map.GetFrameNum();
 	if (m_ghost_num <= 0 ||
 		m_cur_time < 0 ||
@@ -3126,7 +3131,7 @@ bool TraceGroup::GetMappedRulers(FL::RulerList &rulers)
 		for (size_t i = m_cur_time;
 		i < m_cur_time + ghost_lead; ++i)
 		{
-			result += tm_processor.GetMappedRulers(m_track_map,
+			tm_processor.GetMappedRulers(m_track_map,
 				temp_sel_list1, temp_sel_list2,
 				rulers, i, i + 1);
 			//swap
@@ -3135,13 +3140,18 @@ bool TraceGroup::GetMappedRulers(FL::RulerList &rulers)
 		}
 	}
 
+	//clear ruler id
+	for (FL::RulerListIter iter = rulers.begin();
+	iter != rulers.end(); ++iter)
+		(*iter)->Id(0);
+
 	if (m_draw_tail)
 	{
 		temp_sel_list1 = m_cell_list;
 		for (size_t i = m_cur_time;
 		i > m_cur_time - ghost_tail; --i)
 		{
-			result += tm_processor.GetMappedRulers(
+			tm_processor.GetMappedRulers(
 				m_track_map, temp_sel_list1, temp_sel_list2,
 				rulers, i, i - 1);
 			//sawp

@@ -1763,8 +1763,11 @@ RulerListIter TrackMapProcessor::FindRulerFromList(unsigned int id, RulerList &l
 {
 	RulerListIter iter = list.begin();
 	while (iter != list.end())
+	{
 		if ((*iter)->Id() == id)
 			return iter;
+		++iter;
+	}
 	return iter;
 }
 

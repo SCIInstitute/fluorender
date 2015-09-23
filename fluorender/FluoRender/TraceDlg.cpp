@@ -237,6 +237,7 @@ EVT_BUTTON(ID_RefineMapBtn, TraceDlg::OnRefineMapBtn)
 //selection page
 //component tools
 EVT_TEXT(ID_CompIDText, TraceDlg::OnCompIDText)
+EVT_TEXT_ENTER(ID_CompIDText, TraceDlg::OnCompFull)
 EVT_BUTTON(ID_CompIDXBtn, TraceDlg::OnCompIDXBtn)
 EVT_BUTTON(ID_CompFullBtn, TraceDlg::OnCompFull)
 EVT_BUTTON(ID_CompExclusiveBtn, TraceDlg::OnCompExclusive)
@@ -247,6 +248,7 @@ EVT_COMMAND_SCROLL(ID_CellSizeSldr, TraceDlg::OnCellSizeChange)
 EVT_TEXT(ID_CellSizeText, TraceDlg::OnCellSizeText)
 //link page
 EVT_TEXT(ID_CompIDText2, TraceDlg::OnCompIDText)
+EVT_TEXT_ENTER(ID_CompIDText2, TraceDlg::OnCompAppend)
 //ID link controls
 EVT_BUTTON(ID_CellExclusiveLinkBtn, TraceDlg::OnCellExclusiveLink)
 EVT_BUTTON(ID_CellLinkBtn, TraceDlg::OnCellLink)
@@ -256,6 +258,7 @@ EVT_BUTTON(ID_CellUnlinkBtn, TraceDlg::OnCellUnlink)
 EVT_CHECKBOX(ID_ManualAssistCheck, TraceDlg::OnManualAssistCheck)
 //modify page
 //ID edit controls
+EVT_TEXT_ENTER(ID_CellNewIDText, TraceDlg::OnCompAppend)
 EVT_BUTTON(ID_CellNewIDXBtn, TraceDlg::OnCellNewIDX)
 EVT_BUTTON(ID_CompAppend2Btn, TraceDlg::OnCompAppend)
 EVT_CHECKBOX(ID_AutoIDChk, TraceDlg::OnAutoIDChk)
@@ -361,7 +364,7 @@ wxWindow* TraceDlg::CreateSelectPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Selection tools:",
 		wxDefaultPosition, wxSize(100, 20));
 	m_comp_id_text = new wxTextCtrl(page, ID_CompIDText, "",
-		wxDefaultPosition, wxSize(77, 23));
+		wxDefaultPosition, wxSize(77, 23), wxTE_PROCESS_ENTER);
 	m_comp_id_x_btn = new wxButton(page, ID_CompIDXBtn, "X",
 		wxDefaultPosition, wxSize(23, 23));
 	m_comp_full_btn = new wxButton(page, ID_CompFullBtn, "FullCompt",
@@ -418,7 +421,7 @@ wxWindow* TraceDlg::CreateLinkPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Selection tools:",
 		wxDefaultPosition, wxSize(100, 20));
 	m_comp_id_text2 = new wxTextCtrl(page, ID_CompIDText2, "",
-		wxDefaultPosition, wxSize(77, 23));
+		wxDefaultPosition, wxSize(77, 23), wxTE_PROCESS_ENTER);
 	m_comp_id_x_btn = new wxButton(page, ID_CompIDXBtn, "X",
 		wxDefaultPosition, wxSize(23, 23));
 	m_comp_append_btn = new wxButton(page, ID_CompAppendBtn, "Append",
@@ -478,7 +481,7 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "New ID/Selection:",
 		wxDefaultPosition, wxSize(100, 20));
 	m_cell_new_id_text = new wxTextCtrl(page, ID_CellNewIDText, "",
-		wxDefaultPosition, wxSize(77, 23));
+		wxDefaultPosition, wxSize(77, 23), wxTE_PROCESS_ENTER);
 	m_cell_new_id_x_btn = new wxButton(page, ID_CellNewIDXBtn, "X",
 		wxDefaultPosition, wxSize(23, 23));
 	m_comp_append2_btn = new wxButton(page, ID_CompAppend2Btn, "Append",
@@ -955,13 +958,21 @@ void TraceDlg::OnConvertToRulers(wxCommandEvent& event)
 	TraceGroup* trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+	double spcx, spcy, spcz;
+	vd->GetSpacings(spcx, spcy, spcz);
 
 	//get rulers
 	FL::RulerList rulers;
 	trace_group->GetMappedRulers(rulers);
 	for (FL::RulerListIter iter = rulers.begin();
 	iter != rulers.end(); ++iter)
+	{
+		(*iter)->Scale(spcx, spcy, spcz);
 		m_view->GetRulerList()->push_back(*iter);
+	}
 	m_view->RefreshGL();
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetMeasureDlg())
@@ -1104,7 +1115,8 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 
 	//get id
 	wxString str;
-	if (event.GetId() == ID_CompAppend2Btn)
+	if (event.GetId() == ID_CompAppend2Btn ||
+		event.GetId() == ID_CellNewIDText)
 		str = m_cell_new_id_text->GetValue();
 	else
 		str = m_comp_id_text->GetValue();
