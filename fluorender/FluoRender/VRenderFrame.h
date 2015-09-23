@@ -296,13 +296,6 @@ public:
 	Interpolator* GetInterpolator()
 	{ return &m_interpolator; }
 
-	//set mac address
-	void SetAddress(wxString address)
-	{ m_address = address; }
-	//get free version
-	bool GetFreeVersion()
-	{ return false; }
-
 	//tex renderer settings
 	void SetTextureRendererSettings();
 	void SetTextureUndos();
@@ -310,9 +303,8 @@ public:
 	//quit option
 	void OnQuit(wxCommandEvent& WXUNUSED(event))
 	{ Close(true); }
-    //show infor function
-    
-    void OnInfo(wxCommandEvent& WXUNUSED(event));
+	//show info
+	void OnInfo(wxCommandEvent& WXUNUSED(event));
 
 	TextRenderer* GetTextRenderer()
 	{ return m_text_renderer; }

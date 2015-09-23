@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <wx/wx.h>
+#include <wx/notebook.h>
 
 #ifndef _BRUSHTOOLDLG_H_
 #define _BRUSHTOOLDLG_H_
@@ -174,6 +175,8 @@ private:
 	double m_dft_nr_thresh;
 	double m_dft_nr_size;
 
+	//tab control
+	wxNotebook *m_notebook;
 	//paint tools
 	//toolbar
 	wxToolBar *m_toolbar;
@@ -243,6 +246,9 @@ private:
 
 private:
 	void LoadDefault();
+	wxWindow* CreateBrushPage(wxWindow *parent);
+	wxWindow* CreateCalculationPage(wxWindow *parent);
+	wxWindow* CreateAnalysisPage(wxWindow *parent);
 
 	//event handling
 	//paint tools
