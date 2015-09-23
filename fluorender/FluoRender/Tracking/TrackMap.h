@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <boost/signals2.hpp>
 #include <deque>
 
+class Ruler;
 namespace FL
 {
 //tags
@@ -46,7 +47,10 @@ namespace FL
 #define TAG_NUM			7
 
 	typedef boost::signals2::signal<void(int)> SignalProg;
+	typedef std::vector<Ruler*> RulerList;
+	typedef std::vector<Ruler*>::iterator RulerListIter;
 	class TrackMap;
+	//class ::Ruler;
 	class TrackMapProcessor
 	{
 	public:
@@ -94,6 +98,11 @@ namespace FL
 		unsigned int GetMappedEdges(TrackMap& track_map,
 			CellList &sel_list1, CellList &sel_list2,
 			std::vector<float> &verts,
+			size_t frame1, size_t frame2);
+		//rulers
+		bool GetMappedRulers(TrackMap& track_map,
+			CellList &sel_list1, CellList &sel_list2,
+			RulerList &rulers,
 			size_t frame1, size_t frame2);
 
 		//modifications
@@ -149,6 +158,7 @@ namespace FL
 			unsigned int &bl_size_ui, float &bl_size_f);
 		static bool edge_comp_size_ol(InterEdge edge1, InterEdge edge2, InterGraph& graph);
 		static bool edge_comp_size_bl(InterEdge edge1, InterEdge edge2, InterGraph& graph);
+		RulerListIter FindRulerFromList(unsigned int id, RulerList &list);
 
 		//export
 		void WriteBool(std::ofstream& ofs, bool value);

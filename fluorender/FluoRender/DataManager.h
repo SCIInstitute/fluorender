@@ -86,6 +86,14 @@ public:
 	{
 		m_name = name;
 	}
+	unsigned int Id()
+	{
+		return m_id;
+	}
+	void Id(unsigned int id)
+	{
+		m_id = id;
+	}
 
 	//layer adjustment
 	//gamma
@@ -133,6 +141,7 @@ public:
 protected:
 	int type;//-1:invalid, 2:volume, 3:mesh, 4:annotations, 5:group, 6:mesh group, 7:ruler, 8:traces
 	wxString m_name;
+	unsigned int m_id;
 
 	//layer adjustment
 	Color m_gamma;
@@ -921,6 +930,9 @@ public:
 	bool CombineCells(FL::pCell &cell, FL::CellList &list,
 		size_t frame);
 	bool DivideCells(FL::CellList &list, size_t frame);
+
+	//rulers
+	bool GetMappedRulers(FL::RulerList &rulers);
 
 	//i/o
 	bool Load(wxString &filename);

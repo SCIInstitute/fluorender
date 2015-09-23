@@ -3098,6 +3098,61 @@ bool TraceGroup::DivideCells(FL::CellList &list, size_t frame)
 	return tm_processor.DivideCells(m_track_map, list, frame);
 }
 
+bool TraceGroup::GetMappedRulers(FL::RulerList &rulers)
+{
+	unsigned int result = 0;
+	size_t frame_num = m_track_map.GetFrameNum();
+	if (m_ghost_num <= 0 ||
+		m_cur_time < 0 ||
+		m_cur_time >= frame_num)
+		return false;
+
+	//estimate verts size
+	size_t remain_num = frame_num - m_cur_time - 1;
+	size_t ghost_lead, ghost_tail;
+	ghost_lead = m_draw_lead ?
+		(remain_num>m_ghost_num ?
+			m_ghost_num : remain_num) : 0;
+	ghost_tail = m_draw_tail ?
+		(m_cur_time >= m_ghost_num ?
+			m_ghost_num : m_cur_time) : 0;
+
+	FL::CellList temp_sel_list1, temp_sel_list2;
+	FL::TrackMapProcessor tm_processor;
+
+	if (m_draw_lead)
+	{
+		temp_sel_list1 = m_cell_list;
+		for (size_t i = m_cur_time;
+		i < m_cur_time + ghost_lead; ++i)
+		{
+			result += tm_processor.GetMappedRulers(m_track_map,
+				temp_sel_list1, temp_sel_list2,
+				rulers, i, i + 1);
+			//swap
+			temp_sel_list1 = temp_sel_list2;
+			temp_sel_list2.clear();
+		}
+	}
+
+	if (m_draw_tail)
+	{
+		temp_sel_list1 = m_cell_list;
+		for (size_t i = m_cur_time;
+		i > m_cur_time - ghost_tail; --i)
+		{
+			result += tm_processor.GetMappedRulers(
+				m_track_map, temp_sel_list1, temp_sel_list2,
+				rulers, i, i - 1);
+			//sawp
+			temp_sel_list1 = temp_sel_list2;
+			temp_sel_list2.clear();
+		}
+	}
+
+	return true;
+}
+
 bool TraceGroup::Load(wxString &filename)
 {
 	m_data_path = filename;

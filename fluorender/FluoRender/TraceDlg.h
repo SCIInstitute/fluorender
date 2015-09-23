@@ -131,6 +131,7 @@ public:
 		//edit tools
 		ID_AnalyzeBtn,
 		ID_SaveAnalyzeBtn,
+		ID_ConvertToRulersBtn,
 		//magic tool
 		//ID_CellMagic0Btn,
 		//ID_CellMagic1Btn,
@@ -270,6 +271,7 @@ private:
 	//analysis page
 	wxButton* m_analyze_btn;
 	wxButton* m_save_analyze_btn;
+	wxButton* m_convert_to_rulers_btn;
 
 	//magic tool
 	//wxButton* m_cell_magic0_btn;
@@ -349,6 +351,7 @@ private:
 	//analysis page
 	void OnAnalyze(wxCommandEvent &event);
 	void OnSaveAnalyze(wxCommandEvent &event);
+	void OnConvertToRulers(wxCommandEvent &event);
 	//magic tool
 	//void OnCellMagic0Btn(wxCommandEvent& event);
 	//void OnCellMagic1Btn(wxCommandEvent& event);

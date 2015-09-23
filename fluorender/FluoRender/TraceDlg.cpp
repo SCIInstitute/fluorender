@@ -267,6 +267,7 @@ EVT_BUTTON(ID_CellSegmentBtn, TraceDlg::OnCellSegment)
 //analysis page
 EVT_BUTTON(ID_AnalyzeBtn, TraceDlg::OnAnalyze)
 EVT_BUTTON(ID_SaveAnalyzeBtn, TraceDlg::OnSaveAnalyze)
+EVT_BUTTON(ID_ConvertToRulersBtn, TraceDlg::OnConvertToRulers)
 //magic tool
 //EVT_BUTTON(ID_CellMagic0Btn, TraceDlg::OnCellMagic0Btn)
 //EVT_BUTTON(ID_CellMagic1Btn, TraceDlg::OnCellMagic1Btn)
@@ -534,11 +535,14 @@ wxWindow* TraceDlg::CreateAnalysisPage(wxWindow *parent)
 	wxPanel *page = new wxPanel(parent);
 
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
+	m_convert_to_rulers_btn = new wxButton(page, ID_ConvertToRulersBtn, "To Rulers",
+		wxDefaultPosition, wxSize(65, 23));
 	m_analyze_btn = new wxButton(page, ID_AnalyzeBtn, "Analyze",
 		wxDefaultPosition, wxSize(65, 23));
 	m_save_analyze_btn = new wxButton(page, ID_SaveAnalyzeBtn, "Save Text",
 		wxDefaultPosition, wxSize(65, 23));
 	sizer_1->AddStretchSpacer();
+	sizer_1->Add(m_convert_to_rulers_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_analyze_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_save_analyze_btn, 0, wxALIGN_CENTER);
 	sizer_1->AddStretchSpacer();
@@ -941,6 +945,27 @@ void TraceDlg::OnSaveAnalyze(wxCommandEvent &event)
 	}
 	if (fopendlg)
 		delete fopendlg;
+}
+
+void TraceDlg::OnConvertToRulers(wxCommandEvent& event)
+{
+	if (!m_view)
+		return;
+
+	TraceGroup* trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+		return;
+
+	//get rulers
+	FL::RulerList rulers;
+	trace_group->GetMappedRulers(rulers);
+	for (FL::RulerListIter iter = rulers.begin();
+	iter != rulers.end(); ++iter)
+		m_view->GetRulerList()->push_back(*iter);
+	m_view->RefreshGL();
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetMeasureDlg())
+		vr_frame->GetMeasureDlg()->GetSettings(m_view);
 }
 
 //manual tracking assist
