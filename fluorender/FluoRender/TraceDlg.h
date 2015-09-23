@@ -129,7 +129,6 @@ public:
 		ID_CellSegmentBtn,
 		//analysis page
 		//edit tools
-		ID_AddLabelBtn,
 		ID_AnalyzeBtn,
 		ID_SaveAnalyzeBtn,
 		//magic tool
@@ -269,8 +268,6 @@ private:
 	wxButton* m_cell_segment_btn;
 
 	//analysis page
-	//edit tools
-	wxButton* m_add_label_btn;
 	wxButton* m_analyze_btn;
 	wxButton* m_save_analyze_btn;
 

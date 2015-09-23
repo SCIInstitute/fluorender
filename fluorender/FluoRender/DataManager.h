@@ -920,6 +920,7 @@ public:
 		size_t frame1, size_t frame2);
 	bool CombineCells(FL::pCell &cell, FL::CellList &list,
 		size_t frame);
+	bool DivideCells(FL::CellList &list, size_t frame);
 
 	//i/o
 	bool Load(wxString &filename);

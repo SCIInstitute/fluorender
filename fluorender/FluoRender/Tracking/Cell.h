@@ -79,6 +79,7 @@ namespace FL
 		IntraVert GetIntraVert();
 		void SetIntraVert(IntraVert intra_vert);
 		void Inc(size_t i, size_t j, size_t k, float value);
+		void Inc(pCell &cell);
 		void Inc();
 		void IncExternal(float value);
 		void AddVertex(pVertex &vertex);
@@ -132,6 +133,16 @@ namespace FL
 			double(j), double(k))) / (m_size_ui + 1));
 		m_size_ui++;
 		m_size_f += value;
+	}
+
+	inline void Cell::Inc(pCell &cell)
+	{
+		m_center = FLIVR::Point(
+			(m_center * m_size_ui + cell->GetCenter() *
+			cell->GetSizeUi()) / (m_size_ui +
+			cell->GetSizeUi()));
+		m_size_ui += cell->GetSizeUi();
+		m_size_f += cell->GetSizeF();
 	}
 
 	inline void Cell::Inc()

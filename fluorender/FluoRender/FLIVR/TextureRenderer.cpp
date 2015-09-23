@@ -419,15 +419,16 @@ namespace FLIVR
 			double vdx_abs = fabs(vdx);
 			double vdy_abs = fabs(vdy);
 			double vdz_abs = fabs(vdz);
-			//if (vdx_abs < snap) vdx = 0.0;
-			//if (vdy_abs < snap) vdy = 0.0;
-			//if (vdz_abs < snap) vdz = 0.0;
-			if (vdx_abs<snap-0.1) vdx = 0.0;
-			else if (vdx_abs<snap) vdx = (vdx_abs-snap+0.1)*snap*10.0*vdx/vdx_abs;
-			if (vdy_abs<snap-0.1) vdy = 0.0;
-			else if (vdy_abs<snap) vdy = (vdy_abs-snap+0.1)*snap*10.0*vdy/vdy_abs;
-			if (vdz_abs<snap-0.1) vdz = 0.0;
-			else if (vdz_abs<snap) vdz = (vdz_abs-snap+0.1)*snap*10.0*vdz/vdz_abs;
+			if (vdx_abs < snap) vdx = 0.0;
+			if (vdy_abs < snap) vdy = 0.0;
+			if (vdz_abs < snap) vdz = 0.0;
+			//transition (doesn't look good)
+			//if (vdx_abs<snap-0.1) vdx = 0.0;
+			//else if (vdx_abs<snap) vdx = (vdx_abs-snap+0.1)*snap*10.0*vdx/vdx_abs;
+			//if (vdy_abs<snap-0.1) vdy = 0.0;
+			//else if (vdy_abs<snap) vdy = (vdy_abs-snap+0.1)*snap*10.0*vdy/vdy_abs;
+			//if (vdz_abs<snap-0.1) vdz = 0.0;
+			//else if (vdz_abs<snap) vdz = (vdz_abs-snap+0.1)*snap*10.0*vdz/vdz_abs;
 			vd = Vector(vdx, vdy, vdz);
 			vd.safe_normalize();
 		}

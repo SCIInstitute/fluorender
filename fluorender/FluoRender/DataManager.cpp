@@ -3084,12 +3084,18 @@ bool TraceGroup::UnlinkCells(FL::CellList &list1, FL::CellList &list2,
 		list1, list2, frame1, frame2);
 }
 
-bool TraceGroup:: CombineCells(FL::pCell &cell, FL::CellList &list,
+bool TraceGroup::CombineCells(FL::pCell &cell, FL::CellList &list,
 	size_t frame)
 {
 	FL::TrackMapProcessor tm_processor;
 	return tm_processor.CombineCells(m_track_map,
 		cell, list, frame);
+}
+
+bool TraceGroup::DivideCells(FL::CellList &list, size_t frame)
+{
+	FL::TrackMapProcessor tm_processor;
+	return tm_processor.DivideCells(m_track_map, list, frame);
 }
 
 bool TraceGroup::Load(wxString &filename)

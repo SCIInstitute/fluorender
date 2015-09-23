@@ -84,6 +84,7 @@ namespace FL
 		void SetCenter(FLIVR::Point &center);
 		void SetSizeUi(unsigned int size_ui);
 		void SetSizeF(float size_f);
+		void Update();
 
 		FLIVR::Point &GetCenter();
 		unsigned int GetSizeUi();
@@ -93,6 +94,7 @@ namespace FL
 		size_t GetCellNum();
 		bool FindCell(pCell &cell);
 		void AddCell(pCell &cell, bool inc=false);
+		void RemoveCell(pCell &cell);
 		CellBinIter GetCellsBegin();
 		CellBinIter GetCellsEnd();
 
@@ -154,6 +156,28 @@ namespace FL
 		m_size_f = size_f;
 	}
 
+	inline void Vertex::Update()
+	{
+		m_center = FLIVR::Point();
+		m_size_ui = 0;
+		m_size_f = 0.0f;
+
+		if (m_cells.size() == 0)
+			return;
+
+		for (CellBinIter iter = m_cells.begin();
+		iter != m_cells.end(); ++iter)
+		{
+			pCell cell = iter->lock();
+			if (!cell)
+				continue;
+			m_center += cell->GetCenter();
+			m_size_ui += cell->GetSizeUi();
+			m_size_f += cell->GetSizeF();
+		}
+		m_center /= m_cells.size();
+	}
+
 	inline size_t Vertex::GetCellNum()
 	{
 		return m_cells.size();
@@ -181,6 +205,20 @@ namespace FL
 			m_size_f += cell->GetSizeF();
 		}
 		m_cells.push_back(pwCell(cell));
+	}
+
+	inline void Vertex::RemoveCell(pCell &cell)
+	{
+		for (CellBinIter iter = m_cells.begin();
+		iter != m_cells.end(); ++iter)
+		{
+			pCell c = iter->lock();
+			if (c && c->Id() == cell->Id())
+			{
+				m_cells.erase(iter);
+				return;
+			}
+		}
 	}
 
 	inline CellBinIter Vertex::GetCellsBegin()

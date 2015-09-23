@@ -961,13 +961,11 @@ bool TrackMapProcessor::MergeCells(VertexList& vertex_list, CellBin &bin,
 				{
 					InterGraph &graph = track_map.m_inter_graph_list.at(frame - 1);
 					RelinkInterGraph(vertex, vertex0, frame, graph);
-
 				}
 				if (frame < track_map.m_frame_num - 1)
 				{
 					InterGraph &graph = track_map.m_inter_graph_list.at(frame);
 					RelinkInterGraph(vertex, vertex0, frame, graph);
-
 				}
 
 				//collect cells from vertex
@@ -1973,5 +1971,160 @@ bool TrackMapProcessor::AddCell(TrackMap& track_map,
 bool TrackMapProcessor::CombineCells(TrackMap& track_map,
 	pCell &cell, CellList &list, size_t frame)
 {
+	//check validity
+	if (!track_map.ExtendFrameNum(frame))
+		return false;
+
+	CellList &cell_list = track_map.m_cells_list.at(frame);
+	VertexList &vert_list = track_map.m_vertices_list.at(frame);
+
+	//find the largest cell
+	CellListIter cell_iter = cell_list.find(cell->Id());
+	if (cell_iter == cell_list.end())
+		return false;
+	pCell cell0 = cell_iter->second;
+	pVertex vertex0 = cell0->GetVertex().lock();
+
+	//add each cell to cell0
+	for (cell_iter = list.begin();
+	cell_iter != list.end(); ++cell_iter)
+	{
+		CellListIter iter = cell_list.find(cell_iter->second->Id());
+		if (iter == cell_list.end() ||
+			iter->second->Id() == cell0->Id())
+			continue;
+		pCell cell1 = iter->second;
+		pVertex vertex1 = cell1->GetVertex().lock();
+		cell0->Inc(cell1);
+		//relink vertex
+		if (vertex0 && vertex1)
+		{
+			//remove cell1 from vertex1
+			vertex1->RemoveCell(cell1);
+			if (vertex1->GetCellNum() == 0)
+			{
+				//relink inter graph
+				if (frame > 0)
+				{
+					InterGraph &graph = track_map.m_inter_graph_list.at(frame - 1);
+					RelinkInterGraph(vertex1, vertex0, frame, graph);
+				}
+				if (frame < track_map.m_frame_num - 1)
+				{
+					InterGraph &graph = track_map.m_inter_graph_list.at(frame);
+					RelinkInterGraph(vertex1, vertex0, frame, graph);
+				}
+
+				//erase from list
+				vert_list.erase(vertex1->Id());
+			}
+		}
+		//remove from list
+		cell_list.erase(iter);
+	}
+
+	//update information
+	if (vertex0)
+		vertex0->Update();
+
+	return true;
+}
+
+bool TrackMapProcessor::DivideCells(TrackMap& track_map,
+	CellList &list, size_t frame)
+{
+	//check validity
+	if (!track_map.ExtendFrameNum(frame))
+		return false;
+
+	CellList &cell_list = track_map.m_cells_list.at(frame);
+	VertexList &vert_list = track_map.m_vertices_list.at(frame);
+
+	//temporary vertex list
+	VertexList vlist;
+	VertexListIter vert_iter;
+	CellListIter cell_iter;
+	for (cell_iter = list.begin();
+	cell_iter != list.end(); ++cell_iter)
+	{
+		CellListIter iter = cell_list.find(cell_iter->second->Id());
+		if (iter == cell_list.end())
+			continue;
+		pCell cell = iter->second;
+		pVertex vertex = cell->GetVertex().lock();
+		if (cell && vertex)
+		{
+			vert_iter = vlist.find(vertex->Id());
+			if (vert_iter == vlist.end())
+			{
+				pVertex v = pVertex(new Vertex(vertex->Id()));
+				vlist.insert(std::pair<unsigned int, pVertex>(
+					v->Id(), v));
+				v->AddCell(cell_iter->second);
+			}
+			else
+			{
+				vert_iter->second->AddCell(cell_iter->second);
+			}
+		}
+	}
+
+	for (vert_iter = vlist.begin();
+	vert_iter != vlist.end(); ++vert_iter)
+	{
+		pVertex vertex = vert_iter->second;
+		if (vertex->GetCellNum() <= 1)
+			continue;
+
+		unsigned int max_size = 0;
+		unsigned int max_id = 0;
+		for (CellBinIter iter = vertex->GetCellsBegin();
+		iter != vertex->GetCellsEnd(); ++iter)
+		{
+			pCell cell = iter->lock();
+			if (!cell)
+				continue;
+			if (cell->GetSizeUi() > max_size)
+			{
+				max_size = cell->GetSizeUi();
+				max_id = cell->Id();
+			}
+		}
+
+		for (CellBinIter iter = vertex->GetCellsBegin();
+		iter != vertex->GetCellsEnd(); ++iter)
+		{
+			pCell cell = iter->lock();
+			if (!cell)
+				continue;
+			unsigned int id = cell->Id();
+			if (id == max_id)
+				continue;
+			cell_iter = cell_list.find(id);
+			if (cell_iter == cell_list.end())
+				continue;
+			cell = cell_iter->second;
+			pVertex v = cell->GetVertex().lock();
+			if (v)
+				v->RemoveCell(cell);
+			//new vertex
+			VertexListIter viter = vert_list.find(id);
+			if (viter == vert_list.end())
+			{
+				pVertex v0 = pVertex(new Vertex(id));
+				v0->AddCell(cell, true);
+				cell->AddVertex(v0);
+				vert_list.insert(std::pair<unsigned int, pVertex>(
+					id, v0));
+			}
+			else
+			{
+				pVertex v0 = viter->second;
+				v0->AddCell(cell, true);
+				cell->AddVertex(v0);
+			}
+		}
+	}
+
 	return true;
 }

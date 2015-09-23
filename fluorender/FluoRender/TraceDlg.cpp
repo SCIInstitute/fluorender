@@ -474,7 +474,7 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 
 	//ID input
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "New ID:",
+	st = new wxStaticText(page, 0, "New ID/Selection:",
 		wxDefaultPosition, wxSize(100, 20));
 	m_cell_new_id_text = new wxTextCtrl(page, ID_CellNewIDText, "",
 		wxDefaultPosition, wxSize(77, 23));
@@ -513,6 +513,7 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 	sizer_2->Add(m_cell_combine_id_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_divide_id_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_segment_btn, 0, wxALIGN_CENTER);
+	m_cell_segment_btn->Hide();
 	sizer_2->AddStretchSpacer();
 
 	//vertical sizer
@@ -532,9 +533,20 @@ wxWindow* TraceDlg::CreateAnalysisPage(wxWindow *parent)
 {
 	wxPanel *page = new wxPanel(parent);
 
+	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
+	m_analyze_btn = new wxButton(page, ID_AnalyzeBtn, "Analyze",
+		wxDefaultPosition, wxSize(65, 23));
+	m_save_analyze_btn = new wxButton(page, ID_SaveAnalyzeBtn, "Save Text",
+		wxDefaultPosition, wxSize(65, 23));
+	sizer_1->AddStretchSpacer();
+	sizer_1->Add(m_analyze_btn, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_save_analyze_btn, 0, wxALIGN_CENTER);
+	sizer_1->AddStretchSpacer();
+
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer_1, 0, wxEXPAND);
 
 	//set the page
 	page->SetSizer(sizer_v);
@@ -673,7 +685,10 @@ void TraceDlg::GetSettings(VRenderView* vrv)
 		m_ghost_show_lead_chk->SetValue(trace_group->GetDrawLead());
 	}
 	else
+	{
+		m_cur_time = m_view->m_glview->m_tseq_cur_num;
 		m_load_trace_text->SetValue("No Track map");
+	}
 
 	//manual tracking assist
 	m_manual_assist_check->SetValue(m_manual_assist);
@@ -1457,9 +1472,8 @@ void TraceDlg::CellNewID(bool append)
 				}
 			}
 
-	int frame = m_view->m_glview->m_tseq_cur_num;
 	if (new_id)
-		trace_group->AddCell(cell, frame);
+		trace_group->AddCell(cell, m_cur_time);
 
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_pool();
@@ -1467,7 +1481,7 @@ void TraceDlg::CellNewID(bool append)
 	BaseReader* reader = vd->GetReader();
 	if (reader)
 	{
-		wxString data_name = reader->GetCurName(frame, vd->GetCurChannel());
+		wxString data_name = reader->GetCurName(m_cur_time, vd->GetCurChannel());
 		wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
 		MSKWriter msk_writer;
 		msk_writer.SetData(nrrd_label);
@@ -1544,14 +1558,13 @@ void TraceDlg::CellEraseID()
 				data_label[index] = 0;
 		}
 
-		int frame = m_view->m_glview->m_tseq_cur_num;
 		//invalidate label mask in gpu
 		vd->GetVR()->clear_tex_pool();
 		//save label mask to disk
 		BaseReader* reader = vd->GetReader();
 		if (reader)
 		{
-			wxString data_name = reader->GetCurName(frame, vd->GetCurChannel());
+			wxString data_name = reader->GetCurName(m_cur_time, vd->GetCurChannel());
 			wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
 			MSKWriter msk_writer;
 			msk_writer.SetData(nrrd_label);
@@ -1883,6 +1896,16 @@ void TraceDlg::OnCellCombineID(wxCommandEvent &event)
 	}
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_pool();
+	//save label mask to disk
+	BaseReader* reader = vd->GetReader();
+	if (reader)
+	{
+		wxString data_name = reader->GetCurName(m_cur_time, vd->GetCurChannel());
+		wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
+		MSKWriter msk_writer;
+		msk_writer.SetData(nrrd_label);
+		msk_writer.Save(label_name.ToStdWstring(), 1);
+	}
 
 	//modify graphs
 	trace_group->CombineCells(cell, list_cur,
@@ -1894,6 +1917,46 @@ void TraceDlg::OnCellCombineID(wxCommandEvent &event)
 
 void TraceDlg::OnCellDivideID(wxCommandEvent& event)
 {
+	if (!m_view)
+		return;
+
+	//trace group
+	TraceGroup *trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+		return;
+
+	//current T
+	FL::CellList list_cur;
+	//fill current list
+	long item = -1;
+	while (true)
+	{
+		item = m_trace_list_curr->GetNextItem(
+			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		else
+			AddLabel(item, m_trace_list_curr, list_cur);
+	}
+	if (list_cur.empty())
+	{
+		item = -1;
+		while (true)
+		{
+			item = m_trace_list_curr->GetNextItem(
+				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+			if (item == -1)
+				break;
+			else
+				AddLabel(item, m_trace_list_curr, list_cur);
+		}
+	}
+	if (list_cur.size() <= 1)
+		//nothing to divide
+		return;
+
+	//modify graphs
+	trace_group->DivideCells(list_cur, m_cur_time);
 
 }
 
@@ -1976,68 +2039,66 @@ void TraceDlg::Measure()
 	m_info_list.clear();
 	int ilist;
 	int found;
-	int i, j, k;
 	int nx, ny, nz;
-	unsigned long long index;
 	unsigned int id;
 	double value;
 	double delta;
 	vd->GetResolution(nx, ny, nz);
-	for (i = 0; i < nx; ++i)
-		for (j = 0; j < ny; ++j)
-			for (k = 0; k < nz; ++k)
+	unsigned long long for_size = (unsigned long long)nx *
+		(unsigned long long)ny * (unsigned long long)nz;
+	unsigned long long index;
+	for (index = 0; index < for_size; ++index)
+	{
+		if (!data_mask[index] ||
+			!data_label[index])
+			continue;
+
+		id = data_label[index];
+		if (bits == nrrdTypeUChar)
+			value = ((unsigned char*)data_data)[index];
+		else if (bits == nrrdTypeUShort)
+			value = ((unsigned short*)data_data)[index];
+
+		if (value <= 1.0)
+			continue;
+		//find in list
+		found = -1;
+		for (ilist = 0; ilist < (int)m_info_list.size(); ++ilist)
+		{
+			if (m_info_list[ilist].id == id)
 			{
-				index = nx*ny*k + nx*j + i;
-				if (data_mask[index] &&
-					data_label[index])
-				{
-					id = data_label[index];
-					if (bits == nrrdTypeUChar)
-						value = ((unsigned char*)data_data)[index];
-					else if (bits == nrrdTypeUShort)
-						value = ((unsigned short*)data_data)[index];
-
-					if (value <= 1.0)
-						continue;
-					//find in list
-					found = -1;
-					for (ilist = 0; ilist < (int)m_info_list.size(); ++ilist)
-					{
-						if (m_info_list[ilist].id == id)
-						{
-							found = ilist;
-							break;
-						}
-					}
-					if (found == -1)
-					{
-						//not found
-						measure_info info;
-						info.id = id;
-						info.total_num = 1;
-						info.mean = 0.0;
-						info.variance = 0.0;
-						info.m2 = 0.0;
-						delta = value - info.mean;
-						info.mean += delta / info.total_num;
-						info.m2 += delta * (value - info.mean);
-						info.min = value;
-						info.max = value;
-						m_info_list.push_back(info);
-					}
-					else
-					{
-						m_info_list[found].total_num++;
-						delta = value - m_info_list[found].mean;
-						m_info_list[found].mean += delta / m_info_list[found].total_num;
-						m_info_list[found].m2 += delta * (value - m_info_list[found].mean);
-						m_info_list[found].min = value < m_info_list[found].min ? value : m_info_list[found].min;
-						m_info_list[found].max = value > m_info_list[found].max ? value : m_info_list[found].max;
-					}
-				}
+				found = ilist;
+				break;
 			}
+		}
+		if (found == -1)
+		{
+			//not found
+			measure_info info;
+			info.id = id;
+			info.total_num = 1;
+			info.mean = 0.0;
+			info.variance = 0.0;
+			info.m2 = 0.0;
+			delta = value - info.mean;
+			info.mean += delta / info.total_num;
+			info.m2 += delta * (value - info.mean);
+			info.min = value;
+			info.max = value;
+			m_info_list.push_back(info);
+		}
+		else
+		{
+			m_info_list[found].total_num++;
+			delta = value - m_info_list[found].mean;
+			m_info_list[found].mean += delta / m_info_list[found].total_num;
+			m_info_list[found].m2 += delta * (value - m_info_list[found].mean);
+			m_info_list[found].min = value < m_info_list[found].min ? value : m_info_list[found].min;
+			m_info_list[found].max = value > m_info_list[found].max ? value : m_info_list[found].max;
+		}
+	}
 
-	for (i = 0; i < (int)m_info_list.size(); ++i)
+	for (size_t i = 0; i < m_info_list.size(); ++i)
 	{
 		if (m_info_list[i].total_num > 0)
 			m_info_list[i].variance = sqrt(m_info_list[i].m2 / (m_info_list[i].total_num));
