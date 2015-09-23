@@ -1281,7 +1281,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 			vr_frame->UpdateTreeIcons();
 		SetScrollPos(wxVERTICAL, m_scroll_pos);
 		UpdateSelection();
-		vr_frame->RefreshVRenderViews();
+		vr_frame->RefreshVRenderViews(false, true);
 	}
 }
 

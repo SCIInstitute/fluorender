@@ -153,6 +153,7 @@ wxGLCanvas(parent, id, attriblist, pos, size, style),
 	m_int_mode(1),
 	m_force_clear(false),
 	m_interactive(false),
+	m_clear_buffer(false),
 	m_adaptive(true),
 	m_brush_state(0),
 	//resizing
@@ -1079,6 +1080,11 @@ void VRenderGLView::DrawVolumes(int peel)
 		{
 			if (m_interactive)
 				ClearFinalBuffer();
+			else if (m_clear_buffer)
+			{
+				ClearFinalBuffer();
+				m_clear_buffer = false;
+			}
 		}
 		else
 			ClearFinalBuffer();
@@ -1293,6 +1299,7 @@ void VRenderGLView::DrawVolumes(int peel)
 	if (m_interactive)
 	{
 		m_interactive = false;
+		m_clear_buffer = true;
 		RefreshGL();
 	}
 }
@@ -9876,7 +9883,7 @@ return wxWindow::MSWWindowProc(message, wParam, lParam);
 void VRenderGLView::OnMouse(wxMouseEvent& event)
 {
 	//mouse interactive flag
-	m_interactive = false;
+	m_interactive = true;
 	m_paint_enable = false;
 	m_drawing_coord = false;
 
@@ -9965,7 +9972,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			m_int_mode = 8;
 			m_force_clear = true;
 		}
-		//SetSortBricks();
+
 		RefreshGL();
 		return;
 	}

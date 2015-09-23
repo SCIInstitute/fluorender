@@ -612,6 +612,7 @@ private:
 	//8-same as 4, but for paint ruler mode
 	bool m_force_clear;
 	bool m_interactive;
+	bool m_clear_buffer;
 	bool m_adaptive;
 	int m_brush_state;  //sets the button state of the tree panel
 	//0-not set

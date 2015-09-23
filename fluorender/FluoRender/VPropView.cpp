@@ -1035,7 +1035,7 @@ void VPropView::OnShadowEnable(wxCommandEvent &event)
 			m_vd->SetShadow(shadow);
 	}
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(false, true);
 }
 
 void VPropView::OnShadowChange(wxScrollEvent &event)
@@ -1138,7 +1138,7 @@ void VPropView::OnAlphaCheck(wxCommandEvent &event)
 	else if (m_vd)
 		m_vd->SetEnableAlpha(alpha);
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(false, true);
 }
 
 void VPropView::OnAlphaChange(wxScrollEvent &event)
@@ -1246,7 +1246,7 @@ void VPropView::OnShadingEnable(wxCommandEvent &event)
 		m_low_shading_text->Disable();
 	}
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(false, true);
 }
 
 //colormap controls
@@ -1296,7 +1296,7 @@ void VPropView::OnEnableColormap(wxCommandEvent &event)
 		}
 	}
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(false, true);
 }
 
 void VPropView::OnColormapHighValueChange(wxScrollEvent &event)
@@ -1439,7 +1439,7 @@ void VPropView::OnColorChange(wxColor c)
 				adjust_view->UpdateSync();
 		}
 
-		RefreshVRenderViews(true);
+		RefreshVRenderViews(true, true);
 	}
 }
 
@@ -1449,7 +1449,7 @@ void VPropView::OnColor2Change(wxColor c)
 	if (m_vd)
 	{
 		m_vd->SetMaskColor(color);
-		RefreshVRenderViews(true);
+		RefreshVRenderViews(true, true);
 	}
 }
 
@@ -1657,7 +1657,7 @@ void VPropView::OnInvCheck(wxCommandEvent &event)
 	else if (m_vd)
 		m_vd->SetInvert(inv);
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(false, true);
 }
 
 void VPropView::OnMIPCheck(wxCommandEvent &event)
@@ -1726,7 +1726,7 @@ void VPropView::OnMIPCheck(wxCommandEvent &event)
 
 	Layout();
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(false, true);
 }
 
 //noise reduction
@@ -1759,7 +1759,7 @@ void VPropView::OnNRCheck(wxCommandEvent &event)
 			m_vd->SetNR(val);
 	}
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(false, true);
 }
 
 void VPropView::OnFluoRender(wxCommandEvent &event) {
@@ -1800,7 +1800,7 @@ void VPropView::OnDepthCheck(wxCommandEvent &event)
 			m_group->SetBlendMode(0);
 	}
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(false, true);
 }
 
 bool VPropView::SetSpacings()
@@ -1860,7 +1860,7 @@ void VPropView::OnLegendCheck(wxCommandEvent& event)
 	if (m_vd)
 		m_vd->SetLegend(leg);
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(false, true);
 }
 
 //interpolation
@@ -1878,7 +1878,7 @@ void VPropView::OnInterpolateCheck(wxCommandEvent& event)
 	else if (m_vd)
 		m_vd->SetInterpolate(inv);
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(false, true);
 }
 
 //sync within group
@@ -1969,7 +1969,7 @@ void VPropView::OnSyncGroupCheck(wxCommandEvent& event)
 		m_group->SetNR(bVal);
 	}
 
-	RefreshVRenderViews();
+	RefreshVRenderViews(false, true);
 }
 
 void VPropView::OnSaveDefault(wxCommandEvent& event)
@@ -2294,5 +2294,5 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 		m_vd->SetShadow(bval);
 
 	//apply all
-	RefreshVRenderViews();
+	RefreshVRenderViews(false, true);
 }
