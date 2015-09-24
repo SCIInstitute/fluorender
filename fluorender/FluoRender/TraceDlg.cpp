@@ -2080,6 +2080,8 @@ void TraceDlg::Measure()
 	unsigned int id;
 	double value;
 	double delta;
+	double ext;
+	int i, j, k;
 	vd->GetResolution(nx, ny, nz);
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
@@ -2098,6 +2100,13 @@ void TraceDlg::Measure()
 
 		if (value <= 1.0)
 			continue;
+
+		k = index / (nx*ny);
+		j = index % (nx*ny);
+		i = j % nx;
+		j = j / nx;
+		ext = GetExt(data_label, index, id, nx, ny, nz, i, j, k);
+
 		//find in list
 		found = -1;
 		for (ilist = 0; ilist < (int)m_info_list.size(); ++ilist)
@@ -2122,6 +2131,7 @@ void TraceDlg::Measure()
 			info.m2 += delta * (value - info.mean);
 			info.min = value;
 			info.max = value;
+			info.ext_sum = ext;
 			m_info_list.push_back(info);
 		}
 		else
@@ -2132,6 +2142,7 @@ void TraceDlg::Measure()
 			m_info_list[found].m2 += delta * (value - m_info_list[found].mean);
 			m_info_list[found].min = value < m_info_list[found].min ? value : m_info_list[found].min;
 			m_info_list[found].max = value > m_info_list[found].max ? value : m_info_list[found].max;
+			m_info_list[found].ext_sum += ext;
 		}
 	}
 
@@ -2147,11 +2158,12 @@ void TraceDlg::Measure()
 void TraceDlg::OutputMeasureResult(wxString &str)
 {
 	str = "Statistics on the selection:\n";
-	str += "ID\tTotalN\tMean\tSigma\tMinimum\tMaximum\n";
+	str += "ID\tTotalN\tSurfaceN\tMean\tSigma\tMinimum\tMaximum\n";
 	for (int i = 0; i < (int)m_info_list.size(); ++i)
 	{
 		str += wxString::Format("%u\t", m_info_list[i].id);
 		str += wxString::Format("%u\t", m_info_list[i].total_num);
+		str += wxString::Format("%.0f\t", m_info_list[i].ext_sum);
 		str += wxString::Format("%.2f\t", m_info_list[i].mean);
 		str += wxString::Format("%.2f\t", m_info_list[i].variance);
 		str += wxString::Format("%.2f\t", m_info_list[i].min);
@@ -2174,6 +2186,132 @@ void TraceDlg::SaveMeasureResult(wxString &filename)
 	OutputMeasureResult(str);
 
 	tos << str;
+}
+
+double TraceDlg::GetExt(unsigned int* data_label,
+	unsigned long long index,
+	unsigned int id,
+	int nx, int ny, int nz,
+	int i, int j, int k)
+{
+	bool surface_vox, contact_vox;
+	unsigned long long indexn;
+	//determine the numbers
+	if (i == 0 || i == nx - 1 ||
+		j == 0 || j == ny - 1 ||
+		k == 0 || k == nz - 1)
+	{
+		//border voxel
+		surface_vox = true;
+		//determine contact
+		contact_vox = false;
+		if (i > 0)
+		{
+			indexn = index - 1;
+			if (data_label[indexn] &&
+				data_label[indexn] != id)
+				contact_vox = true;
+		}
+		if (!contact_vox && i < nx - 1)
+		{
+			indexn = index + 1;
+			if (data_label[indexn] &&
+				data_label[indexn] != id)
+				contact_vox = true;
+		}
+		if (!contact_vox && j > 0)
+		{
+			indexn = index - nx;
+			if (data_label[indexn] &&
+				data_label[indexn] != id)
+				contact_vox = true;
+		}
+		if (!contact_vox && j < ny - 1)
+		{
+			indexn = index + nx;
+			if (data_label[indexn] &&
+				data_label[indexn] != id)
+				contact_vox = true;
+		}
+		if (!contact_vox && k > 0)
+		{
+			indexn = index - nx*ny;
+			if (data_label[indexn] &&
+				data_label[indexn] != id)
+				contact_vox = true;
+		}
+		if (!contact_vox && k < nz - 1)
+		{
+			indexn = index + nx*ny;
+			if (data_label[indexn] &&
+				data_label[indexn] != id)
+				contact_vox = true;
+		}
+	}
+	else
+	{
+		surface_vox = false;
+		contact_vox = false;
+		//i-1
+		indexn = index - 1;
+		if (data_label[indexn] == 0)
+			surface_vox = true;
+		if (data_label[indexn] &&
+			data_label[indexn] != id)
+			surface_vox = contact_vox = true;
+		//i+1
+		if (!surface_vox || !contact_vox)
+		{
+			indexn = index + 1;
+			if (data_label[indexn] == 0)
+				surface_vox = true;
+			if (data_label[indexn] &&
+				data_label[indexn] != id)
+				surface_vox = contact_vox = true;
+		}
+		//j-1
+		if (!surface_vox || !contact_vox)
+		{
+			indexn = index - nx;
+			if (data_label[indexn] == 0)
+				surface_vox = true;
+			if (data_label[indexn] &&
+				data_label[indexn] != id)
+				surface_vox = contact_vox = true;
+		}
+		//j+1
+		if (!surface_vox || !contact_vox)
+		{
+			indexn = index + nx;
+			if (data_label[indexn] == 0)
+				surface_vox = true;
+			if (data_label[indexn] &&
+				data_label[indexn] != id)
+				surface_vox = contact_vox = true;
+		}
+		//k-1
+		if (!surface_vox || !contact_vox)
+		{
+			indexn = index - nx*ny;
+			if (data_label[indexn] == 0)
+				surface_vox = true;
+			if (data_label[indexn] &&
+				data_label[indexn] != id)
+				surface_vox = contact_vox = true;
+		}
+		//k+1
+		if (!surface_vox || !contact_vox)
+		{
+			indexn = index + nx*ny;
+			if (data_label[indexn] == 0)
+				surface_vox = true;
+			if (data_label[indexn] &&
+				data_label[indexn] != id)
+				surface_vox = contact_vox = true;
+		}
+	}
+
+	return surface_vox ? 1.0 : 0.0;
 }
 
 void TraceDlg::Test1()

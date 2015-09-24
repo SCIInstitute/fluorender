@@ -65,10 +65,10 @@ endif()
 add_definitions(-DFLUORENDER_TITLE="FluoRender")
 
 add_definitions(-DVERSION_MAJOR=2)                   #Be sure to update the Versions and Date for each release!!!!
-add_definitions(-DVERSION_MINOR=17)					 #
+add_definitions(-DVERSION_MINOR=18)					 #
 add_definitions(-DVERSION_MAJOR_TAG="2")             #
-add_definitions(-DVERSION_MINOR_TAG="17")            #
-add_definitions(-DVERSION_COPYRIGHT="August 2015")   # Up to here!
+add_definitions(-DVERSION_MINOR_TAG="18")            #
+add_definitions(-DVERSION_COPYRIGHT="September 2015")   # Up to here!
 
 #static compile
 add_definitions(-DSTATIC_COMPILE)

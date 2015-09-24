@@ -197,6 +197,7 @@ private:
 		double m2;
 		double min;
 		double max;
+		double ext_sum;
 
 		static bool cmp_id(const measure_info info1, const measure_info info2)
 		{ return info1.id < info2.id; }
@@ -307,6 +308,11 @@ private:
 	wxWindow* CreateModifyPage(wxWindow *parent);
 	wxWindow* CreateAnalysisPage(wxWindow *parent);
 
+	double GetExt(unsigned int* data_label,
+		unsigned long long index,
+		unsigned int id,
+		int nx, int ny, int nz,
+		int i, int j, int k);
 	//tests
 	void Test1();
 	void Test2(int type);
