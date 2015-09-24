@@ -43,7 +43,7 @@ class VMovieView : public wxPanel
 	enum
 	{
 		//time sequence
-		ID_SeqChk,
+		ID_SeqChk = wxID_HIGHEST + 701,
 		ID_TimeStartText,
 		ID_TimeEndText,
 		ID_IncTimeBtn,
@@ -56,6 +56,7 @@ class VMovieView : public wxPanel
 		ID_YRd,
 		ID_ZRd,
 		ID_DegreeEndText,
+		ID_RotIntCmb,
 
 		//movie time
 		ID_MovieTimeText,
@@ -65,7 +66,7 @@ class VMovieView : public wxPanel
 
 		//fps, view combo, help
 		ID_FPS_Text,
-		ID_ViewsCombo = wxID_HIGHEST+701,
+		ID_ViewsCombo,
 		ID_HelpBtn,
 
 		//main controls
@@ -139,8 +140,8 @@ public:
 	wxRadioButton *m_x_rd;
 	wxRadioButton *m_y_rd;
 	wxRadioButton *m_z_rd;
-
 	wxTextCtrl *m_degree_end;
+	wxComboBox *m_rot_int_cmb;
 
 	static wxTextCtrl *m_movie_time;
 	wxTextCtrl *m_bitrate_text;
@@ -170,7 +171,7 @@ private:
 	wxWindow* m_frame;
 	int m_last_frame;
 	double m_starting_rot;
-    wxTimer m_timer;
+	wxTimer m_timer;
 	double m_cur_time;
 	wxString m_filename;
 	bool m_running, m_record;
@@ -179,6 +180,7 @@ private:
 	int m_current_page;
 	QVideoEncoder encoder_;
 	wxString filetype_;
+	int m_rot_int_type;//0-linear; 1-smooth
 
 private:
 	void GetSettings(int view=0);
@@ -222,7 +224,7 @@ private:
 
 	//help
 	void OnHelpBtn(wxCommandEvent& event);
-    void OnMovieQuality(wxCommandEvent &event);
+	void OnMovieQuality(wxCommandEvent &event);
 	void OnCh1Check(wxCommandEvent &event);
 	void OnChEmbedCheck(wxCommandEvent &event);
 	static wxWindow* CreateExtraCaptureControl(wxWindow* parent);
@@ -242,8 +244,11 @@ private:
 	void OnSequenceChecked(wxCommandEvent& event);
 	void OnRotateChecked(wxCommandEvent& event);
 
-    //timer for playback.
-    void OnTimer(wxTimerEvent& event);
+	//rotation interpolation
+	void OnRotIntCmb(wxCommandEvent& event);
+
+	//timer for playback.
+	void OnTimer(wxTimerEvent& event);
 
 	DECLARE_EVENT_TABLE();
 };

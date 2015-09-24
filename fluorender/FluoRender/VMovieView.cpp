@@ -41,6 +41,7 @@ BEGIN_EVENT_TABLE(VMovieView, wxPanel)
 	EVT_TEXT(ID_CurrentTimeText, VMovieView::OnTimeText)
 	//rotations
 	EVT_CHECKBOX(ID_RotChk, VMovieView::OnRotateChecked)
+	EVT_COMBOBOX(ID_RotIntCmb, VMovieView::OnRotIntCmb)
 	//fps, view combo, help
 	EVT_COMBOBOX(ID_ViewsCombo, VMovieView::OnViewSelected)
 	EVT_BUTTON(ID_HelpBtn, VMovieView::OnHelpBtn)
@@ -157,6 +158,17 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	sizer_5->Add(m_degree_end, 0, wxALIGN_CENTER);
 	sizer_5->Add(5,5,0);
 	sizer_5->Add(st2, 0, wxALIGN_CENTER);
+	//rotation interpolation
+	st2 = new wxStaticText(page, wxID_ANY, "Interpolation:");
+	m_rot_int_cmb = new wxComboBox(page, ID_RotIntCmb, "",
+		wxDefaultPosition, wxSize(65, -1), 0, NULL, wxCB_READONLY);
+	m_rot_int_cmb->Append("Linear");
+	m_rot_int_cmb->Append("Smooth");
+	m_rot_int_cmb->Select(0);
+	sizer_5->Add(5, 5);
+	sizer_5->Add(st2, 0, wxALIGN_CENTER);
+	sizer_5->Add(5, 5);
+	sizer_5->Add(m_rot_int_cmb, 0, wxALIGN_CENTER);
 	//sizer 6
 	sizer_6->Add(20,5,0);
 	sizer_6->Add(m_z_rd, 0, wxALIGN_CENTER);
@@ -340,7 +352,9 @@ m_timer(this,ID_Timer),
 m_cur_time(0.0),
 m_running(false),
 m_record(false),
-m_current_page(0) {
+m_current_page(0),
+m_rot_int_type(0)
+{
 	//notebook
 	m_notebook = new wxNotebook(this, wxID_ANY);
 	m_notebook->AddPage(CreateSimplePage(m_notebook), "Basic");
@@ -982,7 +996,11 @@ void VMovieView::SetRendering(double pcnt) {
 		if (m_z_rd->GetValue())
 			val = z;
 		double deg = STOD(m_degree_end->GetValue().fn_str());
-		val = m_starting_rot + pcnt * deg;
+		if (m_rot_int_type == 0)
+			val = m_starting_rot + pcnt * deg;
+		else if (m_rot_int_type == 1)
+			val = m_starting_rot +
+			(-2.0*pcnt*pcnt*pcnt+3.0*pcnt*pcnt) * deg;
 		if (m_x_rd->GetValue())
 			vrv->SetRotations(val,y,z);
 		else if (m_y_rd->GetValue())
@@ -1017,6 +1035,11 @@ void VMovieView::OnRotateChecked(wxCommandEvent& event) {
 		EnableRot();
 	else
 		DisableRot();
+}
+
+void VMovieView::OnRotIntCmb(wxCommandEvent& event)
+{
+	m_rot_int_type = m_rot_int_cmb->GetCurrentSelection();
 }
 
 void VMovieView::OnSequenceChecked(wxCommandEvent& event) {
