@@ -28,7 +28,7 @@
 
 #This is an CMake configuration file for FluoRender
 
-cmake_minimum_required ( VERSION 2.6 )
+cmake_minimum_required ( VERSION 2.8.8 )
 
 #for MSVC builds
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
@@ -64,11 +64,11 @@ endif()
 
 add_definitions(-DFLUORENDER_TITLE="FluoRender")
 
-add_definitions(-DVERSION_MAJOR=2)
-add_definitions(-DVERSION_MINOR=17)
-add_definitions(-DVERSION_MAJOR_TAG="2")
-add_definitions(-DVERSION_MINOR_TAG="17")
-add_definitions(-DVERSION_COPYRIGHT="June 2015")
+add_definitions(-DVERSION_MAJOR=2)                   #Be sure to update the Versions and Date for each release!!!!
+add_definitions(-DVERSION_MINOR=17)					 #
+add_definitions(-DVERSION_MAJOR_TAG="2")             #
+add_definitions(-DVERSION_MINOR_TAG="17")            #
+add_definitions(-DVERSION_COPYRIGHT="August 2015")   # Up to here!
 
 #static compile
 add_definitions(-DSTATIC_COMPILE)
@@ -366,6 +366,9 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 			wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES})
    string(REGEX REPLACE "-lpng" "/usr/local/lib/libpng.a" 
 			CMAKE_MAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS})
+   string(REGEX REPLACE "/usr/local/lib/libfreetype.dylib" "/usr/local/lib/libfreetype.a;/usr/local/lib/libpng.a" 
+     FREETYPE_LIBRARIES ${FREETYPE_LIBRARIES})
+   message(STATUS "${FREETYPE_LIBRARIES}")
 endif()
 
 #link the libraries
