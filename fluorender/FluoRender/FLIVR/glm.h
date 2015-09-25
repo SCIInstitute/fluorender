@@ -146,6 +146,13 @@ GLvoid glmCenter(GLMmodel* model, GLfloat* center);
 */
 GLvoid glmDimensions(GLMmodel* model, GLfloat* dimensions);
 
+/* glmArea: Calculates the sum of face areas of a model
+*
+* model      - initialized GLMmodel structure
+* area       - single GLfloat
+*/
+GLvoid glmArea(GLMmodel* model, GLfloat* scale, GLfloat* area);
+
 /* Scale, translate and rotate the model
 * Similar to OpenGL calls
 */

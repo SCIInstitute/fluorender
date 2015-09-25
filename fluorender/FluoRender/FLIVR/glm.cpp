@@ -1094,6 +1094,50 @@ GLvoid glmDimensions(GLMmodel* model, GLfloat* dimensions)
 	dimensions[2] = glmAbs(bbox[5]-bbox[4]);
 }
 
+/* glmArea: Calculates the sum of face areas of a model
+*
+* model      - initialized GLMmodel structure
+* area       - single GLfloat
+*/
+GLvoid glmArea(GLMmodel* model, GLfloat* scale, GLfloat* area)
+{
+	assert(model);
+	assert(model->vertices);
+
+	GLfloat result = 0.0f;
+	GLfloat u[3];
+	GLfloat v[3];
+	GLfloat w[3];
+	GLuint i;
+	for (i = 0; i < model->numtriangles; i++) {
+		model->triangles[i].findex = i + 1;
+
+		u[0] = (model->vertices[3 * T(i).vindices[1] + 0] -
+			model->vertices[3 * T(i).vindices[0] + 0]) *
+			scale[0];
+		u[1] = (model->vertices[3 * T(i).vindices[1] + 1] -
+			model->vertices[3 * T(i).vindices[0] + 1]) *
+			scale[1];
+		u[2] = (model->vertices[3 * T(i).vindices[1] + 2] -
+			model->vertices[3 * T(i).vindices[0] + 2]) *
+			scale[2];
+
+		v[0] = (model->vertices[3 * T(i).vindices[2] + 0] -
+			model->vertices[3 * T(i).vindices[0] + 0]) *
+			scale[0];
+		v[1] = (model->vertices[3 * T(i).vindices[2] + 1] -
+			model->vertices[3 * T(i).vindices[0] + 1]) *
+			scale[1];
+		v[2] = (model->vertices[3 * T(i).vindices[2] + 2] -
+			model->vertices[3 * T(i).vindices[0] + 2]) *
+			scale[2];
+
+		glmCross(u, v, w);
+		result += (GLfloat)sqrt(w[0] * w[0] + w[1] * w[1] + w[2] * w[2])*0.5f;
+	}
+	*area = result;
+}
+
 /* Scale, translate and rotate the model
 * Similar to OpenGL calls
 */

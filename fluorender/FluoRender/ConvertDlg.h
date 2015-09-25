@@ -46,7 +46,9 @@ public:
 		ID_CnvVolMeshUsetransfChk,
 		ID_CnvVolMeshSelectedChk,
 		ID_CnvVolMeshWeldChk,
-		ID_CnvVolMeshConvertBtn
+		ID_CnvVolMeshConvertBtn,
+		//output
+		ID_StatText
 	};
 
 	ConvertDlg(wxWindow* frame, wxWindow* parent);
@@ -68,6 +70,8 @@ private:
 	wxCheckBox* m_cnv_vol_mesh_selected_chk;
 	wxCheckBox* m_cnv_vol_mesh_weld_chk;
 	wxButton* m_cnv_vol_mesh_convert_btn;
+	//output
+	wxTextCtrl* m_stat_text;
 
 	//convert from volume to mesh
 	void OnCnvVolMeshThreshChange(wxScrollEvent &event);
