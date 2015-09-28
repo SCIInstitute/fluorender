@@ -61,7 +61,7 @@ bool VRenderApp::OnInit()
    wxFrame* frame = new VRenderFrame(
          (wxFrame*) NULL,
          wxString(title),
-         50,50,1024,768);
+         -1,-1,1600,1000);
    SetTopWindow(frame);
    frame->Show();
    if (m_file_num>0)

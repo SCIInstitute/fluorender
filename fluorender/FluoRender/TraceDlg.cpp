@@ -2158,8 +2158,11 @@ void TraceDlg::Measure()
 void TraceDlg::OutputMeasureResult(wxString &str)
 {
 	str = "Statistics on the selection:\n";
+	str += "A total of " +
+		wxString::Format("%u", m_info_list.size()) +
+		" component(s) selected\n";
 	str += "ID\tTotalN\tSurfaceN\tMean\tSigma\tMinimum\tMaximum\n";
-	for (int i = 0; i < (int)m_info_list.size(); ++i)
+	for (size_t i = 0; i < m_info_list.size(); ++i)
 	{
 		str += wxString::Format("%u\t", m_info_list[i].id);
 		str += wxString::Format("%u\t", m_info_list[i].total_num);

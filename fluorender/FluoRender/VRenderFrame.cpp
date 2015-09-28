@@ -364,13 +364,15 @@ VRenderFrame::VRenderFrame(
 		Top().CloseButton(false).Layer(4));
 	m_aui_mgr.AddPane(m_list_panel, wxAuiPaneInfo().
 		Name("m_list_panel").Caption(UITEXT_DATAVIEW).
-		Left().CloseButton(true).FloatingSize(wxSize(350, 300)).Layer(3));
+		Left().CloseButton(true).BestSize(wxSize(350, 280)).
+		FloatingSize(wxSize(350, 300)).Layer(3));
 	m_aui_mgr.AddPane(m_tree_panel, wxAuiPaneInfo().
 		Name("m_tree_panel").Caption(UITEXT_TREEVIEW).
-		Left().CloseButton(true).FloatingSize(wxSize(350, 300)).Layer(3));
+		Left().CloseButton(true).BestSize(wxSize(350, 300)).
+		FloatingSize(wxSize(350, 300)).Layer(3));
 	m_aui_mgr.AddPane(m_movie_view, wxAuiPaneInfo().
 		Name("m_movie_view").Caption(UITEXT_MAKEMOVIE).
-		Left().CloseButton(true).MinSize(wxSize(350, 300)).
+		Left().CloseButton(true).BestSize(wxSize(350, 320)).
 		FloatingSize(wxSize(350, 300)).Layer(3));
 	m_aui_mgr.AddPane(m_prop_panel, wxAuiPaneInfo().
 		Name("m_prop_panel").Caption(UITEXT_PROPERTIES).
