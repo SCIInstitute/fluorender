@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/clipbrd.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
+#include <boost/chrono.hpp>
 #include <set>
 #include <limits>
 
@@ -2726,6 +2727,7 @@ void TraceDlg::GenMap()
 		wxGetApp().Yield();
 	}
 
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	//check branch
 	for (size_t iteri = 0; iteri < iter_num; ++iteri)
 	{
@@ -2752,6 +2754,9 @@ void TraceDlg::GenMap()
 			wxGetApp().Yield();
 		}
 	}
+	high_resolution_clock::time_point t2 = high_resolution_clock::now();
+	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+	(*m_stat_text) << wxString::Format("Wall clock time: %.4fs\n", time_span.count());
 
 	m_gen_map_prg->SetValue(100);
 
@@ -2807,6 +2812,7 @@ void TraceDlg::RefineMap()
 	m_gen_map_prg->SetValue(int(prog));
 
 	unsigned int last_op = track_map.GetLastOp();
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	//check branch
 	for (size_t iteri = 0; iteri < iter_num; ++iteri)
 	{
@@ -2823,6 +2829,9 @@ void TraceDlg::RefineMap()
 		else
 			UNLINK_FRAMES;
 	}
+	high_resolution_clock::time_point t2 = high_resolution_clock::now();
+	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+	(*m_stat_text) << wxString::Format("Wall clock time: %.4fs\n", time_span.count());
 
 	m_gen_map_prg->SetValue(100);
 }

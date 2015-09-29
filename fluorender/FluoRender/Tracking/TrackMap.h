@@ -55,7 +55,7 @@ namespace FL
 	{
 	public:
 		TrackMapProcessor() :
-		m_contact_thresh(0.5f), m_size_thresh(25.0f) {};
+		m_contact_thresh(0.7f), m_size_thresh(25.0f) {};
 		~TrackMapProcessor() {};
 
 		void ConnectSignalProgress(SignalProg::slot_type func);
