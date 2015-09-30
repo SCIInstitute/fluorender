@@ -36,6 +36,8 @@ DEALINGS IN THE SOFTWARE.
 #include <set>
 #include <limits>
 
+using namespace boost::chrono;
+
 BEGIN_EVENT_TABLE(TraceListCtrl, wxListCtrl)
 EVT_KEY_DOWN(TraceListCtrl::OnKeyDown)
 EVT_CONTEXT_MENU(TraceListCtrl::OnContextMenu)
