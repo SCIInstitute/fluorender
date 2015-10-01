@@ -306,6 +306,9 @@ wxGLCanvas(parent, id, attriblist, pos, size, style),
 	//new cell id
 	m_cell_new_id(false)
 {
+	//full frame
+	m_full_frame = new wxFrame((wxFrame*)NULL, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE);
+
 	//create context
 	if (sharedContext)
 	{
@@ -12228,6 +12231,9 @@ void VRenderView::OnCamCtrCheck(wxCommandEvent& event)
 {
 	m_glview->m_draw_camctr = 
 		m_options_toolbar->GetToolState(ID_CamCtrChk);
+	m_glview->Reparent(m_glview->m_full_frame);
+	m_glview->m_full_frame->ShowFullScreen(true);
+	m_glview->m_full_frame->Show();
 	RefreshGL();
 }
 

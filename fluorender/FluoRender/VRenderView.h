@@ -565,6 +565,7 @@ private:
 	wxString m_GLversion;
 	wxGLContext* m_glRC;
 	bool m_sharedRC;
+	wxFrame* m_full_frame;
 	wxWindow* m_frame;
 	VRenderView* m_vrv;
 	//populated lists of data
