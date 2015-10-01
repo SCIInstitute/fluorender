@@ -118,6 +118,7 @@ class VRenderFrame: public wxFrame
 		ID_CreateSphere,
 		ID_CreateCone,
 		//view
+		ID_FullScreen,
 		ID_ViewNew,
 		ID_ShowHideUI,
 		ID_PaintTool,
@@ -406,6 +407,7 @@ private:
 	void OnClose(wxCloseEvent &event);
 	void OnExit(wxCommandEvent& WXUNUSED(event));
 	void OnNewView(wxCommandEvent& WXUNUSED(event));
+	void OnFullScreen(wxCommandEvent& WXUNUSED(event));
 	void OnOpenVolume(wxCommandEvent& WXUNUSED(event));
 	void OnOpenMesh(wxCommandEvent& WXUNUSED(event));
 	void OnOrganize(wxCommandEvent& WXUNUSED(event));

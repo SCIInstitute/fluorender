@@ -50,6 +50,7 @@ DEALINGS IN THE SOFTWARE.
 BEGIN_EVENT_TABLE(VRenderFrame, wxFrame)
 	EVT_MENU(wxID_EXIT, VRenderFrame::OnExit)
 	EVT_MENU(ID_ViewNew, VRenderFrame::OnNewView)
+	EVT_MENU(ID_FullScreen, VRenderFrame::OnFullScreen)
 	EVT_MENU(ID_OpenVolume, VRenderFrame::OnOpenVolume)
 	EVT_MENU(ID_OpenMesh, VRenderFrame::OnOpenMesh)
 	EVT_MENU(ID_ViewOrganize, VRenderFrame::OnOrganize)
@@ -572,6 +573,8 @@ VRenderFrame::VRenderFrame(
 	m = new wxMenuItem(m_top_window,ID_ViewNew, wxT("&New View"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_new_view_mini));
 	m_top_window->Append(m);
+	m = new wxMenuItem(m_top_window, ID_FullScreen, wxT("&Full Screen"));
+	m_top_window->Append(m);
 	//help menu
 	m = new wxMenuItem(m_top_help,ID_CheckUpdates, wxT("&Check for Updates"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_check_updates_mini));
@@ -579,7 +582,7 @@ VRenderFrame::VRenderFrame(
 	m = new wxMenuItem(m_top_help,ID_Twitter, wxT("&Twitter"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_twitter_mini));
 	m_top_help->Append(m);
-	m = new wxMenuItem(m_top_help,ID_Facebook, wxT("&Facebook"));
+	m = new wxMenuItem(m_top_help,ID_Facebook, wxT("F&acebook"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_facebook_mini));
 	m_top_help->Append(m);
 	m = new wxMenuItem(m_top_help,ID_Manual, wxT("&Online Manual"));
@@ -735,6 +738,11 @@ VRenderView* VRenderFrame::GetView(wxString& name)
 void VRenderFrame::OnNewView(wxCommandEvent& WXUNUSED(event))
 {
 	wxString str = CreateView();
+}
+
+void VRenderFrame::OnFullScreen(wxCommandEvent& WXUNUSED(event))
+{
+	ShowFullScreen(true);
 }
 
 //open dialog options
