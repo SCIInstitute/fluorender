@@ -4364,6 +4364,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 
 	if (refresh)
 	{
+		wxSizeEvent e;
+		OnResize(e);
 		m_updating = true;
 		RefreshGL(ref_stat, start_loop);
 	}
