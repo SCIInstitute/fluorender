@@ -742,7 +742,12 @@ void VRenderFrame::OnNewView(wxCommandEvent& WXUNUSED(event))
 
 void VRenderFrame::OnFullScreen(wxCommandEvent& WXUNUSED(event))
 {
-	ShowFullScreen(true);
+	if (IsFullScreen())
+		ShowFullScreen(false);
+	else
+		ShowFullScreen(true,
+			wxFULLSCREEN_NOBORDER |
+			wxFULLSCREEN_NOCAPTION);
 }
 
 //open dialog options

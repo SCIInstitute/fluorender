@@ -305,4 +305,7 @@ const static unsigned char redo_png[15953];
 
 /* protractor.png - 16248 bytes */
 const static unsigned char protractor_png[16248];
+
+/* full_screen.png - 14882 bytes */
+const static unsigned char full_screen_png[14882];
 };

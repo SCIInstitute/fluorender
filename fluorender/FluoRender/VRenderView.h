@@ -565,7 +565,6 @@ private:
 	wxString m_GLversion;
 	wxGLContext* m_glRC;
 	bool m_sharedRC;
-	wxFrame* m_full_frame;
 	wxWindow* m_frame;
 	VRenderView* m_vrv;
 	//populated lists of data
@@ -969,6 +968,7 @@ public:
 		ID_DepthAttenFactorSldr,
 		ID_DepthAttenResetBtn,
 		ID_DepthAttenFactorText,
+		ID_FullScreenBtn,
 		ID_CenterBtn,
 		ID_Scale121Btn,
 		ID_ScaleFactorSldr,
@@ -1462,6 +1462,8 @@ public:
 
 	//render view///////////////////////////////////////////////
 	VRenderGLView *m_glview;
+	wxFrame* m_full_frame;
+	wxBoxSizer* m_view_sizer;
 
 	//top bar///////////////////////////////////////////////////
 	wxPanel* m_panel_1;
@@ -1497,6 +1499,7 @@ public:
 
 	//right bar///////////////////////////////////////////////////
 	wxPanel* m_panel_4;
+	wxToolBar *m_full_screen_btn;
 	wxToolBar *m_center_btn;
 	wxToolBar *m_scale_121_btn;
 	wxSlider *m_scale_factor_sldr;
@@ -1549,6 +1552,7 @@ private:
 	void OnAovChange(wxScrollEvent& event);
 	void OnAovText(wxCommandEvent &event);
 	void OnFreeChk(wxCommandEvent& event);
+	void OnFullScreen(wxCommandEvent& event);
 	//bar left
 	void OnDepthAttenCheck(wxCommandEvent& event);
 	void OnDepthAttenFactorChange(wxScrollEvent& event);

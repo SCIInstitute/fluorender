@@ -306,9 +306,6 @@ wxGLCanvas(parent, id, attriblist, pos, size, style),
 	//new cell id
 	m_cell_new_id(false)
 {
-	//full frame
-	m_full_frame = new wxFrame((wxFrame*)NULL, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE);
-
 	//create context
 	if (sharedContext)
 	{
@@ -4335,6 +4332,18 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		if (!wxGetKeyState(wxKeyCode('c')) &&
 			m_clear_mask)
 			m_clear_mask = false;
+		//full screen
+		if (wxGetKeyState(WXK_ESCAPE))
+		{
+			if (GetParent() == m_vrv->m_full_frame)
+			{
+				Reparent(m_vrv);
+				m_vrv->m_view_sizer->Add(this, 1, wxEXPAND);
+				m_vrv->Layout();
+				m_vrv->m_full_frame->Hide();
+				refresh = true;
+			}
+		}
 
 		//forced refresh
 		if (wxGetKeyState(WXK_F5))
@@ -10548,6 +10557,7 @@ BEGIN_EVENT_TABLE(VRenderView, wxPanel)
 	EVT_COMMAND_SCROLL(ID_AovSldr, VRenderView::OnAovChange)
 	EVT_TEXT(ID_AovText, VRenderView::OnAovText)
 	EVT_TOOL(ID_FreeChk, VRenderView::OnFreeChk)
+	EVT_TOOL(ID_FullScreenBtn, VRenderView::OnFullScreen)
 	//bar left
 	EVT_TOOL(ID_DepthAttenChk, VRenderView::OnDepthAttenCheck)
 	EVT_COMMAND_SCROLL(ID_DepthAttenFactorSldr, VRenderView::OnDepthAttenFactorChange)
@@ -10598,6 +10608,11 @@ wxPanel(parent, id, pos, size, style),
 	m_dft_depth_atten_factor(0.0),
 	m_dft_scale_factor(100.0)
 {
+	//full frame
+	m_full_frame = new wxFrame((wxFrame*)NULL, wxID_ANY, "",
+		wxDefaultPosition, wxDefaultSize, wxSTAY_ON_TOP);
+	m_view_sizer = new wxBoxSizer(wxVERTICAL);
+
 	wxString name = wxString::Format("Render View:%d", m_id++);
 	this->SetName(name);
 	// this list takes care of both pixel and context attributes (no custom edits of wx is preferred)
@@ -10643,6 +10658,7 @@ wxPanel(parent, id, pos, size, style),
 	};
 	m_glview = new VRenderGLView(frame, this, wxID_ANY, attriblist, sharedContext);
 	m_glview->SetCanFocus(false);
+	m_view_sizer->Add(m_glview, 1, wxEXPAND);
 #ifdef _WIN32
 	//example Pixel format descriptor detailing each part
 	//PIXELFORMATDESCRIPTOR pfd = { 
@@ -10697,6 +10713,8 @@ VRenderView::~VRenderView()
 {
 	if (m_glview)
 		delete m_glview;
+	if (m_full_frame)
+		delete m_full_frame;
 }
 
 void VRenderView::CreateBar()
@@ -10866,12 +10884,18 @@ void VRenderView::CreateBar()
 
 	m_options_toolbar->Realize();
 
+	m_full_screen_btn = new wxToolBar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_FLAT);
+	m_full_screen_btn->AddTool(ID_FullScreenBtn, "Full Screen",
+		wxGetBitmapFromMemory(full_screen),
+		"Show full screen");
+	m_full_screen_btn->Realize();
+
 	//add the toolbars and other options in order
 	sizer_h_1->AddSpacer(40);
 	sizer_h_1->Add(m_options_toolbar,1,wxEXPAND);
-	//sizer_h_1->AddStretchSpacer();
-	//sizer_h_1->Add(m_options_toolbar2,0,wxEXPAND);
 	sizer_h_1->AddSpacer(35);
+	sizer_h_1->Add(m_full_screen_btn, 0, wxALIGN_CENTER);
 
 	//bar left///////////////////////////////////////////////////
 	wxBoxSizer* sizer_v_3 = new wxBoxSizer(wxVERTICAL);
@@ -10938,7 +10962,7 @@ void VRenderView::CreateBar()
 
 	//middle sizer
 	sizer_m->Add(sizer_v_3, 0, wxEXPAND);
-	sizer_m->Add(m_glview, 1, wxEXPAND);
+	sizer_m->Add(m_view_sizer, 1, wxEXPAND);
 	sizer_m->Add(sizer_v_4, 0, wxEXPAND);
 
 	//bar bottom///////////////////////////////////////////////////
@@ -12231,9 +12255,6 @@ void VRenderView::OnCamCtrCheck(wxCommandEvent& event)
 {
 	m_glview->m_draw_camctr = 
 		m_options_toolbar->GetToolState(ID_CamCtrChk);
-	m_glview->Reparent(m_glview->m_full_frame);
-	m_glview->m_full_frame->ShowFullScreen(true);
-	m_glview->m_full_frame->Show();
 	RefreshGL();
 }
 
@@ -12415,6 +12436,20 @@ void VRenderView::OnFreeChk(wxCommandEvent& event)
 			SetPersp(true);
 	}
 	RefreshGL();
+}
+
+void VRenderView::OnFullScreen(wxCommandEvent& event)
+{
+	if (m_glview->GetParent() != m_full_frame)
+	{
+		m_view_sizer->Detach(m_glview);
+		m_glview->Reparent(m_full_frame);
+		m_full_frame->ShowFullScreen(true);
+		m_glview->SetPosition(wxPoint(0, 0));
+		m_glview->SetSize(m_full_frame->GetSize());
+		m_full_frame->Show();
+		RefreshGL();
+	}
 }
 
 void VRenderView::SaveDefault(unsigned int mask)
