@@ -4353,10 +4353,6 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 				frame->GetStatusBar()->PushStatusText("Forced Refresh");
 			wxSizeEvent e;
 			OnResize(e);
-			SetFocus();
-			Show(false);
-			Show(true);
-			//SetSortBricks();
 			RefreshGL();
 			if (frame && frame->GetStatusBar())
 				frame->GetStatusBar()->PopStatusText();
@@ -5328,6 +5324,9 @@ void VRenderGLView::OnDraw(wxPaintEvent& event)
 	Init();
 	wxPaintDC dc(this);
 	SetCurrent(*m_glRC);
+
+	if (m_resize)
+		m_drawing_coord = false;
 
 	int nx = GetSize().x;
 	int ny = GetSize().y;
