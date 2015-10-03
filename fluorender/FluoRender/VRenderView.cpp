@@ -4351,6 +4351,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			m_updating = true;
 			if (frame && frame->GetStatusBar())
 				frame->GetStatusBar()->PushStatusText("Forced Refresh");
+			wxSizeEvent e;
+			OnResize(e);
 			SetFocus();
 			Show(false);
 			Show(true);
@@ -4364,8 +4366,6 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 
 	if (refresh)
 	{
-		wxSizeEvent e;
-		OnResize(e);
 		m_updating = true;
 		RefreshGL(ref_stat, start_loop);
 	}
