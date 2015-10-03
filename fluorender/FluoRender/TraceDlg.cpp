@@ -1364,7 +1364,8 @@ void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, FL::CellList 
 	FL::pCell cell(new FL::Cell(id));
 	cell->SetSizeUi(size);
 	cell->SetSizeF(float(size));
-	cell->SetCenter(FLIVR::Point(x, y, z));
+    FLIVR::Point p(x, y, z);
+	cell->SetCenter(p);
 	list.insert(pair<unsigned int, FL::pCell>
 		(id, cell));
 }
