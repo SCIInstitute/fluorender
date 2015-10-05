@@ -55,13 +55,16 @@ namespace FL
 	{
 	public:
 		TrackMapProcessor() :
-		m_contact_thresh(0.7f), m_size_thresh(25.0f) {};
+		m_contact_thresh(0.7f),
+		m_size_thresh(25.0f),
+		m_level_thresh(3) {};
 		~TrackMapProcessor() {};
 
 		void ConnectSignalProgress(SignalProg::slot_type func);
 
 		void SetContactThresh(float value);
 		void SetSizeThresh(float value);
+		void SetLevelThresh(int level);
 
 		void SetSizes(TrackMap& track_map,
 			size_t nx, size_t ny, size_t nz);
@@ -77,6 +80,7 @@ namespace FL
 		bool ResolveGraph(TrackMap& track_map, size_t frame1, size_t frame2);
 		bool MatchFrames(TrackMap& track_map, size_t frame1, size_t frame2, bool bl_check = true);
 		bool UnmatchFrames(TrackMap& track_map, size_t frame1, size_t frame2);
+		bool ExMatchFrames(TrackMap& track_map, size_t frame1, size_t frame2);
 
 		bool Export(TrackMap& track_map, std::string &filename);
 		bool Import(TrackMap& track_map, std::string &filename);
@@ -122,6 +126,7 @@ namespace FL
 	private:
 		float m_contact_thresh;
 		float m_size_thresh;
+		int m_level_thresh;
 
 		//processing
 		bool CheckCellContact(TrackMap& track_map,
@@ -134,6 +139,10 @@ namespace FL
 			pVertex &vertex1, pVertex &vertex2,
 			size_t f1, size_t f2,
 			float overlap_value);
+		bool LinkOrphans(InterGraph& graph,
+			pVertex &vertex1, pVertex &vertex2,
+			size_t f1, size_t f2,
+			float dist_value);
 		bool IsolateVertex(InterGraph& graph,
 			pVertex &vertex);
 		bool ForceVertices(InterGraph& graph,
@@ -154,6 +163,9 @@ namespace FL
 		bool RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size_t frame, InterGraph &graph);
 		bool MatchVertex(pVertex &vertex, InterGraph &graph, bool bl_check = true);
 		bool UnmatchVertex(pVertex &vertex, InterGraph &graph);
+		bool ExMatchVertex(pVertex &vertex, InterGraph &inter_graph, size_t frame1, size_t frame2);
+		void FindOrphans(pVertex &vertex, InterGraph &inter_graph,
+			std::vector<pVertex> &orphan_list, int level);
 		unsigned int CheckBackLink(InterVert v0, InterVert v1, InterGraph &graph,
 			unsigned int &bl_size_ui, float &bl_size_f);
 		static bool edge_comp_size_ol(InterEdge edge1, InterEdge edge2, InterGraph& graph);
@@ -206,6 +218,11 @@ namespace FL
 	inline void TrackMapProcessor::SetSizeThresh(float value)
 	{
 		m_size_thresh = value;
+	}
+
+	inline void TrackMapProcessor::SetLevelThresh(int level)
+	{
+		m_level_thresh = level;
 	}
 
 	inline void TrackMapProcessor::WriteBool(std::ofstream& ofs, bool value)

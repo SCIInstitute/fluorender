@@ -325,7 +325,7 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 	sizer_2->Add(m_gen_map_prg, 1, wxEXPAND);
 	st = new wxStaticText(page, 0, "X",
 		wxDefaultPosition, wxSize(10, -1));
-	m_gen_map_spin = new wxSpinCtrl(page, ID_GenMapSpin, "3",
+	m_gen_map_spin = new wxSpinCtrl(page, ID_GenMapSpin, "1",
 		wxDefaultPosition, wxSize(50, 23));
 	sizer_2->Add(10, 10);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
@@ -2647,6 +2647,7 @@ void TraceDlg::GenMap()
 	bool file_err = false;
 
 	size_t iter_num = (size_t)m_gen_map_spin->GetValue();
+	iter_num *= 2;
 	tm_processor.SetSizes(track_map,
 		resx, resy, resz);
 	//	tm_processor.SetContactThresh(0.2f);
@@ -2751,6 +2752,9 @@ void TraceDlg::GenMap()
 		{
 			tm_processor.UnmatchFrames(track_map, fi, fi - 1);
 			tm_processor.UnmatchFrames(track_map, fi, fi + 1);
+			//link orphans
+			tm_processor.ExMatchFrames(track_map, fi, fi + 1);
+			tm_processor.ExMatchFrames(track_map, fi, fi - 1);
 			prog += prog_bit;
 			m_gen_map_prg->SetValue(int(prog));
 			(*m_stat_text) << wxString::Format("Time point %d unlinked.\n", int(fi));
@@ -2782,6 +2786,8 @@ void TraceDlg::GenMap()
 	{ \
 		tm_processor.UnmatchFrames(track_map, fi, fi - 1); \
 		tm_processor.UnmatchFrames(track_map, fi, fi + 1); \
+		tm_processor.ExMatchFrames(track_map, fi, fi + 1); \
+		tm_processor.ExMatchFrames(track_map, fi, fi - 1); \
 		prog += prog_bit; \
 		m_gen_map_prg->SetValue(int(prog)); \
 		(*m_stat_text) << wxString::Format("Time point %d unlinked.\n", int(fi)); \

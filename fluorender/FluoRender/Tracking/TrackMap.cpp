@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <functional>
 #include <algorithm>
 #include <limits>
+#include <windows.h>
 
 using namespace FL;
 
@@ -396,6 +397,42 @@ bool TrackMapProcessor::LinkVertices(InterGraph& graph,
 	return true;
 }
 
+bool TrackMapProcessor::LinkOrphans(InterGraph& graph,
+	pVertex &vertex1, pVertex &vertex2,
+	size_t f1, size_t f2, float dist_value)
+{
+	InterVert v1 = vertex1->GetInterVert(graph);
+	InterVert v2 = vertex2->GetInterVert(graph);
+	if (v1 == InterGraph::null_vertex())
+	{
+		v1 = boost::add_vertex(graph);
+		graph[v1].id = vertex1->Id();
+		graph[v1].frame = f1;
+		graph[v1].vertex = vertex1;
+		vertex1->SetInterVert(graph, v1);
+	}
+	if (v2 == InterGraph::null_vertex())
+	{
+		v2 = boost::add_vertex(graph);
+		graph[v2].id = vertex2->Id();
+		graph[v2].frame = f2;
+		graph[v2].vertex = vertex2;
+		vertex2->SetInterVert(graph, v2);
+	}
+
+	std::pair<InterEdge, bool> e = boost::edge(v1, v2, graph);
+	if (!e.second)
+	{
+		e = boost::add_edge(v1, v2, graph);
+		graph[e.first].size_ui = 0;
+		graph[e.first].size_f = 0.0f;
+		graph[e.first].dist = dist_value;
+		graph[e.first].link = 1;
+	}
+
+	return true;
+}
+
 bool TrackMapProcessor::IsolateVertex(InterGraph& graph, pVertex &vertex)
 {
 	InterVert v1, v2;
@@ -653,6 +690,26 @@ bool TrackMapProcessor::UnmatchFrames(TrackMap& track_map, size_t frame1, size_t
 	return true;
 }
 
+bool TrackMapProcessor::ExMatchFrames(TrackMap& track_map, size_t frame1, size_t frame2)
+{
+	if (frame1 >= track_map.m_frame_num ||
+		frame2 >= track_map.m_frame_num ||
+		frame1 == frame2)
+		return false;
+
+	VertexList &vertex_list1 = track_map.m_vertices_list.at(frame1);
+	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
+		frame1 > frame2 ? frame2 : frame1);
+
+	VertexListIter iter;
+	for (iter = vertex_list1.begin();
+	iter != vertex_list1.end(); ++iter)
+		ExMatchVertex(iter->second, inter_graph,
+			frame1, frame2);
+
+	return true;
+}
+
 bool TrackMapProcessor::MatchVertex(pVertex &vertex,
 	InterGraph &graph, bool bl_check)
 {
@@ -782,6 +839,105 @@ bool TrackMapProcessor::UnmatchVertex(pVertex &vertex, InterGraph &graph)
 		graph[edges[i]].link = 0;
 
 	return true;
+}
+
+bool TrackMapProcessor::ExMatchVertex(pVertex &vertex, InterGraph &inter_graph,
+	size_t frame1, size_t frame2)
+{
+	if (!vertex)
+		return false;
+	InterVert v0 = vertex->GetInterVert(inter_graph);
+	if (v0 == InterGraph::null_vertex())
+		return false;
+
+	InterVert v1;
+	std::pair<InterAdjIter, InterAdjIter> adj_verts;
+	std::pair<InterEdge, bool> edge;
+
+	adj_verts = boost::adjacent_vertices(v0, inter_graph);
+	//for each adjacent vertex
+	for (InterAdjIter inter_iter = adj_verts.first;
+	inter_iter != adj_verts.second; ++inter_iter)
+	{
+		v1 = *inter_iter;
+		edge = boost::edge(v0, v1, inter_graph);
+		if (edge.second && inter_graph[edge.first].link)
+			return true;
+	}
+
+	std::vector<pVertex> orphan_list;
+	//recursive searching
+	FindOrphans(vertex, inter_graph, orphan_list, 0);
+	pVertex min_vertex;//nearest neighbor
+	float min_dist = std::numeric_limits<float>::max();
+	float dist;
+	bool found = false;
+	if (vertex->Id() == 1479400)
+	{
+		std::stringstream ss;
+		ss << "v0" << vertex->GetCenter().x() << "\t" << vertex->GetCenter().y() << "\t" << vertex->GetCenter().z() << "\n";
+		OutputDebugStringA(ss.str().c_str());
+	}
+	for (std::vector<pVertex>::iterator ol_iter = orphan_list.begin();
+	ol_iter != orphan_list.end(); ++ol_iter)
+	{
+		if (vertex->Id() == 1479400)
+		{
+			std::stringstream ss;
+			FLIVR::Point p = (*ol_iter)->GetCenter();
+			ss << (*ol_iter)->Id() << "\t" << p.x() << "\t" << p.y() << "\t" << p.z() << "\n";
+			OutputDebugStringA(ss.str().c_str());
+		}
+		dist = (vertex->GetCenter() - (*ol_iter)->GetCenter()).length();
+		if (dist < min_dist)
+		{
+			min_dist = dist;
+			min_vertex = *ol_iter;
+			found = true;
+		}
+	}
+
+	if (found)
+		LinkOrphans(inter_graph, vertex, min_vertex,
+			frame1, frame2, min_dist);
+
+	return true;
+}
+
+void TrackMapProcessor::FindOrphans(pVertex &vertex, InterGraph &graph,
+	std::vector<pVertex> &orphan_list, int level)
+{
+	if (!vertex) return;
+	InterVert v0 = vertex->GetInterVert(graph);
+	if (v0 == InterGraph::null_vertex())
+		return;
+
+	InterVert v1;
+	std::pair<InterAdjIter, InterAdjIter> adj_verts;
+	std::pair<InterEdge, bool> edge;
+	bool linked = false;
+	pVertex vertex1;
+
+	adj_verts = boost::adjacent_vertices(v0, graph);
+	for (InterAdjIter inter_iter = adj_verts.first;
+	inter_iter != adj_verts.second; ++inter_iter)
+	{
+		v1 = *inter_iter;
+		edge = boost::edge(v0, v1, graph);
+		if (edge.second)
+		{
+			if (graph[edge.first].link)
+				linked = true;
+			if (level < m_level_thresh)
+			{
+				vertex1 = graph[v1].vertex.lock();
+				FindOrphans(vertex1, graph, orphan_list, level + 1);
+			}
+		}
+	}
+
+	if (!linked && level % 2)
+		orphan_list.push_back(vertex);
 }
 
 bool TrackMapProcessor::edge_comp_size_ol(InterEdge edge1,
