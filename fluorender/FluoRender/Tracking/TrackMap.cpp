@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #include <functional>
 #include <algorithm>
 #include <limits>
-#include <windows.h>
 
 using namespace FL;
 
@@ -698,14 +697,19 @@ bool TrackMapProcessor::ExMatchFrames(TrackMap& track_map, size_t frame1, size_t
 		return false;
 
 	VertexList &vertex_list1 = track_map.m_vertices_list.at(frame1);
+	VertexList &vertex_list2 = track_map.m_vertices_list.at(frame2);
 	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
 		frame1 > frame2 ? frame2 : frame1);
 
 	VertexListIter iter;
 	for (iter = vertex_list1.begin();
 	iter != vertex_list1.end(); ++iter)
-		ExMatchVertex(iter->second, inter_graph,
-			frame1, frame2);
+	{
+		if (!ExMatchVertex(iter->second, inter_graph,
+			frame1, frame2))
+			MatchVertexList(iter->second, vertex_list2,
+				inter_graph, frame1, frame2);
+	}
 
 	return true;
 }
@@ -865,52 +869,126 @@ bool TrackMapProcessor::ExMatchVertex(pVertex &vertex, InterGraph &inter_graph,
 			return true;
 	}
 
-	std::vector<pVertex> orphan_list;
+	VertexList orphan_list;
+	VertexList visited_list;
 	//recursive searching
-	FindOrphans(vertex, inter_graph, orphan_list, 0);
+	FindOrphans(vertex, inter_graph, orphan_list, visited_list, 0);
 	pVertex min_vertex;//nearest neighbor
 	float min_dist = std::numeric_limits<float>::max();
 	float dist;
 	bool found = false;
-	if (vertex->Id() == 1479400)
-	{
-		std::stringstream ss;
-		ss << "v0" << vertex->GetCenter().x() << "\t" << vertex->GetCenter().y() << "\t" << vertex->GetCenter().z() << "\n";
-		OutputDebugStringA(ss.str().c_str());
-	}
-	for (std::vector<pVertex>::iterator ol_iter = orphan_list.begin();
+	for (VertexListIter ol_iter = orphan_list.begin();
 	ol_iter != orphan_list.end(); ++ol_iter)
 	{
-		if (vertex->Id() == 1479400)
-		{
-			std::stringstream ss;
-			FLIVR::Point p = (*ol_iter)->GetCenter();
-			ss << (*ol_iter)->Id() << "\t" << p.x() << "\t" << p.y() << "\t" << p.z() << "\n";
-			OutputDebugStringA(ss.str().c_str());
-		}
-		dist = (vertex->GetCenter() - (*ol_iter)->GetCenter()).length();
+		dist = (vertex->GetCenter() - ol_iter->second->GetCenter()).length();
 		if (dist < min_dist)
 		{
 			min_dist = dist;
-			min_vertex = *ol_iter;
+			min_vertex = ol_iter->second;
 			found = true;
 		}
 	}
 
 	if (found)
-		LinkOrphans(inter_graph, vertex, min_vertex,
+	{
+		if (min_dist*min_dist > std::min(vertex->GetSizeUi(),
+			min_vertex->GetSizeUi())*0.2)
+			return false;
+		float v0_size = vertex->GetSizeF();
+		float v1_size = min_vertex->GetSizeF();
+		if (fabs(v0_size - v1_size) / (v0_size + v1_size) > 0.2f)
+			return false;
+		return LinkOrphans(inter_graph, vertex, min_vertex,
+			frame1, frame2, min_dist);
+	}
+
+	return false;
+}
+
+bool TrackMapProcessor::MatchVertexList(pVertex &vertex, VertexList &list2,
+	InterGraph &graph, size_t frame1, size_t frame2)
+{
+	if (!vertex)
+		return false;
+	
+	pVertex vertex2;
+	VertexList neighbor_list;
+	float dist, v0_size, v1_size;
+	InterVert v0, v1;
+	std::pair<InterAdjIter, InterAdjIter> adj_verts;
+	std::pair<InterEdge, bool> edge;
+	bool linked;
+
+	for (VertexListIter iter = list2.begin();
+	iter != list2.end(); ++iter)
+	{
+		vertex2 = iter->second;
+		dist = (vertex->GetCenter() - vertex2->GetCenter()).length();
+		if (dist * dist > std::min(vertex->GetSizeUi(),
+			vertex2->GetSizeUi())*0.3)
+			continue;
+		v0_size = vertex->GetSizeF();
+		v1_size = vertex2->GetSizeF();
+		if (fabs(v0_size - v1_size) / (v0_size + v1_size) > 0.2f)
+			continue;
+		v0 = vertex->GetInterVert(graph);
+		v1 = vertex2->GetInterVert(graph);
+		if (!v0 || !v1)
+		{
+			neighbor_list.insert(std::pair<unsigned int, pVertex>(
+				vertex2->Id(), vertex2));
+			continue;
+		}
+		linked = false;
+		adj_verts = boost::adjacent_vertices(v1, graph);
+		for (InterAdjIter inter_iter = adj_verts.first;
+		inter_iter != adj_verts.second; ++inter_iter)
+		{
+			v1 = *inter_iter;
+			edge = boost::edge(v0, v1, graph);
+			if (edge.second && graph[edge.first].link)
+			{
+				linked = true;
+				break;
+			}
+		}
+		if (!linked)
+			neighbor_list.insert(std::pair<unsigned int, pVertex>(
+				vertex2->Id(), vertex2));
+	}
+
+	bool found = false;
+	pVertex min_vertex;
+	float min_dist = std::numeric_limits<float>::max();
+	for (VertexListIter iter = neighbor_list.begin();
+	iter != neighbor_list.end(); ++iter)
+	{
+		dist = (vertex->GetCenter() - iter->second->GetCenter()).length();
+		if (dist < min_dist)
+		{
+			min_dist = dist;
+			min_vertex = iter->second;
+			found = true;
+		}
+	}
+
+	if (found)
+		return LinkOrphans(graph, vertex, min_vertex,
 			frame1, frame2, min_dist);
 
-	return true;
+	return false;
 }
 
 void TrackMapProcessor::FindOrphans(pVertex &vertex, InterGraph &graph,
-	std::vector<pVertex> &orphan_list, int level)
+	VertexList &orphan_list, VertexList &visited_list, int level)
 {
 	if (!vertex) return;
 	InterVert v0 = vertex->GetInterVert(graph);
 	if (v0 == InterGraph::null_vertex())
 		return;
+
+	visited_list.insert(std::pair<unsigned int, pVertex>
+		(vertex->Id(), vertex));
 
 	InterVert v1;
 	std::pair<InterAdjIter, InterAdjIter> adj_verts;
@@ -931,13 +1009,17 @@ void TrackMapProcessor::FindOrphans(pVertex &vertex, InterGraph &graph,
 			if (level < m_level_thresh)
 			{
 				vertex1 = graph[v1].vertex.lock();
-				FindOrphans(vertex1, graph, orphan_list, level + 1);
+				if (visited_list.find(vertex1->Id()) ==
+					visited_list.end())
+					FindOrphans(vertex1, graph, orphan_list,
+						visited_list, level + 1);
 			}
 		}
 	}
 
 	if (!linked && level % 2)
-		orphan_list.push_back(vertex);
+		orphan_list.insert(std::pair<unsigned int, pVertex>
+			(vertex->Id(), vertex));
 }
 
 bool TrackMapProcessor::edge_comp_size_ol(InterEdge edge1,

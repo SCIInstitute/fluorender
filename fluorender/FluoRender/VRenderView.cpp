@@ -5079,7 +5079,10 @@ void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 	//find labels in the old that are selected by the current mask
 	Nrrd* mask_nrrd = m_cur_vol->GetMask(true);
 	if (!mask_nrrd)
-		return;
+	{
+		m_cur_vol->AddEmptyMask();
+		mask_nrrd = m_cur_vol->GetMask(false);
+	}
 	Nrrd* label_nrrd = m_cur_vol->GetLabel(false);
 	if (!label_nrrd)
 		return;
@@ -9895,6 +9898,10 @@ return wxWindow::MSWWindowProc(message, wParam, lParam);
 
 void VRenderGLView::OnMouse(wxMouseEvent& event)
 {
+	wxWindow *window = wxWindow::FindFocus();
+	if (window &&
+		window->GetClassInfo()->IsKindOf(CLASSINFO(wxTextCtrl)))
+		SetFocus();
 	//mouse interactive flag
 	m_interactive = true;
 	m_paint_enable = false;

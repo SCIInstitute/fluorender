@@ -57,7 +57,7 @@ namespace FL
 		TrackMapProcessor() :
 		m_contact_thresh(0.7f),
 		m_size_thresh(25.0f),
-		m_level_thresh(3) {};
+		m_level_thresh(7) {};
 		~TrackMapProcessor() {};
 
 		void ConnectSignalProgress(SignalProg::slot_type func);
@@ -163,9 +163,11 @@ namespace FL
 		bool RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size_t frame, InterGraph &graph);
 		bool MatchVertex(pVertex &vertex, InterGraph &graph, bool bl_check = true);
 		bool UnmatchVertex(pVertex &vertex, InterGraph &graph);
-		bool ExMatchVertex(pVertex &vertex, InterGraph &inter_graph, size_t frame1, size_t frame2);
+		bool ExMatchVertex(pVertex &vertex, InterGraph &graph, size_t frame1, size_t frame2);
+		bool MatchVertexList(pVertex &vertex, VertexList &list2,
+			InterGraph &graph, size_t frame1, size_t frame2);
 		void FindOrphans(pVertex &vertex, InterGraph &inter_graph,
-			std::vector<pVertex> &orphan_list, int level);
+			VertexList &orphan_list, VertexList &visited_list, int level);
 		unsigned int CheckBackLink(InterVert v0, InterVert v1, InterGraph &graph,
 			unsigned int &bl_size_ui, float &bl_size_f);
 		static bool edge_comp_size_ol(InterEdge edge1, InterEdge edge2, InterGraph& graph);
