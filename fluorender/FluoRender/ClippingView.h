@@ -34,11 +34,21 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _CLIPPINGVIEW_H_
 #define _CLIPPINGVIEW_H_
 
+//plane modes
+enum PLANE_MODES
+{
+	kNormal,
+	kFrame,
+	kLowTrans,
+};
+
 class ClippingView: public wxPanel
 {
 	enum
 	{
-		ID_LinkChannelsChk = wxID_HIGHEST+1,
+		ID_LinkChannelsBtn = wxID_HIGHEST+1,
+		ID_HoldPlanesBtn,
+		ID_PlaneModesBtn,
 		ID_RotatePlanesChk,
 		ID_ClipResetBtn,
 		ID_SetZeroBtn,
@@ -96,10 +106,10 @@ public:
 	void RefreshVRenderViews(bool interactive=false);
 
 	bool GetChannLink()
-	{
-		return m_link_channels->GetToolState(ID_LinkChannelsChk);
-	}
+	{ return m_toolbar->GetToolState(ID_LinkChannelsBtn); }
 	void SetChannLink(bool chann);
+	PLANE_MODES GetPlaneMode()
+	{ return m_plane_mode; }
 	bool GetXLink()
 	{
 		return m_check_tb->GetToolState(ID_LinkXChk);
@@ -156,6 +166,8 @@ private:
 	MeshData* m_md;		//current mesh data
 	DataManager* m_mgr;	//manage all if clipping planes are synced
 	bool m_draw_clip;
+	bool m_hold_planes;
+	PLANE_MODES m_plane_mode;
 
 	int m_x_sldr_dist;
 	int m_y_sldr_dist;
@@ -165,7 +177,7 @@ private:
 	bool m_link_z;
 
 	//1st line
-	wxToolBar *m_link_channels;
+	wxToolBar *m_toolbar;
 	wxButton *m_clip_reset_btn;
 	//fix plane rotations
 	wxButton *m_set_zero_btn;
@@ -222,7 +234,9 @@ private:
 	
 	void OnIdle(wxIdleEvent &event);
 
-	void OnLinkChannelsCheck(wxCommandEvent &event);
+	void OnLinkChannelsBtn(wxCommandEvent &event);
+	void OnHoldPlanesBtn(wxCommandEvent &event);
+	void OnPlaneModesBtn(wxCommandEvent &event);
 	void OnClipResetBtn(wxCommandEvent &event);
 
 	void EnableAll();

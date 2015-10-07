@@ -6884,9 +6884,16 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 {
 	int i;
 	bool link = false;
+	PLANE_MODES plane_mode = kNormal;
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetClippingView())
+	{
 		link = vr_frame->GetClippingView()->GetChannLink();
+		plane_mode = vr_frame->GetClippingView()->GetPlaneMode();
+	}
+
+	if (!border && plane_mode == kFrame)
+		return;
 
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -6923,7 +6930,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		if (!vd)
 			continue;
 
-		if (!link && vd!=m_cur_vol)
+		if (vd!=m_cur_vol)
 			continue;
 
 		VolumeRenderer *vr = vd->GetVR();
@@ -6960,7 +6967,6 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 			continue;
 
 		//calculate 8 points
-//		Point p0, p1, p2, p3, p4, p5, p6, p7;
 		Point pp[8];
 		//p0 = l_x1z1 * py1
 		if (!py1->Intersect(lp_x1z1, lv_x1z1, pp[0]))
@@ -6993,27 +6999,30 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		double plane_trans = 0.0;
 		if (face_winding == BACK_FACE &&
 			(m_clip_mask == 3 ||
-			m_clip_mask == 12 ||
-			m_clip_mask == 48 ||
-			m_clip_mask == 1 ||
-			m_clip_mask == 2 ||
-			m_clip_mask == 4 ||
-			m_clip_mask == 8 ||
-			m_clip_mask == 16 ||
-			m_clip_mask == 32 ||
-			m_clip_mask == 64)
+				m_clip_mask == 12 ||
+				m_clip_mask == 48 ||
+				m_clip_mask == 1 ||
+				m_clip_mask == 2 ||
+				m_clip_mask == 4 ||
+				m_clip_mask == 8 ||
+				m_clip_mask == 16 ||
+				m_clip_mask == 32 ||
+				m_clip_mask == 64)
 			)
-			plane_trans = 0.3;
+			plane_trans = plane_mode == kLowTrans ? 0.1 : 0.3;
 
 		if (face_winding == FRONT_FACE)
 		{
-			plane_trans = 0.3;
+			plane_trans = plane_mode == kLowTrans ? 0.1 : 0.3;
 		}
 
-		if (!link)
+		if (plane_mode == kNormal)
 		{
-			color = vd->GetColor();
+			if (!link)
+				color = vd->GetColor();
 		}
+		else
+			color = m_bg_color_inv;
 
 		//transform
 		if (!vd->GetTexture())
@@ -7077,8 +7086,14 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		//x1 = (p4, p0, p1, p5)
 		if (m_clip_mask & 1)
 		{
-			shader->setLocalParam(0, 1.0, 0.5, 0.5, plane_trans);
-			glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)0);
+			if (plane_mode != kFrame)
+			{
+				if (plane_mode == kNormal)
+					shader->setLocalParam(0, 1.0, 0.5, 0.5, plane_trans);
+				else
+					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)0);
+			}
 			if (border)
 			{
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
@@ -7088,8 +7103,14 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		//x2 = (p7, p3, p2, p6)
 		if (m_clip_mask & 2)
 		{
-			shader->setLocalParam(0, 1.0, 0.5, 1.0, plane_trans);
-			glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(8*4));
+			if (plane_mode != kFrame)
+			{
+				if (plane_mode == kNormal)
+					shader->setLocalParam(0, 1.0, 0.5, 1.0, plane_trans);
+				else
+					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(8 * 4));
+			}
 			if (border)
 			{
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
@@ -7099,8 +7120,14 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		//y1 = (p1, p0, p2, p3)
 		if (m_clip_mask & 4)
 		{
-			shader->setLocalParam(0, 0.5, 1.0, 0.5, plane_trans);
-			glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(16*4));
+			if (plane_mode != kFrame)
+			{
+				if (plane_mode == kNormal)
+					shader->setLocalParam(0, 0.5, 1.0, 0.5, plane_trans);
+				else
+					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(16 * 4));
+			}
 			if (border)
 			{
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
@@ -7110,8 +7137,14 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		//y2 = (p4, p5, p7, p6)
 		if (m_clip_mask & 8)
 		{
-			shader->setLocalParam(0, 1.0, 1.0, 0.5, plane_trans);
-			glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(24*4));
+			if (plane_mode != kFrame)
+			{
+				if (plane_mode == kNormal)
+					shader->setLocalParam(0, 1.0, 1.0, 0.5, plane_trans);
+				else
+					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(24 * 4));
+			}
 			if (border)
 			{
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
@@ -7121,8 +7154,14 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		//z1 = (p0, p4, p6, p2)
 		if (m_clip_mask & 16)
 		{
-			shader->setLocalParam(0, 0.5, 0.5, 1.0, plane_trans);
-			glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(32*4));
+			if (plane_mode != kFrame)
+			{
+				if (plane_mode == kNormal)
+					shader->setLocalParam(0, 0.5, 0.5, 1.0, plane_trans);
+				else
+					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(32 * 4));
+			}
 			if (border)
 			{
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
@@ -7132,8 +7171,14 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		//z2 = (p5, p1, p3, p7)
 		if (m_clip_mask & 32)
 		{
-			shader->setLocalParam(0, 0.5, 1.0, 1.0, plane_trans);
-			glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(40*4));
+			if (plane_mode != kFrame)
+			{
+				if (plane_mode == kNormal)
+					shader->setLocalParam(0, 0.5, 1.0, 1.0, plane_trans);
+				else
+					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(40 * 4));
+			}
 			if (border)
 			{
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);

@@ -33,7 +33,9 @@ DEALINGS IN THE SOFTWARE.
 #include "img/icons.h"
 
 BEGIN_EVENT_TABLE(ClippingView, wxPanel)
-	EVT_TOOL(ID_LinkChannelsChk, ClippingView::OnLinkChannelsCheck)
+	EVT_TOOL(ID_LinkChannelsBtn, ClippingView::OnLinkChannelsBtn)
+	EVT_TOOL(ID_HoldPlanesBtn, ClippingView::OnHoldPlanesBtn)
+	EVT_TOOL(ID_PlaneModesBtn, ClippingView::OnPlaneModesBtn)
 	EVT_BUTTON(ID_SetZeroBtn, ClippingView::OnSetZeroBtn)
 	EVT_BUTTON(ID_RotResetBtn, ClippingView::OnRotResetBtn)
 	EVT_BUTTON(ID_ClipResetBtn, ClippingView::OnClipResetBtn)
@@ -92,6 +94,8 @@ m_sel_type(0),
 m_vd(0),
 m_md(0),
 m_draw_clip(false),
+m_hold_planes(false),
+m_plane_mode(kNormal),
 m_link_x(false),
 m_link_y(false),
 m_link_z(false)
@@ -106,15 +110,23 @@ m_link_z(false)
 
 	//sync channels 1
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_link_channels = new wxToolBar(this,wxID_ANY);
-	m_link_channels->AddCheckTool(ID_LinkChannelsChk, "Sync All Chan.",
-		wxGetBitmapFromMemory(unlink_text), wxNullBitmap,
+	m_toolbar = new wxToolBar(this, wxID_ANY);
+	m_toolbar->AddCheckTool(ID_LinkChannelsBtn, "Sync All Channels",
+		wxGetBitmapFromMemory(sync_chan), wxNullBitmap,
 		"Link all data channels to this cropping",
 		"Link all data channels to this cropping");
-	m_link_channels->ToggleTool(ID_LinkChannelsChk,false);
-	m_link_channels->Realize();
+	m_toolbar->ToggleTool(ID_LinkChannelsBtn, false);
+	m_toolbar->AddCheckTool(ID_HoldPlanesBtn, "Hold Plane Display",
+		wxGetBitmapFromMemory(hold_clip), wxNullBitmap,
+		"Clipping planes are always shown",
+		"Clipping planes are always shown");
+	m_toolbar->ToggleTool(ID_HoldPlanesBtn, false);
+	m_toolbar->AddTool(ID_PlaneModesBtn, "Display Modes",
+		wxGetBitmapFromMemory(clip_normal),
+		"Toggle clipping plane display modes");
+	m_toolbar->Realize();
 	sizer_1->Add(5, 5, 0);
-	sizer_1->Add(m_link_channels, 0, wxALIGN_CENTER, 0);
+	sizer_1->Add(m_toolbar, 0, wxALIGN_CENTER, 0);
 
 	wxStaticText* st_cb = 0;
 
@@ -405,7 +417,6 @@ m_link_z(false)
 
 	//v
 	wxBoxSizer *sizer_v = new wxBoxSizer(wxVERTICAL);
-	sizer_v->Add(10, 10, 0);
 	sizer_v->Add(sizer_1, 0, wxALIGN_CENTER);
 	sizer_v->Add(5, 5, 0);
 	sizer_v->Add(sizer_2, 1, wxEXPAND);
@@ -448,12 +459,12 @@ ClippingView::~ClippingView()
 
 void ClippingView::SetChannLink(bool chann)
 {
-	m_link_channels->ToggleTool(ID_LinkChannelsChk,chann);
+	m_toolbar->ToggleTool(ID_LinkChannelsBtn,chann);
 	if(chann)
-		m_link_channels->SetToolNormalBitmap(ID_LinkChannelsChk,
+		m_toolbar->SetToolNormalBitmap(ID_LinkChannelsBtn,
 			wxGetBitmapFromMemory(link_text));
 	else
-		m_link_channels->SetToolNormalBitmap(ID_LinkChannelsChk,
+		m_toolbar->SetToolNormalBitmap(ID_LinkChannelsBtn,
 			wxGetBitmapFromMemory(unlink_text));
 
 }
@@ -661,14 +672,12 @@ void ClippingView::GetSettings()
 
 }
 
-void ClippingView::OnLinkChannelsCheck(wxCommandEvent &event)
+void ClippingView::OnLinkChannelsBtn(wxCommandEvent &event)
 {
-	if (m_link_channels->GetToolState(ID_LinkChannelsChk))
+	if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
 	{
 		if (!m_mgr)
 			return;
-		m_link_channels->SetToolNormalBitmap(ID_LinkChannelsChk,
-			wxGetBitmapFromMemory(link_text));
 
 		wxString str;
 		//x1
@@ -724,11 +733,36 @@ void ClippingView::OnLinkChannelsCheck(wxCommandEvent &event)
 		}
 
 		RefreshVRenderViews();
-
 	}
-	else
-		m_link_channels->SetToolNormalBitmap(ID_LinkChannelsChk,
-			wxGetBitmapFromMemory(unlink_text));
+}
+
+void ClippingView::OnHoldPlanesBtn(wxCommandEvent &event)
+{
+	m_hold_planes = m_toolbar->GetToolState(ID_HoldPlanesBtn);
+}
+
+void ClippingView::OnPlaneModesBtn(wxCommandEvent &event)
+{
+	switch (m_plane_mode)
+	{
+	case kNormal:
+		m_plane_mode = kFrame;
+		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_frame));
+		break;
+	case kFrame:
+		m_plane_mode = kLowTrans;
+		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_low));
+		break;
+	case kLowTrans:
+		m_plane_mode = kNormal;
+		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_normal));
+		break;
+	}
+
+	RefreshVRenderViews();
 }
 
 void ClippingView::OnClipResetBtn(wxCommandEvent &event)
@@ -790,7 +824,7 @@ void ClippingView::OnClipResetBtn(wxCommandEvent &event)
 	m_z2_clip_text->SetValue(wxString::Format("%d", resz));
 
 	//link
-	if (m_link_channels->GetToolState(ID_LinkChannelsChk))
+	if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
 	{
 		if (m_mgr)
 		{
@@ -900,7 +934,7 @@ void ClippingView::OnX1ClipEdit(wxCommandEvent &event)
 		plane->ChangePlane(Point(val2, 0.0, 0.0), Vector(-1.0, 0.0, 0.0));
 	}
 
-	if (m_link_channels->GetToolState(ID_LinkChannelsChk))
+	if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
 	{
 		if (m_mgr)
 		{
@@ -1016,7 +1050,7 @@ void ClippingView::OnX2ClipEdit(wxCommandEvent &event)
 		plane->ChangePlane(Point(val2, 0.0, 0.0), Vector(1.0, 0.0, 0.0));
 	}
 
-	if (m_link_channels->GetToolState(ID_LinkChannelsChk))
+	if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
 	{
 		if (m_mgr)
 		{
@@ -1124,7 +1158,7 @@ void ClippingView::OnY1ClipEdit(wxCommandEvent &event)
 		plane->ChangePlane(Point(0.0, val2, 0.0), Vector(0.0, -1.0, 0.0));
 	}
 
-	if (m_link_channels->GetToolState(ID_LinkChannelsChk))
+	if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
 	{
 		if (m_mgr)
 		{
@@ -1240,7 +1274,7 @@ void ClippingView::OnY2ClipEdit(wxCommandEvent &event)
 		plane->ChangePlane(Point(0.0, val2, 0.0), Vector(0.0, 1.0, 0.0));
 	}
 
-	if (m_link_channels->GetToolState(ID_LinkChannelsChk))
+	if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
 	{
 		if (m_mgr)
 		{
@@ -1348,7 +1382,7 @@ void ClippingView::OnZ1ClipEdit(wxCommandEvent &event)
 		plane->ChangePlane(Point(0.0, 0.0, val2), Vector(0.0, 0.0, -1.0));
 	}
 
-	if (m_link_channels->GetToolState(ID_LinkChannelsChk))
+	if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
 	{
 		if (m_mgr)
 		{
@@ -1464,7 +1498,7 @@ void ClippingView::OnZ2ClipEdit(wxCommandEvent &event)
 		plane->ChangePlane(Point(0.0, 0.0, val2), Vector(0.0, 0.0, 1.0));
 	}
 
-	if (m_link_channels->GetToolState(ID_LinkChannelsChk))
+	if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
 	{
 		if (m_mgr)
 		{
@@ -1550,6 +1584,12 @@ void ClippingView::OnIdle(wxIdleEvent &event)
 		pct = ((double)v1)/((double)mx);
 		m_zBar->SetPosition(wxPoint(20,10+pct*barsize));
 		m_zBar->SetSize(wxSize(3,barsize*clipSz));
+	}
+
+	if (m_hold_planes)
+	{
+		m_draw_clip = true;
+		return;
 	}
 
 	int i;
@@ -1865,7 +1905,7 @@ void ClippingView::OnSliderRClick(wxCommandEvent& event)
 	//good rate
 	if (m_vd->GetSampleRate()<2.0)
 		m_vd->SetSampleRate(2.0);
-	if (m_link_channels->GetToolState(ID_LinkChannelsChk))
+	if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
 	{
 		if (m_mgr)
 		{
@@ -2434,7 +2474,7 @@ void ClippingView::OnSliderKeyDown(wxKeyEvent& event)
 
 void ClippingView::EnableAll()
 {
-	m_link_channels->Enable();
+	m_toolbar->Enable();
 	m_set_zero_btn->Enable();
 	m_rot_reset_btn->Enable();
 	m_x_rot_sldr->Enable();
@@ -2470,7 +2510,7 @@ void ClippingView::EnableAll()
 
 void ClippingView::DisableAll()
 {
-	m_link_channels->Disable();
+	m_toolbar->Disable();
 	m_set_zero_btn->Disable();
 	m_rot_reset_btn->Disable();
 	m_x_rot_sldr->Disable();
