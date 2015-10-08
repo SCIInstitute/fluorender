@@ -309,18 +309,24 @@ const static unsigned char protractor_png[16248];
 /* full_screen.png - 14882 bytes */
 const static unsigned char full_screen_png[14882];
 
-/* clip_frame.png - 15667 bytes */
-const static unsigned char clip_frame_png[15667];
-
-/* clip_low.png - 15840 bytes */
-const static unsigned char clip_low_png[15840];
-
-/* clip_normal.png - 15827 bytes */
-const static unsigned char clip_normal_png[15827];
-
-/* hold_clip.png - 16004 bytes */
-const static unsigned char hold_clip_png[16004];
-
 /* sync_chan.png - 18734 bytes */
 const static unsigned char sync_chan_png[18734];
+
+/* hold_clip.png - 15800 bytes */
+const static unsigned char hold_clip_png[15800];
+
+/* clip_frame.png - 15635 bytes */
+const static unsigned char clip_frame_png[15635];
+
+/* clip_low.png - 15448 bytes */
+const static unsigned char clip_low_png[15448];
+
+/* clip_low_back.png - 15494 bytes */
+const static unsigned char clip_low_back_png[15494];
+
+/* clip_normal.png - 15692 bytes */
+const static unsigned char clip_normal_png[15692];
+
+/* clip_normal_back.png - 15729 bytes */
+const static unsigned char clip_normal_back_png[15729];
 };

@@ -6892,13 +6892,26 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		plane_mode = vr_frame->GetClippingView()->GetPlaneMode();
 	}
 
+	bool draw_plane = plane_mode != kFrame;
+	if ((plane_mode == kLowTransBack ||
+		plane_mode == kNormalBack) &&
+		m_clip_mask == -1)
+	{
+		glCullFace(GL_FRONT);
+		if (face_winding == BACK_FACE)
+			face_winding = FRONT_FACE;
+		else
+			draw_plane = false;
+	}
+	else
+		glCullFace(GL_BACK);
+
 	if (!border && plane_mode == kFrame)
 		return;
 
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
 	if (face_winding == FRONT_FACE)
 	{
@@ -6912,8 +6925,6 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 	}
 	else if (face_winding == CULL_OFF)
 		glDisable(GL_CULL_FACE);
-
-	glCullFace(GL_BACK);
 
 	ShaderProgram* shader =
 		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
@@ -7009,14 +7020,17 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 				m_clip_mask == 32 ||
 				m_clip_mask == 64)
 			)
-			plane_trans = plane_mode == kLowTrans ? 0.1 : 0.3;
+			plane_trans = plane_mode == kLowTrans ||
+			plane_mode == kLowTransBack ? 0.1 : 0.3;
 
 		if (face_winding == FRONT_FACE)
 		{
-			plane_trans = plane_mode == kLowTrans ? 0.1 : 0.3;
+			plane_trans = plane_mode == kLowTrans ||
+				plane_mode == kLowTransBack ? 0.1 : 0.3;
 		}
 
-		if (plane_mode == kNormal)
+		if (plane_mode == kNormal ||
+			plane_mode == kNormalBack)
 		{
 			if (!link)
 				color = vd->GetColor();
@@ -7086,9 +7100,10 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		//x1 = (p4, p0, p1, p5)
 		if (m_clip_mask & 1)
 		{
-			if (plane_mode != kFrame)
+			if (draw_plane)
 			{
-				if (plane_mode == kNormal)
+				if (plane_mode == kNormal ||
+					plane_mode == kNormalBack)
 					shader->setLocalParam(0, 1.0, 0.5, 0.5, plane_trans);
 				else
 					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
@@ -7103,9 +7118,10 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		//x2 = (p7, p3, p2, p6)
 		if (m_clip_mask & 2)
 		{
-			if (plane_mode != kFrame)
+			if (draw_plane)
 			{
-				if (plane_mode == kNormal)
+				if (plane_mode == kNormal ||
+					plane_mode == kNormalBack)
 					shader->setLocalParam(0, 1.0, 0.5, 1.0, plane_trans);
 				else
 					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
@@ -7120,9 +7136,10 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		//y1 = (p1, p0, p2, p3)
 		if (m_clip_mask & 4)
 		{
-			if (plane_mode != kFrame)
+			if (draw_plane)
 			{
-				if (plane_mode == kNormal)
+				if (plane_mode == kNormal ||
+					plane_mode == kNormalBack)
 					shader->setLocalParam(0, 0.5, 1.0, 0.5, plane_trans);
 				else
 					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
@@ -7137,9 +7154,10 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		//y2 = (p4, p5, p7, p6)
 		if (m_clip_mask & 8)
 		{
-			if (plane_mode != kFrame)
+			if (draw_plane)
 			{
-				if (plane_mode == kNormal)
+				if (plane_mode == kNormal ||
+					plane_mode == kNormalBack)
 					shader->setLocalParam(0, 1.0, 1.0, 0.5, plane_trans);
 				else
 					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
@@ -7154,9 +7172,10 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		//z1 = (p0, p4, p6, p2)
 		if (m_clip_mask & 16)
 		{
-			if (plane_mode != kFrame)
+			if (draw_plane)
 			{
-				if (plane_mode == kNormal)
+				if (plane_mode == kNormal ||
+					plane_mode == kNormalBack)
 					shader->setLocalParam(0, 0.5, 0.5, 1.0, plane_trans);
 				else
 					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
@@ -7171,9 +7190,10 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		//z2 = (p5, p1, p3, p7)
 		if (m_clip_mask & 32)
 		{
-			if (plane_mode != kFrame)
+			if (draw_plane)
 			{
-				if (plane_mode == kNormal)
+				if (plane_mode == kNormal ||
+					plane_mode == kNormalBack)
 					shader->setLocalParam(0, 0.5, 1.0, 1.0, plane_trans);
 				else
 					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
@@ -7197,6 +7217,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		shader->release();
 
 	glFrontFace(GL_CCW);
+	glCullFace(GL_BACK);
 }
 
 void VRenderGLView::DrawGrid()
