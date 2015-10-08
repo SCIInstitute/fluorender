@@ -2813,6 +2813,7 @@ void TraceDlg::RefineMap()
 	int resx, resy, resz;
 	vd->GetResolution(resx, resy, resz);
 	size_t iter_num = (size_t)m_gen_map_spin->GetValue();
+	iter_num *= 2;
 	tm_processor.SetSizes(track_map,
 		resx, resy, resz);
 	//	tm_processor.SetContactThresh(0.2f);

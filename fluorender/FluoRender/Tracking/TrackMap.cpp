@@ -869,6 +869,9 @@ bool TrackMapProcessor::ExMatchVertex(pVertex &vertex, InterGraph &inter_graph,
 			return true;
 	}
 
+	//go to list directly
+	return false;
+
 	VertexList orphan_list;
 	VertexList visited_list;
 	//recursive searching
