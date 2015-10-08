@@ -108,6 +108,8 @@ public:
 	bool GetChannLink()
 	{ return m_toolbar->GetToolState(ID_LinkChannelsBtn); }
 	void SetChannLink(bool chann);
+	bool GetHoldPlanes()
+	{ return m_hold_planes; }
 	PLANE_MODES GetPlaneMode()
 	{ return m_plane_mode; }
 	bool GetXLink()
