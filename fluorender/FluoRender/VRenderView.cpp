@@ -4811,7 +4811,7 @@ void VRenderGLView::Set3DBatFrame(int offset)
 		if (vd && vd->GetReader())
 		{
 			BaseReader* reader = vd->GetReader();
-			if (reader->GetOffset() == offset) return;
+			//if (reader->GetOffset() == offset) return;
 			bool found = false;
 			for (j=0; j<(int)reader_list.size(); j++)
 			{
@@ -4830,7 +4830,7 @@ void VRenderGLView::Set3DBatFrame(int offset)
 			double spcx, spcy, spcz;
 			vd->GetSpacings(spcx, spcy, spcz);
 
-			Nrrd* data = reader->Convert(0, vd->GetCurChannel(), false);
+			Nrrd* data = reader->Convert(0, vd->GetCurChannel(), true);
 			if (vd->Replace(data, true))
 				vd->SetDisp(true);
 			else
