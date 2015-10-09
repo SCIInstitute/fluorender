@@ -4876,7 +4876,10 @@ void VRenderGLView::Set3DBatFrame(int offset)
 	if (vr_frame)
 	{
 		vr_frame->UpdateList();
-		vr_frame->UpdateTree(vr_frame->GetCurSelVol()->GetName());
+		vr_frame->UpdateTree(
+			vr_frame->GetCurSelVol()?
+			vr_frame->GetCurSelVol()->GetName():
+			"");
 	}
 }
 
