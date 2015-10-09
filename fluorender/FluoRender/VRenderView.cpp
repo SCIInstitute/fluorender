@@ -41,6 +41,9 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 #include <boost/process.hpp>
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 
 int VRenderView::m_id = 1;
 ImgShaderFactory VRenderGLView::m_img_shader_factory;
@@ -4341,6 +4344,9 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 				m_vrv->m_view_sizer->Add(this, 1, wxEXPAND);
 				m_vrv->Layout();
 				m_vrv->m_full_frame->Hide();
+#ifdef _WIN32
+				ShowCursor(true);
+#endif
 				refresh = true;
 			}
 		}
@@ -12531,6 +12537,9 @@ void VRenderView::OnFullScreen(wxCommandEvent& event)
 		m_glview->SetPosition(wxPoint(0, 0));
 		m_glview->SetSize(m_full_frame->GetSize());
 		m_full_frame->Show();
+#ifdef _WIN32
+		ShowCursor(false);
+#endif
 		RefreshGL();
 	}
 }
