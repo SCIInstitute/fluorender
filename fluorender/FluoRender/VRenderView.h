@@ -507,7 +507,6 @@ public:
 	//counters
 	int m_tseq_cur_num;
 	int m_tseq_prv_num;
-	int m_bat_cur_num;
 	int m_param_cur_num;
 	int m_total_frames;
 	//file name for capturing

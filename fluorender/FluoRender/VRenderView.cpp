@@ -79,7 +79,6 @@ wxGLCanvas(parent, id, attriblist, pos, size, style),
 	//counters
 	m_tseq_cur_num(0),
 	m_tseq_prv_num(0),
-	m_bat_cur_num(0),
 	m_param_cur_num(0),
 	m_total_frames(0),
 	//hud
@@ -4238,7 +4237,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		//move time sequence
 		//forward
 		if (!m_tseq_forward &&
-			wxGetKeyState(wxKeyCode('d')))
+			wxGetKeyState(wxKeyCode('d')) ||
+			wxGetKeyState(WXK_SPACE))
 		{
 			m_tseq_forward = true;
 			if (frame && frame->GetMovieView())
@@ -4246,7 +4246,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			refresh = true;
 		}
 		if (m_tseq_forward &&
-			!wxGetKeyState(wxKeyCode('d')))
+			!wxGetKeyState(wxKeyCode('d')) &&
+			!wxGetKeyState(WXK_SPACE))
 			m_tseq_forward = false;
 		//backforward
 		if (!m_tseq_backward &&
@@ -4444,7 +4445,6 @@ void VRenderGLView::Set3DRotCapture(double start_angle,
 void VRenderGLView::Set3DBatCapture(wxString &cap_file, int begin_frame, int end_frame)
 {
 	m_cap_file = cap_file;
-	m_bat_cur_num = begin_frame;
 	m_begin_frame = begin_frame;
 	m_end_frame = end_frame;
 	m_capture_bat = true;
@@ -4811,6 +4811,8 @@ void VRenderGLView::Set3DBatFrame(int offset)
 	vector<BaseReader*> reader_list;
 	m_bat_folder = "";
 
+	m_tseq_prv_num = m_tseq_cur_num;
+	m_tseq_cur_num = offset;
 	for (i=0; i<(int)m_vd_pop_list.size(); i++)
 	{
 		VolumeData* vd = m_vd_pop_list[i];
