@@ -128,10 +128,13 @@ public:
 		ID_CellDivideIDBtn,
 		ID_CellSegmentBtn,
 		//analysis page
-		//edit tools
-		ID_AnalyzeBtn,
-		ID_SaveAnalyzeBtn,
+		//conversion
 		ID_ConvertToRulersBtn,
+		ID_ConvertConsistentBtn,
+		//analysis
+		ID_AnalyzeCompBtn,
+		ID_AnalyzeLinkBtn,
+		ID_SaveResultBtn,
 		//magic tool
 		//ID_CellMagic0Btn,
 		//ID_CellMagic1Btn,
@@ -204,6 +207,9 @@ private:
 	};
 	vector<measure_info> m_info_list;
 
+	typedef boost::unordered_map<unsigned int, unsigned int> CellMap;
+	typedef boost::unordered_map<unsigned int, unsigned int>::iterator CellMapIter;
+
 	wxWindow* m_frame;
 	//current view
 	VRenderView* m_view;
@@ -270,9 +276,13 @@ private:
 	wxButton* m_cell_segment_btn;
 
 	//analysis page
-	wxButton* m_analyze_btn;
-	wxButton* m_save_analyze_btn;
+	//conversion
 	wxButton* m_convert_to_rulers_btn;
+	wxButton* m_convert_consistent_btn;
+	//analysis
+	wxButton* m_analyze_comp_btn;
+	wxButton* m_analyze_link_btn;
+	wxButton* m_save_result_btn;
 
 	//magic tool
 	//wxButton* m_cell_magic0_btn;
@@ -313,6 +323,8 @@ private:
 		unsigned int id,
 		int nx, int ny, int nz,
 		int i, int j, int k);
+	unsigned int GetMappedID(unsigned int id, unsigned int* data_label1,
+		unsigned int* data_label2, unsigned long long size);
 	//tests
 	void Test1();
 	void Test2(int type);
@@ -355,9 +367,13 @@ private:
 	void OnCellDivideID(wxCommandEvent& event);
 	void OnCellSegment(wxCommandEvent& event);
 	//analysis page
-	void OnAnalyze(wxCommandEvent &event);
-	void OnSaveAnalyze(wxCommandEvent &event);
+	//conversion
 	void OnConvertToRulers(wxCommandEvent &event);
+	void OnConvertConsistent(wxCommandEvent &event);
+	//analysis
+	void OnAnalyzeComp(wxCommandEvent &event);
+	void OnAnalyzeLink(wxCommandEvent &event);
+	void OnSaveResult(wxCommandEvent &event);
 	//magic tool
 	//void OnCellMagic0Btn(wxCommandEvent& event);
 	//void OnCellMagic1Btn(wxCommandEvent& event);

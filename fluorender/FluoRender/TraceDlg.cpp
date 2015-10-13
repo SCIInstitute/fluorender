@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/clipbrd.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
+#include <wx/dirdlg.h>
 #include <boost/chrono.hpp>
 #include <set>
 #include <limits>
@@ -271,9 +272,13 @@ EVT_BUTTON(ID_CellCombineIDBtn, TraceDlg::OnCellCombineID)
 EVT_BUTTON(ID_CellDivideIDBtn, TraceDlg::OnCellDivideID)
 EVT_BUTTON(ID_CellSegmentBtn, TraceDlg::OnCellSegment)
 //analysis page
-EVT_BUTTON(ID_AnalyzeBtn, TraceDlg::OnAnalyze)
-EVT_BUTTON(ID_SaveAnalyzeBtn, TraceDlg::OnSaveAnalyze)
+//conversion
 EVT_BUTTON(ID_ConvertToRulersBtn, TraceDlg::OnConvertToRulers)
+EVT_BUTTON(ID_ConvertConsistentBtn, TraceDlg::OnConvertConsistent)
+//analysis
+EVT_BUTTON(ID_AnalyzeCompBtn, TraceDlg::OnAnalyzeComp)
+EVT_BUTTON(ID_AnalyzeLinkBtn, TraceDlg::OnAnalyzeLink)
+EVT_BUTTON(ID_SaveResultBtn, TraceDlg::OnSaveResult)
 //magic tool
 //EVT_BUTTON(ID_CellMagic0Btn, TraceDlg::OnCellMagic0Btn)
 //EVT_BUTTON(ID_CellMagic1Btn, TraceDlg::OnCellMagic1Btn)
@@ -540,23 +545,44 @@ wxWindow* TraceDlg::CreateAnalysisPage(wxWindow *parent)
 {
 	wxPanel *page = new wxPanel(parent);
 
+	wxStaticText *st = 0;
+
+	//conversion
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_convert_to_rulers_btn = new wxButton(page, ID_ConvertToRulersBtn, "To Rulers",
+	st = new wxStaticText(page, 0, "Convert to:",
+		wxDefaultPosition, wxSize(100, 20));
+	m_convert_to_rulers_btn = new wxButton(page, ID_ConvertToRulersBtn, "Rulers",
 		wxDefaultPosition, wxSize(65, 23));
-	m_analyze_btn = new wxButton(page, ID_AnalyzeBtn, "Analyze",
+	m_convert_consistent_btn = new wxButton(page, ID_ConvertConsistentBtn, "UniIDs",
 		wxDefaultPosition, wxSize(65, 23));
-	m_save_analyze_btn = new wxButton(page, ID_SaveAnalyzeBtn, "Save Text",
-		wxDefaultPosition, wxSize(65, 23));
-	sizer_1->AddStretchSpacer();
+	sizer_1->Add(5, 5);
+	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_convert_to_rulers_btn, 0, wxALIGN_CENTER);
-	sizer_1->Add(m_analyze_btn, 0, wxALIGN_CENTER);
-	sizer_1->Add(m_save_analyze_btn, 0, wxALIGN_CENTER);
-	sizer_1->AddStretchSpacer();
+	sizer_1->Add(m_convert_consistent_btn, 0, wxALIGN_CENTER);
+
+	//analysis
+	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Information:",
+		wxDefaultPosition, wxSize(100, 20));
+	m_analyze_comp_btn = new wxButton(page, ID_AnalyzeCompBtn, "Compnts",
+		wxDefaultPosition, wxSize(65, 23));
+	m_analyze_link_btn = new wxButton(page, ID_AnalyzeLinkBtn, "Links",
+		wxDefaultPosition, wxSize(65, 23));
+	m_save_result_btn = new wxButton(page, ID_SaveResultBtn, "Save As",
+		wxDefaultPosition, wxSize(65, 23));
+	sizer_2->Add(5, 5);
+	sizer_2->Add(st, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_analyze_comp_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_analyze_link_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_save_result_btn, 0, wxALIGN_CENTER);
 
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	sizer_v->Add(10, 10);
 	sizer_v->Add(sizer_1, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer_2, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
 
 	//set the page
 	page->SetSizer(sizer_v);
@@ -925,34 +951,6 @@ void TraceDlg::OnRefineMapBtn(wxCommandEvent &event)
 }
 
 //analysis
-void TraceDlg::OnAnalyze(wxCommandEvent &event)
-{
-	Measure();
-	wxString str;
-	OutputMeasureResult(str);
-	m_stat_text->SetValue(str);
-}
-
-void TraceDlg::OnSaveAnalyze(wxCommandEvent &event)
-{
-	Measure();
-	wxString str;
-	OutputMeasureResult(str);
-	m_stat_text->SetValue(str);
-	wxFileDialog *fopendlg = new wxFileDialog(
-		m_frame, "Save results", "", "",
-		"Text file (*.txt)|*.txt",
-		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-	int rval = fopendlg->ShowModal();
-	if (rval == wxID_OK)
-	{
-		wxString filename = fopendlg->GetPath();
-		SaveMeasureResult(filename);
-	}
-	if (fopendlg)
-		delete fopendlg;
-}
-
 void TraceDlg::OnConvertToRulers(wxCommandEvent& event)
 {
 	if (!m_view)
@@ -980,6 +978,196 @@ void TraceDlg::OnConvertToRulers(wxCommandEvent& event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetMeasureDlg())
 		vr_frame->GetMeasureDlg()->GetSettings(m_view);
+}
+
+void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
+{
+	if (!m_view)
+		return;
+
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+	BaseReader* reader = vd->GetReader();
+	if (!reader)
+		return;
+	LBLReader lbl_reader;
+	MSKWriter lbl_writer;
+	TraceGroup *trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+		return;
+
+	wxDirDialog *dirdlg = new wxDirDialog(
+		m_frame, "Save labels in", "",
+		wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
+	int rval = dirdlg->ShowModal();
+	wxString out_dir;
+	if (rval == wxID_OK)
+	{
+		out_dir = dirdlg->GetPath();
+		delete dirdlg;
+	}
+	else
+	{
+		delete dirdlg;
+		return;
+	}
+
+	m_stat_text->SetValue("Generating consistent IDs in");
+	wxGetApp().Yield();
+	FL::TrackMap &track_map = trace_group->GetTrackMap();
+	FL::TrackMapProcessor tm_processor;
+	int chan = vd->GetCurChannel();
+	int nx, ny, nz;
+	vd->GetResolution(nx, ny, nz);
+	unsigned long long size = (unsigned long long)nx *
+		(unsigned long long)ny * (unsigned long long)nz;
+	unsigned long long index;
+
+	Nrrd* nrrd_label_in1 = 0;
+	Nrrd* nrrd_label_in2 = 0;
+	Nrrd* nrrd_label_out1 = 0;
+	Nrrd* nrrd_label_out2 = 0;
+	wxString data_name;
+	wxString label_name;
+	wstring lblname;
+
+	CellMap cell_map;
+	CellMapIter iter;
+	unsigned int label_in1, label_in2;
+
+	//read first frame
+	data_name = reader->GetCurName(0, chan);
+	label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
+	lblname = label_name.ToStdWstring();
+	lbl_reader.SetFile(lblname);
+	nrrd_label_in1 = lbl_reader.Convert(0, chan, true);
+	(*m_stat_text) << wxString::Format("Label in 1 of frame %d read.\n", 0);
+	wxGetApp().Yield();
+	//duplicate
+	nrrd_label_in2 = nrrdNew();
+	nrrdCopy(nrrd_label_in2, nrrd_label_in1);
+	for (index = 0; index < size; ++index)
+	{
+		label_in1 = ((unsigned int*)(nrrd_label_in1->data))[index];
+		iter = cell_map.find(label_in1);
+		if (iter != cell_map.end())
+		{
+			((unsigned int*)(nrrd_label_in2->data))[index] = iter->second;
+		}
+		else
+		{
+			if (tm_processor.GetMappedID(track_map,
+				label_in1, label_in2, 0))
+			{
+				((unsigned int*)(nrrd_label_in2->data))[index] = label_in2;
+				cell_map.insert(pair<unsigned int, unsigned int>(label_in1, label_in2));
+			}
+		}
+	}
+	label_name = out_dir + label_name.Right(
+		label_name.Length() - label_name.find_last_of(GETSLASH()));
+	lbl_writer.SetData(nrrd_label_in2);
+	lbl_writer.Save(label_name.ToStdWstring(), 1);
+	(*m_stat_text) << wxString::Format("Label in 2 of frame %d written.\n", 0);
+	wxGetApp().Yield();
+
+	unsigned int label_out1, label_out2;
+	//remaining frames
+	for (size_t fi = 1; fi < track_map.GetFrameNum(); ++fi)
+	{
+		cell_map.clear();
+
+		//read fi frame
+		data_name = reader->GetCurName(fi, chan);
+		label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
+		lblname = label_name.ToStdWstring();
+		lbl_reader.SetFile(lblname);
+		nrrd_label_out1 = lbl_reader.Convert(fi, chan, true);
+		(*m_stat_text) << wxString::Format("Label out 1 of frame %d read.\n", int(fi));
+		wxGetApp().Yield();
+
+		//copy
+		nrrd_label_out2 = nrrdNew();
+		nrrdCopy(nrrd_label_out2, nrrd_label_out1);
+
+		for (index = 0; index < size; ++index)
+		{
+			label_out1 = ((unsigned int*)(nrrd_label_out1->data))[index];
+			iter = cell_map.find(label_out1);
+			if (iter != cell_map.end())
+			{
+				((unsigned int*)(nrrd_label_out2->data))[index] = iter->second;
+			}
+			else
+			{
+				if (tm_processor.GetMappedID(track_map,
+					label_out1, label_in1, fi, fi - 1))
+				{
+					label_out2 = GetMappedID(label_in1,
+						(unsigned int*)(nrrd_label_in1->data),
+						(unsigned int*)(nrrd_label_in2->data),
+						size);
+					if (label_out2)
+					{
+						((unsigned int*)(nrrd_label_out2->data))[index] = label_out2;
+						cell_map.insert(pair<unsigned int, unsigned int>(label_out1, label_out2));
+					}
+				}
+			}
+		}
+
+		//save
+		label_name = out_dir + label_name.Right(
+			label_name.Length() - label_name.find_last_of(GETSLASH()));
+		lbl_writer.SetData(nrrd_label_out2);
+		lbl_writer.Save(label_name.ToStdWstring(), 1);
+		(*m_stat_text) << wxString::Format("Label out 2 of frame %d written.\n", int(fi));
+		wxGetApp().Yield();
+
+		//swap
+		nrrdNuke(nrrd_label_in1);
+		nrrdNuke(nrrd_label_in2);
+		nrrd_label_in1 = nrrd_label_out1;
+		nrrd_label_in2 = nrrd_label_out2;
+	}
+
+	//release
+	nrrdNuke(nrrd_label_out1);
+	nrrdNuke(nrrd_label_out2);
+
+	(*m_stat_text) << "All done.\n";
+}
+
+void TraceDlg::OnAnalyzeComp(wxCommandEvent &event)
+{
+	Measure();
+	wxString str;
+	OutputMeasureResult(str);
+	m_stat_text->SetValue(str);
+}
+
+void TraceDlg::OnAnalyzeLink(wxCommandEvent &event)
+{
+
+}
+
+void TraceDlg::OnSaveResult(wxCommandEvent &event)
+{
+	wxString str;
+	str = m_stat_text->GetValue();
+	wxFileDialog *fopendlg = new wxFileDialog(
+		m_frame, "Save results", "", "",
+		"Text file (*.txt)|*.txt",
+		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	int rval = fopendlg->ShowModal();
+	if (rval == wxID_OK)
+	{
+		wxString filename = fopendlg->GetPath();
+		SaveMeasureResult(filename);
+	}
+	if (fopendlg)
+		delete fopendlg;
 }
 
 //manual tracking assist
@@ -2319,6 +2507,16 @@ double TraceDlg::GetExt(unsigned int* data_label,
 	}
 
 	return surface_vox ? 1.0 : 0.0;
+}
+
+unsigned int TraceDlg::GetMappedID(
+	unsigned int id, unsigned int* data_label1,
+	unsigned int* data_label2, unsigned long long size)
+{
+	for (unsigned long long i = 0; i < size; ++i)
+		if (data_label1[i] == id)
+			return data_label2[i];
+	return 0;
 }
 
 void TraceDlg::Test1()
