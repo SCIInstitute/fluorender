@@ -96,7 +96,8 @@ public:
 		ID_GenMapPrg,
 		ID_GenMapSpin,
 		ID_GenMapBtn,
-		ID_RefineMapBtn,
+		ID_RefineTBtn,
+		ID_RefineAllBtn,
 		//selection page
 		//component tools
 		ID_CompIDText,
@@ -238,7 +239,8 @@ private:
 	wxGauge* m_gen_map_prg;
 	wxSpinCtrl* m_gen_map_spin;
 	wxButton* m_gen_map_btn;
-	wxButton* m_refine_map_btn;
+	wxButton* m_refine_t_btn;
+	wxButton* m_refine_all_btn;
 
 	//selection page
 	//component tools
@@ -337,7 +339,8 @@ private:
 	void OnSaveasTrace(wxCommandEvent& event);
 	//auto tracking
 	void OnGenMapBtn(wxCommandEvent &event);
-	void OnRefineMapBtn(wxCommandEvent &event);
+	void OnRefineTBtn(wxCommandEvent &event);
+	void OnRefineAllBtn(wxCommandEvent &event);
 	//selection page
 	//component tools
 	void OnCompIDText(wxCommandEvent &event);

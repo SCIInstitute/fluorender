@@ -237,7 +237,8 @@ EVT_BUTTON(ID_SaveTraceBtn, TraceDlg::OnSaveTrace)
 EVT_BUTTON(ID_SaveasTraceBtn, TraceDlg::OnSaveasTrace)
 //auto tracking
 EVT_BUTTON(ID_GenMapBtn, TraceDlg::OnGenMapBtn)
-EVT_BUTTON(ID_RefineMapBtn, TraceDlg::OnRefineMapBtn)
+EVT_BUTTON(ID_RefineTBtn, TraceDlg::OnRefineTBtn)
+EVT_BUTTON(ID_RefineAllBtn, TraceDlg::OnRefineAllBtn)
 //selection page
 //component tools
 EVT_TEXT(ID_CompIDText, TraceDlg::OnCompIDText)
@@ -335,16 +336,16 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 	sizer_2->Add(10, 10);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_gen_map_spin, 0, wxALIGN_CENTER);
-	st = new wxStaticText(page, 0, "times",
-		wxDefaultPosition, wxSize(40, -1));
 	m_gen_map_btn = new wxButton(page, ID_GenMapBtn, "Generate",
 		wxDefaultPosition, wxSize(60, 23));
-	m_refine_map_btn = new wxButton(page, ID_RefineMapBtn, "Refine",
+	m_refine_t_btn = new wxButton(page, ID_RefineTBtn, "Refine T",
+		wxDefaultPosition, wxSize(60, 23));
+	m_refine_all_btn = new wxButton(page, ID_RefineAllBtn, "Refine All",
 		wxDefaultPosition, wxSize(60, 23));
 	sizer_2->Add(10, 10);
-	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_gen_map_btn, 0, wxALIGN_CENTER);
-	sizer_2->Add(m_refine_map_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_refine_t_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_refine_all_btn, 0, wxALIGN_CENTER);
 
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
@@ -945,7 +946,12 @@ void TraceDlg::OnGenMapBtn(wxCommandEvent &event)
 	GenMap();
 }
 
-void TraceDlg::OnRefineMapBtn(wxCommandEvent &event)
+void TraceDlg::OnRefineTBtn(wxCommandEvent &event)
+{
+
+}
+
+void TraceDlg::OnRefineAllBtn(wxCommandEvent &event)
 {
 	RefineMap();
 }

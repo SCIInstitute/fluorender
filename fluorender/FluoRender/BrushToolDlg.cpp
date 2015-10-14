@@ -200,7 +200,7 @@ wxWindow* BrushToolDlg::CreateBrushPage(wxWindow *parent)
 	sizer1_3->Add(15, 15);
 	//sizer1
 	sizer1->Add(sizer1_1, 0, wxEXPAND);
-	sizer1->Add(5, 5);
+	sizer1->Add(10, 10);
 	sizer1->Add(sizer1_2, 0, wxEXPAND);
 	sizer1->Add(sizer1_3, 0, wxEXPAND);
 	sizer1->Hide(sizer1_3, true);
@@ -270,21 +270,21 @@ wxWindow* BrushToolDlg::CreateBrushPage(wxWindow *parent)
 	sizer2_4->Add(m_brush_iterss_rb, 0, wxALIGN_CENTER);
 	//sizer2
 	sizer2->Add(sizer2_4, 0, wxEXPAND);
-	sizer2->Add(5, 5);
+	sizer2->Add(10, 10);
 	sizer2->Add(sizer2_2, 0, wxEXPAND);
 	sizer2->Add(sizer2_3, 0, wxEXPAND);
-	sizer2->Add(5, 5);
+	sizer2->Add(10, 10);
 	sizer2->Add(sizer2_1, 0, wxEXPAND);
 
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	sizer_v->Add(10, 10);
 	sizer_v->Add(m_toolbar, 0, wxEXPAND);
-	sizer_v->Add(10, 10);
+	sizer_v->Add(10, 30);
 	sizer_v->Add(sizer1, 0, wxEXPAND);
-	sizer_v->Add(10, 10);
+	sizer_v->Add(10, 30);
 	sizer_v->Add(sizer2, 0, wxEXPAND);
-	sizer_v->Add(10, 10);
+	sizer_v->Add(10, 30);
 
 	//set the page
 	page->SetSizer(sizer_v);
@@ -349,9 +349,9 @@ wxWindow* BrushToolDlg::CreateCalculationPage(wxWindow *parent)
 	sizer_v->Add(sizer1, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 	sizer_v->Add(sizer2, 0, wxEXPAND);
-	sizer_v->Add(10, 10);
+	sizer_v->Add(10, 30);
 	sizer_v->Add(sizer3, 0, wxEXPAND);
-	sizer_v->Add(10, 10);
+	sizer_v->Add(10, 30);
 	sizer_v->Add(sizer4, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 
@@ -484,7 +484,7 @@ wxWindow* BrushToolDlg::CreateAnalysisPage(wxWindow *parent)
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	sizer_v->Add(10, 10);
 	sizer_v->Add(sizer1, 0, wxEXPAND);
-	sizer_v->Add(10, 10);
+	sizer_v->Add(10, 30);
 	sizer_v->Add(sizer2, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 
