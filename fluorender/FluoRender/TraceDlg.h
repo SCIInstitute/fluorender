@@ -181,7 +181,7 @@ public:
 
 	//automatic tracking
 	void GenMap();
-	void RefineMap();
+	void RefineMap(int t=-1);
 
 private:
 	typedef struct

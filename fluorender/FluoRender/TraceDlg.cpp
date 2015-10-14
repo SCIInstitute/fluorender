@@ -948,7 +948,7 @@ void TraceDlg::OnGenMapBtn(wxCommandEvent &event)
 
 void TraceDlg::OnRefineTBtn(wxCommandEvent &event)
 {
-
+	RefineMap(m_cur_time);
 }
 
 void TraceDlg::OnRefineAllBtn(wxCommandEvent &event)
@@ -2975,7 +2975,7 @@ void TraceDlg::GenMap()
 }
 
 #define LINK_FRAMES \
-	for (size_t fi = 0; fi < frames; ++fi) \
+	for (size_t fi = start_frame; fi <= end_frame; ++fi) \
 	{ \
 		tm_processor.MatchFrames(track_map, fi, fi + 1, false); \
 		tm_processor.MatchFrames(track_map, fi, fi - 1, false); \
@@ -2986,7 +2986,7 @@ void TraceDlg::GenMap()
 	}
 
 #define UNLINK_FRAMES \
-	for (size_t fi = 0; fi < frames; ++fi) \
+	for (size_t fi = start_frame; fi <= end_frame; ++fi) \
 	{ \
 		tm_processor.UnmatchFrames(track_map, fi, fi - 1); \
 		tm_processor.UnmatchFrames(track_map, fi, fi + 1); \
@@ -2998,7 +2998,7 @@ void TraceDlg::GenMap()
 		wxGetApp().Yield(); \
 	}
 
-void TraceDlg::RefineMap()
+void TraceDlg::RefineMap(int t)
 {
 	if (!m_view)
 		return;
@@ -3009,11 +3009,22 @@ void TraceDlg::RefineMap()
 	TraceGroup *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
-	m_stat_text->SetValue("Refining track map.\n");
+	if (t < 0)
+		m_stat_text->SetValue("Refining track map for all time points.\n");
+	else
+		m_stat_text->SetValue(wxString::Format(
+			"Refining track map at time point %d.\n", t));
 	wxGetApp().Yield();
 	FL::TrackMap &track_map = trace_group->GetTrackMap();
 	FL::TrackMapProcessor tm_processor;
-	int frames = track_map.GetFrameNum();
+	int start_frame, end_frame;
+	if (t < 0)
+	{
+		start_frame = 0;
+		end_frame = track_map.GetFrameNum() - 1;
+	}
+	else
+		start_frame = end_frame = t;
 	int resx, resy, resz;
 	vd->GetResolution(resx, resy, resz);
 	size_t iter_num = (size_t)m_gen_map_spin->GetValue();
@@ -3021,7 +3032,9 @@ void TraceDlg::RefineMap()
 	tm_processor.SetSizes(track_map,
 		resx, resy, resz);
 	//	tm_processor.SetContactThresh(0.2f);
-	float prog_bit = 100.0f / float(frames * iter_num);
+	float prog_bit = 100.0f / float(
+		(end_frame - start_frame + 1)
+		* iter_num);
 	float prog = 0.0f;
 	m_gen_map_prg->SetValue(int(prog));
 
@@ -3035,8 +3048,8 @@ void TraceDlg::RefineMap()
 		else
 			LINK_FRAMES
 
-			if (++iteri >= iter_num)
-				break;
+		if (++iteri >= iter_num)
+			break;
 
 		if (last_op == 1)
 			LINK_FRAMES
