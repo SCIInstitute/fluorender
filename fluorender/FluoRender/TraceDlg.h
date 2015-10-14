@@ -177,7 +177,7 @@ public:
 	//measurement
 	void Measure();
 	void OutputMeasureResult(wxString &str);
-	void SaveMeasureResult(wxString &filename);
+	void SaveOutputResult(wxString &filename);
 
 	//automatic tracking
 	void GenMap();

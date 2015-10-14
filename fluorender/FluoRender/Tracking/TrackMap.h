@@ -123,6 +123,14 @@ namespace FL
 		bool CombineCells(TrackMap& track_map, pCell &cell, CellList &list, size_t frame);
 		bool DivideCells(TrackMap& track_map, CellList &list, size_t frame);
 
+		//information
+		void GetLinkLists(TrackMap& track_map,
+			size_t frame,
+			FL::VertexList &in_orphan_list,
+			FL::VertexList &out_orphan_list,
+			FL::VertexList &in_multi_list,
+			FL::VertexList &out_multi_list);
+
 	private:
 		float m_contact_thresh;
 		float m_size_thresh;

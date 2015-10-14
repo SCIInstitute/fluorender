@@ -2473,3 +2473,97 @@ bool TrackMapProcessor::DivideCells(TrackMap& track_map,
 
 	return true;
 }
+
+void TrackMapProcessor::GetLinkLists(TrackMap& track_map,
+	size_t frame,
+	FL::VertexList &in_orphan_list,
+	FL::VertexList &out_orphan_list,
+	FL::VertexList &in_multi_list,
+	FL::VertexList &out_multi_list)
+{
+	if (frame >= track_map.m_frame_num)
+		return;
+
+	VertexList &vertex_list = track_map.m_vertices_list.at(frame);
+
+	InterVert v0, v1;
+	std::pair<InterAdjIter, InterAdjIter> adj_verts;
+	std::pair<InterEdge, bool> edge;
+	int edge_count;
+
+	//in lists
+	if (frame > 0)
+	{
+		InterGraph &inter_graph = track_map.m_inter_graph_list.at(frame - 1);
+		for (VertexListIter iter = vertex_list.begin();
+		iter != vertex_list.end(); ++iter)
+		{
+			if (!iter->second)
+				continue;
+			if (iter->second->GetSizeUi() < m_size_thresh)
+				continue;
+			v0 = iter->second->GetInterVert(inter_graph);
+			if (v0 == InterGraph::null_vertex())
+			{
+				in_orphan_list.insert(std::pair<unsigned int, pVertex>(
+					iter->second->Id(), iter->second));
+				continue;
+			}
+			adj_verts = boost::adjacent_vertices(v0, inter_graph);
+			edge_count = 0;
+			//for each adjacent vertex
+			for (InterAdjIter inter_iter = adj_verts.first;
+			inter_iter != adj_verts.second; ++inter_iter)
+			{
+				v1 = *inter_iter;
+				edge = boost::edge(v0, v1, inter_graph);
+				if (edge.second && inter_graph[edge.first].link)
+					edge_count++;
+			}
+			if (edge_count == 0)
+				in_orphan_list.insert(std::pair<unsigned int, pVertex>(
+					iter->second->Id(), iter->second));
+			else if (edge_count > 1)
+				in_multi_list.insert(std::pair<unsigned int, pVertex>(
+					iter->second->Id(), iter->second));
+		}
+	}
+
+	//out lists
+	if (frame < track_map.m_frame_num - 1)
+	{
+		InterGraph &inter_graph = track_map.m_inter_graph_list.at(frame);
+		for (VertexListIter iter = vertex_list.begin();
+		iter != vertex_list.end(); ++iter)
+		{
+			if (!iter->second)
+				continue;
+			if (iter->second->GetSizeUi() < m_size_thresh)
+				continue;
+			v0 = iter->second->GetInterVert(inter_graph);
+			if (v0 == InterGraph::null_vertex())
+			{
+				out_orphan_list.insert(std::pair<unsigned int, pVertex>(
+					iter->second->Id(), iter->second));
+				continue;
+			}
+			adj_verts = boost::adjacent_vertices(v0, inter_graph);
+			edge_count = 0;
+			//for each adjacent vertex
+			for (InterAdjIter inter_iter = adj_verts.first;
+			inter_iter != adj_verts.second; ++inter_iter)
+			{
+				v1 = *inter_iter;
+				edge = boost::edge(v0, v1, inter_graph);
+				if (edge.second && inter_graph[edge.first].link)
+					edge_count++;
+			}
+			if (edge_count == 0)
+				out_orphan_list.insert(std::pair<unsigned int, pVertex>(
+					iter->second->Id(), iter->second));
+			else if (edge_count > 1)
+				out_multi_list.insert(std::pair<unsigned int, pVertex>(
+					iter->second->Id(), iter->second));
+		}
+	}
+}

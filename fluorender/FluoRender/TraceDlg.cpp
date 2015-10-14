@@ -1155,13 +1155,39 @@ void TraceDlg::OnAnalyzeComp(wxCommandEvent &event)
 
 void TraceDlg::OnAnalyzeLink(wxCommandEvent &event)
 {
+	if (!m_view)
+		return;
 
+	TraceGroup* trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+		return;
+	size_t frames = trace_group->GetTrackMap().GetFrameNum();
+	if (frames == 0)
+		m_stat_text->SetValue("ERROR! Generate a track map first.\n");
+	else
+		m_stat_text->SetValue(
+			wxString::Format("Time point number: %d\n", int(frames)));
+
+	(*m_stat_text) << "Time\tIn Orphan\tOut Orphan\tIn Multi\tOut Multi\n";
+	FL::VertexList in_orphan_list;
+	FL::VertexList out_orphan_list;
+	FL::VertexList in_multi_list;
+	FL::VertexList out_multi_list;
+	for (size_t fi = 0; fi < frames; ++fi)
+	{
+		trace_group->GetLinkLists(fi,
+			in_orphan_list, out_orphan_list,
+			in_multi_list, out_multi_list);
+		(*m_stat_text) << int(fi) << "\t" <<
+			int(in_orphan_list.size()) << "\t" <<
+			int(out_orphan_list.size()) << "\t" <<
+			int(in_multi_list.size()) << "\t" <<
+			int(out_multi_list.size()) << "\n";
+	}
 }
 
 void TraceDlg::OnSaveResult(wxCommandEvent &event)
 {
-	wxString str;
-	str = m_stat_text->GetValue();
 	wxFileDialog *fopendlg = new wxFileDialog(
 		m_frame, "Save results", "", "",
 		"Text file (*.txt)|*.txt",
@@ -1170,7 +1196,7 @@ void TraceDlg::OnSaveResult(wxCommandEvent &event)
 	if (rval == wxID_OK)
 	{
 		wxString filename = fopendlg->GetPath();
-		SaveMeasureResult(filename);
+		SaveOutputResult(filename);
 	}
 	if (fopendlg)
 		delete fopendlg;
@@ -2203,22 +2229,6 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 //magic
 /*void TraceDlg::OnCellMagic0Btn(wxCommandEvent &event)
 {
-	Measure();
-	wxString str;
-	OutputMeasureResult(str);
-	m_stat_text->SetValue(str);
-	wxFileDialog *fopendlg = new wxFileDialog(
-		m_frame, "Save results", "", "",
-		"Text file (*.txt)|*.txt",
-		wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
-	int rval = fopendlg->ShowModal();
-	if (rval == wxID_OK)
-	{
-		wxString filename = fopendlg->GetPath();
-		SaveMeasureResult(filename);
-	}
-	if (fopendlg)
-		delete fopendlg;
 }
 
 void TraceDlg::OnCellMagic1Btn(wxCommandEvent &event)
@@ -2373,18 +2383,15 @@ void TraceDlg::OutputMeasureResult(wxString &str)
 
 }
 
-void TraceDlg::SaveMeasureResult(wxString &filename)
+void TraceDlg::SaveOutputResult(wxString &filename)
 {
-	if (m_info_list.empty())
-		return;
-
 	wxFileOutputStream fos(filename);
 	if (!fos.Ok())
 		return;
 	wxTextOutputStream tos(fos);
 
 	wxString str;
-	OutputMeasureResult(str);
+	str = m_stat_text->GetValue();
 
 	tos << str;
 }

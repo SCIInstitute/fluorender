@@ -915,6 +915,13 @@ public:
 	void SetCellSize(int size) {m_cell_size = size;}
 	int GetSizeSize() {return m_cell_size;}
 
+	//get information
+	void GetLinkLists(size_t frame,
+		FL::VertexList &in_orphan_list,
+		FL::VertexList &out_orphan_list,
+		FL::VertexList &in_multi_list,
+		FL::VertexList &out_multi_list);
+
 	//for selective drawing
 	void ClearCellList();
 	void UpdateCellList(FL::CellList &cur_sel_list);

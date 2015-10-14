@@ -3008,6 +3008,29 @@ int TraceGroup::GetPrvTime()
 	return m_prv_time;
 }
 
+//get information
+void TraceGroup::GetLinkLists(size_t frame,
+	FL::VertexList &in_orphan_list,
+	FL::VertexList &out_orphan_list,
+	FL::VertexList &in_multi_list,
+	FL::VertexList &out_multi_list)
+{
+	if (in_orphan_list.size())
+		in_orphan_list.clear();
+	if (out_orphan_list.size())
+		out_orphan_list.clear();
+	if (in_multi_list.size())
+		in_multi_list.clear();
+	if (out_multi_list.size())
+		out_multi_list.clear();
+
+	FL::TrackMapProcessor tm_processor;
+	tm_processor.SetSizeThresh(m_cell_size);
+	tm_processor.GetLinkLists(m_track_map, frame,
+		in_orphan_list, out_orphan_list,
+		in_multi_list, out_multi_list);
+}
+
 void TraceGroup::ClearCellList()
 {
 	m_cell_list.clear();
