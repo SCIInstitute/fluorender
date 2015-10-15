@@ -963,6 +963,7 @@ public:
 		ID_ZRotSldr,
 		ID_RotateTimer,
 		ID_RotLockChk,
+		ID_RotSliderType,
 		ID_DepthAttenChk,
 		ID_DepthAttenFactorSldr,
 		ID_DepthAttenResetBtn,
@@ -1488,6 +1489,7 @@ public:
 	wxTextCtrl *m_z_rot_text;
 	wxTimer m_timer;
 	bool m_x_rotating, m_y_rotating, m_z_rotating;
+	bool m_skip_thumb;
 	wxToolBar *m_rot_lock_btn;
 
 	//left bar///////////////////////////////////////////////////
@@ -1516,6 +1518,9 @@ public:
 		kText
 	};
 	SCALEBAR_STATE m_draw_scalebar;
+
+	//rot slider style
+	bool m_rot_slider;
 
 	bool m_use_dft_settings;
 	double m_dft_x_rot;
@@ -1572,6 +1577,7 @@ private:
 	void OnYRotScroll(wxScrollEvent &event);
 	void OnZRotScroll(wxScrollEvent &event);
 	void OnRotLockCheck(wxCommandEvent& event);
+	void OnRotSliderType(wxCommandEvent& event);
 
 	void OnSaveDefault(wxCommandEvent &event);
 
