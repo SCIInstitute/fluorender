@@ -927,8 +927,11 @@ bool TrackMapProcessor::MatchVertexList(pVertex &vertex, VertexList &list2,
 	{
 		vertex2 = iter->second;
 		dist = (vertex->GetCenter() - vertex2->GetCenter()).length();
-		if (dist * dist > std::min(vertex->GetSizeUi(),
-			vertex2->GetSizeUi())*0.3)
+		if (dist * dist > std::min(
+			vertex->GetSizeUi(),
+			vertex2->GetSizeUi()) * 0.3 ||
+			(vertex->GetCenter() -
+			vertex2->GetCenter()).z() > 2.5)
 			continue;
 		v0_size = vertex->GetSizeF();
 		v1_size = vertex2->GetSizeF();
