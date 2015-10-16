@@ -4640,7 +4640,7 @@ void VRenderGLView::SetParams(double t)
 		clip_view->SetVolumeData(vr_frame->GetCurSelVol());
 	if (vr_frame)
 	{
-		vr_frame->UpdateTree(m_cur_vol->GetName());
+		vr_frame->UpdateTree(m_cur_vol?m_cur_vol->GetName():"");
 		int index = interpolator->GetKeyIndexFromTime(t);
 		vr_frame->GetRecorderDlg()->SetSelection(index);
 	}
@@ -5212,6 +5212,8 @@ void VRenderGLView::RunRandomColors(wxFileConfig &fconfig)
 	//current state: see selection_tracking
 	//steps:
 	//load and replace the label
+	if (!m_cur_vol)
+		return;
 	BaseReader* reader = m_cur_vol->GetReader();
 	if (!reader)
 		return;
@@ -5312,6 +5314,8 @@ void VRenderGLView::RunExternalExe(wxFileConfig &fconfig)
 void VRenderGLView::RunFetchMask(wxFileConfig &fconfig)
 {
 	//load and replace the mask
+	if (!m_cur_vol)
+		return;
 	BaseReader* reader = m_cur_vol->GetReader();
 	if (!reader)
 		return;
