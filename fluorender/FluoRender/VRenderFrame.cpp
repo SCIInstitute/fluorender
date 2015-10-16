@@ -574,6 +574,7 @@ VRenderFrame::VRenderFrame(
 	m->SetBitmap(wxGetBitmapFromMemory(icon_new_view_mini));
 	m_top_window->Append(m);
 	m = new wxMenuItem(m_top_window, ID_FullScreen, wxT("&Full Screen"));
+	m->SetBitmap(wxGetBitmapFromMemory(full_screen));
 	m_top_window->Append(m);
 	//help menu
 	m = new wxMenuItem(m_top_help,ID_CheckUpdates, wxT("&Check for Updates"));
