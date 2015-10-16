@@ -181,6 +181,7 @@ private:
 	QVideoEncoder encoder_;
 	wxString filetype_;
 	int m_rot_int_type;//0-linear; 1-smooth
+	bool m_delayed_stop;
 
 private:
 	void GetSettings(int view=0);

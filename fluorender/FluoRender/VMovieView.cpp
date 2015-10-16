@@ -353,7 +353,8 @@ m_cur_time(0.0),
 m_running(false),
 m_record(false),
 m_current_page(0),
-m_rot_int_type(0)
+m_rot_int_type(0),
+m_delayed_stop(false)
 {
 	//notebook
 	m_notebook = new wxNotebook(this, wxID_ANY);
@@ -518,6 +519,22 @@ void VMovieView::SetView(int index) {
 }
 
 void VMovieView::OnTimer(wxTimerEvent& event) {
+	//get all of the progress info
+	double len;
+	long fps;
+	m_movie_time->GetValue().ToDouble(&len);
+	m_fps_text->GetValue().ToLong(&fps);
+
+	if (m_delayed_stop)
+	{
+		if (m_record)
+			WriteFrameToFile(int(fps*len + 0.5));
+		m_delayed_stop = false;
+		wxCommandEvent e;
+		OnStop(e);
+		return;
+	}
+
 	if (TextureRenderer::get_mem_swap() &&
 		TextureRenderer::get_start_update_loop() &&
 		!TextureRenderer::get_done_update_loop())
@@ -531,11 +548,6 @@ void VMovieView::OnTimer(wxTimerEvent& event) {
 		return;
 	}
 
-	//get all of the progress info
-	double len;
-	long fps;
-	m_movie_time->GetValue().ToDouble(&len);
-	m_fps_text->GetValue().ToLong(&fps);
 	//move forward in time (limits FPS usability to 100 FPS)
 	m_cur_time += 1.0/double(fps);
 	//frame only increments when time passes a whole number
@@ -553,10 +565,8 @@ void VMovieView::OnTimer(wxTimerEvent& event) {
 		m_last_frame = frame;
 		SetRendering(m_cur_time/len);
 	}
-	if (len - m_cur_time < 0.1/double(fps) || m_cur_time > len) {
-		wxCommandEvent e;
-		OnStop(e);
-	}
+	if (len - m_cur_time < 0.1 / double(fps) || m_cur_time > len)
+		m_delayed_stop = true;
 }
 
 void VMovieView::OnPrev(wxCommandEvent& event) {
