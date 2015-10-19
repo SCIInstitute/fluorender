@@ -78,6 +78,7 @@ namespace FL
 		unsigned int Id();
 		IntraVert GetIntraVert();
 		void SetIntraVert(IntraVert intra_vert);
+		void Set(pCell &cell);
 		void Inc(size_t i, size_t j, size_t k, float value);
 		void Inc(pCell &cell);
 		void Inc();
@@ -124,6 +125,13 @@ namespace FL
 	inline void Cell::SetIntraVert(IntraVert intra_vert)
 	{
 		m_intra_vert = intra_vert;
+	}
+
+	inline void Cell::Set(pCell &cell)
+	{
+		m_center = cell->GetCenter();
+		m_size_ui = cell->GetSizeUi();
+		m_size_f = cell->GetSizeF();
 	}
 
 	inline void Cell::Inc(size_t i, size_t j, size_t k, float value)
