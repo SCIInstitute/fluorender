@@ -140,7 +140,11 @@ void TraceListCtrl::DeleteSelection()
 	{
 		wxWindow* parent = GetParent();
 		if (parent)
+		{
 			((TraceDlg*)parent)->CompDelete();
+			if (((TraceDlg*)parent)->GetManualAssist())
+				((TraceDlg*)parent)->CellLink(true);
+		}
 	}
 	else if (m_type == 1)
 	{
@@ -1725,8 +1729,12 @@ void TraceDlg::CellNewID(bool append)
 				index = nx*ny*k + nx*j + i;
 				if (data_mask[index])
 				{
-					if (append && data_label[index])
+					if (append && data_label[index] &&
+						data_label[index] != new_id)
+					{
+						data_mask[index] = 0;
 						continue;
+					}
 					data_label[index] = new_id;
 					if (new_id)
 						cell->Inc(i, j, k, 1.0f);

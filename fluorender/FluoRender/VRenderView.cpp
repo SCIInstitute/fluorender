@@ -1926,7 +1926,7 @@ void VRenderGLView::Segment()
 			if (m_selector.GetMode() == 1 ||
 				m_selector.GetMode() == 2 ||
 				m_selector.GetMode() == 4)
-				vr_frame->GetTraceDlg()->CellNewID(false);
+				vr_frame->GetTraceDlg()->CellNewID(true);
 			else if (m_selector.GetMode() == 3)
 				vr_frame->GetTraceDlg()->CellEraseID();
 		}
