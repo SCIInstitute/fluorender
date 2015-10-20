@@ -276,7 +276,7 @@ namespace FLIVR
 	"		discard;\n" \
 	"	v.x = c.x>1.0?1.0:c.x;\n" \
 	"	float stop = \n" \
-	"		(loc7.y>0.0?(v.y>sqrt(loc7.y)*2.12?0.0:exp(-v.y*v.y/loc7.y)):1.0)*\n" \
+	"		(loc7.y>=1.0?1.0:(v.y>sqrt(loc7.y)*2.12?0.0:exp(-v.y*v.y/loc7.y)))*\n" \
 	"		(v.x>loc7.w?1.0:(loc7.z>0.0?(v.x<loc7.w-sqrt(loc7.z)*2.12?0.0:exp(-(v.x-loc7.w)*(v.x-loc7.w)/loc7.z)):0.0));\n" \
 	"	if (stop == 0.0)\n" \
 	"		discard;\n" \
@@ -301,7 +301,7 @@ namespace FLIVR
 	"			max_nb = nb;\n" \
 	"		}\n" \
 	"	}\n"\
-	"	if (loc7.y>0.0)\n" \
+	"	if (loc7.y<1.0)\n" \
 	"	{\n" \
 	"		m = texture(tex0, max_nb).x + loc7.y;\n" \
 	"		mx = texture(tex0, t.stp).x;\n" \

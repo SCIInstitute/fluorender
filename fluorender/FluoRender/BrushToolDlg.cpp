@@ -34,6 +34,8 @@ DEALINGS IN THE SOFTWARE.
 //resources
 #include "img/icons.h"
 
+#define GM_2_ESTR(x) (1.0 - sqrt(1.0 - (x - 1.0) * (x - 1.0)))
+
 BEGIN_EVENT_TABLE(BrushToolDlg, wxPanel)
 	//paint tools
 	//brush commands
@@ -52,6 +54,9 @@ BEGIN_EVENT_TABLE(BrushToolDlg, wxPanel)
 	//translate
 	EVT_COMMAND_SCROLL(ID_BrushSclTranslateSldr, BrushToolDlg::OnBrushSclTranslateChange)
 	EVT_TEXT(ID_BrushSclTranslateText, BrushToolDlg::OnBrushSclTranslateText)
+	//gm falloff
+	EVT_COMMAND_SCROLL(ID_BrushGmFalloffSldr, BrushToolDlg::OnBrushGmFalloffChange)
+	EVT_TEXT(ID_BrushGmFalloffText, BrushToolDlg::OnBrushGmFalloffText)
 	//2d influence
 	EVT_COMMAND_SCROLL(ID_Brush2dinflSldr, BrushToolDlg::OnBrush2dinflChange)
 	EVT_TEXT(ID_Brush2dinflText, BrushToolDlg::OnBrush2dinflText)
@@ -110,6 +115,9 @@ wxWindow* BrushToolDlg::CreateBrushPage(wxWindow *parent)
 	wxFloatingPointValidator<double> vald_fp1(1);
 	//validator: floating point 2
 	wxFloatingPointValidator<double> vald_fp2(2);
+	//validator: floating point 3
+	wxFloatingPointValidator<double> vald_fp3(3);
+	vald_fp3.SetRange(0.0, 1.0);
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 
@@ -185,25 +193,39 @@ wxWindow* BrushToolDlg::CreateBrushPage(wxWindow *parent)
 	sizer1_2->Add(m_brush_scl_translate_sldr, 1, wxEXPAND);
 	sizer1_2->Add(m_brush_scl_translate_text, 0, wxALIGN_CENTER);
 	sizer1_2->Add(15, 15);
-	//2d
+	//gm falloff
 	wxBoxSizer *sizer1_3 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Edge STR:",
+		wxDefaultPosition, wxSize(70, 20));
+	m_brush_gm_falloff_sldr = new wxSlider(page, ID_BrushGmFalloffSldr, 0, 0, 1000,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_brush_gm_falloff_text = new wxTextCtrl(page, ID_BrushGmFalloffText, "0.000",
+		wxDefaultPosition, wxSize(50, 20), 0, vald_fp3);
+	sizer1_3->Add(5, 5);
+	sizer1_3->Add(st, 0, wxALIGN_CENTER);
+	sizer1_3->Add(m_brush_gm_falloff_sldr, 1, wxEXPAND);
+	sizer1_3->Add(m_brush_gm_falloff_text, 0, wxALIGN_CENTER);
+	sizer1_3->Add(15, 15);
+	//2d
+	wxBoxSizer *sizer1_4 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "2D Adj. Infl.:",
 		wxDefaultPosition, wxSize(70, 20));
 	m_brush_2dinfl_sldr = new wxSlider(page, ID_Brush2dinflSldr, 100, 0, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_INVERSE);
 	m_brush_2dinfl_text = new wxTextCtrl(page, ID_Brush2dinflText, "1.00",
 		wxDefaultPosition, wxSize(40, 20), 0, vald_fp2);
-	sizer1_3->Add(5, 5);
-	sizer1_3->Add(st, 0, wxALIGN_CENTER);
-	sizer1_3->Add(m_brush_2dinfl_sldr, 1, wxEXPAND);
-	sizer1_3->Add(m_brush_2dinfl_text, 0, wxALIGN_CENTER);
-	sizer1_3->Add(15, 15);
+	sizer1_4->Add(5, 5);
+	sizer1_4->Add(st, 0, wxALIGN_CENTER);
+	sizer1_4->Add(m_brush_2dinfl_sldr, 1, wxEXPAND);
+	sizer1_4->Add(m_brush_2dinfl_text, 0, wxALIGN_CENTER);
+	sizer1_4->Add(15, 15);
 	//sizer1
 	sizer1->Add(sizer1_1, 0, wxEXPAND);
 	sizer1->Add(10, 10);
 	sizer1->Add(sizer1_2, 0, wxEXPAND);
 	sizer1->Add(sizer1_3, 0, wxEXPAND);
-	sizer1->Hide(sizer1_3, true);
+	sizer1->Add(sizer1_4, 0, wxEXPAND);
+	sizer1->Hide(sizer1_4, true);
 
 	//Brush properties
 	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
@@ -562,6 +584,11 @@ void BrushToolDlg::GetSettings(VRenderView* vrv)
 	m_dft_scl_translate = dval;
 	m_brush_scl_translate_sldr->SetValue(int(dval*1000.0+0.5));
 	m_brush_scl_translate_text->ChangeValue(wxString::Format("%.2f", dval));
+	//gm falloff
+	dval = vrv->GetBrushGmFalloff();
+	m_dft_gm_falloff = dval;
+	m_brush_gm_falloff_sldr->SetValue(int(GM_2_ESTR(dval)*1000.0 + 0.5));
+	m_brush_gm_falloff_text->ChangeValue(wxString::Format("%.3f", GM_2_ESTR(dval)));
 	//2d influence
 	dval = vrv->GetW2d();
 	m_brush_2dinfl_sldr->SetValue(int(dval*100.0+0.5));
@@ -569,6 +596,16 @@ void BrushToolDlg::GetSettings(VRenderView* vrv)
 	//edge detect
 	bval = vrv->GetEdgeDetect();
 	m_edge_detect_chk->SetValue(bval);
+	if (bval)
+	{
+		m_brush_gm_falloff_sldr->Enable();
+		m_brush_gm_falloff_text->Enable();
+	}
+	else
+	{
+		m_brush_gm_falloff_sldr->Disable();
+		m_brush_gm_falloff_text->Disable();
+	}
 	//hidden removal
 	bval = vrv->GetHiddenRemoval();
 	m_hidden_removal_chk->SetValue(bval);
@@ -822,9 +859,31 @@ void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent &event)
 	m_dft_scl_translate = val/m_max_value;
 	m_brush_scl_translate_sldr->SetValue(int(val*10.0+0.5));
 
-	//set falloff
+	//set translate
 	if (m_cur_view)
 		m_cur_view->SetBrushSclTranslate(m_dft_scl_translate);
+}
+
+//gm falloff
+void BrushToolDlg::OnBrushGmFalloffChange(wxScrollEvent &event)
+{
+	int ival = event.GetPosition();
+	double val = double(ival) / 1000.0;
+	wxString str = wxString::Format("%.3f", val);
+	m_brush_gm_falloff_text->SetValue(str);
+}
+
+void BrushToolDlg::OnBrushGmFalloffText(wxCommandEvent &event)
+{
+	wxString str = m_brush_gm_falloff_text->GetValue();
+	double val;
+	str.ToDouble(&val);
+	m_dft_gm_falloff = GM_2_ESTR(val);
+	m_brush_gm_falloff_sldr->SetValue(int(val*1000.0+0.5));
+
+	//set gm falloff
+	if (m_cur_view)
+		m_cur_view->SetBrushGmFalloff(m_dft_gm_falloff);
 }
 
 //2d influence
@@ -852,6 +911,17 @@ void BrushToolDlg::OnBrush2dinflText(wxCommandEvent &event)
 void BrushToolDlg::OnBrushEdgeDetectChk(wxCommandEvent &event)
 {
 	bool edge_detect = m_edge_detect_chk->GetValue();
+
+	if (edge_detect)
+	{
+		m_brush_gm_falloff_sldr->Enable();
+		m_brush_gm_falloff_text->Enable();
+	}
+	else
+	{
+		m_brush_gm_falloff_sldr->Disable();
+		m_brush_gm_falloff_text->Disable();
+	}
 
 	//set edge detect
 	if (m_cur_view)
@@ -1223,7 +1293,11 @@ void BrushToolDlg::LoadDefault()
 
 	//brush properties
 	fconfig.Read("brush_ini_thresh", &m_dft_ini_thresh);
-	fconfig.Read("brush_gm_falloff", &m_dft_gm_falloff);
+	if (fconfig.Read("brush_gm_falloff", &m_dft_gm_falloff))
+	{
+		m_brush_gm_falloff_sldr->SetValue(int(GM_2_ESTR(m_dft_gm_falloff)*1000.0 + 0.5));
+		m_brush_gm_falloff_text->ChangeValue(wxString::Format("%.3f", GM_2_ESTR(m_dft_gm_falloff)));
+	}
 	fconfig.Read("brush_scl_falloff", &m_dft_scl_falloff);
 	if (fconfig.Read("brush_scl_translate", &m_dft_scl_translate))
 	{

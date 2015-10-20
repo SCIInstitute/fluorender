@@ -2317,7 +2317,6 @@ bool TrackMapProcessor::AddCell(TrackMap& track_map,
 	vertex->SetSizeUi(cell->GetSizeUi());
 	vertex->SetSizeF(cell->GetSizeF());
 	vertex->AddCell(cell);
-	vertex->Update();
 	cell->AddVertex(vertex);
 	vert_list.insert(std::pair<unsigned int, pVertex>
 		(vertex->Id(), vertex));

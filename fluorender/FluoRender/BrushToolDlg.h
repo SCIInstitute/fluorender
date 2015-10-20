@@ -58,6 +58,9 @@ public:
 		//falloff
 		ID_BrushSclTranslateSldr,
 		ID_BrushSclTranslateText,
+		//edge detect strength
+		ID_BrushGmFalloffSldr,
+		ID_BrushGmFalloffText,
 		//2dinfl
 		ID_Brush2dinflSldr,
 		ID_Brush2dinflText,
@@ -181,10 +184,6 @@ private:
 	//toolbar
 	wxToolBar *m_toolbar;
 
-	//selection strength
-	//translate
-	wxSlider* m_brush_scl_translate_sldr;
-	wxTextCtrl* m_brush_scl_translate_text;
 	//stop at boundary
 	wxCheckBox* m_edge_detect_chk;
 	//hidden removal
@@ -193,6 +192,13 @@ private:
 	wxCheckBox* m_select_group_chk;
 	//estimate threshold
 	wxCheckBox* m_estimate_thresh_chk;
+	//selection strength
+	//translate
+	wxSlider* m_brush_scl_translate_sldr;
+	wxTextCtrl* m_brush_scl_translate_text;
+	//gm falloff
+	wxSlider* m_brush_gm_falloff_sldr;
+	wxTextCtrl* m_brush_gm_falloff_text;
 	//2d influence
 	wxSlider* m_brush_2dinfl_sldr;
 	wxTextCtrl* m_brush_2dinfl_text;
@@ -263,9 +269,6 @@ private:
 	void OnBrushCreate(wxCommandEvent& event);
 	void OnBrushSolid(wxCommandEvent& event);
 	//selection adjustment
-	//translate
-	void OnBrushSclTranslateChange(wxScrollEvent &event);
-	void OnBrushSclTranslateText(wxCommandEvent &event);
 	//2d influence
 	void OnBrush2dinflChange(wxScrollEvent &event);
 	void OnBrush2dinflText(wxCommandEvent &event);
@@ -277,6 +280,12 @@ private:
 	void OnEstimateThreshChk(wxCommandEvent &event);
 	//select group
 	void OnBrushSelectGroupChk(wxCommandEvent &event);
+	//translate
+	void OnBrushSclTranslateChange(wxScrollEvent &event);
+	void OnBrushSclTranslateText(wxCommandEvent &event);
+	//gm falloff
+	void OnBrushGmFalloffChange(wxScrollEvent &event);
+	void OnBrushGmFalloffText(wxCommandEvent &event);
 	//brush properties
 	//brush size 1
 	void OnBrushSize1Change(wxScrollEvent &event);

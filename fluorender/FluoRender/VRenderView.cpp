@@ -2132,7 +2132,7 @@ void VRenderGLView::LoadDefaultBrushSettings()
 	if (fconfig.Read("brush_ini_thresh", &val))
 		m_selector.SetBrushIniThresh(val);
 	if (fconfig.Read("brush_gm_falloff", &val))
-		m_selector.SetBrushGMFalloff(val);
+		m_selector.SetBrushGmFalloff(val);
 	if (fconfig.Read("brush_scl_falloff", &val))
 		m_selector.SetBrushSclFalloff(val);
 	if (fconfig.Read("brush_scl_translate", &val))
@@ -2249,7 +2249,7 @@ int VRenderGLView::GetBrushIteration()
 	return m_selector.GetBrushIteration();
 }
 
-//brush falloff
+//brush translate
 void VRenderGLView::SetBrushSclTranslate(double val)
 {
 	m_selector.SetBrushSclTranslate(val);
@@ -2259,6 +2259,17 @@ void VRenderGLView::SetBrushSclTranslate(double val)
 double VRenderGLView::GetBrushSclTranslate()
 {
 	return m_selector.GetBrushSclTranslate();
+}
+
+//gm falloff
+void VRenderGLView::SetBrushGmFalloff(double val)
+{
+	m_selector.SetBrushGmFalloff(val);
+}
+
+double VRenderGLView::GetBrushGmFalloff()
+{
+	return m_selector.GetBrushGmFalloff();
 }
 
 void VRenderGLView::SetW2d(double val)

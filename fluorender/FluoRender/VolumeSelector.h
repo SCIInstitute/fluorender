@@ -50,8 +50,8 @@ public:
 	//set/get brush properties
 	void SetBrushIniThresh(double val) {m_ini_thresh = val;}
 	double GetBrushIniThresh() {return m_ini_thresh;}
-	void SetBrushGMFalloff(double val) {m_gm_falloff = val;}
-	double GetBrushGMFalloff() {return m_gm_falloff;}
+	void SetBrushGmFalloff(double val) {m_gm_falloff = val;}
+	double GetBrushGmFalloff() {return m_gm_falloff;}
 	void SetBrushSclFalloff(double val) {m_scl_falloff = val;}
 	double GetBrushSclFalloff() {return m_scl_falloff;}
 	void SetBrushSclTranslate(double val) {m_scl_translate = val;}

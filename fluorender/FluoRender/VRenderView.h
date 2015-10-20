@@ -410,9 +410,12 @@ public:
 	//set iteration number
 	void SetBrushIteration(int num);
 	int GetBrushIteration();
-	//set brush falloff
+	//set translate
 	void SetBrushSclTranslate(double val);
 	double GetBrushSclTranslate();
+	//set gm falloff
+	void SetBrushGmFalloff(double val);
+	double GetBrushGmFalloff();
 	//w2d
 	void SetW2d(double val);
 	double GetW2d();
@@ -1332,11 +1335,16 @@ public:
 	{ if (m_glview) m_glview->SetBrushIteration(num); }
 	int GetBrushIteration()
 	{ if (m_glview) return m_glview->GetBrushIteration(); else return 0; }
-	//scalar falloff
+	//scalar translate
 	void SetBrushSclTranslate(double val)
 	{ if (m_glview) m_glview->SetBrushSclTranslate(val); }
 	double GetBrushSclTranslate()
 	{ if (m_glview) return m_glview->GetBrushSclTranslate(); else return 0.0; }
+	//gm falloff
+	void SetBrushGmFalloff(double val)
+	{ if (m_glview) m_glview->SetBrushGmFalloff(val); }
+	double GetBrushGmFalloff()
+	{ if (m_glview) return m_glview->GetBrushGmFalloff(); else return 0.0; }
 	//w2d
 	void SetW2d(double val)
 	{ if (m_glview) m_glview->SetW2d(val); }

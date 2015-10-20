@@ -40,7 +40,7 @@ m_vd(0),
 	m_use2d(false),
 	m_size_map(false),
 	m_ini_thresh(0.0),
-	m_gm_falloff(0.0),
+	m_gm_falloff(1.0),
 	m_scl_falloff(0.0),
 	m_scl_translate(0.0),
 	m_select_multi(0),
@@ -131,14 +131,9 @@ void VolumeSelector::Select(double radius)
 		scl_falloff = 0.0;
 	}
 	if (m_edge_detect)
-	{
-		if (m_gm_falloff > 0.0)
-			gm_falloff = m_gm_falloff;
-		else
-			gm_falloff = 0.004;
-	}
+		gm_falloff = m_gm_falloff;
 	else
-		gm_falloff = 0.0;
+		gm_falloff = 1.0;
 
 	if (Texture::mask_undo_num_>0 &&
 		m_vd->GetTexture())
@@ -1027,10 +1022,7 @@ int VolumeSelector::NoiseAnalysis(double min_voxels, double max_voxels, double b
 		ini_thresh = m_ini_thresh;
 	else
 		ini_thresh = sqrt(thresh);
-	if (m_gm_falloff > 0.0)
-		gm_falloff = m_gm_falloff;
-	else
-		gm_falloff = 0.01;
+	gm_falloff = m_gm_falloff;
 	if (m_scl_falloff > 0.0)
 		scl_falloff = m_scl_falloff;
 	else
@@ -1065,10 +1057,7 @@ void VolumeSelector::NoiseRemoval(int iter, double thresh, int mode)
 		ini_thresh = m_ini_thresh;
 	else
 		ini_thresh = sqrt(thresh);
-	if (m_gm_falloff > 0.0)
-		gm_falloff = m_gm_falloff;
-	else
-		gm_falloff = 0.01;
+	gm_falloff = m_gm_falloff;
 	if (m_scl_falloff > 0.0)
 		scl_falloff = m_scl_falloff;
 	else
