@@ -267,6 +267,7 @@ EVT_BUTTON(ID_CellUnlinkBtn, TraceDlg::OnCellUnlink)
 EVT_CHECKBOX(ID_ManualAssistCheck, TraceDlg::OnManualAssistCheck)
 //modify page
 //ID edit controls
+EVT_TEXT(ID_CellNewIDText, TraceDlg::OnCellNewIDText)
 EVT_TEXT_ENTER(ID_CellNewIDText, TraceDlg::OnCompAppend)
 EVT_BUTTON(ID_CellNewIDXBtn, TraceDlg::OnCellNewIDX)
 EVT_BUTTON(ID_CompAppend2Btn, TraceDlg::OnCompAppend)
@@ -2050,6 +2051,22 @@ void TraceDlg::OnCellUnlink(wxCommandEvent &event)
 }
 
 //ID edit controls
+void TraceDlg::OnCellNewIDText(wxCommandEvent &event)
+{
+	wxString str = m_cell_new_id_text->GetValue();
+	unsigned long id;
+	wxColor color(255, 255, 255);
+	if (str.ToULong(&id))
+	{
+		Color c = HSVColor(id % 360, 1.0, 1.0);
+		color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
+		m_cell_new_id_text->SetBackgroundColour(color);
+	}
+	else
+		m_cell_new_id_text->SetBackgroundColour(color);
+	m_cell_new_id_text->Refresh();
+}
+
 void TraceDlg::OnCellNewIDX(wxCommandEvent &event)
 {
 	m_cell_new_id_text->Clear();

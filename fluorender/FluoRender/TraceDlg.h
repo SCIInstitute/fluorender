@@ -362,6 +362,7 @@ private:
 	void OnManualAssistCheck(wxCommandEvent &event);
 	//modify page
 	//ID edit controls
+	void OnCellNewIDText(wxCommandEvent &event);
 	void OnCellNewIDX(wxCommandEvent& event);
 	void OnAutoIDChk(wxCommandEvent& event);
 	void OnCellNewID(wxCommandEvent& event);
