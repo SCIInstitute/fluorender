@@ -85,6 +85,7 @@ namespace FL
 		void IncExternal(float value);
 		void AddVertex(pVertex &vertex);
 		pwVertex GetVertex();
+		unsigned int GetVertexId();
 
 		//get
 		FLIVR::Point &GetCenter();

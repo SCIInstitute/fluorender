@@ -57,46 +57,50 @@ TraceListCtrl::TraceListCtrl(
 	m_type(0)
 {
 	wxListItem itemCol;
-	itemCol.SetText("ID");
+	itemCol.SetText("");
 	InsertColumn(0, itemCol);
-	SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
-	itemCol.SetText("Size");
+	SetColumnWidth(0, 20);
+	itemCol.SetText("ID");
 	InsertColumn(1, itemCol);
 	SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
-	itemCol.SetText("X");
+	itemCol.SetText("Size");
 	InsertColumn(2, itemCol);
 	SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);
-	itemCol.SetText("Y");
+	itemCol.SetText("X");
 	InsertColumn(3, itemCol);
 	SetColumnWidth(3, wxLIST_AUTOSIZE_USEHEADER);
-	itemCol.SetText("Z");
+	itemCol.SetText("Y");
 	InsertColumn(4, itemCol);
 	SetColumnWidth(4, wxLIST_AUTOSIZE_USEHEADER);
+	itemCol.SetText("Z");
+	InsertColumn(5, itemCol);
+	SetColumnWidth(5, wxLIST_AUTOSIZE_USEHEADER);
 }
 
 TraceListCtrl::~TraceListCtrl()
 {
 }
 
-void TraceListCtrl::Append(unsigned int id, wxColor color,
+void TraceListCtrl::Append(wxString &gtype, unsigned int id, wxColor color,
 	int size, double cx, double cy, double cz)
 {
-	wxString str;
+	wxString str = "";
+	long tmp = InsertItem(GetItemCount(), gtype, 0);
 	str = wxString::Format("%u", id);
-	long tmp = InsertItem(GetItemCount(), str, 0);
-	SetColumnWidth(0, wxLIST_AUTOSIZE);
-	str = wxString::Format("%d", size);
 	SetItem(tmp, 1, str);
 	SetColumnWidth(1, wxLIST_AUTOSIZE);
-	str = wxString::Format("%f", cx);
+	str = wxString::Format("%d", size);
 	SetItem(tmp, 2, str);
 	SetColumnWidth(2, wxLIST_AUTOSIZE);
-	str = wxString::Format("%f", cy);
+	str = wxString::Format("%f", cx);
 	SetItem(tmp, 3, str);
 	SetColumnWidth(3, wxLIST_AUTOSIZE);
-	str = wxString::Format("%f", cz);
+	str = wxString::Format("%f", cy);
 	SetItem(tmp, 4, str);
 	SetColumnWidth(4, wxLIST_AUTOSIZE);
+	str = wxString::Format("%f", cz);
+	SetItem(tmp, 5, str);
+	SetColumnWidth(5, wxLIST_AUTOSIZE);
 
 	SetItemBackgroundColour(tmp, color);
 }
@@ -113,23 +117,63 @@ void TraceListCtrl::UpdateTraces(VRenderView* vrv)
 	DeleteAllItems();
 
 	FL::CellList sel_cells = traces->GetCellList();
-	FL::CellListIter iter;
+	std::vector<FL::pCell> cells;
+	for (FL::CellListIter siter = sel_cells.begin();
+	siter != sel_cells.end(); ++siter)
+		cells.push_back(siter->second);
 
+	if (cells.empty())
+		return;
+	else
+		std::sort(cells.begin(), cells.end(), sort_cells);
+
+	wxString gtype;
 	unsigned int id;
+	unsigned int vid;
 	Color c;
 	wxColor wxc;
 	int size;
 	Point center;
+	bool prev, next;
 
-	for (iter = sel_cells.begin();
-	iter != sel_cells.end(); ++iter)
+	for (size_t i = 0; i < cells.size(); ++i)
 	{
-		id = iter->second->Id();
+		id = cells[i]->Id();
+		vid = cells[i]->GetVertexId();
 		c = HSVColor(id % 360, 1.0, 1.0);
 		wxColor color(c.r() * 255, c.g() * 255, c.b() * 255);
-		size = (int)(iter->second->GetSizeUi());
-		center = iter->second->GetCenter();
-		Append(id, color, size,
+		size = (int)(cells[i]->GetSizeUi());
+		center = cells[i]->GetCenter();
+
+		if (vid == 0)
+			gtype = L"\u25ef";
+		else
+		{
+			if (i == 0)
+				prev = false;
+			else
+				prev = cells[i - 1]->GetVertexId() == vid;
+			if (i == cells.size() - 1)
+				next = false;
+			else
+				next = cells[i + 1]->GetVertexId() == vid;
+			if (prev)
+			{
+				if (next)
+					gtype = L"\u2502";
+				else
+					gtype = L"\u2514";
+			}
+			else
+			{
+				if (next)
+					gtype = L"\u250c";
+				else
+					gtype = L"\u2500";
+			}
+		}
+
+		Append(gtype, id, color, size,
 			center.x(), center.y(), center.z());
 	}
 }
@@ -218,7 +262,7 @@ void TraceListCtrl::OnCopySelection(wxCommandEvent& event)
 		wxLIST_STATE_SELECTED);
 	if (item != -1)
 	{
-		wxString name = GetItemText(item);
+		wxString name = GetItemText(item, 1);
 		if (wxTheClipboard->Open())
 		{
 			wxTheClipboard->SetData(new wxTextDataObject(name));
@@ -612,10 +656,10 @@ TraceDlg::TraceDlg(wxWindow* frame, wxWindow* parent)
 
 	//notebook
 	m_notebook = new wxNotebook(this, wxID_ANY);
-	m_notebook->AddPage(CreateMapPage(m_notebook), "Track Map");
-	m_notebook->AddPage(CreateSelectPage(m_notebook), "Selection");
-	m_notebook->AddPage(CreateLinkPage(m_notebook), "Linkage");
-	m_notebook->AddPage(CreateModifyPage(m_notebook), "Modify");
+	m_notebook->AddPage(CreateMapPage(m_notebook), "Track Map >>");
+	m_notebook->AddPage(CreateSelectPage(m_notebook), "Selection >>");
+	m_notebook->AddPage(CreateLinkPage(m_notebook), "Linkage >>");
+	m_notebook->AddPage(CreateModifyPage(m_notebook), "Modify >>");
 	m_notebook->AddPage(CreateAnalysisPage(m_notebook), "Analysis");
 
 	wxStaticText *st = 0;
@@ -651,7 +695,7 @@ TraceDlg::TraceDlg(wxWindow* frame, wxWindow* parent)
 		wxDefaultPosition, wxDefaultSize);
 	m_cell_time_prev_st = new wxStaticText(this, 0, "\tPrevious T",
 		wxDefaultPosition, wxDefaultSize);
-	m_cell_prev_btn = new wxButton(this, ID_CellPrevBtn, "Backward <",
+	m_cell_prev_btn = new wxButton(this, ID_CellPrevBtn, "< Backward",
 		wxDefaultPosition, wxSize(80, 23));
 	m_cell_next_btn = new wxButton(this, ID_CellNextBtn, "Forward >",
 		wxDefaultPosition, wxSize(80, 23));
@@ -751,6 +795,7 @@ void TraceDlg::UpdateList()
 		int prv_time = trace_group->GetPrvTime();
 		if (cur_time != m_cur_time)
 		{
+			wxString item_gtype;
 			wxString item_id;
 			wxString item_size;
 			wxString item_x;
@@ -770,11 +815,12 @@ void TraceDlg::UpdateList()
 					wxLIST_STATE_DONTCARE);
 				if (item != -1)
 				{
-					item_id = m_trace_list_curr->GetText(item, 0);
-					item_size = m_trace_list_curr->GetText(item, 1);
-					item_x = m_trace_list_curr->GetText(item, 2);
-					item_y = m_trace_list_curr->GetText(item, 3);
-					item_z = m_trace_list_curr->GetText(item, 4);
+					item_gtype = m_trace_list_curr->GetText(item, 0);
+					item_id = m_trace_list_curr->GetText(item, 1);
+					item_size = m_trace_list_curr->GetText(item, 2);
+					item_x = m_trace_list_curr->GetText(item, 3);
+					item_y = m_trace_list_curr->GetText(item, 4);
+					item_z = m_trace_list_curr->GetText(item, 5);
 					item_id.ToULong(&id);
 					hue = id % 360;
 					Color c(HSVColor(hue, 1.0, 1.0));
@@ -783,7 +829,7 @@ void TraceDlg::UpdateList()
 					item_x.ToDouble(&x);
 					item_y.ToDouble(&y);
 					item_z.ToDouble(&z);
-					m_trace_list_prev->Append(id, color, size, x, y, z);
+					m_trace_list_prev->Append(item_gtype, id, color, size, x, y, z);
 				}
 				else break;
 			}
@@ -1237,7 +1283,7 @@ void TraceDlg::CompDelete()
 			continue;
 		else
 		{
-			str = m_trace_list_curr->GetItemText(item);
+			str = m_trace_list_curr->GetItemText(item, 1);
 			if (str.ToULong(&ival) && ival)
 				ids.push_back(ival);
 		}

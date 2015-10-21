@@ -109,6 +109,15 @@ namespace FL
 		CellBin m_cells;//children
 	};
 
+	inline unsigned int Cell::GetVertexId()
+	{
+		pVertex vertex = m_vertex.lock();
+		if (vertex)
+			return vertex->Id();
+		else
+			return 0;
+	}
+
 	inline unsigned int Vertex::Id()
 	{
 		return m_id;

@@ -58,7 +58,7 @@ public:
 		long style = wxLC_REPORT);
 	~TraceListCtrl();
 
-	void Append(unsigned int id, wxColor color,
+	void Append(wxString &gtype, unsigned int id, wxColor color,
 		int size, double cx, double cy, double cz);
 	void UpdateTraces(VRenderView* vrv=0);
 	void DeleteSelection();
@@ -69,6 +69,12 @@ public:
 private:
 	VRenderView *m_view;
 	int m_type;//0-current; 1-previous
+
+private:
+	static bool sort_cells(const FL::pCell c1, const FL::pCell c2)
+	{
+		return c1->GetVertexId() < c2->GetVertexId(); 
+	};
 
 private:
 	void OnKeyDown(wxKeyEvent& event);
