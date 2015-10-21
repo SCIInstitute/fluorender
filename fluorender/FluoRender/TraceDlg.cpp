@@ -1621,15 +1621,15 @@ void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, FL::CellList 
 	unsigned long size;
 	double x, y, z;
 
-	str = trace_list_ctrl->GetText(item, 0);
-	str.ToULong(&id);
 	str = trace_list_ctrl->GetText(item, 1);
-	str.ToULong(&size);
+	str.ToULong(&id);
 	str = trace_list_ctrl->GetText(item, 2);
-	str.ToDouble(&x);
+	str.ToULong(&size);
 	str = trace_list_ctrl->GetText(item, 3);
-	str.ToDouble(&y);
+	str.ToDouble(&x);
 	str = trace_list_ctrl->GetText(item, 4);
+	str.ToDouble(&y);
+	str = trace_list_ctrl->GetText(item, 5);
 	str.ToDouble(&z);
 
 	FL::pCell cell(new FL::Cell(id));

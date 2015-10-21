@@ -73,7 +73,12 @@ private:
 private:
 	static bool sort_cells(const FL::pCell c1, const FL::pCell c2)
 	{
-		return c1->GetVertexId() < c2->GetVertexId(); 
+		unsigned int vid1 = c1->GetVertexId();
+		unsigned int vid2 = c2->GetVertexId();
+		if (vid1 == vid2)
+			return c1->GetSizeUi() > c2->GetSizeUi();
+		else
+			return vid1 < vid2;
 	};
 
 private:
