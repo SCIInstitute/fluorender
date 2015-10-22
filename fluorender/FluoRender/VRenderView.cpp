@@ -12266,39 +12266,45 @@ void VRenderView::OnTimer(wxTimerEvent& event) {
 	//the X bar positions
 	int pos = m_x_rot_sldr->GetThumbPosition();
 	int mid = 180;
-	rotx = lock?(((int)((rotx + (pos - mid))/45))*45):(rotx + (pos - mid) / 10.);
-	if (rotx < 360.) rotx +=360.;
+	double dist = pos - mid;
+	rotx = lock?(((int)((rotx + dist)/45))*45):
+		(rotx + dist * dist * dist / 324000.);
+	if (rotx < 0.) rotx +=360.;
 	if (rotx > 360.) rotx -=360.;
 	str = wxString::Format("%.1f", rotx);
-	if ((std::abs(pos - mid) > 1)) {
-		if (!m_x_rotating) {
+	if (std::abs(dist) > 1) {
+		if (!m_x_rotating)
 			m_x_rot_sldr->SetThumbPosition((mid + pos) / 2. + 0.5);
-		}
-		m_x_rot_text->SetValue(str);
+		if (std::abs(dist) > 15)
+			m_x_rot_text->SetValue(str);
 	}
 	//the Y bar positions
 	pos = m_y_rot_sldr->GetThumbPosition();
-	roty = lock?(((int)((roty + (pos - mid))/45))*45):(roty + (pos - mid) / 10.);
-	if (roty < 360.) roty +=360.;
+	dist = pos - mid;
+	roty = lock?(((int)((roty + dist)/45))*45):
+		(roty + dist * dist * dist / 324000.);
+	if (roty < 0.) roty +=360.;
 	if (roty > 360.) roty -=360.;
 	str = wxString::Format("%.1f", roty);
-	if ((std::abs(pos - mid) > 1)) {
-		if (!m_y_rotating) {
+	if (std::abs(dist) > 1) {
+		if (!m_y_rotating)
 			m_y_rot_sldr->SetThumbPosition((mid + pos) / 2. + 0.5);
-		}
-		m_y_rot_text->SetValue(str);
+		if (std::abs(dist) > 15)
+			m_y_rot_text->SetValue(str);
 	}
 	//the Z bar positions
 	pos = m_z_rot_sldr->GetThumbPosition();
-	rotz = lock?(((int)((rotz + (pos - mid))/45))*45):(rotz + (pos - mid) / 10.);
-	if (rotz < 360.) rotz +=360.;
+	dist = pos - mid;
+	rotz = lock?(((int)((rotz + dist)/45))*45):
+		(rotz + dist * dist * dist / 324000.);
+	if (rotz < 0.) rotz +=360.;
 	if (rotz > 360.) rotz -=360.;
 	str = wxString::Format("%.1f", rotz);
-	if ((std::abs(pos - mid) > 1)) {
-		if (!m_z_rotating) {
+	if (std::abs(dist) > 1) {
+		if (!m_z_rotating)
 			m_z_rot_sldr->SetThumbPosition((mid + pos) / 2. + 0.5);
-		}
-		m_z_rot_text->SetValue(str);
+		if (std::abs(dist) > 15)
+			m_z_rot_text->SetValue(str);
 	}
 }
 

@@ -656,10 +656,10 @@ TraceDlg::TraceDlg(wxWindow* frame, wxWindow* parent)
 
 	//notebook
 	m_notebook = new wxNotebook(this, wxID_ANY);
-	m_notebook->AddPage(CreateMapPage(m_notebook), "Track Map >>");
-	m_notebook->AddPage(CreateSelectPage(m_notebook), "Selection >>");
-	m_notebook->AddPage(CreateLinkPage(m_notebook), "Linkage >>");
-	m_notebook->AddPage(CreateModifyPage(m_notebook), "Modify >>");
+	m_notebook->AddPage(CreateMapPage(m_notebook), L"Track Map \u21e8");
+	m_notebook->AddPage(CreateSelectPage(m_notebook), L"Selection \u21e8");
+	m_notebook->AddPage(CreateLinkPage(m_notebook), L"Linkage \u21e8");
+	m_notebook->AddPage(CreateModifyPage(m_notebook), L"Modify \u21e8");
 	m_notebook->AddPage(CreateAnalysisPage(m_notebook), "Analysis");
 
 	wxStaticText *st = 0;
