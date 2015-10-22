@@ -333,6 +333,6 @@ const static unsigned char clip_normal_back_png[15679];
 /* slider_type_pos.png - 15174 bytes */
 const static unsigned char slider_type_pos_png[15174];
 
-/* slider_type_rot.png - 15476 bytes */
-const static unsigned char slider_type_rot_png[15476];
+/* slider_type_rot.png - 16975 bytes */
+const static unsigned char slider_type_rot_png[16975];
 };

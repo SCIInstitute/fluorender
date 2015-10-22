@@ -12275,7 +12275,7 @@ void VRenderView::OnTimer(wxTimerEvent& event) {
 	if (std::abs(dist) > 1) {
 		if (!m_x_rotating)
 			m_x_rot_sldr->SetThumbPosition((mid + pos) / 2. + 0.5);
-		if (std::abs(dist) > 15)
+		if (std::abs(dist) > 10)
 			m_x_rot_text->SetValue(str);
 	}
 	//the Y bar positions
@@ -12289,7 +12289,7 @@ void VRenderView::OnTimer(wxTimerEvent& event) {
 	if (std::abs(dist) > 1) {
 		if (!m_y_rotating)
 			m_y_rot_sldr->SetThumbPosition((mid + pos) / 2. + 0.5);
-		if (std::abs(dist) > 15)
+		if (std::abs(dist) > 10)
 			m_y_rot_text->SetValue(str);
 	}
 	//the Z bar positions
@@ -12303,7 +12303,7 @@ void VRenderView::OnTimer(wxTimerEvent& event) {
 	if (std::abs(dist) > 1) {
 		if (!m_z_rotating)
 			m_z_rot_sldr->SetThumbPosition((mid + pos) / 2. + 0.5);
-		if (std::abs(dist) > 15)
+		if (std::abs(dist) > 10)
 			m_z_rot_text->SetValue(str);
 	}
 }
