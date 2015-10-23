@@ -136,6 +136,7 @@ public:
 		ID_AutoIDChk,
 		ID_CellNewIDBtn,
 		ID_CellAppendIDBtn,
+		ID_CellReplaceIDBtn,
 		ID_CellCombineIDBtn,
 		ID_CellDivideIDBtn,
 		ID_CellSegmentBtn,
@@ -284,6 +285,7 @@ private:
 	wxCheckBox* m_auto_id_chk;
 	wxButton* m_cell_new_id_btn;
 	wxButton* m_cell_append_id_btn;
+	wxButton* m_cell_replace_id_btn;
 	wxButton* m_cell_combine_id_btn;
 	wxButton* m_cell_divide_id_btn;
 	wxButton* m_cell_segment_btn;
@@ -378,6 +380,7 @@ private:
 	void OnAutoIDChk(wxCommandEvent& event);
 	void OnCellNewID(wxCommandEvent& event);
 	void OnCellAppendID(wxCommandEvent& event);
+	void OnCellReplaceID(wxCommandEvent& event);
 	void OnCellCombineID(wxCommandEvent& event);
 	void OnCellDivideID(wxCommandEvent& event);
 	void OnCellSegment(wxCommandEvent& event);

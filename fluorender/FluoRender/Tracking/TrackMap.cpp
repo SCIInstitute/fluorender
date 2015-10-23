@@ -1773,7 +1773,11 @@ bool TrackMapProcessor::GetMappedID(TrackMap& track_map,
 	if (!vertex)
 		return false;
 
-	id_out = vertex->Id();
+	pCell cell = (*vertex->GetCellsBegin()).lock();
+	if (!cell)
+		return false;
+
+	id_out = cell->Id();
 	return true;
 }
 
@@ -1835,7 +1839,10 @@ bool TrackMapProcessor::GetMappedID(TrackMap& track_map,
 		out_size = vertex2->GetSizeF();
 		if (fabs(out_size - in_size) < min_diff)
 		{
-			id_out = vertex2->Id();
+			cell = (*vertex2->GetCellsBegin()).lock();
+			if (!cell)
+				continue;
+			id_out = cell->Id();
 			min_diff = fabs(out_size - in_size);
 			result = true;
 		}
@@ -2482,6 +2489,50 @@ bool TrackMapProcessor::DivideCells(TrackMap& track_map,
 				cell->AddVertex(v0);
 			}
 		}
+	}
+
+	return true;
+}
+
+bool TrackMapProcessor::ReplaceCellID(TrackMap& track_map,
+	unsigned int old_id, unsigned int new_id, size_t frame)
+{
+	if (frame >= track_map.m_frame_num)
+		return false;
+
+	CellList &cell_list = track_map.m_cells_list.at(frame);
+	CellListIter iter = cell_list.find(old_id);
+	if (iter == cell_list.end())
+		return false;
+
+	pCell old_cell = iter->second;
+	pCell new_cell = pCell(new Cell(new_id));
+	new_cell->SetCenter(old_cell->GetCenter());
+	new_cell->SetSizeUi(old_cell->GetSizeUi());
+	new_cell->SetSizeF(old_cell->GetSizeF());
+	new_cell->SetExternalUi(old_cell->GetExternalUi());
+	new_cell->SetExternalF(old_cell->GetExternalF());
+	new_cell->SetIntraVert(old_cell->GetIntraVert());
+	cell_list.erase(iter);
+	cell_list.insert(std::pair<unsigned int, pCell>
+		(new_id, new_cell));
+
+	//vertex
+	pVertex vertex = old_cell->GetVertex().lock();
+	if (vertex)
+	{
+		vertex->RemoveCell(old_cell);
+		vertex->AddCell(new_cell);
+		new_cell->AddVertex(vertex);
+	}
+
+	//intra graph
+	IntraGraph &graph = track_map.m_intra_graph_list.at(frame);
+	IntraVert intra_vert = new_cell->GetIntraVert();
+	if (intra_vert != IntraGraph::null_vertex())
+	{
+		graph[intra_vert].cell = new_cell;
+		graph[intra_vert].id = new_id;
 	}
 
 	return true;

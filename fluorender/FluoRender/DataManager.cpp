@@ -3127,6 +3127,12 @@ bool TraceGroup::DivideCells(FL::CellList &list, size_t frame)
 	return tm_processor.DivideCells(m_track_map, list, frame);
 }
 
+bool TraceGroup::ReplaceCellID(unsigned int old_id, unsigned int new_id, size_t frame)
+{
+	FL::TrackMapProcessor tm_processor;
+	return tm_processor.ReplaceCellID(m_track_map, old_id, new_id, frame);
+}
+
 bool TraceGroup::GetMappedRulers(FL::RulerList &rulers)
 {
 	size_t frame_num = m_track_map.GetFrameNum();

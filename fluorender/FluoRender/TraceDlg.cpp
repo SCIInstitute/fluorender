@@ -318,6 +318,7 @@ EVT_BUTTON(ID_CompAppend2Btn, TraceDlg::OnCompAppend)
 EVT_CHECKBOX(ID_AutoIDChk, TraceDlg::OnAutoIDChk)
 EVT_BUTTON(ID_CellNewIDBtn, TraceDlg::OnCellNewID)
 EVT_BUTTON(ID_CellAppendIDBtn, TraceDlg::OnCellAppendID)
+EVT_BUTTON(ID_CellReplaceIDBtn, TraceDlg::OnCellReplaceID)
 EVT_BUTTON(ID_CellCombineIDBtn, TraceDlg::OnCellCombineID)
 EVT_BUTTON(ID_CellDivideIDBtn, TraceDlg::OnCellDivideID)
 EVT_BUTTON(ID_CellSegmentBtn, TraceDlg::OnCellSegment)
@@ -563,6 +564,8 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(65, 23));
 	m_cell_append_id_btn = new wxButton(page, ID_CellAppendIDBtn, "Add ID",
 		wxDefaultPosition, wxSize(65, 23));
+	m_cell_replace_id_btn = new wxButton(page, ID_CellReplaceIDBtn, "Replace ID",
+		wxDefaultPosition, wxSize(64, 23));
 	m_cell_combine_id_btn = new wxButton(page, ID_CellCombineIDBtn, "Combine",
 		wxDefaultPosition, wxSize(65, 23));
 	m_cell_divide_id_btn = new wxButton(page, ID_CellDivideIDBtn, "Divide",
@@ -572,6 +575,7 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 	sizer_2->AddStretchSpacer();
 	sizer_2->Add(m_cell_new_id_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_append_id_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_cell_replace_id_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_combine_id_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_divide_id_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_segment_btn, 0, wxALIGN_CENTER);
@@ -2131,6 +2135,127 @@ void TraceDlg::OnCellNewID(wxCommandEvent &event)
 void TraceDlg::OnCellAppendID(wxCommandEvent &event)
 {
 	CellNewID(true);
+}
+
+void TraceDlg::OnCellReplaceID(wxCommandEvent &event)
+{
+	if (!m_view)
+		return;
+
+	//get id
+	wxString str = m_cell_new_id_text->GetValue();
+	unsigned long id;
+	if (!str.ToULong(&id))
+		return;
+
+	//trace group
+	TraceGroup *trace_group = m_view->GetTraceGroup();
+	bool track_map = trace_group && trace_group->GetTrackMap().GetFrameNum();
+
+	//current T
+	FL::CellList list_cur;
+	FL::CellListIter cell_iter;
+	//fill current list
+	long item = -1;
+	while (true)
+	{
+		item = m_trace_list_curr->GetNextItem(
+			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		else
+			AddLabel(item, m_trace_list_curr, list_cur);
+	}
+	if (list_cur.empty())
+	{
+		item = -1;
+		while (true)
+		{
+			item = m_trace_list_curr->GetNextItem(
+				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+			if (item == -1)
+				break;
+			else
+				AddLabel(item, m_trace_list_curr, list_cur);
+		}
+	}
+
+	//get current mask
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+	Nrrd* nrrd_mask = vd->GetMask(true);
+	if (!nrrd_mask)
+		return;
+	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
+	if (!data_mask)
+		return;
+	//get current label
+	Texture* tex = vd->GetTexture();
+	if (!tex)
+		return;
+	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
+	if (!nrrd_label)
+		return;
+	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	if (!data_label)
+		return;
+
+	//replace ID
+	boost::unordered_map<unsigned int, unsigned int> list_rep;
+	boost::unordered_map<unsigned int, unsigned int>::iterator list_rep_iter;
+	unsigned int old_id, new_id;
+	int nx, ny, nz;
+	vd->GetResolution(nx, ny, nz);
+	unsigned long long index;
+	unsigned long long for_size = (unsigned long long)nx *
+		(unsigned long long)ny * (unsigned long long)nz;
+	for (index = 0; index < for_size; ++index)
+	{
+		old_id = data_label[index];
+		if (!data_mask[index] ||
+			!old_id ||
+			old_id == id)
+			continue;
+
+		list_rep_iter = list_rep.find(old_id);
+		if (list_rep_iter != list_rep.end())
+		{
+			data_label[index] = list_rep_iter->second;
+			continue;
+		}
+
+		cell_iter = list_cur.find(old_id);
+		if (cell_iter != list_cur.end())
+		{
+			new_id = id;
+			while (vd->SearchLabel(new_id))
+				new_id += 360;
+			//add cell to list_rep
+			list_rep.insert(pair<unsigned int, unsigned int>
+				(old_id, new_id));
+			if (track_map)
+				trace_group->ReplaceCellID(old_id, new_id,
+					m_cur_time);
+			data_label[index] = new_id;
+		}
+	}
+	//invalidate label mask in gpu
+	vd->GetVR()->clear_tex_pool();
+	//save label mask to disk
+	BaseReader* reader = vd->GetReader();
+	if (reader)
+	{
+		wxString data_name = reader->GetCurName(m_cur_time, vd->GetCurChannel());
+		wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
+		MSKWriter msk_writer;
+		msk_writer.SetData(nrrd_label);
+		msk_writer.Save(label_name.ToStdWstring(), 1);
+	}
+
+	CellUpdate();
+	//update view
+	m_view->RefreshGL();
 }
 
 void TraceDlg::OnCellCombineID(wxCommandEvent &event)
