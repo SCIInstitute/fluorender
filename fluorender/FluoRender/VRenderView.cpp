@@ -8702,7 +8702,7 @@ void VRenderGLView::StartLoopUpdate()
 					{
 						(*bricks)[j]->set_drawn(false);
 						if ((*bricks)[j]->get_priority()>0 ||
-							!vd->GetVR()->test_against_view((*bricks)[j]->bbox()))
+							!vd->GetVR()->test_against_view((*bricks)[j]->bbox(), m_persp))
 							continue;
 						total_num++;
 						num_chan++;

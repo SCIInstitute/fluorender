@@ -335,4 +335,10 @@ const static unsigned char slider_type_pos_png[15174];
 
 /* slider_type_rot.png - 16975 bytes */
 const static unsigned char slider_type_rot_png[16975];
+
+/* full_screen_back_menu.png - 15811 bytes */
+const static unsigned char full_screen_back_menu_png[15811];
+
+/* full_screen_menu.png - 15841 bytes */
+const static unsigned char full_screen_menu_png[15841];
 };

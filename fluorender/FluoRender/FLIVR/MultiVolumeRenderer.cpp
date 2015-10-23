@@ -438,7 +438,7 @@ namespace FLIVR
 						continue;
 				}
 
-				if (!vr_list_[0]->test_against_view(b->bbox()))// Clip against view
+				if (!vr_list_[0]->test_against_view(b->bbox(), !orthographic_p))// Clip against view
 				{
 					if (TextureRenderer::mem_swap_ &&
 						TextureRenderer::start_update_loop_ &&
@@ -1092,7 +1092,7 @@ namespace FLIVR
 			for (unsigned int i=0; i < bs->size(); i++)
 			{
 				TextureBrick* b = (*bs)[i];
-				if (!vr_list_[0]->test_against_view(b->bbox())) continue; // Clip against view.
+				if (!vr_list_[0]->test_against_view(b->bbox(), !orthographic_p)) continue; // Clip against view.
 
 				vertex.clear();
 				index.clear();

@@ -424,12 +424,6 @@ VRenderFrame::VRenderFrame(
 		Dockable(false).CloseButton(true));
 	m_aui_mgr.GetPane(m_colocalization_dlg).Float();
 	m_aui_mgr.GetPane(m_colocalization_dlg).Hide();
-	//recorder dialog
-	/*   m_aui_mgr.AddPane(m_recorder_dlg, wxAuiPaneInfo().
-	Name("m_recorder_dlg").Caption("Recorder").
-	Dockable(false).CloseButton(true));
-	m_aui_mgr.GetPane(m_recorder_dlg).Float();
-	m_aui_mgr.GetPane(m_recorder_dlg).Hide()*/;
 	//measure dialog
 	m_aui_mgr.AddPane(m_measure_dlg, wxAuiPaneInfo().
 		Name("m_measure_dlg").Caption("Measurement").
@@ -574,7 +568,7 @@ VRenderFrame::VRenderFrame(
 	m->SetBitmap(wxGetBitmapFromMemory(icon_new_view_mini));
 	m_top_window->Append(m);
 	m = new wxMenuItem(m_top_window, ID_FullScreen, wxT("&Full Screen"));
-	m->SetBitmap(wxGetBitmapFromMemory(full_screen));
+	m->SetBitmap(wxGetBitmapFromMemory(full_screen_menu));
 	m_top_window->Append(m);
 	//help menu
 	m = new wxMenuItem(m_top_help,ID_CheckUpdates, wxT("&Check for Updates"));
@@ -744,11 +738,21 @@ void VRenderFrame::OnNewView(wxCommandEvent& WXUNUSED(event))
 void VRenderFrame::OnFullScreen(wxCommandEvent& WXUNUSED(event))
 {
 	if (IsFullScreen())
+	{
 		ShowFullScreen(false);
+		wxMenuItem* m = m_top_window->FindItem(ID_FullScreen);
+		if (m)
+			m->SetBitmap(wxGetBitmapFromMemory(full_screen_menu));
+	}
 	else
+	{
 		ShowFullScreen(true,
 			wxFULLSCREEN_NOBORDER |
 			wxFULLSCREEN_NOCAPTION);
+		wxMenuItem* m = m_top_window->FindItem(ID_FullScreen);
+		if (m)
+			m->SetBitmap(wxGetBitmapFromMemory(full_screen_back_menu));
+	}
 }
 
 //open dialog options

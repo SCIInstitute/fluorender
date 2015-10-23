@@ -841,7 +841,7 @@ namespace FLIVR
 					continue;
 			}
 
-			if (!test_against_view(b->bbox()) || // Clip against view
+			if (!test_against_view(b->bbox(), !orthographic_p) || // Clip against view
 				b->get_priority()>0) //nothing to draw
 			{
 				if (mem_swap_ && start_update_loop_ && !done_update_loop_)
@@ -1117,7 +1117,7 @@ namespace FLIVR
 			for (unsigned int i=0; i<bricks->size(); i++)
 			{
 				TextureBrick* b = (*bricks)[i];
-				if (!test_against_view(b->bbox())) continue;
+				if (!test_against_view(b->bbox(), !orthographic_p)) continue;
 
 				vertex.clear();
 				index.clear();

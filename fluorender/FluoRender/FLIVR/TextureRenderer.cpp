@@ -508,7 +508,7 @@ namespace FLIVR
 
 	}
 
-	bool TextureRenderer::test_against_view(const BBox &bbox)
+	bool TextureRenderer::test_against_view(const BBox &bbox, bool persp)
 	{
 		memcpy(mvmat_, glm::value_ptr(m_mv_mat2), 16 * sizeof(float));
 		memcpy(prmat_, glm::value_ptr(m_proj_mat), 16 * sizeof(float));
@@ -517,6 +517,16 @@ namespace FLIVR
 		Transform pr;
 		mv.set_trans(mvmat_);
 		pr.set_trans(prmat_);
+
+		if (persp)
+		{
+			const Point p0_cam(0.0, 0.0, 0.0);
+			Point p0, p0_obj;
+			pr.unproject(p0_cam, p0);
+			mv.unproject(p0, p0_obj);
+			if (bbox.inside(p0_obj))
+				return true;
+		}
 
 		bool overx = true;
 		bool overy = true;
