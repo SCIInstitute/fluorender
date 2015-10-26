@@ -157,6 +157,7 @@ wxWindow* BrushToolDlg::CreateBrushPage(wxWindow *parent)
 	m_toolbar->AddTool(ID_BrushCreate, "Extract",
 		wxGetBitmapFromMemory(listicon_brushcreate),
 		"Extract highlighted structures out and create a new volume");
+	m_toolbar->SetBackgroundColour(m_notebook->GetThemeBackgroundColour());
 	m_toolbar->Realize();
 
 	//Selection adjustment

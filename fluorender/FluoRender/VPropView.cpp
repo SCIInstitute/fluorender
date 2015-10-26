@@ -196,7 +196,8 @@ wxPanel(parent, id, pos, size,style, name),
 	sizer_l3->Add(m_luminance_text, 0, wxALIGN_CENTER, 0);
 	sizer_l3->Add(st, 0, wxALIGN_CENTER, 0);
 	//alpha
-	m_alpha_tool = new wxToolBar(this,wxID_ANY);
+	m_alpha_tool = new wxToolBar(this,wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_alpha_tool->AddCheckTool(ID_AlphaChk,"Alpha",
 		wxGetBitmapFromMemory(alpha), wxNullBitmap,
 		"Enables Alpha Editing.",
@@ -218,7 +219,8 @@ wxPanel(parent, id, pos, size,style, name),
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_low_shading_text = new wxTextCtrl(this, ID_LowShadingText, "0.00",
 		wxDefaultPosition, wxSize(40, 20), 0, vald_fp2);
-	m_shade_tool = new wxToolBar(this,wxID_ANY);
+	m_shade_tool = new wxToolBar(this,wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_shade_tool->AddCheckTool(ID_ShadingEnableChk,"Shading",
 		wxGetBitmapFromMemory(shade), wxNullBitmap,
 		"Enables Shading Editing.",
@@ -265,7 +267,8 @@ wxPanel(parent, id, pos, size,style, name),
 	m_hi_shading_text = new wxTextCtrl(this, ID_HiShadingText, "0.00",
 		wxDefaultPosition, wxSize(50, 20), 0, vald_fp2);
 	//shadow
-	m_shadow_tool = new wxToolBar(this,wxID_ANY);
+	m_shadow_tool = new wxToolBar(this,wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_shadow_tool->AddCheckTool(ID_ShadowChk,"Shadow",
 		wxGetBitmapFromMemory(shadow),wxNullBitmap,
 		"Enables Shadow Editing.",
@@ -298,7 +301,8 @@ wxPanel(parent, id, pos, size,style, name),
 	sizer_m4->Add(m_sample_text, 0, wxALIGN_CENTER);
 	sizer_m4->Add(m_sample_sldr, 1, wxEXPAND);
 	//colormap
-	m_colormap_tool = new wxToolBar(this,wxID_ANY);
+	m_colormap_tool = new wxToolBar(this,wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_colormap_tool->AddCheckTool(ID_ColormapEnableChk,"Color Map",
 		wxGetBitmapFromMemory(palette),wxNullBitmap,
 		"Enables Color Map Editing.",
@@ -327,7 +331,8 @@ wxPanel(parent, id, pos, size,style, name),
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	sizer_m5->Add(m_colormap_high_value_sldr, 1, wxEXPAND);
 	//right ///////////////////////////////////////////////////
-	m_options_toolbar = new wxToolBar(this,wxID_ANY);
+	m_options_toolbar = new wxToolBar(this,wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	//MIP
 	m_options_toolbar->AddCheckTool(ID_MipChk,"MIP",
 		wxGetBitmapFromMemory(mip),wxNullBitmap,

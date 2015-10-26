@@ -10853,7 +10853,8 @@ void VRenderView::CreateBar()
 
 	//bar top///////////////////////////////////////////////////
 	//toolbar 1
-	m_options_toolbar = new wxToolBar(this,wxID_ANY);
+	m_options_toolbar = new wxToolBar(this,wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	wxBoxSizer* sizer_h_1 = new wxBoxSizer(wxHORIZONTAL);
 #ifndef _DARWIN
 	//the spacer
@@ -10956,7 +10957,6 @@ void VRenderView::CreateBar()
 	m_options_toolbar->AddStretchableSpace();
 #endif
 	//angle of view
-	//m_options_toolbar2 = new wxToolBar(this, wxID_ANY);
 	st2 = new wxStaticText(m_options_toolbar, wxID_ANY, "Perspective Angle:");
 	m_aov_sldr = new wxSlider(m_options_toolbar, ID_AovSldr, 45, 10, 100,
 		wxDefaultPosition, wxSize(200, 20), wxSL_HORIZONTAL);
@@ -11003,7 +11003,7 @@ void VRenderView::CreateBar()
 	m_options_toolbar->Realize();
 
 	m_full_screen_btn = new wxToolBar(this, wxID_ANY,
-		wxDefaultPosition, wxDefaultSize, wxTB_FLAT);
+		wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_NODIVIDER);
 	m_full_screen_btn->AddTool(ID_FullScreenBtn, "Full Screen",
 		wxGetBitmapFromMemory(full_screen),
 		"Show full screen");
@@ -11017,7 +11017,8 @@ void VRenderView::CreateBar()
 
 	//bar left///////////////////////////////////////////////////
 	wxBoxSizer* sizer_v_3 = new wxBoxSizer(wxVERTICAL);
-	m_left_toolbar = new wxToolBar(this, wxID_ANY);
+	m_left_toolbar = new wxToolBar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_left_toolbar->AddCheckTool(ID_DepthAttenChk,"Depth Interval",
 		wxGetBitmapFromMemory(no_depth_atten),wxNullBitmap,
 		"Enable adjustment of the Depth Attenuation Interval",
@@ -11026,7 +11027,8 @@ void VRenderView::CreateBar()
 	m_depth_atten_factor_sldr = new wxSlider(this, ID_DepthAttenFactorSldr, 0, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL|wxSL_INVERSE);
 	m_depth_atten_factor_sldr->Disable();
-	m_depth_atten_reset_btn = new wxToolBar(this, wxID_ANY);
+	m_depth_atten_reset_btn = new wxToolBar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_depth_atten_reset_btn->AddTool(ID_DepthAttenResetBtn, "Reset",
 		wxGetBitmapFromMemory(reset),
 		"Reset Depth Attenuation Interval");
@@ -11047,19 +11049,22 @@ void VRenderView::CreateBar()
 	//bar right///////////////////////////////////////////////////
 	wxBoxSizer* sizer_v_4 = new wxBoxSizer(wxVERTICAL);
 	st1 = new wxStaticText(this, 0, " Zoom",wxDefaultPosition,wxSize(45,-1));
-	m_center_btn = new wxToolBar(this, wxID_ANY);
+	m_center_btn = new wxToolBar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_center_btn->AddTool(ID_CenterBtn, "Center",
 		wxGetBitmapFromMemory(center),
 		"Center the Data on the Render View");
 	m_center_btn->Realize();
-	m_scale_121_btn = new wxToolBar(this, wxID_ANY);
+	m_scale_121_btn = new wxToolBar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_scale_121_btn->AddTool(ID_Scale121Btn, "1 to 1",
 		wxGetBitmapFromMemory(ratio),
 		"Auto-size the data to a 1:1 ratio");
 	m_scale_121_btn->Realize();
 	m_scale_factor_sldr = new wxSlider(this, ID_ScaleFactorSldr, 100, 50, 999,
 		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
-	m_scale_reset_btn = new wxToolBar(this, wxID_ANY);
+	m_scale_reset_btn = new wxToolBar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_scale_reset_btn->AddTool(ID_ScaleResetBtn, "Reset",
 		wxGetBitmapFromMemory(reset),
 		"Reset the Zoom");
@@ -11085,7 +11090,8 @@ void VRenderView::CreateBar()
 
 	//bar bottom///////////////////////////////////////////////////
 	wxBoxSizer* sizer_h_2 = new wxBoxSizer(wxHORIZONTAL);
-	m_lower_toolbar = new wxToolBar(this,wxID_ANY);
+	m_lower_toolbar = new wxToolBar(this,wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	st1 = new wxStaticText(this, 0, "X:");
 	m_x_rot_sldr = new wxScrollBar(this, ID_XRotSldr);
 	m_x_rot_sldr->SetScrollbar(180,60,420,15);
@@ -11102,7 +11108,8 @@ void VRenderView::CreateBar()
 	m_z_rot_text = new wxTextCtrl(this, ID_ZRotText, "0.0",
 		wxDefaultPosition, wxSize(45,20), 0, vald_fp1);
 
-	m_rot_lock_btn = new wxToolBar(this, wxID_ANY);
+	m_rot_lock_btn = new wxToolBar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_rot_lock_btn->AddCheckTool(ID_RotLockChk, "45 Angles",
 		wxGetBitmapFromMemory(gear_45), wxNullBitmap,
 		"Confine all angles to 45 Degrees",

@@ -270,7 +270,7 @@ private:
 	wxTextCtrl* m_comp_id_text2;
 	//same append button from selection page
 	//assist
-	wxCheckBox* m_manual_assist_check;
+	wxToolBar* m_manual_assist_check;
 	//ID link controls
 	wxButton* m_cell_exclusive_link_btn;
 	wxButton* m_cell_link_btn;
@@ -282,7 +282,7 @@ private:
 	wxTextCtrl* m_cell_new_id_text;
 	wxButton* m_cell_new_id_x_btn;
 	wxButton* m_comp_append2_btn;
-	wxCheckBox* m_auto_id_chk;
+	wxToolBar* m_auto_id_chk;
 	wxButton* m_cell_new_id_btn;
 	wxButton* m_cell_append_id_btn;
 	wxButton* m_cell_replace_id_btn;

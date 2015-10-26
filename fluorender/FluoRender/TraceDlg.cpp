@@ -33,6 +33,8 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <wx/dirdlg.h>
+#include "png_resource.h"
+#include "img/icons.h"
 #include <boost/chrono.hpp>
 #include <set>
 #include <limits>
@@ -308,14 +310,14 @@ EVT_BUTTON(ID_CellLinkBtn, TraceDlg::OnCellLink)
 EVT_BUTTON(ID_CellIsolateBtn, TraceDlg::OnCellIsolate)
 EVT_BUTTON(ID_CellUnlinkBtn, TraceDlg::OnCellUnlink)
 //manual assist
-EVT_CHECKBOX(ID_ManualAssistCheck, TraceDlg::OnManualAssistCheck)
+EVT_TOOL(ID_ManualAssistCheck, TraceDlg::OnManualAssistCheck)
 //modify page
 //ID edit controls
 EVT_TEXT(ID_CellNewIDText, TraceDlg::OnCellNewIDText)
 EVT_TEXT_ENTER(ID_CellNewIDText, TraceDlg::OnCompAppend)
 EVT_BUTTON(ID_CellNewIDXBtn, TraceDlg::OnCellNewIDX)
 EVT_BUTTON(ID_CompAppend2Btn, TraceDlg::OnCompAppend)
-EVT_CHECKBOX(ID_AutoIDChk, TraceDlg::OnAutoIDChk)
+EVT_TOOL(ID_AutoIDChk, TraceDlg::OnAutoIDChk)
 EVT_BUTTON(ID_CellNewIDBtn, TraceDlg::OnCellNewID)
 EVT_BUTTON(ID_CellAppendIDBtn, TraceDlg::OnCellAppendID)
 EVT_BUTTON(ID_CellReplaceIDBtn, TraceDlg::OnCellReplaceID)
@@ -487,8 +489,14 @@ wxWindow* TraceDlg::CreateLinkPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(65, 23));
 	m_comp_clear_btn = new wxButton(page, ID_CompClearBtn, "Clear",
 		wxDefaultPosition, wxSize(65, 23));
-	m_manual_assist_check = new wxCheckBox(page, ID_ManualAssistCheck, "Auto Link",
-		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
+	m_manual_assist_check = new wxToolBar(page, wxID_ANY,
+		wxDefaultPosition, wxSize(-1, 23), wxTB_NODIVIDER);
+	m_manual_assist_check->AddCheckTool(ID_ManualAssistCheck, "Auto Link",
+		wxGetBitmapFromMemory(auto_link_off), wxNullBitmap,
+		"Automatically link selected IDs after each paint brush stroke",
+		"Automatically link selected IDs after each paint brush stroke");
+	m_manual_assist_check->SetBackgroundColour(m_notebook->GetThemeBackgroundColour());
+	m_manual_assist_check->Realize();
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_comp_id_text2, 0, wxALIGN_CENTER);
@@ -547,7 +555,14 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(65, 23));
 	m_comp_clear_btn = new wxButton(page, ID_CompClearBtn, "Clear",
 		wxDefaultPosition, wxSize(65, 23));
-	m_auto_id_chk = new wxCheckBox(page, ID_AutoIDChk, "Auto Assign ID");
+	m_auto_id_chk = new wxToolBar(page, wxID_ANY,
+		wxDefaultPosition, wxSize(-1, 23), wxTB_NODIVIDER);
+	m_auto_id_chk->AddCheckTool(ID_AutoIDChk, "Auto Assign ID",
+		wxGetBitmapFromMemory(auto_assign_off), wxNullBitmap,
+		"Automatically assign an ID to selection after each paint brush stroke",
+		"Automatically assign an ID to selection after each paint brush stroke");
+	m_auto_id_chk->SetBackgroundColour(m_notebook->GetThemeBackgroundColour());
+	m_auto_id_chk->Realize();
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_cell_new_id_text, 0, wxALIGN_CENTER);
@@ -781,7 +796,21 @@ void TraceDlg::GetSettings(VRenderView* vrv)
 	}
 
 	//manual tracking assist
-	m_manual_assist_check->SetValue(m_manual_assist);
+	m_manual_assist_check->ToggleTool(ID_ManualAssistCheck, m_manual_assist);
+	if (m_manual_assist)
+		m_manual_assist_check->SetToolNormalBitmap(
+			ID_ManualAssistCheck, wxGetBitmapFromMemory(auto_link_on));
+	else
+		m_manual_assist_check->SetToolNormalBitmap(
+			ID_ManualAssistCheck, wxGetBitmapFromMemory(auto_link_off));
+	//auto id
+	m_auto_id_chk->ToggleTool(ID_AutoIDChk, m_auto_id);
+	if (m_auto_id)
+		m_auto_id_chk->SetToolNormalBitmap(
+			ID_AutoIDChk, wxGetBitmapFromMemory(auto_assign_on));
+	else
+		m_auto_id_chk->SetToolNormalBitmap(
+			ID_AutoIDChk, wxGetBitmapFromMemory(auto_assign_off));
 }
 
 VRenderView* TraceDlg::GetView()
@@ -1260,7 +1289,22 @@ void TraceDlg::OnSaveResult(wxCommandEvent &event)
 //manual tracking assist
 void TraceDlg::OnManualAssistCheck(wxCommandEvent &event)
 {
-	m_manual_assist = m_manual_assist_check->GetValue();
+	m_manual_assist = m_manual_assist_check->GetToolState(ID_ManualAssistCheck);
+	if (m_manual_assist)
+	{
+		m_manual_assist_check->SetToolNormalBitmap(
+			ID_ManualAssistCheck,
+			wxGetBitmapFromMemory(auto_link_on));
+		(*m_stat_text) << "Auto link enabled. Remember to turn it off after tracking!\n";
+	}
+	else
+	{
+		m_manual_assist_check->SetToolNormalBitmap(
+			ID_ManualAssistCheck,
+			wxGetBitmapFromMemory(auto_link_off));
+		if (!m_auto_id)
+			m_stat_text->Clear();
+	}
 }
 
 //Component tools
@@ -2124,7 +2168,22 @@ void TraceDlg::OnCellNewIDX(wxCommandEvent &event)
 
 void TraceDlg::OnAutoIDChk(wxCommandEvent &event)
 {
-	m_auto_id = m_auto_id_chk->GetValue();
+	m_auto_id = m_auto_id_chk->GetToolState(ID_AutoIDChk);
+	if (m_auto_id)
+	{
+		m_auto_id_chk->SetToolNormalBitmap(
+			ID_AutoIDChk,
+			wxGetBitmapFromMemory(auto_assign_on));
+		(*m_stat_text) << "Auto ID assignment enabled. Remember to turn it off after finish tracking!\n";
+	}
+	else
+	{
+		m_auto_id_chk->SetToolNormalBitmap(
+			ID_AutoIDChk,
+			wxGetBitmapFromMemory(auto_assign_off));
+		if (!m_manual_assist)
+			m_stat_text->Clear();
+	}
 }
 
 void TraceDlg::OnCellNewID(wxCommandEvent &event)

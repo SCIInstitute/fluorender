@@ -118,7 +118,8 @@ m_dft_sync_b(false)
 
 	//second line: red
 	wxBoxSizer *sizer_h_2 = new wxBoxSizer(wxHORIZONTAL);
-	m_sync_r_chk = new wxToolBar(this, wxID_ANY);
+	m_sync_r_chk = new wxToolBar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	st = new wxStaticText(m_sync_r_chk, 0, "Red:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
 	m_sync_r_chk->AddControl(st);
@@ -183,7 +184,8 @@ m_dft_sync_b(false)
 
 	//7th line: green
 	wxBoxSizer *sizer_h_6 = new wxBoxSizer(wxHORIZONTAL);
-	m_sync_g_chk = new wxToolBar(this, wxID_ANY);
+	m_sync_g_chk = new wxToolBar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	st = new wxStaticText(m_sync_g_chk, 0, "Green:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
 	m_sync_g_chk->AddControl(st);
@@ -246,7 +248,8 @@ m_dft_sync_b(false)
 
 	//12th line: blue
 	wxBoxSizer *sizer_h_10 = new wxBoxSizer(wxHORIZONTAL);
-	m_sync_b_chk = new wxToolBar(this, wxID_ANY);
+	m_sync_b_chk = new wxToolBar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	st = new wxStaticText(m_sync_b_chk, 0, "Blue:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
 	m_sync_b_chk->AddControl(st);

@@ -341,4 +341,16 @@ const static unsigned char full_screen_back_menu_png[15811];
 
 /* full_screen_menu.png - 15841 bytes */
 const static unsigned char full_screen_menu_png[15841];
+
+/* auto_assign_off.png - 20001 bytes */
+const static unsigned char auto_assign_off_png[20001];
+
+/* auto_assign_on.png - 18990 bytes */
+const static unsigned char auto_assign_on_png[18990];
+
+/* auto_link_off.png - 19700 bytes */
+const static unsigned char auto_link_off_png[19700];
+
+/* auto_link_on.png - 18865 bytes */
+const static unsigned char auto_link_on_png[18865];
 };

@@ -1149,7 +1149,8 @@ void VRenderFrame::OnInfo(wxCommandEvent& WXUNUSED(event))
 	wxBoxSizer * right = new wxBoxSizer(wxVERTICAL);
 	//left
 	// FluoRender Image (rows 4-5)
-	wxToolBar * logo= new wxToolBar(d, wxID_ANY);
+	wxToolBar * logo= new wxToolBar(d, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	if (psJan!=wxNOT_FOUND || psDec!=wxNOT_FOUND)
 		logo->AddTool(wxID_ANY, "", wxGetBitmapFromMemory(logo_snow));
 	else

@@ -110,7 +110,8 @@ m_link_z(false)
 
 	//sync channels 1
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_toolbar = new wxToolBar(this, wxID_ANY);
+	m_toolbar = new wxToolBar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_toolbar->AddCheckTool(ID_LinkChannelsBtn, "Sync All Channels",
 		wxGetBitmapFromMemory(sync_chan), wxNullBitmap,
 		"Link all data channels to this cropping",
@@ -275,7 +276,8 @@ m_link_z(false)
 
 	//3 -- link checkbox images
 	wxBoxSizer *sizer_3 = new wxBoxSizer(wxHORIZONTAL);
-	m_check_tb = new wxToolBar(this,wxID_ANY);
+	m_check_tb = new wxToolBar(this,wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_check_tb->AddCheckTool(ID_LinkXChk,"Lock X Planes",
 		wxGetBitmapFromMemory(unlink),
 		wxNullBitmap,"Lock X Planes");
