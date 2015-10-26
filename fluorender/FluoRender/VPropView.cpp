@@ -359,7 +359,7 @@ wxPanel(parent, id, pos, size,style, name),
 	m_options_toolbar->ToggleTool(ID_NRChk,false);
 	//sync group
 	m_options_toolbar->AddCheckTool(ID_SyncGroupChk,"Group Sync",
-		wxGetBitmapFromMemory(sync_group),wxNullBitmap,
+		wxGetBitmapFromMemory(sync_chan),wxNullBitmap,
 		"Sync this channel with others in its group.",
 		"Sync this channel with others in its group.");
 	m_options_toolbar->ToggleTool(ID_SyncGroupChk,false);

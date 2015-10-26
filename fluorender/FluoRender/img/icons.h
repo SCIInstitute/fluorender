@@ -3,9 +3,6 @@ public:
 /* align.png - 1470 bytes */
 const static unsigned char align_png[1470];
 
-/* alpha.png - 366 bytes */
-const static unsigned char alpha_png[366];
-
 /* axis.png - 557 bytes */
 const static unsigned char axis_png[577];
 
@@ -222,9 +219,6 @@ const static unsigned char mip_png[436];
 /* no_depth_atten.png - 16600 bytes */
 const static unsigned char no_depth_atten_png[16600];
 
-/* palette.png - 412 bytes */
-const static unsigned char palette_png[412];
-
 /* pause.png - 1389 bytes */
 const static unsigned char pause_png[1389];
 
@@ -257,15 +251,6 @@ const static unsigned char scale_text_png[17358];
 
 /* scale_text_off.png - 1365 bytes */
 const static unsigned char scale_text_off_png[16910];
-
-/* shade.png - 497 bytes */
-const static unsigned char shade_png[497];
-
-/* shadow.png - 390 bytes */
-const static unsigned char shadow_png[390];
-
-/* sync_group.png - 913 bytes */
-const static unsigned char sync_group_png[913];
 
 /* unlink.png - 1503 bytes */
 const static unsigned char unlink_png[1503];
@@ -353,4 +338,16 @@ const static unsigned char auto_link_off_png[19700];
 
 /* auto_link_on.png - 18865 bytes */
 const static unsigned char auto_link_on_png[18865];
+
+/* alpha.png - 16181 bytes */
+const static unsigned char alpha_png[16181];
+
+/* palette.png - 16278 bytes */
+const static unsigned char palette_png[16278];
+
+/* shade.png - 16239 bytes */
+const static unsigned char shade_png[16239];
+
+/* shadow.png - 16235 bytes */
+const static unsigned char shadow_png[16235];
 };
