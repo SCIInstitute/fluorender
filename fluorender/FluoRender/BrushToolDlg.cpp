@@ -404,16 +404,19 @@ wxWindow* BrushToolDlg::CreateAnalysisPage(wxWindow *parent)
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_ca_thresh_text = new wxTextCtrl(page, ID_CAThreshText, "0.0",
 		wxDefaultPosition, wxSize(50, 20), 0, vald_fp1);
+	sizer1_1->Add(5, 5);
 	sizer1_1->Add(st, 0, wxALIGN_CENTER);
 	sizer1_1->Add(m_ca_thresh_sldr, 1, wxEXPAND);
 	sizer1_1->Add(m_ca_thresh_text, 0, wxALIGN_CENTER);
 	m_ca_analyze_btn = new wxButton(page, ID_CAAnalyzeBtn, "Analyze",
 		wxDefaultPosition, wxSize(-1, 23));
 	sizer1_1->Add(m_ca_analyze_btn, 0, wxALIGN_CENTER);
+	sizer1_1->Add(5, 5);
 	//size of ccl
 	wxBoxSizer *sizer1_2 = new wxBoxSizer(wxHORIZONTAL);
 	m_ca_select_only_chk = new wxCheckBox(page, ID_CASelectOnlyChk, "Selct. Only",
 		wxDefaultPosition, wxSize(90, 20));
+	sizer1_2->Add(5, 5);
 	sizer1_2->Add(m_ca_select_only_chk, 0, wxALIGN_CENTER);
 	sizer1_2->AddStretchSpacer();
 	st = new wxStaticText(page, 0, "Min:",
@@ -438,21 +441,26 @@ wxWindow* BrushToolDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer1_2->AddStretchSpacer();
 	m_ca_ignore_max_chk = new wxCheckBox(page, ID_CAIgnoreMaxChk, "Ignore Max");
 	sizer1_2->Add(m_ca_ignore_max_chk, 0, wxALIGN_CENTER);
+	sizer1_2->Add(5, 5);
 	//text result
 	wxBoxSizer *sizer1_3 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Components:");
+	sizer1_3->Add(5, 5);
 	sizer1_3->Add(st, 0, wxALIGN_CENTER);
 	m_ca_comps_text = new wxTextCtrl(page, ID_CACompsText, "0",
 		wxDefaultPosition, wxSize(70, 20), wxTE_READONLY);
 	sizer1_3->Add(m_ca_comps_text, 0, wxALIGN_CENTER);
+	sizer1_3->AddStretchSpacer();
 	st = new wxStaticText(page, 0, "Total Volume:");
 	sizer1_3->Add(st, 0, wxALIGN_CENTER);
 	m_ca_volume_text = new wxTextCtrl(page, ID_CAVolumeText, "0",
 		wxDefaultPosition, wxSize(70, 20), wxTE_READONLY);
 	sizer1_3->Add(m_ca_volume_text, 0, wxALIGN_CENTER);
+	sizer1_3->AddStretchSpacer();
 	m_ca_size_map_chk = new wxCheckBox(page, ID_CASizeMapChk, "Size-Color",
 		wxDefaultPosition, wxSize(75, 20));
 	sizer1_3->Add(m_ca_size_map_chk, 0, wxALIGN_CENTER);
+	sizer1_3->Add(5, 5);
 	//export
 	wxBoxSizer *sizer1_4 = new wxBoxSizer(wxHORIZONTAL);
 	sizer1_4->AddStretchSpacer();
@@ -467,11 +475,17 @@ wxWindow* BrushToolDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer1_4->Add(m_ca_multi_chann_btn, 0, wxALIGN_CENTER);
 	sizer1_4->Add(m_ca_random_color_btn, 0, wxALIGN_CENTER);
 	sizer1_4->Add(m_ca_annotations_btn, 0, wxALIGN_CENTER);
+	sizer1_4->Add(5, 5);
 	//sizer1
+	sizer1->Add(10, 10);
 	sizer1->Add(sizer1_1, 0, wxEXPAND);
+	sizer1->Add(10, 10);
 	sizer1->Add(sizer1_2, 0, wxEXPAND);
+	sizer1->Add(10, 10);
 	sizer1->Add(sizer1_3, 0, wxEXPAND);
+	sizer1->Add(10, 10);
 	sizer1->Add(sizer1_4, 0, wxEXPAND);
+	sizer1->Add(10, 10);
 	//noise removal
 	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Noise Removal"),
@@ -484,6 +498,7 @@ wxWindow* BrushToolDlg::CreateAnalysisPage(wxWindow *parent)
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_nr_size_text = new wxTextCtrl(page, ID_NRSizeText, "10",
 		wxDefaultPosition, wxSize(40, -1), 0, vald_int);
+	sizer2_1->Add(5, 5);
 	sizer2_1->Add(st, 0, wxALIGN_CENTER);
 	sizer2_1->Add(m_nr_size_sldr, 1, wxEXPAND);
 	sizer2_1->Add(m_nr_size_text, 0, wxALIGN_CENTER);
@@ -500,8 +515,11 @@ wxWindow* BrushToolDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer2_2->Add(m_nr_analyze_btn, 0, wxALIGN_CENTER);
 	sizer2_2->Add(m_nr_remove_btn, 0, wxALIGN_CENTER);
 	//sizer2
+	sizer2->Add(10, 10);
 	sizer2->Add(sizer2_1, 0, wxEXPAND);
+	sizer2->Add(10, 10);
 	sizer2->Add(sizer2_2, 0, wxEXPAND);
+	sizer2->Add(10, 10);
 
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
