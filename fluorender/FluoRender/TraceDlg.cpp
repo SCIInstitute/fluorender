@@ -1834,12 +1834,17 @@ void TraceDlg::CellNewID(bool append)
 				index = nx*ny*k + nx*j + i;
 				if (data_mask[index])
 				{
-					if (append && data_label[index] &&
-						data_label[index] != new_id)
+					if (m_auto_id)
 					{
-						data_mask[index] = 0;
-						continue;
+						if (data_label[index] &&
+							data_label[index] != new_id)
+						{
+							data_mask[index] = 0;
+							continue;
+						}
 					}
+					else if (append && data_label[index])
+						continue;
 					data_label[index] = new_id;
 					if (new_id)
 						cell->Inc(i, j, k, 1.0f);
@@ -2225,6 +2230,8 @@ void TraceDlg::OnCellReplaceID(wxCommandEvent &event)
 	wxString str = m_cell_new_id_text->GetValue();
 	unsigned long id;
 	if (!str.ToULong(&id))
+		return;
+	if (!id)
 		return;
 
 	//trace group
