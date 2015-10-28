@@ -38,7 +38,7 @@ namespace FL
 		unsigned int size_ui;
 		float size_f;
 		float dist;
-		unsigned int link;
+		unsigned int link;//0: not linked; 1: linked; 2: force linked
 		//unsaved, for calculation
 		unsigned int bl_num;
 		unsigned int bl_size_ui;

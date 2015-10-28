@@ -494,7 +494,7 @@ bool TrackMapProcessor::ForceVertices(InterGraph& graph,
 		FLIVR::Point p1 = vertex1->GetCenter();
 		FLIVR::Point p2 = vertex2->GetCenter();
 		graph[edge.first].dist = float((p1 - p2).length());
-		graph[edge.first].link = 1;
+		graph[edge.first].link = 2;
 	}
 	else
 	{
@@ -502,7 +502,7 @@ bool TrackMapProcessor::ForceVertices(InterGraph& graph,
 			vertex1->GetSizeUi(), vertex2->GetSizeUi());
 		graph[edge.first].size_f = std::max(
 			vertex1->GetSizeF(), vertex2->GetSizeF());
-		graph[edge.first].link = 1;
+		graph[edge.first].link = 2;
 	}
 
 	return true;
@@ -1037,7 +1037,9 @@ bool TrackMapProcessor::edge_comp_size_ol(InterEdge edge1,
 bool TrackMapProcessor::edge_comp_size_bl(InterEdge edge1,
 	InterEdge edge2, InterGraph& graph)
 {
-	if (graph[edge1].bl_num != graph[edge2].bl_num)
+	if (graph[edge1].link != graph[edge2].link)
+		return graph[edge1].link > graph[edge2].link;
+	else if (graph[edge1].bl_num != graph[edge2].bl_num)
 		return graph[edge1].bl_num < graph[edge2].bl_num;
 	else
 		return graph[edge1].size_f > graph[edge2].size_f;

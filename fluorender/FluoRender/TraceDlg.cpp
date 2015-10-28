@@ -1800,9 +1800,19 @@ void TraceDlg::CellNewID(bool append)
 			inc = 0;
 		}
 	}
+	unsigned int stop_id = new_id;
 	if (inc)
 		while (vd->SearchLabel(new_id))
+		{
 			new_id += inc;
+			if (new_id == stop_id)
+			{
+				(*m_stat_text) << wxString::Format(
+					"ID assignment failed. Type a different ID than %d",
+					stop_id);
+				return;
+			}
+		}
 
 	if (m_auto_id)
 	{
@@ -1853,8 +1863,6 @@ void TraceDlg::CellNewID(bool append)
 	}
 
 	CellUpdate();
-	//update view
-	m_view->RefreshGL();
 }
 
 void TraceDlg::CellEraseID()
@@ -1937,8 +1945,6 @@ void TraceDlg::CellEraseID()
 	}
 
 	CellUpdate();
-	//update view
-	m_view->RefreshGL();
 }
 
 void TraceDlg::CellLink(bool exclusive)
@@ -2014,6 +2020,9 @@ void TraceDlg::CellLink(bool exclusive)
 	//link them
 	trace_group->LinkCells(list_cur, list_prv,
 		m_cur_time, m_prv_time, exclusive);
+
+	//update view
+	m_view->RefreshGL();
 }
 
 void TraceDlg::OnCellLink(wxCommandEvent &event)
@@ -2070,6 +2079,9 @@ void TraceDlg::OnCellIsolate(wxCommandEvent &event)
 
 	//isolate
 	trace_group->IsolateCells(list_cur, m_cur_time);
+
+	//update view
+	m_view->RefreshGL();
 }
 
 void TraceDlg::OnCellUnlink(wxCommandEvent &event)
@@ -2142,6 +2154,9 @@ void TraceDlg::OnCellUnlink(wxCommandEvent &event)
 	//unlink them
 	trace_group->UnlinkCells(list_cur, list_prv,
 		m_cur_time, m_prv_time);
+
+	//update view
+	m_view->RefreshGL();
 }
 
 //ID edit controls
@@ -2152,8 +2167,13 @@ void TraceDlg::OnCellNewIDText(wxCommandEvent &event)
 	wxColor color(255, 255, 255);
 	if (str.ToULong(&id))
 	{
-		Color c = HSVColor(id % 360, 1.0, 1.0);
-		color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
+		if (!id)
+			color = wxColor(24, 167, 181);
+		else
+		{
+			Color c = HSVColor(id % 360, 1.0, 1.0);
+			color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
+		}
 		m_cell_new_id_text->SetBackgroundColour(color);
 	}
 	else
@@ -2313,8 +2333,6 @@ void TraceDlg::OnCellReplaceID(wxCommandEvent &event)
 	}
 
 	CellUpdate();
-	//update view
-	m_view->RefreshGL();
 }
 
 void TraceDlg::OnCellCombineID(wxCommandEvent &event)
