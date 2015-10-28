@@ -840,7 +840,8 @@ bool TrackMapProcessor::UnmatchVertex(pVertex &vertex, InterGraph &graph)
 			std::placeholders::_2, graph));
 
 	for (size_t i = 1; i < edges.size(); ++i)
-		graph[edges[i]].link = 0;
+		if (graph[edges[i]].link < 2)
+			graph[edges[i]].link = 0;
 
 	return true;
 }
