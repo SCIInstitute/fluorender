@@ -1,5 +1,5 @@
 ver_major=2
-ver_minor=17
+ver_minor=18
 [gm\ calculation]
 mode=2
 [peeling\ layers]
@@ -70,8 +70,8 @@ alpha_bit=8
 depth_bit=24
 samples=4
 [context\ attrib]
-gl_major_ver=3
-gl_minor_ver=3
+gl_major_ver=4
+gl_minor_ver=0
 gl_profile_mask=2
 [cl\ device]
 device_id=0
