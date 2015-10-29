@@ -4359,7 +4359,9 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 				m_vrv->Layout();
 				m_vrv->m_full_frame->Hide();
 #ifdef _WIN32
-				ShowCursor(true);
+				if (frame && frame->GetSettingDlg() &&
+					!frame->GetSettingDlg()->GetShowCursor())
+					ShowCursor(true);
 #endif
 				refresh = true;
 			}
@@ -10727,8 +10729,7 @@ wxPanel(parent, id, pos, size, style),
 	m_dft_scale_factor(100.0)
 {
 	//full frame
-	m_full_frame = new wxFrame((wxFrame*)NULL, wxID_ANY, "",
-		wxDefaultPosition, wxDefaultSize, wxSTAY_ON_TOP);
+	m_full_frame = new wxFrame((wxFrame*)NULL, wxID_ANY, "FluoRender");
 	m_view_sizer = new wxBoxSizer(wxVERTICAL);
 
 	wxString name = wxString::Format("Render View:%d", m_id++);
@@ -12692,10 +12693,19 @@ void VRenderView::OnFullScreen(wxCommandEvent& event)
 		m_full_frame->ShowFullScreen(true);
 		m_glview->SetPosition(wxPoint(0, 0));
 		m_glview->SetSize(m_full_frame->GetSize());
-		m_full_frame->Show();
+		VRenderFrame* frame = (VRenderFrame*)m_frame;
+		if (frame && frame->GetSettingDlg())
+		{
+			if (frame->GetSettingDlg()->GetStayTop())
+				m_full_frame->SetWindowStyle(wxBORDER_NONE|wxSTAY_ON_TOP);
+			else
+				m_full_frame->SetWindowStyle(wxBORDER_NONE);
 #ifdef _WIN32
-		ShowCursor(false);
+			if (!frame->GetSettingDlg()->GetShowCursor())
+				ShowCursor(false);
 #endif
+		}
+		m_full_frame->Show();
 		RefreshGL();
 	}
 }

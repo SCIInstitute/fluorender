@@ -136,6 +136,9 @@ public:
 	void SetFontFile(wxString &file) { m_font_file = file; }
 	int GetTextSize() {return m_text_size;}
 	void SetTextSize(int size) {m_text_size = size;}
+	//full screen
+	bool GetStayTop() { return m_stay_top; }
+	bool GetShowCursor() { return m_show_cursor; }
 	//memory settings
 	bool GetMemSwap() {return m_mem_swap;}
 	void SetMemSwap(bool val) {m_mem_swap = val;}
@@ -245,6 +248,9 @@ private:
 	int m_cl_device_id;
 	//paint history depth
 	int m_paint_hist_depth;
+	//full screen
+	bool m_stay_top;
+	bool m_show_cursor;
 
 private:
 	//save project

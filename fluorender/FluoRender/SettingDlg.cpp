@@ -609,6 +609,8 @@ void SettingDlg::GetSettings()
 	m_gl_profile_mask = 2;
 	m_cl_device_id = 0;
 	m_paint_hist_depth = 0;
+	m_stay_top = false;
+	m_show_cursor = true;
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = expath.BeforeLast(GETSLASH(),NULL);
@@ -740,6 +742,13 @@ void SettingDlg::GetSettings()
 		fconfig.SetPath("/text font");
 		fconfig.Read("file", &m_font_file);
 		fconfig.Read("value", &m_text_size);
+	}
+	//full screen
+	if (fconfig.Exists("/full screen"))
+	{
+		fconfig.SetPath("/full screen");
+		fconfig.Read("stay top", &m_stay_top);
+		fconfig.Read("show cursor", &m_show_cursor);
 	}
 	//memory settings
 	if (fconfig.Exists("/memory settings"))
@@ -954,6 +963,11 @@ void SettingDlg::SaveSettings()
 	fconfig.SetPath("/text font");
 	fconfig.Write("file", m_font_file);
 	fconfig.Write("value", m_text_size);
+
+	//full screen
+	fconfig.SetPath("/full screen");
+	fconfig.Write("stay top", m_stay_top);
+	fconfig.Write("show cursor", m_show_cursor);
 
 	//memory settings
 	fconfig.SetPath("/memory settings");

@@ -62,6 +62,7 @@ class VPropView: public wxPanel
 		ID_AlphaChk,
 		ID_AlphaSldr,
 		ID_Alpha_Text,
+		ID_SampleSync,
 		ID_SampleSldr,
 		ID_SampleText,
 		ID_BoundarySldr,
@@ -171,6 +172,7 @@ private:
 	wxSlider *m_alpha_sldr;
 	wxTextCtrl* m_alpha_text;
 	//sample rate
+	wxStaticText* m_sample_st;
 	wxSlider *m_sample_sldr;
 	wxTextCtrl *m_sample_text;
 
@@ -236,6 +238,7 @@ private:
 	void OnAlphaCheck(wxCommandEvent &event);
 	void OnAlphaChange(wxScrollEvent & event);
 	void OnAlphaText(wxCommandEvent& event);
+	void OnSampleSync(wxMouseEvent& event);
 	void OnSampleChange(wxScrollEvent &event);
 	void OnSampleText(wxCommandEvent &event);
 	//5

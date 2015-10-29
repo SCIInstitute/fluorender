@@ -291,13 +291,15 @@ wxPanel(parent, id, pos, size,style, name),
 	sizer_m3->Add(m_shadow_text, 0, wxALIGN_CENTER);
 	sizer_m3->Add(m_shadow_sldr, 1, wxEXPAND);
 	//sample rate
-	st = new wxStaticText(this, 0, "Sample Rate : ",
+	m_sample_st = new wxStaticText(this, ID_SampleSync, "Sample Rate : ",
 		wxDefaultPosition, wxSize(127, -1), wxALIGN_RIGHT);
+	m_sample_st->Connect(ID_SampleSync, wxEVT_LEFT_DCLICK,
+		wxMouseEventHandler(VPropView::OnSampleSync), NULL, this);
 	m_sample_sldr = new wxSlider(this, ID_SampleSldr, 10, 0, 50,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_sample_text = new wxTextCtrl(this, ID_SampleText, "1.0",
 		wxDefaultPosition, wxSize(50, 20), 0, vald_fp1);
-	sizer_m4->Add(st, 0, wxALIGN_CENTER);
+	sizer_m4->Add(m_sample_st, 0, wxALIGN_CENTER);
 	sizer_m4->Add(m_sample_text, 0, wxALIGN_CENTER);
 	sizer_m4->Add(m_sample_sldr, 1, wxEXPAND);
 	//colormap
@@ -1167,6 +1169,16 @@ void VPropView::OnAlphaText(wxCommandEvent& event)
 	else if (m_vd)
 		m_vd->SetAlpha(val);
 
+	RefreshVRenderViews(false, true);
+}
+
+void VPropView::OnSampleSync(wxMouseEvent& event)
+{
+	wxString str = m_sample_text->GetValue();
+	double srate = 0.0;
+	str.ToDouble(&srate);
+	if (m_group)
+		m_group->SetSampleRate(srate);
 	RefreshVRenderViews(false, true);
 }
 
