@@ -301,7 +301,7 @@ namespace FLIVR
 	"			max_nb = nb;\n" \
 	"		}\n" \
 	"	}\n"\
-	"	if (loc7.y<1.0)\n" \
+	"	if (loc7.y>0.0)\n" \
 	"	{\n" \
 	"		m = texture(tex0, max_nb).x + loc7.y;\n" \
 	"		mx = texture(tex0, t.stp).x;\n" \
