@@ -47,9 +47,12 @@ BEGIN_EVENT_TABLE(DataTreeCtrl, wxTreeCtrl)
 	EVT_MENU(ID_Expand, DataTreeCtrl::OnExpand)
 	EVT_MENU(ID_Edit, DataTreeCtrl::OnEdit)
 	EVT_MENU(ID_Measurement, DataTreeCtrl::OnMeasurement)
+	EVT_MENU(ID_Trace, DataTreeCtrl::OnTrace)
 	EVT_MENU(ID_NoiseCancelling, DataTreeCtrl::OnNoiseCancelling)
 	EVT_MENU(ID_Counting, DataTreeCtrl::OnCounting)
 	EVT_MENU(ID_Colocalization, DataTreeCtrl::OnColocalization)
+	EVT_MENU(ID_Convert, DataTreeCtrl::OnConvert)
+	EVT_MENU(ID_Ocl, DataTreeCtrl::OnOcl)
 	EVT_MENU(ID_RandomizeColor, DataTreeCtrl::OnRandomizeColor)
 	EVT_TREE_SEL_CHANGED(wxID_ANY, DataTreeCtrl::OnSelChanged)
 	EVT_TREE_SEL_CHANGING(wxID_ANY, DataTreeCtrl::OnSelChanging)
@@ -285,35 +288,43 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 						menu.Append(ID_Expand, "Collapse");
 					else
 						menu.Append(ID_Expand, "Expand");
+					menu.AppendSeparator();
+					menu.Append(ID_RandomizeColor, "Randomize Colors");
+					menu.Append(ID_AddDataGroup, "Add Volume Group");
+					menu.Append(ID_AddMeshGroup, "Add Mesh Group");
 					wxString str = GetItemText(sel_item);
 					if (str != vr_frame->GetView(0)->GetName())
 						menu.Append(ID_CloseView, "Close");
-					menu.Append(ID_AddDataGroup, "Add Volume Group");
-					menu.Append(ID_AddMeshGroup, "Add Mesh Group");
-					menu.Append(ID_RandomizeColor, "Randomize Colors");
 				}
 				break;
 			case 2:  //volume data
 				menu.Append(ID_ToggleDisp, "Toggle Visibility");
 				menu.Append(ID_Isolate, "Isolate");
 				menu.Append(ID_ShowAll, "Show All");
-				menu.Append(ID_RemoveData, "Delete");
+				menu.AppendSeparator();
+				menu.Append(ID_RandomizeColor, "Randomize Colors");
 				menu.Append(ID_AddDataGroup, "Add Volume Group");
+				menu.Append(ID_RemoveData, "Delete");
+				menu.AppendSeparator();
 				menu.Append(ID_Edit, "Analyze...");
+				menu.Append(ID_Measurement, "Measurement...");
+				menu.Append(ID_Trace, "Components && Tracking...");
 				menu.Append(ID_NoiseCancelling, "Noise Reduction...");
 				menu.Append(ID_Counting, "Counting and Volume...");
 				menu.Append(ID_Colocalization, "Colocalization Analysis...");
-				menu.Append(ID_RandomizeColor, "Randomize Colors");
-				menu.Append(ID_Measurement, "Measurement...");
+				menu.Append(ID_Convert, "Convert...");
+				menu.Append(ID_Ocl, "OpenCL Kernel Editor...");
 				break;
 			case 3:  //mesh data
 				menu.Append(ID_ToggleDisp, "Toggle Visibility");
 				menu.Append(ID_Isolate, "Isolate");
 				menu.Append(ID_ShowAll, "Show All");
-				menu.Append(ID_RemoveData, "Delete");
-				menu.Append(ID_ManipulateData, "Manipulate");
-				menu.Append(ID_AddMeshGroup, "Add Mesh Group");
+				menu.AppendSeparator();
 				menu.Append(ID_RandomizeColor, "Randomize Colors");
+				menu.Append(ID_AddMeshGroup, "Add Mesh Group");
+				menu.Append(ID_RemoveData, "Delete");
+				menu.AppendSeparator();
+				menu.Append(ID_ManipulateData, "Manipulate");
 				break;
 			case 4:  //annotations
 				break;
@@ -323,9 +334,10 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 					menu.Append(ID_Expand, "Collapse");
 				else
 					menu.Append(ID_Expand, "Expand");
-				menu.Append(ID_RemoveData, "Delete");
-				menu.Append(ID_AddDataGroup, "Add Volume Group");
+				menu.AppendSeparator();
 				menu.Append(ID_RandomizeColor, "Randomize Colors");
+				menu.Append(ID_AddDataGroup, "Add Volume Group");
+				menu.Append(ID_RemoveData, "Delete");
 				break;
 			case 6:  //mesh group
 				menu.Append(ID_ToggleDisp, "Toggle Visibility");
@@ -333,9 +345,10 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 					menu.Append(ID_Expand, "Collapse");
 				else
 					menu.Append(ID_Expand, "Expand");
-				menu.Append(ID_RemoveData, "Delete");
-				menu.Append(ID_AddMeshGroup, "Add Mesh Group");
+				menu.AppendSeparator();
 				menu.Append(ID_RandomizeColor, "Randomize Colors");
+				menu.Append(ID_AddMeshGroup, "Add Mesh Group");
+				menu.Append(ID_RemoveData, "Delete");
 				break;
 			}
 			PopupMenu( &menu, point.x, point.y );
@@ -794,11 +807,20 @@ void DataTreeCtrl::OnEdit(wxCommandEvent &event)
 		vr_frame->ShowPaintTool();
 }
 
+//measurement
 void DataTreeCtrl::OnMeasurement(wxCommandEvent &event)
 {
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 		vr_frame->ShowMeasureDlg();
+}
+
+//trace
+void DataTreeCtrl::OnTrace(wxCommandEvent &event)
+{
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+		vr_frame->ShowTraceDlg();
 }
 
 //noise cancelling
@@ -823,6 +845,22 @@ void DataTreeCtrl::OnColocalization(wxCommandEvent& event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 		vr_frame->ShowColocalizationDlg();
+}
+
+//convert
+void DataTreeCtrl::OnConvert(wxCommandEvent& event)
+{
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+		vr_frame->ShowConvertDlg();
+}
+
+//ocl
+void DataTreeCtrl::OnOcl(wxCommandEvent& event)
+{
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+		vr_frame->ShowOclDlg();
 }
 
 //randomize color

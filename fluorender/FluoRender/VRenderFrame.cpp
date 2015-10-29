@@ -67,7 +67,6 @@ BEGIN_EVENT_TABLE(VRenderFrame, wxFrame)
 	EVT_MENU(ID_Counting, VRenderFrame::OnCounting)
 	EVT_MENU(ID_Colocalization, VRenderFrame::OnColocalization)
 	EVT_MENU(ID_Convert, VRenderFrame::OnConvert)
-	EVT_MENU(ID_Recorder, VRenderFrame::OnRecorder)
 	EVT_MENU(ID_Measure, VRenderFrame::OnMeasure)
 	EVT_MENU(ID_Trace, VRenderFrame::OnTrace)
 	EVT_MENU(ID_Ocl, VRenderFrame::OnOcl)
@@ -160,17 +159,17 @@ VRenderFrame::VRenderFrame(
 	m_tb_menu_edit->Append(ID_PaintTool, "Analyze...",
 		"Show analysis tools for volume data");
 	m_tb_menu_edit->Append(ID_Measure, "Measurement...",
-		"Show rulers dialog");
+		"Show measurement tools");
 	m_tb_menu_edit->Append(ID_Trace, "Components && Tracking...",
-		"Show trace dialog");
+		"Show tracking tools");
 	m_tb_menu_edit->Append(ID_NoiseCancelling, "Noise Reduction...",
-		"Show noise cancelling dialog");
+		"Show noise reduction dialog");
 	m_tb_menu_edit->Append(ID_Counting, "Counting and Volume...",
-		"Show counting dialog");
+		"Show voxel counting and volume calculation tools");
 	m_tb_menu_edit->Append(ID_Colocalization, "Colocalization Analysis...",
-		"Show colocalization analysis dialog");
+		"Show colocalization analysis tools");
 	m_tb_menu_edit->Append(ID_Convert, "Convert...",
-		"Show dialog for converting data");
+		"Show tools for volume to mesh conversion");
 	m_tb_menu_edit->Append(ID_Ocl, "OpenCL Kernel Editor...",
 		"Show OpenCL kernel editor window");
 	//build the main toolbar
@@ -333,9 +332,6 @@ VRenderFrame::VRenderFrame(
 
 	//colocalization dialog
 	m_colocalization_dlg = new ColocalizationDlg(this, this);
-
-	//recorder dialog
-	//m_recorder_dlg = new RecorderDlg(this, this);
 
 	//measure dialog
 	m_measure_dlg = new MeasureDlg(this, this);
@@ -519,7 +515,7 @@ VRenderFrame::VRenderFrame(
 	m = new wxMenuItem(m_top_tools,ID_PaintTool, wxT("&Analysis Tools..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_edit_mini));
 	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools,ID_Measure, wxT("&Measurement Tool..."));
+	m = new wxMenuItem(m_top_tools,ID_Measure, wxT("&Measurement Tools..."));
 	m_top_tools->Append(m);
 	m = new wxMenuItem(m_top_tools,ID_Trace, wxT("Components && &Tracking..."));
 	m_top_tools->Append(m);
@@ -4271,6 +4267,11 @@ void VRenderFrame::ShowPaintTool()
 	m_aui_mgr.Update();
 }
 
+void VRenderFrame::OnMeasure(wxCommandEvent& WXUNUSED(event))
+{
+	ShowMeasureDlg();
+}
+
 void VRenderFrame::ShowMeasureDlg()
 {
 	m_aui_mgr.GetPane(m_measure_dlg).Show();
@@ -4314,6 +4315,42 @@ void VRenderFrame::ShowColocalizationDlg()
 	m_aui_mgr.Update();
 }
 
+void VRenderFrame::OnConvert(wxCommandEvent& WXUNUSED(event))
+{
+	ShowConvertDlg();
+}
+
+void VRenderFrame::ShowConvertDlg()
+{
+	m_aui_mgr.GetPane(m_convert_dlg).Show();
+	m_aui_mgr.GetPane(m_convert_dlg).Float();
+	m_aui_mgr.Update();
+}
+
+void VRenderFrame::OnTrace(wxCommandEvent& WXUNUSED(event))
+{
+	ShowTraceDlg();
+}
+
+void VRenderFrame::ShowTraceDlg()
+{
+	m_aui_mgr.GetPane(m_trace_dlg).Show();
+	m_aui_mgr.GetPane(m_trace_dlg).Float();
+	m_aui_mgr.Update();
+}
+
+void VRenderFrame::OnOcl(wxCommandEvent& WXUNUSED(event))
+{
+	ShowOclDlg();
+}
+
+void VRenderFrame::ShowOclDlg()
+{
+	m_aui_mgr.GetPane(m_ocl_dlg).Show();
+	m_aui_mgr.GetPane(m_ocl_dlg).Float();
+	m_aui_mgr.Update();
+}
+
 void VRenderFrame::SetTextureUndos()
 {
 	if (m_setting_dlg)
@@ -4349,41 +4386,6 @@ void VRenderFrame::SetTextureRendererSettings()
 	TextureRenderer::set_force_brick_size(m_setting_dlg->GetForceBrickSize());
 	TextureRenderer::set_up_time(m_setting_dlg->GetResponseTime());
 	TextureRenderer::set_update_order(m_setting_dlg->GetUpdateOrder());
-}
-
-void VRenderFrame::OnConvert(wxCommandEvent& WXUNUSED(event))
-{
-	m_aui_mgr.GetPane(m_convert_dlg).Show();
-	m_aui_mgr.GetPane(m_convert_dlg).Float();
-	m_aui_mgr.Update();
-}
-
-void VRenderFrame::OnRecorder(wxCommandEvent& WXUNUSED(event))
-{
-	m_aui_mgr.GetPane(m_recorder_dlg).Show();
-	m_aui_mgr.GetPane(m_recorder_dlg).Float();
-	m_aui_mgr.Update();
-}
-
-void VRenderFrame::OnMeasure(wxCommandEvent& WXUNUSED(event))
-{
-	m_aui_mgr.GetPane(m_measure_dlg).Show();
-	m_aui_mgr.GetPane(m_measure_dlg).Float();
-	m_aui_mgr.Update();
-}
-
-void VRenderFrame::OnTrace(wxCommandEvent& WXUNUSED(event))
-{
-	m_aui_mgr.GetPane(m_trace_dlg).Show();
-	m_aui_mgr.GetPane(m_trace_dlg).Float();
-	m_aui_mgr.Update();
-}
-
-void VRenderFrame::OnOcl(wxCommandEvent& WXUNUSED(event))
-{
-	m_aui_mgr.GetPane(m_ocl_dlg).Show();
-	m_aui_mgr.GetPane(m_ocl_dlg).Float();
-	m_aui_mgr.Update();
 }
 
 void VRenderFrame::OnFacebook(wxCommandEvent& WXUNUSED(event))

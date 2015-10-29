@@ -127,7 +127,6 @@ class VRenderFrame: public wxFrame
 		ID_Colocalization,
 		ID_Convert,
 		ID_ViewOrganize,
-		ID_Recorder,
 		ID_Measure,
 		ID_Trace,
 		ID_Ocl,
@@ -289,9 +288,12 @@ public:
 	//show dialogs
 	void ShowPaintTool();
 	void ShowMeasureDlg();
+	void ShowTraceDlg();
 	void ShowNoiseCancellingDlg();
 	void ShowCountingDlg();
 	void ShowColocalizationDlg();
+	void ShowConvertDlg();
+	void ShowOclDlg();
 
 	//get interpolator
 	Interpolator* GetInterpolator()
@@ -436,7 +438,6 @@ private:
 	void OnNoiseCancelling(wxCommandEvent& WXUNUSED(event));
 	void OnCounting(wxCommandEvent& WXUNUSED(event));
 	void OnConvert(wxCommandEvent& WXUNUSED(event));
-	void OnRecorder(wxCommandEvent& WXUNUSED(event));
 	void OnColocalization(wxCommandEvent& WXUNUSED(event));
 	void OnMeasure(wxCommandEvent& WXUNUSED(event));
 	void OnTrace(wxCommandEvent& WXUNUSED(event));

@@ -61,9 +61,12 @@ class DataTreeCtrl: public wxTreeCtrl
 		ID_Expand,
 		ID_Edit,
 		ID_Measurement,
+		ID_Trace,
 		ID_NoiseCancelling,
 		ID_Counting,
 		ID_Colocalization,
+		ID_Convert,
+		ID_Ocl,
 		ID_RandomizeColor
 	};
 
@@ -155,9 +158,12 @@ private:
 	void OnExpand(wxCommandEvent& event);
 	void OnEdit(wxCommandEvent& event);
 	void OnMeasurement(wxCommandEvent& event);
+	void OnTrace(wxCommandEvent& event);
 	void OnNoiseCancelling(wxCommandEvent& event);
 	void OnCounting(wxCommandEvent& event);
 	void OnColocalization(wxCommandEvent& event);
+	void OnConvert(wxCommandEvent& event);
+	void OnOcl(wxCommandEvent& event);
 	void OnRandomizeColor(wxCommandEvent& event);
 
 	void OnSelChanged(wxTreeEvent& event);
