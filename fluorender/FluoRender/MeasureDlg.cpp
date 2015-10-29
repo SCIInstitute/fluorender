@@ -541,6 +541,7 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 		wxGetBitmapFromMemory(listicon_addruler),
 		wxNullBitmap,
 		"Add a polyline ruler to the render view by clicking at its points");
+	m_toolbar->AddSeparator();
 	m_toolbar->AddCheckTool(ID_RulerEditBtn, "Edit",
 		wxGetBitmapFromMemory(listicon_ruleredit),
 		wxNullBitmap,
