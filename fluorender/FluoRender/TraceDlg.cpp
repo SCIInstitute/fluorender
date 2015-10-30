@@ -360,11 +360,11 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 	m_load_trace_text = new wxTextCtrl(page, ID_LoadTraceText, "",
 		wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
 	m_load_trace_btn = new wxButton(page, ID_LoadTraceBtn, "Load",
-		wxDefaultPosition, wxSize(60, 23));
+		wxDefaultPosition, wxSize(65, 23));
 	m_save_trace_btn = new wxButton(page, ID_SaveTraceBtn, "Save",
-		wxDefaultPosition, wxSize(60, 23));
+		wxDefaultPosition, wxSize(65, 23));
 	m_saveas_trace_btn = new wxButton(page, ID_SaveasTraceBtn, "Save As",
-		wxDefaultPosition, wxSize(60, 23));
+		wxDefaultPosition, wxSize(65, 23));
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_load_trace_text, 1, wxEXPAND);
@@ -389,11 +389,11 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_gen_map_spin, 0, wxALIGN_CENTER);
 	m_gen_map_btn = new wxButton(page, ID_GenMapBtn, "Generate",
-		wxDefaultPosition, wxSize(60, 23));
+		wxDefaultPosition, wxSize(75, 23));
 	m_refine_t_btn = new wxButton(page, ID_RefineTBtn, "Refine T",
-		wxDefaultPosition, wxSize(60, 23));
+		wxDefaultPosition, wxSize(75, 23));
 	m_refine_all_btn = new wxButton(page, ID_RefineAllBtn, "Refine All",
-		wxDefaultPosition, wxSize(60, 23));
+		wxDefaultPosition, wxSize(75, 23));
 	sizer_2->Add(10, 10);
 	sizer_2->Add(m_gen_map_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_refine_t_btn, 0, wxALIGN_CENTER);
@@ -429,7 +429,7 @@ wxWindow* TraceDlg::CreateSelectPage(wxWindow *parent)
 	m_comp_id_x_btn = new wxButton(page, ID_CompIDXBtn, "X",
 		wxDefaultPosition, wxSize(23, 23));
 	m_comp_full_btn = new wxButton(page, ID_CompFullBtn, "FullCompt",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxSize(80, 23));
 	m_comp_exclusive_btn = new wxButton(page, ID_CompExclusiveBtn, "Replace",
 		wxDefaultPosition, wxSize(65, 23));
 	m_comp_append_btn = new wxButton(page, ID_CompAppendBtn, "Append",
@@ -510,13 +510,13 @@ wxWindow* TraceDlg::CreateLinkPage(wxWindow *parent)
 	//ID link controls
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	m_cell_exclusive_link_btn = new wxButton(page, ID_CellExclusiveLinkBtn, "Excl. Link",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxSize(75, 23));
 	m_cell_link_btn = new wxButton(page, ID_CellLinkBtn, "Link IDs",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxSize(75, 23));
 	m_cell_isolate_btn = new wxButton(page, ID_CellIsolateBtn, "Isolate",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxSize(75, 23));
 	m_cell_unlink_btn = new wxButton(page, ID_CellUnlinkBtn, "Unlink IDs",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxSize(80, 23));
 	sizer_2->AddStretchSpacer();
 	sizer_2->Add(m_cell_exclusive_link_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_link_btn, 0, wxALIGN_CENTER);
@@ -576,17 +576,17 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 	//controls
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	m_cell_new_id_btn = new wxButton(page, ID_CellNewIDBtn, "Assign ID",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxSize(75, 23));
 	m_cell_append_id_btn = new wxButton(page, ID_CellAppendIDBtn, "Add ID",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxSize(75, 23));
 	m_cell_replace_id_btn = new wxButton(page, ID_CellReplaceIDBtn, "Replace ID",
-		wxDefaultPosition, wxSize(64, 23));
+		wxDefaultPosition, wxSize(85, 23));
 	m_cell_combine_id_btn = new wxButton(page, ID_CellCombineIDBtn, "Combine",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxSize(75, 23));
 	m_cell_divide_id_btn = new wxButton(page, ID_CellDivideIDBtn, "Divide",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxSize(75, 23));
 	m_cell_segment_btn = new wxButton(page, ID_CellSegmentBtn, "Segment",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxSize(75, 23));
 	sizer_2->AddStretchSpacer();
 	sizer_2->Add(m_cell_new_id_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_append_id_btn, 0, wxALIGN_CENTER);

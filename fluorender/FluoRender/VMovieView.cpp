@@ -159,7 +159,7 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	sizer_5->Add(5,5,0);
 	sizer_5->Add(st2, 0, wxALIGN_CENTER);
 	//rotation interpolation
-	st2 = new wxStaticText(page, wxID_ANY, "Interpolation:");
+	st2 = new wxStaticText(page, wxID_ANY, "Style:");
 	m_rot_int_cmb = new wxComboBox(page, ID_RotIntCmb, "",
 		wxDefaultPosition, wxSize(65, -1), 0, NULL, wxCB_READONLY);
 	m_rot_int_cmb->Append("Linear");

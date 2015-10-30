@@ -458,7 +458,7 @@ wxWindow* BrushToolDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer1_3->Add(m_ca_volume_text, 0, wxALIGN_CENTER);
 	sizer1_3->AddStretchSpacer();
 	m_ca_size_map_chk = new wxCheckBox(page, ID_CASizeMapChk, "Size-Color",
-		wxDefaultPosition, wxSize(75, 20));
+		wxDefaultPosition, wxSize(90, 20));
 	sizer1_3->Add(m_ca_size_map_chk, 0, wxALIGN_CENTER);
 	sizer1_3->Add(5, 5);
 	//export

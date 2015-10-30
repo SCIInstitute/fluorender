@@ -563,9 +563,11 @@ VRenderFrame::VRenderFrame(
 	m = new wxMenuItem(m_top_window,ID_ViewNew, wxT("&New View"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_new_view_mini));
 	m_top_window->Append(m);
+#ifndef _DARWIN
 	m = new wxMenuItem(m_top_window, ID_FullScreen, wxT("&Full Screen"));
 	m->SetBitmap(wxGetBitmapFromMemory(full_screen_menu));
 	m_top_window->Append(m);
+#endif
 	//help menu
 	m = new wxMenuItem(m_top_help,ID_CheckUpdates, wxT("&Check for Updates"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_check_updates_mini));
