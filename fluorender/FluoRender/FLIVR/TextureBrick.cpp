@@ -179,7 +179,7 @@ z
    }
 
    // compute polygon of edge plane intersections
-   void TextureBrick::compute_polygons(Ray& view, float dt,
+   void TextureBrick::compute_polygons(Ray& view, double dt,
          vector<float>& vertex, vector<uint32_t>& index,
          vector<uint32_t>& size)
    {
@@ -193,12 +193,13 @@ z
       corner[6] = Point(bbox_.max().x(), bbox_.max().y(), bbox_.min().z());
       corner[7] = bbox_.max();
 
-      float tmin = Dot(corner[0] - view.origin(), view.direction());
-      float tmax = tmin;
+      double tmin = Dot(corner[0] - view.origin(), view.direction());
+      double tmax = tmin;
       uint32_t maxi = 0;
+	  double t;
       for (uint32_t i=1; i<8; i++)
       {
-         float t = Dot(corner[i] - view.origin(), view.direction());
+         t = Dot(corner[i] - view.origin(), view.direction());
          tmin = Min(t, tmin);
          if (t > tmax) { maxi = i; tmax = t; }
       }
@@ -206,9 +207,9 @@ z
       // Make all of the slices consistent by offsetting them to a fixed
       // position in space (the origin).  This way they are consistent
       // between bricks and don't change with camera zoom.
-      float tanchor = Dot(corner[maxi], view.direction());
-      float tanchor0 = floor(tanchor/dt)*dt;
-      float tanchordiff = tanchor - tanchor0;
+      double tanchor = Dot(corner[maxi], view.direction());
+      double tanchor0 = floor(tanchor/dt)*dt;
+      double tanchordiff = tanchor - tanchor0;
       tmax -= tanchordiff;
 
       compute_polygons(view, tmin, tmax, dt, vertex, index, size);
@@ -221,7 +222,7 @@ z
    // The representation returned is not efficient, but it appears a
    // typical rendering only contains about 1k triangles.
    void TextureBrick::compute_polygons(Ray& view,
-         float tmin, float tmax, float dt,
+         double tmin, double tmax, double dt,
          vector<float>& vertex, vector<uint32_t>& index,
 		 vector<uint32_t>& size)
    {
@@ -252,8 +253,8 @@ z
       right = Cross(vdir, up);
       bool order = TextureRenderer::get_update_order();
 	  size_t vert_count = 0;
-      for (float t = order?tmin:tmax;
-            order?(t <= tmax):(t >= tmin);
+      for (double t = order?tmin:tmax;
+            order?(t < tmax):(t > tmin);
             t += order?dt:-dt)
       {
          // we compute polys back to front
@@ -288,14 +289,14 @@ z
 			{
 				vc += vv[j]; tc += tt[j];
 			}
-			vc /= (float)degree; tc /= (float)degree;
+			vc /= (double)degree; tc /= (double)degree;
 
 			// sort vertices
-			float pa[6];
+			double pa[6];
 			for (uint32_t i=0; i<degree; i++)
 			{
-				float vx = Dot(vv[i] - vc, right);
-				float vy = Dot(vv[i] - vc, up);
+				double vx = Dot(vv[i] - vc, right);
+				double vy = Dot(vv[i] - vc, up);
 
 				// compute pseudo-angle
 				pa[i] = vy / (fabs(vx) + fabs(vy));

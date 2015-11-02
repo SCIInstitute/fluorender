@@ -801,6 +801,7 @@ namespace FLIVR
 		shader->setLocalParamMatrix(1, glm::value_ptr(m_mv_mat2));
 		//shader->setLocalParamMatrix(5, glm::value_ptr(m_tex_mat));
 
+		num_slices_ = 0;
 		for (unsigned int i=0; i < bricks->size(); i++)
 		{
 			//comment off when debug_ds
@@ -859,6 +860,7 @@ namespace FLIVR
 			index.clear();
 			size.clear();
 			b->compute_polygons(snapview, dt, vertex, index, size);
+			num_slices_ += vertex.size()/12;
 
 			if (vertex.size() == 0) continue;
 			GLint filter;
@@ -1063,20 +1065,20 @@ namespace FLIVR
 		glEnable(GL_DEPTH_TEST);
 		vector<TextureBrick*> *bricks = tex_->get_sorted_bricks(view_ray, orthographic_p);
 
-		float rate = imode_ ? irate_ : sampling_rate_;
+		double rate = imode_ ? irate_ : sampling_rate_;
 		Vector diag = tex_->bbox()->diagonal();
 		Vector cell_diag(diag.x()/tex_->nx(),
 			diag.y()/tex_->ny(),
 			diag.z()/tex_->nz());
-		float dt = cell_diag.length()/compute_rate_scale(snapview.direction())/rate;
-		num_slices_ = (int)(diag.length()/dt);
+		double dt = cell_diag.length()/compute_rate_scale(snapview.direction())/rate;
+		int num_slices = (int)(diag.length()/dt);
 
 		vector<float> vertex;
 		vector<uint32_t> index;
 		vector<uint32_t> size;
-		vertex.reserve(num_slices_*12);
-		index.reserve(num_slices_*6);
-		size.reserve(num_slices_*6);
+		vertex.reserve(num_slices * 12);
+		index.reserve(num_slices * 6);
+		size.reserve(num_slices * 6);
 
 		// Set up shaders
 		ShaderProgram* shader = 0;

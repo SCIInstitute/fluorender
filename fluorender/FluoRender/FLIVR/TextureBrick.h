@@ -125,9 +125,9 @@ namespace FLIVR {
 		virtual GLenum tex_type(int c);
 		virtual void* tex_data(int c);
 
-		void compute_polygons(Ray& view, float tmin, float tmax, float dt,
+		void compute_polygons(Ray& view, double tmin, double tmax, double dt,
 			vector<float>& vertex, vector<uint32_t>& index, vector<uint32_t>& size);
-		void compute_polygons(Ray& view, float dt,
+		void compute_polygons(Ray& view, double dt,
 			vector<float>& vertex, vector<uint32_t>& index, vector<uint32_t>& size);
 		
 		//set d
