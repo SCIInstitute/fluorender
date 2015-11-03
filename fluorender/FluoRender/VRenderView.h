@@ -274,6 +274,7 @@ public:
 
 	//background color
 	Color GetBackgroundColor();
+	Color GetTextColor();
 	void SetBackgroundColor(Color &color);
 	void SetGradBg(bool val);
 
@@ -1102,6 +1103,7 @@ public:
 
 	//background color
 	Color GetBackgroundColor();
+	Color GetTextColor();
 	void SetBackgroundColor(Color &color);
 	void SetGradBg(bool val);
 

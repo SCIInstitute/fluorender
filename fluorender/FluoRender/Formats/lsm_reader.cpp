@@ -250,7 +250,6 @@ void LSMReader::Preprocess()
             if (full_image && cnt_image == 1)
                m_predictor = value<<16>>16;
             break;
-            break;
          case 0x0140://320, colormap
             break;
          case 0x866C://34412, zeiss lsm info

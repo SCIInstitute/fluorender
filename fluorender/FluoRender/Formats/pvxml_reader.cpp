@@ -900,6 +900,7 @@ void PVXMLReader::ReadTiff(char *pbyData, unsigned short *val)
 					width = value;
 				}
 			}
+			break;
 		case 0x0103:  //259, compression
 			{
 				unsigned short value;

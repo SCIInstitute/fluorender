@@ -74,6 +74,7 @@ BEGIN_EVENT_TABLE(SettingDlg, wxPanel)
 	//font
 	EVT_COMBOBOX(ID_FontCmb, SettingDlg::OnFontChange)
 	EVT_COMBOBOX(ID_FontSizeCmb, SettingDlg::OnFontSizeChange)
+	EVT_COMBOBOX(ID_TextColorCmb, SettingDlg::OnTextColorChange)
 	//script
 	EVT_CHECKBOX(ID_RunScriptChk, SettingDlg::OnRunScriptChk)
 	EVT_TEXT(ID_ScriptFileText, SettingDlg::OnScriptFileEdit)
@@ -107,7 +108,7 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 
 	//font
 	wxBoxSizer *group2 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Render View Font and Size"), wxVERTICAL);
+		new wxStaticBox(page, wxID_ANY, "Render View Text"), wxVERTICAL);
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Font:");
 	m_font_cmb = new wxComboBox(page, ID_FontCmb, "",
@@ -127,17 +128,27 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 		file = wxFindNextFile();
 	}
 	sizer2_1->Add(st);
-	sizer2_1->Add(20, 10);
+	sizer2_1->Add(10, 10);
 	sizer2_1->Add(m_font_cmb);
-	sizer2_1->Add(20, 10);
+	sizer2_1->Add(10, 10);
 	st = new wxStaticText(page, 0, "Size:");
 	m_font_size_cmb = new wxComboBox(page, ID_FontSizeCmb, "",
 		wxDefaultPosition, wxSize(50, -1), 0, NULL, wxCB_READONLY);
 	for (int font_size=10; font_size<31; font_size+=2)
 		m_font_size_cmb->Append(wxString::Format("%d", font_size));
 	sizer2_1->Add(st);
-	sizer2_1->Add(20, 10);
+	sizer2_1->Add(10, 10);
 	sizer2_1->Add(m_font_size_cmb);
+	sizer2_1->Add(10, 10);
+	st = new wxStaticText(page, 0, "Color:");
+	m_text_color_cmb = new wxComboBox(page, ID_TextColorCmb, "",
+		wxDefaultPosition, wxSize(100, -1), 0, NULL, wxCB_READONLY);
+	m_text_color_cmb->Append("BG inverted");
+	m_text_color_cmb->Append("Background");
+	m_text_color_cmb->Append("Vol sec color");
+	sizer2_1->Add(st);
+	sizer2_1->Add(10, 10);
+	sizer2_1->Add(m_text_color_cmb);
 	group2->Add(10, 5);
 	group2->Add(sizer2_1, 0, wxEXPAND);
 	group2->Add(10, 5);
@@ -586,6 +597,7 @@ void SettingDlg::GetSettings()
 	m_run_script = false;
 	m_script_file = "";
 	m_text_size = 12;
+	m_text_color = 0;
 	m_font_file = "";
 	m_mem_swap = false;
 	m_graphics_mem = 1000.0;
@@ -742,6 +754,7 @@ void SettingDlg::GetSettings()
 		fconfig.SetPath("/text font");
 		fconfig.Read("file", &m_font_file);
 		fconfig.Read("value", &m_text_size);
+		fconfig.Read("color", &m_text_color);
 	}
 	//full screen
 	if (fconfig.Exists("/full screen"))
@@ -880,6 +893,7 @@ void SettingDlg::UpdateUI()
 			font_size <= m_text_size)
 			m_font_size_cmb->Select(i);
 	}
+	m_text_color_cmb->Select(m_text_color);
 	//script
 	m_run_script_chk->SetValue(m_run_script);
 	m_script_file_text->SetValue(m_script_file);
@@ -963,6 +977,7 @@ void SettingDlg::SaveSettings()
 	fconfig.SetPath("/text font");
 	fconfig.Write("file", m_font_file);
 	fconfig.Write("value", m_text_size);
+	fconfig.Write("color", m_text_color);
 
 	//full screen
 	fconfig.SetPath("/full screen");
@@ -1542,6 +1557,21 @@ void SettingDlg::OnFontSizeChange(wxCommandEvent &event)
 				if (vrv)
 					vrv->RefreshGL();
 			}
+		}
+	}
+}
+
+void SettingDlg::OnTextColorChange(wxCommandEvent &event)
+{
+	m_text_color = m_text_color_cmb->GetCurrentSelection();
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+	{
+		for (int i = 0; i<(int)vr_frame->GetViewList()->size(); i++)
+		{
+			VRenderView* vrv = (*vr_frame->GetViewList())[i];
+			if (vrv)
+				vrv->RefreshGL();
 		}
 	}
 }

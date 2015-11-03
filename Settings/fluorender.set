@@ -1,5 +1,5 @@
 ver_major=2
-ver_minor=18
+ver_minor=19
 [gm\ calculation]
 mode=2
 [peeling\ layers]
@@ -45,6 +45,7 @@ value=0
 [text\ font]
 file=FreeSans.ttf
 value=14
+color=0
 [full\ screen]
 stay\ top=0
 show\ cursor=1

@@ -76,6 +76,7 @@ class SettingDlg : public wxPanel
 		//font
 		ID_FontCmb,
 		ID_FontSizeCmb,
+		ID_TextColorCmb,
 		//script
 		ID_RunScriptChk,
 		ID_ScriptFileText,
@@ -136,6 +137,8 @@ public:
 	void SetFontFile(wxString &file) { m_font_file = file; }
 	int GetTextSize() {return m_text_size;}
 	void SetTextSize(int size) {m_text_size = size;}
+	int GetTextColor() { return m_text_color; }
+	void SetTextColor(int text_color) { m_text_color = text_color; }
 	//full screen
 	bool GetStayTop() { return m_stay_top; }
 	bool GetShowCursor() { return m_show_cursor; }
@@ -213,6 +216,7 @@ private:
 	//text size
 	wxString m_font_file;	//font lib file in the Fonts folder
 	int m_text_size;		//text size in viewport
+	int m_text_color;		//text color: 0- contrast to bg; 1-same as bg; 2-volume sec color
 	//memory limit
 	bool m_mem_swap;		//enable memory swap
 	double m_graphics_mem;	//in MB
@@ -293,6 +297,7 @@ private:
 	//font
 	wxComboBox *m_font_cmb;
 	wxComboBox *m_font_size_cmb;
+	wxComboBox *m_text_color_cmb;
 	//script
 	wxCheckBox *m_run_script_chk;
 	wxTextCtrl *m_script_file_text;
@@ -361,6 +366,7 @@ private:
 	//font
 	void OnFontChange(wxCommandEvent &event);
 	void OnFontSizeChange(wxCommandEvent &event);
+	void OnTextColorChange(wxCommandEvent &event);
 	//script
 	void OnRunScriptChk(wxCommandEvent &event);
 	void OnScriptFileEdit(wxCommandEvent &event);

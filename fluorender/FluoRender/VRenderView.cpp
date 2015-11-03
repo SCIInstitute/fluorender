@@ -1324,6 +1324,8 @@ void VRenderGLView::DrawAnnotations()
 	mv.set(glm::value_ptr(m_mv_mat));
 	p.set(glm::value_ptr(m_proj_mat));
 
+	Color text_color = GetTextColor();
+
 	for (size_t i=0; i<m_layer_list.size(); i++)
 	{
 		if (!m_layer_list[i])
@@ -1357,7 +1359,7 @@ void VRenderGLView::DrawAnnotations()
 						px = pos.x()*nx/2.0;
 						py = pos.y()*ny/2.0;
 						m_text_renderer->RenderText(
-							wstr, m_bg_color_inv,
+							wstr, text_color,
 							px*sx, py*sy, sx, sy);
 					}
 				}
@@ -1640,13 +1642,15 @@ void VRenderGLView::DrawBrush()
 
 		int mode = m_selector.GetMode();
 
+		Color text_color = GetTextColor();
+
 		if (mode == 1 ||
 			mode == 2 ||
 			mode == 8)
 		{
 			glLineWidth(0.5);
 			DrawCircle(cx, cy, m_brush_radius1*pressure,
-				m_bg_color_inv, proj_mat);
+				text_color, proj_mat);
 		}
 
 		if (mode == 1 ||
@@ -1656,7 +1660,7 @@ void VRenderGLView::DrawBrush()
 		{
 			glLineWidth(0.5);
 			DrawCircle(cx, cy, m_brush_radius2*pressure,
-				m_bg_color_inv, proj_mat);
+				text_color, proj_mat);
 		}
 
 		float px, py;
@@ -1678,7 +1682,7 @@ void VRenderGLView::DrawBrush()
 			wstr = L"*";
 			break;
 		}
-		m_text_renderer->RenderText(wstr, m_bg_color_inv, px*sx, py*sy, sx, sy);
+		m_text_renderer->RenderText(wstr, text_color, px*sx, py*sy, sx, sy);
 
 		glLineWidth(line_width);
 		glEnable(GL_DEPTH_TEST);
@@ -5687,6 +5691,7 @@ VolumeData* VRenderGLView::GetAllVolumeData(int index)
 					cnt++;
 				}
 			}
+			break;
 		}
 	}
 	return 0;
@@ -6097,6 +6102,7 @@ void VRenderGLView::RemoveGroup(wxString &name)
 					m_vd_pop_dirty = true;
 				}
 			}
+			break;
 		case 6://mesh group
 			{
 				MeshGroup* group = (MeshGroup*)m_layer_list[i];
@@ -6115,6 +6121,7 @@ void VRenderGLView::RemoveGroup(wxString &name)
 					m_md_pop_dirty = true;
 				}
 			}
+			break;
 		}
 	}
 }
@@ -7068,7 +7075,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 				color = vd->GetColor();
 		}
 		else
-			color = m_bg_color_inv;
+			color = GetTextColor();
 
 		//transform
 		if (!vd->GetTexture())
@@ -7291,7 +7298,8 @@ void VRenderGLView::DrawGrid()
 			shader->create();
 		shader->bind();
 	}
-	shader->setLocalParam(0, m_bg_color_inv.r(), m_bg_color_inv.g(), m_bg_color_inv.b(), 1.0);
+	Color text_color = GetTextColor();
+	shader->setLocalParam(0, text_color.r(), text_color.g(), text_color.b(), 1.0);
 	glm::mat4 matrix = m_proj_mat * m_mv_mat;
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 
@@ -7442,6 +7450,8 @@ void VRenderGLView::DrawScaleBar()
 	vector<float> vertex;
 	vertex.reserve(4*3);
 
+	Color text_color = GetTextColor();
+
 	if (m_draw_frame)
 	{
 		px = (0.95*m_frame_w+m_frame_x)/nx;
@@ -7458,7 +7468,7 @@ void VRenderGLView::DrawScaleBar()
 			py = ny/2.0-ny+0.065*m_frame_h+m_frame_y+offset;
 			if (m_text_renderer)
 				m_text_renderer->RenderText(
-				wsb_text, m_bg_color_inv,
+				wsb_text, text_color,
 				px*sx, py*sy, sx, sy);
 		}
 	}
@@ -7478,7 +7488,7 @@ void VRenderGLView::DrawScaleBar()
 			py = ny/2.0-0.935*ny+offset;
 			if (m_text_renderer)
 				m_text_renderer->RenderText(
-				wsb_text, m_bg_color_inv,
+				wsb_text, text_color,
 				px*sx, py*sy, sx, sy);
 		}
 	}
@@ -7500,7 +7510,7 @@ void VRenderGLView::DrawScaleBar()
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (const GLvoid*)0);
 
-	shader->setLocalParam(0, m_bg_color_inv.r(), m_bg_color_inv.g(), m_bg_color_inv.b(), 1.0);
+	shader->setLocalParam(0, text_color.r(), text_color.g(), text_color.b(), 1.0);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 	glDisableVertexAttribArray(0);
@@ -7702,7 +7712,8 @@ void VRenderGLView::DrawName(
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (const GLvoid*)0);
 
-	shader->setLocalParam(0, m_bg_color_inv.r(), m_bg_color_inv.g(), m_bg_color_inv.b(), 1.0);
+	Color text_color = GetTextColor();
+	shader->setLocalParam(0, text_color.r(), text_color.g(), text_color.b(), 1.0);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0);
 	glDrawArrays(GL_TRIANGLE_STRIP, 4, 4);
@@ -7718,7 +7729,7 @@ void VRenderGLView::DrawName(
 	py1 = ny/2-y+0.25*font_height;
 	wstr = name.ToStdWstring();
 	m_text_renderer->RenderText(
-		wstr, m_bg_color_inv,
+		wstr, text_color,
 		px1*sx, py1*sy, sx, sy);
 	if (highlighted)
 	{
@@ -8002,13 +8013,15 @@ void VRenderGLView::DrawColormap()
 			wxString str;
 			wstring wstr;
 
+			Color text_color = GetTextColor();
+
 			//value 1
 			px = 0.052*m_frame_w+m_frame_x-nx/2.0;
 			py = 0.1*m_frame_h+m_frame_y+offset-ny/2.0;
 			str = wxString::Format("%d", 0);
 			wstr = str.ToStdWstring();
 			m_text_renderer->RenderText(
-				wstr, m_bg_color_inv,
+				wstr, text_color,
 				px*sx, py*sy, sx, sy);
 			//value 2
 			px = 0.052*m_frame_w+m_frame_x-nx/2.0;
@@ -8016,7 +8029,7 @@ void VRenderGLView::DrawColormap()
 			str = wxString::Format("%d", int(m_value_2*max_val));
 			wstr = str.ToStdWstring();
 			m_text_renderer->RenderText(
-				wstr, m_bg_color_inv,
+				wstr, text_color,
 				px*sx, py*sy, sx, sy);
 			//value 4
 			px = 0.052*m_frame_w+m_frame_x-nx/2.0;
@@ -8024,7 +8037,7 @@ void VRenderGLView::DrawColormap()
 			str = wxString::Format("%d", int(m_value_4*max_val));
 			wstr = str.ToStdWstring();
 			m_text_renderer->RenderText(
-				wstr, m_bg_color_inv,
+				wstr, text_color,
 				px*sx, py*sy, sx, sy);
 			//value 6
 			px = 0.052*m_frame_w+m_frame_x-nx/2.0;
@@ -8032,7 +8045,7 @@ void VRenderGLView::DrawColormap()
 			str = wxString::Format("%d", int(m_value_6*max_val));
 			wstr = str.ToStdWstring();
 			m_text_renderer->RenderText(
-				wstr, m_bg_color_inv,
+				wstr, text_color,
 				px*sx, py*sy, sx, sy);
 			//value 7
 			px = 0.052*m_frame_w+m_frame_x-nx/2.0;
@@ -8040,7 +8053,7 @@ void VRenderGLView::DrawColormap()
 			str = wxString::Format("%d", int(max_val));
 			wstr = str.ToStdWstring();
 			m_text_renderer->RenderText(
-				wstr, m_bg_color_inv,
+				wstr, text_color,
 				px*sx, py*sy, sx, sy);
 		}
 	}
@@ -8080,13 +8093,15 @@ void VRenderGLView::DrawColormap()
 			wxString str;
 			wstring wstr;
 
+			Color text_color = GetTextColor();
+
 			//value 1
 			px = 0.052*nx-nx/2.0;
 			py = ny/2.0-0.9*ny+offset;
 			str = wxString::Format("%d", 0);
 			wstr = str.ToStdWstring();
 			m_text_renderer->RenderText(
-				wstr, m_bg_color_inv,
+				wstr, text_color,
 				px*sx, py*sy, sx, sy);
 			//value 2
 			px = 0.052*nx-nx/2.0;
@@ -8094,7 +8109,7 @@ void VRenderGLView::DrawColormap()
 			str = wxString::Format("%d", int(m_value_2*max_val));
 			wstr = str.ToStdWstring();
 			m_text_renderer->RenderText(
-				wstr, m_bg_color_inv,
+				wstr, text_color,
 				px*sx, py*sy, sx, sy);
 			//value 4
 			px = 0.052*nx-nx/2.0;
@@ -8102,7 +8117,7 @@ void VRenderGLView::DrawColormap()
 			str = wxString::Format("%d", int(m_value_4*max_val));
 			wstr = str.ToStdWstring();
 			m_text_renderer->RenderText(
-				wstr, m_bg_color_inv,
+				wstr, text_color,
 				px*sx, py*sy, sx, sy);
 			//value 6
 			px = 0.052*nx-nx/2.0;
@@ -8110,7 +8125,7 @@ void VRenderGLView::DrawColormap()
 			str = wxString::Format("%d", int(m_value_6*max_val));
 			wstr = str.ToStdWstring();
 			m_text_renderer->RenderText(
-				wstr, m_bg_color_inv,
+				wstr, text_color,
 				px*sx, py*sy, sx, sy);
 			//value 7
 			px = 0.052*nx-nx/2.0;
@@ -8118,7 +8133,7 @@ void VRenderGLView::DrawColormap()
 			str = wxString::Format("%d", int(max_val));
 			wstr = str.ToStdWstring();
 			m_text_renderer->RenderText(
-				wstr, m_bg_color_inv,
+				wstr, text_color,
 				px*sx, py*sy, sx, sy);
 		}
 	}
@@ -8173,6 +8188,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 
 	double fps_ = 1.0/goTimer->average();
 	wxString str;
+	Color text_color = GetTextColor();
 	if (TextureRenderer::get_mem_swap())
 	{
 		str = wxString::Format(
@@ -8202,7 +8218,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	px = gapw-nx/2;
 	py = ny/2-gaph/2;
 	m_text_renderer->RenderText(
-	wstr_temp, m_bg_color_inv,
+	wstr_temp, text_color,
 	px*sx, py*sy, sx, sy);
 
 	if (m_draw_coord)
@@ -8218,7 +8234,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 			px = gapw-nx/2;
 			py = ny/2-gaph;
 			m_text_renderer->RenderText(
-			wstr_temp, m_bg_color_inv,
+			wstr_temp, text_color,
 			px*sx, py*sy, sx, sy);
 		}
 	}
@@ -8229,7 +8245,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 		px = gapw-nx/2;
 		py = ny/2-gaph;
 		m_text_renderer->RenderText(
-		wstr_temp, m_bg_color_inv,
+		wstr_temp, text_color,
 		px*sx, py*sy, sx, sy);
 	}
 
@@ -8242,7 +8258,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 			px = gapw-nx/2;
 			py = ny/2-gaph*1.5;
 			m_text_renderer->RenderText(
-			wstr_temp, m_bg_color_inv,
+			wstr_temp, text_color,
 			px*sx, py*sy, sx, sy);
 		}
 		else
@@ -8258,7 +8274,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 					py = ny/2-gaph*(3+i)/2;
 					if (m_text_renderer)
 						m_text_renderer->RenderText(
-						wstr_temp, m_bg_color_inv,
+						wstr_temp, text_color,
 						px*sx, py*sy, sx, sy);
 				}
 			}
@@ -9426,6 +9442,7 @@ void VRenderGLView::DrawRulers()
 	unsigned int num;
 	vector<unsigned int> nums;
 	Color color;
+	Color text_color = GetTextColor();
 
 	for (size_t i=0; i<m_ruler_list.size(); i++)
 	{
@@ -9439,7 +9456,7 @@ void VRenderGLView::DrawRulers()
 			if (ruler->GetUseColor())
 				color = ruler->GetColor();
 			else
-				color = m_bg_color_inv;
+				color = text_color;
 			for (size_t j=0; j<ruler->GetNumPoint(); ++j)
 			{
 				p2 = *(ruler->GetPoint(j));
@@ -9555,7 +9572,7 @@ void VRenderGLView::DrawRulers()
 				if (ruler->GetUseColor())
 					color = ruler->GetColor();
 				else
-					color = m_bg_color_inv;
+					color = text_color;
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0);
 				glDrawArrays(GL_LINES, pos, (GLsizei)(nums[j++]));
 				pos += nums[j-1];
@@ -10406,6 +10423,25 @@ bool VRenderGLView::GetDraw()
 Color VRenderGLView::GetBackgroundColor()
 {
 	return m_bg_color;
+}
+
+Color VRenderGLView::GetTextColor()
+{
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (!frame || !frame->GetSettingDlg())
+		return m_bg_color_inv;
+	switch (frame->GetSettingDlg()->GetTextColor())
+	{
+	case 0://background inverted
+		return m_bg_color_inv;
+	case 1://background
+		return m_bg_color;
+	case 2://secondary color of current volume
+		if (m_cur_vol)
+			return m_cur_vol->GetMaskColor();
+		else
+			return m_bg_color_inv;
+	}
 }
 
 void VRenderGLView::SetBackgroundColor(Color &color)
