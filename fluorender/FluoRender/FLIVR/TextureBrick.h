@@ -128,7 +128,8 @@ namespace FLIVR {
 		void compute_polygons(Ray& view, double tmin, double tmax, double dt,
 			vector<float>& vertex, vector<uint32_t>& index, vector<uint32_t>& size);
 		void compute_polygons(Ray& view, double dt,
-			vector<float>& vertex, vector<uint32_t>& index, vector<uint32_t>& size);
+			vector<float>& vertex, vector<uint32_t>& index,
+			vector<uint32_t>& size, bool bricks=false);
 		
 		//set d
 		void set_d(double d) { d_ = d; }

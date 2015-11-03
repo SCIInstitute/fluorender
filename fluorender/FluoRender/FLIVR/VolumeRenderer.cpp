@@ -802,6 +802,7 @@ namespace FLIVR
 		//shader->setLocalParamMatrix(5, glm::value_ptr(m_tex_mat));
 
 		num_slices_ = 0;
+		bool multibricks = bricks->size() > 1;
 		for (unsigned int i=0; i < bricks->size(); i++)
 		{
 			//comment off when debug_ds
@@ -859,7 +860,7 @@ namespace FLIVR
 			vertex.clear();
 			index.clear();
 			size.clear();
-			b->compute_polygons(snapview, dt, vertex, index, size);
+			b->compute_polygons(snapview, dt, vertex, index, size, multibricks);
 			num_slices_ += vertex.size()/12;
 
 			if (vertex.size() == 0) continue;
@@ -1116,6 +1117,7 @@ namespace FLIVR
 
 		if (bricks)
 		{
+			bool multibricks = bricks->size() > 1;
 			for (unsigned int i=0; i<bricks->size(); i++)
 			{
 				TextureBrick* b = (*bricks)[i];
@@ -1126,7 +1128,7 @@ namespace FLIVR
 				size.clear();
 
 				// Scale out dt such that the slices are artificially further apart.
-				b->compute_polygons(snapview, dt * 1, vertex, index, size);
+				b->compute_polygons(snapview, dt * 1, vertex, index, size, multibricks);
 				draw_polygons_wireframe(vertex, index, size);
 			}
 		}

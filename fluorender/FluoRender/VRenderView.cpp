@@ -10442,6 +10442,7 @@ Color VRenderGLView::GetTextColor()
 		else
 			return m_bg_color_inv;
 	}
+	return m_bg_color_inv;
 }
 
 void VRenderGLView::SetBackgroundColor(Color &color)

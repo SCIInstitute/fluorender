@@ -420,6 +420,7 @@ namespace FLIVR
 
 		if (bs)
 		{
+			bool multibricks = bs->size() > 1;
 			for (unsigned int i=0; i < bs->size(); i++)
 			{
 				if (TextureRenderer::mem_swap_)
@@ -465,7 +466,7 @@ namespace FLIVR
 				vertex.clear();
 				index.clear();
 				size.clear();
-				b->compute_polygons(snapview, dt, vertex, index, size);
+				b->compute_polygons(snapview, dt, vertex, index, size, multibricks);
 				if (vertex.size() == 0) { continue; }
 				shader->setLocalParam(4, 1.0/b->nx(), 1.0/b->ny(), 1.0/b->nz(), 1.0/rate);
 
@@ -1089,6 +1090,7 @@ namespace FLIVR
 
 		if (bs)
 		{
+			bool multibricks = bs->size() > 1;
 			for (unsigned int i=0; i < bs->size(); i++)
 			{
 				TextureBrick* b = (*bs)[i];
@@ -1098,7 +1100,7 @@ namespace FLIVR
 				index.clear();
 				size.clear();
 
-				b->compute_polygons(snapview, dt, vertex, index, size);
+				b->compute_polygons(snapview, dt, vertex, index, size, multibricks);
 				vr_list_[0]->draw_polygons_wireframe(vertex, index, size);
 			}
 		}
