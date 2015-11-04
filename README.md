@@ -96,7 +96,7 @@ We recommend building FluoRender outside of the source tree. <br/>
    
    * Build boost using <code>bootstrap.exe</code> and <code>b2.exe --toolset=msvc-14.0 --build-type=complete architecture=x86 address-model=64 stage</code> in the boost directory in a MSVC prompt. (change the toolset to the version of MSVC you are using, and omit address-model and architecture for 32-bit)
    
-   * The steps following will assume the boost root directory is at <code>~/boost_1_55_0</code> (your version might differ).
+   * The steps following will assume the boost root directory is at <code>C:\boost_1_55_0</code> (your version might differ).
 
    * In a separate directory, checkout a separate boost process library : <code>git clone git@github.com:basisunus/boost_process.git</code> and merge the contents into the boost directory you built in.
 
