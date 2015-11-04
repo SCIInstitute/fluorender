@@ -1420,6 +1420,11 @@ public:
 	{
 		if (m_glview) return m_glview->GetVolumeCalculator(); else return 0;
 	}
+	//get kernel executor
+	KernelExecutor* GetKernelExecutor()
+	{
+		if (m_glview) return m_glview->GetKernelExecutor(); else return 0;
+	}
 
 	//set ruler type
 	int GetRulerType()

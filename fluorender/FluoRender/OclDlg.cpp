@@ -245,12 +245,11 @@ void OclDlg::OnSaveAsBtn(wxCommandEvent& event)
 void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 {
 	m_output_txt->SetValue("");
-#ifdef _DARWIN
-    CGLContextObj ctx = CGLGetCurrentContext();
-    if (ctx != KernelProgram::gl_context_)
-        CGLSetCurrentContext(KernelProgram::gl_context_);
-#endif
+
 	if (!m_view)
+		return;
+	KernelExecutor* executor = m_view->GetKernelExecutor();
+	if (!executor)
 		return;
 
 	//currently, this is expected to be a convolution/filering kernel
@@ -265,150 +264,11 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 	wxString vd_name = vd->GetName();
 	if (vd_name.Find("_CL") != wxNOT_FOUND)
 		dup = false;
-	VolumeRenderer* vr = vd->GetVR();
-	if (!vr)
-		return;
-	Texture* tex = vd->GetTexture();
-	if (!tex)
-		return;
 
-	//get bricks
-	Ray view_ray(Point(0.802,0.267,0.534), Vector(0.802,0.267,0.534));
-	tex->set_sort_bricks();
-	vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray);
-	if (!bricks || bricks->size() == 0)
-		return;
-
-	int res_x, res_y, res_z;
-	vd->GetResolution(res_x, res_y, res_z);
-
-	//execute for each brick
-	TextureBrick *b, *b_r;
-	vector<TextureBrick*> *bricks_r;
-	VolumeData* vd_r = 0;
-	void *result;
-
-	if (dup)
-	{
-		//result
-		double spc_x, spc_y, spc_z;
-		vd->GetSpacings(spc_x, spc_y, spc_z);
-		vd_r = new VolumeData();
-		vd_r->AddEmptyData(8,
-			res_x, res_y, res_z,
-			spc_x, spc_y, spc_z);
-		vd_r->SetSpcFromFile(true);
-		wxString name = vd->GetName();
-		vd_r->SetName(name+"_CL");
-		Texture* tex_r = vd_r->GetTexture();
-		if (!tex_r)
-			return;
-		Nrrd* nrrd_r = tex_r->get_nrrd(0);
-		if (!nrrd_r)
-			return;
-		result = nrrd_r->data;
-		if (!result)
-			return;
-
-		tex_r->set_sort_bricks();
-		bricks_r = tex_r->get_sorted_bricks(view_ray);
-		if (!bricks_r || bricks_r->size() == 0)
-			return;
-
-		if(vd)
-		{
-			//clipping planes
-			vector<Plane*> *planes = vd->GetVR()?vd->GetVR()->get_planes():0;
-			if (planes && vd_r->GetVR())
-				vd_r->GetVR()->set_planes(planes);
-			//transfer function
-			vd_r->Set3DGamma(vd->Get3DGamma());
-			vd_r->SetBoundary(vd->GetBoundary());
-			vd_r->SetOffset(vd->GetOffset());
-			vd_r->SetLeftThresh(vd->GetLeftThresh());
-			vd_r->SetRightThresh(vd->GetRightThresh());
-			FLIVR::Color col = vd->GetColor();
-			vd_r->SetColor(col);
-			vd_r->SetAlpha(vd->GetAlpha());
-			//shading
-			vd_r->SetShading(vd->GetShading());
-			double amb, diff, spec, shine;
-			vd->GetMaterial(amb, diff, spec, shine);
-			vd_r->SetMaterial(amb, diff, spec, shine);
-			//shadow
-			vd_r->SetShadow(vd->GetShadow());
-			double shadow;
-			vd->GetShadowParams(shadow);
-			vd_r->SetShadowParams(shadow);
-			//sample rate
-			vd_r->SetSampleRate(vd->GetSampleRate());
-			//2d adjusts
-			col = vd->GetGamma();
-			vd_r->SetGamma(col);
-			col = vd->GetBrightness();
-			vd_r->SetBrightness(col);
-			col = vd->GetHdr();
-			vd_r->SetHdr(col);
-			vd_r->SetSyncR(vd->GetSyncR());
-			vd_r->SetSyncG(vd->GetSyncG());
-			vd_r->SetSyncB(vd->GetSyncB());
-		}
-	}
-	else
-		result = tex->get_nrrd(0)->data;
-
-	bool kernel_exe = true;
-	for (unsigned int i=0; i<bricks->size(); ++i)
-	{
-		b = (*bricks)[i];
-		if (dup) b_r = (*bricks_r)[i];
-		GLint data_id = vr->load_brick_cl(0, bricks, i);
-		KernelProgram* kernel = VolumeRenderer::vol_kernel_factory_.kernel(code.ToStdString());
-		if (kernel)
-		{
-			(*m_output_txt) << "OpenCL kernel created.\n";
-			if (bricks->size()==1)
-				kernel_exe = ExecuteKernel(kernel, data_id, result, res_x, res_y, res_z);
-			else
-			{
-				int brick_x = b->nx();
-				int brick_y = b->ny();
-				int brick_z = b->nz();
-				unsigned char* bresult = new unsigned char[brick_x*brick_y*brick_z];
-				kernel_exe = ExecuteKernel(kernel, data_id, bresult, brick_x, brick_y, brick_z);
-				if (!kernel_exe)
-					break;
-				//copy data back
-				unsigned char* ptr_br = bresult;
-				unsigned char* ptr_z;
-				if (dup)
-					ptr_z = (unsigned char*)(b_r->tex_data(0));
-				else
-					ptr_z = (unsigned char*)(b->tex_data(0));
-				unsigned char* ptr_y;
-				for (int bk=0; bk<brick_z; ++bk)
-				{
-					ptr_y = ptr_z;
-					for (int bj=0; bj<brick_y; ++bj)
-					{
-						memcpy(ptr_y, ptr_br, brick_x);
-						ptr_y += res_x;
-						ptr_br += brick_x;
-					}
-					ptr_z += res_x*res_y;
-				}
-				delete []bresult;
-			}
-		}
-		else
-		{
-			(*m_output_txt) << "Fail to create OpenCL kernel.\n";
-			kernel_exe = false;
-			break;
-		}
-		//this is a problem needs to be solved
-		VolumeRenderer::vol_kernel_factory_.clean();
-	}
+	executor->SetVolume(vd);
+	executor->SetCode(code);
+	executor->SetDuplicate(dup);
+	executor->Execute();
 
 	//high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	//max_filter(tex->get_nrrd(0)->data, result,
@@ -417,15 +277,12 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 	//duration<double> time_span = duration_cast<duration<double>>(t2-t1);
 	//(*m_output_txt) << "CPU time: " << time_span.count() << " sec.\n";
 
-	if (!kernel_exe)
-	{
-		if (dup && vd_r)
-			delete vd_r;
-		return;
-	}
 	//add result for rendering
 	if (dup)
 	{
+		VolumeData* vd_r = executor->GetResult();
+		if (!vd_r)
+			return;
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vr_frame)
 		{
@@ -436,50 +293,12 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 			vr_frame->UpdateTree(vd_r->GetName());
 		}
 	}
-	else
-	{
-		vd->GetVR()->clear_tex_pool();
-	}
+
+	wxString str;
+	executor->GetMessage(str);
+	(*m_output_txt) << str;
+
 	m_view->RefreshGL();
-}
-
-bool OclDlg::ExecuteKernel(KernelProgram* kernel, GLuint data_id, void* result,
-		size_t brick_x, size_t brick_y, size_t brick_z)
-{
-	if (!kernel)
-        return false;
-
-	if (!kernel->valid())
-	{
-		string name = "kernel_main";
-		if (kernel->create(name))
-			(*m_output_txt) << "Kernel program compiled successfully on " << kernel->get_device_name() << ".\n";
-		else
-		{
-			(*m_output_txt) << "Kernel program failed to compile on " << kernel->get_device_name() << ".\n";
-			(*m_output_txt) << kernel->getInfo() << "\n";
-			return false;
-		}
-	}
-	//textures
-	kernel->setKernelArgTex3D(0, CL_MEM_READ_ONLY, data_id);
-	size_t result_size = brick_x*brick_y*brick_z*sizeof(unsigned char);
-	kernel->setKernelArgBuf(1, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, result_size, result);
-	kernel->setKernelArgConst(2, sizeof(unsigned int), (void*)(&brick_x));
-	kernel->setKernelArgConst(3, sizeof(unsigned int), (void*)(&brick_y));
-	kernel->setKernelArgConst(4, sizeof(unsigned int), (void*)(&brick_z));
-	//execute
-	size_t global_size[3] = {brick_x, brick_y, brick_z};
-	size_t local_size[3] = {1, 1, 1};
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	kernel->execute(3, global_size, local_size);
-	high_resolution_clock::time_point t2 = high_resolution_clock::now();
-	duration<double> time_span = duration_cast<duration<double>>(t2-t1);
-	wxString stime = wxString::Format("%.4f", time_span.count());
-	(*m_output_txt) << "OpenCL time on " << kernel->get_device_name() << ": " << stime << " sec.\n";
-	kernel->readBuffer(1, result);
-
-	return true;
 }
 
 void OclDlg::AddKernelsToList()

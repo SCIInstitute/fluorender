@@ -41,6 +41,7 @@ public:
 	void SetCode(wxString &code);
 	void LoadCode(wxString &filename);
 	void SetVolume(VolumeData *vd);
+	void SetDuplicate(bool dup);
 	VolumeData* GetVolume();
 	VolumeData* GetResult();
 	bool GetMessage(wxString &msg);

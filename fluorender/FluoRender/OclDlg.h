@@ -26,8 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "DataManager.h"
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
 #include <wx/wx.h>
 #include <wx/stc/stc.h>
 #include <wx/listctrl.h>
@@ -78,17 +76,12 @@ private:
 	//stc
 	wxStyledTextCtrl* m_kernel_edit_stc;
 
-
     int m_LineNrID;
     int m_DividerID;
     int m_FoldingID;
 
 private:
 	void AddKernelsToList();
-	bool ExecuteKernel(KernelProgram* kernel,
-		GLuint data_id, void* result,
-		size_t brick_x, size_t brick_y,
-		size_t brick_z);
 
 	void copy_filter(void* data, void* result,
 		int brick_x, int brick_y, int brick_z);

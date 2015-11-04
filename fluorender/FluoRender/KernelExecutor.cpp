@@ -76,6 +76,11 @@ void KernelExecutor::SetVolume(VolumeData *vd)
 	m_vd = vd;
 }
 
+void KernelExecutor::SetDuplicate(bool dup)
+{
+	m_duplicate = dup;
+}
+
 VolumeData* KernelExecutor::GetVolume()
 {
 	return m_vd;
