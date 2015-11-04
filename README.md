@@ -60,7 +60,7 @@ We recommend building FluoRender outside of the source tree. <br/>
    
    * <code>brew install libtiff</code>
 
-   * <code> brew install freetype</code>
+   * <code>brew install freetype</code>
 
 5) Get and build FluoRender
 
