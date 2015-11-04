@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VolumeSelector.h"
 #include "VolumeCalculator.h"
 #include "TextRenderer.h"
+#include "KernelExecutor.h"
 
 #include "FLIVR/Color.h"
 #include "FLIVR/ShaderProgram.h"
@@ -453,6 +454,8 @@ public:
 	VolumeSelector* GetVolumeSelector() {return &m_selector;}
 	//get volume calculator
 	VolumeCalculator* GetVolumeCalculator() {return &m_calculator;}
+	//get kernel executor
+	KernelExecutor* GetKernelExecutor() { return &m_kernel_executor; }
 
 	//force draw
 	void ForceDraw();
@@ -777,6 +780,9 @@ private:
 
 	//calculator
 	VolumeCalculator m_calculator;
+
+	//kernel executor
+	KernelExecutor m_kernel_executor;
 
 	//timer
 	nv::Timer *goTimer;

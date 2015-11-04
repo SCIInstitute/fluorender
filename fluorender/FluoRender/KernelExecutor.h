@@ -50,6 +50,7 @@ public:
 private:
 	VolumeData *m_vd;
 	VolumeData *m_vd_r;//result
+	bool m_duplicate;//whether duplicate the input volume
 
 	wxString m_code;
 	wxString m_message;
