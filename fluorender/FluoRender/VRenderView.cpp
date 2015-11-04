@@ -5038,6 +5038,10 @@ void VRenderGLView::Run4DScript(wxString &scriptname, VolumeData* vd)
 					RunExternalExe(fconfig);
 				else if (str == "fetch_mask")
 					RunFetchMask(fconfig);
+				else if (str == "calculation")
+					RunCalculation(fconfig);
+				else if (str == "opencl")
+					RunOpenCL(fconfig);
 			}
 		}
 	}
@@ -5357,8 +5361,40 @@ void VRenderGLView::RunFetchMask(wxFileConfig &fconfig)
 		m_cur_vol->LoadLabel(label_nrrd_new);
 }
 
+void VRenderGLView::RunCalculation(wxFileConfig &fconfig)
+{
+
+}
+
+void VRenderGLView::RunOpenCL(wxFileConfig &fconfig)
+{
+	wxString str, clname, pathname;
+	fconfig.Read("clpath", &clname, "");
+	if (!wxFileExists(clname))
+		return;
+	fconfig.Read("savepath", &pathname, "");
+	str = pathname;
+	int64_t pos = 0;
+	do
+	{
+		pos = pathname.find(GETSLASH(), pos);
+		if (pos == wxNOT_FOUND)
+			break;
+		pos++;
+		str = pathname.Left(pos);
+		if (!wxDirExists(str))
+			wxMkdir(str);
+	} while (true);
+
+}
+
 //draw
 void VRenderGLView::OnDraw(wxPaintEvent& event)
+{
+	ForceDraw();
+}
+
+void VRenderGLView::ForceDraw()
 {
 	Init();
 	wxPaintDC dc(this);
@@ -10200,18 +10236,21 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 							for (int i=0; i<vr_frame->GetViewNum(); i++)
 							{
 								VRenderView* view = vr_frame->GetView(i);
-								if (view && view->m_glview)
+								if (view && view->m_glview &&
+									view->m_glview != this)
 								{
 									view->m_glview->SetRotations(
 										m_rotx, m_roty, m_rotz, true, false);
-									wxPaintEvent evt;
-									view->m_glview->OnDraw(evt);
+									view->RefreshGL();
 								}
 							}
 						}
 					}
-					if (!hold_old)
-						RefreshGL();
+					else
+					{
+						if (!hold_old)
+							RefreshGL();
+					}
 				}
 				if (event.MiddleIsDown() || (event.ControlDown() && event.LeftIsDown()))
 				{

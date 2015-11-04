@@ -455,7 +455,7 @@ public:
 	VolumeCalculator* GetVolumeCalculator() {return &m_calculator;}
 
 	//force draw
-	void ForceDraw() {wxPaintEvent event; OnDraw(event);}
+	void ForceDraw();
 
 	//run 4d script
 	void SetRun4DScript(bool runscript) {m_run_script = runscript;}
@@ -913,6 +913,8 @@ private:
 	void RunSeparateChannels(wxFileConfig &fconfig);
 	void RunExternalExe(wxFileConfig &fconfig);
 	void RunFetchMask(wxFileConfig &fconfig);
+	void RunCalculation(wxFileConfig &fconfig);
+	void RunOpenCL(wxFileConfig &fconfig);
 
 	//brush states update
 	void SetBrush(int mode);

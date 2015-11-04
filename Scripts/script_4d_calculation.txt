@@ -1,0 +1,5 @@
+[tasks]
+tasknum=1
+[tasks/task0]
+type=external_exe
+exepath=./Executables/cl_synthetic_brainbows.exe
