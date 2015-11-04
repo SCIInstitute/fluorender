@@ -231,6 +231,11 @@ void OclDlg::OnSaveAsBtn(wxCommandEvent& event)
 		if (rval) {
 			m_kernel_file_txt->SetValue(filename);
 			filename = filename.AfterLast(GETSLASH());
+			std::string exePath = wxStandardPaths::Get().GetExecutablePath().ToStdString();
+			exePath = exePath.substr(0, exePath.find_last_of(std::string() + GETSLASH()));
+			wxString temp = wxString(exePath) + GETSLASH() + wxString("CL_code") +
+				wxString(GETSLASH()) + filename;
+			m_kernel_edit_stc->SaveFile(temp);
 			filename = filename.BeforeFirst('.');
 	        m_kernel_list->InsertItem(m_kernel_list->GetItemCount(), filename);
 		}
