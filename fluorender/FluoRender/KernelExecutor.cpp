@@ -66,7 +66,10 @@ void KernelExecutor::LoadCode(wxString &filename)
 	}
 	m_code = "";
 	while (!input.Eof())
+	{
 		m_code += cl_file.ReadLine();
+		m_code += "\n";
+	}
 	m_message = "Kernel file " +
 		filename + " read.\n";
 }
@@ -91,6 +94,13 @@ VolumeData* KernelExecutor::GetResult()
 	return m_vd_r;
 }
 
+void KernelExecutor::DeleteResult()
+{
+	if (m_vd_r)
+		delete m_vd_r;
+	m_vd_r = 0;
+}
+
 bool KernelExecutor::GetMessage(wxString &msg)
 {
 	if (m_message == "")
@@ -102,12 +112,12 @@ bool KernelExecutor::GetMessage(wxString &msg)
 	}
 }
 
-void KernelExecutor::Execute()
+bool KernelExecutor::Execute()
 {
 	if (m_code == "")
 	{
 		m_message = "No OpenCL code to execute.\n";
-		return;
+		return false;
 	}
 
 #ifdef _DARWIN
@@ -120,19 +130,19 @@ void KernelExecutor::Execute()
 	if (!m_vd)
 	{
 		m_message = "No volume selected. Select a volume first.\n";
-		return;
+		return false;
 	}
 	VolumeRenderer* vr = m_vd->GetVR();
 	if (!vr)
 	{
 		m_message = "Volume corrupted.\n";
-		return;
+		return false;
 	}
 	Texture* tex =m_vd->GetTexture();
 	if (!tex)
 	{
 		m_message = "Volume corrupted.\n";
-		return;
+		return false;
 	}
 
 	int res_x, res_y, res_z;
@@ -145,7 +155,7 @@ void KernelExecutor::Execute()
 	if (!bricks || bricks->size() == 0)
 	{
 		m_message = "Volume empty.\n";
-		return;
+		return false;
 	}
 
 	m_message = "";
@@ -168,18 +178,18 @@ void KernelExecutor::Execute()
 		m_vd_r->SetName(name + "_CL");
 		Texture* tex_r = m_vd_r->GetTexture();
 		if (!tex_r)
-			return;
+			return false;
 		Nrrd* nrrd_r = tex_r->get_nrrd(0);
 		if (!nrrd_r)
-			return;
+			return false;
 		result = nrrd_r->data;
 		if (!result)
-			return;
+			return false;
 
 		tex_r->set_sort_bricks();
 		bricks_r = tex_r->get_sorted_bricks(view_ray);
 		if (!bricks_r || bricks_r->size() == 0)
-			return;
+			return false;
 
 		if (m_vd)
 		{
@@ -281,12 +291,14 @@ void KernelExecutor::Execute()
 		if (m_duplicate && m_vd_r)
 			delete m_vd_r;
 		m_vd_r = 0;
-		return;
+		return false;
 	}
 
 	//update
 	if (!m_duplicate)
 		m_vd->GetVR()->clear_tex_pool();
+
+	return true;
 }
 
 bool KernelExecutor::ExecuteKernel(KernelProgram* kernel,

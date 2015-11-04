@@ -44,9 +44,10 @@ public:
 	void SetDuplicate(bool dup);
 	VolumeData* GetVolume();
 	VolumeData* GetResult();
+	void DeleteResult();
 	bool GetMessage(wxString &msg);
 
-	void Execute();
+	bool Execute();
 
 private:
 	VolumeData *m_vd;

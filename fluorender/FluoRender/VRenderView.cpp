@@ -5373,6 +5373,13 @@ void VRenderGLView::RunOpenCL(wxFileConfig &fconfig)
 	if (!wxFileExists(clname))
 		return;
 	fconfig.Read("savepath", &pathname, "");
+	int mode;
+	fconfig.Read("format", &mode, 0);
+	bool bake;
+	fconfig.Read("bake", &bake, false);
+	bool compression;
+	fconfig.Read("compress", &compression, false);
+
 	str = pathname;
 	int64_t pos = 0;
 	do
@@ -5386,6 +5393,25 @@ void VRenderGLView::RunOpenCL(wxFileConfig &fconfig)
 			wxMkdir(str);
 	} while (true);
 
+	if (!m_cur_vol)
+		return;
+
+	m_kernel_executor.LoadCode(clname);
+	m_kernel_executor.SetVolume(m_cur_vol);
+	m_kernel_executor.SetDuplicate(true);
+	bool result = m_kernel_executor.Execute();
+	VolumeData* vd_r = m_kernel_executor.GetResult();
+	if (result && vd_r)
+	{
+		int time_num = m_cur_vol->GetReader()->GetTimeNum();
+		wxString format = wxString::Format("%d", time_num);
+		m_fr_length = format.Length();
+		format = wxString::Format("_T%%0%dd", m_fr_length);
+		str = pathname +
+			wxString::Format(format, m_tseq_cur_num) + ".tif";
+		vd_r->Save(str, mode, bake, compression);
+	}
+	m_kernel_executor.DeleteResult();
 }
 
 //draw
