@@ -161,9 +161,6 @@ public:
 	//randomize color
 	void RandomizeColor();
 
-	//trim volume data with meshes
-	//void TrimData(int type=SEG_MTHD_BOTH);
-
 	//toggle hiding/displaying
 	void SetDraw(bool draw);
 	void ToggleDraw();
@@ -183,7 +180,7 @@ public:
 		roty = m_roty;
 		rotz = m_rotz;
 	}
-	void SetRotations(double rotx, double roty, double rotz, bool ui_update=true, bool link_update=true);
+	void SetRotations(double rotx, double roty, double rotz, bool ui_update=true);
 	void GetCenters(double &ctrx, double &ctry, double &ctrz)
 	{
 		ctrx = m_ctrx; ctry = m_ctry; ctrz = m_ctrz;
@@ -565,7 +562,8 @@ public:
 	//ruler time dependent
 	bool m_ruler_time_dep;
 	//linked rotation
-	bool m_linked_rot;
+	static bool m_linked_rot;
+	static VRenderGLView* m_master_linked_view;
 
 private:
 	wxString m_GLversion;
@@ -1058,11 +1056,6 @@ public:
 	void OrganizeLayers();
 	//randomize color
 	void RandomizeColor();
-	//rotation linking
-	void OnRotLink(bool b);
-
-	//trim volume data with meshes
-	//void TrimData(int type=SEG_MTHD_BOTH);
 
 	//toggle hiding/displaying
 	void SetDraw(bool draw);

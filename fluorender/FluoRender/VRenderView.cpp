@@ -47,6 +47,8 @@ DEALINGS IN THE SOFTWARE.
 
 int VRenderView::m_id = 1;
 ImgShaderFactory VRenderGLView::m_img_shader_factory;
+bool VRenderGLView::m_linked_rot = false;
+VRenderGLView* VRenderGLView::m_master_linked_view = 0;
 
 BEGIN_EVENT_TABLE(VRenderGLView, wxGLCanvas)
 	EVT_PAINT(VRenderGLView::OnDraw)
@@ -121,8 +123,6 @@ wxGLCanvas(parent, id, attriblist, pos, size, style),
 	m_ruler_use_transf(false),
 	//ruler time dependent
 	m_ruler_time_dep(true),
-	//linked rotation
-	m_linked_rot(false),
 	//private
 	m_frame(frame),
 	m_vrv((VRenderView*)parent),
@@ -5503,6 +5503,29 @@ void VRenderGLView::ForceDraw()
 	if (m_resize)
 		m_resize = false;
 
+	if (m_linked_rot)
+	{
+		if (!m_master_linked_view ||
+			this != m_master_linked_view)
+			return;
+
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame)
+		{
+			for (int i = 0; i<vr_frame->GetViewNum(); i++)
+			{
+				VRenderView* view = vr_frame->GetView(i);
+				if (view && view->m_glview &&
+					view->m_glview != this)
+				{
+					view->m_glview->SetRotations(m_rotx, m_roty, m_rotz, true);
+					view->RefreshGL();
+				}
+			}
+		}
+
+		m_master_linked_view = 0;
+	}
 }
 
 void VRenderGLView::SetRadius(double r)
@@ -10255,28 +10278,10 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					m_interactive = m_adaptive;
 
 					if (m_linked_rot)
-					{
-						VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-						if (vr_frame)
-						{
-							for (int i=0; i<vr_frame->GetViewNum(); i++)
-							{
-								VRenderView* view = vr_frame->GetView(i);
-								if (view && view->m_glview &&
-									view->m_glview != this)
-								{
-									view->m_glview->SetRotations(
-										m_rotx, m_roty, m_rotz, true, false);
-									view->RefreshGL();
-								}
-							}
-						}
-					}
-					else
-					{
-						if (!hold_old)
-							RefreshGL();
-					}
+						m_master_linked_view = this;
+
+					if (!hold_old)
+						RefreshGL();
 				}
 				if (event.MiddleIsDown() || (event.ControlDown() && event.LeftIsDown()))
 				{
@@ -10537,7 +10542,7 @@ void VRenderGLView::SetGradBg(bool val)
 	m_grad_bg = val;
 }
 
-void VRenderGLView::SetRotations(double rotx, double roty, double rotz, bool ui_update, bool link_update)
+void VRenderGLView::SetRotations(double rotx, double roty, double rotz, bool ui_update)
 {
 	m_rotx = rotx;
 	m_roty = roty;
@@ -10568,16 +10573,6 @@ void VRenderGLView::SetRotations(double rotx, double roty, double rotz, bool ui_
 	Quaternion up2 = (-m_q) * up * m_q;
 	m_up = Vector(up2.x, up2.y, up2.z);
 
-	//double dval = m_rot_lock?(((int)(m_rotx/45.0))*45):m_rotx;
-	//wxString str = wxString::Format("%.1f", dval);
-	//m_vrv->m_x_rot_text->SetValue(str);
-	//dval = m_rot_lock?(((int)(m_roty/45.0))*45):m_roty;
-	//str = wxString::Format("%.1f", dval);
-	//m_vrv->m_y_rot_text->SetValue(str);
-	//dval = m_rot_lock?(((int)(m_rotz/45.0))*45):m_rotz;
-	//str = wxString::Format("%.1f", dval);
-	//m_vrv->m_z_rot_text->SetValue(str);
-
 	if (ui_update)
 	{
 		wxString str = wxString::Format("%.1f", m_rotx);
@@ -10600,23 +10595,10 @@ void VRenderGLView::SetRotations(double rotx, double roty, double rotz, bool ui_
 		}
 	}
 
-	if (m_linked_rot && link_update)
+	if (m_linked_rot)
 	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
-		{
-			for (int i=0; i<vr_frame->GetViewNum(); i++)
-			{
-				VRenderView* view = vr_frame->GetView(i);
-				if (view && view->m_glview &&
-					view->m_glview!= this &&
-					view->m_glview->m_linked_rot)
-				{
-					view->m_glview->SetRotations(m_rotx, m_roty, m_rotz, true, false);
-					view->RefreshGL();
-				}
-			}
-		}
+		if (!m_master_linked_view)
+			m_master_linked_view = this;
 	}
 }
 
@@ -12330,7 +12312,7 @@ void VRenderView::OnValueEdit(wxCommandEvent& event)
 	}
 }
 
-void VRenderView::OnRotLink(bool b)
+/*void VRenderView::OnRotLink(bool b)
 {
 	m_glview->m_linked_rot = true;
 	double rotx, roty, rotz;
@@ -12349,7 +12331,7 @@ void VRenderView::OnRotLink(bool b)
 			}
 		}
 	}
-}
+}*/
 
 void VRenderView::OnRotReset(wxCommandEvent &event)
 {

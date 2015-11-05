@@ -33,57 +33,57 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/stdpaths.h>
 
 BEGIN_EVENT_TABLE(SettingDlg, wxPanel)
-	EVT_BUTTON(ID_SaveBtn, SettingDlg::OnSave)
-	EVT_BUTTON(ID_CloseBtn, SettingDlg::OnClose)
-	//project save
-	EVT_CHECKBOX(ID_PrjSaveChk, SettingDlg::OnProjectSaveCheck)
-	//real time compress
-	EVT_CHECKBOX(ID_RealtimeCmpChk, SettingDlg::OnRealtimeCompressCheck)
-	//mouse interactions
-	EVT_CHECKBOX(ID_MouseIntChk, SettingDlg::OnMouseIntCheck)
-	//depth peeling
-	EVT_COMMAND_SCROLL(ID_PeelingLayersSldr, SettingDlg::OnPeelingLayersChange)
-	EVT_TEXT(ID_PeelingLayersText, SettingDlg::OnPeelingLayersEdit)
-	//micro blend
-	EVT_CHECKBOX(ID_MicroBlendChk, SettingDlg::OnMicroBlendCheck)
-	//shadow direction
-	EVT_CHECKBOX(ID_ShadowDirChk, SettingDlg::OnShadowDirCheck)
-	EVT_COMMAND_SCROLL(ID_ShadowDirSldr, SettingDlg::OnShadowDirChange)
-	EVT_TEXT(ID_ShadowDirText, SettingDlg::OnShadowDirEdit)
-	//gradient background
-	EVT_CHECKBOX(ID_GradBgChk, SettingDlg::OnGradBgCheck)
-	//link render views rotations
-	EVT_CHECKBOX(ID_RotLinkChk, SettingDlg::OnRotLink)
-	//override vox
-	EVT_CHECKBOX(ID_OverrideVoxChk, SettingDlg::OnOverrideVoxCheck)
-	//wavelength to color
-	EVT_COMBOBOX(ID_WavColor1Cmb, SettingDlg::OnWavColor1Change)
-	EVT_COMBOBOX(ID_WavColor2Cmb, SettingDlg::OnWavColor2Change)
-	EVT_COMBOBOX(ID_WavColor3Cmb, SettingDlg::OnWavColor3Change)
-	EVT_COMBOBOX(ID_WavColor4Cmb, SettingDlg::OnWavColor4Change)
-	//memory settings
-	EVT_CHECKBOX(ID_StreamingChk, SettingDlg::OnStreamingChk)
-	EVT_COMMAND_SCROLL(ID_GraphicsMemSldr, SettingDlg::OnGraphicsMemChange)
-	EVT_TEXT(ID_GraphicsMemText, SettingDlg::OnGraphicsMemEdit)
-	EVT_COMMAND_SCROLL(ID_LargeDataSldr, SettingDlg::OnLargeDataChange)
-	EVT_TEXT(ID_LargeDataText, SettingDlg::OnLargeDataEdit)
-	EVT_COMMAND_SCROLL(ID_BlockSizeSldr, SettingDlg::OnBlockSizeChange)
-	EVT_TEXT(ID_BlockSizeText, SettingDlg::OnBlockSizeEdit)
-	EVT_COMMAND_SCROLL(ID_ResponseTimeSldr, SettingDlg::OnResponseTimeChange)
-	EVT_TEXT(ID_ResponseTimeText, SettingDlg::OnResponseTimeEdit)
-	//font
-	EVT_COMBOBOX(ID_FontCmb, SettingDlg::OnFontChange)
-	EVT_COMBOBOX(ID_FontSizeCmb, SettingDlg::OnFontSizeChange)
-	EVT_COMBOBOX(ID_TextColorCmb, SettingDlg::OnTextColorChange)
-	//script
-	EVT_CHECKBOX(ID_RunScriptChk, SettingDlg::OnRunScriptChk)
-	EVT_TEXT(ID_ScriptFileText, SettingDlg::OnScriptFileEdit)
-	EVT_BUTTON(ID_ScriptFileBtn, SettingDlg::OnScriptFileBtn)
-	//paint history depth
-	EVT_COMMAND_SCROLL(ID_PaintHistDepthSldr, SettingDlg::OnPaintHistDepthChange)
-	EVT_TEXT(ID_PaintHistDepthText, SettingDlg::OnPaintHistDepthEdit)
-	//show
-	EVT_SHOW(SettingDlg::OnShow)
+EVT_BUTTON(ID_SaveBtn, SettingDlg::OnSave)
+EVT_BUTTON(ID_CloseBtn, SettingDlg::OnClose)
+//project save
+EVT_CHECKBOX(ID_PrjSaveChk, SettingDlg::OnProjectSaveCheck)
+//real time compress
+EVT_CHECKBOX(ID_RealtimeCmpChk, SettingDlg::OnRealtimeCompressCheck)
+//mouse interactions
+EVT_CHECKBOX(ID_MouseIntChk, SettingDlg::OnMouseIntCheck)
+//depth peeling
+EVT_COMMAND_SCROLL(ID_PeelingLayersSldr, SettingDlg::OnPeelingLayersChange)
+EVT_TEXT(ID_PeelingLayersText, SettingDlg::OnPeelingLayersEdit)
+//micro blend
+EVT_CHECKBOX(ID_MicroBlendChk, SettingDlg::OnMicroBlendCheck)
+//shadow direction
+EVT_CHECKBOX(ID_ShadowDirChk, SettingDlg::OnShadowDirCheck)
+EVT_COMMAND_SCROLL(ID_ShadowDirSldr, SettingDlg::OnShadowDirChange)
+EVT_TEXT(ID_ShadowDirText, SettingDlg::OnShadowDirEdit)
+//gradient background
+EVT_CHECKBOX(ID_GradBgChk, SettingDlg::OnGradBgCheck)
+//link render views rotations
+EVT_CHECKBOX(ID_RotLinkChk, SettingDlg::OnRotLink)
+//override vox
+EVT_CHECKBOX(ID_OverrideVoxChk, SettingDlg::OnOverrideVoxCheck)
+//wavelength to color
+EVT_COMBOBOX(ID_WavColor1Cmb, SettingDlg::OnWavColor1Change)
+EVT_COMBOBOX(ID_WavColor2Cmb, SettingDlg::OnWavColor2Change)
+EVT_COMBOBOX(ID_WavColor3Cmb, SettingDlg::OnWavColor3Change)
+EVT_COMBOBOX(ID_WavColor4Cmb, SettingDlg::OnWavColor4Change)
+//memory settings
+EVT_CHECKBOX(ID_StreamingChk, SettingDlg::OnStreamingChk)
+EVT_COMMAND_SCROLL(ID_GraphicsMemSldr, SettingDlg::OnGraphicsMemChange)
+EVT_TEXT(ID_GraphicsMemText, SettingDlg::OnGraphicsMemEdit)
+EVT_COMMAND_SCROLL(ID_LargeDataSldr, SettingDlg::OnLargeDataChange)
+EVT_TEXT(ID_LargeDataText, SettingDlg::OnLargeDataEdit)
+EVT_COMMAND_SCROLL(ID_BlockSizeSldr, SettingDlg::OnBlockSizeChange)
+EVT_TEXT(ID_BlockSizeText, SettingDlg::OnBlockSizeEdit)
+EVT_COMMAND_SCROLL(ID_ResponseTimeSldr, SettingDlg::OnResponseTimeChange)
+EVT_TEXT(ID_ResponseTimeText, SettingDlg::OnResponseTimeEdit)
+//font
+EVT_COMBOBOX(ID_FontCmb, SettingDlg::OnFontChange)
+EVT_COMBOBOX(ID_FontSizeCmb, SettingDlg::OnFontSizeChange)
+EVT_COMBOBOX(ID_TextColorCmb, SettingDlg::OnTextColorChange)
+//script
+EVT_CHECKBOX(ID_RunScriptChk, SettingDlg::OnRunScriptChk)
+EVT_TEXT(ID_ScriptFileText, SettingDlg::OnScriptFileEdit)
+EVT_BUTTON(ID_ScriptFileBtn, SettingDlg::OnScriptFileBtn)
+//paint history depth
+EVT_COMMAND_SCROLL(ID_PaintHistDepthSldr, SettingDlg::OnPaintHistDepthChange)
+EVT_TEXT(ID_PaintHistDepthText, SettingDlg::OnPaintHistDepthEdit)
+//show
+EVT_SHOW(SettingDlg::OnShow)
 END_EVENT_TABLE()
 
 wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
@@ -115,7 +115,7 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(150, -1), 0, NULL, wxCB_READONLY);
 	//populate fonts
 	std::string exePath = wxStandardPaths::Get().GetExecutablePath().ToStdString();
-	exePath = exePath.substr(0,exePath.find_last_of(std::string()+GETSLASH()));
+	exePath = exePath.substr(0, exePath.find_last_of(std::string() + GETSLASH()));
 	wxString loc = wxString(exePath) + GETSLASH() + wxString("Fonts") +
 		GETSLASH() + wxString("*.ttf");
 	wxLogNull logNo;
@@ -134,7 +134,7 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Size:");
 	m_font_size_cmb = new wxComboBox(page, ID_FontSizeCmb, "",
 		wxDefaultPosition, wxSize(50, -1), 0, NULL, wxCB_READONLY);
-	for (int font_size=10; font_size<31; font_size+=2)
+	for (int font_size = 10; font_size < 31; font_size += 2)
 		m_font_size_cmb->Append(wxString::Format("%d", font_size));
 	sizer2_1->Add(st);
 	sizer2_1->Add(10, 10);
@@ -270,7 +270,7 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_shadow_dir_text = new wxTextCtrl(page, ID_ShadowDirText, "-45",
 		wxDefaultPosition, wxSize(40, 20), 0, vald_fp2);
-	st = new wxStaticText(page, 0, 
+	st = new wxStaticText(page, 0,
 		"The direction of the shadows, when shadow is enabled for volume data.");
 	sizer3_1->Add(m_shadow_dir_chk, 0, wxALIGN_CENTER);
 	sizer3_1->Add(m_shadow_dir_sldr, 1, wxEXPAND);
@@ -434,7 +434,7 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 
 	//override vox
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
-		new wxStaticBox(page,wxID_ANY, "Override Voxel Size"), wxVERTICAL);
+		new wxStaticBox(page, wxID_ANY, "Override Voxel Size"), wxVERTICAL);
 	wxBoxSizer *sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_override_vox_chk = new wxCheckBox(page, ID_OverrideVoxChk,
 		"Get voxel size info from the first opened dataset.");
@@ -535,10 +535,10 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 }
 
 SettingDlg::SettingDlg(wxWindow *frame, wxWindow *parent) :
-wxPanel(parent, wxID_ANY,
-		 wxDefaultPosition, wxSize(450, 750),
-		 0, "SettingDlg"),
-m_frame(frame)
+	wxPanel(parent, wxID_ANY,
+		wxDefaultPosition, wxSize(450, 750),
+		0, "SettingDlg"),
+	m_frame(frame)
 {
 	//notebook
 	wxNotebook *notebook = new wxNotebook(this, wxID_ANY);
@@ -625,11 +625,11 @@ void SettingDlg::GetSettings()
 	m_show_cursor = true;
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = expath.BeforeLast(GETSLASH(),NULL);
+	expath = expath.BeforeLast(GETSLASH(), NULL);
 #ifdef _WIN32
-    wxString dft = expath + "\\" + SETTING_FILE_NAME;
+	wxString dft = expath + "\\" + SETTING_FILE_NAME;
 #else
-    wxString dft = expath + "/../Resources/" + SETTING_FILE_NAME;
+	wxString dft = expath + "/../Resources/" + SETTING_FILE_NAME;
 #endif
 	wxFileInputStream is(dft);
 	if (!is.IsOk())
@@ -869,24 +869,24 @@ void SettingDlg::UpdateUI()
 		m_shadow_dir_y = 0.0;
 	}
 	double deg = GetShadowDir();
-	m_shadow_dir_sldr->SetValue(int(deg+0.5));
+	m_shadow_dir_sldr->SetValue(int(deg + 0.5));
 	m_shadow_dir_text->ChangeValue(wxString::Format("%.2f", deg));
 	//gradient background
 	m_grad_bg_chk->SetValue(m_grad_bg);
 	//override vox
 	m_override_vox_chk->SetValue(m_override_vox);
 	//wavelength to color
-	m_wav_color1_cmb->Select(m_wav_color1-1);
-	m_wav_color2_cmb->Select(m_wav_color2-1);
-	m_wav_color3_cmb->Select(m_wav_color3-1);
-	m_wav_color4_cmb->Select(m_wav_color4-1);
+	m_wav_color1_cmb->Select(m_wav_color1 - 1);
+	m_wav_color2_cmb->Select(m_wav_color2 - 1);
+	m_wav_color3_cmb->Select(m_wav_color3 - 1);
+	m_wav_color4_cmb->Select(m_wav_color4 - 1);
 	//font
 	wxString str = m_font_file.BeforeLast('.');
 	int font_sel = m_font_cmb->FindString(str);
 	if (font_sel != wxNOT_FOUND)
 		m_font_cmb->Select(font_sel);
 	long font_size;
-	for (unsigned int i=0; i<m_font_size_cmb->GetCount(); ++i)
+	for (unsigned int i = 0; i < m_font_size_cmb->GetCount(); ++i)
 	{
 		str = m_font_size_cmb->GetString(i);
 		if (str.ToLong(&font_size) &&
@@ -1034,11 +1034,11 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("device_id", m_cl_device_id);
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = expath.BeforeLast(GETSLASH(),NULL);
+	expath = expath.BeforeLast(GETSLASH(), NULL);
 #ifdef _WIN32
-    wxString dft = expath + "\\" + SETTING_FILE_NAME;
+	wxString dft = expath + "\\" + SETTING_FILE_NAME;
 #else
-    wxString dft = expath + "/../Resources/" + SETTING_FILE_NAME;
+	wxString dft = expath + "/../Resources/" + SETTING_FILE_NAME;
 #endif
 	wxFileOutputStream os(dft);
 	fconfig.Save(os);
@@ -1124,7 +1124,7 @@ void SettingDlg::OnMouseIntCheck(wxCommandEvent &event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 	{
-		for (int i=0 ; i<(int)vr_frame->GetViewList()->size() ; i++)
+		for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
 		{
 			VRenderView* vrv = (*vr_frame->GetViewList())[i];
 			if (vrv)
@@ -1148,7 +1148,7 @@ void SettingDlg::OnPeelingLayersEdit(wxCommandEvent &event)
 	wxString str = m_peeling_layers_text->GetValue();
 	long ival;
 	str.ToLong(&ival);
-	if (ival<=0)
+	if (ival <= 0)
 		return;
 	m_peeling_layers_sldr->SetValue(ival);
 	m_peeling_layers = ival;
@@ -1156,7 +1156,7 @@ void SettingDlg::OnPeelingLayersEdit(wxCommandEvent &event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 	{
-		for (int i=0 ; i<(int)vr_frame->GetViewList()->size() ; i++)
+		for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
 		{
 			VRenderView* vrv = (*vr_frame->GetViewList())[i];
 			if (vrv)
@@ -1178,7 +1178,7 @@ void SettingDlg::OnMicroBlendCheck(wxCommandEvent &event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 	{
-		for (int i=0 ; i<(int)vr_frame->GetViewList()->size() ; i++)
+		for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
 		{
 			VRenderView* vrv = (*vr_frame->GetViewList())[i];
 			if (vrv)
@@ -1217,7 +1217,7 @@ void SettingDlg::OnShadowDirCheck(wxCommandEvent &event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 	{
-		for (int i=0 ; i<(int)vr_frame->GetViewList()->size() ; i++)
+		for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
 		{
 			VRenderView* vrv = (*vr_frame->GetViewList())[i];
 			if (vrv)
@@ -1244,7 +1244,7 @@ void SettingDlg::OnShadowDirEdit(wxCommandEvent &event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 	{
-		for (int i=0 ; i<(int)vr_frame->GetViewList()->size() ; i++)
+		for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
 		{
 			VRenderView* vrv = (*vr_frame->GetViewList())[i];
 			if (vrv)
@@ -1308,7 +1308,7 @@ void SettingDlg::OnGradBgCheck(wxCommandEvent &event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 	{
-		for (int i=0 ; i<(int)vr_frame->GetViewList()->size() ; i++)
+		for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
 		{
 			VRenderView* vrv = (*vr_frame->GetViewList())[i];
 			if (vrv)
@@ -1323,14 +1323,17 @@ void SettingDlg::OnGradBgCheck(wxCommandEvent &event)
 //link rotations
 void SettingDlg::OnRotLink(wxCommandEvent& event)
 {
-	
-   VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-   if (vr_frame && 0 < vr_frame->GetViewNum()) {
-     VRenderView* view = vr_frame->GetView(0);
-	 if (view) {
-		view->OnRotLink(m_rot_link_chk->GetValue());
-	 }
-   }
+	bool linked_rot = m_rot_link_chk->GetValue();
+	VRenderGLView::m_linked_rot = linked_rot;
+	VRenderGLView::m_master_linked_view = 0;
+
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && 0 < vr_frame->GetViewNum())
+	{
+		VRenderView* view = vr_frame->GetView(0);
+		if (view)
+			view->RefreshGL();
+	}
 }
 
 //override vox
@@ -1443,7 +1446,7 @@ void SettingDlg::OnStreamingChk(wxCommandEvent &event)
 void SettingDlg::OnGraphicsMemChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
-	wxString str = wxString::Format("%d", ival*100);
+	wxString str = wxString::Format("%d", ival * 100);
 	m_graphics_mem_text->SetValue(str);
 }
 
@@ -1452,16 +1455,16 @@ void SettingDlg::OnGraphicsMemEdit(wxCommandEvent &event)
 	wxString str = m_graphics_mem_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	if (val<=0.0)
+	if (val <= 0.0)
 		return;
-	m_graphics_mem_sldr->SetValue(int(val/100.0));
+	m_graphics_mem_sldr->SetValue(int(val / 100.0));
 	m_graphics_mem = val;
 }
 
 void SettingDlg::OnLargeDataChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
-	wxString str = wxString::Format("%d", ival*10);
+	wxString str = wxString::Format("%d", ival * 10);
 	m_large_data_text->SetValue(str);
 }
 
@@ -1470,16 +1473,16 @@ void SettingDlg::OnLargeDataEdit(wxCommandEvent &event)
 	wxString str = m_large_data_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	if (val<0.0)
+	if (val < 0.0)
 		return;
-	m_large_data_sldr->SetValue(int(val/10.0));
+	m_large_data_sldr->SetValue(int(val / 10.0));
 	m_large_data_size = val;
 }
 
 void SettingDlg::OnBlockSizeChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
-	wxString str = wxString::Format("%d", 2<<(ival-1));
+	wxString str = wxString::Format("%d", 2 << (ival - 1));
 	m_block_size_text->SetValue(str);
 }
 
@@ -1488,16 +1491,16 @@ void SettingDlg::OnBlockSizeEdit(wxCommandEvent &event)
 	wxString str = m_block_size_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	if (val<=0.0)
+	if (val <= 0.0)
 		return;
-	m_block_size_sldr->SetValue(int(log(val)/log(2.0)+0.5));
+	m_block_size_sldr->SetValue(int(log(val) / log(2.0) + 0.5));
 	m_force_brick_size = val;
 }
 
 void SettingDlg::OnResponseTimeChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
-	wxString str = wxString::Format("%d", ival*10);
+	wxString str = wxString::Format("%d", ival * 10);
 	m_response_time_text->SetValue(str);
 }
 
@@ -1506,9 +1509,9 @@ void SettingDlg::OnResponseTimeEdit(wxCommandEvent &event)
 	wxString str = m_response_time_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	if (val<=0.0)
+	if (val <= 0.0)
 		return;
-	m_response_time_sldr->SetValue(int(val/10.0));
+	m_response_time_sldr->SetValue(int(val / 10.0));
 	m_up_time = val;
 }
 
@@ -1520,7 +1523,7 @@ void SettingDlg::OnFontChange(wxCommandEvent &event)
 	{
 		m_font_file = str + ".ttf";
 		std::string exePath = wxStandardPaths::Get().GetExecutablePath().ToStdString();
-		exePath = exePath.substr(0,exePath.find_last_of(std::string()+GETSLASH()));
+		exePath = exePath.substr(0, exePath.find_last_of(std::string() + GETSLASH()));
 		std::string loc = exePath + GETSLASH() + wxString("Fonts") +
 			GETSLASH() + str.ToStdString() + ".ttf";
 
@@ -1529,7 +1532,7 @@ void SettingDlg::OnFontChange(wxCommandEvent &event)
 		{
 			vr_frame->GetTextRenderer()->LoadNewFace(loc);
 			vr_frame->GetTextRenderer()->SetSize(m_text_size);
-			for (int i=0 ; i<(int)vr_frame->GetViewList()->size() ; i++)
+			for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
 			{
 				VRenderView* vrv = (*vr_frame->GetViewList())[i];
 				if (vrv)
@@ -1551,7 +1554,7 @@ void SettingDlg::OnFontSizeChange(wxCommandEvent &event)
 		if (vr_frame)
 		{
 			vr_frame->GetTextRenderer()->SetSize(m_text_size);
-			for (int i=0 ; i<(int)vr_frame->GetViewList()->size() ; i++)
+			for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
 			{
 				VRenderView* vrv = (*vr_frame->GetViewList())[i];
 				if (vrv)
@@ -1567,7 +1570,7 @@ void SettingDlg::OnTextColorChange(wxCommandEvent &event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 	{
-		for (int i = 0; i<(int)vr_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
 		{
 			VRenderView* vrv = (*vr_frame->GetViewList())[i];
 			if (vrv)
