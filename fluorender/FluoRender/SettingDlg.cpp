@@ -623,6 +623,7 @@ void SettingDlg::GetSettings()
 	m_paint_hist_depth = 0;
 	m_stay_top = false;
 	m_show_cursor = true;
+	m_last_tool = 0;
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = expath.BeforeLast(GETSLASH(), NULL);
@@ -762,6 +763,12 @@ void SettingDlg::GetSettings()
 		fconfig.SetPath("/full screen");
 		fconfig.Read("stay top", &m_stay_top);
 		fconfig.Read("show cursor", &m_show_cursor);
+	}
+	//last tool
+	if (fconfig.Exists("/last tool"))
+	{
+		fconfig.SetPath("/last tool");
+		fconfig.Read("value", &m_last_tool);
 	}
 	//memory settings
 	if (fconfig.Exists("/memory settings"))
@@ -983,6 +990,10 @@ void SettingDlg::SaveSettings()
 	fconfig.SetPath("/full screen");
 	fconfig.Write("stay top", m_stay_top);
 	fconfig.Write("show cursor", m_show_cursor);
+
+	//last tool
+	fconfig.SetPath("/last tool");
+	fconfig.Write("value", m_last_tool);
 
 	//memory settings
 	fconfig.SetPath("/memory settings");

@@ -32,6 +32,15 @@ DEALINGS IN THE SOFTWARE.
 
 #define SETTING_FILE_NAME "fluorender.set"
 
+#define TOOL_PAINT_BRUSH	1
+#define TOOL_MEASUREMENT	2
+#define TOOL_TRACKING		3
+#define TOOL_NOISE_REDUCTION	4
+#define TOOL_VOLUME_SIZE	5
+#define TOOL_COLOCALIZATION	6
+#define TOOL_CONVERT		7
+#define TOOL_OPENCL			8
+
 //enum BitmapFontType;
 class SettingDlg : public wxPanel
 {
@@ -182,6 +191,9 @@ public:
 	int GetGLProfileMask() {return m_gl_profile_mask;}
 	//cl device
 	int GetCLDeviceID() {return m_cl_device_id;}
+	//last tool
+	void SetLastTool(int tool) { m_last_tool = tool; }
+	int GetLastTool() { return m_last_tool; }
 
 private:
 	wxWindow* m_frame;
@@ -255,6 +267,8 @@ private:
 	//full screen
 	bool m_stay_top;
 	bool m_show_cursor;
+	//last tool
+	int m_last_tool;
 
 private:
 	//save project

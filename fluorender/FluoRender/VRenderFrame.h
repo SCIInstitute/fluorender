@@ -121,15 +121,17 @@ class VRenderFrame: public wxFrame
 		ID_FullScreen,
 		ID_ViewNew,
 		ID_ShowHideUI,
+		//tools
+		ID_LastTool,
 		ID_PaintTool,
+		ID_Measure,
+		ID_Trace,
 		ID_NoiseCancelling,
 		ID_Counting,
 		ID_Colocalization,
 		ID_Convert,
-		ID_ViewOrganize,
-		ID_Measure,
-		ID_Trace,
 		ID_Ocl,
+		//
 		ID_Settings,
 		//UI menu
 		ID_UIListView,
@@ -138,6 +140,7 @@ class VRenderFrame: public wxFrame
 		ID_UIAdjView,
 		ID_UIClipView,
 		ID_UIPropView,
+		ID_ViewOrganize,
 		//right aligned items
 		ID_CheckUpdates,
 		ID_Facebook,
@@ -434,13 +437,15 @@ private:
 	void OnOpenProject(wxCommandEvent& WXUNUSED(event));
 
 	void OnSettings(wxCommandEvent& WXUNUSED(event));
+	//tools
+	void OnLastTool(wxCommandEvent& WXUNUSED(event));
 	void OnPaintTool(wxCommandEvent& WXUNUSED(event));
-	void OnNoiseCancelling(wxCommandEvent& WXUNUSED(event));
-	void OnCounting(wxCommandEvent& WXUNUSED(event));
-	void OnConvert(wxCommandEvent& WXUNUSED(event));
-	void OnColocalization(wxCommandEvent& WXUNUSED(event));
 	void OnMeasure(wxCommandEvent& WXUNUSED(event));
 	void OnTrace(wxCommandEvent& WXUNUSED(event));
+	void OnNoiseCancelling(wxCommandEvent& WXUNUSED(event));
+	void OnCounting(wxCommandEvent& WXUNUSED(event));
+	void OnColocalization(wxCommandEvent& WXUNUSED(event));
+	void OnConvert(wxCommandEvent& WXUNUSED(event));
 	void OnOcl(wxCommandEvent& WXUNUSED(event));
 
 	void OnDraw(wxPaintEvent& event);

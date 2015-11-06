@@ -62,14 +62,17 @@ BEGIN_EVENT_TABLE(VRenderFrame, wxFrame)
 	EVT_MENU(ID_SaveProject, VRenderFrame::OnSaveProject)
 	EVT_MENU(ID_OpenProject, VRenderFrame::OnOpenProject)
 	EVT_MENU(ID_Settings, VRenderFrame::OnSettings)
+	//tools
+	EVT_MENU(ID_LastTool, VRenderFrame::OnLastTool)
 	EVT_MENU(ID_PaintTool, VRenderFrame::OnPaintTool)
+	EVT_MENU(ID_Measure, VRenderFrame::OnMeasure)
+	EVT_MENU(ID_Trace, VRenderFrame::OnTrace)
 	EVT_MENU(ID_NoiseCancelling, VRenderFrame::OnNoiseCancelling)
 	EVT_MENU(ID_Counting, VRenderFrame::OnCounting)
 	EVT_MENU(ID_Colocalization, VRenderFrame::OnColocalization)
 	EVT_MENU(ID_Convert, VRenderFrame::OnConvert)
-	EVT_MENU(ID_Measure, VRenderFrame::OnMeasure)
-	EVT_MENU(ID_Trace, VRenderFrame::OnTrace)
 	EVT_MENU(ID_Ocl, VRenderFrame::OnOcl)
+	//
 	EVT_MENU(ID_Twitter, VRenderFrame::OnTwitter)
 	EVT_MENU(ID_Facebook, VRenderFrame::OnFacebook)
 	EVT_MENU(ID_Manual, VRenderFrame::OnManual)
@@ -156,17 +159,17 @@ VRenderFrame::VRenderFrame(
 	m_tb_menu_ui->Check(ID_UIPropView, true);
 	//create the menu for edit/convert
 	m_tb_menu_edit = new wxMenu;
-	m_tb_menu_edit->Append(ID_PaintTool, "Analyze...",
-		"Show analysis tools for volume data");
+	m_tb_menu_edit->Append(ID_PaintTool, "Paint Brush...",
+		"Show paint brush tools");
 	m_tb_menu_edit->Append(ID_Measure, "Measurement...",
 		"Show measurement tools");
-	m_tb_menu_edit->Append(ID_Trace, "Components && Tracking...",
+	m_tb_menu_edit->Append(ID_Trace, "Tracking...",
 		"Show tracking tools");
 	m_tb_menu_edit->Append(ID_NoiseCancelling, "Noise Reduction...",
-		"Show noise reduction dialog");
-	m_tb_menu_edit->Append(ID_Counting, "Counting and Volume...",
-		"Show voxel counting and volume calculation tools");
-	m_tb_menu_edit->Append(ID_Colocalization, "Colocalization Analysis...",
+		"Show noise reduction tools");
+	m_tb_menu_edit->Append(ID_Counting, "Volume Size...",
+		"Show volume size calculation tools");
+	m_tb_menu_edit->Append(ID_Colocalization, "Colocalization...",
 		"Show colocalization analysis tools");
 	m_tb_menu_edit->Append(ID_Convert, "Convert...",
 		"Show tools for volume to mesh conversion");
@@ -201,12 +204,12 @@ VRenderFrame::VRenderFrame(
 		wxGetBitmapFromMemory(icon_open_mesh), wxNullBitmap, wxITEM_NORMAL,
 		"Open single or multiple mesh file(s)",
 		"Open single or multiple mesh file(s)");
-    m_main_tb->AddTool(ID_PaintTool, "Analyze",
+    m_main_tb->AddTool(ID_LastTool, "Analyze",
                        wxGetBitmapFromMemory(icon_edit), wxNullBitmap,
                        wxITEM_DROPDOWN,
                        "Tools for analyzing selected channel",
                        "Tools for analyzing selected channel");
-    m_main_tb->SetDropdownMenu(ID_PaintTool, m_tb_menu_edit);
+    m_main_tb->SetDropdownMenu(ID_LastTool, m_tb_menu_edit);
 	m_main_tb->AddSeparator();
 	m_main_tb->AddTool(ID_Settings, "Settings",
 		wxGetBitmapFromMemory(icon_settings), wxNullBitmap, wxITEM_NORMAL,
@@ -392,7 +395,7 @@ VRenderFrame::VRenderFrame(
 	//dialogs
 	//brush tool dialog
 	m_aui_mgr.AddPane(m_brush_tool_dlg, wxAuiPaneInfo().
-		Name("m_brush_tool_dlg").Caption("Analyze").
+		Name("m_brush_tool_dlg").Caption("Paint Brush").
 		Dockable(false).CloseButton(true));
 	m_aui_mgr.GetPane(m_brush_tool_dlg).Float();
 	m_aui_mgr.GetPane(m_brush_tool_dlg).Hide();
@@ -404,7 +407,7 @@ VRenderFrame::VRenderFrame(
 	m_aui_mgr.GetPane(m_noise_cancelling_dlg).Hide();
 	//counting dialog
 	m_aui_mgr.AddPane(m_counting_dlg, wxAuiPaneInfo().
-		Name("m_counting_dlg").Caption("Counting and Volume").
+		Name("m_counting_dlg").Caption("Volume Size").
 		Dockable(false).CloseButton(true));
 	m_aui_mgr.GetPane(m_counting_dlg).Float();
 	m_aui_mgr.GetPane(m_counting_dlg).Hide();
@@ -416,7 +419,7 @@ VRenderFrame::VRenderFrame(
 	m_aui_mgr.GetPane(m_convert_dlg).Hide();
 	//colocalization dialog
 	m_aui_mgr.AddPane(m_colocalization_dlg, wxAuiPaneInfo().
-		Name("m_colocalization_dlg").Caption("Colocalization Analysis").
+		Name("m_colocalization_dlg").Caption("Colocalization").
 		Dockable(false).CloseButton(true));
 	m_aui_mgr.GetPane(m_colocalization_dlg).Float();
 	m_aui_mgr.GetPane(m_colocalization_dlg).Hide();
@@ -428,7 +431,7 @@ VRenderFrame::VRenderFrame(
 	m_aui_mgr.GetPane(m_measure_dlg).Hide();
 	//trace dialog
 	m_aui_mgr.AddPane(m_trace_dlg, wxAuiPaneInfo().
-		Name("m_trace_dlg").Caption("Components & Tracking").
+		Name("m_trace_dlg").Caption("Tracking").
 		Dockable(false).CloseButton(true));
 	m_aui_mgr.GetPane(m_trace_dlg).Float();
 	m_aui_mgr.GetPane(m_trace_dlg).Hide();
@@ -512,20 +515,20 @@ VRenderFrame::VRenderFrame(
 	quit->SetBitmap(wxArtProvider::GetBitmap(wxART_QUIT));
 	m_top_file->Append(quit);
 	//tool options
-	m = new wxMenuItem(m_top_tools,ID_PaintTool, wxT("&Analysis Tools..."));
+	m = new wxMenuItem(m_top_tools,ID_PaintTool, wxT("&Paint Brush..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_edit_mini));
 	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools,ID_Measure, wxT("&Measurement Tools..."));
+	m = new wxMenuItem(m_top_tools,ID_Measure, wxT("&Measurement..."));
 	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools,ID_Trace, wxT("Components && &Tracking..."));
+	m = new wxMenuItem(m_top_tools,ID_Trace, wxT("&Tracking..."));
 	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools,ID_NoiseCancelling, wxT("&Noise Reduction..."));
+	m = new wxMenuItem(m_top_tools,ID_NoiseCancelling, wxT("Noise &Reduction..."));
 	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools,ID_Counting, wxT("&Counting and Volume..."));
+	m = new wxMenuItem(m_top_tools,ID_Counting, wxT("&Volume Size..."));
 	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools,ID_Colocalization, wxT("Colocalization &Analysis..."));
+	m = new wxMenuItem(m_top_tools,ID_Colocalization, wxT("&Colocalization..."));
 	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools,ID_Convert, wxT("Con&vert..."));
+	m = new wxMenuItem(m_top_tools,ID_Convert, wxT("Co&nvert..."));
 	m_top_tools->Append(m);
 	m = new wxMenuItem(m_top_tools, ID_Ocl, wxT("&OpenCL Kernel Editor..."));
 	m_top_tools->Append(m);
@@ -4257,16 +4260,50 @@ void VRenderFrame::OnSettings(wxCommandEvent& WXUNUSED(event))
 	m_aui_mgr.Update();
 }
 
+//tools
+void VRenderFrame::OnLastTool(wxCommandEvent& WXUNUSED(event))
+{
+	if (!m_setting_dlg)
+	{
+		ShowPaintTool();
+		return;
+	}
+
+	unsigned int tool = m_setting_dlg->GetLastTool();
+	switch (tool)
+	{
+	case 0:
+	case TOOL_PAINT_BRUSH:
+	default:
+		ShowPaintTool();
+		break;
+	case TOOL_MEASUREMENT:
+		ShowMeasureDlg();
+		break;
+	case TOOL_TRACKING:
+		ShowTraceDlg();
+		break;
+	case TOOL_NOISE_REDUCTION:
+		ShowNoiseCancellingDlg();
+		break;
+	case TOOL_VOLUME_SIZE:
+		ShowCountingDlg();
+		break;
+	case TOOL_COLOCALIZATION:
+		ShowColocalizationDlg();
+		break;
+	case TOOL_CONVERT:
+		ShowConvertDlg();
+		break;
+	case TOOL_OPENCL:
+		ShowOclDlg();
+		break;
+	}
+}
+
 void VRenderFrame::OnPaintTool(wxCommandEvent& WXUNUSED(event))
 {
 	ShowPaintTool();
-}
-
-void VRenderFrame::ShowPaintTool()
-{
-	m_aui_mgr.GetPane(m_brush_tool_dlg).Show();
-	m_aui_mgr.GetPane(m_brush_tool_dlg).Float();
-	m_aui_mgr.Update();
 }
 
 void VRenderFrame::OnMeasure(wxCommandEvent& WXUNUSED(event))
@@ -4274,23 +4311,9 @@ void VRenderFrame::OnMeasure(wxCommandEvent& WXUNUSED(event))
 	ShowMeasureDlg();
 }
 
-void VRenderFrame::ShowMeasureDlg()
-{
-	m_aui_mgr.GetPane(m_measure_dlg).Show();
-	m_aui_mgr.GetPane(m_measure_dlg).Float();
-	m_aui_mgr.Update();
-}
-
 void VRenderFrame::OnNoiseCancelling(wxCommandEvent& WXUNUSED(event))
 {
 	ShowNoiseCancellingDlg();
-}
-
-void VRenderFrame::ShowNoiseCancellingDlg()
-{
-	m_aui_mgr.GetPane(m_noise_cancelling_dlg).Show();
-	m_aui_mgr.GetPane(m_noise_cancelling_dlg).Float();
-	m_aui_mgr.Update();
 }
 
 void VRenderFrame::OnCounting(wxCommandEvent& WXUNUSED(event))
@@ -4298,23 +4321,9 @@ void VRenderFrame::OnCounting(wxCommandEvent& WXUNUSED(event))
 	ShowCountingDlg();
 }
 
-void VRenderFrame::ShowCountingDlg()
-{
-	m_aui_mgr.GetPane(m_counting_dlg).Show();
-	m_aui_mgr.GetPane(m_counting_dlg).Float();
-	m_aui_mgr.Update();
-}
-
 void VRenderFrame::OnColocalization(wxCommandEvent& WXUNUSED(event))
 {
 	ShowColocalizationDlg();
-}
-
-void VRenderFrame::ShowColocalizationDlg()
-{
-	m_aui_mgr.GetPane(m_colocalization_dlg).Show();
-	m_aui_mgr.GetPane(m_colocalization_dlg).Float();
-	m_aui_mgr.Update();
 }
 
 void VRenderFrame::OnConvert(wxCommandEvent& WXUNUSED(event))
@@ -4322,23 +4331,9 @@ void VRenderFrame::OnConvert(wxCommandEvent& WXUNUSED(event))
 	ShowConvertDlg();
 }
 
-void VRenderFrame::ShowConvertDlg()
-{
-	m_aui_mgr.GetPane(m_convert_dlg).Show();
-	m_aui_mgr.GetPane(m_convert_dlg).Float();
-	m_aui_mgr.Update();
-}
-
 void VRenderFrame::OnTrace(wxCommandEvent& WXUNUSED(event))
 {
 	ShowTraceDlg();
-}
-
-void VRenderFrame::ShowTraceDlg()
-{
-	m_aui_mgr.GetPane(m_trace_dlg).Show();
-	m_aui_mgr.GetPane(m_trace_dlg).Float();
-	m_aui_mgr.Update();
 }
 
 void VRenderFrame::OnOcl(wxCommandEvent& WXUNUSED(event))
@@ -4346,11 +4341,76 @@ void VRenderFrame::OnOcl(wxCommandEvent& WXUNUSED(event))
 	ShowOclDlg();
 }
 
+void VRenderFrame::ShowPaintTool()
+{
+	m_aui_mgr.GetPane(m_brush_tool_dlg).Show();
+	m_aui_mgr.GetPane(m_brush_tool_dlg).Float();
+	m_aui_mgr.Update();
+	if (m_setting_dlg)
+		m_setting_dlg->SetLastTool(TOOL_PAINT_BRUSH);
+}
+
+void VRenderFrame::ShowMeasureDlg()
+{
+	m_aui_mgr.GetPane(m_measure_dlg).Show();
+	m_aui_mgr.GetPane(m_measure_dlg).Float();
+	m_aui_mgr.Update();
+	if (m_setting_dlg)
+		m_setting_dlg->SetLastTool(TOOL_MEASUREMENT);
+}
+
+void VRenderFrame::ShowTraceDlg()
+{
+	m_aui_mgr.GetPane(m_trace_dlg).Show();
+	m_aui_mgr.GetPane(m_trace_dlg).Float();
+	m_aui_mgr.Update();
+	if (m_setting_dlg)
+		m_setting_dlg->SetLastTool(TOOL_TRACKING);
+}
+
+void VRenderFrame::ShowNoiseCancellingDlg()
+{
+	m_aui_mgr.GetPane(m_noise_cancelling_dlg).Show();
+	m_aui_mgr.GetPane(m_noise_cancelling_dlg).Float();
+	m_aui_mgr.Update();
+	if (m_setting_dlg)
+		m_setting_dlg->SetLastTool(TOOL_NOISE_REDUCTION);
+}
+
+void VRenderFrame::ShowCountingDlg()
+{
+	m_aui_mgr.GetPane(m_counting_dlg).Show();
+	m_aui_mgr.GetPane(m_counting_dlg).Float();
+	m_aui_mgr.Update();
+	if (m_setting_dlg)
+		m_setting_dlg->SetLastTool(TOOL_VOLUME_SIZE);
+}
+
+void VRenderFrame::ShowColocalizationDlg()
+{
+	m_aui_mgr.GetPane(m_colocalization_dlg).Show();
+	m_aui_mgr.GetPane(m_colocalization_dlg).Float();
+	m_aui_mgr.Update();
+	if (m_setting_dlg)
+		m_setting_dlg->SetLastTool(TOOL_COLOCALIZATION);
+}
+
+void VRenderFrame::ShowConvertDlg()
+{
+	m_aui_mgr.GetPane(m_convert_dlg).Show();
+	m_aui_mgr.GetPane(m_convert_dlg).Float();
+	m_aui_mgr.Update();
+	if (m_setting_dlg)
+		m_setting_dlg->SetLastTool(TOOL_CONVERT);
+}
+
 void VRenderFrame::ShowOclDlg()
 {
 	m_aui_mgr.GetPane(m_ocl_dlg).Show();
 	m_aui_mgr.GetPane(m_ocl_dlg).Float();
 	m_aui_mgr.Update();
+	if (m_setting_dlg)
+		m_setting_dlg->SetLastTool(TOOL_OPENCL);
 }
 
 void VRenderFrame::SetTextureUndos()
