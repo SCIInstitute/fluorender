@@ -5396,6 +5396,7 @@ void VRenderGLView::RunOpenCL(wxFileConfig &fconfig)
 	if (!m_cur_vol)
 		return;
 
+	m_cur_vol->GetVR()->clear_tex_current();
 	m_kernel_executor.LoadCode(clname);
 	m_kernel_executor.SetVolume(m_cur_vol);
 	m_kernel_executor.SetDuplicate(true);

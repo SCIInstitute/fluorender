@@ -165,9 +165,6 @@ namespace FLIVR
 		// Returns true if it is visible.
 		bool test_against_view(const BBox &bbox, bool persp=false);
 
-		//exposed load brick
-		GLint load_brick_cl(int c, vector<TextureBrick*> *b, int i);
-
 		//memory swap
 		static void set_mem_swap(bool val) {mem_swap_ = val;}
 		static bool get_mem_swap() {return mem_swap_;}
