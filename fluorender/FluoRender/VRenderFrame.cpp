@@ -159,22 +159,30 @@ VRenderFrame::VRenderFrame(
 	m_tb_menu_ui->Check(ID_UIPropView, true);
 	//create the menu for edit/convert
 	m_tb_menu_edit = new wxMenu;
-	m_tb_menu_edit->Append(ID_PaintTool, "Paint Brush...",
-		"Show paint brush tools");
-	m_tb_menu_edit->Append(ID_Measure, "Measurement...",
-		"Show measurement tools");
-	m_tb_menu_edit->Append(ID_Trace, "Tracking...",
-		"Show tracking tools");
-	m_tb_menu_edit->Append(ID_NoiseCancelling, "Noise Reduction...",
-		"Show noise reduction tools");
-	m_tb_menu_edit->Append(ID_Counting, "Volume Size...",
-		"Show volume size calculation tools");
-	m_tb_menu_edit->Append(ID_Colocalization, "Colocalization...",
-		"Show colocalization analysis tools");
-	m_tb_menu_edit->Append(ID_Convert, "Convert...",
-		"Show tools for volume to mesh conversion");
-	m_tb_menu_edit->Append(ID_Ocl, "OpenCL Kernel Editor...",
-		"Show OpenCL kernel editor window");
+	wxMenuItem *m = new wxMenuItem(m_tb_menu_edit, ID_PaintTool, wxT("Paint Brush..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_paint_brush_mini));
+	m_tb_menu_edit->Append(m);
+	m = new wxMenuItem(m_tb_menu_edit, ID_Measure, wxT("Measurement..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_measurement_mini));
+	m_tb_menu_edit->Append(m);
+	m = new wxMenuItem(m_tb_menu_edit, ID_Trace, wxT("Tracking..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_tracking_mini));
+	m_tb_menu_edit->Append(m);
+	m = new wxMenuItem(m_tb_menu_edit, ID_NoiseCancelling, wxT("Noise Reduction..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_noise_reduc_mini));
+	m_tb_menu_edit->Append(m);
+	m = new wxMenuItem(m_tb_menu_edit, ID_Counting, wxT("Volume Size..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_volume_size_mini));
+	m_tb_menu_edit->Append(m);
+	m = new wxMenuItem(m_tb_menu_edit, ID_Colocalization, wxT("Colocalization..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_colocalization_mini));
+	m_tb_menu_edit->Append(m);
+	m = new wxMenuItem(m_tb_menu_edit, ID_Convert, wxT("Convert..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_convert_mini));
+	m_tb_menu_edit->Append(m);
+	m = new wxMenuItem(m_tb_menu_edit, ID_Ocl, wxT("OpenCL Kernel Editor..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_opencl_mini));
+	m_tb_menu_edit->Append(m);
 	//build the main toolbar
 	//add tools
 	m_main_tb->AddTool(ID_OpenVolume, "Open Volume",
@@ -204,12 +212,12 @@ VRenderFrame::VRenderFrame(
 		wxGetBitmapFromMemory(icon_open_mesh), wxNullBitmap, wxITEM_NORMAL,
 		"Open single or multiple mesh file(s)",
 		"Open single or multiple mesh file(s)");
-    m_main_tb->AddTool(ID_LastTool, "Analyze",
-                       wxGetBitmapFromMemory(icon_edit), wxNullBitmap,
-                       wxITEM_DROPDOWN,
-                       "Tools for analyzing selected channel",
-                       "Tools for analyzing selected channel");
-    m_main_tb->SetDropdownMenu(ID_LastTool, m_tb_menu_edit);
+	m_main_tb->AddTool(ID_LastTool, "Analyze",
+		wxGetBitmapFromMemory(icon_paint_brush), wxNullBitmap,
+		wxITEM_DROPDOWN,
+		"Tools for analyzing selected channel",
+		"Tools for analyzing selected channel");
+	m_main_tb->SetDropdownMenu(ID_LastTool, m_tb_menu_edit);
 	m_main_tb->AddSeparator();
 	m_main_tb->AddTool(ID_Settings, "Settings",
 		wxGetBitmapFromMemory(icon_settings), wxNullBitmap, wxITEM_NORMAL,
@@ -498,7 +506,7 @@ VRenderFrame::VRenderFrame(
 	m_top_window = new wxMenu;
 	m_top_help = new wxMenu;
 	//file options
-	wxMenuItem *m = new wxMenuItem(m_top_file,ID_OpenVolume, wxT("Open &Volume"));
+	m = new wxMenuItem(m_top_file,ID_OpenVolume, wxT("Open &Volume"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_open_volume_mini));
 	m_top_file->Append(m);
 	m = new wxMenuItem(m_top_file,ID_OpenMesh, wxT("Open &Mesh"));
@@ -516,21 +524,28 @@ VRenderFrame::VRenderFrame(
 	m_top_file->Append(quit);
 	//tool options
 	m = new wxMenuItem(m_top_tools,ID_PaintTool, wxT("&Paint Brush..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_edit_mini));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_paint_brush_mini));
 	m_top_tools->Append(m);
 	m = new wxMenuItem(m_top_tools,ID_Measure, wxT("&Measurement..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_measurement_mini));
 	m_top_tools->Append(m);
 	m = new wxMenuItem(m_top_tools,ID_Trace, wxT("&Tracking..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_tracking_mini));
 	m_top_tools->Append(m);
 	m = new wxMenuItem(m_top_tools,ID_NoiseCancelling, wxT("Noise &Reduction..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_noise_reduc_mini));
 	m_top_tools->Append(m);
 	m = new wxMenuItem(m_top_tools,ID_Counting, wxT("&Volume Size..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_volume_size_mini));
 	m_top_tools->Append(m);
 	m = new wxMenuItem(m_top_tools,ID_Colocalization, wxT("&Colocalization..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_colocalization_mini));
 	m_top_tools->Append(m);
 	m = new wxMenuItem(m_top_tools,ID_Convert, wxT("Co&nvert..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_convert_mini));
 	m_top_tools->Append(m);
 	m = new wxMenuItem(m_top_tools, ID_Ocl, wxT("&OpenCL Kernel Editor..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_opencl_mini));
 	m_top_tools->Append(m);
 	m_top_tools->Append(wxID_SEPARATOR);
 	m = new wxMenuItem(m_top_tools,ID_Settings, wxT("&Settings..."));
@@ -582,8 +597,10 @@ VRenderFrame::VRenderFrame(
 	m->SetBitmap(wxGetBitmapFromMemory(icon_facebook_mini));
 	m_top_help->Append(m);
 	m = new wxMenuItem(m_top_help,ID_Manual, wxT("&Online Manual"));
+	m->SetBitmap(wxGetBitmapFromMemory(web_pdf_mini));
 	m_top_help->Append(m);
 	m = new wxMenuItem(m_top_help,ID_Tutorial, wxT("Online T&utorials"));
+	m->SetBitmap(wxGetBitmapFromMemory(web_pdf_mini));
 	m_top_help->Append(m);
 	m = new wxMenuItem(m_top_help,ID_Info, wxT("&About FluoRender..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_about_mini));
@@ -594,6 +611,47 @@ VRenderFrame::VRenderFrame(
 	m_top_menu->Append(m_top_window,wxT("&Windows"));
 	m_top_menu->Append(m_top_help,wxT("&Help"));
 	SetMenuBar(m_top_menu);
+
+	//set analyze icon
+	if (m_setting_dlg)
+	{
+		switch (m_setting_dlg->GetLastTool())
+		{
+		case TOOL_PAINT_BRUSH:
+		default:
+			m_main_tb->SetToolNormalBitmap(ID_LastTool,
+				wxGetBitmapFromMemory(icon_paint_brush));
+			break;
+		case TOOL_MEASUREMENT:
+			m_main_tb->SetToolNormalBitmap(ID_LastTool,
+				wxGetBitmapFromMemory(icon_measurement));
+			break;
+		case TOOL_TRACKING:
+			m_main_tb->SetToolNormalBitmap(ID_LastTool,
+				wxGetBitmapFromMemory(icon_tracking));
+			break;
+		case TOOL_NOISE_REDUCTION:
+			m_main_tb->SetToolNormalBitmap(ID_LastTool,
+				wxGetBitmapFromMemory(icon_noise_reduc));
+			break;
+		case TOOL_VOLUME_SIZE:
+			m_main_tb->SetToolNormalBitmap(ID_LastTool,
+				wxGetBitmapFromMemory(icon_volume_size));
+			break;
+		case TOOL_COLOCALIZATION:
+			m_main_tb->SetToolNormalBitmap(ID_LastTool,
+				wxGetBitmapFromMemory(icon_colocalization));
+			break;
+		case TOOL_CONVERT:
+			m_main_tb->SetToolNormalBitmap(ID_LastTool,
+				wxGetBitmapFromMemory(icon_convert));
+			break;
+		case TOOL_OPENCL:
+			m_main_tb->SetToolNormalBitmap(ID_LastTool,
+				wxGetBitmapFromMemory(icon_opencl));
+			break;
+		}
+	}
 }
 
 VRenderFrame::~VRenderFrame()
@@ -4348,6 +4406,8 @@ void VRenderFrame::ShowPaintTool()
 	m_aui_mgr.Update();
 	if (m_setting_dlg)
 		m_setting_dlg->SetLastTool(TOOL_PAINT_BRUSH);
+	m_main_tb->SetToolNormalBitmap(ID_LastTool,
+		wxGetBitmapFromMemory(icon_paint_brush));
 }
 
 void VRenderFrame::ShowMeasureDlg()
@@ -4357,6 +4417,8 @@ void VRenderFrame::ShowMeasureDlg()
 	m_aui_mgr.Update();
 	if (m_setting_dlg)
 		m_setting_dlg->SetLastTool(TOOL_MEASUREMENT);
+	m_main_tb->SetToolNormalBitmap(ID_LastTool,
+		wxGetBitmapFromMemory(icon_measurement));
 }
 
 void VRenderFrame::ShowTraceDlg()
@@ -4366,6 +4428,8 @@ void VRenderFrame::ShowTraceDlg()
 	m_aui_mgr.Update();
 	if (m_setting_dlg)
 		m_setting_dlg->SetLastTool(TOOL_TRACKING);
+	m_main_tb->SetToolNormalBitmap(ID_LastTool,
+		wxGetBitmapFromMemory(icon_tracking));
 }
 
 void VRenderFrame::ShowNoiseCancellingDlg()
@@ -4375,6 +4439,8 @@ void VRenderFrame::ShowNoiseCancellingDlg()
 	m_aui_mgr.Update();
 	if (m_setting_dlg)
 		m_setting_dlg->SetLastTool(TOOL_NOISE_REDUCTION);
+	m_main_tb->SetToolNormalBitmap(ID_LastTool,
+		wxGetBitmapFromMemory(icon_noise_reduc));
 }
 
 void VRenderFrame::ShowCountingDlg()
@@ -4384,6 +4450,8 @@ void VRenderFrame::ShowCountingDlg()
 	m_aui_mgr.Update();
 	if (m_setting_dlg)
 		m_setting_dlg->SetLastTool(TOOL_VOLUME_SIZE);
+	m_main_tb->SetToolNormalBitmap(ID_LastTool,
+		wxGetBitmapFromMemory(icon_volume_size));
 }
 
 void VRenderFrame::ShowColocalizationDlg()
@@ -4393,6 +4461,8 @@ void VRenderFrame::ShowColocalizationDlg()
 	m_aui_mgr.Update();
 	if (m_setting_dlg)
 		m_setting_dlg->SetLastTool(TOOL_COLOCALIZATION);
+	m_main_tb->SetToolNormalBitmap(ID_LastTool,
+		wxGetBitmapFromMemory(icon_colocalization));
 }
 
 void VRenderFrame::ShowConvertDlg()
@@ -4402,6 +4472,8 @@ void VRenderFrame::ShowConvertDlg()
 	m_aui_mgr.Update();
 	if (m_setting_dlg)
 		m_setting_dlg->SetLastTool(TOOL_CONVERT);
+	m_main_tb->SetToolNormalBitmap(ID_LastTool,
+		wxGetBitmapFromMemory(icon_convert));
 }
 
 void VRenderFrame::ShowOclDlg()
@@ -4411,6 +4483,8 @@ void VRenderFrame::ShowOclDlg()
 	m_aui_mgr.Update();
 	if (m_setting_dlg)
 		m_setting_dlg->SetLastTool(TOOL_OPENCL);
+	m_main_tb->SetToolNormalBitmap(ID_LastTool,
+		wxGetBitmapFromMemory(icon_opencl));
 }
 
 void VRenderFrame::SetTextureUndos()

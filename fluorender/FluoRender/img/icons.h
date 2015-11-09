@@ -1,5 +1,119 @@
+/*
+For more information, please see: http://software.sci.utah.edu
+
+The MIT License
+
+Copyright (c) 2014 Scientific Computing and Imaging Institute,
+University of Utah.
+
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+*/
+
+#ifndef _ICONS_H_
+#define _ICONS_H_
 class icons {
 public:
+	//main frame toolbar icons
+	/* icon_open_volume.png - 3527 bytes */
+	const static unsigned char icon_open_volume_png[3527];
+	/* icon_open_volume_mini.png - 859 bytes */
+	const static unsigned char icon_open_volume_mini_png[859];
+	/* icon_open_project.png - 4213 bytes */
+	const static unsigned char icon_open_project_png[4213];
+	/* icon_open_project_mini.png - 902 bytes */
+	const static unsigned char icon_open_project_mini_png[902];
+	/* icon_save_project.png - 2809 bytes */
+	const static unsigned char icon_save_project_png[2809];
+	/* icon_save_project_mini.png - 777 bytes */
+	const static unsigned char icon_save_project_mini_png[777];
+	/* icon_new_view.png - 4029 bytes */
+	const static unsigned char icon_new_view_png[4029];
+	/* icon_new_view_mini.png - 840 bytes */
+	const static unsigned char icon_new_view_mini_png[840];
+	/* icon_show_hide_ui.png - 2673 bytes */
+	const static unsigned char icon_show_hide_ui_png[2673];
+	/* icon_show_hide_ui_mini.png - 759 bytes */
+	const static unsigned char icon_show_hide_ui_mini_png[759];
+	/* icon_open_mesh.png - 6116 bytes */
+	const static unsigned char icon_open_mesh_png[6116];
+	/* icon_open_mesh_mini.png - 1109 bytes */
+	const static unsigned char icon_open_mesh_mini_png[1109];
+	/* icon_settings.png - 4147 bytes */
+	const static unsigned char icon_settings_png[4147];
+	/* icon_settings_mini.png - 856 bytes */
+	const static unsigned char icon_settings_mini_png[856];
+	/* icon_check_updates.png - 4044 bytes */
+	const static unsigned char icon_check_updates_png[4044];
+	/* icon_check_updates_mini.png - 817 bytes */
+	const static unsigned char icon_check_updates_mini_png[817];
+	/* icon_facebook.png - 3435 bytes */
+	const static unsigned char icon_facebook_png[3435];
+	/* icon_facebook_mini.png - 760 bytes */
+	const static unsigned char icon_facebook_mini_png[760];
+	/* icon_twitter.png - 3703 bytes */
+	const static unsigned char icon_twitter_png[3703];
+	/* icon_twitter_mini.png - 896 bytes */
+	const static unsigned char icon_twitter_mini_png[896];
+	/* icon_about.png - 2655 bytes */
+	const static unsigned char icon_about_png[2655];
+	/* icon_about_mini.png - 731 bytes */
+	const static unsigned char icon_about_mini_png[731];
+	/* web_pdf_mini.png - 15330 bytes */
+	const static unsigned char web_pdf_mini_png[15330];
+	//tools
+	/* icon_paint_brush.png - 18630 bytes */
+	const static unsigned char icon_paint_brush_png[18630];
+	/* icon_paint_brush_mini.png - 15652 bytes */
+	const static unsigned char icon_paint_brush_mini_png[15652];
+	/* icon_measurement.png - 19465 bytes */
+	const static unsigned char icon_measurement_png[19465];
+	/* icon_measurement_mini.png - 15784 bytes */
+	const static unsigned char icon_measurement_mini_png[15784];
+	/* icon_tracking.png - 18352 bytes */
+	const static unsigned char icon_tracking_png[18352];
+	/* icon_tracking_mini.png - 15664 bytes */
+	const static unsigned char icon_tracking_mini_png[15664];
+	/* icon_noise_reduc.png - 19419 bytes */
+	const static unsigned char icon_noise_reduc_png[19419];
+	/* icon_noise_reduc_mini.png - 15745 bytes */
+	const static unsigned char icon_noise_reduc_mini_png[15745];
+	/* icon_volume_size.png - 19350 bytes */
+	const static unsigned char icon_volume_size_png[19350];
+	/* icon_volume_size_mini.png - 15781 bytes */
+	const static unsigned char icon_volume_size_mini_png[15781];
+	/* icon_colocalization.png - 19331 bytes */
+	const static unsigned char icon_colocalization_png[19331];
+	/* icon_colocalization_mini.png - 15766 bytes */
+	const static unsigned char icon_colocalization_mini_png[15766];
+	/* icon_convert.png - 18947 bytes */
+	const static unsigned char icon_convert_png[18947];
+	/* icon_convert_mini.png - 15765 bytes */
+	const static unsigned char icon_convert_mini_png[15765];
+	/* icon_opencl.png - 19114 bytes */
+	const static unsigned char icon_opencl_png[19114];
+	/* icon_opencl_mini.png - 15693 bytes */
+	const static unsigned char icon_opencl_mini_png[15693];
+
+	/* info.png - 1262 bytes */
+	const static unsigned char info_png[1262];
+
 /* align.png - 1470 bytes */
 const static unsigned char align_png[1470];
 
@@ -41,90 +155,6 @@ const static unsigned char icon_16_png[18975];
 
 /* icon_32.png - 20515 bytes */
 const static unsigned char icon_32_png[20515];
-
-/* icon_about.png - 2655 bytes */
-const static unsigned char icon_about_png[2655];
-
-/* icon_about_mini.png - 731 bytes */
-const static unsigned char icon_about_mini_png[731];
-
-/* icon_check_updates.png - 4044 bytes */
-const static unsigned char icon_check_updates_png[4044];
-
-/* icon_check_updates_mini.png - 817 bytes */
-const static unsigned char icon_check_updates_mini_png[817];
-
-/* icon_edit.png - 17941 bytes */
-const static unsigned char icon_edit_png[17941];
-
-/* icon_edit_mini.png - 806 bytes */
-const static unsigned char icon_edit_mini_png[806];
-
-/* icon_facebook.png - 3435 bytes */
-const static unsigned char icon_facebook_png[3435];
-
-/* icon_facebook_mini.png - 760 bytes */
-const static unsigned char icon_facebook_mini_png[760];
-
-/* icon_measure.png - 5100 bytes */
-const static unsigned char icon_measure_png[5100];
-
-/* icon_new_view.png - 4029 bytes */
-const static unsigned char icon_new_view_png[4029];
-
-/* icon_new_view_mini.png - 840 bytes */
-const static unsigned char icon_new_view_mini_png[840];
-
-/* icon_open_mesh.png - 6116 bytes */
-const static unsigned char icon_open_mesh_png[6116];
-
-/* icon_open_mesh_mini.png - 1109 bytes */
-const static unsigned char icon_open_mesh_mini_png[1109];
-
-/* icon_open_project.png - 4213 bytes */
-const static unsigned char icon_open_project_png[4213];
-
-/* icon_open_project_mini.png - 902 bytes */
-const static unsigned char icon_open_project_mini_png[902];
-
-/* icon_open_volume.png - 3527 bytes */
-const static unsigned char icon_open_volume_png[3527];
-
-/* icon_open_volume_mini.png - 859 bytes */
-const static unsigned char icon_open_volume_mini_png[859];
-
-/* icon_recorder.png - 6124 bytes */
-const static unsigned char icon_recorder_png[6124];
-
-/* icon_recorder_mini.png - 3379 bytes */
-const static unsigned char icon_recorder_mini_png[3379];
-
-/* icon_save_project.png - 2809 bytes */
-const static unsigned char icon_save_project_png[2809];
-
-/* icon_save_project_mini.png - 777 bytes */
-const static unsigned char icon_save_project_mini_png[777];
-
-/* icon_settings.png - 4147 bytes */
-const static unsigned char icon_settings_png[4147];
-
-/* icon_settings_mini.png - 856 bytes */
-const static unsigned char icon_settings_mini_png[856];
-
-/* icon_show_hide_ui.png - 2673 bytes */
-const static unsigned char icon_show_hide_ui_png[2673];
-
-/* icon_show_hide_ui_mini.png - 759 bytes */
-const static unsigned char icon_show_hide_ui_mini_png[759];
-
-/* icon_twitter.png - 3703 bytes */
-const static unsigned char icon_twitter_png[3703];
-
-/* icon_twitter_mini.png - 896 bytes */
-const static unsigned char icon_twitter_mini_png[896];
-
-/* info.png - 1262 bytes */
-const static unsigned char info_png[1262];
 
 /* layers.png - 16600 bytes */
 const static unsigned char layers_png[16600];
@@ -351,3 +381,5 @@ const static unsigned char shade_png[16239];
 /* shadow.png - 16235 bytes */
 const static unsigned char shadow_png[16235];
 };
+
+#endif//_ICONS_H_
