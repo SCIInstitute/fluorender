@@ -40,6 +40,7 @@ DEALINGS IN THE SOFTWARE.
 #define TOOL_COLOCALIZATION	6
 #define TOOL_CONVERT		7
 #define TOOL_OPENCL			8
+#define TOOL_COMPONENT		9
 
 //enum BitmapFontType;
 class SettingDlg : public wxPanel

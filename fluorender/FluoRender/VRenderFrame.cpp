@@ -72,6 +72,7 @@ BEGIN_EVENT_TABLE(VRenderFrame, wxFrame)
 	EVT_MENU(ID_Colocalization, VRenderFrame::OnColocalization)
 	EVT_MENU(ID_Convert, VRenderFrame::OnConvert)
 	EVT_MENU(ID_Ocl, VRenderFrame::OnOcl)
+	EVT_MENU(ID_Component, VRenderFrame::OnComponent)
 	//
 	EVT_MENU(ID_Twitter, VRenderFrame::OnTwitter)
 	EVT_MENU(ID_Facebook, VRenderFrame::OnFacebook)
@@ -128,6 +129,7 @@ VRenderFrame::VRenderFrame(
 	m_measure_dlg(0),
 	m_trace_dlg(0),
 	m_ocl_dlg(0),
+	m_component_dlg(0),
 	m_volume_prop(0),
 	m_mesh_prop(0),
 	m_mesh_manip(0),
@@ -196,6 +198,9 @@ VRenderFrame::VRenderFrame(
 	m->SetBitmap(wxGetBitmapFromMemory(icon_convert_mini));
 	m_tb_menu_edit->Append(m);
 	m = new wxMenuItem(m_tb_menu_edit, ID_Ocl, wxT("OpenCL Kernel Editor..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_opencl_mini));
+	m_tb_menu_edit->Append(m);
+	m = new wxMenuItem(m_tb_menu_edit, ID_Component, wxT("Component Generator..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_opencl_mini));
 	m_tb_menu_edit->Append(m);
 	//build the main toolbar
@@ -369,6 +374,9 @@ VRenderFrame::VRenderFrame(
 	//ocl dialog
 	m_ocl_dlg = new OclDlg(this, this);
 
+	//component dialog
+	m_component_dlg = new ComponentDlg(this, this);
+
 	//help dialog
 	m_help_dlg = new HelpDlg(this, this);
 	//m_help_dlg->LoadPage("C:\\!wanyong!\\TEMP\\wxHtmlWindow.htm");
@@ -465,10 +473,18 @@ VRenderFrame::VRenderFrame(
 		Dockable(false).CloseButton(true));
 	m_aui_mgr.GetPane(m_ocl_dlg).Float();
 	m_aui_mgr.GetPane(m_ocl_dlg).Hide();
+	//component dialog
+	m_aui_mgr.AddPane(m_component_dlg, wxAuiPaneInfo().
+		Name("m_ocl_dlg").Caption("Component Generator").
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true).MinimizeButton(true));
+	m_aui_mgr.GetPane(m_component_dlg).Float();
+	m_aui_mgr.GetPane(m_component_dlg).Hide();
 	//settings
 	m_aui_mgr.AddPane(m_setting_dlg, wxAuiPaneInfo().
 		Name("m_setting_dlg").Caption("Settings").
-		Dockable(false).CloseButton(true));
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true).MinimizeButton(true));
 	m_aui_mgr.GetPane(m_setting_dlg).Float();
 	m_aui_mgr.GetPane(m_setting_dlg).Hide();
 	//help
@@ -561,6 +577,9 @@ VRenderFrame::VRenderFrame(
 	m->SetBitmap(wxGetBitmapFromMemory(icon_convert_mini));
 	m_top_tools->Append(m);
 	m = new wxMenuItem(m_top_tools, ID_Ocl, wxT("&OpenCL Kernel Editor..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_opencl_mini));
+	m_top_tools->Append(m);
+	m = new wxMenuItem(m_top_tools, ID_Component, wxT("Component &Generator..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_opencl_mini));
 	m_top_tools->Append(m);
 	m_top_tools->Append(wxID_SEPARATOR);
@@ -4372,6 +4391,9 @@ void VRenderFrame::OnLastTool(wxCommandEvent& WXUNUSED(event))
 	case TOOL_OPENCL:
 		ShowOclDlg();
 		break;
+	case TOOL_COMPONENT:
+		ShowComponentDlg();
+		break;
 	}
 }
 
@@ -4413,6 +4435,11 @@ void VRenderFrame::OnTrace(wxCommandEvent& WXUNUSED(event))
 void VRenderFrame::OnOcl(wxCommandEvent& WXUNUSED(event))
 {
 	ShowOclDlg();
+}
+
+void VRenderFrame::OnComponent(wxCommandEvent& WXUNUSED(event))
+{
+	ShowComponentDlg();
 }
 
 void VRenderFrame::ShowPaintTool()
@@ -4499,6 +4526,17 @@ void VRenderFrame::ShowOclDlg()
 	m_aui_mgr.Update();
 	if (m_setting_dlg)
 		m_setting_dlg->SetLastTool(TOOL_OPENCL);
+	m_main_tb->SetToolNormalBitmap(ID_LastTool,
+		wxGetBitmapFromMemory(icon_opencl));
+}
+
+void VRenderFrame::ShowComponentDlg()
+{
+	m_aui_mgr.GetPane(m_component_dlg).Show();
+	m_aui_mgr.GetPane(m_component_dlg).Float();
+	m_aui_mgr.Update();
+	if (m_setting_dlg)
+		m_setting_dlg->SetLastTool(TOOL_COMPONENT);
 	m_main_tb->SetToolNormalBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_opencl));
 }
