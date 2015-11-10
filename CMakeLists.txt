@@ -254,6 +254,12 @@ file(GLOB src fluorender/FluoRender/*.cpp)
 file(GLOB hdr fluorender/FluoRender/*.h)
 file(GLOB rsc fluorender/FluoRender/img/*.xpm)
 
+#SynthBB
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/SynthBB)
+file(GLOB synthbb_hdr fluorender/SynthBB/*.h)
+file(GLOB synthbb_src fluorender/SynthBB/*.cpp)
+
+
 #platform specific rules
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    # Mac OS X
@@ -281,6 +287,13 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       $<TARGET_OBJECTS:NV_OBJ>
       $<TARGET_OBJECTS:FORMATS_OBJ>
       $<TARGET_OBJECTS:TRACKING_OBJ>
+      $<TARGET_OBJECTS:GLEW_OBJ>
+      $<TARGET_OBJECTS:POLE_OBJ>
+      $<TARGET_OBJECTS:TEEM_OBJ>)
+   add_executable(SynthBB MACOSX_BUNDLE
+      ${synthbb_src} ${synthbb_hdr}
+      $<TARGET_OBJECTS:FLIVR_OBJ>
+      $<TARGET_OBJECTS:FORMATS_OBJ>
       $<TARGET_OBJECTS:GLEW_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>)
@@ -336,6 +349,13 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 		  $<TARGET_OBJECTS:POLE_OBJ>
 		  $<TARGET_OBJECTS:TEEM_OBJ>
 		  $<TARGET_OBJECTS:WACUTILS_OBJ>)
+      add_executable(SynthBB
+          	  ${synthbb_src} ${synthbb_hdr}
+		  $<TARGET_OBJECTS:FLIVR_OBJ>
+		  $<TARGET_OBJECTS:FORMATS_OBJ>
+		  $<TARGET_OBJECTS:GLEW_OBJ>
+		  $<TARGET_OBJECTS:POLE_OBJ>
+		  $<TARGET_OBJECTS:TEEM_OBJ>)
    endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif()
 
@@ -378,6 +398,12 @@ target_link_libraries(FluoRender
    ${Boost_LIBRARIES}
    ${OPENCL_LIBRARIES}
    ${FREETYPE_LIBRARIES}
+   ${wxWidgets_LIBRARIES})
+target_link_libraries(SynthBB
+   ${ffmpeg_LIBRARIES}
+   ${OPENGL_LIBRARIES}
+   ${Boost_LIBRARIES}
+   ${OPENCL_LIBRARIES}
    ${wxWidgets_LIBRARIES})
 
 #build OpenCL examples copies.

@@ -14,10 +14,13 @@ __kernel void kernel_main(
 {
 	int4 coord = (int4)(get_global_id(0),
 		get_global_id(1), get_global_id(2), 1);
-	int4 kc;
-	float4 dvalue;
+	float value = read_imagef(data, samp, coord).x;
+	float4 kc;
+	float dvalue;
 	float rvalue = 1.0;
-	float r = 0.5;
+	float r = 1.0;
+	float ans = 3.0;
+	float ans2 = ans*ans;
 	int i, j, k;
 	for (i=0; i<KX; ++i)
 	for (j=0; j<KY; ++j)
@@ -25,15 +28,15 @@ __kernel void kernel_main(
 	{
 		float l = sqrt((float)((i-KX/2)*(i-KX/2)+
 				(j-KY/2)*(j-KY/2)+
-				(k-KZ/2)*(k-KZ)/2));
-		if (l == 0.0)
+				(k-KZ/2)*(k-KZ/2)*ans2));
+		if (l < 1e-6)
 			continue;
-		kc = (int4)(coord.x+(i-KX/2)*r/l,
-				coord.y+(j-KY/2)*r/l,
-				coord.z+(k-KZ/2)*r/l, 1);
-		dvalue = read_imagef(data, samp, kc);
-		rvalue = min(rvalue, dvalue.x);
+		kc = (float4)(coord.x+((float)(i-KX/2))*r/l+0.5,
+				coord.y+((float)(j-KY/2))*r/l+0.5,
+				coord.z+((float)(k-KZ/2))*r/l/ans+0.5, 1);
+		dvalue = read_imagef(data, samp, kc).x;
+		rvalue = min(rvalue, dvalue);
 	}
 	unsigned int index = x*y*coord.z + x*coord.y + coord.x;
-	result[index] = rvalue*255.0;
+	result[index] = (value>1.0?value:rvalue)*255.0;
 }
