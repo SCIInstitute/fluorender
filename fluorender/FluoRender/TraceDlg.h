@@ -172,6 +172,7 @@ public:
 	void GetSettings(VRenderView* vrv);
 	VRenderView* GetView();
 	void UpdateList();
+	void SetCellSize(int size);
 
 	//manual assist
 	bool GetManualAssist() {return m_manual_assist;}

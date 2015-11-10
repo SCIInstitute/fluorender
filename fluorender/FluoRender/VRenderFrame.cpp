@@ -117,6 +117,21 @@ VRenderFrame::VRenderFrame(
 	m_list_panel(0),
 	m_prop_panel(0),
 	m_setting_dlg(0),
+	m_clip_view(0),
+	m_adjust_view(0),
+	m_help_dlg(0),
+	m_brush_tool_dlg(0),
+	m_noise_cancelling_dlg(0),
+	m_counting_dlg(0),
+	m_convert_dlg(0),
+	m_colocalization_dlg(0),
+	m_measure_dlg(0),
+	m_trace_dlg(0),
+	m_ocl_dlg(0),
+	m_volume_prop(0),
+	m_mesh_prop(0),
+	m_mesh_manip(0),
+	m_annotation_prop(0),
 	m_ui_state(true),
 	m_cur_sel_type(-1),
 	m_cur_sel_vol(-1),
@@ -349,6 +364,7 @@ VRenderFrame::VRenderFrame(
 
 	//trace dialog
 	m_trace_dlg = new TraceDlg(this, this);
+	m_trace_dlg->SetCellSize(m_setting_dlg->GetComponentSize());
 
 	//ocl dialog
 	m_ocl_dlg = new OclDlg(this, this);

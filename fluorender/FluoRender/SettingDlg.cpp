@@ -82,6 +82,9 @@ EVT_BUTTON(ID_ScriptFileBtn, SettingDlg::OnScriptFileBtn)
 //paint history depth
 EVT_COMMAND_SCROLL(ID_PaintHistDepthSldr, SettingDlg::OnPaintHistDepthChange)
 EVT_TEXT(ID_PaintHistDepthText, SettingDlg::OnPaintHistDepthEdit)
+//component size
+EVT_TEXT(ID_ComponentSizeText, SettingDlg::OnComponentSizeEdit)
+EVT_TEXT(ID_ContactFactorText, SettingDlg::OnContactFactorEdit)
 //show
 EVT_SHOW(SettingDlg::OnShow)
 END_EVENT_TABLE()
@@ -429,6 +432,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 
 wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 {
+	wxFloatingPointValidator<double> vald_fp1(2);
 	wxStaticText* st;
 	wxPanel *page = new wxPanel(parent);
 
@@ -443,11 +447,34 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	group1->Add(sizer1_1, 0, wxEXPAND);
 	group1->Add(10, 5);
 
-	//wavelength to color
+	//component size
 	wxBoxSizer *group2 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "Component Filter"), wxVERTICAL);
+	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Size Threshold:", wxDefaultPosition, wxSize(120, 23));
+	m_component_size_text = new wxTextCtrl(page, ID_ComponentSizeText, "25.00",
+		wxDefaultPosition, wxSize(40, -1), 0, vald_fp1);
+	sizer2_1->Add(5, 5);
+	sizer2_1->Add(st, 0, wxALIGN_CENTER);
+	sizer2_1->Add(5, 5);
+	sizer2_1->Add(m_component_size_text, 0, wxALIGN_CENTER);
+	st = new wxStaticText(page, 0, "Contact Factor:", wxDefaultPosition, wxSize(120, 23));
+	m_contact_factor_text = new wxTextCtrl(page, ID_ContactFactorText, "0.70",
+		wxDefaultPosition, wxSize(40, -1), 0, vald_fp1);
+	sizer2_1->Add(10, 5);
+	sizer2_1->Add(st, 0, wxALIGN_CENTER);
+	sizer2_1->Add(5, 5);
+	sizer2_1->Add(m_contact_factor_text, 0, wxALIGN_CENTER);
+	sizer2_1->Add(5, 5);
+	group2->Add(10, 5);
+	group2->Add(sizer2_1, 0, wxEXPAND);
+	group2->Add(10, 5);
+
+	//wavelength to color
+	wxBoxSizer *group3 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Default Colors for Excitation Wavelengths (nm) (for OIB/OIF/LSM files)"), wxVERTICAL);
 	//combo box line
-	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_wav_color1_cmb = new wxComboBox(page, ID_WavColor1Cmb, "",
 		wxDefaultPosition, wxSize(75, 23), 0, NULL, wxCB_READONLY);
 	m_wav_color2_cmb = new wxComboBox(page, ID_WavColor2Cmb, "",
@@ -480,55 +507,57 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	m_wav_color4_cmb->Append("Blue");
 	m_wav_color4_cmb->Append("Purple");
 	m_wav_color4_cmb->Append("White");
-	sizer2_1->Add(35, 20);
-	sizer2_1->Add(m_wav_color1_cmb);
-	sizer2_1->Add(25, 20);
-	sizer2_1->Add(m_wav_color2_cmb);
-	sizer2_1->Add(25, 20);
-	sizer2_1->Add(m_wav_color3_cmb);
-	sizer2_1->Add(25, 20);
-	sizer2_1->Add(m_wav_color4_cmb);
-	sizer2_1->Add(30, 20);
+	sizer3_1->Add(35, 20);
+	sizer3_1->Add(m_wav_color1_cmb);
+	sizer3_1->Add(25, 20);
+	sizer3_1->Add(m_wav_color2_cmb);
+	sizer3_1->Add(25, 20);
+	sizer3_1->Add(m_wav_color3_cmb);
+	sizer3_1->Add(25, 20);
+	sizer3_1->Add(m_wav_color4_cmb);
+	sizer3_1->Add(30, 20);
 	//static text line
-	wxBoxSizer *sizer2_2 = new wxBoxSizer(wxHORIZONTAL);
-	sizer2_2->Add(10, 20);
+	wxBoxSizer *sizer3_2 = new wxBoxSizer(wxHORIZONTAL);
+	sizer3_2->Add(10, 20);
 	st = new wxStaticText(page, 0, "350", wxDefaultPosition, wxSize(30, 20));
-	sizer2_2->Add(st);
-	sizer2_2->Add(20, 20);
+	sizer3_2->Add(st);
+	sizer3_2->Add(20, 20);
 	st = new wxStaticText(page, 0, "--", wxDefaultPosition, wxSize(30, 20));
-	sizer2_2->Add(st);
-	sizer2_2->Add(20, 20);
+	sizer3_2->Add(st);
+	sizer3_2->Add(20, 20);
 	st = new wxStaticText(page, 0, "450\n480\n488", wxDefaultPosition, wxSize(30, 50));
-	sizer2_2->Add(st);
-	sizer2_2->Add(20, 20);
+	sizer3_2->Add(st);
+	sizer3_2->Add(20, 20);
 	st = new wxStaticText(page, 0, "--", wxDefaultPosition, wxSize(30, 20));
-	sizer2_2->Add(st);
-	sizer2_2->Add(20, 20);
+	sizer3_2->Add(st);
+	sizer3_2->Add(20, 20);
 	st = new wxStaticText(page, 0, "543\n568", wxDefaultPosition, wxSize(30, 35));
-	sizer2_2->Add(st);
-	sizer2_2->Add(20, 20);
+	sizer3_2->Add(st);
+	sizer3_2->Add(20, 20);
 	st = new wxStaticText(page, 0, "--", wxDefaultPosition, wxSize(30, 20));
-	sizer2_2->Add(st);
-	sizer2_2->Add(20, 20);
+	sizer3_2->Add(st);
+	sizer3_2->Add(20, 20);
 	st = new wxStaticText(page, 0, "633", wxDefaultPosition, wxSize(30, 20));
-	sizer2_2->Add(st);
-	sizer2_2->Add(20, 20);
+	sizer3_2->Add(st);
+	sizer3_2->Add(20, 20);
 	st = new wxStaticText(page, 0, "--", wxDefaultPosition, wxSize(30, 20));
-	sizer2_2->Add(st);
-	sizer2_2->Add(20, 20);
+	sizer3_2->Add(st);
+	sizer3_2->Add(20, 20);
 	st = new wxStaticText(page, 0, "700", wxDefaultPosition, wxSize(30, 20));
-	sizer2_2->Add(st);
-	group2->Add(10, 5);
-	group2->Add(sizer2_1, 0);
-	group2->Add(10, 5);
-	group2->Add(sizer2_2, 0);
-	group2->Add(10, 5);
+	sizer3_2->Add(st);
+	group3->Add(10, 5);
+	group3->Add(sizer3_1, 0);
+	group3->Add(10, 5);
+	group3->Add(sizer3_2, 0);
+	group3->Add(10, 5);
 
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(10, 10);
 	sizerV->Add(group1, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 	sizerV->Add(group2, 0, wxEXPAND);
+	sizerV->Add(10, 10);
+	sizerV->Add(group3, 0, wxEXPAND);
 
 	page->SetSizer(sizerV);
 	return page;
@@ -624,6 +653,8 @@ void SettingDlg::GetSettings()
 	m_stay_top = false;
 	m_show_cursor = true;
 	m_last_tool = 0;
+	m_component_size = 25.0;
+	m_contact_factor = 0.7;
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = expath.BeforeLast(GETSLASH(), NULL);
@@ -828,6 +859,13 @@ void SettingDlg::GetSettings()
 		fconfig.Read("depth_bit", &m_depth_bit);
 		fconfig.Read("samples", &m_samples);
 	}
+	//component size
+	if (fconfig.Exists("/components"))
+	{
+		fconfig.SetPath("/components");
+		fconfig.Read("component_size", &m_component_size);
+		fconfig.Read("contact_factor", &m_contact_factor);
+	}
 	//context attrib
 	if (fconfig.Exists("/context attrib"))
 	{
@@ -913,6 +951,9 @@ void SettingDlg::UpdateUI()
 	m_large_data_text->SetValue(wxString::Format("%d", (int)m_large_data_size));
 	m_block_size_text->SetValue(wxString::Format("%d", m_force_brick_size));
 	m_response_time_text->SetValue(wxString::Format("%d", m_up_time));
+	//components
+	m_component_size_text->SetValue(wxString::Format("%.2f", m_component_size));
+	m_contact_factor_text->SetValue(wxString::Format("%.2f", m_contact_factor));
 }
 
 void SettingDlg::SaveSettings()
@@ -994,6 +1035,11 @@ void SettingDlg::SaveSettings()
 	//last tool
 	fconfig.SetPath("/last tool");
 	fconfig.Write("value", m_last_tool);
+
+	//components
+	fconfig.SetPath("/components");
+	fconfig.Write("component_size", m_component_size);
+	fconfig.Write("contact_factor", m_contact_factor);
 
 	//memory settings
 	fconfig.SetPath("/memory settings");
@@ -1636,4 +1682,20 @@ void SettingDlg::OnPaintHistDepthEdit(wxCommandEvent &event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 		vr_frame->SetTextureUndos();
+}
+
+//component size
+void SettingDlg::OnComponentSizeEdit(wxCommandEvent &event)
+{
+	wxString str = m_component_size_text->GetValue();
+	str.ToDouble(&m_component_size);
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetTraceDlg())
+		vr_frame->GetTraceDlg()->SetCellSize(m_component_size);
+}
+
+void SettingDlg::OnContactFactorEdit(wxCommandEvent &event)
+{
+	wxString str = m_contact_factor_text->GetValue();
+	str.ToDouble(&m_contact_factor);
 }

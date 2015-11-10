@@ -813,6 +813,12 @@ void TraceDlg::GetSettings(VRenderView* vrv)
 			ID_AutoIDChk, wxGetBitmapFromMemory(auto_assign_off));
 }
 
+void TraceDlg::SetCellSize(int size)
+{
+	if (m_cell_size_text)
+		m_cell_size_text->SetValue(wxString::Format("%d", size));
+}
+
 VRenderView* TraceDlg::GetView()
 {
 	return m_view;
@@ -3106,6 +3112,14 @@ void TraceDlg::GenMap()
 {
 	if (!m_view)
 		return;
+	double component_size = 25.0;
+	double contact_factor = 0.7;
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetSettingDlg())
+	{
+		component_size = vr_frame->GetSettingDlg()->GetComponentSize();
+		contact_factor = vr_frame->GetSettingDlg()->GetContactFactor();
+	}
 
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
@@ -3141,7 +3155,8 @@ void TraceDlg::GenMap()
 	iter_num *= 2;
 	tm_processor.SetSizes(track_map,
 		resx, resy, resz);
-	//	tm_processor.SetContactThresh(0.2f);
+	tm_processor.SetSizeThresh(component_size);
+	tm_processor.SetContactThresh(contact_factor);
 	float prog_bit = 100.0f / float(frames * (2 + iter_num));
 	float prog = 0.0f;
 	m_gen_map_prg->SetValue(int(prog));
@@ -3289,6 +3304,14 @@ void TraceDlg::RefineMap(int t)
 {
 	if (!m_view)
 		return;
+	double component_size = 25.0;
+	double contact_factor = 0.7;
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetSettingDlg())
+	{
+		component_size = vr_frame->GetSettingDlg()->GetComponentSize();
+		contact_factor = vr_frame->GetSettingDlg()->GetContactFactor();
+	}
 
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
@@ -3318,7 +3341,8 @@ void TraceDlg::RefineMap(int t)
 	iter_num *= 2;
 	tm_processor.SetSizes(track_map,
 		resx, resy, resz);
-	//	tm_processor.SetContactThresh(0.2f);
+	tm_processor.SetSizeThresh(component_size);
+	tm_processor.SetContactThresh(contact_factor);
 	float prog_bit = 100.0f / float(
 		(end_frame - start_frame + 1)
 		* iter_num);

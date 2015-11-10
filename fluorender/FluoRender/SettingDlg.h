@@ -67,6 +67,9 @@ class SettingDlg : public wxPanel
 		ID_RotLinkChk,
 		//override vox
 		ID_OverrideVoxChk,
+		//component size
+		ID_ComponentSizeText,
+		ID_ContactFactorText,
 		//wavelength to color
 		ID_WavColor1Cmb,
 		ID_WavColor2Cmb,
@@ -194,6 +197,11 @@ public:
 	//last tool
 	void SetLastTool(int tool) { m_last_tool = tool; }
 	int GetLastTool() { return m_last_tool; }
+	//component size
+	void SetComponentSize(double size) { m_component_size = size; }
+	double GetComponentSize() { return m_component_size; }
+	void SetContactFactor(double fact) { m_contact_factor = fact; }
+	double GetContactFactor() { return m_contact_factor; }
 
 private:
 	wxWindow* m_frame;
@@ -269,6 +277,9 @@ private:
 	bool m_show_cursor;
 	//last tool
 	int m_last_tool;
+	//component size
+	double m_component_size;
+	double m_contact_factor;
 
 private:
 	//save project
@@ -319,12 +330,16 @@ private:
 	//history depth
 	wxSlider *m_paint_hist_depth_sldr;
 	wxTextCtrl *m_paint_hist_depth_text;
+	//component size
+	wxTextCtrl *m_component_size_text;
+	wxTextCtrl *m_contact_factor_text;
 
 	//save
 	wxButton *m_save_btn;
 	//close
 	wxButton *m_close_btn;
 
+private:
 	//streaming disable/enable
 	void EnableStreaming(bool enable);
 
@@ -388,6 +403,9 @@ private:
 	//paint history depth
 	void OnPaintHistDepthChange(wxScrollEvent &event);
 	void OnPaintHistDepthEdit(wxCommandEvent &event);
+	//component size
+	void OnComponentSizeEdit(wxCommandEvent &event);
+	void OnContactFactorEdit(wxCommandEvent &event);
 
 	DECLARE_EVENT_TABLE();
 };
