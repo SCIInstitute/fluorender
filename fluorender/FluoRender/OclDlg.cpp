@@ -44,7 +44,7 @@ END_EVENT_TABLE()
 OclDlg::OclDlg(wxWindow* frame,
 wxWindow* parent) :
 wxPanel(parent, wxID_ANY,
-wxPoint(500, 150), wxSize(550, 600),
+wxDefaultPosition, wxSize(550, 600),
 0, "OclDlg"),
 m_frame(parent),
 m_view(0)

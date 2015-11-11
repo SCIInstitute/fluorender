@@ -44,7 +44,7 @@ END_EVENT_TABLE()
 
 ConvertDlg::ConvertDlg(wxWindow *frame, wxWindow *parent) :
 wxPanel(parent, wxID_ANY,
-	wxPoint(520, 170), wxSize(400, 300),
+	wxDefaultPosition, wxSize(400, 300),
 	0, "ConvertDlg"),
 	m_frame(parent)
 {

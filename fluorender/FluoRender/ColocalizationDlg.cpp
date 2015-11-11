@@ -43,7 +43,7 @@ END_EVENT_TABLE()
 ColocalizationDlg::ColocalizationDlg(wxWindow* frame,
 	wxWindow* parent) :
 wxPanel(parent, wxID_ANY,
-wxPoint(500, 150), wxSize(400, 165),
+wxDefaultPosition, wxSize(400, 165),
 0, "ColocalizationDlg"),
 m_frame(parent),
 m_view(0),

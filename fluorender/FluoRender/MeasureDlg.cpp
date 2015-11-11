@@ -513,7 +513,7 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 
 	MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	: wxPanel(parent,wxID_ANY,
-	wxPoint(500, 150), wxSize(520, 600),
+	wxDefaultPosition, wxSize(520, 600),
 	0, "MeasureDlg"),
 	m_frame(parent),
 	m_view(0)

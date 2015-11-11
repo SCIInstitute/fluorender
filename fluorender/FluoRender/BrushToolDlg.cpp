@@ -536,7 +536,7 @@ wxWindow* BrushToolDlg::CreateAnalysisPage(wxWindow *parent)
 
 BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	: wxPanel(parent, wxID_ANY,
-	wxPoint(500, 150),
+	wxDefaultPosition,
 	wxSize(400, 550),
 	0, "BrushToolDlg"),
 	m_frame(parent),

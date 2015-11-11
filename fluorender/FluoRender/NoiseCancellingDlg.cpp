@@ -41,15 +41,15 @@ END_EVENT_TABLE()
 
 NoiseCancellingDlg::NoiseCancellingDlg(wxWindow *frame, wxWindow *parent)
 : wxPanel(parent, wxID_ANY,
-			wxPoint(500, 150), wxSize(400, 150),
-			0, "NoiseCancellingDlg"),
-			m_frame(parent),
-			m_view(0),
-			//m_group(0),
-			//m_vol(0),
-			m_max_value(255.0),
-			m_dft_thresh(0.0),
-			m_previewed(false)
+	wxDefaultPosition, wxSize(400, 150),
+	0, "NoiseCancellingDlg"),
+	m_frame(parent),
+	m_view(0),
+	//m_group(0),
+	//m_vol(0),
+	m_max_value(255.0),
+	m_dft_thresh(0.0),
+	m_previewed(false)
 {
 	//validator: floating point 1
 	wxFloatingPointValidator<double> vald_fp1(1);

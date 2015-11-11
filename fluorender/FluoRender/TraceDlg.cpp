@@ -660,7 +660,7 @@ wxWindow* TraceDlg::CreateAnalysisPage(wxWindow *parent)
 
 TraceDlg::TraceDlg(wxWindow* frame, wxWindow* parent)
 	: wxPanel(parent, wxID_ANY,
-		wxPoint(500, 150), wxSize(500, 600),
+		wxDefaultPosition, wxSize(500, 600),
 		0, "TraceDlg"),
 	m_frame(parent),
 	m_view(0),

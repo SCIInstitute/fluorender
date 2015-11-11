@@ -43,7 +43,7 @@ END_EVENT_TABLE()
 
 CountingDlg::CountingDlg(wxWindow *frame, wxWindow*parent)
 : wxPanel(parent, wxID_ANY,
-wxPoint(500, 150), wxSize(400, 150),
+wxDefaultPosition, wxSize(400, 150),
 0, "CountingDlg"),
 m_frame(parent),
 m_view(0),
