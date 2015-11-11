@@ -110,6 +110,10 @@ public:
 	const static unsigned char icon_opencl_png[19114];
 	/* icon_opencl_mini.png - 15693 bytes */
 	const static unsigned char icon_opencl_mini_png[15693];
+	/* icon_components.png - 18813 bytes */
+	const static unsigned char icon_components_png[18813];
+	/* icon_components_mini.png - 16189 bytes */
+	const static unsigned char icon_components_mini_png[16189];
 
 	/* info.png - 1262 bytes */
 	const static unsigned char info_png[1262];

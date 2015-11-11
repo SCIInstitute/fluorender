@@ -201,7 +201,7 @@ VRenderFrame::VRenderFrame(
 	m->SetBitmap(wxGetBitmapFromMemory(icon_opencl_mini));
 	m_tb_menu_edit->Append(m);
 	m = new wxMenuItem(m_tb_menu_edit, ID_Component, wxT("Component Generator..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_opencl_mini));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_components_mini));
 	m_tb_menu_edit->Append(m);
 	//build the main toolbar
 	//add tools
@@ -475,7 +475,7 @@ VRenderFrame::VRenderFrame(
 	m_aui_mgr.GetPane(m_ocl_dlg).Hide();
 	//component dialog
 	m_aui_mgr.AddPane(m_component_dlg, wxAuiPaneInfo().
-		Name("m_ocl_dlg").Caption("Component Generator").
+		Name("m_component_dlg").Caption("Component Generator").
 		Dockable(false).CloseButton(true).
 		MaximizeButton(true).MinimizeButton(true));
 	m_aui_mgr.GetPane(m_component_dlg).Float();
@@ -580,7 +580,7 @@ VRenderFrame::VRenderFrame(
 	m->SetBitmap(wxGetBitmapFromMemory(icon_opencl_mini));
 	m_top_tools->Append(m);
 	m = new wxMenuItem(m_top_tools, ID_Component, wxT("Component &Generator..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_opencl_mini));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_components_mini));
 	m_top_tools->Append(m);
 	m_top_tools->Append(wxID_SEPARATOR);
 	m = new wxMenuItem(m_top_tools,ID_Settings, wxT("&Settings..."));
@@ -684,6 +684,10 @@ VRenderFrame::VRenderFrame(
 		case TOOL_OPENCL:
 			m_main_tb->SetToolNormalBitmap(ID_LastTool,
 				wxGetBitmapFromMemory(icon_opencl));
+			break;
+		case TOOL_COMPONENT:
+			m_main_tb->SetToolNormalBitmap(ID_LastTool,
+				wxGetBitmapFromMemory(icon_components));
 			break;
 		}
 	}
@@ -4538,7 +4542,7 @@ void VRenderFrame::ShowComponentDlg()
 	if (m_setting_dlg)
 		m_setting_dlg->SetLastTool(TOOL_COMPONENT);
 	m_main_tb->SetToolNormalBitmap(ID_LastTool,
-		wxGetBitmapFromMemory(icon_opencl));
+		wxGetBitmapFromMemory(icon_components));
 }
 
 void VRenderFrame::SetTextureUndos()

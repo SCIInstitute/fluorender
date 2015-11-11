@@ -29,6 +29,10 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include <wx/valnum.h>
 
+BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
+	EVT_COLLAPSIBLEPANE_CHANGED(wxID_ANY, ComponentDlg::OnInitialGrowPane)
+END_EVENT_TABLE()
+
 wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 {
 	wxPanel *page = new wxPanel(parent);
@@ -39,17 +43,19 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 
 wxWindow* ComponentDlg::Create2DAnalysisPage(wxWindow *parent)
 {
-	wxPanel *page = new wxPanel(parent);
+	wxScrolledWindow *page = new wxScrolledWindow(parent);
 	wxStaticText *st = 0;
 
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxVERTICAL);
-	sizer1->Add(CreateInitialGrowPane(page), 0, wxGROW | wxALL, 5);
+	sizer1->Add(CreateInitialGrowPane(page), 0, wxEXPAND);
 
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
 	sizerv->Add(10, 10);
 	sizerv->Add(sizer1, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 
+	//page->FitInside();
+	page->SetScrollRate(10, 10);
 	page->SetSizer(sizerv);
 
 	return page;
@@ -57,7 +63,10 @@ wxWindow* ComponentDlg::Create2DAnalysisPage(wxWindow *parent)
 
 wxCollapsiblePane* ComponentDlg::CreateInitialGrowPane(wxWindow *parent)
 {
-	wxCollapsiblePane* collpane = new wxCollapsiblePane(parent, wxID_ANY, "Initial Grow");
+	wxCollapsiblePane* collpane = new wxCollapsiblePane(parent,
+		ID_InitialGrowPane, "Initial Grow",
+		wxDefaultPosition, wxDefaultSize, wxCP_NO_TLW_RESIZE);
+	collpane->SetBackgroundColour(m_notebook->GetThemeBackgroundColour());
 	wxWindow *pane = collpane->GetPane();
 	wxStaticText* st;
 	//validator: integer
@@ -235,11 +244,12 @@ wxCollapsiblePane* ComponentDlg::CreateMatchSlicesPane(wxWindow *parent)
 
 ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	: wxPanel(parent, wxID_ANY,
-		wxPoint(500, 150),
-		wxSize(400, 550),
+		wxDefaultPosition,
+		wxSize(450, 500),
 		0, "ComponentDlg"),
 	m_frame(parent),
-	m_view(0)
+	m_view(0),
+	m_sizerv(0)
 {
 	//notebook
 	m_notebook = new wxNotebook(this, wxID_ANY);
@@ -247,16 +257,23 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	m_notebook->AddPage(Create2DAnalysisPage(m_notebook), "Advanced");
 
 	//all controls
-	wxBoxSizer *sizerv = new wxBoxSizer(wxVERTICAL);
-	sizerv->Add(10, 10);
-	sizerv->Add(m_notebook, 0, wxEXPAND);
-	sizerv->Add(10, 10);
+	m_sizerv = new wxBoxSizer(wxVERTICAL);
+	m_sizerv->Add(10, 10);
+	m_sizerv->Add(m_notebook, 1, wxEXPAND);
+	m_sizerv->Add(10, 10);
 
-	SetSizerAndFit(sizerv);
+	//SetSizerAndFit(m_sizerv);
+	SetSizer(m_sizerv);
+	//m_sizerv->SetSizeHints(this);
 	Layout();
 }
 
 ComponentDlg::~ComponentDlg()
 {
 
+}
+
+void ComponentDlg::OnInitialGrowPane(wxCollapsiblePaneEvent& event)
+{
+	Layout();
 }

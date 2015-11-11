@@ -42,6 +42,7 @@ public:
 	enum
 	{
 		//initial grow pane
+		ID_InitialGrowPane,
 		ID_InitialGrowCheck,
 		ID_ParamTransitionCheck,
 		ID_IterationsSldr,
@@ -84,6 +85,8 @@ private:
 	wxWindow* m_frame;
 	VRenderView* m_view;
 
+	//sizer
+	wxBoxSizer *m_sizerv;
 	//tab control
 	wxNotebook *m_notebook;
 
@@ -125,6 +128,11 @@ private:
 	wxCollapsiblePane* CreateSizedGrowPane(wxWindow *parent);
 	wxCollapsiblePane* CreateCleanupPane(wxWindow *parent);
 	wxCollapsiblePane* CreateMatchSlicesPane(wxWindow *parent);
+
+	//initial grow pane
+	void OnInitialGrowPane(wxCollapsiblePaneEvent& event);
+
+	DECLARE_EVENT_TABLE();
 };
 
 #endif//_COMPONENTDLG_H_
