@@ -108,7 +108,27 @@ public:
 		ID_SGAngleFalloffSldr,
 		ID_SGAngleFalloffText,
 		ID_SGAngleFalloff2Sldr,
-		ID_SGAngleFalloff2Text
+		ID_SGAngleFalloff2Text,
+
+		//cleanup pane
+		ID_CleanupPane,
+		ID_CleanupCheck,
+		ID_CLIterationsSldr,
+		ID_CLIterationsText,
+		ID_CLSizeLimiterSldr,
+		ID_CLSizeLimiterText,
+
+		//match slices pane
+		ID_MatchSlicesPane,
+		ID_MatchSlicesCheck,
+		ID_SizeThreshSldr,
+		ID_SizeThreshText,
+		ID_SizeRatioSldr,
+		ID_SizeRatioText,
+		ID_DistThreshSldr,
+		ID_DistThreshText,
+		ID_AngleThreshSldr,
+		ID_AngleThreshText
 	};
 
 	ComponentDlg(wxWindow* frame,
@@ -116,6 +136,8 @@ public:
 	~ComponentDlg();
 
 	void GetSettings();
+	void LoadSettings();
+	void SaveSettings();
 	VRenderView* GetView();
 
 private:
@@ -125,10 +147,57 @@ private:
 	//initial grow
 	bool m_initial_grow;
 	bool m_ig_param_transition;
+	int m_ig_iterations;
+	//translate
+	double m_ig_translate;
+	double m_ig_translate2;
+	//scalar falloff
+	double m_ig_scalar_falloff;
+	double m_ig_scalar_falloff2;
+	//grad falloff
+	double m_ig_grad_falloff;
+	double m_ig_grad_falloff2;
+	//variance falloff
+	double m_ig_var_falloff;
+	double m_ig_var_falloff2;
+	//angle falloff
+	double m_ig_angle_falloff;
+	double m_ig_angle_falloff2;
 
 	//sized grow
 	bool m_sized_grow;
 	bool m_sg_param_transition;
+	int m_sg_iterations;
+	//size limiter
+	int m_sg_size_limiter;
+	int m_sg_size_limiter2;
+	//translate
+	double m_sg_translate;
+	double m_sg_translate2;
+	//scalar falloff
+	double m_sg_scalar_falloff;
+	double m_sg_scalar_falloff2;
+	//grad falloff
+	double m_sg_grad_falloff;
+	double m_sg_grad_falloff2;
+	//variance falloff
+	double m_sg_var_falloff;
+	double m_sg_var_falloff2;
+	//angle falloff
+	double m_sg_angle_falloff;
+	double m_sg_angle_falloff2;
+
+	//cleanup
+	bool m_cleanup;
+	int m_cl_iterations;
+	int m_cl_size_limiter;
+	
+	//match slices
+	bool m_match_slices;
+	int m_size_thresh;
+	double m_size_ratio;
+	double m_dist_thresh;
+	double m_angle_thresh;
 
 	//tab control
 	wxNotebook *m_notebook;
@@ -143,26 +212,31 @@ private:
 	//translate
 	wxSlider* m_ig_translate_sldr;
 	wxTextCtrl* m_ig_translate_text;
+	wxStaticText* m_ig_translate_st;
 	wxSlider* m_ig_translate2_sldr;
 	wxTextCtrl* m_ig_translate2_text;
 	//scalar falloff
 	wxSlider* m_ig_scalar_falloff_sldr;
 	wxTextCtrl* m_ig_scalar_falloff_text;
+	wxStaticText* m_ig_scalar_falloff_st;
 	wxSlider* m_ig_scalar_falloff2_sldr;
 	wxTextCtrl* m_ig_scalar_falloff2_text;
 	//grad falloff
 	wxSlider* m_ig_grad_falloff_sldr;
 	wxTextCtrl* m_ig_grad_falloff_text;
+	wxStaticText* m_ig_grad_falloff_st;
 	wxSlider* m_ig_grad_falloff2_sldr;
 	wxTextCtrl* m_ig_grad_falloff2_text;
 	//variance falloff
 	wxSlider* m_ig_var_falloff_sldr;
 	wxTextCtrl* m_ig_var_falloff_text;
+	wxStaticText* m_ig_var_falloff_st;
 	wxSlider* m_ig_var_falloff2_sldr;
 	wxTextCtrl* m_ig_var_falloff2_text;
 	//angle falloff
 	wxSlider* m_ig_angle_falloff_sldr;
 	wxTextCtrl* m_ig_angle_falloff_text;
+	wxStaticText* m_ig_angle_falloff_st;
 	wxSlider* m_ig_angle_falloff2_sldr;
 	wxTextCtrl* m_ig_angle_falloff2_text;
 
@@ -175,33 +249,59 @@ private:
 	//size limiter
 	wxSlider* m_sg_size_limiter_sldr;
 	wxTextCtrl* m_sg_size_limiter_text;
+	wxStaticText* m_sg_size_limiter_st;
 	wxSlider* m_sg_size_limiter2_sldr;
 	wxTextCtrl* m_sg_size_limiter2_text;
 	//translate
 	wxSlider* m_sg_translate_sldr;
 	wxTextCtrl* m_sg_translate_text;
+	wxStaticText* m_sg_translate_st;
 	wxSlider* m_sg_translate2_sldr;
 	wxTextCtrl* m_sg_translate2_text;
 	//scalar falloff
 	wxSlider* m_sg_scalar_falloff_sldr;
 	wxTextCtrl* m_sg_scalar_falloff_text;
+	wxStaticText* m_sg_scalar_falloff_st;
 	wxSlider* m_sg_scalar_falloff2_sldr;
 	wxTextCtrl* m_sg_scalar_falloff2_text;
 	//grad falloff
 	wxSlider* m_sg_grad_falloff_sldr;
 	wxTextCtrl* m_sg_grad_falloff_text;
+	wxStaticText* m_sg_grad_falloff_st;
 	wxSlider* m_sg_grad_falloff2_sldr;
 	wxTextCtrl* m_sg_grad_falloff2_text;
 	//variance falloff
 	wxSlider* m_sg_var_falloff_sldr;
 	wxTextCtrl* m_sg_var_falloff_text;
+	wxStaticText* m_sg_var_falloff_st;
 	wxSlider* m_sg_var_falloff2_sldr;
 	wxTextCtrl* m_sg_var_falloff2_text;
 	//angle falloff
 	wxSlider* m_sg_angle_falloff_sldr;
 	wxTextCtrl* m_sg_angle_falloff_text;
+	wxStaticText* m_sg_angle_falloff_st;
 	wxSlider* m_sg_angle_falloff2_sldr;
 	wxTextCtrl* m_sg_angle_falloff2_text;
+
+	//cleanup
+	wxCollapsiblePane* m_cleanup_pane;
+	wxCheckBox* m_cleanup_check;
+	wxSlider* m_cl_iterations_sldr;
+	wxTextCtrl* m_cl_iterations_text;
+	wxSlider* m_cl_size_limiter_sldr;
+	wxTextCtrl* m_cl_size_limiter_text;
+
+	//match slices
+	wxCollapsiblePane* m_match_slices_pane;
+	wxCheckBox* m_match_slices_check;
+	wxSlider* m_size_thresh_sldr;
+	wxTextCtrl* m_size_thresh_text;
+	wxSlider* m_size_ratio_sldr;
+	wxTextCtrl* m_size_ratio_text;
+	wxSlider* m_dist_thresh_sldr;
+	wxTextCtrl* m_dist_thresh_text;
+	wxSlider* m_angle_thresh_sldr;
+	wxTextCtrl* m_angle_thresh_text;
 
 private:
 	wxWindow* Create3DAnalysisPage(wxWindow *parent);
@@ -217,12 +317,91 @@ private:
 	void EnableIGParamTransition(bool value);
 	void OnInitialGrowCheck(wxCommandEvent &event);
 	void OnIGParamTransitionCheck(wxCommandEvent &event);
+	void OnIGIterationsSldr(wxScrollEvent &event);
+	void OnIGIterationsText(wxCommandEvent &event);
+	//translate
+	void OnIGTranslateSldr(wxScrollEvent &event);
+	void OnIGTranslateText(wxCommandEvent &event);
+	void OnIGTranslate2Sldr(wxScrollEvent &event);
+	void OnIGTranslate2Text(wxCommandEvent &event);
+	//scalar falloff
+	void OnIGScalarFalloffSldr(wxScrollEvent &event);
+	void OnIGScalarFalloffText(wxCommandEvent &event);
+	void OnIGScalarFalloff2Sldr(wxScrollEvent &event);
+	void OnIGScalarFalloff2Text(wxCommandEvent &event);
+	//grad falloff
+	void OnIGGradFalloffSldr(wxScrollEvent &event);
+	void OnIGGradFalloffText(wxCommandEvent &event);
+	void OnIGGradFalloff2Sldr(wxScrollEvent &event);
+	void OnIGGradFalloff2Text(wxCommandEvent &event);
+	//variance falloff
+	void OnIGVarFalloffSldr(wxScrollEvent &event);
+	void OnIGVarFalloffText(wxCommandEvent &event);
+	void OnIGVarFalloff2Sldr(wxScrollEvent &event);
+	void OnIGVarFalloff2Text(wxCommandEvent &event);
+	//angle falloff
+	void OnIGAngleFalloffSldr(wxScrollEvent &event);
+	void OnIGAngleFalloffText(wxCommandEvent &event);
+	void OnIGAngleFalloff2Sldr(wxScrollEvent &event);
+	void OnIGAngleFalloff2Text(wxCommandEvent &event);
 
 	//sized grow pane
 	void EnableSizedGrow(bool value);
 	void EnableSGParamTransition(bool value);
 	void OnSizedGrowCheck(wxCommandEvent &event);
 	void OnSGParamTransitionCheck(wxCommandEvent &event);
+	void OnSGIterationsSldr(wxScrollEvent &event);
+	void OnSGIterationsText(wxCommandEvent &event);
+	//size limiter
+	void OnSGSizeLimiterSldr(wxScrollEvent &event);
+	void OnSGSizeLimiterText(wxCommandEvent &event);
+	void OnSGSizeLimiter2Sldr(wxScrollEvent &event);
+	void OnSGSizeLimiter2Text(wxCommandEvent &event);
+	//translate
+	void OnSGTranslateSldr(wxScrollEvent &event);
+	void OnSGTranslateText(wxCommandEvent &event);
+	void OnSGTranslate2Sldr(wxScrollEvent &event);
+	void OnSGTranslate2Text(wxCommandEvent &event);
+	//scalar falloff
+	void OnSGScalarFalloffSldr(wxScrollEvent &event);
+	void OnSGScalarFalloffText(wxCommandEvent &event);
+	void OnSGScalarFalloff2Sldr(wxScrollEvent &event);
+	void OnSGScalarFalloff2Text(wxCommandEvent &event);
+	//grad falloff
+	void OnSGGradFalloffSldr(wxScrollEvent &event);
+	void OnSGGradFalloffText(wxCommandEvent &event);
+	void OnSGGradFalloff2Sldr(wxScrollEvent &event);
+	void OnSGGradFalloff2Text(wxCommandEvent &event);
+	//variance falloff
+	void OnSGVarFalloffSldr(wxScrollEvent &event);
+	void OnSGVarFalloffText(wxCommandEvent &event);
+	void OnSGVarFalloff2Sldr(wxScrollEvent &event);
+	void OnSGVarFalloff2Text(wxCommandEvent &event);
+	//angle falloff
+	void OnSGAngleFalloffSldr(wxScrollEvent &event);
+	void OnSGAngleFalloffText(wxCommandEvent &event);
+	void OnSGAngleFalloff2Sldr(wxScrollEvent &event);
+	void OnSGAngleFalloff2Text(wxCommandEvent &event);
+
+	//cleanup pane
+	void EnableCleanup(bool value);
+	void OnCleanupCheck(wxCommandEvent &event);
+	void OnCLIterationsSldr(wxScrollEvent &event);
+	void OnCLIterationsText(wxCommandEvent &event);
+	void OnCLSizeLimiterSldr(wxScrollEvent &event);
+	void OnCLSizeLimiterText(wxCommandEvent &event);
+
+	//match slices pane
+	void EnableMatchSlices(bool value);
+	void OnMatchSlicesCheck(wxCommandEvent &event);
+	void OnSizeThreshSldr(wxScrollEvent &event);
+	void OnSizeThreshText(wxCommandEvent &event);
+	void OnSizeRatioSldr(wxScrollEvent &event);
+	void OnSizeRatioText(wxCommandEvent &event);
+	void OnDistThreshSldr(wxScrollEvent &event);
+	void OnDistThreshText(wxCommandEvent &event);
+	void OnAngleThreshSldr(wxScrollEvent &event);
+	void OnAngleThreshText(wxCommandEvent &event);
 
 	DECLARE_EVENT_TABLE();
 };

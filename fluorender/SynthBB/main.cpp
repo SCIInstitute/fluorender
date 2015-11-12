@@ -976,7 +976,10 @@ void MatchSlicesCPU()
 	Cell *cell1, *cell2;
 	ReplaceList rep_list;
 	ReplaceListIter rep_iter;
-	unsigned int thresh = 25;
+	unsigned int size_thresh = 25;
+	float size_ratio = 0.6f;
+	float dist_thresh = 2.5f;
+	float angle_thresh = 0.707f;
 	float size1, size2, size_ol;
 	float vx1, vy1, vx2, vy2, d1, d2;
 	//
@@ -1040,20 +1043,20 @@ void MatchSlicesCPU()
 			cell1 = iter->second;
 			if (cell1->edges.empty())
 				continue;
-			if (cell1->size <= thresh)
+			if (cell1->size <= size_thresh)
 				continue;
 			//sort
 			if (cell1->edges.size() > 1)
 				std::sort(cell1->edges.begin(),
 				cell1->edges.end(), sort_ol);
 			cell2 = cell1->edges[0]->cell2;
-			if (cell2->size <= thresh)
+			if (cell2->size <= size_thresh)
 				continue;
 			size1 = cell1->size;
 			size2 = cell2->size;
 			size_ol = cell1->edges[0]->size;
-			if (size_ol/size1 < 0.6f &&
-				size_ol/size2 < 0.6f)
+			if (size_ol/size1 < size_ratio &&
+				size_ol/size2 < size_ratio)
 				continue;
 			vx1 = cell1->x - cell1->edges[0]->x;
 			vy1 = cell1->y - cell1->edges[0]->y;
@@ -1063,8 +1066,8 @@ void MatchSlicesCPU()
 			vx1 /= d1; vy1 /= d1;
 			d2 = sqrt(vx2 * vx2 + vy2 * vy2);
 			vx2 /= d2; vy2 /= d2;
-			if (d1 > 2.5f && d2 > 2.5f &&
-				fabs(vx1 * vx2 + vy1 * vy2) < 0.707f)
+			if (d1 > dist_thresh && d2 > dist_thresh &&
+				fabs(vx1 * vx2 + vy1 * vy2) < angle_thresh)
 				continue;
 			rep_iter = rep_list.find(cell2->id);
 			if (rep_iter != rep_list.end())

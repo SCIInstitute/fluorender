@@ -1279,6 +1279,8 @@ void BrushToolDlg::SaveDefault()
 	//nr thresh
 	fconfig.Write("nr_thresh", m_dft_nr_thresh);
 	//nr_size
+	fconfig.Write("nr_size", m_dft_nr_size);
+
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = expath.BeforeLast(GETSLASH(),NULL);
 #ifdef _WIN32

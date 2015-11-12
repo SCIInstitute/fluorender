@@ -428,69 +428,78 @@ VRenderFrame::VRenderFrame(
 	//brush tool dialog
 	m_aui_mgr.AddPane(m_brush_tool_dlg, wxAuiPaneInfo().
 		Name("m_brush_tool_dlg").Caption("Paint Brush").
-		Dockable(false).CloseButton(true));
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
 	m_aui_mgr.GetPane(m_brush_tool_dlg).Float();
 	m_aui_mgr.GetPane(m_brush_tool_dlg).Hide();
 	//noise cancelling dialog
 	m_aui_mgr.AddPane(m_noise_cancelling_dlg, wxAuiPaneInfo().
 		Name("m_noise_cancelling_dlg").Caption("Noise Reduction").
-		Dockable(false).CloseButton(true));
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
 	m_aui_mgr.GetPane(m_noise_cancelling_dlg).Float();
 	m_aui_mgr.GetPane(m_noise_cancelling_dlg).Hide();
 	//counting dialog
 	m_aui_mgr.AddPane(m_counting_dlg, wxAuiPaneInfo().
 		Name("m_counting_dlg").Caption("Volume Size").
-		Dockable(false).CloseButton(true));
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
 	m_aui_mgr.GetPane(m_counting_dlg).Float();
 	m_aui_mgr.GetPane(m_counting_dlg).Hide();
 	//convert dialog
 	m_aui_mgr.AddPane(m_convert_dlg, wxAuiPaneInfo().
 		Name("m_convert_dlg").Caption("Convert").
-		Dockable(false).CloseButton(true));
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
 	m_aui_mgr.GetPane(m_convert_dlg).Float();
 	m_aui_mgr.GetPane(m_convert_dlg).Hide();
 	//colocalization dialog
 	m_aui_mgr.AddPane(m_colocalization_dlg, wxAuiPaneInfo().
 		Name("m_colocalization_dlg").Caption("Colocalization").
-		Dockable(false).CloseButton(true));
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
 	m_aui_mgr.GetPane(m_colocalization_dlg).Float();
 	m_aui_mgr.GetPane(m_colocalization_dlg).Hide();
 	//measure dialog
 	m_aui_mgr.AddPane(m_measure_dlg, wxAuiPaneInfo().
 		Name("m_measure_dlg").Caption("Measurement").
-		Dockable(false).CloseButton(true));
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
 	m_aui_mgr.GetPane(m_measure_dlg).Float();
 	m_aui_mgr.GetPane(m_measure_dlg).Hide();
 	//trace dialog
 	m_aui_mgr.AddPane(m_trace_dlg, wxAuiPaneInfo().
 		Name("m_trace_dlg").Caption("Tracking").
-		Dockable(false).CloseButton(true));
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
 	m_aui_mgr.GetPane(m_trace_dlg).Float();
 	m_aui_mgr.GetPane(m_trace_dlg).Hide();
 	//ocl fialog
 	m_aui_mgr.AddPane(m_ocl_dlg, wxAuiPaneInfo().
 		Name("m_ocl_dlg").Caption("OpenCL Kernel Editor").
-		Dockable(false).CloseButton(true));
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
 	m_aui_mgr.GetPane(m_ocl_dlg).Float();
 	m_aui_mgr.GetPane(m_ocl_dlg).Hide();
 	//component dialog
 	m_aui_mgr.AddPane(m_component_dlg, wxAuiPaneInfo().
 		Name("m_component_dlg").Caption("Component Generator").
 		Dockable(false).CloseButton(true).
-		MaximizeButton(true).MinimizeButton(true));
+		MaximizeButton(true));
 	m_aui_mgr.GetPane(m_component_dlg).Float();
 	m_aui_mgr.GetPane(m_component_dlg).Hide();
 	//settings
 	m_aui_mgr.AddPane(m_setting_dlg, wxAuiPaneInfo().
 		Name("m_setting_dlg").Caption("Settings").
 		Dockable(false).CloseButton(true).
-		MaximizeButton(true).MinimizeButton(true));
+		MaximizeButton(true));
 	m_aui_mgr.GetPane(m_setting_dlg).Float();
 	m_aui_mgr.GetPane(m_setting_dlg).Hide();
 	//help
 	m_aui_mgr.AddPane(m_help_dlg, wxAuiPaneInfo().
 		Name("m_help_dlg").Caption("Help").
-		Dockable(false).CloseButton(true));
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
 	m_aui_mgr.GetPane(m_help_dlg).Float();
 	m_aui_mgr.GetPane(m_help_dlg).Hide();
 
