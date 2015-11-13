@@ -274,7 +274,7 @@ inline void FIND_FILES(std::wstring m_path_name,
 			std::string file(ent->d_name);
 			std::wstring wfile = s2ws(file);
 			//check if it contains the string.
-			if (wfile[0] != L"." &&
+			if (ent->d_name[0] != '.' &&
 				wfile.find(search_ext) != std::string::npos &&
 				wfile.find(regex_min) != std::string::npos) {
 				std::string ss = ent->d_name;
