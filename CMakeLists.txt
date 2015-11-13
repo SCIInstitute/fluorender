@@ -290,7 +290,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       $<TARGET_OBJECTS:GLEW_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>)
-   add_executable(SynthBB
+   add_executable(SynthBB MACOSX_BUNDLE
       ${synthbb_src} ${synthbb_hdr}
       $<TARGET_OBJECTS:FLIVR_OBJ>
       $<TARGET_OBJECTS:FORMATS_OBJ>
