@@ -537,7 +537,6 @@ bool TrackMapProcessor::ResolveGraph(TrackMap& track_map, size_t frame1, size_t 
 
 	VertexList &vertex_list1 = track_map.m_vertices_list.at(frame1);
 	VertexList &vertex_list2 = track_map.m_vertices_list.at(frame2);
-	CellList &cell_list2 = track_map.m_cells_list.at(frame2);
 	IntraGraph &intra_graph = track_map.m_intra_graph_list.at(frame2);
 	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
 		frame1 > frame2 ? frame2 : frame1);
@@ -1764,7 +1763,6 @@ bool TrackMapProcessor::GetMappedID(TrackMap& track_map,
 	if (frame >= frame_num)
 		return false;
 
-	VertexList &vertex_list = track_map.m_vertices_list.at(frame);
 	CellList &cell_list = track_map.m_cells_list.at(frame);
 
 	CellListIter cell_iter;
@@ -1864,8 +1862,6 @@ bool TrackMapProcessor::GetMappedCells(TrackMap& track_map,
 		frame1 == frame2)
 		return false;
 
-	VertexList &vertex_list1 = track_map.m_vertices_list.at(frame1);
-	VertexList &vertex_list2 = track_map.m_vertices_list.at(frame2);
 	CellList &cell_list1 = track_map.m_cells_list.at(frame1);
 	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
 		frame1 > frame2 ? frame2 : frame1);
@@ -1937,8 +1933,6 @@ unsigned int TrackMapProcessor::GetMappedEdges(TrackMap & track_map,
 		frame1 == frame2)
 		return result;
 
-	VertexList &vertex_list1 = track_map.m_vertices_list.at(frame1);
-	VertexList &vertex_list2 = track_map.m_vertices_list.at(frame2);
 	CellList &cell_list1 = track_map.m_cells_list.at(frame1);
 	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
 		frame1 > frame2 ? frame2 : frame1);
@@ -2036,8 +2030,6 @@ bool TrackMapProcessor::GetMappedRulers(TrackMap& track_map,
 		frame1 == frame2)
 		return false;
 
-	VertexList &vertex_list1 = track_map.m_vertices_list.at(frame1);
-	VertexList &vertex_list2 = track_map.m_vertices_list.at(frame2);
 	CellList &cell_list1 = track_map.m_cells_list.at(frame1);
 	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
 		frame1 > frame2 ? frame2 : frame1);

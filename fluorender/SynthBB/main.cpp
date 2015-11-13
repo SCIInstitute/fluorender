@@ -1,4 +1,9 @@
+#ifdef _WIN32
 #include <CL/cl.h>
+#endif
+#ifdef _DARWIN
+#include <OpenCL/cl.h>
+#endif
 #include <vector>
 #include <algorithm>
 #include <boost/unordered_map.hpp>
@@ -15,7 +20,7 @@ cl_context context_;
 double spcx = 1.0;
 double spcy = 1.0;
 double spcz = 3.0;
-int time = 0;
+int tempo = 0;
 
 bool Init()
 {
@@ -61,7 +66,7 @@ Nrrd* ReadData(string &filename)
 	wstring time_id = L"NA!@";
 	reader.SetTimeId(time_id);
 	reader.Preprocess();
-	return reader.Convert(time, 0, true);
+	return reader.Convert(tempo, 0, true);
 }
 
 inline unsigned int reverse_bit(unsigned int val, unsigned int len)
