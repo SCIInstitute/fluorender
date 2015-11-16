@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ComponentDlg.h"
 #include "VRenderFrame.h"
+#include "Components/CompGenerator.h"
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 
@@ -116,6 +117,9 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_TEXT(ID_DistThreshText, ComponentDlg::OnDistThreshText)
 	EVT_COMMAND_SCROLL(ID_AngleThreshSldr, ComponentDlg::OnAngleThreshSldr)
 	EVT_TEXT(ID_AngleThreshText, ComponentDlg::OnAngleThreshText)
+
+	//execute
+	EVT_BUTTON(ID_ExecuteBtn, ComponentDlg::OnExecute)
 END_EVENT_TABLE()
 
 wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
@@ -662,10 +666,19 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	m_notebook->AddPage(Create3DAnalysisPage(m_notebook), "Basic");
 	m_notebook->AddPage(Create2DAnalysisPage(m_notebook), "Advanced");
 
+	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
+	m_execute_btn = new wxButton(this, ID_ExecuteBtn, "Execute",
+		wxDefaultPosition, wxSize(50, 20));
+	sizer1->AddStretchSpacer();
+	sizer1->Add(m_execute_btn, 0, wxALIGN_CENTER);
+	sizer1->Add(10, 10);
+
 	//all controls
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
 	sizerv->Add(10, 10);
 	sizerv->Add(m_notebook, 1, wxEXPAND);
+	sizerv->Add(10, 10);
+	sizerv->Add(sizer1, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 
 	SetSizer(sizerv);
@@ -1679,3 +1692,15 @@ void ComponentDlg::OnAngleThreshText(wxCommandEvent &event)
 	m_angle_thresh_sldr->SetValue(int(m_angle_thresh * 1000.0 + 0.5));
 }
 
+void ComponentDlg::OnExecute(wxCommandEvent &event)
+{
+	if (!m_view)
+		return;
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+
+	FL::ComponentGenerator cg(vd, KernelProgram::get_device_id());
+	cg.OrderID_2D();
+	cg.InitialGrow();
+}

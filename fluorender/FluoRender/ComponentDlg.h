@@ -128,7 +128,10 @@ public:
 		ID_DistThreshSldr,
 		ID_DistThreshText,
 		ID_AngleThreshSldr,
-		ID_AngleThreshText
+		ID_AngleThreshText,
+
+		//execute
+		ID_ExecuteBtn
 	};
 
 	ComponentDlg(wxWindow* frame,
@@ -138,7 +141,9 @@ public:
 	void GetSettings();
 	void LoadSettings();
 	void SaveSettings();
-	VRenderView* GetView();
+	VRenderView* GetView() {
+		return m_view;
+	}
 
 private:
 	wxWindow* m_frame;
@@ -303,6 +308,9 @@ private:
 	wxSlider* m_angle_thresh_sldr;
 	wxTextCtrl* m_angle_thresh_text;
 
+	//execute
+	wxButton* m_execute_btn;
+
 private:
 	wxWindow* Create3DAnalysisPage(wxWindow *parent);
 	wxWindow* Create2DAnalysisPage(wxWindow *parent);
@@ -402,6 +410,9 @@ private:
 	void OnDistThreshText(wxCommandEvent &event);
 	void OnAngleThreshSldr(wxScrollEvent &event);
 	void OnAngleThreshText(wxCommandEvent &event);
+
+	//execute
+	void OnExecute(wxCommandEvent &event);
 
 	DECLARE_EVENT_TABLE();
 };

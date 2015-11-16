@@ -32,7 +32,7 @@ bool Init()
 		return false;
 
 	cl_device_id devices[2];
-    cl_uint dev_num = 0;
+	cl_uint dev_num = 0;
 	err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 2, devices, &dev_num);
 	if (err != CL_SUCCESS)
 		return false;

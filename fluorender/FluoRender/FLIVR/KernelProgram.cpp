@@ -86,6 +86,11 @@ namespace FLIVR
 		device_id_ = id;
 	}
 
+	int KernelProgram::get_device_id()
+	{
+		return device_id_;
+	}
+
 	std::string& KernelProgram::get_device_name()
 	{
 		return device_name_;
