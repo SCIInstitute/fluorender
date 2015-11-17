@@ -30,9 +30,18 @@ DEALINGS IN THE SOFTWARE.
 #include "Components/CompGenerator.h"
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
+#include <boost/signals2.hpp>
+#include <boost/bind.hpp>
+
+//float ComponentDlg::m_prog_bit = 0.0f;
+//float ComponentDlg::m_prog = 0.0f;
 
 BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_COLLAPSIBLEPANE_CHANGED(wxID_ANY, ComponentDlg::OnPaneChange)
+	//load save settings
+	EVT_BUTTON(ID_LoadSettingsBtn, ComponentDlg::OnLoadSettings)
+	EVT_BUTTON(ID_SaveSettingsBtn, ComponentDlg::OnSaveSettings)
+	EVT_BUTTON(ID_SaveasSettingsBtn, ComponentDlg::OnSaveasSettings)
 	//initial grow
 	EVT_CHECKBOX(ID_InitialGrowCheck, ComponentDlg::OnInitialGrowCheck)
 	EVT_CHECKBOX(ID_IGParamTransitionCheck, ComponentDlg::OnIGParamTransitionCheck)
@@ -119,13 +128,35 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_TEXT(ID_AngleThreshText, ComponentDlg::OnAngleThreshText)
 
 	//execute
-	EVT_BUTTON(ID_ExecuteBtn, ComponentDlg::OnExecute)
+	EVT_BUTTON(ID_GenerateBtn, ComponentDlg::OnGenerate)
 END_EVENT_TABLE()
 
 wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 {
 	wxPanel *page = new wxPanel(parent);
 	wxStaticText *st = 0;
+	//validator: floating point 3
+	wxFloatingPointValidator<double> vald_fp3(3);
+
+	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Threshold:",
+		wxDefaultPosition, wxSize(100, 23));
+	m_basic_thresh_sldr = new wxSlider(page, ID_BasicThreshSldr, 0, 0, 1000,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_basic_thresh_text = new wxTextCtrl(page, ID_BasicThreshText, "0.000",
+		wxDefaultPosition, wxSize(60, 20), 0, vald_fp3);
+	sizer1->Add(5, 5);
+	sizer1->Add(st, 0, wxALIGN_CENTER);
+	sizer1->Add(m_basic_thresh_sldr, 1, wxEXPAND);
+	sizer1->Add(m_basic_thresh_text, 0, wxALIGN_CENTER);
+	sizer1->Add(5, 5);
+
+	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
+	sizerv->Add(10, 10);
+	sizerv->Add(sizer1, 0, wxEXPAND);
+	sizerv->Add(10, 10);
+
+	page->SetSizer(sizerv);
 
 	return page;
 }
@@ -135,22 +166,41 @@ wxWindow* ComponentDlg::Create2DAnalysisPage(wxWindow *parent)
 	m_adv_page = new wxScrolledWindow(parent);
 	wxStaticText *st = 0;
 
+	//load/save settings
+	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(m_adv_page, 0, "Setting File:",
+		wxDefaultPosition, wxDefaultSize);
+	m_load_settings_text = new wxTextCtrl(m_adv_page, ID_LoadSettingsText, "",
+		wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
+	m_load_settings_btn = new wxButton(m_adv_page, ID_LoadSettingsBtn, "Load",
+		wxDefaultPosition, wxSize(65, 23));
+	m_save_settings_btn = new wxButton(m_adv_page, ID_SaveSettingsBtn, "Save",
+		wxDefaultPosition, wxSize(65, 23));
+	m_saveas_settings_btn = new wxButton(m_adv_page, ID_SaveasSettingsBtn, "Save As",
+		wxDefaultPosition, wxSize(65, 23));
+	sizer1->Add(5, 5);
+	sizer1->Add(st, 0, wxALIGN_CENTER);
+	sizer1->Add(m_load_settings_text, 1, wxEXPAND);
+	sizer1->Add(m_load_settings_btn, 0, wxALIGN_CENTER);
+	sizer1->Add(m_save_settings_btn, 0, wxALIGN_CENTER);
+	sizer1->Add(m_saveas_settings_btn, 0, wxALIGN_CENTER);
+
 	//initial grow
-	wxBoxSizer* sizer1 = new wxBoxSizer(wxVERTICAL);
-	m_initial_grow_pane = CreateInitialGrowPane(m_adv_page);
-	sizer1->Add(m_initial_grow_pane, 0, wxEXPAND);
-	//sized grow
 	wxBoxSizer* sizer2 = new wxBoxSizer(wxVERTICAL);
-	m_sized_grow_pane = CreateSizedGrowPane(m_adv_page);
-	sizer2->Add(m_sized_grow_pane, 0, wxEXPAND);
-	//cleanup
+	m_initial_grow_pane = CreateInitialGrowPane(m_adv_page);
+	sizer2->Add(m_initial_grow_pane, 0, wxEXPAND);
+	//sized grow
 	wxBoxSizer* sizer3 = new wxBoxSizer(wxVERTICAL);
-	m_cleanup_pane = CreateCleanupPane(m_adv_page);
-	sizer3->Add(m_cleanup_pane, 0, wxEXPAND);
-	//match slices
+	m_sized_grow_pane = CreateSizedGrowPane(m_adv_page);
+	sizer3->Add(m_sized_grow_pane, 0, wxEXPAND);
+	//cleanup
 	wxBoxSizer* sizer4 = new wxBoxSizer(wxVERTICAL);
+	m_cleanup_pane = CreateCleanupPane(m_adv_page);
+	sizer4->Add(m_cleanup_pane, 0, wxEXPAND);
+	//match slices
+	wxBoxSizer* sizer5 = new wxBoxSizer(wxVERTICAL);
 	m_match_slices_pane = CreateMatchSlicesPane(m_adv_page);
-	sizer4->Add(m_match_slices_pane, 0, wxEXPAND);
+	sizer5->Add(m_match_slices_pane, 0, wxEXPAND);
 
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
 	sizerv->Add(10, 10);
@@ -161,6 +211,8 @@ wxWindow* ComponentDlg::Create2DAnalysisPage(wxWindow *parent)
 	sizerv->Add(sizer3, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 	sizerv->Add(sizer4, 0, wxEXPAND);
+	sizerv->Add(10, 10);
+	sizerv->Add(sizer5, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 
 	m_adv_page->SetScrollRate(10, 10);
@@ -667,11 +719,24 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	m_notebook->AddPage(Create2DAnalysisPage(m_notebook), "Advanced");
 
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	m_execute_btn = new wxButton(this, ID_ExecuteBtn, "Execute",
-		wxDefaultPosition, wxSize(50, 20));
-	sizer1->AddStretchSpacer();
-	sizer1->Add(m_execute_btn, 0, wxALIGN_CENTER);
+	m_generate_prg = new wxGauge(this, ID_GeneratePrg, 100,
+		wxDefaultPosition, wxSize(-1, 18));
+	m_generate_btn = new wxButton(this, ID_GenerateBtn, "Generate",
+		wxDefaultPosition, wxSize(75, -1));
 	sizer1->Add(10, 10);
+	sizer1->Add(m_generate_prg, 1, wxEXPAND);
+	sizer1->Add(10, 10);
+	sizer1->Add(m_generate_btn, 0, wxALIGN_CENTER);
+	sizer1->Add(10, 10);
+
+	//stats text
+	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
+		new wxStaticBox(this, wxID_ANY, "Output"),
+		wxVERTICAL);
+	m_stat_text = new wxTextCtrl(this, ID_StatText, "",
+		wxDefaultPosition, wxSize(-1, 150), wxTE_MULTILINE);
+	m_stat_text->SetEditable(false);
+	sizer2->Add(m_stat_text, 1, wxEXPAND);
 
 	//all controls
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
@@ -679,6 +744,8 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	sizerv->Add(m_notebook, 1, wxEXPAND);
 	sizerv->Add(10, 10);
 	sizerv->Add(sizer1, 0, wxEXPAND);
+	sizerv->Add(10, 10);
+	sizerv->Add(sizer2, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 
 	SetSizer(sizerv);
@@ -689,48 +756,11 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 
 ComponentDlg::~ComponentDlg()
 {
-	SaveSettings();
+	SaveSettings("");
 }
 
-void ComponentDlg::GetSettings()
+void ComponentDlg::Update()
 {
-	//defaults
-	//initial grow
-	m_initial_grow = false;
-	m_ig_param_transition = false;
-	m_ig_iterations = 50;
-	m_ig_translate = m_ig_translate2 = 1.0;
-	m_ig_scalar_falloff = m_ig_scalar_falloff2 = 0.15;
-	m_ig_grad_falloff = m_ig_grad_falloff2 = 0.1;
-	m_ig_var_falloff = m_ig_var_falloff2 = 0.2;
-	m_ig_angle_falloff = m_ig_angle_falloff2 = 0.2;
-
-	//sized grow
-	m_sized_grow = false;
-	m_sg_param_transition = false;
-	m_sg_iterations = 40;
-	m_sg_size_limiter = m_sg_size_limiter2 = 20;
-	m_sg_translate = m_sg_translate2 = 0.5;
-	m_sg_scalar_falloff = m_sg_scalar_falloff2 = 0.25;
-	m_sg_grad_falloff = m_sg_grad_falloff2 = 0.25;
-	m_sg_var_falloff = m_sg_var_falloff2 = 0.35;
-	m_sg_angle_falloff = m_sg_angle_falloff2 = 0.35;
-
-	//cleanup
-	m_cleanup = false;
-	m_cl_iterations = 10;
-	m_cl_size_limiter = 5;
-	
-	//match slices
-	m_match_slices = false;
-	m_size_thresh = 25;
-	m_size_ratio = 0.6;
-	m_dist_thresh = 2.5;
-	m_angle_thresh = 0.7;
-
-	//read values
-	LoadSettings();
-
 	//update ui
 	//initial grow
 	m_initial_grow_check->SetValue(m_initial_grow);
@@ -799,16 +829,60 @@ void ComponentDlg::GetSettings()
 	m_angle_thresh_text->SetValue(wxString::Format("%.3f", m_angle_thresh));
 }
 
-void ComponentDlg::LoadSettings()
+void ComponentDlg::GetSettings()
 {
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = expath.BeforeLast(GETSLASH(), NULL);
+	//defaults
+	//initial grow
+	m_initial_grow = false;
+	m_ig_param_transition = false;
+	m_ig_iterations = 50;
+	m_ig_translate = m_ig_translate2 = 1.0;
+	m_ig_scalar_falloff = m_ig_scalar_falloff2 = 0.15;
+	m_ig_grad_falloff = m_ig_grad_falloff2 = 0.1;
+	m_ig_var_falloff = m_ig_var_falloff2 = 0.2;
+	m_ig_angle_falloff = m_ig_angle_falloff2 = 0.2;
+
+	//sized grow
+	m_sized_grow = false;
+	m_sg_param_transition = false;
+	m_sg_iterations = 40;
+	m_sg_size_limiter = m_sg_size_limiter2 = 20;
+	m_sg_translate = m_sg_translate2 = 0.5;
+	m_sg_scalar_falloff = m_sg_scalar_falloff2 = 0.25;
+	m_sg_grad_falloff = m_sg_grad_falloff2 = 0.25;
+	m_sg_var_falloff = m_sg_var_falloff2 = 0.35;
+	m_sg_angle_falloff = m_sg_angle_falloff2 = 0.35;
+
+	//cleanup
+	m_cleanup = false;
+	m_cl_iterations = 10;
+	m_cl_size_limiter = 5;
+	
+	//match slices
+	m_match_slices = false;
+	m_size_thresh = 25;
+	m_size_ratio = 0.6;
+	m_dist_thresh = 2.5;
+	m_angle_thresh = 0.7;
+
+	//read values
+	LoadSettings("");
+	Update();
+}
+
+void ComponentDlg::LoadSettings(wxString filename)
+{
+	if (!wxFileExists(filename))
+	{
+		wxString expath = wxStandardPaths::Get().GetExecutablePath();
+		expath = expath.BeforeLast(GETSLASH(), NULL);
 #ifdef _WIN32
-	wxString dft = expath + "\\default_component_settings.dft";
+		filename = expath + "\\default_component_settings.dft";
 #else
-	wxString dft = expath + "/../Resources/default_component_settings.dft";
+		filename = expath + "/../Resources/default_component_settings.dft";
 #endif
-	wxFileInputStream is(dft);
+	}
+	wxFileInputStream is(filename);
 	if (!is.IsOk())
 		return;
 	wxFileConfig fconfig(is);
@@ -867,9 +941,11 @@ void ComponentDlg::LoadSettings()
 	fconfig.Read("size_ratio", &m_size_ratio);
 	fconfig.Read("dist_thresh", &m_dist_thresh);
 	fconfig.Read("angle_thresh", &m_angle_thresh);
+
+	m_load_settings_text->SetValue(filename);
 }
 
-void ComponentDlg::SaveSettings()
+void ComponentDlg::SaveSettings(wxString filename)
 {
 	wxFileConfig fconfig("FluoRender default component settings");
 
@@ -928,14 +1004,18 @@ void ComponentDlg::SaveSettings()
 	fconfig.Write("dist_thresh", m_dist_thresh);
 	fconfig.Write("angle_thresh", m_angle_thresh);
 
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = expath.BeforeLast(GETSLASH(), NULL);
+	if (filename == "")
+	{
+		wxString expath = wxStandardPaths::Get().GetExecutablePath();
+		expath = expath.BeforeLast(GETSLASH(), NULL);
 #ifdef _WIN32
-	wxString dft = expath + "\\default_component_settings.dft";
+		filename = expath + "\\default_component_settings.dft";
 #else
-	wxString dft = expath + "/../Resources/default_component_settings.dft";
+		filename = expath + "/../Resources/default_component_settings.dft";
 #endif
-	wxFileOutputStream os(dft);
+	}
+
+	wxFileOutputStream os(filename);
 	fconfig.Save(os);
 }
 
@@ -943,6 +1023,54 @@ void ComponentDlg::OnPaneChange(wxCollapsiblePaneEvent& event)
 {
 	if (m_adv_page)
 		m_adv_page->SendSizeEvent();
+}
+
+void ComponentDlg::OnLoadSettings(wxCommandEvent& event)
+{
+	wxFileDialog *fopendlg = new wxFileDialog(
+		m_frame, "Choose a FluoRender component generator setting file",
+		"", "", "*.txt;*.dft", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+
+	int rval = fopendlg->ShowModal();
+	if (rval == wxID_OK)
+	{
+		wxString filename = fopendlg->GetPath();
+		LoadSettings(filename);
+		Update();
+	}
+
+	if (fopendlg)
+		delete fopendlg;
+}
+
+void ComponentDlg::OnSaveSettings(wxCommandEvent& event)
+{
+	wxString filename = m_load_settings_text->GetValue();
+	if (wxFileExists(filename))
+		SaveSettings(filename);
+	else
+	{
+		wxCommandEvent e;
+		OnSaveasSettings(e);
+	}
+}
+
+void ComponentDlg::OnSaveasSettings(wxCommandEvent& event)
+{
+	wxFileDialog *fopendlg = new wxFileDialog(
+		m_frame, "Save a FluoRender component generator setting file",
+		"", "", "*.txt", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+	int rval = fopendlg->ShowModal();
+	if (rval == wxID_OK)
+	{
+		wxString filename = fopendlg->GetPath();
+		SaveSettings(filename);
+		m_load_settings_text->SetValue(filename);
+	}
+
+	if (fopendlg)
+		delete fopendlg;
 }
 
 void ComponentDlg::EnableInitialGrow(bool value)
@@ -1692,15 +1820,76 @@ void ComponentDlg::OnAngleThreshText(wxCommandEvent &event)
 	m_angle_thresh_sldr->SetValue(int(m_angle_thresh * 1000.0 + 0.5));
 }
 
-void ComponentDlg::OnExecute(wxCommandEvent &event)
+void ComponentDlg::OnGenerate(wxCommandEvent &event)
+{
+	int page = m_notebook->GetSelection();
+	switch (page)
+	{
+	case 0:
+		GenerateBsc();
+		break;
+	case 1:
+		GenerateAdv();
+		break;
+	}
+}
+
+void ComponentDlg::GenerateAdv()
 {
 	if (!m_view)
 		return;
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
 		return;
+	vd->AddEmptyMask(1);
+	vd->AddEmptyLabel();
 
 	FL::ComponentGenerator cg(vd, KernelProgram::get_device_id());
+	m_prog_bit = 90.0f / float(1 +
+		(m_initial_grow ? m_ig_iterations : 0) +
+		(m_sized_grow ? m_sg_iterations : 0) +
+		(m_cleanup ? m_cl_iterations : 0) +
+		1);
+	m_prog = 0.0f;
+	boost::signals2::connection connection =
+		cg.m_sig_progress.connect(boost::bind(
+			&ComponentDlg::UpdateProgress, this));
+
 	cg.OrderID_2D();
-	cg.InitialGrow();
+
+	if (m_initial_grow)
+		cg.InitialGrow(m_ig_param_transition, m_ig_iterations,
+			float(m_ig_translate), float(m_ig_translate2),
+			float(m_ig_scalar_falloff), float(m_ig_scalar_falloff2),
+			float(m_ig_grad_falloff), float(m_ig_grad_falloff2),
+			float(m_ig_var_falloff), float(m_ig_var_falloff2),
+			float(m_ig_angle_falloff), float(m_ig_angle_falloff2));
+
+	if (m_sized_grow)
+		cg.SizedGrow(m_sg_param_transition, m_sg_iterations,
+			(unsigned int)(m_sg_size_limiter), (unsigned int)(m_sg_size_limiter2),
+			float(m_sg_translate), float(m_sg_translate2),
+			float(m_sg_scalar_falloff), float(m_sg_scalar_falloff2),
+			float(m_sg_grad_falloff), float(m_sg_grad_falloff2),
+			float(m_sg_var_falloff), float(m_sg_var_falloff2),
+			float(m_sg_angle_falloff), float(m_sg_angle_falloff2));
+
+	if (m_cleanup)
+		cg.Cleanup(m_cl_iterations, (unsigned int)(m_cl_size_limiter));
+
+	if (m_match_slices)
+		cg.MatchSlices_CPU((unsigned int)(m_size_thresh),
+			float(m_size_ratio), float(m_dist_thresh),
+			float(m_angle_thresh));
+
+	vd->GetVR()->clear_tex_current();
+	m_view->RefreshGL();
+
+	m_generate_prg->SetValue(100);
+	connection.disconnect();
+}
+
+void ComponentDlg::GenerateBsc()
+{
+
 }

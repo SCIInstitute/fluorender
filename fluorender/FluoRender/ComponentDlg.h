@@ -25,6 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#include "Main.h"
 #include "DataManager.h"
 #include <wx/wx.h>
 #include <wx/collpane.h>
@@ -36,11 +37,17 @@ DEALINGS IN THE SOFTWARE.
 class VRenderView;
 class VolumeData;
 
+DECLARE_APP(VRenderApp)
 class ComponentDlg : public wxPanel
 {
 public:
 	enum
 	{
+		// load / save
+		ID_LoadSettingsText,
+		ID_LoadSettingsBtn,
+		ID_SaveSettingsBtn,
+		ID_SaveasSettingsBtn,
 		//initial grow pane
 		ID_InitialGrowPane,
 		ID_InitialGrowCheck,
@@ -130,24 +137,48 @@ public:
 		ID_AngleThreshSldr,
 		ID_AngleThreshText,
 
+		//basic page
+		ID_BasicThreshSldr,
+		ID_BasicThreshText,
+
 		//execute
-		ID_ExecuteBtn
+		ID_GeneratePrg,
+		ID_GenerateBtn,
+
+		//output
+		ID_StatText
 	};
 
 	ComponentDlg(wxWindow* frame,
 		wxWindow* parent);
 	~ComponentDlg();
 
+	void Update();
 	void GetSettings();
-	void LoadSettings();
-	void SaveSettings();
+	void LoadSettings(wxString filename);
+	void SaveSettings(wxString filename);
+	void SetView(VRenderView* vrv) {
+		m_view = vrv;
+	}
 	VRenderView* GetView() {
 		return m_view;
+	}
+
+	//update progress
+	void UpdateProgress()
+	{
+		m_prog += m_prog_bit;
+		m_generate_prg->SetValue(int(m_prog));
+		wxGetApp().Yield();
 	}
 
 private:
 	wxWindow* m_frame;
 	VRenderView* m_view;
+
+	//progress
+	float m_prog_bit;
+	float m_prog;
 
 	//initial grow
 	bool m_initial_grow;
@@ -207,6 +238,12 @@ private:
 	//tab control
 	wxNotebook *m_notebook;
 	wxScrolledWindow* m_adv_page;
+
+	//load/save settings
+	wxTextCtrl* m_load_settings_text;
+	wxButton* m_load_settings_btn;
+	wxButton* m_save_settings_btn;
+	wxButton* m_saveas_settings_btn;
 
 	//initial grow pane
 	wxCollapsiblePane* m_initial_grow_pane;
@@ -308,8 +345,20 @@ private:
 	wxSlider* m_angle_thresh_sldr;
 	wxTextCtrl* m_angle_thresh_text;
 
+	//basic page
+	wxSlider* m_basic_thresh_sldr;
+	wxTextCtrl* m_basic_thresh_text;
+
 	//execute
-	wxButton* m_execute_btn;
+	wxGauge* m_generate_prg;
+	wxButton* m_generate_btn;
+
+	//output
+	wxTextCtrl* m_stat_text;
+
+private:
+	void GenerateAdv();
+	void GenerateBsc();
 
 private:
 	wxWindow* Create3DAnalysisPage(wxWindow *parent);
@@ -319,6 +368,11 @@ private:
 	wxCollapsiblePane* CreateSizedGrowPane(wxWindow *parent);
 	wxCollapsiblePane* CreateCleanupPane(wxWindow *parent);
 	wxCollapsiblePane* CreateMatchSlicesPane(wxWindow *parent);
+
+	//load/save settings
+	void OnLoadSettings(wxCommandEvent &event);
+	void OnSaveSettings(wxCommandEvent &event);
+	void OnSaveasSettings(wxCommandEvent &event);
 
 	//initial grow pane
 	void EnableInitialGrow(bool value);
@@ -412,7 +466,7 @@ private:
 	void OnAngleThreshText(wxCommandEvent &event);
 
 	//execute
-	void OnExecute(wxCommandEvent &event);
+	void OnGenerate(wxCommandEvent &event);
 
 	DECLARE_EVENT_TABLE();
 };

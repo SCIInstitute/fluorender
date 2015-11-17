@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #endif
 #include <vector>
 #include <boost/unordered_map.hpp>
+#include <boost/signals2.hpp>
 
 using namespace std;
 
@@ -68,6 +69,9 @@ namespace FL
 		void Cleanup(int, unsigned int);
 		void MatchSlices_CPU(unsigned int,
 			float, float, float);
+
+		//update progress
+		boost::signals2::signal<void ()> m_sig_progress;
 
 	private:
 		VolumeData *m_vd;

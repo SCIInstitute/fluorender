@@ -78,6 +78,7 @@ void ComponentGenerator::OrderID_3D()
 	if (!m_vd)
 		return;
 	m_vd->AddEmptyLabel(1);
+	m_sig_progress();
 }
 
 #define GET_VOLDATA \
@@ -139,13 +140,13 @@ void ComponentGenerator::OrderID_2D()
 
 	//data
 	cl_image_format image_format;
-	cl_image_desc image_desc;
 	image_format.image_channel_order = CL_R;
-	image_format.image_channel_data_type = CL_UNORM_INT8;
 	if (bits == 8)
 		image_format.image_channel_data_type = CL_UNORM_INT8;
 	else if (bits == 16)
 		image_format.image_channel_data_type = CL_UNORM_INT16;
+	cl_image_desc image_desc;
+	image_desc.image_type = CL_MEM_OBJECT_IMAGE3D;
 	image_desc.image_width = nx;
 	image_desc.image_height = ny;
 	image_desc.image_depth = nz;
@@ -181,6 +182,8 @@ void ComponentGenerator::OrderID_2D()
 	clReleaseKernel(kernel);
 	clReleaseCommandQueue(queue);
 	clReleaseProgram(program);
+
+	m_sig_progress();
 }
 
 void ComponentGenerator::ShuffleID_3D()
@@ -222,12 +225,12 @@ void ComponentGenerator::ShuffleID_3D()
 
 	//data
 	cl_image_format image_format;
-	cl_image_desc image_desc;
 	image_format.image_channel_order = CL_R;
 	if (bits == 8)
 		image_format.image_channel_data_type = CL_UNORM_INT8;
 	else if (bits == 16)
 		image_format.image_channel_data_type = CL_UNORM_INT16;
+	cl_image_desc image_desc;
 	image_desc.image_type = CL_MEM_OBJECT_IMAGE3D;
 	image_desc.image_width = size_t(nx);
 	image_desc.image_height = size_t(ny);
@@ -265,6 +268,8 @@ void ComponentGenerator::ShuffleID_3D()
 	clReleaseKernel(kernel);
 	clReleaseCommandQueue(queue);
 	clReleaseProgram(program);
+
+	m_sig_progress();
 }
 
 void ComponentGenerator::ShuffleID_2D()
@@ -272,6 +277,8 @@ void ComponentGenerator::ShuffleID_2D()
 	if (!m_vd)
 		return;
 	m_vd->AddEmptyLabel(2);
+
+	m_sig_progress();
 }
 
 void ComponentGenerator::InitialGrow(bool param_tr, int iter,
@@ -316,12 +323,12 @@ void ComponentGenerator::InitialGrow(bool param_tr, int iter,
 
 	//data
 	cl_image_format image_format;
-	cl_image_desc image_desc;
 	image_format.image_channel_order = CL_R;
 	if (bits == 8)
 		image_format.image_channel_data_type = CL_UNORM_INT8;
 	else if (bits == 16)
 		image_format.image_channel_data_type = CL_UNORM_INT16;
+	cl_image_desc image_desc;
 	image_desc.image_type = CL_MEM_OBJECT_IMAGE2D;
 	image_desc.image_width = nx;
 	image_desc.image_height = ny;
@@ -358,6 +365,7 @@ void ComponentGenerator::InitialGrow(bool param_tr, int iter,
 
 	const size_t origin[] = { 0, 0, 0 };
 	const size_t region[] = { size_t(nx), size_t(ny), 1 };
+	size_t count = 0;
 	for (size_t i = 0; i<nz; ++i)
 	{
 		if (i)
@@ -390,6 +398,13 @@ void ComponentGenerator::InitialGrow(bool param_tr, int iter,
 
 			err = clEnqueueNDRangeKernel(queue, kernel, 2, NULL, global_size,
 				local_size, 0, NULL, NULL);
+
+			count++;
+			if (count == nz - 1)
+			{
+				count = 0;
+				m_sig_progress();
+			}
 		}
 
 		clFinish(queue);
@@ -461,12 +476,12 @@ void ComponentGenerator::SizedGrow(bool param_tr, int iter,
 
 	//data
 	cl_image_format image_format;
-	cl_image_desc image_desc;
 	image_format.image_channel_order = CL_R;
 	if (bits == 8)
 		image_format.image_channel_data_type = CL_UNORM_INT8;
 	else if (bits == 16)
 		image_format.image_channel_data_type = CL_UNORM_INT16;
+	cl_image_desc image_desc;
 	image_desc.image_type = CL_MEM_OBJECT_IMAGE2D;
 	image_desc.image_width = nx;
 	image_desc.image_height = ny;
@@ -519,6 +534,7 @@ void ComponentGenerator::SizedGrow(bool param_tr, int iter,
 
 	const size_t origin[] = { 0, 0, 0 };
 	const size_t region[] = { size_t(nx), size_t(ny), 1 };
+	size_t count = 0;
 	for (size_t i = 0; i<nz; ++i)
 	{
 		if (i)
@@ -561,6 +577,13 @@ void ComponentGenerator::SizedGrow(bool param_tr, int iter,
 			}
 			err = clEnqueueNDRangeKernel(queue, kernel_2, 2, NULL, global_size,
 				local_size, 0, NULL, NULL);
+
+			count++;
+			if (count == nz - 1)
+			{
+				count = 0;
+				m_sig_progress();
+			}
 		}
 
 		clFinish(queue);
@@ -677,6 +700,7 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 	err = clSetKernelArg(kernel_2, 3, sizeof(unsigned int), (void*)(&ny));
 	err = clSetKernelArg(kernel_2, 4, sizeof(unsigned int), (void*)(&size_lm));
 
+	size_t count = 0;
 	for (size_t i = 0; i<nz; ++i)
 	{
 		if (i)
@@ -697,6 +721,13 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 				local_size, 0, NULL, NULL);
 			err = clEnqueueNDRangeKernel(queue, kernel_2, 2, NULL, global_size,
 				local_size, 0, NULL, NULL);
+
+			count++;
+			if (count == nz - 1)
+			{
+				count = 0;
+				m_sig_progress();
+			}
 		}
 
 		clFinish(queue);
@@ -867,5 +898,7 @@ void ComponentGenerator::MatchSlices_CPU(unsigned int size_thresh,
 			page2_data = (void*)(((unsigned short*)page2_data) + nx*ny);
 		}
 	}
+
+	m_sig_progress();
 }
 

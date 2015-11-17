@@ -193,7 +193,8 @@ public:
 	void LoadMask(Nrrd* mask);
 	Nrrd* GetMask(bool ret);
 	//empty mask
-	void AddEmptyMask();
+	//mode: 0-zeros; 1-255
+	void AddEmptyMask(int mode=0);
 	//load label
 	void LoadLabel(Nrrd* label);
 	Nrrd* GetLabel(bool ret);

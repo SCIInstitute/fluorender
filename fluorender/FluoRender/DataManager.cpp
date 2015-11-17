@@ -551,19 +551,21 @@ void VolumeData::LoadMask(Nrrd* mask)
 	m_tex->set_nrrd(mask, m_tex->nmask());
 }
 
-void VolumeData::AddEmptyMask()
+void VolumeData::AddEmptyMask(int mode)
 {
 	if (!m_tex || !m_vr)
 		return;
 
+	Nrrd *nrrd_mask = 0;
+	uint8 *val8 = 0;
+	unsigned long long mem_size = (unsigned long long)m_res_x*
+		(unsigned long long)m_res_y*(unsigned long long)m_res_z;
 	//prepare the texture bricks for the mask
 	if (m_tex->add_empty_mask())
 	{
 		//add the nrrd data for mask
-		Nrrd *nrrd_mask = nrrdNew();
-		unsigned long long mem_size = (unsigned long long)m_res_x*
-			(unsigned long long)m_res_y*(unsigned long long)m_res_z;
-		uint8 *val8 = new (std::nothrow) uint8[mem_size];
+		nrrd_mask = nrrdNew();
+		val8 = new (std::nothrow) uint8[mem_size];
 		if (!val8)
 		{
 			wxMessageBox("Not enough memory. Please save project and restart.");
@@ -571,7 +573,6 @@ void VolumeData::AddEmptyMask()
 		}
 		double spcx, spcy, spcz;
 		m_tex->get_spacings(spcx, spcy, spcz);
-		memset((void*)val8, 0, mem_size*sizeof(uint8));
 		nrrdWrap(nrrd_mask, val8, nrrdTypeUChar, 3, (size_t)m_res_x, (size_t)m_res_y, (size_t)m_res_z);
 		nrrdAxisInfoSet(nrrd_mask, nrrdAxisInfoSize, (size_t)m_res_x, (size_t)m_res_y, (size_t)m_res_z);
 		nrrdAxisInfoSet(nrrd_mask, nrrdAxisInfoSpacing, spcx, spcy, spcz);
@@ -580,6 +581,14 @@ void VolumeData::AddEmptyMask()
 
 		m_tex->set_nrrd(nrrd_mask, m_tex->nmask());
 	}
+	else
+	{
+		nrrd_mask = m_tex->get_nrrd(m_tex->nmask());
+		val8 = (uint8*)nrrd_mask->data;
+	}
+
+	if (val8)
+		memset((void*)val8, mode ? 255 : 0, mem_size*sizeof(uint8));
 }
 
 //volume label
@@ -722,7 +731,7 @@ Nrrd* VolumeData::GetVolume(bool ret)
 	if (m_vr && m_tex)
 	{
 		if (ret) m_vr->return_volume();
-		return m_tex->get_nrrd(m_tex->nmask());
+		return m_tex->get_nrrd(0);
 	}
 
 	return 0;

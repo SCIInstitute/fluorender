@@ -46,7 +46,6 @@ namespace FL
 #define TAG_LAST_OP		6
 #define TAG_NUM			7
 
-	typedef boost::signals2::signal<void(int)> SignalProg;
 	typedef std::vector<Ruler*> RulerList;
 	typedef std::vector<Ruler*>::iterator RulerListIter;
 	class TrackMap;
@@ -59,8 +58,6 @@ namespace FL
 		m_size_thresh(25.0f),
 		m_level_thresh(7) {}
 		~TrackMapProcessor() {}
-
-		void ConnectSignalProgress(SignalProg::slot_type func);
 
 		void SetContactThresh(float value);
 		void SetSizeThresh(float value);
@@ -209,18 +206,7 @@ namespace FL
 			unsigned int size_ui, float size_f,
 			float dist, unsigned int link);
 
-		//update progress
-		SignalProg m_sig_progress;
-		boost::signals2::connection m_con_progress;
 	};
-
-	inline void TrackMapProcessor::ConnectSignalProgress(
-		SignalProg::slot_type func)
-	{
-		if (m_con_progress.connected())
-			m_con_progress.disconnect();
-		m_con_progress = m_sig_progress.connect(func);
-	}
 
 	inline void TrackMapProcessor::SetContactThresh(float value)
 	{
