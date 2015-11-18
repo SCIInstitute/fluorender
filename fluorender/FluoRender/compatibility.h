@@ -126,6 +126,63 @@ inline int CREATE_DIR(const wchar_t *f) { return CreateDirectory(f, NULL); }
 
 inline uint32_t GET_TICK_COUNT() { return GetTickCount(); }
 
+inline bool FIND_FILES_4D(std::wstring path_name,
+	std::wstring id, std::vector<std::wstring> &batch_list,
+	int &cur_batch)
+{
+	int64_t begin = path_name.find(id);
+	size_t id_len = id.length();
+	if (begin == -1)
+		return false;
+	else
+	{
+		std::wstring searchstr = path_name.substr(0, begin-1);
+		searchstr.push_back(L'*');
+		std::wstring t_num;
+		size_t k;
+		for (k = begin+id_len; k < path_name.length(); ++k)
+		{
+			wchar_t c = path_name[k];
+			if (iswdigit(c))
+				t_num.push_back(c);
+			else if (k == begin + id_len)
+				return false;
+			else
+				searchstr.push_back(c);
+		}
+		if (t_num.length() == 0)
+			return false;
+		
+		std::wstring search_path = path_name.substr(0,
+			path_name.find_last_of(L'\\')) + L'\\';
+		WIN32_FIND_DATAW FindFileData;
+		HANDLE hFind;
+		hFind = FindFirstFileW(searchstr.c_str(), &FindFileData);
+		if (hFind != INVALID_HANDLE_VALUE)
+		{
+			int cnt = 0;
+			batch_list.clear();
+			std::wstring name = search_path + FindFileData.cFileName;
+			batch_list.push_back(name);
+			if (name == path_name)
+				cur_batch = cnt;
+			cnt++;
+
+			while (FindNextFileW(hFind, &FindFileData) != 0)
+			{
+				name = search_path + FindFileData.cFileName;
+				batch_list.push_back(name);
+				if (name == path_name)
+					cur_batch = cnt;
+				cnt++;
+			}
+		}
+		FindClose(hFind);
+
+		return true;
+	}
+}
+
 inline void FIND_FILES(std::wstring m_path_name,
 	std::wstring search_ext,
 	std::vector<std::wstring> &m_batch_list,
@@ -254,6 +311,66 @@ typedef union _LARGE_INTEGER {
 	} u;
 	long long QuadPart;
 } LARGE_INTEGER, *PLARGE_INTEGER;
+
+inline bool FIND_FILES_4D(std::wstring path_name,
+	std::wstring id, std::vector<std::wstring> &batch_list,
+	int &cur_batch)
+{
+	int64_t begin = path_name.find(id);
+	size_t id_len = id.length();
+	if (begin == -1)
+		return false;
+	else
+	{
+		std::wstring searchstr = path_name.substr(0, begin - 1);
+		std::wstring searchstr2;
+		std::wstring t_num;
+		size_t k;
+		for (k = begin + id_len; k < path_name.length(); ++k)
+		{
+			wchar_t c = path_name[k];
+			if (iswdigit(c))
+				t_num.push_back(c);
+			else
+				searchstr2.push_back(c);
+		}
+		if (t_num.length() == 0)
+			return false;
+
+		std::wstring search_path = path_name.substr(0,
+			path_name.find_last_of(L'/')) + L'/';
+		DIR* dir;
+		struct dirent *ent;
+		if ((dir = opendir(ws2s(search_path).c_str())) != NULL)
+		{
+			int cnt = 0;
+			batch_list.clear();
+
+			while ((ent = readdir(dir)) != NULL)
+			{
+				std::string file(ent->d_name);
+				std::wstring wfile = s2ws(file);
+				//check if it contains the string.
+				if (ent->d_name[0] != '.' &&
+					wfile.find(searchstr) != std::string::npos &&
+					wfile.find(searchstr2) != std::string::npos) {
+					std::string ss = ent->d_name;
+					std::wstring f = s2ws(ss);
+					std::wstring name;
+					if (f.find(search_path) == std::string::npos)
+						name = search_path + f;
+					else
+						name = f;
+					m_batch_list.push_back(name);
+					if (name == m_path_name)
+						m_cur_batch = cnt;
+					cnt++;
+				}
+			}
+		}
+		return true;
+	}
+}
 
 inline void FIND_FILES(std::wstring m_path_name,
 	std::wstring search_ext,

@@ -85,29 +85,11 @@ void NRRDReader::Preprocess()
 		return;
 	wstring path = m_path_name.substr(0, pos+1);
 	wstring name = m_path_name.substr(pos+1);
-	//generate search name for time sequence
-	int64_t begin = name.find(m_time_id);
-	size_t end = -1;
-	size_t id_len = m_time_id.size();
-	wstring t_num;
-	if (begin != -1)
-	{
-		size_t j;
-		for (j=begin+id_len; j<name.size(); j++)
-		{
-			wchar_t c = name[j];
-			if (iswdigit(c))
-				t_num.push_back(c);
-			else
-				break;
-		}
-		if (t_num.size() > 0)
-			end = j;
-		else
-			begin = -1;
-	}
+
 	//build 4d sequence
-	if (begin == -1)
+	//search time sequence files
+	std::vector< std::wstring> list;
+	if (!FIND_FILES_4D(m_path_name, m_time_id, list, m_cur_time))
 	{
 		TimeDataInfo info;
 		info.filenumber = 0;
@@ -117,17 +99,23 @@ void NRRDReader::Preprocess()
 	}
 	else
 	{
-		//search time sequence files
-		std::vector<std::wstring> list;
-		int tmp = 0;
-		FIND_FILES(path,L".nrrd",list,tmp,name.substr(0,begin+id_len+1));
+		int64_t begin = m_path_name.find(m_time_id);
+		size_t id_len = m_time_id.length();
 		for(size_t i = 0; i < list.size(); i++) {
-			size_t start_idx = list.at(i).find(m_time_id) + id_len;
-			size_t end_idx   = list.at(i).find(L".nrrd");
-			size_t size = end_idx - start_idx;
-			std::wstring fileno = list.at(i).substr(start_idx, size);
 			TimeDataInfo info;
-			info.filenumber = WSTOI(fileno);
+			std::wstring str = list.at(i);
+			std::wstring t_num;
+			for (size_t j = begin + id_len; j < str.size(); j++)
+			{
+				wchar_t c = str[j];
+				if (iswdigit(c))
+					t_num.push_back(c);
+				else break;
+			}
+			if (t_num.size() > 0)
+				info.filenumber = WSTOI(t_num);
+			else
+				info.filenumber = 0;
 			info.filename = list.at(i);
 			m_4d_seq.push_back(info);
 		}

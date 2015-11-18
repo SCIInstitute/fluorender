@@ -281,6 +281,101 @@ void ComponentGenerator::ShuffleID_2D()
 	m_sig_progress();
 }
 
+void ComponentGenerator::Grow3D(bool diffuse, float tran, float falloff)
+{
+	GET_VOLDATA
+
+	cl_int err;
+	size_t program_size = strlen(str_cl_brainbow_3d);
+	cl_program program = clCreateProgramWithSource(m_context, 1,
+		&str_cl_brainbow_3d, &program_size, &err);
+	if (err != CL_SUCCESS) return;
+	err = clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
+	if (err != CL_SUCCESS)
+	{
+		char *program_log;
+		size_t log_size;
+		clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG,
+			0, NULL, &log_size);
+		program_log = new char[log_size + 1];
+		program_log[log_size] = '\0';
+		clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG,
+			log_size + 1, program_log, NULL);
+		cout << program_log;
+		delete[]program_log;
+		return;
+	}
+	cl_kernel kernel = clCreateKernel(program, "kernel_0", &err);
+	cl_command_queue queue = clCreateCommandQueue(m_context, m_device, 0, &err);
+
+	unsigned int rcnt = 0;
+	unsigned int seed = 11;
+	size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
+	size_t local_size[3] = { 1, 1, 1 };
+	int iter = Max(Max(nx, ny), nz)/3;
+	float scl_ff = diffuse?falloff:0.0f;
+	float grad_ff = diffuse?falloff:0.0f;
+
+	//data
+	cl_image_format image_format;
+	image_format.image_channel_order = CL_R;
+	if (bits == 8)
+		image_format.image_channel_data_type = CL_UNORM_INT8;
+	else if (bits == 16)
+		image_format.image_channel_data_type = CL_UNORM_INT16;
+	cl_image_desc image_desc;
+	image_desc.image_type = CL_MEM_OBJECT_IMAGE3D;
+	image_desc.image_width = nx;
+	image_desc.image_height = ny;
+	image_desc.image_depth = nz;
+	image_desc.image_array_size = 0;
+	image_desc.image_row_pitch = 0;
+	image_desc.image_slice_pitch = 0;
+	image_desc.num_mip_levels = 0;
+	image_desc.num_samples = 0;
+	image_desc.buffer = 0;
+	cl_mem data_buffer = clCreateImage(m_context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+		&image_format, &image_desc, bits == 8 ? (void*)(val8) : (void*)(val16), &err);
+	//label
+	cl_mem label_buffer = clCreateBuffer(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+		sizeof(unsigned int)*nx*ny*nz, val32, &err);
+	//counter
+	cl_mem rcnt_buffer = clCreateBuffer(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+		sizeof(unsigned int), &rcnt, &err);
+	//set
+	err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &data_buffer);
+	err = clSetKernelArg(kernel, 1, sizeof(cl_mem), &label_buffer);
+	err = clSetKernelArg(kernel, 2, sizeof(unsigned int), (void*)(&nx));
+	err = clSetKernelArg(kernel, 3, sizeof(unsigned int), (void*)(&ny));
+	err = clSetKernelArg(kernel, 4, sizeof(unsigned int), (void*)(&nz));
+	err = clSetKernelArg(kernel, 5, sizeof(cl_mem), &rcnt_buffer);
+	err = clSetKernelArg(kernel, 6, sizeof(unsigned int), (void*)(&seed));
+	err = clSetKernelArg(kernel, 7, sizeof(float), (void*)(&tran));
+	err = clSetKernelArg(kernel, 8, sizeof(float), (void*)(&scl_ff));
+	err = clSetKernelArg(kernel, 9, sizeof(float), (void*)(&grad_ff));
+
+	for (int j = 0; j < iter; ++j)
+	{
+		err = clEnqueueNDRangeKernel(queue, kernel, 3, NULL, global_size,
+			local_size, 0, NULL, NULL);
+
+		m_sig_progress();
+	}
+
+	clFinish(queue);
+	err = clEnqueueReadBuffer(
+		queue, label_buffer,
+		CL_TRUE, 0, sizeof(unsigned int)*nx*ny*nz,
+		val32, 0, NULL, NULL);
+
+	clReleaseMemObject(data_buffer);
+	clReleaseMemObject(label_buffer);
+	clReleaseMemObject(rcnt_buffer);
+	clReleaseKernel(kernel);
+	clReleaseCommandQueue(queue);
+	clReleaseProgram(program);
+}
+
 void ComponentGenerator::InitialGrow(bool param_tr, int iter,
 	float tran, float tran2, float scl_ff, float scl_ff2,
 	float grad_ff, float grad_ff2, float var_ff, float var_ff2,

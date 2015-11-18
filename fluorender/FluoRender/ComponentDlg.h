@@ -138,8 +138,11 @@ public:
 		ID_AngleThreshText,
 
 		//basic page
+		ID_BasicDiffCheck,
 		ID_BasicThreshSldr,
 		ID_BasicThreshText,
+		ID_BasicFalloffSldr,
+		ID_BasicFalloffText,
 
 		//execute
 		ID_GeneratePrg,
@@ -234,6 +237,11 @@ private:
 	double m_size_ratio;
 	double m_dist_thresh;
 	double m_angle_thresh;
+
+	//basic settings
+	bool m_basic_diff;
+	double m_basic_thresh;
+	double m_basic_falloff;
 
 	//tab control
 	wxNotebook *m_notebook;
@@ -346,8 +354,11 @@ private:
 	wxTextCtrl* m_angle_thresh_text;
 
 	//basic page
+	wxCheckBox* m_basic_diff_check;
 	wxSlider* m_basic_thresh_sldr;
 	wxTextCtrl* m_basic_thresh_text;
+	wxSlider* m_basic_falloff_sldr;
+	wxTextCtrl* m_basic_falloff_text;
 
 	//execute
 	wxGauge* m_generate_prg;
@@ -464,6 +475,14 @@ private:
 	void OnDistThreshText(wxCommandEvent &event);
 	void OnAngleThreshSldr(wxScrollEvent &event);
 	void OnAngleThreshText(wxCommandEvent &event);
+
+	//basic page
+	void EnableBasicDiff(bool value);
+	void OnBasicDiffCheck(wxCommandEvent &event);
+	void OnBasicThreshSldr(wxScrollEvent &event);
+	void OnBasicThreshText(wxCommandEvent &event);
+	void OnBasicFalloffSldr(wxScrollEvent &event);
+	void OnBasicFalloffText(wxCommandEvent &event);
 
 	//execute
 	void OnGenerate(wxCommandEvent &event);

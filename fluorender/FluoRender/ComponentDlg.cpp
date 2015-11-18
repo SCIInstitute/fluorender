@@ -127,6 +127,13 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_COMMAND_SCROLL(ID_AngleThreshSldr, ComponentDlg::OnAngleThreshSldr)
 	EVT_TEXT(ID_AngleThreshText, ComponentDlg::OnAngleThreshText)
 
+	//basic page
+	EVT_CHECKBOX(ID_BasicDiffCheck, ComponentDlg::OnBasicDiffCheck)
+	EVT_COMMAND_SCROLL(ID_BasicThreshSldr, ComponentDlg::OnBasicThreshSldr)
+	EVT_TEXT(ID_BasicThreshText, ComponentDlg::OnBasicThreshText)
+	EVT_COMMAND_SCROLL(ID_BasicFalloffSldr, ComponentDlg::OnBasicFalloffSldr)
+	EVT_TEXT(ID_BasicFalloffText, ComponentDlg::OnBasicFalloffText)
+
 	//execute
 	EVT_BUTTON(ID_GenerateBtn, ComponentDlg::OnGenerate)
 END_EVENT_TABLE()
@@ -139,21 +146,44 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 	wxFloatingPointValidator<double> vald_fp3(3);
 
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
+	m_basic_diff_check = new wxCheckBox(page, ID_BasicDiffCheck, "Enable Diffusion",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+	sizer1->Add(5, 5);
+	sizer1->Add(m_basic_diff_check, 0, wxALIGN_CENTER);
+
+	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Threshold:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_basic_thresh_sldr = new wxSlider(page, ID_BasicThreshSldr, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_basic_thresh_text = new wxTextCtrl(page, ID_BasicThreshText, "0.000",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_fp3);
-	sizer1->Add(5, 5);
-	sizer1->Add(st, 0, wxALIGN_CENTER);
-	sizer1->Add(m_basic_thresh_sldr, 1, wxEXPAND);
-	sizer1->Add(m_basic_thresh_text, 0, wxALIGN_CENTER);
-	sizer1->Add(5, 5);
+	sizer2->Add(5, 5);
+	sizer2->Add(st, 0, wxALIGN_CENTER);
+	sizer2->Add(m_basic_thresh_sldr, 1, wxEXPAND);
+	sizer2->Add(m_basic_thresh_text, 0, wxALIGN_CENTER);
+	sizer2->Add(5, 5);
+
+	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Falloff:",
+		wxDefaultPosition, wxSize(100, 23));
+	m_basic_falloff_sldr = new wxSlider(page, ID_BasicFalloffSldr, 0, 0, 1000,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_basic_falloff_text = new wxTextCtrl(page, ID_BasicFalloffText, "0.000",
+		wxDefaultPosition, wxSize(60, 20), 0, vald_fp3);
+	sizer3->Add(5, 5);
+	sizer3->Add(st, 0, wxALIGN_CENTER);
+	sizer3->Add(m_basic_falloff_sldr, 1, wxEXPAND);
+	sizer3->Add(m_basic_falloff_text, 0, wxALIGN_CENTER);
+	sizer3->Add(5, 5);
 
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
 	sizerv->Add(10, 10);
 	sizerv->Add(sizer1, 0, wxEXPAND);
+	sizerv->Add(10, 10);
+	sizerv->Add(sizer2, 0, wxEXPAND);
+	sizerv->Add(10, 10);
+	sizerv->Add(sizer3, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 
 	page->SetSizer(sizerv);
@@ -708,7 +738,7 @@ wxCollapsiblePane* ComponentDlg::CreateMatchSlicesPane(wxWindow *parent)
 ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	: wxPanel(parent, wxID_ANY,
 		wxDefaultPosition,
-		wxSize(450, 500),
+		wxSize(500, 700),
 		0, "ComponentDlg"),
 	m_frame(parent),
 	m_view(0)
@@ -827,6 +857,12 @@ void ComponentDlg::Update()
 	m_size_ratio_text->SetValue(wxString::Format("%.3f", m_size_ratio));
 	m_dist_thresh_text->SetValue(wxString::Format("%.3f", m_dist_thresh));
 	m_angle_thresh_text->SetValue(wxString::Format("%.3f", m_angle_thresh));
+
+	//basic page
+	m_basic_diff_check->SetValue(m_basic_diff);
+	EnableBasicDiff(m_basic_diff);
+	m_basic_thresh_text->SetValue(wxString::Format("%.3f", m_basic_thresh));
+	m_basic_falloff_text->SetValue(wxString::Format("%.3f", m_basic_falloff));
 }
 
 void ComponentDlg::GetSettings()
@@ -864,6 +900,11 @@ void ComponentDlg::GetSettings()
 	m_size_ratio = 0.6;
 	m_dist_thresh = 2.5;
 	m_angle_thresh = 0.7;
+
+	//basic page
+	m_basic_diff = false;
+	m_basic_thresh = 0.5;
+	m_basic_falloff = 0.01;
 
 	//read values
 	LoadSettings("");
@@ -942,6 +983,11 @@ void ComponentDlg::LoadSettings(wxString filename)
 	fconfig.Read("dist_thresh", &m_dist_thresh);
 	fconfig.Read("angle_thresh", &m_angle_thresh);
 
+	//basic settings
+	fconfig.Read("basic_diff", &m_basic_diff);
+	fconfig.Read("basic_thresh", &m_basic_thresh);
+	fconfig.Read("basic_falloff", &m_basic_falloff);
+
 	m_load_settings_text->SetValue(filename);
 }
 
@@ -1003,6 +1049,11 @@ void ComponentDlg::SaveSettings(wxString filename)
 	fconfig.Write("size_ratio", m_size_ratio);
 	fconfig.Write("dist_thresh", m_dist_thresh);
 	fconfig.Write("angle_thresh", m_angle_thresh);
+
+	//basic settings
+	fconfig.Write("basic_diff", m_basic_diff);
+	fconfig.Write("basic_thresh", m_basic_thresh);
+	fconfig.Write("basic_falloff", m_basic_falloff);
 
 	if (filename == "")
 	{
@@ -1820,6 +1871,55 @@ void ComponentDlg::OnAngleThreshText(wxCommandEvent &event)
 	m_angle_thresh_sldr->SetValue(int(m_angle_thresh * 1000.0 + 0.5));
 }
 
+//basic page
+void ComponentDlg::EnableBasicDiff(bool value)
+{
+	m_basic_diff = value;
+	if (m_basic_diff)
+	{
+		m_basic_falloff_sldr->Enable();
+		m_basic_falloff_text->Enable();
+	}
+	else
+	{
+		m_basic_falloff_sldr->Disable();
+		m_basic_falloff_text->Disable();
+	}
+}
+
+void ComponentDlg::OnBasicDiffCheck(wxCommandEvent &event)
+{
+	EnableBasicDiff(m_basic_diff_check->GetValue());
+}
+
+void ComponentDlg::OnBasicThreshSldr(wxScrollEvent &event)
+{
+	double val = (double)event.GetPosition() / 1000.0;
+	m_basic_thresh_text->SetValue(wxString::Format("%.3f", val));
+}
+
+void ComponentDlg::OnBasicThreshText(wxCommandEvent &event)
+{
+	double val = 0.0;
+	m_basic_thresh_text->GetValue().ToDouble(&val);
+	m_basic_thresh = val;
+	m_basic_thresh_sldr->SetValue(int(m_basic_thresh * 1000.0 + 0.5));
+}
+
+void ComponentDlg::OnBasicFalloffSldr(wxScrollEvent &event)
+{
+	double val = (double)event.GetPosition() / 1000.0;
+	m_basic_falloff_text->SetValue(wxString::Format("%.3f", val));
+}
+
+void ComponentDlg::OnBasicFalloffText(wxCommandEvent &event)
+{
+	double val = 0.0;
+	m_basic_falloff_text->GetValue().ToDouble(&val);
+	m_basic_falloff = val;
+	m_basic_falloff_sldr->SetValue(int(m_basic_falloff * 1000.0 + 0.5));
+}
+
 void ComponentDlg::OnGenerate(wxCommandEvent &event)
 {
 	int page = m_notebook->GetSelection();
@@ -1845,7 +1945,7 @@ void ComponentDlg::GenerateAdv()
 	vd->AddEmptyLabel();
 
 	FL::ComponentGenerator cg(vd, KernelProgram::get_device_id());
-	m_prog_bit = 90.0f / float(1 +
+	m_prog_bit = 97.0f / float(1 +
 		(m_initial_grow ? m_ig_iterations : 0) +
 		(m_sized_grow ? m_sg_iterations : 0) +
 		(m_cleanup ? m_cl_iterations : 0) +
@@ -1891,5 +1991,31 @@ void ComponentDlg::GenerateAdv()
 
 void ComponentDlg::GenerateBsc()
 {
+	if (!m_view)
+		return;
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+	vd->AddEmptyMask(1);
+	vd->AddEmptyLabel();
+	int nx, ny, nz;
+	vd->GetResolution(nx, ny, nz);
 
+	FL::ComponentGenerator cg(vd, KernelProgram::get_device_id());
+	m_prog_bit = 97.0f / float(1 +
+		Max(Max(nx, ny), nz)/3);
+	m_prog = 0.0f;
+	boost::signals2::connection connection =
+		cg.m_sig_progress.connect(boost::bind(
+			&ComponentDlg::UpdateProgress, this));
+
+	cg.ShuffleID_3D();
+	cg.Grow3D(m_basic_diff,
+		float(m_basic_thresh), float(m_basic_falloff));
+
+	vd->GetVR()->clear_tex_current();
+	m_view->RefreshGL();
+
+	m_generate_prg->SetValue(100);
+	connection.disconnect();
 }
