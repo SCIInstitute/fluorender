@@ -182,6 +182,9 @@ VRenderFrame::VRenderFrame(
 	m = new wxMenuItem(m_tb_menu_edit, ID_Measure, wxT("Measurement..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_measurement_mini));
 	m_tb_menu_edit->Append(m);
+	m = new wxMenuItem(m_tb_menu_edit, ID_Component, wxT("Component Generator..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_components_mini));
+	m_tb_menu_edit->Append(m);
 	m = new wxMenuItem(m_tb_menu_edit, ID_Trace, wxT("Tracking..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_tracking_mini));
 	m_tb_menu_edit->Append(m);
@@ -199,9 +202,6 @@ VRenderFrame::VRenderFrame(
 	m_tb_menu_edit->Append(m);
 	m = new wxMenuItem(m_tb_menu_edit, ID_Ocl, wxT("OpenCL Kernel Editor..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_opencl_mini));
-	m_tb_menu_edit->Append(m);
-	m = new wxMenuItem(m_tb_menu_edit, ID_Component, wxT("Component Generator..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_components_mini));
 	m_tb_menu_edit->Append(m);
 	//build the main toolbar
 	//add tools
@@ -570,6 +570,9 @@ VRenderFrame::VRenderFrame(
 	m = new wxMenuItem(m_top_tools,ID_Measure, wxT("&Measurement..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_measurement_mini));
 	m_top_tools->Append(m);
+	m = new wxMenuItem(m_top_tools, ID_Component, wxT("Component &Generator..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_components_mini));
+	m_top_tools->Append(m);
 	m = new wxMenuItem(m_top_tools,ID_Trace, wxT("&Tracking..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_tracking_mini));
 	m_top_tools->Append(m);
@@ -587,9 +590,6 @@ VRenderFrame::VRenderFrame(
 	m_top_tools->Append(m);
 	m = new wxMenuItem(m_top_tools, ID_Ocl, wxT("&OpenCL Kernel Editor..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_opencl_mini));
-	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools, ID_Component, wxT("Component &Generator..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_components_mini));
 	m_top_tools->Append(m);
 	m_top_tools->Append(wxID_SEPARATOR);
 	m = new wxMenuItem(m_top_tools,ID_Settings, wxT("&Settings..."));

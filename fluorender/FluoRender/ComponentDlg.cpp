@@ -118,6 +118,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 
 	//match slices
 	EVT_CHECKBOX(ID_MatchSlicesCheck, ComponentDlg::OnMatchSlicesCheck)
+	EVT_CHECKBOX(ID_BidirMatchCheck, ComponentDlg::OnBidirMatchCheck)
 	EVT_COMMAND_SCROLL(ID_SizeThreshSldr, ComponentDlg::OnSizeThreshSldr)
 	EVT_TEXT(ID_SizeThreshText, ComponentDlg::OnSizeThreshText)
 	EVT_COMMAND_SCROLL(ID_SizeRatioSldr, ComponentDlg::OnSizeRatioSldr)
@@ -129,6 +130,8 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 
 	//basic page
 	EVT_CHECKBOX(ID_BasicDiffCheck, ComponentDlg::OnBasicDiffCheck)
+	EVT_COMMAND_SCROLL(ID_BasicIterSldr, ComponentDlg::OnBasicIterSldr)
+	EVT_TEXT(ID_BasicIterText, ComponentDlg::OnBasicIterText)
 	EVT_COMMAND_SCROLL(ID_BasicThreshSldr, ComponentDlg::OnBasicThreshSldr)
 	EVT_TEXT(ID_BasicThreshText, ComponentDlg::OnBasicThreshText)
 	EVT_COMMAND_SCROLL(ID_BasicFalloffSldr, ComponentDlg::OnBasicFalloffSldr)
@@ -136,12 +139,15 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 
 	//execute
 	EVT_BUTTON(ID_GenerateBtn, ComponentDlg::OnGenerate)
+	EVT_BUTTON(ID_RefineBtn, ComponentDlg::OnRefine)
 END_EVENT_TABLE()
 
 wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 {
 	wxPanel *page = new wxPanel(parent);
 	wxStaticText *st = 0;
+	//validator: integer
+	wxIntegerValidator<unsigned int> vald_int;
 	//validator: floating point 3
 	wxFloatingPointValidator<double> vald_fp3(3);
 
@@ -152,30 +158,43 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 	sizer1->Add(m_basic_diff_check, 0, wxALIGN_CENTER);
 
 	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Iterations:",
+		wxDefaultPosition, wxSize(100, 23));
+	m_basic_iter_sldr = new wxSlider(page, ID_BasicIterSldr, 0, 0, 100,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_basic_iter_text = new wxTextCtrl(page, ID_BasicIterText, "0",
+		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
+	sizer2->Add(5, 5);
+	sizer2->Add(st, 0, wxALIGN_CENTER);
+	sizer2->Add(m_basic_iter_sldr, 1, wxEXPAND);
+	sizer2->Add(m_basic_iter_text, 0, wxALIGN_CENTER);
+	sizer2->Add(5, 5);
+
+	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Threshold:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_basic_thresh_sldr = new wxSlider(page, ID_BasicThreshSldr, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_basic_thresh_text = new wxTextCtrl(page, ID_BasicThreshText, "0.000",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_fp3);
-	sizer2->Add(5, 5);
-	sizer2->Add(st, 0, wxALIGN_CENTER);
-	sizer2->Add(m_basic_thresh_sldr, 1, wxEXPAND);
-	sizer2->Add(m_basic_thresh_text, 0, wxALIGN_CENTER);
-	sizer2->Add(5, 5);
+	sizer3->Add(5, 5);
+	sizer3->Add(st, 0, wxALIGN_CENTER);
+	sizer3->Add(m_basic_thresh_sldr, 1, wxEXPAND);
+	sizer3->Add(m_basic_thresh_text, 0, wxALIGN_CENTER);
+	sizer3->Add(5, 5);
 
-	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Falloff:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_basic_falloff_sldr = new wxSlider(page, ID_BasicFalloffSldr, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_basic_falloff_text = new wxTextCtrl(page, ID_BasicFalloffText, "0.000",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_fp3);
-	sizer3->Add(5, 5);
-	sizer3->Add(st, 0, wxALIGN_CENTER);
-	sizer3->Add(m_basic_falloff_sldr, 1, wxEXPAND);
-	sizer3->Add(m_basic_falloff_text, 0, wxALIGN_CENTER);
-	sizer3->Add(5, 5);
+	sizer4->Add(5, 5);
+	sizer4->Add(st, 0, wxALIGN_CENTER);
+	sizer4->Add(m_basic_falloff_sldr, 1, wxEXPAND);
+	sizer4->Add(m_basic_falloff_text, 0, wxALIGN_CENTER);
+	sizer4->Add(5, 5);
 
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
 	sizerv->Add(10, 10);
@@ -184,6 +203,8 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 	sizerv->Add(sizer2, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 	sizerv->Add(sizer3, 0, wxEXPAND);
+	sizerv->Add(10, 10);
+	sizerv->Add(sizer4, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 
 	page->SetSizer(sizerv);
@@ -210,7 +231,9 @@ wxWindow* ComponentDlg::Create2DAnalysisPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(65, 23));
 	sizer1->Add(5, 5);
 	sizer1->Add(st, 0, wxALIGN_CENTER);
+	sizer1->Add(10, 10);
 	sizer1->Add(m_load_settings_text, 1, wxEXPAND);
+	sizer1->Add(10, 10);
 	sizer1->Add(m_load_settings_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_save_settings_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_saveas_settings_btn, 0, wxALIGN_CENTER);
@@ -665,8 +688,12 @@ wxCollapsiblePane* ComponentDlg::CreateMatchSlicesPane(wxWindow *parent)
 	wxBoxSizer *sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	m_match_slices_check = new wxCheckBox(pane, ID_MatchSlicesCheck, "Enable",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+	m_bidir_match_check = new wxCheckBox(pane, ID_BidirMatchCheck, "Bidirectional",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 	sizer1->Add(5, 5);
 	sizer1->Add(m_match_slices_check, 0, wxALIGN_CENTER);
+	sizer1->Add(5, 5);
+	sizer1->Add(m_bidir_match_check, 0, wxALIGN_CENTER);
 	//size thresh
 	wxBoxSizer *sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(pane, 0, "Size Threshold:",
@@ -753,10 +780,13 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 		wxDefaultPosition, wxSize(-1, 18));
 	m_generate_btn = new wxButton(this, ID_GenerateBtn, "Generate",
 		wxDefaultPosition, wxSize(75, -1));
+	m_refine_btn = new wxButton(this, ID_RefineBtn, "Refine",
+		wxDefaultPosition, wxSize(75, -1));
 	sizer1->Add(10, 10);
 	sizer1->Add(m_generate_prg, 1, wxEXPAND);
 	sizer1->Add(10, 10);
 	sizer1->Add(m_generate_btn, 0, wxALIGN_CENTER);
+	sizer1->Add(m_refine_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(10, 10);
 
 	//stats text
@@ -848,6 +878,7 @@ void ComponentDlg::Update()
 
 	//match slices
 	m_match_slices_check->SetValue(m_match_slices);
+	m_bidir_match_check->SetValue(m_bidir_match);
 	EnableMatchSlices(m_match_slices);
 	if (m_match_slices)
 		m_match_slices_pane->Expand();
@@ -861,6 +892,7 @@ void ComponentDlg::Update()
 	//basic page
 	m_basic_diff_check->SetValue(m_basic_diff);
 	EnableBasicDiff(m_basic_diff);
+	m_basic_iter_text->SetValue(wxString::Format("%d", m_basic_iter));
 	m_basic_thresh_text->SetValue(wxString::Format("%.3f", m_basic_thresh));
 	m_basic_falloff_text->SetValue(wxString::Format("%.3f", m_basic_falloff));
 }
@@ -896,6 +928,7 @@ void ComponentDlg::GetSettings()
 	
 	//match slices
 	m_match_slices = false;
+	m_bidir_match = false;
 	m_size_thresh = 25;
 	m_size_ratio = 0.6;
 	m_dist_thresh = 2.5;
@@ -903,6 +936,7 @@ void ComponentDlg::GetSettings()
 
 	//basic page
 	m_basic_diff = false;
+	m_basic_iter = 100;
 	m_basic_thresh = 0.5;
 	m_basic_falloff = 0.01;
 
@@ -913,6 +947,7 @@ void ComponentDlg::GetSettings()
 
 void ComponentDlg::LoadSettings(wxString filename)
 {
+	bool get_basic = false;
 	if (!wxFileExists(filename))
 	{
 		wxString expath = wxStandardPaths::Get().GetExecutablePath();
@@ -922,6 +957,7 @@ void ComponentDlg::LoadSettings(wxString filename)
 #else
 		filename = expath + "/../Resources/default_component_settings.dft";
 #endif
+		get_basic = true;
 	}
 	wxFileInputStream is(filename);
 	if (!is.IsOk())
@@ -978,15 +1014,20 @@ void ComponentDlg::LoadSettings(wxString filename)
 
 	//match slices
 	fconfig.Read("match_slices", &m_match_slices);
+	fconfig.Read("bidir_match", &m_bidir_match);
 	fconfig.Read("size_thresh", &m_size_thresh);
 	fconfig.Read("size_ratio", &m_size_ratio);
 	fconfig.Read("dist_thresh", &m_dist_thresh);
 	fconfig.Read("angle_thresh", &m_angle_thresh);
 
 	//basic settings
-	fconfig.Read("basic_diff", &m_basic_diff);
-	fconfig.Read("basic_thresh", &m_basic_thresh);
-	fconfig.Read("basic_falloff", &m_basic_falloff);
+	if (get_basic)
+	{
+		fconfig.Read("basic_diff", &m_basic_diff);
+		fconfig.Read("basic_iter", &m_basic_iter);
+		fconfig.Read("basic_thresh", &m_basic_thresh);
+		fconfig.Read("basic_falloff", &m_basic_falloff);
+	}
 
 	m_load_settings_text->SetValue(filename);
 }
@@ -1045,6 +1086,7 @@ void ComponentDlg::SaveSettings(wxString filename)
 
 	//match slices
 	fconfig.Write("match_slices", m_match_slices);
+	fconfig.Write("bidir_match", m_bidir_match);
 	fconfig.Write("size_thresh", m_size_thresh);
 	fconfig.Write("size_ratio", m_size_ratio);
 	fconfig.Write("dist_thresh", m_dist_thresh);
@@ -1052,6 +1094,7 @@ void ComponentDlg::SaveSettings(wxString filename)
 
 	//basic settings
 	fconfig.Write("basic_diff", m_basic_diff);
+	fconfig.Write("basic_iter", m_basic_iter);
 	fconfig.Write("basic_thresh", m_basic_thresh);
 	fconfig.Write("basic_falloff", m_basic_falloff);
 
@@ -1815,6 +1858,11 @@ void ComponentDlg::OnMatchSlicesCheck(wxCommandEvent &event)
 	EnableMatchSlices(m_match_slices_check->GetValue());
 }
 
+void ComponentDlg::OnBidirMatchCheck(wxCommandEvent &event)
+{
+	m_bidir_match = m_bidir_match_check->GetValue();
+}
+
 void ComponentDlg::OnSizeThreshSldr(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
@@ -1892,6 +1940,20 @@ void ComponentDlg::OnBasicDiffCheck(wxCommandEvent &event)
 	EnableBasicDiff(m_basic_diff_check->GetValue());
 }
 
+void ComponentDlg::OnBasicIterSldr(wxScrollEvent &event)
+{
+	int val = event.GetPosition();
+	m_basic_iter_text->SetValue(wxString::Format("%d", val));
+}
+
+void ComponentDlg::OnBasicIterText(wxCommandEvent &event)
+{
+	long val = 0;
+	m_basic_iter_text->GetValue().ToLong(&val);
+	m_basic_iter = val;
+	m_basic_iter_sldr->SetValue(m_basic_iter);
+}
+
 void ComponentDlg::OnBasicThreshSldr(wxScrollEvent &event)
 {
 	double val = (double)event.GetPosition() / 1000.0;
@@ -1926,15 +1988,29 @@ void ComponentDlg::OnGenerate(wxCommandEvent &event)
 	switch (page)
 	{
 	case 0:
-		GenerateBsc();
+		GenerateBsc(false);
 		break;
 	case 1:
-		GenerateAdv();
+		GenerateAdv(false);
 		break;
 	}
 }
 
-void ComponentDlg::GenerateAdv()
+void ComponentDlg::OnRefine(wxCommandEvent &event)
+{
+	int page = m_notebook->GetSelection();
+	switch (page)
+	{
+	case 0:
+		GenerateBsc(true);
+		break;
+	case 1:
+		GenerateAdv(true);
+		break;
+	}
+}
+
+void ComponentDlg::GenerateAdv(bool refine)
 {
 	if (!m_view)
 		return;
@@ -1942,20 +2018,23 @@ void ComponentDlg::GenerateAdv()
 	if (!vd)
 		return;
 	vd->AddEmptyMask(1);
-	vd->AddEmptyLabel();
 
 	FL::ComponentGenerator cg(vd, KernelProgram::get_device_id());
 	m_prog_bit = 97.0f / float(1 +
 		(m_initial_grow ? m_ig_iterations : 0) +
 		(m_sized_grow ? m_sg_iterations : 0) +
 		(m_cleanup ? m_cl_iterations : 0) +
-		1);
+		(m_match_slices ? (m_bidir_match?2:1):0));
 	m_prog = 0.0f;
 	boost::signals2::connection connection =
 		cg.m_sig_progress.connect(boost::bind(
 			&ComponentDlg::UpdateProgress, this));
 
-	cg.OrderID_2D();
+	if (!refine)
+	{
+		vd->AddEmptyLabel();
+		cg.OrderID_2D();
+	}
 
 	if (m_initial_grow)
 		cg.InitialGrow(m_ig_param_transition, m_ig_iterations,
@@ -1978,9 +2057,17 @@ void ComponentDlg::GenerateAdv()
 		cg.Cleanup(m_cl_iterations, (unsigned int)(m_cl_size_limiter));
 
 	if (m_match_slices)
-		cg.MatchSlices_CPU((unsigned int)(m_size_thresh),
+	{
+		cg.MatchSlices_CPU(false,
+			(unsigned int)(m_size_thresh),
 			float(m_size_ratio), float(m_dist_thresh),
 			float(m_angle_thresh));
+		if (m_bidir_match)
+			cg.MatchSlices_CPU(true,
+				(unsigned int)(m_size_thresh),
+				float(m_size_ratio), float(m_dist_thresh),
+				float(m_angle_thresh));
+	}
 
 	vd->GetVR()->clear_tex_current();
 	m_view->RefreshGL();
@@ -1989,7 +2076,7 @@ void ComponentDlg::GenerateAdv()
 	connection.disconnect();
 }
 
-void ComponentDlg::GenerateBsc()
+void ComponentDlg::GenerateBsc(bool refine)
 {
 	if (!m_view)
 		return;
@@ -1997,20 +2084,23 @@ void ComponentDlg::GenerateBsc()
 	if (!vd)
 		return;
 	vd->AddEmptyMask(1);
-	vd->AddEmptyLabel();
 	int nx, ny, nz;
 	vd->GetResolution(nx, ny, nz);
 
 	FL::ComponentGenerator cg(vd, KernelProgram::get_device_id());
-	m_prog_bit = 97.0f / float(1 +
-		Max(Max(nx, ny), nz)/3);
+	m_prog_bit = 97.0f / float(1 + m_basic_iter);
 	m_prog = 0.0f;
 	boost::signals2::connection connection =
 		cg.m_sig_progress.connect(boost::bind(
 			&ComponentDlg::UpdateProgress, this));
 
-	cg.ShuffleID_3D();
-	cg.Grow3D(m_basic_diff,
+	if (!refine)
+	{
+		vd->AddEmptyLabel();
+		cg.ShuffleID_3D();
+	}
+
+	cg.Grow3D(m_basic_diff, m_basic_iter,
 		float(m_basic_thresh), float(m_basic_falloff));
 
 	vd->GetVR()->clear_tex_current();

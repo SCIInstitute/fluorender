@@ -42,7 +42,7 @@ using namespace std;
 
 namespace FLIVR
 {
-	bool TextureRenderer::mem_swap_ = true;
+	bool TextureRenderer::mem_swap_ = false;
 	bool TextureRenderer::use_mem_limit_ = false;
 	double TextureRenderer::mem_limit_ = 0.0;
 	double TextureRenderer::available_mem_ = 0.0;
@@ -91,6 +91,9 @@ namespace FLIVR
 		blend_num_bits_(32),
 		clear_pool_(false)
 	{
+		if (!ShaderProgram::init())
+			return;
+
 		glGenBuffers(1, &m_slices_vbo);
 		glGenBuffers(1, &m_slices_ibo);
 		glGenVertexArrays(1, &m_slices_vao);
@@ -122,6 +125,9 @@ namespace FLIVR
 		blend_num_bits_(copy.blend_num_bits_),
 		clear_pool_(copy.clear_pool_)
 	{
+		if (!ShaderProgram::init())
+			return;
+
 		//buffers
 		glGenBuffers(1, &m_slices_vbo);
 		glGenBuffers(1, &m_slices_ibo);
@@ -133,6 +139,9 @@ namespace FLIVR
 
 	TextureRenderer::~TextureRenderer()
 	{
+		if (!ShaderProgram::init())
+			return;
+
 		//clear_tex_pool();
 		clear_tex_current();
 		if (glIsFramebuffer(blend_framebuffer_))

@@ -86,7 +86,7 @@ const char* str_cl_slice_brainbow = \
 "		(av_f>0.0f?(angle_var>sqrt(av_f)*2.12f?0.0f:exp(-angle_var*angle_var/av_f)):1.0f);\n" \
 "	\n" \
 "	//max filter\n" \
-"	float random = (float)((*rcnt) % seed)/(float)(seed);\n" \
+"	float random = (float)((*rcnt) % seed)/(float)(seed)+0.001f;\n" \
 "	if (stop < random)\n" \
 "		return;\n" \
 "	unsigned int label_value = label[index];\n" \
@@ -161,7 +161,7 @@ const char* str_cl_brainbow_3d = \
 "		(value>value_t?1.0f:(value_f>0.0f?(value<value_t-sqrt(value_f)*2.12f?0.0f:exp(-(value-value_t)*(value-value_t)/value_f)):0.0f));\n" \
 "	\n" \
 "	//max filter\n" \
-"	float random = (float)((*rcnt) % seed)/(float)(seed);\n" \
+"	float random = (float)((*rcnt) % seed)/(float)(seed)+0.001f;\n" \
 "	if (stop < random)\n" \
 "		return;\n" \
 "	unsigned int label_value = label[index];\n" \
@@ -184,14 +184,14 @@ const char* str_cl_brainbow_3d = \
 "			max_nb_coord = nb_coord;\n" \
 "		}\n" \
 "	}\n" \
-"	if (grad_f > 0.0f)\n" \
+"/*	if (grad_f > 0.0f)\n" \
 "	{\n" \
 "		float xc = value;\n" \
 "		float xn = read_imagef(data, samp, (int4)(max_nb_coord, 1)).x + grad_f;\n" \
 "		if (xn < xc || xn - xc > 2.0f*grad_f)\n" \
 "			return;\n" \
 "	}\n" \
-"\n" \
+"*/\n" \
 "	label[index] = label_value;\n" \
 "}\n";
 
@@ -430,7 +430,7 @@ const char* str_cl_grow_size = \
 "		(av_f>0.0f?(angle_var>sqrt(av_f)*2.12f?0.0f:exp(-angle_var*angle_var/av_f)):1.0f);\n" \
 "	\n" \
 "	//max filter\n" \
-"	float random = (float)((*rcnt) % seed)/(float)(seed);\n" \
+"	float random = (float)((*rcnt) % seed)/(float)(seed)+0.001f;\n" \
 "	if (stop < random)\n" \
 "		return;\n" \
 "	unsigned int label_value = label[index];\n" \

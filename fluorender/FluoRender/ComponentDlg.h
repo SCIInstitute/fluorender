@@ -128,6 +128,7 @@ public:
 		//match slices pane
 		ID_MatchSlicesPane,
 		ID_MatchSlicesCheck,
+		ID_BidirMatchCheck,
 		ID_SizeThreshSldr,
 		ID_SizeThreshText,
 		ID_SizeRatioSldr,
@@ -139,6 +140,8 @@ public:
 
 		//basic page
 		ID_BasicDiffCheck,
+		ID_BasicIterSldr,
+		ID_BasicIterText,
 		ID_BasicThreshSldr,
 		ID_BasicThreshText,
 		ID_BasicFalloffSldr,
@@ -147,6 +150,7 @@ public:
 		//execute
 		ID_GeneratePrg,
 		ID_GenerateBtn,
+		ID_RefineBtn,
 
 		//output
 		ID_StatText
@@ -233,6 +237,7 @@ private:
 	
 	//match slices
 	bool m_match_slices;
+	bool m_bidir_match;
 	int m_size_thresh;
 	double m_size_ratio;
 	double m_dist_thresh;
@@ -240,6 +245,7 @@ private:
 
 	//basic settings
 	bool m_basic_diff;
+	int m_basic_iter;
 	double m_basic_thresh;
 	double m_basic_falloff;
 
@@ -344,6 +350,7 @@ private:
 	//match slices
 	wxCollapsiblePane* m_match_slices_pane;
 	wxCheckBox* m_match_slices_check;
+	wxCheckBox* m_bidir_match_check;
 	wxSlider* m_size_thresh_sldr;
 	wxTextCtrl* m_size_thresh_text;
 	wxSlider* m_size_ratio_sldr;
@@ -355,6 +362,8 @@ private:
 
 	//basic page
 	wxCheckBox* m_basic_diff_check;
+	wxSlider* m_basic_iter_sldr;
+	wxTextCtrl* m_basic_iter_text;
 	wxSlider* m_basic_thresh_sldr;
 	wxTextCtrl* m_basic_thresh_text;
 	wxSlider* m_basic_falloff_sldr;
@@ -363,13 +372,14 @@ private:
 	//execute
 	wxGauge* m_generate_prg;
 	wxButton* m_generate_btn;
+	wxButton* m_refine_btn;
 
 	//output
 	wxTextCtrl* m_stat_text;
 
 private:
-	void GenerateAdv();
-	void GenerateBsc();
+	void GenerateAdv(bool refine);
+	void GenerateBsc(bool refine);
 
 private:
 	wxWindow* Create3DAnalysisPage(wxWindow *parent);
@@ -467,6 +477,7 @@ private:
 	//match slices pane
 	void EnableMatchSlices(bool value);
 	void OnMatchSlicesCheck(wxCommandEvent &event);
+	void OnBidirMatchCheck(wxCommandEvent &event);
 	void OnSizeThreshSldr(wxScrollEvent &event);
 	void OnSizeThreshText(wxCommandEvent &event);
 	void OnSizeRatioSldr(wxScrollEvent &event);
@@ -479,6 +490,8 @@ private:
 	//basic page
 	void EnableBasicDiff(bool value);
 	void OnBasicDiffCheck(wxCommandEvent &event);
+	void OnBasicIterSldr(wxScrollEvent &event);
+	void OnBasicIterText(wxCommandEvent &event);
 	void OnBasicThreshSldr(wxScrollEvent &event);
 	void OnBasicThreshText(wxCommandEvent &event);
 	void OnBasicFalloffSldr(wxScrollEvent &event);
@@ -486,6 +499,7 @@ private:
 
 	//execute
 	void OnGenerate(wxCommandEvent &event);
+	void OnRefine(wxCommandEvent &event);
 
 	DECLARE_EVENT_TABLE();
 };

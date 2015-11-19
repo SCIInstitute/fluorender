@@ -53,7 +53,7 @@ namespace FL
 		void OrderID_2D();
 		void ShuffleID_3D();
 		void ShuffleID_2D();
-		void Grow3D(bool, float, float);
+		void Grow3D(bool, int, float, float);
 		void InitialGrow(bool, int,
 			float, float,
 			float, float,
@@ -68,7 +68,8 @@ namespace FL
 			float, float,
 			float, float);
 		void Cleanup(int, unsigned int);
-		void MatchSlices_CPU(unsigned int,
+		void MatchSlices_CPU(bool backwards,
+			unsigned int,
 			float, float, float);
 
 		//update progress

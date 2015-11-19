@@ -281,7 +281,7 @@ void ComponentGenerator::ShuffleID_2D()
 	m_sig_progress();
 }
 
-void ComponentGenerator::Grow3D(bool diffuse, float tran, float falloff)
+void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float falloff)
 {
 	GET_VOLDATA
 
@@ -309,10 +309,9 @@ void ComponentGenerator::Grow3D(bool diffuse, float tran, float falloff)
 	cl_command_queue queue = clCreateCommandQueue(m_context, m_device, 0, &err);
 
 	unsigned int rcnt = 0;
-	unsigned int seed = 11;
+	unsigned int seed = iter;
 	size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 	size_t local_size[3] = { 1, 1, 1 };
-	int iter = Max(Max(nx, ny), nz)/3;
 	float scl_ff = diffuse?falloff:0.0f;
 	float grad_ff = diffuse?falloff:0.0f;
 
@@ -359,10 +358,10 @@ void ComponentGenerator::Grow3D(bool diffuse, float tran, float falloff)
 		err = clEnqueueNDRangeKernel(queue, kernel, 3, NULL, global_size,
 			local_size, 0, NULL, NULL);
 
+		clFinish(queue);
 		m_sig_progress();
 	}
 
-	clFinish(queue);
 	err = clEnqueueReadBuffer(
 		queue, label_buffer,
 		CL_TRUE, 0, sizeof(unsigned int)*nx*ny*nz,
@@ -410,7 +409,7 @@ void ComponentGenerator::InitialGrow(bool param_tr, int iter,
 	unsigned short* cur_page_data16 = bits == 16 ? val16 : 0;
 	unsigned int* cur_page_label = val32;
 	unsigned int rcnt = 0;
-	unsigned int seed = 11;
+	unsigned int seed = iter;
 	size_t global_size[2] = { size_t(nx), size_t(ny) };
 	size_t local_size[2] = { 1, 1 };
 	//trnsition params
@@ -562,7 +561,7 @@ void ComponentGenerator::SizedGrow(bool param_tr, int iter,
 	unsigned short* cur_page_data16 = bits == 16 ? val16 : 0;
 	unsigned int* cur_page_label = val32;
 	unsigned int rcnt = 0;
-	unsigned int seed = 11;
+	unsigned int seed = iter;
 	size_t global_size[2] = { size_t(nx), size_t(ny) };
 	size_t local_size[2] = { 1, 1 };
 	//trnsition params
@@ -843,18 +842,23 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 	delete[]mask32;
 }
 
-void ComponentGenerator::MatchSlices_CPU(unsigned int size_thresh,
+void ComponentGenerator::MatchSlices_CPU(bool backwards, unsigned int size_thresh,
 	float size_ratio, float dist_thresh, float angle_thresh)
 {
 	GET_VOLDATA
 
+	if (nz < 2) return;
 	float sscale = m_vd->GetScalarScale();
 
 	CellList cell_list1, cell_list2;
 	unsigned int* page1 = val32;
+	if (backwards) page1 = val32 + nx*ny*(nz - 1);
 	unsigned int* page2 = val32 + nx*ny;
+	if (backwards) page2 = val32 + nx*ny*(nz - 2);
 	void* page1_data = bits==8?((void*)val8):((void*)val16);
+	if (backwards) page1_data = bits == 8 ? ((void*)(val8 + nx*ny*(nz - 1))) : ((void*)(val16 + nx*ny*(nz - 1)));
 	void* page2_data = bits==8?((void*)(val8 + nx*ny)):((void*)(val16 + nx*ny));
+	if (backwards) page2_data = bits == 8 ? ((void*)(val8 + nx*ny*(nz - 2))) : ((void*)(val16 + nx*ny*(nz - 2)));
 	unsigned int index;
 	unsigned int label_value1, label_value2;
 	float data_value1, data_value2;
@@ -865,7 +869,9 @@ void ComponentGenerator::MatchSlices_CPU(unsigned int size_thresh,
 	float size1, size2, size_ol;
 	float vx1, vy1, vx2, vy2, d1, d2;
 	//
-	for (size_t i = 0; i<nz - 1; ++i)
+	for (size_t i = backwards?nz:0;
+		backwards?(i>1):(i<nz - 1);
+		backwards?(--i):(++i))
 	{
 		InitializeCellList(page1, page1_data, bits, sscale, nx, ny, &cell_list1);
 		InitializeCellList(page2, page2_data, bits, sscale, nx, ny, &cell_list2);
@@ -980,17 +986,35 @@ void ComponentGenerator::MatchSlices_CPU(unsigned int size_thresh,
 			}
 		ClearCellList(&cell_list1);
 		ClearCellList(&cell_list2);
-		page1 += nx*ny;
-		page2 += nx*ny;
-		if (bits == 8)
+		if (backwards)
 		{
-			page1_data = (void*)(((unsigned char*)page1_data) + nx*ny);
-			page2_data = (void*)(((unsigned char*)page2_data) + nx*ny);
+			page1 -= nx*ny;
+			page2 -= nx*ny;
+			if (bits == 8)
+			{
+				page1_data = (void*)(((unsigned char*)page1_data) - nx*ny);
+				page2_data = (void*)(((unsigned char*)page2_data) - nx*ny);
+			}
+			else
+			{
+				page1_data = (void*)(((unsigned short*)page1_data) - nx*ny);
+				page2_data = (void*)(((unsigned short*)page2_data) - nx*ny);
+			}
 		}
 		else
 		{
-			page1_data = (void*)(((unsigned short*)page1_data) + nx*ny);
-			page2_data = (void*)(((unsigned short*)page2_data) + nx*ny);
+			page1 += nx*ny;
+			page2 += nx*ny;
+			if (bits == 8)
+			{
+				page1_data = (void*)(((unsigned char*)page1_data) + nx*ny);
+				page2_data = (void*)(((unsigned char*)page2_data) + nx*ny);
+			}
+			else
+			{
+				page1_data = (void*)(((unsigned short*)page1_data) + nx*ny);
+				page2_data = (void*)(((unsigned short*)page2_data) + nx*ny);
+			}
 		}
 	}
 
