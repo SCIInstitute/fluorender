@@ -1115,6 +1115,29 @@ void ComponentDlg::SaveSettings(wxString filename)
 
 void ComponentDlg::OnPaneChange(wxCollapsiblePaneEvent& event)
 {
+	int id = event.GetId();
+	bool enable = !event.GetCollapsed();
+
+	switch (id)
+	{
+	case ID_InitialGrowPane:
+		EnableInitialGrow(enable);
+		m_initial_grow_check->SetValue(enable);
+		break;
+	case ID_SizedGrowPane:
+		EnableSizedGrow(enable);
+		m_sized_grow_check->SetValue(enable);
+		break;
+	case ID_CleanupPane:
+		EnableCleanup(enable);
+		m_cleanup_check->SetValue(enable);
+		break;
+	case ID_MatchSlicesPane:
+		EnableBasicDiff(enable);
+		m_match_slices_check->SetValue(enable);
+		break;
+	}
+
 	if (m_adv_page)
 		m_adv_page->SendSizeEvent();
 }
@@ -1831,6 +1854,7 @@ void ComponentDlg::EnableMatchSlices(bool value)
 	m_match_slices = value;
 	if (m_match_slices)
 	{
+		m_bidir_match_check->Enable();
 		m_size_thresh_sldr->Enable();
 		m_size_thresh_text->Enable();
 		m_size_ratio_sldr->Enable();
@@ -1842,6 +1866,7 @@ void ComponentDlg::EnableMatchSlices(bool value)
 	}
 	else
 	{
+		m_bidir_match_check->Disable();
 		m_size_thresh_sldr->Disable();
 		m_size_thresh_text->Disable();
 		m_size_ratio_sldr->Disable();

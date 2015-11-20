@@ -309,7 +309,7 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 	cl_command_queue queue = clCreateCommandQueue(m_context, m_device, 0, &err);
 
 	unsigned int rcnt = 0;
-	unsigned int seed = iter;
+	unsigned int seed = iter > 10 ? iter : 11;
 	size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 	size_t local_size[3] = { 1, 1, 1 };
 	float scl_ff = diffuse?falloff:0.0f;
@@ -409,7 +409,7 @@ void ComponentGenerator::InitialGrow(bool param_tr, int iter,
 	unsigned short* cur_page_data16 = bits == 16 ? val16 : 0;
 	unsigned int* cur_page_label = val32;
 	unsigned int rcnt = 0;
-	unsigned int seed = iter;
+	unsigned int seed = iter>10 ? iter : 11;
 	size_t global_size[2] = { size_t(nx), size_t(ny) };
 	size_t local_size[2] = { 1, 1 };
 	//trnsition params
@@ -561,7 +561,7 @@ void ComponentGenerator::SizedGrow(bool param_tr, int iter,
 	unsigned short* cur_page_data16 = bits == 16 ? val16 : 0;
 	unsigned int* cur_page_label = val32;
 	unsigned int rcnt = 0;
-	unsigned int seed = iter;
+	unsigned int seed = iter>10 ? iter : 11;
 	size_t global_size[2] = { size_t(nx), size_t(ny) };
 	size_t local_size[2] = { 1, 1 };
 	//trnsition params
@@ -986,6 +986,7 @@ void ComponentGenerator::MatchSlices_CPU(bool backwards, unsigned int size_thres
 			}
 		ClearCellList(&cell_list1);
 		ClearCellList(&cell_list2);
+		rep_list.clear();
 		if (backwards)
 		{
 			page1 -= nx*ny;
