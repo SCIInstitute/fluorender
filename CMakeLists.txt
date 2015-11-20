@@ -266,6 +266,10 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/SynthBB)
 file(GLOB synthbb_hdr fluorender/SynthBB/*.h)
 file(GLOB synthbb_src fluorender/SynthBB/*.cpp)
 
+#MaskInt
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/MaskInt)
+file(GLOB maskint_hdr fluorender/MaskInt/*.h)
+file(GLOB maskint_src fluorender/MaskInt/*.cpp)
 
 #platform specific rules
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -298,13 +302,18 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       $<TARGET_OBJECTS:GLEW_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>)
-   add_executable(SynthBB MACOSX_BUNDLE
+   add_executable(SynthBB
       ${synthbb_src} ${synthbb_hdr}
       $<TARGET_OBJECTS:FLIVR_OBJ>
       $<TARGET_OBJECTS:FORMATS_OBJ>
       $<TARGET_OBJECTS:TRACKING_OBJ>
       $<TARGET_OBJECTS:COMPONENTS_OBJ>
       $<TARGET_OBJECTS:GLEW_OBJ>
+      $<TARGET_OBJECTS:POLE_OBJ>
+      $<TARGET_OBJECTS:TEEM_OBJ>)
+   add_executable(MaskInt
+      ${maskint_src} ${maskint_hdr}
+      $<TARGET_OBJECTS:FORMATS_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>)
 
@@ -369,6 +378,11 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 		  $<TARGET_OBJECTS:GLEW_OBJ>
 		  $<TARGET_OBJECTS:POLE_OBJ>
 		  $<TARGET_OBJECTS:TEEM_OBJ>)
+      add_executable(MaskInt
+         ${maskint_src} ${maskint_hdr}
+         $<TARGET_OBJECTS:FORMATS_OBJ>
+         $<TARGET_OBJECTS:POLE_OBJ>
+         $<TARGET_OBJECTS:TEEM_OBJ>)
    endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif()
 
@@ -417,6 +431,10 @@ target_link_libraries(SynthBB
    ${OPENGL_LIBRARIES}
    ${Boost_LIBRARIES}
    ${OPENCL_LIBRARIES}
+   ${wxWidgets_LIBRARIES})
+target_link_libraries(MaskInt
+   ${ffmpeg_LIBRARIES}
+   ${Boost_LIBRARIES}
    ${wxWidgets_LIBRARIES})
 
 #build OpenCL examples copies.
