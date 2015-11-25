@@ -388,12 +388,12 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 	sizer_2->Add(10, 10);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_gen_map_spin, 0, wxALIGN_CENTER);
-	m_gen_map_btn = new wxButton(page, ID_GenMapBtn, "Generate",
-		wxDefaultPosition, wxSize(75, 23));
-	m_refine_t_btn = new wxButton(page, ID_RefineTBtn, "Refine T",
-		wxDefaultPosition, wxSize(75, 23));
-	m_refine_all_btn = new wxButton(page, ID_RefineAllBtn, "Refine All",
-		wxDefaultPosition, wxSize(75, 23));
+	m_gen_map_btn = new wxButton(page, ID_GenMapBtn, "Gen.",
+		wxDefaultPosition, wxSize(65, 23));
+	m_refine_t_btn = new wxButton(page, ID_RefineTBtn, "Ref. T",
+		wxDefaultPosition, wxSize(65, 23));
+	m_refine_all_btn = new wxButton(page, ID_RefineAllBtn, "Ref. All",
+		wxDefaultPosition, wxSize(65, 23));
 	sizer_2->Add(10, 10);
 	sizer_2->Add(m_gen_map_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_refine_t_btn, 0, wxALIGN_CENTER);

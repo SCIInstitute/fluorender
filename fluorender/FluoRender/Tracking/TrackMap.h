@@ -68,15 +68,21 @@ namespace FL
 		void SetBits(TrackMap& track_map,
 			size_t bits);
 
+		//build cell list and intra graph
 		bool InitializeFrame(TrackMap& track_map,
 			void *data, void *label, size_t frame);
+		//build inter graph
 		bool LinkMaps(TrackMap& track_map,
 			size_t f1, size_t f2,
 			void *data1, void *data2,
 			void *label1, void *label2);
+		//group cells
 		bool ResolveGraph(TrackMap& track_map, size_t frame1, size_t frame2);
+		//find the maximum overlapping and set link flags on inter graph
 		bool MatchFrames(TrackMap& track_map, size_t frame1, size_t frame2, bool bl_check = true);
+		//for multiple links, remove link flags
 		bool UnmatchFrames(TrackMap& track_map, size_t frame1, size_t frame2);
+		//for orphans, search neighbors to add link flags
 		bool ExMatchFrames(TrackMap& track_map, size_t frame1, size_t frame2);
 
 		bool Export(TrackMap& track_map, std::string &filename);
