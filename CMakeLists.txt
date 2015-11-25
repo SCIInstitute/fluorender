@@ -186,6 +186,13 @@ file(GLOB fmt_hdr fluorender/FluoRender/Formats/*.h)
 add_library(FORMATS_OBJ OBJECT
       ${fmt_src} ${fmt_hdr})
 
+#Video
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Video)
+file(GLOB vid_src fluorender/FluoRender/Video/*.cpp)
+file(GLOB vid_hdr fluorender/FluoRender/Video/*.h)
+add_library(VIDEO_OBJ OBJECT
+      ${vid_src} ${vid_hdr})
+
 #Tracking
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Tracking)
 file(GLOB trk_src fluorender/FluoRender/Tracking/*.cpp)
@@ -297,6 +304,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       $<TARGET_OBJECTS:ANIMATORS_OBJ>
       $<TARGET_OBJECTS:NV_OBJ>
       $<TARGET_OBJECTS:FORMATS_OBJ>
+      $<TARGET_OBJECTS:VIDEO_OBJ>
       $<TARGET_OBJECTS:TRACKING_OBJ>
       $<TARGET_OBJECTS:COMPONENTS_OBJ>
       $<TARGET_OBJECTS:GLEW_OBJ>
@@ -363,6 +371,7 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 		  $<TARGET_OBJECTS:ANIMATORS_OBJ>
 		  $<TARGET_OBJECTS:NV_OBJ>
 		  $<TARGET_OBJECTS:FORMATS_OBJ>
+		  $<TARGET_OBJECTS:VIDEO_OBJ>
 		  $<TARGET_OBJECTS:TRACKING_OBJ>
 		  $<TARGET_OBJECTS:COMPONENTS_OBJ>
 		  $<TARGET_OBJECTS:GLEW_OBJ>
@@ -427,13 +436,10 @@ target_link_libraries(FluoRender
    ${FREETYPE_LIBRARIES}
    ${wxWidgets_LIBRARIES})
 target_link_libraries(SynthBB
-   ${ffmpeg_LIBRARIES}
-   ${OPENGL_LIBRARIES}
    ${Boost_LIBRARIES}
    ${OPENCL_LIBRARIES}
    ${wxWidgets_LIBRARIES})
 target_link_libraries(MaskInt
-   ${ffmpeg_LIBRARIES}
    ${Boost_LIBRARIES}
    ${wxWidgets_LIBRARIES})
 
