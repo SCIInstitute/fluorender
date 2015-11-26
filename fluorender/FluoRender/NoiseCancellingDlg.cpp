@@ -45,10 +45,9 @@ NoiseCancellingDlg::NoiseCancellingDlg(wxWindow *frame, wxWindow *parent)
 	0, "NoiseCancellingDlg"),
 	m_frame(parent),
 	m_view(0),
-	//m_group(0),
-	//m_vol(0),
 	m_max_value(255.0),
-	m_dft_thresh(0.0),
+	m_dft_thresh(0.5),
+	m_dft_size(50),
 	m_previewed(false)
 {
 	//validator: floating point 1
@@ -136,12 +135,6 @@ void NoiseCancellingDlg::GetSettings(VRenderView* vrv)
 
 	m_view = vrv;
 
-	if (vr_frame->GetBrushToolDlg())
-	{
-		m_dft_thresh = vr_frame->GetBrushToolDlg()->GetDftNRThresh();
-		m_dft_size = vr_frame->GetBrushToolDlg()->GetDftNRSize();
-	}
-
 	//threshold range
 	if (sel_vol)
 	{
@@ -217,14 +210,7 @@ void NoiseCancellingDlg::OnPreviewBtn(wxCommandEvent &event)
 		if (sel_vol)
 			sel_vol->SetUseMaskThreshold(true);
 		if (vr_frame)
-		{
-			if (vr_frame->GetBrushToolDlg())
-			{
-				vr_frame->GetBrushToolDlg()->SetDftNRThresh(m_dft_thresh);
-				vr_frame->GetBrushToolDlg()->SetDftNRSize(m_dft_size);
-			}
 			vr_frame->RefreshVRenderViews();
-		}
 		m_previewed = true;
 		OnEnhanceSelChk(event);
 	}

@@ -48,8 +48,6 @@ BEGIN_EVENT_TABLE(BrushToolDlg, wxPanel)
 	EVT_TOOL(ID_BrushErase, BrushToolDlg::OnBrushErase)
 	EVT_TOOL(ID_BrushCreate, BrushToolDlg::OnBrushCreate)
 	EVT_TOOL(ID_BrushSolid, BrushToolDlg::OnBrushSolid)
-	//help
-	EVT_TOOL(ID_HelpBtn, BrushToolDlg::OnHelpBtn)
 	//selection adjustment
 	//translate
 	EVT_COMMAND_SCROLL(ID_BrushSclTranslateSldr, BrushToolDlg::OnBrushSclTranslateChange)
@@ -80,36 +78,21 @@ BEGIN_EVENT_TABLE(BrushToolDlg, wxPanel)
 	EVT_RADIOBUTTON(ID_BrushIterWRd, BrushToolDlg::OnBrushIterCheck)
 	EVT_RADIOBUTTON(ID_BrushIterSRd, BrushToolDlg::OnBrushIterCheck)
 	EVT_RADIOBUTTON(ID_BrushIterSSRd, BrushToolDlg::OnBrushIterCheck)
-	//component analyzer
-	EVT_COMMAND_SCROLL(ID_CAThreshSldr, BrushToolDlg::OnCAThreshChange)
-	EVT_TEXT(ID_CAThreshText, BrushToolDlg::OnCAThreshText)
-	EVT_CHECKBOX(ID_CAIgnoreMaxChk, BrushToolDlg::OnCAIgnoreMaxChk)
-	EVT_BUTTON(ID_CAAnalyzeBtn, BrushToolDlg::OnCAAnalyzeBtn)
-	EVT_BUTTON(ID_CAMultiChannBtn, BrushToolDlg::OnCAMultiChannBtn)
-	EVT_BUTTON(ID_CARandomColorBtn, BrushToolDlg::OnCARandomColorBtn)
-	EVT_BUTTON(ID_CAAnnotationsBtn, BrushToolDlg::OnCAAnnotationsBtn)
-	//noise removal
-	EVT_COMMAND_SCROLL(ID_NRSizeSldr, BrushToolDlg::OnNRSizeChange)
-	EVT_TEXT(ID_NRSizeText, BrushToolDlg::OnNRSizeText)
-	EVT_BUTTON(ID_NRAnalyzeBtn, BrushToolDlg::OnNRAnalyzeBtn)
-	EVT_BUTTON(ID_NRRemoveBtn, BrushToolDlg::OnNRRemoveBtn)
-
-	//calculations
-	//operands
-	EVT_BUTTON(ID_CalcLoadABtn, BrushToolDlg::OnLoadA)
-	EVT_BUTTON(ID_CalcLoadBBtn, BrushToolDlg::OnLoadB)
-	//operators
-	EVT_BUTTON(ID_CalcSubBtn, BrushToolDlg::OnCalcSub)
-	EVT_BUTTON(ID_CalcAddBtn, BrushToolDlg::OnCalcAdd)
-	EVT_BUTTON(ID_CalcDivBtn, BrushToolDlg::OnCalcDiv)
-	EVT_BUTTON(ID_CalcIscBtn, BrushToolDlg::OnCalcIsc)
-	//one-operators
-	EVT_BUTTON(ID_CalcFillBtn, BrushToolDlg::OnCalcFill)
 END_EVENT_TABLE()
 
-wxWindow* BrushToolDlg::CreateBrushPage(wxWindow *parent)
+BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
+	: wxPanel(parent, wxID_ANY,
+	wxDefaultPosition,
+	wxSize(400, 550),
+	0, "BrushToolDlg"),
+	m_frame(parent),
+	m_cur_view(0),
+	m_max_value(255.0),
+	m_dft_ini_thresh(0.0),
+	m_dft_gm_falloff(0.0),
+	m_dft_scl_falloff(0.0),
+	m_dft_scl_translate(0.0)
 {
-	wxPanel *page = new wxPanel(parent);
 	wxStaticText *st = 0;
 	//validator: floating point 1
 	wxFloatingPointValidator<double> vald_fp1(1);
@@ -122,7 +105,7 @@ wxWindow* BrushToolDlg::CreateBrushPage(wxWindow *parent)
 	wxIntegerValidator<unsigned int> vald_int;
 
 	//toolbar
-	m_toolbar = new wxToolBar(page, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+	m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT);
 	m_toolbar->AddTool(ID_BrushUndo, "Undo",
 		wxGetBitmapFromMemory(undo),
@@ -157,22 +140,21 @@ wxWindow* BrushToolDlg::CreateBrushPage(wxWindow *parent)
 	m_toolbar->AddTool(ID_BrushCreate, "Extract",
 		wxGetBitmapFromMemory(listicon_brushcreate),
 		"Extract highlighted structures out and create a new volume");
-	m_toolbar->SetBackgroundColour(m_notebook->GetThemeBackgroundColour());
 	m_toolbar->Realize();
 
 	//Selection adjustment
 	wxBoxSizer *sizer1 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Selection Settings"),
+		new wxStaticBox(this, wxID_ANY, "Selection Settings"),
 		wxVERTICAL);
 	//stop at boundary
 	wxBoxSizer *sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_estimate_thresh_chk = new wxCheckBox(page, ID_EstimateThreshChk, "Auto Thresh:",
+	m_estimate_thresh_chk = new wxCheckBox(this, ID_EstimateThreshChk, "Auto Thresh:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-	m_edge_detect_chk = new wxCheckBox(page, ID_BrushEdgeDetectChk, "Edge Detect:",
+	m_edge_detect_chk = new wxCheckBox(this, ID_BrushEdgeDetectChk, "Edge Detect:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-	m_hidden_removal_chk = new wxCheckBox(page, ID_BrushHiddenRemovalChk, "Visible Only:",
+	m_hidden_removal_chk = new wxCheckBox(this, ID_BrushHiddenRemovalChk, "Visible Only:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-	m_select_group_chk = new wxCheckBox(page, ID_BrushSelectGroupChk, "Apply to Group:",
+	m_select_group_chk = new wxCheckBox(this, ID_BrushSelectGroupChk, "Apply to Group:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 	sizer1_1->Add(m_estimate_thresh_chk, 0, wxALIGN_CENTER);
 	sizer1_1->Add(5, 5);
@@ -183,11 +165,11 @@ wxWindow* BrushToolDlg::CreateBrushPage(wxWindow *parent)
 	sizer1_1->Add(m_select_group_chk, 0, wxALIGN_CENTER);
 	//threshold4
 	wxBoxSizer *sizer1_2 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Threshold:",
+	st = new wxStaticText(this, 0, "Threshold:",
 		wxDefaultPosition, wxSize(70, 20));
-	m_brush_scl_translate_sldr = new wxSlider(page, ID_BrushSclTranslateSldr, 0, 0, 2550,
+	m_brush_scl_translate_sldr = new wxSlider(this, ID_BrushSclTranslateSldr, 0, 0, 2550,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_brush_scl_translate_text = new wxTextCtrl(page, ID_BrushSclTranslateText, "0.0",
+	m_brush_scl_translate_text = new wxTextCtrl(this, ID_BrushSclTranslateText, "0.0",
 		wxDefaultPosition, wxSize(50, 20), 0, vald_fp1);
 	sizer1_2->Add(5, 5);
 	sizer1_2->Add(st, 0, wxALIGN_CENTER);
@@ -196,11 +178,11 @@ wxWindow* BrushToolDlg::CreateBrushPage(wxWindow *parent)
 	sizer1_2->Add(15, 15);
 	//gm falloff
 	wxBoxSizer *sizer1_3 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Edge STR:",
+	st = new wxStaticText(this, 0, "Edge STR:",
 		wxDefaultPosition, wxSize(70, 20));
-	m_brush_gm_falloff_sldr = new wxSlider(page, ID_BrushGmFalloffSldr, 0, 0, 1000,
+	m_brush_gm_falloff_sldr = new wxSlider(this, ID_BrushGmFalloffSldr, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_brush_gm_falloff_text = new wxTextCtrl(page, ID_BrushGmFalloffText, "0.000",
+	m_brush_gm_falloff_text = new wxTextCtrl(this, ID_BrushGmFalloffText, "0.000",
 		wxDefaultPosition, wxSize(50, 20), 0, vald_fp3);
 	sizer1_3->Add(5, 5);
 	sizer1_3->Add(st, 0, wxALIGN_CENTER);
@@ -209,11 +191,11 @@ wxWindow* BrushToolDlg::CreateBrushPage(wxWindow *parent)
 	sizer1_3->Add(15, 15);
 	//2d
 	wxBoxSizer *sizer1_4 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "2D Adj. Infl.:",
+	st = new wxStaticText(this, 0, "2D Adj. Infl.:",
 		wxDefaultPosition, wxSize(70, 20));
-	m_brush_2dinfl_sldr = new wxSlider(page, ID_Brush2dinflSldr, 100, 0, 200,
+	m_brush_2dinfl_sldr = new wxSlider(this, ID_Brush2dinflSldr, 100, 0, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_INVERSE);
-	m_brush_2dinfl_text = new wxTextCtrl(page, ID_Brush2dinflText, "1.00",
+	m_brush_2dinfl_text = new wxTextCtrl(this, ID_Brush2dinflText, "1.00",
 		wxDefaultPosition, wxSize(40, 20), 0, vald_fp2);
 	sizer1_4->Add(5, 5);
 	sizer1_4->Add(st, 0, wxALIGN_CENTER);
@@ -230,36 +212,36 @@ wxWindow* BrushToolDlg::CreateBrushPage(wxWindow *parent)
 
 	//Brush properties
 	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Brush Properties"),
+		new wxStaticBox(this, wxID_ANY, "Brush Properties"),
 		wxVERTICAL);
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Brush sizes can also be set with mouse wheel in painting mode.");
+	st = new wxStaticText(this, 0, "Brush sizes can also be set with mouse wheel in painting mode.");
 	sizer2_1->Add(5, 5);
 	sizer2_1->Add(st, 0, wxALIGN_CENTER);
 	//brush size 1
 	wxBoxSizer *sizer2_2 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Center Size:",
+	st = new wxStaticText(this, 0, "Center Size:",
 		wxDefaultPosition, wxSize(80, 20));
-	m_brush_size1_sldr = new wxSlider(page, ID_BrushSize1Sldr, 10, 1, 300,
+	m_brush_size1_sldr = new wxSlider(this, ID_BrushSize1Sldr, 10, 1, 300,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_brush_size1_text = new wxTextCtrl(page, ID_BrushSize1Text, "10",
+	m_brush_size1_text = new wxTextCtrl(this, ID_BrushSize1Text, "10",
 		wxDefaultPosition, wxSize(50, 20), 0, vald_int);
 	sizer2_2->Add(5, 5);
 	sizer2_2->Add(st, 0, wxALIGN_CENTER);
 	sizer2_2->Add(m_brush_size1_sldr, 1, wxEXPAND);
 	sizer2_2->Add(m_brush_size1_text, 0, wxALIGN_CENTER);
-	st = new wxStaticText(page, 0, "px",
+	st = new wxStaticText(this, 0, "px",
 		wxDefaultPosition, wxSize(25, 15));
 	sizer2_2->Add(st, 0, wxALIGN_CENTER);
 	//brush size 2
 	wxBoxSizer *sizer2_3 = new wxBoxSizer(wxHORIZONTAL);
-	m_brush_size2_chk = new wxCheckBox(page, ID_BrushSize2Chk, "GrowSize",
+	m_brush_size2_chk = new wxCheckBox(this, ID_BrushSize2Chk, "GrowSize",
 		wxDefaultPosition, wxSize(80, 20), wxALIGN_RIGHT);
-	st = new wxStaticText(page, 0, ":",
+	st = new wxStaticText(this, 0, ":",
 		wxDefaultPosition, wxSize(5, 20), wxALIGN_RIGHT);
-	m_brush_size2_sldr = new wxSlider(page, ID_BrushSize2Sldr, 30, 1, 300,
+	m_brush_size2_sldr = new wxSlider(this, ID_BrushSize2Sldr, 30, 1, 300,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_brush_size2_text = new wxTextCtrl(page, ID_BrushSize2Text, "30",
+	m_brush_size2_text = new wxTextCtrl(this, ID_BrushSize2Text, "30",
 		wxDefaultPosition, wxSize(50, 20), 0, vald_int);
 	m_brush_size2_chk->SetValue(true);
 	m_brush_size2_sldr->Enable();
@@ -268,18 +250,18 @@ wxWindow* BrushToolDlg::CreateBrushPage(wxWindow *parent)
 	sizer2_3->Add(st, 0, wxALIGN_CENTER);
 	sizer2_3->Add(m_brush_size2_sldr, 1, wxEXPAND);
 	sizer2_3->Add(m_brush_size2_text, 0, wxALIGN_CENTER);
-	st = new wxStaticText(page, 0, "px",
+	st = new wxStaticText(this, 0, "px",
 		wxDefaultPosition, wxSize(25, 15));
 	sizer2_3->Add(st, 0, wxALIGN_CENTER);
 	//iterations
 	wxBoxSizer *sizer2_4 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Growth:",
+	st = new wxStaticText(this, 0, "Growth:",
 		wxDefaultPosition, wxSize(70, 20));
-	m_brush_iterw_rb = new wxRadioButton(page, ID_BrushIterWRd, "Weak",
+	m_brush_iterw_rb = new wxRadioButton(this, ID_BrushIterWRd, "Weak",
 		wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-	m_brush_iters_rb = new wxRadioButton(page, ID_BrushIterSRd, "Normal",
+	m_brush_iters_rb = new wxRadioButton(this, ID_BrushIterSRd, "Normal",
 		wxDefaultPosition, wxDefaultSize);
-	m_brush_iterss_rb = new wxRadioButton(page, ID_BrushIterSSRd, "Strong",
+	m_brush_iterss_rb = new wxRadioButton(this, ID_BrushIterSSRd, "Strong",
 		wxDefaultPosition, wxDefaultSize);
 	m_brush_iterw_rb->SetValue(false);
 	m_brush_iters_rb->SetValue(true);
@@ -309,265 +291,7 @@ wxWindow* BrushToolDlg::CreateBrushPage(wxWindow *parent)
 	sizer_v->Add(sizer2, 0, wxEXPAND);
 	sizer_v->Add(10, 30);
 
-	//set the page
-	page->SetSizer(sizer_v);
-	return page;
-}
-
-wxWindow* BrushToolDlg::CreateCalculationPage(wxWindow *parent)
-{
-	wxPanel *page = new wxPanel(parent);
-	wxStaticText *st = 0;
-
-	//operand A
-	wxBoxSizer *sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Volume A:",
-		wxDefaultPosition, wxSize(75, 20));
-	m_calc_load_a_btn = new wxButton(page, ID_CalcLoadABtn, "Load",
-		wxDefaultPosition, wxSize(50, 20));
-	m_calc_a_text = new wxTextCtrl(page, ID_CalcAText, "",
-		wxDefaultPosition, wxSize(200, 20));
-	sizer1->Add(st, 0, wxALIGN_CENTER);
-	sizer1->Add(m_calc_load_a_btn, 0, wxALIGN_CENTER);
-	sizer1->Add(m_calc_a_text, 1, wxEXPAND);
-	//operand B
-	wxBoxSizer *sizer2 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Volume B:",
-		wxDefaultPosition, wxSize(75, 20));
-	m_calc_load_b_btn = new wxButton(page, ID_CalcLoadBBtn, "Load",
-		wxDefaultPosition, wxSize(50, 20));
-	m_calc_b_text = new wxTextCtrl(page, ID_CalcBText, "",
-		wxDefaultPosition, wxSize(200, 20));
-	sizer2->Add(st, 0, wxALIGN_CENTER);
-	sizer2->Add(m_calc_load_b_btn, 0, wxALIGN_CENTER);
-	sizer2->Add(m_calc_b_text, 1, wxEXPAND);
-	//single operators
-	wxBoxSizer *sizer3 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY,
-			"Single-valued Operators (Require A)"), wxVERTICAL);
-	//sizer3
-	m_calc_fill_btn = new wxButton(page, ID_CalcFillBtn, "Consolidate Voxels",
-		wxDefaultPosition, wxDefaultSize);
-	sizer3->Add(m_calc_fill_btn, 0, wxEXPAND);
-	//two operators
-	wxBoxSizer *sizer4 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY,
-			"Two-valued Operators (Require both A and B)"), wxHORIZONTAL);
-	m_calc_sub_btn = new wxButton(page, ID_CalcSubBtn, "Subtract",
-		wxDefaultPosition, wxSize(50, 25));
-	m_calc_add_btn = new wxButton(page, ID_CalcAddBtn, "Add",
-		wxDefaultPosition, wxSize(50, 25));
-	m_calc_div_btn = new wxButton(page, ID_CalcDivBtn, "Divide",
-		wxDefaultPosition, wxSize(50, 25));
-	m_calc_isc_btn = new wxButton(page, ID_CalcIscBtn, "Colocalize",
-		wxDefaultPosition, wxSize(50, 25));
-	sizer4->Add(m_calc_sub_btn, 1, wxEXPAND);
-	sizer4->Add(m_calc_add_btn, 1, wxEXPAND);
-	sizer4->Add(m_calc_div_btn, 1, wxEXPAND);
-	sizer4->Add(m_calc_isc_btn, 1, wxEXPAND);
-
-	//vertical sizer
-	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
-	sizer_v->Add(10, 10);
-	sizer_v->Add(sizer1, 0, wxEXPAND);
-	sizer_v->Add(10, 10);
-	sizer_v->Add(sizer2, 0, wxEXPAND);
-	sizer_v->Add(10, 30);
-	sizer_v->Add(sizer3, 0, wxEXPAND);
-	sizer_v->Add(10, 30);
-	sizer_v->Add(sizer4, 0, wxEXPAND);
-	sizer_v->Add(10, 10);
-
-	//set the page
-	page->SetSizer(sizer_v);
-	return page;
-}
-
-wxWindow* BrushToolDlg::CreateAnalysisPage(wxWindow *parent)
-{
-	wxPanel *page = new wxPanel(parent);
-	wxStaticText *st = 0;
-	//validator: floating point 1
-	wxFloatingPointValidator<double> vald_fp1(1);
-	//validator: integer
-	wxIntegerValidator<unsigned int> vald_int;
-
-	//component analyzer
-	wxBoxSizer *sizer1 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Component Analyzer"),
-		wxVERTICAL);
-	//threshold of ccl
-	wxBoxSizer *sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Threshold:",
-		wxDefaultPosition, wxSize(75, 20));
-	m_ca_thresh_sldr = new wxSlider(page, ID_CAThreshSldr, 0, 0, 2550,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_ca_thresh_text = new wxTextCtrl(page, ID_CAThreshText, "0.0",
-		wxDefaultPosition, wxSize(50, 20), 0, vald_fp1);
-	sizer1_1->Add(5, 5);
-	sizer1_1->Add(st, 0, wxALIGN_CENTER);
-	sizer1_1->Add(m_ca_thresh_sldr, 1, wxEXPAND);
-	sizer1_1->Add(m_ca_thresh_text, 0, wxALIGN_CENTER);
-	m_ca_analyze_btn = new wxButton(page, ID_CAAnalyzeBtn, "Analyze",
-		wxDefaultPosition, wxSize(-1, 23));
-	sizer1_1->Add(m_ca_analyze_btn, 0, wxALIGN_CENTER);
-	sizer1_1->Add(5, 5);
-	//size of ccl
-	wxBoxSizer *sizer1_2 = new wxBoxSizer(wxHORIZONTAL);
-	m_ca_select_only_chk = new wxCheckBox(page, ID_CASelectOnlyChk, "Selct. Only",
-		wxDefaultPosition, wxSize(90, 20));
-	sizer1_2->Add(5, 5);
-	sizer1_2->Add(m_ca_select_only_chk, 0, wxALIGN_CENTER);
-	sizer1_2->AddStretchSpacer();
-	st = new wxStaticText(page, 0, "Min:",
-		wxDefaultPosition, wxSize(40, 15));
-	sizer1_2->Add(st, 0, wxALIGN_CENTER);
-	m_ca_min_text = new wxTextCtrl(page, ID_CAMinText, "0",
-		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
-	sizer1_2->Add(m_ca_min_text, 0, wxALIGN_CENTER);
-	st = new wxStaticText(page, 0, "vx",
-		wxDefaultPosition, wxSize(15, 15));
-	sizer1_2->Add(st, 0, wxALIGN_CENTER);
-	sizer1_2->AddStretchSpacer();
-	st = new wxStaticText(page, 0, "Max:",
-		wxDefaultPosition, wxSize(40, 15));
-	sizer1_2->Add(st, 0, wxALIGN_CENTER);
-	m_ca_max_text = new wxTextCtrl(page, ID_CAMaxText, "1000",
-		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
-	sizer1_2->Add(m_ca_max_text, 0, wxALIGN_CENTER);
-	st = new wxStaticText(page, 0, "vx",
-		wxDefaultPosition, wxSize(15, 15));
-	sizer1_2->Add(st, 0, wxALIGN_CENTER);
-	sizer1_2->AddStretchSpacer();
-	m_ca_ignore_max_chk = new wxCheckBox(page, ID_CAIgnoreMaxChk, "Ignore Max");
-	sizer1_2->Add(m_ca_ignore_max_chk, 0, wxALIGN_CENTER);
-	sizer1_2->Add(5, 5);
-	//text result
-	wxBoxSizer *sizer1_3 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Components:");
-	sizer1_3->Add(5, 5);
-	sizer1_3->Add(st, 0, wxALIGN_CENTER);
-	m_ca_comps_text = new wxTextCtrl(page, ID_CACompsText, "0",
-		wxDefaultPosition, wxSize(70, 20), wxTE_READONLY);
-	sizer1_3->Add(m_ca_comps_text, 0, wxALIGN_CENTER);
-	sizer1_3->AddStretchSpacer();
-	st = new wxStaticText(page, 0, "Total Volume:");
-	sizer1_3->Add(st, 0, wxALIGN_CENTER);
-	m_ca_volume_text = new wxTextCtrl(page, ID_CAVolumeText, "0",
-		wxDefaultPosition, wxSize(70, 20), wxTE_READONLY);
-	sizer1_3->Add(m_ca_volume_text, 0, wxALIGN_CENTER);
-	sizer1_3->AddStretchSpacer();
-	m_ca_size_map_chk = new wxCheckBox(page, ID_CASizeMapChk, "Size-Color",
-		wxDefaultPosition, wxSize(90, 20));
-	sizer1_3->Add(m_ca_size_map_chk, 0, wxALIGN_CENTER);
-	sizer1_3->Add(5, 5);
-	//export
-	wxBoxSizer *sizer1_4 = new wxBoxSizer(wxHORIZONTAL);
-	sizer1_4->AddStretchSpacer();
-	st = new wxStaticText(page, 0, "Export:  ");
-	sizer1_4->Add(st, 0, wxALIGN_CENTER);
-	m_ca_multi_chann_btn = new wxButton(page, ID_CAMultiChannBtn, "Multi-Channels",
-		wxDefaultPosition, wxSize(-1, 23));
-	m_ca_random_color_btn = new wxButton(page, ID_CARandomColorBtn, "Random Colors",
-		wxDefaultPosition, wxSize(-1, 23));
-	m_ca_annotations_btn = new wxButton(page, ID_CAAnnotationsBtn, "Show Annotations",
-		wxDefaultPosition, wxSize(-1, 23));
-	sizer1_4->Add(m_ca_multi_chann_btn, 0, wxALIGN_CENTER);
-	sizer1_4->Add(m_ca_random_color_btn, 0, wxALIGN_CENTER);
-	sizer1_4->Add(m_ca_annotations_btn, 0, wxALIGN_CENTER);
-	sizer1_4->Add(5, 5);
-	//sizer1
-	sizer1->Add(10, 10);
-	sizer1->Add(sizer1_1, 0, wxEXPAND);
-	sizer1->Add(10, 10);
-	sizer1->Add(sizer1_2, 0, wxEXPAND);
-	sizer1->Add(10, 10);
-	sizer1->Add(sizer1_3, 0, wxEXPAND);
-	sizer1->Add(10, 10);
-	sizer1->Add(sizer1_4, 0, wxEXPAND);
-	sizer1->Add(10, 10);
-	//noise removal
-	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Noise Removal"),
-		wxVERTICAL);
-	//size threshold
-	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Size Thresh.:",
-		wxDefaultPosition, wxSize(75, -1));
-	m_nr_size_sldr = new wxSlider(page, ID_NRSizeSldr, 10, 1, 100,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_nr_size_text = new wxTextCtrl(page, ID_NRSizeText, "10",
-		wxDefaultPosition, wxSize(40, -1), 0, vald_int);
-	sizer2_1->Add(5, 5);
-	sizer2_1->Add(st, 0, wxALIGN_CENTER);
-	sizer2_1->Add(m_nr_size_sldr, 1, wxEXPAND);
-	sizer2_1->Add(m_nr_size_text, 0, wxALIGN_CENTER);
-	st = new wxStaticText(page, 0, "vx",
-		wxDefaultPosition, wxSize(25, 15));
-	sizer2_1->Add(st, 0, wxALIGN_CENTER);
-	//buttons
-	wxBoxSizer *sizer2_2 = new wxBoxSizer(wxHORIZONTAL);
-	m_nr_analyze_btn = new wxButton(page, ID_NRAnalyzeBtn, "Analyze",
-		wxDefaultPosition, wxSize(-1, 23));
-	m_nr_remove_btn = new wxButton(page, ID_NRRemoveBtn, "Remove",
-		wxDefaultPosition, wxSize(-1, 23));
-	sizer2_2->AddStretchSpacer();
-	sizer2_2->Add(m_nr_analyze_btn, 0, wxALIGN_CENTER);
-	sizer2_2->Add(m_nr_remove_btn, 0, wxALIGN_CENTER);
-	//sizer2
-	sizer2->Add(10, 10);
-	sizer2->Add(sizer2_1, 0, wxEXPAND);
-	sizer2->Add(10, 10);
-	sizer2->Add(sizer2_2, 0, wxEXPAND);
-	sizer2->Add(10, 10);
-
-	//vertical sizer
-	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
-	sizer_v->Add(10, 10);
-	sizer_v->Add(sizer1, 0, wxEXPAND);
-	sizer_v->Add(10, 30);
-	sizer_v->Add(sizer2, 0, wxEXPAND);
-	sizer_v->Add(10, 10);
-
-	//set the page
-	page->SetSizer(sizer_v);
-	return page;
-}
-
-BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
-	: wxPanel(parent, wxID_ANY,
-	wxDefaultPosition,
-	wxSize(400, 550),
-	0, "BrushToolDlg"),
-	m_frame(parent),
-	m_cur_view(0),
-	m_vol1(0),
-	m_vol2(0),
-	m_max_value(255.0),
-	m_dft_ini_thresh(0.0),
-	m_dft_gm_falloff(0.0),
-	m_dft_scl_falloff(0.0),
-	m_dft_scl_translate(0.0),
-	m_dft_ca_min(0.0),
-	m_dft_ca_max(0.0),
-	m_dft_ca_thresh(0.0),
-	m_dft_ca_falloff(1.0),
-	m_dft_nr_thresh(0.0),
-	m_dft_nr_size(0.0)
-{
-	//notebook
-	m_notebook = new wxNotebook(this, wxID_ANY);
-	m_notebook->AddPage(CreateBrushPage(m_notebook), "Paint Brush");
-	m_notebook->AddPage(CreateCalculationPage(m_notebook), "Calculations");
-	m_notebook->AddPage(CreateAnalysisPage(m_notebook), "Analysis");
-
-	//all controls
-	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
-	sizerV->Add(10, 10);
-	sizerV->Add(m_notebook, 0, wxEXPAND);
-	sizerV->Add(10, 10);
-
-	SetSizerAndFit(sizerV);
+	SetSizerAndFit(sizer_v);
 	Layout();
 
 	LoadDefault();
@@ -683,9 +407,6 @@ void BrushToolDlg::GetSettings(VRenderView* vrv)
 		//falloff
 		m_brush_scl_translate_sldr->SetRange(0, int(m_max_value*10.0));
 		m_brush_scl_translate_text->SetValue(wxString::Format("%.1f", m_dft_scl_translate*m_max_value));
-		m_ca_thresh_sldr->SetRange(0, int(m_max_value*10.0));
-		m_ca_thresh_sldr->SetValue(int(m_dft_ca_thresh*m_max_value*10.0+0.5));
-		m_ca_thresh_text->ChangeValue(wxString::Format("%.1f", m_dft_ca_thresh*m_max_value));
 	}
 
 	UpdateUndoRedo();
@@ -773,13 +494,7 @@ void BrushToolDlg::OnBrushSolid(wxCommandEvent &event)
 
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 	if (frame && frame->GetTree())
-	{
-		//if (m_toolbar->GetToolState(ID_BrushSolid))
-		//   frame->GetTree()->SelectBrush(TreePanel::ID_BrushDiffuse);
-		//else
-		//   frame->GetTree()->SelectBrush(0);
 		frame->GetTree()->BrushSolid(m_toolbar->GetToolState(ID_BrushSolid));
-	}
 }
 
 void BrushToolDlg::OnBrushDesel(wxCommandEvent &event)
@@ -1078,146 +793,6 @@ void BrushToolDlg::OnBrushIterCheck(wxCommandEvent& event)
 	}
 }
 
-//component analyze
-void BrushToolDlg::OnCAThreshChange(wxScrollEvent &event)
-{
-	int ival = event.GetPosition();
-	wxString str = wxString::Format("%.1f", double(ival)/10.0);
-	m_ca_thresh_text->SetValue(str);
-}
-
-void BrushToolDlg::OnCAThreshText(wxCommandEvent &event)
-{
-	wxString str = m_ca_thresh_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	m_dft_ca_thresh = val/m_max_value;
-	m_ca_thresh_sldr->SetValue(int(val*10.0+0.5));
-
-	//change mask threshold
-	VolumeData* sel_vol = 0;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		sel_vol = vr_frame->GetCurSelVol();
-	if (sel_vol)
-		sel_vol->SetMaskThreshold(m_dft_ca_thresh);
-	vr_frame->RefreshVRenderViews();
-}
-
-void BrushToolDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
-{
-	if (m_cur_view)
-	{
-		bool select = m_ca_select_only_chk->GetValue();
-		double min_voxels, max_voxels;
-		wxString str = m_ca_min_text->GetValue();
-		str.ToDouble(&min_voxels);
-		str = m_ca_max_text->GetValue();
-		str.ToDouble(&max_voxels);
-		bool ignore_max = m_ca_ignore_max_chk->GetValue();
-		bool size_map = m_ca_size_map_chk->GetValue();
-
-		int comps = m_cur_view->CompAnalysis(min_voxels, ignore_max?-1.0:max_voxels, m_dft_ca_thresh, m_dft_ca_falloff, select, true, size_map);
-		int volume = m_cur_view->GetVolumeSelector()->GetVolumeNum();
-		//change mask threshold
-		VolumeData* sel_vol = 0;
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
-			sel_vol = vr_frame->GetCurSelVol();
-		if (sel_vol)
-		{
-			sel_vol->SetUseMaskThreshold(true);
-			sel_vol->SetMaskThreshold(m_dft_ca_thresh);
-		}
-		m_ca_comps_text->SetValue(wxString::Format("%d", comps));
-		m_ca_volume_text->SetValue(wxString::Format("%d", volume));
-		if (vr_frame)
-			vr_frame->RefreshVRenderViews();
-	}
-}
-
-void BrushToolDlg::OnCAIgnoreMaxChk(wxCommandEvent &event)
-{
-	if (m_ca_ignore_max_chk->GetValue())
-		m_ca_max_text->Disable();
-	else
-		m_ca_max_text->Enable();
-}
-
-void BrushToolDlg::OnCAMultiChannBtn(wxCommandEvent &event)
-{
-	if (m_cur_view)
-	{
-		bool select = m_ca_select_only_chk->GetValue();
-		m_cur_view->CompExport(0, select);
-	}
-}
-
-void BrushToolDlg::OnCARandomColorBtn(wxCommandEvent &event)
-{
-	if (m_cur_view)
-	{
-		bool select = m_ca_select_only_chk->GetValue();
-		m_cur_view->CompExport(1, select);
-	}
-}
-
-void BrushToolDlg::OnCAAnnotationsBtn(wxCommandEvent &event)
-{
-	if (m_cur_view)
-		m_cur_view->ShowAnnotations();
-}
-
-//noise removal
-void BrushToolDlg::OnNRSizeChange(wxScrollEvent &event)
-{
-	int ival = event.GetPosition();
-	wxString str = wxString::Format("%d", ival);
-	m_nr_size_text->SetValue(str);
-}
-
-void BrushToolDlg::OnNRSizeText(wxCommandEvent &event)
-{
-	wxString str = m_nr_size_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	m_nr_size_sldr->SetValue(int(val));
-}
-
-void BrushToolDlg::OnNRAnalyzeBtn(wxCommandEvent &event)
-{
-	if (m_cur_view)
-	{
-		double min_voxels, max_voxels;
-		min_voxels = 0.0;
-		wxString str = m_nr_size_text->GetValue();
-		str.ToDouble(&max_voxels);
-
-		//int comps = m_cur_view->NoiseAnalysis(0.0, max_voxels, m_dft_ca_thresh);
-		m_cur_view->RefreshGL();
-		//m_ca_comps_text->SetValue(wxString::Format("%d", comps));
-	}
-}
-
-void BrushToolDlg::OnNRRemoveBtn(wxCommandEvent &event)
-{
-	if (m_cur_view)
-	{
-		double max_voxels;
-		wxString str = m_nr_size_text->GetValue();
-		str.ToDouble(&max_voxels);
-
-		m_cur_view->NoiseRemoval(int(max_voxels), m_dft_ca_thresh);
-		m_cur_view->RefreshGL();
-	}
-}
-
-//help button
-void BrushToolDlg::OnHelpBtn(wxCommandEvent &event)
-{
-	::wxLaunchDefaultBrowser(HELP_PAINT);
-}
-
 //save default
 void BrushToolDlg::SaveDefault()
 {
@@ -1256,30 +831,6 @@ void BrushToolDlg::SaveDefault()
 		m_brush_iters_rb->GetValue()?2:
 		m_brush_iterss_rb->GetValue()?3:0;
 	fconfig.Write("brush_iters", ival);
-	//component analyzer
-	//selected only
-	fconfig.Write("ca_select_only", m_ca_select_only_chk->GetValue());
-	//min voxel
-	str = m_ca_min_text->GetValue();
-	str.ToDouble(&val);
-	fconfig.Write("ca_min", val);
-	//max voxel
-	str = m_ca_max_text->GetValue();
-	str.ToDouble(&val);
-	fconfig.Write("ca_max", val);
-	//ignore max
-	fconfig.Write("ca_ignore_max", m_ca_ignore_max_chk->GetValue());
-	//thresh
-	fconfig.Write("ca_thresh", m_dft_ca_thresh);
-	//falloff
-	fconfig.Write("ca_falloff", m_dft_ca_falloff);
-	//size map
-	fconfig.Write("ca_size_map", m_ca_size_map_chk->GetValue());	
-	//noise removal
-	//nr thresh
-	fconfig.Write("nr_thresh", m_dft_nr_thresh);
-	//nr_size
-	fconfig.Write("nr_size", m_dft_nr_size);
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = expath.BeforeLast(GETSLASH(),NULL);
@@ -1391,241 +942,6 @@ void BrushToolDlg::LoadDefault()
 			m_brush_iters_rb->SetValue(false);
 			m_brush_iterss_rb->SetValue(true);
 			break;
-		}
-	}
-	//component analyzer
-	//selected only
-	if (fconfig.Read("ca_select_only", &bval))
-		m_ca_select_only_chk->SetValue(bval);
-	//min voxel
-	if (fconfig.Read("ca_min", &ival))
-	{
-		m_dft_ca_min = ival;
-		str = wxString::Format("%d", ival);
-		m_ca_min_text->SetValue(str);
-	}
-	//max voxel
-	if (fconfig.Read("ca_max", &ival))
-	{
-		m_dft_ca_max = ival;
-		str = wxString::Format("%d", ival);
-		m_ca_max_text->SetValue(str);
-	}
-	//ignore max
-	if (fconfig.Read("ca_ignore_max", &bval))
-	{
-		m_ca_ignore_max_chk->SetValue(bval);
-		if (bval)
-			m_ca_max_text->Disable();
-		else
-			m_ca_max_text->Enable();
-	}
-	//thresh
-	if (fconfig.Read("ca_thresh", &m_dft_ca_thresh))
-	{
-		str = wxString::Format("%.1f", m_dft_ca_thresh*m_max_value);
-		m_ca_thresh_sldr->SetRange(0, int(m_max_value*10.0));
-		m_ca_thresh_text->SetValue(str);
-	}
-	//falloff
-	fconfig.Read("ca_falloff", &m_dft_ca_falloff);
-	//size map
-	if (fconfig.Read("ca_size_map", &bval))
-		m_ca_size_map_chk->SetValue(bval);   
-	//nr thresh
-	fconfig.Read("nr_thresh", &m_dft_nr_thresh);
-	//nr size
-	if (fconfig.Read("nr_size", &m_dft_nr_size))
-	{
-		str = wxString::Format("%d", (int)val);
-		m_nr_size_text->SetValue(str);
-	}
-}
-
-//calculations
-//operands
-void BrushToolDlg::OnLoadA(wxCommandEvent &event)
-{
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		m_vol1 = vr_frame->GetCurSelVol();
-		if (m_vol1)
-			m_calc_a_text->SetValue(m_vol1->GetName());
-	}
-}
-
-void BrushToolDlg::OnLoadB(wxCommandEvent &event)
-{
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		m_vol2 = vr_frame->GetCurSelVol();
-		if (m_vol2)
-			m_calc_b_text->SetValue(m_vol2->GetName());
-	}
-}
-
-//operators
-void BrushToolDlg::OnCalcSub(wxCommandEvent &event)
-{
-	if (!m_vol1 || !m_vol2)
-		return;
-
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		m_cur_view = 0;
-		for (int i=0; i<vr_frame->GetViewNum(); i++)
-		{
-			VRenderView* vrv = vr_frame->GetView(i);
-			wxString str = m_vol1->GetName();
-			if (vrv && vrv->GetVolumeData(str))
-			{
-				m_cur_view = vrv;
-				break;
-			}
-		}
-
-		if (!m_cur_view)
-			m_cur_view = vr_frame->GetView(0);
-
-		if (m_cur_view)
-		{
-			m_cur_view->SetVolumeA(m_vol1);
-			m_cur_view->SetVolumeB(m_vol2);
-			m_cur_view->Calculate(1);
-		}
-	}
-}
-
-void BrushToolDlg::OnCalcAdd(wxCommandEvent &event)
-{
-	if (!m_vol1 || !m_vol2)
-		return;
-
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		m_cur_view = 0;
-		for (int i=0; i<vr_frame->GetViewNum(); i++)
-		{
-			VRenderView* vrv = vr_frame->GetView(i);
-			wxString str = m_vol1->GetName();
-			if (vrv && vrv->GetVolumeData(str))
-			{
-				m_cur_view = vrv;
-				break;
-			}
-		}
-
-		if (!m_cur_view)
-			m_cur_view = vr_frame->GetView(0);
-
-		if (m_cur_view)
-		{
-			m_cur_view->SetVolumeA(m_vol1);
-			m_cur_view->SetVolumeB(m_vol2);
-			m_cur_view->Calculate(2);
-		}
-	}
-}
-
-void BrushToolDlg::OnCalcDiv(wxCommandEvent &event)
-{
-	if (!m_vol1 || !m_vol2)
-		return;
-
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		m_cur_view = 0;
-		for (int i=0; i<vr_frame->GetViewNum(); i++)
-		{
-			VRenderView* vrv = vr_frame->GetView(i);
-			wxString str = m_vol1->GetName();
-			if (vrv && vrv->GetVolumeData(str))
-			{
-				m_cur_view = vrv;
-				break;
-			}
-		}
-
-		if (!m_cur_view)
-			m_cur_view = vr_frame->GetView(0);
-
-		if (m_cur_view)
-		{
-			m_cur_view->SetVolumeA(m_vol1);
-			m_cur_view->SetVolumeB(m_vol2);
-			m_cur_view->Calculate(3);
-		}
-	}
-}
-
-void BrushToolDlg::OnCalcIsc(wxCommandEvent &event)
-{
-	if (!m_vol1 || !m_vol2)
-		return;
-
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		m_cur_view = 0;
-		for (int i=0; i<vr_frame->GetViewNum(); i++)
-		{
-			VRenderView* vrv = vr_frame->GetView(i);
-			wxString str = m_vol1->GetName();
-			if (vrv && vrv->GetVolumeData(str))
-			{
-				m_cur_view = vrv;
-				break;
-			}
-		}
-
-		if (!m_cur_view)
-			m_cur_view = vr_frame->GetView(0);
-
-		if (m_cur_view)
-		{
-			m_cur_view->SetVolumeA(m_vol1);
-			m_cur_view->SetVolumeB(m_vol2);
-			m_cur_view->Calculate(4);
-		}
-	}
-}
-
-//one-operators
-void BrushToolDlg::OnCalcFill(wxCommandEvent &event)
-{
-	if (!m_vol1)
-		return;
-
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		m_cur_view = 0;
-		for (int i=0; i<vr_frame->GetViewNum(); i++)
-		{
-			VRenderView* vrv = vr_frame->GetView(i);
-			wxString str = m_vol1->GetName();
-			if (vrv && vrv->GetVolumeData(str))
-			{
-				m_cur_view = vrv;
-				break;
-			}
-		}
-
-		if (!m_cur_view)
-			m_cur_view = vr_frame->GetView(0);
-
-		if (m_cur_view)
-		{
-			m_cur_view->SetVolumeA(m_vol1);
-			m_vol2 = 0;
-			m_cur_view->SetVolumeB(0);
-			m_calc_b_text->Clear();
-			m_cur_view->Calculate(9);
 		}
 	}
 }

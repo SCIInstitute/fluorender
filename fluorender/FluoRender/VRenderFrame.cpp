@@ -73,6 +73,7 @@ BEGIN_EVENT_TABLE(VRenderFrame, wxFrame)
 	EVT_MENU(ID_Convert, VRenderFrame::OnConvert)
 	EVT_MENU(ID_Ocl, VRenderFrame::OnOcl)
 	EVT_MENU(ID_Component, VRenderFrame::OnComponent)
+	EVT_MENU(ID_Calculations, VRenderFrame::OnCalculations)
 	//
 	EVT_MENU(ID_Twitter, VRenderFrame::OnTwitter)
 	EVT_MENU(ID_Facebook, VRenderFrame::OnFacebook)
@@ -187,6 +188,9 @@ VRenderFrame::VRenderFrame(
 	m_tb_menu_edit->Append(m);
 	m = new wxMenuItem(m_tb_menu_edit, ID_Trace, wxT("Tracking..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_tracking_mini));
+	m_tb_menu_edit->Append(m);
+	m = new wxMenuItem(m_tb_menu_edit, ID_Calculations, wxT("Calculations..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_calculations_mini));
 	m_tb_menu_edit->Append(m);
 	m = new wxMenuItem(m_tb_menu_edit, ID_NoiseCancelling, wxT("Noise Reduction..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_noise_reduc_mini));
@@ -377,6 +381,9 @@ VRenderFrame::VRenderFrame(
 	//component dialog
 	m_component_dlg = new ComponentDlg(this, this);
 
+	//calculation dialog
+	m_calculation_dlg = new CalculationDlg(this, this);
+
 	//help dialog
 	m_help_dlg = new HelpDlg(this, this);
 	//m_help_dlg->LoadPage("C:\\!wanyong!\\TEMP\\wxHtmlWindow.htm");
@@ -488,6 +495,13 @@ VRenderFrame::VRenderFrame(
 		MaximizeButton(true));
 	m_aui_mgr.GetPane(m_component_dlg).Float();
 	m_aui_mgr.GetPane(m_component_dlg).Hide();
+	//calculation dialog
+	m_aui_mgr.AddPane(m_calculation_dlg, wxAuiPaneInfo().
+		Name("m_calculation_dlg").Caption("Calculations").
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
+	m_aui_mgr.GetPane(m_calculation_dlg).Float();
+	m_aui_mgr.GetPane(m_calculation_dlg).Hide();
 	//settings
 	m_aui_mgr.AddPane(m_setting_dlg, wxAuiPaneInfo().
 		Name("m_setting_dlg").Caption("Settings").
@@ -575,6 +589,9 @@ VRenderFrame::VRenderFrame(
 	m_top_tools->Append(m);
 	m = new wxMenuItem(m_top_tools,ID_Trace, wxT("&Tracking..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_tracking_mini));
+	m_top_tools->Append(m);
+	m = new wxMenuItem(m_top_tools, ID_Calculations, wxT("Calculations..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_calculations_mini));
 	m_top_tools->Append(m);
 	m = new wxMenuItem(m_top_tools,ID_NoiseCancelling, wxT("Noise &Reduction..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_noise_reduc_mini));
@@ -697,6 +714,10 @@ VRenderFrame::VRenderFrame(
 		case TOOL_COMPONENT:
 			m_main_tb->SetToolNormalBitmap(ID_LastTool,
 				wxGetBitmapFromMemory(icon_components));
+			break;
+		case TOOL_CALCULATIONS:
+			m_main_tb->SetToolNormalBitmap(ID_LastTool,
+				wxGetBitmapFromMemory(icon_calculations));
 			break;
 		}
 	}
@@ -2775,13 +2796,13 @@ void VRenderFrame::SaveProject(wxString& filename)
 	fconfig.Write("height_text", m_movie_view->m_height_text->GetValue());
 	fconfig.Write("time_start_text", m_movie_view->m_time_start_text->GetValue());
 	fconfig.Write("time_end_text", m_movie_view->m_time_end_text->GetValue());
-	//brushtool diag
+/*	//brushtool diag
 	fconfig.SetPath("/brush_diag");
 	fconfig.Write("ca_min", m_brush_tool_dlg->GetDftCAMin());
 	fconfig.Write("ca_max", m_brush_tool_dlg->GetDftCAMax());
 	fconfig.Write("ca_thresh", m_brush_tool_dlg->GetDftCAThresh());
 	fconfig.Write("nr_thresh", m_brush_tool_dlg->GetDftNRThresh());
-	fconfig.Write("nr_size", m_brush_tool_dlg->GetDftNRSize());
+	fconfig.Write("nr_size", m_brush_tool_dlg->GetDftNRSize());*/
 	//ui layout
 	fconfig.SetPath("/ui_layout");
 	fconfig.Write("ui_main_tb", m_main_tb->IsShown());
@@ -4037,7 +4058,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 			m_movie_view->m_time_end_text->SetValue(sVal);
 	}
 
-	//brushtool diag
+/*	//brushtool diag
 	if (fconfig.Exists("/brush_diag"))
 	{
 		fconfig.SetPath("/brush_diag");
@@ -4059,7 +4080,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 			m_brush_tool_dlg->SetDftNRSize(dval);
 			m_noise_cancelling_dlg->SetDftSize(dval);
 		}
-	}
+	}*/
 
 	//ui layout
 	if (fconfig.Exists("/ui_layout"))
@@ -4409,6 +4430,9 @@ void VRenderFrame::OnLastTool(wxCommandEvent& WXUNUSED(event))
 	case TOOL_COMPONENT:
 		ShowComponentDlg();
 		break;
+	case TOOL_CALCULATIONS:
+		ShowCalculationDlg();
+		break;
 	}
 }
 
@@ -4455,6 +4479,11 @@ void VRenderFrame::OnOcl(wxCommandEvent& WXUNUSED(event))
 void VRenderFrame::OnComponent(wxCommandEvent& WXUNUSED(event))
 {
 	ShowComponentDlg();
+}
+
+void VRenderFrame::OnCalculations(wxCommandEvent& WXUNUSED(event))
+{
+	ShowCalculationDlg();
 }
 
 void VRenderFrame::ShowPaintTool()
@@ -4554,6 +4583,17 @@ void VRenderFrame::ShowComponentDlg()
 		m_setting_dlg->SetLastTool(TOOL_COMPONENT);
 	m_main_tb->SetToolNormalBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_components));
+}
+
+void VRenderFrame::ShowCalculationDlg()
+{
+	m_aui_mgr.GetPane(m_calculation_dlg).Show();
+	m_aui_mgr.GetPane(m_calculation_dlg).Float();
+	m_aui_mgr.Update();
+	if (m_setting_dlg)
+		m_setting_dlg->SetLastTool(TOOL_CALCULATIONS);
+	m_main_tb->SetToolNormalBitmap(ID_LastTool,
+		wxGetBitmapFromMemory(icon_calculations));
 }
 
 void VRenderFrame::SetTextureUndos()

@@ -33,9 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <boost/signals2.hpp>
 #include <boost/bind.hpp>
 
-//float ComponentDlg::m_prog_bit = 0.0f;
-//float ComponentDlg::m_prog = 0.0f;
-
 BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_COLLAPSIBLEPANE_CHANGED(wxID_ANY, ComponentDlg::OnPaneChange)
 	//load save settings
@@ -272,6 +269,12 @@ wxWindow* ComponentDlg::Create2DAnalysisPage(wxWindow *parent)
 	m_adv_page->SetSizer(sizerv);
 
 	return m_adv_page;
+}
+
+wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
+{
+	wxPanel *page = new wxPanel(parent);
+	return page;
 }
 
 wxCollapsiblePane* ComponentDlg::CreateInitialGrowPane(wxWindow *parent)
@@ -765,7 +768,7 @@ wxCollapsiblePane* ComponentDlg::CreateMatchSlicesPane(wxWindow *parent)
 ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	: wxPanel(parent, wxID_ANY,
 		wxDefaultPosition,
-		wxSize(500, 700),
+		wxSize(500, 600),
 		0, "ComponentDlg"),
 	m_frame(parent),
 	m_view(0)
@@ -774,6 +777,7 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	m_notebook = new wxNotebook(this, wxID_ANY);
 	m_notebook->AddPage(Create3DAnalysisPage(m_notebook), "Basic");
 	m_notebook->AddPage(Create2DAnalysisPage(m_notebook), "Advanced");
+	m_notebook->AddPage(CreateAnalysisPage(m_notebook), "Analysis");
 
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	m_generate_prg = new wxGauge(this, ID_GeneratePrg, 100,

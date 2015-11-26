@@ -114,6 +114,10 @@ public:
 	const static unsigned char icon_components_png[18813];
 	/* icon_components_mini.png - 16189 bytes */
 	const static unsigned char icon_components_mini_png[16189];
+	/* icon_calculations.png - 19209 bytes */
+	const static unsigned char icon_calculations_png[19209];
+	/* icon_calculations_mini.png - 16169 bytes */
+	const static unsigned char icon_calculations_mini_png[16169];
 
 	/* info.png - 1262 bytes */
 	const static unsigned char info_png[1262];

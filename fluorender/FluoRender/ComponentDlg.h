@@ -147,6 +147,31 @@ public:
 		ID_BasicFalloffSldr,
 		ID_BasicFalloffText,
 
+		//analysis page
+		//selection
+		ID_CompIdText,
+		ID_CompIdXBtn,
+		ID_CompFullBtn,
+		ID_CompExclusiveBtn,
+		ID_CompAppendBtn,
+		ID_CompAllBtn,
+		IC_CompClearBtn,
+		//stats
+		ID_AnalysisMinCheck,
+		ID_AnalysisMinText,
+		ID_AnalysisMinSpin,
+		ID_AnalysisMaxCheck,
+		ID_AnalysisMaxText,
+		ID_AnalysisMaxSpin,
+		ID_AnalysisSelectCheck,
+		ID_AnalysisStatsBtn,
+		//output
+		ID_OutputMultiRb,
+		ID_OutputRgbRb,
+		ID_OutputRandomBtn,
+		ID_OutputSizeBtn,
+		ID_OutputAnnBtn,
+
 		//execute
 		ID_GeneratePrg,
 		ID_GenerateBtn,
@@ -369,6 +394,31 @@ private:
 	wxSlider* m_basic_falloff_sldr;
 	wxTextCtrl* m_basic_falloff_text;
 
+	//analysis page
+	//selection
+	wxTextCtrl* m_comp_id_text;
+	wxButton* m_comp_id_x_btn;
+	wxButton* m_comp_full_btn;
+	wxButton* m_comp_exclusive_btn;
+	wxButton* m_comp_append_btn;
+	wxButton* m_comp_all_btn;
+	wxButton* m_comp_clear_btn;
+	//stats
+	wxCheckBox* m_analysis_min_check;
+	wxTextCtrl* m_analysis_min_text;
+	wxSpinCtrl* m_analysis_min_spin;
+	wxCheckBox* m_analysis_max_check;
+	wxTextCtrl* m_analysis_max_text;
+	wxSpinCtrl* m_analysis_max_spin;
+	wxCheckBox* m_analysis_select_check;
+	wxButton* m_analysis_stats_btn;
+	//output
+	wxRadioButton* m_output_multi_rb;
+	wxRadioButton* m_output_rgb_rb;
+	wxButton* m_output_random_btn;
+	wxButton* m_output_size_btn;
+	wxButton* m_output_ann_btn;
+
 	//execute
 	wxGauge* m_generate_prg;
 	wxButton* m_generate_btn;
@@ -384,6 +434,7 @@ private:
 private:
 	wxWindow* Create3DAnalysisPage(wxWindow *parent);
 	wxWindow* Create2DAnalysisPage(wxWindow *parent);
+	wxWindow* CreateAnalysisPage(wxWindow *parent);
 	void OnPaneChange(wxCollapsiblePaneEvent& event);
 	wxCollapsiblePane* CreateInitialGrowPane(wxWindow *parent);
 	wxCollapsiblePane* CreateSizedGrowPane(wxWindow *parent);

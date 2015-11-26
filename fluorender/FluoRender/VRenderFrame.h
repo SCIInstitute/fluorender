@@ -48,6 +48,7 @@ DEALINGS IN THE SOFTWARE.
 #include "TraceDlg.h"
 #include "OclDlg.h"
 #include "ComponentDlg.h"
+#include "CalculationDlg.h"
 #include "Tester.h"
 #include "Animator/Interpolator.h"
 #include "TextRenderer.h"
@@ -133,6 +134,7 @@ class VRenderFrame: public wxFrame
 		ID_Convert,
 		ID_Ocl,
 		ID_Component,
+		ID_Calculations,
 		//
 		ID_Settings,
 		//UI menu
@@ -250,6 +252,9 @@ public:
 	//component dialog
 	ComponentDlg* GetComponentDlg()
 	{ return m_component_dlg; }
+	//calculation dialog
+	CalculationDlg* GetCalculationDlg()
+	{ return m_calculation_dlg; }
 
 	//selection
 	int GetCurSelType()
@@ -303,6 +308,7 @@ public:
 	void ShowConvertDlg();
 	void ShowOclDlg();
 	void ShowComponentDlg();
+	void ShowCalculationDlg();
 
 	//get interpolator
 	Interpolator* GetInterpolator()
@@ -355,6 +361,7 @@ private:
 	TraceDlg* m_trace_dlg;
 	OclDlg* m_ocl_dlg;
 	ComponentDlg* m_component_dlg;
+	CalculationDlg* m_calculation_dlg;
 	//prop panel children
 	wxBoxSizer* m_prop_sizer;
 	VPropView* m_volume_prop;
@@ -455,6 +462,7 @@ private:
 	void OnConvert(wxCommandEvent& WXUNUSED(event));
 	void OnOcl(wxCommandEvent& WXUNUSED(event));
 	void OnComponent(wxCommandEvent& WXUNUSED(event));
+	void OnCalculations(wxCommandEvent& WXUNUSED(event));
 
 	void OnDraw(wxPaintEvent& event);
 	void OnKeyDown(wxKeyEvent& event);
