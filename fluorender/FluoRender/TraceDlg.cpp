@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "TraceDlg.h"
 #include "VRenderFrame.h"
 #include "VRenderView.h"
+#include "Components/CompSelector.h"
 #include <wx/valnum.h>
 #include <wx/clipbrd.h>
 #include <wx/wfstream.h>
@@ -1343,55 +1344,32 @@ void TraceDlg::CompDelete()
 		}
 	}
 
-	bool clear_all = ids.empty();
-
-	//get current mask
+	//get current vd
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	if (!vd)
-		return;
-	Nrrd* nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
-		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
-		return;
-	//get current label
-	Texture* tex = vd->GetTexture();
-	if (!tex)
-		return;
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
-		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
-		return;
-	//select append
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
-	unsigned long long index;
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
-	for (index = 0; index < for_size; ++index)
+	FL::ComponentSelector comp_selector(vd);
+	if (ids.size() == 1)
 	{
-		if (clear_all)
-			data_mask[index] = 0;
-		else if (find(ids.begin(), ids.end(), data_label[index])
-			!= ids.end())
-			data_mask[index] = 255;
-		else
-			data_mask[index] = 0;
+		comp_selector.SetId(ids[0]);
+		comp_selector.Delete();
 	}
-	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_pool();
+	else
+		comp_selector.Delete(ids);
+
 	//update view
 	CellUpdate();
 }
 
 void TraceDlg::CompClear()
 {
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetTree())
-		frame->GetTree()->BrushClear();
+	if (!m_view)
+		return;
+
+	//get current vd
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	FL::ComponentSelector comp_selector(vd);
+	comp_selector.Clear();
+
+	//update view
 	CellUpdate();
 	m_trace_list_prev->DeleteAllItems();
 }
@@ -1441,8 +1419,14 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 	if (!m_view)
 		return;
 
-	//get id
 	wxString str;
+	//cell size filter
+	str = m_cell_size_text->GetValue();
+	unsigned long ival;
+	str.ToULong(&ival);
+	unsigned int slimit = (unsigned int)ival;
+
+	//get id
 	if (event.GetId() == ID_CompAppend2Btn ||
 		event.GetId() == ID_CellNewIDText)
 		str = m_cell_new_id_text->GetValue();
@@ -1452,7 +1436,7 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 	if (!str.empty())
 	{
 		bool get_all = false;
-		unsigned long ival = 0;
+		ival = 0;
 		if (str.Lower() == "all")
 			get_all = true;
 		else
@@ -1462,51 +1446,13 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 				return;
 		}
 
-		unsigned int id = ival;
+		unsigned int id = (unsigned int)ival;
 		//get current mask
 		VolumeData* vd = m_view->m_glview->m_cur_vol;
-		if (!vd)
-			return;
-		Nrrd* nrrd_mask = vd->GetMask(true);
-		if (!nrrd_mask)
-		{
-			vd->AddEmptyMask();
-			nrrd_mask = vd->GetMask(false);
-		}
-		unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-		if (!data_mask)
-			return;
-		//get current label
-		Texture* tex = vd->GetTexture();
-		if (!tex)
-			return;
-		Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-		if (!nrrd_label)
-			return;
-		unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-		if (!data_label)
-			return;
-		//select append
-		int nx, ny, nz;
-		vd->GetResolution(nx, ny, nz);
-		unsigned long long for_size = (unsigned long long)nx*
-			(unsigned long long)ny * (unsigned long long)nz;
-		for (unsigned long long index = 0;
-		index < for_size; ++index)
-		{
-			if (get_all)
-			{
-				if (data_label[index])
-					data_mask[index] = 255;
-			}
-			else
-			{
-				if (data_label[index] == id)
-					data_mask[index] = 255;
-			}
-		}
-		//invalidate label mask in gpu
-		vd->GetVR()->clear_tex_pool();
+		FL::ComponentSelector comp_selector(vd);
+		comp_selector.SetId(id);
+		comp_selector.SetMinNum(true, slimit);
+		comp_selector.Append(get_all);
 	}
 
 	//update view
@@ -1518,48 +1464,25 @@ void TraceDlg::OnCompExclusive(wxCommandEvent &event)
 	if (!m_view)
 		return;
 
-	//get id
-	wxString str = m_comp_id_text->GetValue();
+	wxString str;
+	//cell size filter
+	str = m_cell_size_text->GetValue();
 	unsigned long ival;
+	str.ToULong(&ival);
+	unsigned int slimit = (unsigned int)ival;
+
+	//get id
+	str = m_comp_id_text->GetValue();
 	str.ToULong(&ival);
 	if (ival != 0)
 	{
 		unsigned int id = ival;
 		//get current mask
 		VolumeData* vd = m_view->m_glview->m_cur_vol;
-		if (!vd)
-			return;
-		Nrrd* nrrd_mask = vd->GetMask(true);
-		if (!nrrd_mask)
-			return;
-		unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-		if (!data_mask)
-			return;
-		//get current label
-		Texture* tex = vd->GetTexture();
-		if (!tex)
-			return;
-		Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-		if (!nrrd_label)
-			return;
-		unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-		if (!data_label)
-			return;
-		//select append
-		int nx, ny, nz;
-		vd->GetResolution(nx, ny, nz);
-		unsigned long long for_size = (unsigned long long)nx *
-			(unsigned long long)ny * (unsigned long long)nz;
-		unsigned long long index;
-		for (index = 0; index < for_size; ++index)
-		{
-			if (data_label[index] == id)
-				data_mask[index] = 255;
-			else
-				data_mask[index] = 0;
-		}
-		//invalidate label mask in gpu
-		vd->GetVR()->clear_tex_pool();
+		FL::ComponentSelector comp_selector(vd);
+		comp_selector.SetId(id);
+		comp_selector.SetMinNum(true, slimit);
+		comp_selector.Exclusive();
 	}
 
 	//update view
@@ -1597,73 +1520,9 @@ void TraceDlg::CellFull()
 	unsigned int slimit = (unsigned int)ival;
 	//get current mask
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	if (!vd)
-		return;
-	Nrrd* nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
-		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
-		return;
-	//get current label
-	Texture* tex = vd->GetTexture();
-	if (!tex)
-		return;
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
-		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
-		return;
-	//get selected IDs
-	int i, j, k;
-	int nx, ny, nz;
-	unsigned long long index;
-	vd->GetResolution(nx, ny, nz);
-	unsigned int label_value;
-	FL::CellList sel_labels;
-	FL::CellListIter label_iter;
-	for (i = 0; i < nx; ++i)
-		for (j = 0; j < ny; ++j)
-			for (k = 0; k < nz; ++k)
-			{
-				index = nx*ny*k + nx*j + i;
-				if (data_mask[index] &&
-					data_label[index])
-				{
-					label_value = data_label[index];
-					label_iter = sel_labels.find(label_value);
-					if (label_iter == sel_labels.end())
-					{
-						FL::pCell cell(new FL::Cell(label_value));
-						cell->Inc(i, j, k, 1.0f);
-						sel_labels.insert(pair<unsigned int, FL::pCell>
-							(label_value, cell));
-					}
-					else
-						label_iter->second->Inc(i, j, k, 1.0f);
-				}
-			}
-
-	//reselect
-	for (i = 0; i < nx; ++i)
-		for (j = 0; j < ny; ++j)
-			for (k = 0; k<nz; ++k)
-			{
-				index = nx*ny*k + nx*j + i;
-				if (data_label[index])
-				{
-					label_value = data_label[index];
-					label_iter = sel_labels.find(label_value);
-					if (label_iter != sel_labels.end() &&
-						label_iter->second->GetSizeUi() > slimit)
-						data_mask[index] = 255;
-					else
-						data_mask[index] = 0;
-				}
-			}
-	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_pool();
+	FL::ComponentSelector comp_selector(vd);
+	comp_selector.SetMinNum(true, slimit);
+	comp_selector.CompFull();
 	//update view
 	CellUpdate();
 }
@@ -1689,7 +1548,7 @@ void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, FL::CellList 
 	FL::pCell cell(new FL::Cell(id));
 	cell->SetSizeUi(size);
 	cell->SetSizeF(float(size));
-    FLIVR::Point p(x, y, z);
+	FLIVR::Point p(x, y, z);
 	cell->SetCenter(p);
 	list.insert(pair<unsigned int, FL::pCell>
 		(id, cell));

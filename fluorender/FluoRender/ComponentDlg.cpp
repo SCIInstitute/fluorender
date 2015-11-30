@@ -28,10 +28,12 @@ DEALINGS IN THE SOFTWARE.
 #include "ComponentDlg.h"
 #include "VRenderFrame.h"
 #include "Components/CompGenerator.h"
+#include "Components/CompSelector.h"
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include <boost/signals2.hpp>
 #include <boost/bind.hpp>
+#include <limits>
 
 BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_COLLAPSIBLEPANE_CHANGED(wxID_ANY, ComponentDlg::OnPaneChange)
@@ -133,6 +135,18 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_TEXT(ID_BasicThreshText, ComponentDlg::OnBasicThreshText)
 	EVT_COMMAND_SCROLL(ID_BasicFalloffSldr, ComponentDlg::OnBasicFalloffSldr)
 	EVT_TEXT(ID_BasicFalloffText, ComponentDlg::OnBasicFalloffText)
+
+	//analysis page
+	EVT_TEXT(ID_CompIdText, ComponentDlg::OnCompIdText)
+	EVT_TEXT_ENTER(ID_CompIdText, ComponentDlg::OnCompFull)
+	EVT_BUTTON(ID_CompIdXBtn, ComponentDlg::OnCompIdXBtn)
+	EVT_CHECKBOX(ID_AnalysisMinCheck, ComponentDlg::OnAnalysisMinCheck)
+	EVT_CHECKBOX(ID_AnalysisMaxCheck, ComponentDlg::OnAnalysisMaxCheck)
+	EVT_BUTTON(ID_CompFullBtn, ComponentDlg::OnCompFull)
+	EVT_BUTTON(ID_CompExclusiveBtn, ComponentDlg::OnCompExclusive)
+	EVT_BUTTON(ID_CompAppendBtn, ComponentDlg::OnCompAppend)
+	EVT_BUTTON(ID_CompAllBtn, ComponentDlg::OnCompAll)
+	EVT_BUTTON(ID_CompClearBtn, ComponentDlg::OnCompClear)
 
 	//execute
 	EVT_BUTTON(ID_GenerateBtn, ComponentDlg::OnGenerate)
@@ -291,11 +305,13 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	m_analysis_min_check = new wxCheckBox(page, ID_AnalysisMinCheck, "Min Size:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 	m_analysis_min_spin = new wxSpinCtrl(page, ID_AnalysisMinSpin, "0",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, wxSize(80, 23), wxSP_ARROW_KEYS, 0,
+		std::numeric_limits<int>::max(), 0);
 	m_analysis_max_check = new wxCheckBox(page, ID_AnalysisMaxCheck, "Max Size:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 	m_analysis_max_spin = new wxSpinCtrl(page, ID_AnalysisMaxSpin, "100",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, wxSize(80, 23), wxSP_ARROW_KEYS, 0,
+		std::numeric_limits<int>::max(), 100);
 	sizer11->Add(5, 5);
 	sizer11->Add(st, 0, wxALIGN_CENTER);
 	sizer11->Add(m_comp_id_text, 0, wxALIGN_CENTER);
@@ -384,6 +400,11 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizerv->Add(10, 10);
 
 	page->SetSizer(sizerv);
+
+	m_analysis_min_check->SetValue(false);
+	m_analysis_min_spin->Disable();
+	m_analysis_max_check->SetValue(false);
+	m_analysis_max_spin->Disable();
 
 	return page;
 }
@@ -2130,6 +2151,175 @@ void ComponentDlg::OnBasicFalloffText(wxCommandEvent &event)
 	m_basic_falloff_text->GetValue().ToDouble(&val);
 	m_basic_falloff = val;
 	m_basic_falloff_sldr->SetValue(int(m_basic_falloff * 1000.0 + 0.5));
+}
+
+//analysis page
+void ComponentDlg::OnCompIdText(wxCommandEvent &event)
+{
+	wxString str = m_comp_id_text->GetValue();
+	unsigned long id;
+	wxColor color(255, 255, 255);
+	if (str.ToULong(&id))
+	{
+		if (!id)
+			color = wxColor(24, 167, 181);
+		else
+		{
+			Color c = HSVColor(id % 360, 1.0, 1.0);
+			color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
+		}
+		m_comp_id_text->SetBackgroundColour(color);
+	}
+	else
+		m_comp_id_text->SetBackgroundColour(color);
+	m_comp_id_text->Refresh();
+}
+
+void ComponentDlg::OnCompIdXBtn(wxCommandEvent &event)
+{
+	m_comp_id_text->Clear();
+}
+
+void ComponentDlg::OnAnalysisMinCheck(wxCommandEvent &event)
+{
+	if (m_analysis_min_check->GetValue())
+		m_analysis_min_spin->Enable();
+	else
+		m_analysis_min_spin->Disable();
+}
+
+void ComponentDlg::OnAnalysisMaxCheck(wxCommandEvent &event)
+{
+	if (m_analysis_max_check->GetValue())
+		m_analysis_max_spin->Enable();
+	else
+		m_analysis_max_spin->Disable();
+}
+
+void ComponentDlg::OnCompFull(wxCommandEvent &event)
+{
+	//get id
+	wxString str = m_comp_id_text->GetValue();
+	if (str.empty())
+	{
+		if (!m_view)
+			return;
+		//get current mask
+		VolumeData* vd = m_view->m_glview->m_cur_vol;
+		FL::ComponentSelector comp_selector(vd);
+		//cell size filter
+		bool use = m_analysis_min_check->GetValue();
+		unsigned int num = (unsigned int)(m_analysis_min_spin->GetValue());
+		comp_selector.SetMinNum(use, num);
+		use = m_analysis_max_check->GetValue();
+		num = (unsigned int)(m_analysis_max_spin->GetValue());
+		comp_selector.SetMaxNum(use, num);
+		comp_selector.CompFull();
+	}
+	else
+	{
+		wxCommandEvent e;
+		OnCompAppend(e);
+	}
+
+	m_view->RefreshGL();
+}
+
+void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
+{
+	if (!m_view)
+		return;
+
+	wxString str;
+	unsigned long ival;
+	//get id
+	str = m_comp_id_text->GetValue();
+	str.ToULong(&ival);
+	if (ival != 0)
+	{
+		unsigned int id = ival;
+		//get current mask
+		VolumeData* vd = m_view->m_glview->m_cur_vol;
+		FL::ComponentSelector comp_selector(vd);
+		comp_selector.SetId(id);
+		//cell size filter
+		bool use = m_analysis_min_check->GetValue();
+		unsigned int num = (unsigned int)(m_analysis_min_spin->GetValue());
+		comp_selector.SetMinNum(use, num);
+		use = m_analysis_max_check->GetValue();
+		num = (unsigned int)(m_analysis_max_spin->GetValue());
+		comp_selector.SetMaxNum(use, num);
+		comp_selector.Exclusive();
+	}
+
+	m_view->RefreshGL();
+}
+
+void ComponentDlg::OnCompAppend(wxCommandEvent &event)
+{
+	if (!m_view)
+		return;
+
+	wxString str;
+	unsigned long ival;
+	//get id
+	str = m_comp_id_text->GetValue();
+
+	if (!str.empty())
+	{
+		bool get_all = false;
+		ival = 0;
+		if (str.Lower() == "all")
+			get_all = true;
+		else
+		{
+			str.ToULong(&ival);
+			if (ival == 0)
+				return;
+		}
+
+		unsigned int id = (unsigned int)ival;
+		//get current mask
+		VolumeData* vd = m_view->m_glview->m_cur_vol;
+		FL::ComponentSelector comp_selector(vd);
+		comp_selector.SetId(id);
+		//cell size filter
+		bool use = m_analysis_min_check->GetValue();
+		unsigned int num = (unsigned int)(m_analysis_min_spin->GetValue());
+		comp_selector.SetMinNum(use, num);
+		use = m_analysis_max_check->GetValue();
+		num = (unsigned int)(m_analysis_max_spin->GetValue());
+		comp_selector.SetMaxNum(use, num);
+		comp_selector.Append(get_all);
+	}
+
+	m_view->RefreshGL();
+}
+
+void ComponentDlg::OnCompAll(wxCommandEvent &event)
+{
+	if (!m_view)
+		return;
+
+	//get current vd
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	FL::ComponentSelector comp_selector(vd);
+	comp_selector.All();
+
+	m_view->RefreshGL();
+}
+
+void ComponentDlg::OnCompClear(wxCommandEvent &event)
+{
+	if (!m_view)
+		return;
+
+	//get current vd
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	FL::ComponentSelector comp_selector(vd);
+	comp_selector.Clear();
+
+	m_view->RefreshGL();
 }
 
 void ComponentDlg::OnGenerate(wxCommandEvent &event)

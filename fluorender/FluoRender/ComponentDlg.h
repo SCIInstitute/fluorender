@@ -151,16 +151,15 @@ public:
 		//selection
 		ID_CompIdText,
 		ID_CompIdXBtn,
+		ID_AnalysisMinCheck,
+		ID_AnalysisMinSpin,
+		ID_AnalysisMaxCheck,
+		ID_AnalysisMaxSpin,
 		ID_CompFullBtn,
 		ID_CompExclusiveBtn,
 		ID_CompAppendBtn,
 		ID_CompAllBtn,
 		ID_CompClearBtn,
-		//stats
-		ID_AnalysisMinCheck,
-		ID_AnalysisMinSpin,
-		ID_AnalysisMaxCheck,
-		ID_AnalysisMaxSpin,
 		//output
 		ID_OutputMultiRb,
 		ID_OutputRgbRb,
@@ -543,6 +542,17 @@ private:
 	void OnBasicThreshText(wxCommandEvent &event);
 	void OnBasicFalloffSldr(wxScrollEvent &event);
 	void OnBasicFalloffText(wxCommandEvent &event);
+
+	//analysis page
+	void OnCompIdText(wxCommandEvent &event);
+	void OnCompIdXBtn(wxCommandEvent &event);
+	void OnAnalysisMinCheck(wxCommandEvent &event);
+	void OnAnalysisMaxCheck(wxCommandEvent &event);
+	void OnCompFull(wxCommandEvent &event);
+	void OnCompExclusive(wxCommandEvent &event);
+	void OnCompAppend(wxCommandEvent &event);
+	void OnCompAll(wxCommandEvent &event);
+	void OnCompClear(wxCommandEvent &event);
 
 	//execute
 	void OnGenerate(wxCommandEvent &event);
