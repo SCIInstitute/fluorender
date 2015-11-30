@@ -45,7 +45,7 @@ END_EVENT_TABLE()
 CalculationDlg::CalculationDlg(wxWindow *frame, wxWindow *parent)
 	: wxPanel(parent, wxID_ANY,
 		wxDefaultPosition,
-		wxSize(400, 550),
+		wxSize(500, 350),
 		0, "CalculationDlg")
 {
 	wxStaticText *st = 0;
@@ -109,7 +109,7 @@ CalculationDlg::CalculationDlg(wxWindow *frame, wxWindow *parent)
 	sizer_v->Add(sizer4, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 
-	SetSizerAndFit(sizer_v);
+	SetSizer(sizer_v);
 	Layout();
 }
 

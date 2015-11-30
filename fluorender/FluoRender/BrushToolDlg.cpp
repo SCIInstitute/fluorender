@@ -83,7 +83,7 @@ END_EVENT_TABLE()
 BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	: wxPanel(parent, wxID_ANY,
 	wxDefaultPosition,
-	wxSize(400, 550),
+	wxSize(500, 450),
 	0, "BrushToolDlg"),
 	m_frame(parent),
 	m_cur_view(0),
@@ -291,7 +291,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	sizer_v->Add(sizer2, 0, wxEXPAND);
 	sizer_v->Add(10, 30);
 
-	SetSizerAndFit(sizer_v);
+	SetSizer(sizer_v);
 	Layout();
 
 	LoadDefault();

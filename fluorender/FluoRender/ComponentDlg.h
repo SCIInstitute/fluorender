@@ -155,16 +155,12 @@ public:
 		ID_CompExclusiveBtn,
 		ID_CompAppendBtn,
 		ID_CompAllBtn,
-		IC_CompClearBtn,
+		ID_CompClearBtn,
 		//stats
 		ID_AnalysisMinCheck,
-		ID_AnalysisMinText,
 		ID_AnalysisMinSpin,
 		ID_AnalysisMaxCheck,
-		ID_AnalysisMaxText,
 		ID_AnalysisMaxSpin,
-		ID_AnalysisSelectCheck,
-		ID_AnalysisStatsBtn,
 		//output
 		ID_OutputMultiRb,
 		ID_OutputRgbRb,
@@ -176,6 +172,8 @@ public:
 		ID_GeneratePrg,
 		ID_GenerateBtn,
 		ID_RefineBtn,
+		ID_AnalyzeBtn,
+		ID_AnalyzeSelBtn,
 
 		//output
 		ID_StatText
@@ -405,13 +403,9 @@ private:
 	wxButton* m_comp_clear_btn;
 	//stats
 	wxCheckBox* m_analysis_min_check;
-	wxTextCtrl* m_analysis_min_text;
 	wxSpinCtrl* m_analysis_min_spin;
 	wxCheckBox* m_analysis_max_check;
-	wxTextCtrl* m_analysis_max_text;
 	wxSpinCtrl* m_analysis_max_spin;
-	wxCheckBox* m_analysis_select_check;
-	wxButton* m_analysis_stats_btn;
 	//output
 	wxRadioButton* m_output_multi_rb;
 	wxRadioButton* m_output_rgb_rb;
@@ -423,6 +417,8 @@ private:
 	wxGauge* m_generate_prg;
 	wxButton* m_generate_btn;
 	wxButton* m_refine_btn;
+	wxButton* m_analyze_btn;
+	wxButton* m_analyze_sel_btn;
 
 	//output
 	wxTextCtrl* m_stat_text;

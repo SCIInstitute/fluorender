@@ -183,7 +183,7 @@ VRenderFrame::VRenderFrame(
 	m = new wxMenuItem(m_tb_menu_edit, ID_Measure, wxT("Measurement..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_measurement_mini));
 	m_tb_menu_edit->Append(m);
-	m = new wxMenuItem(m_tb_menu_edit, ID_Component, wxT("Component Generator..."));
+	m = new wxMenuItem(m_tb_menu_edit, ID_Component, wxT("Component Analyzer..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_components_mini));
 	m_tb_menu_edit->Append(m);
 	m = new wxMenuItem(m_tb_menu_edit, ID_Trace, wxT("Tracking..."));
@@ -490,7 +490,7 @@ VRenderFrame::VRenderFrame(
 	m_aui_mgr.GetPane(m_ocl_dlg).Hide();
 	//component dialog
 	m_aui_mgr.AddPane(m_component_dlg, wxAuiPaneInfo().
-		Name("m_component_dlg").Caption("Component Generator").
+		Name("m_component_dlg").Caption("Component Analyzer").
 		Dockable(false).CloseButton(true).
 		MaximizeButton(true));
 	m_aui_mgr.GetPane(m_component_dlg).Float();
@@ -584,13 +584,13 @@ VRenderFrame::VRenderFrame(
 	m = new wxMenuItem(m_top_tools,ID_Measure, wxT("&Measurement..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_measurement_mini));
 	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools, ID_Component, wxT("Component &Generator..."));
+	m = new wxMenuItem(m_top_tools, ID_Component, wxT("Component &Analyzer..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_components_mini));
 	m_top_tools->Append(m);
 	m = new wxMenuItem(m_top_tools,ID_Trace, wxT("&Tracking..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_tracking_mini));
 	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools, ID_Calculations, wxT("Calculations..."));
+	m = new wxMenuItem(m_top_tools, ID_Calculations, wxT("Ca&lculations..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_calculations_mini));
 	m_top_tools->Append(m);
 	m = new wxMenuItem(m_top_tools,ID_NoiseCancelling, wxT("Noise &Reduction..."));

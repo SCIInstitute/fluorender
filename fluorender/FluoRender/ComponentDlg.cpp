@@ -274,6 +274,117 @@ wxWindow* ComponentDlg::Create2DAnalysisPage(wxWindow *parent)
 wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 {
 	wxPanel *page = new wxPanel(parent);
+	wxStaticText *st = 0;
+
+	//selection tools
+	wxBoxSizer *sizer1 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "Selection Tools"),
+		wxVERTICAL);
+	wxBoxSizer* sizer11 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "ID:",
+		wxDefaultPosition, wxDefaultSize);
+	m_comp_id_text = new wxTextCtrl(page, ID_CompIdText, "",
+		wxDefaultPosition, wxSize(80, 23), wxTE_PROCESS_ENTER);
+	m_comp_id_x_btn = new wxButton(page, ID_CompIdXBtn, "X",
+		wxDefaultPosition, wxSize(23, 23));
+	//size limiters
+	m_analysis_min_check = new wxCheckBox(page, ID_AnalysisMinCheck, "Min Size:",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+	m_analysis_min_spin = new wxSpinCtrl(page, ID_AnalysisMinSpin, "0",
+		wxDefaultPosition, wxSize(80, 23));
+	m_analysis_max_check = new wxCheckBox(page, ID_AnalysisMaxCheck, "Max Size:",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+	m_analysis_max_spin = new wxSpinCtrl(page, ID_AnalysisMaxSpin, "100",
+		wxDefaultPosition, wxSize(80, 23));
+	sizer11->Add(5, 5);
+	sizer11->Add(st, 0, wxALIGN_CENTER);
+	sizer11->Add(m_comp_id_text, 0, wxALIGN_CENTER);
+	sizer11->Add(m_comp_id_x_btn, 0, wxALIGN_CENTER);
+	sizer11->Add(10, 10);
+	sizer11->Add(m_analysis_min_check, 0, wxALIGN_CENTER);
+	sizer11->Add(10, 10);
+	sizer11->Add(m_analysis_min_spin, 0, wxALIGN_CENTER);
+	sizer11->Add(10, 10);
+	sizer11->Add(m_analysis_max_check, 0, wxALIGN_CENTER);
+	sizer11->Add(10, 10);
+	sizer11->Add(m_analysis_max_spin, 0, wxALIGN_CENTER);
+	//buttons
+	wxBoxSizer* sizer12 = new wxBoxSizer(wxHORIZONTAL);
+	m_comp_full_btn = new wxButton(page, ID_CompFullBtn, "FullCompt",
+		wxDefaultPosition, wxSize(80, 23));
+	m_comp_exclusive_btn = new wxButton(page, ID_CompExclusiveBtn, "Replace",
+		wxDefaultPosition, wxSize(65, 23));
+	m_comp_append_btn = new wxButton(page, ID_CompAppendBtn, "Append",
+		wxDefaultPosition, wxSize(65, 23));
+	m_comp_all_btn = new wxButton(page, ID_CompAllBtn, "All",
+		wxDefaultPosition, wxSize(65, 23));
+	m_comp_clear_btn = new wxButton(page, ID_CompClearBtn, "Clear",
+		wxDefaultPosition, wxSize(65, 23));
+	sizer12->AddStretchSpacer();
+	sizer12->Add(m_comp_full_btn, 0, wxALIGN_CENTER);
+	sizer12->Add(m_comp_exclusive_btn, 0, wxALIGN_CENTER);
+	sizer12->Add(m_comp_append_btn, 0, wxALIGN_CENTER);
+	sizer12->Add(m_comp_all_btn, 0, wxALIGN_CENTER);
+	sizer12->Add(m_comp_clear_btn, 0, wxALIGN_CENTER);
+	sizer12->AddStretchSpacer();
+	//
+	sizer1->Add(10, 10);
+	sizer1->Add(sizer11, 0, wxEXPAND);
+	sizer1->Add(10, 10);
+	sizer1->Add(sizer12, 0, wxEXPAND);
+	sizer1->Add(10, 10);
+
+	//output
+	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "Output as New Channels"),
+		wxVERTICAL);
+	//radios
+	wxBoxSizer *sizer21 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Channel Type:",
+		wxDefaultPosition, wxSize(100, 20));
+	m_output_multi_rb = new wxRadioButton(page, ID_OutputMultiRb, "Each Comp.",
+		wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+	m_output_rgb_rb = new wxRadioButton(page, ID_OutputRgbRb, "R+G+B",
+		wxDefaultPosition, wxDefaultSize);
+	sizer21->Add(5, 5);
+	sizer21->Add(st, 0, wxALIGN_CENTER);
+	sizer21->Add(m_output_multi_rb, 0, wxALIGN_CENTER);
+	sizer21->Add(5, 5);
+	sizer21->Add(m_output_rgb_rb, 0, wxALIGN_CENTER);
+	sizer21->Add(5, 5);
+	//buttons
+	wxBoxSizer *sizer22 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Output:",
+		wxDefaultPosition, wxSize(100, 20));
+	m_output_random_btn = new wxButton(page, ID_OutputRandomBtn, "Random Colors",
+		wxDefaultPosition, wxSize(100, 23));
+	m_output_size_btn = new wxButton(page, ID_OutputSizeBtn, "Size-based",
+		wxDefaultPosition, wxSize(100, 23));
+	m_output_ann_btn = new wxButton(page, ID_OutputAnnBtn, "Annotations",
+		wxDefaultPosition, wxSize(100, 23));
+	sizer22->Add(5, 5);
+	sizer22->Add(st, 0, wxALIGN_CENTER);
+	sizer22->Add(m_output_random_btn, 0, wxALIGN_CENTER);
+	sizer22->Add(m_output_size_btn, 0, wxALIGN_CENTER);
+	sizer22->Add(m_output_ann_btn, 0, wxALIGN_CENTER);
+	sizer22->Add(5, 5);
+	//
+	sizer2->Add(10, 10);
+	sizer2->Add(sizer21, 0, wxEXPAND);
+	sizer2->Add(10, 10);
+	sizer2->Add(sizer22, 0, wxEXPAND);
+	sizer2->Add(10, 10);
+
+	//all
+	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
+	sizerv->Add(10, 10);
+	sizerv->Add(sizer1, 0, wxEXPAND);
+	sizerv->Add(10, 10);
+	sizerv->Add(sizer2, 0, wxEXPAND);
+	sizerv->Add(10, 10);
+
+	page->SetSizer(sizerv);
+
 	return page;
 }
 
@@ -792,15 +903,24 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	sizer1->Add(m_generate_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_refine_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(10, 10);
+	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
+	m_analyze_btn = new wxButton(this, ID_AnalyzeBtn, "Analyze",
+		wxDefaultPosition, wxSize(75, -1));
+	m_analyze_sel_btn = new wxButton(this, ID_AnalyzeSelBtn, "Anlyz. Sel.",
+		wxDefaultPosition, wxSize(75, -1));
+	sizer2->AddStretchSpacer();
+	sizer2->Add(m_analyze_btn, 0, wxALIGN_CENTER);
+	sizer2->Add(m_analyze_sel_btn, 0, wxALIGN_CENTER);
+	sizer2->Add(10, 10);
 
 	//stats text
-	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
+	wxBoxSizer *sizer3 = new wxStaticBoxSizer(
 		new wxStaticBox(this, wxID_ANY, "Output"),
 		wxVERTICAL);
 	m_stat_text = new wxTextCtrl(this, ID_StatText, "",
 		wxDefaultPosition, wxSize(-1, 150), wxTE_MULTILINE);
 	m_stat_text->SetEditable(false);
-	sizer2->Add(m_stat_text, 1, wxEXPAND);
+	sizer3->Add(m_stat_text, 1, wxEXPAND);
 
 	//all controls
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
@@ -808,8 +928,9 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	sizerv->Add(m_notebook, 1, wxEXPAND);
 	sizerv->Add(10, 10);
 	sizerv->Add(sizer1, 0, wxEXPAND);
-	sizerv->Add(10, 10);
 	sizerv->Add(sizer2, 0, wxEXPAND);
+	sizerv->Add(10, 10);
+	sizerv->Add(sizer3, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 
 	SetSizer(sizerv);
@@ -2017,6 +2138,7 @@ void ComponentDlg::OnGenerate(wxCommandEvent &event)
 	switch (page)
 	{
 	case 0:
+	default:
 		GenerateBsc(false);
 		break;
 	case 1:
@@ -2031,6 +2153,7 @@ void ComponentDlg::OnRefine(wxCommandEvent &event)
 	switch (page)
 	{
 	case 0:
+	default:
 		GenerateBsc(true);
 		break;
 	case 1:
