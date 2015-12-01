@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include "VRenderView.h"
 #include "Components/CompSelector.h"
+#include "Components/CompAnalyzer.h"
 #include <wx/valnum.h>
 #include <wx/clipbrd.h>
 #include <wx/wfstream.h>
@@ -1238,9 +1239,13 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 
 void TraceDlg::OnAnalyzeComp(wxCommandEvent &event)
 {
-	Measure();
-	wxString str;
-	OutputMeasureResult(str);
+	if (!m_view)
+		return;
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	FL::ComponentAnalyzer comp_analyzer(vd);
+	comp_analyzer.Analyze(true);
+	string str;
+	comp_analyzer.OutputCompList(str);
 	m_stat_text->SetValue(str);
 }
 
@@ -2391,143 +2396,6 @@ void TraceDlg::OnCellMagic3Btn(wxCommandEvent &event)
 	Test1();
 }*/
 
-void TraceDlg::Measure()
-{
-	if (!m_view)
-		return;
-
-	//get data
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	if (!vd)
-		return;
-	Texture* tex = vd->GetTexture();
-	if (!tex)
-		return;
-	Nrrd* nrrd_data = tex->get_nrrd(0);
-	if (!nrrd_data)
-		return;
-	int bits = nrrd_data->type;
-	void* data_data = nrrd_data->data;
-	if (!data_data)
-		return;
-	//get mask
-	Nrrd* nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
-		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
-		return;
-	//get label
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
-		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
-		return;
-
-	//clear list and start calculating
-	m_info_list.clear();
-	int ilist;
-	int found;
-	int nx, ny, nz;
-	unsigned int id;
-	double value;
-	double delta;
-	double ext;
-	int i, j, k;
-	vd->GetResolution(nx, ny, nz);
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
-	unsigned long long index;
-	for (index = 0; index < for_size; ++index)
-	{
-		if (!data_mask[index] ||
-			!data_label[index])
-			continue;
-
-		id = data_label[index];
-		if (bits == nrrdTypeUChar)
-			value = ((unsigned char*)data_data)[index];
-		else if (bits == nrrdTypeUShort)
-			value = ((unsigned short*)data_data)[index];
-
-		if (value <= 1.0)
-			continue;
-
-		k = index / (nx*ny);
-		j = index % (nx*ny);
-		i = j % nx;
-		j = j / nx;
-		ext = GetExt(data_label, index, id, nx, ny, nz, i, j, k);
-
-		//find in list
-		found = -1;
-		for (ilist = 0; ilist < (int)m_info_list.size(); ++ilist)
-		{
-			if (m_info_list[ilist].id == id)
-			{
-				found = ilist;
-				break;
-			}
-		}
-		if (found == -1)
-		{
-			//not found
-			measure_info info;
-			info.id = id;
-			info.total_num = 1;
-			info.mean = 0.0;
-			info.variance = 0.0;
-			info.m2 = 0.0;
-			delta = value - info.mean;
-			info.mean += delta / info.total_num;
-			info.m2 += delta * (value - info.mean);
-			info.min = value;
-			info.max = value;
-			info.ext_sum = ext;
-			m_info_list.push_back(info);
-		}
-		else
-		{
-			m_info_list[found].total_num++;
-			delta = value - m_info_list[found].mean;
-			m_info_list[found].mean += delta / m_info_list[found].total_num;
-			m_info_list[found].m2 += delta * (value - m_info_list[found].mean);
-			m_info_list[found].min = value < m_info_list[found].min ? value : m_info_list[found].min;
-			m_info_list[found].max = value > m_info_list[found].max ? value : m_info_list[found].max;
-			m_info_list[found].ext_sum += ext;
-		}
-	}
-
-	for (size_t i = 0; i < m_info_list.size(); ++i)
-	{
-		if (m_info_list[i].total_num > 0)
-			m_info_list[i].variance = sqrt(m_info_list[i].m2 / (m_info_list[i].total_num));
-	}
-
-	std::sort(m_info_list.begin(), m_info_list.end(), measure_info::cmp_id);
-}
-
-void TraceDlg::OutputMeasureResult(wxString &str)
-{
-	str = "Statistics on the selection:\n";
-	str += "A total of " +
-		wxString::Format("%u", m_info_list.size()) +
-		" component(s) selected\n";
-	str += "ID\tTotalN\tSurfaceN\tMean\tSigma\tMinimum\tMaximum\n";
-	for (size_t i = 0; i < m_info_list.size(); ++i)
-	{
-		str += wxString::Format("%u\t", m_info_list[i].id);
-		str += wxString::Format("%u\t", m_info_list[i].total_num);
-		str += wxString::Format("%.0f\t", m_info_list[i].ext_sum);
-		str += wxString::Format("%.2f\t", m_info_list[i].mean);
-		str += wxString::Format("%.2f\t", m_info_list[i].variance);
-		str += wxString::Format("%.2f\t", m_info_list[i].min);
-		str += wxString::Format("%.2f\n", m_info_list[i].max);
-	}
-
-}
-
 void TraceDlg::SaveOutputResult(wxString &filename)
 {
 	wxFileOutputStream fos(filename);
@@ -2539,132 +2407,6 @@ void TraceDlg::SaveOutputResult(wxString &filename)
 	str = m_stat_text->GetValue();
 
 	tos << str;
-}
-
-double TraceDlg::GetExt(unsigned int* data_label,
-	unsigned long long index,
-	unsigned int id,
-	int nx, int ny, int nz,
-	int i, int j, int k)
-{
-	bool surface_vox, contact_vox;
-	unsigned long long indexn;
-	//determine the numbers
-	if (i == 0 || i == nx - 1 ||
-		j == 0 || j == ny - 1 ||
-		k == 0 || k == nz - 1)
-	{
-		//border voxel
-		surface_vox = true;
-		//determine contact
-		contact_vox = false;
-		if (i > 0)
-		{
-			indexn = index - 1;
-			if (data_label[indexn] &&
-				data_label[indexn] != id)
-				contact_vox = true;
-		}
-		if (!contact_vox && i < nx - 1)
-		{
-			indexn = index + 1;
-			if (data_label[indexn] &&
-				data_label[indexn] != id)
-				contact_vox = true;
-		}
-		if (!contact_vox && j > 0)
-		{
-			indexn = index - nx;
-			if (data_label[indexn] &&
-				data_label[indexn] != id)
-				contact_vox = true;
-		}
-		if (!contact_vox && j < ny - 1)
-		{
-			indexn = index + nx;
-			if (data_label[indexn] &&
-				data_label[indexn] != id)
-				contact_vox = true;
-		}
-		if (!contact_vox && k > 0)
-		{
-			indexn = index - nx*ny;
-			if (data_label[indexn] &&
-				data_label[indexn] != id)
-				contact_vox = true;
-		}
-		if (!contact_vox && k < nz - 1)
-		{
-			indexn = index + nx*ny;
-			if (data_label[indexn] &&
-				data_label[indexn] != id)
-				contact_vox = true;
-		}
-	}
-	else
-	{
-		surface_vox = false;
-		contact_vox = false;
-		//i-1
-		indexn = index - 1;
-		if (data_label[indexn] == 0)
-			surface_vox = true;
-		if (data_label[indexn] &&
-			data_label[indexn] != id)
-			surface_vox = contact_vox = true;
-		//i+1
-		if (!surface_vox || !contact_vox)
-		{
-			indexn = index + 1;
-			if (data_label[indexn] == 0)
-				surface_vox = true;
-			if (data_label[indexn] &&
-				data_label[indexn] != id)
-				surface_vox = contact_vox = true;
-		}
-		//j-1
-		if (!surface_vox || !contact_vox)
-		{
-			indexn = index - nx;
-			if (data_label[indexn] == 0)
-				surface_vox = true;
-			if (data_label[indexn] &&
-				data_label[indexn] != id)
-				surface_vox = contact_vox = true;
-		}
-		//j+1
-		if (!surface_vox || !contact_vox)
-		{
-			indexn = index + nx;
-			if (data_label[indexn] == 0)
-				surface_vox = true;
-			if (data_label[indexn] &&
-				data_label[indexn] != id)
-				surface_vox = contact_vox = true;
-		}
-		//k-1
-		if (!surface_vox || !contact_vox)
-		{
-			indexn = index - nx*ny;
-			if (data_label[indexn] == 0)
-				surface_vox = true;
-			if (data_label[indexn] &&
-				data_label[indexn] != id)
-				surface_vox = contact_vox = true;
-		}
-		//k+1
-		if (!surface_vox || !contact_vox)
-		{
-			indexn = index + nx*ny;
-			if (data_label[indexn] == 0)
-				surface_vox = true;
-			if (data_label[indexn] &&
-				data_label[indexn] != id)
-				surface_vox = contact_vox = true;
-		}
-	}
-
-	return surface_vox ? 1.0 : 0.0;
 }
 
 unsigned int TraceDlg::GetMappedID(

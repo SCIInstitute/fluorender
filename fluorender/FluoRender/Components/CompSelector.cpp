@@ -221,7 +221,9 @@ void ComponentSelector::Append(bool all)
 			if (data_label[index] == m_id)
 				acc_size++;
 		}
-		if (CompareSize((unsigned int)(acc_size)))
+		if (((m_use_min || m_use_max) &&
+			CompareSize((unsigned int)(acc_size))) ||
+			(!m_use_min && !m_use_max))
 		{
 			for (unsigned long long index = 0;
 			index < for_size; ++index)
@@ -242,7 +244,10 @@ void ComponentSelector::Exclusive()
 		return;
 	Nrrd* nrrd_mask = m_vd->GetMask(true);
 	if (!nrrd_mask)
-		return;
+	{
+		m_vd->AddEmptyMask();
+		nrrd_mask = m_vd->GetMask(false);
+	}
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
 	if (!data_mask)
 		return;
@@ -270,7 +275,9 @@ void ComponentSelector::Exclusive()
 			acc_size++;
 		data_mask[index] = 0;
 	}
-	if (CompareSize((unsigned int)(acc_size)))
+	if (((m_use_min || m_use_max) &&
+		CompareSize((unsigned int)(acc_size))) ||
+		(!m_use_min && !m_use_max))
 	{
 		for (index = 0;
 		index < for_size; ++index)
@@ -290,7 +297,10 @@ void ComponentSelector::All()
 		return;
 	Nrrd* nrrd_mask = m_vd->GetMask(true);
 	if (!nrrd_mask)
-		return;
+	{
+		m_vd->AddEmptyMask();
+		nrrd_mask = m_vd->GetMask(false);
+	}
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
 	if (!data_mask)
 		return;

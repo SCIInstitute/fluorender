@@ -221,7 +221,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	//brush size 1
 	wxBoxSizer *sizer2_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Center Size:",
-		wxDefaultPosition, wxSize(80, 20));
+		wxDefaultPosition, wxSize(80, 20), wxALIGN_RIGHT);
 	m_brush_size1_sldr = new wxSlider(this, ID_BrushSize1Sldr, 10, 1, 300,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_brush_size1_text = new wxTextCtrl(this, ID_BrushSize1Text, "10",

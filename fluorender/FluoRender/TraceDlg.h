@@ -188,8 +188,6 @@ public:
 	void CompClear();
 
 	//measurement
-	void Measure();
-	void OutputMeasureResult(wxString &str);
 	void SaveOutputResult(wxString &filename);
 
 	//automatic tracking
@@ -204,22 +202,6 @@ private:
 		int surface_num;
 		int contact_num;
 	} comp_info;
-
-	struct measure_info
-	{
-		unsigned int id;
-		unsigned int total_num;
-		double mean;
-		double variance;
-		double m2;
-		double min;
-		double max;
-		double ext_sum;
-
-		static bool cmp_id(const measure_info info1, const measure_info info2)
-		{ return info1.id < info2.id; }
-	};
-	vector<measure_info> m_info_list;
 
 	typedef boost::unordered_map<unsigned int, unsigned int> CellMap;
 	typedef boost::unordered_map<unsigned int, unsigned int>::iterator CellMapIter;
@@ -334,11 +316,6 @@ private:
 	wxWindow* CreateModifyPage(wxWindow *parent);
 	wxWindow* CreateAnalysisPage(wxWindow *parent);
 
-	double GetExt(unsigned int* data_label,
-		unsigned long long index,
-		unsigned int id,
-		int nx, int ny, int nz,
-		int i, int j, int k);
 	unsigned int GetMappedID(unsigned int id, unsigned int* data_label1,
 		unsigned int* data_label2, unsigned long long size);
 	//tests

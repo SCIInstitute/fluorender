@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include "Components/CompGenerator.h"
 #include "Components/CompSelector.h"
+#include "Components/CompAnalyzer.h"
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include <boost/signals2.hpp>
@@ -147,10 +148,15 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_BUTTON(ID_CompAppendBtn, ComponentDlg::OnCompAppend)
 	EVT_BUTTON(ID_CompAllBtn, ComponentDlg::OnCompAll)
 	EVT_BUTTON(ID_CompClearBtn, ComponentDlg::OnCompClear)
+	//output
+	EVT_BUTTON(ID_OutputAnnBtn, ComponentDlg::OnOutputAnn)
 
 	//execute
+	EVT_NOTEBOOK_PAGE_CHANGED(ID_Notebook, OnNotebook)
 	EVT_BUTTON(ID_GenerateBtn, ComponentDlg::OnGenerate)
 	EVT_BUTTON(ID_RefineBtn, ComponentDlg::OnRefine)
+	EVT_BUTTON(ID_AnalyzeBtn, ComponentDlg::OnAnalyze)
+	EVT_BUTTON(ID_AnalyzeSelBtn, ComponentDlg::OnAnalyzeSel)
 END_EVENT_TABLE()
 
 wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
@@ -326,21 +332,21 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer11->Add(m_analysis_max_spin, 0, wxALIGN_CENTER);
 	//buttons
 	wxBoxSizer* sizer12 = new wxBoxSizer(wxHORIZONTAL);
-	m_comp_full_btn = new wxButton(page, ID_CompFullBtn, "FullCompt",
-		wxDefaultPosition, wxSize(80, 23));
-	m_comp_exclusive_btn = new wxButton(page, ID_CompExclusiveBtn, "Replace",
-		wxDefaultPosition, wxSize(65, 23));
 	m_comp_append_btn = new wxButton(page, ID_CompAppendBtn, "Append",
 		wxDefaultPosition, wxSize(65, 23));
 	m_comp_all_btn = new wxButton(page, ID_CompAllBtn, "All",
 		wxDefaultPosition, wxSize(65, 23));
+	m_comp_full_btn = new wxButton(page, ID_CompFullBtn, "FullCompt",
+		wxDefaultPosition, wxSize(80, 23));
+	m_comp_exclusive_btn = new wxButton(page, ID_CompExclusiveBtn, "Replace",
+		wxDefaultPosition, wxSize(65, 23));
 	m_comp_clear_btn = new wxButton(page, ID_CompClearBtn, "Clear",
 		wxDefaultPosition, wxSize(65, 23));
 	sizer12->AddStretchSpacer();
-	sizer12->Add(m_comp_full_btn, 0, wxALIGN_CENTER);
-	sizer12->Add(m_comp_exclusive_btn, 0, wxALIGN_CENTER);
 	sizer12->Add(m_comp_append_btn, 0, wxALIGN_CENTER);
 	sizer12->Add(m_comp_all_btn, 0, wxALIGN_CENTER);
+	sizer12->Add(m_comp_full_btn, 0, wxALIGN_CENTER);
+	sizer12->Add(m_comp_exclusive_btn, 0, wxALIGN_CENTER);
 	sizer12->Add(m_comp_clear_btn, 0, wxALIGN_CENTER);
 	sizer12->AddStretchSpacer();
 	//
@@ -391,12 +397,24 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer2->Add(sizer22, 0, wxEXPAND);
 	sizer2->Add(10, 10);
 
+	//note
+	wxBoxSizer *sizer3 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "N.B."),
+		wxVERTICAL);
+	st = new wxStaticText(page, 0,
+		"Enable 4D script in the settings to show component colors.");
+	sizer3->Add(10, 10);
+	sizer3->Add(st, 0);
+	sizer3->Add(10, 10);
+
 	//all
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
 	sizerv->Add(10, 10);
 	sizerv->Add(sizer1, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 	sizerv->Add(sizer2, 0, wxEXPAND);
+	sizerv->Add(10, 10);
+	sizerv->Add(sizer3, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 
 	page->SetSizer(sizerv);
@@ -906,7 +924,7 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	m_view(0)
 {
 	//notebook
-	m_notebook = new wxNotebook(this, wxID_ANY);
+	m_notebook = new wxNotebook(this, ID_Notebook);
 	m_notebook->AddPage(Create3DAnalysisPage(m_notebook), "Basic");
 	m_notebook->AddPage(Create2DAnalysisPage(m_notebook), "Advanced");
 	m_notebook->AddPage(CreateAnalysisPage(m_notebook), "Analysis");
@@ -918,30 +936,27 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 		wxDefaultPosition, wxSize(75, -1));
 	m_refine_btn = new wxButton(this, ID_RefineBtn, "Refine",
 		wxDefaultPosition, wxSize(75, -1));
+	m_analyze_btn = new wxButton(this, ID_AnalyzeBtn, "Analyze",
+		wxDefaultPosition, wxSize(75, -1));
+	m_analyze_sel_btn = new wxButton(this, ID_AnalyzeSelBtn, "Anlyz. Sel.",
+		wxDefaultPosition, wxSize(75, -1));
 	sizer1->Add(10, 10);
 	sizer1->Add(m_generate_prg, 1, wxEXPAND);
 	sizer1->Add(10, 10);
 	sizer1->Add(m_generate_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_refine_btn, 0, wxALIGN_CENTER);
+	sizer1->Add(m_analyze_btn, 0, wxALIGN_CENTER);
+	sizer1->Add(m_analyze_sel_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(10, 10);
-	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
-	m_analyze_btn = new wxButton(this, ID_AnalyzeBtn, "Analyze",
-		wxDefaultPosition, wxSize(75, -1));
-	m_analyze_sel_btn = new wxButton(this, ID_AnalyzeSelBtn, "Anlyz. Sel.",
-		wxDefaultPosition, wxSize(75, -1));
-	sizer2->AddStretchSpacer();
-	sizer2->Add(m_analyze_btn, 0, wxALIGN_CENTER);
-	sizer2->Add(m_analyze_sel_btn, 0, wxALIGN_CENTER);
-	sizer2->Add(10, 10);
 
 	//stats text
-	wxBoxSizer *sizer3 = new wxStaticBoxSizer(
+	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
 		new wxStaticBox(this, wxID_ANY, "Output"),
 		wxVERTICAL);
 	m_stat_text = new wxTextCtrl(this, ID_StatText, "",
 		wxDefaultPosition, wxSize(-1, 150), wxTE_MULTILINE);
 	m_stat_text->SetEditable(false);
-	sizer3->Add(m_stat_text, 1, wxEXPAND);
+	sizer2->Add(m_stat_text, 1, wxEXPAND);
 
 	//all controls
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
@@ -949,9 +964,8 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	sizerv->Add(m_notebook, 1, wxEXPAND);
 	sizerv->Add(10, 10);
 	sizerv->Add(sizer1, 0, wxEXPAND);
-	sizerv->Add(sizer2, 0, wxEXPAND);
 	sizerv->Add(10, 10);
-	sizerv->Add(sizer3, 0, wxEXPAND);
+	sizerv->Add(sizer2, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 
 	SetSizer(sizerv);
@@ -1041,6 +1055,9 @@ void ComponentDlg::Update()
 	m_basic_iter_text->SetValue(wxString::Format("%d", m_basic_iter));
 	m_basic_thresh_text->SetValue(wxString::Format("%.3f", m_basic_thresh));
 	m_basic_falloff_text->SetValue(wxString::Format("%.3f", m_basic_falloff));
+
+	//generate
+	EnableGenerate();
 }
 
 void ComponentDlg::GetSettings()
@@ -1338,6 +1355,8 @@ void ComponentDlg::OnSaveasSettings(wxCommandEvent& event)
 
 void ComponentDlg::EnableInitialGrow(bool value)
 {
+	if (m_initial_grow == value)
+		return;
 	m_initial_grow = value;
 	if (m_initial_grow)
 	{
@@ -1619,6 +1638,8 @@ void ComponentDlg::OnIGAngleFalloff2Text(wxCommandEvent &event)
 //sized grow
 void ComponentDlg::EnableSizedGrow(bool value)
 {
+	if (m_sized_grow == value)
+		return;
 	m_sized_grow = value;
 	if (m_sized_grow)
 	{
@@ -1944,6 +1965,8 @@ void ComponentDlg::OnSGAngleFalloff2Text(wxCommandEvent &event)
 //cleanup
 void ComponentDlg::EnableCleanup(bool value)
 {
+	if (m_cleanup == value)
+		return;
 	m_cleanup = value;
 	if (m_cleanup)
 	{
@@ -1997,6 +2020,8 @@ void ComponentDlg::OnCLSizeLimiterText(wxCommandEvent &event)
 //match slices
 void ComponentDlg::EnableMatchSlices(bool value)
 {
+	if (m_match_slices == value)
+		return;
 	m_match_slices = value;
 	if (m_match_slices)
 	{
@@ -2265,33 +2290,25 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 	//get id
 	str = m_comp_id_text->GetValue();
 
-	if (!str.empty())
-	{
-		bool get_all = false;
-		ival = 0;
-		if (str.Lower() == "all")
-			get_all = true;
-		else
-		{
-			str.ToULong(&ival);
-			if (ival == 0)
-				return;
-		}
+	bool get_all = true;
+	ival = 0;
+	str.ToULong(&ival);
+	if (ival != 0)
+		get_all = false;
 
-		unsigned int id = (unsigned int)ival;
-		//get current mask
-		VolumeData* vd = m_view->m_glview->m_cur_vol;
-		FL::ComponentSelector comp_selector(vd);
-		comp_selector.SetId(id);
-		//cell size filter
-		bool use = m_analysis_min_check->GetValue();
-		unsigned int num = (unsigned int)(m_analysis_min_spin->GetValue());
-		comp_selector.SetMinNum(use, num);
-		use = m_analysis_max_check->GetValue();
-		num = (unsigned int)(m_analysis_max_spin->GetValue());
-		comp_selector.SetMaxNum(use, num);
-		comp_selector.Append(get_all);
-	}
+	unsigned int id = (unsigned int)ival;
+	//get current mask
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	FL::ComponentSelector comp_selector(vd);
+	comp_selector.SetId(id);
+	//cell size filter
+	bool use = m_analysis_min_check->GetValue();
+	unsigned int num = (unsigned int)(m_analysis_min_spin->GetValue());
+	comp_selector.SetMinNum(use, num);
+	use = m_analysis_max_check->GetValue();
+	num = (unsigned int)(m_analysis_max_spin->GetValue());
+	comp_selector.SetMaxNum(use, num);
+	comp_selector.Append(get_all);
 
 	m_view->RefreshGL();
 }
@@ -2320,6 +2337,57 @@ void ComponentDlg::OnCompClear(wxCommandEvent &event)
 	comp_selector.Clear();
 
 	m_view->RefreshGL();
+}
+
+void ComponentDlg::EnableGenerate()
+{
+	int page = m_notebook->GetSelection();
+	switch (page)
+	{
+	case 0:
+	case 1:
+	default:
+		m_generate_btn->Show();
+		m_refine_btn->Show();
+		m_analyze_btn->Hide();
+		m_analyze_sel_btn->Hide();
+		break;
+	case 2:
+		m_generate_btn->Hide();
+		m_refine_btn->Hide();
+		m_analyze_btn->Show();
+		m_analyze_sel_btn->Show();
+		break;
+	}
+	Layout();
+}
+
+//output
+void ComponentDlg::OnOutputAnn(wxCommandEvent &event)
+{
+	if (!m_view)
+		return;
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	FL::ComponentAnalyzer comp_analyzer(vd);
+	Annotations* ann = new Annotations();
+	if (comp_analyzer.GenAnnotations(*ann))
+	{
+		ann->SetVolume(vd);
+		ann->SetTransform(vd->GetTexture()->transform());
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame)
+		{
+			DataManager* mgr = vr_frame->GetDataManager();
+			if (mgr)
+				mgr->AddAnnotations(ann);
+			vr_frame->UpdateList();
+		}
+	}
+}
+
+void ComponentDlg::OnNotebook(wxBookCtrlEvent &event)
+{
+	EnableGenerate();
 }
 
 void ComponentDlg::OnGenerate(wxCommandEvent &event)
@@ -2450,4 +2518,28 @@ void ComponentDlg::GenerateBsc(bool refine)
 
 	m_generate_prg->SetValue(100);
 	connection.disconnect();
+}
+
+void ComponentDlg::OnAnalyze(wxCommandEvent &event)
+{
+	if (!m_view)
+		return;
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	FL::ComponentAnalyzer comp_analyzer(vd);
+	comp_analyzer.Analyze(false);
+	string str;
+	comp_analyzer.OutputCompList(str);
+	m_stat_text->SetValue(str);
+}
+
+void ComponentDlg::OnAnalyzeSel(wxCommandEvent &event)
+{
+	if (!m_view)
+		return;
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	FL::ComponentAnalyzer comp_analyzer(vd);
+	comp_analyzer.Analyze(true);
+	string str;
+	comp_analyzer.OutputCompList(str);
+	m_stat_text->SetValue(str);
 }

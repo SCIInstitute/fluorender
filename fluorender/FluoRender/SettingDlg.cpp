@@ -166,6 +166,13 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 		new wxStaticBox(page, wxID_ANY, "4D Script"), wxVERTICAL);
 	m_run_script_chk = new wxCheckBox(page, ID_RunScriptChk,
 		"Enable execution of a script on 4D data during playback.");
+	st = new wxStaticText(page, 0,
+		"      Also enable this option to show component colors.");
+	group3->Add(10, 5);
+	group3->Add(m_run_script_chk);
+	group3->Add(10, 5);
+	group3->Add(st, 0, wxALIGN_LEFT);
+	group3->Add(10, 5);
 	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Script File:",
 		wxDefaultPosition, wxSize(80, -1));
@@ -176,9 +183,6 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	sizer3_1->Add(st, 0, wxALIGN_CENTER);
 	sizer3_1->Add(m_script_file_text, 1, wxEXPAND);
 	sizer3_1->Add(m_script_file_btn, 0, wxALIGN_CENTER);
-	group3->Add(10, 5);
-	group3->Add(m_run_script_chk);
-	group3->Add(10, 5);
 	group3->Add(sizer3_1, 0, wxEXPAND);
 	group3->Add(10, 5);
 

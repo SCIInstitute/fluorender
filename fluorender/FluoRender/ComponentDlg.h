@@ -168,6 +168,7 @@ public:
 		ID_OutputAnnBtn,
 
 		//execute
+		ID_Notebook,
 		ID_GeneratePrg,
 		ID_GenerateBtn,
 		ID_RefineBtn,
@@ -553,10 +554,16 @@ private:
 	void OnCompAppend(wxCommandEvent &event);
 	void OnCompAll(wxCommandEvent &event);
 	void OnCompClear(wxCommandEvent &event);
+	//output
+	void OnOutputAnn(wxCommandEvent &event);
 
 	//execute
+	void EnableGenerate();
+	void OnNotebook(wxBookCtrlEvent &event);
 	void OnGenerate(wxCommandEvent &event);
 	void OnRefine(wxCommandEvent &event);
+	void OnAnalyze(wxCommandEvent &event);
+	void OnAnalyzeSel(wxCommandEvent &event);
 
 	DECLARE_EVENT_TABLE();
 };
