@@ -1279,7 +1279,7 @@ void ComponentDlg::OnPaneChange(wxCollapsiblePaneEvent& event)
 		m_cleanup_check->SetValue(enable);
 		break;
 	case ID_MatchSlicesPane:
-		EnableBasicDiff(enable);
+		EnableMatchSlices(enable);
 		m_match_slices_check->SetValue(enable);
 		break;
 	}
