@@ -272,6 +272,15 @@ private:
 	double m_basic_thresh;
 	double m_basic_falloff;
 
+	//selection
+	bool m_use_min;
+	int m_min_num;
+	bool m_use_max;
+	int m_max_num;
+
+	//output
+	int m_output_type;//1-multi; 2-rgb;
+
 	//tab control
 	wxNotebook *m_notebook;
 	wxScrolledWindow* m_adv_page;
@@ -548,13 +557,16 @@ private:
 	void OnCompIdText(wxCommandEvent &event);
 	void OnCompIdXBtn(wxCommandEvent &event);
 	void OnAnalysisMinCheck(wxCommandEvent &event);
+	void OnAnalysisMinSpin(wxSpinEvent &event);
 	void OnAnalysisMaxCheck(wxCommandEvent &event);
+	void OnAnalysisMaxSpin(wxSpinEvent &event);
 	void OnCompFull(wxCommandEvent &event);
 	void OnCompExclusive(wxCommandEvent &event);
 	void OnCompAppend(wxCommandEvent &event);
 	void OnCompAll(wxCommandEvent &event);
 	void OnCompClear(wxCommandEvent &event);
 	//output
+	void OnOutputTypeRadio(wxCommandEvent &event);
 	void OnOutputAnn(wxCommandEvent &event);
 
 	//execute

@@ -367,3 +367,9 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann)
 	}
 	return true;
 }
+
+bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs)
+{
+
+	return true;
+}

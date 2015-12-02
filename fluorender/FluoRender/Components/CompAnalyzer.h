@@ -51,6 +51,7 @@ namespace FL
 		void Analyze(bool sel);
 		void OutputCompList(std::string &str);
 		bool GenAnnotations(Annotations &ann);
+		bool GenMultiChannels(std::list<VolumeData*> &channs);
 
 	private:
 		VolumeData* m_vd;

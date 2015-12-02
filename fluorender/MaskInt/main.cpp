@@ -334,24 +334,24 @@ bool GetFillPixel(void* data1, void* data2, void* data_out,
 		fp.x = (p1.x + p2.x) / 2;
 		fp.y = (p1.y + p2.y) / 2;
 		unsigned char value;
-		if (GetNeighbor(data_out, nx, ny, fp.x, fp.y, 0, 0, value) && !value)
+		if (GetNeighbor(page_out, nx, ny, fp.x, fp.y, 0, 0, value) && !value)
 			return true;
-		if (GetNeighbor(data_out, nx, ny, fp.x, fp.y, -1, 0, value) && !value)
+		if (GetNeighbor(page_out, nx, ny, fp.x, fp.y, -1, 0, value) && !value)
 		{
 			fp.x -= 1;
 			return true;
 		}
-		if (GetNeighbor(data_out, nx, ny, fp.x, fp.y, 1, 0, value) && !value)
+		if (GetNeighbor(page_out, nx, ny, fp.x, fp.y, 1, 0, value) && !value)
 		{
 			fp.x += 1;
 			return true;
 		}
-		if (GetNeighbor(data_out, nx, ny, fp.x, fp.y, 0, -1, value) && !value)
+		if (GetNeighbor(page_out, nx, ny, fp.x, fp.y, 0, -1, value) && !value)
 		{
 			fp.y -= 1;
 			return true;
 		}
-		if (GetNeighbor(data_out, nx, ny, fp.x, fp.y, 0, 1, value) && !value)
+		if (GetNeighbor(page_out, nx, ny, fp.x, fp.y, 0, 1, value) && !value)
 		{
 			fp.y += 1;
 			return true;

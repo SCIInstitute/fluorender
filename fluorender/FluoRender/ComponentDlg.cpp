@@ -142,13 +142,17 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_TEXT_ENTER(ID_CompIdText, ComponentDlg::OnCompFull)
 	EVT_BUTTON(ID_CompIdXBtn, ComponentDlg::OnCompIdXBtn)
 	EVT_CHECKBOX(ID_AnalysisMinCheck, ComponentDlg::OnAnalysisMinCheck)
+	EVT_SPINCTRL(ID_AnalysisMinSpin, ComponentDlg::OnAnalysisMinSpin)
 	EVT_CHECKBOX(ID_AnalysisMaxCheck, ComponentDlg::OnAnalysisMaxCheck)
+	EVT_SPINCTRL(ID_AnalysisMaxSpin, ComponentDlg::OnAnalysisMaxSpin)
 	EVT_BUTTON(ID_CompFullBtn, ComponentDlg::OnCompFull)
 	EVT_BUTTON(ID_CompExclusiveBtn, ComponentDlg::OnCompExclusive)
 	EVT_BUTTON(ID_CompAppendBtn, ComponentDlg::OnCompAppend)
 	EVT_BUTTON(ID_CompAllBtn, ComponentDlg::OnCompAll)
 	EVT_BUTTON(ID_CompClearBtn, ComponentDlg::OnCompClear)
 	//output
+	EVT_RADIOBUTTON(ID_OutputMultiRb, ComponentDlg::OnOutputTypeRadio)
+	EVT_RADIOBUTTON(ID_OutputRgbRb, ComponentDlg::OnOutputTypeRadio)
 	EVT_BUTTON(ID_OutputAnnBtn, ComponentDlg::OnOutputAnn)
 
 	//execute
@@ -1056,6 +1060,38 @@ void ComponentDlg::Update()
 	m_basic_thresh_text->SetValue(wxString::Format("%.3f", m_basic_thresh));
 	m_basic_falloff_text->SetValue(wxString::Format("%.3f", m_basic_falloff));
 
+	//selection
+	if (m_use_min)
+	{
+		m_analysis_min_check->SetValue(true);
+		m_analysis_min_spin->Enable();
+	}
+	else
+	{
+		m_analysis_min_check->SetValue(false);
+		m_analysis_min_spin->Disable();
+	}
+	m_analysis_min_spin->SetValue(m_min_num);
+	if (m_use_max)
+	{
+		m_analysis_max_check->SetValue(true);
+		m_analysis_max_spin->Enable();
+	}
+	else
+	{
+		m_analysis_max_check->SetValue(false);
+		m_analysis_max_spin->Disable();
+	}
+	m_analysis_max_spin->SetValue(m_max_num);
+
+	//output type
+	m_output_multi_rb->SetValue(false);
+	m_output_rgb_rb->SetValue(false);
+	if (m_output_type == 1)
+		m_output_multi_rb->SetValue(true);
+	else if (m_output_type == 2)
+		m_output_rgb_rb->SetValue(true);
+
 	//generate
 	EnableGenerate();
 }
@@ -1102,6 +1138,15 @@ void ComponentDlg::GetSettings()
 	m_basic_iter = 100;
 	m_basic_thresh = 0.5;
 	m_basic_falloff = 0.01;
+
+	//selection
+	m_use_min = false;
+	m_min_num = 0;
+	m_use_max = false;
+	m_max_num = 0;
+
+	//output
+	m_output_type = 1;
 
 	//read values
 	LoadSettings("");
@@ -1186,10 +1231,18 @@ void ComponentDlg::LoadSettings(wxString filename)
 	//basic settings
 	if (get_basic)
 	{
+		//
 		fconfig.Read("basic_diff", &m_basic_diff);
 		fconfig.Read("basic_iter", &m_basic_iter);
 		fconfig.Read("basic_thresh", &m_basic_thresh);
 		fconfig.Read("basic_falloff", &m_basic_falloff);
+		//selection
+		fconfig.Read("use_min", &m_use_min);
+		fconfig.Read("min_num", &m_min_num);
+		fconfig.Read("use_max", &m_use_max);
+		fconfig.Read("max_num", &m_max_num);
+		//output
+		fconfig.Read("output_type", &m_output_type);
 	}
 
 	m_load_settings_text->SetValue(filename);
@@ -1260,6 +1313,14 @@ void ComponentDlg::SaveSettings(wxString filename)
 	fconfig.Write("basic_iter", m_basic_iter);
 	fconfig.Write("basic_thresh", m_basic_thresh);
 	fconfig.Write("basic_falloff", m_basic_falloff);
+
+	//selection
+	fconfig.Write("use_min", m_use_min);
+	fconfig.Write("min_num", m_min_num);
+	fconfig.Write("use_max", m_use_max);
+	fconfig.Write("max_num", m_max_num);
+	//output
+	fconfig.Write("output_type", m_output_type);
 
 	if (filename == "")
 	{
@@ -2208,17 +2269,39 @@ void ComponentDlg::OnCompIdXBtn(wxCommandEvent &event)
 void ComponentDlg::OnAnalysisMinCheck(wxCommandEvent &event)
 {
 	if (m_analysis_min_check->GetValue())
+	{
 		m_analysis_min_spin->Enable();
+		m_use_min = true;
+	}
 	else
+	{
 		m_analysis_min_spin->Disable();
+		m_use_min = false;
+	}
+}
+
+void ComponentDlg::OnAnalysisMinSpin(wxSpinEvent &event)
+{
+	m_min_num = m_analysis_min_spin->GetValue();
 }
 
 void ComponentDlg::OnAnalysisMaxCheck(wxCommandEvent &event)
 {
 	if (m_analysis_max_check->GetValue())
+	{
 		m_analysis_max_spin->Enable();
+		m_use_max = true;
+	}
 	else
+	{
 		m_analysis_max_spin->Disable();
+		m_use_max = false;
+	}
+}
+
+void ComponentDlg::OnAnalysisMaxSpin(wxSpinEvent &event)
+{
+	m_max_num = m_analysis_max_spin->GetValue();
 }
 
 void ComponentDlg::OnCompFull(wxCommandEvent &event)
@@ -2363,6 +2446,20 @@ void ComponentDlg::EnableGenerate()
 }
 
 //output
+void ComponentDlg::OnOutputTypeRadio(wxCommandEvent &event)
+{
+	int id = event.GetId();
+	switch (id)
+	{
+	case ID_OutputMultiRb:
+		m_output_type = 1;
+		break;
+	case ID_OutputRgbRb:
+		m_output_type = 2;
+		break;
+	}
+}
+
 void ComponentDlg::OnOutputAnn(wxCommandEvent &event)
 {
 	if (!m_view)
@@ -2380,7 +2477,9 @@ void ComponentDlg::OnOutputAnn(wxCommandEvent &event)
 			DataManager* mgr = vr_frame->GetDataManager();
 			if (mgr)
 				mgr->AddAnnotations(ann);
+			m_view->AddAnnotations(ann);
 			vr_frame->UpdateList();
+			vr_frame->UpdateTree(vd->GetName());
 		}
 	}
 }
