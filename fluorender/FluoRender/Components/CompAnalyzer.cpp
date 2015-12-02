@@ -370,6 +370,93 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann)
 
 bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs)
 {
+	if (!m_vd)
+		return false;
 
+	if (m_comp_list.empty())
+		Analyze(true);
+
+	Texture* tex = m_vd->GetTexture();
+	if (!tex)
+		return false;
+	Nrrd* nrrd_data = tex->get_nrrd(0);
+	if (!nrrd_data)
+		return false;
+	int bits = 8;
+	if (nrrd_data->type == nrrdTypeUChar)
+		bits = 8;
+	else if (nrrd_data->type == nrrdTypeUShort)
+		bits = 16;
+	void* data_data = nrrd_data->data;
+	if (!data_data)
+		return false;
+	//get label
+	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
+	if (!nrrd_label)
+		return false;
+	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	if (!data_label)
+		return false;
+	double spcx, spcy, spcz;
+	m_vd->GetSpacings(spcx, spcy, spcz);
+	int nx, ny, nz;
+	m_vd->GetResolution(nx, ny, nz);
+	double amb, diff, spec, shine;
+	m_vd->GetMaterial(amb, diff, spec, shine);
+
+	unsigned int count = 1;
+	unsigned long long for_size = (unsigned long long)nx *
+		(unsigned long long)ny * (unsigned long long)nz;
+	unsigned long long index;
+	unsigned int value_label;
+	for (auto i = m_comp_list.begin();
+		i != m_comp_list.end(); ++i)
+	{
+		VolumeData* vd = new VolumeData();
+		vd->AddEmptyData(bits,
+			nx, ny, nz,
+			spcx, spcy, spcz);
+		vd->SetSpcFromFile(true);
+		vd->SetName(m_vd->GetName() +
+			wxString::Format("_COMP%d_SIZE%d", count++, i->sumi));
+
+		//populate the volume
+		//the actual data
+		Texture* tex_vd = vd->GetTexture();
+		if (!tex_vd) continue;
+		Nrrd* nrrd_vd = tex_vd->get_nrrd(0);
+		if (!nrrd_vd) continue;
+		void* data_vd = nrrd_vd->data;
+		if (!data_vd) continue;
+		for (index = 0; index < for_size; ++index)
+		{
+			value_label = data_label[index];
+			if (value_label == i->id)
+			{
+				if (bits == 8)
+					((unsigned char*)data_vd)[index] = ((unsigned char*)data_data)[index];
+				else
+					((unsigned short*)data_vd)[index] = ((unsigned short*)data_data)[index];
+			}
+		}
+
+		//settings
+		Color color(HSVColor(i->id % 360, 1.0, 1.0));
+		vd->SetColor(color);
+		vd->SetEnableAlpha(m_vd->GetEnableAlpha());
+		vd->SetShading(m_vd->GetShading());
+		vd->SetShadow(false);
+		//other settings
+		vd->Set3DGamma(m_vd->Get3DGamma());
+		vd->SetBoundary(m_vd->GetBoundary());
+		vd->SetOffset(m_vd->GetOffset());
+		vd->SetLeftThresh(m_vd->GetLeftThresh());
+		vd->SetRightThresh(m_vd->GetRightThresh());
+		vd->SetAlpha(m_vd->GetAlpha());
+		vd->SetSampleRate(m_vd->GetSampleRate());
+		vd->SetMaterial(amb, diff, spec, shine);
+
+		channs.push_back(vd);
+	}
 	return true;
 }

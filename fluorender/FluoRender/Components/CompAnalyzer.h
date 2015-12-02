@@ -40,7 +40,7 @@ namespace FL
 	class ComponentAnalyzer
 	{
 	public:
-		ComponentAnalyzer(VolumeData* vd);
+		ComponentAnalyzer(VolumeData* vd=0);
 		~ComponentAnalyzer();
 
 		void SetVolume(VolumeData* vd)

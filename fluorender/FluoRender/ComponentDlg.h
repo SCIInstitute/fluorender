@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "Main.h"
 #include "DataManager.h"
+#include "Components/CompAnalyzer.h"
 #include <wx/wx.h>
 #include <wx/collpane.h>
 #include <wx/notebook.h>
@@ -280,6 +281,8 @@ private:
 
 	//output
 	int m_output_type;//1-multi; 2-rgb;
+
+	FL::ComponentAnalyzer m_comp_analyzer;
 
 	//tab control
 	wxNotebook *m_notebook;
@@ -567,6 +570,7 @@ private:
 	void OnCompClear(wxCommandEvent &event);
 	//output
 	void OnOutputTypeRadio(wxCommandEvent &event);
+	void OnOuputRandom(wxCommandEvent &event);
 	void OnOutputAnn(wxCommandEvent &event);
 
 	//execute

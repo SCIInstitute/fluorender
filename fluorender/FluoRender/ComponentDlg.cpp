@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include "Components/CompGenerator.h"
 #include "Components/CompSelector.h"
-#include "Components/CompAnalyzer.h"
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include <boost/signals2.hpp>
@@ -2460,14 +2459,61 @@ void ComponentDlg::OnOutputTypeRadio(wxCommandEvent &event)
 	}
 }
 
+void ComponentDlg::OnOutputRandom(wxCommandEvent &event)
+{
+	if (!m_view)
+		return;
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	m_comp_analyzer.SetVolume(vd);
+	vector<VolumeData*> channs;
+	if (m_comp_analyzer.GenMultiChannels(channs))
+	{
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame)
+		{
+			wxString group_name = "";
+			DataGroup* group = 0;
+			for (size_t i = 0; i<channs.size(); ++i)
+			{
+				VolumeData* vd = channs[i];
+				if (vd)
+				{
+					vr_frame->GetDataManager()->AddVolumeData(vd);
+					if (i == 0)
+					{
+						group_name = AddGroup("");
+						group = GetGroup(group_name);
+					}
+					AddVolumeData(vd, group_name);
+				}
+			}
+			if (group)
+			{
+				//group->SetSyncRAll(true);
+				//group->SetSyncGAll(true);
+				//group->SetSyncBAll(true);
+				FLIVR::Color col = vd->GetGamma();
+				group->SetGammaAll(col);
+				col = m_vd->GetBrightness();
+				group->SetBrightnessAll(col);
+				col = m_vd->GetHdr();
+				group->SetHdrAll(col);
+			}
+			vr_frame->UpdateList();
+			vr_frame->UpdateTree(vd->GetName());
+			m_view->RefreshGL();
+		}
+	}
+}
+
 void ComponentDlg::OnOutputAnn(wxCommandEvent &event)
 {
 	if (!m_view)
 		return;
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	FL::ComponentAnalyzer comp_analyzer(vd);
+	m_comp_analyzer.SetVolume(vd);
 	Annotations* ann = new Annotations();
-	if (comp_analyzer.GenAnnotations(*ann))
+	if (m_comp_analyzer.GenAnnotations(*ann))
 	{
 		ann->SetVolume(vd);
 		ann->SetTransform(vd->GetTexture()->transform());
@@ -2624,10 +2670,10 @@ void ComponentDlg::OnAnalyze(wxCommandEvent &event)
 	if (!m_view)
 		return;
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	FL::ComponentAnalyzer comp_analyzer(vd);
-	comp_analyzer.Analyze(false);
+	m_comp_analyzer.SetVolume(vd);
+	m_comp_analyzer.Analyze(false);
 	string str;
-	comp_analyzer.OutputCompList(str);
+	m_comp_analyzer.OutputCompList(str);
 	m_stat_text->SetValue(str);
 }
 
@@ -2636,9 +2682,9 @@ void ComponentDlg::OnAnalyzeSel(wxCommandEvent &event)
 	if (!m_view)
 		return;
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	FL::ComponentAnalyzer comp_analyzer(vd);
-	comp_analyzer.Analyze(true);
+	m_comp_analyzer.SetVolume(vd);
+	m_comp_analyzer.Analyze(true);
 	string str;
-	comp_analyzer.OutputCompList(str);
+	m_comp_analyzer.OutputCompList(str);
 	m_stat_text->SetValue(str);
 }
