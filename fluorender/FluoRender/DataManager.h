@@ -310,6 +310,7 @@ public:
 	void SetColormapProj(int value);
 	int GetColormap();
 	int GetColormapProj();
+	Color GetColorFromColormap(double value);
 
 	//resolution  scaling and spacing
 	void GetResolution(int &res_x, int &res_y, int &res_z);

@@ -1663,6 +1663,43 @@ int VolumeData::GetColormapProj()
 	return m_colormap_proj;
 }
 
+Color VolumeData::GetColorFromColormap(double value)
+{
+	Color color;
+	double v = (value - m_colormap_low_value) /
+		(m_colormap_hi_value - m_colormap_low_value);
+	switch (m_colormap)
+	{
+	case 0:
+	default:
+		color.r(Clamp(4.0*v - 2.0, 0.0, 1.0));
+		color.g(Clamp(v<0.5 ? 4.0*v : -4.0*v + 4.0, 0.0, 1.0));
+		color.b(Clamp(-4.0*v + 2.0, 0.0, 1.0));
+		break;
+	case 1:
+		color.r(Clamp(-4.0*v + 2.0, 0.0, 1.0));
+		color.g(Clamp(v<0.5 ? 4.0*v : -4.0*v + 4.0, 0.0, 1.0));
+		color.b(Clamp(4.0*v - 2.0, 0.0, 1.0));
+		break;
+	case 2:
+		color.r(Clamp(2.0*v, 0.0, 1.0));
+		color.g(Clamp(4.0*v - 2.0, 0.0, 1.0));
+		color.b(Clamp(4.0*v - 3.0, 0.0, 1.0));
+		break;
+	case 3:
+		color.r(Clamp(v, 0.0, 1.0));
+		color.g(Clamp(1.0 - v, 0.0, 1.0));
+		color.b(1.0);
+		break;
+	case 4:
+		color.r(Clamp(v<0.5 ? v*0.9 + 0.25 : 0.7, 0.0, 1.0));
+		color.g(Clamp(v<0.5 ? v*0.8 + 0.3 : (1.0 - v)*1.4, 0.0, 1.0));
+		color.b(Clamp(v<0.5 ? v*(-0.1) + 0.75 : (1.0 - v)*1.1 + 0.15, 0.0, 1.0));
+		break;
+	}
+	return color;
+}
+
 //resolution  scaling and spacing
 void VolumeData::GetResolution(int &res_x, int &res_y, int &res_z)
 {

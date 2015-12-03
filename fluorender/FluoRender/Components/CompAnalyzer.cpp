@@ -29,11 +29,13 @@ DEALINGS IN THE SOFTWARE.
 #include "DataManager.h"
 #include <sstream>
 #include <iostream>
+#include <limits>
 
 using namespace FL;
 
 ComponentAnalyzer::ComponentAnalyzer(VolumeData* vd)
-	: m_vd(vd)
+	: m_vd(vd),
+	m_comp_list_dirty(true)
 {
 }
 
@@ -157,6 +159,8 @@ void ComponentAnalyzer::Analyze(bool sel)
 		}
 	}
 
+	m_comp_list.min = std::numeric_limits<unsigned int>::max();
+	m_comp_list.max = 0;
 	for (iter = comp_ulist.begin();
 		iter != comp_ulist.end(); ++iter)
 	{
@@ -165,11 +169,17 @@ void ComponentAnalyzer::Analyze(bool sel)
 		iter->second.mean *= scale;
 		iter->second.min *= scale;
 		iter->second.max *= scale;
+		m_comp_list.min = iter->second.sumi <
+			m_comp_list.min ? iter->second.sumi :
+			m_comp_list.min;
+		m_comp_list.max = iter->second.sumi >
+			m_comp_list.max ? iter->second.sumi :
+			m_comp_list.max;
 		m_comp_list.push_back(iter->second);
 	}
 
 	m_comp_list.sort();
-	//std::sort(m_comp_list.begin(), m_comp_list.end(), CompInfo::cmp_id);
+	m_comp_list_dirty = false;
 }
 
 void ComponentAnalyzer::OutputCompList(std::string &str)
@@ -344,7 +354,8 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann)
 	int nx, ny, nz;
 	m_vd->GetResolution(nx, ny, nz);
 
-	if (m_comp_list.empty())
+	if (m_comp_list.empty() ||
+		m_comp_list_dirty)
 		Analyze(true);
 
 	double total_int = 0.0;
@@ -368,12 +379,13 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann)
 	return true;
 }
 
-bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs)
+bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int color_type)
 {
 	if (!m_vd)
 		return false;
 
-	if (m_comp_list.empty())
+	if (m_comp_list.empty() ||
+		m_comp_list_dirty)
 		Analyze(true);
 
 	Texture* tex = m_vd->GetTexture();
@@ -441,8 +453,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs)
 		}
 
 		//settings
-		Color color(HSVColor(i->id % 360, 1.0, 1.0));
-		vd->SetColor(color);
+		vd->SetColor(GetColor(*i, m_vd, color_type));
 		vd->SetEnableAlpha(m_vd->GetEnableAlpha());
 		vd->SetShading(m_vd->GetShading());
 		vd->SetShadow(false);
@@ -459,4 +470,203 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs)
 		channs.push_back(vd);
 	}
 	return true;
+}
+
+bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color_type)
+{
+	if (!m_vd)
+		return false;
+
+	if (m_comp_list.empty() ||
+		m_comp_list_dirty)
+		Analyze(true);
+
+	Texture* tex = m_vd->GetTexture();
+	if (!tex)
+		return false;
+	Nrrd* nrrd_data = tex->get_nrrd(0);
+	if (!nrrd_data)
+		return false;
+	int bits = 8;
+	if (nrrd_data->type == nrrdTypeUChar)
+		bits = 8;
+	else if (nrrd_data->type == nrrdTypeUShort)
+		bits = 16;
+	void* data_data = nrrd_data->data;
+	if (!data_data)
+		return false;
+	//get label
+	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
+	if (!nrrd_label)
+		return false;
+	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	if (!data_label)
+		return false;
+	double spcx, spcy, spcz;
+	m_vd->GetSpacings(spcx, spcy, spcz);
+	int nx, ny, nz;
+	m_vd->GetResolution(nx, ny, nz);
+	double amb, diff, spec, shine;
+	m_vd->GetMaterial(amb, diff, spec, shine);
+
+	//red volume
+	VolumeData* vd_r = new VolumeData();
+	vd_r->AddEmptyData(bits,
+		nx, ny, nz,
+		spcx, spcy, spcz);
+	vd_r->SetSpcFromFile(true);
+	vd_r->SetName(m_vd->GetName() +
+		wxString::Format("_CH_R"));
+	//green volume
+	VolumeData* vd_g = new VolumeData();
+	vd_g->AddEmptyData(bits,
+		nx, ny, nz,
+		spcx, spcy, spcz);
+	vd_g->SetSpcFromFile(true);
+	vd_g->SetName(m_vd->GetName() +
+		wxString::Format("_CH_G"));
+	//blue volume
+	VolumeData* vd_b = new VolumeData();
+	vd_b->AddEmptyData(bits,
+		nx, ny, nz,
+		spcx, spcy, spcz);
+	vd_b->SetSpcFromFile(true);
+	vd_b->SetName(m_vd->GetName() +
+		wxString::Format("_CH_B"));
+
+	//get new data
+	//red volume
+	Texture* tex_vd_r = vd_r->GetTexture();
+	if (!tex_vd_r) return false;
+	Nrrd* nrrd_vd_r = tex_vd_r->get_nrrd(0);
+	if (!nrrd_vd_r) return false;
+	void* data_vd_r = nrrd_vd_r->data;
+	if (!data_vd_r) return false;
+	//green volume
+	Texture* tex_vd_g = vd_g->GetTexture();
+	if (!tex_vd_g) return false;
+	Nrrd* nrrd_vd_g = tex_vd_g->get_nrrd(0);
+	if (!nrrd_vd_g) return false;
+	void* data_vd_g = nrrd_vd_g->data;
+	if (!data_vd_g) return false;
+	//blue volume
+	Texture* tex_vd_b = vd_b->GetTexture();
+	if (!tex_vd_b) return false;
+	Nrrd* nrrd_vd_b = tex_vd_b->get_nrrd(0);
+	if (!nrrd_vd_b) return false;
+	void* data_vd_b = nrrd_vd_b->data;
+	if (!data_vd_b) return false;
+
+	unsigned long long for_size = (unsigned long long)nx *
+		(unsigned long long)ny * (unsigned long long)nz;
+	unsigned long long index;
+	unsigned int value_label;
+	Color color;
+	for (index = 0; index < for_size; ++index)
+	{
+		value_label = data_label[index];
+		auto i = std::find(m_comp_list.begin(),
+			m_comp_list.end(), CompInfo(value_label));
+		if (i != m_comp_list.end())
+		{
+			color = GetColor(*i, m_vd, color_type);
+			if (bits == 8)
+			{
+				double value = ((unsigned char*)data_data)[index];
+				((unsigned char*)data_vd_r)[index] = (unsigned char)(color.r()*value);
+				((unsigned char*)data_vd_g)[index] = (unsigned char)(color.g()*value);
+				((unsigned char*)data_vd_b)[index] = (unsigned char)(color.b()*value);
+			}
+			else
+			{
+				double value = ((unsigned short*)data_data)[index];
+				((unsigned short*)data_vd_r)[index] = (unsigned short)(color.r()*value);
+				((unsigned short*)data_vd_g)[index] = (unsigned short)(color.g()*value);
+				((unsigned short*)data_vd_b)[index] = (unsigned short)(color.b()*value);
+			}
+		}
+	}
+
+	FLIVR::Color red = Color(1.0, 0.0, 0.0);
+	FLIVR::Color green = Color(0.0, 1.0, 0.0);
+	FLIVR::Color blue = Color(0.0, 0.0, 1.0);
+	vd_r->SetColor(red);
+	vd_g->SetColor(green);
+	vd_b->SetColor(blue);
+
+	bool bval = m_vd->GetEnableAlpha();
+	vd_r->SetEnableAlpha(bval);
+	vd_g->SetEnableAlpha(bval);
+	vd_b->SetEnableAlpha(bval);
+	bval = m_vd->GetShading();
+	vd_r->SetShading(bval);
+	vd_g->SetShading(bval);
+	vd_b->SetShading(bval);
+	vd_r->SetShadow(false);
+	vd_g->SetShadow(false);
+	vd_b->SetShadow(false);
+	//other settings
+	double dval = m_vd->Get3DGamma();
+	vd_r->Set3DGamma(dval);
+	vd_g->Set3DGamma(dval);
+	vd_b->Set3DGamma(dval);
+	dval = m_vd->GetBoundary();
+	vd_r->SetBoundary(dval);
+	vd_g->SetBoundary(dval);
+	vd_b->SetBoundary(dval);
+	dval = m_vd->GetOffset();
+	vd_r->SetOffset(dval);
+	vd_g->SetOffset(dval);
+	vd_b->SetOffset(dval);
+	dval = m_vd->GetLeftThresh();
+	vd_r->SetLeftThresh(dval);
+	vd_g->SetLeftThresh(dval);
+	vd_b->SetLeftThresh(dval);
+	dval = m_vd->GetRightThresh();
+	vd_r->SetRightThresh(dval);
+	vd_g->SetRightThresh(dval);
+	vd_b->SetRightThresh(dval);
+	dval = m_vd->GetAlpha();
+	vd_r->SetAlpha(dval);
+	vd_g->SetAlpha(dval);
+	vd_b->SetAlpha(dval);
+	dval = m_vd->GetSampleRate();
+	vd_r->SetSampleRate(dval);
+	vd_g->SetSampleRate(dval);
+	vd_b->SetSampleRate(dval);
+	vd_r->SetMaterial(amb, diff, spec, shine);
+	vd_g->SetMaterial(amb, diff, spec, shine);
+	vd_b->SetMaterial(amb, diff, spec, shine);
+
+	channs.push_back(vd_r);
+	channs.push_back(vd_g);
+	channs.push_back(vd_b);
+
+	return true;
+}
+
+FLIVR::Color ComponentAnalyzer::GetColor(CompInfo &comp_info,
+	VolumeData* vd, int color_type)
+{
+	FLIVR::Color color;
+	switch (color_type)
+	{
+	case 1:
+	default:
+		color = FLIVR::Color(HSVColor(comp_info.id % 360, 1.0, 1.0));
+		break;
+	case 2:
+		if (vd)
+		{
+			double value;
+			if (m_comp_list.min == m_comp_list.max)
+				value = 1.0;
+			else
+				value = double(comp_info.sumi - m_comp_list.min) /
+				double(m_comp_list.max - m_comp_list.min);
+			color = vd->GetColorFromColormap(value);
+		}
+		break;
+	}
+	return color;
 }

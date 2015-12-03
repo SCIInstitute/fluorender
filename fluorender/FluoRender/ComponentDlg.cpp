@@ -152,6 +152,8 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	//output
 	EVT_RADIOBUTTON(ID_OutputMultiRb, ComponentDlg::OnOutputTypeRadio)
 	EVT_RADIOBUTTON(ID_OutputRgbRb, ComponentDlg::OnOutputTypeRadio)
+	EVT_BUTTON(ID_OutputRandomBtn, ComponentDlg::OnOutputChannels)
+	EVT_BUTTON(ID_OutputSizeBtn, ComponentDlg::OnOutputChannels)
 	EVT_BUTTON(ID_OutputAnnBtn, ComponentDlg::OnOutputAnn)
 
 	//execute
@@ -2459,32 +2461,32 @@ void ComponentDlg::OnOutputTypeRadio(wxCommandEvent &event)
 	}
 }
 
-void ComponentDlg::OnOutputRandom(wxCommandEvent &event)
+void ComponentDlg::OutputMulti(int color_type)
 {
 	if (!m_view)
 		return;
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	m_comp_analyzer.SetVolume(vd);
-	vector<VolumeData*> channs;
-	if (m_comp_analyzer.GenMultiChannels(channs))
+	list<VolumeData*> channs;
+	if (m_comp_analyzer.GenMultiChannels(channs, color_type))
 	{
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vr_frame)
 		{
 			wxString group_name = "";
 			DataGroup* group = 0;
-			for (size_t i = 0; i<channs.size(); ++i)
+			for (auto i = channs.begin(); i != channs.end(); ++i)
 			{
-				VolumeData* vd = channs[i];
+				VolumeData* vd = *i;
 				if (vd)
 				{
 					vr_frame->GetDataManager()->AddVolumeData(vd);
-					if (i == 0)
+					if (i == channs.begin())
 					{
-						group_name = AddGroup("");
-						group = GetGroup(group_name);
+						group_name = m_view->AddGroup("");
+						group = m_view->GetGroup(group_name);
 					}
-					AddVolumeData(vd, group_name);
+					m_view->AddVolumeData(vd, group_name);
 				}
 			}
 			if (group)
@@ -2494,9 +2496,9 @@ void ComponentDlg::OnOutputRandom(wxCommandEvent &event)
 				//group->SetSyncBAll(true);
 				FLIVR::Color col = vd->GetGamma();
 				group->SetGammaAll(col);
-				col = m_vd->GetBrightness();
+				col = vd->GetBrightness();
 				group->SetBrightnessAll(col);
-				col = m_vd->GetHdr();
+				col = vd->GetHdr();
 				group->SetHdrAll(col);
 			}
 			vr_frame->UpdateList();
@@ -2504,6 +2506,68 @@ void ComponentDlg::OnOutputRandom(wxCommandEvent &event)
 			m_view->RefreshGL();
 		}
 	}
+}
+
+void ComponentDlg::OutputRgb(int color_type)
+{
+	if (!m_view)
+		return;
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	m_comp_analyzer.SetVolume(vd);
+	list<VolumeData*> channs;
+	if (m_comp_analyzer.GenRgbChannels(channs, color_type))
+	{
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame)
+		{
+			wxString group_name = "";
+			DataGroup* group = 0;
+			for (auto i = channs.begin(); i != channs.end(); ++i)
+			{
+				VolumeData* vd = *i;
+				if (vd)
+				{
+					vr_frame->GetDataManager()->AddVolumeData(vd);
+					if (i == channs.begin())
+					{
+						group_name = m_view->AddGroup("");
+						group = m_view->GetGroup(group_name);
+					}
+					m_view->AddVolumeData(vd, group_name);
+				}
+			}
+			if (group)
+			{
+				//group->SetSyncRAll(true);
+				//group->SetSyncGAll(true);
+				//group->SetSyncBAll(true);
+				FLIVR::Color col = vd->GetGamma();
+				group->SetGammaAll(col);
+				col = vd->GetBrightness();
+				group->SetBrightnessAll(col);
+				col = vd->GetHdr();
+				group->SetHdrAll(col);
+			}
+			vr_frame->UpdateList();
+			vr_frame->UpdateTree(vd->GetName());
+			m_view->RefreshGL();
+		}
+	}
+}
+
+void ComponentDlg::OnOutputChannels(wxCommandEvent &event)
+{
+	int id = event.GetId();
+	int color_type;
+	if (id == ID_OutputRandomBtn)
+		color_type = 1;
+	else if (id == ID_OutputSizeBtn)
+		color_type = 2;
+
+	if (m_output_type == 1)
+		OutputMulti(color_type);
+	else if (m_output_type == 2)
+		OutputRgb(color_type);
 }
 
 void ComponentDlg::OnOutputAnn(wxCommandEvent &event)
@@ -2527,6 +2591,7 @@ void ComponentDlg::OnOutputAnn(wxCommandEvent &event)
 			vr_frame->UpdateList();
 			vr_frame->UpdateTree(vd->GetName());
 		}
+		m_view->RefreshGL();
 	}
 }
 

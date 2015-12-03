@@ -570,7 +570,9 @@ private:
 	void OnCompClear(wxCommandEvent &event);
 	//output
 	void OnOutputTypeRadio(wxCommandEvent &event);
-	void OnOuputRandom(wxCommandEvent &event);
+	void OutputMulti(int color_type);
+	void OutputRgb(int color_type);
+	void OnOutputChannels(wxCommandEvent &event);
 	void OnOutputAnn(wxCommandEvent &event);
 
 	//execute

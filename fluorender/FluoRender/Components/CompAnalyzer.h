@@ -29,12 +29,14 @@ DEALINGS IN THE SOFTWARE.
 #define FL_CompAnalyzer_h
 
 #include <FLIVR/Point.h>
+#include <FLIVR/Color.h>
 #include <string>
 #include <list>
 #include <boost/unordered_map.hpp>
 
 class VolumeData;
 class Annotations;
+
 namespace FL
 {
 	class ComponentAnalyzer
@@ -44,14 +46,19 @@ namespace FL
 		~ComponentAnalyzer();
 
 		void SetVolume(VolumeData* vd)
-		{ m_vd = vd; }
+		{
+			m_comp_list_dirty = m_vd != vd;
+			m_vd = vd;
+		}
 		VolumeData* GetVolume()
 		{ return m_vd; }
 
 		void Analyze(bool sel);
 		void OutputCompList(std::string &str);
 		bool GenAnnotations(Annotations &ann);
-		bool GenMultiChannels(std::list<VolumeData*> &channs);
+		//color_type: 1-id-based; 2-size-based
+		bool GenMultiChannels(std::list<VolumeData*> &channs, int color_type);
+		bool GenRgbChannels(std::list<VolumeData*> &channs, int color_type);
 
 	private:
 		VolumeData* m_vd;
@@ -69,16 +76,32 @@ namespace FL
 			double max;
 			FLIVR::Point pos;
 
+			CompInfo() {}
+			CompInfo(unsigned int _id)
+				:id(_id)
+			{}
+
 			bool operator<(const CompInfo &info2)
 			{
 				return id < info2.id;
 			}
+			bool operator==(const CompInfo &info2)
+			{
+				return id == info2.id;
+			}
 		};
 		typedef boost::unordered_map<unsigned int, CompInfo> CompUList;
 		typedef CompUList::iterator CompUListIter;
-		typedef std::list<CompInfo> CompList;
+		class CompList : public std::list<CompInfo>
+		{
+		public:
+			unsigned int min;
+			unsigned int max;
+		};
 		typedef CompList::iterator CompListIter;
+
 		CompList m_comp_list;
+		bool m_comp_list_dirty;
 
 	private:
 		unsigned int GetExt(unsigned int* data_label,
@@ -86,6 +109,7 @@ namespace FL
 			unsigned int id,
 			int nx, int ny, int nz,
 			int i, int j, int k);
+		FLIVR::Color GetColor(CompInfo &comp_info, VolumeData* vd, int color_type);
 	};
 }
 #endif//FL_CompAnalyzer_h
