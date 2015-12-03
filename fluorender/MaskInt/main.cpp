@@ -133,16 +133,19 @@ bool GetNextPixel(void* data, int nx, int ny,
 	return false;
 }
 
+bool BoundPixel(int nx, int ny, Pixel& p);
 bool SearchHead(void* data, int nx, int ny,
 	int x, int y, PixelList& list)
 {
 	Pixel p;
 	p.x = -1; p.y = -1;
-	if (GetNextPixel(data, nx, ny, x, y, list, p))
+	while (GetNextPixel(data, nx, ny, x, y, list, p))
 	{
 		list.push_front(p);
-		SearchHead(data, nx, ny, p.x, p.y, list);
-		return true;
+		if (BoundPixel(nx, ny, p))
+			return true;
+		if (SearchHead(data, nx, ny, p.x, p.y, list))
+			return true;
 	}
 	return false;
 }
@@ -152,11 +155,13 @@ bool SearchTail(void* data, int nx, int ny,
 {
 	Pixel p;
 	p.x = -1; p.y = -1;
-	if (GetNextPixel(data, nx, ny, x, y, list, p))
+	while (GetNextPixel(data, nx, ny, x, y, list, p))
 	{
 		list.push_back(p);
-		SearchTail(data, nx, ny, p.x, p.y, list);
-		return true;
+		if (BoundPixel(nx, ny, p))
+			return true;
+		if (SearchTail(data, nx, ny, p.x, p.y, list))
+			return true;
 	}
 	return false;
 }
@@ -247,12 +252,17 @@ bool ReorderLists(PixelList& list1, PixelList& list2)
 			flag2[5]++;
 	}
 
-	double diff = 0;
+	int cnt = 0;
+	double diff;
 	for (size_t i = 0; i < 6; ++i)
-		diff += fabs(double(flag1[i]) / double(list1.size()) -
+	{
+		diff = fabs(double(flag1[i]) / double(list1.size()) -
 			double(flag2[i]) / double(list2.size()));
+		if (diff > 0.9)
+			cnt++;
+	}
 
-	if (diff > 1.5)
+	if (cnt)
 		ReverseList(list1);
 
 	return true;
@@ -479,38 +489,50 @@ void FillGap(Pixel& p1, Pixel& p2, PixelList& list)
 	int dx = p2.x - p1.x;
 	int dy = p2.y - p1.y;
 
-	int qt, incx, incy;
+	int incx, incy;
 	incx = dx > 0? 1: -1;
 	incy = dy > 0? 1: -1;
 	Pixel p;
+	double qt, acc;
+	bool inc;
 
 	if (abs(dx) > abs(dy))
 	{
 		if (abs(dy))
-			qt = (abs(dx) + 1) / (abs(dy) + 1);
+		{
+			qt = double(abs(dy) + 1) / double(abs(dx) + 1);
+			inc = true;
+		}
 		else
-			qt = 0;
+			inc = false;
 		p.x = p1.x; p.y = p1.y;
+		acc = 0.0;
 		for (int i = 0; i < abs(dx) - 1; ++i)
 		{
 			p.x += incx;
-			if (qt && i%qt == 0 && p.y != p2.y)
+			if (inc && int(acc+qt) > int(acc) && p.y != p2.y)
 				p.y += incy;
+			acc += qt;
 			list.push_back(p);
 		}
 	}
 	else
 	{
 		if (abs(dx))
-			qt = (abs(dy) + 1) / (abs(dx) + 1);
+		{
+			qt = double(abs(dx) + 1) / double(abs(dy) + 1);
+			inc = true;
+		}
 		else
-			qt = 0;
+			inc = false;
 		p.x = p1.x; p.y = p1.y;
+		acc = 0.0;
 		for (int i = 0; i < abs(dy) - 1; ++i)
 		{
 			p.y += incy;
-			if (qt && i%qt == 0 && p.x != p2.x)
+			if (inc && int(acc + qt) > int(acc) && p.x != p2.x)
 				p.x += incx;
+			acc += qt;
 			list.push_back(p);
 		}
 	}
@@ -614,7 +636,9 @@ void Interpolate(int nx, int ny,
 	for (size_t i = 0; i < list1.size(); ++i)
 	{
 		p1 = list1[i];
-		i2 = int((double)i*(double)list2.size() / (double)list1.size() + 0.5);
+		i2 = int((double)i*(double)(list2.size()-1) / (double)(list1.size()-1) + 0.5);
+		if (i2 >= list2.size())
+			i2 = list2.size() - 1;
 		p2 = list2[i2];
 		p_out.x = p1.x + int((p2.x - p1.x) * t + 0.5);
 		p_out.y = p1.y + int((p2.y - p1.y) * t + 0.5);
