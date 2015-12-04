@@ -82,6 +82,8 @@ namespace FL
 		bool MatchFrames(TrackMap& track_map, size_t frame1, size_t frame2, bool bl_check = true);
 		//for multiple links, remove link flags
 		bool UnmatchFrames(TrackMap& track_map, size_t frame1, size_t frame2);
+		//re-segment frame
+		bool ResegmentFrame(TrackMap& track_map, size_t frame);
 		//for orphans, search neighbors to add link flags
 		bool ExMatchFrames(TrackMap& track_map, size_t frame1, size_t frame2);
 

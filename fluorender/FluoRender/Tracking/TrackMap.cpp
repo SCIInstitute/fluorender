@@ -688,6 +688,13 @@ bool TrackMapProcessor::UnmatchFrames(TrackMap& track_map, size_t frame1, size_t
 	return true;
 }
 
+//re-segment frame
+bool TrackMapProcessor::ResegmentFrame(TrackMap& track_map, size_t frame)
+{
+
+	return true;
+}
+
 bool TrackMapProcessor::ExMatchFrames(TrackMap& track_map, size_t frame1, size_t frame2)
 {
 	if (frame1 >= track_map.m_frame_num ||
