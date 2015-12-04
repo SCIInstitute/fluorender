@@ -1584,7 +1584,7 @@ void TraceDlg::CellNewID(bool append)
 		nrrd_mask = vd->GetMask(true);
 	if (!nrrd_mask)
 	{
-		vd->AddEmptyMask();
+		vd->AddEmptyMask(0);
 		nrrd_mask = vd->GetMask(false);
 	}
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);

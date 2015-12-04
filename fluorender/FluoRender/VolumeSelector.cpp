@@ -103,12 +103,16 @@ void VolumeSelector::Select(double radius)
 		return;
 
 	//insert the mask volume into m_vd
-	m_vd->AddEmptyMask();
+	m_vd->AddEmptyMask(2);
 	m_vd->Set2dMask(m_2d_mask);
 	if (m_use2d && glIsTexture(m_2d_weight1) && glIsTexture(m_2d_weight2))
 		m_vd->Set2DWeight(m_2d_weight1, m_2d_weight2);
 	else
 		m_vd->Set2DWeight(0, 0);
+
+	if (Texture::mask_undo_num_>0 &&
+		m_vd->GetTexture())
+		m_vd->GetTexture()->push_mask();
 
 	//segment the volume with 2d mask
 	//result in 3d mask
@@ -134,10 +138,6 @@ void VolumeSelector::Select(double radius)
 		gm_falloff = m_gm_falloff;
 	else
 		gm_falloff = 1.0;
-
-	if (Texture::mask_undo_num_>0 &&
-		m_vd->GetTexture())
-		m_vd->GetTexture()->push_mask();
 
 	//there is some unknown problem of clearing the mask
 	if (m_mode == 1)
@@ -243,7 +243,7 @@ int VolumeSelector::CompAnalysis(double min_voxels, double max_voxels, double th
 		m_iter_label = Max(nx, Max(ny, nz));
 		m_total_pr = m_iter_label+nx*2;
 		//first, grow in the whole volume
-		m_vd->AddEmptyMask();
+		m_vd->AddEmptyMask(2);
 		if (m_use2d && glIsTexture(m_2d_weight1) && glIsTexture(m_2d_weight2))
 			m_vd->Set2DWeight(m_2d_weight1, m_2d_weight2);
 		else
@@ -1012,7 +1012,7 @@ int VolumeSelector::NoiseAnalysis(double min_voxels, double max_voxels, double b
 	}
 
 	//first posterize the volume and put it into the mask
-	m_vd->AddEmptyMask();
+	m_vd->AddEmptyMask(2);
 	if (m_use2d && glIsTexture(m_2d_weight1) && glIsTexture(m_2d_weight2))
 		m_vd->Set2DWeight(m_2d_weight1, m_2d_weight2);
 	else

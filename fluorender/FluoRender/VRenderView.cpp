@@ -5114,7 +5114,7 @@ void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 	Nrrd* mask_nrrd = m_cur_vol->GetMask(true);
 	if (!mask_nrrd)
 	{
-		m_cur_vol->AddEmptyMask();
+		m_cur_vol->AddEmptyMask(0);
 		mask_nrrd = m_cur_vol->GetMask(false);
 	}
 	Nrrd* label_nrrd = m_cur_vol->GetLabel(false);

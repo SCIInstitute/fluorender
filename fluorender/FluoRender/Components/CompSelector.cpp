@@ -137,7 +137,7 @@ void ComponentSelector::Append(bool all)
 	Nrrd* nrrd_mask = m_vd->GetMask(true);
 	if (!nrrd_mask)
 	{
-		m_vd->AddEmptyMask();
+		m_vd->AddEmptyMask(0);
 		nrrd_mask = m_vd->GetMask(false);
 	}
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
@@ -245,7 +245,7 @@ void ComponentSelector::Exclusive()
 	Nrrd* nrrd_mask = m_vd->GetMask(true);
 	if (!nrrd_mask)
 	{
-		m_vd->AddEmptyMask();
+		m_vd->AddEmptyMask(0);
 		nrrd_mask = m_vd->GetMask(false);
 	}
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
@@ -298,7 +298,7 @@ void ComponentSelector::All()
 	Nrrd* nrrd_mask = m_vd->GetMask(true);
 	if (!nrrd_mask)
 	{
-		m_vd->AddEmptyMask();
+		m_vd->AddEmptyMask(0);
 		nrrd_mask = m_vd->GetMask(false);
 	}
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);

@@ -561,7 +561,8 @@ void VolumeData::AddEmptyMask(int mode)
 	unsigned long long mem_size = (unsigned long long)m_res_x*
 		(unsigned long long)m_res_y*(unsigned long long)m_res_z;
 	//prepare the texture bricks for the mask
-	if (m_tex->add_empty_mask())
+	bool empty = m_tex->add_empty_mask();
+	if (empty)
 	{
 		//add the nrrd data for mask
 		nrrd_mask = nrrdNew();
@@ -587,8 +588,17 @@ void VolumeData::AddEmptyMask(int mode)
 		val8 = (uint8*)nrrd_mask->data;
 	}
 
-	if (val8)
-		memset((void*)val8, mode ? 255 : 0, mem_size*sizeof(uint8));
+	if (mode == 0 || mode == 1)
+	{
+		if (val8)
+			memset((void*)val8, mode ?
+				255 : 0, mem_size*sizeof(uint8));
+	}
+	else if (mode == 2)
+	{
+		if (empty)
+			memset((void*)val8, 0, mem_size*sizeof(uint8));
+	}
 }
 
 //volume label
