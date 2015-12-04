@@ -51,6 +51,11 @@ void ComponentSelector::CompFull()
 	//get current mask
 	if (!m_vd)
 		return;
+
+	if (Texture::mask_undo_num_>0 &&
+		m_vd->GetTexture())
+		m_vd->GetTexture()->push_mask();
+
 	Nrrd* nrrd_mask = m_vd->GetMask(true);
 	if (!nrrd_mask)
 		return;
@@ -67,6 +72,7 @@ void ComponentSelector::CompFull()
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
 	if (!data_label)
 		return;
+
 	//get selected IDs
 	int i, j, k;
 	int nx, ny, nz;
@@ -134,6 +140,11 @@ void ComponentSelector::Append(bool all)
 	//get current mask
 	if (!m_vd)
 		return;
+
+	if (Texture::mask_undo_num_>0 &&
+		m_vd->GetTexture())
+		m_vd->GetTexture()->push_mask();
+
 	Nrrd* nrrd_mask = m_vd->GetMask(true);
 	if (!nrrd_mask)
 	{
@@ -153,6 +164,7 @@ void ComponentSelector::Append(bool all)
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
 	if (!data_label)
 		return;
+
 	//select append
 	int nx, ny, nz;
 	m_vd->GetResolution(nx, ny, nz);
@@ -242,6 +254,11 @@ void ComponentSelector::Exclusive()
 	//get current mask
 	if (!m_vd)
 		return;
+
+	if (Texture::mask_undo_num_>0 &&
+		m_vd->GetTexture())
+		m_vd->GetTexture()->push_mask();
+
 	Nrrd* nrrd_mask = m_vd->GetMask(true);
 	if (!nrrd_mask)
 	{
@@ -261,6 +278,7 @@ void ComponentSelector::Exclusive()
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
 	if (!data_label)
 		return;
+
 	//select append
 	int nx, ny, nz;
 	m_vd->GetResolution(nx, ny, nz);
@@ -295,6 +313,11 @@ void ComponentSelector::All()
 	//get current mask
 	if (!m_vd)
 		return;
+
+	if (Texture::mask_undo_num_>0 &&
+		m_vd->GetTexture())
+		m_vd->GetTexture()->push_mask();
+
 	Nrrd* nrrd_mask = m_vd->GetMask(true);
 	if (!nrrd_mask)
 	{
@@ -304,6 +327,7 @@ void ComponentSelector::All()
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
 	if (!data_mask)
 		return;
+
 	//select append
 	int nx, ny, nz;
 	m_vd->GetResolution(nx, ny, nz);
@@ -319,12 +343,18 @@ void ComponentSelector::Clear()
 	//get current mask
 	if (!m_vd)
 		return;
+
+	if (Texture::mask_undo_num_>0 &&
+		m_vd->GetTexture())
+		m_vd->GetTexture()->push_mask();
+
 	Nrrd* nrrd_mask = m_vd->GetMask(true);
 	if (!nrrd_mask)
 		return;
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
 	if (!data_mask)
 		return;
+
 	//select append
 	int nx, ny, nz;
 	m_vd->GetResolution(nx, ny, nz);

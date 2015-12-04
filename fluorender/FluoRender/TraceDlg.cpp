@@ -1362,6 +1362,11 @@ void TraceDlg::CompDelete()
 
 	//update view
 	CellUpdate();
+
+	//frame
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetBrushToolDlg())
+		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void TraceDlg::CompClear()
@@ -1377,6 +1382,11 @@ void TraceDlg::CompClear()
 	//update view
 	CellUpdate();
 	m_trace_list_prev->DeleteAllItems();
+
+	//frame
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetBrushToolDlg())
+		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void TraceDlg::OnCompIDText(wxCommandEvent &event)
@@ -1462,6 +1472,11 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 
 	//update view
 	CellUpdate();
+
+	//frame
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetBrushToolDlg())
+		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void TraceDlg::OnCompExclusive(wxCommandEvent &event)
@@ -1492,6 +1507,11 @@ void TraceDlg::OnCompExclusive(wxCommandEvent &event)
 
 	//update view
 	CellUpdate();
+
+	//frame
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetBrushToolDlg())
+		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 //ID link controls
@@ -1530,6 +1550,11 @@ void TraceDlg::CellFull()
 	comp_selector.CompFull();
 	//update view
 	CellUpdate();
+
+	//frame
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetBrushToolDlg())
+		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, FL::CellList &list)

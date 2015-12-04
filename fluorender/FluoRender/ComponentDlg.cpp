@@ -2332,6 +2332,11 @@ void ComponentDlg::OnCompFull(wxCommandEvent &event)
 	}
 
 	m_view->RefreshGL();
+
+	//frame
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetBrushToolDlg())
+		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
@@ -2362,6 +2367,11 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 	}
 
 	m_view->RefreshGL();
+
+	//frame
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetBrushToolDlg())
+		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void ComponentDlg::OnCompAppend(wxCommandEvent &event)
@@ -2395,6 +2405,11 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 	comp_selector.Append(get_all);
 
 	m_view->RefreshGL();
+
+	//frame
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetBrushToolDlg())
+		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void ComponentDlg::OnCompAll(wxCommandEvent &event)
@@ -2408,6 +2423,11 @@ void ComponentDlg::OnCompAll(wxCommandEvent &event)
 	comp_selector.All();
 
 	m_view->RefreshGL();
+
+	//frame
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetBrushToolDlg())
+		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void ComponentDlg::OnCompClear(wxCommandEvent &event)
@@ -2421,6 +2441,11 @@ void ComponentDlg::OnCompClear(wxCommandEvent &event)
 	comp_selector.Clear();
 
 	m_view->RefreshGL();
+
+	//frame
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetBrushToolDlg())
+		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void ComponentDlg::EnableGenerate()
