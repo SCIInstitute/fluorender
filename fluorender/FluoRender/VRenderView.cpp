@@ -1638,7 +1638,6 @@ void VRenderGLView::DrawBrush()
 
 		//attributes
 		glDisable(GL_DEPTH_TEST);
-		GLfloat line_width = 1.0f;
 
 		int mode = m_selector.GetMode();
 
@@ -1647,21 +1646,15 @@ void VRenderGLView::DrawBrush()
 		if (mode == 1 ||
 			mode == 2 ||
 			mode == 8)
-		{
-			glLineWidth(0.5);
 			DrawCircle(cx, cy, m_brush_radius1*pressure,
 				text_color, proj_mat);
-		}
 
 		if (mode == 1 ||
 			mode == 2 ||
 			mode == 3 ||
 			mode == 4)
-		{
-			glLineWidth(0.5);
 			DrawCircle(cx, cy, m_brush_radius2*pressure,
 				text_color, proj_mat);
-		}
 
 		float px, py;
 		px = cx-7-nx/2.0;
@@ -1684,7 +1677,6 @@ void VRenderGLView::DrawBrush()
 		}
 		m_text_renderer->RenderText(wstr, text_color, px*sx, py*sy, sx, sy);
 
-		glLineWidth(line_width);
 		glEnable(GL_DEPTH_TEST);
 
 	}
@@ -9618,9 +9610,7 @@ void VRenderGLView::DrawRulers()
 
 	if (!verts.empty())
 	{
-		double width = m_text_renderer->GetSize()/3.0;
 		glEnable(GL_LINE_SMOOTH);
-		glLineWidth(GLfloat(width));
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -9673,7 +9663,6 @@ void VRenderGLView::DrawRulers()
 			shader->release();
 
 		glDisable(GL_LINE_SMOOTH);
-		glLineWidth(1.0);
 	}
 }
 
@@ -9916,9 +9905,7 @@ void VRenderGLView::DrawTraces()
 
 		if (!verts.empty())
 		{
-			double width = m_text_renderer->GetSize()/3.0;
 			glEnable(GL_LINE_SMOOTH);
-			glLineWidth(GLfloat(width));
 			glEnable(GL_DEPTH_TEST);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -9959,7 +9946,6 @@ void VRenderGLView::DrawTraces()
 				shader->release();
 
 			glDisable(GL_LINE_SMOOTH);
-			glLineWidth(1.0);
 		}
 	}
 }
