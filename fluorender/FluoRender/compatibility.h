@@ -361,9 +361,9 @@ inline bool FIND_FILES_4D(std::wstring path_name,
 						name = search_path + f;
 					else
 						name = f;
-					m_batch_list.push_back(name);
-					if (name == m_path_name)
-						m_cur_batch = cnt;
+					batch_list.push_back(name);
+					if (name == path_name)
+						cur_batch = cnt;
 					cnt++;
 				}
 			}

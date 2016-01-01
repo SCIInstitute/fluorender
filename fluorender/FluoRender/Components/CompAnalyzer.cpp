@@ -453,7 +453,8 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 		}
 
 		//settings
-		vd->SetColor(GetColor(*i, m_vd, color_type));
+        Color c = GetColor(*i, m_vd, color_type);
+		vd->SetColor(c);
 		vd->SetEnableAlpha(m_vd->GetEnableAlpha());
 		vd->SetShading(m_vd->GetShading());
 		vd->SetShadow(false);
