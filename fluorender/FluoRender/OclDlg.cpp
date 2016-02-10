@@ -32,6 +32,8 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/txtstrm.h>
 #include <wx/stdpaths.h>
 #include "compatibility.h"
+#include <boost/chrono.hpp>
+using namespace boost::chrono;
 
 BEGIN_EVENT_TABLE(OclDlg, wxPanel)
 	EVT_BUTTON(ID_BrowseBtn, OclDlg::OnBrowseBtn)
@@ -270,12 +272,16 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 	executor->SetDuplicate(dup);
 	executor->Execute();
 
-	//high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	//max_filter(tex->get_nrrd(0)->data, result,
-	//	res_x, res_y, res_z);
-	//high_resolution_clock::time_point t2 = high_resolution_clock::now();
-	//duration<double> time_span = duration_cast<duration<double>>(t2-t1);
-	//(*m_output_txt) << "CPU time: " << time_span.count() << " sec.\n";
+	Texture* tex = vd->GetTexture();
+	void* result = executor->GetResult()->GetTexture()->get_nrrd(0)->data;
+	int res_x, res_y, res_z;
+	vd->GetResolution(res_x, res_y, res_z);
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
+	morph_filter(tex->get_nrrd(0)->data, result,
+		res_x, res_y, res_z);
+	high_resolution_clock::time_point t2 = high_resolution_clock::now();
+	duration<double> time_span = duration_cast<duration<double>>(t2-t1);
+	(*m_output_txt) << "CPU time: " << time_span.count() << " sec.\n";
 
 	//add result for rendering
 	if (dup)
@@ -558,3 +564,117 @@ void OclDlg::max_filter(void* data, void* result,
 		((unsigned char*)result)[index] = rvalue;
 	}
 }
+
+void OclDlg::sobel_filter(void* data, void* result,
+	int brick_x, int brick_y, int brick_z)
+{
+	int kx = 3;
+	int ky = 3;
+	int kz = 3;
+
+	int krnx[] = 
+	{ 1, 0, -1,
+		2, 0, -2,
+		1, 0, -1,
+		2, 0, -2,
+		4, 0, -4,
+		2, 0, -2,
+		1, 0, -1,
+		2, 0, -2,
+		1, 0, -1 };
+	int krny[] =
+	{ 1, 2, 1,
+		0, 0, 0,
+		-1, -2, -1,
+		2, 4, 2,
+		0, 0, 0,
+		-2, -4, -2,
+		1, 2, 1,
+		0, 0, 0,
+		-1, -2, -1 };
+	int krnz[] =
+	{ 1, 2, 1,
+		2, 4, 2,
+		1, 2, 1,
+		0, 0, 0,
+		0, 0, 0,
+		0, 0, 0,
+		-1, -2, -1,
+		-2, -4, -2,
+		-1, -2, -1 };
+
+	for (int bi = 0; bi<brick_x; ++bi)
+	for (int bj = 0; bj<brick_y; ++bj)
+	for (int bk = 0; bk<brick_z; ++bk)
+	{
+		unsigned int index = brick_x*brick_y*bk +
+			brick_x*bj + bi;
+		double rx = 0;
+		double ry = 0;
+		double rz = 0;
+		for (int i = 0; i<kx; ++i)
+		for (int j = 0; j<ky; ++j)
+		for (int k = 0; k<kz; ++k)
+		{
+			int cx = bi + i - kx / 2;
+			int cy = bj + j - ky / 2;
+			int cz = bk + k - kz / 2;
+			if (cx < 0) cx = 0;
+			if (cx >= brick_x) cx = brick_x - 1;
+			if (cy < 0) cy = 0;
+			if (cy >= brick_y) cy = brick_y - 1;
+			if (cz < 0) cz = 0;
+			if (cz >= brick_z) cz = brick_z - 1;
+
+			unsigned int kc = brick_x*brick_y*cz +
+				brick_x*cy + cx;
+			unsigned char dvalue = ((unsigned char*)data)[kc];
+			rx += krnx[kx*ky*k + kx*j + i] * dvalue;
+			ry += krny[kx*ky*k + kx*j + i] * dvalue;
+			rz += krnz[kx*ky*k + kx*j + i] * dvalue;
+		}
+		double rvalue = sqrt(rx*rx + ry*ry + rz*rz);
+		((unsigned char*)result)[index] = rvalue;
+	}
+}
+
+void OclDlg::morph_filter(void* data, void* result,
+	int brick_x, int brick_y, int brick_z)
+{
+	int kx = 3;
+	int ky = 3;
+	int kz = 3;
+
+	for (int bi = 0; bi<brick_x; ++bi)
+	for (int bj = 0; bj<brick_y; ++bj)
+	for (int bk = 0; bk<brick_z; ++bk)
+	{
+		unsigned int index = brick_x*brick_y*bk +
+			brick_x*bj + bi;
+		unsigned char rvalue = 0;
+		for (int i = 0; i<kx; ++i)
+		for (int j = 0; j<ky; ++j)
+		for (int k = 0; k<kz; ++k)
+		{
+			int cx = bi + i - kx / 2;
+			int cy = bj + j - ky / 2;
+			int cz = bk + k - kz / 2;
+			if (cx < 0) cx = 0;
+			if (cx >= brick_x) cx = brick_x - 1;
+			if (cy < 0) cy = 0;
+			if (cy >= brick_y) cy = brick_y - 1;
+			if (cz < 0) cz = 0;
+			if (cz >= brick_z) cz = brick_z - 1;
+
+			unsigned int kc = brick_x*brick_y*cz +
+				brick_x*cy + cx;
+			unsigned char dvalue = ((unsigned char*)data)[kc];
+			rvalue = max(rvalue, dvalue);
+		}
+		unsigned int kc = brick_x*brick_y*bk +
+			brick_x*bj + bi;
+		unsigned char dvalue = ((unsigned char*)data)[kc];
+		((unsigned char*)result)[index] = rvalue - dvalue;
+	}
+}
+

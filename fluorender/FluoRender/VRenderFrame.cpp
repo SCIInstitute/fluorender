@@ -106,6 +106,7 @@ bool VRenderFrame::m_load_mask = true;
 bool VRenderFrame::m_save_compress = true;
 bool VRenderFrame::m_vrp_embed = false;
 bool VRenderFrame::m_save_project = false;
+bool VRenderFrame::m_save_alpha = false;
 
 VRenderFrame::VRenderFrame(
 	wxFrame* frame,

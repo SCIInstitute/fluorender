@@ -297,6 +297,11 @@ public:
 	{ m_vrp_embed = value; }
 	static bool GetEmbedProject()
 	{ return m_vrp_embed; }
+	//save alpha
+	static void SetSaveAlpha(bool value)
+	{ m_save_alpha = value; }
+	static bool GetSaveAlpha()
+	{ return m_save_alpha; }
 
 	//show dialogs
 	void ShowPaintTool();
@@ -401,6 +406,8 @@ private:
 	static bool m_vrp_embed;
 	//save project
 	static bool m_save_project;
+	//save alpha
+	static bool m_save_alpha;
 
 	//mac address
 	wxString m_address;

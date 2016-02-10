@@ -95,6 +95,10 @@ private:
 		int brick_x, int brick_y, int brick_z);
 	void max_filter(void* data, void* result,
 		int brick_x, int brick_y, int brick_z);
+	void sobel_filter(void* data, void* result,
+		int brick_x, int brick_y, int brick_z);
+	void morph_filter(void* data, void* result,
+		int brick_x, int brick_y, int brick_z);
 
 	void OnBrowseBtn(wxCommandEvent& event);
 	void OnSaveBtn(wxCommandEvent& event);

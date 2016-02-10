@@ -4945,7 +4945,7 @@ void VRenderGLView::PostDraw()
 			h = GetSize().y;
 		}
 
-		int chann = 3; //RGB or RGBA
+		int chann = VRenderFrame::GetSaveAlpha()?4:3;
 		glPixelStorei(GL_PACK_ROW_LENGTH, w);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		unsigned char *image = new unsigned char[w*h*chann];
@@ -12062,6 +12062,14 @@ void VRenderView::OnCh1Check(wxCommandEvent &event)
 		VRenderFrame::SetCompression(ch1->GetValue());
 }
 
+//save alpha
+void VRenderView::OnChAlphaCheck(wxCommandEvent &event)
+{
+	wxCheckBox* ch_alpha = (wxCheckBox*)event.GetEventObject();
+	if (ch_alpha)
+		VRenderFrame::SetSaveAlpha(ch_alpha->GetValue());
+}
+
 //embde project
 void VRenderView::OnChEmbedCheck(wxCommandEvent &event)
 {
@@ -12072,7 +12080,7 @@ void VRenderView::OnChEmbedCheck(wxCommandEvent &event)
 
 wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 {
-	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(400, 90));
+	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(400, 100));
 
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
@@ -12085,11 +12093,19 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 	if (ch1)
 		ch1->SetValue(VRenderFrame::GetCompression());
 
+	//save alpha
+	wxCheckBox* ch_alpha = new wxCheckBox(panel, wxID_HIGHEST + 3005,
+		"Save alpha channel");
+	ch_alpha->Connect(ch_alpha->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(VRenderView::OnChAlphaCheck), NULL, panel);
+	if (ch_alpha)
+		ch_alpha->SetValue(VRenderFrame::GetSaveAlpha());
+
 	//copy all files check box
 	wxCheckBox* ch_embed = 0;
 	if (VRenderFrame::GetSaveProject())
 	{
-		ch_embed = new wxCheckBox(panel, wxID_HIGHEST+3005,
+		ch_embed = new wxCheckBox(panel, wxID_HIGHEST+3006,
 			"Embed all files in the project folder");
 		ch_embed->Connect(ch_embed->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 			wxCommandEventHandler(VRenderView::OnChEmbedCheck), NULL, panel);
@@ -12099,6 +12115,8 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 	//group
 	group1->Add(10, 10);
 	group1->Add(ch1);
+	group1->Add(10, 10);
+	group1->Add(ch_alpha);
 	group1->Add(10, 10);
 	if (VRenderFrame::GetSaveProject() &&
 		ch_embed)
@@ -12118,7 +12136,10 @@ void VRenderView::OnCapture(wxCommandEvent& event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 
 	if (vr_frame && vr_frame->GetSettingDlg())
+	{
 		VRenderFrame::SetSaveProject(vr_frame->GetSettingDlg()->GetProjSave());
+		VRenderFrame::SetSaveAlpha(vr_frame->GetSettingDlg()->GetSaveAlpha());
+	}
 
 	wxFileDialog file_dlg(m_frame, "Save captured image", "", "", "*.tif", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 	file_dlg.SetExtraControlCreator(CreateExtraCaptureControl);
@@ -12129,14 +12150,17 @@ void VRenderView::OnCapture(wxCommandEvent& event)
 		m_glview->m_capture = true;
 		RefreshGL();
 
-		if (vr_frame && vr_frame->GetSettingDlg() &&
-			vr_frame->GetSettingDlg()->GetProjSave())
+		if (vr_frame && vr_frame->GetSettingDlg())
 		{
-			wxString new_folder;
-			new_folder = m_glview->m_cap_file + "_project";
-			CREATE_DIR(new_folder.fn_str());
-			wxString prop_file = new_folder + "/" + file_dlg.GetFilename() + "_project.vrp";
-			vr_frame->SaveProject(prop_file);
+			if (vr_frame->GetSettingDlg()->GetProjSave())
+			{
+				wxString new_folder;
+				new_folder = m_glview->m_cap_file + "_project";
+				CREATE_DIR(new_folder.fn_str());
+				wxString prop_file = new_folder + "/" + file_dlg.GetFilename() + "_project.vrp";
+				vr_frame->SaveProject(prop_file);
+			}
+			vr_frame->GetSettingDlg()->SetSaveAlpha(VRenderFrame::GetSaveAlpha());
 		}
 	}
 }

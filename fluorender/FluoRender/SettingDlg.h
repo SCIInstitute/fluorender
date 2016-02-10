@@ -115,6 +115,8 @@ public:
 	//get settings from ui
 	int GetGMCMode() {return m_gmc_mode;}
 	bool GetProjSave() {return m_prj_save;}
+	bool GetSaveAlpha() { return m_save_alpha; }
+	void SetSaveAlpha(bool val) { m_save_alpha = val; }
 	bool GetRealtimeCompress() {return m_realtime_compress;}
 	void SetRealtimeCompress(bool val) {m_realtime_compress = val;}
 	bool GetSkipBricks() {return m_skip_bricks;}
@@ -213,6 +215,7 @@ private:
 							//3-real-time 4 samples (removed);
 							//4-pre-calculated 4 samples (removed);
 	bool m_prj_save;		//save project automatically
+	bool m_save_alpha;		//save alpha channel in captured images
 	bool m_realtime_compress;//real time compress
 	bool m_skip_bricks;		//skip empty bricks
 	bool m_test_speed;		//test fps

@@ -227,6 +227,7 @@ private:
 	void OnHelpBtn(wxCommandEvent& event);
 	void OnMovieQuality(wxCommandEvent &event);
 	void OnCh1Check(wxCommandEvent &event);
+	void OnCh2Check(wxCommandEvent &event);
 	void OnChEmbedCheck(wxCommandEvent &event);
 	static wxWindow* CreateExtraCaptureControl(wxWindow* parent);
 

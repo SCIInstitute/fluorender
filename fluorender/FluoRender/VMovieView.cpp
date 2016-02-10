@@ -638,6 +638,12 @@ void VMovieView::OnRun(wxCommandEvent& event) {
 	wxString str = m_views_cmb->GetValue();
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (!vr_frame) return; 
+	if (vr_frame && vr_frame->GetSettingDlg())
+	{
+		VRenderFrame::SetSaveProject(vr_frame->GetSettingDlg()->GetProjSave());
+		VRenderFrame::SetSaveAlpha(vr_frame->GetSettingDlg()->GetSaveAlpha());
+	}
+
 	VRenderView* vrv = vr_frame->GetView(str);
 	if (!vrv) return;
 	wxFileDialog *fopendlg = new wxFileDialog(
@@ -646,7 +652,8 @@ void VMovieView::OnRun(wxCommandEvent& event) {
 		wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 	fopendlg->SetExtraControlCreator(CreateExtraCaptureControl);
 	int rval = fopendlg->ShowModal();
-	if (rval == wxID_OK) {
+	if (rval == wxID_OK)
+	{
 		wxCommandEvent e;
 		OnRewind(e);
 		m_filename = fopendlg->GetPath();
@@ -670,7 +677,12 @@ void VMovieView::OnRun(wxCommandEvent& event) {
 		m_filename = m_filename.SubString(0,m_filename.Len()-5);
 		m_record = true;
 		delete fopendlg;
-	} else {
+		if (vr_frame && vr_frame->GetSettingDlg())
+		{
+			vr_frame->GetSettingDlg()->SetSaveAlpha(VRenderFrame::GetSaveAlpha());
+		}
+	} else
+	{
 		delete fopendlg;
 		return;
 	}
@@ -1090,7 +1102,7 @@ void VMovieView::WriteFrameToFile(int total_frames) {
         w = vrv->GetGLSize().x;
         h = vrv->GetGLSize().y;
     }
-	int chann = 3; //RGB or RGBA
+	int chann = VRenderFrame::GetSaveAlpha() ? 4 : 3;
     glPixelStorei(GL_PACK_ROW_LENGTH, w);
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
     unsigned char *image = new unsigned char[w*h*chann];
@@ -1100,9 +1112,10 @@ void VMovieView::WriteFrameToFile(int total_frames) {
     string str_fn = outputfilename.ToStdString();
 	if (filetype_.IsSameAs(".mov")) {
 		//flip vertically 
-		unsigned char *flip = new unsigned char[w*h*chann];
-		for(size_t yy = 0; yy < (size_t)h; yy++)
-			memcpy(flip + yy * 3 * w, image + 3 * w * (h - yy - 1),w * 3);
+		unsigned char *flip = new unsigned char[w*h*3];
+		for (size_t yy = 0; yy < (size_t)h; yy++)
+		for (size_t xx = 0; xx < (size_t)w; xx++)
+			memcpy(flip + 3 * (w * yy + xx), image + chann * (w * (h - yy - 1) + xx), 3);
 		bool worked = encoder_.set_frame_rgb_data(flip);
 		worked = encoder_.write_video_frame(m_last_frame);
 		delete flip;
@@ -1170,6 +1183,12 @@ void VMovieView::OnCh1Check(wxCommandEvent &event) {
 	if (ch1)
 		VRenderFrame::SetCompression(ch1->GetValue());
 }
+//ch2
+void VMovieView::OnCh2Check(wxCommandEvent &event) {
+	wxCheckBox* ch2 = (wxCheckBox*)event.GetEventObject();
+	if (ch2)
+		VRenderFrame::SetSaveAlpha(ch2->GetValue());
+}
 //movie quality
 void VMovieView::OnMovieQuality(wxCommandEvent &event) {
 	m_Mbitrate = STOD(((wxTextCtrl*)event.GetEventObject())
@@ -1186,7 +1205,7 @@ void VMovieView::OnChEmbedCheck(wxCommandEvent &event) {
 }
 
 wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent) {
-	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(600, 90));
+	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(600, 100));
 
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
@@ -1202,8 +1221,16 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent) {
 		wxCommandEventHandler(VMovieView::OnCh1Check), NULL, panel);
 	if (ch1)
 		ch1->SetValue(VRenderFrame::GetCompression());
+	wxCheckBox *ch2 = new wxCheckBox(panel, wxID_HIGHEST + 3005,
+		"Save alpha");
+	ch2->Connect(ch2->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(VMovieView::OnCh2Check), NULL, panel);
+	if (ch2)
+		ch2->SetValue(VRenderFrame::GetSaveAlpha());
 	line1->Add(tiffopts, 0, wxALIGN_CENTER);
 	line1->Add(ch1, 0, wxALIGN_CENTER);
+	line1->Add(10, 10);
+	line1->Add(ch2, 0, wxALIGN_CENTER);
 	// movie quality
 	//bitrate
 	wxStaticText *MOVopts = new wxStaticText(panel,wxID_ANY, "MOV Options:",

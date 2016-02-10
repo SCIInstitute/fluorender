@@ -1557,6 +1557,7 @@ private:
 	//bar top
 	void OnVolumeMethodCheck(wxCommandEvent& event);
 	void OnCh1Check(wxCommandEvent &event);
+	void OnChAlphaCheck(wxCommandEvent &event);
 	void OnChEmbedCheck(wxCommandEvent &event);
 	static wxWindow* CreateExtraCaptureControl(wxWindow* parent);
 	void OnCapture(wxCommandEvent& event);
