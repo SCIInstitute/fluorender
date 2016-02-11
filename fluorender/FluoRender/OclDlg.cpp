@@ -32,8 +32,8 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/txtstrm.h>
 #include <wx/stdpaths.h>
 #include "compatibility.h"
-#include <boost/chrono.hpp>
-using namespace boost::chrono;
+//#include <boost/chrono.hpp>
+//using namespace boost::chrono;
 
 BEGIN_EVENT_TABLE(OclDlg, wxPanel)
 	EVT_BUTTON(ID_BrowseBtn, OclDlg::OnBrowseBtn)
@@ -272,16 +272,16 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 	executor->SetDuplicate(dup);
 	executor->Execute();
 
-	Texture* tex = vd->GetTexture();
+/*	Texture* tex = vd->GetTexture();
 	void* result = executor->GetResult()->GetTexture()->get_nrrd(0)->data;
 	int res_x, res_y, res_z;
 	vd->GetResolution(res_x, res_y, res_z);
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	morph_filter(tex->get_nrrd(0)->data, result,
+	min_filter(tex->get_nrrd(0)->data, result,
 		res_x, res_y, res_z);
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	duration<double> time_span = duration_cast<duration<double>>(t2-t1);
-	(*m_output_txt) << "CPU time: " << time_span.count() << " sec.\n";
+	(*m_output_txt) << "CPU time: " << time_span.count() << " sec.\n";*/
 
 	//add result for rendering
 	if (dup)
