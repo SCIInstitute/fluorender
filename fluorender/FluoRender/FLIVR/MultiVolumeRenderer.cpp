@@ -733,6 +733,7 @@ namespace FLIVR
 				glClearColor(clear_color[0], clear_color[1], clear_color[2], clear_color[3]);
 				glClear(GL_COLOR_BUFFER_BIT);
 				glEnable(GL_BLEND);
+				glBlendEquationSeparate(GL_FUNC_ADD, GL_MAX);
 				glBlendFunc(GL_ONE, GL_ONE);
 
 				glBindVertexArray(m_slices_vao);
@@ -863,6 +864,7 @@ namespace FLIVR
 				glReadBuffer(cur_read_buffer);
 				glBindTexture(GL_TEXTURE_2D, blend_tex_);
 				//blend
+				glBlendEquation(GL_FUNC_ADD);
 				if (TextureRenderer::get_update_order() == 0)
 					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 				else if (TextureRenderer::get_update_order() == 1)
