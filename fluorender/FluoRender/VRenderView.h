@@ -132,7 +132,9 @@ public:
 	void AddMeshData(MeshData* md);
 	void AddAnnotations(Annotations* ann);
 	wxString AddGroup(wxString str, wxString prev_group="");
+	DataGroup* AddOrGetGroup();
 	wxString AddMGroup(wxString str);
+	MeshGroup* AddOrGetMGroup();
 	//remove
 	void RemoveVolumeData(wxString &name);
 	void RemoveMeshData(wxString &name);
@@ -1032,7 +1034,9 @@ public:
 	void AddMeshData(MeshData* md);
 	void AddAnnotations(Annotations* ann);
 	wxString AddGroup(wxString str = "", wxString prev_group="");
+	DataGroup* AddOrGetGroup();
 	wxString AddMGroup(wxString str = "");
+	MeshGroup* AddOrGetMGroup();
 	MeshGroup* GetMGroup(wxString &name);
 	void RemoveVolumeData(wxString &name);
 	void RemoveMeshData(wxString &name);

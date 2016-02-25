@@ -687,7 +687,7 @@ TraceDlg::TraceDlg(wxWindow* frame, wxWindow* parent)
 
 	//ghost num
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Ghosts:",
+	st = new wxStaticText(this, 0, "Tracks:",
 		wxDefaultPosition, wxSize(70, 20));
 	m_ghost_show_tail_chk = new wxCheckBox(this, ID_GhostShowTailChk, "Tail",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);

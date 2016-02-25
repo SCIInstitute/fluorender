@@ -1063,8 +1063,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
 
 			if (ch_num > 1)
 			{
-				wxString group_name = vrv->AddGroup();
-				DataGroup* group = vrv->GetGroup(group_name);
+				DataGroup* group = vrv->AddOrGetGroup();
 				if (group)
 				{
 					for (int i=ch_num; i>0; i--)
@@ -1072,7 +1071,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
 						VolumeData* vd = m_data_mgr.GetVolumeData(m_data_mgr.GetVolumeNum()-i);
 						if (vd)
 						{
-							vrv->AddVolumeData(vd);
+							vrv->AddVolumeData(vd, group->GetName());
 							wxString vol_name = vd->GetName();
 							if (vol_name.Find("_1ch")!=-1 &&
 								(i==1 || i==2))
@@ -1185,10 +1184,7 @@ void VRenderFrame::LoadMeshes(wxArrayString files, VRenderView* vrv)
 
 	MeshGroup* group = 0;
 	if (files.Count() > 1)
-	{
-		wxString group_name = vrv->AddMGroup();
-		group = vrv->GetMGroup(group_name);
-	}
+		group = vrv->AddOrGetMGroup();
 
 	for (int i=0; i<(int)files.Count(); i++)
 	{

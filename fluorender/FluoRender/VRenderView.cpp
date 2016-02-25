@@ -6836,6 +6836,49 @@ wxString VRenderGLView::AddGroup(wxString str, wxString prev_group)
 		return "";
 }
 
+DataGroup* VRenderGLView::AddOrGetGroup()
+{
+	for (int i = 0; i < (int)m_layer_list.size(); i++)
+	{
+		if (!m_layer_list[i])
+			continue;
+		switch (m_layer_list[i]->IsA())
+		{
+		case 5://group
+		{
+			DataGroup* group_temp = (DataGroup*)m_layer_list[i];
+			if (group_temp && !group_temp->GetVolumeNum())
+				return group_temp;
+		}
+		break;
+		}
+	}
+	//group not found
+	DataGroup* group = new DataGroup();
+	if (!group)
+		return 0;
+	//set default settings
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+	{
+		AdjustView* adjust_view = vr_frame->GetAdjustView();
+		if (adjust_view)
+		{
+			Color gamma, brightness, hdr;
+			bool sync_r, sync_g, sync_b;
+			adjust_view->GetDefaults(gamma, brightness, hdr, sync_r, sync_g, sync_b);
+			group->SetGamma(gamma);
+			group->SetBrightness(brightness);
+			group->SetHdr(hdr);
+			group->SetSyncR(sync_r);
+			group->SetSyncG(sync_g);
+			group->SetSyncB(sync_b);
+		}
+	}
+	m_layer_list.push_back(group);
+	return group;
+}
+
 wxString VRenderGLView::AddMGroup(wxString str)
 {
 	MeshGroup* group = new MeshGroup();
@@ -6847,6 +6890,31 @@ wxString VRenderGLView::AddMGroup(wxString str)
 		return group->GetName();
 	else
 		return "";
+}
+
+MeshGroup* VRenderGLView::AddOrGetMGroup()
+{
+	for (int i = 0; i < (int)m_layer_list.size(); i++)
+	{
+		if (!m_layer_list[i])
+			continue;
+		switch (m_layer_list[i]->IsA())
+		{
+		case 6://group
+		{
+			MeshGroup* group_temp = (MeshGroup*)m_layer_list[i];
+			if (group_temp && !group_temp->GetMeshNum())
+				return group_temp;
+		}
+		break;
+		}
+	}
+	//group not found
+	MeshGroup* group = new MeshGroup();
+	if (!group)
+		return 0;
+	m_layer_list.push_back(group);
+	return group;
 }
 
 MeshGroup* VRenderGLView::GetMGroup(wxString str)
@@ -11397,12 +11465,28 @@ wxString VRenderView::AddGroup(wxString str, wxString prev_group)
 		return "";
 }
 
+DataGroup* VRenderView::AddOrGetGroup()
+{
+	if (m_glview)
+		return m_glview->AddOrGetGroup();
+	else
+		return 0;
+}
+
 wxString VRenderView::AddMGroup(wxString str)
 {
 	if (m_glview)
 		return m_glview->AddMGroup(str);
 	else
 		return "";
+}
+
+MeshGroup* VRenderView::AddOrGetMGroup()
+{
+	if (m_glview)
+		return m_glview->AddOrGetMGroup();
+	else
+		return 0;
 }
 
 MeshGroup* VRenderView::GetMGroup(wxString &str)
