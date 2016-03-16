@@ -1070,7 +1070,32 @@ void TraceDlg::OnCompUncertainBtn(wxCommandEvent &event)
 		return;
 	if (!trace_group->GetTrackMap().GetFrameNum())
 		return;
-	
+	FL::CellList list_in, list_out;
+	//fill inlist
+	long item = -1;
+	while (true)
+	{
+		item = m_trace_list_curr->GetNextItem(
+			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		else
+			AddLabel(item, m_trace_list_curr, list_in);
+	}
+	if (list_in.size() == 0)
+	{
+		item = -1;
+		while (true)
+		{
+			item = m_trace_list_curr->GetNextItem(
+				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+			if (item == -1)
+				break;
+			else
+				AddLabel(item, m_trace_list_curr, list_in);
+		}
+	}
+
 	FL::TrackMap &track_map = trace_group->GetTrackMap();
 	FL::TrackMapProcessor tm_processor;
 	wxString str = m_comp_uncertain_low_text->GetValue();
@@ -1080,8 +1105,6 @@ void TraceDlg::OnCompUncertainBtn(wxCommandEvent &event)
 	str = m_comp_uncertain_hi_text->GetValue();
 	str.ToLong(&ival);
 	tm_processor.SetUncertainHigh(ival);
-
-	FL::CellList list_in, list_out;
 	tm_processor.GetCellsByUncertainty(track_map, list_in, list_out, m_cur_time);
 
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
