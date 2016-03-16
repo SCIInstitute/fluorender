@@ -45,6 +45,8 @@ namespace FL
 #define TAG_FRAM		5
 #define TAG_LAST_OP		6
 #define TAG_NUM			7
+#define TAG_COUNT		8	//added to 2.19 for uncertainty
+							//order: v1, v2, edge
 
 	typedef std::vector<Ruler*> RulerList;
 	typedef std::vector<Ruler*>::iterator RulerListIter;
@@ -62,6 +64,8 @@ namespace FL
 		void SetContactThresh(float value);
 		void SetSizeThresh(float value);
 		void SetLevelThresh(int level);
+		void SetUncertainLow(unsigned int value);
+		void SetUncertainHigh(unsigned int value);
 
 		void SetSizes(TrackMap& track_map,
 			size_t nx, size_t ny, size_t nz);
@@ -137,11 +141,17 @@ namespace FL
 			FL::VertexList &out_orphan_list,
 			FL::VertexList &in_multi_list,
 			FL::VertexList &out_multi_list);
+		void GetCellsByUncertainty(TrackMap& track_map,
+			CellList &list_in, CellList &list_out,
+			size_t frame);
 
 	private:
 		float m_contact_thresh;
 		float m_size_thresh;
 		int m_level_thresh;
+		//uncertainty filter
+		unsigned int m_uncertain_low;
+		unsigned int m_uncertain_high;
 
 		//processing
 		bool CheckCellContact(TrackMap& track_map,
@@ -175,7 +185,7 @@ namespace FL
 		size_t GetBinsCellCount(std::vector<CellBin> &bins);
 		bool MergeCells(VertexList& vertex_list, CellBin &bin,
 			TrackMap& track_map, size_t frame);
-		bool RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size_t frame, InterGraph &graph);
+		bool RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size_t frame, InterGraph &graph, bool reset);
 		bool MatchVertex(pVertex &vertex, InterGraph &graph, bool bl_check = true);
 		bool UnmatchVertex(pVertex &vertex, InterGraph &graph);
 		bool ExMatchVertex(pVertex &vertex, InterGraph &graph, size_t frame1, size_t frame2);
@@ -212,7 +222,9 @@ namespace FL
 			pVertex &vertex1, pVertex &vertex2,
 			size_t f1, size_t f2,
 			unsigned int size_ui, float size_f,
-			float dist, unsigned int link);
+			float dist, unsigned int link,
+			unsigned int v1_count, unsigned int v2_count,
+			unsigned int edge_count);
 
 	};
 
@@ -229,6 +241,16 @@ namespace FL
 	inline void TrackMapProcessor::SetLevelThresh(int level)
 	{
 		m_level_thresh = level;
+	}
+
+	inline void TrackMapProcessor::SetUncertainLow(unsigned int value)
+	{
+		m_uncertain_low = value;
+	}
+
+	inline void TrackMapProcessor::SetUncertainHigh(unsigned int value)
+	{
+		m_uncertain_high = value;
 	}
 
 	inline void TrackMapProcessor::WriteBool(std::ofstream& ofs, bool value)

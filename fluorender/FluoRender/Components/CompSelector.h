@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FL_CompSelector_h
 
 #include <vector>
+#include <CellList.h>
 
 class VolumeData;
 namespace FL
@@ -63,6 +64,7 @@ namespace FL
 		void Clear();
 		void Delete();
 		void Delete(std::vector<unsigned int> &ids);
+		void SelectList(CellList& list);
 
 	private:
 		VolumeData* m_vd;

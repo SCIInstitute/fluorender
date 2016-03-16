@@ -364,17 +364,23 @@ bool TrackMapProcessor::LinkVertices(InterGraph& graph,
 		v1 = boost::add_vertex(graph);
 		graph[v1].id = vertex1->Id();
 		graph[v1].frame = f1;
+		graph[v1].count = 1;
 		graph[v1].vertex = vertex1;
 		vertex1->SetInterVert(graph, v1);
 	}
+	else
+		graph[v1].count++;
 	if (v2 == InterGraph::null_vertex())
 	{
 		v2 = boost::add_vertex(graph);
 		graph[v2].id = vertex2->Id();
 		graph[v2].frame = f2;
+		graph[v2].count = 1;
 		graph[v2].vertex = vertex2;
 		vertex2->SetInterVert(graph, v2);
 	}
+	else
+		graph[v2].count++;
 
 	std::pair<InterEdge, bool> e = boost::edge(v1, v2, graph);
 	if (!e.second)
@@ -385,12 +391,14 @@ bool TrackMapProcessor::LinkVertices(InterGraph& graph,
 		FLIVR::Point p1 = vertex1->GetCenter();
 		FLIVR::Point p2 = vertex2->GetCenter();
 		graph[e.first].dist = float((p1 - p2).length());
-		graph[e.first].link = 0;
+		graph[e.first].link = 1;
+		graph[e.first].count = 0;
 	}
 	else
 	{
 		graph[e.first].size_ui++;
 		graph[e.first].size_f += overlap_value;
+		graph[e.first].count++;
 	}
 
 	return true;
@@ -407,17 +415,23 @@ bool TrackMapProcessor::LinkOrphans(InterGraph& graph,
 		v1 = boost::add_vertex(graph);
 		graph[v1].id = vertex1->Id();
 		graph[v1].frame = f1;
+		graph[v1].count = 1;
 		graph[v1].vertex = vertex1;
 		vertex1->SetInterVert(graph, v1);
 	}
+	else
+		graph[v1].count++;
 	if (v2 == InterGraph::null_vertex())
 	{
 		v2 = boost::add_vertex(graph);
 		graph[v2].id = vertex2->Id();
 		graph[v2].frame = f2;
+		graph[v2].count = 1;
 		graph[v2].vertex = vertex2;
 		vertex2->SetInterVert(graph, v2);
 	}
+	else
+		graph[v2].count++;
 
 	std::pair<InterEdge, bool> e = boost::edge(v1, v2, graph);
 	if (!e.second)
@@ -427,7 +441,10 @@ bool TrackMapProcessor::LinkOrphans(InterGraph& graph,
 		graph[e.first].size_f = 0.0f;
 		graph[e.first].dist = dist_value;
 		graph[e.first].link = 1;
+		graph[e.first].count = 1;
 	}
+	else
+		graph[e.first].count++;
 
 	return true;
 }
@@ -442,6 +459,8 @@ bool TrackMapProcessor::IsolateVertex(InterGraph& graph, pVertex &vertex)
 	v1 = vertex->GetInterVert(graph);
 	if (v1 == InterGraph::null_vertex())
 		return false;
+	//reset
+	graph[v1].count = 0;
 	adj_verts = boost::adjacent_vertices(v1, graph);
 	//for each adjacent vertex
 	for (inter_iter = adj_verts.first;
@@ -453,7 +472,11 @@ bool TrackMapProcessor::IsolateVertex(InterGraph& graph, pVertex &vertex)
 		edge = boost::edge(v1, v2, graph);
 		if (edge.second &&
 			graph[edge.first].link)
+		{
 			graph[edge.first].link = 0;
+			//reset
+			graph[edge.first].count = 0;
+		}
 	}
 
 	return true;
@@ -470,6 +493,8 @@ bool TrackMapProcessor::ForceVertices(InterGraph& graph,
 		v1 = boost::add_vertex(graph);
 		graph[v1].id = vertex1->Id();
 		graph[v1].frame = f1;
+		//reset
+		graph[v1].count = 0;
 		graph[v1].vertex = vertex1;
 		vertex1->SetInterVert(graph, v1);
 	}
@@ -478,6 +503,8 @@ bool TrackMapProcessor::ForceVertices(InterGraph& graph,
 		v2 = boost::add_vertex(graph);
 		graph[v2].id = vertex2->Id();
 		graph[v2].frame = f2;
+		//reset
+		graph[v2].count = 0;
 		graph[v2].vertex = vertex2;
 		vertex2->SetInterVert(graph, v2);
 	}
@@ -495,6 +522,8 @@ bool TrackMapProcessor::ForceVertices(InterGraph& graph,
 		FLIVR::Point p2 = vertex2->GetCenter();
 		graph[edge.first].dist = float((p1 - p2).length());
 		graph[edge.first].link = 2;
+		//reset
+		graph[edge.first].count = 0;
 	}
 	else
 	{
@@ -503,6 +532,8 @@ bool TrackMapProcessor::ForceVertices(InterGraph& graph,
 		graph[edge.first].size_f = std::max(
 			vertex1->GetSizeF(), vertex2->GetSizeF());
 		graph[edge.first].link = 2;
+		//reset
+		graph[edge.first].count = 0;
 	}
 
 	return true;
@@ -516,14 +547,22 @@ bool TrackMapProcessor::UnlinkVertices(InterGraph& graph,
 	v1 = vertex1->GetInterVert(graph);
 	if (v1 == InterGraph::null_vertex())
 		return false;
+	//reset
+	graph[v1].count = 0;
 	v2 = vertex2->GetInterVert(graph);
 	if (v2 == InterGraph::null_vertex())
 		return false;
+	//reset
+	graph[v2].count = 0;
 
 	std::pair<InterEdge, bool> edge;
 	edge = boost::edge(v1, v2, graph);
 	if (edge.second)
+	{
 		graph[edge.first].link = 0;
+		//reset
+		graph[edge.first].count = 0;
+	}
 
 	return true;
 }
@@ -779,6 +818,9 @@ bool TrackMapProcessor::MatchVertex(pVertex &vertex,
 				std::bind(edge_comp_size_bl, std::placeholders::_1,
 				std::placeholders::_2, graph));
 			graph[edges[0]].link = 1;
+			graph[edges[0]].count++;
+			graph[boost::source(edges[0], graph)].count++;
+			graph[boost::target(edges[0], graph)].count++;
 		}
 		else
 		{
@@ -796,7 +838,12 @@ bool TrackMapProcessor::MatchVertex(pVertex &vertex,
 				v1_size = edge_vert->GetSizeF();
 				if (/*edge_size * 10 > std::min(v0_size, v1_size) &&*/
 					fabs(v0_size - v1_size) / (v0_size + v1_size) < 0.2f)
+				{
 					graph[edges[i]].link = 1;
+					graph[edges[i]].count++;
+					graph[boost::source(edges[i], graph)].count++;
+					graph[boost::target(edges[i], graph)].count++;
+				}
 			}
 		}
 	}
@@ -847,7 +894,12 @@ bool TrackMapProcessor::UnmatchVertex(pVertex &vertex, InterGraph &graph)
 
 	for (size_t i = 1; i < edges.size(); ++i)
 		if (graph[edges[i]].link < 2)
+		{
 			graph[edges[i]].link = 0;
+			graph[edges[i]].count++;
+			graph[boost::source(edges[i], graph)].count++;
+			graph[boost::target(edges[i], graph)].count++;
+		}
 
 	return true;
 }
@@ -1214,12 +1266,12 @@ bool TrackMapProcessor::MergeCells(VertexList& vertex_list, CellBin &bin,
 				if (frame > 0)
 				{
 					InterGraph &graph = track_map.m_inter_graph_list.at(frame - 1);
-					RelinkInterGraph(vertex, vertex0, frame, graph);
+					RelinkInterGraph(vertex, vertex0, frame, graph, false);
 				}
 				if (frame < track_map.m_frame_num - 1)
 				{
 					InterGraph &graph = track_map.m_inter_graph_list.at(frame);
-					RelinkInterGraph(vertex, vertex0, frame, graph);
+					RelinkInterGraph(vertex, vertex0, frame, graph, false);
 				}
 
 				//collect cells from vertex
@@ -1252,7 +1304,7 @@ bool TrackMapProcessor::MergeCells(VertexList& vertex_list, CellBin &bin,
 	return true;
 }
 
-bool TrackMapProcessor::RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size_t frame, InterGraph &graph)
+bool TrackMapProcessor::RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size_t frame, InterGraph &graph, bool reset)
 {
 	InterVert inter_vert, inter_vert0;
 	std::pair<InterAdjIter, InterAdjIter> adj_verts;
@@ -1281,9 +1333,17 @@ bool TrackMapProcessor::RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size
 				inter_vert0 = boost::add_vertex(graph);
 				graph[inter_vert0].id = vertex0->Id();
 				graph[inter_vert0].frame = frame;
+				if (reset)
+					graph[inter_vert0].count = 0;
+				else
+					graph[inter_vert0].count = graph[inter_vert].count;
 				graph[inter_vert0].vertex = vertex0;
 				vertex0->SetInterVert(graph, inter_vert0);
 			}
+			if (reset)
+				graph[inter_vert0].count = 0;
+			else
+				graph[inter_vert0].count++;
 			e0 = boost::edge(*inter_iter,
 				inter_vert0, graph);
 			if (!e0.second)
@@ -1294,11 +1354,13 @@ bool TrackMapProcessor::RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size
 				graph[e0.first].size_f = graph[e.first].size_f;
 				graph[e0.first].dist = graph[e.first].dist;
 				graph[e0.first].link = graph[e.first].link;
+				graph[e0.first].count = graph[e.first].count;
 			}
 			else
 			{
 				graph[e0.first].size_ui += graph[e.first].size_ui;
 				graph[e0.first].size_f += graph[e.first].size_f;
+				graph[e0.first].count += graph[e.first].count;
 			}
 			//delete the old edge
 			edges_to_remove.push_back(e.first);
@@ -1436,6 +1498,24 @@ bool TrackMapProcessor::Export(TrackMap & track_map, std::string &filename)
 			WriteFloat(ofs, inter_graph[*inter_iter].size_f);
 			WriteFloat(ofs, inter_graph[*inter_iter].dist);
 			WriteUint(ofs, inter_graph[*inter_iter].link);
+			//uncertainty
+			WriteTag(ofs, TAG_COUNT);
+			if (inter_graph[inter_vert0].frame <
+				inter_graph[inter_vert1].frame)
+			{
+				//first vertex
+				WriteUint(ofs, inter_graph[inter_vert0].count);
+				//second vertex
+				WriteUint(ofs, inter_graph[inter_vert1].count);
+			}
+			else
+			{
+				//first vertex
+				WriteUint(ofs, inter_graph[inter_vert1].count);
+				//second vertex
+				WriteUint(ofs, inter_graph[inter_vert0].count);
+			}
+			WriteUint(ofs, inter_graph[*inter_iter].count);
 		}
 	}
 
@@ -1574,9 +1654,21 @@ bool TrackMapProcessor::Import(TrackMap& track_map, std::string &filename)
 			size_f = ReadFloat(ifs);
 			dist = ReadFloat(ifs);
 			link = ReadUint(ifs);
+			unsigned int v1_count = 0;
+			unsigned int v2_count = 0;
+			unsigned int edge_count = 0;
+			if (ReadTag(ifs) == TAG_COUNT)
+			{
+				v1_count = ReadUint(ifs);
+				v2_count = ReadUint(ifs);
+				edge_count = ReadUint(ifs);
+			}
+			else
+				ifs.unget();
 			if (edge_exist)
 				AddInterEdge(inter_graph, vertex1, vertex2,
-					i-1, i, size_ui, size_f, dist, link);
+					i-1, i, size_ui, size_f, dist, link,
+					v1_count, v2_count, edge_count);
 		}
 	}
 
@@ -1726,7 +1818,10 @@ bool TrackMapProcessor::AddInterEdge(InterGraph& graph,
 	pVertex &vertex1, pVertex &vertex2,
 	size_t f1, size_t f2,
 	unsigned int size_ui, float size_f,
-	float dist, unsigned int link)
+	float dist, unsigned int link,
+	unsigned int v1_count,
+	unsigned int v2_count,
+	unsigned int edge_count)
 {
 	InterVert v1 = vertex1->GetInterVert(graph);
 	InterVert v2 = vertex2->GetInterVert(graph);
@@ -1738,6 +1833,7 @@ bool TrackMapProcessor::AddInterEdge(InterGraph& graph,
 		graph[v1].vertex = vertex1;
 		vertex1->SetInterVert(graph, v1);
 	}
+	graph[v1].count = v1_count;
 	if (v2 == InterGraph::null_vertex())
 	{
 		v2 = boost::add_vertex(graph);
@@ -1746,6 +1842,7 @@ bool TrackMapProcessor::AddInterEdge(InterGraph& graph,
 		graph[v2].vertex = vertex2;
 		vertex2->SetInterVert(graph, v2);
 	}
+	graph[v2].count = v2_count;
 
 	std::pair<InterEdge, bool> e = boost::edge(v1, v2, graph);
 	if (!e.second)
@@ -1755,9 +1852,13 @@ bool TrackMapProcessor::AddInterEdge(InterGraph& graph,
 		graph[e.first].size_f = size_f;
 		graph[e.first].dist = dist;
 		graph[e.first].link = link;
+		graph[e.first].count = edge_count;
 	}
 	else
+	{
+		graph[e.first].count = edge_count;
 		return false;
+	}
 
 	return true;
 }
@@ -2374,12 +2475,12 @@ bool TrackMapProcessor::CombineCells(TrackMap& track_map,
 				if (frame > 0)
 				{
 					InterGraph &graph = track_map.m_inter_graph_list.at(frame - 1);
-					RelinkInterGraph(vertex1, vertex0, frame, graph);
+					RelinkInterGraph(vertex1, vertex0, frame, graph, true);
 				}
 				if (frame < track_map.m_frame_num - 1)
 				{
 					InterGraph &graph = track_map.m_inter_graph_list.at(frame);
-					RelinkInterGraph(vertex1, vertex0, frame, graph);
+					RelinkInterGraph(vertex1, vertex0, frame, graph, true);
 				}
 
 				//erase from list
@@ -2630,6 +2731,60 @@ void TrackMapProcessor::GetLinkLists(TrackMap& track_map,
 			else if (edge_count > 1)
 				out_multi_list.insert(std::pair<unsigned int, pVertex>(
 					iter->second->Id(), iter->second));
+		}
+	}
+}
+
+void TrackMapProcessor::GetCellsByUncertainty(TrackMap& track_map,
+	CellList &list_in, CellList &list_out,
+	size_t frame)
+{
+	if (frame >= track_map.m_frame_num)
+		return;
+
+	VertexList &vertex_list = track_map.m_vertices_list.at(frame);
+	InterGraph &inter_graph = track_map.m_inter_graph_list.at(frame);
+	bool filter = !(list_in.empty());
+
+	InterVert v0;
+	unsigned int count;
+	pVertex vertex;
+	pCell cell;
+	CellBinIter pwcell_iter;
+	CellListIter cell_iter;
+	for (VertexListIter iter = vertex_list.begin();
+	iter != vertex_list.end(); ++iter)
+	{
+		if (!iter->second)
+			continue;
+		if (iter->second->GetSizeUi() < m_size_thresh)
+			continue;
+		v0 = iter->second->GetInterVert(inter_graph);
+		if (v0 == InterGraph::null_vertex())
+			continue;
+		count = inter_graph[v0].count;
+		if (count >= m_uncertain_low &&
+			count <= m_uncertain_high)
+		{
+			vertex = inter_graph[v0].vertex.lock();
+			if (!vertex)
+				continue;
+			for (pwcell_iter = vertex->GetCellsBegin();
+				pwcell_iter != vertex->GetCellsEnd();
+				++pwcell_iter)
+			{
+				cell = pwcell_iter->lock();
+				if (!cell)
+					continue;
+				if (filter)
+				{
+					cell_iter = list_in.find(cell->Id());
+					if (cell_iter == list_in.end())
+						continue;
+				}
+				list_out.insert(std::pair<unsigned int, pCell>
+					(cell->Id(), cell));
+			}
 		}
 	}
 }

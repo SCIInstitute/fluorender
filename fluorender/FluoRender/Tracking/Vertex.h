@@ -43,12 +43,16 @@ namespace FL
 		unsigned int bl_num;
 		unsigned int bl_size_ui;
 		float bl_size_f;
+		//count for changes
+		unsigned int count;
 	};
 
 	struct InterVertexData
 	{
 		unsigned int id;
 		unsigned int frame;
+		//count for changes
+		unsigned int count;
 		pwVertex vertex;
 	};
 

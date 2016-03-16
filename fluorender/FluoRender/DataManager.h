@@ -916,6 +916,11 @@ public:
 	//cells size filter
 	void SetCellSize(int size) {m_cell_size = size;}
 	int GetSizeSize() {return m_cell_size;}
+	//uncertainty filter
+	void SetUncertainLow(int value) { m_uncertain_low = value; }
+	int GetUncertainLow() { return m_uncertain_low; }
+	void SetUncertainHigh(int value) { m_uncertain_high = value; }
+	int GetUncertainHigh() { return m_uncertain_high; }
 
 	//get information
 	void GetLinkLists(size_t frame,
@@ -971,6 +976,8 @@ private:
 	bool m_draw_tail;
 	bool m_draw_lead;
 	int m_cell_size;
+	int m_uncertain_low;
+	int m_uncertain_high;
 
 	FL::TrackMap m_track_map;
 	FL::CellList m_cell_list;

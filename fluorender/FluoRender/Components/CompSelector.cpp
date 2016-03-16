@@ -445,3 +445,51 @@ void ComponentSelector::Delete(std::vector<unsigned int> &ids)
 	//invalidate label mask in gpu
 	m_vd->GetVR()->clear_tex_pool();
 }
+
+void ComponentSelector::SelectList(CellList& list)
+{
+	if (!m_vd)
+		return;
+
+	if (Texture::mask_undo_num_>0 &&
+		m_vd->GetTexture())
+		m_vd->GetTexture()->push_mask();
+
+	Nrrd* nrrd_mask = m_vd->GetMask(true);
+	if (!nrrd_mask)
+	{
+		m_vd->AddEmptyMask(0);
+		nrrd_mask = m_vd->GetMask(false);
+	}
+	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
+	if (!data_mask)
+		return;
+	//get current label
+	Texture* tex = m_vd->GetTexture();
+	if (!tex)
+		return;
+	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
+	if (!nrrd_label)
+		return;
+	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	if (!data_label)
+		return;
+
+	//select append
+	int nx, ny, nz;
+	m_vd->GetResolution(nx, ny, nz);
+	unsigned long long for_size = (unsigned long long)nx *
+		(unsigned long long)ny * (unsigned long long)nz;
+	unsigned long long index;
+	for (index = 0;
+		index < for_size; ++index)
+	{
+		if (list.find(data_label[index]) != list.end())
+			data_mask[index] = 255;
+		else
+			data_mask[index] = 0;
+	}
+
+	//invalidate label mask in gpu
+	m_vd->GetVR()->clear_tex_pool();
+}

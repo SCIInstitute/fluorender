@@ -3039,6 +3039,8 @@ TraceGroup::TraceGroup()
 	m_draw_tail = true;
 	m_draw_lead = false;
 	m_cell_size = 20;
+	m_uncertain_low = 0;
+	m_uncertain_high = 20;
 }
 
 TraceGroup::~TraceGroup()
@@ -3082,6 +3084,8 @@ void TraceGroup::GetLinkLists(size_t frame,
 
 	FL::TrackMapProcessor tm_processor;
 	tm_processor.SetSizeThresh(m_cell_size);
+	tm_processor.SetUncertainLow(m_uncertain_low);
+	tm_processor.SetUncertainHigh(m_uncertain_high);
 	tm_processor.GetLinkLists(m_track_map, frame,
 		in_orphan_list, out_orphan_list,
 		in_multi_list, out_multi_list);

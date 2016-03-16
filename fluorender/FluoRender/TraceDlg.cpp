@@ -303,6 +303,12 @@ EVT_BUTTON(ID_CompClearBtn, TraceDlg::OnCompClear)
 //cell size filter
 EVT_COMMAND_SCROLL(ID_CellSizeSldr, TraceDlg::OnCellSizeChange)
 EVT_TEXT(ID_CellSizeText, TraceDlg::OnCellSizeText)
+//uncertainty filter
+EVT_BUTTON(ID_CompUncertainBtn, TraceDlg::OnCompUncertainBtn)
+EVT_COMMAND_SCROLL(ID_CompUncertainLowSldr, TraceDlg::OnCompUncertainLowChange)
+EVT_TEXT(ID_CompUncertainLowText, TraceDlg::OnCompUncertainLowText)
+EVT_COMMAND_SCROLL(ID_CompUncertainHiSldr, TraceDlg::OnCompUncertainHiChange)
+EVT_TEXT(ID_CompUncertainHiText, TraceDlg::OnCompUncertainHiText)
 //link page
 EVT_TEXT(ID_CompIDText2, TraceDlg::OnCompIDText)
 EVT_TEXT_ENTER(ID_CompIDText2, TraceDlg::OnCompAppend)
@@ -459,6 +465,25 @@ wxWindow* TraceDlg::CreateSelectPage(wxWindow *parent)
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_size_sldr, 1, wxEXPAND);
 	sizer_2->Add(m_cell_size_text, 0, wxALIGN_CENTER);
+	//uncertainty filter
+	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
+	m_comp_uncertain_btn = new wxButton(page, ID_CompUncertainBtn, "Uncertainty filter:",
+		wxDefaultPosition, wxSize(130, 23));
+	m_comp_uncertain_low_sldr = new wxSlider(page, ID_CompUncertainLowSldr, 0, 0, 20,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_comp_uncertain_low_text = new wxTextCtrl(page, ID_CompUncertainLowText, "0",
+		wxDefaultPosition, wxSize(60, 23), 0, vald_int);
+	m_comp_uncertain_hi_sldr = new wxSlider(page, ID_CompUncertainHiSldr, 20, 0, 20,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_comp_uncertain_hi_text = new wxTextCtrl(page, ID_CompUncertainHiText, "20",
+		wxDefaultPosition, wxSize(60, 23), 0, vald_int);
+	sizer_3->Add(5, 5);
+	sizer_3->Add(m_comp_uncertain_btn, 0, wxALIGN_CENTER);
+	sizer_3->Add(m_comp_uncertain_low_sldr, 1, wxEXPAND);
+	sizer_3->Add(m_comp_uncertain_low_text, 0, wxALIGN_CENTER);
+	sizer_3->Add(5, 5);
+	sizer_3->Add(m_comp_uncertain_hi_sldr, 1, wxEXPAND);
+	sizer_3->Add(m_comp_uncertain_hi_text, 0, wxALIGN_CENTER);
 
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
@@ -466,6 +491,8 @@ wxWindow* TraceDlg::CreateSelectPage(wxWindow *parent)
 	sizer_v->Add(sizer_1, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 	sizer_v->Add(sizer_2, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer_3, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 
 	//set the page
@@ -1028,6 +1055,92 @@ void TraceDlg::OnCellSizeText(wxCommandEvent &event)
 		if (trace_group)
 		{
 			trace_group->SetCellSize(ival);
+		}
+	}
+}
+
+//uncertainty filter
+void TraceDlg::OnCompUncertainBtn(wxCommandEvent &event)
+{
+	if (!m_view)
+		return;
+	//trace group
+	TraceGroup *trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+		return;
+	if (!trace_group->GetTrackMap().GetFrameNum())
+		return;
+	
+	FL::TrackMap &track_map = trace_group->GetTrackMap();
+	FL::TrackMapProcessor tm_processor;
+	wxString str = m_comp_uncertain_low_text->GetValue();
+	long ival;
+	str.ToLong(&ival);
+	tm_processor.SetUncertainLow(ival);
+	str = m_comp_uncertain_hi_text->GetValue();
+	str.ToLong(&ival);
+	tm_processor.SetUncertainHigh(ival);
+
+	FL::CellList list_in, list_out;
+	tm_processor.GetCellsByUncertainty(track_map, list_in, list_out, m_cur_time);
+
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	FL::ComponentSelector comp_selector(vd);
+	comp_selector.SelectList(list_out);
+
+	//update view
+	CellUpdate();
+
+	//frame
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetBrushToolDlg())
+		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+}
+
+void TraceDlg::OnCompUncertainLowChange(wxScrollEvent &event)
+{
+	int ival = event.GetPosition();
+	wxString str = wxString::Format("%d", ival);
+	m_comp_uncertain_low_text->SetValue(str);
+}
+
+void TraceDlg::OnCompUncertainLowText(wxCommandEvent &event)
+{
+	wxString str = m_comp_uncertain_low_text->GetValue();
+	long ival;
+	str.ToLong(&ival);
+	m_comp_uncertain_low_sldr->SetValue(ival);
+
+	if (m_view)
+	{
+		TraceGroup* trace_group = m_view->GetTraceGroup();
+		if (trace_group)
+		{
+			trace_group->SetUncertainLow(ival);
+		}
+	}
+}
+
+void TraceDlg::OnCompUncertainHiChange(wxScrollEvent &event)
+{
+	int ival = event.GetPosition();
+	wxString str = wxString::Format("%d", ival);
+	m_comp_uncertain_hi_text->SetValue(str);
+}
+
+void TraceDlg::OnCompUncertainHiText(wxCommandEvent &event)
+{
+	wxString str = m_comp_uncertain_hi_text->GetValue();
+	long ival;
+	str.ToLong(&ival);
+	m_comp_uncertain_hi_sldr->SetValue(ival);
+
+	if (m_view)
+	{
+		TraceGroup* trace_group = m_view->GetTraceGroup();
+		if (trace_group)
+		{
+			trace_group->SetUncertainHigh(ival);
 		}
 	}
 }

@@ -120,6 +120,12 @@ public:
 		//comp size filter
 		ID_CellSizeSldr,
 		ID_CellSizeText,
+		//uncertainty filter
+		ID_CompUncertainBtn,
+		ID_CompUncertainLowSldr,
+		ID_CompUncertainLowText,
+		ID_CompUncertainHiSldr,
+		ID_CompUncertainHiText,
 		//link page
 		ID_CompIDText2,
 		ID_CellExclusiveLinkBtn,
@@ -248,6 +254,12 @@ private:
 	//cell size filter
 	wxSlider* m_cell_size_sldr;
 	wxTextCtrl* m_cell_size_text;
+	//uncertainty filter
+	wxButton* m_comp_uncertain_btn;
+	wxSlider* m_comp_uncertain_low_sldr;
+	wxTextCtrl* m_comp_uncertain_low_text;
+	wxSlider* m_comp_uncertain_hi_sldr;
+	wxTextCtrl* m_comp_uncertain_hi_text;
 
 	//link page
 	wxTextCtrl* m_comp_id_text2;
@@ -343,6 +355,12 @@ private:
 	//cell size filter
 	void OnCellSizeChange(wxScrollEvent &event);
 	void OnCellSizeText(wxCommandEvent &event);
+	//uncertainty filter
+	void OnCompUncertainBtn(wxCommandEvent &event);
+	void OnCompUncertainLowChange(wxScrollEvent &event);
+	void OnCompUncertainLowText(wxCommandEvent &event);
+	void OnCompUncertainHiChange(wxScrollEvent &event);
+	void OnCompUncertainHiText(wxCommandEvent &event);
 	//link page
 	//ID lnik controls
 	void OnCellExclusiveLink(wxCommandEvent& event);
