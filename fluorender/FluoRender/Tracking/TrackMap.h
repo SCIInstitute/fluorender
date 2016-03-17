@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <fstream>
 #include <boost/signals2.hpp>
 #include <deque>
+#include <map>
 
 class Ruler;
 namespace FL
@@ -50,8 +51,13 @@ namespace FL
 
 	typedef std::vector<Ruler*> RulerList;
 	typedef std::vector<Ruler*>::iterator RulerListIter;
+	struct UncertainBin
+	{
+		unsigned int level;
+		unsigned int count;
+	};
+	typedef std::map<unsigned int, UncertainBin> UncertainHist;
 	class TrackMap;
-	//class ::Ruler;
 	class TrackMapProcessor
 	{
 	public:
@@ -144,6 +150,10 @@ namespace FL
 		void GetCellsByUncertainty(TrackMap& track_map,
 			CellList &list_in, CellList &list_out,
 			size_t frame);
+		void GetCellUncertainty(TrackMap& track_map,
+			CellList &list, size_t frame);
+		void GetUncertainHist(TrackMap& track_map,
+			UncertainHist &hist1, UncertainHist &hist2, size_t frame);
 
 	private:
 		float m_contact_thresh;

@@ -368,8 +368,6 @@ bool TrackMapProcessor::LinkVertices(InterGraph& graph,
 		graph[v1].vertex = vertex1;
 		vertex1->SetInterVert(graph, v1);
 	}
-	else
-		graph[v1].count++;
 	if (v2 == InterGraph::null_vertex())
 	{
 		v2 = boost::add_vertex(graph);
@@ -379,8 +377,6 @@ bool TrackMapProcessor::LinkVertices(InterGraph& graph,
 		graph[v2].vertex = vertex2;
 		vertex2->SetInterVert(graph, v2);
 	}
-	else
-		graph[v2].count++;
 
 	std::pair<InterEdge, bool> e = boost::edge(v1, v2, graph);
 	if (!e.second)
@@ -392,13 +388,12 @@ bool TrackMapProcessor::LinkVertices(InterGraph& graph,
 		FLIVR::Point p2 = vertex2->GetCenter();
 		graph[e.first].dist = float((p1 - p2).length());
 		graph[e.first].link = 1;
-		graph[e.first].count = 0;
+		graph[e.first].count = 1;
 	}
 	else
 	{
 		graph[e.first].size_ui++;
 		graph[e.first].size_f += overlap_value;
-		graph[e.first].count++;
 	}
 
 	return true;
@@ -2785,6 +2780,168 @@ void TrackMapProcessor::GetCellsByUncertainty(TrackMap& track_map,
 				list_out.insert(std::pair<unsigned int, pCell>
 					(cell->Id(), cell));
 			}
+		}
+	}
+}
+
+void TrackMapProcessor::GetCellUncertainty(TrackMap& track_map,
+	CellList &list, size_t frame)
+{
+	if (frame >= track_map.m_frame_num)
+		return;
+
+	VertexList &vertex_list = track_map.m_vertices_list.at(frame);
+
+	InterVert v0;
+	pVertex vertex;
+	pCell cell;
+	CellBinIter pwcell_iter;
+	CellListIter cell_iter;
+
+	//in lists
+	if (frame > 0)
+	{
+		InterGraph &inter_graph = track_map.m_inter_graph_list.at(frame - 1);
+		for (VertexListIter iter = vertex_list.begin();
+			iter != vertex_list.end(); ++iter)
+		{
+			if (!iter->second)
+				continue;
+			vertex = iter->second;
+			for (pwcell_iter = vertex->GetCellsBegin();
+				pwcell_iter != vertex->GetCellsEnd();
+				++pwcell_iter)
+			{
+				cell = pwcell_iter->lock();
+				if (!cell)
+					continue;
+				cell_iter = list.find(cell->Id());
+				if (cell_iter != list.end())
+				{
+					v0 = vertex->GetInterVert(inter_graph);
+					if (v0 == InterGraph::null_vertex())
+						continue;
+					cell_iter->second->SetSizeUi(
+						inter_graph[v0].count);
+				}
+			}
+		}
+	}
+	else
+	{
+		//clear size
+		for (cell_iter = list.begin();
+			cell_iter != list.end(); ++cell_iter)
+		{
+			cell_iter->second->SetSizeUi(0);
+		}
+	}
+
+	//out lists
+	if (frame < track_map.m_frame_num - 1)
+	{
+		InterGraph &inter_graph = track_map.m_inter_graph_list.at(frame);
+		for (VertexListIter iter = vertex_list.begin();
+			iter != vertex_list.end(); ++iter)
+		{
+			if (!iter->second)
+				continue;
+			vertex = iter->second;
+			for (pwcell_iter = vertex->GetCellsBegin();
+			pwcell_iter != vertex->GetCellsEnd();
+				++pwcell_iter)
+			{
+				cell = pwcell_iter->lock();
+				if (!cell)
+					continue;
+				cell_iter = list.find(cell->Id());
+				if (cell_iter != list.end())
+				{
+					v0 = vertex->GetInterVert(inter_graph);
+					if (v0 == InterGraph::null_vertex())
+						continue;
+					cell_iter->second->SetExternalUi(
+						inter_graph[v0].count);
+				}
+			}
+		}
+	}
+	else
+	{
+		//clear size
+		for (cell_iter = list.begin();
+		cell_iter != list.end(); ++cell_iter)
+		{
+			cell_iter->second->SetExternalUi(0);
+		}
+	}
+}
+
+void TrackMapProcessor::GetUncertainHist(TrackMap& track_map,
+	UncertainHist &hist1, UncertainHist &hist2, size_t frame)
+{
+	if (frame >= track_map.m_frame_num)
+		return;
+
+	VertexList &vertex_list = track_map.m_vertices_list.at(frame);
+
+	unsigned int count;
+	InterVert v0;
+	pVertex vertex;
+
+	//in lists
+	if (frame > 0)
+	{
+		InterGraph &inter_graph = track_map.m_inter_graph_list.at(frame - 1);
+		for (VertexListIter iter = vertex_list.begin();
+		iter != vertex_list.end(); ++iter)
+		{
+			if (!iter->second)
+				continue;
+			vertex = iter->second;
+			v0 = vertex->GetInterVert(inter_graph);
+			if (v0 == InterGraph::null_vertex())
+				continue;
+			count = inter_graph[v0].count;
+			auto uhist_iter = hist1.find(count);
+			if (uhist_iter == hist1.end())
+			{
+				UncertainBin bin;
+				bin.level = count;
+				bin.count = 1;
+				hist1.insert(std::pair<unsigned int, UncertainBin>(
+					count, bin));
+			}
+			else
+				uhist_iter->second.count++;
+		}
+	}
+
+	//out lists
+	if (frame < track_map.m_frame_num - 1)
+	{
+		InterGraph &inter_graph = track_map.m_inter_graph_list.at(frame);
+		for (VertexListIter iter = vertex_list.begin();
+			iter != vertex_list.end(); ++iter)
+		{
+			if (!iter->second)
+				continue;
+			vertex = iter->second;
+			v0 = vertex->GetInterVert(inter_graph);
+			if (v0 == InterGraph::null_vertex())
+				continue;
+			count = inter_graph[v0].count;
+			auto uhist_iter = hist2.find(count);
+			if (uhist_iter == hist2.end())
+			{
+				UncertainBin bin;
+				bin.level = count;
+				bin.count = 1;
+				hist2.insert(std::pair<unsigned int, UncertainBin>(
+					count, bin));
+			}
+			else
+				uhist_iter->second.count++;
 		}
 	}
 }

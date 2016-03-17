@@ -339,6 +339,7 @@ EVT_BUTTON(ID_ConvertConsistentBtn, TraceDlg::OnConvertConsistent)
 //analysis
 EVT_BUTTON(ID_AnalyzeCompBtn, TraceDlg::OnAnalyzeComp)
 EVT_BUTTON(ID_AnalyzeLinkBtn, TraceDlg::OnAnalyzeLink)
+EVT_BUTTON(ID_AnalyzeUncertainHistBtn, TraceDlg::OnAnalyzeUncertainHist)
 EVT_BUTTON(ID_SaveResultBtn, TraceDlg::OnSaveResult)
 //magic tool
 //EVT_BUTTON(ID_CellMagic0Btn, TraceDlg::OnCellMagic0Btn)
@@ -666,12 +667,15 @@ wxWindow* TraceDlg::CreateAnalysisPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(65, 23));
 	m_analyze_link_btn = new wxButton(page, ID_AnalyzeLinkBtn, "Links",
 		wxDefaultPosition, wxSize(65, 23));
+	m_analyze_uncertain_hist_btn = new wxButton(page, ID_AnalyzeUncertainHistBtn, "Uncertainty",
+		wxDefaultPosition, wxSize(65, 23));
 	m_save_result_btn = new wxButton(page, ID_SaveResultBtn, "Save As",
 		wxDefaultPosition, wxSize(65, 23));
 	sizer_2->Add(5, 5);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_analyze_comp_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_analyze_link_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_analyze_uncertain_hist_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_save_result_btn, 0, wxALIGN_CENTER);
 
 	//vertical sizer
@@ -1415,6 +1419,100 @@ void TraceDlg::OnAnalyzeLink(wxCommandEvent &event)
 			int(out_orphan_list.size()) << "\t" <<
 			int(in_multi_list.size()) << "\t" <<
 			int(out_multi_list.size()) << "\n";
+	}
+}
+
+void TraceDlg::OnAnalyzeUncertainHist(wxCommandEvent &event)
+{
+	if (!m_view)
+		return;
+	//trace group
+	TraceGroup *trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+		return;
+	if (!trace_group->GetTrackMap().GetFrameNum())
+		return;
+	FL::CellList list_in;
+	//fill inlist
+	long item = -1;
+	while (true)
+	{
+		item = m_trace_list_curr->GetNextItem(
+			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		else
+			AddLabel(item, m_trace_list_curr, list_in);
+	}
+	if (list_in.size() == 0)
+	{
+		item = -1;
+		while (true)
+		{
+			item = m_trace_list_curr->GetNextItem(
+				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+			if (item == -1)
+				break;
+			else
+				AddLabel(item, m_trace_list_curr, list_in);
+		}
+	}
+
+	m_stat_text->SetValue("");
+
+	FL::TrackMap &track_map = trace_group->GetTrackMap();
+	FL::TrackMapProcessor tm_processor;
+	if (list_in.empty())
+	{
+		FL::UncertainHist hist1, hist2;
+		tm_processor.GetUncertainHist(track_map,
+			hist1, hist2, m_cur_time);
+		//header
+		(*m_stat_text) << "In\n";
+		(*m_stat_text) << "Level\t" << "Frequency\n";
+		int count = 0;
+		for (auto iter = hist1.begin();
+			iter != hist1.end(); ++iter)
+		{
+			while (iter->second.level > count)
+			{
+				(*m_stat_text) << count++ << "\t" << "0\n";
+			}
+			(*m_stat_text) << int(iter->second.level) << "\t" <<
+				int(iter->second.count) << "\n";
+			count++;
+		}
+
+		//header
+		(*m_stat_text) << "\n";
+		(*m_stat_text) << "Out\n";
+		(*m_stat_text) << "Level\t" << "Frequency\n";
+		count = 0;
+		for (auto iter = hist2.begin();
+		iter != hist2.end(); ++iter)
+		{
+			while (iter->second.level > count)
+			{
+				(*m_stat_text) << count++ << "\t" << "0\n";
+			}
+			(*m_stat_text) << int(iter->second.level) << "\t" <<
+				int(iter->second.count) << "\n";
+			count++;
+		}
+	}
+	else
+	{
+		tm_processor.GetCellUncertainty(track_map,
+			list_in, m_cur_time);
+		//header
+		(*m_stat_text) << "ID\t" << "In\t" << "Out\n";
+		for (FL::CellListIter iter = list_in.begin();
+			iter != list_in.end(); ++iter)
+		{
+			(*m_stat_text) << int(iter->second->Id()) << "\t" <<
+				int(iter->second->GetSizeUi()) << "\t" <<
+				int(iter->second->GetExternalUi()) << "\n";
+		}
 	}
 }
 

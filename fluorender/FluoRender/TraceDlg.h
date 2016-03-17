@@ -153,6 +153,7 @@ public:
 		//analysis
 		ID_AnalyzeCompBtn,
 		ID_AnalyzeLinkBtn,
+		ID_AnalyzeUncertainHistBtn,
 		ID_SaveResultBtn,
 		//magic tool
 		//ID_CellMagic0Btn,
@@ -292,6 +293,7 @@ private:
 	//analysis
 	wxButton* m_analyze_comp_btn;
 	wxButton* m_analyze_link_btn;
+	wxButton* m_analyze_uncertain_hist_btn;
 	wxButton* m_save_result_btn;
 
 	//magic tool
@@ -387,6 +389,7 @@ private:
 	//analysis
 	void OnAnalyzeComp(wxCommandEvent &event);
 	void OnAnalyzeLink(wxCommandEvent &event);
+	void OnAnalyzeUncertainHist(wxCommandEvent &event);
 	void OnSaveResult(wxCommandEvent &event);
 	//magic tool
 	//void OnCellMagic0Btn(wxCommandEvent& event);
