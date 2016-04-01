@@ -3740,9 +3740,9 @@ void VRenderFrame::OpenProject(wxString& filename)
 					vrv->m_glview->SetInitDist(radius/tan(d2r(vrv->GetAov()/2.0)));
 				double scale;
 				if (fconfig.Read("scale", &scale))
-					vrv->SetScaleFactor(scale);
+					vrv->SetScaleFactor(scale, true);
 				else
-					vrv->SetScaleFactor(radius/tan(d2r(vrv->GetAov()/2.0))/dist);
+					vrv->SetScaleFactor(radius/tan(d2r(vrv->GetAov()/2.0))/dist, true);
 				//object
 				if (fconfig.Read("obj_center", &str))
 				{

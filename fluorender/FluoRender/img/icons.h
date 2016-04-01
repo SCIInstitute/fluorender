@@ -388,6 +388,13 @@ const static unsigned char shade_png[16239];
 
 /* shadow.png - 16235 bytes */
 const static unsigned char shadow_png[16235];
+
+/* zoom_view.png - 15206 bytes */
+const static unsigned char zoom_view_png[15206];
+
+/* zoom_data.png - 15638 bytes */
+const static unsigned char zoom_data_png[15638];
+
 };
 
 #endif//_ICONS_H_

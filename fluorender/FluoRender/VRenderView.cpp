@@ -117,6 +117,8 @@ wxGLCanvas(parent, id, attriblist, pos, size, style),
 	//scale factor
 	m_scale_factor(1.0),
 	m_scale_factor_saved(1.0),
+	//scale mode
+	m_scale_mode(true),
 	//mode in determining depth of volume
 	m_point_volume_mode(0),
 	//ruler use volume transfer function
@@ -4630,7 +4632,7 @@ void VRenderGLView::SetParams(double t)
 	double scale;
 	keycode.l2_name = "scale";
 	if (interpolator->GetDouble(keycode, t, scale))
-		m_vrv->SetScaleFactor(scale);
+		m_vrv->SetScaleFactor(scale, true);
 	//rotation
 	keycode.l2 = 0;
 	keycode.l2_name = "rotation";
@@ -5568,9 +5570,9 @@ void VRenderGLView::SetCenter()
 	}
 }
 
-void VRenderGLView::SetScale121()
+double VRenderGLView::Get121ScaleFactor()
 {
-	//SetCenter();
+	double result = 1.0;
 
 	int nx = GetSize().x;
 	int ny = GetSize().y;
@@ -5586,16 +5588,28 @@ void VRenderGLView::SetScale121()
 		vd = m_vd_pop_list[0];
 	if (vd)
 		vd->GetSpacings(spc_x, spc_y, spc_z);
-	spc_x = spc_x<EPS?1.0:spc_x;
-	spc_y = spc_y<EPS?1.0:spc_y;
+	spc_x = spc_x<EPS ? 1.0 : spc_x;
+	spc_y = spc_y<EPS ? 1.0 : spc_y;
 
 	if (aspect > 1.0)
-		m_scale_factor = 2.0*m_radius/spc_y/double(ny);
+		result = 2.0*m_radius / spc_y / double(ny);
 	else
-		m_scale_factor = 2.0*m_radius/spc_x/double(nx);
+		result = 2.0*m_radius / spc_x / double(nx);
 
-	wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
-	m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
+	return result;
+}
+
+void VRenderGLView::SetScale121()
+{
+	//SetCenter();
+
+	m_scale_factor = Get121ScaleFactor();
+	double value = 1.0;
+	if (m_scale_mode)
+		value = m_scale_factor;
+
+	wxString str = wxString::Format("%.0f", value*100.0);
+	m_vrv->m_scale_factor_sldr->SetValue(value*100);
 	m_vrv->m_scale_factor_text->ChangeValue(str);
 
 	//SetSortBricks();
@@ -5627,9 +5641,10 @@ void VRenderGLView::SetPersp(bool persp)
 		m_obj_transz = m_obj_transz_saved;
 		//restore scale factor
 		m_scale_factor = m_scale_factor_saved;
-		wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
-		m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
-		m_vrv->m_scale_factor_text->ChangeValue(str);
+		m_vrv->UpdateScaleFactor(false);
+		//wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
+		//m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
+		//m_vrv->m_scale_factor_text->ChangeValue(str);
 		m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_FreeChk,false);
 
 		SetRotations(m_rotx, m_roty, m_rotz);
@@ -5695,9 +5710,10 @@ void VRenderGLView::SetFree(bool free)
 		m_obj_transz = m_obj_transz_saved;
 		//restore scale factor
 		m_scale_factor = m_scale_factor_saved;
-		wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
-		m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
-		m_vrv->m_scale_factor_text->ChangeValue(str);
+		m_vrv->UpdateScaleFactor(false);
+		//wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
+		//m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
+		//m_vrv->m_scale_factor_text->ChangeValue(str);
 
 		SetRotations(m_rotx, m_roty, m_rotz);
 	}
@@ -10367,9 +10383,10 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 						(double)dx/(double)GetSize().x:
 					(double)-dy/(double)GetSize().y;
 					m_scale_factor += m_scale_factor*delta;
-					wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
-					m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
-					m_vrv->m_scale_factor_text->ChangeValue(str);
+					m_vrv->UpdateScaleFactor(false);
+					//wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
+					//m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
+					//m_vrv->m_scale_factor_text->ChangeValue(str);
 
 					if (m_free)
 					{
@@ -10503,9 +10520,10 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			m_scale_factor += wheel/1000.0;
 			if (m_scale_factor < 0.01)
 				m_scale_factor = 0.01;
-			wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
-			m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
-			m_vrv->m_scale_factor_text->ChangeValue(str);
+			m_vrv->UpdateScaleFactor(false);
+			//wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
+			//m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
+			//m_vrv->m_scale_factor_text->ChangeValue(str);
 		}
 
 		RefreshGL();
@@ -10825,6 +10843,7 @@ BEGIN_EVENT_TABLE(VRenderView, wxPanel)
 	EVT_TOOL(ID_Scale121Btn, VRenderView::OnScale121)
 	EVT_COMMAND_SCROLL(ID_ScaleFactorSldr, VRenderView::OnScaleFactorChange)
 	EVT_TEXT(ID_ScaleFactorText, VRenderView::OnScaleFactorEdit)
+	EVT_TOOL(ID_ScaleModeBtn, VRenderView::OnScaleMode)
 	EVT_TOOL(ID_ScaleResetBtn, VRenderView::OnScaleReset)
 	EVT_SPIN_UP(ID_ScaleFactorSpin, VRenderView::OnScaleFactorSpinDown)
 	EVT_SPIN_DOWN(ID_ScaleFactorSpin, VRenderView::OnScaleFactorSpinUp)
@@ -10865,7 +10884,8 @@ wxPanel(parent, id, pos, size, style),
 	m_dft_y_rot(0.0),
 	m_dft_z_rot(0.0),
 	m_dft_depth_atten_factor(0.0),
-	m_dft_scale_factor(100.0)
+	m_dft_scale_factor(1.0),
+	m_dft_scale_factor_mode(true)
 {
 	//full frame
 	m_full_frame = new wxFrame((wxFrame*)NULL, wxID_ANY, "FluoRender");
@@ -11214,6 +11234,14 @@ void VRenderView::CreateBar()
 		wxDefaultPosition, wxSize(30, 20), 0, vald_int);
 	m_scale_factor_spin = new wxSpinButton(this, ID_ScaleFactorSpin,
 		wxDefaultPosition, wxSize(30, 20));
+	m_scale_mode_btn = new wxToolBar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	m_scale_mode_btn->AddCheckTool(ID_ScaleModeBtn, "Switch zoom ratio mode",
+		wxGetBitmapFromMemory(zoom_view), wxNullBitmap,
+		"Switch zoom ratio mode",
+		"Switch zoom ratio mode");
+	m_scale_mode_btn->ToggleTool(ID_ScaleModeBtn, true);
+	m_scale_mode_btn->Realize();
 	sizer_v_4->AddSpacer(50);
 	sizer_v_4->Add(st1, 0, wxALIGN_CENTER);
 	sizer_v_4->Add(m_center_btn, 0, wxALIGN_CENTER);
@@ -11221,6 +11249,7 @@ void VRenderView::CreateBar()
 	sizer_v_4->Add(m_scale_factor_sldr, 1, wxALIGN_CENTER);
 	sizer_v_4->Add(m_scale_factor_spin, 0, wxALIGN_CENTER);
 	sizer_v_4->Add(m_scale_factor_text, 0, wxALIGN_CENTER);
+	sizer_v_4->Add(m_scale_mode_btn, 0, wxALIGN_CENTER);
 	sizer_v_4->Add(m_scale_reset_btn, 0, wxALIGN_CENTER);
 	sizer_v_4->AddSpacer(50);
 
@@ -12341,10 +12370,23 @@ void VRenderView::OnScaleFactorEdit(wxCommandEvent& event)
 	if (val>0)
 	{
 		m_scale_factor_sldr->SetValue(val);
-		m_glview->m_scale_factor = val/100.0;
+		SetScaleFactor(val/100.0, false);
 		//m_glview->SetSortBricks();
 		RefreshGL(true);
 	}
+}
+
+void VRenderView::OnScaleMode(wxCommandEvent& event)
+{
+	bool mode = m_scale_mode_btn->GetToolState(ID_ScaleModeBtn);
+	if (mode)
+		m_scale_mode_btn->SetToolNormalBitmap(ID_ScaleModeBtn,
+			wxGetBitmapFromMemory(zoom_view));
+	else
+		m_scale_mode_btn->SetToolNormalBitmap(ID_ScaleModeBtn,
+			wxGetBitmapFromMemory(zoom_data));
+	m_glview->m_scale_mode = mode;
+	UpdateScaleFactor(false);
 }
 
 void VRenderView::OnScaleFactorSpinUp(wxSpinEvent& event)
@@ -12370,12 +12412,12 @@ void VRenderView::OnScaleFactorSpinDown(wxSpinEvent& event)
 void VRenderView::OnScaleReset(wxCommandEvent &event)
 {
 	if (m_use_dft_settings)
-	{
-		wxString str = wxString::Format("%d", int(m_dft_scale_factor));
-		m_scale_factor_text->SetValue(str);
-	}
+		m_glview->m_scale_factor = m_dft_scale_factor;
+	//wxString str = wxString::Format("%d", int(m_dft_scale_factor));
+	//m_scale_factor_text->SetValue(str);
 	else
-		m_scale_factor_text->SetValue("100");
+		m_glview->m_scale_factor = 1.0;
+	UpdateScaleFactor();
 	if (m_glview && m_glview->m_mouse_focus)
 		m_glview->SetFocus();
 }
@@ -12984,13 +13026,18 @@ void VRenderView::SaveDefault(unsigned int mask)
 	//scale factor
 	if (mask & 0x400)
 	{
-		str = m_scale_factor_text->GetValue();
-		fconfig.Write("scale_factor_text", str);
-		str.ToDouble(&m_dft_scale_factor);
+		//str = m_scale_factor_text->GetValue();
+		//fconfig.Write("scale_factor_text", str);
+		//str.ToDouble(&m_dft_scale_factor);
+		m_dft_scale_factor = m_glview->m_scale_factor;
+		fconfig.Write("scale_factor", m_dft_scale_factor);
+		m_dft_scale_factor_mode = m_glview->m_scale_mode;
+		fconfig.Write("scale_factor_mode", m_dft_scale_factor_mode);
 	}
 	else
 	{
-		fconfig.Write("scale_factor_text", m_dft_scale_factor);
+		fconfig.Write("scale_factor", m_dft_scale_factor);
+		fconfig.Write("scale_factor_mode", m_dft_scale_factor_mode);
 	}
 	//camera center
 	if (mask & 0x800)
@@ -13157,15 +13204,25 @@ void VRenderView::LoadSettings()
 	wxCommandEvent e;
 	OnRotSliderType(e);
 	UpdateView();  //for rotations
-	if (fconfig.Read("scale_factor_text", &str))
+	//if (fconfig.Read("scale_factor_text", &str))
+	//{
+	//	m_scale_factor_text->ChangeValue(str);
+	//	str.ToDouble(&dVal);
+	//	if (dVal <= 1.0)
+	//		dVal = 100.0;
+	//	m_scale_factor_sldr->SetValue(dVal);
+	//	m_glview->m_scale_factor = dVal/100.0;
+	//	m_dft_scale_factor = dVal;
+	//}
+	if (fconfig.Read("scale_factor_mode", &bVal))
 	{
-		m_scale_factor_text->ChangeValue(str);
-		str.ToDouble(&dVal);
-		if (dVal <= 1.0)
-			dVal = 100.0;
-		m_scale_factor_sldr->SetValue(dVal);
-		m_glview->m_scale_factor = dVal/100.0;
+		SetScaleMode(bVal, false);
+	}
+	if (fconfig.Read("scale_factor", &dVal))
+	{
 		m_dft_scale_factor = dVal;
+		m_glview->m_scale_factor = m_dft_scale_factor;
+		UpdateScaleFactor();
 	}
 	if (fconfig.Read("depth_atten_chk", &bVal))
 	{

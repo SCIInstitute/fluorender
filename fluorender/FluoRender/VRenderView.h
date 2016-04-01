@@ -213,6 +213,7 @@ public:
 	}
 	void SetRadius(double r);
 	void SetCenter();
+	double Get121ScaleFactor();
 	void SetScale121();
 
 	//object operations
@@ -557,6 +558,8 @@ public:
 	//scale factor
 	double m_scale_factor;
 	double m_scale_factor_saved;
+	//scale mode
+	bool m_scale_mode;
 	//mode in determining depth of volume
 	int m_point_volume_mode;  //0: use view plane; 1: use max value; 2: use accumulated value
 	//ruler use volume transfer function
@@ -986,6 +989,7 @@ public:
 		ID_ScaleFactorSldr,
 		ID_ScaleFactorText,
 		ID_ScaleFactorSpin,
+		ID_ScaleModeBtn,
 		ID_ScaleResetBtn,
 		ID_CamCtrChk,
 		ID_FpsChk,
@@ -1077,13 +1081,34 @@ public:
 	void SetCenterEyeDist(double dist);
 	double GetRadius();
 	void SetRadius(double r);
-	void SetScaleFactor(double s)
+	void UpdateScaleFactor(bool update_text=true)
 	{
-		m_glview->m_scale_factor = s;
-		int val = s*100;
+		double scale = m_glview->m_scale_factor;
+		if (!m_glview->m_scale_mode)
+			scale /= m_glview->Get121ScaleFactor();
+		int val = scale * 100;
 		m_scale_factor_sldr->SetValue(val);
-		wxString str = wxString::Format("%d", val);
-		m_scale_factor_text->SetValue(str);
+			wxString str = wxString::Format("%d", val);
+		if (update_text)
+			m_scale_factor_text->SetValue(str);
+		else
+			m_scale_factor_text->ChangeValue(str);
+	}
+	void SetScaleFactor(double s, bool update)
+	{
+		if (m_glview->m_scale_mode)
+			m_glview->m_scale_factor = s;
+		else
+			m_glview->m_scale_factor = s * m_glview->Get121ScaleFactor();
+
+		if (update)
+			UpdateScaleFactor();
+	}
+	void SetScaleMode(bool mode, bool update)
+	{
+		m_glview->m_scale_mode = mode;
+		if (update)
+			UpdateScaleFactor();
 	}
 
 	//object operations
@@ -1525,6 +1550,7 @@ public:
 	wxToolBar *m_scale_121_btn;
 	wxSlider *m_scale_factor_sldr;
 	wxTextCtrl *m_scale_factor_text;
+	wxToolBar *m_scale_mode_btn;
 	wxToolBar *m_scale_reset_btn;
 	wxSpinButton* m_scale_factor_spin;
 
@@ -1548,6 +1574,7 @@ public:
 	double m_dft_z_rot;
 	double m_dft_depth_atten_factor;
 	double m_dft_scale_factor;
+	bool m_dft_scale_factor_mode;
 
 private:
 	//called when updated from bars
@@ -1588,6 +1615,7 @@ private:
 	void OnScale121(wxCommandEvent &event);
 	void OnScaleFactorChange(wxScrollEvent& event);
 	void OnScaleFactorEdit(wxCommandEvent& event);
+	void OnScaleMode(wxCommandEvent& event);
 	void OnScaleReset(wxCommandEvent &event);
 	void OnScaleFactorSpinUp(wxSpinEvent& event);
 	void OnScaleFactorSpinDown(wxSpinEvent& event);
