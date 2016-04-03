@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #include <wx/collpane.h>
 #include <wx/notebook.h>
+#include <wx/spinctrl.h>
 
 #ifndef _COMPONENTDLG_H_
 #define _COMPONENTDLG_H_

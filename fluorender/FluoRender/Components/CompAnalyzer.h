@@ -81,11 +81,11 @@ namespace FL
 				:id(_id)
 			{}
 
-			bool operator<(const CompInfo &info2)
+			bool operator<(const CompInfo &info2) const
 			{
 				return id < info2.id;
 			}
-			bool operator==(const CompInfo &info2)
+			bool operator==(const CompInfo &info2) const
 			{
 				return id == info2.id;
 			}
