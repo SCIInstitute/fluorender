@@ -136,7 +136,7 @@ inline bool FIND_FILES_4D(std::wstring path_name,
 		return false;
 	else
 	{
-		std::wstring searchstr = path_name.substr(0, begin-1);
+		std::wstring searchstr = path_name.substr(0, begin);
 		searchstr.push_back(L'*');
 		std::wstring t_num;
 		size_t k;
