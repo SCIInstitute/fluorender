@@ -322,7 +322,7 @@ inline bool FIND_FILES_4D(std::wstring path_name,
 		return false;
 	else
 	{
-		std::wstring searchstr = path_name.substr(0, begin - 1);
+		std::wstring searchstr = path_name.substr(0, begin);
 		std::wstring searchstr2;
 		std::wstring t_num;
 		size_t k;
@@ -349,7 +349,7 @@ inline bool FIND_FILES_4D(std::wstring path_name,
 			while ((ent = readdir(dir)) != NULL)
 			{
 				std::string file(ent->d_name);
-				std::wstring wfile = s2ws(file);
+				std::wstring wfile = search_path + s2ws(file);
 				//check if it contains the string.
 				if (ent->d_name[0] != '.' &&
 					wfile.find(searchstr) != std::string::npos &&
