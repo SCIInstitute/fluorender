@@ -2679,6 +2679,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			fconfig.Write("centereyedist", vrv->GetCenterEyeDist());
 			fconfig.Write("radius", vrv->GetRadius());
 			fconfig.Write("initdist", vrv->m_glview->GetInitDist());
+			fconfig.Write("scale_mode", vrv->m_glview->m_scale_mode);
 			fconfig.Write("scale", vrv->m_glview->m_scale_factor);
 			//object
 			vrv->GetObjCenters(x, y, z);
@@ -3738,11 +3739,14 @@ void VRenderFrame::OpenProject(wxString& filename)
 					vrv->m_glview->SetInitDist(initdist);
 				else
 					vrv->m_glview->SetInitDist(radius/tan(d2r(vrv->GetAov()/2.0)));
+				bool scale_mode;
+				if (fconfig.Read("scale_mode", &scale_mode))
+					vrv->SetScaleMode(scale_mode, false);
 				double scale;
-				if (fconfig.Read("scale", &scale))
-					vrv->SetScaleFactor(scale, true);
-				else
-					vrv->SetScaleFactor(radius/tan(d2r(vrv->GetAov()/2.0))/dist, true);
+				if (!fconfig.Read("scale", &scale))
+					scale = radius / tan(d2r(vrv->GetAov() / 2.0)) / dist;
+				vrv->m_glview->m_scale_factor = scale;
+				vrv->UpdateScaleFactor();
 				//object
 				if (fconfig.Read("obj_center", &str))
 				{

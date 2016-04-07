@@ -11725,6 +11725,45 @@ void VRenderView::SetRadius(double r)
 		m_glview->SetRadius(r);
 }
 
+void VRenderView::UpdateScaleFactor(bool update_text)
+{
+	double scale = m_glview->m_scale_factor;
+	if (!m_glview->m_scale_mode)
+		scale /= m_glview->Get121ScaleFactor();
+	int val = scale * 100;
+	m_scale_factor_sldr->SetValue(val);
+	wxString str = wxString::Format("%d", val);
+	if (update_text)
+		m_scale_factor_text->SetValue(str);
+	else
+		m_scale_factor_text->ChangeValue(str);
+}
+
+void VRenderView::SetScaleFactor(double s, bool update)
+{
+	if (m_glview->m_scale_mode)
+		m_glview->m_scale_factor = s;
+	else
+		m_glview->m_scale_factor = s * m_glview->Get121ScaleFactor();
+
+	if (update)
+		UpdateScaleFactor();
+}
+
+void VRenderView::SetScaleMode(bool mode, bool update)
+{
+	m_scale_mode_btn->ToggleTool(ID_ScaleModeBtn, mode);
+	if (mode)
+		m_scale_mode_btn->SetToolNormalBitmap(ID_ScaleModeBtn,
+			wxGetBitmapFromMemory(zoom_view));
+	else
+		m_scale_mode_btn->SetToolNormalBitmap(ID_ScaleModeBtn,
+			wxGetBitmapFromMemory(zoom_data));
+	m_glview->m_scale_mode = mode;
+	if (update)
+		UpdateScaleFactor();
+}
+
 //object operations
 void VRenderView::GetObjCenters(double &ctrx, double &ctry, double &ctrz)
 {

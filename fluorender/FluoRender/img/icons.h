@@ -75,8 +75,8 @@ public:
 	const static unsigned char icon_about_png[2655];
 	/* icon_about_mini.png - 731 bytes */
 	const static unsigned char icon_about_mini_png[731];
-	/* web_pdf_mini.png - 15330 bytes */
-	const static unsigned char web_pdf_mini_png[15330];
+	/* web_pdf_mini.png - 779 bytes */
+	const static unsigned char web_pdf_mini_png[779];
 	//tools
 	/* icon_paint_brush.png - 18630 bytes */
 	const static unsigned char icon_paint_brush_png[18630];
@@ -389,11 +389,11 @@ const static unsigned char shade_png[16239];
 /* shadow.png - 16235 bytes */
 const static unsigned char shadow_png[16235];
 
-/* zoom_view.png - 15206 bytes */
-const static unsigned char zoom_view_png[15206];
+/* zoom_view.png - 303 bytes */
+const static unsigned char zoom_view_png[303];
 
-/* zoom_data.png - 15638 bytes */
-const static unsigned char zoom_data_png[15638];
+/* zoom_data.png - 719 bytes */
+const static unsigned char zoom_data_png[719];
 
 };
 
