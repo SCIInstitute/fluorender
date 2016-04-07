@@ -80,60 +80,63 @@ bool LoadSettings(wxString &filename)
 	bool read_value = false;
 
 	//initial grow
-	read_value = read_value || fconfig.Read("initial_grow", &m_initial_grow);
-	read_value = read_value || fconfig.Read("ig_param_transition", &m_ig_param_transition);
-	read_value = read_value || fconfig.Read("ig_iterations", &m_ig_iterations);
+	read_value = fconfig.Read("initial_grow", &m_initial_grow) || read_value;
+	read_value = fconfig.Read("ig_param_transition", &m_ig_param_transition) || read_value;
+	read_value = fconfig.Read("ig_iterations", &m_ig_iterations) || read_value;
 	//translate
-	read_value = read_value || fconfig.Read("ig_translate", &m_ig_translate);
-	read_value = read_value || fconfig.Read("ig_translate2", &m_ig_translate2);
+	read_value = fconfig.Read("ig_translate", &m_ig_translate) || read_value;
+	read_value = fconfig.Read("ig_translate2", &m_ig_translate2) || read_value;
 	//scalar falloff
-	read_value = read_value || fconfig.Read("ig_scalar_falloff", &m_ig_scalar_falloff);
-	read_value = read_value || fconfig.Read("ig_scalar_falloff2", &m_ig_scalar_falloff2);
+	read_value = fconfig.Read("ig_scalar_falloff", &m_ig_scalar_falloff) || read_value;
+	read_value = fconfig.Read("ig_scalar_falloff2", &m_ig_scalar_falloff2) || read_value;
 	//grad falloff
-	read_value = read_value || fconfig.Read("ig_grad_falloff", &m_ig_grad_falloff);
-	read_value = read_value || fconfig.Read("ig_grad_falloff2", &m_ig_grad_falloff2);
+	read_value = fconfig.Read("ig_grad_falloff", &m_ig_grad_falloff) || read_value;
+	read_value = fconfig.Read("ig_grad_falloff2", &m_ig_grad_falloff2) || read_value;
 	//variance falloff
-	read_value = read_value || fconfig.Read("ig_var_falloff", &m_ig_var_falloff);
-	read_value = read_value || fconfig.Read("ig_var_falloff2", &m_ig_var_falloff2);
+	read_value = fconfig.Read("ig_var_falloff", &m_ig_var_falloff) || read_value;
+	read_value = fconfig.Read("ig_var_falloff2", &m_ig_var_falloff2) || read_value;
 	//angle falloff
-	read_value = read_value || fconfig.Read("ig_angle_falloff", &m_ig_angle_falloff);
-	read_value = read_value || fconfig.Read("ig_angle_falloff2", &m_ig_angle_falloff2);
+	read_value = fconfig.Read("ig_angle_falloff", &m_ig_angle_falloff) || read_value;
+	read_value = fconfig.Read("ig_angle_falloff2", &m_ig_angle_falloff2) || read_value;
 
 	//sized grow
-	read_value = read_value || fconfig.Read("sized_grow", &m_sized_grow);
-	read_value = read_value || fconfig.Read("sg_param_transition", &m_sg_param_transition);
-	read_value = read_value || fconfig.Read("sg_iterations", &m_sg_iterations);
+	read_value = fconfig.Read("sized_grow", &m_sized_grow) || read_value;
+	read_value = fconfig.Read("sg_param_transition", &m_sg_param_transition) || read_value;
+	read_value = fconfig.Read("sg_iterations", &m_sg_iterations) || read_value;
 	//size limiter
-	read_value = read_value || fconfig.Read("sg_size_limiter", &m_sg_size_limiter);
-	read_value = read_value || fconfig.Read("sg_size_limiter2", &m_sg_size_limiter2);
+	read_value = fconfig.Read("sg_size_limiter", &m_sg_size_limiter) || read_value;
+	read_value = fconfig.Read("sg_size_limiter2", &m_sg_size_limiter2) || read_value;
 	//translate
-	read_value = read_value || fconfig.Read("sg_translate", &m_sg_translate);
-	read_value = read_value || fconfig.Read("sg_translate2", &m_sg_translate2);
+	read_value = fconfig.Read("sg_translate", &m_sg_translate) || read_value;
+	read_value = fconfig.Read("sg_translate2", &m_sg_translate2) || read_value;
 	//scalar falloff
-	read_value = read_value || fconfig.Read("sg_scalar_falloff", &m_sg_scalar_falloff);
-	read_value = read_value || fconfig.Read("sg_scalar_falloff2", &m_sg_scalar_falloff2);
+	read_value = fconfig.Read("sg_scalar_falloff", &m_sg_scalar_falloff) || read_value;
+	read_value = fconfig.Read("sg_scalar_falloff2", &m_sg_scalar_falloff2) || read_value;
 	//grad falloff
-	read_value = read_value || fconfig.Read("sg_grad_falloff", &m_sg_grad_falloff);
-	read_value = read_value || fconfig.Read("sg_grad_falloff2", &m_sg_grad_falloff2);
+	read_value = fconfig.Read("sg_grad_falloff", &m_sg_grad_falloff) || read_value;
+	read_value = fconfig.Read("sg_grad_falloff2", &m_sg_grad_falloff2) || read_value;
 	//variance falloff
-	read_value = read_value || fconfig.Read("sg_var_falloff", &m_sg_var_falloff);
-	read_value = read_value || fconfig.Read("sg_var_falloff2", &m_sg_var_falloff2);
+	read_value = fconfig.Read("sg_var_falloff", &m_sg_var_falloff) || read_value;
+	read_value = fconfig.Read("sg_var_falloff2", &m_sg_var_falloff2) || read_value;
 	//angle falloff
-	read_value = read_value || fconfig.Read("sg_angle_falloff", &m_sg_angle_falloff);
-	read_value = read_value || fconfig.Read("sg_angle_falloff2", &m_sg_angle_falloff2);
+	read_value = fconfig.Read("sg_angle_falloff", &m_sg_angle_falloff) || read_value;
+	read_value = fconfig.Read("sg_angle_falloff2", &m_sg_angle_falloff2) || read_value;
 
 	//cleanup
-	read_value = read_value || fconfig.Read("cleanup", &m_cleanup);
-	read_value = read_value || fconfig.Read("cl_iterations", &m_cl_iterations);
-	read_value = read_value || fconfig.Read("cl_size_limiter", &m_cl_size_limiter);
+	read_value = fconfig.Read("cleanup", &m_cleanup) || read_value;
+	read_value = fconfig.Read("cl_iterations", &m_cl_iterations) || read_value;
+	read_value = fconfig.Read("cl_size_limiter", &m_cl_size_limiter) || read_value;
 
 	//match slices
-	read_value = read_value || fconfig.Read("match_slices", &m_match_slices);
-	read_value = read_value || fconfig.Read("bidir_match", &m_bidir_match);
-	read_value = read_value || fconfig.Read("size_thresh", &m_size_thresh);
-	read_value = read_value || fconfig.Read("size_ratio", &m_size_ratio);
-	read_value = read_value || fconfig.Read("dist_thresh", &m_dist_thresh);
-	read_value = read_value || fconfig.Read("angle_thresh", &m_angle_thresh);
+	read_value = fconfig.Read("match_slices", &m_match_slices) || read_value;
+	read_value = fconfig.Read("bidir_match", &m_bidir_match) || read_value;
+	read_value = fconfig.Read("size_thresh", &m_size_thresh) || read_value;
+	read_value = fconfig.Read("size_ratio", &m_size_ratio) || read_value;
+	read_value = fconfig.Read("dist_thresh", &m_dist_thresh) || read_value;
+	read_value = fconfig.Read("angle_thresh", &m_angle_thresh) || read_value;
+
+	if (read_value)
+		cout << "Settings found: " << filename << "\n";
 
 	return read_value;
 }
@@ -181,7 +184,7 @@ int main(int argc, char* argv[])
 	wxString filename = argv[1];
 
 	if (!GetSettings(filename))
-		printf("Settings not found. Use default settings.\n");
+		cout << "Settings not found. Use default settings.\n";
 
 	TIFReader reader;
 	wstring str_w = filename.ToStdWstring();
@@ -216,12 +219,15 @@ int main(int argc, char* argv[])
 	cg.OrderID_2D();
 
 	if (m_initial_grow)
+	{
+		cout << "InitialGrow\t" << m_ig_iterations << "\n";
 		cg.InitialGrow(m_ig_param_transition, m_ig_iterations,
 			float(m_ig_translate), float(m_ig_translate2),
 			float(m_ig_scalar_falloff), float(m_ig_scalar_falloff2),
 			float(m_ig_grad_falloff), float(m_ig_grad_falloff2),
 			float(m_ig_var_falloff), float(m_ig_var_falloff2),
 			float(m_ig_angle_falloff), float(m_ig_angle_falloff2));
+	}
 
 	if (m_sized_grow)
 		cg.SizedGrow(m_sg_param_transition, m_sg_iterations,
