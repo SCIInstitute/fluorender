@@ -2022,39 +2022,39 @@ wxPanel(parent, id, pos, size, style, name),
 	m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER);
 	m_toolbar->AddTool(ID_ToggleView, "Toggle View",
-		wxGetBitmapFromMemory(listicon_toggle),
+		wxGetBitmapFromMemory(toggle_disp),
 		"Toggle the visibility of current selection");
 	m_toolbar->AddTool(ID_AddGroup, "Add Group",
-		wxGetBitmapFromMemory(listicon_addgroup),
+		wxGetBitmapFromMemory(add_group),
 		"Add a volume data group to the selected view");
 	m_toolbar->AddTool(ID_AddMGroup, "Add Mesh Group",
-		wxGetBitmapFromMemory(listicon_addmgroup),
+		wxGetBitmapFromMemory(add_mgroup),
 		"Add a mesh data group to the selected view");
 	m_toolbar->AddTool(ID_RemoveData, "Delete",
-		wxGetBitmapFromMemory(listicon_delete),
+		wxGetBitmapFromMemory(delet),
 		"Delete current selection");
 	m_toolbar->AddSeparator();
 	m_toolbar->AddCheckTool(ID_BrushAppend, "Highlight",
-		wxGetBitmapFromMemory(listicon_brushappend),
+		wxGetBitmapFromMemory(brush_append),
 		wxNullBitmap,
 		"Highlight structures by painting on the render view (hold Shift)");
 	m_toolbar->AddCheckTool(ID_BrushDiffuse, "Diffuse",
-		wxGetBitmapFromMemory(listicon_brushdiffuse),
+		wxGetBitmapFromMemory(brush_diffuse),
 		wxNullBitmap,
 		"Diffuse highlighted structures by painting (hold Z)");
 	m_toolbar->AddCheckTool(ID_BrushDesel, "Reset",
-		wxGetBitmapFromMemory(listicon_brushdesel),
+		wxGetBitmapFromMemory(brush_desel),
 		wxNullBitmap,
 		"Reset highlighted structures by painting (hold X)");
 	m_toolbar->AddTool(ID_BrushClear, "Reset All",
-		wxGetBitmapFromMemory(listicon_brushclear),
+		wxGetBitmapFromMemory(brush_clear),
 		"Reset all highlighted structures");
 	m_toolbar->AddSeparator();
 	m_toolbar->AddTool(ID_BrushErase, "Erase",
-		wxGetBitmapFromMemory(listicon_brusherase),
+		wxGetBitmapFromMemory(brush_erase),
 		"Erase highlighted structures");
 	m_toolbar->AddTool(ID_BrushCreate, "Extract",
-		wxGetBitmapFromMemory(listicon_brushcreate),
+		wxGetBitmapFromMemory(brush_create),
 		"Extract highlighted structures out and create a new volume");
 	m_toolbar->Realize();
 

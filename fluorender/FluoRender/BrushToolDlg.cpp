@@ -115,30 +115,30 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 		"Redo the rollback brush operation");
 	m_toolbar->AddSeparator();
 	m_toolbar->AddCheckTool(ID_BrushAppend, "Select",
-		wxGetBitmapFromMemory(listicon_brushappend),
+		wxGetBitmapFromMemory(brush_append),
 		wxNullBitmap,
 		"Highlight structures by painting on the render view (hold Shift)");
 	m_toolbar->AddCheckTool(ID_BrushDiffuse, "Diffuse",
-		wxGetBitmapFromMemory(listicon_brushdiffuse),
+		wxGetBitmapFromMemory(brush_diffuse),
 		wxNullBitmap,
 		"Diffuse highlighted structures by painting (hold Z)");
 	m_toolbar->AddCheckTool(ID_BrushSolid, "Solid",
-		wxGetBitmapFromMemory(listicon_brushsolid),
+		wxGetBitmapFromMemory(brush_solid),
 		wxNullBitmap,
 		"Highlight structures with solid mask");
 	m_toolbar->AddCheckTool(ID_BrushDesel, "Unselect",
-		wxGetBitmapFromMemory(listicon_brushdesel),
+		wxGetBitmapFromMemory(brush_desel),
 		wxNullBitmap,
 		"Reset highlighted structures by painting (hold X)");
 	m_toolbar->AddTool(ID_BrushClear, "Reset All",
-		wxGetBitmapFromMemory(listicon_brushclear),
+		wxGetBitmapFromMemory(brush_clear),
 		"Reset all highlighted structures");
 	m_toolbar->AddSeparator();
 	m_toolbar->AddTool(ID_BrushErase, "Erase",
-		wxGetBitmapFromMemory(listicon_brusherase),
+		wxGetBitmapFromMemory(brush_erase),
 		"Erase highlighted structures");
 	m_toolbar->AddTool(ID_BrushCreate, "Extract",
-		wxGetBitmapFromMemory(listicon_brushcreate),
+		wxGetBitmapFromMemory(brush_create),
 		"Extract highlighted structures out and create a new volume");
 	m_toolbar->Realize();
 

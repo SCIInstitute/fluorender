@@ -550,13 +550,13 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 		wxGetBitmapFromMemory(prof_curve),
 		"Generate intensity profile along curve");
 	m_toolbar->AddTool(ID_DeleteBtn, "Delete",
-		wxGetBitmapFromMemory(listicon_delete),
+		wxGetBitmapFromMemory(delet),
 		"Delete a selected ruler");
 	m_toolbar->AddTool(ID_DeleteAllBtn,"Delete All",
-		wxGetBitmapFromMemory(listicon_delall),
+		wxGetBitmapFromMemory(del_all),
 		"Delete all rulers");
 	m_toolbar->AddTool(ID_ExportBtn, "Export",
-		wxGetBitmapFromMemory(listicon_save),
+		wxGetBitmapFromMemory(save),
 		"Export rulers to a text file");
 	m_toolbar->Realize();
 

@@ -869,22 +869,22 @@ wxPanel(parent, id, pos, size, style, name)//,
    m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
          wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER);
    m_toolbar->AddTool(ID_AddToView, "Add to View",
-         wxGetBitmapFromMemory(listicon_view),
+         wxGetBitmapFromMemory(view),
          "Add: Add the selected dataset to render view");
    m_toolbar->AddTool(ID_Rename, "Rename",
-         wxGetBitmapFromMemory(listicon_rename),
+         wxGetBitmapFromMemory(rename),
          "Rename: Rename the selected dataset");
    m_toolbar->AddTool(ID_Save, "Save As",
-         wxGetBitmapFromMemory(listicon_save),
+         wxGetBitmapFromMemory(save),
          "Save: Save the selected volume dataset");
    m_toolbar->AddTool(ID_Bake, "Bake",
-         wxGetBitmapFromMemory(listicon_bake),
+         wxGetBitmapFromMemory(bake),
          "Bake: Apply the volume properties and save");
    m_toolbar->AddTool(ID_Delete, "Delete",
-         wxGetBitmapFromMemory(listicon_delete),
+         wxGetBitmapFromMemory(delet),
          "Delete: Delete the selected dataset");
    m_toolbar->AddTool(ID_DeleteAll, "Delete All",
-         wxGetBitmapFromMemory(listicon_delall),
+         wxGetBitmapFromMemory(del_all),
          "Delete All: Delete all datasets");
    m_toolbar->Realize();
 

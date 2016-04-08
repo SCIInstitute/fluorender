@@ -407,7 +407,7 @@ m_delayed_stop(false)
 	sizerH->Add(st3, 0, wxALIGN_CENTER);
 	m_save_btn = new wxButton(this, ID_SaveMovie, "Save...",
 		wxDefaultPosition, wxSize(80, 30));
-	m_save_btn->SetBitmap(wxGetBitmapFromMemory(listicon_save));
+	m_save_btn->SetBitmap(wxGetBitmapFromMemory(save));
 	sizerH->Add(m_save_btn, 0, wxEXPAND);
 	//interface
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);

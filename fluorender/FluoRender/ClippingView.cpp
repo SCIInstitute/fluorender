@@ -462,14 +462,8 @@ ClippingView::~ClippingView()
 void ClippingView::SetChannLink(bool chann)
 {
 	m_toolbar->ToggleTool(ID_LinkChannelsBtn,chann);
-	if(chann)
-		m_toolbar->SetToolNormalBitmap(ID_LinkChannelsBtn,
-			wxGetBitmapFromMemory(link_text));
-	else
-		m_toolbar->SetToolNormalBitmap(ID_LinkChannelsBtn,
-			wxGetBitmapFromMemory(unlink_text));
-
 }
+
 int ClippingView::GetSelType()
 {
 	return m_sel_type;

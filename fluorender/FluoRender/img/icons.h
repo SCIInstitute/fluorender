@@ -78,175 +78,190 @@ public:
 	/* web_pdf_mini.png - 779 bytes */
 	const static unsigned char web_pdf_mini_png[779];
 	//tools
-	/* icon_paint_brush.png - 18630 bytes */
-	const static unsigned char icon_paint_brush_png[18630];
-	/* icon_paint_brush_mini.png - 15652 bytes */
-	const static unsigned char icon_paint_brush_mini_png[15652];
-	/* icon_measurement.png - 19465 bytes */
-	const static unsigned char icon_measurement_png[19465];
-	/* icon_measurement_mini.png - 15784 bytes */
-	const static unsigned char icon_measurement_mini_png[15784];
-	/* icon_tracking.png - 18352 bytes */
-	const static unsigned char icon_tracking_png[18352];
-	/* icon_tracking_mini.png - 15664 bytes */
-	const static unsigned char icon_tracking_mini_png[15664];
-	/* icon_noise_reduc.png - 19419 bytes */
-	const static unsigned char icon_noise_reduc_png[19419];
-	/* icon_noise_reduc_mini.png - 15745 bytes */
-	const static unsigned char icon_noise_reduc_mini_png[15745];
-	/* icon_volume_size.png - 19350 bytes */
-	const static unsigned char icon_volume_size_png[19350];
-	/* icon_volume_size_mini.png - 15781 bytes */
-	const static unsigned char icon_volume_size_mini_png[15781];
-	/* icon_colocalization.png - 19331 bytes */
-	const static unsigned char icon_colocalization_png[19331];
-	/* icon_colocalization_mini.png - 15766 bytes */
-	const static unsigned char icon_colocalization_mini_png[15766];
-	/* icon_convert.png - 18947 bytes */
-	const static unsigned char icon_convert_png[18947];
-	/* icon_convert_mini.png - 15765 bytes */
-	const static unsigned char icon_convert_mini_png[15765];
-	/* icon_opencl.png - 19114 bytes */
-	const static unsigned char icon_opencl_png[19114];
-	/* icon_opencl_mini.png - 15693 bytes */
-	const static unsigned char icon_opencl_mini_png[15693];
-	/* icon_components.png - 18813 bytes */
-	const static unsigned char icon_components_png[18813];
-	/* icon_components_mini.png - 16189 bytes */
-	const static unsigned char icon_components_mini_png[16189];
-	/* icon_calculations.png - 19209 bytes */
-	const static unsigned char icon_calculations_png[19209];
-	/* icon_calculations_mini.png - 16169 bytes */
-	const static unsigned char icon_calculations_mini_png[16169];
+	/* icon_paint_brush.png - 3330 bytes */
+	const static unsigned char icon_paint_brush_png[3330];
+	/* icon_paint_brush_mini.png - 665 bytes */
+	const static unsigned char icon_paint_brush_mini_png[665];
+	/* icon_measurement.png - 4160 bytes */
+	const static unsigned char icon_measurement_png[4160];
+	/* icon_measurement_mini.png - 788 bytes */
+	const static unsigned char icon_measurement_mini_png[788];
+	/* icon_tracking.png - 3046 bytes */
+	const static unsigned char icon_tracking_png[3046];
+	/* icon_tracking_mini.png - 674 bytes */
+	const static unsigned char icon_tracking_mini_png[674];
+	/* icon_noise_reduc.png - 4047 bytes */
+	const static unsigned char icon_noise_reduc_png[4047];
+	/* icon_noise_reduc_mini.png - 750 bytes */
+	const static unsigned char icon_noise_reduc_mini_png[750];
+	/* icon_volume_size.png - 3784 bytes */
+	const static unsigned char icon_volume_size_png[3784];
+	/* icon_volume_size_mini.png - 746 bytes */
+	const static unsigned char icon_volume_size_mini_png[746];
+	/* icon_colocalization.png - 4019 bytes */
+	const static unsigned char icon_colocalization_png[4019];
+	/* icon_colocalization_mini.png - 772 bytes */
+	const static unsigned char icon_colocalization_mini_png[772];
+	/* icon_convert.png - 3615 bytes */
+	const static unsigned char icon_convert_png[3615];
+	/* icon_convert_mini.png - 738 bytes */
+	const static unsigned char icon_convert_mini_png[738];
+	/* icon_opencl.png - 3873 bytes */
+	const static unsigned char icon_opencl_png[3873];
+	/* icon_opencl_mini.png - 715 bytes */
+	const static unsigned char icon_opencl_mini_png[715];
+	/* icon_components.png - 4353 bytes */
+	const static unsigned char icon_components_png[4353];
+	/* icon_components_mini.png - 839 bytes */
+	const static unsigned char icon_components_mini_png[839];
+	/* icon_calculations.png - 4744 bytes */
+	const static unsigned char icon_calculations_png[4744];
+	/* icon_calculations_mini.png - 819 bytes */
+	const static unsigned char icon_calculations_mini_png[819];
 
+
+	//render view icons
 	/* info.png - 1262 bytes */
 	const static unsigned char info_png[1262];
+	/* axis.png - 557 bytes */
+	const static unsigned char axis_png[577];
+	/* camera.png - 1011 bytes */
+	const static unsigned char camera_png[1011];
+	/* center.png - 1571 bytes */
+	const static unsigned char center_png[1571];
+	//view modes
+	/* composite.png - 998 bytes */
+	const static unsigned char composite_png[998];
+	/* composite_off.png - 843 bytes */
+	const static unsigned char composite_off_png[843];
+	/* depth.png - 1097 bytes */
+	const static unsigned char depth_png[1097];
+	/* depth.png - 1006 bytes */
+	const static unsigned char depth_off_png[1006];
+	/* layers.png - 859 bytes */
+	const static unsigned char layers_png[859];
+	/* layers_off.png - 736 bytes */
+	const static unsigned char layers_off_png[736];
+	/* depth_atten.png - 1031 bytes */
+	const static unsigned char depth_atten_png[1031];
+	/* no_depth_atten.png - 1019 bytes */
+	const static unsigned char no_depth_atten_png[1019];
+	/* freefly.png - 1143 bytes */
+	const static unsigned char freefly_png[1143];
+	/* gear_45.png - 979 bytes */
+	const static unsigned char gear_45_png[979];
+	/* legend.png - 1142 bytes */
+	const static unsigned char legend_png[1142];
 
-/* align.png - 1470 bytes */
-const static unsigned char align_png[1470];
 
-/* axis.png - 557 bytes */
-const static unsigned char axis_png[577];
+	//clipping view icons
+	/* align.png - 1470 bytes */
+	const static unsigned char align_png[1470];
 
-/* camera.png - 1011 bytes */
-const static unsigned char camera_png[1011];
 
-/* center.png - 1571 bytes */
-const static unsigned char center_png[1571];
+	//list view icons
+	/* add_group.png - 710 bytes */
+	const static unsigned char add_group_png[710];
+	/* add_mgroup.png - 858 bytes */
+	const static unsigned char add_mgroup_png[858];
+	/* bake.png - 1266 bytes */
+	const static unsigned char bake_png[1266];
+	/* del_all.png - 1278 bytes */
+	const static unsigned char del_all_png[1278];
+	/* delet.png - 1053 bytes */
+	const static unsigned char delet_png[1053];
+	/* rename.png - 551 bytes */
+	const static unsigned char rename_png[551];
+	/* save.png - 982 bytes */
+	const static unsigned char save_png[982];
+	/* toggle_disp.png - 887 bytes */
+	const static unsigned char toggle_disp_png[887];
+	/* view.png - 989 bytes */
+	const static unsigned char view_png[989];
 
-/* composite.png - 16600 bytes */
-const static unsigned char composite_png[16600];
 
-/* composite_off.png - 17042 bytes */
-const static unsigned char composite_off_png[17042];
+	//brush tool icons
+	/* brush_append.png - 766 bytes */
+	const static unsigned char brush_append_png[766];
+	/* brush_clear.png - 909 bytes */
+	const static unsigned char brush_clear_png[909];
+	/* brush_create.png - 802 bytes */
+	const static unsigned char brush_create_png[802];
+	/* brush_desel.png - 746 bytes */
+	const static unsigned char brush_desel_png[746];
+	/* brush_diffuse.png - 873 bytes */
+	const static unsigned char brush_diffuse_png[873];
+	/* brush_erase.png - 993 bytes */
+	static const unsigned char brush_erase_png[993];
+	/* brush_solid.png - 788 bytes */
+	const static unsigned char brush_solid_png[788];
+	/* redo.png - 873 bytes */
+	const static unsigned char redo_png[873];
+	/* undo.png - 853 bytes */
+	const static unsigned char undo_png[853];
 
-/* depth.png - 16600 bytes */
-const static unsigned char depth_png[16600];
 
-/* depth.png - 17042 bytes */
-const static unsigned char depth_off_png[17042];
+	//ruler tool icons
+	/* listicon_addruler.png - 3749 bytes */
+	const static unsigned char listicon_addruler_png[3749];
+	/* listicon_locator.png - 16569 bytes */
+	const static unsigned char listicon_locator_png[16569];
+	/* listicon_ruleredit.png - 16569 bytes */
+	const static unsigned char listicon_ruleredit_png[16569];
+	/* drill.png - 15753 bytes */
+	const static unsigned char drill_png[15753];
+	/* prof_curve.png - 18610 bytes */
+	const static unsigned char prof_curve_png[18610];
+	/* protractor.png - 16248 bytes */
+	const static unsigned char protractor_png[16248];
 
-/* depth_atten.png - 16600 bytes */
-const static unsigned char depth_atten_png[16600];
 
-/* fastforward.png - 722 bytes */
-const static unsigned char fastforward_png[722];
+	//common icons
+	/* icon_32.png - 2507 bytes */
+	const static unsigned char icon_32_png[2507];
+	/* logo.png - 41143 bytes */
+	const static unsigned char logo_png[41143];
+	/* logo_snow.png - 49645 bytes */
+	const static unsigned char logo_snow_png[49645];
+	//link/unlink
+	/* link.png - 1227 bytes */
+	const static unsigned char link_png[1227];
+	/* unlink.png - 1503 bytes */
+	const static unsigned char unlink_png[1503];
+	/* save_settings.png - 1314 bytes */
+	const static unsigned char save_settings_png[1314];
 
-/* freefly.png - 1143 bytes */
-const static unsigned char freefly_png[1143];
 
-/* gear_45.png - 17863 bytes */
-const static unsigned char gear_45_png[17863];
 
-/* icon_16.png - 18975 bytes */
-const static unsigned char icon_16_png[18975];
 
-/* icon_32.png - 20515 bytes */
-const static unsigned char icon_32_png[20515];
 
-/* layers.png - 16600 bytes */
-const static unsigned char layers_png[16600];
 
-/* layers_off.png - 16600 bytes */
-const static unsigned char layers_off_png[17042];
 
-/* legend.png - 1142 bytes */
-const static unsigned char legend_png[1142];
 
-/* link.png - 1227 bytes */
-const static unsigned char link_png[1227];
 
-/* link_text.png - 841 bytes */
-const static unsigned char link_text_png[841];
 
-/* listicon_addgroup.png - 3436 bytes */
-const static unsigned char listicon_addgroup_png[3436];
 
-/* listicon_addmgroup.png - 3584 bytes */
-const static unsigned char listicon_addmgroup_png[3584];
 
-/* listicon_addruler.png - 3749 bytes */
-const static unsigned char listicon_addruler_png[3749];
 
-/* listicon_bake.png - 1296 bytes */
-const static unsigned char listicon_bake_png[1296];
 
-/* listicon_brushappend.png - 3634 bytes */
-const static unsigned char listicon_brushappend_png[3634];
 
-/* listicon_brushclear.png - 3691 bytes */
-const static unsigned char listicon_brushclear_png[3691];
 
-/* listicon_brushcreate.png - 3667 bytes */
-const static unsigned char listicon_brushcreate_png[3667];
 
-/* listicon_brushdesel.png - 3737 bytes */
-const static unsigned char listicon_brushdesel_png[3737];
 
-/* listicon_brushdiffuse.png - 3702 bytes */
-const static unsigned char listicon_brushdiffuse_png[3702];
 
-/* brush_solid.png - 16598 bytes */
-static const unsigned char listicon_brushsolid_png[16598];
 
-/* listicon_brusherase.png - 3714 bytes */
-const static unsigned char listicon_brusherase_png[3714];
 
-/* listicon_delall.png - 4015 bytes */
-const static unsigned char listicon_delall_png[4015];
 
-/* listicon_delete.png - 3876 bytes */
-const static unsigned char listicon_delete_png[3876];
 
-/* listicon_locator.png - 16569 bytes */
-const static unsigned char listicon_locator_png[16569];
 
-/* listicon_qmark.png - 16569 bytes */
-const static unsigned char listicon_qmark_png[16569];
 
-/* listicon_rename.png - 3268 bytes */
-const static unsigned char listicon_rename_png[3268];
 
-/* listicon_ruleredit.png - 16569 bytes */
-const static unsigned char listicon_ruleredit_png[16569];
 
-/* listicon_save.png - 3689 bytes */
-const static unsigned char listicon_save_png[3689];
 
-/* listicon_toggle.png - 3627 bytes */
-const static unsigned char listicon_toggle_png[3627];
 
-/* listicon_view.png - 3763 bytes */
-const static unsigned char listicon_view_png[3763];
 
-/* logo.png - 45277 bytes */
-const static unsigned char logo_png[45277];
 
-/* logo_small.png - 10709 bytes */
-const static unsigned char logo_small_png[10709];
 
-/* logo_snow.png - 51922 bytes */
-const static unsigned char logo_snow_png[51922];
 
 /* minus.png - 16443 bytes */
 const static unsigned char minus_png[16443];
@@ -254,8 +269,6 @@ const static unsigned char minus_png[16443];
 /* mip.png - 436 bytes */
 const static unsigned char mip_png[436];
 
-/* no_depth_atten.png - 16600 bytes */
-const static unsigned char no_depth_atten_png[16600];
 
 /* pause.png - 1389 bytes */
 const static unsigned char pause_png[1389];
@@ -278,8 +291,6 @@ const static unsigned char reset_png[16600];
 /* rewind.png - 16443 bytes */
 const static unsigned char rewind_png[16443];
 
-/* save_settings.png - 16830 bytes */
-const static unsigned char save_settings_png[16830];
 
 /* scale.png - 312 bytes */
 const static unsigned char scale_png[16146];
@@ -290,11 +301,7 @@ const static unsigned char scale_text_png[17358];
 /* scale_text_off.png - 1365 bytes */
 const static unsigned char scale_text_off_png[16910];
 
-/* unlink.png - 1503 bytes */
-const static unsigned char unlink_png[1503];
 
-/* unlink_text.png - 765 bytes */
-const static unsigned char unlink_text_png[765];
 
 /* invert.png - 15224 bytes */
 const static unsigned char invert_png[15224];
@@ -314,20 +321,10 @@ const static unsigned char smooth_png[15326];
 /* smooth_off.png - 14747 bytes */
 const static unsigned char smooth_off_png[14747];
 
-/* drill.png - 15753 bytes */
-const static unsigned char drill_png[15753];
 
-/* prof_curve.png - 18610 bytes */
-const static unsigned char prof_curve_png[18610];
 
-/* undo.png - 15940 bytes */
-const static unsigned char undo_png[15940];
 
-/* redo.png - 15953 bytes */
-const static unsigned char redo_png[15953];
 
-/* protractor.png - 16248 bytes */
-const static unsigned char protractor_png[16248];
 
 /* full_screen.png - 14882 bytes */
 const static unsigned char full_screen_png[14882];
