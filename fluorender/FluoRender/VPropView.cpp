@@ -47,8 +47,8 @@ BEGIN_EVENT_TABLE(VPropView, wxPanel)
 	EVT_COMMAND_SCROLL(ID_BoundarySldr, VPropView::OnBoundaryChange)
 	EVT_TEXT(ID_BoundaryText, VPropView::OnBoundaryText)
 	//2
-	EVT_COMMAND_SCROLL(ID_ContrastSldr, VPropView::OnContrastChange)
-	EVT_TEXT(ID_ContrastText, VPropView::OnContrastText)
+	EVT_COMMAND_SCROLL(ID_SaturationSldr, VPropView::OnSaturationChange)
+	EVT_TEXT(ID_SaturationText, VPropView::OnSaturationText)
 	EVT_COMMAND_SCROLL(ID_LeftThreshSldr, VPropView::OnLeftThreshChange)
 	EVT_TEXT(ID_LeftThreshText, VPropView::OnLeftThreshText)
 	EVT_COMMAND_SCROLL(ID_RightThreshSldr, VPropView::OnRightThreshChange)
@@ -106,7 +106,6 @@ BEGIN_EVENT_TABLE(VPropView, wxPanel)
 	EVT_TOOL(ID_NRChk, VPropView::OnNRCheck)
 	//depth mode
 	EVT_TOOL(ID_DepthChk, VPropView::OnDepthCheck)
-	EVT_TOOL(ID_FluoRender, VPropView::OnFluoRender)
 	END_EVENT_TABLE()
 
 VPropView::VPropView(wxWindow* frame,
@@ -166,44 +165,60 @@ wxPanel(parent, id, pos, size,style, name),
 
 	//left///////////////////////////////////////////////////
 	//gamma
-	st = new wxStaticText(this, 0, " : Gamma",
+	m_gamma_st = new wxStaticText(this, ID_GammaSync, " : Gamma",
 		wxDefaultPosition, wxSize(100, -1));
+	m_gamma_st->Connect(ID_GammaSync, wxEVT_LEFT_DCLICK,
+		wxMouseEventHandler(VPropView::OnGammaSync), NULL, this);
+	m_gamma_st->Connect(ID_GammaSync, wxEVT_RIGHT_DCLICK,
+		wxMouseEventHandler(VPropView::OnGammaSync), NULL, this);
 	m_gamma_sldr = new wxSlider(this, ID_GammaSldr, 100, 10, 400,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_INVERSE);
 	m_gamma_text = new wxTextCtrl(this, ID_GammaText, "1.00",
 		wxDefaultPosition, wxSize(40, 20), 0, vald_fp2);
 	sizer_l1->Add(m_gamma_sldr, 1, wxEXPAND);
 	sizer_l1->Add(m_gamma_text, 0, wxALIGN_CENTER);
-	sizer_l1->Add(st, 0, wxALIGN_CENTER);
+	sizer_l1->Add(m_gamma_st, 0, wxALIGN_CENTER);
 	//saturation point
-	st = new wxStaticText(this, 0, " : Saturation",
+	m_saturation_st = new wxStaticText(this, ID_SaturationSync, " : Saturation",
 		wxDefaultPosition, wxSize(100, -1));
-	m_contrast_sldr = new wxSlider(this, ID_ContrastSldr, 255, 0, 255,
+	m_saturation_st->Connect(ID_SaturationSync, wxEVT_LEFT_DCLICK,
+		wxMouseEventHandler(VPropView::OnSaturationSync), NULL, this);
+	m_saturation_st->Connect(ID_SaturationSync, wxEVT_RIGHT_DCLICK,
+		wxMouseEventHandler(VPropView::OnSaturationSync), NULL, this);
+	m_saturation_sldr = new wxSlider(this, ID_SaturationSldr, 255, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_contrast_text = new wxTextCtrl(this, ID_ContrastText, "50",
+	m_saturation_text = new wxTextCtrl(this, ID_SaturationText, "50",
 		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
-	sizer_l2->Add(m_contrast_sldr, 1, wxEXPAND);
-	sizer_l2->Add(m_contrast_text, 0, wxALIGN_CENTER);
-	sizer_l2->Add(st, 0, wxALIGN_CENTER);
+	sizer_l2->Add(m_saturation_sldr, 1, wxEXPAND);
+	sizer_l2->Add(m_saturation_text, 0, wxALIGN_CENTER);
+	sizer_l2->Add(m_saturation_st, 0, wxALIGN_CENTER);
 	//luminance
-	st = new wxStaticText(this, 0, " : Luminance",
+	m_luminance_st = new wxStaticText(this, ID_LuminanceSync, " : Luminance",
 		wxDefaultPosition, wxSize(100, -1));
+	m_luminance_st->Connect(ID_LuminanceSync, wxEVT_LEFT_DCLICK,
+		wxMouseEventHandler(VPropView::OnLuminanceSync), NULL, this);
+	m_luminance_st->Connect(ID_LuminanceSync, wxEVT_RIGHT_DCLICK,
+		wxMouseEventHandler(VPropView::OnLuminanceSync), NULL, this);
 	m_luminance_sldr = new wxSlider(this, ID_LuminanceSldr, 128, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_luminance_text = new wxTextCtrl(this, ID_LuminanceText, "128",
 		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
 	sizer_l3->Add(m_luminance_sldr, 1, wxEXPAND, 0);
 	sizer_l3->Add(m_luminance_text, 0, wxALIGN_CENTER, 0);
-	sizer_l3->Add(st, 0, wxALIGN_CENTER, 0);
+	sizer_l3->Add(m_luminance_st, 0, wxALIGN_CENTER, 0);
 	//alpha
-	m_alpha_tool = new wxToolBar(this,wxID_ANY,
+	m_alpha_tool = new wxToolBar(this, ID_AlphaSync,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_alpha_tool->AddCheckTool(ID_AlphaChk,"Alpha",
+	m_alpha_tool->AddCheckTool(ID_AlphaChk, "Alpha",
 		wxGetBitmapFromMemory(alpha), wxNullBitmap,
 		"Enables Alpha Editing.",
 		"Enables Alpha Editing.");
 	m_alpha_tool->ToggleTool(ID_AlphaChk,true);
 	m_alpha_tool->Realize();
+	m_alpha_tool->Connect(ID_AlphaSync, wxEVT_LEFT_DCLICK,
+		wxMouseEventHandler(VPropView::OnAlphaSync), NULL, this);
+	m_alpha_tool->Connect(ID_AlphaSync, wxEVT_RIGHT_DCLICK,
+		wxMouseEventHandler(VPropView::OnAlphaSync), NULL, this);
 	m_alpha_sldr = new wxSlider(this, ID_AlphaSldr, 127, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_alpha_text = new wxTextCtrl(this, ID_Alpha_Text, "127",
@@ -219,7 +234,7 @@ wxPanel(parent, id, pos, size,style, name),
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_low_shading_text = new wxTextCtrl(this, ID_LowShadingText, "0.00",
 		wxDefaultPosition, wxSize(40, 20), 0, vald_fp2);
-	m_shade_tool = new wxToolBar(this,wxID_ANY,
+	m_shade_tool = new wxToolBar(this, ID_ShadingSync,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_shade_tool->AddCheckTool(ID_ShadingEnableChk,"Shading",
 		wxGetBitmapFromMemory(shade), wxNullBitmap,
@@ -227,6 +242,10 @@ wxPanel(parent, id, pos, size,style, name),
 		"Enables Shading Editing.");
 	m_shade_tool->ToggleTool(ID_ShadingEnableChk,true);
 	m_shade_tool->Realize();
+	m_shade_tool->Connect(ID_ShadingSync, wxEVT_LEFT_DCLICK,
+		wxMouseEventHandler(VPropView::OnShadingSync), NULL, this);
+	m_shade_tool->Connect(ID_ShadingSync, wxEVT_RIGHT_DCLICK,
+		wxMouseEventHandler(VPropView::OnShadingSync), NULL, this);
 	sizer_l5->Add(m_low_shading_sldr, 1, wxEXPAND);
 	sizer_l5->Add(m_low_shading_text, 0, wxALIGN_CENTER);
 	sizer_l5->Add(new wxStaticText(this, 0 , " : ", 
@@ -235,18 +254,26 @@ wxPanel(parent, id, pos, size,style, name),
 	sizer_l5->Add(30,10,0);
 	//middle///////////////////////////////////////////////////
 	//extract boundary
-	st = new wxStaticText(this, 0, "Extract Boundary : ",
+	m_boundary_st = new wxStaticText(this, ID_BoundarySync, "Extract Boundary : ",
 		wxDefaultPosition, wxSize(127, -1), wxALIGN_RIGHT);
+	m_boundary_st->Connect(ID_BoundarySync, wxEVT_LEFT_DCLICK,
+		wxMouseEventHandler(VPropView::OnBoundarySync), NULL, this);
+	m_boundary_st->Connect(ID_BoundarySync, wxEVT_RIGHT_DCLICK,
+		wxMouseEventHandler(VPropView::OnBoundarySync), NULL, this);
 	m_boundary_sldr = new wxSlider(this, ID_BoundarySldr, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_boundary_text = new wxTextCtrl(this, ID_BoundaryText, "0.0000",
 		wxDefaultPosition, wxSize(50, 20), 0, vald_fp4);
-	sizer_m1->Add(st, 0, wxALIGN_CENTER);
+	sizer_m1->Add(m_boundary_st, 0, wxALIGN_CENTER);
 	sizer_m1->Add(m_boundary_text, 0, wxALIGN_CENTER);
 	sizer_m1->Add(m_boundary_sldr, 1, wxEXPAND);
 	//thresholds
-	m_threh_st = new wxStaticText(this, 0, "Threshold : ",
+	m_threh_st = new wxStaticText(this, ID_ThreshSync, "Threshold : ",
 		wxDefaultPosition, wxSize(127, -1), wxALIGN_RIGHT);
+	m_threh_st->Connect(ID_ThreshSync, wxEVT_LEFT_DCLICK,
+		wxMouseEventHandler(VPropView::OnThreshSync), NULL, this);
+	m_threh_st->Connect(ID_ThreshSync, wxEVT_RIGHT_DCLICK,
+		wxMouseEventHandler(VPropView::OnThreshSync), NULL, this);
 	m_left_thresh_sldr = new wxSlider(this, ID_LeftThreshSldr, 5, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_left_thresh_text = new wxTextCtrl(this, ID_LeftThreshText, "5",
@@ -261,13 +288,14 @@ wxPanel(parent, id, pos, size,style, name),
 	sizer_m2->Add(m_right_thresh_text, 0, wxALIGN_CENTER);
 	sizer_m2->Add(m_right_thresh_sldr,1, wxEXPAND);
 	//light/shadow
-	//highlight
-	m_hi_shading_sldr = new wxSlider(this, ID_HiShadingSldr, 0, 0, 100,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_hi_shading_text = new wxTextCtrl(this, ID_HiShadingText, "0.00",
-		wxDefaultPosition, wxSize(50, 20), 0, vald_fp2);
 	//shadow
-	m_shadow_tool = new wxToolBar(this,wxID_ANY,
+	m_hi_shading_st = new wxStaticText(this, ID_HiShadingSync, "Light /",
+		wxDefaultPosition, wxSize(50, -1), wxALIGN_RIGHT);
+	m_hi_shading_st->Connect(ID_HiShadingSync, wxEVT_LEFT_DCLICK,
+		wxMouseEventHandler(VPropView::OnHiShadingSync), NULL, this);
+	m_hi_shading_st->Connect(ID_HiShadingSync, wxEVT_RIGHT_DCLICK,
+		wxMouseEventHandler(VPropView::OnHiShadingSync), NULL, this);
+	m_shadow_tool = new wxToolBar(this, ID_ShadowSync,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_shadow_tool->AddCheckTool(ID_ShadowChk,"Shadow",
 		wxGetBitmapFromMemory(shadow),wxNullBitmap,
@@ -275,16 +303,23 @@ wxPanel(parent, id, pos, size,style, name),
 		"Enables Shadow Editing.");
 	m_shadow_tool->ToggleTool(ID_ShadowChk,false);
 	m_shadow_tool->Realize();
-	st = new wxStaticText(this, 0, "Light /",
-		wxDefaultPosition, wxSize(50, -1), wxALIGN_RIGHT);
+	m_shadow_tool->Connect(ID_ShadowSync, wxEVT_LEFT_DCLICK,
+		wxMouseEventHandler(VPropView::OnShadowSync), NULL, this);
+	m_shadow_tool->Connect(ID_ShadowSync, wxEVT_RIGHT_DCLICK,
+		wxMouseEventHandler(VPropView::OnShadowSync), NULL, this);
+	st = new wxStaticText(this, 0, " : ",
+		wxDefaultPosition, wxSize(20, -1), wxALIGN_RIGHT);
+	//highlight
+	m_hi_shading_sldr = new wxSlider(this, ID_HiShadingSldr, 0, 0, 100,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_hi_shading_text = new wxTextCtrl(this, ID_HiShadingText, "0.00",
+		wxDefaultPosition, wxSize(50, 20), 0, vald_fp2);
 	m_shadow_sldr = new wxSlider(this, ID_ShadowSldr, 0, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_shadow_text = new wxTextCtrl(this, ID_ShadowText, "0.00",
 		wxDefaultPosition, wxSize(50, 20), 0, vald_fp2);
-	sizer_m3->Add(st, 0, wxALIGN_CENTER);
+	sizer_m3->Add(m_hi_shading_st, 0, wxALIGN_CENTER);
 	sizer_m3->Add(m_shadow_tool, 0, wxALIGN_CENTER);
-	st = new wxStaticText(this, 0, " : ",
-		wxDefaultPosition, wxSize(20, -1), wxALIGN_RIGHT);
 	sizer_m3->Add(st, 0, wxALIGN_CENTER);
 	sizer_m3->Add(m_hi_shading_text, 0, wxALIGN_CENTER);
 	sizer_m3->Add(m_hi_shading_sldr, 1, wxEXPAND);
@@ -295,6 +330,8 @@ wxPanel(parent, id, pos, size,style, name),
 		wxDefaultPosition, wxSize(127, -1), wxALIGN_RIGHT);
 	m_sample_st->Connect(ID_SampleSync, wxEVT_LEFT_DCLICK,
 		wxMouseEventHandler(VPropView::OnSampleSync), NULL, this);
+	m_sample_st->Connect(ID_SampleSync, wxEVT_RIGHT_DCLICK,
+		wxMouseEventHandler(VPropView::OnSampleSync), NULL, this);
 	m_sample_sldr = new wxSlider(this, ID_SampleSldr, 10, 0, 50,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_sample_text = new wxTextCtrl(this, ID_SampleText, "1.0",
@@ -303,7 +340,7 @@ wxPanel(parent, id, pos, size,style, name),
 	sizer_m4->Add(m_sample_text, 0, wxALIGN_CENTER);
 	sizer_m4->Add(m_sample_sldr, 1, wxEXPAND);
 	//colormap
-	m_colormap_tool = new wxToolBar(this,wxID_ANY,
+	m_colormap_tool = new wxToolBar(this, ID_ColormapSync,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_colormap_tool->AddCheckTool(ID_ColormapEnableChk,"Color Map",
 		wxGetBitmapFromMemory(palette),wxNullBitmap,
@@ -311,6 +348,10 @@ wxPanel(parent, id, pos, size,style, name),
 		"Enables Color Map Editing.");
 	m_colormap_tool->ToggleTool(ID_ColormapEnableChk,false);
 	m_colormap_tool->Realize();
+	m_colormap_tool->Connect(ID_ColormapSync, wxEVT_LEFT_DCLICK,
+		wxMouseEventHandler(VPropView::OnColormapSync), NULL, this);
+	m_colormap_tool->Connect(ID_ColormapSync, wxEVT_RIGHT_DCLICK,
+		wxMouseEventHandler(VPropView::OnColormapSync), NULL, this);
 	sizer_m5->Add(50,50,0);
 	sizer_m5->Add(m_colormap_tool, 0, wxALIGN_CENTER);
 	st = new wxStaticText(this, 0, " : ",
@@ -332,6 +373,7 @@ wxPanel(parent, id, pos, size,style, name),
 		ID_ColormapHighValueSldr, 255, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	sizer_m5->Add(m_colormap_high_value_sldr, 1, wxEXPAND);
+
 	//right ///////////////////////////////////////////////////
 	m_options_toolbar = new wxToolBar(this,wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
@@ -532,14 +574,14 @@ void VPropView::GetSettings()
 	str = wxString::Format("%.4f", dval);
 	m_boundary_text->ChangeValue(str);
 	//contrast
-	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_contrast_text->GetValidator()))
+	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_saturation_text->GetValidator()))
 		vald_i->SetRange(0, int(m_max_val)*10);
 	dval = m_vd->GetOffset();
 	ival = int(dval*m_max_val+0.5);
-	m_contrast_sldr->SetRange(0, int(m_max_val));
+	m_saturation_sldr->SetRange(0, int(m_max_val));
 	str = wxString::Format("%d", ival);
-	m_contrast_sldr->SetValue(ival);
-	m_contrast_text->ChangeValue(str);
+	m_saturation_sldr->SetValue(ival);
+	m_saturation_text->ChangeValue(str);
 	//left threshold
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_left_thresh_text->GetValidator()))
 		vald_i->SetRange(0, int(m_max_val));
@@ -725,8 +767,8 @@ void VPropView::GetSettings()
 		{
 			m_gamma_sldr->Disable();
 			m_gamma_text->Disable();
-			m_contrast_sldr->Disable();
-			m_contrast_text->Disable();
+			m_saturation_sldr->Disable();
+			m_saturation_text->Disable();
 			m_luminance_sldr->Disable();
 			m_luminance_text->Disable();
 		}
@@ -747,8 +789,8 @@ void VPropView::GetSettings()
 		m_boundary_text->Enable();
 		m_gamma_sldr->Enable();
 		m_gamma_text->Enable();
-		m_contrast_sldr->Enable();
-		m_contrast_text->Enable();
+		m_saturation_sldr->Enable();
+		m_saturation_text->Enable();
 		m_luminance_sldr->Enable();
 		m_luminance_text->Enable();
 		if (m_threh_st)
@@ -841,6 +883,16 @@ VRenderView* VPropView::GetView()
 }
 
 //1
+void VPropView::OnGammaSync(wxMouseEvent& event)
+{
+	wxString str = m_gamma_text->GetValue();
+	double dVal;
+	str.ToDouble(&dVal);
+	if (m_group)
+		m_group->Set3DGamma(dVal);
+	RefreshVRenderViews(false, true);
+}
+
 void VPropView::OnGammaChange(wxScrollEvent & event)
 {
 	double val = (double)event.GetPosition() / 100.0;
@@ -862,6 +914,16 @@ void VPropView::OnGammaText(wxCommandEvent& event)
 	else if (m_vd)
 		m_vd->Set3DGamma(val);
 
+	RefreshVRenderViews(false, true);
+}
+
+void VPropView::OnBoundarySync(wxMouseEvent& event)
+{
+	wxString str = m_boundary_text->GetValue();
+	double dVal;
+	str.ToDouble(&dVal);
+	if (m_group)
+		m_group->SetBoundary(dVal);
 	RefreshVRenderViews(false, true);
 }
 
@@ -890,20 +952,31 @@ void VPropView::OnBoundaryText(wxCommandEvent& event)
 }
 
 //2
-void VPropView::OnContrastChange(wxScrollEvent & event)
+void VPropView::OnSaturationSync(wxMouseEvent& event)
+{
+	wxString str = m_saturation_text->GetValue();
+	long iVal;
+	str.ToLong(&iVal);
+	double dVal = double(iVal) / m_max_val;
+	if (m_group)
+		m_group->SetOffset(dVal);
+	RefreshVRenderViews(false, true);
+}
+
+void VPropView::OnSaturationChange(wxScrollEvent & event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
-	m_contrast_text->SetValue(str);
+	m_saturation_text->SetValue(str);
 }
 
-void VPropView::OnContrastText(wxCommandEvent& event)
+void VPropView::OnSaturationText(wxCommandEvent& event)
 {
-	wxString str = m_contrast_text->GetValue();
+	wxString str = m_saturation_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
 	double val = double(ival) / m_max_val;
-	m_contrast_sldr->SetValue(ival);
+	m_saturation_sldr->SetValue(ival);
 
 	//set contrast value
 	if (m_sync_group && m_group)
@@ -911,6 +984,22 @@ void VPropView::OnContrastText(wxCommandEvent& event)
 	else if (m_vd)
 		m_vd->SetOffset(val);
 
+	RefreshVRenderViews(false, true);
+}
+
+void VPropView::OnThreshSync(wxMouseEvent& event)
+{
+	wxString str = m_left_thresh_text->GetValue();
+	long iVal;
+	str.ToLong(&iVal);
+	double dVal = double(iVal) / m_max_val;
+	if (m_group)
+		m_group->SetLeftThresh(dVal);
+	str = m_right_thresh_text->GetValue();
+	str.ToLong(&iVal);
+	dVal = double(iVal) / m_max_val;
+	if (m_group)
+		m_group->SetRightThresh(dVal);
 	RefreshVRenderViews(false, true);
 }
 
@@ -984,6 +1073,17 @@ void VPropView::OnRightThreshText(wxCommandEvent &event)
 }
 
 //3
+void VPropView::OnLuminanceSync(wxMouseEvent& event)
+{
+	wxString str = m_luminance_text->GetValue();
+	long iVal;
+	str.ToLong(&iVal);
+	double dVal = double(iVal) / m_max_val;
+	if (m_group)
+		m_group->SetLuminance(dVal);
+	RefreshVRenderViews(true, true);
+}
+
 void VPropView::OnLuminanceChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
@@ -1019,7 +1119,55 @@ void VPropView::OnLuminanceText(wxCommandEvent &event)
 	RefreshVRenderViews(true, true);
 }
 
+//hi shading
+void VPropView::OnHiShadingSync(wxMouseEvent& event)
+{
+	wxString str = m_hi_shading_text->GetValue();
+	double dVal;
+	str.ToDouble(&dVal);
+	if (m_group)
+		m_group->SetHiShading(dVal);
+	RefreshVRenderViews(false, true);
+}
+
+void VPropView::OnHiShadingChange(wxScrollEvent &event)
+{
+	double val = (double)event.GetPosition() / 10.0;
+	wxString str = wxString::Format("%.2f", val);
+	m_hi_shading_text->SetValue(str);
+}
+
+void VPropView::OnHiShadingText(wxCommandEvent &event)
+{
+	wxString str = m_hi_shading_text->GetValue();
+	double val = 0.0;
+	str.ToDouble(&val);
+	m_hi_shading_sldr->SetValue(int(val*10.0 + 0.5));
+
+	//set high shading value
+	if (m_sync_group && m_group)
+		m_group->SetHiShading(val);
+	else if (m_vd)
+		m_vd->SetHiShading(val);
+
+	RefreshVRenderViews(false, true);
+}
+
 //shadow
+void VPropView::OnShadowSync(wxMouseEvent& event)
+{
+	bool bVal = m_shadow_tool->GetToolState(ID_ShadowChk);
+	wxString str = m_shadow_text->GetValue();
+	double dVal;
+	str.ToDouble(&dVal);
+	if (m_group)
+	{
+		m_group->SetShadow(bVal);
+		m_group->SetShadowParams(dVal);
+	}
+	RefreshVRenderViews(false, true);
+}
+
 void VPropView::OnShadowEnable(wxCommandEvent &event)
 {
 	bool shadow = m_shadow_tool->GetToolState(ID_ShadowChk);
@@ -1082,30 +1230,18 @@ void VPropView::OnShadowText(wxCommandEvent &event)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::OnHiShadingChange(wxScrollEvent &event)
+//4
+void VPropView::OnAlphaSync(wxMouseEvent& event)
 {
-	double val = (double)event.GetPosition() / 10.0;
-	wxString str = wxString::Format("%.2f", val);
-	m_hi_shading_text->SetValue(str);
-}
-
-void VPropView::OnHiShadingText(wxCommandEvent &event)
-{
-	wxString str = m_hi_shading_text->GetValue();
-	double val = 0.0;
-	str.ToDouble(&val);
-	m_hi_shading_sldr->SetValue(int(val*10.0+0.5));
-
-	//set high shading value
-	if (m_sync_group && m_group)
-		m_group->SetHiShading(val);
-	else if (m_vd)
-		m_vd->SetHiShading(val);
-
+	wxString str = m_alpha_text->GetValue();
+	long iVal;
+	str.ToLong(&iVal);
+	double dVal = double(iVal) / m_max_val;
+	if (m_group)
+		m_group->SetAlpha(dVal);
 	RefreshVRenderViews(false, true);
 }
 
-//4
 void VPropView::OnAlphaCheck(wxCommandEvent &event)
 {
 	bool alpha = m_alpha_tool->GetToolState(ID_AlphaChk);
@@ -1221,6 +1357,20 @@ void VPropView::OnSampleText(wxCommandEvent& event)
 }
 
 //5
+void VPropView::OnShadingSync(wxMouseEvent& event)
+{
+	bool bVal = m_shade_tool->GetToolState(ID_ShadingEnableChk);
+	wxString str = m_low_shading_text->GetValue();
+	double dVal;
+	str.ToDouble(&dVal);
+	if (m_group)
+	{
+		m_group->SetShading(bVal);
+		m_group->SetLowShading(dVal);
+	}
+	RefreshVRenderViews(false, true);
+}
+
 void VPropView::OnLowShadingChange(wxScrollEvent &event)
 {
 	double val = (double)event.GetPosition() / 100.0;
@@ -1267,6 +1417,26 @@ void VPropView::OnShadingEnable(wxCommandEvent &event)
 }
 
 //colormap controls
+void VPropView::OnColormapSync(wxMouseEvent& event)
+{
+	bool bVal = m_colormap_tool->GetToolState(ID_ColormapEnableChk);
+	long iVal;
+	double dVal1, dVal2;
+	wxString str = m_colormap_low_value_text->GetValue();
+	str.ToLong(&iVal);
+	dVal1 = double(iVal) / m_max_val;
+	str = m_colormap_high_value_text->GetValue();
+	str.ToLong(&iVal);
+	dVal2 = double(iVal) / m_max_val;
+	if (m_group)
+	{
+		m_group->SetColormapMode(bVal ? 1 : 0);
+		m_group->SetColormapDisp(bVal);
+		m_group->SetColormapValues(dVal1, dVal2);
+	}
+	RefreshVRenderViews(false, true);
+}
+
 void VPropView::OnEnableColormap(wxCommandEvent &event)
 {
 	bool colormap = 
@@ -1297,8 +1467,8 @@ void VPropView::OnEnableColormap(wxCommandEvent &event)
 		{
 			m_gamma_sldr->Disable();
 			m_gamma_text->Disable();
-			m_contrast_sldr->Disable();
-			m_contrast_text->Disable();
+			m_saturation_sldr->Disable();
+			m_saturation_text->Disable();
 			m_luminance_sldr->Disable();
 			m_luminance_text->Disable();
 		}
@@ -1306,8 +1476,8 @@ void VPropView::OnEnableColormap(wxCommandEvent &event)
 		{
 			m_gamma_sldr->Enable();
 			m_gamma_text->Enable();
-			m_contrast_sldr->Enable();
-			m_contrast_text->Enable();
+			m_saturation_sldr->Enable();
+			m_saturation_text->Enable();
 			m_luminance_sldr->Enable();
 			m_luminance_text->Enable();
 		}
@@ -1709,8 +1879,8 @@ void VPropView::OnMIPCheck(wxCommandEvent &event)
 		{
 			m_gamma_sldr->Disable();
 			m_gamma_text->Disable();
-			m_contrast_sldr->Disable();
-			m_contrast_text->Disable();
+			m_saturation_sldr->Disable();
+			m_saturation_text->Disable();
 		}
 		if (m_threh_st)
 			m_threh_st->SetLabel("Shade Threshold : ");
@@ -1728,8 +1898,8 @@ void VPropView::OnMIPCheck(wxCommandEvent &event)
 		m_boundary_text->Enable();
 		m_gamma_sldr->Enable();
 		m_gamma_text->Enable();
-		m_contrast_sldr->Enable();
-		m_contrast_text->Enable();
+		m_saturation_sldr->Enable();
+		m_saturation_text->Enable();
 		m_luminance_sldr->Enable();
 		m_luminance_text->Enable();
 		if (m_threh_st)
@@ -1920,8 +2090,8 @@ void VPropView::OnSyncGroupCheck(wxCommandEvent& event)
 		str = m_boundary_text->GetValue();
 		str.ToDouble(&dVal);
 		m_group->SetBoundary(dVal);
-		//contrast
-		str = m_contrast_text->GetValue();
+		//saturation
+		str = m_saturation_text->GetValue();
 		str.ToLong(&iVal);
 		dVal = double(iVal) / m_max_val;
 		m_group->SetOffset(dVal);
@@ -2013,7 +2183,7 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
 	fconfig.Write("gamma", val);
 	mgr->m_vol_gam = val;
 	//low offset
-	str = m_contrast_text->GetValue();
+	str = m_saturation_text->GetValue();
 	str.ToDouble(&val);
 	val /= m_max_val;
 	fconfig.Write("low_offset", val);
@@ -2170,8 +2340,8 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 	dval = mgr->m_vol_of1;
 	ival = int(dval*m_max_val+0.5);
 	str = wxString::Format("%d", ival);
-	m_contrast_text->ChangeValue(str);
-	m_contrast_sldr->SetValue(ival);
+	m_saturation_text->ChangeValue(str);
+	m_saturation_sldr->SetValue(ival);
 	m_vd->SetOffset(dval);
 	//low thresholding
 	dval = mgr->m_vol_lth;

@@ -1129,7 +1129,10 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
 			UpdateTree();
 
 		if (vrv)
+		{
 			vrv->InitView(INIT_BOUNDS|INIT_CENTER);
+			vrv->UpdateScaleFactor(false);
+		}
 		if (enable_4d) {
 			m_movie_view->EnableTime();
 			m_movie_view->DisableRot();
@@ -3746,7 +3749,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 				if (!fconfig.Read("scale", &scale))
 					scale = radius / tan(d2r(vrv->GetAov() / 2.0)) / dist;
 				vrv->m_glview->m_scale_factor = scale;
-				vrv->UpdateScaleFactor();
+				vrv->UpdateScaleFactor(false);
 				//object
 				if (fconfig.Read("obj_center", &str))
 				{

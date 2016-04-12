@@ -217,7 +217,7 @@ wxGLCanvas(parent, id, attriblist, pos, size, style),
 	m_obj_rotx(0.0), m_obj_roty(0.0), m_obj_rotz(0.0),
 	m_rot_lock(false),
 	//object bounding box
-	m_radius(5.0),
+	m_radius(348.0),
 	//mouse position
 	old_mouse_X(-1), old_mouse_Y(-1),
 	prv_mouse_X(-1), prv_mouse_Y(-1),
@@ -466,6 +466,8 @@ void VRenderGLView::OnResize(wxSizeEvent& event)
 	m_resize = true;
 	m_resize_ol1 = true;
 	m_resize_ol2 = true;
+
+	m_vrv->UpdateScaleFactor(false);
 
 	RefreshGL();
 }
@@ -6975,7 +6977,7 @@ void VRenderGLView::InitView(unsigned int type)
 			Vector diag = m_bounds.diagonal();
 			m_radius = sqrt(diag.x()*diag.x()+diag.y()*diag.y()) / 2.0;
 			if (m_radius<0.1)
-				m_radius = 5.0;
+				m_radius = 348.0;
 			m_near_clip = m_radius / 1000.0;
 			m_far_clip = m_radius * 100.0;
 		}
@@ -13255,13 +13257,14 @@ void VRenderView::LoadSettings()
 	//}
 	if (fconfig.Read("scale_factor_mode", &bVal))
 	{
+		m_dft_scale_factor_mode = bVal;
 		SetScaleMode(bVal, false);
 	}
 	if (fconfig.Read("scale_factor", &dVal))
 	{
 		m_dft_scale_factor = dVal;
 		m_glview->m_scale_factor = m_dft_scale_factor;
-		UpdateScaleFactor();
+		UpdateScaleFactor(false);
 	}
 	if (fconfig.Read("depth_atten_chk", &bVal))
 	{
