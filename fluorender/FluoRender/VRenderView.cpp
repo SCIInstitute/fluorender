@@ -11167,7 +11167,7 @@ void VRenderView::CreateBar()
 	m_full_screen_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_NODIVIDER);
 	m_full_screen_btn->AddTool(ID_FullScreenBtn, "Full Screen",
-		wxGetBitmapFromMemory(full_screen),
+		wxGetBitmapFromMemory(full_view),
 		"Show full screen");
 	m_full_screen_btn->Realize();
 #endif
@@ -11732,7 +11732,7 @@ void VRenderView::UpdateScaleFactor(bool update_text)
 	double scale = m_glview->m_scale_factor;
 	if (!m_glview->m_scale_mode)
 		scale /= m_glview->Get121ScaleFactor();
-	int val = scale * 100;
+	int val = int(scale * 100 + 0.5);
 	m_scale_factor_sldr->SetValue(val);
 	wxString str = wxString::Format("%d", val);
 	if (update_text)
@@ -12817,7 +12817,7 @@ void VRenderView::OnScaleBar(wxCommandEvent& event)
 		m_glview->m_disp_scale_bar = true;
 		m_glview->m_disp_scale_bar_text = false;
 		m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
-			wxGetBitmapFromMemory(scale));
+			wxGetBitmapFromMemory(scalebar));
 		m_scale_text->Enable();
 		m_scale_cmb->Disable();
 		if (m_glview) m_glview->DisableSBText();

@@ -152,11 +152,41 @@ public:
 	const static unsigned char gear_45_png[979];
 	/* legend.png - 1142 bytes */
 	const static unsigned char legend_png[1142];
+	/* ratio.png - 361 bytes */
+	const static unsigned char ratio_png[361];
+	/* scalebar.png - 803 bytes */
+	const static unsigned char scalebar_png[803];
+	/* scale_text.png - 797 bytes */
+	const static unsigned char scale_text_png[797];
+	/* scale_text_off.png - 712 bytes */
+	const static unsigned char scale_text_off_png[712];
+	/* full_screen.png - 472 bytes */
+	const static unsigned char full_view_png[472];
+	/* slider_type_pos.png - 665 bytes */
+	const static unsigned char slider_type_pos_png[665];
+	/* slider_type_rot.png - 1085 bytes */
+	const static unsigned char slider_type_rot_png[1085];
+	/* zoom_view.png - 303 bytes */
+	const static unsigned char zoom_view_png[303];
+	/* zoom_data.png - 719 bytes */
+	const static unsigned char zoom_data_png[719];
 
 
 	//clipping view icons
 	/* align.png - 1470 bytes */
 	const static unsigned char align_png[1470];
+	/* hold_clip.png - 901 bytes */
+	const static unsigned char hold_clip_png[901];
+	/* clip_frame.png - 730 bytes */
+	const static unsigned char clip_frame_png[730];
+	/* clip_low.png - 566 bytes */
+	const static unsigned char clip_low_png[566];
+	/* clip_low_back.png - 609 bytes */
+	const static unsigned char clip_low_back_png[609];
+	/* clip_normal.png - 790 bytes */
+	const static unsigned char clip_normal_png[790];
+	/* clip_normal_back.png - 773 bytes */
+	const static unsigned char clip_normal_back_png[773];
 
 
 	//list view icons
@@ -202,18 +232,67 @@ public:
 
 
 	//ruler tool icons
-	/* listicon_addruler.png - 3749 bytes */
-	const static unsigned char listicon_addruler_png[3749];
-	/* listicon_locator.png - 16569 bytes */
-	const static unsigned char listicon_locator_png[16569];
-	/* listicon_ruleredit.png - 16569 bytes */
-	const static unsigned char listicon_ruleredit_png[16569];
-	/* drill.png - 15753 bytes */
-	const static unsigned char drill_png[15753];
-	/* prof_curve.png - 18610 bytes */
-	const static unsigned char prof_curve_png[18610];
-	/* protractor.png - 16248 bytes */
-	const static unsigned char protractor_png[16248];
+	/* add_ruler.png - 922 bytes */
+	const static unsigned char add_ruler_png[922];
+	/* drill.png - 819 bytes */
+	const static unsigned char drill_png[819];
+	/* locator.png - 971 bytes */
+	const static unsigned char locator_png[971];
+	/* profile.png - 1207 bytes */
+	const static unsigned char profile_png[1207];
+	/* protractor.png - 1172 bytes */
+	const static unsigned char protractor_png[1172];
+	/* ruler_edit.png - 828 bytes */
+	const static unsigned char ruler_edit_png[828];
+
+
+	//movie play export icons
+	/* minus.png - 426 bytes */
+	const static unsigned char minus_png[426];
+	/* pause.png - 773 bytes */
+	const static unsigned char pause_png[773];
+	/* play.png - 935 bytes */
+	const static unsigned char play_png[935];
+	/* plus.png - 721 bytes */
+	const static unsigned char plus_png[721];
+	/* rewind.png - 1065 bytes */
+	const static unsigned char rewind_png[1065];
+
+
+	//volume property icons
+	/* mip.png - 436 bytes */
+	const static unsigned char mip_png[436];
+	/* interpolate.png - 496 bytes */
+	const static unsigned char interpolate_png[496];
+	/* interpolate_off.png - 501 bytes */
+	const static unsigned char interpolate_off_png[501];
+	/* invert.png - 697 bytes */
+	const static unsigned char invert_png[697];
+	/* invert_off.png - 687 bytes */
+	const static unsigned char invert_off_png[687];
+	/* smooth.png - 876 bytes */
+	const static unsigned char smooth_png[876];
+	/* smooth_off.png - 326 bytes */
+	const static unsigned char smooth_off_png[326];
+	/* alpha.png - 300 bytes */
+	const static unsigned char alpha_png[300];
+	/* palette.png - 375 bytes */
+	const static unsigned char palette_png[375];
+	/* shade.png - 350 bytes */
+	const static unsigned char shade_png[350];
+	/* shadow.png - 358 bytes */
+	const static unsigned char shadow_png[358];
+
+
+	//tracking dialog icons
+	/* auto_assign_off.png - 2258 bytes */
+	const static unsigned char auto_assign_off_png[2258];
+	/* auto_assign_on.png - 1180 bytes */
+	const static unsigned char auto_assign_on_png[1180];
+	/* auto_link_off.png - 1959 bytes */
+	const static unsigned char auto_link_off_png[1959];
+	/* auto_link_on.png - 1081 bytes */
+	const static unsigned char auto_link_on_png[1081];
 
 
 	//common icons
@@ -230,168 +309,14 @@ public:
 	const static unsigned char unlink_png[1503];
 	/* save_settings.png - 1314 bytes */
 	const static unsigned char save_settings_png[1314];
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* minus.png - 16443 bytes */
-const static unsigned char minus_png[16443];
-
-/* mip.png - 436 bytes */
-const static unsigned char mip_png[436];
-
-
-/* pause.png - 1389 bytes */
-const static unsigned char pause_png[1389];
-
-/* play.png - 1258 bytes */
-const static unsigned char play_png[1258];
-
-/* plus.png - 16443 bytes */
-const static unsigned char plus_png[16443];
-
-/* ratio.png - 361 bytes */
-const static unsigned char ratio_png[361];
-
-/* record.png - 1207 bytes */
-const static unsigned char record_png[1207];
-
-/* reset.png - 16600 bytes */
-const static unsigned char reset_png[16600];
-
-/* rewind.png - 16443 bytes */
-const static unsigned char rewind_png[16443];
-
-
-/* scale.png - 312 bytes */
-const static unsigned char scale_png[16146];
-
-/* scale_text.png - 484 bytes */
-const static unsigned char scale_text_png[17358];
-
-/* scale_text_off.png - 1365 bytes */
-const static unsigned char scale_text_off_png[16910];
-
-
-
-/* invert.png - 15224 bytes */
-const static unsigned char invert_png[15224];
-
-/* invert_off_png.png - 15199 bytes */
-const static unsigned char invert_off_png[15199];
-
-/* interpolate.png - 15013 bytes */
-const static unsigned char interpolate_png[15013];
-
-/* interpolate_off.png - 14998 bytes */
-const static unsigned char interpolate_off_png[14998];
-
-/* smooth.png - 15326 bytes */
-const static unsigned char smooth_png[15326];
-
-/* smooth_off.png - 14747 bytes */
-const static unsigned char smooth_off_png[14747];
-
-
-
-
-
-
-/* full_screen.png - 14882 bytes */
-const static unsigned char full_screen_png[14882];
-
-/* sync_chan.png - 18734 bytes */
-const static unsigned char sync_chan_png[18734];
-
-/* hold_clip.png - 15800 bytes */
-const static unsigned char hold_clip_png[15800];
-
-/* clip_frame.png - 15635 bytes */
-const static unsigned char clip_frame_png[15635];
-
-/* clip_low.png - 15448 bytes */
-const static unsigned char clip_low_png[15448];
-
-/* clip_low_back.png - 15494 bytes */
-const static unsigned char clip_low_back_png[15494];
-
-/* clip_normal.png - 15692 bytes */
-const static unsigned char clip_normal_png[15692];
-
-/* clip_normal_back.png - 15679 bytes */
-const static unsigned char clip_normal_back_png[15679];
-
-/* slider_type_pos.png - 15174 bytes */
-const static unsigned char slider_type_pos_png[15174];
-
-/* slider_type_rot.png - 16975 bytes */
-const static unsigned char slider_type_rot_png[16975];
-
-/* full_screen_back_menu.png - 15811 bytes */
-const static unsigned char full_screen_back_menu_png[15811];
-
-/* full_screen_menu.png - 15841 bytes */
-const static unsigned char full_screen_menu_png[15841];
-
-/* auto_assign_off.png - 20001 bytes */
-const static unsigned char auto_assign_off_png[20001];
-
-/* auto_assign_on.png - 18990 bytes */
-const static unsigned char auto_assign_on_png[18990];
-
-/* auto_link_off.png - 19700 bytes */
-const static unsigned char auto_link_off_png[19700];
-
-/* auto_link_on.png - 18865 bytes */
-const static unsigned char auto_link_on_png[18865];
-
-/* alpha.png - 16181 bytes */
-const static unsigned char alpha_png[16181];
-
-/* palette.png - 16278 bytes */
-const static unsigned char palette_png[16278];
-
-/* shade.png - 16239 bytes */
-const static unsigned char shade_png[16239];
-
-/* shadow.png - 16235 bytes */
-const static unsigned char shadow_png[16235];
-
-/* zoom_view.png - 303 bytes */
-const static unsigned char zoom_view_png[303];
-
-/* zoom_data.png - 719 bytes */
-const static unsigned char zoom_data_png[719];
-
+	/* reset.png - 885 bytes */
+	const static unsigned char reset_png[885];
+	/* sync_chan.png - 1081 bytes */
+	const static unsigned char sync_chan_png[1081];
+	/* full_screen_back_menu.png - 921 bytes */
+	const static unsigned char full_screen_back_menu_png[921];
+	/* full_screen_menu.png - 952 bytes */
+	const static unsigned char full_screen_menu_png[952];
 };
 
 #endif//_ICONS_H_

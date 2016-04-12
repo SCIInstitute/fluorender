@@ -522,7 +522,7 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER|wxTB_TEXT);
 	m_toolbar->AddCheckTool(ID_LocatorBtn, "Locator",
-		wxGetBitmapFromMemory(listicon_locator),
+		wxGetBitmapFromMemory(locator),
 		wxNullBitmap,
 		"Add locators to the render view by clicking");
 	m_toolbar->AddCheckTool(ID_ProbeBtn, "Probe",
@@ -534,21 +534,21 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 		wxNullBitmap,
 		"Add protractors to measure angles by clicking at three points");
 	m_toolbar->AddCheckTool(ID_RulerBtn, "2pt Ruler",
-		wxGetBitmapFromMemory(listicon_addruler),
+		wxGetBitmapFromMemory(add_ruler),
 		wxNullBitmap,
 		"Add rulers to the render view by clicking at two end points");
 	m_toolbar->AddCheckTool(ID_RulerMPBtn, "2+pt Ruler",
-		wxGetBitmapFromMemory(listicon_addruler),
+		wxGetBitmapFromMemory(add_ruler),
 		wxNullBitmap,
 		"Add a polyline ruler to the render view by clicking at its points");
 	m_toolbar->AddSeparator();
 	m_toolbar->AddCheckTool(ID_RulerEditBtn, "Edit",
-		wxGetBitmapFromMemory(listicon_ruleredit),
+		wxGetBitmapFromMemory(ruler_edit),
 		wxNullBitmap,
 		"Select and move ruler points");
 	m_toolbar->AddTool(ID_ProfileBtn, "Profile",
-		wxGetBitmapFromMemory(prof_curve),
-		"Generate intensity profile along curve");
+		wxGetBitmapFromMemory(profile),
+		"Add intensity profile along curve. Use \"Export\" to view results");
 	m_toolbar->AddTool(ID_DeleteBtn, "Delete",
 		wxGetBitmapFromMemory(delet),
 		"Delete a selected ruler");
