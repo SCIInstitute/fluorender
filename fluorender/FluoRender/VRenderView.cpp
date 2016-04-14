@@ -11098,7 +11098,7 @@ void VRenderView::CreateBar()
 
 	//scale bar
 	m_options_toolbar->AddTool(ID_ScaleBar,"Scale Bar",
-		wxGetBitmapFromMemory(scale_text_off),
+		wxGetBitmapFromMemory(scalebar),
 		"Toggle Scalebar Options (Off, On, On with text)");
 	m_scale_text = new wxTextCtrl(m_options_toolbar, ID_ScaleText, "50",
 		wxDefaultPosition, wxSize(35, 20), 0, vald_int);
@@ -12817,7 +12817,7 @@ void VRenderView::OnScaleBar(wxCommandEvent& event)
 		m_glview->m_disp_scale_bar = true;
 		m_glview->m_disp_scale_bar_text = false;
 		m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
-			wxGetBitmapFromMemory(scalebar));
+			wxGetBitmapFromMemory(scale_text_off));
 		m_scale_text->Enable();
 		m_scale_cmb->Disable();
 		if (m_glview) m_glview->DisableSBText();
@@ -12839,7 +12839,7 @@ void VRenderView::OnScaleBar(wxCommandEvent& event)
 		m_glview->m_disp_scale_bar = false;
 		m_glview->m_disp_scale_bar_text = false;
 		m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
-			wxGetBitmapFromMemory(scale_text_off));
+			wxGetBitmapFromMemory(scalebar));
 		m_scale_text->Disable();
 		m_scale_cmb->Disable();
 		if (m_glview) m_glview->DisableScaleBar();
