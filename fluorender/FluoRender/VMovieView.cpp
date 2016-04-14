@@ -1118,7 +1118,7 @@ void VMovieView::WriteFrameToFile(int total_frames) {
 			memcpy(flip + 3 * (w * yy + xx), image + chann * (w * (h - yy - 1) + xx), 3);
 		bool worked = encoder_.set_frame_rgb_data(flip);
 		worked = encoder_.write_video_frame(m_last_frame);
-		delete flip;
+		delete []flip;
 		return;
 	}
     TIFF *out = TIFFOpen(str_fn.c_str(), "wb");
