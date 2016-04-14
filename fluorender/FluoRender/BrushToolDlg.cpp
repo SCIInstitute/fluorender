@@ -83,7 +83,7 @@ END_EVENT_TABLE()
 BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	: wxPanel(parent, wxID_ANY,
 	wxDefaultPosition,
-	wxSize(500, 450),
+	wxSize(450, 450),
 	0, "BrushToolDlg"),
 	m_frame(parent),
 	m_cur_view(0),

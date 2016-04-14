@@ -53,6 +53,8 @@ BEGIN_EVENT_TABLE(DataTreeCtrl, wxTreeCtrl)
 	EVT_MENU(ID_Colocalization, DataTreeCtrl::OnColocalization)
 	EVT_MENU(ID_Convert, DataTreeCtrl::OnConvert)
 	EVT_MENU(ID_Ocl, DataTreeCtrl::OnOcl)
+	EVT_MENU(ID_Component, DataTreeCtrl::OnComponent)
+	EVT_MENU(ID_Calculations, DataTreeCtrl::OnCalculations)
 	EVT_MENU(ID_RandomizeColor, DataTreeCtrl::OnRandomizeColor)
 	EVT_TREE_SEL_CHANGED(wxID_ANY, DataTreeCtrl::OnSelChanged)
 	EVT_TREE_SEL_CHANGING(wxID_ANY, DataTreeCtrl::OnSelChanging)
@@ -306,12 +308,14 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 				menu.Append(ID_AddDataGroup, "Add Volume Group");
 				menu.Append(ID_RemoveData, "Delete");
 				menu.AppendSeparator();
-				menu.Append(ID_Edit, "Analyze...");
+				menu.Append(ID_Edit, "Paint Brush...");
 				menu.Append(ID_Measurement, "Measurement...");
-				menu.Append(ID_Trace, "Components && Tracking...");
+				menu.Append(ID_Component, "Component Analyzer...");
+				menu.Append(ID_Trace, "Tracking...");
+				menu.Append(ID_Calculations, "Calculations...");
 				menu.Append(ID_NoiseCancelling, "Noise Reduction...");
-				menu.Append(ID_Counting, "Counting and Volume...");
-				menu.Append(ID_Colocalization, "Colocalization Analysis...");
+				menu.Append(ID_Counting, "Volume Size...");
+				menu.Append(ID_Colocalization, "Colocalization...");
 				menu.Append(ID_Convert, "Convert...");
 				menu.Append(ID_Ocl, "OpenCL Kernel Editor...");
 				break;
@@ -861,6 +865,22 @@ void DataTreeCtrl::OnOcl(wxCommandEvent& event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 		vr_frame->ShowOclDlg();
+}
+
+//component
+void DataTreeCtrl::OnComponent(wxCommandEvent& event)
+{
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+		vr_frame->ShowComponentDlg();
+}
+
+//calculations
+void DataTreeCtrl::OnCalculations(wxCommandEvent& event)
+{
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+		vr_frame->ShowCalculationDlg();
 }
 
 //randomize color
