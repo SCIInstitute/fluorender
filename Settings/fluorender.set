@@ -8,6 +8,8 @@ value=1
 mode=0
 [save\ project]
 mode=1
+[save\ alpha]
+mode=0
 [realtime\ compress]
 mode=0
 [skip\ bricks]
@@ -49,6 +51,11 @@ color=0
 [full\ screen]
 stay\ top=0
 show\ cursor=1
+[last\ tool]
+value=9
+[components]
+component_size=25
+contact_factor=0.7
 [memory\ settings]
 mem\ swap=0
 graphics\ mem=2000
