@@ -168,7 +168,7 @@ add_library(POLE_OBJ OBJECT ${pole_srcs} ${pole_hdrs})
 #ffmpeg
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   include_directories(${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/Win64/include)
-  file(GLOB ffmpeg_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/Win64/lib/*.lib)
+  file(GLOB ffmpeg_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/Win64/lib/*.a ${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/Win64/lib/*.lib)
   add_definitions(-D__STDC_CONSTANT_MACROS)
 else()
   include_directories(${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/OSX/include)
@@ -415,7 +415,7 @@ else()
 endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-   set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib -L/usr/lib ${CMAKE_EXE_LINKER_FLAGS} -lbz2 -framework OpenCL -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration")
+   set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib -L/usr/lib ${CMAKE_EXE_LINKER_FLAGS} -lbz2 -framework OpenCL -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration -framework VideoToolbox -framework Security -framework CoreMedia")
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.9 -DWX_PRECOMP -std=c++11 -stdlib=libc++")
    #make sure png is static linked
    string(REGEX REPLACE "-lpng" "/usr/local/lib/libpng.a" 
@@ -428,6 +428,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 #link the libraries
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 target_link_libraries(FluoRender
    ${ffmpeg_LIBRARIES}
    ${OPENGL_LIBRARIES}
@@ -435,6 +436,17 @@ target_link_libraries(FluoRender
    ${OPENCL_LIBRARIES}
    ${FREETYPE_LIBRARIES}
    ${wxWidgets_LIBRARIES})
+elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+target_link_libraries(FluoRender
+   secur32.lib
+   ${ffmpeg_LIBRARIES}
+   ${OPENGL_LIBRARIES}
+   ${Boost_LIBRARIES}
+   ${OPENCL_LIBRARIES}
+   ${FREETYPE_LIBRARIES}
+   ${wxWidgets_LIBRARIES})
+endif()
+
 target_link_libraries(SynthBB
    ${Boost_LIBRARIES}
    ${OPENCL_LIBRARIES}
@@ -481,18 +493,6 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 		COMMAND ${CMAKE_COMMAND} -E copy_directory
 		"${FluoRender_SOURCE_DIR}/Executables"
 		"${CMAKE_BINARY_DIR}/Executables")
-endif()
-   
-#build DLL copy
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-	file(GLOB ffmpeg_DLLS fluorender/bin/*.dll)
-	foreach (f ${ffmpeg_DLLS})
-		add_custom_command(TARGET FluoRender PRE_BUILD
-			COMMAND ${CMAKE_COMMAND} -E copy  
-			${f}
-			$<TARGET_FILE_DIR:FluoRender>)
-	endforeach()
 endif()
    
 #post build setting files copy
