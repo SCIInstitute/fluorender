@@ -167,12 +167,12 @@ add_library(POLE_OBJ OBJECT ${pole_srcs} ${pole_hdrs})
 
 #ffmpeg
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  include_directories(${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/Win64/include)
-  file(GLOB ffmpeg_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/Win64/lib/*.a ${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/Win64/lib/*.lib)
+  include_directories(${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/include)
+  file(GLOB ffmpeg_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/lib/Win64/*.a ${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/lib/Win64/*.lib)
   add_definitions(-D__STDC_CONSTANT_MACROS)
 else()
-  include_directories(${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/OSX/include)
-  file(GLOB ffmpeg_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/OSX/lib/*.a)
+  include_directories(${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/include)
+  file(GLOB ffmpeg_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/lib/OSX/*.a)
 endif()
 
 #FluoRender
