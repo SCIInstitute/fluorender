@@ -331,6 +331,8 @@ inline bool FIND_FILES_4D(std::wstring path_name,
 			wchar_t c = path_name[k];
 			if (iswdigit(c))
 				t_num.push_back(c);
+            else if (k == begin + id_len)
+                return false;
 			else
 				searchstr2.push_back(c);
 		}
