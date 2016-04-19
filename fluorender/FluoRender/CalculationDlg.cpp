@@ -46,7 +46,8 @@ CalculationDlg::CalculationDlg(wxWindow *frame, wxWindow *parent)
 	: wxPanel(parent, wxID_ANY,
 		wxDefaultPosition,
 		wxSize(500, 350),
-		0, "CalculationDlg")
+		0, "CalculationDlg"),
+		m_frame(frame)
 {
 	wxStaticText *st = 0;
 
