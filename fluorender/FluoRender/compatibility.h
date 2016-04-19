@@ -140,15 +140,24 @@ inline bool FIND_FILES_4D(std::wstring path_name,
 		searchstr.push_back(L'*');
 		std::wstring t_num;
 		size_t k;
+		bool end_digits = false;
 		for (k = begin+id_len; k < path_name.length(); ++k)
 		{
 			wchar_t c = path_name[k];
 			if (iswdigit(c))
-				t_num.push_back(c);
+			{
+				if (end_digits)
+					searchstr.push_back(c);
+				else
+					t_num.push_back(c);
+			}
 			else if (k == begin + id_len)
 				return false;
 			else
+			{
+				end_digits = true;
 				searchstr.push_back(c);
+			}
 		}
 		if (t_num.length() == 0)
 			return false;
@@ -326,15 +335,24 @@ inline bool FIND_FILES_4D(std::wstring path_name,
 		std::wstring searchstr2;
 		std::wstring t_num;
 		size_t k;
+		bool end_digits = false;
 		for (k = begin + id_len; k < path_name.length(); ++k)
 		{
 			wchar_t c = path_name[k];
 			if (iswdigit(c))
-				t_num.push_back(c);
-            else if (k == begin + id_len)
-                return false;
+			{
+				if (end_digits)
+					searchstr.push_back(c);
+				else
+					t_num.push_back(c);
+			}
+			else if (k == begin + id_len)
+				return false;
 			else
+			{
+				end_digits = true;
 				searchstr2.push_back(c);
+			}
 		}
 		if (t_num.length() == 0)
 			return false;
