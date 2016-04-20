@@ -833,6 +833,9 @@ private:
 	//text renderer
 	TextRenderer* m_text_renderer;
 
+	//starting frame for 4d script
+	bool m_sf_script;
+
 private:
 #ifdef _WIN32
 	//wacom tablet
@@ -924,6 +927,7 @@ private:
 	void RunFetchMask(wxFileConfig &fconfig);
 	void RunCalculation(wxFileConfig &fconfig);
 	void RunOpenCL(wxFileConfig &fconfig);
+	void RunCompAnalysis(wxFileConfig &fconfig);
 
 	//brush states update
 	void SetBrush(int mode);

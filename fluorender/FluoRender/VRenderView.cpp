@@ -4731,6 +4731,11 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 		frame < start_frame)
 		return;
 
+	if (frame == start_frame)
+		m_sf_script = true;
+	else
+		m_sf_script = false;
+
 	m_tseq_prv_num = m_tseq_cur_num;
 	m_tseq_cur_num = frame;
 	VRenderFrame* vframe = (VRenderFrame*)m_frame;
@@ -5038,6 +5043,8 @@ void VRenderGLView::Run4DScript(wxString &scriptname, VolumeData* vd)
 					RunCalculation(fconfig);
 				else if (str == "opencl")
 					RunOpenCL(fconfig);
+				else if (str == "comp_analysis")
+					RunCompAnalysis(fconfig);
 			}
 		}
 	}
@@ -5409,6 +5416,42 @@ void VRenderGLView::RunOpenCL(wxFileConfig &fconfig)
 		vd_r->Save(str, mode, bake, compression);
 	}
 	m_kernel_executor.DeleteResult();
+}
+
+void VRenderGLView::RunCompAnalysis(wxFileConfig &fconfig)
+{
+	wxString str, pathname;
+	fconfig.Read("savepath", &pathname);
+
+	str = pathname;
+	int64_t pos = 0;
+	do
+	{
+		pos = pathname.find(GETSLASH(), pos);
+		if (pos == wxNOT_FOUND)
+			break;
+		pos++;
+		str = pathname.Left(pos);
+		if (!wxDirExists(str))
+			wxMkdir(str);
+	} while (true);
+
+	if (!m_cur_vol)
+		return;
+
+	FL::ComponentAnalyzer comp_analyzer(m_cur_vol);
+	comp_analyzer.Analyze(true);
+	string result_str;
+	comp_analyzer.OutputCompList(result_str);
+
+	//save append
+	wxFile file(pathname, m_sf_script ? wxFile::write : wxFile::write_append);
+	if (!file.IsOpened())
+		return;
+	file.Write(wxString::Format("Time point: %d\n", m_tseq_cur_num));
+	file.Write(result_str);
+	file.Write("\n");
+	file.Close();
 }
 
 //draw
