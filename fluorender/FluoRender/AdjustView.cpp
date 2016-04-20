@@ -1201,7 +1201,12 @@ void AdjustView::OnSyncBCheck(wxCommandEvent &event)
 
 void AdjustView::OnSaveDefault(wxCommandEvent &event)
 {
-	wxFileConfig fconfig("FluoRender default 2D adjustment settings");
+	wxString app_name = "FluoRender " +
+		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
+	wxString vendor_name = "FluoRender";
+	wxString local_name = "default_2d_adjustment_settings.dft";
+	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
+		wxCONFIG_USE_LOCAL_FILE);
 	wxString str;
 	double dft_r_gamma, dft_g_gamma, dft_b_gamma;
 	double dft_r_brightness, dft_g_brightness, dft_b_brightness;

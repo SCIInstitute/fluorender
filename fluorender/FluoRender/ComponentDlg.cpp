@@ -1251,7 +1251,12 @@ void ComponentDlg::LoadSettings(wxString filename)
 
 void ComponentDlg::SaveSettings(wxString filename)
 {
-	wxFileConfig fconfig("FluoRender default component settings");
+	wxString app_name = "FluoRender " +
+		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
+	wxString vendor_name = "FluoRender";
+	wxString local_name = "default_component_settings.dft";
+	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
+		wxCONFIG_USE_LOCAL_FILE);
 
 	//initial grow
 	fconfig.Write("initial_grow", m_initial_grow);

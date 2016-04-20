@@ -2249,7 +2249,12 @@ void VRenderFrame::OnOpenProject(wxCommandEvent& WXUNUSED(event))
 
 void VRenderFrame::SaveProject(wxString& filename)
 {
-	wxFileConfig fconfig("FluoRender Project");
+	wxString app_name = "FluoRender " +
+		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
+	wxString vendor_name = "FluoRender";
+	wxString local_name = filename;
+	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
+		wxCONFIG_USE_LOCAL_FILE);
 
 	int i, j, k;
 	fconfig.Write("ver_major", VERSION_MAJOR_TAG);

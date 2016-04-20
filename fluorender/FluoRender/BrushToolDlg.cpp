@@ -796,7 +796,12 @@ void BrushToolDlg::OnBrushIterCheck(wxCommandEvent& event)
 //save default
 void BrushToolDlg::SaveDefault()
 {
-	wxFileConfig fconfig("FluoRender default brush settings");
+	wxString app_name = "FluoRender " +
+		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
+	wxString vendor_name = "FluoRender";
+	wxString local_name = "default_brush_settings.dft";
+	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
+		wxCONFIG_USE_LOCAL_FILE);
 	double val;
 	wxString str;
 	//brush properties

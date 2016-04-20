@@ -969,7 +969,12 @@ void SettingDlg::UpdateUI()
 
 void SettingDlg::SaveSettings()
 {
-	wxFileConfig fconfig("FluoRender Settings");
+	wxString app_name = "FluoRender " +
+		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
+	wxString vendor_name = "FluoRender";
+	wxString local_name = "fluorender.set";
+	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
+		wxCONFIG_USE_LOCAL_FILE);
 
 	fconfig.Write("ver_major", VERSION_MAJOR_TAG);
 	fconfig.Write("ver_minor", VERSION_MINOR_TAG);

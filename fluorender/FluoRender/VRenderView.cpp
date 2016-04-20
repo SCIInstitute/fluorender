@@ -12975,7 +12975,12 @@ void VRenderView::OnFullScreen(wxCommandEvent& event)
 
 void VRenderView::SaveDefault(unsigned int mask)
 {
-	wxFileConfig fconfig("FluoRender default view settings");
+	wxString app_name = "FluoRender " +
+		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
+	wxString vendor_name = "FluoRender";
+	wxString local_name = "default_view_settings.dft";
+	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
+		wxCONFIG_USE_LOCAL_FILE);
 	wxString str;
 	bool bVal;
 	wxColor cVal;
