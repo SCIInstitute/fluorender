@@ -182,17 +182,34 @@ void ComponentAnalyzer::Analyze(bool sel)
 	m_comp_list_dirty = false;
 }
 
-void ComponentAnalyzer::OutputCompList(std::string &str)
+void ComponentAnalyzer::OutputFormHeader(std::string &str)
+{
+	str = "ID\tSumN\tSumI\tSurfaceN\tSurfaceI\tMean\tSigma\tMin\tMax\n";
+}
+
+void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::string comp_header)
 {
 	ostringstream oss;
-	oss << "Statistics on the selection:\n";
-	oss << "A total of " <<
-		m_comp_list.size() <<
-		" component(s) selected\n";
-	oss << "ID\tSumN\tSumI\tSurfaceN\tSurfaceI\tMean\tSigma\tMin\tMax\n";
+	if (verbose == 1)
+	{
+		oss << "Statistics on the selection:\n";
+		oss << "A total of " <<
+			m_comp_list.size() <<
+			" component(s) selected\n";
+		std::string header;
+		OutputFormHeader(header);
+		oss << header;
+	}
 	for (auto i = m_comp_list.begin();
 		i != m_comp_list.end(); ++i)
 	{
+		if (comp_header != "")
+		{
+			if (i == m_comp_list.begin())
+				oss << comp_header << "\t";
+			else
+				oss << "\t";
+		}
 		oss << i->id << "\t";
 		oss << i->sumi << "\t";
 		oss << i->sumd << "\t";

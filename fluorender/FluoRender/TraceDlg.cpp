@@ -1385,7 +1385,7 @@ void TraceDlg::OnAnalyzeComp(wxCommandEvent &event)
 	FL::ComponentAnalyzer comp_analyzer(vd);
 	comp_analyzer.Analyze(true);
 	string str;
-	comp_analyzer.OutputCompList(str);
+	comp_analyzer.OutputCompList(str, 1);
 	m_stat_text->SetValue(str);
 }
 

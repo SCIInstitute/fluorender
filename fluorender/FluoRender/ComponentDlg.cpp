@@ -2768,7 +2768,7 @@ void ComponentDlg::OnAnalyze(wxCommandEvent &event)
 	m_comp_analyzer.SetVolume(vd);
 	m_comp_analyzer.Analyze(false);
 	string str;
-	m_comp_analyzer.OutputCompList(str);
+	m_comp_analyzer.OutputCompList(str, 1);
 	m_stat_text->SetValue(str);
 }
 
@@ -2780,6 +2780,6 @@ void ComponentDlg::OnAnalyzeSel(wxCommandEvent &event)
 	m_comp_analyzer.SetVolume(vd);
 	m_comp_analyzer.Analyze(true);
 	string str;
-	m_comp_analyzer.OutputCompList(str);
+	m_comp_analyzer.OutputCompList(str, 1);
 	m_stat_text->SetValue(str);
 }

@@ -5422,6 +5422,8 @@ void VRenderGLView::RunCompAnalysis(wxFileConfig &fconfig)
 {
 	wxString str, pathname;
 	fconfig.Read("savepath", &pathname);
+	int verbose;
+	fconfig.Read("verbose", &verbose, 0);
 
 	str = pathname;
 	int64_t pos = 0;
@@ -5442,15 +5444,23 @@ void VRenderGLView::RunCompAnalysis(wxFileConfig &fconfig)
 	FL::ComponentAnalyzer comp_analyzer(m_cur_vol);
 	comp_analyzer.Analyze(true);
 	string result_str;
-	comp_analyzer.OutputCompList(result_str);
+	string comp_header = wxString::Format("%d", m_tseq_cur_num);
+	comp_analyzer.OutputCompList(result_str, verbose, comp_header);
 
 	//save append
 	wxFile file(pathname, m_sf_script ? wxFile::write : wxFile::write_append);
 	if (!file.IsOpened())
 		return;
-	file.Write(wxString::Format("Time point: %d\n", m_tseq_cur_num));
+	if (m_sf_script && verbose == 0)
+	{
+		string header;
+		comp_analyzer.OutputFormHeader(header);
+		file.Write(wxString::Format("Time\t"));
+		file.Write(header);
+	}
+	if (verbose == 1)
+		file.Write(wxString::Format("Time point: %d\n", m_tseq_cur_num));
 	file.Write(result_str);
-	file.Write("\n");
 	file.Close();
 }
 
