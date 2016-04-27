@@ -10233,10 +10233,10 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	m_paint_enable = false;
 	m_drawing_coord = false;
 
-	wxPoint mouse_pos = wxGetMousePosition();
-	wxRect view_reg = GetScreenRect();
-	if (view_reg.Contains(mouse_pos))
-		UpdateBrushState();
+	//wxPoint mouse_pos = wxGetMousePosition();
+	//wxRect view_reg = GetScreenRect();
+	//if (view_reg.Contains(mouse_pos))
+	//	UpdateBrushState();
 
 	//mouse button down operations
 	if (event.LeftDown())
