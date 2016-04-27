@@ -323,6 +323,9 @@ public:
 	void SetSpcFromFile(bool val=true) {m_spc_from_file = val;}
 	bool GetSpcFromFile() {return m_spc_from_file;}
 
+	//bits
+	int GetBits();
+
 	//display controls
 	void SetDisp(bool disp);
 	bool GetDisp();

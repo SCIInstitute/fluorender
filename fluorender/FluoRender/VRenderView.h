@@ -28,9 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #include "DataManager.h"
 #include "utility.h"
 #include "VolumeSelector.h"
-#include "VolumeCalculator.h"
 #include "TextRenderer.h"
 #include "KernelExecutor.h"
+#include "Calculate/VolumeCalculator.h"
 
 #include "FLIVR/Color.h"
 #include "FLIVR/ShaderProgram.h"
@@ -453,7 +453,7 @@ public:
 	//get volume selector
 	VolumeSelector* GetVolumeSelector() {return &m_selector;}
 	//get volume calculator
-	VolumeCalculator* GetVolumeCalculator() {return &m_calculator;}
+	FL::VolumeCalculator* GetVolumeCalculator() {return &m_calculator;}
 	//get kernel executor
 	KernelExecutor* GetKernelExecutor() { return &m_kernel_executor; }
 
@@ -782,7 +782,7 @@ private:
 	VolumeSelector m_selector;
 
 	//calculator
-	VolumeCalculator m_calculator;
+	FL::VolumeCalculator m_calculator;
 
 	//kernel executor
 	KernelExecutor m_kernel_executor;
@@ -1416,7 +1416,7 @@ public:
 		if (m_glview) return m_glview->GetVolumeSelector(); else return 0;
 	}
 	//get volume calculator
-	VolumeCalculator* GetVolumeCalculator()
+	FL::VolumeCalculator* GetVolumeCalculator()
 	{
 		if (m_glview) return m_glview->GetVolumeCalculator(); else return 0;
 	}

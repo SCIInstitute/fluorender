@@ -26,7 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "VolumeCalculator.h"
+#include "DataManager.h"
 #include <wx/progdlg.h>
+
+using namespace FL;
 
 VolumeCalculator::VolumeCalculator()
 : m_vd_r(0),

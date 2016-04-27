@@ -1749,6 +1749,21 @@ void VolumeData::GetFileSpacings(double &spcx, double &spcy, double &spcz)
 	spcx = m_spcx; spcy = m_spcy; spcz = m_spcz;
 }
 
+//bits
+int VolumeData::GetBits()
+{
+	if (!m_tex)
+		return 0;
+	Nrrd* nrrd_data = m_tex->get_nrrd(0);
+	if (!nrrd_data)
+		return 0;
+	if (nrrd_data->type == nrrdTypeUChar)
+		return 8;
+	else if (nrrd_data->type == nrrdTypeUShort)
+		return 16;
+	return 0;
+}
+
 //display controls
 void VolumeData::SetDisp(bool disp)
 {
