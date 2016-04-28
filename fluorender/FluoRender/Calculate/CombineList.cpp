@@ -108,6 +108,10 @@ int CombineList::Execute()
 	for (auto iter = m_channs.begin();
 		iter != m_channs.end(); ++iter)
 	{
+		int nx, ny, nz;
+		(*iter)->GetResolution(nx, ny, nz);
+		if (!(nx == m_resx && ny == m_resy && nz == m_resz))
+			continue;
 		FLIVR::Color color = (*iter)->GetColor();
 		Nrrd* nrrd_iter = (*iter)->GetVolume(false);
 		if (!nrrd_iter)
@@ -119,21 +123,27 @@ int CombineList::Execute()
 		{
 			if (m_bits == 8)
 			{
-				((unsigned char*)data_vd_r)[index] += (unsigned char)(color.r()*
-					((unsigned char*)data_iter)[index] + 0.5);
-				((unsigned char*)data_vd_g)[index] += (unsigned char)(color.g()*
-					((unsigned char*)data_iter)[index] + 0.5);
-				((unsigned char*)data_vd_b)[index] += (unsigned char)(color.b()*
-					((unsigned char*)data_iter)[index] + 0.5);
+				((unsigned char*)data_vd_r)[index] = Inc(
+					((unsigned char*)data_vd_r)[index],
+					(unsigned char)(color.r()*((unsigned char*)data_iter)[index] + 0.5));
+				((unsigned char*)data_vd_g)[index] = Inc(
+					((unsigned char*)data_vd_g)[index],
+					(unsigned char)(color.g()*((unsigned char*)data_iter)[index] + 0.5));
+				((unsigned char*)data_vd_b)[index] = Inc(
+					((unsigned char*)data_vd_b)[index],
+					(unsigned char)(color.b()*((unsigned char*)data_iter)[index] + 0.5));
 			}
 			else
 			{
-				((unsigned short*)data_vd_r)[index] += (unsigned short)(color.r()*
-					((unsigned short*)data_iter)[index] + 0.5);
-				((unsigned short*)data_vd_g)[index] += (unsigned short)(color.g()*
-					((unsigned short*)data_iter)[index] + 0.5);
-				((unsigned short*)data_vd_b)[index] += (unsigned short)(color.b()*
-					((unsigned short*)data_iter)[index] + 0.5);
+				((unsigned short*)data_vd_r)[index] = Inc(
+					((unsigned short*)data_vd_r)[index],
+					(unsigned short)(color.r()*((unsigned short*)data_iter)[index] + 0.5));
+				((unsigned short*)data_vd_g)[index] = Inc(
+					((unsigned short*)data_vd_g)[index],
+					(unsigned short)(color.g()*((unsigned short*)data_iter)[index] + 0.5));
+				((unsigned short*)data_vd_b)[index] = Inc(
+					((unsigned short*)data_vd_b)[index],
+					(unsigned short)(color.b()*((unsigned short*)data_iter)[index] + 0.5));
 			}
 		}
 	}
@@ -146,5 +156,27 @@ int CombineList::Execute()
 	vd_b->SetColor(blue);
 
 
+	m_results.push_back(vd_r);
+	m_results.push_back(vd_g);
+	m_results.push_back(vd_b);
+
 	return 1;
+}
+
+unsigned char CombineList::Inc(unsigned char base, unsigned char inc)
+{
+	double value = double(base) + double(inc);
+	if (value > 255.0)
+		return 255;
+	else
+		return base + inc;
+}
+
+unsigned short CombineList::Inc(unsigned short base, unsigned short inc)
+{
+	double value = double(base) + double(inc);
+	if (value > 65535.0)
+		return 65535;
+	else
+		return base + inc;
 }

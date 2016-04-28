@@ -1944,7 +1944,8 @@ void VRenderFrame::OnSelection(int type,
 	case 5:  //group
 		if (m_adjust_view)
 			m_adjust_view->SetGroup(group);
-
+		if (m_calculation_dlg)
+			m_calculation_dlg->SetGroup(group);
 		if (m_volume_prop)
 			m_volume_prop->Show(false);
 		if (m_mesh_prop)

@@ -53,6 +53,10 @@ namespace FL
 		double m_spcx, m_spcy, m_spcz;
 		int m_bits;
 		wxString m_name;
+
+	private:
+		unsigned char Inc(unsigned char base, unsigned char inc);
+		unsigned short Inc(unsigned short base, unsigned short inc);
 	};
 }
 #endif//_COMBINELIST_H_

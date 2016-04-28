@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "CalculationDlg.h"
 #include "VRenderFrame.h"
+#include "Calculate/CombineList.h"
 
 BEGIN_EVENT_TABLE(CalculationDlg, wxPanel)
 	//calculations
@@ -40,6 +41,7 @@ BEGIN_EVENT_TABLE(CalculationDlg, wxPanel)
 	EVT_BUTTON(ID_CalcIscBtn, CalculationDlg::OnCalcIsc)
 	//one-operators
 	EVT_BUTTON(ID_CalcFillBtn, CalculationDlg::OnCalcFill)
+	EVT_BUTTON(ID_CalcCombineBtn, CalculationDlg::OnCalcCombine)
 END_EVENT_TABLE()
 
 CalculationDlg::CalculationDlg(wxWindow *frame, wxWindow *parent)
@@ -47,13 +49,14 @@ CalculationDlg::CalculationDlg(wxWindow *frame, wxWindow *parent)
 		wxDefaultPosition,
 		wxSize(500, 350),
 		0, "CalculationDlg"),
-		m_frame(frame)
+		m_frame(frame),
+		m_group(0)
 {
 	wxStaticText *st = 0;
 
 	//operand A
 	wxBoxSizer *sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Volume A:",
+	st = new wxStaticText(this, 0, "Operand A:",
 		wxDefaultPosition, wxSize(75, 20));
 	m_calc_load_a_btn = new wxButton(this, ID_CalcLoadABtn, "Load",
 		wxDefaultPosition, wxSize(50, 20));
@@ -64,7 +67,7 @@ CalculationDlg::CalculationDlg(wxWindow *frame, wxWindow *parent)
 	sizer1->Add(m_calc_a_text, 1, wxEXPAND);
 	//operand B
 	wxBoxSizer *sizer2 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Volume B:",
+	st = new wxStaticText(this, 0, "Operand B:",
 		wxDefaultPosition, wxSize(75, 20));
 	m_calc_load_b_btn = new wxButton(this, ID_CalcLoadBBtn, "Load",
 		wxDefaultPosition, wxSize(50, 20));
@@ -76,11 +79,14 @@ CalculationDlg::CalculationDlg(wxWindow *frame, wxWindow *parent)
 	//single operators
 	wxBoxSizer *sizer3 = new wxStaticBoxSizer(
 		new wxStaticBox(this, wxID_ANY,
-			"Single-valued Operators (Require A)"), wxVERTICAL);
+			"Single-valued Operators (Require only A)"), wxHORIZONTAL);
 	//sizer3
 	m_calc_fill_btn = new wxButton(this, ID_CalcFillBtn, "Consolidate Voxels",
-		wxDefaultPosition, wxDefaultSize);
-	sizer3->Add(m_calc_fill_btn, 0, wxEXPAND);
+		wxDefaultPosition, wxSize(50, 25));
+	m_calc_combine_btn = new wxButton(this, ID_CalcCombineBtn, "Combine Group",
+		wxDefaultPosition, wxSize(50, 25));
+	sizer3->Add(m_calc_fill_btn, 1, wxEXPAND);
+	sizer3->Add(m_calc_combine_btn, 1, wxEXPAND);
 	//two operators
 	wxBoxSizer *sizer4 = new wxStaticBoxSizer(
 		new wxStaticBox(this, wxID_ANY,
@@ -119,6 +125,11 @@ CalculationDlg::~CalculationDlg()
 
 }
 
+void CalculationDlg::SetGroup(DataGroup* group)
+{
+	m_group = group;
+}
+
 //calculations
 //operands
 void CalculationDlg::OnLoadA(wxCommandEvent &event)
@@ -126,9 +137,20 @@ void CalculationDlg::OnLoadA(wxCommandEvent &event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 	{
-		m_vol1 = vr_frame->GetCurSelVol();
-		if (m_vol1)
-			m_calc_a_text->SetValue(m_vol1->GetName());
+		switch (vr_frame->GetCurSelType())
+		{
+		case 2://volume
+			m_vol1 = vr_frame->GetCurSelVol();
+			m_group = 0;
+			if (m_vol1)
+				m_calc_a_text->SetValue(m_vol1->GetName());
+			break;
+		case 5://volume group
+			m_vol1 = 0;
+			if (m_group)
+				m_calc_a_text->SetValue(m_group->GetName());
+			break;
+		}
 	}
 }
 
@@ -137,9 +159,18 @@ void CalculationDlg::OnLoadB(wxCommandEvent &event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 	{
-		m_vol2 = vr_frame->GetCurSelVol();
-		if (m_vol2)
-			m_calc_b_text->SetValue(m_vol2->GetName());
+		switch (vr_frame->GetCurSelType())
+		{
+		case 2://volume
+			m_vol2 = vr_frame->GetCurSelVol();
+			if (m_vol2)
+				m_calc_b_text->SetValue(m_vol2->GetName());
+			break;
+		case 5://volume group
+			if (m_group)
+				m_calc_b_text->SetValue(m_group->GetName());
+			break;
+		}
 	}
 }
 
@@ -305,4 +336,71 @@ void CalculationDlg::OnCalcFill(wxCommandEvent &event)
 			m_cur_view->Calculate(9);
 		}
 	}
+}
+
+void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
+{
+	if (m_calc_a_text->GetValue() == "")
+		return;
+	if (!m_group)
+		return;
+
+	FL::CombineList Op;
+	wxString name = m_group->GetName() + "_combined";
+	Op.SetName(name);
+	std::list<VolumeData*> channs;
+	for (int i = 0; i < m_group->GetVolumeNum(); ++i)
+	{
+		VolumeData* vd = m_group->GetVolumeData(i);
+		if (!vd)
+			continue;
+		channs.push_back(vd);
+	}
+	Op.SetVolumes(channs);
+	if (Op.Execute())
+	{
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (!vr_frame)
+			return;
+		m_cur_view = 0;
+		for (int i = 0; i < vr_frame->GetViewNum(); i++)
+		{
+			VRenderView* vrv = vr_frame->GetView(i);
+			wxString str = m_group->GetName();
+			if (vrv && vrv->GetGroup(str))
+			{
+				m_cur_view = vrv;
+				break;
+			}
+		}
+
+		if (!m_cur_view)
+			m_cur_view = vr_frame->GetView(0);
+
+		std::list<VolumeData*> results;
+		Op.GetResults(results);
+		if (results.empty())
+			return;
+
+		wxString group_name = "";
+		DataGroup* group = 0;
+		for (auto i = results.begin(); i != results.end(); ++i)
+		{
+			VolumeData* vd = *i;
+			if (vd)
+			{
+				vr_frame->GetDataManager()->AddVolumeData(vd);
+				if (i == results.begin())
+				{
+					group_name = m_cur_view->AddGroup("");
+					group = m_cur_view->GetGroup(group_name);
+				}
+				m_cur_view->AddVolumeData(vd, group_name);
+			}
+		}
+		vr_frame->UpdateList();
+		vr_frame->UpdateTree(m_group->GetName());
+		m_cur_view->RefreshGL();
+	}
+
 }

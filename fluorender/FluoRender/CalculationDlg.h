@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 
 class VRenderView;
 class VolumeData;
+class DataGroup;
 
 class CalculationDlg : public wxPanel
 {
@@ -51,12 +52,15 @@ public:
 		ID_CalcDivBtn,
 		ID_CalcIscBtn,
 		//one-opeartors
-		ID_CalcFillBtn
+		ID_CalcFillBtn,
+		ID_CalcCombineBtn
 	};
 
 	CalculationDlg(wxWindow* frame,
 		wxWindow* parent);
 	~CalculationDlg();
+
+	void SetGroup(DataGroup* group);
 
 private:
 	wxWindow* m_frame;
@@ -66,6 +70,7 @@ private:
 	//current volume
 	VolumeData *m_vol1;
 	VolumeData *m_vol2;
+	DataGroup *m_group;
 
 	//calculations
 	//operands
@@ -80,6 +85,7 @@ private:
 	wxButton *m_calc_isc_btn;
 	//one-operators
 	wxButton *m_calc_fill_btn;
+	wxButton *m_calc_combine_btn;
 
 private:
 	//calculations
@@ -93,6 +99,7 @@ private:
 	void OnCalcIsc(wxCommandEvent &event);
 	//one-operators
 	void OnCalcFill(wxCommandEvent &event);
+	void OnCalcCombine(wxCommandEvent &event);
 
 	DECLARE_EVENT_TABLE();
 };
