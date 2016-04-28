@@ -384,11 +384,13 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 
 		wxString group_name = "";
 		DataGroup* group = 0;
+		VolumeData* volume = 0;
 		for (auto i = results.begin(); i != results.end(); ++i)
 		{
 			VolumeData* vd = *i;
 			if (vd)
 			{
+				if (!volume) volume = vd;
 				vr_frame->GetDataManager()->AddVolumeData(vd);
 				if (i == results.begin())
 				{
@@ -397,6 +399,15 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 				}
 				m_cur_view->AddVolumeData(vd, group_name);
 			}
+		}
+		if (group && volume)
+		{
+			FLIVR::Color col = volume->GetGamma();
+			group->SetGammaAll(col);
+			col = volume->GetBrightness();
+			group->SetBrightnessAll(col);
+			col = volume->GetHdr();
+			group->SetHdrAll(col);
 		}
 		vr_frame->UpdateList();
 		vr_frame->UpdateTree(m_group->GetName());
