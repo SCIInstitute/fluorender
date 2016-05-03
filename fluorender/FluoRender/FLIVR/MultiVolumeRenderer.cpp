@@ -48,6 +48,7 @@ namespace FLIVR
 		hiqual_(true),
 		blend_num_bits_(32),
 		blend_slices_(false),
+		cur_framebuffer_(0),
 		blend_framebuffer_resize_(false),
 		blend_framebuffer_(0),
 		blend_tex_id_(0),
@@ -254,8 +255,6 @@ namespace FLIVR
 		bool use_fog = vr_list_[0]->m_use_fog && colormap_mode_!=2;
 		GLfloat clear_color[4];
 		glGetFloatv(GL_COLOR_CLEAR_VALUE, clear_color);
-		GLint vp[4];
-		glGetIntegerv(GL_VIEWPORT, vp);
 
 		// set up blending
 		glEnable(GL_BLEND);
@@ -285,8 +284,8 @@ namespace FLIVR
 		GLint cur_read_buffer;
 		glGetIntegerv(GL_READ_BUFFER, &cur_read_buffer);
 
-		int w = vp[2];
-		int h = vp[3];
+		int w = vp_[2];
+		int h = vp_[3];
 		int w2 = w;
 		int h2 = h;
 
@@ -348,7 +347,7 @@ namespace FLIVR
 			glClearColor(clear_color[0], clear_color[1], clear_color[2], clear_color[3]);
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			glViewport(vp[0], vp[1], w2, h2);
+			glViewport(vp_[0], vp_[1], w2, h2);
 		}
 
 		//disable depth buffer writing
@@ -546,7 +545,7 @@ namespace FLIVR
 			if (noise_red_ && colormap_mode_!=2)
 			{
 				//FILTERING/////////////////////////////////////////////////////////////////
-				if (!glIsTexture(filter_tex_id_))
+				if (!filter_tex_id_)
 				{
 					glGenTextures(1, &filter_tex_id_);
 					glBindTexture(GL_TEXTURE_2D, filter_tex_id_);
@@ -602,7 +601,7 @@ namespace FLIVR
 			glDrawBuffer(cur_draw_buffer);
 			glReadBuffer(cur_read_buffer);
 
-			glViewport(vp[0], vp[1], vp[2], vp[3]);
+			glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 
 			if (noise_red_ && colormap_mode_!=2)
 				glBindTexture(GL_TEXTURE_2D, filter_tex_id_);
@@ -666,8 +665,6 @@ namespace FLIVR
 
 		GLfloat clear_color[4];
 		glGetFloatv(GL_COLOR_CLEAR_VALUE, clear_color);
-		GLint vp[4];
-		glGetIntegerv(GL_VIEWPORT, vp);
 
 		//save original buffer
 		GLint cur_framebuffer_id;
@@ -683,7 +680,7 @@ namespace FLIVR
 			if (!glIsFramebuffer(blend_fbo_))
 			{
 				glGenFramebuffers(1, &blend_fbo_);
-				if (!glIsTexture(blend_tex_))
+				if (!blend_tex_)
 					glGenTextures(1, &blend_tex_);
 				glBindFramebuffer(GL_FRAMEBUFFER, blend_fbo_);
 				// Initialize texture color renderbuffer

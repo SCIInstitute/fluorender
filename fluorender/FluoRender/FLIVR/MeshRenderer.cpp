@@ -173,9 +173,6 @@ namespace FLIVR
 			update_ = false;
 		}
 
-		GLint vp[4];
-		glGetIntegerv(GL_VIEWPORT, vp);
-
 		ShaderProgram* shader = 0;
 
 		glBindVertexArray(m_vao);
@@ -238,7 +235,7 @@ namespace FLIVR
 				shader->setLocalParam(8, m_fog_intensity, m_fog_start, m_fog_end, 0.0);
 
 			if (depth_peel_)
-				shader->setLocalParam(7, 1.0/double(vp[2]), 1.0/double(vp[3]), 0.0, 0.0);
+				shader->setLocalParam(7, 1.0/double(vp_[2]), 1.0/double(vp_[3]), 0.0, 0.0);
 
 			//draw
 			glDrawArrays(GL_TRIANGLES, pos, (GLsizei)(group->numtriangles*3));

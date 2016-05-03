@@ -138,6 +138,9 @@ namespace FLIVR
 		TextureRenderer(const TextureRenderer&);
 		virtual ~TextureRenderer();
 
+		void set_cur_framebuffer(GLuint cur_framebuffer)
+		{ cur_framebuffer_ = cur_framebuffer; }
+
 		//set the texture for rendering
 		void set_texture(Texture* tex);
 		void reset_texture();
@@ -248,6 +251,8 @@ namespace FLIVR
 		double irate_;
 		bool imode_;
 
+		//saved framebuffer
+		GLuint cur_framebuffer_;
 		//blend frame buffer for output
 		bool blend_framebuffer_resize_;
 		GLuint blend_framebuffer_;

@@ -48,6 +48,12 @@ namespace FLIVR
 		VolumeRenderer(const VolumeRenderer&);
 		virtual ~VolumeRenderer();
 
+		//set viewport
+		void set_viewport(GLint vp[4])
+		{
+			memcpy(vp_, vp, sizeof(GLint) * 4);
+		}
+
 		//quality and data type
 		//set by initialization
 		bool get_hiqual() {return hiqual_;}
@@ -202,6 +208,8 @@ namespace FLIVR
 		friend class MultiVolumeRenderer;
 
 	protected:
+		//viewport
+		GLint vp_[4];
 		double scalar_scale_;
 		double gm_scale_;
 		//transfer function properties

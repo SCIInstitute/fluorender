@@ -608,8 +608,6 @@ namespace FLIVR
 		bool use_fog = m_use_fog && colormap_mode_!=2;
 		GLfloat clear_color[4];
 		glGetFloatv(GL_COLOR_CLEAR_VALUE, clear_color);
-		GLint vp[4];
-		glGetIntegerv(GL_VIEWPORT, vp);
 
 		// set up blending
 		glEnable(GL_BLEND);
@@ -632,15 +630,15 @@ namespace FLIVR
 
 		// Cache this value to reset, in case another framebuffer is active,
 		// as it is in the case of saving an image from the viewer.
-		GLint cur_framebuffer_id;
-		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &cur_framebuffer_id);
-		GLint cur_draw_buffer;
-		glGetIntegerv(GL_DRAW_BUFFER, &cur_draw_buffer);
-		GLint cur_read_buffer;
-		glGetIntegerv(GL_READ_BUFFER, &cur_read_buffer);
+		//GLint cur_framebuffer_id;
+		//glGetIntegerv(GL_FRAMEBUFFER_BINDING, &cur_framebuffer_id);
+		////GLint cur_draw_buffer;
+		//glGetIntegerv(GL_DRAW_BUFFER, &cur_draw_buffer);
+		//GLint cur_read_buffer;
+		//glGetIntegerv(GL_READ_BUFFER, &cur_read_buffer);
 
-		int w = vp[2];
-		int h = vp[3];
+		int w = vp_[2];
+		int h = vp_[3];
 		int w2 = w;
 		int h2 = h;
 
@@ -700,7 +698,7 @@ namespace FLIVR
 			glClearColor(clear_color[0], clear_color[1], clear_color[2], clear_color[3]);
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			glViewport(vp[0], vp[1], w2, h2);
+			glViewport(vp_[0], vp_[1], w2, h2);
 		}
 
 		//disable depth test
@@ -959,7 +957,7 @@ namespace FLIVR
 			if (noise_red_ && colormap_mode_!=2)
 			{
 				//FILTERING/////////////////////////////////////////////////////////////////
-				if (!glIsTexture(filter_tex_id_))
+				if (!filter_tex_id_)
 				{
 					glGenTextures(1, &filter_tex_id_);
 					glBindTexture(GL_TEXTURE_2D, filter_tex_id_);
@@ -1010,11 +1008,11 @@ namespace FLIVR
 			}
 
 			//go back to normal
-			glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_id); 
-			glDrawBuffer(cur_draw_buffer);
-			glReadBuffer(cur_read_buffer);
+			glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_); 
+			//glDrawBuffer(cur_draw_buffer);
+			//glReadBuffer(cur_read_buffer);
 
-			glViewport(vp[0], vp[1], vp[2], vp[3]);
+			glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 
 			if (noise_red_ && colormap_mode_!=2)
 				glBindTexture(GL_TEXTURE_2D, filter_tex_id_);
@@ -1149,8 +1147,8 @@ namespace FLIVR
 	{
 		if (estimate && type==0)
 			est_thresh_ = 0.0;
-		bool use_2d = glIsTexture(tex_2d_weight1_)&&
-			glIsTexture(tex_2d_weight2_)?true:false;
+		bool use_2d = tex_2d_weight1_&&
+			tex_2d_weight2_;
 
 		Ray view_ray = compute_view();
 
@@ -1161,8 +1159,8 @@ namespace FLIVR
 		//mask frame buffer object
 		if (!glIsFramebuffer(fbo_mask_))
 			glGenFramebuffers(1, &fbo_mask_);
-		GLint cur_framebuffer_id;
-		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &cur_framebuffer_id);
+		//GLint cur_framebuffer_id;
+		//glGetIntegerv(GL_FRAMEBUFFER_BINDING, &cur_framebuffer_id);
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo_mask_);
 
 		//--------------------------------------------------------------------------
@@ -1267,9 +1265,6 @@ namespace FLIVR
 		//bind 2d weight map
 		if (use_2d) bind_2d_weight();
 
-		GLint vp[4];
-		glGetIntegerv(GL_VIEWPORT, vp);
-
 		float matrix[16];
 		for (unsigned int i=0; i < bricks->size(); i++)
 		{
@@ -1338,7 +1333,7 @@ namespace FLIVR
 
 		}
 
-		glViewport(vp[0], vp[1], vp[2], vp[3]);
+		glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 
 		//release 2d mask
 		release_texture(6, GL_TEXTURE_2D);
@@ -1353,7 +1348,7 @@ namespace FLIVR
 		release_texture((*bricks)[0]->nmask(), GL_TEXTURE_3D);
 
 		//unbind framebuffer
-		glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_id);
+		glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_);
 
 		//release seg shader
 		if (seg_shader && seg_shader->valid())
@@ -1384,8 +1379,8 @@ namespace FLIVR
 		//label frame buffer object
 		if (!glIsFramebuffer(fbo_label_))
 			glGenFramebuffers(1, &fbo_label_);
-		GLint cur_framebuffer_id;
-		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &cur_framebuffer_id);
+		//GLint cur_framebuffer_id;
+		//glGetIntegerv(GL_FRAMEBUFFER_BINDING, &cur_framebuffer_id);
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo_label_);
 
 		bool has_mask = tex_->nmask()!=-1;
@@ -1446,9 +1441,6 @@ namespace FLIVR
 		// render bricks
 		glDisable(GL_DEPTH_TEST);
 
-		GLint vp[4];
-		glGetIntegerv(GL_VIEWPORT, vp);
-
 		for (unsigned int i=0; i < bricks->size(); i++)
 		{
 			TextureBrick* b = (*bricks)[i];
@@ -1492,7 +1484,7 @@ namespace FLIVR
 			}
 		}
 
-		glViewport(vp[0], vp[1], vp[2], vp[3]);
+		glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 		////////////////////////////////////////////////////////
 
 		//release 3d mask
@@ -1505,7 +1497,7 @@ namespace FLIVR
 			seg_shader->release();
 
 		//unbind framebuffer
-		glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_id);
+		glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_);
 
 		// Release texture
 		release_texture(0, GL_TEXTURE_3D);
@@ -1606,8 +1598,8 @@ namespace FLIVR
 		//mask frame buffer object
 		if (!glIsFramebuffer(fbo_label_))
 			glGenFramebuffers(1, &fbo_label_);
-		GLint cur_framebuffer_id;
-		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &cur_framebuffer_id);
+		//GLint cur_framebuffer_id;
+		//glGetIntegerv(GL_FRAMEBUFFER_BINDING, &cur_framebuffer_id);
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo_label_);
 
 		//--------------------------------------------------------------------------
@@ -1682,7 +1674,7 @@ namespace FLIVR
 		release_texture((*bricks)[0]->nlabel(), GL_TEXTURE_3D);
 
 		//unbind framebuffer
-		glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_id);
+		glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_);
 
 		//release seg shader
 		if (cal_shader && cal_shader->valid())

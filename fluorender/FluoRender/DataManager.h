@@ -165,6 +165,12 @@ public:
 	VolumeData(VolumeData &copy);
 	virtual ~VolumeData();
 
+	//set viewport
+	void SetViewport(GLint vp[4]);
+
+	//set current framebuffer
+	void SetCurFramebuffer(GLuint cur_framebuffer);
+
 	//duplication
 	bool GetDup();
 	//increase duplicate counter
@@ -519,6 +525,9 @@ class MeshData : public TreeLayer
 public:
 	MeshData();
 	virtual ~MeshData();
+
+	//set viewport
+	void SetViewport(GLint vp[4]);
 
 	wxString GetPath();
 	BBox GetBounds();

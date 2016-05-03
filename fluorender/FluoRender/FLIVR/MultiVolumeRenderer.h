@@ -47,6 +47,17 @@ namespace FLIVR
 		MultiVolumeRenderer(MultiVolumeRenderer&);
 		virtual ~MultiVolumeRenderer();
 
+		void set_cur_framebuffer(GLuint cur_framebuffer)
+		{
+			cur_framebuffer_ = cur_framebuffer;
+		}
+
+		//set viewport
+		void set_viewport(GLint vp[4])
+		{
+			memcpy(vp_, vp, sizeof(GLint) * 4);
+		}
+
 		//mode and sampling rate
 		void set_mode(TextureRenderer::RenderMode mode);
 		void set_sampling_rate(double rate);
@@ -93,6 +104,8 @@ namespace FLIVR
 		static void set_soft_threshold(double val) {sw_ = val;}
 
 	private:
+		//viewport
+		GLint vp_[4];
 		//volume renderer list
 		vector<VolumeRenderer*> vr_list_;
 
@@ -103,6 +116,8 @@ namespace FLIVR
 		int blend_num_bits_;
 		bool blend_slices_;
 
+		//saved framebuffer
+		GLuint cur_framebuffer_;
 		//blend frame buffers
 		bool blend_framebuffer_resize_;
 		GLuint blend_framebuffer_;

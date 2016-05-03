@@ -639,6 +639,7 @@ private:
 	bool m_paint_enable;
 	bool m_paint_display;
 	//2d frame buffers
+	GLuint m_cur_framebuffer;
 	GLuint m_fbo;
 	GLuint m_tex;
 	GLuint m_tex_wt2;  //use this texture instead of m_tex when the volume for segmentation is rendered

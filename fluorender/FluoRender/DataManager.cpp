@@ -279,6 +279,20 @@ VolumeData::~VolumeData()
 		delete m_tex;
 }
 
+//set viewport
+void VolumeData::SetViewport(GLint vp[4])
+{
+	if (m_vr)
+		m_vr->set_viewport(vp);
+}
+
+//set current framebuffer
+void VolumeData::SetCurFramebuffer(GLuint cur_framebuffer)
+{
+	if (m_vr)
+		m_vr->set_cur_framebuffer(cur_framebuffer);
+}
+
 //duplication
 bool VolumeData::GetDup()
 {
@@ -1915,6 +1929,13 @@ MeshData::~MeshData()
 		delete m_mr;
 	if (m_data)
 		glmDelete(m_data);
+}
+
+//set viewport
+void MeshData::SetViewport(GLint vp[4])
+{
+	if (m_mr)
+		m_mr->set_viewport(vp);
 }
 
 int MeshData::Load(GLMmodel* mesh)

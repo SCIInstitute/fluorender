@@ -76,6 +76,7 @@ namespace FLIVR
 		num_slices_(0),
 		irate_(0.5),
 		imode_(false),
+		cur_framebuffer_(0),
 		blend_framebuffer_resize_(false),
 		blend_framebuffer_(0),
 		blend_tex_id_(0),
@@ -595,7 +596,7 @@ namespace FLIVR
 				&& nz == tex_pool_[i].nz
 				&& nb == tex_pool_[i].nb
 				&& textype == tex_pool_[i].textype
-				&& glIsTexture(tex_pool_[i].id))
+				&& tex_pool_[i].id)
 			{
 				//found!
 				idx = i;
@@ -771,7 +772,7 @@ namespace FLIVR
 				&& nz == tex_pool_[i].nz
 				&& nb == tex_pool_[i].nb
 				&& textype == tex_pool_[i].textype
-				&& glIsTexture(tex_pool_[i].id))
+				&& tex_pool_[i].id)
 			{
 				//found!
 				idx = i;
@@ -903,7 +904,7 @@ namespace FLIVR
 				&& nz == tex_pool_[i].nz
 				&& nb == tex_pool_[i].nb
 				&& textype == tex_pool_[i].textype
-				&& glIsTexture(tex_pool_[i].id))
+				&& tex_pool_[i].id)
 			{
 				//found!
 				idx = i;
@@ -1073,7 +1074,7 @@ namespace FLIVR
 			for (int j = int(tex_pool_.size() - 1); j >= 0; j--)
 			{
 				if (tex_pool_[j].delayed_del &&
-					glIsTexture(tex_pool_[j].id))
+					tex_pool_[j].id)
 				{
 					glDeleteTextures(1, (GLuint*)&tex_pool_[j].id);
 					tex_pool_.erase(tex_pool_.begin() + j);

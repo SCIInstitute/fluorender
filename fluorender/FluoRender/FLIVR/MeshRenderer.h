@@ -49,6 +49,12 @@ namespace FLIVR
 		MeshRenderer(MeshRenderer&);
 		~MeshRenderer();
 
+		//set viewport
+		void set_viewport(GLint vp[4])
+		{
+			memcpy(vp_, vp, sizeof(GLint) * 4);
+		}
+
 		//draw
 		void draw();
 		void draw_wireframe();
@@ -87,6 +93,8 @@ namespace FLIVR
 		{ return fog_; }
 
 	protected:
+		//viewport
+		GLint vp_[4];
 		//data and display list
 		GLMmodel* data_;
 		//depth peeling

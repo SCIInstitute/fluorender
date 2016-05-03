@@ -1014,6 +1014,10 @@ void VRenderGLView::DrawDP()
 //peel==true -- depth peeling
 void VRenderGLView::DrawMeshes(int peel)
 {
+	int nx = GetSize().x;
+	int ny = GetSize().y;
+	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
+
 	for (int i=0 ; i<(int)m_layer_list.size() ; i++)
 	{
 		if (!m_layer_list[i])
@@ -1025,6 +1029,7 @@ void VRenderGLView::DrawMeshes(int peel)
 			{
 				md->SetMatrices(m_mv_mat, m_proj_mat);
 				md->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+				md->SetViewport(vp);
 				md->Draw(peel);
 			}
 		}
@@ -1040,6 +1045,7 @@ void VRenderGLView::DrawMeshes(int peel)
 					{
 						md->SetMatrices(m_mv_mat, m_proj_mat);
 						md->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+						md->SetViewport(vp);
 						md->Draw(peel);
 					}
 				}
@@ -1837,7 +1843,11 @@ void VRenderGLView::Set2dWeights()
 //segment volumes in current view
 void VRenderGLView::Segment()
 {
-	glViewport(0, 0, (GLint)GetSize().x, (GLint)GetSize().y);
+	int nx = GetSize().x;
+	int ny = GetSize().y;
+	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
+
+	glViewport(0, 0, vp[2], vp[3]);
 	HandleCamera();
 
 	//translate object
@@ -1860,6 +1870,7 @@ void VRenderGLView::Segment()
 		DataGroup* group = 0;
 		if (vd)
 		{
+			vd->SetViewport(vp);
 			for (int i=0; i<GetLayerNum(); i++)
 			{
 				TreeLayer* layer = GetLayer(i);
@@ -1888,6 +1899,7 @@ void VRenderGLView::Segment()
 					if (tmp_vd && tmp_vd->GetDisp())
 					{
 						tmp_vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+						tmp_vd->SetViewport(vp);
 						m_selector.SetVolume(tmp_vd);
 						m_selector.Select(m_brush_radius2-m_brush_radius1);
 					}
@@ -1904,6 +1916,7 @@ void VRenderGLView::Segment()
 		if (vd)
 		{
 			vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+			vd->SetViewport(vp);
 			m_selector.SetVolume(vd);
 			m_selector.Select(m_brush_radius2-m_brush_radius1);
 		}
@@ -1911,6 +1924,7 @@ void VRenderGLView::Segment()
 		if (vd)
 		{
 			vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+			vd->SetViewport(vp);
 			m_selector.SetVolume(vd);
 			m_selector.Select(m_brush_radius2-m_brush_radius1);
 		}
@@ -1946,7 +1960,16 @@ void VRenderGLView::Segment()
 //label volumes in current view
 void VRenderGLView::Label()
 {
-	m_selector.Label(0);
+	int nx = GetSize().x;
+	int ny = GetSize().y;
+	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
+
+	VolumeData* vd = m_selector.GetVolume();
+	if (vd)
+	{
+		vd->SetViewport(vp);
+		m_selector.Label(0);
+	}
 }
 
 //remove noise
@@ -2776,6 +2799,10 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 
 void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, bool mask, int peel)
 {
+	int nx = GetSize().x;
+	int ny = GetSize().y;
+	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
+
 	ShaderProgram* img_shader = 0;
 
 	bool do_over = true;
@@ -2832,6 +2859,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, bool mask, int peel)
 		}
 		//bind the fbo
 		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+		m_cur_framebuffer = m_fbo;
 
 		if (!TextureRenderer::get_mem_swap() ||
 			(TextureRenderer::get_mem_swap() &&
@@ -2850,6 +2878,8 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, bool mask, int peel)
 			vd->SetStreamMode(0);
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 		vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+		vd->SetViewport(vp);
+		vd->SetCurFramebuffer(m_cur_framebuffer);
 		vd->Draw(!m_persp, m_interactive, m_scale_factor);
 	}
 
@@ -2925,6 +2955,10 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, bool mask, int peel)
 
 void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 {
+	int nx = GetSize().x;
+	int ny = GetSize().y;
+	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
+
 	bool do_mip = true;
 	if (TextureRenderer::get_mem_swap() &&
 		TextureRenderer::get_start_update_loop() &&
@@ -2937,10 +2971,6 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 		if (vd->GetVR()->get_done_loop(1))
 			do_mip = false;
 	}
-
-	int nx, ny;
-	nx = GetSize().x;
-	ny = GetSize().y;
 
 	bool shading = vd->GetVR()->get_shading();
 	bool shadow = vd->GetShadow();
@@ -3008,6 +3038,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 
 		//bind the fbo
 		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_ol1);
+		m_cur_framebuffer = m_fbo_ol1;
 
 		if (!TextureRenderer::get_mem_swap() ||
 			(TextureRenderer::get_mem_swap() &&
@@ -3037,6 +3068,8 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 		//draw
 		vd->SetStreamMode(1);
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+		vd->SetViewport(vp);
+		vd->SetCurFramebuffer(m_cur_framebuffer);
 		vd->Draw(!m_persp, m_interactive, m_scale_factor);
 		//
 		if (color_mode == 1)
@@ -3178,6 +3211,10 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 
 void VRenderGLView::DrawOLShading(VolumeData* vd)
 {
+	int nx = GetSize().x;
+	int ny = GetSize().y;
+	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
+
 	if (TextureRenderer::get_mem_swap() &&
 		TextureRenderer::get_start_update_loop() &&
 		!TextureRenderer::get_done_update_loop())
@@ -3382,6 +3419,10 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 	if (vlist.empty())
 		return;
 
+	int nx = GetSize().x;
+	int ny = GetSize().y;
+	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
+
 	size_t i;
 	bool has_shadow = false;
 	vector<int> colormodes;
@@ -3416,10 +3457,6 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 				return;
 	}
 
-	int nx, ny;
-	nx = GetSize().x;
-	ny = GetSize().y;
-
 	//gradient pass
 	if (!glIsFramebuffer(m_fbo_ol1))
 	{
@@ -3448,6 +3485,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_ol1);
+	m_cur_framebuffer = m_fbo_ol1;
 	if (!TextureRenderer::get_mem_swap() ||
 		(TextureRenderer::get_mem_swap() &&
 		TextureRenderer::get_clear_chan_buffer()))
@@ -3480,6 +3518,8 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		vd->SetStreamMode(3);
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 		vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+		vd->SetViewport(vp);
+		vd->SetCurFramebuffer(m_cur_framebuffer);
 		vd->Draw(!m_persp, m_interactive, m_scale_factor);
 		//restore
 		vd->RestoreMode();
@@ -3510,6 +3550,8 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		}
 		m_mvr->set_colormap_mode(2);
 		//draw
+		m_mvr->set_viewport(vp);
+		m_mvr->set_cur_framebuffer(m_cur_framebuffer);
 		m_mvr->draw(m_test_wiref, m_interactive, !m_persp, m_scale_factor, m_intp);
 		//restore
 		m_mvr->set_colormap_mode(0);
@@ -3633,6 +3675,10 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	if (!m_mvr)
 		return;
 
+	int nx = GetSize().x;
+	int ny = GetSize().y;
+	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
+
 	m_mvr->set_blend_slices(m_blend_slices);
 
 	int i;
@@ -3664,10 +3710,6 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 		return;
 	m_mvr->set_depth_peel(peel);
 	m_mvr->set_colormap_mode_single();
-
-	int nx, ny;
-	nx = GetSize().x;
-	ny = GetSize().y;
 
 	//generate textures & buffer objects
 	//frame buffer for each volume
@@ -3727,6 +3769,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 
 	//bind the fbo
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+	m_cur_framebuffer = m_fbo;
 	if (!TextureRenderer::get_mem_swap() ||
 		(TextureRenderer::get_mem_swap() &&
 		TextureRenderer::get_clear_chan_buffer()))
@@ -3737,6 +3780,8 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	}
 
 	//draw multiple volumes at the same time
+	m_mvr->set_viewport(vp);
+	m_mvr->set_cur_framebuffer(m_cur_framebuffer);
 	m_mvr->draw(m_test_wiref, m_interactive, !m_persp, m_scale_factor, m_intp);
 
 	//draw shadows
