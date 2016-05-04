@@ -1107,6 +1107,7 @@ namespace FLIVR
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 	}
 
@@ -1183,47 +1184,35 @@ namespace FLIVR
 	//bind 2d mask for segmentation
 	void TextureRenderer::bind_2d_mask()
 	{
-		if (ShaderProgram::shaders_supported() && glActiveTexture)
-		{
-			glActiveTexture(GL_TEXTURE6);
-			glBindTexture(GL_TEXTURE_2D, tex_2d_mask_);
-			glActiveTexture(GL_TEXTURE0);
-		}
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(GL_TEXTURE_2D, tex_2d_mask_);
+		glActiveTexture(GL_TEXTURE0);
 	}
 
 	//bind 2d weight map for segmentation
 	void TextureRenderer::bind_2d_weight()
 	{
-		if (ShaderProgram::shaders_supported() && glActiveTexture)
-		{
-			glActiveTexture(GL_TEXTURE4);
-			glBindTexture(GL_TEXTURE_2D, tex_2d_weight1_);
-			glActiveTexture(GL_TEXTURE5);
-			glBindTexture(GL_TEXTURE_2D, tex_2d_weight2_);
-			glActiveTexture(GL_TEXTURE0);
-		}
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, tex_2d_weight1_);
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_2D, tex_2d_weight2_);
+		glActiveTexture(GL_TEXTURE0);
 	}
 
 	//bind 2d depth map for rendering shadows
 	void TextureRenderer::bind_2d_dmap()
 	{
-		if (ShaderProgram::shaders_supported() && glActiveTexture)
-		{
-			glActiveTexture(GL_TEXTURE4);
-			glBindTexture(GL_TEXTURE_2D, tex_2d_dmap_);
-			glActiveTexture(GL_TEXTURE0);
-		}
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, tex_2d_dmap_);
+		glActiveTexture(GL_TEXTURE0);
 	}
 
 	//release texture
 	void TextureRenderer::release_texture(int unit, GLenum taget)
 	{
-		if (ShaderProgram::shaders_supported() && glActiveTexture)
-		{
-			glActiveTexture(GL_TEXTURE0 + unit);
-			glBindTexture(taget, 0);
-			glActiveTexture(GL_TEXTURE0);
-		}
+		glActiveTexture(GL_TEXTURE0 + unit);
+		glBindTexture(taget, 0);
+		glActiveTexture(GL_TEXTURE0);
 	}
 
 } // namespace FLIVR

@@ -1041,6 +1041,7 @@ namespace FLIVR
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		glDisable(GL_BLEND);
 
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	void VolumeRenderer::draw_wireframe(bool orthographic_p)

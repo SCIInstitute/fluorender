@@ -229,6 +229,7 @@ namespace FLIVR
 				if (location != -1)
 					glUniform1i(location, i);
 			}
+			glActiveTexture(GL_TEXTURE0);
 
 			glValidateProgram(id_);
 			glGetProgramiv(id_, GL_VALIDATE_STATUS, shader_status);

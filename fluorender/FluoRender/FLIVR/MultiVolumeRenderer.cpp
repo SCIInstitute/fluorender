@@ -632,6 +632,8 @@ namespace FLIVR
 			if (cull_face) glEnable(GL_CULL_FACE);
 
 			glDisable(GL_BLEND);
+
+			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 	}
 
@@ -852,6 +854,7 @@ namespace FLIVR
 				vr_list_[0]->draw_view_quad();
 				if (img_shader && img_shader->valid())
 					img_shader->release();
+				glBindTexture(GL_TEXTURE_2D, 0);
 			}
 		}
 

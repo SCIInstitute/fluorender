@@ -1802,6 +1802,7 @@ void VRenderGLView::PaintStroke()
 
 	//bind back the window frame buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 	RefreshGL();
 }
 
@@ -1831,6 +1832,7 @@ void VRenderGLView::DisplayStroke()
 	if (img_shader && img_shader->valid())
 		img_shader->release();
 
+	glBindTexture(GL_TEXTURE_2D, 0);
 	glEnable(GL_DEPTH_TEST);
 }
 
@@ -2621,6 +2623,8 @@ void VRenderGLView::DrawFinalBuffer()
 
 	if (img_shader && img_shader->valid())
 		img_shader->release();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 //Draw the volmues with compositing
@@ -3673,6 +3677,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, 0);
+	glActiveTexture(GL_TEXTURE0);
 
 	glBlendEquation(GL_FUNC_ADD);
 }
@@ -10923,6 +10928,7 @@ void VRenderGLView::DrawViewQuad()
 
 	glBindVertexArray(m_quad_vao);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }
 
