@@ -4035,8 +4035,7 @@ void VRenderGLView::PickMesh()
 	m_mv_mat = glm::translate(m_mv_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
 
 	//set up fbo
-	GLint cur_framebuffer_id;
-	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &cur_framebuffer_id);
+	m_cur_framebuffer = 0;
 	if (glIsFramebuffer(m_fbo_pick)!=GL_TRUE)
 	{
 		glGenFramebuffers(1, &m_fbo_pick);
@@ -4099,7 +4098,7 @@ void VRenderGLView::PickMesh()
 	unsigned int choose = 0;
 	glReadPixels(mouse_pos.x, ny-mouse_pos.y, 1, 1, GL_RED_INTEGER,
 		GL_UNSIGNED_INT, (GLvoid*)&choose);
-	glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_id);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_cur_framebuffer);
 
 	if (choose >0 && choose<=(int)m_md_pop_list.size())
 	{

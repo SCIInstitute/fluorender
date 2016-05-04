@@ -273,15 +273,6 @@ namespace FLIVR
 			break;
 		}
 
-		// Cache this value to reset, in case another framebuffer is active,
-		// as it is in the case of saving an image from the viewer.
-		GLint cur_framebuffer_id;
-		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &cur_framebuffer_id);
-		GLint cur_draw_buffer;
-		glGetIntegerv(GL_DRAW_BUFFER, &cur_draw_buffer);
-		GLint cur_read_buffer;
-		glGetIntegerv(GL_READ_BUFFER, &cur_read_buffer);
-
 		int w = vp_[2];
 		int h = vp_[3];
 		int w2 = w;
@@ -340,7 +331,7 @@ namespace FLIVR
 
 			glBindTexture(GL_TEXTURE_2D, 0);
 
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, blend_framebuffer_);
+			glBindFramebuffer(GL_FRAMEBUFFER, blend_framebuffer_);
 
 			glClearColor(clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3]);
 			glClear(GL_COLOR_BUFFER_BIT);
@@ -595,9 +586,7 @@ namespace FLIVR
 			}
 
 			//go back to normal
-			glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_id);
-			glDrawBuffer(cur_draw_buffer);
-			glReadBuffer(cur_read_buffer);
+			glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_);
 
 			glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 
@@ -660,14 +649,6 @@ namespace FLIVR
 		//check vr_list size
 		if (vr_list_.size() <= 0)
 			return;
-
-		//save original buffer
-		GLint cur_framebuffer_id;
-		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &cur_framebuffer_id);
-		GLint cur_draw_buffer;
-		glGetIntegerv(GL_DRAW_BUFFER, &cur_draw_buffer);
-		GLint cur_read_buffer;
-		glGetIntegerv(GL_READ_BUFFER, &cur_read_buffer);
 
 		if (blend_slices_ && colormap_mode_!=2)
 		{
@@ -851,9 +832,7 @@ namespace FLIVR
 				glBindVertexArray(0);
 				glUseProgram(0);
 				//set buffer back
-				glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_id);
-				glDrawBuffer(cur_draw_buffer);
-				glReadBuffer(cur_read_buffer);
+				glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_);
 				glBindTexture(GL_TEXTURE_2D, blend_tex_);
 				//blend
 				glBlendEquation(GL_FUNC_ADD);

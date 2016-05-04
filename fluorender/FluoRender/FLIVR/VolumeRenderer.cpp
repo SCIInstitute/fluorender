@@ -626,15 +626,6 @@ namespace FLIVR
 			break;
 		}
 
-		// Cache this value to reset, in case another framebuffer is active,
-		// as it is in the case of saving an image from the viewer.
-		//GLint cur_framebuffer_id;
-		//glGetIntegerv(GL_FRAMEBUFFER_BINDING, &cur_framebuffer_id);
-		////GLint cur_draw_buffer;
-		//glGetIntegerv(GL_DRAW_BUFFER, &cur_draw_buffer);
-		//GLint cur_read_buffer;
-		//glGetIntegerv(GL_READ_BUFFER, &cur_read_buffer);
-
 		int w = vp_[2];
 		int h = vp_[3];
 		int w2 = w;
@@ -1007,8 +998,6 @@ namespace FLIVR
 
 			//go back to normal
 			glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_); 
-			//glDrawBuffer(cur_draw_buffer);
-			//glReadBuffer(cur_read_buffer);
 
 			glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 
@@ -1157,8 +1146,6 @@ namespace FLIVR
 		//mask frame buffer object
 		if (!glIsFramebuffer(fbo_mask_))
 			glGenFramebuffers(1, &fbo_mask_);
-		//GLint cur_framebuffer_id;
-		//glGetIntegerv(GL_FRAMEBUFFER_BINDING, &cur_framebuffer_id);
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo_mask_);
 
 		//--------------------------------------------------------------------------
@@ -1377,8 +1364,6 @@ namespace FLIVR
 		//label frame buffer object
 		if (!glIsFramebuffer(fbo_label_))
 			glGenFramebuffers(1, &fbo_label_);
-		//GLint cur_framebuffer_id;
-		//glGetIntegerv(GL_FRAMEBUFFER_BINDING, &cur_framebuffer_id);
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo_label_);
 
 		bool has_mask = tex_->nmask()!=-1;
@@ -1596,8 +1581,6 @@ namespace FLIVR
 		//mask frame buffer object
 		if (!glIsFramebuffer(fbo_label_))
 			glGenFramebuffers(1, &fbo_label_);
-		//GLint cur_framebuffer_id;
-		//glGetIntegerv(GL_FRAMEBUFFER_BINDING, &cur_framebuffer_id);
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo_label_);
 
 		//--------------------------------------------------------------------------
