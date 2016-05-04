@@ -1846,6 +1846,7 @@ void VRenderGLView::Segment()
 	int nx = GetSize().x;
 	int ny = GetSize().y;
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
+	GLfloat clear_color[4] = { 0, 0, 0, 0 };
 
 	glViewport(0, 0, vp[2], vp[3]);
 	HandleCamera();
@@ -1871,6 +1872,7 @@ void VRenderGLView::Segment()
 		if (vd)
 		{
 			vd->SetViewport(vp);
+			vd->SetClearColor(clear_color);
 			for (int i=0; i<GetLayerNum(); i++)
 			{
 				TreeLayer* layer = GetLayer(i);
@@ -1900,6 +1902,7 @@ void VRenderGLView::Segment()
 					{
 						tmp_vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 						tmp_vd->SetViewport(vp);
+						tmp_vd->SetClearColor(clear_color);
 						m_selector.SetVolume(tmp_vd);
 						m_selector.Select(m_brush_radius2-m_brush_radius1);
 					}
@@ -1917,6 +1920,7 @@ void VRenderGLView::Segment()
 		{
 			vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 			vd->SetViewport(vp);
+			vd->SetClearColor(clear_color);
 			m_selector.SetVolume(vd);
 			m_selector.Select(m_brush_radius2-m_brush_radius1);
 		}
@@ -1925,6 +1929,7 @@ void VRenderGLView::Segment()
 		{
 			vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 			vd->SetViewport(vp);
+			vd->SetClearColor(clear_color);
 			m_selector.SetVolume(vd);
 			m_selector.Select(m_brush_radius2-m_brush_radius1);
 		}
@@ -1963,11 +1968,13 @@ void VRenderGLView::Label()
 	int nx = GetSize().x;
 	int ny = GetSize().y;
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
+	GLfloat clear_color[4] = { 0, 0, 0, 0 };
 
 	VolumeData* vd = m_selector.GetVolume();
 	if (vd)
 	{
 		vd->SetViewport(vp);
+		vd->SetClearColor(clear_color);
 		m_selector.Label(0);
 	}
 }
@@ -2802,6 +2809,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, bool mask, int peel)
 	int nx = GetSize().x;
 	int ny = GetSize().y;
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
+	GLfloat clear_color[4] = { 0, 0, 0, 0 };
 
 	ShaderProgram* img_shader = 0;
 
@@ -2879,6 +2887,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, bool mask, int peel)
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 		vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 		vd->SetViewport(vp);
+		vd->SetClearColor(clear_color);
 		vd->SetCurFramebuffer(m_cur_framebuffer);
 		vd->Draw(!m_persp, m_interactive, m_scale_factor);
 	}
@@ -2958,6 +2967,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 	int nx = GetSize().x;
 	int ny = GetSize().y;
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
+	GLfloat clear_color[4] = { 0, 0, 0, 0 };
 
 	bool do_mip = true;
 	if (TextureRenderer::get_mem_swap() &&
@@ -3069,6 +3079,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 		vd->SetStreamMode(1);
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 		vd->SetViewport(vp);
+		vd->SetClearColor(clear_color);
 		vd->SetCurFramebuffer(m_cur_framebuffer);
 		vd->Draw(!m_persp, m_interactive, m_scale_factor);
 		//
@@ -3422,6 +3433,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 	int nx = GetSize().x;
 	int ny = GetSize().y;
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
+	GLfloat clear_color[4] = { 1, 1, 1, 1 };
 
 	size_t i;
 	bool has_shadow = false;
@@ -3519,6 +3531,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 		vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 		vd->SetViewport(vp);
+		vd->SetClearColor(clear_color);
 		vd->SetCurFramebuffer(m_cur_framebuffer);
 		vd->Draw(!m_persp, m_interactive, m_scale_factor);
 		//restore
@@ -3551,6 +3564,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		m_mvr->set_colormap_mode(2);
 		//draw
 		m_mvr->set_viewport(vp);
+		m_mvr->set_clear_color(clear_color);
 		m_mvr->set_cur_framebuffer(m_cur_framebuffer);
 		m_mvr->draw(m_test_wiref, m_interactive, !m_persp, m_scale_factor, m_intp);
 		//restore
@@ -3678,6 +3692,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	int nx = GetSize().x;
 	int ny = GetSize().y;
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
+	GLfloat clear_color[4] = { 0, 0, 0, 0 };
 
 	m_mvr->set_blend_slices(m_blend_slices);
 
@@ -3781,6 +3796,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 
 	//draw multiple volumes at the same time
 	m_mvr->set_viewport(vp);
+	m_mvr->set_clear_color(clear_color);
 	m_mvr->set_cur_framebuffer(m_cur_framebuffer);
 	m_mvr->draw(m_test_wiref, m_interactive, !m_persp, m_scale_factor, m_intp);
 
@@ -10885,7 +10901,7 @@ void VRenderGLView::CalcFrame()
 
 void VRenderGLView::DrawViewQuad()
 {
-	if (!glIsVertexArray(m_quad_vao))
+	if (!m_quad_vao)
 	{
 		float points[] = {
 			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,

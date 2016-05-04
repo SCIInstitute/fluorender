@@ -168,6 +168,9 @@ public:
 	//set viewport
 	void SetViewport(GLint vp[4]);
 
+	//set clear color
+	void SetClearColor(GLfloat clear_color[4]);
+
 	//set current framebuffer
 	void SetCurFramebuffer(GLuint cur_framebuffer);
 

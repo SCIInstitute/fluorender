@@ -253,8 +253,6 @@ namespace FLIVR
 		for (size_t i=0; i<vr_list_.size(); ++i)
 			use_shading = use_shading || vr_list_[i]->shading_;
 		bool use_fog = vr_list_[0]->m_use_fog && colormap_mode_!=2;
-		GLfloat clear_color[4];
-		glGetFloatv(GL_COLOR_CLEAR_VALUE, clear_color);
 
 		// set up blending
 		glEnable(GL_BLEND);
@@ -344,7 +342,7 @@ namespace FLIVR
 
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, blend_framebuffer_);
 
-			glClearColor(clear_color[0], clear_color[1], clear_color[2], clear_color[3]);
+			glClearColor(clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3]);
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			glViewport(vp_[0], vp_[1], w2, h2);
@@ -663,9 +661,6 @@ namespace FLIVR
 		if (vr_list_.size() <= 0)
 			return;
 
-		GLfloat clear_color[4];
-		glGetFloatv(GL_COLOR_CLEAR_VALUE, clear_color);
-
 		//save original buffer
 		GLint cur_framebuffer_id;
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &cur_framebuffer_id);
@@ -727,7 +722,7 @@ namespace FLIVR
 			{
 				//set blend buffer
 				glBindFramebuffer(GL_FRAMEBUFFER, blend_fbo_);
-				glClearColor(clear_color[0], clear_color[1], clear_color[2], clear_color[3]);
+				glClearColor(clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3]);
 				glClear(GL_COLOR_BUFFER_BIT);
 				glEnable(GL_BLEND);
 				glBlendEquationSeparate(GL_FUNC_ADD, GL_MAX);

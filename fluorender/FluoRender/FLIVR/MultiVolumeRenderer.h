@@ -58,6 +58,12 @@ namespace FLIVR
 			memcpy(vp_, vp, sizeof(GLint) * 4);
 		}
 
+		//set clear color
+		void set_clear_color(GLfloat clear_color[4])
+		{
+			memcpy(clear_color_, clear_color, sizeof(GLfloat) * 4);
+		}
+
 		//mode and sampling rate
 		void set_mode(TextureRenderer::RenderMode mode);
 		void set_sampling_rate(double rate);
@@ -106,6 +112,9 @@ namespace FLIVR
 	private:
 		//viewport
 		GLint vp_[4];
+		//clear color
+		GLfloat clear_color_[4];
+
 		//volume renderer list
 		vector<VolumeRenderer*> vr_list_;
 

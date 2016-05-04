@@ -54,6 +54,12 @@ namespace FLIVR
 			memcpy(vp_, vp, sizeof(GLint) * 4);
 		}
 
+		//set clear color
+		void set_clear_color(GLfloat clear_color[4])
+		{
+			memcpy(clear_color_, clear_color, sizeof(GLfloat) * 4);
+		}
+
 		//quality and data type
 		//set by initialization
 		bool get_hiqual() {return hiqual_;}
@@ -210,6 +216,9 @@ namespace FLIVR
 	protected:
 		//viewport
 		GLint vp_[4];
+		//clear color
+		GLfloat clear_color_[4];
+
 		double scalar_scale_;
 		double gm_scale_;
 		//transfer function properties
