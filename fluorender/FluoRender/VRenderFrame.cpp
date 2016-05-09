@@ -803,6 +803,13 @@ wxString VRenderFrame::CreateView(int row)
 		vrv->SetTextRenderer(m_text_renderer);
 	}
 
+	//reset gl
+	for (int i = 0; i < m_vrv_list.size(); ++i)
+	{
+		if (m_vrv_list[i])
+			m_vrv_list[i]->m_glview->m_set_gl = false;
+	}
+
 	//m_aui_mgr.Update();
 	OrganizeVRenderViews(1);
 	UpdateTree();

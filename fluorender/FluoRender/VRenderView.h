@@ -89,7 +89,7 @@ public:
 	VRenderGLView(wxWindow* frame,
 		wxWindow* parent,
 		wxWindowID id,
-		const int* attriblist = NULL,
+		const wxGLAttributes& attriblist,
 		wxGLContext* sharedContext=0,
 		const wxPoint& pos=wxDefaultPosition,
 		const wxSize& size=wxDefaultSize,
@@ -498,6 +498,8 @@ public:
 	{ m_text_renderer = text_renderer; }
 
 public:
+	//set gl context
+	bool m_set_gl;
 	//script run
 	bool m_run_script;
 	wxString m_script_file;

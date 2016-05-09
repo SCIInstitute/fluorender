@@ -79,6 +79,8 @@ public:
 private:
 	wstring m_data_name;
 
+	bool m_force_stack;
+
 	struct ChannelInfo
 	{
 		wstring file_name;
@@ -110,6 +112,19 @@ private:
 	//struct for PVStateShard
 	struct StateShard
 	{
+		StateShard() :
+			grid_index(0),
+			grid_index_x(0),
+			grid_index_y(0),
+			pos_x(0),
+			pos_y(0),
+			pos_z(0),
+			z_device(0),
+			ppl(0),
+			lpf(0),
+			mpp_x(0),
+			mpp_y(0),
+			bit_depth(0) {}
 		int grid_index;
 		int grid_index_x;
 		int grid_index_y;

@@ -33,6 +33,8 @@ DEALINGS IN THE SOFTWARE.
 
 PVXMLReader::PVXMLReader()
 {
+	m_force_stack = false;
+
 	m_resize_type = 0;
 	m_resample_type = 0;
 	m_alignment = 0;
@@ -206,10 +208,11 @@ void PVXMLReader::Preprocess()
 	//make sure not divide by zero
 	m_xspc = m_xspc==0.0?1.0:m_xspc;
 	m_yspc = m_yspc==0.0?1.0:m_yspc;
-	m_zspc = m_zspc==0.0?1.0:m_zspc;
+	m_zspc = m_zspc==0.0?1.0:(m_zspc==FLT_MAX?1.0:m_zspc);
 
 	m_x_size = int((m_x_max - m_x_min) / m_xspc + 0.5);
 	m_y_size = int((m_y_max - m_y_min) / m_yspc + 0.5);
+	if (m_z_max == FLT_MAX) m_z_max = 1.0;
 	m_slice_num = int((m_z_max - m_z_min) / m_zspc + 0.5);
 
 	if (m_user_flip_y == 1 ||
@@ -448,8 +451,18 @@ void PVXMLReader::ReadIndexedKey(wxXmlNode* keyNode, wxString &key)
 
 void PVXMLReader::ReadSequence(wxXmlNode* seqNode)
 {
-	m_new_seq = true;
-	m_seq_slice_num = 0;
+	if (m_current_state.grid_index == -1 &&
+		!m_force_stack)
+	{
+		m_force_stack = true;
+		m_new_seq = false;
+		m_seq_slice_num = 0;
+	}
+	else if (!m_force_stack)
+	{
+		m_new_seq = true;
+		m_seq_slice_num = 0;
+	}
 	m_seq_zspc = FLT_MAX;
 	m_seq_zpos = 0.0;
 	wxXmlNode *child = seqNode->GetChildren();
@@ -576,23 +589,28 @@ void PVXMLReader::ReadFrame(wxXmlNode* frameNode)
 		m_new_seq = false;
 	}
 
-	TimeDataInfo* time_data_info = &(m_pvxml_info.back());
-	if (time_data_info)
+	if (m_force_stack && m_pvxml_info.empty())
 	{
-		if (!m_seq_slice_num)
-		{
-			SequenceInfo info_new;
-			info_new.grid_index = -1;
-			info_new.apart = false;
-			time_data_info->push_back(info_new);
-		}
-		SequenceInfo* sequence_info = &(time_data_info->back());
-		if (sequence_info)
-		{
-			sequence_info->apart = sequence_info->apart || apart;
-			sequence_info->frames.push_back(frame_info);
-		}
+		TimeDataInfo info_new;
+		m_pvxml_info.push_back(info_new);
 	}
+
+	TimeDataInfo* time_data_info = &(m_pvxml_info.back());
+	if (!m_seq_slice_num)
+	{
+		SequenceInfo info_new;
+		info_new.grid_index = -1;
+		info_new.apart = false;
+		time_data_info->push_back(info_new);
+	}
+	SequenceInfo* sequence_info = &(time_data_info->back());
+	if (sequence_info)
+	{
+		sequence_info->apart = sequence_info->apart || apart;
+		sequence_info->frames.push_back(frame_info);
+	}
+	//if (m_force_stack)
+	//	m_seq_slice_num++;
 }
 
 void PVXMLReader::SetSliceSeq(bool ss)

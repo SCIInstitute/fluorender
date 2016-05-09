@@ -61,12 +61,12 @@ BEGIN_EVENT_TABLE(VRenderGLView, wxGLCanvas)
 	VRenderGLView::VRenderGLView(wxWindow* frame,
 	wxWindow* parent,
 	wxWindowID id,
-	const int* attriblist,
+	const wxGLAttributes& attriblist,
 	wxGLContext* sharedContext,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
-wxGLCanvas(parent, id, attriblist, pos, size, style),
+wxGLCanvas(parent, attriblist, id, pos, size, style),
 	//public
 	//capture modes
 	m_capture(false),
@@ -141,6 +141,8 @@ wxGLCanvas(parent, id, attriblist, pos, size, style),
 	//initializaion
 	m_initialized(false),
 	m_init_view(false),
+	//set gl
+	m_set_gl(false),
 	//bg color
 	m_bg_color(0.0, 0.0, 0.0),
 	m_bg_color_inv(1.0, 1.0, 1.0),
@@ -310,17 +312,8 @@ wxGLCanvas(parent, id, attriblist, pos, size, style),
 	//new cell id
 	m_cell_new_id(false)
 {
-	//create context
-	if (sharedContext)
-	{
-		m_glRC = sharedContext;
-		m_sharedRC = true;
-	}
-	else
-	{
-		m_glRC = new wxGLContext(this);
-		m_sharedRC = false;
-	}
+	m_glRC = sharedContext;
+	m_sharedRC = m_glRC ? true : false;
 
 	goTimer = new nv::Timer(10);
 	m_sb_num = "50";
@@ -477,7 +470,7 @@ void VRenderGLView::Init()
 	if (!m_initialized)
 	{
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		SetCurrent(*m_glRC);
+		//SetCurrent(*m_glRC);
 		ShaderProgram::init_shaders_supported();
 		if (vr_frame && vr_frame->GetSettingDlg()) KernelProgram::set_device_id(vr_frame->GetSettingDlg()->GetCLDeviceID());
 		KernelProgram::init_kernels_supported();
@@ -666,7 +659,6 @@ void VRenderGLView::Draw()
 	int ny = GetSize().y;
 
 	// clear color and depth buffers
-	glDrawBuffer(GL_BACK);
 	glClearDepth(1.0);
 	glClearColor(m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -737,7 +729,7 @@ void VRenderGLView::DrawDP()
 	int ny = GetSize().y;
 
 	//clear
-	glDrawBuffer(GL_BACK);
+//	glDrawBuffer(GL_BACK);
 	glClearDepth(1.0);
 	glClearColor(m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -836,8 +828,8 @@ void VRenderGLView::DrawDP()
 		for (i=0; i<m_peeling_layers; i++)
 		{
 			glBindFramebuffer(GL_FRAMEBUFFER, m_dp_fbo_list[i]);
-			glDrawBuffer(GL_NONE);
-			glReadBuffer(GL_NONE);
+			//glDrawBuffer(GL_NONE);
+			//glReadBuffer(GL_NONE);
 
 			glClearDepth(1.0);
 			glClear(GL_DEPTH_BUFFER_BIT);
@@ -5537,9 +5529,25 @@ void VRenderGLView::OnDraw(wxPaintEvent& event)
 
 void VRenderGLView::ForceDraw()
 {
+	if (!m_set_gl)
+	{
+		SetCurrent(*m_glRC);
+		m_set_gl = true;
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame)
+		{
+			for (int i = 0; i<vr_frame->GetViewNum(); i++)
+			{
+				VRenderView* view = vr_frame->GetView(i);
+				if (view && view->m_glview &&
+					view->m_glview != this)
+				{
+					view->m_glview->m_set_gl = false;
+				}
+			}
+		}
+	}
 	Init();
-	wxPaintDC dc(this);
-	SetCurrent(*m_glRC);
 
 	if (m_resize)
 		m_drawing_coord = false;
@@ -11038,24 +11046,30 @@ wxPanel(parent, id, pos, size, style),
 		gl_minor_ver = vr_frame->GetSettingDlg()->GetGLMinorVer();
 		gl_profile_mask = vr_frame->GetSettingDlg()->GetGLProfileMask();
 	}
-	int attriblist[] =
-	{
-		//pixel properties
-		WX_GL_MIN_RED, red_bit,
-		WX_GL_MIN_GREEN, green_bit,
-		WX_GL_MIN_BLUE, blue_bit,
-		WX_GL_MIN_ALPHA, alpha_bit,
-		WX_GL_DEPTH_SIZE, depth_bit,
-		WX_GL_DOUBLEBUFFER,
-		WX_GL_SAMPLE_BUFFERS, 1,
-		WX_GL_SAMPLES, samples,
-		// context properties.
-		WX_GL_CORE_PROFILE,
-		WX_GL_MAJOR_VERSION, gl_major_ver,
-		WX_GL_MINOR_VERSION, gl_minor_ver,
-		0, 0
-	};
+
+	wxGLAttributes attriblist;
+	attriblist.PlatformDefaults().
+		MinRGBA(red_bit, green_bit, blue_bit, alpha_bit).
+		Depth(depth_bit).
+		DoubleBuffer().
+		SampleBuffers(1).
+		Samplers(samples).
+		EndList();
 	m_glview = new VRenderGLView(frame, this, wxID_ANY, attriblist, sharedContext);
+	if (!sharedContext)
+	{
+		wxGLContextAttrs contextAttrs;
+		contextAttrs.CoreProfile().
+			MajorVersion(gl_major_ver).
+			MinorVersion(gl_minor_ver).
+			Robust().
+			ResetIsolation().
+			EndList();
+		sharedContext = new wxGLContext(m_glview, NULL, &contextAttrs);
+		sharedContext->SetCurrent(*m_glview);
+		m_glview->m_glRC = sharedContext;
+		m_glview->m_set_gl = true;
+	}
 	m_glview->SetCanFocus(false);
 	m_view_sizer->Add(m_glview, 1, wxEXPAND);
 #ifdef _WIN32
