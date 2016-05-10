@@ -212,7 +212,7 @@ void PVXMLReader::Preprocess()
 
 	m_x_size = int((m_x_max - m_x_min) / m_xspc + 0.5);
 	m_y_size = int((m_y_max - m_y_min) / m_yspc + 0.5);
-	if (m_z_max == FLT_MAX) m_z_max = 1.0;
+	if (m_z_max == FLT_MAX) m_z_max = m_seq_slice_num;
 	m_slice_num = int((m_z_max - m_z_min) / m_zspc + 0.5);
 
 	if (m_user_flip_y == 1 ||
@@ -242,7 +242,10 @@ void PVXMLReader::Preprocess()
 				{
 					frame_info->x = int((frame_info->x_start - m_x_min) / m_xspc + 0.5);
 					frame_info->y = int((frame_info->y_start - m_y_min) / m_yspc + 0.5);
-					frame_info->z = int((frame_info->z_start - m_z_min) / m_zspc + 0.5);
+					if (m_force_stack)
+						frame_info->z = k;
+					else
+						frame_info->z = int((frame_info->z_start - m_z_min) / m_zspc + 0.5);
 				}
 				if (m_user_flip_y==0 && !flipy)
 				{
@@ -451,12 +454,14 @@ void PVXMLReader::ReadIndexedKey(wxXmlNode* keyNode, wxString &key)
 
 void PVXMLReader::ReadSequence(wxXmlNode* seqNode)
 {
-	if (m_current_state.grid_index == -1 &&
-		!m_force_stack)
+	if (m_current_state.grid_index == -1)
 	{
-		m_force_stack = true;
-		m_new_seq = false;
-		m_seq_slice_num = 0;
+		if (!m_force_stack)
+		{
+			m_force_stack = true;
+			m_new_seq = false;
+			m_seq_slice_num = 0;
+		}
 	}
 	else if (!m_force_stack)
 	{
