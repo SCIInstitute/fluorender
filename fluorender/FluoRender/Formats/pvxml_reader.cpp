@@ -97,6 +97,7 @@ void PVXMLReader::Preprocess()
 	m_group_num = 0;
 	m_max_value = 0.0;
 	m_seq_boxes.clear();
+	m_force_stack = false;
 
 	//separate path and name
 	int64_t pos = m_path_name.find_last_of(GETSLASH());
@@ -382,6 +383,11 @@ void PVXMLReader::ReadKey(wxXmlNode* keyNode)
 		strValue.ToLong(&ival);
 		m_current_state.bit_depth = ival;
 	}
+	else if (strKey == "seqType")
+	{
+		strValue.ToLong(&ival);
+		m_current_state.seq_type = ival;
+	}
 }
 
 void PVXMLReader::ReadIndexedKey(wxXmlNode* keyNode, wxString &key)
@@ -454,7 +460,7 @@ void PVXMLReader::ReadIndexedKey(wxXmlNode* keyNode, wxString &key)
 
 void PVXMLReader::ReadSequence(wxXmlNode* seqNode)
 {
-	if (m_current_state.grid_index == -1)
+	if (m_current_state.seq_type == 1)
 	{
 		if (!m_force_stack)
 		{
@@ -463,7 +469,7 @@ void PVXMLReader::ReadSequence(wxXmlNode* seqNode)
 			m_seq_slice_num = 0;
 		}
 	}
-	else if (!m_force_stack)
+	else
 	{
 		m_new_seq = true;
 		m_seq_slice_num = 0;
@@ -604,7 +610,7 @@ void PVXMLReader::ReadFrame(wxXmlNode* frameNode)
 	if (!m_seq_slice_num)
 	{
 		SequenceInfo info_new;
-		info_new.grid_index = -1;
+		info_new.grid_index = 0;
 		info_new.apart = false;
 		time_data_info->push_back(info_new);
 	}
