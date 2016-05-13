@@ -5547,6 +5547,7 @@ void VRenderGLView::ForceDraw()
 		}
 	}
 	Init();
+	wxPaintDC dc(this);
 
 	if (m_resize)
 		m_drawing_coord = false;
