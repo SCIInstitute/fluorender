@@ -5621,6 +5621,7 @@ void VRenderGLView::ForceDraw()
 
 	goTimer->sample();
 
+#ifdef _WIN32
 	for (int i=0; i<m_dp_tex_list.size(); ++i)
 		glInvalidateTexImage(m_dp_tex_list[i], 0);
 	glInvalidateTexImage(m_tex_paint, 0);
@@ -5632,6 +5633,7 @@ void VRenderGLView::ForceDraw()
 	glInvalidateTexImage(m_tex_ol2, 0);
 	glInvalidateTexImage(m_tex_pick, 0);
 	glInvalidateTexImage(m_tex_pick_depth, 0);
+#endif
 
 	SwapBuffers();
 
@@ -11079,6 +11081,7 @@ wxPanel(parent, id, pos, size, style),
 			EndList();
 		sharedContext = new wxGLContext(m_glview, NULL, &contextAttrs);
 		sharedContext->SetCurrent(*m_glview);
+		m_glview->SetCurrent(*sharedContext);
 		m_glview->m_glRC = sharedContext;
 		m_glview->m_set_gl = true;
 	}
@@ -11168,14 +11171,23 @@ void VRenderView::CreateBar()
 	wxStaticText * stb;
 #endif
 	//add the options
-	m_options_toolbar->AddRadioTool(ID_VolumeSeqRd,"Layered",
-		wxGetBitmapFromMemory(layers),wxNullBitmap,"Render View as Layers",
+	wxBitmap bitmap;
+	bitmap = wxGetBitmapFromMemory(layers);
+	m_options_toolbar->AddRadioTool(
+		ID_VolumeSeqRd, "Layered",
+		bitmap, wxNullBitmap,
+		"Render View as Layers",
 		"Render View as Layers");
-	m_options_toolbar->AddRadioTool(ID_VolumeMultiRd,"Depth",
-		wxGetBitmapFromMemory(depth),wxNullBitmap,"Render View by Depth",
+	bitmap = wxGetBitmapFromMemory(depth);
+	m_options_toolbar->AddRadioTool(
+		ID_VolumeMultiRd, "Depth",
+		bitmap, wxNullBitmap,
+		"Render View by Depth",
 		"Render View by Depth");
-	m_options_toolbar->AddRadioTool(ID_VolumeCompRd,"Composite",
-		wxGetBitmapFromMemory(composite),wxNullBitmap,
+	bitmap = wxGetBitmapFromMemory(composite);
+	m_options_toolbar->AddRadioTool(
+		ID_VolumeCompRd, "Composite",
+		bitmap, wxNullBitmap,
 		"Render View as a Composite of Colors",
 		"Render View as a Composite of Colors");
 
@@ -11215,20 +11227,26 @@ void VRenderView::CreateBar()
 	m_options_toolbar->AddSeparator();
 #endif
 
-	m_options_toolbar->AddCheckTool(ID_CamCtrChk,"Axis",
-		wxGetBitmapFromMemory(axis),wxNullBitmap,
+	bitmap = wxGetBitmapFromMemory(axis);
+	m_options_toolbar->AddCheckTool(
+		ID_CamCtrChk, "Axis",
+		bitmap, wxNullBitmap,
 		"Toggle View of the Center Axis",
 		"Toggle View of the Center Axis");
 	m_options_toolbar->ToggleTool(ID_CamCtrChk,false);
 
-	m_options_toolbar->AddCheckTool(ID_FpsChk,"Info",
-		wxGetBitmapFromMemory(info),wxNullBitmap,
+	bitmap = wxGetBitmapFromMemory(info);
+	m_options_toolbar->AddCheckTool(
+		ID_FpsChk, "Info",
+		bitmap, wxNullBitmap,
 		"Toggle View of FPS and Mouse Position",
 		"Toggle View of FPS and Mouse Position");
 	m_options_toolbar->ToggleTool(ID_FpsChk,false);
 
-	m_options_toolbar->AddCheckTool(ID_LegendChk,"Legend",
-		wxGetBitmapFromMemory(legend),wxNullBitmap,
+	bitmap = wxGetBitmapFromMemory(legend);
+	m_options_toolbar->AddCheckTool(
+		ID_LegendChk, "Legend",
+		bitmap, wxNullBitmap,
 		"Toggle View of the Legend",
 		"Toggle View of the Legend");
 	m_options_toolbar->ToggleTool(ID_LegendChk,false);
@@ -11242,8 +11260,9 @@ void VRenderView::CreateBar()
 #endif
 
 	//scale bar
-	m_options_toolbar->AddTool(ID_ScaleBar,"Scale Bar",
-		wxGetBitmapFromMemory(scalebar),
+	bitmap = wxGetBitmapFromMemory(scalebar);
+	m_options_toolbar->AddTool(
+		ID_ScaleBar, "Scale Bar", bitmap,
 		"Toggle Scalebar Options (Off, On, On with text)");
 	m_scale_text = new wxTextCtrl(m_options_toolbar, ID_ScaleText, "50",
 		wxDefaultPosition, wxSize(35, 20), 0, vald_int);
@@ -11279,8 +11298,10 @@ void VRenderView::CreateBar()
 	m_options_toolbar->AddControl(m_aov_sldr);
 	m_options_toolbar->AddControl(m_aov_text);
 
-	m_options_toolbar->AddCheckTool(ID_FreeChk,"Free Fly",
-		wxGetBitmapFromMemory(freefly),wxNullBitmap,
+	bitmap = wxGetBitmapFromMemory(freefly);
+	m_options_toolbar->AddCheckTool(
+		ID_FreeChk, "Free Fly",
+		bitmap, wxNullBitmap,
 		"Change the camera to a 'Free-Fly' Mode",
 		"Change the camera to a 'Free-Fly' Mode");
 
@@ -11303,17 +11324,19 @@ void VRenderView::CreateBar()
 	m_options_toolbar->AddControl(st1);
 	m_options_toolbar->AddControl(m_bg_color_picker);
 
-	m_options_toolbar->AddTool(ID_DefaultBtn,"Save",
-		wxGetBitmapFromMemory(save_settings),
+	bitmap = wxGetBitmapFromMemory(save_settings);
+	m_options_toolbar->AddTool(
+		ID_DefaultBtn, "Save", bitmap,
 		"Set Default Render View Settings");
 
 	m_options_toolbar->Realize();
-#ifndef _DARWIN
+#ifdef _WIN32
 	m_full_screen_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_NODIVIDER);
-	m_full_screen_btn->AddTool(ID_FullScreenBtn, "Full Screen",
-		wxGetBitmapFromMemory(full_view),
-		"Show full screen");
+	bitmap = wxGetBitmapFromMemory(full_view);
+	m_full_screen_btn->AddTool(
+		ID_FullScreenBtn, "Full Screen",
+		bitmap, "Show full screen");
 	m_full_screen_btn->Realize();
 #endif
 	//add the toolbars and other options in order
@@ -11327,8 +11350,9 @@ void VRenderView::CreateBar()
 	wxBoxSizer* sizer_v_3 = new wxBoxSizer(wxVERTICAL);
 	m_left_toolbar = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_left_toolbar->AddCheckTool(ID_DepthAttenChk,"Depth Interval",
-		wxGetBitmapFromMemory(no_depth_atten),wxNullBitmap,
+	bitmap = wxGetBitmapFromMemory(no_depth_atten);
+	m_left_toolbar->AddCheckTool(ID_DepthAttenChk, "Depth Interval",
+		bitmap, wxNullBitmap,
 		"Enable adjustment of the Depth Attenuation Interval",
 		"Enable adjustment of the Depth Attenuation Interval");
 	m_left_toolbar->ToggleTool(ID_DepthAttenChk, true);
@@ -11337,9 +11361,10 @@ void VRenderView::CreateBar()
 	m_depth_atten_factor_sldr->Disable();
 	m_depth_atten_reset_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_depth_atten_reset_btn->AddTool(ID_DepthAttenResetBtn, "Reset",
-		wxGetBitmapFromMemory(reset),
-		"Reset Depth Attenuation Interval");
+	bitmap = wxGetBitmapFromMemory(reset);
+	m_depth_atten_reset_btn->AddTool(
+		ID_DepthAttenResetBtn, "Reset",
+		bitmap, "Reset Depth Attenuation Interval");
 	m_depth_atten_reset_btn->Realize();
 	m_depth_atten_factor_text = new wxTextCtrl(this, ID_DepthAttenFactorText, "0.0",
 		wxDefaultPosition, wxSize(40, 20), 0, vald_fp2);
@@ -11359,23 +11384,23 @@ void VRenderView::CreateBar()
 	st1 = new wxStaticText(this, 0, " Zoom",wxDefaultPosition,wxSize(45,-1));
 	m_center_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	bitmap = wxGetBitmapFromMemory(center);
 	m_center_btn->AddTool(ID_CenterBtn, "Center",
-		wxGetBitmapFromMemory(center),
-		"Center the Data on the Render View");
+		bitmap, "Center the Data on the Render View");
 	m_center_btn->Realize();
 	m_scale_121_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	bitmap = wxGetBitmapFromMemory(ratio);
 	m_scale_121_btn->AddTool(ID_Scale121Btn, "1 to 1",
-		wxGetBitmapFromMemory(ratio),
-		"Auto-size the data to a 1:1 ratio");
+		bitmap, "Auto-size the data to a 1:1 ratio");
 	m_scale_121_btn->Realize();
 	m_scale_factor_sldr = new wxSlider(this, ID_ScaleFactorSldr, 100, 50, 999,
 		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
 	m_scale_reset_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	bitmap = wxGetBitmapFromMemory(reset);
 	m_scale_reset_btn->AddTool(ID_ScaleResetBtn, "Reset",
-		wxGetBitmapFromMemory(reset),
-		"Reset the Zoom");
+		bitmap, "Reset the Zoom");
 	m_scale_reset_btn->Realize();
 	m_scale_factor_text = new wxTextCtrl(this, ID_ScaleFactorText, "100",
 		wxDefaultPosition, wxSize(30, 20), 0, vald_int);
@@ -11383,8 +11408,10 @@ void VRenderView::CreateBar()
 		wxDefaultPosition, wxSize(30, 20));
 	m_scale_mode_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_scale_mode_btn->AddCheckTool(ID_ScaleModeBtn, "Switch zoom ratio mode",
-		wxGetBitmapFromMemory(zoom_view), wxNullBitmap,
+	bitmap = wxGetBitmapFromMemory(zoom_view);
+	m_scale_mode_btn->AddCheckTool(
+		ID_ScaleModeBtn, "Switch zoom ratio mode",
+		bitmap, wxNullBitmap,
 		"Switch zoom ratio mode",
 		"Switch zoom ratio mode");
 	m_scale_mode_btn->ToggleTool(ID_ScaleModeBtn, true);
@@ -11427,20 +11454,22 @@ void VRenderView::CreateBar()
 
 	m_rot_lock_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	bitmap = wxGetBitmapFromMemory(gear_45);
 	m_rot_lock_btn->AddCheckTool(ID_RotLockChk, "45 Angles",
-		wxGetBitmapFromMemory(gear_45), wxNullBitmap,
+		bitmap, wxNullBitmap,
 		"Confine all angles to 45 Degrees",
 		"Confine all angles to 45 Degrees");
+	bitmap = wxGetBitmapFromMemory(slider_type_rot);
 	m_rot_lock_btn->AddCheckTool(ID_RotSliderType, "Slider Style",
-		wxGetBitmapFromMemory(slider_type_rot), wxNullBitmap,
+		bitmap, wxNullBitmap,
 		"Choose slider style",
 		"Choose slider style");
 	m_rot_lock_btn->ToggleTool(ID_RotSliderType, m_rot_slider);
 	m_rot_lock_btn->Realize();
 
+	bitmap = wxGetBitmapFromMemory(reset);
 	m_lower_toolbar->AddTool(ID_RotResetBtn,"Reset",
-		wxGetBitmapFromMemory(reset),
-		"Reset Rotations");
+		bitmap, "Reset Rotations");
 	m_lower_toolbar->Realize();
 
 	sizer_h_2->AddSpacer(40);

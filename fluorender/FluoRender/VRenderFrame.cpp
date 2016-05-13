@@ -210,59 +210,72 @@ VRenderFrame::VRenderFrame(
 	m_tb_menu_edit->Append(m);
 	//build the main toolbar
 	//add tools
+	wxBitmap bitmap;
+	bitmap = wxGetBitmapFromMemory(icon_open_volume);
 	m_main_tb->AddTool(ID_OpenVolume, "Open Volume",
-		wxGetBitmapFromMemory(icon_open_volume), wxNullBitmap, wxITEM_NORMAL,
+		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Open single or multiple volume data file(s)",
 		"Open single or multiple volume data file(s)");
+	bitmap = wxGetBitmapFromMemory(icon_open_project);
 	m_main_tb->AddTool(ID_OpenProject, "Open Project",
-		wxGetBitmapFromMemory(icon_open_project), wxNullBitmap, wxITEM_NORMAL,
+		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Open a saved project",
 		"Open a saved project");
+	bitmap = wxGetBitmapFromMemory(icon_save_project);
 	m_main_tb->AddTool(ID_SaveProject, "Save Project",
-		wxGetBitmapFromMemory(icon_save_project), wxNullBitmap, wxITEM_NORMAL,
+		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Save current work as a project",
 		"Save current work as a project");
 	m_main_tb->AddSeparator();
+	bitmap = wxGetBitmapFromMemory(icon_new_view);
 	m_main_tb->AddTool(ID_ViewNew, "New View",
-		wxGetBitmapFromMemory(icon_new_view), wxNullBitmap, wxITEM_NORMAL,
+		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Create a new render viewport",
 		"Create a new render viewport");
+	bitmap = wxGetBitmapFromMemory(icon_show_hide_ui);
 	m_main_tb->AddTool(ID_ShowHideUI, "Show/Hide UI",
-		wxGetBitmapFromMemory(icon_show_hide_ui), wxNullBitmap, wxITEM_DROPDOWN,
+		bitmap, wxNullBitmap, wxITEM_DROPDOWN,
 		"Show or hide all control panels",
 		"Show or hide all control panels");
 	m_main_tb->SetDropdownMenu(ID_ShowHideUI, m_tb_menu_ui);
 	m_main_tb->AddSeparator();
+	bitmap = wxGetBitmapFromMemory(icon_open_mesh);
 	m_main_tb->AddTool(ID_OpenMesh, "Open Mesh",
-		wxGetBitmapFromMemory(icon_open_mesh), wxNullBitmap, wxITEM_NORMAL,
+		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Open single or multiple mesh file(s)",
 		"Open single or multiple mesh file(s)");
+	bitmap = wxGetBitmapFromMemory(icon_paint_brush);
 	m_main_tb->AddTool(ID_LastTool, "Analyze",
-		wxGetBitmapFromMemory(icon_paint_brush), wxNullBitmap,
+		bitmap, wxNullBitmap,
 		wxITEM_DROPDOWN,
 		"Tools for analyzing selected channel",
 		"Tools for analyzing selected channel");
 	m_main_tb->SetDropdownMenu(ID_LastTool, m_tb_menu_edit);
 	m_main_tb->AddSeparator();
+	bitmap = wxGetBitmapFromMemory(icon_settings);
 	m_main_tb->AddTool(ID_Settings, "Settings",
-		wxGetBitmapFromMemory(icon_settings), wxNullBitmap, wxITEM_NORMAL,
+		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Settings of FluoRender",
 		"Settings of FluoRender");
 	m_main_tb->AddStretchableSpace();
+	bitmap = wxGetBitmapFromMemory(icon_check_updates);
 	m_main_tb->AddTool(ID_CheckUpdates, "Update",
-		wxGetBitmapFromMemory(icon_check_updates), wxNullBitmap, wxITEM_NORMAL,
+		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Check if there is a new release",
 		"Check if there is a new release (requires Internet connection)");
+	bitmap = wxGetBitmapFromMemory(icon_facebook);
 	m_main_tb->AddTool(ID_Facebook, "Facebook",
-		wxGetBitmapFromMemory(icon_facebook), wxNullBitmap, wxITEM_NORMAL,
+		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"FluoRender's facebook page",
 		"FluoRender's facebook page (requires Internet connection)");
+	bitmap = wxGetBitmapFromMemory(icon_twitter);
 	m_main_tb->AddTool(ID_Twitter, "Twitter",
-		wxGetBitmapFromMemory(icon_twitter), wxNullBitmap, wxITEM_NORMAL,
+		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Follow FluoRender on Twitter",
 		"Follow FluoRender on Twitter (requires Internet connection)");
+	bitmap = wxGetBitmapFromMemory(icon_about);
 	m_main_tb->AddTool(ID_Info, "About",
-		wxGetBitmapFromMemory(icon_about), wxNullBitmap, wxITEM_NORMAL,
+		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"FluoRender information",
 		"FluoRender information");
 

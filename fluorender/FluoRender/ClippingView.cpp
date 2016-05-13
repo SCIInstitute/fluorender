@@ -112,19 +112,22 @@ m_link_z(false)
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_toolbar = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	wxBitmap bitmap;
+	bitmap = wxGetBitmapFromMemory(sync_chan);
 	m_toolbar->AddCheckTool(ID_LinkChannelsBtn, "Sync All Channels",
-		wxGetBitmapFromMemory(sync_chan), wxNullBitmap,
+		bitmap, wxNullBitmap,
 		"Link all data channels to this cropping",
 		"Link all data channels to this cropping");
 	m_toolbar->ToggleTool(ID_LinkChannelsBtn, false);
+	bitmap = wxGetBitmapFromMemory(hold_clip);
 	m_toolbar->AddCheckTool(ID_HoldPlanesBtn, "Hold Plane Display",
-		wxGetBitmapFromMemory(hold_clip), wxNullBitmap,
+		bitmap, wxNullBitmap,
 		"Clipping planes are always shown",
 		"Clipping planes are always shown");
 	m_toolbar->ToggleTool(ID_HoldPlanesBtn, false);
+	bitmap = wxGetBitmapFromMemory(clip_normal);
 	m_toolbar->AddTool(ID_PlaneModesBtn, "Display Modes",
-		wxGetBitmapFromMemory(clip_normal),
-		"Toggle clipping plane display modes");
+		bitmap, "Toggle clipping plane display modes");
 	m_toolbar->Realize();
 	sizer_1->Add(5, 5, 0);
 	sizer_1->Add(m_toolbar, 0, wxALIGN_CENTER, 0);
@@ -278,19 +281,19 @@ m_link_z(false)
 	wxBoxSizer *sizer_3 = new wxBoxSizer(wxHORIZONTAL);
 	m_check_tb = new wxToolBar(this,wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	bitmap = wxGetBitmapFromMemory(unlink);
 	m_check_tb->AddCheckTool(ID_LinkXChk,"Lock X Planes",
-		wxGetBitmapFromMemory(unlink),
-		wxNullBitmap,"Lock X Planes");
+		bitmap, wxNullBitmap,"Lock X Planes");
 	m_check_tb->AddSeparator();
 	m_check_tb->AddSeparator();
+	bitmap = wxGetBitmapFromMemory(unlink);
 	m_check_tb->AddCheckTool(ID_LinkYChk,"Lock Y Planes",
-		wxGetBitmapFromMemory(unlink),
-		wxNullBitmap,"Lock Y Planes");
+		bitmap, wxNullBitmap,"Lock Y Planes");
 	m_check_tb->AddSeparator();
 	m_check_tb->AddSeparator();
+	bitmap = wxGetBitmapFromMemory(unlink);
 	m_check_tb->AddCheckTool(ID_LinkZChk,"Lock Z Planes",
-		wxGetBitmapFromMemory(unlink),
-		wxNullBitmap,"Lock Z Planes");
+		bitmap, wxNullBitmap,"Lock Z Planes");
 	m_check_tb->Realize();
 	sizer_3->Add(5,5,0);
 	sizer_3->Add(m_check_tb, 1, wxALIGN_TOP|wxSHRINK );

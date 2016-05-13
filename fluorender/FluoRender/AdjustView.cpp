@@ -124,8 +124,10 @@ m_dft_sync_b(false)
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
 	m_sync_r_chk->AddControl(st);
 	m_sync_r_chk->AddStretchableSpace();
+	wxBitmap bitmap;
+	bitmap = wxGetBitmapFromMemory(unlink);
 	m_sync_r_chk->AddCheckTool(ID_SyncRChk, "Link",
-		wxGetBitmapFromMemory(unlink), wxNullBitmap,
+		bitmap, wxNullBitmap,
 		"Link Red Properties with Linked Green or Blue",
 		"Link Red Properties with Linked Green or Blue");
 	sizer_h_2->Add(m_sync_r_chk, 1, wxEXPAND);
@@ -190,8 +192,9 @@ m_dft_sync_b(false)
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
 	m_sync_g_chk->AddControl(st);
 	m_sync_g_chk->AddStretchableSpace();
+	bitmap = wxGetBitmapFromMemory(unlink);
 	m_sync_g_chk->AddCheckTool(ID_SyncGChk, "Link",
-		wxGetBitmapFromMemory(unlink), wxNullBitmap,
+		bitmap, wxNullBitmap,
 		"Link Green Properties with Linked Red or Blue",
 		"Link Green Properties with Linked Red or Blue");
 	sizer_h_6->Add(m_sync_g_chk, 1, wxEXPAND);
@@ -254,8 +257,9 @@ m_dft_sync_b(false)
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
 	m_sync_b_chk->AddControl(st);
 	m_sync_b_chk->AddStretchableSpace();
+	bitmap = wxGetBitmapFromMemory(unlink);
 	m_sync_b_chk->AddCheckTool(ID_SyncBChk, "Link",
-		wxGetBitmapFromMemory(unlink), wxNullBitmap,
+		bitmap, wxNullBitmap,
 		"Link Blue Properties with Linked Red or Green",
 		"Link Blue Properties with Linked Red or Green");
 	sizer_h_10->Add(m_sync_b_chk, 1, wxEXPAND);

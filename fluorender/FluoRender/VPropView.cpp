@@ -209,8 +209,9 @@ wxPanel(parent, id, pos, size,style, name),
 	//alpha
 	m_alpha_tool = new wxToolBar(this, ID_AlphaSync,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	wxBitmap bitmap = wxGetBitmapFromMemory(alpha);
 	m_alpha_tool->AddCheckTool(ID_AlphaChk, "Alpha",
-		wxGetBitmapFromMemory(alpha), wxNullBitmap,
+		bitmap, wxNullBitmap,
 		"Enables Alpha Editing.",
 		"Enables Alpha Editing.");
 	m_alpha_tool->ToggleTool(ID_AlphaChk,true);
@@ -236,8 +237,9 @@ wxPanel(parent, id, pos, size,style, name),
 		wxDefaultPosition, wxSize(40, 20), 0, vald_fp2);
 	m_shade_tool = new wxToolBar(this, ID_ShadingSync,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	bitmap = wxGetBitmapFromMemory(shade);
 	m_shade_tool->AddCheckTool(ID_ShadingEnableChk,"Shading",
-		wxGetBitmapFromMemory(shade), wxNullBitmap,
+		bitmap, wxNullBitmap,
 		"Enables Shading Editing.",
 		"Enables Shading Editing.");
 	m_shade_tool->ToggleTool(ID_ShadingEnableChk,true);
@@ -297,8 +299,9 @@ wxPanel(parent, id, pos, size,style, name),
 		wxMouseEventHandler(VPropView::OnHiShadingSync), NULL, this);
 	m_shadow_tool = new wxToolBar(this, ID_ShadowSync,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_shadow_tool->AddCheckTool(ID_ShadowChk,"Shadow",
-		wxGetBitmapFromMemory(shadow),wxNullBitmap,
+	bitmap = wxGetBitmapFromMemory(shadow);
+	m_shadow_tool->AddCheckTool(ID_ShadowChk, "Shadow",
+		bitmap, wxNullBitmap,
 		"Enables Shadow Editing.",
 		"Enables Shadow Editing.");
 	m_shadow_tool->ToggleTool(ID_ShadowChk,false);
@@ -342,8 +345,9 @@ wxPanel(parent, id, pos, size,style, name),
 	//colormap
 	m_colormap_tool = new wxToolBar(this, ID_ColormapSync,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_colormap_tool->AddCheckTool(ID_ColormapEnableChk,"Color Map",
-		wxGetBitmapFromMemory(palette),wxNullBitmap,
+	bitmap = wxGetBitmapFromMemory(palette);
+	m_colormap_tool->AddCheckTool(ID_ColormapEnableChk, "Color Map",
+		bitmap, wxNullBitmap,
 		"Enables Color Map Editing.",
 		"Enables Color Map Editing.");
 	m_colormap_tool->ToggleTool(ID_ColormapEnableChk,false);
@@ -378,54 +382,61 @@ wxPanel(parent, id, pos, size,style, name),
 	m_options_toolbar = new wxToolBar(this,wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	//MIP
-	m_options_toolbar->AddCheckTool(ID_MipChk,"MIP",
-		wxGetBitmapFromMemory(mip),wxNullBitmap,
+	bitmap = wxGetBitmapFromMemory(mip);
+	m_options_toolbar->AddCheckTool(ID_MipChk, "MIP",
+		bitmap, wxNullBitmap,
 		"Enable Maximum Intensity Projection.",
 		"Enable Maximum Intensity Projection.");
 	m_options_toolbar->ToggleTool(ID_MipChk,false);
 	//inversion
-	m_options_toolbar->AddCheckTool(ID_InvChk,"Inversion",
-		wxGetBitmapFromMemory(invert_off),wxNullBitmap,
+	bitmap = wxGetBitmapFromMemory(invert_off);
+	m_options_toolbar->AddCheckTool(ID_InvChk, "Inversion",
+		bitmap, wxNullBitmap,
 		"Inverts data values when checked.",
 		"Inverts data values when checked.");
 	m_options_toolbar->ToggleTool(ID_InvChk,false);
 	//interpolation
-	m_options_toolbar->AddCheckTool(ID_InterpolateChk,"Interpolate",
-		wxGetBitmapFromMemory(interpolate),wxNullBitmap,
+	bitmap = wxGetBitmapFromMemory(interpolate);
+	m_options_toolbar->AddCheckTool(ID_InterpolateChk, "Interpolate",
+		bitmap, wxNullBitmap,
 		"Interpolates between data when checked.",
 		"Interpolates between data when checked.");
 	m_options_toolbar->ToggleTool(ID_InterpolateChk,true);
 	//noise reduction
-	m_options_toolbar->AddCheckTool(ID_NRChk,"Smoothing",
-		wxGetBitmapFromMemory(smooth_off),wxNullBitmap,
+	bitmap = wxGetBitmapFromMemory(smooth_off);
+	m_options_toolbar->AddCheckTool(ID_NRChk, "Smoothing",
+		bitmap, wxNullBitmap,
 		"Enable Data Smoothing.",
 		"Enable Data Smoothing.");
 	m_options_toolbar->ToggleTool(ID_NRChk,false);
 	//sync group
+	bitmap = wxGetBitmapFromMemory(sync_chan);
 	m_options_toolbar->AddCheckTool(ID_SyncGroupChk,"Group Sync",
-		wxGetBitmapFromMemory(sync_chan),wxNullBitmap,
+		bitmap, wxNullBitmap,
 		"Sync this channel with others in its group.",
 		"Sync this channel with others in its group.");
 	m_options_toolbar->ToggleTool(ID_SyncGroupChk,false);
 	//depth mode
-	m_options_toolbar->AddCheckTool(ID_DepthChk,"Depth Mode",
-		wxGetBitmapFromMemory(depth_off),wxNullBitmap,
+	bitmap = wxGetBitmapFromMemory(depth_off);
+	m_options_toolbar->AddCheckTool(ID_DepthChk, "Depth Mode",
+		bitmap, wxNullBitmap,
 		"Enable Depth Mode.",
 		"Enable Depth Mode.");
 	m_options_toolbar->ToggleTool(ID_DepthChk,false);
 	//legend
-	m_options_toolbar->AddCheckTool(ID_LegendChk,"Legend",
-		wxGetBitmapFromMemory(legend),wxNullBitmap,
+	bitmap = wxGetBitmapFromMemory(legend);
+	m_options_toolbar->AddCheckTool(ID_LegendChk, "Legend",
+		bitmap, wxNullBitmap,
 		"Enable Legend for this channel.",
 		"Enable Legend for this channel.");
 	m_options_toolbar->ToggleTool(ID_LegendChk,true);
 	//buttons
+	bitmap = wxGetBitmapFromMemory(reset);
 	m_options_toolbar->AddTool(ID_ResetDefault,"Reset",
-		wxGetBitmapFromMemory(reset),
-		"Reset Properties");
+		bitmap, "Reset Properties");
+	bitmap = wxGetBitmapFromMemory(save_settings);
 	m_options_toolbar->AddTool(ID_SaveDefault,"Save",
-		wxGetBitmapFromMemory(save_settings),
-		"Set as default settings");
+		bitmap, "Set as default settings");
 	sizer_r1->AddStretchSpacer();
 	sizer_r1->Add(m_options_toolbar, 0, wxALIGN_CENTER);
 	sizer_r1->AddStretchSpacer();

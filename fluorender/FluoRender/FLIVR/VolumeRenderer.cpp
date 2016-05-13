@@ -1031,9 +1031,10 @@ namespace FLIVR
 			if (img_shader && img_shader->valid())
 				img_shader->release();
 
+#ifdef _WIN32
 			glInvalidateTexImage(blend_tex_id_, 0);
 			glInvalidateTexImage(filter_tex_id_, 0);
-
+#endif
 			if (depth_test) glEnable(GL_DEPTH_TEST);
 			if (cull_face) glEnable(GL_CULL_FACE);
 

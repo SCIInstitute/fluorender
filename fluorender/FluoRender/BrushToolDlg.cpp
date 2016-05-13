@@ -107,39 +107,42 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	//toolbar
 	m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT);
-	m_toolbar->AddTool(ID_BrushUndo, "Undo",
-		wxGetBitmapFromMemory(undo),
+	wxBitmap bitmap;
+	bitmap = wxGetBitmapFromMemory(undo);
+	m_toolbar->AddTool(
+		ID_BrushUndo, "Undo", bitmap,
 		"Rollback previous brush operation");
-	m_toolbar->AddTool(ID_BrushRedo, "Redo",
-		wxGetBitmapFromMemory(redo),
+	bitmap = wxGetBitmapFromMemory(redo);
+	m_toolbar->AddTool(
+		ID_BrushRedo, "Redo", bitmap,
 		"Redo the rollback brush operation");
 	m_toolbar->AddSeparator();
+	bitmap = wxGetBitmapFromMemory(brush_append);
 	m_toolbar->AddCheckTool(ID_BrushAppend, "Select",
-		wxGetBitmapFromMemory(brush_append),
-		wxNullBitmap,
+		bitmap, wxNullBitmap,
 		"Highlight structures by painting on the render view (hold Shift)");
+	bitmap = wxGetBitmapFromMemory(brush_diffuse);
 	m_toolbar->AddCheckTool(ID_BrushDiffuse, "Diffuse",
-		wxGetBitmapFromMemory(brush_diffuse),
-		wxNullBitmap,
+		bitmap, wxNullBitmap,
 		"Diffuse highlighted structures by painting (hold Z)");
+	bitmap = wxGetBitmapFromMemory(brush_solid);
 	m_toolbar->AddCheckTool(ID_BrushSolid, "Solid",
-		wxGetBitmapFromMemory(brush_solid),
-		wxNullBitmap,
+		bitmap, wxNullBitmap,
 		"Highlight structures with solid mask");
+	bitmap = wxGetBitmapFromMemory(brush_desel);
 	m_toolbar->AddCheckTool(ID_BrushDesel, "Unselect",
-		wxGetBitmapFromMemory(brush_desel),
-		wxNullBitmap,
+		bitmap, wxNullBitmap,
 		"Reset highlighted structures by painting (hold X)");
+	bitmap = wxGetBitmapFromMemory(brush_clear);
 	m_toolbar->AddTool(ID_BrushClear, "Reset All",
-		wxGetBitmapFromMemory(brush_clear),
-		"Reset all highlighted structures");
+		bitmap, "Reset all highlighted structures");
 	m_toolbar->AddSeparator();
+	bitmap = wxGetBitmapFromMemory(brush_erase);
 	m_toolbar->AddTool(ID_BrushErase, "Erase",
-		wxGetBitmapFromMemory(brush_erase),
-		"Erase highlighted structures");
+		bitmap, "Erase highlighted structures");
+	bitmap = wxGetBitmapFromMemory(brush_create);
 	m_toolbar->AddTool(ID_BrushCreate, "Extract",
-		wxGetBitmapFromMemory(brush_create),
-		"Extract highlighted structures out and create a new volume");
+		bitmap, "Extract highlighted structures out and create a new volume");
 	m_toolbar->Realize();
 
 	//Selection adjustment

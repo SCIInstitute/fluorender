@@ -521,8 +521,9 @@ wxWindow* TraceDlg::CreateLinkPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(65, 23));
 	m_manual_assist_check = new wxToolBar(page, wxID_ANY,
 		wxDefaultPosition, wxSize(-1, 23), wxTB_NODIVIDER);
+	wxBitmap bitmap = wxGetBitmapFromMemory(auto_link_off);
 	m_manual_assist_check->AddCheckTool(ID_ManualAssistCheck, "Auto Link",
-		wxGetBitmapFromMemory(auto_link_off), wxNullBitmap,
+		bitmap, wxNullBitmap,
 		"Automatically link selected IDs after each paint brush stroke",
 		"Automatically link selected IDs after each paint brush stroke");
 	m_manual_assist_check->SetBackgroundColour(m_notebook->GetThemeBackgroundColour());
@@ -587,8 +588,9 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(65, 23));
 	m_auto_id_chk = new wxToolBar(page, wxID_ANY,
 		wxDefaultPosition, wxSize(-1, 23), wxTB_NODIVIDER);
+	wxBitmap bitmap = wxGetBitmapFromMemory(auto_assign_off);
 	m_auto_id_chk->AddCheckTool(ID_AutoIDChk, "Auto Assign ID",
-		wxGetBitmapFromMemory(auto_assign_off), wxNullBitmap,
+		bitmap, wxNullBitmap,
 		"Automatically assign an ID to selection after each paint brush stroke",
 		"Automatically assign an ID to selection after each paint brush stroke");
 	m_auto_id_chk->SetBackgroundColour(m_notebook->GetThemeBackgroundColour());

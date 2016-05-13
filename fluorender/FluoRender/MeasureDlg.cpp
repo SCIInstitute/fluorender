@@ -521,42 +521,42 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	//toolbar
 	m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER|wxTB_TEXT);
+	wxBitmap bitmap = wxGetBitmapFromMemory(locator);
 	m_toolbar->AddCheckTool(ID_LocatorBtn, "Locator",
-		wxGetBitmapFromMemory(locator),
-		wxNullBitmap,
+		bitmap, wxNullBitmap,
 		"Add locators to the render view by clicking");
+	bitmap = wxGetBitmapFromMemory(drill);
 	m_toolbar->AddCheckTool(ID_ProbeBtn, "Probe",
-		wxGetBitmapFromMemory(drill),
-		wxNullBitmap,
+		bitmap, wxNullBitmap,
 		"Add probes to the render view by clicking once");
+	bitmap = wxGetBitmapFromMemory(protractor);
 	m_toolbar->AddCheckTool(ID_ProtractorBtn, "Protractor",
-		wxGetBitmapFromMemory(protractor),
-		wxNullBitmap,
+		bitmap, wxNullBitmap,
 		"Add protractors to measure angles by clicking at three points");
+	bitmap = wxGetBitmapFromMemory(add_ruler);
 	m_toolbar->AddCheckTool(ID_RulerBtn, "2pt Ruler",
-		wxGetBitmapFromMemory(add_ruler),
-		wxNullBitmap,
+		bitmap, wxNullBitmap,
 		"Add rulers to the render view by clicking at two end points");
+	bitmap = wxGetBitmapFromMemory(add_ruler);
 	m_toolbar->AddCheckTool(ID_RulerMPBtn, "2+pt Ruler",
-		wxGetBitmapFromMemory(add_ruler),
-		wxNullBitmap,
+		bitmap, wxNullBitmap,
 		"Add a polyline ruler to the render view by clicking at its points");
 	m_toolbar->AddSeparator();
+	bitmap = wxGetBitmapFromMemory(ruler_edit);
 	m_toolbar->AddCheckTool(ID_RulerEditBtn, "Edit",
-		wxGetBitmapFromMemory(ruler_edit),
-		wxNullBitmap,
+		bitmap, wxNullBitmap,
 		"Select and move ruler points");
-	m_toolbar->AddTool(ID_ProfileBtn, "Profile",
-		wxGetBitmapFromMemory(profile),
+	bitmap = wxGetBitmapFromMemory(profile);
+	m_toolbar->AddTool(ID_ProfileBtn, "Profile", bitmap,
 		"Add intensity profile along curve. Use \"Export\" to view results");
-	m_toolbar->AddTool(ID_DeleteBtn, "Delete",
-		wxGetBitmapFromMemory(delet),
+	bitmap = wxGetBitmapFromMemory(delet);
+	m_toolbar->AddTool(ID_DeleteBtn, "Delete", bitmap,
 		"Delete a selected ruler");
-	m_toolbar->AddTool(ID_DeleteAllBtn,"Delete All",
-		wxGetBitmapFromMemory(del_all),
+	bitmap = wxGetBitmapFromMemory(del_all);
+	m_toolbar->AddTool(ID_DeleteAllBtn,"Delete All", bitmap,
 		"Delete all rulers");
-	m_toolbar->AddTool(ID_ExportBtn, "Export",
-		wxGetBitmapFromMemory(save),
+	bitmap = wxGetBitmapFromMemory(save);
+	m_toolbar->AddTool(ID_ExportBtn, "Export", bitmap,
 		"Export rulers to a text file");
 	m_toolbar->Realize();
 

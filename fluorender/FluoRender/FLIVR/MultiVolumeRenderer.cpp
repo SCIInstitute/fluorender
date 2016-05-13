@@ -631,10 +631,11 @@ namespace FLIVR
 			if (depth_test) glEnable(GL_DEPTH_TEST);
 			if (cull_face) glEnable(GL_CULL_FACE);
 
+#ifdef _WIN32
 			glInvalidateTexImage(blend_tex_id_, 0);
 			glInvalidateTexImage(filter_tex_id_, 0);
 			glInvalidateTexImage(blend_tex_, 0);
-
+#endif
 			glDisable(GL_BLEND);
 
 			glBindTexture(GL_TEXTURE_2D, 0);
