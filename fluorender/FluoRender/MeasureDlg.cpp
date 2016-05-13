@@ -522,6 +522,9 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER|wxTB_TEXT);
 	wxBitmap bitmap = wxGetBitmapFromMemory(locator);
+#ifdef _DARWIN
+	m_toolbar->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_toolbar->AddCheckTool(ID_LocatorBtn, "Locator",
 		bitmap, wxNullBitmap,
 		"Add locators to the render view by clicking");

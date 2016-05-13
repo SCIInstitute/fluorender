@@ -11173,6 +11173,9 @@ void VRenderView::CreateBar()
 	//add the options
 	wxBitmap bitmap;
 	bitmap = wxGetBitmapFromMemory(layers);
+#ifdef _DARWIN
+	m_options_toolbar->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_options_toolbar->AddRadioTool(
 		ID_VolumeSeqRd, "Layered",
 		bitmap, wxNullBitmap,
@@ -11351,6 +11354,9 @@ void VRenderView::CreateBar()
 	m_left_toolbar = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(no_depth_atten);
+#ifdef _DARWIN
+	m_left_toolbar->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_left_toolbar->AddCheckTool(ID_DepthAttenChk, "Depth Interval",
 		bitmap, wxNullBitmap,
 		"Enable adjustment of the Depth Attenuation Interval",
@@ -11362,6 +11368,9 @@ void VRenderView::CreateBar()
 	m_depth_atten_reset_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(reset);
+#ifdef _DARWIN
+	m_depth_atten_reset_btn->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_depth_atten_reset_btn->AddTool(
 		ID_DepthAttenResetBtn, "Reset",
 		bitmap, "Reset Depth Attenuation Interval");
@@ -11385,12 +11394,18 @@ void VRenderView::CreateBar()
 	m_center_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(center);
+#ifdef _DARWIN
+	m_center_btn->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_center_btn->AddTool(ID_CenterBtn, "Center",
 		bitmap, "Center the Data on the Render View");
 	m_center_btn->Realize();
 	m_scale_121_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(ratio);
+#ifdef _DARWIN
+	m_scale_121_btn->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_scale_121_btn->AddTool(ID_Scale121Btn, "1 to 1",
 		bitmap, "Auto-size the data to a 1:1 ratio");
 	m_scale_121_btn->Realize();
@@ -11399,6 +11414,9 @@ void VRenderView::CreateBar()
 	m_scale_reset_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(reset);
+#ifdef _DARWIN
+	m_scale_reset_btn->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_scale_reset_btn->AddTool(ID_ScaleResetBtn, "Reset",
 		bitmap, "Reset the Zoom");
 	m_scale_reset_btn->Realize();
@@ -11409,6 +11427,9 @@ void VRenderView::CreateBar()
 	m_scale_mode_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(zoom_view);
+#ifdef _DARWIN
+	m_scale_mode_btn->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_scale_mode_btn->AddCheckTool(
 		ID_ScaleModeBtn, "Switch zoom ratio mode",
 		bitmap, wxNullBitmap,
@@ -11455,6 +11476,9 @@ void VRenderView::CreateBar()
 	m_rot_lock_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(gear_45);
+#ifdef _DARWIN
+	m_rot_lock_btn->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_rot_lock_btn->AddCheckTool(ID_RotLockChk, "45 Angles",
 		bitmap, wxNullBitmap,
 		"Confine all angles to 45 Degrees",
@@ -11468,6 +11492,9 @@ void VRenderView::CreateBar()
 	m_rot_lock_btn->Realize();
 
 	bitmap = wxGetBitmapFromMemory(reset);
+#ifdef _DARWIN
+	m_lower_toolbar->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_lower_toolbar->AddTool(ID_RotResetBtn,"Reset",
 		bitmap, "Reset Rotations");
 	m_lower_toolbar->Realize();

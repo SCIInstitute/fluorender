@@ -114,6 +114,9 @@ m_link_z(false)
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	wxBitmap bitmap;
 	bitmap = wxGetBitmapFromMemory(sync_chan);
+#ifdef _DARWIN
+	m_toolbar->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_toolbar->AddCheckTool(ID_LinkChannelsBtn, "Sync All Channels",
 		bitmap, wxNullBitmap,
 		"Link all data channels to this cropping",
@@ -282,6 +285,9 @@ m_link_z(false)
 	m_check_tb = new wxToolBar(this,wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(unlink);
+#ifdef _DARWIN
+	m_check_tb->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_check_tb->AddCheckTool(ID_LinkXChk,"Lock X Planes",
 		bitmap, wxNullBitmap,"Lock X Planes");
 	m_check_tb->AddSeparator();

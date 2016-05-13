@@ -2042,6 +2042,9 @@ wxPanel(parent, id, pos, size, style, name),
 	m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER);
 	wxBitmap bitmap = wxGetBitmapFromMemory(toggle_disp);
+#ifdef _DARWIN
+	m_toolbar->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_toolbar->AddTool(ID_ToggleView, "Toggle View", bitmap,
 		"Toggle the visibility of current selection");
 	bitmap = wxGetBitmapFromMemory(add_group);

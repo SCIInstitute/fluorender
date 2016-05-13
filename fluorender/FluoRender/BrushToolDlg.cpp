@@ -109,6 +109,9 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT);
 	wxBitmap bitmap;
 	bitmap = wxGetBitmapFromMemory(undo);
+#ifdef _DARWIN
+	m_toolbar->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_toolbar->AddTool(
 		ID_BrushUndo, "Undo", bitmap,
 		"Rollback previous brush operation");

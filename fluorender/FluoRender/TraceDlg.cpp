@@ -522,6 +522,9 @@ wxWindow* TraceDlg::CreateLinkPage(wxWindow *parent)
 	m_manual_assist_check = new wxToolBar(page, wxID_ANY,
 		wxDefaultPosition, wxSize(-1, 23), wxTB_NODIVIDER);
 	wxBitmap bitmap = wxGetBitmapFromMemory(auto_link_off);
+#ifdef _DARWIN
+	m_manual_assist_check->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_manual_assist_check->AddCheckTool(ID_ManualAssistCheck, "Auto Link",
 		bitmap, wxNullBitmap,
 		"Automatically link selected IDs after each paint brush stroke",
@@ -589,6 +592,9 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 	m_auto_id_chk = new wxToolBar(page, wxID_ANY,
 		wxDefaultPosition, wxSize(-1, 23), wxTB_NODIVIDER);
 	wxBitmap bitmap = wxGetBitmapFromMemory(auto_assign_off);
+#ifdef _DARWIN
+	m_auto_id_chk->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_auto_id_chk->AddCheckTool(ID_AutoIDChk, "Auto Assign ID",
 		bitmap, wxNullBitmap,
 		"Automatically assign an ID to selection after each paint brush stroke",

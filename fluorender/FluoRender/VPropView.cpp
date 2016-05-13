@@ -210,6 +210,9 @@ wxPanel(parent, id, pos, size,style, name),
 	m_alpha_tool = new wxToolBar(this, ID_AlphaSync,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	wxBitmap bitmap = wxGetBitmapFromMemory(alpha);
+#ifdef _DARWIN
+	m_alpha_tool->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_alpha_tool->AddCheckTool(ID_AlphaChk, "Alpha",
 		bitmap, wxNullBitmap,
 		"Enables Alpha Editing.",
@@ -238,6 +241,9 @@ wxPanel(parent, id, pos, size,style, name),
 	m_shade_tool = new wxToolBar(this, ID_ShadingSync,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(shade);
+#ifdef _DARWIN
+	m_shade_tool->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_shade_tool->AddCheckTool(ID_ShadingEnableChk,"Shading",
 		bitmap, wxNullBitmap,
 		"Enables Shading Editing.",
@@ -300,6 +306,9 @@ wxPanel(parent, id, pos, size,style, name),
 	m_shadow_tool = new wxToolBar(this, ID_ShadowSync,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(shadow);
+#ifdef _DARWIN
+	m_shadow_tool->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_shadow_tool->AddCheckTool(ID_ShadowChk, "Shadow",
 		bitmap, wxNullBitmap,
 		"Enables Shadow Editing.",
@@ -346,6 +355,9 @@ wxPanel(parent, id, pos, size,style, name),
 	m_colormap_tool = new wxToolBar(this, ID_ColormapSync,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(palette);
+#ifdef _DARWIN
+	m_colormap_tool->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_colormap_tool->AddCheckTool(ID_ColormapEnableChk, "Color Map",
 		bitmap, wxNullBitmap,
 		"Enables Color Map Editing.",
@@ -383,6 +395,9 @@ wxPanel(parent, id, pos, size,style, name),
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	//MIP
 	bitmap = wxGetBitmapFromMemory(mip);
+#ifdef _DARWIN
+	m_options_toolbar->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_options_toolbar->AddCheckTool(ID_MipChk, "MIP",
 		bitmap, wxNullBitmap,
 		"Enable Maximum Intensity Projection.",

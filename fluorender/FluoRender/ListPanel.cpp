@@ -869,6 +869,9 @@ ListPanel::ListPanel(wxWindow *frame,
 	m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER);
 	wxBitmap bitmap = wxGetBitmapFromMemory(view);
+#ifdef _DARWIN
+	m_toolbar->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_toolbar->AddTool(ID_AddToView, "Add to View",
 		bitmap, "Add: Add the selected dataset to render view");
 	bitmap = wxGetBitmapFromMemory(rename);

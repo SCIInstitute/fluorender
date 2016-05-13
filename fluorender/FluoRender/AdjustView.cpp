@@ -126,6 +126,9 @@ m_dft_sync_b(false)
 	m_sync_r_chk->AddStretchableSpace();
 	wxBitmap bitmap;
 	bitmap = wxGetBitmapFromMemory(unlink);
+#ifdef _DARWIN
+	m_sync_r_chk->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_sync_r_chk->AddCheckTool(ID_SyncRChk, "Link",
 		bitmap, wxNullBitmap,
 		"Link Red Properties with Linked Green or Blue",
@@ -193,6 +196,9 @@ m_dft_sync_b(false)
 	m_sync_g_chk->AddControl(st);
 	m_sync_g_chk->AddStretchableSpace();
 	bitmap = wxGetBitmapFromMemory(unlink);
+#ifdef _DARWIN
+	m_sync_g_chk->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_sync_g_chk->AddCheckTool(ID_SyncGChk, "Link",
 		bitmap, wxNullBitmap,
 		"Link Green Properties with Linked Red or Blue",
@@ -258,6 +264,9 @@ m_dft_sync_b(false)
 	m_sync_b_chk->AddControl(st);
 	m_sync_b_chk->AddStretchableSpace();
 	bitmap = wxGetBitmapFromMemory(unlink);
+#ifdef _DARWIN
+	m_sync_b_chk->SetToolBitmapSize(bitmap.GetSize());
+#endif
 	m_sync_b_chk->AddCheckTool(ID_SyncBChk, "Link",
 		bitmap, wxNullBitmap,
 		"Link Blue Properties with Linked Red or Green",
