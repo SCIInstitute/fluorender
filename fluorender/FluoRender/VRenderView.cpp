@@ -5528,6 +5528,7 @@ void VRenderGLView::OnDraw(wxPaintEvent& event)
 
 void VRenderGLView::ForceDraw()
 {
+#ifdef _WIN32
 	if (!m_set_gl)
 	{
 		SetCurrent(*m_glRC);
@@ -5546,6 +5547,10 @@ void VRenderGLView::ForceDraw()
 			}
 		}
 	}
+#endif
+#ifdef _DARWIN
+    SetCurrent(*m_glRC);
+#endif
 	Init();
 	wxPaintDC dc(this);
 
