@@ -1235,17 +1235,17 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent) {
 	//bitrate
 	wxStaticText *MOVopts = new wxStaticText(panel,wxID_ANY, "MOV Options:",
 		wxDefaultPosition,wxSize(95,-1));
-	wxTextCtrl *bitrate_text = new wxTextCtrl(panel, wxID_ANY, "1.0",
+	wxTextCtrl *bitrate_text = new wxTextCtrl(panel, wxID_ANY, "20.0",
 		wxDefaultPosition,wxSize(50,-1));
 	bitrate_text->Connect(bitrate_text->GetId(), wxEVT_TEXT ,
 		wxCommandEventHandler(VMovieView::OnMovieQuality), NULL, panel);
 	wxStaticText *st = new wxStaticText(panel,wxID_ANY, "Bitrate:",
 		wxDefaultPosition,wxSize(50,-1));
-	wxStaticText *st2 = new wxStaticText(panel, wxID_ANY, "Mb/s (0 - 20 Mb/s)",
+	wxStaticText *st2 = new wxStaticText(panel, wxID_ANY, "Mbps",
 		wxDefaultPosition, wxSize(140, -1));
 	wxStaticText *st3 = new wxStaticText(panel, wxID_ANY, "Estimated size:",
 		wxDefaultPosition, wxSize(110, -1));
-	m_estimated_size_text = new wxTextCtrl(panel, ID_BitrateText, "0.25",
+	m_estimated_size_text = new wxTextCtrl(panel, ID_BitrateText, "2.5",
 		wxDefaultPosition,wxSize(50,-1));
 	m_estimated_size_text->Disable();   
 	m_Mbitrate = STOD(bitrate_text->GetValue().fn_str());
