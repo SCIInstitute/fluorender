@@ -209,6 +209,9 @@ protected:
 	int LZWDecode(tidata_t tif, tidata_t op0, tsize_t occ0);
 	void DecodeAcc8(tidata_t cp0, tsize_t cc, tsize_t stride);
 	void DecodeAcc16(tidata_t cp0, tsize_t cc, tsize_t stride);
+
+	//read number after a position in a string
+	int get_number(string &str, int64_t pos);
 };
 
 #endif//_BASE_READER_H_

@@ -155,11 +155,14 @@ public:
 private:
 	wstring m_data_name;
 	bool isBig_;
+	bool isHyperstack_;		//true if it is a hyperstack tiff saved by ImageJ
 
 	struct SliceInfo
 	{
 		int slicenumber;	//slice number for sorting
 		wstring slice;		//slice file name
+		int pagenumber;		//used to find the slice if it's in a hyperstack
+							//for a multichannel data set, this is the number of the first channel
 	};
 	struct TimeDataInfo
 	{

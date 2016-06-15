@@ -280,3 +280,19 @@ int BaseReader::LoadOffset(int offset)
 }
 
 int BaseReader::GetOffset() { return m_cur_batch; }
+
+int BaseReader::get_number(string &str, int64_t pos)
+{
+	string num_str;
+	for (int64_t i = pos; i < str.length(); ++i)
+	{
+		if (isdigit(str[i]))
+			num_str.push_back(str[i]);
+		else
+			break;
+	}
+	if (num_str != "")
+		return atoi(num_str.c_str());
+	else
+		return 0;
+}
