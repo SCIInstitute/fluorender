@@ -60,25 +60,21 @@ void ComponentAnalyzer::Analyze(bool sel)
 		return;
 	//get mask
 	Nrrd* nrrd_mask = m_vd->GetMask(true);
-	if (!nrrd_mask)
-		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
-		return;
+	unsigned char* data_mask = 0;
+	if (nrrd_mask)
+		data_mask = (unsigned char*)(nrrd_mask->data);
 	//get label
 	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
-		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
-		return;
+	unsigned int* data_label = 0;
+	if (nrrd_label)
+		data_label = (unsigned int*)(nrrd_label->data);
 
 	//clear list and start calculating
 	m_comp_list.clear();
 	int ilist;
 	int found;
 	int nx, ny, nz;
-	unsigned int id;
+	unsigned int id = 0;
 	double value;
 	double scale;
 	double delta;
@@ -92,12 +88,17 @@ void ComponentAnalyzer::Analyze(bool sel)
 	CompUListIter iter;
 	for (index = 0; index < for_size; ++index)
 	{
-		if (sel && !data_mask[index])
+		if (sel)
+		{
+			if (data_mask && !data_mask[index])
 			continue;
-		if (!data_label[index])
+		}
+		if (data_label && !data_label[index])
 			continue;
 
-		id = data_label[index];
+		if (data_label)
+			id = data_label[index];
+
 		if (bits == nrrdTypeUChar)
 		{
 			value = ((unsigned char*)data_data)[index] / 255.0;
@@ -229,6 +230,8 @@ unsigned int ComponentAnalyzer::GetExt(unsigned int* data_label,
 	int nx, int ny, int nz,
 	int i, int j, int k)
 {
+	if (!data_label)
+		return 0;
 	bool surface_vox, contact_vox;
 	unsigned long long indexn;
 	//determine the numbers
