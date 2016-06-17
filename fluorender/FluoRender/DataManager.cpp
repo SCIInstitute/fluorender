@@ -4044,6 +4044,7 @@ int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_
 		}
 	}
 
+	int reader_return = -1;
 	if (reader)
 	{
 		bool preprocess = false;
@@ -4059,7 +4060,7 @@ int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_
 			preprocess = true;
 		}
 		if (preprocess)
-			reader->Preprocess();
+			reader_return = reader->Preprocess();
 	}
 	else
 	{
@@ -4087,7 +4088,14 @@ int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_
 		reader->SetSliceSeq(m_sliceSequence);
 		str_w = m_timeId.ToStdWstring();
 		reader->SetTimeId(str_w);
-		reader->Preprocess();
+		reader_return = reader->Preprocess();
+	}
+
+	if (reader_return > 0)
+	{
+		string err_str = BaseReader::GetError(reader_return);
+		wxMessageBox(err_str);
+		return result;
 	}
 
 	//align data for compression if vtc is not supported

@@ -78,11 +78,11 @@ void LSMReader::SetFile(wstring &file)
    m_id_string = m_path_name;
 }
 
-void LSMReader::Preprocess()
+int LSMReader::Preprocess()
 {
    FILE* pfile = 0;
    if (!WFOPEN(&pfile, m_path_name.c_str(), L"rb"))
-      return;
+      return READER_OPEN_FAIL;
 
    m_lsm_info.clear();
    m_l4gb = false;
@@ -94,7 +94,7 @@ void LSMReader::Preprocess()
    if (ioffset!=0x002A4949)
    {
       fclose(pfile);
-      return;
+      return READER_FORMAT_ERROR;
    }
 
    int cnt_image = 0;
@@ -104,7 +104,7 @@ void LSMReader::Preprocess()
    if (fread(&ioffset, sizeof(unsigned int), 1, pfile)<1)
    {
       fclose(pfile);
-      return;
+      return READER_FORMAT_ERROR;
    }
 
    unsigned int prev_offset = 0;
@@ -118,7 +118,7 @@ void LSMReader::Preprocess()
       if (fread(&entry_num, sizeof(unsigned short), 1, pfile)<1)
       {
          fclose(pfile);
-         return;
+         return READER_FORMAT_ERROR;
       }
 
       vector<unsigned int> offsets;
@@ -131,25 +131,25 @@ void LSMReader::Preprocess()
          if (fread(&tag, sizeof(unsigned short), 1, pfile)<1)
          {
             fclose(pfile);
-            return;
+            return READER_FORMAT_ERROR;
          }
          unsigned short type;
          if (fread(&type, sizeof(unsigned short), 1, pfile)<1)
          {
             fclose(pfile);
-            return;
+            return READER_FORMAT_ERROR;
          }
          unsigned int length;
          if (fread(&length, sizeof(unsigned int), 1, pfile)<1)
          {
             fclose(pfile);
-            return;
+            return READER_FORMAT_ERROR;
          }
          unsigned int value;
          if (fread(&value, sizeof(unsigned int), 1, pfile)<1)
          {
             fclose(pfile);
-            return;
+            return READER_FORMAT_ERROR;
          }
 
          //remember current position
@@ -258,13 +258,13 @@ void LSMReader::Preprocess()
                if (fseek(pfile, value, SEEK_SET)!=0)
                {
                   fclose(pfile);
-                  return;
+                  return READER_FORMAT_ERROR;
                }
                unsigned char* pdata = new unsigned char[length];
                if (fread(pdata, sizeof(unsigned char), length, pfile)!=length)
                {
                   fclose(pfile);
-                  return;
+                  return READER_FORMAT_ERROR;
                }
                //read lsm info
                ReadLsmInfo(pfile, pdata, length);
@@ -278,7 +278,7 @@ void LSMReader::Preprocess()
          if (fseek(pfile, cur_pos, SEEK_SET)!=0)
          {
             fclose(pfile);
-            return;
+            return READER_FORMAT_ERROR;
          }
       }
 
@@ -312,7 +312,7 @@ void LSMReader::Preprocess()
       if (fread(&ioffset, sizeof(unsigned int), 1, pfile)<1)
       {
          fclose(pfile);
-         return;
+         return READER_FORMAT_ERROR;
       }
       if (!ioffset)
          break;
@@ -322,6 +322,8 @@ void LSMReader::Preprocess()
 
    m_cur_time = 0;
    m_data_name = m_path_name.substr(m_path_name.find_last_of(GETSLASH())+1);
+
+   return READER_OK;
 }
 
 void LSMReader::ReadLsmInfo(FILE* pfile, unsigned char* pdata, unsigned int size)

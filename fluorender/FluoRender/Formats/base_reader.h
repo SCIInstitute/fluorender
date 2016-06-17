@@ -39,6 +39,12 @@ using namespace std;
 	#define nrrdAxisInfoSet nrrdAxisInfoSet_va
 #endif
 
+#define READER_OK	0
+#define READER_OPEN_FAIL	1
+#define READER_FORMAT_ERROR	2
+#define READER_EMPTY_DATA	3
+#define READER_FP32_DATA	4
+
 class BaseReader
 {
 public:
@@ -51,7 +57,7 @@ public:
 	virtual bool GetSliceSeq() = 0;			//get slice sequence
 	virtual void SetTimeId(wstring &id) = 0;	//time sequence identifier
 	virtual wstring GetTimeId() = 0;			//get time id
-	virtual void Preprocess() = 0;			//preprocess
+	virtual int Preprocess() = 0;			//preprocess
 	virtual void SetBatch(bool batch) = 0;	//set batch mode
 	virtual bool GetBatch() = 0;			//get batch mode
 	virtual int LoadBatch(int index) = 0;	//load file for 3D batch mode
@@ -114,6 +120,8 @@ public:
 	{
 		return m_alignment;
 	}
+
+	static string GetError(int code);
 
 protected:
 	wstring m_id_string;	//the path and file name used to read files

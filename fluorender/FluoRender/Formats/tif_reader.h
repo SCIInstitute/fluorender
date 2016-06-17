@@ -51,7 +51,7 @@ public:
 	bool GetSliceSeq();
 	void SetTimeId(wstring &id);
 	wstring GetTimeId();
-	void Preprocess();
+	int Preprocess();
 	/**
 	 * Finds the tag value given by \@tag of a tiff on the current page.
 	 * @param tag The tag to look for in the header.

@@ -55,8 +55,9 @@ void LBLReader::SetFile(wstring &file)
 	m_path_name = file;
 }
 
-void LBLReader::Preprocess()
+int LBLReader::Preprocess()
 {
+	return READER_OK;
 }
 
 void LBLReader::SetSliceSeq(bool ss)

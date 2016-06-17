@@ -75,14 +75,14 @@ void NRRDReader::SetFile(wstring &file)
 	m_id_string = m_path_name;
 }
 
-void NRRDReader::Preprocess()
+int NRRDReader::Preprocess()
 {
 	m_4d_seq.clear();
 
 	//separate path and name
 	int64_t pos = m_path_name.find_last_of(GETSLASH());
 	if (pos == -1)
-		return;
+		return READER_OPEN_FAIL;
 	wstring path = m_path_name.substr(0, pos+1);
 	wstring name = m_path_name.substr(pos+1);
 
@@ -139,6 +139,8 @@ void NRRDReader::Preprocess()
 	m_chan_num = 1;
 	//get time number
 	m_time_num = (int)m_4d_seq.size();
+
+	return READER_OK;
 }
 
 void NRRDReader::SetSliceSeq(bool ss)

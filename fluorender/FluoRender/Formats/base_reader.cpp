@@ -296,3 +296,27 @@ int BaseReader::get_number(string &str, int64_t pos)
 	else
 		return 0;
 }
+
+string BaseReader::GetError(int code)
+{
+	string err_str;
+	switch (code)
+	{
+	case READER_OK:
+		err_str = "No Error.";
+		break;
+	case READER_OPEN_FAIL:
+		err_str = "Cannot open file.";
+		break;
+	case READER_FORMAT_ERROR:
+		err_str = "Cannot understand file format.";
+		break;
+	case READER_EMPTY_DATA:
+		err_str = "File is empty.";
+		break;
+	case READER_FP32_DATA:
+		err_str = "Floating point data are unsupported.";
+		break;
+	}
+	return err_str;
+}

@@ -76,7 +76,7 @@ void OIBReader::SetFile(wstring &file)
 	m_id_string = m_path_name;
 }
 
-void OIBReader::Preprocess()
+int OIBReader::Preprocess()
 {
 	m_type = 0;
 	m_oib_info.clear();
@@ -84,7 +84,7 @@ void OIBReader::Preprocess()
 	//separate path and name
 	int64_t pos = m_path_name.find_last_of(GETSLASH());
 	if (pos == -1)
-		return;
+		return READER_OPEN_FAIL;
 	wstring path = m_path_name.substr(0, pos + 1);
 	wstring name = m_path_name.substr(pos + 1);
 
@@ -135,6 +135,8 @@ void OIBReader::Preprocess()
 		m_cur_time = 0;
 	m_chan_num = m_time_num > 0 ? int(m_oib_info[0].dataset.size()) : 0;
 	m_slice_num = m_chan_num > 0 ? int(m_oib_info[0].dataset[0].size()) : 0;
+
+	return READER_OK;
 }
 
 bool OIBReader::oib_sort(const TimeDataInfo& info1, const TimeDataInfo& info2)

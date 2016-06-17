@@ -44,7 +44,7 @@ public:
 	bool GetSliceSeq();
 	void SetTimeId(wstring &id);
 	wstring GetTimeId();
-	void Preprocess();
+	int Preprocess();
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
 	Nrrd* Convert(int t, int c, bool get_max);

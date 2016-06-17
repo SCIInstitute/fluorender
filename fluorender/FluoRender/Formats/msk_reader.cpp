@@ -55,8 +55,9 @@ void MSKReader::SetFile(wstring &file)
 	m_path_name = file;
 }
 
-void MSKReader::Preprocess()
+int MSKReader::Preprocess()
 {
+	return READER_OK;
 }
 
 void MSKReader::SetSliceSeq(bool ss)

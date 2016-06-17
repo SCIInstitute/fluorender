@@ -85,7 +85,7 @@ void TIFReader::SetFile(wstring &file)
 	m_id_string = m_path_name;
 }
 
-void TIFReader::Preprocess()
+int TIFReader::Preprocess()
 {
 	int i;
 
@@ -95,13 +95,19 @@ void TIFReader::Preprocess()
 	//separate path and name
 	int64_t pos = m_path_name.find_last_of(GETSLASH());
 	if (pos == -1)
-		return;
+		return READER_OPEN_FAIL;
 	wstring path = m_path_name.substr(0, pos + 1);
 	wstring name = m_path_name.substr(pos + 1);
 
 	//determine if it is an ImageJ hyperstack
 	char img_desc[256];
 	OpenTiff(m_path_name.c_str());
+	uint64_t bits = GetTiffField(kBitsPerSampleTag, NULL, 0);
+	if (bits > 16)
+	{
+		CloseTiff();
+		return READER_FP32_DATA;
+	}
 	GetTiffField(kImageDescriptionTag, img_desc, 256);
 	string desc = string((char*)img_desc);
 	string search_str = "hyperstack=true";
@@ -291,6 +297,8 @@ void TIFReader::Preprocess()
 		}
 		else m_chan_num = 0;
 	}
+
+	return READER_OK;
 }
 
 uint64_t TIFReader::GetTiffField(

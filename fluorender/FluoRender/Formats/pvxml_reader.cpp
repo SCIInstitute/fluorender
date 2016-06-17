@@ -89,7 +89,7 @@ void PVXMLReader::SetFile(wstring &file)
 	m_id_string = m_path_name;
 }
 
-void PVXMLReader::Preprocess()
+int PVXMLReader::Preprocess()
 {
 	m_pvxml_info.clear();
 	m_slice_num = 0;
@@ -102,18 +102,18 @@ void PVXMLReader::Preprocess()
 	//separate path and name
 	int64_t pos = m_path_name.find_last_of(GETSLASH());
 	if (pos == -1)
-		return;
+		return READER_OPEN_FAIL;
 	wstring path = m_path_name.substr(0, pos+1);
 	wstring name = m_path_name.substr(pos+1);
 
 	wxXmlDocument doc;
 	if (!doc.Load(m_path_name))
-		return;
+		return READER_OPEN_FAIL;
 
 	wxXmlNode *root = doc.GetRoot();
 
 	if (!root || root->GetName() != "PVScan")
-		return;
+		return READER_FORMAT_ERROR;
 
 	wxXmlNode *child = root->GetChildren();
 	while (child)
@@ -133,7 +133,7 @@ void PVXMLReader::Preprocess()
 	m_time_num = int(m_pvxml_info.size());
 	m_cur_time = 0;
 
-	if (m_time_num == 0) return;
+	if (m_time_num == 0) return READER_EMPTY_DATA;
 
 	int i, j, k, l;
 	double x_end, y_end, z_end;
@@ -269,6 +269,8 @@ void PVXMLReader::Preprocess()
 			}
 		}
 	}
+
+	return READER_OK;
 }
 
 void PVXMLReader::ReadSystemConfig(wxXmlNode* systemNode)

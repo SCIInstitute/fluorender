@@ -79,7 +79,7 @@ void OIFReader::SetFile(wstring &file)
 	m_id_string = m_path_name;
 }
 
-void OIFReader::Preprocess()
+int OIFReader::Preprocess()
 {
 	m_type = 0;
 	m_oif_info.clear();
@@ -87,7 +87,7 @@ void OIFReader::Preprocess()
 	//separate path and name
 	int64_t pos = m_path_name.find_last_of(GETSLASH());
 	if (pos == -1)
-		return;
+		return READER_OPEN_FAIL;
 	wstring path = m_path_name.substr(0, pos + 1);
 	wstring name = m_path_name.substr(pos + 1);
 
@@ -142,6 +142,8 @@ void OIFReader::Preprocess()
 		m_cur_time = 0;
 	m_chan_num = m_time_num > 0 ? int(m_oif_info[0].dataset.size()) : 0;
 	m_slice_num = m_chan_num > 0 ? int(m_oif_info[0].dataset[0].size()) : 0;
+
+	return READER_OK;
 }
 
 bool OIFReader::oif_sort(const TimeDataInfo& info1, const TimeDataInfo& info2)
