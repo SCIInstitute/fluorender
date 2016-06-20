@@ -79,6 +79,7 @@ class SettingDlg : public wxPanel
 		ID_WavColor4Cmb,
 		//memory settings
 		ID_StreamingChk,
+		ID_UpdateOrderRbox,
 		ID_GraphicsMemSldr,
 		ID_GraphicsMemText,
 		ID_LargeDataSldr,
@@ -169,7 +170,7 @@ public:
 	void SetForceBrickSize(int val) {m_force_brick_size = val;}
 	int GetResponseTime() {return m_up_time;}
 	void SetResponseTime(int val) {m_up_time = val;}
-	int GetUpdateOrder() {return m_update_order;}
+	int GetUpdateOrder() {return m_mem_swap?m_update_order:0;}
 	void SetUpdateOrder(int val) {m_update_order = val;}
 	//point volume mode
 	int GetPointVolumeMode() {return m_point_volume_mode;}
@@ -316,6 +317,7 @@ private:
 	wxComboBox *m_wav_color4_cmb;
 	//memory settings
 	wxCheckBox *m_streaming_chk;
+	wxRadioBox *m_update_order_rbox;
 	wxSlider *m_graphics_mem_sldr;
 	wxTextCtrl *m_graphics_mem_text;
 	wxSlider *m_large_data_sldr;
@@ -389,6 +391,7 @@ private:
 	void OnWavColor4Change(wxCommandEvent &event);
 	//memory settings
 	void OnStreamingChk(wxCommandEvent &event);
+	void OnUpdateOrderChange(wxCommandEvent & event);
 	void OnGraphicsMemChange(wxScrollEvent &event);
 	void OnGraphicsMemEdit(wxCommandEvent &event);
 	void OnLargeDataChange(wxScrollEvent &event);

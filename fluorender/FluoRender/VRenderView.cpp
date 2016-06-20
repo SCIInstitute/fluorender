@@ -462,7 +462,7 @@ void VRenderGLView::OnResize(wxSizeEvent& event)
 
 	m_vrv->UpdateScaleFactor(false);
 
-	RefreshGL();
+	RefreshGL(1);
 }
 
 void VRenderGLView::Init()
@@ -1301,9 +1301,14 @@ void VRenderGLView::DrawVolumes(int peel)
 
 	if (m_interactive)
 	{
+		wxMouseState ms = wxGetMouseState();
+		if (ms.LeftIsDown() ||
+			ms.MiddleIsDown() ||
+			ms.RightIsDown())
+			return;
 		m_interactive = false;
 		m_clear_buffer = true;
-		RefreshGL();
+		RefreshGL(2);
 	}
 }
 
@@ -1794,7 +1799,7 @@ void VRenderGLView::PaintStroke()
 	//bind back the window frame buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	RefreshGL();
+	RefreshGL(3);
 }
 
 //show the stroke buffer
@@ -2078,7 +2083,7 @@ void VRenderGLView::CompExport(int mode, bool select)
 		}
 		vr_frame->UpdateList();
 		vr_frame->UpdateTree(m_selector.GetVolume()->GetName());
-		RefreshGL();
+		RefreshGL(4);
 	}
 }
 
@@ -2472,7 +2477,7 @@ void VRenderGLView::CalculateSingle(int type, wxString prev_group, bool add)
 					vr_frame->GetPropView()->SetVolumeData(vd_a);
 			}
 		}
-		RefreshGL();
+		RefreshGL(5);
 	}
 }
 
@@ -3905,7 +3910,7 @@ void VRenderGLView::UpdateBrushState()
 				tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
 			if (brush_dlg)
 				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
-			RefreshGL();
+			RefreshGL(6);
 		}
 		else if (wxGetKeyState(wxKeyCode('Z')))
 		{
@@ -3914,7 +3919,7 @@ void VRenderGLView::UpdateBrushState()
 				tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
 			if (brush_dlg)
 				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
-			RefreshGL();
+			RefreshGL(7);
 		}
 		else if (wxGetKeyState(wxKeyCode('X')))
 		{
@@ -3923,7 +3928,7 @@ void VRenderGLView::UpdateBrushState()
 				tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
 			if (brush_dlg)
 				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDesel);
-			RefreshGL();
+			RefreshGL(8);
 		}
 	}
 	else
@@ -3938,7 +3943,7 @@ void VRenderGLView::UpdateBrushState()
 					tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
 				if (brush_dlg)
 					brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
-				RefreshGL();
+				RefreshGL(9);
 			}
 			else if (wxGetKeyState(wxKeyCode('Z')))
 			{
@@ -3948,7 +3953,7 @@ void VRenderGLView::UpdateBrushState()
 					tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
 				if (brush_dlg)
 					brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
-				RefreshGL();
+				RefreshGL(10);
 			}
 			else if (wxGetKeyState(wxKeyCode('X')))
 			{
@@ -3958,12 +3963,12 @@ void VRenderGLView::UpdateBrushState()
 					tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
 				if (brush_dlg)
 					brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDesel);
-				RefreshGL();
+				RefreshGL(11);
 			}
 			else
 			{
 				SetBrush(m_brush_state);
-				RefreshGL();
+				RefreshGL(12);
 			}
 		}
 		else if (!wxGetKeyState(WXK_SHIFT) &&
@@ -3982,7 +3987,7 @@ void VRenderGLView::UpdateBrushState()
 				tree_panel->SelectBrush(0);
 			if (brush_dlg)
 				brush_dlg->SelectBrush(0);
-			RefreshGL();
+			RefreshGL(13);
 
 			if (m_prev_focus)
 			{
@@ -4431,7 +4436,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 				frame->GetStatusBar()->PushStatusText("Forced Refresh");
 			wxSizeEvent e;
 			OnResize(e);
-			RefreshGL();
+			RefreshGL(14);
 			if (frame && frame->GetStatusBar())
 				frame->GetStatusBar()->PopStatusText();
 			return;
@@ -4441,7 +4446,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 	if (refresh)
 	{
 		m_updating = true;
-		RefreshGL(ref_stat, start_loop);
+		RefreshGL(15, ref_stat, start_loop);
 	}
 }
 
@@ -4738,7 +4743,7 @@ void VRenderGLView::ResetMovieAngle()
 	m_capture = false;
 	m_capture_rotat = false;
 
-	RefreshGL();
+	RefreshGL(16);
 }
 
 void VRenderGLView::StopMovie()
@@ -4836,7 +4841,7 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 				vd->GetVR()->clear_tex_pool();
 		}
 	}
-	RefreshGL();
+	RefreshGL(17);
 }
 
 void VRenderGLView::Get3DBatFrames(int &start_frame, int &end_frame, int &cur_frame)
@@ -4954,7 +4959,7 @@ void VRenderGLView::Set3DBatFrame(int offset)
 
 	InitView(INIT_BOUNDS|INIT_CENTER);
 
-	RefreshGL();
+	RefreshGL(18);
 
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
@@ -5713,7 +5718,7 @@ void VRenderGLView::SetCenter()
 
 		//SetSortBricks();
 
-		RefreshGL();
+		RefreshGL(20);
 	}
 }
 
@@ -5761,7 +5766,7 @@ void VRenderGLView::SetScale121()
 
 	//SetSortBricks();
 
-	RefreshGL();
+	RefreshGL(21);
 }
 
 void VRenderGLView::SetPersp(bool persp)
@@ -9068,8 +9073,14 @@ void VRenderGLView::HaltLoopUpdate()
 }
 
 //new function to refresh
-void VRenderGLView::RefreshGL(bool erase, bool start_loop)
+void VRenderGLView::RefreshGL(int debug_code, bool erase, bool start_loop)
 {
+	//for debugging refresh events
+	/*std::wostringstream os;
+	os << "refresh" << "\t" <<
+		debug_code << "\t" <<
+		m_interactive << "\n";
+	OutputDebugString(os.str().c_str());*/
 	m_updating = true;
 	if (start_loop)
 		StartLoopUpdate();
@@ -10263,7 +10274,7 @@ prv_mouse_Y = old_mouse_Y;
 m_paint_enable = true;
 m_clear_paint = true;
 m_on_press = true;
-RefreshGL();
+RefreshGL(22);
 }
 }
 
@@ -10275,7 +10286,7 @@ m_paint_enable = true;
 Segment();
 m_int_mode = 1;
 m_on_press = false;
-RefreshGL();
+RefreshGL(23);
 }
 }
 
@@ -10298,7 +10309,7 @@ prv_mouse_Y = old_mouse_Y;
 if (m_int_mode == 2 && m_on_press)
 {
 m_paint_enable = true;
-RefreshGL();
+RefreshGL(24);
 }
 
 if (m_on_press)
@@ -10307,7 +10318,7 @@ else
 m_pressure = 1.0;
 
 if (m_draw_brush)
-RefreshGL();
+RefreshGL(25);
 }
 }
 
@@ -10321,7 +10332,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		window->GetClassInfo()->IsKindOf(CLASSINFO(wxTextCtrl)))
 		SetFocus();
 	//mouse interactive flag
-	m_interactive = true;
+	m_interactive = false;
 	m_paint_enable = false;
 	m_drawing_coord = false;
 
@@ -10354,7 +10365,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			prv_mouse_Y = old_mouse_Y;
 			m_paint_enable = true;
 			m_clear_paint = true;
-			RefreshGL();
+			RefreshGL(26);
 		}
 		return;
 	}
@@ -10411,13 +10422,13 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			m_force_clear = true;
 		}
 
-		RefreshGL();
+		RefreshGL(27);
 		return;
 	}
 	if (event.MiddleUp())
 	{
 		//SetSortBricks();
-		RefreshGL();
+		RefreshGL(28);
 		return;
 	}
 	if (event.RightUp())
@@ -10439,7 +10450,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			}
 		}
 		//SetSortBricks();
-		RefreshGL();
+		RefreshGL(29);
 		return;
 	}
 
@@ -10499,7 +10510,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 						m_master_linked_view = this;
 
 					if (!hold_old)
-						RefreshGL();
+						RefreshGL(30);
 				}
 				if (event.MiddleIsDown() || (event.ControlDown() && event.LeftIsDown()))
 				{
@@ -10519,7 +10530,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					m_interactive = m_adaptive;
 
 					//SetSortBricks();
-					RefreshGL();
+					RefreshGL(31);
 				}
 				if (event.RightIsDown())
 				{
@@ -10549,7 +10560,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					m_interactive = m_adaptive;
 
 					//SetSortBricks();
-					RefreshGL();
+					RefreshGL(32);
 				}
 			}
 		}
@@ -10557,7 +10568,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		{
 			m_paint_enable = true;
 			m_pressure = 1.0;
-			RefreshGL();
+			RefreshGL(33);
 		}
 		else if (m_int_mode ==3)
 		{
@@ -10572,7 +10583,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					m_q_cl = q_delta * m_q_cl;
 					m_q_cl.Normalize();
 					SetRotations(m_rotx, m_roty, m_rotz);
-					RefreshGL();
+					RefreshGL(34);
 				}
 			}
 		}
@@ -10609,7 +10620,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					m_editing_ruler_point->x(point.x());
 					m_editing_ruler_point->y(point.y());
 					m_editing_ruler_point->z(point.z());
-					RefreshGL();
+					RefreshGL(35);
 					VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 					if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
 						vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
@@ -10673,7 +10684,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			//m_vrv->m_scale_factor_text->ChangeValue(str);
 		}
 
-		RefreshGL();
+		RefreshGL(36);
 		return;
 	}
 
@@ -10683,14 +10694,14 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	{
 		old_mouse_X = event.GetX();
 		old_mouse_Y = event.GetY();
-		RefreshGL();
+		RefreshGL(37);
 		return;
 	}
 
 	if (m_draw_coord)
 	{
 		m_drawing_coord = true;
-		RefreshGL(false, false);
+		RefreshGL(38, false, false);
 		return;
 	}
 }
@@ -12237,7 +12248,7 @@ void VRenderView::RefreshGL(bool interactive, bool start_loop)
 	{
 		m_glview->m_force_clear = true;
 		m_glview->m_interactive = interactive && m_glview->m_adaptive;
-		m_glview->RefreshGL(false, start_loop);
+		m_glview->RefreshGL(39, false, start_loop);
 	}
 }
 

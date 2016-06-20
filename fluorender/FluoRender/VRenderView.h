@@ -468,7 +468,7 @@ public:
 	//start loop update
 	void StartLoopUpdate();
 	void HaltLoopUpdate();
-	void RefreshGL(bool erase=false, bool start_loop=true);
+	void RefreshGL(int debug_code, bool erase=false, bool start_loop=true);
 
 	//rulers
 	int GetRulerType();

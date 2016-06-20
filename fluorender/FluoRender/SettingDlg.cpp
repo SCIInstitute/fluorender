@@ -63,6 +63,7 @@ EVT_COMBOBOX(ID_WavColor3Cmb, SettingDlg::OnWavColor3Change)
 EVT_COMBOBOX(ID_WavColor4Cmb, SettingDlg::OnWavColor4Change)
 //memory settings
 EVT_CHECKBOX(ID_StreamingChk, SettingDlg::OnStreamingChk)
+EVT_RADIOBOX(ID_UpdateOrderRbox, SettingDlg::OnUpdateOrderChange)
 EVT_COMMAND_SCROLL(ID_GraphicsMemSldr, SettingDlg::OnGraphicsMemChange)
 EVT_TEXT(ID_GraphicsMemText, SettingDlg::OnGraphicsMemEdit)
 EVT_COMMAND_SCROLL(ID_LargeDataSldr, SettingDlg::OnLargeDataChange)
@@ -351,6 +352,10 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 		new wxStaticBox(page, wxID_ANY, "Large Data Streaming"), wxVERTICAL);
 	m_streaming_chk = new wxCheckBox(page, ID_StreamingChk,
 		"Enable streaming for large datasets.");
+	wxString choices[2] = {"Back to front", "Front to back"};
+	m_update_order_rbox = new wxRadioBox(page, ID_UpdateOrderRbox,
+		"Update order", wxDefaultPosition, wxDefaultSize,
+		2, choices, 0, wxRA_SPECIFY_COLS);
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Graphics Memory:",
 		wxDefaultPosition, wxSize(110, -1));
@@ -405,6 +410,8 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	sizer2_4->Add(st);
 	group2->Add(10, 5);
 	group2->Add(m_streaming_chk);
+	group2->Add(10, 10);
+	group2->Add(m_update_order_rbox);
 	group2->Add(10, 10);
 	group2->Add(sizer2_1, 0, wxEXPAND);
 	group2->Add(10, 5);
@@ -958,6 +965,7 @@ void SettingDlg::UpdateUI()
 	//memory settings
 	m_streaming_chk->SetValue(m_mem_swap);
 	EnableStreaming(m_mem_swap);
+	m_update_order_rbox->SetSelection(m_update_order);
 	m_graphics_mem_text->SetValue(wxString::Format("%d", (int)m_graphics_mem));
 	m_large_data_text->SetValue(wxString::Format("%d", (int)m_large_data_size));
 	m_block_size_text->SetValue(wxString::Format("%d", m_force_brick_size));
@@ -1333,6 +1341,8 @@ void SettingDlg::EnableStreaming(bool enable)
 {
 	if (enable)
 	{
+		m_update_order_rbox->Enable(0, true);
+		m_update_order_rbox->Enable(1, true);
 		m_graphics_mem_sldr->Enable();
 		m_graphics_mem_text->Enable();
 		m_large_data_sldr->Enable();
@@ -1344,6 +1354,8 @@ void SettingDlg::EnableStreaming(bool enable)
 	}
 	else
 	{
+		m_update_order_rbox->Enable(0, false);
+		m_update_order_rbox->Enable(1, false);
 		m_graphics_mem_sldr->Disable();
 		m_graphics_mem_text->Disable();
 		m_large_data_sldr->Disable();
@@ -1517,6 +1529,11 @@ void SettingDlg::OnStreamingChk(wxCommandEvent &event)
 	else
 		m_mem_swap = false;
 	EnableStreaming(m_mem_swap);
+}
+
+void SettingDlg::OnUpdateOrderChange(wxCommandEvent &event)
+{
+	m_update_order = m_update_order_rbox->GetSelection();
 }
 
 void SettingDlg::OnGraphicsMemChange(wxScrollEvent &event)
