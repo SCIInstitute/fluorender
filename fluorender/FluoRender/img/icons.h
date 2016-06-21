@@ -204,6 +204,8 @@ public:
 	const static unsigned char rename_png[551];
 	/* save.png - 982 bytes */
 	const static unsigned char save_png[982];
+	/* save_mask.png - 1204 bytes */
+	const static unsigned char save_mask_png[1204];
 	/* toggle_disp.png - 887 bytes */
 	const static unsigned char toggle_disp_png[887];
 	/* view.png - 989 bytes */

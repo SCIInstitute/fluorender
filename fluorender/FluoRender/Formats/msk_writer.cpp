@@ -66,16 +66,16 @@ void MSKWriter::Save(wstring filename, int mode)
 	if (!m_data)
 		return;
 
-	int64_t pos = filename.find_last_of('.');
-	if (pos == -1)
-		return;
-	wstring str_name = filename.substr(0, pos);
-	wostringstream strs;
-	if (mode == 0)
-		strs << str_name /*<< "_t" << m_time << "_c" << m_channel*/ << ".msk";
-	else if (mode == 1)
-		strs << str_name /*<< "_t" << m_time << "_c" << m_channel*/ << ".lbl";
-	str_name = strs.str();
+	//int64_t pos = filename.find_last_of('.');
+	//if (pos == -1)
+	//	return;
+	//wstring str_name = filename.substr(0, pos);
+	//wostringstream strs;
+	//if (mode == 0)
+	//	strs << str_name /*<< "_t" << m_time << "_c" << m_channel*/ << ".msk";
+	//else if (mode == 1)
+	//	strs << str_name /*<< "_t" << m_time << "_c" << m_channel*/ << ".lbl";
+	//str_name = strs.str();
 
 	if (m_use_spacings &&
 		m_data->dim == 3)
@@ -88,9 +88,9 @@ void MSKWriter::Save(wstring filename, int mode)
 	}
 
 	string str;
-	str.assign(str_name.length(), 0);
-	for (int i=0; i<(int)str_name.length(); i++)
-		str[i] = (char)str_name[i];
+	str.assign(filename.length(), 0);
+	for (int i=0; i<(int)filename.length(); i++)
+		str[i] = (char)filename[i];
 	nrrdSave(str.c_str(), m_data, NULL);
 }
 

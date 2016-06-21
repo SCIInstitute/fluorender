@@ -1274,8 +1274,6 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 	Nrrd* nrrd_label_in2 = 0;
 	Nrrd* nrrd_label_out1 = 0;
 	Nrrd* nrrd_label_out2 = 0;
-	wxString data_name;
-	wxString label_name;
 	wstring lblname;
 
 	CellMap cell_map;
@@ -1283,9 +1281,7 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 	unsigned int label_in1, label_in2;
 
 	//read first frame
-	data_name = reader->GetCurName(0, chan);
-	label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
-	lblname = label_name.ToStdWstring();
+	lblname = reader->GetCurLabelName(0, chan);
 	lbl_reader.SetFile(lblname);
 	nrrd_label_in1 = lbl_reader.Convert(0, chan, true);
 	(*m_stat_text) << wxString::Format("Label in 1 of frame %d read.\n", 0);
@@ -1311,10 +1307,10 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 			}
 		}
 	}
-	label_name = out_dir + label_name.Right(
-		label_name.Length() - label_name.find_last_of(GETSLASH()));
+	lblname = out_dir.ToStdWstring() + lblname.substr(
+		lblname.find_last_of(GETSLASH()) + 1);
 	lbl_writer.SetData(nrrd_label_in2);
-	lbl_writer.Save(label_name.ToStdWstring(), 1);
+	lbl_writer.Save(lblname, 1);
 	(*m_stat_text) << wxString::Format("Label in 2 of frame %d written.\n", 0);
 	wxGetApp().Yield();
 
@@ -1325,9 +1321,7 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 		cell_map.clear();
 
 		//read fi frame
-		data_name = reader->GetCurName(fi, chan);
-		label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
-		lblname = label_name.ToStdWstring();
+		lblname = reader->GetCurLabelName(fi, chan);
 		lbl_reader.SetFile(lblname);
 		nrrd_label_out1 = lbl_reader.Convert(fi, chan, true);
 		(*m_stat_text) << wxString::Format("Label out 1 of frame %d read.\n", int(fi));
@@ -1364,10 +1358,10 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 		}
 
 		//save
-		label_name = out_dir + label_name.Right(
-			label_name.Length() - label_name.find_last_of(GETSLASH()));
+		lblname = out_dir.ToStdWstring() + lblname.substr(
+			lblname.find_last_of(GETSLASH()) + 1);
 		lbl_writer.SetData(nrrd_label_out2);
-		lbl_writer.Save(label_name.ToStdWstring(), 1);
+		lbl_writer.Save(lblname, 1);
 		(*m_stat_text) << wxString::Format("Label out 2 of frame %d written.\n", int(fi));
 		wxGetApp().Yield();
 
@@ -1994,15 +1988,7 @@ void TraceDlg::CellNewID(bool append)
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_pool();
 	//save label mask to disk
-	BaseReader* reader = vd->GetReader();
-	if (reader)
-	{
-		wxString data_name = reader->GetCurName(m_cur_time, vd->GetCurChannel());
-		wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
-		MSKWriter msk_writer;
-		msk_writer.SetData(nrrd_label);
-		msk_writer.Save(label_name.ToStdWstring(), 1);
-	}
+	vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
 
 	CellUpdate();
 }
@@ -2075,15 +2061,7 @@ void TraceDlg::CellEraseID()
 		//invalidate label mask in gpu
 		vd->GetVR()->clear_tex_pool();
 		//save label mask to disk
-		BaseReader* reader = vd->GetReader();
-		if (reader)
-		{
-			wxString data_name = reader->GetCurName(m_cur_time, vd->GetCurChannel());
-			wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
-			MSKWriter msk_writer;
-			msk_writer.SetData(nrrd_label);
-			msk_writer.Save(label_name.ToStdWstring(), 1);
-		}
+		vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
 	}
 
 	CellUpdate();
@@ -2466,15 +2444,7 @@ void TraceDlg::OnCellReplaceID(wxCommandEvent &event)
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_pool();
 	//save label mask to disk
-	BaseReader* reader = vd->GetReader();
-	if (reader)
-	{
-		wxString data_name = reader->GetCurName(m_cur_time, vd->GetCurChannel());
-		wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
-		MSKWriter msk_writer;
-		msk_writer.SetData(nrrd_label);
-		msk_writer.Save(label_name.ToStdWstring(), 1);
-	}
+	vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
 
 	CellUpdate();
 }
@@ -2575,15 +2545,7 @@ void TraceDlg::OnCellCombineID(wxCommandEvent &event)
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_pool();
 	//save label mask to disk
-	BaseReader* reader = vd->GetReader();
-	if (reader)
-	{
-		wxString data_name = reader->GetCurName(m_cur_time, vd->GetCurChannel());
-		wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
-		MSKWriter msk_writer;
-		msk_writer.SetData(nrrd_label);
-		msk_writer.Save(label_name.ToStdWstring(), 1);
-	}
+	vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
 
 	//modify graphs
 	trace_group->CombineCells(cell, list_cur,
@@ -3014,8 +2976,6 @@ void TraceDlg::GenMap()
 	Nrrd* nrrd_data2 = 0;
 	Nrrd* nrrd_label1 = 0;
 	Nrrd* nrrd_label2 = 0;
-	wxString data_name;
-	wxString label_name;
 	wstring lblname;
 	bool file_err = false;
 
@@ -3038,9 +2998,7 @@ void TraceDlg::GenMap()
 				file_err = true;
 				continue;
 			}
-			data_name = reader->GetCurName(i, chan);
-			label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
-			lblname = label_name.ToStdWstring();
+			lblname = reader->GetCurLabelName(i, chan);
 			lbl_reader.SetFile(lblname);
 			nrrd_label1 = lbl_reader.Convert(i, chan, true);
 			if (!nrrd_label1)
@@ -3059,9 +3017,7 @@ void TraceDlg::GenMap()
 				file_err = true;
 				continue;
 			}
-			data_name = reader->GetCurName(i, chan);
-			label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
-			lblname = label_name.ToStdWstring();
+			lblname = reader->GetCurLabelName(i, chan);
 			lbl_reader.SetFile(lblname);
 			nrrd_label2 = lbl_reader.Convert(i, chan, true);
 			if (!nrrd_label2)

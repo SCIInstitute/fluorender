@@ -632,14 +632,72 @@ Nrrd* TIFReader::Convert(int t, int c, bool get_max)
 	return data;
 }
 
-wstring TIFReader::GetCurName(int t, int c)
+wstring TIFReader::GetCurDataName(int t, int c)
 {
 	if (isHyperstack_)
-		return m_data_name;
+		return m_path_name;
 	else
 	{
 		if (t >= 0 && t < (int64_t)m_4d_seq.size())
 			return (m_4d_seq[t].slices)[0].slice;
+		else
+			return L"";
+	}
+}
+
+wstring TIFReader::GetCurMaskName(int t, int c)
+{
+	if (isHyperstack_)
+	{
+		wostringstream woss;
+		woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
+		if (m_time_num > 1) woss << "_T" << t;
+		if (m_chan_num > 1) woss << "_C" << c;
+		woss << ".msk";
+		wstring mask_name = woss.str();
+		return mask_name;
+	}
+	else
+	{
+		if (t >= 0 && t < (int64_t)m_4d_seq.size())
+		{
+			wstring data_name = (m_4d_seq[t].slices)[0].slice;
+			wostringstream woss;
+			woss << data_name.substr(0, data_name.find_last_of('.'));
+			if (m_chan_num > 1) woss << "_C" << c;
+			woss << ".msk";
+			wstring mask_name = woss.str();
+			return mask_name;
+		}
+		else
+			return L"";
+	}
+}
+
+wstring TIFReader::GetCurLabelName(int t, int c)
+{
+	if (isHyperstack_)
+	{
+		wostringstream woss;
+		woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
+		if (m_time_num > 1) woss << "_T" << t;
+		if (m_chan_num > 1) woss << "_C" << c;
+		woss << ".lbl";
+		wstring label_name = woss.str();
+		return label_name;
+	}
+	else
+	{
+		if (t >= 0 && t < (int64_t)m_4d_seq.size())
+		{
+			wstring data_name = (m_4d_seq[t].slices)[0].slice;
+			wostringstream woss;
+			woss << data_name.substr(0, data_name.find_last_of('.'));
+			if (m_chan_num > 1) woss << "_C" << c;
+			woss << ".lbl";
+			wstring label_name = woss.str();
+			return label_name;
+		}
 		else
 			return L"";
 	}

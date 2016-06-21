@@ -137,7 +137,17 @@ Nrrd* MSKReader::Convert(int t, int c, bool get_max)
 	return output;
 }
 
-wstring MSKReader::GetCurName(int t, int c)
+wstring MSKReader::GetCurDataName(int t, int c)
+{
+	return wstring(L"");
+}
+
+wstring MSKReader::GetCurMaskName(int t, int c)
+{
+	return wstring(L"");
+}
+
+wstring MSKReader::GetCurLabelName(int t, int c)
 {
 	return wstring(L"");
 }

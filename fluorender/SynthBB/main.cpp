@@ -266,6 +266,7 @@ int main(int argc, char* argv[])
 		double spcx, spcy, spcz;
 		vd->GetSpacings(spcx, spcy, spcz);
 		msk_writer.SetSpacings(spcx, spcy, spcz);
+		filename = filename.Left(filename.find(".")) + ".lbl";
 		msk_writer.Save(filename.ToStdWstring(), 1);
 	}
 	else

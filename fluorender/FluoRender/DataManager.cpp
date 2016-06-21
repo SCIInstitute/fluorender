@@ -926,183 +926,215 @@ double VolumeData::GetTransferedValue(int i, int j, int k)
 //save
 void VolumeData::Save(wxString &filename, int mode, bool bake, bool compress)
 {
-	if (m_vr && m_tex)
+	if (!m_vr || !m_tex)
+		return;
+
+	Nrrd* data = 0;
+
+	BaseWriter *writer = 0;
+	switch (mode)
 	{
-		Nrrd* data = 0;
+	case 0://multi-page tiff
+		writer = new TIFWriter();
+		break;
+	case 1://single-page tiff sequence
+		writer = new TIFWriter();
+		break;
+	case 2://nrrd
+		writer = new NRRDWriter();
+		break;
+	}
 
-		BaseWriter *writer = 0;
-		switch (mode)
+	double spcx, spcy, spcz;
+	GetSpacings(spcx, spcy, spcz);
+
+	//save data
+	data = m_tex->get_nrrd(0);
+	if (data)
+	{
+		if (bake)
 		{
-		case 0://multi-page tiff
-			writer = new TIFWriter();
-			break;
-		case 1://single-page tiff sequence
-			writer = new TIFWriter();
-			break;
-		case 2://nrrd
-			writer = new NRRDWriter();
-			break;
+			wxProgressDialog *prg_diag = new wxProgressDialog(
+				"FluoRender: Baking volume data...",
+				"Baking volume data. Please wait.",
+				100, 0, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
+
+			//process the data
+			int bits = data->type==nrrdTypeUShort?16:8;
+			int nx = int(data->axis[0].size);
+			int ny = int(data->axis[1].size);
+			int nz = int(data->axis[2].size);
+
+			//clipping planes
+			vector<Plane*> *planes = m_vr->get_planes();
+
+			Nrrd* baked_data = nrrdNew();
+			if (bits == 8)
+			{
+				unsigned long long mem_size = (unsigned long long)nx*
+					(unsigned long long)ny*(unsigned long long)nz;
+				uint8 *val8 = new (std::nothrow) uint8[mem_size];
+				if (!val8)
+				{
+					wxMessageBox("Not enough memory. Please save project and restart.");
+					return;
+				}
+				//transfer function
+				for (int i=0; i<nx; i++)
+				{
+					prg_diag->Update(95*(i+1)/nx);
+					for (int j=0; j<ny; j++)
+						for (int k=0; k<nz; k++)
+						{
+							int index = nx*ny*k + nx*j + i;
+							bool clipped = false;
+							Point p(double(i) / double(nx),
+								double(j) / double(ny),
+								double(k) / double(nz));
+							for (int pi = 0; pi < 6; ++pi)
+							{
+								if ((*planes)[pi] &&
+									(*planes)[pi]->eval_point(p) < 0.0)
+								{
+									val8[index] = 0;
+									clipped = true;
+								}
+							}
+							if (!clipped)
+							{
+								double new_value = GetTransferedValue(i, j, k);
+								val8[index] = uint8(new_value*255.0);
+							}
+						}
+				}
+				nrrdWrap(baked_data, val8, nrrdTypeUChar, 3, (size_t)nx, (size_t)ny, (size_t)nz);
+			}
+			else if (bits == 16)
+			{
+				unsigned long long mem_size = (unsigned long long)nx*
+					(unsigned long long)ny*(unsigned long long)nz;
+				uint16 *val16 = new (std::nothrow) uint16[mem_size];
+				if (!val16)
+				{
+					wxMessageBox("Not enough memory. Please save project and restart.");
+					return;
+				}
+				//transfer function
+				for (int i=0; i<nx; i++)
+				{
+					prg_diag->Update(95*(i+1)/nx);
+					for (int j=0; j<ny; j++)
+						for (int k=0; k<nz; k++)
+						{
+							int index = nx*ny*k + nx*j + i;
+							bool clipped = false;
+							Point p(double(i) / double(nx),
+								double(j) / double(ny),
+								double(k) / double(nz));
+							for (int pi = 0; pi < 6; ++pi)
+							{
+								if ((*planes)[pi] &&
+									(*planes)[pi]->eval_point(p) < 0.0)
+								{
+									val16[index] = 0;
+									clipped = true;
+								}
+							}
+							if (!clipped)
+							{
+								double new_value = GetTransferedValue(i, j, k);
+								val16[index] = uint16(new_value*65535.0);
+							}
+						}
+				}
+				nrrdWrap(baked_data, val16, nrrdTypeUShort, 3, (size_t)nx, (size_t)ny, (size_t)nz);
+			}
+			nrrdAxisInfoSet(baked_data, nrrdAxisInfoSpacing, spcx, spcy, spcz);
+			nrrdAxisInfoSet(baked_data, nrrdAxisInfoMax, spcx*nx, spcy*ny, spcz*nz);
+			nrrdAxisInfoSet(baked_data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+			nrrdAxisInfoSet(baked_data, nrrdAxisInfoSize, (size_t)nx, (size_t)ny, (size_t)nz);
+
+			writer->SetData(baked_data);
+			writer->SetSpacings(spcx, spcy, spcz);
+			writer->SetCompression(compress);
+			writer->Save(filename.ToStdWstring(), mode);
+
+			//free memory
+			delete []baked_data->data;
+			nrrdNix(baked_data);
+
+			prg_diag->Update(100);
+			delete prg_diag;
 		}
+		else
+		{
+			writer->SetData(data);
+			writer->SetSpacings(spcx, spcy, spcz);
+			writer->SetCompression(compress);
+			writer->Save(filename.ToStdWstring(), mode);
+		}
+	}
+	delete writer;
 
-		double spcx, spcy, spcz;
-		GetSpacings(spcx, spcy, spcz);
+	m_tex_path = filename;
+	SaveMask(false, 0, 0);
+	SaveLabel(false, 0, 0);
+}
 
-		//save data
-		data = m_tex->get_nrrd(0);
+void VolumeData::SaveMask(bool use_reader, int t, int c)
+{
+	if (!m_vr || !m_tex)
+		return;
+
+	Nrrd* data = 0;
+	double spcx, spcy, spcz;
+	GetSpacings(spcx, spcy, spcz);
+
+	//save mask
+	if (m_tex->nmask() != -1)
+	{
+		m_vr->return_mask();
+		data = m_tex->get_nrrd(m_tex->nmask());
 		if (data)
 		{
-			if (bake)
-			{
-				wxProgressDialog *prg_diag = new wxProgressDialog(
-					"FluoRender: Baking volume data...",
-					"Baking volume data. Please wait.",
-					100, 0, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
-
-				//process the data
-				int bits = data->type==nrrdTypeUShort?16:8;
-				int nx = int(data->axis[0].size);
-				int ny = int(data->axis[1].size);
-				int nz = int(data->axis[2].size);
-
-				//clipping planes
-				vector<Plane*> *planes = m_vr->get_planes();
-
-				Nrrd* baked_data = nrrdNew();
-				if (bits == 8)
-				{
-					unsigned long long mem_size = (unsigned long long)nx*
-						(unsigned long long)ny*(unsigned long long)nz;
-					uint8 *val8 = new (std::nothrow) uint8[mem_size];
-					if (!val8)
-					{
-						wxMessageBox("Not enough memory. Please save project and restart.");
-						return;
-					}
-					//transfer function
-					for (int i=0; i<nx; i++)
-					{
-						prg_diag->Update(95*(i+1)/nx);
-						for (int j=0; j<ny; j++)
-							for (int k=0; k<nz; k++)
-							{
-								int index = nx*ny*k + nx*j + i;
-								bool clipped = false;
-								Point p(double(i) / double(nx),
-									double(j) / double(ny),
-									double(k) / double(nz));
-								for (int pi = 0; pi < 6; ++pi)
-								{
-									if ((*planes)[pi] &&
-										(*planes)[pi]->eval_point(p) < 0.0)
-									{
-										val8[index] = 0;
-										clipped = true;
-									}
-								}
-								if (!clipped)
-								{
-									double new_value = GetTransferedValue(i, j, k);
-									val8[index] = uint8(new_value*255.0);
-								}
-							}
-					}
-					nrrdWrap(baked_data, val8, nrrdTypeUChar, 3, (size_t)nx, (size_t)ny, (size_t)nz);
-				}
-				else if (bits == 16)
-				{
-					unsigned long long mem_size = (unsigned long long)nx*
-						(unsigned long long)ny*(unsigned long long)nz;
-					uint16 *val16 = new (std::nothrow) uint16[mem_size];
-					if (!val16)
-					{
-						wxMessageBox("Not enough memory. Please save project and restart.");
-						return;
-					}
-					//transfer function
-					for (int i=0; i<nx; i++)
-					{
-						prg_diag->Update(95*(i+1)/nx);
-						for (int j=0; j<ny; j++)
-							for (int k=0; k<nz; k++)
-							{
-								int index = nx*ny*k + nx*j + i;
-								bool clipped = false;
-								Point p(double(i) / double(nx),
-									double(j) / double(ny),
-									double(k) / double(nz));
-								for (int pi = 0; pi < 6; ++pi)
-								{
-									if ((*planes)[pi] &&
-										(*planes)[pi]->eval_point(p) < 0.0)
-									{
-										val16[index] = 0;
-										clipped = true;
-									}
-								}
-								if (!clipped)
-								{
-									double new_value = GetTransferedValue(i, j, k);
-									val16[index] = uint16(new_value*65535.0);
-								}
-							}
-					}
-					nrrdWrap(baked_data, val16, nrrdTypeUShort, 3, (size_t)nx, (size_t)ny, (size_t)nz);
-				}
-				nrrdAxisInfoSet(baked_data, nrrdAxisInfoSpacing, spcx, spcy, spcz);
-				nrrdAxisInfoSet(baked_data, nrrdAxisInfoMax, spcx*nx, spcy*ny, spcz*nz);
-				nrrdAxisInfoSet(baked_data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-				nrrdAxisInfoSet(baked_data, nrrdAxisInfoSize, (size_t)nx, (size_t)ny, (size_t)nz);
-
-				writer->SetData(baked_data);
-				writer->SetSpacings(spcx, spcy, spcz);
-				writer->SetCompression(compress);
-				writer->Save(filename.ToStdWstring(), mode);
-
-				//free memory
-				delete []baked_data->data;
-				nrrdNix(baked_data);
-
-				prg_diag->Update(100);
-				delete prg_diag;
-			}
+			MSKWriter msk_writer;
+			msk_writer.SetData(data);
+			msk_writer.SetSpacings(spcx, spcy, spcz);
+			wstring filename;
+			if (use_reader && m_reader)
+				filename = m_reader->GetCurMaskName(t, c);
 			else
-			{
-				writer->SetData(data);
-				writer->SetSpacings(spcx, spcy, spcz);
-				writer->SetCompression(compress);
-				writer->Save(filename.ToStdWstring(), mode);
-			}
+				filename = m_tex_path.substr(0, m_tex_path.find_last_of('.')) + ".msk";
+			msk_writer.Save(filename, 0);
 		}
-		delete writer;
+	}
+}
 
-		//save mask
-		if (m_tex->nmask() != -1)
+void VolumeData::SaveLabel(bool use_reader, int t, int c)
+{
+	if (!m_vr || !m_tex)
+		return;
+
+	Nrrd* data = 0;
+	double spcx, spcy, spcz;
+	GetSpacings(spcx, spcy, spcz);
+
+	//save label
+	if (m_tex->nlabel() != -1)
+	{
+		data = m_tex->get_nrrd(m_tex->nlabel());
+		if (data)
 		{
-			m_vr->return_mask();
-			data = m_tex->get_nrrd(m_tex->nmask());
-			if (data)
-			{
-				MSKWriter msk_writer;
-				msk_writer.SetData(data);
-				msk_writer.SetSpacings(spcx, spcy, spcz);
-				msk_writer.Save(filename.ToStdWstring(), 0);
-			}
+			MSKWriter msk_writer;
+			msk_writer.SetData(data);
+			msk_writer.SetSpacings(spcx, spcy, spcz);
+			wstring filename;
+			if (use_reader && m_reader)
+				filename = m_reader->GetCurLabelName(t, c);
+			else
+				filename = m_tex_path.substr(0, m_tex_path.find_last_of('.')) + ".lbl";
+			msk_writer.Save(filename, 1);
 		}
-
-		//save label
-		if (m_tex->nlabel() != -1)
-		{
-			data = m_tex->get_nrrd(m_tex->nlabel());
-			if (data)
-			{
-				MSKWriter msk_writer;
-				msk_writer.SetData(data);
-				msk_writer.SetSpacings(spcx, spcy, spcz);
-				msk_writer.Save(filename.ToStdWstring(), 1);
-			}
-		}
-
-		m_tex_path = filename;
 	}
 }
 

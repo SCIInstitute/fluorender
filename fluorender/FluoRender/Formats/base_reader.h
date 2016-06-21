@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <nrrd.h>
 #include <vector>
+#include <sstream>
 
 using namespace std;
 
@@ -66,7 +67,9 @@ public:
 	virtual Nrrd* Convert(bool get_max);			//Convert the data to nrrd
 	virtual Nrrd* Convert(int c, bool get_max);		//convert the specified channel to nrrd
 	virtual Nrrd* Convert(int t, int c, bool get_max) = 0;//convert the specified channel and time point to nrrd
-	virtual wstring GetCurName(int t, int c) = 0;//for a 4d sequence, get the file name for specified time and channel
+	virtual wstring GetCurDataName(int t, int c) = 0;//for a 4d sequence, get the file name for specified time and channel
+	virtual wstring GetCurMaskName(int t, int c) = 0;//for a 4d sequence, get the file name for the mask of specified time and channel
+	virtual wstring GetCurLabelName(int t, int c) = 0;//for a 4d sequence, get the file name for the label of specified time and channel
 
 	virtual wstring GetPathName() = 0;
 	virtual wstring GetDataName() = 0;

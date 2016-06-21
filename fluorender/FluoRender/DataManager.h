@@ -216,6 +216,8 @@ public:
 	double GetOriginalValue(int i, int j, int k);
 	double GetTransferedValue(int i, int j, int k);
 	void Save(wxString &filename, int mode=0, bool bake=false, bool compress=false);
+	void SaveMask(bool use_reader, int t, int c);
+	void SaveLabel(bool use_reader, int t, int c);
 
 	//volumerenderer
 	VolumeRenderer *GetVR();

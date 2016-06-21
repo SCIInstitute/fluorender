@@ -767,9 +767,57 @@ Nrrd *OIBReader::Convert(int t, int c, bool get_max)
 	return data;
 }
 
-wstring OIBReader::GetCurName(int t, int c)
+wstring OIBReader::GetCurDataName(int t, int c)
 {
-	return m_type == 0 ? wstring(L"") : m_oib_info[t].filename;
+	return m_type == 0 ? m_path_name : m_oib_info[t].filename;
+}
+
+wstring OIBReader::GetCurMaskName(int t, int c)
+{
+	if (m_type == 0)
+	{
+		wostringstream woss;
+		woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
+		if (m_time_num > 1) woss << "_T" << t;
+		if (m_chan_num > 1) woss << "_C" << c;
+		woss << ".msk";
+		wstring mask_name = woss.str();
+		return mask_name;
+	}
+	else
+	{
+		wstring data_name = m_oib_info[t].filename;
+		wostringstream woss;
+		woss << data_name.substr(0, data_name.find_last_of('.'));
+		if (m_chan_num > 1) woss << "_C" << c;
+		woss << ".msk";
+		wstring mask_name = woss.str();
+		return mask_name;
+	}
+}
+
+wstring OIBReader::GetCurLabelName(int t, int c)
+{
+	if (m_type == 0)
+	{
+		wostringstream woss;
+		woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
+		if (m_time_num > 1) woss << "_T" << t;
+		if (m_chan_num > 1) woss << "_C" << c;
+		woss << ".lbl";
+		wstring label_name = woss.str();
+		return label_name;
+	}
+	else
+	{
+		wstring data_name = m_oib_info[t].filename;
+		wostringstream woss;
+		woss << data_name.substr(0, data_name.find_last_of('.'));
+		if (m_chan_num > 1) woss << "_C" << c;
+		woss << ".lbl";
+		wstring label_name = woss.str();
+		return label_name;
+	}
 }
 
 void OIBReader::ReadTiff(unsigned char *pbyData, unsigned short *val, int z)
