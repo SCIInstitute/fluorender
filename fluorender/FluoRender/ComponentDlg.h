@@ -171,6 +171,7 @@ public:
 
 		//execute
 		ID_Notebook,
+		ID_UseSelChk,
 		ID_GeneratePrg,
 		ID_GenerateBtn,
 		ID_RefineBtn,
@@ -428,6 +429,7 @@ private:
 
 	//execute
 	wxGauge* m_generate_prg;
+	wxCheckBox* m_use_sel_chk;
 	wxButton* m_generate_btn;
 	wxButton* m_refine_btn;
 	wxButton* m_analyze_btn;

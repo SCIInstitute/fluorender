@@ -158,6 +158,50 @@ void DataListCtrl::SetSelection(int type, wxString &name)
 	}
 }
 
+void DataListCtrl::SaveSelMask()
+{
+	long item = GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+	if (item != -1 && GetItemText(item) == "Volume")
+	{
+		wxString name = GetText(item, 1);
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame)
+		{
+			VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+			if (vd)
+			{
+				vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
+				vd->SaveLabel(true, vd->GetCurTime(), vd->GetCurChannel());
+			}
+		}
+	}
+}
+
+void DataListCtrl::SaveAllMasks()
+{
+	long item = GetNextItem(-1);
+	while (item != -1)
+	{
+		if (GetItemText(item) == "Volume")
+		{
+			wxString name = GetText(item, 1);
+			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+			if (vr_frame)
+			{
+				VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+				if (vd)
+				{
+					vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
+					vd->SaveLabel(true, vd->GetCurTime(), vd->GetCurChannel());
+				}
+			}
+		}
+		item = GetNextItem(item);
+	}
+}
+
 void DataListCtrl::OnContextMenu(wxContextMenuEvent &event)
 {
 	if (GetSelectedItemCount() > 0)
@@ -557,23 +601,7 @@ void DataListCtrl::OnBake(wxCommandEvent& event)
 
 void DataListCtrl::OnSaveMask(wxCommandEvent& event)
 {
-	long item = GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-	if (item != -1 && GetItemText(item) == "Volume")
-	{
-		wxString name = GetText(item, 1);
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
-		{
-			VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
-			if (vd)
-			{
-				vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
-				vd->SaveLabel(true, vd->GetCurTime(), vd->GetCurChannel());
-			}
-		}
-	}
+	SaveSelMask();
 }
 
 void DataListCtrl::OnSelect(wxListEvent &event)
@@ -962,6 +990,12 @@ void ListPanel::SetSelection(int type, wxString &name)
 {
 	if (m_datalist)
 		m_datalist->SetSelection(type, name);
+}
+
+void ListPanel::SaveAllMasks()
+{
+	if (m_datalist)
+		m_datalist->SaveAllMasks();
 }
 
 void ListPanel::OnAddToView(wxCommandEvent& event)

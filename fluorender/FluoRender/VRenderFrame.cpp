@@ -2505,20 +2505,8 @@ void VRenderFrame::SaveProject(wxString& filename)
 			fconfig.Write("legend", vd->GetLegend());
 
 			//mask
-			Nrrd* mask = vd->GetMask(true);
-			str = "";
-			if (mask)
-			{
-				wxString new_folder;
-				new_folder = filename + "_files";
-				CREATE_DIR(new_folder.fn_str());
-				str = new_folder + GETSLASH() + vd->GetName() + ".msk";
-				MSKWriter msk_writer;
-				msk_writer.SetData(mask);
-				msk_writer.SetSpacings(resx, resy, resz);
-				msk_writer.Save(str.ToStdWstring(), 0);
-			}
-			fconfig.Write("mask", str);
+			vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
+			vd->SaveLabel(true, vd->GetCurTime(), vd->GetCurChannel());
 		}
 	}
 	//mesh

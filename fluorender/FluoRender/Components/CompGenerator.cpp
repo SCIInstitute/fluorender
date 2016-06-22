@@ -34,7 +34,8 @@ using namespace FL;
 
 ComponentGenerator::ComponentGenerator(VolumeData* vd, int device_id)
 	: m_vd(vd),
-	m_init(false)
+	m_init(false),
+	m_use_mask(false)
 {
 	cl_int err;
 	cl_platform_id platform;
@@ -83,12 +84,16 @@ void ComponentGenerator::OrderID_3D()
 
 #define GET_VOLDATA \
 	if (!m_vd) \
-	return; \
+		return; \
 	int nx, ny, nz; \
 	m_vd->GetResolution(nx, ny, nz); \
-	Nrrd* nrrd_data = m_vd->GetVolume(false); \
+	Nrrd* nrrd_data = 0; \
+	if (m_use_mask) \
+		nrrd_data = m_vd->GetMask(true); \
 	if (!nrrd_data) \
-	return; \
+		nrrd_data = m_vd->GetVolume(false); \
+	if (!nrrd_data) \
+		return; \
 	Nrrd* nrrd_label = m_vd->GetLabel(false); \
 	if (!nrrd_data) \
 	return; \

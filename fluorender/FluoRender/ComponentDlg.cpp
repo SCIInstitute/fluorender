@@ -937,6 +937,8 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	m_generate_prg = new wxGauge(this, ID_GeneratePrg, 100,
 		wxDefaultPosition, wxSize(-1, 18));
+	m_use_sel_chk = new wxCheckBox(this, ID_UseSelChk, "Use Sel.",
+		wxDefaultPosition, wxDefaultSize);
 	m_generate_btn = new wxButton(this, ID_GenerateBtn, "Generate",
 		wxDefaultPosition, wxSize(75, -1));
 	m_refine_btn = new wxButton(this, ID_RefineBtn, "Refine",
@@ -948,6 +950,7 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	sizer1->Add(10, 10);
 	sizer1->Add(m_generate_prg, 1, wxEXPAND);
 	sizer1->Add(10, 10);
+	sizer1->Add(m_use_sel_chk, 0, wxALIGN_CENTER);
 	sizer1->Add(m_generate_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_refine_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_analyze_btn, 0, wxALIGN_CENTER);
@@ -2461,12 +2464,14 @@ void ComponentDlg::EnableGenerate()
 	case 0:
 	case 1:
 	default:
+		m_use_sel_chk->Show();
 		m_generate_btn->Show();
 		m_refine_btn->Show();
 		m_analyze_btn->Hide();
 		m_analyze_sel_btn->Hide();
 		break;
 	case 2:
+		m_use_sel_chk->Hide();
 		m_generate_btn->Hide();
 		m_refine_btn->Hide();
 		m_analyze_btn->Show();
@@ -2680,6 +2685,8 @@ void ComponentDlg::GenerateAdv(bool refine)
 		cg.m_sig_progress.connect(boost::bind(
 			&ComponentDlg::UpdateProgress, this));
 
+	cg.SetUseMask(m_use_sel_chk->GetValue());
+
 	if (!refine)
 	{
 		vd->AddEmptyLabel();
@@ -2743,6 +2750,8 @@ void ComponentDlg::GenerateBsc(bool refine)
 	boost::signals2::connection connection =
 		cg.m_sig_progress.connect(boost::bind(
 			&ComponentDlg::UpdateProgress, this));
+
+	cg.SetUseMask(m_use_sel_chk->GetValue());
 
 	if (!refine)
 	{

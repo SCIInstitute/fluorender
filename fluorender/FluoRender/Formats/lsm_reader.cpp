@@ -763,7 +763,7 @@ Nrrd* LSMReader::Convert(int t, int c, bool get_max)
    }
 
    fclose(pfile);
-
+   m_cur_time = t;
    return data;
 }
 

@@ -59,6 +59,8 @@ class DataListCtrl: public wxListCtrl
    wxString GetText(long item, int col);
    void SetText(long item, int col, wxString &str);
    void SetSelection(int type, wxString &name);
+   void SaveSelMask();
+   void SaveAllMasks();
 
    friend class ListPanel;
 
@@ -129,6 +131,7 @@ class ListPanel : public wxPanel
    void SetText(long item, int col, wxString &str);
    void DeleteAllItems();
    void SetSelection(int type, wxString &name);
+   void SaveAllMasks();
 
    private:
    //wxWindow* m_frame;

@@ -3940,7 +3940,7 @@ m_vol_exb(0.0),
 	//time sequence identifier
 	m_timeId = "_T";
 	//load mask
-	m_load_mask = false;
+	m_load_mask = true;
 }
 
 DataManager::~DataManager()
@@ -4156,17 +4156,16 @@ int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_
 			{
 				//mask
 				MSKReader msk_reader;
-				std::wstring str = reader->GetPathName();
+				std::wstring str = reader->GetCurMaskName(t_num >= 0 ? t_num : reader->GetCurTime(), i);
 				msk_reader.SetFile(str);
-				Nrrd* mask = msk_reader.Convert(t_num>=0?t_num:reader->GetCurTime(), i, true);
+				Nrrd* mask = msk_reader.Convert(0, 0, true);
 				if (mask)
 					vd->LoadMask(mask);
 				//label mask
 				LBLReader lbl_reader;
-				str = reader->GetPathName();
+				str = reader->GetCurLabelName(t_num >= 0 ? t_num : reader->GetCurTime(), i);
 				lbl_reader.SetFile(str);
-
-				Nrrd* label = lbl_reader.Convert(t_num>=0?t_num:reader->GetCurTime(), i, true);
+				Nrrd* label = lbl_reader.Convert(0, 0, true);
 				if (label)
 					vd->LoadLabel(label);
 			}

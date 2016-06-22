@@ -95,6 +95,7 @@ class SettingDlg : public wxPanel
 		//script
 		ID_RunScriptChk,
 		ID_ScriptFileText,
+		ID_ScriptClearBtn,
 		ID_ScriptFileBtn,
 		//paint history depth
 		ID_PaintHistDepthSldr,
@@ -333,6 +334,7 @@ private:
 	//script
 	wxCheckBox *m_run_script_chk;
 	wxTextCtrl *m_script_file_text;
+	wxButton *m_script_clear_btn;
 	wxButton *m_script_file_btn;
 	//history depth
 	wxSlider *m_paint_hist_depth_sldr;
@@ -407,6 +409,7 @@ private:
 	//script
 	void OnRunScriptChk(wxCommandEvent &event);
 	void OnScriptFileEdit(wxCommandEvent &event);
+	void OnScriptClearBtn(wxCommandEvent &event);
 	void OnScriptFileBtn(wxCommandEvent &event);
 	//paint history depth
 	void OnPaintHistDepthChange(wxScrollEvent &event);

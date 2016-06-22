@@ -79,6 +79,7 @@ EVT_COMBOBOX(ID_TextColorCmb, SettingDlg::OnTextColorChange)
 //script
 EVT_CHECKBOX(ID_RunScriptChk, SettingDlg::OnRunScriptChk)
 EVT_TEXT(ID_ScriptFileText, SettingDlg::OnScriptFileEdit)
+EVT_BUTTON(ID_ScriptClearBtn, SettingDlg::OnScriptClearBtn)
 EVT_BUTTON(ID_ScriptFileBtn, SettingDlg::OnScriptFileBtn)
 //paint history depth
 EVT_COMMAND_SCROLL(ID_PaintHistDepthSldr, SettingDlg::OnPaintHistDepthChange)
@@ -179,10 +180,13 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(80, -1));
 	m_script_file_text = new wxTextCtrl(page, ID_ScriptFileText, "",
 		wxDefaultPosition, wxDefaultSize);
+	m_script_clear_btn = new wxButton(page, ID_ScriptClearBtn, "X",
+		wxDefaultPosition, wxSize(25, -1));
 	m_script_file_btn = new wxButton(page, ID_ScriptFileBtn, "Browse...",
 		wxDefaultPosition, wxSize(80, -1));
 	sizer3_1->Add(st, 0, wxALIGN_CENTER);
 	sizer3_1->Add(m_script_file_text, 1, wxEXPAND);
+	sizer3_1->Add(m_script_clear_btn, 0, wxALIGN_CENTER);
 	sizer3_1->Add(m_script_file_btn, 0, wxALIGN_CENTER);
 	group3->Add(sizer3_1, 0, wxEXPAND);
 	group3->Add(10, 5);
@@ -1681,6 +1685,11 @@ void SettingDlg::OnRunScriptChk(wxCommandEvent &event)
 void SettingDlg::OnScriptFileEdit(wxCommandEvent &event)
 {
 	m_script_file = m_script_file_text->GetValue();
+}
+
+void SettingDlg::OnScriptClearBtn(wxCommandEvent &event)
+{
+	m_script_file_text->Clear();
 }
 
 void SettingDlg::OnScriptFileBtn(wxCommandEvent &event)

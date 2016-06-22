@@ -89,15 +89,8 @@ int MSKReader::LoadBatch(int index)
 
 Nrrd* MSKReader::Convert(int t, int c, bool get_max)
 {
-	int64_t pos = m_path_name.find_last_of('.');
-	if (pos == -1)
-		return 0;
-	wstring str_name = m_path_name.substr(0, pos);
-	wostringstream strs;
-	strs << str_name /*<< "_t" << t << "_c" << c*/ << ".msk";
-	str_name = strs.str();
 	FILE* msk_file = 0;
-	if (!WFOPEN(&msk_file, str_name.c_str(), L"rb"))
+	if (!WFOPEN(&msk_file, m_path_name.c_str(), L"rb"))
 		return 0;
 
 	Nrrd *output = nrrdNew();

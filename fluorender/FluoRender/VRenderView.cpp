@@ -294,6 +294,7 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	m_pick(false),
 	m_draw_mask(true),
 	m_clear_mask(false),
+	m_save_mask(false),
 	//move view
 	m_move_left(false),
 	m_move_right(false),
@@ -3702,22 +3703,30 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	m_mvr->clear_vr();
 	for (i=0; i<(int)list.size(); i++)
 	{
-		if (list[i] && list[i]->GetDisp())
+		VolumeData* vd = list[i];
+		if (vd && vd->GetDisp())
 		{
-			VolumeRenderer* vr = list[i]->GetVR();
+			VolumeRenderer* vr = vd->GetVR();
 			if (vr)
 			{
-				list[i]->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-				list[i]->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+				if (vr_frame &&
+					vr_frame->GetSettingDlg() &&
+					vr_frame->GetSettingDlg()->GetRunScript() &&
+					vd->GetMask(false) &&
+					vd->GetLabel(false))
+					vd->SetMaskMode(4);
+				vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+				vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 				m_mvr->add_vr(vr);
 				m_mvr->set_sampling_rate(vr->get_sampling_rate());
 				m_mvr->SetNoiseRed(vr->GetNoiseRed());
 			}
 			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-			if (list[i]->GetTexture() &&
-				list[i]->GetTexture()->nmask()!=-1 &&
+			if (vd->GetTexture() &&
+				vd->GetTexture()->nmask()!=-1 &&
 				vr_frame &&
-				list[i]==vr_frame->GetCurSelVol())
+				vd ==vr_frame->GetCurSelVol())
 				use_tex_wt2 = true;
 		}
 	}
@@ -4410,6 +4419,17 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		if (!wxGetKeyState(wxKeyCode('c')) &&
 			m_clear_mask)
 			m_clear_mask = false;
+		//save all masks
+		if (wxGetKeyState(wxKeyCode('m')) &&
+			!m_save_mask)
+		{
+			if (frame && frame->GetList())
+				frame->GetList()->SaveAllMasks();
+			m_save_mask = true;
+		}
+		if (!wxGetKeyState(wxKeyCode('m')) &&
+			m_save_mask)
+			m_save_mask = false;
 		//full screen
 		if (wxGetKeyState(WXK_ESCAPE))
 		{
