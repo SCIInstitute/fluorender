@@ -68,6 +68,8 @@ void ComponentAnalyzer::Analyze(bool sel)
 	unsigned int* data_label = 0;
 	if (nrrd_label)
 		data_label = (unsigned int*)(nrrd_label->data);
+	if (!data_mask && !data_label)
+		return;
 
 	//clear list and start calculating
 	m_comp_list.clear();
