@@ -62,6 +62,12 @@ void TrackMapProcessor::SetBits(TrackMap& track_map,
 	track_map.m_data_bits = bits;
 }
 
+void TrackMapProcessor::SetScale(TrackMap& track_map,
+	float scale)
+{
+	track_map.m_scale = scale;
+}
+
 bool TrackMapProcessor::InitializeFrame(TrackMap& track_map,
 	void* data, void* label, size_t frame)
 {

@@ -2981,6 +2981,8 @@ void TraceDlg::GenMap()
 
 	size_t iter_num = (size_t)m_gen_map_spin->GetValue();
 	iter_num *= 2;
+	tm_processor.SetBits(track_map, vd->GetBits());
+	tm_processor.SetScale(track_map, vd->GetScalarScale());
 	tm_processor.SetSizes(track_map,
 		resx, resy, resz);
 	tm_processor.SetSizeThresh(component_size);
@@ -3163,6 +3165,8 @@ void TraceDlg::RefineMap(int t)
 	vd->GetResolution(resx, resy, resz);
 	size_t iter_num = (size_t)m_gen_map_spin->GetValue();
 	iter_num *= 2;
+	tm_processor.SetBits(track_map, vd->GetBits());
+	tm_processor.SetScale(track_map, vd->GetScalarScale());
 	tm_processor.SetSizes(track_map,
 		resx, resy, resz);
 	tm_processor.SetSizeThresh(component_size);

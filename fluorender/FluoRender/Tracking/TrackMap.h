@@ -77,6 +77,7 @@ namespace FL
 			size_t nx, size_t ny, size_t nz);
 		void SetBits(TrackMap& track_map,
 			size_t bits);
+		void SetScale(TrackMap& track_map, float scale);
 
 		//build cell list and intra graph
 		bool InitializeFrame(TrackMap& track_map,

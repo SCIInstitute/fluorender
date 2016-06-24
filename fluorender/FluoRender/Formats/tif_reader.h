@@ -158,6 +158,7 @@ private:
 	wstring m_data_name;
 	bool isBig_;
 	bool isHyperstack_;		//true if it is a hyperstack tiff saved by ImageJ
+	bool isHsTimeSeq_;		//true if it is a time sequence of hyperstack files
 
 	struct SliceInfo
 	{
