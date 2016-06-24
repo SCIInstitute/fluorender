@@ -283,6 +283,10 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 	duration<double> time_span = duration_cast<duration<double>>(t2-t1);
 	(*m_output_txt) << "CPU time: " << time_span.count() << " sec.\n";*/
 
+	wxString str;
+	executor->GetMessage(str);
+	(*m_output_txt) << str;
+
 	//add result for rendering
 	if (dup)
 	{
@@ -299,10 +303,6 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 			vr_frame->UpdateTree(vd_r->GetName());
 		}
 	}
-
-	wxString str;
-	executor->GetMessage(str);
-	(*m_output_txt) << str;
 
 	m_view->RefreshGL();
 }
