@@ -396,13 +396,14 @@ public:
 
 	//brush properties
 	//load default;
-	void LoadDefaultBrushSettings();
+	void LoadBrushSettings();
+	void SaveBrushSettings();
 	//use pressure
 	void SetBrushUsePres(bool pres);
 	bool GetBrushUsePres();
 	//set brush size
 	void SetUseBrushSize2(bool val);
-	bool GetBrushSize2Link();
+	bool GetUseBrushSize2();
 	void SetBrushSize(double size1, double size2);
 	double GetBrushSize1();
 	double GetBrushSize2();
@@ -773,6 +774,16 @@ private:
 	double m_brush_radius1;
 	double m_brush_radius2;
 	bool m_use_brush_radius2;
+	//radius settings for individual brush types
+	typedef struct
+	{
+		int type;//brush type
+		double radius1;//radius 1
+		double radius2;//radius 2
+		bool use_radius2;//use radius 2
+	} BrushRadiusSet;
+	vector<BrushRadiusSet> m_brush_radius_sets;
+	int m_brush_sets_index;
 	//paint stroke spacing
 	double m_brush_spacing;
 
@@ -929,9 +940,11 @@ private:
 	void RunSeparateChannels(wxFileConfig &fconfig);
 	void RunExternalExe(wxFileConfig &fconfig);
 	void RunFetchMask(wxFileConfig &fconfig);
+	void RunSaveMask(wxFileConfig &fconfig);
 	void RunCalculation(wxFileConfig &fconfig);
 	void RunOpenCL(wxFileConfig &fconfig);
 	void RunCompAnalysis(wxFileConfig &fconfig);
+	void RunGenerateComp(wxFileConfig &fconfig);
 
 	//brush states update
 	void SetBrush(int mode);
@@ -949,6 +962,9 @@ private:
 	double GetPointVolumeBox2(Point &p1, Point &p2, int mx, int my, VolumeData* vd);
 	double GetPointPlane(Point &mp, int mx, int my, Point *planep=0, bool calc_mats=true);
 	Point* GetEditingRulerPoint(int mx, int my);
+
+	//brush sets
+	void ChangeBrushSetsIndex();
 
 	//system call
 	void OnDraw(wxPaintEvent& event);
@@ -1331,8 +1347,8 @@ public:
 	//set brush size
 	void SetUseBrushSize2(bool val)
 	{ if (m_glview) m_glview->SetUseBrushSize2(val); }
-	bool GetBrushSize2Link()
-	{ if (m_glview) return m_glview->GetBrushSize2Link(); else return false; }
+	bool GetUseBrushSize2()
+	{ if (m_glview) return m_glview->GetUseBrushSize2(); else return false; }
 	void SetBrushSize(double size1, double size2)
 	{ if (m_glview) m_glview->SetBrushSize(size1, size2); }
 	double GetBrushSize1()

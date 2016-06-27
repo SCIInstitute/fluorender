@@ -205,6 +205,9 @@ public:
 		wxGetApp().Yield();
 	}
 
+	void GenerateAdv(bool refine);
+	void GenerateBsc(bool refine);
+
 private:
 	wxWindow* m_frame;
 	VRenderView* m_view;
@@ -437,10 +440,6 @@ private:
 
 	//output
 	wxTextCtrl* m_stat_text;
-
-private:
-	void GenerateAdv(bool refine);
-	void GenerateBsc(bool refine);
 
 private:
 	wxWindow* Create3DAnalysisPage(wxWindow *parent);

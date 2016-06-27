@@ -92,11 +92,6 @@ class SettingDlg : public wxPanel
 		ID_FontCmb,
 		ID_FontSizeCmb,
 		ID_TextColorCmb,
-		//script
-		ID_RunScriptChk,
-		ID_ScriptFileText,
-		ID_ScriptClearBtn,
-		ID_ScriptFileBtn,
 		//paint history depth
 		ID_PaintHistDepthSldr,
 		ID_PaintHistDepthText,
@@ -331,11 +326,6 @@ private:
 	wxComboBox *m_font_cmb;
 	wxComboBox *m_font_size_cmb;
 	wxComboBox *m_text_color_cmb;
-	//script
-	wxCheckBox *m_run_script_chk;
-	wxTextCtrl *m_script_file_text;
-	wxButton *m_script_clear_btn;
-	wxButton *m_script_file_btn;
 	//history depth
 	wxSlider *m_paint_hist_depth_sldr;
 	wxTextCtrl *m_paint_hist_depth_text;
@@ -406,11 +396,6 @@ private:
 	void OnFontChange(wxCommandEvent &event);
 	void OnFontSizeChange(wxCommandEvent &event);
 	void OnTextColorChange(wxCommandEvent &event);
-	//script
-	void OnRunScriptChk(wxCommandEvent &event);
-	void OnScriptFileEdit(wxCommandEvent &event);
-	void OnScriptClearBtn(wxCommandEvent &event);
-	void OnScriptFileBtn(wxCommandEvent &event);
 	//paint history depth
 	void OnPaintHistDepthChange(wxScrollEvent &event);
 	void OnPaintHistDepthEdit(wxCommandEvent &event);

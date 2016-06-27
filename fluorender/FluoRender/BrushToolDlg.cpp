@@ -299,13 +299,10 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 
 	SetSizer(sizer_v);
 	Layout();
-
-	LoadDefault();
 }
 
 BrushToolDlg::~BrushToolDlg()
 {
-	SaveDefault();
 }
 
 void BrushToolDlg::GetSettings(VRenderView* vrv)
@@ -370,8 +367,8 @@ void BrushToolDlg::GetSettings(VRenderView* vrv)
 	m_brush_size1_sldr->SetValue(int(dval));
 	m_brush_size1_text->ChangeValue(wxString::Format("%.0f", dval));
 	//size2
-	m_brush_size2_chk->SetValue(vrv->GetBrushSize2Link());
-	if (vrv->GetBrushSize2Link())
+	m_brush_size2_chk->SetValue(vrv->GetUseBrushSize2());
+	if (vrv->GetUseBrushSize2())
 	{
 		m_brush_size2_sldr->Enable();
 		m_brush_size2_text->Enable();
@@ -439,6 +436,8 @@ void BrushToolDlg::SelectBrush(int id)
 	case ID_BrushSolid:
 		m_toolbar->ToggleTool(ID_BrushSolid, true);
 	}
+
+	GetSettings(m_cur_view);
 }
 
 void BrushToolDlg::UpdateUndoRedo()
@@ -473,6 +472,7 @@ void BrushToolDlg::OnBrushAppend(wxCommandEvent &event)
 			frame->GetTree()->SelectBrush(0);
 		frame->GetTree()->BrushAppend();
 	}
+	GetSettings(m_cur_view);
 }
 
 void BrushToolDlg::OnBrushDiffuse(wxCommandEvent &event)
@@ -490,6 +490,7 @@ void BrushToolDlg::OnBrushDiffuse(wxCommandEvent &event)
 			frame->GetTree()->SelectBrush(0);
 		frame->GetTree()->BrushDiffuse();
 	}
+	GetSettings(m_cur_view);
 }
 
 void BrushToolDlg::OnBrushSolid(wxCommandEvent &event)
@@ -501,6 +502,7 @@ void BrushToolDlg::OnBrushSolid(wxCommandEvent &event)
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 	if (frame && frame->GetTree())
 		frame->GetTree()->BrushSolid(m_toolbar->GetToolState(ID_BrushSolid));
+	GetSettings(m_cur_view);
 }
 
 void BrushToolDlg::OnBrushDesel(wxCommandEvent &event)
@@ -518,6 +520,7 @@ void BrushToolDlg::OnBrushDesel(wxCommandEvent &event)
 			frame->GetTree()->SelectBrush(0);
 		frame->GetTree()->BrushDesel();
 	}
+	GetSettings(m_cur_view);
 }
 
 void BrushToolDlg::OnBrushClear(wxCommandEvent &event)
@@ -796,163 +799,5 @@ void BrushToolDlg::OnBrushIterCheck(wxCommandEvent& event)
 	{
 		if (m_cur_view)
 			m_cur_view->SetBrushIteration(BRUSH_TOOL_ITER_STRONG);
-	}
-}
-
-//save default
-void BrushToolDlg::SaveDefault()
-{
-	wxString app_name = "FluoRender " +
-		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
-	wxString vendor_name = "FluoRender";
-	wxString local_name = "default_brush_settings.dft";
-	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
-		wxCONFIG_USE_LOCAL_FILE);
-	double val;
-	wxString str;
-	//brush properties
-	fconfig.Write("brush_ini_thresh", m_dft_ini_thresh);
-	fconfig.Write("brush_gm_falloff", m_dft_gm_falloff);
-	fconfig.Write("brush_scl_falloff", m_dft_scl_falloff);
-	fconfig.Write("brush_scl_translate", m_dft_scl_translate);
-	//auto thresh
-	fconfig.Write("auto_thresh", m_estimate_thresh_chk->GetValue());
-	//edge detect
-	fconfig.Write("edge_detect", m_edge_detect_chk->GetValue());
-	//hidden removal
-	fconfig.Write("hidden_removal", m_hidden_removal_chk->GetValue());
-	//select group
-	fconfig.Write("select_group", m_select_group_chk->GetValue());
-	//2d influence
-	str = m_brush_2dinfl_text->GetValue();
-	str.ToDouble(&val);
-	fconfig.Write("brush_2dinfl", val);
-	//size 1
-	str = m_brush_size1_text->GetValue();
-	str.ToDouble(&val);
-	fconfig.Write("brush_size1", val);
-	//size2 link
-	fconfig.Write("use_brush_size2", m_brush_size2_chk->GetValue());
-	//size 2
-	str = m_brush_size2_text->GetValue();
-	str.ToDouble(&val);
-	fconfig.Write("brush_size2", val);
-	//iterations
-	int ival = m_brush_iterw_rb->GetValue()?1:
-		m_brush_iters_rb->GetValue()?2:
-		m_brush_iterss_rb->GetValue()?3:0;
-	fconfig.Write("brush_iters", ival);
-
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = expath.BeforeLast(GETSLASH(),NULL);
-#ifdef _WIN32
-	wxString dft = expath + "\\default_brush_settings.dft";
-#else
-	wxString dft = expath + "/../Resources/default_brush_settings.dft";
-#endif
-	wxFileOutputStream os(dft);
-	fconfig.Save(os);
-}
-
-//load default
-void BrushToolDlg::LoadDefault()
-{
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = expath.BeforeLast(GETSLASH(),NULL);
-#ifdef _WIN32
-	wxString dft = expath + "\\default_brush_settings.dft";
-#else
-	wxString dft = expath + "/../Resources/default_brush_settings.dft";
-#endif
-	wxFileInputStream is(dft);
-	if (!is.IsOk())
-		return;
-	wxFileConfig fconfig(is);
-
-	wxString str;
-	double val;
-	int ival;
-	bool bval;
-
-	//brush properties
-	fconfig.Read("brush_ini_thresh", &m_dft_ini_thresh);
-	if (fconfig.Read("brush_gm_falloff", &m_dft_gm_falloff))
-	{
-		m_brush_gm_falloff_sldr->SetValue(int(GM_2_ESTR(m_dft_gm_falloff)*1000.0 + 0.5));
-		m_brush_gm_falloff_text->ChangeValue(wxString::Format("%.3f", GM_2_ESTR(m_dft_gm_falloff)));
-	}
-	fconfig.Read("brush_scl_falloff", &m_dft_scl_falloff);
-	if (fconfig.Read("brush_scl_translate", &m_dft_scl_translate))
-	{
-		str = wxString::Format("%.1f", m_dft_scl_translate*m_max_value);
-		m_brush_scl_translate_sldr->SetRange(0, int(m_max_value*10.0));
-		m_brush_scl_translate_text->SetValue(str);
-	}
-	//auto thresh
-	if (fconfig.Read("auto_thresh", &bval))
-		m_estimate_thresh_chk->SetValue(bval);
-	//edge detect
-	if (fconfig.Read("edge_detect", &bval))
-		m_edge_detect_chk->SetValue(bval);
-	//hidden removal
-	if (fconfig.Read("hidden_removal", &bval))
-		m_hidden_removal_chk->SetValue(bval);
-	//select group
-	if (fconfig.Read("select_group", &bval))
-		m_select_group_chk->SetValue(bval);
-	//2d influence
-	if (fconfig.Read("brush_2dinfl", &val))
-	{
-		str = wxString::Format("%.2f", val);
-		m_brush_2dinfl_text->SetValue(str);
-	}
-	//size 1
-	if (fconfig.Read("brush_size1", &val) && val>0.0)
-	{
-		str = wxString::Format("%d", (int)val);
-		m_brush_size1_text->SetValue(str);
-	}
-	//size 2 link
-	if (fconfig.Read("use_brush_size2", &bval))
-	{
-		m_brush_size2_chk->SetValue(bval);
-		if (bval)
-		{
-			m_brush_size2_sldr->Enable();
-			m_brush_size2_text->Enable();
-		}
-		else
-		{
-			m_brush_size2_sldr->Disable();
-			m_brush_size2_text->Disable();
-		}
-	}
-	//size 2
-	if (fconfig.Read("brush_size2", &val) && val>0.0)
-	{
-		str = wxString::Format("%d", (int)val);
-		m_brush_size2_text->SetValue(str);
-	}
-	//iterations
-	if (fconfig.Read("brush_iters", &ival))
-	{
-		switch (ival)
-		{
-		case 1:
-			m_brush_iterw_rb->SetValue(true);
-			m_brush_iters_rb->SetValue(false);
-			m_brush_iterss_rb->SetValue(false);
-			break;
-		case 2:
-			m_brush_iterw_rb->SetValue(false);
-			m_brush_iters_rb->SetValue(true);
-			m_brush_iterss_rb->SetValue(false);
-			break;
-		case 3:
-			m_brush_iterw_rb->SetValue(false);
-			m_brush_iters_rb->SetValue(false);
-			m_brush_iterss_rb->SetValue(true);
-			break;
-		}
 	}
 }
