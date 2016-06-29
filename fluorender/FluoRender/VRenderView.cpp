@@ -5602,8 +5602,15 @@ void VRenderGLView::RunSaveMask(wxFileConfig &fconfig)
 {
 	if (!m_cur_vol)
 		return;
-	m_cur_vol->SaveMask(true, m_tseq_prv_num, m_cur_vol->GetCurChannel());
-	m_cur_vol->SaveLabel(true, m_tseq_prv_num, m_cur_vol->GetCurChannel());
+	int toffset;
+	fconfig.Read("toffset", &toffset, 0);
+	int time;
+	if (toffset)
+		time = m_tseq_cur_num;
+	else
+		time = m_tseq_prv_num;
+	m_cur_vol->SaveMask(true, time, m_cur_vol->GetCurChannel());
+	m_cur_vol->SaveLabel(true, time, m_cur_vol->GetCurChannel());
 }
 
 void VRenderGLView::RunCalculation(wxFileConfig &fconfig)
@@ -5708,7 +5715,12 @@ void VRenderGLView::RunCompAnalysis(wxFileConfig &fconfig)
 
 void VRenderGLView::RunGenerateComp(wxFileConfig &fconfig)
 {
+	int ival;
+	fconfig.Read("mode", &ival, 0);
 
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetComponentDlg())
+		vr_frame->GetComponentDlg()->GenerateComp(ival);
 }
 
 //draw

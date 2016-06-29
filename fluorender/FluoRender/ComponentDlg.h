@@ -141,13 +141,16 @@ public:
 		ID_AngleThreshText,
 
 		//basic page
-		ID_BasicDiffCheck,
 		ID_BasicIterSldr,
 		ID_BasicIterText,
 		ID_BasicThreshSldr,
 		ID_BasicThreshText,
+		ID_BasicDiffCheck,
 		ID_BasicFalloffSldr,
 		ID_BasicFalloffText,
+		ID_BasicSizeCheck,
+		ID_BasicSizeSldr,
+		ID_BasicSizeText,
 
 		//analysis page
 		//selection
@@ -205,8 +208,7 @@ public:
 		wxGetApp().Yield();
 	}
 
-	void GenerateAdv(bool refine);
-	void GenerateBsc(bool refine);
+	void GenerateComp(int type);
 
 private:
 	wxWindow* m_frame;
@@ -273,10 +275,12 @@ private:
 	double m_angle_thresh;
 
 	//basic settings
-	bool m_basic_diff;
 	int m_basic_iter;
 	double m_basic_thresh;
+	bool m_basic_diff;
 	double m_basic_falloff;
+	bool m_basic_size;
+	int m_basic_size_lm;
 
 	//selection
 	bool m_use_min;
@@ -401,13 +405,16 @@ private:
 	wxTextCtrl* m_angle_thresh_text;
 
 	//basic page
-	wxCheckBox* m_basic_diff_check;
 	wxSlider* m_basic_iter_sldr;
 	wxTextCtrl* m_basic_iter_text;
 	wxSlider* m_basic_thresh_sldr;
 	wxTextCtrl* m_basic_thresh_text;
+	wxCheckBox* m_basic_diff_check;
 	wxSlider* m_basic_falloff_sldr;
 	wxTextCtrl* m_basic_falloff_text;
+	wxCheckBox* m_basic_size_check;
+	wxSlider* m_basic_size_sldr;
+	wxTextCtrl* m_basic_size_text;
 
 	//analysis page
 	//selection
@@ -442,6 +449,9 @@ private:
 	wxTextCtrl* m_stat_text;
 
 private:
+	void GenerateAdv(bool refine);
+	void GenerateBsc(bool refine);
+
 	wxWindow* Create3DAnalysisPage(wxWindow *parent);
 	wxWindow* Create2DAnalysisPage(wxWindow *parent);
 	wxWindow* CreateAnalysisPage(wxWindow *parent);
@@ -549,14 +559,18 @@ private:
 	void OnAngleThreshText(wxCommandEvent &event);
 
 	//basic page
-	void EnableBasicDiff(bool value);
-	void OnBasicDiffCheck(wxCommandEvent &event);
 	void OnBasicIterSldr(wxScrollEvent &event);
 	void OnBasicIterText(wxCommandEvent &event);
 	void OnBasicThreshSldr(wxScrollEvent &event);
 	void OnBasicThreshText(wxCommandEvent &event);
+	void EnableBasicDiff(bool value);
+	void OnBasicDiffCheck(wxCommandEvent &event);
 	void OnBasicFalloffSldr(wxScrollEvent &event);
 	void OnBasicFalloffText(wxCommandEvent &event);
+	void EnableBasicSize(bool value);
+	void OnBasicSizeCheck(wxCommandEvent &event);
+	void OnBasicSizeSldr(wxScrollEvent &event);
+	void OnBasicSizeText(wxCommandEvent &event);
 
 	//analysis page
 	void OnCompIdText(wxCommandEvent &event);

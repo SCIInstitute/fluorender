@@ -1,7 +1,8 @@
 [tasks]
 tasknum=2
 [tasks/task0]
-type=save_mask
-[tasks/task1]
 type=generate_comp
 mode=0
+[tasks/task1]
+type=save_mask
+toffset=1

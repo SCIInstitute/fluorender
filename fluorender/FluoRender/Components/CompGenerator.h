@@ -58,6 +58,7 @@ namespace FL
 		void ShuffleID_3D();
 		void ShuffleID_2D();
 		void Grow3D(bool, int, float, float);
+		void Grow3DSized(bool, int, float, float, int);
 		void InitialGrow(bool, int,
 			float, float,
 			float, float,

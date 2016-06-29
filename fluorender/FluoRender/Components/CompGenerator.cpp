@@ -380,6 +380,135 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 	clReleaseProgram(program);
 }
 
+void ComponentGenerator::Grow3DSized(bool diffuse, int iter, float tran, float falloff, int size_lm)
+{
+	GET_VOLDATA
+
+	unsigned int* mask32 = new unsigned int[nx*ny*nz];
+	memset(mask32, 0, sizeof(unsigned int)*nx*ny*nz);
+
+	cl_int err;
+	size_t program_size = strlen(str_cl_brainbow_3d_sized);
+	cl_program program = clCreateProgramWithSource(m_context, 1,
+		&str_cl_brainbow_3d_sized, &program_size, &err);
+	if (err != CL_SUCCESS) return;
+	err = clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
+	if (err != CL_SUCCESS)
+	{
+		char *program_log;
+		size_t log_size;
+		clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG,
+			0, NULL, &log_size);
+		program_log = new char[log_size + 1];
+		program_log[log_size] = '\0';
+		clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG,
+			log_size + 1, program_log, NULL);
+		cout << program_log;
+		delete[]program_log;
+		return;
+	}
+	cl_command_queue queue = clCreateCommandQueue(m_context, m_device, 0, &err);
+	cl_kernel kernel_0 = clCreateKernel(program, "kernel_0", &err);
+	cl_kernel kernel_1 = clCreateKernel(program, "kernel_1", &err);
+	cl_kernel kernel_2 = clCreateKernel(program, "kernel_2", &err);
+
+	unsigned int rcnt = 0;
+	unsigned int seed = iter > 10 ? iter : 11;
+	size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
+	size_t local_size[3] = { 1, 1, 1 };
+	float scl_ff = diffuse ? falloff : 0.0f;
+	float grad_ff = diffuse ? falloff : 0.0f;
+
+	//data
+	cl_image_format image_format;
+	image_format.image_channel_order = CL_R;
+	if (bits == 8)
+		image_format.image_channel_data_type = CL_UNORM_INT8;
+	else if (bits == 16)
+		image_format.image_channel_data_type = CL_UNORM_INT16;
+	cl_image_desc image_desc;
+	image_desc.image_type = CL_MEM_OBJECT_IMAGE3D;
+	image_desc.image_width = nx;
+	image_desc.image_height = ny;
+	image_desc.image_depth = nz;
+	image_desc.image_array_size = 0;
+	image_desc.image_row_pitch = 0;
+	image_desc.image_slice_pitch = 0;
+	image_desc.num_mip_levels = 0;
+	image_desc.num_samples = 0;
+	image_desc.buffer = 0;
+	cl_mem data_buffer = clCreateImage(m_context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+		&image_format, &image_desc, bits == 8 ? (void*)(val8) : (void*)(val16), &err);
+	//mask
+	cl_mem mask_buffer = clCreateBuffer(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+		sizeof(unsigned int)*nx*ny*nz, mask32, &err);
+	//label
+	cl_mem label_buffer = clCreateBuffer(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+		sizeof(unsigned int)*nx*ny*nz, val32, &err);
+	//counter
+	cl_mem rcnt_buffer = clCreateBuffer(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+		sizeof(unsigned int), &rcnt, &err);
+	//set
+	//kernel 0
+	err = clSetKernelArg(kernel_0, 0, sizeof(cl_mem), &mask_buffer);
+	err = clSetKernelArg(kernel_0, 1, sizeof(cl_mem), &label_buffer);
+	err = clSetKernelArg(kernel_0, 2, sizeof(unsigned int), (void*)(&nx));
+	err = clSetKernelArg(kernel_0, 3, sizeof(unsigned int), (void*)(&ny));
+	err = clSetKernelArg(kernel_0, 4, sizeof(unsigned int), (void*)(&nz));
+	//kernel 1
+	err = clSetKernelArg(kernel_1, 0, sizeof(cl_mem), &mask_buffer);
+	err = clSetKernelArg(kernel_1, 1, sizeof(cl_mem), &label_buffer);
+	err = clSetKernelArg(kernel_1, 2, sizeof(unsigned int), (void*)(&nx));
+	err = clSetKernelArg(kernel_1, 3, sizeof(unsigned int), (void*)(&ny));
+	err = clSetKernelArg(kernel_1, 4, sizeof(unsigned int), (void*)(&nz));
+	//kernel 2
+	err = clSetKernelArg(kernel_2, 0, sizeof(cl_mem), &data_buffer);
+	err = clSetKernelArg(kernel_1, 1, sizeof(cl_mem), &mask_buffer);
+	err = clSetKernelArg(kernel_2, 2, sizeof(cl_mem), &label_buffer);
+	err = clSetKernelArg(kernel_2, 3, sizeof(unsigned int), (void*)(&nx));
+	err = clSetKernelArg(kernel_2, 4, sizeof(unsigned int), (void*)(&ny));
+	err = clSetKernelArg(kernel_2, 5, sizeof(unsigned int), (void*)(&nz));
+	err = clSetKernelArg(kernel_2, 6, sizeof(cl_mem), &rcnt_buffer);
+	err = clSetKernelArg(kernel_2, 7, sizeof(unsigned int), (void*)(&seed));
+	err = clSetKernelArg(kernel_2, 8, sizeof(float), (void*)(&tran));
+	err = clSetKernelArg(kernel_2, 9, sizeof(float), (void*)(&scl_ff));
+	err = clSetKernelArg(kernel_2, 10, sizeof(float), (void*)(&grad_ff));
+	err = clSetKernelArg(kernel_2, 11, sizeof(unsigned int), (void*)(&size_lm));
+
+	for (int j = 0; j < iter; ++j)
+	{
+		err = clEnqueueWriteBuffer(
+			queue, mask_buffer,
+			CL_TRUE, 0, sizeof(unsigned int)*nx*ny*nz,
+			mask32, 0, NULL, NULL);
+		err = clEnqueueNDRangeKernel(queue, kernel_0, 3, NULL, global_size,
+			local_size, 0, NULL, NULL);
+		err = clEnqueueNDRangeKernel(queue, kernel_1, 3, NULL, global_size,
+			local_size, 0, NULL, NULL);
+		err = clEnqueueNDRangeKernel(queue, kernel_2, 3, NULL, global_size,
+			local_size, 0, NULL, NULL);
+
+		clFinish(queue);
+		m_sig_progress();
+	}
+
+	err = clEnqueueReadBuffer(
+		queue, label_buffer,
+		CL_TRUE, 0, sizeof(unsigned int)*nx*ny*nz,
+		val32, 0, NULL, NULL);
+
+	clReleaseMemObject(data_buffer);
+	clReleaseMemObject(label_buffer);
+	clReleaseMemObject(mask_buffer);
+	clReleaseMemObject(rcnt_buffer);
+	clReleaseKernel(kernel_0);
+	clReleaseKernel(kernel_1);
+	clReleaseKernel(kernel_2);
+	clReleaseCommandQueue(queue);
+	clReleaseProgram(program);
+	delete[] mask32;
+}
+
 void ComponentGenerator::InitialGrow(bool param_tr, int iter,
 	float tran, float tran2, float scl_ff, float scl_ff2,
 	float grad_ff, float grad_ff2, float var_ff, float var_ff2,
@@ -707,7 +836,7 @@ void ComponentGenerator::SizedGrow(bool param_tr, int iter,
 	clReleaseKernel(kernel_2);
 	clReleaseCommandQueue(queue);
 	clReleaseProgram(program);
-	delete[]mask32;
+	delete[] mask32;
 }
 
 void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)

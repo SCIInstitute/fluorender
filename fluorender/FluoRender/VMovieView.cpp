@@ -1025,6 +1025,12 @@ void VMovieView::OnRunScriptChk(wxCommandEvent &event)
 		m_notebook->SetPageText(2, "4D Script (Enabled)");
 	else
 		m_notebook->SetPageText(2, "4D Script");
+	if (vr_frame)
+	{
+		VRenderView* vrv = (*vr_frame->GetViewList())[m_views_cmb->GetCurrentSelection()];
+		if (vrv)
+			vrv->RefreshGL();
+	}
 }
 
 void VMovieView::OnScriptFileEdit(wxCommandEvent &event)
