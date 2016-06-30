@@ -463,7 +463,7 @@ void ComponentGenerator::Grow3DSized(bool diffuse, int iter, float tran, float f
 	err = clSetKernelArg(kernel_1, 4, sizeof(unsigned int), (void*)(&nz));
 	//kernel 2
 	err = clSetKernelArg(kernel_2, 0, sizeof(cl_mem), &data_buffer);
-	err = clSetKernelArg(kernel_1, 1, sizeof(cl_mem), &mask_buffer);
+	err = clSetKernelArg(kernel_2, 1, sizeof(cl_mem), &mask_buffer);
 	err = clSetKernelArg(kernel_2, 2, sizeof(cl_mem), &label_buffer);
 	err = clSetKernelArg(kernel_2, 3, sizeof(unsigned int), (void*)(&nx));
 	err = clSetKernelArg(kernel_2, 4, sizeof(unsigned int), (void*)(&ny));
