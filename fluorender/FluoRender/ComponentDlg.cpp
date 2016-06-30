@@ -2824,6 +2824,7 @@ void ComponentDlg::GenerateBsc(bool refine)
 	{
 		vd->AddEmptyLabel();
 		cg.ShuffleID_3D();
+		//vd->AddEmptyLabel(1);
 	}
 
 	if (m_basic_size)

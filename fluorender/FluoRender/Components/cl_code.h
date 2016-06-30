@@ -213,28 +213,49 @@ const char* str_cl_brainbow_3d_sized = \
 "	return grad;\n" \
 "}\n" \
 "\n" \
+"unsigned int __attribute((always_inline)) reverse_bit(unsigned int val, unsigned int len)\n" \
+"{\n" \
+"	unsigned int res = val;\n" \
+"	int s = len - 1;\n" \
+"	for (val >>= 1; val; val >>= 1)\n" \
+"	{\n" \
+"		res <<= 1;\n" \
+"		res |= val & 1;\n" \
+"		s--;\n" \
+"	}\n" \
+"	res <<= s;\n" \
+"	res <<= 32-len;\n" \
+"	res >>= 32-len;\n" \
+"	return res;\n" \
+"}\n" \
 "__kernel void kernel_0(\n" \
 "	__global unsigned int* mask,\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
-"	unsigned int nz)\n" \
+"	unsigned int nz,\n" \
+"	unsigned int len)\n" \
 "{\n" \
 "	unsigned int i = (unsigned int)(get_global_id(0));\n" \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	unsigned int value_l = label[index];\n" \
-"	if (value_l)\n" \
+"	if (value_l == 0)\n" \
+"		return;\n" \
+"	unsigned int res = nx*ny*nz - value_l;\n" \
+"	unsigned int x = 0;\n" \
+"	unsigned int y = 0;\n" \
+"	unsigned int z = 0;\n" \
+"	unsigned int ii;\n" \
+"	for (ii=0; ii<len; ++ii)\n" \
 "	{\n" \
-"		value_l--;\n" \
-"		unsigned int olk = value_l / (nx*ny);\n" \
-"		unsigned int rem = value_l % (nx*ny);\n" \
-"		unsigned int oli = rem % nx;\n" \
-"		unsigned int olj = rem / nx;\n" \
-"		index = nx*ny*olk + nx*olj + oli;\n" \
-"		atomic_inc(&(mask[index]));\n" \
+"		x |= (1<<3*ii);\n" \
+"		y |= ;\n" \
+"		z |= ;\n" \
 "	}\n" \
+"	index = nx*ny*z + nx*y + x;\n" \
+"	atomic_inc(&(mask[index]));\n" \
 "}\n" \
 "__kernel void kernel_1(\n" \
 "	__global unsigned int* mask,\n" \
@@ -376,9 +397,9 @@ const char* str_cl_shuffle_id_3d = \
 "		res = 0;\n" \
 "		for (ii=0; ii<len; ++ii)\n" \
 "		{\n" \
-"			res |= (1<<ii & x)<<(2*ii);\n" \
-"			res |= (1<<ii & y)<<(2*ii+1);\n" \
-"			res |= (1<<ii & z)<<(2*ii+2);\n" \
+"			res |= (1<<ii & x)<<(3*ii);\n" \
+"			res |= (1<<ii & y)<<(3*ii+1);\n" \
+"			res |= (1<<ii & z)<<(3*ii+2);\n" \
 "		}\n" \
 "		label[index] = nx*ny*nz - res;\n" \
 "	}\n" \
