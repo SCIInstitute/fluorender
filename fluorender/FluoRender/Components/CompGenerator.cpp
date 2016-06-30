@@ -418,6 +418,13 @@ void ComponentGenerator::Grow3DSized(bool diffuse, int iter, float tran, float f
 	size_t local_size[3] = { 1, 1, 1 };
 	float scl_ff = diffuse ? falloff : 0.0f;
 	float grad_ff = diffuse ? falloff : 0.0f;
+	unsigned int len = 0;
+	unsigned int r = Max(nx, Max(ny, nz));
+	while (r > 0)
+	{
+		r /= 2;
+		len++;
+	}
 
 	//data
 	cl_image_format image_format;
@@ -455,12 +462,14 @@ void ComponentGenerator::Grow3DSized(bool diffuse, int iter, float tran, float f
 	err = clSetKernelArg(kernel_0, 2, sizeof(unsigned int), (void*)(&nx));
 	err = clSetKernelArg(kernel_0, 3, sizeof(unsigned int), (void*)(&ny));
 	err = clSetKernelArg(kernel_0, 4, sizeof(unsigned int), (void*)(&nz));
+	err = clSetKernelArg(kernel_0, 5, sizeof(unsigned int), (void*)(&len));
 	//kernel 1
 	err = clSetKernelArg(kernel_1, 0, sizeof(cl_mem), &mask_buffer);
 	err = clSetKernelArg(kernel_1, 1, sizeof(cl_mem), &label_buffer);
 	err = clSetKernelArg(kernel_1, 2, sizeof(unsigned int), (void*)(&nx));
 	err = clSetKernelArg(kernel_1, 3, sizeof(unsigned int), (void*)(&ny));
 	err = clSetKernelArg(kernel_1, 4, sizeof(unsigned int), (void*)(&nz));
+	err = clSetKernelArg(kernel_1, 5, sizeof(unsigned int), (void*)(&len));
 	//kernel 2
 	err = clSetKernelArg(kernel_2, 0, sizeof(cl_mem), &data_buffer);
 	err = clSetKernelArg(kernel_2, 1, sizeof(cl_mem), &mask_buffer);

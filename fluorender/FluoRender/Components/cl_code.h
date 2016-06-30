@@ -250,10 +250,13 @@ const char* str_cl_brainbow_3d_sized = \
 "	unsigned int ii;\n" \
 "	for (ii=0; ii<len; ++ii)\n" \
 "	{\n" \
-"		x |= (1<<3*ii);\n" \
-"		y |= ;\n" \
-"		z |= ;\n" \
+"		x |= (1<<(3*ii) & res)>>ii;\n" \
+"		y |= (1<<(3*ii+1) & res)>>ii;\n" \
+"		z |= (1<<(3*ii+2) & res)>>ii;\n" \
 "	}\n" \
+"	x = reverse_bit(x, len);\n" \
+"	y = reverse_bit(y, len);\n" \
+"	z = reverse_bit(z, len);\n" \
 "	index = nx*ny*z + nx*y + x;\n" \
 "	atomic_inc(&(mask[index]));\n" \
 "}\n" \
@@ -262,24 +265,33 @@ const char* str_cl_brainbow_3d_sized = \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
-"	unsigned int nz)\n" \
+"	unsigned int nz,\n" \
+"	unsigned int len)\n" \
 "{\n" \
 "	unsigned int i = (unsigned int)(get_global_id(0));\n" \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	unsigned int value_l = label[index];\n" \
-"	if (value_l)\n" \
+"	if (value_l == 0)\n" \
+"		return;\n" \
+"	unsigned int res = nx*ny*nz - value_l;\n" \
+"	unsigned int x = 0;\n" \
+"	unsigned int y = 0;\n" \
+"	unsigned int z = 0;\n" \
+"	unsigned int ii;\n" \
+"	for (ii=0; ii<len; ++ii)\n" \
 "	{\n" \
-"		value_l--;\n" \
-"		unsigned int olk = value_l / (nx*ny);\n" \
-"		unsigned int rem = value_l % (nx*ny);\n" \
-"		unsigned int oli = rem % nx;\n" \
-"		unsigned int olj = rem / nx;\n" \
-"		unsigned int index2 = nx*ny*olk + nx*olj + oli;\n" \
-"		if (index != index2)\n" \
-"			mask[index] = mask[index2];\n" \
+"		x |= (1<<(3*ii) & res)>>ii;\n" \
+"		y |= (1<<(3*ii+1) & res)>>ii;\n" \
+"		z |= (1<<(3*ii+2) & res)>>ii;\n" \
 "	}\n" \
+"	x = reverse_bit(x, len);\n" \
+"	y = reverse_bit(y, len);\n" \
+"	z = reverse_bit(z, len);\n" \
+"	unsigned int index2 = nx*ny*z + nx*y + x;\n" \
+"	if (index != index2)\n" \
+"		mask[index] = mask[index2];\n" \
 "}\n" \
 "__kernel void kernel_2(\n" \
 "	__read_only image3d_t data,\n" \
