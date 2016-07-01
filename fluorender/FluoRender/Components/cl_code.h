@@ -250,9 +250,9 @@ const char* str_cl_brainbow_3d_sized = \
 "	unsigned int ii;\n" \
 "	for (ii=0; ii<len; ++ii)\n" \
 "	{\n" \
-"		x |= (1<<(3*ii) & res)>>ii;\n" \
-"		y |= (1<<(3*ii+1) & res)>>ii;\n" \
-"		z |= (1<<(3*ii+2) & res)>>ii;\n" \
+"		x |= (1<<(3*ii) & res)>>(2*ii);\n" \
+"		y |= (1<<(3*ii+1) & res)>>(2*ii+1);\n" \
+"		z |= (1<<(3*ii+2) & res)>>(2*ii+2);\n" \
 "	}\n" \
 "	x = reverse_bit(x, len);\n" \
 "	y = reverse_bit(y, len);\n" \
@@ -282,9 +282,9 @@ const char* str_cl_brainbow_3d_sized = \
 "	unsigned int ii;\n" \
 "	for (ii=0; ii<len; ++ii)\n" \
 "	{\n" \
-"		x |= (1<<(3*ii) & res)>>ii;\n" \
-"		y |= (1<<(3*ii+1) & res)>>ii;\n" \
-"		z |= (1<<(3*ii+2) & res)>>ii;\n" \
+"		x |= (1<<(3*ii) & res)>>(2*ii);\n" \
+"		y |= (1<<(3*ii+1) & res)>>(2*ii+1);\n" \
+"		z |= (1<<(3*ii+2) & res)>>(2*ii+2);\n" \
 "	}\n" \
 "	x = reverse_bit(x, len);\n" \
 "	y = reverse_bit(y, len);\n" \
@@ -409,9 +409,9 @@ const char* str_cl_shuffle_id_3d = \
 "		res = 0;\n" \
 "		for (ii=0; ii<len; ++ii)\n" \
 "		{\n" \
-"			res |= (1<<ii & x)<<(3*ii);\n" \
-"			res |= (1<<ii & y)<<(3*ii+1);\n" \
-"			res |= (1<<ii & z)<<(3*ii+2);\n" \
+"			res |= (1<<ii & x)<<(2*ii);\n" \
+"			res |= (1<<ii & y)<<(2*ii+1);\n" \
+"			res |= (1<<ii & z)<<(2*ii+2);\n" \
 "		}\n" \
 "		label[index] = nx*ny*nz - res;\n" \
 "	}\n" \

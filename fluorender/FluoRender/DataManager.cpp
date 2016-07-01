@@ -675,9 +675,9 @@ void VolumeData::SetShuffledID(unsigned int* val)
 				res = 0;
 				for (unsigned int ii=0; ii<len; ii++)
 				{
-					res |= (1<<ii & x)<<(3*ii);
-					res |= (1<<ii & y)<<(3*ii+1);
-					res |= (1<<ii & z)<<(3*ii+2);
+					res |= (1<<ii & x)<<(2*ii);
+					res |= (1<<ii & y)<<(2*ii+1);
+					res |= (1<<ii & z)<<(2*ii+2);
 				}
 				unsigned int index = m_res_x*m_res_y*k + m_res_x*j + i;
 				val[index] = m_res_x*m_res_y*m_res_z - res;

@@ -363,10 +363,10 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 		err = clEnqueueNDRangeKernel(queue, kernel, 3, NULL, global_size,
 			local_size, 0, NULL, NULL);
 
-		clFinish(queue);
 		m_sig_progress();
 	}
 
+	clFinish(queue);
 	err = clEnqueueReadBuffer(
 		queue, label_buffer,
 		CL_TRUE, 0, sizeof(unsigned int)*nx*ny*nz,
@@ -486,21 +486,24 @@ void ComponentGenerator::Grow3DSized(bool diffuse, int iter, float tran, float f
 
 	for (int j = 0; j < iter; ++j)
 	{
-		err = clEnqueueWriteBuffer(
-			queue, mask_buffer,
-			CL_TRUE, 0, sizeof(unsigned int)*nx*ny*nz,
-			mask32, 0, NULL, NULL);
-		err = clEnqueueNDRangeKernel(queue, kernel_0, 3, NULL, global_size,
-			local_size, 0, NULL, NULL);
-		err = clEnqueueNDRangeKernel(queue, kernel_1, 3, NULL, global_size,
-			local_size, 0, NULL, NULL);
+		//err = clEnqueueWriteBuffer(
+		//	queue, mask_buffer,
+		//	CL_TRUE, 0, sizeof(unsigned int)*nx*ny*nz,
+		//	mask32, 0, NULL, NULL);
+		if (j)
+		{
+			err = clEnqueueNDRangeKernel(queue, kernel_0, 3, NULL, global_size,
+				local_size, 0, NULL, NULL);
+			err = clEnqueueNDRangeKernel(queue, kernel_1, 3, NULL, global_size,
+				local_size, 0, NULL, NULL);
+		}
 		err = clEnqueueNDRangeKernel(queue, kernel_2, 3, NULL, global_size,
 			local_size, 0, NULL, NULL);
 
-		clFinish(queue);
 		m_sig_progress();
 	}
 
+	clFinish(queue);
 	err = clEnqueueReadBuffer(
 		queue, label_buffer,
 		CL_TRUE, 0, sizeof(unsigned int)*nx*ny*nz,
