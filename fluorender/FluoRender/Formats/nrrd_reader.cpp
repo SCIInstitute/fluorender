@@ -325,13 +325,13 @@ wstring NRRDReader::GetCurDataName(int t, int c)
 wstring NRRDReader::GetCurMaskName(int t, int c)
 {
 	wstring data_name = m_4d_seq[t].filename;
-	wstring mask_name = data_name.substr(0, data_name.find_last_of('.')) + ".msk";
+	wstring mask_name = data_name.substr(0, data_name.find_last_of('.')) + L".msk";
 	return mask_name;
 }
 
 wstring NRRDReader::GetCurLabelName(int t, int c)
 {
 	wstring data_name = m_4d_seq[t].filename;
-	wstring label_name = data_name.substr(0, data_name.find_last_of('.')) + ".lbl";
+	wstring label_name = data_name.substr(0, data_name.find_last_of('.')) + L".lbl";
 	return label_name;
 }

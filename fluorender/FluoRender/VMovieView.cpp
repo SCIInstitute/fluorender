@@ -1037,8 +1037,10 @@ void VMovieView::OnScriptFileEdit(wxCommandEvent &event)
 {
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetSettingDlg())
-		vr_frame->GetSettingDlg()->SetScriptFile(
-			m_script_file_text->GetValue());
+    {
+        wxString str = m_script_file_text->GetValue();
+		vr_frame->GetSettingDlg()->SetScriptFile(str);
+    }
 }
 
 void VMovieView::OnScriptClearBtn(wxCommandEvent &event)
