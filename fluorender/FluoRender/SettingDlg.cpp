@@ -615,6 +615,7 @@ void SettingDlg::GetSettings()
 	m_force_brick_size = 128;
 	m_up_time = 100;
 	m_update_order = 0;
+	m_invalidate_tex = false;
 	m_point_volume_mode = 0;
 	m_ruler_use_transf = false;
 	m_ruler_time_dep = true;
@@ -809,6 +810,12 @@ void SettingDlg::GetSettings()
 	{
 		fconfig.SetPath("/update order");
 		fconfig.Read("value", &m_update_order);
+	}
+	//invalidate texture
+	if (fconfig.Exists("/invalidate tex"))
+	{
+		fconfig.SetPath("/invalidate tex");
+		fconfig.Read("value", &m_invalidate_tex);
 	}
 	//point volume mode
 	if (fconfig.Exists("/point volume mode"))
@@ -1046,6 +1053,10 @@ void SettingDlg::SaveSettings()
 	//update order
 	fconfig.SetPath("/update order");
 	fconfig.Write("value", m_update_order);
+
+	//invalidate texture
+	fconfig.SetPath("/invalidate tex");
+	fconfig.Write("value", m_invalidate_tex);
 
 	//point volume mode
 	fconfig.SetPath("/point volume mode");

@@ -4685,6 +4685,7 @@ void VRenderFrame::SetTextureRendererSettings()
 	TextureRenderer::set_force_brick_size(m_setting_dlg->GetForceBrickSize());
 	TextureRenderer::set_up_time(m_setting_dlg->GetResponseTime());
 	TextureRenderer::set_update_order(m_setting_dlg->GetUpdateOrder());
+	TextureRenderer::set_invalidate_tex(m_setting_dlg->GetInvalidateTex());
 }
 
 void VRenderFrame::OnFacebook(wxCommandEvent& WXUNUSED(event))

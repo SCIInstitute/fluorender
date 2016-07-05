@@ -168,6 +168,8 @@ public:
 	void SetResponseTime(int val) {m_up_time = val;}
 	int GetUpdateOrder() {return m_mem_swap?m_update_order:0;}
 	void SetUpdateOrder(int val) {m_update_order = val;}
+	bool GetInvalidateTex() { return m_invalidate_tex; }
+	void SetInvalidateTex(bool val) { m_invalidate_tex = val; }
 	//point volume mode
 	int GetPointVolumeMode() {return m_point_volume_mode;}
 	void SetPointVolumeMode(int mode) {m_point_volume_mode = mode;}
@@ -250,6 +252,7 @@ private:
 							//final value is determined by both reading from the card and this value
 	int m_up_time;			//response time in ms
 	int m_update_order;		//0:back-to-front; 1:front-to-back
+	bool m_invalidate_tex;	//invalidate texture in every loop
 	//point volume mode
 	int m_point_volume_mode;
 	//ruler use transfer function

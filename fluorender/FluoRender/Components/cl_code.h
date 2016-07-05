@@ -417,6 +417,34 @@ const char* str_cl_shuffle_id_3d = \
 "	}\n" \
 "}\n";
 
+const char* str_cl_order_id_2d = \
+"const sampler_t samp =\n" \
+"	CLK_NORMALIZED_COORDS_FALSE|\n" \
+"	CLK_ADDRESS_REPEAT|\n" \
+"	CLK_FILTER_NEAREST;\n" \
+"\n" \
+"\n" \
+"__kernel void kernel_0(\n" \
+"	__read_only image3d_t data,\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz)\n" \
+"{\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
+"	unsigned int index = nx*ny*k + nx*j + i;\n" \
+"	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
+"	if (value < 0.001)\n" \
+"		label[index] = 0;\n" \
+"	else if (i<1 || i>nx-2 ||\n" \
+"			j<1 || j>ny-2)\n" \
+"		label[index] = 0;\n" \
+"	else\n" \
+"		label[index] = index + 1;\n" \
+"}\n";
+
 const char* str_cl_shuffle_id_2d = \
 "const sampler_t samp =\n" \
 "	CLK_NORMALIZED_COORDS_FALSE|\n" \
@@ -444,8 +472,10 @@ const char* str_cl_shuffle_id_2d = \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
-"	unsigned int nz)\n" \
+"	unsigned int nz,\n" \
+"	unsigned int len)\n" \
 "{\n" \
+"	unsigned int x, y, res, ii;\n" \
 "	unsigned int i = (unsigned int)(get_global_id(0));\n" \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
@@ -457,7 +487,18 @@ const char* str_cl_shuffle_id_2d = \
 "			j<1 || j>ny-2)\n" \
 "		label[index] = 0;\n" \
 "	else\n" \
-"		label[index] = index + 1;\n" \
+"	{\n" \
+"		x = reverse_bit(i, len);\n" \
+"		y = reverse_bit(j, len);\n" \
+"		res = 0;\n" \
+"		res |= k<<(2*len);\n" \
+"		for (ii=0; ii<len; ++ii)\n" \
+"		{\n" \
+"			res |= (1<<ii & x)<<(ii);\n" \
+"			res |= (1<<ii & y)<<(ii+1);\n" \
+"		}\n" \
+"		label[index] = nx*ny - res;\n" \
+"	}\n" \
 "}\n";
 
 const char* str_cl_grow_size = \
@@ -485,46 +526,75 @@ const char* str_cl_grow_size = \
 "	return 0.586f*grad1 + 0.414f*grad2r;\n" \
 "}\n" \
 "\n" \
+"unsigned int __attribute((always_inline)) reverse_bit(unsigned int val, unsigned int len)\n" \
+"{\n" \
+"	unsigned int res = val;\n" \
+"	int s = len - 1;\n" \
+"	for (val >>= 1; val; val >>= 1)\n" \
+"	{\n" \
+"		res <<= 1;\n" \
+"		res |= val & 1;\n" \
+"		s--;\n" \
+"	}\n" \
+"	res <<= s;\n" \
+"	res <<= 32-len;\n" \
+"	res >>= 32-len;\n" \
+"	return res;\n" \
+"}\n" \
 "__kernel void kernel_0(\n" \
 "	__global unsigned int* mask,\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
-"	unsigned int ny)\n" \
+"	unsigned int ny,\n" \
+"	unsigned int len)\n" \
 "{\n" \
 "	unsigned int i = (unsigned int)(get_global_id(0));\n" \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
 "	unsigned int index = nx*j + i;\n" \
 "	unsigned int value_l = label[index];\n" \
-"	if (value_l)\n" \
+"	if (value_l == 0)\n" \
+"		return;\n" \
+"	unsigned int res = nx*ny - value_l;\n" \
+"	unsigned int x = 0;\n" \
+"	unsigned int y = 0;\n" \
+"	unsigned int ii;\n" \
+"	for (ii=0; ii<len; ++ii)\n" \
 "	{\n" \
-"		value_l--;\n" \
-"		unsigned int rem = value_l % (nx*ny);\n" \
-"		unsigned int oli = rem % nx;\n" \
-"		unsigned int olj = rem / nx;\n" \
-"		index = nx*olj + oli;\n" \
-"		atomic_inc(&(mask[index]));\n" \
+"		x |= (1<<(2*ii) & res)>>(ii);\n" \
+"		y |= (1<<(2*ii+1) & res)>>(ii+1);\n" \
 "	}\n" \
+"	x = reverse_bit(x, len);\n" \
+"	y = reverse_bit(y, len);\n" \
+"	index = nx*y + x;\n" \
+"	atomic_inc(&(mask[index]));\n" \
 "}\n" \
 "__kernel void kernel_1(\n" \
 "	__global unsigned int* mask,\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
-"	unsigned int ny)\n" \
+"	unsigned int ny,\n" \
+"	unsigned int len)\n" \
 "{\n" \
 "	unsigned int i = (unsigned int)(get_global_id(0));\n" \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
 "	unsigned int index = nx*j + i;\n" \
 "	unsigned int value_l = label[index];\n" \
-"	if (value_l)\n" \
+"	if (value_l == 0)\n" \
+"		return;\n" \
+"	unsigned int res = nx*ny - value_l;\n" \
+"	unsigned int x = 0;\n" \
+"	unsigned int y = 0;\n" \
+"	unsigned int ii;\n" \
+"	for (ii=0; ii<len; ++ii)\n" \
 "	{\n" \
-"		value_l--;\n" \
-"		unsigned int rem = value_l % (nx*ny);\n" \
-"		unsigned int oli = rem % nx;\n" \
-"		unsigned int olj = rem / nx;\n" \
-"		unsigned int index2 = nx*olj + oli;\n" \
-"		if (index != index2)\n" \
-"			mask[index] = mask[index2];\n" \
+"		x |= (1<<(2*ii) & res)>>(ii);\n" \
+"		y |= (1<<(2*ii+1) & res)>>(ii+1);\n" \
 "	}\n" \
+"	x = reverse_bit(x, len);\n" \
+"	y = reverse_bit(y, len);\n" \
+"	unsigned int index2 = nx*y + x;\n" \
+"	if (index != index2)\n" \
+"		mask[index] = mask[index2];\n" \
 "}\n" \
 "__kernel void kernel_2(\n" \
 "	__read_only image2d_t data,\n" \

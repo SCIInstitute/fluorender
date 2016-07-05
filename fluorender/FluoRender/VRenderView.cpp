@@ -5829,19 +5829,22 @@ void VRenderGLView::ForceDraw()
 
 	goTimer->sample();
 
+	if (TextureRenderer::get_invalidate_tex())
+	{
 #ifdef _WIN32
-	for (int i=0; i<m_dp_tex_list.size(); ++i)
-		glInvalidateTexImage(m_dp_tex_list[i], 0);
-	glInvalidateTexImage(m_tex_paint, 0);
-	glInvalidateTexImage(m_tex_final, 0);
-	glInvalidateTexImage(m_tex, 0);
-	glInvalidateTexImage(m_tex_temp, 0);
-	glInvalidateTexImage(m_tex_wt2, 0);
-	glInvalidateTexImage(m_tex_ol1, 0);
-	glInvalidateTexImage(m_tex_ol2, 0);
-	glInvalidateTexImage(m_tex_pick, 0);
-	glInvalidateTexImage(m_tex_pick_depth, 0);
+		for (int i = 0; i < m_dp_tex_list.size(); ++i)
+			glInvalidateTexImage(m_dp_tex_list[i], 0);
+		glInvalidateTexImage(m_tex_paint, 0);
+		glInvalidateTexImage(m_tex_final, 0);
+		glInvalidateTexImage(m_tex, 0);
+		glInvalidateTexImage(m_tex_temp, 0);
+		glInvalidateTexImage(m_tex_wt2, 0);
+		glInvalidateTexImage(m_tex_ol1, 0);
+		glInvalidateTexImage(m_tex_ol2, 0);
+		glInvalidateTexImage(m_tex_pick, 0);
+		glInvalidateTexImage(m_tex_pick_depth, 0);
 #endif
+	}
 
 	SwapBuffers();
 

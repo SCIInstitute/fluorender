@@ -2759,25 +2759,38 @@ void ComponentDlg::GenerateAdv(bool refine)
 	if (!refine)
 	{
 		vd->AddEmptyLabel();
-		cg.OrderID_2D();
+		cg.ShuffleID_2D();
 	}
+
+	double scale = vd->GetScalarScale();
+	double scale2 = scale * scale;
 
 	if (m_initial_grow)
 		cg.InitialGrow(m_ig_param_transition, m_ig_iterations,
-			float(m_ig_translate), float(m_ig_translate2),
-			float(m_ig_scalar_falloff), float(m_ig_scalar_falloff2),
-			float(m_ig_grad_falloff), float(m_ig_grad_falloff2),
-			float(m_ig_var_falloff), float(m_ig_var_falloff2),
-			float(m_ig_angle_falloff), float(m_ig_angle_falloff2));
+			float(m_ig_translate / scale),
+			float(m_ig_translate2 / scale),
+			float(m_ig_scalar_falloff / scale2),
+			float(m_ig_scalar_falloff2 / scale2),
+			float(m_ig_grad_falloff / scale2),
+			float(m_ig_grad_falloff2 / scale2),
+			float(m_ig_var_falloff / scale2),
+			float(m_ig_var_falloff2 / scale2),
+			float(m_ig_angle_falloff / scale2),
+			float(m_ig_angle_falloff2 / scale2));
 
 	if (m_sized_grow)
 		cg.SizedGrow(m_sg_param_transition, m_sg_iterations,
 			(unsigned int)(m_sg_size_limiter), (unsigned int)(m_sg_size_limiter2),
-			float(m_sg_translate), float(m_sg_translate2),
-			float(m_sg_scalar_falloff), float(m_sg_scalar_falloff2),
-			float(m_sg_grad_falloff), float(m_sg_grad_falloff2),
-			float(m_sg_var_falloff), float(m_sg_var_falloff2),
-			float(m_sg_angle_falloff), float(m_sg_angle_falloff2));
+			float(m_sg_translate / scale),
+			float(m_sg_translate2 / scale),
+			float(m_sg_scalar_falloff / scale2),
+			float(m_sg_scalar_falloff2 / scale2),
+			float(m_sg_grad_falloff / scale2),
+			float(m_sg_grad_falloff2 / scale2),
+			float(m_sg_var_falloff / scale2),
+			float(m_sg_var_falloff2 / scale2),
+			float(m_sg_angle_falloff / scale2),
+			float(m_sg_angle_falloff2 / scale2));
 
 	if (m_cleanup)
 		cg.Cleanup(m_cl_iterations, (unsigned int)(m_cl_size_limiter));
@@ -2824,15 +2837,20 @@ void ComponentDlg::GenerateBsc(bool refine)
 	{
 		vd->AddEmptyLabel();
 		cg.ShuffleID_3D();
-		//vd->AddEmptyLabel(1);
 	}
+
+	double scale = vd->GetScalarScale();
+	double scale2 = scale * scale;
 
 	if (m_basic_size)
 		cg.Grow3DSized(m_basic_diff, m_basic_iter,
-			float(m_basic_thresh), float(m_basic_falloff), m_basic_size_lm);
+			float(m_basic_thresh / scale),
+			float(m_basic_falloff / scale2),
+			m_basic_size_lm);
 	else
 		cg.Grow3D(m_basic_diff, m_basic_iter,
-			float(m_basic_thresh), float(m_basic_falloff));
+			float(m_basic_thresh / scale),
+			float(m_basic_falloff / scale2));
 
 	vd->GetVR()->clear_tex_current();
 	m_view->RefreshGL();
