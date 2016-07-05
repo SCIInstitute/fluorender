@@ -574,6 +574,7 @@ public:
 	static VRenderGLView* m_master_linked_view;
 
 private:
+	wxSize m_size;
 	wxString m_GLversion;
 	wxGLContext* m_glRC;
 	bool m_sharedRC;

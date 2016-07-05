@@ -444,6 +444,11 @@ VRenderGLView::~VRenderGLView()
 
 void VRenderGLView::OnResize(wxSizeEvent& event)
 {
+	if (m_size == event.GetSize())
+		return;
+	else
+		m_size = event.GetSize();
+
 	int i;
 	for (i=0; i<(int)m_vd_pop_list.size(); i++)
 	{
@@ -5752,7 +5757,7 @@ void VRenderGLView::ForceDraw()
 	}
 #endif
 #ifdef _DARWIN
-    SetCurrent(*m_glRC);
+	SetCurrent(*m_glRC);
 #endif
 	Init();
 	wxPaintDC dc(this);
@@ -9283,11 +9288,13 @@ void VRenderGLView::HaltLoopUpdate()
 void VRenderGLView::RefreshGL(int debug_code, bool erase, bool start_loop)
 {
 	//for debugging refresh events
-	/*std::wostringstream os;
+#ifdef _DEBUG
+	std::wostringstream os;
 	os << "refresh" << "\t" <<
 		debug_code << "\t" <<
 		m_interactive << "\n";
-	OutputDebugString(os.str().c_str());*/
+	OutputDebugString(os.str().c_str());
+#endif
 	m_updating = true;
 	if (start_loop)
 		StartLoopUpdate();
@@ -10597,6 +10604,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			//pick polygon models
 			if (m_pick)
 				Pick();
+			//RefreshGL(27);
+			return;
 		}
 		else if (m_int_mode == 2)
 		{
@@ -10605,12 +10614,16 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			Segment();
 			m_int_mode = 4;
 			m_force_clear = true;
+			RefreshGL(27);
+			return;
 		}
 		else if (m_int_mode == 5 &&
 			!event.AltDown())
 		{
 			//add one point to a ruler
 			AddRulerPoint(event.GetX(), event.GetY());
+			RefreshGL(27);
+			return;
 		}
 		else if (m_int_mode == 6)
 		{
@@ -10627,15 +10640,14 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				AddPaintRulerPoint();
 			m_int_mode = 8;
 			m_force_clear = true;
+			RefreshGL(27);
+			return;
 		}
-
-		RefreshGL(27);
-		return;
 	}
 	if (event.MiddleUp())
 	{
 		//SetSortBricks();
-		RefreshGL(28);
+		//RefreshGL(28);
 		return;
 	}
 	if (event.RightUp())
@@ -10655,10 +10667,10 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				AddRulerPoint(event.GetX(), event.GetY());
 				FinishRuler();
 			}
+			RefreshGL(29);
+			return;
 		}
 		//SetSortBricks();
-		RefreshGL(29);
-		return;
 	}
 
 	//mouse dragging
@@ -11303,6 +11315,19 @@ wxPanel(parent, id, pos, size, style),
 			ResetIsolation().
 			EndList();
 		sharedContext = new wxGLContext(m_glview, NULL, &contextAttrs);
+		if (!sharedContext->IsOK())
+		{
+			contextAttrs.PlatformDefaults().EndList();
+			sharedContext = new wxGLContext(m_glview, NULL, &contextAttrs);
+		}
+		if (!sharedContext->IsOK())
+		{
+			wxMessageBox("FluoRender needs an OpenGL 3.3 capable driver.\n" \
+				"Please update your graphics card driver or upgrade your graphics card.\n",
+				"Graphics card error", wxOK | wxICON_ERROR, this);
+			delete sharedContext;
+			sharedContext = 0;
+		}
 		sharedContext->SetCurrent(*m_glview);
 		m_glview->SetCurrent(*sharedContext);
 		m_glview->m_glRC = sharedContext;
@@ -11310,7 +11335,7 @@ wxPanel(parent, id, pos, size, style),
 	}
 	m_glview->SetCanFocus(false);
 	m_view_sizer->Add(m_glview, 1, wxEXPAND);
-#ifdef _WIN32
+#ifdef _DEBUG
 	//example Pixel format descriptor detailing each part
 	//PIXELFORMATDESCRIPTOR pfd = { 
 	// sizeof(PIXELFORMATDESCRIPTOR),  //  size of this pfd  
@@ -13295,7 +13320,7 @@ void VRenderView::OnAovSldrIdle(wxIdleEvent& event)
 		{
 			m_glview->m_draw_clip = true;
 			m_glview->m_clip_mask = -1;
-			RefreshGL();
+			RefreshGL(true);
 			m_draw_clip = true;
 		}
 	}
@@ -13304,7 +13329,7 @@ void VRenderView::OnAovSldrIdle(wxIdleEvent& event)
 		if (m_draw_clip)
 		{
 			m_glview->m_draw_clip = false;
-			RefreshGL();
+			RefreshGL(true);
 			m_draw_clip = false;
 		}
 	}
