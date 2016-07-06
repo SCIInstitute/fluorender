@@ -11317,8 +11317,9 @@ wxPanel(parent, id, pos, size, style),
 		sharedContext = new wxGLContext(m_glview, NULL, &contextAttrs);
 		if (!sharedContext->IsOK())
 		{
-			contextAttrs.PlatformDefaults().EndList();
-			sharedContext = new wxGLContext(m_glview, NULL, &contextAttrs);
+			wxGLContextAttrs contextAttrs2;
+			contextAttrs2.PlatformDefaults().EndList();
+			sharedContext = new wxGLContext(m_glview, NULL, &contextAttrs2);
 		}
 		if (!sharedContext->IsOK())
 		{
@@ -11328,10 +11329,13 @@ wxPanel(parent, id, pos, size, style),
 			delete sharedContext;
 			sharedContext = 0;
 		}
-		sharedContext->SetCurrent(*m_glview);
-		m_glview->SetCurrent(*sharedContext);
-		m_glview->m_glRC = sharedContext;
-		m_glview->m_set_gl = true;
+		if (sharedContext)
+		{
+			sharedContext->SetCurrent(*m_glview);
+			m_glview->SetCurrent(*sharedContext);
+			m_glview->m_glRC = sharedContext;
+			m_glview->m_set_gl = true;
+		}
 	}
 	m_glview->SetCanFocus(false);
 	m_view_sizer->Add(m_glview, 1, wxEXPAND);
