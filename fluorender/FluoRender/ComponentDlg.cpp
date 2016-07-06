@@ -2882,12 +2882,20 @@ void ComponentDlg::GenerateComp(int type)
 				vd->AddEmptyMask(1);
 			vd->AddEmptyLabel();
 			cg.ShuffleID_3D();
+
+			double scale = vd->GetScalarScale();
+			double scale2 = scale * scale;
+
 			if (m_basic_size)
 				cg.Grow3DSized(m_basic_diff, m_basic_iter,
-					float(m_basic_thresh), float(m_basic_falloff), m_basic_size_lm);
+					float(m_basic_thresh / scale),
+					float(m_basic_falloff / scale2),
+					m_basic_size_lm);
 			else
 				cg.Grow3D(m_basic_diff, m_basic_iter,
-					float(m_basic_thresh), float(m_basic_falloff));
+					float(m_basic_thresh / scale),
+					float(m_basic_falloff / scale2));
+
 			vd->GetVR()->clear_tex_current();
 			m_view->RefreshGL();
 		}

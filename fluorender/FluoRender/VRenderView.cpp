@@ -11265,6 +11265,7 @@ wxPanel(parent, id, pos, size, style),
 	m_dft_scale_factor(1.0),
 	m_dft_scale_factor_mode(true)
 {
+	wxLogNull logNo;
 	//full frame
 	m_full_frame = new wxFrame((wxFrame*)NULL, wxID_ANY, "FluoRender");
 	m_view_sizer = new wxBoxSizer(wxVERTICAL);
@@ -11317,9 +11318,9 @@ wxPanel(parent, id, pos, size, style),
 		sharedContext = new wxGLContext(m_glview, NULL, &contextAttrs);
 		if (!sharedContext->IsOK())
 		{
-			wxGLContextAttrs contextAttrs2;
-			contextAttrs2.PlatformDefaults().EndList();
-			sharedContext = new wxGLContext(m_glview, NULL, &contextAttrs2);
+			contextAttrs.Reset();
+			contextAttrs.PlatformDefaults().EndList();
+			sharedContext = new wxGLContext(m_glview, NULL, &contextAttrs);
 		}
 		if (!sharedContext->IsOK())
 		{
