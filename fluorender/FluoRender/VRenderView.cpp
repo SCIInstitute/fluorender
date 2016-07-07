@@ -3372,6 +3372,8 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	vd->GetVR()->set_shading(true);
+	bool alpha = vd->GetEnableAlpha();
+	vd->SetEnableAlpha(true);
 	vd->SetMode(2);
 	int colormode = vd->GetColormapMode();
 	vd->SetStreamMode(2);
@@ -3380,6 +3382,7 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 	vd->Draw(!m_persp, m_interactive, m_scale_factor);
 	vd->RestoreMode();
 	vd->SetColormapMode(colormode);
+	vd->SetEnableAlpha(alpha);
 
 	//bind fbo for final composition
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);

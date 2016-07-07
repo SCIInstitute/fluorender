@@ -223,6 +223,18 @@ private:
 	void GetSettings();
 	bool SetSpacings();
 
+	//enable/disable
+	void EnableAlpha();
+	void DisableAlpha();
+	void EnableShading();
+	void DisableShading();
+	void EnableShadow();
+	void DisableShadow();
+	void EnableColormap();
+	void DisableColormap();
+	void EnableMip();
+	void DisableMip();
+
 	//1
 	void OnGammaSync(wxMouseEvent& event);
 	void OnGammaChange(wxScrollEvent &event);
