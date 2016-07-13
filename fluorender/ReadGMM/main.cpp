@@ -18,7 +18,7 @@ vector<wstring> m_xml_list;
 vector<wstring> m_lbl_list;
 int m_digits = 0;
 FL::TrackMap m_track_map;
-FL::TrackMapProcessor tm_processor;
+FL::TrackMapProcessor m_tm_processor;
 
 void ProcessInputName(wstring &infilename)
 {
@@ -115,10 +115,6 @@ glm::mat3 ReadMatrix(string &str)
 		if (!ss)
 			break;
 		matrix[cx][cy] = v;
-		//if (cx == cy)
-		//	matrix[cx][cy] = 0.001;
-		//else
-		//	matrix[cx][cy] = 0.0;
 		cx++;
 		if (cx == 3)
 		{
@@ -135,13 +131,9 @@ double Gaussian(glm::vec3 x, glm::vec3 m, glm::mat3 s)
 	glm::vec3 x2 = s * x1;
 	double p = glm::dot(x1, x2);
 	return exp(-p);
-	//if (glm::length(x-m) < 4.0)
-	//	return 1;
-	//else
-	//	return 0;
 }
 
-void AddLabel(wxXmlNode* node, unsigned int* label_data)
+void AddLabel(int num, wxXmlNode* node, unsigned int* label_data)
 {
 	unsigned long ival;
 	double dval;
@@ -150,8 +142,6 @@ void AddLabel(wxXmlNode* node, unsigned int* label_data)
 	//id
 	strItem = node->GetAttribute("id");
 	strItem.ToULong(&ival);
-	//if (ival)
-	//	return;
 	unsigned int id = ival + 1;//nonzero
 	//parent
 	strItem = node->GetAttribute("parent");
@@ -172,6 +162,7 @@ void AddLabel(wxXmlNode* node, unsigned int* label_data)
 	glm::mat3 corr = ReadMatrix(strItem.ToStdString());
 
 	//fill label
+	unsigned int cell_size = 100;
 	for (int i=0; i<nx; ++i)
 	for (int j=0; j<ny; ++j)
 	for (int k=0; k<nz; ++k)
@@ -188,7 +179,27 @@ void AddLabel(wxXmlNode* node, unsigned int* label_data)
 		{
 			unsigned long long index = nx*ny*k + nx*j + i;
 			label_data[index] = id;
+			cell_size++;
 		}
+	}
+	//add to track map
+	FL::pCell cell = FL::pCell(new FL::Cell(id));
+	FLIVR::Point center(centroid.x, centroid.y, centroid.z);
+	cell->SetCenter(center);
+	cell->SetSizeUi(cell_size);
+	cell->SetSizeF(cell_size);
+	FL::CellListIter iter;
+	m_tm_processor.AddCell(m_track_map, cell, num, iter);
+	if (prev_id)
+	{
+		//link
+		FL::CellList list1, list2;
+		list1.insert(pair<unsigned int, FL::pCell>
+			(id, cell));
+		FL::pCell cell2 = FL::pCell(new FL::Cell(prev_id));
+		list2.insert(pair<unsigned int, FL::pCell>
+			(prev_id, cell2));
+		m_tm_processor.LinkCells(m_track_map, list1, list2, num, num-1, false);
 	}
 }
 
@@ -212,7 +223,7 @@ void ProcessXml(int num)
 	{
 		if (child->GetName() == "GaussianMixtureModel")
 		{
-			AddLabel(child, data_label);
+			AddLabel(num, child, data_label);
 		}
 		child = child->GetNext();
 	}
@@ -234,7 +245,7 @@ void ProcessXml(int num)
 
 int main(int argc, char* argv[])
 {
-	if (argc < 6)
+	if (argc < 7)
 	{
 		printf("Wrong arguments.\n");
 		return 1;
@@ -246,12 +257,16 @@ int main(int argc, char* argv[])
 	nx = atoi(argv[3]);
 	ny = atoi(argv[4]);
 	nz = atoi(argv[5]);
+	string trackfile = argv[6];
 
 	ProcessInputName(in_filename);
 	ProcessOutputName(out_filename);
 
 	for (int i = 0; i < m_xml_list.size(); ++i)
 		ProcessXml(i);
+
+	//save trackmap
+	m_tm_processor.Export(m_track_map, trackfile);
 
 	printf("All done. Quit.\n");
 
