@@ -340,7 +340,6 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    add_executable(ReadGMM
       ${readgmm_src} ${readgmm_hdr}
       $<TARGET_OBJECTS:FORMATS_OBJ>
-      $<TARGET_OBJECTS:TRACKING_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>)
 
@@ -415,7 +414,6 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       add_executable(ReadGMM
          ${readgmm_src} ${readgmm_hdr}
 		  $<TARGET_OBJECTS:FORMATS_OBJ>
-		  $<TARGET_OBJECTS:TRACKING_OBJ>
 		  $<TARGET_OBJECTS:POLE_OBJ>
 		  $<TARGET_OBJECTS:TEEM_OBJ>)
    endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
