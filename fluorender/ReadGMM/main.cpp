@@ -140,29 +140,35 @@ void AddLabel(int num, wxXmlNode* node, unsigned int* label_data)
 	wxString strItem;
 
 	//id
-	strItem = node->GetAttribute("id");
+	if (!node->GetAttribute("id", &strItem))
+		return;
 	strItem.ToULong(&ival);
 	unsigned int id = ival + 1;//nonzero
 	//parent
-	strItem = node->GetAttribute("parent");
+	if (!node->GetAttribute("parent", &strItem))
+		return;
 	strItem.ToULong(&ival);
 	unsigned int prev_id = ival + 1;
 	//splitScore
-	strItem = node->GetAttribute("splitScore");
+	if (!node->GetAttribute("splitScore", &strItem))
+		return;
 	strItem.ToDouble(&dval);
 	double uncertainty = 5.0 - dval;
 	//scale
-	strItem = node->GetAttribute("scale");
+	if (!node->GetAttribute("scale", &strItem))
+		return;
 	glm::vec3 scale = ReadVector(strItem.ToStdString());
 	//centroid
-	strItem = node->GetAttribute("m");
+	if (!node->GetAttribute("m", &strItem))
+		return;
 	glm::vec3 centroid = ReadVector(strItem.ToStdString());
 	//corr
-	strItem = node->GetAttribute("W");
+	if (!node->GetAttribute("W", &strItem))
+		return;
 	glm::mat3 corr = ReadMatrix(strItem.ToStdString());
 
 	//fill label
-	unsigned int cell_size = 100;
+	unsigned int cell_size = 0;
 	for (int i=0; i<nx; ++i)
 	for (int j=0; j<ny; ++j)
 	for (int k=0; k<nz; ++k)
@@ -182,6 +188,8 @@ void AddLabel(int num, wxXmlNode* node, unsigned int* label_data)
 			cell_size++;
 		}
 	}
+	if (!cell_size)
+		return;
 	//add to track map
 	FL::pCell cell = FL::pCell(new FL::Cell(id));
 	FLIVR::Point center(centroid.x, centroid.y, centroid.z);

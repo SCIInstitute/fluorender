@@ -2245,12 +2245,12 @@ bool TrackMapProcessor::LinkCells(TrackMap& track_map,
 		cell = cell_list1.find(cell_id);
 		if (cell == cell_list1.end())
 			continue;// AddCell(track_map, citer1->second, frame1, cell);
-		else
-			cell->second->Set(citer1->second);
+		//else
+		//	cell->second->Set(citer1->second);
 		pVertex vert1 = cell->second->GetVertex().lock();
 		if (vert1)
 		{
-			vert1->Update();
+			//vert1->Update();
 			vlist1.insert(std::pair<unsigned int, pVertex>
 				(vert1->Id(), vert1));
 		}
@@ -2262,8 +2262,8 @@ bool TrackMapProcessor::LinkCells(TrackMap& track_map,
 		cell = cell_list2.find(cell_id);
 		if (cell == cell_list2.end())
 			continue;// AddCell(track_map, citer2->second, frame2, cell);
-		else
-			cell->second->Set(citer2->second);
+		//else
+		//	cell->second->Set(citer2->second);
 		pVertex vert2 = cell->second->GetVertex().lock();
 		if (vert2)
 		{
