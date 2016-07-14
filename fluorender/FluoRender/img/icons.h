@@ -259,7 +259,8 @@ public:
 	const static unsigned char plus_png[721];
 	/* rewind.png - 1065 bytes */
 	const static unsigned char rewind_png[1065];
-
+	/* playscript.png - 892 bytes */
+	const static unsigned char playscript_png[892];
 
 	//volume property icons
 	/* mip.png - 436 bytes */

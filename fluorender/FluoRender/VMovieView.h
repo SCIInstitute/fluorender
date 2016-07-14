@@ -214,9 +214,9 @@ private:
 private:
 	wxWindow* CreateSimplePage(wxWindow *parent);
 	wxWindow* CreateAdvancedPage(wxWindow *parent);
-	wxWindow* CreateScriptPage(wxWindow *parent);
 	wxWindow* CreateAutoKeyPage(wxWindow *parent);
 	wxWindow* CreateCroppingPage(wxWindow *parent);
+	wxWindow* CreateScriptPage(wxWindow *parent);
 	void Init();
 	void GenKey();
 
