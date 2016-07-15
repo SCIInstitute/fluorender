@@ -2859,11 +2859,11 @@ void ComponentDlg::GenerateBsc(bool refine)
 	connection.disconnect();
 }
 
-void ComponentDlg::GenerateComp(int type)
+void ComponentDlg::GenerateComp(int type, int mode)
 {
 	switch (type)
 	{
-	case 0:
+	case 0://basic
 		{
 			if (!m_view)
 				return;
@@ -2880,8 +2880,12 @@ void ComponentDlg::GenerateComp(int type)
 			}
 			else
 				vd->AddEmptyMask(1);
-			vd->AddEmptyLabel();
-			cg.ShuffleID_3D();
+
+			if (mode == 0)
+			{
+				vd->AddEmptyLabel();
+				cg.ShuffleID_3D();
+			}
 
 			double scale = vd->GetScalarScale();
 			double scale2 = scale * scale;

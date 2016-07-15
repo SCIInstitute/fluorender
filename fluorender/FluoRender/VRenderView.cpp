@@ -5723,12 +5723,14 @@ void VRenderGLView::RunCompAnalysis(wxFileConfig &fconfig)
 
 void VRenderGLView::RunGenerateComp(wxFileConfig &fconfig)
 {
-	int ival;
-	fconfig.Read("mode", &ival, 0);
+	int type;
+	fconfig.Read("type", &type, 0);
+	int mode;
+	fconfig.Read("mode", &mode, 0);
 
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetComponentDlg())
-		vr_frame->GetComponentDlg()->GenerateComp(ival);
+		vr_frame->GetComponentDlg()->GenerateComp(type, mode);
 }
 
 //draw
