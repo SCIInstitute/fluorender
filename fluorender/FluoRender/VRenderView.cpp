@@ -11337,7 +11337,7 @@ wxPanel(parent, id, pos, size, style),
 		}
 		if (sharedContext)
 		{
-			sharedContext->SetCurrent(*m_glview);
+			//sharedContext->SetCurrent(*m_glview);
 			m_glview->SetCurrent(*sharedContext);
 			m_glview->m_glRC = sharedContext;
 			m_glview->m_set_gl = true;

@@ -2449,6 +2449,10 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 	m_color2_text->ChangeValue(wxString::Format("%d , %d , %d",
 		wxc.Red(), wxc.Green(), wxc.Blue()));
 	m_color2_btn->SetColour(wxc);
+	//colormap mode
+	m_vd->SetColormapMode(mgr->m_vol_cmm);
+	bool colormap = m_vd->GetColormapMode() == 1;
+	m_colormap_tool->ToggleTool(ID_ColormapEnableChk, colormap);
 	//colormap
 	m_colormap_combo->SetSelection(mgr->m_vol_cmp);
 	m_vd->SetColormap(mgr->m_vol_cmp);
@@ -2515,6 +2519,27 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 		m_group->SetShadow(bval);
 	else
 		m_vd->SetShadow(bval);
+
+	if (m_vd->GetEnableAlpha())
+		EnableAlpha();
+	else
+		DisableAlpha();
+	if (m_vd->GetVR()->get_shading())
+		EnableShading();
+	else
+		DisableShading();
+	if (m_vd->GetShadow())
+		EnableShadow();
+	else
+		DisableShadow();
+	if (m_vd->GetColormapMode() == 1)
+		EnableColormap();
+	else
+		DisableColormap();
+	if (m_vd->GetMode() == 1)
+		EnableMip();
+	else
+		DisableMip();
 
 	//apply all
 	RefreshVRenderViews(false, true);

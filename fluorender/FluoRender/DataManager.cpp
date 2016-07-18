@@ -3841,6 +3841,7 @@ m_vol_exb(0.0),
 	m_vol_ysp(1.0),
 	m_vol_zsp(2.5),
 	m_vol_lum(1.0),
+	m_vol_cmm(0),
 	m_vol_cmp(0),
 	m_vol_lcm(0.0),
 	m_vol_hcm(1.0),
@@ -3898,6 +3899,8 @@ m_vol_exb(0.0),
 		m_vol_zsp = val;
 	if (fconfig.Read("luminance", &val))
 		m_vol_lum = val;
+	if (fconfig.Read("colormap_mode", &ival))
+		m_vol_cmm = ival;
 	if (fconfig.Read("colormap", &ival))
 		m_vol_cmp = ival;
 	if (fconfig.Read("colormap_low", &val))
@@ -3996,6 +3999,7 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 		vd->SetMaterial(m_vol_lsh, diff, spec, m_vol_hsh);
 		if (!vd->GetSpcFromFile())
 			vd->SetSpacings(m_vol_xsp, m_vol_ysp, m_vol_zsp);
+		vd->SetColormapMode(m_vol_cmm);
 		vd->SetColormap(m_vol_cmp);
 		vd->SetColormapValues(m_vol_lcm, m_vol_hcm);
 
