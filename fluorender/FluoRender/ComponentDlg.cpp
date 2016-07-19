@@ -128,13 +128,16 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_TEXT(ID_AngleThreshText, ComponentDlg::OnAngleThreshText)
 
 	//basic page
-	EVT_CHECKBOX(ID_BasicDiffCheck, ComponentDlg::OnBasicDiffCheck)
 	EVT_COMMAND_SCROLL(ID_BasicIterSldr, ComponentDlg::OnBasicIterSldr)
 	EVT_TEXT(ID_BasicIterText, ComponentDlg::OnBasicIterText)
 	EVT_COMMAND_SCROLL(ID_BasicThreshSldr, ComponentDlg::OnBasicThreshSldr)
 	EVT_TEXT(ID_BasicThreshText, ComponentDlg::OnBasicThreshText)
+	EVT_CHECKBOX(ID_BasicDiffCheck, ComponentDlg::OnBasicDiffCheck)
 	EVT_COMMAND_SCROLL(ID_BasicFalloffSldr, ComponentDlg::OnBasicFalloffSldr)
 	EVT_TEXT(ID_BasicFalloffText, ComponentDlg::OnBasicFalloffText)
+	EVT_CHECKBOX(ID_BasicSizeCheck, ComponentDlg::OnBasicSizeCheck)
+	EVT_COMMAND_SCROLL(ID_BasicSizeSldr, ComponentDlg::OnBasicSizeSldr)
+	EVT_TEXT(ID_BasicSizeText, ComponentDlg::OnBasicSizeText)
 
 	//analysis page
 	EVT_TEXT(ID_CompIdText, ComponentDlg::OnCompIdText)
@@ -157,7 +160,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_BUTTON(ID_OutputAnnBtn, ComponentDlg::OnOutputAnn)
 
 	//execute
-    EVT_NOTEBOOK_PAGE_CHANGED(ID_Notebook, ComponentDlg::OnNotebook)
+	EVT_NOTEBOOK_PAGE_CHANGED(ID_Notebook, ComponentDlg::OnNotebook)
 	EVT_BUTTON(ID_GenerateBtn, ComponentDlg::OnGenerate)
 	EVT_BUTTON(ID_RefineBtn, ComponentDlg::OnRefine)
 	EVT_BUTTON(ID_AnalyzeBtn, ComponentDlg::OnAnalyze)
@@ -174,36 +177,36 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 	wxFloatingPointValidator<double> vald_fp3(3);
 
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	m_basic_diff_check = new wxCheckBox(page, ID_BasicDiffCheck, "Enable Diffusion",
-		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-	sizer1->Add(5, 5);
-	sizer1->Add(m_basic_diff_check, 0, wxALIGN_CENTER);
-
-	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Iterations:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_basic_iter_sldr = new wxSlider(page, ID_BasicIterSldr, 0, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_basic_iter_text = new wxTextCtrl(page, ID_BasicIterText, "0",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-	sizer2->Add(5, 5);
-	sizer2->Add(st, 0, wxALIGN_CENTER);
-	sizer2->Add(m_basic_iter_sldr, 1, wxEXPAND);
-	sizer2->Add(m_basic_iter_text, 0, wxALIGN_CENTER);
-	sizer2->Add(5, 5);
+	sizer1->Add(5, 5);
+	sizer1->Add(st, 0, wxALIGN_CENTER);
+	sizer1->Add(m_basic_iter_sldr, 1, wxEXPAND);
+	sizer1->Add(m_basic_iter_text, 0, wxALIGN_CENTER);
+	sizer1->Add(5, 5);
 
-	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Threshold:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_basic_thresh_sldr = new wxSlider(page, ID_BasicThreshSldr, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_basic_thresh_text = new wxTextCtrl(page, ID_BasicThreshText, "0.000",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_fp3);
+	sizer2->Add(5, 5);
+	sizer2->Add(st, 0, wxALIGN_CENTER);
+	sizer2->Add(m_basic_thresh_sldr, 1, wxEXPAND);
+	sizer2->Add(m_basic_thresh_text, 0, wxALIGN_CENTER);
+	sizer2->Add(5, 5);
+
+	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
+	m_basic_diff_check = new wxCheckBox(page, ID_BasicDiffCheck, "Enable Diffusion",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 	sizer3->Add(5, 5);
-	sizer3->Add(st, 0, wxALIGN_CENTER);
-	sizer3->Add(m_basic_thresh_sldr, 1, wxEXPAND);
-	sizer3->Add(m_basic_thresh_text, 0, wxALIGN_CENTER);
-	sizer3->Add(5, 5);
+	sizer3->Add(m_basic_diff_check, 0, wxALIGN_CENTER);
 
 	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Falloff:",
@@ -218,6 +221,25 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 	sizer4->Add(m_basic_falloff_text, 0, wxALIGN_CENTER);
 	sizer4->Add(5, 5);
 
+	wxBoxSizer* sizer5 = new wxBoxSizer(wxHORIZONTAL);
+	m_basic_size_check = new wxCheckBox(page, ID_BasicSizeCheck, "Enable Size Limiter",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+	sizer5->Add(5, 5);
+	sizer5->Add(m_basic_size_check, 0, wxALIGN_CENTER);
+
+	wxBoxSizer* sizer6 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Size:",
+		wxDefaultPosition, wxSize(100, 23));
+	m_basic_size_sldr = new wxSlider(page, ID_BasicSizeSldr, 100, 0, 500,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_basic_size_text = new wxTextCtrl(page, ID_BasicSizeText, "100",
+		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
+	sizer6->Add(5, 5);
+	sizer6->Add(st, 0, wxALIGN_CENTER);
+	sizer6->Add(m_basic_size_sldr, 1, wxEXPAND);
+	sizer6->Add(m_basic_size_text, 0, wxALIGN_CENTER);
+	sizer6->Add(5, 5);
+
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
 	sizerv->Add(10, 10);
 	sizerv->Add(sizer1, 0, wxEXPAND);
@@ -227,6 +249,10 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 	sizerv->Add(sizer3, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 	sizerv->Add(sizer4, 0, wxEXPAND);
+	sizerv->Add(10, 10);
+	sizerv->Add(sizer5, 0, wxEXPAND);
+	sizerv->Add(10, 10);
+	sizerv->Add(sizer6, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 
 	page->SetSizer(sizerv);
@@ -937,6 +963,8 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	m_generate_prg = new wxGauge(this, ID_GeneratePrg, 100,
 		wxDefaultPosition, wxSize(-1, 18));
+	m_use_sel_chk = new wxCheckBox(this, ID_UseSelChk, "Use Sel.",
+		wxDefaultPosition, wxDefaultSize);
 	m_generate_btn = new wxButton(this, ID_GenerateBtn, "Generate",
 		wxDefaultPosition, wxSize(75, -1));
 	m_refine_btn = new wxButton(this, ID_RefineBtn, "Refine",
@@ -948,6 +976,7 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	sizer1->Add(10, 10);
 	sizer1->Add(m_generate_prg, 1, wxEXPAND);
 	sizer1->Add(10, 10);
+	sizer1->Add(m_use_sel_chk, 0, wxALIGN_CENTER);
 	sizer1->Add(m_generate_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_refine_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_analyze_btn, 0, wxALIGN_CENTER);
@@ -1055,11 +1084,14 @@ void ComponentDlg::Update()
 	m_angle_thresh_text->SetValue(wxString::Format("%.3f", m_angle_thresh));
 
 	//basic page
-	m_basic_diff_check->SetValue(m_basic_diff);
-	EnableBasicDiff(m_basic_diff);
 	m_basic_iter_text->SetValue(wxString::Format("%d", m_basic_iter));
 	m_basic_thresh_text->SetValue(wxString::Format("%.3f", m_basic_thresh));
+	m_basic_diff_check->SetValue(m_basic_diff);
+	EnableBasicDiff(m_basic_diff);
 	m_basic_falloff_text->SetValue(wxString::Format("%.3f", m_basic_falloff));
+	m_basic_size_check->SetValue(m_basic_size);
+	EnableBasicSize(m_basic_size);
+	m_basic_size_text->SetValue(wxString::Format("%d", m_basic_size_lm));
 
 	//selection
 	if (m_use_min)
@@ -1135,10 +1167,12 @@ void ComponentDlg::GetSettings()
 	m_angle_thresh = 0.7;
 
 	//basic page
-	m_basic_diff = false;
 	m_basic_iter = 100;
 	m_basic_thresh = 0.5;
+	m_basic_diff = false;
 	m_basic_falloff = 0.01;
+	m_basic_size = false;
+	m_basic_size_lm = 100;
 
 	//selection
 	m_use_min = false;
@@ -1233,10 +1267,12 @@ void ComponentDlg::LoadSettings(wxString filename)
 	if (get_basic)
 	{
 		//
-		fconfig.Read("basic_diff", &m_basic_diff);
 		fconfig.Read("basic_iter", &m_basic_iter);
 		fconfig.Read("basic_thresh", &m_basic_thresh);
+		fconfig.Read("basic_diff", &m_basic_diff);
 		fconfig.Read("basic_falloff", &m_basic_falloff);
+		fconfig.Read("basic_size", &m_basic_size);
+		fconfig.Read("basic_size_lm", &m_basic_size_lm);
 		//selection
 		fconfig.Read("use_min", &m_use_min);
 		fconfig.Read("min_num", &m_min_num);
@@ -1315,10 +1351,12 @@ void ComponentDlg::SaveSettings(wxString filename)
 	fconfig.Write("angle_thresh", m_angle_thresh);
 
 	//basic settings
-	fconfig.Write("basic_diff", m_basic_diff);
 	fconfig.Write("basic_iter", m_basic_iter);
 	fconfig.Write("basic_thresh", m_basic_thresh);
+	fconfig.Write("basic_diff", m_basic_diff);
 	fconfig.Write("basic_falloff", m_basic_falloff);
+	fconfig.Write("basic_size", m_basic_size);
+	fconfig.Write("basic_size_lm", m_basic_size_lm);
 
 	//selection
 	fconfig.Write("use_min", m_use_min);
@@ -2183,26 +2221,6 @@ void ComponentDlg::OnAngleThreshText(wxCommandEvent &event)
 }
 
 //basic page
-void ComponentDlg::EnableBasicDiff(bool value)
-{
-	m_basic_diff = value;
-	if (m_basic_diff)
-	{
-		m_basic_falloff_sldr->Enable();
-		m_basic_falloff_text->Enable();
-	}
-	else
-	{
-		m_basic_falloff_sldr->Disable();
-		m_basic_falloff_text->Disable();
-	}
-}
-
-void ComponentDlg::OnBasicDiffCheck(wxCommandEvent &event)
-{
-	EnableBasicDiff(m_basic_diff_check->GetValue());
-}
-
 void ComponentDlg::OnBasicIterSldr(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
@@ -2231,6 +2249,26 @@ void ComponentDlg::OnBasicThreshText(wxCommandEvent &event)
 	m_basic_thresh_sldr->SetValue(int(m_basic_thresh * 1000.0 + 0.5));
 }
 
+void ComponentDlg::EnableBasicDiff(bool value)
+{
+	m_basic_diff = value;
+	if (m_basic_diff)
+	{
+		m_basic_falloff_sldr->Enable();
+		m_basic_falloff_text->Enable();
+	}
+	else
+	{
+		m_basic_falloff_sldr->Disable();
+		m_basic_falloff_text->Disable();
+	}
+}
+
+void ComponentDlg::OnBasicDiffCheck(wxCommandEvent &event)
+{
+	EnableBasicDiff(m_basic_diff_check->GetValue());
+}
+
 void ComponentDlg::OnBasicFalloffSldr(wxScrollEvent &event)
 {
 	double val = (double)event.GetPosition() / 1000.0;
@@ -2243,6 +2281,40 @@ void ComponentDlg::OnBasicFalloffText(wxCommandEvent &event)
 	m_basic_falloff_text->GetValue().ToDouble(&val);
 	m_basic_falloff = val;
 	m_basic_falloff_sldr->SetValue(int(m_basic_falloff * 1000.0 + 0.5));
+}
+
+void ComponentDlg::EnableBasicSize(bool value)
+{
+	m_basic_size = value;
+	if (m_basic_size)
+	{
+		m_basic_size_sldr->Enable();
+		m_basic_size_text->Enable();
+	}
+	else
+	{
+		m_basic_size_sldr->Disable();
+		m_basic_size_text->Disable();
+	}
+}
+
+void ComponentDlg::OnBasicSizeCheck(wxCommandEvent &event)
+{
+	EnableBasicSize(m_basic_size_check->GetValue());
+}
+
+void ComponentDlg::OnBasicSizeSldr(wxScrollEvent &event)
+{
+	int val = event.GetPosition();
+	m_basic_size_text->SetValue(wxString::Format("%d", val));
+}
+
+void ComponentDlg::OnBasicSizeText(wxCommandEvent &event)
+{
+	long val = 0;
+	m_basic_size_text->GetValue().ToLong(&val);
+	m_basic_size_lm = (int)val;
+	m_basic_size_sldr->SetValue(m_basic_size_lm);
 }
 
 //analysis page
@@ -2461,12 +2533,14 @@ void ComponentDlg::EnableGenerate()
 	case 0:
 	case 1:
 	default:
+		m_use_sel_chk->Show();
 		m_generate_btn->Show();
 		m_refine_btn->Show();
 		m_analyze_btn->Hide();
 		m_analyze_sel_btn->Hide();
 		break;
 	case 2:
+		m_use_sel_chk->Hide();
 		m_generate_btn->Hide();
 		m_refine_btn->Hide();
 		m_analyze_btn->Show();
@@ -2680,28 +2754,43 @@ void ComponentDlg::GenerateAdv(bool refine)
 		cg.m_sig_progress.connect(boost::bind(
 			&ComponentDlg::UpdateProgress, this));
 
+	cg.SetUseMask(m_use_sel_chk->GetValue());
+
 	if (!refine)
 	{
 		vd->AddEmptyLabel();
-		cg.OrderID_2D();
+		cg.ShuffleID_2D();
 	}
+
+	double scale = vd->GetScalarScale();
+	double scale2 = scale * scale;
 
 	if (m_initial_grow)
 		cg.InitialGrow(m_ig_param_transition, m_ig_iterations,
-			float(m_ig_translate), float(m_ig_translate2),
-			float(m_ig_scalar_falloff), float(m_ig_scalar_falloff2),
-			float(m_ig_grad_falloff), float(m_ig_grad_falloff2),
-			float(m_ig_var_falloff), float(m_ig_var_falloff2),
-			float(m_ig_angle_falloff), float(m_ig_angle_falloff2));
+			float(m_ig_translate / scale),
+			float(m_ig_translate2 / scale),
+			float(m_ig_scalar_falloff / scale2),
+			float(m_ig_scalar_falloff2 / scale2),
+			float(m_ig_grad_falloff / scale2),
+			float(m_ig_grad_falloff2 / scale2),
+			float(m_ig_var_falloff / scale2),
+			float(m_ig_var_falloff2 / scale2),
+			float(m_ig_angle_falloff / scale2),
+			float(m_ig_angle_falloff2 / scale2));
 
 	if (m_sized_grow)
 		cg.SizedGrow(m_sg_param_transition, m_sg_iterations,
 			(unsigned int)(m_sg_size_limiter), (unsigned int)(m_sg_size_limiter2),
-			float(m_sg_translate), float(m_sg_translate2),
-			float(m_sg_scalar_falloff), float(m_sg_scalar_falloff2),
-			float(m_sg_grad_falloff), float(m_sg_grad_falloff2),
-			float(m_sg_var_falloff), float(m_sg_var_falloff2),
-			float(m_sg_angle_falloff), float(m_sg_angle_falloff2));
+			float(m_sg_translate / scale),
+			float(m_sg_translate2 / scale),
+			float(m_sg_scalar_falloff / scale2),
+			float(m_sg_scalar_falloff2 / scale2),
+			float(m_sg_grad_falloff / scale2),
+			float(m_sg_grad_falloff2 / scale2),
+			float(m_sg_var_falloff / scale2),
+			float(m_sg_var_falloff2 / scale2),
+			float(m_sg_angle_falloff / scale2),
+			float(m_sg_angle_falloff2 / scale2));
 
 	if (m_cleanup)
 		cg.Cleanup(m_cl_iterations, (unsigned int)(m_cl_size_limiter));
@@ -2734,8 +2823,6 @@ void ComponentDlg::GenerateBsc(bool refine)
 	if (!vd)
 		return;
 	vd->AddEmptyMask(1);
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
 
 	FL::ComponentGenerator cg(vd, KernelProgram::get_device_id());
 	m_prog_bit = 97.0f / float(1 + m_basic_iter);
@@ -2744,20 +2831,80 @@ void ComponentDlg::GenerateBsc(bool refine)
 		cg.m_sig_progress.connect(boost::bind(
 			&ComponentDlg::UpdateProgress, this));
 
+	cg.SetUseMask(m_use_sel_chk->GetValue());
+
 	if (!refine)
 	{
 		vd->AddEmptyLabel();
 		cg.ShuffleID_3D();
 	}
 
-	cg.Grow3D(m_basic_diff, m_basic_iter,
-		float(m_basic_thresh), float(m_basic_falloff));
+	double scale = vd->GetScalarScale();
+	double scale2 = scale * scale;
+
+	if (m_basic_size)
+		cg.Grow3DSized(m_basic_diff, m_basic_iter,
+			float(m_basic_thresh / scale),
+			float(m_basic_falloff / scale2),
+			m_basic_size_lm);
+	else
+		cg.Grow3D(m_basic_diff, m_basic_iter,
+			float(m_basic_thresh / scale),
+			float(m_basic_falloff / scale2));
 
 	vd->GetVR()->clear_tex_current();
 	m_view->RefreshGL();
 
 	m_generate_prg->SetValue(100);
 	connection.disconnect();
+}
+
+void ComponentDlg::GenerateComp(int type, int mode)
+{
+	switch (type)
+	{
+	case 0://basic
+		{
+			if (!m_view)
+				return;
+			VolumeData* vd = m_view->m_glview->m_cur_vol;
+			if (!vd)
+				return;
+			FL::ComponentGenerator cg(vd, KernelProgram::get_device_id());
+			bool use_mask = m_use_sel_chk->GetValue();
+			cg.SetUseMask(use_mask);
+			if (use_mask)
+			{
+				if (!vd->GetMask(true))
+					return;
+			}
+			else
+				vd->AddEmptyMask(1);
+
+			if (mode == 0)
+			{
+				vd->AddEmptyLabel();
+				cg.ShuffleID_3D();
+			}
+
+			double scale = vd->GetScalarScale();
+			double scale2 = scale * scale;
+
+			if (m_basic_size)
+				cg.Grow3DSized(m_basic_diff, m_basic_iter,
+					float(m_basic_thresh / scale),
+					float(m_basic_falloff / scale2),
+					m_basic_size_lm);
+			else
+				cg.Grow3D(m_basic_diff, m_basic_iter,
+					float(m_basic_thresh / scale),
+					float(m_basic_falloff / scale2));
+
+			vd->GetVR()->clear_tex_current();
+			m_view->RefreshGL();
+		}
+		break;
+	}
 }
 
 void ComponentDlg::OnAnalyze(wxCommandEvent &event)

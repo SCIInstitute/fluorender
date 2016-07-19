@@ -343,8 +343,13 @@ namespace FLIVR
 		glDisable(GL_DEPTH_TEST);
 		glDepthMask(GL_FALSE);
 
-		for (size_t i = 0; i<vr_list_.size(); ++i)
+		int ml_mode = 0;
+		for (size_t i = 0; i < vr_list_.size(); ++i)
+		{
 			vr_list_[i]->eval_ml_mode();
+			ml_mode = vr_list_[i]->ml_mode_ > ml_mode ?
+				vr_list_[i]->ml_mode_ : ml_mode;
+		}
 
 		//--------------------------------------------------------------------------
 		// Set up shaders
@@ -354,7 +359,7 @@ namespace FLIVR
 			vr_list_[0]->tex_->nc(),
 			use_shading, use_fog,
 			depth_peel_, true,
-			hiqual_, vr_list_[0]->ml_mode_,
+			hiqual_, ml_mode,
 			colormap_mode_, colormap_, colormap_proj_,
 			false, 1);
 		if (shader)
@@ -631,11 +636,14 @@ namespace FLIVR
 			if (depth_test) glEnable(GL_DEPTH_TEST);
 			if (cull_face) glEnable(GL_CULL_FACE);
 
+			if (TextureRenderer::get_invalidate_tex())
+			{
 #ifdef _WIN32
-			glInvalidateTexImage(blend_tex_id_, 0);
-			glInvalidateTexImage(filter_tex_id_, 0);
-			glInvalidateTexImage(blend_tex_, 0);
+				glInvalidateTexImage(blend_tex_id_, 0);
+				glInvalidateTexImage(filter_tex_id_, 0);
+				glInvalidateTexImage(blend_tex_, 0);
 #endif
+			}
 			glDisable(GL_BLEND);
 
 			glBindTexture(GL_TEXTURE_2D, 0);

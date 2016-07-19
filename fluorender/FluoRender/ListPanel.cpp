@@ -42,6 +42,7 @@ EVT_MENU(Menu_Del, DataListCtrl::OnDelete)
 EVT_MENU(Menu_Rename, DataListCtrl::OnRename)
 EVT_MENU(Menu_Save, DataListCtrl::OnSave)
 EVT_MENU(Menu_Bake, DataListCtrl::OnBake)
+EVT_MENU(Menu_SaveMask, DataListCtrl::OnSaveMask)
 EVT_KEY_DOWN(DataListCtrl::OnKeyDown)
 EVT_KEY_UP(DataListCtrl::OnKeyUp)
 EVT_MOUSE_EVENTS(DataListCtrl::OnMouse)
@@ -157,6 +158,50 @@ void DataListCtrl::SetSelection(int type, wxString &name)
 	}
 }
 
+void DataListCtrl::SaveSelMask()
+{
+	long item = GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+	if (item != -1 && GetItemText(item) == "Volume")
+	{
+		wxString name = GetText(item, 1);
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame)
+		{
+			VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+			if (vd)
+			{
+				vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
+				vd->SaveLabel(true, vd->GetCurTime(), vd->GetCurChannel());
+			}
+		}
+	}
+}
+
+void DataListCtrl::SaveAllMasks()
+{
+	long item = GetNextItem(-1);
+	while (item != -1)
+	{
+		if (GetItemText(item) == "Volume")
+		{
+			wxString name = GetText(item, 1);
+			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+			if (vr_frame)
+			{
+				VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+				if (vd)
+				{
+					vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
+					vd->SaveLabel(true, vd->GetCurTime(), vd->GetCurChannel());
+				}
+			}
+		}
+		item = GetNextItem(item);
+	}
+}
+
 void DataListCtrl::OnContextMenu(wxContextMenuEvent &event)
 {
 	if (GetSelectedItemCount() > 0)
@@ -207,6 +252,7 @@ void DataListCtrl::OnContextMenu(wxContextMenuEvent &event)
 							else
 								menu.Append(Menu_Save, "Save As...");
 							menu.Append(Menu_Bake, "Bake...");
+							menu.Append(Menu_SaveMask, "Save Mask");
 						}
 					}
 					else if (GetItemText(item) == "Mesh")
@@ -553,6 +599,11 @@ void DataListCtrl::OnBake(wxCommandEvent& event)
 	}
 }
 
+void DataListCtrl::OnSaveMask(wxCommandEvent& event)
+{
+	SaveSelMask();
+}
+
 void DataListCtrl::OnSelect(wxListEvent &event)
 {
 	long item = GetNextItem(-1,
@@ -848,6 +899,7 @@ EVT_TOOL(ID_AddToView, ListPanel::OnAddToView)
 EVT_TOOL(ID_Rename, ListPanel::OnRename)
 EVT_TOOL(ID_Save, ListPanel::OnSave)
 EVT_TOOL(ID_Bake, ListPanel::OnBake)
+EVT_TOOL(ID_SaveMask, ListPanel::OnSaveMask)
 EVT_TOOL(ID_Delete, ListPanel::OnDelete)
 EVT_TOOL(ID_DeleteAll, ListPanel::OnDeleteAll)
 END_EVENT_TABLE()
@@ -883,6 +935,9 @@ ListPanel::ListPanel(wxWindow *frame,
 	bitmap = wxGetBitmapFromMemory(bake);
 	m_toolbar->AddTool(ID_Bake, "Bake",
 		bitmap, "Bake: Apply the volume properties and save");
+	bitmap = wxGetBitmapFromMemory(save_mask);
+	m_toolbar->AddTool(ID_SaveMask, "Save Mask",
+		bitmap, "Save Mask: Save its mask to a file");
 	bitmap = wxGetBitmapFromMemory(delet);
 	m_toolbar->AddTool(ID_Delete, "Delete",
 		bitmap, "Delete: Delete the selected dataset");
@@ -937,6 +992,12 @@ void ListPanel::SetSelection(int type, wxString &name)
 		m_datalist->SetSelection(type, name);
 }
 
+void ListPanel::SaveAllMasks()
+{
+	if (m_datalist)
+		m_datalist->SaveAllMasks();
+}
+
 void ListPanel::OnAddToView(wxCommandEvent& event)
 {
 	wxListEvent list_event;
@@ -956,6 +1017,11 @@ void ListPanel::OnSave(wxCommandEvent& event)
 void ListPanel::OnBake(wxCommandEvent& event)
 {
 	m_datalist->OnBake(event);
+}
+
+void ListPanel::OnSaveMask(wxCommandEvent& event)
+{
+	m_datalist->OnSaveMask(event);
 }
 
 void ListPanel::OnDelete(wxCommandEvent& event)

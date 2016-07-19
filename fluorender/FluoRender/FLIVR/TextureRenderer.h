@@ -233,6 +233,9 @@ namespace FLIVR
 		//update order
 		static void set_update_order(int val) {update_order_ = val;}
 		static int get_update_order() {return update_order_;}
+		//invalidate tex
+		static void set_invalidate_tex(bool val) { invalidate_tex_ = val; }
+		static bool get_invalidate_tex() { return invalidate_tex_; }
 
 		//kernel for calculation
 		static VolKernelFactory vol_kernel_factory_;
@@ -300,6 +303,7 @@ namespace FLIVR
 		static int cur_chan_brick_num_;
 		static bool clear_chan_buffer_;
 		static bool save_final_buffer_;
+		static bool invalidate_tex_;
 		//timer for rendering
 		static unsigned long st_time_;
 		static unsigned long up_time_;

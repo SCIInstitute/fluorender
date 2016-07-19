@@ -65,10 +65,10 @@ endif()
 add_definitions(-DFLUORENDER_TITLE="FluoRender")
 
 add_definitions(-DVERSION_MAJOR=2)                   #Be sure to update the Versions and Date for each release!!!!
-add_definitions(-DVERSION_MINOR=20)					 #
+add_definitions(-DVERSION_MINOR=19.3)					 #
 add_definitions(-DVERSION_MAJOR_TAG="2")             #
-add_definitions(-DVERSION_MINOR_TAG="20")            #
-add_definitions(-DVERSION_COPYRIGHT="June 2016")   # Up to here!
+add_definitions(-DVERSION_MINOR_TAG="19.3")            #
+add_definitions(-DVERSION_COPYRIGHT="July 2016")   # Up to here!
 
 #static compile
 add_definitions(-DSTATIC_COMPILE)
@@ -285,6 +285,11 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/MaskInt)
 file(GLOB maskint_hdr fluorender/MaskInt/*.h)
 file(GLOB maskint_src fluorender/MaskInt/*.cpp)
 
+#ReadGMM
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/ReadGMM)
+file(GLOB readgmm_hdr fluorender/ReadGMM/*.h)
+file(GLOB readgmm_src fluorender/ReadGMM/*.cpp)
+
 #platform specific rules
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    # Mac OS X
@@ -329,6 +334,11 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       $<TARGET_OBJECTS:TEEM_OBJ>)
    add_executable(MaskInt
       ${maskint_src} ${maskint_hdr}
+      $<TARGET_OBJECTS:FORMATS_OBJ>
+      $<TARGET_OBJECTS:POLE_OBJ>
+      $<TARGET_OBJECTS:TEEM_OBJ>)
+   add_executable(ReadGMM
+      ${readgmm_src} ${readgmm_hdr}
       $<TARGET_OBJECTS:FORMATS_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>)
@@ -401,6 +411,11 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
          $<TARGET_OBJECTS:FORMATS_OBJ>
          $<TARGET_OBJECTS:POLE_OBJ>
          $<TARGET_OBJECTS:TEEM_OBJ>)
+      add_executable(ReadGMM
+         ${readgmm_src} ${readgmm_hdr}
+		  $<TARGET_OBJECTS:FORMATS_OBJ>
+		  $<TARGET_OBJECTS:POLE_OBJ>
+		  $<TARGET_OBJECTS:TEEM_OBJ>)
    endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif()
 
@@ -461,6 +476,9 @@ target_link_libraries(SynthBB
    ${OPENCL_LIBRARIES}
    ${wxWidgets_LIBRARIES})
 target_link_libraries(MaskInt
+   ${Boost_LIBRARIES}
+   ${wxWidgets_LIBRARIES})
+target_link_libraries(ReadGMM
    ${Boost_LIBRARIES}
    ${wxWidgets_LIBRARIES})
 

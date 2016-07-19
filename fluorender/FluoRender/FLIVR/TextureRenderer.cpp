@@ -67,6 +67,7 @@ namespace FLIVR
 	int TextureRenderer::quota_bricks_ = 0;
 	Point TextureRenderer::quota_center_;
 	int TextureRenderer::update_order_ = 0;
+	bool TextureRenderer::invalidate_tex_ = false;
 
 	TextureRenderer::TextureRenderer(Texture* tex)
 		:

@@ -120,10 +120,10 @@ namespace FL
 			std::vector<float> &verts,
 			size_t frame1, size_t frame2);
 		//rulers
-		bool GetMappedRulers(TrackMap& track_map,
-			CellList &sel_list1, CellList &sel_list2,
-			RulerList &rulers,
-			size_t frame1, size_t frame2);
+		//bool GetMappedRulers(TrackMap& track_map,
+		//	CellList &sel_list1, CellList &sel_list2,
+		//	RulerList &rulers,
+		//	size_t frame1, size_t frame2);
 
 		//modifications
 		bool LinkCells(TrackMap& track_map,

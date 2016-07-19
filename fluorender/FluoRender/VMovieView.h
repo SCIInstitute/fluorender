@@ -76,6 +76,12 @@ class VMovieView : public wxPanel
 		ID_ProgressText,
 		ID_SaveMovie,
 
+		//4d script
+		ID_RunScriptChk,
+		ID_ScriptFileText,
+		ID_ScriptClearBtn,
+		ID_ScriptFileBtn,
+
 		//auto key
 		ID_AutoKeyList,
 		ID_GenKeyBtn,
@@ -146,6 +152,12 @@ public:
 	static wxTextCtrl *m_movie_time;
 	wxTextCtrl *m_bitrate_text;
 
+	//script
+	wxCheckBox *m_run_script_chk;
+	wxTextCtrl *m_script_file_text;
+	wxButton *m_script_clear_btn;
+	wxButton *m_script_file_btn;
+
 	//auto key controls
 	wxListCtrl* m_auto_key_list;
 	wxButton* m_gen_keys_btn;
@@ -204,6 +216,7 @@ private:
 	wxWindow* CreateAdvancedPage(wxWindow *parent);
 	wxWindow* CreateAutoKeyPage(wxWindow *parent);
 	wxWindow* CreateCroppingPage(wxWindow *parent);
+	wxWindow* CreateScriptPage(wxWindow *parent);
 	void Init();
 	void GenKey();
 
@@ -230,6 +243,12 @@ private:
 	void OnCh2Check(wxCommandEvent &event);
 	void OnChEmbedCheck(wxCommandEvent &event);
 	static wxWindow* CreateExtraCaptureControl(wxWindow* parent);
+
+	//script
+	void OnRunScriptChk(wxCommandEvent &event);
+	void OnScriptFileEdit(wxCommandEvent &event);
+	void OnScriptClearBtn(wxCommandEvent &event);
+	void OnScriptFileBtn(wxCommandEvent &event);
 
 	//auto key
 	void OnListItemAct(wxListEvent &event);

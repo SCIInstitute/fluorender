@@ -137,7 +137,17 @@ Nrrd* LBLReader::Convert(int t, int c, bool get_max)
 	return output;
 }
 
-wstring LBLReader::GetCurName(int t, int c)
+wstring LBLReader::GetCurDataName(int t, int c)
+{
+	return wstring(L"");
+}
+
+wstring LBLReader::GetCurMaskName(int t, int c)
+{
+	return wstring(L"");
+}
+
+wstring LBLReader::GetCurLabelName(int t, int c)
 {
 	return wstring(L"");
 }

@@ -91,6 +91,7 @@ int TIFReader::Preprocess()
 
 	m_4d_seq.clear();
 	isHyperstack_ = false;
+	isHsTimeSeq_ = false;
 
 	//separate path and name
 	int64_t pos = m_path_name.find_last_of(GETSLASH());
@@ -112,7 +113,7 @@ int TIFReader::Preprocess()
 	string desc = string((char*)img_desc);
 	string search_str = "hyperstack=true";
 	int64_t str_pos = desc.find(search_str);
-	while (str_pos != -1)
+	if (str_pos != -1)
 	{
 		//it is an ImageJ hyperstack, get information from the description
 		int num;
@@ -122,33 +123,43 @@ int TIFReader::Preprocess()
 		if (str_pos != -1)
 			num = get_number(desc, str_pos + search_str.length());
 		else
-			break;
+			num = 1;
 		if (num)
 			m_chan_num = num;
 		else
-			break;
+			m_chan_num = 1;
 		//slices
 		search_str = "slices=";
 		str_pos = desc.find(search_str);
 		if (str_pos != -1)
 			num = get_number(desc, str_pos + search_str.length());
 		else
-			break;
+			num = 1;
 		if (num)
 			m_slice_num = num;
 		else
-			break;
+			m_slice_num = 1;
 		//frames
 		search_str = "frames=";
 		str_pos = desc.find(search_str);
 		if (str_pos != -1)
 			num = get_number(desc, str_pos + search_str.length());
 		else
-			break;
+			num = 1;
 		if (num)
 			m_time_num = num;
 		else
-			break;
+			m_time_num = 1;
+
+		std::vector<std::wstring> list;
+		if (m_time_num == 1)
+		{
+			if (FIND_FILES_4D(m_path_name, m_time_id, list, m_cur_time))
+			{
+				isHsTimeSeq_ = true;
+				m_time_num = list.size();
+			}
+		}
 
 		//build sequence information for the hyperstack
 		isHyperstack_ = true;
@@ -157,20 +168,50 @@ int TIFReader::Preprocess()
 		for (int i = 0; i < m_time_num; ++i)
 		{
 			TimeDataInfo info;
+
 			info.type = 0;
-			info.filenumber = 0;
+			std::wstring str;
+			if (isHsTimeSeq_)
+			{
+				page_cnt = 0;
+				int64_t begin = m_path_name.find(m_time_id);
+				size_t id_len = m_time_id.length();
+				str = list.at(i);
+				std::wstring t_num;
+				for (size_t j = begin + id_len; j < str.size(); j++)
+				{
+					wchar_t c = str[j];
+					if (iswdigit(c))
+						t_num.push_back(c);
+					else break;
+				}
+				if (t_num.size() > 0)
+					info.filenumber = WSTOI(t_num);
+				else
+					info.filenumber = 0;
+			}
+			else
+			{
+				info.filenumber = 0;
+			}
+
+			//add slices
 			for (int j = 0; j < m_slice_num; ++j)
 			{
 				SliceInfo sliceinfo;
 				sliceinfo.slicenumber = 0;
+				if (isHsTimeSeq_)
+					sliceinfo.slice = str;
 				sliceinfo.pagenumber = page_cnt;
 				page_cnt += m_chan_num;
 				info.slices.push_back(sliceinfo);
 			}
 			m_4d_seq.push_back(info);
-			m_cur_time = 0;
 		}
-		break;
+		if (isHsTimeSeq_ && m_4d_seq.size() > 0)
+			std::sort(m_4d_seq.begin(), m_4d_seq.end(), TIFReader::tif_sort);
+
+		m_cur_time = 0;
 	}
 	CloseTiff();
 	
@@ -179,7 +220,7 @@ int TIFReader::Preprocess()
 		//it is not an ImageJ hyperstack, do the usual processing
 		//build 4d sequence
 		//search time sequence files
-		std::vector< std::wstring> list;
+		std::vector<std::wstring> list;
 		if (!FIND_FILES_4D(m_path_name, m_time_id, list, m_cur_time))
 		{
 			TimeDataInfo info;
@@ -624,7 +665,7 @@ Nrrd* TIFReader::Convert(int t, int c, bool get_max)
 
 	Nrrd* data = 0;
 	TimeDataInfo chan_info = m_4d_seq[t];
-	if (!isHyperstack_)
+	if (!isHyperstack_ || isHsTimeSeq_)
 		m_data_name = chan_info.slices[0].slice.substr(
 			chan_info.slices[0].slice.find_last_of(GETSLASH()) + 1);
 	data = ReadTiff(chan_info.slices, c, get_max);
@@ -632,14 +673,72 @@ Nrrd* TIFReader::Convert(int t, int c, bool get_max)
 	return data;
 }
 
-wstring TIFReader::GetCurName(int t, int c)
+wstring TIFReader::GetCurDataName(int t, int c)
 {
-	if (isHyperstack_)
-		return m_data_name;
+	if (isHyperstack_ && !isHsTimeSeq_)
+		return m_path_name;
 	else
 	{
 		if (t >= 0 && t < (int64_t)m_4d_seq.size())
 			return (m_4d_seq[t].slices)[0].slice;
+		else
+			return L"";
+	}
+}
+
+wstring TIFReader::GetCurMaskName(int t, int c)
+{
+	if (isHyperstack_)
+	{
+		wostringstream woss;
+		woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
+		if (m_time_num > 1) woss << "_T" << t;
+		if (m_chan_num > 1) woss << "_C" << c;
+		woss << ".msk";
+		wstring mask_name = woss.str();
+		return mask_name;
+	}
+	else
+	{
+		if (t >= 0 && t < (int64_t)m_4d_seq.size())
+		{
+			wstring data_name = (m_4d_seq[t].slices)[0].slice;
+			wostringstream woss;
+			woss << data_name.substr(0, data_name.find_last_of('.'));
+			if (m_chan_num > 1) woss << "_C" << c;
+			woss << ".msk";
+			wstring mask_name = woss.str();
+			return mask_name;
+		}
+		else
+			return L"";
+	}
+}
+
+wstring TIFReader::GetCurLabelName(int t, int c)
+{
+	if (isHyperstack_)
+	{
+		wostringstream woss;
+		woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
+		if (m_time_num > 1) woss << "_T" << t;
+		if (m_chan_num > 1) woss << "_C" << c;
+		woss << ".lbl";
+		wstring label_name = woss.str();
+		return label_name;
+	}
+	else
+	{
+		if (t >= 0 && t < (int64_t)m_4d_seq.size())
+		{
+			wstring data_name = (m_4d_seq[t].slices)[0].slice;
+			wostringstream woss;
+			woss << data_name.substr(0, data_name.find_last_of('.'));
+			if (m_chan_num > 1) woss << "_C" << c;
+			woss << ".lbl";
+			wstring label_name = woss.str();
+			return label_name;
+		}
 		else
 			return L"";
 	}
@@ -823,7 +922,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 	if (numPages <= 0)
 		return 0;
 	wstring filename;
-	if (isHyperstack_)
+	if (isHyperstack_ && !isHsTimeSeq_)
 		filename = m_path_name;
 	else
 		filename = filelist[0].slice;

@@ -79,6 +79,7 @@ class SettingDlg : public wxPanel
 		ID_WavColor4Cmb,
 		//memory settings
 		ID_StreamingChk,
+		ID_UpdateOrderRbox,
 		ID_GraphicsMemSldr,
 		ID_GraphicsMemText,
 		ID_LargeDataSldr,
@@ -91,10 +92,6 @@ class SettingDlg : public wxPanel
 		ID_FontCmb,
 		ID_FontSizeCmb,
 		ID_TextColorCmb,
-		//script
-		ID_RunScriptChk,
-		ID_ScriptFileText,
-		ID_ScriptFileBtn,
 		//paint history depth
 		ID_PaintHistDepthSldr,
 		ID_PaintHistDepthText,
@@ -169,8 +166,10 @@ public:
 	void SetForceBrickSize(int val) {m_force_brick_size = val;}
 	int GetResponseTime() {return m_up_time;}
 	void SetResponseTime(int val) {m_up_time = val;}
-	int GetUpdateOrder() {return m_update_order;}
+	int GetUpdateOrder() {return m_mem_swap?m_update_order:0;}
 	void SetUpdateOrder(int val) {m_update_order = val;}
+	bool GetInvalidateTex() { return m_invalidate_tex; }
+	void SetInvalidateTex(bool val) { m_invalidate_tex = val; }
 	//point volume mode
 	int GetPointVolumeMode() {return m_point_volume_mode;}
 	void SetPointVolumeMode(int mode) {m_point_volume_mode = mode;}
@@ -253,6 +252,7 @@ private:
 							//final value is determined by both reading from the card and this value
 	int m_up_time;			//response time in ms
 	int m_update_order;		//0:back-to-front; 1:front-to-back
+	bool m_invalidate_tex;	//invalidate texture in every loop
 	//point volume mode
 	int m_point_volume_mode;
 	//ruler use transfer function
@@ -316,6 +316,7 @@ private:
 	wxComboBox *m_wav_color4_cmb;
 	//memory settings
 	wxCheckBox *m_streaming_chk;
+	wxRadioBox *m_update_order_rbox;
 	wxSlider *m_graphics_mem_sldr;
 	wxTextCtrl *m_graphics_mem_text;
 	wxSlider *m_large_data_sldr;
@@ -328,10 +329,6 @@ private:
 	wxComboBox *m_font_cmb;
 	wxComboBox *m_font_size_cmb;
 	wxComboBox *m_text_color_cmb;
-	//script
-	wxCheckBox *m_run_script_chk;
-	wxTextCtrl *m_script_file_text;
-	wxButton *m_script_file_btn;
 	//history depth
 	wxSlider *m_paint_hist_depth_sldr;
 	wxTextCtrl *m_paint_hist_depth_text;
@@ -389,6 +386,7 @@ private:
 	void OnWavColor4Change(wxCommandEvent &event);
 	//memory settings
 	void OnStreamingChk(wxCommandEvent &event);
+	void OnUpdateOrderChange(wxCommandEvent & event);
 	void OnGraphicsMemChange(wxScrollEvent &event);
 	void OnGraphicsMemEdit(wxCommandEvent &event);
 	void OnLargeDataChange(wxScrollEvent &event);
@@ -401,10 +399,6 @@ private:
 	void OnFontChange(wxCommandEvent &event);
 	void OnFontSizeChange(wxCommandEvent &event);
 	void OnTextColorChange(wxCommandEvent &event);
-	//script
-	void OnRunScriptChk(wxCommandEvent &event);
-	void OnScriptFileEdit(wxCommandEvent &event);
-	void OnScriptFileBtn(wxCommandEvent &event);
 	//paint history depth
 	void OnPaintHistDepthChange(wxScrollEvent &event);
 	void OnPaintHistDepthEdit(wxCommandEvent &event);

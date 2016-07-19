@@ -49,11 +49,16 @@ namespace FL
 		ComponentGenerator(VolumeData* vd, int device_id = 0);
 		~ComponentGenerator();
 
+		void SetUseMask(bool use_mask)
+		{ m_use_mask = use_mask; }
+		bool GetUseMask()
+		{ return m_use_mask; }
 		void OrderID_3D();
 		void OrderID_2D();
 		void ShuffleID_3D();
 		void ShuffleID_2D();
 		void Grow3D(bool, int, float, float);
+		void Grow3DSized(bool, int, float, float, int);
 		void InitialGrow(bool, int,
 			float, float,
 			float, float,
@@ -77,6 +82,7 @@ namespace FL
 
 	private:
 		VolumeData *m_vd;
+		bool m_use_mask;//use mask instead of data
 		bool m_init;
 		cl_device_id m_device;
 		cl_context m_context;

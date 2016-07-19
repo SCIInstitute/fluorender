@@ -661,16 +661,6 @@ void VPropView::GetSettings()
 	m_alpha_text->ChangeValue(str);
 	bool alpha = m_vd->GetEnableAlpha();
 	m_alpha_tool->ToggleTool(ID_AlphaChk,alpha);
-	if (alpha)
-	{
-		m_alpha_sldr->Enable();
-		m_alpha_text->Enable();
-	}
-	else
-	{
-		m_alpha_sldr->Disable();
-		m_alpha_text->Disable();
-	}
 
 	//shadings
 	if ((vald_fp = (wxFloatingPointValidator<double>*)m_low_shading_text->GetValidator()))
@@ -691,7 +681,8 @@ void VPropView::GetSettings()
 	//shadow
 	if ((vald_fp = (wxFloatingPointValidator<double>*)m_shadow_text->GetValidator()))
 		vald_fp->SetRange(0.0, 1.0);
-	m_shadow_tool->ToggleTool(ID_ShadowChk,m_vd->GetShadow());
+	bool shadow = m_vd->GetShadow();
+	m_shadow_tool->ToggleTool(ID_ShadowChk, shadow);
 	double shadow_int;
 	m_vd->GetShadowParams(shadow_int);
 	m_shadow_sldr->SetValue(int(shadow_int*100.0+0.5));
@@ -763,10 +754,8 @@ void VPropView::GetSettings()
 	m_colormap_combo->SetSelection(m_vd->GetColormap());
 	m_colormap_combo2->SetSelection(m_vd->GetColormapProj());
 	//mode
-	if (m_vd->GetColormapMode() == 1)
-		m_colormap_tool->ToggleTool(ID_ColormapEnableChk,true);
-	else
-		m_colormap_tool->ToggleTool(ID_ColormapEnableChk,false);
+	bool colormap = m_vd->GetColormapMode() == 1;
+	m_colormap_tool->ToggleTool(ID_ColormapEnableChk, colormap);
 
 	//inversion
 	bool inv = m_vd->GetInvert();
@@ -783,42 +772,12 @@ void VPropView::GetSettings()
 	if (mode == 1)
 	{
 		m_options_toolbar->ToggleTool(ID_MipChk,true);
-		m_alpha_sldr->Disable();
-		m_alpha_text->Disable();
-		m_right_thresh_sldr->Disable();
-		m_right_thresh_text->Disable();
-		m_boundary_sldr->Disable();
-		m_boundary_text->Disable();
-		if (m_vd->GetColormapMode() == 1)
-		{
-			m_gamma_sldr->Disable();
-			m_gamma_text->Disable();
-			m_saturation_sldr->Disable();
-			m_saturation_text->Disable();
-			m_luminance_sldr->Disable();
-			m_luminance_text->Disable();
-		}
 		if (m_threh_st)
 			m_threh_st->SetLabel("Shade Threshold : ");
 	}
 	else
 	{
 		m_options_toolbar->ToggleTool(ID_MipChk,false);
-		if (alpha)
-		{
-			m_alpha_sldr->Enable();
-			m_alpha_text->Enable();
-		}
-		m_right_thresh_sldr->Enable();
-		m_right_thresh_text->Enable();
-		m_boundary_sldr->Enable();
-		m_boundary_text->Enable();
-		m_gamma_sldr->Enable();
-		m_gamma_text->Enable();
-		m_saturation_sldr->Enable();
-		m_saturation_text->Enable();
-		m_luminance_sldr->Enable();
-		m_luminance_text->Enable();
 		if (m_threh_st)
 			m_threh_st->SetLabel("Threshold : ");
 	}
@@ -845,6 +804,27 @@ void VPropView::GetSettings()
 		m_options_toolbar->ToggleTool(ID_DepthChk,false);
 		m_options_toolbar->SetToolNormalBitmap(ID_DepthChk, wxGetBitmapFromMemory(depth_off));
 	}
+
+	if (alpha)
+		EnableAlpha();
+	else
+		DisableAlpha();
+	if (shading)
+		EnableShading();
+	else
+		DisableShading();
+	if (shadow)
+		EnableShadow();
+	else
+		DisableShadow();
+	if (colormap)
+		EnableColormap();
+	else
+		DisableColormap();
+	if (mode == 1)
+		EnableMip();
+	else
+		DisableMip();
 
 	Layout();
 }
@@ -1197,24 +1177,17 @@ void VPropView::OnShadowSync(wxMouseEvent& event)
 void VPropView::OnShadowEnable(wxCommandEvent &event)
 {
 	bool shadow = m_shadow_tool->GetToolState(ID_ShadowChk);
-	/*if (m_vrv && m_vrv->GetVolMethod()==VOL_METHOD_MULTI)
-	{
-		for (int i=0; i<m_vrv->GetAllVolumeNum(); i++)
-		{
-			VolumeData* vd = m_vrv->GetAllVolumeData(i);
-			if (vd)
-				vd->SetShadow(shadow);
-		}
-	}
-	else*/
-	{
-		if (m_sync_group && m_group)
-			m_group->SetShadow(shadow);
-		else if (m_group && m_group->GetBlendMode()==2)
-			m_vd->SetShadow(shadow);
-		else if (m_vd)
-			m_vd->SetShadow(shadow);
-	}
+	if (m_sync_group && m_group)
+		m_group->SetShadow(shadow);
+	else if (m_group && m_group->GetBlendMode()==2)
+		m_vd->SetShadow(shadow);
+	else if (m_vd)
+		m_vd->SetShadow(shadow);
+
+	if (shadow)
+		EnableShadow();
+	else
+		DisableShadow();
 
 	RefreshVRenderViews(false, true);
 }
@@ -1234,24 +1207,12 @@ void VPropView::OnShadowText(wxCommandEvent &event)
 	m_shadow_sldr->SetValue(int(val*100.0+0.5));
 
 	//set shadow darkness
-/*	if (m_vrv && m_vrv->GetVolMethod()==VOL_METHOD_MULTI)
-	{
-		for (int i=0; i<m_vrv->GetAllVolumeNum(); i++)
-		{
-			VolumeData* vd = m_vrv->GetAllVolumeData(i);
-			if (vd)
-				vd->SetShadowParams(val);
-		}
-	}
-	else*/
-	{
-		if (m_sync_group && m_group)
-			m_group->SetShadowParams(val);
-		else if (m_group && m_group->GetBlendMode()==2)
-			m_group->SetShadowParams(val);
-		else if (m_vd)
-			m_vd->SetShadowParams(val);
-	}
+	if (m_sync_group && m_group)
+		m_group->SetShadowParams(val);
+	else if (m_group && m_group->GetBlendMode()==2)
+		m_group->SetShadowParams(val);
+	else if (m_vd)
+		m_vd->SetShadowParams(val);
 
 	RefreshVRenderViews(false, true);
 }
@@ -1271,41 +1232,15 @@ void VPropView::OnAlphaSync(wxMouseEvent& event)
 void VPropView::OnAlphaCheck(wxCommandEvent &event)
 {
 	bool alpha = m_alpha_tool->GetToolState(ID_AlphaChk);
-
-	if (alpha)
-	{
-		if (m_vd && m_vd->GetMode()==0)
-		{
-			m_alpha_sldr->Enable();
-			m_alpha_text->Enable();
-		}
-		//shading
-		if (m_vd->GetShading())
-		{
-			m_low_shading_sldr->Enable();
-			m_low_shading_text->Enable();
-			m_shade_tool->ToggleTool(ID_ShadingEnableChk,true);
-			m_vd->GetVR()->set_shading(true);
-		}
-	}
-	else
-	{
-		m_alpha_sldr->Disable();
-		m_alpha_text->Disable();
-		//shading
-		if (m_vd->GetShading())
-		{
-			m_low_shading_sldr->Disable();
-			m_low_shading_text->Disable();
-			m_shade_tool->ToggleTool(ID_ShadingEnableChk,false);
-			m_vd->GetVR()->set_shading(false);
-		}
-	}
-
 	if (m_sync_group && m_group)
 		m_group->SetEnableAlpha(alpha);
 	else if (m_vd)
 		m_vd->SetEnableAlpha(alpha);
+
+	if (alpha)
+		EnableAlpha();
+	else
+		DisableAlpha();
 
 	RefreshVRenderViews(false, true);
 }
@@ -1429,15 +1364,9 @@ void VPropView::OnShadingEnable(wxCommandEvent &event)
 		m_vd->SetShading(shading);
 
 	if (shading)
-	{
-		m_low_shading_sldr->Enable();
-		m_low_shading_text->Enable();
-	}
+		EnableShading();
 	else
-	{
-		m_low_shading_sldr->Disable();
-		m_low_shading_text->Disable();
-	}
+		DisableShading();
 
 	RefreshVRenderViews(false, true);
 }
@@ -1487,27 +1416,10 @@ void VPropView::OnEnableColormap(wxCommandEvent &event)
 			adjust_view->UpdateSync();
 	}
 
-	if (m_vd && m_vd->GetMode()==1)
-	{
-		if (colormap)
-		{
-			m_gamma_sldr->Disable();
-			m_gamma_text->Disable();
-			m_saturation_sldr->Disable();
-			m_saturation_text->Disable();
-			m_luminance_sldr->Disable();
-			m_luminance_text->Disable();
-		}
-		else
-		{
-			m_gamma_sldr->Enable();
-			m_gamma_text->Enable();
-			m_saturation_sldr->Enable();
-			m_saturation_text->Enable();
-			m_luminance_sldr->Enable();
-			m_luminance_text->Enable();
-		}
-	}
+	if (colormap)
+		EnableColormap();
+	else
+		DisableColormap();
 
 	RefreshVRenderViews(false, true);
 }
@@ -1877,6 +1789,11 @@ void VPropView::OnMIPCheck(wxCommandEvent &event)
 {
 	int val = m_options_toolbar->GetToolState(ID_MipChk)?1:0;
 
+	if (m_sync_group && m_group)
+		m_group->SetMode(val);
+	else if (m_vd)
+		m_vd->SetMode(val);
+
 	if (val==1)
 	{
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
@@ -1893,49 +1810,16 @@ void VPropView::OnMIPCheck(wxCommandEvent &event)
 				}
 			}
 		}
-		m_alpha_sldr->Disable();
-		m_alpha_text->Disable();
-		m_right_thresh_sldr->Disable();
-		m_right_thresh_text->Disable();
-		m_boundary_sldr->Disable();
-		m_boundary_text->Disable();
-		m_luminance_sldr->Disable();
-		m_luminance_text->Disable();
-		if (m_vd && m_vd->GetColormapMode() == 1)
-		{
-			m_gamma_sldr->Disable();
-			m_gamma_text->Disable();
-			m_saturation_sldr->Disable();
-			m_saturation_text->Disable();
-		}
+		EnableMip();
 		if (m_threh_st)
 			m_threh_st->SetLabel("Shade Threshold : ");
 	}
 	else
 	{
-		if (m_vd && m_vd->GetEnableAlpha())
-		{
-			m_alpha_sldr->Enable();
-			m_alpha_text->Enable();
-		}
-		m_right_thresh_sldr->Enable();
-		m_right_thresh_text->Enable();
-		m_boundary_sldr->Enable();
-		m_boundary_text->Enable();
-		m_gamma_sldr->Enable();
-		m_gamma_text->Enable();
-		m_saturation_sldr->Enable();
-		m_saturation_text->Enable();
-		m_luminance_sldr->Enable();
-		m_luminance_text->Enable();
+		DisableMip();
 		if (m_threh_st)
 			m_threh_st->SetLabel("Threshold : ");
 	}
-
-	if (m_sync_group && m_group)
-		m_group->SetMode(val);
-	else if (m_vd)
-		m_vd->SetMode(val);
 
 	Layout();
 
@@ -2058,6 +1942,127 @@ bool VPropView::SetSpacings()
 	}
 
 	return true;
+}
+
+//enable/disable
+void VPropView::EnableAlpha()
+{
+	if (m_vd->GetMode() != 1)
+	{
+		m_alpha_sldr->Enable();
+		m_alpha_text->Enable();
+	}
+}
+
+void VPropView::DisableAlpha()
+{
+	m_alpha_sldr->Disable();
+	m_alpha_text->Disable();
+}
+
+void VPropView::EnableShading()
+{
+	m_low_shading_sldr->Enable();
+	m_low_shading_text->Enable();
+	m_hi_shading_sldr->Enable();
+	m_hi_shading_text->Enable();
+	if (m_vd->GetMode() == 1)
+	{
+		m_left_thresh_sldr->Enable();
+		m_left_thresh_text->Enable();
+		m_right_thresh_sldr->Enable();
+		m_right_thresh_text->Enable();
+	}
+}
+
+void VPropView::DisableShading()
+{
+	m_low_shading_sldr->Disable();
+	m_low_shading_text->Disable();
+	m_hi_shading_sldr->Disable();
+	m_hi_shading_text->Disable();
+	if (m_vd->GetMode() == 1 &&
+		!m_vd->GetShadow())
+	{
+		m_left_thresh_sldr->Disable();
+		m_left_thresh_text->Disable();
+		m_right_thresh_sldr->Disable();
+		m_right_thresh_text->Disable();
+	}
+}
+
+void VPropView::EnableShadow()
+{
+	m_shadow_sldr->Enable();
+	m_shadow_text->Enable();
+	if (m_vd->GetMode() == 1)
+	{
+		m_left_thresh_sldr->Enable();
+		m_left_thresh_text->Enable();
+		m_right_thresh_sldr->Enable();
+		m_right_thresh_text->Enable();
+	}
+}
+
+void VPropView::DisableShadow()
+{
+	m_shadow_sldr->Disable();
+	m_shadow_text->Disable();
+	if (m_vd->GetMode() == 1 &&
+		!m_vd->GetShading())
+	{
+		m_left_thresh_sldr->Disable();
+		m_left_thresh_text->Disable();
+		m_right_thresh_sldr->Disable();
+		m_right_thresh_text->Disable();
+	}
+}
+
+void VPropView::EnableColormap()
+{
+	m_colormap_high_value_sldr->Enable();
+	m_colormap_high_value_text->Enable();
+	m_colormap_low_value_sldr->Enable();
+	m_colormap_low_value_text->Enable();
+}
+
+void VPropView::DisableColormap()
+{
+	m_colormap_high_value_sldr->Disable();
+	m_colormap_high_value_text->Disable();
+	m_colormap_low_value_sldr->Disable();
+	m_colormap_low_value_text->Disable();
+}
+
+void VPropView::EnableMip()
+{
+	DisableAlpha();
+	m_boundary_sldr->Disable();
+	m_boundary_text->Disable();
+	m_luminance_sldr->Disable();
+	m_luminance_text->Disable();
+	if (m_vd->GetShading() ||
+		m_vd->GetShadow())
+		EnableShading();
+	else
+		DisableShading();
+}
+
+void VPropView::DisableMip()
+{
+	if (m_vd->GetEnableAlpha())
+		EnableAlpha();
+	else
+		DisableAlpha();
+	m_boundary_sldr->Enable();
+	m_boundary_text->Enable();
+	m_luminance_sldr->Enable();
+	m_luminance_text->Enable();
+	if (m_vd->GetShading() ||
+		m_vd->GetShadow())
+		EnableShading();
+	else
+		DisableShading();
 }
 
 void VPropView::OnSpaceText(wxCommandEvent& event)
@@ -2444,6 +2449,10 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 	m_color2_text->ChangeValue(wxString::Format("%d , %d , %d",
 		wxc.Red(), wxc.Green(), wxc.Blue()));
 	m_color2_btn->SetColour(wxc);
+	//colormap mode
+	m_vd->SetColormapMode(mgr->m_vol_cmm);
+	bool colormap = m_vd->GetColormapMode() == 1;
+	m_colormap_tool->ToggleTool(ID_ColormapEnableChk, colormap);
 	//colormap
 	m_colormap_combo->SetSelection(mgr->m_vol_cmp);
 	m_vd->SetColormap(mgr->m_vol_cmp);
@@ -2510,6 +2519,27 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 		m_group->SetShadow(bval);
 	else
 		m_vd->SetShadow(bval);
+
+	if (m_vd->GetEnableAlpha())
+		EnableAlpha();
+	else
+		DisableAlpha();
+	if (m_vd->GetVR()->get_shading())
+		EnableShading();
+	else
+		DisableShading();
+	if (m_vd->GetShadow())
+		EnableShadow();
+	else
+		DisableShadow();
+	if (m_vd->GetColormapMode() == 1)
+		EnableColormap();
+	else
+		DisableColormap();
+	if (m_vd->GetMode() == 1)
+		EnableMip();
+	else
+		DisableMip();
 
 	//apply all
 	RefreshVRenderViews(false, true);

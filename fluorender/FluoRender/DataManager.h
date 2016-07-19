@@ -216,6 +216,8 @@ public:
 	double GetOriginalValue(int i, int j, int k);
 	double GetTransferedValue(int i, int j, int k);
 	void Save(wxString &filename, int mode=0, bool bake=false, bool compress=false);
+	void SaveMask(bool use_reader, int t, int c);
+	void SaveLabel(bool use_reader, int t, int c);
 
 	//volumerenderer
 	VolumeRenderer *GetVR();
@@ -1325,6 +1327,7 @@ public:
 	double m_vol_ysp;	//y_spacing
 	double m_vol_zsp;	//z_spacing
 	double m_vol_lum;	//luminance
+	int m_vol_cmm;		//colormap mode
 	int m_vol_cmp;		//colormap
 	double m_vol_lcm;	//colormap low value
 	double m_vol_hcm;	//colormap high value

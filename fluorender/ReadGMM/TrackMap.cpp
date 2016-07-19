@@ -2128,94 +2128,94 @@ RulerListIter TrackMapProcessor::FindRulerFromList(unsigned int id, RulerList &l
 	return iter;
 }
 
-bool TrackMapProcessor::GetMappedRulers(TrackMap& track_map,
-	CellList& sel_list1, CellList &sel_list2,
-	RulerList& rulers,
-	size_t frame1, size_t frame2)
-{
-	size_t frame_num = track_map.m_frame_num;
-	if (frame1 >= frame_num ||
-		frame2 >= frame_num ||
-		frame1 == frame2)
-		return false;
-
-	CellList &cell_list1 = track_map.m_cells_list.at(frame1);
-	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
-		frame1 > frame2 ? frame2 : frame1);
-	CellListIter sel_iter, cell_iter;
-	pVertex vertex1, vertex2;
-	pCell cell;
-	InterVert v1, v2;
-	std::pair<InterAdjIter, InterAdjIter> adj_verts;
-	InterAdjIter inter_iter;
-	CellBinIter pwcell_iter;
-	FLIVR::Color c;
-	std::pair<InterEdge, bool> inter_edge;
-	RulerListIter ruler_iter;
-
-	for (sel_iter = sel_list1.begin();
-	sel_iter != sel_list1.end();
-		++sel_iter)
-	{
-		cell_iter = cell_list1.find(sel_iter->second->Id());
-		if (cell_iter == cell_list1.end())
-			continue;
-		vertex1 = cell_iter->second->GetVertex().lock();
-		if (!vertex1)
-			continue;
-		v1 = vertex1->GetInterVert(inter_graph);
-		if (v1 == InterGraph::null_vertex())
-			continue;
-		adj_verts = boost::adjacent_vertices(v1, inter_graph);
-		//for each adjacent vertex
-		for (inter_iter = adj_verts.first;
-		inter_iter != adj_verts.second;
-			++inter_iter)
-		{
-			v2 = *inter_iter;
-			//get edge
-			inter_edge = boost::edge(v1, v2, inter_graph);
-			if (!inter_edge.second)
-				continue;
-			else if (!inter_graph[inter_edge.first].link)
-				continue;
-			vertex2 = inter_graph[v2].vertex.lock();
-			if (!vertex2)
-				continue;
-			//store all cells in sel_list2
-			for (pwcell_iter = vertex2->GetCellsBegin();
-			pwcell_iter != vertex2->GetCellsEnd();
-				++pwcell_iter)
-			{
-				cell = pwcell_iter->lock();
-				if (!cell)
-					continue;
-				sel_list2.insert(std::pair<unsigned int, pCell>
-					(cell->Id(), cell));
-				//save to rulers
-				ruler_iter = FindRulerFromList(vertex1->Id(), rulers);
-				if (ruler_iter == rulers.end())
-				{
-					Ruler* ruler = new Ruler();
-					ruler->SetRulerType(1);//multi-point
-					ruler->AddPoint(vertex1->GetCenter());
-					ruler->AddPoint(vertex2->GetCenter());
-					ruler->SetTimeDep(false);
-					ruler->Id(vertex2->Id());
-					rulers.push_back(ruler);
-				}
-				else
-				{
-					Ruler* ruler = *ruler_iter;
-					ruler->AddPoint(vertex2->GetCenter());
-					ruler->Id(vertex2->Id());
-				}
-			}
-		}
-	}
-
-	return true;
-}
+//bool TrackMapProcessor::GetMappedRulers(TrackMap& track_map,
+//	CellList& sel_list1, CellList &sel_list2,
+//	RulerList& rulers,
+//	size_t frame1, size_t frame2)
+//{
+//	size_t frame_num = track_map.m_frame_num;
+//	if (frame1 >= frame_num ||
+//		frame2 >= frame_num ||
+//		frame1 == frame2)
+//		return false;
+//
+//	CellList &cell_list1 = track_map.m_cells_list.at(frame1);
+//	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
+//		frame1 > frame2 ? frame2 : frame1);
+//	CellListIter sel_iter, cell_iter;
+//	pVertex vertex1, vertex2;
+//	pCell cell;
+//	InterVert v1, v2;
+//	std::pair<InterAdjIter, InterAdjIter> adj_verts;
+//	InterAdjIter inter_iter;
+//	CellBinIter pwcell_iter;
+//	FLIVR::Color c;
+//	std::pair<InterEdge, bool> inter_edge;
+//	RulerListIter ruler_iter;
+//
+//	for (sel_iter = sel_list1.begin();
+//	sel_iter != sel_list1.end();
+//		++sel_iter)
+//	{
+//		cell_iter = cell_list1.find(sel_iter->second->Id());
+//		if (cell_iter == cell_list1.end())
+//			continue;
+//		vertex1 = cell_iter->second->GetVertex().lock();
+//		if (!vertex1)
+//			continue;
+//		v1 = vertex1->GetInterVert(inter_graph);
+//		if (v1 == InterGraph::null_vertex())
+//			continue;
+//		adj_verts = boost::adjacent_vertices(v1, inter_graph);
+//		//for each adjacent vertex
+//		for (inter_iter = adj_verts.first;
+//		inter_iter != adj_verts.second;
+//			++inter_iter)
+//		{
+//			v2 = *inter_iter;
+//			//get edge
+//			inter_edge = boost::edge(v1, v2, inter_graph);
+//			if (!inter_edge.second)
+//				continue;
+//			else if (!inter_graph[inter_edge.first].link)
+//				continue;
+//			vertex2 = inter_graph[v2].vertex.lock();
+//			if (!vertex2)
+//				continue;
+//			//store all cells in sel_list2
+//			for (pwcell_iter = vertex2->GetCellsBegin();
+//			pwcell_iter != vertex2->GetCellsEnd();
+//				++pwcell_iter)
+//			{
+//				cell = pwcell_iter->lock();
+//				if (!cell)
+//					continue;
+//				sel_list2.insert(std::pair<unsigned int, pCell>
+//					(cell->Id(), cell));
+//				//save to rulers
+//				ruler_iter = FindRulerFromList(vertex1->Id(), rulers);
+//				if (ruler_iter == rulers.end())
+//				{
+//					Ruler* ruler = new Ruler();
+//					ruler->SetRulerType(1);//multi-point
+//					ruler->AddPoint(vertex1->GetCenter());
+//					ruler->AddPoint(vertex2->GetCenter());
+//					ruler->SetTimeDep(false);
+//					ruler->Id(vertex2->Id());
+//					rulers.push_back(ruler);
+//				}
+//				else
+//				{
+//					Ruler* ruler = *ruler_iter;
+//					ruler->AddPoint(vertex2->GetCenter());
+//					ruler->Id(vertex2->Id());
+//				}
+//			}
+//		}
+//	}
+//
+//	return true;
+//}
 
 //modifications
 bool TrackMapProcessor::LinkCells(TrackMap& track_map,
@@ -2244,13 +2244,13 @@ bool TrackMapProcessor::LinkCells(TrackMap& track_map,
 		cell_id = citer1->second->Id();
 		cell = cell_list1.find(cell_id);
 		if (cell == cell_list1.end())
-			AddCell(track_map, citer1->second, frame1, cell);
-		else
-			cell->second->Set(citer1->second);
+			continue;// AddCell(track_map, citer1->second, frame1, cell);
+		//else
+		//	cell->second->Set(citer1->second);
 		pVertex vert1 = cell->second->GetVertex().lock();
 		if (vert1)
 		{
-			vert1->Update();
+			//vert1->Update();
 			vlist1.insert(std::pair<unsigned int, pVertex>
 				(vert1->Id(), vert1));
 		}
@@ -2261,13 +2261,13 @@ bool TrackMapProcessor::LinkCells(TrackMap& track_map,
 		cell_id = citer2->second->Id();
 		cell = cell_list2.find(cell_id);
 		if (cell == cell_list2.end())
-			AddCell(track_map, citer2->second, frame2, cell);
-		else
-			cell->second->Set(citer2->second);
+			continue;// AddCell(track_map, citer2->second, frame2, cell);
+		//else
+		//	cell->second->Set(citer2->second);
 		pVertex vert2 = cell->second->GetVertex().lock();
 		if (vert2)
 		{
-			vert2->Update();
+			//vert2->Update();
 			vlist2.insert(std::pair<unsigned int, pVertex>
 				(vert2->Id(), vert2));
 		}

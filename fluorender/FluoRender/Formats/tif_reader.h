@@ -131,7 +131,9 @@ public:
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
 	Nrrd* Convert(int t, int c, bool get_max);
-	wstring GetCurName(int t, int c);
+	wstring GetCurDataName(int t, int c);
+	wstring GetCurMaskName(int t, int c);
+	wstring GetCurLabelName(int t, int c);
 
 	wstring GetPathName() {return m_path_name;}
 	wstring GetDataName() {return m_data_name;}
@@ -156,6 +158,7 @@ private:
 	wstring m_data_name;
 	bool isBig_;
 	bool isHyperstack_;		//true if it is a hyperstack tiff saved by ImageJ
+	bool isHsTimeSeq_;		//true if it is a time sequence of hyperstack files
 
 	struct SliceInfo
 	{

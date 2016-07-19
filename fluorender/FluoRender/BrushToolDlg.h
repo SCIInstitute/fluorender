@@ -90,8 +90,6 @@ public:
 	~BrushToolDlg();
 
 	void GetSettings(VRenderView* vrv);
-	//save default
-	void SaveDefault();
 
 	//set the brush icon down
 	void SelectBrush(int id);
@@ -148,8 +146,6 @@ private:
 	wxRadioButton* m_brush_iterss_rb;
 
 private:
-	void LoadDefault();
-
 	//event handling
 	//paint tools
 	//brush commands

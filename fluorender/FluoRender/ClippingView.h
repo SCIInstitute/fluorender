@@ -105,7 +105,7 @@ public:
 	int GetSelType();
 	VolumeData* GetVolumeData();
 	MeshData* GetMeshData();
-	void RefreshVRenderViews(bool interactive=false);
+	void RefreshVRenderViews(bool interactive=true);
 
 	bool GetChannLink()
 	{ return m_toolbar->GetToolState(ID_LinkChannelsBtn); }

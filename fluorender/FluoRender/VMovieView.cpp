@@ -51,6 +51,11 @@ BEGIN_EVENT_TABLE(VMovieView, wxPanel)
 	EVT_COMMAND_SCROLL(ID_ProgressSldr,VMovieView::OnTimeChange)
 	EVT_TEXT(ID_ProgressText, VMovieView::OnTimeEnter)
 	EVT_BUTTON(ID_SaveMovie, VMovieView::OnRun)
+	//script
+	EVT_CHECKBOX(ID_RunScriptChk, VMovieView::OnRunScriptChk)
+	EVT_TEXT(ID_ScriptFileText, VMovieView::OnScriptFileEdit)
+	EVT_BUTTON(ID_ScriptClearBtn, VMovieView::OnScriptClearBtn)
+	EVT_BUTTON(ID_ScriptFileBtn, VMovieView::OnScriptFileBtn)
 	//auto key
 	EVT_BUTTON(ID_GenKeyBtn, VMovieView::OnGenKey)
 	EVT_LIST_ITEM_ACTIVATED(ID_AutoKeyList, VMovieView::OnListItemAct)
@@ -70,7 +75,7 @@ BEGIN_EVENT_TABLE(VMovieView, wxPanel)
 	EVT_SPIN_DOWN(ID_WidthSpin, VMovieView::OnFrameSpinDown)
 	EVT_SPIN_DOWN(ID_HeightSpin, VMovieView::OnFrameSpinDown)
 //timer
-    EVT_TIMER(ID_Timer, VMovieView::OnTimer)
+	EVT_TIMER(ID_Timer, VMovieView::OnTimer)
 END_EVENT_TABLE()
 
 double VMovieView::m_Mbitrate = 1;
@@ -210,7 +215,7 @@ wxWindow* VMovieView::CreateAdvancedPage(wxWindow *parent) {
 	wxPanel *page = new wxPanel(parent);
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
-    m_advanced_movie = new RecorderDlg(m_frame, page);
+	m_advanced_movie = new RecorderDlg(m_frame, page);
 	(reinterpret_cast<VRenderFrame*>(m_frame))->m_recorder_dlg 
 		= m_advanced_movie;
 	sizer_v->Add(m_advanced_movie,0,wxEXPAND);
@@ -338,6 +343,46 @@ wxWindow* VMovieView::CreateCroppingPage(wxWindow *parent) {
 
 }
 
+wxWindow* VMovieView::CreateScriptPage(wxWindow *parent)
+{
+	wxPanel *page = new wxPanel(parent);
+	//script
+	//vertical sizer
+	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
+	m_run_script_chk = new wxCheckBox(page, ID_RunScriptChk,
+		"Enable execution of a script on 4D data during playback.");
+	wxStaticText* st = new wxStaticText(page, 0,
+		"Also enable this option to show component colors.");
+	sizer_v->Add(10, 10);
+	sizer_v->Add(m_run_script_chk);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(st, 0, wxALIGN_LEFT);
+	sizer_v->Add(10, 10);
+	st = new wxStaticText(page, 0, "Script File:",
+		wxDefaultPosition, wxSize(80, -1));
+	sizer_v->Add(st, 0, wxALIGN_LEFT);
+	wxBoxSizer *sizer_1 = new wxBoxSizer(wxHORIZONTAL);
+	m_script_file_text = new wxTextCtrl(page, ID_ScriptFileText, "",
+		wxDefaultPosition, wxDefaultSize);
+	m_script_clear_btn = new wxButton(page, ID_ScriptClearBtn, "X",
+		wxDefaultPosition, wxSize(25, -1));
+	sizer_1->Add(m_script_file_text, 1, wxEXPAND);
+	sizer_1->Add(m_script_clear_btn, 0, wxALIGN_CENTER);
+	wxBoxSizer *sizer_2 = new wxBoxSizer(wxHORIZONTAL);
+	m_script_file_btn = new wxButton(page, ID_ScriptFileBtn, "Browse...",
+		wxDefaultPosition, wxSize(80, -1));
+	sizer_2->AddStretchSpacer();
+	sizer_2->Add(m_script_file_btn, 0, wxALIGN_CENTER);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer_1, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer_2, 0, wxEXPAND);
+
+	//set the page
+	page->SetSizer(sizer_v);
+	return page;
+}
+
 VMovieView::VMovieView(wxWindow* frame,
 	wxWindow* parent,
 	wxWindowID id,
@@ -362,6 +407,7 @@ m_delayed_stop(false)
 	m_notebook->AddPage(CreateAdvancedPage(m_notebook), "Advanced");
 	m_notebook->AddPage(CreateAutoKeyPage(m_notebook), "Auto Key");
 	m_notebook->AddPage(CreateCroppingPage(m_notebook), "Cropping");
+	m_notebook->AddPage(CreateScriptPage(m_notebook), "4D Script");
 	//renderview selector
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	//FPS
@@ -460,6 +506,26 @@ void VMovieView::GetSettings(int view) {
 		m_height_text->SetValue(wxString::Format("%d", h));
 	} else
 		m_frame_chk->SetValue(false);
+
+	//script
+	if (vr_frame && vr_frame->GetSettingDlg())
+	{
+		bool run_script = vr_frame->GetSettingDlg()->GetRunScript();
+		m_run_script_chk->SetValue(
+			run_script);
+		m_script_file_text->SetValue(
+			vr_frame->GetSettingDlg()->GetScriptFile());
+		if (run_script)
+		{
+			m_play_btn->SetBitmap(wxGetBitmapFromMemory(playscript));
+			m_notebook->SetPageText(4, "4D Script (Enabled)");
+		}
+		else
+		{
+			m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
+			m_notebook->SetPageText(4, "4D Script");
+		}
+	}
 }
 
 void VMovieView::Init() {
@@ -954,6 +1020,67 @@ void VMovieView::OnListItemAct(wxListEvent &event)
 	GenKey();
 }
 
+//script
+void VMovieView::OnRunScriptChk(wxCommandEvent &event)
+{
+	bool run_script = m_run_script_chk->GetValue();
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetSettingDlg())
+		vr_frame->GetSettingDlg()->SetRunScript(run_script);
+	if (run_script)
+	{
+		m_play_btn->SetBitmap(wxGetBitmapFromMemory(playscript));
+		m_notebook->SetPageText(4, "4D Script (Enabled)");
+	}
+	else
+	{
+		m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
+		m_notebook->SetPageText(4, "4D Script");
+	}
+	if (vr_frame)
+	{
+		VRenderView* vrv = (*vr_frame->GetViewList())[m_views_cmb->GetCurrentSelection()];
+		if (vrv)
+			vrv->RefreshGL();
+	}
+}
+
+void VMovieView::OnScriptFileEdit(wxCommandEvent &event)
+{
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetSettingDlg())
+    {
+        wxString str = m_script_file_text->GetValue();
+		vr_frame->GetSettingDlg()->SetScriptFile(str);
+    }
+}
+
+void VMovieView::OnScriptClearBtn(wxCommandEvent &event)
+{
+	m_script_file_text->Clear();
+}
+
+void VMovieView::OnScriptFileBtn(wxCommandEvent &event)
+{
+	wxFileDialog *fopendlg = new wxFileDialog(
+		m_frame, "Choose a 4D script file", "", "",
+		"4D script file (*.txt)|*.txt",
+		wxFD_OPEN);
+
+	int rval = fopendlg->ShowModal();
+	if (rval == wxID_OK)
+	{
+		wxString file = fopendlg->GetPath();
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame && vr_frame->GetSettingDlg())
+			vr_frame->GetSettingDlg()->SetScriptFile(file);
+		m_script_file_text->SetValue(file);
+	}
+
+	delete fopendlg;
+}
+
+//auto key
 void VMovieView::OnGenKey(wxCommandEvent& event) {
 	GenKey();
 }

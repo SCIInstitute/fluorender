@@ -294,6 +294,7 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	m_pick(false),
 	m_draw_mask(true),
 	m_clear_mask(false),
+	m_save_mask(false),
 	//move view
 	m_move_left(false),
 	m_move_right(false),
@@ -325,7 +326,7 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 		m_hTab = TabletInit((HWND)GetHWND());
 	}
 #endif
-	LoadDefaultBrushSettings();
+	LoadBrushSettings();
 }
 
 #ifdef _WIN32
@@ -355,6 +356,8 @@ HCTX VRenderGLView::TabletInit(HWND hWnd)
 
 VRenderGLView::~VRenderGLView()
 {
+	SaveBrushSettings();
+
 	goTimer->stop();
 	delete goTimer;
 #ifdef _WIN32
@@ -441,6 +444,11 @@ VRenderGLView::~VRenderGLView()
 
 void VRenderGLView::OnResize(wxSizeEvent& event)
 {
+	if (m_size == event.GetSize())
+		return;
+	else
+		m_size = event.GetSize();
+
 	int i;
 	for (i=0; i<(int)m_vd_pop_list.size(); i++)
 	{
@@ -462,7 +470,7 @@ void VRenderGLView::OnResize(wxSizeEvent& event)
 
 	m_vrv->UpdateScaleFactor(false);
 
-	RefreshGL();
+	RefreshGL(1);
 }
 
 void VRenderGLView::Init()
@@ -1301,9 +1309,14 @@ void VRenderGLView::DrawVolumes(int peel)
 
 	if (m_interactive)
 	{
+		wxMouseState ms = wxGetMouseState();
+		if (ms.LeftIsDown() ||
+			ms.MiddleIsDown() ||
+			ms.RightIsDown())
+			return;
 		m_interactive = false;
 		m_clear_buffer = true;
-		RefreshGL();
+		RefreshGL(2);
 	}
 }
 
@@ -1563,6 +1576,7 @@ void VRenderGLView::SetPaintMode(int mode)
 {
 	m_selector.SetMode(mode);
 	m_brush_state = mode;
+	ChangeBrushSetsIndex();
 }
 
 int VRenderGLView::GetPaintMode()
@@ -1794,7 +1808,7 @@ void VRenderGLView::PaintStroke()
 	//bind back the window frame buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	RefreshGL();
+	RefreshGL(3);
 }
 
 //show the stroke buffer
@@ -2078,7 +2092,7 @@ void VRenderGLView::CompExport(int mode, bool select)
 		}
 		vr_frame->UpdateList();
 		vr_frame->UpdateTree(m_selector.GetVolume()->GetName());
-		RefreshGL();
+		RefreshGL(4);
 	}
 }
 
@@ -2132,8 +2146,8 @@ void VRenderGLView::NoiseRemoval(int iter, double thresh)
 }
 
 //brush properties
-//load default
-void VRenderGLView::LoadDefaultBrushSettings()
+//load settings
+void VRenderGLView::LoadBrushSettings()
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = expath.BeforeLast(GETSLASH(),NULL);
@@ -2190,6 +2204,52 @@ void VRenderGLView::LoadDefaultBrushSettings()
 	//size 2
 	if (fconfig.Read("brush_size2", &val) && val>0.0)
 		m_brush_radius2 = val;
+	//radius settings for individual brush types
+	if (fconfig.Exists("/radius_settings"))
+	{
+		fconfig.SetPath("/radius_settings");
+		int brush_num = fconfig.Read("num", 0l);
+		if (m_brush_radius_sets.size() != brush_num)
+			m_brush_radius_sets.resize(brush_num);
+		wxString str;
+		for (int i = 0; i < brush_num; ++i)
+		{
+			str = wxString::Format("/radius_settings/%d", i);
+			if (!fconfig.Exists(str))
+				continue;
+			fconfig.SetPath(str);
+			//type
+			fconfig.Read("type", &(m_brush_radius_sets[i].type));
+			//radius 1
+			fconfig.Read("radius1", &(m_brush_radius_sets[i].radius1));
+			//radius 2
+			fconfig.Read("radius2", &(m_brush_radius_sets[i].radius2));
+			//use radius 2
+			fconfig.Read("use_radius2", &(m_brush_radius_sets[i].use_radius2));
+		}
+		fconfig.SetPath("/");
+	}
+	if (m_brush_radius_sets.size() == 0)
+	{
+		BrushRadiusSet radius_set;
+		//select brush
+		radius_set.type = 2;
+		radius_set.radius1 = 10;
+		radius_set.radius2 = 30;
+		radius_set.use_radius2 = true;
+		m_brush_radius_sets.push_back(radius_set);
+		//erase
+		radius_set.type = 3;
+		m_brush_radius_sets.push_back(radius_set);
+		//diffuse brush
+		radius_set.type = 4;
+		m_brush_radius_sets.push_back(radius_set);
+		//solid brush
+		radius_set.type = 8;
+		radius_set.use_radius2 = false;
+		m_brush_radius_sets.push_back(radius_set);
+	}
+	m_brush_sets_index = 0;
 	//iterations
 	if (fconfig.Read("brush_iters", &ival))
 	{
@@ -2206,6 +2266,79 @@ void VRenderGLView::LoadDefaultBrushSettings()
 			break;
 		}
 	}
+}
+
+void VRenderGLView::SaveBrushSettings()
+{
+	wxString app_name = "FluoRender " +
+		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
+	wxString vendor_name = "FluoRender";
+	wxString local_name = "default_brush_settings.dft";
+	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
+		wxCONFIG_USE_LOCAL_FILE);
+	wxString str;
+	//brush properties
+	fconfig.Write("brush_ini_thresh",
+		m_selector.GetBrushIniThresh());
+	fconfig.Write("brush_gm_falloff",
+		m_selector.GetBrushGmFalloff());
+	fconfig.Write("brush_scl_falloff",
+		m_selector.GetBrushSclFalloff());
+	fconfig.Write("brush_scl_translate",
+		m_selector.GetBrushSclTranslate());
+	//auto thresh
+	fconfig.Write("auto_thresh",
+		m_selector.GetEstimateThreshold());
+	//edge detect
+	fconfig.Write("edge_detect",
+		m_selector.GetEdgeDetect());
+	//hidden removal
+	fconfig.Write("hidden_removal",
+		m_selector.GetHiddenRemoval());
+	//select group
+	fconfig.Write("select_group",
+		m_selector.GetSelectGroup());
+	//2d influence
+	fconfig.Write("brush_2dinfl",
+		m_selector.GetW2d());
+	//size 1
+	fconfig.Write("brush_size1", m_brush_radius1);
+	//size2 link
+	fconfig.Write("use_brush_size2", m_use_brush_radius2);
+	//size 2
+	fconfig.Write("brush_size2", m_brush_radius2);
+	//radius settings for individual brush types
+	fconfig.SetPath("/radius_settings");
+	int brush_num = m_brush_radius_sets.size();
+	fconfig.Write("num", brush_num);
+	for (int i = 0; i < brush_num; ++i)
+	{
+		BrushRadiusSet radius_set = m_brush_radius_sets[i];
+		str = wxString::Format("/radius_settings/%d", i);
+		fconfig.SetPath(str);
+		//type
+		fconfig.Write("type", radius_set.type);
+		//radius 1
+		fconfig.Write("radius1", radius_set.radius1);
+		//radius 2
+		fconfig.Write("radius2", radius_set.radius2);
+		//use radius 2
+		fconfig.Write("use_radius2", radius_set.use_radius2);
+	}
+	fconfig.SetPath("/");
+	//iterations
+	fconfig.Write("brush_iters",
+		m_selector.GetBrushIteration());
+
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = expath.BeforeLast(GETSLASH(), NULL);
+#ifdef _WIN32
+	wxString dft = expath + "\\default_brush_settings.dft";
+#else
+	wxString dft = expath + "/../Resources/default_brush_settings.dft";
+#endif
+	wxFileOutputStream os(dft);
+	fconfig.Save(os);
 }
 
 void VRenderGLView::SetBrushUsePres(bool pres)
@@ -2226,7 +2359,7 @@ void VRenderGLView::SetUseBrushSize2(bool val)
 		m_brush_radius2 = m_brush_radius1;
 }
 
-bool VRenderGLView::GetBrushSize2Link()
+bool VRenderGLView::GetUseBrushSize2()
 {
 	return m_use_brush_radius2;
 }
@@ -2472,7 +2605,7 @@ void VRenderGLView::CalculateSingle(int type, wxString prev_group, bool add)
 					vr_frame->GetPropView()->SetVolumeData(vd_a);
 			}
 		}
-		RefreshGL();
+		RefreshGL(5);
 	}
 }
 
@@ -3239,6 +3372,8 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	vd->GetVR()->set_shading(true);
+	bool alpha = vd->GetEnableAlpha();
+	vd->SetEnableAlpha(true);
 	vd->SetMode(2);
 	int colormode = vd->GetColormapMode();
 	vd->SetStreamMode(2);
@@ -3247,6 +3382,7 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 	vd->Draw(!m_persp, m_interactive, m_scale_factor);
 	vd->RestoreMode();
 	vd->SetColormapMode(colormode);
+	vd->SetEnableAlpha(alpha);
 
 	//bind fbo for final composition
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
@@ -3697,22 +3833,30 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	m_mvr->clear_vr();
 	for (i=0; i<(int)list.size(); i++)
 	{
-		if (list[i] && list[i]->GetDisp())
+		VolumeData* vd = list[i];
+		if (vd && vd->GetDisp())
 		{
-			VolumeRenderer* vr = list[i]->GetVR();
+			VolumeRenderer* vr = vd->GetVR();
 			if (vr)
 			{
-				list[i]->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-				list[i]->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+				if (vr_frame &&
+					vr_frame->GetSettingDlg() &&
+					vr_frame->GetSettingDlg()->GetRunScript() &&
+					vd->GetMask(false) &&
+					vd->GetLabel(false))
+					vd->SetMaskMode(4);
+				vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+				vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 				m_mvr->add_vr(vr);
 				m_mvr->set_sampling_rate(vr->get_sampling_rate());
 				m_mvr->SetNoiseRed(vr->GetNoiseRed());
 			}
 			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-			if (list[i]->GetTexture() &&
-				list[i]->GetTexture()->nmask()!=-1 &&
+			if (vd->GetTexture() &&
+				vd->GetTexture()->nmask()!=-1 &&
 				vr_frame &&
-				list[i]==vr_frame->GetCurSelVol())
+				vd ==vr_frame->GetCurSelVol())
 				use_tex_wt2 = true;
 		}
 	}
@@ -3883,6 +4027,7 @@ void VRenderGLView::SetBrush(int mode)
 	}
 	m_paint_display = true;
 	m_draw_brush = true;
+	ChangeBrushSetsIndex();
 }
 
 void VRenderGLView::UpdateBrushState()
@@ -3905,7 +4050,7 @@ void VRenderGLView::UpdateBrushState()
 				tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
 			if (brush_dlg)
 				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
-			RefreshGL();
+			RefreshGL(6);
 		}
 		else if (wxGetKeyState(wxKeyCode('Z')))
 		{
@@ -3914,7 +4059,7 @@ void VRenderGLView::UpdateBrushState()
 				tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
 			if (brush_dlg)
 				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
-			RefreshGL();
+			RefreshGL(7);
 		}
 		else if (wxGetKeyState(wxKeyCode('X')))
 		{
@@ -3923,7 +4068,7 @@ void VRenderGLView::UpdateBrushState()
 				tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
 			if (brush_dlg)
 				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDesel);
-			RefreshGL();
+			RefreshGL(8);
 		}
 	}
 	else
@@ -3938,7 +4083,7 @@ void VRenderGLView::UpdateBrushState()
 					tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
 				if (brush_dlg)
 					brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
-				RefreshGL();
+				RefreshGL(9);
 			}
 			else if (wxGetKeyState(wxKeyCode('Z')))
 			{
@@ -3948,7 +4093,7 @@ void VRenderGLView::UpdateBrushState()
 					tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
 				if (brush_dlg)
 					brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
-				RefreshGL();
+				RefreshGL(10);
 			}
 			else if (wxGetKeyState(wxKeyCode('X')))
 			{
@@ -3958,12 +4103,12 @@ void VRenderGLView::UpdateBrushState()
 					tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
 				if (brush_dlg)
 					brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDesel);
-				RefreshGL();
+				RefreshGL(11);
 			}
 			else
 			{
 				SetBrush(m_brush_state);
-				RefreshGL();
+				RefreshGL(12);
 			}
 		}
 		else if (!wxGetKeyState(WXK_SHIFT) &&
@@ -3982,13 +4127,39 @@ void VRenderGLView::UpdateBrushState()
 				tree_panel->SelectBrush(0);
 			if (brush_dlg)
 				brush_dlg->SelectBrush(0);
-			RefreshGL();
+			RefreshGL(13);
 
 			if (m_prev_focus)
 			{
 				m_prev_focus->SetFocus();
 				m_prev_focus = 0;
 			}
+		}
+	}
+}
+
+//brush sets
+void VRenderGLView::ChangeBrushSetsIndex()
+{
+	int mode = m_selector.GetMode();
+	if (mode == 1)
+		mode = 2;
+	for (int i = 0; i < m_brush_radius_sets.size(); ++i)
+	{
+		BrushRadiusSet radius_set = m_brush_radius_sets[i];
+		if (radius_set.type == mode &&
+			m_brush_sets_index != i)
+		{
+			//save previous
+			m_brush_radius_sets[m_brush_sets_index].radius1 = m_brush_radius1;
+			m_brush_radius_sets[m_brush_sets_index].radius2 = m_brush_radius2;
+			m_brush_radius_sets[m_brush_sets_index].use_radius2 = m_use_brush_radius2;
+			//get new
+			m_brush_radius1 = radius_set.radius1;
+			m_brush_radius2 = radius_set.radius2;
+			m_use_brush_radius2 = radius_set.use_radius2;
+			m_brush_sets_index = i;
+			break;
 		}
 	}
 }
@@ -4405,6 +4576,17 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		if (!wxGetKeyState(wxKeyCode('c')) &&
 			m_clear_mask)
 			m_clear_mask = false;
+		//save all masks
+		if (wxGetKeyState(wxKeyCode('m')) &&
+			!m_save_mask)
+		{
+			if (frame && frame->GetList())
+				frame->GetList()->SaveAllMasks();
+			m_save_mask = true;
+		}
+		if (!wxGetKeyState(wxKeyCode('m')) &&
+			m_save_mask)
+			m_save_mask = false;
 		//full screen
 		if (wxGetKeyState(WXK_ESCAPE))
 		{
@@ -4431,7 +4613,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 				frame->GetStatusBar()->PushStatusText("Forced Refresh");
 			wxSizeEvent e;
 			OnResize(e);
-			RefreshGL();
+			RefreshGL(14);
 			if (frame && frame->GetStatusBar())
 				frame->GetStatusBar()->PopStatusText();
 			return;
@@ -4441,7 +4623,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 	if (refresh)
 	{
 		m_updating = true;
-		RefreshGL(ref_stat, start_loop);
+		RefreshGL(15, ref_stat, start_loop);
 	}
 }
 
@@ -4738,7 +4920,7 @@ void VRenderGLView::ResetMovieAngle()
 	m_capture = false;
 	m_capture_rotat = false;
 
-	RefreshGL();
+	RefreshGL(16);
 }
 
 void VRenderGLView::StopMovie()
@@ -4801,6 +4983,8 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 		m_script_file = vframe->GetSettingDlg()->GetScriptFile();
 	}
 
+	//save currently selected volume
+	VolumeData* cur_vd_save = m_cur_vol;
 	for (int i=0; i<(int)m_vd_pop_list.size(); i++)
 	{
 		VolumeData* vd = m_vd_pop_list[i];
@@ -4836,7 +5020,12 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 				vd->GetVR()->clear_tex_pool();
 		}
 	}
-	RefreshGL();
+	//restore currently selected volume
+	m_cur_vol = cur_vd_save;
+	m_selector.SetVolume(m_cur_vol);
+	m_calculator.SetVolumeA(m_cur_vol);
+
+	RefreshGL(17);
 }
 
 void VRenderGLView::Get3DBatFrames(int &start_frame, int &end_frame, int &cur_frame)
@@ -4954,7 +5143,7 @@ void VRenderGLView::Set3DBatFrame(int offset)
 
 	InitView(INIT_BOUNDS|INIT_CENTER);
 
-	RefreshGL();
+	RefreshGL(18);
 
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
@@ -5095,12 +5284,16 @@ void VRenderGLView::Run4DScript(wxString &scriptname, VolumeData* vd)
 					RunExternalExe(fconfig);
 				else if (str == "fetch_mask")
 					RunFetchMask(fconfig);
+				else if (str == "save_mask")
+					RunSaveMask(fconfig);
 				else if (str == "calculation")
 					RunCalculation(fconfig);
 				else if (str == "opencl")
 					RunOpenCL(fconfig);
 				else if (str == "comp_analysis")
 					RunCompAnalysis(fconfig);
+				else if (str == "generate_comp")
+					RunGenerateComp(fconfig);
 			}
 		}
 	}
@@ -5228,10 +5421,8 @@ void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 	BaseReader* reader = m_cur_vol->GetReader();
 	if (!reader)
 		return;
-	wxString data_name = reader->GetCurName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
-	wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
 	LBLReader lbl_reader;
-	wstring lblname = label_name.ToStdWstring();
+	wstring lblname = reader->GetCurLabelName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
 	lbl_reader.SetFile(lblname);
 	Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
 	if (!label_nrrd_new)
@@ -5299,10 +5490,8 @@ void VRenderGLView::RunRandomColors(wxFileConfig &fconfig)
 	BaseReader* reader = m_cur_vol->GetReader();
 	if (!reader)
 		return;
-	wxString data_name = reader->GetCurName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
-	wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
 	LBLReader lbl_reader;
-	wstring lblname = label_name.ToStdWstring();
+	wstring lblname = reader->GetCurLabelName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
 	lbl_reader.SetFile(lblname);
 	Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
 	if (!label_nrrd_new)
@@ -5380,7 +5569,7 @@ void VRenderGLView::RunExternalExe(wxFileConfig &fconfig)
 	BaseReader* reader = vd->GetReader();
 	if (!reader)
 		return;
-	wxString data_name = reader->GetCurName(m_tseq_cur_num, vd->GetCurChannel());
+	wxString data_name = reader->GetCurDataName(m_tseq_cur_num, vd->GetCurChannel());
 	
 	vector<string> args;
 	args.push_back(pathname.ToStdString());
@@ -5401,23 +5590,35 @@ void VRenderGLView::RunFetchMask(wxFileConfig &fconfig)
 	BaseReader* reader = m_cur_vol->GetReader();
 	if (!reader)
 		return;
-	wxString data_name = reader->GetCurName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
-	wxString mask_name = data_name.Left(data_name.find_last_of('.')) + ".msk";
 	MSKReader msk_reader;
-	wstring mskname = mask_name.ToStdWstring();
+	wstring mskname = reader->GetCurMaskName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
 	msk_reader.SetFile(mskname);
 	Nrrd* mask_nrrd_new = msk_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
 	if (mask_nrrd_new)
 		m_cur_vol->LoadMask(mask_nrrd_new);
 
 	//load and replace the label
-	wxString label_name = data_name.Left(data_name.find_last_of('.')) + ".lbl";
 	LBLReader lbl_reader;
-	wstring lblname = label_name.ToStdWstring();
+	wstring lblname = reader->GetCurLabelName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
 	lbl_reader.SetFile(lblname);
 	Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
 	if (label_nrrd_new)
 		m_cur_vol->LoadLabel(label_nrrd_new);
+}
+
+void VRenderGLView::RunSaveMask(wxFileConfig &fconfig)
+{
+	if (!m_cur_vol)
+		return;
+	int toffset;
+	fconfig.Read("toffset", &toffset, 0);
+	int time;
+	if (toffset)
+		time = m_tseq_cur_num;
+	else
+		time = m_tseq_prv_num;
+	m_cur_vol->SaveMask(true, time, m_cur_vol->GetCurChannel());
+	m_cur_vol->SaveLabel(true, time, m_cur_vol->GetCurChannel());
 }
 
 void VRenderGLView::RunCalculation(wxFileConfig &fconfig)
@@ -5520,6 +5721,18 @@ void VRenderGLView::RunCompAnalysis(wxFileConfig &fconfig)
 	file.Close();
 }
 
+void VRenderGLView::RunGenerateComp(wxFileConfig &fconfig)
+{
+	int type;
+	fconfig.Read("type", &type, 0);
+	int mode;
+	fconfig.Read("mode", &mode, 0);
+
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetComponentDlg())
+		vr_frame->GetComponentDlg()->GenerateComp(type, mode);
+}
+
 //draw
 void VRenderGLView::OnDraw(wxPaintEvent& event)
 {
@@ -5549,7 +5762,7 @@ void VRenderGLView::ForceDraw()
 	}
 #endif
 #ifdef _DARWIN
-    SetCurrent(*m_glRC);
+	SetCurrent(*m_glRC);
 #endif
 	Init();
 	wxPaintDC dc(this);
@@ -5626,19 +5839,22 @@ void VRenderGLView::ForceDraw()
 
 	goTimer->sample();
 
+	if (TextureRenderer::get_invalidate_tex())
+	{
 #ifdef _WIN32
-	for (int i=0; i<m_dp_tex_list.size(); ++i)
-		glInvalidateTexImage(m_dp_tex_list[i], 0);
-	glInvalidateTexImage(m_tex_paint, 0);
-	glInvalidateTexImage(m_tex_final, 0);
-	glInvalidateTexImage(m_tex, 0);
-	glInvalidateTexImage(m_tex_temp, 0);
-	glInvalidateTexImage(m_tex_wt2, 0);
-	glInvalidateTexImage(m_tex_ol1, 0);
-	glInvalidateTexImage(m_tex_ol2, 0);
-	glInvalidateTexImage(m_tex_pick, 0);
-	glInvalidateTexImage(m_tex_pick_depth, 0);
+		for (int i = 0; i < m_dp_tex_list.size(); ++i)
+			glInvalidateTexImage(m_dp_tex_list[i], 0);
+		glInvalidateTexImage(m_tex_paint, 0);
+		glInvalidateTexImage(m_tex_final, 0);
+		glInvalidateTexImage(m_tex, 0);
+		glInvalidateTexImage(m_tex_temp, 0);
+		glInvalidateTexImage(m_tex_wt2, 0);
+		glInvalidateTexImage(m_tex_ol1, 0);
+		glInvalidateTexImage(m_tex_ol2, 0);
+		glInvalidateTexImage(m_tex_pick, 0);
+		glInvalidateTexImage(m_tex_pick_depth, 0);
 #endif
+	}
 
 	SwapBuffers();
 
@@ -5713,7 +5929,7 @@ void VRenderGLView::SetCenter()
 
 		//SetSortBricks();
 
-		RefreshGL();
+		RefreshGL(20);
 	}
 }
 
@@ -5761,7 +5977,7 @@ void VRenderGLView::SetScale121()
 
 	//SetSortBricks();
 
-	RefreshGL();
+	RefreshGL(21);
 }
 
 void VRenderGLView::SetPersp(bool persp)
@@ -8961,12 +9177,18 @@ bool VRenderGLView::GetIntp()
 
 void VRenderGLView::Run4DScript()
 {
+	//save currently selected volume
+	VolumeData* cur_vd_save = m_cur_vol;
 	for (int i = 0; i < (int)m_vd_pop_list.size(); ++i)
 	{
 		VolumeData* vd = m_vd_pop_list[i];
 		if (vd)
 			Run4DScript(m_script_file, vd);
 	}
+	//restore currently selected volume
+	m_cur_vol = cur_vd_save;
+	m_selector.SetVolume(m_cur_vol);
+	m_calculator.SetVolumeA(m_cur_vol);
 }
 
 //start loop update
@@ -9068,8 +9290,16 @@ void VRenderGLView::HaltLoopUpdate()
 }
 
 //new function to refresh
-void VRenderGLView::RefreshGL(bool erase, bool start_loop)
+void VRenderGLView::RefreshGL(int debug_code, bool erase, bool start_loop)
 {
+	//for debugging refresh events
+#ifdef _DEBUG
+	std::wostringstream os;
+	os << "refresh" << "\t" <<
+		debug_code << "\t" <<
+		m_interactive << "\n";
+	OutputDebugString(os.str().c_str());
+#endif
 	m_updating = true;
 	if (start_loop)
 		StartLoopUpdate();
@@ -10263,7 +10493,7 @@ prv_mouse_Y = old_mouse_Y;
 m_paint_enable = true;
 m_clear_paint = true;
 m_on_press = true;
-RefreshGL();
+RefreshGL(22);
 }
 }
 
@@ -10275,7 +10505,7 @@ m_paint_enable = true;
 Segment();
 m_int_mode = 1;
 m_on_press = false;
-RefreshGL();
+RefreshGL(23);
 }
 }
 
@@ -10298,7 +10528,7 @@ prv_mouse_Y = old_mouse_Y;
 if (m_int_mode == 2 && m_on_press)
 {
 m_paint_enable = true;
-RefreshGL();
+RefreshGL(24);
 }
 
 if (m_on_press)
@@ -10307,7 +10537,7 @@ else
 m_pressure = 1.0;
 
 if (m_draw_brush)
-RefreshGL();
+RefreshGL(25);
 }
 }
 
@@ -10321,7 +10551,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		window->GetClassInfo()->IsKindOf(CLASSINFO(wxTextCtrl)))
 		SetFocus();
 	//mouse interactive flag
-	m_interactive = true;
+	m_interactive = false;
 	m_paint_enable = false;
 	m_drawing_coord = false;
 
@@ -10354,7 +10584,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			prv_mouse_Y = old_mouse_Y;
 			m_paint_enable = true;
 			m_clear_paint = true;
-			RefreshGL();
+			RefreshGL(26);
 		}
 		return;
 	}
@@ -10379,6 +10609,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			//pick polygon models
 			if (m_pick)
 				Pick();
+			//RefreshGL(27);
+			return;
 		}
 		else if (m_int_mode == 2)
 		{
@@ -10387,12 +10619,16 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			Segment();
 			m_int_mode = 4;
 			m_force_clear = true;
+			RefreshGL(27);
+			return;
 		}
 		else if (m_int_mode == 5 &&
 			!event.AltDown())
 		{
 			//add one point to a ruler
 			AddRulerPoint(event.GetX(), event.GetY());
+			RefreshGL(27);
+			return;
 		}
 		else if (m_int_mode == 6)
 		{
@@ -10409,15 +10645,14 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				AddPaintRulerPoint();
 			m_int_mode = 8;
 			m_force_clear = true;
+			RefreshGL(27);
+			return;
 		}
-
-		RefreshGL();
-		return;
 	}
 	if (event.MiddleUp())
 	{
 		//SetSortBricks();
-		RefreshGL();
+		//RefreshGL(28);
 		return;
 	}
 	if (event.RightUp())
@@ -10437,10 +10672,10 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				AddRulerPoint(event.GetX(), event.GetY());
 				FinishRuler();
 			}
+			RefreshGL(29);
+			return;
 		}
 		//SetSortBricks();
-		RefreshGL();
-		return;
 	}
 
 	//mouse dragging
@@ -10499,7 +10734,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 						m_master_linked_view = this;
 
 					if (!hold_old)
-						RefreshGL();
+						RefreshGL(30);
 				}
 				if (event.MiddleIsDown() || (event.ControlDown() && event.LeftIsDown()))
 				{
@@ -10519,7 +10754,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					m_interactive = m_adaptive;
 
 					//SetSortBricks();
-					RefreshGL();
+					RefreshGL(31);
 				}
 				if (event.RightIsDown())
 				{
@@ -10549,7 +10784,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					m_interactive = m_adaptive;
 
 					//SetSortBricks();
-					RefreshGL();
+					RefreshGL(32);
 				}
 			}
 		}
@@ -10557,7 +10792,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		{
 			m_paint_enable = true;
 			m_pressure = 1.0;
-			RefreshGL();
+			RefreshGL(33);
 		}
 		else if (m_int_mode ==3)
 		{
@@ -10572,7 +10807,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					m_q_cl = q_delta * m_q_cl;
 					m_q_cl.Normalize();
 					SetRotations(m_rotx, m_roty, m_rotz);
-					RefreshGL();
+					RefreshGL(34);
 				}
 			}
 		}
@@ -10609,7 +10844,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					m_editing_ruler_point->x(point.x());
 					m_editing_ruler_point->y(point.y());
 					m_editing_ruler_point->z(point.z());
-					RefreshGL();
+					RefreshGL(35);
 					VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 					if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
 						vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
@@ -10673,7 +10908,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			//m_vrv->m_scale_factor_text->ChangeValue(str);
 		}
 
-		RefreshGL();
+		RefreshGL(36);
 		return;
 	}
 
@@ -10683,14 +10918,14 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	{
 		old_mouse_X = event.GetX();
 		old_mouse_Y = event.GetY();
-		RefreshGL();
+		RefreshGL(37);
 		return;
 	}
 
 	if (m_draw_coord)
 	{
 		m_drawing_coord = true;
-		RefreshGL(false, false);
+		RefreshGL(38, false, false);
 		return;
 	}
 }
@@ -11035,6 +11270,7 @@ wxPanel(parent, id, pos, size, style),
 	m_dft_scale_factor(1.0),
 	m_dft_scale_factor_mode(true)
 {
+	wxLogNull logNo;
 	//full frame
 	m_full_frame = new wxFrame((wxFrame*)NULL, wxID_ANY, "FluoRender");
 	m_view_sizer = new wxBoxSizer(wxVERTICAL);
@@ -11085,14 +11321,31 @@ wxPanel(parent, id, pos, size, style),
 			ResetIsolation().
 			EndList();
 		sharedContext = new wxGLContext(m_glview, NULL, &contextAttrs);
-		sharedContext->SetCurrent(*m_glview);
-		m_glview->SetCurrent(*sharedContext);
-		m_glview->m_glRC = sharedContext;
-		m_glview->m_set_gl = true;
+		if (!sharedContext->IsOK())
+		{
+			contextAttrs.Reset();
+			contextAttrs.PlatformDefaults().EndList();
+			sharedContext = new wxGLContext(m_glview, NULL, &contextAttrs);
+		}
+		if (!sharedContext->IsOK())
+		{
+			wxMessageBox("FluoRender needs an OpenGL 3.3 capable driver.\n" \
+				"Please update your graphics card driver or upgrade your graphics card.\n",
+				"Graphics card error", wxOK | wxICON_ERROR, this);
+			delete sharedContext;
+			sharedContext = 0;
+		}
+		if (sharedContext)
+		{
+			//sharedContext->SetCurrent(*m_glview);
+			m_glview->SetCurrent(*sharedContext);
+			m_glview->m_glRC = sharedContext;
+			m_glview->m_set_gl = true;
+		}
 	}
 	m_glview->SetCanFocus(false);
 	m_view_sizer->Add(m_glview, 1, wxEXPAND);
-#ifdef _WIN32
+#ifdef _DEBUG
 	//example Pixel format descriptor detailing each part
 	//PIXELFORMATDESCRIPTOR pfd = { 
 	// sizeof(PIXELFORMATDESCRIPTOR),  //  size of this pfd  
@@ -12237,7 +12490,7 @@ void VRenderView::RefreshGL(bool interactive, bool start_loop)
 	{
 		m_glview->m_force_clear = true;
 		m_glview->m_interactive = interactive && m_glview->m_adaptive;
-		m_glview->RefreshGL(false, start_loop);
+		m_glview->RefreshGL(39, false, start_loop);
 	}
 }
 
@@ -13077,7 +13330,7 @@ void VRenderView::OnAovSldrIdle(wxIdleEvent& event)
 		{
 			m_glview->m_draw_clip = true;
 			m_glview->m_clip_mask = -1;
-			RefreshGL();
+			RefreshGL(true);
 			m_draw_clip = true;
 		}
 	}
@@ -13086,7 +13339,7 @@ void VRenderView::OnAovSldrIdle(wxIdleEvent& event)
 		if (m_draw_clip)
 		{
 			m_glview->m_draw_clip = false;
-			RefreshGL();
+			RefreshGL(true);
 			m_draw_clip = false;
 		}
 	}

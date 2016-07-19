@@ -425,6 +425,6 @@ bool QVideoEncoder::set_frame_rgb_data(unsigned char * data) {
 				inData, inLinesize,
 				0, height_, output_stream_.frame->data, 
 				output_stream_.frame->linesize);
-	delete temp_array;
+	delete []temp_array;
 	return true;
 }

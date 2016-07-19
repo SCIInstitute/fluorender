@@ -63,6 +63,7 @@ EVT_COMBOBOX(ID_WavColor3Cmb, SettingDlg::OnWavColor3Change)
 EVT_COMBOBOX(ID_WavColor4Cmb, SettingDlg::OnWavColor4Change)
 //memory settings
 EVT_CHECKBOX(ID_StreamingChk, SettingDlg::OnStreamingChk)
+EVT_RADIOBOX(ID_UpdateOrderRbox, SettingDlg::OnUpdateOrderChange)
 EVT_COMMAND_SCROLL(ID_GraphicsMemSldr, SettingDlg::OnGraphicsMemChange)
 EVT_TEXT(ID_GraphicsMemText, SettingDlg::OnGraphicsMemEdit)
 EVT_COMMAND_SCROLL(ID_LargeDataSldr, SettingDlg::OnLargeDataChange)
@@ -75,10 +76,6 @@ EVT_TEXT(ID_ResponseTimeText, SettingDlg::OnResponseTimeEdit)
 EVT_COMBOBOX(ID_FontCmb, SettingDlg::OnFontChange)
 EVT_COMBOBOX(ID_FontSizeCmb, SettingDlg::OnFontSizeChange)
 EVT_COMBOBOX(ID_TextColorCmb, SettingDlg::OnTextColorChange)
-//script
-EVT_CHECKBOX(ID_RunScriptChk, SettingDlg::OnRunScriptChk)
-EVT_TEXT(ID_ScriptFileText, SettingDlg::OnScriptFileEdit)
-EVT_BUTTON(ID_ScriptFileBtn, SettingDlg::OnScriptFileBtn)
 //paint history depth
 EVT_COMMAND_SCROLL(ID_PaintHistDepthSldr, SettingDlg::OnPaintHistDepthChange)
 EVT_TEXT(ID_PaintHistDepthText, SettingDlg::OnPaintHistDepthEdit)
@@ -161,35 +158,10 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	group2->Add(st);
 	group2->Add(10, 5);
 
-	//script
-	wxBoxSizer *group3 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "4D Script"), wxVERTICAL);
-	m_run_script_chk = new wxCheckBox(page, ID_RunScriptChk,
-		"Enable execution of a script on 4D data during playback.");
-	st = new wxStaticText(page, 0,
-		"      Also enable this option to show component colors.");
-	group3->Add(10, 5);
-	group3->Add(m_run_script_chk);
-	group3->Add(10, 5);
-	group3->Add(st, 0, wxALIGN_LEFT);
-	group3->Add(10, 5);
-	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Script File:",
-		wxDefaultPosition, wxSize(80, -1));
-	m_script_file_text = new wxTextCtrl(page, ID_ScriptFileText, "",
-		wxDefaultPosition, wxDefaultSize);
-	m_script_file_btn = new wxButton(page, ID_ScriptFileBtn, "Browse...",
-		wxDefaultPosition, wxSize(80, -1));
-	sizer3_1->Add(st, 0, wxALIGN_CENTER);
-	sizer3_1->Add(m_script_file_text, 1, wxEXPAND);
-	sizer3_1->Add(m_script_file_btn, 0, wxALIGN_CENTER);
-	group3->Add(sizer3_1, 0, wxEXPAND);
-	group3->Add(10, 5);
-
 	//paint history depth
-	wxBoxSizer *group4 = new wxStaticBoxSizer(
+	wxBoxSizer *group3 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Paint History"), wxVERTICAL);
-	wxBoxSizer *sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_paint_hist_depth_sldr = new wxSlider(page, ID_PaintHistDepthSldr, 0, 0, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_paint_hist_depth_text = new wxTextCtrl(page, ID_PaintHistDepthText, "0",
@@ -198,13 +170,13 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 		"The number of undo steps for paint brush selection.\n" \
 		"Set the value to 0 to disable history.\n" \
 		"A value greater than 0 slows down speed and increases memory usage.");
-	sizer4_1->Add(m_paint_hist_depth_sldr, 1, wxEXPAND);
-	sizer4_1->Add(m_paint_hist_depth_text, 0, wxALIGN_CENTER);
-	group4->Add(10, 5);
-	group4->Add(sizer4_1, 0, wxEXPAND);
-	group4->Add(10, 5);
-	group4->Add(st);
-	group4->Add(10, 5);
+	sizer3_1->Add(m_paint_hist_depth_sldr, 1, wxEXPAND);
+	sizer3_1->Add(m_paint_hist_depth_text, 0, wxALIGN_CENTER);
+	group3->Add(10, 5);
+	group3->Add(sizer3_1, 0, wxEXPAND);
+	group3->Add(10, 5);
+	group3->Add(st);
+	group3->Add(10, 5);
 
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(10, 10);
@@ -213,8 +185,6 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	sizerV->Add(group2, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 	sizerV->Add(group3, 0, wxEXPAND);
-	sizerV->Add(10, 10);
-	sizerV->Add(group4, 0, wxEXPAND);
 
 	page->SetSizer(sizerV);
 	return page;
@@ -351,6 +321,10 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 		new wxStaticBox(page, wxID_ANY, "Large Data Streaming"), wxVERTICAL);
 	m_streaming_chk = new wxCheckBox(page, ID_StreamingChk,
 		"Enable streaming for large datasets.");
+	wxString choices[2] = {"Back to front", "Front to back"};
+	m_update_order_rbox = new wxRadioBox(page, ID_UpdateOrderRbox,
+		"Update order", wxDefaultPosition, wxDefaultSize,
+		2, choices, 0, wxRA_SPECIFY_COLS);
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Graphics Memory:",
 		wxDefaultPosition, wxSize(110, -1));
@@ -405,6 +379,8 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	sizer2_4->Add(st);
 	group2->Add(10, 5);
 	group2->Add(m_streaming_chk);
+	group2->Add(10, 10);
+	group2->Add(m_update_order_rbox);
 	group2->Add(10, 10);
 	group2->Add(sizer2_1, 0, wxEXPAND);
 	group2->Add(10, 5);
@@ -639,6 +615,7 @@ void SettingDlg::GetSettings()
 	m_force_brick_size = 128;
 	m_up_time = 100;
 	m_update_order = 0;
+	m_invalidate_tex = false;
 	m_point_volume_mode = 0;
 	m_ruler_use_transf = false;
 	m_ruler_time_dep = true;
@@ -834,6 +811,12 @@ void SettingDlg::GetSettings()
 		fconfig.SetPath("/update order");
 		fconfig.Read("value", &m_update_order);
 	}
+	//invalidate texture
+	if (fconfig.Exists("/invalidate tex"))
+	{
+		fconfig.SetPath("/invalidate tex");
+		fconfig.Read("value", &m_invalidate_tex);
+	}
 	//point volume mode
 	if (fconfig.Exists("/point volume mode"))
 	{
@@ -950,14 +933,12 @@ void SettingDlg::UpdateUI()
 			m_font_size_cmb->Select(i);
 	}
 	m_text_color_cmb->Select(m_text_color);
-	//script
-	m_run_script_chk->SetValue(m_run_script);
-	m_script_file_text->SetValue(m_script_file);
 	//paint history depth
 	m_paint_hist_depth_text->SetValue(wxString::Format("%d", m_paint_hist_depth));
 	//memory settings
 	m_streaming_chk->SetValue(m_mem_swap);
 	EnableStreaming(m_mem_swap);
+	m_update_order_rbox->SetSelection(m_update_order);
 	m_graphics_mem_text->SetValue(wxString::Format("%d", (int)m_graphics_mem));
 	m_large_data_text->SetValue(wxString::Format("%d", (int)m_large_data_size));
 	m_block_size_text->SetValue(wxString::Format("%d", m_force_brick_size));
@@ -1072,6 +1053,10 @@ void SettingDlg::SaveSettings()
 	//update order
 	fconfig.SetPath("/update order");
 	fconfig.Write("value", m_update_order);
+
+	//invalidate texture
+	fconfig.SetPath("/invalidate tex");
+	fconfig.Write("value", m_invalidate_tex);
 
 	//point volume mode
 	fconfig.SetPath("/point volume mode");
@@ -1333,6 +1318,8 @@ void SettingDlg::EnableStreaming(bool enable)
 {
 	if (enable)
 	{
+		m_update_order_rbox->Enable(0, true);
+		m_update_order_rbox->Enable(1, true);
 		m_graphics_mem_sldr->Enable();
 		m_graphics_mem_text->Enable();
 		m_large_data_sldr->Enable();
@@ -1344,6 +1331,8 @@ void SettingDlg::EnableStreaming(bool enable)
 	}
 	else
 	{
+		m_update_order_rbox->Enable(0, false);
+		m_update_order_rbox->Enable(1, false);
 		m_graphics_mem_sldr->Disable();
 		m_graphics_mem_text->Disable();
 		m_large_data_sldr->Disable();
@@ -1519,6 +1508,11 @@ void SettingDlg::OnStreamingChk(wxCommandEvent &event)
 	EnableStreaming(m_mem_swap);
 }
 
+void SettingDlg::OnUpdateOrderChange(wxCommandEvent &event)
+{
+	m_update_order = m_update_order_rbox->GetSelection();
+}
+
 void SettingDlg::OnGraphicsMemChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
@@ -1653,34 +1647,6 @@ void SettingDlg::OnTextColorChange(wxCommandEvent &event)
 				vrv->RefreshGL();
 		}
 	}
-}
-
-//script
-void SettingDlg::OnRunScriptChk(wxCommandEvent &event)
-{
-	m_run_script = m_run_script_chk->GetValue();
-}
-
-void SettingDlg::OnScriptFileEdit(wxCommandEvent &event)
-{
-	m_script_file = m_script_file_text->GetValue();
-}
-
-void SettingDlg::OnScriptFileBtn(wxCommandEvent &event)
-{
-	wxFileDialog *fopendlg = new wxFileDialog(
-		m_frame, "Choose a 4D script file", "", "",
-		"4D script file (*.txt)|*.txt",
-		wxFD_OPEN);
-
-	int rval = fopendlg->ShowModal();
-	if (rval == wxID_OK)
-	{
-		m_script_file = fopendlg->GetPath();
-		m_script_file_text->SetValue(m_script_file);
-	}
-
-	delete fopendlg;
 }
 
 //paint history depth

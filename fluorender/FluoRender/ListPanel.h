@@ -41,6 +41,7 @@ class DataListCtrl: public wxListCtrl
       Menu_Rename,
       Menu_Save,
       Menu_Bake,
+	  Menu_SaveMask,
       ID_RenameText,
       Menu_View_start
    };
@@ -58,6 +59,8 @@ class DataListCtrl: public wxListCtrl
    wxString GetText(long item, int col);
    void SetText(long item, int col, wxString &str);
    void SetSelection(int type, wxString &name);
+   void SaveSelMask();
+   void SaveAllMasks();
 
    friend class ListPanel;
 
@@ -81,6 +84,7 @@ class DataListCtrl: public wxListCtrl
    static wxWindow* CreateExtraControl(wxWindow* parent);
    void OnSave(wxCommandEvent& event);
    void OnBake(wxCommandEvent& event);
+   void OnSaveMask(wxCommandEvent& event);
 
    void OnSelect(wxListEvent &event);
    void OnAct(wxListEvent &event);
@@ -108,6 +112,7 @@ class ListPanel : public wxPanel
       ID_Rename,
       ID_Save,
       ID_Bake,
+	  ID_SaveMask,
       ID_Delete,
       ID_DeleteAll
    };
@@ -126,6 +131,7 @@ class ListPanel : public wxPanel
    void SetText(long item, int col, wxString &str);
    void DeleteAllItems();
    void SetSelection(int type, wxString &name);
+   void SaveAllMasks();
 
    private:
    //wxWindow* m_frame;
@@ -136,6 +142,7 @@ class ListPanel : public wxPanel
    void OnRename(wxCommandEvent& event);
    void OnSave(wxCommandEvent& event);
    void OnBake(wxCommandEvent& event);
+   void OnSaveMask(wxCommandEvent& event);
    void OnDelete(wxCommandEvent& event);
    void OnDeleteAll(wxCommandEvent& event);
 

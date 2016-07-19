@@ -317,7 +317,21 @@ bool NRRDReader::nrrd_sort(const TimeDataInfo& info1, const TimeDataInfo& info2)
 	return info1.filenumber < info2.filenumber;
 }
 
-wstring NRRDReader::GetCurName(int t, int c)
+wstring NRRDReader::GetCurDataName(int t, int c)
 {
 	return m_4d_seq[t].filename;
+}
+
+wstring NRRDReader::GetCurMaskName(int t, int c)
+{
+	wstring data_name = m_4d_seq[t].filename;
+	wstring mask_name = data_name.substr(0, data_name.find_last_of('.')) + L".msk";
+	return mask_name;
+}
+
+wstring NRRDReader::GetCurLabelName(int t, int c)
+{
+	wstring data_name = m_4d_seq[t].filename;
+	wstring label_name = data_name.substr(0, data_name.find_last_of('.')) + L".lbl";
+	return label_name;
 }
