@@ -77,7 +77,7 @@ void PVXMLReader::SetFile(string &file)
 			m_path_name.clear();
 		m_path_name.assign(file.length(), L' ');
 		copy(file.begin(), file.end(), m_path_name.begin());
-		m_data_name = m_path_name.substr(m_path_name.find_last_of(GETSLASH())+1);
+		m_data_name = GET_NAME(m_path_name);
 	}
 	m_id_string = m_path_name;
 }
@@ -85,7 +85,7 @@ void PVXMLReader::SetFile(string &file)
 void PVXMLReader::SetFile(wstring &file)
 {
 	m_path_name = file;
-	m_data_name = m_path_name.substr(m_path_name.find_last_of(GETSLASH())+1);
+	m_data_name = GET_NAME(m_path_name);
 	m_id_string = m_path_name;
 }
 
@@ -100,11 +100,9 @@ int PVXMLReader::Preprocess()
 	m_force_stack = false;
 
 	//separate path and name
-	int64_t pos = m_path_name.find_last_of(GETSLASH());
-	if (pos == -1)
+	wstring path, name;
+	if (!SEP_PATH_NAME(m_path_name, path, name))
 		return READER_OPEN_FAIL;
-	wstring path = m_path_name.substr(0, pos+1);
-	wstring name = m_path_name.substr(pos+1);
 
 	wxXmlDocument doc;
 	if (!doc.Load(m_path_name))
@@ -651,7 +649,7 @@ void PVXMLReader::SetBatch(bool batch)
 	if (batch)
 	{
 		//read the directory info
-		wstring search_path = m_path_name.substr(0, m_path_name.find_last_of(GETSLASH())) + GETSLASH();
+		wstring search_path = GET_PATH(m_path_name);
 		FIND_FILES(search_path,L".oib",m_batch_list,m_cur_batch);
 		m_batch = true;
 	}

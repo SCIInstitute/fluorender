@@ -61,6 +61,64 @@ DEALINGS IN THE SOFTWARE.
 #define SSCANF    sscanf
 
 inline wchar_t GETSLASH() { return L'\\'; }
+inline wchar_t GETSLASHALT() { return L'/'; }
+
+inline std::wstring GET_NAME(std::wstring &pathname)
+{
+	int64_t pos1 = pathname.find_last_of(GETSLASH());
+	int64_t pos2 = pathname.find_last_of(GETSLASHALT());
+	if (pos1 != std::wstring::npos &&
+		pos2 != std::wstring::npos)
+		return pathname.substr((pos1 > pos2 ? pos1 : pos2) + 1);
+	else if (pos1 != std::wstring::npos)
+		return pathname.substr(pos1 + 1);
+	else if (pos2 != std::wstring::npos)
+		return pathname.substr(pos2 + 1);
+	else
+		return pathname;
+}
+
+inline std::wstring GET_PATH(std::wstring &pathname)
+{
+	int64_t pos1 = pathname.find_last_of(GETSLASH());
+	int64_t pos2 = pathname.find_last_of(GETSLASHALT());
+	if (pos1 != std::wstring::npos &&
+		pos2 != std::wstring::npos)
+		return pathname.substr(0, (pos1 > pos2 ? pos1 : pos2) + 1);
+	else if (pos1 != std::wstring::npos)
+		return pathname.substr(0, pos1 + 1);
+	else if (pos2 != std::wstring::npos)
+		return pathname.substr(0, pos2 + 1);
+	else
+		return pathname;
+}
+
+inline bool SEP_PATH_NAME(std::wstring &pathname, std::wstring &path, std::wstring &name)
+{
+	int64_t pos1 = pathname.find_last_of(GETSLASH());
+	int64_t pos2 = pathname.find_last_of(GETSLASHALT());
+	if (pos1 != std::wstring::npos &&
+		pos2 != std::wstring::npos)
+	{
+		path = pathname.substr(0, (pos1 > pos2 ? pos1 : pos2) + 1);
+		name = pathname.substr((pos1 > pos2 ? pos1 : pos2) + 1);
+		return true;
+	}
+	else if (pos1 != std::wstring::npos)
+	{
+		path = pathname.substr(0, pos1 + 1);
+		name = pathname.substr(pos1 + 1);
+		return true;
+	}
+	else if (pos2 != std::wstring::npos)
+	{
+		path = pathname.substr(0, pos2 + 1);
+		name = pathname.substr(pos2 + 1);
+		return true;
+	}
+	else
+		return false;
+}
 
 inline std::wstring s2ws(const std::string& utf8) {
 	//    return std::wstring( str.begin(), str.end() );
@@ -121,8 +179,6 @@ inline double STOD(wxChar * s) { return _wtof(s); }
 inline double STOD(const wxChar * s) { return _wtof(s); }
 
 inline time_t TIME(time_t* n) { return _time32((__time32_t*)n); }
-
-inline int CREATE_DIR(const wchar_t *f) { return CreateDirectory(f, NULL); }
 
 inline uint32_t GET_TICK_COUNT() { return GetTickCount(); }
 
@@ -243,6 +299,37 @@ inline void FIND_FILES(std::wstring m_path_name,
 
 inline wchar_t GETSLASH() { return L'/'; }
 
+inline std::wstring GET_NAME(std::wstring &pathname)
+{
+	int64_t pos = pathname.find_last_of(GETSLASH());
+	if (pos != std::wstring::npos)
+		return pathname.substr(pos + 1);
+	else
+		return pathname;
+}
+
+inline std::wstring GET_PATH(std::wstring &pathname)
+{
+	int64_t pos = pathname.find_last_of(GETSLASH());
+	if (pos != std::wstring::npos)
+		return pathname.substr(0, pos + 1);
+	else
+		return pathname;
+}
+
+inline bool SEP_PATH_NAME(std::wstring &pathname, std::wstring &path, std::wstring &name)
+{
+	int64_t pos = pathname.find_last_of(GETSLASH());
+	if (pos != std::wstring::npos)
+	{
+		path = pathname.substr(0, pos + 1);
+		name = pathname.substr(pos + 1);
+		return true;
+	}
+	else
+		return false;
+}
+
 inline std::wstring s2ws(const std::string& utf8) {
 	//    return std::wstring( str.begin(), str.end() );
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
@@ -306,8 +393,6 @@ inline int STOI(const char * s) { return atoi(s); }
 inline double STOD(const char * s) { return atof(s); }
 
 inline time_t TIME(time_t* n) { return time(n); }
-
-inline int CREATE_DIR(const char *f) { return mkdir(f, S_IRWXU | S_IRGRP | S_IXGRP); }
 
 typedef union _LARGE_INTEGER {
 	struct {

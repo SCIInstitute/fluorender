@@ -114,15 +114,15 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	m_font_cmb = new wxComboBox(page, ID_FontCmb, "",
 		wxDefaultPosition, wxSize(150, -1), 0, NULL, wxCB_READONLY);
 	//populate fonts
-	std::string exePath = wxStandardPaths::Get().GetExecutablePath().ToStdString();
-	exePath = exePath.substr(0, exePath.find_last_of(std::string() + GETSLASH()));
-	wxString loc = wxString(exePath) + GETSLASH() + wxString("Fonts") +
-		GETSLASH() + wxString("*.ttf");
+	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+	exePath = wxPathOnly(exePath);
+	wxString loc = exePath + GETSLASH() + "Fonts" +
+		GETSLASH() + "*.ttf";
 	wxLogNull logNo;
 	wxString file = wxFindFirstFile(loc);
 	while (!file.empty())
 	{
-		file = file.AfterLast(GETSLASH());
+		file = wxFileNameFromPath(file);
 		file = file.BeforeLast('.');
 		m_font_cmb->Append(file);
 		file = wxFindNextFile();
@@ -639,7 +639,7 @@ void SettingDlg::GetSettings()
 	m_contact_factor = 0.7;
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = expath.BeforeLast(GETSLASH(), NULL);
+	expath = wxPathOnly(expath);
 #ifdef _WIN32
 	wxString dft = expath + "\\" + SETTING_FILE_NAME;
 #else
@@ -1095,7 +1095,7 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("device_id", m_cl_device_id);
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = expath.BeforeLast(GETSLASH(), NULL);
+	expath = wxPathOnly(expath);
 #ifdef _WIN32
 	wxString dft = expath + "\\" + SETTING_FILE_NAME;
 #else
@@ -1592,15 +1592,15 @@ void SettingDlg::OnFontChange(wxCommandEvent &event)
 	if (str != "")
 	{
 		m_font_file = str + ".ttf";
-		std::string exePath = wxStandardPaths::Get().GetExecutablePath().ToStdString();
-		exePath = exePath.substr(0, exePath.find_last_of(std::string() + GETSLASH()));
-		std::string loc = exePath + GETSLASH() + wxString("Fonts") +
-			GETSLASH() + str.ToStdString() + ".ttf";
+		wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+		exePath = wxPathOnly(exePath);
+		wxString loc = exePath + GETSLASH() + "Fonts" +
+			GETSLASH() + str + ".ttf";
 
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vr_frame)
 		{
-			vr_frame->GetTextRenderer()->LoadNewFace(loc);
+			vr_frame->GetTextRenderer()->LoadNewFace(loc.ToStdString());
 			vr_frame->GetTextRenderer()->SetSize(m_text_size);
 			for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
 			{

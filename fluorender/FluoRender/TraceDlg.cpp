@@ -1307,8 +1307,7 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 			}
 		}
 	}
-	lblname = out_dir.ToStdWstring() + lblname.substr(
-		lblname.find_last_of(GETSLASH()) + 1);
+	lblname = out_dir.ToStdWstring() + GET_NAME(lblname);
 	lbl_writer.SetData(nrrd_label_in2);
 	lbl_writer.Save(lblname, 1);
 	(*m_stat_text) << wxString::Format("Label in 2 of frame %d written.\n", 0);
@@ -1358,8 +1357,7 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 		}
 
 		//save
-		lblname = out_dir.ToStdWstring() + lblname.substr(
-			lblname.find_last_of(GETSLASH()) + 1);
+		lblname = out_dir.ToStdWstring() + GET_NAME(lblname);
 		lbl_writer.SetData(nrrd_label_out2);
 		lbl_writer.Save(lblname, 1);
 		(*m_stat_text) << wxString::Format("Label out 2 of frame %d written.\n", int(fi));

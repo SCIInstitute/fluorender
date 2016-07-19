@@ -2150,7 +2150,7 @@ void VRenderGLView::NoiseRemoval(int iter, double thresh)
 void VRenderGLView::LoadBrushSettings()
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = expath.BeforeLast(GETSLASH(),NULL);
+	expath = wxPathOnly(expath);
 #ifdef _WIN32
 	wxString dft = expath + "\\default_brush_settings.dft";
 #else
@@ -2331,7 +2331,7 @@ void VRenderGLView::SaveBrushSettings()
 		m_selector.GetBrushIteration());
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = expath.BeforeLast(GETSLASH(), NULL);
+	expath = wxPathOnly(expath);
 #ifdef _WIN32
 	wxString dft = expath + "\\default_brush_settings.dft";
 #else
@@ -4705,16 +4705,9 @@ void VRenderGLView::Set3DBatCapture(wxString &cap_file, int begin_frame, int end
 
 	if (!m_cap_file.IsEmpty() && m_total_frames>1)
 	{
-		wxString path = m_cap_file;
-		int sep = path.Find(GETSLASH(), true);
-		if (sep != wxNOT_FOUND)
-		{
-			sep++;
-			path = path.Left(sep);
-		}
-
-		wxString new_folder = path + m_bat_folder + "_folder";
-		CREATE_DIR(new_folder.fn_str());
+		wxString new_folder = wxPathOnly(m_cap_file)
+			+ GETSLASH() + m_bat_folder + "_folder";
+		wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 	}
 
 	//wxString s_fr_length = wxString ::Format("%d", end_frame);
@@ -5313,32 +5306,37 @@ void VRenderGLView::RunNoiseReduction(wxFileConfig &fconfig)
 	bool compression;
 	fconfig.Read("compress", &compression, false);
 	fconfig.Read("savepath", &pathname, "");
-	str = pathname;
-	int64_t pos = 0;
-	do
-	{
-		pos = pathname.find(GETSLASH(), pos);
-		if (pos == wxNOT_FOUND)
-			break;
-		pos++;
-		str = pathname.Left(pos);
-		if (!wxDirExists(str))
-			wxMkdir(str);
-	} while (true);
+	str = wxPathOnly(pathname);
+	if (!wxDirExists(str))
+		wxFileName::Mkdir(str, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 
-	CompAnalysis(0.0, size, thresh, 1.0, false, false, false);
-	Calculate(6, "", false);
-	VolumeData* vd = m_calculator.GetResult();
-	if (vd)
+	if (wxDirExists(str))
 	{
-		int time_num = vd->GetReader()->GetTimeNum();
-		wxString format = wxString::Format("%d", time_num);
-		m_fr_length = format.Length();
-		format = wxString::Format("_T%%0%dd", m_fr_length);
-		str = pathname +
-			wxString::Format(format, m_tseq_cur_num) + ".tif";
-		vd->Save(str, mode, bake, compression);
-		delete vd;
+		CompAnalysis(0.0, size, thresh, 1.0, false, false, false);
+		Calculate(6, "", false);
+		VolumeData* vd = m_calculator.GetResult();
+		if (vd)
+		{
+			str = pathname;
+			//time
+			int time_num = vd->GetReader()->GetTimeNum();
+			wxString format = wxString::Format("%d", time_num);
+			m_fr_length = format.Length();
+			format = wxString::Format("_T%%0%dd", m_fr_length);
+			str += wxString::Format(format, m_tseq_cur_num);
+			//channel
+			int chan_num = vd->GetReader()->GetChanNum();
+			if (chan_num > 1)
+			{
+				format = wxString::Format("%d", chan_num);
+				int ch_length = format.Length();
+				format = wxString::Format("_CH%%0%dd", ch_length + 1);
+				str += wxString::Format(format, vd->GetCurChannel() + 1);
+			}
+			str += ".tif";
+			vd->Save(str, mode, bake, compression);
+			delete vd;
+		}
 	}
 }
 
@@ -5469,49 +5467,54 @@ void VRenderGLView::RunRandomColors(wxFileConfig &fconfig)
 	fconfig.Read("huemode", &hmode, 1);
 	wxString str, pathname;
 	fconfig.Read("savepath", &pathname, "");
-	str = pathname;
-	int64_t pos = 0;
-	do
-	{
-		pos = pathname.find(GETSLASH(), pos);
-		if (pos == wxNOT_FOUND)
-			break;
-		pos++;
-		str = pathname.Left(pos);
-		if (!wxDirExists(str))
-			wxMkdir(str);
-	} while (true);
+	str = wxPathOnly(pathname);
+	if (!wxDirExists(str))
+		wxFileName::Mkdir(str, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 
-	//current state: see selection_tracking
-	//steps:
-	//load and replace the label
-	if (!m_cur_vol)
-		return;
-	BaseReader* reader = m_cur_vol->GetReader();
-	if (!reader)
-		return;
-	LBLReader lbl_reader;
-	wstring lblname = reader->GetCurLabelName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
-	lbl_reader.SetFile(lblname);
-	Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
-	if (!label_nrrd_new)
-		return;
-	m_cur_vol->LoadLabel(label_nrrd_new);
-	int time_num = m_cur_vol->GetReader()->GetTimeNum();
-	//generate RGB volumes
-	m_selector.CompExportRandomColor(hmode, 0, 0, 0, false, false);
-	vector<VolumeData*> *vol_list = m_selector.GetResultVols();
-	for (int ii = 0; ii<(int)vol_list->size(); ii++)
+	if (wxDirExists(str))
 	{
-		VolumeData* vd = (*vol_list)[ii];
-		if (vd)
+		//current state: see selection_tracking
+		//steps:
+		//load and replace the label
+		if (!m_cur_vol)
+			return;
+		VolumeData* vd = m_cur_vol;
+		BaseReader* reader = vd->GetReader();
+		if (!reader)
+			return;
+		LBLReader lbl_reader;
+		wstring lblname = reader->GetCurLabelName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
+		lbl_reader.SetFile(lblname);
+		Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
+		if (!label_nrrd_new)
+			return;
+		vd->LoadLabel(label_nrrd_new);
+		int time_num = reader->GetTimeNum();
+		//generate RGB volumes
+		m_selector.CompExportRandomColor(hmode, 0, 0, 0, false, false);
+		vector<VolumeData*> *vol_list = m_selector.GetResultVols();
+		for (int ii = 0; ii < (int)vol_list->size(); ii++)
 		{
+			vd = (*vol_list)[ii];
+			if (!vd)
+				break;
+
+			//time
 			wxString format = wxString::Format("%d", time_num);
 			m_fr_length = format.Length();
 			format = wxString::Format("_T%%0%dd", m_fr_length);
-			str = pathname +
-				wxString::Format(format, m_tseq_cur_num) +
-				wxString::Format("_COMP%d", ii + 1) + ".tif";
+			str += wxString::Format(format, m_tseq_cur_num);
+			//channel
+			int chan_num = vd->GetReader()->GetChanNum();
+			if (chan_num > 1)
+			{
+				format = wxString::Format("%d", chan_num);
+				int ch_length = format.Length();
+				format = wxString::Format("_CH%%0%dd", ch_length + 1);
+				str += wxString::Format(format, vd->GetCurChannel() + 1);
+			}
+			//comp
+			str += wxString::Format("_COMP%d", ii + 1) + ".tif";
 			vd->Save(str);
 			delete vd;
 		}
@@ -5528,32 +5531,31 @@ void VRenderGLView::RunSeparateChannels(wxFileConfig &fconfig)
 	bool compression;
 	fconfig.Read("compress", &compression, false);
 	fconfig.Read("savepath", &pathname, "");
-	str = pathname;
-	int64_t pos = 0;
-	do
-	{
-		pos = pathname.find(GETSLASH(), pos);
-		if (pos == wxNOT_FOUND)
-			break;
-		pos++;
-		str = pathname.Left(pos);
-		if (!wxDirExists(str))
-			wxMkdir(str);
-	} while (true);
+	str = wxPathOnly(pathname);
+	if (!wxDirExists(str))
+		wxFileName::Mkdir(str, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 
-	if (wxDirExists(pathname))
+	if (wxDirExists(str))
 	{
-		VolumeData* vd = m_selector.GetVolume();
-		if (vd)
-		{
-			int time_num = vd->GetReader()->GetTimeNum();
-			wxString format = wxString::Format("%d", time_num);
-			m_fr_length = format.Length();
-			format = wxString::Format("_T%%0%dd", m_fr_length);
-			str = pathname +
-				wxString::Format(format, m_tseq_cur_num) + ".tif";
-			vd->Save(str, mode, bake, compression);
-		}
+		if (!m_cur_vol)
+			return;
+
+		VolumeData* vd = m_cur_vol;
+
+		str = pathname;
+		//time
+		int time_num = vd->GetReader()->GetTimeNum();
+		wxString format = wxString::Format("%d", time_num);
+		m_fr_length = format.Length();
+		format = wxString::Format("_T%%0%dd", m_fr_length);
+		str += wxString::Format(format, m_tseq_cur_num);
+		//channel
+		int chan_num = vd->GetReader()->GetChanNum();
+		format = wxString::Format("%d", chan_num);
+		int ch_length = format.Length();
+		format = wxString::Format("_CH%%0%dd", ch_length+1);
+		str += wxString::Format(format, vd->GetCurChannel()+1) + ".tif";
+		vd->Save(str, mode, bake, compression);
 	}
 }
 
@@ -5640,39 +5642,47 @@ void VRenderGLView::RunOpenCL(wxFileConfig &fconfig)
 	bool compression;
 	fconfig.Read("compress", &compression, false);
 
-	str = pathname;
-	int64_t pos = 0;
-	do
-	{
-		pos = pathname.find(GETSLASH(), pos);
-		if (pos == wxNOT_FOUND)
-			break;
-		pos++;
-		str = pathname.Left(pos);
-		if (!wxDirExists(str))
-			wxMkdir(str);
-	} while (true);
+	str = wxPathOnly(pathname);
+	if (!wxDirExists(str))
+		wxFileName::Mkdir(str, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 
-	if (!m_cur_vol)
-		return;
-
-	m_cur_vol->GetVR()->clear_tex_current();
-	m_kernel_executor.LoadCode(clname);
-	m_kernel_executor.SetVolume(m_cur_vol);
-	m_kernel_executor.SetDuplicate(true);
-	bool result = m_kernel_executor.Execute();
-	VolumeData* vd_r = m_kernel_executor.GetResult();
-	if (result && vd_r)
+	if (wxDirExists(str))
 	{
-		int time_num = m_cur_vol->GetReader()->GetTimeNum();
+		if (!m_cur_vol)
+			return;
+
+		VolumeData* vd = m_cur_vol;
+
+		m_cur_vol->GetVR()->clear_tex_current();
+		m_kernel_executor.LoadCode(clname);
+		m_kernel_executor.SetVolume(m_cur_vol);
+		m_kernel_executor.SetDuplicate(true);
+		bool result = m_kernel_executor.Execute();
+		VolumeData* vd_r = m_kernel_executor.GetResult();
+		if (!result || !vd_r)
+			return;
+
+		str = pathname;
+		//time
+		int time_num = vd->GetReader()->GetTimeNum();
 		wxString format = wxString::Format("%d", time_num);
 		m_fr_length = format.Length();
 		format = wxString::Format("_T%%0%dd", m_fr_length);
-		str = pathname +
-			wxString::Format(format, m_tseq_cur_num) + ".tif";
+		str += wxString::Format(format, m_tseq_cur_num);
+		//channel
+		int chan_num = vd->GetReader()->GetChanNum();
+		if (chan_num > 1)
+		{
+			format = wxString::Format("%d", chan_num);
+			int ch_length = format.Length();
+			format = wxString::Format("_CH%%0%dd", ch_length + 1);
+			str += wxString::Format(format, vd->GetCurChannel() + 1);
+		}
+		str += ".tif";
 		vd_r->Save(str, mode, bake, compression);
+
+		m_kernel_executor.DeleteResult();
 	}
-	m_kernel_executor.DeleteResult();
 }
 
 void VRenderGLView::RunCompAnalysis(wxFileConfig &fconfig)
@@ -5682,18 +5692,9 @@ void VRenderGLView::RunCompAnalysis(wxFileConfig &fconfig)
 	int verbose;
 	fconfig.Read("verbose", &verbose, 0);
 
-	str = pathname;
-	int64_t pos = 0;
-	do
-	{
-		pos = pathname.find(GETSLASH(), pos);
-		if (pos == wxNOT_FOUND)
-			break;
-		pos++;
-		str = pathname.Left(pos);
-		if (!wxDirExists(str))
-			wxMkdir(str);
-	} while (true);
+	str = wxPathOnly(pathname);
+	if (!wxDirExists(str))
+		wxFileName::Mkdir(str, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 
 	if (!m_cur_vol)
 		return;
@@ -12759,7 +12760,7 @@ void VRenderView::OnCapture(wxCommandEvent& event)
 	int rval = file_dlg.ShowModal();
 	if (rval == wxID_OK)
 	{
-		m_glview->m_cap_file = file_dlg.GetDirectory() + "/" + file_dlg.GetFilename();
+		m_glview->m_cap_file = file_dlg.GetDirectory() + GETSLASH() + file_dlg.GetFilename();
 		m_glview->m_capture = true;
 		RefreshGL();
 
@@ -12769,8 +12770,8 @@ void VRenderView::OnCapture(wxCommandEvent& event)
 			{
 				wxString new_folder;
 				new_folder = m_glview->m_cap_file + "_project";
-				CREATE_DIR(new_folder.fn_str());
-				wxString prop_file = new_folder + "/" + file_dlg.GetFilename() + "_project.vrp";
+				wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+				wxString prop_file = new_folder + GETSLASH() + file_dlg.GetFilename() + "_project.vrp";
 				vr_frame->SaveProject(prop_file);
 			}
 			vr_frame->GetSettingDlg()->SetSaveAlpha(VRenderFrame::GetSaveAlpha());
@@ -13552,7 +13553,7 @@ void VRenderView::SaveDefault(unsigned int mask)
 		fconfig.Write("center", str);
 	}
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = expath.BeforeLast(GETSLASH(),NULL);
+	expath = wxPathOnly(expath);
 #ifdef _WIN32
 	wxString dft = expath + "\\default_view_settings.dft";
 #else
@@ -13572,7 +13573,7 @@ void VRenderView::OnSaveDefault(wxCommandEvent &event)
 void VRenderView::LoadSettings()
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = expath.BeforeLast(GETSLASH(),NULL);
+	expath = wxPathOnly(expath);
 #ifdef _WIN32
 	wxString dft = expath + "\\default_view_settings.dft";
 #else

@@ -1265,7 +1265,7 @@ void AdjustView::OnSaveDefault(wxCommandEvent &event)
 	m_dft_brightness = Color(dft_r_brightness, dft_g_brightness, dft_b_brightness);
 	m_dft_hdr = Color(dft_r_hdr, dft_g_hdr, dft_b_hdr);
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = expath.BeforeLast(GETSLASH(),NULL);
+	expath = wxPathOnly(expath);
 #ifdef _WIN32
     wxString dft = expath + "\\default_2d_adjustment_settings.dft";
 #else
@@ -1278,7 +1278,7 @@ void AdjustView::OnSaveDefault(wxCommandEvent &event)
 void AdjustView::LoadSettings()
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = expath.BeforeLast(GETSLASH(),NULL);
+	expath = wxPathOnly(expath);
 #ifdef _WIN32
     wxString dft = expath + "\\default_2d_adjustment_settings.dft";
 #else

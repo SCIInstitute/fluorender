@@ -162,7 +162,7 @@ CountingDlg::~CountingDlg()
 void CountingDlg::LoadDefault()
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = expath.BeforeLast(GETSLASH(),NULL);
+	expath = wxPathOnly(expath);
 #ifdef _WIN32
     wxString dft = expath + "\\default_brush_settings.dft";
 #else

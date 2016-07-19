@@ -359,14 +359,14 @@ VRenderFrame::VRenderFrame(
 		wxDefaultPosition, wxSize(130, 700));
 
 	wxString font_file = m_setting_dlg->GetFontFile();
-	std::string exePath = wxStandardPaths::Get().GetExecutablePath().ToStdString();
-	exePath = exePath.substr(0,exePath.find_last_of(std::string()+GETSLASH()));
+	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+	exePath = wxPathOnly(exePath);
 	if (font_file != "")
-		font_file = wxString(exePath) + GETSLASH() + wxString("Fonts") +
+		font_file = exePath + GETSLASH() + "Fonts" +
 			GETSLASH() + font_file;
 	else
-		font_file = wxString(exePath) + GETSLASH() + wxString("Fonts") +
-			GETSLASH() + wxString("FreeSans.ttf");
+		font_file = exePath + GETSLASH() + "Fonts" +
+			GETSLASH() + "FreeSans.ttf";
 	m_text_renderer = new TextRenderer(font_file.ToStdString());
 	m_text_renderer->SetSize(m_setting_dlg->GetTextSize());
 
@@ -2366,7 +2366,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			{
 				wxString new_folder;
 				new_folder = filename + "_files";
-				CREATE_DIR(new_folder.fn_str());
+				wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 				str = new_folder + GETSLASH() + vd->GetName() + ".tif";
 				vd->Save(str, 0, false, VRenderFrame::GetCompression());
 				fconfig.Write("path", str);
@@ -2526,7 +2526,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			{
 				wxString new_folder;
 				new_folder = filename + "_files";
-				CREATE_DIR(new_folder.fn_str());
+				wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 				str = new_folder + GETSLASH() + md->GetName() + ".obj";
 				md->Save(str);
 			}
@@ -2595,7 +2595,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			{
 				wxString new_folder;
 				new_folder = filename + "_files";
-				CREATE_DIR(new_folder.fn_str());
+				wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 				str = new_folder + GETSLASH() + ann->GetName() + ".txt";
 				ann->Save(str);
 			}

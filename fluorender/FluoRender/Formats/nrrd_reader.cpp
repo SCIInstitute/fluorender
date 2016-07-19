@@ -80,11 +80,9 @@ int NRRDReader::Preprocess()
 	m_4d_seq.clear();
 
 	//separate path and name
-	int64_t pos = m_path_name.find_last_of(GETSLASH());
-	if (pos == -1)
+	wstring path, name;
+	if (!SEP_PATH_NAME(m_path_name, path, name))
 		return READER_OPEN_FAIL;
-	wstring path = m_path_name.substr(0, pos+1);
-	wstring name = m_path_name.substr(pos+1);
 
 	//build 4d sequence
 	//search time sequence files
@@ -168,8 +166,7 @@ void NRRDReader::SetBatch(bool batch)
 	if (batch)
 	{
 		//read the directory info
-		wstring search_path = m_path_name.substr(0, m_path_name.find_last_of(GETSLASH())) + GETSLASH();
-		wstring search_str = search_path + L".nrrd";
+		wstring search_path = GET_PATH(m_path_name);
 		FIND_FILES(search_path,L".nrrd",m_batch_list,m_cur_batch,L"");
 		m_batch = true;
 	}
@@ -201,7 +198,7 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 	int i;
 
 	wstring str_name = m_4d_seq[t].filename;
-	m_data_name = str_name.substr(str_name.find_last_of(GETSLASH())+1);
+	m_data_name = GET_NAME(str_name);
 	FILE* nrrd_file = 0;
 	if (!WFOPEN(&nrrd_file, str_name.c_str(), L"rb"))
 		return 0;

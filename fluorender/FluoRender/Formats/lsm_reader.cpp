@@ -321,7 +321,7 @@ int LSMReader::Preprocess()
    fclose(pfile);
 
    m_cur_time = 0;
-   m_data_name = m_path_name.substr(m_path_name.find_last_of(GETSLASH())+1);
+   m_data_name = GET_NAME(m_path_name);
 
    return READER_OK;
 }

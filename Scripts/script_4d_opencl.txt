@@ -2,5 +2,5 @@
 tasknum=1
 [tasks/task0]
 type=opencl
-clpath=./CL_code/erosion.cl
-savepath=./DATA/filtered/
+clpath=./CL_code/opencl_kernel.cl
+savepath=./DATA/filtered/FilenamePrefix

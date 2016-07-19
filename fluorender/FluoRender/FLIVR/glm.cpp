@@ -327,8 +327,15 @@ static char* glmDirName(char* path)
 	dir = STRDUP(path);
 
 	i = (int)strlen(dir);
-	while (dir[i+1]!=GETSLASH() && i>0)
+#ifdef _WIN32
+	while (dir[i+1]!=GETSLASH() &&
+		   dir[i+1]!=GETSLASHALT() && i>0)
 		i--;
+#endif
+#ifdef _DARWIN
+	while (dir[i + 1] != GETSLASH() && i>0)
+		i--;
+#endif
 
 	STRNCPY(s, sizeof(s), dir, i+2);
 

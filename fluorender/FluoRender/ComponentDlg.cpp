@@ -1194,7 +1194,7 @@ void ComponentDlg::LoadSettings(wxString filename)
 	if (!wxFileExists(filename))
 	{
 		wxString expath = wxStandardPaths::Get().GetExecutablePath();
-		expath = expath.BeforeLast(GETSLASH(), NULL);
+		expath = wxPathOnly(expath);
 #ifdef _WIN32
 		filename = expath + "\\default_component_settings.dft";
 #else
@@ -1369,7 +1369,7 @@ void ComponentDlg::SaveSettings(wxString filename)
 	if (filename == "")
 	{
 		wxString expath = wxStandardPaths::Get().GetExecutablePath();
-		expath = expath.BeforeLast(GETSLASH(), NULL);
+		expath = wxPathOnly(expath);
 #ifdef _WIN32
 		filename = expath + "\\default_component_settings.dft";
 #else

@@ -82,11 +82,9 @@ int OIBReader::Preprocess()
 	m_oib_info.clear();
 
 	//separate path and name
-	int64_t pos = m_path_name.find_last_of(GETSLASH());
-	if (pos == -1)
+	wstring path, name;
+	if (!SEP_PATH_NAME(m_path_name, path, name))
 		return READER_OPEN_FAIL;
-	wstring path = m_path_name.substr(0, pos + 1);
-	wstring name = m_path_name.substr(pos + 1);
 
 	//search time sequence files
 	std::vector< std::wstring> list;
@@ -222,8 +220,7 @@ void OIBReader::SetBatch(bool batch)
 	if (batch)
 	{
 		//read the directory info
-		wstring search_path = m_path_name.substr(0,
-			m_path_name.find_last_of(GETSLASH())) + GETSLASH();
+		wstring search_path = GET_PATH(m_path_name);
 		FIND_FILES(search_path, L".oib", m_batch_list, m_cur_batch);
 		m_batch = true;
 	}

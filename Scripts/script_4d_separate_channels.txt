@@ -4,4 +4,4 @@ tasknum=1
 type=separate_channels
 format=0
 compress=1
-savepath=./DATA/Channels/
+savepath=./DATA/Channels/FilenamePrefix

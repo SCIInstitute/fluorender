@@ -94,11 +94,9 @@ int TIFReader::Preprocess()
 	isHsTimeSeq_ = false;
 
 	//separate path and name
-	int64_t pos = m_path_name.find_last_of(GETSLASH());
-	if (pos == -1)
+	wstring path, name;
+	if (!SEP_PATH_NAME(m_path_name, path, name))
 		return READER_OPEN_FAIL;
-	wstring path = m_path_name.substr(0, pos + 1);
-	wstring name = m_path_name.substr(pos + 1);
 
 	//determine if it is an ImageJ hyperstack
 	char img_desc[256];
@@ -566,11 +564,8 @@ void TIFReader::SetBatch(bool batch)
 	if (batch)
 	{
 		//separate path and name
-		int64_t pos = m_path_name.find_last_of(GETSLASH());
-		if (pos == -1)
-			return;
-		wstring path = m_path_name.substr(0, pos + 1);
-		FIND_FILES(path, L".tif", m_batch_list, m_cur_batch);
+		wstring search_path = GET_PATH(m_path_name);
+		FIND_FILES(search_path, L".tif", m_batch_list, m_cur_batch);
 		m_batch = true;
 	}
 	else
@@ -666,8 +661,7 @@ Nrrd* TIFReader::Convert(int t, int c, bool get_max)
 	Nrrd* data = 0;
 	TimeDataInfo chan_info = m_4d_seq[t];
 	if (!isHyperstack_ || isHsTimeSeq_)
-		m_data_name = chan_info.slices[0].slice.substr(
-			chan_info.slices[0].slice.find_last_of(GETSLASH()) + 1);
+		m_data_name = GET_NAME(chan_info.slices[0].slice);
 	data = ReadTiff(chan_info.slices, c, get_max);
 	m_cur_time = t;
 	return data;

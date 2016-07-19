@@ -229,14 +229,14 @@ void OclDlg::OnSaveAsBtn(wxCommandEvent& event)
 		rval = m_kernel_edit_stc->SaveFile(filename);
 		if (rval) {
 			m_kernel_file_txt->SetValue(filename);
-			filename = filename.AfterLast(GETSLASH());
-			std::string exePath = wxStandardPaths::Get().GetExecutablePath().ToStdString();
-			exePath = exePath.substr(0, exePath.find_last_of(std::string() + GETSLASH()));
-			wxString temp = wxString(exePath) + GETSLASH() + wxString("CL_code") +
-				wxString(GETSLASH()) + filename;
+			filename = wxFileNameFromPath(filename);
+			wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+			exePath = wxPathOnly(exePath);
+			wxString temp = exePath + GETSLASH() + "CL_code" +
+				GETSLASH() + filename;
 			m_kernel_edit_stc->SaveFile(temp);
 			filename = filename.BeforeFirst('.');
-	        m_kernel_list->InsertItem(m_kernel_list->GetItemCount(), filename);
+			m_kernel_list->InsertItem(m_kernel_list->GetItemCount(), filename);
 		}
 	}
 
@@ -309,16 +309,16 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 
 void OclDlg::AddKernelsToList()
 {
-    std::string exePath = wxStandardPaths::Get().GetExecutablePath().ToStdString();
-    exePath = exePath.substr(0,exePath.find_last_of(std::string()+GETSLASH()));
+	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+	exePath = wxPathOnly(exePath);
 	m_kernel_list->DeleteAllItems();
-    wxString loc = wxString(exePath) + GETSLASH() + wxString("CL_code") +
-                                       GETSLASH() + wxString("*.cl");
+	wxString loc = exePath + GETSLASH() + "CL_code" +
+		GETSLASH() + "*.cl";
 	wxLogNull logNo;
 	wxString file = wxFindFirstFile(loc);
 	while (!file.empty())
 	{
-		file = file.AfterLast(GETSLASH());
+		file = wxFileNameFromPath(file);
 		file = file.BeforeLast('.');
 		m_kernel_list->InsertItem(m_kernel_list->GetItemCount(), file);
 		file = wxFindNextFile();
@@ -327,21 +327,21 @@ void OclDlg::AddKernelsToList()
 
 void OclDlg::OnKernelListSelected(wxListEvent& event)
 {
-   long item = m_kernel_list->GetNextItem(-1,
-         wxLIST_NEXT_ALL,
-         wxLIST_STATE_SELECTED);
+	long item = m_kernel_list->GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
 
-   if (item != -1)
-   {
-      wxString file = m_kernel_list->GetItemText(item);
-    std::string exePath = wxStandardPaths::Get().GetExecutablePath().ToStdString();
-    exePath = exePath.substr(0,exePath.find_last_of(std::string()+GETSLASH()));
-    file = wxString(exePath) + GETSLASH() + wxString("CL_code") +
-                                       GETSLASH() + file + wxString(".cl");
+	if (item != -1)
+	{
+		wxString file = m_kernel_list->GetItemText(item);
+		wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+		exePath = wxPathOnly(exePath);
+		file = exePath + GETSLASH() + "CL_code" +
+			GETSLASH() + file + ".cl";
 		m_kernel_edit_stc->LoadFile(file);
 		m_kernel_edit_stc->EmptyUndoBuffer();
 		m_kernel_file_txt->SetValue(file);
-   }
+	}
 }
 
 void OclDlg::copy_filter(void* data, void* result,

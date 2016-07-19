@@ -1087,8 +1087,9 @@ void RecorderDlg::OnPlay(wxCommandEvent &event)
 		{
 			wxString new_folder;
 			new_folder = filename + "_project";
-			CREATE_DIR(new_folder.fn_str());
-			wxString prop_file = new_folder + "/" + fopendlg->GetFilename() + "_project.vrp";
+			wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+			wxString prop_file = new_folder + GETSLASH()
+				+ fopendlg->GetFilename() + "_project.vrp";
 			vr_frame->SaveProject(prop_file);
 		}
 	}

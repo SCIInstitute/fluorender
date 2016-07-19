@@ -2046,7 +2046,7 @@ int MeshData::Load(GLMmodel* mesh)
 int MeshData::Load(wxString &filename)
 {
 	m_data_path = filename;
-	m_name = m_data_path.Mid(m_data_path.Find(GETSLASH(), true)+1);
+	m_name = wxFileNameFromPath(filename);
 
 	if (m_data)
 		delete m_data;
@@ -3858,7 +3858,7 @@ m_vol_exb(0.0),
 	m_override_vox(true)
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = expath.BeforeLast(GETSLASH(),NULL);
+	expath = wxPathOnly(expath);
 #ifdef _WIN32
 	wxString dft = expath + "\\default_volume_settings.dft";
 #else
@@ -4029,9 +4029,7 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 void DataManager::SetProjectPath(wxString path)
 {
 	m_prj_path.Clear();
-	int sep = path.Find(GETSLASH(), true);
-	if (sep != wxNOT_FOUND)
-		m_prj_path = path.Left(sep);
+	m_prj_path = wxPathOnly(path);
 }
 
 wxString DataManager::SearchProjectPath(wxString &filename)

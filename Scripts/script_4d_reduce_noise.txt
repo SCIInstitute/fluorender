@@ -6,4 +6,4 @@ threshold=0.5
 voxelsize=500
 format=0
 compress=0
-savepath=./DATA/no_noise/
+savepath=./DATA/NoNoise/FilenamePrefix
