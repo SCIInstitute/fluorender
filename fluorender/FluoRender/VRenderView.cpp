@@ -5725,7 +5725,7 @@ void VRenderGLView::RunCompAnalysis(wxFileConfig &fconfig)
 void VRenderGLView::RunGenerateComp(wxFileConfig &fconfig)
 {
 	int type;
-	fconfig.Read("type", &type, 0);
+	fconfig.Read("gentype", &type, 0);
 	int mode;
 	fconfig.Read("mode", &mode, 0);
 

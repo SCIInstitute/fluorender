@@ -2,7 +2,7 @@
 tasknum=2
 [tasks/task0]
 type=generate_comp
-type=0
+gentype=0
 mode=0
 [tasks/task1]
 type=save_mask
