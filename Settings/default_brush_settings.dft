@@ -10,7 +10,7 @@ brush_2dinfl=0
 brush_size1=10
 use_brush_size2=1
 brush_size2=30
-brush_iters=30
+brush_iters=20
 [radius_settings]
 num=4
 [radius_settings/0]

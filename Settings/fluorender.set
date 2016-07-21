@@ -1,5 +1,5 @@
 ver_major=2
-ver_minor=19
+ver_minor=19.4
 [gm\ calculation]
 mode=2
 [peeling\ layers]
@@ -63,6 +63,8 @@ large\ data\ size=50
 force\ brick\ size=128
 up\ time=100
 [update\ order]
+value=0
+[invalidate\ tex]
 value=0
 [point\ volume\ mode]
 value=1
