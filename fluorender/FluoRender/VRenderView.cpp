@@ -11288,7 +11288,7 @@ wxPanel(parent, id, pos, size, style),
 	int samples = 0;
 	int gl_major_ver = 4;
 	int gl_minor_ver = 4;
-	int gl_profile_mask = WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
+	int gl_profile_mask = WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetSettingDlg())
 	{
@@ -11315,7 +11315,16 @@ wxPanel(parent, id, pos, size, style),
 	if (!sharedContext)
 	{
 		wxGLContextAttrs contextAttrs;
-		contextAttrs.CoreProfile().
+		switch (gl_profile_mask)
+		{
+		case WGL_CONTEXT_CORE_PROFILE_BIT_ARB:
+			contextAttrs.CoreProfile().EndList();
+			break;
+		case WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB:
+			contextAttrs.CompatibilityProfile().EndList();
+			break;
+		}
+		contextAttrs.
 			MajorVersion(gl_major_ver).
 			MinorVersion(gl_minor_ver).
 			Robust().
