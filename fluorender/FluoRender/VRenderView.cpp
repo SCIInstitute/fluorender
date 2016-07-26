@@ -4278,6 +4278,7 @@ void VRenderGLView::PickMesh()
 				frame->GetTree()->SetFocus();
 				frame->GetTree()->Select(m_vrv->GetName(), md->GetName());
 			}
+			RefreshGL(27);
 		}
 	}
 	else
@@ -10610,7 +10611,6 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			//pick polygon models
 			if (m_pick)
 				Pick();
-			//RefreshGL(27);
 			return;
 		}
 		else if (m_int_mode == 2)
