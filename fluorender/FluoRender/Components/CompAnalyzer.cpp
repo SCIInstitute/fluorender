@@ -187,7 +187,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 
 void ComponentAnalyzer::OutputFormHeader(std::string &str)
 {
-	str = "ID\tSumN\tSumI\tSurfaceN\tSurfaceI\tMean\tSigma\tMin\tMax\n";
+	str = "ID\tPosX\tPosY\tPosZ\tSumN\tSumI\tSurfaceN\tSurfaceI\tMean\tSigma\tMin\tMax\n";
 }
 
 void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::string comp_header)
@@ -214,6 +214,9 @@ void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::strin
 				oss << "\t";
 		}
 		oss << i->id << "\t";
+		oss << i->pos.x() << "\t";
+		oss << i->pos.y() << "\t";
+		oss << i->pos.z() << "\t";
 		oss << i->sumi << "\t";
 		oss << i->sumd << "\t";
 		oss << i->ext_sumi << "\t";
