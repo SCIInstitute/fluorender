@@ -3858,12 +3858,8 @@ m_vol_exb(0.0),
 	m_override_vox(true)
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-#ifdef _WIN32
-	wxString dft = expath + "\\default_volume_settings.dft";
-#else
-	wxString dft = expath + "/../Resources/default_volume_settings.dft";
-#endif
+    expath = wxPathOnly(expath);
+    wxString dft = expath + "/default_volume_settings.dft";
 	wxFileInputStream is(dft);
 	if (!is.IsOk())
 		return;

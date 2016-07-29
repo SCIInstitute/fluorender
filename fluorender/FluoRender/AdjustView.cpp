@@ -1265,12 +1265,8 @@ void AdjustView::OnSaveDefault(wxCommandEvent &event)
 	m_dft_brightness = Color(dft_r_brightness, dft_g_brightness, dft_b_brightness);
 	m_dft_hdr = Color(dft_r_hdr, dft_g_hdr, dft_b_hdr);
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-#ifdef _WIN32
-    wxString dft = expath + "\\default_2d_adjustment_settings.dft";
-#else
-    wxString dft = expath + "/../Resources/default_2d_adjustment_settings.dft";
-#endif
+    expath = wxPathOnly(expath);
+    wxString dft = expath + "/default_2d_adjustment_settings.dft";
 	wxFileOutputStream os(dft);
 	fconfig.Save(os);
 }
@@ -1278,12 +1274,8 @@ void AdjustView::OnSaveDefault(wxCommandEvent &event)
 void AdjustView::LoadSettings()
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-#ifdef _WIN32
-    wxString dft = expath + "\\default_2d_adjustment_settings.dft";
-#else
-    wxString dft = expath + "/../Resources/default_2d_adjustment_settings.dft";
-#endif
+    expath = wxPathOnly(expath);
+    wxString dft = expath + "/default_2d_adjustment_settings.dft";
     
 	wxFileInputStream is(dft);
 	if (!is.IsOk())

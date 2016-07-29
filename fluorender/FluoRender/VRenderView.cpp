@@ -2150,12 +2150,8 @@ void VRenderGLView::NoiseRemoval(int iter, double thresh)
 void VRenderGLView::LoadBrushSettings()
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-#ifdef _WIN32
-	wxString dft = expath + "\\default_brush_settings.dft";
-#else
-	wxString dft = expath + "/../Resources/default_brush_settings.dft";
-#endif
+    expath = wxPathOnly(expath);
+    wxString dft = expath + "/default_brush_settings.dft";
 	wxFileInputStream is(dft);
 	if (!is.IsOk())
 		return;
@@ -2331,12 +2327,8 @@ void VRenderGLView::SaveBrushSettings()
 		m_selector.GetBrushIteration());
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-#ifdef _WIN32
-	wxString dft = expath + "\\default_brush_settings.dft";
-#else
-	wxString dft = expath + "/../Resources/default_brush_settings.dft";
-#endif
+    expath = wxPathOnly(expath);
+    wxString dft = expath + "/default_brush_settings.dft";
 	wxFileOutputStream os(dft);
 	fconfig.Save(os);
 }
@@ -13562,12 +13554,8 @@ void VRenderView::SaveDefault(unsigned int mask)
 		fconfig.Write("center", str);
 	}
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-#ifdef _WIN32
-	wxString dft = expath + "\\default_view_settings.dft";
-#else
-	wxString dft = expath + "/../Resources/default_view_settings.dft";
-#endif
+    expath = wxPathOnly(expath);
+    wxString dft = expath + "/default_view_settings.dft";
 	wxFileOutputStream os(dft);
 	fconfig.Save(os);
 
@@ -13582,12 +13570,8 @@ void VRenderView::OnSaveDefault(wxCommandEvent &event)
 void VRenderView::LoadSettings()
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-#ifdef _WIN32
-	wxString dft = expath + "\\default_view_settings.dft";
-#else
-	wxString dft = expath + "/../Resources/default_view_settings.dft";
-#endif
+    expath = wxPathOnly(expath);
+    wxString dft = expath + "/default_view_settings.dft";
 
 	wxFileInputStream is(dft);
 

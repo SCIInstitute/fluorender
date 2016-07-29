@@ -1194,12 +1194,8 @@ void ComponentDlg::LoadSettings(wxString filename)
 	if (!wxFileExists(filename))
 	{
 		wxString expath = wxStandardPaths::Get().GetExecutablePath();
-		expath = wxPathOnly(expath);
-#ifdef _WIN32
-		filename = expath + "\\default_component_settings.dft";
-#else
-		filename = expath + "/../Resources/default_component_settings.dft";
-#endif
+        expath = wxPathOnly(expath);
+        filename = expath + "/default_component_settings.dft";
 		get_basic = true;
 	}
 	wxFileInputStream is(filename);
@@ -1369,12 +1365,8 @@ void ComponentDlg::SaveSettings(wxString filename)
 	if (filename == "")
 	{
 		wxString expath = wxStandardPaths::Get().GetExecutablePath();
-		expath = wxPathOnly(expath);
-#ifdef _WIN32
-		filename = expath + "\\default_component_settings.dft";
-#else
-		filename = expath + "/../Resources/default_component_settings.dft";
-#endif
+        expath = wxPathOnly(expath);
+        filename = expath + "/default_component_settings.dft";
 	}
 
 	wxFileOutputStream os(filename);

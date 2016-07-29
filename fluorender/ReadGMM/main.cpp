@@ -11,16 +11,14 @@
 #include <glm/glm.hpp>
 //#include <vld.h>
 
-using namespace std;
-
 int nx, ny, nz;
-vector<wstring> m_xml_list;
-vector<wstring> m_lbl_list;
+vector<std::wstring> m_xml_list;
+vector<std::wstring> m_lbl_list;
 int m_digits = 0;
 FL::TrackMap m_track_map;
 FL::TrackMapProcessor m_tm_processor;
 
-void ProcessInputName(wstring &infilename)
+void ProcessInputName(std::wstring &infilename)
 {
 	//separate path and name
 	int64_t pos = infilename.find_last_of(GETSLASH());
@@ -51,7 +49,7 @@ void ProcessInputName(wstring &infilename)
 	}
 }
 
-void ProcessOutputName(wstring &outfilename)
+void ProcessOutputName(std::wstring &outfilename)
 {
 	int num = m_xml_list.size();
 	for (int i = 0; i < num; ++i)
@@ -80,7 +78,7 @@ void ProcessOutputName(wstring &outfilename)
 	}
 }
 
-glm::vec3 ReadVector(string &str)
+glm::vec3 ReadVector(std::string &str)
 {
 	glm::vec3 vector;
 	int c = 0;
@@ -102,7 +100,7 @@ glm::vec3 ReadVector(string &str)
 	return vector;
 }
 
-glm::mat3 ReadMatrix(string &str)
+glm::mat3 ReadMatrix(std::string &str)
 {
 	glm::mat3 matrix;
 	int cx = 0;
@@ -153,19 +151,22 @@ void AddLabel(int num, wxXmlNode* node, unsigned int* label_data)
 	if (!node->GetAttribute("splitScore", &strItem))
 		return;
 	strItem.ToDouble(&dval);
-	double uncertainty = 5.0 - dval;
+	//double uncertainty = 5.0 - dval;
 	//scale
 	if (!node->GetAttribute("scale", &strItem))
 		return;
-	glm::vec3 scale = ReadVector(strItem.ToStdString());
+    auto item = strItem.ToStdString();
+	glm::vec3 scale = ReadVector(item);
 	//centroid
 	if (!node->GetAttribute("m", &strItem))
 		return;
-	glm::vec3 centroid = ReadVector(strItem.ToStdString());
+    item = strItem.ToStdString();
+	glm::vec3 centroid = ReadVector(item);
 	//corr
 	if (!node->GetAttribute("W", &strItem))
 		return;
-	glm::mat3 corr = ReadMatrix(strItem.ToStdString());
+    item = strItem.ToStdString();
+	glm::mat3 corr = ReadMatrix(item);
 
 	//fill label
 	unsigned int cell_size = 0;
@@ -260,12 +261,12 @@ int main(int argc, char* argv[])
 	}
 
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	wstring in_filename = converter.from_bytes(argv[1]);
-	wstring out_filename = converter.from_bytes(argv[2]);
+	std::wstring in_filename = converter.from_bytes(argv[1]);
+	std::wstring out_filename = converter.from_bytes(argv[2]);
 	nx = atoi(argv[3]);
 	ny = atoi(argv[4]);
 	nz = atoi(argv[5]);
-	string trackfile = argv[6];
+	std::string trackfile = argv[6];
 
 	ProcessInputName(in_filename);
 	ProcessOutputName(out_filename);
