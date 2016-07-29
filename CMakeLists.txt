@@ -290,6 +290,19 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/ReadGMM)
 file(GLOB readgmm_hdr fluorender/ReadGMM/*.h)
 file(GLOB readgmm_src fluorender/ReadGMM/*.cpp)
 
+# For Apple set the icns file containing icons
+IF(APPLE)
+  # set how it shows up in the Info.plist file
+  SET(MACOSX_BUNDLE_ICON_FILE FluoRender_icon.icns) 
+  # set where in the bundle to put the icns file
+  SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/fluorender/FluoRender/img/FluoRender_icon.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  # include the icns file in the target
+  SET(src ${src} ${CMAKE_CURRENT_SOURCE_DIR}/fluorender/FluoRender/img/FluoRender_icon.icns)
+ELSEIF(WIN32)
+  SET(src ${src} ${CMAKE_CURRENT_SOURCE_DIR}/fluorender/FluoRender/img/FluoRender.rc)
+ENDIF(APPLE)
+FILE(GLOB icns ${CMAKE_CURRENT_SOURCE_DIR}/fluorender/FluoRender/img/fluorenderIcon.ico)
+
 #platform specific rules
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    # Mac OS X
@@ -303,13 +316,8 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    set(CFLAGS "-fPIC")
    set(CXXFLAGS "-fPIC ")
    include(BundleUtilities)
-   #icon file for Apple, bundle properties
-   set(ICON_FILE_PATH "FluoRender_icon")
-   SET( MACOSX_BUNDLE_ICON_FILE ${ICON_FILE_PATH} )
-   SET_SOURCE_FILES_PROPERTIES(${ICON_FILE_PATH} PROPERTIES 
-      MACOSX_BUNDLE_LOCATION Resources)
    add_executable(FluoRender MACOSX_BUNDLE
-      ${src} ${hdr} ${rsc}
+      ${src} ${hdr} ${rsc} ${icns}
       $<TARGET_OBJECTS:IMAGES_OBJ>
       $<TARGET_OBJECTS:CONVERTERS_OBJ>
       $<TARGET_OBJECTS:FLIVR_OBJ>
@@ -382,7 +390,7 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	  add_library(WACUTILS_OBJ OBJECT
 			     ${wac_src} ${wac_hdr})
       add_executable(FluoRender WIN32
-          	  ${src} ${hdr} ${rsc}
+          	  ${src} ${hdr} ${rsc} ${icns}
 		  $<TARGET_OBJECTS:IMAGES_OBJ>
 		  $<TARGET_OBJECTS:CONVERTERS_OBJ>
 		  $<TARGET_OBJECTS:FLIVR_OBJ>
@@ -520,15 +528,31 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 		COMMAND ${CMAKE_COMMAND} -E copy_directory
 		"${FluoRender_SOURCE_DIR}/Executables"
 		"${CMAKE_BINARY_DIR}/Executables")
+elseif(APPLE)
+	add_custom_command(TARGET FluoRender PRE_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_directory
+		"${FluoRender_SOURCE_DIR}/Executables"
+		$<TARGET_FILE_DIR:FluoRender>/FluoRender.app/Contents/MacOS)
+	add_custom_command(TARGET FluoRender PRE_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_directory
+		"${FluoRender_SOURCE_DIR}/Executables"
+		$<TARGET_FILE_DIR:FluoRender>/FluoRender.app/Contents/MacOS)
 endif()
    
 #post build setting files copy
+file(GLOB settings_files Settings/*)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-	file(GLOB settings_files Settings/*)
 	foreach (f ${settings_files})
 		add_custom_command(TARGET FluoRender PRE_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy  
 			${f}
 			$<TARGET_FILE_DIR:FluoRender>)
+	endforeach()
+elseif(APPLE)
+	foreach (f ${settings_files})
+		add_custom_command(TARGET FluoRender PRE_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy  
+			${f}
+			$<TARGET_FILE_DIR:FluoRender>/FluoRender.app/Contents/MacOS)
 	endforeach()
 endif()
