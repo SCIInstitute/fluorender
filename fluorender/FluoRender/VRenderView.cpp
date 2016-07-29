@@ -4858,7 +4858,10 @@ void VRenderGLView::SetParams(double t)
 	double scale;
 	keycode.l2_name = "scale";
 	if (interpolator->GetDouble(keycode, t, scale))
-		m_vrv->SetScaleFactor(scale, true);
+	{
+		m_scale_factor = scale;
+		m_vrv->UpdateScaleFactor(false);
+	}
 	//rotation
 	keycode.l2 = 0;
 	keycode.l2_name = "rotation";
