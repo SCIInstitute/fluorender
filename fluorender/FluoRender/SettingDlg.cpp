@@ -639,12 +639,8 @@ void SettingDlg::GetSettings()
 	m_contact_factor = 0.7;
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-#ifdef _WIN32
-	wxString dft = expath + "\\" + SETTING_FILE_NAME;
-#else
-	wxString dft = expath + "/../Resources/" + SETTING_FILE_NAME;
-#endif
+    expath = wxPathOnly(expath);
+    wxString dft = expath + "/fluorender.set";
 	wxFileInputStream is(dft);
 	if (!is.IsOk())
 		return;
@@ -1095,12 +1091,8 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("device_id", m_cl_device_id);
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-#ifdef _WIN32
-	wxString dft = expath + "\\" + SETTING_FILE_NAME;
-#else
-	wxString dft = expath + "/../Resources/" + SETTING_FILE_NAME;
-#endif
+    expath = wxPathOnly(expath);
+    wxString dft = expath + "/fluorender.set";
 	wxFileOutputStream os(dft);
 	fconfig.Save(os);
 }

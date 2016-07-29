@@ -30,8 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _SETTINGDLG_H_
 #define _SETTINGDLG_H_
 
-#define SETTING_FILE_NAME "fluorender.set"
-
 #define TOOL_PAINT_BRUSH	1
 #define TOOL_MEASUREMENT	2
 #define TOOL_TRACKING		3
