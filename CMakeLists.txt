@@ -517,7 +517,7 @@ add_custom_command(TARGET FluoRender POST_BUILD
   "$<TARGET_FILE_DIR:FluoRender>")
 
 #make the Executable dir
-add_custom_command(TARGET FluoRender POST_BUILD
+add_custom_target(make_exe_dir ALL 
   COMMAND ${CMAKE_COMMAND} -E make_directory
   "$<TARGET_FILE_DIR:FluoRender>/Executables")
 #copy the other binaries into Executables
