@@ -1,30 +1,18 @@
-We are pleased to announce the latest relese of FluoRender, version 2.19. It incorporates improvements, bug fixes, and new features. Download the latest version for both Windows and Mac OS X at github.com:
+We are excited to announce the latest relese of FluoRender, version 2.19.4, which incorporates improvements, bug fixes, and new features. Download the latest version for both Windows and Mac OS X at github.com:
 https://github.com/SCIInstitute/fluorender/releases
-Also make sure that the latest graphics driver is installed on your computer before using FluoRender.
+In this release, we mainly improved the usablity of a series of functions for 4D analysis, including the component analyzer, 4D scripts, paint brush tools, and format supports. We have also made a series of video tutorials and published them on YouTube:
+https://www.youtube.com/playlist?list=PLSBz7un7RyZhO51UWhmGiusaJebmaWPbc
 
-These issues from previous versions have been fixed:
-1. Insufficient slicing numerical precision that might cause artifacts due to misalignment.
-2. It read hidden files as part of a sequence on Mac OS X.
-3. Problems to read time sequence data correctly.
-4. It sometimes cleared a selection mask when paint brush history was recalled.
-5. Selection mask operations from the tracking dialog were not registered in the paint brush history.
-6. Empty groups were left unused when several data sets were repeatedly loaded and deleted.
-7. Clipping patterns when many channels were rendered with microblending.
-8. The bitrate setting for QuickTime movie export was not working on Mac OS X.
-9. FluoRender settings were not read and saved correctly on Mac OS X.
-10. Issues of the user interface.
-
-These new features have been added:
-1. Support of OpenCL 1.2. Please make sure the latest graphics driver is installed. Deprecated functions from OpenCL 1.1 have been updated in FluoRender to work with OpenCL 1.2.
-2. A new setting for render view text color. It allows more flexible customization of the color of render view text, including the scale bar. You can choose to use the background color, the inverse of background color, or the secondary color of a volume channel.
-3. A new 4D script type for executing OpenCL filters. It allows application of an OpenCL filter to each file of a time sequence. Use this function for image processing of a time sequence.
-4. Improved main tool bar for analysis tools. The last used analysis tool will be displayed on the main tool bar, allowing easy access to the tool.
-5. A new component analysis module. It manages all settings and analysis functions.
-6. A new external executable for applying component analysis settings to a time sequence. It can read settings from the new component analysis module and then apply them to an input file. Use this feature along with the 4D script for external executable to apply component analysis to a sequence of files.
-7. New OpenCL filters. Two OpenCL filters are included for computing morphological gradient and Sobel edge detection.
-8. An option to save the alpha channel in screenshots. You can choose to save an additional alpha channel in screenshots, so that the captured images can be used in a compositing software.
-9. An uncertainty analysis on tracking results. You can analyze an automatic tracking result and locate uncertain tracks. Use this feature to manually fix tracking issues with good efficiency.
-10. A mode switch for zoom ratio display. You can choose how the zoom ratio is displayed. Two modes are available. The first mode is view-based, where the percentage of the zoom ratio value represents the size of an entire data set to that of the render view. The second mode is data-based, where the zoom ratio value represents the rendered size of a data set to its 1:1 voxel-pixel state.
-11. Synchronization of individual volume property settings. Volume property settings can be individually synchronized within a group. Double-click a property’s name to synchronize.
+The details of the improvements are:
+1. We reorganized the 4D script settings. The user interface has been moved from the setting window to the movie export panel as a tab. 4D scripts allow customizations of the time sequence play back in FluoRender. 4D data can be processed and analyzed with a series of scripts, examples of which can be found in FluoRender's installation directory. For more intuitive 4D tracking and analysis, we also added a series of new 4D scripts.
+2. We added a size limiter to the basic operations of the component analyzer. Component generation can also be applied to currently selected structures.
+3. Different paint brush tools (select, diffuse, unselect, etc.) can remember their own size settings. This allows more intuitive switching among brush tools.
+4. We added a new calculation operation for combining any number of channels into RGB.
+5. We improved OpenGL performance on certain platforms by removing query functions from render loops.
+6. We added ImageJ hyperstack TIFF support. Convert an unsupported format by FluoRender to hyperstack, which supports both time sequence data and multichannel data.
+7. We improved the processing of 16-bit data.
+8. We added a mask saving function for all data formats. For example, you can paint select and perform component analysis on an ImageJ hyperstack (or Olympus, Zeiss, Prairie, etc. formats) and save the results with masks.
+9. We improved the user interface. For example, control widgets in the property panel are only enabled when the corresponding function is enabled.
+10. We have made a series of tutorial videos and published them on YouTube. These videos cover FluoRender's functions from the basic operations to advanced features such as 4D tracking. You can find these videos by searching "fluorender" at YouTube.com.
 
 Many of the bug fixes, improvements, and new features became available because of the cordial support from FluoRender users. We wish to thank every user and welcome any suggestions for future releases.
