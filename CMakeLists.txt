@@ -299,9 +299,11 @@ IF(APPLE)
   # include the icns file in the target
   SET(src ${src} ${CMAKE_CURRENT_SOURCE_DIR}/fluorender/FluoRender/img/FluoRender_icon.icns)
 ELSEIF(WIN32)
-  SET(src ${src} ${CMAKE_CURRENT_SOURCE_DIR}/fluorender/FluoRender/img/FluoRender.rc)
+  SET(icon_rc "${CMAKE_CURRENT_SOURCE_DIR}/fluorender/FluoRender/img/FluoRender.rc")
+  SET(icns "${CMAKE_CURRENT_SOURCE_DIR}/fluorender/FluoRender/img/fluorenderIcon.ico")
+  ADD_DEFINITIONS(-DICON_RC_FILE="${icns}")
+  SET(src ${src} ${icon_rc})
 ENDIF(APPLE)
-FILE(GLOB icns ${CMAKE_CURRENT_SOURCE_DIR}/fluorender/FluoRender/img/fluorenderIcon.ico)
 
 #platform specific rules
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
