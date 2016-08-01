@@ -207,6 +207,13 @@ file(GLOB cmp_hdr fluorender/FluoRender/Components/*.h)
 add_library(COMPONENTS_OBJ OBJECT
   ${cmp_src} ${cmp_hdr})
 
+#Cluster
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Cluster)
+file(GLOB clstr_src fluorender/FluoRender/Cluster/*.cpp)
+file(GLOB clstr_hdr fluorender/FluoRender/Cluster/*.h)
+add_library(CLUSTER_OBJ OBJECT
+  ${clstr_src} ${clstr_hdr})
+
 #Calculate
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Calculate)
 file(GLOB calc_src fluorender/FluoRender/Calculate/*.cpp)
@@ -329,6 +336,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     $<TARGET_OBJECTS:VIDEO_OBJ>
     $<TARGET_OBJECTS:TRACKING_OBJ>
     $<TARGET_OBJECTS:COMPONENTS_OBJ>
+    $<TARGET_OBJECTS:CLUSTER_OBJ>
     $<TARGET_OBJECTS:CALCULATE_OBJ>
     $<TARGET_OBJECTS:GLEW_OBJ>
     $<TARGET_OBJECTS:POLE_OBJ>
@@ -402,6 +410,7 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       $<TARGET_OBJECTS:VIDEO_OBJ>
       $<TARGET_OBJECTS:TRACKING_OBJ>
       $<TARGET_OBJECTS:COMPONENTS_OBJ>
+      $<TARGET_OBJECTS:CLUSTER_OBJ>
       $<TARGET_OBJECTS:CALCULATE_OBJ>
       $<TARGET_OBJECTS:GLEW_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
