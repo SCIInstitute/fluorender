@@ -632,7 +632,6 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 	sizer_2->Add(m_cell_combine_id_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_divide_id_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_segment_btn, 0, wxALIGN_CENTER);
-	m_cell_segment_btn->Hide();
 	sizer_2->AddStretchSpacer();
 
 	//vertical sizer
@@ -2600,6 +2599,63 @@ void TraceDlg::OnCellDivideID(wxCommandEvent& event)
 
 void TraceDlg::OnCellSegment(wxCommandEvent& event)
 {
+	if (!m_view)
+		return;
+
+	//current T
+	FL::CellList list_cur;
+	//fill current list
+	long item = -1;
+	while (true)
+	{
+		item = m_trace_list_curr->GetNextItem(
+			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		else
+			AddLabel(item, m_trace_list_curr, list_cur);
+	}
+	if (list_cur.empty())
+	{
+		item = -1;
+		while (true)
+		{
+			item = m_trace_list_curr->GetNextItem(
+				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+			if (item == -1)
+				break;
+			else
+				AddLabel(item, m_trace_list_curr, list_cur);
+		}
+	}
+	if (list_cur.size() <= 1)
+		//nothing to segment
+		return;
+
+	//modify graphs
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+	BaseReader* reader = vd->GetReader();
+	if (!reader)
+		return;
+	int chan = vd->GetCurChannel();
+	Nrrd* nrrd_data = reader->Convert(m_cur_time, chan, true);
+	if (!nrrd_data)
+		return;
+	wstring lblname = reader->GetCurLabelName(m_cur_time, chan);
+	LBLReader lbl_reader;
+	lbl_reader.SetFile(lblname);
+	Nrrd* nrrd_label = lbl_reader.Convert(m_cur_time, chan, true);
+	if (!nrrd_label)
+		return;
+	TraceGroup *trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+		return;
+	FL::TrackMap &track_map = trace_group->GetTrackMap();
+	FL::TrackMapProcessor tm_processor;
+	tm_processor.SegmentCells(track_map, nrrd_data->data,
+		nrrd_label->data, list_cur, m_cur_time);
 
 }
 

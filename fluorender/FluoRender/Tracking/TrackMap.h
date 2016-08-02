@@ -138,6 +138,7 @@ namespace FL
 		bool AddCell(TrackMap& track_map, pCell &cell, size_t frame, CellListIter &iter);
 		bool CombineCells(TrackMap& track_map, pCell &cell, CellList &list, size_t frame);
 		bool DivideCells(TrackMap& track_map, CellList &list, size_t frame);
+		bool SegmentCells(TrackMap& track_map, void* data, void* label, CellList &list, size_t frame);
 		bool ReplaceCellID(TrackMap& track_map, unsigned int old_id,
 			unsigned int new_id, size_t frame);
 

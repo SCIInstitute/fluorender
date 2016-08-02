@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FL_Dbscan_h
 
 #include <FLIVR/Point.h>
+#include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
 #include <vector>
 
@@ -42,6 +43,8 @@ namespace FL
 		float intensity;
 	};
 
+	typedef boost::shared_ptr<ClusterPoint> pClusterPoint;
+
 	inline float Dist(const ClusterPoint &p1, const ClusterPoint &p2, float w)
 	{
 		FLIVR::Vector p1p2 = p1.center - p2.center;
@@ -49,7 +52,7 @@ namespace FL
 		return p1p2.length() + w * int_diff;
 	}
 
-	typedef boost::unordered_map<unsigned int, ClusterPoint> Cluster;
+	typedef boost::unordered_map<unsigned int, pClusterPoint> Cluster;
 	typedef Cluster::iterator ClusterIter;
 
 	class ClusterSet
@@ -58,6 +61,16 @@ namespace FL
 		ClusterSet() {};
 		~ClusterSet() {};
 
+		void push_back(const Cluster &cluster)
+		{ m_list.push_back(cluster); }
+
+		bool find(const pClusterPoint &p)
+		{
+			for (size_t i = 0; i < m_list.size(); ++i)
+				if (m_list[i].find(p->id) != m_list[i].end())
+					return true;
+			return false;
+		}
 	private:
 		std::vector<Cluster> m_list;
 	};
@@ -76,6 +89,9 @@ namespace FL
 		{ m_size = size; }
 		void SetEps(float eps)
 		{ m_eps = eps; }
+		void ResetIDCounter()
+		{ m_id_counter = 1; }
+		void AddClusterPoint(const FLIVR::Point &p, const float value);
 		bool Execute();
 
 	private:
@@ -84,10 +100,30 @@ namespace FL
 		unsigned int m_size;
 		float m_eps;
 		float m_intw;
+		unsigned int m_id_counter;
 
 	private:
-		void ExpandCluster();
-		Cluster GetNeighbors(ClusterPoint &p);
+		void ExpandCluster(pClusterPoint& p, Cluster& neighbors, Cluster& cluster);
+		Cluster GetNeighbors(pClusterPoint &p);
+		unsigned int reverse_bit(unsigned int val, unsigned int len);
 	};
+
+	inline unsigned int ClusterDbscan::reverse_bit(unsigned int val, unsigned int len)
+	{
+		unsigned int res = val;
+		int s = len - 1;
+
+		for (val >>= 1; val; val >>= 1)
+		{
+			res <<= 1;
+			res |= val & 1;
+			s--;
+		}
+		res <<= s;
+		res <<= 32 - len;
+		res >>= 32 - len;
+		return res;
+	}
+
 }
 #endif//FL_Dbscan_h

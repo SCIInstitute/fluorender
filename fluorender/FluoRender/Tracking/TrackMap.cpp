@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "TrackMap.h"
 #include "DataManager.h"
+#include "Cluster/dbscan.h"
 #include <functional>
 #include <algorithm>
 #include <limits>
@@ -91,52 +92,52 @@ bool TrackMapProcessor::InitializeFrame(TrackMap& track_map,
 
 	//build cell list
 	for (i = 0; i < nx; ++i)
-		for (j = 0; j < ny; ++j)
-			for (k = 0; k < nz; ++k)
-			{
-				index = nx*ny*k + nx*j + i;
-				label_value = ((unsigned int*)label)[index];
+	for (j = 0; j < ny; ++j)
+	for (k = 0; k < nz; ++k)
+	{
+		index = nx*ny*k + nx*j + i;
+		label_value = ((unsigned int*)label)[index];
 
-				if (!label_value)
-					continue;
+		if (!label_value)
+			continue;
 
-				if (track_map.m_data_bits == 8)
-					data_value = ((unsigned char*)data)[index] / 255.0f;
-				else if (track_map.m_data_bits == 16)
-					data_value = ((unsigned short*)data)[index] * track_map.m_scale / 65535.0f;
+		if (track_map.m_data_bits == 8)
+			data_value = ((unsigned char*)data)[index] / 255.0f;
+		else if (track_map.m_data_bits == 16)
+			data_value = ((unsigned short*)data)[index] * track_map.m_scale / 65535.0f;
 
-				iter = cell_list.find(label_value);
-				if (iter != cell_list.end())
-				{
-					iter->second->Inc(i, j, k, data_value);
-				}
-				else
-				{
-					Cell* cell = new Cell(label_value);
-					cell->Inc(i, j, k, data_value);
-					cell_list.insert(std::pair<unsigned int, pCell>
-						(label_value, pCell(cell)));
-				}
-			}
+		iter = cell_list.find(label_value);
+		if (iter != cell_list.end())
+		{
+			iter->second->Inc(i, j, k, data_value);
+		}
+		else
+		{
+			Cell* cell = new Cell(label_value);
+			cell->Inc(i, j, k, data_value);
+			cell_list.insert(std::pair<unsigned int, pCell>
+				(label_value, pCell(cell)));
+		}
+	}
 
 	//build intra graph
 	for (i = 0; i < nx; ++i)
-		for (j = 0; j < ny; ++j)
-			for (k = 0; k < nz; ++k)
-			{
-				index = nx*ny*k + nx*j + i;
-				label_value = ((unsigned int*)label)[index];
-				if (!label_value)
-					continue;
+	for (j = 0; j < ny; ++j)
+	for (k = 0; k < nz; ++k)
+	{
+		index = nx*ny*k + nx*j + i;
+		label_value = ((unsigned int*)label)[index];
+		if (!label_value)
+			continue;
 
-				iter = cell_list.find(label_value);
-				if (iter != cell_list.end())
-				{
-					CheckCellContact(track_map,
-						iter->second, data, label,
-						i, j, k);
-				}
-			}
+		iter = cell_list.find(label_value);
+		if (iter != cell_list.end())
+		{
+			CheckCellContact(track_map,
+				iter->second, data, label,
+				i, j, k);
+		}
+	}
 
 	//build vertex list
 	track_map.m_vertices_list.push_back(VertexList());
@@ -1764,7 +1765,7 @@ void TrackMapProcessor::ReadVertex(std::ifstream& ifs,
 	vertex = pVertex(new Vertex(id));
 	vertex->SetSizeUi(ReadUint(ifs));
 	vertex->SetSizeF(ReadFloat(ifs));
-    FLIVR::Point p = ReadPoint(ifs);
+	FLIVR::Point p = ReadPoint(ifs);
 	vertex->SetCenter(p);
 
 	//cell number
@@ -2594,6 +2595,48 @@ bool TrackMapProcessor::DivideCells(TrackMap& track_map,
 			}
 		}
 	}
+
+	return true;
+}
+
+bool TrackMapProcessor::SegmentCells(TrackMap& track_map,
+	void* data, void* label,
+	CellList &list, size_t frame)
+{
+	ClusterDbscan cs_processor;
+
+	for (CellListIter cliter = list.begin();
+		cliter != list.end(); ++cliter)
+	{
+		pCell cell = cliter->second;
+		unsigned int cid = cell->Id();
+
+		size_t index;
+		size_t i, j, k;
+		size_t nx = track_map.m_size_x;
+		size_t ny = track_map.m_size_y;
+		size_t nz = track_map.m_size_z;
+		float data_value;
+		unsigned int label_value;
+		for (i = 0; i < nx; ++i)
+		for (j = 0; j < ny; ++j)
+		for (k = 0; k < nz; ++k)
+		{
+			index = nx*ny*k + nx*j + i;
+			label_value = ((unsigned int*)label)[index];
+			if (label_value == cid)
+			{
+				if (track_map.m_data_bits == 8)
+					data_value = ((unsigned char*)data)[index] / 255.0f;
+				else if (track_map.m_data_bits == 16)
+					data_value = ((unsigned short*)data)[index] * track_map.m_scale / 65535.0f;
+				cs_processor.AddClusterPoint(
+					FLIVR::Point(i, j, k), data_value);
+			}
+		}
+	}
+
+	cs_processor.Execute();
 
 	return true;
 }

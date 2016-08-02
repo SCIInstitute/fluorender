@@ -29,7 +29,11 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace FL;
 
-ClusterDbscan::ClusterDbscan()
+ClusterDbscan::ClusterDbscan():
+	m_size(50),
+	m_eps(2.0f),
+	m_intw(100.0f),
+	m_id_counter(1)
 {
 
 }
@@ -39,41 +43,68 @@ ClusterDbscan::~ClusterDbscan()
 
 }
 
+void ClusterDbscan::AddClusterPoint(const FLIVR::Point &p, const float value)
+{
+	pClusterPoint pp(new ClusterPoint);
+	pp->id = m_id_counter++;
+	pp->visited = false;
+	pp->center = p;
+	pp->intensity = value;
+	m_data.insert(std::pair<unsigned int, pClusterPoint>
+		(pp->id, pp));
+}
+
 bool ClusterDbscan::Execute()
 {
 	for (ClusterIter iter = m_data.begin();
 		iter != m_data.end(); ++iter)
 	{
-		ClusterPoint &p = iter->second;
-		if (p.visited)
+		pClusterPoint p = iter->second;
+		if (p->visited)
 			continue;
-		p.visited = true;
+		p->visited = true;
 		Cluster neighbors = GetNeighbors(p);
 		if (neighbors.size() >= m_size)
 		{
 			Cluster cluster;
-			ExpandCluster();
+			ExpandCluster(p, neighbors, cluster);
 			m_result.push_back(cluster);
 		}
 	}
 	return true;
 }
 
-void ClusterDbscan::ExpandCluster()
+void ClusterDbscan::ExpandCluster(pClusterPoint& p, Cluster& neighbors, Cluster& cluster)
 {
-
+	cluster.insert(std::pair<unsigned int, pClusterPoint>
+		(p->id, p));
+	for (ClusterIter iter = neighbors.begin();
+		iter != neighbors.end(); ++iter)
+	{
+		pClusterPoint p2 = iter->second;
+		if (!p2->visited)
+		{
+			p2->visited = true;
+			Cluster neighbors2 = GetNeighbors(p2);
+			if (neighbors2.size() >= m_size)
+				neighbors.insert(neighbors2.begin(), neighbors2.end());
+		}
+		if (!m_result.find(p2))
+			cluster.insert(std::pair<unsigned int, pClusterPoint>
+			(p2->id, p2));
+	}
 }
 
-Cluster ClusterDbscan::GetNeighbors(ClusterPoint &p)
+Cluster ClusterDbscan::GetNeighbors(pClusterPoint &p)
 {
 	Cluster neighbors;
 
 	for (ClusterIter iter = m_data.begin();
 		iter != m_data.end(); ++iter)
 	{
-		if (Dist(p, iter->second, m_intw) < m_eps)
-			neighbors.insert(std::pair<unsigned int, ClusterPoint>
-			(iter->second.id, iter->second));
+		if (Dist(*p, *(iter->second), m_intw) < m_eps)
+			neighbors.insert(std::pair<unsigned int, pClusterPoint>
+			(iter->second->id, iter->second));
 	}
 
 	return neighbors;
