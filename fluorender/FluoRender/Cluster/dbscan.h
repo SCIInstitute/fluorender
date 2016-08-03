@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <FLIVR/Point.h>
 #include <boost/shared_ptr.hpp>
-#include <boost/unordered_map.hpp>
+#include <list>
 #include <vector>
 
 namespace FL
@@ -52,8 +52,31 @@ namespace FL
 		return p1p2.length() + w * int_diff;
 	}
 
-	typedef boost::unordered_map<unsigned int, pClusterPoint> Cluster;
+	class Cluster : public std::list<pClusterPoint>
+	{
+	public:
+		bool find(pClusterPoint &p);
+		void join(Cluster &cluster);
+	};
+
 	typedef Cluster::iterator ClusterIter;
+
+	inline bool Cluster::find(pClusterPoint &p)
+	{
+		for (ClusterIter iter = this->begin();
+			iter != this->end(); ++iter)
+			if ((*iter)->id == p->id)
+				return true;
+		return false;
+	}
+
+	inline void Cluster::join(Cluster &cluster)
+	{
+		for (ClusterIter iter = cluster.begin();
+			iter != cluster.end(); ++iter)
+			if (!this->find(*iter))
+				this->push_back(*iter);
+	}
 
 	class ClusterSet
 	{
@@ -67,10 +90,18 @@ namespace FL
 		bool find(const pClusterPoint &p)
 		{
 			for (size_t i = 0; i < m_list.size(); ++i)
-				if (m_list[i].find(p->id) != m_list[i].end())
+			for (ClusterIter iter = m_list[i].begin();
+				iter != m_list[i].end(); ++iter)
+				if ((*iter)->id == p->id)
 					return true;
 			return false;
 		}
+
+		size_t size()
+		{ return m_list.size(); }
+		Cluster& operator[](size_t idx)
+		{ return m_list[idx]; }
+
 	private:
 		std::vector<Cluster> m_list;
 	};
@@ -93,6 +124,8 @@ namespace FL
 		{ m_id_counter = 1; }
 		void AddClusterPoint(const FLIVR::Point &p, const float value);
 		bool Execute();
+		void GenerateNewIDs(unsigned int id, void* label,
+			size_t nx, size_t ny, size_t nz);
 
 	private:
 		Cluster m_data;
@@ -105,25 +138,9 @@ namespace FL
 	private:
 		void ExpandCluster(pClusterPoint& p, Cluster& neighbors, Cluster& cluster);
 		Cluster GetNeighbors(pClusterPoint &p);
-		unsigned int reverse_bit(unsigned int val, unsigned int len);
+		bool FindId(void* label, unsigned int id,
+			size_t nx, size_t ny, size_t nz);
 	};
-
-	inline unsigned int ClusterDbscan::reverse_bit(unsigned int val, unsigned int len)
-	{
-		unsigned int res = val;
-		int s = len - 1;
-
-		for (val >>= 1; val; val >>= 1)
-		{
-			res <<= 1;
-			res |= val & 1;
-			s--;
-		}
-		res <<= s;
-		res <<= 32 - len;
-		res >>= 32 - len;
-		return res;
-	}
 
 }
 #endif//FL_Dbscan_h

@@ -2628,7 +2628,7 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 				AddLabel(item, m_trace_list_curr, list_cur);
 		}
 	}
-	if (list_cur.size() <= 1)
+	if (list_cur.size() == 0)
 		//nothing to segment
 		return;
 
@@ -2636,27 +2636,39 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
 		return;
-	BaseReader* reader = vd->GetReader();
-	if (!reader)
-		return;
+	int resx, resy, resz;
+	vd->GetResolution(resx, resy, resz);
 	int chan = vd->GetCurChannel();
-	Nrrd* nrrd_data = reader->Convert(m_cur_time, chan, true);
+	Texture* tex = vd->GetTexture();
+	if (!tex)
+		return;
+
+	Nrrd* nrrd_data = tex->get_nrrd(0);
 	if (!nrrd_data)
 		return;
-	wstring lblname = reader->GetCurLabelName(m_cur_time, chan);
-	LBLReader lbl_reader;
-	lbl_reader.SetFile(lblname);
-	Nrrd* nrrd_label = lbl_reader.Convert(m_cur_time, chan, true);
+	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
 	if (!nrrd_label)
 		return;
+
 	TraceGroup *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
+
 	FL::TrackMap &track_map = trace_group->GetTrackMap();
 	FL::TrackMapProcessor tm_processor;
+	tm_processor.SetBits(track_map, vd->GetBits());
+	tm_processor.SetScale(track_map, vd->GetScalarScale());
+	tm_processor.SetSizes(track_map, resx, resy, resz);
 	tm_processor.SegmentCells(track_map, nrrd_data->data,
 		nrrd_label->data, list_cur, m_cur_time);
 
+	//invalidate label mask in gpu
+	vd->GetVR()->clear_tex_pool();
+	//save label mask to disk
+	vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
+
+	//update view
+	CellUpdate();
 }
 
 //magic

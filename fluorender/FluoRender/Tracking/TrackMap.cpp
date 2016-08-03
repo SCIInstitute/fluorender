@@ -2604,20 +2604,23 @@ bool TrackMapProcessor::SegmentCells(TrackMap& track_map,
 	CellList &list, size_t frame)
 {
 	ClusterDbscan cs_processor;
+	size_t index;
+	size_t i, j, k;
+	size_t nx = track_map.m_size_x;
+	size_t ny = track_map.m_size_y;
+	size_t nz = track_map.m_size_z;
+	unsigned int label_value;
+	unsigned int id = 0;
+	float data_value;
 
+	//add cluster points
 	for (CellListIter cliter = list.begin();
 		cliter != list.end(); ++cliter)
 	{
 		pCell cell = cliter->second;
 		unsigned int cid = cell->Id();
+		if (!id) id = cid;
 
-		size_t index;
-		size_t i, j, k;
-		size_t nx = track_map.m_size_x;
-		size_t ny = track_map.m_size_y;
-		size_t nz = track_map.m_size_z;
-		float data_value;
-		unsigned int label_value;
 		for (i = 0; i < nx; ++i)
 		for (j = 0; j < ny; ++j)
 		for (k = 0; k < nz; ++k)
@@ -2636,7 +2639,12 @@ bool TrackMapProcessor::SegmentCells(TrackMap& track_map,
 		}
 	}
 
-	cs_processor.Execute();
+	//run clustering
+	if (cs_processor.Execute())
+	{
+		cs_processor.GenerateNewIDs(id, label,
+			nx, ny, nz);
+	}
 
 	return true;
 }
