@@ -78,6 +78,7 @@ namespace FL
 				this->push_back(*iter);
 	}
 
+	typedef std::vector<Cluster>::iterator ClusterSetIter;
 	class ClusterSet
 	{
 	public:
@@ -101,6 +102,8 @@ namespace FL
 		{ return m_list.size(); }
 		Cluster& operator[](size_t idx)
 		{ return m_list[idx]; }
+		ClusterSetIter begin()
+		{ return m_list.begin(); }
 
 	private:
 		std::vector<Cluster> m_list;
