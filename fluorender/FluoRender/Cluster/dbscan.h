@@ -39,6 +39,7 @@ namespace FL
 	{
 		unsigned int id;
 		bool visited;
+		bool noise;
 		FLIVR::Point center;
 		float intensity;
 	};
@@ -98,12 +99,24 @@ namespace FL
 			return false;
 		}
 
+		int find_(const pClusterPoint &p)
+		{
+			for (size_t i = 0; i < m_list.size(); ++i)
+			for (ClusterIter iter = m_list[i].begin();
+				iter != m_list[i].end(); ++iter)
+				if ((*iter)->id == p->id)
+					return int(i);
+			return -1;
+		}
+
 		size_t size()
 		{ return m_list.size(); }
 		Cluster& operator[](size_t idx)
 		{ return m_list[idx]; }
 		ClusterSetIter begin()
 		{ return m_list.begin(); }
+		void clear()
+		{ m_list.clear(); }
 
 	private:
 		std::vector<Cluster> m_list;
@@ -139,10 +152,14 @@ namespace FL
 		unsigned int m_id_counter;
 
 	private:
+		void Dbscan();
+		void ResetData();
 		void ExpandCluster(pClusterPoint& p, Cluster& neighbors, Cluster& cluster);
-		Cluster GetNeighbors(pClusterPoint &p);
+		Cluster GetNeighbors(pClusterPoint &p, float eps);
 		bool FindId(void* label, unsigned int id,
 			size_t nx, size_t ny, size_t nz);
+		void RemoveNoise();
+		bool ClusterNoise(pClusterPoint& p, Cluster& neighbors);
 	};
 
 }

@@ -2665,7 +2665,7 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_pool();
 	//save label mask to disk
-	vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
+//	vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
 
 	//update view
 	CellUpdate();
