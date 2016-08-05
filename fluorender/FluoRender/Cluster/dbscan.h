@@ -155,7 +155,7 @@ namespace FL
 		void Dbscan();
 		void ResetData();
 		void ExpandCluster(pClusterPoint& p, Cluster& neighbors, Cluster& cluster);
-		Cluster GetNeighbors(pClusterPoint &p, float eps);
+		Cluster GetNeighbors(pClusterPoint &p, float eps, float intw);
 		bool FindId(void* label, unsigned int id,
 			size_t nx, size_t ny, size_t nz);
 		void RemoveNoise();

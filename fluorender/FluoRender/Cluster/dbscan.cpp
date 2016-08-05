@@ -32,8 +32,8 @@ using namespace FL;
 
 ClusterDbscan::ClusterDbscan():
 	m_size(60),
-	m_eps(2.8f),
-	m_intw(0.0f),
+	m_eps(3.5f),
+	m_intw(8.0f),
 	m_id_counter(1)
 {
 
@@ -59,10 +59,11 @@ bool ClusterDbscan::Execute()
 {
 	m_result.clear();
 	Dbscan();
-	while (m_result.size() < 2 && m_size)
+	while (m_result.size() == 1 && m_size)
 	{
 		ResetData();
-		m_size -= 1;
+		m_size += 1;
+		//m_eps += 0.1;
 		Dbscan();
 	}
 
@@ -97,7 +98,7 @@ void ClusterDbscan::Dbscan()
 		if (p->visited)
 			continue;
 		p->visited = true;
-		Cluster neighbors = GetNeighbors(p, m_eps);
+		Cluster neighbors = GetNeighbors(p, m_eps, m_intw);
 		if (neighbors.size() >= m_size)
 		{
 			Cluster cluster;
@@ -118,7 +119,7 @@ void ClusterDbscan::ExpandCluster(pClusterPoint& p, Cluster& neighbors, Cluster&
 		if (!p2->visited)
 		{
 			p2->visited = true;
-			Cluster neighbors2 = GetNeighbors(p2, m_eps);
+			Cluster neighbors2 = GetNeighbors(p2, m_eps, m_intw);
 			if (neighbors2.size() >= m_size)
 				neighbors.join(neighbors2);
 		}
@@ -130,14 +131,14 @@ void ClusterDbscan::ExpandCluster(pClusterPoint& p, Cluster& neighbors, Cluster&
 	}
 }
 
-Cluster ClusterDbscan::GetNeighbors(pClusterPoint &p, float eps)
+Cluster ClusterDbscan::GetNeighbors(pClusterPoint &p, float eps, float intw)
 {
 	Cluster neighbors;
 
 	for (ClusterIter iter = m_data.begin();
 		iter != m_data.end(); ++iter)
 	{
-		if (Dist(*p, **iter, m_intw) < eps)
+		if (Dist(*p, **iter, intw) < eps)
 			neighbors.push_back(*iter);
 	}
 
@@ -207,7 +208,7 @@ void ClusterDbscan::RemoveNoise()
 			//find a point that is not clustered
 			if (!(*iter)->noise)
 				continue;
-			Cluster neighbors = GetNeighbors(*iter, 1.1f);
+			Cluster neighbors = GetNeighbors(*iter, 1.1f, 0.0f);
 			if (neighbors.size() &&
 				ClusterNoise(*iter, neighbors))
 				noise_num++;
