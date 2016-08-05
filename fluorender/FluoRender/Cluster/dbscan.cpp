@@ -31,10 +31,10 @@ DEALINGS IN THE SOFTWARE.
 using namespace FL;
 
 ClusterDbscan::ClusterDbscan():
+	ClusterMethod(),
 	m_size(60),
 	m_eps(3.5f),
-	m_intw(8.0f),
-	m_id_counter(1)
+	m_intw(8.0f)
 {
 
 }
@@ -42,17 +42,6 @@ ClusterDbscan::ClusterDbscan():
 ClusterDbscan::~ClusterDbscan()
 {
 
-}
-
-void ClusterDbscan::AddClusterPoint(const FLIVR::Point &p, const float value)
-{
-	pClusterPoint pp(new ClusterPoint);
-	pp->id = m_id_counter++;
-	pp->visited = false;
-	pp->noise = true;
-	pp->center = p;
-	pp->intensity = value;
-	m_data.push_back(pp);
 }
 
 bool ClusterDbscan::Execute()
@@ -143,56 +132,6 @@ Cluster ClusterDbscan::GetNeighbors(pClusterPoint &p, float eps, float intw)
 	}
 
 	return neighbors;
-}
-
-void ClusterDbscan::GenerateNewIDs(unsigned int id, void* label,
-	size_t nx, size_t ny, size_t nz)
-{
-	unsigned int id2 = id;
-	unsigned long long index;
-	int i, j, k;
-
-	for (size_t ii = 0; ii < m_result.size(); ++ii)
-	{
-		Cluster &cluster = m_result[ii];
-		do
-		{
-			id2 += 20;
-			if (id2 == id)
-				break;
-		}
-		while (!id2 || FindId(label, id2, nx, ny, nz));
-
-		for (ClusterIter iter = cluster.begin();
-			iter != cluster.end(); ++iter)
-		{
-			i = int((*iter)->center.x() + 0.5);
-			if (i <= 0 || i >= nx - 1)
-				continue;
-			j = int((*iter)->center.y() + 0.5);
-			if (j <= 0 || j >= ny - 1)
-				continue;
-			k = int((*iter)->center.z() + 0.5);
-			if (k <= 0 || k >= nz - 1)
-				continue;
-			index = nx*ny*k + nx*j + i;
-			((unsigned int*)label)[index] = id2;
-		}
-	}
-}
-
-bool ClusterDbscan::FindId(void* label, unsigned int id,
-	size_t nx, size_t ny, size_t nz)
-{
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
-	unsigned long long index;
-	for (index = 0; index < for_size; ++index)
-	{
-		if (((unsigned int*)label)[index] == id)
-			return true;
-	}
-	return false;
 }
 
 void ClusterDbscan::RemoveNoise()

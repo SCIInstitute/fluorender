@@ -25,8 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef FL_Dbscan_h
-#define FL_Dbscan_h
+#ifndef FL_ClusterMethod_h
+#define FL_ClusterMethod_h
 
 #include <FLIVR/Point.h>
 #include <boost/shared_ptr.hpp>
@@ -56,8 +56,8 @@ namespace FL
 	class Cluster : public std::list<pClusterPoint>
 	{
 	public:
-		bool find(pClusterPoint &p);
-		void join(Cluster &cluster);
+		inline bool find(pClusterPoint &p);
+		inline void join(Cluster &cluster);
 	};
 
 	typedef Cluster::iterator ClusterIter;
@@ -117,50 +117,37 @@ namespace FL
 		{ return m_list.begin(); }
 		void clear()
 		{ m_list.clear(); }
+		void resize(size_t n)
+		{ m_list.resize(n); }
 
 	private:
 		std::vector<Cluster> m_list;
 	};
 
-	class ClusterDbscan
+	class ClusterMethod
 	{
 	public:
-		ClusterDbscan();
-		~ClusterDbscan();
+		ClusterMethod() :
+			m_id_counter(1) {};
+		~ClusterMethod() {};
 
 		void SetData(Cluster &data)
 		{ m_data = data; }
 		ClusterSet &GetResult()
 		{ return m_result; }
-		void SetSize(unsigned int size)
-		{ m_size = size; }
-		void SetEps(float eps)
-		{ m_eps = eps; }
 		void ResetIDCounter()
 		{ m_id_counter = 1; }
 		void AddClusterPoint(const FLIVR::Point &p, const float value);
-		bool Execute();
 		void GenerateNewIDs(unsigned int id, void* label,
 			size_t nx, size_t ny, size_t nz);
-
-	private:
-		Cluster m_data;
-		ClusterSet m_result;
-		unsigned int m_size;
-		float m_eps;
-		float m_intw;
-		unsigned int m_id_counter;
-
-	private:
-		void Dbscan();
-		void ResetData();
-		void ExpandCluster(pClusterPoint& p, Cluster& neighbors, Cluster& cluster);
-		Cluster GetNeighbors(pClusterPoint &p, float eps, float intw);
 		bool FindId(void* label, unsigned int id,
 			size_t nx, size_t ny, size_t nz);
-		void RemoveNoise();
-		bool ClusterNoise(pClusterPoint& p, Cluster& neighbors);
-	};
+		virtual bool Execute() = 0;
 
+	protected:
+		Cluster m_data;
+		ClusterSet m_result;
+		unsigned int m_id_counter;
+	};
 }
-#endif//FL_Dbscan_h
+#endif//FL_ClusterMethod_h

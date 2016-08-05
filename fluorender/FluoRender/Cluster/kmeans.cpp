@@ -25,233 +25,148 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "dbscan.h"
+#include "kmeans.h"
 #include <algorithm>
 
 using namespace FL;
 
-ClusterDbscan::ClusterDbscan():
-	m_size(60),
-	m_eps(3.5f),
-	m_intw(8.0f),
-	m_id_counter(1)
+ClusterKmeans::ClusterKmeans() :
+	m_clnum(2),
+	m_eps(1e-3),
+	m_max_iter(100)
 {
 
 }
 
-ClusterDbscan::~ClusterDbscan()
+ClusterKmeans::~ClusterKmeans()
 {
 
 }
 
-void ClusterDbscan::AddClusterPoint(const FLIVR::Point &p, const float value)
+bool ClusterKmeans::Execute()
 {
-	pClusterPoint pp(new ClusterPoint);
-	pp->id = m_id_counter++;
-	pp->visited = false;
-	pp->noise = true;
-	pp->center = p;
-	pp->intensity = value;
-	m_data.push_back(pp);
-}
+	Initialize();
+	m_means_prv = m_means;
+	for (int i = 0; i < m_means_prv.size(); ++i)
+		m_means_prv[i] += FLIVR::Vector(m_eps);
 
-bool ClusterDbscan::Execute()
-{
-	m_result.clear();
-	Dbscan();
-	while (m_result.size() == 1 && m_size)
+	size_t counter = 0;
+	while (!Converge() &&
+		counter < m_max_iter)
 	{
-		ResetData();
-		m_size += 1;
-		//m_eps += 0.1;
-		Dbscan();
+		m_means_prv = m_means;
+		Assign();
+		Update();
+		counter++;
 	}
 
-	if (m_result.size() > 0)
-	{
-		RemoveNoise();
-		return true;
-	}
-	else
+	if (counter == m_max_iter)
 		return false;
+	else
+		return true;
 }
 
-void ClusterDbscan::ResetData()
+void ClusterKmeans::Initialize()
 {
+	m_means.clear();
+	//search for maximum
+	pClusterPoint p = nullptr;
+	Cluster cluster;
 	for (ClusterIter iter = m_data.begin();
 		iter != m_data.end(); ++iter)
 	{
-		(*iter)->visited = false;
-		(*iter)->noise = true;
-	}
-	m_result.clear();
-}
-
-void ClusterDbscan::Dbscan()
-{
-	//an implementation of the DBSCAN algorithm
-	//see wikipedia.org
-	for (ClusterIter iter = m_data.begin();
-		iter != m_data.end(); ++iter)
-	{
-		pClusterPoint p = *iter;
-		if (p->visited)
-			continue;
-		p->visited = true;
-		Cluster neighbors = GetNeighbors(p, m_eps, m_intw);
-		if (neighbors.size() >= m_size)
+		if (iter == m_data.begin())
+			p = *iter;
+		else
 		{
-			Cluster cluster;
-			ExpandCluster(p, neighbors, cluster);
-			m_result.push_back(cluster);
+			if ((*iter)->intensity > p->intensity)
+				p = *iter;
 		}
 	}
-}
-
-void ClusterDbscan::ExpandCluster(pClusterPoint& p, Cluster& neighbors, Cluster& cluster)
-{
-	cluster.push_back(p);
-	p->noise = false;
-	for (ClusterIter iter = neighbors.begin();
-		iter != neighbors.end(); ++iter)
+	if (p != nullptr)
 	{
-		pClusterPoint p2 = *iter;
-		if (!p2->visited)
-		{
-			p2->visited = true;
-			Cluster neighbors2 = GetNeighbors(p2, m_eps, m_intw);
-			if (neighbors2.size() >= m_size)
-				neighbors.join(neighbors2);
-		}
-		if (!m_result.find(p2))
-		{
-			cluster.push_back(p2);
-			p2->noise = false;
-		}
+		m_means.push_back(p->center);
+		cluster.push_back(p);
 	}
-}
-
-Cluster ClusterDbscan::GetNeighbors(pClusterPoint &p, float eps, float intw)
-{
-	Cluster neighbors;
-
-	for (ClusterIter iter = m_data.begin();
-		iter != m_data.end(); ++iter)
+	//search for the rest
+	for (int i = 1; i < m_clnum; ++i)
 	{
-		if (Dist(*p, **iter, intw) < eps)
-			neighbors.push_back(*iter);
-	}
-
-	return neighbors;
-}
-
-void ClusterDbscan::GenerateNewIDs(unsigned int id, void* label,
-	size_t nx, size_t ny, size_t nz)
-{
-	unsigned int id2 = id;
-	unsigned long long index;
-	int i, j, k;
-
-	for (size_t ii = 0; ii < m_result.size(); ++ii)
-	{
-		Cluster &cluster = m_result[ii];
-		do
-		{
-			id2 += 20;
-			if (id2 == id)
-				break;
-		}
-		while (!id2 || FindId(label, id2, nx, ny, nz));
-
-		for (ClusterIter iter = cluster.begin();
-			iter != cluster.end(); ++iter)
-		{
-			i = int((*iter)->center.x() + 0.5);
-			if (i <= 0 || i >= nx - 1)
-				continue;
-			j = int((*iter)->center.y() + 0.5);
-			if (j <= 0 || j >= ny - 1)
-				continue;
-			k = int((*iter)->center.z() + 0.5);
-			if (k <= 0 || k >= nz - 1)
-				continue;
-			index = nx*ny*k + nx*j + i;
-			((unsigned int*)label)[index] = id2;
-		}
-	}
-}
-
-bool ClusterDbscan::FindId(void* label, unsigned int id,
-	size_t nx, size_t ny, size_t nz)
-{
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
-	unsigned long long index;
-	for (index = 0; index < for_size; ++index)
-	{
-		if (((unsigned int*)label)[index] == id)
-			return true;
-	}
-	return false;
-}
-
-void ClusterDbscan::RemoveNoise()
-{
-	//remove noise
-	unsigned int noise_num;
-	do
-	{
-		noise_num = 0;
+		p = nullptr;
 		for (ClusterIter iter = m_data.begin();
 			iter != m_data.end(); ++iter)
 		{
-			//find a point that is not clustered
-			if (!(*iter)->noise)
+			if (cluster.find(*iter))
 				continue;
-			Cluster neighbors = GetNeighbors(*iter, 1.1f, 0.0f);
-			if (neighbors.size() &&
-				ClusterNoise(*iter, neighbors))
-				noise_num++;
+			if (p == nullptr)
+				p = *iter;
+			else
+			{
+				double d1 = (p->center - m_means[i - 1]).length();
+				double d2 = ((*iter)->center - m_means[i - 1]).length();
+				if (d2 > d1)
+					p = *iter;
+			}
 		}
-	} while (noise_num);
+		if (p != nullptr)
+		{
+			m_means.push_back(p->center);
+			cluster.push_back(p);
+		}
+	}
 }
 
-bool ClusterDbscan::ClusterNoise(pClusterPoint& p, Cluster& neighbors)
+void ClusterKmeans::Assign()
 {
-	if (m_result.size() > 1)
+	m_result.clear();
+	m_result.resize(m_clnum);
+	for (ClusterIter iter = m_data.begin();
+		iter != m_data.end(); ++iter)
 	{
-		std::vector<unsigned int> cluster_count;
-		cluster_count.resize(m_result.size(), 0);
-
-		for (ClusterIter iter = neighbors.begin();
-			iter != neighbors.end(); ++iter)
+		int index = -1;
+		double mind;
+		for (int i = 0; i < m_clnum; ++i)
 		{
-			if ((*iter)->noise)
-				continue;
-			int index = m_result.find_(*iter);
-			if (index == -1)
-				continue;
-			cluster_count[index]++;
+			double d = ((*iter)->center - m_means[i]).length();
+			if (i == 0)
+			{
+				index = i;
+				mind = d;
+			}
+			else
+			{
+				if (d < mind)
+				{
+					index = i;
+					mind = d;
+				}
+			}
 		}
 
-		//find max
-		auto result = std::max_element(
-			cluster_count.begin(), cluster_count.end());
-		if (*result)
-		{
-			int index = std::distance(cluster_count.begin(), result);
-			m_result[index].push_back(p);
-			p->noise = false;
-			return true;
-		}
-		else return false;
+		m_result[index].push_back(*iter);
 	}
-	else
+}
+
+void ClusterKmeans::Update()
+{
+	for (int i = 0; i < m_clnum; ++i)
 	{
-		Cluster cluster;
-		cluster.push_back(p);
-		p->noise = false;
-		m_result.push_back(cluster);
-		return true;
+		if (m_result[i].size() == 0)
+			continue;
+		FLIVR::Point sum;
+		for (ClusterIter iter = m_result[i].begin();
+			iter != m_result[i].end(); ++i)
+			sum += (*iter)->center;
+		m_means[i] = sum / double(m_result[i].size());
 	}
+}
+
+bool ClusterKmeans::Converge()
+{
+	for (int i = 0; i < m_clnum; ++i)
+	{
+		double d = (m_means[i] - m_means_prv[i]).length();
+		if (d > m_eps)
+			return false;
+	}
+	return true;
 }
