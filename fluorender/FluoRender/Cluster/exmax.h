@@ -25,39 +25,25 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef FL_Kmeans_h
-#define FL_Kmeans_h
+#ifndef FL_Exmax_h
+#define FL_Exmax_h
 
 #include "ClusterMethod.h"
 
 namespace FL
 {
-	class ClusterKmeans : public ClusterMethod
+	class ClusterExmax : public ClusterMethod
 	{
 	public:
-		ClusterKmeans();
-		~ClusterKmeans();
+		ClusterExmax();
+		~ClusterExmax();
 
-		void SetClnum(unsigned int num)
-		{ m_clnum = num; }
 		bool Execute();
 
 	private:
-		//cluster number
-		unsigned int m_clnum;
-		//distance measure for convergence
-		float m_eps;
-		//maximum iteration number
-		size_t m_max_iter;
-		std::vector<FLIVR::Point> m_means;
-		std::vector<FLIVR::Point> m_means_prv;
 
 	private:
-		void Initialize();
-		void Assign();
-		void Update();
-		bool Converge();
 	};
 
 }
-#endif//FL_Dbscan_h
+#endif//FL_Exmax_h
