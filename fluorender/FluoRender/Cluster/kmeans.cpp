@@ -154,7 +154,7 @@ void ClusterKmeans::Update()
 			continue;
 		FLIVR::Point sum;
 		for (ClusterIter iter = m_result[i].begin();
-			iter != m_result[i].end(); ++i)
+			iter != m_result[i].end(); ++iter)
 			sum += (*iter)->center;
 		m_means[i] = sum / double(m_result[i].size());
 	}

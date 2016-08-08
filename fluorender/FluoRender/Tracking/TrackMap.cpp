@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "TrackMap.h"
 #include "DataManager.h"
 #include "Cluster/dbscan.h"
+#include "Cluster/kmeans.h"
 #include <functional>
 #include <algorithm>
 #include <limits>
@@ -2603,7 +2604,8 @@ bool TrackMapProcessor::SegmentCells(TrackMap& track_map,
 	void* data, void* label,
 	CellList &list, size_t frame)
 {
-	ClusterDbscan cs_processor;
+	//ClusterDbscan cs_processor;
+	ClusterKmeans cs_processor;
 	size_t index;
 	size_t i, j, k;
 	size_t nx = track_map.m_size_x;
