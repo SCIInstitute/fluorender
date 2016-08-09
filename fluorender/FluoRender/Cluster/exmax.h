@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FL_Exmax_h
 
 #include "ClusterMethod.h"
+#include <FLIVR/Matrix.h>
 
 namespace FL
 {
@@ -38,11 +39,41 @@ namespace FL
 		ClusterExmax();
 		~ClusterExmax();
 
+		void SetClnum(unsigned int num)
+		{ m_clnum = num; }
 		bool Execute();
 
 	private:
+		//cluster number
+		unsigned int m_clnum;
+		//measure for convergence
+		float m_eps;
+		//maximum iteration number
+		size_t m_max_iter;
+
+		//parameters to estimate
+		typedef struct
+		{
+			double tau;
+			FLIVR::Point mean;
+			FLIVR::Mat3 covar;
+		} Params;
+		//all paramters to estimate
+		std::vector<Params> m_params;
+		std::vector<Params> m_params_prv;
+		//likelihood
+		double m_likelihood;
+		double m_likelihood_prv;
+		//membership probabilities
+		std::vector<std::vector<double>> m_mem_prob;//0-idx: comps; 1-idx: points
 
 	private:
+		void Initialize();
+		void Expectation();
+		double Gaussian(FLIVR::Point &p, FLIVR::Point &m, FLIVR::Mat3 &s);
+		void Maximization();
+		bool Converge();
+		void GenResult();
 	};
 
 }

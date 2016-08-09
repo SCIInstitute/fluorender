@@ -46,19 +46,15 @@ ClusterKmeans::~ClusterKmeans()
 bool ClusterKmeans::Execute()
 {
 	Initialize();
-	m_means_prv = m_means;
-	for (int i = 0; i < m_means_prv.size(); ++i)
-		m_means_prv[i] += FLIVR::Vector(m_eps);
 
 	size_t counter = 0;
-	while (!Converge() &&
-		counter < m_max_iter)
-	{
+	do {
 		m_means_prv = m_means;
 		Assign();
 		Update();
 		counter++;
-	}
+	} while (!Converge() &&
+		counter < m_max_iter);
 
 	if (counter == m_max_iter)
 		return false;
@@ -142,7 +138,8 @@ void ClusterKmeans::Assign()
 			}
 		}
 
-		m_result[index].push_back(*iter);
+		if (index > -1)
+			m_result[index].push_back(*iter);
 	}
 }
 
