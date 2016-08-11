@@ -78,6 +78,8 @@ namespace FL
 		void SetBits(TrackMap& track_map,
 			size_t bits);
 		void SetScale(TrackMap& track_map, float scale);
+		void SetSpacings(TrackMap& track_map,
+			float spcx, float spcy, float spcz);
 
 		//build cell list and intra graph
 		bool InitializeFrame(TrackMap& track_map,
@@ -172,6 +174,12 @@ namespace FL
 		bool AddContact(IntraGraph& graph,
 			pCell &cell1, pCell &cell2,
 			float contact_value);
+		bool CheckCellDist(TrackMap& track_map,
+			pCell &cell, void *data, void *label,
+			size_t ci, size_t cj, size_t ck);
+		bool AddNeighbor(IntraGraph& graph,
+			pCell &cell1, pCell &cell2,
+			float dist_v, float dist_s);
 		bool LinkVertices(InterGraph& graph,
 			pVertex &vertex1, pVertex &vertex2,
 			size_t f1, size_t f2,
@@ -229,7 +237,8 @@ namespace FL
 		void ReadVertex(std::ifstream& ifs, VertexList& vertex_list, CellList& cell_list);
 		bool AddIntraEdge(IntraGraph& graph,
 			pCell &cell1, pCell &cell2,
-			unsigned int size_ui, float size_f);
+			unsigned int size_ui, float size_f,
+			float dist_v, float dist_s);
 		bool AddInterEdge(InterGraph& graph,
 			pVertex &vertex1, pVertex &vertex2,
 			size_t f1, size_t f2,
@@ -383,6 +392,9 @@ namespace FL
 		size_t m_size_z;
 		size_t m_data_bits;
 		float m_scale;
+		float m_spc_x;
+		float m_spc_y;
+		float m_spc_z;
 
 		//lists
 		std::deque<CellList> m_cells_list;

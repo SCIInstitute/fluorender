@@ -155,11 +155,6 @@ public:
 		ID_AnalyzeLinkBtn,
 		ID_AnalyzeUncertainHistBtn,
 		ID_SaveResultBtn,
-		//magic tool
-		//ID_CellMagic0Btn,
-		//ID_CellMagic1Btn,
-		//ID_CellMagic2Btn,
-		//ID_CellMagic3Btn,
 		//ghost num
 		ID_GhostNumSldr,
 		ID_GhostNumText,

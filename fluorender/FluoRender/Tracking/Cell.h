@@ -47,8 +47,12 @@ namespace FL
 
 	struct IntraEdgeData
 	{
-		unsigned int size_ui;
-		float size_f;
+		//contact size
+		unsigned int size_ui;//voxel count
+		float size_f;//voxel count weighted by intensity
+		//distance
+		float dist_v;//distance calculated from voxel grid
+		float dist_s;//distance calculated from xyz spatial coordinates
 	};
 
 	struct IntraCellData

@@ -341,11 +341,6 @@ EVT_BUTTON(ID_AnalyzeCompBtn, TraceDlg::OnAnalyzeComp)
 EVT_BUTTON(ID_AnalyzeLinkBtn, TraceDlg::OnAnalyzeLink)
 EVT_BUTTON(ID_AnalyzeUncertainHistBtn, TraceDlg::OnAnalyzeUncertainHist)
 EVT_BUTTON(ID_SaveResultBtn, TraceDlg::OnSaveResult)
-//magic tool
-//EVT_BUTTON(ID_CellMagic0Btn, TraceDlg::OnCellMagic0Btn)
-//EVT_BUTTON(ID_CellMagic1Btn, TraceDlg::OnCellMagic1Btn)
-//EVT_BUTTON(ID_CellMagic2Btn, TraceDlg::OnCellMagic2Btn)
-//EVT_BUTTON(ID_CellMagic3Btn, TraceDlg::OnCellMagic3Btn)
 //ghost num
 EVT_COMMAND_SCROLL(ID_GhostNumSldr, TraceDlg::OnGhostNumChange)
 EVT_TEXT(ID_GhostNumText, TraceDlg::OnGhostNumText)
@@ -614,25 +609,29 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 	//controls
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	m_cell_new_id_btn = new wxButton(page, ID_CellNewIDBtn, "Assign ID",
-		wxDefaultPosition, wxSize(75, 23));
+		wxDefaultPosition, wxSize(85, 23));
 	m_cell_append_id_btn = new wxButton(page, ID_CellAppendIDBtn, "Add ID",
-		wxDefaultPosition, wxSize(75, 23));
+		wxDefaultPosition, wxSize(85, 23));
 	m_cell_replace_id_btn = new wxButton(page, ID_CellReplaceIDBtn, "Replace ID",
 		wxDefaultPosition, wxSize(85, 23));
-	m_cell_combine_id_btn = new wxButton(page, ID_CellCombineIDBtn, "Combine",
-		wxDefaultPosition, wxSize(75, 23));
-	m_cell_divide_id_btn = new wxButton(page, ID_CellDivideIDBtn, "Divide",
-		wxDefaultPosition, wxSize(75, 23));
-	m_cell_segment_btn = new wxButton(page, ID_CellSegmentBtn, "Segment",
-		wxDefaultPosition, wxSize(75, 23));
 	sizer_2->AddStretchSpacer();
 	sizer_2->Add(m_cell_new_id_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_append_id_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_replace_id_btn, 0, wxALIGN_CENTER);
-	sizer_2->Add(m_cell_combine_id_btn, 0, wxALIGN_CENTER);
-	sizer_2->Add(m_cell_divide_id_btn, 0, wxALIGN_CENTER);
-	sizer_2->Add(m_cell_segment_btn, 0, wxALIGN_CENTER);
 	sizer_2->AddStretchSpacer();
+
+	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
+	m_cell_combine_id_btn = new wxButton(page, ID_CellCombineIDBtn, "Combine",
+		wxDefaultPosition, wxSize(85, 23));
+	m_cell_divide_id_btn = new wxButton(page, ID_CellDivideIDBtn, "Divide",
+		wxDefaultPosition, wxSize(85, 23));
+	m_cell_segment_btn = new wxButton(page, ID_CellSegmentBtn, "Segment",
+		wxDefaultPosition, wxSize(85, 23));
+	sizer_3->AddStretchSpacer();
+	sizer_3->Add(m_cell_combine_id_btn, 0, wxALIGN_CENTER);
+	sizer_3->Add(m_cell_divide_id_btn, 0, wxALIGN_CENTER);
+	sizer_3->Add(m_cell_segment_btn, 0, wxALIGN_CENTER);
+	sizer_3->AddStretchSpacer();
 
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
@@ -640,6 +639,8 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 	sizer_v->Add(sizer_1, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 	sizer_v->Add(sizer_2, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer_3, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 
 	//set the page

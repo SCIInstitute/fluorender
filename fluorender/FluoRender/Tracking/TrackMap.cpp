@@ -43,7 +43,10 @@ TrackMap::TrackMap() :
 	m_size_y(0),
 	m_size_z(0),
 	m_data_bits(8),
-	m_scale(1.0f)
+	m_scale(1.0f),
+	m_spc_x(1.0f),
+	m_spc_y(1.0f),
+	m_spc_z(1.0f)
 {
 }
 
@@ -69,6 +72,14 @@ void TrackMapProcessor::SetScale(TrackMap& track_map,
 	float scale)
 {
 	track_map.m_scale = scale;
+}
+
+void TrackMapProcessor::SetSpacings(TrackMap& track_map,
+	float spcx, float spcy, float spcz)
+{
+	track_map.m_spc_x = spcx;
+	track_map.m_spc_y = spcy;
+	track_map.m_spc_z = spcz;
 }
 
 bool TrackMapProcessor::InitializeFrame(TrackMap& track_map,
@@ -254,8 +265,22 @@ bool TrackMapProcessor::CheckCellContact(TrackMap& track_map,
 	}
 
 	if (ec)
+	{
 		cell->IncExternal(value);
 
+		//expand search range if it's external
+		CheckCellDist(track_map,
+			cell, data, label,
+			ci, cj, ck);
+	}
+
+	return true;
+}
+
+bool TrackMapProcessor::CheckCellDist(TrackMap& track_map,
+	pCell &cell, void *data, void *label,
+	size_t ci, size_t cj, size_t ck)
+{
 	return true;
 }
 
@@ -285,11 +310,60 @@ bool TrackMapProcessor::AddContact(IntraGraph& graph,
 		e = boost::add_edge(v1, v2, graph);
 		graph[e.first].size_ui = 1;
 		graph[e.first].size_f = contact_value;
+		graph[e.first].dist_v = 0.0f;
+		graph[e.first].dist_s = 0.0f;
 	}
 	else
 	{
 		graph[e.first].size_ui++;
 		graph[e.first].size_f += contact_value;
+		graph[e.first].dist_v = 0.0f;
+		graph[e.first].dist_s = 0.0f;
+	}
+
+	return true;
+}
+
+bool TrackMapProcessor::AddNeighbor(IntraGraph& graph,
+	pCell &cell1, pCell &cell2,
+	float dist_v, float dist_s)
+{
+	IntraVert v1 = cell1->GetIntraVert();
+	IntraVert v2 = cell2->GetIntraVert();
+	if (v1 == IntraGraph::null_vertex())
+	{
+		v1 = boost::add_vertex(graph);
+		graph[v1].id = cell1->Id();
+		graph[v1].cell = cell1;
+		cell1->SetIntraVert(v1);
+	}
+	if (v2 == IntraGraph::null_vertex())
+	{
+		v2 = boost::add_vertex(graph);
+		graph[v2].id = cell2->Id();
+		graph[v2].cell = cell2;
+		cell2->SetIntraVert(v2);
+	}
+
+	std::pair<IntraEdge, bool> e = boost::edge(v1, v2, graph);
+	if (!e.second)
+	{
+		e = boost::add_edge(v1, v2, graph);
+		graph[e.first].size_ui = 0;
+		graph[e.first].size_f = 0.0f;
+		graph[e.first].dist_v = dist_v;
+		graph[e.first].dist_s = dist_s;
+	}
+	else
+	{
+		//update the distance only if there is no
+		//contact and current distance is shorter
+		if (graph[e.first].size_ui == 0 &&
+			dist_v < graph[e.first].dist_v)
+		{
+			graph[e.first].dist_v = dist_v;
+			graph[e.first].dist_s = dist_s;
+		}
 	}
 
 	return true;
@@ -1461,6 +1535,9 @@ bool TrackMapProcessor::Export(TrackMap & track_map, std::string &filename)
 			//size
 			WriteUint(ofs, intra_graph[*intra_iter].size_ui);
 			WriteFloat(ofs, intra_graph[*intra_iter].size_f);
+			//distance
+			WriteFloat(ofs, intra_graph[*intra_iter].dist_v);
+			WriteFloat(ofs, intra_graph[*intra_iter].dist_s);
 		}
 		//write inter edges
 		if (i == 0)
@@ -1567,6 +1644,7 @@ bool TrackMapProcessor::Import(TrackMap& track_map, std::string &filename)
 	CellListIter cell_iter;
 	unsigned int size_ui;
 	float size_f;
+	float dist_v, dist_s;
 	pVertex vertex1, vertex2;
 	VertexListIter vertex_iter;
 	float dist;
@@ -1619,9 +1697,11 @@ bool TrackMapProcessor::Import(TrackMap& track_map, std::string &filename)
 			//add edge
 			size_ui = ReadUint(ifs);
 			size_f = ReadFloat(ifs);
+			dist_v = ReadFloat(ifs);
+			dist_s = ReadFloat(ifs);
 			if (edge_exist)
 				AddIntraEdge(intra_graph, cell1, cell2,
-					size_ui, size_f);
+					size_ui, size_f, dist_v, dist_s);
 		}
 		//inter graph
 		if (i == 0)
@@ -1786,7 +1866,9 @@ void TrackMapProcessor::ReadVertex(std::ifstream& ifs,
 }
 
 bool TrackMapProcessor::AddIntraEdge(IntraGraph& graph,
-	pCell &cell1, pCell &cell2, unsigned int size_ui, float size_f)
+	pCell &cell1, pCell &cell2,
+	unsigned int size_ui, float size_f,
+	float dist_v, float dist_s)
 {
 	IntraVert v1 = cell1->GetIntraVert();
 	IntraVert v2 = cell2->GetIntraVert();
@@ -1811,6 +1893,8 @@ bool TrackMapProcessor::AddIntraEdge(IntraGraph& graph,
 		e = boost::add_edge(v1, v2, graph);
 		graph[e.first].size_ui = size_ui;
 		graph[e.first].size_f = size_f;
+		graph[e.first].dist_v = dist_v;
+		graph[e.first].dist_s = dist_s;
 	}
 	else
 		return false;
