@@ -3038,6 +3038,8 @@ void TraceDlg::GenMap()
 	int frames = reader->GetTimeNum();
 	int resx, resy, resz;
 	vd->GetResolution(resx, resy, resz);
+	double spcx, spcy, spcz;
+	vd->GetSpacings(spcx, spcy, spcz);
 
 	Nrrd* nrrd_data1 = 0;
 	Nrrd* nrrd_data2 = 0;
@@ -3052,6 +3054,8 @@ void TraceDlg::GenMap()
 	tm_processor.SetScale(track_map, vd->GetScalarScale());
 	tm_processor.SetSizes(track_map,
 		resx, resy, resz);
+	tm_processor.SetSpacings(track_map,
+		spcx, spcy, spcz);
 	tm_processor.SetSizeThresh(component_size);
 	tm_processor.SetContactThresh(contact_factor);
 	float prog_bit = 100.0f / float(frames * (2 + iter_num));
@@ -3230,12 +3234,16 @@ void TraceDlg::RefineMap(int t)
 		start_frame = end_frame = t;
 	int resx, resy, resz;
 	vd->GetResolution(resx, resy, resz);
+	double spcx, spcy, spcz;
+	vd->GetSpacings(spcx, spcy, spcz);
 	size_t iter_num = (size_t)m_gen_map_spin->GetValue();
 	iter_num *= 2;
 	tm_processor.SetBits(track_map, vd->GetBits());
 	tm_processor.SetScale(track_map, vd->GetScalarScale());
 	tm_processor.SetSizes(track_map,
 		resx, resy, resz);
+	tm_processor.SetSpacings(track_map,
+		spcx, spcy, spcz);
 	tm_processor.SetSizeThresh(component_size);
 	tm_processor.SetContactThresh(contact_factor);
 	float prog_bit = 100.0f / float(

@@ -46,8 +46,9 @@ namespace FL
 #define TAG_FRAM		5
 #define TAG_LAST_OP		6
 #define TAG_NUM			7
-#define TAG_COUNT		8	//added to 2.19 for uncertainty
+#define TAG_VER219		8	//added to 2.19 for uncertainty
 							//order: v1, v2, edge
+#define TAG_VER220		9	//new values added in v2.20
 
 	typedef std::vector<Ruler*> RulerList;
 	typedef std::vector<Ruler*>::iterator RulerListIter;
@@ -175,7 +176,7 @@ namespace FL
 			pCell &cell1, pCell &cell2,
 			float contact_value);
 		bool CheckCellDist(TrackMap& track_map,
-			pCell &cell, void *data, void *label,
+			pCell &cell, void *label,
 			size_t ci, size_t cj, size_t ck);
 		bool AddNeighbor(IntraGraph& graph,
 			pCell &cell1, pCell &cell2,

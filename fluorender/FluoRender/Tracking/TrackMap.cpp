@@ -268,19 +268,55 @@ bool TrackMapProcessor::CheckCellContact(TrackMap& track_map,
 	{
 		cell->IncExternal(value);
 
-		//expand search range if it's external
-		CheckCellDist(track_map,
-			cell, data, label,
-			ci, cj, ck);
+		//expand search range if it's external but not contacting
+		if (cc == 0)
+			CheckCellDist(track_map,
+				cell, label,
+				ci, cj, ck);
 	}
 
 	return true;
 }
 
 bool TrackMapProcessor::CheckCellDist(TrackMap& track_map,
-	pCell &cell, void *data, void *label,
-	size_t ci, size_t cj, size_t ck)
+	pCell &cell, void *label, size_t ci, size_t cj, size_t ck)
 {
+	size_t nx = track_map.m_size_x;
+	size_t ny = track_map.m_size_y;
+	size_t nz = track_map.m_size_z;
+	float spcx = track_map.m_spc_x;
+	float spcy = track_map.m_spc_y;
+	float spcz = track_map.m_spc_z;
+	size_t indexn;//neighbor index
+	unsigned int idn;//neighbor id
+	size_t index = nx*ny*ck + nx*cj + ci;
+	unsigned int id = cell->Id();
+	IntraGraph &intra_graph = track_map.m_intra_graph_list.back();
+	CellList &cell_list = track_map.m_cells_list.back();
+	CellListIter iter;
+	float dist_v, dist_s;
+
+	//search range
+	int r = int(sqrt(m_size_thresh)/2.0+0.5);
+	r = r < 1 ? 1 : r;
+	for (int k = -r; k<=r; ++k)
+	for (int j = -r; j<=r; ++j)
+	for (int i = -r; i<=r; ++i)
+	{
+		if (ck + k < 0 || ck + k >= nz || cj + j < 0 || cj + j >= ny || ci + i < 0 || ci + i >= nx)
+			continue;
+		indexn = nx*ny*(ck + k) + nx*(cj + j) + ci + i;
+		idn = ((unsigned int*)label)[indexn];
+		if (!idn || idn == id)
+			continue;
+		iter = cell_list.find(idn);
+		if (iter != cell_list.end())
+		{
+			dist_v = sqrt(i*i + j*j + k*k);
+			dist_s = sqrt(i*i*spcx*spcx + j*j*spcy*spcy + k*k*spcz*spcz);
+			AddNeighbor(intra_graph, cell, iter->second, dist_v, dist_s);
+		}
+	}
 	return true;
 }
 
@@ -359,7 +395,7 @@ bool TrackMapProcessor::AddNeighbor(IntraGraph& graph,
 		//update the distance only if there is no
 		//contact and current distance is shorter
 		if (graph[e.first].size_ui == 0 &&
-			dist_v < graph[e.first].dist_v)
+			dist_s < graph[e.first].dist_s)
 		{
 			graph[e.first].dist_v = dist_v;
 			graph[e.first].dist_s = dist_s;
@@ -723,6 +759,9 @@ bool TrackMapProcessor::ResolveGraph(TrackMap& track_map, size_t frame1, size_t 
 				{
 					intra_edge = boost::edge(c2, c2c, intra_graph);
 					if (!intra_edge.second)
+						continue;
+					//continue if no contact
+					if (intra_graph[intra_edge.first].size_ui == 0)
 						continue;
 					osizef = intra_graph[intra_edge.first].size_f;
 					c1sizef = cell2->GetSizeF();
@@ -1536,6 +1575,7 @@ bool TrackMapProcessor::Export(TrackMap & track_map, std::string &filename)
 			WriteUint(ofs, intra_graph[*intra_iter].size_ui);
 			WriteFloat(ofs, intra_graph[*intra_iter].size_f);
 			//distance
+			WriteTag(ofs, TAG_VER220);
 			WriteFloat(ofs, intra_graph[*intra_iter].dist_v);
 			WriteFloat(ofs, intra_graph[*intra_iter].dist_s);
 		}
@@ -1580,7 +1620,7 @@ bool TrackMapProcessor::Export(TrackMap & track_map, std::string &filename)
 			WriteFloat(ofs, inter_graph[*inter_iter].dist);
 			WriteUint(ofs, inter_graph[*inter_iter].link);
 			//uncertainty
-			WriteTag(ofs, TAG_COUNT);
+			WriteTag(ofs, TAG_VER219);
 			if (inter_graph[inter_vert0].frame <
 				inter_graph[inter_vert1].frame)
 			{
@@ -1697,8 +1737,16 @@ bool TrackMapProcessor::Import(TrackMap& track_map, std::string &filename)
 			//add edge
 			size_ui = ReadUint(ifs);
 			size_f = ReadFloat(ifs);
-			dist_v = ReadFloat(ifs);
-			dist_s = ReadFloat(ifs);
+			if (ReadTag(ifs) == TAG_VER220)
+			{
+				dist_v = ReadFloat(ifs);
+				dist_s = ReadFloat(ifs);
+			}
+			else
+			{
+				ifs.unget();
+				dist_v = dist_s = 0.0f;
+			}
 			if (edge_exist)
 				AddIntraEdge(intra_graph, cell1, cell2,
 					size_ui, size_f, dist_v, dist_s);
@@ -1741,7 +1789,7 @@ bool TrackMapProcessor::Import(TrackMap& track_map, std::string &filename)
 			unsigned int v1_count = 0;
 			unsigned int v2_count = 0;
 			unsigned int edge_count = 0;
-			if (ReadTag(ifs) == TAG_COUNT)
+			if (ReadTag(ifs) == TAG_VER219)
 			{
 				v1_count = ReadUint(ifs);
 				v2_count = ReadUint(ifs);
