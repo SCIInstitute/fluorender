@@ -207,6 +207,18 @@ namespace FL
 		bool MergeCells(VertexList& vertex_list, CellBin &bin,
 			TrackMap& track_map, size_t frame);
 		bool RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size_t frame, InterGraph &graph, bool reset);
+		
+		//vertex matching routines
+		//find out current valence of a vertex
+		bool GetValence(pVertex &vertex, InterGraph &graph,
+			size_t &valence);
+		bool GetValence(pVertex &vertex, InterGraph &graph,
+			size_t &valence, std::vector<InterEdge> &edges);
+		//match the max overlap
+		bool MatchVertexMax(InterGraph &graph, std::vector<InterEdge> &edges);
+		//reduce valence by merging vertices
+		//bool MatchVertexMerge(InterGraph &graph, )
+		
 		bool MatchVertex(pVertex &vertex, InterGraph &graph, bool bl_check = true);
 		bool UnmatchVertex(pVertex &vertex, InterGraph &graph);
 		bool ExMatchVertex(pVertex &vertex, InterGraph &graph, size_t frame1, size_t frame2);

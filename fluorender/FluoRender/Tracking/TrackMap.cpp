@@ -303,7 +303,9 @@ bool TrackMapProcessor::CheckCellDist(TrackMap& track_map,
 	for (int j = -r; j<=r; ++j)
 	for (int i = -r; i<=r; ++i)
 	{
-		if (ck + k < 0 || ck + k >= nz || cj + j < 0 || cj + j >= ny || ci + i < 0 || ci + i >= nx)
+		if (ck + k < 0 || ck + k >= nz ||
+			cj + j < 0 || cj + j >= ny ||
+			ci + i < 0 || ci + i >= nx)
 			continue;
 		indexn = nx*ny*(ck + k) + nx*(cj + j) + ci + i;
 		idn = ((unsigned int*)label)[indexn];
@@ -873,6 +875,91 @@ bool TrackMapProcessor::ExMatchFrames(TrackMap& track_map, size_t frame1, size_t
 				inter_graph, frame1, frame2);
 	}
 
+	return true;
+}
+
+//vertex matching routines
+//find out current valence of a vertex
+bool TrackMapProcessor::GetValence(pVertex &vertex, InterGraph &graph,
+	size_t &valence)
+{
+	valence = 0;
+	if (!vertex)
+		return false;
+	InterVert v0 = vertex->GetInterVert(graph);
+	if (v0 == InterGraph::null_vertex())
+		return false;
+
+	InterVert v1;
+	std::pair<InterEdge, bool> edge;
+
+	//set flag for link
+	std::pair<InterAdjIter, InterAdjIter> adj_verts =
+		boost::adjacent_vertices(v0, graph);
+	//for each adjacent vertex
+	for (InterAdjIter inter_iter = adj_verts.first;
+		inter_iter != adj_verts.second; ++inter_iter)
+	{
+		v1 = *inter_iter;
+		edge = boost::edge(v0, v1, graph);
+		if (edge.second)
+		{
+			if (graph[edge.first].link)
+				valence++;
+		}
+	}
+
+	return true;
+}
+
+bool TrackMapProcessor::GetValence(pVertex &vertex, InterGraph &graph,
+	size_t &valence, std::vector<InterEdge> &edges)
+{
+	valence = 0;
+	if (!vertex)
+		return false;
+	InterVert v0 = vertex->GetInterVert(graph);
+	if (v0 == InterGraph::null_vertex())
+		return false;
+
+	InterVert v1;
+	std::pair<InterEdge, bool> edge;
+
+	//set flag for link
+	std::pair<InterAdjIter, InterAdjIter> adj_verts =
+		boost::adjacent_vertices(v0, graph);
+	//for each adjacent vertex
+	for (InterAdjIter inter_iter = adj_verts.first;
+		inter_iter != adj_verts.second; ++inter_iter)
+	{
+		v1 = *inter_iter;
+		edge = boost::edge(v0, v1, graph);
+		if (edge.second)
+		{
+			if (graph[edge.first].link)
+				valence++;
+			edges.push_back(edge.first);
+		}
+	}
+
+	return true;
+}
+
+//match the max overlap
+bool TrackMapProcessor::MatchVertexMax(InterGraph &graph, std::vector<InterEdge> &edges)
+{
+	if (!edges.size())
+		return false;
+
+	//sort edges
+	std::sort(edges.begin(), edges.end(),
+		std::bind(edge_comp_size_ol, std::placeholders::_1,
+			std::placeholders::_2, graph));
+	//link the max
+	graph[edges[0]].link = 1;
+	graph[edges[0]].count++;
+	graph[boost::source(edges[0], graph)].count++;
+	graph[boost::target(edges[0], graph)].count++;
 	return true;
 }
 
@@ -2776,11 +2863,9 @@ bool TrackMapProcessor::SegmentCells(TrackMap& track_map,
 	}
 
 	//run clustering
-	if (cs_processor.Execute())
-	{
-		cs_processor.GenerateNewIDs(id, label,
-			nx, ny, nz);
-	}
+	cs_processor.Execute();
+	cs_processor.GenerateNewIDs(id, label,
+		nx, ny, nz);
 
 	return true;
 }

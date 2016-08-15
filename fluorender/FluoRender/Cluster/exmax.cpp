@@ -57,13 +57,11 @@ bool ClusterExmax::Execute()
 	} while (!Converge() &&
 		counter < m_max_iter);
 
+	GenResult();
 	if (counter == m_max_iter)
 		return false;
 	else
-	{
-		GenResult();
 		return true;
-	}
 }
 
 void ClusterExmax::Initialize()
