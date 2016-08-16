@@ -1109,7 +1109,7 @@ void TraceDlg::OnCompUncertainBtn(wxCommandEvent &event)
 	}
 
 	FL::TrackMap &track_map = trace_group->GetTrackMap();
-	FL::TrackMapProcessor tm_processor;
+	FL::TrackMapProcessor tm_processor(track_map);
 	wxString str = m_comp_uncertain_low_text->GetValue();
 	long ival;
 	str.ToLong(&ival);
@@ -1117,7 +1117,7 @@ void TraceDlg::OnCompUncertainBtn(wxCommandEvent &event)
 	str = m_comp_uncertain_hi_text->GetValue();
 	str.ToLong(&ival);
 	tm_processor.SetUncertainHigh(ival);
-	tm_processor.GetCellsByUncertainty(track_map, list_in, list_out, m_cur_time);
+	tm_processor.GetCellsByUncertainty(list_in, list_out, m_cur_time);
 
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	FL::ComponentSelector comp_selector(vd);
@@ -1212,9 +1212,9 @@ void TraceDlg::OnConvertToRulers(wxCommandEvent& event)
 	vd->GetSpacings(spcx, spcy, spcz);
 
 	//get rulers
-	FL::RulerList rulers;
+	RulerList rulers;
 	trace_group->GetMappedRulers(rulers);
-	for (FL::RulerListIter iter = rulers.begin();
+	for (RulerListIter iter = rulers.begin();
 	iter != rulers.end(); ++iter)
 	{
 		(*iter)->Scale(spcx, spcy, spcz);
@@ -1262,7 +1262,7 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 	m_stat_text->SetValue("Generating consistent IDs in");
 	wxGetApp().Yield();
 	FL::TrackMap &track_map = trace_group->GetTrackMap();
-	FL::TrackMapProcessor tm_processor;
+	FL::TrackMapProcessor tm_processor(track_map);
 	int chan = vd->GetCurChannel();
 	int nx, ny, nz;
 	vd->GetResolution(nx, ny, nz);
@@ -1299,8 +1299,7 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 		}
 		else
 		{
-			if (tm_processor.GetMappedID(track_map,
-				label_in1, label_in2, 0))
+			if (tm_processor.GetMappedID(label_in1, label_in2, 0))
 			{
 				((unsigned int*)(nrrd_label_in2->data))[index] = label_in2;
 				cell_map.insert(pair<unsigned int, unsigned int>(label_in1, label_in2));
@@ -1340,8 +1339,7 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 			}
 			else
 			{
-				if (tm_processor.GetMappedID(track_map,
-					label_out1, label_in1, fi, fi - 1))
+				if (tm_processor.GetMappedID(label_out1, label_in1, fi, fi - 1))
 				{
 					label_out2 = GetMappedID(label_in1,
 						(unsigned int*)(nrrd_label_in1->data),
@@ -1461,12 +1459,11 @@ void TraceDlg::OnAnalyzeUncertainHist(wxCommandEvent &event)
 	m_stat_text->SetValue("");
 
 	FL::TrackMap &track_map = trace_group->GetTrackMap();
-	FL::TrackMapProcessor tm_processor;
+	FL::TrackMapProcessor tm_processor(track_map);
 	if (list_in.empty())
 	{
 		FL::UncertainHist hist1, hist2;
-		tm_processor.GetUncertainHist(track_map,
-			hist1, hist2, m_cur_time);
+		tm_processor.GetUncertainHist(hist1, hist2, m_cur_time);
 		//header
 		(*m_stat_text) << "In\n";
 		(*m_stat_text) << "Level\t" << "Frequency\n";
@@ -1502,8 +1499,7 @@ void TraceDlg::OnAnalyzeUncertainHist(wxCommandEvent &event)
 	}
 	else
 	{
-		tm_processor.GetCellUncertainty(track_map,
-			list_in, m_cur_time);
+		tm_processor.GetCellUncertainty(list_in, m_cur_time);
 		//header
 		(*m_stat_text) << "ID\t" << "In\t" << "Out\n";
 		for (FL::CellListIter iter = list_in.begin();
@@ -2656,11 +2652,11 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 		return;
 
 	FL::TrackMap &track_map = trace_group->GetTrackMap();
-	FL::TrackMapProcessor tm_processor;
-	tm_processor.SetBits(track_map, vd->GetBits());
-	tm_processor.SetScale(track_map, vd->GetScalarScale());
-	tm_processor.SetSizes(track_map, resx, resy, resz);
-	tm_processor.SegmentCells(track_map, nrrd_data->data,
+	FL::TrackMapProcessor tm_processor(track_map);
+	tm_processor.SetBits(vd->GetBits());
+	tm_processor.SetScale(vd->GetScalarScale());
+	tm_processor.SetSizes(resx, resy, resz);
+	tm_processor.SegmentCells(nrrd_data->data,
 		nrrd_label->data, list_cur, m_cur_time);
 
 	//invalidate label mask in gpu
@@ -3033,7 +3029,7 @@ void TraceDlg::GenMap()
 	m_stat_text->SetValue("Generating track map.\n");
 	wxGetApp().Yield();
 	FL::TrackMap &track_map = trace_group->GetTrackMap();
-	FL::TrackMapProcessor tm_processor;
+	FL::TrackMapProcessor tm_processor(track_map);
 	int chan = vd->GetCurChannel();
 	int frames = reader->GetTimeNum();
 	int resx, resy, resz;
@@ -3050,12 +3046,10 @@ void TraceDlg::GenMap()
 
 	size_t iter_num = (size_t)m_gen_map_spin->GetValue();
 	iter_num *= 2;
-	tm_processor.SetBits(track_map, vd->GetBits());
-	tm_processor.SetScale(track_map, vd->GetScalarScale());
-	tm_processor.SetSizes(track_map,
-		resx, resy, resz);
-	tm_processor.SetSpacings(track_map,
-		spcx, spcy, spcz);
+	tm_processor.SetBits(vd->GetBits());
+	tm_processor.SetScale(vd->GetScalarScale());
+	tm_processor.SetSizes(resx, resy, resz);
+	tm_processor.SetSpacings(spcx, spcy, spcz);
 	tm_processor.SetSizeThresh(component_size);
 	tm_processor.SetContactThresh(contact_factor);
 	float prog_bit = 100.0f / float(frames * (2 + iter_num));
@@ -3079,8 +3073,7 @@ void TraceDlg::GenMap()
 				file_err = true;
 				continue;
 			}
-			tm_processor.InitializeFrame(track_map,
-				nrrd_data1->data, nrrd_label1->data, i);
+			tm_processor.InitializeFrame(nrrd_data1->data, nrrd_label1->data, i);
 		}
 		else
 		{
@@ -3098,11 +3091,10 @@ void TraceDlg::GenMap()
 				file_err = true;
 				continue;
 			}
-			tm_processor.InitializeFrame(track_map,
-				nrrd_data2->data, nrrd_label2->data, i);
+			tm_processor.InitializeFrame(nrrd_data2->data, nrrd_label2->data, i);
 
 			//link maps 1 and 2
-			tm_processor.LinkMaps(track_map, i - 1, i,
+			tm_processor.LinkMaps(i - 1, i,
 				nrrd_data1->data, nrrd_data2->data,
 				nrrd_label1->data, nrrd_label2->data);
 
@@ -3126,8 +3118,8 @@ void TraceDlg::GenMap()
 	//resolve multiple links of single vertex
 	for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
 	{
-		tm_processor.ResolveGraph(track_map, fi, fi + 1);
-		tm_processor.ResolveGraph(track_map, fi, fi - 1);
+		tm_processor.ResolveGraph(fi, fi + 1);
+		tm_processor.ResolveGraph(fi, fi - 1);
 		prog += prog_bit;
 		m_gen_map_prg->SetValue(int(prog));
 		(*m_stat_text) << wxString::Format("Time point %d resolved.\n", int(fi));
@@ -3140,8 +3132,8 @@ void TraceDlg::GenMap()
 	{
 		for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
 		{
-			tm_processor.MatchFrames(track_map, fi, fi + 1, iteri != 0);
-			tm_processor.MatchFrames(track_map, fi, fi - 1, iteri != 0);
+			tm_processor.ProcessFrames(fi, fi + 1);
+			tm_processor.ProcessFrames(fi, fi - 1);
 			prog += prog_bit;
 			m_gen_map_prg->SetValue(int(prog));
 			(*m_stat_text) << wxString::Format("Time point %d linked.\n", int(fi));
@@ -3153,11 +3145,11 @@ void TraceDlg::GenMap()
 
 		for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
 		{
-			tm_processor.UnmatchFrames(track_map, fi, fi - 1);
-			tm_processor.UnmatchFrames(track_map, fi, fi + 1);
+			tm_processor.UnmatchFrames(fi, fi - 1);
+			tm_processor.UnmatchFrames(fi, fi + 1);
 			//link orphans
-			tm_processor.ExMatchFrames(track_map, fi, fi + 1);
-			tm_processor.ExMatchFrames(track_map, fi, fi - 1);
+			tm_processor.ExMatchFrames(fi, fi + 1);
+			tm_processor.ExMatchFrames(fi, fi - 1);
 			prog += prog_bit;
 			m_gen_map_prg->SetValue(int(prog));
 			(*m_stat_text) << wxString::Format("Time point %d unlinked.\n", int(fi));
@@ -3176,8 +3168,8 @@ void TraceDlg::GenMap()
 #define LINK_FRAMES \
 	for (size_t fi = start_frame; fi <= end_frame; ++fi) \
 	{ \
-		tm_processor.MatchFrames(track_map, fi, fi + 1, false); \
-		tm_processor.MatchFrames(track_map, fi, fi - 1, false); \
+		tm_processor.ProcessFrames(track_map, fi, fi + 1); \
+		tm_processor.ProcessFrames(track_map, fi, fi - 1); \
 		prog += prog_bit; \
 		m_gen_map_prg->SetValue(int(prog)); \
 		(*m_stat_text) << wxString::Format("Time point %d linked.\n", int(fi)); \
@@ -3223,7 +3215,7 @@ void TraceDlg::RefineMap(int t)
 			"Refining track map at time point %d.\n", t));
 	wxGetApp().Yield();
 	FL::TrackMap &track_map = trace_group->GetTrackMap();
-	FL::TrackMapProcessor tm_processor;
+	FL::TrackMapProcessor tm_processor(track_map);
 	int start_frame, end_frame;
 	if (t < 0)
 	{
@@ -3238,12 +3230,10 @@ void TraceDlg::RefineMap(int t)
 	vd->GetSpacings(spcx, spcy, spcz);
 	size_t iter_num = (size_t)m_gen_map_spin->GetValue();
 	iter_num *= 2;
-	tm_processor.SetBits(track_map, vd->GetBits());
-	tm_processor.SetScale(track_map, vd->GetScalarScale());
-	tm_processor.SetSizes(track_map,
-		resx, resy, resz);
-	tm_processor.SetSpacings(track_map,
-		spcx, spcy, spcz);
+	tm_processor.SetBits(vd->GetBits());
+	tm_processor.SetScale(vd->GetScalarScale());
+	tm_processor.SetSizes(resx, resy, resz);
+	tm_processor.SetSpacings(spcx, spcy, spcz);
 	tm_processor.SetSizeThresh(component_size);
 	tm_processor.SetContactThresh(contact_factor);
 	float prog_bit = 100.0f / float(
@@ -3252,7 +3242,7 @@ void TraceDlg::RefineMap(int t)
 	float prog = 0.0f;
 	m_gen_map_prg->SetValue(int(prog));
 
-	unsigned int last_op = track_map.GetLastOp();
+/*	unsigned int last_op = track_map.GetLastOp();
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	//check branch
 	for (size_t iteri = 0; iteri < iter_num; ++iteri)
@@ -3273,6 +3263,6 @@ void TraceDlg::RefineMap(int t)
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 	(*m_stat_text) << wxString::Format("Wall clock time: %.4fs\n", time_span.count());
-
+	*/
 	m_gen_map_prg->SetValue(100);
 }

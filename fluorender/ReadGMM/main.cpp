@@ -16,7 +16,7 @@ vector<std::wstring> m_xml_list;
 vector<std::wstring> m_lbl_list;
 int m_digits = 0;
 FL::TrackMap m_track_map;
-FL::TrackMapProcessor m_tm_processor;
+FL::TrackMapProcessor m_tm_processor(m_track_map);
 
 void ProcessInputName(std::wstring &infilename)
 {
@@ -198,7 +198,7 @@ void AddLabel(int num, wxXmlNode* node, unsigned int* label_data)
 	cell->SetSizeUi(cell_size);
 	cell->SetSizeF(cell_size);
 	FL::CellListIter iter;
-	m_tm_processor.AddCell(m_track_map, cell, num, iter);
+	m_tm_processor.AddCell(cell, num, iter);
 	if (prev_id)
 	{
 		//link
@@ -208,7 +208,7 @@ void AddLabel(int num, wxXmlNode* node, unsigned int* label_data)
 		FL::pCell cell2 = FL::pCell(new FL::Cell(prev_id));
 		list2.insert(pair<unsigned int, FL::pCell>
 			(prev_id, cell2));
-		m_tm_processor.LinkCells(m_track_map, list1, list2, num, num-1, false);
+		m_tm_processor.LinkCells(list1, list2, num, num-1, false);
 	}
 }
 
@@ -275,7 +275,7 @@ int main(int argc, char* argv[])
 		ProcessXml(i);
 
 	//save trackmap
-	m_tm_processor.Export(m_track_map, trackfile);
+	m_tm_processor.Export(trackfile);
 
 	printf("All done. Quit.\n");
 

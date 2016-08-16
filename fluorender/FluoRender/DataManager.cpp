@@ -3157,11 +3157,11 @@ void TraceGroup::GetLinkLists(size_t frame,
 	if (out_multi_list.size())
 		out_multi_list.clear();
 
-	FL::TrackMapProcessor tm_processor;
+	FL::TrackMapProcessor tm_processor(m_track_map);
 	tm_processor.SetSizeThresh(m_cell_size);
 	tm_processor.SetUncertainLow(m_uncertain_low);
 	tm_processor.SetUncertainHigh(m_uncertain_high);
-	tm_processor.GetLinkLists(m_track_map, frame,
+	tm_processor.GetLinkLists(frame,
 		in_orphan_list, out_orphan_list,
 		in_multi_list, out_multi_list);
 }
@@ -3200,8 +3200,8 @@ void TraceGroup::UpdateCellList(FL::CellList &cur_sel_list)
 
 	//get mapped cells
 	//cur_sel_list -> m_cell_list
-	FL::TrackMapProcessor tm_processor;
-	tm_processor.GetMappedCells(m_track_map,
+	FL::TrackMapProcessor tm_processor(m_track_map);
+	tm_processor.GetMappedCells(
 		cur_sel_list, m_cell_list,
 		(unsigned int)m_prv_time,
 		(unsigned int)m_cur_time);
@@ -3220,55 +3220,52 @@ bool TraceGroup::FindCell(unsigned int id)
 //modifications
 bool TraceGroup::AddCell(FL::pCell &cell, size_t frame)
 {
-	FL::TrackMapProcessor tm_processor;
+	FL::TrackMapProcessor tm_processor(m_track_map);
 	FL::CellListIter iter;
-	return tm_processor.AddCell(m_track_map, cell, frame, iter);
+	return tm_processor.AddCell(cell, frame, iter);
 }
 
 bool TraceGroup::LinkCells(FL::CellList &list1, FL::CellList &list2,
 	size_t frame1, size_t frame2, bool exclusive)
 {
-	FL::TrackMapProcessor tm_processor;
-	return tm_processor.LinkCells(m_track_map,
-		list1, list2, frame1, frame2, exclusive);
+	FL::TrackMapProcessor tm_processor(m_track_map);
+	return tm_processor.LinkCells(list1, list2,
+		frame1, frame2, exclusive);
 }
 
 bool TraceGroup::IsolateCells(FL::CellList &list, size_t frame)
 {
-	FL::TrackMapProcessor tm_processor;
-	return tm_processor.IsolateCells(m_track_map,
-		list, frame);
+	FL::TrackMapProcessor tm_processor(m_track_map);
+	return tm_processor.IsolateCells(list, frame);
 }
 
 bool TraceGroup::UnlinkCells(FL::CellList &list1, FL::CellList &list2,
 	size_t frame1, size_t frame2)
 {
-	FL::TrackMapProcessor tm_processor;
-	return tm_processor.UnlinkCells(m_track_map,
-		list1, list2, frame1, frame2);
+	FL::TrackMapProcessor tm_processor(m_track_map);
+	return tm_processor.UnlinkCells(list1, list2, frame1, frame2);
 }
 
 bool TraceGroup::CombineCells(FL::pCell &cell, FL::CellList &list,
 	size_t frame)
 {
-	FL::TrackMapProcessor tm_processor;
-	return tm_processor.CombineCells(m_track_map,
-		cell, list, frame);
+	FL::TrackMapProcessor tm_processor(m_track_map);
+	return tm_processor.CombineCells(cell, list, frame);
 }
 
 bool TraceGroup::DivideCells(FL::CellList &list, size_t frame)
 {
-	FL::TrackMapProcessor tm_processor;
-	return tm_processor.DivideCells(m_track_map, list, frame);
+	FL::TrackMapProcessor tm_processor(m_track_map);
+	return tm_processor.DivideCells(list, frame);
 }
 
 bool TraceGroup::ReplaceCellID(unsigned int old_id, unsigned int new_id, size_t frame)
 {
-	FL::TrackMapProcessor tm_processor;
-	return tm_processor.ReplaceCellID(m_track_map, old_id, new_id, frame);
+	FL::TrackMapProcessor tm_processor(m_track_map);
+	return tm_processor.ReplaceCellID(old_id, new_id, frame);
 }
 
-bool TraceGroup::GetMappedRulers(FL::RulerList &rulers)
+bool TraceGroup::GetMappedRulers(RulerList &rulers)
 {
 	size_t frame_num = m_track_map.GetFrameNum();
 	if (m_ghost_num <= 0 ||
@@ -3287,7 +3284,6 @@ bool TraceGroup::GetMappedRulers(FL::RulerList &rulers)
 			m_ghost_num : m_cur_time) : 0;
 
 	FL::CellList temp_sel_list1, temp_sel_list2;
-	FL::TrackMapProcessor tm_processor;
 
 	if (m_draw_lead)
 	{
@@ -3295,7 +3291,7 @@ bool TraceGroup::GetMappedRulers(FL::RulerList &rulers)
 		for (size_t i = m_cur_time;
 		i < m_cur_time + ghost_lead; ++i)
 		{
-			tm_processor.GetMappedRulers(m_track_map,
+			GetMappedRulers(
 				temp_sel_list1, temp_sel_list2,
 				rulers, i, i + 1);
 			//swap
@@ -3305,7 +3301,7 @@ bool TraceGroup::GetMappedRulers(FL::RulerList &rulers)
 	}
 
 	//clear ruler id
-	for (FL::RulerListIter iter = rulers.begin();
+	for (RulerListIter iter = rulers.begin();
 	iter != rulers.end(); ++iter)
 		(*iter)->Id(0);
 
@@ -3315,8 +3311,8 @@ bool TraceGroup::GetMappedRulers(FL::RulerList &rulers)
 		for (size_t i = m_cur_time;
 		i > m_cur_time - ghost_tail; --i)
 		{
-			tm_processor.GetMappedRulers(
-				m_track_map, temp_sel_list1, temp_sel_list2,
+			GetMappedRulers(
+				temp_sel_list1, temp_sel_list2,
 				rulers, i, i - 1);
 			//sawp
 			temp_sel_list1 = temp_sel_list2;
@@ -3327,21 +3323,208 @@ bool TraceGroup::GetMappedRulers(FL::RulerList &rulers)
 	return true;
 }
 
+unsigned int TraceGroup::GetMappedEdges(
+	FL::CellList & sel_list1, FL::CellList & sel_list2,
+	std::vector<float>& verts,
+	size_t frame1, size_t frame2)
+{
+	unsigned int result = 0;
+
+	size_t frame_num = m_track_map.GetFrameNum();
+	if (frame1 >= frame_num ||
+		frame2 >= frame_num ||
+		frame1 == frame2)
+		return result;
+
+	FL::CellList &cell_list1 = m_track_map.GetCellList(frame1);
+	FL::InterGraph &inter_graph = m_track_map.GetInterGraph(
+		frame1 > frame2 ? frame2 : frame1);
+	FL::CellListIter sel_iter, cell_iter;
+	FL::pVertex vertex1, vertex2;
+	FL::pCell cell;
+	FL::InterVert v1, v2;
+	std::pair<FL::InterAdjIter, FL::InterAdjIter> adj_verts;
+	FL::InterAdjIter inter_iter;
+	FL::CellBinIter pwcell_iter;
+	FLIVR::Color c;
+	std::pair<FL::InterEdge, bool> inter_edge;
+
+	for (sel_iter = sel_list1.begin();
+		sel_iter != sel_list1.end();
+		++sel_iter)
+	{
+		cell_iter = cell_list1.find(sel_iter->second->Id());
+		if (cell_iter == cell_list1.end())
+			continue;
+		vertex1 = cell_iter->second->GetVertex().lock();
+		if (!vertex1)
+			continue;
+		v1 = vertex1->GetInterVert(inter_graph);
+		if (v1 == FL::InterGraph::null_vertex())
+			continue;
+		adj_verts = boost::adjacent_vertices(v1, inter_graph);
+		//for each adjacent vertex
+		for (inter_iter = adj_verts.first;
+			inter_iter != adj_verts.second;
+			++inter_iter)
+		{
+			v2 = *inter_iter;
+			//get edge
+			inter_edge = boost::edge(v1, v2, inter_graph);
+			if (!inter_edge.second)
+				continue;
+			else if (!inter_graph[inter_edge.first].link)
+				continue;
+			vertex2 = inter_graph[v2].vertex.lock();
+			if (!vertex2)
+				continue;
+			//store all cells in sel_list2
+			for (pwcell_iter = vertex2->GetCellsBegin();
+				pwcell_iter != vertex2->GetCellsEnd();
+				++pwcell_iter)
+			{
+				cell = pwcell_iter->lock();
+				if (!cell)
+					continue;
+				sel_list2.insert(std::pair<unsigned int, FL::pCell>
+					(cell->Id(), cell));
+				//save to verts
+				c = FLIVR::HSVColor(cell->Id() % 360, 1.0, 0.9);
+				verts.push_back(vertex1->GetCenter().x());
+				verts.push_back(vertex1->GetCenter().y());
+				verts.push_back(vertex1->GetCenter().z());
+				verts.push_back(c.r());
+				verts.push_back(c.g());
+				verts.push_back(c.b());
+				verts.push_back(vertex2->GetCenter().x());
+				verts.push_back(vertex2->GetCenter().y());
+				verts.push_back(vertex2->GetCenter().z());
+				verts.push_back(c.r());
+				verts.push_back(c.g());
+				verts.push_back(c.b());
+				result += 2;
+			}
+		}
+	}
+
+	return result;
+}
+
+bool TraceGroup::GetMappedRulers(
+	FL::CellList& sel_list1, FL::CellList &sel_list2,
+	RulerList& rulers,
+	size_t frame1, size_t frame2)
+{
+	size_t frame_num = m_track_map.GetFrameNum();
+	if (frame1 >= frame_num ||
+		frame2 >= frame_num ||
+		frame1 == frame2)
+		return false;
+
+	FL::CellList &cell_list1 = m_track_map.GetCellList(frame1);
+	FL::InterGraph &inter_graph = m_track_map.GetInterGraph(
+		frame1 > frame2 ? frame2 : frame1);
+	FL::CellListIter sel_iter, cell_iter;
+	FL::pVertex vertex1, vertex2;
+	FL::pCell cell;
+	FL::InterVert v1, v2;
+	std::pair<FL::InterAdjIter, FL::InterAdjIter> adj_verts;
+	FL::InterAdjIter inter_iter;
+	FL::CellBinIter pwcell_iter;
+	FLIVR::Color c;
+	std::pair<FL::InterEdge, bool> inter_edge;
+	RulerListIter ruler_iter;
+
+	for (sel_iter = sel_list1.begin();
+		sel_iter != sel_list1.end();
+		++sel_iter)
+	{
+		cell_iter = cell_list1.find(sel_iter->second->Id());
+		if (cell_iter == cell_list1.end())
+			continue;
+		vertex1 = cell_iter->second->GetVertex().lock();
+		if (!vertex1)
+			continue;
+		v1 = vertex1->GetInterVert(inter_graph);
+		if (v1 == FL::InterGraph::null_vertex())
+			continue;
+		adj_verts = boost::adjacent_vertices(v1, inter_graph);
+		//for each adjacent vertex
+		for (inter_iter = adj_verts.first;
+			inter_iter != adj_verts.second;
+			++inter_iter)
+		{
+			v2 = *inter_iter;
+			//get edge
+			inter_edge = boost::edge(v1, v2, inter_graph);
+			if (!inter_edge.second)
+				continue;
+			else if (!inter_graph[inter_edge.first].link)
+				continue;
+			vertex2 = inter_graph[v2].vertex.lock();
+			if (!vertex2)
+				continue;
+			//store all cells in sel_list2
+			for (pwcell_iter = vertex2->GetCellsBegin();
+				pwcell_iter != vertex2->GetCellsEnd();
+				++pwcell_iter)
+			{
+				cell = pwcell_iter->lock();
+				if (!cell)
+					continue;
+				sel_list2.insert(std::pair<unsigned int, FL::pCell>
+					(cell->Id(), cell));
+				//save to rulers
+				ruler_iter = FindRulerFromList(vertex1->Id(), rulers);
+				if (ruler_iter == rulers.end())
+				{
+					Ruler* ruler = new Ruler();
+					ruler->SetRulerType(1);//multi-point
+					ruler->AddPoint(vertex1->GetCenter());
+					ruler->AddPoint(vertex2->GetCenter());
+					ruler->SetTimeDep(false);
+					ruler->Id(vertex2->Id());
+					rulers.push_back(ruler);
+				}
+				else
+				{
+					Ruler* ruler = *ruler_iter;
+					ruler->AddPoint(vertex2->GetCenter());
+					ruler->Id(vertex2->Id());
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
+RulerListIter TraceGroup::FindRulerFromList(unsigned int id, RulerList &list)
+{
+	RulerListIter iter = list.begin();
+	while (iter != list.end())
+	{
+		if ((*iter)->Id() == id)
+			return iter;
+		++iter;
+	}
+	return iter;
+}
+
 bool TraceGroup::Load(wxString &filename)
 {
 	m_data_path = filename;
-	FL::TrackMapProcessor tm_processor;
-    std::string str = ws2s(m_data_path.ToStdWstring());
-	return tm_processor.Import(m_track_map, str);
+	FL::TrackMapProcessor tm_processor(m_track_map);
+	std::string str = ws2s(m_data_path.ToStdWstring());
+	return tm_processor.Import(str);
 }
 
 bool TraceGroup::Save(wxString &filename)
 {
 	m_data_path = filename;
-	FL::TrackMapProcessor tm_processor;
-    
-    std::string str = ws2s(m_data_path.ToStdWstring());
-	return tm_processor.Export(m_track_map, str);
+	FL::TrackMapProcessor tm_processor(m_track_map);
+	std::string str = ws2s(m_data_path.ToStdWstring());
+	return tm_processor.Export(str);
 }
 
 unsigned int TraceGroup::Draw(vector<float> &verts)
@@ -3366,7 +3549,6 @@ unsigned int TraceGroup::Draw(vector<float> &verts)
 		m_cell_list.size() * 3 * 6 * 3);//1.5 branches each
 
 	FL::CellList temp_sel_list1, temp_sel_list2;
-	FL::TrackMapProcessor tm_processor;
 
 	if (m_draw_lead)
 	{
@@ -3374,7 +3556,7 @@ unsigned int TraceGroup::Draw(vector<float> &verts)
 		for (size_t i = m_cur_time;
 			i < m_cur_time + ghost_lead; ++i)
 		{
-			result += tm_processor.GetMappedEdges(m_track_map,
+			result += GetMappedEdges(
 				temp_sel_list1, temp_sel_list2,
 				verts, i, i + 1);
 			//swap
@@ -3389,8 +3571,8 @@ unsigned int TraceGroup::Draw(vector<float> &verts)
 		for (size_t i = m_cur_time;
 			i > m_cur_time - ghost_tail; --i)
 		{
-			result += tm_processor.GetMappedEdges(
-				m_track_map, temp_sel_list1, temp_sel_list2,
+			result += GetMappedEdges(
+				temp_sel_list1, temp_sel_list2,
 				verts, i, i - 1);
 			//sawp
 			temp_sel_list1 = temp_sel_list2;

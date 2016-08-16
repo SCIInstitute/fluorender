@@ -35,7 +35,6 @@ DEALINGS IN THE SOFTWARE.
 #include <deque>
 #include <map>
 
-class Ruler;
 namespace FL
 {
 //tags
@@ -44,14 +43,12 @@ namespace FL
 #define TAG_INTRA_EDGE	3
 #define TAG_INTER_EDGE	4
 #define TAG_FRAM		5
-#define TAG_LAST_OP		6
+#define TAG_FPCOUNT		6
 #define TAG_NUM			7
 #define TAG_VER219		8	//added to 2.19 for uncertainty
 							//order: v1, v2, edge
 #define TAG_VER220		9	//new values added in v2.20
 
-	typedef std::vector<Ruler*> RulerList;
-	typedef std::vector<Ruler*>::iterator RulerListIter;
 	struct UncertainBin
 	{
 		unsigned int level;
@@ -62,7 +59,8 @@ namespace FL
 	class TrackMapProcessor
 	{
 	public:
-		TrackMapProcessor() :
+		TrackMapProcessor(TrackMap &track_map) :
+		m_map(track_map),
 		m_contact_thresh(0.7f),
 		m_size_thresh(25.0f),
 		m_level_thresh(7) {}
@@ -74,91 +72,66 @@ namespace FL
 		void SetUncertainLow(unsigned int value);
 		void SetUncertainHigh(unsigned int value);
 
-		void SetSizes(TrackMap& track_map,
-			size_t nx, size_t ny, size_t nz);
-		void SetBits(TrackMap& track_map,
-			size_t bits);
-		void SetScale(TrackMap& track_map, float scale);
-		void SetSpacings(TrackMap& track_map,
-			float spcx, float spcy, float spcz);
+		void SetSizes(size_t nx, size_t ny, size_t nz);
+		void SetBits(size_t bits);
+		void SetScale(float scale);
+		void SetSpacings(float spcx, float spcy, float spcz);
 
 		//build cell list and intra graph
-		bool InitializeFrame(TrackMap& track_map,
-			void *data, void *label, size_t frame);
+		bool InitializeFrame(void *data, void *label, size_t frame);
 		//build inter graph
-		bool LinkMaps(TrackMap& track_map,
-			size_t f1, size_t f2,
+		bool LinkMaps(size_t f1, size_t f2,
 			void *data1, void *data2,
 			void *label1, void *label2);
 		//group cells
-		bool ResolveGraph(TrackMap& track_map, size_t frame1, size_t frame2);
+		bool ResolveGraph(size_t frame1, size_t frame2);
 		//find the maximum overlapping and set link flags on inter graph
-		bool MatchFrames(TrackMap& track_map, size_t frame1, size_t frame2, bool bl_check = true);
+		bool ProcessFrames(size_t frame1, size_t frame2);
 		//for multiple links, remove link flags
-		bool UnmatchFrames(TrackMap& track_map, size_t frame1, size_t frame2);
+		bool UnmatchFrames(size_t frame1, size_t frame2);
 		//re-segment frame
-		bool ResegmentFrame(TrackMap& track_map, size_t frame);
+		bool ResegmentFrame(size_t frame);
 		//for orphans, search neighbors to add link flags
-		bool ExMatchFrames(TrackMap& track_map, size_t frame1, size_t frame2);
+		bool ExMatchFrames(size_t frame1, size_t frame2);
 
-		bool Export(TrackMap& track_map, std::string &filename);
-		bool Import(TrackMap& track_map, std::string &filename);
+		bool Export(std::string &filename);
+		bool Import(std::string &filename);
 
-		bool ResetVertexIDs(TrackMap& track_map);
+		bool ResetVertexIDs();
 
 		//get mapped cell
-		bool GetMappedID(TrackMap& track_map,
-			unsigned int id_in, unsigned int& id_out,
+		bool GetMappedID(unsigned int id_in, unsigned int& id_out,
 			size_t frame);
-		bool GetMappedID(TrackMap& track_map,
-			unsigned int id_in, unsigned int& id_out,
+		bool GetMappedID(unsigned int id_in, unsigned int& id_out,
 			size_t frame1, size_t frame2);
 		//get mapped cells
-		bool GetMappedCells(TrackMap& track_map,
-			CellList &sel_list1, CellList &sel_list2,
-			size_t frame1, size_t frame2);
-		//edges (in a vector of drawable)
-		unsigned int GetMappedEdges(TrackMap& track_map,
-			CellList &sel_list1, CellList &sel_list2,
-			std::vector<float> &verts,
-			size_t frame1, size_t frame2);
-		//rulers
-		bool GetMappedRulers(TrackMap& track_map,
-			CellList &sel_list1, CellList &sel_list2,
-			RulerList &rulers,
+		bool GetMappedCells(CellList &sel_list1, CellList &sel_list2,
 			size_t frame1, size_t frame2);
 
 		//modifications
-		bool LinkCells(TrackMap& track_map,
-			CellList &list1, CellList &list2,
+		bool LinkCells(CellList &list1, CellList &list2,
 			size_t frame1, size_t frame2, bool exclusive);
-		bool IsolateCells(TrackMap& track_map,
-			CellList &list, size_t frame);
-		bool UnlinkCells(TrackMap& track_map,
-			CellList &list1, CellList &list2,
+		bool IsolateCells(CellList &list, size_t frame);
+		bool UnlinkCells(CellList &list1, CellList &list2,
 			size_t frame1, size_t frame2);
 		//
-		bool AddCell(TrackMap& track_map, pCell &cell, size_t frame, CellListIter &iter);
-		bool CombineCells(TrackMap& track_map, pCell &cell, CellList &list, size_t frame);
-		bool DivideCells(TrackMap& track_map, CellList &list, size_t frame);
-		bool SegmentCells(TrackMap& track_map, void* data, void* label, CellList &list, size_t frame);
-		bool ReplaceCellID(TrackMap& track_map, unsigned int old_id,
+		bool AddCell(pCell &cell, size_t frame, CellListIter &iter);
+		bool CombineCells(pCell &cell, CellList &list, size_t frame);
+		bool DivideCells(CellList &list, size_t frame);
+		bool SegmentCells(void* data, void* label, CellList &list, size_t frame);
+		bool ReplaceCellID(unsigned int old_id,
 			unsigned int new_id, size_t frame);
 
 		//information
-		void GetLinkLists(TrackMap& track_map,
-			size_t frame,
+		void GetLinkLists(size_t frame,
 			FL::VertexList &in_orphan_list,
 			FL::VertexList &out_orphan_list,
 			FL::VertexList &in_multi_list,
 			FL::VertexList &out_multi_list);
-		void GetCellsByUncertainty(TrackMap& track_map,
-			CellList &list_in, CellList &list_out,
+		void GetCellsByUncertainty(CellList &list_in, CellList &list_out,
 			size_t frame);
-		void GetCellUncertainty(TrackMap& track_map,
-			CellList &list, size_t frame);
-		void GetUncertainHist(TrackMap& track_map,
-			UncertainHist &hist1, UncertainHist &hist2, size_t frame);
+		void GetCellUncertainty(CellList &list, size_t frame);
+		void GetUncertainHist(UncertainHist &hist1, UncertainHist &hist2, size_t frame);
 
 	private:
 		float m_contact_thresh;
@@ -167,16 +140,16 @@ namespace FL
 		//uncertainty filter
 		unsigned int m_uncertain_low;
 		unsigned int m_uncertain_high;
+		//the trackmap
+		TrackMap &m_map;
 
 		//processing
-		bool CheckCellContact(TrackMap& track_map,
-			pCell &cell, void *data, void *label,
+		bool CheckCellContact(pCell &cell, void *data, void *label,
 			size_t ci, size_t cj, size_t ck);
 		bool AddContact(IntraGraph& graph,
 			pCell &cell1, pCell &cell2,
 			float contact_value);
-		bool CheckCellDist(TrackMap& track_map,
-			pCell &cell, void *label,
+		bool CheckCellDist(pCell &cell, void *label,
 			size_t ci, size_t cj, size_t ck);
 		bool AddNeighbor(IntraGraph& graph,
 			pCell &cell1, pCell &cell2,
@@ -204,22 +177,30 @@ namespace FL
 			pwCell &cell1, pwCell &cell2);
 		bool GreaterThanCellBin(pCell &cell1, CellBin &bin, pwCell &cell2);
 		size_t GetBinsCellCount(std::vector<CellBin> &bins);
-		bool MergeCells(VertexList& vertex_list, CellBin &bin,
-			TrackMap& track_map, size_t frame);
+		bool MergeCells(VertexList& vertex_list, CellBin &bin, size_t frame);
 		bool RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size_t frame, InterGraph &graph, bool reset);
 		
 		//vertex matching routines
 		//find out current valence of a vertex
 		bool GetValence(pVertex &vertex, InterGraph &graph,
 			size_t &valence);
+		//edges include linked and unlinked
 		bool GetValence(pVertex &vertex, InterGraph &graph,
 			size_t &valence, std::vector<InterEdge> &edges);
+		//edges include linked only
+		bool GetLinkedEdges(pVertex &vertex, InterGraph &graph,
+			std::vector<InterEdge> &edges);
 		//match the max overlap
 		bool MatchVertexMax(InterGraph &graph, std::vector<InterEdge> &edges);
+		//match by size similarity
+		bool MatchVertexSize(InterGraph &graph, pVertex &vertex,
+			std::vector<InterEdge> &edges);
 		//reduce valence by merging vertices
 		//bool MatchVertexMerge(InterGraph &graph, )
 		
-		bool MatchVertex(pVertex &vertex, InterGraph &graph, bool bl_check = true);
+		//replaces all previous match/unmatch funcs
+		bool ProcessVertex(pVertex &vertex, InterGraph &graph);
+		//bool MatchVertex(pVertex &vertex, InterGraph &graph, bool bl_check = true);
 		bool UnmatchVertex(pVertex &vertex, InterGraph &graph);
 		bool ExMatchVertex(pVertex &vertex, InterGraph &graph, size_t frame1, size_t frame2);
 		bool MatchVertexList(pVertex &vertex, VertexList &list2,
@@ -230,7 +211,6 @@ namespace FL
 			unsigned int &bl_size_ui, float &bl_size_f);
 		static bool edge_comp_size_ol(InterEdge edge1, InterEdge edge2, InterGraph& graph);
 		static bool edge_comp_size_bl(InterEdge edge1, InterEdge edge2, InterGraph& graph);
-		RulerListIter FindRulerFromList(unsigned int id, RulerList &list);
 
 		//export
 		void WriteBool(std::ofstream& ofs, bool value);
@@ -392,12 +372,15 @@ namespace FL
 		~TrackMap();
 
 		size_t GetFrameNum();
+		CellList &GetCellList(size_t frame);
+		VertexList &GetVertexList(size_t frame);
+		IntraGraph &GetIntraGraph(size_t frame);
+		InterGraph &GetInterGraph(size_t frame);
 		bool ExtendFrameNum(size_t frame);
-		unsigned int GetLastOp();
 		void Clear();
 
 	private:
-		unsigned int m_last_op;//1: linking; 2: unlinking;
+		unsigned int m_counter;//counter for frame processing
 		//data information
 		size_t m_frame_num;
 		size_t m_size_x;
@@ -423,6 +406,26 @@ namespace FL
 		return m_frame_num;
 	}
 
+	inline CellList &TrackMap::GetCellList(size_t frame)
+	{
+		return m_cells_list.at(frame);
+	}
+
+	inline VertexList &TrackMap::GetVertexList(size_t frame)
+	{
+		return m_vertices_list.at(frame);
+	}
+
+	inline IntraGraph &TrackMap::GetIntraGraph(size_t frame)
+	{
+		return m_intra_graph_list.at(frame);
+	}
+
+	inline InterGraph &TrackMap::GetInterGraph(size_t frame)
+	{
+		return m_inter_graph_list.at(frame);
+	}
+
 	inline bool TrackMap::ExtendFrameNum(size_t frame)
 	{
 		size_t sframe = m_frame_num;
@@ -441,11 +444,6 @@ namespace FL
 		return frame < m_frame_num;
 	}
 
-	inline unsigned int TrackMap::GetLastOp()
-	{
-		return m_last_op;
-	}
-
 	inline void TrackMap::Clear()
 	{
 		m_cells_list.clear();
@@ -456,7 +454,7 @@ namespace FL
 		m_size_x = m_size_y = m_size_z = 0;
 		m_data_bits = 8;
 		m_scale = 1.0f;
-		m_last_op = 0;
+		m_counter = 0;
 	}
 
 }//namespace FL

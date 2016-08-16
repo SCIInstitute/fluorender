@@ -892,6 +892,9 @@ private:
 
 };
 
+typedef std::vector<Ruler*> RulerList;
+typedef std::vector<Ruler*>::iterator RulerListIter;
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class TraceGroup : public TreeLayer
 {
@@ -965,7 +968,7 @@ public:
 	bool ReplaceCellID(unsigned int old_id, unsigned int new_id, size_t frame);
 
 	//rulers
-	bool GetMappedRulers(FL::RulerList &rulers);
+	bool GetMappedRulers(RulerList &rulers);
 
 	//i/o
 	bool Load(wxString &filename);
@@ -998,6 +1001,18 @@ private:
 
 	FL::TrackMap m_track_map;
 	FL::CellList m_cell_list;
+
+	//edges (in a vector of drawable)
+	unsigned int GetMappedEdges(
+		FL::CellList &sel_list1, FL::CellList &sel_list2,
+		std::vector<float> &verts,
+		size_t frame1, size_t frame2);
+	//rulers
+	bool GetMappedRulers(
+		FL::CellList &sel_list1, FL::CellList &sel_list2,
+		RulerList &rulers,
+		size_t frame1, size_t frame2);
+	RulerListIter FindRulerFromList(unsigned int id, RulerList &list);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

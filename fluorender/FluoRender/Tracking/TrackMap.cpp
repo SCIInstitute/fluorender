@@ -26,7 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "TrackMap.h"
-#include "DataManager.h"
 #include "Cluster/dbscan.h"
 #include "Cluster/kmeans.h"
 #include "Cluster/exmax.h"
@@ -37,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 using namespace FL;
 
 TrackMap::TrackMap() :
-	m_last_op(0),
+	m_counter(0),
 	m_frame_num(0),
 	m_size_x(0),
 	m_size_y(0),
@@ -54,52 +53,47 @@ TrackMap::~TrackMap()
 {
 }
 
-void TrackMapProcessor::SetSizes(TrackMap& track_map,
-	size_t nx, size_t ny, size_t nz)
+void TrackMapProcessor::SetSizes(size_t nx, size_t ny, size_t nz)
 {
-	track_map.m_size_x = nx;
-	track_map.m_size_y = ny;
-	track_map.m_size_z = nz;
+	m_map.m_size_x = nx;
+	m_map.m_size_y = ny;
+	m_map.m_size_z = nz;
 }
 
-void TrackMapProcessor::SetBits(TrackMap& track_map,
-	size_t bits)
+void TrackMapProcessor::SetBits(size_t bits)
 {
-	track_map.m_data_bits = bits;
+	m_map.m_data_bits = bits;
 }
 
-void TrackMapProcessor::SetScale(TrackMap& track_map,
-	float scale)
+void TrackMapProcessor::SetScale(float scale)
 {
-	track_map.m_scale = scale;
+	m_map.m_scale = scale;
 }
 
-void TrackMapProcessor::SetSpacings(TrackMap& track_map,
-	float spcx, float spcy, float spcz)
+void TrackMapProcessor::SetSpacings(float spcx, float spcy, float spcz)
 {
-	track_map.m_spc_x = spcx;
-	track_map.m_spc_y = spcy;
-	track_map.m_spc_z = spcz;
+	m_map.m_spc_x = spcx;
+	m_map.m_spc_y = spcy;
+	m_map.m_spc_z = spcz;
 }
 
-bool TrackMapProcessor::InitializeFrame(TrackMap& track_map,
-	void* data, void* label, size_t frame)
+bool TrackMapProcessor::InitializeFrame(void* data, void* label, size_t frame)
 {
 	if (!data || !label)
 		return false;
 
 	//add one empty cell list to track_map
-	track_map.m_cells_list.push_back(CellList());
-	CellList &cell_list = track_map.m_cells_list.back();
+	m_map.m_cells_list.push_back(CellList());
+	CellList &cell_list = m_map.m_cells_list.back();
 	CellListIter iter;
 	//in the meanwhile build the intra graph
-	track_map.m_intra_graph_list.push_back(IntraGraph());
+	m_map.m_intra_graph_list.push_back(IntraGraph());
 
 	size_t index;
 	size_t i, j, k;
-	size_t nx = track_map.m_size_x;
-	size_t ny = track_map.m_size_y;
-	size_t nz = track_map.m_size_z;
+	size_t nx = m_map.m_size_x;
+	size_t ny = m_map.m_size_y;
+	size_t nz = m_map.m_size_z;
 	float data_value;
 	unsigned int label_value;
 
@@ -114,10 +108,10 @@ bool TrackMapProcessor::InitializeFrame(TrackMap& track_map,
 		if (!label_value)
 			continue;
 
-		if (track_map.m_data_bits == 8)
+		if (m_map.m_data_bits == 8)
 			data_value = ((unsigned char*)data)[index] / 255.0f;
-		else if (track_map.m_data_bits == 16)
-			data_value = ((unsigned short*)data)[index] * track_map.m_scale / 65535.0f;
+		else if (m_map.m_data_bits == 16)
+			data_value = ((unsigned short*)data)[index] * m_map.m_scale / 65535.0f;
 
 		iter = cell_list.find(label_value);
 		if (iter != cell_list.end())
@@ -146,15 +140,14 @@ bool TrackMapProcessor::InitializeFrame(TrackMap& track_map,
 		iter = cell_list.find(label_value);
 		if (iter != cell_list.end())
 		{
-			CheckCellContact(track_map,
-				iter->second, data, label,
+			CheckCellContact(iter->second, data, label,
 				i, j, k);
 		}
 	}
 
 	//build vertex list
-	track_map.m_vertices_list.push_back(VertexList());
-	VertexList &vertex_list = track_map.m_vertices_list.back();
+	m_map.m_vertices_list.push_back(VertexList());
+	VertexList &vertex_list = m_map.m_vertices_list.back();
 	for (CellList::iterator cell_iterator = cell_list.begin();
 	cell_iterator != cell_list.end(); ++cell_iterator)
 	{
@@ -170,7 +163,7 @@ bool TrackMapProcessor::InitializeFrame(TrackMap& track_map,
 			(vertex->Id(), vertex));
 	}
 
-	track_map.m_frame_num++;
+	m_map.m_frame_num++;
 	return true;
 }
 
@@ -195,30 +188,30 @@ bool TrackMapProcessor::InitializeFrame(TrackMap& track_map,
 		} \
 	}
 
-bool TrackMapProcessor::CheckCellContact(TrackMap& track_map,
+bool TrackMapProcessor::CheckCellContact(
 	pCell &cell, void *data, void *label,
 	size_t ci, size_t cj, size_t ck)
 {
 	int ec = 0;//external count
 	int cc = 0;//contact count
-	size_t nx = track_map.m_size_x;
-	size_t ny = track_map.m_size_y;
-	size_t nz = track_map.m_size_z;
+	size_t nx = m_map.m_size_x;
+	size_t ny = m_map.m_size_y;
+	size_t nz = m_map.m_size_z;
 	size_t indexn;//neighbor index
 	unsigned int idn;//neighbor id
 	float valuen;//neighbor vlaue
 	size_t index = nx*ny*ck + nx*cj + ci;
 	unsigned int id = cell->Id();
 	float value;
-	size_t data_bits = track_map.m_data_bits;
-	float scale = track_map.m_scale;
+	size_t data_bits = m_map.m_data_bits;
+	float scale = m_map.m_scale;
 	if (data_bits == 8)
 		value = ((unsigned char*)data)[index] / 255.0f;
 	else if (data_bits == 16)
 		value = ((unsigned short*)data)[index] * scale / 65535.0f;
 	float contact_value;
-	IntraGraph &intra_graph = track_map.m_intra_graph_list.back();
-	CellList &cell_list = track_map.m_cells_list.back();
+	IntraGraph &intra_graph = m_map.m_intra_graph_list.back();
+	CellList &cell_list = m_map.m_cells_list.back();
 	CellListIter iter;
 
 	if (ci == 0)
@@ -270,29 +263,27 @@ bool TrackMapProcessor::CheckCellContact(TrackMap& track_map,
 
 		//expand search range if it's external but not contacting
 		if (cc == 0)
-			CheckCellDist(track_map,
-				cell, label,
-				ci, cj, ck);
+			CheckCellDist(cell, label, ci, cj, ck);
 	}
 
 	return true;
 }
 
-bool TrackMapProcessor::CheckCellDist(TrackMap& track_map,
+bool TrackMapProcessor::CheckCellDist(
 	pCell &cell, void *label, size_t ci, size_t cj, size_t ck)
 {
-	size_t nx = track_map.m_size_x;
-	size_t ny = track_map.m_size_y;
-	size_t nz = track_map.m_size_z;
-	float spcx = track_map.m_spc_x;
-	float spcy = track_map.m_spc_y;
-	float spcz = track_map.m_spc_z;
+	size_t nx = m_map.m_size_x;
+	size_t ny = m_map.m_size_y;
+	size_t nz = m_map.m_size_z;
+	float spcx = m_map.m_spc_x;
+	float spcy = m_map.m_spc_y;
+	float spcz = m_map.m_spc_z;
 	size_t indexn;//neighbor index
 	unsigned int idn;//neighbor id
 	size_t index = nx*ny*ck + nx*cj + ci;
 	unsigned int id = cell->Id();
-	IntraGraph &intra_graph = track_map.m_intra_graph_list.back();
-	CellList &cell_list = track_map.m_cells_list.back();
+	IntraGraph &intra_graph = m_map.m_intra_graph_list.back();
+	CellList &cell_list = m_map.m_cells_list.back();
 	CellListIter iter;
 	float dist_v, dist_s;
 
@@ -407,29 +398,29 @@ bool TrackMapProcessor::AddNeighbor(IntraGraph& graph,
 	return true;
 }
 
-bool TrackMapProcessor::LinkMaps(TrackMap& track_map,
+bool TrackMapProcessor::LinkMaps(
 	size_t f1, size_t f2, void *data1, void *data2,
 	void *label1, void *label2)
 {
-	size_t frame_num = track_map.m_frame_num;
+	size_t frame_num = m_map.m_frame_num;
 	if (f1 >= frame_num || f2 >= frame_num ||
 		f1 == f2 || !data1 || !data2 ||
 		!label1 || !label2)
 		return false;
 
-	track_map.m_inter_graph_list.push_back(InterGraph());
-	InterGraph &inter_graph = track_map.m_inter_graph_list.back();
+	m_map.m_inter_graph_list.push_back(InterGraph());
+	InterGraph &inter_graph = m_map.m_inter_graph_list.back();
 	inter_graph.index = f1;
 
 	size_t index;
 	size_t i, j, k;
-	size_t nx = track_map.m_size_x;
-	size_t ny = track_map.m_size_y;
-	size_t nz = track_map.m_size_z;
+	size_t nx = m_map.m_size_x;
+	size_t ny = m_map.m_size_y;
+	size_t nz = m_map.m_size_z;
 	float data_value1, data_value2;
 	unsigned int label_value1, label_value2;
-	VertexList &vertex_list1 = track_map.m_vertices_list.at(f1);
-	VertexList &vertex_list2 = track_map.m_vertices_list.at(f2);
+	VertexList &vertex_list1 = m_map.m_vertices_list.at(f1);
+	VertexList &vertex_list2 = m_map.m_vertices_list.at(f2);
 	VertexListIter iter1, iter2;
 
 	for (i = 0; i < nx; ++i)
@@ -443,15 +434,15 @@ bool TrackMapProcessor::LinkMaps(TrackMap& track_map,
 		if (!label_value1 || !label_value2)
 			continue;
 
-		if (track_map.m_data_bits == 8)
+		if (m_map.m_data_bits == 8)
 		{
 			data_value1 = ((unsigned char*)data1)[index] / 255.0f;
 			data_value2 = ((unsigned char*)data2)[index] / 255.0f;
 		}
-		else if (track_map.m_data_bits == 16)
+		else if (m_map.m_data_bits == 16)
 		{
-			data_value1 = ((unsigned short*)data1)[index] * track_map.m_scale / 65535.0f;
-			data_value2 = ((unsigned short*)data2)[index] * track_map.m_scale / 65535.0f;
+			data_value1 = ((unsigned short*)data1)[index] * m_map.m_scale / 65535.0f;
+			data_value2 = ((unsigned short*)data2)[index] * m_map.m_scale / 65535.0f;
 		}
 
 		iter1 = vertex_list1.find(label_value1);
@@ -683,17 +674,17 @@ bool TrackMapProcessor::UnlinkVertices(InterGraph& graph,
 	return true;
 }
 
-bool TrackMapProcessor::ResolveGraph(TrackMap& track_map, size_t frame1, size_t frame2)
+bool TrackMapProcessor::ResolveGraph(size_t frame1, size_t frame2)
 {
-	if (frame1 >= track_map.m_frame_num ||
-		frame2 >= track_map.m_frame_num ||
+	if (frame1 >= m_map.m_frame_num ||
+		frame2 >= m_map.m_frame_num ||
 		frame1 == frame2)
 		return false;
 
-	VertexList &vertex_list1 = track_map.m_vertices_list.at(frame1);
-	VertexList &vertex_list2 = track_map.m_vertices_list.at(frame2);
-	IntraGraph &intra_graph = track_map.m_intra_graph_list.at(frame2);
-	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
+	VertexList &vertex_list1 = m_map.m_vertices_list.at(frame1);
+	VertexList &vertex_list2 = m_map.m_vertices_list.at(frame2);
+	IntraGraph &intra_graph = m_map.m_intra_graph_list.at(frame2);
+	InterGraph &inter_graph = m_map.m_inter_graph_list.at(
 		frame1 > frame2 ? frame2 : frame1);
 
 	VertexListIter iter;
@@ -785,44 +776,41 @@ bool TrackMapProcessor::ResolveGraph(TrackMap& track_map, size_t frame1, size_t 
 
 		//modify vertex list 2 if necessary
 		for (i = 0; i < cell_bins.size(); ++i)
-			MergeCells(vertex_list2, cell_bins[i], track_map, frame2);
+			MergeCells(vertex_list2, cell_bins[i], frame2);
 	}
 
 	return true;
 }
 
-bool TrackMapProcessor::MatchFrames(TrackMap& track_map,
-	size_t frame1, size_t frame2, bool bl_check)
+bool TrackMapProcessor::ProcessFrames(size_t frame1, size_t frame2)
 {
-	if (frame1 >= track_map.m_frame_num ||
-		frame2 >= track_map.m_frame_num ||
+	if (frame1 >= m_map.m_frame_num ||
+		frame2 >= m_map.m_frame_num ||
 		frame1 == frame2)
 		return false;
 
-	VertexList &vertex_list1 = track_map.m_vertices_list.at(frame1);
-	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
+	VertexList &vertex_list1 = m_map.m_vertices_list.at(frame1);
+	InterGraph &inter_graph = m_map.m_inter_graph_list.at(
 		frame1 > frame2 ? frame2 : frame1);
 
 	VertexListIter iter;
 
 	for (iter = vertex_list1.begin();
-	iter != vertex_list1.end(); ++iter)
-		MatchVertex(iter->second, inter_graph, bl_check);
-
-	track_map.m_last_op = 1;
+		iter != vertex_list1.end(); ++iter)
+		ProcessVertex(iter->second, inter_graph);
 
 	return true;
 }
 
-bool TrackMapProcessor::UnmatchFrames(TrackMap& track_map, size_t frame1, size_t frame2)
+bool TrackMapProcessor::UnmatchFrames(size_t frame1, size_t frame2)
 {
-	if (frame1 >= track_map.m_frame_num ||
-		frame2 >= track_map.m_frame_num ||
+	if (frame1 >= m_map.m_frame_num ||
+		frame2 >= m_map.m_frame_num ||
 		frame1 == frame2)
 		return false;
 
-	VertexList &vertex_list1 = track_map.m_vertices_list.at(frame1);
-	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
+	VertexList &vertex_list1 = m_map.m_vertices_list.at(frame1);
+	InterGraph &inter_graph = m_map.m_inter_graph_list.at(
 		frame1 > frame2 ? frame2 : frame1);
 
 	VertexListIter iter;
@@ -841,28 +829,26 @@ bool TrackMapProcessor::UnmatchFrames(TrackMap& track_map, size_t frame1, size_t
 		}
 	}
 
-	track_map.m_last_op = 2;
-
 	return true;
 }
 
 //re-segment frame
-bool TrackMapProcessor::ResegmentFrame(TrackMap& track_map, size_t frame)
+bool TrackMapProcessor::ResegmentFrame(size_t frame)
 {
 
 	return true;
 }
 
-bool TrackMapProcessor::ExMatchFrames(TrackMap& track_map, size_t frame1, size_t frame2)
+bool TrackMapProcessor::ExMatchFrames(size_t frame1, size_t frame2)
 {
-	if (frame1 >= track_map.m_frame_num ||
-		frame2 >= track_map.m_frame_num ||
+	if (frame1 >= m_map.m_frame_num ||
+		frame2 >= m_map.m_frame_num ||
 		frame1 == frame2)
 		return false;
 
-	VertexList &vertex_list1 = track_map.m_vertices_list.at(frame1);
-	VertexList &vertex_list2 = track_map.m_vertices_list.at(frame2);
-	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
+	VertexList &vertex_list1 = m_map.m_vertices_list.at(frame1);
+	VertexList &vertex_list2 = m_map.m_vertices_list.at(frame2);
+	InterGraph &inter_graph = m_map.m_inter_graph_list.at(
 		frame1 > frame2 ? frame2 : frame1);
 
 	VertexListIter iter;
@@ -945,6 +931,37 @@ bool TrackMapProcessor::GetValence(pVertex &vertex, InterGraph &graph,
 	return true;
 }
 
+bool TrackMapProcessor::GetLinkedEdges(pVertex &vertex, InterGraph &graph,
+	std::vector<InterEdge> &edges)
+{
+	if (!vertex)
+		return false;
+	InterVert v0 = vertex->GetInterVert(graph);
+	if (v0 == InterGraph::null_vertex())
+		return false;
+
+	InterVert v1;
+	std::pair<InterEdge, bool> edge;
+
+	//set flag for link
+	std::pair<InterAdjIter, InterAdjIter> adj_verts =
+		boost::adjacent_vertices(v0, graph);
+	//for each adjacent vertex
+	for (InterAdjIter inter_iter = adj_verts.first;
+		inter_iter != adj_verts.second; ++inter_iter)
+	{
+		v1 = *inter_iter;
+		edge = boost::edge(v0, v1, graph);
+		if (edge.second)
+		{
+			if (graph[edge.first].link)
+				edges.push_back(edge.first);
+		}
+	}
+
+	return true;
+}
+
 //match the max overlap
 bool TrackMapProcessor::MatchVertexMax(InterGraph &graph, std::vector<InterEdge> &edges)
 {
@@ -963,7 +980,12 @@ bool TrackMapProcessor::MatchVertexMax(InterGraph &graph, std::vector<InterEdge>
 	return true;
 }
 
-bool TrackMapProcessor::MatchVertex(pVertex &vertex,
+bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph)
+{
+	return true;
+}
+
+/*bool TrackMapProcessor::MatchVertex(pVertex &vertex,
 	InterGraph &graph, bool bl_check)
 {
 	if (!vertex)
@@ -1040,7 +1062,7 @@ bool TrackMapProcessor::MatchVertex(pVertex &vertex,
 				edge_vert = graph[boost::target(edges[i], graph)].vertex.lock();
 				if (!edge_vert) continue;
 				v1_size = edge_vert->GetSizeF();
-				if (/*edge_size * 10 > std::min(v0_size, v1_size) &&*/
+				if (//edge_size * 10 > std::min(v0_size, v1_size) &&
 					fabs(v0_size - v1_size) / (v0_size + v1_size) < 0.2f)
 				{
 					graph[edges[i]].link = 1;
@@ -1053,7 +1075,7 @@ bool TrackMapProcessor::MatchVertex(pVertex &vertex,
 	}
 
 	return true;
-}
+}*/
 
 bool TrackMapProcessor::UnmatchVertex(pVertex &vertex, InterGraph &graph)
 {
@@ -1435,8 +1457,8 @@ size_t TrackMapProcessor::GetBinsCellCount(std::vector<CellBin> &bins)
 	return count;
 }
 
-bool TrackMapProcessor::MergeCells(VertexList& vertex_list, CellBin &bin,
-	TrackMap& track_map, size_t frame)
+bool TrackMapProcessor::MergeCells(
+	VertexList& vertex_list, CellBin &bin, size_t frame)
 {
 	if (bin.size() <= 1)
 		return false;
@@ -1469,12 +1491,12 @@ bool TrackMapProcessor::MergeCells(VertexList& vertex_list, CellBin &bin,
 				//relink inter graph
 				if (frame > 0)
 				{
-					InterGraph &graph = track_map.m_inter_graph_list.at(frame - 1);
+					InterGraph &graph = m_map.m_inter_graph_list.at(frame - 1);
 					RelinkInterGraph(vertex, vertex0, frame, graph, false);
 				}
-				if (frame < track_map.m_frame_num - 1)
+				if (frame < m_map.m_frame_num - 1)
 				{
-					InterGraph &graph = track_map.m_inter_graph_list.at(frame);
+					InterGraph &graph = m_map.m_inter_graph_list.at(frame);
 					RelinkInterGraph(vertex, vertex0, frame, graph, false);
 				}
 
@@ -1584,12 +1606,12 @@ bool TrackMapProcessor::RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size
 	return true;
 }
 
-bool TrackMapProcessor::Export(TrackMap & track_map, std::string &filename)
+bool TrackMapProcessor::Export(std::string &filename)
 {
-	if (track_map.m_frame_num == 0 ||
-		track_map.m_frame_num != track_map.m_cells_list.size() ||
-		track_map.m_frame_num != track_map.m_vertices_list.size() ||
-		track_map.m_frame_num != track_map.m_inter_graph_list.size() + 1)
+	if (m_map.m_frame_num == 0 ||
+		m_map.m_frame_num != m_map.m_cells_list.size() ||
+		m_map.m_frame_num != m_map.m_vertices_list.size() ||
+		m_map.m_frame_num != m_map.m_inter_graph_list.size() + 1)
 		return false;
 
 	std::ofstream ofs(filename, std::ios::out | std::ios::binary);
@@ -1601,12 +1623,12 @@ bool TrackMapProcessor::Export(TrackMap & track_map, std::string &filename)
 	ofs.write(header.c_str(), header.size());
 
 	//last operation
-	WriteTag(ofs, TAG_LAST_OP);
-	WriteUint(ofs, track_map.m_last_op);
+	WriteTag(ofs, TAG_FPCOUNT);
+	WriteUint(ofs, m_map.m_counter);
 
 	//number of frames
 	WriteTag(ofs, TAG_NUM);
-	size_t num = track_map.m_frame_num;
+	size_t num = m_map.m_frame_num;
 	WriteUint(ofs, num);
 
 	VertexListIter iter;
@@ -1626,7 +1648,7 @@ bool TrackMapProcessor::Export(TrackMap & track_map, std::string &filename)
 		WriteUint(ofs, i);
 
 		//vertex list
-		VertexList &vertex_list = track_map.m_vertices_list.at(i);
+		VertexList &vertex_list = m_map.m_vertices_list.at(i);
 		//vertex number
 		WriteUint(ofs, vertex_list.size());
 		//write each vertex
@@ -1637,7 +1659,7 @@ bool TrackMapProcessor::Export(TrackMap & track_map, std::string &filename)
 			WriteVertex(ofs, vertex);
 		}
 		//write intra edges
-		IntraGraph &intra_graph = track_map.m_intra_graph_list.at(i);
+		IntraGraph &intra_graph = m_map.m_intra_graph_list.at(i);
 		intra_pair = edges(intra_graph);
 		edge_num = 0;
 		for (intra_iter = intra_pair.first;
@@ -1669,7 +1691,7 @@ bool TrackMapProcessor::Export(TrackMap & track_map, std::string &filename)
 		//write inter edges
 		if (i == 0)
 			continue;
-		InterGraph &inter_graph = track_map.m_inter_graph_list.at(i - 1);
+		InterGraph &inter_graph = m_map.m_inter_graph_list.at(i - 1);
 		inter_pair = boost::edges(inter_graph);
 		edge_num = 0;
 		for (inter_iter = inter_pair.first;
@@ -1730,10 +1752,10 @@ bool TrackMapProcessor::Export(TrackMap & track_map, std::string &filename)
 	return true;
 }
 
-bool TrackMapProcessor::Import(TrackMap& track_map, std::string &filename)
+bool TrackMapProcessor::Import(std::string &filename)
 {
 	//clear everything
-	track_map.Clear();
+	m_map.Clear();
 
 	std::ifstream ifs(filename, std::ios::in | std::ios::binary);
 	if (ifs.bad())
@@ -1748,8 +1770,8 @@ bool TrackMapProcessor::Import(TrackMap& track_map, std::string &filename)
 		return false;
 
 	//last operation
-	if (ReadTag(ifs) == TAG_LAST_OP)
-		track_map.m_last_op = ReadUint(ifs);
+	if (ReadTag(ifs) == TAG_FPCOUNT)
+		m_map.m_counter = ReadUint(ifs);
 	else
 		ifs.unget();
 
@@ -1786,19 +1808,19 @@ bool TrackMapProcessor::Import(TrackMap& track_map, std::string &filename)
 		ReadUint(ifs);
 
 		//vertex list
-		track_map.m_vertices_list.push_back(VertexList());
-		VertexList &vertex_list1 = track_map.m_vertices_list.back();
+		m_map.m_vertices_list.push_back(VertexList());
+		VertexList &vertex_list1 = m_map.m_vertices_list.back();
 		//cell list
-		track_map.m_cells_list.push_back(CellList());
-		CellList &cell_list = track_map.m_cells_list.back();
+		m_map.m_cells_list.push_back(CellList());
+		CellList &cell_list = m_map.m_cells_list.back();
 		//vertex number
 		vertex_num = ReadUint(ifs);
 		//read each vertex
 		for (size_t j = 0; j < vertex_num; ++j)
 			ReadVertex(ifs, vertex_list1, cell_list);
 		//intra graph
-		track_map.m_intra_graph_list.push_back(IntraGraph());
-		IntraGraph &intra_graph = track_map.m_intra_graph_list.back();
+		m_map.m_intra_graph_list.push_back(IntraGraph());
+		IntraGraph &intra_graph = m_map.m_intra_graph_list.back();
 		//intra edge num
 		edge_num = ReadUint(ifs);
 		//read each intra edge
@@ -1842,9 +1864,9 @@ bool TrackMapProcessor::Import(TrackMap& track_map, std::string &filename)
 		if (i == 0)
 			continue;
 		//old vertex list
-		VertexList &vertex_list0 = track_map.m_vertices_list.at(i - 1);
-		track_map.m_inter_graph_list.push_back(InterGraph());
-		InterGraph &inter_graph = track_map.m_inter_graph_list.back();
+		VertexList &vertex_list0 = m_map.m_vertices_list.at(i - 1);
+		m_map.m_inter_graph_list.push_back(InterGraph());
+		InterGraph &inter_graph = m_map.m_inter_graph_list.back();
 		inter_graph.index = i - 1;
 		//inter edge num
 		edge_num = ReadUint(ifs);
@@ -1891,15 +1913,15 @@ bool TrackMapProcessor::Import(TrackMap& track_map, std::string &filename)
 		}
 	}
 
-	track_map.m_frame_num = num;
+	m_map.m_frame_num = num;
 	return true;
 }
 
-bool TrackMapProcessor::ResetVertexIDs(TrackMap& track_map)
+bool TrackMapProcessor::ResetVertexIDs()
 {
-	for (size_t fi = 0; fi < track_map.m_frame_num; ++fi)
+	for (size_t fi = 0; fi < m_map.m_frame_num; ++fi)
 	{
-		VertexList &vertex_list = track_map.m_vertices_list.at(fi);
+		VertexList &vertex_list = m_map.m_vertices_list.at(fi);
 		for (VertexListIter vertex_iter = vertex_list.begin();
 		vertex_iter != vertex_list.end(); ++vertex_iter)
 		{
@@ -1926,14 +1948,14 @@ bool TrackMapProcessor::ResetVertexIDs(TrackMap& track_map)
 				vertex->Id(max_id);
 				if (fi > 0)
 				{
-					InterGraph &inter_graph = track_map.m_inter_graph_list.at(fi - 1);
+					InterGraph &inter_graph = m_map.m_inter_graph_list.at(fi - 1);
 					InterVert inter_vert = vertex->GetInterVert(inter_graph);
 					if (inter_vert != InterGraph::null_vertex())
 						inter_graph[inter_vert].id = max_id;
 				}
-				if (fi < track_map.m_frame_num - 1)
+				if (fi < m_map.m_frame_num - 1)
 				{
-					InterGraph &inter_graph = track_map.m_inter_graph_list.at(fi);
+					InterGraph &inter_graph = m_map.m_inter_graph_list.at(fi);
 					InterVert inter_vert = vertex->GetInterVert(inter_graph);
 					if (inter_vert != InterGraph::null_vertex())
 						inter_graph[inter_vert].id = max_id;
@@ -2086,15 +2108,15 @@ bool TrackMapProcessor::AddInterEdge(InterGraph& graph,
 	return true;
 }
 
-bool TrackMapProcessor::GetMappedID(TrackMap& track_map,
+bool TrackMapProcessor::GetMappedID(
 	unsigned int id_in, unsigned int& id_out,
 	size_t frame)
 {
-	size_t frame_num = track_map.m_frame_num;
+	size_t frame_num = m_map.m_frame_num;
 	if (frame >= frame_num)
 		return false;
 
-	CellList &cell_list = track_map.m_cells_list.at(frame);
+	CellList &cell_list = m_map.m_cells_list.at(frame);
 
 	CellListIter cell_iter;
 	pVertex vertex;
@@ -2113,19 +2135,19 @@ bool TrackMapProcessor::GetMappedID(TrackMap& track_map,
 	return true;
 }
 
-bool TrackMapProcessor::GetMappedID(TrackMap& track_map,
+bool TrackMapProcessor::GetMappedID(
 	unsigned int id_in, unsigned int& id_out,
 	size_t frame1, size_t frame2)
 {
 	bool result = false;
-	size_t frame_num = track_map.m_frame_num;
+	size_t frame_num = m_map.m_frame_num;
 	if (frame1 >= frame_num ||
 		frame2 >= frame_num ||
 		frame1 == frame2)
 		return false;
 
-	CellList &cell_list1 = track_map.m_cells_list.at(frame1);
-	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
+	CellList &cell_list1 = m_map.m_cells_list.at(frame1);
+	InterGraph &inter_graph = m_map.m_inter_graph_list.at(
 		frame1 > frame2 ? frame2 : frame1);
 	CellListIter cell_iter;
 	pVertex vertex1, vertex2;
@@ -2183,18 +2205,18 @@ bool TrackMapProcessor::GetMappedID(TrackMap& track_map,
 	return result;
 }
 
-bool TrackMapProcessor::GetMappedCells(TrackMap& track_map,
+bool TrackMapProcessor::GetMappedCells(
 	CellList &sel_list1, CellList &sel_list2,
 	size_t frame1, size_t frame2)
 {
-	size_t frame_num = track_map.m_frame_num;
+	size_t frame_num = m_map.m_frame_num;
 	if (frame1 >= frame_num ||
 		frame2 >= frame_num ||
 		frame1 == frame2)
 		return false;
 
-	CellList &cell_list1 = track_map.m_cells_list.at(frame1);
-	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
+	CellList &cell_list1 = m_map.m_cells_list.at(frame1);
+	InterGraph &inter_graph = m_map.m_inter_graph_list.at(
 		frame1 > frame2 ? frame2 : frame1);
 	CellListIter sel_iter, cell_iter;
 	pVertex vertex1, vertex2;
@@ -2244,194 +2266,6 @@ bool TrackMapProcessor::GetMappedCells(TrackMap& track_map,
 					continue;
 				sel_list2.insert(std::pair<unsigned int, pCell>
 					(cell->Id(), cell));
-			}
-		}
-	}
-
-	return true;
-}
-
-unsigned int TrackMapProcessor::GetMappedEdges(TrackMap & track_map,
-	CellList & sel_list1, CellList & sel_list2,
-	std::vector<float>& verts,
-	size_t frame1, size_t frame2)
-{
-	unsigned int result = 0;
-
-	size_t frame_num = track_map.m_frame_num;
-	if (frame1 >= frame_num ||
-		frame2 >= frame_num ||
-		frame1 == frame2)
-		return result;
-
-	CellList &cell_list1 = track_map.m_cells_list.at(frame1);
-	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
-		frame1 > frame2 ? frame2 : frame1);
-	CellListIter sel_iter, cell_iter;
-	pVertex vertex1, vertex2;
-	pCell cell;
-	InterVert v1, v2;
-	std::pair<InterAdjIter, InterAdjIter> adj_verts;
-	InterAdjIter inter_iter;
-	CellBinIter pwcell_iter;
-	FLIVR::Color c;
-	std::pair<InterEdge, bool> inter_edge;
-
-	for (sel_iter = sel_list1.begin();
-	sel_iter != sel_list1.end();
-		++sel_iter)
-	{
-		cell_iter = cell_list1.find(sel_iter->second->Id());
-		if (cell_iter == cell_list1.end())
-			continue;
-		vertex1 = cell_iter->second->GetVertex().lock();
-		if (!vertex1)
-			continue;
-		v1 = vertex1->GetInterVert(inter_graph);
-		if (v1 == InterGraph::null_vertex())
-			continue;
-		adj_verts = boost::adjacent_vertices(v1, inter_graph);
-		//for each adjacent vertex
-		for (inter_iter = adj_verts.first;
-		inter_iter != adj_verts.second;
-			++inter_iter)
-		{
-			v2 = *inter_iter;
-			//get edge
-			inter_edge = boost::edge(v1, v2, inter_graph);
-			if (!inter_edge.second)
-				continue;
-			else if (!inter_graph[inter_edge.first].link)
-				continue;
-			vertex2 = inter_graph[v2].vertex.lock();
-			if (!vertex2)
-				continue;
-			//store all cells in sel_list2
-			for (pwcell_iter = vertex2->GetCellsBegin();
-			pwcell_iter != vertex2->GetCellsEnd();
-				++pwcell_iter)
-			{
-				cell = pwcell_iter->lock();
-				if (!cell)
-					continue;
-				sel_list2.insert(std::pair<unsigned int, pCell>
-					(cell->Id(), cell));
-				//save to verts
-				c = FLIVR::HSVColor(cell->Id() % 360, 1.0, 0.9);
-				verts.push_back(vertex1->GetCenter().x());
-				verts.push_back(vertex1->GetCenter().y());
-				verts.push_back(vertex1->GetCenter().z());
-				verts.push_back(c.r());
-				verts.push_back(c.g());
-				verts.push_back(c.b());
-				verts.push_back(vertex2->GetCenter().x());
-				verts.push_back(vertex2->GetCenter().y());
-				verts.push_back(vertex2->GetCenter().z());
-				verts.push_back(c.r());
-				verts.push_back(c.g());
-				verts.push_back(c.b());
-				result += 2;
-			}
-		}
-	}
-
-	return result;
-}
-
-RulerListIter TrackMapProcessor::FindRulerFromList(unsigned int id, RulerList &list)
-{
-	RulerListIter iter = list.begin();
-	while (iter != list.end())
-	{
-		if ((*iter)->Id() == id)
-			return iter;
-		++iter;
-	}
-	return iter;
-}
-
-bool TrackMapProcessor::GetMappedRulers(TrackMap& track_map,
-	CellList& sel_list1, CellList &sel_list2,
-	RulerList& rulers,
-	size_t frame1, size_t frame2)
-{
-	size_t frame_num = track_map.m_frame_num;
-	if (frame1 >= frame_num ||
-		frame2 >= frame_num ||
-		frame1 == frame2)
-		return false;
-
-	CellList &cell_list1 = track_map.m_cells_list.at(frame1);
-	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
-		frame1 > frame2 ? frame2 : frame1);
-	CellListIter sel_iter, cell_iter;
-	pVertex vertex1, vertex2;
-	pCell cell;
-	InterVert v1, v2;
-	std::pair<InterAdjIter, InterAdjIter> adj_verts;
-	InterAdjIter inter_iter;
-	CellBinIter pwcell_iter;
-	FLIVR::Color c;
-	std::pair<InterEdge, bool> inter_edge;
-	RulerListIter ruler_iter;
-
-	for (sel_iter = sel_list1.begin();
-	sel_iter != sel_list1.end();
-		++sel_iter)
-	{
-		cell_iter = cell_list1.find(sel_iter->second->Id());
-		if (cell_iter == cell_list1.end())
-			continue;
-		vertex1 = cell_iter->second->GetVertex().lock();
-		if (!vertex1)
-			continue;
-		v1 = vertex1->GetInterVert(inter_graph);
-		if (v1 == InterGraph::null_vertex())
-			continue;
-		adj_verts = boost::adjacent_vertices(v1, inter_graph);
-		//for each adjacent vertex
-		for (inter_iter = adj_verts.first;
-		inter_iter != adj_verts.second;
-			++inter_iter)
-		{
-			v2 = *inter_iter;
-			//get edge
-			inter_edge = boost::edge(v1, v2, inter_graph);
-			if (!inter_edge.second)
-				continue;
-			else if (!inter_graph[inter_edge.first].link)
-				continue;
-			vertex2 = inter_graph[v2].vertex.lock();
-			if (!vertex2)
-				continue;
-			//store all cells in sel_list2
-			for (pwcell_iter = vertex2->GetCellsBegin();
-			pwcell_iter != vertex2->GetCellsEnd();
-				++pwcell_iter)
-			{
-				cell = pwcell_iter->lock();
-				if (!cell)
-					continue;
-				sel_list2.insert(std::pair<unsigned int, pCell>
-					(cell->Id(), cell));
-				//save to rulers
-				ruler_iter = FindRulerFromList(vertex1->Id(), rulers);
-				if (ruler_iter == rulers.end())
-				{
-					Ruler* ruler = new Ruler();
-					ruler->SetRulerType(1);//multi-point
-					ruler->AddPoint(vertex1->GetCenter());
-					ruler->AddPoint(vertex2->GetCenter());
-					ruler->SetTimeDep(false);
-					ruler->Id(vertex2->Id());
-					rulers.push_back(ruler);
-				}
-				else
-				{
-					Ruler* ruler = *ruler_iter;
-					ruler->AddPoint(vertex2->GetCenter());
-					ruler->Id(vertex2->Id());
-				}
 			}
 		}
 	}
@@ -2440,7 +2274,7 @@ bool TrackMapProcessor::GetMappedRulers(TrackMap& track_map,
 }
 
 //modifications
-bool TrackMapProcessor::LinkCells(TrackMap& track_map,
+bool TrackMapProcessor::LinkCells(
 	CellList &list1, CellList &list2,
 	size_t frame1, size_t frame2,
 	bool exclusive)
@@ -2448,15 +2282,15 @@ bool TrackMapProcessor::LinkCells(TrackMap& track_map,
 	//check validity
 	if ((frame2 != frame1 + 1 &&
 		frame2 != frame1 - 1) ||
-		!track_map.ExtendFrameNum(
+		!m_map.ExtendFrameNum(
 		std::max(frame1, frame2)))
 		return false;
 
 	VertexList vlist1, vlist2;
 	CellListIter citer1, citer2;
 
-	CellList &cell_list1 = track_map.m_cells_list.at(frame1);
-	CellList &cell_list2 = track_map.m_cells_list.at(frame2);
+	CellList &cell_list1 = m_map.m_cells_list.at(frame1);
+	CellList &cell_list2 = m_map.m_cells_list.at(frame2);
 	CellListIter cell;
 	unsigned int cell_id;
 
@@ -2466,7 +2300,7 @@ bool TrackMapProcessor::LinkCells(TrackMap& track_map,
 		cell_id = citer1->second->Id();
 		cell = cell_list1.find(cell_id);
 		if (cell == cell_list1.end())
-			AddCell(track_map, citer1->second, frame1, cell);
+			AddCell(citer1->second, frame1, cell);
 		else
 			cell->second->Set(citer1->second);
 		pVertex vert1 = cell->second->GetVertex().lock();
@@ -2483,7 +2317,7 @@ bool TrackMapProcessor::LinkCells(TrackMap& track_map,
 		cell_id = citer2->second->Id();
 		cell = cell_list2.find(cell_id);
 		if (cell == cell_list2.end())
-			AddCell(track_map, citer2->second, frame2, cell);
+			AddCell(citer2->second, frame2, cell);
 		else
 			cell->second->Set(citer2->second);
 		pVertex vert2 = cell->second->GetVertex().lock();
@@ -2499,7 +2333,7 @@ bool TrackMapProcessor::LinkCells(TrackMap& track_map,
 		vlist2.size() == 0)
 		return false;
 
-	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
+	InterGraph &inter_graph = m_map.m_inter_graph_list.at(
 		frame1 > frame2 ? frame2 : frame1);
 	
 	VertexListIter viter1, viter2;
@@ -2525,18 +2359,18 @@ bool TrackMapProcessor::LinkCells(TrackMap& track_map,
 	return true;
 }
 
-bool TrackMapProcessor::IsolateCells(TrackMap& track_map,
+bool TrackMapProcessor::IsolateCells(
 	CellList &list, size_t frame)
 {
 	//check validity
-	size_t frame_num = track_map.m_frame_num;
+	size_t frame_num = m_map.m_frame_num;
 	if (frame >= frame_num)
 		return false;
 
 	VertexList vlist;
 	CellListIter citer;
 
-	CellList &cell_list = track_map.m_cells_list.at(frame);
+	CellList &cell_list = m_map.m_cells_list.at(frame);
 	CellListIter cell;
 
 	for (citer = list.begin();
@@ -2556,7 +2390,7 @@ bool TrackMapProcessor::IsolateCells(TrackMap& track_map,
 
 	if (frame > 0)
 	{
-		InterGraph &inter_graph = track_map.m_inter_graph_list.at(frame - 1);
+		InterGraph &inter_graph = m_map.m_inter_graph_list.at(frame - 1);
 		VertexListIter viter;
 		for (viter = vlist.begin();
 		viter != vlist.end(); ++viter)
@@ -2564,7 +2398,7 @@ bool TrackMapProcessor::IsolateCells(TrackMap& track_map,
 	}
 	if (frame < frame_num - 1)
 	{
-		InterGraph &inter_graph = track_map.m_inter_graph_list.at(frame);
+		InterGraph &inter_graph = m_map.m_inter_graph_list.at(frame);
 		VertexListIter viter;
 		for (viter = vlist.begin();
 		viter != vlist.end(); ++viter)
@@ -2574,12 +2408,12 @@ bool TrackMapProcessor::IsolateCells(TrackMap& track_map,
 	return true;
 }
 
-bool TrackMapProcessor::UnlinkCells(TrackMap& track_map,
+bool TrackMapProcessor::UnlinkCells(
 	CellList &list1, CellList &list2,
 	size_t frame1, size_t frame2)
 {
 	//check validity
-	size_t frame_num = track_map.m_frame_num;
+	size_t frame_num = m_map.m_frame_num;
 	if (frame1 >= frame_num ||
 		frame2 >= frame_num ||
 		(frame2 != frame1 + 1 &&
@@ -2589,8 +2423,8 @@ bool TrackMapProcessor::UnlinkCells(TrackMap& track_map,
 	VertexList vlist1, vlist2;
 	CellListIter citer1, citer2;
 
-	CellList &cell_list1 = track_map.m_cells_list.at(frame1);
-	CellList &cell_list2 = track_map.m_cells_list.at(frame2);
+	CellList &cell_list1 = m_map.m_cells_list.at(frame1);
+	CellList &cell_list2 = m_map.m_cells_list.at(frame2);
 	CellListIter cell;
 
 	for (citer1 = list1.begin();
@@ -2620,7 +2454,7 @@ bool TrackMapProcessor::UnlinkCells(TrackMap& track_map,
 		vlist2.size() == 0)
 		return false;
 
-	InterGraph &inter_graph = track_map.m_inter_graph_list.at(
+	InterGraph &inter_graph = m_map.m_inter_graph_list.at(
 		frame1 > frame2 ? frame2 : frame1);
 
 	VertexListIter viter1, viter2;
@@ -2635,15 +2469,15 @@ bool TrackMapProcessor::UnlinkCells(TrackMap& track_map,
 	return true;
 }
 
-bool TrackMapProcessor::AddCell(TrackMap& track_map,
+bool TrackMapProcessor::AddCell(
 	pCell &cell, size_t frame, CellListIter &iter)
 {
 	//check validity
-	if (!track_map.ExtendFrameNum(frame))
+	if (!m_map.ExtendFrameNum(frame))
 		return false;
 
-	CellList &cell_list = track_map.m_cells_list.at(frame);
-	VertexList &vert_list = track_map.m_vertices_list.at(frame);
+	CellList &cell_list = m_map.m_cells_list.at(frame);
+	VertexList &vert_list = m_map.m_vertices_list.at(frame);
 
 	pVertex vertex(new Vertex(cell->Id()));
 	vertex->SetCenter(cell->GetCenter());
@@ -2659,15 +2493,15 @@ bool TrackMapProcessor::AddCell(TrackMap& track_map,
 	return true;
 }
 
-bool TrackMapProcessor::CombineCells(TrackMap& track_map,
+bool TrackMapProcessor::CombineCells(
 	pCell &cell, CellList &list, size_t frame)
 {
 	//check validity
-	if (!track_map.ExtendFrameNum(frame))
+	if (!m_map.ExtendFrameNum(frame))
 		return false;
 
-	CellList &cell_list = track_map.m_cells_list.at(frame);
-	VertexList &vert_list = track_map.m_vertices_list.at(frame);
+	CellList &cell_list = m_map.m_cells_list.at(frame);
+	VertexList &vert_list = m_map.m_vertices_list.at(frame);
 
 	//find the largest cell
 	CellListIter cell_iter = cell_list.find(cell->Id());
@@ -2697,12 +2531,12 @@ bool TrackMapProcessor::CombineCells(TrackMap& track_map,
 				//relink inter graph
 				if (frame > 0)
 				{
-					InterGraph &graph = track_map.m_inter_graph_list.at(frame - 1);
+					InterGraph &graph = m_map.m_inter_graph_list.at(frame - 1);
 					RelinkInterGraph(vertex1, vertex0, frame, graph, true);
 				}
-				if (frame < track_map.m_frame_num - 1)
+				if (frame < m_map.m_frame_num - 1)
 				{
-					InterGraph &graph = track_map.m_inter_graph_list.at(frame);
+					InterGraph &graph = m_map.m_inter_graph_list.at(frame);
 					RelinkInterGraph(vertex1, vertex0, frame, graph, true);
 				}
 
@@ -2721,15 +2555,15 @@ bool TrackMapProcessor::CombineCells(TrackMap& track_map,
 	return true;
 }
 
-bool TrackMapProcessor::DivideCells(TrackMap& track_map,
+bool TrackMapProcessor::DivideCells(
 	CellList &list, size_t frame)
 {
 	//check validity
-	if (!track_map.ExtendFrameNum(frame))
+	if (!m_map.ExtendFrameNum(frame))
 		return false;
 
-	CellList &cell_list = track_map.m_cells_list.at(frame);
-	VertexList &vert_list = track_map.m_vertices_list.at(frame);
+	CellList &cell_list = m_map.m_cells_list.at(frame);
+	VertexList &vert_list = m_map.m_vertices_list.at(frame);
 
 	//temporary vertex list
 	VertexList vlist;
@@ -2820,18 +2654,18 @@ bool TrackMapProcessor::DivideCells(TrackMap& track_map,
 	return true;
 }
 
-bool TrackMapProcessor::SegmentCells(TrackMap& track_map,
+bool TrackMapProcessor::SegmentCells(
 	void* data, void* label,
 	CellList &list, size_t frame)
 {
-	//ClusterDbscan cs_processor;
+	ClusterDbscan cs_processor;
 	//ClusterKmeans cs_processor;
-	ClusterExmax cs_processor;
+	//ClusterExmax cs_processor;
 	size_t index;
 	size_t i, j, k;
-	size_t nx = track_map.m_size_x;
-	size_t ny = track_map.m_size_y;
-	size_t nz = track_map.m_size_z;
+	size_t nx = m_map.m_size_x;
+	size_t ny = m_map.m_size_y;
+	size_t nz = m_map.m_size_z;
 	unsigned int label_value;
 	unsigned int id = 0;
 	float data_value;
@@ -2852,10 +2686,10 @@ bool TrackMapProcessor::SegmentCells(TrackMap& track_map,
 			label_value = ((unsigned int*)label)[index];
 			if (label_value == cid)
 			{
-				if (track_map.m_data_bits == 8)
+				if (m_map.m_data_bits == 8)
 					data_value = ((unsigned char*)data)[index] / 255.0f;
-				else if (track_map.m_data_bits == 16)
-					data_value = ((unsigned short*)data)[index] * track_map.m_scale / 65535.0f;
+				else if (m_map.m_data_bits == 16)
+					data_value = ((unsigned short*)data)[index] * m_map.m_scale / 65535.0f;
 				cs_processor.AddClusterPoint(
 					FLIVR::Point(i, j, k), data_value);
 			}
@@ -2870,13 +2704,13 @@ bool TrackMapProcessor::SegmentCells(TrackMap& track_map,
 	return true;
 }
 
-bool TrackMapProcessor::ReplaceCellID(TrackMap& track_map,
+bool TrackMapProcessor::ReplaceCellID(
 	unsigned int old_id, unsigned int new_id, size_t frame)
 {
-	if (frame >= track_map.m_frame_num)
+	if (frame >= m_map.m_frame_num)
 		return false;
 
-	CellList &cell_list = track_map.m_cells_list.at(frame);
+	CellList &cell_list = m_map.m_cells_list.at(frame);
 	CellListIter iter = cell_list.find(old_id);
 	if (iter == cell_list.end())
 		return false;
@@ -2903,7 +2737,7 @@ bool TrackMapProcessor::ReplaceCellID(TrackMap& track_map,
 	}
 
 	//intra graph
-	IntraGraph &graph = track_map.m_intra_graph_list.at(frame);
+	IntraGraph &graph = m_map.m_intra_graph_list.at(frame);
 	IntraVert intra_vert = new_cell->GetIntraVert();
 	if (intra_vert != IntraGraph::null_vertex())
 	{
@@ -2914,17 +2748,17 @@ bool TrackMapProcessor::ReplaceCellID(TrackMap& track_map,
 	return true;
 }
 
-void TrackMapProcessor::GetLinkLists(TrackMap& track_map,
+void TrackMapProcessor::GetLinkLists(
 	size_t frame,
 	FL::VertexList &in_orphan_list,
 	FL::VertexList &out_orphan_list,
 	FL::VertexList &in_multi_list,
 	FL::VertexList &out_multi_list)
 {
-	if (frame >= track_map.m_frame_num)
+	if (frame >= m_map.m_frame_num)
 		return;
 
-	VertexList &vertex_list = track_map.m_vertices_list.at(frame);
+	VertexList &vertex_list = m_map.m_vertices_list.at(frame);
 
 	InterVert v0, v1;
 	std::pair<InterAdjIter, InterAdjIter> adj_verts;
@@ -2934,7 +2768,7 @@ void TrackMapProcessor::GetLinkLists(TrackMap& track_map,
 	//in lists
 	if (frame > 0)
 	{
-		InterGraph &inter_graph = track_map.m_inter_graph_list.at(frame - 1);
+		InterGraph &inter_graph = m_map.m_inter_graph_list.at(frame - 1);
 		for (VertexListIter iter = vertex_list.begin();
 		iter != vertex_list.end(); ++iter)
 		{
@@ -2970,9 +2804,9 @@ void TrackMapProcessor::GetLinkLists(TrackMap& track_map,
 	}
 
 	//out lists
-	if (frame < track_map.m_frame_num - 1)
+	if (frame < m_map.m_frame_num - 1)
 	{
-		InterGraph &inter_graph = track_map.m_inter_graph_list.at(frame);
+		InterGraph &inter_graph = m_map.m_inter_graph_list.at(frame);
 		for (VertexListIter iter = vertex_list.begin();
 		iter != vertex_list.end(); ++iter)
 		{
@@ -3008,15 +2842,15 @@ void TrackMapProcessor::GetLinkLists(TrackMap& track_map,
 	}
 }
 
-void TrackMapProcessor::GetCellsByUncertainty(TrackMap& track_map,
+void TrackMapProcessor::GetCellsByUncertainty(
 	CellList &list_in, CellList &list_out,
 	size_t frame)
 {
-	if (frame >= track_map.m_frame_num)
+	if (frame >= m_map.m_frame_num)
 		return;
 
-	VertexList &vertex_list = track_map.m_vertices_list.at(frame);
-	InterGraph &inter_graph = track_map.m_inter_graph_list.at(frame);
+	VertexList &vertex_list = m_map.m_vertices_list.at(frame);
+	InterGraph &inter_graph = m_map.m_inter_graph_list.at(frame);
 	bool filter = !(list_in.empty());
 
 	InterVert v0;
@@ -3062,13 +2896,13 @@ void TrackMapProcessor::GetCellsByUncertainty(TrackMap& track_map,
 	}
 }
 
-void TrackMapProcessor::GetCellUncertainty(TrackMap& track_map,
+void TrackMapProcessor::GetCellUncertainty(
 	CellList &list, size_t frame)
 {
-	if (frame >= track_map.m_frame_num)
+	if (frame >= m_map.m_frame_num)
 		return;
 
-	VertexList &vertex_list = track_map.m_vertices_list.at(frame);
+	VertexList &vertex_list = m_map.m_vertices_list.at(frame);
 
 	InterVert v0;
 	pVertex vertex;
@@ -3079,7 +2913,7 @@ void TrackMapProcessor::GetCellUncertainty(TrackMap& track_map,
 	//in lists
 	if (frame > 0)
 	{
-		InterGraph &inter_graph = track_map.m_inter_graph_list.at(frame - 1);
+		InterGraph &inter_graph = m_map.m_inter_graph_list.at(frame - 1);
 		for (VertexListIter iter = vertex_list.begin();
 			iter != vertex_list.end(); ++iter)
 		{
@@ -3116,9 +2950,9 @@ void TrackMapProcessor::GetCellUncertainty(TrackMap& track_map,
 	}
 
 	//out lists
-	if (frame < track_map.m_frame_num - 1)
+	if (frame < m_map.m_frame_num - 1)
 	{
-		InterGraph &inter_graph = track_map.m_inter_graph_list.at(frame);
+		InterGraph &inter_graph = m_map.m_inter_graph_list.at(frame);
 		for (VertexListIter iter = vertex_list.begin();
 			iter != vertex_list.end(); ++iter)
 		{
@@ -3155,13 +2989,13 @@ void TrackMapProcessor::GetCellUncertainty(TrackMap& track_map,
 	}
 }
 
-void TrackMapProcessor::GetUncertainHist(TrackMap& track_map,
+void TrackMapProcessor::GetUncertainHist(
 	UncertainHist &hist1, UncertainHist &hist2, size_t frame)
 {
-	if (frame >= track_map.m_frame_num)
+	if (frame >= m_map.m_frame_num)
 		return;
 
-	VertexList &vertex_list = track_map.m_vertices_list.at(frame);
+	VertexList &vertex_list = m_map.m_vertices_list.at(frame);
 
 	unsigned int count;
 	InterVert v0;
@@ -3170,7 +3004,7 @@ void TrackMapProcessor::GetUncertainHist(TrackMap& track_map,
 	//in lists
 	if (frame > 0)
 	{
-		InterGraph &inter_graph = track_map.m_inter_graph_list.at(frame - 1);
+		InterGraph &inter_graph = m_map.m_inter_graph_list.at(frame - 1);
 		for (VertexListIter iter = vertex_list.begin();
 		iter != vertex_list.end(); ++iter)
 		{
@@ -3196,9 +3030,9 @@ void TrackMapProcessor::GetUncertainHist(TrackMap& track_map,
 	}
 
 	//out lists
-	if (frame < track_map.m_frame_num - 1)
+	if (frame < m_map.m_frame_num - 1)
 	{
-		InterGraph &inter_graph = track_map.m_inter_graph_list.at(frame);
+		InterGraph &inter_graph = m_map.m_inter_graph_list.at(frame);
 		for (VertexListIter iter = vertex_list.begin();
 			iter != vertex_list.end(); ++iter)
 		{
