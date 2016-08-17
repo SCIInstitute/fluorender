@@ -63,7 +63,8 @@ namespace FL
 		m_map(track_map),
 		m_contact_thresh(0.7f),
 		m_size_thresh(25.0f),
-		m_level_thresh(7) {}
+		m_level_thresh(7),
+		m_similar_thresh(0.2f) {}
 		~TrackMapProcessor() {}
 
 		void SetContactThresh(float value);
@@ -137,13 +138,15 @@ namespace FL
 		float m_contact_thresh;
 		float m_size_thresh;
 		int m_level_thresh;
+		float m_similar_thresh;
 		//uncertainty filter
 		unsigned int m_uncertain_low;
 		unsigned int m_uncertain_high;
 		//the trackmap
 		TrackMap &m_map;
 
-		//processing
+	private:
+		//modification
 		bool CheckCellContact(pCell &cell, void *data, void *label,
 			size_t ci, size_t cj, size_t ck);
 		bool AddContact(IntraGraph& graph,
@@ -180,6 +183,8 @@ namespace FL
 		bool MergeCells(VertexList& vertex_list, CellBin &bin, size_t frame);
 		bool RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size_t frame, InterGraph &graph, bool reset);
 		
+		//replaces all previous match/unmatch funcs
+		bool ProcessVertex(pVertex &vertex, InterGraph &graph);
 		//vertex matching routines
 		//find out current valence of a vertex
 		bool GetValence(pVertex &vertex, InterGraph &graph,
@@ -190,16 +195,30 @@ namespace FL
 		//edges include linked only
 		bool GetLinkedEdges(pVertex &vertex, InterGraph &graph,
 			std::vector<InterEdge> &edges);
-		//match the max overlap
-		bool MatchVertexMax(InterGraph &graph, std::vector<InterEdge> &edges);
-		//match by size similarity
-		bool MatchVertexSize(InterGraph &graph, pVertex &vertex,
+		//detailed match functions
+		//link edge of the max overlap
+		bool LinkEdgeMax(InterGraph &graph, std::vector<InterEdge> &edges);
+		//unlink edge by size similarity
+		bool UnlinkEdgeSize(InterGraph &graph, pVertex &vertex,
 			std::vector<InterEdge> &edges);
-		//reduce valence by merging vertices
-		//bool MatchVertexMerge(InterGraph &graph, )
+		//unlink edge by extended alternating path
+		bool UnlinkAlterPath(InterGraph &graph, pVertex &vertex,
+			std::vector<InterEdge> &edges);
+		//reduce valence by segmentation
+		bool MatchVertexMerge(InterGraph &graph, pVertex &vertex,
+			std::vector<InterEdge> &edges);
+		bool MatchVertexCluster(InterGraph &graph, pVertex &vertex,
+			std::vector<InterEdge> &edges);
 		
-		//replaces all previous match/unmatch funcs
-		bool ProcessVertex(pVertex &vertex, InterGraph &graph);
+		//helper functions
+		bool get_alter_path(InterGraph &graph, pVertex &vertex,
+			Path &alt_path, VertexList &visited, int curl);
+		static bool comp_edge_size(InterEdge &edge1, InterEdge &edge2, InterGraph& graph);
+		bool similar_edge_size(InterEdge edge1, InterEdge edge2, InterGraph& graph);
+		static bool comp_path_size(Path &path1, Path &path2, InterGraph& graph);
+		void link_edge(InterEdge edge, InterGraph &graph, unsigned int value = 1);
+		void unlink_edge(InterEdge edge, InterGraph &graph, unsigned int value = 0);
+
 		//bool MatchVertex(pVertex &vertex, InterGraph &graph, bool bl_check = true);
 		bool UnmatchVertex(pVertex &vertex, InterGraph &graph);
 		bool ExMatchVertex(pVertex &vertex, InterGraph &graph, size_t frame1, size_t frame2);
@@ -209,8 +228,6 @@ namespace FL
 			VertexList &orphan_list, VertexList &visited_list, int level);
 		unsigned int CheckBackLink(InterVert v0, InterVert v1, InterGraph &graph,
 			unsigned int &bl_size_ui, float &bl_size_f);
-		static bool edge_comp_size_ol(InterEdge edge1, InterEdge edge2, InterGraph& graph);
-		static bool edge_comp_size_bl(InterEdge edge1, InterEdge edge2, InterGraph& graph);
 
 		//export
 		void WriteBool(std::ofstream& ofs, bool value);

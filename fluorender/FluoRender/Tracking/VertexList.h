@@ -30,11 +30,43 @@ DEALINGS IN THE SOFTWARE.
 
 #include "Vertex.h"
 #include <boost/unordered_map.hpp>
+#include <deque>
 
 namespace FL
 {
 	typedef boost::unordered_map<unsigned int, pVertex> VertexList;
 	typedef boost::unordered_map<unsigned int, pVertex>::iterator VertexListIter;
+
+	class Path : public std::deque<InterVert>
+	{
+	public:
+		inline float get_size(InterGraph &graph, int odd);
+	};
+	typedef std::deque<InterVert>::iterator PathIter;
+	typedef std::vector<Path> PathList;
+	typedef std::vector<Path>::iterator PathListIter;
+
+	inline float Path::get_size(InterGraph &graph, int odd)
+	{
+		unsigned int counter = 0;
+		float result = 0.0f;
+		for (PathIter iter = this->begin();
+			iter != this->end(); ++iter)
+		{
+			PathIter i1 = iter + 1;
+			if (i1 == this->end())
+				break;
+			if (counter % 2 == odd)
+			{
+				std::pair<InterEdge, bool> edge =
+					boost::edge(*iter, *i1, graph);
+				if (edge.second)
+					result += graph[edge.first].size_f;
+			}
+			counter++;
+		}
+		return result;
+	}
 }//namespace FL
 
 #endif//FL_VertexList_h
