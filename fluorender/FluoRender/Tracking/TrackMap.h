@@ -204,18 +204,19 @@ namespace FL
 		//unlink edge by extended alternating path
 		bool UnlinkAlterPath(InterGraph &graph, pVertex &vertex,
 			std::vector<InterEdge> &edges);
-		//reduce valence by segmentation
-		bool MatchVertexMerge(InterGraph &graph, pVertex &vertex,
+		//check if any out vertex can be combined
+		bool MergeEdges(InterGraph &graph, pVertex &vertex,
 			std::vector<InterEdge> &edges);
-		bool MatchVertexCluster(InterGraph &graph, pVertex &vertex,
+		bool SplitVertex(InterGraph &graph, pVertex &vertex,
 			std::vector<InterEdge> &edges);
 		
 		//helper functions
 		bool get_alter_path(InterGraph &graph, pVertex &vertex,
 			Path &alt_path, VertexList &visited, int curl);
 		static bool comp_edge_size(InterEdge &edge1, InterEdge &edge2, InterGraph& graph);
-		bool similar_edge_size(InterEdge edge1, InterEdge edge2, InterGraph& graph);
-		static bool comp_path_size(Path &path1, Path &path2, InterGraph& graph);
+		bool similar_edge_size(InterEdge &edge1, InterEdge &edge2, InterGraph& graph);
+		static bool comp_path_size(Path &path1, Path &path2);
+		bool similar_path_size(Path &path1, Path &path2);
 		void link_edge(InterEdge edge, InterGraph &graph, unsigned int value = 1);
 		void unlink_edge(InterEdge edge, InterGraph &graph, unsigned int value = 0);
 
