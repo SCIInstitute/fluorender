@@ -172,6 +172,12 @@ namespace FL
 			size_t f1, size_t f2);
 		bool UnlinkVertices(InterGraph& graph,
 			pVertex &vertex1, pVertex &vertex2);
+		bool MergeCells(VertexList& vertex_list, CellBin &bin, size_t frame);
+		bool RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size_t frame, InterGraph &graph, bool reset);
+		
+		//determine if cells on intragraph can be merged
+		bool GroupCells(std::vector<pwCell> &cells, std::vector<CellBin> &cell_bins,
+			IntraGraph &intra_graph);
 		bool EqualCells(pwCell &cell1, pwCell &cell2);
 		bool FindCellBin(CellBin &bin, pwCell &cell);
 		bool AddCellBin(std::vector<CellBin> &bins,
@@ -180,9 +186,7 @@ namespace FL
 			pwCell &cell1, pwCell &cell2);
 		bool GreaterThanCellBin(pCell &cell1, CellBin &bin, pwCell &cell2);
 		size_t GetBinsCellCount(std::vector<CellBin> &bins);
-		bool MergeCells(VertexList& vertex_list, CellBin &bin, size_t frame);
-		bool RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size_t frame, InterGraph &graph, bool reset);
-		
+
 		//replaces all previous match/unmatch funcs
 		bool ProcessVertex(pVertex &vertex, InterGraph &graph);
 		//vertex matching routines
@@ -213,6 +217,7 @@ namespace FL
 		//helper functions
 		bool get_alter_path(InterGraph &graph, pVertex &vertex,
 			Path &alt_path, VertexList &visited, int curl);
+		bool merge_cell_size(IntraEdge &edge, pCell &cell1, pCell &cell2, IntraGraph& graph);
 		static bool comp_edge_size(InterEdge &edge1, InterEdge &edge2, InterGraph& graph);
 		bool similar_edge_size(InterEdge &edge1, InterEdge &edge2, InterGraph& graph);
 		static bool comp_path_size(Path &path1, Path &path2);

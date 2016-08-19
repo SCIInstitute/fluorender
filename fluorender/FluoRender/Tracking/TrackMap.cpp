@@ -692,29 +692,21 @@ bool TrackMapProcessor::ResolveGraph(size_t frame1, size_t frame2)
 	std::pair<InterAdjIter, InterAdjIter> adj_verts;
 	InterAdjIter inter_iter;
 	std::vector<pwCell> cells;
+	std::vector<CellBin> cell_bins;
 	CellBinIter pwcell_iter;
 	pVertex vertex2;
-	std::vector<CellBin> cell_bins;
-	pCell cell2, cell2c;
-	IntraVert c2, c2c;
-	std::pair<IntraAdjIter, IntraAdjIter> adj_cells;
-	IntraAdjIter intra_iter;
-	bool added;
-	std::pair<IntraEdge, bool> intra_edge;
-	float osizef, c1sizef, c2sizef;
-	size_t i;
 
 	//check all vertices in the time frame
 	for (iter = vertex_list1.begin();
 	iter != vertex_list1.end(); ++iter)
 	{
-		cells.clear();
-		cell_bins.clear();
 		v1 = iter->second->GetInterVert(inter_graph);
 		if (v1 == InterGraph::null_vertex())
 			continue;
 		adj_verts = boost::adjacent_vertices(v1, inter_graph);
 		//for each adjacent vertex
+		//add cells to cells the list
+		cells.clear();
 		for (inter_iter = adj_verts.first;
 		inter_iter != adj_verts.second; ++inter_iter)
 		{
@@ -729,54 +721,13 @@ bool TrackMapProcessor::ResolveGraph(size_t frame1, size_t frame2)
 		}
 		//if a cell in the list has contacts that are also in the list,
 		//try to group them
-		for (pwcell_iter = cells.begin();
-		pwcell_iter != cells.end(); ++pwcell_iter)
+		cell_bins.clear();
+		if (GroupCells(cells, cell_bins, intra_graph))
 		{
-			cell2 = pwcell_iter->lock();
-			if (!cell2)
-				continue;
-			added = false;
-			c2 = cell2->GetIntraVert();
-			if (c2 == IntraGraph::null_vertex())
-			{
-				AddCellBin(cell_bins, *pwcell_iter);
-				continue;
-			}
-			adj_cells = boost::adjacent_vertices(c2, intra_graph);
-			//for each cell in contact
-			for (intra_iter = adj_cells.first;
-			intra_iter != adj_cells.second; ++intra_iter)
-			{
-				c2c = *intra_iter;
-				if (FindCellBin(cells, intra_graph[c2c].cell))
-				{
-					intra_edge = boost::edge(c2, c2c, intra_graph);
-					if (!intra_edge.second)
-						continue;
-					//continue if no contact
-					if (intra_graph[intra_edge.first].size_ui == 0)
-						continue;
-					osizef = intra_graph[intra_edge.first].size_f;
-					c1sizef = cell2->GetSizeF();
-					cell2c = intra_graph[c2c].cell.lock();
-					if (!cell2c)
-						continue;
-					c2sizef = cell2c->GetSizeF();
-					if (osizef / c1sizef > m_contact_thresh ||
-						osizef / c2sizef > m_contact_thresh)
-					{
-						//add both to bin list
-						added = AddCellBin(cell_bins, *pwcell_iter, intra_graph[c2c].cell);
-					}
-				}
-			}
-			if (!added)//add to bin as well
-				AddCellBin(cell_bins, *pwcell_iter);
+			//modify vertex list 2 if necessary
+			for (size_t i = 0; i < cell_bins.size(); ++i)
+				MergeCells(vertex_list2, cell_bins[i], frame2);
 		}
-
-		//modify vertex list 2 if necessary
-		for (i = 0; i < cell_bins.size(); ++i)
-			MergeCells(vertex_list2, cell_bins[i], frame2);
 	}
 
 	return true;
@@ -1070,7 +1021,34 @@ bool TrackMapProcessor::MergeEdges(InterGraph &graph, pVertex &vertex,
 	if (edges.size() < 2)
 		return false;
 
-	return true;
+	pVertex v1;
+	CellBinIter pwcell_iter;
+	std::vector<pwCell> cells;
+	std::vector<CellBin> cell_bins;
+
+	//first, check if any out cells are touching
+	for (size_t i = 0; i < edges.size(); ++i)
+	{
+		v1 = graph[boost::target(edges[i], graph)].vertex.lock();
+		if (v1 == vertex)
+			v1 = graph[boost::source(edges[i], graph)].vertex.lock();
+		if (!v1) continue;
+
+		//store all cells in the list temporarily
+		for (pwcell_iter = v1->GetCellsBegin();
+			pwcell_iter != v1->GetCellsEnd(); ++pwcell_iter)
+			cells.push_back(*pwcell_iter);
+	}
+	//if a cell in the list has contacts that are also in the list,
+	//try to group them
+	//if (GroupCells(cells, cell_bins, intra_graph))
+	{
+		//modify vertex list 2 if necessary
+		//for (size_t i = 0; i < cell_bins.size(); ++i)
+		//	MergeCells(vertex_list2, cell_bins[i], frame2);
+	}
+
+	return false;
 }
 
 bool TrackMapProcessor::SplitVertex(InterGraph &graph, pVertex &vertex,
@@ -1215,6 +1193,17 @@ bool TrackMapProcessor::get_alter_path(InterGraph &graph, pVertex &vertex,
 	}
 
 	return false;
+}
+
+bool TrackMapProcessor::merge_cell_size(IntraEdge &edge,
+	pCell &cell1, pCell &cell2, IntraGraph& graph)
+{
+	float osizef, c1sizef, c2sizef;
+	osizef = graph[edge].size_f;
+	c1sizef = cell1->GetSizeF();
+	c2sizef = cell2->GetSizeF();
+	return osizef / c1sizef > m_contact_thresh ||
+			osizef / c2sizef > m_contact_thresh;
 }
 
 /*bool TrackMapProcessor::MatchVertex(pVertex &vertex,
@@ -1575,6 +1564,66 @@ unsigned int TrackMapProcessor::CheckBackLink(InterVert v0,
 		}
 	}
 	
+	return result;
+}
+
+//determine if cells on intragraph can be merged
+bool TrackMapProcessor::GroupCells(std::vector<pwCell> &cells,
+	std::vector<CellBin> &cell_bins, IntraGraph &intra_graph)
+{
+	pCell cell2, cell2c;
+	IntraVert c2, c2c;
+	std::pair<IntraAdjIter, IntraAdjIter> adj_cells;
+	IntraAdjIter intra_iter;
+	bool added;
+	std::pair<IntraEdge, bool> intra_edge;
+	bool result = false;
+
+	for (auto pwcell_iter = cells.begin();
+		pwcell_iter != cells.end(); ++pwcell_iter)
+	{
+		cell2 = pwcell_iter->lock();
+		if (!cell2)
+			continue;
+		added = false;
+		c2 = cell2->GetIntraVert();
+		if (c2 == IntraGraph::null_vertex())
+		{
+			AddCellBin(cell_bins, *pwcell_iter);
+			continue;
+		}
+		adj_cells = boost::adjacent_vertices(c2, intra_graph);
+		//for each cell in contact
+		for (intra_iter = adj_cells.first;
+			intra_iter != adj_cells.second; ++intra_iter)
+		{
+			c2c = *intra_iter;
+			if (FindCellBin(cells, intra_graph[c2c].cell))
+			{
+				intra_edge = boost::edge(c2, c2c, intra_graph);
+				if (!intra_edge.second)
+					continue;
+				//continue if no contact
+				if (intra_graph[intra_edge.first].size_ui == 0)
+					continue;
+				cell2c = intra_graph[c2c].cell.lock();
+				if (!cell2c)
+					continue;
+				//meausre for merging
+				if (merge_cell_size(intra_edge.first,
+					cell2, cell2c, intra_graph))
+				{
+					//add both to bin list
+					added = AddCellBin(cell_bins,
+						*pwcell_iter, intra_graph[c2c].cell);
+					result |= added;
+				}
+			}
+		}
+		if (!added)//add to bin as well
+			AddCellBin(cell_bins, *pwcell_iter);
+	}
+
 	return result;
 }
 
