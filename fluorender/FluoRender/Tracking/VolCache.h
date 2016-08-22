@@ -25,228 +25,114 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef FL_Cell_h
-#define FL_Cell_h
+#ifndef FL_VolCache_h
+#define FL_VolCache_h
 
-#include <Point.h>
-#include <BBox.h>
-#include <Color.h>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
-#include <boost/graph/graph_traits.hpp>
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/adjacency_iterator.hpp>
+#include <deque>
+#include <boost/signals2.hpp>
 
 namespace FL
 {
-	class Vertex;
-	typedef boost::shared_ptr<Vertex> pVertex;
-	typedef boost::weak_ptr<Vertex> pwVertex;
-	class Cell;
-	typedef boost::shared_ptr<Cell> pCell;
-	typedef boost::weak_ptr<Cell> pwCell;
-
-	struct IntraEdgeData
+	struct VolCache
 	{
-		//contact size
-		unsigned int size_ui;//voxel count
-		float size_f;//voxel count weighted by intensity
-		//distance
-		float dist_v;//distance calculated from voxel grid
-		float dist_s;//distance calculated from xyz spatial coordinates
+		VolCache() :
+			handle(0),
+			data(0),
+			label(0),
+			frame(0),
+			valid(false) {}
+
+		//manage memory externally
+		//don't care releasing here
+		void* handle;
+		void* data;
+		void* label;
+		size_t frame;
+		bool valid;
 	};
 
-	struct IntraCellData
-	{
-		unsigned int id;
-		pwCell cell;
-	};
-
-	typedef boost::adjacency_list<boost::listS,
-		boost::listS, boost::undirectedS,
-		IntraCellData, IntraEdgeData> IntraGraph;
-	typedef IntraGraph::vertex_descriptor IntraVert;
-	typedef IntraGraph::edge_descriptor IntraEdge;
-	typedef boost::graph_traits<IntraGraph>::adjacency_iterator IntraAdjIter;
-	typedef boost::graph_traits<IntraGraph>::edge_iterator IntraEdgeIter;
-
-	class Cell
+	//queue with a max size
+	class CacheQueue
 	{
 	public:
-		Cell(unsigned int id) :
-			m_id(id), m_size_ui(0), m_size_f(0.0f),
-			m_external_ui(0), m_external_f(0.0f),
-			m_intra_vert(IntraGraph::null_vertex())
-		{}
-		~Cell() {}
+		CacheQueue() {};
+		~CacheQueue() {};
 
-		unsigned int Id();
-		IntraVert GetIntraVert();
-		void SetIntraVert(IntraVert intra_vert);
-		void Set(pCell &cell);
-		void Inc(size_t i, size_t j, size_t k, float value);
-		void Inc(pCell &cell);
-		void Inc();
-		void IncExternal(float value);
-		void AddVertex(pVertex &vertex);
-		pwVertex GetVertex();
-		unsigned int GetVertexId();
+		inline void set_max_size(size_t size);
+		inline size_t get_max_size();
+		inline size_t size();
+		inline void push_back(const VolCache& val);
+		inline VolCache get(size_t frame);
 
-		//get
-		FLIVR::Point &GetCenter();
-		FLIVR::BBox &GetBox();
-		unsigned int GetSizeUi();
-		float GetSizeF();
-		unsigned int GetExternalUi();
-		float GetExternalF();
-		//set
-		void SetCenter(FLIVR::Point &center);
-		void SetBox(FLIVR::BBox &box);
-		void SetSizeUi(unsigned int size_ui);
-		void SetSizeF(float size_f);
-		void SetExternalUi(unsigned int external_ui);
-		void SetExternalF(float external_f);
+		//external calls
+		boost::signals2::signal<void(VolCache&)> m_new_cache;
+		boost::signals2::signal<void(VolCache&)> m_del_cache;
 
 	private:
-		unsigned int m_id;
-		FLIVR::Point m_center;
-		FLIVR::BBox m_box;
-		//size
-		unsigned int m_size_ui;
-		float m_size_f;
-		//external size
-		unsigned int m_external_ui;
-		float m_external_f;
-		IntraVert m_intra_vert;
-		pwVertex m_vertex;//parent
+		size_t m_max_size;
+		std::deque<VolCache> m_queue;
 	};
 
-	inline unsigned int Cell::Id()
+	inline void CacheQueue::set_max_size(size_t size)
 	{
-		return m_id;
+		if (size == 0)
+			return;
+		m_max_size = size;
+		while (m_queue.size() > m_max_size)
+		{
+			m_del_cache(m_queue.front());
+			m_queue.pop_front();
+		}
 	}
 
-	inline IntraVert Cell::GetIntraVert()
+	inline size_t CacheQueue::get_max_size()
 	{
-		return m_intra_vert;
+		return m_max_size;
 	}
 
-	inline void Cell::SetIntraVert(IntraVert intra_vert)
+	inline size_t CacheQueue::size()
 	{
-		m_intra_vert = intra_vert;
+		return m_queue.size();
 	}
 
-	inline void Cell::Set(pCell &cell)
+	inline void CacheQueue::push_back(const VolCache& val)
 	{
-		m_center = cell->GetCenter();
-		m_size_ui = cell->GetSizeUi();
-		m_size_f = cell->GetSizeF();
-		m_box = cell->GetBox();
+		while (m_queue.size() > m_max_size - 1)
+		{
+			m_del_cache(m_queue.front());
+			m_queue.pop_front();
+		}
+		m_queue.push_back(val);
 	}
 
-	inline void Cell::Inc(size_t i, size_t j, size_t k, float value)
+	inline VolCache CacheQueue::get(size_t frame)
 	{
-		m_center = FLIVR::Point(
-			(m_center*m_size_ui + FLIVR::Point(double(i),
-			double(j), double(k))) / (m_size_ui + 1));
-		m_size_ui++;
-		m_size_f += value;
-		FLIVR::Point p(i, j, k);
-		m_box.extend(p);
-	}
-
-	inline void Cell::Inc(pCell &cell)
-	{
-		m_center = FLIVR::Point(
-			(m_center * m_size_ui + cell->GetCenter() *
-			cell->GetSizeUi()) / (m_size_ui +
-			cell->GetSizeUi()));
-		m_size_ui += cell->GetSizeUi();
-		m_size_f += cell->GetSizeF();
-		m_box.extend(cell->GetBox());
-	}
-
-	inline void Cell::Inc()
-	{
-		m_size_ui++;
-	}
-
-	inline void Cell::IncExternal(float value)
-	{
-		m_external_ui++;
-		m_external_f += value;
-	}
-
-	inline void Cell::AddVertex(pVertex &vertex)
-	{
-		m_vertex = vertex;
-	}
-
-	inline pwVertex Cell::GetVertex()
-	{
-		return m_vertex;
-	}
-
-	inline FLIVR::Point &Cell::GetCenter()
-	{
-		return m_center;
-	}
-
-	inline FLIVR::BBox &Cell::GetBox()
-	{
-		return m_box;
-	}
-
-	inline unsigned int Cell::GetSizeUi()
-	{
-		return m_size_ui;
-	}
-
-	inline float Cell::GetSizeF()
-	{
-		return m_size_f;
-	}
-
-	inline unsigned int Cell::GetExternalUi()
-	{
-		return m_external_ui;
-	}
-
-	inline float Cell::GetExternalF()
-	{
-		return m_external_f;
-	}
-
-	inline void Cell::SetCenter(FLIVR::Point &center)
-	{
-		m_center = center;
-	}
-
-	inline void Cell::SetBox(FLIVR::BBox &box)
-	{
-		m_box = box;
-	}
-
-	inline void Cell::SetSizeUi(unsigned int size_ui)
-	{
-		m_size_ui = size_ui;
-	}
-
-	inline void Cell::SetSizeF(float size_f)
-	{
-		m_size_f = size_f;
-	}
-
-	inline void Cell::SetExternalUi(unsigned int external_ui)
-	{
-		m_external_ui = external_ui;
-	}
-
-	inline void Cell::SetExternalF(float external_f)
-	{
-		m_external_f = external_f;
+		bool found = false;
+		int index = -1;
+		for (size_t i = 0; i < m_queue.size(); ++i)
+		{
+			if (m_queue[i].frame == frame)
+			{
+				index = (int)i;
+				found = true;
+				break;
+			}
+		}
+		if (found)
+		{
+			if (!m_queue[index].valid)
+				m_new_cache(m_queue[index]);
+			return m_queue[index];
+		}
+		else
+		{
+			VolCache vol_cache;
+			m_new_cache(vol_cache);
+			push_back(vol_cache);
+			return vol_cache;
+		}
 	}
 
 }//namespace FL
 
-#endif//FL_Cell_h
+#endif//FL_VolCache_h

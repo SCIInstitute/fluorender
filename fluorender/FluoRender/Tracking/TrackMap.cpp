@@ -176,11 +176,11 @@ bool TrackMapProcessor::InitializeFrame(void* data, void* label, size_t frame)
 		ec++; \
 		if (data_bits == 8) \
 			valuen = ((unsigned char*)data)[indexn] / 255.0f; \
-				else if (data_bits == 16) \
+		else if (data_bits == 16) \
 			valuen = ((unsigned short*)data)[indexn] * scale / 65535.0f; \
 		contact_value = std::min(value, valuen); \
 		if (contact_value > m_contact_thresh) \
-				{ \
+		{ \
 			cc++; \
 			iter = cell_list.find(idn); \
 			if (iter != cell_list.end()) \
@@ -722,7 +722,8 @@ bool TrackMapProcessor::ResolveGraph(size_t frame1, size_t frame2)
 		//if a cell in the list has contacts that are also in the list,
 		//try to group them
 		cell_bins.clear();
-		if (GroupCells(cells, cell_bins, intra_graph))
+		if (GroupCells(cells, cell_bins, intra_graph,
+			&TrackMapProcessor::merge_cell_size))
 		{
 			//modify vertex list 2 if necessary
 			for (size_t i = 0; i < cell_bins.size(); ++i)
@@ -1569,7 +1570,8 @@ unsigned int TrackMapProcessor::CheckBackLink(InterVert v0,
 
 //determine if cells on intragraph can be merged
 bool TrackMapProcessor::GroupCells(std::vector<pwCell> &cells,
-	std::vector<CellBin> &cell_bins, IntraGraph &intra_graph)
+	std::vector<CellBin> &cell_bins, IntraGraph &intra_graph,
+	f_merge_cell merge_cell)
 {
 	pCell cell2, cell2c;
 	IntraVert c2, c2c;
@@ -1610,7 +1612,7 @@ bool TrackMapProcessor::GroupCells(std::vector<pwCell> &cells,
 				if (!cell2c)
 					continue;
 				//meausre for merging
-				if (merge_cell_size(intra_edge.first,
+				if ((this->*merge_cell)(intra_edge.first,
 					cell2, cell2c, intra_graph))
 				{
 					//add both to bin list

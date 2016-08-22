@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include "CellList.h"
 #include "VertexList.h"
+#include "VolCache.h"
 #include <fstream>
 #include <boost/signals2.hpp>
 #include <deque>
@@ -144,6 +145,8 @@ namespace FL
 		unsigned int m_uncertain_high;
 		//the trackmap
 		TrackMap &m_map;
+		//volume data cache
+		CacheQueue m_vol_cache;
 
 	private:
 		//modification
@@ -176,8 +179,9 @@ namespace FL
 		bool RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size_t frame, InterGraph &graph, bool reset);
 		
 		//determine if cells on intragraph can be merged
+		typedef bool(TrackMapProcessor::*f_merge_cell)(IntraEdge&, pCell&, pCell&, IntraGraph&);
 		bool GroupCells(std::vector<pwCell> &cells, std::vector<CellBin> &cell_bins,
-			IntraGraph &intra_graph);
+			IntraGraph &intra_graph, f_merge_cell merge_cell);
 		bool EqualCells(pwCell &cell1, pwCell &cell2);
 		bool FindCellBin(CellBin &bin, pwCell &cell);
 		bool AddCellBin(std::vector<CellBin> &bins,
@@ -329,6 +333,9 @@ namespace FL
 		WriteUint(ofs, cell->GetExternalUi());
 		WriteFloat(ofs, cell->GetExternalF());
 		WritePoint(ofs, cell->GetCenter());
+		WriteTag(ofs, TAG_VER220);
+		WritePoint(ofs, cell->GetBox().min());
+		WritePoint(ofs, cell->GetBox().max());
 	}
 
 	inline bool TrackMapProcessor::ReadBool(std::ifstream& ifs)
@@ -383,6 +390,17 @@ namespace FL
 		cell->SetExternalF(ReadFloat(ifs));
 		FLIVR::Point p = ReadPoint(ifs);
 		cell->SetCenter(p);
+		FLIVR::BBox box;
+		FLIVR::Point p1;
+		if (ReadTag(ifs) == TAG_VER220)
+		{
+			p = ReadPoint(ifs);
+			p1 = ReadPoint(ifs);
+			box = FLIVR::BBox(p, p1);
+			cell->SetBox(box);
+		}
+		else
+			ifs.unget();
 		cell_list.insert(std::pair<unsigned int, pCell>
 			(id, cell));
 		return cell;

@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FL_Cell_h
 
 #include <Point.h>
+#include <BBox.h>
 #include <Color.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
@@ -93,12 +94,14 @@ namespace FL
 
 		//get
 		FLIVR::Point &GetCenter();
+		FLIVR::BBox &GetBox();
 		unsigned int GetSizeUi();
 		float GetSizeF();
 		unsigned int GetExternalUi();
 		float GetExternalF();
 		//set
 		void SetCenter(FLIVR::Point &center);
+		void SetBox(FLIVR::BBox &box);
 		void SetSizeUi(unsigned int size_ui);
 		void SetSizeF(float size_f);
 		void SetExternalUi(unsigned int external_ui);
@@ -107,6 +110,7 @@ namespace FL
 	private:
 		unsigned int m_id;
 		FLIVR::Point m_center;
+		FLIVR::BBox m_box;
 		//size
 		unsigned int m_size_ui;
 		float m_size_f;
@@ -137,6 +141,7 @@ namespace FL
 		m_center = cell->GetCenter();
 		m_size_ui = cell->GetSizeUi();
 		m_size_f = cell->GetSizeF();
+		m_box = cell->GetBox();
 	}
 
 	inline void Cell::Inc(size_t i, size_t j, size_t k, float value)
@@ -146,6 +151,8 @@ namespace FL
 			double(j), double(k))) / (m_size_ui + 1));
 		m_size_ui++;
 		m_size_f += value;
+		FLIVR::Point p(i, j, k);
+		m_box.extend(p);
 	}
 
 	inline void Cell::Inc(pCell &cell)
@@ -156,6 +163,7 @@ namespace FL
 			cell->GetSizeUi()));
 		m_size_ui += cell->GetSizeUi();
 		m_size_f += cell->GetSizeF();
+		m_box.extend(cell->GetBox());
 	}
 
 	inline void Cell::Inc()
@@ -184,6 +192,11 @@ namespace FL
 		return m_center;
 	}
 
+	inline FLIVR::BBox &Cell::GetBox()
+	{
+		return m_box;
+	}
+
 	inline unsigned int Cell::GetSizeUi()
 	{
 		return m_size_ui;
@@ -207,6 +220,11 @@ namespace FL
 	inline void Cell::SetCenter(FLIVR::Point &center)
 	{
 		m_center = center;
+	}
+
+	inline void Cell::SetBox(FLIVR::BBox &box)
+	{
+		m_box = box;
 	}
 
 	inline void Cell::SetSizeUi(unsigned int size_ui)
