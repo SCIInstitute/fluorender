@@ -77,8 +77,12 @@ void TrackMapProcessor::SetSpacings(float spcx, float spcy, float spcz)
 	m_map.m_spc_z = spcz;
 }
 
-bool TrackMapProcessor::InitializeFrame(void* data, void* label, size_t frame)
+bool TrackMapProcessor::InitializeFrame(size_t frame)
 {
+	//get label and data from cache
+	VolCache cache = m_vol_cache.get(frame);
+	void* data = cache.data;
+	void* label = cache.label;
 	if (!data || !label)
 		return false;
 
@@ -398,14 +402,23 @@ bool TrackMapProcessor::AddNeighbor(IntraGraph& graph,
 	return true;
 }
 
-bool TrackMapProcessor::LinkMaps(
-	size_t f1, size_t f2, void *data1, void *data2,
-	void *label1, void *label2)
+bool TrackMapProcessor::LinkFrames(
+	size_t f1, size_t f2)
 {
 	size_t frame_num = m_map.m_frame_num;
-	if (f1 >= frame_num || f2 >= frame_num ||
-		f1 == f2 || !data1 || !data2 ||
-		!label1 || !label2)
+	if (f1 >= frame_num || f2 >= frame_num || f1 == f2)
+		return false;
+
+	//get data and label
+	VolCache cache = m_vol_cache.get(f1);
+	void* data1 = cache.data;
+	void* label1 = cache.label;
+	if (!data1 || !label1)
+		return false;
+	cache = m_vol_cache.get(f2);
+	void* data2 = cache.data;
+	void* label2 = cache.label;
+	if (!data2 || !label2)
 		return false;
 
 	m_map.m_inter_graph_list.push_back(InterGraph());

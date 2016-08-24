@@ -36,7 +36,8 @@ namespace FL
 	struct VolCache
 	{
 		VolCache() :
-			handle(0),
+			nrrd_data(0),
+			nrrd_label(0),
 			data(0),
 			label(0),
 			frame(0),
@@ -44,7 +45,10 @@ namespace FL
 
 		//manage memory externally
 		//don't care releasing here
-		void* handle;
+		//handles to release
+		void* nrrd_data;
+		void* nrrd_label;
+		//actual data
 		void* data;
 		void* label;
 		size_t frame;
@@ -56,7 +60,7 @@ namespace FL
 	{
 	public:
 		CacheQueue() {};
-		~CacheQueue() {};
+		~CacheQueue();
 
 		inline void set_max_size(size_t size);
 		inline size_t get_max_size();
@@ -72,6 +76,12 @@ namespace FL
 		size_t m_max_size;
 		std::deque<VolCache> m_queue;
 	};
+
+	inline CacheQueue::~CacheQueue()
+	{
+		for (size_t i = 0; i < m_queue.size(); ++i)
+			m_del_cache(m_queue[i]);
+	}
 
 	inline void CacheQueue::set_max_size(size_t size)
 	{
@@ -127,6 +137,7 @@ namespace FL
 		else
 		{
 			VolCache vol_cache;
+			vol_cache.frame = frame;
 			m_new_cache(vol_cache);
 			push_back(vol_cache);
 			return vol_cache;

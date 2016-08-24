@@ -66,7 +66,7 @@ namespace FL
 		m_size_thresh(25.0f),
 		m_level_thresh(7),
 		m_similar_thresh(0.2f) {}
-		~TrackMapProcessor() {}
+		~TrackMapProcessor();
 
 		void SetContactThresh(float value);
 		void SetSizeThresh(float value);
@@ -80,11 +80,10 @@ namespace FL
 		void SetSpacings(float spcx, float spcy, float spcz);
 
 		//build cell list and intra graph
-		bool InitializeFrame(void *data, void *label, size_t frame);
+		bool InitializeFrame(size_t frame);
 		//build inter graph
-		bool LinkMaps(size_t f1, size_t f2,
-			void *data1, void *data2,
-			void *label1, void *label2);
+		bool LinkFrames(size_t f1, size_t f2);
+
 		//group cells
 		bool ResolveGraph(size_t frame1, size_t frame2);
 		//find the maximum overlapping and set link flags on inter graph
@@ -135,6 +134,11 @@ namespace FL
 		void GetCellUncertainty(CellList &list, size_t frame);
 		void GetUncertainHist(UncertainHist &hist1, UncertainHist &hist2, size_t frame);
 
+		//connect and disconnect functions for cache queue
+		typedef boost::function<void (VolCache&)> func_cache;
+		void RegisterCacheQueueFuncs(const func_cache &fnew, const func_cache &fdel);
+		void UnregisterCacheQueueFuncs();
+
 	private:
 		float m_contact_thresh;
 		float m_size_thresh;
@@ -147,6 +151,8 @@ namespace FL
 		TrackMap &m_map;
 		//volume data cache
 		CacheQueue m_vol_cache;
+		boost::signals2::connection m_new_conn;
+		boost::signals2::connection m_del_conn;
 
 	private:
 		//modification
@@ -268,6 +274,27 @@ namespace FL
 			unsigned int edge_count);
 
 	};
+
+	inline TrackMapProcessor::~TrackMapProcessor()
+	{
+		//delete cache queue
+		//order is important
+		m_vol_cache.CacheQueue::~CacheQueue();
+		UnregisterCacheQueueFuncs();
+	}
+
+	inline void TrackMapProcessor::RegisterCacheQueueFuncs(
+		const func_cache &fnew, const func_cache &fdel)
+	{
+		m_new_conn = m_vol_cache.m_new_cache.connect(fnew);
+		m_del_conn = m_vol_cache.m_del_cache.connect(fdel);
+	}
+
+	inline void TrackMapProcessor::UnregisterCacheQueueFuncs()
+	{
+		m_new_conn.disconnect();
+		m_del_conn.disconnect();
+	}
 
 	inline void TrackMapProcessor::SetContactThresh(float value)
 	{

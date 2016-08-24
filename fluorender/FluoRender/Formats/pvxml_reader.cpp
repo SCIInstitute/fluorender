@@ -855,12 +855,6 @@ Nrrd *PVXMLReader::Convert(int t, int c, bool get_max)
 			nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
 			nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
 		}
-		else
-		{
-			//something is wrong
-			if (val)
-				delete []val;
-		}
 	}
 
 	m_cur_time = t;
@@ -944,21 +938,28 @@ void PVXMLReader::ReadTiff(char *pbyData, unsigned short *val)
 				s_num1 = *((unsigned int*)(pbyData+offset+2+12*i+4));
 				unsigned int entry_offset = 0;
 				entry_offset = *((unsigned int*)(pbyData+offset+2+12*i+8));
-				for (int j=0; j<int(s_num1); j++)
+				if (s_num1 == 1)
 				{
-					if (type == 3)
+					strip_offsets.push_back(entry_offset);
+				}
+				else
+				{
+					for (int j=0; j<int(s_num1); j++)
 					{
-						//unsigned short
-						unsigned short value;
-						value = *((unsigned short*)(pbyData+entry_offset+2*j));
-						strip_offsets.push_back((unsigned int)value);
-					}
-					else if (type == 4)
-					{
-						//unsigned int
-						unsigned int value;
-						value = *((unsigned int*)(pbyData+entry_offset+4*j));
-						strip_offsets.push_back(value);
+						if (type == 3)
+						{
+							//unsigned short
+							unsigned short value;
+							value = *((unsigned short*)(pbyData+entry_offset+2*j));
+							strip_offsets.push_back((unsigned int)value);
+						}
+						else if (type == 4)
+						{
+							//unsigned int
+							unsigned int value;
+							value = *((unsigned int*)(pbyData+entry_offset+4*j));
+							strip_offsets.push_back(value);
+						}
 					}
 				}
 			}
@@ -989,21 +990,28 @@ void PVXMLReader::ReadTiff(char *pbyData, unsigned short *val)
 				s_num2 = *((unsigned int*)(pbyData+offset+2+12*i+4));
 				unsigned int entry_offset = 0;
 				entry_offset = *((unsigned int*)(pbyData+offset+2+12*i+8));
-				for (int j=0; j<int(s_num2); j++)
+				if (s_num2 == 1)
 				{
-					if (type == 3)
+					strip_bytes.push_back(entry_offset);
+				}
+				else
+				{
+					for (int j=0; j<int(s_num2); j++)
 					{
-						//unsigned short
-						unsigned short value;
-						value = *((unsigned short*)(pbyData+entry_offset+2*j));
-						strip_bytes.push_back((unsigned int)value);
-					}
-					else if (type == 4)
-					{
-						//unsigned int
-						unsigned int value;
-						value = *((unsigned int*)(pbyData+entry_offset+4*j));
-						strip_bytes.push_back(value);
+						if (type == 3)
+						{
+							//unsigned short
+							unsigned short value;
+							value = *((unsigned short*)(pbyData+entry_offset+2*j));
+							strip_bytes.push_back((unsigned int)value);
+						}
+						else if (type == 4)
+						{
+							//unsigned int
+							unsigned int value;
+							value = *((unsigned int*)(pbyData+entry_offset+4*j));
+							strip_bytes.push_back(value);
+						}
 					}
 				}
 			}

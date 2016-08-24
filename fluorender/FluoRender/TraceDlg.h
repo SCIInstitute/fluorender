@@ -331,6 +331,10 @@ private:
 	void Test1();
 	void Test2(int type);
 
+	//read/delete volume cache
+	void ReadVolCache(FL::VolCache& vol_cache);
+	void DelVolCache(FL::VolCache& vol_cache);
+
 private:
 	//map page
 	//load/save trace

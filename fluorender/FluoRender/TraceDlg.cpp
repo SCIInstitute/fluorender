@@ -2986,6 +2986,46 @@ void TraceDlg::Test2(int type)
 		m_stat_text->SetValue(str);*/
 }
 
+//read/delete volume cache
+void TraceDlg::ReadVolCache(FL::VolCache& vol_cache)
+{
+	//get volume, readers
+	if (!m_view || !m_view->m_glview)
+		return;
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+	BaseReader* reader = vd->GetReader();
+	if (!reader)
+		return;
+	LBLReader lbl_reader;
+
+	int chan = vd->GetCurChannel();
+	int frame = vol_cache.frame;
+
+	Nrrd* data = reader->Convert(frame, chan, true);
+	vol_cache.nrrd_data = data;
+	vol_cache.data = data->data;
+	wstring lblname = reader->GetCurLabelName(frame, chan);
+	lbl_reader.SetFile(lblname);
+	Nrrd* label = lbl_reader.Convert(frame, chan, true);
+	vol_cache.nrrd_label = data;
+	vol_cache.label = data->data;
+	if (data && label)
+		vol_cache.valid = true;
+}
+
+void TraceDlg::DelVolCache(FL::VolCache& vol_cache)
+{
+	nrrdNuke((Nrrd*)(vol_cache.nrrd_data));
+	nrrdNuke((Nrrd*)(vol_cache.nrrd_label));
+	vol_cache.nrrd_data = 0;
+	vol_cache.nrrd_label = 0;
+	vol_cache.data = 0;
+	vol_cache.label = 0;
+	vol_cache.valid = false;
+}
+
 void TraceDlg::OnCellPrev(wxCommandEvent &event)
 {
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
@@ -3005,6 +3045,8 @@ void TraceDlg::GenMap()
 {
 	if (!m_view)
 		return;
+
+	//some parameters
 	double component_size = 25.0;
 	double contact_factor = 0.7;
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
@@ -3014,48 +3056,70 @@ void TraceDlg::GenMap()
 		contact_factor = vr_frame->GetSettingDlg()->GetContactFactor();
 	}
 
+	//get trace group
+	m_view->CreateTraceGroup();
+	TraceGroup *trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+		return;
+
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
 		return;
 	BaseReader* reader = vd->GetReader();
 	if (!reader)
 		return;
-	LBLReader lbl_reader;
-	m_view->CreateTraceGroup();
-	TraceGroup *trace_group = m_view->GetTraceGroup();
-	if (!trace_group)
-		return;
 
+	//start progress
+	size_t iter_num = (size_t)m_gen_map_spin->GetValue();
+	iter_num *= 2;
 	m_stat_text->SetValue("Generating track map.\n");
 	wxGetApp().Yield();
+	int frames = reader->GetTimeNum();
+	float prog_bit = 100.0f / float(frames * (2 + iter_num));
+	float prog = 0.0f;
+	m_gen_map_prg->SetValue(int(prog));
+
+	//get and set parameters
 	FL::TrackMap &track_map = trace_group->GetTrackMap();
 	FL::TrackMapProcessor tm_processor(track_map);
 	int chan = vd->GetCurChannel();
-	int frames = reader->GetTimeNum();
 	int resx, resy, resz;
 	vd->GetResolution(resx, resy, resz);
 	double spcx, spcy, spcz;
 	vd->GetSpacings(spcx, spcy, spcz);
-
-	Nrrd* nrrd_data1 = 0;
-	Nrrd* nrrd_data2 = 0;
-	Nrrd* nrrd_label1 = 0;
-	Nrrd* nrrd_label2 = 0;
-	wstring lblname;
-	bool file_err = false;
-
-	size_t iter_num = (size_t)m_gen_map_spin->GetValue();
-	iter_num *= 2;
 	tm_processor.SetBits(vd->GetBits());
 	tm_processor.SetScale(vd->GetScalarScale());
 	tm_processor.SetSizes(resx, resy, resz);
 	tm_processor.SetSpacings(spcx, spcy, spcz);
 	tm_processor.SetSizeThresh(component_size);
 	tm_processor.SetContactThresh(contact_factor);
-	float prog_bit = 100.0f / float(frames * (2 + iter_num));
-	float prog = 0.0f;
-	m_gen_map_prg->SetValue(int(prog));
+	//register file reading and deleteing functions
+	tm_processor.RegisterCacheQueueFuncs(
+		boost::bind(&TraceDlg::ReadVolCache, this, _1),
+		boost::bind(&TraceDlg::DelVolCache, this, _1));
+
+	//initialization
 	for (int i = 0; i < frames; ++i)
+	{
+		tm_processor.InitializeFrame(i);
+		if (i > 0)
+			//link maps 1 and 2
+			tm_processor.LinkFrames(i - 1, i);
+
+		prog += prog_bit;
+		m_gen_map_prg->SetValue(int(prog));
+		(*m_stat_text) << wxString::Format("Time point %d initialized.\n", i);
+		wxGetApp().Yield();
+	}
+
+	//Nrrd* nrrd_data1 = 0;
+	//Nrrd* nrrd_data2 = 0;
+	//Nrrd* nrrd_label1 = 0;
+	//Nrrd* nrrd_label2 = 0;
+	//wstring lblname;
+	//bool file_err = false;
+
+/*	for (int i = 0; i < frames; ++i)
 	{
 		if (i == 0)
 		{
@@ -3113,7 +3177,7 @@ void TraceDlg::GenMap()
 		(*m_stat_text) << "ERROR! Certain file(s) missing. Check if label files exist.\n";
 
 	nrrdNuke(nrrd_data2);
-	nrrdNuke(nrrd_label2);
+	nrrdNuke(nrrd_label2);*/
 
 	//resolve multiple links of single vertex
 	for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
@@ -3126,6 +3190,7 @@ void TraceDlg::GenMap()
 		wxGetApp().Yield();
 	}
 
+	//start iterations
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	//check branch
 	for (size_t iteri = 0; iteri < iter_num; ++iteri)
