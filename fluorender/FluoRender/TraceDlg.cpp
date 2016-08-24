@@ -817,7 +817,15 @@ void TraceDlg::GetSettings(VRenderView* vrv)
 	TraceGroup* trace_group = m_view->GetTraceGroup();
 	if (trace_group)
 	{
-		wxString str = trace_group->GetPath();
+		wxString str;
+		//cell size filter
+		str = m_cell_size_text->GetValue();
+		unsigned long ival;
+		str.ToULong(&ival);
+		unsigned int slimit = (unsigned int)ival;
+		trace_group->SetCellSize(ival);
+
+		str = trace_group->GetPath();
 		if (str != "")
 			m_load_trace_text->SetValue(str);
 		else
@@ -858,6 +866,7 @@ void TraceDlg::SetCellSize(int size)
 {
 	if (m_cell_size_text)
 		m_cell_size_text->SetValue(wxString::Format("%d", size));
+
 }
 
 VRenderView* TraceDlg::GetView()
@@ -3009,21 +3018,29 @@ void TraceDlg::ReadVolCache(FL::VolCache& vol_cache)
 	wstring lblname = reader->GetCurLabelName(frame, chan);
 	lbl_reader.SetFile(lblname);
 	Nrrd* label = lbl_reader.Convert(frame, chan, true);
-	vol_cache.nrrd_label = data;
-	vol_cache.label = data->data;
+	vol_cache.nrrd_label = label;
+	vol_cache.label = label->data;
 	if (data && label)
 		vol_cache.valid = true;
 }
 
 void TraceDlg::DelVolCache(FL::VolCache& vol_cache)
 {
-	nrrdNuke((Nrrd*)(vol_cache.nrrd_data));
-	nrrdNuke((Nrrd*)(vol_cache.nrrd_label));
-	vol_cache.nrrd_data = 0;
-	vol_cache.nrrd_label = 0;
-	vol_cache.data = 0;
-	vol_cache.label = 0;
 	vol_cache.valid = false;
+	if (vol_cache.data)
+	{
+		delete[] vol_cache.data;
+		nrrdNix((Nrrd*)vol_cache.nrrd_data);
+		vol_cache.data = 0;
+		vol_cache.nrrd_data = 0;
+	}
+	if (vol_cache.label)
+	{
+		delete[] vol_cache.label;
+		nrrdNix((Nrrd*)vol_cache.nrrd_label);
+		vol_cache.label = 0;
+		vol_cache.nrrd_label = 0;
+	}
 }
 
 void TraceDlg::OnCellPrev(wxCommandEvent &event)
@@ -3180,7 +3197,7 @@ void TraceDlg::GenMap()
 	nrrdNuke(nrrd_label2);*/
 
 	//resolve multiple links of single vertex
-	for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
+/*	for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
 	{
 		tm_processor.ResolveGraph(fi, fi + 1);
 		tm_processor.ResolveGraph(fi, fi - 1);
@@ -3224,7 +3241,7 @@ void TraceDlg::GenMap()
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 	(*m_stat_text) << wxString::Format("Wall clock time: %.4fs\n", time_span.count());
-
+*/
 	m_gen_map_prg->SetValue(100);
 
 	GetSettings(m_view);

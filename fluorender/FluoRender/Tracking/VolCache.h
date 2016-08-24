@@ -59,7 +59,8 @@ namespace FL
 	class CacheQueue
 	{
 	public:
-		CacheQueue() {};
+		CacheQueue():
+		m_max_size(1) {};
 		~CacheQueue();
 
 		inline void set_max_size(size_t size);
