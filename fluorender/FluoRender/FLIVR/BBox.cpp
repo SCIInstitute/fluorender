@@ -50,12 +50,6 @@ void BBox::extend_disk(const Point& cen, const Vector& normal, double r)
 	extend(cen-Vector(x,y,z));
 }
 
-void BBox::translate(const Vector &v)
-{
-	cmin_+=v;
-	cmax_+=v;
-}
-
 void BBox::scale(double s, const Vector&o)
 {
 	cmin_-=o;

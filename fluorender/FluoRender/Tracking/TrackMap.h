@@ -112,6 +112,8 @@ namespace FL
 		//modifications
 		bool LinkCells(CellList &list1, CellList &list2,
 			size_t frame1, size_t frame2, bool exclusive);
+		bool LinkCells(pCell &cell1, pCell &cell2,
+			size_t frame1, size_t frame2, bool exclusive);
 		bool IsolateCells(CellList &list, size_t frame);
 		bool UnlinkCells(CellList &list1, CellList &list2,
 			size_t frame1, size_t frame2);
@@ -133,6 +135,12 @@ namespace FL
 			size_t frame);
 		void GetCellUncertainty(CellList &list, size_t frame);
 		void GetUncertainHist(UncertainHist &hist1, UncertainHist &hist2, size_t frame);
+
+		//tracking by matching user input
+		bool TrackStencils(size_t frame1, size_t frame2);
+		////test purpose only
+		//bool TrackStencilsP1(size_t frame1, size_t frame2,
+		//	void* data1, void* data2, void* label1, void* label2);
 
 		//connect and disconnect functions for cache queue
 		typedef boost::function<void (VolCache&)> func_cache;

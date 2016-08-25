@@ -5265,6 +5265,8 @@ void VRenderGLView::Run4DScript(wxString &scriptname, VolumeData* vd)
 					RunNoiseReduction(fconfig);
 				else if (str == "selection_tracking")
 					RunSelectionTracking(fconfig);
+				else if (str == "sparse_tracking")
+					RunSparseTracking(fconfig);
 				else if (str == "random_colors")
 					RunRandomColors(fconfig);
 				else if (str == "separate_channels")
@@ -5450,6 +5452,36 @@ void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 				mask_data[index] = 255;
 		}
 	}
+
+	//add traces to trace dialog
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (m_vrv && vr_frame && vr_frame->GetTraceDlg())
+		vr_frame->GetTraceDlg()->GetSettings(m_vrv);
+}
+
+void VRenderGLView::RunSparseTracking(wxFileConfig &fconfig)
+{
+	if (!m_trace_group)
+		CreateTraceGroup();
+
+	FL::TrackMapProcessor tm_processor(m_trace_group->GetTrackMap());
+	int chan = m_cur_vol->GetCurChannel();
+	int resx, resy, resz;
+	m_cur_vol->GetResolution(resx, resy, resz);
+	double spcx, spcy, spcz;
+	m_cur_vol->GetSpacings(spcx, spcy, spcz);
+	tm_processor.SetBits(m_cur_vol->GetBits());
+	tm_processor.SetScale(m_cur_vol->GetScalarScale());
+	tm_processor.SetSizes(resx, resy, resz);
+	tm_processor.SetSpacings(spcx, spcy, spcz);
+	//tm_processor.SetSizeThresh(component_size);
+	//tm_processor.SetContactThresh(contact_factor);
+	//register file reading and deleteing functions
+	tm_processor.RegisterCacheQueueFuncs(
+		boost::bind(&VRenderGLView::ReadVolCache, this, _1),
+		boost::bind(&VRenderGLView::DelVolCache, this, _1));
+
+	tm_processor.TrackStencils(m_tseq_prv_num, m_tseq_cur_num);
 
 	//add traces to trace dialog
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
@@ -5728,6 +5760,86 @@ void VRenderGLView::RunGenerateComp(wxFileConfig &fconfig)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetComponentDlg())
 		vr_frame->GetComponentDlg()->GenerateComp(type, mode);
+}
+
+//read/delete volume cache
+void VRenderGLView::ReadVolCache(FL::VolCache& vol_cache)
+{
+	//get volume, readers
+	if (!m_cur_vol)
+		return;
+	BaseReader* reader = m_cur_vol->GetReader();
+	if (!reader)
+		return;
+	LBLReader lbl_reader;
+
+	int chan = m_cur_vol->GetCurChannel();
+	int frame = vol_cache.frame;
+
+	Nrrd* data = reader->Convert(frame, chan, true);
+	vol_cache.nrrd_data = data;
+	vol_cache.data = data->data;
+	wstring lblname = reader->GetCurLabelName(frame, chan);
+	lbl_reader.SetFile(lblname);
+	Nrrd* label = lbl_reader.Convert(frame, chan, true);
+	if (!label)
+	{
+		int resx, resy, resz;
+		m_cur_vol->GetResolution(resx, resy, resz);
+		double spcx, spcy, spcz;
+		m_cur_vol->GetSpacings(spcx, spcy, spcz);
+		label = nrrdNew();
+		unsigned long long mem_size = (unsigned long long)resx*
+			(unsigned long long)resy*(unsigned long long)resz;
+		unsigned int *val32 = new (std::nothrow) unsigned int[mem_size];
+		memset(val32, 0, sizeof(unsigned int)*mem_size);
+		nrrdWrap(label, val32, nrrdTypeUInt, 3, (size_t)resx, (size_t)resy, (size_t)resz);
+		nrrdAxisInfoSet(label, nrrdAxisInfoSpacing, spcx, spcy, spcz);
+		nrrdAxisInfoSet(label, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+		nrrdAxisInfoSet(label, nrrdAxisInfoMax, spcx*resx, spcy*resy, spcz*resz);
+		nrrdAxisInfoSet(label, nrrdAxisInfoSize, (size_t)resx, (size_t)resy, (size_t)resz);
+	}
+	vol_cache.nrrd_label = label;
+	vol_cache.label = label->data;
+	if (data && label)
+		vol_cache.valid = true;
+}
+
+void VRenderGLView::DelVolCache(FL::VolCache& vol_cache)
+{
+	if (!m_cur_vol)
+		return;
+	vol_cache.valid = false;
+	if (vol_cache.data)
+	{
+		delete[] vol_cache.data;
+		nrrdNix((Nrrd*)vol_cache.nrrd_data);
+		vol_cache.data = 0;
+		vol_cache.nrrd_data = 0;
+	}
+	if (vol_cache.label)
+	{
+		int chan = m_cur_vol->GetCurChannel();
+		int frame = vol_cache.frame;
+		double spcx, spcy, spcz;
+		m_cur_vol->GetSpacings(spcx, spcy, spcz);
+
+		MSKWriter msk_writer;
+		msk_writer.SetData((Nrrd*)(vol_cache.nrrd_label));
+		msk_writer.SetSpacings(spcx, spcy, spcz);
+		BaseReader* reader = m_cur_vol->GetReader();
+		if (reader)
+		{
+			wstring filename;
+			filename = reader->GetCurLabelName(frame, chan);
+			msk_writer.Save(filename, 1);
+		}
+
+		delete[] vol_cache.label;
+		nrrdNix((Nrrd*)vol_cache.nrrd_label);
+		vol_cache.label = 0;
+		vol_cache.nrrd_label = 0;
+	}
 }
 
 //draw

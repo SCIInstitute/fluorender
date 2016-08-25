@@ -937,6 +937,7 @@ private:
 	void Run4DScript(wxString &scriptname, VolumeData* vd);
 	void RunNoiseReduction(wxFileConfig &fconfig);
 	void RunSelectionTracking(wxFileConfig &fconfig);
+	void RunSparseTracking(wxFileConfig &fconfig);
 	void RunRandomColors(wxFileConfig &fconfig);
 	void RunSeparateChannels(wxFileConfig &fconfig);
 	void RunExternalExe(wxFileConfig &fconfig);
@@ -946,6 +947,11 @@ private:
 	void RunOpenCL(wxFileConfig &fconfig);
 	void RunCompAnalysis(wxFileConfig &fconfig);
 	void RunGenerateComp(wxFileConfig &fconfig);
+
+	//read/delete volume cache
+	//for sparse tracking
+	void ReadVolCache(FL::VolCache& vol_cache);
+	void DelVolCache(FL::VolCache& vol_cache);
 
 	//brush states update
 	void SetBrush(int mode);

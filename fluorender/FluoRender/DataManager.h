@@ -967,6 +967,9 @@ public:
 	bool DivideCells(FL::CellList &list, size_t frame);
 	bool ReplaceCellID(unsigned int old_id, unsigned int new_id, size_t frame);
 
+	//sparse tracking
+	bool TrackStencils();
+
 	//rulers
 	bool GetMappedRulers(RulerList &rulers);
 

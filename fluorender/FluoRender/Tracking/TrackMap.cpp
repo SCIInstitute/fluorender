@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "TrackMap.h"
+#include "Stencil.h"
 #include "Cluster/dbscan.h"
 #include "Cluster/kmeans.h"
 #include "Cluster/exmax.h"
@@ -2638,6 +2639,54 @@ bool TrackMapProcessor::LinkCells(
 	return true;
 }
 
+bool TrackMapProcessor::LinkCells(pCell &cell1, pCell &cell2,
+	size_t frame1, size_t frame2, bool exclusive)
+{
+	//check validity
+	if ((frame2 != frame1 + 1 &&
+		frame2 != frame1 - 1) ||
+		!m_map.ExtendFrameNum(
+			std::max(frame1, frame2)))
+		return false;
+
+	VertexList vlist1, vlist2;
+
+	CellList &cell_list1 = m_map.m_cells_list.at(frame1);
+	CellList &cell_list2 = m_map.m_cells_list.at(frame2);
+	CellListIter cell;
+	unsigned int cell_id;
+
+	cell_id = cell1->Id();
+	cell = cell_list1.find(cell_id);
+	if (cell == cell_list1.end())
+		AddCell(cell1, frame1, cell);
+	pVertex vert1 = cell->second->GetVertex().lock();
+
+	cell_id = cell2->Id();
+	cell = cell_list2.find(cell_id);
+	if (cell == cell_list2.end())
+		AddCell(cell2, frame2, cell);
+	pVertex vert2 = cell->second->GetVertex().lock();
+
+	if (!vert1 || !vert2)
+		return false;
+
+	InterGraph &inter_graph = m_map.m_inter_graph_list.at(
+		frame1 > frame2 ? frame2 : frame1);
+
+	if (exclusive)
+	{
+		IsolateVertex(inter_graph, vert1);
+		IsolateVertex(inter_graph, vert2);
+	}
+
+	ForceVertices(inter_graph,
+		vert1, vert2,
+		frame1, frame2);
+
+	return true;
+}
+
 bool TrackMapProcessor::IsolateCells(
 	CellList &list, size_t frame)
 {
@@ -2757,6 +2806,10 @@ bool TrackMapProcessor::AddCell(
 
 	CellList &cell_list = m_map.m_cells_list.at(frame);
 	VertexList &vert_list = m_map.m_vertices_list.at(frame);
+
+	if (cell_list.find(cell->Id()) != cell_list.end() ||
+		vert_list.find(cell->Id()) != vert_list.end())
+		return true;
 
 	pVertex vertex(new Vertex(cell->Id()));
 	vertex->SetCenter(cell->GetCenter());
@@ -3335,4 +3388,109 @@ void TrackMapProcessor::GetUncertainHist(
 				uhist_iter->second.count++;
 		}
 	}
+}
+
+bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2)
+{
+	//check validity
+	if (!m_map.ExtendFrameNum(std::max(f1, f2)))
+		return false;
+
+	size_t frame_num = m_map.m_frame_num;
+	if (f1 >= frame_num || f2 >= frame_num || f1 == f2)
+		return false;
+
+	//get data and label
+	m_vol_cache.set_max_size(2);
+	VolCache cache = m_vol_cache.get(f1);
+	void* data1 = cache.data;
+	void* label1 = cache.label;
+	if (!data1 || !label1)
+		return false;
+	cache = m_vol_cache.get(f2);
+	void* data2 = cache.data;
+	void* label2 = cache.label;
+	if (!data2 || !label2)
+		return false;
+
+	size_t index;
+	size_t i, j, k;
+	size_t nx = m_map.m_size_x;
+	size_t ny = m_map.m_size_y;
+	size_t nz = m_map.m_size_z;
+	unsigned int label_value;
+
+	//get all stencils from frame1
+	StencilList stencil_list;
+	StencilListIter iter;
+	for (i = 0; i < nx; ++i)
+	for (j = 0; j < ny; ++j)
+	for (k = 0; k < nz; ++k)
+	{
+		index = nx*ny*k + nx*j + i;
+		label_value = ((unsigned int*)label1)[index];
+
+		if (!label_value)
+			continue;
+
+		iter = stencil_list.find(label_value);
+		if (iter != stencil_list.end())
+		{
+			iter->second.extend(i, j, k);
+		}
+		else
+		{
+			Stencil stencil;
+			stencil.data = data1;
+			stencil.id = label_value;
+			stencil.nx = nx;
+			stencil.ny = ny;
+			stencil.nz = nz;
+			stencil.bits = m_map.m_data_bits;
+			stencil.scale = m_map.m_scale;
+			stencil.box.extend(FLIVR::Point(i, j, k));
+			stencil_list.insert(std::pair<unsigned int, Stencil>
+				(label_value, stencil));
+		}
+	}
+
+	//find matching stencil in frame2
+	FLIVR::Point center;
+	FLIVR::Vector ext(1.5, 1.5, 0.5);
+	float prob;
+	Stencil s1, s2;
+	s2.data = data2;
+	s2.nx = nx;
+	s2.ny = ny;
+	s2.nz = nz;
+	s2.bits = m_map.m_data_bits;
+	s2.scale = m_map.m_scale;
+	for (iter = stencil_list.begin(); iter != stencil_list.end(); ++iter)
+	{
+		s1 = iter->second;
+		if (match_stencils(s1, s2, ext, center, prob))
+		{
+			if (prob > 0.5f)
+				continue;
+
+			//label stencil 2
+			label_stencil(s1, s2, label1, label2);
+
+			//add s1 to track map
+			CellListIter iter;
+			pCell cell1(new Cell(s1.id));
+			cell1->SetCenter(s1.box.center());
+			cell1->SetBox(s1.box);
+			AddCell(cell1, f1, iter);
+			//add s2 id to track map
+			pCell cell2(new Cell(s2.id));
+			cell2->SetCenter(s2.box.center());
+			cell2->SetBox(s2.box);
+			AddCell(cell2, f2, iter);
+			//connect cells
+			LinkCells(cell1, cell2, f1, f2, false);
+		}
+	}
+
+	return true;
 }

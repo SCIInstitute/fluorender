@@ -135,7 +135,25 @@ namespace FLIVR
 		//! with normal normal, and radius r.
 		void extend_disk(const Point& cen, const Vector& normal, double r);
 
-		inline Point center() const  
+		//extend anisotropically
+		inline void extend_ani(const Vector& v)
+		{
+			if (is_valid_)
+			{
+				Vector d = diagonal();
+				cmin_ -= d * v;
+				cmax_ += d * v;
+			}
+		}
+
+		//x, y, z size
+		inline Point size() const
+		{
+			assert(is_valid_);
+			return Point(cmax_ - cmin_);
+		}
+
+		inline Point center() const
 		{ assert(is_valid_); Vector d = diagonal(); return cmin_ + (d * 0.5); }
 
 		inline double longest_edge() const
@@ -153,7 +171,11 @@ namespace FLIVR
 		}
 
 		//! Move the bounding box 
-		void translate(const Vector &v);
+		inline void translate(const Vector &v)
+		{
+			cmin_ += v;
+			cmax_ += v;
+		}
 
 		//! Scale the bounding box by s, centered around o
 		void scale(double s, const Vector &o);
@@ -194,6 +216,30 @@ namespace FLIVR
 		Point cmax_;
 		bool is_valid_;
 	};
+
+	//overlap region between two boxes
+	inline BBox intersect(const BBox& box1, const BBox& box2)
+	{
+		BBox ibox;
+		if (!box1.valid() || !box2.valid())
+			return ibox;
+		if (box1.max().x() < box2.min().x())
+			return ibox;
+		if (box1.min().x() > box2.max().x())
+			return ibox;
+		if (box1.max().y() < box2.min().y())
+			return ibox;
+		if (box1.min().y() > box2.max().y())
+			return ibox;
+		if (box1.max().z() < box2.min().z())
+			return ibox;
+		if (box1.min().z() > box2.max().z())
+			return ibox;
+		Point min = Max(box1.min(), box2.min());
+		Point max = Min(box1.max(), box2.max());
+		ibox = BBox(min, max);
+		return ibox;
+	}
 
 } // End namespace FLIVR
 
