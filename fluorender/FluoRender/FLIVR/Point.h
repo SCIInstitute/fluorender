@@ -49,7 +49,11 @@ public:
   Point(const Point&);
   inline Point();
   inline int operator==(const Point&) const;
-  int operator!=(const Point&) const;
+  inline int operator!=(const Point&) const;
+  inline bool operator<(const Point&) const;
+  inline bool operator>(const Point&) const;
+  inline bool operator<=(const Point&) const;
+  inline bool operator>=(const Point&) const;
   inline Point& operator=(const Point&);
   inline Vector operator+(const Point&) const;
   inline Vector operator-(const Point&) const;
@@ -154,6 +158,55 @@ inline Point::Point()
 	x_=y_=z_=0.0;
 }
 
+inline int Point::operator==(const Point& p) const
+{
+	return p.x_ == x_ && p.y_ == y_ && p.z_ == z_;
+}
+
+inline int Point::operator!=(const Point& p) const
+{
+	return p.x_ != x_ || p.y_ != y_ || p.z_ != z_;
+}
+
+inline bool Point::operator<(const Point& p) const
+{
+	if (x_ < p.x_ &&
+		y_ < p.y_ &&
+		z_ < p.z_)
+		return true;
+	else
+		return false;
+}
+
+inline bool Point::operator>(const Point& p) const
+{
+	if (x_ > p.x_ &&
+		y_ > p.y_ &&
+		z_ > p.z_)
+		return true;
+	else
+		return false;
+}
+
+inline bool Point::operator<=(const Point& p) const
+{
+	if (x_ <= p.x_ &&
+		y_ <= p.y_ &&
+		z_ <= p.z_)
+		return true;
+	else
+		return false;
+}
+
+inline bool Point::operator>=(const Point& p) const
+{
+	if (x_ >= p.x_ &&
+		y_ >= p.y_ &&
+		z_ >= p.z_)
+		return true;
+	else
+		return false;
+}
 
 inline Point& Point::operator=(const Point& p)
 {

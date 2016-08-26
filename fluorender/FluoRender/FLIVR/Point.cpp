@@ -44,16 +44,6 @@ namespace FLIVR
 		return buf;
 	}
 
-	int Point::operator==(const Point& p) const
-	{
-		return p.x_ == x_ && p.y_ == y_ && p.z_ == z_;
-	}
-
-	int Point::operator!=(const Point& p) const
-	{
-		return p.x_ != x_ || p.y_ != y_ || p.z_ != z_;
-	}
-
 	Point::Point(double x, double y, double z, double w)
 	{
 		if(w==0)

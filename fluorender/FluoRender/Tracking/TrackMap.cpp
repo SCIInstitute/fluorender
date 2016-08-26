@@ -3470,8 +3470,8 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2)
 		s1 = iter->second;
 		if (match_stencils(s1, s2, ext, center, prob))
 		{
-			if (prob > 0.5f)
-				continue;
+			//if (prob > 0.5f)
+			//	continue;
 
 			//label stencil 2
 			label_stencil(s1, s2, label1, label2);

@@ -146,6 +146,18 @@ namespace FLIVR
 			}
 		}
 
+		//clamp the box to another one
+		inline void clamp(const BBox &box)
+		{
+			if (is_valid_)
+			{
+				cmin_ = Max(cmin_, box.min());
+				cmax_ = Min(cmax_, box.max());
+				if (!(cmin_ <= cmax_))
+					is_valid_ = false;
+			}
+		}
+
 		//x, y, z size
 		inline Point size() const
 		{
