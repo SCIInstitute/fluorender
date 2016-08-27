@@ -552,18 +552,15 @@ namespace FLIVR
 	"// PAINT_SHADER_CODE\n" \
 	"uniform vec4 loc0; //(mouse_x, mouse_y, radius1, radius2)\n" \
 	"uniform vec4 loc1; //(width, height, 0, 0)\n" \
-	"uniform sampler2D tex0;\n" \
 	"\n" \
 	"void main()\n" \
 	"{\n" \
 	"	vec4 t = vec4(OutTexCoord, 1.0);\n" \
-	"	vec4 c = texture(tex0, t.xy);\n" \
 	"	vec2 center = vec2(loc0.x, loc0.y);\n" \
 	"	vec2 pos = vec2(t.x*loc1.x, t.y*loc1.y);\n" \
 	"	float d = length(pos - center);\n" \
-	"	vec4 ctemp = d<loc0.z?vec4(1.0, 1.0, 1.0, 1.0):(d<loc0.w?vec4(0.5, 0.5, 0.5, 1.0):vec4(0.0, 0.0, 0.0, 1.0));\n" \
-	"	FragColor = ctemp.r>c.r?ctemp:c;\n" \
-	"	FragColor.a = FragColor.r>0.1?0.5:0.0;\n" \
+	"	if (d<loc0.w) FragColor = vec4(0.5);\n" \
+	"	if (d<loc0.z) FragColor = vec4(1.0, 1.0, 1.0, 0.5);\n" \
 	"}\n"
 
 	ImgShader::ImgShader(int type, int colormap) : 

@@ -1749,10 +1749,9 @@ void VRenderGLView::PaintStroke()
 		//paint to texture
 		//bind fbo for final composition
 		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_paint);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m_tex_paint);
-		glDisable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendEquation(GL_MAX);
 
 		double px = double(old_mouse_X-prv_mouse_X);
 		double py = double(old_mouse_Y-prv_mouse_Y);
@@ -1807,7 +1806,7 @@ void VRenderGLView::PaintStroke()
 
 	//bind back the window frame buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	glBlendEquation(GL_FUNC_ADD);
 	RefreshGL(3);
 }
 
