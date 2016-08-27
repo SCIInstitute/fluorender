@@ -37,7 +37,7 @@ namespace FLIVR
 	"//KERNEL_HIST_3D_CODE\n" \
 	"const sampler_t samp =\n" \
 	"	CLK_NORMALIZED_COORDS_FALSE|\n" \
-	"	CLK_ADDRESS_REPEAT|\n" \
+	"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
 	"	CLK_FILTER_NEAREST;\n" \
 	"__kernel void hist_3d(image3d_t data,\n" \
 	"	image3d_t mask, __global float* hist,\n" \

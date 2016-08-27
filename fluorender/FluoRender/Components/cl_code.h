@@ -1,7 +1,7 @@
 const char* str_cl_slice_brainbow = \
 "const sampler_t samp =\n" \
 "	CLK_NORMALIZED_COORDS_FALSE|\n" \
-"	CLK_ADDRESS_REPEAT|\n" \
+"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
 "	CLK_FILTER_NEAREST;\n" \
 "\n" \
 "float2 vol_grad_func(image2d_t image, int2 pos)\n" \
@@ -119,7 +119,7 @@ const char* str_cl_slice_brainbow = \
 const char* str_cl_brainbow_3d = \
 "const sampler_t samp =\n" \
 "	CLK_NORMALIZED_COORDS_FALSE|\n" \
-"	CLK_ADDRESS_REPEAT|\n" \
+"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
 "	CLK_FILTER_NEAREST;\n" \
 "\n" \
 "float3 vol_grad_func(image3d_t image, int4 pos)\n" \
@@ -198,7 +198,7 @@ const char* str_cl_brainbow_3d = \
 const char* str_cl_brainbow_3d_sized = \
 "const sampler_t samp =\n" \
 "	CLK_NORMALIZED_COORDS_FALSE|\n" \
-"	CLK_ADDRESS_REPEAT|\n" \
+"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
 "	CLK_FILTER_NEAREST;\n" \
 "\n" \
 "float3 vol_grad_func(image3d_t image, int4 pos)\n" \
@@ -362,7 +362,7 @@ const char* str_cl_brainbow_3d_sized = \
 const char* str_cl_shuffle_id_3d = \
 "const sampler_t samp =\n" \
 "	CLK_NORMALIZED_COORDS_FALSE|\n" \
-"	CLK_ADDRESS_REPEAT|\n" \
+"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
 "	CLK_FILTER_NEAREST;\n" \
 "\n" \
 "unsigned int __attribute((always_inline)) reverse_bit(unsigned int val, unsigned int len)\n" \
@@ -420,7 +420,7 @@ const char* str_cl_shuffle_id_3d = \
 const char* str_cl_order_id_2d = \
 "const sampler_t samp =\n" \
 "	CLK_NORMALIZED_COORDS_FALSE|\n" \
-"	CLK_ADDRESS_REPEAT|\n" \
+"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
 "	CLK_FILTER_NEAREST;\n" \
 "\n" \
 "\n" \
@@ -448,7 +448,7 @@ const char* str_cl_order_id_2d = \
 const char* str_cl_shuffle_id_2d = \
 "const sampler_t samp =\n" \
 "	CLK_NORMALIZED_COORDS_FALSE|\n" \
-"	CLK_ADDRESS_REPEAT|\n" \
+"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
 "	CLK_FILTER_NEAREST;\n" \
 "\n" \
 "unsigned int __attribute((always_inline)) reverse_bit(unsigned int val, unsigned int len)\n" \
@@ -504,7 +504,7 @@ const char* str_cl_shuffle_id_2d = \
 const char* str_cl_grow_size = \
 "const sampler_t samp =\n" \
 "	CLK_NORMALIZED_COORDS_FALSE|\n" \
-"	CLK_ADDRESS_REPEAT|\n" \
+"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
 "	CLK_FILTER_NEAREST;\n" \
 "\n" \
 "float2 vol_grad_func(image2d_t image, int2 pos)\n" \
