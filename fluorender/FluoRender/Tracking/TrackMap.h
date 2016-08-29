@@ -79,6 +79,8 @@ namespace FL
 		void SetScale(float scale);
 		void SetSpacings(float spcx, float spcy, float spcz);
 
+		void SetVolCacheSize(size_t size);
+
 		//build cell list and intra graph
 		bool InitializeFrame(size_t frame);
 		//build inter graph
@@ -231,7 +233,9 @@ namespace FL
 			std::vector<InterEdge> &edges);
 		bool SplitVertex(InterGraph &graph, pVertex &vertex,
 			std::vector<InterEdge> &edges);
-		
+		bool ClusterCellsMerge(CellList &list, size_t frame);
+		bool ClusterCellsSplit(CellList &list, size_t frame, size_t clnum);
+
 		//helper functions
 		bool get_alter_path(InterGraph &graph, pVertex &vertex,
 			Path &alt_path, VertexList &visited, int curl);

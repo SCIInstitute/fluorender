@@ -65,6 +65,11 @@ bool ClusterDbscan::Execute()
 		return false;
 }
 
+float ClusterDbscan::GetProb()
+{
+	return 1.0;
+}
+
 void ClusterDbscan::ResetData()
 {
 	for (ClusterIter iter = m_data.begin();

@@ -3114,6 +3114,7 @@ void TraceDlg::GenMap()
 	tm_processor.RegisterCacheQueueFuncs(
 		boost::bind(&TraceDlg::ReadVolCache, this, _1),
 		boost::bind(&TraceDlg::DelVolCache, this, _1));
+	tm_processor.SetVolCacheSize(2);
 
 	//initialization
 	for (int i = 0; i < frames; ++i)
@@ -3129,78 +3130,12 @@ void TraceDlg::GenMap()
 		wxGetApp().Yield();
 	}
 
-	//Nrrd* nrrd_data1 = 0;
-	//Nrrd* nrrd_data2 = 0;
-	//Nrrd* nrrd_label1 = 0;
-	//Nrrd* nrrd_label2 = 0;
-	//wstring lblname;
-	//bool file_err = false;
-
-/*	for (int i = 0; i < frames; ++i)
-	{
-		if (i == 0)
-		{
-			nrrd_data1 = reader->Convert(i, chan, true);
-			if (!nrrd_data1)
-			{
-				file_err = true;
-				continue;
-			}
-			lblname = reader->GetCurLabelName(i, chan);
-			lbl_reader.SetFile(lblname);
-			nrrd_label1 = lbl_reader.Convert(i, chan, true);
-			if (!nrrd_label1)
-			{
-				file_err = true;
-				continue;
-			}
-			tm_processor.InitializeFrame(nrrd_data1->data, nrrd_label1->data, i);
-		}
-		else
-		{
-			nrrd_data2 = reader->Convert(i, chan, true);
-			if (!nrrd_data2)
-			{
-				file_err = true;
-				continue;
-			}
-			lblname = reader->GetCurLabelName(i, chan);
-			lbl_reader.SetFile(lblname);
-			nrrd_label2 = lbl_reader.Convert(i, chan, true);
-			if (!nrrd_label2)
-			{
-				file_err = true;
-				continue;
-			}
-			tm_processor.InitializeFrame(nrrd_data2->data, nrrd_label2->data, i);
-
-			//link maps 1 and 2
-			tm_processor.LinkMaps(i - 1, i,
-				nrrd_data1->data, nrrd_data2->data,
-				nrrd_label1->data, nrrd_label2->data);
-
-			nrrdNuke(nrrd_data1);
-			nrrdNuke(nrrd_label1);
-			nrrd_data1 = nrrd_data2;
-			nrrd_label1 = nrrd_label2;
-		}
-		prog += prog_bit;
-		m_gen_map_prg->SetValue(int(prog));
-		(*m_stat_text) << wxString::Format("Time point %d initialized.\n", i);
-		wxGetApp().Yield();
-	}
-
-	if (file_err)
-		(*m_stat_text) << "ERROR! Certain file(s) missing. Check if label files exist.\n";
-
-	nrrdNuke(nrrd_data2);
-	nrrdNuke(nrrd_label2);*/
-
 	//resolve multiple links of single vertex
-/*	for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
+	for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
 	{
 		tm_processor.ResolveGraph(fi, fi + 1);
 		tm_processor.ResolveGraph(fi, fi - 1);
+
 		prog += prog_bit;
 		m_gen_map_prg->SetValue(int(prog));
 		(*m_stat_text) << wxString::Format("Time point %d resolved.\n", int(fi));
@@ -3208,7 +3143,7 @@ void TraceDlg::GenMap()
 	}
 
 	//start iterations
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
+/*	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	//check branch
 	for (size_t iteri = 0; iteri < iter_num; ++iteri)
 	{

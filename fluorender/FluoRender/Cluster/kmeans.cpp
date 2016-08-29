@@ -62,6 +62,11 @@ bool ClusterKmeans::Execute()
 		return true;
 }
 
+float ClusterKmeans::GetProb()
+{
+	return 1.0;
+}
+
 void ClusterKmeans::Initialize()
 {
 	m_means.clear();

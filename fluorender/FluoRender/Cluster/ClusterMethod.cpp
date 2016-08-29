@@ -43,6 +43,8 @@ void ClusterMethod::AddClusterPoint(const FLIVR::Point &p, const float value)
 void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
 	size_t nx, size_t ny, size_t nz)
 {
+	m_id_list.clear();
+
 	unsigned int id2 = id;
 	unsigned long long index;
 	int i, j, k;
@@ -72,6 +74,7 @@ void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
 			index = nx*ny*k + nx*j + i;
 			((unsigned int*)label)[index] = id2;
 		}
+		m_id_list.push_back(id2);
 	}
 }
 

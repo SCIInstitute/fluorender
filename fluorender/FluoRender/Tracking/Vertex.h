@@ -85,6 +85,7 @@ namespace FL
 		void Id(unsigned int);
 		InterVert GetInterVert(InterGraph& graph);
 		void SetInterVert(InterGraph& graph, InterVert inter_vert);
+		size_t GetFrame(InterGraph& graph);
 
 		void SetCenter(FLIVR::Point &center);
 		void SetSizeUi(unsigned int size_ui);
@@ -153,6 +154,16 @@ namespace FL
 		else
 			m_inter_verts.insert(
 				std::pair<unsigned int, InterVert>(key, inter_vert));
+	}
+
+	inline size_t Vertex::GetFrame(InterGraph& graph)
+	{
+		unsigned int key = graph.index;
+		InterVertListIter iter = m_inter_verts.find(key);
+		if (iter != m_inter_verts.end())
+			return graph[iter->second].frame;
+		else
+			return (size_t)-1;
 	}
 
 	inline void Vertex::SetCenter(FLIVR::Point &center)

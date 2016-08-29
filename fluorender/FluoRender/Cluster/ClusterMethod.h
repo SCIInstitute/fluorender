@@ -142,12 +142,16 @@ namespace FL
 			size_t nx, size_t ny, size_t nz);
 		bool FindId(void* label, unsigned int id,
 			size_t nx, size_t ny, size_t nz);
+		std::vector<unsigned int> &GetNewIDs()
+		{ return m_id_list; }
 		virtual bool Execute() = 0;
+		virtual float GetProb() = 0;
 
 	protected:
 		Cluster m_data;
 		ClusterSet m_result;
 		unsigned int m_id_counter;
+		std::vector<unsigned int> m_id_list;
 	};
 }
 #endif//FL_ClusterMethod_h

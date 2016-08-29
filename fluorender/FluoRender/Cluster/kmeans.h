@@ -41,6 +41,7 @@ namespace FL
 		void SetClnum(unsigned int num)
 		{ m_clnum = num; }
 		bool Execute();
+		float GetProb();
 
 	private:
 		//cluster number

@@ -64,6 +64,30 @@ bool ClusterExmax::Execute()
 		return true;
 }
 
+float ClusterExmax::GetProb()
+{
+	if (m_mem_prob.empty())
+		return 0.0f;
+
+	double sum = 0;
+	double max;
+	size_t size = m_mem_prob[0].size();
+	for (size_t i = 0; i < size; ++i)
+	{
+		max = 0;
+		for (size_t j = 0; j < m_clnum; ++j)
+		{
+			if (m_mem_prob[j][i] > max)
+				max = m_mem_prob[j][i];
+		}
+		sum += max;
+	}
+	if (size)
+		return float(sum / size);
+	else
+		return 0.0f;
+}
+
 void ClusterExmax::Initialize()
 {
 	//use same tau and covar

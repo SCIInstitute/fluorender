@@ -78,6 +78,11 @@ void TrackMapProcessor::SetSpacings(float spcx, float spcy, float spcz)
 	m_map.m_spc_z = spcz;
 }
 
+void TrackMapProcessor::SetVolCacheSize(size_t size)
+{
+	m_vol_cache.set_max_size(size);
+}
+
 bool TrackMapProcessor::InitializeFrame(size_t frame)
 {
 	//get label and data from cache
@@ -1038,8 +1043,9 @@ bool TrackMapProcessor::MergeEdges(InterGraph &graph, pVertex &vertex,
 
 	pVertex v1;
 	CellBinIter pwcell_iter;
-	std::vector<pwCell> cells;
-	std::vector<CellBin> cell_bins;
+	CellList cells;
+	pCell cell;
+	CellBin cell_bin;
 
 	//first, check if any out cells are touching
 	for (size_t i = 0; i < edges.size(); ++i)
@@ -1052,15 +1058,24 @@ bool TrackMapProcessor::MergeEdges(InterGraph &graph, pVertex &vertex,
 		//store all cells in the list temporarily
 		for (pwcell_iter = v1->GetCellsBegin();
 			pwcell_iter != v1->GetCellsEnd(); ++pwcell_iter)
-			cells.push_back(*pwcell_iter);
+		{
+			cell = pwcell_iter->lock();
+			if (cell)
+			cells.insert(std::pair<unsigned int, pCell>
+				(cell->Id(), cell));
+			cell_bin.push_back(*pwcell_iter);
+		}
 	}
 	//if a cell in the list has contacts that are also in the list,
 	//try to group them
-	//if (GroupCells(cells, cell_bins, intra_graph))
+	if (!v1) return false;
+	size_t frame = v1->GetFrame(graph);
+	if (ClusterCellsMerge(cells, frame))
 	{
 		//modify vertex list 2 if necessary
-		//for (size_t i = 0; i < cell_bins.size(); ++i)
-		//	MergeCells(vertex_list2, cell_bins[i], frame2);
+		VertexList &vertex_list = m_map.m_vertices_list.at(frame);
+		MergeCells(vertex_list, cell_bin, frame);
+		return true;
 	}
 
 	return false;
@@ -1069,7 +1084,30 @@ bool TrackMapProcessor::MergeEdges(InterGraph &graph, pVertex &vertex,
 bool TrackMapProcessor::SplitVertex(InterGraph &graph, pVertex &vertex,
 	std::vector<InterEdge> &edges)
 {
-	return true;
+	if (!vertex || edges.size() < 2)
+		return false;
+
+	CellBinIter pwcell_iter;
+	CellList cells;
+	pCell cell;
+
+	//store all cells in the list temporarily
+	for (pwcell_iter = vertex->GetCellsBegin();
+		pwcell_iter != vertex->GetCellsEnd(); ++pwcell_iter)
+	{
+		cell = pwcell_iter->lock();
+		if (cell)
+			cells.insert(std::pair<unsigned int, pCell>
+				(cell->Id(), cell));
+	}
+
+	size_t frame = vertex->GetFrame(graph);
+	if (ClusterCellsSplit(cells, frame, edges.size()))
+	{
+		return true;
+	}
+
+	return false;
 }
 
 bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph)
@@ -2986,13 +3024,164 @@ bool TrackMapProcessor::DivideCells(
 	return true;
 }
 
+bool TrackMapProcessor::ClusterCellsMerge(CellList &list, size_t frame)
+{
+	size_t frame_num = m_map.m_frame_num;
+	if (frame >= frame_num)
+		return false;
+
+	//get data and label
+	VolCache cache = m_vol_cache.get(frame);
+	void* data = cache.data;
+	void* label = cache.label;
+	if (!data || !label)
+		return false;
+
+	//needs a way to choose processor
+	ClusterExmax cs_processor;
+	size_t index;
+	size_t i, j, k;
+	size_t nx = m_map.m_size_x;
+	size_t ny = m_map.m_size_y;
+	size_t nz = m_map.m_size_z;
+	size_t minx, miny, minz;
+	size_t maxx, maxy, maxz;
+	unsigned int label_value;
+	unsigned int id = 0;
+	float data_value;
+
+	//add cluster points
+	for (CellListIter cliter = list.begin();
+		cliter != list.end(); ++cliter)
+	{
+		pCell cell = cliter->second;
+		unsigned int cid = cell->Id();
+		if (!id) id = cid;
+
+		minx = size_t(cell->GetBox().min().x() + 0.5);
+		miny = size_t(cell->GetBox().min().y() + 0.5);
+		minz = size_t(cell->GetBox().min().z() + 0.5);
+		maxx = size_t(cell->GetBox().max().x() + 0.5);
+		maxy = size_t(cell->GetBox().max().y() + 0.5);
+		maxz = size_t(cell->GetBox().max().z() + 0.5);
+		for (i = minx; i <= maxx; ++i)
+		for (j = miny; j <= maxy; ++j)
+		for (k = minz; k <= maxz; ++k)
+		{
+			index = nx*ny*k + nx*j + i;
+			label_value = ((unsigned int*)label)[index];
+			if (label_value == cid)
+			{
+				if (m_map.m_data_bits == 8)
+					data_value = ((unsigned char*)data)[index] / 255.0f;
+				else if (m_map.m_data_bits == 16)
+					data_value = ((unsigned short*)data)[index] * m_map.m_scale / 65535.0f;
+				cs_processor.AddClusterPoint(
+					FLIVR::Point(i, j, k), data_value);
+			}
+		}
+	}
+
+	//cluster range 1-list.size()
+	size_t clnum = 0;
+	float max_prob = 0;
+	for (size_t i = 1; i <= list.size(); ++i)
+	{
+		cs_processor.SetClnum(i);
+		if (cs_processor.Execute())
+		{
+			float prob = cs_processor.GetProb();
+			if (prob > max_prob)
+			{
+				max_prob = prob;
+				clnum = i;
+			}
+		}
+	}
+
+	if (clnum == 1)
+		return true;
+	else
+		return false;
+}
+
+bool TrackMapProcessor::ClusterCellsSplit(CellList &list, size_t frame, size_t clnum)
+{
+	size_t frame_num = m_map.m_frame_num;
+	if (frame >= frame_num)
+		return false;
+
+	//get data and label
+	VolCache cache = m_vol_cache.get(frame);
+	void* data = cache.data;
+	void* label = cache.label;
+	if (!data || !label)
+		return false;
+
+	//needs a way to choose processor
+	ClusterExmax cs_processor;
+	size_t index;
+	size_t i, j, k;
+	size_t nx = m_map.m_size_x;
+	size_t ny = m_map.m_size_y;
+	size_t nz = m_map.m_size_z;
+	size_t minx, miny, minz;
+	size_t maxx, maxy, maxz;
+	unsigned int label_value;
+	unsigned int id = 0;
+	float data_value;
+
+	//add cluster points
+	for (CellListIter cliter = list.begin();
+		cliter != list.end(); ++cliter)
+	{
+		pCell cell = cliter->second;
+		unsigned int cid = cell->Id();
+		if (!id) id = cid;
+
+		minx = size_t(cell->GetBox().min().x() + 0.5);
+		miny = size_t(cell->GetBox().min().y() + 0.5);
+		minz = size_t(cell->GetBox().min().z() + 0.5);
+		maxx = size_t(cell->GetBox().max().x() + 0.5);
+		maxy = size_t(cell->GetBox().max().y() + 0.5);
+		maxz = size_t(cell->GetBox().max().z() + 0.5);
+		for (i = minx; i <= maxx; ++i)
+		for (j = miny; j <= maxy; ++j)
+		for (k = minz; k <= maxz; ++k)
+		{
+			index = nx*ny*k + nx*j + i;
+			label_value = ((unsigned int*)label)[index];
+			if (label_value == cid)
+			{
+				if (m_map.m_data_bits == 8)
+					data_value = ((unsigned char*)data)[index] / 255.0f;
+				else if (m_map.m_data_bits == 16)
+					data_value = ((unsigned short*)data)[index] * m_map.m_scale / 65535.0f;
+				cs_processor.AddClusterPoint(
+					FLIVR::Point(i, j, k), data_value);
+			}
+		}
+	}
+
+	cs_processor.SetClnum(clnum);
+	if (cs_processor.Execute())
+	{
+		cs_processor.GenerateNewIDs(id, label,
+			nx, ny, nz);
+
+		return true;
+	}
+	else
+		return false;
+}
+
 bool TrackMapProcessor::SegmentCells(
 	void* data, void* label,
 	CellList &list, size_t frame)
 {
-	ClusterDbscan cs_processor;
+	//ClusterDbscan cs_processor;
 	//ClusterKmeans cs_processor;
-	//ClusterExmax cs_processor;
+	ClusterExmax cs_processor;
 	size_t index;
 	size_t i, j, k;
 	size_t nx = m_map.m_size_x;

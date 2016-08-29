@@ -43,6 +43,7 @@ namespace FL
 		void SetEps(float eps)
 		{ m_eps = eps; }
 		bool Execute();
+		float GetProb();
 
 	private:
 		unsigned int m_size;
