@@ -209,7 +209,8 @@ namespace FL
 		size_t GetBinsCellCount(std::vector<CellBin> &bins);
 
 		//replaces all previous match/unmatch funcs
-		bool ProcessVertex(pVertex &vertex, InterGraph &graph);
+		bool ProcessVertex(pVertex &vertex, InterGraph &graph,
+			bool hint_merge = false, bool hint_split = false);
 		//vertex matching routines
 		//find out current valence of a vertex
 		bool GetValence(pVertex &vertex, InterGraph &graph,
@@ -218,8 +219,9 @@ namespace FL
 		bool GetValence(pVertex &vertex, InterGraph &graph,
 			size_t &valence, std::vector<InterEdge> &edges);
 		//edges include linked only
-		bool GetLinkedEdges(pVertex &vertex, InterGraph &graph,
-			std::vector<InterEdge> &edges);
+		bool GetValence(pVertex &vertex, InterGraph &graph,
+			size_t &valence, std::vector<InterEdge> &all_edges,
+			std::vector<InterEdge> &linked_edges);
 		//detailed match functions
 		//link edge of the max overlap
 		bool LinkEdgeMax(InterGraph &graph, std::vector<InterEdge> &edges);

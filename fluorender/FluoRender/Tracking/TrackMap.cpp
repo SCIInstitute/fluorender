@@ -768,7 +768,10 @@ bool TrackMapProcessor::ProcessFrames(size_t frame1, size_t frame2)
 
 	for (iter = vertex_list1.begin();
 		iter != vertex_list1.end(); ++iter)
-		ProcessVertex(iter->second, inter_graph);
+	{
+		ProcessVertex(iter->second, inter_graph,
+			true, true);
+	}
 
 	return true;
 }
@@ -906,9 +909,11 @@ bool TrackMapProcessor::GetValence(pVertex &vertex, InterGraph &graph,
 	return true;
 }
 
-bool TrackMapProcessor::GetLinkedEdges(pVertex &vertex, InterGraph &graph,
-	std::vector<InterEdge> &edges)
+bool TrackMapProcessor::GetValence(pVertex &vertex, InterGraph &graph,
+	size_t &valence, std::vector<InterEdge> &all_edges,
+	std::vector<InterEdge> &linked_edges)
 {
+	valence = 0;
 	if (!vertex)
 		return false;
 	InterVert v0 = vertex->GetInterVert(graph);
@@ -932,7 +937,11 @@ bool TrackMapProcessor::GetLinkedEdges(pVertex &vertex, InterGraph &graph,
 		{
 			link = graph[edge.first].link;
 			if (link == 1 || link == 2)
-				edges.push_back(edge.first);
+			{
+				valence++;
+				linked_edges.push_back(edge.first);
+			}
+			all_edges.push_back(edge.first);
 		}
 	}
 
@@ -1112,15 +1121,34 @@ bool TrackMapProcessor::SplitVertex(InterGraph &graph, pVertex &vertex,
 	return false;
 }
 
-bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph)
+bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph,
+	bool hint_merge, bool hint_split)
 {
+	bool result = false;
 	size_t valence;
-	std::vector<InterEdge> edges;
-	GetValence(vertex, graph, valence, edges);
+	std::vector<InterEdge> all_edges;
+	std::vector<InterEdge> linked_edges;
+	GetValence(vertex, graph, valence, all_edges, linked_edges);
 	if (valence == 0)
-		LinkEdgeMax(graph, edges);
+	{
+		if (linked_edges.size() == 0)
+			result = LinkEdgeMax(graph, all_edges);
+		//else
+		//	;
 
-	return true;
+	}
+	else if (valence > 1)
+	{
+		result = UnlinkEdgeSize(graph, vertex, linked_edges);
+		if (!result)
+			result = UnlinkAlterPath(graph, vertex, linked_edges);
+		if (!result && hint_merge)
+			result = MergeEdges(graph, vertex, linked_edges);
+		if (!result && hint_split)
+			result = SplitVertex(graph, vertex, linked_edges);
+	}
+
+	return result;
 }
 
 bool TrackMapProcessor::comp_edge_size(InterEdge &edge1,
