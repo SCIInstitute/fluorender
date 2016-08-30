@@ -272,8 +272,8 @@ bool TrackMapProcessor::CheckCellContact(
 		cell->IncExternal(value);
 
 		//expand search range if it's external but not contacting
-		if (cc == 0)
-			CheckCellDist(cell, label, ci, cj, ck);
+		//if (cc == 0)
+		//	CheckCellDist(cell, label, ci, cj, ck);
 	}
 
 	return true;
@@ -1102,8 +1102,10 @@ bool TrackMapProcessor::SplitVertex(InterGraph &graph, pVertex &vertex,
 	}
 
 	size_t frame = vertex->GetFrame(graph);
-	if (ClusterCellsSplit(cells, frame, edges.size()))
+	CellList outlist;
+	if (ClusterCellsSplit(cells, frame, edges.size(), outlist))
 	{
+		AddCells(outlist, frame);
 		return true;
 	}
 
@@ -1112,6 +1114,12 @@ bool TrackMapProcessor::SplitVertex(InterGraph &graph, pVertex &vertex,
 
 bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph)
 {
+	size_t valence;
+	std::vector<InterEdge> edges;
+	GetValence(vertex, graph, valence, edges);
+	if (valence == 0)
+		LinkEdgeMax(graph, edges);
+
 	return true;
 }
 
@@ -2863,6 +2871,38 @@ bool TrackMapProcessor::AddCell(
 	return true;
 }
 
+bool TrackMapProcessor::AddCells(CellList &list, size_t frame)
+{
+	//check validity
+	if (!m_map.ExtendFrameNum(frame))
+		return false;
+
+	CellList &cell_list = m_map.m_cells_list.at(frame);
+	VertexList &vert_list = m_map.m_vertices_list.at(frame);
+
+	for (CellListIter iter = list.begin();
+		iter != list.end(); ++iter)
+	{
+		pCell cell = iter->second;
+		if (cell_list.find(cell->Id()) != cell_list.end() ||
+			vert_list.find(cell->Id()) != vert_list.end())
+			continue;
+
+		pVertex vertex(new Vertex(cell->Id()));
+		vertex->SetCenter(cell->GetCenter());
+		vertex->SetSizeUi(cell->GetSizeUi());
+		vertex->SetSizeF(cell->GetSizeF());
+		vertex->AddCell(cell);
+		cell->AddVertex(vertex);
+		vert_list.insert(std::pair<unsigned int, pVertex>
+			(vertex->Id(), vertex));
+		cell_list.insert(std::pair<unsigned int, pCell>
+			(cell->Id(), cell));
+	}
+
+	return true;
+}
+
 bool TrackMapProcessor::CombineCells(
 	pCell &cell, CellList &list, size_t frame)
 {
@@ -3105,7 +3145,8 @@ bool TrackMapProcessor::ClusterCellsMerge(CellList &list, size_t frame)
 		return false;
 }
 
-bool TrackMapProcessor::ClusterCellsSplit(CellList &list, size_t frame, size_t clnum)
+bool TrackMapProcessor::ClusterCellsSplit(CellList &list, size_t frame,
+	size_t clnum, CellList &listout)
 {
 	size_t frame_num = m_map.m_frame_num;
 	if (frame >= frame_num)
@@ -3168,6 +3209,34 @@ bool TrackMapProcessor::ClusterCellsSplit(CellList &list, size_t frame, size_t c
 	{
 		cs_processor.GenerateNewIDs(id, label,
 			nx, ny, nz);
+		//generate output cell list
+		Cluster &points = cs_processor.GetData();
+		std::vector<unsigned int> &ids = cs_processor.GetNewIDs();
+		pClusterPoint point;
+		unsigned int id2;
+		CellListIter citer;
+		for (ClusterIter piter = points.begin();
+			piter != points.end(); ++piter)
+		{
+			point = *piter;
+			i = size_t(point->center.x() + 0.5);
+			j = size_t(point->center.y() + 0.5);
+			k = size_t(point->center.z() + 0.5);
+			index = nx*ny*k + nx*j + i;
+			id2 = ((unsigned int*)label)[index];
+			citer = listout.find(id2);
+			if (citer != listout.end())
+			{
+				citer->second->Inc(i, j, k, point->intensity);
+			}
+			else
+			{
+				Cell* cell = new Cell(id2);
+				cell->Inc(i, j, k, point->intensity);
+				listout.insert(std::pair<unsigned int, pCell>
+					(id2, pCell(cell)));
+			}
+		}
 
 		return true;
 	}

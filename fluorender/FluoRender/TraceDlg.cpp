@@ -3143,7 +3143,7 @@ void TraceDlg::GenMap()
 	}
 
 	//start iterations
-/*	high_resolution_clock::time_point t1 = high_resolution_clock::now();
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	//check branch
 	for (size_t iteri = 0; iteri < iter_num; ++iteri)
 	{
@@ -3153,30 +3153,15 @@ void TraceDlg::GenMap()
 			tm_processor.ProcessFrames(fi, fi - 1);
 			prog += prog_bit;
 			m_gen_map_prg->SetValue(int(prog));
-			(*m_stat_text) << wxString::Format("Time point %d linked.\n", int(fi));
+			(*m_stat_text) << wxString::Format("Time point %d processed.\n", int(fi));
 			wxGetApp().Yield();
 		}
 
-		if (++iteri >= iter_num)
-			break;
-
-		for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
-		{
-			tm_processor.UnmatchFrames(fi, fi - 1);
-			tm_processor.UnmatchFrames(fi, fi + 1);
-			//link orphans
-			tm_processor.ExMatchFrames(fi, fi + 1);
-			tm_processor.ExMatchFrames(fi, fi - 1);
-			prog += prog_bit;
-			m_gen_map_prg->SetValue(int(prog));
-			(*m_stat_text) << wxString::Format("Time point %d unlinked.\n", int(fi));
-			wxGetApp().Yield();
-		}
 	}
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 	(*m_stat_text) << wxString::Format("Wall clock time: %.4fs\n", time_span.count());
-*/
+
 	m_gen_map_prg->SetValue(100);
 
 	GetSettings(m_view);

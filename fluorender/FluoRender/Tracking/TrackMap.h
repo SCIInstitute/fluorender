@@ -121,6 +121,7 @@ namespace FL
 			size_t frame1, size_t frame2);
 		//
 		bool AddCell(pCell &cell, size_t frame, CellListIter &iter);
+		bool AddCells(CellList &list, size_t frame);
 		bool CombineCells(pCell &cell, CellList &list, size_t frame);
 		bool DivideCells(CellList &list, size_t frame);
 		bool SegmentCells(void* data, void* label, CellList &list, size_t frame);
@@ -231,10 +232,12 @@ namespace FL
 		//check if any out vertex can be combined
 		bool MergeEdges(InterGraph &graph, pVertex &vertex,
 			std::vector<InterEdge> &edges);
+		//check if the vertex can split
 		bool SplitVertex(InterGraph &graph, pVertex &vertex,
 			std::vector<InterEdge> &edges);
 		bool ClusterCellsMerge(CellList &list, size_t frame);
-		bool ClusterCellsSplit(CellList &list, size_t frame, size_t clnum);
+		bool ClusterCellsSplit(CellList &list, size_t frame,
+			size_t clnum, CellList &listout);
 
 		//helper functions
 		bool get_alter_path(InterGraph &graph, pVertex &vertex,

@@ -133,6 +133,8 @@ namespace FL
 
 		void SetData(Cluster &data)
 		{ m_data = data; }
+		Cluster &GetData()
+		{ return m_data; }
 		ClusterSet &GetResult()
 		{ return m_result; }
 		void ResetIDCounter()
