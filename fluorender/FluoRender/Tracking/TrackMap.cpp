@@ -1118,6 +1118,8 @@ bool TrackMapProcessor::SplitVertex(InterGraph &graph, pVertex &vertex,
 		RemoveVertex(graph, vertex);
 		//RemoveVertex(frame, vertex);
 		AddCells(outlist, frame);
+		LinkAddedCells(outlist, frame, frame - 1);
+		LinkAddedCells(outlist, frame, frame + 1);
 		return true;
 	}
 
@@ -2970,6 +2972,96 @@ bool TrackMapProcessor::AddCells(CellList &list, size_t frame)
 			(vertex->Id(), vertex));
 		cell_list.insert(std::pair<unsigned int, pCell>
 			(cell->Id(), cell));
+	}
+
+	return true;
+}
+
+bool TrackMapProcessor::LinkAddedCells(CellList &list, size_t f1, size_t f2)
+{
+	size_t frame_num = m_map.m_frame_num;
+	if (f1 >= frame_num || f2 >= frame_num || f1 == f2)
+		return false;
+
+	//get data and label
+	VolCache cache = m_vol_cache.get(f1);
+	void* data1 = cache.data;
+	void* label1 = cache.label;
+	if (!data1 || !label1)
+		return false;
+	cache = m_vol_cache.get(f2);
+	void* data2 = cache.data;
+	void* label2 = cache.label;
+	if (!data2 || !label2)
+		return false;
+
+	InterGraph &inter_graph = m_map.m_inter_graph_list.at(
+		f1 > f2 ? f2 : f1);
+	VertexList &vertex_list1 = m_map.m_vertices_list.at(f1);
+	VertexList &vertex_list2 = m_map.m_vertices_list.at(f2);
+	VertexListIter iter1, iter2;
+
+	size_t index;
+	size_t i, j, k;
+	size_t nx = m_map.m_size_x;
+	size_t ny = m_map.m_size_y;
+	size_t nz = m_map.m_size_z;
+	size_t minx, miny, minz;
+	size_t maxx, maxy, maxz;
+	float data_value1, data_value2;
+	unsigned int label_value1, label_value2;
+
+	for (CellListIter cliter = list.begin();
+		cliter != list.end(); ++cliter)
+	{
+		pCell cell = cliter->second;
+		unsigned int cid = cell->Id();
+
+		minx = size_t(cell->GetBox().min().x() + 0.5);
+		miny = size_t(cell->GetBox().min().y() + 0.5);
+		minz = size_t(cell->GetBox().min().z() + 0.5);
+		maxx = size_t(cell->GetBox().max().x() + 0.5);
+		maxy = size_t(cell->GetBox().max().y() + 0.5);
+		maxz = size_t(cell->GetBox().max().z() + 0.5);
+		for (i = minx; i <= maxx; ++i)
+		for (j = miny; j <= maxy; ++j)
+		for (k = minz; k <= maxz; ++k)
+		{
+			index = nx*ny*k + nx*j + i;
+			label_value1 = ((unsigned int*)label1)[index];
+			label_value2 = ((unsigned int*)label2)[index];
+
+			if (label_value1 != cid ||
+				!label_value2)
+				continue;
+
+			if (m_map.m_data_bits == 8)
+			{
+				data_value1 = ((unsigned char*)data1)[index] / 255.0f;
+				data_value2 = ((unsigned char*)data2)[index] / 255.0f;
+			}
+			else if (m_map.m_data_bits == 16)
+			{
+				data_value1 = ((unsigned short*)data1)[index] * m_map.m_scale / 65535.0f;
+				data_value2 = ((unsigned short*)data2)[index] * m_map.m_scale / 65535.0f;
+			}
+
+			iter1 = vertex_list1.find(label_value1);
+			iter2 = vertex_list2.find(label_value2);
+
+			if (iter1 == vertex_list1.end() ||
+				iter2 == vertex_list2.end())
+				continue;
+
+			if (iter1->second->GetSizeF() < m_size_thresh ||
+				iter2->second->GetSizeF() < m_size_thresh)
+				continue;
+
+			LinkVertices(inter_graph,
+				iter1->second, iter2->second,
+				f1, f2,
+				std::min(data_value1, data_value2));
+		}
 	}
 
 	return true;

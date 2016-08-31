@@ -3138,7 +3138,7 @@ void TraceDlg::GenMap()
 	tm_processor.RegisterCacheQueueFuncs(
 		boost::bind(&TraceDlg::ReadVolCache, this, _1),
 		boost::bind(&TraceDlg::DelVolCache, this, _1));
-	tm_processor.SetVolCacheSize(2);
+	tm_processor.SetVolCacheSize(3);
 
 	//start timing
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();

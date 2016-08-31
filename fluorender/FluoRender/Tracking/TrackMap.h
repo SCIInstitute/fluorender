@@ -122,6 +122,7 @@ namespace FL
 		//
 		bool AddCell(pCell &cell, size_t frame, CellListIter &iter);
 		bool AddCells(CellList &list, size_t frame);
+		bool LinkAddedCells(CellList &list, size_t frame1, size_t frame2);
 		bool CombineCells(pCell &cell, CellList &list, size_t frame);
 		bool DivideCells(CellList &list, size_t frame);
 		bool SegmentCells(void* data, void* label, CellList &list, size_t frame);
