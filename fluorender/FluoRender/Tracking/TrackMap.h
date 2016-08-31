@@ -194,6 +194,8 @@ namespace FL
 			pVertex &vertex1, pVertex &vertex2);
 		bool MergeCells(VertexList& vertex_list, CellBin &bin, size_t frame);
 		bool RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size_t frame, InterGraph &graph, bool reset);
+		bool RemoveVertex(InterGraph& graph, pVertex &vertex);
+		bool RemoveVertex(size_t frame, pVertex &vertex);
 		
 		//determine if cells on intragraph can be merged
 		typedef bool(TrackMapProcessor::*f_merge_cell)(IntraEdge&, pCell&, pCell&, IntraGraph&);
@@ -243,7 +245,7 @@ namespace FL
 
 		//helper functions
 		bool get_alter_path(InterGraph &graph, pVertex &vertex,
-			Path &alt_path, VertexList &visited, int curl);
+			Path &alt_path, VertVisitList &visited, int curl);
 		bool merge_cell_size(IntraEdge &edge, pCell &cell1, pCell &cell2, IntraGraph& graph);
 		static bool comp_edge_size(InterEdge &edge1, InterEdge &edge2, InterGraph& graph);
 		bool similar_edge_size(InterEdge &edge1, InterEdge &edge2, InterGraph& graph);

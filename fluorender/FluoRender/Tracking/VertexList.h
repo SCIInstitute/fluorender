@@ -36,6 +36,7 @@ namespace FL
 {
 	typedef boost::unordered_map<unsigned int, pVertex> VertexList;
 	typedef boost::unordered_map<unsigned int, pVertex>::iterator VertexListIter;
+	typedef std::set<InterVert> VertVisitList;
 
 	typedef std::deque<InterVert>::iterator PathIter;
 	class Path
@@ -62,6 +63,8 @@ namespace FL
 		{ return m_path.end(); }
 		inline void push_back(const InterVert& v)
 		{ m_path.push_back(v); }
+		inline size_t size()
+		{ return m_path.size(); }
 		inline float get_size(int odd);
 		float get_max_size()
 		{ return m_max_size; }

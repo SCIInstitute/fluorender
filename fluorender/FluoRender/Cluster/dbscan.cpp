@@ -33,7 +33,7 @@ using namespace FL;
 ClusterDbscan::ClusterDbscan():
 	ClusterMethod(),
 	m_size(60),
-	m_eps(3.5f),
+	m_eps(2.5f),
 	m_intw(8.0f)
 {
 
@@ -48,13 +48,13 @@ bool ClusterDbscan::Execute()
 {
 	m_result.clear();
 	Dbscan();
-	while (m_result.size() == 1 && m_size)
-	{
-		ResetData();
-		m_size += 1;
-		//m_eps += 0.1;
-		Dbscan();
-	}
+	//while (m_result.size() == 1 && m_size)
+	//{
+	//	ResetData();
+	//	m_size += 1;
+	//	//m_eps += 0.1;
+	//	Dbscan();
+	//}
 
 	if (m_result.size() > 0)
 	{

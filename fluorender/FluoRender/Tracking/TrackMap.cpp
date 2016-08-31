@@ -999,7 +999,7 @@ bool TrackMapProcessor::UnlinkAlterPath(InterGraph &graph, pVertex &vertex,
 	m_level_thresh = 2;
 	bool got_list;
 	PathList path_list;
-	VertexList visited;
+	VertVisitList visited;
 	do
 	{
 		Path alt_path(graph);
@@ -1114,6 +1114,9 @@ bool TrackMapProcessor::SplitVertex(InterGraph &graph, pVertex &vertex,
 	CellList outlist;
 	if (ClusterCellsSplit(cells, frame, edges.size(), outlist))
 	{
+		//remove input vertex
+		RemoveVertex(graph, vertex);
+		//RemoveVertex(frame, vertex);
 		AddCells(outlist, frame);
 		return true;
 	}
@@ -1131,7 +1134,7 @@ bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph,
 	GetValence(vertex, graph, valence, all_edges, linked_edges);
 	if (valence == 0)
 	{
-		if (linked_edges.size() == 0)
+		if (all_edges.size() > 0)
 			result = LinkEdgeMax(graph, all_edges);
 		//else
 		//	;
@@ -1193,23 +1196,15 @@ bool TrackMapProcessor::similar_edge_size(InterEdge &edge1,
 
 bool TrackMapProcessor::similar_path_size(Path &path1, Path &path2)
 {
-	float p1_odd = path1.get_odd_size();
-	float p1_evn = path1.get_evn_size();
-	float p2_odd = path2.get_odd_size();
-	float p2_evn = path2.get_evn_size();
+	float p1 = path1.get_max_size();
+	float p2 = path2.get_max_size();
 	float d;
-	//p1_odd compares to p2_evn;
-	if (p1_odd > 0.0f || p2_evn > 0.0f)
+	//p1 compares to p2
+	if (p1 > 0.0f || p2 > 0.0f)
 	{
-		d = fabs(p1_odd - p2_evn) / std::max(p1_odd, p2_evn);
+		d = fabs(p1 - p2) / std::max(p1, p2);
 		if (d < m_similar_thresh)
 			return true;
-	}
-	//p1_evn compares to p2_odd
-	if (p1_evn > 0.0f || p2_odd > 0.0f)
-	{
-		d = fabs(p1_evn - p2_odd) / std::max(p1_evn, p2_odd);
-		return d < m_similar_thresh;
 	}
 	return true;
 }
@@ -1245,7 +1240,7 @@ void TrackMapProcessor::unlink_edge(InterEdge edge, InterGraph &graph, unsigned 
 }
 
 bool TrackMapProcessor::get_alter_path(InterGraph &graph, pVertex &vertex,
-	Path &alt_path, VertexList &visited, int curl)
+	Path &alt_path, VertVisitList &visited, int curl)
 {
 	if (!vertex)
 		return false;
@@ -1253,8 +1248,7 @@ bool TrackMapProcessor::get_alter_path(InterGraph &graph, pVertex &vertex,
 	if (v0 == InterGraph::null_vertex())
 		return false;
 
-	visited.insert(std::pair<unsigned int, pVertex>
-		(vertex->Id(), vertex));
+	visited.insert(v0);
 	alt_path.push_back(v0);
 
 	if (curl >= m_level_thresh)
@@ -1274,14 +1268,17 @@ bool TrackMapProcessor::get_alter_path(InterGraph &graph, pVertex &vertex,
 		if (edge.second)
 		{
 			vertex1 = graph[v1].vertex.lock();
-			if (visited.find(vertex1->Id()) ==
+			if (visited.find(v1) ==
 				visited.end())
 				return get_alter_path(graph, vertex1,
 					alt_path, visited, curl + 1);
 		}
 	}
 
-	return false;
+	if (alt_path.size() > 1)
+		return true;
+	else
+		return false;
 }
 
 bool TrackMapProcessor::merge_cell_size(IntraEdge &edge,
@@ -1953,11 +1950,58 @@ bool TrackMapProcessor::RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size
 			graph.remove_edge(*edge_to_remove);
 		}
 		//remove the vertex from inter graph
-		//edges should be removed as well
+		//edges are NOT removed!
 		boost::remove_vertex(inter_vert, graph);
 	}
 
 	return true;
+}
+
+bool TrackMapProcessor::RemoveVertex(InterGraph& graph, pVertex &vertex)
+{
+	InterVert inter_vert = vertex->GetInterVert(graph);
+	if (inter_vert != InterGraph::null_vertex())
+	{
+		std::pair<InterAdjIter, InterAdjIter> adj_verts;
+		std::vector<InterEdge> edges_to_remove;
+		std::vector<InterEdge>::iterator edge_to_remove;
+		InterAdjIter inter_iter;
+		adj_verts = boost::adjacent_vertices(inter_vert, graph);
+		std::pair<InterEdge, bool> e;
+		for (inter_iter = adj_verts.first;
+			inter_iter != adj_verts.second; ++inter_iter)
+		{
+			//get edge
+			e = boost::edge(*inter_iter, inter_vert, graph);
+			if (!e.second)
+				continue;
+			//delete the old edge
+			edges_to_remove.push_back(e.first);
+		}
+		//remove edges
+		for (edge_to_remove = edges_to_remove.begin();
+			edge_to_remove != edges_to_remove.end();
+			++edge_to_remove)
+			graph.remove_edge(*edge_to_remove);
+		//remove the vertex from inter graph
+		//edges are NOT removed!
+		boost::remove_vertex(inter_vert, graph);
+		vertex->SetInterVert(graph, 0);
+		return true;
+	}
+	return false;
+}
+
+bool TrackMapProcessor::RemoveVertex(size_t frame, pVertex &vertex)
+{
+	VertexList &vertex_list = m_map.m_vertices_list.at(frame);
+	unsigned int id = vertex->Id();
+	if (vertex_list.find(id) != vertex_list.end())
+	{
+		vertex_list.erase(vertex->Id());
+		return true;
+	}
+	return false;
 }
 
 bool TrackMapProcessor::Export(std::string &filename)
@@ -3106,7 +3150,7 @@ bool TrackMapProcessor::ClusterCellsMerge(CellList &list, size_t frame)
 		return false;
 
 	//needs a way to choose processor
-	ClusterExmax cs_processor;
+	ClusterDbscan cs_processor;
 	size_t index;
 	size_t i, j, k;
 	size_t nx = m_map.m_size_x;
@@ -3150,24 +3194,12 @@ bool TrackMapProcessor::ClusterCellsMerge(CellList &list, size_t frame)
 		}
 	}
 
-	//cluster range 1-list.size()
-	size_t clnum = 0;
-	float max_prob = 0;
-	for (size_t i = 1; i <= list.size(); ++i)
-	{
-		cs_processor.SetClnum(i);
-		if (cs_processor.Execute())
-		{
-			float prob = cs_processor.GetProb();
-			if (prob > max_prob)
-			{
-				max_prob = prob;
-				clnum = i;
-			}
-		}
-	}
-
-	if (clnum == 1)
+	//use dbscan to check cluster
+	//set values to be conservative
+	unsigned int size = (unsigned int)m_size_thresh;
+	cs_processor.SetSize(size);
+	cs_processor.Execute();
+	if (cs_processor.GetCluterNum() == 1)
 		return true;
 	else
 		return false;
@@ -3266,6 +3298,9 @@ bool TrackMapProcessor::ClusterCellsSplit(CellList &list, size_t frame,
 			}
 		}
 
+		//label modified, save before delete
+		m_vol_cache.set_modified(frame);
+
 		return true;
 	}
 	else
@@ -3276,9 +3311,11 @@ bool TrackMapProcessor::SegmentCells(
 	void* data, void* label,
 	CellList &list, size_t frame)
 {
-	//ClusterDbscan cs_processor;
+	ClusterDbscan cs_processor;
+	unsigned int size = (unsigned int)m_size_thresh;
+	cs_processor.SetSize(size);
 	//ClusterKmeans cs_processor;
-	ClusterExmax cs_processor;
+	//ClusterExmax cs_processor;
 	size_t index;
 	size_t i, j, k;
 	size_t nx = m_map.m_size_x;

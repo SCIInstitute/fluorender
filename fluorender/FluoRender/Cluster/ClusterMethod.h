@@ -137,6 +137,8 @@ namespace FL
 		{ return m_data; }
 		ClusterSet &GetResult()
 		{ return m_result; }
+		size_t GetCluterNum()
+		{ return m_result.size(); }
 		void ResetIDCounter()
 		{ m_id_counter = 1; }
 		void AddClusterPoint(const FLIVR::Point &p, const float value);

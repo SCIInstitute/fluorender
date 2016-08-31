@@ -41,7 +41,8 @@ namespace FL
 			data(0),
 			label(0),
 			frame(0),
-			valid(false) {}
+			valid(false),
+			modified(false) {}
 
 		//manage memory externally
 		//don't care releasing here
@@ -53,6 +54,7 @@ namespace FL
 		void* label;
 		size_t frame;
 		bool valid;
+		bool modified;
 	};
 
 	//queue with a max size
@@ -68,6 +70,7 @@ namespace FL
 		inline size_t size();
 		inline void push_back(const VolCache& val);
 		inline VolCache get(size_t frame);
+		inline void set_modified(size_t frame, bool value = true);
 
 		//external calls
 		boost::signals2::signal<void(VolCache&)> m_new_cache;
@@ -142,6 +145,19 @@ namespace FL
 			m_new_cache(vol_cache);
 			push_back(vol_cache);
 			return vol_cache;
+		}
+	}
+
+	inline void CacheQueue::set_modified(size_t frame, bool value)
+	{
+		for (size_t i = 0; i < m_queue.size(); ++i)
+		{
+			if (m_queue[i].frame == frame)
+			{
+				if (m_queue[i].valid)
+					m_queue[i].modified = value;
+				return;
+			}
 		}
 	}
 

@@ -3026,6 +3026,30 @@ void TraceDlg::ReadVolCache(FL::VolCache& vol_cache)
 
 void TraceDlg::DelVolCache(FL::VolCache& vol_cache)
 {
+	while (vol_cache.valid && vol_cache.modified)
+	{
+		//save it first if modified
+		//assume that only label is modified
+		if (!m_view || !m_view->m_glview)
+			break;
+		VolumeData* vd = m_view->m_glview->m_cur_vol;
+		if (!vd)
+			break;
+		BaseReader* reader = vd->GetReader();
+		if (!reader)
+			break;
+		MSKWriter msk_writer;
+		msk_writer.SetData((Nrrd*)vol_cache.nrrd_label);
+		double spcx, spcy, spcz;
+		vd->GetSpacings(spcx, spcy, spcz);
+		msk_writer.SetSpacings(spcx, spcy, spcz);
+		int chan = vd->GetCurChannel();
+		int frame = vol_cache.frame;
+		wstring filename = reader->GetCurLabelName(frame, chan);
+		msk_writer.Save(filename, 1);
+		break;
+	}
+
 	vol_cache.valid = false;
 	if (vol_cache.data)
 	{
@@ -3092,7 +3116,7 @@ void TraceDlg::GenMap()
 	m_stat_text->SetValue("Generating track map.\n");
 	wxGetApp().Yield();
 	int frames = reader->GetTimeNum();
-	float prog_bit = 100.0f / float(frames * (2 + iter_num));
+	float prog_bit = 99.0f / float(frames * 4);
 	float prog = 0.0f;
 	m_gen_map_prg->SetValue(int(prog));
 
@@ -3116,48 +3140,47 @@ void TraceDlg::GenMap()
 		boost::bind(&TraceDlg::DelVolCache, this, _1));
 	tm_processor.SetVolCacheSize(2);
 
+	//start timing
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	//initialization
 	for (int i = 0; i < frames; ++i)
 	{
 		tm_processor.InitializeFrame(i);
-		if (i > 0)
-			//link maps 1 and 2
-			tm_processor.LinkFrames(i - 1, i);
-
 		prog += prog_bit;
 		m_gen_map_prg->SetValue(int(prog));
 		(*m_stat_text) << wxString::Format("Time point %d initialized.\n", i);
 		wxGetApp().Yield();
-	}
 
-	//resolve multiple links of single vertex
-	for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
-	{
-		tm_processor.ResolveGraph(fi, fi + 1);
-		tm_processor.ResolveGraph(fi, fi - 1);
+		if (i == 0)
+			continue;
 
+		//link maps 1 and 2
+		tm_processor.LinkFrames(i - 1, i);
 		prog += prog_bit;
 		m_gen_map_prg->SetValue(int(prog));
-		(*m_stat_text) << wxString::Format("Time point %d resolved.\n", int(fi));
+		(*m_stat_text) << wxString::Format("Time point %d linked.\n", i);
+		wxGetApp().Yield();
+
+		//check contacts and merge cells
+		tm_processor.ResolveGraph(i, i + 1);
+		tm_processor.ResolveGraph(i, i - 1);
+		prog += prog_bit;
+		m_gen_map_prg->SetValue(int(prog));
+		(*m_stat_text) << wxString::Format("Time point %d merged.\n", i);
+		wxGetApp().Yield();
+
+		//further process
+		for (size_t iteri = 0; iteri < iter_num; ++iteri)
+		{
+			tm_processor.ProcessFrames(i, i + 1);
+			tm_processor.ProcessFrames(i, i - 1);
+		}
+		prog += prog_bit;
+		m_gen_map_prg->SetValue(int(prog));
+		(*m_stat_text) << wxString::Format("Time point %d processed.\n", i);
 		wxGetApp().Yield();
 	}
 
-	//start iterations
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	//check branch
-	for (size_t iteri = 0; iteri < iter_num; ++iteri)
-	{
-		for (size_t fi = 0; fi < track_map.GetFrameNum(); ++fi)
-		{
-			tm_processor.ProcessFrames(fi, fi + 1);
-			tm_processor.ProcessFrames(fi, fi - 1);
-			prog += prog_bit;
-			m_gen_map_prg->SetValue(int(prog));
-			(*m_stat_text) << wxString::Format("Time point %d processed.\n", int(fi));
-			wxGetApp().Yield();
-		}
-
-	}
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 	(*m_stat_text) << wxString::Format("Wall clock time: %.4fs\n", time_span.count());
