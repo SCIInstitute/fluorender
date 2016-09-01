@@ -25,6 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#include <Windows.h>
 #include "TrackMap.h"
 #include "Stencil.h"
 #include "Cluster/dbscan.h"
@@ -767,10 +768,15 @@ bool TrackMapProcessor::ProcessFrames(size_t frame1, size_t frame2)
 	VertexListIter iter;
 
 	for (iter = vertex_list1.begin();
-		iter != vertex_list1.end(); ++iter)
+		iter != vertex_list1.end();)
 	{
 		ProcessVertex(iter->second, inter_graph,
 			true, true);
+		//see if it is removed
+		if (!iter->second->GetInterVert(inter_graph))
+			iter = vertex_list1.erase(iter);
+		else
+			++iter;
 	}
 
 	return true;
@@ -1114,12 +1120,27 @@ bool TrackMapProcessor::SplitVertex(InterGraph &graph, pVertex &vertex,
 	CellList outlist;
 	if (ClusterCellsSplit(cells, frame, edges.size(), outlist))
 	{
+		std::wostringstream os;
+		os << "start\t" << vertex->Id() << "\n";
+		OutputDebugString(os.str().c_str());
+
 		//remove input vertex
 		RemoveVertex(graph, vertex);
-		//RemoveVertex(frame, vertex);
 		AddCells(outlist, frame);
+		//remove vertex from another intergraph
+		size_t gindex = graph.index == frame ? frame - 1 : frame;
+		if (gindex < m_map.m_frame_num - 1)
+		{
+			InterGraph &graph2 = m_map.m_inter_graph_list.at(gindex);
+			RemoveVertex(graph2, vertex);
+		}
+
 		LinkAddedCells(outlist, frame, frame - 1);
 		LinkAddedCells(outlist, frame, frame + 1);
+
+		os << "end\t" << vertex->Id() << "\n";
+		OutputDebugString(os.str().c_str());
+
 		return true;
 	}
 
@@ -1174,8 +1195,10 @@ bool TrackMapProcessor::comp_path_size(Path &path1, Path &path2)
 bool TrackMapProcessor::similar_edge_size(InterEdge &edge1,
 	InterEdge &edge2, InterGraph& graph)
 {
-	float s1 = graph[edge1].size_f;
-	float s2 = graph[edge2].size_f;
+	//float s1 = graph[edge1].size_f;
+	//float s2 = graph[edge2].size_f;
+	float s1 = graph[edge1].size_ui;
+	float s2 = graph[edge2].size_ui;
 	float d;
 	if (s1 > 0.0f || s2 > 0.0f)
 	{
@@ -1989,18 +2012,7 @@ bool TrackMapProcessor::RemoveVertex(InterGraph& graph, pVertex &vertex)
 		//edges are NOT removed!
 		boost::remove_vertex(inter_vert, graph);
 		vertex->SetInterVert(graph, 0);
-		return true;
-	}
-	return false;
-}
-
-bool TrackMapProcessor::RemoveVertex(size_t frame, pVertex &vertex)
-{
-	VertexList &vertex_list = m_map.m_vertices_list.at(frame);
-	unsigned int id = vertex->Id();
-	if (vertex_list.find(id) != vertex_list.end())
-	{
-		vertex_list.erase(vertex->Id());
+		//it needs to be actually removed from the list later
 		return true;
 	}
 	return false;

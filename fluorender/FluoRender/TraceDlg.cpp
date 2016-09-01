@@ -3112,11 +3112,10 @@ void TraceDlg::GenMap()
 
 	//start progress
 	size_t iter_num = (size_t)m_gen_map_spin->GetValue();
-	iter_num *= 2;
 	m_stat_text->SetValue("Generating track map.\n");
 	wxGetApp().Yield();
 	int frames = reader->GetTimeNum();
-	float prog_bit = 99.0f / float(frames * 4);
+	float prog_bit = 99.0f / float(frames * (4 + iter_num));
 	float prog = 0.0f;
 	m_gen_map_prg->SetValue(int(prog));
 
@@ -3134,11 +3133,12 @@ void TraceDlg::GenMap()
 	tm_processor.SetSpacings(spcx, spcy, spcz);
 	tm_processor.SetSizeThresh(component_size);
 	tm_processor.SetContactThresh(contact_factor);
+	tm_processor.SetSimilarThresh(0.85f);
 	//register file reading and deleteing functions
 	tm_processor.RegisterCacheQueueFuncs(
 		boost::bind(&TraceDlg::ReadVolCache, this, _1),
 		boost::bind(&TraceDlg::DelVolCache, this, _1));
-	tm_processor.SetVolCacheSize(3);
+	tm_processor.SetVolCacheSize(4);
 
 	//start timing
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
@@ -3151,7 +3151,7 @@ void TraceDlg::GenMap()
 		(*m_stat_text) << wxString::Format("Time point %d initialized.\n", i);
 		wxGetApp().Yield();
 
-		if (i == 0)
+		if (i < 1)
 			continue;
 
 		//link maps 1 and 2
@@ -3162,23 +3162,45 @@ void TraceDlg::GenMap()
 		wxGetApp().Yield();
 
 		//check contacts and merge cells
-		tm_processor.ResolveGraph(i, i + 1);
+		tm_processor.ResolveGraph(i - 1, i);
 		tm_processor.ResolveGraph(i, i - 1);
 		prog += prog_bit;
 		m_gen_map_prg->SetValue(int(prog));
-		(*m_stat_text) << wxString::Format("Time point %d merged.\n", i);
+		(*m_stat_text) << wxString::Format("Time point %d merged.\n", i - 1);
 		wxGetApp().Yield();
 
+		if (i < 2)
+			continue;
+
 		//further process
-		for (size_t iteri = 0; iteri < iter_num; ++iteri)
-		{
-			tm_processor.ProcessFrames(i, i + 1);
-			tm_processor.ProcessFrames(i, i - 1);
-		}
+		tm_processor.ProcessFrames(i - 2, i - 1);
+		tm_processor.ProcessFrames(i - 1, i - 2);
 		prog += prog_bit;
 		m_gen_map_prg->SetValue(int(prog));
-		(*m_stat_text) << wxString::Format("Time point %d processed.\n", i);
+		(*m_stat_text) << wxString::Format("Time point %d processed.\n", i - 1);
 		wxGetApp().Yield();
+	}
+	//last frame
+	tm_processor.ProcessFrames(frames - 2, frames - 1);
+	tm_processor.ProcessFrames(frames - 1, frames - 2);
+	prog += prog_bit;
+	m_gen_map_prg->SetValue(int(prog));
+	(*m_stat_text) << wxString::Format("Time point %d processed.\n", frames - 1);
+	wxGetApp().Yield();
+
+	//iterations
+	for (size_t iteri = 0; iteri < iter_num; ++iteri)
+	{
+		for (int i = 2; i <= frames; ++i)
+		{
+			//further process
+			tm_processor.ProcessFrames(i - 2, i - 1);
+			tm_processor.ProcessFrames(i - 1, i - 2);
+			prog += prog_bit;
+			m_gen_map_prg->SetValue(int(prog));
+			(*m_stat_text) << wxString::Format("Time point %d processed.\n", i - 1);
+			wxGetApp().Yield();
+		}
 	}
 
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
@@ -3190,34 +3212,12 @@ void TraceDlg::GenMap()
 	GetSettings(m_view);
 }
 
-#define LINK_FRAMES \
-	for (size_t fi = start_frame; fi <= end_frame; ++fi) \
-	{ \
-		tm_processor.ProcessFrames(track_map, fi, fi + 1); \
-		tm_processor.ProcessFrames(track_map, fi, fi - 1); \
-		prog += prog_bit; \
-		m_gen_map_prg->SetValue(int(prog)); \
-		(*m_stat_text) << wxString::Format("Time point %d linked.\n", int(fi)); \
-		wxGetApp().Yield(); \
-	}
-
-#define UNLINK_FRAMES \
-	for (size_t fi = start_frame; fi <= end_frame; ++fi) \
-	{ \
-		tm_processor.UnmatchFrames(track_map, fi, fi - 1); \
-		tm_processor.UnmatchFrames(track_map, fi, fi + 1); \
-		tm_processor.ExMatchFrames(track_map, fi, fi + 1); \
-		tm_processor.ExMatchFrames(track_map, fi, fi - 1); \
-		prog += prog_bit; \
-		m_gen_map_prg->SetValue(int(prog)); \
-		(*m_stat_text) << wxString::Format("Time point %d unlinked.\n", int(fi)); \
-		wxGetApp().Yield(); \
-	}
-
 void TraceDlg::RefineMap(int t)
 {
 	if (!m_view)
 		return;
+
+	//some parameters
 	double component_size = 25.0;
 	double contact_factor = 0.7;
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
@@ -3227,6 +3227,7 @@ void TraceDlg::RefineMap(int t)
 		contact_factor = vr_frame->GetSettingDlg()->GetContactFactor();
 	}
 
+	//get trace group
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
 		return;
@@ -3239,8 +3240,10 @@ void TraceDlg::RefineMap(int t)
 		m_stat_text->SetValue(wxString::Format(
 			"Refining track map at time point %d.\n", t));
 	wxGetApp().Yield();
+
+	//start progress
 	FL::TrackMap &track_map = trace_group->GetTrackMap();
-	FL::TrackMapProcessor tm_processor(track_map);
+	size_t iter_num = (size_t)m_gen_map_spin->GetValue();
 	int start_frame, end_frame;
 	if (t < 0)
 	{
@@ -3249,45 +3252,51 @@ void TraceDlg::RefineMap(int t)
 	}
 	else
 		start_frame = end_frame = t;
+	float prog_bit = 99.0f / float(
+		(end_frame - start_frame + 1)
+		* (4 + iter_num));
+	float prog = 0.0f;
+	m_gen_map_prg->SetValue(int(prog));
+
+	//get and set parameters
+	FL::TrackMapProcessor tm_processor(track_map);
 	int resx, resy, resz;
 	vd->GetResolution(resx, resy, resz);
 	double spcx, spcy, spcz;
 	vd->GetSpacings(spcx, spcy, spcz);
-	size_t iter_num = (size_t)m_gen_map_spin->GetValue();
-	iter_num *= 2;
 	tm_processor.SetBits(vd->GetBits());
 	tm_processor.SetScale(vd->GetScalarScale());
 	tm_processor.SetSizes(resx, resy, resz);
 	tm_processor.SetSpacings(spcx, spcy, spcz);
 	tm_processor.SetSizeThresh(component_size);
 	tm_processor.SetContactThresh(contact_factor);
-	float prog_bit = 100.0f / float(
-		(end_frame - start_frame + 1)
-		* iter_num);
-	float prog = 0.0f;
-	m_gen_map_prg->SetValue(int(prog));
+	tm_processor.SetSimilarThresh(0.85f);
+	//register file reading and deleteing functions
+	tm_processor.RegisterCacheQueueFuncs(
+		boost::bind(&TraceDlg::ReadVolCache, this, _1),
+		boost::bind(&TraceDlg::DelVolCache, this, _1));
+	tm_processor.SetVolCacheSize(4);
 
-/*	unsigned int last_op = track_map.GetLastOp();
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	//check branch
+
+	//iterations
 	for (size_t iteri = 0; iteri < iter_num; ++iteri)
 	{
-		if (last_op == 1)
-			UNLINK_FRAMES
-		else
-			LINK_FRAMES
-
-		if (++iteri >= iter_num)
-			break;
-
-		if (last_op == 1)
-			LINK_FRAMES
-		else
-			UNLINK_FRAMES;
+		for (int i = start_frame - 1; i <= end_frame; ++i)
+		{
+			//further process
+			tm_processor.ProcessFrames(i, i + 1);
+			tm_processor.ProcessFrames(i + 1, i);
+			prog += prog_bit;
+			m_gen_map_prg->SetValue(int(prog));
+			(*m_stat_text) << wxString::Format("Time point %d processed.\n", i + 1);
+			wxGetApp().Yield();
+		}
 	}
+
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 	(*m_stat_text) << wxString::Format("Wall clock time: %.4fs\n", time_span.count());
-	*/
+
 	m_gen_map_prg->SetValue(100);
 }

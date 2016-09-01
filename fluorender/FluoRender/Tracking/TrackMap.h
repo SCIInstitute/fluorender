@@ -70,6 +70,7 @@ namespace FL
 
 		void SetContactThresh(float value);
 		void SetSizeThresh(float value);
+		void SetSimilarThresh(float value);
 		void SetLevelThresh(int level);
 		void SetUncertainLow(unsigned int value);
 		void SetUncertainHigh(unsigned int value);
@@ -196,7 +197,6 @@ namespace FL
 		bool MergeCells(VertexList& vertex_list, CellBin &bin, size_t frame);
 		bool RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size_t frame, InterGraph &graph, bool reset);
 		bool RemoveVertex(InterGraph& graph, pVertex &vertex);
-		bool RemoveVertex(size_t frame, pVertex &vertex);
 		
 		//determine if cells on intragraph can be merged
 		typedef bool(TrackMapProcessor::*f_merge_cell)(IntraEdge&, pCell&, pCell&, IntraGraph&);
@@ -324,6 +324,11 @@ namespace FL
 	inline void TrackMapProcessor::SetSizeThresh(float value)
 	{
 		m_size_thresh = value;
+	}
+
+	inline void TrackMapProcessor::SetSimilarThresh(float value)
+	{
+		m_similar_thresh = value;
 	}
 
 	inline void TrackMapProcessor::SetLevelThresh(int level)
