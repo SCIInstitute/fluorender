@@ -85,6 +85,6 @@ samples=4
 [context\ attrib]
 gl_major_ver=4
 gl_minor_ver=4
-gl_profile_mask=1
+gl_profile_mask=2
 [cl\ device]
-device_id=0
+device_id=1

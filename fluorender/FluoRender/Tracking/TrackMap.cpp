@@ -25,7 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <Windows.h>
+
 #include "TrackMap.h"
 #include "Stencil.h"
 #include "Cluster/dbscan.h"
@@ -1120,10 +1120,6 @@ bool TrackMapProcessor::SplitVertex(InterGraph &graph, pVertex &vertex,
 	CellList outlist;
 	if (ClusterCellsSplit(cells, frame, edges.size(), outlist))
 	{
-		std::wostringstream os;
-		os << "start\t" << vertex->Id() << "\n";
-		OutputDebugString(os.str().c_str());
-
 		//remove input vertex
 		RemoveVertex(graph, vertex);
 		AddCells(outlist, frame);
@@ -1137,9 +1133,6 @@ bool TrackMapProcessor::SplitVertex(InterGraph &graph, pVertex &vertex,
 
 		LinkAddedCells(outlist, frame, frame - 1);
 		LinkAddedCells(outlist, frame, frame + 1);
-
-		os << "end\t" << vertex->Id() << "\n";
-		OutputDebugString(os.str().c_str());
 
 		return true;
 	}
