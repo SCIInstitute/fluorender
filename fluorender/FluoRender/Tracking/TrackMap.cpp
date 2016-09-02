@@ -1188,10 +1188,10 @@ bool TrackMapProcessor::comp_path_size(Path &path1, Path &path2)
 bool TrackMapProcessor::similar_edge_size(InterEdge &edge1,
 	InterEdge &edge2, InterGraph& graph)
 {
-	//float s1 = graph[edge1].size_f;
-	//float s2 = graph[edge2].size_f;
-	float s1 = graph[edge1].size_ui;
-	float s2 = graph[edge2].size_ui;
+	float s1 = graph[edge1].size_f;
+	float s2 = graph[edge2].size_f;
+	//float s1 = graph[edge1].size_ui;
+	//float s2 = graph[edge2].size_ui;
 	float d;
 	if (s1 > 0.0f || s2 > 0.0f)
 	{
