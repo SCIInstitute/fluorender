@@ -21,9 +21,8 @@ FL::TrackMapProcessor m_tm_processor(m_track_map);
 void ProcessInputName(std::wstring &infilename)
 {
 	//separate path and name
-	int64_t pos = infilename.find_last_of(GETSLASH());
-	wstring path = infilename.substr(0, pos + 1);
-	wstring name = infilename.substr(pos + 1);
+	wstring path = GET_PATH(infilename);
+	wstring name = GET_NAME(infilename);
 
 	//find seq number in name
 	size_t pos2 = name.find_last_of(L'.');
@@ -272,7 +271,10 @@ int main(int argc, char* argv[])
 	ProcessOutputName(out_filename);
 
 	for (int i = 0; i < m_xml_list.size(); ++i)
+	{
 		ProcessXml(i);
+		printf("Frame %d processed.\n", i);
+	}
 
 	//save trackmap
 	m_tm_processor.Export(trackfile);
