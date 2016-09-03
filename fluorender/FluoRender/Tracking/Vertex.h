@@ -39,11 +39,6 @@ namespace FL
 		float size_f;
 		float dist_f;
 		unsigned int link;//0: not linked; 1: linked; 2: force linked; 3: force unlinked
-		//unsaved, for calculation
-		//
-		unsigned int bl_num;
-		unsigned int bl_size_ui;
-		float bl_size_f;
 		//count for changes
 		unsigned int count;
 	};

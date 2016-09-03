@@ -86,17 +86,10 @@ namespace FL
 		bool InitializeFrame(size_t frame);
 		//build inter graph
 		bool LinkFrames(size_t f1, size_t f2);
-
 		//group cells
 		bool ResolveGraph(size_t frame1, size_t frame2);
 		//find the maximum overlapping and set link flags on inter graph
 		bool ProcessFrames(size_t frame1, size_t frame2);
-		//for multiple links, remove link flags
-		bool UnmatchFrames(size_t frame1, size_t frame2);
-		//re-segment frame
-		bool ResegmentFrame(size_t frame);
-		//for orphans, search neighbors to add link flags
-		bool ExMatchFrames(size_t frame1, size_t frame2);
 
 		bool Export(std::string &filename);
 		bool Import(std::string &filename);
@@ -143,9 +136,6 @@ namespace FL
 
 		//tracking by matching user input
 		bool TrackStencils(size_t frame1, size_t frame2);
-		////test purpose only
-		//bool TrackStencilsP1(size_t frame1, size_t frame2,
-		//	void* data1, void* data2, void* label1, void* label2);
 
 		//connect and disconnect functions for cache queue
 		typedef boost::function<void (VolCache&)> func_cache;
@@ -255,15 +245,8 @@ namespace FL
 		void link_edge(InterEdge edge, InterGraph &graph, unsigned int value = 1);
 		void unlink_edge(InterEdge edge, InterGraph &graph, unsigned int value = 0);
 
-		//bool MatchVertex(pVertex &vertex, InterGraph &graph, bool bl_check = true);
-		bool UnmatchVertex(pVertex &vertex, InterGraph &graph);
-		bool ExMatchVertex(pVertex &vertex, InterGraph &graph, size_t frame1, size_t frame2);
-		bool MatchVertexList(pVertex &vertex, VertexList &list2,
-			InterGraph &graph, size_t frame1, size_t frame2);
 		void FindOrphans(pVertex &vertex, InterGraph &inter_graph,
 			VertexList &orphan_list, VertexList &visited_list, int level);
-		unsigned int CheckBackLink(InterVert v0, InterVert v1, InterGraph &graph,
-			unsigned int &bl_size_ui, float &bl_size_f);
 
 		//export
 		void WriteBool(std::ofstream& ofs, bool value);
