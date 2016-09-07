@@ -141,16 +141,30 @@ public:
 		ID_AngleThreshText,
 
 		//basic page
+		//iterations
 		ID_BasicIterSldr,
 		ID_BasicIterText,
+		//threshold
 		ID_BasicThreshSldr,
 		ID_BasicThreshText,
+		//falloff
 		ID_BasicDiffCheck,
 		ID_BasicFalloffSldr,
 		ID_BasicFalloffText,
+		//size
 		ID_BasicSizeCheck,
 		ID_BasicSizeSldr,
 		ID_BasicSizeText,
+		//density
+		ID_BasicDensityCheck,
+		ID_BasicDensitySldr,
+		ID_BasicDensityText,
+		//clean
+		ID_BasicCleanCheck,
+		ID_BasicCleanIterSldr,
+		ID_BasicCleanIterText,
+		ID_BasicCleanLimitSldr,
+		ID_BasicCleanLimitText,
 
 		//analysis page
 		//selection
@@ -283,6 +297,13 @@ private:
 	double m_basic_falloff;
 	bool m_basic_size;
 	int m_basic_size_lm;
+	//density
+	bool m_basic_density;
+	double m_basic_density_vl;
+	//clean
+	bool m_basic_clean;
+	int m_basic_clean_iter;
+	int m_basic_clean_size_vl;
 
 	//selection
 	bool m_use_min;
@@ -417,6 +438,16 @@ private:
 	wxCheckBox* m_basic_size_check;
 	wxSlider* m_basic_size_sldr;
 	wxTextCtrl* m_basic_size_text;
+	//density
+	wxCheckBox* m_basic_density_check;
+	wxSlider* m_basic_density_sldr;
+	wxTextCtrl* m_basic_density_text;
+	//clean
+	wxCheckBox* m_basic_clean_check;
+	wxSlider* m_basic_clean_iter_sldr;
+	wxTextCtrl* m_basic_clean_iter_text;
+	wxSlider* m_basic_clean_limit_sldr;
+	wxTextCtrl* m_basic_clean_limit_text;
 
 	//analysis page
 	//selection
@@ -573,6 +604,18 @@ private:
 	void OnBasicSizeCheck(wxCommandEvent &event);
 	void OnBasicSizeSldr(wxScrollEvent &event);
 	void OnBasicSizeText(wxCommandEvent &event);
+	//density
+	void EnableBasicDensity(bool value);
+	void OnBasicDensityCheck(wxCommandEvent &event);
+	void OnBasicDensitySldr(wxScrollEvent &event);
+	void OnBasicDensityText(wxCommandEvent &event);
+	//clean
+	void EnableBasicClean(bool value);
+	void OnBasicCleanCheck(wxCommandEvent &event);
+	void OnBasicCleanIterSldr(wxScrollEvent &event);
+	void OnBasicCleanIterText(wxCommandEvent &event);
+	void OnBasicCleanLimitSldr(wxScrollEvent &event);
+	void OnBasicCleanLimitText(wxCommandEvent &event);
 
 	//analysis page
 	void OnCompIdText(wxCommandEvent &event);

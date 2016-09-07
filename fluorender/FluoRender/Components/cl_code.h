@@ -134,6 +134,29 @@ const char* str_cl_brainbow_3d = \
 "	return grad;\n" \
 "}\n" \
 "\n" \
+"unsigned int __attribute((always_inline)) reverse_bit(unsigned int val, unsigned int len)\n" \
+"{\n" \
+"	unsigned int res = val;\n" \
+"	int s = len - 1;\n" \
+"	for (val >>= 1; val; val >>= 1)\n" \
+"	{\n" \
+"		res <<= 1;\n" \
+"		res |= val & 1;\n" \
+"		s--;\n" \
+"	}\n" \
+"	res <<= s;\n" \
+"	res <<= 32-len;\n" \
+"	res >>= 32-len;\n" \
+"	return res;\n" \
+"}\n" \
+"float get_2d_density(image3d_t image, int4 pos, int r)\n" \
+"{\n" \
+"	float sum = 0.0f;\n" \
+"	for (int i=-r; i<=r; ++i)\n" \
+"	for (int j=-r; j<=r; ++j)\n" \
+"		sum = read_imagef(image, samp, pos+(int4)(i, j, 0, 0)).x;\n" \
+"	return sum / (float)(r * r);\n" \
+"}\n" \
 "__kernel void kernel_0(\n" \
 "	__read_only image3d_t data,\n" \
 "	__global unsigned int* label,\n" \
@@ -144,7 +167,8 @@ const char* str_cl_brainbow_3d = \
 "	unsigned int seed,\n" \
 "	float value_t,\n" \
 "	float value_f,\n" \
-"	float grad_f)\n" \
+"	float grad_f,\n" \
+"	float density)\n" \
 "{\n" \
 "	atomic_inc(rcnt);\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
@@ -152,6 +176,10 @@ const char* str_cl_brainbow_3d = \
 "	unsigned int index = nx*ny*coord.z + nx*coord.y + coord.x;\n" \
 "	unsigned int label_v = label[index];\n" \
 "	if (label_v == 0)\n" \
+"		return;\n" \
+"	//break if low density\n" \
+"	if (density > 0.0f &&\n" \
+"		get_2d_density(data, (int4)(coord, 1), 2) < density)\n" \
 "		return;\n" \
 "	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
 "	float grad = length(vol_grad_func(data, (int4)(coord, 1)));\n" \
@@ -166,7 +194,6 @@ const char* str_cl_brainbow_3d = \
 "		return;\n" \
 "	unsigned int label_value = label[index];\n" \
 "	int3 nb_coord;\n" \
-"	int3 max_nb_coord = coord;\n" \
 "	unsigned int nb_index;\n" \
 "	unsigned int m;\n" \
 "	for (int i=-1; i<2; ++i)\n" \
@@ -179,21 +206,110 @@ const char* str_cl_brainbow_3d = \
 "		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
 "		m = label[nb_index];\n" \
 "		if (m > label_value)\n" \
-"		{\n" \
 "			label_value = m;\n" \
-"			max_nb_coord = nb_coord;\n" \
+"	}\n" \
+"	label[index] = label_value;\n" \
+"}\n" \
+"__kernel void kernel_1(\n" \
+"	__global unsigned int* mask,\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned int len)\n" \
+"{\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
+"	unsigned int index = nx*ny*k + nx*j + i;\n" \
+"	unsigned int value_l = label[index];\n" \
+"	if (value_l == 0)\n" \
+"		return;\n" \
+"	unsigned int res = nx*ny*nz - value_l;\n" \
+"	unsigned int x = 0;\n" \
+"	unsigned int y = 0;\n" \
+"	unsigned int z = 0;\n" \
+"	unsigned int ii;\n" \
+"	for (ii=0; ii<len; ++ii)\n" \
+"	{\n" \
+"		x |= (1<<(3*ii) & res)>>(2*ii);\n" \
+"		y |= (1<<(3*ii+1) & res)>>(2*ii+1);\n" \
+"		z |= (1<<(3*ii+2) & res)>>(2*ii+2);\n" \
+"	}\n" \
+"	x = reverse_bit(x, len);\n" \
+"	y = reverse_bit(y, len);\n" \
+"	z = reverse_bit(z, len);\n" \
+"	index = nx*ny*z + nx*y + x;\n" \
+"	atomic_inc(&(mask[index]));\n" \
+"}\n" \
+"__kernel void kernel_2(\n" \
+"	__global unsigned int* mask,\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned int len)\n" \
+"{\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
+"	unsigned int index = nx*ny*k + nx*j + i;\n" \
+"	unsigned int value_l = label[index];\n" \
+"	if (value_l == 0)\n" \
+"		return;\n" \
+"	unsigned int res = nx*ny*nz - value_l;\n" \
+"	unsigned int x = 0;\n" \
+"	unsigned int y = 0;\n" \
+"	unsigned int z = 0;\n" \
+"	unsigned int ii;\n" \
+"	for (ii=0; ii<len; ++ii)\n" \
+"	{\n" \
+"		x |= (1<<(3*ii) & res)>>(2*ii);\n" \
+"		y |= (1<<(3*ii+1) & res)>>(2*ii+1);\n" \
+"		z |= (1<<(3*ii+2) & res)>>(2*ii+2);\n" \
+"	}\n" \
+"	x = reverse_bit(x, len);\n" \
+"	y = reverse_bit(y, len);\n" \
+"	z = reverse_bit(z, len);\n" \
+"	unsigned int index2 = nx*ny*z + nx*y + x;\n" \
+"	if (index != index2)\n" \
+"		mask[index] = mask[index2];\n" \
+"}\n" \
+"__kernel void kernel_3(\n" \
+"	__global unsigned int* mask,\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned int thresh)\n" \
+"{\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
+"	unsigned int index = nx*ny*k + nx*j + i;\n" \
+"	//break if large enough\n" \
+"	if (label[index]==0 ||\n" \
+"		mask[index] > thresh)\n" \
+"		return;\n" \
+"	unsigned int nb_index;\n" \
+"	unsigned int max_size = 0;\n" \
+"	unsigned int max_nb_index;\n" \
+"	for (int ni=-1; ni<2; ++ni)\n" \
+"	for (int nj=-1; nj<2; ++nj)\n" \
+"	for (int nk=-1; nj<2; ++nk)\n" \
+"	{\n" \
+"		nb_index = nx*ny*(k+nk) + nx*(j+nj) + i+ni;\n" \
+"		if (mask[nb_index]>thresh &&\n" \
+"			mask[nb_index]>max_size)\n" \
+"		{\n" \
+"			max_size = mask[nb_index];\n" \
+"			max_nb_index = nb_index;\n" \
 "		}\n" \
 "	}\n" \
-"/*	if (grad_f > 0.0f)\n" \
-"	{\n" \
-"		float xc = value;\n" \
-"		float xn = read_imagef(data, samp, (int4)(max_nb_coord, 1)).x + grad_f;\n" \
-"		if (xn < xc || xn - xc > 2.0f*grad_f)\n" \
-"			return;\n" \
-"	}\n" \
-"*/\n" \
-"	label[index] = label_value;\n" \
+"	if (max_size > 0)\n" \
+"		label[index] = label[max_nb_index];\n" \
 "}\n";
+
 
 const char* str_cl_brainbow_3d_sized = \
 "const sampler_t samp =\n" \
@@ -227,6 +343,14 @@ const char* str_cl_brainbow_3d_sized = \
 "	res <<= 32-len;\n" \
 "	res >>= 32-len;\n" \
 "	return res;\n" \
+"}\n" \
+"float get_2d_density(image3d_t image, int4 pos, int r)\n" \
+"{\n" \
+"	float sum = 0.0f;\n" \
+"	for (int i=-r; i<=r; ++i)\n" \
+"	for (int j=-r; j<=r; ++j)\n" \
+"		sum = read_imagef(image, samp, pos+(int4)(i, j, 0, 0)).x;\n" \
+"	return sum / (float)(r * r);\n" \
 "}\n" \
 "__kernel void kernel_0(\n" \
 "	__global unsigned int* mask,\n" \
@@ -305,7 +429,8 @@ const char* str_cl_brainbow_3d_sized = \
 "	float value_t,\n" \
 "	float value_f,\n" \
 "	float grad_f,\n" \
-"	unsigned int thresh)\n" \
+"	unsigned int thresh,\n" \
+"	float density)\n" \
 "{\n" \
 "	atomic_inc(rcnt);\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
@@ -313,6 +438,10 @@ const char* str_cl_brainbow_3d_sized = \
 "	unsigned int index = nx*ny*coord.z + nx*coord.y + coord.x;\n" \
 "	//break if large enough\n" \
 "	if (mask[index] > thresh)\n" \
+"		return;\n" \
+"	//break if low density\n" \
+"	if (density > 0.0f &&\n" \
+"		get_2d_density(data, (int4)(coord, 1), 2) < density)\n" \
 "		return;\n" \
 "	unsigned int label_v = label[index];\n" \
 "	if (label_v == 0)\n" \
@@ -330,7 +459,6 @@ const char* str_cl_brainbow_3d_sized = \
 "		return;\n" \
 "	unsigned int label_value = label[index];\n" \
 "	int3 nb_coord;\n" \
-"	int3 max_nb_coord = coord;\n" \
 "	unsigned int nb_index;\n" \
 "	unsigned int m;\n" \
 "	for (int i=-1; i<2; ++i)\n" \
@@ -343,21 +471,45 @@ const char* str_cl_brainbow_3d_sized = \
 "		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
 "		m = label[nb_index];\n" \
 "		if (m > label_value)\n" \
-"		{\n" \
 "			label_value = m;\n" \
-"			max_nb_coord = nb_coord;\n" \
+"	}\n" \
+"	label[index] = label_value;\n" \
+"}\n" \
+"__kernel void kernel_3(\n" \
+"	__global unsigned int* mask,\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned int thresh)\n" \
+"{\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
+"	unsigned int index = nx*ny*k + nx*j + i;\n" \
+"	//break if large enough\n" \
+"	if (label[index]==0 ||\n" \
+"		mask[index] > thresh)\n" \
+"		return;\n" \
+"	unsigned int nb_index;\n" \
+"	unsigned int max_size = 0;\n" \
+"	unsigned int max_nb_index;\n" \
+"	for (int ni=-1; ni<2; ++ni)\n" \
+"	for (int nj=-1; nj<2; ++nj)\n" \
+"	for (int nk=-1; nj<2; ++nk)\n" \
+"	{\n" \
+"		nb_index = nx*ny*(k+nk) + nx*(j+nj) + i+ni;\n" \
+"		if (mask[nb_index]>thresh &&\n" \
+"			mask[nb_index]>max_size)\n" \
+"		{\n" \
+"			max_size = mask[nb_index];\n" \
+"			max_nb_index = nb_index;\n" \
 "		}\n" \
 "	}\n" \
-"/*	if (grad_f > 0.0f)\n" \
-"	{\n" \
-"		float xc = value;\n" \
-"		float xn = read_imagef(data, samp, (int4)(max_nb_coord, 1)).x + grad_f;\n" \
-"		if (xn < xc || xn - xc > 2.0f*grad_f)\n" \
-"			return;\n" \
-"	}\n" \
-"*/\n" \
-"	label[index] = label_value;\n" \
+"	if (max_size > 0)\n" \
+"		label[index] = label[max_nb_index];\n" \
 "}\n";
+
 
 const char* str_cl_shuffle_id_3d = \
 "const sampler_t samp =\n" \

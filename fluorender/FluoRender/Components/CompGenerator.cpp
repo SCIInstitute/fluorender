@@ -363,7 +363,8 @@ void ComponentGenerator::ShuffleID_2D()
 	m_sig_progress();
 }
 
-void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float falloff)
+void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float falloff,
+	float density, int clean_iter, int clean_size)
 {
 	GET_VOLDATA
 
@@ -387,8 +388,8 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 		delete[]program_log;
 		return;
 	}
-	cl_kernel kernel = clCreateKernel(program, "kernel_0", &err);
 	cl_command_queue queue = clCreateCommandQueue(m_context, m_device, 0, &err);
+	cl_kernel kernel = clCreateKernel(program, "kernel_0", &err);
 
 	unsigned int rcnt = 0;
 	unsigned int seed = iter > 10 ? iter : 11;
@@ -434,11 +435,74 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 	err = clSetKernelArg(kernel, 7, sizeof(float), (void*)(&tran));
 	err = clSetKernelArg(kernel, 8, sizeof(float), (void*)(&scl_ff));
 	err = clSetKernelArg(kernel, 9, sizeof(float), (void*)(&grad_ff));
+	err = clSetKernelArg(kernel, 10, sizeof(float), (void*)(&density));
 
 	for (int j = 0; j < iter; ++j)
 	{
 		err = clEnqueueNDRangeKernel(queue, kernel, 3, NULL, global_size,
 			local_size, 0, NULL, NULL);
+
+		m_sig_progress();
+	}
+
+	if (clean_iter)
+	{
+		cl_kernel kernel_1 = clCreateKernel(program, "kernel_1", &err);
+		cl_kernel kernel_2 = clCreateKernel(program, "kernel_2", &err);
+		cl_kernel kernel_3 = clCreateKernel(program, "kernel_3", &err);
+
+		unsigned int len = 0;
+		unsigned int r = Max(nx, Max(ny, nz));
+		while (r > 0)
+		{
+			r /= 2;
+			len++;
+		}
+
+		unsigned int* mask32 = new unsigned int[nx*ny*nz];
+		memset(mask32, 0, sizeof(unsigned int)*nx*ny*nz);
+		//mask
+		cl_mem mask_buffer = clCreateBuffer(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*nx*ny*nz, mask32, &err);
+
+		//set
+		//kernel 1
+		err = clSetKernelArg(kernel_1, 0, sizeof(cl_mem), &mask_buffer);
+		err = clSetKernelArg(kernel_1, 1, sizeof(cl_mem), &label_buffer);
+		err = clSetKernelArg(kernel_1, 2, sizeof(unsigned int), (void*)(&nx));
+		err = clSetKernelArg(kernel_1, 3, sizeof(unsigned int), (void*)(&ny));
+		err = clSetKernelArg(kernel_1, 4, sizeof(unsigned int), (void*)(&nz));
+		err = clSetKernelArg(kernel_1, 5, sizeof(unsigned int), (void*)(&len));
+		//kernel 2
+		err = clSetKernelArg(kernel_2, 0, sizeof(cl_mem), &mask_buffer);
+		err = clSetKernelArg(kernel_2, 1, sizeof(cl_mem), &label_buffer);
+		err = clSetKernelArg(kernel_2, 2, sizeof(unsigned int), (void*)(&nx));
+		err = clSetKernelArg(kernel_2, 3, sizeof(unsigned int), (void*)(&ny));
+		err = clSetKernelArg(kernel_2, 4, sizeof(unsigned int), (void*)(&nz));
+		err = clSetKernelArg(kernel_2, 5, sizeof(unsigned int), (void*)(&len));
+		//kernel 3
+		err = clSetKernelArg(kernel_3, 0, sizeof(cl_mem), &mask_buffer);
+		err = clSetKernelArg(kernel_3, 1, sizeof(cl_mem), &label_buffer);
+		err = clSetKernelArg(kernel_3, 2, sizeof(unsigned int), (void*)(&nx));
+		err = clSetKernelArg(kernel_3, 3, sizeof(unsigned int), (void*)(&ny));
+		err = clSetKernelArg(kernel_3, 4, sizeof(unsigned int), (void*)(&nz));
+		err = clSetKernelArg(kernel_3, 5, sizeof(unsigned int), (void*)(&clean_size));
+
+		for (int j = 0; j < clean_iter; ++j)
+		{
+			err = clEnqueueNDRangeKernel(queue, kernel_1, 3, NULL, global_size,
+				local_size, 0, NULL, NULL);
+			err = clEnqueueNDRangeKernel(queue, kernel_2, 3, NULL, global_size,
+				local_size, 0, NULL, NULL);
+			err = clEnqueueNDRangeKernel(queue, kernel_3, 3, NULL, global_size,
+				local_size, 0, NULL, NULL);
+		}
+
+		clReleaseMemObject(mask_buffer);
+		clReleaseKernel(kernel_1);
+		clReleaseKernel(kernel_2);
+		clReleaseKernel(kernel_3);
+		delete[] mask32;
 
 		m_sig_progress();
 	}
@@ -457,7 +521,9 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 	clReleaseProgram(program);
 }
 
-void ComponentGenerator::Grow3DSized(bool diffuse, int iter, float tran, float falloff, int size_lm)
+void ComponentGenerator::Grow3DSized(
+	bool diffuse, int iter, float tran, float falloff,
+	int size_lm, float density, int clean_iter, int clean_size)
 {
 	GET_VOLDATA
 
@@ -488,6 +554,7 @@ void ComponentGenerator::Grow3DSized(bool diffuse, int iter, float tran, float f
 	cl_kernel kernel_0 = clCreateKernel(program, "kernel_0", &err);
 	cl_kernel kernel_1 = clCreateKernel(program, "kernel_1", &err);
 	cl_kernel kernel_2 = clCreateKernel(program, "kernel_2", &err);
+	cl_kernel kernel_3 = clCreateKernel(program, "kernel_3", &err);
 
 	unsigned int rcnt = 0;
 	unsigned int seed = iter > 10 ? iter : 11;
@@ -560,13 +627,10 @@ void ComponentGenerator::Grow3DSized(bool diffuse, int iter, float tran, float f
 	err = clSetKernelArg(kernel_2, 9, sizeof(float), (void*)(&scl_ff));
 	err = clSetKernelArg(kernel_2, 10, sizeof(float), (void*)(&grad_ff));
 	err = clSetKernelArg(kernel_2, 11, sizeof(unsigned int), (void*)(&size_lm));
+	err = clSetKernelArg(kernel_2, 12, sizeof(float), (void*)(&density));
 
 	for (int j = 0; j < iter; ++j)
 	{
-		//err = clEnqueueWriteBuffer(
-		//	queue, mask_buffer,
-		//	CL_TRUE, 0, sizeof(unsigned int)*nx*ny*nz,
-		//	mask32, 0, NULL, NULL);
 		if (j)
 		{
 			err = clEnqueueNDRangeKernel(queue, kernel_0, 3, NULL, global_size,
@@ -576,6 +640,29 @@ void ComponentGenerator::Grow3DSized(bool diffuse, int iter, float tran, float f
 		}
 		err = clEnqueueNDRangeKernel(queue, kernel_2, 3, NULL, global_size,
 			local_size, 0, NULL, NULL);
+
+		m_sig_progress();
+	}
+
+	//kernel 3
+	if (clean_iter)
+	{
+		err = clSetKernelArg(kernel_3, 0, sizeof(cl_mem), &mask_buffer);
+		err = clSetKernelArg(kernel_3, 1, sizeof(cl_mem), &label_buffer);
+		err = clSetKernelArg(kernel_3, 2, sizeof(unsigned int), (void*)(&nx));
+		err = clSetKernelArg(kernel_3, 3, sizeof(unsigned int), (void*)(&ny));
+		err = clSetKernelArg(kernel_3, 4, sizeof(unsigned int), (void*)(&nz));
+		err = clSetKernelArg(kernel_3, 5, sizeof(unsigned int), (void*)(&clean_size));
+
+		for (int j = 0; j < clean_iter; ++j)
+		{
+			err = clEnqueueNDRangeKernel(queue, kernel_0, 3, NULL, global_size,
+				local_size, 0, NULL, NULL);
+			err = clEnqueueNDRangeKernel(queue, kernel_1, 3, NULL, global_size,
+				local_size, 0, NULL, NULL);
+			err = clEnqueueNDRangeKernel(queue, kernel_3, 3, NULL, global_size,
+				local_size, 0, NULL, NULL);
+		}
 
 		m_sig_progress();
 	}
@@ -593,6 +680,7 @@ void ComponentGenerator::Grow3DSized(bool diffuse, int iter, float tran, float f
 	clReleaseKernel(kernel_0);
 	clReleaseKernel(kernel_1);
 	clReleaseKernel(kernel_2);
+	clReleaseKernel(kernel_3);
 	clReleaseCommandQueue(queue);
 	clReleaseProgram(program);
 	delete[] mask32;
