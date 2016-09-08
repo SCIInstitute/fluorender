@@ -303,31 +303,35 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 	sizer11->Add(m_basic_clean_limit_text, 0, wxALIGN_CENTER);
 	sizer11->Add(5, 5);
 
+	wxBoxSizer *group1 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "Advanced Settings"), wxVERTICAL);
+	group1->Add(10, 10);
+	group1->Add(sizer3, 0, wxEXPAND);
+	group1->Add(10, 10);
+	group1->Add(sizer4, 0, wxEXPAND);
+	group1->Add(10, 10);
+	group1->Add(sizer5, 0, wxEXPAND);
+	group1->Add(10, 10);
+	group1->Add(sizer6, 0, wxEXPAND);
+	group1->Add(10, 10);
+	group1->Add(sizer7, 0, wxEXPAND);
+	group1->Add(10, 10);
+	group1->Add(sizer8, 0, wxEXPAND);
+	group1->Add(10, 10);
+	group1->Add(sizer9, 0, wxEXPAND);
+	group1->Add(10, 10);
+	group1->Add(sizer10, 0, wxEXPAND);
+	group1->Add(10, 10);
+	group1->Add(sizer11, 0, wxEXPAND);
+	group1->Add(10, 10);
+
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
 	sizerv->Add(10, 10);
 	sizerv->Add(sizer1, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 	sizerv->Add(sizer2, 0, wxEXPAND);
 	sizerv->Add(10, 10);
-	sizerv->Add(sizer3, 0, wxEXPAND);
-	sizerv->Add(10, 10);
-	sizerv->Add(sizer4, 0, wxEXPAND);
-	sizerv->Add(10, 10);
-	sizerv->Add(sizer5, 0, wxEXPAND);
-	sizerv->Add(10, 10);
-	sizerv->Add(sizer6, 0, wxEXPAND);
-	sizerv->Add(10, 10);
-	sizerv->Add(sizer7, 0, wxEXPAND);
-	sizerv->Add(10, 10);
-	sizerv->Add(sizer8, 0, wxEXPAND);
-	sizerv->Add(10, 10);
-	sizerv->Add(sizer9, 0, wxEXPAND);
-	sizerv->Add(10, 10);
-	sizerv->Add(sizer10, 0, wxEXPAND);
-	sizerv->Add(10, 10);
-	sizerv->Add(sizer11, 0, wxEXPAND);
-	sizerv->Add(10, 10);
-
+	sizerv->Add(group1, 0, wxEXPAND);
 	page->SetSizer(sizerv);
 
 	return page;
@@ -1166,8 +1170,10 @@ void ComponentDlg::Update()
 	EnableBasicSize(m_basic_size);
 	m_basic_size_text->SetValue(wxString::Format("%d", m_basic_size_lm));
 	EnableBasicDensity(m_basic_density);
+	m_basic_density_check->SetValue(m_basic_density);
 	m_basic_density_text->SetValue(wxString::Format("%.3f", m_basic_density_vl));
 	EnableBasicClean(m_basic_clean);
+	m_basic_clean_check->SetValue(m_basic_clean);
 	m_basic_clean_iter_text->SetValue(wxString::Format("%d", m_basic_clean_iter));
 	m_basic_clean_limit_text->SetValue(wxString::Format("%d", m_basic_clean_size_vl));
 
