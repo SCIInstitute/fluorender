@@ -918,16 +918,18 @@ bool TrackMapProcessor::UnlinkEdgeSize(InterGraph &graph, pVertex &vertex,
 	std::sort(edges.begin(), edges.end(),
 		std::bind(comp_edge_size, std::placeholders::_1,
 			std::placeholders::_2, graph));
-	//see if first two have similar overlap/distance
-	bool similar = similar_edge_size(edges[0], edges[1], graph);
-	//
-	if (!similar)
+	//suppose we have more than 2 edges, find where to cut
+	for (size_t ei = 1; ei < edges.size(); ++ei)
 	{
-		//if unsimilar, keep the first one
-		for (size_t i = 1; i < edges.size(); ++i)
-			unlink_edge(edges[i], graph);
-		return true;
+		if (!similar_edge_size(edges[0], edges[ei], graph))
+		{
+			//if unsimilar, keep the first one
+			for (size_t i = ei; i < edges.size(); ++i)
+				unlink_edge(edges[i], graph);
+			return true;
+		}
 	}
+
 	return false;
 }
 
@@ -962,28 +964,26 @@ bool TrackMapProcessor::UnlinkAlterPath(InterGraph &graph, pVertex &vertex,
 	//order paths
 	std::sort(path_list.begin(), path_list.end(),
 		TrackMapProcessor::comp_path_size);
-	//see if the first two have similar size
-	bool similar = similar_path_size(path_list[0], path_list[1]);
-	if (!similar)
+	//similar to unlink edge size
+	for (size_t pi = 1; pi < path_list.size(); ++pi)
 	{
-		//if unsimilar, keep the first one
-		if (path_list[0].get_max_size() ==
-			path_list[0].get_evn_size())
+		if (!similar_path_size(path_list[0], path_list[pi]))
 		{
-			//flip all paths other than the first
-			for (size_t i = 1; i < path_list.size(); ++i)
-				path_list[i].flip();
-			return true;
-		}
-		else
-		{
-			//flip all paths other than the second
-			path_list[0].flip();
-			for (size_t i = 2; i < path_list.size(); ++i)
-				path_list[i].flip();
+			for (size_t i = 0; i < path_list.size(); ++i)
+			{
+				if (i < pi)
+				{
+					if (path_list[i].get_max_size() ==
+						path_list[i].get_odd_size())
+						path_list[i].flip();
+				}
+				else
+					path_list[i].flip();
+			}
 			return true;
 		}
 	}
+
 	return false;
 }
 
