@@ -1185,8 +1185,8 @@ bool TrackMapProcessor::similar_path_size(Path &path1, Path &path2)
 
 bool TrackMapProcessor::similar_vertex_size(pVertex& v1, pVertex& v2)
 {
-	float s1 = v1.GetSizeF();
-	float s2 = v2.GetSizeF();
+	float s1 = v1->GetSizeF();
+	float s2 = v2->GetSizeF();
 	if (fabs(s1 - s2) / std::max(s1, s2) < m_similar_thresh)
 		return true;
 	else
