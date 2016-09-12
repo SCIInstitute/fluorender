@@ -156,6 +156,8 @@ namespace FL
 		CacheQueue m_vol_cache;
 		boost::signals2::connection m_new_conn;
 		boost::signals2::connection m_del_conn;
+		//neighbor frame for orphan searching
+		size_t m_nframe;
 
 	private:
 		//modification
@@ -173,10 +175,6 @@ namespace FL
 			pVertex &vertex1, pVertex &vertex2,
 			size_t f1, size_t f2,
 			float overlap_value);
-		bool LinkOrphans(InterGraph& graph,
-			pVertex &vertex1, pVertex &vertex2,
-			size_t f1, size_t f2,
-			float dist_value);
 		bool IsolateVertex(InterGraph& graph,
 			pVertex &vertex);
 		bool ForceVertices(InterGraph& graph,
@@ -218,6 +216,8 @@ namespace FL
 		//detailed match functions
 		//link edge of the max overlap
 		bool LinkEdgeMax(InterGraph &graph, std::vector<InterEdge> &edges);
+		//search for neighboring orphans for linking
+		bool LinkOrphans(InterGraph& graph, pVertex &vertex);
 		//unlink edge by size similarity
 		bool UnlinkEdgeSize(InterGraph &graph, pVertex &vertex,
 			std::vector<InterEdge> &edges);
@@ -244,9 +244,7 @@ namespace FL
 		bool similar_path_size(Path &path1, Path &path2);
 		void link_edge(InterEdge edge, InterGraph &graph, unsigned int value = 1);
 		void unlink_edge(InterEdge edge, InterGraph &graph, unsigned int value = 0);
-
-		void FindOrphans(pVertex &vertex, InterGraph &inter_graph,
-			VertexList &orphan_list, VertexList &visited_list, int level);
+		bool similar_vertex_size(pVertex& v1, pVertex& v2);
 
 		//export
 		void WriteBool(std::ofstream& ofs, bool value);
