@@ -156,8 +156,9 @@ namespace FL
 		CacheQueue m_vol_cache;
 		boost::signals2::connection m_new_conn;
 		boost::signals2::connection m_del_conn;
-		//neighbor frame for orphan searching
-		size_t m_nframe;
+		//cur & neighbor frames for orphan searching
+		size_t m_frame1;
+		size_t m_frame2;
 
 	private:
 		//modification

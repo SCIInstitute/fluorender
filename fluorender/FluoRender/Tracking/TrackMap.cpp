@@ -548,7 +548,7 @@ bool TrackMapProcessor::LinkOrphans(InterGraph& graph, pVertex &vertex)
 
 	//find closest
 	VertexListIter iter;
-	VertexList &vertex_list = m_map.m_vertices_list.at(m_nframe);
+	VertexList &vertex_list = m_map.m_vertices_list.at(m_frame2);
 	for (iter = vertex_list.begin();
 		iter != vertex_list.end(); ++iter)
 	{
@@ -575,16 +575,58 @@ bool TrackMapProcessor::LinkOrphans(InterGraph& graph, pVertex &vertex)
 		}
 	}
 
-	if (v1_min)
-	{
-		if (!similar_vertex_size(vertex, v1_min))
-			return false;
-		pos1 = v1_min->GetCenter();
-		d = (pos - pos1).length();
-		//if (d > )
-	}
+	if (!v1_min)
+		return false;
+	//should have similar size
+	if (!similar_vertex_size(vertex, v1_min))
+		return false;
+	pos1 = v1_min->GetCenter();
+	d = (pos - pos1).length();
+	//should be very close
+	FLIVR::BBox box = vertex->GetBox();
+	if (d > 1.4*box.longest_edge())
+		return false;
 
-	return false;
+	//link vertices
+	InterVert v1 = vertex->GetInterVert(graph);
+	InterVert v2 = v1_min->GetInterVert(graph);
+	if (v1 == InterGraph::null_vertex())
+	{
+		v1 = boost::add_vertex(graph);
+		graph[v1].id = vertex->Id();
+		graph[v1].frame = m_frame1;
+		graph[v1].count = 1;
+		graph[v1].vertex = vertex;
+		vertex->SetInterVert(graph, v1);
+	}
+	else
+		graph[v1].count++;
+	if (v2 == InterGraph::null_vertex())
+	{
+		v2 = boost::add_vertex(graph);
+		graph[v2].id = v1_min->Id();
+		graph[v2].frame = m_frame2;
+		graph[v2].count = 1;
+		graph[v2].vertex = v1_min;
+		v1_min->SetInterVert(graph, v2);
+	}
+	else
+		graph[v2].count++;
+
+	std::pair<InterEdge, bool> e = boost::edge(v1, v2, graph);
+	if (!e.second)
+	{
+		e = boost::add_edge(v1, v2, graph);
+		graph[e.first].size_ui = 0;
+		graph[e.first].size_f = 0.0f;
+		graph[e.first].dist_f = d;
+		graph[e.first].link = 1;
+		graph[e.first].count = 1;
+	}
+	else
+		graph[e.first].count++;
+
+	return true;
 }
 
 bool TrackMapProcessor::IsolateVertex(InterGraph& graph, pVertex &vertex)
@@ -775,7 +817,8 @@ bool TrackMapProcessor::ProcessFrames(size_t frame1, size_t frame2)
 	VertexList &vertex_list1 = m_map.m_vertices_list.at(frame1);
 	InterGraph &inter_graph = m_map.m_inter_graph_list.at(
 		frame1 > frame2 ? frame2 : frame1);
-	m_nframe = frame2;
+	m_frame1 = frame1;
+	m_frame2 = frame2;
 
 	VertexListIter iter;
 
@@ -785,7 +828,9 @@ bool TrackMapProcessor::ProcessFrames(size_t frame1, size_t frame2)
 		ProcessVertex(iter->second, inter_graph,
 			true, true);
 		//see if it is removed
-		if (!iter->second->GetInterVert(inter_graph))
+		////debug
+		//pVertex vert = iter->second;
+		if (iter->second->GetRemovedFromGraph())
 			iter = vertex_list1.erase(iter);
 		else
 			++iter;
@@ -888,6 +933,8 @@ bool TrackMapProcessor::GetValence(pVertex &vertex, InterGraph &graph,
 		inter_iter != adj_verts.second; ++inter_iter)
 	{
 		v1 = *inter_iter;
+		////debug
+		//pVertex vert1 = graph[v1].vertex.lock();
 		edge = boost::edge(v0, v1, graph);
 		if (edge.second)
 		{
@@ -1117,9 +1164,9 @@ bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph,
 		result = UnlinkEdgeSize(graph, vertex, linked_edges);
 		if (!result)
 			result = UnlinkAlterPath(graph, vertex, linked_edges);
-		if (!result && hint_merge && count > 5)
+		if (!result && hint_merge)
 			result = MergeEdges(graph, vertex, linked_edges);
-		if (!result && hint_split && count > 5)
+		if (!result && hint_split)
 			result = SplitVertex(graph, vertex, linked_edges);
 	}
 

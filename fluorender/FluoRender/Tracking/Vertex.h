@@ -80,6 +80,7 @@ namespace FL
 		void Id(unsigned int);
 		InterVert GetInterVert(InterGraph& graph);
 		void SetInterVert(InterGraph& graph, InterVert inter_vert);
+		bool GetRemovedFromGraph();
 		size_t GetFrame(InterGraph& graph);
 
 		void SetCenter(FLIVR::Point &center);
@@ -90,6 +91,8 @@ namespace FL
 		FLIVR::Point &GetCenter();
 		unsigned int GetSizeUi();
 		float GetSizeF();
+		//bbox computed from cells
+		FLIVR::BBox GetBox();
 
 		//cells
 		size_t GetCellNum();
@@ -149,6 +152,15 @@ namespace FL
 		else
 			m_inter_verts.insert(
 				std::pair<unsigned int, InterVert>(key, inter_vert));
+	}
+
+	inline bool Vertex::GetRemovedFromGraph()
+	{
+		for (auto iter = m_inter_verts.begin();
+			iter != m_inter_verts.end(); ++iter)
+			if (iter->second != InterGraph::null_vertex())
+				return false;
+		return true;
 	}
 
 	inline size_t Vertex::GetFrame(InterGraph& graph)
@@ -264,6 +276,18 @@ namespace FL
 	inline float Vertex::GetSizeF()
 	{
 		return m_size_f;
+	}
+
+	inline FLIVR::BBox Vertex::GetBox()
+	{
+		FLIVR::BBox box;
+		for (CellBinIter iter = m_cells.begin();
+			iter != m_cells.end(); ++iter)
+		{
+			pCell c = iter->lock();
+			box.extend(c->GetBox());
+		}
+		return box;
 	}
 
 }//namespace FL
