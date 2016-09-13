@@ -330,8 +330,8 @@ EVT_BUTTON(ID_CellNewIDBtn, TraceDlg::OnCellNewID)
 EVT_BUTTON(ID_CellAppendIDBtn, TraceDlg::OnCellAppendID)
 EVT_BUTTON(ID_CellReplaceIDBtn, TraceDlg::OnCellReplaceID)
 EVT_BUTTON(ID_CellCombineIDBtn, TraceDlg::OnCellCombineID)
+EVT_BUTTON(ID_CellSeparateBtn, TraceDlg::OnCellSeparateID)
 EVT_BUTTON(ID_CellDivideIDBtn, TraceDlg::OnCellDivideID)
-EVT_BUTTON(ID_CellSegmentBtn, TraceDlg::OnCellSegment)
 //analysis page
 //conversion
 EVT_BUTTON(ID_ConvertToRulersBtn, TraceDlg::OnConvertToRulers)
@@ -623,14 +623,14 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
 	m_cell_combine_id_btn = new wxButton(page, ID_CellCombineIDBtn, "Combine",
 		wxDefaultPosition, wxSize(85, 23));
-	m_cell_divide_id_btn = new wxButton(page, ID_CellDivideIDBtn, "Divide",
+	m_cell_separate_id_btn = new wxButton(page, ID_CellSeparateBtn, "Separate",
 		wxDefaultPosition, wxSize(85, 23));
-	m_cell_segment_btn = new wxButton(page, ID_CellSegmentBtn, "Segment",
+	m_cell_divide_id_btn = new wxButton(page, ID_CellDivideIDBtn, "Divide",
 		wxDefaultPosition, wxSize(85, 23));
 	sizer_3->AddStretchSpacer();
 	sizer_3->Add(m_cell_combine_id_btn, 0, wxALIGN_CENTER);
+	sizer_3->Add(m_cell_separate_id_btn, 0, wxALIGN_CENTER);
 	sizer_3->Add(m_cell_divide_id_btn, 0, wxALIGN_CENTER);
-	sizer_3->Add(m_cell_segment_btn, 0, wxALIGN_CENTER);
 	sizer_3->AddStretchSpacer();
 
 	//vertical sizer
@@ -2558,7 +2558,7 @@ void TraceDlg::OnCellCombineID(wxCommandEvent &event)
 	CellUpdate();
 }
 
-void TraceDlg::OnCellDivideID(wxCommandEvent& event)
+void TraceDlg::OnCellSeparateID(wxCommandEvent& event)
 {
 	if (!m_view)
 		return;
@@ -2603,7 +2603,7 @@ void TraceDlg::OnCellDivideID(wxCommandEvent& event)
 
 }
 
-void TraceDlg::OnCellSegment(wxCommandEvent& event)
+void TraceDlg::OnCellDivideID(wxCommandEvent& event)
 {
 	if (!m_view)
 		return;

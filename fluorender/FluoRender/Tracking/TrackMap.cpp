@@ -933,8 +933,8 @@ bool TrackMapProcessor::GetValence(pVertex &vertex, InterGraph &graph,
 		inter_iter != adj_verts.second; ++inter_iter)
 	{
 		v1 = *inter_iter;
-		////debug
-		//pVertex vert1 = graph[v1].vertex.lock();
+		//debug
+		pVertex vert1 = graph[v1].vertex.lock();
 		edge = boost::edge(v0, v1, graph);
 		if (edge.second)
 		{
@@ -1042,8 +1042,51 @@ bool TrackMapProcessor::UnlinkAlterPath(InterGraph &graph, pVertex &vertex,
 			return true;
 		}
 	}
+	//if there are both even-only and odd paths,
+	//unlink odd paths
+	PathList odd_list;
+	for (size_t pi = 0; pi < path_list.size(); ++pi)
+	{
+		if (path_list[pi].get_odd_size() > 0.0f)
+			odd_list.push_back(path_list[pi]);
+	}
+	if (odd_list.size() &&
+		odd_list.size() < path_list.size())
+	{
+		for (size_t pi = 0; pi < odd_list.size(); ++pi)
+			odd_list[pi].flip();
+		return true;
+	}
 
 	return false;
+}
+
+//unlink edge by vertex size, use after merge fails
+bool TrackMapProcessor::UnlinkVertexSize(InterGraph &graph, pVertex &vertex,
+	std::vector<InterEdge> &edges)
+{
+	if (edges.size() < 2)
+		return false;
+
+	bool result = false;
+
+	//find vertex that is not similar
+	pVertex vert1;
+	for (size_t ei = 0; ei < edges.size(); ++ei)
+	{
+		vert1 = graph[boost::target(edges[ei], graph)].vertex.lock();
+		if (vertex == vert1)
+			vert1 = graph[boost::source(edges[ei], graph)].vertex.lock();
+		if (!vert1) continue;
+
+		if (!similar_vertex_size(vertex, vert1))
+		{
+			unlink_edge(edges[ei], graph);
+			result = true;
+		}
+	}
+
+	return result;
 }
 
 //reduce valence by segmentation
@@ -1161,11 +1204,16 @@ bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph,
 	}
 	else if (valence > 1)
 	{
-		result = UnlinkEdgeSize(graph, vertex, linked_edges);
-		if (!result)
-			result = UnlinkAlterPath(graph, vertex, linked_edges);
+		if (count < 5)
+		{
+			result = UnlinkEdgeSize(graph, vertex, linked_edges);
+			if (!result)
+				result = UnlinkAlterPath(graph, vertex, linked_edges);
+		}
 		if (!result && hint_merge)
 			result = MergeEdges(graph, vertex, linked_edges);
+		if (!result)
+			result = UnlinkVertexSize(graph, vertex, linked_edges);
 		if (!result && hint_split)
 			result = SplitVertex(graph, vertex, linked_edges);
 	}
@@ -3055,11 +3103,12 @@ bool TrackMapProcessor::SegmentCells(
 	void* data, void* label,
 	CellList &list, size_t frame)
 {
-	ClusterDbscan cs_processor;
-	unsigned int size = (unsigned int)m_size_thresh;
-	cs_processor.SetSize(size);
+	//ClusterDbscan cs_processor;
+	//unsigned int size = (unsigned int)m_size_thresh;
+	//cs_processor.SetSize(size);
 	//ClusterKmeans cs_processor;
-	//ClusterExmax cs_processor;
+	ClusterExmax cs_processor;
+
 	size_t index;
 	size_t i, j, k;
 	size_t nx = m_map.m_size_x;

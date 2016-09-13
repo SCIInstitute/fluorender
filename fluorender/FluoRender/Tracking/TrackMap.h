@@ -228,6 +228,9 @@ namespace FL
 		//check if any out vertex can be combined
 		bool MergeEdges(InterGraph &graph, pVertex &vertex,
 			std::vector<InterEdge> &edges);
+		//unlink edge by vertex size, use after merge fails
+		bool UnlinkVertexSize(InterGraph &graph, pVertex &vertex,
+			std::vector<InterEdge> &edges);
 		//check if the vertex can split
 		bool SplitVertex(InterGraph &graph, pVertex &vertex,
 			std::vector<InterEdge> &edges);

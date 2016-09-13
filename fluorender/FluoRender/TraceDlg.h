@@ -144,8 +144,8 @@ public:
 		ID_CellAppendIDBtn,
 		ID_CellReplaceIDBtn,
 		ID_CellCombineIDBtn,
+		ID_CellSeparateBtn,
 		ID_CellDivideIDBtn,
-		ID_CellSegmentBtn,
 		//analysis page
 		//conversion
 		ID_ConvertToRulersBtn,
@@ -278,8 +278,8 @@ private:
 	wxButton* m_cell_append_id_btn;
 	wxButton* m_cell_replace_id_btn;
 	wxButton* m_cell_combine_id_btn;
+	wxButton* m_cell_separate_id_btn;
 	wxButton* m_cell_divide_id_btn;
-	wxButton* m_cell_segment_btn;
 
 	//analysis page
 	//conversion
@@ -379,8 +379,8 @@ private:
 	void OnCellAppendID(wxCommandEvent& event);
 	void OnCellReplaceID(wxCommandEvent& event);
 	void OnCellCombineID(wxCommandEvent& event);
+	void OnCellSeparateID(wxCommandEvent& event);
 	void OnCellDivideID(wxCommandEvent& event);
-	void OnCellSegment(wxCommandEvent& event);
 	//analysis page
 	//conversion
 	void OnConvertToRulers(wxCommandEvent &event);
