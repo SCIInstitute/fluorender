@@ -33,7 +33,8 @@ using namespace FL;
 ClusterExmax::ClusterExmax() :
 	m_clnum(2),
 	m_eps(1e-3),
-	m_max_iter(200)
+	m_max_iter(200),
+	m_weak_result(false)
 {
 
 }
@@ -59,10 +60,13 @@ bool ClusterExmax::Execute()
 
 	if (counter == m_max_iter)
 	{
-		//if (GetProb() > 0.96)
-		//	return true;
-		//else
-			return false;
+		if (m_weak_result)
+		{
+			GenResult();
+			if (GetProb() > 0.8)
+				return true;
+		}
+		return false;
 	}
 	else
 	{

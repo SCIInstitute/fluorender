@@ -382,26 +382,56 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(70, 20));
 	m_gen_map_prg = new wxGauge(page, ID_GenMapPrg, 100,
 		wxDefaultPosition, wxSize(-1, 18));
-	sizer_2->Add(5, 5);
-	sizer_2->Add(st, 0, wxALIGN_CENTER);
-	sizer_2->Add(m_gen_map_prg, 1, wxEXPAND);
-	st = new wxStaticText(page, 0, "X",
-		wxDefaultPosition, wxSize(10, -1));
-	m_gen_map_spin = new wxSpinCtrl(page, ID_GenMapSpin, "1",
-		wxDefaultPosition, wxSize(50, 23));
-	sizer_2->Add(10, 10);
-	sizer_2->Add(st, 0, wxALIGN_CENTER);
-	sizer_2->Add(m_gen_map_spin, 0, wxALIGN_CENTER);
 	m_gen_map_btn = new wxButton(page, ID_GenMapBtn, "Gen.",
 		wxDefaultPosition, wxSize(65, 23));
 	m_refine_t_btn = new wxButton(page, ID_RefineTBtn, "Ref. T",
 		wxDefaultPosition, wxSize(65, 23));
 	m_refine_all_btn = new wxButton(page, ID_RefineAllBtn, "Ref. All",
 		wxDefaultPosition, wxSize(65, 23));
-	sizer_2->Add(10, 10);
+	sizer_2->Add(5, 5);
+	sizer_2->Add(st, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_gen_map_prg, 1, wxEXPAND);
 	sizer_2->Add(m_gen_map_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_refine_t_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_refine_all_btn, 0, wxALIGN_CENTER);
+
+	//settings
+	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Times:",
+		wxDefaultPosition, wxDefaultSize);
+	m_map_iter_spin = new wxSpinCtrl(page, ID_MapIterSpin, "3",
+		wxDefaultPosition, wxSize(50, 23));
+	sizer_3->Add(5, 5);
+	sizer_3->Add(st, 0, wxALIGN_CENTER);
+	sizer_3->Add(m_map_iter_spin, 0, wxALIGN_CENTER);
+	st = new wxStaticText(page, 0, "Size Thr.:",
+		wxDefaultPosition, wxDefaultSize);
+	m_map_size_spin = new wxSpinCtrl(page, ID_MapSizeSpin, "25",
+		wxDefaultPosition, wxSize(50, 23));
+	sizer_3->AddStretchSpacer(1);
+	sizer_3->Add(st, 0, wxALIGN_CENTER);
+	sizer_3->Add(m_map_size_spin, 0, wxALIGN_CENTER);
+	st = new wxStaticText(page, 0, "Contact F.:",
+		wxDefaultPosition, wxDefaultSize);
+	m_map_cntct_spin = new wxSpinCtrlDouble(
+		page, ID_MapCntctSpin, "0.7",
+		wxDefaultPosition, wxSize(50, 23),
+		wxSP_ARROW_KEYS | wxSP_WRAP,
+		0, 1, 0.7, 0.01);
+	sizer_3->AddStretchSpacer(1);
+	sizer_3->Add(st, 0, wxALIGN_CENTER);
+	sizer_3->Add(m_map_cntct_spin, 0, wxALIGN_CENTER);
+	st = new wxStaticText(page, 0, "Similarity:",
+		wxDefaultPosition, wxDefaultSize);
+	m_map_simlr_spin = new wxSpinCtrlDouble(
+		page, ID_MapSimlrSpin, "0.85",
+		wxDefaultPosition, wxSize(50, 23),
+		wxSP_ARROW_KEYS| wxSP_WRAP,
+		0, 1, 0.85, 0.01);
+	sizer_3->AddStretchSpacer(1);
+	sizer_3->Add(st, 0, wxALIGN_CENTER);
+	sizer_3->Add(m_map_simlr_spin, 0, wxALIGN_CENTER);
+	sizer_3->Add(5, 5);
 
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
@@ -409,6 +439,8 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 	sizer_v->Add(sizer_1, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 	sizer_v->Add(sizer_2, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer_3, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 
 	//set the page
@@ -860,6 +892,20 @@ void TraceDlg::GetSettings(VRenderView* vrv)
 	else
 		m_auto_id_chk->SetToolNormalBitmap(
 			ID_AutoIDChk, wxGetBitmapFromMemory(auto_assign_off));
+
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetSettingDlg())
+	{
+		double size_thresh =
+			vr_frame->GetSettingDlg()->GetComponentSize();
+		double con_factor =
+			vr_frame->GetSettingDlg()->GetContactFactor();
+		double sim_thresh =
+			vr_frame->GetSettingDlg()->GetSimilarity();
+		m_map_size_spin->SetValue(size_thresh);
+		m_map_cntct_spin->SetValue(con_factor);
+		m_map_simlr_spin->SetValue(sim_thresh);
+	}
 }
 
 void TraceDlg::SetCellSize(int size)
@@ -3087,16 +3133,6 @@ void TraceDlg::GenMap()
 	if (!m_view)
 		return;
 
-	//some parameters
-	double component_size = 25.0;
-	double contact_factor = 0.7;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-	{
-		component_size = vr_frame->GetSettingDlg()->GetComponentSize();
-		contact_factor = vr_frame->GetSettingDlg()->GetContactFactor();
-	}
-
 	//get trace group
 	m_view->CreateTraceGroup();
 	TraceGroup *trace_group = m_view->GetTraceGroup();
@@ -3110,8 +3146,21 @@ void TraceDlg::GenMap()
 	if (!reader)
 		return;
 
+	//get settings
+	size_t iter_num = (size_t)m_map_iter_spin->GetValue();
+	float size_thresh = m_map_size_spin->GetValue();
+	float sim_thresh = m_map_simlr_spin->GetValue();
+	float con_factor = m_map_cntct_spin->GetValue();
+	//save settings
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetSettingDlg())
+	{
+		vr_frame->GetSettingDlg()->SetComponentSize(size_thresh);
+		vr_frame->GetSettingDlg()->SetContactFactor(con_factor);
+		vr_frame->GetSettingDlg()->SetSimilarity(sim_thresh);
+	}
+
 	//start progress
-	size_t iter_num = (size_t)m_gen_map_spin->GetValue();
 	m_stat_text->SetValue("Generating track map.\n");
 	wxGetApp().Yield();
 	int frames = reader->GetTimeNum();
@@ -3131,9 +3180,9 @@ void TraceDlg::GenMap()
 	tm_processor.SetScale(vd->GetScalarScale());
 	tm_processor.SetSizes(resx, resy, resz);
 	tm_processor.SetSpacings(spcx, spcy, spcz);
-	tm_processor.SetSizeThresh(component_size);
-	tm_processor.SetContactThresh(contact_factor);
-	tm_processor.SetSimilarThresh(0.85f);
+	tm_processor.SetSizeThresh(size_thresh);
+	tm_processor.SetContactThresh(con_factor);
+	tm_processor.SetSimilarThresh(sim_thresh);
 	//register file reading and deleteing functions
 	tm_processor.RegisterCacheQueueFuncs(
 		boost::bind(&TraceDlg::ReadVolCache, this, _1),
@@ -3217,16 +3266,6 @@ void TraceDlg::RefineMap(int t)
 	if (!m_view)
 		return;
 
-	//some parameters
-	double component_size = 25.0;
-	double contact_factor = 0.7;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-	{
-		component_size = vr_frame->GetSettingDlg()->GetComponentSize();
-		contact_factor = vr_frame->GetSettingDlg()->GetContactFactor();
-	}
-
 	//get trace group
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
@@ -3241,9 +3280,22 @@ void TraceDlg::RefineMap(int t)
 			"Refining track map at time point %d.\n", t));
 	wxGetApp().Yield();
 
+	//get settings
+	size_t iter_num = (size_t)m_map_iter_spin->GetValue();
+	float size_thresh = m_map_size_spin->GetValue();
+	float sim_thresh = m_map_simlr_spin->GetValue();
+	float con_factor = m_map_cntct_spin->GetValue();
+	//save settings
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetSettingDlg())
+	{
+		vr_frame->GetSettingDlg()->SetComponentSize(size_thresh);
+		vr_frame->GetSettingDlg()->SetContactFactor(con_factor);
+		vr_frame->GetSettingDlg()->SetSimilarity(sim_thresh);
+	}
+
 	//start progress
 	FL::TrackMap &track_map = trace_group->GetTrackMap();
-	size_t iter_num = (size_t)m_gen_map_spin->GetValue();
 	int start_frame, end_frame;
 	if (t < 0)
 	{
@@ -3268,9 +3320,9 @@ void TraceDlg::RefineMap(int t)
 	tm_processor.SetScale(vd->GetScalarScale());
 	tm_processor.SetSizes(resx, resy, resz);
 	tm_processor.SetSpacings(spcx, spcy, spcz);
-	tm_processor.SetSizeThresh(component_size);
-	tm_processor.SetContactThresh(contact_factor);
-	tm_processor.SetSimilarThresh(0.85f);
+	tm_processor.SetSizeThresh(size_thresh);
+	tm_processor.SetContactThresh(con_factor);
+	tm_processor.SetSimilarThresh(sim_thresh);
 	//register file reading and deleteing functions
 	tm_processor.RegisterCacheQueueFuncs(
 		boost::bind(&TraceDlg::ReadVolCache, this, _1),

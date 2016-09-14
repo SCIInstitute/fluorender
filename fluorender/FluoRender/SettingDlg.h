@@ -203,6 +203,8 @@ public:
 	double GetComponentSize() { return m_component_size; }
 	void SetContactFactor(double fact) { m_contact_factor = fact; }
 	double GetContactFactor() { return m_contact_factor; }
+	void SetSimilarity(double siml) { m_similarity = siml; }
+	double GetSimilarity() { return m_similarity; }
 
 private:
 	wxWindow* m_frame;
@@ -283,6 +285,7 @@ private:
 	//component size
 	double m_component_size;
 	double m_contact_factor;
+	double m_similarity;
 
 private:
 	//save project
@@ -330,9 +333,6 @@ private:
 	//history depth
 	wxSlider *m_paint_hist_depth_sldr;
 	wxTextCtrl *m_paint_hist_depth_text;
-	//component size
-	wxTextCtrl *m_component_size_text;
-	wxTextCtrl *m_contact_factor_text;
 
 	//save
 	wxButton *m_save_btn;
@@ -400,9 +400,6 @@ private:
 	//paint history depth
 	void OnPaintHistDepthChange(wxScrollEvent &event);
 	void OnPaintHistDepthEdit(wxCommandEvent &event);
-	//component size
-	void OnComponentSizeEdit(wxCommandEvent &event);
-	void OnContactFactorEdit(wxCommandEvent &event);
 
 	DECLARE_EVENT_TABLE();
 };

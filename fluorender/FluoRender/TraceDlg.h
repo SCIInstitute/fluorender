@@ -105,10 +105,13 @@ public:
 		ID_SaveasTraceBtn,
 		//auto tracking
 		ID_GenMapPrg,
-		ID_GenMapSpin,
 		ID_GenMapBtn,
 		ID_RefineTBtn,
 		ID_RefineAllBtn,
+		ID_MapIterSpin,
+		ID_MapSizeSpin,
+		ID_MapSimlrSpin,
+		ID_MapCntctSpin,
 		//selection page
 		//component tools
 		ID_CompIDText,
@@ -234,10 +237,14 @@ private:
 	wxButton* m_saveas_trace_btn;
 	//auto tracking
 	wxGauge* m_gen_map_prg;
-	wxSpinCtrl* m_gen_map_spin;
 	wxButton* m_gen_map_btn;
 	wxButton* m_refine_t_btn;
 	wxButton* m_refine_all_btn;
+	//settings
+	wxSpinCtrl* m_map_iter_spin;
+	wxSpinCtrl* m_map_size_spin;
+	wxSpinCtrlDouble* m_map_simlr_spin;
+	wxSpinCtrlDouble* m_map_cntct_spin;
 
 	//selection page
 	//component tools
@@ -290,12 +297,6 @@ private:
 	wxButton* m_analyze_link_btn;
 	wxButton* m_analyze_uncertain_hist_btn;
 	wxButton* m_save_result_btn;
-
-	//magic tool
-	//wxButton* m_cell_magic0_btn;
-	//wxButton* m_cell_magic1_btn;
-	//wxButton* m_cell_magic2_btn;
-	//wxButton* m_cell_magic3_btn;
 
 	//ghost num
 	wxSlider* m_ghost_num_sldr;

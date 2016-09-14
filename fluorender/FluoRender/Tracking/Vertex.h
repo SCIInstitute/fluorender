@@ -72,7 +72,8 @@ namespace FL
 	{
 	public:
 		Vertex(unsigned int id) :
-			m_id(id), m_size_ui(0), m_size_f(0.0f)
+			m_id(id), m_size_ui(0),
+			m_size_f(0.0f), m_split(false)
 		{}
 		~Vertex() {};
 
@@ -82,6 +83,8 @@ namespace FL
 		void SetInterVert(InterGraph& graph, InterVert inter_vert);
 		bool GetRemovedFromGraph();
 		size_t GetFrame(InterGraph& graph);
+		void SetSplit(bool split = true);
+		bool GetSplit();
 
 		void SetCenter(FLIVR::Point &center);
 		void SetSizeUi(unsigned int size_ui);
@@ -111,6 +114,7 @@ namespace FL
 		typedef boost::unordered_map<unsigned int, InterVert>::iterator InterVertListIter;
 		InterVertList m_inter_verts;
 		CellBin m_cells;//children
+		bool m_split;//true if em has been run already
 	};
 
 	inline unsigned int Cell::GetVertexId()
@@ -171,6 +175,16 @@ namespace FL
 			return graph[iter->second].frame;
 		else
 			return (size_t)-1;
+	}
+
+	inline bool Vertex::GetSplit()
+	{
+		return m_split;
+	}
+
+	inline void Vertex::SetSplit(bool split)
+	{
+		m_split = split;
 	}
 
 	inline void Vertex::SetCenter(FLIVR::Point &center)
@@ -237,17 +251,20 @@ namespace FL
 			m_size_f += cell->GetSizeF();
 		}
 		m_cells.push_back(pwCell(cell));
+
+		m_split = false;
 	}
 
 	inline void Vertex::RemoveCell(pCell &cell)
 	{
 		for (CellBinIter iter = m_cells.begin();
-		iter != m_cells.end(); ++iter)
+			iter != m_cells.end(); ++iter)
 		{
 			pCell c = iter->lock();
 			if (c && c->Id() == cell->Id())
 			{
 				m_cells.erase(iter);
+				m_split = false;
 				return;
 			}
 		}

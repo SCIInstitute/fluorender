@@ -145,8 +145,8 @@ namespace FL
 	private:
 		float m_contact_thresh;
 		float m_size_thresh;
-		int m_level_thresh;
 		float m_similar_thresh;
+		int m_level_thresh;
 		//uncertainty filter
 		unsigned int m_uncertain_low;
 		unsigned int m_uncertain_high;
@@ -223,8 +223,12 @@ namespace FL
 		bool UnlinkEdgeSize(InterGraph &graph, pVertex &vertex,
 			std::vector<InterEdge> &edges);
 		//unlink edge by extended alternating path
-		bool UnlinkAlterPath(InterGraph &graph, pVertex &vertex,
-			std::vector<InterEdge> &edges);
+		bool GetAlterPath(InterGraph &graph, pVertex &vertex,
+			PathList &paths);
+		bool UnlinkAlterPathSize(InterGraph &graph, pVertex &vertex,
+			PathList &paths);
+		bool UnlinkAlterPathConn(InterGraph &graph, pVertex &vertex,
+			PathList &paths);
 		//check if any out vertex can be combined
 		bool MergeEdges(InterGraph &graph, pVertex &vertex,
 			std::vector<InterEdge> &edges);

@@ -993,65 +993,73 @@ bool TrackMapProcessor::UnlinkEdgeSize(InterGraph &graph, pVertex &vertex,
 }
 
 //unlink edge by extended alternating path
-bool TrackMapProcessor::UnlinkAlterPath(InterGraph &graph, pVertex &vertex,
-	std::vector<InterEdge> &edges)
+bool TrackMapProcessor::GetAlterPath(InterGraph &graph, pVertex &vertex,
+	PathList &paths)
 {
-	if (edges.size() < 2)
-		return false;
-
 	//get all potential alternating paths
 	//search level is 2, which includes two edges and three vertices
-	m_level_thresh = 2;
 	bool got_list;
-	PathList path_list;
 	VertVisitList visited;
-	do
+	while (true)
 	{
 		Path alt_path(graph);
 		got_list = get_alter_path(
 			graph, vertex, alt_path,
 			visited, 0);
 		if (got_list)
-			path_list.push_back(alt_path);
+			paths.push_back(alt_path);
 		else
 			break;
-	} while (true);
+	}
 
-	if (path_list.size() < 2)
+	if (paths.size() < 2)
 		return false;
+	else
+		return true;
+}
 
+bool TrackMapProcessor::UnlinkAlterPathSize(InterGraph &graph, pVertex &vertex,
+	PathList &paths)
+{
 	//order paths
-	std::sort(path_list.begin(), path_list.end(),
+	std::sort(paths.begin(), paths.end(),
 		TrackMapProcessor::comp_path_size);
 	//similar to unlink edge size
-	for (size_t pi = 1; pi < path_list.size(); ++pi)
+	for (size_t pi = 1; pi < paths.size(); ++pi)
 	{
-		if (!similar_path_size(path_list[0], path_list[pi]))
+		if (!similar_path_size(paths[0], paths[pi]))
 		{
-			for (size_t i = 0; i < path_list.size(); ++i)
+			for (size_t i = 0; i < paths.size(); ++i)
 			{
 				if (i < pi)
 				{
-					if (path_list[i].get_max_size() ==
-						path_list[i].get_odd_size())
-						path_list[i].flip();
+					if (paths[i].get_max_size() ==
+						paths[i].get_odd_size())
+						paths[i].flip();
 				}
 				else
-					path_list[i].flip();
+					paths[i].flip();
 			}
 			return true;
 		}
 	}
+
+	return false;
+}
+
+bool TrackMapProcessor::UnlinkAlterPathConn(InterGraph &graph, pVertex &vertex,
+	PathList &paths)
+{
 	//if there are both even-only and odd paths,
 	//unlink odd paths
 	PathList odd_list;
-	for (size_t pi = 0; pi < path_list.size(); ++pi)
+	for (size_t pi = 0; pi < paths.size(); ++pi)
 	{
-		if (path_list[pi].get_odd_size() > 0.0f)
-			odd_list.push_back(path_list[pi]);
+		if (paths[pi].get_odd_size() > 0.0f)
+			odd_list.push_back(paths[pi]);
 	}
 	if (odd_list.size() &&
-		odd_list.size() < path_list.size())
+		odd_list.size() < paths.size())
 	{
 		for (size_t pi = 0; pi < odd_list.size(); ++pi)
 			odd_list[pi].flip();
@@ -1141,6 +1149,10 @@ bool TrackMapProcessor::SplitVertex(InterGraph &graph, pVertex &vertex,
 {
 	if (!vertex || edges.size() < 2)
 		return false;
+
+	if (vertex->GetSplit())
+		return false;
+	vertex->SetSplit();
 	
 	CellBinIter pwcell_iter;
 	CellList cells;
@@ -1189,6 +1201,8 @@ bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph,
 	InterVert inter_vert = vertex->GetInterVert(graph);
 	if (inter_vert != InterGraph::null_vertex())
 		count = graph[inter_vert].count;
+	//get a random number
+	int r = 2 + rand() % 5;
 
 	//get valence
 	size_t valence;
@@ -1197,24 +1211,35 @@ bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph,
 	GetValence(vertex, graph, valence, all_edges, linked_edges);
 	if (valence == 0)
 	{
-		if (count < 5)
+		if (count < r)	//only link edges with max overlap
 			result = LinkEdgeMax(graph, all_edges);
-		if (!result)
+		if (!result)	//find and link neighboring orphans
 			result = LinkOrphans(graph, vertex);
 	}
 	else if (valence > 1)
 	{
-		if (count < 5)
-		{
+		if (count < r)	//unlink based on edge overlap, only dissimilar+small edges are unlinked
 			result = UnlinkEdgeSize(graph, vertex, linked_edges);
-			if (!result)
-				result = UnlinkAlterPath(graph, vertex, linked_edges);
-		}
-		if (!result && hint_merge)
-			result = MergeEdges(graph, vertex, linked_edges);
 		if (!result)
+		{
+			//expand the search range with alternating paths
+			m_level_thresh = 2;
+			PathList paths;
+			if (GetAlterPath(graph, vertex, paths))
+			{
+				if (count < r)	//flip paths based on edge overlap
+					result = UnlinkAlterPathSize(
+						graph, vertex, paths);
+				if (!result && count < r*2)	//flip paths based on alternate links
+					result = UnlinkAlterPathConn(
+						graph, vertex, paths);
+			}
+		}
+		if (!result && hint_merge)	//merge edges if possible (DBSCAN)
+			result = MergeEdges(graph, vertex, linked_edges);
+		if (!result)	//unlink edge based on vertex size
 			result = UnlinkVertexSize(graph, vertex, linked_edges);
-		if (!result && hint_split)
+		if (!result && hint_split)	//split vertex if possible (EM)
 			result = SplitVertex(graph, vertex, linked_edges);
 	}
 
@@ -3056,8 +3081,18 @@ bool TrackMapProcessor::ClusterCellsSplit(CellList &list, size_t frame,
 		}
 	}
 
-	cs_processor.SetClnum(clnum);
-	if (cs_processor.Execute())
+	bool result = false;
+	for (size_t clnumi = clnum; clnumi > 1; --clnumi)
+	{
+		cs_processor.SetClnum(clnum);
+		if (cs_processor.Execute())
+		{
+			result = true;
+			break;
+		}
+	}
+
+	if (result)
 	{
 		cs_processor.GenerateNewIDs(id, label,
 			nx, ny, nz);

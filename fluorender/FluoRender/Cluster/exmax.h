@@ -43,10 +43,14 @@ namespace FL
 		{ m_clnum = num; }
 		bool Execute();
 		float GetProb();
+		void SetWeakResult(bool result = true)
+		{ m_weak_result = result; }
 
 	private:
 		//cluster number
 		unsigned int m_clnum;
+		//try to match the cluster
+		bool m_weak_result;
 		//measure for convergence
 		float m_eps;
 		//maximum iteration number

@@ -56,6 +56,7 @@ value=1
 [components]
 component_size=25
 contact_factor=0.7
+similarity=0.85
 [memory\ settings]
 mem\ swap=0
 graphics\ mem=2000
