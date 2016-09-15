@@ -62,9 +62,9 @@ namespace FL
 	public:
 		TrackMapProcessor(TrackMap &track_map) :
 		m_map(track_map),
-		m_contact_thresh(0.7f),
+		m_contact_thresh(0.6f),
 		m_size_thresh(25.0f),
-		m_level_thresh(7),
+		m_level_thresh(2),
 		m_similar_thresh(0.2f) {}
 		~TrackMapProcessor();
 
@@ -216,7 +216,7 @@ namespace FL
 			std::vector<InterEdge> &linked_edges);
 		//detailed match functions
 		//link edge of the max overlap
-		bool LinkEdgeMax(InterGraph &graph, std::vector<InterEdge> &edges);
+		bool LinkEdgeSize(InterGraph &graph, std::vector<InterEdge> &edges);
 		//search for neighboring orphans for linking
 		bool LinkOrphans(InterGraph& graph, pVertex &vertex);
 		//unlink edge by size similarity
@@ -253,6 +253,9 @@ namespace FL
 		void link_edge(InterEdge edge, InterGraph &graph, unsigned int value = 1);
 		void unlink_edge(InterEdge edge, InterGraph &graph, unsigned int value = 0);
 		bool similar_vertex_size(pVertex& v1, pVertex& v2);
+
+		//random number
+		bool get_random(size_t count, InterGraph &graph);
 
 		//export
 		void WriteBool(std::ofstream& ofs, bool value);
@@ -445,6 +448,16 @@ namespace FL
 		cell_list.insert(std::pair<unsigned int, pCell>
 			(id, cell));
 		return cell;
+	}
+
+	//random
+	inline bool TrackMapProcessor::get_random(size_t count, InterGraph &graph)
+	{
+		int c = graph.counter;
+		if (c < 4)
+			return true;
+		int r = c / 2 + rand() % c;
+		return count < r;
 	}
 
 	class TrackMap

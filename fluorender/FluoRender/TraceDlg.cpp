@@ -414,20 +414,20 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Contact F.:",
 		wxDefaultPosition, wxDefaultSize);
 	m_map_cntct_spin = new wxSpinCtrlDouble(
-		page, ID_MapCntctSpin, "0.7",
+		page, ID_MapCntctSpin, "0.6",
 		wxDefaultPosition, wxSize(50, 23),
 		wxSP_ARROW_KEYS | wxSP_WRAP,
-		0, 1, 0.7, 0.01);
+		0, 1, 0.6, 0.01);
 	sizer_3->AddStretchSpacer(1);
 	sizer_3->Add(st, 0, wxALIGN_CENTER);
 	sizer_3->Add(m_map_cntct_spin, 0, wxALIGN_CENTER);
 	st = new wxStaticText(page, 0, "Similarity:",
 		wxDefaultPosition, wxDefaultSize);
 	m_map_simlr_spin = new wxSpinCtrlDouble(
-		page, ID_MapSimlrSpin, "0.85",
+		page, ID_MapSimlrSpin, "0.2",
 		wxDefaultPosition, wxSize(50, 23),
 		wxSP_ARROW_KEYS| wxSP_WRAP,
-		0, 1, 0.85, 0.01);
+		0, 1, 0.2, 0.01);
 	sizer_3->AddStretchSpacer(1);
 	sizer_3->Add(st, 0, wxALIGN_CENTER);
 	sizer_3->Add(m_map_simlr_spin, 0, wxALIGN_CENTER);
@@ -1560,7 +1560,8 @@ void TraceDlg::OnAnalyzeUncertainHist(wxCommandEvent &event)
 		for (FL::CellListIter iter = list_in.begin();
 			iter != list_in.end(); ++iter)
 		{
-			(*m_stat_text) << int(iter->second->Id()) << "\t" <<
+			wxString sid = wxString::Format("%u", iter->second->Id());
+			(*m_stat_text) << sid << "\t" <<
 				int(iter->second->GetSizeUi()) << "\t" <<
 				int(iter->second->GetExternalUi()) << "\n";
 		}

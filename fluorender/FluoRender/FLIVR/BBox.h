@@ -103,6 +103,25 @@ namespace FLIVR
 			}
 		}
 
+		//extend by a ratio for all axes
+		inline void extend(double px, double py, double pz)
+		{
+			if (is_valid_)
+			{
+				Vector diag = diagonal();
+				double valx = diag.x() * px / 2.0;
+				double valy = diag.y() * py / 2.0;
+				double valz = diag.z() * pz / 2.0;
+
+				cmin_.x(cmin_.x() - valx);
+				cmin_.y(cmin_.y() - valy);
+				cmin_.z(cmin_.z() - valz);
+				cmax_.x(cmax_.x() + valx);
+				cmax_.y(cmax_.y() + valy);
+				cmax_.z(cmax_.z() + valz);
+			}
+		}
+
 		//! Expand the bounding box to include a sphere of radius radius
 		//! and centered at point p
 		inline void extend(const Point& p, double radius)
@@ -218,6 +237,9 @@ namespace FLIVR
 		//! in hitNear
 		bool intersect(const Point& e, const Vector& v, Point& hitNear);
 
+		//if it intersects another bbox
+		bool intersect(const BBox &box) const;
+
 		//distance between two bboxes
 		double distance(const BBox& bb) const;
 
@@ -252,6 +274,26 @@ namespace FLIVR
 		ibox = BBox(min, max);
 		return ibox;
 	}
+
+	inline	bool BBox::intersect(const BBox &box) const
+	{
+		if (!valid() || !box.valid())
+			return false;
+		if (max().x() < box.min().x())
+			return false;
+		if (min().x() > box.max().x())
+			return false;
+		if (max().y() < box.min().y())
+			return false;
+		if (min().y() > box.max().y())
+			return false;
+		if (max().z() < box.min().z())
+			return false;
+		if (min().z() > box.max().z())
+			return false;
+		return true;
+	}
+
 
 } // End namespace FLIVR
 

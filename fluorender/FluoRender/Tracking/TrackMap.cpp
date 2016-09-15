@@ -431,6 +431,7 @@ bool TrackMapProcessor::LinkFrames(
 	m_map.m_inter_graph_list.push_back(InterGraph());
 	InterGraph &inter_graph = m_map.m_inter_graph_list.back();
 	inter_graph.index = f1;
+	inter_graph.counter = 0;
 
 	size_t index;
 	size_t i, j, k;
@@ -580,11 +581,12 @@ bool TrackMapProcessor::LinkOrphans(InterGraph& graph, pVertex &vertex)
 	//should have similar size
 	if (!similar_vertex_size(vertex, v1_min))
 		return false;
-	pos1 = v1_min->GetCenter();
-	d = (pos - pos1).length();
 	//should be very close
 	FLIVR::BBox box = vertex->GetBox();
-	if (d > 1.4*box.longest_edge())
+	FLIVR::BBox box1 = v1_min->GetBox();
+	box.extend(0.1, 0.1, 0.1);
+	box1.extend(0.1, 0.1, 0.1);
+	if (!box.intersect(box1))
 		return false;
 
 	//link vertices
@@ -826,7 +828,7 @@ bool TrackMapProcessor::ProcessFrames(size_t frame1, size_t frame2)
 		iter != vertex_list1.end();)
 	{
 		ProcessVertex(iter->second, inter_graph,
-			true, true);
+			false, true);
 		//see if it is removed
 		////debug
 		//pVertex vert = iter->second;
@@ -835,6 +837,8 @@ bool TrackMapProcessor::ProcessFrames(size_t frame1, size_t frame2)
 		else
 			++iter;
 	}
+
+	inter_graph.counter++;
 
 	return true;
 }
@@ -952,18 +956,54 @@ bool TrackMapProcessor::GetValence(pVertex &vertex, InterGraph &graph,
 }
 
 //simple match of the max overlap
-bool TrackMapProcessor::LinkEdgeMax(InterGraph &graph, std::vector<InterEdge> &edges)
+bool TrackMapProcessor::LinkEdgeSize(InterGraph &graph, std::vector<InterEdge> &edges)
 {
-	if (!edges.size())
+	size_t edge_size = edges.size();
+	if (!edge_size)
 		return false;
+	else if (edge_size == 1)
+	{
+		link_edge(edges[0], graph);
+		return true;
+	}
 
 	//sort edges
 	std::sort(edges.begin(), edges.end(),
 		std::bind(comp_edge_size, std::placeholders::_1,
 			std::placeholders::_2, graph));
-	//link the max
-	link_edge(edges[0], graph);
-	return true;
+	//link edges by size
+	unsigned int count_prv = graph[edges[0]].count;
+	bool result = false;
+	//if 0 hasn't been linked/unlinked many times
+	if (get_random(count_prv, graph))
+	{
+		link_edge(edges[0], graph);
+		for (size_t i = 1; i < edges.size(); ++i)
+		{
+			if (similar_edge_size(edges[0], edges[i], graph))
+			{
+				link_edge(edges[i], graph);
+				result = true;
+			}
+		}
+	}
+	else//otherwise, find later ones
+	{
+		unsigned int count_cur;
+		for (size_t i = 1; i < edges.size(); ++i)
+		{
+			count_cur = graph[edges[i]].count;
+			if (count_cur < count_prv)
+			{
+				link_edge(edges[i], graph);
+				result = true;
+				break;
+			}
+			count_prv = count_cur;
+		}
+	}
+
+	return result;
 }
 
 //unlink edge by size similarity
@@ -978,14 +1018,34 @@ bool TrackMapProcessor::UnlinkEdgeSize(InterGraph &graph, pVertex &vertex,
 		std::bind(comp_edge_size, std::placeholders::_1,
 			std::placeholders::_2, graph));
 	//suppose we have more than 2 edges, find where to cut
-	for (size_t ei = 1; ei < edges.size(); ++ei)
+	unsigned int count_prv = graph[edges[0]].count;
+	//if 0 hasn't been linked/unlinked many times
+	if (get_random(count_prv, graph))
 	{
-		if (!similar_edge_size(edges[0], edges[ei], graph))
+		for (size_t ei = 1; ei < edges.size(); ++ei)
 		{
-			//if unsimilar, keep the first one
-			for (size_t i = ei; i < edges.size(); ++i)
-				unlink_edge(edges[i], graph);
-			return true;
+			if (!similar_edge_size(edges[0], edges[ei], graph))
+			{
+				//if unsimilar, keep the first one
+				for (size_t i = ei; i < edges.size(); ++i)
+					unlink_edge(edges[i], graph);
+				return true;
+			}
+		}
+	}
+	else//otherwise, consider later ones
+	{
+		unsigned int count_cur;
+		for (size_t ei = 1; ei < edges.size(); ++ei)
+		{
+			count_cur = graph[edges[ei]].count;
+			if (count_cur < count_prv)
+			{
+				for (size_t i = ei+1; i < edges.size(); ++i)
+					unlink_edge(edges[i], graph);
+				return true;
+			}
+			count_prv = count_cur;
 		}
 	}
 
@@ -1201,8 +1261,6 @@ bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph,
 	InterVert inter_vert = vertex->GetInterVert(graph);
 	if (inter_vert != InterGraph::null_vertex())
 		count = graph[inter_vert].count;
-	//get a random number
-	int r = 2 + rand() % 5;
 
 	//get valence
 	size_t valence;
@@ -1211,15 +1269,13 @@ bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph,
 	GetValence(vertex, graph, valence, all_edges, linked_edges);
 	if (valence == 0)
 	{
-		if (count < r)	//only link edges with max overlap
-			result = LinkEdgeMax(graph, all_edges);
+		result = LinkEdgeSize(graph, all_edges);
 		if (!result)	//find and link neighboring orphans
 			result = LinkOrphans(graph, vertex);
 	}
 	else if (valence > 1)
 	{
-		if (count < r)	//unlink based on edge overlap, only dissimilar+small edges are unlinked
-			result = UnlinkEdgeSize(graph, vertex, linked_edges);
+		result = UnlinkEdgeSize(graph, vertex, linked_edges);
 		if (!result)
 		{
 			//expand the search range with alternating paths
@@ -1227,11 +1283,11 @@ bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph,
 			PathList paths;
 			if (GetAlterPath(graph, vertex, paths))
 			{
-				if (count < r)	//flip paths based on edge overlap
+				//flip paths based on alternate links
+				result = UnlinkAlterPathConn(
+					graph, vertex, paths);
+				if(!result)//flip paths based on edge overlap
 					result = UnlinkAlterPathSize(
-						graph, vertex, paths);
-				if (!result && count < r*2)	//flip paths based on alternate links
-					result = UnlinkAlterPathConn(
 						graph, vertex, paths);
 			}
 		}
@@ -1817,6 +1873,13 @@ bool TrackMapProcessor::Export(std::string &filename)
 		if (i == 0)
 			continue;
 		InterGraph &inter_graph = m_map.m_inter_graph_list.at(i - 1);
+		//write index and counter
+		WriteTag(ofs, TAG_VER220);
+		//index
+		WriteUint(ofs, inter_graph.index);
+		//counter
+		WriteUint(ofs, inter_graph.counter);
+		//get edge number
 		inter_pair = boost::edges(inter_graph);
 		edge_num = 0;
 		for (inter_iter = inter_pair.first;
@@ -1992,7 +2055,20 @@ bool TrackMapProcessor::Import(std::string &filename)
 		VertexList &vertex_list0 = m_map.m_vertices_list.at(i - 1);
 		m_map.m_inter_graph_list.push_back(InterGraph());
 		InterGraph &inter_graph = m_map.m_inter_graph_list.back();
-		inter_graph.index = i - 1;
+		//read index and counter
+		if (ReadTag(ifs) == TAG_VER220)
+		{
+			//index
+			inter_graph.index = ReadUint(ifs);
+			//counter
+			inter_graph.counter = ReadUint(ifs);
+		}
+		else
+		{
+			ifs.unget();
+			inter_graph.index = i - 1;
+			inter_graph.counter = 0;
+		}
 		//inter edge num
 		edge_num = ReadUint(ifs);
 		//read each inter edge

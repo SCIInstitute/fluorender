@@ -59,6 +59,7 @@ namespace FL
 	{
 	public:
 		size_t index;
+		size_t counter;
 	};
 	typedef InterGraph::vertex_descriptor InterVert;
 	typedef InterGraph::edge_descriptor InterEdge;
