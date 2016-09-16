@@ -481,12 +481,13 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 		err = clSetKernelArg(kernel_2, 4, sizeof(unsigned int), (void*)(&nz));
 		err = clSetKernelArg(kernel_2, 5, sizeof(unsigned int), (void*)(&len));
 		//kernel 3
-		err = clSetKernelArg(kernel_3, 0, sizeof(cl_mem), &mask_buffer);
-		err = clSetKernelArg(kernel_3, 1, sizeof(cl_mem), &label_buffer);
-		err = clSetKernelArg(kernel_3, 2, sizeof(unsigned int), (void*)(&nx));
-		err = clSetKernelArg(kernel_3, 3, sizeof(unsigned int), (void*)(&ny));
-		err = clSetKernelArg(kernel_3, 4, sizeof(unsigned int), (void*)(&nz));
-		err = clSetKernelArg(kernel_3, 5, sizeof(unsigned int), (void*)(&clean_size));
+		err = clSetKernelArg(kernel_3, 0, sizeof(cl_mem), &data_buffer);
+		err = clSetKernelArg(kernel_3, 1, sizeof(cl_mem), &mask_buffer);
+		err = clSetKernelArg(kernel_3, 2, sizeof(cl_mem), &label_buffer);
+		err = clSetKernelArg(kernel_3, 3, sizeof(unsigned int), (void*)(&nx));
+		err = clSetKernelArg(kernel_3, 4, sizeof(unsigned int), (void*)(&ny));
+		err = clSetKernelArg(kernel_3, 5, sizeof(unsigned int), (void*)(&nz));
+		err = clSetKernelArg(kernel_3, 6, sizeof(unsigned int), (void*)(&clean_size));
 	}
 
 	for (int j = 0; j < iter; ++j)
@@ -662,12 +663,13 @@ void ComponentGenerator::Grow3DSized(
 	//kernel 3
 	if (clean_iter)
 	{
-		err = clSetKernelArg(kernel_3, 0, sizeof(cl_mem), &mask_buffer);
-		err = clSetKernelArg(kernel_3, 1, sizeof(cl_mem), &label_buffer);
-		err = clSetKernelArg(kernel_3, 2, sizeof(unsigned int), (void*)(&nx));
-		err = clSetKernelArg(kernel_3, 3, sizeof(unsigned int), (void*)(&ny));
-		err = clSetKernelArg(kernel_3, 4, sizeof(unsigned int), (void*)(&nz));
-		err = clSetKernelArg(kernel_3, 5, sizeof(unsigned int), (void*)(&clean_size));
+		err = clSetKernelArg(kernel_3, 0, sizeof(cl_mem), &data_buffer);
+		err = clSetKernelArg(kernel_3, 1, sizeof(cl_mem), &mask_buffer);
+		err = clSetKernelArg(kernel_3, 2, sizeof(cl_mem), &label_buffer);
+		err = clSetKernelArg(kernel_3, 3, sizeof(unsigned int), (void*)(&nx));
+		err = clSetKernelArg(kernel_3, 4, sizeof(unsigned int), (void*)(&ny));
+		err = clSetKernelArg(kernel_3, 5, sizeof(unsigned int), (void*)(&nz));
+		err = clSetKernelArg(kernel_3, 6, sizeof(unsigned int), (void*)(&clean_size));
 
 		for (int j = 0; j < clean_iter; ++j)
 		{

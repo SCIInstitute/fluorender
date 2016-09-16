@@ -112,6 +112,8 @@ public:
 		ID_MapSizeSpin,
 		ID_MapSimlrSpin,
 		ID_MapCntctSpin,
+		ID_MapMergeChk,
+		ID_MapSplitChk,
 		//selection page
 		//component tools
 		ID_CompIDText,
@@ -157,6 +159,7 @@ public:
 		ID_AnalyzeCompBtn,
 		ID_AnalyzeLinkBtn,
 		ID_AnalyzeUncertainHistBtn,
+		ID_AnalyzePathBtn,
 		ID_SaveResultBtn,
 		//ghost num
 		ID_GhostNumSldr,
@@ -245,6 +248,8 @@ private:
 	wxSpinCtrl* m_map_size_spin;
 	wxSpinCtrlDouble* m_map_simlr_spin;
 	wxSpinCtrlDouble* m_map_cntct_spin;
+	wxCheckBox* m_map_merge_chk;
+	wxCheckBox* m_map_split_chk;
 
 	//selection page
 	//component tools
@@ -296,6 +301,7 @@ private:
 	wxButton* m_analyze_comp_btn;
 	wxButton* m_analyze_link_btn;
 	wxButton* m_analyze_uncertain_hist_btn;
+	wxButton* m_analyze_path_btn;
 	wxButton* m_save_result_btn;
 
 	//ghost num
@@ -390,12 +396,8 @@ private:
 	void OnAnalyzeComp(wxCommandEvent &event);
 	void OnAnalyzeLink(wxCommandEvent &event);
 	void OnAnalyzeUncertainHist(wxCommandEvent &event);
+	void OnAnalyzePath(wxCommandEvent &event);
 	void OnSaveResult(wxCommandEvent &event);
-	//magic tool
-	//void OnCellMagic0Btn(wxCommandEvent& event);
-	//void OnCellMagic1Btn(wxCommandEvent& event);
-	//void OnCellMagic2Btn(wxCommandEvent& event);
-	//void OnCellMagic3Btn(wxCommandEvent& event);
 	//ghost number
 	void OnGhostNumChange(wxScrollEvent &event);
 	void OnGhostNumText(wxCommandEvent &event);

@@ -828,7 +828,7 @@ bool TrackMapProcessor::ProcessFrames(size_t frame1, size_t frame2)
 		iter != vertex_list1.end();)
 	{
 		ProcessVertex(iter->second, inter_graph,
-			false, true);
+			m_merge, m_split);
 		//see if it is removed
 		////debug
 		//pVertex vert = iter->second;
@@ -1053,6 +1053,38 @@ bool TrackMapProcessor::UnlinkEdgeSize(InterGraph &graph, pVertex &vertex,
 }
 
 //unlink edge by extended alternating path
+bool TrackMapProcessor::UnlinkAlterPath(InterGraph &graph, pVertex &vertex)
+{
+	bool result = false;
+	//expand the search range with alternating paths
+	m_level_thresh = 2;
+	PathList paths;
+	if (!GetAlterPath(graph, vertex, paths))
+		return false;
+	if (paths.size() < 2)
+		return false;
+	
+	switch (graph.counter % 3)
+	{
+	case 0:
+		//flip paths based on alternate links
+		result = UnlinkAlterPathConn(
+			graph, vertex, paths);
+		break;
+	case 1:
+		//flip paths based on edge overlap
+		result = UnlinkAlterPathSize(
+			graph, vertex, paths);
+		break;
+	case 2:
+		//flip paths based on link count
+		result = UnlinkAlterPathCount(
+			graph, vertex, paths);
+		break;
+	}
+	return result;
+}
+
 bool TrackMapProcessor::GetAlterPath(InterGraph &graph, pVertex &vertex,
 	PathList &paths)
 {
@@ -1072,10 +1104,10 @@ bool TrackMapProcessor::GetAlterPath(InterGraph &graph, pVertex &vertex,
 			break;
 	}
 
-	if (paths.size() < 2)
-		return false;
-	else
+	if (paths.size())
 		return true;
+	else
+		return false;
 }
 
 bool TrackMapProcessor::UnlinkAlterPathSize(InterGraph &graph, pVertex &vertex,
@@ -1107,6 +1139,30 @@ bool TrackMapProcessor::UnlinkAlterPathSize(InterGraph &graph, pVertex &vertex,
 	return false;
 }
 
+bool TrackMapProcessor::UnlinkAlterPathCount(InterGraph &graph, pVertex &vertex,
+	PathList &paths)
+{
+	//order paths
+	if (graph.counter % 2)
+		std::sort(paths.begin(), paths.end(),
+			TrackMapProcessor::comp_path_count);
+	else
+		std::sort(paths.begin(), paths.end(),
+			TrackMapProcessor::comp_path_count_rev);
+	//similar to unlink edge size
+	for (size_t pi = 1; pi < paths.size(); ++pi)
+	{
+		if (!similar_path_count(paths[0], paths[pi]))
+		{
+			for (size_t i = 0; i < paths.size(); ++i)
+				paths[i].flip();
+			return true;
+		}
+	}
+
+	return false;
+}
+
 bool TrackMapProcessor::UnlinkAlterPathConn(InterGraph &graph, pVertex &vertex,
 	PathList &paths)
 {
@@ -1118,6 +1174,7 @@ bool TrackMapProcessor::UnlinkAlterPathConn(InterGraph &graph, pVertex &vertex,
 		if (paths[pi].get_odd_size() > 0.0f)
 			odd_list.push_back(paths[pi]);
 	}
+	//only check backlinks
 	if (odd_list.size() &&
 		odd_list.size() < paths.size())
 	{
@@ -1276,21 +1333,8 @@ bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph,
 	else if (valence > 1)
 	{
 		result = UnlinkEdgeSize(graph, vertex, linked_edges);
-		if (!result)
-		{
-			//expand the search range with alternating paths
-			m_level_thresh = 2;
-			PathList paths;
-			if (GetAlterPath(graph, vertex, paths))
-			{
-				//flip paths based on alternate links
-				result = UnlinkAlterPathConn(
-					graph, vertex, paths);
-				if(!result)//flip paths based on edge overlap
-					result = UnlinkAlterPathSize(
-						graph, vertex, paths);
-			}
-		}
+		if (!result)	//unlink edge by extended alternating path
+			result = UnlinkAlterPath(graph, vertex);
 		if (!result && hint_merge)	//merge edges if possible (DBSCAN)
 			result = MergeEdges(graph, vertex, linked_edges);
 		if (!result)	//unlink edge based on vertex size
@@ -1351,6 +1395,39 @@ bool TrackMapProcessor::similar_path_size(Path &path1, Path &path2)
 	float d;
 	//p1 compares to p2
 	if (p1 > 0.0f || p2 > 0.0f)
+	{
+		d = fabs(p1 - p2) / std::max(p1, p2);
+		if (d < m_similar_thresh)
+			return true;
+	}
+	return true;
+}
+
+bool TrackMapProcessor::comp_path_count(Path &path1, Path &path2)
+{
+	unsigned int p1 = path1.get_count(0);
+	unsigned int p1_odd = path1.get_count(1);
+	unsigned int p2 = path2.get_count(0);
+	unsigned int p2_odd = path2.get_count(1);
+	return path1.get_max_count() < path2.get_max_count();
+}
+
+bool TrackMapProcessor::comp_path_count_rev(Path &path1, Path &path2)
+{
+	unsigned int p1 = path1.get_count(0);
+	unsigned int p1_odd = path1.get_count(1);
+	unsigned int p2 = path2.get_count(0);
+	unsigned int p2_odd = path2.get_count(1);
+	return path1.get_max_count() > path2.get_max_count();
+}
+
+bool TrackMapProcessor::similar_path_count(Path &path1, Path &path2)
+{
+	unsigned int p1 = path1.get_max_count();
+	unsigned int p2 = path2.get_max_count();
+	float d;
+	//p1 compares to p2
+	if (p1 > 0 || p2 > 0)
 	{
 		d = fabs(p1 - p2) / std::max(p1, p2);
 		if (d < m_similar_thresh)
@@ -3614,6 +3691,45 @@ void TrackMapProcessor::GetUncertainHist(
 			else
 				uhist_iter->second.count++;
 		}
+	}
+}
+
+void TrackMapProcessor::GetPaths(CellList &cell_list, PathList &path_list, size_t frame1, size_t frame2)
+{
+	size_t frame_num = m_map.m_frame_num;
+	if (frame1 >= frame_num ||
+		frame2 >= frame_num ||
+		frame1 == frame2)
+		return;
+
+	CellList &cell_list1 = m_map.m_cells_list.at(frame1);
+	InterGraph &inter_graph = m_map.m_inter_graph_list.at(
+		frame1 > frame2 ? frame2 : frame1);
+	VertexList vertex_list;
+	CellListIter cell_iter;
+	pVertex vertex1;
+
+	for (auto sel_iter = cell_list.begin();
+		sel_iter != cell_list.end();
+		++sel_iter)
+	{
+		cell_iter = cell_list1.find(sel_iter->second->Id());
+		if (cell_iter == cell_list1.end())
+			continue;
+		vertex1 = cell_iter->second->GetVertex().lock();
+		if (!vertex1)
+			continue;
+		if (vertex_list.find(vertex1->Id()) ==
+			vertex_list.end())
+			vertex_list.insert(std::pair<unsigned int, pVertex>
+			(vertex1->Id(), vertex1));
+	}
+
+	m_level_thresh = 2;
+	for (auto iter = vertex_list.begin();
+		iter != vertex_list.end(); ++iter)
+	{
+		GetAlterPath(inter_graph, iter->second, path_list);
 	}
 }
 

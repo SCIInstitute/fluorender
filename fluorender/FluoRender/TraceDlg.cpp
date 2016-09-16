@@ -340,6 +340,7 @@ EVT_BUTTON(ID_ConvertConsistentBtn, TraceDlg::OnConvertConsistent)
 EVT_BUTTON(ID_AnalyzeCompBtn, TraceDlg::OnAnalyzeComp)
 EVT_BUTTON(ID_AnalyzeLinkBtn, TraceDlg::OnAnalyzeLink)
 EVT_BUTTON(ID_AnalyzeUncertainHistBtn, TraceDlg::OnAnalyzeUncertainHist)
+EVT_BUTTON(ID_AnalyzePathBtn, TraceDlg::OnAnalyzePath)
 EVT_BUTTON(ID_SaveResultBtn, TraceDlg::OnSaveResult)
 //ghost num
 EVT_COMMAND_SCROLL(ID_GhostNumSldr, TraceDlg::OnGhostNumChange)
@@ -432,6 +433,17 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 	sizer_3->Add(st, 0, wxALIGN_CENTER);
 	sizer_3->Add(m_map_simlr_spin, 0, wxALIGN_CENTER);
 	sizer_3->Add(5, 5);
+	m_map_merge_chk = new wxCheckBox(
+		page, ID_MapMergeChk, "Merge",
+		wxDefaultPosition, wxDefaultSize,
+		wxALIGN_CENTER);
+	m_map_split_chk = new wxCheckBox(
+		page, ID_MapSplitChk, "Split",
+		wxDefaultPosition, wxDefaultSize,
+		wxALIGN_CENTER);
+	sizer_3->AddStretchSpacer(1);
+	sizer_3->Add(m_map_merge_chk, 0, wxALIGN_CENTER);
+	sizer_3->Add(m_map_split_chk, 0, wxALIGN_CENTER);
 
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
@@ -709,6 +721,8 @@ wxWindow* TraceDlg::CreateAnalysisPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(65, 23));
 	m_analyze_uncertain_hist_btn = new wxButton(page, ID_AnalyzeUncertainHistBtn, "Uncertainty",
 		wxDefaultPosition, wxSize(65, 23));
+	m_analyze_path_btn = new wxButton(page, ID_AnalyzePathBtn, "Paths",
+		wxDefaultPosition, wxSize(65, 23));
 	m_save_result_btn = new wxButton(page, ID_SaveResultBtn, "Save As",
 		wxDefaultPosition, wxSize(65, 23));
 	sizer_2->Add(5, 5);
@@ -716,6 +730,7 @@ wxWindow* TraceDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer_2->Add(m_analyze_comp_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_analyze_link_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_analyze_uncertain_hist_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_analyze_path_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_save_result_btn, 0, wxALIGN_CENTER);
 
 	//vertical sizer
@@ -733,7 +748,7 @@ wxWindow* TraceDlg::CreateAnalysisPage(wxWindow *parent)
 
 TraceDlg::TraceDlg(wxWindow* frame, wxWindow* parent)
 	: wxPanel(parent, wxID_ANY,
-		wxDefaultPosition, wxSize(500, 600),
+		wxDefaultPosition, wxSize(550, 600),
 		0, "TraceDlg"),
 	m_frame(parent),
 	m_view(0),
@@ -1565,6 +1580,70 @@ void TraceDlg::OnAnalyzeUncertainHist(wxCommandEvent &event)
 				int(iter->second->GetSizeUi()) << "\t" <<
 				int(iter->second->GetExternalUi()) << "\n";
 		}
+	}
+}
+
+void TraceDlg::OnAnalyzePath(wxCommandEvent &event)
+{
+	if (!m_view)
+		return;
+	//trace group
+	TraceGroup *trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+		return;
+	if (!trace_group->GetTrackMap().GetFrameNum())
+		return;
+	FL::CellList list_in;
+	//fill inlist
+	long item = -1;
+	while (true)
+	{
+		item = m_trace_list_curr->GetNextItem(
+			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		else
+			AddLabel(item, m_trace_list_curr, list_in);
+	}
+	if (list_in.size() == 0)
+	{
+		item = -1;
+		while (true)
+		{
+			item = m_trace_list_curr->GetNextItem(
+				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+			if (item == -1)
+				break;
+			else
+				AddLabel(item, m_trace_list_curr, list_in);
+		}
+	}
+
+	m_stat_text->SetValue("");
+
+	FL::TrackMap &track_map = trace_group->GetTrackMap();
+	FL::TrackMapProcessor tm_processor(track_map);
+	if (list_in.empty())
+		return;
+
+	m_stat_text->SetValue("");
+	std::ostream os(m_stat_text);
+
+	if (m_cur_time > 0)
+	{
+		(*m_stat_text) << "Paths of T" << m_cur_time << " to T" << m_cur_time - 1 << ":\n";
+		FL::PathList paths_prv;
+		tm_processor.GetPaths(list_in, paths_prv, m_cur_time, m_cur_time - 1);
+		for (size_t i = 0; i < paths_prv.size(); ++i)
+			os << paths_prv[i];
+	}
+	if (m_cur_time < trace_group->GetTrackMap().GetFrameNum() - 1)
+	{
+		(*m_stat_text) << "Paths of T" << m_cur_time << " to T" << m_cur_time + 1 << ":\n";
+		FL::PathList paths_nxt;
+		tm_processor.GetPaths(list_in, paths_nxt, m_cur_time, m_cur_time + 1);
+		for (size_t i = 0; i < paths_nxt.size(); ++i)
+			os << paths_nxt[i];
 	}
 }
 
@@ -3189,6 +3268,9 @@ void TraceDlg::GenMap()
 		boost::bind(&TraceDlg::ReadVolCache, this, _1),
 		boost::bind(&TraceDlg::DelVolCache, this, _1));
 	tm_processor.SetVolCacheSize(4);
+	//merge/split
+	tm_processor.SetMerge(m_map_merge_chk->GetValue());
+	tm_processor.SetSplit(m_map_split_chk->GetValue());
 
 	//start timing
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();

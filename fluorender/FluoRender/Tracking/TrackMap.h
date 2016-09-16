@@ -65,7 +65,9 @@ namespace FL
 		m_contact_thresh(0.6f),
 		m_size_thresh(25.0f),
 		m_level_thresh(2),
-		m_similar_thresh(0.2f) {}
+		m_similar_thresh(0.2f),
+		m_merge(false),
+		m_split(false) {}
 		~TrackMapProcessor();
 
 		void SetContactThresh(float value);
@@ -74,6 +76,8 @@ namespace FL
 		void SetLevelThresh(int level);
 		void SetUncertainLow(unsigned int value);
 		void SetUncertainHigh(unsigned int value);
+		void SetMerge(bool value);
+		void SetSplit(bool value);
 
 		void SetSizes(size_t nx, size_t ny, size_t nz);
 		void SetBits(size_t bits);
@@ -133,6 +137,7 @@ namespace FL
 			size_t frame);
 		void GetCellUncertainty(CellList &list, size_t frame);
 		void GetUncertainHist(UncertainHist &hist1, UncertainHist &hist2, size_t frame);
+		void GetPaths(CellList &cell_list, PathList &path_list, size_t frame1, size_t frame2);
 
 		//tracking by matching user input
 		bool TrackStencils(size_t frame1, size_t frame2);
@@ -147,6 +152,8 @@ namespace FL
 		float m_size_thresh;
 		float m_similar_thresh;
 		int m_level_thresh;
+		bool m_merge;
+		bool m_split;
 		//uncertainty filter
 		unsigned int m_uncertain_low;
 		unsigned int m_uncertain_high;
@@ -223,11 +230,14 @@ namespace FL
 		bool UnlinkEdgeSize(InterGraph &graph, pVertex &vertex,
 			std::vector<InterEdge> &edges);
 		//unlink edge by extended alternating path
+		bool UnlinkAlterPath(InterGraph &graph, pVertex &vertex);
 		bool GetAlterPath(InterGraph &graph, pVertex &vertex,
 			PathList &paths);
 		bool UnlinkAlterPathSize(InterGraph &graph, pVertex &vertex,
 			PathList &paths);
 		bool UnlinkAlterPathConn(InterGraph &graph, pVertex &vertex,
+			PathList &paths);
+		bool UnlinkAlterPathCount(InterGraph &graph, pVertex &vertex,
 			PathList &paths);
 		//check if any out vertex can be combined
 		bool MergeEdges(InterGraph &graph, pVertex &vertex,
@@ -250,9 +260,13 @@ namespace FL
 		bool similar_edge_size(InterEdge &edge1, InterEdge &edge2, InterGraph& graph);
 		static bool comp_path_size(Path &path1, Path &path2);
 		bool similar_path_size(Path &path1, Path &path2);
+		static bool comp_path_count(Path &path1, Path &path2);
+		static bool comp_path_count_rev(Path &path1, Path &path2);
+		bool similar_path_count(Path &path1, Path &path2);
+		bool similar_vertex_size(pVertex& v1, pVertex& v2);
+
 		void link_edge(InterEdge edge, InterGraph &graph, unsigned int value = 1);
 		void unlink_edge(InterEdge edge, InterGraph &graph, unsigned int value = 0);
-		bool similar_vertex_size(pVertex& v1, pVertex& v2);
 
 		//random number
 		bool get_random(size_t count, InterGraph &graph);
@@ -336,6 +350,16 @@ namespace FL
 	inline void TrackMapProcessor::SetUncertainHigh(unsigned int value)
 	{
 		m_uncertain_high = value;
+	}
+
+	inline void TrackMapProcessor::SetMerge(bool value)
+	{
+		m_merge = value;
+	}
+
+	inline void TrackMapProcessor::SetSplit(bool value)
+	{
+		m_split = value;
 	}
 
 	inline void TrackMapProcessor::WriteBool(std::ofstream& ofs, bool value)

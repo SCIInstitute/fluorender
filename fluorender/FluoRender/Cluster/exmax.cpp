@@ -71,7 +71,7 @@ bool ClusterExmax::Execute()
 	else
 	{
 		GenResult();
-		if (GetProb() > 0.8)
+		if (GetProb() > 0.95)
 			return true;
 		else
 			return false;

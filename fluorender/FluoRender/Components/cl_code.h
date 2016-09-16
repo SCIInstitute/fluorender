@@ -277,6 +277,7 @@ const char* str_cl_brainbow_3d = \
 "		mask[index] = mask[index2];\n" \
 "}\n" \
 "__kernel void kernel_3(\n" \
+"	__read_only image3d_t data,\n" \
 "	__global unsigned int* mask,\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
@@ -292,10 +293,12 @@ const char* str_cl_brainbow_3d = \
 "	if (label[index]==0 ||\n" \
 "		mask[index] > thresh)\n" \
 "		return;\n" \
+"	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
 "	unsigned int nb_index;\n" \
 "	unsigned int min_dist = 10;\n" \
 "	unsigned int dist;\n" \
 "	unsigned int max_nb_index;\n" \
+"	float nb_value;\n" \
 "	for (int ni=-1; ni<2; ++ni)\n" \
 "	for (int nj=-1; nj<2; ++nj)\n" \
 "	for (int nk=-1; nk<2; ++nk)\n" \
@@ -308,6 +311,9 @@ const char* str_cl_brainbow_3d = \
 "		if (mask[nb_index]>thresh &&\n" \
 "			dist < min_dist)\n" \
 "		{\n" \
+"			nb_value = read_imagef(data, samp, (int4)(i+ni, j+nj, k+nk, 1)).x;\n" \
+"			if (nb_value < value)\n" \
+"				continue;\n" \
 "			min_dist = dist;\n" \
 "			max_nb_index = nb_index;\n" \
 "		}\n" \
@@ -483,6 +489,7 @@ const char* str_cl_brainbow_3d_sized = \
 "	label[index] = label_value;\n" \
 "}\n" \
 "__kernel void kernel_3(\n" \
+"	__read_only image3d_t data,\n" \
 "	__global unsigned int* mask,\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
@@ -498,10 +505,12 @@ const char* str_cl_brainbow_3d_sized = \
 "	if (label[index]==0 ||\n" \
 "		mask[index] > thresh)\n" \
 "		return;\n" \
+"	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
 "	unsigned int nb_index;\n" \
 "	unsigned int min_dist = 10;\n" \
 "	unsigned int dist;\n" \
 "	unsigned int max_nb_index;\n" \
+"	float nb_value;\n" \
 "	for (int ni=-1; ni<2; ++ni)\n" \
 "	for (int nj=-1; nj<2; ++nj)\n" \
 "	for (int nk=-1; nk<2; ++nk)\n" \
@@ -514,6 +523,9 @@ const char* str_cl_brainbow_3d_sized = \
 "		if (mask[nb_index]>thresh &&\n" \
 "			dist < min_dist)\n" \
 "		{\n" \
+"			nb_value = read_imagef(data, samp, (int4)(i+ni, j+nj, k+nk, 1)).x;\n" \
+"			if (nb_value < value)\n" \
+"				continue;\n" \
 "			min_dist = dist;\n" \
 "			max_nb_index = nb_index;\n" \
 "		}\n" \
