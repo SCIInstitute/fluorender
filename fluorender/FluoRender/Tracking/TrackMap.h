@@ -233,6 +233,8 @@ namespace FL
 		bool UnlinkAlterPath(InterGraph &graph, pVertex &vertex);
 		bool GetAlterPath(InterGraph &graph, pVertex &vertex,
 			PathList &paths);
+		bool UnlinkAlterPathMaxMatch(InterGraph &graph, pVertex &vertex,
+			PathList &paths);
 		bool UnlinkAlterPathSize(InterGraph &graph, pVertex &vertex,
 			PathList &paths);
 		bool UnlinkAlterPathConn(InterGraph &graph, pVertex &vertex,
@@ -255,6 +257,8 @@ namespace FL
 		//helper functions
 		bool get_alter_path(InterGraph &graph, pVertex &vertex,
 			Path &alt_path, VertVisitList &visited, int curl);
+		float get_path_max(InterGraph &graph, PathList &paths,
+			size_t curl, InterVert v0);
 		bool merge_cell_size(IntraEdge &edge, pCell &cell1, pCell &cell2, IntraGraph& graph);
 		static bool comp_edge_size(InterEdge &edge1, InterEdge &edge2, InterGraph& graph);
 		bool similar_edge_size(InterEdge &edge1, InterEdge &edge2, InterGraph& graph);

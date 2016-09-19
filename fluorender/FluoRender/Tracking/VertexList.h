@@ -37,9 +37,17 @@ namespace FL
 {
 	typedef boost::unordered_map<unsigned int, pVertex> VertexList;
 	typedef boost::unordered_map<unsigned int, pVertex>::iterator VertexListIter;
-	typedef std::set<InterVert> VertVisitList;
 
-	typedef std::deque<InterVert>::iterator PathIter;
+	struct PathVert
+	{
+		InterVert vert;
+		bool edge_valid;
+		float edge_value;
+		unsigned int link_flag;
+	};
+
+	typedef std::set<InterVert> VertVisitList;
+	typedef std::deque<PathVert>::iterator PathIter;
 	class Path
 	{
 	public:
@@ -62,10 +70,14 @@ namespace FL
 		{ return m_path.begin(); }
 		inline PathIter end()
 		{ return m_path.end(); }
-		inline void push_back(const InterVert& v)
+		inline void push_back(const PathVert& v)
 		{ m_path.push_back(v); }
 		inline size_t size()
 		{ return m_path.size(); }
+		inline PathVert& back()
+		{ return m_path.back(); }
+		inline PathVert& operator[](size_t n)
+		{ return m_path[n]; }
 		
 		//overlap size
 		inline float get_size(int odd);
@@ -91,7 +103,7 @@ namespace FL
 		void flip();
 
 	private:
-		std::deque<InterVert> m_path;
+		std::deque<PathVert> m_path;
 		InterGraph &m_graph;
 		//overlap size
 		float m_max_size;
@@ -112,16 +124,10 @@ namespace FL
 		for (PathIter iter = m_path.begin();
 			iter != m_path.end(); ++iter)
 		{
-			PathIter i1 = iter + 1;
-			if (i1 == m_path.end())
+			if (!iter->edge_valid)
 				break;
 			if (counter % 2 == odd)
-			{
-				std::pair<InterEdge, bool> edge =
-					boost::edge(*iter, *i1, m_graph);
-				if (edge.second)
-					result += m_graph[edge.first].size_f;
-			}
+				result += iter->edge_value;
 			counter++;
 		}
 		m_max_size = std::max(m_max_size, result);
@@ -145,7 +151,7 @@ namespace FL
 			if (counter % 2 == odd)
 			{
 				std::pair<InterEdge, bool> edge =
-					boost::edge(*iter, *i1, m_graph);
+					boost::edge(iter->vert, i1->vert, m_graph);
 				if (edge.second)
 					result += m_graph[edge.first].count;
 			}
@@ -171,7 +177,7 @@ namespace FL
 			if (i1 == m_path.end())
 				break;
 			std::pair<InterEdge, bool> edge =
-				boost::edge(*iter, *i1, m_graph);
+				boost::edge(iter->vert, i1->vert, m_graph);
 			if (edge.second)
 			{
 				l = m_graph[edge.first].link;
@@ -202,20 +208,20 @@ namespace FL
 			iter != p.end(); ++iter)
 		{
 			//output vertex
-			vertex = graph[*iter].vertex.lock();
+			vertex = graph[iter->vert].vertex.lock();
 			if (vertex)
 			{
 				os << "(Vertex: ";
 				os << vertex->Id() << ", ";
 				os << vertex->GetSizeF() << ", ";
-				os << graph[*iter].count << ") ";
+				os << graph[iter->vert].count << ") ";
 			}
 			//output edge
 			PathIter i1 = iter + 1;
 			if (i1 != p.end())
 			{
 				std::pair<InterEdge, bool> edge =
-					boost::edge(*iter, *i1, graph);
+					boost::edge(iter->vert, i1->vert, graph);
 				if (edge.second)
 				{
 					os << "(Edge: ";

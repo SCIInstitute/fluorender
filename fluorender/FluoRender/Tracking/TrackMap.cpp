@@ -1055,7 +1055,6 @@ bool TrackMapProcessor::UnlinkEdgeSize(InterGraph &graph, pVertex &vertex,
 //unlink edge by extended alternating path
 bool TrackMapProcessor::UnlinkAlterPath(InterGraph &graph, pVertex &vertex)
 {
-	bool result = false;
 	//expand the search range with alternating paths
 	m_level_thresh = 2;
 	PathList paths;
@@ -1063,26 +1062,9 @@ bool TrackMapProcessor::UnlinkAlterPath(InterGraph &graph, pVertex &vertex)
 		return false;
 	if (paths.size() < 2)
 		return false;
-	
-	switch (graph.counter % 3)
-	{
-	case 0:
-		//flip paths based on alternate links
-		result = UnlinkAlterPathConn(
-			graph, vertex, paths);
-		break;
-	case 1:
-		//flip paths based on edge overlap
-		result = UnlinkAlterPathSize(
-			graph, vertex, paths);
-		break;
-	case 2:
-		//flip paths based on link count
-		result = UnlinkAlterPathCount(
-			graph, vertex, paths);
-		break;
-	}
-	return result;
+
+	//use max matching
+	return UnlinkAlterPathMaxMatch(graph, vertex, paths);
 }
 
 bool TrackMapProcessor::GetAlterPath(InterGraph &graph, pVertex &vertex,
@@ -1108,6 +1090,18 @@ bool TrackMapProcessor::GetAlterPath(InterGraph &graph, pVertex &vertex,
 		return true;
 	else
 		return false;
+}
+
+bool TrackMapProcessor::UnlinkAlterPathMaxMatch(InterGraph &graph, pVertex &vertex,
+	PathList &paths)
+{
+	float max_weight = 0;
+	float path_weight;
+	size_t index;
+
+	max_weight = get_path_max(graph, paths, 0, 0);
+
+	return false;
 }
 
 bool TrackMapProcessor::UnlinkAlterPathSize(InterGraph &graph, pVertex &vertex,
@@ -1486,7 +1480,14 @@ bool TrackMapProcessor::get_alter_path(InterGraph &graph, pVertex &vertex,
 		return false;
 
 	visited.insert(v0);
-	alt_path.push_back(v0);
+	PathVert pv0;
+	pv0.vert = v0;
+	pv0.edge_valid = false;
+	pv0.edge_value = 0;
+	pv0.link_flag = 0;
+	alt_path.push_back(pv0);
+	graph[v0].max_value = 0;
+	graph[v0].max_valid = false;
 
 	if (curl >= m_level_thresh)
 		return true;
@@ -1507,8 +1508,14 @@ bool TrackMapProcessor::get_alter_path(InterGraph &graph, pVertex &vertex,
 			vertex1 = graph[v1].vertex.lock();
 			if (visited.find(v1) ==
 				visited.end())
+			{
+				//set back
+				alt_path.back().edge_valid = true;
+				alt_path.back().edge_value = graph[edge.first].size_f;
+
 				return get_alter_path(graph, vertex1,
 					alt_path, visited, curl + 1);
+			}
 		}
 	}
 
@@ -1516,6 +1523,55 @@ bool TrackMapProcessor::get_alter_path(InterGraph &graph, pVertex &vertex,
 		return true;
 	else
 		return false;
+}
+
+float TrackMapProcessor::get_path_max(InterGraph &graph, PathList &paths,
+	size_t curl, InterVert v0)
+{
+	float result = 0.0f;
+	float value;
+	VertVisitList visited;
+
+	for (size_t pi = 0; pi < paths.size(); ++pi)
+	{
+		if (curl >= paths[pi].size())
+			continue;
+		InterVert vert = paths[pi][curl].vert;
+		//self is not linked
+		if (v0 == vert)
+			continue;
+
+		if (vert != InterGraph::null_vertex() &&
+			visited.find(vert) == visited.end() &&
+			graph[vert].max_valid)
+		{
+			result += graph[v0].max_value;
+			visited.insert(vert);
+			continue;
+		}
+
+		value = paths[pi][curl].edge_value;
+		if (paths[pi][curl].edge_valid)
+			value += get_path_max(graph, paths, curl + 1,
+				paths[pi][curl+1].vert);
+		if (visited.find(vert) ==
+			visited.end())
+		{
+			result += value;
+			graph[vert].max_value = value;
+			visited.insert(vert);
+		}
+		else if (value > graph[vert].max_value)
+		{
+			result -= graph[vert].max_value;
+			result += value;
+			graph[vert].max_value = value;
+		}
+
+		graph[vert].max_valid = true;
+	}
+
+	return result;
 }
 
 bool TrackMapProcessor::merge_cell_size(IntraEdge &edge,

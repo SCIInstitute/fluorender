@@ -50,6 +50,9 @@ namespace FL
 		//count for changes
 		unsigned int count;
 		pwVertex vertex;
+		//for matching
+		bool max_valid;
+		float max_value;
 	};
 
 	class InterGraph :
