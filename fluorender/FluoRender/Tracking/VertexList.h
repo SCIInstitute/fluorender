@@ -43,6 +43,7 @@ namespace FL
 		InterVert vert;
 		bool edge_valid;
 		float edge_value;
+		float max_value;
 		unsigned int link_flag;
 	};
 
@@ -101,6 +102,7 @@ namespace FL
 		{ return m_graph; }
 
 		void flip();
+		void unlink();
 
 	private:
 		std::deque<PathVert> m_path;
@@ -195,6 +197,28 @@ namespace FL
 					m_graph[boost::source(edge.first, m_graph)].count++;
 					m_graph[boost::target(edge.first, m_graph)].count++;
 				}
+			}
+		}
+	}
+
+	inline void Path::unlink()
+	{
+		PathIter iter = m_path.begin();
+		PathIter i1 = iter + 1;
+		if (i1 == m_path.end())
+			return;
+
+		std::pair<InterEdge, bool> edge =
+			boost::edge(iter->vert, i1->vert, m_graph);
+		if (edge.second)
+		{
+			unsigned int l = m_graph[edge.first].link;
+			if (l == 1)
+			{
+				m_graph[edge.first].link = 0;
+				m_graph[edge.first].count++;
+				m_graph[boost::source(edge.first, m_graph)].count++;
+				m_graph[boost::target(edge.first, m_graph)].count++;
 			}
 		}
 	}

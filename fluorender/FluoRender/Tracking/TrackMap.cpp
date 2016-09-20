@@ -956,7 +956,8 @@ bool TrackMapProcessor::GetValence(pVertex &vertex, InterGraph &graph,
 }
 
 //simple match of the max overlap
-bool TrackMapProcessor::LinkEdgeSize(InterGraph &graph, std::vector<InterEdge> &edges)
+bool TrackMapProcessor::LinkEdgeSize(InterGraph &graph, pVertex &vertex,
+	std::vector<InterEdge> &edges)
 {
 	size_t edge_size = edges.size();
 	if (!edge_size)
@@ -971,13 +972,36 @@ bool TrackMapProcessor::LinkEdgeSize(InterGraph &graph, std::vector<InterEdge> &
 	std::sort(edges.begin(), edges.end(),
 		std::bind(comp_edge_size, std::placeholders::_1,
 			std::placeholders::_2, graph));
+	//get count
+	unsigned int count = 0;
+	InterVert inter_vert = vertex->GetInterVert(graph);
+	if (inter_vert != InterGraph::null_vertex())
+		count = graph[inter_vert].count;
+
 	//link edges by size
-	unsigned int count_prv = graph[edges[0]].count;
 	bool result = false;
 	//if 0 hasn't been linked/unlinked many times
-	if (get_random(count_prv, graph))
+	//try later ones
+	if (graph.counter > 1 &&
+		get_random(count, graph))
 	{
-		link_edge(edges[0], graph);
+		unsigned int count_cur;
+		for (size_t i = 1; i < edges.size(); ++i)
+		{
+			count_cur = graph[edges[i]].count;
+			if (count_cur <= count)
+			{
+				link_edge(edges[i], graph);
+				result = true;
+				break;
+			}
+			count = count_cur;
+		}
+	}
+	else//otherwise, it may be useful
+	{
+		if (graph.counter < 2)
+			link_edge(edges[0], graph);
 		for (size_t i = 1; i < edges.size(); ++i)
 		{
 			if (similar_edge_size(edges[0], edges[i], graph))
@@ -985,21 +1009,6 @@ bool TrackMapProcessor::LinkEdgeSize(InterGraph &graph, std::vector<InterEdge> &
 				link_edge(edges[i], graph);
 				result = true;
 			}
-		}
-	}
-	else//otherwise, find later ones
-	{
-		unsigned int count_cur;
-		for (size_t i = 1; i < edges.size(); ++i)
-		{
-			count_cur = graph[edges[i]].count;
-			if (count_cur < count_prv)
-			{
-				link_edge(edges[i], graph);
-				result = true;
-				break;
-			}
-			count_prv = count_cur;
 		}
 	}
 
@@ -1033,22 +1042,7 @@ bool TrackMapProcessor::UnlinkEdgeSize(InterGraph &graph, pVertex &vertex,
 			}
 		}
 	}
-	else//otherwise, consider later ones
-	{
-		unsigned int count_cur;
-		for (size_t ei = 1; ei < edges.size(); ++ei)
-		{
-			count_cur = graph[edges[ei]].count;
-			if (count_cur < count_prv)
-			{
-				for (size_t i = ei+1; i < edges.size(); ++i)
-					unlink_edge(edges[i], graph);
-				return true;
-			}
-			count_prv = count_cur;
-		}
-	}
-
+	//otherwise, it's uncertain
 	return false;
 }
 
@@ -1096,12 +1090,26 @@ bool TrackMapProcessor::UnlinkAlterPathMaxMatch(InterGraph &graph, pVertex &vert
 	PathList &paths)
 {
 	float max_weight = 0;
-	float path_weight;
-	size_t index;
-
 	max_weight = get_path_max(graph, paths, 0, 0);
 
+	//order paths
+	std::sort(paths.begin(), paths.end(),
+		TrackMapProcessor::comp_path_mm);
+	
+	//similar to unlink edge size
+	for (size_t pi = 1; pi < paths.size(); ++pi)
+	{
+		if (!similar_path_mm(paths[0], paths[pi]))
+		{
+			//if unsimilar, keep the first one
+			for (size_t i = pi; i < paths.size(); ++i)
+				paths[i].unlink();
+			return true;
+		}
+	}
+
 	return false;
+	//return true;
 }
 
 bool TrackMapProcessor::UnlinkAlterPathSize(InterGraph &graph, pVertex &vertex,
@@ -1307,11 +1315,6 @@ bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph,
 	bool hint_merge, bool hint_split)
 {
 	bool result = false;
-	//get count
-	unsigned int count = 0;
-	InterVert inter_vert = vertex->GetInterVert(graph);
-	if (inter_vert != InterGraph::null_vertex())
-		count = graph[inter_vert].count;
 
 	//get valence
 	size_t valence;
@@ -1320,9 +1323,9 @@ bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph,
 	GetValence(vertex, graph, valence, all_edges, linked_edges);
 	if (valence == 0)
 	{
-		result = LinkEdgeSize(graph, all_edges);
-		if (!result)	//find and link neighboring orphans
-			result = LinkOrphans(graph, vertex);
+		result = LinkEdgeSize(graph, vertex, all_edges);
+		//if (!result)	//find and link neighboring orphans
+		//	result = LinkOrphans(graph, vertex);
 	}
 	else if (valence > 1)
 	{
@@ -1353,6 +1356,14 @@ bool TrackMapProcessor::comp_path_size(Path &path1, Path &path2)
 	float p2 = path2.get_size(0);
 	float p2_odd = path2.get_size(1);
 	return path1.get_max_size() > path2.get_max_size();
+}
+
+bool TrackMapProcessor::comp_path_mm(Path &path1, Path &path2)
+{
+	if (path1.size() && path2.size())
+		return path1[0].max_value > path2[0].max_value;
+	else
+		return false;
 }
 
 bool TrackMapProcessor::similar_edge_size(InterEdge &edge1,
@@ -1394,7 +1405,25 @@ bool TrackMapProcessor::similar_path_size(Path &path1, Path &path2)
 		if (d < m_similar_thresh)
 			return true;
 	}
-	return true;
+	return false;
+}
+
+bool TrackMapProcessor::similar_path_mm(Path &path1, Path &path2)
+{
+	if (path1.size() && path2.size())
+	{
+		float p1 = path1[0].max_value;
+		float p2 = path2[0].max_value;
+		float d;
+		//p1 compares to p2
+		if (p1 > 0.0f || p2 > 0.0f)
+		{
+			d = fabs(p1 - p2) / std::max(p1, p2);
+			if (d < m_similar_thresh)
+				return true;
+		}
+	}
+	return false;
 }
 
 bool TrackMapProcessor::comp_path_count(Path &path1, Path &path2)
@@ -1427,7 +1456,7 @@ bool TrackMapProcessor::similar_path_count(Path &path1, Path &path2)
 		if (d < m_similar_thresh)
 			return true;
 	}
-	return true;
+	return false;
 }
 
 bool TrackMapProcessor::similar_vertex_size(pVertex& v1, pVertex& v2)
@@ -1484,6 +1513,7 @@ bool TrackMapProcessor::get_alter_path(InterGraph &graph, pVertex &vertex,
 	pv0.vert = v0;
 	pv0.edge_valid = false;
 	pv0.edge_value = 0;
+	pv0.max_value = 0;
 	pv0.link_flag = 0;
 	alt_path.push_back(pv0);
 	graph[v0].max_value = 0;
@@ -1530,17 +1560,21 @@ float TrackMapProcessor::get_path_max(InterGraph &graph, PathList &paths,
 {
 	float result = 0.0f;
 	float value;
+	InterVert vert;
 	VertVisitList visited;
 
+	//go through all paths
 	for (size_t pi = 0; pi < paths.size(); ++pi)
 	{
+		//continue if path doesn't have the level
 		if (curl >= paths[pi].size())
 			continue;
-		InterVert vert = paths[pi][curl].vert;
-		//self is not linked
+		vert = paths[pi][curl].vert;
+		//input vert is not linked
 		if (v0 == vert)
 			continue;
 
+		//if already calculated, use the stored value
 		if (vert != InterGraph::null_vertex() &&
 			visited.find(vert) == visited.end() &&
 			graph[vert].max_valid)
@@ -1550,10 +1584,14 @@ float TrackMapProcessor::get_path_max(InterGraph &graph, PathList &paths,
 			continue;
 		}
 
+		//if not calculated, calculate max value recursively
 		value = paths[pi][curl].edge_value;
 		if (paths[pi][curl].edge_valid)
 			value += get_path_max(graph, paths, curl + 1,
 				paths[pi][curl+1].vert);
+		paths[pi][curl].max_value = value;
+
+		//accumulate all possible values
 		if (visited.find(vert) ==
 			visited.end())
 		{
@@ -1567,11 +1605,85 @@ float TrackMapProcessor::get_path_max(InterGraph &graph, PathList &paths,
 			result += value;
 			graph[vert].max_value = value;
 		}
+	}
 
-		graph[vert].max_valid = true;
+	//set flag for validity
+	for (size_t pi = 0; pi < paths.size(); ++pi)
+	{
+		//continue if path doesn't have the level
+		if (curl >= paths[pi].size())
+			continue;
+		vert = paths[pi][curl].vert;
+		if (visited.find(vert) != visited.end())
+			graph[vert].max_valid = true;
 	}
 
 	return result;
+}
+
+bool TrackMapProcessor::unlink_alt_path(InterGraph &graph, PathList &paths)
+{
+	for (size_t pi = 0; pi < paths.size(); ++pi)
+	{
+		Path path = paths[pi];
+		bool link = false;
+		unsigned int l;
+		for (PathIter iter = path.begin();
+			iter != path.end(); ++iter)
+		{
+			PathIter i1 = iter + 1;
+			if (i1 == path.end())
+				break;
+			std::pair<InterEdge, bool> edge =
+				boost::edge(iter->vert, i1->vert, graph);
+			if (!edge.second)
+				break;
+			l = graph[edge.first].link;
+
+			//link
+			if (!link &&
+				iter->edge_valid &&
+				iter->max_value ==
+				graph[iter->vert].max_value)
+			{
+				if (l == 2 || l == 3)
+				{
+					link = true;
+					continue;
+				}
+
+				if (l != 1)
+				{
+					graph[edge.first].link = 1;
+					graph[edge.first].count++;
+					graph[boost::source(edge.first, graph)].count++;
+					graph[boost::target(edge.first, graph)].count++;
+				}
+
+				link = true;
+			}
+			else//unlink
+			{
+				if (l == 2 || l == 3)
+				{
+					link = false;
+					continue;
+				}
+
+				if (l != 0)
+				{
+					graph[edge.first].link = 0;
+					graph[edge.first].count++;
+					graph[boost::source(edge.first, graph)].count++;
+					graph[boost::target(edge.first, graph)].count++;
+				}
+
+				link = false;
+			}
+		}
+	}
+
+	return true;
 }
 
 bool TrackMapProcessor::merge_cell_size(IntraEdge &edge,

@@ -223,7 +223,8 @@ namespace FL
 			std::vector<InterEdge> &linked_edges);
 		//detailed match functions
 		//link edge of the max overlap
-		bool LinkEdgeSize(InterGraph &graph, std::vector<InterEdge> &edges);
+		bool LinkEdgeSize(InterGraph &graph, pVertex &vertex,
+			std::vector<InterEdge> &edges);
 		//search for neighboring orphans for linking
 		bool LinkOrphans(InterGraph& graph, pVertex &vertex);
 		//unlink edge by size similarity
@@ -259,11 +260,14 @@ namespace FL
 			Path &alt_path, VertVisitList &visited, int curl);
 		float get_path_max(InterGraph &graph, PathList &paths,
 			size_t curl, InterVert v0);
+		bool unlink_alt_path(InterGraph &graph, PathList &paths);
 		bool merge_cell_size(IntraEdge &edge, pCell &cell1, pCell &cell2, IntraGraph& graph);
 		static bool comp_edge_size(InterEdge &edge1, InterEdge &edge2, InterGraph& graph);
 		bool similar_edge_size(InterEdge &edge1, InterEdge &edge2, InterGraph& graph);
 		static bool comp_path_size(Path &path1, Path &path2);
+		static bool comp_path_mm(Path &path1, Path &path2);
 		bool similar_path_size(Path &path1, Path &path2);
+		bool similar_path_mm(Path &path1, Path &path2);
 		static bool comp_path_count(Path &path1, Path &path2);
 		static bool comp_path_count_rev(Path &path1, Path &path2);
 		bool similar_path_count(Path &path1, Path &path2);
