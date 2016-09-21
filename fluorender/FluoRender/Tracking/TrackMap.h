@@ -224,14 +224,15 @@ namespace FL
 		//detailed match functions
 		//link edge of the max overlap
 		bool LinkEdgeSize(InterGraph &graph, pVertex &vertex,
-			std::vector<InterEdge> &edges);
+			std::vector<InterEdge> &edges, bool calc_sim = true);
 		//search for neighboring orphans for linking
 		bool LinkOrphans(InterGraph& graph, pVertex &vertex);
 		//unlink edge by size similarity
 		bool UnlinkEdgeSize(InterGraph &graph, pVertex &vertex,
-			std::vector<InterEdge> &edges);
+			std::vector<InterEdge> &edges, bool calc_sim = true);
 		//unlink edge by extended alternating path
-		bool UnlinkAlterPath(InterGraph &graph, pVertex &vertex);
+		bool UnlinkAlterPath(InterGraph &graph, pVertex &vertex,
+			bool calc_sim = true);
 		bool GetAlterPath(InterGraph &graph, pVertex &vertex,
 			PathList &paths);
 		bool UnlinkAlterPathMaxMatch(InterGraph &graph, pVertex &vertex,

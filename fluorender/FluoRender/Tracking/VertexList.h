@@ -44,7 +44,7 @@ namespace FL
 		bool edge_valid;
 		float edge_value;
 		float max_value;
-		unsigned int link_flag;
+		unsigned int link;
 	};
 
 	typedef std::set<InterVert> VertVisitList;
