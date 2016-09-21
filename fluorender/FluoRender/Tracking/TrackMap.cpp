@@ -1579,7 +1579,7 @@ float TrackMapProcessor::get_path_max(InterGraph &graph, PathList &paths,
 			visited.find(vert) == visited.end() &&
 			graph[vert].max_valid)
 		{
-			result += graph[v0].max_value;
+			result += graph[vert].max_value;
 			visited.insert(vert);
 			continue;
 		}
