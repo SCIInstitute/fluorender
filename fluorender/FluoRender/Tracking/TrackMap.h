@@ -235,7 +235,7 @@ namespace FL
 		bool GetAlterPath(InterGraph &graph, pVertex &vertex,
 			PathList &paths);
 		bool UnlinkAlterPathMaxMatch(InterGraph &graph, pVertex &vertex,
-			PathList &paths);
+			PathList &paths, bool calc_sim = true);
 		bool UnlinkAlterPathSize(InterGraph &graph, pVertex &vertex,
 			PathList &paths);
 		bool UnlinkAlterPathConn(InterGraph &graph, pVertex &vertex,

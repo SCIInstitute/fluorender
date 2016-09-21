@@ -101,8 +101,8 @@ namespace FL
 		InterGraph &get_graph()
 		{ return m_graph; }
 
-		void flip();
-		void unlink();
+		bool flip();
+		bool unlink();
 
 	private:
 		std::deque<PathVert> m_path;
@@ -167,8 +167,9 @@ namespace FL
 		return result;
 	}
 
-	inline void Path::flip()
+	inline bool Path::flip()
 	{
+		bool result = false;
 		bool flag;
 		bool link;
 		unsigned int l;
@@ -196,17 +197,20 @@ namespace FL
 					m_graph[edge.first].count++;
 					m_graph[boost::source(edge.first, m_graph)].count++;
 					m_graph[boost::target(edge.first, m_graph)].count++;
+					result = true;
 				}
 			}
 		}
+		return result;
 	}
 
-	inline void Path::unlink()
+	inline bool Path::unlink()
 	{
+		//return if it is unlinked
 		PathIter iter = m_path.begin();
 		PathIter i1 = iter + 1;
 		if (i1 == m_path.end())
-			return;
+			return false;
 
 		std::pair<InterEdge, bool> edge =
 			boost::edge(iter->vert, i1->vert, m_graph);
@@ -219,8 +223,12 @@ namespace FL
 				m_graph[edge.first].count++;
 				m_graph[boost::source(edge.first, m_graph)].count++;
 				m_graph[boost::target(edge.first, m_graph)].count++;
+
+				return true;
 			}
 		}
+
+		return false;
 	}
 
 	//output

@@ -1000,16 +1000,13 @@ bool TrackMapProcessor::LinkEdgeSize(InterGraph &graph, pVertex &vertex,
 	}
 	else//otherwise, it may be useful
 	{
-		if (graph.counter < 2)
-			link_edge(edges[0], graph);
+		link_edge(edges[0], graph);
 		for (size_t i = 1; i < edges.size(); ++i)
 		{
 			if (similar_edge_size(edges[0], edges[i], graph))
-			{
 				link_edge(edges[i], graph);
-				result = true;
-			}
 		}
+		result = true;
 	}
 
 	return result;
@@ -1049,8 +1046,24 @@ bool TrackMapProcessor::UnlinkEdgeSize(InterGraph &graph, pVertex &vertex,
 //unlink edge by extended alternating path
 bool TrackMapProcessor::UnlinkAlterPath(InterGraph &graph, pVertex &vertex)
 {
+	//get count
+	unsigned int count = 0;
+	InterVert inter_vert = vertex->GetInterVert(graph);
+	if (inter_vert != InterGraph::null_vertex())
+		count = graph[inter_vert].count;
 	//expand the search range with alternating paths
-	m_level_thresh = 2;
+	bool calc_sim;
+	if (get_random(count, graph))
+	{
+		calc_sim = true;
+		m_level_thresh = 2;
+	}
+	else
+	{
+		calc_sim = false;
+		m_level_thresh = 3;
+	}
+
 	PathList paths;
 	if (!GetAlterPath(graph, vertex, paths))
 		return false;
@@ -1058,14 +1071,13 @@ bool TrackMapProcessor::UnlinkAlterPath(InterGraph &graph, pVertex &vertex)
 		return false;
 
 	//use max matching
-	return UnlinkAlterPathMaxMatch(graph, vertex, paths);
+	return UnlinkAlterPathMaxMatch(graph, vertex, paths, calc_sim);
 }
 
 bool TrackMapProcessor::GetAlterPath(InterGraph &graph, pVertex &vertex,
 	PathList &paths)
 {
 	//get all potential alternating paths
-	//search level is 2, which includes two edges and three vertices
 	bool got_list;
 	VertVisitList visited;
 	while (true)
@@ -1087,7 +1099,7 @@ bool TrackMapProcessor::GetAlterPath(InterGraph &graph, pVertex &vertex,
 }
 
 bool TrackMapProcessor::UnlinkAlterPathMaxMatch(InterGraph &graph, pVertex &vertex,
-	PathList &paths)
+	PathList &paths, bool calc_sim)
 {
 	float max_weight = 0;
 	max_weight = get_path_max(graph, paths, 0, 0);
@@ -1097,19 +1109,20 @@ bool TrackMapProcessor::UnlinkAlterPathMaxMatch(InterGraph &graph, pVertex &vert
 		TrackMapProcessor::comp_path_mm);
 	
 	//similar to unlink edge size
+	bool unlinked = false;
 	for (size_t pi = 1; pi < paths.size(); ++pi)
 	{
-		if (!similar_path_mm(paths[0], paths[pi]))
+		if (!calc_sim || (calc_sim &&
+			!similar_path_mm(paths[0], paths[pi])))
 		{
 			//if unsimilar, keep the first one
 			for (size_t i = pi; i < paths.size(); ++i)
-				paths[i].unlink();
-			return true;
+				unlinked |= paths[i].unlink();
+			return unlinked;
 		}
 	}
 
 	return false;
-	//return true;
 }
 
 bool TrackMapProcessor::UnlinkAlterPathSize(InterGraph &graph, pVertex &vertex,
