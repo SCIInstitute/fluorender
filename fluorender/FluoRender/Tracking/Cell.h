@@ -100,8 +100,8 @@ namespace FL
 		unsigned int GetExternalUi();
 		float GetExternalF();
 		//set
-		void SetCenter(FLIVR::Point &center);
-		void SetBox(FLIVR::BBox &box);
+		void SetCenter(const FLIVR::Point &center);
+		void SetBox(const FLIVR::BBox &box);
 		void SetSizeUi(unsigned int size_ui);
 		void SetSizeF(float size_f);
 		void SetExternalUi(unsigned int external_ui);
@@ -217,12 +217,12 @@ namespace FL
 		return m_external_f;
 	}
 
-	inline void Cell::SetCenter(FLIVR::Point &center)
+	inline void Cell::SetCenter(const FLIVR::Point &center)
 	{
 		m_center = center;
 	}
 
-	inline void Cell::SetBox(FLIVR::BBox &box)
+	inline void Cell::SetBox(const FLIVR::BBox &box)
 	{
 		m_box = box;
 	}

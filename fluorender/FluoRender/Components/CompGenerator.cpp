@@ -1153,10 +1153,10 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 
 		for (int j = 0; j<iter; ++j)
 		{
-			std::wostringstream os;
-			os << "j:" << "\t" <<
-				j << "\n";
-			OutputDebugString(os.str().c_str());
+			//std::wostringstream os;
+			//os << "j:" << "\t" <<
+			//	j << "\n";
+			//OutputDebugString(os.str().c_str());
 
 			err = clEnqueueWriteBuffer(
 				queue, mask_buffer,
