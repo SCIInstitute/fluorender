@@ -281,13 +281,13 @@ namespace FL
 		bool get_random(size_t count, InterGraph &graph);
 
 		//export
-		void WriteBool(std::ofstream& ofs, bool value);
-		void WriteTag(std::ofstream& ofs, unsigned char tag);
-		void WriteUint(std::ofstream& ofs, unsigned int value);
-		void WriteFloat(std::ofstream& ofs, float value);
-		void WritePoint(std::ofstream& ofs, FLIVR::Point &point);
-		void WriteCell(std::ofstream& ofs, pCell &cell);
-		void WriteVertex(std::ofstream& ofs, pVertex &vertex);
+		void WriteBool(std::ofstream& ofs, const bool value);
+		void WriteTag(std::ofstream& ofs, const unsigned char tag);
+		void WriteUint(std::ofstream& ofs, const unsigned int value);
+		void WriteFloat(std::ofstream& ofs, const float value);
+		void WritePoint(std::ofstream& ofs, const FLIVR::Point &point);
+		void WriteCell(std::ofstream& ofs, const pCell &cell);
+		void WriteVertex(std::ofstream& ofs, const pVertex &vertex);
 		//import
 		bool ReadBool(std::ifstream& ifs);
 		unsigned char ReadTag(std::ifstream& ifs);
@@ -371,27 +371,27 @@ namespace FL
 		m_split = value;
 	}
 
-	inline void TrackMapProcessor::WriteBool(std::ofstream& ofs, bool value)
+	inline void TrackMapProcessor::WriteBool(std::ofstream& ofs, const bool value)
 	{
 		ofs.write(reinterpret_cast<const char*>(&value), sizeof(bool));
 	}
 
-	inline void TrackMapProcessor::WriteTag(std::ofstream& ofs, unsigned char tag)
+	inline void TrackMapProcessor::WriteTag(std::ofstream& ofs, const unsigned char tag)
 	{
 		ofs.write(reinterpret_cast<const char*>(&tag), sizeof(unsigned char));
 	}
 
-	inline void TrackMapProcessor::WriteUint(std::ofstream& ofs, unsigned int value)
+	inline void TrackMapProcessor::WriteUint(std::ofstream& ofs, const unsigned int value)
 	{
 		ofs.write(reinterpret_cast<const char*>(&value), sizeof(unsigned int));
 	}
 
-	inline void TrackMapProcessor::WriteFloat(std::ofstream& ofs, float value)
+	inline void TrackMapProcessor::WriteFloat(std::ofstream& ofs, const float value)
 	{
 		ofs.write(reinterpret_cast<const char*>(&value), sizeof(float));
 	}
 
-	inline void TrackMapProcessor::WritePoint(std::ofstream& ofs, FLIVR::Point &point)
+	inline void TrackMapProcessor::WritePoint(std::ofstream& ofs, const FLIVR::Point &point)
 	{
 		double x = point.x();
 		ofs.write(reinterpret_cast<const char*>(&x), sizeof(double));
@@ -401,7 +401,7 @@ namespace FL
 		ofs.write(reinterpret_cast<const char*>(&x), sizeof(double));
 	}
 
-	inline void TrackMapProcessor::WriteCell(std::ofstream& ofs, pCell &cell)
+	inline void TrackMapProcessor::WriteCell(std::ofstream& ofs, const pCell &cell)
 	{
 		WriteTag(ofs, TAG_CELL);
 		WriteUint(ofs, cell->Id());

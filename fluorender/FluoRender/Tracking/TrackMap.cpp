@@ -937,8 +937,8 @@ bool TrackMapProcessor::GetValence(pVertex &vertex, InterGraph &graph,
 		inter_iter != adj_verts.second; ++inter_iter)
 	{
 		v1 = *inter_iter;
-		//debug
-		pVertex vert1 = graph[v1].vertex.lock();
+		////debug
+		//pVertex vert1 = graph[v1].vertex.lock();
 		edge = boost::edge(v0, v1, graph);
 		if (edge.second)
 		{
@@ -2443,7 +2443,7 @@ bool TrackMapProcessor::ResetVertexIDs()
 	return true;
 }
 
-void TrackMapProcessor::WriteVertex(std::ofstream& ofs, pVertex &vertex)
+void TrackMapProcessor::WriteVertex(std::ofstream& ofs, const pVertex &vertex)
 {
 	WriteTag(ofs, TAG_VERT);
 	WriteUint(ofs, vertex->Id());
