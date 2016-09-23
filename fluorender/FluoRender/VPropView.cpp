@@ -2063,6 +2063,10 @@ void VPropView::DisableMip()
 		EnableShading();
 	else
 		DisableShading();
+	m_left_thresh_sldr->Enable();
+	m_left_thresh_text->Enable();
+	m_right_thresh_sldr->Enable();
+	m_right_thresh_text->Enable();
 }
 
 void VPropView::OnSpaceText(wxCommandEvent& event)
