@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "exmax.h"
 #include <algorithm>
+#include <fstream>
 
 using namespace FL;
 
@@ -54,6 +55,9 @@ bool ClusterExmax::Execute()
 		m_likelihood_prv = m_likelihood;
 		Expectation();
 		Maximization();
+		////histograom test
+		//GenHistogram(10);
+		//GenUncertainty(0.05);
 		counter++;
 	} while (!Converge() &&
 		counter < m_max_iter);
@@ -181,6 +185,8 @@ void ClusterExmax::Initialize()
 	m_mem_prob.resize(m_clnum);
 	for (size_t i = 0; i < m_clnum; ++i)
 		m_mem_prob[i].resize(m_data.size(), 0);
+	m_mem_prob_prv.clear();
+	m_count.resize(m_data.size(), 0);
 }
 
 void ClusterExmax::Expectation()
@@ -306,4 +312,96 @@ void ClusterExmax::GenResult()
 			m_result[index].push_back(*iter);
 		i++;
 	}
+}
+
+void ClusterExmax::GenHistogram(size_t bins)
+{
+	if (!m_clnum)
+		return;
+
+	m_bins = bins;
+	//allocate histogram space
+	m_histogram.clear();
+	double value = 1.0 / m_clnum;
+	double inc = (1.0 - value) / m_bins;
+	for (size_t i = 0; i < m_bins; ++i)
+	{
+		EmBin bin;
+		bin.value = value;
+		value += inc;
+		bin.count = 0;
+		m_histogram.push_back(bin);
+	}
+	//fill in histogram
+	unsigned int i = 0;
+	for (ClusterIter iter = m_data.begin();
+		iter != m_data.end(); ++iter)
+	{
+		double max_mem_prob = 0;
+		for (int j = 0; j < m_clnum; ++j)
+		{
+			if (j == 0)
+				max_mem_prob = m_mem_prob[j][i];
+			else if (m_mem_prob[j][i] > max_mem_prob)
+				max_mem_prob = m_mem_prob[j][i];
+		}
+		i++;
+		//
+		size_t index = size_t((max_mem_prob - 
+			1.0 / m_clnum) / inc);
+		if (index < m_bins)
+			m_histogram[index].count++;
+	}
+	//output histogram
+	std::ofstream outfile;
+	outfile.open("E:\\hist.txt", std::ofstream::out |
+		std::ofstream::app);
+	for (size_t i = 0; i < m_histogram.size(); ++i)
+		if (i < m_histogram.size() - 1)
+			outfile << m_histogram[i].count << "\t";
+		else
+			outfile << m_histogram[i].count << "\n";
+	outfile.close();
+}
+
+void ClusterExmax::GenUncertainty(double delta)
+{
+	if (!m_clnum)
+		return;
+	if (!m_mem_prob_prv.size())
+	{
+		m_mem_prob_prv = m_mem_prob;
+		return;
+	}
+
+	//compute count
+	for (size_t i = 0; i < m_mem_prob[0].size(); ++i)
+	{
+		double var = 0;
+		for (size_t j = 0; j < m_mem_prob.size(); ++j)
+			var += fabs(m_mem_prob[j][i] -
+				m_mem_prob_prv[j][i]);
+		size_t count = size_t(var / delta);
+		m_count[i] += count;
+	}
+	//allocate histogram space
+	m_histogram.clear();
+	//fill in histogram
+	for (size_t i = 0; i < m_count.size(); ++i)
+	{
+		if (m_histogram.size() <= m_count[i])
+			m_histogram.resize(m_count[i] + 1);
+		m_histogram[m_count[i]].count++;
+	}
+	m_mem_prob_prv = m_mem_prob;
+	//output histogram
+	std::ofstream outfile;
+	outfile.open("E:\\hist.txt", std::ofstream::out |
+		std::ofstream::app);
+	for (size_t i = 0; i < m_histogram.size(); ++i)
+		if (i < m_histogram.size() - 1)
+			outfile << m_histogram[i].count << "\t";
+		else
+			outfile << m_histogram[i].count << "\n";
+	outfile.close();
 }

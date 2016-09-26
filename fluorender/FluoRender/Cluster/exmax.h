@@ -71,6 +71,17 @@ namespace FL
 		double m_likelihood_prv;
 		//membership probabilities
 		std::vector<std::vector<double>> m_mem_prob;//0-idx: comps; 1-idx: points
+		std::vector<std::vector<double>> m_mem_prob_prv;//for comparison
+		std::vector<size_t> m_count;//count for changes
+
+		//histogram
+		typedef struct
+		{
+			double value;//starting value of the range
+			size_t count;
+		} EmBin;
+		std::vector<EmBin> m_histogram;
+		size_t m_bins;
 
 	private:
 		void Initialize();
@@ -79,6 +90,8 @@ namespace FL
 		void Maximization();
 		bool Converge();
 		void GenResult();
+		void GenHistogram(size_t bins);
+		void GenUncertainty(double delta);
 	};
 
 }
