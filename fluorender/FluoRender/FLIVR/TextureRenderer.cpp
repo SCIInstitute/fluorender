@@ -68,6 +68,9 @@ namespace FLIVR
 	Point TextureRenderer::quota_center_;
 	int TextureRenderer::update_order_ = 0;
 	bool TextureRenderer::invalidate_tex_ = false;
+#ifdef _DARWIN
+    CGLContextObj TextureRenderer::gl_context_ = 0;
+#endif
 
 	TextureRenderer::TextureRenderer(Texture* tex)
 		:
@@ -95,7 +98,9 @@ namespace FLIVR
 	{
 		if (!ShaderProgram::init())
 			return;
-
+#ifdef _DARWIN
+        CGLSetCurrentContext(TextureRenderer::gl_context_);
+#endif
 		glGenBuffers(1, &m_slices_vbo);
 		glGenBuffers(1, &m_slices_ibo);
 		glGenVertexArrays(1, &m_slices_vao);

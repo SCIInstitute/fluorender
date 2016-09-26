@@ -481,6 +481,11 @@ void VRenderGLView::Init()
 		ShaderProgram::init_shaders_supported();
 		if (vr_frame && vr_frame->GetSettingDlg()) KernelProgram::set_device_id(vr_frame->GetSettingDlg()->GetCLDeviceID());
 		KernelProgram::init_kernels_supported();
+#ifdef _DARWIN
+        CGLContextObj ctx = CGLGetCurrentContext();
+        if (ctx != TextureRenderer::gl_context_)
+            TextureRenderer::gl_context_ = ctx;
+#endif
 		if (vr_frame)
 		{
 			vr_frame->SetTextureRendererSettings();

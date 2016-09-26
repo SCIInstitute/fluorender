@@ -34,6 +34,12 @@
 #include "Texture.h"
 #include <stdint.h>
 #include <glm/glm.hpp>
+#ifdef _DARWIN
+#include <OpenCL/cl.h>
+#include <OpenCL/cl_gl.h>
+#include <OpenCL/cl_gl_ext.h>
+#include <OpenGL/CGLCurrent.h>
+#endif
 
 namespace FLIVR
 {
@@ -287,6 +293,9 @@ namespace FLIVR
 		int blend_num_bits_;
 		bool clear_pool_;
 
+#ifdef _DARWIN
+        static CGLContextObj gl_context_;
+#endif
 		//memory management
 		static bool mem_swap_;
 		static bool use_mem_limit_;
