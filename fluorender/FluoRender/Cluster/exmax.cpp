@@ -56,8 +56,7 @@ bool ClusterExmax::Execute()
 		Expectation();
 		Maximization();
 		////histograom test
-		//GenHistogram(10);
-		//GenUncertainty(0.05);
+		GenUncertainty(0.05);
 		counter++;
 	} while (!Converge() &&
 		counter < m_max_iter);
@@ -354,7 +353,7 @@ void ClusterExmax::GenHistogram(size_t bins)
 	}
 	//output histogram
 	std::ofstream outfile;
-	outfile.open("E:\\hist.txt", std::ofstream::out |
+	outfile.open("hist.txt", std::ofstream::out |
 		std::ofstream::app);
 	for (size_t i = 0; i < m_histogram.size(); ++i)
 		if (i < m_histogram.size() - 1)
@@ -396,7 +395,7 @@ void ClusterExmax::GenUncertainty(double delta)
 	m_mem_prob_prv = m_mem_prob;
 	//output histogram
 	std::ofstream outfile;
-	outfile.open("E:\\hist.txt", std::ofstream::out |
+	outfile.open("hist.txt", std::ofstream::out |
 		std::ofstream::app);
 	for (size_t i = 0; i < m_histogram.size(); ++i)
 		if (i < m_histogram.size() - 1)
@@ -404,4 +403,84 @@ void ClusterExmax::GenUncertainty(double delta)
 		else
 			outfile << m_histogram[i].count << "\n";
 	outfile.close();
+}
+
+void ClusterExmax::GenerateNewColors(void* label,
+	size_t nx, size_t ny, size_t nz)
+{
+	//m_id_list.clear();
+
+	unsigned int id;
+	unsigned long long index;
+	int i, j, k;
+
+	unsigned int ii = 0;
+	for (ClusterIter iter = m_data.begin();
+		iter != m_data.end(); ++iter)
+	{
+		id = m_count[ii] * 10 + 1;
+		ii++;
+		i = int((*iter)->center.x() + 0.5);
+		if (i <= 0 || i >= nx - 1)
+			continue;
+		j = int((*iter)->center.y() + 0.5);
+		if (j <= 0 || j >= ny - 1)
+			continue;
+		k = int((*iter)->center.z() + 0.5);
+		if (k <= 0 || k >= nz - 1)
+			continue;
+		index = nx*ny*k + nx*j + i;
+		((unsigned int*)label)[index] = id;
+	}
+
+}
+
+void ClusterExmax::GenerateNewColors2(void* label,
+	size_t nx, size_t ny, size_t nz)
+{
+	//m_id_list.clear();
+
+	unsigned int id;
+	unsigned long long index;
+	int i, j, k;
+
+	unsigned int ii = 0;
+	for (ClusterIter iter = m_data.begin();
+		iter != m_data.end(); ++iter)
+	{
+		int index = -1;
+		double max_mem_prob;
+		id = 0;
+		for (int j = 0; j < m_clnum; ++j)
+		{
+			if (j == 0)
+			{
+				index = j;
+				max_mem_prob = m_mem_prob[j][ii];
+			}
+			else
+			{
+				if (m_mem_prob[j][ii] > max_mem_prob)
+				{
+					index = j;
+					max_mem_prob = m_mem_prob[j][ii];
+				}
+			}
+		}
+		if (index > -1)
+			id = (1.0 - max_mem_prob) * 700 + 1;
+		ii++;
+		i = int((*iter)->center.x() + 0.5);
+		if (i <= 0 || i >= nx - 1)
+			continue;
+		j = int((*iter)->center.y() + 0.5);
+		if (j <= 0 || j >= ny - 1)
+			continue;
+		k = int((*iter)->center.z() + 0.5);
+		if (k <= 0 || k >= nz - 1)
+			continue;
+		index = nx*ny*k + nx*j + i;
+		((unsigned int*)label)[index] = id;
+	}
+
 }

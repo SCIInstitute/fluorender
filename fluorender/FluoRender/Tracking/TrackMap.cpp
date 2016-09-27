@@ -3532,8 +3532,8 @@ bool TrackMapProcessor::SegmentCells(
 
 	//run clustering
 	cs_processor.Execute();
-	cs_processor.GenerateNewIDs(id, label,
-		nx, ny, nz);
+	//cs_processor.GenerateNewIDs(id, label, nx, ny, nz);
+	cs_processor.GenerateNewColors2(label, nx, ny, nz);
 
 	return true;
 }

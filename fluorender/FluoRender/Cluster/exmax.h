@@ -46,6 +46,12 @@ namespace FL
 		void SetWeakResult(bool result = true)
 		{ m_weak_result = result; }
 
+		//for test
+		void GenerateNewColors(void* label,
+			size_t nx, size_t ny, size_t nz);
+		void GenerateNewColors2(void* label,
+			size_t nx, size_t ny, size_t nz);
+
 	private:
 		//cluster number
 		unsigned int m_clnum;
