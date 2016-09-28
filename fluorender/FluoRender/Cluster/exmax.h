@@ -78,7 +78,7 @@ namespace FL
 		//membership probabilities
 		std::vector<std::vector<double>> m_mem_prob;//0-idx: comps; 1-idx: points
 		std::vector<std::vector<double>> m_mem_prob_prv;//for comparison
-		std::vector<size_t> m_count;//count for changes
+		std::vector<double> m_count;//count for changes
 
 		//histogram
 		typedef struct

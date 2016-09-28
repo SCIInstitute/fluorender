@@ -56,7 +56,7 @@ bool ClusterExmax::Execute()
 		Expectation();
 		Maximization();
 		////histograom test
-		GenUncertainty(0.05);
+		//GenUncertainty(0.05);
 		counter++;
 	} while (!Converge() &&
 		counter < m_max_iter);
@@ -202,9 +202,12 @@ void ClusterExmax::Expectation()
 				m_params_prv[j].covar);
 		for (unsigned int j = 0; j < m_clnum; ++j)
 		{
-			m_mem_prob[j][i] = m_params_prv[j].tau *
+			if (sum > 0.0)
+				m_mem_prob[j][i] = m_params_prv[j].tau *
 				Gaussian((*iter)->center, m_params_prv[j].mean,
 					m_params_prv[j].covar) / sum;
+			else
+				m_mem_prob[j][i] = 1.0;
 		}
 		i++;
 	}
@@ -213,8 +216,17 @@ void ClusterExmax::Expectation()
 double ClusterExmax::Gaussian(FLIVR::Point &p, FLIVR::Point &m, FLIVR::Mat3 &s)
 {
 	double pi2_3 = 248.050213442399; //(2pi)^3
+	double det = s.det();
+	if (det == 0.0)
+	{
+		//perturb
+		s.mat[0][0] = s.mat[0][0] < 0.5 ? 0.5 : s.mat[0][0];
+		s.mat[1][1] = s.mat[1][1] < 0.5 ? 0.5 : s.mat[1][1];
+		s.mat[2][2] = s.mat[2][2] < 0.5 ? 0.5 : s.mat[2][2];
+		det = s.det();
+	}
 	FLIVR::Vector d = p - m;
-	return exp(-0.5 * FLIVR::Dot(d, s.inv() * d)) / sqrt(pi2_3 * s.det());
+	return exp(-0.5 * FLIVR::Dot(d, s.inv() * d)) / sqrt(pi2_3 * det);
 }
 
 void ClusterExmax::Maximization()
@@ -380,17 +392,25 @@ void ClusterExmax::GenUncertainty(double delta)
 		for (size_t j = 0; j < m_mem_prob.size(); ++j)
 			var += fabs(m_mem_prob[j][i] -
 				m_mem_prob_prv[j][i]);
-		size_t count = size_t(var / delta);
-		m_count[i] += count;
+		//size_t count = size_t(var / delta);
+		//m_count[i] += count;
+		m_count[i] += var;
 	}
 	//allocate histogram space
 	m_histogram.clear();
 	//fill in histogram
 	for (size_t i = 0; i < m_count.size(); ++i)
 	{
-		if (m_histogram.size() <= m_count[i])
-			m_histogram.resize(m_count[i] + 1);
-		m_histogram[m_count[i]].count++;
+		//if (m_histogram.size() <= m_count[i])
+		//	m_histogram.resize(m_count[i] + 1);
+		//m_histogram[m_count[i]].count++;
+		size_t index = m_count[i] / delta;
+		if (m_histogram.size() <= index)
+		{
+			m_histogram.resize(index + 1);
+			m_histogram[index].value = index * delta;
+		}
+		m_histogram[index].count++;
 	}
 	m_mem_prob_prv = m_mem_prob;
 	//output histogram
@@ -414,20 +434,24 @@ void ClusterExmax::GenerateNewColors(void* label,
 	unsigned long long index;
 	int i, j, k;
 
+	double scale = m_histogram.back().value;
+	scale = 350 / scale;
+
 	unsigned int ii = 0;
 	for (ClusterIter iter = m_data.begin();
 		iter != m_data.end(); ++iter)
 	{
-		id = m_count[ii] * 10 + 1;
+		//id = m_count[ii] * 10 + 1;
+		id = m_count[ii] * scale + 1;
 		ii++;
 		i = int((*iter)->center.x() + 0.5);
-		if (i <= 0 || i >= nx - 1)
+		if (i < 0 || i >= nx)
 			continue;
 		j = int((*iter)->center.y() + 0.5);
-		if (j <= 0 || j >= ny - 1)
+		if (j < 0 || j >= ny)
 			continue;
 		k = int((*iter)->center.z() + 0.5);
-		if (k <= 0 || k >= nz - 1)
+		if (k < 0 || k >= nz)
 			continue;
 		index = nx*ny*k + nx*j + i;
 		((unsigned int*)label)[index] = id;
@@ -471,13 +495,13 @@ void ClusterExmax::GenerateNewColors2(void* label,
 			id = (1.0 - max_mem_prob) * 700 + 1;
 		ii++;
 		i = int((*iter)->center.x() + 0.5);
-		if (i <= 0 || i >= nx - 1)
+		if (i < 0 || i >= nx)
 			continue;
 		j = int((*iter)->center.y() + 0.5);
-		if (j <= 0 || j >= ny - 1)
+		if (j < 0 || j >= ny)
 			continue;
 		k = int((*iter)->center.z() + 0.5);
-		if (k <= 0 || k >= nz - 1)
+		if (k < 0 || k >= nz)
 			continue;
 		index = nx*ny*k + nx*j + i;
 		((unsigned int*)label)[index] = id;

@@ -37,8 +37,8 @@ namespace FLIVR
 {
 	class Mat3
 	{
-		double mat[3][3];
 	public:
+		double mat[3][3];
 		inline explicit Mat3(const Vector& row1,
 			const Vector& row2, const Vector row3);
 		inline Mat3(double m00, double m01, double m02,
