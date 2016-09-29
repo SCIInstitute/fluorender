@@ -49,6 +49,8 @@ int VRenderView::m_id = 1;
 ImgShaderFactory VRenderGLView::m_img_shader_factory;
 bool VRenderGLView::m_linked_rot = false;
 VRenderGLView* VRenderGLView::m_master_linked_view = 0;
+bool VRenderGLView::m_enlarge = false;
+double VRenderGLView::m_enlarge_scale = 1.0;
 
 BEGIN_EVENT_TABLE(VRenderGLView, wxGLCanvas)
 	EVT_PAINT(VRenderGLView::OnDraw)
@@ -5196,9 +5198,11 @@ void VRenderGLView::PostDraw()
 		glPixelStorei(GL_PACK_ROW_LENGTH, w);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		unsigned char *image = new unsigned char[w*h*chann];
+		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_final);
 		glReadBuffer(GL_BACK);
 		glReadPixels(x, y, w, h, chann==3?GL_RGB:GL_RGBA, GL_UNSIGNED_BYTE, image);
 		glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		string str_fn = outputfilename.ToStdString();
 		TIFF *out = TIFFOpen(str_fn.c_str(), "wb");
 		if (!out)
@@ -12812,9 +12816,78 @@ void VRenderView::OnChEmbedCheck(wxCommandEvent &event)
 		VRenderFrame::SetEmbedProject(ch_embed->GetValue());
 }
 
+//enlarge output image
+void VRenderView::OnChEnlargeCheck(wxCommandEvent &event)
+{
+	wxCheckBox* ch_enlarge = (wxCheckBox*)event.GetEventObject();
+	if (ch_enlarge)
+	{
+		bool enlarge = ch_enlarge->GetValue();
+		VRenderGLView::SetEnlarge(enlarge);
+		if (ch_enlarge->GetParent())
+		{
+			wxSlider* sl_enlarge = (wxSlider*)
+				ch_enlarge->GetParent()->FindWindow(
+					wxID_HIGHEST + 3008);
+			wxTextCtrl* tx_enlarge = (wxTextCtrl*)
+				ch_enlarge->GetParent()->FindWindow(
+					wxID_HIGHEST + 3009);
+			if (sl_enlarge && tx_enlarge)
+			{
+				if (enlarge)
+				{
+					sl_enlarge->Enable();
+					tx_enlarge->Enable();
+				}
+				else
+				{
+					sl_enlarge->Disable();
+					tx_enlarge->Disable();
+				}
+			}
+		}
+	}
+}
+
+void VRenderView::OnSlEnlargeScroll(wxScrollEvent &event)
+{
+	int ival = event.GetPosition();
+	wxSlider* sl_enlarge = (wxSlider*)event.GetEventObject();
+	if (sl_enlarge && sl_enlarge->GetParent())
+	{
+		wxTextCtrl* tx_enlarge = (wxTextCtrl*)
+			sl_enlarge->GetParent()->FindWindow(
+				wxID_HIGHEST + 3009);
+		if (tx_enlarge)
+		{
+			wxString str = wxString::Format("%.1f", ival / 10.0);
+			tx_enlarge->SetValue(str);
+		}
+	}
+}
+
+void VRenderView::OnTxEnlargeText(wxCommandEvent &event)
+{
+	wxString str = event.GetString();
+	double dval;
+	str.ToDouble(&dval);
+	VRenderGLView::SetEnlargeScale(dval);
+	int ival = int(dval * 10 + 0.5);
+	wxTextCtrl* tx_enlarge = (wxTextCtrl*)event.GetEventObject();
+	if (tx_enlarge && tx_enlarge->GetParent())
+	{
+		wxSlider* sl_enlarge = (wxSlider*)
+			tx_enlarge->GetParent()->FindWindow(
+				wxID_HIGHEST + 3008);
+		if (sl_enlarge)
+			sl_enlarge->SetValue(ival);
+	}
+}
+
+
 wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 {
-	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(400, 100));
+	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(600, 150));
 
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
@@ -12835,6 +12908,29 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 	if (ch_alpha)
 		ch_alpha->SetValue(VRenderFrame::GetSaveAlpha());
 
+	//enlarge
+	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
+	wxCheckBox* ch_enlarge = new wxCheckBox(panel, wxID_HIGHEST + 3007,
+		"Enlarge output image");
+	ch_enlarge->Connect(ch_enlarge->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(VRenderView::OnChEnlargeCheck), NULL, panel);
+	wxSlider* sl_enlarge = new wxSlider(panel, wxID_HIGHEST + 3008,
+		10, 10, 100);
+	sl_enlarge->Connect(sl_enlarge->GetId(), wxEVT_COMMAND_SLIDER_UPDATED,
+		wxScrollEventHandler(VRenderView::OnSlEnlargeScroll), NULL, panel);
+	sl_enlarge->Disable();
+	wxFloatingPointValidator<double> vald_fp(1);
+	wxTextCtrl* tx_enlarge = new wxTextCtrl(panel, wxID_HIGHEST + 3009,
+		"1.0", wxDefaultPosition, wxSize(60, 23), 0, vald_fp);
+	tx_enlarge->Connect(tx_enlarge->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
+		wxCommandEventHandler(VRenderView::OnTxEnlargeText), NULL, panel);
+	tx_enlarge->Disable();
+	sizer_1->Add(ch_enlarge, 0, wxALIGN_CENTER);
+	sizer_1->Add(10, 10);
+	sizer_1->Add(sl_enlarge, 1, wxEXPAND);
+	sizer_1->Add(10, 10);
+	sizer_1->Add(tx_enlarge, 0, wxALIGN_CENTER);
+
 	//copy all files check box
 	wxCheckBox* ch_embed = 0;
 	if (VRenderFrame::GetSaveProject())
@@ -12852,6 +12948,8 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 	group1->Add(10, 10);
 	group1->Add(ch_alpha);
 	group1->Add(10, 10);
+	group1->Add(sizer_1);
+	group1->Add(10, 10);
 	if (VRenderFrame::GetSaveProject() &&
 		ch_embed)
 	{
@@ -12867,6 +12965,10 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 
 void VRenderView::OnCapture(wxCommandEvent& event)
 {
+	//reset enlargement
+	VRenderGLView::SetEnlarge(false);
+	VRenderGLView::SetEnlargeScale(1.0);
+
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 
 	if (vr_frame && vr_frame->GetSettingDlg())

@@ -498,6 +498,12 @@ public:
 	void SetTextRenderer(TextRenderer* text_renderer)
 	{ m_text_renderer = text_renderer; }
 
+	//enlarge output image
+	static void SetEnlarge(bool value)
+	{ m_enlarge = true; }
+	static void SetEnlargeScale(double value)
+	{ m_enlarge_scale = value; }
+
 public:
 	//set gl context
 	bool m_set_gl;
@@ -851,6 +857,10 @@ private:
 
 	//starting frame for 4d script
 	bool m_sf_script;
+
+	//enlargement
+	static bool m_enlarge;
+	static double m_enlarge_scale;
 
 private:
 #ifdef _WIN32
@@ -1595,6 +1605,9 @@ private:
 	void OnCh1Check(wxCommandEvent &event);
 	void OnChAlphaCheck(wxCommandEvent &event);
 	void OnChEmbedCheck(wxCommandEvent &event);
+	void OnChEnlargeCheck(wxCommandEvent &event);
+	void OnSlEnlargeScroll(wxScrollEvent &event);
+	void OnTxEnlargeText(wxCommandEvent &event);
 	static wxWindow* CreateExtraCaptureControl(wxWindow* parent);
 	void OnCapture(wxCommandEvent& event);
 	void OnBgColorChange(wxColourPickerEvent& event);

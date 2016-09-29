@@ -56,6 +56,7 @@ namespace FL
 		unsigned int count;
 	};
 	typedef std::map<unsigned int, UncertainBin> UncertainHist;
+	typedef std::map<unsigned int, UncertainBin>::iterator UncertainHistIter;
 	class TrackMap;
 	class TrackMapProcessor
 	{
@@ -137,6 +138,7 @@ namespace FL
 			size_t frame);
 		void GetCellUncertainty(CellList &list, size_t frame);
 		void GetUncertainHist(UncertainHist &hist1, UncertainHist &hist2, size_t frame);
+		void GetUncertainHist(UncertainHist &hist, VertexList &vertex_list, InterGraph &graph);
 		void GetPaths(CellList &cell_list, PathList &path_list, size_t frame1, size_t frame2);
 
 		//tracking by matching user input
@@ -279,6 +281,9 @@ namespace FL
 
 		//random number
 		bool get_random(size_t count, InterGraph &graph);
+		//get if segmentation is computed
+		bool get_segment(VertexList &vertex_list, InterGraph &inter_graph);
+		bool similar_count(unsigned int count1, unsigned int count2);
 
 		//export
 		void WriteBool(std::ofstream& ofs, const bool value);

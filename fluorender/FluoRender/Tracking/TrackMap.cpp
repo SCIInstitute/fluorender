@@ -816,24 +816,29 @@ bool TrackMapProcessor::ProcessFrames(size_t frame1, size_t frame2)
 		frame1 == frame2)
 		return false;
 
-	VertexList &vertex_list1 = m_map.m_vertices_list.at(frame1);
+	VertexList &vertex_list = m_map.m_vertices_list.at(frame1);
 	InterGraph &inter_graph = m_map.m_inter_graph_list.at(
 		frame1 > frame2 ? frame2 : frame1);
 	m_frame1 = frame1;
 	m_frame2 = frame2;
 
+	//compute segmentation
+	bool calc_seg = false;
+	if (m_merge || m_split)
+		calc_seg = get_segment(vertex_list, inter_graph);
+
 	VertexListIter iter;
 
-	for (iter = vertex_list1.begin();
-		iter != vertex_list1.end();)
+	for (iter = vertex_list.begin();
+		iter != vertex_list.end();)
 	{
 		ProcessVertex(iter->second, inter_graph,
-			m_merge, m_split);
+			calc_seg && m_merge, calc_seg && m_split);
 		//see if it is removed
 		////debug
 		//pVertex vert = iter->second;
 		if (iter->second->GetRemovedFromGraph())
-			iter = vertex_list1.erase(iter);
+			iter = vertex_list.erase(iter);
 		else
 			++iter;
 	}
@@ -1343,6 +1348,7 @@ bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph,
 	InterVert inter_vert = vertex->GetInterVert(graph);
 	if (inter_vert != InterGraph::null_vertex())
 		count = graph[inter_vert].count;
+	//compute similarity
 	bool calc_sim = get_random(count, graph);
 
 	//get valence
@@ -1353,8 +1359,8 @@ bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph,
 	if (valence == 0)
 	{
 		result = LinkEdgeSize(graph, vertex, all_edges, calc_sim);
-		//if (!result)	//find and link neighboring orphans
-		//	result = LinkOrphans(graph, vertex);
+		if (!result)	//find and link neighboring orphans
+			result = LinkOrphans(graph, vertex);
 	}
 	else if (valence > 1)
 	{
@@ -1725,6 +1731,82 @@ bool TrackMapProcessor::merge_cell_size(IntraEdge &edge,
 	c2sizef = cell2->GetSizeF();
 	return osizef / c1sizef > m_contact_thresh ||
 			osizef / c2sizef > m_contact_thresh;
+}
+
+//get if segmentation is computed
+bool TrackMapProcessor::get_segment(VertexList &vertex_list,
+	InterGraph &inter_graph)
+{
+	if (inter_graph.counter < 6)
+		return false;
+
+	UncertainHist hist;
+	GetUncertainHist(hist, vertex_list, inter_graph);
+	if (hist.empty())
+		return false;
+	//search for first peak
+	unsigned int idx_max;
+	unsigned int count_max = 0;
+	for (UncertainHistIter iter = hist.begin();
+		iter != hist.end(); ++iter)
+	{
+		if (iter->second.count > count_max)
+		{
+			count_max = iter->second.count;
+			idx_max = iter->second.level;
+		}
+	}
+	if (count_max == 0)
+		return false;
+	//search for second peak
+	unsigned int idx_max2;
+	unsigned int count_max2 = 0;
+	for (UncertainHistIter iter = std::next(hist.begin(), idx_max + 1);
+		iter != hist.end(); ++iter)
+	{
+		UncertainHistIter prv_iter = std::prev(iter);
+		if (prv_iter == hist.end())
+			return false;
+		if (iter->second.count <= prv_iter->second.count)
+			continue;
+		if (iter->second.count > count_max2)
+		{
+			count_max2 = iter->second.count;
+			idx_max2 = iter->second.level;
+		}
+	}
+	if (count_max2 == 0)
+		return false;
+	//find valley
+	unsigned int idx_min;
+	unsigned int count_min = count_max;
+	for (UncertainHistIter iter = std::next(hist.begin(), idx_max + 1);
+		iter != std::next(hist.begin(), idx_max2 - 1); ++iter)
+	{
+		if (iter->second.count < count_min)
+		{
+			count_min = iter->second.count;
+			idx_min = iter->second.level;
+		}
+	}
+
+	//count_min should be much smaller than count_max2
+	if (!similar_count(count_max2, count_min))
+		return true;
+	else
+		return false;
+}
+
+bool TrackMapProcessor::similar_count(unsigned int count1, unsigned int count2)
+{
+	if (count1 > 0 || count2 > 0)
+	{
+		double d = double(abs(int(count1 - count2))) /
+			std::max(count1, count2);
+		if (d < 0.65)
+			return true;
+	}
+	return false;
 }
 
 //determine if cells on intragraph can be merged
@@ -3831,64 +3913,49 @@ void TrackMapProcessor::GetUncertainHist(
 
 	VertexList &vertex_list = m_map.m_vertices_list.at(frame);
 
-	unsigned int count;
-	InterVert v0;
-	pVertex vertex;
-
 	//in lists
 	if (frame > 0)
 	{
 		InterGraph &inter_graph = m_map.m_inter_graph_list.at(frame - 1);
-		for (VertexListIter iter = vertex_list.begin();
-		iter != vertex_list.end(); ++iter)
-		{
-			if (!iter->second)
-				continue;
-			vertex = iter->second;
-			v0 = vertex->GetInterVert(inter_graph);
-			if (v0 == InterGraph::null_vertex())
-				continue;
-			count = inter_graph[v0].count;
-			auto uhist_iter = hist1.find(count);
-			if (uhist_iter == hist1.end())
-			{
-				UncertainBin bin;
-				bin.level = count;
-				bin.count = 1;
-				hist1.insert(std::pair<unsigned int, UncertainBin>(
-					count, bin));
-			}
-			else
-				uhist_iter->second.count++;
-		}
+		GetUncertainHist(hist1, vertex_list, inter_graph);
 	}
 
 	//out lists
 	if (frame < m_map.m_frame_num - 1)
 	{
 		InterGraph &inter_graph = m_map.m_inter_graph_list.at(frame);
-		for (VertexListIter iter = vertex_list.begin();
-			iter != vertex_list.end(); ++iter)
+		GetUncertainHist(hist2, vertex_list, inter_graph);
+	}
+}
+
+void TrackMapProcessor::GetUncertainHist(UncertainHist &hist,
+	VertexList &vertex_list, InterGraph &inter_graph)
+{
+	unsigned int count;
+	InterVert v0;
+	pVertex vertex;
+
+	for (VertexListIter iter = vertex_list.begin();
+		iter != vertex_list.end(); ++iter)
+	{
+		if (!iter->second)
+			continue;
+		vertex = iter->second;
+		v0 = vertex->GetInterVert(inter_graph);
+		if (v0 == InterGraph::null_vertex())
+			continue;
+		count = inter_graph[v0].count;
+		auto uhist_iter = hist.find(count);
+		if (uhist_iter == hist.end())
 		{
-			if (!iter->second)
-				continue;
-			vertex = iter->second;
-			v0 = vertex->GetInterVert(inter_graph);
-			if (v0 == InterGraph::null_vertex())
-				continue;
-			count = inter_graph[v0].count;
-			auto uhist_iter = hist2.find(count);
-			if (uhist_iter == hist2.end())
-			{
-				UncertainBin bin;
-				bin.level = count;
-				bin.count = 1;
-				hist2.insert(std::pair<unsigned int, UncertainBin>(
-					count, bin));
-			}
-			else
-				uhist_iter->second.count++;
+			UncertainBin bin;
+			bin.level = count;
+			bin.count = 1;
+			hist.insert(std::pair<unsigned int, UncertainBin>(
+				count, bin));
 		}
+		else
+			uhist_iter->second.count++;
 	}
 }
 
