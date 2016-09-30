@@ -444,15 +444,10 @@ VRenderGLView::~VRenderGLView()
 		delete m_trace_group;
 }
 
-void VRenderGLView::OnResize(wxSizeEvent& event)
+void VRenderGLView::ResizeFramebuffers()
 {
-	if (m_size == event.GetSize())
-		return;
-	else
-		m_size = event.GetSize();
-
 	int i;
-	for (i=0; i<(int)m_vd_pop_list.size(); i++)
+	for (i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
 		VolumeData* vd = m_vd_pop_list[i];
 		if (vd)
@@ -469,6 +464,17 @@ void VRenderGLView::OnResize(wxSizeEvent& event)
 	m_resize = true;
 	m_resize_ol1 = true;
 	m_resize_ol2 = true;
+}
+
+void VRenderGLView::OnResize(wxSizeEvent& event)
+{
+	wxSize size = GetGLSize();
+	if (m_size == size)
+		return;
+	else
+		m_size = size;
+
+	ResizeFramebuffers();
 
 	m_vrv->UpdateScaleFactor(false);
 
@@ -484,16 +490,16 @@ void VRenderGLView::Init()
 		if (vr_frame && vr_frame->GetSettingDlg()) KernelProgram::set_device_id(vr_frame->GetSettingDlg()->GetCLDeviceID());
 		KernelProgram::init_kernels_supported();
 #ifdef _DARWIN
-        CGLContextObj ctx = CGLGetCurrentContext();
-        if (ctx != TextureRenderer::gl_context_)
-            TextureRenderer::gl_context_ = ctx;
+		CGLContextObj ctx = CGLGetCurrentContext();
+		if (ctx != TextureRenderer::gl_context_)
+			TextureRenderer::gl_context_ = ctx;
 #endif
 		if (vr_frame)
 		{
 			vr_frame->SetTextureRendererSettings();
 			vr_frame->SetTextureUndos();
 		}
-		glViewport(0, 0, (GLint)(GetSize().x), (GLint)(GetSize().y));
+		//glViewport(0, 0, (GLint)(GetSize().x), (GLint)(GetSize().y));
 		goTimer->start();
 		glGenBuffers(1, &m_quad_vbo);
 		m_quad_vao = 0;
@@ -504,11 +510,6 @@ void VRenderGLView::Init()
 
 		m_initialized = true;
 	}
-
-	////query the OGL version to determine actual context info
-	//char version[16];
-	//memcpy(version,glGetString(GL_VERSION),16);
-	//m_GLversion = wxString("OpenGL Version: ") + wxString(version);
 }
 
 void VRenderGLView::Clear()
@@ -603,10 +604,6 @@ double VRenderGLView::CalcZ(double z)
 
 void VRenderGLView::CalcFogRange()
 {
-	int w, h;
-	w = GetSize().x;
-	h = GetSize().y;
-
 	BBox bbox;
 	bool use_box = false;
 	if (m_cur_vol)
@@ -669,8 +666,8 @@ void VRenderGLView::CalcFogRange()
 //draw the volume data only
 void VRenderGLView::Draw()
 {
-	int nx = GetSize().x;
-	int ny = GetSize().y;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 
 	// clear color and depth buffers
 	glClearDepth(1.0);
@@ -739,8 +736,8 @@ void VRenderGLView::Draw()
 void VRenderGLView::DrawDP()
 {
 	int i;
-	int nx = GetSize().x;
-	int ny = GetSize().y;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 
 	//clear
 //	glDrawBuffer(GL_BACK);
@@ -1020,8 +1017,8 @@ void VRenderGLView::DrawDP()
 //peel==true -- depth peeling
 void VRenderGLView::DrawMeshes(int peel)
 {
-	int nx = GetSize().x;
-	int ny = GetSize().y;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 
 	for (int i=0 ; i<(int)m_layer_list.size() ; i++)
@@ -1072,6 +1069,9 @@ void VRenderGLView::DrawVolumes(int peel)
 	}
 
 	PrepFinalBuffer();
+
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 
 	//draw
 	if ((!m_drawing_coord &&
@@ -1188,11 +1188,9 @@ void VRenderGLView::DrawVolumes(int peel)
 					if (m_vd_pop_list.size())
 						vd = m_vd_pop_list[0];
 				Point p;
-				if (vd && (GetPointVolumeBox(p,
-					GetSize().x/2, GetSize().y/2,
-					vd, false)>0.0 ||
-					GetPointPlane(p, GetSize().x/2,
-					GetSize().y/2, 0, false)>0.0))
+				if (vd &&
+					(GetPointVolumeBox(p, nx/2, ny/2, vd, false)>0.0 ||
+					GetPointPlane(p, nx/2, ny/2, 0, false)>0.0))
 				{
 					int resx, resy, resz;
 					double sclx, scly, sclz;
@@ -1333,8 +1331,8 @@ void VRenderGLView::DrawAnnotations()
 		return;
 
 	int nx, ny;
-	nx = GetSize().x;
-	ny = GetSize().y;
+	nx = GetGLSize().x;
+	ny = GetGLSize().y;
 	float sx, sy;
 	sx = 2.0/nx;
 	sy = 2.0/ny;
@@ -1646,8 +1644,8 @@ void VRenderGLView::DrawBrush()
 	{
 		int i;
 		int nx, ny;
-		nx = GetSize().x;
-		ny = GetSize().y;
+		nx = GetGLSize().x;
+		ny = GetGLSize().y;
 		double cx = pos1.x;
 		double cy = ny - pos1.y;
 		float sx, sy;
@@ -1708,8 +1706,8 @@ void VRenderGLView::DrawBrush()
 void VRenderGLView::PaintStroke()
 {
 	int nx, ny;
-	nx = GetSize().x;
-	ny = GetSize().y;
+	nx = GetGLSize().x;
+	ny = GetGLSize().y;
 
 	double pressure = m_use_pres?m_pressure:1.0;
 
@@ -1856,8 +1854,8 @@ void VRenderGLView::Set2dWeights()
 //segment volumes in current view
 void VRenderGLView::Segment()
 {
-	int nx = GetSize().x;
-	int ny = GetSize().y;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 	GLfloat clear_color[4] = { 0, 0, 0, 0 };
 
@@ -1978,8 +1976,8 @@ void VRenderGLView::Segment()
 //label volumes in current view
 void VRenderGLView::Label()
 {
-	int nx = GetSize().x;
-	int ny = GetSize().y;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 	GLfloat clear_color[4] = { 0, 0, 0, 0 };
 
@@ -2669,8 +2667,8 @@ void VRenderGLView::Calculate(int type, wxString prev_group, bool add)
 void VRenderGLView::PrepFinalBuffer()
 {
 	int nx, ny;
-	nx = GetSize().x;
-	ny = GetSize().y;
+	nx = GetGLSize().x;
+	ny = GetGLSize().y;
 
 	//generate textures & buffer objects
 	glActiveTexture(GL_TEXTURE0);
@@ -2782,8 +2780,8 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 		return;
 
 	int nx, ny;
-	nx = GetSize().x;
-	ny = GetSize().y;
+	nx = GetGLSize().x;
+	ny = GetGLSize().y;
 
 	//generate textures & buffer objects
 	//frame buffer for each volume
@@ -2932,8 +2930,8 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 
 void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, bool mask, int peel)
 {
-	int nx = GetSize().x;
-	int ny = GetSize().y;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 	GLfloat clear_color[4] = { 0, 0, 0, 0 };
 
@@ -3090,8 +3088,8 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, bool mask, int peel)
 
 void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 {
-	int nx = GetSize().x;
-	int ny = GetSize().y;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 	GLfloat clear_color[4] = { 0, 0, 0, 0 };
 
@@ -3348,8 +3346,8 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 
 void VRenderGLView::DrawOLShading(VolumeData* vd)
 {
-	int nx = GetSize().x;
-	int ny = GetSize().y;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 
 	if (TextureRenderer::get_mem_swap() &&
@@ -3447,8 +3445,8 @@ bool VRenderGLView::GetMeshShadow(double &val)
 void VRenderGLView::DrawOLShadowsMesh(GLuint tex_depth, double darkness)
 {
 	int nx, ny;
-	nx = GetSize().x;
-	ny = GetSize().y;
+	nx = GetGLSize().x;
+	ny = GetGLSize().y;
 
 	//shadow pass
 	if (!glIsFramebuffer(m_fbo_ol2))
@@ -3559,8 +3557,8 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 	if (vlist.empty())
 		return;
 
-	int nx = GetSize().x;
-	int ny = GetSize().y;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 	GLfloat clear_color[4] = { 1, 1, 1, 1 };
 
@@ -3819,8 +3817,8 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	if (!m_mvr)
 		return;
 
-	int nx = GetSize().x;
-	int ny = GetSize().y;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 	GLfloat clear_color[4] = { 0, 0, 0, 0 };
 
@@ -4175,8 +4173,8 @@ void VRenderGLView::Pick()
 void VRenderGLView::PickMesh()
 {
 	int i;
-	int nx = GetSize().x;
-	int ny = GetSize().y;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 	if (nx<=0 || ny<=0)
 		return;
 	wxPoint mouse_pos = ScreenToClient(wxGetMousePosition());
@@ -5175,10 +5173,10 @@ void VRenderGLView::PostDraw()
 	//output animations
 	if (m_capture && !m_cap_file.IsEmpty())
 	{
-		wxString outputfilename = m_cap_file;
-
 		//capture
+		wxString outputfilename = m_cap_file;
 		int x, y, w, h;
+
 		if (m_draw_frame)
 		{
 			x = m_frame_x;
@@ -5190,19 +5188,24 @@ void VRenderGLView::PostDraw()
 		{
 			x = 0;
 			y = 0;
-			w = GetSize().x;
-			h = GetSize().y;
+			w = GetGLSize().x;
+			h = GetGLSize().y;
 		}
+
+		if (m_enlarge)
+			glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_final);
 
 		int chann = VRenderFrame::GetSaveAlpha()?4:3;
 		glPixelStorei(GL_PACK_ROW_LENGTH, w);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		unsigned char *image = new unsigned char[w*h*chann];
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_final);
 		glReadBuffer(GL_BACK);
 		glReadPixels(x, y, w, h, chann==3?GL_RGB:GL_RGBA, GL_UNSIGNED_BYTE, image);
 		glPixelStorei(GL_PACK_ROW_LENGTH, 0);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		if (m_enlarge)
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 		string str_fn = outputfilename.ToStdString();
 		TIFF *out = TIFFOpen(str_fn.c_str(), "wb");
 		if (!out)
@@ -5887,8 +5890,8 @@ void VRenderGLView::ForceDraw()
 	if (m_resize)
 		m_drawing_coord = false;
 
-	int nx = GetSize().x;
-	int ny = GetSize().y;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 
 	PopMeshList();
 	if (m_md_pop_list.size()>0)
@@ -5978,6 +5981,13 @@ void VRenderGLView::ForceDraw()
 	if (m_resize)
 		m_resize = false;
 
+	if (m_enlarge)
+	{
+		m_enlarge = false;
+		ResizeFramebuffers();
+		RefreshGL(19);
+	}
+
 	if (m_linked_rot)
 	{
 		if (!m_master_linked_view ||
@@ -6054,8 +6064,8 @@ double VRenderGLView::Get121ScaleFactor()
 {
 	double result = 1.0;
 
-	int nx = GetSize().x;
-	int ny = GetSize().y;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 	double aspect = (double)nx / (double)ny;
 
 	double spc_x = 1.0;
@@ -8023,8 +8033,8 @@ void VRenderGLView::DrawCamCtr()
 void VRenderGLView::DrawFrame()
 {
 	int nx, ny;
-	nx = GetSize().x;
-	ny = GetSize().y;
+	nx = GetGLSize().x;
+	ny = GetGLSize().y;
 	glm::mat4 proj_mat = glm::ortho(float(0), float(nx), float(0), float(ny));
 
 	glDisable(GL_DEPTH_TEST);
@@ -8073,8 +8083,8 @@ void VRenderGLView::DrawScaleBar()
 	if (m_draw_legend)
 		offset = m_sb_height;
 
-	int nx = GetSize().x;
-	int ny = GetSize().y;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 	float sx, sy;
 	sx = 2.0/nx;
 	sy = 2.0/ny;
@@ -8176,8 +8186,8 @@ void VRenderGLView::DrawLegend()
 
 	double font_height = m_text_renderer->GetSize() + 3.0;
 
-	int nx = GetSize().x;
-	int ny = GetSize().y;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 
 	double xoffset = 10.0;
 	double yoffset = 10.0;
@@ -8604,8 +8614,8 @@ void VRenderGLView::DrawColormap()
 	if (m_draw_legend)
 		offset = m_sb_height;
 
-	int nx = GetSize().x;
-	int ny = GetSize().y;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 	float sx, sy;
 	sx = 2.0/nx;
 	sy = 2.0/ny;
@@ -9319,8 +9329,8 @@ void VRenderGLView::StartLoopUpdate()
 
 	if (TextureRenderer::get_mem_swap())
 	{
-		int nx = GetSize().x;
-		int ny = GetSize().y;
+		int nx = GetGLSize().x;
+		int ny = GetGLSize().y;
 		//projection
 		HandleProjection(nx, ny);
 		//Transformation
@@ -9436,8 +9446,8 @@ double VRenderGLView::GetPointVolume(Point& mp, int mx, int my,
 	void* data = nrrd->data;
 	if (!data) return -1.0;
 
-	int nx = GetSize().x;
-	int ny = GetSize().y;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
@@ -9596,8 +9606,8 @@ double VRenderGLView::GetPointVolumeBox(Point &mp, int mx, int my, VolumeData* v
 {
 	if (!vd)
 		return -1.0;
-	int nx = GetSize().x;
-	int ny = GetSize().y;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 	vector<Plane*> *planes = vd->GetVR()->get_planes();
@@ -9703,8 +9713,8 @@ double VRenderGLView::GetPointVolumeBox2(Point &p1, Point &p2, int mx, int my, V
 {
 	if (!vd)
 		return -1.0;
-	int nx = GetSize().x;
-	int ny = GetSize().y;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 	vector<Plane*> *planes = vd->GetVR()->get_planes();
@@ -9808,8 +9818,8 @@ double VRenderGLView::GetPointVolumeBox2(Point &p1, Point &p2, int mx, int my, V
 
 double VRenderGLView::GetPointPlane(Point &mp, int mx, int my, Point* planep, bool calc_mats)
 {
-	int nx = GetSize().x;
-	int ny = GetSize().y;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
@@ -9871,8 +9881,8 @@ Point* VRenderGLView::GetEditingRulerPoint(int mx, int my)
 {
 	Point* point = 0;
 
-	int nx = GetSize().x;
-	int ny = GetSize().y;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 
 	if (nx <= 0 || ny <= 0)
 		return 0;
@@ -10075,8 +10085,8 @@ void VRenderGLView::DrawRulers()
 	if (!m_text_renderer)
 		return;
 
-	int nx = GetSize().x;
-	int ny = GetSize().y;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 	float sx, sy;
 	sx = 2.0/nx;
 	sy = 2.0/ny;
@@ -10671,11 +10681,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	m_interactive = false;
 	m_paint_enable = false;
 	m_drawing_coord = false;
-
-	//wxPoint mouse_pos = wxGetMousePosition();
-	//wxRect view_reg = GetScreenRect();
-	//if (view_reg.Contains(mouse_pos))
-	//	UpdateBrushState();
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
 
 	//mouse button down operations
 	if (event.LeftDown())
@@ -10861,8 +10868,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					m_head.normalize();
 					Vector side = Cross(m_up, m_head);
 					Vector trans = -(
-						side*(double(dx)*(m_ortho_right-m_ortho_left)/double(GetSize().x))+
-						m_up*(double(dy)*(m_ortho_top-m_ortho_bottom)/double(GetSize().y)));
+						side*(double(dx)*(m_ortho_right-m_ortho_left)/double(nx))+
+						m_up*(double(dy)*(m_ortho_top-m_ortho_bottom)/double(ny)));
 					m_obj_transx += trans.x();
 					m_obj_transy += trans.y();
 					m_obj_transz += trans.z();
@@ -10878,8 +10885,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					long dy = event.GetY() - old_mouse_Y;
 
 					double delta = abs(dx)>abs(dy)?
-						(double)dx/(double)GetSize().x:
-					(double)-dy/(double)GetSize().y;
+						(double)dx/(double)nx:
+						(double)-dy/(double)ny;
 					m_scale_factor += m_scale_factor*delta;
 					m_vrv->UpdateScaleFactor(false);
 					//wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
@@ -11199,8 +11206,8 @@ void VRenderGLView::GetFrame(int &x, int &y, int &w, int &h)
 void VRenderGLView::CalcFrame()
 {
 	int w, h;
-	w = GetSize().x;
-	h = GetSize().y;
+	w = GetGLSize().x;
+	h = GetGLSize().y;
 
 	if (m_cur_vol)
 	{
@@ -12984,6 +12991,8 @@ void VRenderView::OnCapture(wxCommandEvent& event)
 	{
 		m_glview->m_cap_file = file_dlg.GetDirectory() + GETSLASH() + file_dlg.GetFilename();
 		m_glview->m_capture = true;
+		if (VRenderGLView::m_enlarge)
+			m_glview->ResizeFramebuffers();
 		RefreshGL();
 
 		if (vr_frame && vr_frame->GetSettingDlg())

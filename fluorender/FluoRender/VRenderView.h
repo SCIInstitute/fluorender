@@ -993,10 +993,23 @@ private:
 	//draw quad
 	void DrawViewQuad();
 
+	//get size, considering enlargement
+	wxSize GetGLSize();
+	void ResizeFramebuffers();
+
 	DECLARE_EVENT_TABLE();
 
 	friend class VRenderView;
 };
+
+inline wxSize VRenderGLView::GetGLSize()
+{
+	wxSize size = GetSize();
+	if (m_enlarge)
+		size.Set(size.x * m_enlarge_scale,
+			size.y * m_enlarge_scale);
+	return size;
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class VRenderView: public wxPanel
