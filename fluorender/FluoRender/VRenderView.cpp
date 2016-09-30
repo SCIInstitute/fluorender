@@ -5240,6 +5240,18 @@ void VRenderGLView::PostDraw()
 	}
 }
 
+void VRenderGLView::ResetEnlarge()
+{
+	//skip if not done with loop
+	if (TextureRenderer::get_mem_swap() &&
+		TextureRenderer::get_start_update_loop() &&
+		!TextureRenderer::get_done_update_loop())
+		return;
+	m_enlarge = false;
+	ResizeFramebuffers();
+	RefreshGL(19);
+}
+
 //run 4d script
 void VRenderGLView::Run4DScript(wxString &scriptname, VolumeData* vd)
 {
@@ -5982,11 +5994,7 @@ void VRenderGLView::ForceDraw()
 		m_resize = false;
 
 	if (m_enlarge)
-	{
-		m_enlarge = false;
-		ResizeFramebuffers();
-		RefreshGL(19);
-	}
+		ResetEnlarge();
 
 	if (m_linked_rot)
 	{

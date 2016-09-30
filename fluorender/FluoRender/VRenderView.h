@@ -942,6 +942,7 @@ private:
 	//pre draw and post draw
 	void PreDraw();
 	void PostDraw();
+	void ResetEnlarge();
 
 	//run 4d script
 	void Run4DScript(wxString &scriptname, VolumeData* vd);
