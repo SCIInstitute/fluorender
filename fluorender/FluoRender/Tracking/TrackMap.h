@@ -211,7 +211,8 @@ namespace FL
 
 		//replaces all previous match/unmatch funcs
 		bool ProcessVertex(pVertex &vertex, InterGraph &graph,
-			bool hint_merge = false, bool hint_split = false);
+			unsigned int merge_count_min = 0,
+			unsigned int split_count_min = 0);
 		//vertex matching routines
 		//find out current valence of a vertex
 		bool GetValence(pVertex &vertex, InterGraph &graph,
@@ -223,6 +224,10 @@ namespace FL
 		bool GetValence(pVertex &vertex, InterGraph &graph,
 			size_t &valence, std::vector<InterEdge> &all_edges,
 			std::vector<InterEdge> &linked_edges);
+		//get uncertain edges for segmentation
+		bool GetUncertainEdges(pVertex &vertex, InterGraph &graph,
+			unsigned int min_count,
+			std::vector<InterEdge> &uncertain_edges);
 		//detailed match functions
 		//link edge of the max overlap
 		bool LinkEdgeSize(InterGraph &graph, pVertex &vertex,
@@ -282,7 +287,7 @@ namespace FL
 		//random number
 		bool get_random(size_t count, InterGraph &graph);
 		//get if segmentation is computed
-		bool get_segment(VertexList &vertex_list, InterGraph &inter_graph);
+		unsigned int get_segment(VertexList &vertex_list, InterGraph &inter_graph);
 		bool similar_count(unsigned int count1, unsigned int count2);
 
 		//export

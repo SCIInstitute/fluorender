@@ -823,9 +823,9 @@ bool TrackMapProcessor::ProcessFrames(size_t frame1, size_t frame2)
 	m_frame2 = frame2;
 
 	//compute segmentation
-	bool calc_seg = false;
+	unsigned int count_min = 0;
 	if (m_merge || m_split)
-		calc_seg = get_segment(vertex_list, inter_graph);
+		count_min = get_segment(vertex_list, inter_graph);
 
 	VertexListIter iter;
 
@@ -833,7 +833,8 @@ bool TrackMapProcessor::ProcessFrames(size_t frame1, size_t frame2)
 		iter != vertex_list.end();)
 	{
 		ProcessVertex(iter->second, inter_graph,
-			calc_seg && m_merge, calc_seg && m_split);
+			m_merge?count_min:0,
+			m_split?count_min:0);
 		//see if it is removed
 		////debug
 		//pVertex vert = iter->second;
@@ -954,6 +955,39 @@ bool TrackMapProcessor::GetValence(pVertex &vertex, InterGraph &graph,
 				linked_edges.push_back(edge.first);
 			}
 			all_edges.push_back(edge.first);
+		}
+	}
+
+	return true;
+}
+
+//get uncertain edges for segmentation
+bool TrackMapProcessor::GetUncertainEdges(pVertex &vertex, InterGraph &graph,
+	unsigned int min_count, std::vector<InterEdge> &uncertain_edges)
+{
+	if (!vertex)
+		return false;
+	InterVert v0 = vertex->GetInterVert(graph);
+	if (v0 == InterGraph::null_vertex())
+		return false;
+
+	InterVert v1;
+	std::pair<InterEdge, bool> edge;
+
+	std::pair<InterAdjIter, InterAdjIter> adj_verts =
+		boost::adjacent_vertices(v0, graph);
+	//for each adjacent vertex
+	for (InterAdjIter inter_iter = adj_verts.first;
+		inter_iter != adj_verts.second; ++inter_iter)
+	{
+		v1 = *inter_iter;
+		////debug
+		//pVertex vert1 = graph[v1].vertex.lock();
+		edge = boost::edge(v0, v1, graph);
+		if (edge.second)
+		{
+			if (graph[edge.first].count >= min_count)
+				uncertain_edges.push_back(edge.first);
 		}
 	}
 
@@ -1339,7 +1373,7 @@ bool TrackMapProcessor::SplitVertex(InterGraph &graph, pVertex &vertex,
 }
 
 bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph,
-	bool hint_merge, bool hint_split)
+	unsigned int merge_count_min, unsigned int split_count_min)
 {
 	bool result = false;
 
@@ -1367,12 +1401,23 @@ bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph,
 		result = UnlinkEdgeSize(graph, vertex, linked_edges, calc_sim);
 		if (!result)	//unlink edge by extended alternating path
 			result = UnlinkAlterPath(graph, vertex, calc_sim);
-		if (!result && hint_merge)	//merge edges if possible (DBSCAN)
-			result = MergeEdges(graph, vertex, linked_edges);
-		if (!result)	//unlink edge based on vertex size
-			result = UnlinkVertexSize(graph, vertex, linked_edges);
-		if (!result && hint_split)	//split vertex if possible (EM)
-			result = SplitVertex(graph, vertex, linked_edges);
+
+		//segmentation
+		if (!merge_count_min && !split_count_min)
+			return result;
+		std::vector<InterEdge> uncertain_edges;
+		GetUncertainEdges(vertex, graph,
+			std::min(merge_count_min, split_count_min),
+			uncertain_edges);
+		result = false;
+		if (merge_count_min &&
+			count >= merge_count_min)	//merge edges if possible (DBSCAN)
+			result = MergeEdges(graph, vertex, uncertain_edges);
+		//if (!result)	//unlink edge based on vertex size
+		//	result = UnlinkVertexSize(graph, vertex, linked_edges);
+		if (!result && split_count_min &&
+			count >= split_count_min)	//split vertex if possible (EM)
+			result = SplitVertex(graph, vertex, uncertain_edges);
 	}
 
 	return result;
@@ -1734,16 +1779,16 @@ bool TrackMapProcessor::merge_cell_size(IntraEdge &edge,
 }
 
 //get if segmentation is computed
-bool TrackMapProcessor::get_segment(VertexList &vertex_list,
+unsigned int TrackMapProcessor::get_segment(VertexList &vertex_list,
 	InterGraph &inter_graph)
 {
 	if (inter_graph.counter < 6)
-		return false;
+		return 0;
 
 	UncertainHist hist;
 	GetUncertainHist(hist, vertex_list, inter_graph);
 	if (hist.empty())
-		return false;
+		return 0;
 	//search for first peak
 	unsigned int idx_max;
 	unsigned int count_max = 0;
@@ -1757,46 +1802,51 @@ bool TrackMapProcessor::get_segment(VertexList &vertex_list,
 		}
 	}
 	if (count_max == 0)
-		return false;
-	//search for second peak
-	unsigned int idx_max2;
-	unsigned int count_max2 = 0;
-	if (idx_max >= hist.size())
-		return false;
-	for (UncertainHistIter iter = std::next(hist.begin(), idx_max + 1);
-		iter != hist.end(); ++iter)
-	{
-		UncertainHistIter prv_iter = std::prev(iter);
-		if (prv_iter == hist.end())
-			return false;
-		if (iter->second.count <= prv_iter->second.count)
-			continue;
-		if (iter->second.count > count_max2)
-		{
-			count_max2 = iter->second.count;
-			idx_max2 = iter->second.level;
-		}
-	}
-	if (count_max2 == 0)
-		return false;
-	//find valley
-	unsigned int idx_min;
-	unsigned int count_min = count_max;
-	for (UncertainHistIter iter = std::next(hist.begin(), idx_max + 1);
-		iter != std::next(hist.begin(), idx_max2 - 1); ++iter)
-	{
-		if (iter->second.count < count_min)
-		{
-			count_min = iter->second.count;
-			idx_min = iter->second.level;
-		}
-	}
+		return 0;
 
-	//count_min should be much smaller than count_max2
-	if (!similar_count(count_max2, count_min))
-		return true;
-	else
-		return false;
+	unsigned int idx_max2, idx_min;
+	unsigned int count_max2, count_min;
+	while (true)
+	{
+		//search for second peak
+		count_max2 = 0;
+		if (idx_max >= hist.size())
+			return 0;
+		for (UncertainHistIter iter = std::next(hist.begin(), idx_max);
+			iter != hist.end(); ++iter)
+		{
+			UncertainHistIter prv_iter = std::prev(iter);
+			if (prv_iter == hist.end())
+				return 0;
+			if (iter->second.count <= prv_iter->second.count)
+				continue;
+			if (iter->second.count > count_max2)
+			{
+				count_max2 = iter->second.count;
+				idx_max2 = iter->second.level;
+			}
+		}
+		if (count_max2 == 0)
+			return 0;
+
+		//find valley
+		count_min = count_max;
+		for (UncertainHistIter iter = std::next(hist.begin(), idx_max);
+			iter != std::next(hist.begin(), idx_max2 - 1); ++iter)
+		{
+			if (iter->second.count < count_min)
+			{
+				count_min = iter->second.count;
+				idx_min = iter->second.level;
+			}
+		}
+
+		//count_min should be much smaller than count_max2
+		if (!similar_count(count_max2, count_min))
+			return idx_min;
+		else
+			idx_max = idx_max2;
+	}
 }
 
 bool TrackMapProcessor::similar_count(unsigned int count1, unsigned int count2)

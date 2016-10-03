@@ -3411,6 +3411,9 @@ void TraceDlg::RefineMap(int t)
 		boost::bind(&TraceDlg::ReadVolCache, this, _1),
 		boost::bind(&TraceDlg::DelVolCache, this, _1));
 	tm_processor.SetVolCacheSize(4);
+	//merge/split
+	tm_processor.SetMerge(m_map_merge_chk->GetValue());
+	tm_processor.SetSplit(m_map_split_chk->GetValue());
 
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
