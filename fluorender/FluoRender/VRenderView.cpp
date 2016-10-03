@@ -2714,6 +2714,9 @@ void VRenderGLView::ClearFinalBuffer()
 
 void VRenderGLView::DrawFinalBuffer()
 {
+	if (m_enlarge)
+		return;
+
 	//bind back the window frame buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
