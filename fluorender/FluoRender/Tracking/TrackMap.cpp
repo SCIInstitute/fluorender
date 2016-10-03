@@ -1761,6 +1761,8 @@ bool TrackMapProcessor::get_segment(VertexList &vertex_list,
 	//search for second peak
 	unsigned int idx_max2;
 	unsigned int count_max2 = 0;
+	if (idx_max >= hist.size())
+		return false;
 	for (UncertainHistIter iter = std::next(hist.begin(), idx_max + 1);
 		iter != hist.end(); ++iter)
 	{
