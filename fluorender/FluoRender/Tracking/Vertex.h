@@ -33,6 +33,18 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FL
 {
+	struct UncertainBin
+	{
+		unsigned int level;
+		unsigned int count;
+
+		UncertainBin() :level(0), count(0) {}
+	};
+	inline bool operator==(const UncertainBin& bin1, const UncertainBin& bin2)
+	{ return bin1.level == bin2.level && bin1.count == bin2.count; }
+	typedef std::map<unsigned int, UncertainBin> UncertainHist;
+	typedef std::map<unsigned int, UncertainBin>::iterator UncertainHistIter;
+
 	struct InterEdgeData
 	{
 		unsigned int size_ui;
@@ -63,6 +75,7 @@ namespace FL
 	public:
 		size_t index;
 		size_t counter;
+		UncertainBin major_bin[2];
 	};
 	typedef InterGraph::vertex_descriptor InterVert;
 	typedef InterGraph::edge_descriptor InterEdge;

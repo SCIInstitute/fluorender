@@ -824,8 +824,9 @@ bool TrackMapProcessor::ProcessFrames(size_t frame1, size_t frame2)
 
 	//compute segmentation
 	unsigned int count_min = 0;
+	bool major_converge = false;
 	if (m_merge || m_split)
-		count_min = get_segment(vertex_list, inter_graph);
+		major_converge = get_segment(vertex_list, inter_graph, count_min);
 
 	VertexListIter iter;
 
@@ -973,6 +974,8 @@ bool TrackMapProcessor::GetUncertainEdges(pVertex &vertex, InterGraph &graph,
 
 	InterVert v1;
 	std::pair<InterEdge, bool> edge;
+	unsigned int link;
+	unsigned int count;
 
 	std::pair<InterAdjIter, InterAdjIter> adj_verts =
 		boost::adjacent_vertices(v0, graph);
@@ -986,7 +989,9 @@ bool TrackMapProcessor::GetUncertainEdges(pVertex &vertex, InterGraph &graph,
 		edge = boost::edge(v0, v1, graph);
 		if (edge.second)
 		{
-			if (graph[edge.first].count >= min_count)
+			link = graph[edge.first].link;
+			count = graph[edge.first].count;
+			if (link == 1 || link == 2 || count >= min_count)
 				uncertain_edges.push_back(edge.first);
 		}
 	}
@@ -1028,7 +1033,7 @@ bool TrackMapProcessor::LinkEdgeSize(InterGraph &graph, pVertex &vertex,
 			count_prv = count_cur;
 		}
 	}
-	else//otherwise, it may be useful (uncertain)
+	if (!result)//otherwise, it may be useful (uncertain)
 	{
 		link_edge(edges[0], graph);
 		for (size_t i = 1; i < edge_size; ++i)
@@ -1779,18 +1784,19 @@ bool TrackMapProcessor::merge_cell_size(IntraEdge &edge,
 }
 
 //get if segmentation is computed
-unsigned int TrackMapProcessor::get_segment(VertexList &vertex_list,
-	InterGraph &inter_graph)
+bool TrackMapProcessor::get_segment(VertexList &vertex_list,
+	InterGraph &inter_graph, unsigned int &count_thresh)
 {
+	count_thresh = 0;
 	if (inter_graph.counter < 6)
-		return 0;
+		return false;
 
 	UncertainHist hist;
 	GetUncertainHist(hist, vertex_list, inter_graph);
 	if (hist.empty())
-		return 0;
+		return false;
 	//search for first peak
-	unsigned int idx_max;
+	UncertainHistIter idx_max;
 	unsigned int count_max = 0;
 	for (UncertainHistIter iter = hist.begin();
 		iter != hist.end(); ++iter)
@@ -1798,55 +1804,78 @@ unsigned int TrackMapProcessor::get_segment(VertexList &vertex_list,
 		if (iter->second.count > count_max)
 		{
 			count_max = iter->second.count;
-			idx_max = iter->second.level;
+			idx_max = iter;
 		}
 	}
 	if (count_max == 0)
-		return 0;
+		return false;
 
-	unsigned int idx_max2, idx_min;
+	UncertainBin major_bin = idx_max->second;
+
+	UncertainHistIter idx_max2, idx_min;
 	unsigned int count_max2, count_min;
 	while (true)
 	{
 		//search for second peak
 		count_max2 = 0;
-		if (idx_max >= hist.size())
-			return 0;
-		for (UncertainHistIter iter = std::next(hist.begin(), idx_max);
+		if (idx_max == hist.end())
+			return false;
+		for (UncertainHistIter iter = std::next(idx_max);
 			iter != hist.end(); ++iter)
 		{
 			UncertainHistIter prv_iter = std::prev(iter);
 			if (prv_iter == hist.end())
-				return 0;
+				return false;
 			if (iter->second.count <= prv_iter->second.count)
 				continue;
 			if (iter->second.count > count_max2)
 			{
 				count_max2 = iter->second.count;
-				idx_max2 = iter->second.level;
+				idx_max2 = iter;
 			}
 		}
 		if (count_max2 == 0)
-			return 0;
+			return false;
 
 		//find valley
 		count_min = count_max;
-		for (UncertainHistIter iter = std::next(hist.begin(), idx_max);
-			iter != std::next(hist.begin(), idx_max2 - 1); ++iter)
+		for (UncertainHistIter iter = std::next(idx_max);
+			iter != idx_max2; ++iter)
 		{
 			if (iter->second.count < count_min)
 			{
 				count_min = iter->second.count;
-				idx_min = iter->second.level;
+				idx_min = iter;
 			}
 		}
 
 		//count_min should be much smaller than count_max2
 		if (!similar_count(count_max2, count_min))
-			return idx_min;
+			count_thresh = idx_min->second.level;
 		else
 			idx_max = idx_max2;
 	}
+
+	return get_major_converge(inter_graph, m_frame1, major_bin);
+}
+
+bool TrackMapProcessor::get_major_converge(InterGraph &inter_graph, size_t vertex_frame, UncertainBin &major_bin)
+{
+	bool result = false;
+	if (vertex_frame == inter_graph.index)
+	{
+		if (major_bin == inter_graph.major_bin[0])
+			result = true;
+		inter_graph.major_bin[0] = major_bin;
+	}
+	else
+	{
+		if (major_bin == inter_graph.major_bin[1])
+			result = true;
+		inter_graph.major_bin[1] = major_bin;
+	}
+
+	return result;
 }
 
 bool TrackMapProcessor::similar_count(unsigned int count1, unsigned int count2)
@@ -4008,6 +4037,26 @@ void TrackMapProcessor::GetUncertainHist(UncertainHist &hist,
 		}
 		else
 			uhist_iter->second.count++;
+	}
+
+	//fill in zeros
+	unsigned int index = 0;
+	for (UncertainHistIter iter = hist.begin();
+		iter != hist.end(); ++iter)
+	{
+		if (iter->second.level > index)
+		{
+			for (unsigned int i = index;
+				i < iter->second.level; ++i)
+			{
+				UncertainBin bin;
+				bin.level = i;
+				bin.count = 0;
+				hist.insert(std::pair<unsigned int,
+					UncertainBin>(i, bin));
+			}
+		}
+		index = iter->second.level + 1;
 	}
 }
 

@@ -50,13 +50,6 @@ namespace FL
 							//order: v1, v2, edge
 #define TAG_VER220		9	//new values added in v2.20
 
-	struct UncertainBin
-	{
-		unsigned int level;
-		unsigned int count;
-	};
-	typedef std::map<unsigned int, UncertainBin> UncertainHist;
-	typedef std::map<unsigned int, UncertainBin>::iterator UncertainHistIter;
 	class TrackMap;
 	class TrackMapProcessor
 	{
@@ -287,7 +280,8 @@ namespace FL
 		//random number
 		bool get_random(size_t count, InterGraph &graph);
 		//get if segmentation is computed
-		unsigned int get_segment(VertexList &vertex_list, InterGraph &inter_graph);
+		bool get_segment(VertexList &vertex_list, InterGraph &inter_graph, unsigned int &count_thresh);
+		bool get_major_converge(InterGraph &inter_graph, size_t vertex_frame, UncertainBin &major_bin);
 		bool similar_count(unsigned int count1, unsigned int count2);
 
 		//export
