@@ -824,18 +824,16 @@ bool TrackMapProcessor::ProcessFrames(size_t frame1, size_t frame2)
 
 	//compute segmentation
 	unsigned int count_min = 0;
-	bool major_converge = false;
+	m_major_converge = false;
 	if (m_merge || m_split)
-		major_converge = get_segment(vertex_list, inter_graph, count_min);
+		m_major_converge = get_segment(vertex_list, inter_graph, count_min);
 
 	VertexListIter iter;
 
 	for (iter = vertex_list.begin();
 		iter != vertex_list.end();)
 	{
-		ProcessVertex(iter->second, inter_graph,
-			m_merge?count_min:0,
-			m_split?count_min:0);
+		ProcessVertex(iter->second, inter_graph, count_min);
 		//see if it is removed
 		////debug
 		//pVertex vert = iter->second;
@@ -1282,6 +1280,46 @@ bool TrackMapProcessor::UnlinkVertexSize(InterGraph &graph, pVertex &vertex,
 	return result;
 }
 
+//fix multi-link by segmentation
+bool TrackMapProcessor::UnlinkSegment(InterGraph &graph, pVertex &vertex,
+	std::vector<InterEdge> &linked_edges, bool calc_sim, bool segment,
+	unsigned int seg_count_min)
+{
+	bool result = false;
+	if (!m_merge && !m_split)
+		return result;
+	//not converge and uncertainty not separate
+	if (!m_major_converge && !segment)
+		return result;
+
+	//majority converged but uncertainty not separate
+	if (m_major_converge && !segment)
+	{
+		if (calc_sim)
+		{
+			//merge edges if possible (DBSCAN)
+			if (m_merge)
+				result = MergeEdges(graph, vertex, linked_edges);
+			//split vertex if possible (EM)
+			if (!result && m_split)
+				result = SplitVertex(graph, vertex, linked_edges);
+		}
+	}
+	else//majority converged or uncertanty separate
+	{
+		std::vector<InterEdge> uncertain_edges;
+		GetUncertainEdges(vertex, graph, seg_count_min, uncertain_edges);
+		//merge edges if possible (DBSCAN)
+		if (m_merge)
+			result = MergeEdges(graph, vertex, uncertain_edges);
+		//split vertex if possible (EM)
+		if (!result && m_split)
+			result = SplitVertex(graph, vertex, uncertain_edges);
+	}
+
+	return result;
+}
+
 //reduce valence by segmentation
 bool TrackMapProcessor::MergeEdges(InterGraph &graph, pVertex &vertex,
 	std::vector<InterEdge> &edges)
@@ -1378,7 +1416,7 @@ bool TrackMapProcessor::SplitVertex(InterGraph &graph, pVertex &vertex,
 }
 
 bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph,
-	unsigned int merge_count_min, unsigned int split_count_min)
+	unsigned int seg_count_min)
 {
 	bool result = false;
 
@@ -1403,26 +1441,19 @@ bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph,
 	}
 	else if (valence > 1)
 	{
-		result = UnlinkEdgeSize(graph, vertex, linked_edges, calc_sim);
-		if (!result)	//unlink edge by extended alternating path
-			result = UnlinkAlterPath(graph, vertex, calc_sim);
-
-		//segmentation
-		if (!merge_count_min && !split_count_min)
-			return result;
-		std::vector<InterEdge> uncertain_edges;
-		GetUncertainEdges(vertex, graph,
-			std::min(merge_count_min, split_count_min),
-			uncertain_edges);
-		result = false;
-		if (merge_count_min &&
-			count >= merge_count_min)	//merge edges if possible (DBSCAN)
-			result = MergeEdges(graph, vertex, uncertain_edges);
-		//if (!result)	//unlink edge based on vertex size
-		//	result = UnlinkVertexSize(graph, vertex, linked_edges);
-		if (!result && split_count_min &&
-			count >= split_count_min)	//split vertex if possible (EM)
-			result = SplitVertex(graph, vertex, uncertain_edges);
+		//do not run unlink repeatedly if it has been
+		//executed so many times
+		if (calc_sim || !m_major_converge || !seg_count_min)
+		{
+			result = UnlinkEdgeSize(graph, vertex, linked_edges, calc_sim);
+			//unlink edge by extended alternating path
+			if (!result)
+				result = UnlinkAlterPath(graph, vertex, calc_sim);
+		}
+		if (!result)
+			//segmentation
+			result = UnlinkSegment(graph, vertex, linked_edges,
+				calc_sim, seg_count_min < count, seg_count_min);
 	}
 
 	return result;
@@ -1851,7 +1882,10 @@ bool TrackMapProcessor::get_segment(VertexList &vertex_list,
 
 		//count_min should be much smaller than count_max2
 		if (!similar_count(count_max2, count_min))
+		{
 			count_thresh = idx_min->second.level;
+			break;
+		}
 		else
 			idx_max = idx_max2;
 	}

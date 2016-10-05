@@ -500,7 +500,7 @@ public:
 
 	//enlarge output image
 	static void SetEnlarge(bool value)
-	{ m_enlarge = true; }
+	{ m_enlarge = value; }
 	static void SetEnlargeScale(double value)
 	{ m_enlarge_scale = value; }
 

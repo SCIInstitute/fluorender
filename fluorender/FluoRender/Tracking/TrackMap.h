@@ -161,6 +161,7 @@ namespace FL
 		//cur & neighbor frames for orphan searching
 		size_t m_frame1;
 		size_t m_frame2;
+		bool m_major_converge;//majority of the links have converged
 
 	private:
 		//modification
@@ -204,8 +205,7 @@ namespace FL
 
 		//replaces all previous match/unmatch funcs
 		bool ProcessVertex(pVertex &vertex, InterGraph &graph,
-			unsigned int merge_count_min = 0,
-			unsigned int split_count_min = 0);
+			unsigned int seg_count_min);
 		//vertex matching routines
 		//find out current valence of a vertex
 		bool GetValence(pVertex &vertex, InterGraph &graph,
@@ -224,19 +224,23 @@ namespace FL
 		//detailed match functions
 		//link edge of the max overlap
 		bool LinkEdgeSize(InterGraph &graph, pVertex &vertex,
-			std::vector<InterEdge> &edges, bool calc_sim = true);
+			std::vector<InterEdge> &edges, bool calc_sim);
 		//search for neighboring orphans for linking
 		bool LinkOrphans(InterGraph& graph, pVertex &vertex);
 		//unlink edge by size similarity
 		bool UnlinkEdgeSize(InterGraph &graph, pVertex &vertex,
-			std::vector<InterEdge> &edges, bool calc_sim = true);
+			std::vector<InterEdge> &edges, bool calc_sim);
 		//unlink edge by extended alternating path
 		bool UnlinkAlterPath(InterGraph &graph, pVertex &vertex,
-			bool calc_sim = true);
+			bool calc_sim);
+		//fix multi-link by segmentation
+		bool UnlinkSegment(InterGraph &graph, pVertex &vertex,
+			std::vector<InterEdge> &linked_edges, bool calc_sim,
+			bool segment, unsigned int seg_count_min);
 		bool GetAlterPath(InterGraph &graph, pVertex &vertex,
 			PathList &paths);
 		bool UnlinkAlterPathMaxMatch(InterGraph &graph, pVertex &vertex,
-			PathList &paths, bool calc_sim = true);
+			PathList &paths, bool calc_sim);
 		bool UnlinkAlterPathSize(InterGraph &graph, pVertex &vertex,
 			PathList &paths);
 		bool UnlinkAlterPathConn(InterGraph &graph, pVertex &vertex,
