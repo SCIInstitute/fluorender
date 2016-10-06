@@ -41,7 +41,7 @@ void ClusterMethod::AddClusterPoint(const FLIVR::Point &p, const float value)
 }
 
 void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
-	size_t nx, size_t ny, size_t nz)
+	size_t nx, size_t ny, size_t nz, unsigned int inc)
 {
 	m_id_list.clear();
 
@@ -54,7 +54,7 @@ void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
 		Cluster &cluster = m_result[ii];
 		do
 		{
-			id2 += 20;
+			id2 += inc;
 			if (id2 == id)
 				break;
 		} while (!id2 || FindId(label, id2, nx, ny, nz));

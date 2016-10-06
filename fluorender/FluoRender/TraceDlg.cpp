@@ -479,11 +479,11 @@ wxWindow* TraceDlg::CreateSelectPage(wxWindow *parent)
 	m_comp_full_btn = new wxButton(page, ID_CompFullBtn, "FullCompt",
 		wxDefaultPosition, wxSize(80, 23));
 	m_comp_exclusive_btn = new wxButton(page, ID_CompExclusiveBtn, "Replace",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxSize(80, 23));
 	m_comp_append_btn = new wxButton(page, ID_CompAppendBtn, "Append",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxSize(80, 23));
 	m_comp_clear_btn = new wxButton(page, ID_CompClearBtn, "Clear",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxSize(80, 23));
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_comp_id_text, 0, wxALIGN_CENTER);
@@ -555,9 +555,9 @@ wxWindow* TraceDlg::CreateLinkPage(wxWindow *parent)
 	m_comp_id_x_btn = new wxButton(page, ID_CompIDXBtn, "X",
 		wxDefaultPosition, wxSize(23, 23));
 	m_comp_append_btn = new wxButton(page, ID_CompAppendBtn, "Append",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxSize(80, 23));
 	m_comp_clear_btn = new wxButton(page, ID_CompClearBtn, "Clear",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxSize(80, 23));
 	m_manual_assist_check = new wxToolBar(page, wxID_ANY,
 		wxDefaultPosition, wxSize(-1, 23), wxTB_NODIVIDER);
 	wxBitmap bitmap = wxGetBitmapFromMemory(auto_link_off);
@@ -583,19 +583,24 @@ wxWindow* TraceDlg::CreateLinkPage(wxWindow *parent)
 	//ID link controls
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	m_cell_exclusive_link_btn = new wxButton(page, ID_CellExclusiveLinkBtn, "Excl. Link",
-		wxDefaultPosition, wxSize(75, 23));
+		wxDefaultPosition, wxSize(80, 23));
 	m_cell_link_btn = new wxButton(page, ID_CellLinkBtn, "Link IDs",
-		wxDefaultPosition, wxSize(75, 23));
-	m_cell_isolate_btn = new wxButton(page, ID_CellIsolateBtn, "Isolate",
-		wxDefaultPosition, wxSize(75, 23));
-	m_cell_unlink_btn = new wxButton(page, ID_CellUnlinkBtn, "Unlink IDs",
 		wxDefaultPosition, wxSize(80, 23));
 	sizer_2->AddStretchSpacer();
 	sizer_2->Add(m_cell_exclusive_link_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_link_btn, 0, wxALIGN_CENTER);
-	sizer_2->Add(m_cell_isolate_btn, 0, wxALIGN_CENTER);
-	sizer_2->Add(m_cell_unlink_btn, 0, wxALIGN_CENTER);
 	sizer_2->AddStretchSpacer();
+
+	//ID unlink controls
+	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
+	m_cell_isolate_btn = new wxButton(page, ID_CellIsolateBtn, "Isolate",
+		wxDefaultPosition, wxSize(80, 23));
+	m_cell_unlink_btn = new wxButton(page, ID_CellUnlinkBtn, "Unlink IDs",
+		wxDefaultPosition, wxSize(80, 23));
+	sizer_3->AddStretchSpacer();
+	sizer_3->Add(m_cell_isolate_btn, 0, wxALIGN_CENTER);
+	sizer_3->Add(m_cell_unlink_btn, 0, wxALIGN_CENTER);
+	sizer_3->AddStretchSpacer();
 
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
@@ -603,6 +608,8 @@ wxWindow* TraceDlg::CreateLinkPage(wxWindow *parent)
 	sizer_v->Add(sizer_1, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 	sizer_v->Add(sizer_2, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer_3, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 
 	//set the page
@@ -625,9 +632,9 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 	m_cell_new_id_x_btn = new wxButton(page, ID_CellNewIDXBtn, "X",
 		wxDefaultPosition, wxSize(23, 23));
 	m_comp_append2_btn = new wxButton(page, ID_CompAppend2Btn, "Append",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxSize(80, 23));
 	m_comp_clear_btn = new wxButton(page, ID_CompClearBtn, "Clear",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxSize(80, 23));
 	m_auto_id_chk = new wxToolBar(page, wxID_ANY,
 		wxDefaultPosition, wxSize(-1, 23), wxTB_NODIVIDER);
 	wxBitmap bitmap = wxGetBitmapFromMemory(auto_assign_off);
@@ -703,9 +710,9 @@ wxWindow* TraceDlg::CreateAnalysisPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Convert to:",
 		wxDefaultPosition, wxSize(100, 20));
 	m_convert_to_rulers_btn = new wxButton(page, ID_ConvertToRulersBtn, "Rulers",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxSize(80, 23));
 	m_convert_consistent_btn = new wxButton(page, ID_ConvertConsistentBtn, "UniIDs",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxSize(80, 23));
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_convert_to_rulers_btn, 0, wxALIGN_CENTER);
@@ -716,22 +723,29 @@ wxWindow* TraceDlg::CreateAnalysisPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Information:",
 		wxDefaultPosition, wxSize(100, 20));
 	m_analyze_comp_btn = new wxButton(page, ID_AnalyzeCompBtn, "Compnts",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxSize(80, 23));
 	m_analyze_link_btn = new wxButton(page, ID_AnalyzeLinkBtn, "Links",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxSize(80, 23));
 	m_analyze_uncertain_hist_btn = new wxButton(page, ID_AnalyzeUncertainHistBtn, "Uncertainty",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxSize(80, 23));
 	m_analyze_path_btn = new wxButton(page, ID_AnalyzePathBtn, "Paths",
-		wxDefaultPosition, wxSize(65, 23));
-	m_save_result_btn = new wxButton(page, ID_SaveResultBtn, "Save As",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxSize(80, 23));
 	sizer_2->Add(5, 5);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_analyze_comp_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_analyze_link_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_analyze_uncertain_hist_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_analyze_path_btn, 0, wxALIGN_CENTER);
-	sizer_2->Add(m_save_result_btn, 0, wxALIGN_CENTER);
+
+	//Export
+	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Export:",
+		wxDefaultPosition, wxSize(100, 20));
+	m_save_result_btn = new wxButton(page, ID_SaveResultBtn, "Save As",
+		wxDefaultPosition, wxSize(80, 23));
+	sizer_3->Add(5, 5);
+	sizer_3->Add(st, 0, wxALIGN_CENTER);
+	sizer_3->Add(m_save_result_btn, 0, wxALIGN_CENTER);
 
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
@@ -739,6 +753,8 @@ wxWindow* TraceDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer_v->Add(sizer_1, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 	sizer_v->Add(sizer_2, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer_3, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 
 	//set the page
@@ -748,7 +764,7 @@ wxWindow* TraceDlg::CreateAnalysisPage(wxWindow *parent)
 
 TraceDlg::TraceDlg(wxWindow* frame, wxWindow* parent)
 	: wxPanel(parent, wxID_ANY,
-		wxDefaultPosition, wxSize(550, 600),
+		wxDefaultPosition, wxSize(550, 650),
 		0, "TraceDlg"),
 	m_frame(parent),
 	m_view(0),
@@ -802,10 +818,10 @@ TraceDlg::TraceDlg(wxWindow* frame, wxWindow* parent)
 		wxDefaultPosition, wxDefaultSize);
 	m_cell_time_prev_st = new wxStaticText(this, 0, "\tPrevious T",
 		wxDefaultPosition, wxDefaultSize);
-	m_cell_prev_btn = new wxButton(this, ID_CellPrevBtn, "< Backward",
-		wxDefaultPosition, wxSize(80, 23));
-	m_cell_next_btn = new wxButton(this, ID_CellNextBtn, "Forward >",
-		wxDefaultPosition, wxSize(80, 23));
+	m_cell_prev_btn = new wxButton(this, ID_CellPrevBtn, L"\u21e6 Backward (A)",
+		wxDefaultPosition, wxSize(100, 23));
+	m_cell_next_btn = new wxButton(this, ID_CellNextBtn, L"Forward (D) \u21e8",
+		wxDefaultPosition, wxSize(100, 23));
 	sizer_21->Add(m_cell_time_curr_st, 1, wxEXPAND);
 	sizer_21->Add(m_cell_prev_btn, 0, wxALIGN_CENTER);
 	sizer_21->Add(m_cell_next_btn, 0, wxALIGN_CENTER);

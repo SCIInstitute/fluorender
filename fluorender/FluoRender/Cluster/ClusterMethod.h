@@ -143,7 +143,7 @@ namespace FL
 		{ m_id_counter = 1; }
 		void AddClusterPoint(const FLIVR::Point &p, const float value);
 		void GenerateNewIDs(unsigned int id, void* label,
-			size_t nx, size_t ny, size_t nz);
+			size_t nx, size_t ny, size_t nz, unsigned int inc = 20);
 		bool FindId(void* label, unsigned int id,
 			size_t nx, size_t ny, size_t nz);
 		std::vector<unsigned int> &GetNewIDs()

@@ -29,6 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include "Components/CompGenerator.h"
 #include "Components/CompSelector.h"
+#include "Cluster/dbscan.h"
+#include "Cluster/kmeans.h"
+#include "Cluster/exmax.h"
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include <boost/signals2.hpp>
@@ -149,6 +152,18 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_COMMAND_SCROLL(ID_BasicCleanLimitSldr, ComponentDlg::OnBasicCleanLimitSldr)
 	EVT_TEXT(ID_BasicCleanLimitText, ComponentDlg::OnBasicCleanLimitText)
 
+	//clustering page
+	EVT_RADIOBUTTON(ID_ClusterMethodExmaxRd, ComponentDlg::OnClusterMethodExmaxCheck)
+	EVT_RADIOBUTTON(ID_ClusterMethodDbscanRd, ComponentDlg::OnClusterMethodDbscanCheck)
+	EVT_RADIOBUTTON(ID_ClusterMethodKmeansRd, ComponentDlg::OnClusterMethodKmeansCheck)
+	//parameters
+	EVT_COMMAND_SCROLL(ID_ClusterClnumSldr, ComponentDlg::OnClusterClnumSldr)
+	EVT_TEXT(ID_ClusterClnumText, ComponentDlg::OnClusterClnumText)
+	EVT_COMMAND_SCROLL(ID_ClusterSizeSldr, ComponentDlg::OnClusterSizeSldr)
+	EVT_TEXT(ID_ClusterSizeText, ComponentDlg::OnClusterSizeText)
+	EVT_COMMAND_SCROLL(ID_ClusterEpsSldr, ComponentDlg::OnClusterEpsSldr)
+	EVT_TEXT(ID_ClusterEpsText, ComponentDlg::OnClusterepsText)
+
 	//analysis page
 	EVT_TEXT(ID_CompIdText, ComponentDlg::OnCompIdText)
 	EVT_TEXT_ENTER(ID_CompIdText, ComponentDlg::OnCompFull)
@@ -173,6 +188,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_NOTEBOOK_PAGE_CHANGED(ID_Notebook, ComponentDlg::OnNotebook)
 	EVT_BUTTON(ID_GenerateBtn, ComponentDlg::OnGenerate)
 	EVT_BUTTON(ID_RefineBtn, ComponentDlg::OnRefine)
+	EVT_BUTTON(ID_ClusterBtn, ComponentDlg::OnCluster)
 	EVT_BUTTON(ID_AnalyzeBtn, ComponentDlg::OnAnalyze)
 	EVT_BUTTON(ID_AnalyzeSelBtn, ComponentDlg::OnAnalyzeSel)
 END_EVENT_TABLE()
@@ -397,6 +413,117 @@ wxWindow* ComponentDlg::Create2DAnalysisPage(wxWindow *parent)
 	m_adv_page->SetSizer(sizerv);
 
 	return m_adv_page;
+}
+
+wxWindow* ComponentDlg::CreateClusteringPage(wxWindow *parent)
+{
+	wxPanel *page = new wxPanel(parent);
+	wxStaticText *st = 0;
+	//validator: integer
+	wxIntegerValidator<unsigned int> vald_int;
+	//validator: floating point 3
+	wxFloatingPointValidator<double> vald_fp1(1);
+
+	//clustering methods
+	wxBoxSizer *sizer1 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "Clustering Method"),
+		wxVERTICAL);
+	wxBoxSizer* sizer11 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Choose Method:",
+		wxDefaultPosition, wxSize(100, 20));
+	m_cluster_method_exmax_rd = new wxRadioButton(page, ID_ClusterMethodExmaxRd,
+		"EM", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+	m_cluster_method_dbscan_rd = new wxRadioButton(page, ID_ClusterMethodDbscanRd,
+		"DBSCAN", wxDefaultPosition, wxDefaultSize);
+	m_cluster_method_kmeans_rd = new wxRadioButton(page, ID_ClusterMethodKmeansRd,
+		"K-Means", wxDefaultPosition, wxDefaultSize);
+	sizer11->Add(5, 5);
+	sizer11->Add(st, 0, wxALIGN_CENTER);
+	sizer11->Add(m_cluster_method_exmax_rd, 0, wxALIGN_CENTER);
+	sizer11->Add(10, 10);
+	sizer11->Add(m_cluster_method_dbscan_rd, 0, wxALIGN_CENTER);
+	sizer11->Add(10, 10);
+	sizer11->Add(m_cluster_method_kmeans_rd, 0, wxALIGN_CENTER);
+	//
+	sizer1->Add(10, 10);
+	sizer1->Add(sizer11, 0, wxEXPAND);
+	sizer1->Add(10, 10);
+
+	//parameters
+	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "Settings"),
+		wxVERTICAL);
+	//clnum
+	wxBoxSizer *sizer21 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Cluster Number:",
+		wxDefaultPosition, wxSize(100, 20));
+	m_cluster_clnum_sldr = new wxSlider(page, ID_ClusterClnumSldr, 2, 2, 10,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_cluster_clnum_text = new wxTextCtrl(page, ID_ClusterClnumText, "2",
+		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
+	sizer21->Add(5, 5);
+	sizer21->Add(st, 0, wxALIGN_CENTER);
+	sizer21->Add(m_cluster_clnum_sldr, 1, wxEXPAND);
+	sizer21->Add(m_cluster_clnum_text, 0, wxALIGN_CENTER);
+	sizer21->Add(5, 5);
+	//size
+	wxBoxSizer *sizer22 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Min. Size:",
+		wxDefaultPosition, wxSize(100, 20));
+	m_cluster_size_sldr = new wxSlider(page, ID_ClusterSizeSldr, 60, 1, 100,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_cluster_size_text = new wxTextCtrl(page, ID_ClusterSizeText, "60",
+		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
+	sizer22->Add(5, 5);
+	sizer22->Add(st, 0, wxALIGN_CENTER);
+	sizer22->Add(m_cluster_size_sldr, 1, wxEXPAND);
+	sizer22->Add(m_cluster_size_text, 0, wxALIGN_CENTER);
+	sizer22->Add(5, 5);
+	//eps
+	wxBoxSizer *sizer23 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Neighborhood:",
+		wxDefaultPosition, wxSize(100, 20));
+	m_cluster_eps_sldr = new wxSlider(page, ID_ClusterEpsSldr, 25, 5, 100,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_cluster_eps_text = new wxTextCtrl(page, ID_ClusterEpsText, "2.5",
+		wxDefaultPosition, wxSize(60, 20), 0, vald_fp1);
+	sizer23->Add(5, 5);
+	sizer23->Add(st, 0, wxALIGN_CENTER);
+	sizer23->Add(m_cluster_eps_sldr, 1, wxEXPAND);
+	sizer23->Add(m_cluster_eps_text, 0, wxALIGN_CENTER);
+	sizer23->Add(5, 5);
+	//
+	sizer2->Add(10, 10);
+	sizer2->Add(sizer21, 0, wxEXPAND);
+	sizer2->Add(10, 10);
+	sizer2->Add(sizer22, 0, wxEXPAND);
+	sizer2->Add(10, 10);
+	sizer2->Add(sizer23, 0, wxEXPAND);
+	sizer2->Add(10, 10);
+
+	//note
+	wxBoxSizer *sizer3 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "N.B."),
+		wxVERTICAL);
+	st = new wxStaticText(page, 0,
+		"Make selection with paint brush first, and then compute clustering on the selection.");
+	sizer3->Add(10, 10);
+	sizer3->Add(st, 0);
+	sizer3->Add(10, 10);
+
+	//all
+	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
+	sizerv->Add(10, 10);
+	sizerv->Add(sizer1, 0, wxEXPAND);
+	sizerv->Add(10, 10);
+	sizerv->Add(sizer2, 0, wxEXPAND);
+	sizerv->Add(10, 10);
+	sizerv->Add(sizer3, 0, wxEXPAND);
+	sizerv->Add(10, 10);
+
+	page->SetSizer(sizerv);
+
+	return page;
 }
 
 wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
@@ -1035,6 +1162,7 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	m_notebook = new wxNotebook(this, ID_Notebook);
 	m_notebook->AddPage(Create3DAnalysisPage(m_notebook), "Basic");
 	m_notebook->AddPage(Create2DAnalysisPage(m_notebook), "2D Slices");
+	m_notebook->AddPage(CreateClusteringPage(m_notebook), "Clustering");
 	m_notebook->AddPage(CreateAnalysisPage(m_notebook), "Analysis");
 
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
@@ -1046,6 +1174,8 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 		wxDefaultPosition, wxSize(75, -1));
 	m_refine_btn = new wxButton(this, ID_RefineBtn, "Refine",
 		wxDefaultPosition, wxSize(75, -1));
+	m_cluster_btn = new wxButton(this, ID_ClusterBtn, "Cluster",
+		wxDefaultPosition, wxSize(75, -1));
 	m_analyze_btn = new wxButton(this, ID_AnalyzeBtn, "Analyze",
 		wxDefaultPosition, wxSize(75, -1));
 	m_analyze_sel_btn = new wxButton(this, ID_AnalyzeSelBtn, "Anlyz. Sel.",
@@ -1056,6 +1186,7 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	sizer1->Add(m_use_sel_chk, 0, wxALIGN_CENTER);
 	sizer1->Add(m_generate_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_refine_btn, 0, wxALIGN_CENTER);
+	sizer1->Add(m_cluster_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_analyze_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_analyze_sel_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(10, 10);
@@ -1177,6 +1308,16 @@ void ComponentDlg::Update()
 	m_basic_clean_iter_text->SetValue(wxString::Format("%d", m_basic_clean_iter));
 	m_basic_clean_limit_text->SetValue(wxString::Format("%d", m_basic_clean_size_vl));
 
+	//cluster page
+	m_cluster_method_exmax_rd->SetValue(m_cluster_method_exmax);
+	m_cluster_method_dbscan_rd->SetValue(m_cluster_method_dbscan);
+	m_cluster_method_kmeans_rd->SetValue(m_cluster_method_kmeans);
+	//parameters
+	m_cluster_clnum_text->SetValue(wxString::Format("%d", m_cluster_clnum));
+	m_cluster_size_text->SetValue(wxString::Format("%d", m_cluster_size));
+	m_cluster_eps_text->SetValue(wxString::Format("%.1f", m_cluster_eps));
+	UpdateClusterMethod();
+
 	//selection
 	if (m_use_min)
 	{
@@ -1262,6 +1403,14 @@ void ComponentDlg::GetSettings()
 	m_basic_clean = false;
 	m_basic_clean_iter = 5;
 	m_basic_clean_size_vl = 5;
+
+	//cluster
+	m_cluster_method_exmax = true;
+	m_cluster_method_dbscan = false;
+	m_cluster_method_kmeans = false;
+	m_cluster_clnum = 2;
+	m_cluster_size = 60;
+	m_cluster_eps = 2.5;
 
 	//selection
 	m_use_min = false;
@@ -1364,6 +1513,15 @@ void ComponentDlg::LoadSettings(wxString filename)
 		fconfig.Read("basic_clean_iter", &m_basic_clean_iter);
 		fconfig.Read("basic_clean_size_vl", &m_basic_clean_size_vl);
 
+		//cluster
+		fconfig.Read("cluster_method_exmax", &m_cluster_method_exmax);
+		fconfig.Read("cluster_method_dbscan", &m_cluster_method_dbscan);
+		fconfig.Read("cluster_method_kmeans", &m_cluster_method_kmeans);
+		//parameters
+		fconfig.Read("cluster_clnum", &m_cluster_clnum);
+		fconfig.Read("cluster_size", &m_cluster_size);
+		fconfig.Read("cluster_eps", &m_cluster_eps);
+
 		//selection
 		fconfig.Read("use_min", &m_use_min);
 		fconfig.Read("min_num", &m_min_num);
@@ -1453,6 +1611,15 @@ void ComponentDlg::SaveSettings(wxString filename)
 	fconfig.Write("basic_clean", m_basic_clean);
 	fconfig.Write("basic_clean_iter", m_basic_clean_iter);
 	fconfig.Write("basic_clean_size_vl", m_basic_clean_size_vl);
+
+	//cluster
+	fconfig.Write("cluster_method_exmax", m_cluster_method_exmax);
+	fconfig.Write("cluster_method_dbscan", m_cluster_method_dbscan);
+	fconfig.Write("cluster_method_kmeans", m_cluster_method_kmeans);
+	//parameters
+	fconfig.Write("cluster_clnum", m_cluster_clnum);
+	fconfig.Write("cluster_size", m_cluster_size);
+	fconfig.Write("cluster_eps", m_cluster_eps);
 
 	//selection
 	fconfig.Write("use_min", m_use_min);
@@ -2495,6 +2662,97 @@ void ComponentDlg::OnBasicCleanLimitText(wxCommandEvent &event)
 	m_basic_clean_limit_sldr->SetValue(m_basic_clean_size_vl);
 }
 
+//clustering page
+void ComponentDlg::UpdateClusterMethod()
+{
+	if (m_cluster_method_exmax ||
+		m_cluster_method_kmeans)
+	{
+		m_cluster_clnum_sldr->Enable();
+		m_cluster_clnum_text->Enable();
+		m_cluster_size_sldr->Disable();
+		m_cluster_size_text->Disable();
+		m_cluster_eps_sldr->Disable();
+		m_cluster_eps_text->Disable();
+	}
+	if (m_cluster_method_dbscan)
+	{
+		m_cluster_clnum_sldr->Disable();
+		m_cluster_clnum_text->Disable();
+		m_cluster_size_sldr->Enable();
+		m_cluster_size_text->Enable();
+		m_cluster_eps_sldr->Enable();
+		m_cluster_eps_text->Enable();
+	}
+}
+
+void ComponentDlg::OnClusterMethodExmaxCheck(wxCommandEvent &event)
+{
+	m_cluster_method_exmax = true;
+	m_cluster_method_dbscan = false;
+	m_cluster_method_kmeans = false;
+	UpdateClusterMethod();
+}
+
+void ComponentDlg::OnClusterMethodDbscanCheck(wxCommandEvent &event)
+{
+	m_cluster_method_exmax = false;
+	m_cluster_method_dbscan = true;
+	m_cluster_method_kmeans = false;
+	UpdateClusterMethod();
+}
+
+void ComponentDlg::OnClusterMethodKmeansCheck(wxCommandEvent &event)
+{
+	m_cluster_method_exmax = false;
+	m_cluster_method_dbscan = false;
+	m_cluster_method_kmeans = true;
+	UpdateClusterMethod();
+}
+
+//parameters
+void ComponentDlg::OnClusterClnumSldr(wxScrollEvent &event)
+{
+	int val = event.GetPosition();
+	m_cluster_clnum_text->SetValue(wxString::Format("%d", val));
+}
+
+void ComponentDlg::OnClusterClnumText(wxCommandEvent &event)
+{
+	long val = 0;
+	m_cluster_clnum_text->GetValue().ToLong(&val);
+	m_cluster_clnum = (int)val;
+	m_cluster_clnum_sldr->SetValue(m_cluster_clnum);
+}
+
+void ComponentDlg::OnClusterSizeSldr(wxScrollEvent &event)
+{
+	int val = event.GetPosition();
+	m_cluster_size_text->SetValue(wxString::Format("%d", val));
+}
+
+void ComponentDlg::OnClusterSizeText(wxCommandEvent &event)
+{
+	long val = 0;
+	m_cluster_size_text->GetValue().ToLong(&val);
+	m_cluster_size = (int)val;
+	m_cluster_size_sldr->SetValue(m_cluster_size);
+}
+
+void ComponentDlg::OnClusterEpsSldr(wxScrollEvent &event)
+{
+	double val = (double)event.GetPosition() / 10.0;
+	m_cluster_eps_text->SetValue(wxString::Format("%.1f", val));
+}
+
+void ComponentDlg::OnClusterepsText(wxCommandEvent &event)
+{
+	double val = 0.0;
+	m_cluster_eps_text->GetValue().ToDouble(&val);
+	m_cluster_eps = val;
+	m_cluster_eps_sldr->SetValue(int(m_cluster_eps * 10.0 + 0.5));
+}
+
 //analysis page
 void ComponentDlg::OnCompIdText(wxCommandEvent &event)
 {
@@ -2714,6 +2972,7 @@ void ComponentDlg::EnableGenerate()
 		m_use_sel_chk->Show();
 		m_generate_btn->Show();
 		m_refine_btn->Show();
+		m_cluster_btn->Hide();
 		m_analyze_btn->Hide();
 		m_analyze_sel_btn->Hide();
 		break;
@@ -2721,6 +2980,15 @@ void ComponentDlg::EnableGenerate()
 		m_use_sel_chk->Hide();
 		m_generate_btn->Hide();
 		m_refine_btn->Hide();
+		m_cluster_btn->Show();
+		m_analyze_btn->Hide();
+		m_analyze_sel_btn->Hide();
+		break;
+	case 3:
+		m_use_sel_chk->Hide();
+		m_generate_btn->Hide();
+		m_refine_btn->Hide();
+		m_cluster_btn->Hide();
 		m_analyze_btn->Show();
 		m_analyze_sel_btn->Show();
 		break;
@@ -2912,6 +3180,11 @@ void ComponentDlg::OnRefine(wxCommandEvent &event)
 	}
 }
 
+void ComponentDlg::OnCluster(wxCommandEvent &event)
+{
+	Cluster();
+}
+
 void ComponentDlg::GenerateAdv(bool refine)
 {
 	if (!m_view)
@@ -3048,6 +3321,100 @@ void ComponentDlg::GenerateBsc(bool refine)
 
 	m_generate_prg->SetValue(100);
 	connection.disconnect();
+}
+
+void ComponentDlg::Cluster()
+{
+	if (!m_view)
+		return;
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+	Texture* tex = vd->GetTexture();
+	if (!tex)
+		return;
+	Nrrd* nrrd_data = tex->get_nrrd(0);
+	if (!nrrd_data)
+		return;
+	int bits = vd->GetBits();
+	void* data_data = nrrd_data->data;
+	if (!data_data)
+		return;
+	//get mask
+	Nrrd* nrrd_mask = vd->GetMask(true);
+	if (!nrrd_mask)
+		return;
+	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
+	if (!data_mask)
+		return;
+	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
+	if (!nrrd_label)
+	{
+		vd->AddEmptyLabel();
+		nrrd_label = tex->get_nrrd(tex->nlabel());
+	}
+	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	if (!data_label)
+		return;
+
+	int nx, ny, nz;
+	vd->GetResolution(nx, ny, nz);
+	double scale = vd->GetScalarScale();
+
+	FL::ClusterMethod* method = 0;
+	//switch method
+	if (m_cluster_method_exmax)
+	{
+		FL::ClusterExmax* method_exmax = new FL::ClusterExmax();
+		method_exmax->SetClnum(m_cluster_clnum);
+		method = method_exmax;
+	}
+	else if (m_cluster_method_dbscan)
+	{
+		FL::ClusterDbscan* method_dbscan = new FL::ClusterDbscan();
+		method_dbscan->SetSize(m_cluster_size);
+		method_dbscan->SetEps(m_cluster_eps);
+		method = method_dbscan;
+	}
+	else if (m_cluster_method_kmeans)
+	{
+		FL::ClusterKmeans* method_kmeans = new FL::ClusterKmeans();
+		method_kmeans->SetClnum(m_cluster_clnum);
+		method = method_kmeans;
+	}
+
+	if (!method)
+		return;
+
+	//add cluster points
+	size_t i, j, k;
+	size_t index;
+	unsigned char mask_value;
+	float data_value;
+	for (i = 0; i < nx; ++i)
+	for (j = 0; j < ny; ++j)
+	for (k = 0; k < nz; ++k)
+	{
+		index = nx*ny*k + nx*j + i;
+		mask_value = data_mask[index];
+		if (mask_value)
+		{
+			if (bits == 8)
+				data_value = ((unsigned char*)data_data)[index] / 255.0f;
+			else if (bits == 16)
+				data_value = ((unsigned short*)data_data)[index] * scale / 65535.0f;
+			method->AddClusterPoint(
+				FLIVR::Point(i, j, k), data_value);
+		}
+	}
+
+	if (method->Execute())
+	{
+		method->GenerateNewIDs(0, (void*)data_label, nx, ny, nz, 60);
+		vd->GetVR()->clear_tex_pool();
+	}
+
+	delete method;
 }
 
 void ComponentDlg::GenerateComp(int type, int mode)

@@ -166,6 +166,18 @@ public:
 		ID_BasicCleanLimitSldr,
 		ID_BasicCleanLimitText,
 
+		//clustering page
+		ID_ClusterMethodExmaxRd,
+		ID_ClusterMethodDbscanRd,
+		ID_ClusterMethodKmeansRd,
+		//parameters
+		ID_ClusterClnumSldr,
+		ID_ClusterClnumText,
+		ID_ClusterSizeSldr,
+		ID_ClusterSizeText,
+		ID_ClusterEpsSldr,
+		ID_ClusterEpsText,
+
 		//analysis page
 		//selection
 		ID_CompIdText,
@@ -192,6 +204,7 @@ public:
 		ID_GeneratePrg,
 		ID_GenerateBtn,
 		ID_RefineBtn,
+		ID_ClusterBtn,
 		ID_AnalyzeBtn,
 		ID_AnalyzeSelBtn,
 
@@ -304,6 +317,15 @@ private:
 	bool m_basic_clean;
 	int m_basic_clean_iter;
 	int m_basic_clean_size_vl;
+
+	//cluster settings
+	bool m_cluster_method_exmax;
+	bool m_cluster_method_dbscan;
+	bool m_cluster_method_kmeans;
+	//parameters
+	int m_cluster_clnum;
+	int m_cluster_size;
+	double m_cluster_eps;
 
 	//selection
 	bool m_use_min;
@@ -449,6 +471,18 @@ private:
 	wxSlider* m_basic_clean_limit_sldr;
 	wxTextCtrl* m_basic_clean_limit_text;
 
+	//clustering page
+	wxRadioButton* m_cluster_method_exmax_rd;
+	wxRadioButton* m_cluster_method_dbscan_rd;
+	wxRadioButton* m_cluster_method_kmeans_rd;
+	//parameters
+	wxSlider* m_cluster_clnum_sldr;
+	wxTextCtrl* m_cluster_clnum_text;
+	wxSlider* m_cluster_size_sldr;
+	wxTextCtrl* m_cluster_size_text;
+	wxSlider* m_cluster_eps_sldr;
+	wxTextCtrl* m_cluster_eps_text;
+
 	//analysis page
 	//selection
 	wxTextCtrl* m_comp_id_text;
@@ -475,6 +509,7 @@ private:
 	wxCheckBox* m_use_sel_chk;
 	wxButton* m_generate_btn;
 	wxButton* m_refine_btn;
+	wxButton* m_cluster_btn;
 	wxButton* m_analyze_btn;
 	wxButton* m_analyze_sel_btn;
 
@@ -484,9 +519,11 @@ private:
 private:
 	void GenerateAdv(bool refine);
 	void GenerateBsc(bool refine);
+	void Cluster();
 
 	wxWindow* Create3DAnalysisPage(wxWindow *parent);
 	wxWindow* Create2DAnalysisPage(wxWindow *parent);
+	wxWindow* CreateClusteringPage(wxWindow *parent);
 	wxWindow* CreateAnalysisPage(wxWindow *parent);
 	void OnPaneChange(wxCollapsiblePaneEvent& event);
 	wxCollapsiblePane* CreateInitialGrowPane(wxWindow *parent);
@@ -617,6 +654,19 @@ private:
 	void OnBasicCleanLimitSldr(wxScrollEvent &event);
 	void OnBasicCleanLimitText(wxCommandEvent &event);
 
+	//clustering page
+	void UpdateClusterMethod();
+	void OnClusterMethodExmaxCheck(wxCommandEvent &event);
+	void OnClusterMethodDbscanCheck(wxCommandEvent &event);
+	void OnClusterMethodKmeansCheck(wxCommandEvent &event);
+	//parameters
+	void OnClusterClnumSldr(wxScrollEvent &event);
+	void OnClusterClnumText(wxCommandEvent &event);
+	void OnClusterSizeSldr(wxScrollEvent &event);
+	void OnClusterSizeText(wxCommandEvent &event);
+	void OnClusterEpsSldr(wxScrollEvent &event);
+	void OnClusterepsText(wxCommandEvent &event);
+
 	//analysis page
 	void OnCompIdText(wxCommandEvent &event);
 	void OnCompIdXBtn(wxCommandEvent &event);
@@ -641,6 +691,7 @@ private:
 	void OnNotebook(wxBookCtrlEvent &event);
 	void OnGenerate(wxCommandEvent &event);
 	void OnRefine(wxCommandEvent &event);
+	void OnCluster(wxCommandEvent &event);
 	void OnAnalyze(wxCommandEvent &event);
 	void OnAnalyzeSel(wxCommandEvent &event);
 
