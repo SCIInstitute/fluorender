@@ -803,8 +803,14 @@ void VMovieView::OnRun(wxCommandEvent& event) {
 	OnPrev(e);
 }
 
-void VMovieView::OnStop(wxCommandEvent& event) {
-	m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
+void VMovieView::OnStop(wxCommandEvent& event)
+{
+	bool run_script = m_run_script_chk->GetValue();
+	if (run_script)
+		m_play_btn->SetBitmap(wxGetBitmapFromMemory(playscript));
+	else
+		m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
+
 	m_timer.Stop();
 	m_running = false;
 	m_record = false;
