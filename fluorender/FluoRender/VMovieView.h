@@ -81,6 +81,7 @@ class VMovieView : public wxPanel
 		ID_ScriptFileText,
 		ID_ScriptClearBtn,
 		ID_ScriptFileBtn,
+		ID_ScriptList,
 
 		//auto key
 		ID_AutoKeyList,
@@ -157,6 +158,7 @@ public:
 	wxTextCtrl *m_script_file_text;
 	wxButton *m_script_clear_btn;
 	wxButton *m_script_file_btn;
+	wxListCtrl *m_script_list;
 
 	//auto key controls
 	wxListCtrl* m_auto_key_list;
@@ -197,6 +199,7 @@ private:
 
 private:
 	void GetSettings(int view=0);
+	void AddScriptToList();
 
 	//set the renderview and progress bars/text
 	void SetRendering(double pcnt);
@@ -249,6 +252,7 @@ private:
 	void OnScriptFileEdit(wxCommandEvent &event);
 	void OnScriptClearBtn(wxCommandEvent &event);
 	void OnScriptFileBtn(wxCommandEvent &event);
+	void OnScriptListSelected(wxListEvent &event);
 
 	//auto key
 	void OnListItemAct(wxListEvent &event);

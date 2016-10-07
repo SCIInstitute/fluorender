@@ -87,70 +87,70 @@ m_view(0)
 
 	//list
 	m_kernel_list = new wxListCtrl(this, ID_KernelList,
-		wxDefaultPosition, wxSize(-1,-1), wxLC_REPORT|wxLC_SINGLE_SEL);
-    wxListItem itemCol;
-    itemCol.SetText("Kernel File");
-    m_kernel_list->InsertColumn(0, itemCol);
-    m_kernel_list->SetColumnWidth(0, 100);
+		wxDefaultPosition, wxSize(-1, -1), wxLC_REPORT | wxLC_SINGLE_SEL);
+	wxListItem itemCol;
+	itemCol.SetText("Kernel Files");
+	m_kernel_list->InsertColumn(0, itemCol);
+	m_kernel_list->SetColumnWidth(0, 100);
 	//stc
-    m_LineNrID = 0;
-    m_DividerID = 1;
-    m_FoldingID = 2;
+	m_LineNrID = 0;
+	m_DividerID = 1;
+	m_FoldingID = 2;
 	m_kernel_edit_stc = new wxStyledTextCtrl(
 		this, ID_KernelEditStc,
 		wxDefaultPosition, wxDefaultSize);
-    wxFont font (10, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
-    m_kernel_edit_stc->StyleSetFont (wxSTC_STYLE_DEFAULT, font);
-    m_kernel_edit_stc->StyleSetForeground (wxSTC_STYLE_DEFAULT, *wxBLACK);
-    m_kernel_edit_stc->StyleSetBackground (wxSTC_STYLE_DEFAULT, *wxWHITE);
-    m_kernel_edit_stc->StyleSetForeground (wxSTC_STYLE_LINENUMBER, wxColour (wxT("DARK GREY")));
-    m_kernel_edit_stc->StyleSetBackground (wxSTC_STYLE_LINENUMBER, *wxWHITE);
-    m_kernel_edit_stc->StyleSetForeground(wxSTC_STYLE_INDENTGUIDE, wxColour (wxT("DARK GREY")));
+	wxFont font(10, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+	m_kernel_edit_stc->StyleSetFont(wxSTC_STYLE_DEFAULT, font);
+	m_kernel_edit_stc->StyleSetForeground(wxSTC_STYLE_DEFAULT, *wxBLACK);
+	m_kernel_edit_stc->StyleSetBackground(wxSTC_STYLE_DEFAULT, *wxWHITE);
+	m_kernel_edit_stc->StyleSetForeground(wxSTC_STYLE_LINENUMBER, wxColour(wxT("DARK GREY")));
+	m_kernel_edit_stc->StyleSetBackground(wxSTC_STYLE_LINENUMBER, *wxWHITE);
+	m_kernel_edit_stc->StyleSetForeground(wxSTC_STYLE_INDENTGUIDE, wxColour(wxT("DARK GREY")));
 	m_kernel_edit_stc->SetLexer(wxSTC_LEX_CPP);
 	m_kernel_edit_stc->SetMarginType(m_LineNrID, wxSTC_MARGIN_NUMBER);
 	m_kernel_edit_stc->StyleSetForeground(wxSTC_STYLE_LINENUMBER, wxColour(wxT("DARK GREY")));
 	m_kernel_edit_stc->StyleSetBackground(wxSTC_STYLE_LINENUMBER, *wxWHITE);
 	m_kernel_edit_stc->SetMarginWidth(m_LineNrID, 50);
-    m_kernel_edit_stc->StyleSetBackground(wxSTC_STYLE_LASTPREDEFINED + 1, wxColour(244, 220, 220));
-    m_kernel_edit_stc->StyleSetForeground(wxSTC_STYLE_LASTPREDEFINED + 1, *wxBLACK);
-    m_kernel_edit_stc->StyleSetSizeFractional(wxSTC_STYLE_LASTPREDEFINED + 1,
-            (m_kernel_edit_stc->StyleGetSizeFractional(wxSTC_STYLE_DEFAULT)*4)/5);
-    m_kernel_edit_stc->SetWrapMode (wxSTC_WRAP_WORD); // other choice is wxSCI_WRAP_NONE
-    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_STRING,            wxColour(150,0,0));
-    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_PREPROCESSOR,      wxColour(165,105,0));
-    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_IDENTIFIER,        wxColour(40,0,60));
-    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_NUMBER,            wxColour(0,150,0));
-    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_CHARACTER,         wxColour(150,0,0));
-    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_WORD,              wxColour(0,0,150));
-    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_WORD2,             wxColour(0,150,0));
-    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_COMMENT,           wxColour(150,150,150));
-    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_COMMENTLINE,       wxColour(150,150,150));
-    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_COMMENTDOC,        wxColour(150,150,150));
-    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_COMMENTDOCKEYWORD, wxColour(0,0,200));
-    m_kernel_edit_stc->StyleSetForeground (wxSTC_C_COMMENTDOCKEYWORDERROR, wxColour(0,0,200));
-    m_kernel_edit_stc->StyleSetBold(wxSTC_C_WORD, true);
-    m_kernel_edit_stc->StyleSetBold(wxSTC_C_WORD2, true);
-    m_kernel_edit_stc->StyleSetBold(wxSTC_C_COMMENTDOCKEYWORD, true);
-    // a sample list of keywords, I haven't included them all to keep it short...
-    m_kernel_edit_stc->SetKeyWords(0, wxT("return for while break continue __kernel kernel_main __global"));
-    m_kernel_edit_stc->SetKeyWords(1, wxT("const int float void char double unsigned int4 float4 signed"));
-	m_kernel_edit_stc->SetMarginType (m_FoldingID, wxSTC_MARGIN_SYMBOL);
-	m_kernel_edit_stc->SetMarginMask (m_FoldingID, wxSTC_MASK_FOLDERS);
-	m_kernel_edit_stc->StyleSetBackground (m_FoldingID, *wxWHITE);
-    // markers
-    m_kernel_edit_stc->MarkerDefine (wxSTC_MARKNUM_FOLDER,        wxSTC_MARK_DOTDOTDOT, wxT("BLACK"), wxT("BLACK"));
-    m_kernel_edit_stc->MarkerDefine (wxSTC_MARKNUM_FOLDEROPEN,    wxSTC_MARK_ARROWDOWN, wxT("BLACK"), wxT("BLACK"));
-    m_kernel_edit_stc->MarkerDefine (wxSTC_MARKNUM_FOLDERSUB,     wxSTC_MARK_EMPTY,     wxT("BLACK"), wxT("BLACK"));
-    m_kernel_edit_stc->MarkerDefine (wxSTC_MARKNUM_FOLDEREND,     wxSTC_MARK_DOTDOTDOT, wxT("BLACK"), wxT("WHITE"));
-    m_kernel_edit_stc->MarkerDefine (wxSTC_MARKNUM_FOLDEROPENMID, wxSTC_MARK_ARROWDOWN, wxT("BLACK"), wxT("WHITE"));
-    m_kernel_edit_stc->MarkerDefine (wxSTC_MARKNUM_FOLDERMIDTAIL, wxSTC_MARK_EMPTY,     wxT("BLACK"), wxT("BLACK"));
-    m_kernel_edit_stc->MarkerDefine (wxSTC_MARKNUM_FOLDERTAIL,    wxSTC_MARK_EMPTY,     wxT("BLACK"), wxT("BLACK"));
+	m_kernel_edit_stc->StyleSetBackground(wxSTC_STYLE_LASTPREDEFINED + 1, wxColour(244, 220, 220));
+	m_kernel_edit_stc->StyleSetForeground(wxSTC_STYLE_LASTPREDEFINED + 1, *wxBLACK);
+	m_kernel_edit_stc->StyleSetSizeFractional(wxSTC_STYLE_LASTPREDEFINED + 1,
+		(m_kernel_edit_stc->StyleGetSizeFractional(wxSTC_STYLE_DEFAULT) * 4) / 5);
+	m_kernel_edit_stc->SetWrapMode(wxSTC_WRAP_WORD); // other choice is wxSCI_WRAP_NONE
+	m_kernel_edit_stc->StyleSetForeground(wxSTC_C_STRING, wxColour(150, 0, 0));
+	m_kernel_edit_stc->StyleSetForeground(wxSTC_C_PREPROCESSOR, wxColour(165, 105, 0));
+	m_kernel_edit_stc->StyleSetForeground(wxSTC_C_IDENTIFIER, wxColour(40, 0, 60));
+	m_kernel_edit_stc->StyleSetForeground(wxSTC_C_NUMBER, wxColour(0, 150, 0));
+	m_kernel_edit_stc->StyleSetForeground(wxSTC_C_CHARACTER, wxColour(150, 0, 0));
+	m_kernel_edit_stc->StyleSetForeground(wxSTC_C_WORD, wxColour(0, 0, 150));
+	m_kernel_edit_stc->StyleSetForeground(wxSTC_C_WORD2, wxColour(0, 150, 0));
+	m_kernel_edit_stc->StyleSetForeground(wxSTC_C_COMMENT, wxColour(150, 150, 150));
+	m_kernel_edit_stc->StyleSetForeground(wxSTC_C_COMMENTLINE, wxColour(150, 150, 150));
+	m_kernel_edit_stc->StyleSetForeground(wxSTC_C_COMMENTDOC, wxColour(150, 150, 150));
+	m_kernel_edit_stc->StyleSetForeground(wxSTC_C_COMMENTDOCKEYWORD, wxColour(0, 0, 200));
+	m_kernel_edit_stc->StyleSetForeground(wxSTC_C_COMMENTDOCKEYWORDERROR, wxColour(0, 0, 200));
+	m_kernel_edit_stc->StyleSetBold(wxSTC_C_WORD, true);
+	m_kernel_edit_stc->StyleSetBold(wxSTC_C_WORD2, true);
+	m_kernel_edit_stc->StyleSetBold(wxSTC_C_COMMENTDOCKEYWORD, true);
+	// a sample list of keywords, I haven't included them all to keep it short...
+	m_kernel_edit_stc->SetKeyWords(0, wxT("return for while break continue __kernel kernel_main __global"));
+	m_kernel_edit_stc->SetKeyWords(1, wxT("const int float void char double unsigned int4 float4 signed"));
+	m_kernel_edit_stc->SetMarginType(m_FoldingID, wxSTC_MARGIN_SYMBOL);
+	m_kernel_edit_stc->SetMarginMask(m_FoldingID, wxSTC_MASK_FOLDERS);
+	m_kernel_edit_stc->StyleSetBackground(m_FoldingID, *wxWHITE);
+	// markers
+	m_kernel_edit_stc->MarkerDefine(wxSTC_MARKNUM_FOLDER, wxSTC_MARK_DOTDOTDOT, wxT("BLACK"), wxT("BLACK"));
+	m_kernel_edit_stc->MarkerDefine(wxSTC_MARKNUM_FOLDEROPEN, wxSTC_MARK_ARROWDOWN, wxT("BLACK"), wxT("BLACK"));
+	m_kernel_edit_stc->MarkerDefine(wxSTC_MARKNUM_FOLDERSUB, wxSTC_MARK_EMPTY, wxT("BLACK"), wxT("BLACK"));
+	m_kernel_edit_stc->MarkerDefine(wxSTC_MARKNUM_FOLDEREND, wxSTC_MARK_DOTDOTDOT, wxT("BLACK"), wxT("WHITE"));
+	m_kernel_edit_stc->MarkerDefine(wxSTC_MARKNUM_FOLDEROPENMID, wxSTC_MARK_ARROWDOWN, wxT("BLACK"), wxT("WHITE"));
+	m_kernel_edit_stc->MarkerDefine(wxSTC_MARKNUM_FOLDERMIDTAIL, wxSTC_MARK_EMPTY, wxT("BLACK"), wxT("BLACK"));
+	m_kernel_edit_stc->MarkerDefine(wxSTC_MARKNUM_FOLDERTAIL, wxSTC_MARK_EMPTY, wxT("BLACK"), wxT("BLACK"));
 
 	//sizer
 	wxBoxSizer *sizer_3 = new wxBoxSizer(wxHORIZONTAL);
-    sizer_3->Add(m_kernel_list, 0, wxEXPAND);
-    wxStaticText * separator = new wxStaticText(this,0,"",wxDefaultPosition,wxSize(5,-1));
-    sizer_3->Add(separator,0,wxEXPAND);
+	sizer_3->Add(m_kernel_list, 0, wxEXPAND);
+	wxStaticText * separator = new wxStaticText(this, 0, "", wxDefaultPosition, wxSize(5, -1));
+	sizer_3->Add(separator, 0, wxEXPAND);
 	sizer_3->Add(m_kernel_edit_stc, 1, wxEXPAND);
 
 	//all controls

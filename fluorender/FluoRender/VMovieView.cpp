@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <tiffio.h>
 #include <wx/aboutdlg.h>
 #include <wx/valnum.h>
+#include <wx/stdpaths.h>
 #include "png_resource.h"
 #include "img/icons.h"
 
@@ -56,6 +57,7 @@ BEGIN_EVENT_TABLE(VMovieView, wxPanel)
 	EVT_TEXT(ID_ScriptFileText, VMovieView::OnScriptFileEdit)
 	EVT_BUTTON(ID_ScriptClearBtn, VMovieView::OnScriptClearBtn)
 	EVT_BUTTON(ID_ScriptFileBtn, VMovieView::OnScriptFileBtn)
+	EVT_LIST_ITEM_SELECTED(ID_ScriptList, VMovieView::OnScriptListSelected)
 	//auto key
 	EVT_BUTTON(ID_GenKeyBtn, VMovieView::OnGenKey)
 	EVT_LIST_ITEM_ACTIVATED(ID_AutoKeyList, VMovieView::OnListItemAct)
@@ -355,28 +357,43 @@ wxWindow* VMovieView::CreateScriptPage(wxWindow *parent)
 		"Also enable this option to show component colors.");
 	sizer_v->Add(10, 10);
 	sizer_v->Add(m_run_script_chk);
-	sizer_v->Add(10, 10);
+	sizer_v->Add(5, 5);
 	sizer_v->Add(st, 0, wxALIGN_LEFT);
-	sizer_v->Add(10, 10);
+	sizer_v->Add(5, 5);
+
+	//browse button
+	wxBoxSizer *sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Script File:",
 		wxDefaultPosition, wxSize(80, -1));
-	sizer_v->Add(st, 0, wxALIGN_LEFT);
-	wxBoxSizer *sizer_1 = new wxBoxSizer(wxHORIZONTAL);
+	m_script_file_btn = new wxButton(page, ID_ScriptFileBtn, "Browse...",
+		wxDefaultPosition, wxSize(80, -1));
+	sizer_1->Add(st, 0, wxALIGN_CENTER);
+	sizer_1->AddStretchSpacer(1);
+	sizer_1->Add(m_script_file_btn, 0, wxALIGN_CENTER);
+
+	//file name
+	wxBoxSizer *sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	m_script_file_text = new wxTextCtrl(page, ID_ScriptFileText, "",
 		wxDefaultPosition, wxDefaultSize);
 	m_script_clear_btn = new wxButton(page, ID_ScriptClearBtn, "X",
 		wxDefaultPosition, wxSize(25, -1));
-	sizer_1->Add(m_script_file_text, 1, wxEXPAND);
-	sizer_1->Add(m_script_clear_btn, 0, wxALIGN_CENTER);
-	wxBoxSizer *sizer_2 = new wxBoxSizer(wxHORIZONTAL);
-	m_script_file_btn = new wxButton(page, ID_ScriptFileBtn, "Browse...",
-		wxDefaultPosition, wxSize(80, -1));
-	sizer_2->AddStretchSpacer();
-	sizer_2->Add(m_script_file_btn, 0, wxALIGN_CENTER);
-	sizer_v->Add(10, 10);
+	sizer_2->Add(m_script_file_text, 1, wxEXPAND);
+	sizer_2->Add(m_script_clear_btn, 0, wxALIGN_CENTER);
+
+	//script list
+	m_script_list = new wxListCtrl(page, ID_ScriptList,
+		wxDefaultPosition, wxSize(-1, -1), wxLC_REPORT | wxLC_SINGLE_SEL);
+	wxListItem itemCol;
+	itemCol.SetText("Built-in Scripte Files");
+	m_script_list->InsertColumn(0, itemCol);
+	m_script_list->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
+
+	sizer_v->Add(5, 5);
 	sizer_v->Add(sizer_1, 0, wxEXPAND);
-	sizer_v->Add(10, 10);
+	sizer_v->Add(5, 5);
 	sizer_v->Add(sizer_2, 0, wxEXPAND);
+	sizer_v->Add(5, 5);
+	sizer_v->Add(m_script_list, 1, wxEXPAND);
 
 	//set the page
 	page->SetSizer(sizer_v);
@@ -468,14 +485,16 @@ m_delayed_stop(false)
 
 VMovieView::~VMovieView() {}
 
-void VMovieView::OnViewSelected(wxCommandEvent& event) {
+void VMovieView::OnViewSelected(wxCommandEvent& event)
+{
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (!vr_frame) return;
 	vr_frame->m_mov_view = m_views_cmb->GetCurrentSelection();
 	GetSettings(vr_frame->m_mov_view);
 }
 
-void VMovieView::GetSettings(int view) {
+void VMovieView::GetSettings(int view)
+{
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (!vr_frame) return;
 	VRenderView* vrv = (*vr_frame->GetViewList())[view];
@@ -525,6 +544,25 @@ void VMovieView::GetSettings(int view) {
 			m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
 			m_notebook->SetPageText(4, "4D Script");
 		}
+	}
+	AddScriptToList();
+}
+
+void VMovieView::AddScriptToList()
+{
+	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+	exePath = wxPathOnly(exePath);
+	m_script_list->DeleteAllItems();
+	wxString loc = exePath + GETSLASH() + "Scripts" +
+		GETSLASH() + "*.txt";
+	wxLogNull logNo;
+	wxString file = wxFindFirstFile(loc);
+	while (!file.empty())
+	{
+		file = wxFileNameFromPath(file);
+		file = file.BeforeLast('.');
+		m_script_list->InsertItem(m_script_list->GetItemCount(), file);
+		file = wxFindNextFile();
 	}
 }
 
@@ -1087,6 +1125,23 @@ void VMovieView::OnScriptFileBtn(wxCommandEvent &event)
 	}
 
 	delete fopendlg;
+}
+
+void VMovieView::OnScriptListSelected(wxListEvent &event)
+{
+	long item = m_script_list->GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+
+	if (item != -1)
+	{
+		wxString file = m_script_list->GetItemText(item);
+		wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+		exePath = wxPathOnly(exePath);
+		file = exePath + GETSLASH() + "Scripts" +
+			GETSLASH() + file + ".txt";
+		m_script_file_text->SetValue(file);
+	}
 }
 
 //auto key

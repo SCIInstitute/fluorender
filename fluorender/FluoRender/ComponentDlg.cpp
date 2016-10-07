@@ -3412,6 +3412,7 @@ void ComponentDlg::Cluster()
 	{
 		method->GenerateNewIDs(0, (void*)data_label, nx, ny, nz, 60);
 		vd->GetVR()->clear_tex_pool();
+		m_view->RefreshGL();
 	}
 
 	delete method;

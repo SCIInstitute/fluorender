@@ -76,9 +76,9 @@ private:
 	//stc
 	wxStyledTextCtrl* m_kernel_edit_stc;
 
-    int m_LineNrID;
-    int m_DividerID;
-    int m_FoldingID;
+	int m_LineNrID;
+	int m_DividerID;
+	int m_FoldingID;
 
 private:
 	void AddKernelsToList();
