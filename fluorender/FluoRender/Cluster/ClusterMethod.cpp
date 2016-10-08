@@ -69,7 +69,7 @@ void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
 			if (j <= 0 || j >= ny - 1)
 				continue;
 			k = int((*iter)->center.z() + 0.5);
-			if (k <= 0 || k >= nz - 1)
+			if (k < 0 || k > nz - 1)
 				continue;
 			index = nx*ny*k + nx*j + i;
 			((unsigned int*)label)[index] = id2;

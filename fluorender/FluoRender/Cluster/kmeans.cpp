@@ -45,6 +45,9 @@ ClusterKmeans::~ClusterKmeans()
 
 bool ClusterKmeans::Execute()
 {
+	if (m_data.empty())
+		return false;
+
 	Initialize();
 
 	size_t counter = 0;

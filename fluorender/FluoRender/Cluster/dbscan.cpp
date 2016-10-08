@@ -46,6 +46,9 @@ ClusterDbscan::~ClusterDbscan()
 
 bool ClusterDbscan::Execute()
 {
+	if (m_data.empty())
+		return false;
+
 	m_result.clear();
 	Dbscan();
 	//while (m_result.size() == 1 && m_size)
