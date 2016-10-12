@@ -35,7 +35,7 @@ using namespace FL;
 ComponentGenerator::ComponentGenerator(VolumeData* vd, int device_id)
 	: m_vd(vd),
 	m_use_mask(false),
-    m_init(false)
+	m_init(false)
 {
 	cl_int err;
 	cl_platform_id platform;

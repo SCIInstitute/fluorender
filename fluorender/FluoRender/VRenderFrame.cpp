@@ -121,7 +121,7 @@ VRenderFrame::VRenderFrame(
 	m_prop_panel(0),
 	m_clip_view(0),
 	m_adjust_view(0),
-    m_setting_dlg(0),
+	m_setting_dlg(0),
 	m_help_dlg(0),
 	m_brush_tool_dlg(0),
 	m_noise_cancelling_dlg(0),

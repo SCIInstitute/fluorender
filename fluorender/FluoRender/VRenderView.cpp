@@ -138,8 +138,8 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	m_editing_ruler_point(0),
 	//traces
 	m_trace_group(0),
-    //set gl
-    m_set_gl(false),
+	//set gl
+	m_set_gl(false),
 	//multivolume
 	m_mvr(0),
 	//initializaion

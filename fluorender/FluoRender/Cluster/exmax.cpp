@@ -33,9 +33,9 @@ using namespace FL;
 
 ClusterExmax::ClusterExmax() :
 	m_clnum(2),
-    m_weak_result(false),
-    m_eps(1e-3),
-    m_max_iter(200)
+	m_weak_result(false),
+	m_eps(1e-3),
+	m_max_iter(200)
 {
 
 }
