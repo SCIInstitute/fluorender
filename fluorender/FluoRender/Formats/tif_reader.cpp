@@ -1011,7 +1011,6 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 			for (uint64_t strip = 0; strip < num_strips; strip++)
 			{
 				long long valindex;
-				int indexinpage;
 				valindex = pagepixels*i +
 					strip*strip_size / (eight_bit ? 1 : 2);
 

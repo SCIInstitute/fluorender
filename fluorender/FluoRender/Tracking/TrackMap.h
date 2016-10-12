@@ -55,13 +55,13 @@ namespace FL
 	{
 	public:
 		TrackMapProcessor(TrackMap &track_map) :
-		m_map(track_map),
-		m_contact_thresh(0.6f),
+        m_contact_thresh(0.6f),
 		m_size_thresh(25.0f),
-		m_level_thresh(2),
 		m_similar_thresh(0.2f),
+        m_level_thresh(2),
 		m_merge(false),
-		m_split(false) {}
+		m_split(false),
+        m_map(track_map) {}
 		~TrackMapProcessor();
 
 		void SetContactThresh(float value);

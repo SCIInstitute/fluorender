@@ -885,7 +885,6 @@ void TraceDlg::GetSettings(VRenderView* vrv)
 		str = m_cell_size_text->GetValue();
 		unsigned long ival;
 		str.ToULong(&ival);
-		unsigned int slimit = (unsigned int)ival;
 		trace_group->SetCellSize(ival);
 
 		str = trace_group->GetPath();
@@ -2786,7 +2785,6 @@ void TraceDlg::OnCellDivideID(wxCommandEvent& event)
 		return;
 	int resx, resy, resz;
 	vd->GetResolution(resx, resy, resz);
-	int chan = vd->GetCurChannel();
 	Texture* tex = vd->GetTexture();
 	if (!tex)
 		return;
@@ -3267,7 +3265,6 @@ void TraceDlg::GenMap()
 	//get and set parameters
 	FL::TrackMap &track_map = trace_group->GetTrackMap();
 	FL::TrackMapProcessor tm_processor(track_map);
-	int chan = vd->GetCurChannel();
 	int resx, resy, resz;
 	vd->GetResolution(resx, resy, resz);
 	double spcx, spcy, spcz;

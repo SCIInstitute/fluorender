@@ -138,13 +138,13 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	m_editing_ruler_point(0),
 	//traces
 	m_trace_group(0),
+    //set gl
+    m_set_gl(false),
 	//multivolume
 	m_mvr(0),
 	//initializaion
 	m_initialized(false),
 	m_init_view(false),
-	//set gl
-	m_set_gl(false),
 	//bg color
 	m_bg_color(0.0, 0.0, 0.0),
 	m_bg_color_inv(1.0, 1.0, 1.0),
@@ -1642,7 +1642,6 @@ void VRenderGLView::DrawBrush()
 	wxRect reg = GetClientRect();
 	if (reg.Contains(pos1))
 	{
-		int i;
 		int nx, ny;
 		nx = GetGLSize().x;
 		ny = GetGLSize().y;
@@ -3349,10 +3348,6 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 
 void VRenderGLView::DrawOLShading(VolumeData* vd)
 {
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
-	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
-
 	if (TextureRenderer::get_mem_swap() &&
 		TextureRenderer::get_start_update_loop() &&
 		!TextureRenderer::get_done_update_loop())
@@ -4241,7 +4236,7 @@ void VRenderGLView::PickMesh()
 
 	//bind
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_pick);
-	GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	//GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glClearDepth(1.0);
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -4477,8 +4472,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		//move time sequence
 		//forward
 		if (!m_tseq_forward &&
-			wxGetKeyState(wxKeyCode('d')) ||
-			wxGetKeyState(WXK_SPACE))
+			(wxGetKeyState(wxKeyCode('d')) ||
+			wxGetKeyState(WXK_SPACE)))
 		{
 			m_tseq_forward = true;
 			if (frame && frame->GetMovieView())
@@ -5491,7 +5486,6 @@ void VRenderGLView::RunSparseTracking(wxFileConfig &fconfig)
 		CreateTraceGroup();
 
 	FL::TrackMapProcessor tm_processor(m_trace_group->GetTrackMap());
-	int chan = m_cur_vol->GetCurChannel();
 	int resx, resy, resz;
 	m_cur_vol->GetResolution(resx, resy, resz);
 	double spcx, spcy, spcz;
@@ -8049,7 +8043,7 @@ void VRenderGLView::DrawFrame()
 	glm::mat4 proj_mat = glm::ortho(float(0), float(nx), float(0), float(ny));
 
 	glDisable(GL_DEPTH_TEST);
-	GLfloat line_width = 1.0f;
+	//GLfloat line_width = 1.0f;
 
 	vector<float> vertex;
 	vertex.reserve(4*3);

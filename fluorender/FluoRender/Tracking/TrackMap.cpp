@@ -291,7 +291,6 @@ bool TrackMapProcessor::CheckCellDist(
 	float spcz = m_map.m_spc_z;
 	size_t indexn;//neighbor index
 	unsigned int idn;//neighbor id
-	size_t index = nx*ny*ck + nx*cj + ci;
 	unsigned int id = cell->Id();
 	IntraGraph &intra_graph = m_map.m_intra_graph_list.back();
 	CellList &cell_list = m_map.m_cells_list.back();
@@ -305,9 +304,9 @@ bool TrackMapProcessor::CheckCellDist(
 	for (int j = -r; j<=r; ++j)
 	for (int i = -r; i<=r; ++i)
 	{
-		if (ck + k < 0 || ck + k >= nz ||
-			cj + j < 0 || cj + j >= ny ||
-			ci + i < 0 || ci + i >= nx)
+		if ((int)ck + k < 0 || ck + k >= nz ||
+			(int)cj + j < 0 || cj + j >= ny ||
+			(int)ci + i < 0 || ci + i >= nx)
 			continue;
 		indexn = nx*ny*(ck + k) + nx*(cj + j) + ci + i;
 		idn = ((unsigned int*)label)[indexn];
@@ -538,7 +537,6 @@ bool TrackMapProcessor::LinkOrphans(InterGraph& graph, pVertex &vertex)
 		return false;
 
 	FLIVR::Point pos = vertex->GetCenter();
-	float size = vertex->GetSizeF();
 
 	pVertex vertex1;
 	size_t valence1;
@@ -1467,10 +1465,10 @@ bool TrackMapProcessor::comp_edge_size(InterEdge &edge1,
 
 bool TrackMapProcessor::comp_path_size(Path &path1, Path &path2)
 {
-	float p1 = path1.get_size(0);
-	float p1_odd = path1.get_size(1);
-	float p2 = path2.get_size(0);
-	float p2_odd = path2.get_size(1);
+	path1.get_size(0);
+	path1.get_size(1);
+	path2.get_size(0);
+	path2.get_size(1);
 	return path1.get_max_size() > path2.get_max_size();
 }
 
@@ -1544,19 +1542,19 @@ bool TrackMapProcessor::similar_path_mm(Path &path1, Path &path2)
 
 bool TrackMapProcessor::comp_path_count(Path &path1, Path &path2)
 {
-	unsigned int p1 = path1.get_count(0);
-	unsigned int p1_odd = path1.get_count(1);
-	unsigned int p2 = path2.get_count(0);
-	unsigned int p2_odd = path2.get_count(1);
+	path1.get_count(0);
+	path1.get_count(1);
+	path2.get_count(0);
+	path2.get_count(1);
 	return path1.get_max_count() < path2.get_max_count();
 }
 
 bool TrackMapProcessor::comp_path_count_rev(Path &path1, Path &path2)
 {
-	unsigned int p1 = path1.get_count(0);
-	unsigned int p1_odd = path1.get_count(1);
-	unsigned int p2 = path2.get_count(0);
-	unsigned int p2_odd = path2.get_count(1);
+	path1.get_count(0);
+	path1.get_count(1);
+	path2.get_count(0);
+	path2.get_count(1);
 	return path1.get_max_count() > path2.get_max_count();
 }
 
@@ -1568,7 +1566,7 @@ bool TrackMapProcessor::similar_path_count(Path &path1, Path &path2)
 	//p1 compares to p2
 	if (p1 > 0 || p2 > 0)
 	{
-		d = fabs(p1 - p2) / std::max(p1, p2);
+		d = fabs((double)p1 - (double)p2) / std::max(p1, p2);
 		if (d < m_similar_thresh)
 			return true;
 	}
@@ -3278,7 +3276,7 @@ bool TrackMapProcessor::LinkAddedCells(CellList &list, size_t f1, size_t f2)
 	size_t i, j, k;
 	size_t nx = m_map.m_size_x;
 	size_t ny = m_map.m_size_y;
-	size_t nz = m_map.m_size_z;
+	//size_t nz = m_map.m_size_z;
 	size_t minx, miny, minz;
 	size_t maxx, maxy, maxz;
 	float data_value1, data_value2;
@@ -3520,7 +3518,7 @@ bool TrackMapProcessor::ClusterCellsMerge(CellList &list, size_t frame)
 	size_t i, j, k;
 	size_t nx = m_map.m_size_x;
 	size_t ny = m_map.m_size_y;
-	size_t nz = m_map.m_size_z;
+	//size_t nz = m_map.m_size_z;
 	size_t minx, miny, minz;
 	size_t maxx, maxy, maxz;
 	unsigned int label_value;
@@ -3646,7 +3644,7 @@ bool TrackMapProcessor::ClusterCellsSplit(CellList &list, size_t frame,
 			nx, ny, nz);
 		//generate output cell list
 		Cluster &points = cs_processor.GetData();
-		std::vector<unsigned int> &ids = cs_processor.GetNewIDs();
+		//std::vector<unsigned int> &ids = cs_processor.GetNewIDs();
 		pClusterPoint point;
 		unsigned int id2;
 		CellListIter citer;

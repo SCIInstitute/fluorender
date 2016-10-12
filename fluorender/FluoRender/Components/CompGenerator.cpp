@@ -34,8 +34,8 @@ using namespace FL;
 
 ComponentGenerator::ComponentGenerator(VolumeData* vd, int device_id)
 	: m_vd(vd),
-	m_init(false),
-	m_use_mask(false)
+	m_use_mask(false),
+    m_init(false)
 {
 	cl_int err;
 	cl_platform_id platform;
@@ -1105,7 +1105,6 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 	cl_kernel kernel_2 = clCreateKernel(program, "kernel_0", &err);
 
 	unsigned int* cur_page_label = val32;
-	unsigned int thresh = 5;
 	size_t global_size[2] = { size_t(nx), size_t(ny) };
 	size_t local_size[2] = { 1, 1 };
 	unsigned int len = 0;

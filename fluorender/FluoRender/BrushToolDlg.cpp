@@ -88,9 +88,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	m_frame(parent),
 	m_cur_view(0),
 	m_max_value(255.0),
-	m_dft_ini_thresh(0.0),
 	m_dft_gm_falloff(0.0),
-	m_dft_scl_falloff(0.0),
 	m_dft_scl_translate(0.0)
 {
 	wxStaticText *st = 0;

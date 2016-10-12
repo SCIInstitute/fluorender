@@ -73,8 +73,6 @@ void ComponentAnalyzer::Analyze(bool sel)
 
 	//clear list and start calculating
 	m_comp_list.clear();
-	int ilist;
-	int found;
 	int nx, ny, nz;
 	unsigned int id = 0;
 	double value;

@@ -138,7 +138,7 @@ namespace FL
 		size_t miny2 = size_t(s2.box.min().y() + 0.5);
 		size_t minz2 = size_t(s2.box.min().z() + 0.5);
 
-		float v1, v2, d;
+		float v1;
 		float v1max = 0;
 		float v2max = 0;
 		FLIVR::Point p1max, p2max;

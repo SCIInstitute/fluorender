@@ -105,9 +105,7 @@ private:
 	//max volume value
 	double m_max_value;
 	//default brush properties
-	double m_dft_ini_thresh;
 	double m_dft_gm_falloff;
-	double m_dft_scl_falloff;
 	double m_dft_scl_translate;
 
 	//paint tools

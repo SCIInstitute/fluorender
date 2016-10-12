@@ -33,9 +33,9 @@ using namespace FL;
 
 ClusterExmax::ClusterExmax() :
 	m_clnum(2),
-	m_eps(1e-3),
-	m_max_iter(200),
-	m_weak_result(false)
+    m_weak_result(false),
+    m_eps(1e-3),
+    m_max_iter(200)
 {
 
 }
@@ -468,7 +468,6 @@ void ClusterExmax::GenerateNewColors2(void* label,
 	//m_id_list.clear();
 
 	unsigned int id;
-	unsigned long long index;
 	int i, j, k;
 
 	unsigned int ii = 0;
