@@ -68,7 +68,7 @@ add_definitions(-DVERSION_MAJOR=2)                   #Be sure to update the Vers
 add_definitions(-DVERSION_MINOR=20)                  #
 add_definitions(-DVERSION_MAJOR_TAG="2")             #
 add_definitions(-DVERSION_MINOR_TAG="20")            #
-add_definitions(-DVERSION_COPYRIGHT="August 2016")   # Up to here!
+add_definitions(-DVERSION_COPYRIGHT="October 2016")  # Up to here!
 
 #static compile
 add_definitions(-DSTATIC_COMPILE)
