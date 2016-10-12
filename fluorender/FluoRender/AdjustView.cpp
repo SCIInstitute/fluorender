@@ -147,15 +147,13 @@ m_dft_sync_b(false)
 	wxBoxSizer *sizer_h_3 = new wxBoxSizer(wxHORIZONTAL);
 	m_r_gamma_sldr = new wxSlider(this, ID_RGammaSldr, 100, 10, 400,
 		wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
-	sizer_h_3->Add(m_r_gamma_sldr, 1, wxEXPAND);
+	sizer_h_3->Add(m_r_gamma_sldr, 1, wxEXPAND|wxALIGN_CENTER_HORIZONTAL);
 	m_r_brightness_sldr = new wxSlider(this, ID_RBrightnessSldr, 0, -256, 256,
 		wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
-	sizer_h_3->Add(m_r_brightness_sldr, 1, wxEXPAND);
-    
+	sizer_h_3->Add(m_r_brightness_sldr, 1, wxEXPAND | wxALIGN_CENTER_HORIZONTAL);
 	m_r_hdr_sldr = new wxSlider(this, ID_RHdrSldr, 0, 0, 100,
-                                wxDefaultPosition, wxSize(25,-1), wxSL_VERTICAL);
-
-	sizer_h_3->Add(m_r_hdr_sldr, 1, wxEXPAND);
+		wxDefaultPosition, wxSize(25, -1), wxSL_VERTICAL);
+	sizer_h_3->Add(m_r_hdr_sldr, 1, wxEXPAND | wxALIGN_CENTER_HORIZONTAL);
 	sizer_v->Add(sizer_h_3, 1, wxEXPAND);
 
 	//fifth line: reset buttons
