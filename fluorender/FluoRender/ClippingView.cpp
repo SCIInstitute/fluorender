@@ -143,12 +143,12 @@ m_link_z(false)
 	m_xpanel = new wxPanel(this);
 	st = new wxStaticText(this, 0, "X");
 	m_x1_clip_sldr = new wxSlider(m_xpanel, ID_X1ClipSldr, 0, 0, 512,
-		wxPoint(0,0), wxSize(20,-1), wxSL_VERTICAL);
+		wxPoint(0,0), wxDefaultSize, wxSL_VERTICAL);
 	m_xBar = new wxStaticText(m_xpanel, 0, "",
 		wxPoint(20,10), wxSize(3, m_x1_clip_sldr->GetSize().GetHeight() - 20));
 	m_xBar->SetBackgroundColour(wxColor(255, 128, 128));
 	m_x2_clip_sldr = new wxSlider(m_xpanel, ID_X2ClipSldr, 512, 0, 512,
-		wxPoint(23,0), wxSize(20,-1), wxSL_VERTICAL);
+		wxPoint(23,0), wxDefaultSize, wxSL_VERTICAL);
 	m_x1_clip_text = new wxTextCtrl(this, ID_X1ClipText, "0",
 		wxDefaultPosition, wxSize(34, 20), 0, vald_int);
 	st_cb = new wxStaticText(this, 0, "",
@@ -175,12 +175,12 @@ m_link_z(false)
 	wxPanel * ypanel = new wxPanel(this);
 	st = new wxStaticText(this, 0, "Y");
 	m_y1_clip_sldr = new wxSlider(ypanel, ID_Y1ClipSldr, 0, 0, 512,
-		wxPoint(0,0),  wxSize(20,-1), wxSL_VERTICAL);
+		wxPoint(0,0), wxDefaultSize, wxSL_VERTICAL);
 	m_yBar = new wxStaticText(ypanel, 0, "",
 		wxPoint(20,10), wxSize(3, m_x1_clip_sldr->GetSize().GetHeight() - 20));
 	m_yBar->SetBackgroundColour(wxColor(128, 255, 128));
 	m_y2_clip_sldr = new wxSlider(ypanel, ID_Y2ClipSldr, 512, 0, 512,
-		wxPoint(23,0),  wxSize(20,-1), wxSL_VERTICAL);
+		wxPoint(23,0), wxDefaultSize, wxSL_VERTICAL);
 	m_y1_clip_text = new wxTextCtrl(this, ID_Y1ClipText, "0",
 		wxDefaultPosition, wxSize(34, 20), 0, vald_int);
 	st_cb = new wxStaticText(this, 0, "",
@@ -207,12 +207,12 @@ m_link_z(false)
 	wxPanel * zpanel = new wxPanel(this);
 	st = new wxStaticText(this, 0, "Z");
 	m_z1_clip_sldr = new wxSlider(zpanel, ID_Z1ClipSldr, 0, 0, 512,
-		wxPoint(0,0),  wxSize(20,-1), wxSL_VERTICAL);
+		wxPoint(0,0), wxDefaultSize, wxSL_VERTICAL);
 	m_zBar = new wxStaticText(zpanel, 0, "",
 		wxPoint(20,10), wxSize(3, m_x1_clip_sldr->GetSize().GetHeight() - 20));
 	m_zBar->SetBackgroundColour(wxColor(128, 128, 255));
 	m_z2_clip_sldr = new wxSlider(zpanel, ID_Z2ClipSldr, 512, 0, 512,
-		wxPoint(23,0),  wxSize(20,-1), wxSL_VERTICAL);
+		wxPoint(23,0), wxDefaultSize, wxSL_VERTICAL);
 	m_z1_clip_text = new wxTextCtrl(this, ID_Z1ClipText, "0",
 		wxDefaultPosition, wxSize(34, 20), 0, vald_int);
 	st_cb = new wxStaticText(this, 0, "",
