@@ -534,9 +534,15 @@ add_custom_command(TARGET FluoRender POST_BUILD
   "$<TARGET_FILE_DIR:FluoRender>")
 
 #make the Executable dir
+if (WIN32)
 add_custom_target(make_exe_dir ALL 
   COMMAND ${CMAKE_COMMAND} -E make_directory
   "$<TARGET_FILE_DIR:FluoRender>/Executables")
+else()
+  add_custom_command(TARGET FluoRender POST_BUILD 
+  COMMAND ${CMAKE_COMMAND} -E make_directory
+  "$<TARGET_FILE_DIR:FluoRender>/Executables")
+endif()
 #copy the other binaries into Executables
 add_custom_command(TARGET SynthBB POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
