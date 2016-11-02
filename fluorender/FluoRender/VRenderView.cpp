@@ -1314,11 +1314,11 @@ void VRenderGLView::DrawVolumes(int peel)
 
 	if (m_interactive)
 	{
-		wxMouseState ms = wxGetMouseState();
-		if (ms.LeftIsDown() ||
-			ms.MiddleIsDown() ||
-			ms.RightIsDown())
-			return;
+		//wxMouseState ms = wxGetMouseState();
+		//if (ms.LeftIsDown() ||
+		//	ms.MiddleIsDown() ||
+		//	ms.RightIsDown())
+		//	return;
 		m_interactive = false;
 		m_clear_buffer = true;
 		RefreshGL(2);
