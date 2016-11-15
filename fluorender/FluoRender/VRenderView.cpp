@@ -11027,6 +11027,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		}
 		else
 		{
+			m_interactive = m_adaptive;
 			m_scale_factor += wheel/1000.0;
 			if (m_scale_factor < 0.01)
 				m_scale_factor = 0.01;
