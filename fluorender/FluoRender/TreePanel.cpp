@@ -418,7 +418,7 @@ void DataTreeCtrl::OnIsolate(wxCommandEvent& event)
 		if (vrv)
 		{
 			vrv->Isolate(item_type, itemname);
-			vrv->RefreshGL();
+			vrv->RefreshGL(true);
 			vr_frame->UpdateTreeIcons();
 		}
 
