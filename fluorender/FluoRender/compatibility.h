@@ -63,6 +63,15 @@ DEALINGS IN THE SOFTWARE.
 inline wchar_t GETSLASH() { return L'\\'; }
 inline wchar_t GETSLASHALT() { return L'/'; }
 
+inline std::wstring GET_SUFFIX(std::wstring &pathname)
+{
+	int64_t pos = pathname.find_last_of(L'.');
+	if (pos != std::wstring::npos)
+		return pathname.substr(pos);
+	else
+		return L"";
+}
+
 inline std::wstring GET_NAME(std::wstring &pathname)
 {
 	int64_t pos1 = pathname.find_last_of(GETSLASH());
@@ -298,6 +307,15 @@ inline void FIND_FILES(std::wstring m_path_name,
 #define FSEEK64     fseek
 
 inline wchar_t GETSLASH() { return L'/'; }
+
+inline std::wstring GET_SUFFIX(std::wstring &pathname)
+{
+	int64_t pos = pathname.find_last_of(L'.');
+	if (pos != std::wstring::npos)
+		return pathname.substr(pos);
+	else
+		return L"";
+}
 
 inline std::wstring GET_NAME(std::wstring &pathname)
 {
