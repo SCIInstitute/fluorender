@@ -123,6 +123,8 @@ public:
 	void DownFrame();
 	void SetCurrentTime(size_t t);
 
+	bool GetRunning() { return m_running; }
+
 public:
 	//controls
 	wxTextCtrl *m_fps_text;

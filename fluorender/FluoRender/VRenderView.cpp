@@ -11053,6 +11053,11 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 
 	if (m_draw_coord)
 	{
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame && vr_frame->GetMovieView() &&
+			vr_frame->GetMovieView()->GetRunning())
+			return;
+
 		m_drawing_coord = true;
 		RefreshGL(38, false, false);
 		return;
