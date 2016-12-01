@@ -90,8 +90,7 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	m_draw_annotations(true),
 	m_draw_camctr(false),
 	m_camctr_size(2.0),
-	m_draw_info(false),
-	m_draw_coord(false),
+	m_draw_info(250),
 	m_drawing_coord(false),
 	m_draw_frame(false),
 	m_test_speed(false),
@@ -5938,7 +5937,7 @@ void VRenderGLView::ForceDraw()
 		DrawFrame();
 
 	//draw info
-	if (m_draw_info)
+	if (m_draw_info & INFO_DISP)
 		DrawInfo(nx, ny);
 
 	if (m_int_mode == 2 ||
@@ -8878,7 +8877,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	wstr_temp, text_color,
 	px*sx, py*sy, sx, sy);
 
-	if (m_draw_coord)
+	if (m_draw_info & (INFO_T|INFO_X|INFO_Y|INFO_Z))
 	{
 		Point p;
 		wxPoint mouse_pos = ScreenToClient(wxGetMousePosition());
@@ -8894,16 +8893,6 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 			wstr_temp, text_color,
 			px*sx, py*sy, sx, sy);
 		}
-	}
-	else
-	{
-		str = wxString::Format("T: %d", m_tseq_cur_num);
-		wstr_temp = str.ToStdWstring();
-		px = gapw-nx/2;
-		py = ny/2-gaph;
-		m_text_renderer->RenderText(
-		wstr_temp, text_color,
-		px*sx, py*sy, sx, sy);
 	}
 
 	if (m_test_wiref)
@@ -11051,7 +11040,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		return;
 	}
 
-	if (m_draw_coord)
+	if (m_draw_info & INFO_DISP)
 	{
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vr_frame && vr_frame->GetMovieView() &&
@@ -13465,9 +13454,10 @@ void VRenderView::OnCamCtrCheck(wxCommandEvent& event)
 
 void VRenderView::OnFpsCheck(wxCommandEvent& event)
 {
-	m_glview->m_draw_info = 
-		m_options_toolbar->GetToolState(ID_FpsChk);
-	m_glview->m_draw_coord = m_glview->m_draw_info;
+	if (m_options_toolbar->GetToolState(ID_FpsChk))
+		m_glview->m_draw_info |= 1;
+	else
+		m_glview->m_draw_info &= ~1;
 	RefreshGL();
 }
 
@@ -13719,8 +13709,7 @@ void VRenderView::SaveDefault(unsigned int mask)
 	//fps
 	if (mask & 0x10)
 	{
-		bVal = m_options_toolbar->GetToolState(ID_FpsChk);
-		fconfig.Write("fps_chk", bVal);
+		fconfig.Write("info_chk", m_glview->m_draw_info);
 	}
 	//selection
 	if (mask & 0x20)
@@ -13827,6 +13816,7 @@ void VRenderView::LoadSettings()
 
 	bool bVal;
 	double dVal;
+	int iVal;
 	if (fconfig.Read("volume_seq_rd", &bVal))
 	{
 		m_options_toolbar->ToggleTool(ID_VolumeSeqRd,bVal);
@@ -13885,11 +13875,10 @@ void VRenderView::LoadSettings()
 	{
 		m_glview->m_camctr_size = dVal;
 	}
-	if (fconfig.Read("fps_chk", &bVal))
+	if (fconfig.Read("info_chk", &iVal))
 	{
-		m_options_toolbar->ToggleTool(ID_FpsChk,bVal);
-		m_glview->m_draw_info = bVal;
-		m_glview->m_draw_coord = bVal;
+		m_options_toolbar->ToggleTool(ID_FpsChk, iVal&INFO_DISP);
+		m_glview->m_draw_info = iVal;
 	}
 	if (fconfig.Read("legend_chk", &bVal))
 	{

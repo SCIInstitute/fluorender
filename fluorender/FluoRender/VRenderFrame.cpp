@@ -2715,7 +2715,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			fconfig.Write("fog", vrv->GetFog());
 			fconfig.Write("fogintensity", (double)vrv->GetFogIntensity());
 			fconfig.Write("draw_camctr", vrv->m_glview->m_draw_camctr);
-			fconfig.Write("draw_fps", vrv->m_glview->m_draw_info);
+			fconfig.Write("draw_info", vrv->m_glview->m_draw_info);
 			fconfig.Write("draw_legend", vrv->m_glview->m_draw_legend);
 
 			double x, y, z;
@@ -3754,10 +3754,10 @@ void VRenderFrame::OpenProject(wxString& filename)
 					vrv->m_glview->m_draw_camctr = bVal;
 					vrv->m_options_toolbar->ToggleTool(VRenderView::ID_CamCtrChk,bVal);
 				}
-				if (fconfig.Read("draw_fps", &bVal))
+				if (fconfig.Read("draw_info", &iVal))
 				{
-					vrv->m_glview->m_draw_info = bVal;
-					vrv->m_options_toolbar->ToggleTool(VRenderView::ID_FpsChk,bVal);
+					vrv->m_glview->m_draw_info = iVal;
+					vrv->m_options_toolbar->ToggleTool(VRenderView::ID_FpsChk, iVal|INFO_DISP);
 				}
 				if (fconfig.Read("draw_legend", &bVal))
 				{

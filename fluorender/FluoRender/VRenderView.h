@@ -80,6 +80,16 @@ DEALINGS IN THE SOFTWARE.
 #define FRONT_FACE  1
 #define BACK_FACE  2
 
+//information bits
+#define INFO_DISP	1
+#define INFO_POS	2
+#define INFO_FRAME	4
+#define INFO_FPS	8
+#define INFO_T		16
+#define INFO_X		32
+#define INFO_Y		64
+#define INFO_Z		128
+
 using namespace std;
 
 class VRenderView;
@@ -534,8 +544,7 @@ public:
 	bool m_draw_annotations;
 	bool m_draw_camctr;
 	double m_camctr_size;
-	bool m_draw_info;
-	bool m_draw_coord;
+	int m_draw_info;
 	bool m_drawing_coord;
 	bool m_draw_frame;
 	bool m_test_speed;
