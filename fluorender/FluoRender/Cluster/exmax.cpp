@@ -58,8 +58,8 @@ bool ClusterExmax::Execute()
 		m_likelihood_prv = m_likelihood;
 		Expectation();
 		Maximization();
-		////histograom test
-		//GenUncertainty(0.05);
+		//histograom test
+		GenUncertainty(0.05);
 		counter++;
 	} while (!Converge() &&
 		counter < m_max_iter);

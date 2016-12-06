@@ -159,6 +159,8 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	//parameters
 	EVT_COMMAND_SCROLL(ID_ClusterClnumSldr, ComponentDlg::OnClusterClnumSldr)
 	EVT_TEXT(ID_ClusterClnumText, ComponentDlg::OnClusterClnumText)
+	EVT_COMMAND_SCROLL(ID_ClusterMaxIterSldr, ComponentDlg::OnClusterMaxiterSldr)
+	EVT_TEXT(ID_ClusterMaxIterText, ComponentDlg::OnClusterMaxiterText)
 	EVT_COMMAND_SCROLL(ID_ClusterSizeSldr, ComponentDlg::OnClusterSizeSldr)
 	EVT_TEXT(ID_ClusterSizeText, ComponentDlg::OnClusterSizeText)
 	EVT_COMMAND_SCROLL(ID_ClusterEpsSldr, ComponentDlg::OnClusterEpsSldr)
@@ -466,32 +468,45 @@ wxWindow* ComponentDlg::CreateClusteringPage(wxWindow *parent)
 	sizer21->Add(m_cluster_clnum_sldr, 1, wxEXPAND);
 	sizer21->Add(m_cluster_clnum_text, 0, wxALIGN_CENTER);
 	sizer21->Add(5, 5);
-	//size
+	//maxiter
 	wxBoxSizer *sizer22 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Max Iterations:",
+		wxDefaultPosition, wxSize(100, 20));
+	m_cluster_maxiter_sldr = new wxSlider(page, ID_ClusterMaxIterSldr, 200, 1, 1000,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_cluster_maxiter_text = new wxTextCtrl(page, ID_ClusterMaxIterText, "200",
+		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
+	sizer22->Add(5, 5);
+	sizer22->Add(st, 0, wxALIGN_CENTER);
+	sizer22->Add(m_cluster_maxiter_sldr, 1, wxEXPAND);
+	sizer22->Add(m_cluster_maxiter_text, 0, wxALIGN_CENTER);
+	sizer22->Add(5, 5);
+	//size
+	wxBoxSizer *sizer23 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Min. Size:",
 		wxDefaultPosition, wxSize(100, 20));
 	m_cluster_size_sldr = new wxSlider(page, ID_ClusterSizeSldr, 60, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_cluster_size_text = new wxTextCtrl(page, ID_ClusterSizeText, "60",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-	sizer22->Add(5, 5);
-	sizer22->Add(st, 0, wxALIGN_CENTER);
-	sizer22->Add(m_cluster_size_sldr, 1, wxEXPAND);
-	sizer22->Add(m_cluster_size_text, 0, wxALIGN_CENTER);
-	sizer22->Add(5, 5);
+	sizer23->Add(5, 5);
+	sizer23->Add(st, 0, wxALIGN_CENTER);
+	sizer23->Add(m_cluster_size_sldr, 1, wxEXPAND);
+	sizer23->Add(m_cluster_size_text, 0, wxALIGN_CENTER);
+	sizer23->Add(5, 5);
 	//eps
-	wxBoxSizer *sizer23 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer24 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Neighborhood:",
 		wxDefaultPosition, wxSize(100, 20));
 	m_cluster_eps_sldr = new wxSlider(page, ID_ClusterEpsSldr, 25, 5, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_cluster_eps_text = new wxTextCtrl(page, ID_ClusterEpsText, "2.5",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_fp1);
-	sizer23->Add(5, 5);
-	sizer23->Add(st, 0, wxALIGN_CENTER);
-	sizer23->Add(m_cluster_eps_sldr, 1, wxEXPAND);
-	sizer23->Add(m_cluster_eps_text, 0, wxALIGN_CENTER);
-	sizer23->Add(5, 5);
+	sizer24->Add(5, 5);
+	sizer24->Add(st, 0, wxALIGN_CENTER);
+	sizer24->Add(m_cluster_eps_sldr, 1, wxEXPAND);
+	sizer24->Add(m_cluster_eps_text, 0, wxALIGN_CENTER);
+	sizer24->Add(5, 5);
 	//
 	sizer2->Add(10, 10);
 	sizer2->Add(sizer21, 0, wxEXPAND);
@@ -499,6 +514,8 @@ wxWindow* ComponentDlg::CreateClusteringPage(wxWindow *parent)
 	sizer2->Add(sizer22, 0, wxEXPAND);
 	sizer2->Add(10, 10);
 	sizer2->Add(sizer23, 0, wxEXPAND);
+	sizer2->Add(10, 10);
+	sizer2->Add(sizer24, 0, wxEXPAND);
 	sizer2->Add(10, 10);
 
 	//note
@@ -1314,6 +1331,7 @@ void ComponentDlg::Update()
 	m_cluster_method_kmeans_rd->SetValue(m_cluster_method_kmeans);
 	//parameters
 	m_cluster_clnum_text->SetValue(wxString::Format("%d", m_cluster_clnum));
+	m_cluster_maxiter_text->SetValue(wxString::Format("%d", m_cluster_maxiter));
 	m_cluster_size_text->SetValue(wxString::Format("%d", m_cluster_size));
 	m_cluster_eps_text->SetValue(wxString::Format("%.1f", m_cluster_eps));
 	UpdateClusterMethod();
@@ -1409,6 +1427,7 @@ void ComponentDlg::GetSettings()
 	m_cluster_method_dbscan = false;
 	m_cluster_method_kmeans = false;
 	m_cluster_clnum = 2;
+	m_cluster_maxiter = 200;
 	m_cluster_size = 60;
 	m_cluster_eps = 2.5;
 
@@ -1519,6 +1538,7 @@ void ComponentDlg::LoadSettings(wxString filename)
 		fconfig.Read("cluster_method_kmeans", &m_cluster_method_kmeans);
 		//parameters
 		fconfig.Read("cluster_clnum", &m_cluster_clnum);
+		fconfig.Read("cluster_maxiter", &m_cluster_maxiter);
 		fconfig.Read("cluster_size", &m_cluster_size);
 		fconfig.Read("cluster_eps", &m_cluster_eps);
 
@@ -1618,6 +1638,7 @@ void ComponentDlg::SaveSettings(wxString filename)
 	fconfig.Write("cluster_method_kmeans", m_cluster_method_kmeans);
 	//parameters
 	fconfig.Write("cluster_clnum", m_cluster_clnum);
+	fconfig.Write("cluster_maxiter", m_cluster_maxiter);
 	fconfig.Write("cluster_size", m_cluster_size);
 	fconfig.Write("cluster_eps", m_cluster_eps);
 
@@ -2725,6 +2746,20 @@ void ComponentDlg::OnClusterClnumText(wxCommandEvent &event)
 	m_cluster_clnum_sldr->SetValue(m_cluster_clnum);
 }
 
+void ComponentDlg::OnClusterMaxiterSldr(wxScrollEvent &event)
+{
+	int val = event.GetPosition();
+	m_cluster_maxiter_text->SetValue(wxString::Format("%d", val));
+}
+
+void ComponentDlg::OnClusterMaxiterText(wxCommandEvent &event)
+{
+	long val = 0;
+	m_cluster_maxiter_text->GetValue().ToLong(&val);
+	m_cluster_maxiter = (int)val;
+	m_cluster_maxiter_sldr->SetValue(m_cluster_maxiter);
+}
+
 void ComponentDlg::OnClusterSizeSldr(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
@@ -3367,6 +3402,7 @@ void ComponentDlg::Cluster()
 	{
 		FL::ClusterExmax* method_exmax = new FL::ClusterExmax();
 		method_exmax->SetClnum(m_cluster_clnum);
+		method_exmax->SetMaxiter(m_cluster_maxiter);
 		method = method_exmax;
 	}
 	else if (m_cluster_method_dbscan)
@@ -3380,6 +3416,7 @@ void ComponentDlg::Cluster()
 	{
 		FL::ClusterKmeans* method_kmeans = new FL::ClusterKmeans();
 		method_kmeans->SetClnum(m_cluster_clnum);
+		method_kmeans->SetMaxiter(m_cluster_maxiter);
 		method = method_kmeans;
 	}
 

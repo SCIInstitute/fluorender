@@ -40,6 +40,8 @@ namespace FL
 
 		void SetClnum(unsigned int num)
 		{ m_clnum = num; }
+		void SetMaxiter(size_t num)
+		{ m_max_iter = num; }
 		bool Execute();
 		float GetProb();
 

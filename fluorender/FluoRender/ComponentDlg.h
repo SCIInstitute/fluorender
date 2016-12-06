@@ -173,6 +173,8 @@ public:
 		//parameters
 		ID_ClusterClnumSldr,
 		ID_ClusterClnumText,
+		ID_ClusterMaxIterSldr,
+		ID_ClusterMaxIterText,
 		ID_ClusterSizeSldr,
 		ID_ClusterSizeText,
 		ID_ClusterEpsSldr,
@@ -324,6 +326,7 @@ private:
 	bool m_cluster_method_kmeans;
 	//parameters
 	int m_cluster_clnum;
+	int m_cluster_maxiter;
 	int m_cluster_size;
 	double m_cluster_eps;
 
@@ -478,6 +481,8 @@ private:
 	//parameters
 	wxSlider* m_cluster_clnum_sldr;
 	wxTextCtrl* m_cluster_clnum_text;
+	wxSlider* m_cluster_maxiter_sldr;
+	wxTextCtrl* m_cluster_maxiter_text;
 	wxSlider* m_cluster_size_sldr;
 	wxTextCtrl* m_cluster_size_text;
 	wxSlider* m_cluster_eps_sldr;
@@ -662,6 +667,8 @@ private:
 	//parameters
 	void OnClusterClnumSldr(wxScrollEvent &event);
 	void OnClusterClnumText(wxCommandEvent &event);
+	void OnClusterMaxiterSldr(wxScrollEvent &event);
+	void OnClusterMaxiterText(wxCommandEvent &event);
 	void OnClusterSizeSldr(wxScrollEvent &event);
 	void OnClusterSizeText(wxCommandEvent &event);
 	void OnClusterEpsSldr(wxScrollEvent &event);
