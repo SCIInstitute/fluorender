@@ -8877,7 +8877,10 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	wstr_temp, text_color,
 	px*sx, py*sy, sx, sy);
 
-	if (m_draw_info & (INFO_T|INFO_X|INFO_Y|INFO_Z))
+	if ((m_draw_info & INFO_T) &&
+		(m_draw_info & INFO_X) &&
+		(m_draw_info & INFO_Y) &&
+		(m_draw_info & INFO_Z))
 	{
 		Point p;
 		wxPoint mouse_pos = ScreenToClient(wxGetMousePosition());
@@ -8892,6 +8895,37 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 			m_text_renderer->RenderText(
 			wstr_temp, text_color,
 			px*sx, py*sy, sx, sy);
+		}
+	}
+	else if (m_draw_info & INFO_Z)
+	{
+		if (m_cur_vol)
+		{
+			int resx, resy, resz;
+			m_cur_vol->GetResolution(resx, resy, resz);
+			double spcx, spcy, spcz;
+			m_cur_vol->GetSpacings(spcx, spcy, spcz);
+			vector<Plane*> *planes = m_cur_vol->GetVR()->get_planes();
+			Plane* plane = (*planes)[4];
+			double abcd[4];
+			plane->get_copy(abcd);
+			int val = fabs(abcd[3] * resz) + 0.499;
+
+			str = wxString::Format("Z: %.2f µm", val * spcz);
+			wstr_temp = str.ToStdWstring();
+			if (m_draw_frame)
+			{
+				px = gapw + m_frame_x - nx / 2.0;
+				py = gaph + m_frame_y - ny / 2.0;
+			}
+			else
+			{
+				px = gapw - nx / 2.0;
+				py = gaph - ny / 2.0;
+			}
+			m_text_renderer->RenderText(
+				wstr_temp, text_color,
+				px*sx, py*sy, sx, sy);
 		}
 	}
 
