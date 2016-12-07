@@ -91,6 +91,7 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	m_draw_camctr(false),
 	m_camctr_size(2.0),
 	m_draw_info(250),
+	m_load_update(false),
 	m_drawing_coord(false),
 	m_draw_frame(false),
 	m_test_speed(false),
@@ -1073,7 +1074,8 @@ void VRenderGLView::DrawVolumes(int peel)
 	int ny = GetGLSize().y;
 
 	//draw
-	if ((!m_drawing_coord &&
+	if (m_load_update ||
+		(!m_drawing_coord &&
 		m_int_mode!=2 &&
 		m_int_mode!=7 &&
 		m_updating) ||
@@ -1089,6 +1091,7 @@ void VRenderGLView::DrawVolumes(int peel)
 	{
 		m_updating = false;
 		m_force_clear = false;
+		m_load_update = false;
 
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vr_frame &&
@@ -6550,6 +6553,8 @@ DataGroup* VRenderGLView::AddVolumeData(VolumeData* vd, wxString group_name)
 		}
 	}
 
+	m_load_update = true;
+
 	return group;
 }
 
@@ -8915,13 +8920,13 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 			wstr_temp = str.ToStdWstring();
 			if (m_draw_frame)
 			{
-				px = gapw + m_frame_x - nx / 2.0;
-				py = gaph + m_frame_y - ny / 2.0;
+				px = 0.01*m_frame_w + m_frame_x - nx / 2.0;
+				py = 0.04*m_frame_h + m_frame_y - ny / 2.0;
 			}
 			else
 			{
-				px = gapw - nx / 2.0;
-				py = gaph - ny / 2.0;
+				px = 0.01*nx - nx / 2.0;
+				py = 0.04*ny - ny / 2.0;
 			}
 			m_text_renderer->RenderText(
 				wstr_temp, text_color,

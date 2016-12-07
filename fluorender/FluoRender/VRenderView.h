@@ -545,6 +545,7 @@ public:
 	bool m_draw_camctr;
 	double m_camctr_size;
 	int m_draw_info;
+	bool m_load_update;
 	bool m_drawing_coord;
 	bool m_draw_frame;
 	bool m_test_speed;
