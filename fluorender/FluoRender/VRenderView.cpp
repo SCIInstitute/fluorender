@@ -6573,6 +6573,9 @@ void VRenderGLView::RemoveVolumeData(wxString &name)
 {
 	int i, j;
 
+	if (m_cur_vol && m_cur_vol->GetName() == name)
+		m_cur_vol = 0;
+
 	for (i=0; i<(int)m_layer_list.size(); i++)
 	{
 		if (!m_layer_list[i])
