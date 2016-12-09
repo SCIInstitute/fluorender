@@ -65,6 +65,7 @@ namespace FLIVR
 		static bool texture_non_power_of_two();
 		static const int MAX_SHADER_UNIFORMS = 16;
 		static std::string glsl_version_;
+		static bool no_tex_unpack_;
 
 	protected:
 		unsigned int id_;

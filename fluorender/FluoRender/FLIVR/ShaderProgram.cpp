@@ -49,6 +49,7 @@ namespace FLIVR
 	int ShaderProgram::v_major_ = 4;
 	int ShaderProgram::v_minor_ = 0;
 	string ShaderProgram::glsl_version_;
+	bool ShaderProgram::no_tex_unpack_ = false;
 
 	ShaderProgram::ShaderProgram(const string& frag_shader) :
 	id_(0), vert_shader_(""), frag_shader_(frag_shader), valid_(false)
@@ -116,8 +117,10 @@ namespace FLIVR
 			{
 				string str = (char*)strRenderer;
 				if (str.find("FirePro") != string::npos)
-					glPixelTransferf(GL_RED_BIAS, FLT_MIN);//for AMD FirePro cards
+					no_tex_unpack_ = true;//for AMD FirePro cards
 			}
+#else
+			no_tex_unpack_ = true;//for Mac OS
 #endif
 
 			// Check for non-power-of-two texture support.
