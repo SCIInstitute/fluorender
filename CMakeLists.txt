@@ -533,6 +533,22 @@ add_custom_command(TARGET FluoRender POST_BUILD
   "${FluoRender_SOURCE_DIR}/Settings"
   "$<TARGET_FILE_DIR:FluoRender>")
 
+#copy data dir to the binary directory
+if (WIN32)
+add_custom_command(TARGET FluoRender POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  "${FluoRender_SOURCE_DIR}/Data"
+  "$<TARGET_FILE_DIR:FluoRender>/Data")
+endif()
+
+#benchmark files
+if (WIN32)
+add_custom_command(TARGET FluoRender POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  "${FluoRender_SOURCE_DIR}/Benchmark"
+  "$<TARGET_FILE_DIR:FluoRender>")
+endif()
+
 #make the Executable dir
 if (WIN32)
 add_custom_target(make_exe_dir ALL 

@@ -112,7 +112,11 @@ VRenderFrame::VRenderFrame(
 	wxFrame* frame,
 	const wxString& title,
 	int x, int y,
-	int w, int h)
+	int w, int h,
+	bool benchmark,
+	bool fullscreen,
+	bool windowed,
+	bool hidepanels)
 	: wxFrame(frame, wxID_ANY, title, wxPoint(x, y), wxSize(w, h),wxDEFAULT_FRAME_STYLE),
 	m_mov_view(0),
 	m_movie_view(0),
@@ -139,7 +143,8 @@ VRenderFrame::VRenderFrame(
 	m_ui_state(true),
 	m_cur_sel_type(-1),
 	m_cur_sel_vol(-1),
-	m_cur_sel_mesh(-1)
+	m_cur_sel_mesh(-1),
+	m_benchmark(benchmark)
 {
 	//create this first to read the settings
 	m_setting_dlg = new SettingDlg(this, this);
@@ -573,7 +578,15 @@ VRenderFrame::VRenderFrame(
 	SetMinSize(wxSize(800,600));
 
 	m_aui_mgr.Update();
-	Maximize();
+	
+	if (!windowed)
+		Maximize();
+
+	if (hidepanels)
+	{
+		m_ui_state = true;
+		ToggleAllTools(false);
+	}
 
 	//make movie settings
 	m_mov_view = 0;
@@ -770,6 +783,12 @@ VRenderFrame::VRenderFrame(
 				wxGetBitmapFromMemory(icon_calculations));
 			break;
 		}
+	}
+
+	if (fullscreen)
+	{
+		vrv->SetFullScreen();
+		Iconize();
 	}
 }
 
@@ -2140,22 +2159,25 @@ void VRenderFrame::OrganizeVRenderViews(int mode)
 }
 
 //hide/show tools
-void VRenderFrame::ToggleAllTools()
+void VRenderFrame::ToggleAllTools(bool cur_state)
 {
-	if (m_aui_mgr.GetPane(m_list_panel).IsShown() &&
-		m_aui_mgr.GetPane(m_tree_panel).IsShown() &&
-		m_aui_mgr.GetPane(m_movie_view).IsShown() &&
-		m_aui_mgr.GetPane(m_prop_panel).IsShown() &&
-		m_aui_mgr.GetPane(m_adjust_view).IsShown() &&
-		m_aui_mgr.GetPane(m_clip_view).IsShown())
-		m_ui_state = true;
-	else if (!m_aui_mgr.GetPane(m_list_panel).IsShown() &&
-		!m_aui_mgr.GetPane(m_tree_panel).IsShown() &&
-		!m_aui_mgr.GetPane(m_movie_view).IsShown() &&
-		!m_aui_mgr.GetPane(m_prop_panel).IsShown() &&
-		!m_aui_mgr.GetPane(m_adjust_view).IsShown() &&
-		!m_aui_mgr.GetPane(m_clip_view).IsShown())
-		m_ui_state = false;
+	if (cur_state)
+	{
+		if (m_aui_mgr.GetPane(m_list_panel).IsShown() &&
+			m_aui_mgr.GetPane(m_tree_panel).IsShown() &&
+			m_aui_mgr.GetPane(m_movie_view).IsShown() &&
+			m_aui_mgr.GetPane(m_prop_panel).IsShown() &&
+			m_aui_mgr.GetPane(m_adjust_view).IsShown() &&
+			m_aui_mgr.GetPane(m_clip_view).IsShown())
+			m_ui_state = true;
+		else if (!m_aui_mgr.GetPane(m_list_panel).IsShown() &&
+			!m_aui_mgr.GetPane(m_tree_panel).IsShown() &&
+			!m_aui_mgr.GetPane(m_movie_view).IsShown() &&
+			!m_aui_mgr.GetPane(m_prop_panel).IsShown() &&
+			!m_aui_mgr.GetPane(m_adjust_view).IsShown() &&
+			!m_aui_mgr.GetPane(m_clip_view).IsShown())
+			m_ui_state = false;
+	}
 
 	if (m_ui_state)
 	{
@@ -4710,7 +4732,7 @@ void VRenderFrame::OnTwitter(wxCommandEvent& WXUNUSED(event))
 
 void VRenderFrame::OnShowHideUI(wxCommandEvent& WXUNUSED(event))
 {
-	ToggleAllTools();
+	ToggleAllTools(true);
 }
 
 void VRenderFrame::OnShowHideToolbar(wxCommandEvent& WXUNUSED(event))

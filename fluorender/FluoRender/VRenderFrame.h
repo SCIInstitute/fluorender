@@ -157,9 +157,13 @@ class VRenderFrame: public wxFrame
 
 public:
 	VRenderFrame(wxFrame* frame,
-                 const wxString& title,
-                 int x, int y,
-                 int w, int h);
+		const wxString& title,
+		int x, int y,
+		int w, int h,
+		bool benchmark,
+		bool fullscreen,
+		bool windowed,
+		bool hidepanels);
 	~VRenderFrame();
 
 	TreePanel *GetTree();
@@ -184,7 +188,7 @@ public:
 	//organize render views
 	void OrganizeVRenderViews(int mode);
 	//hide/show tools
-	void ToggleAllTools();
+	void ToggleAllTools(bool cur_state);
 	//show/hide panes
 	void ShowPane(wxPanel* pane, bool show=true);
 
@@ -332,6 +336,9 @@ public:
 	TextRenderer* GetTextRenderer()
 	{ return m_text_renderer; }
 
+	bool GetBenchmark()
+	{ return m_benchmark; }
+
 public: //public so export window can see it and set it. 
 	RecorderDlg* m_recorder_dlg;
 	VMovieView* m_movie_view;
@@ -414,6 +421,9 @@ private:
 
 	//draw text
 	TextRenderer *m_text_renderer;
+
+	//benchmark mode
+	bool m_benchmark;
 
 private:
 	//views

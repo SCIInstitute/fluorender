@@ -37,53 +37,88 @@ DEALINGS IN THE SOFTWARE.
 
 IMPLEMENT_APP(VRenderApp)
 
-static const wxCmdLineEntryDesc g_cmdLineDesc [] =
+static const wxCmdLineEntryDesc g_cmdLineDesc[] =
 {
-   { wxCMD_LINE_PARAM, NULL, NULL, NULL,
-      wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL|wxCMD_LINE_PARAM_MULTIPLE },
-   { wxCMD_LINE_NONE }
+	{ wxCMD_LINE_SWITCH, "b", "benchmark", "start FluoRender in the benchmark mode",
+		wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL},
+	{ wxCMD_LINE_SWITCH, "f", "fullscreen", "start FluoRender in the full screen mode",
+		wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL },
+	{ wxCMD_LINE_SWITCH, "win", "windowed", "start FluoRender in a non maximized window",
+		wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL },
+	{ wxCMD_LINE_SWITCH, "hp", "hidepanels", "start FluoRender without showing its ui panels",
+		wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL },
+	{ wxCMD_LINE_OPTION, "w", "width", "width of FluoRender's start window",
+		wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL },
+	{ wxCMD_LINE_OPTION, "h", "height", "height of FluoRender's start window",
+		wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL },
+	{ wxCMD_LINE_PARAM, NULL, NULL, "a volume file to load",
+		wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL | wxCMD_LINE_PARAM_MULTIPLE },
+	{ wxCMD_LINE_NONE }
 };
 
 bool VRenderApp::OnInit()
 {
-   char cpath[FILENAME_MAX];
-   GETCURRENTDIR(cpath, sizeof(cpath));
-   ::wxSetWorkingDirectory(wxString(s2ws(std::string(cpath))));
-   // call default behaviour (mandatory)
-   if (!wxApp::OnInit())
-      return false;
-   //add png handler
-   wxImage::AddHandler(new wxPNGHandler);
-   //the frame
-   std::string title =  std::string(FLUORENDER_TITLE) + std::string(" ") +
-      std::string(VERSION_MAJOR_TAG) +  std::string(".") +
-      std::string(VERSION_MINOR_TAG);
-   wxFrame* frame = new VRenderFrame(
-         (wxFrame*) NULL,
-         wxString(title),
-         -1,-1,1600,1000);
-   SetTopWindow(frame);
-   frame->Show();
-   if (m_file_num>0)
-      ((VRenderFrame*)frame)->StartupLoad(m_files);
-   return true;
+	char cpath[FILENAME_MAX];
+	GETCURRENTDIR(cpath, sizeof(cpath));
+	::wxSetWorkingDirectory(wxString(s2ws(std::string(cpath))));
+	// call default behaviour (mandatory)
+	if (!wxApp::OnInit())
+		return false;
+	//add png handler
+	wxImage::AddHandler(new wxPNGHandler);
+	//the frame
+	std::string title = std::string(FLUORENDER_TITLE) + std::string(" ") +
+		std::string(VERSION_MAJOR_TAG) + std::string(".") +
+		std::string(VERSION_MINOR_TAG);
+	wxFrame* frame = new VRenderFrame(
+		(wxFrame*)NULL,
+		wxString(title),
+		-1, -1,
+		m_win_width, m_win_height,
+		m_benchmark, m_fullscreen,
+		m_windowed, m_hidepanels);
+	SetTopWindow(frame);
+	frame->Show();
+	if (m_file_num > 0)
+		((VRenderFrame*)frame)->StartupLoad(m_files);
+	return true;
 }
 
 void VRenderApp::OnInitCmdLine(wxCmdLineParser& parser)
 {
-   parser.SetDesc (g_cmdLineDesc);
+	parser.SetDesc(g_cmdLineDesc);
+	parser.SetSwitchChars("-");
 }
 
 bool VRenderApp::OnCmdLineParsed(wxCmdLineParser& parser)
 {
-   int i=0;
-   for (i = 0; i < (int)parser.GetParamCount(); i++)
-   {
-      wxString file = parser.GetParam(i);
-      m_files.Add(file);
-   }
+	m_file_num = 0;
+	m_benchmark = false;
+	m_fullscreen = false;
+	m_windowed = false;
+	m_hidepanels = false;
+	m_win_width = 1600;
+	m_win_height = 1000;
 
-   m_file_num = i;
+	//control string
+	if (parser.Found("b"))
+		m_benchmark = true;
+	if (parser.Found("f"))
+		m_fullscreen = true;
+	if (parser.Found("win"))
+		m_windowed = true;
+	if (parser.Found("hp"))
+		m_hidepanels = true;
+	long lVal;
+	if (parser.Found("w", &lVal))
+		m_win_width = lVal;
+	if (parser.Found("h", &lVal))
+		m_win_height = lVal;
 
-   return true;
+	//volumes to load
+	for (size_t i = 0; i < parser.GetParamCount(); ++i)
+		m_files.Add(parser.GetParam(i));
+	m_file_num = m_files.GetCount();
+
+	return true;
 }

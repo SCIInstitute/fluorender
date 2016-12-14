@@ -41,6 +41,12 @@ public:
 private:
 	wxArrayString m_files;
 	int m_file_num;
+	bool m_benchmark;
+	bool m_fullscreen;
+	bool m_windowed;
+	bool m_hidepanels;
+	int m_win_width;
+	int m_win_height;
 };
 
 DECLARE_APP(VRenderApp)

@@ -313,12 +313,13 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	//link cells
 	m_cell_link(false),
 	//new cell id
-	m_cell_new_id(false)
+	m_cell_new_id(false),
+	//benchmark
+	m_bstarted(false)
 {
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;
 
-	goTimer = new nv::Timer(10);
 	m_sb_num = "50";
 #ifdef _WIN32
 	//tablet initialization
@@ -329,6 +330,13 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	}
 #endif
 	LoadBrushSettings();
+
+	goTimer = new nv::Timer(10);
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetBenchmark())
+		m_benchmark = true;
+	else
+		m_benchmark = false;
 }
 
 #ifdef _WIN32
@@ -358,10 +366,26 @@ HCTX VRenderGLView::TabletInit(HWND hWnd)
 
 VRenderGLView::~VRenderGLView()
 {
-	SaveBrushSettings();
-
+	if (m_benchmark)
+	{
+		clock_t btotal = clock() - m_bstart;
+		int msec = btotal * 1000 / CLOCKS_PER_SEC;
+		double fps = double(m_bframes) * double(CLOCKS_PER_SEC) / double(btotal);
+		wxString string = wxString("FluoRender has finished benchmarking.\n") +
+			wxString("Results:\n") +
+			wxString("Render size: ") + wxString::Format("%d X %d\n", m_size.GetWidth(), m_size.GetHeight()) +
+			wxString("Time: ") + wxString::Format("%d msec\n", msec) +
+			wxString("Frames: ") + wxString::Format("%llu\n", m_bframes) +
+			wxString("FPS: ") + wxString::Format("%.2f", fps);
+		wxMessageDialog *diag = new wxMessageDialog(this, string, "Benchmark Results",
+			wxOK | wxICON_INFORMATION);
+		diag->ShowModal();
+	}
 	goTimer->stop();
 	delete goTimer;
+
+	SaveBrushSettings();
+
 #ifdef _WIN32
 	//tablet
 	if (m_hTab)
@@ -500,7 +524,6 @@ void VRenderGLView::Init()
 			vr_frame->SetTextureUndos();
 		}
 		//glViewport(0, 0, (GLint)(GetSize().x), (GLint)(GetSize().y));
-		goTimer->start();
 		glGenBuffers(1, &m_quad_vbo);
 		m_quad_vao = 0;
 		glGenBuffers(1, &m_misc_vbo);
@@ -509,6 +532,8 @@ void VRenderGLView::Init()
 		glEnable( GL_MULTISAMPLE );
 
 		m_initialized = true;
+
+		goTimer->start();
 	}
 }
 
@@ -4345,6 +4370,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 	bool start_loop = true;
 	m_drawing_coord = false;
 
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+
 	//check memory swap status
 	if (TextureRenderer::get_mem_swap() &&
 		TextureRenderer::get_start_update_loop() &&
@@ -4353,11 +4380,28 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		refresh = true;
 		start_loop = false;
 	}
+
 	if (m_capture_rotat ||
 		m_capture_tsequ ||
 		m_capture_param ||
 		m_test_speed)
 	{
+		refresh = true;
+		if (TextureRenderer::get_mem_swap() &&
+			TextureRenderer::get_done_update_loop())
+			m_pre_draw = true;
+	}
+
+	if (frame && frame->GetBenchmark())
+	{
+		double fps = 1.0 / goTimer->average();
+		wxString title = wxString(FLUORENDER_TITLE) +
+			" " + wxString(VERSION_MAJOR_TAG) +
+			"." + wxString(VERSION_MINOR_TAG) +
+			" Benchmarking... FPS = " +
+			wxString::Format("%.2f", fps);
+		frame->SetTitle(title);
+
 		refresh = true;
 		if (TextureRenderer::get_mem_swap() &&
 			TextureRenderer::get_done_update_loop())
@@ -4372,7 +4416,6 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 	{
 		UpdateBrushState();
 
-		VRenderFrame* frame = (VRenderFrame*)m_frame;
 		//draw_mask
 		if (wxGetKeyState(wxKeyCode('V')) &&
 			m_draw_mask)
@@ -4593,11 +4636,23 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 				m_vrv->m_view_sizer->Add(this, 1, wxEXPAND);
 				m_vrv->Layout();
 				m_vrv->m_full_frame->Hide();
+				if (frame)
+				{
 #ifdef _WIN32
-				if (frame && frame->GetSettingDlg() &&
-					!frame->GetSettingDlg()->GetShowCursor())
-					ShowCursor(true);
+					if (frame->GetSettingDlg() &&
+						!frame->GetSettingDlg()->GetShowCursor())
+						ShowCursor(true);
 #endif
+					if (frame->GetBenchmark())
+						frame->Close(true);
+					else
+					{
+						frame->Iconize(false);
+						frame->SetFocus();
+						frame->Raise();
+						frame->Show();
+					}
+				}
 				refresh = true;
 			}
 		}
@@ -5968,7 +6023,6 @@ void VRenderGLView::ForceDraw()
 	if (m_int_mode == 8)
 		m_int_mode = 7;
 
-	goTimer->sample();
 
 	if (TextureRenderer::get_invalidate_tex())
 	{
@@ -5988,6 +6042,18 @@ void VRenderGLView::ForceDraw()
 	}
 
 	SwapBuffers();
+	goTimer->sample();
+	if (m_benchmark)
+	{
+		if (m_bstarted)
+			m_bframes++;
+		else
+		{
+			m_bstart = clock();
+			m_bframes = 0;
+			m_bstarted = true;
+		}
+	}
 
 	if (m_resize)
 		m_resize = false;
@@ -13681,7 +13747,7 @@ void VRenderView::OnFreeChk(wxCommandEvent& event)
 	RefreshGL();
 }
 
-void VRenderView::OnFullScreen(wxCommandEvent& event)
+void VRenderView::SetFullScreen()
 {
 	if (m_glview->GetParent() != m_full_frame)
 	{
@@ -13702,9 +13768,15 @@ void VRenderView::OnFullScreen(wxCommandEvent& event)
 				ShowCursor(false);
 #endif
 		}
+		m_full_frame->SetFocus();
 		m_full_frame->Show();
 		RefreshGL();
 	}
+}
+
+void VRenderView::OnFullScreen(wxCommandEvent& event)
+{
+	SetFullScreen();
 }
 
 void VRenderView::SaveDefault(unsigned int mask)

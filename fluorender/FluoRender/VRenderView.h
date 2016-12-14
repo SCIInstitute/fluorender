@@ -872,6 +872,12 @@ private:
 	static bool m_enlarge;
 	static double m_enlarge_scale;
 
+	//for benchmark
+	bool m_benchmark;
+	bool m_bstarted;
+	clock_t m_bstart;
+	unsigned long long m_bframes;
+
 private:
 #ifdef _WIN32
 	//wacom tablet
@@ -1539,6 +1545,9 @@ public:
 	//text renderer
 	void SetTextRenderer(TextRenderer* text_renderer)
 	{ if (m_glview) m_glview->SetTextRenderer(text_renderer); }
+
+	//set full screen
+	void SetFullScreen();
 
 public:
 	wxWindow* m_frame;

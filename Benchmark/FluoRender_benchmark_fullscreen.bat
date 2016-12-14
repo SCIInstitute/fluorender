@@ -1,0 +1,1 @@
+FluoRender.exe -b -hp -f "./Data/zf_ch01.tif" "./Data/zf_ch02.tif" "./Data/zf_ch03.tif"
