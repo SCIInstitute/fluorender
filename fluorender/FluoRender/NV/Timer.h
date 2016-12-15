@@ -51,9 +51,13 @@ DEALINGS IN THE SOFTWARE.
 #ifdef _WIN32
 #define WINDOWS_LEAN_AND_MEAN
 #include <windows.h>
-#endif
-// includes for other OSes will go here
+#include <winbase.h>
 
+// includes for other OSes will go here
+#else
+#include <time.h>
+#include <sys/time.h>
+#endif
 
 //
 // Namespace
@@ -132,8 +136,13 @@ private:
     LARGE_INTEGER _nStopCount;
     
     LARGE_INTEGER _nFrequency;
-#endif
+
 // Data for other OSes potentially goes here
+#else
+    unsigned long long _nStartCount;
+    unsigned long long _nStopCount;
+    unsigned long long _nFrequency;
+#endif
 
     double _nLastPeriod;
     double _nSum;

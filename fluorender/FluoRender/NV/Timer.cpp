@@ -81,6 +81,10 @@ Timer::Timer(unsigned int nBoxFilterSize) :
   _nStartCount(gcLargeIntZero)
 , _nStopCount(gcLargeIntZero)
 , _nFrequency(gcLargeIntZero) ,
+#else
+_nStartCount(0)
+, _nStopCount(0)
+, _nFrequency(0) ,
 #endif
   _nLastPeriod(0.0)
 , _nSum(0.0)
@@ -91,6 +95,8 @@ Timer::Timer(unsigned int nBoxFilterSize) :
 {
 #ifdef _WIN32
 	QueryPerformanceFrequency(&_nFrequency);
+#else
+    _nFrequency = 1000;
 #endif
 	// create array to store timing results
 	_aIntervals = new double[_nBoxFilterSize];
@@ -120,6 +126,11 @@ Timer::start()
 
 #ifdef _WIN32
 	QueryPerformanceCounter(&_nStartCount);
+#else
+    timeval t;
+    gettimeofday(&t, NULL);
+    _nStartCount = t.tv_sec * 1000;
+    _nStartCount += t.tv_usec / 1000;
 #endif
 	_bClockRuns = true;
 }
@@ -135,6 +146,13 @@ Timer::stop()
 	QueryPerformanceCounter(&_nStopCount);
 	_nLastPeriod = static_cast<double>(_nStopCount.QuadPart - _nStartCount.QuadPart) 
 		/ static_cast<double>(_nFrequency.QuadPart);
+#else
+    timeval t;
+    gettimeofday(&t, NULL);
+    _nStopCount = t.tv_sec * 1000;
+    _nStopCount += t.tv_usec / 1000;
+    _nLastPeriod = static_cast<double>(_nStopCount - _nStartCount)
+        / static_cast<double>(_nFrequency);
 #endif
 	_nSum -= _aIntervals[_iFilterPosition];
 	_nSum += _nLastPeriod;
@@ -156,6 +174,15 @@ Timer::sample()
 	_nLastPeriod = static_cast<double>(nCurrentCount.QuadPart - _nStartCount.QuadPart) 
 		/ static_cast<double>(_nFrequency.QuadPart);
 	_nStartCount = nCurrentCount;
+#else
+    unsigned long long nCurrentCount;
+    timeval t;
+    gettimeofday(&t, NULL);
+    nCurrentCount = t.tv_sec * 1000;
+    nCurrentCount += t.tv_usec / 1000;
+    _nLastPeriod = static_cast<double>(nCurrentCount - _nStartCount)
+        / static_cast<double>(_nFrequency);
+    _nStartCount = nCurrentCount;
 #endif
 	_nSum -= _aIntervals[_iFilterPosition];
 	_nSum += _nLastPeriod;
