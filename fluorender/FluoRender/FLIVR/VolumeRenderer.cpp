@@ -631,22 +631,34 @@ namespace FLIVR
 		int w2 = w;
 		int h2 = h;
 
-		double sf = CalcScaleFactor(w, h, tex_->nx(), tex_->ny(), zoom);
-		if (fabs(sf-sfactor_)>0.05)
+		if (noise_red_)
 		{
-			sfactor_ = sf;
-			blend_framebuffer_resize_ = true;
-			filter_buffer_resize_ = true;
-		}
-		else if (sf==1.0 && sfactor_!=1.0)
-		{
-			sfactor_ = sf;
-			blend_framebuffer_resize_ = true;
-			filter_buffer_resize_ = true;
-		}
+			double sf = CalcScaleFactor(w, h, tex_->nx(), tex_->ny(), zoom);
+			if (fabs(sf-sfactor_)>0.05)
+			{
+				sfactor_ = sf;
+				blend_framebuffer_resize_ = true;
+				filter_buffer_resize_ = true;
+			}
+			else if (sf==1.0 && sfactor_!=1.0)
+			{
+				sfactor_ = sf;
+				blend_framebuffer_resize_ = true;
+				filter_buffer_resize_ = true;
+			}
 
-		w2 = int(w*sfactor_+0.5);
-		h2 = int(h*sfactor_+0.5);
+			w2 = int(w*sfactor_+0.5);
+			h2 = int(h*sfactor_+0.5);
+		}
+		else
+		{
+			if (sfactor_ != 1.0)
+			{
+				sfactor_ = 1.0;
+				blend_framebuffer_resize_ = true;
+				filter_buffer_resize_ = true;
+			}
+		}
 
 		if(blend_num_bits_ > 8)
 		{
