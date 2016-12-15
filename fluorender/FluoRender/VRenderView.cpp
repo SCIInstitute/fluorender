@@ -4627,7 +4627,12 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		//full screen
 		if (wxGetKeyState(WXK_ESCAPE))
 		{
-			if (GetParent() == m_vrv->m_full_frame)
+			if (m_benchmark)
+			{
+				if (frame)
+					frame->Close();
+			}
+			else if (GetParent() == m_vrv->m_full_frame)
 			{
 				Reparent(m_vrv);
 				m_vrv->m_view_sizer->Add(this, 1, wxEXPAND);
@@ -4640,15 +4645,10 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 						!frame->GetSettingDlg()->GetShowCursor())
 						ShowCursor(true);
 #endif
-					if (frame->GetBenchmark())
-						frame->Close(true);
-					else
-					{
-						frame->Iconize(false);
-						frame->SetFocus();
-						frame->Raise();
-						frame->Show();
-					}
+					frame->Iconize(false);
+					frame->SetFocus();
+					frame->Raise();
+					frame->Show();
 				}
 				refresh = true;
 			}
