@@ -64,7 +64,7 @@ using namespace nv;
 //
 
 #ifdef _WIN32
-const LARGE_INTEGER gcLargeIntZero = {{0, 0}};
+const LARGE_INTEGER gcLargeIntZero = { {0, 0} };
 #endif
 // ----------------------------------------------------------------------------
 // Timer class
@@ -78,25 +78,27 @@ const LARGE_INTEGER gcLargeIntZero = {{0, 0}};
 //
 Timer::Timer(unsigned int nBoxFilterSize) :
 #ifdef _WIN32
-  _nStartCount(gcLargeIntZero)
-, _nStopCount(gcLargeIntZero)
-, _nFrequency(gcLargeIntZero) ,
+	_nStartCount(gcLargeIntZero),
+	_nStopCount(gcLargeIntZero),
+	_nFrequency(gcLargeIntZero),
 #else
-_nStartCount(0)
-, _nStopCount(0)
-, _nFrequency(0) ,
+	_nStartCount(0),
+	_nStopCount(0),
+	_nFrequency(0),
 #endif
-  _nLastPeriod(0.0)
-, _nSum(0.0)
-, _nBoxFilterSize(nBoxFilterSize)
-, _iFilterPosition(0)
-, _aIntervals(0)
-, _bClockRuns(false)
+	_nLastPeriod(0.0),
+	_nSum(0.0),
+	_nTotal(0.0),
+	_nCount(0),
+	_nBoxFilterSize(nBoxFilterSize),
+	_iFilterPosition(0),
+	_aIntervals(0),
+	_bClockRuns(false)
 {
 #ifdef _WIN32
 	QueryPerformanceFrequency(&_nFrequency);
 #else
-    _nFrequency = 1000;
+	_nFrequency = 1000;
 #endif
 	// create array to store timing results
 	_aIntervals = new double[_nBoxFilterSize];
@@ -127,10 +129,10 @@ Timer::start()
 #ifdef _WIN32
 	QueryPerformanceCounter(&_nStartCount);
 #else
-    timeval t;
-    gettimeofday(&t, NULL);
-    _nStartCount = t.tv_sec * 1000;
-    _nStartCount += t.tv_usec / 1000;
+	timeval t;
+	gettimeofday(&t, NULL);
+	_nStartCount = t.tv_sec * 1000;
+	_nStartCount += t.tv_usec / 1000;
 #endif
 	_bClockRuns = true;
 }
@@ -144,15 +146,15 @@ Timer::stop()
 
 #ifdef _WIN32
 	QueryPerformanceCounter(&_nStopCount);
-	_nLastPeriod = static_cast<double>(_nStopCount.QuadPart - _nStartCount.QuadPart) 
+	_nLastPeriod = static_cast<double>(_nStopCount.QuadPart - _nStartCount.QuadPart)
 		/ static_cast<double>(_nFrequency.QuadPart);
 #else
-    timeval t;
-    gettimeofday(&t, NULL);
-    _nStopCount = t.tv_sec * 1000;
-    _nStopCount += t.tv_usec / 1000;
-    _nLastPeriod = static_cast<double>(_nStopCount - _nStartCount)
-        / static_cast<double>(_nFrequency);
+	timeval t;
+	gettimeofday(&t, NULL);
+	_nStopCount = t.tv_sec * 1000;
+	_nStopCount += t.tv_usec / 1000;
+	_nLastPeriod = static_cast<double>(_nStopCount - _nStartCount)
+		/ static_cast<double>(_nFrequency);
 #endif
 	_nSum -= _aIntervals[_iFilterPosition];
 	_nSum += _nLastPeriod;
@@ -171,24 +173,29 @@ Timer::sample()
 #ifdef _WIN32
 	LARGE_INTEGER nCurrentCount;
 	QueryPerformanceCounter(&nCurrentCount);
-	_nLastPeriod = static_cast<double>(nCurrentCount.QuadPart - _nStartCount.QuadPart) 
+	_nLastPeriod = static_cast<double>(nCurrentCount.QuadPart - _nStartCount.QuadPart)
 		/ static_cast<double>(_nFrequency.QuadPart);
 	_nStartCount = nCurrentCount;
 #else
-    unsigned long long nCurrentCount;
-    timeval t;
-    gettimeofday(&t, NULL);
-    nCurrentCount = t.tv_sec * 1000;
-    nCurrentCount += t.tv_usec / 1000;
-    _nLastPeriod = static_cast<double>(nCurrentCount - _nStartCount)
-        / static_cast<double>(_nFrequency);
-    _nStartCount = nCurrentCount;
+	unsigned long long nCurrentCount;
+	timeval t;
+	gettimeofday(&t, NULL);
+	nCurrentCount = t.tv_sec * 1000;
+	nCurrentCount += t.tv_usec / 1000;
+	_nLastPeriod = static_cast<double>(nCurrentCount - _nStartCount)
+		/ static_cast<double>(_nFrequency);
+	_nStartCount = nCurrentCount;
 #endif
 	_nSum -= _aIntervals[_iFilterPosition];
 	_nSum += _nLastPeriod;
 	_aIntervals[_iFilterPosition] = _nLastPeriod;
 	_iFilterPosition++;
 	_iFilterPosition %= _nBoxFilterSize;
+
+	//total
+	_nCount++;
+	if (_nCount >= _nBoxFilterSize)
+		_nTotal += _nLastPeriod;
 }
 
 // time
@@ -215,8 +222,29 @@ double
 Timer::average()
 const
 {
-	return _nSum/_nBoxFilterSize;
+	return _nSum / _nBoxFilterSize;
 }
 
+unsigned long long
+Timer::count() const
+{
+	if (_nCount >= _nBoxFilterSize)
+		return _nCount - _nBoxFilterSize;
+	else
+		return 0;
+}
 
+double
+Timer::total_time() const
+{
+	return _nTotal;
+}
 
+double
+Timer::total_fps() const
+{
+	if (_nCount >= _nBoxFilterSize)
+		return static_cast<double>(_nCount) / _nTotal;
+	else
+		return 0;
+}

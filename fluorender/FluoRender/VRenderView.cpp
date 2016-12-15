@@ -313,9 +313,7 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	//link cells
 	m_cell_link(false),
 	//new cell id
-	m_cell_new_id(false),
-	//benchmark
-	m_bstarted(false)
+	m_cell_new_id(false)
 {
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;
@@ -331,7 +329,7 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 #endif
 	LoadBrushSettings();
 
-	goTimer = new nv::Timer(10);
+	m_timer = new nv::Timer(10);
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetBenchmark())
 		m_benchmark = true;
@@ -368,21 +366,20 @@ VRenderGLView::~VRenderGLView()
 {
 	if (m_benchmark)
 	{
-		clock_t btotal = clock() - m_bstart;
-		int msec = btotal * 1000 / CLOCKS_PER_SEC;
-		double fps = double(m_bframes) * double(CLOCKS_PER_SEC) / double(btotal);
+		int msec = int(m_timer->total_time() * 1000.0);
+		double fps = m_timer->total_fps();
 		wxString string = wxString("FluoRender has finished benchmarking.\n") +
 			wxString("Results:\n") +
 			wxString("Render size: ") + wxString::Format("%d X %d\n", m_size.GetWidth(), m_size.GetHeight()) +
 			wxString("Time: ") + wxString::Format("%d msec\n", msec) +
-			wxString("Frames: ") + wxString::Format("%llu\n", m_bframes) +
+			wxString("Frames: ") + wxString::Format("%llu\n", m_timer->count()) +
 			wxString("FPS: ") + wxString::Format("%.2f", fps);
 		wxMessageDialog *diag = new wxMessageDialog(this, string, "Benchmark Results",
 			wxOK | wxICON_INFORMATION);
 		diag->ShowModal();
 	}
-	goTimer->stop();
-	delete goTimer;
+	m_timer->stop();
+	delete m_timer;
 
 	SaveBrushSettings();
 
@@ -533,7 +530,7 @@ void VRenderGLView::Init()
 
 		m_initialized = true;
 
-		goTimer->start();
+		m_timer->start();
 	}
 }
 
@@ -4394,7 +4391,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 
 	if (frame && frame->GetBenchmark())
 	{
-		double fps = 1.0 / goTimer->average();
+		double fps = 1.0 / m_timer->average();
 		wxString title = wxString(FLUORENDER_TITLE) +
 			" " + wxString(VERSION_MAJOR_TAG) +
 			"." + wxString(VERSION_MINOR_TAG) +
@@ -6042,18 +6039,7 @@ void VRenderGLView::ForceDraw()
 	}
 
 	SwapBuffers();
-	goTimer->sample();
-	if (m_benchmark)
-	{
-		if (m_bstarted)
-			m_bframes++;
-		else
-		{
-			m_bstart = clock();
-			m_bframes = 0;
-			m_bstarted = true;
-		}
-	}
+	m_timer->sample();
 
 	if (m_resize)
 		m_resize = false;
@@ -8916,7 +8902,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	float gapw = m_text_renderer->GetSize();
 	float gaph = gapw*2;
 
-	double fps_ = 1.0/goTimer->average();
+	double fps_ = 1.0/ m_timer->average();
 	wxString str;
 	Color text_color = GetTextColor();
 	if (TextureRenderer::get_mem_swap())

@@ -66,98 +66,101 @@ DEALINGS IN THE SOFTWARE.
 namespace nv {
 
 
-// ----------------------------------------------------------------------------
-// Timer class
-//
-class Timer
-{
-public:
-    // 
-    // Construction and destruction
-    //
-    
-            // Default constructor
-            //
-    Timer(unsigned int nBoxFilterSize = 1);
-    
-            // Destructor
-            //
-   ~Timer();
-   
-    
-    //
-    // Public methods
-    //
-    
-            // start
-            //
-            void
-    start();
-    
-            // stop
-            //
-            void
-    stop();
-    
-            // sample
-            //
-            void
-    sample();
-    
-            // time
-            //
-            // Description:
-            //      Time interval in ms
-            //
-            double
-    time()
-            const;
-            
-            // average
-            //
-            // Description:
-            //      Average time interval of the last events in ms.
-            //          Box filter size determines how many events get
-            //      tracked. If not at least filter-size events were timed
-            //      the result is undetermined.
-            //
-            double
-    average()
-            const;
-   
+	// ----------------------------------------------------------------------------
+	// Timer class
+	//
+	class Timer
+	{
+	public:
+		// 
+		// Construction and destruction
+		//
 
-private:
-    //
-    // Private data
-    //
-    
+		// Default constructor
+		//
+		Timer(unsigned int nBoxFilterSize = 1);
+
+		// Destructor
+		//
+		~Timer();
+
+
+		//
+		// Public methods
+		//
+
+		// start
+		//
+		void
+			start();
+
+		// stop
+		//
+		void
+			stop();
+
+		// sample
+		//
+		void
+			sample();
+
+		// time
+		//
+		// Description:
+		//      Time interval in ms
+		//
+		double
+			time()
+			const;
+
+		// average
+		//
+		// Description:
+		//      Average time interval of the last events in ms.
+		//          Box filter size determines how many events get
+		//      tracked. If not at least filter-size events were timed
+		//      the result is undetermined.
+		//
+		double
+			average()
+			const;
+
+		unsigned long long
+			count() const;
+
+		double
+			total_time() const;
+
+		double
+			total_fps() const;
+
+	private:
+		//
+		// Private data
+		//
+
 #ifdef _WIN32
-    LARGE_INTEGER _nStartCount;
-    LARGE_INTEGER _nStopCount;
-    
-    LARGE_INTEGER _nFrequency;
-
-// Data for other OSes potentially goes here
+		LARGE_INTEGER _nStartCount;
+		LARGE_INTEGER _nStopCount;
+		LARGE_INTEGER _nFrequency;
+		// Data for other OSes potentially goes here
 #else
-    unsigned long long _nStartCount;
-    unsigned long long _nStopCount;
-    unsigned long long _nFrequency;
+		unsigned long long _nStartCount;
+		unsigned long long _nStopCount;
+		unsigned long long _nFrequency;
 #endif
 
-    double _nLastPeriod;
-    double _nSum;
-    
-    unsigned int _nBoxFilterSize;
-    unsigned int _iFilterPosition;
-    double *     _aIntervals;
-    
-    bool _bClockRuns;
-};
+		double _nLastPeriod;
+		double _nSum;
+		double _nTotal;
+		unsigned long long _nCount;
 
+		unsigned int _nBoxFilterSize;
+		unsigned int _iFilterPosition;
+		double *     _aIntervals;
 
-
-
-
+		bool _bClockRuns;
+	};
 }; // end namespace nv
 
 #endif // NV_TIMER_H 

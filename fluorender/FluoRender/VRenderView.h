@@ -819,7 +819,7 @@ private:
 	KernelExecutor m_kernel_executor;
 
 	//timer
-	nv::Timer *goTimer;
+	nv::Timer *m_timer;
 
 	//wacom support
 #ifdef _WIN32
@@ -874,9 +874,6 @@ private:
 
 	//for benchmark
 	bool m_benchmark;
-	bool m_bstarted;
-	clock_t m_bstart;
-	unsigned long long m_bframes;
 
 private:
 #ifdef _WIN32
