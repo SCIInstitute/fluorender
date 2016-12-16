@@ -4630,7 +4630,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		//full screen
 		if (wxGetKeyState(WXK_ESCAPE))
 		{
-			m_fullscreen_trigger.StartOnce();
+            m_fullscreen_trigger.Start(10);
 		}
 
 		//forced refresh
@@ -4662,6 +4662,7 @@ void VRenderGLView::OnKeyDown(wxKeyEvent& event)
 
 void VRenderGLView::OnQuitFscreen(wxTimerEvent& event)
 {
+    m_fullscreen_trigger.Stop();
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 	if (!frame || !m_vrv)
 		return;
@@ -11831,22 +11832,21 @@ void VRenderView::CreateBar()
 		"Set Default Render View Settings");
 
 	m_options_toolbar->Realize();
-#ifdef _WIN32
-	m_full_screen_btn = new wxToolBar(this, wxID_ANY,
+
+    m_full_screen_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(full_view);
 	m_full_screen_btn->AddTool(
 		ID_FullScreenBtn, "Full Screen",
 		bitmap, "Show full screen");
 	m_full_screen_btn->Realize();
-#endif
+    
 	//add the toolbars and other options in order
 	sizer_h_1->AddSpacer(40);
 	sizer_h_1->Add(m_options_toolbar,1,wxEXPAND);
 	sizer_h_1->AddSpacer(35);
-#ifndef _DARWIN
 	sizer_h_1->Add(m_full_screen_btn, 0, wxALIGN_CENTER);
-#endif
+
 	//bar left///////////////////////////////////////////////////
 	wxBoxSizer* sizer_v_3 = new wxBoxSizer(wxVERTICAL);
 	m_left_toolbar = new wxToolBar(this, wxID_ANY,
