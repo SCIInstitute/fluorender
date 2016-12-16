@@ -13768,7 +13768,9 @@ void VRenderView::SetFullScreen()
 				ShowCursor(false);
 #endif
 		}
+		m_full_frame->Iconize(false);
 		m_full_frame->SetFocus();
+		m_full_frame->Raise();
 		m_full_frame->Show();
 		RefreshGL();
 	}
