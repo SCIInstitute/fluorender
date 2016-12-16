@@ -58,9 +58,10 @@ BEGIN_EVENT_TABLE(VRenderGLView, wxGLCanvas)
 	EVT_MOUSE_EVENTS(VRenderGLView::OnMouse)
 	EVT_IDLE(VRenderGLView::OnIdle)
 	EVT_KEY_DOWN(VRenderGLView::OnKeyDown)
-	END_EVENT_TABLE()
+	EVT_TIMER(ID_ftrigger, VRenderGLView::OnQuitFscreen)
+END_EVENT_TABLE()
 
-	VRenderGLView::VRenderGLView(wxWindow* frame,
+VRenderGLView::VRenderGLView(wxWindow* frame,
 	wxWindow* parent,
 	wxWindowID id,
 	const wxGLAttributes& attriblist,
@@ -313,7 +314,9 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	//link cells
 	m_cell_link(false),
 	//new cell id
-	m_cell_new_id(false)
+	m_cell_new_id(false),
+	//timer for fullscreen
+	m_fullscreen_trigger(this, ID_ftrigger)
 {
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;
@@ -4627,33 +4630,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		//full screen
 		if (wxGetKeyState(WXK_ESCAPE))
 		{
-			if (m_benchmark)
-			{
-				if (m_vrv->m_full_frame)
-					m_vrv->m_full_frame->Hide();
-				if (frame)
-					frame->Close();
-			}
-			else if (GetParent() == m_vrv->m_full_frame)
-			{
-				Reparent(m_vrv);
-				m_vrv->m_view_sizer->Add(this, 1, wxEXPAND);
-				m_vrv->Layout();
-				m_vrv->m_full_frame->Hide();
-				if (frame)
-				{
-#ifdef _WIN32
-					if (frame->GetSettingDlg() &&
-						!frame->GetSettingDlg()->GetShowCursor())
-						ShowCursor(true);
-#endif
-					frame->Iconize(false);
-					frame->SetFocus();
-					frame->Raise();
-					frame->Show();
-				}
-				refresh = true;
-			}
+			m_fullscreen_trigger.StartOnce();
 		}
 
 		//forced refresh
@@ -4681,6 +4658,41 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 void VRenderGLView::OnKeyDown(wxKeyEvent& event)
 {
 	event.Skip();
+}
+
+void VRenderGLView::OnQuitFscreen(wxTimerEvent& event)
+{
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (!frame || !m_vrv)
+		return;
+
+	if (m_benchmark)
+	{
+		if (m_vrv->m_full_frame)
+			m_vrv->m_full_frame->Hide();
+		if (frame)
+			frame->Close();
+	}
+	else if (GetParent() == m_vrv->m_full_frame)
+	{
+		Reparent(m_vrv);
+		m_vrv->m_view_sizer->Add(this, 1, wxEXPAND);
+		m_vrv->Layout();
+		m_vrv->m_full_frame->Hide();
+		if (frame)
+		{
+#ifdef _WIN32
+			if (frame->GetSettingDlg() &&
+				!frame->GetSettingDlg()->GetShowCursor())
+				ShowCursor(true);
+#endif
+			frame->Iconize(false);
+			frame->SetFocus();
+			frame->Raise();
+			frame->Show();
+		}
+		RefreshGL(40);
+	}
 }
 
 void VRenderGLView::Set3DRotCapture(double start_angle,

@@ -90,6 +90,8 @@ DEALINGS IN THE SOFTWARE.
 #define INFO_Y		64
 #define INFO_Z		128
 
+#define ID_ftrigger	wxID_HIGHEST + 2701
+
 using namespace std;
 
 class VRenderView;
@@ -821,6 +823,9 @@ private:
 	//timer
 	nv::Timer *m_timer;
 
+	//timer for full screen
+	wxTimer m_fullscreen_trigger;
+
 	//wacom support
 #ifdef _WIN32
 	HCTX m_hTab;
@@ -1003,6 +1008,7 @@ private:
 	void OnIdle(wxIdleEvent& event);
 	void OnKeyDown(wxKeyEvent& event);
 	//WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
+	void OnQuitFscreen(wxTimerEvent& event);
 
 	//draw quad
 	void DrawViewQuad();
