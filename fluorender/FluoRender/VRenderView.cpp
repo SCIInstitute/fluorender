@@ -4629,11 +4629,14 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		{
 			if (m_benchmark)
 			{
+				if (m_vrv->m_full_frame)
+					m_vrv->m_full_frame->Hide();
 				if (frame)
 					frame->Close();
 			}
 			else if (GetParent() == m_vrv->m_full_frame)
 			{
+				Sleep(100);
 				Reparent(m_vrv);
 				m_vrv->m_view_sizer->Add(this, 1, wxEXPAND);
 				m_vrv->Layout();
