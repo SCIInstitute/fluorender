@@ -4636,7 +4636,6 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			}
 			else if (GetParent() == m_vrv->m_full_frame)
 			{
-				Sleep(100);
 				Reparent(m_vrv);
 				m_vrv->m_view_sizer->Add(this, 1, wxEXPAND);
 				m_vrv->Layout();
