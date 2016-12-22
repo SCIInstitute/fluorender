@@ -923,7 +923,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 	else
 		filename = filelist[0].slice;
 	OpenTiff(filename.c_str());
-	bool sequence = numPages > 1;
+	bool sequence = numPages == m_slice_num;
 	if (!sequence) {
 		if (get_max)
 			numPages = GetNumTiffPages();

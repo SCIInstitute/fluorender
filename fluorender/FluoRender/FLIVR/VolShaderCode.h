@@ -341,11 +341,11 @@ namespace FLIVR
 	"	float tf_alp = 0.0;\n" \
 	"	float alpha = 0.0;\n" \
 	"	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;\n" \
-	"	if (v.x<loc2.z-loc3.w || v.x>loc2.w+loc3.w || v.y<loc3.y-loc3.w)\n" \
+	"	if (v.x<loc2.z-loc3.w || (loc2.w<1.0 && v.x>loc2.w+loc3.w) || v.y<loc3.y-loc3.w)\n" \
 	"		c = vec4(0.0);\n" \
 	"	else\n" \
 	"	{\n" \
-	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
+	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
 	"		v.x = (v.y<loc3.y?(loc3.w-loc3.y+v.y)/loc3.w:1.0)*v.x;\n" \
 	"		tf_alp = pow(clamp(v.x/loc3.z,\n" \
 	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0,\n" \
@@ -361,11 +361,11 @@ namespace FLIVR
 	"	float tf_alp = 0.0;\n" \
 	"	float alpha = 0.0;\n" \
 	"	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;\n" \
-	"	if (v.x<loc2.z-loc3.w || v.x>loc2.w+loc3.w || v.y<loc3.y)\n" \
+	"	if (v.x<loc2.z-loc3.w || (loc2.w<1.0 && v.x>loc2.w+loc3.w) || v.y<loc3.y)\n" \
 	"		c = vec4(0.0, 0.0, 0.0, 1.0);\n" \
 	"	else\n" \
 	"	{\n" \
-	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
+	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
 	"		tf_alp = pow(clamp(v.x/loc3.z,\n" \
 	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0,\n" \
 	"			loc3.x>1.0?0.9999:1.0), loc3.x);\n" \
@@ -379,11 +379,11 @@ namespace FLIVR
 	"	float tf_alp = 0.0;\n" \
 	"	float alpha = 0.0;\n" \
 	"	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;\n" \
-	"	if (v.x<loc2.z-loc3.w || v.x>loc2.w+loc3.w || v.y<loc3.y)\n" \
+	"	if (v.x<loc2.z-loc3.w || (loc2.w<1.0 && v.x>loc2.w+loc3.w) || v.y<loc3.y)\n" \
 	"		c = vec4(0.0);\n" \
 	"	else\n" \
 	"	{\n" \
-	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
+	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
 	"		tf_alp = pow(clamp(v.x/loc3.z,\n" \
 	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0,\n" \
 	"			loc3.x>1.0?0.9999:1.0), loc3.x);\n" \
@@ -398,11 +398,11 @@ namespace FLIVR
 	"	vec4 c;\n" \
 	"	float tf_alp;\n" \
 	"	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;\n" \
-	"	if (v.x<loc2.z-loc3.w || v.x>loc2.w+loc3.w || v.y<loc3.y)\n" \
+	"	if (v.x<loc2.z-loc3.w || (loc2.w<1.0 && v.x>loc2.w+loc3.w) || v.y<loc3.y)\n" \
 	"		c = vec4(0.0);\n" \
 	"	else\n" \
 	"	{\n" \
-	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
+	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
 	"		tf_alp = pow(clamp(v.x/loc3.z,\n" \
 	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0,\n" \
 	"			loc3.x>1.0?0.9999:1.0), loc3.x);\n" \
@@ -454,11 +454,11 @@ namespace FLIVR
 	"	float tf_alp = 0.0;\n" \
 	"	float alpha = 0.0;\n" \
 	"	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;\n" \
-	"	if (v.x<loc2.z-loc3.w || v.x>loc2.w+loc3.w || v.y<loc3.y)\n" \
+	"	if (v.x<loc2.z-loc3.w || (loc2.w<1.0 && v.x>loc2.w+loc3.w) || v.y<loc3.y)\n" \
 	"		c = vec4(0.0);\n" \
 	"	else\n" \
 	"	{\n" \
-	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
+	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
 	"		vec4 rb = vec4(0.0);\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_VALU0 \
@@ -493,11 +493,11 @@ namespace FLIVR
 	"	float tf_alp = 0.0;\n" \
 	"	float alpha = 0.0;\n" \
 	"	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;\n" \
-	"	if (v.x<loc2.z-loc3.w || v.x>loc2.w+loc3.w || v.y<loc3.y)\n" \
+	"	if (v.x<loc2.z-loc3.w || (loc2.w<1.0 && v.x>loc2.w+loc3.w) || v.y<loc3.y)\n" \
 	"		c = vec4(0.0, 0.0, 0.0, 1.0);\n" \
 	"	else\n" \
 	"	{\n" \
-	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
+	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
 	"		vec4 rb = vec4(0.0);\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT \
@@ -512,11 +512,11 @@ namespace FLIVR
 	"	float tf_alp = 0.0;\n" \
 	"	float alpha = 0.0;\n" \
 	"	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;\n" \
-	"	if (v.x<loc2.z-loc3.w || v.x>loc2.w+loc3.w || v.y<loc3.y)\n" \
+	"	if (v.x<loc2.z-loc3.w || (loc2.w<1.0 && v.x>loc2.w+loc3.w) || v.y<loc3.y)\n" \
 	"		c = vec4(0.0);\n" \
 	"	else\n" \
 	"	{\n" \
-	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
+	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
 	"		tf_alp = pow(clamp(v.x/loc3.z,\n" \
 	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0,\n" \
 	"			loc3.x>1.0?0.9999:1.0), loc3.x);\n" \
