@@ -923,9 +923,9 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 	else
 		filename = filelist[0].slice;
 	OpenTiff(filename.c_str());
-	bool sequence = numPages == m_slice_num;
+	bool sequence = numPages > 1;
 	if (!sequence) {
-		if (get_max)
+		if (get_max && !isHyperstack_)
 			numPages = GetNumTiffPages();
 		else
 			numPages = m_slice_num;
@@ -1111,7 +1111,10 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 				m_max_value = max_value;
 			else {
 				double value;
-				for (int i = 0; i < m_slice_num*m_x_size*m_y_size; i++) {
+				unsigned long long totali = (unsigned long long)m_slice_num*
+					(unsigned long long)m_x_size*(unsigned long long)m_y_size;
+				for (unsigned long long i = 0; i < totali; ++i)
+				{
 					value = ((unsigned short*)nrrdout->data)[i];
 					m_max_value = value > m_max_value ? value : m_max_value;
 				}
