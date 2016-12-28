@@ -97,7 +97,7 @@ int TIFReader::Preprocess()
 	wstring path, name;
 	if (!SEP_PATH_NAME(m_path_name, path, name))
 		return READER_OPEN_FAIL;
-	std::wstring suffix = GET_SUFFIX(m_path_name);
+	//std::wstring suffix = GET_SUFFIX(m_path_name);
 
 	//determine if it is an ImageJ hyperstack
 	char img_desc[256];
@@ -285,13 +285,14 @@ int TIFReader::Preprocess()
 				{
 					//search slice sequence
 					std::vector<std::wstring> list;
+					std::wstring search_ext = slice_str.substr(end2 + 1);
 					std::wstring regex = slice_str.substr(0, begin2 + 1);
-					FIND_FILES(path, suffix, list, m_cur_time, regex);
+					FIND_FILES(path, search_ext, list, m_cur_time, regex);
 					m_4d_seq[t].type = 1;
 					m_4d_seq[t].slices.clear();
 					for (size_t f = 0; f < list.size(); f++) {
 						size_t start_idx = begin2 + 1;
-						size_t end_idx = list.at(f).find(suffix);
+						size_t end_idx = list.at(f).find(search_ext);
 						size_t size = end_idx - start_idx;
 						std::wstring fileno = list.at(f).substr(start_idx, size);
 						SliceInfo slice;
