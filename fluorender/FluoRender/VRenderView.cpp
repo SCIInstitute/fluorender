@@ -5428,6 +5428,15 @@ void VRenderGLView::RunNoiseReduction(wxFileConfig &fconfig)
 	}
 }
 
+//add traces to trace dialog
+#define UPDATE_TRACE_DLG_AND_RETURN \
+	{ \
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame; \
+		if (m_vrv && vr_frame && vr_frame->GetTraceDlg()) \
+			vr_frame->GetTraceDlg()->GetSettings(m_vrv); \
+		return; \
+	}
+
 void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 {
 	//read the size threshold
@@ -5445,7 +5454,8 @@ void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 	int nx, ny, nz;
 	//return current mask (into system memory)
 	if (!m_cur_vol)
-		return;
+		UPDATE_TRACE_DLG_AND_RETURN
+
 	m_cur_vol->GetVR()->return_mask();
 	m_cur_vol->GetResolution(nx, ny, nz);
 	//find labels in the old that are selected by the current mask
@@ -5457,13 +5467,16 @@ void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 	}
 	Nrrd* label_nrrd = m_cur_vol->GetLabel(false);
 	if (!label_nrrd)
-		return;
+		UPDATE_TRACE_DLG_AND_RETURN
+
 	unsigned char* mask_data = (unsigned char*)(mask_nrrd->data);
 	if (!mask_data)
-		return;
+		UPDATE_TRACE_DLG_AND_RETURN
+
 	unsigned int* label_data = (unsigned int*)(label_nrrd->data);
 	if (!label_data)
-		return;
+		UPDATE_TRACE_DLG_AND_RETURN
+
 	FL::CellList sel_labels;
 	FL::CellListIter label_iter;
 	for (ii = 0; ii<nx; ii++)
@@ -5506,7 +5519,8 @@ void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 	//load and replace the label
 	BaseReader* reader = m_cur_vol->GetReader();
 	if (!reader)
-		return;
+		UPDATE_TRACE_DLG_AND_RETURN
+
 	LBLReader lbl_reader;
 	wstring lblname = reader->GetCurLabelName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
 	lbl_reader.SetFile(lblname);
@@ -5520,7 +5534,8 @@ void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 		m_cur_vol->LoadLabel(label_nrrd_new);
 	label_data = (unsigned int*)(label_nrrd_new->data);
 	if (!label_data)
-		return;
+		UPDATE_TRACE_DLG_AND_RETURN
+
 	//update the mask according to the new label
 	memset((void*)mask_data, 0, sizeof(uint8)*nx*ny*nz);
 	for (ii = 0; ii<nx; ii++)
@@ -5543,10 +5558,7 @@ void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 		}
 	}
 
-	//add traces to trace dialog
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (m_vrv && vr_frame && vr_frame->GetTraceDlg())
-		vr_frame->GetTraceDlg()->GetSettings(m_vrv);
+	UPDATE_TRACE_DLG_AND_RETURN
 }
 
 void VRenderGLView::RunSparseTracking(wxFileConfig &fconfig)
