@@ -62,7 +62,7 @@ public:
 
 	int GetCurrSelection();
 	void DeleteSelection();
-	void DeleteAll(bool cur_time=true);
+	void DeleteAll(bool cur_time=false);
 
 	void Export(wxString filename);
 
