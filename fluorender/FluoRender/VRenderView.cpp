@@ -10374,6 +10374,16 @@ vector<Ruler*>* VRenderGLView::GetRulerList()
 	return &m_ruler_list;
 }
 
+Ruler* VRenderGLView::GetRuler(unsigned int id)
+{
+	for (size_t i = 0; i < m_ruler_list.size(); ++i)
+	{
+		if (m_ruler_list[i] && m_ruler_list[i]->Id() == id)
+			return m_ruler_list[i];
+	}
+	return 0;
+}
+
 int VRenderGLView::RulerProfile(int index)
 {
 	if (index < 0 ||
