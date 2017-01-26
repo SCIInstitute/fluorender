@@ -100,10 +100,11 @@ RulerListCtrl::~RulerListCtrl()
 {
 }
 
-void RulerListCtrl::Append(wxString name, wxString &color, double length, wxString &unit,
+void RulerListCtrl::Append(unsigned int id, wxString name, wxString &color, double length, wxString &unit,
 	double angle, wxString &points, bool time_dep, int time, wxString extra)
 {
 	long tmp = InsertItem(GetItemCount(), name, 0);
+	SetItemData(tmp, long(id));
 	//    SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
 	SetItem(tmp, 1, color);
 	SetColumnWidth(1, wxLIST_AUTOSIZE);
@@ -183,7 +184,7 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 			int(ruler->GetColor().b()*255));
 		else
 			color = "N/A";
-		Append(ruler->GetName(), color, ruler->GetLength(), unit,
+		Append(ruler->Id(), ruler->GetName(), color, ruler->GetLength(), unit,
 			ruler->GetAngle(), points, ruler->GetTimeDep(), ruler->GetTime(), ruler->GetDelInfoValues(", "));
 	}
 }
@@ -406,8 +407,7 @@ void RulerListCtrl::OnSelection(wxListEvent &event)
 		m_color_picker->SetSize(rect.GetSize());
 		if (m_view)
 		{
-			vector<Ruler*>* ruler_list = m_view->GetRulerList();
-			Ruler* ruler = (*ruler_list)[m_editing_item];
+			Ruler* ruler = m_view->GetRuler(GetItemData(item));
 			if (ruler)
 			{
 				Color color;
@@ -448,9 +448,7 @@ void RulerListCtrl::OnNameText(wxCommandEvent& event)
 
 	wxString str = m_name_text->GetValue();
 
-	vector<Ruler*>* ruler_list = m_view->GetRulerList();
-	if (!ruler_list) return;
-	Ruler* ruler = (*ruler_list)[m_editing_item];
+	Ruler* ruler = m_view->GetRuler(GetItemData(m_editing_item));
 	if (!ruler) return;
 	ruler->SetName(str);
 	SetText(m_editing_item, 0, str);
@@ -466,9 +464,7 @@ void RulerListCtrl::OnColorChange(wxColourPickerEvent& event)
 
 	wxColor c = event.GetColour();
 	Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
-	vector<Ruler*>* ruler_list = m_view->GetRulerList();
-	if (!ruler_list) return;
-	Ruler* ruler = (*ruler_list)[m_editing_item];
+	Ruler* ruler = m_view->GetRuler(GetItemData(m_editing_item));
 	if (!ruler) return;
 	ruler->SetColor(color);
 	wxString str_color;

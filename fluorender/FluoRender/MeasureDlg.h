@@ -55,14 +55,14 @@ public:
 		long style=wxLC_REPORT|wxLC_SINGLE_SEL);
 	~RulerListCtrl();
 
-	void Append(wxString name, wxString &color, double length, wxString &unit,
+	void Append(unsigned int id, wxString name, wxString &color, double length, wxString &unit,
 		double angle, wxString &points, bool time_dep, int time,
 		wxString extra);
 	void UpdateRulers(VRenderView* vrv=0);
 
 	int GetCurrSelection();
 	void DeleteSelection();
-	void DeleteAll(bool cur_time=true);
+	void DeleteAll(bool cur_time=false);
 
 	void Export(wxString filename);
 

@@ -492,6 +492,7 @@ public:
 	void AddPaintRulerPoint();
 	void DrawRulers();
 	vector<Ruler*>* GetRulerList();
+	Ruler* GetRuler(unsigned int id);
 	int RulerProfile(int index);
 	//public mouse
 
@@ -1513,6 +1514,10 @@ public:
 	vector<Ruler*>* GetRulerList()
 	{
 		if (m_glview) return m_glview->GetRulerList(); else return 0;
+	}
+	Ruler* GetRuler(unsigned int id)
+	{
+		if (m_glview) return m_glview->GetRuler(id); else return 0;
 	}
 	int RulerProfile(int index)
 	{
