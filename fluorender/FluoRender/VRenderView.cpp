@@ -5246,10 +5246,20 @@ void VRenderGLView::PostDraw()
 
 		if (m_draw_frame)
 		{
-			x = m_frame_x;
-			y = m_frame_y;
-			w = m_frame_w;
-			h = m_frame_h;
+			if (m_enlarge)
+			{
+				x = m_frame_x * m_enlarge_scale;
+				y = m_frame_y * m_enlarge_scale;
+				w = m_frame_w * m_enlarge_scale;
+				h = m_frame_h * m_enlarge_scale;
+			}
+			else
+			{
+				x = m_frame_x;
+				y = m_frame_y;
+				w = m_frame_w;
+				h = m_frame_h;
+			}
 		}
 		else
 		{
