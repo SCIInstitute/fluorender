@@ -334,6 +334,9 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 				break;
 			case 5:  //data group
 				menu.Append(ID_ToggleDisp, "Toggle Visibility");
+				menu.Append(ID_Isolate, "Isolate");
+				menu.Append(ID_ShowAll, "Show All");
+				menu.AppendSeparator();
 				if (IsExpanded(sel_item))
 					menu.Append(ID_Expand, "Collapse");
 				else
@@ -345,6 +348,9 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 				break;
 			case 6:  //mesh group
 				menu.Append(ID_ToggleDisp, "Toggle Visibility");
+				menu.Append(ID_Isolate, "Isolate");
+				menu.Append(ID_ShowAll, "Show All");
+				menu.AppendSeparator();
 				if (IsExpanded(sel_item))
 					menu.Append(ID_Expand, "Collapse");
 				else

@@ -6864,16 +6864,28 @@ void VRenderGLView::Isolate(int type, wxString name)
 				DataGroup* group = (DataGroup*)m_layer_list[i];
 				if (group)
 				{
-					for (int i=0; i<(int)group->GetVolumeNum(); i++)
+					if (type == 5)
 					{
-						VolumeData* vd = group->GetVolumeData(i);
-						if (vd)
+						if (group->GetName() == name)
+							group->SetDisp(true);
+						else
+							group->SetDisp(false);
+					}
+					else if (type == 6)
+						group->SetDisp(false);
+					else
+					{
+						for (int i=0; i<(int)group->GetVolumeNum(); i++)
 						{
-							if (type == 2 &&
-								vd->GetName() == name)
-								vd->SetDisp(true);
-							else
-								vd->SetDisp(false);
+							VolumeData* vd = group->GetVolumeData(i);
+							if (vd)
+							{
+								if (type == 2 &&
+									vd->GetName() == name)
+									vd->SetDisp(true);
+								else
+									vd->SetDisp(false);
+							}
 						}
 					}
 				}
@@ -6884,16 +6896,28 @@ void VRenderGLView::Isolate(int type, wxString name)
 				MeshGroup* group = (MeshGroup*)m_layer_list[i];
 				if (group)
 				{
-					for (int i=0; i<(int)group->GetMeshNum(); i++)
+					if (type == 6)
 					{
-						MeshData* md = group->GetMeshData(i);
-						if (md)
+						if (group->GetName() == name)
+							group->SetDisp(true);
+						else
+							group->SetDisp(false);
+					}
+					else if (type == 5)
+						group->SetDisp(false);
+					else
+					{
+						for (int i = 0; i < (int)group->GetMeshNum(); i++)
 						{
-							if (type == 3 &&
-								md->GetName() == name)
-								md->SetDisp(true);
-							else
-								md->SetDisp(false);
+							MeshData* md = group->GetMeshData(i);
+							if (md)
+							{
+								if (type == 3 &&
+									md->GetName() == name)
+									md->SetDisp(true);
+								else
+									md->SetDisp(false);
+							}
 						}
 					}
 				}
@@ -6972,6 +6996,7 @@ void VRenderGLView::ShowAll()
 				DataGroup* group = (DataGroup*)m_layer_list[i];
 				if (group)
 				{
+					group->SetDisp(true);
 					for (int j=0; j<group->GetVolumeNum(); ++j)
 					{
 						VolumeData* vd = group->GetVolumeData(j);
@@ -6986,6 +7011,7 @@ void VRenderGLView::ShowAll()
 				MeshGroup* group = (MeshGroup*)m_layer_list[i];
 				if (group)
 				{
+					group->SetDisp(true);
 					for (int j=0; j<group->GetMeshNum(); ++j)
 					{
 						MeshData* md = group->GetMeshData(j);
