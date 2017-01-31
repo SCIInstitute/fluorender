@@ -559,6 +559,7 @@ namespace FLIVR
 	"	vec2 center = vec2(loc0.x, loc0.y);\n" \
 	"	vec2 pos = vec2(t.x*loc1.x, t.y*loc1.y);\n" \
 	"	float d = length(pos - center);\n" \
+	"	FragColor = vec4(0.0);\n" \
 	"	if (d<loc0.w) FragColor = vec4(0.5);\n" \
 	"	if (d<loc0.z) FragColor = vec4(1.0, 1.0, 1.0, 0.5);\n" \
 	"}\n"
