@@ -59,7 +59,7 @@ bool ClusterExmax::Execute()
 		Expectation();
 		Maximization();
 		//histograom test
-		//GenUncertainty(0.05);
+		GenUncertainty(0.05);
 		counter++;
 	} while (!Converge() &&
 		counter < m_max_iter);
@@ -378,7 +378,7 @@ void ClusterExmax::GenHistogram(size_t bins)
 	outfile.close();
 }
 
-void ClusterExmax::GenUncertainty(double delta)
+void ClusterExmax::GenUncertainty(double delta, bool output)
 {
 	if (!m_clnum)
 		return;
@@ -416,16 +416,20 @@ void ClusterExmax::GenUncertainty(double delta)
 		m_histogram[index].count++;
 	}
 	m_mem_prob_prv = m_mem_prob;
-	//output histogram
-	std::ofstream outfile;
-	outfile.open("hist.txt", std::ofstream::out |
-		std::ofstream::app);
-	for (size_t i = 0; i < m_histogram.size(); ++i)
-		if (i < m_histogram.size() - 1)
-			outfile << m_histogram[i].count << "\t";
-		else
-			outfile << m_histogram[i].count << "\n";
-	outfile.close();
+
+	if (output)
+	{
+		//output histogram
+		std::ofstream outfile;
+		outfile.open("hist.txt", std::ofstream::out |
+			std::ofstream::app);
+		for (size_t i = 0; i < m_histogram.size(); ++i)
+			if (i < m_histogram.size() - 1)
+				outfile << m_histogram[i].count << "\t";
+			else
+				outfile << m_histogram[i].count << "\n";
+		outfile.close();
+	}
 }
 
 void ClusterExmax::GenerateNewColors(void* label,

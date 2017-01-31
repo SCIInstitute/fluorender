@@ -99,7 +99,7 @@ namespace FL
 		bool Converge();
 		void GenResult();
 		void GenHistogram(size_t bins);
-		void GenUncertainty(double delta);
+		void GenUncertainty(double delta, bool output = false);
 	};
 
 }
