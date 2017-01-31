@@ -2868,6 +2868,8 @@ void VRenderFrame::SaveProject(wxString& filename)
 	fconfig.Write("height_text", m_movie_view->m_height_text->GetValue());
 	fconfig.Write("time_start_text", m_movie_view->m_time_start_text->GetValue());
 	fconfig.Write("time_end_text", m_movie_view->m_time_end_text->GetValue());
+	fconfig.Write("run_script", m_setting_dlg->GetRunScript());
+	fconfig.Write("script_file", m_setting_dlg->GetScriptFile());
 /*	//brushtool diag
 	fconfig.SetPath("/brush_diag");
 	fconfig.Write("ca_min", m_brush_tool_dlg->GetDftCAMin());
@@ -4131,6 +4133,11 @@ void VRenderFrame::OpenProject(wxString& filename)
 			m_movie_view->m_time_start_text->SetValue(sVal);
 		if (fconfig.Read("time_end_text", &sVal))
 			m_movie_view->m_time_end_text->SetValue(sVal);
+		if (fconfig.Read("run_script", &bVal))
+			m_setting_dlg->SetRunScript(bVal);
+		if (fconfig.Read("script_file", &sVal))
+			m_setting_dlg->SetScriptFile(sVal);
+		m_movie_view->GetScriptSettings();
 	}
 
 /*	//brushtool diag

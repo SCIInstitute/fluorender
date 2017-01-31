@@ -124,6 +124,7 @@ public:
 	void SetCurrentTime(size_t t);
 
 	bool GetRunning() { return m_running; }
+	void GetScriptSettings();
 
 public:
 	//controls
