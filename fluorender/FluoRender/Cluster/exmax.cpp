@@ -59,7 +59,7 @@ bool ClusterExmax::Execute()
 		Expectation();
 		Maximization();
 		//histograom test
-		GenUncertainty(0.05);
+		//GenUncertainty(0.05);
 		counter++;
 	} while (!Converge() &&
 		counter < m_max_iter);
