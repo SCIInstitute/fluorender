@@ -996,21 +996,21 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL );
 
 	//slice sequence check box
-	wxCheckBox* ch1 = new wxCheckBox(panel, wxID_HIGHEST+3001,
+	wxCheckBox* ch1 = new wxCheckBox(panel, ID_READ_ZSLICES,
 		"Read a sequence as Z slices (the last digits in filenames are used to identify the sequence)");
 	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VRenderFrame::OnCh1Check), NULL, panel);
 	ch1->SetValue(m_sliceSequence);
 
 	//compression
-	wxCheckBox* ch2 = new wxCheckBox(panel, wxID_HIGHEST+3002,
+	wxCheckBox* ch2 = new wxCheckBox(panel, ID_COMPRESS,
 		"Compress data (loading will take longer time and data are compressed in graphics memory)");
 	ch2->Connect(ch2->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VRenderFrame::OnCh2Check), NULL, panel);
 	ch2->SetValue(m_compression);
 
 	//empty brick skipping
-	wxCheckBox* ch3 = new wxCheckBox(panel, wxID_HIGHEST+3006,
+	wxCheckBox* ch3 = new wxCheckBox(panel, ID_SKIP_BRICKS,
 		"Skip empty bricks during rendering (loading takes longer time)");
 	ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VRenderFrame::OnCh3Check), NULL, panel);
@@ -1018,7 +1018,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 
 	//time sequence identifier
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	wxTextCtrl* txt1 = new wxTextCtrl(panel, wxID_HIGHEST+3003,
+	wxTextCtrl* txt1 = new wxTextCtrl(panel, ID_TSEQ_ID,
 		"", wxDefaultPosition, wxSize(80, 20));
 	txt1->SetValue(m_time_id);
 	txt1->Connect(txt1->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
@@ -2265,14 +2265,14 @@ wxWindow* VRenderFrame::CreateExtraControlProjectSave(wxWindow* parent)
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL );
 
 	//copy all files check box
-	wxCheckBox* ch_embed = new wxCheckBox(panel, wxID_HIGHEST+3005,
+	wxCheckBox* ch_embed = new wxCheckBox(panel, ID_EMBED_FILES,
 		"Embed all files in the project folder");
 	ch_embed->Connect(ch_embed->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VRenderFrame::OnChEmbedCheck), NULL, panel);
 	ch_embed->SetValue(m_vrp_embed);
 
 	//compressed
-	wxCheckBox* ch_cmp = new wxCheckBox(panel, wxID_HIGHEST+3004,
+	wxCheckBox* ch_cmp = new wxCheckBox(panel, ID_LZW_COMP,
 		"Lempel-Ziv-Welch Compression");
 	ch_cmp->Connect(ch_cmp->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VRenderFrame::OnChSaveCmpCheck), NULL, panel);

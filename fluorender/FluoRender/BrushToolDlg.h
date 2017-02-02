@@ -44,7 +44,7 @@ public:
 	{
 		//group1
 		//toolbar
-		ID_BrushAppend = wxID_HIGHEST+1301,
+		ID_BrushAppend = ID_BRUSH_TOOL,
 		ID_BrushDesel,
 		ID_BrushDiffuse,
 		ID_BrushErase,

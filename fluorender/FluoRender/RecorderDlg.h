@@ -40,7 +40,7 @@ class KeyListCtrl : public wxListCtrl
 {
    enum
    {
-      ID_FrameText = wxID_HIGHEST+1751,
+      ID_FrameText = ID_RECORD1,
       ID_DurationText,
       ID_InterpoCmb,
       ID_DescriptionText
@@ -110,7 +110,7 @@ class RecorderDlg : public wxPanel
    public:
       enum
       {
-         ID_SetKeyBtn = wxID_HIGHEST+1701,
+         ID_SetKeyBtn = ID_RECORD2,
          ID_DurationText,
          ID_InterpolationCmb,
          ID_DelKeyBtn,

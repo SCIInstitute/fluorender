@@ -59,7 +59,7 @@ class AdjustView: public wxPanel
 	enum
 	{
 		//gamma
-		ID_RGammaSldr = wxID_HIGHEST+1101,
+		ID_RGammaSldr = ID_ADJUST_VIEW,
 		ID_RGammaText,
 		ID_GGammaSldr,
 		ID_GGammaText,

@@ -49,7 +49,7 @@ class DataTreeCtrl: public wxTreeCtrl
 {
 	enum
 	{
-		ID_TreeCtrl = wxID_HIGHEST+501,
+		ID_TreeCtrl = ID_TREE_PANEL1,
 		ID_ToggleDisp,
 		ID_Isolate,
 		ID_ShowAll,
@@ -190,7 +190,7 @@ class TreePanel : public wxPanel
 public:
 	enum
 	{
-		ID_ToggleView = wxID_HIGHEST+551,
+		ID_ToggleView = ID_TREE_PANEL2,
 		ID_AddGroup,
 		ID_AddMGroup,
 		ID_RemoveData,

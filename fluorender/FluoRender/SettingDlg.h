@@ -47,7 +47,7 @@ class SettingDlg : public wxPanel
 	enum
 	{
 		//project save
-		ID_PrjSaveChk = wxID_HIGHEST+1201,
+		ID_PrjSaveChk = ID_SETTING,
 		//real time compress
 		ID_RealtimeCmpChk,
 		//mouse interactions

@@ -38,7 +38,7 @@ class MManipulator: public wxPanel
 {
 	enum
 	{
-		ID_XTransText = wxID_HIGHEST+301,
+		ID_XTransText = ID_MANIPULATOR,
 		ID_XTransSpin,
 		ID_YTransText,
 		ID_YTransSpin,

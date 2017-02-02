@@ -90,7 +90,7 @@ DEALINGS IN THE SOFTWARE.
 #define INFO_Y		64
 #define INFO_Z		128
 
-#define ID_ftrigger	wxID_HIGHEST + 2701
+#define ID_ftrigger	ID_VRENDER_VIEW1
 
 using namespace std;
 
@@ -1038,7 +1038,7 @@ class VRenderView: public wxPanel
 public:
 	enum
 	{
-		ID_VolumeSeqRd = wxID_HIGHEST+1001,
+		ID_VolumeSeqRd = ID_VRENDER_VIEW2,
 		ID_VolumeMultiRd,
 		ID_VolumeCompRd,
 		ID_CaptureBtn,

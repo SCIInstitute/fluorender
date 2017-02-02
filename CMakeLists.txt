@@ -70,6 +70,51 @@ add_definitions(-DVERSION_MAJOR_TAG="2")             #
 add_definitions(-DVERSION_MINOR_TAG="20.1")            #
 add_definitions(-DVERSION_COPYRIGHT="December 2016")  # Up to here!
 
+#UI IDs
+add_definitions(-DID_START=5999)
+add_definitions(-DID_ADJUST_VIEW=ID_START+1)
+add_definitions(-DID_APROP_VIEW=ID_ADJUST_VIEW+31)
+add_definitions(-DID_BRUSH_TOOL=ID_APROP_VIEW+11)
+add_definitions(-DID_CALCULATION=ID_BRUSH_TOOL+41)
+add_definitions(-DID_CLIP_VIEW=ID_CALCULATION+21)
+add_definitions(-DID_COLOCALIZE=ID_CLIP_VIEW+41)
+add_definitions(-DID_COMPONENT=ID_COLOCALIZE+11)
+add_definitions(-DID_CONVERT=ID_COMPONENT+171)
+add_definitions(-DID_COUNTING=ID_CONVERT+21)
+add_definitions(-DID_LIST_PANEL1=ID_COUNTING+21)
+add_definitions(-DID_LIST_PANEL2=ID_LIST_PANEL1+11)
+add_definitions(-DID_MEASURE1=ID_LIST_PANEL2+11)
+add_definitions(-DID_MEASURE2=ID_MEASURE1+11)
+add_definitions(-DID_MANIPULATOR=ID_MEASURE2+21)
+add_definitions(-DID_MPROP_VIEW=ID_MANIPULATOR+21)
+add_definitions(-DID_NOISE_CANCEL=ID_MPROP_VIEW+21)
+add_definitions(-DID_OCL=ID_NOISE_CANCEL+11)
+add_definitions(-DID_RECORD1=ID_OCL+11)
+add_definitions(-DID_RECORD2=ID_RECORD1+11)
+add_definitions(-DID_SETTING=ID_RECORD2+11)
+add_definitions(-DID_TESTER=ID_SETTING+51)
+add_definitions(-DID_TRACE1=ID_TESTER+21)
+add_definitions(-DID_TRACE2=ID_TRACE1+11)
+add_definitions(-DID_TREE_PANEL1=ID_TRACE2+81)
+add_definitions(-DID_TREE_PANEL2=ID_TREE_PANEL1+31)
+add_definitions(-DID_MOVIEW_VIEW=ID_TREE_PANEL2+11)
+add_definitions(-DID_VPROP_VIEW=ID_MOVIEW_VIEW+61)
+add_definitions(-DID_VRENDER_FRAME=ID_VPROP_VIEW+71)
+add_definitions(-DID_VRENDER_VIEW1=ID_VRENDER_FRAME+51)
+add_definitions(-DID_VRENDER_VIEW2=ID_VRENDER_VIEW1+11)
+#dialog common IDs
+add_definitions(-DID_LZW_COMP=ID_VRENDER_VIEW2+41)
+add_definitions(-DID_SAVE_ALPHA=ID_LZW_COMP+1)
+add_definitions(-DID_EMBED_FILES=ID_SAVE_ALPHA+1)
+add_definitions(-DID_READ_ZSLICES=ID_EMBED_FILES+1)
+add_definitions(-DID_COMPRESS=ID_READ_ZSLICES+1)
+add_definitions(-DID_SKIP_BRICKS=ID_COMPRESS+1)
+add_definitions(-DID_TSEQ_ID=ID_SKIP_BRICKS+1)
+add_definitions(-DID_ENLARGE_SLDR=ID_TSEQ_ID+1)
+add_definitions(-DID_ENLARGE_TEXT=ID_ENLARGE_SLDR+1)
+add_definitions(-DID_ENLARGE_CHK=ID_ENLARGE_TEXT+1)
+
+
 #static compile
 add_definitions(-DSTATIC_COMPILE)
 

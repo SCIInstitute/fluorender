@@ -45,7 +45,7 @@ class TraceListCtrl : public wxListCtrl
 {
 	enum
 	{
-		Menu_CopyText = wxID_HIGHEST+2251,
+		Menu_CopyText = ID_TRACE1,
 		Menu_Delete
 	};
 
@@ -99,7 +99,7 @@ public:
 	{
 		//map page
 		//load/save trace
-		ID_LoadTraceText = wxID_HIGHEST+2201,
+		ID_LoadTraceText = ID_TRACE2,
 		ID_LoadTraceBtn,
 		ID_SaveTraceBtn,
 		ID_SaveasTraceBtn,

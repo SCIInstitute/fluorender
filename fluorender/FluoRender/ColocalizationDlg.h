@@ -41,7 +41,7 @@ public:
 	enum
 	{
 		//operand A
-		ID_CalcLoadABtn = wxID_HIGHEST + 2001,
+		ID_CalcLoadABtn = ID_COLOCALIZE,
 		ID_CalcAText,
 		//operand B
 		ID_CalcLoadBBtn,

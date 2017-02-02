@@ -37,7 +37,7 @@ class ConvertDlg : public wxPanel
 public:
 	enum
 	{
-		ID_CnvVolMeshThreshSldr = wxID_HIGHEST+1401,
+		ID_CnvVolMeshThreshSldr = ID_CONVERT,
 		ID_CnvVolMeshThreshText,
 		ID_CnvVolMeshDownsampleSldr,
 		ID_CnvVolMeshDownsampleText,

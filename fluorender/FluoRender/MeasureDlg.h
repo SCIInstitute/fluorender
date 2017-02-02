@@ -42,7 +42,7 @@ class RulerListCtrl : public wxListCtrl
 {
 	enum
 	{
-		ID_NameText = wxID_HIGHEST+2351,
+		ID_NameText = ID_MEASURE1,
 		ID_ColorPicker
 	};
 
@@ -102,7 +102,7 @@ class MeasureDlg : public wxPanel
 public:
 	enum
 	{
-		ID_LocatorBtn = wxID_HIGHEST+2101,
+		ID_LocatorBtn = ID_MEASURE2,
 		ID_ProbeBtn,
 		ID_ProtractorBtn,
 		ID_RulerBtn,

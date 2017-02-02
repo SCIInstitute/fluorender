@@ -50,7 +50,7 @@ class VPropView: public wxPanel
 {
 	enum
 	{
-		ID_GammaSync = wxID_HIGHEST+801,
+		ID_GammaSync = ID_VPROP_VIEW,
 		ID_GammaSldr,
 		ID_GammaText,
 		ID_SaturationSync,

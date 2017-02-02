@@ -42,7 +42,7 @@ class NoiseCancellingDlg : public wxPanel
 public:
 	enum
 	{
-		ID_ThresholdSldr = wxID_HIGHEST+1601,
+		ID_ThresholdSldr = ID_NOISE_CANCEL,
 		ID_ThresholdText,
 		ID_VoxelSldr,
 		ID_VoxelText,

@@ -42,7 +42,7 @@ class APropView : public wxPanel
 {
 	enum
 	{
-		ID_MemoText = wxID_HIGHEST+1801,
+		ID_MemoText = ID_APROP_VIEW,
 		ID_MemoUpdateBtn
 	};
 

@@ -43,7 +43,7 @@ class VMovieView : public wxPanel
 	enum
 	{
 		//time sequence
-		ID_SeqChk = wxID_HIGHEST + 701,
+		ID_SeqChk = ID_MOVIEW_VIEW,
 		ID_TimeStartText,
 		ID_TimeEndText,
 		ID_IncTimeBtn,

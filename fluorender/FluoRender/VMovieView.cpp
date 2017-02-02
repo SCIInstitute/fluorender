@@ -1421,13 +1421,13 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent) {
 	//compressed TIFF
 	wxStaticText *tiffopts = new wxStaticText(panel, wxID_ANY, "TIFF Options:",
 		wxDefaultPosition, wxSize(95, -1));
-	wxCheckBox *ch1 = new wxCheckBox(panel, wxID_HIGHEST + 3004,
+	wxCheckBox *ch1 = new wxCheckBox(panel, ID_LZW_COMP,
 		"Lempel-Ziv-Welch Compression");
 	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VMovieView::OnCh1Check), NULL, panel);
 	if (ch1)
 		ch1->SetValue(VRenderFrame::GetCompression());
-	wxCheckBox *ch2 = new wxCheckBox(panel, wxID_HIGHEST + 3005,
+	wxCheckBox *ch2 = new wxCheckBox(panel, ID_SAVE_ALPHA,
 		"Save alpha");
 	ch2->Connect(ch2->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VMovieView::OnCh2Check), NULL, panel);
@@ -1475,7 +1475,7 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent) {
 	//copy all files check box
 	wxCheckBox *ch_embed;
 	if (VRenderFrame::GetSaveProject()) {
-		ch_embed = new wxCheckBox(panel, wxID_HIGHEST + 3005,
+		ch_embed = new wxCheckBox(panel, ID_EMBED_FILES,
 			"Embed all files in the project folder");
 		ch_embed->Connect(ch_embed->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 			wxCommandEventHandler(VMovieView::OnChEmbedCheck), NULL, panel);

@@ -35,7 +35,7 @@ class TesterDlg : public wxDialog
 {
 	enum
 	{
-		ID_P1Slider = wxID_HIGHEST+1501,
+		ID_P1Slider = ID_TESTER,
 		ID_P1Text,
 		ID_P1Check,
 		ID_P2Slider,

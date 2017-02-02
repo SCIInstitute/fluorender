@@ -445,7 +445,7 @@ wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
 
 	//compressed
-	wxCheckBox* ch1 = new wxCheckBox(panel, wxID_HIGHEST + 3004,
+	wxCheckBox* ch1 = new wxCheckBox(panel, ID_LZW_COMP,
 		"Lempel-Ziv-Welch Compression");
 	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(DataListCtrl::OnCh1Check), NULL, panel);

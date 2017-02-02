@@ -35,7 +35,7 @@ class DataListCtrl: public wxListCtrl
 {
    enum
    {
-      Menu_AddTo = wxID_HIGHEST+201,
+      Menu_AddTo = ID_LIST_PANEL1,
       Menu_Prop,
       Menu_Del,
       Menu_Rename,
@@ -108,7 +108,7 @@ class ListPanel : public wxPanel
 {
    enum
    {
-      ID_AddToView = wxID_HIGHEST+251,
+      ID_AddToView = ID_LIST_PANEL2,
       ID_Rename,
       ID_Save,
       ID_Bake,

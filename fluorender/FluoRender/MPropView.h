@@ -42,7 +42,7 @@ class MPropView: public wxPanel
 {
 	enum
 	{
-		ID_diff_picker = wxID_HIGHEST+401,
+		ID_diff_picker = ID_MPROP_VIEW,
 		ID_spec_picker,
 		ID_shine_sldr,
 		ID_shine_text,

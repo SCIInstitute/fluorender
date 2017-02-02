@@ -48,7 +48,7 @@ class ClippingView: public wxPanel
 {
 	enum
 	{
-		ID_LinkChannelsBtn = wxID_HIGHEST+1,
+		ID_LinkChannelsBtn = ID_CLIP_VIEW,
 		ID_HoldPlanesBtn,
 		ID_PlaneModesBtn,
 		ID_RotatePlanesChk,

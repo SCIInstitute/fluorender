@@ -41,7 +41,7 @@ class OclDlg : public wxPanel
 public:
 	enum
 	{
-		ID_KernelFileTxt = wxID_HIGHEST + 2601,
+		ID_KernelFileTxt = ID_OCL,
 		ID_BrowseBtn,
 		ID_SaveBtn,
 		ID_SaveAsBtn,

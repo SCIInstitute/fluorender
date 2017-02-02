@@ -39,7 +39,7 @@ class CountingDlg : public wxPanel
 public:
 	enum
 	{
-		ID_CASelectOnlyChk = wxID_HIGHEST+1901,
+		ID_CASelectOnlyChk = ID_COUNTING,
 		ID_CAMinText,
 		ID_CAMaxText,
 		ID_CAIgnoreMaxChk,

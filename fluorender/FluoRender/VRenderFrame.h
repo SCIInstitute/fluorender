@@ -106,7 +106,7 @@ class VRenderFrame: public wxFrame
 	{
 		//file
 		//file\new
-		ID_Save = wxID_HIGHEST+901,
+		ID_Save = ID_VRENDER_FRAME,
 		ID_SaveProject,
 		//file\open
 		ID_Open,

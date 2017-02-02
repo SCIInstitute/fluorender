@@ -13001,10 +13001,10 @@ void VRenderView::OnChEnlargeCheck(wxCommandEvent &event)
 		{
 			wxSlider* sl_enlarge = (wxSlider*)
 				ch_enlarge->GetParent()->FindWindow(
-					wxID_HIGHEST + 3008);
+					ID_ENLARGE_SLDR);
 			wxTextCtrl* tx_enlarge = (wxTextCtrl*)
 				ch_enlarge->GetParent()->FindWindow(
-					wxID_HIGHEST + 3009);
+					ID_ENLARGE_TEXT);
 			if (sl_enlarge && tx_enlarge)
 			{
 				if (enlarge)
@@ -13030,7 +13030,7 @@ void VRenderView::OnSlEnlargeScroll(wxScrollEvent &event)
 	{
 		wxTextCtrl* tx_enlarge = (wxTextCtrl*)
 			sl_enlarge->GetParent()->FindWindow(
-				wxID_HIGHEST + 3009);
+				ID_ENLARGE_TEXT);
 		if (tx_enlarge)
 		{
 			wxString str = wxString::Format("%.1f", ival / 10.0);
@@ -13051,7 +13051,7 @@ void VRenderView::OnTxEnlargeText(wxCommandEvent &event)
 	{
 		wxSlider* sl_enlarge = (wxSlider*)
 			tx_enlarge->GetParent()->FindWindow(
-				wxID_HIGHEST + 3008);
+				ID_ENLARGE_SLDR);
 		if (sl_enlarge)
 			sl_enlarge->SetValue(ival);
 	}
@@ -13066,7 +13066,7 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
 
 	//compressed
-	wxCheckBox* ch1 = new wxCheckBox(panel, wxID_HIGHEST+3004,
+	wxCheckBox* ch1 = new wxCheckBox(panel, ID_LZW_COMP,
 		"Lempel-Ziv-Welch Compression");
 	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VRenderView::OnCh1Check), NULL, panel);
@@ -13074,7 +13074,7 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 		ch1->SetValue(VRenderFrame::GetCompression());
 
 	//save alpha
-	wxCheckBox* ch_alpha = new wxCheckBox(panel, wxID_HIGHEST + 3005,
+	wxCheckBox* ch_alpha = new wxCheckBox(panel, ID_SAVE_ALPHA,
 		"Save alpha channel");
 	ch_alpha->Connect(ch_alpha->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VRenderView::OnChAlphaCheck), NULL, panel);
@@ -13083,17 +13083,17 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 
 	//enlarge
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
-	wxCheckBox* ch_enlarge = new wxCheckBox(panel, wxID_HIGHEST + 3007,
+	wxCheckBox* ch_enlarge = new wxCheckBox(panel, ID_ENLARGE_CHK,
 		"Enlarge output image");
 	ch_enlarge->Connect(ch_enlarge->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VRenderView::OnChEnlargeCheck), NULL, panel);
-	wxSlider* sl_enlarge = new wxSlider(panel, wxID_HIGHEST + 3008,
+	wxSlider* sl_enlarge = new wxSlider(panel, ID_ENLARGE_SLDR,
 		10, 10, 100);
 	sl_enlarge->Connect(sl_enlarge->GetId(), wxEVT_COMMAND_SLIDER_UPDATED,
 		wxScrollEventHandler(VRenderView::OnSlEnlargeScroll), NULL, panel);
 	sl_enlarge->Disable();
 	wxFloatingPointValidator<double> vald_fp(1);
-	wxTextCtrl* tx_enlarge = new wxTextCtrl(panel, wxID_HIGHEST + 3009,
+	wxTextCtrl* tx_enlarge = new wxTextCtrl(panel, ID_ENLARGE_TEXT,
 		"1.0", wxDefaultPosition, wxSize(60, 23), 0, vald_fp);
 	tx_enlarge->Connect(tx_enlarge->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(VRenderView::OnTxEnlargeText), NULL, panel);
@@ -13108,7 +13108,7 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 	wxCheckBox* ch_embed = 0;
 	if (VRenderFrame::GetSaveProject())
 	{
-		ch_embed = new wxCheckBox(panel, wxID_HIGHEST+3006,
+		ch_embed = new wxCheckBox(panel, ID_EMBED_FILES,
 			"Embed all files in the project folder");
 		ch_embed->Connect(ch_embed->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 			wxCommandEventHandler(VRenderView::OnChEmbedCheck), NULL, panel);

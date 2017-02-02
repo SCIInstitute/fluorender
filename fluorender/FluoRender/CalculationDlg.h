@@ -41,7 +41,7 @@ public:
 	{
 		//calculations
 		//operand A
-		ID_CalcLoadABtn = wxID_HIGHEST + 2501,
+		ID_CalcLoadABtn = ID_CALCULATION,
 		ID_CalcAText,
 		//operand B
 		ID_CalcLoadBBtn,

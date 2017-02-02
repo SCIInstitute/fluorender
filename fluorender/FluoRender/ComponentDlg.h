@@ -46,7 +46,7 @@ public:
 	enum
 	{
 		// load / save
-		ID_LoadSettingsText = wxID_HIGHEST + 2401,
+		ID_LoadSettingsText = ID_COMPONENT,
 		ID_LoadSettingsBtn,
 		ID_SaveSettingsBtn,
 		ID_SaveasSettingsBtn,
