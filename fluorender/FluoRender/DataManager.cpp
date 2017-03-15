@@ -3223,8 +3223,7 @@ bool TraceGroup::FindCell(unsigned int id)
 bool TraceGroup::AddCell(FL::pCell &cell, size_t frame)
 {
 	FL::TrackMapProcessor tm_processor(m_track_map);
-	FL::CellListIter iter;
-	return tm_processor.AddCell(cell, frame, iter);
+	return tm_processor.AddCellDup(cell, frame);
 }
 
 bool TraceGroup::LinkCells(FL::CellList &list1, FL::CellList &list2,

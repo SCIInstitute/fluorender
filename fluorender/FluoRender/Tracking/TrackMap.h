@@ -116,6 +116,7 @@ namespace FL
 		bool UnlinkCells(CellList &list1, CellList &list2,
 			size_t frame1, size_t frame2);
 		//
+		bool AddCellDup(pCell & cell, size_t frame);
 		bool AddCell(pCell &cell, size_t frame, CellListIter &iter);
 		bool AddCells(CellList &list, size_t frame);
 		bool LinkAddedCells(CellList &list, size_t frame1, size_t frame2);

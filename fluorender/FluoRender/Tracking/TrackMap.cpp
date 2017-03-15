@@ -3188,6 +3188,14 @@ bool TrackMapProcessor::UnlinkCells(
 	return true;
 }
 
+bool TrackMapProcessor::AddCellDup(pCell & cell, size_t frame)
+{
+	pCell new_cell = pCell(new Cell(cell->Id()));
+	new_cell->Set(cell);
+	CellListIter iter;
+	return AddCell(new_cell, frame, iter);
+}
+
 bool TrackMapProcessor::AddCell(
 	pCell &cell, size_t frame, CellListIter &iter)
 {
