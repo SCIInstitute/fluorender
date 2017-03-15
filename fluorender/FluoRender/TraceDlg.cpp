@@ -1193,7 +1193,8 @@ void TraceDlg::OnCompUncertainBtn(wxCommandEvent &event)
 		}
 	}
 
-	FL::TrackMapProcessor tm_processor(trace_group->GetTrackMap());
+	FL::pTrackMap track_map = trace_group->GetTrackMap();
+	FL::TrackMapProcessor tm_processor(track_map);
 	wxString str = m_comp_uncertain_low_text->GetValue();
 	long ival;
 	str.ToLong(&ival);
@@ -1345,7 +1346,8 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 
 	m_stat_text->SetValue("Generating consistent IDs in");
 	wxGetApp().Yield();
-	FL::TrackMapProcessor tm_processor(trace_group->GetTrackMap());
+	FL::pTrackMap track_map = trace_group->GetTrackMap();
+	FL::TrackMapProcessor tm_processor(track_map);
 	int chan = vd->GetCurChannel();
 	int nx, ny, nz;
 	vd->GetResolution(nx, ny, nz);
@@ -1397,7 +1399,7 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 
 	unsigned int label_out1, label_out2;
 	//remaining frames
-	for (size_t fi = 1; fi < trace_group->GetTrackMap()->GetFrameNum(); ++fi)
+	for (size_t fi = 1; fi < track_map->GetFrameNum(); ++fi)
 	{
 		cell_map.clear();
 
@@ -1541,7 +1543,8 @@ void TraceDlg::OnAnalyzeUncertainHist(wxCommandEvent &event)
 
 	m_stat_text->SetValue("");
 
-	FL::TrackMapProcessor tm_processor(trace_group->GetTrackMap());
+	FL::pTrackMap track_map = trace_group->GetTrackMap();
+	FL::TrackMapProcessor tm_processor(track_map);
 	if (list_in.empty())
 	{
 		FL::UncertainHist hist1, hist2;
@@ -1633,7 +1636,8 @@ void TraceDlg::OnAnalyzePath(wxCommandEvent &event)
 
 	m_stat_text->SetValue("");
 
-	FL::TrackMapProcessor tm_processor(trace_group->GetTrackMap());
+	FL::pTrackMap track_map = trace_group->GetTrackMap();
+	FL::TrackMapProcessor tm_processor(track_map);
 	if (list_in.empty())
 		return;
 
@@ -1648,7 +1652,7 @@ void TraceDlg::OnAnalyzePath(wxCommandEvent &event)
 		for (size_t i = 0; i < paths_prv.size(); ++i)
 			os << paths_prv[i];
 	}
-	if (m_cur_time < trace_group->GetTrackMap()->GetFrameNum() - 1)
+	if (m_cur_time < track_map->GetFrameNum() - 1)
 	{
 		(*m_stat_text) << "Paths of T" << m_cur_time << " to T" << m_cur_time + 1 << ":\n";
 		FL::PathList paths_nxt;
@@ -2796,7 +2800,8 @@ void TraceDlg::OnCellDivideID(wxCommandEvent& event)
 	if (!trace_group)
 		return;
 
-	FL::TrackMapProcessor tm_processor(trace_group->GetTrackMap());
+	FL::pTrackMap track_map = trace_group->GetTrackMap();
+	FL::TrackMapProcessor tm_processor(track_map);
 	tm_processor.SetBits(vd->GetBits());
 	tm_processor.SetScale(vd->GetScalarScale());
 	tm_processor.SetSizes(resx, resy, resz);
@@ -3258,7 +3263,8 @@ void TraceDlg::GenMap()
 	m_gen_map_prg->SetValue(int(prog));
 
 	//get and set parameters
-	FL::TrackMapProcessor tm_processor(trace_group->GetTrackMap());
+	FL::pTrackMap track_map = trace_group->GetTrackMap();
+	FL::TrackMapProcessor tm_processor(track_map);
 	int resx, resy, resz;
 	vd->GetResolution(resx, resy, resz);
 	double spcx, spcy, spcz;
