@@ -5519,7 +5519,7 @@ void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 			++label_iter;
 	}
 	if (m_trace_group &&
-		m_trace_group->GetTrackMap().GetFrameNum())
+		m_trace_group->GetTrackMap()->GetFrameNum())
 	{
 		//create new id list
 		m_trace_group->SetCurTime(m_tseq_cur_num);
@@ -5555,7 +5555,7 @@ void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 		int index = nx*ny*kk + nx*jj + ii;
 		unsigned int label_value = label_data[index];
 		if (m_trace_group &&
-			m_trace_group->GetTrackMap().GetFrameNum())
+			m_trace_group->GetTrackMap()->GetFrameNum())
 		{
 			if (m_trace_group->FindCell(label_value))
 				mask_data[index] = 255;

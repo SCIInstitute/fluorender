@@ -916,7 +916,7 @@ public:
 		return m_num;
 	}
 
-	FL::TrackMap &GetTrackMap()
+	FL::pTrackMap GetTrackMap()
 	{
 		return m_track_map;
 	}
@@ -1002,7 +1002,7 @@ private:
 	int m_uncertain_low;
 	int m_uncertain_high;
 
-	FL::TrackMap m_track_map;
+	FL::pTrackMap m_track_map;
 	FL::CellList m_cell_list;
 
 	//edges (in a vector of drawable)

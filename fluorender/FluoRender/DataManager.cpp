@@ -3117,6 +3117,7 @@ TraceGroup::TraceGroup()
 	m_cell_size = 20;
 	m_uncertain_low = 0;
 	m_uncertain_high = 20;
+	m_track_map = FL::pTrackMap(new FL::TrackMap());
 }
 
 TraceGroup::~TraceGroup()
@@ -3268,7 +3269,7 @@ bool TraceGroup::ReplaceCellID(unsigned int old_id, unsigned int new_id, size_t 
 
 bool TraceGroup::GetMappedRulers(RulerList &rulers)
 {
-	size_t frame_num = m_track_map.GetFrameNum();
+	size_t frame_num = m_track_map->GetFrameNum();
 	if (m_ghost_num <= 0 ||
 		m_cur_time < 0 ||
 		m_cur_time >= frame_num)
@@ -3331,14 +3332,14 @@ unsigned int TraceGroup::GetMappedEdges(
 {
 	unsigned int result = 0;
 
-	size_t frame_num = m_track_map.GetFrameNum();
+	size_t frame_num = m_track_map->GetFrameNum();
 	if (frame1 >= frame_num ||
 		frame2 >= frame_num ||
 		frame1 == frame2)
 		return result;
 
-	FL::CellList &cell_list1 = m_track_map.GetCellList(frame1);
-	FL::InterGraph &inter_graph = m_track_map.GetInterGraph(
+	FL::CellList &cell_list1 = m_track_map->GetCellList(frame1);
+	FL::InterGraph &inter_graph = m_track_map->GetInterGraph(
 		frame1 > frame2 ? frame2 : frame1);
 	FL::CellListIter sel_iter, cell_iter;
 	FL::pVertex vertex1, vertex2;
@@ -3416,14 +3417,14 @@ bool TraceGroup::GetMappedRulers(
 	RulerList& rulers,
 	size_t frame1, size_t frame2)
 {
-	size_t frame_num = m_track_map.GetFrameNum();
+	size_t frame_num = m_track_map->GetFrameNum();
 	if (frame1 >= frame_num ||
 		frame2 >= frame_num ||
 		frame1 == frame2)
 		return false;
 
-	FL::CellList &cell_list1 = m_track_map.GetCellList(frame1);
-	FL::InterGraph &inter_graph = m_track_map.GetInterGraph(
+	FL::CellList &cell_list1 = m_track_map->GetCellList(frame1);
+	FL::InterGraph &inter_graph = m_track_map->GetInterGraph(
 		frame1 > frame2 ? frame2 : frame1);
 	FL::CellListIter sel_iter, cell_iter;
 	FL::pVertex vertex1, vertex2;
@@ -3531,7 +3532,7 @@ bool TraceGroup::Save(wxString &filename)
 unsigned int TraceGroup::Draw(vector<float> &verts)
 {
 	unsigned int result = 0;
-	size_t frame_num = m_track_map.GetFrameNum();
+	size_t frame_num = m_track_map->GetFrameNum();
 	if (m_ghost_num <= 0 ||
 		m_cur_time < 0 ||
 		m_cur_time >= frame_num)

@@ -32,6 +32,8 @@ DEALINGS IN THE SOFTWARE.
 #include "VertexList.h"
 #include "VolCache.h"
 #include <fstream>
+#include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
 #include <boost/signals2.hpp>
 #include <deque>
 #include <map>
@@ -51,10 +53,12 @@ namespace FL
 #define TAG_VER220		9	//new values added in v2.20
 
 	class TrackMap;
+	typedef boost::shared_ptr<TrackMap> pTrackMap;
+	typedef boost::weak_ptr<TrackMap> pwTrackMap;
 	class TrackMapProcessor
 	{
 	public:
-		TrackMapProcessor(TrackMap &track_map) :
+		TrackMapProcessor(pTrackMap &track_map) :
 		m_contact_thresh(0.6f),
 		m_size_thresh(25.0f),
 		m_similar_thresh(0.2f),
@@ -153,7 +157,7 @@ namespace FL
 		unsigned int m_uncertain_low;
 		unsigned int m_uncertain_high;
 		//the trackmap
-		TrackMap &m_map;
+		pTrackMap m_map;
 		//volume data cache
 		CacheQueue m_vol_cache;
 		boost::signals2::connection m_new_conn;

@@ -15,7 +15,7 @@ int nx, ny, nz;
 vector<std::wstring> m_xml_list;
 vector<std::wstring> m_lbl_list;
 int m_digits = 0;
-FL::TrackMap m_track_map;
+FL::pTrackMap m_track_map(new FL::TrackMap());
 FL::TrackMapProcessor m_tm_processor(m_track_map);
 
 void ProcessInputName(std::wstring &infilename)
