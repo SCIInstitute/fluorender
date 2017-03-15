@@ -1908,8 +1908,9 @@ void TraceDlg::CellUpdate()
 		else
 			m_view->CreateTraceGroup();
 
-		m_view->m_glview->GetTraces();
+		m_view->m_glview->GetTraces(false);
 		m_view->RefreshGL();
+		GetSettings(m_view);
 	}
 }
 
@@ -2128,13 +2129,13 @@ void TraceDlg::CellNewID(bool append)
 
 	if (new_id)
 		trace_group->AddCell(cell, m_cur_time);
+	CellUpdate();
 
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_pool();
 	//save label mask to disk
 	vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
 
-	CellUpdate();
 }
 
 void TraceDlg::CellEraseID()

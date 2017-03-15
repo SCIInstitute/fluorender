@@ -505,7 +505,7 @@ public:
 	int SaveTraceGroup(wxString filename);
 	void ExportTrace(wxString filename, unsigned int id);
 	void DrawTraces();
-	void GetTraces();
+	void GetTraces(bool update=false);
 
 	//text renderer
 	void SetTextRenderer(TextRenderer* text_renderer)

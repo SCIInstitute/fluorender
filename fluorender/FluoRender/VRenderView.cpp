@@ -10700,7 +10700,7 @@ void VRenderGLView::DrawTraces()
 	}
 }
 
-void VRenderGLView::GetTraces()
+void VRenderGLView::GetTraces(bool update)
 {
 	if (!m_trace_group)
 		return;
@@ -10751,9 +10751,12 @@ void VRenderGLView::GetTraces()
 	m_trace_group->UpdateCellList(sel_labels);
 
 	//add traces to trace dialog
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (m_vrv && vr_frame && vr_frame->GetTraceDlg())
-		vr_frame->GetTraceDlg()->GetSettings(m_vrv);
+	if (update)
+	{
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (m_vrv && vr_frame && vr_frame->GetTraceDlg())
+			vr_frame->GetTraceDlg()->GetSettings(m_vrv);
+	}
 }
 
 /*WXLRESULT VRenderGLView::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
