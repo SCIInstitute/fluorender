@@ -5576,7 +5576,8 @@ void VRenderGLView::RunSparseTracking(wxFileConfig &fconfig)
 	if (!m_trace_group)
 		CreateTraceGroup();
 
-	FL::TrackMapProcessor tm_processor(m_trace_group->GetTrackMap());
+	FL::pTrackMap track_map = m_trace_group->GetTrackMap();
+	FL::TrackMapProcessor tm_processor(track_map);
 	int resx, resy, resz;
 	m_cur_vol->GetResolution(resx, resy, resz);
 	double spcx, spcy, spcz;
