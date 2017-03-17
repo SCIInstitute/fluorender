@@ -326,9 +326,9 @@ namespace FL
 	inline TrackMapProcessor::~TrackMapProcessor()
 	{
 		//delete cache queue
-		//order is important
-		m_vol_cache.CacheQueue::~CacheQueue();
-		UnregisterCacheQueueFuncs();
+		//automatic release, otherwise crash on mac
+		//m_vol_cache.CacheQueue::~CacheQueue();
+		//UnregisterCacheQueueFuncs();
 	}
 
 	inline void TrackMapProcessor::RegisterCacheQueueFuncs(
