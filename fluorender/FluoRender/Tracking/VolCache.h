@@ -65,6 +65,7 @@ namespace FL
 		m_max_size(1) {};
 		~CacheQueue();
 
+		inline void clear();
 		inline void set_max_size(size_t size);
 		inline size_t get_max_size();
 		inline size_t size();
@@ -83,8 +84,14 @@ namespace FL
 
 	inline CacheQueue::~CacheQueue()
 	{
+		clear();
+	}
+
+	inline void CacheQueue::clear()
+	{
 		for (size_t i = 0; i < m_queue.size(); ++i)
 			m_del_cache(m_queue[i]);
+		m_queue.clear();
 	}
 
 	inline void CacheQueue::set_max_size(size_t size)

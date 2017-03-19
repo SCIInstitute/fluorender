@@ -328,7 +328,8 @@ namespace FL
 		//delete cache queue
 		//automatic release, otherwise crash on mac
 		//m_vol_cache.CacheQueue::~CacheQueue();
-		//UnregisterCacheQueueFuncs();
+		m_vol_cache.clear();
+		UnregisterCacheQueueFuncs();
 	}
 
 	inline void TrackMapProcessor::RegisterCacheQueueFuncs(
