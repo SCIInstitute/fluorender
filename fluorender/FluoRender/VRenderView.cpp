@@ -4823,7 +4823,7 @@ void VRenderGLView::SetParams(double t)
 	Interpolator *interpolator = vr_frame->GetInterpolator();
 	if(!interpolator)
 		return;
-	KeyCode keycode;
+	FlKeyCode keycode;
 	keycode.l0 = 1;
 	keycode.l0_name = m_vrv->GetName();
 

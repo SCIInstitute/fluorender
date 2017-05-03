@@ -705,7 +705,7 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	Interpolator *interpolator = vr_frame->GetInterpolator();
 	if (!interpolator)
 		return;
-	KeyCode keycode;
+	FlKeyCode keycode;
 	FlKeyDouble* flkey = 0;
 	FlKeyQuaternion* flkeyQ = 0;
 	FlKeyBoolean* flkeyB = 0;
@@ -930,7 +930,7 @@ void RecorderDlg::AutoKeyChanComb(int comb)
 	double duration;
 	str.ToDouble(&duration);
 
-	KeyCode keycode;
+	FlKeyCode keycode;
 	FlKeyBoolean* flkeyB = 0;
 
 	double t = interpolator->GetLastT();

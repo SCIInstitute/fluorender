@@ -45,7 +45,7 @@ public:
 		m_code.l2 = 0;
 		m_code.l2_name = "";
 	}
-	FlKeyQuaternion(KeyCode keycode, Quaternion &qval)
+	FlKeyQuaternion(FlKeyCode keycode, Quaternion &qval)
 	{
 		m_code = keycode;
 		m_qval = qval;

@@ -2928,7 +2928,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 					fconfig.SetPath(str);
 					int key_type = key->GetType();
 					fconfig.Write("type", key_type);
-					KeyCode code = key->GetKeyCode();
+					FlKeyCode code = key->GetKeyCode();
 					fconfig.Write("l0", code.l0);
 					str = code.l0_name;
 					fconfig.Write("l0_name", str);
@@ -4361,7 +4361,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 							int key_type;
 							if (fconfig.Read("type", &key_type))
 							{
-								KeyCode code;
+								FlKeyCode code;
 								if (fconfig.Read("l0", &iVal))
 									code.l0 = iVal;
 								if (fconfig.Read("l0_name", &sVal))
