@@ -37,6 +37,9 @@ wxPanel(parent, wxID_ANY,
 		 0, "HelpDlg"),
 m_html(0)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	m_name = "";
 	wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
 	m_html = new wxHtmlWindow(this);

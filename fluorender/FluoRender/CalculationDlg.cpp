@@ -52,6 +52,9 @@ CalculationDlg::CalculationDlg(wxWindow *frame, wxWindow *parent)
 		m_frame(frame),
 		m_group(0)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	wxStaticText *st = 0;
 
 	//operand A

@@ -51,6 +51,9 @@ wxDefaultPosition, wxSize(550, 600),
 m_frame(parent),
 m_view(0)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	wxStaticText *st = 0;
 	//
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);

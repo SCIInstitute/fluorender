@@ -58,6 +58,9 @@ m_p3(0.0),
 m_p4(0.0)//,
 //m_frame(frame)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 /*	wxStaticText *st;
 
 	//p1

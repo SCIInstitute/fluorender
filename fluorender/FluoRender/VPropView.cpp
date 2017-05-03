@@ -127,6 +127,9 @@ wxPanel(parent, id, pos, size,style, name),
 	m_space_y_text(0),
 	m_space_z_text(0)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	wxBoxSizer* sizer_all = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* sizer_left = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer* sizer_middle = new wxBoxSizer(wxVERTICAL);

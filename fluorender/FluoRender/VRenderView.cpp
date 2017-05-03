@@ -11504,6 +11504,9 @@ wxPanel(parent, id, pos, size, style),
 	m_dft_scale_factor(1.0),
 	m_dft_scale_factor_mode(true)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	wxLogNull logNo;
 	//full frame
 	m_full_frame = new wxFrame((wxFrame*)NULL, wxID_ANY, "FluoRender");

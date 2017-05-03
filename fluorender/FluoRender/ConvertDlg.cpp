@@ -48,6 +48,9 @@ wxPanel(parent, wxID_ANY,
 	0, "ConvertDlg"),
 	m_frame(parent)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	//validator: floating point 2
 	wxFloatingPointValidator<double> vald_fp2(2);
 	//validator: integer
