@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/Transform.h>
 #include <FLIVR/Point.h>
 #include <FLIVR/Plane.h>
+#include <cstring>
 #include <iostream>
 
 using namespace FLIVR;
