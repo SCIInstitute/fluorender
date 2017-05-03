@@ -60,6 +60,9 @@ TraceListCtrl::TraceListCtrl(
 	wxListCtrl(parent, id, pos, size, style),
 	m_type(0)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	wxListItem itemCol;
 	itemCol.SetText("");
 	InsertColumn(0, itemCol);
@@ -774,6 +777,9 @@ TraceDlg::TraceDlg(wxWindow* frame, wxWindow* parent)
 	m_manual_assist(false),
 	m_auto_id(false)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 

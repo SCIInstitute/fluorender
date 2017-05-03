@@ -33,6 +33,7 @@
 //FYI: FFmpeg is a pure C project using C99 math features, 
 //in order to enable C++ to use them you have to append -D__STDC_CONSTANT_MACROS to your CXXFLAGS
 
+#include <cstring>
 #include "QVideoEncoder.h"
 
 QVideoEncoder::QVideoEncoder() {
@@ -411,7 +412,7 @@ bool QVideoEncoder::set_frame_rgb_data(unsigned char * data) {
 	}
 	//this is where data gets cropped if width/height are not divisible by 16
 	for(size_t i = 0; i < height_; i++)
-		memcpy(
+		std::memcpy(
 		aligned_data + (3 * i * width_),
 		data         + (3 * i * actual_width_),
 		3 * width_);

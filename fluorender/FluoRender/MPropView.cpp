@@ -61,6 +61,9 @@ m_frame(frame),
 m_md(0),
 m_vrv(0)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	wxBoxSizer* sizer_v1 = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);

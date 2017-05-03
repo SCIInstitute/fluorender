@@ -1,54 +1,55 @@
-#/*
-#For more information, please see: http://software.sci.utah.edu
-#
-#The MIT License
-#
-#Copyright (c) 2014 Scientific Computing and Imaging Institute,
-#University of Utah.
-#
-#
-#Permission is hereby granted, free of charge, to any person obtaining a
-#copy of this software and associated documentation files (the "Software"),
-#to deal in the Software without restriction, including without limitation
-#the rights to use, copy, modify, merge, publish, distribute, sublicense,
-#and/or sell copies of the Software, and to permit persons to whom the
-#Software is furnished to do so, subject to the following conditions:
-#
-#The above copyright notice and this permission notice shall be included
-#in all copies or substantial portions of the Software.
-#
-#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-#OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-#THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-#FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-#DEALINGS IN THE SOFTWARE.
-#*/
+# /*
+# For more information, please see: http://software.sci.utah.edu
+# 
+# The MIT License
+# 
+# Copyright (c) 2014 Scientific Computing and Imaging Institute,
+# University of Utah.
+# 
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+# */
 
-#This is an CMake configuration file for FluoRender
+# This is an CMake configuration file for FluoRender
 
-cmake_minimum_required ( VERSION 2.8.8 )
+cmake_minimum_required(VERSION 2.8.8)
 
-#for MSVC builds
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+# for MSVC builds
+if(WIN32)
   if(MSVC)
     SET(MSVC_INCREMENTAL_DEFAULT OFF)
   endif()
 endif()
 
-project ( FluoRender )
+project(FluoRender)
 
 IF((COMMAND cmake_policy) AND NOT (CMAKE_MAJOR_VERSION LESS 3))
   CMAKE_POLICY(SET CMP0040 NEW)
   CMAKE_POLICY(SET CMP0043 NEW)
 ENDIF()
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  # Mac OS X
+set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
+
+if(UNIX OR APPLE OR MINGW)
   set(ARCHITECTURE 64)
-else()
-  # Windows
+elseif(WIN32)
   if(${CMAKE_SIZEOF_VOID_P} MATCHES "8")
     set(ARCHITECTURE 64)
   else()
@@ -62,38 +63,44 @@ else()
   add_definitions(-DFLUORENDER_ARCH="32bit")
 endif()
 
+set(RELEASE_FLAGS ${RELEASE_FLAGS} -O3 -march=corei7-avx)
+set(DEBUG_FLAGS ${DEBUG_FLAGS} -O0 -march=corei7-avx -ggdb)
+
 add_definitions(-DFLUORENDER_TITLE="FluoRender")
 
-add_definitions(-DVERSION_MAJOR=2)                   #Be sure to update the Versions and Date for each release!!!!
-add_definitions(-DVERSION_MINOR=20.1)                  #
-add_definitions(-DVERSION_MAJOR_TAG="2")             #
-add_definitions(-DVERSION_MINOR_TAG="20.1")            #
-add_definitions(-DVERSION_COPYRIGHT="December 2016")  # Up to here!
+add_definitions(-DVERSION_MAJOR=2)                   # Be sure to update the Versions and Date for each release!!!!
+add_definitions(-DVERSION_MINOR=20.1)                # 
+add_definitions(-DVERSION_MAJOR_TAG="2")             # 
+add_definitions(-DVERSION_MINOR_TAG="20.1")          # 
+add_definitions(-DVERSION_COPYRIGHT="December 2016") # Up to here!
 
-#static compile
+# static compile
 add_definitions(-DSTATIC_COMPILE)
 
-#teem required definitions
+# teem required definitions
 add_definitions(-DTEEM_DIO=0)
 add_definitions(-DTEEM_ENDIAN=1234)
 add_definitions(-DTEEM_QNANHIBIT=1)
 
-#output directories
+# output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BUILD_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BUILD_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-#wxWidgets
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# wxWidgets
 set(wxWidgets_USE_REL_AND_DBG ON)
 if(${CMAKE_BUILD_TYPE} MATCHES "Release")
   set(wxWidgets_CONFIGURATION mswu)
 elseif(${CMAKE_BUILD_TYPE} MATCHES "Debug")
   set(wxWidgets_CONFIGURATION mswud)
 endif()
-find_package(wxWidgets COMPONENTS core base aui html xml adv gl stc scintilla REQUIRED)
+find_package(wxWidgets COMPONENTS core base aui html xml adv gl stc REQUIRED)
 include(${wxWidgets_USE_FILE})
 set(wxWidgets_USE_STATIC ON)
-if (APPLE)
+if(UNIX OR APPLE OR MINGW)
   find_package(TIFF REQUIRED)
   include_directories(${TIFF_INCLUDE_DIR})
 else()
@@ -101,34 +108,40 @@ else()
 endif()
 add_definitions(-DUNICODE)
 add_definitions(-D_UNICODE)
-#solution for wxWidgets linking "ambiguous" errors
+# solution for wxWidgets linking "ambiguous" errors
 add_definitions(-D_WCHAR_H_CPLUSPLUS_98_CONFORMANCE_)
-#fix the library names for OSX if needed.
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+# fix the library names for OSX if needed.
+if(APPLE)
   foreach(arg ${wxWidgets_LIBRARIES})
     set(wxlib_out "${wxlib_out} ${arg}")
   endforeach()
   string(STRIP ${wxlib_out} wxWidgets_LIBRARIES)
-  string(REGEX REPLACE "libwx_osx_cocoau_scintilla" "libwxscintilla"
+  string(REGEX REPLACE "wx_osx_cocoau_scintilla" "wxscintilla"
     wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES})
-  find_package(Freetype REQUIRED)
-  include_directories(${FREETYPE_INCLUDE_DIRS})
+elseif(UNIX OR MINGW)
+  foreach(arg ${wxWidgets_LIBRARIES})
+    set(wxlib_out "${wxlib_out} ${arg}")
+  endforeach()
+  string(STRIP ${wxlib_out} wxWidgets_LIBRARIES)
+  string(REGEX REPLACE "wx_gtk3u_scintilla" "wxscintilla"
+    wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES})
 endif()
 
-#OpenGL
+# OpenGL
 find_package(OpenGL REQUIRED)
 
-#Boost
-set(Boost_USE_STATIC_LIBS        ON) # only find static libs
+# Boost
+# only find static libs:
+#set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME    OFF)
 find_package(Boost COMPONENTS system chrono filesystem REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
-#teem
+# teem
 # add zlib
 find_package(ZLIB)
-if (ZLIB_FOUND)
+if(ZLIB_FOUND)
   add_definitions(-DTEEM_ZLIB=1)
   include_directories(${ZLIB_INCLUDE_DIRS})
 endif()
@@ -150,7 +163,7 @@ add_library(TEEM_OBJ OBJECT
   ${airsrc} ${hestsrc} ${nrrdsrc} ${biffsrc}
   ${airhdr} ${hesthdr} ${nrrdhdr} ${biffhdr})
 
-#glew
+# glew
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/glew)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/glew/GL)
 file(GLOB gl_srcs fluorender/glew/*.c)
@@ -159,140 +172,145 @@ file(GLOB gl_hdrs2 fluorender/glew/GL/*.h)
 add_library(GLEW_OBJ OBJECT
   ${gl_srcs} ${gl_hdrs1} ${gl_hdrs2})
 
-#pole
+# pole
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/pole)
 file(GLOB pole_srcs fluorender/pole/pole.cpp)
 file(GLOB pole_hdrs fluorender/pole/pole.h)
 add_library(POLE_OBJ OBJECT ${pole_srcs} ${pole_hdrs})
 
-#ffmpeg
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+# ffmpeg
+if(WIN32)
   include_directories(${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/include)
-  file(GLOB ffmpeg_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/lib/Win64/*.a ${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/lib/Win64/*.lib)
+  file(GLOB FFMPEG_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/lib/Win64/*.a ${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/lib/Win64/*.lib)
   add_definitions(-D__STDC_CONSTANT_MACROS)
-else()
+elseif(APPLE)
   include_directories(${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/include)
-  file(GLOB ffmpeg_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/lib/OSX/*.a)
+  file(GLOB FFMPEG_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/lib/OSX/*.a)
+else()
+  find_package(FFMPEG REQUIRED)
+  #string(REPLACE "/usr/include/" "" FFMPEG_INCLUDE_DIR "${FFMPEG_INCLUDE_DIR}")
+  #include_directories(${FFMPEG_INCLUDE_DIR})
 endif()
 
-#FluoRender
+# FluoRender
 include_directories(${FluoRender_SOURCE_DIR}/fluorender)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender)
 
-#Formats
+# Formats
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Formats)
 file(GLOB fmt_src fluorender/FluoRender/Formats/*.cpp)
 file(GLOB fmt_hdr fluorender/FluoRender/Formats/*.h)
 add_library(FORMATS_OBJ OBJECT
   ${fmt_src} ${fmt_hdr})
 
-#Video
+# Video
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Video)
 file(GLOB vid_src fluorender/FluoRender/Video/*.cpp)
 file(GLOB vid_hdr fluorender/FluoRender/Video/*.h)
 add_library(VIDEO_OBJ OBJECT
   ${vid_src} ${vid_hdr})
 
-#Tracking
+# Tracking
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Tracking)
 file(GLOB trk_src fluorender/FluoRender/Tracking/*.cpp)
 file(GLOB trk_hdr fluorender/FluoRender/Tracking/*.h)
 add_library(TRACKING_OBJ OBJECT
   ${trk_src} ${trk_hdr})
 
-#Components
+# Components
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Components)
 file(GLOB cmp_src fluorender/FluoRender/Components/*.cpp)
 file(GLOB cmp_hdr fluorender/FluoRender/Components/*.h)
 add_library(COMPONENTS_OBJ OBJECT
   ${cmp_src} ${cmp_hdr})
 
-#Cluster
+# Cluster
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Cluster)
 file(GLOB clstr_src fluorender/FluoRender/Cluster/*.cpp)
 file(GLOB clstr_hdr fluorender/FluoRender/Cluster/*.h)
 add_library(CLUSTER_OBJ OBJECT
   ${clstr_src} ${clstr_hdr})
 
-#Calculate
+# Calculate
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Calculate)
 file(GLOB calc_src fluorender/FluoRender/Calculate/*.cpp)
 file(GLOB calc_hdr fluorender/FluoRender/Calculate/*.h)
 add_library(CALCULATE_OBJ OBJECT
   ${calc_src} ${calc_hdr})
 
-#Animators
+# Animators
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Animators)
 file(GLOB ani_src fluorender/FluoRender/Animator/*.cpp)
 file(GLOB ani_hdr fluorender/FluoRender/Animator/*.h)
 add_library(ANIMATORS_OBJ OBJECT
   ${ani_src} ${ani_hdr})
 
-#NV
+# NV
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/NV)
 file(GLOB nv_src fluorender/FluoRender/NV/*.cpp)
 file(GLOB nv_hdr fluorender/FluoRender/NV/*.h)
 add_library(NV_OBJ OBJECT
   ${nv_src} ${nv_hdr})
 
-#FLIVR
+# FLIVR
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/FLIVR)
 file(GLOB fli_src fluorender/FluoRender/FLIVR/*.cpp)
 file(GLOB fli_hdr fluorender/FluoRender/FLIVR/*.h)
 add_library(FLIVR_OBJ OBJECT
   ${fli_src} ${fli_hdr})
 
-#Converters
+# Converters
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Converters)
 file(GLOB cvt_src fluorender/FluoRender/Converters/*.cpp)
 file(GLOB cvt_hdr fluorender/FluoRender/Converters/*.h)
 add_library(CONVERTERS_OBJ OBJECT
   ${cvt_src} ${cvt_hdr})
 
-#images
+# images
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/img)
 file(GLOB pngs_hdr fluorender/FluoRender/img/*.h)
 file(GLOB pngs_src fluorender/FluoRender/img/*.cpp)
 add_library(IMAGES_OBJ OBJECT  ${pngs_hdr} ${pngs_src})
 
-#OpenCL
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+# OpenCL
+if(WIN32)
   include_directories(${FluoRender_SOURCE_DIR}/fluorender/OpenCL/include)
   if(${ARCHITECTURE} MATCHES 64)
-    file(GLOB OPENCL_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/OpenCL/lib/x86_64/*.lib)
+    file(GLOB OpenCL_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/OpenCL/lib/x86_64/*.lib)
   elseif(${ARCHITECTURE} MATCHES 32)
-    file(GLOB OPENCL_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/OpenCL/lib/x86/*.lib)
+    file(GLOB OpenCL_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/OpenCL/lib/x86/*.lib)
   endif()
-elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  include(${CMAKE_SOURCE_DIR}/FindOpenCL.cmake)
-  include_directories( ${OPENCL_INCLUDE_DIRS})
+elseif(UNIX OR APPLE OR MINGW)
+  #include(${CMAKE_SOURCE_DIR}/FindOpenCL.cmake)
+  find_package(OpenCL REQUIRED)
+  include_directories(${OpenCL_INCLUDE_DIRS})
 endif()
 
-#freetype
+# freetype
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/freetype/include)
-if (WIN32)
+if(WIN32)
   file(GLOB FREETYPE_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/freetype/lib/*.lib)
 else()
   find_package(Freetype REQUIRED)
   include_directories(${FREETYPE_INCLUDE_DIRS})
 endif()
 
-#other sources
+# other sources
 file(GLOB src fluorender/FluoRender/*.cpp)
 file(GLOB hdr fluorender/FluoRender/*.h)
 file(GLOB rsc fluorender/FluoRender/img/*.xpm)
 
-#SynthBB
+# SynthBB
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/SynthBB)
 file(GLOB synthbb_hdr fluorender/SynthBB/*.h)
 file(GLOB synthbb_src fluorender/SynthBB/*.cpp)
 
-#MaskInt
+# MaskInt
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/MaskInt)
 file(GLOB maskint_hdr fluorender/MaskInt/*.h)
 file(GLOB maskint_src fluorender/MaskInt/*.cpp)
 
-#ReadGMM
+# ReadGMM
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/ReadGMM)
 file(GLOB readgmm_hdr fluorender/ReadGMM/*.h)
 file(GLOB readgmm_src fluorender/ReadGMM/*.cpp)
@@ -310,10 +328,10 @@ ELSEIF(WIN32)
   SET(icns "${CMAKE_CURRENT_SOURCE_DIR}/fluorender/FluoRender/img/fluorenderIcon.ico")
   ADD_DEFINITIONS(-DICON_RC_FILE="${icns}")
   SET(src ${src} ${icon_rc})
-ENDIF(APPLE)
+ENDIF()
 
-#platform specific rules
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+# platform specific rules
+if(APPLE)
   # Mac OS X
   if(NOT OPEN_GL_HEADER_LOC)
     add_definitions(-DOPEN_GL_HEADER_LOC=<OpenGL/gl.h>)
@@ -363,9 +381,58 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     $<TARGET_OBJECTS:TRACKING_OBJ>
     $<TARGET_OBJECTS:POLE_OBJ>
     $<TARGET_OBJECTS:TEEM_OBJ>)
-
-elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  #Windows
+elseif(UNIX OR MINGW)
+  # Linux
+  #if(NOT OPEN_GL_HEADER_LOC)
+  #  add_definitions(-DOPEN_GL_HEADER_LOC=<OpenGL/gl.h>)
+  #endif()
+  #if(NOT OPEN_GLU_HEADER_LOC)
+  #  add_definitions(-DOPEN_GLU_HEADER_LOC=<OpenGL/glu.h>)
+  #endif()
+  #add_definitions(-D_DARWIN)
+  set(CFLAGS "-fPIC")
+  set(CXXFLAGS "-fPIC ")
+  #include(BundleUtilities)
+  add_executable(FluoRender
+    ${src} ${hdr} ${rsc} ${icns}
+    $<TARGET_OBJECTS:IMAGES_OBJ>
+    $<TARGET_OBJECTS:CONVERTERS_OBJ>
+    $<TARGET_OBJECTS:FLIVR_OBJ>
+    $<TARGET_OBJECTS:ANIMATORS_OBJ>
+    $<TARGET_OBJECTS:NV_OBJ>
+    $<TARGET_OBJECTS:FORMATS_OBJ>
+    $<TARGET_OBJECTS:VIDEO_OBJ>
+    $<TARGET_OBJECTS:TRACKING_OBJ>
+    $<TARGET_OBJECTS:COMPONENTS_OBJ>
+    $<TARGET_OBJECTS:CLUSTER_OBJ>
+    $<TARGET_OBJECTS:CALCULATE_OBJ>
+    $<TARGET_OBJECTS:GLEW_OBJ>
+    $<TARGET_OBJECTS:POLE_OBJ>
+    $<TARGET_OBJECTS:TEEM_OBJ>)
+  add_executable(SynthBB
+    ${synthbb_src} ${synthbb_hdr}
+    $<TARGET_OBJECTS:FLIVR_OBJ>
+    $<TARGET_OBJECTS:FORMATS_OBJ>
+    $<TARGET_OBJECTS:TRACKING_OBJ>
+    $<TARGET_OBJECTS:COMPONENTS_OBJ>
+    $<TARGET_OBJECTS:CLUSTER_OBJ>
+    $<TARGET_OBJECTS:GLEW_OBJ>
+    $<TARGET_OBJECTS:POLE_OBJ>
+    $<TARGET_OBJECTS:TEEM_OBJ>)
+  add_executable(MaskInt
+    ${maskint_src} ${maskint_hdr}
+    $<TARGET_OBJECTS:FORMATS_OBJ>
+    $<TARGET_OBJECTS:POLE_OBJ>
+    $<TARGET_OBJECTS:TEEM_OBJ>)
+  add_executable(ReadGMM
+    ${readgmm_src} ${readgmm_hdr}
+    $<TARGET_OBJECTS:FORMATS_OBJ>
+    $<TARGET_OBJECTS:CLUSTER_OBJ>
+    $<TARGET_OBJECTS:TRACKING_OBJ>
+    $<TARGET_OBJECTS:POLE_OBJ>
+    $<TARGET_OBJECTS:TEEM_OBJ>)
+elseif(WIN32)
+  # Windows
   if(NOT OPEN_GL_HEADER_LOC)
     add_definitions(-DOPEN_GL_HEADER_LOC=<GL/gl.h>)
   endif()
@@ -373,7 +440,7 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     add_definitions(-DOPEN_GLU_HEADER_LOC=<GL/glu.h>)
   endif()
   # windows
-  if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  if(WIN32)
     add_definitions(-DWIN32)
     add_definitions(-D_WIN32)
     if(MSVC)
@@ -385,16 +452,16 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       add_definitions(-D_XKEYCHECK_H)
       set(CFLAGS "")
       set(CXXFLAGS "/EHsc")
-      #make sure the reference option is turned off and not incremental build linking
+      # make sure the reference option is turned off and not incremental build linking
       STRING(REPLACE "INCREMENTAL" "INCREMENTAL:NO" replacementFlags ${CMAKE_EXE_LINKER_FLAGS_DEBUG})
       STRING(REPLACE "INCREMENTAL:NO:NO" "INCREMENTAL:NO" replacementFlags1 ${replacementFlags})
-      SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "/INCREMENTAL:NO /OPT:NOREF ${replacementFlags1}" )
+      SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "/INCREMENTAL:NO /OPT:NOREF ${replacementFlags1}")
 
       STRING(REPLACE "INCREMENTAL" "INCREMENTAL:NO" replacementFlags2 ${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO})
       STRING(REPLACE "INCREMENTAL:NO:NO" "INCREMENTAL:NO" replacementFlags3 ${replacementFlags2})
-      SET(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "/INCREMENTAL:NO /OPT:NOREF ${replacementFlags3}" )
+      SET(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "/INCREMENTAL:NO /OPT:NOREF ${replacementFlags3}")
 
-      SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "/INCREMENTAL:NO /OPT:NOREF" )
+      SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "/INCREMENTAL:NO /OPT:NOREF")
     endif()
     include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/WacUtils)
     include_directories(${FluoRender_SOURCE_DIR}/fluorender/Wacom/Include)
@@ -441,32 +508,32 @@ elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       $<TARGET_OBJECTS:TRACKING_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>)
-  endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  endif()
 endif()
 
-#architecture specific rules
+# architecture specific rules
 if(${ARCHITECTURE} MATCHES 64)
-  if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  if(APPLE)
     set(ARCH_FLAGS "-m64 -arch x86_64")
-  endif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  endif()
   add_definitions(-DTEEM_32BIT=0)
   set(CMAKE_C_FLAGS "${ARCH_FLAGS} ${CFLAGS}")
-  set(CMAKE_CXX_FLAGS "${ARCH_FLAGS} ${CXXFLAGS} ${CXX_11_FLAG}")
-  set(CMAKE_EXE_LINKER_FLAGS "${ARCH_FLAGS} ${CXX_11_FLAG}")
+  set(CMAKE_CXX_FLAGS "${ARCH_FLAGS} ${CXXFLAGS}")
+  set(CMAKE_EXE_LINKER_FLAGS "${ARCH_FLAGS}")
 else()
-  if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  if(APPLE)
     set(ARCH_FLAGS "-m32 -arch i386")
-  endif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  endif()
   add_definitions(-DTEEM_32BIT=1)
-  set(CMAKE_C_FLAGS "${ARCH_FLAGS} ${CFLAGS}" )
-  set(CMAKE_CXX_FLAGS "${ARCH_FLAGS} ${CXXFLAGS} ${CXX_11_FLAG}")
-  set(CMAKE_EXE_LINKER_FLAGS "${ARCH_FLAGS} ${CXX_11_FLAG}")
+  set(CMAKE_C_FLAGS "${ARCH_FLAGS} ${CFLAGS}")
+  set(CMAKE_CXX_FLAGS "${ARCH_FLAGS} ${CXXFLAGS}")
+  set(CMAKE_EXE_LINKER_FLAGS "${ARCH_FLAGS}")
 endif()
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if(APPLE)
   set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib -L/usr/lib ${CMAKE_EXE_LINKER_FLAGS} -lbz2 -framework OpenCL -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration -framework VideoToolbox -framework Security -framework CoreMedia")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.9 -DWX_PRECOMP -std=c++11 -stdlib=libc++")
-  #make sure png is static linked
+  # make sure png is static linked
   string(REGEX REPLACE "-lpng" "/usr/local/lib/libpng.a"
     wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES})
   string(REGEX REPLACE "-lpng" "/usr/local/lib/libpng.a"
@@ -476,29 +543,33 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   message(STATUS "${FREETYPE_LIBRARIES}")
 endif()
 
-#link the libraries
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+target_compile_options(FluoRender PRIVATE "$<$<CONFIG:RELEASE>:${RELEASE_FLAGS}>")
+target_compile_options(FluoRender PRIVATE "$<$<CONFIG:DEBUG>:${DEBUG_FLAGS}>")
+
+# link the libraries
+if(UNIX OR APPLE OR MINGW)
   target_link_libraries(FluoRender
-    ${ffmpeg_LIBRARIES}
+    ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${OPENCL_LIBRARIES}
+    ${OpenCL_LIBRARIES}
+    ${wxWidgets_LIBRARIES}
     ${FREETYPE_LIBRARIES}
-    ${wxWidgets_LIBRARIES})
-elseif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    ${TIFF_LIBRARIES})
+elseif(WIN32)
   target_link_libraries(FluoRender
     secur32.lib
-    ${ffmpeg_LIBRARIES}
+    ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${OPENCL_LIBRARIES}
+    ${OpenCL_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${wxWidgets_LIBRARIES})
 endif()
 
 target_link_libraries(SynthBB
   ${Boost_LIBRARIES}
-  ${OPENCL_LIBRARIES}
+  ${OpenCL_LIBRARIES}
   ${wxWidgets_LIBRARIES})
 target_link_libraries(MaskInt
   ${Boost_LIBRARIES}
@@ -507,64 +578,64 @@ target_link_libraries(ReadGMM
   ${Boost_LIBRARIES}
   ${wxWidgets_LIBRARIES})
 
-#build OpenCL examples copies.
 
-#copy openCL examples to the binary directory
+
+# copy openCL examples to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/CL_code"
   "$<TARGET_FILE_DIR:FluoRender>/CL_code")
 
-#copy font dir to the binary directory
+# copy font dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/Fonts"
   "$<TARGET_FILE_DIR:FluoRender>/Fonts")
 
-#copy script dir to the binary directory
+# copy script dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/Scripts"
   "$<TARGET_FILE_DIR:FluoRender>/Scripts")
 
-#settings files
+# settings files
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/Settings"
   "$<TARGET_FILE_DIR:FluoRender>")
 
-#copy data dir to the binary directory
+# copy data dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/Data"
   "$<TARGET_FILE_DIR:FluoRender>/Data")
 
-#benchmark files
+# benchmark files
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/Benchmark"
   "$<TARGET_FILE_DIR:FluoRender>")
 
-#make the Executable dir
-if (WIN32)
-add_custom_target(make_exe_dir ALL 
-  COMMAND ${CMAKE_COMMAND} -E make_directory
-  "$<TARGET_FILE_DIR:FluoRender>/Executables")
+# make the Executable dir
+if(WIN32)
+  add_custom_target(make_exe_dir ALL 
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+    "$<TARGET_FILE_DIR:FluoRender>/Executables")
 else()
   add_custom_command(TARGET FluoRender POST_BUILD 
-  COMMAND ${CMAKE_COMMAND} -E make_directory
-  "$<TARGET_FILE_DIR:FluoRender>/Executables")
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+    "$<TARGET_FILE_DIR:FluoRender>/Executables")
 endif()
-#copy the other binaries into Executables
+# copy the other binaries into Executables
 add_custom_command(TARGET SynthBB POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
-  "$<TARGET_FILE:SynthBB>"
-  "$<TARGET_FILE_DIR:FluoRender>/Executables")
+    "$<TARGET_FILE:SynthBB>"
+    "$<TARGET_FILE_DIR:FluoRender>/Executables")
 add_custom_command(TARGET ReadGMM POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
-  "$<TARGET_FILE:ReadGMM>"
-  "$<TARGET_FILE_DIR:FluoRender>/Executables")
+    "$<TARGET_FILE:ReadGMM>"
+    "$<TARGET_FILE_DIR:FluoRender>/Executables")
 add_custom_command(TARGET MaskInt POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
-  "$<TARGET_FILE:MaskInt>"
-  "$<TARGET_FILE_DIR:FluoRender>/Executables")
+    "$<TARGET_FILE:MaskInt>"
+    "$<TARGET_FILE_DIR:FluoRender>/Executables")

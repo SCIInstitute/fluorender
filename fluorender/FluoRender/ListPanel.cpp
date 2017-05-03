@@ -61,6 +61,9 @@ DataListCtrl::DataListCtrl(
 	wxListCtrl(parent, id, pos, size, style),
 	m_frame(frame)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	wxListItem itemCol;
 	itemCol.SetText("Type");
 	this->InsertColumn(0, itemCol);
@@ -914,6 +917,9 @@ ListPanel::ListPanel(wxWindow *frame,
 	wxPanel(parent, id, pos, size, style, name)//,
 	//m_frame(frame)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	//create data list
 	m_datalist = new DataListCtrl(frame, this, wxID_ANY);
 

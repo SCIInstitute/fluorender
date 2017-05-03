@@ -43,7 +43,7 @@ public:
 		m_code.l2_name = "";
 		m_dval = 0.0;
 	}
-	FlKeyDouble(KeyCode keycode, double dval)
+	FlKeyDouble(FlKeyCode keycode, double dval)
 	{
 		m_code = keycode;
 		m_dval = dval;

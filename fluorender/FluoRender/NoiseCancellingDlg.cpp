@@ -50,6 +50,9 @@ NoiseCancellingDlg::NoiseCancellingDlg(wxWindow *frame, wxWindow *parent)
 	m_dft_size(50),
 	m_previewed(false)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	//validator: floating point 1
 	wxFloatingPointValidator<double> vald_fp1(1);
 	//validator: integer

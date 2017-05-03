@@ -50,6 +50,9 @@ m_view(0),
 m_vol_a(0),
 m_vol_b(0)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 

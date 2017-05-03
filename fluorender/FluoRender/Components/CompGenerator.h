@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_CompGenerator_h
 #define FL_CompGenerator_h
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__linux__)
 #include <CL/cl.h>
 #endif
 #ifdef _DARWIN

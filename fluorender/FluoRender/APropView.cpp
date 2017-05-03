@@ -44,6 +44,9 @@ m_frame(frame),
 m_ann(0),
 m_vrv(0)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	wxBoxSizer* sizer_v1 = new wxBoxSizer(wxVERTICAL);
 	wxStaticText* st = 0;
 

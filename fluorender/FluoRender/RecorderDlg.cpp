@@ -58,6 +58,9 @@ m_frame(frame),
 m_editing_item(-1),
 m_dragging_to_item(-1)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 
@@ -529,6 +532,9 @@ wxPoint(500, 150), wxSize(450, 600),
 m_frame(frame),
 m_view(0)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 	wxStaticText* st = 0;
@@ -705,7 +711,7 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	Interpolator *interpolator = vr_frame->GetInterpolator();
 	if (!interpolator)
 		return;
-	KeyCode keycode;
+	FlKeyCode keycode;
 	FlKeyDouble* flkey = 0;
 	FlKeyQuaternion* flkeyQ = 0;
 	FlKeyBoolean* flkeyB = 0;
@@ -930,7 +936,7 @@ void RecorderDlg::AutoKeyChanComb(int comb)
 	double duration;
 	str.ToDouble(&duration);
 
-	KeyCode keycode;
+	FlKeyCode keycode;
 	FlKeyBoolean* flkeyB = 0;
 
 	double t = interpolator->GetLastT();

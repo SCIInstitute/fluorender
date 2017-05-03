@@ -41,12 +41,14 @@ DEALINGS IN THE SOFTWARE.
 #include <cstdarg>
 #include <cstdint>
 #include <string>
+#include <cstring> 
+#include <locale>
 #include <vector>
 #include <windows.h>
 #include <ole2.h>
 #include <wintab.h>
 #include <pktdef.h>
-#include <time.h>
+#include <ctime>
 #include <sys/types.h>
 #include <ctype.h>
 #include <wx/wx.h>
@@ -293,6 +295,9 @@ inline void FIND_FILES(std::wstring m_path_name,
 
 #else // MAC OSX or LINUX
 
+#include <string>
+#include <cstring> 
+#include <locale>
 #include <unistd.h>
 #include <dirent.h>
 #include <sys/time.h>
