@@ -3887,7 +3887,9 @@ void TrackMapProcessor::GetCellsByUncertainty(
 		return;
 
 	VertexList &vertex_list = m_map->m_vertices_list.at(frame);
-	InterGraph &inter_graph = m_map->m_inter_graph_list.at(frame);
+	InterGraph &inter_graph = frame==m_map->m_frame_num-1?
+		m_map->m_inter_graph_list.at(frame-1):
+		m_map->m_inter_graph_list.at(frame);
 	bool filter = !(list_in.empty());
 
 	InterVert v0;
