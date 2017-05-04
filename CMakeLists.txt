@@ -97,7 +97,7 @@ if(${CMAKE_BUILD_TYPE} MATCHES "Release")
 elseif(${CMAKE_BUILD_TYPE} MATCHES "Debug")
   set(wxWidgets_CONFIGURATION mswud)
 endif()
-find_package(wxWidgets COMPONENTS core base aui html xml adv gl stc REQUIRED)
+find_package(wxWidgets COMPONENTS core base aui html xml adv gl stc scintilla REQUIRED)
 include(${wxWidgets_USE_FILE})
 set(wxWidgets_USE_STATIC ON)
 if(UNIX OR APPLE OR MINGW)
@@ -132,7 +132,7 @@ find_package(OpenGL REQUIRED)
 
 # Boost
 # only find static libs:
-#set(Boost_USE_STATIC_LIBS        ON)
+set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME    OFF)
 find_package(Boost COMPONENTS system chrono filesystem REQUIRED)
