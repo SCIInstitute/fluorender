@@ -100,6 +100,9 @@ m_link_x(false),
 m_link_y(false),
 m_link_z(false)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	//validator: floating point 1
 	wxFloatingPointValidator<double> vald_fp1(1);
 	vald_fp1.SetRange(-180.0, 180.0);

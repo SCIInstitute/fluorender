@@ -91,6 +91,9 @@ m_dft_sync_r(false),
 m_dft_sync_g(false),
 m_dft_sync_b(false)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	this->SetSize(75,-1);
 	//validator: floating point 2
 	wxFloatingPointValidator<double> vald_fp2(2);

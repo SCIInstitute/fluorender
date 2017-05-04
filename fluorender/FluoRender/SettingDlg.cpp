@@ -521,6 +521,9 @@ SettingDlg::SettingDlg(wxWindow *frame, wxWindow *parent) :
 		0, "SettingDlg"),
 	m_frame(frame)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	//notebook
 	wxNotebook *notebook = new wxNotebook(this, wxID_ANY);
 	notebook->AddPage(CreateProjectPage(notebook), "Project");

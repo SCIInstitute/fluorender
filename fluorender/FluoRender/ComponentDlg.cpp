@@ -1175,6 +1175,9 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	m_frame(parent),
 	m_view(0)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	//notebook
 	m_notebook = new wxNotebook(this, ID_Notebook);
 	m_notebook->AddPage(Create3DAnalysisPage(m_notebook), "Basic");

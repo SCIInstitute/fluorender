@@ -30,7 +30,7 @@
 #include "ShaderProgram.h"
 #include "Utils.h"
 #include "../compatibility.h"
-#include <time.h>
+#include <ctime>
 #include <cstdio>
 #include <sstream>
 #include <iostream>

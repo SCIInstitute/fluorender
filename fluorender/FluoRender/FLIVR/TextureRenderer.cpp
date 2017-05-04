@@ -27,7 +27,7 @@
 //  
 
 #include <GL/glew.h>
-#include <FLIVR/texturebrick.h>
+#include <FLIVR/TextureBrick.h>
 #include <FLIVR/TextureRenderer.h>
 #include <FLIVR/Color.h>
 #include <FLIVR/Utils.h>

@@ -64,9 +64,9 @@ BEGIN_EVENT_TABLE(DataTreeCtrl, wxTreeCtrl)
 	EVT_TREE_END_DRAG(wxID_ANY, DataTreeCtrl::OnEndDrag)
 	EVT_KEY_DOWN(DataTreeCtrl::OnKeyDown)
 	EVT_KEY_UP(DataTreeCtrl::OnKeyUp)
-	END_EVENT_TABLE()
+END_EVENT_TABLE()
 
-	DataTreeCtrl::DataTreeCtrl(
+DataTreeCtrl::DataTreeCtrl(
 	wxWindow* frame,
 	wxWindow* parent,
 	wxWindowID id,
@@ -78,6 +78,9 @@ wxTreeCtrl(parent, id, pos, size, style),
 	m_fixed(false),
 	m_scroll_pos(-1)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	wxImageList *images = new wxImageList(16, 16, true);
 	wxIcon icons[2];
 	icons[0] = wxIcon(cross_xpm);

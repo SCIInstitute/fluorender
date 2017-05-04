@@ -4823,7 +4823,7 @@ void VRenderGLView::SetParams(double t)
 	Interpolator *interpolator = vr_frame->GetInterpolator();
 	if(!interpolator)
 		return;
-	KeyCode keycode;
+	FlKeyCode keycode;
 	keycode.l0 = 1;
 	keycode.l0_name = m_vrv->GetName();
 
@@ -5701,6 +5701,7 @@ void VRenderGLView::RunSeparateChannels(wxFileConfig &fconfig)
 
 void VRenderGLView::RunExternalExe(wxFileConfig &fconfig)
 {
+#ifndef __linux__
 	wxString pathname;
 	fconfig.Read("exepath", &pathname);
 	if (!wxFileExists(pathname))
@@ -5722,6 +5723,7 @@ void VRenderGLView::RunExternalExe(wxFileConfig &fconfig)
 		boost::process::launch(pathname.ToStdString(),
 		args, ctx);
 	c.wait();
+#endif
 }
 
 void VRenderGLView::RunFetchMask(wxFileConfig &fconfig)
@@ -5982,7 +5984,7 @@ void VRenderGLView::ForceDraw()
 		}
 	}
 #endif
-#ifdef _DARWIN
+#if defined(_DARWIN) || defined(__linux__)
 	SetCurrent(*m_glRC);
 #endif
 	Init();
@@ -11540,9 +11542,9 @@ BEGIN_EVENT_TABLE(VRenderView, wxPanel)
 	EVT_TOOL(ID_DefaultBtn, VRenderView::OnSaveDefault)
 
 	EVT_KEY_DOWN(VRenderView::OnKeyDown)
-	END_EVENT_TABLE()
+END_EVENT_TABLE()
 
-	VRenderView::VRenderView(wxWindow* frame,
+VRenderView::VRenderView(wxWindow* frame,
 	wxWindow* parent,
 	wxWindowID id,
 	wxGLContext* sharedContext,
@@ -11564,6 +11566,9 @@ wxPanel(parent, id, pos, size, style),
 	m_dft_scale_factor(1.0),
 	m_dft_scale_factor_mode(true)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	wxLogNull logNo;
 	//full frame
 	m_full_frame = new wxFrame((wxFrame*)NULL, wxID_ANY, "FluoRender");

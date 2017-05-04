@@ -52,6 +52,9 @@ m_view(0),
 m_max_value(255.0),
 m_dft_thresh(0.0)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	//validator: floating point 1
 	wxFloatingPointValidator<double> vald_fp1(1);
 	//validator: integer

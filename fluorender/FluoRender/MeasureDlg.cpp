@@ -47,9 +47,9 @@ BEGIN_EVENT_TABLE(RulerListCtrl, wxListCtrl)
 	EVT_COLOURPICKER_CHANGED(ID_ColorPicker, RulerListCtrl::OnColorChange)
 	EVT_SCROLLWIN(RulerListCtrl::OnScroll)
 	EVT_MOUSEWHEEL(RulerListCtrl::OnScroll)
-	END_EVENT_TABLE()
+END_EVENT_TABLE()
 
-	RulerListCtrl::RulerListCtrl(
+RulerListCtrl::RulerListCtrl(
 	wxWindow* frame,
 	wxWindow* parent,
 	wxWindowID id,
@@ -59,6 +59,9 @@ BEGIN_EVENT_TABLE(RulerListCtrl, wxListCtrl)
 wxListCtrl(parent, id, pos, size, style)//,
 	//m_frame(frame)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	wxListItem itemCol;
 	itemCol.SetText("Name");
 	this->InsertColumn(0, itemCol);
@@ -505,15 +508,18 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	EVT_RADIOBUTTON(ID_AccIntensityRd, MeasureDlg::OnIntensityMethodCheck)
 	EVT_CHECKBOX(ID_UseTransferChk, MeasureDlg::OnUseTransferCheck)
 	EVT_CHECKBOX(ID_TransientChk, MeasureDlg::OnTransientCheck)
-	END_EVENT_TABLE()
+END_EVENT_TABLE()
 
-	MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
+MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	: wxPanel(parent,wxID_ANY,
 	wxDefaultPosition, wxSize(650, 600),
 	0, "MeasureDlg"),
 	m_frame(parent),
 	m_view(0)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	//toolbar
 	m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER|wxTB_TEXT);

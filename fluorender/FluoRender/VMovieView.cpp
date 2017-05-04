@@ -418,6 +418,9 @@ VMovieView::VMovieView(wxWindow* frame,
 	m_rot_int_type(0),
 	m_delayed_stop(false)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	//notebook
 	m_notebook = new wxNotebook(this, wxID_ANY);
 	m_notebook->AddPage(CreateSimplePage(m_notebook), "Basic");

@@ -25,6 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+
+#ifndef _VRENDERVIEW_H_
+#define _VRENDERVIEW_H_
+
 #include "DataManager.h"
 #include "utility.h"
 #include "VolumeSelector.h"
@@ -51,12 +55,9 @@ DEALINGS IN THE SOFTWARE.
 
 #include <vector>
 #include <stdarg.h>
-#include "nv/timer.h"
+#include "NV/Timer.h"
 
 #include <glm/glm.hpp>
-
-#ifndef _VRENDERVIEW_H_
-#define _VRENDERVIEW_H_
 
 #define VOL_METHOD_SEQ    1
 #define VOL_METHOD_MULTI  2

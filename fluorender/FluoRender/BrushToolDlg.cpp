@@ -91,6 +91,9 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	m_dft_gm_falloff(0.0),
 	m_dft_scl_translate(0.0)
 {
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+
 	wxStaticText *st = 0;
 	//validator: floating point 1
 	wxFloatingPointValidator<double> vald_fp1(1);
