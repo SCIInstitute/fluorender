@@ -96,7 +96,7 @@ void ComponentGenerator::OrderID_3D()
 		return; \
 	Nrrd* nrrd_label = m_vd->GetLabel(false); \
 	if (!nrrd_data) \
-	return; \
+		return; \
 	unsigned char* val8 = 0; \
 	unsigned short* val16 = 0; \
 	int bits; \
@@ -414,6 +414,17 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 		kernel_3 = clCreateKernel(program, "kernel_3", &err);
 	}
 
+	Nrrd* nrrd_data = 0;
+	if (m_use_mask)
+		nrrd_data = m_vd->GetMask(true);
+	if (!nrrd_data)
+		nrrd_data = m_vd->GetVolume(false);
+	if (!nrrd_data)
+		return;
+	Nrrd* nrrd_label = m_vd->GetLabel(false);
+	if (!nrrd_data)
+		return;
+
 	for (size_t i = 0; i < bricks->size(); ++i)
 	{
 		int nx, ny, nz;
@@ -424,6 +435,55 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 		int bits;
 		unsigned int* val32 = 0;
 		//GET_VOLDATA
+		TextureBrick* b = (*bricks)[i];
+		int c = m_use_mask?b->nmask():0;
+		int nb = b->nb(c);
+		nx = b->nx();
+		ny = b->ny();
+		nz = b->nz();
+		bits = nb * 8;
+		//nrrd data
+		unsigned long long mem_size = (unsigned long long)nx*
+			(unsigned long long)ny*(unsigned long long)nz*nb;
+		unsigned char* temp = new unsigned char[mem_size];
+		unsigned char* tempp = temp;
+		unsigned char* tp = (unsigned char*)(b->tex_data(c));
+		unsigned char* tp2;
+		for (unsigned int k = 0; k < nz; ++k)
+		{
+			tp2 = tp;
+			for (unsigned int j = 0; j < ny; ++j)
+			{
+				memcpy(tempp, tp2, nx*nb);
+				tempp += nx*nb;
+				tp2 += b->sx()*nb;
+			}
+			tp += b->sx()*b->sy()*nb;
+		}
+		if (bits == 8)
+			val8 = temp;
+		else if (bits == 16)
+			val16 = (unsigned short*)temp;
+		//nrrd label
+		c = b->nlabel();
+		nb = b->nb(c);
+		mem_size = (unsigned long long)nx*
+			(unsigned long long)ny*(unsigned long long)nz*nb;
+		temp = new unsigned char[mem_size];
+		tempp = temp;
+		tp = (unsigned char*)(b->tex_data(c));
+		for (unsigned int k = 0; k < nz; ++k)
+		{
+			tp2 = tp;
+			for (unsigned int j = 0; j < ny; ++j)
+			{
+				memcpy(tempp, tp2, nx*nb);
+				tempp += nx*nb;
+				tp2 += b->sx()*nb;
+			}
+			tp += b->sx()*b->sy()*nb;
+		}
+		val32 = (unsigned int*)temp;
 
 		unsigned int rcnt = 0;
 		unsigned int seed = iter > 10 ? iter : 11;
@@ -552,6 +612,9 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 			clReleaseMemObject(mask_buffer);
 			delete[] mask32;
 		}
+		if (val8) delete[] val8;
+		if (val16) delete[] val16;
+		if (val32) delete[] val32;
 	}
 	//release kernels and program
 	clReleaseKernel(kernel);
