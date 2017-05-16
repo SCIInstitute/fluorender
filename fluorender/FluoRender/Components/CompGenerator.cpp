@@ -603,6 +603,21 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 			queue, label_buffer,
 			CL_TRUE, 0, sizeof(unsigned int)*nx*ny*nz,
 			val32, 0, NULL, NULL);
+		err = clFinish(queue);
+		//nrrd label
+		tempp = (unsigned char*)val32;
+		tp = (unsigned char*)(b->tex_data(c));
+		for (unsigned int k = 0; k < nz; ++k)
+		{
+			tp2 = tp;
+			for (unsigned int j = 0; j < ny; ++j)
+			{
+				memcpy(tp2, tempp, nx*nb);
+				tempp += nx*nb;
+				tp2 += b->sx()*nb;
+			}
+			tp += b->sx()*b->sy()*nb;
+		}
 
 		clReleaseMemObject(data_buffer);
 		clReleaseMemObject(label_buffer);
