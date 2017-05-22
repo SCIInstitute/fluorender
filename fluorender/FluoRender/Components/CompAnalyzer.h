@@ -68,6 +68,7 @@ namespace FL
 		struct CompInfo
 		{
 			unsigned int id;
+			unsigned int brick_id;
 			unsigned int sumi;
 			double sumd;
 			unsigned int ext_sumi;
@@ -80,20 +81,23 @@ namespace FL
 			FLIVR::Point pos;
 
 			CompInfo() {}
-			CompInfo(unsigned int _id)
-				:id(_id)
+			CompInfo(unsigned int _id,
+				unsigned int _bid)
+				:id(_id), brick_id(_bid)
 			{}
 
 			bool operator<(const CompInfo &info2) const
 			{
-				return id < info2.id;
+				return (brick_id < info2.brick_id) ||
+					(id < info2.id);
 			}
 			bool operator==(const CompInfo &info2) const
 			{
-				return id == info2.id;
+				return (brick_id == info2.brick_id) &&
+					(id == info2.id);
 			}
 		};
-		typedef boost::unordered_map<unsigned int, CompInfo> CompUList;
+		typedef boost::unordered_map<unsigned long long, CompInfo> CompUList;
 		typedef CompUList::iterator CompUListIter;
 		class CompList : public std::list<CompInfo>
 		{
@@ -107,6 +111,11 @@ namespace FL
 		bool m_comp_list_dirty;
 
 	private:
+		unsigned long long GetKey(unsigned int id, unsigned int brick_id)
+		{
+			unsigned long long temp = brick_id;
+			return (temp << 32) & id;
+		}
 		unsigned int GetExt(unsigned int* data_label,
 			unsigned long long index,
 			unsigned int id,

@@ -45,138 +45,166 @@ ComponentAnalyzer::~ComponentAnalyzer()
 
 void ComponentAnalyzer::Analyze(bool sel)
 {
-	if (!m_vd)
+	if (!m_vd || !m_vd->GetTexture())
+		return;
+	vector<TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	if (!bricks || bricks->size() == 0)
 		return;
 
-	Texture* tex = m_vd->GetTexture();
-	if (!tex)
-		return;
-	Nrrd* nrrd_data = tex->get_nrrd(0);
-	if (!nrrd_data)
-		return;
-	int bits = nrrd_data->type;
-	void* data_data = nrrd_data->data;
-	if (!data_data)
-		return;
-	//get mask
-	Nrrd* nrrd_mask = m_vd->GetMask(true);
-	unsigned char* data_mask = 0;
-	if (nrrd_mask)
-		data_mask = (unsigned char*)(nrrd_mask->data);
-	//get label
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	unsigned int* data_label = 0;
-	if (nrrd_label)
-		data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_mask && !data_label)
-		return;
+	//Texture* tex = m_vd->GetTexture();
+	//if (!tex)
+	//	return;
+	//Nrrd* nrrd_data = tex->get_nrrd(0);
+	//if (!nrrd_data)
+	//	return;
+	//int bits = nrrd_data->type;
+	//void* data_data = nrrd_data->data;
+	//if (!data_data)
+	//	return;
+	////get mask
+	//Nrrd* nrrd_mask = m_vd->GetMask(true);
+	//unsigned char* data_mask = 0;
+	//if (nrrd_mask)
+	//	data_mask = (unsigned char*)(nrrd_mask->data);
+	////get label
+	//Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
+	//unsigned int* data_label = 0;
+	//if (nrrd_label)
+	//	data_label = (unsigned int*)(nrrd_label->data);
+	//if (!data_mask && !data_label)
+	//	return;
 
 	//clear list and start calculating
 	m_comp_list.clear();
-	int nx, ny, nz;
-	unsigned int id = 0;
-	double value;
-	double scale;
-	double delta;
-	double ext;
-	int i, j, k;
-	m_vd->GetResolution(nx, ny, nz);
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
-	unsigned long long index;
-	CompUList comp_ulist;
-	CompUListIter iter;
-	for (index = 0; index < for_size; ++index)
+
+	if (sel)
+		m_vd->GetVR()->return_mask();
+
+	int bits;
+	void* data_data = 0;
+	unsigned char* data_mask = 0;
+	unsigned int* data_label = 0;
+	for (size_t bi = 0; bi < bricks->size(); ++bi)
 	{
-		if (sel)
+		int nx, ny, nz;
+		TextureBrick* b = 0;
+		int c = 0;
+		int nb = 1;
+		if (bricks->size() > 1)
 		{
-			if (data_mask && !data_mask[index])
-			continue;
-		}
-		if (data_label && !data_label[index])
-			continue;
-
-		if (data_label)
-			id = data_label[index];
-
-		if (bits == nrrdTypeUChar)
-		{
-			value = ((unsigned char*)data_data)[index] / 255.0;
-			scale = 255.0;
-		}
-		else if (bits == nrrdTypeUShort)
-		{
-			value = ((unsigned short*)data_data)[index] / 65535.0;
-			scale = 65535.0;
-		}
-
-		if (value <= 0.0)
-			continue;
-
-		k = index / (nx*ny);
-		j = index % (nx*ny);
-		i = j % nx;
-		j = j / nx;
-		ext = GetExt(data_label, index, id, nx, ny, nz, i, j, k);
-
-		//find in list
-		iter = comp_ulist.find(id);
-		if (iter == comp_ulist.end())
-		{
-			//not found
-			CompInfo info;
-			info.id = id;
-			info.sumi = 1;
-			info.sumd = value;
-			info.ext_sumi = ext;
-			info.ext_sumd = value * ext;
-			info.mean = 0.0;
-			info.var = 0.0;
-			info.m2 = 0.0;
-			delta = value - info.mean;
-			info.mean += delta / info.sumi;
-			info.m2 += delta * (value - info.mean);
-			info.min = value;
-			info.max = value;
-			info.pos = FLIVR::Point(i, j, k);
-			comp_ulist.insert(pair<unsigned int, CompInfo>
-				(id, info));
 		}
 		else
 		{
-			iter->second.pos = FLIVR::Point((iter->second.pos * iter->second.sumi +
-				FLIVR::Point(i, j, k)) / (iter->second.sumi + 1));
-			//
-			iter->second.sumi++;
-			iter->second.sumd += value;
-			iter->second.ext_sumi += ext;
-			iter->second.ext_sumd += value * ext;
-			//
-			delta = value - iter->second.mean;
-			iter->second.mean += delta / iter->second.sumi;
-			iter->second.m2 += delta * (value - iter->second.mean);
-			iter->second.min = value < iter->second.min ? value : iter->second.min;
-			iter->second.max = value > iter->second.max ? value : iter->second.max;
+			m_vd->GetResolution(nx, ny, nz);
+			Nrrd* nrrd_data = m_vd->GetVolume(false);
+			int bits = nrrd_data->type;
 		}
-	}
 
-	m_comp_list.min = std::numeric_limits<unsigned int>::max();
-	m_comp_list.max = 0;
-	for (iter = comp_ulist.begin();
-		iter != comp_ulist.end(); ++iter)
-	{
-		if (iter->second.sumi > 0)
-			iter->second.var = sqrt(iter->second.m2 / (iter->second.sumi));
-		iter->second.mean *= scale;
-		iter->second.min *= scale;
-		iter->second.max *= scale;
-		m_comp_list.min = iter->second.sumi <
-			m_comp_list.min ? iter->second.sumi :
-			m_comp_list.min;
-		m_comp_list.max = iter->second.sumi >
-			m_comp_list.max ? iter->second.sumi :
-			m_comp_list.max;
-		m_comp_list.push_back(iter->second);
+		unsigned int id = 0;
+		double value;
+		double scale;
+		double delta;
+		double ext;
+		int i, j, k;
+		m_vd->GetResolution(nx, ny, nz);
+		unsigned long long for_size = (unsigned long long)nx *
+			(unsigned long long)ny * (unsigned long long)nz;
+		unsigned long long index;
+		CompUList comp_ulist;
+		CompUListIter iter;
+		for (index = 0; index < for_size; ++index)
+		{
+			if (sel)
+			{
+				if (data_mask && !data_mask[index])
+					continue;
+			}
+			if (data_label && !data_label[index])
+				continue;
+
+			if (data_label)
+				id = data_label[index];
+
+			if (bits == nrrdTypeUChar)
+			{
+				value = ((unsigned char*)data_data)[index] / 255.0;
+				scale = 255.0;
+			}
+			else if (bits == nrrdTypeUShort)
+			{
+				value = ((unsigned short*)data_data)[index] / 65535.0;
+				scale = 65535.0;
+			}
+
+			if (value <= 0.0)
+				continue;
+
+			k = index / (nx*ny);
+			j = index % (nx*ny);
+			i = j % nx;
+			j = j / nx;
+			ext = GetExt(data_label, index, id, nx, ny, nz, i, j, k);
+
+			//find in list
+			iter = comp_ulist.find(id);
+			if (iter == comp_ulist.end())
+			{
+				//not found
+				CompInfo info;
+				info.id = id;
+				info.sumi = 1;
+				info.sumd = value;
+				info.ext_sumi = ext;
+				info.ext_sumd = value * ext;
+				info.mean = 0.0;
+				info.var = 0.0;
+				info.m2 = 0.0;
+				delta = value - info.mean;
+				info.mean += delta / info.sumi;
+				info.m2 += delta * (value - info.mean);
+				info.min = value;
+				info.max = value;
+				info.pos = FLIVR::Point(i, j, k);
+				comp_ulist.insert(pair<unsigned int, CompInfo>
+					(id, info));
+			}
+			else
+			{
+				iter->second.pos = FLIVR::Point((iter->second.pos * iter->second.sumi +
+					FLIVR::Point(i, j, k)) / (iter->second.sumi + 1));
+				//
+				iter->second.sumi++;
+				iter->second.sumd += value;
+				iter->second.ext_sumi += ext;
+				iter->second.ext_sumd += value * ext;
+				//
+				delta = value - iter->second.mean;
+				iter->second.mean += delta / iter->second.sumi;
+				iter->second.m2 += delta * (value - iter->second.mean);
+				iter->second.min = value < iter->second.min ? value : iter->second.min;
+				iter->second.max = value > iter->second.max ? value : iter->second.max;
+			}
+		}
+
+		m_comp_list.min = std::numeric_limits<unsigned int>::max();
+		m_comp_list.max = 0;
+		for (iter = comp_ulist.begin();
+			iter != comp_ulist.end(); ++iter)
+		{
+			if (iter->second.sumi > 0)
+				iter->second.var = sqrt(iter->second.m2 / (iter->second.sumi));
+			iter->second.mean *= scale;
+			iter->second.min *= scale;
+			iter->second.max *= scale;
+			m_comp_list.min = iter->second.sumi <
+				m_comp_list.min ? iter->second.sumi :
+				m_comp_list.min;
+			m_comp_list.max = iter->second.sumi >
+				m_comp_list.max ? iter->second.sumi :
+				m_comp_list.max;
+			m_comp_list.push_back(iter->second);
+		}
+
 	}
 
 	m_comp_list.sort();
@@ -476,7 +504,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 		}
 
 		//settings
-        Color c = GetColor(*i, m_vd, color_type);
+		Color c = GetColor(*i, m_vd, color_type);
 		vd->SetColor(c);
 		vd->SetEnableAlpha(m_vd->GetEnableAlpha());
 		vd->SetShading(m_vd->GetShading());
@@ -590,7 +618,7 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 	{
 		value_label = data_label[index];
 		auto i = std::find(m_comp_list.begin(),
-			m_comp_list.end(), CompInfo(value_label));
+			m_comp_list.end(), CompInfo(value_label, 0));
 		if (i != m_comp_list.end())
 		{
 			color = GetColor(*i, m_vd, color_type);

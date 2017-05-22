@@ -183,7 +183,7 @@ void ComponentGenerator::OrderID_3D()
 		m_vd->GetResolution(nx, ny, nz); \
 		Nrrd* nrrd_data = 0; \
 		if (m_use_mask) \
-			nrrd_data = m_vd->GetMask(true); \
+			nrrd_data = m_vd->GetMask(false); \
 		if (!nrrd_data) \
 			nrrd_data = m_vd->GetVolume(false); \
 		if (!nrrd_data) \
