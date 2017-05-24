@@ -92,12 +92,95 @@ void ComponentAnalyzer::Analyze(bool sel)
 		int nb = 1;
 		if (bricks->size() > 1)
 		{
+			// get brick if ther are more than one brick
+			b = (*bricks)[bi];
+			nb = b->nb(0);
+			nx = b->nx();
+			ny = b->ny();
+			nz = b->nz();
+			bits = nb * 8;
+			//size
+			unsigned long long mem_size = (unsigned long long)nx*
+				(unsigned long long)ny*(unsigned long long)nz*nb;
+			//data
+			unsigned char* temp = new unsigned char[mem_size];
+			unsigned char* tempp = temp;
+			unsigned char* tp = (unsigned char*)(b->tex_data(0));
+			unsigned char* tp2;
+			for (unsigned int k = 0; k < nz; ++k)
+			{
+				tp2 = tp;
+				for (unsigned int j = 0; j < ny; ++j)
+				{
+					memcpy(tempp, tp2, nx*nb);
+					tempp += nx*nb;
+					tp2 += b->sx()*nb;
+				}
+				tp += b->sx()*b->sy()*nb;
+			}
+			data_data = (void*)temp;
+			//mask
+			if (sel)
+			{
+				c = b->nmask();
+				nb = b->nb(c);
+				mem_size = (unsigned long long)nx*
+					(unsigned long long)ny*(unsigned long long)nz*nb;
+				temp = new unsigned char[mem_size];
+				tempp = temp;
+				tp = (unsigned char*)(b->tex_data(c));
+				for (unsigned int k = 0; k < nz; ++k)
+				{
+					tp2 = tp;
+					for (unsigned int j = 0; j < ny; ++j)
+					{
+						memcpy(tempp, tp2, nx*nb);
+						tempp += nx*nb;
+						tp2 += b->sx()*nb;
+					}
+					tp += b->sx()*b->sy()*nb;
+				}
+				data_mask = temp;
+			}
+			//label
+			c = b->nlabel();
+			nb = b->nb(c);
+			mem_size = (unsigned long long)nx*
+				(unsigned long long)ny*(unsigned long long)nz*nb;
+			temp = new unsigned char[mem_size];
+			tempp = temp;
+			tp = (unsigned char*)(b->tex_data(c));
+			for (unsigned int k = 0; k < nz; ++k)
+			{
+				tp2 = tp;
+				for (unsigned int j = 0; j < ny; ++j)
+				{
+					memcpy(tempp, tp2, nx*nb);
+					tempp += nx*nb;
+					tp2 += b->sx()*nb;
+				}
+				tp += b->sx()*b->sy()*nb;
+			}
+			data_label = (unsigned int*)temp;
 		}
 		else
 		{
+			// get data if there is only one brick
 			m_vd->GetResolution(nx, ny, nz);
 			Nrrd* nrrd_data = m_vd->GetVolume(false);
-			int bits = nrrd_data->type;
+			if (nrrd_data)
+			{
+				bits = nrrd_data->type;
+				data_data = nrrd_data->data;
+			}
+			Nrrd* nrrd_mask = m_vd->GetMask(false);
+			if (nrrd_mask)
+				data_mask = (unsigned char*)(nrrd_mask->data);
+			Nrrd* nrrd_label = m_vd->GetLabel(false);
+			if (nrrd_label)
+				data_label = (unsigned int*)(nrrd_label->data);
+			if (!data_data || (sel && !data_mask) || !data_label)
+				return;
 		}
 
 		unsigned int id = 0;
@@ -146,12 +229,13 @@ void ComponentAnalyzer::Analyze(bool sel)
 			ext = GetExt(data_label, index, id, nx, ny, nz, i, j, k);
 
 			//find in list
-			iter = comp_ulist.find(id);
+			iter = comp_ulist.find(GetKey(id, bi));
 			if (iter == comp_ulist.end())
 			{
 				//not found
 				CompInfo info;
 				info.id = id;
+				info.brick_id = bi;
 				info.sumi = 1;
 				info.sumd = value;
 				info.ext_sumi = ext;
@@ -165,8 +249,8 @@ void ComponentAnalyzer::Analyze(bool sel)
 				info.min = value;
 				info.max = value;
 				info.pos = FLIVR::Point(i, j, k);
-				comp_ulist.insert(pair<unsigned int, CompInfo>
-					(id, info));
+				comp_ulist.insert(pair<unsigned long long, CompInfo>
+					(GetKey(id, bi), info));
 			}
 			else
 			{

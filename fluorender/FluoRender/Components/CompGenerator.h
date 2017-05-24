@@ -61,6 +61,7 @@ namespace FL
 			float, int, int);
 		void Grow3DSized(bool, int, float, float,
 			int, float, int, int);
+		void FillBorder3D(float);
 		void InitialGrow(bool, int,
 			float, float,
 			float, float,
