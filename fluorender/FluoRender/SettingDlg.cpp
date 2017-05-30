@@ -612,7 +612,7 @@ void SettingDlg::GetSettings()
 	m_last_tool = 0;
 	m_component_size = 25.0;
 	m_contact_factor = 0.6;
-	m_similarity = 0.2;
+	m_similarity = 0.3;
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
