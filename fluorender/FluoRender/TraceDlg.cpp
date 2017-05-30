@@ -2133,14 +2133,26 @@ void TraceDlg::CellNewID(bool append)
 				}
 			}
 
+	//save label mask to disk
+	vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
+
 	if (new_id)
-		trace_group->AddCell(cell, m_cur_time);
+	{
+		//trace_group->AddCell(cell, m_cur_time);
+		FL::pTrackMap track_map = trace_group->GetTrackMap();
+		FL::TrackMapProcessor tm_processor(track_map);
+		//register file reading and deleteing functions
+		tm_processor.RegisterCacheQueueFuncs(
+			boost::bind(&TraceDlg::ReadVolCache, this, _1),
+			boost::bind(&TraceDlg::DelVolCache, this, _1));
+		tm_processor.SetVolCacheSize(4);
+		//add
+		tm_processor.AddCellDup(cell, m_cur_time);
+	}
 	CellUpdate();
 
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_pool();
-	//save label mask to disk
-	vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
 
 }
 

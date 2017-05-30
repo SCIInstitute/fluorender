@@ -3193,7 +3193,14 @@ bool TrackMapProcessor::AddCellDup(pCell & cell, size_t frame)
 	pCell new_cell = pCell(new Cell(cell->Id()));
 	new_cell->Set(cell);
 	CellListIter iter;
-	return AddCell(new_cell, frame, iter);
+	bool result = AddCell(new_cell, frame, iter);
+	//link new cell
+	CellList list;
+	list.insert(std::pair<unsigned int, pCell>
+		(cell->Id(), cell));
+	LinkAddedCells(list, frame, frame - 1);
+	LinkAddedCells(list, frame, frame + 1);
+	return result;
 }
 
 bool TrackMapProcessor::AddCell(
