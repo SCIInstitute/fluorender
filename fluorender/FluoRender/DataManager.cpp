@@ -4720,92 +4720,45 @@ bool DataManager::CheckNames(wxString &str)
 	return result;
 }
 
+Color DataManager::GetColor(int c)
+{
+	Color result(1.0, 1.0, 1.0);
+	switch (c)
+	{
+	case 1://red
+		result = Color(1.0, 0.0, 0.0);
+		break;
+	case 2://green
+		result = Color(0.0, 1.0, 0.0);
+		break;
+	case 3://blue
+		result = Color(0.0, 0.0, 1.0);
+		break;
+	case 4://cyan
+		result = Color(0.0, 1.0, 1.0);
+		break;
+	case 5://magenta
+		result = Color(1.0, 0.0, 1.0);
+		break;
+	case 6://yellow
+		result = Color(1.0, 1.0, 0.0);
+		break;
+	case 7://orange
+		result = Color(1.0, 0.5, 0.0);
+		break;
+	case 8://white
+		result = Color(1.0, 1.0, 1.0);
+		break;
+	}
+	return result;
+}
+
 void DataManager::SetWavelengthColor(int c1, int c2, int c3, int c4)
 {
-	switch (c1)
-	{
-	case 1:
-		m_vol_wav[0] = Color(1.0, 0.0, 0.0);
-		break;
-	case 2:
-		m_vol_wav[0] = Color(0.0, 1.0, 0.0);
-		break;
-	case 3:
-		m_vol_wav[0] = Color(0.0, 0.0, 1.0);
-		break;
-	case 4:
-		m_vol_wav[0] = Color(1.0, 0.0, 1.0);
-		break;
-	case 5:
-		m_vol_wav[0] = Color(1.0, 1.0, 1.0);
-		break;
-	default:
-		m_vol_wav[0] = Color(1.0, 1.0, 1.0);
-		break;
-	}
-	switch (c2)
-	{
-	case 1:
-		m_vol_wav[1] = Color(1.0, 0.0, 0.0);
-		break;
-	case 2:
-		m_vol_wav[1] = Color(0.0, 1.0, 0.0);
-		break;
-	case 3:
-		m_vol_wav[1] = Color(0.0, 0.0, 1.0);
-		break;
-	case 4:
-		m_vol_wav[1] = Color(1.0, 0.0, 1.0);
-		break;
-	case 5:
-		m_vol_wav[1] = Color(1.0, 1.0, 1.0);
-		break;
-	default:
-		m_vol_wav[1] = Color(1.0, 1.0, 1.0);
-		break;
-	}
-	switch (c3)
-	{
-	case 1:
-		m_vol_wav[2] = Color(1.0, 0.0, 0.0);
-		break;
-	case 2:
-		m_vol_wav[2] = Color(0.0, 1.0, 0.0);
-		break;
-	case 3:
-		m_vol_wav[2] = Color(0.0, 0.0, 1.0);
-		break;
-	case 4:
-		m_vol_wav[2] = Color(1.0, 0.0, 1.0);
-		break;
-	case 5:
-		m_vol_wav[2] = Color(1.0, 1.0, 1.0);
-		break;
-	default:
-		m_vol_wav[2] = Color(1.0, 1.0, 1.0);
-		break;
-	}
-	switch (c4)
-	{
-	case 1:
-		m_vol_wav[3] = Color(1.0, 0.0, 0.0);
-		break;
-	case 2:
-		m_vol_wav[3] = Color(0.0, 1.0, 0.0);
-		break;
-	case 3:
-		m_vol_wav[3] = Color(0.0, 0.0, 1.0);
-		break;
-	case 4:
-		m_vol_wav[3] = Color(1.0, 0.0, 1.0);
-		break;
-	case 5:
-		m_vol_wav[3] = Color(1.0, 1.0, 1.0);
-		break;
-	default:
-		m_vol_wav[0] = Color(1.0, 1.0, 1.0);
-		break;
-	}
+	m_vol_wav[0] = GetColor(c1);
+	m_vol_wav[1] = GetColor(c2);
+	m_vol_wav[2] = GetColor(c3);
+	m_vol_wav[3] = GetColor(c4);
 }
 
 Color DataManager::GetWavelengthColor(double wavelength)

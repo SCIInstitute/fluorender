@@ -441,25 +441,37 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	m_wav_color1_cmb->Append("Red");
 	m_wav_color1_cmb->Append("Green");
 	m_wav_color1_cmb->Append("Blue");
-	m_wav_color1_cmb->Append("Purple");
+	m_wav_color1_cmb->Append("Cyan");
+	m_wav_color1_cmb->Append("Magenta");
+	m_wav_color1_cmb->Append("Yellow");
+	m_wav_color1_cmb->Append("Orange");
 	m_wav_color1_cmb->Append("White");
 	//2
 	m_wav_color2_cmb->Append("Red");
 	m_wav_color2_cmb->Append("Green");
 	m_wav_color2_cmb->Append("Blue");
-	m_wav_color2_cmb->Append("Purple");
+	m_wav_color2_cmb->Append("Cyan");
+	m_wav_color2_cmb->Append("Magenta");
+	m_wav_color2_cmb->Append("Yellow");
+	m_wav_color2_cmb->Append("Orange");
 	m_wav_color2_cmb->Append("White");
 	//3
 	m_wav_color3_cmb->Append("Red");
 	m_wav_color3_cmb->Append("Green");
 	m_wav_color3_cmb->Append("Blue");
-	m_wav_color3_cmb->Append("Purple");
+	m_wav_color3_cmb->Append("Cyan");
+	m_wav_color3_cmb->Append("Magenta");
+	m_wav_color3_cmb->Append("Yellow");
+	m_wav_color3_cmb->Append("Orange");
 	m_wav_color3_cmb->Append("White");
 	//4
 	m_wav_color4_cmb->Append("Red");
 	m_wav_color4_cmb->Append("Green");
 	m_wav_color4_cmb->Append("Blue");
-	m_wav_color4_cmb->Append("Purple");
+	m_wav_color4_cmb->Append("Cyan");
+	m_wav_color4_cmb->Append("Magenta");
+	m_wav_color4_cmb->Append("Yellow");
+	m_wav_color4_cmb->Append("Orange");
 	m_wav_color4_cmb->Append("White");
 	sizer2_1->Add(35, 20);
 	sizer2_1->Add(m_wav_color1_cmb);

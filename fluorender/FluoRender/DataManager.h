@@ -1316,6 +1316,7 @@ public:
 	//wavelength to color
 	void SetWavelengthColor(int c1, int c2, int c3, int c4);
 	Color GetWavelengthColor(double wavelength);
+	Color GetColor(int);
 
 	//override voxel size
 	void SetOverrideVox(bool val)
