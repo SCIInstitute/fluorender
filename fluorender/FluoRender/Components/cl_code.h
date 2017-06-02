@@ -343,7 +343,7 @@ const char* str_cl_fill_borders_3d = \
 "	{\n" \
 "		float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
 "		float nb_value = read_imagef(data, samp, (int4)(i+1, j, k, 1)).x;\n" \
-"		if (abs_diff(value, nb_value) < tol)\n" \
+"		if (fabs(value - nb_value) < tol)\n" \
 "		{\n" \
 "			unsigned int index = nx*ny*k + nx*j + i;\n" \
 "			unsigned int nb_index = index + 1;\n" \
@@ -354,7 +354,7 @@ const char* str_cl_fill_borders_3d = \
 "	{\n" \
 "		float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
 "		float nb_value = read_imagef(data, samp, (int4)(i-1, j, k, 1)).x;\n" \
-"		if (abs_diff(value, nb_value) < tol)\n" \
+"		if (fabs(value - nb_value) < tol)\n" \
 "		{\n" \
 "			unsigned int index = nx*ny*k + nx*j + i;\n" \
 "			unsigned int nb_index = index - 1;\n" \
@@ -365,7 +365,7 @@ const char* str_cl_fill_borders_3d = \
 "	{\n" \
 "		float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
 "		float nb_value = read_imagef(data, samp, (int4)(i, j+1, k, 1)).x;\n" \
-"		if (abs_diff(value, nb_value) < tol)\n" \
+"		if (fabs(value - nb_value) < tol)\n" \
 "		{\n" \
 "			unsigned int index = nx*ny*k + nx*j + i;\n" \
 "			unsigned int nb_index = index + nx;\n" \
@@ -376,7 +376,7 @@ const char* str_cl_fill_borders_3d = \
 "	{\n" \
 "		float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
 "		float nb_value = read_imagef(data, samp, (int4)(i, j-1, k, 1)).x;\n" \
-"		if (abs_diff(value, nb_value) < tol)\n" \
+"		if (fabs(value - nb_value) < tol)\n" \
 "		{\n" \
 "			unsigned int index = nx*ny*k + nx*j + i;\n" \
 "			unsigned int nb_index = index - nx;\n" \
@@ -387,7 +387,7 @@ const char* str_cl_fill_borders_3d = \
 "	{\n" \
 "		float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
 "		float nb_value = read_imagef(data, samp, (int4)(i, j, k+1, 1)).x;\n" \
-"		if (abs_diff(value, nb_value) < tol)\n" \
+"		if (fabs(value - nb_value) < tol)\n" \
 "		{\n" \
 "			unsigned int index = nx*ny*k + nx*j + i;\n" \
 "			unsigned int nb_index = index + nx*ny;\n" \
@@ -398,7 +398,7 @@ const char* str_cl_fill_borders_3d = \
 "	{\n" \
 "		float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
 "		float nb_value = read_imagef(data, samp, (int4)(i, j, k-1, 1)).x;\n" \
-"		if (abs_diff(value, nb_value) < tol)\n" \
+"		if (fabs(value - nb_value) < tol)\n" \
 "		{\n" \
 "			unsigned int index = nx*ny*k + nx*j + i;\n" \
 "			unsigned int nb_index = index - nx*ny;\n" \

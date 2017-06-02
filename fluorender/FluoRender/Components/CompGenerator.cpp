@@ -116,6 +116,7 @@ void ComponentGenerator::OrderID_3D()
 	if (!m_vd || !m_vd->GetTexture()) \
 		return; \
 	vector<TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks(); \
+	m_vd->SetBrickNum(bricks->size()); \
 	if (!bricks || bricks->size() == 0) \
 		return;
 
@@ -894,7 +895,7 @@ void ComponentGenerator::FillBorder3D(float tol)
 	cl_int err;
 	size_t program_size = strlen(str_cl_fill_borders_3d);
 	cl_program program = clCreateProgramWithSource(m_context, 1,
-		&str_cl_brainbow_3d, &program_size, &err);
+		&str_cl_fill_borders_3d, &program_size, &err);
 	if (err != CL_SUCCESS) return;
 	err = clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
 	if (err != CL_SUCCESS)

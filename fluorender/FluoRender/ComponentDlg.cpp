@@ -3354,6 +3354,9 @@ void ComponentDlg::GenerateBsc(bool refine)
 			float(m_basic_falloff / scale2),
 			density, clean_iter, clean_size);
 
+	if (vd->GetBrickNum() > 1)
+		cg.FillBorder3D(0.1);
+
 	vd->GetVR()->clear_tex_current();
 	m_view->RefreshGL();
 
