@@ -54,6 +54,7 @@ namespace FL
 		{ return m_vd; }
 
 		void Analyze(bool sel);
+		void MatchBricks();
 		void OutputFormHeader(std::string &str);
 		//print out results
 		//verbose: 0-clean output; 1-extra info

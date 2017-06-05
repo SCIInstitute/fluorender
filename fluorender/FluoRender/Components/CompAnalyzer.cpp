@@ -51,29 +51,6 @@ void ComponentAnalyzer::Analyze(bool sel)
 	if (!bricks || bricks->size() == 0)
 		return;
 
-	//Texture* tex = m_vd->GetTexture();
-	//if (!tex)
-	//	return;
-	//Nrrd* nrrd_data = tex->get_nrrd(0);
-	//if (!nrrd_data)
-	//	return;
-	//int bits = nrrd_data->type;
-	//void* data_data = nrrd_data->data;
-	//if (!data_data)
-	//	return;
-	////get mask
-	//Nrrd* nrrd_mask = m_vd->GetMask(true);
-	//unsigned char* data_mask = 0;
-	//if (nrrd_mask)
-	//	data_mask = (unsigned char*)(nrrd_mask->data);
-	////get label
-	//Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	//unsigned int* data_label = 0;
-	//if (nrrd_label)
-	//	data_label = (unsigned int*)(nrrd_label->data);
-	//if (!data_mask && !data_label)
-	//	return;
-
 	//clear list and start calculating
 	m_comp_list.clear();
 
@@ -295,9 +272,16 @@ void ComponentAnalyzer::Analyze(bool sel)
 	m_comp_list_dirty = false;
 }
 
+void ComponentAnalyzer::MatchBricks()
+{
+}
+
 void ComponentAnalyzer::OutputFormHeader(std::string &str)
 {
-	str = "ID\tPosX\tPosY\tPosZ\tSumN\tSumI\tSurfaceN\tSurfaceI\tMean\tSigma\tMin\tMax\n";
+	if (m_vd && m_vd->GetBrickNum())
+		str = "BRICK_ID\tID\tPosX\tPosY\tPosZ\tSumN\tSumI\tSurfaceN\tSurfaceI\tMean\tSigma\tMin\tMax\n";
+	else
+		str = "ID\tPosX\tPosY\tPosZ\tSumN\tSumI\tSurfaceN\tSurfaceI\tMean\tSigma\tMin\tMax\n";
 }
 
 void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::string comp_header)
@@ -323,6 +307,8 @@ void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::strin
 			else
 				oss << "\t";
 		}
+		if (m_vd && m_vd->GetBrickNum())
+			oss << i->brick_id << "\t";
 		oss << i->id << "\t";
 		oss << i->pos.x() << "\t";
 		oss << i->pos.y() << "\t";

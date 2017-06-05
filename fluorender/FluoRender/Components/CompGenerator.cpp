@@ -1354,7 +1354,7 @@ void ComponentGenerator::SizedGrow(bool param_tr, int iter,
 
 void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 {
-	if (!m_vd)
+	/*if (!m_vd)
 		return;
 	int nx, ny, nz;
 	m_vd->GetResolution(nx, ny, nz);
@@ -1363,8 +1363,11 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 		return;
 	unsigned int* val32 = (unsigned int*)(nrrd_label->data);
 	unsigned int* mask32 = new unsigned int[nx*ny];
-	memset(mask32, 0, sizeof(unsigned int)*nx*ny);
+	memset(mask32, 0, sizeof(unsigned int)*nx*ny);*/
 
+	CHECK_BRICKS
+
+	//create program and kernels
 	cl_int err;
 	cl_command_queue queue = clCreateCommandQueue(m_context, m_device, 0, &err);
 
@@ -1412,94 +1415,111 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 	}
 	cl_kernel kernel_2 = clCreateKernel(program, "kernel_0", &err);
 
-	unsigned int* cur_page_label = val32;
-	size_t global_size[2] = { size_t(nx), size_t(ny) };
-	size_t local_size[2] = { 1, 1 };
-	unsigned int len = 0;
-	unsigned int r = Max(nx, ny);
-	while (r > 0)
+	for (size_t i = 0; i < bricks->size(); ++i)
 	{
-		r /= 2;
-		len++;
-	}
+		GET_VOLDATA_STREAM
 
-	//mask
-	cl_mem mask_buffer = clCreateBuffer(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-		sizeof(unsigned int)*nx*ny, mask32, &err);
-	//label
-	cl_mem label_buffer = clCreateBuffer(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-		sizeof(unsigned int)*nx*ny, cur_page_label, &err);
-	//set
-	//kernel 0
-	err = clSetKernelArg(kernel_0, 0, sizeof(cl_mem), &mask_buffer);
-	err = clSetKernelArg(kernel_0, 1, sizeof(cl_mem), &label_buffer);
-	err = clSetKernelArg(kernel_0, 2, sizeof(unsigned int), (void*)(&nx));
-	err = clSetKernelArg(kernel_0, 3, sizeof(unsigned int), (void*)(&ny));
-	err = clSetKernelArg(kernel_0, 4, sizeof(unsigned int), (void*)(&len));
-	//kernel 1
-	err = clSetKernelArg(kernel_1, 0, sizeof(cl_mem), &mask_buffer);
-	err = clSetKernelArg(kernel_1, 1, sizeof(cl_mem), &label_buffer);
-	err = clSetKernelArg(kernel_1, 2, sizeof(unsigned int), (void*)(&nx));
-	err = clSetKernelArg(kernel_1, 3, sizeof(unsigned int), (void*)(&ny));
-	err = clSetKernelArg(kernel_1, 4, sizeof(unsigned int), (void*)(&len));
-	//kernel 2
-	err = clSetKernelArg(kernel_2, 0, sizeof(cl_mem), &mask_buffer);
-	err = clSetKernelArg(kernel_2, 1, sizeof(cl_mem), &label_buffer);
-	err = clSetKernelArg(kernel_2, 2, sizeof(unsigned int), (void*)(&nx));
-	err = clSetKernelArg(kernel_2, 3, sizeof(unsigned int), (void*)(&ny));
-	err = clSetKernelArg(kernel_2, 4, sizeof(unsigned int), (void*)(&size_lm));
+			unsigned int* mask32 = new unsigned int[nx*ny];
+		memset(mask32, 0, sizeof(unsigned int)*nx*ny);
 
-	size_t count = 0;
-	for (size_t i = 0; i<nz; ++i)
-	{
-		if (i)
-			err = clEnqueueWriteBuffer(
+		unsigned int* cur_page_label = val32;
+		size_t global_size[2] = { size_t(nx), size_t(ny) };
+		size_t local_size[2] = { 1, 1 };
+		unsigned int len = 0;
+		unsigned int r = Max(nx, ny);
+		while (r > 0)
+		{
+			r /= 2;
+			len++;
+		}
+
+		//mask
+		cl_mem mask_buffer = clCreateBuffer(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*nx*ny, mask32, &err);
+		//label
+		cl_mem label_buffer = clCreateBuffer(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*nx*ny, cur_page_label, &err);
+		//set
+		//kernel 0
+		err = clSetKernelArg(kernel_0, 0, sizeof(cl_mem), &mask_buffer);
+		err = clSetKernelArg(kernel_0, 1, sizeof(cl_mem), &label_buffer);
+		err = clSetKernelArg(kernel_0, 2, sizeof(unsigned int), (void*)(&nx));
+		err = clSetKernelArg(kernel_0, 3, sizeof(unsigned int), (void*)(&ny));
+		err = clSetKernelArg(kernel_0, 4, sizeof(unsigned int), (void*)(&len));
+		//kernel 1
+		err = clSetKernelArg(kernel_1, 0, sizeof(cl_mem), &mask_buffer);
+		err = clSetKernelArg(kernel_1, 1, sizeof(cl_mem), &label_buffer);
+		err = clSetKernelArg(kernel_1, 2, sizeof(unsigned int), (void*)(&nx));
+		err = clSetKernelArg(kernel_1, 3, sizeof(unsigned int), (void*)(&ny));
+		err = clSetKernelArg(kernel_1, 4, sizeof(unsigned int), (void*)(&len));
+		//kernel 2
+		err = clSetKernelArg(kernel_2, 0, sizeof(cl_mem), &mask_buffer);
+		err = clSetKernelArg(kernel_2, 1, sizeof(cl_mem), &label_buffer);
+		err = clSetKernelArg(kernel_2, 2, sizeof(unsigned int), (void*)(&nx));
+		err = clSetKernelArg(kernel_2, 3, sizeof(unsigned int), (void*)(&ny));
+		err = clSetKernelArg(kernel_2, 4, sizeof(unsigned int), (void*)(&size_lm));
+
+		size_t count = 0;
+		for (size_t i = 0; i < nz; ++i)
+		{
+			if (i)
+				err = clEnqueueWriteBuffer(
+					queue, label_buffer,
+					CL_TRUE, 0, sizeof(unsigned int)*nx*ny,
+					cur_page_label, 0, NULL, NULL);
+
+			for (int j = 0; j < iter; ++j)
+			{
+				//std::wostringstream os;
+				//os << "j:" << "\t" <<
+				//	j << "\n";
+				//OutputDebugString(os.str().c_str());
+
+				err = clEnqueueWriteBuffer(
+					queue, mask_buffer,
+					CL_TRUE, 0, sizeof(unsigned int)*nx*ny,
+					mask32, 0, NULL, NULL);
+				err = clEnqueueNDRangeKernel(queue, kernel_0, 2, NULL, global_size,
+					local_size, 0, NULL, NULL);
+				err = clEnqueueNDRangeKernel(queue, kernel_1, 2, NULL, global_size,
+					local_size, 0, NULL, NULL);
+				err = clEnqueueNDRangeKernel(queue, kernel_2, 2, NULL, global_size,
+					local_size, 0, NULL, NULL);
+
+				count++;
+				if (count == nz - 1)
+				{
+					count = 0;
+					m_sig_progress();
+				}
+			}
+
+			err = clEnqueueReadBuffer(
 				queue, label_buffer,
 				CL_TRUE, 0, sizeof(unsigned int)*nx*ny,
 				cur_page_label, 0, NULL, NULL);
-
-		for (int j = 0; j<iter; ++j)
-		{
-			//std::wostringstream os;
-			//os << "j:" << "\t" <<
-			//	j << "\n";
-			//OutputDebugString(os.str().c_str());
-
-			err = clEnqueueWriteBuffer(
-				queue, mask_buffer,
-				CL_TRUE, 0, sizeof(unsigned int)*nx*ny,
-				mask32, 0, NULL, NULL);
-			err = clEnqueueNDRangeKernel(queue, kernel_0, 2, NULL, global_size,
-				local_size, 0, NULL, NULL);
-			err = clEnqueueNDRangeKernel(queue, kernel_1, 2, NULL, global_size,
-				local_size, 0, NULL, NULL);
-			err = clEnqueueNDRangeKernel(queue, kernel_2, 2, NULL, global_size,
-				local_size, 0, NULL, NULL);
-
-			count++;
-			if (count == nz - 1)
-			{
-				count = 0;
-				m_sig_progress();
-			}
+			clFlush(queue);
+			clFinish(queue);
+			cur_page_label += nx*ny;
 		}
 
+		clFlush(queue);
 		clFinish(queue);
-		err = clEnqueueReadBuffer(
-			queue, label_buffer,
-			CL_TRUE, 0, sizeof(unsigned int)*nx*ny,
-			cur_page_label, 0, NULL, NULL);
-		cur_page_label += nx*ny;
+		clReleaseMemObject(label_buffer);
+		clReleaseMemObject(mask_buffer);
+		delete[]mask32;
+
+		m_sig_progress();
+
+		RELEASE_DATA_STREAM
 	}
 
-	clReleaseMemObject(label_buffer);
-	clReleaseMemObject(mask_buffer);
+	//release kernels and program
 	clReleaseKernel(kernel_0);
 	clReleaseKernel(kernel_1);
 	clReleaseKernel(kernel_2);
-	clReleaseProgram(program);
 	clReleaseCommandQueue(queue);
-	delete[]mask32;
+	clReleaseProgram(program);
 }
 
 void ComponentGenerator::MatchSlices_CPU(bool backwards, unsigned int size_thresh,
