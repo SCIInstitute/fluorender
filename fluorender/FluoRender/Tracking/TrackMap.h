@@ -51,6 +51,7 @@ namespace FL
 #define TAG_VER219		8	//added to 2.19 for uncertainty
 							//order: v1, v2, edge
 #define TAG_VER220		9	//new values added in v2.20
+#define TAG_VER221		10	//new values added in v2.21
 
 	class TrackMap;
 	typedef boost::shared_ptr<TrackMap> pTrackMap;
@@ -418,6 +419,8 @@ namespace FL
 	{
 		WriteTag(ofs, TAG_CELL);
 		WriteUint(ofs, cell->Id());
+		WriteTag(ofs, TAG_VER221);
+		WriteUint(ofs, cell->BrickId());
 		WriteUint(ofs, cell->GetSizeUi());
 		WriteFloat(ofs, cell->GetSizeF());
 		WriteUint(ofs, cell->GetExternalUi());
@@ -474,6 +477,13 @@ namespace FL
 		if (cell_list.find(id) != cell_list.end())
 			return cell;
 		cell = pCell(new Cell(id));
+		if (ReadTag(ifs) == TAG_VER221)
+		{
+			id = ReadUint(ifs);
+			cell->SetBrickId(id);
+		}
+		else
+			ifs.unget();
 		cell->SetSizeUi(ReadUint(ifs));
 		cell->SetSizeF(ReadFloat(ifs));
 		cell->SetExternalUi(ReadUint(ifs));

@@ -33,8 +33,8 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FL
 {
-	typedef boost::unordered_map<unsigned int, pCell> CellList;
-	typedef boost::unordered_map<unsigned int, pCell>::iterator CellListIter;
+	typedef boost::unordered_map<unsigned long long, pCell> CellList;
+	typedef CellList::iterator CellListIter;
 }//namespace FL
 
 #endif//FL_CellList_h

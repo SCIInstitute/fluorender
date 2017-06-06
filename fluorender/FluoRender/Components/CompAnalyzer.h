@@ -115,7 +115,7 @@ namespace FL
 		unsigned long long GetKey(unsigned int id, unsigned int brick_id)
 		{
 			unsigned long long temp = brick_id;
-			return (temp << 32) & id;
+			return (temp << 32) | id;
 		}
 		unsigned int GetExt(unsigned int* data_label,
 			unsigned long long index,

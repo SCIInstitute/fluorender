@@ -74,13 +74,16 @@ namespace FL
 	{
 	public:
 		Cell(unsigned int id) :
-			m_id(id), m_size_ui(0), m_size_f(0.0f),
+			m_id(id), m_brick_id(0),
+			m_size_ui(0), m_size_f(0.0f),
 			m_external_ui(0), m_external_f(0.0f),
 			m_intra_vert(IntraGraph::null_vertex())
 		{}
 		~Cell() {}
 
 		unsigned int Id();
+		unsigned int BrickId();
+		unsigned long long GetKey();
 		IntraVert GetIntraVert();
 		void SetIntraVert(IntraVert intra_vert);
 		void Set(pCell &cell);
@@ -100,6 +103,7 @@ namespace FL
 		unsigned int GetExternalUi();
 		float GetExternalF();
 		//set
+		void SetBrickId(unsigned int id);
 		void SetCenter(const FLIVR::Point &center);
 		void SetBox(const FLIVR::BBox &box);
 		void SetSizeUi(unsigned int size_ui);
@@ -109,6 +113,7 @@ namespace FL
 
 	private:
 		unsigned int m_id;
+		unsigned int m_brick_id;
 		FLIVR::Point m_center;
 		FLIVR::BBox m_box;
 		//size
@@ -124,6 +129,17 @@ namespace FL
 	inline unsigned int Cell::Id()
 	{
 		return m_id;
+	}
+
+	inline unsigned int Cell::BrickId()
+	{
+		return m_brick_id;
+	}
+
+	inline unsigned long long Cell::GetKey()
+	{
+		unsigned long long temp = m_brick_id;
+		return (temp << 32) | m_id;
 	}
 
 	inline IntraVert Cell::GetIntraVert()
@@ -215,6 +231,11 @@ namespace FL
 	inline float Cell::GetExternalF()
 	{
 		return m_external_f;
+	}
+
+	inline void Cell::SetBrickId(unsigned int id)
+	{
+		m_brick_id = id;
 	}
 
 	inline void Cell::SetCenter(const FLIVR::Point &center)

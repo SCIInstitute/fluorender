@@ -274,11 +274,16 @@ void ComponentAnalyzer::Analyze(bool sel)
 
 void ComponentAnalyzer::MatchBricks()
 {
+	if (!m_vd || !m_vd->GetTexture())
+		return;
+	vector<TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	if (!bricks || bricks->size() <= 1)
+		return;
 }
 
 void ComponentAnalyzer::OutputFormHeader(std::string &str)
 {
-	if (m_vd && m_vd->GetBrickNum())
+	if (m_vd && m_vd->GetBrickNum() > 1)
 		str = "BRICK_ID\tID\tPosX\tPosY\tPosZ\tSumN\tSumI\tSurfaceN\tSurfaceI\tMean\tSigma\tMin\tMax\n";
 	else
 		str = "ID\tPosX\tPosY\tPosZ\tSumN\tSumI\tSurfaceN\tSurfaceI\tMean\tSigma\tMin\tMax\n";
@@ -307,7 +312,7 @@ void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::strin
 			else
 				oss << "\t";
 		}
-		if (m_vd && m_vd->GetBrickNum())
+		if (m_vd && m_vd->GetBrickNum() > 1)
 			oss << i->brick_id << "\t";
 		oss << i->id << "\t";
 		oss << i->pos.x() << "\t";
