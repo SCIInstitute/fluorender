@@ -161,6 +161,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 		}
 
 		unsigned int id = 0;
+		unsigned int brick_id = b->get_id();
 		double value;
 		double scale;
 		double delta;
@@ -206,13 +207,13 @@ void ComponentAnalyzer::Analyze(bool sel)
 			ext = GetExt(data_label, index, id, nx, ny, nz, i, j, k);
 
 			//find in list
-			iter = comp_ulist.find(GetKey(id, bi));
+			iter = comp_ulist.find(GetKey(id, brick_id));
 			if (iter == comp_ulist.end())
 			{
 				//not found
 				CompInfo info;
 				info.id = id;
-				info.brick_id = bi;
+				info.brick_id = brick_id;
 				info.sumi = 1;
 				info.sumd = value;
 				info.ext_sumi = ext;
@@ -227,7 +228,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 				info.max = value;
 				info.pos = FLIVR::Point(i, j, k);
 				comp_ulist.insert(pair<unsigned long long, CompInfo>
-					(GetKey(id, bi), info));
+					(GetKey(id, brick_id), info));
 			}
 			else
 			{
@@ -252,8 +253,9 @@ void ComponentAnalyzer::Analyze(bool sel)
 		for (iter = comp_ulist.begin();
 			iter != comp_ulist.end(); ++iter)
 		{
-			if (iter->second.sumi > 0)
-				iter->second.var = sqrt(iter->second.m2 / (iter->second.sumi));
+			if (!sel && iter->second.sumi < 2)
+				continue;
+			iter->second.var = sqrt(iter->second.m2 / (iter->second.sumi));
 			iter->second.mean *= scale;
 			iter->second.min *= scale;
 			iter->second.max *= scale;
@@ -265,20 +267,74 @@ void ComponentAnalyzer::Analyze(bool sel)
 				m_comp_list.max;
 			m_comp_list.push_back(iter->second);
 		}
-
 	}
+
+	MatchBricks(sel);
 
 	m_comp_list.sort();
 	m_comp_list_dirty = false;
 }
 
-void ComponentAnalyzer::MatchBricks()
+void ComponentAnalyzer::MatchBricks(bool sel)
 {
 	if (!m_vd || !m_vd->GetTexture())
 		return;
-	vector<TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	Texture* tex = m_vd->GetTexture();
+	vector<TextureBrick*> *bricks = tex->get_bricks();
 	if (!bricks || bricks->size() <= 1)
 		return;
+
+	int bits;
+	void* data_data = 0;
+	unsigned char* data_mask = 0;
+	unsigned int* data_label = 0;
+	for (size_t bi = 0; bi < bricks->size(); ++bi)
+	{
+		int nx, ny, nz;
+		int c = 0;
+		int nb = 1;
+		//get one brick
+		TextureBrick* b = (*bricks)[bi];
+		nb = b->nb(0);
+		nx = b->nx();
+		ny = b->ny();
+		nz = b->nz();
+		bits = nb * 8;
+		//label
+		c = b->nlabel();
+		nb = b->nb(c);
+		unsigned long long mem_size = (unsigned long long)nx*
+			(unsigned long long)ny*(unsigned long long)nz*nb;
+		unsigned char* temp = new unsigned char[mem_size];
+		unsigned char* tempp = temp;
+		unsigned char* tp = (unsigned char*)(b->tex_data(c));
+		unsigned char* tp2;
+		for (unsigned int k = 0; k < nz; ++k)
+		{
+			tp2 = tp;
+			for (unsigned int j = 0; j < ny; ++j)
+			{
+				memcpy(tempp, tp2, nx*nb);
+				tempp += nx*nb;
+				tp2 += b->sx()*nb;
+			}
+			tp += b->sx()*b->sy()*nb;
+		}
+		data_label = (unsigned int*)temp;
+		//check 3 sides
+		unsigned int l1, l2, index;
+		//(x, y, nz-1)
+		for (unsigned int i = 0; i < nx; ++i)
+		for (unsigned int j = 0; j < ny; ++j)
+		{
+			index = nx*ny*(nz - 1) + j*nx + i;
+			l1 = data_label[index];
+			if (!l1) continue;
+			index -= nx*ny;
+			l2 = data_label[index];
+			if (!l2 || l1 == l2) continue;
+		}
+	}
 }
 
 void ComponentAnalyzer::OutputFormHeader(std::string &str)

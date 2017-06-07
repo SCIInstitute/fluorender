@@ -365,6 +365,11 @@ namespace FLIVR
 			bsize[2] = Min(int(Pow2(sz_z)), max_texture_size);
 		}
 
+		bszx_ = bsize[0]; bszy_ = bsize[1]; bszz_ = bsize[2];
+		bnx_ = sz_x / bsize[0] + ((sz_x%bsize[0]) ? 1 : 0);
+		bny_ = sz_y / bsize[1] + ((sz_y%bsize[1]) ? 1 : 0);
+		bnz_ = sz_z / bsize[2] + ((sz_z%bsize[2]) ? 1 : 0);
+
 		bricks.clear();
 
 		int i, j, k;
@@ -430,7 +435,7 @@ namespace FLIVR
 
 					TextureBrick *b = new TextureBrick(0, 0, mx2, my2, mz2, numc, numb, 
 						i-(mx2-mx), j-(my2-my), k-(mz2-mz),
-						mx2, my2, mz2, bbox, tbox);
+						mx2, my2, mz2, bbox, tbox, bricks.size());
 					bricks.push_back(b);
 				}
 			}

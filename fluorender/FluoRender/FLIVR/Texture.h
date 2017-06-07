@@ -56,6 +56,26 @@ namespace FLIVR
 		inline int ny() { return ny_; }
 		inline int nz() { return nz_; }
 
+		//bricks
+		inline int bszx() { return bszx_; }
+		inline int bszy() { return bszy_; }
+		inline int bszz() { return bszz_; }
+		inline int bnx() { return bnx_; }
+		inline int bny() { return bny_; }
+		inline int bnz() { return bnz_; }
+		//get neighbor id
+		inline unsigned int nxid(unsigned int id)
+		{
+			int x = (id % (bnx_ * bny_)) % bnx_;
+			int y = (id % (bnx_ * bny_)) / bnx_;
+			int z = id / (bnx_ * bny_);
+			int r = z * bnx_ * bny_ + y * bnx_ + x - 1;
+			if (r < 0 || r >= bnx_ * bny_ * bnz_)
+				return id;
+			else
+				return r;
+		}
+
 		inline int nc() { return nc_; }
 		inline int nb(int i)
 		{
@@ -183,7 +203,15 @@ namespace FLIVR
 		//! data size
 		int											nx_;
 		int											ny_;
-		int											nz_; 
+		int											nz_;
+		//brick size, planned
+		int											bszx_;
+		int											bszy_;
+		int											bszz_;
+		//brick num
+		int											bnx_;
+		int											bny_;
+		int											bnz_;
 		//! number of components currently used.
 		int											nc_; 
 		//type of all the components

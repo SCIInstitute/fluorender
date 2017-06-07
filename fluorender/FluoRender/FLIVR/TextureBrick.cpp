@@ -42,9 +42,10 @@ namespace FLIVR
 		int nx, int ny, int nz, int nc, int* nb,
 		int ox, int oy, int oz,
 		int mx, int my, int mz,
-		const BBox& bbox, const BBox& tbox)
+		const BBox& bbox, const BBox& tbox,
+		unsigned int id)
 		: nx_(nx), ny_(ny), nz_(nz), nc_(nc), ox_(ox), oy_(oy), oz_(oz),
-		mx_(mx), my_(my), mz_(mz), bbox_(bbox), tbox_(tbox)
+		mx_(mx), my_(my), mz_(mz), bbox_(bbox), tbox_(tbox), id_(id)
 	{
 		for (int i = 0; i < TEXTURE_MAX_COMPONENTS; i++)
 		{

@@ -60,7 +60,8 @@ namespace FLIVR {
 		// Creator of the brick owns the nrrd memory.
 		TextureBrick(Nrrd* n0, Nrrd* n1,
 			int nx, int ny, int nz, int nc, int* nb, int ox, int oy, int oz,
-			int mx, int my, int mz, const BBox& bbox, const BBox& tbox);
+			int mx, int my, int mz, const BBox& bbox, const BBox& tbox,
+			unsigned int id);
 		virtual ~TextureBrick();
 
 		inline BBox &bbox() { return bbox_; }
@@ -143,6 +144,9 @@ namespace FLIVR {
 		inline void set_ind(size_t ind) {ind_ = ind;}
 		inline size_t get_ind() {return ind_;}
 
+		//id for analysis
+		inline unsigned int get_id() { return id_; }
+
 	private:
 		void compute_edge_rays(BBox &bbox);
 		void compute_edge_rays_tex(BBox &bbox);
@@ -182,6 +186,8 @@ namespace FLIVR {
 		bool drawn_[TEXTURE_RENDER_MODES];
 		//current index in the queue, for reverse searching
 		size_t ind_;
+		//id for analysis
+		unsigned int id_;
 	};
 
 } // namespace FLIVR
