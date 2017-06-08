@@ -64,17 +64,12 @@ namespace FLIVR
 		inline int bny() { return bny_; }
 		inline int bnz() { return bnz_; }
 		//get neighbor id
-		inline unsigned int nxid(unsigned int id)
-		{
-			int x = (id % (bnx_ * bny_)) % bnx_;
-			int y = (id % (bnx_ * bny_)) / bnx_;
-			int z = id / (bnx_ * bny_);
-			int r = z * bnx_ * bny_ + y * bnx_ + x - 1;
-			if (r < 0 || r >= bnx_ * bny_ * bnz_)
-				return id;
-			else
-				return r;
-		}
+		inline unsigned int negxid(unsigned int id);
+		inline unsigned int negyid(unsigned int id);
+		inline unsigned int negzid(unsigned int id);
+		inline unsigned int posxid(unsigned int id);
+		inline unsigned int posyid(unsigned int id);
+		inline unsigned int poszid(unsigned int id);
 
 		inline int nc() { return nc_; }
 		inline int nb(int i)
@@ -248,6 +243,78 @@ namespace FLIVR
 		vector<void*> mask_undos_;
 		int mask_undo_pointer_;
 	};
+
+	inline unsigned int Texture::negxid(unsigned int id)
+	{
+		int x = (id % (bnx_ * bny_)) % bnx_;
+		int y = (id % (bnx_ * bny_)) / bnx_;
+		int z = id / (bnx_ * bny_);
+		int r = z * bnx_ * bny_ + y * bnx_ + x - 1;
+		if (r < 0 || r >= bnx_ * bny_ * bnz_)
+			return id;
+		else
+			return r;
+	}
+
+	inline unsigned int Texture::negyid(unsigned int id)
+	{
+		int x = (id % (bnx_ * bny_)) % bnx_;
+		int y = (id % (bnx_ * bny_)) / bnx_;
+		int z = id / (bnx_ * bny_);
+		int r = z * bnx_ * bny_ + (y - 1) * bnx_ + x;
+		if (r < 0 || r >= bnx_ * bny_ * bnz_)
+			return id;
+		else
+			return r;
+	}
+
+	inline unsigned int Texture::negzid(unsigned int id)
+	{
+		int x = (id % (bnx_ * bny_)) % bnx_;
+		int y = (id % (bnx_ * bny_)) / bnx_;
+		int z = id / (bnx_ * bny_);
+		int r = (z - 1) * bnx_ * bny_ + y * bnx_ + x;
+		if (r < 0 || r >= bnx_ * bny_ * bnz_)
+			return id;
+		else
+			return r;
+	}
+
+	inline unsigned int Texture::posxid(unsigned int id)
+	{
+		int x = (id % (bnx_ * bny_)) % bnx_;
+		int y = (id % (bnx_ * bny_)) / bnx_;
+		int z = id / (bnx_ * bny_);
+		int r = z * bnx_ * bny_ + y * bnx_ + x + 1;
+		if (r < 0 || r >= bnx_ * bny_ * bnz_)
+			return id;
+		else
+			return r;
+	}
+
+	inline unsigned int Texture::posyid(unsigned int id)
+	{
+		int x = (id % (bnx_ * bny_)) % bnx_;
+		int y = (id % (bnx_ * bny_)) / bnx_;
+		int z = id / (bnx_ * bny_);
+		int r = z * bnx_ * bny_ + (y + 1) * bnx_ + x;
+		if (r < 0 || r >= bnx_ * bny_ * bnz_)
+			return id;
+		else
+			return r;
+	}
+
+	inline unsigned int Texture::poszid(unsigned int id)
+	{
+		int x = (id % (bnx_ * bny_)) % bnx_;
+		int y = (id % (bnx_ * bny_)) / bnx_;
+		int z = id / (bnx_ * bny_);
+		int r = (z + 1) * bnx_ * bny_ + y * bnx_ + x;
+		if (r < 0 || r >= bnx_ * bny_ * bnz_)
+			return id;
+		else
+			return r;
+	}
 
 } // namespace FLIVR
 

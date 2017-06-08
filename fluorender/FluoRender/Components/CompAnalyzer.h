@@ -28,11 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_CompAnalyzer_h
 #define FL_CompAnalyzer_h
 
-#include <FLIVR/Point.h>
-#include <FLIVR/Color.h>
 #include <string>
-#include <list>
-#include <boost/unordered_map.hpp>
+#include "CompGraph.h"
 
 class VolumeData;
 class Annotations;
@@ -66,50 +63,11 @@ namespace FL
 
 	private:
 		VolumeData* m_vd;
-		struct CompInfo
-		{
-			unsigned int id;
-			unsigned int brick_id;
-			unsigned int sumi;
-			double sumd;
-			unsigned int ext_sumi;
-			double ext_sumd;
-			double mean;
-			double var;
-			double m2;
-			double min;
-			double max;
-			FLIVR::Point pos;
-
-			CompInfo() {}
-			CompInfo(unsigned int _id,
-				unsigned int _bid)
-				:id(_id), brick_id(_bid)
-			{}
-
-			bool operator<(const CompInfo &info2) const
-			{
-				return (brick_id < info2.brick_id) ||
-					(id < info2.id);
-			}
-			bool operator==(const CompInfo &info2) const
-			{
-				return (brick_id == info2.brick_id) &&
-					(id == info2.id);
-			}
-		};
-		typedef boost::unordered_map<unsigned long long, CompInfo> CompUList;
-		typedef CompUList::iterator CompUListIter;
-		class CompList : public std::list<CompInfo>
-		{
-		public:
-			unsigned int min;
-			unsigned int max;
-		};
-		typedef CompList::iterator CompListIter;
-
 		CompList m_comp_list;
 		bool m_comp_list_dirty;
+
+		//comp graph
+		CompGraph m_comp_graph;
 
 	private:
 		unsigned long long GetKey(unsigned int id, unsigned int brick_id)

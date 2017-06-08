@@ -53,16 +53,17 @@ void ComponentAnalyzer::Analyze(bool sel)
 
 	//clear list and start calculating
 	m_comp_list.clear();
+	m_comp_graph.clear();
 
 	if (sel)
 		m_vd->GetVR()->return_mask();
 
 	int bits;
-	void* data_data = 0;
-	unsigned char* data_mask = 0;
-	unsigned int* data_label = 0;
 	for (size_t bi = 0; bi < bricks->size(); ++bi)
 	{
+		void* data_data = 0;
+		unsigned char* data_mask = 0;
+		unsigned int* data_label = 0;
 		int nx, ny, nz;
 		TextureBrick* b = 0;
 		int c = 0;
@@ -265,13 +266,17 @@ void ComponentAnalyzer::Analyze(bool sel)
 			m_comp_list.max = iter->second.sumi >
 				m_comp_list.max ? iter->second.sumi :
 				m_comp_list.max;
-			m_comp_list.push_back(iter->second);
+			m_comp_list.insert(std::pair<unsigned long long, CompInfo>
+				(iter->first, iter->second));
 		}
+
+		if (data_data) delete[] data_data;
+		if (data_mask) delete[] data_mask;
+		if (data_label) delete[] data_label;
 	}
 
 	MatchBricks(sel);
 
-	m_comp_list.sort();
 	m_comp_list_dirty = false;
 }
 
@@ -285,11 +290,11 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 		return;
 
 	int bits;
-	void* data_data = 0;
-	unsigned char* data_mask = 0;
-	unsigned int* data_label = 0;
 	for (size_t bi = 0; bi < bricks->size(); ++bi)
 	{
+		void* data_data = 0;
+		unsigned char* data_mask = 0;
+		unsigned int* data_label = 0;
 		int nx, ny, nz;
 		int c = 0;
 		int nb = 1;
@@ -321,11 +326,35 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 			tp += b->sx()*b->sy()*nb;
 		}
 		data_label = (unsigned int*)temp;
-		//check 3 sides
-		unsigned int l1, l2, index;
-		//(x, y, nz-1)
-		for (unsigned int i = 0; i < nx; ++i)
+		//check all 6 faces
+		unsigned int l1, l2, index, b1, b2;
+		//(x, y, 0)
 		for (unsigned int j = 0; j < ny; ++j)
+		for (unsigned int i = 0; i < nx; ++i)
+		{
+			index = j*nx + i;
+			l1 = data_label[index];
+			if (!l1) continue;
+			index -= nx*ny;
+			l2 = data_label[index];
+			if (!l2 || l1 == l2) continue;
+			//get brick ids
+			b1 = b->get_id();
+			b2 = tex->negzid(b1);
+			//if l1 and l2 are different and already in the comp list
+			//connect them
+			auto i1 = m_comp_list.find(GetKey(l1, b1));
+			auto i2 = m_comp_list.find(GetKey(l2, b2));
+			if (i1 != m_comp_list.end() && i2 != m_comp_list.end())
+			{
+				//CompInfo info1 = i1->second;
+				//CompInfo info2 = i2->second;
+				m_comp_graph.LinkComps(i1->second, i2->second);
+			}
+		}
+		//(x, y, nz-1)
+		for (unsigned int j = 0; j < ny; ++j)
+		for (unsigned int i = 0; i < nx; ++i)
 		{
 			index = nx*ny*(nz - 1) + j*nx + i;
 			l1 = data_label[index];
@@ -334,6 +363,10 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 			l2 = data_label[index];
 			if (!l2 || l1 == l2) continue;
 		}
+
+		if (data_data) delete[] data_data;
+		if (data_mask) delete[] data_mask;
+		if (data_label) delete[] data_label;
 	}
 }
 
@@ -347,6 +380,8 @@ void ComponentAnalyzer::OutputFormHeader(std::string &str)
 
 void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::string comp_header)
 {
+	int bn = m_vd->GetBrickNum();
+
 	ostringstream oss;
 	if (verbose == 1)
 	{
@@ -361,6 +396,12 @@ void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::strin
 	for (auto i = m_comp_list.begin();
 		i != m_comp_list.end(); ++i)
 	{
+		if (bn > 1)
+		{
+			CompUList list;
+			m_comp_graph.GetLinkedComps(i->second, list);
+
+		}
 		if (comp_header != "")
 		{
 			if (i == m_comp_list.begin())
@@ -369,19 +410,19 @@ void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::strin
 				oss << "\t";
 		}
 		if (m_vd && m_vd->GetBrickNum() > 1)
-			oss << i->brick_id << "\t";
-		oss << i->id << "\t";
-		oss << i->pos.x() << "\t";
-		oss << i->pos.y() << "\t";
-		oss << i->pos.z() << "\t";
-		oss << i->sumi << "\t";
-		oss << i->sumd << "\t";
-		oss << i->ext_sumi << "\t";
-		oss << i->ext_sumd << "\t";
-		oss << i->mean << "\t";
-		oss << i->var << "\t";
-		oss << i->min << "\t";
-		oss << i->max << "\n";
+			oss << i->second.brick_id << "\t";
+		oss << i->second.id << "\t";
+		oss << i->second.pos.x() << "\t";
+		oss << i->second.pos.y() << "\t";
+		oss << i->second.pos.z() << "\t";
+		oss << i->second.sumi << "\t";
+		oss << i->second.sumd << "\t";
+		oss << i->second.ext_sumi << "\t";
+		oss << i->second.ext_sumd << "\t";
+		oss << i->second.mean << "\t";
+		oss << i->second.var << "\t";
+		oss << i->second.min << "\t";
+		oss << i->second.max << "\n";
 	}
 	str = oss.str();
 }
@@ -548,15 +589,16 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann)
 		i != m_comp_list.end(); ++i)
 	{
 		oss.str("");
-		oss << i->sumi << "\t";
-		oss << double(i->sumi)*spcx*spcy*spcz << "\t";
-		oss << i->mean;
+		oss << i->second.sumi << "\t";
+		oss << double(i->second.sumi)*spcx*spcy*spcz << "\t";
+		oss << i->second.mean;
 		sinfo = oss.str();
-		ann.AddText(std::to_string(i->id),
-			FLIVR::Point(i->pos.x()/nx, i->pos.y()/ny, i->pos.z()/nz),
+		ann.AddText(std::to_string(i->second.id),
+			FLIVR::Point(i->second.pos.x()/nx,
+			i->second.pos.y()/ny, i->second.pos.z()/nz),
 			sinfo);
-		total_int += i->sumd * scale;
-		sum += i->sumi;
+		total_int += i->second.sumd * scale;
+		sum += i->second.sumi;
 	}
 	return true;
 }
@@ -612,7 +654,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 			spcx, spcy, spcz);
 		vd->SetSpcFromFile(true);
 		vd->SetName(m_vd->GetName() +
-			wxString::Format("_COMP%d_SIZE%d", count++, i->sumi));
+			wxString::Format("_COMP%d_SIZE%d", count++, i->second.sumi));
 
 		//populate the volume
 		//the actual data
@@ -625,7 +667,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 		for (index = 0; index < for_size; ++index)
 		{
 			value_label = data_label[index];
-			if (value_label == i->id)
+			if (value_label == i->second.id)
 			{
 				if (bits == 8)
 					((unsigned char*)data_vd)[index] = ((unsigned char*)data_data)[index];
@@ -635,7 +677,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 		}
 
 		//settings
-		Color c = GetColor(*i, m_vd, color_type);
+		Color c = GetColor(i->second, m_vd, color_type);
 		vd->SetColor(c);
 		vd->SetEnableAlpha(m_vd->GetEnableAlpha());
 		vd->SetShading(m_vd->GetShading());
@@ -748,11 +790,12 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 	for (index = 0; index < for_size; ++index)
 	{
 		value_label = data_label[index];
-		auto i = std::find(m_comp_list.begin(),
-			m_comp_list.end(), CompInfo(value_label, 0));
+		//auto i = std::find(m_comp_list.begin(),
+		//	m_comp_list.end(), CompInfo(value_label, 0));
+		auto i = m_comp_list.find(GetKey(value_label, 0));//to add bricks
 		if (i != m_comp_list.end())
 		{
-			color = GetColor(*i, m_vd, color_type);
+			color = GetColor(i->second, m_vd, color_type);
 			if (bits == 8)
 			{
 				double value = ((unsigned char*)data_data)[index];
