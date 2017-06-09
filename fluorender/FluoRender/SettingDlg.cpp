@@ -339,7 +339,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Large Data Size:",
 		wxDefaultPosition, wxSize(110, -1));
 	sizer2_2->Add(st);
-	m_large_data_sldr = new wxSlider(page, ID_LargeDataSldr, 20, 5, 200,
+	m_large_data_sldr = new wxSlider(page, ID_LargeDataSldr, 20, 0, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_large_data_text = new wxTextCtrl(page, ID_LargeDataText, "200",
 		wxDefaultPosition, wxSize(40, -1), 0, vald_int);

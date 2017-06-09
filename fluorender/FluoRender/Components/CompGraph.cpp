@@ -30,6 +30,14 @@
 
 using namespace FL;
 
+void CompGraph::ClearVisited()
+{
+	std::pair<CompVertexIter, CompVertexIter> vertices =
+		boost::vertices(*this);
+	for (auto iter = vertices.first; iter != vertices.second; ++iter)
+		(*this)[*iter].visited = false;
+}
+
 bool CompGraph::GetLinkedComps(CompInfo& comp, CompUList& list)
 {
 	if (comp.v == CompGraph::null_vertex())
@@ -49,6 +57,7 @@ bool CompGraph::GetLinkedComps(CompInfo& comp, CompUList& list)
 			CompInfo info = *(*this)[v1].compinfo;
 			list.insert(std::pair<unsigned long long, CompInfo>
 				(GetKey(id, brick_id), info));
+			(*this)[v1].visited = true;
 			added = true;
 			GetLinkedComps(info, list);
 		}

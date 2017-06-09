@@ -59,8 +59,8 @@ contact_factor=0.6
 similarity=0.3
 [memory\ settings]
 mem\ swap=0
-graphics\ mem=2000
-large\ data\ size=50
+graphics\ mem=4000
+large\ data\ size=200
 force\ brick\ size=128
 up\ time=100
 [update\ order]

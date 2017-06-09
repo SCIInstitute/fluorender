@@ -61,6 +61,7 @@ namespace FL
 	{
 		unsigned int id;
 		unsigned int brick_id;
+		bool visited;
 		CompInfo* compinfo;
 	};
 
@@ -70,6 +71,8 @@ namespace FL
 		CompNodeData, CompEdgeData>
 	{
 	public:
+		bool Visited(CompInfo &comp);
+		void ClearVisited();
 		void LinkComps(CompInfo &comp1, CompInfo &comp2);
 		bool GetLinkedComps(CompInfo& comp, CompUList& list);
 	private:
@@ -81,8 +84,9 @@ namespace FL
 	};
 	typedef CompGraph::vertex_descriptor CompVert;
 	typedef CompGraph::edge_descriptor CompEdge;
-	typedef boost::graph_traits<CompGraph>::adjacency_iterator CompAdjIter;
+	typedef boost::graph_traits<CompGraph>::vertex_iterator CompVertexIter;
 	typedef boost::graph_traits<CompGraph>::edge_iterator CompEdgeIter;
+	typedef boost::graph_traits<CompGraph>::adjacency_iterator CompAdjIter;
 
 	struct CompInfo
 	{
@@ -128,6 +132,14 @@ namespace FL
 		}
 	};
 
+	inline bool CompGraph::Visited(CompInfo &comp)
+	{
+		if (comp.v != CompGraph::null_vertex())
+			return (*this)[comp.v].visited;
+		else
+			return false;
+	}
+	
 	inline void CompGraph::LinkComps(CompInfo &comp1, CompInfo &comp2)
 	{
 		CompVert v1 = comp1.v;

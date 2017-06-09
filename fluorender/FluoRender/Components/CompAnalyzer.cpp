@@ -51,6 +51,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 	if (!bricks || bricks->size() == 0)
 		return;
 
+	size_t bn = bricks->size();
 	//clear list and start calculating
 	m_comp_list.clear();
 	m_comp_graph.clear();
@@ -59,24 +60,23 @@ void ComponentAnalyzer::Analyze(bool sel)
 		m_vd->GetVR()->return_mask();
 
 	int bits;
-	for (size_t bi = 0; bi < bricks->size(); ++bi)
+	for (size_t bi = 0; bi < bn; ++bi)
 	{
 		void* data_data = 0;
 		unsigned char* data_mask = 0;
 		unsigned int* data_label = 0;
 		int nx, ny, nz;
-		TextureBrick* b = 0;
+		TextureBrick* b = (*bricks)[bi];
 		int c = 0;
 		int nb = 1;
-		if (bricks->size() > 1)
+		if (bn > 1)
 		{
 			// get brick if ther are more than one brick
-			b = (*bricks)[bi];
 			nb = b->nb(0);
 			nx = b->nx();
 			ny = b->ny();
 			nz = b->nz();
-			bits = nb * 8;
+			bits = nb==1? nrrdTypeUChar: nrrdTypeUShort;
 			//size
 			unsigned long long mem_size = (unsigned long long)nx*
 				(unsigned long long)ny*(unsigned long long)nz*nb;
@@ -168,7 +168,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 		double delta;
 		double ext;
 		int i, j, k;
-		m_vd->GetResolution(nx, ny, nz);
+		//m_vd->GetResolution(nx, ny, nz);
 		unsigned long long for_size = (unsigned long long)nx *
 			(unsigned long long)ny * (unsigned long long)nz;
 		unsigned long long index;
@@ -176,6 +176,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 		CompUListIter iter;
 		for (index = 0; index < for_size; ++index)
 		{
+			value = 0.0;
 			if (sel)
 			{
 				if (data_mask && !data_mask[index])
@@ -270,9 +271,12 @@ void ComponentAnalyzer::Analyze(bool sel)
 				(iter->first, iter->second));
 		}
 
-		if (data_data) delete[] data_data;
-		if (data_mask) delete[] data_mask;
-		if (data_label) delete[] data_label;
+		if (bn > 1)
+		{
+			if (data_data) delete[] data_data;
+			if (data_mask) delete[] data_mask;
+			if (data_label) delete[] data_label;
+		}
 	}
 
 	MatchBricks(sel);
@@ -289,8 +293,10 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 	if (!bricks || bricks->size() <= 1)
 		return;
 
+	size_t bn = bricks->size();
+
 	int bits;
-	for (size_t bi = 0; bi < bricks->size(); ++bi)
+	for (size_t bi = 0; bi < bn; ++bi)
 	{
 		void* data_data = 0;
 		unsigned char* data_mask = 0;
@@ -332,25 +338,22 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 		for (unsigned int j = 0; j < ny; ++j)
 		for (unsigned int i = 0; i < nx; ++i)
 		{
-			index = j*nx + i;
+			index = j*nx + i;//diff
 			l1 = data_label[index];
 			if (!l1) continue;
-			index -= nx*ny;
+			index += nx*ny;//diff
 			l2 = data_label[index];
 			if (!l2 || l1 == l2) continue;
 			//get brick ids
-			b1 = b->get_id();
-			b2 = tex->negzid(b1);
+			b2 = b->get_id();
+			b1 = tex->negzid(b2);//diff
+			if (b1 == b2) continue;
 			//if l1 and l2 are different and already in the comp list
 			//connect them
 			auto i1 = m_comp_list.find(GetKey(l1, b1));
 			auto i2 = m_comp_list.find(GetKey(l2, b2));
 			if (i1 != m_comp_list.end() && i2 != m_comp_list.end())
-			{
-				//CompInfo info1 = i1->second;
-				//CompInfo info2 = i2->second;
 				m_comp_graph.LinkComps(i1->second, i2->second);
-			}
 		}
 		//(x, y, nz-1)
 		for (unsigned int j = 0; j < ny; ++j)
@@ -362,6 +365,100 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 			index -= nx*ny;
 			l2 = data_label[index];
 			if (!l2 || l1 == l2) continue;
+			//get brick ids
+			b2 = b->get_id();
+			b1 = tex->poszid(b2);
+			if (b1 == b2) continue;
+			//if l1 and l2 are different and already in the comp list
+			//connect them
+			auto i1 = m_comp_list.find(GetKey(l1, b1));
+			auto i2 = m_comp_list.find(GetKey(l2, b2));
+			if (i1 != m_comp_list.end() && i2 != m_comp_list.end())
+				m_comp_graph.LinkComps(i1->second, i2->second);
+		}
+		//(x, 0, z)
+		for (unsigned int k = 0; k < nz; ++k)
+		for (unsigned int i = 0; i < nx; ++i)
+		{
+			index = nx*ny*k + i;
+			l1 = data_label[index];
+			if (!l1) continue;
+			index += nx;
+			l2 = data_label[index];
+			if (!l2 || l1 == l2) continue;
+			//get brick ids
+			b2 = b->get_id();
+			b1 = tex->negyid(b2);
+			if (b1 == b2) continue;
+			//if l1 and l2 are different and already in the comp list
+			//connect them
+			auto i1 = m_comp_list.find(GetKey(l1, b1));
+			auto i2 = m_comp_list.find(GetKey(l2, b2));
+			if (i1 != m_comp_list.end() && i2 != m_comp_list.end())
+				m_comp_graph.LinkComps(i1->second, i2->second);
+		}
+		//(x, ny-1, z)
+		for (unsigned int k = 0; k < nz; ++k)
+		for (unsigned int i = 0; i < nx; ++i)
+		{
+			index = nx*ny*k + nx*(ny-1) + i;
+			l1 = data_label[index];
+			if (!l1) continue;
+			index -= nx;
+			l2 = data_label[index];
+			if (!l2 || l1 == l2) continue;
+			//get brick ids
+			b2 = b->get_id();
+			b1 = tex->posyid(b2);
+			if (b1 == b2) continue;
+			//if l1 and l2 are different and already in the comp list
+			//connect them
+			auto i1 = m_comp_list.find(GetKey(l1, b1));
+			auto i2 = m_comp_list.find(GetKey(l2, b2));
+			if (i1 != m_comp_list.end() && i2 != m_comp_list.end())
+				m_comp_graph.LinkComps(i1->second, i2->second);
+		}
+		//(0, y, z)
+		for (unsigned int k = 0; k < nz; ++k)
+		for (unsigned int j = 0; j < ny; ++j)
+		{
+			index = nx*ny*k + nx*j;
+			l1 = data_label[index];
+			if (!l1) continue;
+			index += 1;
+			l2 = data_label[index];
+			if (!l2 || l1 == l2) continue;
+			//get brick ids
+			b2 = b->get_id();
+			b1 = tex->negxid(b2);
+			if (b1 == b2) continue;
+			//if l1 and l2 are different and already in the comp list
+			//connect them
+			auto i1 = m_comp_list.find(GetKey(l1, b1));
+			auto i2 = m_comp_list.find(GetKey(l2, b2));
+			if (i1 != m_comp_list.end() && i2 != m_comp_list.end())
+				m_comp_graph.LinkComps(i1->second, i2->second);
+		}
+		//(nx-1, y, z)
+		for (unsigned int k = 0; k < nz; ++k)
+		for (unsigned int j = 0; j < ny; ++j)
+		{
+			index = nx*ny*k + nx*j + nx-1;
+			l1 = data_label[index];
+			if (!l1) continue;
+			index -= 1;
+			l2 = data_label[index];
+			if (!l2 || l1 == l2) continue;
+			//get brick ids
+			b2 = b->get_id();
+			b1 = tex->posxid(b2);
+			if (b1 == b2) continue;
+			//if l1 and l2 are different and already in the comp list
+			//connect them
+			auto i1 = m_comp_list.find(GetKey(l1, b1));
+			auto i2 = m_comp_list.find(GetKey(l2, b2));
+			if (i1 != m_comp_list.end() && i2 != m_comp_list.end())
+				m_comp_graph.LinkComps(i1->second, i2->second);
 		}
 
 		if (data_data) delete[] data_data;
@@ -396,12 +493,6 @@ void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::strin
 	for (auto i = m_comp_list.begin();
 		i != m_comp_list.end(); ++i)
 	{
-		if (bn > 1)
-		{
-			CompUList list;
-			m_comp_graph.GetLinkedComps(i->second, list);
-
-		}
 		if (comp_header != "")
 		{
 			if (i == m_comp_list.begin())
@@ -409,20 +500,96 @@ void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::strin
 			else
 				oss << "\t";
 		}
-		if (m_vd && m_vd->GetBrickNum() > 1)
-			oss << i->second.brick_id << "\t";
-		oss << i->second.id << "\t";
-		oss << i->second.pos.x() << "\t";
-		oss << i->second.pos.y() << "\t";
-		oss << i->second.pos.z() << "\t";
-		oss << i->second.sumi << "\t";
-		oss << i->second.sumd << "\t";
-		oss << i->second.ext_sumi << "\t";
-		oss << i->second.ext_sumd << "\t";
-		oss << i->second.mean << "\t";
-		oss << i->second.var << "\t";
-		oss << i->second.min << "\t";
-		oss << i->second.max << "\n";
+
+		std::list<unsigned int> ids;
+		std::list<unsigned int> brick_ids;
+		unsigned int sumi;
+		double sumd;
+		unsigned int ext_sumi;
+		double ext_sumd;
+		double mean;
+		double var;
+		double min;
+		double max;
+		FLIVR::Point pos;
+
+		if (bn > 1)
+		{
+			if (m_comp_graph.Visited(i->second))
+				continue;
+
+			CompUList list;
+			if (m_comp_graph.GetLinkedComps(i->second, list))
+			{
+				sumi = 0;
+				sumd = 0.0;
+				ext_sumi = 0;
+				ext_sumd = 0.0;
+				mean = 0.0;
+				var = 0.0;
+				min = std::numeric_limits<double>::max();
+				max = 0.0;
+
+				for (auto iter = list.begin();
+					iter != list.end(); ++iter)
+				{
+					ids.push_back(iter->second.id);
+					brick_ids.push_back(iter->second.brick_id);
+					sumi += iter->second.sumi;
+					sumd += iter->second.sumd;
+					ext_sumi += iter->second.ext_sumi;
+					ext_sumd += iter->second.ext_sumd;
+					//mean
+					//var
+					min = iter->second.min < min ? iter->second.min : min;
+					max = iter->second.max > max ? iter->second.max : max;
+					//pos
+				}
+			}
+			else
+			{
+				ids.push_back(i->second.id);
+				brick_ids.push_back(i->second.brick_id);
+				sumi = i->second.sumi;
+				sumd = i->second.sumd;
+				ext_sumi = i->second.ext_sumi;
+				ext_sumd = i->second.ext_sumd;
+				mean = i->second.mean;
+				var = i->second.mean;
+				min = i->second.min;
+				max = i->second.max;
+				pos = i->second.pos;
+			}
+		}
+		else
+		{
+			ids.push_back(i->second.id);
+			brick_ids.push_back(i->second.brick_id);
+			sumi = i->second.sumi;
+			sumd = i->second.sumd;
+			ext_sumi = i->second.ext_sumi;
+			ext_sumd = i->second.ext_sumd;
+			mean = i->second.mean;
+			var = i->second.mean;
+			min = i->second.min;
+			max = i->second.max;
+			pos = i->second.pos;
+		}
+
+		if (bn > 1)
+			oss << brick_ids.front() << "\t";
+		oss << ids.front() << "\t";
+		oss << pos.x() << "\t";
+		oss << pos.y() << "\t";
+		oss << pos.z() << "\t";
+		oss << sumi << "\t";
+		oss << sumd << "\t";
+		oss << ext_sumi << "\t";
+		oss << ext_sumd << "\t";
+		oss << mean << "\t";
+		oss << var << "\t";
+		oss << min << "\t";
+		oss << max << "\n";
 	}
 	str = oss.str();
 }
