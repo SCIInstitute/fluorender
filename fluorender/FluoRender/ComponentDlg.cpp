@@ -3524,24 +3524,41 @@ void ComponentDlg::GenerateComp(int type, int mode)
 
 void ComponentDlg::OnAnalyze(wxCommandEvent &event)
 {
-	if (!m_view)
-		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	m_comp_analyzer.SetVolume(vd);
-	m_comp_analyzer.Analyze(false);
-	string str;
-	m_comp_analyzer.OutputCompList(str, 1);
-	m_stat_text->SetValue(str);
+	Analyze(false);
 }
 
 void ComponentDlg::OnAnalyzeSel(wxCommandEvent &event)
+{
+	Analyze(true);
+}
+
+void ComponentDlg::Analyze(bool sel)
 {
 	if (!m_view)
 		return;
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	m_comp_analyzer.SetVolume(vd);
-	m_comp_analyzer.Analyze(true);
-	string str;
-	m_comp_analyzer.OutputCompList(str, 1);
-	m_stat_text->SetValue(str);
+	m_comp_analyzer.Analyze(sel);
+
+	if (m_comp_analyzer.GetListSize() > 10000)
+	{
+		wxFileDialog *fopendlg = new wxFileDialog(
+			this, "Save Analysis Data", "", "",
+			"Text file (*.txt)|*.txt",
+			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+		int rval = fopendlg->ShowModal();
+		if (rval == wxID_OK)
+		{
+			wxString filename = fopendlg->GetPath();
+			m_comp_analyzer.OutputCompListTxt(filename.ToStdString(), 1);
+		}
+		if (fopendlg)
+			delete fopendlg;
+	}
+	else
+	{
+		string str;
+		m_comp_analyzer.OutputCompList(str, 1);
+		m_stat_text->SetValue(str);
+	}
 }

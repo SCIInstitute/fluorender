@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include "DataManager.h"
 #include <sstream>
 #include <iostream>
+#include <fstream>
 #include <limits>
 
 using namespace FL;
@@ -469,6 +470,11 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 	}
 }
 
+size_t ComponentAnalyzer::GetListSize()
+{
+	return m_comp_list.size();
+}
+
 void ComponentAnalyzer::OutputFormHeader(std::string &str)
 {
 	if (m_vd && m_vd->GetBrickNum() > 1)
@@ -594,6 +600,127 @@ void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::strin
 		oss << max << "\n";
 	}
 	str = oss.str();
+}
+
+void ComponentAnalyzer::OutputCompListTxt(std::string &filename, int verbose, std::string comp_header)
+{
+	int bn = m_vd->GetBrickNum();
+
+	ofstream ofs;
+	ofs.open(filename, std::ofstream::out);
+	if (verbose == 1)
+	{
+		ofs << "Statistics on the selection:\n";
+		ofs << "A total of " <<
+			m_comp_list.size() <<
+			" component(s) selected\n";
+		std::string header;
+		OutputFormHeader(header);
+		ofs << header;
+	}
+	for (auto i = m_comp_list.begin();
+		i != m_comp_list.end(); ++i)
+	{
+		if (comp_header != "")
+		{
+			if (i == m_comp_list.begin())
+				ofs << comp_header << "\t";
+			else
+				ofs << "\t";
+		}
+
+		std::list<unsigned int> ids;
+		std::list<unsigned int> brick_ids;
+		unsigned int sumi;
+		double sumd;
+		unsigned int ext_sumi;
+		double ext_sumd;
+		double mean;
+		double var;
+		double min;
+		double max;
+		FLIVR::Point pos;
+
+		if (bn > 1)
+		{
+			if (m_comp_graph.Visited(i->second))
+				continue;
+
+			CompUList list;
+			if (m_comp_graph.GetLinkedComps(i->second, list))
+			{
+				sumi = 0;
+				sumd = 0.0;
+				ext_sumi = 0;
+				ext_sumd = 0.0;
+				mean = 0.0;
+				var = 0.0;
+				min = std::numeric_limits<double>::max();
+				max = 0.0;
+
+				for (auto iter = list.begin();
+					iter != list.end(); ++iter)
+				{
+					ids.push_back(iter->second.id);
+					brick_ids.push_back(iter->second.brick_id);
+					sumi += iter->second.sumi;
+					sumd += iter->second.sumd;
+					ext_sumi += iter->second.ext_sumi;
+					ext_sumd += iter->second.ext_sumd;
+					//mean
+					//var
+					min = iter->second.min < min ? iter->second.min : min;
+					max = iter->second.max > max ? iter->second.max : max;
+					//pos
+				}
+			}
+			else
+			{
+				ids.push_back(i->second.id);
+				brick_ids.push_back(i->second.brick_id);
+				sumi = i->second.sumi;
+				sumd = i->second.sumd;
+				ext_sumi = i->second.ext_sumi;
+				ext_sumd = i->second.ext_sumd;
+				mean = i->second.mean;
+				var = i->second.mean;
+				min = i->second.min;
+				max = i->second.max;
+				pos = i->second.pos;
+			}
+		}
+		else
+		{
+			ids.push_back(i->second.id);
+			brick_ids.push_back(i->second.brick_id);
+			sumi = i->second.sumi;
+			sumd = i->second.sumd;
+			ext_sumi = i->second.ext_sumi;
+			ext_sumd = i->second.ext_sumd;
+			mean = i->second.mean;
+			var = i->second.mean;
+			min = i->second.min;
+			max = i->second.max;
+			pos = i->second.pos;
+		}
+
+		if (bn > 1)
+			ofs << brick_ids.front() << "\t";
+		ofs << ids.front() << "\t";
+		ofs << pos.x() << "\t";
+		ofs << pos.y() << "\t";
+		ofs << pos.z() << "\t";
+		ofs << sumi << "\t";
+		ofs << sumd << "\t";
+		ofs << ext_sumi << "\t";
+		ofs << ext_sumd << "\t";
+		ofs << mean << "\t";
+		ofs << var << "\t";
+		ofs << min << "\t";
+		ofs << max << "\n";
+	}
+
+	ofs.close();
 }
 
 unsigned int ComponentAnalyzer::GetExt(unsigned int* data_label,

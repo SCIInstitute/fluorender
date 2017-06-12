@@ -919,15 +919,20 @@ void SettingDlg::UpdateUI()
 	}
 	m_text_color_cmb->Select(m_text_color);
 	//paint history depth
-	m_paint_hist_depth_text->SetValue(wxString::Format("%d", m_paint_hist_depth));
+	m_paint_hist_depth_text->ChangeValue(wxString::Format("%d", m_paint_hist_depth));
+	m_paint_hist_depth_sldr->SetValue(m_paint_hist_depth);
 	//memory settings
 	m_streaming_chk->SetValue(m_mem_swap);
 	EnableStreaming(m_mem_swap);
 	m_update_order_rbox->SetSelection(m_update_order);
-	m_graphics_mem_text->SetValue(wxString::Format("%d", (int)m_graphics_mem));
-	m_large_data_text->SetValue(wxString::Format("%d", (int)m_large_data_size));
-	m_block_size_text->SetValue(wxString::Format("%d", m_force_brick_size));
-	m_response_time_text->SetValue(wxString::Format("%d", m_up_time));
+	m_graphics_mem_text->ChangeValue(wxString::Format("%d", (int)m_graphics_mem));
+	m_graphics_mem_sldr->SetValue((int)(m_graphics_mem / 100.0));
+	m_large_data_text->ChangeValue(wxString::Format("%d", (int)m_large_data_size));
+	m_large_data_sldr->SetValue((int)(m_large_data_size / 10.0));
+	m_block_size_text->ChangeValue(wxString::Format("%d", m_force_brick_size));
+	m_block_size_sldr->SetValue(int(log(m_force_brick_size) / log(2.0) + 0.5));
+	m_response_time_text->ChangeValue(wxString::Format("%d", m_up_time));
+	m_response_time_sldr->SetValue(int(m_up_time / 10.0));
 }
 
 void SettingDlg::SaveSettings()

@@ -701,6 +701,7 @@ private:
 	void OnCluster(wxCommandEvent &event);
 	void OnAnalyze(wxCommandEvent &event);
 	void OnAnalyzeSel(wxCommandEvent &event);
+	void Analyze(bool sel);
 
 	DECLARE_EVENT_TABLE();
 };
