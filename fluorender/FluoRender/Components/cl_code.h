@@ -350,17 +350,6 @@ const char* str_cl_fill_borders_3d = \
 "			label[index] = label[nb_index];\n" \
 "		}\n" \
 "	}\n" \
-"	if (i == nx-1)\n" \
-"	{\n" \
-"		float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
-"		float nb_value = read_imagef(data, samp, (int4)(i-1, j, k, 1)).x;\n" \
-"		if (fabs(value - nb_value) < tol)\n" \
-"		{\n" \
-"			unsigned int index = nx*ny*k + nx*j + i;\n" \
-"			unsigned int nb_index = index - 1;\n" \
-"			label[index] = label[nb_index];\n" \
-"		}\n" \
-"	}\n" \
 "	if (j == 0)\n" \
 "	{\n" \
 "		float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
@@ -372,17 +361,6 @@ const char* str_cl_fill_borders_3d = \
 "			label[index] = label[nb_index];\n" \
 "		}\n" \
 "	}\n" \
-"	if (j == ny-1)\n" \
-"	{\n" \
-"		float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
-"		float nb_value = read_imagef(data, samp, (int4)(i, j-1, k, 1)).x;\n" \
-"		if (fabs(value - nb_value) < tol)\n" \
-"		{\n" \
-"			unsigned int index = nx*ny*k + nx*j + i;\n" \
-"			unsigned int nb_index = index - nx;\n" \
-"			label[index] = label[nb_index];\n" \
-"		}\n" \
-"	}\n" \
 "	if (k == 0)\n" \
 "	{\n" \
 "		float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
@@ -391,17 +369,6 @@ const char* str_cl_fill_borders_3d = \
 "		{\n" \
 "			unsigned int index = nx*ny*k + nx*j + i;\n" \
 "			unsigned int nb_index = index + nx*ny;\n" \
-"			label[index] = label[nb_index];\n" \
-"		}\n" \
-"	}\n" \
-"	if (k == nz-1)\n" \
-"	{\n" \
-"		float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
-"		float nb_value = read_imagef(data, samp, (int4)(i, j, k-1, 1)).x;\n" \
-"		if (fabs(value - nb_value) < tol)\n" \
-"		{\n" \
-"			unsigned int index = nx*ny*k + nx*j + i;\n" \
-"			unsigned int nb_index = index - nx*ny;\n" \
 "			label[index] = label[nb_index];\n" \
 "		}\n" \
 "	}\n" \

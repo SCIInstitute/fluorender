@@ -73,10 +73,12 @@ void ComponentAnalyzer::Analyze(bool sel)
 		{
 			// get brick if ther are more than one brick
 			nb = b->nb(0);
-			nx = b->nx();
-			ny = b->ny();
-			nz = b->nz();
 			bits = nb==1? nrrdTypeUChar: nrrdTypeUShort;
+			nx = b->nx()-1;
+			ny = b->ny()-1;
+			nz = b->nz()-1;
+			if (!nx || !ny || !nz) continue;
+
 			//size
 			unsigned long long mem_size = (unsigned long long)nx*
 				(unsigned long long)ny*(unsigned long long)nz*nb;
@@ -334,7 +336,7 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 		data_label = (unsigned int*)temp;
 		//check all 6 faces
 		unsigned int l1, l2, index, b1, b2;
-		//(x, y, 0)
+/*		//(x, y, 0)
 		for (unsigned int j = 0; j < ny; ++j)
 		for (unsigned int i = 0; i < nx; ++i)
 		{
@@ -354,7 +356,7 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 			auto i2 = m_comp_list.find(GetKey(l2, b2));
 			if (i1 != m_comp_list.end() && i2 != m_comp_list.end())
 				m_comp_graph.LinkComps(i1->second, i2->second);
-		}
+		}*/
 		//(x, y, nz-1)
 		for (unsigned int j = 0; j < ny; ++j)
 		for (unsigned int i = 0; i < nx; ++i)
@@ -376,7 +378,7 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 			if (i1 != m_comp_list.end() && i2 != m_comp_list.end())
 				m_comp_graph.LinkComps(i1->second, i2->second);
 		}
-		//(x, 0, z)
+/*		//(x, 0, z)
 		for (unsigned int k = 0; k < nz; ++k)
 		for (unsigned int i = 0; i < nx; ++i)
 		{
@@ -396,7 +398,7 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 			auto i2 = m_comp_list.find(GetKey(l2, b2));
 			if (i1 != m_comp_list.end() && i2 != m_comp_list.end())
 				m_comp_graph.LinkComps(i1->second, i2->second);
-		}
+		}*/
 		//(x, ny-1, z)
 		for (unsigned int k = 0; k < nz; ++k)
 		for (unsigned int i = 0; i < nx; ++i)
@@ -418,7 +420,7 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 			if (i1 != m_comp_list.end() && i2 != m_comp_list.end())
 				m_comp_graph.LinkComps(i1->second, i2->second);
 		}
-		//(0, y, z)
+/*		//(0, y, z)
 		for (unsigned int k = 0; k < nz; ++k)
 		for (unsigned int j = 0; j < ny; ++j)
 		{
@@ -438,7 +440,7 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 			auto i2 = m_comp_list.find(GetKey(l2, b2));
 			if (i1 != m_comp_list.end() && i2 != m_comp_list.end())
 				m_comp_graph.LinkComps(i1->second, i2->second);
-		}
+		}*/
 		//(nx-1, y, z)
 		for (unsigned int k = 0; k < nz; ++k)
 		for (unsigned int j = 0; j < ny; ++j)
