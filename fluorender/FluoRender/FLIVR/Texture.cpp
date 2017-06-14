@@ -366,9 +366,9 @@ namespace FLIVR
 		}
 
 		bszx_ = bsize[0]; bszy_ = bsize[1]; bszz_ = bsize[2];
-		bnx_ = sz_x / bsize[0] + ((sz_x%bsize[0]) ? 1 : 0);
-		bny_ = sz_y / bsize[1] + ((sz_y%bsize[1]) ? 1 : 0);
-		bnz_ = sz_z / bsize[2] + ((sz_z%bsize[2]) ? 1 : 0);
+		bnx_ = sz_x / (bszx_-1) + ((sz_x % (bszx_-1)) ? 1 : 0);
+		bny_ = sz_y / (bszy_-1) + ((sz_y % (bszy_-1)) ? 1 : 0);
+		bnz_ = sz_z / (bszz_-1) + ((sz_z % (bszz_-1)) ? 1 : 0);
 
 		bricks.clear();
 

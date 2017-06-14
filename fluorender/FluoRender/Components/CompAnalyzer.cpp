@@ -55,6 +55,8 @@ void ComponentAnalyzer::Analyze(bool sel)
 	size_t bn = bricks->size();
 	//clear list and start calculating
 	m_comp_list.clear();
+	m_comp_list.min = std::numeric_limits<unsigned int>::max();
+	m_comp_list.max = 0;
 	m_comp_graph.clear();
 
 	if (sel)
@@ -175,8 +177,8 @@ void ComponentAnalyzer::Analyze(bool sel)
 		unsigned long long for_size = (unsigned long long)nx *
 			(unsigned long long)ny * (unsigned long long)nz;
 		unsigned long long index;
-		CompUList comp_ulist;
-		CompUListIter iter;
+		CompListBrick comp_list_brick;
+		CompListBrickIter iter;
 		for (index = 0; index < for_size; ++index)
 		{
 			value = 0.0;
@@ -212,8 +214,8 @@ void ComponentAnalyzer::Analyze(bool sel)
 			ext = GetExt(data_label, index, id, nx, ny, nz, i, j, k);
 
 			//find in list
-			iter = comp_ulist.find(GetKey(id, brick_id));
-			if (iter == comp_ulist.end())
+			iter = comp_list_brick.find(id);
+			if (iter == comp_list_brick.end())
 			{
 				//not found
 				CompInfo info;
@@ -232,8 +234,8 @@ void ComponentAnalyzer::Analyze(bool sel)
 				info.min = value;
 				info.max = value;
 				info.pos = FLIVR::Point(i, j, k);
-				comp_ulist.insert(pair<unsigned long long, CompInfo>
-					(GetKey(id, brick_id), info));
+				comp_list_brick.insert(pair<unsigned int, CompInfo>
+					(id, info));
 			}
 			else
 			{
@@ -253,12 +255,10 @@ void ComponentAnalyzer::Analyze(bool sel)
 			}
 		}
 
-		m_comp_list.min = std::numeric_limits<unsigned int>::max();
-		m_comp_list.max = 0;
-		for (iter = comp_ulist.begin();
-			iter != comp_ulist.end(); ++iter)
+		for (iter = comp_list_brick.begin();
+			iter != comp_list_brick.end(); ++iter)
 		{
-			if (!sel && iter->second.sumi < 2)
+			if (!sel && iter->second.sumi < 3)
 				continue;
 			iter->second.var = sqrt(iter->second.m2 / (iter->second.sumi));
 			iter->second.mean *= scale;
@@ -271,7 +271,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 				m_comp_list.max ? iter->second.sumi :
 				m_comp_list.max;
 			m_comp_list.insert(std::pair<unsigned long long, CompInfo>
-				(iter->first, iter->second));
+				(GetKey(iter->second.id, iter->second.brick_id), iter->second));
 		}
 
 		if (bn > 1)
@@ -335,39 +335,18 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 			tp += b->sx()*b->sy()*nb;
 		}
 		data_label = (unsigned int*)temp;
-		//check all 6 faces
+		//check 3 positive faces
 		unsigned int l1, l2, index, b1, b2;
-/*		//(x, y, 0)
-		for (unsigned int j = 0; j < ny; ++j)
-		for (unsigned int i = 0; i < nx; ++i)
-		{
-			index = j*nx + i;//diff
-			l1 = data_label[index];
-			if (!l1) continue;
-			index += nx*ny;//diff
-			l2 = data_label[index];
-			if (!l2 || l1 == l2) continue;
-			//get brick ids
-			b2 = b->get_id();
-			b1 = tex->negzid(b2);//diff
-			if (b1 == b2) continue;
-			//if l1 and l2 are different and already in the comp list
-			//connect them
-			auto i1 = m_comp_list.find(GetKey(l1, b1));
-			auto i2 = m_comp_list.find(GetKey(l2, b2));
-			if (i1 != m_comp_list.end() && i2 != m_comp_list.end())
-				m_comp_graph.LinkComps(i1->second, i2->second);
-		}*/
 		//(x, y, nz-1)
-		for (unsigned int j = 0; j < ny; ++j)
-		for (unsigned int i = 0; i < nx; ++i)
+		for (unsigned int j = 0; j < ny-1; ++j)
+		for (unsigned int i = 0; i < nx-1; ++i)
 		{
 			index = nx*ny*(nz - 1) + j*nx + i;
 			l1 = data_label[index];
 			if (!l1) continue;
 			index -= nx*ny;
 			l2 = data_label[index];
-			if (!l2 || l1 == l2) continue;
+			if (!l2) continue;
 			//get brick ids
 			b2 = b->get_id();
 			b1 = tex->poszid(b2);
@@ -379,37 +358,16 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 			if (i1 != m_comp_list.end() && i2 != m_comp_list.end())
 				m_comp_graph.LinkComps(i1->second, i2->second);
 		}
-/*		//(x, 0, z)
-		for (unsigned int k = 0; k < nz; ++k)
-		for (unsigned int i = 0; i < nx; ++i)
-		{
-			index = nx*ny*k + i;
-			l1 = data_label[index];
-			if (!l1) continue;
-			index += nx;
-			l2 = data_label[index];
-			if (!l2 || l1 == l2) continue;
-			//get brick ids
-			b2 = b->get_id();
-			b1 = tex->negyid(b2);
-			if (b1 == b2) continue;
-			//if l1 and l2 are different and already in the comp list
-			//connect them
-			auto i1 = m_comp_list.find(GetKey(l1, b1));
-			auto i2 = m_comp_list.find(GetKey(l2, b2));
-			if (i1 != m_comp_list.end() && i2 != m_comp_list.end())
-				m_comp_graph.LinkComps(i1->second, i2->second);
-		}*/
 		//(x, ny-1, z)
-		for (unsigned int k = 0; k < nz; ++k)
-		for (unsigned int i = 0; i < nx; ++i)
+		for (unsigned int k = 0; k < nz-1; ++k)
+		for (unsigned int i = 0; i < nx-1; ++i)
 		{
 			index = nx*ny*k + nx*(ny-1) + i;
 			l1 = data_label[index];
 			if (!l1) continue;
 			index -= nx;
 			l2 = data_label[index];
-			if (!l2 || l1 == l2) continue;
+			if (!l2) continue;
 			//get brick ids
 			b2 = b->get_id();
 			b1 = tex->posyid(b2);
@@ -421,37 +379,16 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 			if (i1 != m_comp_list.end() && i2 != m_comp_list.end())
 				m_comp_graph.LinkComps(i1->second, i2->second);
 		}
-/*		//(0, y, z)
-		for (unsigned int k = 0; k < nz; ++k)
-		for (unsigned int j = 0; j < ny; ++j)
-		{
-			index = nx*ny*k + nx*j;
-			l1 = data_label[index];
-			if (!l1) continue;
-			index += 1;
-			l2 = data_label[index];
-			if (!l2 || l1 == l2) continue;
-			//get brick ids
-			b2 = b->get_id();
-			b1 = tex->negxid(b2);
-			if (b1 == b2) continue;
-			//if l1 and l2 are different and already in the comp list
-			//connect them
-			auto i1 = m_comp_list.find(GetKey(l1, b1));
-			auto i2 = m_comp_list.find(GetKey(l2, b2));
-			if (i1 != m_comp_list.end() && i2 != m_comp_list.end())
-				m_comp_graph.LinkComps(i1->second, i2->second);
-		}*/
 		//(nx-1, y, z)
-		for (unsigned int k = 0; k < nz; ++k)
-		for (unsigned int j = 0; j < ny; ++j)
+		for (unsigned int k = 0; k < nz-1; ++k)
+		for (unsigned int j = 0; j < ny-1; ++j)
 		{
 			index = nx*ny*k + nx*j + nx-1;
 			l1 = data_label[index];
 			if (!l1) continue;
 			index -= 1;
 			l2 = data_label[index];
-			if (!l2 || l1 == l2) continue;
+			if (!l2) continue;
 			//get brick ids
 			b2 = b->get_id();
 			b1 = tex->posxid(b2);
@@ -485,6 +422,7 @@ void ComponentAnalyzer::OutputFormHeader(std::string &str)
 
 void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::string comp_header)
 {
+	m_comp_graph.ClearVisited();
 	int bn = m_vd->GetBrickNum();
 
 	ostringstream oss;
@@ -526,7 +464,7 @@ void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::strin
 			if (m_comp_graph.Visited(i->second))
 				continue;
 
-			CompUList list;
+			CompList list;
 			if (m_comp_graph.GetLinkedComps(i->second, list))
 			{
 				sumi = 0;
@@ -604,6 +542,7 @@ void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::strin
 
 void ComponentAnalyzer::OutputCompListTxt(std::string &filename, int verbose, std::string comp_header)
 {
+	m_comp_graph.ClearVisited();
 	int bn = m_vd->GetBrickNum();
 
 	ofstream ofs;
@@ -646,7 +585,7 @@ void ComponentAnalyzer::OutputCompListTxt(std::string &filename, int verbose, st
 			if (m_comp_graph.Visited(i->second))
 				continue;
 
-			CompUList list;
+			CompList list;
 			if (m_comp_graph.GetLinkedComps(i->second, list))
 			{
 				sumi = 0;

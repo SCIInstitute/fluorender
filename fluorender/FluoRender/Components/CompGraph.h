@@ -40,8 +40,8 @@ namespace FL
 {
 	struct CompInfo;
 
-	typedef boost::unordered_map<unsigned long long, CompInfo> CompUList;
-	typedef CompUList::iterator CompUListIter;
+	typedef boost::unordered_map<unsigned int, CompInfo> CompListBrick;
+	typedef CompListBrick::iterator CompListBrickIter;
 
 	class CompList : public std::map<unsigned long long, CompInfo>
 	{
@@ -74,7 +74,7 @@ namespace FL
 		bool Visited(CompInfo &comp);
 		void ClearVisited();
 		void LinkComps(CompInfo &comp1, CompInfo &comp2);
-		bool GetLinkedComps(CompInfo& comp, CompUList& list);
+		bool GetLinkedComps(CompInfo& comp, CompList& list);
 	private:
 		unsigned long long GetKey(unsigned int id, unsigned int brick_id)
 		{
