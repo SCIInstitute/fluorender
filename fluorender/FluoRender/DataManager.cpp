@@ -1922,6 +1922,16 @@ void VolumeData::SetFog(bool use_fog,
 		m_vr->set_fog(use_fog, fog_intensity, fog_start, fog_end);
 }
 
+int VolumeData::GetAllBrickNum()
+{
+	if (!m_tex)
+		return 0;
+	vector<TextureBrick*> *bricks = m_tex->get_bricks();
+	if (bricks)
+		return (int)bricks->size();
+	return 0;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 MeshData::MeshData() :
 m_data(0),

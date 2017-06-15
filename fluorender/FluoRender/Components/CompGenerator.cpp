@@ -1490,7 +1490,6 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 				if (count == nz - 1)
 				{
 					count = 0;
-					m_sig_progress();
 				}
 			}
 

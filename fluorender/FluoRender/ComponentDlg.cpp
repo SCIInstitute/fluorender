@@ -1413,7 +1413,7 @@ void ComponentDlg::GetSettings()
 	m_angle_thresh = 0.7;
 
 	//basic page
-	m_basic_iter = 100;
+	m_basic_iter = 50;
 	m_basic_thresh = 0.5;
 	m_basic_diff = false;
 	m_basic_falloff = 0.01;
@@ -3232,13 +3232,16 @@ void ComponentDlg::GenerateAdv(bool refine)
 		return;
 	vd->AddEmptyMask(1);
 
-	FL::ComponentGenerator cg(vd, KernelProgram::get_device_id());
-	m_prog_bit = 97.0f / float(1 +
-		(m_initial_grow ? m_ig_iterations : 0) +
-		(m_sized_grow ? m_sg_iterations : 0) +
-		(m_cleanup ? m_cl_iterations : 0) +
-		(m_match_slices ? (m_bidir_match?2:1):0));
+	int bn = vd->GetAllBrickNum();
+	m_prog_bit = 97.0f / float(bn * (1 +
+		(m_initial_grow ? 1 : 0) +
+		(m_sized_grow ? 1 : 0) +
+		(m_cleanup ? 1 : 0) +
+		(m_match_slices ?
+		(m_bidir_match?2:1):0)));
 	m_prog = 0.0f;
+
+	FL::ComponentGenerator cg(vd, KernelProgram::get_device_id());
 	boost::signals2::connection connection =
 		cg.m_sig_progress.connect(boost::bind(
 			&ComponentDlg::UpdateProgress, this));
@@ -3324,9 +3327,12 @@ void ComponentDlg::GenerateBsc(bool refine)
 		clean_size = 0;
 	}
 
-	FL::ComponentGenerator cg(vd, KernelProgram::get_device_id());
-	m_prog_bit = 97.0f / float(1 + m_basic_iter + clean_iter);
+	//get brick number
+	int bn = vd->GetAllBrickNum();
+	m_prog_bit = 97.0f / float(bn * 3);
 	m_prog = 0.0f;
+
+	FL::ComponentGenerator cg(vd, KernelProgram::get_device_id());
 	boost::signals2::connection connection =
 		cg.m_sig_progress.connect(boost::bind(
 			&ComponentDlg::UpdateProgress, this));
@@ -3354,7 +3360,7 @@ void ComponentDlg::GenerateBsc(bool refine)
 			float(m_basic_falloff / scale2),
 			density, clean_iter, clean_size);
 
-	if (vd->GetBrickNum() > 1)
+	if (bn > 1)
 		cg.FillBorder3D(0.1);
 
 	vd->GetVR()->clear_tex_current();
@@ -3537,6 +3543,12 @@ void ComponentDlg::Analyze(bool sel)
 	if (!m_view)
 		return;
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+
+	int bn = vd->GetAllBrickNum();
+	m_prog_bit = 97.0f / float(bn);
+	m_prog = 0.0f;
 	m_comp_analyzer.SetVolume(vd);
 	m_comp_analyzer.Analyze(sel);
 

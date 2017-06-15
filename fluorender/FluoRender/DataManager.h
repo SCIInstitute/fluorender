@@ -393,6 +393,8 @@ public:
 	void SetInterpolate(bool val);
 	bool GetInterpolate();
 
+	//number of all bricks
+	int GetAllBrickNum();
 	//number of valid bricks
 	void SetBrickNum(int num) {m_brick_num = num;}
 	int GetBrickNum() {return m_brick_num;}
