@@ -258,7 +258,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 		for (iter = comp_list_brick.begin();
 			iter != comp_list_brick.end(); ++iter)
 		{
-			if (!sel && iter->second.sumi < 3)
+			if (!sel && iter->second.sumi < 9)
 				continue;
 			iter->second.var = sqrt(iter->second.m2 / (iter->second.sumi));
 			iter->second.mean *= scale;
