@@ -3329,7 +3329,11 @@ void ComponentDlg::GenerateBsc(bool refine)
 
 	//get brick number
 	int bn = vd->GetAllBrickNum();
-	m_prog_bit = 97.0f / float(bn * 3);
+	if (refine)
+		m_prog_bit = 97.0f / float(bn * 2);
+	else
+		m_prog_bit = 97.0f / float(bn * 3);
+
 	m_prog = 0.0f;
 
 	FL::ComponentGenerator cg(vd, KernelProgram::get_device_id());
@@ -3547,8 +3551,13 @@ void ComponentDlg::Analyze(bool sel)
 		return;
 
 	int bn = vd->GetAllBrickNum();
-	m_prog_bit = 97.0f / float(bn);
+	m_prog_bit = 97.0f / float(bn * 2);
 	m_prog = 0.0f;
+
+	boost::signals2::connection connection =
+		m_comp_analyzer.m_sig_progress.connect(boost::bind(
+		&ComponentDlg::UpdateProgress, this));
+
 	m_comp_analyzer.SetVolume(vd);
 	m_comp_analyzer.Analyze(sel);
 
@@ -3573,4 +3582,7 @@ void ComponentDlg::Analyze(bool sel)
 		m_comp_analyzer.OutputCompList(str, 1);
 		m_stat_text->SetValue(str);
 	}
+
+	m_generate_prg->SetValue(100);
+	connection.disconnect();
 }

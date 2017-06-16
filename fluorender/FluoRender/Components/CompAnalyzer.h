@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FL_CompAnalyzer_h
 
 #include <string>
+#include <boost/signals2.hpp>
 #include "CompGraph.h"
 
 class VolumeData;
@@ -63,6 +64,9 @@ namespace FL
 		//color_type: 1-id-based; 2-size-based
 		bool GenMultiChannels(std::list<VolumeData*> &channs, int color_type);
 		bool GenRgbChannels(std::list<VolumeData*> &channs, int color_type);
+
+		//update progress
+		boost::signals2::signal<void()> m_sig_progress;
 
 	private:
 		VolumeData* m_vd;

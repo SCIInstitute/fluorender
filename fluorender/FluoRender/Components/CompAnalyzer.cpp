@@ -280,6 +280,8 @@ void ComponentAnalyzer::Analyze(bool sel)
 			if (data_mask) delete[] data_mask;
 			if (data_label) delete[] data_label;
 		}
+
+		m_sig_progress();
 	}
 
 	MatchBricks(sel);
@@ -404,6 +406,8 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 		if (data_data) delete[] data_data;
 		if (data_mask) delete[] data_mask;
 		if (data_label) delete[] data_label;
+
+		m_sig_progress();
 	}
 }
 
