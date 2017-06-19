@@ -3571,7 +3571,8 @@ void ComponentDlg::Analyze(bool sel)
 		if (rval == wxID_OK)
 		{
 			wxString filename = fopendlg->GetPath();
-			m_comp_analyzer.OutputCompListTxt(filename.ToStdString(), 1);
+			string str = filename.ToStdString();
+			m_comp_analyzer.OutputCompListTxt(str, 1);
 		}
 		if (fopendlg)
 			delete fopendlg;
