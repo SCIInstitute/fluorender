@@ -197,6 +197,7 @@ namespace FLIVR
 		done_update_loop_ = false;}
 		static void reset_update_loop() {start_update_loop_ = false;}
 		static bool get_done_update_loop() {return done_update_loop_;}
+		static void set_done_update_loop() { done_update_loop_ = true; }
 		static bool get_start_update_loop() {return start_update_loop_;}
 		static bool get_done_current_chan() {return done_current_chan_;}
 		static void reset_done_current_chan()

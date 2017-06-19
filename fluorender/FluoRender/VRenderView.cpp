@@ -1091,6 +1091,8 @@ void VRenderGLView::DrawVolumes(int peel)
 	{
 		finished_bricks = TextureRenderer::get_finished_bricks();
 		TextureRenderer::reset_finished_bricks();
+		if (finished_bricks == 0)
+			TextureRenderer::set_done_update_loop();
 	}
 
 	PrepFinalBuffer();
@@ -4630,7 +4632,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		//full screen
 		if (wxGetKeyState(WXK_ESCAPE))
 		{
-            m_fullscreen_trigger.Start(10);
+			m_fullscreen_trigger.Start(10);
 		}
 
 		//forced refresh
