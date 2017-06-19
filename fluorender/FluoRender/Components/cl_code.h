@@ -202,7 +202,9 @@ const char* str_cl_brainbow_3d = \
 "	for (int k=-1; k<2; ++k)\n" \
 "	{\n" \
 "		nb_coord = (int3)(coord.x+i, coord.y+j, coord.z+k);\n" \
-"		if (nb_coord.z < 0 || nb_coord.z > nz-1)\n" \
+"		if (nb_coord.x < 0 || nb_coord.x > nx-1 ||\n" \
+"			nb_coord.y < 0 || nb_coord.y > ny-1 ||\n" \
+"			nb_coord.z < 0 || nb_coord.z > nz-1)\n" \
 "			continue;\n" \
 "		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
 "		m = label[nb_index];\n" \
@@ -530,7 +532,9 @@ const char* str_cl_brainbow_3d_sized = \
 "	for (int k=-1; k<2; ++k)\n" \
 "	{\n" \
 "		nb_coord = (int3)(coord.x+i, coord.y+j, coord.z+k);\n" \
-"		if (nb_coord.z < 0 || nb_coord.z > nz-1)\n" \
+"		if (nb_coord.x < 0 || nb_coord.x > nx-1 ||\n" \
+"			nb_coord.y < 0 || nb_coord.y > ny-1 ||\n" \
+"			nb_coord.z < 0 || nb_coord.z > nz-1)\n" \
 "			continue;\n" \
 "		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
 "		m = label[nb_index];\n" \
