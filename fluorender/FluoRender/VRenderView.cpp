@@ -316,7 +316,9 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	//new cell id
 	m_cell_new_id(false),
 	//timer for fullscreen
-	m_fullscreen_trigger(this, ID_ftrigger)
+	m_fullscreen_trigger(this, ID_ftrigger),
+	//nodraw count
+	m_nodraw_count(0)
 {
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;
@@ -1092,7 +1094,15 @@ void VRenderGLView::DrawVolumes(int peel)
 		finished_bricks = TextureRenderer::get_finished_bricks();
 		TextureRenderer::reset_finished_bricks();
 		if (finished_bricks == 0)
-			TextureRenderer::set_done_update_loop();
+		{
+			if (m_nodraw_count == 10)
+			{
+				TextureRenderer::set_done_update_loop();
+				m_nodraw_count = 0;
+			}
+			else
+				m_nodraw_count++;
+		}
 	}
 
 	PrepFinalBuffer();

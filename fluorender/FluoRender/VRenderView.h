@@ -882,6 +882,9 @@ private:
 	//for benchmark
 	bool m_benchmark;
 
+	//nodraw count
+	int m_nodraw_count;
+
 private:
 #ifdef _WIN32
 	//wacom tablet
