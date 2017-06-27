@@ -102,6 +102,8 @@ namespace FL
 		double min;
 		double max;
 		FLIVR::Point pos;
+		std::vector<unsigned int> cosumi;
+		std::vector<double> cosumd;
 		CompVert v;
 
 		CompInfo()

@@ -44,7 +44,18 @@ ComponentAnalyzer::~ComponentAnalyzer()
 {
 }
 
-void ComponentAnalyzer::Analyze(bool sel)
+int ComponentAnalyzer::GetColocalization(
+	size_t bi,
+	unsigned long long index,
+	std::vector<unsigned int> &sumi,
+	std::vector<double> &sumd)
+{
+	int num = 0;
+
+	return num;
+}
+
+void ComponentAnalyzer::Analyze(bool sel, bool colocal)
 {
 	if (!m_vd || !m_vd->GetTexture())
 		return;

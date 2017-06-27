@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FL_CompAnalyzer_h
 
 #include <string>
+#include <vector>
 #include <boost/signals2.hpp>
 #include "CompGraph.h"
 
@@ -51,7 +52,12 @@ namespace FL
 		VolumeData* GetVolume()
 		{ return m_vd; }
 
-		void Analyze(bool sel);
+		void SetCoVolumes(std::vector<VolumeData*> &list)
+		{
+			m_vd_list = list;
+		}
+
+		void Analyze(bool sel, bool colocal=false);
 		void MatchBricks(bool sel);
 
 		size_t GetListSize();
@@ -69,7 +75,10 @@ namespace FL
 		boost::signals2::signal<void()> m_sig_progress;
 
 	private:
-		VolumeData* m_vd;
+		VolumeData* m_vd;//main volume
+		std::vector<VolumeData*> m_vd_list;//list of volumes for colocalization analysis
+
+		//output components
 		CompList m_comp_list;
 		bool m_comp_list_dirty;
 
@@ -88,6 +97,10 @@ namespace FL
 			int nx, int ny, int nz,
 			int i, int j, int k);
 		FLIVR::Color GetColor(CompInfo &comp_info, VolumeData* vd, int color_type);
+		int GetColocalization(size_t bi,
+			unsigned long long index,
+			std::vector<unsigned int> &sumi,
+			std::vector<double> &sumd);
 	};
 }
 #endif//FL_CompAnalyzer_h

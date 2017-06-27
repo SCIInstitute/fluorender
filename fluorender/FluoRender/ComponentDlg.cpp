@@ -179,6 +179,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_BUTTON(ID_CompAppendBtn, ComponentDlg::OnCompAppend)
 	EVT_BUTTON(ID_CompAllBtn, ComponentDlg::OnCompAll)
 	EVT_BUTTON(ID_CompClearBtn, ComponentDlg::OnCompClear)
+	EVT_CHECKBOX(ID_ColocalCheck, ComponentDlg::OnColocalCheck)
 	//output
 	EVT_RADIOBUTTON(ID_OutputMultiRb, ComponentDlg::OnOutputTypeRadio)
 	EVT_RADIOBUTTON(ID_OutputRgbRb, ComponentDlg::OnOutputTypeRadio)
@@ -608,26 +609,40 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer1->Add(sizer12, 0, wxEXPAND);
 	sizer1->Add(10, 10);
 
-	//output
+	//colocalization
 	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "Colocalization"),
+		wxVERTICAL);
+	wxBoxSizer *sizer21 = new wxBoxSizer(wxHORIZONTAL);
+	m_colocal_check = new wxCheckBox(page, ID_ColocalCheck, "Compute colocalization with other channels",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+	sizer21->Add(5, 5);
+	sizer21->Add(m_colocal_check, 0, wxALIGN_CENTER);
+	//
+	sizer2->Add(10, 10);
+	sizer2->Add(sizer21, 0, wxEXPAND);
+	sizer2->Add(10, 10);
+
+	//output
+	wxBoxSizer *sizer3 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Output as New Channels"),
 		wxVERTICAL);
 	//radios
-	wxBoxSizer *sizer21 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer31 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Channel Type:",
 		wxDefaultPosition, wxSize(100, 20));
 	m_output_multi_rb = new wxRadioButton(page, ID_OutputMultiRb, "Each Comp.",
 		wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 	m_output_rgb_rb = new wxRadioButton(page, ID_OutputRgbRb, "R+G+B",
 		wxDefaultPosition, wxDefaultSize);
-	sizer21->Add(5, 5);
-	sizer21->Add(st, 0, wxALIGN_CENTER);
-	sizer21->Add(m_output_multi_rb, 0, wxALIGN_CENTER);
-	sizer21->Add(5, 5);
-	sizer21->Add(m_output_rgb_rb, 0, wxALIGN_CENTER);
-	sizer21->Add(5, 5);
+	sizer31->Add(5, 5);
+	sizer31->Add(st, 0, wxALIGN_CENTER);
+	sizer31->Add(m_output_multi_rb, 0, wxALIGN_CENTER);
+	sizer31->Add(5, 5);
+	sizer31->Add(m_output_rgb_rb, 0, wxALIGN_CENTER);
+	sizer31->Add(5, 5);
 	//buttons
-	wxBoxSizer *sizer22 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer32 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Output:",
 		wxDefaultPosition, wxSize(100, 20));
 	m_output_random_btn = new wxButton(page, ID_OutputRandomBtn, "Random Colors",
@@ -636,28 +651,28 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(100, 23));
 	m_output_ann_btn = new wxButton(page, ID_OutputAnnBtn, "Annotations",
 		wxDefaultPosition, wxSize(100, 23));
-	sizer22->Add(5, 5);
-	sizer22->Add(st, 0, wxALIGN_CENTER);
-	sizer22->Add(m_output_random_btn, 0, wxALIGN_CENTER);
-	sizer22->Add(m_output_size_btn, 0, wxALIGN_CENTER);
-	sizer22->Add(m_output_ann_btn, 0, wxALIGN_CENTER);
-	sizer22->Add(5, 5);
+	sizer32->Add(5, 5);
+	sizer32->Add(st, 0, wxALIGN_CENTER);
+	sizer32->Add(m_output_random_btn, 0, wxALIGN_CENTER);
+	sizer32->Add(m_output_size_btn, 0, wxALIGN_CENTER);
+	sizer32->Add(m_output_ann_btn, 0, wxALIGN_CENTER);
+	sizer32->Add(5, 5);
 	//
-	sizer2->Add(10, 10);
-	sizer2->Add(sizer21, 0, wxEXPAND);
-	sizer2->Add(10, 10);
-	sizer2->Add(sizer22, 0, wxEXPAND);
-	sizer2->Add(10, 10);
+	sizer3->Add(10, 10);
+	sizer3->Add(sizer31, 0, wxEXPAND);
+	sizer3->Add(10, 10);
+	sizer3->Add(sizer32, 0, wxEXPAND);
+	sizer3->Add(10, 10);
 
 	//note
-	wxBoxSizer *sizer3 = new wxStaticBoxSizer(
+	wxBoxSizer *sizer4 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "N.B."),
 		wxVERTICAL);
 	st = new wxStaticText(page, 0,
 		"Enable 4D script in the settings to show component colors.");
-	sizer3->Add(10, 10);
-	sizer3->Add(st, 0);
-	sizer3->Add(10, 10);
+	sizer4->Add(10, 10);
+	sizer4->Add(st, 0);
+	sizer4->Add(10, 10);
 
 	//all
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
@@ -667,6 +682,8 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizerv->Add(sizer2, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 	sizerv->Add(sizer3, 0, wxEXPAND);
+	sizerv->Add(10, 10);
+	sizerv->Add(sizer4, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 
 	page->SetSizer(sizerv);
@@ -1439,6 +1456,8 @@ void ComponentDlg::GetSettings()
 	m_min_num = 0;
 	m_use_max = false;
 	m_max_num = 0;
+	//colocalization
+	m_colocal = false;
 
 	//output
 	m_output_type = 1;
@@ -1550,6 +1569,8 @@ void ComponentDlg::LoadSettings(wxString filename)
 		fconfig.Read("min_num", &m_min_num);
 		fconfig.Read("use_max", &m_use_max);
 		fconfig.Read("max_num", &m_max_num);
+		//colocalization
+		fconfig.Read("colocal", &m_colocal);
 		//output
 		fconfig.Read("output_type", &m_output_type);
 	}
@@ -1650,6 +1671,8 @@ void ComponentDlg::SaveSettings(wxString filename)
 	fconfig.Write("min_num", m_min_num);
 	fconfig.Write("use_max", m_use_max);
 	fconfig.Write("max_num", m_max_num);
+	//colocalization
+	fconfig.Write("colocal", m_colocal);
 	//output
 	fconfig.Write("output_type", m_output_type);
 
@@ -2997,6 +3020,11 @@ void ComponentDlg::OnCompClear(wxCommandEvent &event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetBrushToolDlg())
 		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+}
+
+void ComponentDlg::OnColocalCheck(wxCommandEvent &event)
+{
+	m_colocal = m_colocal_check->GetValue();
 }
 
 void ComponentDlg::EnableGenerate()
