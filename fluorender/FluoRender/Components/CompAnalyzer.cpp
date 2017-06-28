@@ -36,7 +36,8 @@ using namespace FL;
 
 ComponentAnalyzer::ComponentAnalyzer(VolumeData* vd)
 	: m_vd(vd),
-	m_comp_list_dirty(true)
+	m_comp_list_dirty(true),
+	m_colocal(false)
 {
 }
 
@@ -45,12 +46,42 @@ ComponentAnalyzer::~ComponentAnalyzer()
 }
 
 int ComponentAnalyzer::GetColocalization(
-	size_t bi,
-	unsigned long long index,
+	size_t bid,
+	unsigned int bi,
+	unsigned int bj,
+	unsigned int bk,
 	std::vector<unsigned int> &sumi,
 	std::vector<double> &sumd)
 {
 	int num = 0;
+
+	for (size_t i=0; i<m_vd_list.size(); ++i)
+	{
+		if (!m_vd_list[i])
+		{
+			sumi.push_back(0);
+			sumd.push_back(0.0);
+			continue;
+		}
+		Texture* tex = m_vd_list[i]->GetTexture();
+		if (!tex)
+		{
+			sumi.push_back(0);
+			sumd.push_back(0.0);
+			continue;
+		}
+		TextureBrick* b = tex->get_brick(bid);
+		if (!b)
+		{
+			sumi.push_back(0);
+			sumd.push_back(0.0);
+			continue;
+		}
+		double value = b->get_data(bi, bj, bk);
+		sumi.push_back(value > 0.0 ? 1 : 0);
+		sumd.push_back(value);
+		num++;
+	}
 
 	return num;
 }
@@ -224,6 +255,11 @@ void ComponentAnalyzer::Analyze(bool sel, bool colocal)
 			j = j / nx;
 			ext = GetExt(data_label, index, id, nx, ny, nz, i, j, k);
 
+			//colocalization
+			std::vector<unsigned int> sumi;
+			std::vector<double> sumd;
+			if (colocal) GetColocalization(brick_id, i, j, k, sumi, sumd);
+
 			//find in list
 			iter = comp_list_brick.find(id);
 			if (iter == comp_list_brick.end())
@@ -245,6 +281,11 @@ void ComponentAnalyzer::Analyze(bool sel, bool colocal)
 				info.min = value;
 				info.max = value;
 				info.pos = FLIVR::Point(i, j, k);
+				if (colocal)
+				{
+					info.cosumi = sumi;
+					info.cosumd = sumd;
+				}
 				comp_list_brick.insert(pair<unsigned int, CompInfo>
 					(id, info));
 			}
@@ -263,6 +304,14 @@ void ComponentAnalyzer::Analyze(bool sel, bool colocal)
 				iter->second.m2 += delta * (value - iter->second.mean);
 				iter->second.min = value < iter->second.min ? value : iter->second.min;
 				iter->second.max = value > iter->second.max ? value : iter->second.max;
+				//
+				if (colocal)
+				{
+					for (size_t i = 0; i < iter->second.cosumi.size(); ++i)
+						iter->second.cosumi[i] += sumi[i];
+					for (size_t i = 0; i < iter->second.cosumd.size(); ++i)
+						iter->second.cosumd[i] += sumd[i];
+				}
 			}
 		}
 
@@ -298,6 +347,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool colocal)
 	MatchBricks(sel);
 
 	m_comp_list_dirty = false;
+	m_colocal = colocal && m_vd_list.size();
 }
 
 void ComponentAnalyzer::MatchBricks(bool sel)
@@ -429,10 +479,18 @@ size_t ComponentAnalyzer::GetListSize()
 
 void ComponentAnalyzer::OutputFormHeader(std::string &str)
 {
+	str = "";
 	if (m_vd && m_vd->GetBrickNum() > 1)
-		str = "BRICK_ID\tID\tPosX\tPosY\tPosZ\tSumN\tSumI\tSurfaceN\tSurfaceI\tMean\tSigma\tMin\tMax\n";
-	else
-		str = "ID\tPosX\tPosY\tPosZ\tSumN\tSumI\tSurfaceN\tSurfaceI\tMean\tSigma\tMin\tMax\n";
+		str = "BRICK_ID\t";
+
+	str += "ID\tPosX\tPosY\tPosZ\tSumN\tSumI\tSurfaceN\tSurfaceI\tMean\tSigma\tMin\tMax";
+
+	if (m_colocal)
+	{
+		for (size_t i = 0; i < m_vd_list.size(); ++i)
+			str += "\t" + m_vd_list[i]->GetName() + "\t";
+	}
+	str += "\n";
 }
 
 void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::string comp_header)
@@ -473,6 +531,8 @@ void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::strin
 		double min;
 		double max;
 		FLIVR::Point pos;
+		std::vector<unsigned int> cosumi;
+		std::vector<double> cosumd;
 
 		if (bn > 1)
 		{
@@ -490,6 +550,8 @@ void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::strin
 				var = 0.0;
 				min = std::numeric_limits<double>::max();
 				max = 0.0;
+				cosumi.resize(m_vd_list.size(), 0);
+				cosumd.resize(m_vd_list.size(), 0.0);
 
 				for (auto iter = list.begin();
 					iter != list.end(); ++iter)
@@ -505,6 +567,12 @@ void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::strin
 					min = iter->second.min < min ? iter->second.min : min;
 					max = iter->second.max > max ? iter->second.max : max;
 					//pos
+					//colocalization
+					for (size_t i=0; i<m_vd_list.size(); ++i)
+					{
+						cosumi[i] += iter->second.cosumi[i];
+						cosumd[i] += iter->second.cosumd[i];
+					}
 				}
 			}
 			else
@@ -520,6 +588,8 @@ void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::strin
 				min = i->second.min;
 				max = i->second.max;
 				pos = i->second.pos;
+				cosumi = i->second.cosumi;
+				cosumd = i->second.cosumd;
 			}
 		}
 		else
@@ -535,6 +605,8 @@ void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::strin
 			min = i->second.min;
 			max = i->second.max;
 			pos = i->second.pos;
+			cosumi = i->second.cosumi;
+			cosumd = i->second.cosumd;
 		}
 
 		if (bn > 1)
@@ -550,7 +622,16 @@ void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::strin
 		oss << mean << "\t";
 		oss << var << "\t";
 		oss << min << "\t";
-		oss << max << "\n";
+		oss << max;
+		if (m_colocal)
+		{
+			oss << "\t";
+			for (size_t i=0; i<m_vd_list.size(); ++i)
+			{
+				oss << cosumi[i] << "\t" << cosumd[i] << "\t";
+			}
+		}
+		oss << "\n";
 	}
 	str = oss.str();
 }

@@ -147,6 +147,9 @@ namespace FLIVR {
 		//id for analysis
 		inline unsigned int get_id() { return id_; }
 
+		//get value
+		double get_data(unsigned int i, unsigned int j, unsigned int k);
+
 	private:
 		void compute_edge_rays(BBox &bbox);
 		void compute_edge_rays_tex(BBox &bbox);
@@ -189,6 +192,28 @@ namespace FLIVR {
 		//id for analysis
 		unsigned int id_;
 	};
+
+	inline double TextureBrick::get_data(unsigned int i, unsigned int j, unsigned int k)
+	{
+		unsigned long long offset =
+			(unsigned long long)(oz() + k) *
+			(unsigned long long)(sx()) *
+			(unsigned long long)(sy()) +
+			(unsigned long long)(oy() + j) *
+			(unsigned long long)(sx()) +
+			(unsigned long long)(ox() + i);
+		if (nb_[0] == 1)
+		{
+			unsigned char *ptr = (unsigned char*)(data_[0]->data);
+			return ptr[offset] / 255.0;
+		}
+		else
+		{
+			unsigned short *ptr = (unsigned short*)(data_[0]->data);
+			return ptr[offset] / 65535.0;
+		}
+		return 0.0;
+	}
 
 } // namespace FLIVR
 

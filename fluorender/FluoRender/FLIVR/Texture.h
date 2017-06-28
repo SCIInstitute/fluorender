@@ -70,6 +70,7 @@ namespace FLIVR
 		inline unsigned int posxid(unsigned int id);
 		inline unsigned int posyid(unsigned int id);
 		inline unsigned int poszid(unsigned int id);
+		TextureBrick* get_brick(unsigned int bid);
 
 		inline int nc() { return nc_; }
 		inline int nb(int i)
@@ -314,6 +315,16 @@ namespace FLIVR
 			return id;
 		else
 			return r;
+	}
+
+	inline TextureBrick* Texture::get_brick(unsigned int bid)
+	{
+		for (size_t i=0; i<bricks_.size(); ++i)
+		{
+			if (bricks_[i]->get_id() == bid)
+				return bricks_[i];
+		}
+		return 0;
 	}
 
 } // namespace FLIVR

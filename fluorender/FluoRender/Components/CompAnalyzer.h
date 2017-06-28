@@ -56,6 +56,14 @@ namespace FL
 		{
 			m_vd_list = list;
 		}
+		void AddCoVolume(VolumeData* vd)
+		{
+			m_vd_list.push_back(vd);
+		}
+		void ClearCoVolumes()
+		{
+			m_vd_list.clear();
+		}
 
 		void Analyze(bool sel, bool colocal=false);
 		void MatchBricks(bool sel);
@@ -76,6 +84,7 @@ namespace FL
 
 	private:
 		VolumeData* m_vd;//main volume
+		bool m_colocal;
 		std::vector<VolumeData*> m_vd_list;//list of volumes for colocalization analysis
 
 		//output components
@@ -97,8 +106,10 @@ namespace FL
 			int nx, int ny, int nz,
 			int i, int j, int k);
 		FLIVR::Color GetColor(CompInfo &comp_info, VolumeData* vd, int color_type);
-		int GetColocalization(size_t bi,
-			unsigned long long index,
+		int GetColocalization(size_t bid,
+			unsigned int bi,
+			unsigned int bj,
+			unsigned int bk,
 			std::vector<unsigned int> &sumi,
 			std::vector<double> &sumd);
 	};

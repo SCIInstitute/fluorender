@@ -3587,7 +3587,13 @@ void ComponentDlg::Analyze(bool sel)
 		&ComponentDlg::UpdateProgress, this));
 
 	m_comp_analyzer.SetVolume(vd);
-	m_comp_analyzer.Analyze(sel);
+	if (m_colocal)
+	{
+		m_comp_analyzer.ClearCoVolumes();
+		for (int i = 0; i < m_view->GetDispVolumeNum(); ++i)
+			m_comp_analyzer.AddCoVolume(m_view->GetDispVolumeData(i));
+	}
+	m_comp_analyzer.Analyze(sel, m_colocal);
 
 	if (m_comp_analyzer.GetListSize() > 10000)
 	{
