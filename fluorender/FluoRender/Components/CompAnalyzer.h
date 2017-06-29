@@ -72,8 +72,9 @@ namespace FL
 		void OutputFormHeader(std::string &str);
 		//print out results
 		//verbose: 0-clean output; 1-extra info
-		void OutputCompList(std::string &str, int verbose, std::string comp_header="");
-		void OutputCompListTxt(std::string &filename, int verbose, std::string comp_header = "");
+		void OutputCompListStream(std::ostream &stream, int verbose, std::string comp_header = "");
+		void OutputCompListStr(std::string &str, int verbose, std::string comp_header="");
+		void OutputCompListFile(std::string &filename, int verbose, std::string comp_header = "");
 		bool GenAnnotations(Annotations &ann);
 		//color_type: 1-id-based; 2-size-based
 		bool GenMultiChannels(std::list<VolumeData*> &channs, int color_type);

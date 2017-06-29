@@ -3591,7 +3591,11 @@ void ComponentDlg::Analyze(bool sel)
 	{
 		m_comp_analyzer.ClearCoVolumes();
 		for (int i = 0; i < m_view->GetDispVolumeNum(); ++i)
-			m_comp_analyzer.AddCoVolume(m_view->GetDispVolumeData(i));
+		{
+			VolumeData* vdi = m_view->GetDispVolumeData(i);
+			if (vdi != vd)
+				m_comp_analyzer.AddCoVolume(vdi);
+		}
 	}
 	m_comp_analyzer.Analyze(sel, m_colocal);
 
@@ -3606,7 +3610,7 @@ void ComponentDlg::Analyze(bool sel)
 		{
 			wxString filename = fopendlg->GetPath();
 			string str = filename.ToStdString();
-			m_comp_analyzer.OutputCompListTxt(str, 1);
+			m_comp_analyzer.OutputCompListFile(str, 1);
 		}
 		if (fopendlg)
 			delete fopendlg;
@@ -3614,7 +3618,7 @@ void ComponentDlg::Analyze(bool sel)
 	else
 	{
 		string str;
-		m_comp_analyzer.OutputCompList(str, 1);
+		m_comp_analyzer.OutputCompListStr(str, 1);
 		m_stat_text->SetValue(str);
 	}
 

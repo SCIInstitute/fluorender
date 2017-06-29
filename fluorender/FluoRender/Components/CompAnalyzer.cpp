@@ -493,21 +493,20 @@ void ComponentAnalyzer::OutputFormHeader(std::string &str)
 	str += "\n";
 }
 
-void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::string comp_header)
+void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, std::string comp_header)
 {
 	m_comp_graph.ClearVisited();
 	int bn = m_vd->GetBrickNum();
 
-	ostringstream oss;
 	if (verbose == 1)
 	{
-		oss << "Statistics on the selection:\n";
-		oss << "A total of " <<
+		stream << "Statistics on the selection:\n";
+		stream << "A total of " <<
 			m_comp_list.size() <<
 			" component(s) selected\n";
 		std::string header;
 		OutputFormHeader(header);
-		oss << header;
+		stream << header;
 	}
 	for (auto i = m_comp_list.begin();
 		i != m_comp_list.end(); ++i)
@@ -515,9 +514,9 @@ void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::strin
 		if (comp_header != "")
 		{
 			if (i == m_comp_list.begin())
-				oss << comp_header << "\t";
+				stream << comp_header << "\t";
 			else
-				oss << "\t";
+				stream << "\t";
 		}
 
 		std::list<unsigned int> ids;
@@ -558,17 +557,26 @@ void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::strin
 				{
 					ids.push_back(iter->second.id);
 					brick_ids.push_back(iter->second.brick_id);
+					//mean
+					double temp = (mean * sumi + iter->second.mean * iter->second.sumi) /
+						(sumi + iter->second.sumi);
+					//var
+					var = ((var + mean * mean) * sumi +
+						(iter->second.var + iter->second.mean * iter->second.mean) * iter->second.sumi) /
+						(sumi + iter->second.sumi) - temp * temp;
+					//pos
+					pos = FLIVR::Point((pos * sumi + iter->second.pos * iter->second.sumi) /
+						(sumi + iter->second.sumi));
+					mean = temp;
+					//others
 					sumi += iter->second.sumi;
 					sumd += iter->second.sumd;
 					ext_sumi += iter->second.ext_sumi;
 					ext_sumd += iter->second.ext_sumd;
-					//mean
-					//var
 					min = iter->second.min < min ? iter->second.min : min;
 					max = iter->second.max > max ? iter->second.max : max;
-					//pos
 					//colocalization
-					for (size_t i=0; i<m_vd_list.size(); ++i)
+					for (size_t i = 0; i<m_vd_list.size(); ++i)
 					{
 						cosumi[i] += iter->second.cosumi[i];
 						cosumd[i] += iter->second.cosumd[i];
@@ -610,151 +618,43 @@ void ComponentAnalyzer::OutputCompList(std::string &str, int verbose, std::strin
 		}
 
 		if (bn > 1)
-			oss << brick_ids.front() << "\t";
-		oss << ids.front() << "\t";
-		oss << pos.x() << "\t";
-		oss << pos.y() << "\t";
-		oss << pos.z() << "\t";
-		oss << sumi << "\t";
-		oss << sumd << "\t";
-		oss << ext_sumi << "\t";
-		oss << ext_sumd << "\t";
-		oss << mean << "\t";
-		oss << var << "\t";
-		oss << min << "\t";
-		oss << max;
+			stream << brick_ids.front() << "\t";
+		stream << ids.front() << "\t";
+		stream << pos.x() << "\t";
+		stream << pos.y() << "\t";
+		stream << pos.z() << "\t";
+		stream << sumi << "\t";
+		stream << sumd << "\t";
+		stream << ext_sumi << "\t";
+		stream << ext_sumd << "\t";
+		stream << mean << "\t";
+		stream << var << "\t";
+		stream << min << "\t";
+		stream << max;
 		if (m_colocal)
 		{
-			oss << "\t";
-			for (size_t i=0; i<m_vd_list.size(); ++i)
+			stream << "\t";
+			for (size_t i = 0; i<m_vd_list.size(); ++i)
 			{
-				oss << cosumi[i] << "\t" << cosumd[i] << "\t";
+				stream << cosumi[i] << "\t" << cosumd[i] << "\t";
 			}
 		}
-		oss << "\n";
+		stream << "\n";
 	}
+}
+
+void ComponentAnalyzer::OutputCompListStr(std::string &str, int verbose, std::string comp_header)
+{
+	ostringstream oss;
+	OutputCompListStream(oss, verbose, comp_header);
 	str = oss.str();
 }
 
-void ComponentAnalyzer::OutputCompListTxt(std::string &filename, int verbose, std::string comp_header)
+void ComponentAnalyzer::OutputCompListFile(std::string &filename, int verbose, std::string comp_header)
 {
-	m_comp_graph.ClearVisited();
-	int bn = m_vd->GetBrickNum();
-
 	ofstream ofs;
 	ofs.open(filename, std::ofstream::out);
-	if (verbose == 1)
-	{
-		ofs << "Statistics on the selection:\n";
-		ofs << "A total of " <<
-			m_comp_list.size() <<
-			" component(s) selected\n";
-		std::string header;
-		OutputFormHeader(header);
-		ofs << header;
-	}
-	for (auto i = m_comp_list.begin();
-		i != m_comp_list.end(); ++i)
-	{
-		if (comp_header != "")
-		{
-			if (i == m_comp_list.begin())
-				ofs << comp_header << "\t";
-			else
-				ofs << "\t";
-		}
-
-		std::list<unsigned int> ids;
-		std::list<unsigned int> brick_ids;
-		unsigned int sumi;
-		double sumd;
-		unsigned int ext_sumi;
-		double ext_sumd;
-		double mean;
-		double var;
-		double min;
-		double max;
-		FLIVR::Point pos;
-
-		if (bn > 1)
-		{
-			if (m_comp_graph.Visited(i->second))
-				continue;
-
-			CompList list;
-			if (m_comp_graph.GetLinkedComps(i->second, list))
-			{
-				sumi = 0;
-				sumd = 0.0;
-				ext_sumi = 0;
-				ext_sumd = 0.0;
-				mean = 0.0;
-				var = 0.0;
-				min = std::numeric_limits<double>::max();
-				max = 0.0;
-
-				for (auto iter = list.begin();
-					iter != list.end(); ++iter)
-				{
-					ids.push_back(iter->second.id);
-					brick_ids.push_back(iter->second.brick_id);
-					sumi += iter->second.sumi;
-					sumd += iter->second.sumd;
-					ext_sumi += iter->second.ext_sumi;
-					ext_sumd += iter->second.ext_sumd;
-					//mean
-					//var
-					min = iter->second.min < min ? iter->second.min : min;
-					max = iter->second.max > max ? iter->second.max : max;
-					//pos
-				}
-			}
-			else
-			{
-				ids.push_back(i->second.id);
-				brick_ids.push_back(i->second.brick_id);
-				sumi = i->second.sumi;
-				sumd = i->second.sumd;
-				ext_sumi = i->second.ext_sumi;
-				ext_sumd = i->second.ext_sumd;
-				mean = i->second.mean;
-				var = i->second.mean;
-				min = i->second.min;
-				max = i->second.max;
-				pos = i->second.pos;
-			}
-		}
-		else
-		{
-			ids.push_back(i->second.id);
-			brick_ids.push_back(i->second.brick_id);
-			sumi = i->second.sumi;
-			sumd = i->second.sumd;
-			ext_sumi = i->second.ext_sumi;
-			ext_sumd = i->second.ext_sumd;
-			mean = i->second.mean;
-			var = i->second.mean;
-			min = i->second.min;
-			max = i->second.max;
-			pos = i->second.pos;
-		}
-
-		if (bn > 1)
-			ofs << brick_ids.front() << "\t";
-		ofs << ids.front() << "\t";
-		ofs << pos.x() << "\t";
-		ofs << pos.y() << "\t";
-		ofs << pos.z() << "\t";
-		ofs << sumi << "\t";
-		ofs << sumd << "\t";
-		ofs << ext_sumi << "\t";
-		ofs << ext_sumd << "\t";
-		ofs << mean << "\t";
-		ofs << var << "\t";
-		ofs << min << "\t";
-		ofs << max << "\n";
-	}
-
+	OutputCompListStream(ofs, verbose, comp_header);
 	ofs.close();
 }
 

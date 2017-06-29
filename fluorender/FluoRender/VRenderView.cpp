@@ -5857,7 +5857,7 @@ void VRenderGLView::RunCompAnalysis(wxFileConfig &fconfig)
 	comp_analyzer.Analyze(true);
 	string result_str;
 	string comp_header = wxString::Format("%d", m_tseq_cur_num);
-	comp_analyzer.OutputCompList(result_str, verbose, comp_header);
+	comp_analyzer.OutputCompListStr(result_str, verbose, comp_header);
 
 	//save append
 	wxFile file(pathname, m_sf_script ? wxFile::write : wxFile::write_append);
