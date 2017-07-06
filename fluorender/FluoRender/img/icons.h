@@ -152,6 +152,8 @@ public:
 	const static unsigned char gear_45_png[979];
 	/* legend.png - 1142 bytes */
 	const static unsigned char legend_png[1142];
+	/* pin.png - 881 bytes */
+	const static unsigned char pin_png[881];
 	/* ratio.png - 361 bytes */
 	const static unsigned char ratio_png[361];
 	/* scalebar.png - 803 bytes */

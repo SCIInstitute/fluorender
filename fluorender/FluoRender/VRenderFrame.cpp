@@ -2755,6 +2755,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			fconfig.Write("initdist", vrv->m_glview->GetInitDist());
 			fconfig.Write("scale_mode", vrv->m_glview->m_scale_mode);
 			fconfig.Write("scale", vrv->m_glview->m_scale_factor);
+			fconfig.Write("pin_rot_center", vrv->m_glview->m_pin_rot_center);
 			//object
 			vrv->GetObjCenters(x, y, z);
 			str = wxString::Format("%f %f %f", x, y, z);
@@ -3823,6 +3824,13 @@ void VRenderFrame::OpenProject(wxString& filename)
 					scale = radius / tan(d2r(vrv->GetAov() / 2.0)) / dist;
 				vrv->m_glview->m_scale_factor = scale;
 				vrv->UpdateScaleFactor(false);
+				bool pin_rot_center;
+				if (fconfig.Read("pin_rot_center", &pin_rot_center))
+				{
+					vrv->m_glview->m_pin_rot_center = pin_rot_center;
+					if (pin_rot_center)
+						vrv->m_glview->m_rot_center_dirty = true;
+				}
 				//object
 				if (fconfig.Read("obj_center", &str))
 				{

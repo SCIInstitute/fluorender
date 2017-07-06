@@ -318,7 +318,10 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	//timer for fullscreen
 	m_fullscreen_trigger(this, ID_ftrigger),
 	//nodraw count
-	m_nodraw_count(0)
+	m_nodraw_count(0),
+	//pin rotation center
+	m_pin_rot_center(false),
+	m_rot_center_dirty(false)
 {
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;
@@ -4420,6 +4423,24 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			m_pre_draw = true;
 	}
 
+	//pin rotation center
+	if (m_pin_rot_center && m_rot_center_dirty && m_cur_vol)
+	{
+		Point p;
+		int nx = GetGLSize().x;
+		int ny = GetGLSize().y;
+		double dist = GetPointVolume(p,
+			nx / 2, ny / 2,
+			m_cur_vol, 2, true, 0.5);
+		if (dist > 0.0)
+		{
+			m_obj_transx = -(p.x() - m_obj_ctrx);
+			m_obj_transy = p.y() - m_obj_ctry;
+			m_obj_transz = p.z() - m_obj_ctrz;
+		}
+		m_rot_center_dirty = false;
+	}
+
 	wxPoint mouse_pos = wxGetMousePosition();
 	wxRect view_reg = GetScreenRect();
 
@@ -6216,6 +6237,13 @@ void VRenderGLView::SetScale121()
 	//SetSortBricks();
 
 	RefreshGL(21);
+}
+
+void VRenderGLView::SetPinRotCenter(bool pin)
+{
+	m_pin_rot_center = pin;
+	if (pin)
+		m_rot_center_dirty = true;
 }
 
 void VRenderGLView::SetPersp(bool persp)
@@ -11055,6 +11083,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 
 					m_interactive = m_adaptive;
 
+					m_rot_center_dirty = true;
+
 					//SetSortBricks();
 					RefreshGL(31);
 				}
@@ -11202,6 +11232,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		else
 		{
 			m_interactive = m_adaptive;
+			m_rot_center_dirty = true;
 			m_scale_factor += wheel/1000.0;
 			if (m_scale_factor < 0.01)
 				m_scale_factor = 0.01;
@@ -11530,6 +11561,7 @@ BEGIN_EVENT_TABLE(VRenderView, wxPanel)
 	EVT_TEXT(ID_DepthAttenFactorText, VRenderView::OnDepthAttenFactorEdit)
 	EVT_TOOL(ID_DepthAttenResetBtn, VRenderView::OnDepthAttenReset)
 	//bar right
+	EVT_TOOL(ID_PinBtn, VRenderView::OnPin)
 	EVT_TOOL(ID_CenterBtn, VRenderView::OnCenter)
 	EVT_TOOL(ID_Scale121Btn, VRenderView::OnScale121)
 	EVT_COMMAND_SCROLL(ID_ScaleFactorSldr, VRenderView::OnScaleFactorChange)
@@ -11968,6 +12000,17 @@ void VRenderView::CreateBar()
 	//bar right///////////////////////////////////////////////////
 	wxBoxSizer* sizer_v_4 = new wxBoxSizer(wxVERTICAL);
 	st1 = new wxStaticText(this, 0, " Zoom",wxDefaultPosition,wxSize(45,-1));
+	m_pin_btn = new wxToolBar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	bitmap = wxGetBitmapFromMemory(pin);
+#ifdef _DARWIN
+	m_pin_btn->SetToolBitmapSize(bitmap.GetSize());
+#endif
+	m_pin_btn->AddCheckTool(ID_PinBtn, "Pin",
+		bitmap, wxNullBitmap,
+		"Pin the rotation center to data",
+		"Pin the rotation center to data");
+	m_pin_btn->Realize();
 	m_center_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(center);
@@ -12016,6 +12059,7 @@ void VRenderView::CreateBar()
 	m_scale_mode_btn->Realize();
 	sizer_v_4->AddSpacer(50);
 	sizer_v_4->Add(st1, 0, wxALIGN_CENTER);
+	sizer_v_4->Add(m_pin_btn, 0, wxALIGN_CENTER);
 	sizer_v_4->Add(m_center_btn, 0, wxALIGN_CENTER);
 	sizer_v_4->Add(m_scale_121_btn, 0, wxALIGN_CENTER);
 	sizer_v_4->Add(m_scale_factor_sldr, 1, wxALIGN_CENTER);
@@ -13253,6 +13297,12 @@ void VRenderView::OnDepthAttenReset(wxCommandEvent &event)
 }
 
 //bar right
+void VRenderView::OnPin(wxCommandEvent &event)
+{
+	bool pin = m_pin_btn->GetToolState(ID_PinBtn);
+	m_glview->SetPinRotCenter(pin);
+}
+
 void VRenderView::OnCenter(wxCommandEvent &event)
 {
 	if (m_glview)
@@ -13958,6 +14008,7 @@ void VRenderView::SaveDefault(unsigned int mask)
 	//scale factor
 	if (mask & 0x400)
 	{
+		fconfig.Write("pin_rot_center", m_glview->m_pin_rot_center);
 		//str = m_scale_factor_text->GetValue();
 		//fconfig.Write("scale_factor_text", str);
 		//str.ToDouble(&m_dft_scale_factor);
@@ -13979,8 +14030,8 @@ void VRenderView::SaveDefault(unsigned int mask)
 		fconfig.Write("center", str);
 	}
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-    expath = wxPathOnly(expath);
-    wxString dft = expath + "/default_view_settings.dft";
+	expath = wxPathOnly(expath);
+	wxString dft = expath + "/default_view_settings.dft";
 	wxFileOutputStream os(dft);
 	fconfig.Save(os);
 
@@ -14138,6 +14189,13 @@ void VRenderView::LoadSettings()
 	//	m_glview->m_scale_factor = dVal/100.0;
 	//	m_dft_scale_factor = dVal;
 	//}
+	if (fconfig.Read("pin_rot_center", &bVal))
+	{
+		m_glview->m_pin_rot_center = bVal;
+		if (bVal)
+			m_glview->m_rot_center_dirty = true;
+		m_pin_btn->ToggleTool(ID_PinBtn, bVal);
+	}
 	if (fconfig.Read("scale_factor_mode", &bVal))
 	{
 		m_dft_scale_factor_mode = bVal;

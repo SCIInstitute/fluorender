@@ -228,6 +228,7 @@ public:
 	void SetCenter();
 	double Get121ScaleFactor();
 	void SetScale121();
+	void SetPinRotCenter(bool);
 
 	//object operations
 	void GetObjCenters(double &ctrx, double &ctry, double &ctrz)
@@ -583,6 +584,9 @@ public:
 	double m_scale_factor_saved;
 	//scale mode
 	bool m_scale_mode;
+	//pin rotation center
+	bool m_pin_rot_center;
+	bool m_rot_center_dirty;
 	//mode in determining depth of volume
 	int m_point_volume_mode;  //0: use view plane; 1: use max value; 2: use accumulated value
 	//ruler use volume transfer function
@@ -1063,6 +1067,7 @@ public:
 		ID_DepthAttenResetBtn,
 		ID_DepthAttenFactorText,
 		ID_FullScreenBtn,
+		ID_PinBtn,
 		ID_CenterBtn,
 		ID_Scale121Btn,
 		ID_ScaleFactorSldr,
@@ -1606,6 +1611,7 @@ public:
 	//right bar///////////////////////////////////////////////////
 	wxPanel* m_panel_4;
 	wxToolBar *m_full_screen_btn;
+	wxToolBar *m_pin_btn;
 	wxToolBar *m_center_btn;
 	wxToolBar *m_scale_121_btn;
 	wxSlider *m_scale_factor_sldr;
@@ -1674,6 +1680,7 @@ private:
 	void OnDepthAttenFactorEdit(wxCommandEvent& event);
 	void OnDepthAttenReset(wxCommandEvent &event);
 	//bar right
+	void OnPin(wxCommandEvent &event);
 	void OnCenter(wxCommandEvent &event);
 	void OnScale121(wxCommandEvent &event);
 	void OnScaleFactorChange(wxScrollEvent& event);
