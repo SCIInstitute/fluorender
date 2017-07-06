@@ -565,7 +565,7 @@ void VRenderGLView::HandleProjection(int nx, int ny)
 {
 	double aspect = (double)nx / (double)ny;
 	if (!m_free)
-		m_distance = m_radius/tan(d2r(m_aov/2.0))/m_scale_factor;
+		m_distance = m_radius / tan(d2r(m_aov / 2.0)) / m_scale_factor;
 	if (aspect>1.0)
 	{
 		m_ortho_left = -m_radius*aspect/m_scale_factor;

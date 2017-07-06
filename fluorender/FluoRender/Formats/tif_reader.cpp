@@ -960,6 +960,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 		m_xspc = 1 / x_res;
 		m_yspc = 1 / y_res;
 		m_zspc = z_res;
+		if (m_zspc < 1e-3) m_zspc = m_xspc;
 		m_valid_spc = true;
 	}
 	else {
