@@ -4424,21 +4424,36 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 	}
 
 	//pin rotation center
-	if (m_pin_rot_center && m_rot_center_dirty && m_cur_vol)
+	if (m_pin_rot_center && m_rot_center_dirty &&
+		m_cur_vol && !m_free)
 	{
 		Point p;
 		int nx = GetGLSize().x;
 		int ny = GetGLSize().y;
 		double dist = GetPointVolume(p,
-			nx / 2, ny / 2,
+			nx / 2.0, ny / 2.0,
 			m_cur_vol, 2, true, 0.5);
 		if (dist > 0.0)
 		{
-			m_obj_transx = -(p.x() - m_obj_ctrx);
-			m_obj_transy = p.y() - m_obj_ctry;
-			m_obj_transz = p.z() - m_obj_ctrz;
+			//Point c(m_transx + m_obj_transx,
+			//	m_transy + m_obj_transy,
+			//	m_transz + m_obj_transz);
+			//Point p0(m_obj_transx,
+			//	m_obj_transy,
+			//	m_obj_transz);
+			p = Point(m_obj_ctrx - p.x(),
+				p.y() - m_obj_ctry,
+				p.z() - m_obj_ctrz);
+			//if ((p-c).length() > (p0-c).length())
+			//	m_distance += (p0-p).length();
+			//else
+			//	m_distance -= (p0 - p).length();
+			m_obj_transx = p.x();
+			m_obj_transy = p.y();
+			m_obj_transz = p.z();
 		}
 		m_rot_center_dirty = false;
+		refresh = true;
 	}
 
 	wxPoint mouse_pos = wxGetMousePosition();
@@ -9628,7 +9643,7 @@ void VRenderGLView::RefreshGL(int debug_code, bool erase, bool start_loop)
 	Refresh(erase);
 }
 
-double VRenderGLView::GetPointVolume(Point& mp, int mx, int my,
+double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 	VolumeData* vd, int mode, bool use_transf, double thresh)
 {
 	if (!vd)
@@ -9666,8 +9681,8 @@ double VRenderGLView::GetPointVolume(Point& mp, int mx, int my,
 	p.set(glm::value_ptr(m_proj_mat));
 
 	double x, y;
-	x = double(mx) * 2.0 / double(nx) - 1.0;
-	y = 1.0 - double(my) * 2.0 / double(ny);
+	x = mx * 2.0 / double(nx) - 1.0;
+	y = 1.0 - my * 2.0 / double(ny);
 	p.invert();
 	mv.invert();
 	//transform mp1 and mp2 to object space
@@ -9796,7 +9811,7 @@ double VRenderGLView::GetPointVolume(Point& mp, int mx, int my,
 		return -1.0;
 }
 
-double VRenderGLView::GetPointVolumeBox(Point &mp, int mx, int my, VolumeData* vd, bool calc_mats)
+double VRenderGLView::GetPointVolumeBox(Point &mp, double mx, double my, VolumeData* vd, bool calc_mats)
 {
 	if (!vd)
 		return -1.0;
@@ -9844,8 +9859,8 @@ double VRenderGLView::GetPointVolumeBox(Point &mp, int mx, int my, VolumeData* v
 	p.set(glm::value_ptr(m_proj_mat));
 
 	double x, y;
-	x = double(mx) * 2.0 / double(nx) - 1.0;
-	y = 1.0 - double(my) * 2.0 / double(ny);
+	x = mx * 2.0 / double(nx) - 1.0;
+	y = 1.0 - my * 2.0 / double(ny);
 	p.invert();
 	mv.invert();
 	//transform mp1 and mp2 to object space
@@ -9903,7 +9918,7 @@ double VRenderGLView::GetPointVolumeBox(Point &mp, int mx, int my, VolumeData* v
 	return mint;
 }
 
-double VRenderGLView::GetPointVolumeBox2(Point &p1, Point &p2, int mx, int my, VolumeData* vd)
+double VRenderGLView::GetPointVolumeBox2(Point &p1, Point &p2, double mx, double my, VolumeData* vd)
 {
 	if (!vd)
 		return -1.0;
@@ -9944,8 +9959,8 @@ double VRenderGLView::GetPointVolumeBox2(Point &p1, Point &p2, int mx, int my, V
 	p.set(glm::value_ptr(m_proj_mat));
 
 	double x, y;
-	x = double(mx) * 2.0 / double(nx) - 1.0;
-	y = 1.0 - double(my) * 2.0 / double(ny);
+	x = mx * 2.0 / double(nx) - 1.0;
+	y = 1.0 - my * 2.0 / double(ny);
 	p.invert();
 	mv.invert();
 	//transform mp1 and mp2 to object space
@@ -10010,7 +10025,7 @@ double VRenderGLView::GetPointVolumeBox2(Point &p1, Point &p2, int mx, int my, V
 	return mint;
 }
 
-double VRenderGLView::GetPointPlane(Point &mp, int mx, int my, Point* planep, bool calc_mats)
+double VRenderGLView::GetPointPlane(Point &mp, double mx, double my, Point* planep, bool calc_mats)
 {
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
@@ -10051,8 +10066,8 @@ double VRenderGLView::GetPointPlane(Point &mp, int mx, int my, Point* planep, bo
 		center = mv.transform(center);
 	}
 	double x, y;
-	x = double(mx) * 2.0 / double(nx) - 1.0;
-	y = 1.0 - double(my) * 2.0 / double(ny);
+	x = mx * 2.0 / double(nx) - 1.0;
+	y = 1.0 - my * 2.0 / double(ny);
 	p.invert();
 	mv.invert();
 	//transform mp1 and mp2 to eye space
@@ -10071,7 +10086,7 @@ double VRenderGLView::GetPointPlane(Point &mp, int mx, int my, Point* planep, bo
 	return (mp-mp1).length();
 }
 
-Point* VRenderGLView::GetEditingRulerPoint(int mx, int my)
+Point* VRenderGLView::GetEditingRulerPoint(double mx, double my)
 {
 	Point* point = 0;
 
@@ -10082,8 +10097,8 @@ Point* VRenderGLView::GetEditingRulerPoint(int mx, int my)
 		return 0;
 
 	double x, y;
-	x = double(mx) * 2.0 / double(nx) - 1.0;
-	y = 1.0 - double(my) * 2.0 / double(ny);
+	x = mx * 2.0 / double(nx) - 1.0;
+	y = 1.0 - my * 2.0 / double(ny);
 	double aspect = (double)nx / (double)ny;
 
 	//projection
