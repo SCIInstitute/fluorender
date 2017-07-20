@@ -1096,16 +1096,6 @@ void VRenderGLView::DrawVolumes(int peel)
 	{
 		finished_bricks = TextureRenderer::get_finished_bricks();
 		TextureRenderer::reset_finished_bricks();
-		if (finished_bricks == 0)
-		{
-			if (m_nodraw_count == 10)
-			{
-				TextureRenderer::set_done_update_loop();
-				m_nodraw_count = 0;
-			}
-			else
-				m_nodraw_count++;
-		}
 	}
 
 	PrepFinalBuffer();
@@ -1116,18 +1106,18 @@ void VRenderGLView::DrawVolumes(int peel)
 	//draw
 	if (m_load_update ||
 		(!m_drawing_coord &&
-		m_int_mode!=2 &&
-		m_int_mode!=7 &&
-		m_updating) ||
-		(!m_drawing_coord &&
+			m_int_mode != 2 &&
+			m_int_mode != 7 &&
+			m_updating) ||
+			(!m_drawing_coord &&
 		(m_int_mode == 1 ||
-		m_int_mode == 3 ||
-		m_int_mode == 4 ||
-		m_int_mode == 5 ||
-		(m_int_mode == 6 &&
-		!m_editing_ruler_point) ||
-		m_int_mode == 8 ||
-		m_force_clear)))
+			m_int_mode == 3 ||
+			m_int_mode == 4 ||
+			m_int_mode == 5 ||
+			(m_int_mode == 6 &&
+				!m_editing_ruler_point) ||
+			m_int_mode == 8 ||
+			m_force_clear)))
 	{
 		m_updating = false;
 		m_force_clear = false;
@@ -1197,17 +1187,17 @@ void VRenderGLView::DrawVolumes(int peel)
 							quota_vd_list.size() < m_vd_pop_list.size())
 						{
 							if (count % 2 == 0)
-								vd_index = cur_index + count/2 + 1;
+								vd_index = cur_index + count / 2 + 1;
 							else
-								vd_index = cur_index - count/2 - 1;
+								vd_index = cur_index - count / 2 - 1;
 							count++;
-							if (vd_index<0 ||
-								(size_t)vd_index>=m_vd_pop_list.size())
+							if (vd_index < 0 ||
+								(size_t)vd_index >= m_vd_pop_list.size())
 								continue;
 							vd = m_vd_pop_list[vd_index];
 							int brick_num = vd->GetBrickNum();
 							quota_vd_list.push_back(vd);
-							if (count_bricks+brick_num > quota_bricks)
+							if (count_bricks + brick_num > quota_bricks)
 								quota_bricks_chan = quota_bricks - count_bricks;
 							else
 								quota_bricks_chan = brick_num;
@@ -1231,8 +1221,8 @@ void VRenderGLView::DrawVolumes(int peel)
 						vd = m_vd_pop_list[0];
 				Point p;
 				if (vd &&
-					(GetPointVolumeBox(p, nx/2, ny/2, vd, false)>0.0 ||
-					GetPointPlane(p, nx/2, ny/2, 0, false)>0.0))
+					(GetPointVolumeBox(p, nx / 2, ny / 2, vd, false) > 0.0 ||
+						GetPointPlane(p, nx / 2, ny / 2, 0, false) > 0.0))
 				{
 					int resx, resy, resz;
 					double sclx, scly, sclz;
@@ -1240,9 +1230,9 @@ void VRenderGLView::DrawVolumes(int peel)
 					vd->GetResolution(resx, resy, resz);
 					vd->GetScalings(sclx, scly, sclz);
 					vd->GetSpacings(spcx, spcy, spcz);
-					p = Point(p.x()/(resx*sclx*spcx),
-						p.y()/(resy*scly*spcy),
-						p.z()/(resz*sclz*spcz));
+					p = Point(p.x() / (resx*sclx*spcx),
+						p.y() / (resy*scly*spcy),
+						p.z() / (resz*sclz*spcz));
 					TextureRenderer::set_qutoa_center(p);
 				}
 				else
@@ -1255,7 +1245,7 @@ void VRenderGLView::DrawVolumes(int peel)
 		{
 			if (TextureRenderer::get_mem_swap() &&
 				TextureRenderer::get_interactive() &&
-				quota_vd_list.size()>0)
+				quota_vd_list.size() > 0)
 				DrawVolumesMulti(quota_vd_list, peel);
 			else
 				DrawVolumesMulti(m_vd_pop_list, peel);
@@ -1267,23 +1257,55 @@ void VRenderGLView::DrawVolumes(int peel)
 		{
 			int i, j;
 			vector<VolumeData*> list;
-			for (i=(int)m_layer_list.size()-1; i>=0; i--)
+			for (i = (int)m_layer_list.size() - 1; i >= 0; i--)
 			{
 				if (!m_layer_list[i])
 					continue;
 				switch (m_layer_list[i]->IsA())
 				{
 				case 2://volume data (this won't happen now)
+				{
+					VolumeData* vd = (VolumeData*)m_layer_list[i];
+					if (vd && vd->GetDisp())
 					{
-						VolumeData* vd = (VolumeData*)m_layer_list[i];
+						if (TextureRenderer::get_mem_swap() &&
+							TextureRenderer::get_interactive() &&
+							quota_vd_list.size() > 0)
+						{
+							if (find(quota_vd_list.begin(),
+								quota_vd_list.end(), vd) !=
+								quota_vd_list.end())
+								list.push_back(vd);
+						}
+						else
+							list.push_back(vd);
+					}
+				}
+				break;
+				case 5://group
+				{
+					if (!list.empty())
+					{
+						DrawVolumesComp(list, false, peel);
+						//draw masks
+						if (m_draw_mask)
+							DrawVolumesComp(list, true, peel);
+						list.clear();
+					}
+					DataGroup* group = (DataGroup*)m_layer_list[i];
+					if (!group->GetDisp())
+						continue;
+					for (j = group->GetVolumeNum() - 1; j >= 0; j--)
+					{
+						VolumeData* vd = group->GetVolumeData(j);
 						if (vd && vd->GetDisp())
 						{
 							if (TextureRenderer::get_mem_swap() &&
 								TextureRenderer::get_interactive() &&
-								quota_vd_list.size()>0)
+								quota_vd_list.size() > 0)
 							{
 								if (find(quota_vd_list.begin(),
-									quota_vd_list.end(), vd)!=
+									quota_vd_list.end(), vd) !=
 									quota_vd_list.end())
 									list.push_back(vd);
 							}
@@ -1291,51 +1313,19 @@ void VRenderGLView::DrawVolumes(int peel)
 								list.push_back(vd);
 						}
 					}
-					break;
-				case 5://group
+					if (!list.empty())
 					{
-						if (!list.empty())
-						{
+						if (group->GetBlendMode() == VOL_METHOD_MULTI)
+							DrawVolumesMulti(list, peel);
+						else
 							DrawVolumesComp(list, false, peel);
-							//draw masks
-							if (m_draw_mask)
-								DrawVolumesComp(list, true, peel);
-							list.clear();
-						}
-						DataGroup* group = (DataGroup*)m_layer_list[i];
-						if (!group->GetDisp())
-							continue;
-						for (j=group->GetVolumeNum()-1; j>=0; j--)
-						{
-							VolumeData* vd = group->GetVolumeData(j);
-							if (vd && vd->GetDisp())
-							{
-								if (TextureRenderer::get_mem_swap() &&
-									TextureRenderer::get_interactive() &&
-									quota_vd_list.size()>0)
-								{
-									if (find(quota_vd_list.begin(),
-										quota_vd_list.end(), vd)!=
-										quota_vd_list.end())
-										list.push_back(vd);
-								}
-								else
-									list.push_back(vd);
-							}
-						}
-						if (!list.empty())
-						{
-							if (group->GetBlendMode() == VOL_METHOD_MULTI)
-								DrawVolumesMulti(list, peel);
-							else
-								DrawVolumesComp(list, false, peel);
-							//draw masks
-							if (m_draw_mask)
-								DrawVolumesComp(list, true, peel);
-							list.clear();
-						}
+						//draw masks
+						if (m_draw_mask)
+							DrawVolumesComp(list, true, peel);
+						list.clear();
 					}
-					break;
+				}
+				break;
 				}
 			}
 		}
@@ -1364,6 +1354,20 @@ void VRenderGLView::DrawVolumes(int peel)
 		m_interactive = false;
 		m_clear_buffer = true;
 		RefreshGL(2);
+	}
+
+	if (TextureRenderer::get_mem_swap())
+	{
+		if (finished_bricks == 0)
+		{
+			if (m_nodraw_count == 100)
+			{
+				TextureRenderer::set_done_update_loop();
+				m_nodraw_count = 0;
+			}
+			else
+				m_nodraw_count++;
+		}
 	}
 }
 
