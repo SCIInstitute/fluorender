@@ -315,6 +315,7 @@ namespace FLIVR
 		static bool save_final_buffer_;
 		static bool invalidate_tex_;
 		//timer for rendering
+		static bool debug_uptime_;
 		static unsigned long st_time_;
 		static unsigned long up_time_;
 		static unsigned long cor_up_time_;//mouse movement corrected up time

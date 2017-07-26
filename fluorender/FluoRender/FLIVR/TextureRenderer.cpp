@@ -57,6 +57,11 @@ namespace FLIVR
 	int TextureRenderer::cur_chan_brick_num_ = 0;
 	bool TextureRenderer::clear_chan_buffer_ = true;
 	bool TextureRenderer::save_final_buffer_ = true;
+#ifdef _DEBUG
+	bool TextureRenderer::debug_uptime_ = true;//change to max time
+#else
+	bool TextureRenderer::debug_uptime_ = false;//change to max time
+#endif
 	unsigned long TextureRenderer::st_time_ = 0;
 	unsigned long TextureRenderer::up_time_ = 100;
 	unsigned long TextureRenderer::cor_up_time_ = 100;
@@ -267,10 +272,15 @@ namespace FLIVR
 	//timer
 	unsigned long TextureRenderer::get_up_time()
 	{
-		if (interactive_)
-			return cor_up_time_;
+		if (debug_uptime_)
+			return -1;
 		else
-			return up_time_;
+		{
+			if (interactive_)
+				return cor_up_time_;
+			else
+				return up_time_;
+		}
 	}
 
 	//set corrected up time according to mouse speed
