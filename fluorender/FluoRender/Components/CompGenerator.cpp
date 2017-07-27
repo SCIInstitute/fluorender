@@ -38,35 +38,73 @@ ComponentGenerator::ComponentGenerator(VolumeData* vd, int device_id)
 	m_init(false)
 {
 	cl_int err;
-	cl_platform_id platform;
+	cl_uint platform_num;
+	cl_platform_id* platforms;
 
-	err = clGetPlatformIDs(1, &platform, NULL);
+	//get platform number
+	err = clGetPlatformIDs(0, NULL, &platform_num);
 	if (err != CL_SUCCESS)
 		return;
-
-	cl_device_id devices[4];
-	cl_uint dev_num = 0;
-	err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 4, devices, &dev_num);
-	if (err != CL_SUCCESS)
+	if (platform_num == 0)
 		return;
-	if (device_id >= 0 && device_id < dev_num)
-		m_device = devices[device_id];
-	else
-		m_device = devices[0];
-	char buffer[10240];
-	clGetDeviceInfo(m_device, CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
+	platforms = new cl_platform_id[platform_num];
+	err = clGetPlatformIDs(platform_num, platforms, NULL);
 
 	cl_context_properties properties[] =
 	{
-		CL_CONTEXT_PLATFORM,
-		(cl_context_properties)platform,
+#ifdef _WIN32
+		CL_GL_CONTEXT_KHR, (cl_context_properties)wglGetCurrentContext(),
+		CL_WGL_HDC_KHR, (cl_context_properties)wglGetCurrentDC(),
+#endif
+#ifdef _DARWIN
+		CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE,
+		(cl_context_properties)CGLGetShareGroup(CGLGetCurrentContext()),
+#endif
+		CL_CONTEXT_PLATFORM, (cl_context_properties)0,
 		0
 	};
-	m_context = clCreateContext(properties, 1, &m_device, NULL, NULL, &err);
-	if (err != CL_SUCCESS)
-		return;
 
-	m_init = true;
+	typedef CL_API_ENTRY cl_int(CL_API_CALL *P1)(
+		const cl_context_properties *properties,
+		cl_gl_context_info param_name,
+		size_t param_value_size,
+		void *param_value,
+		size_t *param_value_size_ret);
+	CL_API_ENTRY cl_int(CL_API_CALL *myclGetGLContextInfoKHR)(
+		const cl_context_properties *properties,
+		cl_gl_context_info param_name,
+		size_t param_value_size,
+		void *param_value,
+		size_t *param_value_size_ret) = NULL;
+	myclGetGLContextInfoKHR = (P1)clGetExtensionFunctionAddress("clGetGLContextInfoKHR");
+
+	for (cl_uint i=0; i<platform_num; ++i)
+	{
+		properties[5] = (cl_context_properties)(platforms[i]);
+		cl_device_id devices[4];
+		size_t size;
+		err = myclGetGLContextInfoKHR(properties, CL_DEVICES_FOR_GL_CONTEXT_KHR,
+			4 * sizeof(cl_device_id), devices, &size);
+		if (err != CL_SUCCESS || size == 0)
+			continue;
+		int count = size / sizeof(cl_device_id);
+		if (device_id >= 0 && device_id < count)
+			m_device = devices[device_id];
+		else
+			m_device = devices[0];
+
+		char buffer[10240];
+		clGetDeviceInfo(m_device, CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
+
+		m_context = clCreateContext(properties, 1, &m_device, NULL, NULL, &err);
+		if (err != CL_SUCCESS)
+			return;
+
+		m_init = true;
+		delete[] platforms;
+		return;
+	}
+	delete[] platforms;
 }
 
 ComponentGenerator::~ComponentGenerator()

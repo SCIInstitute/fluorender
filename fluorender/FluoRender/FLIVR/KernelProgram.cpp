@@ -29,27 +29,18 @@ namespace FLIVR
 			return;
 
 		cl_int err;
-		cl_platform_id platform;
+		cl_uint platform_num;
+		cl_platform_id* platforms;
 
-		err = clGetPlatformIDs(1, &platform, NULL);
+		//get platform number
+		err = clGetPlatformIDs(0, NULL, &platform_num);
 		if (err != CL_SUCCESS)
 			return;
-
-		cl_device_id devices[4];
-		cl_uint dev_num = 0;
-		err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 4, devices, &dev_num);
-		if (err != CL_SUCCESS)
+		if (platform_num == 0)
 			return;
-		if (device_id_ >=0 && device_id_ < dev_num)
-			device_ = devices[device_id_];
-		else
-			device_ = devices[0];
-		char buffer[10240];
-		clGetDeviceInfo(device_, CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
-		device_name_ = std::string(buffer);
-#ifdef _DARWIN
-        gl_context_ =CGLGetCurrentContext();
-#endif
+		platforms = new cl_platform_id[platform_num];
+		err = clGetPlatformIDs(platform_num, platforms, NULL);
+
 		cl_context_properties properties[] =
 		{
 #ifdef _WIN32
@@ -58,16 +49,55 @@ namespace FLIVR
 #endif
 #ifdef _DARWIN
 			CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE,
-            (cl_context_properties) CGLGetShareGroup( gl_context_),
+			(cl_context_properties)CGLGetShareGroup(CGLGetCurrentContext()),
 #endif
-			CL_CONTEXT_PLATFORM, (cl_context_properties)platform,
+			CL_CONTEXT_PLATFORM, (cl_context_properties)0,
 			0
 		};
-	    context_ = clCreateContext(properties, 1, &device_, NULL, NULL, &err);
-		if (err != CL_SUCCESS)
-			return;
 
-		init_ = true;
+		typedef CL_API_ENTRY cl_int(CL_API_CALL *P1)(
+			const cl_context_properties *properties,
+			cl_gl_context_info param_name,
+			size_t param_value_size,
+			void *param_value,
+			size_t *param_value_size_ret);
+		CL_API_ENTRY cl_int(CL_API_CALL *myclGetGLContextInfoKHR)(
+			const cl_context_properties *properties,
+			cl_gl_context_info param_name,
+			size_t param_value_size,
+			void *param_value,
+			size_t *param_value_size_ret) = NULL;
+		myclGetGLContextInfoKHR = (P1)clGetExtensionFunctionAddress("clGetGLContextInfoKHR");
+
+		for (cl_uint i = 0; i<platform_num; ++i)
+		{
+			properties[5] = (cl_context_properties)(platforms[i]);
+			cl_device_id devices[4];
+			size_t size;
+			err = myclGetGLContextInfoKHR(properties, CL_DEVICES_FOR_GL_CONTEXT_KHR,
+				4 * sizeof(cl_device_id), devices, &size);
+			if (err != CL_SUCCESS || size == 0)
+				continue;
+			int count = size / sizeof(cl_device_id);
+			if (device_id_ >= 0 && device_id_ < count)
+				device_ = devices[device_id_];
+			else
+				device_ = devices[0];
+
+			char buffer[10240];
+			clGetDeviceInfo(device_, CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
+			device_name_ = std::string(buffer);
+
+			context_ = clCreateContext(properties, 1, &device_, NULL, NULL, &err);
+			if (err != CL_SUCCESS)
+				return;
+
+			init_ = true;
+			delete[] platforms;
+			return;
+		}
+		delete[] platforms;
+
 	}
 
 	bool KernelProgram::init()

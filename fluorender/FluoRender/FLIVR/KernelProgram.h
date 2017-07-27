@@ -5,6 +5,7 @@
 #if defined(_WIN32) || defined(__linux__)
 #include <CL/cl.h>
 #include <CL/cl_gl.h>
+#include <CL/cl_gl_ext.h>
 #endif
 #ifdef _DARWIN
 #include <OpenCL/cl.h>

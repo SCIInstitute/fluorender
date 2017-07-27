@@ -30,9 +30,14 @@ DEALINGS IN THE SOFTWARE.
 
 #if defined(_WIN32) || defined(__linux__)
 #include <CL/cl.h>
+#include <CL/cl_gl.h>
+#include <CL/cl_gl_ext.h>
 #endif
 #ifdef _DARWIN
 #include <OpenCL/cl.h>
+#include <OpenCL/cl_gl.h>
+#include <OpenCL/cl_gl_ext.h>
+#include <OpenGL/CGLCurrent.h>
 #endif
 #include <vector>
 #include <boost/unordered_map.hpp>
