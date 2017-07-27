@@ -2877,15 +2877,17 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 	if (use_tex_wt2)
 	{
 		if (glIsTexture(m_tex_wt2)!=GL_TRUE)
+		{
 			glGenTextures(1, &m_tex_wt2);
-		//color buffer for current segmented volume
-		glBindTexture(GL_TEXTURE_2D, m_tex_wt2);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
-			GL_RGBA, GL_FLOAT, NULL);
+			//color buffer for current segmented volume
+			glBindTexture(GL_TEXTURE_2D, m_tex_wt2);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
+				GL_RGBA, GL_FLOAT, NULL);
+		}
 	}
 
 	if (m_resize)
@@ -3931,19 +3933,21 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	if (use_tex_wt2)
 	{
 		if (glIsTexture(m_tex_wt2)!=GL_TRUE)
+		{
 			glGenTextures(1, &m_tex_wt2);
-		//color buffer for current segmented volume
-		glBindTexture(GL_TEXTURE_2D, m_tex_wt2);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
-			GL_RGBA, GL_FLOAT, NULL);
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-		glFramebufferTexture2D(GL_FRAMEBUFFER,
-			GL_COLOR_ATTACHMENT0,
-			GL_TEXTURE_2D, m_tex_wt2, 0);
+			//color buffer for current segmented volume
+			glBindTexture(GL_TEXTURE_2D, m_tex_wt2);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
+				GL_RGBA, GL_FLOAT, NULL);
+			glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+			glFramebufferTexture2D(GL_FRAMEBUFFER,
+				GL_COLOR_ATTACHMENT0,
+				GL_TEXTURE_2D, m_tex_wt2, 0);
+		}
 	}
 
 	if (m_resize)
@@ -9601,7 +9605,9 @@ void VRenderGLView::StartLoopUpdate()
 						if (vd->GetShadow())
 							total_num++;
 						//mask
-						if (vd->GetTexture() && vd->GetTexture()->nmask()!=-1)
+						if (vd->GetTexture() &&
+							vd->GetTexture()->nmask()!=-1 &&
+							vd->GetTexture()->nlabel()==-1)
 							total_num++;
 					}
 				}
