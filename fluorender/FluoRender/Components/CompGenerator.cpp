@@ -25,9 +25,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#include "DataManager.h"
 #include "CompGenerator.h"
 #include "cl_code.h"
-#include "DataManager.h"
 #include <algorithm>
 
 using namespace FL;
