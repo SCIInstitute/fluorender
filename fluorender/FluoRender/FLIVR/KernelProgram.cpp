@@ -124,6 +124,7 @@ namespace FLIVR
 				continue;
 #endif
 #ifdef _DARWIN
+			properties[3] = (cl_context_properties)(platforms[i]);
 			if (device_id_ >= 0 && device_id_ < device_num)
 				device_ = devices[device_id_];
 			else

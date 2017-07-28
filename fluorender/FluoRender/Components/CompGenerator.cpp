@@ -133,6 +133,7 @@ ComponentGenerator::ComponentGenerator(VolumeData* vd, int device_id)
 			continue;
 #endif
 #ifdef _DARWIN
+		properties[3] = (cl_context_properties)(platforms[i]);
 		if (device_id >= 0 && device_id < device_num)
 			m_device = devices[device_id];
 		else
