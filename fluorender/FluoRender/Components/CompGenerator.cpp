@@ -81,17 +81,50 @@ ComponentGenerator::ComponentGenerator(VolumeData* vd, int device_id)
 	for (cl_uint i=0; i<platform_num; ++i)
 	{
 		properties[5] = (cl_context_properties)(platforms[i]);
-		cl_device_id devices[4];
-		size_t size;
-		err = myclGetGLContextInfoKHR(properties, CL_DEVICES_FOR_GL_CONTEXT_KHR,
-			4 * sizeof(cl_device_id), devices, &size);
-		if (err != CL_SUCCESS || size == 0)
+		cl_device_id device;
+		cl_device_id *devices;
+		cl_uint device_num;
+		//get gpu devices
+		err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, 0, NULL, &device_num);
+		if (err != CL_SUCCESS || device_num == 0)
 			continue;
-		int count = size / sizeof(cl_device_id);
-		if (device_id >= 0 && device_id < count)
-			m_device = devices[device_id];
+		devices = new cl_device_id[device_num];
+		err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, device_num, devices, NULL);
+		if (err != CL_SUCCESS)
+		{
+			delete[] devices;
+			continue;
+		}
+		//get GL device
+		bool found = false;
+		if (myclGetGLContextInfoKHR)
+			err = myclGetGLContextInfoKHR(properties, CL_CURRENT_DEVICE_FOR_GL_CONTEXT_KHR,
+				sizeof(cl_device_id), &device, NULL);
 		else
-			m_device = devices[0];
+			err = 1;
+		if (err != CL_SUCCESS)
+		{
+			if (device_id >= 0 && device_id < device_num)
+				m_device = devices[device_id];
+			else
+				m_device = devices[0];
+			found = true;
+		}
+		else
+		{
+			for (cl_uint j = 0; j<device_num; ++j)
+			{
+				if (device == devices[j])
+				{
+					m_device = device;
+					found = true;
+					break;
+				}
+			}
+		}
+		delete[] devices;
+		if (!found)
+			continue;
 
 		char buffer[10240];
 		clGetDeviceInfo(m_device, CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);

@@ -72,17 +72,50 @@ namespace FLIVR
 		for (cl_uint i = 0; i<platform_num; ++i)
 		{
 			properties[5] = (cl_context_properties)(platforms[i]);
-			cl_device_id devices[4];
-			size_t size;
-			err = myclGetGLContextInfoKHR(properties, CL_DEVICES_FOR_GL_CONTEXT_KHR,
-				4 * sizeof(cl_device_id), devices, &size);
-			if (err != CL_SUCCESS || size == 0)
+			cl_device_id device;
+			cl_device_id *devices;
+			cl_uint device_num;
+			//get gpu devices
+			err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, 0, NULL, &device_num);
+			if (err != CL_SUCCESS || device_num == 0)
 				continue;
-			int count = size / sizeof(cl_device_id);
-			if (device_id_ >= 0 && device_id_ < count)
-				device_ = devices[device_id_];
+			devices = new cl_device_id[device_num];
+			err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, device_num, devices, NULL);
+			if (err != CL_SUCCESS)
+			{
+				delete[] devices;
+				continue;
+			}
+			//get GL device
+			bool found = false;
+			if (myclGetGLContextInfoKHR)
+				err = myclGetGLContextInfoKHR(properties, CL_CURRENT_DEVICE_FOR_GL_CONTEXT_KHR,
+					sizeof(cl_device_id), &device, NULL);
 			else
-				device_ = devices[0];
+				err = 1;
+			if (err != CL_SUCCESS)
+			{
+				if (device_id_ >= 0 && device_id_ < device_num)
+					device_ = devices[device_id_];
+				else
+					device_ = devices[0];
+				found = true;
+			}
+			else
+			{
+				for (cl_uint j=0; j<device_num; ++j)
+				{
+					if (device == devices[j])
+					{
+						device_ = device;
+						found = true;
+						break;
+					}
+				}
+			}
+			delete[] devices;
+			if (!found)
+				continue;
 
 			char buffer[10240];
 			clGetDeviceInfo(device_, CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
@@ -97,7 +130,6 @@ namespace FLIVR
 			return;
 		}
 		delete[] platforms;
-
 	}
 
 	bool KernelProgram::init()
