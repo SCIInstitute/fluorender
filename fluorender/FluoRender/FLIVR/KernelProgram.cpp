@@ -64,10 +64,18 @@ namespace FLIVR
 			size_t *param_value_size_ret) = NULL;
 		myclGetGLContextInfoKHR = (P1)clGetExtensionFunctionAddress("clGetGLContextInfoKHR");
 #endif
+#ifdef _DARWIN
+		cl_context_properties properties[] =
+		{
+			CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE,
+			(cl_context_properties)CGLGetShareGroup(CGLGetCurrentContext()),
+			CL_CONTEXT_PLATFORM, (cl_context_properties)0,
+			0
+		};
+#endif
 
 		for (cl_uint i = 0; i<platform_num; ++i)
 		{
-			properties[5] = (cl_context_properties)(platforms[i]);
 			cl_device_id device;
 			cl_device_id *devices;
 			cl_uint device_num;
@@ -85,6 +93,7 @@ namespace FLIVR
 #ifdef _WIN32
 			//get GL device
 			bool found = false;
+			properties[5] = (cl_context_properties)(platforms[i]);
 			if (myclGetGLContextInfoKHR)
 				err = myclGetGLContextInfoKHR(properties, CL_CURRENT_DEVICE_FOR_GL_CONTEXT_KHR,
 					sizeof(cl_device_id), &device, NULL);
