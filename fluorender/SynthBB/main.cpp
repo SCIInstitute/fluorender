@@ -1,6 +1,6 @@
-#include "Components/CompGenerator.h"
 #include "DataManager.h"
 #include "DataManager.cpp"
+#include "Components/CompGenerator.h"
 #include "Formats/tif_reader.h"
 #include "Formats/msk_writer.h"
 #include "compatibility.h"
