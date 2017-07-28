@@ -41,16 +41,11 @@ namespace FLIVR
 		platforms = new cl_platform_id[platform_num];
 		err = clGetPlatformIDs(platform_num, platforms, NULL);
 
+#ifdef _WIN32
 		cl_context_properties properties[] =
 		{
-#ifdef _WIN32
 			CL_GL_CONTEXT_KHR, (cl_context_properties)wglGetCurrentContext(),
 			CL_WGL_HDC_KHR, (cl_context_properties)wglGetCurrentDC(),
-#endif
-#ifdef _DARWIN
-			CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE,
-			(cl_context_properties)CGLGetShareGroup(CGLGetCurrentContext()),
-#endif
 			CL_CONTEXT_PLATFORM, (cl_context_properties)0,
 			0
 		};
@@ -68,6 +63,7 @@ namespace FLIVR
 			void *param_value,
 			size_t *param_value_size_ret) = NULL;
 		myclGetGLContextInfoKHR = (P1)clGetExtensionFunctionAddress("clGetGLContextInfoKHR");
+#endif
 
 		for (cl_uint i = 0; i<platform_num; ++i)
 		{
@@ -86,6 +82,7 @@ namespace FLIVR
 				delete[] devices;
 				continue;
 			}
+#ifdef _WIN32
 			//get GL device
 			bool found = false;
 			if (myclGetGLContextInfoKHR)
@@ -116,6 +113,14 @@ namespace FLIVR
 			delete[] devices;
 			if (!found)
 				continue;
+#endif
+#ifdef _DARWIN
+			if (device_id_ >= 0 && device_id_ < device_num)
+				device_ = devices[device_id_];
+			else
+				device_ = devices[0];
+			delete[] devices;
+#endif
 
 			char buffer[10240];
 			clGetDeviceInfo(device_, CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
