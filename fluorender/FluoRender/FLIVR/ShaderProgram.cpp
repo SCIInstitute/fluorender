@@ -101,7 +101,15 @@ namespace FLIVR
 			glGetIntegerv(GL_MAJOR_VERSION, &v_major_);
 			glGetIntegerv(GL_MINOR_VERSION, &v_minor_);
 			ostringstream oss;
-			oss << "#version " << v_major_ << v_minor_ << 0 << "\n";
+			if (v_major_ >= 3)
+			{
+				if (v_major_ > 3 || v_minor_ >= 3)
+					oss << "#version " << v_major_ << v_minor_ << 0 << "\n";
+				else
+					oss << "#version " << 1 << v_minor_ + 3 << 0 << "\n";
+			}
+			else if (v_major_ == 2)
+				oss << "#version " << 1 << v_minor_ + 1 << 0 << "\n";
 			glsl_version_ = oss.str();
 
 			supported_ = glTexImage3D;
