@@ -145,10 +145,9 @@ ComponentGenerator::ComponentGenerator(VolumeData* vd, int device_id)
 		clGetDeviceInfo(m_device, CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
 
 		m_context = clCreateContext(properties, 1, &m_device, NULL, NULL, &err);
-		if (err != CL_SUCCESS)
-			return;
+		if (err == CL_SUCCESS)
+			m_init = true;
 
-		m_init = true;
 		delete[] platforms;
 		return;
 	}

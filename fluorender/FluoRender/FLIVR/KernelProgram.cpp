@@ -137,10 +137,9 @@ namespace FLIVR
 			device_name_ = std::string(buffer);
 
 			context_ = clCreateContext(properties, 1, &device_, NULL, NULL, &err);
-			if (err != CL_SUCCESS)
-				return;
+			if (err == CL_SUCCESS)
+				init_ = true;
 
-			init_ = true;
 			delete[] platforms;
 			return;
 		}
