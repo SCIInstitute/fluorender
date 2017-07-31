@@ -205,6 +205,9 @@ public:
 	double GetContactFactor() { return m_contact_factor; }
 	void SetSimilarity(double siml) { m_similarity = siml; }
 	double GetSimilarity() { return m_similarity; }
+	//texture size
+	void SetMaxTextureSize(int size) { m_max_texture_size = size; }
+	int GetMaxTextureSize() { return m_max_texture_size; }
 
 private:
 	wxWindow* m_frame;
@@ -286,6 +289,8 @@ private:
 	double m_component_size;
 	double m_contact_factor;
 	double m_similarity;
+	//max texture size
+	int m_max_texture_size;
 
 private:
 	//save project

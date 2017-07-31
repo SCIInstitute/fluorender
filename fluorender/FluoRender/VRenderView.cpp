@@ -11668,6 +11668,7 @@ wxPanel(parent, id, pos, size, style),
 		gl_major_ver = vr_frame->GetSettingDlg()->GetGLMajorVer();
 		gl_minor_ver = vr_frame->GetSettingDlg()->GetGLMinorVer();
 		gl_profile_mask = vr_frame->GetSettingDlg()->GetGLProfileMask();
+		ShaderProgram::max_texture_size_ = vr_frame->GetSettingDlg()->GetMaxTextureSize();
 	}
 
 	wxGLAttributes attriblist;

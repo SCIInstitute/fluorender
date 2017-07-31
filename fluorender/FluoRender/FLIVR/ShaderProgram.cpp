@@ -117,7 +117,7 @@ namespace FLIVR
 			//check max texture size
 			GLint texSize;
 			glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &texSize);
-			max_texture_size_ = texSize;
+			max_texture_size_ = min(max_texture_size_, (int)texSize);
 
 #ifdef _WIN32
 			const GLubyte* strRenderer=0;

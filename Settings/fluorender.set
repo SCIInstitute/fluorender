@@ -87,5 +87,6 @@ samples=4
 gl_major_ver=4
 gl_minor_ver=4
 gl_profile_mask=1
+max_texture_size=2048
 [cl\ device]
 device_id=0
