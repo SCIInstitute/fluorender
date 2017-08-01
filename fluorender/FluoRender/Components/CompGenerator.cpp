@@ -85,7 +85,7 @@ ComponentGenerator::ComponentGenerator(VolumeData* vd, int device_id)
 
 	for (cl_uint i=0; i<platform_num; ++i)
 	{
-		cl_device_id device;
+		cl_device_id device = 0;
 		cl_device_id *devices;
 		cl_uint device_num;
 		//get gpu devices
@@ -108,7 +108,7 @@ ComponentGenerator::ComponentGenerator(VolumeData* vd, int device_id)
 				sizeof(cl_device_id), &device, NULL);
 		else
 			err = 1;
-		if (err != CL_SUCCESS)
+		if (err != CL_SUCCESS || !device)
 		{
 			if (device_id >= 0 && device_id < device_num)
 				m_device = devices[device_id];

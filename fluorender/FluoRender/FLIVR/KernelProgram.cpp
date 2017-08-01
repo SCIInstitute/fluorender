@@ -76,7 +76,7 @@ namespace FLIVR
 
 		for (cl_uint i = 0; i<platform_num; ++i)
 		{
-			cl_device_id device;
+			cl_device_id device = 0;
 			cl_device_id *devices;
 			cl_uint device_num;
 			//get gpu devices
@@ -99,7 +99,7 @@ namespace FLIVR
 					sizeof(cl_device_id), &device, NULL);
 			else
 				err = 1;
-			if (err != CL_SUCCESS)
+			if (err != CL_SUCCESS || !device)
 			{
 				if (device_id_ >= 0 && device_id_ < device_num)
 					device_ = devices[device_id_];
