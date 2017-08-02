@@ -101,11 +101,8 @@ namespace FLIVR
 				err = 1;
 			if (err != CL_SUCCESS || !device)
 			{
-				if (device_id_ >= 0 && device_id_ < device_num)
-					device_ = devices[device_id_];
-				else
-					device_ = devices[0];
-				found = true;
+				delete[] devices;
+				continue;
 			}
 			else
 			{

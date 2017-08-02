@@ -110,11 +110,8 @@ ComponentGenerator::ComponentGenerator(VolumeData* vd, int device_id)
 			err = 1;
 		if (err != CL_SUCCESS || !device)
 		{
-			if (device_id >= 0 && device_id < device_num)
-				m_device = devices[device_id];
-			else
-				m_device = devices[0];
-			found = true;
+			delete[] devices;
+			continue;
 		}
 		else
 		{
