@@ -92,33 +92,41 @@ namespace FLIVR
 			}
 #ifdef _WIN32
 			//get GL device
-			bool found = false;
 			properties[5] = (cl_context_properties)(platforms[i]);
 			if (myclGetGLContextInfoKHR)
+			{
+				bool found = false;
 				err = myclGetGLContextInfoKHR(properties, CL_CURRENT_DEVICE_FOR_GL_CONTEXT_KHR,
 					sizeof(cl_device_id), &device, NULL);
-			else
-				err = 1;
-			if (err != CL_SUCCESS || !device)
-			{
-				delete[] devices;
-				continue;
-			}
-			else
-			{
-				for (cl_uint j=0; j<device_num; ++j)
+				if (err != CL_SUCCESS || !device)
 				{
-					if (device == devices[j])
+					delete[] devices;
+					continue;
+				}
+				else
+				{
+					for (cl_uint j=0; j<device_num; ++j)
 					{
-						device_ = device;
-						found = true;
-						break;
+						if (device == devices[j])
+						{
+							device_ = device;
+							found = true;
+							break;
+						}
 					}
 				}
+				delete[] devices;
+				if (!found)
+					continue;
 			}
-			delete[] devices;
-			if (!found)
-				continue;
+			else
+			{
+				if (device_id_ >= 0 && device_id_ < device_num)
+					device_ = devices[device_id_];
+				else
+					device_ = devices[0];
+				delete[] devices;
+			}
 #endif
 #ifdef _DARWIN
 			properties[3] = (cl_context_properties)(platforms[i]);
