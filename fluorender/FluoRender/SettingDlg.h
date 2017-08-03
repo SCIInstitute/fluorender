@@ -86,6 +86,9 @@ class SettingDlg : public wxPanel
 		ID_BlockSizeText,
 		ID_ResponseTimeSldr,
 		ID_ResponseTimeText,
+		//texture size
+		ID_MaxTextureSizeChk,
+		ID_MaxTextureSizeText,
 		//font
 		ID_FontCmb,
 		ID_FontSizeCmb,
@@ -106,6 +109,7 @@ public:
 	void GetSettings();
 	void UpdateUI();
 	void SaveSettings();
+	void UpdateTextureSize();
 
 	//get settings from ui
 	int GetGMCMode() {return m_gmc_mode;}
@@ -206,6 +210,8 @@ public:
 	void SetSimilarity(double siml) { m_similarity = siml; }
 	double GetSimilarity() { return m_similarity; }
 	//texture size
+	void SetUseMaxtextureSize(bool val) { m_use_max_texture_size = val; }
+	bool GetUseMaxTextureSize() { return m_use_max_texture_size; }
 	void SetMaxTextureSize(int size) { m_max_texture_size = size; }
 	int GetMaxTextureSize() { return m_max_texture_size; }
 
@@ -290,6 +296,7 @@ private:
 	double m_contact_factor;
 	double m_similarity;
 	//max texture size
+	bool m_use_max_texture_size;
 	int m_max_texture_size;
 
 private:
@@ -320,6 +327,9 @@ private:
 	wxComboBox *m_wav_color2_cmb;
 	wxComboBox *m_wav_color3_cmb;
 	wxComboBox *m_wav_color4_cmb;
+	//texture size
+	wxCheckBox *m_max_texture_size_chk;
+	wxTextCtrl *m_max_texture_size_text;
 	//memory settings
 	wxCheckBox *m_streaming_chk;
 	wxRadioBox *m_update_order_rbox;
@@ -387,6 +397,9 @@ private:
 	void OnWavColor2Change(wxCommandEvent &event);
 	void OnWavColor3Change(wxCommandEvent &event);
 	void OnWavColor4Change(wxCommandEvent &event);
+	//texture size
+	void OnMaxTextureSizeChk(wxCommandEvent &event);
+	void OnMaxTextureSizeEdit(wxCommandEvent &event);
 	//memory settings
 	void OnStreamingChk(wxCommandEvent &event);
 	void OnUpdateOrderChange(wxCommandEvent & event);

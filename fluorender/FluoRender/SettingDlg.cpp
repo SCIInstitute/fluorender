@@ -61,6 +61,9 @@ EVT_COMBOBOX(ID_WavColor1Cmb, SettingDlg::OnWavColor1Change)
 EVT_COMBOBOX(ID_WavColor2Cmb, SettingDlg::OnWavColor2Change)
 EVT_COMBOBOX(ID_WavColor3Cmb, SettingDlg::OnWavColor3Change)
 EVT_COMBOBOX(ID_WavColor4Cmb, SettingDlg::OnWavColor4Change)
+//texture size
+EVT_CHECKBOX(ID_MaxTextureSizeChk, SettingDlg::OnMaxTextureSizeChk)
+EVT_TEXT(ID_MaxTextureSizeText, SettingDlg::OnMaxTextureSizeEdit)
 //memory settings
 EVT_CHECKBOX(ID_StreamingChk, SettingDlg::OnStreamingChk)
 EVT_RADIOBOX(ID_UpdateOrderRbox, SettingDlg::OnUpdateOrderChange)
@@ -409,6 +412,9 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 
 wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 {
+	//validator: integer
+	wxIntegerValidator<unsigned int> vald_int;
+	//float 2
 	wxFloatingPointValidator<double> vald_fp1(2);
 	wxStaticText* st;
 	wxPanel *page = new wxPanel(parent);
@@ -517,11 +523,36 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	group2->Add(sizer2_2, 0);
 	group2->Add(10, 5);
 
+	//max texture size
+	wxBoxSizer *group3 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "Max Texture Size"), wxVERTICAL);
+	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
+	m_max_texture_size_chk = new wxCheckBox(page, ID_MaxTextureSizeChk,
+		"Set max texture size");
+	m_max_texture_size_text = new wxTextCtrl(page, ID_MaxTextureSizeText, "2048",
+		wxDefaultPosition, wxSize(40, -1), 0, vald_int);
+	sizer3_1->Add(m_max_texture_size_chk, 0, wxALIGN_CENTER);
+	sizer3_1->Add(10, 10);
+	sizer3_1->Add(m_max_texture_size_text, 0, wxALIGN_CENTER);
+	st = new wxStaticText(page, 0,
+		"Note:\n"\
+		"Set a texture size smaller than 1024 to correctly perform component analysis.\n"\
+		"When both the max texture size and data streaming are set, the smaller number\n"\
+		"is used to divide a large data set into bricks.\n"\
+		"Restart FluoRender after setting this value.");
+	group3->Add(10, 5);
+	group3->Add(sizer3_1, 0);
+	group3->Add(10, 5);
+	group3->Add(st, 0);
+	group3->Add(10, 5);
+
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(10, 10);
 	sizerV->Add(group1, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 	sizerV->Add(group2, 0, wxEXPAND);
+	sizerV->Add(10, 10);
+	sizerV->Add(group3, 0, wxEXPAND);
 
 	page->SetSizer(sizerV);
 	return page;
@@ -625,6 +656,7 @@ void SettingDlg::GetSettings()
 	m_component_size = 25.0;
 	m_contact_factor = 0.6;
 	m_similarity = 0.3;
+	m_use_max_texture_size = false;
 	m_max_texture_size = 2048;
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
@@ -853,6 +885,12 @@ void SettingDlg::GetSettings()
 		fconfig.Read("gl_major_ver", &m_gl_major_ver);
 		fconfig.Read("gl_minor_ver", &m_gl_minor_ver);
 		fconfig.Read("gl_profile_mask", &m_gl_profile_mask);
+	}
+	//max texture size
+	if (fconfig.Exists("/max texture size"))
+	{
+		fconfig.SetPath("/max texture size");
+		fconfig.Read("use_max_texture_size", &m_use_max_texture_size);
 		fconfig.Read("max_texture_size", &m_max_texture_size);
 	}
 	//cl device
@@ -906,6 +944,22 @@ void SettingDlg::UpdateUI()
 	m_wav_color2_cmb->Select(m_wav_color2 - 1);
 	m_wav_color3_cmb->Select(m_wav_color3 - 1);
 	m_wav_color4_cmb->Select(m_wav_color4 - 1);
+	//max texture size
+	m_max_texture_size_chk->SetValue(m_use_max_texture_size);
+	if (m_use_max_texture_size)
+	{
+		ShaderProgram::set_max_texture_size(m_max_texture_size);
+		m_max_texture_size_text->SetValue(
+			wxString::Format("%d", m_max_texture_size));
+		m_max_texture_size_text->Enable();
+	}
+	else
+	{
+		m_max_texture_size_text->SetValue(
+			wxString::Format("%d", ShaderProgram::
+				max_texture_size()));
+		m_max_texture_size_text->Disable();
+	}
 	//font
 	wxString str = m_font_file.BeforeLast('.');
 	int font_sel = m_font_cmb->FindString(str);
@@ -1079,6 +1133,10 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("gl_major_ver", m_gl_major_ver);
 	fconfig.Write("gl_minor_ver", m_gl_minor_ver);
 	fconfig.Write("gl_profile_mask", m_gl_profile_mask);
+
+	//max texture size
+	fconfig.SetPath("/max texture size");
+	fconfig.Write("use_max_texture_size", m_use_max_texture_size);
 	fconfig.Write("max_texture_size", m_max_texture_size);
 
 	//cl device
@@ -1090,6 +1148,16 @@ void SettingDlg::SaveSettings()
 	wxString dft = expath + "/fluorender.set";
 	wxFileOutputStream os(dft);
 	fconfig.Save(os);
+}
+
+void SettingDlg::UpdateTextureSize()
+{
+	if (!m_use_max_texture_size)
+	{
+		m_max_texture_size_text->SetValue(
+			wxString::Format("%d", ShaderProgram::
+				max_texture_size()));
+	}
 }
 
 bool SettingDlg::GetTestMode(int type)
@@ -1482,6 +1550,35 @@ void SettingDlg::OnWavColor4Change(wxCommandEvent &event)
 			m_wav_color2,
 			m_wav_color3,
 			m_wav_color4);
+	}
+}
+
+//texture size
+void SettingDlg::OnMaxTextureSizeChk(wxCommandEvent &event)
+{
+	m_use_max_texture_size = m_max_texture_size_chk->GetValue();
+	if (m_use_max_texture_size)
+	{
+		ShaderProgram::set_max_texture_size(m_max_texture_size);
+		m_max_texture_size_text->SetValue(
+			wxString::Format("%d", m_max_texture_size));
+		m_max_texture_size_text->Enable();
+	}
+	else
+		m_max_texture_size_text->Disable();
+}
+
+void SettingDlg::OnMaxTextureSizeEdit(wxCommandEvent &event)
+{
+	if (m_use_max_texture_size)
+	{
+		wxString str = m_max_texture_size_text->GetValue();
+		long size;
+		if (str.ToLong(&size))
+		{
+			m_max_texture_size = size;
+			ShaderProgram::set_max_texture_size(size);
+		}
 	}
 }
 

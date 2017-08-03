@@ -527,6 +527,7 @@ void VRenderGLView::Init()
 		{
 			vr_frame->SetTextureRendererSettings();
 			vr_frame->SetTextureUndos();
+			vr_frame->GetSettingDlg()->UpdateTextureSize();
 		}
 		//glViewport(0, 0, (GLint)(GetSize().x), (GLint)(GetSize().y));
 		glGenBuffers(1, &m_quad_vbo);
@@ -11668,7 +11669,6 @@ wxPanel(parent, id, pos, size, style),
 		gl_major_ver = vr_frame->GetSettingDlg()->GetGLMajorVer();
 		gl_minor_ver = vr_frame->GetSettingDlg()->GetGLMinorVer();
 		gl_profile_mask = vr_frame->GetSettingDlg()->GetGLProfileMask();
-		ShaderProgram::max_texture_size_ = vr_frame->GetSettingDlg()->GetMaxTextureSize();
 	}
 
 	wxGLAttributes attriblist;

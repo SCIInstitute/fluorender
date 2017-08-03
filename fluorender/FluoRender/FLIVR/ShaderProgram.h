@@ -62,11 +62,11 @@ namespace FLIVR
 		static void init_shaders_supported();
 		static bool shaders_supported();
 		static int max_texture_size();
+		static void set_max_texture_size(int size);
 		static bool texture_non_power_of_two();
 		static const int MAX_SHADER_UNIFORMS = 16;
 		static std::string glsl_version_;
 		static bool no_tex_unpack_;
-		static int  max_texture_size_;
 
 	protected:
 		unsigned int id_;
@@ -84,6 +84,7 @@ namespace FLIVR
 		static bool init_;
 		static bool supported_;
 		static bool non_2_textures_;
+		static int  max_texture_size_;
 		static int v_major_;
 		static int v_minor_;
 	};

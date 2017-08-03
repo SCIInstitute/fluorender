@@ -117,7 +117,7 @@ namespace FLIVR
 			//check max texture size
 			GLint texSize;
 			glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &texSize);
-			max_texture_size_ = min(max_texture_size_, (int)texSize);
+			max_texture_size_ = texSize;
 
 #ifdef _WIN32
 			const GLubyte* strRenderer=0;
@@ -149,6 +149,11 @@ namespace FLIVR
 	int ShaderProgram::max_texture_size()
 	{
 		return max_texture_size_;
+	}
+
+	void ShaderProgram::set_max_texture_size(int size)
+	{
+		max_texture_size_ = size;
 	}
 
 	bool ShaderProgram::texture_non_power_of_two()
