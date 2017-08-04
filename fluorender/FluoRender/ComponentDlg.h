@@ -193,7 +193,8 @@ public:
 		ID_CompAppendBtn,
 		ID_CompAllBtn,
 		ID_CompClearBtn,
-		//colocalization
+		//options
+		ID_ConsistentCheck,
 		ID_ColocalCheck,
 		//output
 		ID_OutputMultiRb,
@@ -337,7 +338,8 @@ private:
 	int m_min_num;
 	bool m_use_max;
 	int m_max_num;
-	//colocalization
+	//options
+	bool m_consistent;
 	bool m_colocal;
 
 	//output
@@ -506,7 +508,8 @@ private:
 	wxSpinCtrl* m_analysis_min_spin;
 	wxCheckBox* m_analysis_max_check;
 	wxSpinCtrl* m_analysis_max_spin;
-	//colocalization
+	//options
+	wxCheckBox* m_consistent_check;
 	wxCheckBox* m_colocal_check;
 	//output
 	wxRadioButton* m_output_multi_rb;
@@ -692,6 +695,7 @@ private:
 	void OnCompAppend(wxCommandEvent &event);
 	void OnCompAll(wxCommandEvent &event);
 	void OnCompClear(wxCommandEvent &event);
+	void OnConsistentCheck(wxCommandEvent &event);
 	void OnColocalCheck(wxCommandEvent &event);
 	//output
 	void OnOutputTypeRadio(wxCommandEvent &event);

@@ -179,6 +179,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_BUTTON(ID_CompAppendBtn, ComponentDlg::OnCompAppend)
 	EVT_BUTTON(ID_CompAllBtn, ComponentDlg::OnCompAll)
 	EVT_BUTTON(ID_CompClearBtn, ComponentDlg::OnCompClear)
+	EVT_CHECKBOX(ID_ConsistentCheck, ComponentDlg::OnConsistentCheck)
 	EVT_CHECKBOX(ID_ColocalCheck, ComponentDlg::OnColocalCheck)
 	//output
 	EVT_RADIOBUTTON(ID_OutputMultiRb, ComponentDlg::OnOutputTypeRadio)
@@ -611,16 +612,23 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 
 	//colocalization
 	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Colocalization"),
+		new wxStaticBox(page, wxID_ANY, "Options"),
 		wxVERTICAL);
 	wxBoxSizer *sizer21 = new wxBoxSizer(wxHORIZONTAL);
-	m_colocal_check = new wxCheckBox(page, ID_ColocalCheck, "Compute colocalization with other channels",
+	m_consistent_check = new wxCheckBox(page, ID_ConsistentCheck, "Make color consistent for multiple bricks",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	sizer21->Add(5, 5);
-	sizer21->Add(m_colocal_check, 0, wxALIGN_CENTER);
+	sizer21->Add(m_consistent_check, 0, wxALIGN_CENTER);
+	wxBoxSizer *sizer22 = new wxBoxSizer(wxHORIZONTAL);
+	m_colocal_check = new wxCheckBox(page, ID_ColocalCheck, "Compute colocalization with other channels",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+	sizer22->Add(5, 5);
+	sizer22->Add(m_colocal_check, 0, wxALIGN_CENTER);
 	//
 	sizer2->Add(10, 10);
 	sizer2->Add(sizer21, 0, wxEXPAND);
+	sizer2->Add(10, 10);
+	sizer2->Add(sizer22, 0, wxEXPAND);
 	sizer2->Add(10, 10);
 
 	//output
@@ -3020,6 +3028,11 @@ void ComponentDlg::OnCompClear(wxCommandEvent &event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetBrushToolDlg())
 		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+}
+
+void ComponentDlg::OnConsistentCheck(wxCommandEvent &event)
+{
+	m_consistent = m_consistent_check->GetValue();
 }
 
 void ComponentDlg::OnColocalCheck(wxCommandEvent &event)
