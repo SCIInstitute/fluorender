@@ -114,6 +114,13 @@ namespace FL
 			unsigned int bk,
 			std::vector<unsigned int> &sumi,
 			std::vector<double> &sumd);
+
+		//replace id to make color consistent
+		void ReplaceId(unsigned int base_id, CompInfo &info);
+		//get nonconflict color
+		unsigned int GetNonconflictId(unsigned int id,
+			unsigned int size,
+			unsigned int* data);
 	};
 }
 #endif//FL_CompAnalyzer_h

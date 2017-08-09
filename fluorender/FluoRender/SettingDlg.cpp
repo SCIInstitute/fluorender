@@ -1158,6 +1158,8 @@ void SettingDlg::UpdateTextureSize()
 			wxString::Format("%d", ShaderProgram::
 				max_texture_size()));
 	}
+	else
+		ShaderProgram::set_max_texture_size(m_max_texture_size);
 }
 
 bool SettingDlg::GetTestMode(int type)

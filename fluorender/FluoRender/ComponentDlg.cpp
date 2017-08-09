@@ -3592,7 +3592,7 @@ void ComponentDlg::Analyze(bool sel)
 		return;
 
 	int bn = vd->GetAllBrickNum();
-	m_prog_bit = 97.0f / float(bn * 2);
+	m_prog_bit = 97.0f / float(bn * 2 + m_consistent?1:0);
 	m_prog = 0.0f;
 
 	boost::signals2::connection connection =
@@ -3611,6 +3611,13 @@ void ComponentDlg::Analyze(bool sel)
 		}
 	}
 	m_comp_analyzer.Analyze(sel, m_consistent, m_colocal);
+
+	if (m_consistent)
+	{
+		//invalidate label mask in gpu
+		vd->GetVR()->clear_tex_pool();
+		m_view->RefreshGL();
+	}
 
 	if (m_comp_analyzer.GetListSize() > 10000)
 	{

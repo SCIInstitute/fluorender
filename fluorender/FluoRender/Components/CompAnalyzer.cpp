@@ -483,6 +483,35 @@ void ComponentAnalyzer::MakeColorConsistent()
 	if (!bricks || bricks->size() <= 1)
 		return;
 
+	m_comp_graph.ClearVisited();
+	for (auto i = m_comp_list.begin();
+		i != m_comp_list.end(); ++i)
+	{
+		if (m_comp_graph.Visited(i->second))
+			continue;
+		CompList list;
+		if (m_comp_graph.GetLinkedComps(i->second, list))
+		{
+			//make color consistent
+			//get the id of the first item in the list
+			//which is also the base color
+			unsigned int base_id = list.begin()->second.id;
+			//for other items
+			for (auto iter = std::next(list.begin());
+				iter != list.end(); ++iter)
+			{
+				unsigned int link_id = iter->second.id;
+				if ((link_id - base_id) % 360)
+				{
+					//color is different
+					//generate new_id
+					ReplaceId(base_id, iter->second);
+				}
+			}
+		}
+	}
+
+	m_sig_progress();
 }
 
 size_t ComponentAnalyzer::GetListSize()
@@ -1139,4 +1168,98 @@ FLIVR::Color ComponentAnalyzer::GetColor(CompInfo &comp_info,
 		break;
 	}
 	return color;
+}
+
+//replace id to make color consistent
+void ComponentAnalyzer::ReplaceId(unsigned int base_id, CompInfo &info)
+{
+	if (!m_vd || !m_vd->GetTexture())
+		return;
+	Texture* tex = m_vd->GetTexture();
+
+	unsigned int brick_id = info.brick_id;
+	unsigned int rep_id = info.id;
+	unsigned int new_id = base_id;
+
+	//get brick label data
+	unsigned int* data_label = 0;
+	TextureBrick* b = tex->get_brick(brick_id);
+	int nx = b->nx();
+	int ny = b->ny();
+	int nz = b->nz();
+	int c = b->nlabel();
+	int nb = b->nb(c);
+	int bits = nb * 8;
+	unsigned long long mem_size = (unsigned long long)nx*
+		(unsigned long long)ny*(unsigned long long)nz*nb;
+	unsigned char* temp = new unsigned char[mem_size];
+	unsigned char* tempp = temp;
+	unsigned char* tp = (unsigned char*)(b->tex_data(c));
+	unsigned char* tp2;
+	for (unsigned int k = 0; k < nz; ++k)
+	{
+		tp2 = tp;
+		for (unsigned int j = 0; j < ny; ++j)
+		{
+			memcpy(tempp, tp2, nx*nb);
+			tempp += nx*nb;
+			tp2 += b->sx()*nb;
+		}
+		tp += b->sx()*b->sy()*nb;
+	}
+	data_label = (unsigned int*)temp;
+
+	unsigned int size = nx*ny*nz;
+	//get nonconflict id
+	new_id = GetNonconflictId(new_id, size, data_label);
+
+	//assign new id
+	tp = (unsigned char*)(b->tex_data(c));
+	for (unsigned int k = 0; k < nz - 1; ++k)
+	{
+		tp2 = tp;
+		for (unsigned int j = 0; j < ny - 1; ++j)
+		{
+			for (unsigned int i = 0; i < nx - 1; ++i)
+			{
+				unsigned int id = ((unsigned int*)tp2)[i];
+				if (id == rep_id)
+					((unsigned int*)tp2)[i] = new_id;
+			}
+			tp2 += b->sx()*nb;
+		}
+		tp += b->sx()*b->sy()*nb;
+	}
+
+	if (data_label) delete[] data_label;
+}
+
+unsigned int ComponentAnalyzer::GetNonconflictId(
+	unsigned int id,
+	unsigned int size,
+	unsigned int* data)
+{
+	unsigned int result = 0;
+	unsigned int iid = id;
+
+	do
+	{
+		bool found = false;
+		for (unsigned int i = 0; i < size; ++i)
+		{
+			if (data[i] == iid)
+			{
+				found = true;
+				iid += 360;
+				break;
+			}
+		}
+		if (!found)
+		{
+			result = iid;
+			break;
+		}
+	} while (id != iid);
+
+	return result;
 }
