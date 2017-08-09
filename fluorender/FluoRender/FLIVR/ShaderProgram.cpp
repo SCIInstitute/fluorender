@@ -45,7 +45,7 @@ namespace FLIVR
 	bool ShaderProgram::init_ = false;
 	bool ShaderProgram::supported_ = false;
 	bool ShaderProgram::non_2_textures_ = false;
-	int ShaderProgram::max_texture_size_ = 64;
+	int ShaderProgram::max_texture_size_ = 1000;
 	int ShaderProgram::v_major_ = 4;
 	int ShaderProgram::v_minor_ = 0;
 	string ShaderProgram::glsl_version_;

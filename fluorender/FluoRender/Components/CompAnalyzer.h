@@ -65,8 +65,9 @@ namespace FL
 			m_vd_list.clear();
 		}
 
-		void Analyze(bool sel, bool colocal=false);
+		void Analyze(bool sel, bool consistent = false, bool colocal=false);
 		void MatchBricks(bool sel);
+		void MakeColorConsistent();
 
 		size_t GetListSize();
 		void OutputFormHeader(std::string &str);

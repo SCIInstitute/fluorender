@@ -3610,7 +3610,7 @@ void ComponentDlg::Analyze(bool sel)
 				m_comp_analyzer.AddCoVolume(vdi);
 		}
 	}
-	m_comp_analyzer.Analyze(sel, m_colocal);
+	m_comp_analyzer.Analyze(sel, m_consistent, m_colocal);
 
 	if (m_comp_analyzer.GetListSize() > 10000)
 	{

@@ -86,7 +86,7 @@ int ComponentAnalyzer::GetColocalization(
 	return num;
 }
 
-void ComponentAnalyzer::Analyze(bool sel, bool colocal)
+void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 {
 	if (!m_vd || !m_vd->GetTexture())
 		return;
@@ -345,6 +345,8 @@ void ComponentAnalyzer::Analyze(bool sel, bool colocal)
 	}
 
 	MatchBricks(sel);
+	if (consistent)
+		MakeColorConsistent();
 
 	m_comp_list_dirty = false;
 	m_colocal = colocal && m_vd_list.size();
@@ -470,6 +472,17 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 
 		m_sig_progress();
 	}
+}
+
+void ComponentAnalyzer::MakeColorConsistent()
+{
+	if (!m_vd || !m_vd->GetTexture())
+		return;
+	Texture* tex = m_vd->GetTexture();
+	vector<TextureBrick*> *bricks = tex->get_bricks();
+	if (!bricks || bricks->size() <= 1)
+		return;
+
 }
 
 size_t ComponentAnalyzer::GetListSize()
