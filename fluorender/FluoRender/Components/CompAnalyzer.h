@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <boost/signals2.hpp>
 #include "CompGraph.h"
+#include "DataManager.h"
 
 class VolumeData;
 class Annotations;
@@ -119,7 +120,8 @@ namespace FL
 		void ReplaceId(unsigned int base_id, CompInfo &info);
 		//get nonconflict color
 		unsigned int GetNonconflictId(unsigned int id,
-			unsigned int size,
+			int nx, int ny, int nz,
+			FLIVR::TextureBrick* b,
 			unsigned int* data);
 	};
 }

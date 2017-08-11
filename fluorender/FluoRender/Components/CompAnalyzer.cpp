@@ -26,7 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "CompAnalyzer.h"
-#include "DataManager.h"
 #include <sstream>
 #include <iostream>
 #include <fstream>
@@ -1182,39 +1181,20 @@ void ComponentAnalyzer::ReplaceId(unsigned int base_id, CompInfo &info)
 	unsigned int new_id = base_id;
 
 	//get brick label data
-	unsigned int* data_label = 0;
 	TextureBrick* b = tex->get_brick(brick_id);
 	int nx = b->nx();
 	int ny = b->ny();
 	int nz = b->nz();
 	int c = b->nlabel();
-	int nb = b->nb(c);
-	int bits = nb * 8;
-	unsigned long long mem_size = (unsigned long long)nx*
-		(unsigned long long)ny*(unsigned long long)nz*nb;
-	unsigned char* temp = new unsigned char[mem_size];
-	unsigned char* tempp = temp;
-	unsigned char* tp = (unsigned char*)(b->tex_data(c));
-	unsigned char* tp2;
-	for (unsigned int k = 0; k < nz; ++k)
-	{
-		tp2 = tp;
-		for (unsigned int j = 0; j < ny; ++j)
-		{
-			memcpy(tempp, tp2, nx*nb);
-			tempp += nx*nb;
-			tp2 += b->sx()*nb;
-		}
-		tp += b->sx()*b->sy()*nb;
-	}
-	data_label = (unsigned int*)temp;
+	unsigned int* data_label = (unsigned int*)(b->tex_data(c));
 
-	unsigned int size = nx*ny*nz;
 	//get nonconflict id
-	new_id = GetNonconflictId(new_id, size, data_label);
+	new_id = GetNonconflictId(new_id, nx, ny, nz, b, data_label);
 
 	//assign new id
-	tp = (unsigned char*)(b->tex_data(c));
+	unsigned int *tp, *tp2;
+	unsigned int lv;
+	tp = data_label;
 	for (unsigned int k = 0; k < nz - 1; ++k)
 	{
 		tp2 = tp;
@@ -1222,38 +1202,53 @@ void ComponentAnalyzer::ReplaceId(unsigned int base_id, CompInfo &info)
 		{
 			for (unsigned int i = 0; i < nx - 1; ++i)
 			{
-				unsigned int id = ((unsigned int*)tp2)[i];
-				if (id == rep_id)
-					((unsigned int*)tp2)[i] = new_id;
+				lv = tp2[i];
+				if (lv == rep_id)
+					tp2[i] = new_id;
 			}
-			tp2 += b->sx()*nb;
+			tp2 += b->sx();
 		}
-		tp += b->sx()*b->sy()*nb;
+		tp += b->sx()*b->sy();
 	}
-
-	if (data_label) delete[] data_label;
 }
 
 unsigned int ComponentAnalyzer::GetNonconflictId(
 	unsigned int id,
-	unsigned int size,
+	int nx, int ny, int nz,
+	TextureBrick* b,
 	unsigned int* data)
 {
 	unsigned int result = 0;
 	unsigned int iid = id;
 
+	unsigned int *tp, *tp2;
+	unsigned int lv;
 	do
 	{
 		bool found = false;
-		for (unsigned int i = 0; i < size; ++i)
+		tp = data;
+		for (unsigned int k = 0; k < nz - 1; ++k)
 		{
-			if (data[i] == iid)
+			tp2 = tp;
+			for (unsigned int j = 0; j < ny - 1; ++j)
 			{
-				found = true;
-				iid += 360;
-				break;
+				for (unsigned int i = 0; i < nx - 1; ++i)
+				{
+					lv = tp2[i];
+					if (lv == iid)
+					{
+						found = true;
+						iid += 360;
+						break;
+					}
+				}
+				if (found) break;
+				tp2 += b->sx();
 			}
+			if (found) break;
+			tp += b->sx()*b->sy();
 		}
+
 		if (!found)
 		{
 			result = iid;
