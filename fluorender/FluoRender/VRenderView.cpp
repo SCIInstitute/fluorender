@@ -3895,12 +3895,12 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 				m_mvr->set_sampling_rate(vr->get_sampling_rate());
 				m_mvr->SetNoiseRed(vr->GetNoiseRed());
 			}
-			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-			if (vd->GetTexture() &&
-				vd->GetTexture()->nmask()!=-1 &&
-				vr_frame &&
-				vd ==vr_frame->GetCurSelVol())
-				use_tex_wt2 = true;
+			//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+			//if (vd->GetTexture() &&
+			//	vd->GetTexture()->nmask()!=-1 &&
+			//	vr_frame &&
+			//	vd ==vr_frame->GetCurSelVol())
+			//	use_tex_wt2 = true;
 		}
 	}
 
@@ -3959,12 +3959,9 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
 				GL_RGBA, GL_FLOAT, NULL);
 		}
-		else
-		{
-			glBindTexture(GL_TEXTURE_2D, m_tex);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
-				GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
-		}
+		glBindTexture(GL_TEXTURE_2D, m_tex);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
+			GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
 	}
 
 	//bind the fbo
@@ -11083,6 +11080,12 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					m_vrv->m_y_rot_text->ChangeValue(str);
 					str = wxString::Format("%.1f", m_rotz);
 					m_vrv->m_z_rot_text->ChangeValue(str);
+					if (!m_vrv->m_rot_slider)
+					{
+						m_vrv->m_x_rot_sldr->SetThumbPosition(int(m_rotx));
+						m_vrv->m_y_rot_sldr->SetThumbPosition(int(m_roty));
+						m_vrv->m_z_rot_sldr->SetThumbPosition(int(m_rotz));
+					}
 
 					m_interactive = m_adaptive;
 

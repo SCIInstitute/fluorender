@@ -3781,7 +3781,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 				if (fconfig.Read("draw_info", &iVal))
 				{
 					vrv->m_glview->m_draw_info = iVal;
-					vrv->m_options_toolbar->ToggleTool(VRenderView::ID_FpsChk, iVal|INFO_DISP);
+					vrv->m_options_toolbar->ToggleTool(VRenderView::ID_FpsChk, iVal & INFO_DISP);
 				}
 				if (fconfig.Read("draw_legend", &bVal))
 				{
