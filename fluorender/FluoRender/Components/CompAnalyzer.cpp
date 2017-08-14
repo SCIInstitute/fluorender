@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #include <iostream>
 #include <fstream>
 #include <limits>
+#include <boost/graph/connected_components.hpp>
+#include <boost/graph/filtered_graph.hpp>
 
 using namespace FL;
 
@@ -518,6 +520,29 @@ size_t ComponentAnalyzer::GetListSize()
 	return m_comp_list.size();
 }
 
+size_t ComponentAnalyzer::GetCompSize()
+{
+	size_t list_size = m_comp_list.size();
+	size_t graph_size = boost::num_vertices(m_comp_graph);
+	size_t cc_size = 0;
+	if (graph_size)
+	{
+		m_comp_graph.ClearVisited();
+		std::pair<CompVertexIter, CompVertexIter> vertices =
+			boost::vertices(m_comp_graph);
+		for (auto iter = vertices.first; iter != vertices.second; ++iter)
+		{
+			if (m_comp_graph[*iter].visited)
+				continue;
+			CompList list;
+			m_comp_graph.GetLinkedComps(*(m_comp_graph[*iter].compinfo), list);
+			cc_size++;
+		}
+	}
+
+	return list_size - graph_size + cc_size;
+}
+
 void ComponentAnalyzer::OutputFormHeader(std::string &str)
 {
 	str = "";
@@ -543,7 +568,7 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 	{
 		stream << "Statistics on the selection:\n";
 		stream << "A total of " <<
-			m_comp_list.size() <<
+			GetCompSize() <<
 			" component(s) selected\n";
 		std::string header;
 		OutputFormHeader(header);

@@ -70,6 +70,7 @@ namespace FL
 		void MatchBricks(bool sel);
 		void MakeColorConsistent();
 
+		size_t GetCompSize();
 		size_t GetListSize();
 		void OutputFormHeader(std::string &str);
 		//print out results
