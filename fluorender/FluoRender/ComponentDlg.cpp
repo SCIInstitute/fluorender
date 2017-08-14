@@ -3281,6 +3281,7 @@ void ComponentDlg::GenerateAdv(bool refine)
 		(m_match_slices ?
 		(m_bidir_match?2:1):0)));
 	m_prog = 0.0f;
+	m_generate_prg->SetValue(0);
 
 	FL::ComponentGenerator cg(vd, KernelProgram::get_device_id());
 	boost::signals2::connection connection =
@@ -3376,6 +3377,7 @@ void ComponentDlg::GenerateBsc(bool refine)
 		m_prog_bit = 97.0f / float(bn * 3);
 
 	m_prog = 0.0f;
+	m_generate_prg->SetValue(0);
 
 	FL::ComponentGenerator cg(vd, KernelProgram::get_device_id());
 	boost::signals2::connection connection =
@@ -3592,8 +3594,9 @@ void ComponentDlg::Analyze(bool sel)
 		return;
 
 	int bn = vd->GetAllBrickNum();
-	m_prog_bit = 97.0f / float(bn * 2 + m_consistent?1:0);
+	m_prog_bit = 97.0f / float(bn * 2 + (m_consistent?1:0));
 	m_prog = 0.0f;
+	m_generate_prg->SetValue(0);
 
 	boost::signals2::connection connection =
 		m_comp_analyzer.m_sig_progress.connect(boost::bind(
