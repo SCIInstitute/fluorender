@@ -1388,6 +1388,10 @@ void ComponentDlg::Update()
 	}
 	m_analysis_max_spin->SetValue(m_max_num);
 
+	//options
+	m_consistent_check->SetValue(m_consistent);
+	m_colocal_check->SetValue(m_colocal);
+
 	//output type
 	m_output_multi_rb->SetValue(false);
 	m_output_rgb_rb->SetValue(false);
@@ -1466,6 +1470,7 @@ void ComponentDlg::GetSettings()
 	m_max_num = 0;
 	//colocalization
 	m_colocal = false;
+	m_consistent = false;
 
 	//output
 	m_output_type = 1;
@@ -3097,7 +3102,7 @@ void ComponentDlg::OutputMulti(int color_type)
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	m_comp_analyzer.SetVolume(vd);
 	list<VolumeData*> channs;
-	if (m_comp_analyzer.GenMultiChannels(channs, color_type))
+	if (m_comp_analyzer.GenMultiChannels(channs, color_type, m_consistent))
 	{
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vr_frame)
@@ -3144,7 +3149,7 @@ void ComponentDlg::OutputRgb(int color_type)
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	m_comp_analyzer.SetVolume(vd);
 	list<VolumeData*> channs;
-	if (m_comp_analyzer.GenRgbChannels(channs, color_type))
+	if (m_comp_analyzer.GenRgbChannels(channs, color_type, m_consistent))
 	{
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vr_frame)
@@ -3206,7 +3211,7 @@ void ComponentDlg::OnOutputAnn(wxCommandEvent &event)
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	m_comp_analyzer.SetVolume(vd);
 	Annotations* ann = new Annotations();
-	if (m_comp_analyzer.GenAnnotations(*ann))
+	if (m_comp_analyzer.GenAnnotations(*ann, m_consistent))
 	{
 		ann->SetVolume(vd);
 		ann->SetTransform(vd->GetTexture()->transform());

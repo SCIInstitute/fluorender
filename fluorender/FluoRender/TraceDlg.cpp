@@ -1472,7 +1472,7 @@ void TraceDlg::OnAnalyzeComp(wxCommandEvent &event)
 		return;
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	FL::ComponentAnalyzer comp_analyzer(vd);
-	comp_analyzer.Analyze(true);
+	comp_analyzer.Analyze(true, true);
 	string str;
 	comp_analyzer.OutputCompListStr(str, 1);
 	m_stat_text->SetValue(str);

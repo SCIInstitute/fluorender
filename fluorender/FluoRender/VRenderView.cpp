@@ -5887,6 +5887,9 @@ void VRenderGLView::RunCompAnalysis(wxFileConfig &fconfig)
 	fconfig.Read("savepath", &pathname);
 	int verbose;
 	fconfig.Read("verbose", &verbose, 0);
+	bool consistent;
+	fconfig.Read("consistent", &consistent, true);
+
 
 	str = wxPathOnly(pathname);
 	if (!wxDirExists(str))
@@ -5896,7 +5899,7 @@ void VRenderGLView::RunCompAnalysis(wxFileConfig &fconfig)
 		return;
 
 	FL::ComponentAnalyzer comp_analyzer(m_cur_vol);
-	comp_analyzer.Analyze(true);
+	comp_analyzer.Analyze(true, consistent);
 	string result_str;
 	string comp_header = wxString::Format("%d", m_tseq_cur_num);
 	comp_analyzer.OutputCompListStr(result_str, verbose, comp_header);

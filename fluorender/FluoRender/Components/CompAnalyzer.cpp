@@ -281,7 +281,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 				info.m2 += delta * (value - info.mean);
 				info.min = value;
 				info.max = value;
-				info.pos = FLIVR::Point(i, j, k);
+				info.pos = FLIVR::Point(i+b->ox(), j+b->oy(), k+b->oz());
 				if (colocal)
 				{
 					info.cosumi = sumi;
@@ -293,7 +293,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 			else
 			{
 				iter->second.pos = FLIVR::Point((iter->second.pos * iter->second.sumi +
-					FLIVR::Point(i, j, k)) / (iter->second.sumi + 1));
+					FLIVR::Point(i + b->ox(), j + b->oy(), k + b->oz())) / (iter->second.sumi + 1));
 				//
 				iter->second.sumi++;
 				iter->second.sumd += value;
@@ -599,6 +599,7 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 		FLIVR::Point pos;
 		std::vector<unsigned int> cosumi;
 		std::vector<double> cosumd;
+		bool added = false;
 
 		if (bn > 1)
 		{
@@ -649,25 +650,26 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 						cosumd[i] += iter->second.cosumd[i];
 					}
 				}
+				added = true;
 			}
-			else
-			{
-				ids.push_back(i->second.id);
-				brick_ids.push_back(i->second.brick_id);
-				sumi = i->second.sumi;
-				sumd = i->second.sumd;
-				ext_sumi = i->second.ext_sumi;
-				ext_sumd = i->second.ext_sumd;
-				mean = i->second.mean;
-				var = i->second.mean;
-				min = i->second.min;
-				max = i->second.max;
-				pos = i->second.pos;
-				cosumi = i->second.cosumi;
-				cosumd = i->second.cosumd;
-			}
+			//else
+			//{
+			//	ids.push_back(i->second.id);
+			//	brick_ids.push_back(i->second.brick_id);
+			//	sumi = i->second.sumi;
+			//	sumd = i->second.sumd;
+			//	ext_sumi = i->second.ext_sumi;
+			//	ext_sumd = i->second.ext_sumd;
+			//	mean = i->second.mean;
+			//	var = i->second.mean;
+			//	min = i->second.min;
+			//	max = i->second.max;
+			//	pos = i->second.pos;
+			//	cosumi = i->second.cosumi;
+			//	cosumd = i->second.cosumd;
+			//}
 		}
-		else
+		if (!added)
 		{
 			ids.push_back(i->second.id);
 			brick_ids.push_back(i->second.brick_id);
@@ -853,7 +855,7 @@ unsigned int ComponentAnalyzer::GetExt(unsigned int* data_label,
 	return surface_vox ? 1 : 0;
 }
 
-bool ComponentAnalyzer::GenAnnotations(Annotations &ann)
+bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent)
 {
 	if (!m_vd)
 		return false;
@@ -877,38 +879,71 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann)
 
 	if (m_comp_list.empty() ||
 		m_comp_list_dirty)
-		Analyze(true);
+		Analyze(true, consistent);
 
-	double total_int = 0.0;
-	unsigned int sum = 0;
 	std::string sinfo;
 	ostringstream oss;
+
+	int bn = m_vd->GetBrickNum();
+	m_comp_graph.ClearVisited();
 	for (auto i = m_comp_list.begin();
 		i != m_comp_list.end(); ++i)
 	{
-		oss.str("");
-		oss << i->second.sumi << "\t";
-		oss << double(i->second.sumi)*spcx*spcy*spcz << "\t";
-		oss << i->second.mean;
-		sinfo = oss.str();
-		ann.AddText(std::to_string(i->second.id),
-			FLIVR::Point(i->second.pos.x()/nx,
-			i->second.pos.y()/ny, i->second.pos.z()/nz),
-			sinfo);
-		total_int += i->second.sumd * scale;
-		sum += i->second.sumi;
+		bool added = false;
+		if (bn > 1)
+		{
+			if (m_comp_graph.Visited(i->second))
+				continue;
+			CompList list;
+			if (m_comp_graph.GetLinkedComps(i->second, list))
+			{
+				unsigned int sumi = 0;
+				double mean = 0.0;
+				FLIVR::Point pos;
+				for (auto iter = list.begin();
+					iter != list.end(); ++iter)
+				{
+					mean = (mean * sumi + iter->second.mean * iter->second.sumi) /
+						(sumi + iter->second.sumi);
+					pos = FLIVR::Point((pos * sumi + iter->second.pos * iter->second.sumi) /
+						(sumi + iter->second.sumi));
+					sumi += iter->second.sumi;
+				}
+				oss.str("");
+				oss << sumi << "\t";
+				oss << double(sumi)*spcx*spcy*spcz << "\t";
+				oss << mean;
+				sinfo = oss.str();
+				ann.AddText(std::to_string(i->second.id),
+					FLIVR::Point(pos.x() / nx, pos.y() / ny, pos.z() / nz),
+					sinfo);
+				added = true;
+			}
+		}
+		if (!added)
+		{
+			oss.str("");
+			oss << i->second.sumi << "\t";
+			oss << double(i->second.sumi)*spcx*spcy*spcz << "\t";
+			oss << i->second.mean;
+			sinfo = oss.str();
+			ann.AddText(std::to_string(i->second.id),
+				FLIVR::Point(i->second.pos.x()/nx,
+				i->second.pos.y()/ny, i->second.pos.z()/nz),
+				sinfo);
+		}
 	}
 	return true;
 }
 
-bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int color_type)
+bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int color_type, bool consistent)
 {
 	if (!m_vd)
 		return false;
 
 	if (m_comp_list.empty() ||
 		m_comp_list_dirty)
-		Analyze(true);
+		Analyze(true, consistent);
 
 	Texture* tex = m_vd->GetTexture();
 	if (!tex)
@@ -943,9 +978,19 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 		(unsigned long long)ny * (unsigned long long)nz;
 	unsigned long long index;
 	unsigned int value_label;
+
+	int bn = m_vd->GetBrickNum();
+	m_comp_graph.ClearVisited();
 	for (auto i = m_comp_list.begin();
 		i != m_comp_list.end(); ++i)
 	{
+
+		if (bn > 1)
+		{
+			if (m_comp_graph.Visited(i->second))
+				continue;
+		}
+
 		VolumeData* vd = new VolumeData();
 		vd->AddEmptyData(bits,
 			nx, ny, nz,
@@ -962,15 +1007,92 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 		if (!nrrd_vd) continue;
 		void* data_vd = nrrd_vd->data;
 		if (!data_vd) continue;
-		for (index = 0; index < for_size; ++index)
+
+		if (bn > 1)
 		{
-			value_label = data_label[index];
-			if (value_label == i->second.id)
+			CompList list;
+			if (!m_comp_graph.GetLinkedComps(i->second, list))
 			{
-				if (bits == 8)
-					((unsigned char*)data_vd)[index] = ((unsigned char*)data_data)[index];
-				else
-					((unsigned short*)data_vd)[index] = ((unsigned short*)data_data)[index];
+				list.insert(std::pair<unsigned long long, CompInfo>
+					(GetKey(i->second.id, i->second.brick_id), i->second));
+			}
+			//for comps in list
+			for (auto iter = list.begin();
+				iter != list.end(); ++iter)
+			{
+				TextureBrick* b_orig = tex->get_brick(iter->second.brick_id);
+				TextureBrick* b_new = tex_vd->get_brick(iter->second.brick_id);
+				int nx2 = b_orig->nx();
+				int ny2 = b_orig->ny();
+				int nz2 = b_orig->nz();
+				int c = b_orig->nlabel();
+				unsigned int* data_label_old = (unsigned int*)(b_orig->tex_data(c));
+				unsigned char* data_data_old = (unsigned char*)(b_orig->tex_data(0));
+				unsigned char* data_data_new = (unsigned char*)(b_new->tex_data(0));
+
+				unsigned int *tp, *tp2;
+				unsigned char *tp_old, *tp2_old;
+				unsigned char *tp_new, *tp2_new;
+				unsigned int lv;
+				tp = data_label_old;
+				tp_old = data_data_old;
+				tp_new = data_data_new;
+				for (unsigned int k = 0; k < nz - 1; ++k)
+				{
+					tp2 = tp;
+					tp2_old = tp_old;
+					tp2_new = tp_new;
+					for (unsigned int j = 0; j < ny - 1; ++j)
+					{
+						for (unsigned int i = 0; i < nx - 1; ++i)
+						{
+							lv = tp2[i];
+							if (lv == iter->second.id)
+							{
+								if (bits == 8)
+									tp2_new[i] = tp2_old[i];
+								else
+									((unsigned short*)tp2_new)[i] = ((unsigned short*)tp2_old)[i];
+							}
+						}
+						tp2 += b_orig->sx();
+						if (bits == 8)
+						{
+							tp2_old += b_orig->sx();
+							tp2_new += b_new->sx();
+						}
+						else
+						{
+							tp2_old += b_orig->sx()*2;
+							tp2_new += b_new->sx()*2;
+						}
+					}
+					tp += b_orig->sx()*b_orig->sy();
+					if (bits == 8)
+					{
+						tp_old += b_orig->sx()*b_orig->sy();
+						tp_new += b_new->sx()*b_new->sy();
+					}
+					else
+					{
+						tp_old += b_orig->sx()*b_orig->sy()*2;
+						tp_new += b_new->sx()*b_new->sy()*2;
+					}
+				}
+			}
+		}
+		else
+		{
+			for (index = 0; index < for_size; ++index)
+			{
+				value_label = data_label[index];
+				if (value_label == i->second.id)
+				{
+					if (bits == 8)
+						((unsigned char*)data_vd)[index] = ((unsigned char*)data_data)[index];
+					else
+						((unsigned short*)data_vd)[index] = ((unsigned short*)data_data)[index];
+				}
 			}
 		}
 
@@ -995,14 +1117,14 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 	return true;
 }
 
-bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color_type)
+bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color_type, bool consistent)
 {
 	if (!m_vd)
 		return false;
 
 	if (m_comp_list.empty() ||
 		m_comp_list_dirty)
-		Analyze(true);
+		Analyze(true, consistent);
 
 	Texture* tex = m_vd->GetTexture();
 	if (!tex)
