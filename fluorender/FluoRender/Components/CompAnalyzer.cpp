@@ -561,7 +561,6 @@ void ComponentAnalyzer::OutputFormHeader(std::string &str)
 
 void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, std::string comp_header)
 {
-	m_comp_graph.ClearVisited();
 	int bn = m_vd->GetBrickNum();
 
 	if (verbose == 1)
@@ -574,6 +573,8 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 		OutputFormHeader(header);
 		stream << header;
 	}
+
+	m_comp_graph.ClearVisited();
 	for (auto i = m_comp_list.begin();
 		i != m_comp_list.end(); ++i)
 	{
