@@ -206,7 +206,6 @@ void ComponentGenerator::OrderID_3D()
 	if (!m_vd || !m_vd->GetTexture()) \
 		return; \
 	vector<TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks(); \
-	m_vd->SetBrickNum(bricks->size()); \
 	if (!bricks || bricks->size() == 0) \
 		return;
 

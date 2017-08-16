@@ -546,7 +546,7 @@ size_t ComponentAnalyzer::GetCompSize()
 void ComponentAnalyzer::OutputFormHeader(std::string &str)
 {
 	str = "";
-	if (m_vd && m_vd->GetBrickNum() > 1)
+	if (m_vd && m_vd->GetAllBrickNum() > 1)
 		str = "BRICK_ID\t";
 
 	str += "ID\tPosX\tPosY\tPosZ\tSumN\tSumI\tSurfaceN\tSurfaceI\tMean\tSigma\tMin\tMax";
@@ -561,7 +561,7 @@ void ComponentAnalyzer::OutputFormHeader(std::string &str)
 
 void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, std::string comp_header)
 {
-	int bn = m_vd->GetBrickNum();
+	int bn = m_vd->GetAllBrickNum();
 
 	if (verbose == 1)
 	{
@@ -884,7 +884,7 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent)
 	std::string sinfo;
 	ostringstream oss;
 
-	int bn = m_vd->GetBrickNum();
+	int bn = m_vd->GetAllBrickNum();
 	m_comp_graph.ClearVisited();
 	for (auto i = m_comp_list.begin();
 		i != m_comp_list.end(); ++i)
@@ -979,12 +979,11 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 	unsigned long long index;
 	unsigned int value_label;
 
-	int bn = m_vd->GetBrickNum();
+	int bn = m_vd->GetAllBrickNum();
 	m_comp_graph.ClearVisited();
 	for (auto i = m_comp_list.begin();
 		i != m_comp_list.end(); ++i)
 	{
-
 		if (bn > 1)
 		{
 			if (m_comp_graph.Visited(i->second))
@@ -1037,14 +1036,14 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 				tp = data_label_old;
 				tp_old = data_data_old;
 				tp_new = data_data_new;
-				for (unsigned int k = 0; k < nz - 1; ++k)
+				for (unsigned int k = 0; k < nz2 - 1; ++k)
 				{
 					tp2 = tp;
 					tp2_old = tp_old;
 					tp2_new = tp_new;
-					for (unsigned int j = 0; j < ny - 1; ++j)
+					for (unsigned int j = 0; j < ny2 - 1; ++j)
 					{
-						for (unsigned int i = 0; i < nx - 1; ++i)
+						for (unsigned int i = 0; i < nx2 - 1; ++i)
 						{
 							lv = tp2[i];
 							if (lv == iter->second.id)

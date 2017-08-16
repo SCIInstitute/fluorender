@@ -1926,10 +1926,7 @@ int VolumeData::GetAllBrickNum()
 {
 	if (!m_tex)
 		return 0;
-	vector<TextureBrick*> *bricks = m_tex->get_bricks();
-	if (bricks)
-		return (int)bricks->size();
-	return 0;
+	return m_tex->get_brick_num();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
