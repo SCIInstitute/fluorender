@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #define FL_CompGraph_h
 
 #include <map>
+#include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -39,11 +41,13 @@ DEALINGS IN THE SOFTWARE.
 namespace FL
 {
 	struct CompInfo;
+	typedef boost::shared_ptr<CompInfo> pCompInfo;
+	typedef boost::weak_ptr<CompInfo> pwCompInfo;
 
-	typedef boost::unordered_map<unsigned int, CompInfo> CompListBrick;
+	typedef boost::unordered_map<unsigned int, pCompInfo> CompListBrick;
 	typedef CompListBrick::iterator CompListBrickIter;
 
-	class CompList : public std::map<unsigned long long, CompInfo>
+	class CompList : public std::map<unsigned long long, pCompInfo>
 	{
 	public:
 		unsigned int min;
@@ -62,7 +66,7 @@ namespace FL
 		unsigned int id;
 		unsigned int brick_id;
 		bool visited;
-		CompInfo* compinfo;
+		pwCompInfo compinfo;
 	};
 
 	class CompGraph :
@@ -71,10 +75,10 @@ namespace FL
 		CompNodeData, CompEdgeData>
 	{
 	public:
-		bool Visited(CompInfo &comp);
+		bool Visited(pCompInfo &comp);
 		void ClearVisited();
-		void LinkComps(CompInfo &comp1, CompInfo &comp2);
-		bool GetLinkedComps(CompInfo& comp, CompList& list);
+		void LinkComps(pCompInfo &comp1, pCompInfo &comp2);
+		bool GetLinkedComps(pCompInfo& comp, CompList& list);
 	private:
 		unsigned long long GetKey(unsigned int id, unsigned int brick_id)
 		{
@@ -91,6 +95,7 @@ namespace FL
 	struct CompInfo
 	{
 		unsigned int id;
+		unsigned int alt_id;//altered id to make color consistent
 		unsigned int brick_id;
 		unsigned int sumi;
 		double sumd;
@@ -134,33 +139,33 @@ namespace FL
 		}
 	};
 
-	inline bool CompGraph::Visited(CompInfo &comp)
+	inline bool CompGraph::Visited(pCompInfo &comp)
 	{
-		if (comp.v != CompGraph::null_vertex())
-			return (*this)[comp.v].visited;
+		if (comp->v != CompGraph::null_vertex())
+			return (*this)[comp->v].visited;
 		else
 			return false;
 	}
 	
-	inline void CompGraph::LinkComps(CompInfo &comp1, CompInfo &comp2)
+	inline void CompGraph::LinkComps(pCompInfo &comp1, pCompInfo &comp2)
 	{
-		CompVert v1 = comp1.v;
-		CompVert v2 = comp2.v;
+		CompVert v1 = comp1->v;
+		CompVert v2 = comp2->v;
 		if (v1 == CompGraph::null_vertex())
 		{
 			v1 = boost::add_vertex(*this);
-			comp1.v = v1;
-			(*this)[v1].id = comp1.id;
-			(*this)[v1].brick_id = comp1.brick_id;
-			(*this)[v1].compinfo = &comp1;
+			comp1->v = v1;
+			(*this)[v1].id = comp1->id;
+			(*this)[v1].brick_id = comp1->brick_id;
+			(*this)[v1].compinfo = comp1;
 		}
 		if (v2 == CompGraph::null_vertex())
 		{
 			v2 = boost::add_vertex(*this);
-			comp2.v = v2;
-			(*this)[v2].id = comp2.id;
-			(*this)[v2].brick_id = comp2.brick_id;
-			(*this)[v2].compinfo = &comp2;
+			comp2->v = v2;
+			(*this)[v2].id = comp2->id;
+			(*this)[v2].brick_id = comp2->brick_id;
+			(*this)[v2].compinfo = comp2;
 		}
 
 		std::pair<CompEdge, bool> edge = boost::edge(v1, v2, *this);

@@ -38,22 +38,25 @@ void CompGraph::ClearVisited()
 		(*this)[*iter].visited = false;
 }
 
-bool CompGraph::GetLinkedComps(CompInfo& comp, CompList& list)
+bool CompGraph::GetLinkedComps(pCompInfo& comp, CompList& list)
 {
-	if (comp.v == CompGraph::null_vertex())
+	if (!comp)
 		return false;
 
-	if ((*this)[comp.v].visited)
+	if (comp->v == CompGraph::null_vertex())
+		return false;
+
+	if ((*this)[comp->v].visited)
 		return false;
 	else
 	{
-		list.insert(std::pair<unsigned long long, CompInfo>
-			(GetKey(comp.id, comp.brick_id), comp));
-		(*this)[comp.v].visited = true;
+		list.insert(std::pair<unsigned long long, pCompInfo>
+			(GetKey(comp->id, comp->brick_id), comp));
+		(*this)[comp->v].visited = true;
 	}
 
 	std::pair<CompAdjIter, CompAdjIter> adj_verts =
-		boost::adjacent_vertices(comp.v, *this);
+		boost::adjacent_vertices(comp->v, *this);
 	for (auto iter = adj_verts.first; iter != adj_verts.second; ++iter)
 	{
 		auto v1 = *iter;
@@ -62,7 +65,7 @@ bool CompGraph::GetLinkedComps(CompInfo& comp, CompList& list)
 		auto l1 = list.find(GetKey(id, brick_id));
 		if (l1 == list.end())
 		{
-			CompInfo info = *(*this)[v1].compinfo;
+			pCompInfo info = (*this)[v1].compinfo.lock();
 			GetLinkedComps(info, list);
 		}
 	}

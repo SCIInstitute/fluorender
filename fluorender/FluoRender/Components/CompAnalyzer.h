@@ -68,6 +68,7 @@ namespace FL
 
 		void Analyze(bool sel, bool consistent, bool colocal=false);
 		void MatchBricks(bool sel);
+		void UpdateMaxCompSize(bool);
 		void MakeColorConsistent();
 
 		size_t GetCompSize();
@@ -109,7 +110,10 @@ namespace FL
 			unsigned int id,
 			int nx, int ny, int nz,
 			int i, int j, int k);
-		FLIVR::Color GetColor(CompInfo &comp_info, VolumeData* vd, int color_type);
+
+		bool GetColor(unsigned int id, int brick_id,
+			VolumeData* vd, int color_type,
+			FLIVR::Color &color);
 		int GetColocalization(size_t bid,
 			unsigned int bi,
 			unsigned int bj,
@@ -118,7 +122,7 @@ namespace FL
 			std::vector<double> &sumd);
 
 		//replace id to make color consistent
-		void ReplaceId(unsigned int base_id, CompInfo &info);
+		void ReplaceId(unsigned int base_id, pCompInfo &info);
 		//get nonconflict color
 		unsigned int GetNonconflictId(unsigned int id,
 			int nx, int ny, int nz,

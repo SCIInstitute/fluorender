@@ -266,52 +266,53 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 			if (iter == comp_list_brick.end())
 			{
 				//not found
-				CompInfo info;
-				info.id = id;
-				info.brick_id = brick_id;
-				info.sumi = 1;
-				info.sumd = value;
-				info.ext_sumi = ext;
-				info.ext_sumd = value * ext;
-				info.mean = 0.0;
-				info.var = 0.0;
-				info.m2 = 0.0;
-				delta = value - info.mean;
-				info.mean += delta / info.sumi;
-				info.m2 += delta * (value - info.mean);
-				info.min = value;
-				info.max = value;
-				info.pos = FLIVR::Point(i+b->ox(), j+b->oy(), k+b->oz());
+				CompInfo* info = new CompInfo;
+				info->id = id;
+				info->alt_id = 0;//unused
+				info->brick_id = brick_id;
+				info->sumi = 1;
+				info->sumd = value;
+				info->ext_sumi = ext;
+				info->ext_sumd = value * ext;
+				info->mean = 0.0;
+				info->var = 0.0;
+				info->m2 = 0.0;
+				delta = value - info->mean;
+				info->mean += delta / info->sumi;
+				info->m2 += delta * (value - info->mean);
+				info->min = value;
+				info->max = value;
+				info->pos = FLIVR::Point(i+b->ox(), j+b->oy(), k+b->oz());
 				if (colocal)
 				{
-					info.cosumi = sumi;
-					info.cosumd = sumd;
+					info->cosumi = sumi;
+					info->cosumd = sumd;
 				}
-				comp_list_brick.insert(pair<unsigned int, CompInfo>
-					(id, info));
+				comp_list_brick.insert(pair<unsigned int, pCompInfo>
+					(id, pCompInfo(info)));
 			}
 			else
 			{
-				iter->second.pos = FLIVR::Point((iter->second.pos * iter->second.sumi +
-					FLIVR::Point(i + b->ox(), j + b->oy(), k + b->oz())) / (iter->second.sumi + 1));
+				iter->second->pos = FLIVR::Point((iter->second->pos * iter->second->sumi +
+					FLIVR::Point(i + b->ox(), j + b->oy(), k + b->oz())) / (iter->second->sumi + 1));
 				//
-				iter->second.sumi++;
-				iter->second.sumd += value;
-				iter->second.ext_sumi += ext;
-				iter->second.ext_sumd += value * ext;
+				iter->second->sumi++;
+				iter->second->sumd += value;
+				iter->second->ext_sumi += ext;
+				iter->second->ext_sumd += value * ext;
 				//
-				delta = value - iter->second.mean;
-				iter->second.mean += delta / iter->second.sumi;
-				iter->second.m2 += delta * (value - iter->second.mean);
-				iter->second.min = value < iter->second.min ? value : iter->second.min;
-				iter->second.max = value > iter->second.max ? value : iter->second.max;
+				delta = value - iter->second->mean;
+				iter->second->mean += delta / iter->second->sumi;
+				iter->second->m2 += delta * (value - iter->second->mean);
+				iter->second->min = value < iter->second->min ? value : iter->second->min;
+				iter->second->max = value > iter->second->max ? value : iter->second->max;
 				//
 				if (colocal)
 				{
-					for (size_t i = 0; i < iter->second.cosumi.size(); ++i)
-						iter->second.cosumi[i] += sumi[i];
-					for (size_t i = 0; i < iter->second.cosumd.size(); ++i)
-						iter->second.cosumd[i] += sumd[i];
+					for (size_t i = 0; i < iter->second->cosumi.size(); ++i)
+						iter->second->cosumi[i] += sumi[i];
+					for (size_t i = 0; i < iter->second->cosumd.size(); ++i)
+						iter->second->cosumd[i] += sumd[i];
 				}
 			}
 		}
@@ -319,20 +320,20 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 		for (iter = comp_list_brick.begin();
 			iter != comp_list_brick.end(); ++iter)
 		{
-			if (bn > 1 && iter->second.sumi < 9)
+			if (bn > 1 && iter->second->sumi < 9)
 				continue;
-			iter->second.var = sqrt(iter->second.m2 / (iter->second.sumi));
-			iter->second.mean *= scale;
-			iter->second.min *= scale;
-			iter->second.max *= scale;
-			m_comp_list.min = iter->second.sumi <
-				m_comp_list.min ? iter->second.sumi :
+			iter->second->var = sqrt(iter->second->m2 / (iter->second->sumi));
+			iter->second->mean *= scale;
+			iter->second->min *= scale;
+			iter->second->max *= scale;
+			m_comp_list.min = iter->second->sumi <
+				m_comp_list.min ? iter->second->sumi :
 				m_comp_list.min;
-			m_comp_list.max = iter->second.sumi >
-				m_comp_list.max ? iter->second.sumi :
+			m_comp_list.max = iter->second->sumi >
+				m_comp_list.max ? iter->second->sumi :
 				m_comp_list.max;
-			m_comp_list.insert(std::pair<unsigned long long, CompInfo>
-				(GetKey(iter->second.id, iter->second.brick_id), iter->second));
+			m_comp_list.insert(std::pair<unsigned long long, pCompInfo>
+				(GetKey(iter->second->id, iter->second->brick_id), iter->second));
 		}
 
 		if (bn > 1)
@@ -346,6 +347,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 	}
 
 	MatchBricks(sel);
+	UpdateMaxCompSize(colocal);
 	if (consistent)
 		MakeColorConsistent();
 
@@ -475,6 +477,104 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 	}
 }
 
+void ComponentAnalyzer::UpdateMaxCompSize(bool colocal)
+{
+	unsigned int sumi;
+	double sumd;
+	unsigned int ext_sumi;
+	double ext_sumd;
+	double mean;
+	double var;
+	double min;
+	double max;
+	FLIVR::Point pos;
+	std::vector<unsigned int> cosumi;
+	std::vector<double> cosumd;
+
+	m_comp_graph.ClearVisited();
+	std::pair<CompVertexIter, CompVertexIter> vertices =
+		boost::vertices(m_comp_graph);
+	for (auto iter = vertices.first; iter != vertices.second; ++iter)
+	{
+		if (m_comp_graph[*iter].visited)
+			continue;
+		CompList list;
+		pCompInfo info = m_comp_graph[*iter].compinfo.lock();
+		if (m_comp_graph.GetLinkedComps(info, list))
+		{
+			sumi = 0;
+			sumd = 0.0;
+			ext_sumi = 0;
+			ext_sumd = 0.0;
+			mean = 0.0;
+			var = 0.0;
+			min = std::numeric_limits<double>::max();
+			max = 0.0;
+			if (colocal)
+			{
+				cosumi.resize(m_vd_list.size(), 0);
+				cosumd.resize(m_vd_list.size(), 0.0);
+			}
+
+			for (auto li = list.begin();
+				li != list.end(); ++li)
+			{
+				//mean
+				double temp = (mean * sumi + li->second->mean * li->second->sumi) /
+					(sumi + li->second->sumi);
+				//var
+				var = ((var + mean * mean) * sumi +
+					(li->second->var + li->second->mean * li->second->mean) * li->second->sumi) /
+					(sumi + li->second->sumi) - temp * temp;
+				//pos
+				pos = FLIVR::Point((pos * sumi + li->second->pos * li->second->sumi) /
+					(sumi + li->second->sumi));
+				mean = temp;
+				//others
+				sumi += li->second->sumi;
+				sumd += li->second->sumd;
+				ext_sumi += li->second->ext_sumi;
+				ext_sumd += li->second->ext_sumd;
+				min = li->second->min < min ? li->second->min : min;
+				max = li->second->max > max ? li->second->max : max;
+				//colocalization
+				if (colocal)
+				{
+					for (size_t i = 0; i<m_vd_list.size(); ++i)
+					{
+						cosumi[i] += li->second->cosumi[i];
+						cosumd[i] += li->second->cosumd[i];
+					}
+				}
+			}
+
+			//update in comp list
+			if (sumi > m_comp_list.max)
+				m_comp_list.max = sumi;
+
+			//update each
+			for (auto li = list.begin();
+				li != list.end(); ++li)
+			{
+				li->second->sumi = sumi;
+				li->second->sumd = sumd;
+				li->second->ext_sumi = ext_sumi;
+				li->second->ext_sumd = ext_sumd;
+				li->second->mean = mean;
+				li->second->var = var;
+				li->second->min = min;
+				li->second->max = max;
+				li->second->pos = pos;
+				if (colocal)
+				{
+					li->second->cosumi = cosumi;
+					li->second->cosumd = cosumd;
+				}
+			}
+		}
+	}
+}
+
 void ComponentAnalyzer::MakeColorConsistent()
 {
 	if (!m_vd || !m_vd->GetTexture())
@@ -496,12 +596,12 @@ void ComponentAnalyzer::MakeColorConsistent()
 			//make color consistent
 			//get the id of the first item in the list
 			//which is also the base color
-			unsigned int base_id = list.begin()->second.id;
+			unsigned int base_id = list.begin()->second->id;
 			//for other items
 			for (auto iter = std::next(list.begin());
 				iter != list.end(); ++iter)
 			{
-				unsigned int link_id = iter->second.id;
+				unsigned int link_id = iter->second->id;
 				if ((link_id - base_id) % 360)
 				{
 					//color is different
@@ -535,7 +635,8 @@ size_t ComponentAnalyzer::GetCompSize()
 			if (m_comp_graph[*iter].visited)
 				continue;
 			CompList list;
-			m_comp_graph.GetLinkedComps(*(m_comp_graph[*iter].compinfo), list);
+			pCompInfo info = m_comp_graph[*iter].compinfo.lock();
+			m_comp_graph.GetLinkedComps(info, list);
 			cc_size++;
 		}
 	}
@@ -588,17 +689,6 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 
 		std::list<unsigned int> ids;
 		std::list<unsigned int> brick_ids;
-		unsigned int sumi;
-		double sumd;
-		unsigned int ext_sumi;
-		double ext_sumd;
-		double mean;
-		double var;
-		double min;
-		double max;
-		FLIVR::Point pos;
-		std::vector<unsigned int> cosumi;
-		std::vector<double> cosumd;
 		bool added = false;
 
 		if (bn > 1)
@@ -609,103 +699,41 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 			CompList list;
 			if (m_comp_graph.GetLinkedComps(i->second, list))
 			{
-				sumi = 0;
-				sumd = 0.0;
-				ext_sumi = 0;
-				ext_sumd = 0.0;
-				mean = 0.0;
-				var = 0.0;
-				min = std::numeric_limits<double>::max();
-				max = 0.0;
-				cosumi.resize(m_vd_list.size(), 0);
-				cosumd.resize(m_vd_list.size(), 0.0);
-
 				for (auto iter = list.begin();
 					iter != list.end(); ++iter)
 				{
-					ids.push_back(iter->second.id);
-					brick_ids.push_back(iter->second.brick_id);
-					//mean
-					double temp = (mean * sumi + iter->second.mean * iter->second.sumi) /
-						(sumi + iter->second.sumi);
-					//var
-					var = ((var + mean * mean) * sumi +
-						(iter->second.var + iter->second.mean * iter->second.mean) * iter->second.sumi) /
-						(sumi + iter->second.sumi) - temp * temp;
-					//pos
-					pos = FLIVR::Point((pos * sumi + iter->second.pos * iter->second.sumi) /
-						(sumi + iter->second.sumi));
-					mean = temp;
-					//others
-					sumi += iter->second.sumi;
-					sumd += iter->second.sumd;
-					ext_sumi += iter->second.ext_sumi;
-					ext_sumd += iter->second.ext_sumd;
-					min = iter->second.min < min ? iter->second.min : min;
-					max = iter->second.max > max ? iter->second.max : max;
-					//colocalization
-					for (size_t i = 0; i<m_vd_list.size(); ++i)
-					{
-						cosumi[i] += iter->second.cosumi[i];
-						cosumd[i] += iter->second.cosumd[i];
-					}
+					ids.push_back(iter->second->id);
+					brick_ids.push_back(iter->second->brick_id);
 				}
 				added = true;
 			}
-			//else
-			//{
-			//	ids.push_back(i->second.id);
-			//	brick_ids.push_back(i->second.brick_id);
-			//	sumi = i->second.sumi;
-			//	sumd = i->second.sumd;
-			//	ext_sumi = i->second.ext_sumi;
-			//	ext_sumd = i->second.ext_sumd;
-			//	mean = i->second.mean;
-			//	var = i->second.mean;
-			//	min = i->second.min;
-			//	max = i->second.max;
-			//	pos = i->second.pos;
-			//	cosumi = i->second.cosumi;
-			//	cosumd = i->second.cosumd;
-			//}
 		}
 		if (!added)
 		{
-			ids.push_back(i->second.id);
-			brick_ids.push_back(i->second.brick_id);
-			sumi = i->second.sumi;
-			sumd = i->second.sumd;
-			ext_sumi = i->second.ext_sumi;
-			ext_sumd = i->second.ext_sumd;
-			mean = i->second.mean;
-			var = i->second.mean;
-			min = i->second.min;
-			max = i->second.max;
-			pos = i->second.pos;
-			cosumi = i->second.cosumi;
-			cosumd = i->second.cosumd;
+			ids.push_back(i->second->id);
+			brick_ids.push_back(i->second->brick_id);
 		}
 
 		if (bn > 1)
 			stream << brick_ids.front() << "\t";
 		stream << ids.front() << "\t";
-		stream << pos.x() << "\t";
-		stream << pos.y() << "\t";
-		stream << pos.z() << "\t";
-		stream << sumi << "\t";
-		stream << sumd << "\t";
-		stream << ext_sumi << "\t";
-		stream << ext_sumd << "\t";
-		stream << mean << "\t";
-		stream << var << "\t";
-		stream << min << "\t";
-		stream << max;
+		stream << i->second->pos.x() << "\t";
+		stream << i->second->pos.y() << "\t";
+		stream << i->second->pos.z() << "\t";
+		stream << i->second->sumi << "\t";
+		stream << i->second->sumd << "\t";
+		stream << i->second->ext_sumi << "\t";
+		stream << i->second->ext_sumd << "\t";
+		stream << i->second->mean << "\t";
+		stream << i->second->var << "\t";
+		stream << i->second->min << "\t";
+		stream << i->second->max;
 		if (m_colocal)
 		{
 			stream << "\t";
-			for (size_t i = 0; i<m_vd_list.size(); ++i)
+			for (size_t ii = 0; ii<m_vd_list.size(); ++ii)
 			{
-				stream << cosumi[i] << "\t" << cosumd[i] << "\t";
+				stream << i->second->cosumi[ii] << "\t" << i->second->cosumd[ii] << "\t";
 			}
 		}
 		stream << "\n";
@@ -889,49 +917,23 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent)
 	for (auto i = m_comp_list.begin();
 		i != m_comp_list.end(); ++i)
 	{
-		bool added = false;
 		if (bn > 1)
 		{
 			if (m_comp_graph.Visited(i->second))
 				continue;
 			CompList list;
-			if (m_comp_graph.GetLinkedComps(i->second, list))
-			{
-				unsigned int sumi = 0;
-				double mean = 0.0;
-				FLIVR::Point pos;
-				for (auto iter = list.begin();
-					iter != list.end(); ++iter)
-				{
-					mean = (mean * sumi + iter->second.mean * iter->second.sumi) /
-						(sumi + iter->second.sumi);
-					pos = FLIVR::Point((pos * sumi + iter->second.pos * iter->second.sumi) /
-						(sumi + iter->second.sumi));
-					sumi += iter->second.sumi;
-				}
-				oss.str("");
-				oss << sumi << "\t";
-				oss << double(sumi)*spcx*spcy*spcz << "\t";
-				oss << mean;
-				sinfo = oss.str();
-				ann.AddText(std::to_string(i->second.id),
-					FLIVR::Point(pos.x() / nx, pos.y() / ny, pos.z() / nz),
-					sinfo);
-				added = true;
-			}
+			m_comp_graph.GetLinkedComps(i->second, list);
 		}
-		if (!added)
-		{
-			oss.str("");
-			oss << i->second.sumi << "\t";
-			oss << double(i->second.sumi)*spcx*spcy*spcz << "\t";
-			oss << i->second.mean;
-			sinfo = oss.str();
-			ann.AddText(std::to_string(i->second.id),
-				FLIVR::Point(i->second.pos.x()/nx,
-				i->second.pos.y()/ny, i->second.pos.z()/nz),
-				sinfo);
-		}
+
+		oss.str("");
+		oss << i->second->sumi << "\t";
+		oss << double(i->second->sumi)*spcx*spcy*spcz << "\t";
+		oss << i->second->mean;
+		sinfo = oss.str();
+		ann.AddText(std::to_string(i->second->id),
+			FLIVR::Point(i->second->pos.x()/nx,
+			i->second->pos.y()/ny, i->second->pos.z()/nz),
+			sinfo);
 	}
 	return true;
 }
@@ -996,7 +998,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 			spcx, spcy, spcz);
 		vd->SetSpcFromFile(true);
 		vd->SetName(m_vd->GetName() +
-			wxString::Format("_COMP%d_SIZE%d", count++, i->second.sumi));
+			wxString::Format("_COMP%d_SIZE%d", count++, i->second->sumi));
 
 		//populate the volume
 		//the actual data
@@ -1012,15 +1014,15 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 			CompList list;
 			if (!m_comp_graph.GetLinkedComps(i->second, list))
 			{
-				list.insert(std::pair<unsigned long long, CompInfo>
-					(GetKey(i->second.id, i->second.brick_id), i->second));
+				list.insert(std::pair<unsigned long long, pCompInfo>
+					(GetKey(i->second->id, i->second->brick_id), i->second));
 			}
 			//for comps in list
 			for (auto iter = list.begin();
 				iter != list.end(); ++iter)
 			{
-				TextureBrick* b_orig = tex->get_brick(iter->second.brick_id);
-				TextureBrick* b_new = tex_vd->get_brick(iter->second.brick_id);
+				TextureBrick* b_orig = tex->get_brick(iter->second->brick_id);
+				TextureBrick* b_new = tex_vd->get_brick(iter->second->brick_id);
 				int nx2 = b_orig->nx();
 				int ny2 = b_orig->ny();
 				int nz2 = b_orig->nz();
@@ -1046,7 +1048,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 						for (unsigned int i = 0; i < nx2 - 1; ++i)
 						{
 							lv = tp2[i];
-							if (lv == iter->second.id)
+							if (lv == iter->second->id)
 							{
 								if (bits == 8)
 									tp2_new[i] = tp2_old[i];
@@ -1085,7 +1087,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 			for (index = 0; index < for_size; ++index)
 			{
 				value_label = data_label[index];
-				if (value_label == i->second.id)
+				if (value_label == i->second->id)
 				{
 					if (bits == 8)
 						((unsigned char*)data_vd)[index] = ((unsigned char*)data_data)[index];
@@ -1096,22 +1098,27 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 		}
 
 		//settings
-		Color c = GetColor(i->second, m_vd, color_type);
-		vd->SetColor(c);
-		vd->SetEnableAlpha(m_vd->GetEnableAlpha());
-		vd->SetShading(m_vd->GetShading());
-		vd->SetShadow(false);
-		//other settings
-		vd->Set3DGamma(m_vd->Get3DGamma());
-		vd->SetBoundary(m_vd->GetBoundary());
-		vd->SetOffset(m_vd->GetOffset());
-		vd->SetLeftThresh(m_vd->GetLeftThresh());
-		vd->SetRightThresh(m_vd->GetRightThresh());
-		vd->SetAlpha(m_vd->GetAlpha());
-		vd->SetSampleRate(m_vd->GetSampleRate());
-		vd->SetMaterial(amb, diff, spec, shine);
+		FLIVR::Color c;
+		if (GetColor(i->second->id, i->second->brick_id, m_vd, color_type, c))
+		{
+			vd->SetColor(c);
+			vd->SetEnableAlpha(m_vd->GetEnableAlpha());
+			vd->SetShading(m_vd->GetShading());
+			vd->SetShadow(false);
+			//other settings
+			vd->Set3DGamma(m_vd->Get3DGamma());
+			vd->SetBoundary(m_vd->GetBoundary());
+			vd->SetOffset(m_vd->GetOffset());
+			vd->SetLeftThresh(m_vd->GetLeftThresh());
+			vd->SetRightThresh(m_vd->GetRightThresh());
+			vd->SetAlpha(m_vd->GetAlpha());
+			vd->SetSampleRate(m_vd->GetSampleRate());
+			vd->SetMaterial(amb, diff, spec, shine);
 
-		channs.push_back(vd);
+			channs.push_back(vd);
+		}
+		else
+			delete vd;
 	}
 	return true;
 }
@@ -1209,12 +1216,8 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 	for (index = 0; index < for_size; ++index)
 	{
 		value_label = data_label[index];
-		//auto i = std::find(m_comp_list.begin(),
-		//	m_comp_list.end(), CompInfo(value_label, 0));
-		auto i = m_comp_list.find(GetKey(value_label, 0));//to add bricks
-		if (i != m_comp_list.end())
+		if (GetColor(value_label, -1, m_vd, color_type, color))
 		{
-			color = GetColor(i->second, m_vd, color_type);
 			if (bits == 8)
 			{
 				double value = ((unsigned char*)data_data)[index];
@@ -1290,41 +1293,66 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 	return true;
 }
 
-FLIVR::Color ComponentAnalyzer::GetColor(CompInfo &comp_info,
-	VolumeData* vd, int color_type)
+bool ComponentAnalyzer::GetColor(
+	unsigned int id, int brick_id,
+	VolumeData* vd, int color_type,
+	FLIVR::Color &color)
 {
-	FLIVR::Color color;
+	if (!id)
+		return false;
+
 	switch (color_type)
 	{
 	case 1:
 	default:
-		color = FLIVR::Color(HSVColor(comp_info.id % 360, 1.0, 1.0));
-		break;
+		color = FLIVR::Color(HSVColor(id % 360, 1.0, 1.0));
+		return true;
 	case 2:
 		if (vd)
 		{
+			unsigned int size = 0;
+			CompListIter iter;
+			//search in comp list
+			if (brick_id < 0)
+			{
+				int bn = vd->GetAllBrickNum();
+				for (unsigned int i=0; i<bn; ++i)
+				{
+					iter = m_comp_list.find(GetKey(id, i));
+					if (iter != m_comp_list.end())
+						break;
+				}
+			}
+			else
+			{
+				iter = m_comp_list.find(GetKey(id, brick_id));
+			}
+			if (iter == m_comp_list.end())
+				return false;
+			size = iter->second->sumi;
 			double value;
 			if (m_comp_list.min == m_comp_list.max)
 				value = 1.0;
 			else
-				value = double(comp_info.sumi - m_comp_list.min) /
+				value = double(size - m_comp_list.min) /
 				double(m_comp_list.max - m_comp_list.min);
 			color = vd->GetColorFromColormap(value);
+			return true;
 		}
 		break;
 	}
-	return color;
+	return false;
 }
 
 //replace id to make color consistent
-void ComponentAnalyzer::ReplaceId(unsigned int base_id, CompInfo &info)
+void ComponentAnalyzer::ReplaceId(unsigned int base_id, pCompInfo &info)
 {
 	if (!m_vd || !m_vd->GetTexture())
 		return;
 	Texture* tex = m_vd->GetTexture();
 
-	unsigned int brick_id = info.brick_id;
-	unsigned int rep_id = info.id;
+	unsigned int brick_id = info->brick_id;
+	unsigned int rep_id = info->id;
 	unsigned int new_id = base_id;
 
 	//get brick label data
@@ -1357,6 +1385,8 @@ void ComponentAnalyzer::ReplaceId(unsigned int base_id, CompInfo &info)
 		}
 		tp += b->sx()*b->sy();
 	}
+
+	info->alt_id = new_id;
 }
 
 unsigned int ComponentAnalyzer::GetNonconflictId(
