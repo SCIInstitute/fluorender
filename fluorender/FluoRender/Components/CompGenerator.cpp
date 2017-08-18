@@ -445,12 +445,20 @@ void ComponentGenerator::ShuffleID_3D()
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
-		unsigned int len = 0;
-		unsigned int r = Max(nx, Max(ny, nz));
+		//bit length
+		unsigned int lenx = 0;
+		unsigned int r = Max(nx, ny);
 		while (r > 0)
 		{
 			r /= 2;
-			len++;
+			lenx++;
+		}
+		unsigned int lenz = 0;
+		r = nz;
+		while (r > 0)
+		{
+			r /= 2;
+			lenz++;
 		}
 
 		//data
@@ -482,7 +490,8 @@ void ComponentGenerator::ShuffleID_3D()
 		err = clSetKernelArg(kernel, 2, sizeof(unsigned int), (void*)(&nx));
 		err = clSetKernelArg(kernel, 3, sizeof(unsigned int), (void*)(&ny));
 		err = clSetKernelArg(kernel, 4, sizeof(unsigned int), (void*)(&nz));
-		err = clSetKernelArg(kernel, 5, sizeof(unsigned int), (void*)(&len));
+		err = clSetKernelArg(kernel, 5, sizeof(unsigned int), (void*)(&lenx));
+		err = clSetKernelArg(kernel, 6, sizeof(unsigned int), (void*)(&lenz));
 
 		err = clEnqueueNDRangeKernel(queue, kernel, 3, NULL, global_size,
 			local_size, 0, NULL, NULL);
@@ -704,12 +713,20 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 
 		if (clean_iter)
 		{
-			unsigned int len = 0;
-			unsigned int r = Max(nx, Max(ny, nz));
+			//bit length
+			unsigned int lenx = 0;
+			unsigned int r = Max(nx, ny);
 			while (r > 0)
 			{
 				r /= 2;
-				len++;
+				lenx++;
+			}
+			unsigned int lenz = 0;
+			r = nz;
+			while (r > 0)
+			{
+				r /= 2;
+				lenz++;
 			}
 
 			mask32 = new unsigned int[nx*ny*nz];
@@ -725,14 +742,16 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 			err = clSetKernelArg(kernel_1, 2, sizeof(unsigned int), (void*)(&nx));
 			err = clSetKernelArg(kernel_1, 3, sizeof(unsigned int), (void*)(&ny));
 			err = clSetKernelArg(kernel_1, 4, sizeof(unsigned int), (void*)(&nz));
-			err = clSetKernelArg(kernel_1, 5, sizeof(unsigned int), (void*)(&len));
+			err = clSetKernelArg(kernel_1, 5, sizeof(unsigned int), (void*)(&lenx));
+			err = clSetKernelArg(kernel_1, 6, sizeof(unsigned int), (void*)(&lenz));
 			//kernel 2
 			err = clSetKernelArg(kernel_2, 0, sizeof(cl_mem), &mask_buffer);
 			err = clSetKernelArg(kernel_2, 1, sizeof(cl_mem), &label_buffer);
 			err = clSetKernelArg(kernel_2, 2, sizeof(unsigned int), (void*)(&nx));
 			err = clSetKernelArg(kernel_2, 3, sizeof(unsigned int), (void*)(&ny));
 			err = clSetKernelArg(kernel_2, 4, sizeof(unsigned int), (void*)(&nz));
-			err = clSetKernelArg(kernel_2, 5, sizeof(unsigned int), (void*)(&len));
+			err = clSetKernelArg(kernel_2, 5, sizeof(unsigned int), (void*)(&lenx));
+			err = clSetKernelArg(kernel_2, 6, sizeof(unsigned int), (void*)(&lenz));
 			//kernel 3
 			err = clSetKernelArg(kernel_3, 0, sizeof(cl_mem), &data_buffer);
 			err = clSetKernelArg(kernel_3, 1, sizeof(cl_mem), &mask_buffer);
@@ -846,12 +865,20 @@ void ComponentGenerator::Grow3DSized(
 		size_t local_size[3] = { 1, 1, 1 };
 		float scl_ff = diffuse ? falloff : 0.0f;
 		float grad_ff = diffuse ? falloff : 0.0f;
-		unsigned int len = 0;
-		unsigned int r = Max(nx, Max(ny, nz));
+		//bit length
+		unsigned int lenx = 0;
+		unsigned int r = Max(nx, ny);
 		while (r > 0)
 		{
 			r /= 2;
-			len++;
+			lenx++;
+		}
+		unsigned int lenz = 0;
+		r = nz;
+		while (r > 0)
+		{
+			r /= 2;
+			lenz++;
 		}
 
 		//data
@@ -890,14 +917,16 @@ void ComponentGenerator::Grow3DSized(
 		err = clSetKernelArg(kernel_0, 2, sizeof(unsigned int), (void*)(&nx));
 		err = clSetKernelArg(kernel_0, 3, sizeof(unsigned int), (void*)(&ny));
 		err = clSetKernelArg(kernel_0, 4, sizeof(unsigned int), (void*)(&nz));
-		err = clSetKernelArg(kernel_0, 5, sizeof(unsigned int), (void*)(&len));
+		err = clSetKernelArg(kernel_0, 5, sizeof(unsigned int), (void*)(&lenx));
+		err = clSetKernelArg(kernel_0, 6, sizeof(unsigned int), (void*)(&lenz));
 		//kernel 1
 		err = clSetKernelArg(kernel_1, 0, sizeof(cl_mem), &mask_buffer);
 		err = clSetKernelArg(kernel_1, 1, sizeof(cl_mem), &label_buffer);
 		err = clSetKernelArg(kernel_1, 2, sizeof(unsigned int), (void*)(&nx));
 		err = clSetKernelArg(kernel_1, 3, sizeof(unsigned int), (void*)(&ny));
 		err = clSetKernelArg(kernel_1, 4, sizeof(unsigned int), (void*)(&nz));
-		err = clSetKernelArg(kernel_1, 5, sizeof(unsigned int), (void*)(&len));
+		err = clSetKernelArg(kernel_1, 5, sizeof(unsigned int), (void*)(&lenx));
+		err = clSetKernelArg(kernel_1, 6, sizeof(unsigned int), (void*)(&lenz));
 		//kernel 2
 		err = clSetKernelArg(kernel_2, 0, sizeof(cl_mem), &data_buffer);
 		err = clSetKernelArg(kernel_2, 1, sizeof(cl_mem), &mask_buffer);
