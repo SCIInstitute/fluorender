@@ -1048,8 +1048,11 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 						for (unsigned int i = 0; i < nx2 - 1; ++i)
 						{
 							lv = tp2[i];
-							if (lv == iter->second->id)
+							if (lv == (iter->second->alt_id?
+								iter->second->alt_id:
+								iter->second->id))
 							{
+								//assign values
 								if (bits == 8)
 									tp2_new[i] = tp2_old[i];
 								else
@@ -1218,6 +1221,7 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 		value_label = data_label[index];
 		if (GetColor(value_label, -1, m_vd, color_type, color))
 		{
+			//assign colors
 			if (bits == 8)
 			{
 				double value = ((unsigned char*)data_data)[index];
