@@ -70,6 +70,8 @@ namespace FLIVR
 		inline unsigned int posxid(unsigned int id);
 		inline unsigned int posyid(unsigned int id);
 		inline unsigned int poszid(unsigned int id);
+		//get brick id by index
+		inline unsigned int get_brick_id(unsigned long long index);
 		TextureBrick* get_brick(unsigned int bid);
 
 		inline int nc() { return nc_; }
@@ -315,6 +317,20 @@ namespace FLIVR
 			return id;
 		else
 			return r;
+	}
+
+	inline unsigned int Texture::get_brick_id(unsigned long long index)
+	{
+		int x, y, z;
+		z = index / (nx_ * ny_);
+		y = index % (nx_ * ny_);
+		x = y % nx_;
+		y = y / nx_;
+		//get brick indices
+		x = x / (bszx_-1);
+		y = y / (bszy_-1);
+		z = z / (bszz_-1);
+		return z * bnx_ * bny_ + y * bnx_ + x;
 	}
 
 	inline TextureBrick* Texture::get_brick(unsigned int bid)

@@ -607,9 +607,23 @@ void ComponentAnalyzer::MakeColorConsistent()
 					//color is different
 					//generate new_id
 					ReplaceId(base_id, iter->second);
+					//insert one with consistent key
+					if (link_id != iter->second->id)
+						m_comp_list.insert(std::pair<unsigned long long, pCompInfo>
+						(GetKey(iter->second->id, iter->second->brick_id), iter->second));
 				}
 			}
 		}
+	}
+
+	//remove comps with inconsistent keys
+	for (auto i = m_comp_list.begin();
+		i != m_comp_list.end();)
+	{
+		if (i->first != GetKey(i->second->id, i->second->brick_id))
+			i = m_comp_list.erase(i);
+		else
+			++i;
 	}
 
 	m_sig_progress();
@@ -1219,7 +1233,7 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 	for (index = 0; index < for_size; ++index)
 	{
 		value_label = data_label[index];
-		if (GetColor(value_label, -1, m_vd, color_type, color))
+		if (GetColor(value_label, tex->get_brick_id(index), m_vd, color_type, color))
 		{
 			//assign colors
 			if (bits == 8)
@@ -1391,6 +1405,7 @@ void ComponentAnalyzer::ReplaceId(unsigned int base_id, pCompInfo &info)
 	}
 
 	info->alt_id = new_id;
+	info->id = new_id;
 }
 
 unsigned int ComponentAnalyzer::GetNonconflictId(
