@@ -3295,10 +3295,15 @@ void ComponentDlg::GenerateAdv(bool refine)
 
 	cg.SetUseMask(m_use_sel_chk->GetValue());
 
-	if (!refine)
+	if (refine)
+	{
+		if (bn > 1)
+			cg.ClearBorders3D();
+	}
+	else
 	{
 		vd->AddEmptyLabel();
-		cg.ShuffleID_2D();
+		cg.ShuffleID_3D();
 	}
 
 	double scale = vd->GetScalarScale();
@@ -3376,10 +3381,7 @@ void ComponentDlg::GenerateBsc(bool refine)
 
 	//get brick number
 	int bn = vd->GetAllBrickNum();
-	if (refine)
-		m_prog_bit = 97.0f / float(bn * 2);
-	else
-		m_prog_bit = 97.0f / float(bn * 3);
+	m_prog_bit = 97.0f / float(bn * 3);
 
 	m_prog = 0.0f;
 	m_generate_prg->SetValue(0);
@@ -3391,7 +3393,12 @@ void ComponentDlg::GenerateBsc(bool refine)
 
 	cg.SetUseMask(m_use_sel_chk->GetValue());
 
-	if (!refine)
+	if (refine)
+	{
+		if (bn > 1)
+			cg.ClearBorders3D();
+	}
+	else
 	{
 		vd->AddEmptyLabel();
 		cg.ShuffleID_3D();
@@ -3545,6 +3552,11 @@ void ComponentDlg::GenerateComp(int type, int mode)
 			{
 				vd->AddEmptyLabel();
 				cg.ShuffleID_3D();
+			}
+			else
+			{
+				if (vd->GetAllBrickNum() > 1)
+					cg.ClearBorders3D();
 			}
 
 			double scale = vd->GetScalarScale();

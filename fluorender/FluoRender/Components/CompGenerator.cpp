@@ -617,6 +617,76 @@ void ComponentGenerator::ShuffleID_2D()
 	clReleaseProgram(program);
 }
 
+void ComponentGenerator::ClearBorders3D()
+{
+	CHECK_BRICKS
+
+	//create program and kernels
+	cl_int err;
+	size_t program_size = strlen(str_cl_clear_borders_3d);
+	cl_program program = clCreateProgramWithSource(m_context, 1,
+		&str_cl_clear_borders_3d, &program_size, &err);
+	if (err != CL_SUCCESS) return;
+	err = clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
+	if (err != CL_SUCCESS)
+	{
+		char *program_log;
+		size_t log_size;
+		clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG,
+			0, NULL, &log_size);
+		program_log = new char[log_size + 1];
+		program_log[log_size] = '\0';
+		clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG,
+			log_size + 1, program_log, NULL);
+		cout << program_log;
+		delete[]program_log;
+		return;
+	}
+	cl_kernel kernel = clCreateKernel(program, "kernel_0", &err);
+	cl_command_queue queue = clCreateCommandQueue(m_context, m_device, 0, &err);
+
+	if (m_use_mask)
+		m_vd->GetVR()->return_mask();
+
+	for (size_t i = 0; i < bricks->size(); ++i)
+	{
+		GET_VOLDATA_STREAM
+
+		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
+		size_t local_size[3] = { 1, 1, 1 };
+
+		//label
+		cl_mem label_buffer = clCreateBuffer(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*nx*ny*nz, val32, &err);
+		//set
+		err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &label_buffer);
+		err = clSetKernelArg(kernel, 1, sizeof(unsigned int), (void*)(&nx));
+		err = clSetKernelArg(kernel, 2, sizeof(unsigned int), (void*)(&ny));
+		err = clSetKernelArg(kernel, 3, sizeof(unsigned int), (void*)(&nz));
+
+		err = clEnqueueNDRangeKernel(queue, kernel, 3, NULL, global_size,
+			local_size, 0, NULL, NULL);
+
+		err = clEnqueueReadBuffer(
+			queue, label_buffer,
+			CL_TRUE, 0, sizeof(unsigned int)*nx*ny*nz,
+			val32, 0, NULL, NULL);
+
+		clFlush(queue);
+		clFinish(queue);
+		clReleaseMemObject(label_buffer);
+
+		m_sig_progress();
+
+		RELEASE_DATA_STREAM
+	}
+
+	//release kernels and program
+	clReleaseKernel(kernel);
+	clReleaseCommandQueue(queue);
+	clReleaseProgram(program);
+}
+
 void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float falloff,
 	float density, int clean_iter, int clean_size)
 {

@@ -581,6 +581,29 @@ const char* str_cl_brainbow_3d_sized = \
 "		label[index] = label[max_nb_index];\n" \
 "}\n";
 
+const char* str_cl_clear_borders_3d = \
+"const sampler_t samp =\n" \
+"	CLK_NORMALIZED_COORDS_FALSE|\n" \
+"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
+"	CLK_FILTER_NEAREST;\n" \
+"\n" \
+"\n" \
+"__kernel void kernel_0(\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz)\n" \
+"{\n" \
+"	unsigned int x, y, z;\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
+"	unsigned int index = nx*ny*k + nx*j + i;\n" \
+"	if (i == 0 || i == nx-1 ||\n" \
+"		j == 0 || j == ny-1 ||\n" \
+"		k == 0 || k == nz-1)\n" \
+"		label[index] = 0;\n" \
+"}\n";
 
 const char* str_cl_shuffle_id_3d = \
 "const sampler_t samp =\n" \
