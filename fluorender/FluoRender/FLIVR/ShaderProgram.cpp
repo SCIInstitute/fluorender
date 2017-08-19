@@ -156,6 +156,14 @@ namespace FLIVR
 		max_texture_size_ = size;
 	}
 
+	void ShaderProgram::reset_max_texture_size()
+	{
+		//check max texture size
+		GLint texSize;
+		glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &texSize);
+		max_texture_size_ = texSize;
+	}
+
 	bool ShaderProgram::texture_non_power_of_two()
 	{
 		return non_2_textures_;

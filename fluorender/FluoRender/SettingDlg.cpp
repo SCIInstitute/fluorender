@@ -1567,7 +1567,10 @@ void SettingDlg::OnMaxTextureSizeChk(wxCommandEvent &event)
 		m_max_texture_size_text->Enable();
 	}
 	else
+	{
+		ShaderProgram::reset_max_texture_size();
 		m_max_texture_size_text->Disable();
+	}
 }
 
 void SettingDlg::OnMaxTextureSizeEdit(wxCommandEvent &event)
