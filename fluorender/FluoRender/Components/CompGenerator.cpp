@@ -228,7 +228,7 @@ void ComponentGenerator::OrderID_3D()
 		nz = b->nz(); \
 		bits = nb * 8; \
 		unsigned long long mem_size = (unsigned long long)nx* \
-		(unsigned long long)ny*(unsigned long long)nz*nb; \
+		(unsigned long long)ny*(unsigned long long)nz*(unsigned long long)nb; \
 		unsigned char* temp = new unsigned char[mem_size]; \
 		unsigned char* tempp = temp; \
 		unsigned char* tp = (unsigned char*)(b->tex_data(c)); \
@@ -251,7 +251,7 @@ void ComponentGenerator::OrderID_3D()
 		c = b->nlabel(); \
 		nb = b->nb(c); \
 		mem_size = (unsigned long long)nx* \
-		(unsigned long long)ny*(unsigned long long)nz*nb; \
+		(unsigned long long)ny*(unsigned long long)nz*(unsigned long long)nb; \
 		temp = new unsigned char[mem_size]; \
 		tempp = temp; \
 		tp = (unsigned char*)(b->tex_data(c)); \
@@ -760,8 +760,11 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 		cl_mem data_buffer = clCreateImage(m_context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 			&image_format, &image_desc, bits == 8 ? (void*)(val8) : (void*)(val16), &err);
 		//label
+		unsigned long long data_size = (unsigned long long)nx * (unsigned long long)ny *
+			(unsigned long long)nz;
+		unsigned long long label_size = data_size * 4;
 		cl_mem label_buffer = clCreateBuffer(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny*nz, val32, &err);
+			label_size, val32, &err);
 		//counter
 		cl_mem rcnt_buffer = clCreateBuffer(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			sizeof(unsigned int), &rcnt, &err);
@@ -799,11 +802,11 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 				lenz++;
 			}
 
-			mask32 = new unsigned int[nx*ny*nz];
-			memset(mask32, 0, sizeof(unsigned int)*nx*ny*nz);
+			mask32 = new unsigned int[data_size];
+			memset(mask32, 0, label_size);
 			//mask
 			mask_buffer = clCreateBuffer(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-				sizeof(unsigned int)*nx*ny*nz, mask32, &err);
+				label_size, mask32, &err);
 
 			//set
 			//kernel 1
@@ -853,7 +856,7 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 
 		err = clEnqueueReadBuffer(
 			queue, label_buffer,
-			CL_TRUE, 0, sizeof(unsigned int)*nx*ny*nz,
+			CL_TRUE, 0, label_size,
 			val32, 0, NULL, NULL);
 
 		clFlush(queue);
