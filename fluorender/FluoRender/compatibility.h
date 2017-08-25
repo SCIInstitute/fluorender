@@ -545,7 +545,7 @@ inline FILE* WFOPEN(FILE ** fp, const wchar_t* filename, const wchar_t* mode) {
 }
 
 inline FILE* FOPEN(FILE ** fp, const char* filename, const char* mode) {
-	*fp = fopen(filename, mode);
+	*fp = _fsopen(filename, mode, _SH_DENYNO);
 	return *fp;
 }
 
