@@ -2061,17 +2061,17 @@ int MeshData::Load(wxString &filename)
 	string str_fn = filename.ToStdString();
 	bool no_fail = true;
 	m_data = glmReadOBJ(str_fn.c_str(),&no_fail);
-	while (!no_fail) {
-		wxMessageDialog *dial = new wxMessageDialog(NULL, 
-			wxT("A part of the OBJ file failed to load. Would you like to try re-loading?"), 
-			wxT("OBJ Load Failure"), 
-			wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION);
-		if (dial->ShowModal() == wxID_YES) {
-			if (m_data)
-				delete m_data;
-			m_data = glmReadOBJ(str_fn.c_str(),&no_fail);
-		} else break;
-	}
+	//while (!no_fail) {
+	//	wxMessageDialog *dial = new wxMessageDialog(NULL, 
+	//		wxT("A part of the OBJ file failed to load. Would you like to try re-loading?"), 
+	//		wxT("OBJ Load Failure"), 
+	//		wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION);
+	//	if (dial->ShowModal() == wxID_YES) {
+	//		if (m_data)
+	//			delete m_data;
+	//		m_data = glmReadOBJ(str_fn.c_str(),&no_fail);
+	//	} else break;
+	//}
 
 	if (!m_data)
 		return 0;

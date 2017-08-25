@@ -36,7 +36,7 @@ typedef struct _GLMnode
 	struct _GLMnode* next;
 } GLMnode;
 
-GLboolean glmLoadTGA(TextureImage *texture, char *filename,GLuint *textureID)      // Loads A TGA File Into Memory
+GLboolean glmLoadTGA(TextureImage *texture, const char *filename,GLuint *textureID)      // Loads A TGA File Into Memory
 {
 	GLubyte    TGAheader[12]={0,0,2,0,0,0,0,0,0,0,0,0};  // Uncompressed TGA Header
 	GLubyte    TGAcompare[12];                // Used To Compare TGA Header
@@ -354,22 +354,32 @@ static char* glmDirName(char* path)
 static GLboolean glmReadMTL(GLMmodel* model, char* name)
 {
 	FILE* file;
-	char* dir;
-	char* filename;
+	//char* dir;
+	//char* filename;
 	char buf[128];
 	char line[256];
 	GLuint nummaterials, i;
 
-	dir = glmDirName(model->pathname);
-	int size_fn = int(strlen(dir) + strlen(name) + 1);
-	filename = (char*)malloc(sizeof(char) * size_fn);
-	STRCPY(filename, size_fn, dir);
-	STRCAT(filename, size_fn, name);
-	free(dir);
+	//dir = glmDirName(model->pathname);
+	//int size_fn = int(strlen(dir) + strlen(name) + 1);
+	//filename = (char*)malloc(sizeof(char) * size_fn);
+	//STRCPY(filename, size_fn, dir);
+	//STRCAT(filename, size_fn, name);
+	//free(dir);
+	std::string dir(model->pathname);
+	std::wstring wdir = s2ws(dir);
+	wdir = GET_PATH(wdir);
+	std::string str(name);
+	std::wstring wname = s2ws(str);
+	std::wstring filename = wdir + wname;
+	str = ws2s(filename);
 
-	if (!FOPEN(&file, filename, "rb"))
+	if (!FOPEN(&file, str.c_str(), "rb"))
+	{
+		//free(filename);
 		return false;
-	free(filename);
+	}
+	//free(filename);
 
 	//find file size
 	fseek(file, 0L, SEEK_END);
@@ -379,7 +389,10 @@ static GLboolean glmReadMTL(GLMmodel* model, char* name)
 	//read file to a string
 	char* mtl_content = (char*)malloc(size+1);
 	if (!fread(mtl_content, sizeof(char), size, file))
+	{
+		fclose(file);
 		return false;
+	}
 	mtl_content[size] = 0;
 	/* close the file */
 	fclose(file);
@@ -467,21 +480,26 @@ static GLboolean glmReadMTL(GLMmodel* model, char* name)
 			{
 				char texname[128];
 				SSCANF(line, "%s %s", texname,  texname);
-				dir = glmDirName(model->pathname);
-				int size_tn = int(strlen(dir) + strlen(texname) + 1);
-				filename = (char*)malloc(sizeof(char) * size_tn);
-				STRCPY(filename, size_tn, dir);
-				STRCAT(filename, size_tn, texname);
-				free(dir);
+				//dir = glmDirName(model->pathname);
+				//int size_tn = int(strlen(dir) + strlen(texname) + 1);
+				//filename = (char*)malloc(sizeof(char) * size_tn);
+				//STRCPY(filename, size_tn, dir);
+				//STRCAT(filename, size_tn, texname);
+				//free(dir);
+				std::string str(texname);
+				std::wstring wname = s2ws(str);
+				std::wstring filename = wdir + wname;
+				str = ws2s(filename);
+
 				TextureImage texture;
-				if (glmLoadTGA(&texture, filename,
+				if (glmLoadTGA(&texture, str.c_str(),
 					&model->materials[nummaterials].textureID))
 				{
 					model->materials[nummaterials].havetexture = GL_TRUE;
 					free(texture.imageData);
 					model->hastexture = GL_TRUE;
 				}
-				free(filename);
+				//free(filename);
 			}
 			break;
 		case 'K':
