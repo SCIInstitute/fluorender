@@ -1179,7 +1179,7 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 
 	//red volume
 	VolumeData* vd_r = new VolumeData();
-	vd_r->AddEmptyData(bits,
+	vd_r->AddEmptyData(8,
 		nx, ny, nz,
 		spcx, spcy, spcz);
 	vd_r->SetSpcFromFile(true);
@@ -1187,7 +1187,7 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 		wxString::Format("_CH_R"));
 	//green volume
 	VolumeData* vd_g = new VolumeData();
-	vd_g->AddEmptyData(bits,
+	vd_g->AddEmptyData(8,
 		nx, ny, nz,
 		spcx, spcy, spcz);
 	vd_g->SetSpcFromFile(true);
@@ -1195,7 +1195,7 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 		wxString::Format("_CH_G"));
 	//blue volume
 	VolumeData* vd_b = new VolumeData();
-	vd_b->AddEmptyData(bits,
+	vd_b->AddEmptyData(8,
 		nx, ny, nz,
 		spcx, spcy, spcz);
 	vd_b->SetSpcFromFile(true);
@@ -1230,26 +1230,21 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 	unsigned long long index;
 	unsigned int value_label;
 	Color color;
+	double max_value = m_vd->GetMaxValue();
 	for (index = 0; index < for_size; ++index)
 	{
 		value_label = data_label[index];
 		if (GetColor(value_label, tex->get_brick_id(index), m_vd, color_type, color))
 		{
 			//assign colors
+			double value;//0-255
 			if (bits == 8)
-			{
-				double value = ((unsigned char*)data_data)[index];
-				((unsigned char*)data_vd_r)[index] = (unsigned char)(color.r()*value);
-				((unsigned char*)data_vd_g)[index] = (unsigned char)(color.g()*value);
-				((unsigned char*)data_vd_b)[index] = (unsigned char)(color.b()*value);
-			}
+				value = ((unsigned char*)data_data)[index];
 			else
-			{
-				double value = ((unsigned short*)data_data)[index];
-				((unsigned short*)data_vd_r)[index] = (unsigned short)(color.r()*value);
-				((unsigned short*)data_vd_g)[index] = (unsigned short)(color.g()*value);
-				((unsigned short*)data_vd_b)[index] = (unsigned short)(color.b()*value);
-			}
+				value = ((unsigned short*)data_data)[index] * 255.0 / max_value;
+			((unsigned char*)data_vd_r)[index] = (unsigned char)(color.r()*value);
+			((unsigned char*)data_vd_g)[index] = (unsigned char)(color.g()*value);
+			((unsigned char*)data_vd_b)[index] = (unsigned char)(color.b()*value);
 		}
 	}
 
