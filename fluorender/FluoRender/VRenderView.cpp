@@ -4438,7 +4438,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		int ny = GetGLSize().y;
 		double dist = GetPointVolume(p,
 			nx / 2.0, ny / 2.0,
-			m_cur_vol, 2, true, 0.9);
+			m_cur_vol, 2, true, 0.6);
 		if (dist > 0.0)
 		{
 			//Point c(m_transx + m_obj_transx,
