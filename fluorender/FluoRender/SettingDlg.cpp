@@ -847,9 +847,9 @@ void SettingDlg::GetSettings()
 		fconfig.Read("value", &m_ruler_use_transf);
 	}
 	//ruler time dependent
-	if (fconfig.Exists("/ruler time dep"))
+	if (fconfig.Exists("/ruler time dependent"))
 	{
-		fconfig.SetPath("/ruler time dep");
+		fconfig.SetPath("/ruler time dependent");
 		fconfig.Read("value", &m_ruler_time_dep);
 	}
 	//flags for pvxml flipping

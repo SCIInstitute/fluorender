@@ -985,6 +985,7 @@ private:
 	void RunOpenCL(wxFileConfig &fconfig);
 	void RunCompAnalysis(wxFileConfig &fconfig);
 	void RunGenerateComp(wxFileConfig &fconfig);
+	void RunRulerProfile(wxFileConfig &fconfig);
 
 	//read/delete volume cache
 	//for sparse tracking

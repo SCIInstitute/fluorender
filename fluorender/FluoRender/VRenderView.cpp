@@ -5439,6 +5439,8 @@ void VRenderGLView::Run4DScript(wxString &scriptname, VolumeData* vd)
 					RunCompAnalysis(fconfig);
 				else if (str == "generate_comp")
 					RunGenerateComp(fconfig);
+				else if (str == "ruler_profile")
+					RunRulerProfile(fconfig);
 			}
 		}
 	}
@@ -5931,6 +5933,51 @@ void VRenderGLView::RunGenerateComp(wxFileConfig &fconfig)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetComponentDlg())
 		vr_frame->GetComponentDlg()->GenerateComp(type, mode);
+}
+
+void VRenderGLView::RunRulerProfile(wxFileConfig &fconfig)
+{
+	if (m_ruler_list.empty())
+		return;
+
+	for (size_t i=0; i<m_ruler_list.size(); ++i)
+		RulerProfile(i);
+
+	wxString path;
+	if (m_cur_vol)
+	{
+		path = m_cur_vol->GetPath();
+		path = wxPathOnly(path);
+	}
+	path += GETSLASH();
+	path += "profiles.txt";
+
+	//save append
+	wxFile file(path, m_sf_script ? wxFile::write : wxFile::write_append);
+	if (!file.IsOpened())
+		return;
+	for (size_t i = 0; i<m_ruler_list.size(); ++i)
+	{
+		wxString str;
+		Ruler* ruler = m_ruler_list[i];
+		if (!ruler) continue;
+
+		vector<ProfileBin>* profile = ruler->GetProfile();
+		if (profile && profile->size())
+		{
+			for (size_t j = 0; j<profile->size(); ++j)
+			{
+				int pixels = (*profile)[j].m_pixels;
+				if (pixels <= 0)
+					str += "0.0\t";
+				else
+					str += wxString::Format("%f\t", (*profile)[j].m_accum / pixels);
+			}
+			str += "\n";
+		}
+		file.Write(str);
+	}
+	file.Close();
 }
 
 //read/delete volume cache
