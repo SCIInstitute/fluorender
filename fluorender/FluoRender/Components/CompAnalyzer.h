@@ -39,6 +39,8 @@ class Annotations;
 
 namespace FL
 {
+#define SIZE_LIMIT 10
+
 	class ComponentAnalyzer
 	{
 	public:

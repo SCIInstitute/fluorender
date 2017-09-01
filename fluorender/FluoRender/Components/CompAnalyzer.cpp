@@ -320,7 +320,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 		for (iter = comp_list_brick.begin();
 			iter != comp_list_brick.end(); ++iter)
 		{
-			if (bn > 1 && iter->second->sumi < 9)
+			if (bn > 1 && iter->second->sumi < SIZE_LIMIT)
 				continue;
 			iter->second->var = sqrt(iter->second->m2 / (iter->second->sumi));
 			iter->second->mean *= scale;
@@ -500,7 +500,7 @@ void ComponentAnalyzer::UpdateMaxCompSize(bool colocal)
 			continue;
 		CompList list;
 		pCompInfo info = m_comp_graph[*iter].compinfo.lock();
-		if (m_comp_graph.GetLinkedComps(info, list))
+		if (m_comp_graph.GetLinkedComps(info, list, SIZE_LIMIT))
 		{
 			sumi = 0;
 			sumd = 0.0;
@@ -591,7 +591,7 @@ void ComponentAnalyzer::MakeColorConsistent()
 		if (m_comp_graph.Visited(i->second))
 			continue;
 		CompList list;
-		if (m_comp_graph.GetLinkedComps(i->second, list))
+		if (m_comp_graph.GetLinkedComps(i->second, list, SIZE_LIMIT))
 		{
 			//make color consistent
 			//get the id of the first item in the list
@@ -650,7 +650,7 @@ size_t ComponentAnalyzer::GetCompSize()
 				continue;
 			CompList list;
 			pCompInfo info = m_comp_graph[*iter].compinfo.lock();
-			m_comp_graph.GetLinkedComps(info, list);
+			m_comp_graph.GetLinkedComps(info, list, SIZE_LIMIT);
 			cc_size++;
 		}
 	}
@@ -711,7 +711,7 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 				continue;
 
 			CompList list;
-			if (m_comp_graph.GetLinkedComps(i->second, list))
+			if (m_comp_graph.GetLinkedComps(i->second, list, SIZE_LIMIT))
 			{
 				for (auto iter = list.begin();
 					iter != list.end(); ++iter)
@@ -936,7 +936,7 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent)
 			if (m_comp_graph.Visited(i->second))
 				continue;
 			CompList list;
-			m_comp_graph.GetLinkedComps(i->second, list);
+			m_comp_graph.GetLinkedComps(i->second, list, SIZE_LIMIT);
 		}
 
 		oss.str("");
@@ -1026,7 +1026,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 		if (bn > 1)
 		{
 			CompList list;
-			if (!m_comp_graph.GetLinkedComps(i->second, list))
+			if (!m_comp_graph.GetLinkedComps(i->second, list, SIZE_LIMIT))
 			{
 				list.insert(std::pair<unsigned long long, pCompInfo>
 					(GetKey(i->second->id, i->second->brick_id), i->second));
