@@ -189,6 +189,57 @@ private:
 	double m_max_value;
 	double m_scalar_scale;
 
+	//page properties
+	struct PageInfo
+	{
+		//sub file type
+		bool b_sub_file_type;
+		unsigned long ul_sub_file_type;
+		//width
+		bool b_image_width;
+		unsigned long ul_image_width;
+		//length
+		bool b_image_length;
+		unsigned long ul_image_length;
+		//bits per sample
+		bool b_bits_per_sample;
+		unsigned short us_bits_per_sample;
+		//compression
+		bool b_compression;
+		unsigned short us_compression;
+		//prediction
+		bool b_prediction;
+		unsigned short us_prediction;
+		//planar configuration
+		bool b_planar_config;
+		unsigned short us_planar_config;
+		//image desc
+		bool b_image_desc;
+		char c_image_desc[256];
+		//strip number
+		bool b_strip_num;
+		unsigned long ul_strip_num;
+		//strip offset
+		bool b_strip_offset;
+		unsigned long long ull_strip_offset;
+		//samples per pixel
+		bool b_samples_per_pixel;
+		unsigned short us_samples_per_pixel;
+		//rows per strip
+		bool b_rows_per_strip;
+		unsigned long ul_rows_per_strip;
+		//strip byte count
+		bool b_strip_byte_count;
+		unsigned long ul_strip_byte_count;
+		//x resolution
+		bool b_x_resolution;
+		float f_x_resolution;
+		//y resolution
+		bool b_y_resolution;
+		float f_y_resolution;
+	};
+	PageInfo m_page_info;
+
 	//time sequence id
 	wstring m_time_id;
 	/** The input stream for reading the tiff */
@@ -266,6 +317,28 @@ private:
 	static bool tif_slice_sort(const SliceInfo& info1, const SliceInfo& info2);
 	//read tiff
 	Nrrd* ReadTiff(vector<SliceInfo> &filelist, int c, bool get_max);
+
+	//invalidate page info
+	inline void InvalidatePageInfo();
 };
+
+void TIFReader::InvalidatePageInfo()
+{
+	m_page_info.b_sub_file_type = false;
+	m_page_info.b_image_width = false;
+	m_page_info.b_image_length = false;
+	m_page_info.b_bits_per_sample = false;
+	m_page_info.b_compression = false;
+	m_page_info.b_prediction = false;
+	m_page_info.b_planar_config = false;
+	m_page_info.b_image_desc = false;
+	m_page_info.b_strip_num = false;
+	m_page_info.b_strip_offset = false;
+	m_page_info.b_samples_per_pixel = false;
+	m_page_info.b_rows_per_strip = false;
+	m_page_info.b_strip_byte_count = false;
+	m_page_info.b_x_resolution = false;
+	m_page_info.b_y_resolution = false;
+}
 
 #endif//_TIF_READER_H_
