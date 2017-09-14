@@ -677,6 +677,47 @@ uint64_t TIFReader::GetTiffField(
 			return answer;
 		}
 	}
+
+	//save info
+	switch (in_tag)
+	{
+	case kSubFileTypeTag:
+		m_page_info.b_sub_file_type = true;
+		m_page_info.ul_sub_file_type = static_cast<unsigned long>(0);
+		break;
+	case kImageWidthTag:
+		m_page_info.b_image_width = true;
+		m_page_info.ul_image_width = static_cast<unsigned long>(0);
+		break;
+	case kImageLengthTag:
+		m_page_info.b_image_length = true;
+		m_page_info.ul_image_length = static_cast<unsigned long>(0);
+		break;
+	case kBitsPerSampleTag:
+		m_page_info.b_bits_per_sample = true;
+		m_page_info.us_bits_per_sample = static_cast<unsigned short>(0);
+		break;
+	case kCompressionTag:
+		m_page_info.b_compression = true;
+		m_page_info.us_compression = static_cast<unsigned short>(0);
+		break;
+	case kPredictionTag:
+		m_page_info.b_prediction = true;
+		m_page_info.us_prediction = static_cast<unsigned short>(0);
+		break;
+	case kPlanarConfigurationTag:
+		m_page_info.b_planar_config = true;
+		m_page_info.us_planar_config = static_cast<unsigned short>(0);
+		break;
+	case kSamplesPerPixelTag:
+		m_page_info.b_samples_per_pixel = true;
+		m_page_info.us_samples_per_pixel = static_cast<unsigned short>(0);
+		break;
+	case kRowsPerStripTag:
+		m_page_info.b_rows_per_strip = true;
+		m_page_info.ul_rows_per_strip = static_cast<unsigned long>(0);
+		break;
+	}
 	return 0;
 }
 
