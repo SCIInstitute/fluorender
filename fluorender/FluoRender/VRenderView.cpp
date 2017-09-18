@@ -5324,7 +5324,36 @@ void VRenderGLView::PostDraw()
 		}
 
 		if (m_enlarge)
+		{
 			glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_final);
+			//draw the final buffer to itself
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, m_tex_final);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			glDisable(GL_DEPTH_TEST);
+
+			//2d adjustment
+			ShaderProgram* img_shader =
+				m_img_shader_factory.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
+			if (img_shader)
+			{
+				if (!img_shader->valid())
+					img_shader->create();
+				img_shader->bind();
+			}
+			img_shader->setLocalParam(0, m_gamma.r(), m_gamma.g(), m_gamma.b(), 1.0);
+			img_shader->setLocalParam(1, m_brightness.r(), m_brightness.g(), m_brightness.b(), 1.0);
+			img_shader->setLocalParam(2, m_hdr.r(), m_hdr.g(), m_hdr.b(), 0.0);
+			//2d adjustment
+
+			DrawViewQuad();
+
+			if (img_shader && img_shader->valid())
+				img_shader->release();
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
 
 		int chann = VRenderFrame::GetSaveAlpha()?4:3;
 		glPixelStorei(GL_PACK_ROW_LENGTH, w);

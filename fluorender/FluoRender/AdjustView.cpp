@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include "img/icons.h"
 
 BEGIN_EVENT_TABLE(AdjustView, wxPanel)
-	//set gamme
+	//set gamma
 	EVT_COMMAND_SCROLL(ID_RGammaSldr, AdjustView::OnRGammaChange)
 	EVT_TEXT(ID_RGammaText, AdjustView::OnRGammaText)
 	EVT_COMMAND_SCROLL(ID_GGammaSldr, AdjustView::OnGGammaChange)
