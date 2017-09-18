@@ -92,6 +92,7 @@ int TIFReader::Preprocess()
 	m_4d_seq.clear();
 	isHyperstack_ = false;
 	isHsTimeSeq_ = false;
+	large_hs_ = false;
 	InvalidatePageInfo();
 
 	//separate path and name
@@ -150,6 +151,21 @@ int TIFReader::Preprocess()
 			m_time_num = num;
 		else
 			m_time_num = 1;
+		//max
+		if (bits == 16)
+		{
+			search_str = "max=";
+			str_pos = desc.find(search_str);
+			if (str_pos != -1)
+				num = get_number(desc, str_pos + search_str.length());
+			else
+				num = 0;
+			if (num)
+			{
+				m_max_value = num;
+				m_scalar_scale = 65535.0 / m_max_value;
+			}
+		}
 
 		std::vector<std::wstring> list;
 		if (m_time_num == 1)
@@ -863,6 +879,9 @@ Nrrd* TIFReader::Convert(int t, int c, bool get_max)
 		c < 0 || c >= m_chan_num)
 		return 0;
 
+	if (isHyperstack_ && m_max_value)
+		get_max = false;
+
 	Nrrd* data = 0;
 	TimeDataInfo chan_info = m_4d_seq[t];
 	if (!isHyperstack_ || isHsTimeSeq_)
@@ -978,15 +997,18 @@ void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
 	if (current_page_ > page)
 		ResetTiff();
 	// fast forward if we are behind.
-	while (current_page_ < page)
+	if (!large_hs_)
 	{
-		tiff_stream.seekg(current_offset_, tiff_stream.beg);
-		if (GetTiffField(kSubFileTypeTag, NULL, 0) != 1) current_page_++;
-		current_offset_ = GetTiffField(kNextPageOffsetTag, NULL, 0);
+		while (current_page_ < page)
+		{
+			tiff_stream.seekg(current_offset_, tiff_stream.beg);
+			if (GetTiffField(kSubFileTypeTag, NULL, 0) != 1) current_page_++;
+			current_offset_ = GetTiffField(kNextPageOffsetTag, NULL, 0);
+		}
 	}
 	//get the byte count and the strip offset to read data from.
 	uint64_t byte_count = 0;
-	if (current_offset_)
+	if (current_offset_ && !large_hs_)
 	{
 		m_page_info.ul_strip_byte_count =
 			GetTiffStripOffsetOrCount(kStripBytesCountTag, strip);
@@ -1003,9 +1025,11 @@ void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
 		byte_count = m_page_info.ul_strip_byte_count;
 		//if (m_page_info.b_strip_offset)
 		tiff_stream.seekg(m_page_info.ull_strip_offset + page * byte_count, tiff_stream.beg);
+		large_hs_ = true;
 	}
 	//actually read the data now
 	char *temp = new char[byte_count];
+	unsigned long long pos = tiff_stream.tellg();
 	tiff_stream.read((char*)temp, byte_count);
 	bool eight_bits = 8 == GetTiffField(kBitsPerSampleTag, NULL, 0);
 	if (swap_ && !eight_bits) {

@@ -248,6 +248,7 @@ private:
 	uint64_t current_page_;
 	/** This is the offset of the page we are currently on */
 	uint64_t current_offset_;
+	bool large_hs_;
 	/** Tells us if the data is little endian */
 	bool swap_;
 	/** The tiff tag for subfile type */
