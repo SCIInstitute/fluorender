@@ -46,6 +46,9 @@ public:
 		ID_SaveBtn,
 		ID_SaveAsBtn,
 		ID_ExecuteBtn,
+		ID_ExecuteNBtn,
+		ID_IterationsSldr,
+		ID_IterationsTxt,
 		ID_KernelList,
 		ID_KernelEditStc,
 		ID_OutputTxt
@@ -68,6 +71,9 @@ private:
 	wxButton* m_save_btn;
 	wxButton* m_saveas_btn;
 	wxButton* m_execute_btn;
+	wxButton* m_execute_n_btn;
+	wxSlider* m_iterations_sldr;
+	wxTextCtrl* m_iterations_txt;
 	wxTextCtrl* m_output_txt;
 
 	//list
@@ -82,6 +88,7 @@ private:
 
 private:
 	void AddKernelsToList();
+	void Execute();
 
 	void copy_filter(void* data, void* result,
 		int brick_x, int brick_y, int brick_z);
@@ -104,6 +111,9 @@ private:
 	void OnSaveBtn(wxCommandEvent& event);
 	void OnSaveAsBtn(wxCommandEvent& event);
 	void OnExecuteBtn(wxCommandEvent& event);
+	void OnExecuteNBtn(wxCommandEvent& event);
+	void OnIterationsChange(wxScrollEvent &event);
+	void OnIterationsEdit(wxCommandEvent &event);
 	void OnKernelListSelected(wxListEvent& event);
 
 	DECLARE_EVENT_TABLE();

@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <wx/stdpaths.h>
+#include <wx/valnum.h>
 #include "compatibility.h"
 //#include <boost/chrono.hpp>
 //using namespace boost::chrono;
@@ -40,6 +41,9 @@ BEGIN_EVENT_TABLE(OclDlg, wxPanel)
 	EVT_BUTTON(ID_SaveBtn, OclDlg::OnSaveBtn)
 	EVT_BUTTON(ID_SaveAsBtn, OclDlg::OnSaveAsBtn)
 	EVT_BUTTON(ID_ExecuteBtn, OclDlg::OnExecuteBtn)
+	EVT_BUTTON(ID_ExecuteNBtn, OclDlg::OnExecuteNBtn)
+	EVT_COMMAND_SCROLL(ID_IterationsSldr, OclDlg::OnIterationsChange)
+	EVT_TEXT(ID_IterationsTxt, OclDlg::OnIterationsEdit)
 	EVT_LIST_ITEM_SELECTED(ID_KernelList, OclDlg::OnKernelListSelected)
 END_EVENT_TABLE()
 
@@ -53,6 +57,9 @@ m_view(0)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+
+	//validator: integer
+	wxIntegerValidator<unsigned int> vald_int;
 
 	wxStaticText *st = 0;
 	//
@@ -80,9 +87,20 @@ m_view(0)
 		wxDefaultPosition, wxSize(70, 20));
 	m_execute_btn = new wxButton(this, ID_ExecuteBtn, "Run",
 		wxDefaultPosition, wxSize(60, 23));
+	m_execute_n_btn = new wxButton(this, ID_ExecuteNBtn, "Run N Times",
+		wxDefaultPosition, wxSize(80, 23));
+	m_iterations_sldr = new wxSlider(this, ID_IterationsSldr, 1, 1, 100,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_iterations_txt = new wxTextCtrl(this, ID_IterationsTxt, "1",
+		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
 	sizer_2->Add(5, 5);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_execute_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_execute_n_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(5, 5);
+	sizer_2->Add(m_iterations_sldr, 1, wxEXPAND);
+	sizer_2->Add(m_iterations_txt, 0, wxALIGN_CENTER);
+	sizer_2->Add(5, 5);
 
 	//output
 	m_output_txt = new wxTextCtrl(this, ID_OutputTxt, "",
@@ -249,6 +267,54 @@ void OclDlg::OnSaveAsBtn(wxCommandEvent& event)
 
 void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 {
+	Execute();
+}
+
+void OclDlg::OnExecuteNBtn(wxCommandEvent& event)
+{
+	wxString str = m_iterations_txt->GetValue();
+	unsigned long ival;
+	str.ToULong(&ival);
+
+	for (int i=0; i<ival; ++i)
+		Execute();
+}
+
+void OclDlg::OnIterationsChange(wxScrollEvent &event)
+{
+	int ival = event.GetPosition();
+	wxString str = wxString::Format("%d", ival);
+	m_iterations_txt->SetValue(str);
+}
+
+void OclDlg::OnIterationsEdit(wxCommandEvent &event)
+{
+	wxString str = m_iterations_txt->GetValue();
+	unsigned long ival;
+	str.ToULong(&ival);
+	m_iterations_sldr->SetValue(ival);
+}
+
+void OclDlg::AddKernelsToList()
+{
+	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+	exePath = wxPathOnly(exePath);
+	m_kernel_list->DeleteAllItems();
+	wxString loc = exePath + GETSLASH() + "CL_code" +
+		GETSLASH() + "*.cl";
+	wxLogNull logNo;
+	wxString file = wxFindFirstFile(loc);
+	while (!file.empty())
+	{
+		file = wxFileNameFromPath(file);
+		file = file.BeforeLast('.');
+		m_kernel_list->InsertItem(m_kernel_list->GetItemCount(), file);
+		file = wxFindNextFile();
+	}
+}
+
+void OclDlg::Execute()
+{
 	m_output_txt->SetValue("");
 
 	if (!m_view)
@@ -275,13 +341,13 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 	executor->SetDuplicate(dup);
 	executor->Execute();
 
-/*	Texture* tex = vd->GetTexture();
+	/*	Texture* tex = vd->GetTexture();
 	void* result = executor->GetResult()->GetTexture()->get_nrrd(0)->data;
 	int res_x, res_y, res_z;
 	vd->GetResolution(res_x, res_y, res_z);
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	min_filter(tex->get_nrrd(0)->data, result,
-		res_x, res_y, res_z);
+	res_x, res_y, res_z);
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	duration<double> time_span = duration_cast<duration<double>>(t2-t1);
 	(*m_output_txt) << "CPU time: " << time_span.count() << " sec.\n";*/
@@ -308,24 +374,6 @@ void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 	}
 
 	m_view->RefreshGL();
-}
-
-void OclDlg::AddKernelsToList()
-{
-	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-	exePath = wxPathOnly(exePath);
-	m_kernel_list->DeleteAllItems();
-	wxString loc = exePath + GETSLASH() + "CL_code" +
-		GETSLASH() + "*.cl";
-	wxLogNull logNo;
-	wxString file = wxFindFirstFile(loc);
-	while (!file.empty())
-	{
-		file = wxFileNameFromPath(file);
-		file = file.BeforeLast('.');
-		m_kernel_list->InsertItem(m_kernel_list->GetItemCount(), file);
-		file = wxFindNextFile();
-	}
 }
 
 void OclDlg::OnKernelListSelected(wxListEvent& event)

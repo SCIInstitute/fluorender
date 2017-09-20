@@ -2,6 +2,20 @@
 #define KY 3
 #define KZ 3
 #define TH 0.5
+bool check_loop(bool loop[])
+{
+	int count = loop[0]?1:0;
+	int count_chg = 0;
+	for (int i=1; i<8; ++i)
+	{
+		count += loop[i]?1:0;
+		if (!loop[i-1] && loop[i])
+			count_chg++;
+	}
+	if (!loop[7] && loop[0])
+		count_chg++;
+	return count>2 && count<8 && count_chg==1;
+}
 const sampler_t samp =
 	CLK_NORMALIZED_COORDS_FALSE|
 	CLK_ADDRESS_CLAMP_TO_EDGE|
@@ -34,13 +48,33 @@ __kernel void kernel_main(
 		nbs[count] = dvalue>=TH?true:false;
 		count++;
 	}
-	int pos1 = -1;
-	int pos2 = -1;
-	for (i=0; i<KX*KY*KZ; ++i)
-	{
-		if (!nbs[i] && pos1==-1)
-			pos1 = i;
-	}
+	//check 5 loops
+	bool loop[8];
+	//first
+	loop[0] = nbs[1]; loop[1] = nbs[4]; loop[2] = nbs[7]; loop[3] = nbs[16];
+	loop[4] = nbs[25]; loop[5] = nbs[22]; loop[6] = nbs[19]; loop[7] = nbs[10];
+	if (!check_loop(loop))
+		return;
+	//second
+	//loop[0] = nbs[0]; loop[1] = nbs[3]; loop[2] = nbs[6]; loop[3] = nbs[16];
+	//loop[4] = nbs[26]; loop[5] = nbs[23]; loop[6] = nbs[20]; loop[7] = nbs[10];
+	//if (!check_loop(loop))
+	//	return;
+	//third
+	loop[0] = nbs[9]; loop[1] = nbs[12]; loop[2] = nbs[15]; loop[3] = nbs[16];
+	loop[4] = nbs[17]; loop[5] = nbs[14]; loop[6] = nbs[11]; loop[7] = nbs[10];
+	if (!check_loop(loop))
+		return;
+	//fourth
+	//loop[0] = nbs[18]; loop[1] = nbs[21]; loop[2] = nbs[24]; loop[3] = nbs[16];
+	//loop[4] = nbs[8]; loop[5] = nbs[5]; loop[6] = nbs[2]; loop[7] = nbs[10];
+	//if (!check_loop(loop))
+	//	return;
+	//fifth
+	loop[0] = nbs[3]; loop[1] = nbs[4]; loop[2] = nbs[5]; loop[3] = nbs[14];
+	loop[4] = nbs[23]; loop[5] = nbs[22]; loop[6] = nbs[21]; loop[7] = nbs[12];
+	if (!check_loop(loop))
+		return;
 	unsigned int index = x*y*coord.z + x*coord.y + coord.x;
 	result[index] = 0.0;
 }
