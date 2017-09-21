@@ -1150,7 +1150,7 @@ namespace FLIVR
 	void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 		double ini_thresh, double gm_falloff, double scl_falloff,
 		double scl_translate, double w2d, double bins, bool orthographic_p,
-		bool estimate)
+		bool estimate, bool order)
 	{
 		if (estimate && type==0)
 			est_thresh_ = 0.0;
@@ -1271,7 +1271,9 @@ namespace FLIVR
 		if (use_2d) bind_2d_weight();
 
 		float matrix[16];
-		for (unsigned int i=0; i < bricks->size(); i++)
+		int i;
+		unsigned int num = bricks->size();
+		for (i=order?0:num-1; order?(i<num):(i>=0); i+=order?1:-1)
 		{
 			TextureBrick* b = (*bricks)[i];
 

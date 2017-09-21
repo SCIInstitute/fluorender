@@ -142,24 +142,24 @@ void VolumeSelector::Select(double radius)
 	//there is some unknown problem of clearing the mask
 	if (m_mode == 1)
 	{
-		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
-		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
+		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, false);
+		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, false);
 	}
 	else if (m_mode == 6)
-		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
+		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, false);
 
 	//initialization
 	int hr_mode = m_hidden_removal?(m_ortho?1:2):0;
 	if ((m_mode==1 || m_mode==2) && m_estimate_threshold)
 	{
-		m_vd->DrawMask(0, m_mode, hr_mode, 0.0, gm_falloff, scl_falloff, 0.0, m_w2d, 0.0, false, true);
-		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
+		m_vd->DrawMask(0, m_mode, hr_mode, 0.0, gm_falloff, scl_falloff, 0.0, m_w2d, 0.0, false, false, true);
+		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, false);
 		ini_thresh = m_vd->GetEstThresh() * m_vd->GetScalarScale();
 		if (m_iter_num>BRUSH_TOOL_ITER_WEAK)
 			ini_thresh /= 2.0;
 		m_scl_translate = ini_thresh;
 	}
-	m_vd->DrawMask(0, m_mode, hr_mode, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
+	m_vd->DrawMask(0, m_mode, hr_mode, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, false);
 
 	//grow the selection when paint mode is select, append, erase, or invert
 	if (m_mode==1 ||
@@ -170,7 +170,7 @@ void VolumeSelector::Select(double radius)
 		//loop for growing
 		int iter = m_iter_num*(radius/200.0>1.0?radius/200.0:1.0);
 		for (int i=0; i<iter; i++)
-			m_vd->DrawMask(1, m_mode, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0);
+			m_vd->DrawMask(1, m_mode, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, true);
 	}
 
 	if (m_mode == 6)
@@ -249,7 +249,7 @@ int VolumeSelector::CompAnalysis(double min_voxels, double max_voxels, double th
 		else
 			m_vd->Set2DWeight(0, 0);
 
-		m_vd->DrawMask(0, 5, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+		m_vd->DrawMask(0, 5, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false);
 		//next do the same as when it's selected by brush
 	}
 	Label(0);
@@ -1027,7 +1027,7 @@ int VolumeSelector::NoiseAnalysis(double min_voxels, double max_voxels, double b
 		scl_falloff = m_scl_falloff;
 	else
 		scl_falloff = 0.01;
-	m_vd->DrawMask(0, 11, 0, ini_thresh, gm_falloff, scl_falloff, thresh, m_w2d, bins);
+	m_vd->DrawMask(0, 11, 0, ini_thresh, gm_falloff, scl_falloff, thresh, m_w2d, bins, false);
 
 	//then label
 	Label(1);
@@ -1067,14 +1067,14 @@ void VolumeSelector::NoiseRemoval(int iter, double thresh, int mode)
 	{
 		for (int i=0; i<iter; i++)
 		{
-			m_vd->DrawMask(2, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+			m_vd->DrawMask(2, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false);
 			if (m_prog_diag)
 			{
 				m_progress++;
 				m_prog_diag->Update(95*(m_progress+1)/m_total_pr);
 			}
 		}
-		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, thresh, m_w2d, 0.0);
+		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, thresh, m_w2d, 0.0, false);
 		m_vd->GetVR()->return_volume();
 	}
 	else if (mode == 1)
@@ -1169,14 +1169,14 @@ void VolumeSelector::NoiseRemoval(int iter, double thresh, int mode)
 
 		for (int i=0; i<iter; i++)
 		{
-			vd_new->DrawMask(2, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+			vd_new->DrawMask(2, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false);
 			if (m_prog_diag)
 			{
 				m_progress++;
 				m_prog_diag->Update(95*(m_progress+1)/m_total_pr);
 			}
 		}
-		vd_new->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, thresh, m_w2d, 0.0);
+		vd_new->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, thresh, m_w2d, 0.0, false);
 		vd_new->GetVR()->return_volume();
 
 		m_result_vols.push_back(vd_new);
