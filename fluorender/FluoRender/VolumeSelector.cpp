@@ -169,8 +169,10 @@ void VolumeSelector::Select(double radius)
 	{
 		//loop for growing
 		int iter = m_iter_num*(radius/200.0>1.0?radius/200.0:1.0);
+		int div = iter / 3;
+		div = div ? div : 1;
 		for (int i=0; i<iter; i++)
-			m_vd->DrawMask(1, m_mode, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, true);
+			m_vd->DrawMask(1, m_mode, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, i%div==0);
 	}
 
 	if (m_mode == 6)

@@ -1353,7 +1353,7 @@ void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 		{
 			//invalidate mask
 			m_vr->return_mask();
-			m_vr->clear_tex_current();
+			m_vr->clear_tex_mask();
 			m_vr->draw_mask(type, paint_mode, hr_mode, ini_thresh, gm_falloff, scl_falloff, scl_translate, w2d, bins, ortho, estimate, false);
 		}
 		if (estimate)

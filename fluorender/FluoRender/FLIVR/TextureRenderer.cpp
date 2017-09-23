@@ -243,6 +243,20 @@ namespace FLIVR
 		}
 	}
 
+	void TextureRenderer::clear_tex_mask()
+	{
+		TextureBrick* brick = 0;
+		for (int i = tex_pool_.size() - 1; i >= 0; --i)
+		{
+			brick = tex_pool_[i].brick;
+			if (tex_pool_[i].comp == brick->nmask())
+			{
+				glDeleteTextures(1, (GLuint*)&tex_pool_[i].id);
+				tex_pool_.erase(tex_pool_.begin() + i);
+			}
+		}
+	}
+
 	//resize the fbo texture
 	void TextureRenderer::resize()
 	{

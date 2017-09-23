@@ -157,6 +157,7 @@ namespace FLIVR
 		//clear the opengl textures from the texture pool
 		void clear_tex_pool();
 		void clear_tex_current();
+		void clear_tex_mask();
 
 		//resize the fbo texture
 		void resize();
