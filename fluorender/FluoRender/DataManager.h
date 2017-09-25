@@ -245,9 +245,10 @@ public:
 	//type: 0-initial; 1-diffusion-based growing
 	//paint_mode: 1-select; 2-append; 3-erase; 4-diffuse; 5-flood; 6-clear
 	//hr_mode (hidden removal): 0-none; 1-ortho; 2-persp
+	//order (for updating instreaming mode): 0-no op; 1-normal order; 2-reversed order
 	void DrawMask(int type, int paint_mode, int hr_mode,
 		double ini_thresh, double gm_falloff, double scl_falloff, double scl_translate,
-		double w2d, double bins, bool twice, bool ortho=false, bool estimate=false);
+		double w2d, double bins, int order, bool ortho=false, bool estimate=false);
 	//draw label (create the label)
 	//type: 0-initialize; 1-maximum intensity filtering
 	//mode: 0-normal; 1-posterized, 2-copy values

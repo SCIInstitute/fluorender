@@ -1150,7 +1150,7 @@ namespace FLIVR
 	void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 		double ini_thresh, double gm_falloff, double scl_falloff,
 		double scl_translate, double w2d, double bins, bool orthographic_p,
-		bool estimate, bool order)
+		bool estimate)
 	{
 		if (estimate && type==0)
 			est_thresh_ = 0.0;
@@ -1273,7 +1273,7 @@ namespace FLIVR
 		float matrix[16];
 		int i;
 		unsigned int num = bricks->size();
-		for (i=order?0:num-1; order?(i<num):(i>=0); i+=order?1:-1)
+		for (i=0; i<num; ++i)
 		{
 			TextureBrick* b = (*bricks)[i];
 
@@ -1737,7 +1737,7 @@ namespace FLIVR
 	}
 
 	//return the mask volume
-	void VolumeRenderer::return_mask()
+	void VolumeRenderer::return_mask(int order)
 	{
 		if (!tex_)
 			return;
@@ -1749,7 +1749,11 @@ namespace FLIVR
 		if (c<0 || c>=TEXTURE_MAX_COMPONENTS)
 			return;
 
-		for (unsigned int i=0; i<bricks->size(); i++)
+		int i;
+		size_t num = bricks->size();
+		for (i=((order==2)?(num-1):0);
+			(order==2)?(i>=0):(i<num);
+			i+=((order==2)?-1:1))
 		{
 			load_brick_mask(bricks, i);
 			glActiveTexture(GL_TEXTURE0+c);
