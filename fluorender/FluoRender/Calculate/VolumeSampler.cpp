@@ -42,6 +42,9 @@ VolumeSampler::VolumeSampler() :
 	m_bits(0),
 	m_bits_in(0),
 	m_type(0),
+	m_fx(0),
+	m_fy(0),
+	m_fz(0),
 	m_border(0)
 {
 }
@@ -75,6 +78,13 @@ void VolumeSampler::SetSize(int nx, int ny, int nz)
 void VolumeSampler::SetType(int type)
 {
 	m_type = type;
+}
+
+void VolumeSampler::SetFilterSize(int fx, int fy, int fz)
+{
+	m_fx = fx;
+	m_fy = fy;
+	m_fz = fz;
 }
 
 void VolumeSampler::Resize()
@@ -127,9 +137,9 @@ void VolumeSampler::Resize()
 	int i, j, k;
 	double x, y, z;
 	double value;
-	for (i = 0; i < m_nx; ++i)
-	for (j = 0; j < m_ny; ++j)
 	for (k = 0; k < m_nz; ++k)
+	for (j = 0; j < m_ny; ++j)
+	for (i = 0; i < m_nx; ++i)
 	{
 		index = (unsigned long long)m_nx*(unsigned long long)m_ny*
 			(unsigned long long)k + (unsigned long long)m_nx*
@@ -171,22 +181,20 @@ double VolumeSampler::Sample(double x, double y, double z)
 		return SampleNearestNeighbor(x, y, z);
 	case 1:
 		return SampleLinear(x, y, z);
+	case 2:
+		return SampleBox(x, y, z);
 	}
 	return 0.0;
 }
 
-double VolumeSampler::SampleNearestNeighbor(double x, double y, double z)
+bool VolumeSampler::ijk(int &i, int &j, int &k)
 {
-	int i, j, k;
-	i = int(x*m_nx_in);
-	j = int(y*m_ny_in);
-	k = int(z*m_nz_in);
 	if (i < 0)
 	{
 		switch (m_border)
 		{
 		case 0:
-			return 0.0;
+			return false;
 		case 1:
 			i = 0;
 			break;
@@ -200,7 +208,7 @@ double VolumeSampler::SampleNearestNeighbor(double x, double y, double z)
 		switch (m_border)
 		{
 		case 0:
-			return 0;
+			return false;
 		case 1:
 			i = m_nx_in - 1;
 			break;
@@ -213,7 +221,7 @@ double VolumeSampler::SampleNearestNeighbor(double x, double y, double z)
 		switch (m_border)
 		{
 		case 0:
-			return 0.0;
+			return false;
 		case 1:
 			j = 0;
 			break;
@@ -227,7 +235,7 @@ double VolumeSampler::SampleNearestNeighbor(double x, double y, double z)
 		switch (m_border)
 		{
 		case 0:
-			return 0;
+			return false;
 		case 1:
 			j = m_ny_in - 1;
 			break;
@@ -240,7 +248,7 @@ double VolumeSampler::SampleNearestNeighbor(double x, double y, double z)
 		switch (m_border)
 		{
 		case 0:
-			return 0.0;
+			return false;
 		case 1:
 			k = 0;
 			break;
@@ -254,7 +262,7 @@ double VolumeSampler::SampleNearestNeighbor(double x, double y, double z)
 		switch (m_border)
 		{
 		case 0:
-			return 0;
+			return false;
 		case 1:
 			k = m_nz_in - 1;
 			break;
@@ -262,6 +270,23 @@ double VolumeSampler::SampleNearestNeighbor(double x, double y, double z)
 			k = m_nz_in * 2 - k - 1;
 		}
 	}
+	return true;
+}
+
+void VolumeSampler::xyz2ijk(double x, double y, double z,
+	int &i, int &j, int &k)
+{
+	i = int(x*m_nx_in);
+	j = int(y*m_ny_in);
+	k = int(z*m_nz_in);
+}
+
+double VolumeSampler::SampleNearestNeighbor(double x, double y, double z)
+{
+	int i, j, k;
+	xyz2ijk(x, y, z, i, j, k);
+	if (!ijk(i, j, k))
+		return 0.0;
 	unsigned long long index = (unsigned long long)m_nx_in*(unsigned long long)m_ny_in*
 		(unsigned long long)k + (unsigned long long)m_nx_in*
 		(unsigned long long)j + (unsigned long long)i;
@@ -275,4 +300,36 @@ double VolumeSampler::SampleNearestNeighbor(double x, double y, double z)
 double VolumeSampler::SampleLinear(double x, double y, double z)
 {
 	return 0;
+}
+
+double VolumeSampler::SampleBox(double x, double y, double z)
+{
+	int i, j, k;
+	xyz2ijk(x, y, z, i, j, k);
+	double sum = 0.0;
+	int count = 0;
+	unsigned long long index;
+	for (int kk=k-m_fz; kk<=k+m_fz; ++kk)
+	for (int jj=j-m_fy; jj<=j+m_fy; ++jj)
+	for (int ii=i-m_fx; ii<=i+m_fx; ++ii)
+	{
+		if (ijk(ii, jj, kk))
+		{
+			index = (unsigned long long)m_nx_in*(unsigned long long)m_ny_in*
+				(unsigned long long)kk + (unsigned long long)m_nx_in*
+				(unsigned long long)jj + (unsigned long long)ii;
+			if (m_bits_in == 8)
+				sum += double(((unsigned char*)(m_vd->data))[index]) / 255.0;
+			else if (m_bits_in == 16)
+				sum += double(((unsigned short*)(m_vd->data))[index]) / 65535.0;
+		}
+		count++;
+	}
+	if (count)
+		sum /= count;
+	index = (unsigned long long)m_nx_in*(unsigned long long)m_ny_in*
+		(unsigned long long)k + (unsigned long long)m_nx_in*
+		(unsigned long long)j + (unsigned long long)i;
+	double test = double(((unsigned char*)(m_vd->data))[index]) / 255.0;
+	return sum;
 }

@@ -4368,6 +4368,8 @@ int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_
 						FL::VolumeSampler sampler;
 						sampler.SetVolume(mask);
 						sampler.SetSize(nx, ny, nz);
+						sampler.SetType(2);
+						sampler.SetFilterSize(2, 2, 0);
 						sampler.Resize();
 						Nrrd* mask_resize = sampler.GetResult();
 						vd->LoadMask(mask_resize);

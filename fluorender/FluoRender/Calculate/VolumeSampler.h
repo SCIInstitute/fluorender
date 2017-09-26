@@ -47,6 +47,7 @@ namespace FL
 		Nrrd* GetResult();
 		void SetSize(int nx, int ny, int nz);
 		void SetType(int type);
+		void SetFilterSize(int fx, int fy, int fz);
 		void Resize();
 		double Sample(double x, double y, double z);
 
@@ -68,7 +69,12 @@ namespace FL
 
 		int m_type;	//sampler type
 					//0:nearest neighbor;
-					//2:linear;
+					//1:linear;
+					//2:box;
+		//filter size
+		int m_fx;
+		int m_fy;
+		int m_fz;
 
 		int m_border;	//border handling
 					//0:set to 0;
@@ -76,8 +82,12 @@ namespace FL
 					//2:mirror
 
 	private:
+		bool ijk(int &i, int &j, int &k);
+		void xyz2ijk(double x, double y, double z,
+			int &i, int &j, int &k);
 		double SampleNearestNeighbor(double x, double y, double z);
 		double SampleLinear(double x, double y, double z);
+		double SampleBox(double x, double y, double z);
 	};
 }
 #endif//_VOLUMESAMPLER_H_
