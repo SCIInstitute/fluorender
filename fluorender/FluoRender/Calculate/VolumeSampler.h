@@ -29,6 +29,10 @@ DEALINGS IN THE SOFTWARE.
 #define _VOLUMESAMPLER_H_
 
 #include <nrrd.h>
+#ifdef STATIC_COMPILE
+#define nrrdWrap nrrdWrap_va
+#define nrrdAxisInfoSet nrrdAxisInfoSet_va
+#endif
 
 namespace FL
 {
@@ -42,8 +46,9 @@ namespace FL
 		Nrrd* GetVolume();
 		Nrrd* GetResult();
 		void SetSize(int nx, int ny, int nz);
-
-		void Sample();
+		void SetType(int type);
+		void Resize();
+		double Sample(double x, double y, double z);
 
 	private:
 		Nrrd *m_vd_r;	//result volume data
@@ -53,19 +58,26 @@ namespace FL
 		int m_nx;
 		int m_ny;
 		int m_nz;
+		//old size
+		int m_nx_in;
+		int m_ny_in;
+		int m_nz_in;
+		//bits
+		int m_bits;
+		int m_bits_in;
 
 		int m_type;	//sampler type
-					//1:substraction;
-					//2:addition;
-					//3:division;
-					//4:intersection
-					//5:apply mask (single volume multiplication)
-					//6:apply mask inverted (multiplication with mask's complement in volume)
-					//7:apply mask inverted, then replace volume a
-					//8:intersection with masks if available
-					//9:fill holes
+					//0:nearest neighbor;
+					//2:linear;
+
+		int m_border;	//border handling
+					//0:set to 0;
+					//1:clamp to border
+					//2:mirror
 
 	private:
+		double SampleNearestNeighbor(double x, double y, double z);
+		double SampleLinear(double x, double y, double z);
 	};
 }
 #endif//_VOLUMESAMPLER_H_

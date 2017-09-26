@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "DataManager.h"
+#include "Calculate/VolumeSampler.h"
 #include "teem/Nrrd/nrrd.h"
 #include <wx/msgdlg.h>
 #include <wx/progdlg.h>
@@ -4355,7 +4356,26 @@ int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_
 				msk_reader.SetFile(str);
 				Nrrd* mask = msk_reader.Convert(0, 0, true);
 				if (mask)
-					vd->LoadMask(mask);
+				{
+					int nx, ny, nz;
+					vd->GetResolution(nx, ny, nz);
+					int nx2, ny2, nz2;
+					nx2 = mask->axis[0].size;
+					ny2 = mask->axis[1].size;
+					nz2 = mask->axis[2].size;
+					if (nx!=nx2 || ny!=ny2 || nz!=nz2)
+					{
+						FL::VolumeSampler sampler;
+						sampler.SetVolume(mask);
+						sampler.SetSize(nx, ny, nz);
+						sampler.Resize();
+						Nrrd* mask_resize = sampler.GetResult();
+						vd->LoadMask(mask_resize);
+						nrrdNuke(mask);
+					}
+					else
+						vd->LoadMask(mask);
+				}
 				//label mask
 				LBLReader lbl_reader;
 				str = reader->GetCurLabelName(t_num >= 0 ? t_num : reader->GetCurTime(), i);
