@@ -41,6 +41,9 @@ VolumeSampler::VolumeSampler() :
 	m_nz_in(0),
 	m_bits(0),
 	m_bits_in(0),
+	m_spcx_in(1.0),
+	m_spcy_in(1.0),
+	m_spcz_in(1.0),
 	m_type(0),
 	m_fx(0),
 	m_fy(0),
@@ -73,6 +76,13 @@ void VolumeSampler::SetSize(int nx, int ny, int nz)
 	m_nx = nx;
 	m_ny = ny;
 	m_nz = nz;
+}
+
+void VolumeSampler::SetSpacings(double spcx, double spcy, double spcz)
+{
+	m_spcx_in = spcx;
+	m_spcy_in = spcy;
+	m_spcz_in = spcz;
 }
 
 void VolumeSampler::SetType(int type)
@@ -162,9 +172,9 @@ void VolumeSampler::Resize()
 		nrrdWrap(m_vd_r, (uint16_t*)data, nrrdTypeUShort,
 			3, (size_t)m_nx, (size_t)m_ny, (size_t)m_nz);
 	double spcx, spcy, spcz;
-	spcx = m_vd->axis[0].spacing * double(m_nx_in) / double(m_nx);
-	spcy = m_vd->axis[1].spacing * double(m_ny_in) / double(m_ny);
-	spcz = m_vd->axis[2].spacing * double(m_nz_in) / double(m_nz);
+	spcx = m_spcx_in * double(m_nx_in) / double(m_nx);
+	spcy = m_spcy_in * double(m_ny_in) / double(m_ny);
+	spcz = m_spcz_in * double(m_nz_in) / double(m_nz);
 	nrrdAxisInfoSet(m_vd_r, nrrdAxisInfoSpacing, spcx, spcy, spcz);
 	nrrdAxisInfoSet(m_vd_r, nrrdAxisInfoMax, spcx*m_nx,
 		spcy*m_ny, spcz*m_nz);

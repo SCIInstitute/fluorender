@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include "DataManager.h"
 #include "VRenderFrame.h"
 #include "Formats/png_resource.h"
+#include <wx/valnum.h>
 
 //resources
 #include "img/icons.h"
@@ -50,6 +51,8 @@ EVT_TEXT_ENTER(ID_RenameText, DataListCtrl::OnEndEditName)
 EVT_SCROLLWIN(DataListCtrl::OnScroll)
 EVT_MOUSEWHEEL(DataListCtrl::OnScroll)
 END_EVENT_TABLE()
+
+VolumeData* DataListCtrl::m_vd = 0;
 
 DataListCtrl::DataListCtrl(
 	wxWindow* frame,
@@ -433,31 +436,118 @@ void DataListCtrl::OnRename(wxCommandEvent& event)
 }
 
 //ch1
-void DataListCtrl::OnCh1Check(wxCommandEvent &event)
+void DataListCtrl::OnCompCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
 	if (ch1)
 		VRenderFrame::SetCompression(ch1->GetValue());
 }
 
+void DataListCtrl::OnResizeCheck(wxCommandEvent &event)
+{
+	wxCheckBox* comp_chk = (wxCheckBox*)event.GetEventObject();
+	if (!comp_chk)
+		return;
+	bool resize = comp_chk->GetValue();
+	wxWindow* panel = comp_chk->GetParent();
+	if (!panel)
+		return;
+	wxTextCtrl* size_x_txt = (wxTextCtrl*)panel->FindWindow(ID_RESIZE_X_TXT);
+	wxTextCtrl* size_y_txt = (wxTextCtrl*)panel->FindWindow(ID_RESIZE_Y_TXT);
+	wxTextCtrl* size_z_txt = (wxTextCtrl*)panel->FindWindow(ID_RESIZE_Z_TXT);
+	//set size values
+	if (size_x_txt && size_y_txt && size_z_txt)
+	{
+		if (m_vd && resize)
+		{
+			int nx, ny, nz;
+			m_vd->GetResolution(nx, ny, nz);
+			size_x_txt->SetValue(wxString::Format("%d", nx));
+			size_y_txt->SetValue(wxString::Format("%d", ny));
+			size_z_txt->SetValue(wxString::Format("%d", nz));
+		}
+		else
+		{
+			size_x_txt->SetValue("");
+			size_y_txt->SetValue("");
+			size_z_txt->SetValue("");
+		}
+	}
+	if (m_vd)
+		m_vd->SetResize(resize ? 1 : 0, -1, -1, -1);
+}
+
+void DataListCtrl::OnSizeXText(wxCommandEvent &event)
+{
+	wxTextCtrl* size_x_txt = (wxTextCtrl*)event.GetEventObject();
+	if (size_x_txt && m_vd)
+		m_vd->SetResize(-1, STOI(size_x_txt->GetValue().fn_str()), -1, -1);
+}
+
+void DataListCtrl::OnSizeYText(wxCommandEvent &event)
+{
+	wxTextCtrl* size_y_txt = (wxTextCtrl*)event.GetEventObject();
+	if (size_y_txt && m_vd)
+		m_vd->SetResize(-1, -1, STOI(size_y_txt->GetValue().fn_str()), -1);
+}
+
+void DataListCtrl::OnSizeZText(wxCommandEvent &event)
+{
+	wxTextCtrl* size_z_txt = (wxTextCtrl*)event.GetEventObject();
+	if (size_z_txt && m_vd)
+		m_vd->SetResize(-1, -1, -1, STOI(size_z_txt->GetValue().fn_str()));
+}
+
 wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 {
+	wxIntegerValidator<unsigned int> vald_int;
+
 	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(400, 90));
 
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
 
 	//compressed
-	wxCheckBox* ch1 = new wxCheckBox(panel, ID_LZW_COMP,
+	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
+	wxCheckBox* comp_chk = new wxCheckBox(panel, ID_LZW_COMP,
 		"Lempel-Ziv-Welch Compression");
-	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(DataListCtrl::OnCh1Check), NULL, panel);
-	if (ch1)
-		ch1->SetValue(VRenderFrame::GetCompression());
+	comp_chk->Connect(comp_chk->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(DataListCtrl::OnCompCheck), NULL, panel);
+	comp_chk->SetValue(VRenderFrame::GetCompression());
+	sizer1->Add(10, 10);
+	sizer1->Add(comp_chk);
+	//resize
+	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
+	wxCheckBox* resize_chk = new wxCheckBox(panel, ID_RESIZE_CHK,
+		"Resize");
+	resize_chk->Connect(resize_chk->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(DataListCtrl::OnResizeCheck), NULL, panel);
+	wxTextCtrl* size_x_txt = new wxTextCtrl(panel, ID_RESIZE_X_TXT, "",
+		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+	size_x_txt->Connect(size_x_txt->GetId(), wxEVT_TEXT,
+		wxCommandEventHandler(DataListCtrl::OnSizeXText), NULL, panel);
+	wxTextCtrl* size_y_txt = new wxTextCtrl(panel, ID_RESIZE_Y_TXT, "",
+		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+	size_y_txt->Connect(size_y_txt->GetId(), wxEVT_TEXT,
+		wxCommandEventHandler(DataListCtrl::OnSizeYText), NULL, panel);
+	wxTextCtrl* size_z_txt = new wxTextCtrl(panel, ID_RESIZE_Z_TXT, "",
+		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+	size_z_txt->Connect(size_z_txt->GetId(), wxEVT_TEXT,
+		wxCommandEventHandler(DataListCtrl::OnSizeZText), NULL, panel);
+	sizer2->Add(10, 10);
+	sizer2->Add(resize_chk, 0, wxALIGN_CENTER);
+	sizer2->Add(10, 10);
+	sizer2->Add(size_x_txt, 0, wxALIGN_CENTER);
+	sizer2->Add(10, 10);
+	sizer2->Add(size_y_txt, 0, wxALIGN_CENTER);
+	sizer2->Add(10, 10);
+	sizer2->Add(size_z_txt, 0, wxALIGN_CENTER);
 
 	//group
 	group1->Add(10, 10);
-	group1->Add(ch1);
+	group1->Add(sizer1);
+	group1->Add(10, 10);
+	group1->Add(sizer2);
 	group1->Add(10, 10);
 
 	panel->SetSizer(group1);
@@ -477,6 +567,13 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 
 		if (GetItemText(item) == "Volume")
 		{
+
+			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+			if (vr_frame)
+				m_vd = vr_frame->GetDataManager()->GetVolumeData(name);
+			else
+				return;
+
 			wxFileDialog *fopendlg = new wxFileDialog(
 				m_frame, "Save Volume Data", "", "",
 				"Muti-page Tiff file (*.tif, *.tiff)|*.tif;*.tiff|"\
@@ -490,17 +587,11 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 			if (rval == wxID_OK)
 			{
 				wxString filename = fopendlg->GetPath();
-
-				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-				if (vr_frame)
+				if (m_vd)
 				{
-					VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
-					if (vd)
-					{
-						vd->Save(filename, fopendlg->GetFilterIndex(), false, VRenderFrame::GetCompression());
-						wxString str = vd->GetPath();
-						SetText(item, 2, str);
-					}
+					m_vd->Save(filename, fopendlg->GetFilterIndex(), false, VRenderFrame::GetCompression());
+					wxString str = m_vd->GetPath();
+					SetText(item, 2, str);
 				}
 			}
 			delete fopendlg;

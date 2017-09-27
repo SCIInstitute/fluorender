@@ -46,6 +46,7 @@ namespace FL
 		Nrrd* GetVolume();
 		Nrrd* GetResult();
 		void SetSize(int nx, int ny, int nz);
+		void SetSpacings(double spcx, double spcy, double spcz);
 		void SetType(int type);
 		void SetFilterSize(int fx, int fy, int fz);
 		void Resize();
@@ -66,6 +67,10 @@ namespace FL
 		//bits
 		int m_bits;
 		int m_bits_in;
+		//spacings
+		double m_spcx_in;
+		double m_spcy_in;
+		double m_spcz_in;
 
 		int m_type;	//sampler type
 					//0:nearest neighbor;

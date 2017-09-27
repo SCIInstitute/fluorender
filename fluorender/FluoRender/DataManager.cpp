@@ -258,6 +258,11 @@ VolumeData::VolumeData(VolumeData &copy)
 
 	//compression
 	m_compression = false;
+	//resize
+	m_resize = false;
+	m_rnx = 0;
+	m_rny = 0;
+	m_rnz = 0;
 
 	//skip brick
 	m_skip_brick = false;
@@ -567,6 +572,25 @@ void VolumeData::LoadMask(Nrrd* mask)
 {
 	if (!mask || !m_tex || !m_vr)
 		return;
+
+	int nx2, ny2, nz2;
+	nx2 = mask->axis[0].size;
+	ny2 = mask->axis[1].size;
+	nz2 = mask->axis[2].size;
+	if (m_res_x != nx2 || m_res_y != ny2 || m_res_z != nz2)
+	{
+		double spcx, spcy, spcz;
+		GetSpacings(spcx, spcy, spcz);
+		FL::VolumeSampler sampler;
+		sampler.SetVolume(mask);
+		sampler.SetSize(m_res_x, m_res_y, m_res_z);
+		sampler.SetSpacings(spcx, spcy, spcz);
+		sampler.SetType(0);
+		//sampler.SetFilterSize(2, 2, 0);
+		sampler.Resize();
+		nrrdNuke(mask);
+		mask = sampler.GetResult();
+	}
 
 	//prepare the texture bricks for the mask
 	m_tex->add_empty_mask();
@@ -924,6 +948,18 @@ double VolumeData::GetTransferedValue(int i, int j, int k)
 	return 0.0;
 }
 
+void VolumeData::SetResize(int resize, int nx, int ny, int nz)
+{
+	if (resize > -1)
+		m_resize = resize > 0;
+	if (nx > -1)
+		m_rnx = nx;
+	if (ny > -1)
+		m_rny = ny;
+	if (nz > -1)
+		m_rnz = nz;
+}
+
 //save
 void VolumeData::Save(wxString &filename, int mode, bool bake, bool compress)
 {
@@ -931,6 +967,7 @@ void VolumeData::Save(wxString &filename, int mode, bool bake, bool compress)
 		return;
 
 	Nrrd* data = 0;
+	bool delete_data = false;
 
 	BaseWriter *writer = 0;
 	switch (mode)
@@ -1055,24 +1092,40 @@ void VolumeData::Save(wxString &filename, int mode, bool bake, bool compress)
 			nrrdAxisInfoSet(baked_data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
 			nrrdAxisInfoSet(baked_data, nrrdAxisInfoSize, (size_t)nx, (size_t)ny, (size_t)nz);
 
-			writer->SetData(baked_data);
-			writer->SetSpacings(spcx, spcy, spcz);
-			writer->SetCompression(compress);
-			writer->Save(filename.ToStdWstring(), mode);
-
-			//free memory
-			delete []baked_data->data;
-			nrrdNix(baked_data);
+			data = baked_data;
+			delete_data = true;
 
 			prg_diag->Update(100);
 			delete prg_diag;
 		}
-		else
+
+		if (m_resize)
 		{
-			writer->SetData(data);
-			writer->SetSpacings(spcx, spcy, spcz);
-			writer->SetCompression(compress);
-			writer->Save(filename.ToStdWstring(), mode);
+			FL::VolumeSampler sampler;
+			sampler.SetVolume(data);
+			sampler.SetSize(m_rnx, m_rny, m_rnz);
+			sampler.SetSpacings(spcx, spcy, spcz);
+			sampler.SetType(0);
+			//sampler.SetFilterSize(2, 2, 0);
+			sampler.Resize();
+			Nrrd* temp = data;
+			data = sampler.GetResult();
+			spcx = data->axis[0].spacing;
+			spcy = data->axis[1].spacing;
+			spcz = data->axis[2].spacing;
+			if (delete_data)
+				nrrdNuke(temp);
+		}
+
+		writer->SetData(data);
+		writer->SetSpacings(spcx, spcy, spcz);
+		writer->SetCompression(compress);
+		writer->Save(filename.ToStdWstring(), mode);
+
+		if (delete_data)
+		{
+			delete []data->data;
+			nrrdNix(data);
 		}
 	}
 	delete writer;
@@ -4356,28 +4409,7 @@ int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_
 				msk_reader.SetFile(str);
 				Nrrd* mask = msk_reader.Convert(0, 0, true);
 				if (mask)
-				{
-					int nx, ny, nz;
-					vd->GetResolution(nx, ny, nz);
-					int nx2, ny2, nz2;
-					nx2 = mask->axis[0].size;
-					ny2 = mask->axis[1].size;
-					nz2 = mask->axis[2].size;
-					if (nx!=nx2 || ny!=ny2 || nz!=nz2)
-					{
-						FL::VolumeSampler sampler;
-						sampler.SetVolume(mask);
-						sampler.SetSize(nx, ny, nz);
-						sampler.SetType(2);
-						sampler.SetFilterSize(2, 2, 0);
-						sampler.Resize();
-						Nrrd* mask_resize = sampler.GetResult();
-						vd->LoadMask(mask_resize);
-						nrrdNuke(mask);
-					}
-					else
-						vd->LoadMask(mask);
-				}
+					vd->LoadMask(mask);
 				//label mask
 				LBLReader lbl_reader;
 				str = reader->GetCurLabelName(t_num >= 0 ? t_num : reader->GetCurTime(), i);

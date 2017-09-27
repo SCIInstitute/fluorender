@@ -215,6 +215,7 @@ public:
 	//save
 	double GetOriginalValue(int i, int j, int k);
 	double GetTransferedValue(int i, int j, int k);
+	void SetResize(int resize, int nx, int ny, int nz);
 	void Save(wxString &filename, int mode=0, bool bake=false, bool compress=false);
 	void SaveMask(bool use_reader, int t, int c);
 	void SaveLabel(bool use_reader, int t, int c);
@@ -499,6 +500,9 @@ private:
 
 	//compression
 	bool m_compression;
+	//resize
+	bool m_resize;
+	int m_rnx, m_rny, m_rnz;
 
 	//brick skipping
 	bool m_skip_brick;
