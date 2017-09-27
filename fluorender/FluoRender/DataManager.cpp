@@ -1110,9 +1110,12 @@ void VolumeData::Save(wxString &filename, int mode, bool bake, bool compress)
 			sampler.Resize();
 			Nrrd* temp = data;
 			data = sampler.GetResult();
-			spcx = data->axis[0].spacing;
-			spcy = data->axis[1].spacing;
-			spcz = data->axis[2].spacing;
+			if (data)
+			{
+				spcx = data->axis[0].spacing;
+				spcy = data->axis[1].spacing;
+				spcz = data->axis[2].spacing;
+			}
 			if (delete_data)
 				nrrdNuke(temp);
 		}
@@ -1141,6 +1144,7 @@ void VolumeData::SaveMask(bool use_reader, int t, int c)
 		return;
 
 	Nrrd* data = 0;
+	bool delete_data = false;
 	double spcx, spcy, spcz;
 	GetSpacings(spcx, spcy, spcz);
 
@@ -1151,6 +1155,25 @@ void VolumeData::SaveMask(bool use_reader, int t, int c)
 		data = m_tex->get_nrrd(m_tex->nmask());
 		if (data)
 		{
+			if (m_resize)
+			{
+				FL::VolumeSampler sampler;
+				sampler.SetVolume(data);
+				sampler.SetSize(m_rnx, m_rny, m_rnz);
+				sampler.SetSpacings(spcx, spcy, spcz);
+				sampler.SetType(0);
+				//sampler.SetFilterSize(2, 2, 0);
+				sampler.Resize();
+				data = sampler.GetResult();
+				if (data)
+				{
+					spcx = data->axis[0].spacing;
+					spcy = data->axis[1].spacing;
+					spcz = data->axis[2].spacing;
+					delete_data = true;
+				}
+			}
+
 			MSKWriter msk_writer;
 			msk_writer.SetData(data);
 			msk_writer.SetSpacings(spcx, spcy, spcz);
@@ -1160,6 +1183,11 @@ void VolumeData::SaveMask(bool use_reader, int t, int c)
 			else
 				filename = m_tex_path.substr(0, m_tex_path.find_last_of('.')) + ".msk";
 			msk_writer.Save(filename, 0);
+			if (delete_data)
+			{
+				delete[]data->data;
+				nrrdNix(data);
+			}
 		}
 	}
 }

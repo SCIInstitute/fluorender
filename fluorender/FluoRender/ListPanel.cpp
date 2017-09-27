@@ -574,6 +574,9 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 			else
 				return;
 
+			if (m_vd)
+				m_vd->SetResize(0, -1, -1, -1);
+
 			wxFileDialog *fopendlg = new wxFileDialog(
 				m_frame, "Save Volume Data", "", "",
 				"Muti-page Tiff file (*.tif, *.tiff)|*.tif;*.tiff|"\
@@ -595,6 +598,9 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 				}
 			}
 			delete fopendlg;
+
+			if (m_vd)
+				m_vd->SetResize(0, -1, -1, -1);
 		}
 		else if (GetItemText(item) == "Mesh")
 		{
