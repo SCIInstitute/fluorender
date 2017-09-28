@@ -650,8 +650,25 @@ void VolumeData::AddEmptyMask(int mode)
 //volume label
 void VolumeData::LoadLabel(Nrrd* label)
 {
-	if (!m_tex || !m_vr)
+	if (!label || !m_tex || !m_vr)
 		return;
+
+	int nx2, ny2, nz2;
+	nx2 = label->axis[0].size;
+	ny2 = label->axis[1].size;
+	nz2 = label->axis[2].size;
+	if (m_res_x != nx2 || m_res_y != ny2 || m_res_z != nz2)
+	{
+		double spcx, spcy, spcz;
+		GetSpacings(spcx, spcy, spcz);
+		FL::VolumeSampler sampler;
+		sampler.SetVolume(label);
+		sampler.SetSize(m_res_x, m_res_y, m_res_z);
+		sampler.SetSpacings(spcx, spcy, spcz);
+		sampler.Resize();
+		nrrdNuke(label);
+		label = sampler.GetResult();
+	}
 
 	m_tex->add_empty_label();
 	m_tex->set_nrrd(label, m_tex->nlabel());
@@ -1184,10 +1201,7 @@ void VolumeData::SaveMask(bool use_reader, int t, int c)
 				filename = m_tex_path.substr(0, m_tex_path.find_last_of('.')) + ".msk";
 			msk_writer.Save(filename, 0);
 			if (delete_data)
-			{
-				delete[]data->data;
-				nrrdNix(data);
-			}
+				nrrdNuke(data);
 		}
 	}
 }
@@ -1198,6 +1212,7 @@ void VolumeData::SaveLabel(bool use_reader, int t, int c)
 		return;
 
 	Nrrd* data = 0;
+	bool delete_data = false;
 	double spcx, spcy, spcz;
 	GetSpacings(spcx, spcy, spcz);
 
@@ -1207,6 +1222,23 @@ void VolumeData::SaveLabel(bool use_reader, int t, int c)
 		data = m_tex->get_nrrd(m_tex->nlabel());
 		if (data)
 		{
+			if (m_resize)
+			{
+				FL::VolumeSampler sampler;
+				sampler.SetVolume(data);
+				sampler.SetSize(m_rnx, m_rny, m_rnz);
+				sampler.SetSpacings(spcx, spcy, spcz);
+				sampler.Resize();
+				data = sampler.GetResult();
+				if (data)
+				{
+					spcx = data->axis[0].spacing;
+					spcy = data->axis[1].spacing;
+					spcz = data->axis[2].spacing;
+					delete_data = true;
+				}
+			}
+
 			MSKWriter msk_writer;
 			msk_writer.SetData(data);
 			msk_writer.SetSpacings(spcx, spcy, spcz);
@@ -1216,6 +1248,8 @@ void VolumeData::SaveLabel(bool use_reader, int t, int c)
 			else
 				filename = m_tex_path.substr(0, m_tex_path.find_last_of('.')) + ".lbl";
 			msk_writer.Save(filename, 1);
+			if (delete_data)
+				nrrdNuke(data);
 		}
 	}
 }

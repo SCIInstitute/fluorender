@@ -51,6 +51,7 @@ namespace FL
 		void SetFilterSize(int fx, int fy, int fz);
 		void Resize();
 		double Sample(double x, double y, double z);
+		unsigned int SampleInt(double x, double y, double z);
 
 	private:
 		Nrrd *m_vd_r;	//result volume data

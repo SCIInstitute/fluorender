@@ -133,6 +133,10 @@ void VolumeSampler::Resize()
 	case nrrdTypeUShort:
 		m_bits_in = 16;
 		break;
+	case nrrdTypeInt:
+	case nrrdTypeUInt:
+		m_bits_in = 32;
+		break;
 	}
 	m_bits = m_bits_in;
 
@@ -157,11 +161,16 @@ void VolumeSampler::Resize()
 		x = (double(i) + 0.5) / double(m_nx);
 		y = (double(j) + 0.5) / double(m_ny);
 		z = (double(k) + 0.5) / double(m_nz);
-		value = Sample(x, y, z);
-		if (m_bits == 8)
-			((unsigned char*)data)[index] = unsigned char(value * 255);
-		else if (m_bits == 16)
-			((unsigned short*)data)[index] = unsigned short(value * 65535);
+		if (m_bits == 32)
+			((unsigned int*)data)[index] = SampleInt(x, y, z);
+		else
+		{
+			value = Sample(x, y, z);
+			if (m_bits == 8)
+				((unsigned char*)data)[index] = unsigned char(value * 255);
+			else if (m_bits == 16)
+				((unsigned short*)data)[index] = unsigned short(value * 65535);
+		}
 	}
 
 	//write to nrrd
@@ -171,6 +180,10 @@ void VolumeSampler::Resize()
 	else if (m_bits == 16)
 		nrrdWrap(m_vd_r, (uint16_t*)data, nrrdTypeUShort,
 			3, (size_t)m_nx, (size_t)m_ny, (size_t)m_nz);
+	else if (m_bits == 32)
+		nrrdWrap(m_vd_r, (uint32_t*)data, nrrdTypeUInt,
+			3, (size_t)m_nx, (size_t)m_ny, (size_t)m_nz);
+
 	double spcx, spcy, spcz;
 	spcx = m_spcx_in * double(m_nx_in) / double(m_nx);
 	spcy = m_spcy_in * double(m_ny_in) / double(m_ny);
@@ -195,6 +208,18 @@ double VolumeSampler::Sample(double x, double y, double z)
 		return SampleBox(x, y, z);
 	}
 	return 0.0;
+}
+
+unsigned int VolumeSampler::SampleInt(double x, double y, double z)
+{
+	int i, j, k;
+	xyz2ijk(x, y, z, i, j, k);
+	if (!ijk(i, j, k))
+		return 0.0;
+	unsigned long long index = (unsigned long long)m_nx_in*(unsigned long long)m_ny_in*
+		(unsigned long long)k + (unsigned long long)m_nx_in*
+		(unsigned long long)j + (unsigned long long)i;
+	return ((unsigned int*)(m_vd->data))[index];
 }
 
 bool VolumeSampler::ijk(int &i, int &j, int &k)
