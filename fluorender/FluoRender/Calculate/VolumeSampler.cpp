@@ -167,9 +167,9 @@ void VolumeSampler::Resize()
 		{
 			value = Sample(x, y, z);
 			if (m_bits == 8)
-				((unsigned char*)data)[index] = unsigned char(value * 255);
+				((unsigned char*)data)[index] = (unsigned char)(value * 255);
 			else if (m_bits == 16)
-				((unsigned short*)data)[index] = unsigned short(value * 65535);
+				((unsigned short*)data)[index] = (unsigned short)(value * 65535);
 		}
 	}
 
