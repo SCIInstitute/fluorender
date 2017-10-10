@@ -1692,15 +1692,17 @@ void VRenderGLView::DrawBrush()
 		int nx, ny;
 		nx = GetGLSize().x;
 		ny = GetGLSize().y;
-		double cx = pos1.x;
-		double cy = ny - pos1.y;
 		float sx, sy;
 		sx = 2.0/nx;
 		sy = 2.0/ny;
 
 		//draw the circles
 		//set up the matrices
-		glm::mat4 proj_mat = glm::ortho(float(0), float(nx), float(0), float(ny));
+		//glm::mat4 proj_mat = glm::ortho(float(0), float(nx), float(0), float(ny));
+		glm::mat4 proj_mat = glm::ortho(float(m_ortho_left), float(m_ortho_right),
+			float(m_ortho_top), float(m_ortho_bottom));
+		double cx = m_ortho_left + pos1.x * (m_ortho_right - m_ortho_left) / nx;
+		double cy = m_ortho_bottom + pos1.y * (m_ortho_top - m_ortho_bottom) / ny;
 
 		//attributes
 		glDisable(GL_DEPTH_TEST);
@@ -1722,9 +1724,11 @@ void VRenderGLView::DrawBrush()
 			DrawCircle(cx, cy, m_brush_radius2*pressure,
 				text_color, proj_mat);
 
+		float cx2 = pos1.x;
+		float cy2 = ny - pos1.y;
 		float px, py;
-		px = cx-7-nx/2.0;
-		py = cy-3-ny/2.0;
+		px = cx2 - 7 - nx / 2.0;
+		py = cy2 - 3 - ny / 2.0;
 		wstring wstr;
 		switch (mode)
 		{
