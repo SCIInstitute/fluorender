@@ -141,6 +141,9 @@ namespace FLIVR
 
 #define SEG_BODY_INIT_CULL \
 	"	//SEG_BODY_INIT_CULL\n" \
+	"	if (any(lessThan(s.xy, vec2(0.0, 0.0))) ||\n"\
+	"		any(greaterThan(s.xy, vec2(1.0, 1.0))))\n"\
+	"		discard;\n"\
 	"	float cmask2d = texture(tex6, s.xy).x;\n"\
 	"	if (cmask2d < 0.95)\n"\
 	"		discard;\n"\
@@ -148,6 +151,9 @@ namespace FLIVR
 
 #define SEG_BODY_INIT_CULL_ERASE \
 	"	//SEG_BODY_INIT_CULL_ERASE\n" \
+	"	if (any(lessThan(s.xy, vec2(0.0, 0.0))) ||\n"\
+	"		any(greaterThan(s.xy, vec2(1.0, 1.0))))\n"\
+	"		discard;\n"\
 	"	float cmask2d = texture(tex6, s.xy).x;\n"\
 	"	if (cmask2d < 0.45)\n"\
 	"	{\n"\
@@ -265,6 +271,9 @@ namespace FLIVR
 
 #define SEG_BODY_DB_GROW_CULL \
 	"	//SEG_BODY_DB_GROW_CULL\n" \
+	"	if (any(lessThan(s.xy, vec2(0.0, 0.0))) ||\n"\
+	"		any(greaterThan(s.xy, vec2(1.0, 1.0))))\n"\
+	"		discard;\n"\
 	"	float cmask2d = texture(tex6, s.xy).x;\n"\
 	"	if (cmask2d < 0.45 /*|| cmask2d > 0.55*/)\n"\
 	"		discard;\n"\
