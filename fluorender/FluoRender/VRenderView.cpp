@@ -3064,7 +3064,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, bool mask, int peel)
 		vd->SetViewport(vp);
 		vd->SetClearColor(clear_color);
 		vd->SetCurFramebuffer(m_cur_framebuffer);
-		vd->Draw(!m_persp, m_interactive, m_scale_factor);
+		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor);
 	}
 
 	if (vd->GetShadow())
@@ -3256,7 +3256,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 		vd->SetViewport(vp);
 		vd->SetClearColor(clear_color);
 		vd->SetCurFramebuffer(m_cur_framebuffer);
-		vd->Draw(!m_persp, m_interactive, m_scale_factor);
+		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor);
 		//
 		if (color_mode == 1)
 		{
@@ -3422,7 +3422,7 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 	vd->SetStreamMode(2);
 	vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 	vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-	vd->Draw(!m_persp, m_interactive, m_scale_factor);
+	vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor);
 	vd->RestoreMode();
 	vd->SetColormapMode(colormode);
 	vd->SetEnableAlpha(alpha);
@@ -3707,7 +3707,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		vd->SetViewport(vp);
 		vd->SetClearColor(clear_color);
 		vd->SetCurFramebuffer(m_cur_framebuffer);
-		vd->Draw(!m_persp, m_interactive, m_scale_factor);
+		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor);
 		//restore
 		vd->RestoreMode();
 		vd->SetMaskMode(msk_mode);
@@ -4690,6 +4690,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		//forced refresh
 		if (wxGetKeyState(WXK_F5))
 		{
+			m_clear_buffer = true;
 			m_updating = true;
 			if (frame && frame->GetStatusBar())
 				frame->GetStatusBar()->PushStatusText("Forced Refresh");
@@ -4704,6 +4705,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 
 	if (refresh)
 	{
+		m_clear_buffer = true;
 		m_updating = true;
 		RefreshGL(15, ref_stat, start_loop);
 	}
