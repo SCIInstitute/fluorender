@@ -1276,6 +1276,8 @@ namespace FLIVR
 		for (i=0; i<num; ++i)
 		{
 			TextureBrick* b = (*bricks)[i];
+			if (!test_against_view(b->bbox(), !orthographic_p))
+				continue;
 
 			BBox bbox = b->bbox();
 			matrix[0] = float(bbox.max().x()-bbox.min().x());
