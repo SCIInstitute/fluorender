@@ -142,13 +142,15 @@ namespace FLIVR
 
 		//draw
 		void eval_ml_mode();
-		virtual void draw(bool draw_wireframe_p, 
-			bool interactive_mode_p, 
+		virtual void draw(bool draw_wireframe_p,
+			bool adaptive,
+			bool interactive_mode_p,
 			bool orthographic_p = false,
 			double zoom = 1.0, 
 			int mode = 0);
 		void draw_wireframe(bool orthographic_p = false);
-		void draw_volume(bool interactive_mode_p,
+		void draw_volume(bool adaptive,
+			bool interactive_mode_p,
 			bool orthographic_p = false,
 			double zoom = 1.0, 
 			int mode = 0);

@@ -212,16 +212,17 @@ namespace FLIVR
 
 	//draw
 	void MultiVolumeRenderer::draw(bool draw_wireframe_p,
+		bool adaptive,
 		bool interactive_mode_p,
 		bool orthographic_p,
 		double zoom, bool intp)
 	{
-		draw_volume(interactive_mode_p, orthographic_p, zoom, intp);
+		draw_volume(adaptive, interactive_mode_p, orthographic_p, zoom, intp);
 		if(draw_wireframe_p)
 			draw_wireframe(orthographic_p);
 	}
 
-	void MultiVolumeRenderer::draw_volume(bool interactive_mode_p, bool orthographic_p, double zoom, bool intp)
+	void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bool orthographic_p, double zoom, bool intp)
 	{
 		if (get_vr_num()<=0 || !(vr_list_[0]))
 			return;
@@ -229,10 +230,11 @@ namespace FLIVR
 		Ray view_ray = vr_list_[0]->compute_view();
 		Ray snapview = vr_list_[0]->compute_snapview(0.4);
 
-		set_interactive_mode(adaptive_ && interactive_mode_p);
+		set_adaptive(adaptive);
+		set_interactive_mode(interactive_mode_p);
 
 		// Set sampling rate based on interaction.
-		double rate = imode_ ? irate_ : sampling_rate_;
+		double rate = imode_ && adaptive_ ? irate_ : sampling_rate_;
 		Vector diag = bbox_.diagonal();
 		Vector cell_diag(diag.x()/res_.x(),
 			diag.y()/res_.y(),
@@ -1035,7 +1037,7 @@ namespace FLIVR
 		Ray snapview = vr_list_[0]->compute_snapview(0.4);
 
 		// Set sampling rate based on interaction.
-		double rate = imode_ ? irate_ : sampling_rate_;
+		double rate = imode_ && adaptive_ ? irate_ : sampling_rate_;
 		Vector diag = bbox_.diagonal();
 		Vector cell_diag(diag.x()/res_.x(),
 			diag.y()/res_.y(),

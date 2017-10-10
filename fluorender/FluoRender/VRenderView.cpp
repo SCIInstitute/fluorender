@@ -3740,7 +3740,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		m_mvr->set_viewport(vp);
 		m_mvr->set_clear_color(clear_color);
 		m_mvr->set_cur_framebuffer(m_cur_framebuffer);
-		m_mvr->draw(m_test_wiref, m_interactive, !m_persp, m_scale_factor, m_intp);
+		m_mvr->draw(m_test_wiref, m_adaptive, m_interactive, !m_persp, m_scale_factor, m_intp);
 		//restore
 		m_mvr->set_colormap_mode(0);
 		for (i=0; i<list.size(); i++)
@@ -3980,7 +3980,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	m_mvr->set_viewport(vp);
 	m_mvr->set_clear_color(clear_color);
 	m_mvr->set_cur_framebuffer(m_cur_framebuffer);
-	m_mvr->draw(m_test_wiref, m_interactive, !m_persp, m_scale_factor, m_intp);
+	m_mvr->draw(m_test_wiref, m_adaptive, m_interactive, !m_persp, m_scale_factor, m_intp);
 
 	//draw shadows
 	DrawOLShadows(list, use_tex_wt2?m_tex_wt2:m_tex);
@@ -11166,7 +11166,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 						m_vrv->m_z_rot_sldr->SetThumbPosition(int(m_rotz));
 					}
 
-					m_interactive = m_adaptive;
+					m_interactive = true;
 
 					if (m_linked_rot)
 						m_master_linked_view = this;
@@ -11189,7 +11189,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					m_obj_transy += trans.y();
 					m_obj_transz += trans.z();
 
-					m_interactive = m_adaptive;
+					m_interactive = true;
 
 					m_rot_center_dirty = true;
 
@@ -11221,7 +11221,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 						m_ctrz = ctr.z();
 					}
 
-					m_interactive = m_adaptive;
+					m_interactive = true;
 
 					//SetSortBricks();
 					RefreshGL(32);
@@ -11339,7 +11339,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		}
 		else
 		{
-			m_interactive = m_adaptive;
+			m_interactive = true;
 			m_rot_center_dirty = true;
 			m_scale_factor += wheel/1000.0;
 			if (m_scale_factor < 0.01)
@@ -12960,7 +12960,7 @@ void VRenderView::RefreshGL(bool interactive, bool start_loop)
 	if (m_glview)
 	{
 		m_glview->m_force_clear = true;
-		m_glview->m_interactive = interactive && m_glview->m_adaptive;
+		m_glview->m_interactive = interactive;
 		m_glview->RefreshGL(39, false, start_loop);
 	}
 }

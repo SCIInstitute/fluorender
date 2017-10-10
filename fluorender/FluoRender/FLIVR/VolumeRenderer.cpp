@@ -555,15 +555,16 @@ namespace FLIVR
 		}
 	}
 
-	void VolumeRenderer::draw(bool draw_wireframe_p, bool interactive_mode_p,
-		bool orthographic_p, double zoom, int mode)
+	void VolumeRenderer::draw(bool draw_wireframe_p, bool adaptive,
+		bool interactive_mode_p, bool orthographic_p, double zoom, int mode)
 	{
-		draw_volume(interactive_mode_p, orthographic_p, zoom, mode);
+		draw_volume(adaptive, interactive_mode_p, orthographic_p, zoom, mode);
 		if(draw_wireframe_p)
 			draw_wireframe(orthographic_p);
 	}
 
-	void VolumeRenderer::draw_volume(bool interactive_mode_p,
+	void VolumeRenderer::draw_volume(bool adaptive,
+		bool interactive_mode_p,
 		bool orthographic_p,
 		double zoom,
 		int mode)
@@ -584,10 +585,11 @@ namespace FLIVR
 		if (!bricks || bricks->size() == 0)
 			return;
 
-		set_interactive_mode(adaptive_ && interactive_mode_p);
+		set_adaptive(adaptive);
+		set_interactive_mode(interactive_mode_p);
 
 		// Set sampling rate based on interaction
-		double rate = imode_ ? irate_ : sampling_rate_;
+		double rate = imode_ && adaptive_ ? irate_ : sampling_rate_;
 		Vector diag = tex_->bbox()->diagonal();
 		Vector cell_diag(
 			diag.x() / tex_->nx(),
@@ -1071,7 +1073,7 @@ namespace FLIVR
 		glEnable(GL_DEPTH_TEST);
 		vector<TextureBrick*> *bricks = tex_->get_sorted_bricks(view_ray, orthographic_p);
 
-		double rate = imode_ ? irate_ : sampling_rate_;
+		double rate = imode_ && adaptive_ ? irate_ : sampling_rate_;
 		Vector diag = tex_->bbox()->diagonal();
 		Vector cell_diag(diag.x()/tex_->nx(),
 			diag.y()/tex_->ny(),

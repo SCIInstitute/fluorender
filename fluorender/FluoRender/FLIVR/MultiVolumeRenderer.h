@@ -77,13 +77,14 @@ namespace FLIVR
 		void clear_vr();
 		int get_vr_num();
 
-		void draw(bool draw_wireframe_p, 
+		void draw(bool draw_wireframe_p,
+			bool adaptive,
 			bool interactive_mode_p, 
 			bool orthographic_p,
 			double zoom, bool intp);
 
 		void draw_wireframe(bool orthographic_p);
-		void draw_volume(bool interactive_mode_p, bool orthographic_p, double zoom, bool intp);
+		void draw_volume(bool adaptive, bool interactive_mode_p, bool orthographic_p, double zoom, bool intp);
 
 		double num_slices_to_rate(int slices);
 
