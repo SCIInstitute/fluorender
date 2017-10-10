@@ -237,9 +237,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	sizer2_2->Add(st, 0, wxALIGN_CENTER);
 	sizer2_2->Add(m_brush_size1_sldr, 1, wxEXPAND);
 	sizer2_2->Add(m_brush_size1_text, 0, wxALIGN_CENTER);
-	st = new wxStaticText(this, 0, "px",
-		wxDefaultPosition, wxSize(25, 15));
-	sizer2_2->Add(st, 0, wxALIGN_CENTER);
+	sizer2_2->Add(15, 15);
 	//brush size 2
 	wxBoxSizer *sizer2_3 = new wxBoxSizer(wxHORIZONTAL);
 	m_brush_size2_chk = new wxCheckBox(this, ID_BrushSize2Chk, "GrowSize",
@@ -257,9 +255,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	sizer2_3->Add(st, 0, wxALIGN_CENTER);
 	sizer2_3->Add(m_brush_size2_sldr, 1, wxEXPAND);
 	sizer2_3->Add(m_brush_size2_text, 0, wxALIGN_CENTER);
-	st = new wxStaticText(this, 0, "px",
-		wxDefaultPosition, wxSize(25, 15));
-	sizer2_3->Add(st, 0, wxALIGN_CENTER);
+	sizer2_3->Add(15, 15);
 	//iterations
 	wxBoxSizer *sizer2_4 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Growth:",

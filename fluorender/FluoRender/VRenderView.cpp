@@ -1822,15 +1822,19 @@ void VRenderGLView::PaintStroke()
 		}
 
 		//set the width and height
-		paint_shader->setLocalParam(1, nx, ny, 0.0f, 0.0f);
+		paint_shader->setLocalParam(1, m_ortho_right - m_ortho_left,
+			m_ortho_top - m_ortho_bottom, 0.0f, 0.0f);
 
 		double x, y;
+		double cx, cy;
 		double radius1 = m_brush_radius1;
 		double radius2 = m_brush_radius2;
 		for (int i=0; i<=repeat; i++)
 		{
 			x = spx + i*px;
 			y = spy + i*py;
+			cx = x * (m_ortho_right - m_ortho_left) / nx;
+			cy = (ny - y) * (m_ortho_top - m_ortho_bottom) / ny;
 			switch (m_selector.GetMode())
 			{
 			case 3:
@@ -1846,8 +1850,7 @@ void VRenderGLView::PaintStroke()
 				break;
 			}
 			//send uniforms to paint shader
-			paint_shader->setLocalParam(0,
-				x, double(ny)-y,
+			paint_shader->setLocalParam(0, cx, cy,
 				radius1*pressure,
 				radius2*pressure);
 			//draw a square
