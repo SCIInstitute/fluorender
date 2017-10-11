@@ -78,7 +78,10 @@ BEGIN_EVENT_TABLE(BrushToolDlg, wxPanel)
 	EVT_RADIOBUTTON(ID_BrushIterWRd, BrushToolDlg::OnBrushIterCheck)
 	EVT_RADIOBUTTON(ID_BrushIterSRd, BrushToolDlg::OnBrushIterCheck)
 	EVT_RADIOBUTTON(ID_BrushIterSSRd, BrushToolDlg::OnBrushIterCheck)
-END_EVENT_TABLE()
+	//brush size relation
+	EVT_RADIOBUTTON(ID_BrushSizeDataRd, BrushToolDlg::OnBrushSizeRelationCheck)
+	EVT_RADIOBUTTON(ID_BrushSizeScreenRd, BrushToolDlg::OnBrushSizeRelationCheck)
+	END_EVENT_TABLE()
 
 BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	: wxPanel(parent, wxID_ANY,
@@ -276,8 +279,25 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	sizer2_4->Add(m_brush_iters_rb, 0, wxALIGN_CENTER);
 	sizer2_4->Add(15, 15);
 	sizer2_4->Add(m_brush_iterss_rb, 0, wxALIGN_CENTER);
+	//size relation
+	wxBoxSizer *sizer2_5 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(this, 0, "Dependent:",
+		wxDefaultPosition, wxSize(70, 20));
+	m_brush_size_data_rb = new wxRadioButton(this, ID_BrushSizeDataRd, "Data",
+		wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+	m_brush_size_screen_rb = new wxRadioButton(this, ID_BrushSizeScreenRd, "Screen",
+		wxDefaultPosition, wxDefaultSize);
+	m_brush_size_data_rb->SetValue(true);
+	m_brush_size_screen_rb->SetValue(false);
+	sizer2_5->Add(5, 5);
+	sizer2_5->Add(st, 0, wxALIGN_CENTER);
+	sizer2_5->Add(m_brush_size_data_rb, 0, wxALIGN_CENTER);
+	sizer2_5->Add(15, 15);
+	sizer2_5->Add(m_brush_size_screen_rb, 0, wxALIGN_CENTER);
 	//sizer2
 	sizer2->Add(sizer2_4, 0, wxEXPAND);
+	sizer2->Add(5, 5);
+	sizer2->Add(sizer2_5, 0, wxEXPAND);
 	sizer2->Add(10, 10);
 	sizer2->Add(sizer2_2, 0, wxEXPAND);
 	sizer2->Add(sizer2_3, 0, wxEXPAND);
@@ -398,6 +418,19 @@ void BrushToolDlg::GetSettings(VRenderView* vrv)
 		m_brush_iterw_rb->SetValue(false);
 		m_brush_iters_rb->SetValue(false);
 		m_brush_iterss_rb->SetValue(true);
+	}
+
+	//brush size relation
+	bval = vrv->GetBrushSizeData();
+	if (bval)
+	{
+		m_brush_size_data_rb->SetValue(true);
+		m_brush_size_screen_rb->SetValue(false);
+	}
+	else
+	{
+		m_brush_size_data_rb->SetValue(false);
+		m_brush_size_screen_rb->SetValue(true);
 	}
 
 	//threshold range
@@ -796,5 +829,20 @@ void BrushToolDlg::OnBrushIterCheck(wxCommandEvent& event)
 	{
 		if (m_cur_view)
 			m_cur_view->SetBrushIteration(BRUSH_TOOL_ITER_STRONG);
+	}
+}
+
+//brush size relation
+void BrushToolDlg::OnBrushSizeRelationCheck(wxCommandEvent& event)
+{
+	if (m_brush_size_data_rb->GetValue())
+	{
+		if (m_cur_view)
+			m_cur_view->SetBrushSizeData(true);
+	}
+	else if (m_brush_size_screen_rb->GetValue())
+	{
+		if (m_cur_view)
+			m_cur_view->SetBrushSizeData(false);
 	}
 }

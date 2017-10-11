@@ -83,6 +83,9 @@ public:
 		ID_BrushIterWRd,
 		ID_BrushIterSRd,
 		ID_BrushIterSSRd,
+		//size relation
+		ID_BrushSizeDataRd,
+		ID_BrushSizeScreenRd
 	};
 
 	BrushToolDlg(wxWindow* frame,
@@ -142,6 +145,9 @@ private:
 	wxRadioButton* m_brush_iterw_rb;
 	wxRadioButton* m_brush_iters_rb;
 	wxRadioButton* m_brush_iterss_rb;
+	//size relation
+	wxRadioButton* m_brush_size_data_rb;
+	wxRadioButton* m_brush_size_screen_rb;
 
 private:
 	//event handling
@@ -184,6 +190,8 @@ private:
 	void OnBrushSize2Text(wxCommandEvent &event);
 	//brush iterations
 	void OnBrushIterCheck(wxCommandEvent& event);
+	//brush size relation
+	void OnBrushSizeRelationCheck(wxCommandEvent& event);
 
 	DECLARE_EVENT_TABLE();
 };

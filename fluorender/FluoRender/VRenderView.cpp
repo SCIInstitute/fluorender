@@ -290,6 +290,8 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	m_use_brush_radius2(true),
 	//paint stroke spacing
 	m_brush_spacing(0.1),
+	//brush size relation
+	m_brush_size_data(true),
 	//clipping plane rotations
 	m_rotx_cl(0), m_roty_cl(0), m_rotz_cl(0),
 	m_pressure(0.0),
@@ -1698,11 +1700,21 @@ void VRenderGLView::DrawBrush()
 
 		//draw the circles
 		//set up the matrices
-		//glm::mat4 proj_mat = glm::ortho(float(0), float(nx), float(0), float(ny));
-		glm::mat4 proj_mat = glm::ortho(float(m_ortho_left), float(m_ortho_right),
-			float(m_ortho_top), float(m_ortho_bottom));
-		double cx = m_ortho_left + pos1.x * (m_ortho_right - m_ortho_left) / nx;
-		double cy = m_ortho_bottom + pos1.y * (m_ortho_top - m_ortho_bottom) / ny;
+		glm::mat4 proj_mat;
+		double cx, cy;
+		if (m_brush_size_data)
+		{
+			proj_mat = glm::ortho(float(m_ortho_left), float(m_ortho_right),
+				float(m_ortho_top), float(m_ortho_bottom));
+			cx = m_ortho_left + pos1.x * (m_ortho_right - m_ortho_left) / nx;
+			cy = m_ortho_bottom + pos1.y * (m_ortho_top - m_ortho_bottom) / ny;
+		}
+		else
+		{
+			proj_mat = glm::ortho(float(0), float(nx), float(0), float(ny));
+			cx = pos1.x;
+			cy = ny - pos1.y;
+		}
 
 		//attributes
 		glDisable(GL_DEPTH_TEST);
@@ -1822,8 +1834,11 @@ void VRenderGLView::PaintStroke()
 		}
 
 		//set the width and height
-		paint_shader->setLocalParam(1, m_ortho_right - m_ortho_left,
-			m_ortho_top - m_ortho_bottom, 0.0f, 0.0f);
+		if (m_brush_size_data)
+			paint_shader->setLocalParam(1, m_ortho_right - m_ortho_left,
+				m_ortho_top - m_ortho_bottom, 0.0f, 0.0f);
+		else
+			paint_shader->setLocalParam(1, nx, ny, 0.0f, 0.0f);
 
 		double x, y;
 		double cx, cy;
@@ -1833,8 +1848,16 @@ void VRenderGLView::PaintStroke()
 		{
 			x = spx + i*px;
 			y = spy + i*py;
-			cx = x * (m_ortho_right - m_ortho_left) / nx;
-			cy = (ny - y) * (m_ortho_top - m_ortho_bottom) / ny;
+			if (m_brush_size_data)
+			{
+				cx = x * (m_ortho_right - m_ortho_left) / nx;
+				cy = (ny - y) * (m_ortho_top - m_ortho_bottom) / ny;
+			}
+			else
+			{
+				cx = x;
+				cy = double(ny) - y;
+			}
 			switch (m_selector.GetMode())
 			{
 			case 3:
@@ -2319,6 +2342,9 @@ void VRenderGLView::LoadBrushSettings()
 			break;
 		}
 	}
+	//brush size relation
+	if (fconfig.Read("brush_size_data", &bval))
+		m_brush_size_data = bval;
 }
 
 void VRenderGLView::SaveBrushSettings()
@@ -2382,10 +2408,12 @@ void VRenderGLView::SaveBrushSettings()
 	//iterations
 	fconfig.Write("brush_iters",
 		m_selector.GetBrushIteration());
+	//brush size relation
+	fconfig.Write("brush_size_data", m_brush_size_data);
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-    expath = wxPathOnly(expath);
-    wxString dft = expath + "/default_brush_settings.dft";
+	expath = wxPathOnly(expath);
+	wxString dft = expath + "/default_brush_settings.dft";
 	wxFileOutputStream os(dft);
 	fconfig.Save(os);
 }
@@ -2452,6 +2480,16 @@ void VRenderGLView::SetBrushIteration(int num)
 int VRenderGLView::GetBrushIteration()
 {
 	return m_selector.GetBrushIteration();
+}
+
+void VRenderGLView::SetBrushSizeData(bool val)
+{
+	m_brush_size_data = val;
+}
+
+bool VRenderGLView::GetBrushSizeData()
+{
+	return m_brush_size_data;
 }
 
 //brush translate

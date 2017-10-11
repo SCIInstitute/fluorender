@@ -3921,6 +3921,8 @@ void VRenderFrame::OpenProject(wxString& filename)
 					vrv->SetBrushSpacing(dVal);
 				if (fconfig.Read("brush_iteration", &dVal))
 					vrv->SetBrushIteration(dVal);
+				if (fconfig.Read("brush_size_data", &bVal))
+					vrv->SetBrushSizeData(bVal);
 				if (fconfig.Read("brush_translate", &dVal))
 					vrv->SetBrushSclTranslate(dVal);
 				if (fconfig.Read("w2d", &dVal))

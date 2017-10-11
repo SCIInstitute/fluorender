@@ -427,6 +427,9 @@ public:
 	//set iteration number
 	void SetBrushIteration(int num);
 	int GetBrushIteration();
+	//set brush size relation
+	void SetBrushSizeData(bool val);
+	bool GetBrushSizeData();
 	//set translate
 	void SetBrushSclTranslate(double val);
 	double GetBrushSclTranslate();
@@ -811,6 +814,8 @@ private:
 	int m_brush_sets_index;
 	//paint stroke spacing
 	double m_brush_spacing;
+	//brush size relation
+	bool m_brush_size_data;
 
 	//clipping plane rotations
 	Quaternion m_q_cl;
@@ -1426,6 +1431,11 @@ public:
 	{ if (m_glview) m_glview->SetBrushIteration(num); }
 	int GetBrushIteration()
 	{ if (m_glview) return m_glview->GetBrushIteration(); else return 0; }
+	//set brush size relation
+	void SetBrushSizeData(bool val)
+	{ if (m_glview) m_glview->SetBrushSizeData(val); }
+	bool GetBrushSizeData()
+	{ if (m_glview) return m_glview->GetBrushSizeData(); else return false; }
 	//scalar translate
 	void SetBrushSclTranslate(double val)
 	{ if (m_glview) m_glview->SetBrushSclTranslate(val); }
