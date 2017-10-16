@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 class VolumeData;
 namespace FL
 {
+	class ComponentAnalyzer;
 	class ComponentSelector
 	{
 	public:
@@ -44,6 +45,8 @@ namespace FL
 		{ m_vd = vd; }
 		VolumeData* GetVolume()
 		{ return m_vd; }
+		void SetAnalyzer(ComponentAnalyzer* analyzer);
+		ComponentAnalyzer* GetAnalyzer();
 		void SetSelAll(bool value)
 		{ m_sel_all = value; }
 		bool GetSelAll()
@@ -68,6 +71,7 @@ namespace FL
 
 	private:
 		VolumeData* m_vd;
+		ComponentAnalyzer* m_analyzer;
 		bool m_sel_all;
 		unsigned int m_id;
 		bool m_use_min;
@@ -76,6 +80,11 @@ namespace FL
 		unsigned int m_max_num;
 
 	private:
+		unsigned long long GetKey(unsigned int id, unsigned int brick_id)
+		{
+			unsigned long long temp = brick_id;
+			return (temp << 32) | id;
+		}
 		bool CompareSize(unsigned int size);
 	};
 

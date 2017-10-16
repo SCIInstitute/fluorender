@@ -67,6 +67,10 @@ namespace FL
 		{
 			m_vd_list.clear();
 		}
+		CompGraph* GetCompGraph()
+		{
+			return &m_comp_graph;
+		}
 
 		void Analyze(bool sel, bool consistent, bool colocal=false);
 		void MatchBricks(bool sel);

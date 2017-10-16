@@ -79,6 +79,7 @@ namespace FL
 		void ClearVisited();
 		void LinkComps(pCompInfo &comp1, pCompInfo &comp2);
 		bool GetLinkedComps(pCompInfo& comp, CompList& list, unsigned int size_limit=0);
+		bool GetLinkedComps(CompList& list_in, CompList& list, unsigned int size_limit = 0);
 	private:
 		unsigned long long GetKey(unsigned int id, unsigned int brick_id)
 		{

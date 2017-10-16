@@ -2910,6 +2910,7 @@ void ComponentDlg::OnCompFull(wxCommandEvent &event)
 		use = m_analysis_max_check->GetValue();
 		num = (unsigned int)(m_analysis_max_spin->GetValue());
 		comp_selector.SetMaxNum(use, num);
+		comp_selector.SetAnalyzer(&m_comp_analyzer);
 		comp_selector.CompFull();
 	}
 	else

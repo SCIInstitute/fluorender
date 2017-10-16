@@ -26,12 +26,14 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "CompSelector.h"
+#include "CompAnalyzer.h"
 #include "DataManager.h"
 
 using namespace FL;
 
 ComponentSelector::ComponentSelector(VolumeData* vd)
 	: m_vd(vd),
+	m_analyzer(0),
 	m_sel_all(false),
 	m_id(0),
 	m_use_min(false),
@@ -44,6 +46,16 @@ ComponentSelector::ComponentSelector(VolumeData* vd)
 
 ComponentSelector::~ComponentSelector()
 {
+}
+
+void ComponentSelector::SetAnalyzer(ComponentAnalyzer* analyzer)
+{
+	m_analyzer = analyzer;
+}
+
+ComponentAnalyzer* ComponentSelector::GetAnalyzer()
+{
+	return m_analyzer;
 }
 
 void ComponentSelector::CompFull()
@@ -79,8 +91,9 @@ void ComponentSelector::CompFull()
 	unsigned long long index;
 	m_vd->GetResolution(nx, ny, nz);
 	unsigned int label_value;
-	CellList sel_labels;
-	CellListIter label_iter;
+	unsigned int brick_id;
+	CompList sel_labels;
+	CompListIter label_iter;
 	for (i = 0; i < nx; ++i)
 	for (j = 0; j < ny; ++j)
 	for (k = 0; k < nz; ++k)
@@ -90,35 +103,56 @@ void ComponentSelector::CompFull()
 			data_label[index])
 		{
 			label_value = data_label[index];
-			label_iter = sel_labels.find(label_value);
+			brick_id = tex->get_brick_id(index);
+			label_iter = sel_labels.find(GetKey(label_value, brick_id));
 			if (label_iter == sel_labels.end())
 			{
-				FL::pCell cell(new FL::Cell(label_value));
-				cell->Inc(i, j, k, 1.0f);
-				sel_labels.insert(pair<unsigned int, FL::pCell>
-					(label_value, cell));
+				CompInfo* info = new CompInfo;
+				info->id = label_value;
+				info->brick_id = brick_id;
+				if (!m_analyzer)
+				{
+					info->sumi = 1;
+				}
+				sel_labels.insert(std::pair<unsigned long long, pCompInfo>
+					(GetKey(label_value, brick_id), pCompInfo(info)));
 			}
-			else
-				label_iter->second->Inc(i, j, k, 1.0f);
+			else if (!m_analyzer)
+			{
+				label_iter->second->sumi++;
+			}
 		}
 	}
+
+	CompList* comp_list = 0;
+	CompList result_list;
+	if (m_analyzer)
+	{
+		if (m_analyzer->GetCompGraph()->GetLinkedComps(sel_labels, result_list))
+			comp_list = &result_list;
+		else
+			comp_list = &sel_labels;
+	}
+	else
+		comp_list = &sel_labels;
 
 	//reselect
 	unsigned int size;
 	for (i = 0; i < nx; ++i)
 	for (j = 0; j < ny; ++j)
-	for (k = 0; k<nz; ++k)
+	for (k = 0; k < nz; ++k)
 	{
 		index = nx*ny*k + nx*j + i;
 		if (data_label[index])
 		{
 			label_value = data_label[index];
-			label_iter = sel_labels.find(label_value);
-			if (label_iter != sel_labels.end())
+			brick_id = tex->get_brick_id(index);
+			label_iter = comp_list->find(GetKey(label_value, brick_id));
+			if (label_iter != comp_list->end())
 			{
 				if (m_use_min || m_use_max)
 				{
-					size = label_iter->second->GetSizeUi();
+					size = label_iter->second->sumi;
 					if (CompareSize(size))
 						data_mask[index] = 255;
 					else
