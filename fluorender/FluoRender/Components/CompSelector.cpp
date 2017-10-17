@@ -128,7 +128,23 @@ void ComponentSelector::CompFull()
 	CompList result_list;
 	if (m_analyzer)
 	{
-		if (m_analyzer->GetCompGraph()->GetLinkedComps(sel_labels, result_list))
+		bool assigned = true;
+		//assign graph node identifier for sel_labels
+		CompList* analyzer_list = m_analyzer->GetCompList();
+		for (auto iter = sel_labels.begin(); iter != sel_labels.end(); ++iter)
+		{
+			auto iter2 = analyzer_list->find(iter->first);
+			if (iter2 == analyzer_list->end())
+			{
+				assigned = false;
+				break;
+			}
+			iter->second->v = iter2->second->v;
+			iter->second->sumi = iter2->second->sumi;
+		}
+		if (assigned && m_analyzer->
+			GetCompGraph()->GetLinkedComps(
+			sel_labels, result_list))
 			comp_list = &result_list;
 		else
 			comp_list = &sel_labels;

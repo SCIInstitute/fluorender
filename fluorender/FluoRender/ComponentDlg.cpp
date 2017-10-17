@@ -3358,6 +3358,13 @@ void ComponentDlg::GenerateAdv(bool refine)
 
 	m_generate_prg->SetValue(100);
 	connection.disconnect();
+
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+	{
+		vr_frame->GetSettingDlg()->SetRunScript(true);
+		vr_frame->GetMovieView()->GetScriptSettings();
+	}
 }
 
 void ComponentDlg::GenerateBsc(bool refine)
@@ -3428,6 +3435,13 @@ void ComponentDlg::GenerateBsc(bool refine)
 
 	m_generate_prg->SetValue(100);
 	connection.disconnect();
+
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+	{
+		vr_frame->GetSettingDlg()->SetRunScript(true);
+		vr_frame->GetMovieView()->GetScriptSettings();
+	}
 }
 
 void ComponentDlg::Cluster()

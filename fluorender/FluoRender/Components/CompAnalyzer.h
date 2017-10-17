@@ -67,6 +67,10 @@ namespace FL
 		{
 			m_vd_list.clear();
 		}
+		CompList* GetCompList()
+		{
+			return &m_comp_list;
+		}
 		CompGraph* GetCompGraph()
 		{
 			return &m_comp_graph;

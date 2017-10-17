@@ -85,49 +85,16 @@ bool CompGraph::GetLinkedComps(pCompInfo& comp, CompList& list, unsigned int siz
 
 bool CompGraph::GetLinkedComps(CompList& list_in, CompList& list, unsigned int size_limit)
 {
+	ClearVisited();
+
 	for (auto comp_iter = list_in.begin();
 		comp_iter != list_in.end(); ++comp_iter)
 	{
-		ClearVisited();
-
 		auto comp = comp_iter->second;
-		auto v1 = comp->v;
-
-		if (v1 == CompGraph::null_vertex())
-			return false;
-
-		if ((*this)[v1].visited)
-			return false;
-		else
-		{
+		if (!GetLinkedComps(comp, list, size_limit))
 			list.insert(std::pair<unsigned long long, pCompInfo>
-				(GetKey(comp->id, comp->brick_id), comp));
-			(*this)[v1].visited = true;
-		}
-
-		std::pair<CompAdjIter, CompAdjIter> adj_verts =
-			boost::adjacent_vertices(v1, *this);
-		for (auto iter = adj_verts.first; iter != adj_verts.second; ++iter)
-		{
-			auto v2 = *iter;
-			//check connecting size
-			std::pair<CompEdge, bool> edge = boost::edge(v1, v2, *this);
-			if (edge.second)
-			{
-				if ((*this)[edge.first].size_ui < size_limit)
-					continue;
-			}
-			//
-			unsigned int id = (*this)[v2].id;
-			unsigned int brick_id = (*this)[v2].brick_id;
-			auto l1 = list.find(GetKey(id, brick_id));
-			if (l1 == list.end())
-			{
-				pCompInfo info = (*this)[v2].compinfo.lock();
-				GetLinkedComps(info, list, size_limit);
-			}
-		}
+			(comp_iter->first, comp));
 	}
 
-	return true;
+	return !list.empty();
 }
