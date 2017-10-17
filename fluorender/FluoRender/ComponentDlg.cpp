@@ -2894,37 +2894,7 @@ void ComponentDlg::OnAnalysisMaxSpin(wxSpinEvent &event)
 
 void ComponentDlg::OnCompFull(wxCommandEvent &event)
 {
-	//get id
-	wxString str = m_comp_id_text->GetValue();
-	if (str.empty())
-	{
-		if (!m_view)
-			return;
-		//get current mask
-		VolumeData* vd = m_view->m_glview->m_cur_vol;
-		FL::ComponentSelector comp_selector(vd);
-		//cell size filter
-		bool use = m_analysis_min_check->GetValue();
-		unsigned int num = (unsigned int)(m_analysis_min_spin->GetValue());
-		comp_selector.SetMinNum(use, num);
-		use = m_analysis_max_check->GetValue();
-		num = (unsigned int)(m_analysis_max_spin->GetValue());
-		comp_selector.SetMaxNum(use, num);
-		comp_selector.SetAnalyzer(&m_comp_analyzer);
-		comp_selector.CompFull();
-	}
-	else
-	{
-		wxCommandEvent e;
-		OnCompAppend(e);
-	}
-
-	m_view->RefreshGL();
-
-	//frame
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
-		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	SelectFullComp();
 }
 
 void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
@@ -2990,6 +2960,7 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 	use = m_analysis_max_check->GetValue();
 	num = (unsigned int)(m_analysis_max_spin->GetValue());
 	comp_selector.SetMaxNum(use, num);
+	comp_selector.SetAnalyzer(&m_comp_analyzer);
 	comp_selector.Append(get_all);
 
 	m_view->RefreshGL();
@@ -3605,6 +3576,41 @@ void ComponentDlg::GenerateComp(int type, int mode)
 		}
 		break;
 	}
+}
+
+void ComponentDlg::SelectFullComp()
+{
+	//get id
+	wxString str = m_comp_id_text->GetValue();
+	if (str.empty())
+	{
+		if (!m_view)
+			return;
+		//get current mask
+		VolumeData* vd = m_view->m_glview->m_cur_vol;
+		FL::ComponentSelector comp_selector(vd);
+		//cell size filter
+		bool use = m_analysis_min_check->GetValue();
+		unsigned int num = (unsigned int)(m_analysis_min_spin->GetValue());
+		comp_selector.SetMinNum(use, num);
+		use = m_analysis_max_check->GetValue();
+		num = (unsigned int)(m_analysis_max_spin->GetValue());
+		comp_selector.SetMaxNum(use, num);
+		comp_selector.SetAnalyzer(&m_comp_analyzer);
+		comp_selector.CompFull();
+	}
+	else
+	{
+		wxCommandEvent e;
+		OnCompAppend(e);
+	}
+
+	m_view->RefreshGL();
+
+	//frame
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetBrushToolDlg())
+		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void ComponentDlg::OnAnalyze(wxCommandEvent &event)

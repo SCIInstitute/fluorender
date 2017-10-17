@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <vector>
 #include <CellList.h>
+#include <CompGraph.h>
 
 class VolumeData;
 namespace FL
@@ -86,6 +87,7 @@ namespace FL
 			return (temp << 32) | id;
 		}
 		bool CompareSize(unsigned int size);
+		CompList* GetListFromAnalyzer(CompList &list_in, CompList &list_out);
 	};
 
 	inline bool ComponentSelector::CompareSize(

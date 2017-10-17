@@ -243,6 +243,7 @@ public:
 	//type: 0-basic; 1-advanced
 	//mode: 0-generate; 1-refine
 	void GenerateComp(int type, int mode);
+	void SelectFullComp();
 
 private:
 	wxWindow* m_frame;

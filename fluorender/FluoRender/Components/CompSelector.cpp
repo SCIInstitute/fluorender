@@ -98,7 +98,8 @@ void ComponentSelector::CompFull()
 	for (j = 0; j < ny; ++j)
 	for (k = 0; k < nz; ++k)
 	{
-		index = nx*ny*k + nx*j + i;
+		index = (unsigned long long)nx*(unsigned long long)ny*(unsigned long long)k +
+			(unsigned long long)nx*(unsigned long long)j + (unsigned long long)i;
 		if (data_mask[index] &&
 			data_label[index])
 		{
@@ -111,46 +112,17 @@ void ComponentSelector::CompFull()
 				info->id = label_value;
 				info->brick_id = brick_id;
 				if (!m_analyzer)
-				{
 					info->sumi = 1;
-				}
 				sel_labels.insert(std::pair<unsigned long long, pCompInfo>
 					(GetKey(label_value, brick_id), pCompInfo(info)));
 			}
 			else if (!m_analyzer)
-			{
 				label_iter->second->sumi++;
-			}
 		}
 	}
 
-	CompList* comp_list = 0;
-	CompList result_list;
-	if (m_analyzer)
-	{
-		bool assigned = true;
-		//assign graph node identifier for sel_labels
-		CompList* analyzer_list = m_analyzer->GetCompList();
-		for (auto iter = sel_labels.begin(); iter != sel_labels.end(); ++iter)
-		{
-			auto iter2 = analyzer_list->find(iter->first);
-			if (iter2 == analyzer_list->end())
-			{
-				assigned = false;
-				break;
-			}
-			iter->second->v = iter2->second->v;
-			iter->second->sumi = iter2->second->sumi;
-		}
-		if (assigned && m_analyzer->
-			GetCompGraph()->GetLinkedComps(
-			sel_labels, result_list))
-			comp_list = &result_list;
-		else
-			comp_list = &sel_labels;
-	}
-	else
-		comp_list = &sel_labels;
+	CompList list_out;
+	CompList* comp_list = GetListFromAnalyzer(sel_labels, list_out);
 
 	//reselect
 	unsigned int size;
@@ -225,8 +197,9 @@ void ComponentSelector::Append(bool all)
 		int i, j, k;
 		unsigned long long index;
 		unsigned int label_value;
-		CellList sel_labels;
-		CellListIter label_iter;
+		unsigned int brick_id;
+		CompList sel_labels;
+		CompListIter label_iter;
 		for (i = 0; i < nx; ++i)
 		for (j = 0; j < ny; ++j)
 		for (k = 0; k < nz; ++k)
@@ -236,31 +209,40 @@ void ComponentSelector::Append(bool all)
 			if (data_label[index])
 			{
 				label_value = data_label[index];
-				label_iter = sel_labels.find(label_value);
+				brick_id = tex->get_brick_id(index);
+				label_iter = sel_labels.find(GetKey(label_value, brick_id));
 				if (label_iter == sel_labels.end())
 				{
-					FL::pCell cell(new FL::Cell(label_value));
-					cell->Inc(i, j, k, 1.0f);
-					sel_labels.insert(pair<unsigned int, FL::pCell>
-						(label_value, cell));
+					CompInfo* info = new CompInfo;
+					info->id = label_value;
+					info->brick_id = brick_id;
+					if (!m_analyzer)
+						info->sumi = 1;
+					sel_labels.insert(std::pair<unsigned long long, pCompInfo>
+						(GetKey(label_value, brick_id), pCompInfo(info)));
 				}
-				else
-					label_iter->second->Inc(i, j, k, 1.0f);
+				else if (!m_analyzer)
+					label_iter->second->sumi++;
 			}
 		}
+
+		CompList list_out;
+		CompList* comp_list = GetListFromAnalyzer(sel_labels, list_out);
+
+		//reselect
 		unsigned int size;
-		for (index = 0;
-		index < for_size; ++index)
+		for (index = 0; index < for_size; ++index)
 		{
 			if (data_label[index])
 			{
 				label_value = data_label[index];
-				label_iter = sel_labels.find(label_value);
-				if (label_iter != sel_labels.end())
+				brick_id = tex->get_brick_id(index);
+				label_iter = comp_list->find(GetKey(label_value, brick_id));
+				if (label_iter != comp_list->end())
 				{
 					if (m_use_min || m_use_max)
 					{
-						size = label_iter->second->GetSizeUi();
+						size = label_iter->second->sumi;
 						if (CompareSize(size))
 							data_mask[index] = 255;
 						else
@@ -542,4 +524,35 @@ void ComponentSelector::SelectList(CellList& list)
 
 	//invalidate label mask in gpu
 	m_vd->GetVR()->clear_tex_pool();
+}
+
+inline CompList* ComponentSelector::GetListFromAnalyzer(CompList &list_in, CompList &list_out)
+{
+	if (m_analyzer)
+	{
+		//bool assigned = true;
+		//assign graph node identifier for sel_labels
+		CompList* analyzer_list = m_analyzer->GetCompList();
+		for (auto iter = list_in.begin(); iter != list_in.end(); ++iter)
+		{
+			auto iter2 = analyzer_list->find(iter->first);
+			if (iter2 == analyzer_list->end())
+			{
+				continue;
+				//assigned = false;
+				//break;
+			}
+			iter->second->v = iter2->second->v;
+			iter->second->sumi = iter2->second->sumi;
+		}
+		if (/*assigned && */m_analyzer->
+			GetCompGraph()->GetLinkedComps(
+				list_in, list_out))
+			return &list_out;
+		else
+			return &list_in;
+	}
+	else
+		return &list_in;
+	return 0;
 }

@@ -4672,8 +4672,10 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			wxGetKeyState(wxKeyCode('f')))
 		{
 			m_cell_full = true;
+			if (frame && frame->GetComponentDlg())
+				frame->GetComponentDlg()->SelectFullComp();
 			if (frame && frame->GetTraceDlg())
-				frame->GetTraceDlg()->CellFull();
+				frame->GetTraceDlg()->CellUpdate();
 			refresh = true;
 		}
 		if (m_cell_full &&
