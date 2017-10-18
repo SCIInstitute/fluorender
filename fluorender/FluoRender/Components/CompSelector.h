@@ -67,9 +67,9 @@ namespace FL
 
 		void CompFull();
 		void All();
-		void Append(bool all);
+		void Append(bool all, bool rmask = true);
 		void Exclusive();
-		void Clear();
+		void Clear(bool invalidate=true);
 		void Delete();
 		void Delete(std::vector<unsigned int> &ids);
 		void SelectList(CellList& list);

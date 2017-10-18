@@ -2907,15 +2907,18 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 	wxString str;
 	unsigned long ival;
 	//get id
+	unsigned int id;
+	int brick_id;
 	str = m_comp_id_text->GetValue();
-	str.ToULong(&ival);
-	if (ival != 0)
+
+	if (GetIds(str.ToStdString(), id, brick_id))
 	{
-		unsigned int id = ival;
 		//get current mask
 		VolumeData* vd = m_view->m_glview->m_cur_vol;
 		FL::ComponentSelector comp_selector(vd);
 		comp_selector.SetId(id);
+		comp_selector.SetBrickId(brick_id);
+
 		//cell size filter
 		bool use = m_analysis_min_check->GetValue();
 		unsigned int num = (unsigned int)(m_analysis_min_spin->GetValue());
@@ -2923,15 +2926,16 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 		use = m_analysis_max_check->GetValue();
 		num = (unsigned int)(m_analysis_max_spin->GetValue());
 		comp_selector.SetMaxNum(use, num);
+		comp_selector.SetAnalyzer(&m_comp_analyzer);
 		comp_selector.Exclusive();
+
+		m_view->RefreshGL();
+
+		//frame
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame && vr_frame->GetBrushToolDlg())
+			vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 	}
-
-	m_view->RefreshGL();
-
-	//frame
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
-		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void ComponentDlg::OnCompAppend(wxCommandEvent &event)

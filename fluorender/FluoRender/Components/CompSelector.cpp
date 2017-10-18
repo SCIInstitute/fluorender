@@ -158,7 +158,7 @@ void ComponentSelector::CompFull()
 	m_vd->GetVR()->clear_tex_pool();
 }
 
-void ComponentSelector::Append(bool all)
+void ComponentSelector::Append(bool all, bool rmask)
 {
 	//get current mask
 	if (!m_vd)
@@ -168,7 +168,7 @@ void ComponentSelector::Append(bool all)
 		m_vd->GetTexture())
 		m_vd->GetTexture()->push_mask();
 
-	Nrrd* nrrd_mask = m_vd->GetMask(true);
+	Nrrd* nrrd_mask = m_vd->GetMask(rmask);
 	if (!nrrd_mask)
 	{
 		m_vd->AddEmptyMask(0);
@@ -293,8 +293,6 @@ void ComponentSelector::Append(bool all)
 								else
 									data_mask[index] = 255;
 							}
-							else
-								data_mask[index] = 0;
 						}
 					}
 				}
@@ -306,19 +304,44 @@ void ComponentSelector::Append(bool all)
 		if (simple_select)
 		{
 			unsigned long long acc_size = 0;
-			for (index = 0; index < for_size; ++index)
+			if (m_brick_id >= 0)
 			{
-				if (data_label[index] == m_id)
-					acc_size++;
+				for (index = 0; index < for_size; ++index)
+				{
+					brick_id = tex->get_brick_id(index);
+					if (data_label[index] == m_id &&
+						brick_id == m_brick_id)
+						acc_size++;
+				}
+				if (((m_use_min || m_use_max) &&
+					CompareSize((unsigned int)(acc_size))) ||
+					(!m_use_min && !m_use_max))
+				{
+					for (index = 0; index < for_size; ++index)
+					{
+						brick_id = tex->get_brick_id(index);
+						if (data_label[index] == m_id &&
+							brick_id == m_brick_id)
+							data_mask[index] = 255;
+					}
+				}
 			}
-			if (((m_use_min || m_use_max) &&
-				CompareSize((unsigned int)(acc_size))) ||
-				(!m_use_min && !m_use_max))
+			else
 			{
 				for (index = 0; index < for_size; ++index)
 				{
 					if (data_label[index] == m_id)
-						data_mask[index] = 255;
+						acc_size++;
+				}
+				if (((m_use_min || m_use_max) &&
+					CompareSize((unsigned int)(acc_size))) ||
+					(!m_use_min && !m_use_max))
+				{
+					for (index = 0; index < for_size; ++index)
+					{
+						if (data_label[index] == m_id)
+							data_mask[index] = 255;
+					}
 				}
 			}
 		}
@@ -329,61 +352,8 @@ void ComponentSelector::Append(bool all)
 
 void ComponentSelector::Exclusive()
 {
-	//get current mask
-	if (!m_vd)
-		return;
-
-	if (Texture::mask_undo_num_>0 &&
-		m_vd->GetTexture())
-		m_vd->GetTexture()->push_mask();
-
-	Nrrd* nrrd_mask = m_vd->GetMask(true);
-	if (!nrrd_mask)
-	{
-		m_vd->AddEmptyMask(0);
-		nrrd_mask = m_vd->GetMask(false);
-	}
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
-		return;
-	//get current label
-	Texture* tex = m_vd->GetTexture();
-	if (!tex)
-		return;
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
-		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
-		return;
-
-	//select append
-	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
-	unsigned long long index;
-	unsigned long long acc_size = 0;
-	for (index = 0;
-	index < for_size; ++index)
-	{
-		if (data_label[index] == m_id)
-			acc_size++;
-		data_mask[index] = 0;
-	}
-	if (((m_use_min || m_use_max) &&
-		CompareSize((unsigned int)(acc_size))) ||
-		(!m_use_min && !m_use_max))
-	{
-		for (index = 0;
-		index < for_size; ++index)
-		{
-			if (data_label[index] == m_id)
-				data_mask[index] = 255;
-		}
-	}
-	//invalidate label mask in gpu
-	m_vd->GetVR()->clear_tex_pool();
+	Clear(false);
+	Append(false, false);
 }
 
 void ComponentSelector::All()
@@ -416,7 +386,7 @@ void ComponentSelector::All()
 	m_vd->GetVR()->clear_tex_pool();
 }
 
-void ComponentSelector::Clear()
+void ComponentSelector::Clear(bool invalidate)
 {
 	//get current mask
 	if (!m_vd)
@@ -440,7 +410,8 @@ void ComponentSelector::Clear()
 		(unsigned long long)ny * (unsigned long long)nz;
 	memset(data_mask, 0, for_size);
 	//invalidate label mask in gpu
-	m_vd->GetVR()->clear_tex_pool();
+	if (invalidate)
+		m_vd->GetVR()->clear_tex_pool();
 }
 
 void ComponentSelector::Delete()
