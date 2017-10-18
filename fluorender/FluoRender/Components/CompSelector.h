@@ -56,6 +56,10 @@ namespace FL
 		{ m_id = id; }
 		unsigned int GetId()
 		{ return m_id; }
+		void SetBrickId(int id)
+		{ m_brick_id = id; }
+		int GetBrickId()
+		{ return m_brick_id; }
 		void SetMinNum(bool use, unsigned int num)
 		{ m_use_min = use; m_min_num = num; }
 		void SetMaxNum(bool use, unsigned int num)
@@ -75,6 +79,7 @@ namespace FL
 		ComponentAnalyzer* m_analyzer;
 		bool m_sel_all;
 		unsigned int m_id;
+		int m_brick_id;//<0: not used
 		bool m_use_min;
 		bool m_use_max;
 		unsigned int m_min_num;
@@ -117,5 +122,6 @@ namespace FL
 		else
 			return false;
 	}
+
 }
 #endif//FL_CompSelector_h

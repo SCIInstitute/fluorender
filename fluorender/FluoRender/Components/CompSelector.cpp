@@ -36,6 +36,7 @@ ComponentSelector::ComponentSelector(VolumeData* vd)
 	m_analyzer(0),
 	m_sel_all(false),
 	m_id(0),
+	m_brick_id(-1),
 	m_use_min(false),
 	m_use_max(false),
 	m_min_num(0),
@@ -192,14 +193,15 @@ void ComponentSelector::Append(bool all)
 	m_vd->GetResolution(nx, ny, nz);
 	unsigned long long for_size = (unsigned long long)nx*
 		(unsigned long long)ny * (unsigned long long)nz;
+	unsigned long long index;
+	unsigned int label_value;
+	unsigned int brick_id;
+	CompListIter label_iter;
+	unsigned int size;
 	if (all)
 	{
 		int i, j, k;
-		unsigned long long index;
-		unsigned int label_value;
-		unsigned int brick_id;
 		CompList sel_labels;
-		CompListIter label_iter;
 		for (i = 0; i < nx; ++i)
 		for (j = 0; j < ny; ++j)
 		for (k = 0; k < nz; ++k)
@@ -230,7 +232,6 @@ void ComponentSelector::Append(bool all)
 		CompList* comp_list = GetListFromAnalyzer(sel_labels, list_out);
 
 		//reselect
-		unsigned int size;
 		for (index = 0; index < for_size; ++index)
 		{
 			if (data_label[index])
@@ -258,22 +259,67 @@ void ComponentSelector::Append(bool all)
 	}
 	else
 	{
-		unsigned long long acc_size = 0;
-		for (unsigned long long index = 0;
-		index < for_size; ++index)
+		bool simple_select = false;
+		if (m_analyzer)
 		{
-			if (data_label[index] == m_id)
-				acc_size++;
+			CompList* analyzer_list = m_analyzer->GetCompList();
+			auto iter = analyzer_list->find(GetKey(m_id, m_brick_id));
+			if (iter == analyzer_list->end())
+				simple_select = true;
+			else
+			{
+				m_analyzer->GetCompGraph()->ClearVisited();
+				CompList comp_list;
+				if (m_analyzer->GetCompGraph()->
+					GetLinkedComps(iter->second, comp_list))
+				{
+					for (index = 0; index < for_size; ++index)
+					{
+						if (data_label[index])
+						{
+							label_value = data_label[index];
+							brick_id = tex->get_brick_id(index);
+							label_iter = comp_list.find(GetKey(label_value, brick_id));
+							if (label_iter != comp_list.end())
+							{
+								if (m_use_min || m_use_max)
+								{
+									size = label_iter->second->sumi;
+									if (CompareSize(size))
+										data_mask[index] = 255;
+									else
+										data_mask[index] = 0;
+								}
+								else
+									data_mask[index] = 255;
+							}
+							else
+								data_mask[index] = 0;
+						}
+					}
+				}
+				else
+					simple_select = true;
+			}
 		}
-		if (((m_use_min || m_use_max) &&
-			CompareSize((unsigned int)(acc_size))) ||
-			(!m_use_min && !m_use_max))
+
+		if (simple_select)
 		{
-			for (unsigned long long index = 0;
-			index < for_size; ++index)
+			unsigned long long acc_size = 0;
+			for (index = 0; index < for_size; ++index)
 			{
 				if (data_label[index] == m_id)
-					data_mask[index] = 255;
+					acc_size++;
+			}
+			if (((m_use_min || m_use_max) &&
+				CompareSize((unsigned int)(acc_size))) ||
+				(!m_use_min && !m_use_max))
+			{
+				for (index = 0; index < for_size; ++index)
+				{
+					if (data_label[index] == m_id)
+						data_mask[index] = 255;
+				}
 			}
 		}
 	}

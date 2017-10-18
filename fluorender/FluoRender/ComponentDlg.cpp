@@ -37,6 +37,8 @@ DEALINGS IN THE SOFTWARE.
 #include <boost/signals2.hpp>
 #include <boost/bind.hpp>
 #include <limits>
+#include <string>
+#include <cctype>
 
 BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_COLLAPSIBLEPANE_CHANGED(wxID_ANY, ComponentDlg::OnPaneChange)
@@ -2938,21 +2940,19 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 		return;
 
 	wxString str;
-	unsigned long ival;
 	//get id
+	unsigned int id;
+	int brick_id;
 	str = m_comp_id_text->GetValue();
+	bool get_all = GetIds(str.ToStdString(), id, brick_id);
+	get_all = !get_all;
 
-	bool get_all = true;
-	ival = 0;
-	str.ToULong(&ival);
-	if (ival != 0)
-		get_all = false;
-
-	unsigned int id = (unsigned int)ival;
 	//get current mask
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	FL::ComponentSelector comp_selector(vd);
 	comp_selector.SetId(id);
+	comp_selector.SetBrickId(brick_id);
+
 	//cell size filter
 	bool use = m_analysis_min_check->GetValue();
 	unsigned int num = (unsigned int)(m_analysis_min_spin->GetValue());
@@ -3512,6 +3512,42 @@ void ComponentDlg::Cluster()
 	delete method;
 }
 
+bool ComponentDlg::GetIds(std::string &str, unsigned int &id, int &brick_id)
+{
+	std::string::size_type sz;
+	try
+	{
+		id = std::stoul(str, &sz);
+	}
+	catch (...)
+	{
+		return false;
+	}
+	std::string str2;
+	if (sz < str.size())
+	{
+		brick_id = id;
+		for (size_t i = sz; i< str.size() - 1; ++i)
+		{
+			if (std::isdigit(static_cast<unsigned char>(str[i])))
+			{
+				str2 = str.substr(i);
+				try
+				{
+					id = std::stoul(str2);
+				}
+				catch(...)
+				{
+					return false;
+				}
+				return true;
+			}
+		}
+	}
+	brick_id = -1;
+	return true;
+}
+
 void ComponentDlg::GenerateComp(int type, int mode)
 {
 	switch (type)
@@ -3686,3 +3722,4 @@ void ComponentDlg::Analyze(bool sel)
 	m_generate_prg->SetValue(100);
 	connection.disconnect();
 }
+

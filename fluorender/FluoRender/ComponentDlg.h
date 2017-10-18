@@ -535,6 +535,7 @@ private:
 	void GenerateAdv(bool refine);
 	void GenerateBsc(bool refine);
 	void Cluster();
+	bool GetIds(std::string &str, unsigned int &id, int &brick_id);
 
 	wxWindow* Create3DAnalysisPage(wxWindow *parent);
 	wxWindow* Create2DAnalysisPage(wxWindow *parent);
