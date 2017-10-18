@@ -530,24 +530,23 @@ inline CompList* ComponentSelector::GetListFromAnalyzer(CompList &list_in, CompL
 {
 	if (m_analyzer)
 	{
-		//bool assigned = true;
 		//assign graph node identifier for sel_labels
 		CompList* analyzer_list = m_analyzer->GetCompList();
-		for (auto iter = list_in.begin(); iter != list_in.end(); ++iter)
+		for (auto iter = list_in.begin(); iter != list_in.end(); )
 		{
 			auto iter2 = analyzer_list->find(iter->first);
 			if (iter2 == analyzer_list->end())
 			{
+				//remove
+				iter = list_in.erase(iter);
 				continue;
-				//assigned = false;
-				//break;
 			}
 			iter->second->v = iter2->second->v;
 			iter->second->sumi = iter2->second->sumi;
+			++iter;
 		}
-		if (/*assigned && */m_analyzer->
-			GetCompGraph()->GetLinkedComps(
-				list_in, list_out))
+		if (m_analyzer->GetCompGraph()->
+			GetLinkedComps(list_in, list_out))
 			return &list_out;
 		else
 			return &list_in;

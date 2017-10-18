@@ -92,8 +92,10 @@ bool CompGraph::GetLinkedComps(CompList& list_in, CompList& list, unsigned int s
 	{
 		auto comp = comp_iter->second;
 		if (!GetLinkedComps(comp, list, size_limit))
+		{
 			list.insert(std::pair<unsigned long long, pCompInfo>
 			(comp_iter->first, comp));
+		}
 	}
 
 	return !list.empty();
