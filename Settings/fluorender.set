@@ -1,5 +1,5 @@
 ver_major=2
-ver_minor=21
+ver_minor=22
 [gm\ calculation]
 mode=2
 [peeling\ layers]
@@ -60,9 +60,9 @@ similarity=0.3
 [memory\ settings]
 mem\ swap=0
 graphics\ mem=4000
-large\ data\ size=200
-force\ brick\ size=128
-up\ time=100
+large\ data\ size=400
+force\ brick\ size=256
+up\ time=50
 [update\ order]
 value=0
 [invalidate\ tex]

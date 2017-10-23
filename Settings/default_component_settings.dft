@@ -57,4 +57,5 @@ use_min=0
 min_num=0
 use_max=0
 max_num=0
+colocal=0
 output_type=1
