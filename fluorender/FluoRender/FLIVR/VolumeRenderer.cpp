@@ -1279,7 +1279,10 @@ namespace FLIVR
 		{
 			TextureBrick* b = (*bricks)[i];
 			if (!test_against_view(b->bbox(), !orthographic_p))
+			{
+				b->set_skip_mask(true);
 				continue;
+			}
 
 			BBox bbox = b->bbox();
 			matrix[0] = float(bbox.max().x()-bbox.min().x());
@@ -1759,6 +1762,9 @@ namespace FLIVR
 			(order==2)?(i>=0):(i<num);
 			i+=((order==2)?-1:1))
 		{
+			if ((*bricks)[i]->get_skip_mask())
+				continue;
+
 			load_brick_mask(bricks, i);
 			glActiveTexture(GL_TEXTURE0+c);
 

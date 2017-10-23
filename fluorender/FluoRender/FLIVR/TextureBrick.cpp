@@ -82,6 +82,9 @@ namespace FLIVR
 
 		//priority
 		priority_ = 0;
+
+		//skip mask updating
+		skip_mask_ = false;
 	}
 
 	TextureBrick::~TextureBrick()

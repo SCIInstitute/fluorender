@@ -150,6 +150,14 @@ namespace FLIVR {
 		//get value
 		double get_data(unsigned int i, unsigned int j, unsigned int k);
 
+		//get skip mask
+		bool get_skip_mask()
+		{ return skip_mask_; }
+		void set_skip_mask(bool value)
+		{ skip_mask_ = value; }
+		void reset_skip_mask()
+		{ skip_mask_ = false; }
+
 	private:
 		void compute_edge_rays(BBox &bbox);
 		void compute_edge_rays_tex(BBox &bbox);
@@ -191,6 +199,8 @@ namespace FLIVR {
 		size_t ind_;
 		//id for analysis
 		unsigned int id_;
+		//skip mask updating
+		bool skip_mask_;
 	};
 
 	inline double TextureBrick::get_data(unsigned int i, unsigned int j, unsigned int k)

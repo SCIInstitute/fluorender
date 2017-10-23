@@ -249,6 +249,11 @@ namespace FLIVR
 		for (int i = tex_pool_.size() - 1; i >= 0; --i)
 		{
 			brick = tex_pool_[i].brick;
+			if (brick->get_skip_mask())
+			{
+				brick->reset_skip_mask();
+				continue;
+			}
 			if (tex_pool_[i].comp == brick->nmask())
 			{
 				glDeleteTextures(1, (GLuint*)&tex_pool_[i].id);
