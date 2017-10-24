@@ -2905,13 +2905,15 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 		return;
 
 	wxString str;
+	std::string sstr;
 	unsigned long ival;
 	//get id
 	unsigned int id;
 	int brick_id;
 	str = m_comp_id_text->GetValue();
+	sstr = str.ToStdString();
 
-	if (GetIds(str.ToStdString(), id, brick_id))
+	if (GetIds(sstr, id, brick_id))
 	{
 		//get current mask
 		VolumeData* vd = m_view->m_glview->m_cur_vol;
@@ -2944,11 +2946,13 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 		return;
 
 	wxString str;
+	std::string sstr;
 	//get id
 	unsigned int id;
 	int brick_id;
 	str = m_comp_id_text->GetValue();
-	bool get_all = GetIds(str.ToStdString(), id, brick_id);
+	sstr = str.ToStdString();
+	bool get_all = GetIds(sstr, id, brick_id);
 	get_all = !get_all;
 
 	//get current mask

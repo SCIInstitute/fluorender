@@ -1545,17 +1545,6 @@ void ComponentGenerator::SizedGrow(bool param_tr, int iter,
 
 void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 {
-	/*if (!m_vd)
-		return;
-	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
-	Nrrd* nrrd_label = m_vd->GetLabel(false);
-	if (!nrrd_label)
-		return;
-	unsigned int* val32 = (unsigned int*)(nrrd_label->data);
-	unsigned int* mask32 = new unsigned int[nx*ny];
-	memset(mask32, 0, sizeof(unsigned int)*nx*ny);*/
-
 	CHECK_BRICKS
 
 	//create program and kernels
