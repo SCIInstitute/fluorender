@@ -129,7 +129,7 @@ namespace FL
 	public:
 		ClusterMethod() :
 			m_id_counter(1) {};
-		~ClusterMethod() {};
+		virtual ~ClusterMethod() {};
 
 		void SetData(Cluster &data)
 		{ m_data = data; }

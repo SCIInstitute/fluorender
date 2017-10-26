@@ -1143,10 +1143,7 @@ void VolumeData::Save(wxString &filename, int mode, bool bake, bool compress)
 		writer->Save(filename.ToStdWstring(), mode);
 
 		if (delete_data)
-		{
-			delete []data->data;
-			nrrdNix(data);
-		}
+			nrrdNuke(data);
 	}
 	delete writer;
 

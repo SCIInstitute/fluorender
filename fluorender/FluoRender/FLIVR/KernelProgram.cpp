@@ -76,7 +76,6 @@ namespace FLIVR
 
 		for (cl_uint i = 0; i<platform_num; ++i)
 		{
-			cl_device_id device = 0;
 			cl_device_id *devices;
 			cl_uint device_num;
 			//get gpu devices

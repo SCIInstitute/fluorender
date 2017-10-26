@@ -2906,7 +2906,6 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 
 	wxString str;
 	std::string sstr;
-	unsigned long ival;
 	//get id
 	unsigned int id;
 	int brick_id;

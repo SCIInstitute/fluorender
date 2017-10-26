@@ -6108,8 +6108,7 @@ void VRenderGLView::DelVolCache(FL::VolCache& vol_cache)
 	vol_cache.valid = false;
 	if (vol_cache.data)
 	{
-		delete[] vol_cache.data;
-		nrrdNix((Nrrd*)vol_cache.nrrd_data);
+		nrrdNuke((Nrrd*)vol_cache.nrrd_data);
 		vol_cache.data = 0;
 		vol_cache.nrrd_data = 0;
 	}
@@ -6131,8 +6130,7 @@ void VRenderGLView::DelVolCache(FL::VolCache& vol_cache)
 			msk_writer.Save(filename, 1);
 		}
 
-		delete[] vol_cache.label;
-		nrrdNix((Nrrd*)vol_cache.nrrd_label);
+		nrrdNuke((Nrrd*)vol_cache.nrrd_label);
 		vol_cache.label = 0;
 		vol_cache.nrrd_label = 0;
 	}
