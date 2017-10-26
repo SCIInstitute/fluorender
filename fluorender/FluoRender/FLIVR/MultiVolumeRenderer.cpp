@@ -753,7 +753,10 @@ namespace FLIVR
 					vr_list_[tn]->shading_?vr_list_[tn]->diffuse_:0.0,
 					vr_list_[tn]->specular_,
 					vr_list_[tn]->shine_);
-				shader->setLocalParam(2, vr_list_[tn]->scalar_scale_,
+				shader->setLocalParam(2,
+					vr_list_[tn]->inv_?
+					-vr_list_[tn]->scalar_scale_:
+					vr_list_[tn]->scalar_scale_,
 					vr_list_[tn]->gm_scale_,
 					vr_list_[tn]->lo_thresh_,
 					vr_list_[tn]->hi_thresh_);

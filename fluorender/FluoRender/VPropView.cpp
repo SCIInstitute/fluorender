@@ -2102,6 +2102,8 @@ void VPropView::OnInterpolateCheck(wxCommandEvent& event)
 		m_group->SetInterpolate(inv);
 	else if (m_vd)
 		m_vd->SetInterpolate(inv);
+	if (m_vrv)
+		m_vrv->m_glview->SetIntp(inv);
 
 	RefreshVRenderViews(false, true);
 }
@@ -2186,6 +2188,11 @@ void VPropView::OnSyncGroupCheck(wxCommandEvent& event)
 		//inversion
 		bVal = m_options_toolbar->GetToolState(ID_InvChk);
 		m_group->SetInvert(bVal);
+		//interpolation
+		bVal = m_options_toolbar->GetToolState(ID_InterpolateChk);
+		m_group->SetInterpolate(bVal);
+		if (m_vrv)
+			m_vrv->m_glview->SetIntp(bVal);
 		//MIP
 		bVal = m_options_toolbar->GetToolState(ID_MipChk);
 		m_group->SetMode(bVal?1:0);
