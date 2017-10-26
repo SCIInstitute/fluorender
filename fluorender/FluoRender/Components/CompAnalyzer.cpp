@@ -37,8 +37,8 @@ using namespace FL;
 
 ComponentAnalyzer::ComponentAnalyzer(VolumeData* vd)
 	: m_vd(vd),
-	m_comp_list_dirty(true),
-	m_colocal(false)
+	m_colocal(false),
+	m_comp_list_dirty(true)
 {
 }
 
@@ -338,9 +338,9 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 
 		if (bn > 1)
 		{
-			if (data_data) delete[] data_data;
-			if (data_mask) delete[] data_mask;
-			if (data_label) delete[] data_label;
+			if (data_data) delete[] (unsigned char*)data_data;
+			if (data_mask) delete[] (unsigned char*)data_mask;
+			if (data_label) delete[] (unsigned int*)data_label;
 		}
 
 		m_sig_progress();
@@ -469,9 +469,9 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 				m_comp_graph.LinkComps(i1->second, i2->second);
 		}
 
-		if (data_data) delete[] data_data;
-		if (data_mask) delete[] data_mask;
-		if (data_label) delete[] data_label;
+		if (data_data) delete[] (unsigned char*)data_data;
+		if (data_mask) delete[] (unsigned char*)data_mask;
+		if (data_label) delete[] (unsigned int*)data_label;
 
 		m_sig_progress();
 	}

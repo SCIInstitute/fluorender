@@ -71,6 +71,8 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	long style) :
 wxGLCanvas(parent, attriblist, id, pos, size, style),
 	//public
+	//set gl
+	m_set_gl(false),
 	//capture modes
 	m_capture(false),
 	m_capture_rotat(false),
@@ -139,8 +141,6 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	m_editing_ruler_point(0),
 	//traces
 	m_trace_group(0),
-	//set gl
-	m_set_gl(false),
 	//multivolume
 	m_mvr(0),
 	//initializaion
@@ -227,8 +227,8 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	old_mouse_X(-1), old_mouse_Y(-1),
 	prv_mouse_X(-1), prv_mouse_Y(-1),
 	//draw controls
-	m_draw_all(true),
 	m_draw_bounds(false),
+	m_draw_all(true),
 	m_draw_grid(false),
 	m_draw_type(1),
 	m_vol_method(VOL_METHOD_SEQ),
@@ -264,18 +264,16 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	m_sync_g(false),
 	m_sync_b(false),
 	//volume color map
-	//m_value_1(0.0),
-	m_value_2(0.0),
-	m_value_3(0.25),
-	m_value_4(0.5),
-	m_value_5(0.75),
-	m_value_6(1.0),
-	//m_value_7(1.0),
 	m_color_1(Color(0.0, 0.0, 1.0)),
+	m_value_2(0.0),
 	m_color_2(Color(0.0, 0.0, 1.0)),
+	m_value_3(0.25),
 	m_color_3(Color(0.0, 1.0, 1.0)),
+	m_value_4(0.5),
 	m_color_4(Color(0.0, 1.0, 0.0)),
+	m_value_5(0.75),
 	m_color_5(Color(1.0, 1.0, 0.0)),
+	m_value_6(1.0),
 	m_color_6(Color(1.0, 0.0, 0.0)),
 	m_color_7(Color(1.0, 0.0, 0.0)),
 	//paint brush presssure

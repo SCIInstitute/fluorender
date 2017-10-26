@@ -362,6 +362,6 @@ double VolumeSampler::SampleBox(double x, double y, double z)
 	index = (unsigned long long)m_nx_in*(unsigned long long)m_ny_in*
 		(unsigned long long)k + (unsigned long long)m_nx_in*
 		(unsigned long long)j + (unsigned long long)i;
-	double test = double(((unsigned char*)(m_vd->data))[index]) / 255.0;
+	//double test = double(((unsigned char*)(m_vd->data))[index]) / 255.0;
 	return sum;
 }

@@ -85,7 +85,9 @@ ComponentGenerator::ComponentGenerator(VolumeData* vd, int device_id)
 
 	for (cl_uint i=0; i<platform_num; ++i)
 	{
+#ifdef _WIN32
 		cl_device_id device = 0;
+#endif
 		cl_device_id *devices;
 		cl_uint device_num;
 		//get gpu devices
@@ -213,7 +215,7 @@ void ComponentGenerator::OrderID_3D()
 	int nx, ny, nz; \
 	unsigned char* val8 = 0; \
 	unsigned short* val16 = 0; \
-	int bits; \
+	int bits = 8; \
 	unsigned int* val32 = 0; \
 	TextureBrick* b = 0; \
 	int c = 0; \
