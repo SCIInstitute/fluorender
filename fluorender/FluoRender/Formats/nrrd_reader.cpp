@@ -215,8 +215,7 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 	rewind(nrrd_file);
 	if (output->dim != 3)
 	{
-		delete []output->data;
-		nrrdNix(output);
+		nrrdNuke(output);
 		fclose(nrrd_file);
 		return 0;
 	}
@@ -244,8 +243,7 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 
 	if (nrrdRead(output, nrrd_file, NULL))
 	{
-		delete []output->data;
-		nrrdNix(output);
+		nrrdNuke(output);
 		fclose(nrrd_file);
 		return 0;
 	}
@@ -298,8 +296,7 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 	}
 	else
 	{
-		delete []output->data;
-		nrrdNix(output);
+		nrrdNuke(output);
 		fclose(nrrd_file);
 		return 0;
 	}

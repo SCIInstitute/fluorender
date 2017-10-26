@@ -1029,7 +1029,7 @@ void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
 	}
 	//actually read the data now
 	char *temp = new char[byte_count];
-	unsigned long long pos = tiff_stream.tellg();
+	//unsigned long long pos = tiff_stream.tellg();
 	tiff_stream.read((char*)temp, byte_count);
 	bool eight_bits = 8 == GetTiffField(kBitsPerSampleTag, NULL, 0);
 	if (swap_ && !eight_bits) {

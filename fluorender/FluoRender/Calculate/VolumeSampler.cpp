@@ -106,10 +106,7 @@ void VolumeSampler::Resize()
 
 	//create m_vd_r
 	if (m_vd_r && m_vd_r->data)
-	{
-		delete[] m_vd_r->data;
-		nrrdNix(m_vd_r);
-	}
+		nrrdNuke(m_vd_r);
 
 	
 	m_nx_in = m_vd->axis[0].size;

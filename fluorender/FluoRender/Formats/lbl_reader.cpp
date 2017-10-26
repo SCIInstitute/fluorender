@@ -114,8 +114,7 @@ Nrrd* LBLReader::Convert(int t, int c, bool get_max)
 		(output->type != nrrdTypeInt &&
 		output->type != nrrdTypeUInt))
 	{
-		delete []output->data;
-		nrrdNix(output);
+		nrrdNuke(output);
 		fclose(lbl_file);
 		return 0;
 	}
@@ -127,8 +126,7 @@ Nrrd* LBLReader::Convert(int t, int c, bool get_max)
 
 	if (nrrdRead(output, lbl_file, NULL))
 	{
-		delete []output->data;
-		nrrdNix(output);
+		nrrdNuke(output);
 		fclose(lbl_file);
 		return 0;
 	}
