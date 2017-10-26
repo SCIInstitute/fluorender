@@ -292,7 +292,7 @@ private:
 	//key down
 	void OnSliderKeyDown(wxKeyEvent& event);
 
-	DECLARE_EVENT_TABLE();
+	DECLARE_EVENT_TABLE()
 
 };
 

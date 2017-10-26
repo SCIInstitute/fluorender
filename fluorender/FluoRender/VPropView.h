@@ -318,7 +318,7 @@ private:
 	void OnDepthCheck(wxCommandEvent &event);
 	void OnFluoRender(wxCommandEvent &event);
 
-	DECLARE_EVENT_TABLE();
+	DECLARE_EVENT_TABLE()
 };
 
 #endif//_VPROPVIEW_H_

@@ -1032,7 +1032,7 @@ private:
 	wxSize GetGLSize();
 	void ResizeFramebuffers();
 
-	DECLARE_EVENT_TABLE();
+	DECLARE_EVENT_TABLE()
 
 	friend class VRenderView;
 };
@@ -1715,7 +1715,7 @@ private:
 	//idle
 	void OnTimer(wxTimerEvent& event);
 
-	DECLARE_EVENT_TABLE();
+	DECLARE_EVENT_TABLE()
 
 };
 

@@ -716,7 +716,7 @@ private:
 	void OnAnalyzeSel(wxCommandEvent &event);
 	void Analyze(bool sel);
 
-	DECLARE_EVENT_TABLE();
+	DECLARE_EVENT_TABLE()
 };
 
 #endif//_COMPONENTDLG_H_

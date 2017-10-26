@@ -407,7 +407,7 @@ private:
 	void OnCellPrev(wxCommandEvent& event);
 	void OnCellNext(wxCommandEvent& event);
 
-	DECLARE_EVENT_TABLE();
+	DECLARE_EVENT_TABLE()
 };
 
 #endif//_TRACEDLG_H_

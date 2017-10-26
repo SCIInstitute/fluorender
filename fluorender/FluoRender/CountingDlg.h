@@ -102,7 +102,7 @@ private:
 	void OnCARandomColorBtn(wxCommandEvent &event);
 	void OnCAAnnotationsBtn(wxCommandEvent &event);
 
-	DECLARE_EVENT_TABLE();
+	DECLARE_EVENT_TABLE()
 };
 
 #endif//_COUNTINGDLG_H_

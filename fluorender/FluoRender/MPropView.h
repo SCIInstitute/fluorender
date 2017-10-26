@@ -118,7 +118,7 @@ private:
 	void OnSizeChange(wxScrollEvent& event);
 	void OnSizeText(wxCommandEvent& event);
 
-	DECLARE_EVENT_TABLE();
+	DECLARE_EVENT_TABLE()
 };
 
 #endif//_MPROPVIEW_H_

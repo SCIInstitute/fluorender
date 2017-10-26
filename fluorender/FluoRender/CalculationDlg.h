@@ -101,7 +101,7 @@ private:
 	void OnCalcFill(wxCommandEvent &event);
 	void OnCalcCombine(wxCommandEvent &event);
 
-	DECLARE_EVENT_TABLE();
+	DECLARE_EVENT_TABLE()
 };
 
 #endif//_CALCULATIONDLG_H_

@@ -82,7 +82,7 @@ private:
 	void OnCnvVolMeshDownsampleZText(wxCommandEvent &event);
 	void OnCnvVolMeshConvert(wxCommandEvent& event);
 
-	DECLARE_EVENT_TABLE();
+	DECLARE_EVENT_TABLE()
 };
 
 #endif//_CONVERTDLG_H_

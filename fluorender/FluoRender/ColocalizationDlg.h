@@ -103,7 +103,7 @@ private:
 	//calculate
 	void OnColocalizationBtn(wxCommandEvent &event);
 
-	DECLARE_EVENT_TABLE();
+	DECLARE_EVENT_TABLE()
 };
 
 #endif//_COLOCALIZATIONDLG_H_

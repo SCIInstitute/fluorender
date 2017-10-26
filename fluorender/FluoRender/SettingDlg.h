@@ -419,7 +419,7 @@ private:
 	void OnPaintHistDepthChange(wxScrollEvent &event);
 	void OnPaintHistDepthEdit(wxCommandEvent &event);
 
-	DECLARE_EVENT_TABLE();
+	DECLARE_EVENT_TABLE()
 };
 
 #endif//_SETTINGDLG_H_

@@ -103,7 +103,7 @@ private:
 	void OnEraseBtn(wxCommandEvent &event);
 	void OnEnhanceSelChk(wxCommandEvent &event);
 
-	DECLARE_EVENT_TABLE();
+	DECLARE_EVENT_TABLE()
 };
 
 #endif//_NOISECANCELLINGDLG_H_

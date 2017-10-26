@@ -193,7 +193,7 @@ class RecorderDlg : public wxPanel
       void OnPlay(wxCommandEvent &event);
       void OnStop(wxCommandEvent &event);
 
-      DECLARE_EVENT_TABLE();
+      DECLARE_EVENT_TABLE()
 };
 
 #endif//_RECORDERDLG_H_

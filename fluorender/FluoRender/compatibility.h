@@ -421,7 +421,7 @@ typedef union _LARGE_INTEGER {
 	struct {
 		unsigned int LowPart;
 		long HighPart;
-	};
+	} v;
 	struct {
 		unsigned int LowPart;
 		long HighPart;

@@ -116,7 +116,7 @@ private:
 	void OnIterationsEdit(wxCommandEvent &event);
 	void OnKernelListSelected(wxListEvent& event);
 
-	DECLARE_EVENT_TABLE();
+	DECLARE_EVENT_TABLE()
 };
 
 #endif

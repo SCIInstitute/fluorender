@@ -115,7 +115,7 @@ private:
 	void OnSpinDown(wxSpinEvent& event);
 	void OnValueEnter(wxCommandEvent& event);
 
-	DECLARE_EVENT_TABLE();
+	DECLARE_EVENT_TABLE()
 };
 
 #endif//_MMANIPULATOR_H_

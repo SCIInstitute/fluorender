@@ -158,7 +158,7 @@ private:
 	void OnUseTransferCheck(wxCommandEvent& event);
 	void OnTransientCheck(wxCommandEvent& event);
 
-	DECLARE_EVENT_TABLE();
+	DECLARE_EVENT_TABLE()
 };
 
 #endif//_MEASUREDLG_H_

@@ -278,7 +278,7 @@ private:
 	//timer for playback.
 	void OnTimer(wxTimerEvent& event);
 
-	DECLARE_EVENT_TABLE();
+	DECLARE_EVENT_TABLE()
 };
 
 #endif//_VMovieView_H_

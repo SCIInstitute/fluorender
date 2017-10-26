@@ -193,7 +193,7 @@ private:
 	//brush size relation
 	void OnBrushSizeRelationCheck(wxCommandEvent& event);
 
-	DECLARE_EVENT_TABLE();
+	DECLARE_EVENT_TABLE()
 };
 
 #endif//_BRUSHTOOLDLG_H_
