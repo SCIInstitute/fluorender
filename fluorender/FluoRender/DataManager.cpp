@@ -2282,13 +2282,13 @@ void MeshData::SetMatrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat)
 		m_trans[1]+m_center.y(),
 		m_trans[2]+m_center.z()));
 		mv_temp = glm::rotate(
-			mv_temp, float(m_rot[0]),
+			mv_temp, float(glm::radians(m_rot[0])),
 			glm::vec3(1.0, 0.0, 0.0));
 		mv_temp = glm::rotate(
-			mv_temp, float(m_rot[1]),
+			mv_temp, float(glm::radians(m_rot[1])),
 			glm::vec3(0.0, 1.0, 0.0));
 		mv_temp = glm::rotate(
-			mv_temp, float(m_rot[2]),
+			mv_temp, float(glm::radians(m_rot[2])),
 			glm::vec3(0.0, 0.0, 1.0));
 		mv_temp = glm::scale(mv_temp,
 			glm::vec3(float(m_scale[0]), float(m_scale[1]), float(m_scale[2])));
