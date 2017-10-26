@@ -132,6 +132,9 @@ add_definitions(-DTEEM_DIO=0)
 add_definitions(-DTEEM_ENDIAN=1234)
 add_definitions(-DTEEM_QNANHIBIT=1)
 
+# glm
+add_definitions(-DGLM_FORCE_RADIANS=1)
+
 # output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BUILD_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BUILD_DIR})

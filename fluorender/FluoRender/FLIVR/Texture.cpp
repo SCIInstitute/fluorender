@@ -77,9 +77,10 @@ namespace FLIVR
 		{
 			if (data_[i])
 			{
-				if (ntype_[i]!=TYPE_MASK)
-					delete [] data_[i]->data;
-				nrrdNix(data_[i]);
+				if (ntype_[i]==TYPE_MASK)
+					nrrdNix(data_[i]);
+				else
+					nrrdNuke(data_[i]);
 			}
 		}
 	}
@@ -90,7 +91,7 @@ namespace FLIVR
 		for (size_t i=0; i<mask_undos_.size(); ++i)
 		{
 			if (mask_undos_[i])
-				delete []mask_undos_[i];
+				delete[] (unsigned char*)(mask_undos_[i]);
 			mask_undos_.clear();
 			mask_undo_pointer_ = -1;
 		}
@@ -496,9 +497,10 @@ namespace FLIVR
 		{
 			if (data_[index] && data)
 			{
-				if (index != nmask_)
-					delete [] data_[index]->data;
-				nrrdNix(data_[index]);
+				if (index == nmask_)
+					nrrdNix(data_[index]);
+				else
+					nrrdNuke(data_[index]);
 			}
 
 			data_[index] = data;
@@ -524,7 +526,7 @@ namespace FLIVR
 			mask_undo_pointer_>0 &&
 			mask_undo_pointer_<mask_undos_.size())
 		{
-			delete []mask_undos_.front();
+			delete[] (unsigned char*)(mask_undos_.front());
 			mask_undos_.erase(mask_undos_.begin());
 			mask_undo_pointer_--;
 		}
@@ -543,7 +545,7 @@ namespace FLIVR
 			mask_undo_pointer_>=0 &&
 			mask_undo_pointer_<mask_undos_.size()-1)
 		{
-			delete []mask_undos_.back();
+			delete[] (unsigned char*)(mask_undos_.back());
 			mask_undos_.pop_back();
 		}
 		return true;

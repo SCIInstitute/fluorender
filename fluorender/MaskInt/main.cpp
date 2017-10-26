@@ -170,8 +170,6 @@ bool GetPixelList(void* data, int nx, int ny,
 	int z, PixelList &list)
 {
 	unsigned char* page = ((unsigned char*)data) + nx*ny*z;
-	unsigned char value;
-	unsigned char nv;
 	//find the first bounday pixel
 	Pixel sp;
 	sp.x = -1; sp.y = -1;

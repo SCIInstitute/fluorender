@@ -390,7 +390,7 @@ namespace FLIVR
 		}
 		else
 		{
-			cl_mem tex_buffer = clCreateFromGLTexture2D(context_, flag, GL_TEXTURE_2D, 0, texture, &err);
+			cl_mem tex_buffer = clCreateFromGLTexture(context_, flag, GL_TEXTURE_2D, 0, texture, &err);
 			if (err != CL_SUCCESS)
 				return;
 			arg.buffer = tex_buffer;
@@ -416,7 +416,7 @@ namespace FLIVR
 		}
 		else
 		{
-			cl_mem tex_buffer = clCreateFromGLTexture3D(context_, flag, GL_TEXTURE_3D, 0, texture, &err);
+			cl_mem tex_buffer = clCreateFromGLTexture(context_, flag, GL_TEXTURE_3D, 0, texture, &err);
 			if (err != CL_SUCCESS)
 				return;
 			arg.buffer = tex_buffer;
