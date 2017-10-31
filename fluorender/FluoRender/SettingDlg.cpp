@@ -355,7 +355,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Brick Size:",
 		wxDefaultPosition, wxSize(110, -1));
 	sizer2_3->Add(st);
-	m_block_size_sldr = new wxSlider(page, ID_BlockSizeSldr, 7, 4, 11,
+	m_block_size_sldr = new wxSlider(page, ID_BlockSizeSldr, 7, 6, 12,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_block_size_text = new wxTextCtrl(page, ID_BlockSizeText, "128",
 		wxDefaultPosition, wxSize(40, -1), 0, vald_int);

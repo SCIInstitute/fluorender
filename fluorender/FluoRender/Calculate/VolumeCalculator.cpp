@@ -116,6 +116,7 @@ void VolumeCalculator::CreateVolumeResult1()
 
 	m_vd_a->GetResolution(res_x, res_y, res_z);
 	m_vd_a->GetSpacings(spc_x, spc_y, spc_z);
+	int brick_size = m_vd_a->GetTexture()->get_build_max_tex_size();
 
 	//int bits = (m_vd_a->GetMaxValue()>255.0)?
 	//  16:8;
@@ -124,7 +125,8 @@ void VolumeCalculator::CreateVolumeResult1()
 	m_vd_r = new VolumeData();
 	m_vd_r->AddEmptyData(bits,
 		res_x, res_y, res_z,
-		spc_x, spc_y, spc_z);
+		spc_x, spc_y, spc_z,
+		brick_size);
 	m_vd_r->SetSpcFromFile(true);
 
 	wxString name = m_vd_a->GetName();
@@ -158,6 +160,7 @@ void VolumeCalculator::CreateVolumeResult2()
 	m_vd_b->GetResolution(res_x_b, res_y_b, res_z_b);
 	m_vd_a->GetSpacings(spc_x_a, spc_y_a, spc_z_a);
 	m_vd_b->GetSpacings(spc_x_b, spc_y_b, spc_z_b);
+	int brick_size = m_vd_a->GetTexture()->get_build_max_tex_size();
 
 	//int bits = (m_vd_a->GetMaxValue()>255.0||m_vd_b->GetMaxValue()>255.0)?
 	//  16:8;
@@ -175,7 +178,8 @@ void VolumeCalculator::CreateVolumeResult2()
 	m_vd_r = new VolumeData();
 	m_vd_r->AddEmptyData(bits,
 		res_x, res_y, res_z,
-		spc_x, spc_y, spc_z);
+		spc_x, spc_y, spc_z,
+		brick_size);
 	m_vd_r->SetSpcFromFile(true);
 
 	wxString name_a = m_vd_a->GetName();

@@ -39,6 +39,8 @@ namespace FLIVR
 {
 	size_t Texture::mask_undo_num_ = 0;
 	Texture::Texture():
+	build_max_tex_size_(0),
+	brick_size_(0),
 	sort_bricks_(true),
 	nx_(0),
 	ny_(0),
@@ -335,17 +337,28 @@ namespace FLIVR
 			force_pow2 = !ShaderProgram::texture_non_power_of_two();
 
 		int max_texture_size = 2048;
-		if (ShaderProgram::init())
-			max_texture_size = ShaderProgram::max_texture_size();
 
-		//further determine the max texture size
-		if (TextureRenderer::get_mem_swap())
+		if (brick_size_ > 1)
+			max_texture_size = brick_size_;
+		else
 		{
-			double data_size = double(sz_x)*double(sz_y)*double(sz_z)/1.04e6;
-			if (data_size > TextureRenderer::get_mem_limit() ||
-				data_size > TextureRenderer::get_large_data_size())
-				max_texture_size = TextureRenderer::get_force_brick_size();
+			if (ShaderProgram::init())
+				max_texture_size = ShaderProgram::max_texture_size();
+
+			//further determine the max texture size
+			if (TextureRenderer::get_mem_swap())
+			{
+				double data_size = double(sz_x)*double(sz_y)*double(sz_z)/1.04e6;
+				if (data_size > TextureRenderer::get_mem_limit() ||
+					data_size > TextureRenderer::get_large_data_size())
+					max_texture_size = TextureRenderer::get_force_brick_size();
+			}
 		}
+
+		if (max_texture_size > 1)
+			build_max_tex_size_ = max_texture_size;
+		else
+			max_texture_size = 2048;
 
 		// Initial brick size
 		int bsize[3];

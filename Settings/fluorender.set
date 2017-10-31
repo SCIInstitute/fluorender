@@ -58,7 +58,7 @@ component_size=25
 contact_factor=0.6
 similarity=0.3
 [memory\ settings]
-mem\ swap=0
+mem\ swap=1
 graphics\ mem=4000
 large\ data\ size=400
 force\ brick\ size=256

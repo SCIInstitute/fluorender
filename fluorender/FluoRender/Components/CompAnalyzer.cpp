@@ -988,6 +988,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 	m_vd->GetResolution(nx, ny, nz);
 	double amb, diff, spec, shine;
 	m_vd->GetMaterial(amb, diff, spec, shine);
+	int brick_size = m_vd->GetTexture()->get_build_max_tex_size();
 
 	unsigned int count = 1;
 	unsigned long long for_size = (unsigned long long)nx *
@@ -1009,7 +1010,8 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 		VolumeData* vd = new VolumeData();
 		vd->AddEmptyData(bits,
 			nx, ny, nz,
-			spcx, spcy, spcz);
+			spcx, spcy, spcz,
+			brick_size);
 		vd->SetSpcFromFile(true);
 		vd->SetName(m_vd->GetName() +
 			wxString::Format("_COMP%d_SIZE%d", count++, i->second->sumi));
@@ -1176,12 +1178,14 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 	m_vd->GetResolution(nx, ny, nz);
 	double amb, diff, spec, shine;
 	m_vd->GetMaterial(amb, diff, spec, shine);
+	int brick_size = m_vd->GetTexture()->get_build_max_tex_size();
 
 	//red volume
 	VolumeData* vd_r = new VolumeData();
 	vd_r->AddEmptyData(8,
 		nx, ny, nz,
-		spcx, spcy, spcz);
+		spcx, spcy, spcz,
+		brick_size);
 	vd_r->SetSpcFromFile(true);
 	vd_r->SetName(m_vd->GetName() +
 		wxString::Format("_CH_R"));
@@ -1189,7 +1193,8 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 	VolumeData* vd_g = new VolumeData();
 	vd_g->AddEmptyData(8,
 		nx, ny, nz,
-		spcx, spcy, spcz);
+		spcx, spcy, spcz,
+		brick_size);
 	vd_g->SetSpcFromFile(true);
 	vd_g->SetName(m_vd->GetName() +
 		wxString::Format("_CH_G"));
@@ -1197,7 +1202,8 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 	VolumeData* vd_b = new VolumeData();
 	vd_b->AddEmptyData(8,
 		nx, ny, nz,
-		spcx, spcy, spcz);
+		spcx, spcy, spcz,
+		brick_size);
 	vd_b->SetSpcFromFile(true);
 	vd_b->SetName(m_vd->GetName() +
 		wxString::Format("_CH_B"));

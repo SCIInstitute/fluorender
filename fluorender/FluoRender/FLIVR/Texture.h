@@ -47,6 +47,8 @@ namespace FLIVR
 		Texture();
 		virtual ~Texture();
 
+		int get_build_max_tex_size() { return build_max_tex_size_; }
+		void set_brick_size(int size) { brick_size_ = size; }
 		void build(Nrrd* val, Nrrd* grad,
 			double vmn, double vmx,
 			double gmn, double gmx);
@@ -100,7 +102,6 @@ namespace FLIVR
 				ntype_[1] = TYPE_GM;
 			}
 		}
-
 
 		//! Interface that does not expose FLIVR::BBox.
 		inline 
@@ -192,6 +193,10 @@ namespace FLIVR
 			int nx, int ny, int nz,
 			int nc, int* nb);
 
+		//remember the brick size, as it may change
+		int build_max_tex_size_;
+		//expected brick size, 0: ignored
+		int brick_size_;
 		//! data carved up to texture memory sized chunks.
 		vector<TextureBrick*>						bricks_;
 		//for limited number of bricks during interactions

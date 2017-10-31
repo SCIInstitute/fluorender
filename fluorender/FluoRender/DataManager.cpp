@@ -476,7 +476,8 @@ int VolumeData::Replace(VolumeData* data)
 //volume data
 void VolumeData::AddEmptyData(int bits,
 	int nx, int ny, int nz,
-	double spcx, double spcy, double spcz)
+	double spcx, double spcy, double spcz,
+	int brick_size)
 {
 	if (bits!=8 && bits!=16)
 		return;
@@ -534,6 +535,7 @@ void VolumeData::AddEmptyData(int bits,
 	//create texture
 	m_tex = new Texture();
 	m_tex->set_use_priority(false);
+	m_tex->set_brick_size(brick_size);
 	m_tex->build(nv, 0, 0, 256, 0, 0);
 	m_tex->set_spacings(spcx, spcy, spcz);
 

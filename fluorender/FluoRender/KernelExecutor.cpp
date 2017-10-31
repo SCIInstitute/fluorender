@@ -147,6 +147,7 @@ bool KernelExecutor::Execute()
 
 	int res_x, res_y, res_z;
 	m_vd->GetResolution(res_x, res_y, res_z);
+	int brick_size = m_vd->GetTexture()->get_build_max_tex_size();
 
 	//get bricks
 	Ray view_ray(Point(0.802, 0.267, 0.534), Vector(0.802, 0.267, 0.534));
@@ -172,7 +173,8 @@ bool KernelExecutor::Execute()
 		m_vd_r = new VolumeData();
 		m_vd_r->AddEmptyData(8,
 			res_x, res_y, res_z,
-			spc_x, spc_y, spc_z);
+			spc_x, spc_y, spc_z,
+			brick_size);
 		m_vd_r->SetSpcFromFile(true);
 		wxString name = m_vd->GetName();
 		m_vd_r->SetName(name + "_CL");

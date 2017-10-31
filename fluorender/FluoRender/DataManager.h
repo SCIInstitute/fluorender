@@ -197,7 +197,8 @@ public:
 	//empty data
 	void AddEmptyData(int bits,
 		int nx, int ny, int nz,
-		double spcx, double spcy, double spcz);
+		double spcx, double spcy, double spcz,
+		int brick_size = 0);
 	//load mask
 	void LoadMask(Nrrd* mask);
 	Nrrd* GetMask(bool ret);

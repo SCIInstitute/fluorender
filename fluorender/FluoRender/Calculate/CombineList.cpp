@@ -54,6 +54,7 @@ int CombineList::Execute()
 	(*m_channs.begin())->GetResolution(m_resx, m_resy, m_resz);
 	(*m_channs.begin())->GetSpacings(m_spcx, m_spcy, m_spcz);
 	m_bits = (*m_channs.begin())->GetBits();
+	int brick_size = (*m_channs.begin())->GetTexture()->get_build_max_tex_size();
 	if (m_name == "")
 		m_name = "combined_volume";
 
@@ -61,21 +62,24 @@ int CombineList::Execute()
 	VolumeData* vd_r = new VolumeData();
 	vd_r->AddEmptyData(m_bits,
 		m_resx, m_resy, m_resz,
-		m_spcx, m_spcy, m_spcz);
+		m_spcx, m_spcy, m_spcz,
+		brick_size);
 	vd_r->SetSpcFromFile(true);
 	vd_r->SetName(m_name + wxString::Format("_CH_R"));
 	//green volume
 	VolumeData* vd_g = new VolumeData();
 	vd_g->AddEmptyData(m_bits,
 		m_resx, m_resy, m_resz,
-		m_spcx, m_spcy, m_spcz);
+		m_spcx, m_spcy, m_spcz,
+		brick_size);
 	vd_g->SetSpcFromFile(true);
 	vd_g->SetName(m_name + wxString::Format("_CH_G"));
 	//blue volume
 	VolumeData* vd_b = new VolumeData();
 	vd_b->AddEmptyData(m_bits,
 		m_resx, m_resy, m_resz,
-		m_spcx, m_spcy, m_spcz);
+		m_spcx, m_spcy, m_spcz,
+		brick_size);
 	vd_b->SetSpcFromFile(true);
 	vd_b->SetName(m_name + wxString::Format("_CH_B"));
 

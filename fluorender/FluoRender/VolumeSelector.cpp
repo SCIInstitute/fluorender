@@ -539,6 +539,15 @@ void VolumeSelector::CompExportMultiChann(bool select)
 	unsigned int* data_mvd_label = (unsigned int*)nrrd_mvd_label->data;
 	if (!data_mvd || (select&&!data_mvd_mask) || !data_mvd_label) return;
 
+	int res_x, res_y, res_z;
+	double spc_x, spc_y, spc_z;
+	int bits = 8;
+	m_vd->GetResolution(res_x, res_y, res_z);
+	m_vd->GetSpacings(spc_x, spc_y, spc_z);
+	double amb, diff, spec, shine;
+	m_vd->GetMaterial(amb, diff, spec, shine);
+	int brick_size = m_vd->GetTexture()->get_build_max_tex_size();
+
 	i = 1;
 	boost::unordered_map <unsigned int, Component> :: const_iterator comp_iter;
 	for (comp_iter=m_comps.begin(); comp_iter!=m_comps.end(); comp_iter++)
@@ -548,18 +557,11 @@ void VolumeSelector::CompExportMultiChann(bool select)
 			continue;
 
 		//create a new volume
-		int res_x, res_y, res_z;
-		double spc_x, spc_y, spc_z;
-		int bits = 8;
-		m_vd->GetResolution(res_x, res_y, res_z);
-		m_vd->GetSpacings(spc_x, spc_y, spc_z);
-		double amb, diff, spec, shine;
-		m_vd->GetMaterial(amb, diff, spec, shine);
-
 		VolumeData* vd = new VolumeData();
 		vd->AddEmptyData(bits,
 			res_x, res_y, res_z,
-			spc_x, spc_y, spc_z);
+			spc_x, spc_y, spc_z,
+			brick_size);
 		vd->SetSpcFromFile(true);
 		vd->SetName(m_vd->GetName() +
 			wxString::Format("_COMP%d_SIZE%d", i++, comp_iter->second.counter));
@@ -661,6 +663,8 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 	int bits = 8;
 	m_vd->GetResolution(res_x, res_y, res_z);
 	m_vd->GetSpacings(spc_x, spc_y, spc_z);
+	int brick_size = m_vd->GetTexture()->get_build_max_tex_size();
+
 	bool push_new = true;
 	//red volume
 	if (!vd_r)
@@ -669,7 +673,8 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 		push_new = false;
 	vd_r->AddEmptyData(bits,
 		res_x, res_y, res_z,
-		spc_x, spc_y, spc_z);
+		spc_x, spc_y, spc_z,
+		brick_size);
 	vd_r->SetSpcFromFile(true);
 	vd_r->SetName(m_vd->GetName() +
 		wxString::Format("_COMP1"));
@@ -678,7 +683,8 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 		vd_g = new VolumeData();
 	vd_g->AddEmptyData(bits,
 		res_x, res_y, res_z,
-		spc_x, spc_y, spc_z);
+		spc_x, spc_y, spc_z,
+		brick_size);
 	vd_g->SetSpcFromFile(true);
 	vd_g->SetName(m_vd->GetName() +
 		wxString::Format("_COMP2"));
@@ -687,7 +693,8 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 		vd_b = new VolumeData();
 	vd_b->AddEmptyData(bits,
 		res_x, res_y, res_z,
-		spc_x, spc_y, spc_z);
+		spc_x, spc_y, spc_z,
+		brick_size);
 	vd_b->SetSpcFromFile(true);
 	vd_b->SetName(m_vd->GetName() +
 		wxString::Format("_COMP3"));
