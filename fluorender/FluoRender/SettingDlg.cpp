@@ -391,12 +391,12 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	group2->Add(sizer2_4, 0, wxEXPAND);
 	group2->Add(10, 5);
 	st = new wxStaticText(page, 0,
-		"Note:\n"\
-		"Data streaming allows rendering datasets of much larger size than available\n"\
-		"graphics memory. Datasets are divided into small bricks. The bricks are loaded\n"\
-		"into graphics memory and sequentially rendered. Restart is needed for the\n"\
-		"bricking to take effect. Some analysis features may not work in streaming mode.\n"\
-		"Disable streaming if this happens.");
+		"Note: Configure these settings before loading data.\n"\
+		"Data streaming allows rendering and processing datasets of larger size than\n"\
+		"available graphics memory. Datasets are divided into bricks. The bricks are\n"\
+		"sequentially loaded into graphics memory for rendering and processing.\n"\
+		"Different computer hardware may need different settings. You may need to\n"\
+		"experiment in order to find the best settings for your computer.");
 	group2->Add(st);
 	group2->Add(10, 5);
 

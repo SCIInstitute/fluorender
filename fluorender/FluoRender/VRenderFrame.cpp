@@ -1100,9 +1100,26 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
 	wxProgressDialog *prg_diag = 0;
 	if (vrv)
 	{
+		bool streaming = m_setting_dlg->GetMemSwap();
+		double gpu_size = m_setting_dlg->GetGraphicsMem();
+		double data_size = m_setting_dlg->GetLargeDataSize();
+		int brick_size = m_setting_dlg->GetForceBrickSize();
+		int resp_time = m_setting_dlg->GetResponseTime();
+		wxString str_streaming;
+		if (streaming)
+		{
+			str_streaming = "Large data streaming is currently ON\n";
+			str_streaming += wxString::Format("FluoRender will use %dMB GPU Memory\n", int(gpu_size));
+			str_streaming += wxString::Format("Data channel larger than %dMB will be divided into bricks of %d voxels\n",
+				int (data_size), brick_size);
+			str_streaming += wxString::Format("System response time is %dms", resp_time);
+		}
+		else
+			str_streaming = "Large data streaming is currently OFF";
+
 		prg_diag = new wxProgressDialog(
 			"FluoRender: Loading volume data...",
-			"To visualize large data, please enable streaming in the Settings.",
+			"",
 			100, 0, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
 
 		m_data_mgr.SetSliceSequence(m_sliceSequence);
@@ -1116,8 +1133,9 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
 
 		for (j=0; j<(int)files.Count(); j++)
 		{
+			wxGetApp().Yield();
 			prg_diag->Update(90*(j+1)/(int)files.Count(),
-				"To visualize large data, please enable streaming in the Settings.");
+				str_streaming);
 
 			int ch_num = 0;
 			wxString filename = files[j];
