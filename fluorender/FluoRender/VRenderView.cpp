@@ -6522,12 +6522,30 @@ void VRenderGLView::SetVolMethod(int method)
 	{
 	case VOL_METHOD_SEQ:
 		m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_VolumeSeqRd,true);
+		m_vrv->m_options_toolbar->SetToolNormalBitmap(
+			VRenderView::ID_VolumeSeqRd, wxGetBitmapFromMemory(layers));
+		m_vrv->m_options_toolbar->SetToolNormalBitmap(
+			VRenderView::ID_VolumeMultiRd, wxGetBitmapFromMemory(depth_off));
+		m_vrv->m_options_toolbar->SetToolNormalBitmap(
+			VRenderView::ID_VolumeCompRd, wxGetBitmapFromMemory(composite_off));
 		break;
 	case VOL_METHOD_MULTI:
 		m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_VolumeMultiRd,true);
+		m_vrv->m_options_toolbar->SetToolNormalBitmap(
+			VRenderView::ID_VolumeSeqRd, wxGetBitmapFromMemory(layers_off));
+		m_vrv->m_options_toolbar->SetToolNormalBitmap(
+			VRenderView::ID_VolumeMultiRd, wxGetBitmapFromMemory(depth));
+		m_vrv->m_options_toolbar->SetToolNormalBitmap(
+			VRenderView::ID_VolumeCompRd, wxGetBitmapFromMemory(composite_off));
 		break;
 	case VOL_METHOD_COMP:
 		m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_VolumeCompRd,true);
+		m_vrv->m_options_toolbar->SetToolNormalBitmap(
+			VRenderView::ID_VolumeSeqRd, wxGetBitmapFromMemory(layers_off));
+		m_vrv->m_options_toolbar->SetToolNormalBitmap(
+			VRenderView::ID_VolumeMultiRd, wxGetBitmapFromMemory(depth_off));
+		m_vrv->m_options_toolbar->SetToolNormalBitmap(
+			VRenderView::ID_VolumeCompRd, wxGetBitmapFromMemory(composite));
 		break;
 	}
 }
@@ -13025,30 +13043,12 @@ void VRenderView::OnVolumeMethodCheck(wxCommandEvent& event)
 	{
 	case ID_VolumeSeqRd:
 		SetVolMethod(VOL_METHOD_SEQ);
-		m_options_toolbar->SetToolNormalBitmap(
-			ID_VolumeSeqRd, wxGetBitmapFromMemory(layers));
-		m_options_toolbar->SetToolNormalBitmap(
-			ID_VolumeMultiRd, wxGetBitmapFromMemory(depth_off));
-		m_options_toolbar->SetToolNormalBitmap(
-			ID_VolumeCompRd, wxGetBitmapFromMemory(composite_off));
 		break;
 	case ID_VolumeMultiRd:
 		SetVolMethod(VOL_METHOD_MULTI);
-		m_options_toolbar->SetToolNormalBitmap(
-			ID_VolumeSeqRd, wxGetBitmapFromMemory(layers_off));
-		m_options_toolbar->SetToolNormalBitmap(
-			ID_VolumeMultiRd, wxGetBitmapFromMemory(depth));
-		m_options_toolbar->SetToolNormalBitmap(
-			ID_VolumeCompRd, wxGetBitmapFromMemory(composite_off));
 		break;
 	case ID_VolumeCompRd:
 		SetVolMethod(VOL_METHOD_COMP);
-		m_options_toolbar->SetToolNormalBitmap(
-			ID_VolumeSeqRd, wxGetBitmapFromMemory(layers_off));
-		m_options_toolbar->SetToolNormalBitmap(
-			ID_VolumeMultiRd, wxGetBitmapFromMemory(depth_off));
-		m_options_toolbar->SetToolNormalBitmap(
-			ID_VolumeCompRd, wxGetBitmapFromMemory(composite));
 		break;
 	}
 
@@ -14216,45 +14216,13 @@ void VRenderView::LoadSettings()
 	bool bVal;
 	double dVal;
 	int iVal;
-	if (fconfig.Read("volume_seq_rd", &bVal))
-	{
-		m_options_toolbar->ToggleTool(ID_VolumeSeqRd,bVal);
-		if (bVal) {
-			SetVolMethod(VOL_METHOD_SEQ);
-			m_options_toolbar->SetToolNormalBitmap(
-				ID_VolumeSeqRd, wxGetBitmapFromMemory(layers));
-			m_options_toolbar->SetToolNormalBitmap(
-				ID_VolumeMultiRd, wxGetBitmapFromMemory(depth_off));
-			m_options_toolbar->SetToolNormalBitmap(
-				ID_VolumeCompRd, wxGetBitmapFromMemory(composite_off));
-		}
-	}
-	if (fconfig.Read("volume_multi_rd", &bVal))
-	{
-		m_options_toolbar->ToggleTool(ID_VolumeMultiRd,bVal);
-		if (bVal) {
-			SetVolMethod(VOL_METHOD_MULTI);
-			m_options_toolbar->SetToolNormalBitmap(
-				ID_VolumeSeqRd, wxGetBitmapFromMemory(layers_off));
-			m_options_toolbar->SetToolNormalBitmap(
-				ID_VolumeMultiRd, wxGetBitmapFromMemory(depth));
-			m_options_toolbar->SetToolNormalBitmap(
-				ID_VolumeCompRd, wxGetBitmapFromMemory(composite_off));
-		}
-	}
-	if (fconfig.Read("volume_comp_rd", &bVal))
-	{
-		m_options_toolbar->ToggleTool(ID_VolumeCompRd,bVal);
-		if (bVal) {
-			SetVolMethod(VOL_METHOD_COMP);
-			m_options_toolbar->SetToolNormalBitmap(
-				ID_VolumeSeqRd, wxGetBitmapFromMemory(layers_off));
-			m_options_toolbar->SetToolNormalBitmap(
-				ID_VolumeMultiRd, wxGetBitmapFromMemory(depth_off));
-			m_options_toolbar->SetToolNormalBitmap(
-				ID_VolumeCompRd, wxGetBitmapFromMemory(composite));
-		}
-	}
+	if (fconfig.Read("volume_seq_rd", &bVal) && bVal)
+		SetVolMethod(VOL_METHOD_SEQ);
+	if (fconfig.Read("volume_multi_rd", &bVal) && bVal)
+		SetVolMethod(VOL_METHOD_MULTI);
+	if (fconfig.Read("volume_comp_rd", &bVal) && bVal)
+		SetVolMethod(VOL_METHOD_COMP);
+
 	wxString str;
 	if (fconfig.Read("bg_color_picker", &str))
 	{
