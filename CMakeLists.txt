@@ -63,10 +63,10 @@ else()
   add_definitions(-DFLUORENDER_ARCH="32bit")
 endif()
 
-if(UNIX)
-  set(RELEASE_FLAGS ${RELEASE_FLAGS} -O3 -march=corei7-avx)
-  set(DEBUG_FLAGS ${DEBUG_FLAGS} -O0 -march=corei7-avx -ggdb)
-endif()
+#if(UNIX)
+#  set(RELEASE_FLAGS ${RELEASE_FLAGS} -O3 -march=corei7-avx)
+#  set(DEBUG_FLAGS ${DEBUG_FLAGS} -O0 -march=corei7-avx -ggdb)
+#endif()
 
 add_definitions(-DFLUORENDER_TITLE="FluoRender")
 
