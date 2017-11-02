@@ -586,7 +586,7 @@ void VRenderGLView::HandleProjection(int nx, int ny)
 	}
 	if (m_persp)
 	{
-		m_proj_mat = glm::perspective(m_aov, aspect, m_near_clip, m_far_clip);
+		m_proj_mat = glm::perspective(glm::radians(m_aov), aspect, m_near_clip, m_far_clip);
 	}
 	else
 	{
