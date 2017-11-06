@@ -1262,9 +1262,10 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 			//read file
 			for (uint64_t strip = 0; strip < num_strips; strip++)
 			{
-				long long valindex;
-				valindex = pagepixels*i +
-					strip*strip_size / (eight_bit ? 1 : 2);
+				unsigned long long valindex;
+				valindex = (unsigned long long)pagepixels * (unsigned long long)i +
+					(unsigned long long)strip * (unsigned long long)strip_size /
+					(unsigned long long)(eight_bit ? 1 : 2);
 
 				if (eight_bit)
 					GetTiffStrip(pageindex, strip,
