@@ -111,7 +111,7 @@ int LSMReader::Preprocess()
 	unsigned int offset_high = 0;
 
 	//images
-	while (fseek(pfile, ioffset, SEEK_SET) == 0)
+	while (_fseeki64(pfile, ioffset, SEEK_SET) == 0)
 	{
 		unsigned short entry_num;
 		//entry number
@@ -198,7 +198,7 @@ int LSMReader::Preprocess()
 					}
 					else
 					{
-						if (fseek(pfile, value, SEEK_SET) == 0)
+						if (_fseeki64(pfile, value, SEEK_SET) == 0)
 						{
 							unsigned int vtemp;
 							for (j = 0; j < (int)length; j++)
@@ -232,7 +232,7 @@ int LSMReader::Preprocess()
 					}
 					else
 					{
-						if (fseek(pfile, value, SEEK_SET) == 0)
+						if (_fseeki64(pfile, value, SEEK_SET) == 0)
 						{
 							unsigned int vtemp;
 							for (j = 0; j < (int)length; j++)
@@ -255,7 +255,7 @@ int LSMReader::Preprocess()
 			case 0x866C://34412, zeiss lsm info
 				if (type == 1)
 				{
-					if (fseek(pfile, value, SEEK_SET) != 0)
+					if (_fseeki64(pfile, value, SEEK_SET) != 0)
 					{
 						fclose(pfile);
 						return READER_FORMAT_ERROR;
@@ -275,7 +275,7 @@ int LSMReader::Preprocess()
 			}
 
 			//reset position
-			if (fseek(pfile, cur_pos, SEEK_SET) != 0)
+			if (_fseeki64(pfile, cur_pos, SEEK_SET) != 0)
 			{
 				fclose(pfile);
 				return READER_FORMAT_ERROR;
@@ -400,7 +400,7 @@ void LSMReader::ReadLsmInfo(FILE* pfile, unsigned char* pdata, unsigned int size
 		unsigned int type_offset = 0;
 		if (offset < size) type_offset = *((unsigned int*)(pdata + offset));
 		long cur_pos = ftell(pfile);
-		if (fseek(pfile, type_offset, SEEK_SET) == 0)
+		if (_fseeki64(pfile, type_offset, SEEK_SET) == 0)
 		{
 			unsigned int data_type;
 			if (fread(&data_type, sizeof(unsigned int), 1, pfile) == 1)
@@ -427,7 +427,7 @@ void LSMReader::ReadLsmInfo(FILE* pfile, unsigned char* pdata, unsigned int size
 				}
 			}
 		}
-		fseek(pfile, cur_pos, SEEK_SET);
+		_fseeki64(pfile, cur_pos, SEEK_SET);
 		offset -= 64;
 	}
 	//read wavelength
@@ -436,7 +436,7 @@ void LSMReader::ReadLsmInfo(FILE* pfile, unsigned char* pdata, unsigned int size
 	if (offset < size) wl_offset = *((unsigned int*)(pdata + offset));
 	if (wl_offset)
 	{
-		if (fseek(pfile, wl_offset, SEEK_SET) == 0)
+		if (_fseeki64(pfile, wl_offset, SEEK_SET) == 0)
 		{
 			unsigned int uentry, utype, usize;
 
@@ -474,7 +474,7 @@ void LSMReader::ReadLsmInfo(FILE* pfile, unsigned char* pdata, unsigned int size
 						break;
 					if (fread(&usize, sizeof(unsigned int), 1, pfile) != 1)
 						break;
-					if (fseek(pfile, usize, SEEK_CUR) != 0)
+					if (_fseeki64(pfile, usize, SEEK_CUR) != 0)
 						break;
 
 					sub_cnt++;
@@ -511,7 +511,7 @@ void LSMReader::ReadLsmInfo(FILE* pfile, unsigned char* pdata, unsigned int size
 						break;
 					if (fread(&usize, sizeof(unsigned int), 1, pfile) != 1)
 						break;
-					if (fseek(pfile, usize, SEEK_CUR) != 0)
+					if (_fseeki64(pfile, usize, SEEK_CUR) != 0)
 						break;
 
 					sub_cnt--;
@@ -603,7 +603,7 @@ void LSMReader::ReadLsmInfo(FILE* pfile, unsigned char* pdata, unsigned int size
 						break;
 					if (fread(&usize, sizeof(unsigned int), 1, pfile) != 1)
 						break;
-					if (fseek(pfile, usize, SEEK_CUR) != 0)
+					if (_fseeki64(pfile, usize, SEEK_CUR) != 0)
 						break;
 				}
 			}
@@ -699,7 +699,7 @@ Nrrd* LSMReader::Convert(int t, int c, bool get_max)
 			{
 				if (m_l4gb ?
 					FSEEK64(pfile, ((uint64_t((*cinfo)[i].offset_high)) << 32) + (*cinfo)[i].offset, SEEK_SET) == 0 :
-					fseek(pfile, (*cinfo)[i].offset, SEEK_SET) == 0)
+					_fseeki64(pfile, (*cinfo)[i].offset, SEEK_SET) == 0)
 				{
 					unsigned int val_pos = m_x_size*m_y_size*i;
 					if (m_compression == 1)
@@ -735,7 +735,7 @@ Nrrd* LSMReader::Convert(int t, int c, bool get_max)
 			{
 				if (m_l4gb ?
 					FSEEK64(pfile, ((uint64_t((*cinfo)[i].offset_high)) << 32) + (*cinfo)[i].offset, SEEK_SET) == 0 :
-					fseek(pfile, (*cinfo)[i].offset, SEEK_SET) == 0)
+					_fseeki64(pfile, (*cinfo)[i].offset, SEEK_SET) == 0)
 				{
 					unsigned int val_pos = m_x_size*m_y_size*i;
 					if (m_compression == 1)
