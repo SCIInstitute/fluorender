@@ -545,7 +545,7 @@ void ComponentSelector::SelectList(CellList& list)
 
 inline CompList* ComponentSelector::GetListFromAnalyzer(CompList &list_in, CompList &list_out)
 {
-	if (m_analyzer)
+	if (m_analyzer && m_analyzer->GetAnalyzed())
 	{
 		//assign graph node identifier for sel_labels
 		CompList* analyzer_list = m_analyzer->GetCompList();

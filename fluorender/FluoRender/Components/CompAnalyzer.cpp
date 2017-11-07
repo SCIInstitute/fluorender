@@ -36,7 +36,8 @@ DEALINGS IN THE SOFTWARE.
 using namespace FL;
 
 ComponentAnalyzer::ComponentAnalyzer(VolumeData* vd)
-	: m_vd(vd),
+	: m_analyzed(false),
+	m_vd(vd),
 	m_colocal(false),
 	m_comp_list_dirty(true)
 {
@@ -101,6 +102,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 	m_comp_list.min = std::numeric_limits<unsigned int>::max();
 	m_comp_list.max = 0;
 	m_comp_graph.clear();
+	m_analyzed = false;
 
 	if (sel)
 		m_vd->GetVR()->return_mask();
@@ -353,6 +355,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 
 	m_comp_list_dirty = false;
 	m_colocal = colocal && m_vd_list.size();
+	m_analyzed = true;
 }
 
 void ComponentAnalyzer::MatchBricks(bool sel)

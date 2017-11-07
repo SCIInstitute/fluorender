@@ -47,6 +47,8 @@ namespace FL
 		ComponentAnalyzer(VolumeData* vd=0);
 		~ComponentAnalyzer();
 
+		bool GetAnalyzed()
+		{ return m_analyzed; }
 		void SetVolume(VolumeData* vd)
 		{
 			m_comp_list_dirty = m_vd != vd;
@@ -98,6 +100,7 @@ namespace FL
 		boost::signals2::signal<void()> m_sig_progress;
 
 	private:
+		bool m_analyzed;//if used
 		VolumeData* m_vd;//main volume
 		bool m_colocal;
 		std::vector<VolumeData*> m_vd_list;//list of volumes for colocalization analysis
