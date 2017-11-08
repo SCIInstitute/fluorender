@@ -977,7 +977,7 @@ private:
 	void ResetEnlarge();
 
 	//run 4d script
-	void Run4DScript(wxString &scriptname, VolumeData* vd);
+	void Run4DScript(wxString &scriptname, VolumeData* vd=0);
 	void RunNoiseReduction(wxFileConfig &fconfig);
 	void RunSelectionTracking(wxFileConfig &fconfig);
 	void RunSparseTracking(wxFileConfig &fconfig);
@@ -986,6 +986,7 @@ private:
 	void RunExternalExe(wxFileConfig &fconfig);
 	void RunFetchMask(wxFileConfig &fconfig);
 	void RunSaveMask(wxFileConfig &fconfig);
+	void RunSaveVolume(wxFileConfig &fconfig);
 	void RunCalculation(wxFileConfig &fconfig);
 	void RunOpenCL(wxFileConfig &fconfig);
 	void RunCompAnalysis(wxFileConfig &fconfig);

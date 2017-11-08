@@ -148,6 +148,17 @@ VolumeData::VolumeData()
 	m_clip_dist_y = 0;
 	m_clip_dist_z = 0;
 
+	//compression
+	m_compression = false;
+	//resize
+	m_resize = false;
+	m_rnx = 0;
+	m_rny = 0;
+	m_rnz = 0;
+
+	//skip brick
+	m_skip_brick = false;
+
 	//legend
 	m_legend = true;
 	//interpolate

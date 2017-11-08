@@ -5186,6 +5186,10 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 	m_selector.SetVolume(m_cur_vol);
 	m_calculator.SetVolumeA(m_cur_vol);
 
+	//run script
+	if (run_script)
+		Run4DScript(m_script_file);
+
 	RefreshGL(17);
 }
 
@@ -5491,32 +5495,40 @@ void VRenderGLView::Run4DScript(wxString &scriptname, VolumeData* vd)
 			{
 				fconfig.SetPath(str);
 				fconfig.Read("type", &str, "");
-				if (str == "noise_reduction")
-					RunNoiseReduction(fconfig);
-				else if (str == "selection_tracking")
-					RunSelectionTracking(fconfig);
-				else if (str == "sparse_tracking")
-					RunSparseTracking(fconfig);
-				else if (str == "random_colors")
-					RunRandomColors(fconfig);
-				else if (str == "separate_channels")
-					RunSeparateChannels(fconfig);
-				else if (str == "external_exe")
-					RunExternalExe(fconfig);
-				else if (str == "fetch_mask")
-					RunFetchMask(fconfig);
-				else if (str == "save_mask")
-					RunSaveMask(fconfig);
-				else if (str == "calculation")
-					RunCalculation(fconfig);
-				else if (str == "opencl")
-					RunOpenCL(fconfig);
-				else if (str == "comp_analysis")
-					RunCompAnalysis(fconfig);
-				else if (str == "generate_comp")
-					RunGenerateComp(fconfig);
-				else if (str == "ruler_profile")
-					RunRulerProfile(fconfig);
+				if (vd)
+				{
+					if (str == "noise_reduction")
+						RunNoiseReduction(fconfig);
+					else if (str == "selection_tracking")
+						RunSelectionTracking(fconfig);
+					else if (str == "sparse_tracking")
+						RunSparseTracking(fconfig);
+					else if (str == "random_colors")
+						RunRandomColors(fconfig);
+					else if (str == "separate_channels")
+						RunSeparateChannels(fconfig);
+					else if (str == "external_exe")
+						RunExternalExe(fconfig);
+					else if (str == "fetch_mask")
+						RunFetchMask(fconfig);
+					else if (str == "save_mask")
+						RunSaveMask(fconfig);
+					else if (str == "opencl")
+						RunOpenCL(fconfig);
+					else if (str == "comp_analysis")
+						RunCompAnalysis(fconfig);
+					else if (str == "generate_comp")
+						RunGenerateComp(fconfig);
+					else if (str == "ruler_profile")
+						RunRulerProfile(fconfig);
+				}
+				else
+				{
+					if (str == "save_volume")
+						RunSaveVolume(fconfig);
+					else if (str == "calculation")
+						RunCalculation(fconfig);
+				}
 			}
 		}
 	}
@@ -5897,9 +5909,73 @@ void VRenderGLView::RunSaveMask(wxFileConfig &fconfig)
 	m_cur_vol->SaveLabel(true, time, m_cur_vol->GetCurChannel());
 }
 
+void VRenderGLView::RunSaveVolume(wxFileConfig &fconfig)
+{
+	int mode;
+	fconfig.Read("format", &mode, 0);
+	bool bake;
+	fconfig.Read("bake", &bake, false);
+	bool compression;
+	fconfig.Read("compress", &compression, false);
+	wxString str, pathname;
+	fconfig.Read("savepath", &pathname, "");
+	bool del_vol;
+	fconfig.Read("delete", &del_vol, false);
+	str = wxPathOnly(pathname);
+	if (!wxDirExists(str))
+		wxFileName::Mkdir(str, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+	if (wxDirExists(str))
+	{
+		VolumeData* vd = m_calculator.GetResult();
+		if (!vd || !m_vd_pop_list[0])
+			return;
+
+		str = pathname;
+		//time
+		int time_num = m_vd_pop_list[0]->GetReader()->GetTimeNum();
+		wxString format = wxString::Format("%d", time_num);
+		m_fr_length = format.Length();
+		format = wxString::Format("_T%%0%dd", m_fr_length);
+		str += wxString::Format(format, m_tseq_cur_num);
+		if (mode == 0 || mode == 1)
+			str += ".tif";
+		else if (mode == 2)
+			str += ".nrrd";
+		vd->Save(str, mode, bake, compression);
+		if (del_vol)
+			delete vd;
+	}
+}
+
 void VRenderGLView::RunCalculation(wxFileConfig &fconfig)
 {
+	int vol_a_index;
+	fconfig.Read("vol_a", &vol_a_index, 0);
+	int vol_b_index;
+	fconfig.Read("vol_b", &vol_b_index, 0);
+	wxString sOperand;
+	fconfig.Read("operand", &sOperand, "");
 
+	//get volumes
+	VolumeData* vol_a = 0;
+	if (vol_a_index >= 0 && vol_a_index < (int)m_vd_pop_list.size())
+		vol_a = m_vd_pop_list[vol_a_index];
+	VolumeData* vol_b = 0;
+	if (vol_b_index >= 0 && vol_b_index < (int)m_vd_pop_list.size())
+		vol_b = m_vd_pop_list[vol_b_index];
+	//calculate
+	SetVolumeA(vol_a);
+	SetVolumeB(vol_b);
+	if (sOperand == "subtract")
+		Calculate(1, "", false);
+	else if (sOperand == "add")
+		Calculate(2, "", false);
+	else if (sOperand == "divide")
+		Calculate(3, "", false);
+	else if (sOperand == "colocate")
+		Calculate(4, "", false);
+	else if (sOperand == "fill")
+		Calculate(9, "", false);
 }
 
 void VRenderGLView::RunOpenCL(wxFileConfig &fconfig)
@@ -9673,6 +9749,7 @@ void VRenderGLView::Run4DScript()
 	m_cur_vol = cur_vd_save;
 	m_selector.SetVolume(m_cur_vol);
 	m_calculator.SetVolumeA(m_cur_vol);
+	Run4DScript(m_script_file);
 }
 
 //start loop update
