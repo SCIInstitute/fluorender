@@ -124,7 +124,8 @@ namespace FLIVR
 			if ((strRenderer=glGetString(GL_RENDERER)))
 			{
 				string str = (char*)strRenderer;
-				if (str.find("FirePro") != string::npos)
+				if (str.find("FirePro") != string::npos ||
+					str.find("Radeon (TM) Pro WX") != string::npos)
 					no_tex_unpack_ = true;//for AMD FirePro cards
 			}
 #else
