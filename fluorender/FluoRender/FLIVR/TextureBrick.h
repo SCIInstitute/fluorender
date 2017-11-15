@@ -50,6 +50,53 @@ namespace FLIVR {
 	//these are the render modes used to determine if each mode is drawn
 #define TEXTURE_RENDER_MODES	5
 
+#define BRICK_FILE_TYPE_NONE	0
+#define BRICK_FILE_TYPE_RAW		1
+#define BRICK_FILE_TYPE_JPEG	2
+#define BRICK_FILE_TYPE_ZLIB	3
+
+	class FileLocInfo {
+	public:
+		FileLocInfo()
+		{
+			filename = L"";
+			offset = 0;
+			datasize = 0;
+			type = 0;
+			isurl = false;
+			cached = false;
+			cache_filename = L"";
+		}
+		FileLocInfo(std::wstring filename_, int offset_, int datasize_, int type_, bool isurl_)
+		{
+			filename = filename_;
+			offset = offset_;
+			datasize = datasize_;
+			type = type_;
+			isurl = isurl_;
+			cached = false;
+			cache_filename = L"";
+		}
+		FileLocInfo(const FileLocInfo &copy)
+		{
+			filename = copy.filename;
+			offset = copy.offset;
+			datasize = copy.datasize;
+			type = copy.type;
+			isurl = copy.isurl;
+			cached = copy.cached;
+			cache_filename = copy.cache_filename;
+		}
+
+		std::wstring filename;
+		int offset;
+		int datasize;
+		int type; //1-raw; 2-jpeg; 3-zlib;
+		bool isurl;
+		bool cached;
+		std::wstring cache_filename;
+	};
+
 	class TextureBrick
 	{
 	public:
@@ -60,8 +107,8 @@ namespace FLIVR {
 		// Creator of the brick owns the nrrd memory.
 		TextureBrick(Nrrd* n0, Nrrd* n1,
 			int nx, int ny, int nz, int nc, int* nb, int ox, int oy, int oz,
-			int mx, int my, int mz, const BBox& bbox, const BBox& tbox,
-			unsigned int id);
+			int mx, int my, int mz, const BBox& bbox, const BBox& tbox, const BBox& dbox,
+			unsigned int id, int findex = 0, long long offset = 0LL, long long fsize = 0LL);
 		virtual ~TextureBrick();
 
 		inline BBox &bbox() { return bbox_; }
@@ -125,6 +172,7 @@ namespace FLIVR {
 
 		virtual GLenum tex_type(int c);
 		virtual void* tex_data(int c);
+		virtual void* tex_data_brk(int c, const FileLocInfo* finfo);
 
 		void compute_polygons(Ray& view, double tmin, double tmax, double dt,
 			vector<float>& vertex, vector<uint32_t>& index, vector<uint32_t>& size);
@@ -158,11 +206,16 @@ namespace FLIVR {
 		void reset_skip_mask()
 		{ skip_mask_ = false; }
 
+		void freeBrkData();
+		bool read_brick(char* data, size_t size, const FileLocInfo* finfo);
+
 	private:
 		void compute_edge_rays(BBox &bbox);
 		void compute_edge_rays_tex(BBox &bbox);
 		size_t tex_type_size(GLenum t);
 		GLenum tex_type_aux(Nrrd* n);
+
+		bool raw_brick_reader(char* data, size_t size, const FileLocInfo* finfo);
 
 		//! bbox edges
 		Ray edge_[12]; 
@@ -186,7 +239,7 @@ namespace FLIVR {
 		//! data axis sizes (not necessarily pow2)
 		int mx_, my_, mz_; 
 		//! bounding box and texcoord box
-		BBox bbox_, tbox_; 
+		BBox bbox_, tbox_, dbox_;
 		Vector view_vector_;
 		//a value used for sorting
 		//usually distance
@@ -201,6 +254,12 @@ namespace FLIVR {
 		unsigned int id_;
 		//skip mask updating
 		bool skip_mask_;
+
+		int findex_;
+		long long offset_;
+		long long fsize_;
+		void *brkdata_;
+
 	};
 
 	inline double TextureBrick::get_data(unsigned int i, unsigned int j, unsigned int k)
@@ -225,6 +284,12 @@ namespace FLIVR {
 		return 0.0;
 	}
 
+	struct Pyramid_Level {
+		std::vector<FileLocInfo *> *filenames;
+		int filetype;
+		Nrrd* data;
+		std::vector<TextureBrick *> bricks;
+	};
 } // namespace FLIVR
 
 #endif // Volume_TextureBrick_h

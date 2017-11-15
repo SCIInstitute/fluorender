@@ -26,13 +26,14 @@
 //  DEALINGS IN THE SOFTWARE.
 //
 
+#include "../compatibility.h"
 #include <math.h>
-
 #include <FLIVR/TextureBrick.h>
 #include <FLIVR/TextureRenderer.h>
 #include <FLIVR/Utils.h>
 #include <utility>
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -42,10 +43,13 @@ namespace FLIVR
 		int nx, int ny, int nz, int nc, int* nb,
 		int ox, int oy, int oz,
 		int mx, int my, int mz,
-		const BBox& bbox, const BBox& tbox,
-		unsigned int id)
+		const BBox& bbox, const BBox& tbox, const BBox& dbox,
+		unsigned int id,
+		int findex, long long offset, long long fsize)
 		: nx_(nx), ny_(ny), nz_(nz), nc_(nc), ox_(ox), oy_(oy), oz_(oz),
-		mx_(mx), my_(my), mz_(mz), bbox_(bbox), tbox_(tbox), id_(id)
+		mx_(mx), my_(my), mz_(mz), bbox_(bbox), tbox_(tbox), dbox_(dbox),
+		id_(id),
+		findex_(findex), offset_(offset), fsize_(fsize)
 	{
 		for (int i = 0; i < TEXTURE_MAX_COMPONENTS; i++)
 		{
@@ -406,6 +410,24 @@ namespace FLIVR
 			return NULL;
 	}
 
+	void *TextureBrick::tex_data_brk(int c, const FileLocInfo* finfo)
+	{
+		unsigned char *ptr = NULL;
+		if (brkdata_) ptr = (unsigned char *)(brkdata_);
+		else
+		{
+			int bd = tex_type_size(tex_type(c));
+			ptr = new unsigned char[(size_t)nx_*(size_t)ny_*(size_t)nz_*(size_t)bd];
+			if (!read_brick((char *)ptr, (size_t)nx_*(size_t)ny_*(size_t)nz_*(size_t)bd, finfo))
+			{
+				delete[] ptr;
+				return NULL;
+			}
+			brkdata_ = (void *)ptr;
+		}
+		return ptr;
+	}
+
 	void TextureBrick::set_priority()
 	{
 		if (!data_[0])
@@ -452,6 +474,72 @@ namespace FLIVR
 			else
 				priority_ = 0;
 		}
+	}
+
+	void TextureBrick::freeBrkData()
+	{
+		if (brkdata_) delete[] brkdata_;
+		brkdata_ = NULL;
+	}
+
+	bool TextureBrick::read_brick(char* data, size_t size, const FileLocInfo* finfo)
+	{
+		if (!finfo) return false;
+
+		//if (finfo->isurl)
+		//{
+		//	if (finfo->type == BRICK_FILE_TYPE_RAW)  return raw_brick_reader_url(data, size, finfo);
+		//	if (finfo->type == BRICK_FILE_TYPE_JPEG) return jpeg_brick_reader_url(data, size, finfo);
+		//	if (finfo->type == BRICK_FILE_TYPE_ZLIB) return zlib_brick_reader_url(data, size, finfo);
+		//}
+		//else
+		//{
+			if (finfo->type == BRICK_FILE_TYPE_RAW)  return raw_brick_reader(data, size, finfo);
+		//	if (finfo->type == BRICK_FILE_TYPE_JPEG) return jpeg_brick_reader(data, size, finfo);
+		//	if (finfo->type == BRICK_FILE_TYPE_ZLIB) return zlib_brick_reader(data, size, finfo);
+		//}
+
+		return false;
+	}
+
+	bool TextureBrick::raw_brick_reader(char* data, size_t size, const FileLocInfo* finfo)
+	{
+		try
+		{
+			ifstream ifs;
+			ifs.open(ws2s(finfo->filename), ios::binary);
+			if (!ifs) return false;
+			if (finfo->datasize > 0 && size != finfo->datasize) return false;
+			size_t read_size = finfo->datasize > 0 ? finfo->datasize : size;
+			ifs.seekg(finfo->offset, ios_base::beg);
+			ifs.read(data, read_size);
+			if (ifs) ifs.close();
+			/*
+			FILE* fp = fopen(ws2s(finfo->filename).c_str(), "rb");
+			if (!fp) return false;
+			if (finfo->datasize > 0 && size != finfo->datasize) return false;
+			size_t read_size = finfo->datasize > 0 ? finfo->datasize : size;
+			setvbuf(fp, NULL, _IONBF, 0);
+			fseek(fp, finfo->offset, SEEK_SET);
+			fread(data, 0x1, read_size, fp);
+			if (fp) fclose(fp);
+			*//*
+			ofstream ofs1;
+			wstring str = *fname + wstring(L".txt");
+			ofs1.open(str);
+			for(int i=0; i < size/2; i++){
+			ofs1 << ((unsigned short *)data)[i] << "\n";
+			}
+			ofs1.close();
+			*/
+		}
+		catch (std::exception &e)
+		{
+			cerr << typeid(e).name() << "\n" << e.what() << endl;
+			return false;
+		}
+
+		return true;
 	}
 
 } // end namespace FLIVR

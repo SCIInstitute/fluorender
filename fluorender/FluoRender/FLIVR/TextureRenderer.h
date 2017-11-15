@@ -129,6 +129,11 @@ namespace FLIVR
 		{}
 	};
 
+#define PALETTE_W 256
+#define PALETTE_H 256
+#define PALETTE_SIZE (PALETTE_W*PALETTE_H)
+#define PALETTE_ELEM_COMP 4
+
 	class TextureRenderer
 	{
 	public:

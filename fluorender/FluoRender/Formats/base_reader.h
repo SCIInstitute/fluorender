@@ -140,6 +140,8 @@ protected:
 	
 	wstring m_path_name;
 
+	wstring m_info;
+
 	//all the decoding stuff
 	#define MAXCODE(n)	((1L<<(n))-1)
 	#define	BITS_MIN	9		/* start with 9 bits */

@@ -425,11 +425,13 @@ if(APPLE)
     $<TARGET_OBJECTS:TEEM_OBJ>)
   add_executable(MaskInt
     ${maskint_src} ${maskint_hdr}
+    $<TARGET_OBJECTS:FLIVR_OBJ>
     $<TARGET_OBJECTS:FORMATS_OBJ>
     $<TARGET_OBJECTS:POLE_OBJ>
     $<TARGET_OBJECTS:TEEM_OBJ>)
   add_executable(ReadGMM
     ${readgmm_src} ${readgmm_hdr}
+    $<TARGET_OBJECTS:FLIVR_OBJ>
     $<TARGET_OBJECTS:FORMATS_OBJ>
     $<TARGET_OBJECTS:CLUSTER_OBJ>
     $<TARGET_OBJECTS:TRACKING_OBJ>
@@ -476,11 +478,13 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:TEEM_OBJ>)
   add_executable(MaskInt
     ${maskint_src} ${maskint_hdr}
+    $<TARGET_OBJECTS:FLIVR_OBJ>
     $<TARGET_OBJECTS:FORMATS_OBJ>
     $<TARGET_OBJECTS:POLE_OBJ>
     $<TARGET_OBJECTS:TEEM_OBJ>)
   add_executable(ReadGMM
     ${readgmm_src} ${readgmm_hdr}
+    $<TARGET_OBJECTS:FLIVR_OBJ>
     $<TARGET_OBJECTS:FORMATS_OBJ>
     $<TARGET_OBJECTS:CLUSTER_OBJ>
     $<TARGET_OBJECTS:TRACKING_OBJ>
@@ -554,15 +558,19 @@ elseif(WIN32)
       $<TARGET_OBJECTS:TEEM_OBJ>)
     add_executable(MaskInt
       ${maskint_src} ${maskint_hdr}
+      $<TARGET_OBJECTS:FLIVR_OBJ>
       $<TARGET_OBJECTS:FORMATS_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
+      $<TARGET_OBJECTS:GLEW_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>)
     add_executable(ReadGMM
       ${readgmm_src} ${readgmm_hdr}
+      $<TARGET_OBJECTS:FLIVR_OBJ>
       $<TARGET_OBJECTS:FORMATS_OBJ>
       $<TARGET_OBJECTS:CLUSTER_OBJ>
       $<TARGET_OBJECTS:TRACKING_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
+      $<TARGET_OBJECTS:GLEW_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>)
   endif()
 endif()
@@ -629,9 +637,11 @@ target_link_libraries(SynthBB
   ${wxWidgets_LIBRARIES})
 target_link_libraries(MaskInt
   ${Boost_LIBRARIES}
+  ${OpenCL_LIBRARIES}
   ${wxWidgets_LIBRARIES})
 target_link_libraries(ReadGMM
   ${Boost_LIBRARIES}
+  ${OpenCL_LIBRARIES}
   ${wxWidgets_LIBRARIES})
 
 

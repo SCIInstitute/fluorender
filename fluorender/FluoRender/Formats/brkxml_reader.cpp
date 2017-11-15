@@ -178,7 +178,7 @@ void BRKXMLReader::SetDir(wstring &dir)
 }
 
 
-void BRKXMLReader::Preprocess()
+int BRKXMLReader::Preprocess()
 {
 	Clear();
 	m_slice_num = 0;
@@ -196,12 +196,12 @@ void BRKXMLReader::Preprocess()
 	wstring name = m_path_name.substr(pos+1);
 
 	if (m_doc.LoadFile(ws2s(m_path_name).c_str()) != 0){
-		return;
+		return READER_OPEN_FAIL;
 	}
 		
 	tinyxml2::XMLElement *root = m_doc.RootElement();
 	if (!root || strcmp(root->Name(), "BRK"))
-		return;
+		return READER_OPEN_FAIL;
 	m_imageinfo = ReadImageInfo(root);
 
 	if (root->Attribute("exMetadataPath"))
@@ -223,7 +223,7 @@ void BRKXMLReader::Preprocess()
 
 	m_cur_time = 0;
 
-	if(m_pyramid.empty()) return;
+	if(m_pyramid.empty()) return READER_OPEN_FAIL;
 
 	m_xspc = m_pyramid[0].xspc;
 	m_yspc = m_pyramid[0].yspc;
@@ -261,6 +261,7 @@ void BRKXMLReader::Preprocess()
 	SetInfo();
 
 	//OutputInfo();
+	return READER_OK;
 }
 
 BRKXMLReader::ImageInfo BRKXMLReader::ReadImageInfo(tinyxml2::XMLElement *infoNode)
@@ -1091,9 +1092,11 @@ void BRKXMLReader::build_bricks(vector<FLIVR::TextureBrick*> &tbrks, int lv)
 		FLIVR::BBox dbox = FLIVR::BBox(FLIVR::Point(dx0, dy0, dz0), FLIVR::Point(dx1, dy1, dz1));
 
 		//numc? gm_nrrd?
-		FLIVR::TextureBrick *b = new FLIVR::TextureBrick(0, 0, (*bite)->x_size, (*bite)->y_size, (*bite)->z_size, 1, numb, 
-														 (*bite)->x_start, (*bite)->y_start, (*bite)->z_start,
-														 (*bite)->x_size, (*bite)->y_size, (*bite)->z_size, bbox, tbox, dbox, (*bite)->id, (*bite)->offset, (*bite)->fsize);
+		FLIVR::TextureBrick *b = new FLIVR::TextureBrick(
+			0, 0, (*bite)->x_size, (*bite)->y_size, (*bite)->z_size, 1, numb, 
+			(*bite)->x_start, (*bite)->y_start, (*bite)->z_start,
+			(*bite)->x_size, (*bite)->y_size, (*bite)->z_size, bbox, tbox, dbox,
+			0, (*bite)->id, (*bite)->offset, (*bite)->fsize);
 		tbrks.push_back(b);
 		
 		bite++;

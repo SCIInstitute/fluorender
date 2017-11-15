@@ -387,9 +387,10 @@ namespace FLIVR
 		bricks.clear();
 
 		int i, j, k;
-		int mx, my, mz, mx2, my2, mz2;
+		int mx, my, mz, mx2, my2, mz2, ox, oy, oz;
 		double tx0, ty0, tz0, tx1, ty1, tz1;
 		double bx1, by1, bz1;
+		double dx0, dy0, dz0, dx1, dy1, dz1;
 		for (k = 0; k < sz_z; k += bsize[2])
 		{
 			if (k) k--;
@@ -447,9 +448,19 @@ namespace FLIVR
 						k==0?0:(k+0.5) / (double)sz_z),
 						Point(bx1, by1, bz1));
 
-					TextureBrick *b = new TextureBrick(0, 0, mx2, my2, mz2, numc, numb, 
-						i-(mx2-mx), j-(my2-my), k-(mz2-mz),
-						mx2, my2, mz2, bbox, tbox, bricks.size());
+					ox = i - (mx2 - mx);
+					oy = j - (my2 - my);
+					oz = k - (mz2 - mz);
+					dx0 = (double)ox / sz_x;
+					dy0 = (double)oy / sz_y;
+					dz0 = (double)oz / sz_z;
+					dx1 = (double)(ox + mx2) / sz_x;
+					dy1 = (double)(oy + my2) / sz_y;
+					dz1 = (double)(oz + mz2) / sz_z;
+
+					BBox dbox(Point(dx0, dy0, dz0), Point(dx1, dy1, dz1));
+					TextureBrick *b = new TextureBrick(0, 0, mx2, my2, mz2, numc, numb,
+						ox, oy, oz, mx2, my2, mz2, bbox, tbox, dbox, bricks.size());
 					bricks.push_back(b);
 				}
 			}

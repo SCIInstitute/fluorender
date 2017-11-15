@@ -26,7 +26,7 @@ public:
 	void SetCurTime(int t);
 	void SetCurChan(int c);
 	wstring GetTimeId();
-	void Preprocess();
+	int Preprocess();
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
 	int LoadOffset(int offset);
