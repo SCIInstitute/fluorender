@@ -581,7 +581,7 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 				m_frame, "Save Volume Data", "", "",
 				"Muti-page Tiff file (*.tif, *.tiff)|*.tif;*.tiff|"\
 				"Single-page Tiff sequence (*.tif)|*.tif;*.tiff|"\
-				"Nrrd file (*.nrrd)|*.nrrd",
+				"Utah Nrrd file (*.nrrd)|*.nrrd",
 				wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 			fopendlg->SetExtraControlCreator(CreateExtraControl);
 
@@ -672,7 +672,7 @@ void DataListCtrl::OnBake(wxCommandEvent& event)
 			m_frame, "Bake Volume Data", "", "",
 			"Muti-page Tiff file (*.tif, *.tiff)|*.tif;*.tiff|"\
 			"Single-page Tiff sequence (*.tif)|*.tif;*.tiff|"\
-			"Nrrd file (*.nrrd)|*.nrrd",
+			"Utah Nrrd file (*.nrrd)|*.nrrd",
 			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 		fopendlg->SetExtraControlCreator(CreateExtraControl);
 

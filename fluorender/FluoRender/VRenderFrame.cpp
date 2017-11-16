@@ -1061,7 +1061,9 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 		"Olympus Original Imaging Format (*.oif)|*.oif|"\
 		"Zeiss Laser Scanning Microscope (*.lsm)|*.lsm|"\
 		"Prairie View XML (*.xml)|*.xml|"\
-		"Nrrd files (*.nrrd)|*.nrrd", wxFD_OPEN|wxFD_MULTIPLE);
+		"Utah Nrrd files (*.nrrd)|*.nrrd"\
+		"Janelia VVD files (*.vvd)|*.vvd",
+		wxFD_OPEN|wxFD_MULTIPLE);
 	fopendlg->SetExtraControlCreator(CreateExtraControlVolume);
 
 	int rval = fopendlg->ShowModal();
@@ -1153,6 +1155,8 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_LSM);
 			else if (suffix==".xml")
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_PVXML);
+			else if (suffix == ".vvd")
+				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_BRKXML);
 
 			if (ch_num > 1)
 			{
@@ -1232,6 +1236,8 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
 
 		delete prg_diag;
 	}
+
+	vrv->RefreshGL();//added by Takashi
 }
 
 void VRenderFrame::StartupLoad(wxArrayString files)
@@ -1254,7 +1260,8 @@ void VRenderFrame::StartupLoad(wxArrayString files)
 			suffix == ".oib" ||
 			suffix == ".oif" ||
 			suffix == ".lsm" ||
-			suffix == ".xml")
+			suffix == ".xml" ||
+			suffix == ".vvd")
 		{
 			LoadVolumes(files);
 		}
