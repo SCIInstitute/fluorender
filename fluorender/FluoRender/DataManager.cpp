@@ -383,7 +383,32 @@ int VolumeData::Load(Nrrd* data, wxString &name, wxString &path)
 
 	m_tex = new Texture();
 	m_tex->set_use_priority(m_skip_brick);
-	m_tex->build(nv, gm, 0, 256, 0, 0);
+	if (m_reader && m_reader->GetType()==READER_BRKXML_TYPE)
+	{
+		BRKXMLReader *breader = (BRKXMLReader*)m_reader;
+		vector<Pyramid_Level> pyramid;
+		vector<vector<vector<vector<FileLocInfo *>>>> fnames;
+		int ftype = BRICK_FILE_TYPE_NONE;
+
+		breader->build_pyramid(pyramid, fnames, 0, breader->GetCurChan());
+		m_tex->SetCopyableLevel(breader->GetCopyableLevel());
+
+		int lmnum = breader->GetLandmarkNum();
+		for (int j = 0; j < lmnum; j++)
+		{
+			wstring name;
+			VD_Landmark vlm;
+			breader->GetLandmark(j, vlm.name, vlm.x, vlm.y, vlm.z, vlm.spcx, vlm.spcy, vlm.spcz);
+			m_landmarks.push_back(vlm);
+			breader->GetMetadataID(m_metadata_id);
+		}
+		if (!m_tex->buildPyramid(pyramid, fnames, breader->isURL())) return 0;
+	}
+	else
+	{
+		if (!m_tex->build(nv, gm, 0, 256, 0, 0))
+			return 0;
+	}
 
 	if (m_tex)
 	{
@@ -4375,6 +4400,12 @@ wxString DataManager::SearchProjectPath(wxString &filename)
 
 int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_num)
 {
+	bool isURL = false;
+	bool downloaded = false;
+	wxString downloaded_filepath;
+	bool downloaded_metadata = false;
+	wxString downloaded_metadatafilepath;
+
 	wxString pathname = filename;
 	if (!wxFileExists(pathname))
 	{
@@ -4434,6 +4465,8 @@ int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_
 			((PVXMLReader*)reader)->SetFlipX(m_pvxml_flip_x);
 			((PVXMLReader*)reader)->SetFlipY(m_pvxml_flip_y);
 		}
+		else if (type == LOAD_TYPE_BRKXML)
+			reader = new BRKXMLReader();
 
 		m_reader_list.push_back(reader);
 		wstring str_w = pathname.ToStdWstring();
@@ -4463,15 +4496,37 @@ int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_
 		i<(ch_num>=0?ch_num+1:chan); i++)
 	{
 		VolumeData *vd = new VolumeData();
+		if (!vd)
+			continue;
+
 		vd->SetSkipBrick(m_skip_brick);
 		Nrrd* data = reader->Convert(t_num>=0?t_num:reader->GetCurTime(), i, true);
 		if (!data)
 			continue;
-		wxString name = wxString(reader->GetDataName());
-		if (chan > 1)
-			name += wxString::Format("_%d", i+1);
+
+		wxString name;
+		if (type != LOAD_TYPE_BRKXML)
+		{
+			name = wxString(reader->GetDataName());
+			if (chan > 1)
+				name += wxString::Format("_Ch%d", i + 1);
+		}
+		else
+		{
+			BRKXMLReader* breader = (BRKXMLReader*)reader;
+			name = reader->GetDataName();
+			name = name.Mid(0, name.find_last_of(wxT('.')));
+			if (ch_num > 1) name = wxT("_Ch") + wxString::Format("%i", i);
+			pathname = filename;
+			breader->SetCurChan(i);
+			breader->SetCurTime(0);
+		}
+
+		vd->SetReader(reader);
+		vd->SetCompression(m_compression);
+
 		bool valid_spc = reader->IsSpcInfoValid();
-		if (vd && vd->Load(data, name, pathname))
+		if (vd->Load(data, name, pathname))
 		{
 			if (m_load_mask)
 			{
@@ -4506,10 +4561,8 @@ int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_
 			delete vd;
 			continue;
 		}
-		vd->SetReader(reader);
-		vd->SetCompression(m_compression);
-		AddVolumeData(vd);
 
+		AddVolumeData(vd);
 		SetVolumeDefault(vd);
 
 		//get excitation wavelength

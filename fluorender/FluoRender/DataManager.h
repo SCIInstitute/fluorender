@@ -49,6 +49,7 @@ DEALINGS IN THE SOFTWARE.
 #include "Formats/lsm_reader.h"
 #include "Formats/lbl_reader.h"
 #include "Formats/pvxml_reader.h"
+#include "Formats/brkxml_reader.h"
 #include "Tracking/TrackMap.h"
 
 #ifndef _DATAMANAGER_H_
@@ -157,6 +158,13 @@ protected:
 
 	//associated layer
 	TreeLayer* m_associated;
+};
+
+struct VD_Landmark
+{
+	wstring name;
+	double x, y, z;
+	double spcx, spcy, spcz;
 };
 
 class VolumeData : public TreeLayer
@@ -519,6 +527,9 @@ private:
 
 	//estimated threshold
 	double m_est_thresh;
+
+	vector<VD_Landmark> m_landmarks;
+	wstring m_metadata_id;
 
 private:
 	//label functions

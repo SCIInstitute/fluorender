@@ -181,13 +181,13 @@ inline int WSTOI(std::wstring s) { return _wtoi(s.c_str()); }
 
 inline double WSTOD(std::wstring s) { return _wtof(s.c_str()); }
 
-inline int STOI(const char * s) { return atoi(s); }
-inline int STOI(const wxChar * s) { return _wtoi(s); }
-inline int STOI(wxChar * s) { return _wtoi(s); }
+inline int STOI(const char * s) { return (s ? atoi(s) : 0); }
+inline int STOI(const wxChar * s) { return (s ? _wtoi(s) : 0); }
+inline int STOI(wxChar * s) { return (s ? _wtoi(s) : 0); }
 
-inline double STOD(const char * s) { return atof(s); }
-inline double STOD(wxChar * s) { return _wtof(s); }
-inline double STOD(const wxChar * s) { return _wtof(s); }
+inline double STOD(const char * s) { return (s ? atof(s) : 0.0); }
+inline double STOD(wxChar * s) { return (s ? _wtof(s) : 0.0); }
+inline double STOD(const wxChar * s) { return (s ? _wtof(s) : 0.0); }
 
 inline time_t TIME(time_t* n) { return _time32((__time32_t*)n); }
 
@@ -411,9 +411,9 @@ inline int WSTOI(std::wstring s) { return atoi(ws2s(s).c_str()); }
 
 inline double WSTOD(std::wstring s) { return atof(ws2s(s).c_str()); }
 
-inline int STOI(const char * s) { return atoi(s); }
+inline int STOI(const char * s) { return (s ? atoi(s) : 0); }
 
-inline double STOD(const char * s) { return atof(s); }
+inline double STOD(const char * s) { return (s ? atof(s) : 0.0); }
 
 inline time_t TIME(time_t* n) { return time(n); }
 

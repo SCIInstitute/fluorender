@@ -35,11 +35,15 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
+#define READER_NRRD_TYPE	1
+
 class NRRDReader : public BaseReader
 {
 public:
 	NRRDReader();
 	~NRRDReader();
+
+	int GetType() { return READER_NRRD_TYPE; }
 
 	void SetFile(string &file);
 	void SetFile(wstring &file);

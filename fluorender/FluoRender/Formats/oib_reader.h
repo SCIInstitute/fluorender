@@ -36,13 +36,17 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
+#define READER_OIB_TYPE	3
+
 class OIBReader : public BaseReader
 {
    public:
       OIBReader();
       ~OIBReader();
 
-      void SetFile(string &file);
+	  int GetType() { return READER_OIB_TYPE; }
+
+	  void SetFile(string &file);
       void SetFile(wstring &file);
       void SetSliceSeq(bool ss);
       bool GetSliceSeq();

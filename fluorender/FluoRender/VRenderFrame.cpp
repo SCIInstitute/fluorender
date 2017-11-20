@@ -1055,13 +1055,13 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Choose the volume data file", "", "",
-		"All Supported|*.tif;*.tiff;*.oib;*.oif;*.lsm;*.xml;*.nrrd|"\
+		"All Supported|*.tif;*.tiff;*.oib;*.oif;*.lsm;*.xml;*.nrrd;*.vvd|"\
 		"Tiff Files (*.tif, *.tiff)|*.tif;*.tiff|"\
 		"Olympus Image Binary Files (*.oib)|*.oib|"\
 		"Olympus Original Imaging Format (*.oif)|*.oif|"\
 		"Zeiss Laser Scanning Microscope (*.lsm)|*.lsm|"\
 		"Prairie View XML (*.xml)|*.xml|"\
-		"Utah Nrrd files (*.nrrd)|*.nrrd"\
+		"Utah Nrrd files (*.nrrd)|*.nrrd|"\
 		"Janelia VVD files (*.vvd)|*.vvd",
 		wxFD_OPEN|wxFD_MULTIPLE);
 	fopendlg->SetExtraControlCreator(CreateExtraControlVolume);

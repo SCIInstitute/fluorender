@@ -35,11 +35,15 @@ using namespace std;
 class wxXmlNode;
 class wxString;
 
+#define READER_PVXML_TYPE	6
+
 class PVXMLReader : public BaseReader
 {
 public:
 	PVXMLReader();
 	~PVXMLReader();
+
+	int GetType() { return READER_PVXML_TYPE; }
 
 	void SetFile(string &file);
 	void SetFile(wstring &file);

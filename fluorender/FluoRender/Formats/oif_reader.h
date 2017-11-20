@@ -37,11 +37,15 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
+#define READER_OIF_TYPE	4
+
 class OIFReader : public BaseReader
 {
 public:
 	OIFReader();
 	~OIFReader();
+
+	int GetType() { return READER_OIF_TYPE; }
 
 	void SetFile(string &file);
 	void SetFile(wstring &file);

@@ -52,6 +52,8 @@ public:
 	//BaseReader();
 	virtual ~BaseReader() {};
 
+	virtual int GetType() = 0;	//get reader type
+
 	virtual void SetFile(string &file) = 0;	//set the file name
 	virtual void SetFile(wstring &file) = 0;//set the file name in wide string
 	virtual void SetSliceSeq(bool ss) = 0;	//slices are stored as a file sequence

@@ -49,9 +49,10 @@ namespace FLIVR
 
 		int get_build_max_tex_size() { return build_max_tex_size_; }
 		void set_brick_size(int size) { brick_size_ = size; }
-		void build(Nrrd* val, Nrrd* grad,
+		bool build(Nrrd* val, Nrrd* grad,
 			double vmn, double vmx,
-			double gmn, double gmx);
+			double gmn, double gmx,
+			vector<FLIVR::TextureBrick*>* brks = NULL);
 
 		inline Vector res() { return Vector(nx_, ny_, nz_); }
 		inline int nx() { return nx_; }
@@ -188,6 +189,15 @@ namespace FLIVR
 		inline int get_n_p0()
 		{if (use_priority_) return n_p0_; else return int(bricks_.size());}
 
+		//for brkxml file
+		int GetCurLevel() { return pyramid_cur_lv_; }
+		int GetLevelNum() { return pyramid_.size(); }
+		void SetCopyableLevel(int lv) { pyramid_copy_lv_ = lv; }
+		int GetCopyableLevel() { return pyramid_copy_lv_; }
+		bool buildPyramid(vector<Pyramid_Level> &pyramid, vector<vector<vector<vector<FileLocInfo *>>>> &filenames, bool useURL = false);
+		void setLevel(int lv);
+		void set_data_file(vector<FileLocInfo *> *fname, int type);
+
 	protected:
 		void build_bricks(vector<TextureBrick*> &bricks,
 			int nx, int ny, int nz,
@@ -250,6 +260,18 @@ namespace FLIVR
 		//undos for mask
 		vector<void*> mask_undos_;
 		int mask_undo_pointer_;
+
+		//for brkxml
+		bool brkxml_;
+		int pyramid_cur_lv_;
+		int pyramid_cur_fr_;
+		int pyramid_cur_ch_;
+		int pyramid_lv_num_;
+		int pyramid_copy_lv_;
+		vector<Pyramid_Level> pyramid_;
+		vector<vector<vector<vector<FileLocInfo *>>>> filenames_;
+
+		void clearPyramid();
 	};
 
 	inline unsigned int Texture::negxid(unsigned int id)

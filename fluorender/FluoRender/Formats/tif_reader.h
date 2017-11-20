@@ -39,11 +39,15 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
+#define READER_TIF_TYPE	2
+
 class TIFReader : public BaseReader
 {
 public:
 	TIFReader();
 	~TIFReader();
+
+	int GetType() { return READER_TIF_TYPE; }
 
 	void SetFile(string &file);
 	void SetFile(wstring &file);

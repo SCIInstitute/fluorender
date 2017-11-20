@@ -249,9 +249,10 @@ namespace FLIVR
 		set_transform(tform);
 	}
 
-	void Texture::build(Nrrd* nv_nrrd, Nrrd* gm_nrrd,
+	bool Texture::build(Nrrd* nv_nrrd, Nrrd* gm_nrrd,
 		double vmn, double vmx,
-		double gmn, double gmx)
+		double gmn, double gmx,
+		vector<FLIVR::TextureBrick*>* brks)
 	{
 		size_t axis_size[4];
 		nrrdAxisInfoGet_nva(nv_nrrd, nrrdAxisInfoSize, axis_size);
@@ -326,6 +327,8 @@ namespace FLIVR
 
 		set_nrrd(nv_nrrd, 0);
 		set_nrrd(gm_nrrd, 1);
+
+		return true;
 	}
 
 	void Texture::build_bricks(vector<TextureBrick*> &bricks, 
@@ -512,6 +515,93 @@ namespace FLIVR
 		}
 		else
 			return false;
+	}
+
+	bool Texture::buildPyramid(vector<Pyramid_Level> &pyramid, vector<vector<vector<vector<FileLocInfo *>>>> &filenames, bool useURL)
+	{
+		if (pyramid.empty()) return false;
+		if (pyramid.size() != filenames.size()) return false;
+
+		brkxml_ = true;
+		//useURL_ = useURL;
+
+		clearPyramid();
+
+		pyramid_lv_num_ = pyramid.size();
+		pyramid_ = pyramid;
+		filenames_ = filenames;
+		for (int i = 0; i < pyramid_.size(); i++)
+		{
+			if (!pyramid_[i].data || pyramid_[i].bricks.empty())
+			{
+				clearPyramid();
+				return false;
+			}
+
+			for (int j = 0; j < pyramid_[i].bricks.size(); j++)
+			{
+				pyramid_[i].bricks[j]->set_nrrd(pyramid_[i].data, 0);
+				pyramid_[i].bricks[j]->set_nrrd(0, 1);
+			}
+		}
+		setLevel(pyramid_lv_num_ - 1);
+		pyramid_cur_lv_ = -1;
+
+		return true;
+	}
+
+	void Texture::clearPyramid()
+	{
+		if (!brkxml_) return;
+
+		if (pyramid_.empty()) return;
+
+		for (int i = 0; i<(int)pyramid_.size(); i++)
+		{
+			for (int j = 0; j<(int)pyramid_[i].bricks.size(); j++)
+			{
+				if (pyramid_[i].bricks[j]) delete pyramid_[i].bricks[j];
+			}
+			vector<TextureBrick *>().swap(pyramid_[i].bricks);
+			nrrdNix(pyramid_[i].data);
+		}
+		vector<Pyramid_Level>().swap(pyramid_);
+
+		for (int i = 0; i<(int)filenames_.size(); i++)
+			for (int j = 0; j<(int)filenames_[i].size(); j++)
+				for (int k = 0; k<(int)filenames_[i][j].size(); k++)
+					for (int n = 0; n<(int)filenames_[i][j][k].size(); n++)
+						if (filenames_[i][j][k][n]) delete filenames_[i][j][k][n];
+
+		vector<vector<vector<vector<FileLocInfo *>>>>().swap(filenames_);
+
+		pyramid_lv_num_ = 0;
+		pyramid_cur_lv_ = -1;
+	}
+
+	void Texture::setLevel(int lv)
+	{
+		if (lv < 0 || lv >= pyramid_lv_num_ || !brkxml_ || pyramid_cur_lv_ == lv) return;
+		pyramid_cur_lv_ = lv;
+		build(pyramid_[pyramid_cur_lv_].data, 0, 0, 256, 0, 0, &pyramid_[pyramid_cur_lv_].bricks);
+		set_data_file(pyramid_[pyramid_cur_lv_].filenames, pyramid_[pyramid_cur_lv_].filetype);
+
+		int offset = 0;
+		if (pyramid_[lv].data->dim > 3) offset = 1;
+		spcx_ = pyramid_[lv].data->axis[offset + 0].spacing;
+		spcy_ = pyramid_[lv].data->axis[offset + 1].spacing;
+		spcz_ = pyramid_[lv].data->axis[offset + 2].spacing;
+		Transform tform;
+		tform.load_identity();
+		Point nmax(nx_*spcx_*s_spcx_, ny_*spcy_*s_spcy_, nz_*spcz_*s_spcz_);
+		tform.pre_scale(Vector(nmax));
+		set_transform(tform);
+	}
+
+	void Texture::set_data_file(vector<FileLocInfo *> *fname, int type)
+	{
+		filename_ = fname;
+		filetype_ = type;
 	}
 
 	//set nrrd

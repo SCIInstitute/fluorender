@@ -902,11 +902,32 @@ Nrrd *BRKXMLReader::Convert(int t, int c, bool get_max)
 	return data;
 }
 
-wstring BRKXMLReader::GetCurName(int t, int c)
+wstring BRKXMLReader::GetCurDataName(int t, int c)
 {
-   return wstring(L"");
+	return m_path_name;
 }
 
+wstring BRKXMLReader::GetCurMaskName(int t, int c)
+{
+	wostringstream woss;
+	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
+	if (m_time_num > 1) woss << "_T" << t;
+	if (m_chan_num > 1) woss << "_C" << c;
+	woss << ".msk";
+	wstring mask_name = woss.str();
+	return mask_name;
+}
+
+wstring BRKXMLReader::GetCurLabelName(int t, int c)
+{
+	wostringstream woss;
+	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
+	if (m_time_num > 1) woss << "_T" << t;
+	if (m_chan_num > 1) woss << "_C" << c;
+	woss << ".lbl";
+	wstring label_name = woss.str();
+	return label_name;
+}
 FLIVR::FileLocInfo* BRKXMLReader::GetBrickFilePath(int fr, int ch, int id, int lv)
 {
 	int level = lv;

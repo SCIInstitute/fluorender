@@ -32,11 +32,15 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
+#define READER_LBL_TYPE	0
+
 class LBLReader : public BaseReader
 {
 public:
 	LBLReader();
 	~LBLReader();
+
+	int GetType() { return READER_LBL_TYPE; }
 
 	void SetFile(string &file);
 	void SetFile(wstring &file);
