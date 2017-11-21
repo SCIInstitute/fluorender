@@ -37,6 +37,7 @@
 #include <FLIVR/VolCalShader.h>
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
+#include "compatibility.h"
 
 using namespace std;
 
@@ -46,6 +47,8 @@ namespace FLIVR
 	bool TextureRenderer::use_mem_limit_ = false;
 	double TextureRenderer::mem_limit_ = 0.0;
 	double TextureRenderer::available_mem_ = 0.0;
+	double TextureRenderer::mainmem_buf_size_ = 9000.0;
+	double TextureRenderer::available_mainmem_buf_size_ = 0.0;
 	double TextureRenderer::large_data_size_ = 0.0;
 	int TextureRenderer::force_brick_size_ = 0;
 	vector<TexParam> TextureRenderer::tex_pool_;
@@ -72,6 +75,9 @@ namespace FLIVR
 	int TextureRenderer::quota_bricks_ = 0;
 	Point TextureRenderer::quota_center_;
 	int TextureRenderer::update_order_ = 0;
+	bool TextureRenderer::load_on_main_thread_ = false;
+	vector<TextureRenderer::LoadedBrick> TextureRenderer::loadedbrks;
+	int TextureRenderer::del_id = 0;
 	bool TextureRenderer::invalidate_tex_ = false;
 #ifdef _DARWIN
     CGLContextObj TextureRenderer::gl_context_ = 0;
@@ -715,6 +721,11 @@ namespace FLIVR
 				glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
 			}
+			else if (tex_->isBrxml())
+			{
+				glPixelStorei(GL_UNPACK_ROW_LENGTH, nx);
+				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, ny);
+			}
 			else
 			{
 				glPixelStorei(GL_UNPACK_ROW_LENGTH, brick->sx());
@@ -752,10 +763,155 @@ namespace FLIVR
 
 				if (glTexImage3D)
 				{
-					glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format,
-						brick->tex_type(c), 0);
+					if (tex_->isBrxml())
+					{
+						if (load_on_main_thread_)
+						{
+							bool brkerror = false;
+							bool lb_swapped = false;
+							if (brick->isLoaded())
+							{
+								if (brick->get_id_in_loadedbrks() >= 0 && brick->get_id_in_loadedbrks() < loadedbrks.size())
+								{
+									loadedbrks[brick->get_id_in_loadedbrks()].swapped = true;
+									lb_swapped = true;
+								}
+								else
+									brkerror = true;
+							}
+							else if (mainmem_buf_size_ >= 1.0)
+							{
+								double bsize = brick->nx()*brick->ny()*brick->nz()*brick->nb(c) / 1.04e6;
+								if (available_mainmem_buf_size_ - bsize < 0.0)
+								{
+									double free_mem_size = 0.0;
+									while (free_mem_size < bsize && del_id < loadedbrks.size())
+									{
+										TextureBrick* b = loadedbrks[del_id].brk;
+										if (!loadedbrks[del_id].swapped && b->isLoaded()) {
+											b->freeBrkData();
+											free_mem_size += b->nx() * b->ny() * b->nz() * b->nb(0) / 1.04e6;
+										}
+										del_id++;
+									}
+									available_mainmem_buf_size_ += free_mem_size;
+								}
+							}
 
-					LOAD_TEXTURE
+							FileLocInfo *finfo = tex_->GetFileName(brick->getID());
+							void *texdata = brick->tex_data_brk(c, finfo);
+							if (texdata)
+							{
+								glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format, brick->tex_type(c), 0);
+								glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, nx, ny, nz, format, brick->tex_type(c), texdata);
+							}
+							else
+							{
+								glDeleteTextures(1, (GLuint*)&tex_pool_[idx].id);
+								tex_pool_.erase(tex_pool_.begin() + idx);
+								brkerror = true;
+								result = -1;
+							}
+
+							if (mainmem_buf_size_ == 0.0) brick->freeBrkData();
+							else
+							{
+								if (brkerror)
+								{
+									brick->freeBrkData();
+
+									double new_mem = brick->nx()*brick->ny()*brick->nz()*brick->nb(c) / 1.04e6;
+									available_mainmem_buf_size_ += new_mem;
+								}
+								else
+								{
+									if (!lb_swapped)
+									{
+										double new_mem = brick->nx()*brick->ny()*brick->nz()*brick->nb(c) / 1.04e6;
+										available_mainmem_buf_size_ -= new_mem;
+									}
+
+									LoadedBrick lb;
+									lb.swapped = false;
+									lb.size = brick->nx()*brick->ny()*brick->nz()*brick->nb(c) / 1.04e6;
+									lb.brk = brick;
+									lb.brk->set_id_in_loadedbrks(loadedbrks.size());
+									loadedbrks.push_back(lb);
+
+								}
+
+							}
+						}
+						else
+						{
+							if (brick->isLoaded())
+							{
+								bool brkerror = false;
+								void *texdata = brick->tex_data_brk(c, NULL);
+								if (texdata)
+								{
+									glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format, brick->tex_type(c), 0);
+									glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, nx, ny, nz, format, brick->tex_type(c), texdata);
+								}
+								else
+								{
+									glDeleteTextures(1, (GLuint*)&tex_pool_[idx].id);
+									tex_pool_.erase(tex_pool_.begin() + idx);
+									brkerror = true;
+									result = -1;
+								}
+							}
+							else if (!interactive_)
+							{
+								uint32_t rn_time;
+								unsigned long elapsed;
+								long t;
+								do {
+									rn_time = GET_TICK_COUNT();
+									elapsed = rn_time - st_time_;
+									t = up_time_ - elapsed;
+									if (t > 0) wxMilliSleep(t);
+								} while (elapsed <= up_time_);
+
+								if (brick->isLoaded())
+								{
+									bool brkerror = false;
+									void *texdata = brick->tex_data_brk(c, NULL);
+									if (texdata)
+									{
+										glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format, brick->tex_type(c), 0);
+										glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, nx, ny, nz, format, brick->tex_type(c), texdata);
+									}
+									else
+									{
+										glDeleteTextures(1, (GLuint*)&tex_pool_[idx].id);
+										tex_pool_.erase(tex_pool_.begin() + idx);
+										brkerror = true;
+										result = -1;
+									}
+								}
+								else
+								{
+									glDeleteTextures(1, (GLuint*)&tex_pool_[idx].id);
+									tex_pool_.erase(tex_pool_.begin() + idx);
+									result = -1;
+								}
+							}
+							else
+							{
+								glDeleteTextures(1, (GLuint*)&tex_pool_[idx].id);
+								tex_pool_.erase(tex_pool_.begin() + idx);
+								result = -1;
+							}
+						}
+					}
+					else
+					{
+						glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format,
+							brick->tex_type(c), 0);
+
+						LOAD_TEXTURE
+					}
 
 					if (mem_swap_)
 					{

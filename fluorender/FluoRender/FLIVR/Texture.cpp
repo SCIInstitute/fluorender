@@ -604,6 +604,12 @@ namespace FLIVR
 		filetype_ = type;
 	}
 
+	FileLocInfo *Texture::GetFileName(int id)
+	{
+		if (id < 0 || !filename_ || id >= filename_->size()) return NULL;
+		return (*filename_)[id];
+	}
+
 	//set nrrd
 	void Texture::set_nrrd(Nrrd* data, int index)
 	{

@@ -208,6 +208,10 @@ namespace FLIVR {
 
 		void freeBrkData();
 		bool read_brick(char* data, size_t size, const FileLocInfo* finfo);
+		bool isLoaded() { return brkdata_ ? true : false; };
+		int get_id_in_loadedbrks() { return id_in_loadedbrks; }
+		int getID() { return findex_; }
+		void set_id_in_loadedbrks(int id) { id_in_loadedbrks = id; };
 
 	private:
 		void compute_edge_rays(BBox &bbox);
@@ -259,6 +263,7 @@ namespace FLIVR {
 		long long offset_;
 		long long fsize_;
 		void *brkdata_;
+		int id_in_loadedbrks;
 
 	};
 

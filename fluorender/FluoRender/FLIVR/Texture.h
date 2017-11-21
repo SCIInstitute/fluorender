@@ -197,6 +197,8 @@ namespace FLIVR
 		bool buildPyramid(vector<Pyramid_Level> &pyramid, vector<vector<vector<vector<FileLocInfo *>>>> &filenames, bool useURL = false);
 		void setLevel(int lv);
 		void set_data_file(vector<FileLocInfo *> *fname, int type);
+		bool isBrxml() { return brkxml_; }
+		FileLocInfo *GetFileName(int id);
 
 	protected:
 		void build_bricks(vector<TextureBrick*> &bricks,

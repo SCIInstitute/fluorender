@@ -308,6 +308,8 @@ namespace FLIVR
 		static bool use_mem_limit_;
 		static double mem_limit_;
 		static double available_mem_;
+		static double mainmem_buf_size_;
+		static double available_mainmem_buf_size_;
 		static double large_data_size_;
 		static int force_brick_size_;
 		static vector<TexParam> tex_pool_;
@@ -338,6 +340,15 @@ namespace FLIVR
 		static Point quota_center_;
 		//update order
 		static int update_order_;
+		//threading
+		static bool load_on_main_thread_;
+		struct LoadedBrick {
+			bool swapped;
+			TextureBrick *brk;
+			double size;
+		};
+		static vector<LoadedBrick> loadedbrks;
+		static int del_id;
 
 		//for view testing
 		float mvmat_[16];
