@@ -251,6 +251,14 @@ namespace FLIVR
 		double										spcx_;
 		double										spcy_;
 		double										spcz_;
+		//! base spacings (for brxml)
+		double										b_spcx_;
+		double										b_spcy_;
+		double										b_spcz_;
+		//! scales of spacings (for brxml)
+		double										s_spcx_;
+		double										s_spcy_;
+		double										s_spcz_;
 		//priority
 		bool use_priority_;
 		int n_p0_;
@@ -270,6 +278,8 @@ namespace FLIVR
 		int pyramid_copy_lv_;
 		vector<Pyramid_Level> pyramid_;
 		vector<vector<vector<vector<FileLocInfo *>>>> filenames_;
+		vector<FileLocInfo *> *filename_;
+		int filetype_;
 
 		void clearPyramid();
 	};
