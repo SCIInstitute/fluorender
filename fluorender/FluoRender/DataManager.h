@@ -417,6 +417,8 @@ public:
 	//fog
 	void SetFog(bool use_fog, double fog_intensity, double fog_start, double fog_end);
 
+	bool isBrxml();
+
 private:
 	//duplication indicator and counter
 	bool m_dup;
@@ -1083,6 +1085,12 @@ public:
 			m_vd_list.push_back(vd);
 		}
 	}
+	void ReplaceVolumeData(int index, VolumeData *vd)
+	{
+		if (index >= 0 && index<(int)m_vd_list.size())
+			m_vd_list[index] = vd;
+		ResetSync();
+	}
 	void RemoveVolumeData(int index)
 	{
 		if (index>=0 && index<(int)m_vd_list.size())
@@ -1284,6 +1292,7 @@ public:
 	void AddVolumeData(VolumeData* vd);
 	VolumeData* DuplicateVolumeData(VolumeData* vd);
 	void RemoveVolumeData(int index);
+	void RemoveVolumeData(const wxString &name);
 	int GetVolumeNum();
 	VolumeData* GetVolumeData(int index);
 	VolumeData* GetVolumeData(wxString &name);

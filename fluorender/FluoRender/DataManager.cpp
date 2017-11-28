@@ -2087,6 +2087,13 @@ int VolumeData::GetAllBrickNum()
 	return m_tex->get_brick_num();
 }
 
+bool VolumeData::isBrxml()
+{
+	if (!m_tex) return false;
+
+	return m_tex->isBrxml();
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 MeshData::MeshData() :
 m_data(0),
@@ -4721,6 +4728,17 @@ void DataManager::RemoveVolumeData(int index)
 		delete data;
 		data = 0;
 	}	
+}
+
+void DataManager::RemoveVolumeData(const wxString &name)
+{
+	for (int i = 0; i<(int)m_vd_list.size(); i++)
+	{
+		if (name == m_vd_list[i]->GetName())
+		{
+			RemoveVolumeData(i);
+		}
+	}
 }
 
 void DataManager::RemoveMeshData(int index)

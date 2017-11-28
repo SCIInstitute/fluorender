@@ -39,6 +39,8 @@ using namespace std;
 
 namespace FLIVR
 {
+	map<wstring, wstring> TextureBrick::cache_table_ = map<wstring, wstring>();
+
 	TextureBrick::TextureBrick(Nrrd* n0, Nrrd* n1,
 		int nx, int ny, int nz, int nc, int* nb,
 		int ox, int oy, int oz,
@@ -89,6 +91,13 @@ namespace FLIVR
 
 		//skip mask updating
 		skip_mask_ = false;
+
+		//brkxml
+		brkdata_ = NULL;
+		id_in_loadedbrks = -1;
+		loading_ = false;
+		disp_ = true;
+		//prevent_tex_deletion_ = false;
 	}
 
 	TextureBrick::~TextureBrick()
@@ -97,6 +106,8 @@ namespace FLIVR
 		// This object never deletes that memory.
 		data_[0] = 0;
 		data_[1] = 0;
+
+		if (brkdata_) delete[] brkdata_;
 	}
 
 	/* The cube is numbered in the following way
@@ -538,6 +549,134 @@ namespace FLIVR
 			cerr << typeid(e).name() << "\n" << e.what() << endl;
 			return false;
 		}
+
+		return true;
+	}
+
+	bool TextureBrick::read_brick_without_decomp(char* &data, size_t &readsize, FileLocInfo* finfo, wxThread *th)
+	{
+		readsize = -1;
+
+		if (!finfo) return false;
+
+		if (finfo->isurl)
+		{
+			bool found_cache = false;
+			wxString wxcfname = finfo->cache_filename;
+			if (finfo->cached && wxFileExists(wxcfname))
+				found_cache = true;
+			else
+			{
+				wstring fcname;
+
+				auto itr = cache_table_.find(fcname);
+				if (itr != cache_table_.end())
+				{
+					wxcfname = itr->second;
+					if (wxFileExists(wxcfname))
+						found_cache = true;
+				}
+
+				if (found_cache)
+				{
+					finfo->cached = true;
+					finfo->cache_filename = fcname;
+				}
+			}
+
+			if (!found_cache)
+			{
+/*				CURLcode ret;
+
+				if (s_curl_ == NULL) {
+					cerr << "curl_easy_init() failed" << endl;
+					return false;
+				}
+				curl_easy_reset(s_curl_);
+				curl_easy_setopt(s_curl_, CURLOPT_URL, wxString::wxString(finfo->filename).ToStdString().c_str());
+				curl_easy_setopt(s_curl_, CURLOPT_TIMEOUT, 10L);
+				curl_easy_setopt(s_curl_, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+				curl_easy_setopt(s_curl_, CURLOPT_WRITEFUNCTION, WriteFileCallback);
+				curl_easy_setopt(s_curl_, CURLOPT_SSL_VERIFYPEER, 0);
+				curl_easy_setopt(s_curl_, CURLOPT_NOSIGNAL, 1);
+				curl_easy_setopt(s_curl_, CURLOPT_FAILONERROR, 1);
+				curl_easy_setopt(s_curl_, CURLOPT_FILETIME, 1);
+				curl_easy_setopt(s_curl_, CURLOPT_XFERINFOFUNCTION, xferinfo);
+				curl_easy_setopt(s_curl_, CURLOPT_XFERINFODATA, th);
+				curl_easy_setopt(s_curl_, CURLOPT_NOPROGRESS, 0L);
+
+				wxString expath = wxStandardPaths::Get().GetExecutablePath();
+				expath = expath.BeforeLast(GETSLASH(), NULL);
+#ifdef _WIN32
+				wxString dft = expath + "\\vvd_cache";
+				wxString dft2 = wxStandardPaths::Get().GetUserDataDir() + "\\vvd_cache";
+				if (!wxDirExists(dft) && wxDirExists(dft2))
+					dft = dft2;
+				else if (!wxDirExists(dft))
+					wxMkdir(dft);
+				dft += L"\\";
+#else
+				wxString dft = expath + "/../Resources/vvd_cache";
+				if (!wxDirExists(dft))
+					wxMkdir(dft);
+				dft += L"/";
+#endif
+				wstring randname;
+				int len = 16;
+				char s[17];
+				wxString test;
+				do {
+					const char alphanum[] =
+						"0123456789"
+						"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+						"abcdefghijklmnopqrstuvwxyz";
+
+					for (int i = 0; i < len; ++i) {
+						s[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
+					}
+					s[len] = 0;
+					test = dft;
+					test += s;
+				} while (wxFileExists(test));
+				dft += s;
+
+				wstring cfname = dft.ToStdWstring();
+				ofstream ofs(ws2s(cfname), ios::binary);
+				if (!ofs) return false;
+				curl_easy_setopt(s_curl_, CURLOPT_WRITEDATA, &ofs);
+				ret = curl_easy_perform(s_curl_);
+				bool succeeded = false;
+				if (ret == CURLE_OK)
+					succeeded = true;
+
+				ofs.close();
+
+				if (succeeded)
+				{
+					finfo->cached = true;
+					finfo->cache_filename = cfname;
+					cache_table_[finfo->filename] = cfname;
+				}
+				else
+				{
+					if (wxFileExists(cfname)) wxRemoveFile(cfname);
+					return false;
+				}
+*/			}
+		}
+
+		ifstream ifs;
+		wstring fn = finfo->cached ? finfo->cache_filename : finfo->filename;
+		ifs.open(ws2s(fn), ios::binary);
+		if (!ifs) return false;
+		size_t zsize = finfo->datasize;
+		if (zsize <= 0) zsize = (size_t)ifs.seekg(0, std::ios::end).tellg();
+		char *zdata = new char[zsize];
+		ifs.seekg(finfo->offset, ios_base::beg);
+		ifs.read((char*)zdata, zsize);
+		if (ifs) ifs.close();
+		data = zdata;
+		readsize = zsize;
 
 		return true;
 	}

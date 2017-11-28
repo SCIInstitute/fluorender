@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #define _VRENDERVIEW_H_
 
 #include "DataManager.h"
+#include "VolumeLoader.h"
 #include "utility.h"
 #include "VolumeSelector.h"
 #include "TextRenderer.h"
@@ -150,6 +151,7 @@ public:
 	MeshGroup* AddOrGetMGroup();
 	//remove
 	void RemoveVolumeData(wxString &name);
+	void ReplaceVolumeData(wxString &name, VolumeData *dst);
 	void RemoveMeshData(wxString &name);
 	void RemoveAnnotations(wxString &name);
 	void RemoveGroup(wxString &name);
@@ -893,6 +895,9 @@ private:
 
 	//nodraw count
 	int m_nodraw_count;
+
+	VolumeLoader m_loader;
+	bool m_load_in_main_thread;
 
 private:
 #ifdef _WIN32

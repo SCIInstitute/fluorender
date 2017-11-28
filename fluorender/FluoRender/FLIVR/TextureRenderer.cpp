@@ -82,6 +82,7 @@ namespace FLIVR
 #ifdef _DARWIN
     CGLContextObj TextureRenderer::gl_context_ = 0;
 #endif
+	bool TextureRenderer::clear_pool_ = false;
 
 	TextureRenderer::TextureRenderer(Texture* tex)
 		:
@@ -104,8 +105,7 @@ namespace FLIVR
 		tex_2d_weight1_(0),
 		tex_2d_weight2_(0),
 		tex_2d_dmap_(0),
-		blend_num_bits_(32),
-		clear_pool_(false)
+		blend_num_bits_(32)
 	{
 		if (!ShaderProgram::init())
 			return;
@@ -140,8 +140,7 @@ namespace FLIVR
 		tex_2d_weight1_(0),
 		tex_2d_weight2_(0),
 		tex_2d_dmap_(0),
-		blend_num_bits_(copy.blend_num_bits_),
-		clear_pool_(copy.clear_pool_)
+		blend_num_bits_(copy.blend_num_bits_)
 	{
 		if (!ShaderProgram::init())
 			return;

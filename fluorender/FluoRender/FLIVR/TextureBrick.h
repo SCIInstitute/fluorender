@@ -33,10 +33,11 @@
 #include "Ray.h"
 #include "BBox.h"
 #include "Plane.h"
-
+#include <wx/thread.h>
 #include <vector>
 #include <nrrd.h>
 #include <stdint.h>
+#include <map>
 
 namespace FLIVR {
 
@@ -182,6 +183,7 @@ namespace FLIVR {
 		
 		//set d
 		void set_d(double d) { d_ = d; }
+		double get_d() { return d_; }
 		//sorting function
 		static bool sort_asc(const TextureBrick* b1, const TextureBrick* b2)
 		{ return b1->d_ > b2->d_; }
@@ -209,9 +211,18 @@ namespace FLIVR {
 		void freeBrkData();
 		bool read_brick(char* data, size_t size, const FileLocInfo* finfo);
 		bool isLoaded() { return brkdata_ ? true : false; };
+		bool isLoading() { return loading_; }
+		void set_loading_state(bool val) { loading_ = val; }
+		void set_id_in_loadedbrks(int id) { id_in_loadedbrks = id; };
 		int get_id_in_loadedbrks() { return id_in_loadedbrks; }
 		int getID() { return findex_; }
-		void set_id_in_loadedbrks(int id) { id_in_loadedbrks = id; };
+
+		void set_brkdata(void *brkdata) { brkdata_ = brkdata; }
+		const void *getBrickData() { return brkdata_; }
+		static bool read_brick_without_decomp(char* &data, size_t &readsize, FileLocInfo* finfo, wxThread *th = NULL);
+
+		void set_disp(bool disp) { disp_ = disp; }
+		bool get_disp() { return disp_; }
 
 	private:
 		void compute_edge_rays(BBox &bbox);
@@ -263,8 +274,11 @@ namespace FLIVR {
 		long long offset_;
 		long long fsize_;
 		void *brkdata_;
+		bool loading_;
 		int id_in_loadedbrks;
+		bool disp_;
 
+		static std::map<std::wstring, std::wstring> cache_table_;
 	};
 
 	inline double TextureBrick::get_data(unsigned int i, unsigned int j, unsigned int k)

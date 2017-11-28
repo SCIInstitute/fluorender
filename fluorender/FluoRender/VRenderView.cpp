@@ -396,6 +396,9 @@ VRenderGLView::~VRenderGLView()
 	if (m_hTab)
 		gpWTClose(m_hTab);
 #endif
+
+	m_loader.StopAll();
+
 	int i;
 	//delete groups
 	for (i=0; i<(int)m_layer_list.size(); i++)
@@ -545,6 +548,9 @@ void VRenderGLView::Init()
 
 void VRenderGLView::Clear()
 {
+	m_loader.RemoveAllLoadedBrick();
+	TextureRenderer::clear_tex_pool();
+
 	//delete groups
 	for (int i=0; i<(int)m_layer_list.size(); i++)
 	{
@@ -1588,6 +1594,8 @@ void VRenderGLView::RandomizeColor()
 
 void VRenderGLView::ClearVolList()
 {
+	m_loader.RemoveAllLoadedBrick();
+	TextureRenderer::clear_tex_pool();
 	m_vd_pop_list.clear();
 }
 
@@ -6940,6 +6948,80 @@ void VRenderGLView::AddAnnotations(Annotations* ann)
 	m_layer_list.push_back(ann);
 }
 
+void VRenderGLView::ReplaceVolumeData(wxString &name, VolumeData *dst)
+{
+	int i, j;
+
+	bool found = false;
+	DataGroup* group = 0;
+
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (!vr_frame) return;
+	DataManager *dm = vr_frame->GetDataManager();
+	if (!dm) return;
+
+	for (i = 0; i<(int)m_layer_list.size(); i++)
+	{
+		if (!m_layer_list[i])
+			continue;
+		switch (m_layer_list[i]->IsA())
+		{
+		case 2://volume data
+		{
+			VolumeData* vd = (VolumeData*)m_layer_list[i];
+			if (vd && vd->GetName() == name)
+			{
+				if (m_cur_vol == vd) m_cur_vol = dst;
+				m_loader.RemoveBrickVD(vd);
+				vd->GetVR()->clear_tex_current();
+				m_layer_list[i] = dst;
+				m_vd_pop_dirty = true;
+				found = true;
+				dm->RemoveVolumeData(name);
+				break;
+			}
+		}
+		break;
+		case 5://group
+		{
+			DataGroup* tmpgroup = (DataGroup*)m_layer_list[i];
+			for (j = 0; j<tmpgroup->GetVolumeNum(); j++)
+			{
+				VolumeData* vd = tmpgroup->GetVolumeData(j);
+				if (vd && vd->GetName() == name)
+				{
+					if (m_cur_vol == vd) m_cur_vol = dst;
+					m_loader.RemoveBrickVD(vd);
+					vd->GetVR()->clear_tex_current();
+					tmpgroup->ReplaceVolumeData(j, dst);
+					m_vd_pop_dirty = true;
+					found = true;
+					group = tmpgroup;
+					dm->RemoveVolumeData(name);
+					break;
+				}
+			}
+		}
+		break;
+		}
+	}
+
+	if (found)
+	{
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame)
+		{
+			AdjustView* adjust_view = vr_frame->GetAdjustView();
+			if (adjust_view)
+			{
+				adjust_view->SetVolumeData(dst);
+				if (!group) adjust_view->SetGroupLink(group);
+				adjust_view->UpdateSync();
+			}
+		}
+	}
+}
+
 void VRenderGLView::RemoveVolumeData(wxString &name)
 {
 	int i, j;
@@ -9783,7 +9865,7 @@ void VRenderGLView::StartLoopUpdate()
 		int total_num = 0;
 		int num_chan;
 		//reset drawn status for all bricks
-		unsigned int i, j;
+		int i, j, k;
 		for (i=0; i<m_vd_pop_list.size(); i++)
 		{
 			VolumeData* vd = m_vd_pop_list[i];
@@ -9832,6 +9914,337 @@ void VRenderGLView::StartLoopUpdate()
 				if (vd->GetVR())
 					vd->GetVR()->set_done_loop(false);
 			}
+		}
+
+		vector<VolumeLoaderData> queues;
+		if (m_vol_method == VOL_METHOD_MULTI)
+		{
+			vector<VolumeData*> list;
+			for (i = 0; i<m_vd_pop_list.size(); i++)
+			{
+				VolumeData* vd = m_vd_pop_list[i];
+				if (!vd || !vd->GetDisp() || !vd->isBrxml())
+					continue;
+				Texture* tex = vd->GetTexture();
+				if (!tex)
+					continue;
+				vector<TextureBrick*> *bricks = tex->get_bricks();
+				if (!bricks || bricks->size() == 0)
+					continue;
+				list.push_back(vd);
+			}
+
+			vector<VolumeLoaderData> tmp_shade;
+			vector<VolumeLoaderData> tmp_shadow;
+			for (i = 0; i < list.size(); i++)
+			{
+				VolumeData* vd = list[i];
+				Texture* tex = vd->GetTexture();
+				Ray view_ray = vd->GetVR()->compute_view();
+				vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
+				int mode = vd->GetMode() == 1 ? 1 : 0;
+				bool shade = (mode == 1 && vd->GetShading());
+				bool shadow = vd->GetShadow();
+				for (j = 0; j < bricks->size(); j++)
+				{
+					VolumeLoaderData d;
+					TextureBrick* b = (*bricks)[j];
+					if (b->get_disp())
+					{
+						d.brick = b;
+						d.finfo = tex->GetFileName(b->getID());
+						d.vd = vd;
+						if (!b->drawn(mode))
+						{
+							d.mode = mode;
+							queues.push_back(d);
+						}
+						if (shade && !b->drawn(2))
+						{
+							d.mode = 2;
+							tmp_shade.push_back(d);
+						}
+						if (shadow && !b->drawn(3))
+						{
+							d.mode = 3;
+							tmp_shadow.push_back(d);
+						}
+					}
+				}
+			}
+			if (TextureRenderer::get_update_order() == 1)
+				std::sort(queues.begin(), queues.end(), VolumeLoader::sort_data_dsc);
+			else if (TextureRenderer::get_update_order() == 0)
+				std::sort(queues.begin(), queues.end(), VolumeLoader::sort_data_asc);
+
+			if (!tmp_shade.empty())
+			{
+				if (TextureRenderer::get_update_order() == 1)
+					std::sort(tmp_shade.begin(), tmp_shade.end(), VolumeLoader::sort_data_dsc);
+				else if (TextureRenderer::get_update_order() == 0)
+					std::sort(tmp_shade.begin(), tmp_shade.end(), VolumeLoader::sort_data_asc);
+				queues.insert(queues.end(), tmp_shade.begin(), tmp_shade.end());
+			}
+			if (!tmp_shadow.empty())
+			{
+				if (TextureRenderer::get_update_order() == 1)
+				{
+					int order = TextureRenderer::get_update_order();
+					TextureRenderer::set_update_order(0);
+					for (i = 0; i < list.size(); i++)
+					{
+						Ray view_ray = list[i]->GetVR()->compute_view();
+						list[i]->GetTexture()->set_sort_bricks();
+						list[i]->GetTexture()->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
+						list[i]->GetTexture()->set_sort_bricks();
+					}
+					TextureRenderer::set_update_order(order);
+					std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
+				}
+				else if (TextureRenderer::get_update_order() == 0)
+					std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
+				queues.insert(queues.end(), tmp_shadow.begin(), tmp_shadow.end());
+			}
+		}
+		else if (m_layer_list.size() > 0)
+		{
+			for (i = (int)m_layer_list.size() - 1; i >= 0; i--)
+			{
+				if (!m_layer_list[i])
+					continue;
+				switch (m_layer_list[i]->IsA())
+				{
+				case 2://volume data (this won't happen now)
+				{
+					VolumeData* vd = (VolumeData*)m_layer_list[i];
+					vector<VolumeLoaderData> tmp_shade;
+					vector<VolumeLoaderData> tmp_shadow;
+					if (vd && vd->GetDisp() && vd->isBrxml())
+					{
+						Texture* tex = vd->GetTexture();
+						if (!tex)
+							continue;
+						Ray view_ray = vd->GetVR()->compute_view();
+						vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
+						if (!bricks || bricks->size() == 0)
+							continue;
+						int mode = vd->GetMode() == 1 ? 1 : 0;
+						bool shade = (mode == 1 && vd->GetShading());
+						bool shadow = vd->GetShadow();
+						for (j = 0; j<bricks->size(); j++)
+						{
+							VolumeLoaderData d;
+							TextureBrick* b = (*bricks)[j];
+							if (b->get_disp())
+							{
+								d.brick = b;
+								d.finfo = tex->GetFileName(b->getID());
+								d.vd = vd;
+								if (!b->drawn(mode))
+								{
+									d.mode = mode;
+									queues.push_back(d);
+								}
+								if (shade && !b->drawn(2))
+								{
+									d.mode = 2;
+									tmp_shade.push_back(d);
+								}
+								if (shadow && !b->drawn(3))
+								{
+									d.mode = 3;
+									tmp_shadow.push_back(d);
+								}
+							}
+						}
+						if (!tmp_shade.empty()) queues.insert(queues.end(), tmp_shade.begin(), tmp_shade.end());
+						if (!tmp_shadow.empty())
+						{
+							if (TextureRenderer::get_update_order() == 1)
+							{
+								int order = TextureRenderer::get_update_order();
+								TextureRenderer::set_update_order(0);
+								Ray view_ray = vd->GetVR()->compute_view();
+								tex->set_sort_bricks();
+								tex->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
+								tex->set_sort_bricks();
+								TextureRenderer::set_update_order(order);
+								std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
+							}
+							queues.insert(queues.end(), tmp_shadow.begin(), tmp_shadow.end());
+						}
+					}
+				}
+				break;
+				case 5://group
+				{
+					vector<VolumeData*> list;
+					DataGroup* group = (DataGroup*)m_layer_list[i];
+					if (!group->GetDisp())
+						continue;
+					for (j = group->GetVolumeNum() - 1; j >= 0; j--)
+					{
+						VolumeData* vd = group->GetVolumeData(j);
+						if (!vd || !vd->GetDisp() || !vd->isBrxml())
+							continue;
+						Texture* tex = vd->GetTexture();
+						if (!tex)
+							continue;
+						Ray view_ray = vd->GetVR()->compute_view();
+						vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
+						if (!bricks || bricks->size() == 0)
+							continue;
+						list.push_back(vd);
+					}
+					if (list.empty())
+						continue;
+
+					vector<VolumeLoaderData> tmp_q;
+					vector<VolumeLoaderData> tmp_shade;
+					vector<VolumeLoaderData> tmp_shadow;
+					if (group->GetBlendMode() == VOL_METHOD_MULTI)
+					{
+						for (k = 0; k < list.size(); k++)
+						{
+							VolumeData* vd = list[k];
+							Texture* tex = vd->GetTexture();
+							Ray view_ray = vd->GetVR()->compute_view();
+							vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
+							int mode = vd->GetMode() == 1 ? 1 : 0;
+							bool shade = (mode == 1 && vd->GetShading());
+							bool shadow = vd->GetShadow();
+							for (j = 0; j < bricks->size(); j++)
+							{
+								VolumeLoaderData d;
+								TextureBrick* b = (*bricks)[j];
+								if (b->get_disp())
+								{
+									d.brick = b;
+									d.finfo = tex->GetFileName(b->getID());
+									d.vd = vd;
+									if (!b->drawn(mode))
+									{
+										d.mode = mode;
+										tmp_q.push_back(d);
+									}
+									if (shade && !b->drawn(2))
+									{
+										d.mode = 2;
+										tmp_shade.push_back(d);
+									}
+									if (shadow && !b->drawn(3))
+									{
+										d.mode = 3;
+										tmp_shadow.push_back(d);
+									}
+								}
+							}
+						}
+						if (!tmp_q.empty())
+						{
+							if (TextureRenderer::get_update_order() == 1)
+								std::sort(tmp_q.begin(), tmp_q.end(), VolumeLoader::sort_data_dsc);
+							else if (TextureRenderer::get_update_order() == 0)
+								std::sort(tmp_q.begin(), tmp_q.end(), VolumeLoader::sort_data_asc);
+							queues.insert(queues.end(), tmp_q.begin(), tmp_q.end());
+						}
+						if (!tmp_shade.empty())
+						{
+							if (TextureRenderer::get_update_order() == 1)
+								std::sort(tmp_shade.begin(), tmp_shade.end(), VolumeLoader::sort_data_dsc);
+							else if (TextureRenderer::get_update_order() == 0)
+								std::sort(tmp_shade.begin(), tmp_shade.end(), VolumeLoader::sort_data_asc);
+							queues.insert(queues.end(), tmp_shade.begin(), tmp_shade.end());
+						}
+						if (!tmp_shadow.empty())
+						{
+							if (TextureRenderer::get_update_order() == 1)
+							{
+								int order = TextureRenderer::get_update_order();
+								TextureRenderer::set_update_order(0);
+								for (k = 0; k < list.size(); k++)
+								{
+									Ray view_ray = list[k]->GetVR()->compute_view();
+									list[i]->GetTexture()->set_sort_bricks();
+									list[i]->GetTexture()->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
+									list[i]->GetTexture()->set_sort_bricks();
+								}
+								TextureRenderer::set_update_order(order);
+								std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
+							}
+							else if (TextureRenderer::get_update_order() == 0)
+								std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
+							queues.insert(queues.end(), tmp_shadow.begin(), tmp_shadow.end());
+						}
+					}
+					else
+					{
+						for (j = 0; j < list.size(); j++)
+						{
+							VolumeData* vd = list[j];
+							Texture* tex = vd->GetTexture();
+							Ray view_ray = vd->GetVR()->compute_view();
+							vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
+							int mode = vd->GetMode() == 1 ? 1 : 0;
+							bool shade = (mode == 1 && vd->GetShading());
+							bool shadow = vd->GetShadow();
+							for (k = 0; k<bricks->size(); k++)
+							{
+								VolumeLoaderData d;
+								TextureBrick* b = (*bricks)[k];
+								if (b->get_disp())
+								{
+									d.brick = b;
+									d.finfo = tex->GetFileName(b->getID());
+									d.vd = vd;
+									if (!b->drawn(mode))
+									{
+										d.mode = mode;
+										queues.push_back(d);
+									}
+									if (shade && !b->drawn(2))
+									{
+										d.mode = 2;
+										tmp_shade.push_back(d);
+									}
+									if (shadow && !b->drawn(3))
+									{
+										d.mode = 3;
+										tmp_shadow.push_back(d);
+									}
+								}
+							}
+							if (!tmp_shade.empty()) queues.insert(queues.end(), tmp_shade.begin(), tmp_shade.end());
+							if (!tmp_shadow.empty())
+							{
+								if (TextureRenderer::get_update_order() == 1)
+								{
+									int order = TextureRenderer::get_update_order();
+									TextureRenderer::set_update_order(0);
+									Ray view_ray = vd->GetVR()->compute_view();
+									tex->set_sort_bricks();
+									tex->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
+									tex->set_sort_bricks();
+									TextureRenderer::set_update_order(order);
+									std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
+								}
+								queues.insert(queues.end(), tmp_shadow.begin(), tmp_shadow.end());
+							}
+						}
+					}
+
+				}
+				break;
+				}
+			}
+		}
+
+		if (queues.size() > 0 && !m_interactive)
+		{
+			m_loader.Set(queues);
+			m_loader.SetMemoryLimitByte((long long)TextureRenderer::mainmem_buf_size_ * 1024LL * 1024LL);
+			TextureRenderer::set_load_on_main_thread(false);
+			m_loader.Run();
 		}
 
 		if (total_num > 0)

@@ -160,7 +160,7 @@ namespace FLIVR
 		void set_blend_num_bits(int b);
 
 		//clear the opengl textures from the texture pool
-		void clear_tex_pool();
+		static void clear_tex_pool();
 		void clear_tex_current();
 		void clear_tex_mask();
 
@@ -249,6 +249,9 @@ namespace FLIVR
 		//invalidate tex
 		static void set_invalidate_tex(bool val) { invalidate_tex_ = val; }
 		static bool get_invalidate_tex() { return invalidate_tex_; }
+		//load on main thread
+		static void set_load_on_main_thread(bool val) { load_on_main_thread_ = val; }
+		static bool get_load_on_main_thread() { return load_on_main_thread_; }
 
 		//kernel for calculation
 		static VolKernelFactory vol_kernel_factory_;
@@ -298,7 +301,7 @@ namespace FLIVR
 		GLuint tex_2d_dmap_;
 
 		int blend_num_bits_;
-		bool clear_pool_;
+		static bool clear_pool_;
 
 #ifdef _DARWIN
         static CGLContextObj gl_context_;
