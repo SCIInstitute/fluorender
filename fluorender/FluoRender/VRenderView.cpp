@@ -322,7 +322,7 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	//pin rotation center
 	m_pin_rot_center(false),
 	m_rot_center_dirty(false),
-	m_res_mode(2)
+	m_res_mode(1)
 {
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;
@@ -501,6 +501,18 @@ void VRenderGLView::ResizeFramebuffers()
 
 void VRenderGLView::OnResize(wxSizeEvent& event)
 {
+	int i;
+	for (i = 0; i<(int)m_vd_pop_list.size(); i++)
+	{
+		VolumeData* vd = m_vd_pop_list[i];
+		if (vd)
+		{
+			VolumeRenderer* vr = vd->GetVR();
+			if (vr)
+				vr->resize();
+		}
+	}
+
 	wxSize size = GetGLSize();
 	if (m_size == size)
 		return;

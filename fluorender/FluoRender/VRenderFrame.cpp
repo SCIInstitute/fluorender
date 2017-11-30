@@ -1224,6 +1224,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
 			UpdateTree(vd_sel->GetName());
 		else
 			UpdateTree();
+		vrv->RefreshGL();
 
 		vrv->InitView(INIT_BOUNDS|INIT_CENTER);
 		vrv->UpdateScaleFactor(false);
@@ -1646,6 +1647,9 @@ void VRenderFrame::UpdateTreeColors()
 
 void VRenderFrame::UpdateTree(wxString name)
 {
+	if (!m_tree_panel)
+		return;
+
 	m_tree_panel->DeleteAll();
 	m_tree_panel->ClearIcons();
 
@@ -1657,6 +1661,8 @@ void VRenderFrame::UpdateTree(wxString name)
 	m_tree_panel->AppendIcon();
 	m_tree_panel->Expand(root_item);
 	m_tree_panel->ChangeIconColor(0, wxColor(255, 255, 255));
+
+	wxTreeItemId sel_item;
 
 	for (int i=0 ; i<(int)m_vrv_list.size() ; i++)
 	{
@@ -1698,7 +1704,7 @@ void VRenderFrame::UpdateTree(wxString name)
 					m_tree_panel->SetVolItemImage(item, vd->GetDisp()?2*ii+1:2*ii);
 					if (name == vd->GetName())
 					{
-						m_tree_panel->SelectItem(item);
+						sel_item = item;
 						vrv->SetVolumeA(vd);
 						GetBrushToolDlg()->GetSettings(vrv);
 						GetMeasureDlg()->GetSettings(vrv);
@@ -1727,7 +1733,7 @@ void VRenderFrame::UpdateTree(wxString name)
 					wxTreeItemId item = m_tree_panel->AddMeshItem(vrv_item, md->GetName());
 					m_tree_panel->SetMeshItemImage(item, md->GetDisp()?2*ii+1:2*ii);
 					if (name == md->GetName())
-						m_tree_panel->SelectItem(item);
+						sel_item = item;
 				}
 				break;
 			case 4://annotations
@@ -1743,7 +1749,7 @@ void VRenderFrame::UpdateTree(wxString name)
 					wxTreeItemId item = m_tree_panel->AddAnnotationItem(vrv_item, ann->GetName());
 					m_tree_panel->SetAnnotationItemImage(item, ann->GetDisp()?2*ii+1:2*ii);
 					if (name == ann->GetName())
-						m_tree_panel->SelectItem(item);
+						sel_item = item;
 				}
 				break;
 			case 5://group
@@ -1773,7 +1779,7 @@ void VRenderFrame::UpdateTree(wxString name)
 						m_tree_panel->SetVolItemImage(item, vd->GetDisp()?2*ii+1:2*ii);
 						if (name == vd->GetName())
 						{
-							m_tree_panel->SelectItem(item);
+							sel_item = item;
 							vrv->SetVolumeA(vd);
 							GetBrushToolDlg()->GetSettings(vrv);
 							GetMeasureDlg()->GetSettings(vrv);
@@ -1783,7 +1789,7 @@ void VRenderFrame::UpdateTree(wxString name)
 						}
 					}
 					if (name == group->GetName())
-						m_tree_panel->SelectItem(group_item);
+						sel_item = group_item;
 				}
 				break;
 			case 6://mesh group
@@ -1814,16 +1820,18 @@ void VRenderFrame::UpdateTree(wxString name)
 						wxTreeItemId item = m_tree_panel->AddMeshItem(group_item, md->GetName());
 						m_tree_panel->SetMeshItemImage(item, md->GetDisp()?2*ii+1:2*ii);
 						if (name == md->GetName())
-							m_tree_panel->SelectItem(item);
+							sel_item = item;
 					}
 					if (name == group->GetName())
-						m_tree_panel->SelectItem(group_item);
+						sel_item = group_item;
 				}
 				break;
 			}
 		}
 	}
 
+	if (sel_item.IsOk())
+		m_tree_panel->SelectItem(sel_item);
 	m_tree_panel->ExpandAll();
 }
 
