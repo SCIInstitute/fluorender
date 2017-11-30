@@ -1960,6 +1960,65 @@ void VolumeData::GetFileSpacings(double &spcx, double &spcy, double &spcz)
 	spcx = m_spcx; spcy = m_spcy; spcz = m_spcz;
 }
 
+//brkxml
+void VolumeData::SetBaseSpacings(double spcx, double spcy, double spcz)
+{
+	if (GetTexture())
+	{
+		GetTexture()->set_base_spacings(spcx, spcy, spcz);
+		m_bounds.reset();
+		GetTexture()->get_bounds(m_bounds);
+	}
+}
+
+void VolumeData::GetBaseSpacings(double &spcx, double &spcy, double & spcz)
+{
+	if (GetTexture())
+		GetTexture()->get_base_spacings(spcx, spcy, spcz);
+}
+
+void VolumeData::SetSpacingScales(double s_spcx, double s_spcy, double s_spcz)
+{
+	if (GetTexture())
+	{
+		GetTexture()->set_spacing_scales(s_spcx, s_spcy, s_spcz);
+		m_bounds.reset();
+		GetTexture()->get_bounds(m_bounds);
+	}
+}
+
+void VolumeData::GetSpacingScales(double &s_spcx, double &s_spcy, double &s_spcz)
+{
+	if (GetTexture())
+		GetTexture()->get_spacing_scales(s_spcx, s_spcy, s_spcz);
+}
+
+void VolumeData::SetLevel(int lv)
+{
+	if (GetTexture() && isBrxml())
+	{
+		GetTexture()->setLevel(lv);
+		m_bounds.reset();
+		GetTexture()->get_bounds(m_bounds);
+	}
+}
+
+int VolumeData::GetLevel()
+{
+	if (GetTexture() && isBrxml())
+		return GetTexture()->GetCurLevel();
+	else
+		return -1;
+}
+
+int VolumeData::GetLevelNum()
+{
+	if (GetTexture() && isBrxml())
+		return GetTexture()->GetLevelNum();
+	else
+		return -1;
+}
+
 //bits
 int VolumeData::GetBits()
 {
@@ -4552,9 +4611,14 @@ int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_
 				if (label)
 					vd->LoadLabel(label);
 			}
-			vd->SetSpacings(reader->GetXSpc(),
-				reader->GetYSpc(),
-				reader->GetZSpc());
+			if (type == LOAD_TYPE_BRKXML) ((BRKXMLReader*)reader)->SetLevel(0);
+			//for 2D data
+			int xres, yres, zres;
+			vd->GetResolution(xres, yres, zres);
+			double zspcfac = (double)Max(xres, yres) / 256.0;
+			if (zspcfac < 1.0) zspcfac = 1.0;
+			if (zres == 1) vd->SetBaseSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetXSpc()*zspcfac);
+			else vd->SetBaseSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetZSpc());
 			vd->SetSpcFromFile(valid_spc);
 			vd->SetScalarScale(reader->GetScalarScale());
 			vd->SetMaxValue(reader->GetMaxValue());
@@ -4782,8 +4846,8 @@ void DataManager::AddVolumeData(VolumeData* vd)
 		if (m_vd_list.size() > 0)
 		{
 			double spcx, spcy, spcz;
-			m_vd_list[0]->GetSpacings(spcx, spcy, spcz);
-			vd->SetSpacings(spcx, spcy, spcz);
+			m_vd_list[0]->GetBaseSpacings(spcx, spcy, spcz);
+			vd->SetBaseSpacings(spcx, spcy, spcz);
 			vd->SetSpcFromFile(true);
 		}
 	}

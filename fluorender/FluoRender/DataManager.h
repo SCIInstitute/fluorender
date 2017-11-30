@@ -346,6 +346,15 @@ public:
 	void SetSpcFromFile(bool val=true) {m_spc_from_file = val;}
 	bool GetSpcFromFile() {return m_spc_from_file;}
 
+	//brkxml
+	void SetBaseSpacings(double spcx, double spcy, double spcz);
+	void GetBaseSpacings(double &spcx, double &spcy, double & spcz);
+	void SetSpacingScales(double s_spcx, double s_spcy, double s_spcz);
+	void GetSpacingScales(double &s_spcx, double &s_spcy, double &s_spcz);
+	void SetLevel(int lv);
+	int GetLevel();
+	int GetLevelNum();
+
 	//bits
 	int GetBits();
 

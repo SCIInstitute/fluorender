@@ -321,7 +321,8 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	m_nodraw_count(0),
 	//pin rotation center
 	m_pin_rot_center(false),
-	m_rot_center_dirty(false)
+	m_rot_center_dirty(false),
+	m_res_mode(2)
 {
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;
@@ -5164,25 +5165,46 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 
 			if (cur_frame != frame)
 			{
-				double spcx, spcy, spcz;
-				vd->GetSpacings(spcx, spcy, spcz);
+				Texture *tex = vd->GetTexture();
+				if (tex && tex->isBrxml())
+				{
+					BRKXMLReader *br = (BRKXMLReader *)reader;
+					br->SetCurTime(frame);
+					int curlv = tex->GetCurLevel();
+					for (int j = 0; j < br->GetLevelNum(); j++)
+					{
+						tex->setLevel(j);
+						if (vd->GetVR()) vd->GetVR()->clear_brick_buf();
+					}
+					tex->setLevel(curlv);
+					tex->set_FrameAndChannel(frame, vd->GetCurChannel());
+					vd->SetCurTime(reader->GetCurTime());
+					//update rulers
+					if (vframe && vframe->GetMeasureDlg())
+						vframe->GetMeasureDlg()->UpdateList();
+				}
+				else
+				{
+					double spcx, spcy, spcz;
+					vd->GetSpacings(spcx, spcy, spcz);
 
-				Nrrd* data = reader->Convert(frame, vd->GetCurChannel(), false);
-				if (!vd->Replace(data, false))
-					continue;
+					Nrrd* data = reader->Convert(frame, vd->GetCurChannel(), false);
+					if (!vd->Replace(data, false))
+						continue;
 
-				vd->SetCurTime(reader->GetCurTime());
-				vd->SetSpacings(spcx, spcy, spcz);
+					vd->SetCurTime(reader->GetCurTime());
+					vd->SetSpacings(spcx, spcy, spcz);
 
-				//update rulers
-				if (vframe && vframe->GetMeasureDlg())
-					vframe->GetMeasureDlg()->UpdateList();
+					//update rulers
+					if (vframe && vframe->GetMeasureDlg())
+						vframe->GetMeasureDlg()->UpdateList();
 
-				//run script
-				if (run_script)
-					Run4DScript(m_script_file, vd);
+					//run script
+					if (run_script)
+						Run4DScript(m_script_file, vd);
 
-				clear_pool = true;
+					clear_pool = true;
+				}
 			}
 
 			if (clear_pool && vd->GetVR())
@@ -5256,61 +5278,96 @@ void VRenderGLView::Set3DBatFrame(int offset)
 		VolumeData* vd = m_vd_pop_list[i];
 		if (vd && vd->GetReader())
 		{
+			Texture *tex = vd->GetTexture();
 			BaseReader* reader = vd->GetReader();
-			//if (reader->GetOffset() == offset) return;
-			bool found = false;
-			for (j=0; j<(int)reader_list.size(); j++)
+			if (tex && tex->isBrxml())
 			{
-				if (reader == reader_list[j])
+				BRKXMLReader *br = (BRKXMLReader *)reader;
+				int curlv = tex->GetCurLevel();
+				for (int j = 0; j < br->GetLevelNum(); j++)
 				{
-					found = true;
-					break;
+					tex->setLevel(j);
+					if (vd->GetVR()) vd->GetVR()->clear_brick_buf();
 				}
-			}
-			if (!found)
-			{
-				reader->LoadOffset(offset);
-				reader_list.push_back(reader);
-			}
+				tex->setLevel(curlv);
+				tex->set_FrameAndChannel(0, vd->GetCurChannel());
+				vd->SetCurTime(reader->GetCurTime());
+				wxString data_name = wxString(reader->GetDataName());
+				if (i > 0)
+					m_bat_folder += "_";
+				m_bat_folder += data_name;
 
-			double spcx, spcy, spcz;
-			vd->GetSpacings(spcx, spcy, spcz);
+				int chan_num = 0;
+				if (data_name.Find("_1ch") != -1)
+					chan_num = 1;
+				else if (data_name.Find("_2ch") != -1)
+					chan_num = 2;
+				if (chan_num>0 && vd->GetCurChannel() >= chan_num)
+					vd->SetDisp(false);
+				else
+					vd->SetDisp(true);
 
-			Nrrd* data = reader->Convert(0, vd->GetCurChannel(), true);
-			if (vd->Replace(data, true))
-				vd->SetDisp(true);
+				if (reader->GetChanNum() > 1)
+					data_name += wxString::Format("_%d", vd->GetCurChannel() + 1);
+				vd->SetName(data_name);
+			}
 			else
 			{
-				vd->SetDisp(false);
-				continue;
+				//if (reader->GetOffset() == offset) return;
+				bool found = false;
+				for (j = 0; j<(int)reader_list.size(); j++)
+				{
+					if (reader == reader_list[j])
+					{
+						found = true;
+						break;
+					}
+				}
+				if (!found)
+				{
+					reader->LoadOffset(offset);
+					reader_list.push_back(reader);
+				}
+
+				double spcx, spcy, spcz;
+				vd->GetSpacings(spcx, spcy, spcz);
+
+				Nrrd* data = reader->Convert(0, vd->GetCurChannel(), true);
+				if (vd->Replace(data, true))
+					vd->SetDisp(true);
+				else
+				{
+					vd->SetDisp(false);
+					continue;
+				}
+
+				wxString data_name = wxString(reader->GetDataName());
+				if (i > 0)
+					m_bat_folder += "_";
+				m_bat_folder += data_name;
+
+				int chan_num = 0;
+				if (data_name.Find("_1ch") != -1)
+					chan_num = 1;
+				else if (data_name.Find("_2ch") != -1)
+					chan_num = 2;
+				if (chan_num>0 && vd->GetCurChannel() >= chan_num)
+					vd->SetDisp(false);
+				else
+					vd->SetDisp(true);
+
+				if (reader->GetChanNum() > 1)
+					data_name += wxString::Format("_%d", vd->GetCurChannel() + 1);
+				vd->SetName(data_name);
+				vd->SetPath(wxString(reader->GetPathName()));
+				vd->SetCurTime(reader->GetCurTime());
+				if (!reader->IsSpcInfoValid())
+					vd->SetSpacings(spcx, spcy, spcz);
+				else
+					vd->SetSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetZSpc());
+				if (vd->GetVR())
+					vd->GetVR()->clear_tex_pool();
 			}
-
-			wxString data_name = wxString(reader->GetDataName());
-			if (i > 0)
-				m_bat_folder += "_";
-			m_bat_folder += data_name;
-
-			int chan_num = 0;
-			if (data_name.Find("_1ch")!=-1)
-				chan_num = 1;
-			else if (data_name.Find("_2ch")!=-1)
-				chan_num = 2;
-			if (chan_num>0 && vd->GetCurChannel()>=chan_num)
-				vd->SetDisp(false);
-			else
-				vd->SetDisp(true);
-
-			if (reader->GetChanNum() > 1)
-				data_name += wxString::Format("_%d", vd->GetCurChannel()+1);
-			vd->SetName(data_name);
-			vd->SetPath(wxString(reader->GetPathName()));
-			vd->SetCurTime(reader->GetCurTime());
-			if (!reader->IsSpcInfoValid())
-				vd->SetSpacings(spcx, spcy, spcz);
-			else
-				vd->SetSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetZSpc());
-			if (vd->GetVR())
-				vd->GetVR()->clear_tex_pool();
 		}
 	}
 
@@ -9871,6 +9928,7 @@ void VRenderGLView::StartLoopUpdate()
 			VolumeData* vd = m_vd_pop_list[i];
 			if (vd)
 			{
+				switchLevel(vd);
 				vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 
 				num_chan = 0;
@@ -12193,6 +12251,103 @@ void VRenderGLView::DrawViewQuad()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }
+
+void VRenderGLView::switchLevel(VolumeData *vd)
+{
+	if (!vd) return;
+
+	int nx, ny;
+	nx = GetSize().x;
+	ny = GetSize().y;
+	/*
+	if(m_min_ppi < 0)m_min_ppi = 60;
+	//wxDisplay disp(wxDisplay::GetFromWindow(m_frame));
+	wxSize disp_ppi = wxGetDisplayPPI();
+	double disp_ppi_x = m_min_ppi;
+	double disp_ppi_y = m_min_ppi;
+	if(disp_ppi.GetX() > 0)disp_ppi_x = disp_ppi.GetX();
+	if(disp_ppi.GetY() > 0)disp_ppi_y = disp_ppi.GetY();
+	*/
+	Texture *vtex = vd->GetTexture();
+	if (vtex && vtex->isBrxml())
+	{
+		int prev_lv = vd->GetLevel();
+		int new_lv = 0;
+
+		if (m_res_mode > 0)
+		{
+			double res_scale = 1.0;
+			switch (m_res_mode)
+			{
+			case 1:
+				res_scale = 1;
+				break;
+			case 2:
+				res_scale = 1.5;
+				break;
+			case 3:
+				res_scale = 2.0;
+				break;
+			case 4:
+				res_scale = 3.0;
+				break;
+			default:
+				res_scale = 1.0;
+			}
+			vector<double> sfs;
+			vector<double> spx, spy, spz;
+			int lvnum = vtex->GetLevelNum();
+			for (int i = 0; i < lvnum; i++)
+			{
+				double aspect = (double)nx / (double)ny;
+
+				double spc_x;
+				double spc_y;
+				double spc_z;
+				vtex->get_spacings(spc_x, spc_y, spc_z, i);
+				spc_x = spc_x<EPS ? 1.0 : spc_x;
+				spc_y = spc_y<EPS ? 1.0 : spc_y;
+
+				spx.push_back(spc_x);
+				spy.push_back(spc_y);
+				spz.push_back(spc_z);
+
+				double sf;
+				if (aspect > 1.0)
+					sf = 2.0*m_radius*res_scale / spc_y / double(ny);
+				else
+					sf = 2.0*m_radius*res_scale / spc_x / double(nx);
+				sfs.push_back(sf);
+			}
+
+			int lv = lvnum - 1;
+			//if (!m_manip)
+			{
+				for (int i = lvnum - 1; i >= 0; i--)
+				{
+					if (m_scale_factor > (m_interactive ? sfs[i] * 16.0 : sfs[i])) lv = i - 1;
+				}
+			}
+			if (lv < 0) lv = 0;
+			//if (m_interactive) lv += 2;
+			if (lv >= lvnum) lv = lvnum - 1;
+			new_lv = lv;
+			//vd->GetVR()->set_scalar_scale();
+		}
+		if (prev_lv != new_lv)
+		{
+			vector<TextureBrick*> *bricks = vtex->get_bricks();
+			if (bricks)
+			{
+				for (int i = 0; i < bricks->size(); i++)
+					(*bricks)[i]->set_disp(false);
+			}
+			vd->SetLevel(new_lv);
+			vtex->set_sort_bricks();
+		}
+	}
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////

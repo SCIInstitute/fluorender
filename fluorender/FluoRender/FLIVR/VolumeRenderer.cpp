@@ -801,6 +801,8 @@ namespace FLIVR
 		shader->setLocalParamMatrix(0, glm::value_ptr(m_proj_mat));
 		shader->setLocalParamMatrix(1, glm::value_ptr(m_mv_mat2));
 		//shader->setLocalParamMatrix(5, glm::value_ptr(m_tex_mat));
+		
+		if (cur_chan_brick_num_ == 0) rearrangeLoadedBrkVec();
 
 		num_slices_ = 0;
 		bool multibricks = bricks->size() > 1;

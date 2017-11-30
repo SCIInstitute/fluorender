@@ -899,6 +899,8 @@ private:
 	VolumeLoader m_loader;
 	bool m_load_in_main_thread;
 
+	int m_res_mode;
+
 private:
 #ifdef _WIN32
 	//wacom tablet
@@ -1037,6 +1039,8 @@ private:
 	//get size, considering enlargement
 	wxSize GetGLSize();
 	void ResizeFramebuffers();
+
+	void switchLevel(VolumeData *vd);
 
 	DECLARE_EVENT_TABLE()
 

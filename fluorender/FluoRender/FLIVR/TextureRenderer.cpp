@@ -159,6 +159,7 @@ namespace FLIVR
 		if (!ShaderProgram::init())
 			return;
 
+		clear_brick_buf();
 		//clear_tex_pool();
 		clear_tex_current();
 		if (glIsFramebuffer(blend_framebuffer_))
@@ -1368,6 +1369,47 @@ namespace FLIVR
 		glActiveTexture(GL_TEXTURE0 + unit);
 		glBindTexture(taget, 0);
 		glActiveTexture(GL_TEXTURE0);
+	}
+
+	void TextureRenderer::rearrangeLoadedBrkVec()
+	{
+		if (loadedbrks.empty()) return;
+		vector<LoadedBrick>::iterator ite = loadedbrks.begin();
+		while (ite != loadedbrks.end())
+		{
+			if (!ite->brk->isLoaded())
+			{
+				ite->brk->set_id_in_loadedbrks(-1);
+				ite = loadedbrks.erase(ite);
+			}
+			else if (ite->swapped)
+			{
+				ite = loadedbrks.erase(ite);
+			}
+			else ite++;
+		}
+		for (int i = 0; i < loadedbrks.size(); i++) loadedbrks[i].brk->set_id_in_loadedbrks(i);
+		del_id = 0;
+	}
+
+	//Texture‚ÖˆÚ“®—\’è
+	void TextureRenderer::clear_brick_buf()
+	{
+		int cur_lv = tex_->GetCurLevel();
+		for (unsigned int lv = 0; lv < tex_->GetLevelNum(); lv++)
+		{
+			tex_->setLevel(lv);
+			vector<TextureBrick *> *bs = tex_->get_bricks();
+			for (unsigned int i = 0; i < bs->size(); i++)
+			{
+				if ((*bs)[i]->isLoaded()) {
+					available_mainmem_buf_size_ += (*bs)[i]->nx() * (*bs)[i]->ny() * (*bs)[i]->nz() * (*bs)[i]->nb(0) / 1.04e6;
+					(*bs)[i]->freeBrkData();
+				}
+			}
+			rearrangeLoadedBrkVec();//tex_‚Åload‚µ‚½‚à‚Ì‚¾‚¯‚ðÁ‚·
+		}
+		tex_->setLevel(cur_lv);
 	}
 
 } // namespace FLIVR

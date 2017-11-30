@@ -401,6 +401,9 @@ namespace FLIVR
 		void bind_2d_weight();
 		//bind 2d depth map for rendering shadows
 		void bind_2d_dmap();
+
+		void rearrangeLoadedBrkVec();
+		void clear_brick_buf();
 	};
 } // end namespace FLIVR
 

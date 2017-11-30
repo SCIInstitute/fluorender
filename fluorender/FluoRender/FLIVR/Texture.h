@@ -145,11 +145,11 @@ namespace FLIVR
 		bool get_sort_bricks() {return sort_bricks_;}
 		// load the bricks independent of the view
 		vector<TextureBrick*>* get_bricks();
-		int get_brick_num() {return int(bricks_.size());}
+		int get_brick_num() {return int((*bricks_).size());}
 		//quota bricks
 		vector<TextureBrick*>* get_quota_bricks();
 
-		inline int nlevels(){ return int(bricks_.size()); }
+		inline int nlevels(){ return int((*bricks_).size()); }
 
 		inline double vmin() const { return vmin_; }
 		inline double vmax() const { return vmax_; }
@@ -159,8 +159,63 @@ namespace FLIVR
 		{vmin_ = vmin; vmax_ = vmax; gmin_ = gmin; gmax_ = gmax;}
 
 		void set_spacings(double x, double y, double z);
-		void get_spacings(double &x, double &y, double &z)
-		{x = spcx_; y = spcy_; z = spcz_;}
+		void get_spacings(double &x, double &y, double &z, int lv = -1)
+		{
+			if (!brkxml_)
+			{
+				x = spcx_;
+				y = spcy_;
+				z = spcz_;
+			}
+			else if (lv < 0 || lv >= pyramid_lv_num_ || pyramid_.empty())
+			{
+				x = spcx_ * s_spcx_;
+				y = spcy_ * s_spcy_;
+				z = spcz_ * s_spcz_;
+			}
+			else if (pyramid_[lv].data)
+			{
+				int offset = 0;
+				if (pyramid_[lv].data->dim > 3) offset = 1;
+				x = pyramid_[lv].data->axis[offset + 0].spacing * s_spcx_;
+				y = pyramid_[lv].data->axis[offset + 1].spacing * s_spcy_;
+				z = pyramid_[lv].data->axis[offset + 2].spacing * s_spcz_;
+			}
+		}
+		void set_base_spacings(double x, double y, double z)
+		{
+			spcx_ = x;
+			spcy_ = y;
+			spcz_ = z;
+			b_spcx_ = x;
+			b_spcy_ = y;
+			b_spcz_ = z;
+			Transform tform;
+			tform.load_identity();
+			Point nmax(nx_*x, ny_*y, nz_*z);
+			tform.pre_scale(Vector(nmax));
+			set_transform(tform);
+		}
+
+		void get_base_spacings(double &x, double &y, double &z)
+		{
+			x = b_spcx_;
+			y = b_spcy_;
+			z = b_spcz_;
+		}
+		void set_spacing_scales(double x, double y, double z)
+		{
+			if (x > 0.0) s_spcx_ = x;
+			if (y > 0.0) s_spcy_ = y;
+			if (z > 0.0) s_spcz_ = z;
+		}
+
+		void get_spacing_scales(double &x, double &y, double &z)
+		{
+			x = s_spcx_;
+			y = s_spcy_;
+			z = s_spcz_;
+		}
 
 		// Creator of the brick owns the nrrd memory.
 		void set_nrrd(Nrrd* data, int index);
@@ -187,7 +242,7 @@ namespace FLIVR
 		inline void set_use_priority(bool value) {use_priority_ = value;}
 		inline bool get_use_priority() {return use_priority_;}
 		inline int get_n_p0()
-		{if (use_priority_) return n_p0_; else return int(bricks_.size());}
+		{if (use_priority_) return n_p0_; else return int((*bricks_).size());}
 
 		//for brkxml file
 		int GetCurLevel() { return pyramid_cur_lv_; }
@@ -199,6 +254,7 @@ namespace FLIVR
 		void set_data_file(vector<FileLocInfo *> *fname, int type);
 		bool isBrxml() { return brkxml_; }
 		FileLocInfo *GetFileName(int id);
+		void set_FrameAndChannel(int fr, int ch);
 
 	protected:
 		void build_bricks(vector<TextureBrick*> &bricks,
@@ -210,7 +266,7 @@ namespace FLIVR
 		//expected brick size, 0: ignored
 		int brick_size_;
 		//! data carved up to texture memory sized chunks.
-		vector<TextureBrick*>						bricks_;
+		vector<TextureBrick*>						*bricks_;
 		//for limited number of bricks during interactions
 		vector<TextureBrick*>						quota_bricks_;
 		//sort texture brick
@@ -277,13 +333,18 @@ namespace FLIVR
 		int pyramid_cur_fr_;
 		int pyramid_cur_ch_;
 		int pyramid_lv_num_;
+
 		int pyramid_copy_lv_;
-		vector<Pyramid_Level> pyramid_;
-		vector<vector<vector<vector<FileLocInfo *>>>> filenames_;
-		vector<FileLocInfo *> *filename_;
 		int filetype_;
 
+		vector<Pyramid_Level> pyramid_;
+		vector<vector<vector<vector<FileLocInfo *>>>> filenames_;
+
+		vector<FileLocInfo *> *filename_;
 		void clearPyramid();
+
+		//used when brkxml_ is not equal to false.
+		vector<TextureBrick*> default_vec_;
 	};
 
 	inline unsigned int Texture::negxid(unsigned int id)
@@ -374,10 +435,10 @@ namespace FLIVR
 
 	inline TextureBrick* Texture::get_brick(unsigned int bid)
 	{
-		for (size_t i=0; i<bricks_.size(); ++i)
+		for (size_t i=0; i<(*bricks_).size(); ++i)
 		{
-			if (bricks_[i]->get_id() == bid)
-				return bricks_[i];
+			if ((*bricks_)[i]->get_id() == bid)
+				return (*bricks_)[i];
 		}
 		return 0;
 	}
