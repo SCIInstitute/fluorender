@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <stdexcept>
 #include <algorithm>
 #include <stdint.h>
+#include <string>
 
 using namespace std;
 
@@ -74,6 +75,13 @@ public:
 	uint64_t GetTiffField(
 		const uint64_t tag,
 		void * pointer, uint64_t size);
+	/**
+	* Gets the specified offset for the strip offset or count.
+	* @param tag The tag for either the offset or the count.
+	* @param strip The strip number to get the correct count/offset.
+	* @return The count or strip offset determined by @strip.
+	*/
+	uint64_t GetTiffStripOffsetOrCount(uint64_t tag, uint64_t strip);
 	/**
 	 * Reads a strip of data from a tiff file.
 	 * @param page The page to read from.
@@ -125,13 +133,6 @@ public:
 	 * @return The number of pages in the file.
 	 */
 	uint64_t GetNumTiffPages();
-	/**
-	 * Gets the specified offset for the strip offset or count.
-	 * @param tag The tag for either the offset or the count.
-	 * @param strip The strip number to get the correct count/offset.
-	 * @return The count or strip offset determined by @strip.
-	 */
-	uint64_t GetTiffStripOffsetOrCount(uint64_t tag, uint64_t strip);
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
 	Nrrd* Convert(int t, int c, bool get_max);
@@ -196,6 +197,8 @@ private:
 	//page properties
 	struct PageInfo
 	{
+		//if the page info is valid
+		bool b_valid;
 		//sub file type
 		bool b_sub_file_type;
 		unsigned long ul_sub_file_type;
@@ -219,28 +222,48 @@ private:
 		unsigned short us_planar_config;
 		//image desc
 		bool b_image_desc;
-		char c_image_desc[256];
+		string s_image_desc;
 		//strip number
 		bool b_strip_num;
 		unsigned long ul_strip_num;
-		//strip offset
-		bool b_strip_offset;
-		unsigned long long ull_strip_offset;
-		//samples per pixel
-		bool b_samples_per_pixel;
-		unsigned short us_samples_per_pixel;
+		//strip offsets
+		bool b_strip_offsets;
+		vector<unsigned long long> ull_strip_offsets;
+		//strip byte counts
+		bool b_strip_byte_counts;
+		vector<unsigned long long> ull_strip_byte_counts;
 		//rows per strip
 		bool b_rows_per_strip;
 		unsigned long ul_rows_per_strip;
-		//strip byte count
-		bool b_strip_byte_count;
-		unsigned long ul_strip_byte_count;
+		//samples per pixel
+		bool b_samples_per_pixel;
+		unsigned short us_samples_per_pixel;
 		//x resolution
 		bool b_x_resolution;
-		float f_x_resolution;
+		double d_x_resolution;
 		//y resolution
 		bool b_y_resolution;
-		float f_y_resolution;
+		double d_y_resolution;
+		//use tiles (instead of strips)
+		bool b_use_tiles;
+		//tile width
+		bool b_tile_width;
+		unsigned long ul_tile_width;
+		//tile length
+		bool b_tile_length;
+		unsigned long ul_tile_length;
+		//tile number
+		bool b_tile_num;
+		unsigned long ul_tile_num;
+		//tile offsets
+		bool b_tile_offsets;
+		vector<unsigned long long> ull_tile_offsets;
+		//tile byte counts
+		bool b_tile_byte_counts;
+		vector<unsigned long long> ull_tile_byte_counts;
+		//next page offset
+		bool b_next_page_offset;
+		unsigned long long ull_next_page_offset;
 	};
 	PageInfo m_page_info;
 
@@ -277,12 +300,20 @@ private:
 	static const uint64_t kSamplesPerPixelTag = 277;
 	/** The tiff tag for rows per strip */
 	static const uint64_t kRowsPerStripTag = 278;
-	/** The tiff tag for strip bytes count */
-	static const uint64_t kStripBytesCountTag = 279;
+	/** The tiff tag for strip bytes counts */
+	static const uint64_t kStripBytesCountsTag = 279;
 	/** The tiff tag for x resolution */
 	static const uint64_t kXResolutionTag = 282;
 	/** The tiff tag for y resolution */
 	static const uint64_t kYResolutionTag = 283;
+	/** The tiff tag for tile width */
+	static const uint64_t kTileWidthTag = 322;
+	/** The tiff tag for tile length */
+	static const uint64_t kTileLengthTag = 323;
+	/** The tiff tag for tile offsets */
+	static const uint64_t kTileOffsetsTag = 324;
+	/** The tiff tag for tile bytes counts */
+	static const uint64_t kTileBytesCountsTag = 325;
 	/** The tiff tag number of entries on current page */
 	static const uint64_t kNextPageOffsetTag = 500;
 	/** The BYTE type */
@@ -324,11 +355,16 @@ private:
 	Nrrd* ReadTiff(vector<SliceInfo> &filelist, int c, bool get_max);
 
 	//invalidate page info
+	bool TagInInfo(uint16_t tag);
+	void SetPageInfo(uint16_t tag, uint64_t answer);
+	void SetPageInfoVector(uint16_t tag, uint16_t type, uint64_t cnt, void* data);
+	void ReadTiffFields();
 	inline void InvalidatePageInfo();
 };
 
 void TIFReader::InvalidatePageInfo()
 {
+	m_page_info.b_valid = false;
 	m_page_info.b_sub_file_type = false;
 	m_page_info.b_image_width = false;
 	m_page_info.b_image_length = false;
@@ -338,12 +374,24 @@ void TIFReader::InvalidatePageInfo()
 	m_page_info.b_planar_config = false;
 	m_page_info.b_image_desc = false;
 	m_page_info.b_strip_num = false;
-	m_page_info.b_strip_offset = false;
-	m_page_info.b_samples_per_pixel = false;
+	m_page_info.b_strip_offsets = false;
+	m_page_info.b_strip_byte_counts = false;
 	m_page_info.b_rows_per_strip = false;
-	m_page_info.b_strip_byte_count = false;
+	m_page_info.b_samples_per_pixel = false;
 	m_page_info.b_x_resolution = false;
 	m_page_info.b_y_resolution = false;
+	m_page_info.b_use_tiles = false;
+	m_page_info.b_tile_width = false;
+	m_page_info.b_tile_length = false;
+	m_page_info.b_tile_num = false;
+	m_page_info.b_tile_offsets = false;
+	m_page_info.b_tile_byte_counts = false;
+	m_page_info.b_next_page_offset = false;
+	s_image_desc.clear();
+	ull_strip_offsets.clear();
+	ull_strip_byte_counts.clear();
+	ull_tile_offsets.clear();
+	ull_tile_byte_counts.clear();
 }
 
 #endif//_TIF_READER_H_
