@@ -93,6 +93,8 @@ int TIFReader::Preprocess()
 	isHyperstack_ = false;
 	isHsTimeSeq_ = false;
 	large_hs_ = false;
+	m_b_page_num = false;
+	m_ull_page_num = 0;
 	InvalidatePageInfo();
 
 	//separate path and name
@@ -102,27 +104,26 @@ int TIFReader::Preprocess()
 	//std::wstring suffix = GET_SUFFIX(m_path_name);
 
 	//determine if it is an ImageJ hyperstack
-	char img_desc[256];
+	string img_desc;
 	OpenTiff(m_path_name.c_str());
-	uint64_t bits = GetTiffField(kBitsPerSampleTag, NULL, 0);
+	uint64_t bits = GetTiffField(kBitsPerSampleTag);
 	if (bits > 16)
 	{
 		CloseTiff();
 		return READER_FP32_DATA;
 	}
-	GetTiffField(kImageDescriptionTag, img_desc, 256);
-	string desc = string((char*)img_desc);
+	GetImageDescription(img_desc);
 	string search_str = "hyperstack=true";
-	int64_t str_pos = desc.find(search_str);
+	int64_t str_pos = img_desc.find(search_str);
 	if (str_pos != -1)
 	{
 		//it is an ImageJ hyperstack, get information from the description
 		int num;
 		//channels
 		search_str = "channels=";
-		str_pos = desc.find(search_str);
+		str_pos = img_desc.find(search_str);
 		if (str_pos != -1)
-			num = get_number(desc, str_pos + search_str.length());
+			num = get_number(img_desc, str_pos + search_str.length());
 		else
 			num = 1;
 		if (num)
@@ -131,9 +132,9 @@ int TIFReader::Preprocess()
 			m_chan_num = 1;
 		//slices
 		search_str = "slices=";
-		str_pos = desc.find(search_str);
+		str_pos = img_desc.find(search_str);
 		if (str_pos != -1)
-			num = get_number(desc, str_pos + search_str.length());
+			num = get_number(img_desc, str_pos + search_str.length());
 		else
 			num = 1;
 		if (num)
@@ -142,9 +143,9 @@ int TIFReader::Preprocess()
 			m_slice_num = 1;
 		//frames
 		search_str = "frames=";
-		str_pos = desc.find(search_str);
+		str_pos = img_desc.find(search_str);
 		if (str_pos != -1)
-			num = get_number(desc, str_pos + search_str.length());
+			num = get_number(img_desc, str_pos + search_str.length());
 		else
 			num = 1;
 		if (num)
@@ -155,9 +156,9 @@ int TIFReader::Preprocess()
 		if (bits == 16)
 		{
 			search_str = "max=";
-			str_pos = desc.find(search_str);
+			str_pos = img_desc.find(search_str);
 			if (str_pos != -1)
-				num = get_number(desc, str_pos + search_str.length());
+				num = get_number(img_desc, str_pos + search_str.length());
 			else
 				num = 0;
 			if (num)
@@ -344,10 +345,10 @@ int TIFReader::Preprocess()
 			{
 				InvalidatePageInfo();
 				OpenTiff(tiff_name);
-				m_chan_num = GetTiffField(kSamplesPerPixelTag, NULL, 0);
+				m_chan_num = GetTiffField(kSamplesPerPixelTag);
 				if (m_chan_num == 0 &&
-					GetTiffField(kImageWidthTag, NULL, 0) > 0 &&
-					GetTiffField(kImageLengthTag, NULL, 0) > 0) {
+					GetTiffField(kImageWidthTag) > 0 &&
+					GetTiffField(kImageLengthTag) > 0) {
 					m_chan_num = 1;
 				}
 				CloseTiff();
@@ -360,8 +361,7 @@ int TIFReader::Preprocess()
 	return READER_OK;
 }
 
-uint64_t TIFReader::GetTiffField(
-	const uint64_t in_tag, void * buf, uint64_t size)
+uint64_t TIFReader::GetTiffField(const uint64_t in_tag)
 {
 	if (!m_page_info.b_valid)
 		ReadTiffFields();
@@ -398,10 +398,6 @@ uint64_t TIFReader::GetTiffField(
 			if (m_page_info.b_planar_config)
 				return m_page_info.us_planar_config;
 			break;
-		//case kStripOffsetsTag:
-		//	if (!buf && size == kCount && m_page_info.b_strip_num)
-		//		return m_page_info.ul_strip_num;
-		//	break;
 		case kSamplesPerPixelTag:
 			if (m_page_info.b_samples_per_pixel)
 				return m_page_info.us_samples_per_pixel;
@@ -410,31 +406,21 @@ uint64_t TIFReader::GetTiffField(
 			if (m_page_info.b_rows_per_strip)
 				return m_page_info.ul_rows_per_strip;
 			break;
-			//case kStripBytesCountTag:
-			//	if (m_page_info.b_strip_byte_count)
-			//		return m_page_info.ul_strip_byte_count;
-			//	break;
-		case kXResolutionTag:
-			if (m_page_info.b_x_resolution)
-			{
-				memcpy(buf, &(m_page_info.f_x_resolution), sizeof(float));
-				return 0;
-			}
+		case kTileWidthTag:
+			if (m_page_info.b_tile_width)
+				return m_page_info.ul_tile_width;
 			break;
-		case kYResolutionTag:
-			if (m_page_info.b_y_resolution)
-			{
-				memcpy(buf, &(m_page_info.f_y_resolution), sizeof(float));
-				return 0;
-			}
+		case kTileLengthTag:
+			if (m_page_info.b_tile_length)
+				return m_page_info.ul_tile_length;
 			break;
 		}
 	}
-	else
-		return 0;
+
+	return 0;
 }
 
-uint64_t TIFReader::GetTiffStripOffsetOrCount(uint64_t tag, uint64_t strip)
+/*uint64_t TIFReader::GetTiffStripOffsetOrCount(uint64_t tag, uint64_t strip)
 {
 	//search for the offset that tells us the byte count for this strip
 	uint64_t type = GetTiffField(tag, NULL, kType);
@@ -480,7 +466,7 @@ uint64_t TIFReader::GetTiffStripOffsetOrCount(uint64_t tag, uint64_t strip)
 		break;
 	}
 	return value;
-}
+}*/
 
 bool TIFReader::TagInInfo(uint16_t tag)
 {
@@ -495,13 +481,13 @@ bool TIFReader::TagInInfo(uint16_t tag)
 		tag == kStripOffsetsTag ||
 		tag == kSamplesPerPixelTag ||
 		tag == kRowsPerStripTag ||
-		tag == kStripBytesCountTag ||
+		tag == kStripBytesCountsTag ||
 		tag == kXResolutionTag ||
 		tag == kYResolutionTag ||
 		tag == kTileWidthTag ||
 		tag == kTileLengthTag ||
 		tag == kTileOffsetsTag ||
-		tag == kTileBytesCountTag)
+		tag == kTileBytesCountsTag)
 		return true;
 	else
 		return false;
@@ -550,11 +536,31 @@ void TIFReader::SetPageInfo(uint16_t tag, uint64_t answer)
 		break;
 	case kXResolutionTag:
 		m_page_info.b_x_resolution = true;
-		memcpy(&(m_page_info.f_x_resolution), &answer, sizeof(double));
+		memcpy(&(m_page_info.d_x_resolution), &answer, sizeof(double));
 		break;
 	case kYResolutionTag:
 		m_page_info.b_y_resolution = true;
-		memcpy(&(m_page_info.f_y_resolution), &answer, sizeof(double));
+		memcpy(&(m_page_info.d_y_resolution), &answer, sizeof(double));
+		break;
+	case kStripOffsetsTag:
+		m_page_info.b_strip_offsets = true;
+		m_page_info.ull_strip_offsets.resize(1);
+		m_page_info.ull_strip_offsets[0] = static_cast<unsigned long long>(answer);
+		break;
+	case kStripBytesCountsTag:
+		m_page_info.b_strip_byte_counts = true;
+		m_page_info.ull_strip_byte_counts.resize(1);
+		m_page_info.ull_strip_byte_counts[0] = static_cast<unsigned long long>(answer);
+		break;
+	case kTileOffsetsTag:
+		m_page_info.b_tile_offsets = true;
+		m_page_info.ull_tile_offsets.resize(1);
+		m_page_info.ull_tile_offsets[0] = static_cast<unsigned long long>(answer);
+		break;
+	case kTileBytesCountsTag:
+		m_page_info.b_tile_byte_counts = true;
+		m_page_info.ull_tile_byte_counts.resize(1);
+		m_page_info.ull_tile_byte_counts[0] = static_cast<unsigned long long>(answer);
 		break;
 	}
 }
@@ -564,22 +570,22 @@ void TIFReader::SetPageInfoVector(uint16_t tag, uint16_t type, uint64_t cnt, voi
 	vector<unsigned long long>* v = 0;
 	if (tag == kStripOffsetsTag)
 	{
-		b_strip_offsets = true;
+		m_page_info.b_strip_offsets = true;
 		v = &(m_page_info.ull_strip_offsets);
 	}
 	else if (tag == kStripBytesCountsTag)
 	{
-		b_strip_byte_counts = true;
+		m_page_info.b_strip_byte_counts = true;
 		v = &(m_page_info.ull_strip_byte_counts);
 	}
 	else if (tag == kTileOffsetsTag)
 	{
-		b_tile_offsets = true;
+		m_page_info.b_tile_offsets = true;
 		v = &(m_page_info.ull_tile_offsets);
 	}
 	else if (tag == kTileBytesCountsTag)
 	{
-		b_tile_byte_counts = true;
+		m_page_info.b_tile_byte_counts = true;
 		v = &(m_page_info.ull_tile_byte_counts);
 	}
 
@@ -587,7 +593,7 @@ void TIFReader::SetPageInfoVector(uint16_t tag, uint16_t type, uint64_t cnt, voi
 	unsigned long long value;
 	if (type == kShort)
 	{
-		uint16_t data2 = (uint16_t*)data;
+		uint16_t *data2 = (uint16_t*)data;
 		for (uint64_t i = 0; i < cnt; ++i)
 		{
 			value = static_cast<unsigned long long>(
@@ -597,7 +603,7 @@ void TIFReader::SetPageInfoVector(uint16_t tag, uint16_t type, uint64_t cnt, voi
 	}
 	else if (type == kLong)
 	{
-		uint32_t data2 = (uint32_t*)data;
+		uint32_t *data2 = (uint32_t*)data;
 		for (uint64_t i = 0; i < cnt; ++i)
 		{
 			value = static_cast<unsigned long long>(
@@ -607,7 +613,7 @@ void TIFReader::SetPageInfoVector(uint16_t tag, uint16_t type, uint64_t cnt, voi
 	}
 	else if (type == kLong8)
 	{
-		uint64_t data2 = (uint64_t*)data;
+		uint64_t *data2 = (uint64_t*)data;
 		for (uint64_t i = 0; i < cnt; ++i)
 		{
 			value = static_cast<unsigned long long>(
@@ -686,7 +692,7 @@ void TIFReader::ReadTiffFields()
 			{
 				m_page_info.b_tile_num = true;
 				m_page_info.ul_tile_num = static_cast<unsigned long>(cnt);
-				b_use_tiles = true;
+				m_page_info.b_use_tiles = true;
 			}
 
 			//now get the value (different for different types.)
@@ -694,7 +700,7 @@ void TIFReader::ReadTiffFields()
 			uint32_t addr32;
 			uint64_t addr64 = current_offset_ + start_off + multiplier*i + off2;
 			//if (size == kValueAddress) return addr;
-			tiff_stream.seekg(addr, tiff_stream.beg);
+			tiff_stream.seekg(addr64, tiff_stream.beg);
 
 			uint64_t answer = 0;
 			char* buf = 0;
@@ -817,7 +823,7 @@ void TIFReader::ReadTiffFields()
 			if (tag == kImageDescriptionTag && buf)
 			{
 				m_page_info.b_image_desc = true;
-				s_image_desc = buf;
+				m_page_info.s_image_desc = buf;
 			}
 			else if (!answer && buf)
 				SetPageInfoVector(tag, type, cnt, (void*)buf);
@@ -844,13 +850,59 @@ void TIFReader::ReadTiffFields()
 		uint32_t next_offset = 0;
 		tiff_stream.read((char*)&next_offset, sizeof(uint32_t));
 		if (swap_)
-			m_page_info.ull_next_page_offset = static_cast<uint64_t>(SwapLong(next_offset));
+			m_page_info.ull_next_page_offset = static_cast<uint64_t>(SwapWord(next_offset));
 		else
 			m_page_info.ull_next_page_offset = static_cast<uint64_t>(next_offset);
 		m_page_info.b_next_page_offset = true;
 	}
 
 	m_page_info.b_valid = true;
+}
+
+uint64_t TIFReader::GetTiffNextPageOffset()
+{
+	uint64_t results = 0;
+	if (!tiff_stream.is_open())
+		throw std::runtime_error("TIFF File not open for reading.");
+	//go to the current IFD block/page
+	tiff_stream.seekg(current_offset_, tiff_stream.beg);
+	uint64_t num_entries = 0;
+	//how many entries are there?
+	if (isBig_)
+	{
+		tiff_stream.read((char*)&num_entries, sizeof(uint64_t));
+		if (swap_) num_entries = SwapLong(num_entries);
+	}
+	else
+	{
+		uint16_t temp;
+		tiff_stream.read((char*)&temp, sizeof(uint16_t));
+		if (swap_) temp = SwapShort(temp);
+		num_entries = static_cast<uint64_t>(temp);
+	}
+	char start_off = 2, multiplier = 12;
+	if (isBig_) { start_off = 8; multiplier = 20; }
+	//get the next page offset
+	tiff_stream.seekg(current_offset_ + start_off + multiplier*num_entries, tiff_stream.beg);
+	if (isBig_)
+	{
+		uint64_t next_offset = 0;
+		tiff_stream.read((char*)&next_offset, sizeof(uint64_t));
+		if (swap_)
+			results = SwapLong(next_offset);
+		else
+			results = next_offset;
+	}
+	else
+	{
+		uint32_t next_offset = 0;
+		tiff_stream.read((char*)&next_offset, sizeof(uint32_t));
+		if (swap_)
+			results = static_cast<uint64_t>(SwapWord(next_offset));
+		else
+			results = static_cast<uint64_t>(next_offset);
+	}
+	return results;
 }
 
 uint16_t TIFReader::SwapShort(uint16_t num) {
@@ -1090,19 +1142,26 @@ bool TIFReader::tif_slice_sort(const SliceInfo& info1, const SliceInfo& info2)
 
 uint64_t TIFReader::GetNumTiffPages()
 {
-	uint64_t count = 0;
-	uint64_t save_offset = current_offset_;
-	uint64_t save_page = current_page_;
-	ResetTiff();
-	while (true) {
-		// count it if it's not a thumbnail
-		if (GetTiffField(kSubFileTypeTag, NULL, 0) != 1) count++;
-		current_offset_ = GetTiffField(kNextPageOffsetTag, NULL, 0);
-		if (current_offset_ == 0) break;
+	if (!m_b_page_num)
+	{
+		uint64_t count = 0;
+		uint64_t save_offset = current_offset_;
+		uint64_t save_page = current_page_;
+		ResetTiff();
+		while (true)
+		{
+			// count it if it's not a thumbnail
+			if (GetTiffField(kSubFileTypeTag) != 1) count++;
+			current_offset_ = GetTiffNextPageOffset();
+			if (current_offset_ == 0) break;
+		}
+		current_offset_ = save_offset;
+		current_page_ = save_page;
+		m_ull_page_num = count;
+		m_b_page_num = true;
 	}
-	current_offset_ = save_offset;
-	current_page_ = save_page;
-	return count;
+
+	return m_ull_page_num;
 }
 
 void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
@@ -1118,57 +1177,55 @@ void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
 		while (current_page_ < page)
 		{
 			tiff_stream.seekg(current_offset_, tiff_stream.beg);
-			if (GetTiffField(kSubFileTypeTag, NULL, 0) != 1) current_page_++;
-			current_offset_ = GetTiffField(kNextPageOffsetTag, NULL, 0);
+			if (GetTiffField(kSubFileTypeTag) != 1) current_page_++;
+			current_offset_ = GetTiffNextPageOffset();
 		}
 	}
 	//get the byte count and the strip offset to read data from.
 	uint64_t byte_count = 0;
 	if (current_offset_ && !large_hs_)
 	{
-		uint64_t strip_byte_count =
-			GetTiffStripOffsetOrCount(kStripBytesCountTag, strip);
-		if (strip_byte_count)
-			m_page_info.ul_strip_byte_count = strip_byte_count;
-		else
+		uint64_t strip_byte_count = GetTiffStripCount(strip);
+		if (!strip_byte_count)
+		//	m_page_info.ul_strip_byte_count = strip_byte_count;
+		//else
 		{
-			uint64_t bits = GetTiffField(kBitsPerSampleTag, NULL, 0);
-			m_page_info.ul_strip_byte_count = strip_size * bits /8;
+			uint64_t bits = GetTiffField(kBitsPerSampleTag);
+			m_page_info.ull_strip_byte_counts[0] = strip_size * bits /8;
+			m_page_info.b_strip_byte_counts = true;
+			m_page_info.b_strip_offsets = true;
 		}
-		m_page_info.ull_strip_offset = GetTiffStripOffsetOrCount(
-			kStripOffsetsTag, strip);
-		m_page_info.b_strip_byte_count = true;
-		m_page_info.b_strip_offset = true;
-		byte_count = m_page_info.ul_strip_byte_count;
-		tiff_stream.seekg(m_page_info.ull_strip_offset, tiff_stream.beg);
+		//m_page_info.ull_strip_offset = GetTiffStripOffset(strip);
+		byte_count = m_page_info.ull_strip_byte_counts[0];
+		tiff_stream.seekg(m_page_info.ull_strip_offsets[0], tiff_stream.beg);
 	}
 	else
 	{
 		//if (m_page_info.b_strip_byte_count)
-		byte_count = m_page_info.ul_strip_byte_count;
+		byte_count = m_page_info.ull_strip_byte_counts[0];
 		//if (m_page_info.b_strip_offset)
-		tiff_stream.seekg(m_page_info.ull_strip_offset + page * byte_count, tiff_stream.beg);
+		tiff_stream.seekg(m_page_info.ull_strip_offsets[0] + page * byte_count, tiff_stream.beg);
 		large_hs_ = true;
 	}
 	//actually read the data now
 	char *temp = new char[byte_count];
 	//unsigned long long pos = tiff_stream.tellg();
 	tiff_stream.read((char*)temp, byte_count);
-	bool eight_bits = 8 == GetTiffField(kBitsPerSampleTag, NULL, 0);
+	bool eight_bits = 8 == GetTiffField(kBitsPerSampleTag);
 	if (swap_ && !eight_bits) {
 		short * temp2 = reinterpret_cast<short*>(temp);
 		for (size_t sh = 0; sh < byte_count / 2; sh++)
 			temp2[sh] = SwapShort(temp2[sh]);
 	}
 	//get compression tag, decompress if necessary
-	uint64_t tmp = GetTiffField(kCompressionTag, NULL, 0);
-	uint64_t prediction = GetTiffField(kPredictionTag, NULL, 0);
-	uint64_t samples = GetTiffField(kSamplesPerPixelTag, NULL, 0);
+	uint64_t tmp = GetTiffField(kCompressionTag);
+	uint64_t prediction = GetTiffField(kPredictionTag);
+	uint64_t samples = GetTiffField(kSamplesPerPixelTag);
 	samples = samples == 0 ? 1 : samples;
-	tsize_t stride = (GetTiffField(kPlanarConfigurationTag, NULL, 0) == 2) ? 1 : samples;
+	tsize_t stride = (GetTiffField(kPlanarConfigurationTag) == 2) ? 1 : samples;
 	//uint64_t rows_per_strip = GetTiffField(kRowsPerStripTag,NULL,0);
 	uint64_t rows_per_strip = strip_size /
-		GetTiffField(kImageWidthTag, NULL, 0) /
+		GetTiffField(kImageWidthTag) /
 		samples;
 	bool isCompressed = tmp == 5;
 	if (isCompressed) {
@@ -1246,7 +1303,8 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 		filename = filelist[0].slice;
 	OpenTiff(filename.c_str());
 	bool sequence = numPages > 1;
-	if (!sequence) {
+	if (!sequence)
+	{
 		if (get_max && !isHyperstack_)
 			numPages = GetNumTiffPages();
 		else
@@ -1257,16 +1315,16 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 	//reading first page
 	InvalidatePageInfo();
 
-	uint64_t width = GetTiffField(kImageWidthTag, NULL, 0);
-	uint64_t height = GetTiffField(kImageLengthTag, NULL, 0);
-	uint64_t bits = GetTiffField(kBitsPerSampleTag, NULL, 0);
-	uint64_t samples = GetTiffField(kSamplesPerPixelTag, NULL, 0);
+	uint64_t width = GetTiffField(kImageWidthTag);
+	uint64_t height = GetTiffField(kImageLengthTag);
+	uint64_t bits = GetTiffField(kBitsPerSampleTag);
+	uint64_t samples = GetTiffField(kSamplesPerPixelTag);
 	if (samples == 0 && width > 0 && height > 0) samples = 1;
 
-	float x_res = 0.0, y_res = 0.0, z_res = 0.0;
-	GetTiffField(kXResolutionTag, &x_res, sizeof(float));
-	GetTiffField(kYResolutionTag, &y_res, sizeof(float));
-	uint64_t rowsperstrip = GetTiffField(kRowsPerStripTag, NULL, 0);
+	double x_res = 0.0, y_res = 0.0, z_res = 0.0;
+	x_res = GetTiffXResolution();
+	y_res = GetTiffYResolution();
+	uint64_t rowsperstrip = GetTiffField(kRowsPerStripTag);
 	uint64_t strip_size;
 	if (rowsperstrip > 0)
 		strip_size = rowsperstrip * width * samples * (bits / 8);
@@ -1276,12 +1334,11 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 		strip_size = height * width * samples * (bits / 8);
 	}
 
-	char img_desc[256];
-	GetTiffField(kImageDescriptionTag, img_desc, 256);
-	string desc = string((char*)img_desc);
-	int64_t start = desc.find("spacing=");
+	string img_desc;
+	GetImageDescription(img_desc);
+	int64_t start = img_desc.find("spacing=");
 	if (start != -1) {
-		string spacing = desc.substr(start + 8);
+		string spacing = img_desc.substr(start + 8);
 		int64_t end = spacing.find("\n");
 		if (end != -1)
 			z_res = static_cast<float>(
@@ -1341,7 +1398,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 		uint64_t pageindex = filelist[0].pagenumber + c;
 		for (int i = 0; i < numPages; ++i)
 		{
-			uint64_t num_strips = GetTiffField(kStripOffsetsTag, NULL, kCount);
+			uint64_t num_strips = GetTiffStripNum();
 
 			//read file
 			for (uint64_t strip = 0; strip < num_strips; strip++)
@@ -1370,12 +1427,12 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 				OpenTiff(filename);
 			}
 			//this is a thumbnail, skip
-			if (GetTiffField(kSubFileTypeTag, NULL, 0) == 1) {
+			if (GetTiffField(kSubFileTypeTag) == 1) {
 				if (sequence) CloseTiff();
 				continue;
 			}
 
-			uint64_t num_strips = GetTiffField(kStripOffsetsTag, NULL, kCount);
+			uint64_t num_strips = GetTiffStripNum();
 			num_strips = num_strips ? num_strips : 1;
 
 			//read file

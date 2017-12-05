@@ -72,16 +72,28 @@ public:
 	 * @throws An exception if a tiff is not open.
 	 * @return The value in the header denoted by tag.
 	 */
-	uint64_t GetTiffField(
-		const uint64_t tag,
-		void * pointer, uint64_t size);
+	uint64_t GetTiffField(const uint64_t tag);
+	//next page
+	uint64_t GetTiffNextPageOffset();
+	//get description
+	inline bool GetImageDescription(string &desc);
 	/**
 	* Gets the specified offset for the strip offset or count.
 	* @param tag The tag for either the offset or the count.
 	* @param strip The strip number to get the correct count/offset.
 	* @return The count or strip offset determined by @strip.
 	*/
-	uint64_t GetTiffStripOffsetOrCount(uint64_t tag, uint64_t strip);
+	inline uint32_t GetTiffStripNum();
+	inline uint64_t GetTiffStripOffset(uint64_t strip);
+	inline uint64_t GetTiffStripCount(uint64_t strip);
+	//for tiles
+	inline bool GetTiffUseTiles();
+	inline uint32_t GetTiffTileNum();
+	inline uint64_t GetTiffTileOffset(uint64_t tile);
+	inline uint64_t GetTiffTileCount(uint64_t tile);
+	//resolution
+	inline double GetTiffXResolution();
+	inline double GetTiffYResolution();
 	/**
 	 * Reads a strip of data from a tiff file.
 	 * @param page The page to read from.
@@ -194,6 +206,9 @@ private:
 	double m_max_value;
 	double m_scalar_scale;
 
+	//pages
+	bool m_b_page_num;
+	unsigned long long m_ull_page_num;
 	//page properties
 	struct PageInfo
 	{
@@ -387,11 +402,98 @@ void TIFReader::InvalidatePageInfo()
 	m_page_info.b_tile_offsets = false;
 	m_page_info.b_tile_byte_counts = false;
 	m_page_info.b_next_page_offset = false;
-	s_image_desc.clear();
-	ull_strip_offsets.clear();
-	ull_strip_byte_counts.clear();
-	ull_tile_offsets.clear();
-	ull_tile_byte_counts.clear();
+	m_page_info.s_image_desc.clear();
+	m_page_info.ull_strip_offsets.clear();
+	m_page_info.ull_strip_byte_counts.clear();
+	m_page_info.ull_tile_offsets.clear();
+	m_page_info.ull_tile_byte_counts.clear();
+}
+
+//get description
+bool TIFReader::GetImageDescription(string &desc)
+{
+	if (m_page_info.b_valid && m_page_info.b_image_desc)
+	{
+		desc = m_page_info.s_image_desc;
+		return true;
+	}
+	else
+		return false;
+}
+
+//strips
+uint32_t TIFReader::GetTiffStripNum()
+{
+	if (m_page_info.b_valid && m_page_info.b_strip_num)
+		return m_page_info.ul_strip_num;
+	else
+		return 0;
+}
+
+uint64_t TIFReader::GetTiffStripOffset(uint64_t strip)
+{
+	if (m_page_info.b_valid && m_page_info.b_strip_offsets)
+		return m_page_info.ull_strip_offsets[strip];
+	else
+		return 0;
+}
+
+uint64_t TIFReader::GetTiffStripCount(uint64_t strip)
+{
+	if (m_page_info.b_valid && m_page_info.b_strip_byte_counts)
+		return m_page_info.ull_strip_byte_counts[strip];
+	else
+		return 0;
+}
+
+//for tiles
+bool TIFReader::GetTiffUseTiles()
+{
+	if (m_page_info.b_valid)
+		return m_page_info.b_use_tiles;
+	else
+		return false;
+}
+
+uint64_t TIFReader::GetTiffTileOffset(uint64_t tile)
+{
+	if (m_page_info.b_valid && m_page_info.b_tile_offsets)
+		return m_page_info.ull_tile_offsets[tile];
+	else
+		return 0;
+}
+
+uint32_t TIFReader::GetTiffTileNum()
+{
+	if (m_page_info.b_valid && m_page_info.b_tile_num)
+		return m_page_info.ul_tile_num;
+	else
+		return 0;
+}
+
+uint64_t TIFReader::GetTiffTileCount(uint64_t tile)
+{
+	if (m_page_info.b_valid && m_page_info.b_tile_byte_counts)
+		return m_page_info.ull_tile_byte_counts[tile];
+	else
+		return 0;
+}
+
+//resolution
+inline double TIFReader::GetTiffXResolution()
+{
+	if (m_page_info.b_valid && m_page_info.b_x_resolution)
+		return m_page_info.d_x_resolution;
+	else
+		return 0.0;
+}
+
+inline double TIFReader::GetTiffYResolution()
+{
+	if (m_page_info.b_valid && m_page_info.b_y_resolution)
+		return m_page_info.d_y_resolution;
+	else
+		return 0.0;
 }
 
 #endif//_TIF_READER_H_
