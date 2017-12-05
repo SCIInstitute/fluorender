@@ -588,6 +588,17 @@ void TIFReader::SetPageInfoVector(uint16_t tag, uint16_t type, uint64_t cnt, voi
 		m_page_info.b_tile_byte_counts = true;
 		v = &(m_page_info.ull_tile_byte_counts);
 	}
+	else if (tag == kBitsPerSampleTag)
+	{
+		if (type == kShort)
+		{
+			uint16_t *data2 = (uint16*)data;
+			m_page_info.b_bits_per_sample = true;
+			m_page_info.us_bits_per_sample =
+				swap_ ? SwapShort(data2[0]) : data2[0];
+		}
+		return;
+	}
 
 	v->reserve(cnt);
 	unsigned long long value;
@@ -745,9 +756,9 @@ void TIFReader::ReadTiffFields()
 						tiff_stream.read((char*)&addr32, sizeof(uint32_t));
 						addr64 = static_cast<uint64_t>(swap_ ? SwapWord(addr32) : addr32);
 					}
-					tiff_stream.seekg(answer, tiff_stream.beg);
+					tiff_stream.seekg(addr64, tiff_stream.beg);
 					buf = (char*)(new uint16_t[cnt]);
-					tiff_stream.read((char*)&buf, sizeof(uint16_t)*cnt);
+					tiff_stream.read((char*)buf, sizeof(uint16_t)*cnt);
 				}
 				else
 				{
@@ -773,7 +784,7 @@ void TIFReader::ReadTiffFields()
 					}
 					tiff_stream.seekg(addr64, tiff_stream.beg);
 					buf = (char*)(new uint32_t[cnt]);
-					tiff_stream.read((char*)&buf, sizeof(uint32_t)*cnt);
+					tiff_stream.read((char*)buf, sizeof(uint32_t)*cnt);
 				}
 				else
 				{
@@ -790,7 +801,7 @@ void TIFReader::ReadTiffFields()
 					addr64 = swap_ ? SwapLong(addr64) : addr64;
 					tiff_stream.seekg(addr64, tiff_stream.beg);
 					buf = (char*)(new uint64_t[cnt]);
-					tiff_stream.read((char*)&buf, sizeof(uint64_t)*cnt);
+					tiff_stream.read((char*)buf, sizeof(uint64_t)*cnt);
 				}
 				else
 				{
@@ -902,6 +913,12 @@ uint64_t TIFReader::GetTiffNextPageOffset()
 		else
 			results = static_cast<uint64_t>(next_offset);
 	}
+	return results;
+}
+
+uint64_t TIFReader::TurnPage()
+{
+	uint64_t results = 0;
 	return results;
 }
 
@@ -1191,13 +1208,14 @@ void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
 		//else
 		{
 			uint64_t bits = GetTiffField(kBitsPerSampleTag);
+			m_page_info.ull_strip_byte_counts.resize(1);
 			m_page_info.ull_strip_byte_counts[0] = strip_size * bits /8;
 			m_page_info.b_strip_byte_counts = true;
 			m_page_info.b_strip_offsets = true;
 		}
 		//m_page_info.ull_strip_offset = GetTiffStripOffset(strip);
-		byte_count = m_page_info.ull_strip_byte_counts[0];
-		tiff_stream.seekg(m_page_info.ull_strip_offsets[0], tiff_stream.beg);
+		byte_count = GetTiffStripCount(strip);
+		tiff_stream.seekg(GetTiffStripOffset(strip), tiff_stream.beg);
 	}
 	else
 	{

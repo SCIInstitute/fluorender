@@ -75,6 +75,7 @@ public:
 	uint64_t GetTiffField(const uint64_t tag);
 	//next page
 	uint64_t GetTiffNextPageOffset();
+	uint64_t TurnPage();
 	//get description
 	inline bool GetImageDescription(string &desc);
 	/**
