@@ -75,7 +75,7 @@ public:
 	uint64_t GetTiffField(const uint64_t tag);
 	//next page
 	uint64_t GetTiffNextPageOffset();
-	uint64_t TurnPage();
+	uint64_t TurnToPage(uint64_t page);
 	//get description
 	inline bool GetImageDescription(string &desc);
 	/**
@@ -108,6 +108,13 @@ public:
 		uint64_t strip,
 		void * data,
 		uint64_t strip_size);
+	//read a tile
+	void GetTiffTile(
+		uint64_t page,
+		uint64_t tile,
+		void *data,
+		uint64_t tile_size,
+		uint64_t tile_height);
 	/**
 	 * Opens the tiff stream.
 	 * @param name The filename of the tiff.
@@ -291,7 +298,8 @@ private:
 	uint64_t current_page_;
 	/** This is the offset of the page we are currently on */
 	uint64_t current_offset_;
-	bool large_hs_;
+	bool imagej_raw_possible_;
+	bool imagej_raw_;
 	/** Tells us if the data is little endian */
 	bool swap_;
 	/** The tiff tag for subfile type */
