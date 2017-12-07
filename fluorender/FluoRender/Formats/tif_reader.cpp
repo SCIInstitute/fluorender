@@ -1624,22 +1624,20 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 									memcpy((uint16_t*)val + valindex,
 									(uint16_t*)buf + i*tile_w,
 										sizeof(uint16_t)*tile_w);
-								indexinpage += width;
-								valindex += width;
 							}
 							else
 							{
 								if (eight_bit)
 									memcpy((uint8_t*)val + valindex,
-									(uint8_t*)buf + i*tile_w_last,
+									(uint8_t*)buf + i*tile_w,
 										sizeof(uint8_t)*tile_w_last);
 								else
 									memcpy((uint16_t*)val + valindex,
-									(uint16_t*)buf + i*tile_w_last,
+									(uint16_t*)buf + i*tile_w,
 										sizeof(uint16_t)*tile_w_last);
-								indexinpage += width;
-								valindex += width;
 							}
+							indexinpage += width;
+							valindex += width;
 						}
 					}
 				}
