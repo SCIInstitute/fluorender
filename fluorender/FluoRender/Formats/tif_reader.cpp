@@ -670,6 +670,9 @@ void TIFReader::SetPageInfoVector(uint16_t tag, uint16_t type, uint64_t cnt, voi
 
 void TIFReader::ReadTiffFields()
 {
+	if (m_page_info.b_valid)
+		return;
+
 	if (!tiff_stream.is_open())
 		throw std::runtime_error("TIFF File not open for reading.");
 	//go to the current IFD block/page
@@ -1279,11 +1282,6 @@ void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
 	//unsigned long long pos = tiff_stream.tellg();
 	tiff_stream.read((char*)temp, byte_count);
 	bool eight_bits = 8 == GetTiffField(kBitsPerSampleTag);
-	if (swap_ && !eight_bits) {
-		short * temp2 = reinterpret_cast<short*>(temp);
-		for (size_t sh = 0; sh < byte_count / 2; sh++)
-			temp2[sh] = SwapShort(temp2[sh]);
-	}
 	//get compression tag, decompress if necessary
 	uint64_t tmp = GetTiffField(kCompressionTag);
 	uint64_t prediction = GetTiffField(kPredictionTag);
@@ -1310,6 +1308,14 @@ void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
 	else
 		memcpy(data, temp, byte_count);
 	delete[] temp;
+
+	//swap after decompression
+	if (swap_ && !eight_bits)
+	{
+		short * data2 = reinterpret_cast<short*>(data);
+		for (size_t sh = 0; sh < strip_size / 2; sh++)
+			data2[sh] = SwapShort(data2[sh]);
+	}
 }
 
 //read a tile
@@ -1323,22 +1329,12 @@ void TIFReader::GetTiffTile(uint64_t page, uint64_t tile,
 	//unsigned long long pos = tiff_stream.tellg();
 	tiff_stream.read((char*)temp, byte_count);
 	bool eight_bits = 8 == GetTiffField(kBitsPerSampleTag);
-	if (swap_ && !eight_bits)
-	{
-		short * temp2 = reinterpret_cast<short*>(temp);
-		for (size_t sh = 0; sh < byte_count / 2; sh++)
-			temp2[sh] = SwapShort(temp2[sh]);
-	}
 	//get compression tag, decompress if necessary
 	uint64_t tmp = GetTiffField(kCompressionTag);
 	uint64_t prediction = GetTiffField(kPredictionTag);
 	uint64_t samples = GetTiffField(kSamplesPerPixelTag);
 	samples = samples == 0 ? 1 : samples;
 	tsize_t stride = (GetTiffField(kPlanarConfigurationTag) == 2) ? 1 : samples;
-	//uint64_t rows_per_strip = GetTiffField(kRowsPerStripTag,NULL,0);
-	//uint64_t rows_per_strip = strip_size /
-	//	GetTiffField(kImageWidthTag) /
-	//	samples;
 	bool isCompressed = tmp == 5;
 	if (isCompressed)
 	{
@@ -1355,6 +1351,14 @@ void TIFReader::GetTiffTile(uint64_t page, uint64_t tile,
 	else
 		memcpy(data, temp, byte_count);
 	delete[] temp;
+
+	//swap after decompression
+	if (swap_ && !eight_bits)
+	{
+		short * data2 = reinterpret_cast<short*>(data);
+		for (size_t sh = 0; sh < tile_size / 2; sh++)
+			data2[sh] = SwapShort(data2[sh]);
+	}
 }
 
 void TIFReader::ResetTiff()
