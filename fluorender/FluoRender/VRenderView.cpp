@@ -4503,24 +4503,28 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		double dist = GetPointVolume(p,
 			nx / 2.0, ny / 2.0,
 			m_cur_vol, 2, true, 0.6);
+		if (dist <= 0.0)
+			dist = GetPointVolumeBox(p,
+				nx / 2.0, ny / 2.0,
+				m_cur_vol, true);
 		if (dist > 0.0)
 		{
-			//Point c(m_transx + m_obj_transx,
-			//	m_transy + m_obj_transy,
-			//	m_transz + m_obj_transz);
-			//Point p0(m_obj_transx,
-			//	m_obj_transy,
-			//	m_obj_transz);
+			double obj_transx, obj_transy, obj_transz;
 			p = Point(m_obj_ctrx - p.x(),
 				p.y() - m_obj_ctry,
 				p.z() - m_obj_ctrz);
-			//if ((p-c).length() > (p0-c).length())
-			//	m_distance += (p0-p).length();
-			//else
-			//	m_distance -= (p0 - p).length();
-			m_obj_transx = p.x();
-			m_obj_transy = p.y();
-			m_obj_transz = p.z();
+			obj_transx = p.x();
+			obj_transy = p.y();
+			obj_transz = p.z();
+			double thresh = 10.0;
+			if (sqrt((m_obj_transx-obj_transx)*(m_obj_transx - obj_transx)+
+				(m_obj_transy - obj_transy)*(m_obj_transy - obj_transy) + 
+				(m_obj_transz - obj_transz)*(m_obj_transz - obj_transz)) > thresh)
+			{
+				m_obj_transx = obj_transx;
+				m_obj_transy = obj_transy;
+				m_obj_transz = obj_transz;
+			}
 		}
 		m_rot_center_dirty = false;
 		refresh = true;

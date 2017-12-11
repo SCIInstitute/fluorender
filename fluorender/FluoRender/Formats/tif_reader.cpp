@@ -1313,7 +1313,7 @@ void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
 	if (swap_ && !eight_bits)
 	{
 		short * data2 = reinterpret_cast<short*>(data);
-		for (size_t sh = 0; sh < strip_size / 2; sh++)
+		for (uint64_t sh = 0; sh < strip_size / 2; sh++)
 			data2[sh] = SwapShort(data2[sh]);
 	}
 }
@@ -1685,8 +1685,8 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 						valindex = pageindex*pagepixels +
 							strip*strip_size / (eight_bit ? 1 : 2);
 						uint64_t strip_size_used = strip_size;
-						if (valindex + strip_size >= total_size)
-							strip_size_used = total_size - valindex;
+						if (valindex + strip_size / (eight_bit ? 1 : 2) >= total_size)
+							strip_size_used = (total_size - valindex) * (eight_bit ? 1 : 2);
 						if (strip_size_used > 0)
 						{
 							if (eight_bit)
