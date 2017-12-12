@@ -191,7 +191,7 @@ wxPanel(parent, id, pos, size,style, name),
 	m_saturation_sldr = new wxSlider(this, ID_SaturationSldr, 255, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_saturation_text = new wxTextCtrl(this, ID_SaturationText, "50",
-		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+		wxDefaultPosition, wxSize(40, 20)/*, 0, vald_int*/);
 	sizer_l2->Add(m_saturation_sldr, 1, wxEXPAND);
 	sizer_l2->Add(m_saturation_text, 0, wxALIGN_CENTER);
 	sizer_l2->Add(m_saturation_st, 0, wxALIGN_CENTER);
@@ -205,7 +205,7 @@ wxPanel(parent, id, pos, size,style, name),
 	m_luminance_sldr = new wxSlider(this, ID_LuminanceSldr, 128, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_luminance_text = new wxTextCtrl(this, ID_LuminanceText, "128",
-		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+		wxDefaultPosition, wxSize(40, 20)/*, 0, vald_int*/);
 	sizer_l3->Add(m_luminance_sldr, 1, wxEXPAND, 0);
 	sizer_l3->Add(m_luminance_text, 0, wxALIGN_CENTER, 0);
 	sizer_l3->Add(m_luminance_st, 0, wxALIGN_CENTER, 0);
