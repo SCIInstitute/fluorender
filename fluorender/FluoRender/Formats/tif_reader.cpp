@@ -1364,7 +1364,7 @@ void TIFReader::GetTiffTile(uint64_t page, uint64_t tile,
 	if (swap_ && !eight_bits)
 	{
 		short * data2 = reinterpret_cast<short*>(data);
-		for (size_t sh = 0; sh < tile_size / 2; sh++)
+		for (uint64_t sh = 0; sh < tile_size / 2; sh++)
 			data2[sh] = SwapShort(data2[sh]);
 	}
 }
@@ -1614,6 +1614,45 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 					uint64_t indexinpage;
 					if (samples > 1)
 					{
+						GetTiffTile(sequence ? 0 : pageindex, tile, buf, tile_size, tile_h);
+						int num_pixels = tile_size / samples / (eight_bit ? 1 : 2);
+						uint64_t tx, ty;//tile coord
+						tx = tile % x_tile_num;
+						ty = tile / x_tile_num;
+						indexinpage = width * ty * tile_h + tx * tile_w;
+						valindex = pageindex * pagepixels + indexinpage;
+						for (int i = 0; i<num_pixels; i++)
+						{
+							if (tx == x_tile_num - 1)
+							{
+								if (i % tile_w == tile_w_last)
+									i += tile_w - tile_w_last;
+							}
+							if (i % tile_w == 0 && i)
+							{
+								if (tx < x_tile_num - 1)
+								{
+									indexinpage += width - tile_w;
+									valindex += width - tile_w;
+								}
+								else
+								{
+									indexinpage += width - tile_w_last;
+									valindex += width - tile_w_last;
+								}
+							}
+							if (indexinpage >= pagepixels) break;
+							if (eight_bit)
+								memcpy((uint8_t*)val + valindex,
+								(uint8_t*)buf + samples*i + c,
+									sizeof(uint8_t));
+							else
+								memcpy((uint16_t*)val + valindex,
+								(uint16_t*)buf + samples*i + c,
+									sizeof(uint16_t));
+							indexinpage++;
+							valindex++;
+						}
 					}
 					else
 					{
@@ -1681,12 +1720,12 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 								memcpy((uint8_t*)val + valindex,
 									(uint8_t*)buf + samples*i + c, sizeof(uint8_t));
 							else
-								memcpy((uint16_t*)val + valindex * 2,
+								memcpy((uint16_t*)val + valindex,
 									(uint16_t*)buf + samples*i + c, sizeof(uint16_t));
 							if (!eight_bit && get_max &&
 								*((uint16_t*)val + valindex) > max_value)
 								max_value = *((uint16_t*)val + valindex);
-							if (eight_bit) valindex++;
+							valindex++;
 						}
 					}
 					else
