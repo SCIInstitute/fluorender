@@ -12341,7 +12341,7 @@ void VRenderGLView::switchLevel(VolumeData *vd)
 			{
 				for (int i = lvnum - 1; i >= 0; i--)
 				{
-					if (m_scale_factor > (m_interactive ? sfs[i] * 16.0 : sfs[i])) lv = i - 1;
+					if (m_scale_factor/5 > (/*m_interactive ? sfs[i] * 16.0 :*/ sfs[i])) lv = i - 1;
 				}
 			}
 			if (lv < 0) lv = 0;
@@ -12353,11 +12353,11 @@ void VRenderGLView::switchLevel(VolumeData *vd)
 		if (prev_lv != new_lv)
 		{
 			vector<TextureBrick*> *bricks = vtex->get_bricks();
-			if (bricks)
-			{
-				for (int i = 0; i < bricks->size(); i++)
-					(*bricks)[i]->set_disp(false);
-			}
+			//if (bricks)
+			//{
+			//	for (int i = 0; i < bricks->size(); i++)
+			//		(*bricks)[i]->set_disp(false);
+			//}
 			vd->SetLevel(new_lv);
 			vtex->set_sort_bricks();
 		}
