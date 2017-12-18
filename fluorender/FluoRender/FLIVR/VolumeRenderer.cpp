@@ -851,7 +851,7 @@ namespace FLIVR
 			{
 				if (mem_swap_ && start_update_loop_ && !done_update_loop_)
 				{
-					if (!b->drawn(mode))
+					if (!b->drawn(mode) && b->tex_data(0))
 					{
 						b->set_drawn(mode, true);
 						cur_chan_brick_num_++;

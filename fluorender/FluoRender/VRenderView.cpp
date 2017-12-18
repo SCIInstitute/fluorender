@@ -11609,6 +11609,8 @@ return wxWindow::MSWWindowProc(message, wParam, lParam);
 
 void VRenderGLView::OnMouse(wxMouseEvent& event)
 {
+	if (m_interactive)
+		return;
 	wxWindow *window = wxWindow::FindFocus();
 	if (window &&
 		window->GetClassInfo()->IsKindOf(CLASSINFO(wxTextCtrl)))

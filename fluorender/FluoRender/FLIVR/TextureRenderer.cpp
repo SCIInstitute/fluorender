@@ -61,9 +61,9 @@ namespace FLIVR
 	bool TextureRenderer::clear_chan_buffer_ = true;
 	bool TextureRenderer::save_final_buffer_ = true;
 #ifdef _DEBUG
-	bool TextureRenderer::debug_uptime_ = false;//change to max time
+	bool TextureRenderer::debug_uptime_ = true;//change to max time
 #else
-	bool TextureRenderer::debug_uptime_ = false;//change to max time
+	bool TextureRenderer::debug_uptime_ = true;//change to max time
 #endif
 	unsigned long TextureRenderer::st_time_ = 0;
 	unsigned long TextureRenderer::up_time_ = 100;
@@ -644,8 +644,8 @@ namespace FLIVR
 
 		if (clear_pool_) clear_tex_pool();
 		TextureBrick* brick = (*bricks)[bindex];
-		int idx;
-
+		if (!brick || !brick->tex_data(c))
+			return 0;
 		if (c < 0 || c >= TEXTURE_MAX_COMPONENTS)
 			return 0;
 		if (brick->ntype(c) != TextureBrick::TYPE_INT)
@@ -660,7 +660,7 @@ namespace FLIVR
 		GLenum textype = brick->tex_type(c);
 
 		//! Try to find the existing texture in tex_pool_, for this brick.
-		idx = -1;
+		int idx = -1;
 		for (unsigned int i = 0; i < tex_pool_.size() && idx < 0; i++)
 		{
 			if (tex_pool_[i].id != 0
