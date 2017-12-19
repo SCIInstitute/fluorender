@@ -61,9 +61,9 @@ namespace FLIVR
 	bool TextureRenderer::clear_chan_buffer_ = true;
 	bool TextureRenderer::save_final_buffer_ = true;
 #ifdef _DEBUG
-	bool TextureRenderer::debug_uptime_ = true;//change to max time
+	bool TextureRenderer::debug_uptime_ = false;//change to max time
 #else
-	bool TextureRenderer::debug_uptime_ = true;//change to max time
+	bool TextureRenderer::debug_uptime_ = false;//change to max time
 #endif
 	unsigned long TextureRenderer::st_time_ = 0;
 	unsigned long TextureRenderer::up_time_ = 100;

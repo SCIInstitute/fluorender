@@ -576,6 +576,7 @@ namespace FLIVR
 		Ray snapview = compute_snapview(0.4);
 
 		vector<TextureBrick*> *bricks = 0;
+		tex_->set_matrices(m_mv_mat2, m_proj_mat);
 		if (mem_swap_ && interactive_)
 			bricks = tex_->get_closest_bricks(
 			quota_center_, quota_bricks_chan_, true,
@@ -809,12 +810,12 @@ namespace FLIVR
 		for (unsigned int i=0; i < bricks->size(); i++)
 		{
 			//comment off when debug_ds
-			if (mem_swap_)
-			{
-				uint32_t rn_time = GET_TICK_COUNT();
-				if (rn_time - st_time_ > get_up_time())
-					break;
-			}
+			//if (mem_swap_)
+			//{
+			//	uint32_t rn_time = GET_TICK_COUNT();
+			//	if (rn_time - st_time_ > get_up_time())
+			//		break;
+			//}
 
 			TextureBrick* b = (*bricks)[i];
 			if (colormap_mode_==1 && colormap_proj_)
@@ -846,7 +847,8 @@ namespace FLIVR
 					continue;
 			}
 
-			if (!test_against_view(b->bbox(), !orthographic_p) || // Clip against view
+			if (((!mem_swap_ || !interactive_) &&
+				!test_against_view(b->bbox(), !orthographic_p)) || // Clip against view
 				b->get_priority()>0) //nothing to draw
 			{
 				if (mem_swap_ && start_update_loop_ && !done_update_loop_)

@@ -33,6 +33,7 @@
 #include "Transform.h"
 #include "TextureBrick.h"
 #include "Utils.h"
+#include <glm/glm.hpp>
 
 namespace FLIVR
 {
@@ -148,6 +149,12 @@ namespace FLIVR
 		int get_brick_num() {return int((*bricks_).size());}
 		//quota bricks
 		vector<TextureBrick*>* get_quota_bricks();
+
+		// Tests the bounding box against the current MODELVIEW and
+		// PROJECTION matrices to determine if it is within the viewport.
+		// Returns true if it is visible.
+		void set_matrices(glm::mat4 &mv_mat2, glm::mat4 &proj_mat);
+		bool test_against_view(const BBox &bbox, bool persp = false);
 
 		inline int nlevels(){ return int((*bricks_).size()); }
 
@@ -345,6 +352,10 @@ namespace FLIVR
 
 		//used when brkxml_ is not equal to false.
 		vector<TextureBrick*> default_vec_;
+
+		//for view testing
+		Transform mv_;
+		Transform pr_;
 	};
 
 	inline unsigned int Texture::negxid(unsigned int id)

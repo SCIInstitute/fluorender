@@ -32,6 +32,7 @@
 #include <FLIVR/Utils.h>
 #include <algorithm>
 #include <inttypes.h>
+#include <glm/gtc/type_ptr.hpp>
 
 using namespace std;
 
@@ -199,6 +200,8 @@ namespace FLIVR
 
 			for (i=0; i<(unsigned int)(*bricks_).size(); i++)
 			{
+				if (!test_against_view((*bricks_)[i]->bbox(), !is_orthographic))
+					continue;
 				if (skip)
 				{
 					if ((*bricks_)[i]->get_priority() == 0)
@@ -253,6 +256,51 @@ namespace FLIVR
 		}
 
 		return &quota_bricks_;
+	}
+
+	void Texture::set_matrices(glm::mat4 &mv_mat2, glm::mat4 &proj_mat)
+	{
+		float mvmat_[16];
+		float prmat_[16];
+		memcpy(mvmat_, glm::value_ptr(mv_mat2), 16 * sizeof(float));
+		memcpy(prmat_, glm::value_ptr(proj_mat), 16 * sizeof(float));
+		mv_.set_trans(mvmat_);
+		pr_.set_trans(prmat_);
+	}
+	
+	bool Texture::test_against_view(const BBox &bbox, bool persp)
+	{
+		if (persp)
+		{
+			const Point p0_cam(0.0, 0.0, 0.0);
+			Point p0, p0_obj;
+			pr_.unproject(p0_cam, p0);
+			mv_.unproject(p0, p0_obj);
+			if (bbox.inside(p0_obj))
+				return true;
+		}
+
+		bool overx = true;
+		bool overy = true;
+		bool overz = true;
+		bool underx = true;
+		bool undery = true;
+		bool underz = true;
+		for (int i = 0; i < 8; i++)
+		{
+			const Point pold((i & 1) ? bbox.min().x() : bbox.max().x(),
+				(i & 2) ? bbox.min().y() : bbox.max().y(),
+				(i & 4) ? bbox.min().z() : bbox.max().z());
+			const Point p = pr_.project(mv_.project(pold));
+			overx = overx && (p.x() > 1.0);
+			overy = overy && (p.y() > 1.0);
+			overz = overz && (p.z() > 1.0);
+			underx = underx && (p.x() < -1.0);
+			undery = undery && (p.y() < -1.0);
+			underz = underz && (p.z() < -1.0);
+		}
+
+		return !(overx || overy || overz || underx || undery || underz);
 	}
 
 	vector<TextureBrick*>* Texture::get_bricks()
