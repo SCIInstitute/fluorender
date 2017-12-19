@@ -1371,7 +1371,7 @@ void VRenderFrame::OnInfo(wxCommandEvent& WXUNUSED(event))
 	int psJan = time.Find("Jan");
 	int psDec = time.Find("Dec");
 	wxDialog* d = new wxDialog(this,wxID_ANY,"About FluoRender",wxDefaultPosition,
-		wxSize(540,250),wxDEFAULT_DIALOG_STYLE );
+		wxSize(600,200),wxDEFAULT_DIALOG_STYLE );
 	wxBoxSizer * main = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer * left = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer * right = new wxBoxSizer(wxVERTICAL);
@@ -1404,8 +1404,8 @@ void VRenderFrame::OnInfo(wxCommandEvent& WXUNUSED(event))
 	right->Add(txt,0,wxEXPAND);
 	right->Add(3,5,0);
 	txt = new wxStaticText(d,wxID_ANY,VERSION_AUTHORS,
-		wxDefaultPosition,wxSize(-1,110));
-	font = wxFont(10,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
+		wxDefaultPosition,wxSize(300,-1));
+	font = wxFont(7,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
 	txt->SetFont(font);
 	right->Add(txt,0,wxEXPAND);
 	wxHyperlinkCtrl* hyp = new wxHyperlinkCtrl(d,wxID_ANY,"Contact Info",
