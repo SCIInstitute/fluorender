@@ -5074,6 +5074,23 @@ void VRenderGLView::SetParams(double t)
 	int ival;
 	if (interpolator->GetInt(keycode, t, ival))
 		SetVolMethod(ival);
+	//perspective angle
+	keycode.l2_name = "aov";
+	double aov;
+	if (interpolator->GetDouble(keycode, t, aov))
+	{
+		if (aov <= 10)
+		{
+			SetPersp(false);
+			m_vrv->m_aov_text->ChangeValue("Ortho");
+			m_vrv->m_aov_sldr->SetValue(10);
+		}
+		else
+		{
+			SetPersp(true);
+			SetAov(aov);
+		}
+	}
 
 	if (clip_view)
 		clip_view->SetVolumeData(vr_frame->GetCurSelVol());
@@ -11609,12 +11626,22 @@ return wxWindow::MSWWindowProc(message, wParam, lParam);
 
 void VRenderGLView::OnMouse(wxMouseEvent& event)
 {
-	if (m_interactive)
+	if (m_interactive && !m_rot_lock)
 		return;
 	wxWindow *window = wxWindow::FindFocus();
 	if (window &&
-		window->GetClassInfo()->IsKindOf(CLASSINFO(wxTextCtrl)))
+		window->GetClassInfo()->
+		IsKindOf(CLASSINFO(wxTextCtrl)) &&
+		(event.LeftDown() ||
+		event.RightDown() ||
+		event.MiddleDown() ||
+		event.LeftUp() ||
+		event.MiddleUp() ||
+		event.RightUp() ||
+		event.Dragging() ||
+		event.GetWheelRotation()))
 		SetFocus();
+
 	//mouse interactive flag
 	m_interactive = false;
 	m_paint_enable = false;

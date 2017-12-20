@@ -853,6 +853,14 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	keycode.l2_name = "volmethod";
 	flkeyI = new FlKeyInt(keycode, ival);
 	interpolator->AddKey(flkeyI);
+	//perspective angle
+	bool persp = m_view->GetPersp();
+	double aov = m_view->GetAov();
+	if (!persp)
+		aov = 9.9;
+	keycode.l2_name = "aov";
+	flkey = new FlKeyDouble(keycode, aov);
+	interpolator->AddKey(flkey);
 
 	interpolator->End();
 
