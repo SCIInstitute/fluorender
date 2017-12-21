@@ -119,7 +119,7 @@ VolumeLoaderThread::~VolumeLoaderThread()
 
 wxThread::ExitCode VolumeLoaderThread::Entry()
 {
-	unsigned int st_time = GET_TICK_COUNT();
+	//unsigned int st_time = GET_TICK_COUNT();
 
 	while (m_vl->m_running_decomp_th > 0)
 	{
