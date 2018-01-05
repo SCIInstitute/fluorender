@@ -644,7 +644,8 @@ namespace FLIVR
 
 		if (clear_pool_) clear_tex_pool();
 		TextureBrick* brick = (*bricks)[bindex];
-		if (!brick || !brick->tex_data(c))
+		if (!tex_->isBrxml() &&
+			(!brick || !brick->tex_data(c)))
 			return 0;
 		if (c < 0 || c >= TEXTURE_MAX_COMPONENTS)
 			return 0;

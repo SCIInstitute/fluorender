@@ -818,6 +818,30 @@ namespace FLIVR
 			//}
 
 			TextureBrick* b = (*bricks)[i];
+			if (tex_->isBrxml() && !b->isLoaded())
+				continue;
+
+			if (mem_swap_ && start_update_loop_ && !done_update_loop_)
+			{
+				if (b->drawn(mode))
+					continue;
+			}
+
+			if (((!mem_swap_ || !interactive_) &&
+				!test_against_view(b->bbox(), !orthographic_p)) || // Clip against view
+				b->get_priority()>0) //nothing to draw
+			{
+				if (mem_swap_ && start_update_loop_ && !done_update_loop_)
+				{
+					if (!b->drawn(mode))
+					{
+						b->set_drawn(mode, true);
+						cur_chan_brick_num_++;
+					}
+				}
+				continue;
+			}
+
 			if (colormap_mode_==1 && colormap_proj_)
 			{
 				BBox bbox = b->bbox();
@@ -841,31 +865,23 @@ namespace FLIVR
 				shader->setLocalParamMatrix(5, matrix);
 			}
 
-			if (mem_swap_ && start_update_loop_ && !done_update_loop_)
-			{
-				if (b->drawn(mode))
-					continue;
-			}
-
-			if (((!mem_swap_ || !interactive_) &&
-				!test_against_view(b->bbox(), !orthographic_p)) || // Clip against view
-				b->get_priority()>0) //nothing to draw
-			{
-				if (mem_swap_ && start_update_loop_ && !done_update_loop_)
-				{
-					if (!b->drawn(mode) && b->tex_data(0))
-					{
-						b->set_drawn(mode, true);
-						cur_chan_brick_num_++;
-					}
-				}
-				continue;
-			}
-
 			vertex.clear();
 			index.clear();
 			size.clear();
 			b->compute_polygons(snapview, dt, vertex, index, size, multibricks);
+			//if (vertex.size() == 0) {
+			//	if (mem_swap_ && start_update_loop_ && !done_update_loop_)
+			//	{
+			//		if (!b->drawn(mode))
+			//		{
+			//			b->set_drawn(mode, true);
+			//			cur_brick_num_++;
+			//			cur_chan_brick_num_++;
+			//		}
+			//	}
+			//	continue;
+			//}
+
 			num_slices_ += vertex.size()/12;
 
 			if (vertex.size() == 0) continue;

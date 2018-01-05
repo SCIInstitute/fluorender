@@ -1378,16 +1378,16 @@ void VRenderGLView::DrawVolumes(int peel)
 
 	if (TextureRenderer::get_mem_swap())
 	{
-		if (finished_bricks == 0)
-		{
-			if (m_nodraw_count == 100)
-			{
-				TextureRenderer::set_done_update_loop();
-				m_nodraw_count = 0;
-			}
-			else
-				m_nodraw_count++;
-		}
+		//if (finished_bricks == 0)
+		//{
+		//	if (m_nodraw_count == 100)
+		//	{
+		//		TextureRenderer::set_done_update_loop();
+		//		m_nodraw_count = 0;
+		//	}
+		//	else
+		//		m_nodraw_count++;
+		//}
 	}
 }
 
