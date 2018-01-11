@@ -9978,15 +9978,22 @@ void VRenderGLView::StartLoopUpdate()
 						mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
 					vd->GetVR()->m_mv_mat2 = vd->GetVR()->m_mv_mat * vd->GetVR()->m_mv_mat2;
 
-					vector<TextureBrick*> *bricks = tex->get_bricks();
+					//vector<TextureBrick*> *bricks = tex->get_bricks();
+					Ray view_ray = vd->GetVR()->compute_view();
+					vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 					if (!bricks || bricks->size()==0)
 						continue;
 					for (j=0; j<bricks->size(); j++)
 					{
 						(*bricks)[j]->set_drawn(false);
-						if ((*bricks)[j]->get_priority()>0 ||
+						if ((*bricks)[j]->get_priority() > 0 ||
 							!vd->GetVR()->test_against_view((*bricks)[j]->bbox(), m_persp))
+						{
+							(*bricks)[j]->set_disp(false);
 							continue;
+						}
+						else
+							(*bricks)[j]->set_disp(true);
 						total_num++;
 						num_chan++;
 						if (vd->GetMode()==1 &&
@@ -12382,11 +12389,11 @@ void VRenderGLView::switchLevel(VolumeData *vd)
 		if (prev_lv != new_lv)
 		{
 			vector<TextureBrick*> *bricks = vtex->get_bricks();
-			//if (bricks)
-			//{
-			//	for (int i = 0; i < bricks->size(); i++)
-			//		(*bricks)[i]->set_disp(false);
-			//}
+			if (bricks)
+			{
+				for (int i = 0; i < bricks->size(); i++)
+					(*bricks)[i]->set_disp(false);
+			}
 			vd->SetLevel(new_lv);
 			vtex->set_sort_bricks();
 		}
