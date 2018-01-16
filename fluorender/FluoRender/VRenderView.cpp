@@ -5244,14 +5244,15 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 				vd->GetVR()->clear_tex_pool();
 		}
 	}
-	//restore currently selected volume
-	m_cur_vol = cur_vd_save;
-	m_selector.SetVolume(m_cur_vol);
-	m_calculator.SetVolumeA(m_cur_vol);
 
 	//run script
 	if (run_script)
 		Run4DScript(m_script_file);
+
+	//restore currently selected volume
+	m_cur_vol = cur_vd_save;
+	m_selector.SetVolume(m_cur_vol);
+	m_calculator.SetVolumeA(m_cur_vol);
 
 	RefreshGL(17);
 }
