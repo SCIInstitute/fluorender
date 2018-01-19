@@ -702,16 +702,3 @@ else()
     COMMAND ${CMAKE_COMMAND} -E make_directory
     "$<TARGET_FILE_DIR:FluoRender>/Executables")
 endif()
-# copy the other binaries into Executables
-add_custom_command(TARGET SynthBB POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy
-    "$<TARGET_FILE:SynthBB>"
-    "$<TARGET_FILE_DIR:FluoRender>/Executables")
-add_custom_command(TARGET ReadGMM POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy
-    "$<TARGET_FILE:ReadGMM>"
-    "$<TARGET_FILE_DIR:FluoRender>/Executables")
-add_custom_command(TARGET MaskInt POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy
-    "$<TARGET_FILE:MaskInt>"
-    "$<TARGET_FILE_DIR:FluoRender>/Executables")
