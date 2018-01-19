@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
+#include <boost/process.hpp>
 #include "VRenderView.h"
 #include "VRenderFrame.h"
 #include <tiffio.h>
@@ -40,10 +41,9 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
-#include <boost/process.hpp>
-#ifdef _WIN32
-#include <Windows.h>
-#endif
+//#ifdef _WIN32
+//#include <Windows.h>
+//#endif
 
 int VRenderView::m_id = 1;
 ImgShaderFactory VRenderGLView::m_img_shader_factory;
@@ -5960,11 +5960,8 @@ void VRenderGLView::RunExternalExe(wxFileConfig &fconfig)
 	vector<string> args;
 	args.push_back(pathname.ToStdString());
 	args.push_back(data_name.ToStdString());
-	boost::process::context ctx;
-	ctx.stdout_behavior = boost::process::silence_stream();
-	boost::process::child c =
-		boost::process::launch(pathname.ToStdString(),
-		args, ctx);
+	boost::process::child c(pathname.ToStdString(),
+		data_name.ToStdString());
 	c.wait();
 #endif
 }

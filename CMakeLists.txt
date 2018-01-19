@@ -76,6 +76,11 @@ add_definitions(-DVERSION_MAJOR_TAG="2")					#
 add_definitions(-DVERSION_MINOR_TAG="22.2")					# 
 add_definitions(-DVERSION_COPYRIGHT="December 2017")		# Up to here!
 
+#windows
+if(WIN32)
+add_definitions(-D_WIN32_WINNT=0x0501)
+endif()
+
 #UI IDs
 add_definitions(-DID_START=5999)
 add_definitions(-DID_ADJUST_VIEW=ID_START+1)
