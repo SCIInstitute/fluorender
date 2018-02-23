@@ -4515,6 +4515,7 @@ int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_
 	else
 	{
 		//RGB tiff
+		//TODO: Loading with imageJ irrespective of the file type.
 		if (type == LOAD_TYPE_TIFF)
 			reader = new TIFReader();
 		else if (type == LOAD_TYPE_NRRD)

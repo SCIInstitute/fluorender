@@ -166,11 +166,13 @@ protected:
 		unsigned char	value;		/* data value */
 		unsigned char	firstchar;	/* first token of string */
 	} code_t;
+
 	typedef struct
 	{
 		long	hash;
 		hcode_t	code;
 	} hash_t;
+
 	typedef struct
 	{
 		int		predictor;	/* predictor tag value */

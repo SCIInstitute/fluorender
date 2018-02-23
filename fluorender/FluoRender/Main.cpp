@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/filefn.h>
 #include "VRenderFrame.h"
 #include "compatibility.h"
+#include "JVMInitializer.h"
 
 IMPLEMENT_APP(VRenderApp)
 
@@ -81,6 +82,10 @@ bool VRenderApp::OnInit()
 	frame->Show();
 	if (m_file_num > 0)
 		((VRenderFrame*)frame)->StartupLoad(m_files);
+
+	// Adding JVm initialization.
+	// TODO: Need to call destroy JVM after this on destruction.
+	JVMInitializer::getInstance();
 	return true;
 }
 
