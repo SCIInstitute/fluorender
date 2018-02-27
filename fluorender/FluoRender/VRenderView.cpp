@@ -12002,7 +12002,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		{
 			m_interactive = true;
 			m_rot_center_dirty = true;
-			m_scale_factor += wheel/1000.0;
+			m_scale_factor += wheel*m_scale_factor/1000.0;
 			if (m_scale_factor < 0.01)
 				m_scale_factor = 0.01;
 			m_vrv->UpdateScaleFactor(false);
