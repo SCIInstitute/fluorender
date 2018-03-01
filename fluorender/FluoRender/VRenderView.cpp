@@ -322,7 +322,10 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	//pin rotation center
 	m_pin_rot_center(false),
 	m_rot_center_dirty(false),
-	m_res_mode(1)
+	m_res_mode(1),
+	m_enable_touch(false),
+	m_ptr_id1(-1),
+	m_ptr_id2(-1)
 {
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;
@@ -335,6 +338,14 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 		gpWTInfoA(0, 0, NULL);
 		m_hTab = TabletInit((HWND)GetHWND());
 	}
+	//check touch
+	HMODULE user32 = LoadLibrary(L"user32");
+	GetPI = reinterpret_cast<decltype(GetPointerInfo)*>
+		(GetProcAddress(user32, "GetPointerInfo"));
+	if (GetPI != NULL)
+		m_enable_touch = true;
+	else
+		m_enable_touch = false;
 #endif
 	LoadBrushSettings();
 
@@ -11566,82 +11577,175 @@ void VRenderGLView::GetTraces(bool update)
 	}
 }
 
-/*WXLRESULT VRenderGLView::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
+#ifdef _WIN32
+WXLRESULT VRenderGLView::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
 {
-PACKET pkt;
+/*	PACKET pkt;
 
-if (message == WT_PACKET)
-{
-if (gpWTPacket((HCTX)lParam, wParam, &pkt))
-{
-unsigned int prsNew = pkt.pkNormalPressure;
-wxSize size = GetClientSize();
-long pkx = (size.GetX() * pkt.pkX) / m_lc.lcOutExtX;
-long pky = size.GetY() - (size.GetY() * pkt.pkY) / m_lc.lcOutExtY;
+	if (message == WT_PACKET)
+	{
+		if (gpWTPacket((HCTX)lParam, wParam, &pkt))
+		{
+			unsigned int prsNew = pkt.pkNormalPressure;
+			wxSize size = GetClientSize();
+			long pkx = (size.GetX() * pkt.pkX) / m_lc.lcOutExtX;
+			long pky = size.GetY() - (size.GetY() * pkt.pkY) / m_lc.lcOutExtY;
 
-m_paint_enable = false;
+			m_paint_enable = false;
 
-if (HIWORD(pkt.pkButtons)==TBN_DOWN)
-{
-if (m_int_mode == 2)
-{
-old_mouse_X = pkx;
-old_mouse_Y = pky;
-prv_mouse_X = old_mouse_X;
-prv_mouse_Y = old_mouse_Y;
-m_paint_enable = true;
-m_clear_paint = true;
-m_on_press = true;
-RefreshGL(22);
-}
-}
+			if (HIWORD(pkt.pkButtons) == TBN_DOWN)
+			{
+				if (m_int_mode == 2)
+				{
+					old_mouse_X = pkx;
+					old_mouse_Y = pky;
+					prv_mouse_X = old_mouse_X;
+					prv_mouse_Y = old_mouse_Y;
+					m_paint_enable = true;
+					m_clear_paint = true;
+					m_on_press = true;
+					RefreshGL(22);
+				}
+			}
 
-if (HIWORD(pkt.pkButtons)==TBN_UP)
-{
-if (m_int_mode == 2)
-{
-m_paint_enable = true;
-Segment();
-m_int_mode = 1;
-m_on_press = false;
-RefreshGL(23);
-}
-}
+			if (HIWORD(pkt.pkButtons) == TBN_UP)
+			{
+				if (m_int_mode == 2)
+				{
+					m_paint_enable = true;
+					Segment();
+					m_int_mode = 1;
+					m_on_press = false;
+					RefreshGL(23);
+				}
+			}
 
-//update mouse position
-if (old_mouse_X >= 0 && old_mouse_Y >=0)
-{
-prv_mouse_X = old_mouse_X;
-prv_mouse_Y = old_mouse_Y;
-old_mouse_X = pkx;
-old_mouse_Y = pky;
-}
-else
-{
-old_mouse_X = pkx;
-old_mouse_Y = pky;
-prv_mouse_X = old_mouse_X;
-prv_mouse_Y = old_mouse_Y;
-}
+			//update mouse position
+			if (old_mouse_X >= 0 && old_mouse_Y >= 0)
+			{
+				prv_mouse_X = old_mouse_X;
+				prv_mouse_Y = old_mouse_Y;
+				old_mouse_X = pkx;
+				old_mouse_Y = pky;
+			}
+			else
+			{
+				old_mouse_X = pkx;
+				old_mouse_Y = pky;
+				prv_mouse_X = old_mouse_X;
+				prv_mouse_Y = old_mouse_Y;
+			}
 
-if (m_int_mode == 2 && m_on_press)
-{
-m_paint_enable = true;
-RefreshGL(24);
-}
+			if (m_int_mode == 2 && m_on_press)
+			{
+				m_paint_enable = true;
+				RefreshGL(24);
+			}
 
-if (m_on_press)
-m_pressure = double(prsNew)/512.0;
-else
-m_pressure = 1.0;
+			if (m_on_press)
+				m_pressure = double(prsNew) / 512.0;
+			else
+				m_pressure = 1.0;
 
-if (m_draw_brush)
-RefreshGL(25);
-}
-}
+			if (m_draw_brush)
+				RefreshGL(25);
+		}
+	}*/
 
-return wxWindow::MSWWindowProc(message, wParam, lParam);
-}*/
+	if (m_enable_touch)
+	{
+		if (message == WM_POINTERDOWN)
+		{
+			POINTER_INFO pointerinfo = {};
+			// get pointer info
+			if (GetPI(GET_POINTERID_WPARAM(
+				wParam), &pointerinfo))
+			{
+				int id = pointerinfo.pointerId;
+				if (m_ptr_id1 < 0)
+				{
+					m_ptr_id1 = id;
+					m_ptr1_x = pointerinfo.ptPixelLocation.x;
+					m_ptr1_y = pointerinfo.ptPixelLocation.y;
+				}
+				else if (m_ptr_id2 < 0 &&
+					m_ptr_id1 != id)
+				{
+					m_ptr_id2 = id;
+					m_ptr2_x = pointerinfo.ptPixelLocation.x;
+					m_ptr2_y = pointerinfo.ptPixelLocation.y;
+				}
+				if (m_ptr_id1 >= 0 &&
+					m_ptr_id2 >= 0)
+				{
+					//simulate middle button
+					wxMouseEvent me(wxEVT_MIDDLE_DOWN);
+					int ptx = (m_ptr1_x + m_ptr2_x) / 2;
+					int pty = (m_ptr1_y + m_ptr2_y) / 2;
+					me.SetX(ptx);
+					me.SetY(pty);
+					ProcessWindowEvent(me);
+				}
+			}
+		}
+		else if (message == WM_POINTERUP)
+		{
+			POINTER_INFO pointerinfo = {};
+			// get pointer info
+			if (GetPI(GET_POINTERID_WPARAM(
+				wParam), &pointerinfo))
+			{
+				int id = pointerinfo.pointerId;
+				if (m_ptr_id1 == id)
+					m_ptr_id1 = -1;
+				else if (m_ptr_id2 == id)
+					m_ptr_id2 = -1;
+				if (m_ptr_id1 < 0 &&
+					m_ptr_id2 < 0)
+				{
+					//simulate middle button
+					wxMouseEvent me(wxEVT_MIDDLE_UP);
+					ProcessWindowEvent(me);
+				}
+			}
+		}
+		else if (message == WM_POINTERUPDATE)
+		{
+			POINTER_INFO pointerinfo = {};
+			// get pointer info
+			if (GetPI(GET_POINTERID_WPARAM(
+				wParam), &pointerinfo))
+			{
+				int id = pointerinfo.pointerId;
+				if (m_ptr_id1 == id)
+				{
+					m_ptr1_x = pointerinfo.ptPixelLocation.x;
+					m_ptr1_y = pointerinfo.ptPixelLocation.y;
+				}
+				else if (m_ptr_id2 == id)
+				{
+					m_ptr2_x = pointerinfo.ptPixelLocation.x;
+					m_ptr2_y = pointerinfo.ptPixelLocation.y;
+				}
+			}
+
+			if (m_ptr_id1 > 0 &&
+				m_ptr_id2 > 0)
+			{
+				wxMouseEvent me(wxEVT_MOTION);
+				me.SetMiddleDown(true);
+				int ptx = (m_ptr1_x + m_ptr2_x) / 2;
+				int pty = (m_ptr1_y + m_ptr2_y) / 2;
+				me.SetX(ptx);
+				me.SetY(pty);
+				ProcessWindowEvent(me);
+			}
+		}
+	}
+
+	return wxWindow::MSWWindowProc(message, wParam, lParam);
+}
+#endif
 
 void VRenderGLView::OnMouse(wxMouseEvent& event)
 {

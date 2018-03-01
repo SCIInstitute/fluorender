@@ -96,6 +96,12 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
+//typedef BOOL(WINAPI *
+//	myGetPointerInfo)(
+//		UINT32 pointerId,
+//		POINTER_INFO *pointerInfo);
+//
+
 class VRenderView;
 class VRenderGLView: public wxGLCanvas
 {
@@ -901,6 +907,16 @@ private:
 
 	int m_res_mode;
 
+	//touch pointer ids
+	bool m_enable_touch;
+	decltype(GetPointerInfo)* GetPI;
+	int m_ptr_id1;
+	int m_ptr1_x;
+	int m_ptr1_y;
+	int m_ptr_id2;
+	int m_ptr2_x;
+	int m_ptr2_y;
+
 private:
 #ifdef _WIN32
 	//wacom tablet
@@ -1030,8 +1046,10 @@ private:
 	void OnResize(wxSizeEvent& event);
 	void OnIdle(wxIdleEvent& event);
 	void OnKeyDown(wxKeyEvent& event);
-	//WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
 	void OnQuitFscreen(wxTimerEvent& event);
+#ifdef _WIN32
+	WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
+#endif
 
 	//draw quad
 	void DrawViewQuad();

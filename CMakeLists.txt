@@ -78,7 +78,7 @@ add_definitions(-DVERSION_COPYRIGHT="December 2017")		# Up to here!
 
 #windows
 if(WIN32)
-add_definitions(-D_WIN32_WINNT=0x0501)
+add_definitions(-D_WIN32_WINNT=0x0602)
 endif()
 
 #UI IDs
