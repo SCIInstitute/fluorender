@@ -232,8 +232,8 @@ namespace FLIVR
 		//number of bricks rendered before time is up
 		static void reset_finished_bricks();
 		static int get_finished_bricks() {return finished_bricks_;}
-		static int get_finished_bricks_max();
-		static int get_est_bricks(int mode);
+		static void push_quota_brick(int bricks);
+		static int get_est_bricks(int mode, int init);
 		static int get_queue_last() {return brick_queue_.GetLast();}
 		//quota bricks in interactive mode
 		static void set_quota_bricks(int quota) {quota_bricks_ = quota;}

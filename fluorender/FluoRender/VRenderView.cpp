@@ -1176,15 +1176,29 @@ void VRenderGLView::DrawVolumes(int peel)
 			{
 				//calculate quota
 				int total_bricks = TextureRenderer::get_total_brick_num();
-				int quota_bricks = 0;
-				if (finished_bricks < total_bricks)
-					quota_bricks = TextureRenderer::get_est_bricks(3);
-				else
-					quota_bricks = total_bricks;
-				quota_bricks = Min(total_bricks, int(double(quota_bricks) *
-					double(TextureRenderer::get_cor_up_time()) /
-					double(TextureRenderer::get_up_time())));
+				int quota_bricks = total_bricks / 2;
+				int fin_bricks = finished_bricks;
+				int est_bricks = TextureRenderer::
+					get_est_bricks(0, quota_bricks);
+				unsigned long up_time = TextureRenderer::get_cor_up_time();
+				unsigned long consumed_time = TextureRenderer::get_consumed_time();
+				quota_bricks = Max(1, int(double(est_bricks) *
+					double(fin_bricks) / double(total_bricks)));
+				quota_bricks = Min(total_bricks, quota_bricks);
 				TextureRenderer::set_quota_bricks(quota_bricks);
+				TextureRenderer::push_quota_brick(quota_bricks);
+				//test
+				std::ofstream ofs("quota.txt", std::ios::out | std::ios::app);
+				std::string str;
+				str += std::to_string(quota_bricks) + "\t";
+				str += std::to_string(total_bricks) + "\t";
+				str += std::to_string(fin_bricks) + "\t";
+				str += std::to_string(est_bricks) + "\t";
+				str += std::to_string(TextureRenderer::get_up_time()) + "\t";
+				str += std::to_string(up_time) + "\t";
+				str += std::to_string(consumed_time) + "\n";
+				ofs.write(str.c_str(), str.size());
+
 				int quota_bricks_chan = 0;
 				if (m_vd_pop_list.size() > 1)
 				{
@@ -1366,11 +1380,11 @@ void VRenderGLView::DrawVolumes(int peel)
 
 	if (m_interactive)
 	{
-		//wxMouseState ms = wxGetMouseState();
-		//if (ms.LeftIsDown() ||
-		//	ms.MiddleIsDown() ||
-		//	ms.RightIsDown())
-		//	return;
+		wxMouseState ms = wxGetMouseState();
+		if (ms.LeftIsDown() ||
+			ms.MiddleIsDown() ||
+			ms.RightIsDown())
+			return;
 		m_interactive = false;
 		m_clear_buffer = true;
 		RefreshGL(2);
@@ -9423,11 +9437,11 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	if (TextureRenderer::get_mem_swap())
 	{
 		str = wxString::Format(
-			"FPS: %.2f, Bricks: %d, Quota: %d, Int: %s, Time: %lu",
+			"Int: %s, FPS: %.2f, Bricks: %d, Quota: %d, Time: %lu",
+			m_interactive?"Yes":"No",
 			fps_>=0.0&&fps_<300.0?fps_:0.0,
 			TextureRenderer::get_finished_bricks(),
 			TextureRenderer::get_quota_bricks(),
-			m_interactive?"Yes":"No",
 			TextureRenderer::get_cor_up_time());
 		////budget_test
 		//if (m_interactive)
@@ -11631,8 +11645,8 @@ return wxWindow::MSWWindowProc(message, wParam, lParam);
 
 void VRenderGLView::OnMouse(wxMouseEvent& event)
 {
-	if (m_interactive && !m_rot_lock)
-		return;
+	//if (m_interactive && !m_rot_lock)
+	//	return;
 	wxWindow *window = wxWindow::FindFocus();
 	if (window &&
 		window->GetClassInfo()->
@@ -11647,8 +11661,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		event.GetWheelRotation()))
 		SetFocus();
 
-	//mouse interactive flag
 	m_interactive = false;
+
 	m_paint_enable = false;
 	m_drawing_coord = false;
 	int nx = GetGLSize().x;
