@@ -340,13 +340,17 @@ namespace FLIVR
 		{
 			//mean
 			double sum = 0.0;
+			int count = 0;
 			for (int i = 0; i < brick_queue_.GetLimit(); i++)
 			{
 				int quota = brick_queue_.Get(i);
-				sum += quota?quota:init;
-
+				if (quota)
+				{
+					sum += quota;
+					count++;
+				}
 			}
-			result = sum / brick_queue_.GetLimit();
+			result = (sum + init) / (count + 1);
 		}
 		else if (mode == 1)
 		{

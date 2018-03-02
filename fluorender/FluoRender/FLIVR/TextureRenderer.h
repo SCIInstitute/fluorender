@@ -233,7 +233,7 @@ namespace FLIVR
 		static void reset_finished_bricks();
 		static int get_finished_bricks() {return finished_bricks_;}
 		static void push_quota_brick(int bricks);
-		static int get_est_bricks(int mode, int init);
+		static int get_est_bricks(int mode, int init=0);
 		static int get_queue_last() {return brick_queue_.GetLast();}
 		//quota bricks in interactive mode
 		static void set_quota_bricks(int quota) {quota_bricks_ = quota;}

@@ -1204,26 +1204,36 @@ void VRenderGLView::DrawVolumes(int peel)
 				int total_bricks = TextureRenderer::get_total_brick_num();
 				int quota_bricks = total_bricks / 2;
 				int fin_bricks = finished_bricks;
-				int est_bricks = TextureRenderer::
-					get_est_bricks(0, quota_bricks);
+				int last_bricks = TextureRenderer::
+					get_est_bricks(3);
+				int adj_bricks = 0;
 				unsigned long up_time = TextureRenderer::get_cor_up_time();
 				unsigned long consumed_time = TextureRenderer::get_consumed_time();
-				quota_bricks = Max(1, int(double(est_bricks) *
-					double(fin_bricks) / double(total_bricks)));
+				if (consumed_time == 0)
+					quota_bricks = total_bricks;
+				else if (consumed_time / up_time > total_bricks)
+					quota_bricks = 1;
+				else
+				{
+					adj_bricks = Max(1, int(double(last_bricks) *
+						double(up_time) / double(consumed_time)));
+					quota_bricks = TextureRenderer::
+						get_est_bricks(0, adj_bricks);
+				}
 				quota_bricks = Min(total_bricks, quota_bricks);
 				TextureRenderer::set_quota_bricks(quota_bricks);
 				TextureRenderer::push_quota_brick(quota_bricks);
-				//test
-				std::ofstream ofs("quota.txt", std::ios::out | std::ios::app);
-				std::string str;
-				str += std::to_string(quota_bricks) + "\t";
-				str += std::to_string(total_bricks) + "\t";
-				str += std::to_string(fin_bricks) + "\t";
-				str += std::to_string(est_bricks) + "\t";
-				str += std::to_string(TextureRenderer::get_up_time()) + "\t";
-				str += std::to_string(up_time) + "\t";
-				str += std::to_string(consumed_time) + "\n";
-				ofs.write(str.c_str(), str.size());
+				////test
+				//std::ofstream ofs("quota.txt", std::ios::out | std::ios::app);
+				//std::string str;
+				//str += std::to_string(quota_bricks) + "\t";
+				//str += std::to_string(total_bricks) + "\t";
+				//str += std::to_string(fin_bricks) + "\t";
+				//str += std::to_string(adj_bricks) + "\t";
+				//str += std::to_string(TextureRenderer::get_up_time()) + "\t";
+				//str += std::to_string(up_time) + "\t";
+				//str += std::to_string(consumed_time) + "\n";
+				//ofs.write(str.c_str(), str.size());
 
 				int quota_bricks_chan = 0;
 				if (m_vd_pop_list.size() > 1)
