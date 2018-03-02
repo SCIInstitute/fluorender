@@ -59,7 +59,8 @@ BEGIN_EVENT_TABLE(VRenderGLView, wxGLCanvas)
 	EVT_IDLE(VRenderGLView::OnIdle)
 	EVT_KEY_DOWN(VRenderGLView::OnKeyDown)
 	EVT_TIMER(ID_ftrigger, VRenderGLView::OnQuitFscreen)
-END_EVENT_TABLE()
+	EVT_CLOSE(VRenderGLView::OnClose)
+	END_EVENT_TABLE()
 
 VRenderGLView::VRenderGLView(wxWindow* frame,
 	wxWindow* parent,
@@ -325,7 +326,8 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	m_res_mode(1),
 	m_enable_touch(false),
 	m_ptr_id1(-1),
-	m_ptr_id2(-1)
+	m_ptr_id2(-1),
+	m_full_screen(false)
 {
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;
@@ -486,6 +488,19 @@ VRenderGLView::~VRenderGLView()
 
 	if (m_trace_group)
 		delete m_trace_group;
+
+	if (m_full_screen)
+	{
+		m_full_screen = false;
+		m_vrv->m_glview = 0;
+		m_vrv->m_full_frame = 0;
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame)
+		{
+			vr_frame->ClearVrvList();
+			vr_frame->Close();
+		}
+	}
 }
 
 void VRenderGLView::ResizeFramebuffers()
@@ -4818,6 +4833,7 @@ void VRenderGLView::OnQuitFscreen(wxTimerEvent& event)
 	if (!frame || !m_vrv)
 		return;
 
+	m_full_screen = false;
 	if (m_benchmark)
 	{
 		if (m_vrv->m_full_frame)
@@ -4844,6 +4860,15 @@ void VRenderGLView::OnQuitFscreen(wxTimerEvent& event)
 			frame->Show();
 		}
 		RefreshGL(40);
+	}
+}
+
+void VRenderGLView::OnClose(wxCloseEvent &event)
+{
+	if (m_full_screen)
+	{
+		m_fullscreen_trigger.Start(10);
+		event.Veto();
 	}
 }
 
@@ -14867,7 +14892,12 @@ void VRenderView::SetFullScreen()
 		m_full_frame->SetFocus();
 		m_full_frame->Raise();
 		m_full_frame->Show();
+		m_glview->m_full_screen = true;
 		RefreshGL();
+	}
+	else
+	{
+		m_glview->Close();
 	}
 }
 

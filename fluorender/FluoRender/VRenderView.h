@@ -917,6 +917,9 @@ private:
 	int m_ptr2_x;
 	int m_ptr2_y;
 
+	//is full screen
+	bool m_full_screen;
+
 private:
 #ifdef _WIN32
 	//wacom tablet
@@ -1047,6 +1050,7 @@ private:
 	void OnIdle(wxIdleEvent& event);
 	void OnKeyDown(wxKeyEvent& event);
 	void OnQuitFscreen(wxTimerEvent& event);
+	void OnClose(wxCloseEvent& event);
 #ifdef _WIN32
 	WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
 #endif

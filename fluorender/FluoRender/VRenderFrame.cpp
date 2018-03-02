@@ -821,7 +821,7 @@ void VRenderFrame::OnClose(wxCloseEvent &event)
 			break;
 		}
 	}
-	if (!vrv_saved)
+	if (!vrv_saved && !m_vrv_list.empty())
 		m_vrv_list[0]->SaveDefault(0xaff);
 	event.Skip();
 }

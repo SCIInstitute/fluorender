@@ -340,6 +340,9 @@ public:
 	bool GetBenchmark()
 	{ return m_benchmark; }
 
+	void ClearVrvList()
+	{ m_vrv_list.clear(); }
+
 public: //public so export window can see it and set it. 
 	RecorderDlg* m_recorder_dlg;
 	VMovieView* m_movie_view;
