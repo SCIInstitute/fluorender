@@ -327,7 +327,8 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	m_enable_touch(false),
 	m_ptr_id1(-1),
 	m_ptr_id2(-1),
-	m_full_screen(false)
+	m_full_screen(false),
+	m_drawing(false)
 {
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;
@@ -1202,7 +1203,7 @@ void VRenderGLView::DrawVolumes(int peel)
 			{
 				//calculate quota
 				int total_bricks = TextureRenderer::get_total_brick_num();
-				int quota_bricks = total_bricks / 2;
+				int quota_bricks = 1;// total_bricks / 2;
 				int fin_bricks = finished_bricks;
 				int last_bricks = TextureRenderer::
 					get_est_bricks(3);
@@ -6412,6 +6413,7 @@ void VRenderGLView::ForceDraw()
 	else
 		m_draw_type = 1;
 
+	m_drawing = true;
 	PreDraw();
 
 	switch (m_draw_type)
@@ -6490,6 +6492,7 @@ void VRenderGLView::ForceDraw()
 
 	SwapBuffers();
 	m_timer->sample();
+	m_drawing = false;
 
 	if (m_resize)
 		m_resize = false;
@@ -11786,6 +11789,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 {
 	//if (m_interactive && !m_rot_lock)
 	//	return;
+	if (m_drawing) return;
 	wxWindow *window = wxWindow::FindFocus();
 	if (window &&
 		window->GetClassInfo()->
@@ -11853,10 +11857,17 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	{
 		if (m_int_mode == 1)
 		{
-			//pick polygon models
+			//pick stuff
 			if (m_pick)
+			{
 				Pick();
-			return;
+				return;
+			}
+			else
+			{
+				RefreshGL(27);
+				return;
+			}
 		}
 		else if (m_int_mode == 2)
 		{
@@ -11898,11 +11909,16 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	if (event.MiddleUp())
 	{
 		//SetSortBricks();
-		//RefreshGL(28);
+		RefreshGL(28);
 		return;
 	}
 	if (event.RightUp())
 	{
+		if (m_int_mode == 1)
+		{
+			RefreshGL(27);
+			return;
+		}
 		if (m_int_mode == 5 &&
 			!event.AltDown())
 		{
