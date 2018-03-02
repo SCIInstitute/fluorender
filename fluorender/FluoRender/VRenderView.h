@@ -96,12 +96,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
-//typedef BOOL(WINAPI *
-//	myGetPointerInfo)(
-//		UINT32 pointerId,
-//		POINTER_INFO *pointerInfo);
-//
-
 class VRenderView;
 class VRenderGLView: public wxGLCanvas
 {

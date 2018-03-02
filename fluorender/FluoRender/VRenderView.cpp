@@ -1417,11 +1417,11 @@ void VRenderGLView::DrawVolumes(int peel)
 
 	if (m_interactive)
 	{
-		wxMouseState ms = wxGetMouseState();
-		if (ms.LeftIsDown() ||
-			ms.MiddleIsDown() ||
-			ms.RightIsDown())
-			return;
+		//wxMouseState ms = wxGetMouseState();
+		//if (ms.LeftIsDown() ||
+		//	ms.MiddleIsDown() ||
+		//	ms.RightIsDown())
+		//	return;
 		m_interactive = false;
 		m_clear_buffer = true;
 		RefreshGL(2);
@@ -6493,6 +6493,12 @@ void VRenderGLView::ForceDraw()
 	SwapBuffers();
 	m_timer->sample();
 	m_drawing = false;
+#ifdef _DEBUG
+	std::wostringstream os;
+	os << "buffer swapped" << "\t" <<
+		m_interactive << "\n";
+	OutputDebugString(os.str().c_str());
+#endif
 
 	if (m_resize)
 		m_resize = false;
@@ -10041,7 +10047,14 @@ void VRenderGLView::StartLoopUpdate()
 
 					//vector<TextureBrick*> *bricks = tex->get_bricks();
 					Ray view_ray = vd->GetVR()->compute_view();
-					vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
+					vector<TextureBrick*> *bricks = 0;
+					if (m_interactive)
+						bricks = tex->get_closest_bricks(
+							vd->GetVR()->get_quota_center(),
+							vd->GetVR()->get_total_brick_num(),
+							true, view_ray, !m_persp);
+					else
+						bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 					if (!bricks || bricks->size()==0)
 						continue;
 					for (j=0; j<bricks->size(); j++)
@@ -11787,9 +11800,9 @@ WXLRESULT VRenderGLView::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM
 
 void VRenderGLView::OnMouse(wxMouseEvent& event)
 {
-	//if (m_interactive && !m_rot_lock)
-	//	return;
-	if (m_drawing) return;
+	if (m_interactive && !m_rot_lock)
+		return;
+	//if (m_drawing) return;
 	wxWindow *window = wxWindow::FindFocus();
 	if (window &&
 		window->GetClassInfo()->
@@ -11865,7 +11878,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			}
 			else
 			{
-				RefreshGL(27);
+//				RefreshGL(27);
 				return;
 			}
 		}
@@ -11909,15 +11922,15 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	if (event.MiddleUp())
 	{
 		//SetSortBricks();
-		RefreshGL(28);
+//		RefreshGL(28);
 		return;
 	}
 	if (event.RightUp())
 	{
 		if (m_int_mode == 1)
 		{
-			RefreshGL(27);
-			return;
+//			RefreshGL(27);
+//			return;
 		}
 		if (m_int_mode == 5 &&
 			!event.AltDown())

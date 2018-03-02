@@ -243,6 +243,7 @@ namespace FLIVR
 		int get_quota_bricks_chan() {return quota_bricks_chan_;}
 		//quota center
 		static void set_qutoa_center(Point &point) {quota_center_ = point;}
+		static Point& get_quota_center() { return quota_center_; }
 		//update order
 		static void set_update_order(int val) {update_order_ = val;}
 		static int get_update_order() {return update_order_;}
