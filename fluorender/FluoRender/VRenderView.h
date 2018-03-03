@@ -908,9 +908,13 @@ private:
 	int m_ptr_id1;
 	int m_ptr1_x;
 	int m_ptr1_y;
+	int m_ptr1_x_save;
+	int m_ptr1_y_save;
 	int m_ptr_id2;
 	int m_ptr2_x;
 	int m_ptr2_y;
+	int m_ptr2_x_save;
+	int m_ptr2_y_save;
 
 	//is full screen
 	bool m_full_screen;

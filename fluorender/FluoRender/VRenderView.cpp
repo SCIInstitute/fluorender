@@ -11631,7 +11631,7 @@ void VRenderGLView::GetTraces(bool update)
 #ifdef _WIN32
 WXLRESULT VRenderGLView::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
 {
-/*	PACKET pkt;
+	/*	PACKET pkt;
 
 	if (message == WT_PACKET)
 	{
@@ -11718,6 +11718,8 @@ WXLRESULT VRenderGLView::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM
 					m_ptr_id1 = id;
 					m_ptr1_x = pointerinfo.ptPixelLocation.x;
 					m_ptr1_y = pointerinfo.ptPixelLocation.y;
+					m_ptr1_x_save = m_ptr1_x;
+					m_ptr1_y_save = m_ptr1_y;
 				}
 				else if (m_ptr_id2 < 0 &&
 					m_ptr_id1 != id)
@@ -11725,6 +11727,8 @@ WXLRESULT VRenderGLView::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM
 					m_ptr_id2 = id;
 					m_ptr2_x = pointerinfo.ptPixelLocation.x;
 					m_ptr2_y = pointerinfo.ptPixelLocation.y;
+					m_ptr2_x_save = m_ptr2_x;
+					m_ptr2_y_save = m_ptr2_y;
 				}
 				if (m_ptr_id1 >= 0 &&
 					m_ptr_id2 >= 0)
@@ -11783,13 +11787,21 @@ WXLRESULT VRenderGLView::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM
 			if (m_ptr_id1 > 0 &&
 				m_ptr_id2 > 0)
 			{
-				wxMouseEvent me(wxEVT_MOTION);
-				me.SetMiddleDown(true);
-				int ptx = (m_ptr1_x + m_ptr2_x) / 2;
-				int pty = (m_ptr1_y + m_ptr2_y) / 2;
-				me.SetX(ptx);
-				me.SetY(pty);
-				ProcessWindowEvent(me);
+				int dist1 = abs(m_ptr1_x_save - m_ptr2_x_save) +
+					abs(m_ptr1_y_save - m_ptr2_y_save);
+				int dist2 = abs(m_ptr1_x - m_ptr2_x) +
+					abs(m_ptr1_y - m_ptr2_y);
+				if (abs(dist1 - dist2) < 20)
+				{
+					wxMouseEvent me(wxEVT_MOTION);
+					me.SetMiddleDown(true);
+					int ptx = (m_ptr1_x + m_ptr2_x) / 2;
+					int pty = (m_ptr1_y + m_ptr2_y) / 2;
+					me.SetX(ptx);
+					me.SetY(pty);
+					ProcessWindowEvent(me);
+
+				}
 			}
 		}
 	}
