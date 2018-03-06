@@ -904,7 +904,9 @@ private:
 
 	//touch pointer ids
 	bool m_enable_touch;
+#ifdef _WIN32
 	decltype(GetPointerInfo)* GetPI;
+#endif
 	int m_ptr_id1;
 	int m_ptr1_x;
 	int m_ptr1_y;
