@@ -7,8 +7,11 @@
 		Defines for the general-purpose functions for the WinTab demos.
 
 	COPYRIGHT
-		Copyright (c) Wacom Company, Ltd. 2010 All Rights Reserved
+		Copyright (c) Wacom Company, Ltd. 2014 All Rights Reserved
 		All rights reserved.
+
+		The text and information contained in this file may be freely used,
+		copied, or distributed without compensation or licensing restrictions.
 
 ---------------------------------------------------------------------------- */
 #pragma once
@@ -18,7 +21,7 @@
 #include	<assert.h>
 #include	<stdarg.h>
 
-#include	<wintab.h>		// NOTE: get from wactab header package
+#include	"wintab.h"		// NOTE: get from wactab header package
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -45,11 +48,14 @@ typedef BOOL ( API * WTEXTGET ) ( HCTX, UINT, LPVOID );
 typedef BOOL ( API * WTQUEUESIZESET ) ( HCTX, int );
 typedef int  ( API * WTDATAPEEK ) ( HCTX, UINT, UINT, int, LPVOID, LPINT);
 typedef int  ( API * WTPACKETSGET ) (HCTX, int, LPVOID);
+typedef HMGR ( API * WTMGROPEN ) ( HWND, UINT );
+typedef BOOL ( API * WTMGRCLOSE ) ( HMGR );
+typedef HCTX ( API * WTMGRDEFCONTEXT ) ( HMGR, BOOL );
+typedef HCTX ( API * WTMGRDEFCONTEXTEX ) ( HMGR, UINT, BOOL );
 
-// ToDo - add more wintab32 function defs as needed
+// TODO - add more wintab32 function defs as needed
 
 //////////////////////////////////////////////////////////////////////////////
-
 // Loaded Wintab32 API functions.
 extern HINSTANCE ghWintab;
 
@@ -69,8 +75,12 @@ extern WTEXTGET gpWTExtGet;
 extern WTQUEUESIZESET gpWTQueueSizeSet;
 extern WTDATAPEEK gpWTDataPeek;
 extern WTPACKETSGET gpWTPacketsGet;
+extern WTMGROPEN gpWTMgrOpen;
+extern WTMGRCLOSE gpWTMgrClose;
+extern WTMGRDEFCONTEXT gpWTMgrDefContext;
+extern WTMGRDEFCONTEXTEX gpWTMgrDefContextEx;
 
-// ToDo - add more wintab32 function pointers as needed
+// TODO - add more wintab32 function pointers as needed
 
 //////////////////////////////////////////////////////////////////////////////
 BOOL LoadWintab( void );
@@ -90,7 +100,4 @@ void WacomTrace( char *lpszFormat, ...);
 #define WACOM_ASSERT( x )
 
 #endif // WACOM_DEBUG
-
-#define PACKETDATA	(PK_X | PK_Y | PK_BUTTONS | PK_NORMAL_PRESSURE)
-#define PACKETMODE	PK_BUTTONS
 

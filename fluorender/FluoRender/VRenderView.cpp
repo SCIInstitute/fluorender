@@ -41,9 +41,6 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
-//#ifdef _WIN32
-//#include <Windows.h>
-//#endif
 
 int VRenderView::m_id = 1;
 ImgShaderFactory VRenderGLView::m_img_shader_factory;
@@ -336,10 +333,11 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	m_sb_num = "50";
 #ifdef _WIN32
 	//tablet initialization
-	if (m_use_pres && LoadWintab())
+	if (m_use_pres &&
+		LoadWintab() &&
+		gpWTInfoA(0, 0, NULL))
 	{
-		gpWTInfoA(0, 0, NULL);
-		m_hTab = TabletInit((HWND)GetHWND());
+		m_hTab = TabletInit((HWND)GetHWND(), (HINSTANCE)::wxGetInstance());
 	}
 	//check touch
 	HMODULE user32 = LoadLibrary(L"user32");
@@ -362,26 +360,82 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 
 #ifdef _WIN32
 //tablet init
-HCTX VRenderGLView::TabletInit(HWND hWnd)
+HCTX VRenderGLView::TabletInit(HWND hWnd, HINSTANCE hInst)
 {
-	/* get default region */
-	gpWTInfoA(WTI_DEFCONTEXT, 0, &m_lc);
+	HCTX hctx = NULL;
+	UINT wDevice = 0;
+	UINT wExtX = 0;
+	UINT wExtY = 0;
+	UINT wWTInfoRetVal = 0;
+	AXIS TabletX = { 0 };
+	AXIS TabletY = { 0 };
 
-	/* modify the digitizing region */
+	// Set option to move system cursor before getting default system context.
+	m_lc.lcOptions |= CXO_SYSTEM;
+
+	// Open default system context so that we can get tablet data
+	// in screen coordinates (not tablet coordinates).
+	wWTInfoRetVal = gpWTInfoA(WTI_DEFSYSCTX, 0, &m_lc);
+	WACOM_ASSERT(wWTInfoRetVal == sizeof(LOGCONTEXT));
+
+	WACOM_ASSERT(m_lc.lcOptions & CXO_SYSTEM);
+
+	// modify the digitizing region
+	sprintf(m_lc.lcName, "PrsTest Digitizing %x", hInst);
+
+	// We process WT_PACKET (CXO_MESSAGES) messages.
 	m_lc.lcOptions |= CXO_MESSAGES;
+
+	// What data items we want to be included in the tablet packets
 	m_lc.lcPktData = PACKETDATA;
+
+	// Which packet items should show change in value since the last
+	// packet (referred to as 'relative' data) and which items
+	// should be 'absolute'.
 	m_lc.lcPktMode = PACKETMODE;
+
+	// This bitfield determines whether or not this context will receive
+	// a packet when a value for each packet field changes.  This is not
+	// supported by the Intuos Wintab.  Your context will always receive
+	// packets, even if there has been no change in the data.
 	m_lc.lcMoveMask = PACKETDATA;
+
+	// Which buttons events will be handled by this context.  lcBtnMask
+	// is a bitfield with one bit per button.
 	m_lc.lcBtnUpMask = m_lc.lcBtnDnMask;
 
-	/* output in 10000 x 10000 grid */
-	m_lc.lcOutOrgX = m_lc.lcOutOrgY = 0;
-	m_lc.lcOutExtX = 10000;
-	m_lc.lcOutExtY = 10000;
+	// Set the entire tablet as active
+	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES + 0, DVC_X, &TabletX);
+	WACOM_ASSERT(wWTInfoRetVal == sizeof(AXIS));
 
-	/* open the region */
-	return gpWTOpenA(hWnd, &m_lc, TRUE);
+	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES, DVC_Y, &TabletY);
+	WACOM_ASSERT(wWTInfoRetVal == sizeof(AXIS));
 
+	m_lc.lcInOrgX = 0;
+	m_lc.lcInOrgY = 0;
+	m_lc.lcInExtX = TabletX.axMax;
+	m_lc.lcInExtY = TabletY.axMax;
+
+	// Guarantee the output coordinate space to be in screen coordinates.  
+	m_lc.lcOutOrgX = GetSystemMetrics(SM_XVIRTUALSCREEN);
+	m_lc.lcOutOrgY = GetSystemMetrics(SM_YVIRTUALSCREEN);
+	m_lc.lcOutExtX = GetSystemMetrics(SM_CXVIRTUALSCREEN); //SM_CXSCREEN );
+
+																  // In Wintab, the tablet origin is lower left.  Move origin to upper left
+																  // so that it coincides with screen origin.
+	m_lc.lcOutExtY = -GetSystemMetrics(SM_CYVIRTUALSCREEN);	//SM_CYSCREEN );
+
+																	// Leave the system origin and extents as received:
+																	// lcSysOrgX, lcSysOrgY, lcSysExtX, lcSysExtY
+
+																	// open the region
+																	// The Wintab spec says we must open the context disabled if we are 
+																	// using cursor masks.  
+	hctx = gpWTOpenA(hWnd, &m_lc, FALSE);
+
+	WacomTrace("HCTX: %i\n", hctx);
+
+	return hctx;
 }
 #endif
 
@@ -410,6 +464,7 @@ VRenderGLView::~VRenderGLView()
 	//tablet
 	if (m_hTab)
 		gpWTClose(m_hTab);
+	UnloadWintab();
 #endif
 
 	m_loader.StopAll();

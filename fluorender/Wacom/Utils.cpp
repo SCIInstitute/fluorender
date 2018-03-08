@@ -7,24 +7,14 @@
 		Some general-purpose functions for the WinTab demos.
 
 	COPYRIGHT
-		Copyright (c) Wacom Company, Ltd. 2010 All Rights Reserved
+		Copyright (c) Wacom Company, Ltd. 2014 All Rights Reserved
 		All rights reserved.
 
+		The text and information contained in this file may be freely used,
+		copied, or distributed without compensation or licensing restrictions.
+
 ---------------------------------------------------------------------------- */
-
-#include <WacUtils.h>
-
-#ifdef WACOM_DEBUG
-
-void WacomTrace( char *lpszFormat, ...);
-
-#define WACOM_ASSERT( x ) assert( x )
-#define WACOM_TRACE(...)  WacomTrace(__VA_ARGS__)
-#else
-#define WACOM_TRACE(...)
-#define WACOM_ASSERT( x )
-
-#endif // WACOM_DEBUG
+#include "Utils.h"
 
 //////////////////////////////////////////////////////////////////////////////
 HINSTANCE ghWintab = NULL;
@@ -45,9 +35,13 @@ WTEXTGET gpWTExtGet = NULL;
 WTQUEUESIZESET gpWTQueueSizeSet = NULL;
 WTDATAPEEK gpWTDataPeek = NULL;
 WTPACKETSGET gpWTPacketsGet = NULL;
+WTMGROPEN gpWTMgrOpen = NULL;
+WTMGRCLOSE gpWTMgrClose = NULL;
+WTMGRDEFCONTEXT gpWTMgrDefContext = NULL;
+WTMGRDEFCONTEXTEX gpWTMgrDefContextEx = NULL;
 
-// ToDo - add more wintab32 function pointers as needed
-
+// TODO - add more wintab32 function pointers as needed
+char* gpszProgramName = "FluoRender Wacom Support";
 char* pszProgramName = NULL;
 
 #define GETPROCADDRESS(type, func) \
@@ -65,12 +59,15 @@ char* pszProgramName = NULL;
 //
 BOOL LoadWintab( void )
 {
-	ghWintab = LoadLibraryA(  "Wintab32.dll" );
+//	ghWintab = LoadLibraryA(  "C:\\dev\\mainline\\Wacom\\Win\\Win32\\Debug\\Wacom_Tablet.dll" );
+//	ghWintab = LoadLibraryA(  "C:\\dev\\mainline\\Wacom\\Win\\Win32\\Debug\\Wintab32.dll" );	
+	ghWintab = LoadLibraryA( "Wintab32.dll" );
+	
 	if ( !ghWintab )
 	{
-		//DWORD err = GetLastError();
-		//WACOM_TRACE("LoadLibrary error: %i\n", err);
-		//ShowError("Could not load Wintab32.dll");
+		DWORD err = GetLastError();
+		WACOM_TRACE("LoadLibrary error: %i\n", err);
+		ShowError("Could not load Wintab32.dll");
 		return FALSE;
 	}
 
@@ -92,9 +89,13 @@ BOOL LoadWintab( void )
 	GETPROCADDRESS( WTQUEUESIZESET, WTQueueSizeSet );
 	GETPROCADDRESS( WTDATAPEEK, WTDataPeek );
 	GETPROCADDRESS( WTPACKETSGET, WTPacketsGet );
+	GETPROCADDRESS( WTMGROPEN, WTMgrOpen );
+	GETPROCADDRESS( WTMGRCLOSE, WTMgrClose );
+	GETPROCADDRESS( WTMGRDEFCONTEXT, WTMgrDefContext );
+	GETPROCADDRESS( WTMGRDEFCONTEXTEX, WTMgrDefContextEx );
 
 
-	// ToDo - don't forget to NULL out pointers in UnloadWintab().
+	// TODO - don't forget to NULL out pointers in UnloadWintab().
 	return TRUE;
 }
 
@@ -123,7 +124,7 @@ void UnloadWintab( void )
 	gpWTPacket			= NULL;
 	gpWTEnable			= NULL;
 	gpWTOverlap			= NULL;
-	gpWTSave			= NULL;
+	gpWTSave				= NULL;
 	gpWTConfig			= NULL;
 	gpWTGetA				= NULL;
 	gpWTSetA				= NULL;
@@ -133,6 +134,10 @@ void UnloadWintab( void )
 	gpWTQueueSizeSet	= NULL;
 	gpWTDataPeek		= NULL;
 	gpWTPacketsGet		= NULL;
+	gpWTMgrOpen			= NULL;
+	gpWTMgrClose		= NULL;
+	gpWTMgrDefContext = NULL;
+	gpWTMgrDefContextEx = NULL;
 }
 
 
@@ -147,8 +152,9 @@ void ShowError( char *pszErrorMessage )
 
 	WACOM_ASSERT( pszErrorMessage );
 
-	MessageBoxA( NULL, pszErrorMessage, "FluoRender", MB_OK | MB_ICONHAND );
+	MessageBoxA( NULL, pszErrorMessage, gpszProgramName, MB_OK | MB_ICONHAND );
 }
+
 
 
 #ifdef WACOM_DEBUG

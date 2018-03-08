@@ -532,10 +532,9 @@ elseif(WIN32)
       SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -MD")
       SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -MD")
     endif()
-    include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/WacUtils)
     include_directories(${FluoRender_SOURCE_DIR}/fluorender/Wacom/Include)
-    file(GLOB wac_src fluorender/FluoRender/WacUtils/*.cpp)
-    file(GLOB wac_hdr fluorender/FluoRender/WacUtils/*.h)
+    file(GLOB wac_src fluorender/Wacom/*.cpp)
+    file(GLOB wac_hdr fluorender/Wacom/*.h)
     add_library(WACUTILS_OBJ OBJECT
       ${wac_src} ${wac_hdr})
     add_executable(FluoRender WIN32

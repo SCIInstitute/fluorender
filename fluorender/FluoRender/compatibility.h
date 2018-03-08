@@ -46,14 +46,11 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <windows.h>
 #include <ole2.h>
-#include <wintab.h>
-#include <pktdef.h>
 #include <ctime>
 #include <sys/types.h>
 #include <ctype.h>
 #include <wx/wx.h>
 #include "tiffio.h"
-#include "WacUtils/WacUtils.h"
 #include <direct.h>
 #include <codecvt>
 

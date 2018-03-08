@@ -60,6 +60,18 @@ DEALINGS IN THE SOFTWARE.
 
 #include <glm/glm.hpp>
 
+#ifdef _WIN32
+//#include <Windows.h>
+//wacom support
+#include <wx/msw/private.h>
+#include <MSGPACK.h>
+#include <wintab.h>
+#define PACKETDATA	(PK_X | PK_Y | PK_BUTTONS | PK_NORMAL_PRESSURE)
+#define PACKETMODE	PK_BUTTONS
+#include <PKTDEF.h>
+#include <Wacom/Utils.h>
+#endif
+
 #define VOL_METHOD_SEQ    1
 #define VOL_METHOD_MULTI  2
 #define VOL_METHOD_COMP    3
@@ -927,7 +939,7 @@ private:
 private:
 #ifdef _WIN32
 	//wacom tablet
-	HCTX TabletInit(HWND hWnd);
+	HCTX TabletInit(HWND hWnd, HINSTANCE hInst);
 #endif
 
 	void DrawBounds();
