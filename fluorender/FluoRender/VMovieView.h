@@ -126,6 +126,11 @@ public:
 	bool GetRunning() { return m_running; }
 	void GetScriptSettings();
 
+	//4d movie slider
+	void Get4DFrames();
+	//3d batch
+	void Get3DFrames();
+
 public:
 	//controls
 	wxTextCtrl *m_fps_text;
@@ -210,12 +215,6 @@ private:
 
 	//write frames to file
 	void WriteFrameToFile(int total_frames);
-
-	//4d movie slider
-	void Get4DFrames();
-
-	//3d batch
-	void Get3DFrames();
 
 private:
 	wxWindow* CreateSimplePage(wxWindow *parent);

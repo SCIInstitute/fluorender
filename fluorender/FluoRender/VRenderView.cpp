@@ -5077,6 +5077,13 @@ void VRenderGLView::SetParams(double t)
 		if (interpolator->GetDouble(keycode, t, val))
 			plane->ChangePlane(Point(0.0, 0.0, abs(val)),
 			Vector(0.0, 0.0, -1.0));
+		//t
+		double frame;
+		keycode.l2 = 0;
+		keycode.l2_name = "frame";
+		if (interpolator->GetDouble(keycode, t, frame))
+			Set4DSeqFrameVd(int(frame+0.5), false,
+				vd, vr_frame);
 	}
 
 	bool bx, by, bz;
@@ -5225,13 +5232,71 @@ void VRenderGLView::Get4DSeqFrames(int &start_frame, int &end_frame, int &cur_fr
 	}
 }
 
+void VRenderGLView::Set4DSeqFrameVd(int frame, bool run_script,
+	VolumeData* vd, VRenderFrame* vframe)
+{
+	if (vd && vd->GetReader())
+	{
+		BaseReader* reader = vd->GetReader();
+		bool clear_pool = false;
+
+		if (vd->GetCurTime() != frame)
+		{
+			Texture *tex = vd->GetTexture();
+			if (tex && tex->isBrxml())
+			{
+				BRKXMLReader *br = (BRKXMLReader *)reader;
+				br->SetCurTime(frame);
+				int curlv = tex->GetCurLevel();
+				for (int j = 0; j < br->GetLevelNum(); j++)
+				{
+					tex->setLevel(j);
+					if (vd->GetVR()) vd->GetVR()->clear_brick_buf();
+				}
+				tex->setLevel(curlv);
+				tex->set_FrameAndChannel(frame, vd->GetCurChannel());
+				vd->SetCurTime(reader->GetCurTime());
+				//update rulers
+				if (vframe && vframe->GetMeasureDlg())
+					vframe->GetMeasureDlg()->UpdateList();
+			}
+			else
+			{
+				double spcx, spcy, spcz;
+				vd->GetSpacings(spcx, spcy, spcz);
+
+				Nrrd* data = reader->Convert(frame, vd->GetCurChannel(), false);
+				if (!vd->Replace(data, false))
+					return;
+
+				vd->SetCurTime(reader->GetCurTime());
+				vd->SetSpacings(spcx, spcy, spcz);
+
+				//update rulers
+				if (vframe && vframe->GetMeasureDlg())
+					vframe->GetMeasureDlg()->UpdateList();
+
+				//run script
+				if (run_script)
+					Run4DScript(m_script_file, vd);
+
+				clear_pool = true;
+			}
+		}
+
+		if (clear_pool && vd->GetVR())
+			vd->GetVR()->clear_tex_pool();
+	}
+}
+
 void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 {
 	int start_frame, end_frame, cur_frame;
 	Get4DSeqFrames(start_frame, end_frame, cur_frame);
-	if (frame > end_frame ||
-		frame < start_frame)
-		return;
+	if (frame > end_frame)
+		frame = end_frame;
+	if (frame < start_frame)
+		frame = start_frame;
 
 	if (frame == start_frame)
 		m_sf_script = true;
@@ -5252,58 +5317,8 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 	for (int i=0; i<(int)m_vd_pop_list.size(); i++)
 	{
 		VolumeData* vd = m_vd_pop_list[i];
-		if (vd && vd->GetReader())
-		{
-			BaseReader* reader = vd->GetReader();
-			bool clear_pool = false;
-
-			if (cur_frame != frame)
-			{
-				Texture *tex = vd->GetTexture();
-				if (tex && tex->isBrxml())
-				{
-					BRKXMLReader *br = (BRKXMLReader *)reader;
-					br->SetCurTime(frame);
-					int curlv = tex->GetCurLevel();
-					for (int j = 0; j < br->GetLevelNum(); j++)
-					{
-						tex->setLevel(j);
-						if (vd->GetVR()) vd->GetVR()->clear_brick_buf();
-					}
-					tex->setLevel(curlv);
-					tex->set_FrameAndChannel(frame, vd->GetCurChannel());
-					vd->SetCurTime(reader->GetCurTime());
-					//update rulers
-					if (vframe && vframe->GetMeasureDlg())
-						vframe->GetMeasureDlg()->UpdateList();
-				}
-				else
-				{
-					double spcx, spcy, spcz;
-					vd->GetSpacings(spcx, spcy, spcz);
-
-					Nrrd* data = reader->Convert(frame, vd->GetCurChannel(), false);
-					if (!vd->Replace(data, false))
-						continue;
-
-					vd->SetCurTime(reader->GetCurTime());
-					vd->SetSpacings(spcx, spcy, spcz);
-
-					//update rulers
-					if (vframe && vframe->GetMeasureDlg())
-						vframe->GetMeasureDlg()->UpdateList();
-
-					//run script
-					if (run_script)
-						Run4DScript(m_script_file, vd);
-
-					clear_pool = true;
-				}
-			}
-
-			if (clear_pool && vd->GetVR())
-				vd->GetVR()->clear_tex_pool();
-		}
+		Set4DSeqFrameVd(frame, run_script,
+			vd, vframe);
 	}
 
 	//run script

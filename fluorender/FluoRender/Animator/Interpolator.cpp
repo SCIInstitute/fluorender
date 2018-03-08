@@ -520,6 +520,83 @@ bool Interpolator::GetQuaternion(FlKeyCode keycode, double t, Quaternion &qval)
 	return false;
 }
 
+//get values at index
+bool Interpolator::GetDouble(FlKeyCode keycode, int index, double &dval)
+{
+	if (index < 0 || index >= m_key_list.size())
+	{
+		dval = 0.0;
+		return false;
+	}
+
+	FlKey *key = SearchKey(keycode, m_key_list[index]);
+	if (!key)
+	{
+		dval = 0.0;
+		return false;
+	}
+
+	dval = ((FlKeyDouble*)key)->GetValue();
+	return true;
+}
+
+bool Interpolator::GetBoolean(FlKeyCode keycode, int index, bool &bval)
+{
+	if (index < 0 || index >= m_key_list.size())
+	{
+		bval = false;
+		return false;
+	}
+
+	FlKey *key = SearchKey(keycode, m_key_list[index]);
+	if (!key)
+	{
+		bval = false;
+		return false;
+	}
+
+	bval = ((FlKeyBoolean*)key)->GetValue();
+	return true;
+}
+
+bool Interpolator::GetInt(FlKeyCode keycode, int index, int &ival)
+{
+	if (index < 0 || index >= m_key_list.size())
+	{
+		ival = 0;
+		return false;
+	}
+
+	FlKey *key = SearchKey(keycode, m_key_list[index]);
+	if (!key)
+	{
+		ival = 0;
+		return false;
+	}
+
+	ival = ((FlKeyInt*)key)->GetValue();
+	return true;
+}
+
+bool Interpolator::GetQuaternion(FlKeyCode keycode, int index, Quaternion &qval)
+{
+	if (index < 0 || index >= m_key_list.size())
+	{
+		qval = Quaternion(0, 0, 0, 1);
+		return false;
+	}
+
+	FlKey *key = SearchKey(keycode, m_key_list[index]);
+	if (!key)
+	{
+		qval = Quaternion(0, 0, 0, 1);
+		return false;
+	}
+
+	qval = ((FlKeyQuaternion*)key)->GetValue();
+	return true;
+}
+
 //search
 FlKey* Interpolator::SearchKey(FlKeyCode keycode, FlKeyGroup* g)
 {

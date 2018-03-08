@@ -532,6 +532,9 @@ void VMovieView::GetSettings(int view)
 
 	GetScriptSettings();
 	AddScriptToList();
+
+	if (m_advanced_movie)
+		m_advanced_movie->GetSettings(vrv);
 }
 
 void VMovieView::GetScriptSettings()
@@ -982,7 +985,8 @@ void VMovieView::OnHelpBtn(wxCommandEvent &event) {
 	::wxLaunchDefaultBrowser(wxString(HELP_MANUAL) + wxString("#page=41"));
 }
 
-void VMovieView::Get4DFrames() {
+void VMovieView::Get4DFrames()
+{
 	wxString str = m_views_cmb->GetValue();
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (!vr_frame) return;
@@ -994,7 +998,7 @@ void VMovieView::Get4DFrames() {
 	vrv->Get4DSeqFrames(start_frame, end_frame, cur_frame);
 	m_progress_sldr->SetRange(start_frame, end_frame);
 	m_progress_sldr->SetValue(cur_frame);
-	m_progress_text->ChangeValue(wxString::Format("%.2f", cur_frame));
+	m_progress_text->ChangeValue(wxString::Format("%.2f", double(cur_frame)));
 	m_time_start_text->ChangeValue(wxString::Format("%d", start_frame));
 	m_time_end_text->ChangeValue(wxString::Format("%d", end_frame));
 }
