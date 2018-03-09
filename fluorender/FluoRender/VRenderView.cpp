@@ -275,7 +275,7 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	m_color_6(Color(1.0, 0.0, 0.0)),
 	m_color_7(Color(1.0, 0.0, 0.0)),
 	//paint brush presssure
-	m_use_pres(false),
+	m_use_press(true),
 	m_on_press(false),
 #ifdef _WIN32
 	m_hTab(0),
@@ -291,6 +291,7 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	//clipping plane rotations
 	m_rotx_cl(0), m_roty_cl(0), m_rotz_cl(0),
 	m_pressure(0.0),
+	m_press_peak(0.0),
 	//selection
 	m_pick(false),
 	m_draw_mask(true),
@@ -333,7 +334,7 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	m_sb_num = "50";
 #ifdef _WIN32
 	//tablet initialization
-	if (m_use_pres &&
+	if (m_use_press &&
 		LoadWintab() &&
 		gpWTInfoA(0, 0, NULL))
 	{
@@ -369,6 +370,7 @@ HCTX VRenderGLView::TabletInit(HWND hWnd, HINSTANCE hInst)
 	UINT wWTInfoRetVal = 0;
 	AXIS TabletX = { 0 };
 	AXIS TabletY = { 0 };
+	AXIS TabletNPress = { 0 };
 
 	// Set option to move system cursor before getting default system context.
 	m_lc.lcOptions |= CXO_SYSTEM;
@@ -376,12 +378,12 @@ HCTX VRenderGLView::TabletInit(HWND hWnd, HINSTANCE hInst)
 	// Open default system context so that we can get tablet data
 	// in screen coordinates (not tablet coordinates).
 	wWTInfoRetVal = gpWTInfoA(WTI_DEFSYSCTX, 0, &m_lc);
-	WACOM_ASSERT(wWTInfoRetVal == sizeof(LOGCONTEXT));
+	WACOM_ASSERT(wWTInfoRetVal == sizeof(LOGCONTEXTA));
 
 	WACOM_ASSERT(m_lc.lcOptions & CXO_SYSTEM);
 
 	// modify the digitizing region
-	sprintf(m_lc.lcName, "PrsTest Digitizing %x", hInst);
+	sprintf(m_lc.lcName, "FluoRender Digitizing %x", hInst);
 
 	// We process WT_PACKET (CXO_MESSAGES) messages.
 	m_lc.lcOptions |= CXO_MESSAGES;
@@ -411,6 +413,10 @@ HCTX VRenderGLView::TabletInit(HWND hWnd, HINSTANCE hInst)
 	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES, DVC_Y, &TabletY);
 	WACOM_ASSERT(wWTInfoRetVal == sizeof(AXIS));
 
+	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES, DVC_NPRESSURE, &TabletNPress);
+	WACOM_ASSERT(wWTInfoRetVal == sizeof(AXIS));
+
+	m_press_nmax = TabletNPress.axMax;
 	m_lc.lcInOrgX = 0;
 	m_lc.lcInOrgY = 0;
 	m_lc.lcInExtX = TabletX.axMax;
@@ -431,7 +437,7 @@ HCTX VRenderGLView::TabletInit(HWND hWnd, HINSTANCE hInst)
 																	// open the region
 																	// The Wintab spec says we must open the context disabled if we are 
 																	// using cursor masks.  
-	hctx = gpWTOpenA(hWnd, &m_lc, FALSE);
+	hctx = gpWTOpenA(hWnd, &m_lc, TRUE);
 
 	WacomTrace("HCTX: %i\n", hctx);
 
@@ -1810,7 +1816,7 @@ void VRenderGLView::DrawCircle(double cx, double cy,
 //draw the brush shape
 void VRenderGLView::DrawBrush()
 {
-	double pressure = m_use_pres&&m_on_press?m_pressure:1.0;
+	double pressure = m_use_press ? m_pressure+0.5 : 1.0;
 
 	wxPoint pos1(old_mouse_X, old_mouse_Y);
 	wxRect reg = GetClientRect();
@@ -1896,7 +1902,7 @@ void VRenderGLView::PaintStroke()
 	nx = GetGLSize().x;
 	ny = GetGLSize().y;
 
-	double pressure = m_use_pres?m_pressure:1.0;
+	double pressure = m_use_press?m_pressure+0.5:1.0;
 
 	//generate texture and buffer objects
 	//painting fbo
@@ -2077,6 +2083,15 @@ void VRenderGLView::Segment()
 	//orthographic
 	m_selector.SetOrthographic(!m_persp);
 
+	double thresh_save = m_selector.GetBrushIniThresh();
+	//modulate threshold with pressure
+	if (m_use_press && m_press_peak > 0.0)
+	{
+		double thresh = thresh_save - m_press_peak + 0.5;
+		if (thresh < 0.0) thresh = 0.0;
+		m_selector.SetBrushIniThresh(thresh);
+	}
+
 	if (m_selector.GetSelectGroup())
 	{
 		VolumeData* vd = m_selector.GetVolume();
@@ -2149,6 +2164,10 @@ void VRenderGLView::Segment()
 	else
 		m_selector.Select(m_brush_radius2-m_brush_radius1);
 
+	//restore
+	m_selector.SetBrushIniThresh(thresh_save);
+
+	//update
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetTraceDlg())
 	{
@@ -2545,12 +2564,12 @@ void VRenderGLView::SaveBrushSettings()
 
 void VRenderGLView::SetBrushUsePres(bool pres)
 {
-	m_use_pres = pres;
+	m_use_press = pres;
 }
 
 bool VRenderGLView::GetBrushUsePres()
 {
-	return m_use_pres;
+	return m_use_press;
 }
 
 void VRenderGLView::SetUseBrushSize2(bool val)
@@ -9562,12 +9581,13 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	if (TextureRenderer::get_mem_swap())
 	{
 		str = wxString::Format(
-			"Int: %s, FPS: %.2f, Bricks: %d, Quota: %d, Time: %lu",
+			"Int: %s, FPS: %.2f, Bricks: %d, Quota: %d, Time: %lu, Pressure: %.2f",
 			m_interactive?"Yes":"No",
 			fps_>=0.0&&fps_<300.0?fps_:0.0,
 			TextureRenderer::get_finished_bricks(),
 			TextureRenderer::get_quota_bricks(),
-			TextureRenderer::get_cor_up_time());
+			TextureRenderer::get_cor_up_time(),
+			m_pressure);
 		////budget_test
 		//if (m_interactive)
 		//  tos <<
@@ -9583,7 +9603,8 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 		//  << "\n";
 	}
 	else
-		str = wxString::Format("FPS: %.2f", fps_>=0.0&&fps_<300.0?fps_:0.0);
+		str = wxString::Format("FPS: %.2f, Pressure: &.2f",
+			fps_>=0.0&&fps_<300.0?fps_:0.0, m_pressure);
 	wstring wstr_temp = str.ToStdWstring();
 	px = gapw-nx/2;
 	py = ny/2-gaph/2;
@@ -11701,77 +11722,20 @@ void VRenderGLView::GetTraces(bool update)
 #ifdef _WIN32
 WXLRESULT VRenderGLView::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
 {
-	/*	PACKET pkt;
-
-	if (message == WT_PACKET)
+	if (m_use_press)
 	{
-		if (gpWTPacket((HCTX)lParam, wParam, &pkt))
+		if (message == WT_PACKET)
 		{
-			unsigned int prsNew = pkt.pkNormalPressure;
-			wxSize size = GetClientSize();
-			long pkx = (size.GetX() * pkt.pkX) / m_lc.lcOutExtX;
-			long pky = size.GetY() - (size.GetY() * pkt.pkY) / m_lc.lcOutExtY;
-
-			m_paint_enable = false;
-
-			if (HIWORD(pkt.pkButtons) == TBN_DOWN)
+			PACKET pkt;
+			if (gpWTPacket((HCTX)lParam, wParam, &pkt))
 			{
-				if (m_int_mode == 2)
-				{
-					old_mouse_X = pkx;
-					old_mouse_Y = pky;
-					prv_mouse_X = old_mouse_X;
-					prv_mouse_Y = old_mouse_Y;
-					m_paint_enable = true;
-					m_clear_paint = true;
-					m_on_press = true;
-					RefreshGL(22);
-				}
+				//compute pressure, normalized to [0, 1]
+				m_pressure = pkt.pkNormalPressure / m_press_nmax;
+				if (m_pressure > m_press_peak)
+					m_press_peak = m_pressure;
 			}
-
-			if (HIWORD(pkt.pkButtons) == TBN_UP)
-			{
-				if (m_int_mode == 2)
-				{
-					m_paint_enable = true;
-					Segment();
-					m_int_mode = 1;
-					m_on_press = false;
-					RefreshGL(23);
-				}
-			}
-
-			//update mouse position
-			if (old_mouse_X >= 0 && old_mouse_Y >= 0)
-			{
-				prv_mouse_X = old_mouse_X;
-				prv_mouse_Y = old_mouse_Y;
-				old_mouse_X = pkx;
-				old_mouse_Y = pky;
-			}
-			else
-			{
-				old_mouse_X = pkx;
-				old_mouse_Y = pky;
-				prv_mouse_X = old_mouse_X;
-				prv_mouse_Y = old_mouse_Y;
-			}
-
-			if (m_int_mode == 2 && m_on_press)
-			{
-				m_paint_enable = true;
-				RefreshGL(24);
-			}
-
-			if (m_on_press)
-				m_pressure = double(prsNew) / 512.0;
-			else
-				m_pressure = 1.0;
-
-			if (m_draw_brush)
-				RefreshGL(25);
 		}
-	}*/
+	}
 
 	if (m_enable_touch)
 	{
@@ -11930,6 +11894,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			prv_mouse_Y = old_mouse_Y;
 			m_paint_enable = true;
 			m_clear_paint = true;
+			m_press_peak = 0.0;
 			RefreshGL(26);
 		}
 		return;
@@ -12156,7 +12121,6 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		else if (m_int_mode == 2 || m_int_mode == 7)
 		{
 			m_paint_enable = true;
-			m_pressure = 1.0;
 			RefreshGL(33);
 		}
 		else if (m_int_mode ==3)

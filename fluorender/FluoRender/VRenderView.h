@@ -66,7 +66,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/msw/private.h>
 #include <MSGPACK.h>
 #include <wintab.h>
-#define PACKETDATA	(PK_X | PK_Y | PK_BUTTONS | PK_NORMAL_PRESSURE)
+#define PACKETDATA	(/*PK_X | PK_Y | */PK_BUTTONS | PK_NORMAL_PRESSURE)
 #define PACKETMODE	PK_BUTTONS
 #include <PKTDEF.h>
 #include <Wacom/Utils.h>
@@ -814,8 +814,11 @@ private:
 	Color m_color_7;
 
 	//paint brush use pressure
-	bool m_use_pres;
+	bool m_use_press;
 	bool m_on_press;
+	double m_pressure;
+	double m_press_peak;
+	double m_press_nmax;
 	//paint stroke radius
 	double m_brush_radius1;
 	double m_brush_radius2;
@@ -860,7 +863,6 @@ private:
 	HCTX m_hTab;
 	LOGCONTEXTA m_lc;
 #endif
-	double m_pressure;
 
 	//for selection
 	bool m_pick;
