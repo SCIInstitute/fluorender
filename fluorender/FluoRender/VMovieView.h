@@ -98,7 +98,10 @@ class VMovieView : public wxPanel
 		ID_HeightText,
 		ID_WidthSpin,
 		ID_HeightSpin,
-		ID_Timer
+		ID_Timer,
+
+		//notebook
+		ID_Notebook
 	};
 
 public:
@@ -125,11 +128,6 @@ public:
 
 	bool GetRunning() { return m_running; }
 	void GetScriptSettings();
-
-	//4d movie slider
-	void Get4DFrames();
-	//3d batch
-	void Get3DFrames();
 
 public:
 	//controls
@@ -276,6 +274,9 @@ private:
 
 	//timer for playback.
 	void OnTimer(wxTimerEvent& event);
+
+	//notebook page change
+	void OnNbPageChange(wxBookCtrlEvent& event);
 
 	DECLARE_EVENT_TABLE()
 };

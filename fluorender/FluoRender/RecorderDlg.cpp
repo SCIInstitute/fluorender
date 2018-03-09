@@ -1042,9 +1042,6 @@ void RecorderDlg::OnDelKey(wxCommandEvent &event)
 void RecorderDlg::OnDelAll(wxCommandEvent &event)
 {
 	m_keylist->DeleteAll();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetMovieView())
-		vr_frame->GetMovieView()->Get4DFrames();
 }
 
 //ch1

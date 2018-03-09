@@ -78,6 +78,8 @@ EVT_SPIN_DOWN(ID_WidthSpin, VMovieView::OnFrameSpinDown)
 EVT_SPIN_DOWN(ID_HeightSpin, VMovieView::OnFrameSpinDown)
 //timer
 EVT_TIMER(ID_Timer, VMovieView::OnTimer)
+//notebook
+EVT_NOTEBOOK_PAGE_CHANGED(ID_Notebook, VMovieView::OnNbPageChange)
 END_EVENT_TABLE()
 
 double VMovieView::m_Mbitrate = 1;
@@ -422,7 +424,7 @@ VMovieView::VMovieView(wxWindow* frame,
 	wxEventBlocker blocker(this);
 
 	//notebook
-	m_notebook = new wxNotebook(this, wxID_ANY);
+	m_notebook = new wxNotebook(this, ID_Notebook);
 	m_notebook->AddPage(CreateSimplePage(m_notebook), "Basic");
 	m_notebook->AddPage(CreateAdvancedPage(m_notebook), "Advanced");
 	m_notebook->AddPage(CreateAutoKeyPage(m_notebook), "Auto Key");
@@ -686,7 +688,16 @@ void VMovieView::OnTimer(wxTimerEvent& event) {
 		m_delayed_stop = true;
 }
 
-void VMovieView::OnPrev(wxCommandEvent& event) {
+void VMovieView::OnNbPageChange(wxBookCtrlEvent& event)
+{
+	int sel = event.GetSelection();
+	int old_sel = event.GetOldSelection();
+	if (sel <=1)
+		m_current_page = sel;
+}
+
+void VMovieView::OnPrev(wxCommandEvent& event)
+{
 	if (m_running) {
 		wxCommandEvent e;
 		OnStop(e);
@@ -731,16 +742,15 @@ void VMovieView::OnPrev(wxCommandEvent& event) {
 	while (m_starting_rot < -360.) m_starting_rot += 360.;
 	if (360. - std::abs(m_starting_rot) < 0.001)
 		m_starting_rot = 0.;
-	//advanced options
-	int page = m_notebook->GetSelection();
-	if (page <= 1) m_current_page = page;
-	if (m_current_page == 1) {
+	if (m_current_page == 1)
+	{
 		Interpolator *interpolator = vr_frame->GetInterpolator();
-		if (!interpolator)
-			return;
-		int frames = int(interpolator->GetLastT());
-		double runtime = (double)frames / (double)fps;
-		m_movie_time->ChangeValue(wxString::Format("%.2f", runtime));
+		if (interpolator && interpolator->GetLastIndex() > 0)
+		{
+			int frames = int(interpolator->GetLastT());
+			double runtime = (double)frames / (double)fps;
+			m_movie_time->ChangeValue(wxString::Format("%.2f", runtime));
+		}
 	}
 	SetProgress(0.);
 	SetRendering(0.);
@@ -985,41 +995,6 @@ void VMovieView::OnHelpBtn(wxCommandEvent &event) {
 	::wxLaunchDefaultBrowser(wxString(HELP_MANUAL) + wxString("#page=41"));
 }
 
-void VMovieView::Get4DFrames()
-{
-	wxString str = m_views_cmb->GetValue();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
-	VRenderView* vrv = vr_frame->GetView(str);
-	if (!vrv) return;
-	int start_frame = 0;
-	int end_frame = 0;
-	int cur_frame = 0;
-	vrv->Get4DSeqFrames(start_frame, end_frame, cur_frame);
-	m_progress_sldr->SetRange(start_frame, end_frame);
-	m_progress_sldr->SetValue(cur_frame);
-	m_progress_text->ChangeValue(wxString::Format("%.2f", double(cur_frame)));
-	m_time_start_text->ChangeValue(wxString::Format("%d", start_frame));
-	m_time_end_text->ChangeValue(wxString::Format("%d", end_frame));
-}
-
-void VMovieView::Get3DFrames() {
-	wxString str = m_views_cmb->GetValue();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
-	VRenderView* vrv = vr_frame->GetView(str);
-	if (!vrv) return;
-	int start_frame = 0;
-	int end_frame = 0;
-	int cur_frame = 0;
-	vrv->Get3DBatFrames(start_frame, end_frame, cur_frame);
-	m_progress_sldr->SetRange(start_frame, end_frame);
-	m_progress_sldr->SetValue(cur_frame);
-	m_progress_text->ChangeValue(wxString::Format("%.2f", cur_frame));
-	m_time_start_text->ChangeValue(wxString::Format("%d", start_frame));
-	m_time_end_text->ChangeValue(wxString::Format("%d", end_frame));
-}
-
 void VMovieView::DisableTime() {
 	m_time_start_text->Disable();
 	m_time_end_text->Disable();
@@ -1029,7 +1004,8 @@ void VMovieView::DisableTime() {
 	m_seq_chk->SetValue(false);
 }
 
-void VMovieView::EnableTime() {
+void VMovieView::EnableTime()
+{
 	wxString str = m_views_cmb->GetValue();
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (!vr_frame) return;
@@ -1196,14 +1172,16 @@ void VMovieView::SetRendering(double pcnt) {
 	VRenderView* vrv = vr_frame->GetView(str);
 	if (!vrv) return;
 	//advanced options
-	if (m_current_page == 1) {
+	if (m_current_page == 1)
+	{
 		Interpolator *interpolator = vr_frame->GetInterpolator();
-		if (!interpolator)
+		if (interpolator && interpolator->GetLastIndex() > 0)
+		{
+			int end_frame = int(interpolator->GetLastT());
+			vrv->SetParams(pcnt * end_frame);
+			vrv->RefreshGL();
 			return;
-		int end_frame = int(interpolator->GetLastT());
-		vrv->SetParams(pcnt * end_frame);
-		vrv->RefreshGL();
-		return;
+		}
 	}
 	//basic options
 	int start_time = STOI(m_time_start_text->GetValue().fn_str());

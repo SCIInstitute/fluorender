@@ -334,12 +334,17 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	m_sb_num = "50";
 #ifdef _WIN32
 	//tablet initialization
-	if (m_use_press &&
-		LoadWintab() &&
-		gpWTInfoA(0, 0, NULL))
+	if (m_use_press)
 	{
-		m_hTab = TabletInit((HWND)GetHWND(), (HINSTANCE)::wxGetInstance());
+		if (LoadWintab() &&
+			gpWTInfoA(0, 0, NULL))
+		{
+			m_hTab = TabletInit((HWND)GetHWND(), (HINSTANCE)::wxGetInstance());
+		}
+		else
+			m_use_press = false;
 	}
+
 	//check touch
 	HMODULE user32 = LoadLibrary(L"user32");
 	GetPI = reinterpret_cast<decltype(GetPointerInfo)*>
@@ -1816,7 +1821,8 @@ void VRenderGLView::DrawCircle(double cx, double cy,
 //draw the brush shape
 void VRenderGLView::DrawBrush()
 {
-	double pressure = m_use_press ? m_pressure+0.5 : 1.0;
+	double pressure = m_use_press && m_pressure > 0.0 ?
+		m_pressure+0.5 : 1.0;
 
 	wxPoint pos1(old_mouse_X, old_mouse_Y);
 	wxRect reg = GetClientRect();
@@ -1902,7 +1908,8 @@ void VRenderGLView::PaintStroke()
 	nx = GetGLSize().x;
 	ny = GetGLSize().y;
 
-	double pressure = m_use_press?m_pressure+0.5:1.0;
+	double pressure = m_use_press && m_pressure > 0.0 ?
+		m_pressure + 0.5 : 1.0;
 
 	//generate texture and buffer objects
 	//painting fbo
@@ -2083,13 +2090,31 @@ void VRenderGLView::Segment()
 	//orthographic
 	m_selector.SetOrthographic(!m_persp);
 
-	double thresh_save = m_selector.GetBrushIniThresh();
 	//modulate threshold with pressure
+	double ini_thresh_save, gm_falloff_save,
+		scl_falloff_save, scl_translate_save;
 	if (m_use_press && m_press_peak > 0.0)
 	{
-		double thresh = thresh_save - m_press_peak + 0.5;
-		if (thresh < 0.0) thresh = 0.0;
-		m_selector.SetBrushIniThresh(thresh);
+		//initial threshold
+		/*ini_thresh_save = m_selector.GetBrushIniThresh();
+		double ini_thresh = ini_thresh_save - m_press_peak + 0.5;
+		if (ini_thresh < 0.0) ini_thresh = 0.0;
+		m_selector.SetBrushIniThresh(ini_thresh);*/
+		//gradient magnitude falloff
+		gm_falloff_save = m_selector.GetBrushGmFalloff();
+		double gm_falloff = gm_falloff_save + (m_press_peak - 0.5) * 0.1;
+		if (gm_falloff < 0.0) gm_falloff = 0.0;
+		m_selector.SetBrushGmFalloff(gm_falloff);
+		//scalar falloff
+		/*scl_falloff_save = m_selector.GetBrushSclFalloff();
+		double scl_falloff = scl_falloff_save + (m_press_peak - 0.5) * 0.1;
+		if (scl_falloff < 0.0) scl_falloff = 0.0;
+		m_selector.SetBrushSclFalloff(scl_falloff);*/
+		//scalar translate
+		scl_translate_save = m_selector.GetBrushSclTranslate();
+		double scl_translate = scl_translate_save - m_press_peak + 0.5;
+		if (scl_translate < 0.0) scl_translate = 0.0;
+		m_selector.SetBrushSclTranslate(scl_translate);
 	}
 
 	if (m_selector.GetSelectGroup())
@@ -2165,7 +2190,13 @@ void VRenderGLView::Segment()
 		m_selector.Select(m_brush_radius2-m_brush_radius1);
 
 	//restore
-	m_selector.SetBrushIniThresh(thresh_save);
+	if (m_use_press && m_press_peak > 0.0)
+	{
+		//m_selector.SetBrushIniThresh(ini_thresh_save);
+		m_selector.SetBrushGmFalloff(gm_falloff_save);
+		//m_selector.SetBrushSclFalloff(scl_falloff_save);
+		m_selector.SetBrushSclTranslate(scl_translate_save);
+	}
 
 	//update
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
@@ -9580,14 +9611,23 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	Color text_color = GetTextColor();
 	if (TextureRenderer::get_mem_swap())
 	{
-		str = wxString::Format(
-			"Int: %s, FPS: %.2f, Bricks: %d, Quota: %d, Time: %lu, Pressure: %.2f",
-			m_interactive?"Yes":"No",
-			fps_>=0.0&&fps_<300.0?fps_:0.0,
-			TextureRenderer::get_finished_bricks(),
-			TextureRenderer::get_quota_bricks(),
-			TextureRenderer::get_cor_up_time(),
-			m_pressure);
+		if (m_use_press)
+			str = wxString::Format(
+				"Int: %s, FPS: %.2f, Bricks: %d, Quota: %d, Time: %lu, Pressure: %.2f",
+				m_interactive?"Yes":"No",
+				fps_>=0.0&&fps_<300.0?fps_:0.0,
+				TextureRenderer::get_finished_bricks(),
+				TextureRenderer::get_quota_bricks(),
+				TextureRenderer::get_cor_up_time(),
+				m_pressure);
+		else
+			str = wxString::Format(
+				"Int: %s, FPS: %.2f, Bricks: %d, Quota: %d, Time: %lu",
+				m_interactive ? "Yes" : "No",
+				fps_ >= 0.0&&fps_<300.0 ? fps_ : 0.0,
+				TextureRenderer::get_finished_bricks(),
+				TextureRenderer::get_quota_bricks(),
+				TextureRenderer::get_cor_up_time());
 		////budget_test
 		//if (m_interactive)
 		//  tos <<
@@ -9603,8 +9643,14 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 		//  << "\n";
 	}
 	else
-		str = wxString::Format("FPS: %.2f, Pressure: &.2f",
-			fps_>=0.0&&fps_<300.0?fps_:0.0, m_pressure);
+	{
+		if (m_use_press)
+			str = wxString::Format("FPS: %.2f, Pressure: &.2f",
+				fps_>=0.0&&fps_<300.0?fps_:0.0, m_pressure);
+		else
+			str = wxString::Format("FPS: %.2f",
+				fps_ >= 0.0&&fps_<300.0 ? fps_ : 0.0);
+	}
 	wstring wstr_temp = str.ToStdWstring();
 	px = gapw-nx/2;
 	py = ny/2-gaph/2;
