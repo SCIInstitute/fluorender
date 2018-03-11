@@ -1822,7 +1822,7 @@ void VRenderGLView::DrawCircle(double cx, double cy,
 void VRenderGLView::DrawBrush()
 {
 	double pressure = m_use_press && m_pressure > 0.0 ?
-		m_pressure+0.5 : 1.0;
+		1.0 + (m_pressure-0.5)*0.4 : 1.0;
 
 	wxPoint pos1(old_mouse_X, old_mouse_Y);
 	wxRect reg = GetClientRect();
@@ -1909,7 +1909,7 @@ void VRenderGLView::PaintStroke()
 	ny = GetGLSize().y;
 
 	double pressure = m_use_press && m_pressure > 0.0 ?
-		m_pressure + 0.5 : 1.0;
+		1.0 + (m_pressure - 0.5)*0.4 : 1.0;
 
 	//generate texture and buffer objects
 	//painting fbo
@@ -2102,8 +2102,8 @@ void VRenderGLView::Segment()
 		m_selector.SetBrushIniThresh(ini_thresh);*/
 		//gradient magnitude falloff
 		gm_falloff_save = m_selector.GetBrushGmFalloff();
-		double gm_falloff = gm_falloff_save + (m_press_peak - 0.5) * 0.1;
-		if (gm_falloff < 0.0) gm_falloff = 0.0;
+		double gm_falloff = gm_falloff_save + m_press_peak * 0.5;
+		//if (gm_falloff < 0.0) gm_falloff = 0.0;
 		m_selector.SetBrushGmFalloff(gm_falloff);
 		//scalar falloff
 		/*scl_falloff_save = m_selector.GetBrushSclFalloff();
