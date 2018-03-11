@@ -48,6 +48,10 @@ bool VRenderGLView::m_linked_rot = false;
 VRenderGLView* VRenderGLView::m_master_linked_view = 0;
 bool VRenderGLView::m_enlarge = false;
 double VRenderGLView::m_enlarge_scale = 1.0;
+#ifdef _WIN32
+HCTX VRenderGLView::m_hTab = 0;
+LOGCONTEXTA VRenderGLView::m_lc;
+#endif
 
 BEGIN_EVENT_TABLE(VRenderGLView, wxGLCanvas)
 	EVT_PAINT(VRenderGLView::OnDraw)
@@ -277,9 +281,6 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	//paint brush presssure
 	m_use_press(true),
 	m_on_press(false),
-#ifdef _WIN32
-	m_hTab(0),
-#endif
 	//paint stroke radius
 	m_brush_radius1(10),
 	m_brush_radius2(30),
@@ -336,7 +337,7 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	//tablet initialization
 	if (m_use_press)
 	{
-		if (LoadWintab() &&
+		if (!m_hTab && LoadWintab() &&
 			gpWTInfoA(0, 0, NULL))
 		{
 			m_hTab = TabletInit((HWND)GetHWND(), (HINSTANCE)::wxGetInstance());
@@ -474,8 +475,11 @@ VRenderGLView::~VRenderGLView()
 #ifdef _WIN32
 	//tablet
 	if (m_hTab)
+	{
 		gpWTClose(m_hTab);
-	UnloadWintab();
+		m_hTab = 0;
+		UnloadWintab();
+	}
 #endif
 
 	m_loader.StopAll();

@@ -860,8 +860,8 @@ private:
 
 	//wacom support
 #ifdef _WIN32
-	HCTX m_hTab;
-	LOGCONTEXTA m_lc;
+	static HCTX m_hTab;
+	static LOGCONTEXTA m_lc;
 #endif
 
 	//for selection
