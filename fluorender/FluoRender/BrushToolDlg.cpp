@@ -342,11 +342,19 @@ void BrushToolDlg::GetSettings(VRenderView* vrv)
 	int ival = 0;
 	bool bval = false;
 
+	//threshold range
+	if (sel_vol)
+	{
+		m_max_value = sel_vol->GetMaxValue();
+		//falloff
+		m_brush_scl_translate_sldr->SetRange(0, int(m_max_value*10.0));
+		//m_brush_scl_translate_text->SetValue(wxString::Format("%.1f", m_dft_scl_translate*m_max_value));
+	}
 	//selection strength
 	dval = vrv->GetBrushSclTranslate();
 	m_dft_scl_translate = dval;
 	m_brush_scl_translate_sldr->SetValue(int(dval*1000.0+0.5));
-	m_brush_scl_translate_text->ChangeValue(wxString::Format("%.2f", dval));
+	m_brush_scl_translate_text->ChangeValue(wxString::Format("%.1f", m_dft_scl_translate*m_max_value));
 	//gm falloff
 	dval = vrv->GetBrushGmFalloff();
 	m_dft_gm_falloff = dval;
@@ -431,15 +439,6 @@ void BrushToolDlg::GetSettings(VRenderView* vrv)
 	{
 		m_brush_size_data_rb->SetValue(false);
 		m_brush_size_screen_rb->SetValue(true);
-	}
-
-	//threshold range
-	if (sel_vol)
-	{
-		m_max_value = sel_vol->GetMaxValue();
-		//falloff
-		m_brush_scl_translate_sldr->SetRange(0, int(m_max_value*10.0));
-		m_brush_scl_translate_text->SetValue(wxString::Format("%.1f", m_dft_scl_translate*m_max_value));
 	}
 
 	UpdateUndoRedo();

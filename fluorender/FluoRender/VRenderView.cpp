@@ -293,6 +293,7 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	m_rotx_cl(0), m_roty_cl(0), m_rotz_cl(0),
 	m_pressure(0.0),
 	m_press_peak(0.0),
+	m_air_press(0.5),
 	//selection
 	m_pick(false),
 	m_draw_mask(true),
@@ -377,6 +378,7 @@ HCTX VRenderGLView::TabletInit(HWND hWnd, HINSTANCE hInst)
 	AXIS TabletX = { 0 };
 	AXIS TabletY = { 0 };
 	AXIS TabletNPress = { 0 };
+	AXIS TabletTPress = { 0 };
 
 	// Set option to move system cursor before getting default system context.
 	m_lc.lcOptions |= CXO_SYSTEM;
@@ -421,8 +423,12 @@ HCTX VRenderGLView::TabletInit(HWND hWnd, HINSTANCE hInst)
 
 	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES, DVC_NPRESSURE, &TabletNPress);
 	WACOM_ASSERT(wWTInfoRetVal == sizeof(AXIS));
-
 	m_press_nmax = TabletNPress.axMax;
+
+	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES, DVC_TPRESSURE, &TabletTPress);
+	WACOM_ASSERT(wWTInfoRetVal == sizeof(AXIS));
+	m_press_tmax = TabletTPress.axMax;
+
 	m_lc.lcInOrgX = 0;
 	m_lc.lcInOrgY = 0;
 	m_lc.lcInExtX = TabletX.axMax;
@@ -2694,6 +2700,31 @@ double VRenderGLView::GetBrushGmFalloff()
 	return m_selector.GetBrushGmFalloff();
 }
 
+//change brush display
+void VRenderGLView::ChangeBrushSize(int value)
+{
+	if (!value) return;
+
+	if (m_use_brush_radius2 && m_selector.GetMode() != 8)
+	{
+		double delta = value * m_brush_radius2 / 2000.0;
+		m_brush_radius2 += delta;
+		m_brush_radius2 = max(1.0, m_brush_radius2);
+		m_brush_radius1 = min(m_brush_radius2, m_brush_radius1);
+	}
+	else
+	{
+		double delta = value * m_brush_radius1 / 1000.0;
+		m_brush_radius1 += delta;
+		m_brush_radius1 = max(m_brush_radius1, 1.0);
+		m_brush_radius2 = m_brush_radius1;
+	}
+
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetBrushToolDlg())
+		vr_frame->GetBrushToolDlg()->GetSettings(m_vrv);
+}
+
 void VRenderGLView::SetW2d(double val)
 {
 	m_selector.SetW2d(val);
@@ -4915,6 +4946,15 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		if (wxGetKeyState(WXK_ESCAPE))
 		{
 			m_fullscreen_trigger.Start(10);
+		}
+		//brush size
+		if (wxGetKeyState(wxKeyCode('[')))
+		{
+			ChangeBrushSize(-10);
+		}
+		if (wxGetKeyState(wxKeyCode(']')))
+		{
+			ChangeBrushSize(10);
 		}
 
 		//forced refresh
@@ -11783,6 +11823,13 @@ WXLRESULT VRenderGLView::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM
 				m_pressure = pkt.pkNormalPressure / m_press_nmax;
 				if (m_pressure > m_press_peak)
 					m_press_peak = m_pressure;
+				//wheel of air brush
+				double air_press = pkt.pkTangentPressure / m_press_tmax;
+				if (air_press != m_air_press)
+				{
+					ChangeBrushSize((air_press - m_air_press) * 100);
+					m_air_press = air_press;
+				}
 			}
 		}
 	}
@@ -12258,23 +12305,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	{
 		if (m_int_mode == 2 || m_int_mode == 7)
 		{
-			if (m_use_brush_radius2 && m_selector.GetMode()!=8)
-			{
-				double delta = wheel / 100.0;
-				m_brush_radius2 += delta;
-				m_brush_radius2 = max(1.0, m_brush_radius2);
-				m_brush_radius1 = min(m_brush_radius2, m_brush_radius1);
-			}
-			else
-			{
-				m_brush_radius1 += wheel / 100.0;
-				m_brush_radius1 = max(m_brush_radius1, 1.0);
-				m_brush_radius2 = m_brush_radius1;
-			}
-
-			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-			if (vr_frame && vr_frame->GetBrushToolDlg())
-				vr_frame->GetBrushToolDlg()->GetSettings(m_vrv);
+			ChangeBrushSize(wheel);
 		}
 		else
 		{

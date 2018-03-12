@@ -66,7 +66,8 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/msw/private.h>
 #include <MSGPACK.h>
 #include <wintab.h>
-#define PACKETDATA	(/*PK_X | PK_Y | */PK_BUTTONS | PK_NORMAL_PRESSURE)
+#define PACKETDATA	(/*PK_X | PK_Y | */PK_BUTTONS |\
+		PK_NORMAL_PRESSURE | PK_TANGENT_PRESSURE)
 #define PACKETMODE	PK_BUTTONS
 #include <PKTDEF.h>
 #include <Wacom/Utils.h>
@@ -453,6 +454,8 @@ public:
 	//set gm falloff
 	void SetBrushGmFalloff(double val);
 	double GetBrushGmFalloff();
+	//change display
+	void ChangeBrushSize(int value);
 	//w2d
 	void SetW2d(double val);
 	double GetW2d();
@@ -819,6 +822,9 @@ private:
 	double m_pressure;
 	double m_press_peak;
 	double m_press_nmax;
+	double m_press_tmax;
+	//air brush
+	double m_air_press;
 	//paint stroke radius
 	double m_brush_radius1;
 	double m_brush_radius2;
