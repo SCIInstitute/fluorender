@@ -1833,6 +1833,8 @@ void VRenderGLView::DrawBrush()
 {
 	double pressure = m_use_press && m_pressure > 0.0 ?
 		1.0 + (m_pressure-0.5)*0.4 : 1.0;
+	pressure += m_air_press - 0.5;
+	pressure = max(pressure, 0.0);
 
 	wxPoint pos1(old_mouse_X, old_mouse_Y);
 	wxRect reg = GetClientRect();
@@ -1920,6 +1922,8 @@ void VRenderGLView::PaintStroke()
 
 	double pressure = m_use_press && m_pressure > 0.0 ?
 		1.0 + (m_pressure - 0.5)*0.4 : 1.0;
+	pressure += m_air_press - 0.5;
+	pressure = max(pressure, 0.0);
 
 	//generate texture and buffer objects
 	//painting fbo
@@ -11824,12 +11828,7 @@ WXLRESULT VRenderGLView::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM
 				if (m_pressure > m_press_peak)
 					m_press_peak = m_pressure;
 				//wheel of air brush
-				double air_press = pkt.pkTangentPressure / m_press_tmax;
-				if (air_press != m_air_press)
-				{
-					ChangeBrushSize((air_press - m_air_press) * 100);
-					m_air_press = air_press;
-				}
+				m_air_press = pkt.pkTangentPressure / m_press_tmax;
 			}
 		}
 	}
