@@ -604,7 +604,7 @@ void VPropView::GetSettings()
 	m_boundary_text->ChangeValue(str);
 	//contrast
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_saturation_text->GetValidator()))
-		vald_i->SetRange(0, int(m_max_val)*10);
+		vald_i->SetMin(0);
 	dval = m_vd->GetOffset();
 	ival = int(dval*m_max_val+0.5);
 	m_saturation_sldr->SetRange(0, int(m_max_val));
@@ -613,7 +613,7 @@ void VPropView::GetSettings()
 	m_saturation_text->ChangeValue(str);
 	//left threshold
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_left_thresh_text->GetValidator()))
-		vald_i->SetRange(0, int(m_max_val));
+		vald_i->SetMin(0);
 	dval = m_vd->GetLeftThresh();
 	ival = int(dval*m_max_val+0.5);
 	m_left_thresh_sldr->SetRange(0, int(m_max_val));
@@ -622,7 +622,7 @@ void VPropView::GetSettings()
 	m_left_thresh_text->ChangeValue(str);
 	//right threshold
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_right_thresh_text->GetValidator()))
-		vald_i->SetRange(0, int(m_max_val));
+		vald_i->SetMin(0);
 	dval = m_vd->GetRightThresh();
 	ival = int(dval*m_max_val+0.5);
 	m_right_thresh_sldr->SetRange(0, int(m_max_val));
@@ -631,7 +631,7 @@ void VPropView::GetSettings()
 	m_right_thresh_text->ChangeValue(str);
 	//luminance
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_luminance_text->GetValidator()))
-		vald_i->SetRange(0, int(m_max_val));
+		vald_i->SetMin(0);
 	dval = m_vd->GetLuminance();
 	ival = int(dval*m_max_val+0.5);
 	m_luminance_sldr->SetRange(0, int(m_max_val));
@@ -655,7 +655,7 @@ void VPropView::GetSettings()
 	m_color2_btn->SetColour(wxc);
 	//alpha
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_alpha_text->GetValidator()))
-		vald_i->SetRange(0, int(m_max_val));
+		vald_i->SetMin(0);
 	dval = m_vd->GetAlpha();
 	ival = int(dval*m_max_val+0.5);
 	m_alpha_sldr->SetRange(0, int(m_max_val));
@@ -739,7 +739,7 @@ void VPropView::GetSettings()
 	m_vd->GetColormapValues(low, high);
 	//low
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_colormap_low_value_text->GetValidator()))
-		vald_i->SetRange(0, int(m_max_val));
+		vald_i->SetMin(0);
 	ival = int(low*m_max_val+0.5);
 	m_colormap_low_value_sldr->SetRange(0, int(m_max_val));
 	str = wxString::Format("%d", ival);
@@ -747,7 +747,7 @@ void VPropView::GetSettings()
 	m_colormap_low_value_text->ChangeValue(str);
 	//high
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_colormap_high_value_text->GetValidator()))
-		vald_i->SetRange(0, int(m_max_val));
+		vald_i->SetMin(0);
 	ival = int(high*m_max_val+0.5);
 	m_colormap_high_value_sldr->SetRange(0, int(m_max_val));
 	str = wxString::Format("%d", ival);
@@ -984,8 +984,14 @@ void VPropView::OnSaturationText(wxCommandEvent& event)
 	wxString str = m_saturation_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
-	double val = double(ival) / m_max_val;
+	if (double(ival) > m_max_val)
+	{
+		UpdateMaxVal(ival);
+		str = wxString::Format("%d", ival);
+		m_saturation_text->ChangeValue(str);
+	}
 	m_saturation_sldr->SetValue(ival);
+	double val = double(ival) / m_max_val;
 
 	//set contrast value
 	if (m_sync_group && m_group)
@@ -1024,6 +1030,12 @@ void VPropView::OnLeftThreshText(wxCommandEvent &event)
 	wxString str = m_left_thresh_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
+	if (double(ival) > m_max_val)
+	{
+		UpdateMaxVal(ival);
+		str = wxString::Format("%d", ival);
+		m_left_thresh_text->ChangeValue(str);
+	}
 	double val = double(ival) / m_max_val;
 	double right_val = (double)m_right_thresh_sldr->GetValue() / m_max_val;
 
@@ -1064,6 +1076,12 @@ void VPropView::OnRightThreshText(wxCommandEvent &event)
 	wxString str = m_right_thresh_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
+	if (double(ival) > m_max_val)
+	{
+		UpdateMaxVal(ival);
+		str = wxString::Format("%d", ival);
+		m_right_thresh_text->ChangeValue(str);
+	}
 	double val = double(ival) / m_max_val;
 	double left_val = (double)m_left_thresh_sldr->GetValue() / m_max_val;
 
@@ -1105,6 +1123,12 @@ void VPropView::OnLuminanceText(wxCommandEvent &event)
 	wxString str = m_luminance_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
+	if (double(ival) > m_max_val)
+	{
+		UpdateMaxVal(ival);
+		str = wxString::Format("%d", ival);
+		m_luminance_text->ChangeValue(str);
+	}
 	double val = double(ival) / m_max_val;
 	m_luminance_sldr->SetValue(ival);
 
@@ -1260,6 +1284,12 @@ void VPropView::OnAlphaText(wxCommandEvent& event)
 	wxString str = m_alpha_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
+	if (double(ival) > m_max_val)
+	{
+		UpdateMaxVal(ival);
+		str = wxString::Format("%d", ival);
+		m_alpha_text->ChangeValue(str);
+	}
 	double val = double(ival) / m_max_val;
 	m_alpha_sldr->SetValue(ival);
 
@@ -1446,6 +1476,12 @@ void VPropView::OnColormapHighValueText(wxCommandEvent &event)
 	wxString str = m_colormap_high_value_text->GetValue();
 	long iVal = 0;
 	str.ToLong(&iVal);
+	if (double(iVal) > m_max_val)
+	{
+		UpdateMaxVal(iVal);
+		str = wxString::Format("%d", iVal);
+		m_colormap_high_value_text->ChangeValue(str);
+	}
 	long iVal2 = m_colormap_low_value_sldr->GetValue();
 
 	if (iVal >= iVal2)
@@ -1479,6 +1515,12 @@ void VPropView::OnColormapLowValueText(wxCommandEvent &event)
 	wxString str = m_colormap_low_value_text->GetValue();
 	long iVal = 0;
 	str.ToLong(&iVal);
+	if (double(iVal) > m_max_val)
+	{
+		UpdateMaxVal(iVal);
+		str = wxString::Format("%d", iVal);
+		m_colormap_low_value_text->ChangeValue(str);
+	}
 	long iVal2 = m_colormap_high_value_sldr->GetValue();
 
 	if (iVal > iVal2)
@@ -2070,6 +2112,26 @@ void VPropView::DisableMip()
 	m_left_thresh_text->Enable();
 	m_right_thresh_sldr->Enable();
 	m_right_thresh_text->Enable();
+}
+
+//update max value
+void VPropView::UpdateMaxVal(double value)
+{
+	if (!m_vd) return;
+	int bits = m_vd->GetBits();
+	if (bits == 8)
+		return;
+	else if (bits > 8)
+	{
+		if (value < 255.0)
+			value = 255.0;
+		if (value > 65535.0)
+			value = 65535.0;
+	}
+	m_max_val = value;
+	m_vd->SetMaxValue(m_max_val);
+	m_vd->SetScalarScale(65535.0 / m_max_val);
+	GetSettings();
 }
 
 void VPropView::OnSpaceText(wxCommandEvent& event)
