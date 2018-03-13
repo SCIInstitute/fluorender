@@ -823,6 +823,7 @@ private:
 	double m_press_peak;
 	double m_press_nmax;
 	double m_press_tmax;
+	UINT m_wdevice;
 	//air brush
 	double m_air_press;
 	//paint stroke radius
