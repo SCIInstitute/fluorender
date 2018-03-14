@@ -281,7 +281,6 @@ wxGLCanvas(parent, attriblist, id, pos, size, style),
 	//paint brush presssure
 	m_use_press(true),
 	m_on_press(false),
-	m_wdevice(0),
 	//paint stroke radius
 	m_brush_radius1(10),
 	m_brush_radius2(30),
@@ -381,9 +380,6 @@ HCTX VRenderGLView::TabletInit(HWND hWnd, HINSTANCE hInst)
 	AXIS TabletNPress = { 0 };
 	AXIS TabletTPress = { 0 };
 
-	gpWTInfoA(WTI_DEFCONTEXT, CTX_DEVICE, &wDevice);
-	m_wdevice = wDevice;
-
 	// Set option to move system cursor before getting default system context.
 	m_lc.lcOptions |= CXO_SYSTEM;
 
@@ -419,17 +415,17 @@ HCTX VRenderGLView::TabletInit(HWND hWnd, HINSTANCE hInst)
 	m_lc.lcBtnUpMask = m_lc.lcBtnDnMask;
 
 	// Set the entire tablet as active
-	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES + wDevice, DVC_X, &TabletX);
+	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES + 0, DVC_X, &TabletX);
 	WACOM_ASSERT(wWTInfoRetVal == sizeof(AXIS));
 
-	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES + wDevice, DVC_Y, &TabletY);
+	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES, DVC_Y, &TabletY);
 	WACOM_ASSERT(wWTInfoRetVal == sizeof(AXIS));
 
-	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES + wDevice, DVC_NPRESSURE, &TabletNPress);
+	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES, DVC_NPRESSURE, &TabletNPress);
 	WACOM_ASSERT(wWTInfoRetVal == sizeof(AXIS));
 	m_press_nmax = TabletNPress.axMax;
 
-	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES + wDevice, DVC_TPRESSURE, &TabletTPress);
+	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES, DVC_TPRESSURE, &TabletTPress);
 	WACOM_ASSERT(wWTInfoRetVal == sizeof(AXIS));
 	m_press_tmax = TabletTPress.axMax;
 
@@ -11827,18 +11823,6 @@ WXLRESULT VRenderGLView::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM
 			PACKET pkt;
 			if (gpWTPacket((HCTX)lParam, wParam, &pkt))
 			{
-				UINT wDevice = 0;
-				gpWTInfoA(WTI_DEFCONTEXT, CTX_DEVICE, &wDevice);
-				if (wDevice != m_wdevice)
-				{
-					AXIS TabletNPress = { 0 };
-					AXIS TabletTPress = { 0 };
-					gpWTInfoA(WTI_DEVICES + wDevice, DVC_NPRESSURE, &TabletNPress);
-					m_press_nmax = TabletNPress.axMax;
-					m_wdevice = wDevice;
-					gpWTInfoA(WTI_DEVICES + wDevice, DVC_TPRESSURE, &TabletTPress);
-					m_press_tmax = TabletTPress.axMax;
-				}
 				//compute pressure, normalized to [0, 1]
 				m_pressure = pkt.pkNormalPressure / m_press_nmax;
 				if (m_pressure > m_press_peak)
