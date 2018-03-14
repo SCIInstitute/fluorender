@@ -1949,10 +1949,10 @@ void VolumeData::SetSpacings(double spcx, double spcy, double spcz)
 	}
 }
 
-void VolumeData::GetSpacings(double &spcx, double &spcy, double & spcz)
+void VolumeData::GetSpacings(double &spcx, double &spcy, double & spcz, int lv)
 {
 	if (GetTexture())
-		GetTexture()->get_spacings(spcx, spcy, spcz);
+		GetTexture()->get_spacings(spcx, spcy, spcz, lv);
 }
 
 void VolumeData::GetFileSpacings(double &spcx, double &spcy, double &spcz)

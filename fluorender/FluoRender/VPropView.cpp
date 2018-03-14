@@ -702,7 +702,7 @@ void VPropView::GetSettings()
 
 	//spacings
 	double spcx, spcy, spcz;
-	m_vd->GetSpacings(spcx, spcy, spcz);
+	m_vd->GetSpacings(spcx, spcy, spcz, 0);
 	if ((vald_fp = (wxFloatingPointValidator<double>*)m_space_x_text->GetValidator()))
 		vald_fp->SetMin(0.0);
 	str = wxString::Format("%.3f", spcx);
@@ -1970,21 +1970,31 @@ bool VPropView::SetSpacings()
 	if (spcz<=0.0)
 		return false;
 
-	wxString v_name;
-	if (m_vd)
-		v_name = m_vd->GetName();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if ((m_sync_group/* || m_sync_group_spc*/) && m_group)
 	{
-		for (int i=0; i<(int)vr_frame->GetViewList()->size(); i++)
-		{
-			VRenderView *vrv = (*vr_frame->GetViewList())[i];
-			if (vrv)
-				if (vrv->GetVolumeData(v_name))
-					for (int j=0; j<vrv->GetAllVolumeNum(); j++)
-						vrv->GetAllVolumeData(j)->SetSpacings(spcx, spcy, spcz);
-		}
+		for (int i = 0; i<m_group->GetVolumeNum(); i++)
+			m_group->GetVolumeData(i)->SetSpacings(spcx, spcy, spcz);
 	}
+	else if (m_vd)
+	{
+		m_vd->SetSpacings(spcx, spcy, spcz);
+	}
+	else return false;
+	//wxString v_name;
+	//if (m_vd)
+	//	v_name = m_vd->GetName();
+	//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	//if (vr_frame)
+	//{
+	//	for (int i=0; i<(int)vr_frame->GetViewList()->size(); i++)
+	//	{
+	//		VRenderView *vrv = (*vr_frame->GetViewList())[i];
+	//		if (vrv)
+	//			if (vrv->GetVolumeData(v_name))
+	//				for (int j=0; j<vrv->GetAllVolumeNum(); j++)
+	//					vrv->GetAllVolumeData(j)->SetSpacings(spcx, spcy, spcz);
+	//	}
+	//}
 
 	return true;
 }

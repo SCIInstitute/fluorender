@@ -7212,7 +7212,7 @@ DataGroup* VRenderGLView::AddVolumeData(VolumeData* vd, wxString group_name)
 			return 0;
 	}
 
-	for (i=0; i<1; i++)
+	/*for (i=0; i<1; i++)
 	{
 		VolumeData* vol_data = group->GetVolumeData(i);
 		if (vol_data)
@@ -7221,7 +7221,7 @@ DataGroup* VRenderGLView::AddVolumeData(VolumeData* vd, wxString group_name)
 			vol_data->GetSpacings(spcx, spcy, spcz);
 			vd->SetSpacings(spcx, spcy, spcz);
 		}
-	}
+	}*/
 
 	group->InsertVolumeData(group->GetVolumeNum()-1, vd);
 

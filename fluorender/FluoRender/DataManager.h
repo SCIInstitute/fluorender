@@ -340,7 +340,7 @@ public:
 	void SetScalings(double sclx, double scly, double sclz);
 	void GetScalings(double &sclx, double &scly, double &sclz);
 	void SetSpacings(double spcx, double spcy, double spcz);
-	void GetSpacings(double &spcx, double &spcy, double & spcz);
+	void GetSpacings(double &spcx, double &spcy, double & spcz, int lv = -1);
 	void GetFileSpacings(double &spcx, double &spcy, double &spcz);
 	//read resolutions from file
 	void SetSpcFromFile(bool val=true) {m_spc_from_file = val;}
