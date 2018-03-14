@@ -422,12 +422,16 @@ HCTX VRenderGLView::TabletInit(HWND hWnd, HINSTANCE hInst)
 	WACOM_ASSERT(wWTInfoRetVal == sizeof(AXIS));
 
 	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES, DVC_NPRESSURE, &TabletNPress);
-	WACOM_ASSERT(wWTInfoRetVal == sizeof(AXIS));
-	m_press_nmax = TabletNPress.axMax;
+	if (wWTInfoRetVal == sizeof(AXIS))
+		m_press_nmax = TabletNPress.axMax;
+	else
+		m_press_nmax = 1.0;
 
 	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES, DVC_TPRESSURE, &TabletTPress);
-	WACOM_ASSERT(wWTInfoRetVal == sizeof(AXIS));
-	m_press_tmax = TabletTPress.axMax;
+	if (wWTInfoRetVal == sizeof(AXIS))
+		m_press_tmax = TabletTPress.axMax;
+	else
+		m_press_tmax = 1.0;
 
 	m_lc.lcInOrgX = 0;
 	m_lc.lcInOrgY = 0;
@@ -11824,11 +11828,13 @@ WXLRESULT VRenderGLView::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM
 			if (gpWTPacket((HCTX)lParam, wParam, &pkt))
 			{
 				//compute pressure, normalized to [0, 1]
-				m_pressure = pkt.pkNormalPressure / m_press_nmax;
+				if (m_press_nmax > 1.0)
+					m_pressure = pkt.pkNormalPressure / m_press_nmax;
 				if (m_pressure > m_press_peak)
 					m_press_peak = m_pressure;
 				//wheel of air brush
-				m_air_press = pkt.pkTangentPressure / m_press_tmax;
+				if (m_press_tmax > 1.0)
+					m_air_press = pkt.pkTangentPressure / m_press_tmax;
 			}
 		}
 	}
