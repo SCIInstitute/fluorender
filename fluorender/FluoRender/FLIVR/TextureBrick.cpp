@@ -34,6 +34,7 @@
 #include <utility>
 #include <iostream>
 #include <fstream>
+#include <wx/filefn.h>
 
 using namespace std;
 

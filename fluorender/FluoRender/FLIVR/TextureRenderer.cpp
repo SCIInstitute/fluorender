@@ -38,6 +38,7 @@
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
 #include "compatibility.h"
+#include <wx/utils.h>
 
 using namespace std;
 
