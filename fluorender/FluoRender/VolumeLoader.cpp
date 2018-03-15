@@ -27,6 +27,7 @@
 //  
 
 #include "VolumeLoader.h"
+#include <wx/utils.h> 
 
 VolumeDecompressorThread::VolumeDecompressorThread(VolumeLoader *vl)
 	: wxThread(wxTHREAD_DETACHED), m_vl(vl)
