@@ -192,6 +192,9 @@ namespace FLIVR
 		//available memory
 		static void set_available_mem(double val) {available_mem_ = val;}
 		static double get_available_mem() {return available_mem_;}
+		//main(cpu) memory limit
+		static void set_mainmem_buf_size(double val) { mainmem_buf_size_ = val; }
+		static double get_mainmem_buf_size() { return mainmem_buf_size_; }
 		//large data size
 		static void set_large_data_size(double val) {large_data_size_ = val;}
 		static double get_large_data_size() {return large_data_size_;}

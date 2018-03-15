@@ -4408,7 +4408,7 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 		vd->GetMaterial(amb, diff, spec, shine);
 		vd->SetMaterial(m_vol_lsh, diff, spec, m_vol_hsh);
 		if (!vd->GetSpcFromFile())
-			vd->SetSpacings(m_vol_xsp, m_vol_ysp, m_vol_zsp);
+			vd->SetBaseSpacings(m_vol_xsp, m_vol_ysp, m_vol_zsp);
 		vd->SetColormapMode(m_vol_cmm);
 		vd->SetColormap(m_vol_cmp);
 		vd->SetColormapValues(m_vol_lcm, m_vol_hcm);
@@ -4633,8 +4633,8 @@ int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_
 			continue;
 		}
 
-		AddVolumeData(vd);
 		SetVolumeDefault(vd);
+		AddVolumeData(vd);
 
 		//get excitation wavelength
 		double wavelength = reader->GetExcitationWavelength(i);
@@ -4848,7 +4848,7 @@ void DataManager::AddVolumeData(VolumeData* vd)
 			double spcx, spcy, spcz;
 			m_vd_list[0]->GetBaseSpacings(spcx, spcy, spcz);
 			vd->SetBaseSpacings(spcx, spcy, spcz);
-			vd->SetSpcFromFile(true);
+			//vd->SetSpcFromFile(true);
 		}
 	}
 	m_vd_list.push_back(vd);

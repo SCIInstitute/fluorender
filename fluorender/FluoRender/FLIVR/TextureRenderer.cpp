@@ -48,7 +48,7 @@ namespace FLIVR
 	bool TextureRenderer::use_mem_limit_ = false;
 	double TextureRenderer::mem_limit_ = 0.0;
 	double TextureRenderer::available_mem_ = 0.0;
-	double TextureRenderer::mainmem_buf_size_ = 9000.0;
+	double TextureRenderer::mainmem_buf_size_ = 4000.0;
 	double TextureRenderer::available_mainmem_buf_size_ = 0.0;
 	double TextureRenderer::large_data_size_ = 0.0;
 	int TextureRenderer::force_brick_size_ = 0;

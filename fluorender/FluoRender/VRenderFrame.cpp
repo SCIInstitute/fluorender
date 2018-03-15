@@ -790,6 +790,11 @@ VRenderFrame::VRenderFrame(
 		vrv->SetFullScreen();
 		Iconize();
 	}
+
+	wxMemorySize free_mem_size = wxGetFreeMemory();
+	double mainmem_buf_size = free_mem_size.ToDouble() * 0.8 / 1024.0 / 1024.0;
+	if (mainmem_buf_size > TextureRenderer::get_mainmem_buf_size())
+		TextureRenderer::set_mainmem_buf_size(mainmem_buf_size);
 }
 
 VRenderFrame::~VRenderFrame()

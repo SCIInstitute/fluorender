@@ -1969,8 +1969,12 @@ bool VPropView::SetSpacings()
 	str.ToDouble(&spcz);
 	if (spcz<=0.0)
 		return false;
+	bool override_vox = true;
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetSettingDlg())
+		override_vox = vr_frame->GetSettingDlg()->GetOverrideVox();
 
-	if ((m_sync_group/* || m_sync_group_spc*/) && m_group)
+	if ((m_sync_group || override_vox) && m_group)
 	{
 		for (int i = 0; i<m_group->GetVolumeNum(); i++)
 			m_group->GetVolumeData(i)->SetSpacings(spcx, spcy, spcz);
@@ -1980,21 +1984,6 @@ bool VPropView::SetSpacings()
 		m_vd->SetSpacings(spcx, spcy, spcz);
 	}
 	else return false;
-	//wxString v_name;
-	//if (m_vd)
-	//	v_name = m_vd->GetName();
-	//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	//if (vr_frame)
-	//{
-	//	for (int i=0; i<(int)vr_frame->GetViewList()->size(); i++)
-	//	{
-	//		VRenderView *vrv = (*vr_frame->GetViewList())[i];
-	//		if (vrv)
-	//			if (vrv->GetVolumeData(v_name))
-	//				for (int j=0; j<vrv->GetAllVolumeNum(); j++)
-	//					vrv->GetAllVolumeData(j)->SetSpacings(spcx, spcy, spcz);
-	//	}
-	//}
 
 	return true;
 }
