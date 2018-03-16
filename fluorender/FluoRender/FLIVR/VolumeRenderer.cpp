@@ -819,7 +819,12 @@ namespace FLIVR
 
 			TextureBrick* b = (*bricks)[i];
 			if (tex_->isBrxml() && !b->isLoaded())
+			{
+				if (!test_against_view(b->bbox(), !orthographic_p) ||
+					b->get_priority() > 0)
+					cur_chan_brick_num_++;
 				continue;
+			}
 
 			if (mem_swap_ && start_update_loop_ && !done_update_loop_)
 			{
