@@ -12623,15 +12623,12 @@ void VRenderGLView::switchLevel(VolumeData *vd)
 	int nx, ny;
 	nx = GetSize().x;
 	ny = GetSize().y;
-	/*
-	if(m_min_ppi < 0)m_min_ppi = 60;
-	//wxDisplay disp(wxDisplay::GetFromWindow(m_frame));
-	wxSize disp_ppi = wxGetDisplayPPI();
-	double disp_ppi_x = m_min_ppi;
-	double disp_ppi_y = m_min_ppi;
-	if(disp_ppi.GetX() > 0)disp_ppi_x = disp_ppi.GetX();
-	if(disp_ppi.GetY() > 0)disp_ppi_y = disp_ppi.GetY();
-	*/
+	if (m_enlarge)
+	{
+		nx = int(nx * m_enlarge_scale);
+		ny = int(ny * m_enlarge_scale);
+	}
+
 	Texture *vtex = vd->GetTexture();
 	if (vtex && vtex->isBrxml())
 	{
