@@ -10600,7 +10600,7 @@ void VRenderGLView::StartLoopUpdate()
 			}
 		}
 
-		if (queues.size() > 0 && !m_interactive)
+		if (queues.size() > 0 /*&& !m_interactive*/)
 		{
 			m_loader.Set(queues);
 			m_loader.SetMemoryLimitByte((long long)TextureRenderer::mainmem_buf_size_ * 1024LL * 1024LL);
@@ -12690,10 +12690,9 @@ void VRenderGLView::switchLevel(VolumeData *vd)
 				}
 			}
 			if (lv < 0) lv = 0;
-			//if (m_interactive) lv += 2;
+			//if (m_interactive) lv += 1;
 			if (lv >= lvnum) lv = lvnum - 1;
 			new_lv = lv;
-			//vd->GetVR()->set_scalar_scale();
 		}
 		if (prev_lv != new_lv)
 		{

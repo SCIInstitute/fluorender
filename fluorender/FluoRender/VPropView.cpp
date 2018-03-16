@@ -702,7 +702,7 @@ void VPropView::GetSettings()
 
 	//spacings
 	double spcx, spcy, spcz;
-	m_vd->GetSpacings(spcx, spcy, spcz, 0);
+	m_vd->GetBaseSpacings(spcx, spcy, spcz);
 	if ((vald_fp = (wxFloatingPointValidator<double>*)m_space_x_text->GetValidator()))
 		vald_fp->SetMin(0.0);
 	str = wxString::Format("%.3f", spcx);
