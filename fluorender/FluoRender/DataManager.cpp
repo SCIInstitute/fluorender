@@ -903,7 +903,7 @@ double VolumeData::GetOriginalValue(int i, int j, int k)
 double VolumeData::GetTransferedValue(int i, int j, int k)
 {
 	Nrrd* data = m_tex->get_nrrd(0);
-	if (!data) return 0.0;
+	if (!data || !data->data) return 0.0;
 
 	int bits = data->type;
 	int64_t nx = (int64_t)(data->axis[0].size);
@@ -1922,11 +1922,20 @@ Color VolumeData::GetColorFromColormap(double value)
 }
 
 //resolution  scaling and spacing
-void VolumeData::GetResolution(int &res_x, int &res_y, int &res_z)
+void VolumeData::GetResolution(int &res_x, int &res_y, int &res_z, int lv)
 {
-	res_x = m_res_x;
-	res_y = m_res_y;
-	res_z = m_res_z;
+	if (lv >= 0 && isBrxml() && m_tex)
+	{
+		res_x = m_tex->nx();
+		res_y = m_tex->ny();
+		res_z = m_tex->nz();
+	}
+	else
+	{
+		res_x = m_res_x;
+		res_y = m_res_y;
+		res_z = m_res_z;
+	}
 }
 
 void VolumeData::SetScalings(double sclx, double scly, double sclz)

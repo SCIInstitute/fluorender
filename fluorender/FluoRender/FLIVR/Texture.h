@@ -74,7 +74,7 @@ namespace FLIVR
 		inline unsigned int posxid(unsigned int id);
 		inline unsigned int posyid(unsigned int id);
 		inline unsigned int poszid(unsigned int id);
-		//get brick id by index
+		//get brick id by voxel index
 		inline unsigned int get_brick_id(unsigned long long index);
 		TextureBrick* get_brick(unsigned int bid);
 

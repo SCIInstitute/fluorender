@@ -308,6 +308,19 @@ namespace FLIVR {
 		int filetype;
 		Nrrd* data;
 		std::vector<TextureBrick *> bricks;
+		//some information
+		//total size
+		int szx;
+		int szy;
+		int szz;
+		//typical brick size
+		int bszx;
+		int bszy;
+		int bszz;
+		//brick num along axes
+		int bnx;
+		int bny;
+		int bnz;
 	};
 } // namespace FLIVR
 

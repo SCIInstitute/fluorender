@@ -702,6 +702,16 @@ namespace FLIVR
 		Point nmax(nx_*spcx_*s_spcx_, ny_*spcy_*s_spcy_, nz_*spcz_*s_spcz_);
 		tform.pre_scale(Vector(nmax));
 		set_transform(tform);
+		//additional information
+		nx_ = pyramid_[lv].szx;
+		ny_ = pyramid_[lv].szy;
+		nz_ = pyramid_[lv].szz;
+		bszx_ = pyramid_[lv].bszx;
+		bszy_ = pyramid_[lv].bszy;
+		bszz_ = pyramid_[lv].bszz;
+		bnx_ = pyramid_[lv].bnx;
+		bny_ = pyramid_[lv].bny;
+		bnz_ = pyramid_[lv].bnz;
 	}
 
 	void Texture::set_data_file(vector<FileLocInfo *> *fname, int type)

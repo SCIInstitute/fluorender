@@ -336,7 +336,7 @@ public:
 	Color GetColorFromColormap(double value);
 
 	//resolution  scaling and spacing
-	void GetResolution(int &res_x, int &res_y, int &res_z);
+	void GetResolution(int &res_x, int &res_y, int &res_z, int lv = -1);
 	void SetScalings(double sclx, double scly, double sclz);
 	void GetScalings(double &sclx, double &scly, double &sclz);
 	void SetSpacings(double spcx, double spcy, double spcz);

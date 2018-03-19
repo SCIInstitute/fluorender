@@ -10654,7 +10654,7 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 	Nrrd* nrrd = tex->get_nrrd(0);
 	if (!nrrd) return -1.0;
 	void* data = nrrd->data;
-	if (!data) return -1.0;
+	if (!data && vd->GetAllBrickNum()<1) return -1.0;
 
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
@@ -10703,7 +10703,7 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 	double spcx, spcy, spcz;
 	vd->GetSpacings(spcx, spcy, spcz);
 	int resx, resy, resz;
-	vd->GetResolution(resx, resy, resz);
+	vd->GetResolution(resx, resy, resz, vd->GetLevel());
 	//volume bounding box
 	BBox bbox = vd->GetBounds();
 	Vector vv = mp2 - mp1;
@@ -10749,6 +10749,7 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 			nmp.z(hit.z() / bbox.max().z());
 			bool inside = true;
 			if (planes)
+			{
 				for (int i=0; i<6; i++)
 					if ((*planes)[i] &&
 						(*planes)[i]->eval_point(nmp)<0.0)
@@ -10756,39 +10757,48 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 						inside = false;
 						break;
 					}
-					if (inside)
+			}
+			if (inside)
+			{
+				xx = xx==resx?resx-1:xx;
+				yy = yy==resy?resy-1:yy;
+				zz = zz==resz?resz-1:zz;
+
+				//if it's multiresolution, get brick first
+				if (vd->isBrxml())
+				{
+
+				}
+				else
+				{
+					if (use_transf)
+						value = vd->GetTransferedValue(xx, yy, zz);
+					else
+						value = vd->GetOriginalValue(xx, yy, zz);
+				}
+
+				if (mode == 1)
+				{
+					if (value > max_int)
 					{
-						xx = xx==resx?resx-1:xx;
-						yy = yy==resy?resy-1:yy;
-						zz = zz==resz?resz-1:zz;
-
-						if (use_transf)
-							value = vd->GetTransferedValue(xx, yy, zz);
-						else
-							value = vd->GetOriginalValue(xx, yy, zz);
-
-						if (mode == 1)
-						{
-							if (value > max_int)
-							{
-								mp = Point((xx+0.5)*spcx, (yy+0.5)*spcy, (zz+0.5)*spcz);
-								max_int = value;
-							}
-						}
-						else if (mode == 2)
-						{
-							//accumulate
-							if (value > 0.0)
-							{
-								alpha = 1.0 - pow(Clamp(1.0-value, 0.0, 1.0), vd->GetSampleRate());
-								max_int += alpha*(1.0-max_int);
-								mp = Point((xx+0.5)*spcx, (yy+0.5)*spcy, (zz+0.5)*spcz);
-							}
-							if (max_int >= thresh)
-								break;
-						}
+						mp = Point((xx+0.5)*spcx, (yy+0.5)*spcy, (zz+0.5)*spcz);
+						max_int = value;
 					}
-					hit += vv*mspc;
+				}
+				else if (mode == 2)
+				{
+					//accumulate
+					if (value > 0.0)
+					{
+						alpha = 1.0 - pow(Clamp(1.0-value, 0.0, 1.0), vd->GetSampleRate());
+						max_int += alpha*(1.0-max_int);
+						mp = Point((xx+0.5)*spcx, (yy+0.5)*spcy, (zz+0.5)*spcz);
+					}
+					if (max_int >= thresh)
+						break;
+				}
+			}
+			hit += vv*mspc;
 		}
 	}
 	else
