@@ -223,8 +223,8 @@ public:
 	bool SearchLabel(unsigned int label);
 
 	//save
-	double GetOriginalValue(int i, int j, int k);
-	double GetTransferedValue(int i, int j, int k);
+	double GetOriginalValue(int i, int j, int k, TextureBrick* b = 0);
+	double GetTransferedValue(int i, int j, int k, TextureBrick* b=0);
 	void SetResize(int resize, int nx, int ny, int nz);
 	void Save(wxString &filename, int mode=0, bool bake=false, bool compress=false);
 	void SaveMask(bool use_reader, int t, int c);

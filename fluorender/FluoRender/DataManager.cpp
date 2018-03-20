@@ -870,53 +870,98 @@ Nrrd* VolumeData::GetLabel(bool ret)
 	return 0;
 }
 
-double VolumeData::GetOriginalValue(int i, int j, int k)
+double VolumeData::GetOriginalValue(int i, int j, int k, TextureBrick* b)
 {
-	Nrrd* data = m_tex->get_nrrd(0);
-	if (!data) return 0.0;
+	void *data_data = 0;
+	int bits = 8;
+	int64_t nx, ny, nz;
 
-	int bits = data->type;
-	int64_t nx = (int64_t)(data->axis[0].size);
-	int64_t ny = (int64_t)(data->axis[1].size);
-	int64_t nz = (int64_t)(data->axis[2].size);
+	if (isBrxml())
+	{
+		if (!b || !b->isLoaded()) return 0.0;
+		FileLocInfo *finfo = m_tex->GetFileName(b->getID());
+		data_data = b->tex_data_brk(0, finfo);
+		if (!data_data) return 0.0;
+		bits = b->nb(0) * 8;
+		nx = b->nx();
+		ny = b->ny();
+		nz = b->nz();
+	}
+	else
+	{
+		Nrrd* data = 0;
+		data = m_tex->get_nrrd(0);
+		if (!data || !data->data) return 0.0;
+		data_data = data->data;
+		if (data->type == nrrdTypeUChar)
+			bits = 8;
+		else if (data->type == nrrdTypeUShort)
+			bits = 16;
+		nx = (int64_t)(data->axis[0].size);
+		ny = (int64_t)(data->axis[1].size);
+		nz = (int64_t)(data->axis[2].size);
+	}
 
 	if (i<0 || i>=nx || j<0 || j>=ny || k<0 || k>=nz)
 		return 0.0;
 	uint64_t ii = i, jj = j, kk = k;
 
-	if (bits == nrrdTypeUChar)
+	if (bits == 8)
 	{
 		uint64_t index = (nx)*(ny)*(kk) + (nx)*(jj) + (ii);
-		uint8 old_value = ((uint8*)(data->data))[index];
+		uint8 old_value = ((uint8*)(data_data))[index];
 		return double(old_value)/255.0;
 	}
-	else if (bits == nrrdTypeUShort)
+	else if (bits == 16)
 	{
 		uint64_t index = (nx)*(ny)*(kk) + (nx)*(jj) + (ii);
-		uint16 old_value = ((uint16*)(data->data))[index];
+		uint16 old_value = ((uint16*)(data_data))[index];
 		return double(old_value)*m_scalar_scale/65535.0;
 	}
 
 	return 0.0;
 }
 
-double VolumeData::GetTransferedValue(int i, int j, int k)
+double VolumeData::GetTransferedValue(int i, int j, int k, TextureBrick* b)
 {
-	Nrrd* data = m_tex->get_nrrd(0);
-	if (!data || !data->data) return 0.0;
+	void *data_data = 0;
+	int bits = 8;
+	int64_t nx, ny, nz;
 
-	int bits = data->type;
-	int64_t nx = (int64_t)(data->axis[0].size);
-	int64_t ny = (int64_t)(data->axis[1].size);
-	int64_t nz = (int64_t)(data->axis[2].size);
+	if (isBrxml())
+	{
+		if (!b || !b->isLoaded()) return 0.0;
+		FileLocInfo *finfo = m_tex->GetFileName(b->getID());
+		data_data = b->tex_data_brk(0, finfo);
+		if (!data_data) return 0.0;
+		bits = b->nb(0) * 8;
+		nx = b->nx();
+		ny = b->ny();
+		nz = b->nz();
+	}
+	else
+	{
+		Nrrd* data = 0;
+		data = m_tex->get_nrrd(0);
+		if (!data || !data->data) return 0.0;
+		data_data = data->data;
+		if (data->type == nrrdTypeUChar)
+			bits = 8;
+		else if (data->type == nrrdTypeUShort)
+			bits = 16;
+		nx = (int64_t)(data->axis[0].size);
+		ny = (int64_t)(data->axis[1].size);
+		nz = (int64_t)(data->axis[2].size);
+	}
+
 	if (i<0 || i>=nx || j<0 || j>=ny || k<0 || k>=nz)
 		return 0.0;
 	int64_t ii = i, jj = j, kk = k;
 
-	if (bits == nrrdTypeUChar)
+	if (bits == 8)
 	{
 		uint64_t index = nx*ny*kk + nx*jj + ii;
-		uint8 old_value = ((uint8*)(data->data))[index];
+		uint8 old_value = ((uint8*)(data_data))[index];
 		double gm = 0.0;
 		double new_value = double(old_value)/255.0;
 		if (m_vr->get_inversion())
@@ -925,12 +970,12 @@ double VolumeData::GetTransferedValue(int i, int j, int k)
 			j>0 && j<ny-1 &&
 			k>0 && k<nz-1)
 		{
-			double v1 = ((uint8*)(data->data))[nx*ny*kk + nx*jj + ii-1];
-			double v2 = ((uint8*)(data->data))[nx*ny*kk + nx*jj + ii+1];
-			double v3 = ((uint8*)(data->data))[nx*ny*kk + nx*(jj-1) + ii];
-			double v4 = ((uint8*)(data->data))[nx*ny*kk + nx*(jj+1) + ii];
-			double v5 = ((uint8*)(data->data))[nx*ny*(kk-1) + nx*jj + ii];
-			double v6 = ((uint8*)(data->data))[nx*ny*(kk+1) + nx*jj + ii];
+			double v1 = ((uint8*)(data_data))[nx*ny*kk + nx*jj + ii-1];
+			double v2 = ((uint8*)(data_data))[nx*ny*kk + nx*jj + ii+1];
+			double v3 = ((uint8*)(data_data))[nx*ny*kk + nx*(jj-1) + ii];
+			double v4 = ((uint8*)(data_data))[nx*ny*kk + nx*(jj+1) + ii];
+			double v5 = ((uint8*)(data_data))[nx*ny*(kk-1) + nx*jj + ii];
+			double v6 = ((uint8*)(data_data))[nx*ny*(kk+1) + nx*jj + ii];
 			double normal_x, normal_y, normal_z;
 			normal_x = (v2 - v1) / 255.0;
 			normal_y = (v4 - v3) / 255.0;
@@ -956,10 +1001,10 @@ double VolumeData::GetTransferedValue(int i, int j, int k)
 		}
 		return new_value;
 	}
-	else if (bits == nrrdTypeUShort)
+	else if (bits == 16)
 	{
 		uint64_t index = nx*ny*kk + nx*jj + ii;
-		uint16 old_value = ((uint16*)(data->data))[index];
+		uint16 old_value = ((uint16*)(data_data))[index];
 		double gm = 0.0;
 		double new_value = double(old_value)*m_scalar_scale/65535.0;
 		if (m_vr->get_inversion())
@@ -968,12 +1013,12 @@ double VolumeData::GetTransferedValue(int i, int j, int k)
 			jj>0 && jj<ny-1 &&
 			kk>0 && kk<nz-1)
 		{
-			double v1 = ((uint8*)(data->data))[nx*ny*kk + nx*jj + ii-1];
-			double v2 = ((uint8*)(data->data))[nx*ny*kk + nx*jj + ii+1];
-			double v3 = ((uint8*)(data->data))[nx*ny*kk + nx*(jj-1) + ii];
-			double v4 = ((uint8*)(data->data))[nx*ny*kk + nx*(jj+1) + ii];
-			double v5 = ((uint8*)(data->data))[nx*ny*(kk-1) + nx*jj + ii];
-			double v6 = ((uint8*)(data->data))[nx*ny*(kk+1) + nx*jj + ii];
+			double v1 = ((uint8*)(data_data))[nx*ny*kk + nx*jj + ii-1];
+			double v2 = ((uint8*)(data_data))[nx*ny*kk + nx*jj + ii+1];
+			double v3 = ((uint8*)(data_data))[nx*ny*kk + nx*(jj-1) + ii];
+			double v4 = ((uint8*)(data_data))[nx*ny*kk + nx*(jj+1) + ii];
+			double v5 = ((uint8*)(data_data))[nx*ny*(kk-1) + nx*jj + ii];
+			double v6 = ((uint8*)(data_data))[nx*ny*(kk+1) + nx*jj + ii];
 			double normal_x, normal_y, normal_z;
 			normal_x = (v2 - v1)*m_scalar_scale/65535.0;
 			normal_y = (v4 - v3)*m_scalar_scale/65535.0;

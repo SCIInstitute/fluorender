@@ -10720,6 +10720,17 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 		planes = vd->GetVR()->get_planes();
 	if (bbox.intersect(mp1, vv, hit))
 	{
+		int brick_id = -1;
+		TextureBrick* hit_brick = 0;
+		unsigned long long vindex;
+		int data_nx, data_ny, data_nz;
+		if (vd->isBrxml())
+		{
+			data_nx = tex->nx();
+			data_ny = tex->ny();
+			data_nz = tex->nz();
+		}
+
 		while (true)
 		{
 			tmp_xx = int(hit.x() / spcx);
@@ -10767,7 +10778,28 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 				//if it's multiresolution, get brick first
 				if (vd->isBrxml())
 				{
-
+					vindex = (unsigned long long)data_nx*(unsigned long long)data_ny*
+						(unsigned long long)zz + (unsigned long long)data_nx*
+						(unsigned long long)yy + (unsigned long long)xx;
+					int id = tex->get_brick_id(vindex);
+					if (id != brick_id)
+					{
+						//update hit brick
+						hit_brick = tex->get_brick(id);
+						brick_id = id;
+					}
+					if (hit_brick)
+					{
+						//coords in brick
+						int ii, jj, kk;
+						ii = xx - hit_brick->ox();
+						jj = yy - hit_brick->oy();
+						kk = zz - hit_brick->oz();
+						if (use_transf)
+							value = vd->GetTransferedValue(ii, jj, kk, hit_brick);
+						else
+							value = vd->GetOriginalValue(ii, jj, kk, hit_brick);
+					}
 				}
 				else
 				{
@@ -13194,8 +13226,8 @@ void VRenderView::CreateBar()
 #endif
 	m_pin_btn->AddCheckTool(ID_PinBtn, "Pin",
 		bitmap, wxNullBitmap,
-		"Pin the rotation center to data",
-		"Pin the rotation center to data");
+		"Anchor the rotation center on data",
+		"Anchor the rotation center on data");
 	m_pin_btn->Realize();
 	m_center_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
