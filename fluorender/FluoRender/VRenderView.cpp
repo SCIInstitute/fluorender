@@ -10234,16 +10234,9 @@ void VRenderGLView::StartLoopUpdate()
 						mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
 					vd->GetVR()->m_mv_mat2 = vd->GetVR()->m_mv_mat * vd->GetVR()->m_mv_mat2;
 
-					//vector<TextureBrick*> *bricks = tex->get_bricks();
 					Ray view_ray = vd->GetVR()->compute_view();
 					vector<TextureBrick*> *bricks = 0;
-					if (m_interactive)
-						bricks = tex->get_closest_bricks(
-							vd->GetVR()->get_quota_center(),
-							vd->GetVR()->get_total_brick_num(),
-							true, view_ray, !m_persp);
-					else
-						bricks = tex->get_sorted_bricks(view_ray, !m_persp);
+					bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 					if (!bricks || bricks->size()==0)
 						continue;
 					for (j=0; j<bricks->size(); j++)
@@ -13783,6 +13776,18 @@ void VRenderView::UpdateScaleFactor(bool update_text)
 		m_scale_factor_text->SetValue(str);
 	else
 		m_scale_factor_text->ChangeValue(str);
+	//update pin rotation center
+	if (scale > 10.0)
+	{
+		m_pin_btn->ToggleTool(ID_PinBtn, true);
+		m_glview->m_pin_rot_center = true;
+		m_glview->m_rot_center_dirty = true;
+	}
+	else
+	{
+		m_pin_btn->ToggleTool(ID_PinBtn, false);
+		m_glview->m_pin_rot_center = false;
+	}
 }
 
 void VRenderView::SetScaleFactor(double s, bool update)
