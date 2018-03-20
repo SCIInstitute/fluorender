@@ -86,6 +86,8 @@ class SettingDlg : public wxPanel
 		ID_BlockSizeText,
 		ID_ResponseTimeSldr,
 		ID_ResponseTimeText,
+		ID_DetailLevelOffsetSldr,
+		ID_DetailLevelOffsetText,
 		//texture size
 		ID_MaxTextureSizeChk,
 		ID_MaxTextureSizeText,
@@ -172,6 +174,8 @@ public:
 	void SetUpdateOrder(int val) {m_update_order = val;}
 	bool GetInvalidateTex() { return m_invalidate_tex; }
 	void SetInvalidateTex(bool val) { m_invalidate_tex = val; }
+	int GetDetailLevelOffset() { return m_detail_level_offset; }
+	void SetDetailLevelOffset(int val) { m_detail_level_offset = val; }
 	//point volume mode
 	int GetPointVolumeMode() {return m_point_volume_mode;}
 	void SetPointVolumeMode(int mode) {m_point_volume_mode = mode;}
@@ -262,6 +266,7 @@ private:
 	int m_up_time;			//response time in ms
 	int m_update_order;		//0:back-to-front; 1:front-to-back
 	bool m_invalidate_tex;	//invalidate texture in every loop
+	int m_detail_level_offset;	//an offset value to current level of detail (for multiresolution data only)
 	//point volume mode
 	int m_point_volume_mode;
 	//ruler use transfer function
@@ -341,6 +346,8 @@ private:
 	wxTextCtrl *m_block_size_text;
 	wxSlider *m_response_time_sldr;
 	wxTextCtrl *m_response_time_text;
+	wxSlider *m_detail_level_offset_sldr;
+	wxTextCtrl *m_detail_level_offset_text;
 	//font
 	wxComboBox *m_font_cmb;
 	wxComboBox *m_font_size_cmb;
@@ -411,6 +418,8 @@ private:
 	void OnBlockSizeEdit(wxCommandEvent &event);
 	void OnResponseTimeChange(wxScrollEvent &event);
 	void OnResponseTimeEdit(wxCommandEvent &event);
+	void OnDetailLevelOffsetChange(wxScrollEvent &event);
+	void OnDetailLevelOffsetEdit(wxCommandEvent &event);
 	//font
 	void OnFontChange(wxCommandEvent &event);
 	void OnFontSizeChange(wxCommandEvent &event);

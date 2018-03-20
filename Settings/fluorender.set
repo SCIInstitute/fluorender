@@ -63,6 +63,7 @@ graphics\ mem=4000
 large\ data\ size=400
 force\ brick\ size=256
 up\ time=50
+detail\ level\ offset=0
 [update\ order]
 value=0
 [invalidate\ tex]

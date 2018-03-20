@@ -12731,6 +12731,10 @@ void VRenderGLView::switchLevel(VolumeData *vd)
 					if (m_scale_factor/5 > (/*m_interactive ? sfs[i] * 16.0 :*/ sfs[i])) lv = i - 1;
 				}
 			}
+			//apply offset
+			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+			if (vr_frame && vr_frame->GetSettingDlg())
+				lv += vr_frame->GetSettingDlg()->GetDetailLevelOffset();
 			if (lv < 0) lv = 0;
 			//if (m_interactive) lv += 1;
 			if (lv >= lvnum) lv = lvnum - 1;

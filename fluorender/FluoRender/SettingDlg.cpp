@@ -75,6 +75,8 @@ EVT_COMMAND_SCROLL(ID_BlockSizeSldr, SettingDlg::OnBlockSizeChange)
 EVT_TEXT(ID_BlockSizeText, SettingDlg::OnBlockSizeEdit)
 EVT_COMMAND_SCROLL(ID_ResponseTimeSldr, SettingDlg::OnResponseTimeChange)
 EVT_TEXT(ID_ResponseTimeText, SettingDlg::OnResponseTimeEdit)
+EVT_COMMAND_SCROLL(ID_DetailLevelOffsetSldr, SettingDlg::OnDetailLevelOffsetChange)
+EVT_TEXT(ID_DetailLevelOffsetText, SettingDlg::OnDetailLevelOffsetEdit)
 //font
 EVT_COMBOBOX(ID_FontCmb, SettingDlg::OnFontChange)
 EVT_COMBOBOX(ID_FontSizeCmb, SettingDlg::OnFontSizeChange)
@@ -303,6 +305,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 {
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
+	wxIntegerValidator<int> vald_int2;
 	wxStaticText* st;
 	wxPanel *page = new wxPanel(parent);
 
@@ -377,6 +380,17 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	sizer2_4->Add(m_response_time_sldr, 1, wxEXPAND);
 	sizer2_4->Add(m_response_time_text, 0, wxALIGN_CENTER);
 	sizer2_4->Add(st);
+	wxBoxSizer *sizer2_5 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Detail Level Offset:",
+		wxDefaultPosition, wxSize(110, -1));
+	sizer2_5->Add(st);
+	m_detail_level_offset_sldr = new wxSlider(page, ID_DetailLevelOffsetSldr, 0, -5, 5,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_detail_level_offset_text = new wxTextCtrl(page, ID_DetailLevelOffsetText, "0",
+		wxDefaultPosition, wxSize(40, -1), 0, vald_int2);
+	sizer2_5->Add(m_detail_level_offset_sldr, 1, wxEXPAND);
+	sizer2_5->Add(m_detail_level_offset_text, 0, wxALIGN_CENTER);
+	sizer2_5->Add(20, 5);
 	group2->Add(10, 5);
 	group2->Add(m_streaming_chk);
 	group2->Add(10, 10);
@@ -389,6 +403,8 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	group2->Add(sizer2_3, 0, wxEXPAND);
 	group2->Add(10, 5);
 	group2->Add(sizer2_4, 0, wxEXPAND);
+	group2->Add(10, 5);
+	group2->Add(sizer2_5, 0, wxEXPAND);
 	group2->Add(10, 5);
 	st = new wxStaticText(page, 0,
 		"Note: Configure these settings before loading data.\n"\
@@ -634,6 +650,7 @@ void SettingDlg::GetSettings()
 	m_up_time = 100;
 	m_update_order = 0;
 	m_invalidate_tex = false;
+	m_detail_level_offset = 0;
 	m_point_volume_mode = 0;
 	m_ruler_use_transf = false;
 	m_ruler_time_dep = true;
@@ -820,6 +837,8 @@ void SettingDlg::GetSettings()
 		fconfig.Read("force brick size", &m_force_brick_size);
 		//response time
 		fconfig.Read("up time", &m_up_time);
+		//detail level offset
+		fconfig.Read("detail level offset", &m_detail_level_offset);
 	}
 	EnableStreaming(m_mem_swap);
 	//update order
@@ -989,6 +1008,8 @@ void SettingDlg::UpdateUI()
 	m_block_size_sldr->SetValue(int(log(m_force_brick_size) / log(2.0) + 0.5));
 	m_response_time_text->ChangeValue(wxString::Format("%d", m_up_time));
 	m_response_time_sldr->SetValue(int(m_up_time / 10.0));
+	m_detail_level_offset_text->ChangeValue(wxString::Format("%d", -m_detail_level_offset));
+	m_detail_level_offset_sldr->SetValue(-m_detail_level_offset);
 }
 
 void SettingDlg::SaveSettings()
@@ -1092,6 +1113,7 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("large data size", m_large_data_size);
 	fconfig.Write("force brick size", m_force_brick_size);
 	fconfig.Write("up time", m_up_time);
+	fconfig.Write("detail level offset", m_detail_level_offset);
 	EnableStreaming(m_mem_swap);
 
 	//update order
@@ -1672,6 +1694,33 @@ void SettingDlg::OnResponseTimeEdit(wxCommandEvent &event)
 		return;
 	m_response_time_sldr->SetValue(int(val / 10.0));
 	m_up_time = val;
+}
+
+void SettingDlg::OnDetailLevelOffsetChange(wxScrollEvent &event)
+{
+	int ival = event.GetPosition();
+	wxString str = wxString::Format("%d", ival);
+	m_detail_level_offset_text->SetValue(str);
+}
+
+void SettingDlg::OnDetailLevelOffsetEdit(wxCommandEvent &event)
+{
+	wxString str = m_detail_level_offset_text->GetValue();
+	long val;
+	str.ToLong(&val);
+	m_detail_level_offset_sldr->SetValue(val);
+	m_detail_level_offset = -val;
+
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+	{
+		for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
+		{
+			VRenderView* vrv = (*vr_frame->GetViewList())[i];
+			if (vrv)
+				vrv->RefreshGL();
+		}
+	}
 }
 
 //font
