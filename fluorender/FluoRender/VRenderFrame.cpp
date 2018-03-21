@@ -2186,11 +2186,10 @@ void VRenderFrame::OrganizeVRenderViews(int mode)
 	int paneNum = (int)m_vrv_list.size();
 	int i;
 	//get total area
-	for (i = 0; i < paneNum-1; i++)
+	for (i = 0; i < paneNum; i++)
 	{
-		wxAuiPaneInfo auiInfo;
 		VRenderView* vrv = m_vrv_list[i];
-		if (vrv)
+		if (vrv && m_aui_mgr.GetPane(vrv).IsOk())
 		{
 			wxPoint pos = vrv->GetPosition();
 			wxSize size = vrv->GetSize();
