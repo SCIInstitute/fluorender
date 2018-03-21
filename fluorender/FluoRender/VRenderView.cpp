@@ -4981,6 +4981,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		}
 	}
 
+#ifdef _WIN32
 	//update ortho rotation
 	if (!m_vrv->m_ortho_view_cmb->HasFocus())
 	{
@@ -4999,7 +5000,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		else
 			m_vrv->m_ortho_view_cmb->Select(6);
 	}
-
+#endif
+    
 	if (refresh)
 	{
 		m_clear_buffer = true;
