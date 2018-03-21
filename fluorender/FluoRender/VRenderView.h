@@ -1124,6 +1124,7 @@ public:
 		ID_RotateTimer,
 		ID_RotLockChk,
 		ID_RotSliderType,
+		ID_OrthoViewCmb,
 		ID_DepthAttenChk,
 		ID_DepthAttenFactorSldr,
 		ID_DepthAttenResetBtn,
@@ -1668,6 +1669,7 @@ public:
 	bool m_x_rotating, m_y_rotating, m_z_rotating;
 	bool m_skip_thumb;
 	wxToolBar *m_rot_lock_btn;
+	wxComboBox *m_ortho_view_cmb;
 
 	//left bar///////////////////////////////////////////////////
 	wxPanel* m_panel_3;
@@ -1735,7 +1737,6 @@ private:
 	void OnScaleBar(wxCommandEvent& event);
 	void OnScaleTextEditing(wxCommandEvent& event);
 	void OnScaleUnitSelected(wxCommandEvent& event);
-
 	void OnAovSldrIdle(wxIdleEvent& event);
 	void OnAovChange(wxScrollEvent& event);
 	void OnAovText(wxCommandEvent &event);
@@ -1764,6 +1765,7 @@ private:
 	void OnZRotScroll(wxScrollEvent &event);
 	void OnRotLockCheck(wxCommandEvent& event);
 	void OnRotSliderType(wxCommandEvent& event);
+	void OnOrthoViewSelected(wxCommandEvent& event);
 
 	void OnSaveDefault(wxCommandEvent &event);
 

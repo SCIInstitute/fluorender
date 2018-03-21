@@ -4981,6 +4981,25 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		}
 	}
 
+	//update ortho rotation
+	if (!m_vrv->m_ortho_view_cmb->HasFocus())
+	{
+		if (m_q.AlmostEqual(Quaternion(0, sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
+			m_vrv->m_ortho_view_cmb->Select(0);
+		else if (m_q.AlmostEqual(Quaternion(0, -sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
+			m_vrv->m_ortho_view_cmb->Select(1);
+		else if (m_q.AlmostEqual(Quaternion(sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
+			m_vrv->m_ortho_view_cmb->Select(2);
+		else if (m_q.AlmostEqual(Quaternion(-sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
+			m_vrv->m_ortho_view_cmb->Select(3);
+		else if (m_q.AlmostEqual(Quaternion(0, 0, 0, 1)))
+			m_vrv->m_ortho_view_cmb->Select(4);
+		else if (m_q.AlmostEqual(Quaternion(0, -1, 0, 0)))
+			m_vrv->m_ortho_view_cmb->Select(5);
+		else
+			m_vrv->m_ortho_view_cmb->Select(6);
+	}
+
 	if (refresh)
 	{
 		m_clear_buffer = true;
@@ -11988,8 +12007,10 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	//if (m_drawing) return;
 	wxWindow *window = wxWindow::FindFocus();
 	if (window &&
+		(window->GetClassInfo()->
+		IsKindOf(CLASSINFO(wxTextCtrl)) ||
 		window->GetClassInfo()->
-		IsKindOf(CLASSINFO(wxTextCtrl)) &&
+		IsKindOf(CLASSINFO(wxComboBox))) &&
 		(event.LeftDown() ||
 		event.RightDown() ||
 		event.MiddleDown() ||
@@ -12795,6 +12816,7 @@ BEGIN_EVENT_TABLE(VRenderView, wxPanel)
 	EVT_COMMAND_SCROLL(ID_ZRotSldr, VRenderView::OnZRotScroll)
 	EVT_TOOL(ID_RotLockChk, VRenderView::OnRotLockCheck)
 	EVT_TOOL(ID_RotSliderType, VRenderView::OnRotSliderType)
+	EVT_COMBOBOX(ID_OrthoViewCmb, VRenderView::OnOrthoViewSelected)
 	//timer
 	EVT_TIMER(ID_RotateTimer, VRenderView::OnTimer)
 	//save default
@@ -13309,6 +13331,7 @@ void VRenderView::CreateBar()
 	m_z_rot_text = new wxTextCtrl(this, ID_ZRotText, "0.0",
 		wxDefaultPosition, wxSize(45,20), 0, vald_fp1);
 
+	//45 lock
 	m_rot_lock_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(gear_45);
@@ -13327,6 +13350,18 @@ void VRenderView::CreateBar()
 	m_rot_lock_btn->ToggleTool(ID_RotSliderType, m_rot_slider);
 	m_rot_lock_btn->Realize();
 
+	//ortho view selector
+	m_ortho_view_cmb = new wxComboBox(m_lower_toolbar, ID_OrthoViewCmb, "",
+		wxDefaultPosition, wxSize(50, 30), 0, NULL, wxCB_READONLY);
+	m_ortho_view_cmb->Append("+X");
+	m_ortho_view_cmb->Append("-X");
+	m_ortho_view_cmb->Append("+Y");
+	m_ortho_view_cmb->Append("-Y");
+	m_ortho_view_cmb->Append("+Z");
+	m_ortho_view_cmb->Append("-Z");
+	m_ortho_view_cmb->Append("NA");
+	m_ortho_view_cmb->Select(6);
+	m_lower_toolbar->AddControl(m_ortho_view_cmb);
 	bitmap = wxGetBitmapFromMemory(reset);
 #ifdef _DARWIN
 	m_lower_toolbar->SetToolBitmapSize(bitmap.GetSize());
@@ -14880,6 +14915,45 @@ void VRenderView::OnRotSliderType(wxCommandEvent& event)
 		m_y_rot_sldr->SetThumbPosition(int(roty));
 		m_z_rot_sldr->SetThumbPosition(int(rotz));
 	}
+}
+
+void VRenderView::OnOrthoViewSelected(wxCommandEvent& event)
+{
+	int sel = 6;
+	if (m_ortho_view_cmb)
+		sel = m_ortho_view_cmb->GetSelection();
+	switch (sel)
+	{
+	case 0://+X
+		SetRotations(0.0, 90.0, 0.0, false);
+		break;
+	case 1://-X
+		SetRotations(0.0, 270.0, 0.0, false);
+		break;
+	case 2://+Y
+		SetRotations(90.0, 0.0, 0.0, false);
+		break;
+	case 3://-Y
+		SetRotations(270.0, 0.0, 0.0, false);
+		break;
+	case 4://+Z
+		SetRotations(0.0, 0.0, 0.0, false);
+		break;
+	case 5:
+		SetRotations(0.0, 180.0, 0.0, false);
+		break;
+	}
+	if (sel < 6)
+	{
+		m_rot_lock_btn->ToggleTool(ID_RotLockChk, true);
+		if (m_glview) m_glview->SetRotLock(true);
+	}
+	else
+	{
+		m_rot_lock_btn->ToggleTool(ID_RotLockChk, false);
+		if (m_glview) m_glview->SetRotLock(false);
+	}
+	RefreshGL();
 }
 
 //top

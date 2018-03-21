@@ -170,6 +170,18 @@ public:
 		return (x==q.x && y==q.y && z==q.z && w==q.w);
 	}
 
+	bool AlmostEqual(const Quaternion& q)const
+	{
+		return (fabs(x - q.x) < EPS &&
+			fabs(y - q.y) < EPS &&
+			fabs(z - q.z) < EPS &&
+			fabs(w - q.w) < EPS) ||
+			(fabs(x + q.x) < EPS &&
+			fabs(y + q.y) < EPS &&
+			fabs(z + q.z) < EPS &&
+			fabs(w + q.w) < EPS);
+	}
+
 	bool IsIdentity()
 	{
 		return (x==0.0 && y==0.0 && z==0.0 && w==1.0);

@@ -123,6 +123,7 @@ class VRenderFrame: public wxFrame
 		//view
 		ID_FullScreen,
 		ID_ViewNew,
+		ID_Layout,
 		ID_ShowHideUI,
 		//tools
 		ID_LastTool,
@@ -447,6 +448,7 @@ private:
 	void OnClose(wxCloseEvent &event);
 	void OnExit(wxCommandEvent& WXUNUSED(event));
 	void OnNewView(wxCommandEvent& WXUNUSED(event));
+	void OnLayout(wxCommandEvent& WXUNUSED(event));
 	void OnFullScreen(wxCommandEvent& WXUNUSED(event));
 	void OnOpenVolume(wxCommandEvent& WXUNUSED(event));
 	void OnOpenMesh(wxCommandEvent& WXUNUSED(event));
