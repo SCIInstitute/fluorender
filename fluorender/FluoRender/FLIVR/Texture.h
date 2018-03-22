@@ -199,7 +199,20 @@ namespace FLIVR
 			b_spcz_ = z;
 			Transform tform;
 			tform.load_identity();
-			Point nmax(nx_*x, ny_*y, nz_*z);
+			int nx, ny, nz;
+			if (brkxml_)
+			{
+				nx = pyramid_[0].data->axis[0].size;
+				ny = pyramid_[0].data->axis[1].size;
+				nz = pyramid_[0].data->axis[2].size;
+			}
+			else
+			{
+				nx = nx_;
+				ny = ny_;
+				nz = nz_;
+			}
+			Point nmax(nx*x, ny*y, nz*z);
 			tform.pre_scale(Vector(nmax));
 			set_transform(tform);
 		}

@@ -949,7 +949,7 @@ void VRenderFrame::OnNewView(wxCommandEvent& WXUNUSED(event))
 
 void VRenderFrame::OnLayout(wxCommandEvent& WXUNUSED(event))
 {
-	OrganizeVRenderViews(0);
+	OrganizeVRenderViews(1);
 }
 
 void VRenderFrame::OnFullScreen(wxCommandEvent& WXUNUSED(event))

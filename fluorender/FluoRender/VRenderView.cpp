@@ -6788,7 +6788,7 @@ double VRenderGLView::Get121ScaleFactor()
 	else if (m_vd_pop_list.size())
 		vd = m_vd_pop_list[0];
 	if (vd)
-		vd->GetSpacings(spc_x, spc_y, spc_z);
+		vd->GetSpacings(spc_x, spc_y, spc_z, vd->GetLevel());
 	spc_x = spc_x<EPS ? 1.0 : spc_x;
 	spc_y = spc_y<EPS ? 1.0 : spc_y;
 
