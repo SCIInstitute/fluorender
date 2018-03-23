@@ -8427,6 +8427,9 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		plane_mode = vr_frame->GetClippingView()->GetPlaneMode();
 	}
 
+	if (plane_mode == kNone)
+		return;
+
 	bool draw_plane = plane_mode != kFrame;
 	if ((plane_mode == kLowTransBack ||
 		plane_mode == kNormalBack) &&

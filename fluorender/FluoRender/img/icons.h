@@ -189,6 +189,8 @@ public:
 	const static unsigned char clip_normal_png[790];
 	/* clip_normal_back.png - 773 bytes */
 	const static unsigned char clip_normal_back_png[773];
+	/* clip_none.png - 1286 bytes */
+	const static unsigned char clip_none_png[1286];
 
 
 	//list view icons

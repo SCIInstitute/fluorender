@@ -774,6 +774,11 @@ void ClippingView::OnPlaneModesBtn(wxCommandEvent &event)
 			wxGetBitmapFromMemory(clip_normal_back));
 		break;
 	case kNormalBack:
+		m_plane_mode = kNone;
+		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_none));
+		break;
+	case kNone:
 		m_plane_mode = kNormal;
 		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 			wxGetBitmapFromMemory(clip_normal));

@@ -41,7 +41,8 @@ enum PLANE_MODES
 	kFrame,
 	kLowTrans,
 	kLowTransBack,
-	kNormalBack
+	kNormalBack,
+	kNone
 };
 
 class ClippingView: public wxPanel
