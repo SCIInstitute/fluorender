@@ -942,7 +942,10 @@ namespace FLIVR
 
 		if (mem_swap_ &&
 			cur_brick_num_ == total_brick_num_)
+		{
 			done_update_loop_ = true;
+			active_view_ = -1;
+		}
 		if (mem_swap_ &&
 			(size_t)cur_chan_brick_num_ == (*bricks).size())
 		{

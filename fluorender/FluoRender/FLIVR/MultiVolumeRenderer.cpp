@@ -505,7 +505,10 @@ namespace FLIVR
 
 		if (TextureRenderer::mem_swap_ &&
 			TextureRenderer::cur_brick_num_ == TextureRenderer::total_brick_num_)
+		{
 			TextureRenderer::done_update_loop_ = true;
+			TextureRenderer::active_view_ = -1;
+		}
 		if (TextureRenderer::mem_swap_)
 		{
 			int num = 0;

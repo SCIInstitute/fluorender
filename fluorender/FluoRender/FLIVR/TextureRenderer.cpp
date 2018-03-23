@@ -45,6 +45,7 @@ using namespace std;
 namespace FLIVR
 {
 	bool TextureRenderer::mem_swap_ = false;
+	int TextureRenderer::active_view_ = -1;
 	bool TextureRenderer::use_mem_limit_ = false;
 	double TextureRenderer::mem_limit_ = 0.0;
 	double TextureRenderer::available_mem_ = 0.0;

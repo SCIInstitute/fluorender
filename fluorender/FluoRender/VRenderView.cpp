@@ -42,7 +42,7 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 
-int VRenderView::m_id = 1;
+int VRenderView::m_max_id = 1;
 ImgShaderFactory VRenderGLView::m_img_shader_factory;
 bool VRenderGLView::m_linked_rot = false;
 VRenderGLView* VRenderGLView::m_master_linked_view = 0;
@@ -4661,8 +4661,11 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		TextureRenderer::get_start_update_loop() &&
 		!TextureRenderer::get_done_update_loop())
 	{
-		refresh = true;
-		start_loop = false;
+		if (TextureRenderer::active_view_ == m_vrv->m_id)
+		{
+			refresh = true;
+			start_loop = false;
+		}
 	}
 
 	if (m_capture_rotat ||
@@ -10212,6 +10215,12 @@ void VRenderGLView::StartLoopUpdate()
 
 	if (TextureRenderer::get_mem_swap())
 	{
+		if (TextureRenderer::active_view_ > 0 &&
+			TextureRenderer::active_view_ != m_vrv->m_id)
+			return;
+		else
+			TextureRenderer::active_view_ = m_vrv->m_id;
+
 		int nx = GetGLSize().x;
 		int ny = GetGLSize().y;
 		//projection
@@ -10646,7 +10655,8 @@ void VRenderGLView::RefreshGL(int debug_code, bool erase, bool start_loop)
 	//for debugging refresh events
 #ifdef _DEBUG
 	std::wostringstream os;
-	os << "refresh" << "\t" <<
+	os << m_vrv->m_id << "\t" <<
+		"refresh" << "\t" <<
 		debug_code << "\t" <<
 		m_interactive << "\n";
 	OutputDebugString(os.str().c_str());
@@ -12857,7 +12867,8 @@ wxPanel(parent, id, pos, size, style),
 	m_full_frame = new wxFrame((wxFrame*)NULL, wxID_ANY, "FluoRender");
 	m_view_sizer = new wxBoxSizer(wxVERTICAL);
 
-	wxString name = wxString::Format("Render View:%d", m_id++);
+	m_id = m_max_id;
+	wxString name = wxString::Format("Render View:%d", m_max_id++);
 	this->SetName(name);
 	// this list takes care of both pixel and context attributes (no custom edits of wx is preferred)
 	//render view/////////////////////////////////////////////////
@@ -14099,7 +14110,7 @@ double VRenderView::GetFogIntensity()
 //reset counter
 void VRenderView::ResetID()
 {
-	m_id = 1;
+	m_max_id = 1;
 }
 
 //get rendering context
@@ -14927,22 +14938,22 @@ void VRenderView::OnOrthoViewSelected(wxCommandEvent& event)
 	switch (sel)
 	{
 	case 0://+X
-		SetRotations(0.0, 90.0, 0.0, false);
+		SetRotations(0.0, 90.0, 0.0, true);
 		break;
 	case 1://-X
-		SetRotations(0.0, 270.0, 0.0, false);
+		SetRotations(0.0, 270.0, 0.0, true);
 		break;
 	case 2://+Y
-		SetRotations(90.0, 0.0, 0.0, false);
+		SetRotations(90.0, 0.0, 0.0, true);
 		break;
 	case 3://-Y
-		SetRotations(270.0, 0.0, 0.0, false);
+		SetRotations(270.0, 0.0, 0.0, true);
 		break;
 	case 4://+Z
-		SetRotations(0.0, 0.0, 0.0, false);
+		SetRotations(0.0, 0.0, 0.0, true);
 		break;
 	case 5:
-		SetRotations(0.0, 180.0, 0.0, false);
+		SetRotations(0.0, 180.0, 0.0, true);
 		break;
 	}
 	if (sel < 6)

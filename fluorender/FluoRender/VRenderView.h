@@ -1636,7 +1636,8 @@ public:
 
 public:
 	wxWindow* m_frame;
-	static int m_id;
+	static int m_max_id;
+	int m_id;
 
 	//render view///////////////////////////////////////////////
 	VRenderGLView *m_glview;

@@ -312,6 +312,7 @@ namespace FLIVR
 #endif
 		//memory management
 		static bool mem_swap_;
+		static int active_view_;
 		static bool use_mem_limit_;
 		static double mem_limit_;
 		static double available_mem_;
