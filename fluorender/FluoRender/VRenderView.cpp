@@ -13255,7 +13255,7 @@ void VRenderView::CreateBar()
 	st1 = new wxStaticText(this, 0, " Zoom",wxDefaultPosition,wxSize(45,-1));
 	m_pin_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	bitmap = wxGetBitmapFromMemory(pin);
+	bitmap = wxGetBitmapFromMemory(anchor_dark);
 #ifdef _DARWIN
 	m_pin_btn->SetToolBitmapSize(bitmap.GetSize());
 #endif
@@ -13350,7 +13350,7 @@ void VRenderView::CreateBar()
 	//45 lock
 	m_rot_lock_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	bitmap = wxGetBitmapFromMemory(gear_45);
+	bitmap = wxGetBitmapFromMemory(gear_dark);
 #ifdef _DARWIN
 	m_rot_lock_btn->SetToolBitmapSize(bitmap.GetSize());
 #endif
@@ -13831,12 +13831,16 @@ void VRenderView::UpdateScaleFactor(bool update_text)
 	if (scale > 10.0)
 	{
 		m_pin_btn->ToggleTool(ID_PinBtn, true);
+		m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
+			wxGetBitmapFromMemory(pin));
 		m_glview->m_pin_rot_center = true;
 		m_glview->m_rot_center_dirty = true;
 	}
 	else
 	{
 		m_pin_btn->ToggleTool(ID_PinBtn, false);
+		m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
+			wxGetBitmapFromMemory(anchor_dark));
 		m_glview->m_pin_rot_center = false;
 	}
 }
@@ -14561,6 +14565,12 @@ void VRenderView::OnPin(wxCommandEvent &event)
 {
 	bool pin = m_pin_btn->GetToolState(ID_PinBtn);
 	m_glview->SetPinRotCenter(pin);
+	if (pin)
+		m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
+			wxGetBitmapFromMemory(pin));
+	else
+		m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
+			wxGetBitmapFromMemory(anchor_dark));
 }
 
 void VRenderView::OnCenter(wxCommandEvent &event)
@@ -14894,10 +14904,18 @@ void VRenderView::OnRotLockCheck(wxCommandEvent& event)
 	bool lock = m_rot_lock_btn->GetToolState(ID_RotLockChk);
 	double rotx, roty, rotz;
 	m_glview->GetRotations(rotx, roty, rotz);
-	if (lock) {
+	if (lock)
+	{
+		m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
+			wxGetBitmapFromMemory(gear_45));
 		rotx = (((int)(rotx/45))*45);
 		roty = (((int)(roty/45))*45);
 		rotz = (((int)(rotz/45))*45);
+	}
+	else
+	{
+		m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
+			wxGetBitmapFromMemory(gear_dark));
 	}
 	m_glview->SetRotLock(lock);
 	wxString str = wxString::Format("%.1f", rotx);
@@ -14962,11 +14980,15 @@ void VRenderView::OnOrthoViewSelected(wxCommandEvent& event)
 	if (sel < 6)
 	{
 		m_rot_lock_btn->ToggleTool(ID_RotLockChk, true);
+		m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
+			wxGetBitmapFromMemory(gear_45));
 		if (m_glview) m_glview->SetRotLock(true);
 	}
 	else
 	{
 		m_rot_lock_btn->ToggleTool(ID_RotLockChk, false);
+		m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
+			wxGetBitmapFromMemory(gear_dark));
 		if (m_glview) m_glview->SetRotLock(false);
 	}
 	RefreshGL();
@@ -15442,6 +15464,13 @@ void VRenderView::LoadSettings()
 	if (fconfig.Read("rot_lock", &bVal))
 	{
 		m_rot_lock_btn->ToggleTool(ID_RotLockChk,bVal);
+		if (bVal)
+			m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
+				wxGetBitmapFromMemory(gear_45));
+		else
+			m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
+				wxGetBitmapFromMemory(gear_dark));
+
 		m_glview->SetRotLock(bVal);
 	}
 	if (fconfig.Read("rot_slider", &m_rot_slider))
@@ -15467,6 +15496,12 @@ void VRenderView::LoadSettings()
 		if (bVal)
 			m_glview->m_rot_center_dirty = true;
 		m_pin_btn->ToggleTool(ID_PinBtn, bVal);
+		if (bVal)
+			m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
+				wxGetBitmapFromMemory(pin));
+		else
+			m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
+				wxGetBitmapFromMemory(anchor_dark));
 	}
 	if (fconfig.Read("scale_factor_mode", &bVal))
 	{
