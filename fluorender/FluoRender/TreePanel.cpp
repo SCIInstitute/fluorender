@@ -136,6 +136,13 @@ void DataTreeCtrl::DeleteSelection()
 
 	if (sel_item.IsOk() && vr_frame)
 	{
+		LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
+		if (item_data && item_data->type == 1)//view
+		{
+			wxString name = GetItemText(sel_item);
+			vr_frame->DeleteVRenderView(name);
+		}
+
 		wxString name_data = GetItemText(sel_item);
 		wxTreeItemId par_item = GetItemParent(sel_item);
 		if (!par_item.IsOk())

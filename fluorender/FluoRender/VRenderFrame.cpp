@@ -841,20 +841,10 @@ wxString VRenderFrame::CreateView(int row)
 	{
 		wxGLContext* sharedContext = m_vrv_list[0]->GetContext();
 		vrv = new VRenderView(this, this, wxID_ANY, sharedContext);
-		//m_aui_mgr.AddPane(vrv, wxAuiPaneInfo().
-		//	Name(vrv->GetName()).Caption(vrv->GetName()).
-		//	Dockable(true).CloseButton(false).Resizable().
-		//	//FloatingSize(wxSize(600, 400)).MinSize(wxSize(300, 200)).
-		//	Layer(0).Centre().Right());
 	}
 	else
 	{
 		vrv = new VRenderView(this, this, wxID_ANY);
-		//m_aui_mgr.AddPane(vrv, wxAuiPaneInfo().
-		//	Name(vrv->GetName()).Caption(vrv->GetName()).
-		//	Dockable(true).CloseButton(false).Resizable().
-		//	//FloatingSize(wxSize(600, 400)).MinSize(wxSize(300, 200)).
-		//	Layer(0).Centre());
 	}
 
 	if (vrv)
@@ -888,7 +878,6 @@ wxString VRenderFrame::CreateView(int row)
 
 	//m_aui_mgr.Update();
 	OrganizeVRenderViews(1);
-	UpdateTree();
 
 	//set view default settings
 	if (m_adjust_view && vrv)
@@ -903,6 +892,44 @@ wxString VRenderFrame::CreateView(int row)
 		vrv->m_glview->SetSyncG(sync_g);
 		vrv->m_glview->SetSyncB(sync_b);
 	}
+
+	//add volumes
+	if (m_vrv_list.size() > 0 && vrv)
+	{
+		VRenderView* vrv0 = m_vrv_list[0];
+		if (vrv0)
+		{
+			for (int i = 0; i < vrv0->GetDispVolumeNum(); ++i)
+			{
+				VolumeData* vd = vrv0->GetDispVolumeData(i);
+				if (vd)
+				{
+					VolumeData* vd_add = m_data_mgr.DuplicateVolumeData(vd);
+
+					if (vd_add)
+					{
+						int chan_num = vrv->GetAny();
+						Color color(1.0, 1.0, 1.0);
+						if (chan_num == 0)
+							color = Color(1.0, 0.0, 0.0);
+						else if (chan_num == 1)
+							color = Color(0.0, 1.0, 0.0);
+						else if (chan_num == 2)
+							color = Color(0.0, 0.0, 1.0);
+
+						if (chan_num >= 0 && chan_num < 3)
+							vd_add->SetColor(color);
+
+						vrv->AddVolumeData(vd_add);
+					}
+				}
+			}
+		}
+		//update
+		vrv->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
+	}
+
+	UpdateTree();
 
 	if (vrv)
 		return vrv->GetName();
@@ -2161,7 +2188,7 @@ void VRenderFrame::DeleteVRenderView(wxString &name)
 	for (int i=0; i<GetViewNum(); i++)
 	{
 		VRenderView* vrv = GetView(i);
-		if (vrv && name == vrv->GetName())
+		if (vrv && name == vrv->GetName() && vrv->m_id > 1)
 		{
 			DeleteVRenderView(i);
 			return;
