@@ -114,7 +114,7 @@ add_definitions(-DID_VRENDER_FRAME=ID_VPROP_VIEW+71)
 add_definitions(-DID_VRENDER_VIEW1=ID_VRENDER_FRAME+51)
 add_definitions(-DID_VRENDER_VIEW2=ID_VRENDER_VIEW1+11)
 #dialog common IDs
-add_definitions(-DID_LZW_COMP=ID_VRENDER_VIEW2+41)
+add_definitions(-DID_LZW_COMP=ID_VRENDER_VIEW2+51)
 add_definitions(-DID_RESIZE_CHK=ID_LZW_COMP+1)
 add_definitions(-DID_RESIZE_X_TXT=ID_RESIZE_CHK+1)
 add_definitions(-DID_RESIZE_Y_TXT=ID_RESIZE_X_TXT+1)

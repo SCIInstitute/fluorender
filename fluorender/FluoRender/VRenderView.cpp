@@ -13263,6 +13263,7 @@ void VRenderView::CreateBar()
 		bitmap, wxNullBitmap,
 		"Anchor the rotation center on data",
 		"Anchor the rotation center on data");
+	m_pin_btn->ToggleTool(ID_PinBtn, false);
 	m_pin_btn->Realize();
 	m_center_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
@@ -13830,18 +13831,24 @@ void VRenderView::UpdateScaleFactor(bool update_text)
 	//update pin rotation center
 	if (scale > 10.0)
 	{
-		m_pin_btn->ToggleTool(ID_PinBtn, true);
-		m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
-			wxGetBitmapFromMemory(pin));
-		m_glview->m_pin_rot_center = true;
-		m_glview->m_rot_center_dirty = true;
+		if (!m_glview->m_pin_rot_center)
+		{
+			m_pin_btn->ToggleTool(ID_PinBtn, true);
+			m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
+				wxGetBitmapFromMemory(pin));
+			m_glview->m_pin_rot_center = true;
+			m_glview->m_rot_center_dirty = true;
+		}
 	}
 	else
 	{
-		m_pin_btn->ToggleTool(ID_PinBtn, false);
-		m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
-			wxGetBitmapFromMemory(anchor_dark));
-		m_glview->m_pin_rot_center = false;
+		if (m_glview->m_pin_rot_center)
+		{
+			m_pin_btn->ToggleTool(ID_PinBtn, false);
+			m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
+				wxGetBitmapFromMemory(anchor_dark));
+			m_glview->m_pin_rot_center = false;
+		}
 	}
 }
 
