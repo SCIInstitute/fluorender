@@ -427,7 +427,7 @@ HCTX VRenderGLView::TabletInit(HWND hWnd, HINSTANCE hInst)
 	else
 		m_press_tmax = 1.0;
 
-	m_lc.lcInOrgX = 0;
+/*	m_lc.lcInOrgX = 0;
 	m_lc.lcInOrgY = 0;
 	m_lc.lcInExtX = TabletX.axMax;
 	m_lc.lcInExtY = TabletY.axMax;
@@ -447,7 +447,7 @@ HCTX VRenderGLView::TabletInit(HWND hWnd, HINSTANCE hInst)
 															// open the region
 															// The Wintab spec says we must open the context disabled if we are 
 															// using cursor masks.  
-	hctx = gpWTOpenA(hWnd, &m_lc, TRUE);
+*/	hctx = gpWTOpenA(hWnd, &m_lc, TRUE);
 
 	WacomTrace("HCTX: %i\n", hctx);
 
