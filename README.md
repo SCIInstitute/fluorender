@@ -8,7 +8,9 @@ This is the open-source repository for FluoRender, an interactive rendering tool
 Aknowledgements
 ========
 If you use FluoRender in work that leads to published research, we humbly ask that you add the following to the 'Acknowledgments' section of your paper: 
-"This work was made possible in part by software funded by the NIH: Fluorender: An Imaging Tool for Visualization and Analysis of Confocal Data as Applied to Zebrafish Research, R01-GM098151-01."
+"This work was made possible in part by software funded by the NIH: Fluorender: Visualization-Based and Interactive Analysis for Multichannel Microscopy Data, R01EB023947."
+If you would like to cite FluoRender, you may reference the following publication:
+Wan, Y., et al. (2017). FluoRender: joint free-hand segmentation and visualization for many-channel fluorescence data analysis. BMC Bioinformatics, 18:280.
 
 <strong>Author: </strong> Yong Wan<br/>
 <strong>Developer: </strong> Brig Bagley<br/>
