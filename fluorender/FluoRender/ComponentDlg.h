@@ -716,6 +716,9 @@ private:
 	void OnAnalyzeSel(wxCommandEvent &event);
 	void Analyze(bool sel);
 
+	//select output
+	void OnKey(wxKeyEvent &event);
+
 	DECLARE_EVENT_TABLE()
 };
 

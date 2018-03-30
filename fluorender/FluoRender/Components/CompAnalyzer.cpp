@@ -319,10 +319,15 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 			}
 		}
 
+		unsigned int size_limit;
 		for (iter = comp_list_brick.begin();
 			iter != comp_list_brick.end(); ++iter)
 		{
-			if (bn > 1 && iter->second->sumi < SIZE_LIMIT)
+			if (bn > 1)
+				size_limit = SIZE_LIMIT;
+			else
+				size_limit = 2;
+			if (iter->second->sumi < size_limit)
 				continue;
 			iter->second->var = sqrt(iter->second->m2 / (iter->second->sumi));
 			iter->second->mean *= scale;

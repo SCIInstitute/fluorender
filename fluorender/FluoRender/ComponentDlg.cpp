@@ -1245,6 +1245,7 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	m_stat_text = new wxTextCtrl(this, ID_StatText, "",
 		wxDefaultPosition, wxSize(-1, 150), wxTE_MULTILINE);
 	m_stat_text->SetEditable(false);
+	m_stat_text->Connect(wxID_ANY, wxEVT_KEY_DOWN, wxKeyEventHandler(ComponentDlg::OnKey), 0L, this);
 	sizer2->Add(m_stat_text, 1, wxEXPAND);
 
 	//all controls
@@ -3730,3 +3731,22 @@ void ComponentDlg::Analyze(bool sel)
 	connection.disconnect();
 }
 
+void ComponentDlg::OnKey(wxKeyEvent &event)
+{
+	switch (event.GetKeyCode())
+	{
+	case wxKeyCode('a'):
+	case wxKeyCode('A'):
+		if (event.ControlDown())
+		{
+			m_stat_text->SetSelection(-1, -1);
+		}
+		else
+			event.Skip();
+		break;
+
+	default:
+		event.Skip();
+		break;
+	}
+}
