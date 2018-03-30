@@ -317,6 +317,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	//pin rotation center
 	m_pin_rot_center(false),
 	m_rot_center_dirty(false),
+	m_pin_thresh(0.6),
 	m_res_mode(1),
 	m_enable_touch(false),
 	m_ptr_id1(-1),
@@ -3051,6 +3052,18 @@ void VRenderGLView::DrawFinalBuffer()
 		img_shader->release();
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, 0);
+
+	//get pixel value
+	if (m_pin_rot_center &&
+		m_rot_center_dirty &&
+		!m_free)
+	{
+		unsigned char pixel[4];
+		int nx = GetGLSize().x;
+		int ny = GetGLSize().y;
+		glReadPixels(nx / 2, ny / 2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
+		m_pin_thresh = 0.8 * double(pixel[3]) / 255.0;
+	}
 }
 
 //Draw the volmues with compositing
@@ -4698,7 +4711,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		int ny = GetGLSize().y;
 		double dist = GetPointVolume(p,
 			nx / 2.0, ny / 2.0,
-			m_cur_vol, 2, true, 0.6);
+			m_cur_vol, 2, true, m_pin_thresh);
 		if (dist <= 0.0)
 			dist = GetPointVolumeBox(p,
 				nx / 2.0, ny / 2.0,
