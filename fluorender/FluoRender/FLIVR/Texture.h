@@ -451,9 +451,9 @@ namespace FLIVR
 		x = y % nx_;
 		y = y / nx_;
 		//get brick indices
-		x = x / (bszx_-1);
-		y = y / (bszy_-1);
-		z = z / (bszz_-1);
+		x = bszx_ <= 1 ? 0 : x / (bszx_-1);
+		y = bszy_ <= 1 ? 0 : y / (bszy_-1);
+		z = bszz_ <= 1 ? 0 : z / (bszz_-1);
 		return z * bnx_ * bny_ + y * bnx_ + x;
 	}
 

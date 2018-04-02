@@ -360,7 +360,8 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 
 	m_comp_list_dirty = false;
 	m_colocal = colocal && m_vd_list.size();
-	m_analyzed = true;
+	if (!sel)
+		m_analyzed = true;
 }
 
 void ComponentAnalyzer::MatchBricks(bool sel)

@@ -1019,13 +1019,10 @@ void ComponentGenerator::Grow3DSized(
 
 		for (int j = 0; j < iter; ++j)
 		{
-			if (j)
-			{
-				err = clEnqueueNDRangeKernel(queue, kernel_0, 3, NULL, global_size,
-					local_size, 0, NULL, NULL);
-				err = clEnqueueNDRangeKernel(queue, kernel_1, 3, NULL, global_size,
-					local_size, 0, NULL, NULL);
-			}
+			err = clEnqueueNDRangeKernel(queue, kernel_0, 3, NULL, global_size,
+				local_size, 0, NULL, NULL);
+			err = clEnqueueNDRangeKernel(queue, kernel_1, 3, NULL, global_size,
+				local_size, 0, NULL, NULL);
 			err = clEnqueueNDRangeKernel(queue, kernel_2, 3, NULL, global_size,
 				local_size, 0, NULL, NULL);
 		}

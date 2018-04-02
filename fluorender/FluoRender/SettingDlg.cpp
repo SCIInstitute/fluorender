@@ -1407,6 +1407,8 @@ void SettingDlg::EnableStreaming(bool enable)
 		m_block_size_text->Enable();
 		m_response_time_sldr->Enable();
 		m_response_time_text->Enable();
+		m_detail_level_offset_sldr->Enable();
+		m_detail_level_offset_text->Enable();
 	}
 	else
 	{
@@ -1420,6 +1422,8 @@ void SettingDlg::EnableStreaming(bool enable)
 		m_block_size_text->Disable();
 		m_response_time_sldr->Disable();
 		m_response_time_text->Disable();
+		m_detail_level_offset_sldr->Disable();
+		m_detail_level_offset_text->Disable();
 	}
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)

@@ -112,12 +112,12 @@ void ComponentSelector::CompFull()
 				CompInfo* info = new CompInfo;
 				info->id = label_value;
 				info->brick_id = brick_id;
-				if (!m_analyzer)
+				if (!m_analyzer || !m_analyzer->GetAnalyzed())
 					info->sumi = 1;
 				sel_labels.insert(std::pair<unsigned long long, pCompInfo>
 					(GetKey(label_value, brick_id), pCompInfo(info)));
 			}
-			else if (!m_analyzer)
+			else if (!m_analyzer || !m_analyzer->GetAnalyzed())
 				label_iter->second->sumi++;
 		}
 	}
@@ -218,12 +218,12 @@ void ComponentSelector::Append(bool all, bool rmask)
 					CompInfo* info = new CompInfo;
 					info->id = label_value;
 					info->brick_id = brick_id;
-					if (!m_analyzer)
+					if (!m_analyzer || !m_analyzer->GetAnalyzed())
 						info->sumi = 1;
 					sel_labels.insert(std::pair<unsigned long long, pCompInfo>
 						(GetKey(label_value, brick_id), pCompInfo(info)));
 				}
-				else if (!m_analyzer)
+				else if (!m_analyzer || !m_analyzer->GetAnalyzed())
 					label_iter->second->sumi++;
 			}
 		}
