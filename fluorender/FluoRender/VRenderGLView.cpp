@@ -4613,7 +4613,9 @@ void VRenderGLView::PickVolume()
 	{
 		vd = m_vd_pop_list[i];
 		if (!vd) continue;
-		dist = GetPointVolume(p, old_mouse_X, old_mouse_Y, vd, 2, true, 0.5);
+		int mode = 2;
+		if (vd->GetMode() == 1) mode = 1;
+		dist = GetPointVolume(p, old_mouse_X, old_mouse_Y, vd, mode, true, 0.5);
 		if (dist > 0.0)
 		{
 			if (min_dist < 0.0)
@@ -4709,9 +4711,11 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		Point p;
 		int nx = GetGLSize().x;
 		int ny = GetGLSize().y;
+		int mode = 2;
+		if (m_cur_vol->GetMode() == 1) mode = 1;
 		double dist = GetPointVolume(p,
 			nx / 2.0, ny / 2.0,
-			m_cur_vol, 2, true, m_pin_thresh);
+			m_cur_vol, mode, true, m_pin_thresh);
 		if (dist <= 0.0)
 			dist = GetPointVolumeBox(p,
 				nx / 2.0, ny / 2.0,
@@ -10752,6 +10756,7 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 		mspc = sqrt(spcx*spcx + spcy*spcy + spcz*spcz) / vd->GetSampleRate();
 	if (vd->GetVR())
 		planes = vd->GetVR()->get_planes();
+	int counter = 0;//counter to determine if the ray casting has run
 	if (bbox.intersect(mp1, vv, hit))
 	{
 		int brick_id = -1;
@@ -10849,6 +10854,7 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 					{
 						mp = Point((xx + 0.5)*spcx, (yy + 0.5)*spcy, (zz + 0.5)*spcz);
 						max_int = value;
+						counter++;
 					}
 				}
 				else if (mode == 2)
@@ -10859,8 +10865,9 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 						alpha = 1.0 - pow(Clamp(1.0 - value, 0.0, 1.0), vd->GetSampleRate());
 						max_int += alpha*(1.0 - max_int);
 						mp = Point((xx + 0.5)*spcx, (yy + 0.5)*spcy, (zz + 0.5)*spcz);
+						counter++;
 					}
-					if (max_int >= thresh)
+					if (max_int > thresh || max_int >= 1.0)
 						break;
 				}
 			}
@@ -10868,6 +10875,9 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 		}
 	}
 	else
+		return -1.0;
+
+	if (counter == 0)
 		return -1.0;
 
 	if (mode == 1)
@@ -10879,7 +10889,7 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 	}
 	else if (mode == 2)
 	{
-		if (max_int >= thresh)
+		if (max_int > thresh || max_int >= 1.0)
 			return (mp - mp1).length();
 		else
 			return -1.0;
@@ -12394,9 +12404,11 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		{
 			m_interactive = true;
 			m_rot_center_dirty = true;
-			m_scale_factor += wheel*m_scale_factor / 1000.0;
-			if (m_scale_factor < 0.01)
-				m_scale_factor = 0.01;
+			double value = wheel*m_scale_factor / 1000.0;
+			if (m_scale_factor + value > 0.01)
+				m_scale_factor += value;
+			//if (m_scale_factor < 0.01)
+			//	m_scale_factor = 0.01;
 			m_vrv->UpdateScaleFactor(false);
 			//wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
 			//m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
