@@ -9736,7 +9736,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	else
 	{
 		if (m_use_press)
-			str = wxString::Format("FPS: %.2f, Pressure: &.2f",
+			str = wxString::Format("FPS: %.2f, Pressure: %.2f",
 				fps_ >= 0.0&&fps_<300.0 ? fps_ : 0.0, m_pressure);
 		else
 			str = wxString::Format("FPS: %.2f",
