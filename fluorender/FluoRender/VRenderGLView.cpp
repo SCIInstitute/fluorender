@@ -315,9 +315,10 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	//nodraw count
 	m_nodraw_count(0),
 	//pin rotation center
+	m_auto_update_rot_center(true),
 	m_pin_rot_center(false),
 	m_rot_center_dirty(false),
-	m_pin_thresh(0.6),
+	m_pin_pick_thresh(0.6),
 	m_res_mode(1),
 	m_enable_touch(false),
 	m_ptr_id1(-1),
@@ -3062,7 +3063,7 @@ void VRenderGLView::DrawFinalBuffer()
 		int nx = GetGLSize().x;
 		int ny = GetGLSize().y;
 		glReadPixels(nx / 2, ny / 2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
-		m_pin_thresh = 0.8 * double(pixel[3]) / 255.0;
+		m_pin_pick_thresh = 0.8 * double(pixel[3]) / 255.0;
 	}
 }
 
@@ -4715,7 +4716,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		if (m_cur_vol->GetMode() == 1) mode = 1;
 		double dist = GetPointVolume(p,
 			nx / 2.0, ny / 2.0,
-			m_cur_vol, mode, true, m_pin_thresh);
+			m_cur_vol, mode, true, m_pin_pick_thresh);
 		if (dist <= 0.0)
 			dist = GetPointVolumeBox(p,
 				nx / 2.0, ny / 2.0,

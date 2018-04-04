@@ -396,6 +396,7 @@ VRenderFrame::VRenderFrame(
 	m_vrv_list[0]->SetBlendSlices(m_setting_dlg->GetMicroBlend());
 	m_vrv_list[0]->SetAdaptive(m_setting_dlg->GetMouseInt());
 	m_vrv_list[0]->SetGradBg(m_setting_dlg->GetGradBg());
+	m_vrv_list[0]->SetPinThreshold(m_setting_dlg->GetPinThreshold());
 	m_vrv_list[0]->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
 	m_vrv_list[0]->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
 	m_vrv_list[0]->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
@@ -863,6 +864,7 @@ wxString VRenderFrame::CreateView(int row)
 		vrv->SetBlendSlices(m_setting_dlg->GetMicroBlend());
 		vrv->SetAdaptive(m_setting_dlg->GetMouseInt());
 		vrv->SetGradBg(m_setting_dlg->GetGradBg());
+		vrv->SetPinThreshold(m_setting_dlg->GetPinThreshold());
 		vrv->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
 		vrv->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
 		vrv->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());

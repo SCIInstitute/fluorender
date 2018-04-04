@@ -63,6 +63,9 @@ class SettingDlg : public wxPanel
 		ID_ShadowDirText,
 		//gradient background
 		ID_GradBgChk,
+		//auto rot center anchor threshold
+		ID_PinThreshSldr,
+		ID_PinThreshText,
 		//link rotations
 		ID_RotLinkChk,
 		//override vox
@@ -135,6 +138,8 @@ public:
 	//gradient background
 	bool GetGradBg() {return m_grad_bg;}
 	void SetGradBg(bool val) {m_grad_bg = val;}
+	//rot center anchor thresh
+	double GetPinThreshold() { return m_pin_threshold; }
 	//override vox
 	bool GetOverrideVox() {return m_override_vox;}
 	void SetOverrideVox(bool val) {m_override_vox = val;}
@@ -303,6 +308,8 @@ private:
 	//max texture size
 	bool m_use_max_texture_size;
 	int m_max_texture_size;
+	//rot center anchor thresh
+	double m_pin_threshold;
 
 private:
 	//save project
@@ -322,8 +329,10 @@ private:
 	wxTextCtrl *m_shadow_dir_text;
 	//gradient background
 	wxCheckBox *m_grad_bg_chk;
+	//rot center anchor
+	wxSlider *m_pin_threshold_sldr;
+	wxTextCtrl *m_pin_threshold_text;
 	//rotations link
-	
 	wxCheckBox *m_rot_link_chk;
 	//override vox
 	wxCheckBox *m_override_vox_chk;
@@ -395,6 +404,9 @@ private:
 	void OnShadowDirEdit(wxCommandEvent &event);
 	//gradient background
 	void OnGradBgCheck(wxCommandEvent &event);
+	//rot center anchor threshold
+	void OnPinThresholdChange(wxScrollEvent &event);
+	void OnPinThresholdEdit(wxCommandEvent &event);
 	//link rotations
 	void OnRotLink(wxCommandEvent& event);
 	//override vox

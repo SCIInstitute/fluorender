@@ -109,6 +109,7 @@ wxPanel(parent, id, pos, size, style),
 	m_timer(this,ID_RotateTimer),
 	m_draw_clip(false), 
 	m_draw_scalebar(kOff),
+	m_pin_scale_thresh(10.0),
 	m_rot_slider(true),
 	m_use_dft_settings(false),
 	m_dft_x_rot(0.0),
@@ -1070,26 +1071,29 @@ void VRenderView::UpdateScaleFactor(bool update_text)
 		m_scale_factor_text->SetValue(str);
 	else
 		m_scale_factor_text->ChangeValue(str);
-	//update pin rotation center
-	if (scale > 10.0)
+	//auto update pin rotation center
+	if (m_glview->m_auto_update_rot_center)
 	{
-		if (!m_glview->m_pin_rot_center)
+		if (scale > m_pin_scale_thresh)
 		{
-			m_pin_btn->ToggleTool(ID_PinBtn, true);
-			m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
-				wxGetBitmapFromMemory(pin));
-			m_glview->m_pin_rot_center = true;
-			m_glview->m_rot_center_dirty = true;
+			if (!m_glview->m_pin_rot_center)
+			{
+				m_pin_btn->ToggleTool(ID_PinBtn, true);
+				m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
+					wxGetBitmapFromMemory(pin));
+				m_glview->m_pin_rot_center = true;
+				m_glview->m_rot_center_dirty = true;
+			}
 		}
-	}
-	else
-	{
-		if (m_glview->m_pin_rot_center)
+		else
 		{
-			m_pin_btn->ToggleTool(ID_PinBtn, false);
-			m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
-				wxGetBitmapFromMemory(anchor_dark));
-			m_glview->m_pin_rot_center = false;
+			if (m_glview->m_pin_rot_center)
+			{
+				m_pin_btn->ToggleTool(ID_PinBtn, false);
+				m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
+					wxGetBitmapFromMemory(anchor_dark));
+				m_glview->m_pin_rot_center = false;
+			}
 		}
 	}
 }
@@ -1220,6 +1224,12 @@ void VRenderView::SetGradBg(bool val)
 {
 	if (m_glview)
 		m_glview->SetGradBg(val);
+}
+
+//rot center anchor thresh
+void VRenderView::SetPinThreshold(double value)
+{
+	m_pin_scale_thresh = value;
 }
 
 //point volume mode
@@ -1814,12 +1824,27 @@ void VRenderView::OnPin(wxCommandEvent &event)
 {
 	bool pin = m_pin_btn->GetToolState(ID_PinBtn);
 	m_glview->SetPinRotCenter(pin);
+	double scale = m_glview->m_scale_factor;
+	if (!m_glview->m_scale_mode)
+		scale /= m_glview->Get121ScaleFactor();
 	if (pin)
+	{
 		m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
 			wxGetBitmapFromMemory(pin));
+		if (scale > m_pin_scale_thresh)
+			m_glview->m_auto_update_rot_center = true;
+		else
+			m_glview->m_auto_update_rot_center = false;
+	}
 	else
+	{
 		m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
 			wxGetBitmapFromMemory(anchor_dark));
+		if (scale > m_pin_scale_thresh)
+			m_glview->m_auto_update_rot_center = false;
+		else
+			m_glview->m_auto_update_rot_center = true;
+	}
 }
 
 void VRenderView::OnCenter(wxCommandEvent &event)

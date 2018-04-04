@@ -186,6 +186,9 @@ public:
 	void SetBackgroundColor(Color &color);
 	void SetGradBg(bool val);
 
+	//rot center anchor thresh
+	void SetPinThreshold(double value);
+
 	//point volume mode
 	void SetPointVolumeMode(int mode);
 	int GetPointVolumeMode();
@@ -629,6 +632,7 @@ public:
 	};
 	SCALEBAR_STATE m_draw_scalebar;
 
+	double m_pin_scale_thresh;//scale factor theshold value for auto update
 	//rot slider style
 	bool m_rot_slider;
 

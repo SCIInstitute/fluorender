@@ -90,6 +90,8 @@ gl_minor_ver=4
 gl_profile_mask=1
 [cl\ device]
 device_id=0
+[pin\ threshold]
+value=10
 [max\ texture\ size]
 use_max_texture_size=0
 max_texture_size=2048

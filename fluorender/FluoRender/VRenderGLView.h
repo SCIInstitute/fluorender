@@ -618,9 +618,10 @@ public:
 	//scale mode
 	bool m_scale_mode;
 	//pin rotation center
+	bool m_auto_update_rot_center;
 	bool m_pin_rot_center;
 	bool m_rot_center_dirty;
-	double m_pin_thresh;
+	double m_pin_pick_thresh;//ray casting threshold value
 	//mode in determining depth of volume
 	int m_point_volume_mode;  //0: use view plane; 1: use max value; 2: use accumulated value
 							  //ruler use volume transfer function
