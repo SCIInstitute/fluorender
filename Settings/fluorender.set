@@ -95,3 +95,5 @@ value=10
 [max\ texture\ size]
 use_max_texture_size=0
 max_texture_size=2048
+[clipping\ planes]
+mode=0

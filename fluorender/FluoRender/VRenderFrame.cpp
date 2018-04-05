@@ -359,6 +359,8 @@ VRenderFrame::VRenderFrame(
 	m_clip_view = new ClippingView(this, this, wxID_ANY,
 		wxDefaultPosition, wxSize(130,700));
 	m_clip_view->SetDataManager(&m_data_mgr);
+	m_clip_view->SetPlaneMode(static_cast<PLANE_MODES>(
+		m_setting_dlg->GetPlaneMode()));
 
 	//adjust view
 	m_adjust_view = new AdjustView(this, this, wxID_ANY,
@@ -2994,6 +2996,8 @@ void VRenderFrame::SaveProject(wxString& filename)
 	fconfig.Write("cur_sel_vol", m_cur_sel_vol);
 	fconfig.Write("cur_sel_mesh", m_cur_sel_mesh);
 	fconfig.Write("chann_link", m_clip_view->GetChannLink());
+	fconfig.Write("hold planes", m_clip_view->GetHoldPlanes());
+	fconfig.Write("plane mode", int(m_clip_view->GetPlaneMode()));
 	fconfig.Write("x_link", m_clip_view->GetXLink());
 	fconfig.Write("y_link", m_clip_view->GetYLink());
 	fconfig.Write("z_link", m_clip_view->GetZLink());
@@ -4200,15 +4204,20 @@ void VRenderFrame::OpenProject(wxString& filename)
 				OnSelection(2, 0, 0, vd);
 			}
 		}
-		bool link;
-		if (fconfig.Read("chann_link", &link))
-			m_clip_view->SetChannLink(link);
-		if (fconfig.Read("x_link", &link))
-			m_clip_view->SetXLink(link);
-		if (fconfig.Read("y_link", &link))
-			m_clip_view->SetYLink(link);
-		if (fconfig.Read("z_link", &link))
-			m_clip_view->SetZLink(link);
+		bool bval;
+		if (fconfig.Read("chann_link", &bval))
+			m_clip_view->SetChannLink(bval);
+		if (fconfig.Read("hold planes", &bval))
+			m_clip_view->SetHoldPlanes(bval);
+		int mode;
+		if (fconfig.Read("plane mode", &mode))
+			m_clip_view->SetPlaneMode(static_cast<PLANE_MODES>(mode));
+		if (fconfig.Read("x_link", &bval))
+			m_clip_view->SetXLink(bval);
+		if (fconfig.Read("y_link", &bval))
+			m_clip_view->SetYLink(bval);
+		if (fconfig.Read("z_link", &bval))
+			m_clip_view->SetZLink(bval);
 	}
 
 	//movie panel

@@ -687,6 +687,7 @@ void SettingDlg::GetSettings()
 	m_similarity = 0.3;
 	m_use_max_texture_size = false;
 	m_max_texture_size = 2048;
+	m_plane_mode = 0;
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
@@ -935,6 +936,12 @@ void SettingDlg::GetSettings()
 	{
 		fconfig.SetPath("/cl device");
 		fconfig.Read("device_id", &m_cl_device_id);
+	}
+	//clipping plane display mode
+	if (fconfig.Exists("/clipping planes"))
+	{
+		fconfig.SetPath("/clipping planes");
+		fconfig.Read("mode", &m_plane_mode);
 	}
 
 	UpdateUI();
@@ -1188,6 +1195,13 @@ void SettingDlg::SaveSettings()
 	//cl device
 	fconfig.SetPath("/cl device");
 	fconfig.Write("device_id", m_cl_device_id);
+
+	//clipping plane mode
+	fconfig.SetPath("/clipping planes");
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetClippingView())
+		m_plane_mode = vr_frame->GetClippingView()->GetPlaneMode();
+	fconfig.Write("mode", m_plane_mode);
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);

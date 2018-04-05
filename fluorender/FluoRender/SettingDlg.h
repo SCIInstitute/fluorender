@@ -223,6 +223,7 @@ public:
 	bool GetUseMaxTextureSize() { return m_use_max_texture_size; }
 	void SetMaxTextureSize(int size) { m_max_texture_size = size; }
 	int GetMaxTextureSize() { return m_max_texture_size; }
+	int GetPlaneMode() { return m_plane_mode; }
 
 private:
 	wxWindow* m_frame;
@@ -310,6 +311,8 @@ private:
 	int m_max_texture_size;
 	//rot center anchor thresh
 	double m_pin_threshold;
+	//clipping plane display mode
+	int m_plane_mode;
 
 private:
 	//save project
