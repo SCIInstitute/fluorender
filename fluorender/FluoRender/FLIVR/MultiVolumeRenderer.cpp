@@ -479,7 +479,7 @@ namespace FLIVR
 
 				//for brick transformation
 				float matrix[16];
-				BBox bbox = b->bbox();
+				BBox bbox = b->dbox();
 				matrix[0] = float(bbox.max().x()-bbox.min().x());
 				matrix[1] = 0.0f;
 				matrix[2] = 0.0f;
