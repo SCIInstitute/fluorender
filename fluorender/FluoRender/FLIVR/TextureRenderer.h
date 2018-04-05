@@ -215,6 +215,7 @@ namespace FLIVR
 		static int get_cur_chan_brick_num() {return cur_chan_brick_num_;}
 		static void set_total_brick_num(int num) {total_brick_num_ = num; cur_brick_num_ = 0;}
 		static int get_total_brick_num() {return total_brick_num_;}
+		static void set_clear_chan_buffer() { clear_chan_buffer_ = true; }
 		static void reset_clear_chan_buffer() {clear_chan_buffer_ = false;}
 		static bool get_clear_chan_buffer() {return clear_chan_buffer_;}
 		static void reset_save_final_buffer() {save_final_buffer_ = false;}

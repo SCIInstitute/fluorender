@@ -324,7 +324,8 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_ptr_id1(-1),
 	m_ptr_id2(-1),
 	m_full_screen(false),
-	m_drawing(false)
+	m_drawing(false),
+	m_refresh(false)
 {
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;
@@ -635,7 +636,9 @@ void VRenderGLView::Init()
 	{
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		ShaderProgram::init_shaders_supported();
-		if (vr_frame && vr_frame->GetSettingDlg()) KernelProgram::set_device_id(vr_frame->GetSettingDlg()->GetCLDeviceID());
+		if (vr_frame && vr_frame->GetSettingDlg())
+			KernelProgram::set_device_id(vr_frame->
+				GetSettingDlg()->GetCLDeviceID());
 		KernelProgram::init_kernels_supported();
 #ifdef _DARWIN
 		CGLContextObj ctx = CGLGetCurrentContext();
@@ -6578,7 +6581,18 @@ void VRenderGLView::DelVolCache(FL::VolCache& vol_cache)
 //draw
 void VRenderGLView::OnDraw(wxPaintEvent& event)
 {
-	ForceDraw();
+	if (!m_refresh && TextureRenderer::get_mem_swap())
+	{
+		m_clear_buffer = true;
+		m_updating = true;
+		m_refresh = true;
+		RefreshGL(41);
+	}
+	else
+	{
+		m_refresh = false;
+		ForceDraw();
+	}
 }
 
 void VRenderGLView::ForceDraw()
@@ -10680,6 +10694,7 @@ void VRenderGLView::RefreshGL(int debug_code, bool erase, bool start_loop)
 	if (start_loop)
 		StartLoopUpdate();
 	SetSortBricks();
+	m_refresh = true;
 	Refresh(erase);
 }
 

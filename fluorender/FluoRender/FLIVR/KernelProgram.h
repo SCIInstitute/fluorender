@@ -25,12 +25,19 @@ namespace FLIVR
 		KernelProgram(const std::string& source);
 		~KernelProgram();
 
-		bool create(std::string &name);
 		bool valid();
 		void destroy();
 
-		void execute(cl_uint, size_t*, size_t*);
+		//create a kernel in the program
+		//return kernel index; -1 unsuccessful
+		int createKernel(std::string &name);
+		int findKernel(std::string &name);
+		//execute kernel
+		bool executeKernel(int, cl_uint, size_t*, size_t*);
+		bool executeKernel(std::string &name,
+			cl_uint, size_t*, size_t*);
 
+		//argument
 		typedef struct
 		{
 			cl_uint index;
@@ -39,11 +46,19 @@ namespace FLIVR
 			cl_mem buffer;
 		} Argument;
 		bool matchArg(Argument*, unsigned int&);
-		void setKernelArgConst(int, size_t, void*);
-		void setKernelArgBuf(int, cl_mem_flags, size_t, void*);
-		void setKernelArgBufWrite(int, cl_mem_flags, size_t, void*);
-		void setKernelArgTex2D(int, cl_mem_flags, GLuint);
-		void setKernelArgTex3D(int, cl_mem_flags, GLuint);
+		//set argument
+		void setKernelArgConst(int, int, size_t, void*);
+		void setKernelArgConst(std::string &name, int, size_t, void*);
+		void setKernelArgBuf(int, int, cl_mem_flags, size_t, void*);
+		void setKernelArgBuf(std::string &name, int, cl_mem_flags, size_t, void*);
+		void setKernelArgBufWrite(int, int, cl_mem_flags, size_t, void*);
+		void setKernelArgBufWrite(std::string &name, int, cl_mem_flags, size_t, void*);
+		void setKernelArgTex2D(int, int, cl_mem_flags, GLuint);
+		void setKernelArgTex2D(std::string &name, int, cl_mem_flags, GLuint);
+		void setKernelArgTex3D(int, int, cl_mem_flags, GLuint);
+		void setKernelArgTex3D(std::string &name, int, cl_mem_flags, GLuint);
+
+		//read/write
 		void readBuffer(int, void*);
 		void writeBuffer(int, void*, size_t, size_t, size_t);
 
@@ -60,13 +75,20 @@ namespace FLIVR
 
 		friend class VolKernel;
 #ifdef _DARWIN
-        static CGLContextObj gl_context_;
+		static CGLContextObj gl_context_;
 #endif
 	protected:
 		std::string source_;
 		cl_program program_;
-		cl_kernel kernel_;
 		cl_command_queue queue_;
+
+		//there can be multiple kernels in one program
+		typedef struct
+		{
+			cl_kernel kernel;
+			std::string name;
+		} Kernel;
+		std::vector<Kernel> kernels_;
 
 		std::string info_;
 
