@@ -91,7 +91,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_camctr_size(2.0),
 	m_draw_info(250),
 	m_load_update(false),
-	m_drawing_coord(false),
+	m_retain_finalbuffer(false),
 	m_draw_frame(false),
 	m_test_speed(false),
 	m_draw_clip(false),
@@ -1231,11 +1231,11 @@ void VRenderGLView::DrawVolumes(int peel)
 
 	//draw
 	if (m_load_update ||
-		(!m_drawing_coord &&
+		(!m_retain_finalbuffer &&
 			m_int_mode != 2 &&
 			m_int_mode != 7 &&
 			m_updating) ||
-			(!m_drawing_coord &&
+			(!m_retain_finalbuffer &&
 		(m_int_mode == 1 ||
 			m_int_mode == 3 ||
 			m_int_mode == 4 ||
@@ -4665,7 +4665,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 	bool refresh = false;
 	bool ref_stat = false;
 	bool start_loop = true;
-	m_drawing_coord = false;
+	m_retain_finalbuffer = false;
 
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 
@@ -6581,19 +6581,11 @@ void VRenderGLView::DelVolCache(FL::VolCache& vol_cache)
 //draw
 void VRenderGLView::OnDraw(wxPaintEvent& event)
 {
-	if (!m_refresh && TextureRenderer::get_mem_swap())
-	{
-		//m_clear_buffer = true;
-		//m_updating = true;
-		m_drawing_coord = true;
-		m_refresh = true;
-		RefreshGL(41);
-	}
+	if (!m_refresh)
+		m_retain_finalbuffer = true;
 	else
-	{
 		m_refresh = false;
-		ForceDraw();
-	}
+	ForceDraw();
 }
 
 void VRenderGLView::ForceDraw()
@@ -6625,7 +6617,7 @@ void VRenderGLView::ForceDraw()
 	wxPaintDC dc(this);
 
 	if (m_resize)
-		m_drawing_coord = false;
+		m_retain_finalbuffer = false;
 
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
@@ -12073,7 +12065,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	m_interactive = false;
 
 	m_paint_enable = false;
-	m_drawing_coord = false;
+	m_retain_finalbuffer = false;
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
 
@@ -12453,7 +12445,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			vr_frame->GetMovieView()->GetRunning())
 			return;
 
-		m_drawing_coord = true;
+		m_retain_finalbuffer = true;
 		RefreshGL(38, false, false);
 		return;
 	}

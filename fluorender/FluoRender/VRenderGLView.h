@@ -578,13 +578,14 @@ public:
 	//folder name for 3d batch
 	wxString m_bat_folder;
 	//hud
+	bool m_retain_finalbuffer;	//sometimes we don't redraw everything,
+								//just use the final buffer from last draw
 	bool m_updating;
 	bool m_draw_annotations;
 	bool m_draw_camctr;
 	double m_camctr_size;
 	int m_draw_info;
 	bool m_load_update;
-	bool m_drawing_coord;
 	bool m_draw_frame;
 	bool m_test_speed;
 	bool m_draw_clip;
