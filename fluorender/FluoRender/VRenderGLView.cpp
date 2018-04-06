@@ -12446,7 +12446,11 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			return;
 
 		m_retain_finalbuffer = true;
-		RefreshGL(38, false, false);
+#ifdef _WIN32
+        RefreshGL(38, false, false);
+#else
+		RefreshGL(38, false, true);
+#endif
 		return;
 	}
 }
