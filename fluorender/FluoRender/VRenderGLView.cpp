@@ -6581,25 +6581,11 @@ void VRenderGLView::DelVolCache(FL::VolCache& vol_cache)
 //draw
 void VRenderGLView::OnDraw(wxPaintEvent& event)
 {
-#ifdef _WIN32
 	if (!m_refresh)
 		m_retain_finalbuffer = true;
 	else
 		m_refresh = false;
 	ForceDraw();
-#else
-	if (!m_refresh)
-	{
-		m_retain_finalbuffer = true;
-		m_refresh = true;
-		RefreshGL(41);
-	}
-	else
-	{
-		m_refresh = false;
-		ForceDraw();
-	}
-#endif
 }
 
 void VRenderGLView::ForceDraw()
