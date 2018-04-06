@@ -2493,10 +2493,10 @@ void VRenderView::SetFullScreen()
 #endif
 		}
 		m_full_frame->Iconize(false);
-		m_full_frame->SetFocus();
 		m_full_frame->Raise();
 		m_full_frame->Show();
 		m_glview->m_full_screen = true;
+		m_glview->SetFocus();
 		RefreshGL();
 	}
 	else
