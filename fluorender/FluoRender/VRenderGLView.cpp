@@ -6583,8 +6583,9 @@ void VRenderGLView::OnDraw(wxPaintEvent& event)
 {
 	if (!m_refresh && TextureRenderer::get_mem_swap())
 	{
-		m_clear_buffer = true;
-		m_updating = true;
+		//m_clear_buffer = true;
+		//m_updating = true;
+		m_drawing_coord = true;
 		m_refresh = true;
 		RefreshGL(41);
 	}
