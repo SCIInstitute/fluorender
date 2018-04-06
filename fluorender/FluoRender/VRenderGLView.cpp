@@ -764,7 +764,7 @@ void VRenderGLView::CalcFogRange()
 	bool use_box = false;
 	if (m_cur_vol)
 	{
-		bbox = m_cur_vol->GetBounds();
+		bbox = m_cur_vol->GetClippedBounds();
 		use_box = true;
 	}
 	else if (!m_md_pop_list.empty())
@@ -810,6 +810,8 @@ void VRenderGLView::CalcFogRange()
 		maxz = fabs(maxz);
 		m_fog_start = minz<maxz ? minz : maxz;
 		m_fog_end = maxz>minz ? maxz : minz;
+		if (m_pin_rot_center)
+			m_fog_start = m_pin_dist;
 	}
 	else
 	{
@@ -4742,6 +4744,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 				m_obj_transy = obj_transy;
 				m_obj_transz = obj_transz;
 			}
+			m_pin_dist = dist;
 		}
 		m_rot_center_dirty = false;
 		refresh = true;

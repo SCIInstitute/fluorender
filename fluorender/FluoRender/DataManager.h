@@ -238,6 +238,7 @@ public:
 
 	//bounding box
 	BBox GetBounds();
+	BBox GetClippedBounds();
 	//path
 	void SetPath(wxString path);
 	wxString GetPath();

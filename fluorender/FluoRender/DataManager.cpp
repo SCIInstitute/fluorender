@@ -1340,6 +1340,32 @@ BBox VolumeData::GetBounds()
 	return m_bounds;
 }
 
+BBox VolumeData::GetClippedBounds()
+{
+	vector<Plane*> *planes = m_vr->get_planes();
+	if (planes->size() != 6)
+		return m_bounds;
+
+	//calculating planes
+	//get six planes
+	Plane* px1 = (*planes)[0];
+	Plane* px2 = (*planes)[1];
+	Plane* py1 = (*planes)[2];
+	Plane* py2 = (*planes)[3];
+	Plane* pz1 = (*planes)[4];
+	Plane* pz2 = (*planes)[5];
+
+	Vector diff = m_bounds.max() - m_bounds.min();
+	Point min = Point(m_bounds.min().x() - diff.x()*px1->d(),
+		m_bounds.min().y() - diff.y()*py1->d(),
+		m_bounds.min().z() - diff.z()*pz1->d());
+	Point max = Point(m_bounds.min().x() + diff.x()*px2->d(),
+		m_bounds.min().y() + diff.y()*py2->d(),
+		m_bounds.min().z() + diff.z()*pz2->d());
+
+	return BBox(min, max);
+}
+
 //path
 void VolumeData::SetPath(wxString path)
 {
