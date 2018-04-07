@@ -812,7 +812,7 @@ void VRenderGLView::CalcFogRange()
 		m_fog_end = maxz>minz ? maxz : minz;
 		if (m_pin_rot_center)
 		{
-			p = mv.transform(m_pin_ctr);
+			p = -mv.transform(m_pin_ctr);
 			if (p.z() > m_fog_start && p.z() < m_fog_end)
 				m_fog_start = p.z();
 		}
@@ -4732,6 +4732,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 				m_cur_vol, true);
 		if (dist > 0.0)
 		{
+			m_pin_ctr = p;
 			double obj_transx, obj_transy, obj_transz;
 			p = Point(m_obj_ctrx - p.x(),
 				p.y() - m_obj_ctry,
@@ -4748,7 +4749,6 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 				m_obj_transy = obj_transy;
 				m_obj_transz = obj_transz;
 			}
-			m_pin_ctr = p;
 		}
 		m_rot_center_dirty = false;
 		refresh = true;
