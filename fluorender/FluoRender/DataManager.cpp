@@ -4927,6 +4927,7 @@ void DataManager::AddVolumeData(VolumeData* vd)
 		{
 			double spcx, spcy, spcz;
 			m_vd_list[0]->GetBaseSpacings(spcx, spcy, spcz);
+			vd->SetSpacings(spcx, spcy, spcz);
 			vd->SetBaseSpacings(spcx, spcy, spcz);
 			//vd->SetSpcFromFile(true);
 		}

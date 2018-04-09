@@ -1976,12 +1976,16 @@ bool VPropView::SetSpacings()
 
 	if ((m_sync_group || override_vox) && m_group)
 	{
-		for (int i = 0; i<m_group->GetVolumeNum(); i++)
+		for (int i = 0; i < m_group->GetVolumeNum(); i++)
+		{
 			m_group->GetVolumeData(i)->SetSpacings(spcx, spcy, spcz);
+			m_group->GetVolumeData(i)->SetBaseSpacings(spcx, spcy, spcz);
+		}
 	}
 	else if (m_vd)
 	{
 		m_vd->SetSpacings(spcx, spcy, spcz);
+		m_vd->SetBaseSpacings(spcx, spcy, spcz);
 	}
 	else return false;
 
