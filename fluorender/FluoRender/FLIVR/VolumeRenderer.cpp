@@ -328,8 +328,7 @@ namespace FLIVR
 	void VolumeRenderer::set_sampling_rate(double rate)
 	{
 		sampling_rate_ = rate;
-		//irate_ = rate>1.0 ? max(rate / 2.0, 1.0) : rate;
-		irate_ = max(rate / 2.0, 0.1);
+		irate_ = rate / 2.0;
 	}
 
 	double VolumeRenderer::get_sampling_rate()
@@ -596,8 +595,17 @@ namespace FLIVR
 			diag.x() / tex_->nx(),
 			diag.y() / tex_->ny(),
 			diag.z() / tex_->nz());
-		double dt = cell_diag.length()/compute_rate_scale(snapview.direction())/rate;
-		num_slices_ = (int)(diag.length()/dt);
+		double dt;
+		if (rate > 0.0)
+		{
+			dt = cell_diag.length() / compute_rate_scale(snapview.direction()) / rate;
+			num_slices_ = (int)(diag.length()/dt);
+		}
+		else
+		{
+			dt = 0.0;
+			num_slices_ = 0;
+		}
 
 		vector<float> vertex;
 		vector<uint32_t> index;
@@ -889,55 +897,63 @@ namespace FLIVR
 
 			num_slices_ += vertex.size()/12;
 
-			if (vertex.size() == 0) continue;
-			GLint filter;
-			if (interpolate_)
-				filter = GL_LINEAR;
+			if (vertex.size() == 0)
+			{
+				if (mem_swap_ &&
+					start_update_loop_ &&
+					!done_update_loop_)
+				{
+					if (!(*bricks)[i]->drawn(mode))
+					{
+						(*bricks)[i]->set_drawn(mode, true);
+						cur_brick_num_++;
+						cur_chan_brick_num_++;
+					}
+				}
+			}
 			else
-				filter = GL_NEAREST;
+			{
+				GLint filter;
+				if (interpolate_)
+					filter = GL_LINEAR;
+				else
+					filter = GL_NEAREST;
 
-			if (!load_brick(0, 0, bricks, i, filter, compression_, mode))
-				continue;
-			if (mask_)
-				load_brick_mask(bricks, i, filter);
-			if (label_)
-				load_brick_label(bricks, i);
-			shader->setLocalParam(4, 1.0/b->nx(), 1.0/b->ny(), 1.0/b->nz(),
-				mode_==MODE_OVER?1.0/rate:1.0);
+				if (!load_brick(0, 0, bricks, i, filter, compression_, mode))
+					continue;
+				if (mask_)
+					load_brick_mask(bricks, i, filter);
+				if (label_)
+					load_brick_label(bricks, i);
+				shader->setLocalParam(4, 1.0 / b->nx(), 1.0 / b->ny(), 1.0 / b->nz(),
+					mode_ == MODE_OVER ? 1.0 / rate : 1.0);
 
-			//for brick transformation
-			float matrix[16];
-			BBox bbox = b->dbox();
-			matrix[0] = float(bbox.max().x()-bbox.min().x());
-			matrix[1] = 0.0f;
-			matrix[2] = 0.0f;
-			matrix[3] = 0.0f;
-			matrix[4] = 0.0f;
-			matrix[5] = float(bbox.max().y()-bbox.min().y());
-			matrix[6] = 0.0f;
-			matrix[7] = 0.0f;
-			matrix[8] = 0.0f;
-			matrix[9] = 0.0f;
-			matrix[10] = float(bbox.max().z()-bbox.min().z());
-			matrix[11] = 0.0f;
-			matrix[12] = float(bbox.min().x());
-			matrix[13] = float(bbox.min().y());
-			matrix[14] = float(bbox.min().z());
-			matrix[15] = 1.0f;
-			shader->setLocalParamMatrix(2, matrix);
+				//for brick transformation
+				float matrix[16];
+				BBox bbox = b->dbox();
+				matrix[0] = float(bbox.max().x() - bbox.min().x());
+				matrix[1] = 0.0f;
+				matrix[2] = 0.0f;
+				matrix[3] = 0.0f;
+				matrix[4] = 0.0f;
+				matrix[5] = float(bbox.max().y() - bbox.min().y());
+				matrix[6] = 0.0f;
+				matrix[7] = 0.0f;
+				matrix[8] = 0.0f;
+				matrix[9] = 0.0f;
+				matrix[10] = float(bbox.max().z() - bbox.min().z());
+				matrix[11] = 0.0f;
+				matrix[12] = float(bbox.min().x());
+				matrix[13] = float(bbox.min().y());
+				matrix[14] = float(bbox.min().z());
+				matrix[15] = 1.0f;
+				shader->setLocalParamMatrix(2, matrix);
 
-			draw_polygons(vertex, index);
+				draw_polygons(vertex, index);
+			}
 
 			if (mem_swap_)
 				finished_bricks_++;
-
-			////this is for debug_ds, comment when done
-			//if (mem_swap_)
-			//{
-			//	uint32_t rn_time = GET_TICK_COUNT();
-			//	if (rn_time - st_time_ > get_up_time())
-			//		break;
-			//}
 		}
 
 		if (mem_swap_ &&
@@ -1106,8 +1122,18 @@ namespace FLIVR
 		Vector cell_diag(diag.x()/tex_->nx(),
 			diag.y()/tex_->ny(),
 			diag.z()/tex_->nz());
-		double dt = cell_diag.length()/compute_rate_scale(snapview.direction())/rate;
-		int num_slices = (int)(diag.length()/dt);
+		double dt;
+		int num_slices;
+		if (rate > 0.0)
+		{
+			dt = cell_diag.length() / compute_rate_scale(snapview.direction()) / rate;
+			num_slices = (int)(diag.length()/dt);
+		}
+		else
+		{
+			dt = 0.0;
+			num_slices = 0;
+		}
 
 		vector<float> vertex;
 		vector<uint32_t> index;

@@ -347,10 +347,10 @@ wxPanel(parent, id, pos, size,style, name),
 		wxMouseEventHandler(VPropView::OnSampleSync), NULL, this);
 	m_sample_st->Connect(ID_SampleSync, wxEVT_RIGHT_DCLICK,
 		wxMouseEventHandler(VPropView::OnSampleSync), NULL, this);
-	m_sample_sldr = new wxSlider(this, ID_SampleSldr, 10, 0, 50,
+	m_sample_sldr = new wxSlider(this, ID_SampleSldr, 10, 1, 50,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_sample_text = new wxTextCtrl(this, ID_SampleText, "1.0",
-		wxDefaultPosition, wxSize(50, 20), 0, vald_fp1);
+		wxDefaultPosition, wxSize(50, 20), 0, vald_fp2);
 	sizer_m4->Add(m_sample_st, 0, wxALIGN_CENTER);
 	sizer_m4->Add(m_sample_text, 0, wxALIGN_CENTER);
 	sizer_m4->Add(m_sample_sldr, 1, wxEXPAND);

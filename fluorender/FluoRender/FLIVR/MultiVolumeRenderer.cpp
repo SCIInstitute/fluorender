@@ -140,8 +140,7 @@ namespace FLIVR
 	void MultiVolumeRenderer::set_sampling_rate(double rate)
 	{
 		sampling_rate_ = rate;
-		//irate_ = rate>1.0 ? max(rate / 2.0, 1.0) : rate;
-		irate_ = max(rate / 2.0, 0.1);
+		irate_ = rate / 2.0;
 	}
 
 	void MultiVolumeRenderer::set_interactive_rate(double rate)
@@ -239,9 +238,18 @@ namespace FLIVR
 		Vector cell_diag(diag.x()/res_.x(),
 			diag.y()/res_.y(),
 			diag.z()/res_.z());
-		double dt = cell_diag.length()/
-			vr_list_[0]->compute_rate_scale(snapview.direction())/rate;
-		num_slices_ = (int)(diag.length()/dt);
+		double dt;
+		if (rate > 0.0)
+		{
+			dt = cell_diag.length() /
+				vr_list_[0]->compute_rate_scale(snapview.direction())/rate;
+			num_slices_ = (int)(diag.length()/dt);
+		}
+		else
+		{
+			dt = 0.0;
+			num_slices_ = 0;
+		}
 
 		vector<float> vertex;
 		vector<uint32_t> index;
@@ -1048,9 +1056,18 @@ namespace FLIVR
 		Vector cell_diag(diag.x()/res_.x(),
 			diag.y()/res_.y(),
 			diag.z()/res_.z());
-		double dt = cell_diag.length()/
-			vr_list_[0]->compute_rate_scale(snapview.direction())/rate;
-		num_slices_ = (int)(diag.length()/dt);
+		double dt;
+		if (rate > 0.0)
+		{
+			dt = cell_diag.length() /
+				vr_list_[0]->compute_rate_scale(snapview.direction())/rate;
+			num_slices_ = (int)(diag.length()/dt);
+		}
+		else
+		{
+			dt = 0.0;
+			num_slices_ = 0;
+		}
 
 		vector<float> vertex;
 		vector<uint32_t> index;
