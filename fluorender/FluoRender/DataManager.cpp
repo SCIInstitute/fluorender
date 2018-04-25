@@ -4533,13 +4533,15 @@ wxString DataManager::SearchProjectPath(wxString &filename)
 	wxString search_str;
 	for (i=pathname.Length()-1; i>=0; i--)
 	{
-		search_str.Prepend(pathname[i]);
 		if (pathname[i]=='\\' || pathname[i]=='/')
 		{
+            search_str.Prepend(GETSLASH());
 			wxString name_temp = m_prj_path + search_str;
 			if (wxFileExists(name_temp))
 				return name_temp;
 		}
+        else
+            search_str.Prepend(pathname[i]);
 	}
 	return "";
 }
