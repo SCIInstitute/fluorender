@@ -353,11 +353,11 @@ namespace FLIVR
 			arg.index = i;
 			arg.size = size;
 			arg.texture = 0;
-			unsigned int index;
 
-			if (matchArg(&arg, index))
+			unsigned int ai;
+			if (matchArg(&arg, ai))
 			{
-				arg.buffer = arg_list_[index].buffer;
+				arg.buffer = arg_list_[ai].buffer;
 			}
 			else
 			{
@@ -397,12 +397,12 @@ namespace FLIVR
 			arg.index = i;
 			arg.size = size;
 			arg.texture = 0;
-			unsigned int index;
 
-			if (matchArg(&arg, index))
+			unsigned int ai;
+			if (matchArg(&arg, ai))
 			{
-				arg.buffer = arg_list_[index].buffer;
-				clReleaseMemObject(arg_list_[index].buffer);
+				arg.buffer = arg_list_[ai].buffer;
+				clReleaseMemObject(arg_list_[ai].buffer);
 				arg.buffer = clCreateBuffer(context_, flag, size, data, &err);
 				if (err != CL_SUCCESS)
 					return;
