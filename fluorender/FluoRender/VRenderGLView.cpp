@@ -5844,7 +5844,7 @@ void VRenderGLView::ResetEnlarge()
 //run 4d script
 void VRenderGLView::Run4DScript(wxString &scriptname, VolumeData* vd)
 {
-	if (m_run_script && wxFileExists(m_script_file))
+	if (m_run_script)
 	{
 		m_selector.SetVolume(vd);
 		m_calculator.SetVolumeA(vd);
@@ -5853,6 +5853,17 @@ void VRenderGLView::Run4DScript(wxString &scriptname, VolumeData* vd)
 	else
 		return;
 
+	if (!wxFileExists(scriptname))
+	{
+		std::wstring name = scriptname.ToStdWstring();
+		name = GET_NAME(name);
+		wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+		exePath = wxPathOnly(exePath);
+		scriptname = exePath + "\\Scripts\\" + name;
+
+		if (!wxFileExists(scriptname))
+			return;
+	}
 	wxFileInputStream is(scriptname);
 	if (!is.IsOk())
 		return;
@@ -10226,11 +10237,11 @@ void VRenderGLView::Run4DScript()
 		if (vd)
 			Run4DScript(m_script_file, vd);
 	}
+	Run4DScript(m_script_file);
 	//restore currently selected volume
 	m_cur_vol = cur_vd_save;
 	m_selector.SetVolume(m_cur_vol);
 	m_calculator.SetVolumeA(m_cur_vol);
-	Run4DScript(m_script_file);
 }
 
 //start loop update

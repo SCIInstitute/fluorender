@@ -684,7 +684,7 @@ void SettingDlg::GetSettings()
 	m_last_tool = 0;
 	m_component_size = 25.0;
 	m_contact_factor = 0.6;
-	m_similarity = 0.3;
+	m_similarity = 0.5;
 	m_use_max_texture_size = false;
 	m_max_texture_size = 2048;
 	m_plane_mode = 0;
