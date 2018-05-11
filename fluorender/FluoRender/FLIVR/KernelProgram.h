@@ -40,12 +40,16 @@ namespace FLIVR
 		//argument
 		typedef struct
 		{
+			int kernel_index;
 			cl_uint index;
 			size_t size;
 			GLuint texture;
 			cl_mem buffer;
+			void* orgn_addr;
 		} Argument;
 		bool matchArg(Argument*, unsigned int&);
+		bool matchArgTex(Argument*, unsigned int&);//use texture id to match
+		bool matchArgAddr(Argument*, unsigned int&);//use data address to match
 		//set argument
 		void setKernelArgConst(int, int, size_t, void*);
 		void setKernelArgConst(std::string &name, int, size_t, void*);
@@ -57,10 +61,16 @@ namespace FLIVR
 		void setKernelArgTex2D(std::string &name, int, cl_mem_flags, GLuint);
 		void setKernelArgTex3D(int, int, cl_mem_flags, GLuint);
 		void setKernelArgTex3D(std::string &name, int, cl_mem_flags, GLuint);
+		void setKernelArgImage(int, int, cl_mem_flags, cl_image_format, cl_image_desc, void*);
+		void setKernelArgImage(std::string &name, int, cl_mem_flags, cl_image_format, cl_image_desc, void*);
 
 		//read/write
 		void readBuffer(int, void*);
 		void writeBuffer(int, void*, size_t, size_t, size_t);
+
+		//release mem obj
+		void releaseMemObject(int, int, size_t, GLuint);
+		void releaseMemObject(size_t, void* orgn_addr);
 
 		//initialization
 		static void init_kernels_supported();

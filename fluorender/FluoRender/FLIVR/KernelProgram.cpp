@@ -296,6 +296,7 @@ namespace FLIVR
 					return false;
 			}
 		}
+		clFlush(queue_);
 		clFinish(queue_);
 		return true;
 	}
@@ -310,9 +311,37 @@ namespace FLIVR
 	{
 		for (unsigned int i=0; i<arg_list_.size(); ++i)
 		{
-			if (arg_list_[i].index == arg->index &&
+			if (arg_list_[i].kernel_index == arg->kernel_index &&
+				arg_list_[i].index == arg->index &&
 				arg_list_[i].size == arg->size &&
 				arg_list_[i].texture == arg->texture)
+			{
+				arg_index = i;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool KernelProgram::matchArgTex(Argument* arg, unsigned int& arg_index)
+	{
+		for (unsigned int i = 0; i<arg_list_.size(); ++i)
+		{
+			if (arg_list_[i].texture == arg->texture)
+			{
+				arg_index = i;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool KernelProgram::matchArgAddr(Argument* arg, unsigned int& arg_index)
+	{
+		for (unsigned int i = 0; i<arg_list_.size(); ++i)
+		{
+			if (arg_list_[i].orgn_addr == arg->orgn_addr &&
+				arg_list_[i].size == arg->size)
 			{
 				arg_index = i;
 				return true;
@@ -350,12 +379,14 @@ namespace FLIVR
 		if (data)
 		{
 			Argument arg;
+			arg.kernel_index = index;
 			arg.index = i;
 			arg.size = size;
 			arg.texture = 0;
+			arg.orgn_addr = data;
 
 			unsigned int ai;
-			if (matchArg(&arg, ai))
+			if (matchArgAddr(&arg, ai))
 			{
 				arg.buffer = arg_list_[ai].buffer;
 			}
@@ -394,12 +425,14 @@ namespace FLIVR
 		if (data)
 		{
 			Argument arg;
+			arg.kernel_index = index;
 			arg.index = i;
 			arg.size = size;
 			arg.texture = 0;
+			arg.orgn_addr = data;
 
 			unsigned int ai;
-			if (matchArg(&arg, ai))
+			if (matchArgAddr(&arg, ai))
 			{
 				arg.buffer = arg_list_[ai].buffer;
 				clReleaseMemObject(arg_list_[ai].buffer);
@@ -441,12 +474,14 @@ namespace FLIVR
 
 		cl_int err;
 		Argument arg;
+		arg.kernel_index = index;
 		arg.index = i;
 		arg.size = 0;
 		arg.texture = texture;
+		arg.orgn_addr = 0;
 		unsigned int ai;
 
-		if (matchArg(&arg, ai))
+		if (matchArgTex(&arg, ai))
 			arg.buffer = arg_list_[ai].buffer;
 		else
 		{
@@ -474,12 +509,14 @@ namespace FLIVR
 
 		cl_int err;
 		Argument arg;
+		arg.kernel_index = index;
 		arg.index = i;
 		arg.size = 0;
 		arg.texture = texture;
+		arg.orgn_addr = 0;
 		unsigned int ai;
 
-		if (matchArg(&arg, ai))
+		if (matchArgTex(&arg, ai))
 		{
 			arg.buffer = arg_list_[ai].buffer;
 		}
@@ -502,6 +539,44 @@ namespace FLIVR
 		return setKernelArgTex3D(index, i, flag, texture);
 	}
 
+	void KernelProgram::setKernelArgImage(int index, int i, cl_mem_flags flag, cl_image_format format, cl_image_desc desc, void* data)
+	{
+		if (index < 0 || index >= kernels_.size())
+			return;
+
+		cl_int err;
+		Argument arg;
+		arg.kernel_index = index;
+		arg.index = i;
+		arg.size = 0;
+		arg.texture = 0;
+		arg.orgn_addr = data;
+		unsigned int ai;
+
+		if (matchArgAddr(&arg, ai))
+		{
+			arg.buffer = arg_list_[ai].buffer;
+		}
+		else
+		{
+			cl_mem image_buffer = clCreateImage(context_, flag,
+				&format, &desc, data, &err);
+			if (err != CL_SUCCESS)
+				return;
+			arg.buffer = image_buffer;
+			arg_list_.push_back(arg);
+		}
+		err = clSetKernelArg(kernels_[index].kernel, i, sizeof(cl_mem), &(arg.buffer));
+		if (err != CL_SUCCESS)
+			return;
+	}
+
+	void KernelProgram::setKernelArgImage(std::string &name, int i, cl_mem_flags flag, cl_image_format format, cl_image_desc desc, void* data)
+	{
+		int index = findKernel(name);
+		return setKernelArgImage(index, i, flag, format, desc, data);
+	}
+
 	void KernelProgram::readBuffer(int index, void* data)
 	{
 		bool found = false;
@@ -522,6 +597,8 @@ namespace FLIVR
 				arg.size, data, 0, NULL, NULL);
 			if (err != CL_SUCCESS)
 				return;
+			clFlush(queue_);
+			clFinish(queue_);
 		}
 	}
 
@@ -547,6 +624,52 @@ namespace FLIVR
 			//	pattern_size, offset, size, 0, NULL, NULL);
 			//if (err != CL_SUCCESS)
 			//	return;
+		}
+	}
+
+	//release mem obj
+	void KernelProgram::releaseMemObject(int kernel_index,
+		int index, size_t size, GLuint texture)
+	{
+		Argument arg;
+		arg.kernel_index = kernel_index;
+		arg.index = index;
+		arg.size = size;
+		arg.texture = texture;
+		unsigned int ai;
+
+		if (texture)
+		{
+			if (matchArgTex(&arg, ai))
+			{
+				clReleaseMemObject(arg_list_[ai].buffer);
+				arg_list_.erase(arg_list_.begin() + ai);
+			}
+		}
+		else
+		{
+			if (matchArg(&arg, ai))
+			{
+				clReleaseMemObject(arg_list_[ai].buffer);
+				arg_list_.erase(arg_list_.begin() + ai);
+			}
+		}
+	}
+
+	void KernelProgram::releaseMemObject(size_t size, void* orgn_addr)
+	{
+		Argument arg;
+		arg.kernel_index = 0;
+		arg.index = 0;
+		arg.size = size;
+		arg.texture = 0;
+		arg.orgn_addr = orgn_addr;
+		unsigned int ai;
+
+		if (matchArgAddr(&arg, ai))
+		{
+			clReleaseMemObject(arg_list_[ai].buffer);
+			arg_list_.erase(arg_list_.begin() + ai);
 		}
 	}
 
