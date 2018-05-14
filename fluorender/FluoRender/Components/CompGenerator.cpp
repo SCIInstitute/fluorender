@@ -860,7 +860,7 @@ void ComponentGenerator::Grow3DSized(
 			sizeof(float), (void*)(&scl_ff));
 		kernel_prog->setKernelArgConst(kernel_index2, 10,
 			sizeof(float), (void*)(&grad_ff));
-		kernel_prog->setKernelArgConst(kernel_index2, 7,
+		kernel_prog->setKernelArgConst(kernel_index2, 11,
 			sizeof(unsigned int), (void*)(&size_lm));
 		kernel_prog->setKernelArgConst(kernel_index2, 12,
 			sizeof(float), (void*)(&density));
