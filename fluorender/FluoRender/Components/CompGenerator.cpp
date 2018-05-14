@@ -1494,6 +1494,8 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 
 		RELEASE_DATA_STREAM
 	}
+
+	kernel_prog1->removeExternalKernels();
 }
 
 void ComponentGenerator::MatchSlices_CPU(bool backwards, unsigned int size_thresh,

@@ -266,6 +266,16 @@ namespace FLIVR
 		return -1;
 	}
 
+	void KernelProgram::removeExternalKernels()
+	{
+		auto it = kernels_.begin();
+		while (it != kernels_.end())
+		{
+			if (it->external)
+				it = kernels_.erase(it);
+		}
+	}
+
 	bool KernelProgram::valid()
 	{
 		return init_ && program_ && queue_ && !kernels_.empty();

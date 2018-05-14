@@ -35,6 +35,7 @@ namespace FLIVR
 		//add a kernel from another program
 		//for sharing buffers...
 		int addKernel(KernelProgram*, int);
+		void removeExternalKernels();
 		//execute kernel
 		bool executeKernel(int, cl_uint, size_t*, size_t*);
 		bool executeKernel(std::string &name,
