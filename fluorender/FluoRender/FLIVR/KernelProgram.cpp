@@ -294,7 +294,8 @@ namespace FLIVR
 		unsigned int i;
 		for (i=0; i<arg_list_.size(); ++i)
 		{
-			if (arg_list_[i].size == 0)
+			if (arg_list_[i].size == 0 &&
+				glIsTexture(arg_list_[i].texture))
 			{
 				err = clEnqueueAcquireGLObjects(queue_, 1, &(arg_list_[i].buffer), 0, NULL, NULL);
 				if (err != CL_SUCCESS)
@@ -307,7 +308,8 @@ namespace FLIVR
 			return false;
 		for (i=0; i<arg_list_.size(); ++i)
 		{
-			if (arg_list_[i].size == 0)
+			if (arg_list_[i].size == 0 &&
+				glIsTexture(arg_list_[i].texture))
 			{
 				err = clEnqueueReleaseGLObjects(queue_, 1, &(arg_list_[i].buffer), 0, NULL, NULL);
 				if (err != CL_SUCCESS)
