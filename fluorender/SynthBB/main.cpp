@@ -206,7 +206,7 @@ int main(int argc, char* argv[])
 	vd->AddEmptyMask(1);
 	vd->AddEmptyLabel();
 
-	FL::ComponentGenerator cg(vd, 0);
+	FL::ComponentGenerator cg(vd);
 	m_prog_bit = 97.0f / float(1 +
 		(m_initial_grow ? m_ig_iterations : 0) +
 		(m_sized_grow ? m_sg_iterations : 0) +

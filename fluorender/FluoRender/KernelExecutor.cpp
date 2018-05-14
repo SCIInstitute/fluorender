@@ -345,7 +345,7 @@ bool KernelExecutor::ExecuteKernel(KernelProgram* kernel,
 	m_message += "OpenCL time on " +
 		kernel->get_device_name() +
 		": " + stime + " sec.\n";
-	kernel->readBuffer(1, result);
+	kernel->readBuffer(result_size, result, result);
 
 	return true;
 }

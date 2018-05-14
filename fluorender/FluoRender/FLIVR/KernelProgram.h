@@ -32,6 +32,9 @@ namespace FLIVR
 		//return kernel index; -1 unsuccessful
 		int createKernel(std::string &name);
 		int findKernel(std::string &name);
+		//add a kernel from another program
+		//for sharing buffers...
+		int addKernel(KernelProgram*, int);
 		//execute kernel
 		bool executeKernel(int, cl_uint, size_t*, size_t*);
 		bool executeKernel(std::string &name,
@@ -47,28 +50,38 @@ namespace FLIVR
 			cl_mem buffer;
 			void* orgn_addr;
 		} Argument;
+		bool matchArg(cl_mem, unsigned int&);//find buffer
 		bool matchArg(Argument*, unsigned int&);
 		bool matchArgTex(Argument*, unsigned int&);//use texture id to match
 		bool matchArgAddr(Argument*, unsigned int&);//use data address to match
 		//set argument
 		void setKernelArgConst(int, int, size_t, void*);
 		void setKernelArgConst(std::string &name, int, size_t, void*);
-		void setKernelArgBuf(int, int, cl_mem_flags, size_t, void*);
-		void setKernelArgBuf(std::string &name, int, cl_mem_flags, size_t, void*);
-		void setKernelArgBufWrite(int, int, cl_mem_flags, size_t, void*);
-		void setKernelArgBufWrite(std::string &name, int, cl_mem_flags, size_t, void*);
-		void setKernelArgTex2D(int, int, cl_mem_flags, GLuint);
-		void setKernelArgTex2D(std::string &name, int, cl_mem_flags, GLuint);
-		void setKernelArgTex3D(int, int, cl_mem_flags, GLuint);
-		void setKernelArgTex3D(std::string &name, int, cl_mem_flags, GLuint);
-		void setKernelArgImage(int, int, cl_mem_flags, cl_image_format, cl_image_desc, void*);
-		void setKernelArgImage(std::string &name, int, cl_mem_flags, cl_image_format, cl_image_desc, void*);
+		cl_mem setKernelArgBuf(int, int, cl_mem_flags, size_t, void*);
+		cl_mem setKernelArgBuf(std::string &name, int, cl_mem_flags, size_t, void*);
+		cl_mem setKernelArgBufWrite(int, int, cl_mem_flags, size_t, void*);
+		cl_mem setKernelArgBufWrite(std::string &name, int, cl_mem_flags, size_t, void*);
+		cl_mem setKernelArgTex2D(int, int, cl_mem_flags, GLuint);
+		cl_mem setKernelArgTex2D(std::string &name, int, cl_mem_flags, GLuint);
+		cl_mem setKernelArgTex3D(int, int, cl_mem_flags, GLuint);
+		cl_mem setKernelArgTex3D(std::string &name, int, cl_mem_flags, GLuint);
+		cl_mem setKernelArgImage(int, int, cl_mem_flags, cl_image_format, cl_image_desc, void*);
+		cl_mem setKernelArgImage(std::string &name, int, cl_mem_flags, cl_image_format, cl_image_desc, void*);
 
 		//read/write
-		void readBuffer(int, void*);
-		void writeBuffer(int, void*, size_t, size_t, size_t);
+		void readBuffer(size_t size,
+			void* buf_data, void* data);
+		void readBuffer(cl_mem buffer, void* data);
+		void writeBuffer(size_t size,
+			void* buf_data, void* data);
+		void writeBuffer(cl_mem buffer, void* data);
+		void writeImage(const size_t* origin, const size_t* region,
+			void* img_data, void* data);
+		void writeImage(const size_t* origin, const size_t* region,
+			cl_mem image, void* data);
 
 		//release mem obj
+		void releaseMemObject(cl_mem);
 		void releaseMemObject(int, int, size_t, GLuint);
 		void releaseMemObject(size_t, void* orgn_addr);
 
@@ -97,6 +110,7 @@ namespace FLIVR
 		{
 			cl_kernel kernel;
 			std::string name;
+			bool external;
 		} Kernel;
 		std::vector<Kernel> kernels_;
 

@@ -1607,7 +1607,7 @@ namespace FLIVR
 			size_t global_size[3] = {brick_x, brick_y, brick_z};
 			size_t local_size[3] = {1, 1, 1};
 			kernel->executeKernel(kernel_index, 3, global_size, local_size);
-			kernel->readBuffer(2, hist);
+			kernel->readBuffer(hist_size * sizeof(float), (void*)hist, (void*)hist);
 			//analyze hist
 			int i;
 			float sum = 0;

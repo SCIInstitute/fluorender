@@ -3268,7 +3268,7 @@ void ComponentDlg::GenerateAdv(bool refine)
 	m_prog = 0.0f;
 	m_generate_prg->SetValue(0);
 
-	FL::ComponentGenerator cg(vd, KernelProgram::get_device_id());
+	FL::ComponentGenerator cg(vd);
 	boost::signals2::connection connection =
 		cg.m_sig_progress.connect(boost::bind(
 			&ComponentDlg::UpdateProgress, this));
@@ -3373,7 +3373,7 @@ void ComponentDlg::GenerateBsc(bool refine)
 	m_prog = 0.0f;
 	m_generate_prg->SetValue(0);
 
-	FL::ComponentGenerator cg(vd, KernelProgram::get_device_id());
+	FL::ComponentGenerator cg(vd);
 	boost::signals2::connection connection =
 		cg.m_sig_progress.connect(boost::bind(
 			&ComponentDlg::UpdateProgress, this));
@@ -3567,7 +3567,7 @@ void ComponentDlg::GenerateComp(int type, int mode)
 			VolumeData* vd = m_view->m_glview->m_cur_vol;
 			if (!vd)
 				return;
-			FL::ComponentGenerator cg(vd, KernelProgram::get_device_id());
+			FL::ComponentGenerator cg(vd);
 			bool use_mask = m_use_sel_chk->GetValue();
 			cg.SetUseMask(use_mask);
 			if (use_mask)

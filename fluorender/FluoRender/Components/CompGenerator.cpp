@@ -256,7 +256,7 @@ void ComponentGenerator::OrderID_2D()
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
-		kernel_prog->readBuffer(1, val32);
+		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
 
 		//release buffer
 		kernel_prog->releaseMemObject(kernel_index, 0, 0, 0);
@@ -348,7 +348,7 @@ void ComponentGenerator::ShuffleID_3D()
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
-		kernel_prog->readBuffer(1, val32);
+		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
 
 		//release buffer
 		kernel_prog->releaseMemObject(kernel_index, 0, 0, 0);
@@ -430,7 +430,7 @@ void ComponentGenerator::ShuffleID_2D()
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
-		kernel_prog->readBuffer(1, val32);
+		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
 
 		//release buffer
 		kernel_prog->releaseMemObject(kernel_index, 0, 0, 0);
@@ -480,7 +480,7 @@ void ComponentGenerator::ClearBorders3D()
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
-		kernel_prog->readBuffer(1, val32);
+		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
 
 		//release buffer
 		kernel_prog->releaseMemObject(kernel_index, 0, sizeof(unsigned int)*nx*ny*nz, 0);
@@ -688,7 +688,7 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 		}
 
 		//read back
-		kernel_prog->readBuffer(1, val32);
+		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
 
 		//release buffer
 		kernel_prog->releaseMemObject(0,
@@ -905,7 +905,7 @@ void ComponentGenerator::Grow3DSized(
 		}
 
 		//read back
-		kernel_prog->readBuffer(1, val32);
+		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
 
 		//release buffer
 		kernel_prog->releaseMemObject(0,
@@ -985,7 +985,7 @@ void ComponentGenerator::FillBorder3D(float tol)
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
-		kernel_prog->readBuffer(1, val32);
+		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
 
 		//release buffer
 		kernel_prog->releaseMemObject(kernel_index, 0, 0, 0);
@@ -1052,11 +1052,11 @@ void ComponentGenerator::InitialGrow(bool param_tr, int iter,
 		image_desc.num_samples = 0;
 		image_desc.buffer = 0;
 		//set
-		kernel_prog->setKernelArgImage(kernel_index, 0,
+		cl_mem data_buffer = kernel_prog->setKernelArgImage(kernel_index, 0,
 			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 			image_format, image_desc,
 			bits == 8 ? (void*)(cur_page_data8) : (void*)(cur_page_data16));
-		kernel_prog->setKernelArgBuf(kernel_index, 1,
+		cl_mem label_buffer = kernel_prog->setKernelArgBuf(kernel_index, 1,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			sizeof(unsigned int)*nx*ny, cur_page_label);
 		kernel_prog->setKernelArgConst(kernel_index, 2,
@@ -1085,18 +1085,13 @@ void ComponentGenerator::InitialGrow(bool param_tr, int iter,
 		const size_t origin[] = { 0, 0, 0 };
 		const size_t region[] = { size_t(nx), size_t(ny), 1 };
 		size_t count = 0;
+		void *img_data = bits == 8 ? (void*)(cur_page_data8) : (void*)(cur_page_data16);
 		for (size_t i = 0; i<nz; ++i)
 		{
 			if (i)
 			{
-				err = clEnqueueWriteImage(
-					queue, data_buffer,
-					CL_TRUE, origin, region,
-					0, 0, bits==8?(void*)(cur_page_data8):(void*)(cur_page_data16), 0, NULL, NULL);
-				err = clEnqueueWriteBuffer(
-					queue, label_buffer,
-					CL_TRUE, 0, sizeof(unsigned int)*nx*ny,
-					cur_page_label, 0, NULL, NULL);
+				kernel_prog->writeImage(origin, region, data_buffer, img_data);
+				kernel_prog->writeBuffer(label_buffer, cur_page_label);
 			}
 
 			for (int j = 0; j < iter; ++j)
@@ -1108,15 +1103,19 @@ void ComponentGenerator::InitialGrow(bool param_tr, int iter,
 					cur_grad_ff = grad_ff + (float)j*(grad_ff2 - grad_ff) / (float)(iter - 1);
 					cur_var_ff = var_ff + (float)j*(var_ff2 - var_ff) / (float)(iter - 1);
 					cur_ang_ff = ang_ff + (float)j*(ang_ff2 - ang_ff) / (float)(iter - 1);
-					err = clSetKernelArg(kernel, 6, sizeof(float), (void*)(&cur_tran));
-					err = clSetKernelArg(kernel, 7, sizeof(float), (void*)(&cur_scl_ff));
-					err = clSetKernelArg(kernel, 8, sizeof(float), (void*)(&cur_grad_ff));
-					err = clSetKernelArg(kernel, 9, sizeof(float), (void*)(&cur_var_ff));
-					err = clSetKernelArg(kernel, 10, sizeof(float), (void*)(&cur_ang_ff));
+					kernel_prog->setKernelArgConst(kernel_index, 6,
+						sizeof(float), (void*)(&cur_tran));
+					kernel_prog->setKernelArgConst(kernel_index, 7,
+						sizeof(float), (void*)(&cur_scl_ff));
+					kernel_prog->setKernelArgConst(kernel_index, 8,
+						sizeof(float), (void*)(&cur_grad_ff));
+					kernel_prog->setKernelArgConst(kernel_index, 9,
+						sizeof(float), (void*)(&cur_var_ff));
+					kernel_prog->setKernelArgConst(kernel_index, 10,
+						sizeof(float), (void*)(&cur_ang_ff));
 				}
 
-				err = clEnqueueNDRangeKernel(queue, kernel, 2, NULL, global_size,
-					local_size, 0, NULL, NULL);
+				kernel_prog->executeKernel(kernel_index, 2, global_size, local_size);
 
 				count++;
 				if (count == nz - 1)
@@ -1125,13 +1124,7 @@ void ComponentGenerator::InitialGrow(bool param_tr, int iter,
 				}
 			}
 
-			err = clEnqueueReadBuffer(
-				queue, label_buffer,
-				CL_TRUE, 0, sizeof(unsigned int)*nx*ny,
-				cur_page_label, 0, NULL, NULL);
-
-			clFlush(queue);
-			clFinish(queue);
+			kernel_prog->readBuffer(label_buffer, cur_page_label);
 
 			if (bits == 8)
 				cur_page_data8 += nx*ny;
@@ -1140,21 +1133,15 @@ void ComponentGenerator::InitialGrow(bool param_tr, int iter,
 			cur_page_label += nx*ny;
 		}
 
-		clFlush(queue);
-		clFinish(queue);
-		clReleaseMemObject(data_buffer);
-		clReleaseMemObject(label_buffer);
-		clReleaseMemObject(rcnt_buffer);
+		kernel_prog->releaseMemObject(data_buffer);
+		kernel_prog->releaseMemObject(label_buffer);
+		kernel_prog->releaseMemObject(sizeof(unsigned int),
+			(void*)(&rcnt));
 
 		m_sig_progress();
 
 		RELEASE_DATA_STREAM
 	}
-
-	//release kernels and program
-	clReleaseKernel(kernel);
-	clReleaseCommandQueue(queue);
-	clReleaseProgram(program);
 }
 
 void ComponentGenerator::SizedGrow(bool param_tr, int iter,
@@ -1165,30 +1152,28 @@ void ComponentGenerator::SizedGrow(bool param_tr, int iter,
 	CHECK_BRICKS
 
 	//create program and kernels
-	cl_int err;
-	size_t program_size = strlen(str_cl_grow_size);
-	cl_program program = clCreateProgramWithSource(m_context, 1,
-		&str_cl_grow_size, &program_size, &err);
-	if (err != CL_SUCCESS) return;
-	err = clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
-	if (err != CL_SUCCESS)
-	{
-		char *program_log;
-		size_t log_size;
-		clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG,
-			0, NULL, &log_size);
-		program_log = new char[log_size + 1];
-		program_log[log_size] = '\0';
-		clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG,
-			log_size + 1, program_log, NULL);
-		cout << program_log;
-		delete[]program_log;
+	KernelProgram* kernel_prog = VolumeRenderer::
+		vol_kernel_factory_.kernel(str_cl_grow_size);
+	if (!kernel_prog)
 		return;
+	int kernel_index0 = -1;
+	int kernel_index1 = -1;
+	int kernel_index2 = -1;
+	string name0 = "kernel_0";
+	string name1 = "kernel_1";
+	string name2 = "kernel_2";
+	if (kernel_prog->valid())
+	{
+		kernel_index0 = kernel_prog->findKernel(name0);
+		kernel_index1 = kernel_prog->findKernel(name1);
+		kernel_index2 = kernel_prog->findKernel(name2);
 	}
-	cl_command_queue queue = clCreateCommandQueue(m_context, m_device, 0, &err);
-	cl_kernel kernel_0 = clCreateKernel(program, "kernel_0", &err);
-	cl_kernel kernel_1 = clCreateKernel(program, "kernel_1", &err);
-	cl_kernel kernel_2 = clCreateKernel(program, "kernel_2", &err);
+	else
+	{
+		kernel_index0 = kernel_prog->createKernel(name0);
+		kernel_index1 = kernel_prog->createKernel(name1);
+		kernel_index2 = kernel_prog->createKernel(name2);
+	}
 
 	if (m_use_mask)
 		m_vd->GetVR()->return_mask();
@@ -1237,75 +1222,86 @@ void ComponentGenerator::SizedGrow(bool param_tr, int iter,
 		image_desc.num_mip_levels = 0;
 		image_desc.num_samples = 0;
 		image_desc.buffer = 0;
-		cl_mem data_buffer = clCreateImage(m_context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			&image_format, &image_desc, bits == 8 ? (void*)(cur_page_data8) : (void*)(cur_page_data16), &err);
-		//mask
-		cl_mem mask_buffer = clCreateBuffer(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny, mask32, &err);
-		//label
-		cl_mem label_buffer = clCreateBuffer(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny, cur_page_label, &err);
-		//counter
-		cl_mem rcnt_buffer = clCreateBuffer(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int), &rcnt, &err);
 		//set
 		//kernel 0
-		err = clSetKernelArg(kernel_0, 0, sizeof(cl_mem), &mask_buffer);
-		err = clSetKernelArg(kernel_0, 1, sizeof(cl_mem), &label_buffer);
-		err = clSetKernelArg(kernel_0, 2, sizeof(unsigned int), (void*)(&nx));
-		err = clSetKernelArg(kernel_0, 3, sizeof(unsigned int), (void*)(&ny));
-		err = clSetKernelArg(kernel_0, 4, sizeof(unsigned int), (void*)(&len));
+		cl_mem mask_buffer = kernel_prog->setKernelArgBuf(kernel_index0, 0,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*nx*ny, mask32);
+		cl_mem label_buffer = kernel_prog->setKernelArgBuf(kernel_index0, 1,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*nx*ny, cur_page_label);
+		kernel_prog->setKernelArgConst(kernel_index0, 2,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(kernel_index0, 3,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(kernel_index0, 4,
+			sizeof(unsigned int), (void*)(&len));
 		//kernel 1
-		err = clSetKernelArg(kernel_1, 0, sizeof(cl_mem), &mask_buffer);
-		err = clSetKernelArg(kernel_1, 1, sizeof(cl_mem), &label_buffer);
-		err = clSetKernelArg(kernel_1, 2, sizeof(unsigned int), (void*)(&nx));
-		err = clSetKernelArg(kernel_1, 3, sizeof(unsigned int), (void*)(&ny));
-		err = clSetKernelArg(kernel_1, 4, sizeof(unsigned int), (void*)(&len));
+		mask_buffer = kernel_prog->setKernelArgBuf(kernel_index1, 0,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*nx*ny, mask32);
+		label_buffer = kernel_prog->setKernelArgBuf(kernel_index1, 1,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*nx*ny, cur_page_label);
+		kernel_prog->setKernelArgConst(kernel_index1, 2,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(kernel_index1, 3,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(kernel_index1, 4,
+			sizeof(unsigned int), (void*)(&len));
 		//kernel 2
-		err = clSetKernelArg(kernel_2, 0, sizeof(cl_mem), &data_buffer);
-		err = clSetKernelArg(kernel_2, 1, sizeof(cl_mem), &mask_buffer);
-		err = clSetKernelArg(kernel_2, 2, sizeof(cl_mem), &label_buffer);
-		err = clSetKernelArg(kernel_2, 3, sizeof(unsigned int), (void*)(&nx));
-		err = clSetKernelArg(kernel_2, 4, sizeof(unsigned int), (void*)(&ny));
-		err = clSetKernelArg(kernel_2, 5, sizeof(cl_mem), &rcnt_buffer);
-		err = clSetKernelArg(kernel_2, 6, sizeof(unsigned int), (void*)(&seed));
+		cl_mem data_buffer = kernel_prog->setKernelArgImage(kernel_index2, 0,
+			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+			image_format, image_desc,
+			bits == 8 ? (void*)(cur_page_data8) : (void*)(cur_page_data16));
+		mask_buffer = kernel_prog->setKernelArgBuf(kernel_index2, 1,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*nx*ny, mask32);
+		label_buffer = kernel_prog->setKernelArgBuf(kernel_index2, 2,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*nx*ny, cur_page_label);
+		kernel_prog->setKernelArgConst(kernel_index2, 3,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(kernel_index2, 4,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgBuf(kernel_index2, 5,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int), (void*)(&rcnt));
+		kernel_prog->setKernelArgConst(kernel_index2, 6,
+			sizeof(unsigned int), (void*)(&seed));
 		if (!param_tr)
 		{
-			err = clSetKernelArg(kernel_2, 7, sizeof(float), (void*)(&tran));
-			err = clSetKernelArg(kernel_2, 8, sizeof(float), (void*)(&scl_ff));
-			err = clSetKernelArg(kernel_2, 9, sizeof(float), (void*)(&grad_ff));
-			err = clSetKernelArg(kernel_2, 10, sizeof(float), (void*)(&var_ff));
-			err = clSetKernelArg(kernel_2, 11, sizeof(float), (void*)(&ang_ff));
-			err = clSetKernelArg(kernel_2, 12, sizeof(unsigned int), (void*)(&size_lm));
+			kernel_prog->setKernelArgConst(kernel_index2, 7,
+				sizeof(float), (void*)(&tran));
+			kernel_prog->setKernelArgConst(kernel_index2, 8,
+				sizeof(float), (void*)(&scl_ff));
+			kernel_prog->setKernelArgConst(kernel_index2, 9,
+				sizeof(float), (void*)(&grad_ff));
+			kernel_prog->setKernelArgConst(kernel_index2, 10,
+				sizeof(float), (void*)(&var_ff));
+			kernel_prog->setKernelArgConst(kernel_index2, 11,
+				sizeof(float), (void*)(&ang_ff));
+			kernel_prog->setKernelArgConst(kernel_index2, 12,
+				sizeof(float), (void*)(&size_lm));
 		}
 
 		const size_t origin[] = { 0, 0, 0 };
 		const size_t region[] = { size_t(nx), size_t(ny), 1 };
 		size_t count = 0;
+		void *img_data = bits == 8 ? (void*)(cur_page_data8) : (void*)(cur_page_data16);
 		for (size_t i = 0; i<nz; ++i)
 		{
 			if (i)
 			{
-				err = clEnqueueWriteImage(
-					queue, data_buffer,
-					CL_TRUE, origin, region,
-					0, 0, bits == 8 ? (void*)(cur_page_data8) : (void*)(cur_page_data16), 0, NULL, NULL);
-				err = clEnqueueWriteBuffer(
-					queue, label_buffer,
-					CL_TRUE, 0, sizeof(unsigned int)*nx*ny,
-					cur_page_label, 0, NULL, NULL);
+				kernel_prog->writeImage(origin, region, data_buffer, img_data);
+				kernel_prog->writeBuffer(label_buffer, cur_page_label);
 			}
 
 			for (int j = 0; j<iter; ++j)
 			{
-				err = clEnqueueWriteBuffer(
-					queue, mask_buffer,
-					CL_TRUE, 0, sizeof(unsigned int)*nx*ny,
-					mask32, 0, NULL, NULL);
-				err = clEnqueueNDRangeKernel(queue, kernel_0, 2, NULL, global_size,
-					local_size, 0, NULL, NULL);
-				err = clEnqueueNDRangeKernel(queue, kernel_1, 2, NULL, global_size,
-					local_size, 0, NULL, NULL);
+				kernel_prog->writeBuffer(mask_buffer, mask32);
+				kernel_prog->executeKernel(kernel_index0, 2, global_size, local_size);
+				kernel_prog->executeKernel(kernel_index1, 2, global_size, local_size);
 
 				if (param_tr)
 				{
@@ -1315,15 +1311,20 @@ void ComponentGenerator::SizedGrow(bool param_tr, int iter,
 					cur_grad_ff = grad_ff + (float)j*(grad_ff2 - grad_ff) / (float)(iter - 1);
 					cur_var_ff = var_ff + (float)j*(var_ff2 - var_ff) / (float)(iter - 1);
 					cur_ang_ff = ang_ff + (float)j*(ang_ff2 - ang_ff) / (float)(iter - 1);
-					err = clSetKernelArg(kernel_2, 7, sizeof(float), (void*)(&cur_tran));
-					err = clSetKernelArg(kernel_2, 8, sizeof(float), (void*)(&cur_scl_ff));
-					err = clSetKernelArg(kernel_2, 9, sizeof(float), (void*)(&cur_grad_ff));
-					err = clSetKernelArg(kernel_2, 10, sizeof(float), (void*)(&cur_var_ff));
-					err = clSetKernelArg(kernel_2, 11, sizeof(float), (void*)(&cur_ang_ff));
-					err = clSetKernelArg(kernel_2, 12, sizeof(unsigned int), (void*)(&cur_size_lm));
+					kernel_prog->setKernelArgConst(kernel_index2, 7,
+						sizeof(float), (void*)(&cur_tran));
+					kernel_prog->setKernelArgConst(kernel_index2, 8,
+						sizeof(float), (void*)(&cur_scl_ff));
+					kernel_prog->setKernelArgConst(kernel_index2, 9,
+						sizeof(float), (void*)(&cur_grad_ff));
+					kernel_prog->setKernelArgConst(kernel_index2, 10,
+						sizeof(float), (void*)(&cur_var_ff));
+					kernel_prog->setKernelArgConst(kernel_index2, 11,
+						sizeof(float), (void*)(&cur_ang_ff));
+					kernel_prog->setKernelArgConst(kernel_index2, 12,
+						sizeof(float), (void*)(&cur_size_lm));
 				}
-				err = clEnqueueNDRangeKernel(queue, kernel_2, 2, NULL, global_size,
-					local_size, 0, NULL, NULL);
+				kernel_prog->executeKernel(kernel_index2, 2, global_size, local_size);
 
 				count++;
 				if (count == nz - 1)
@@ -1332,13 +1333,7 @@ void ComponentGenerator::SizedGrow(bool param_tr, int iter,
 				}
 			}
 
-			err = clEnqueueReadBuffer(
-				queue, label_buffer,
-				CL_TRUE, 0, sizeof(unsigned int)*nx*ny,
-				cur_page_label, 0, NULL, NULL);
-
-			clFlush(queue);
-			clFinish(queue);
+			kernel_prog->readBuffer(label_buffer, cur_page_label);
 
 			if (bits == 8)
 				cur_page_data8 += nx*ny;
@@ -1347,25 +1342,17 @@ void ComponentGenerator::SizedGrow(bool param_tr, int iter,
 			cur_page_label += nx*ny;
 		}
 
-		clFlush(queue);
-		clFinish(queue);
-		clReleaseMemObject(data_buffer);
-		clReleaseMemObject(label_buffer);
-		clReleaseMemObject(mask_buffer);
-		clReleaseMemObject(rcnt_buffer);
+		kernel_prog->releaseMemObject(data_buffer);
+		kernel_prog->releaseMemObject(label_buffer);
+		kernel_prog->releaseMemObject(mask_buffer);
+		kernel_prog->releaseMemObject(sizeof(unsigned int),
+			(void*)(&rcnt));
 		delete[] mask32;
 
 		m_sig_progress();
 
 		RELEASE_DATA_STREAM
 	}
-
-	//release kernels and program
-	clReleaseKernel(kernel_0);
-	clReleaseKernel(kernel_1);
-	clReleaseKernel(kernel_2);
-	clReleaseCommandQueue(queue);
-	clReleaseProgram(program);
 }
 
 void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
@@ -1373,58 +1360,42 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 	CHECK_BRICKS
 
 	//create program and kernels
-	cl_int err;
-	cl_command_queue queue = clCreateCommandQueue(m_context, m_device, 0, &err);
-
-	size_t program_size = strlen(str_cl_grow_size);
-	cl_program program = clCreateProgramWithSource(m_context, 1,
-		&str_cl_grow_size, &program_size, &err);
-	if (err != CL_SUCCESS) return;
-	err = clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
-	if (err != CL_SUCCESS)
-	{
-		char *program_log;
-		size_t log_size;
-		clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG,
-			0, NULL, &log_size);
-		program_log = new char[log_size + 1];
-		program_log[log_size] = '\0';
-		clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG,
-			log_size + 1, program_log, NULL);
-		cout << program_log;
-		delete[]program_log;
+	KernelProgram* kernel_prog1 = VolumeRenderer::
+		vol_kernel_factory_.kernel(str_cl_grow_size);
+	if (!kernel_prog1)
 		return;
-	}
-	cl_kernel kernel_0 = clCreateKernel(program, "kernel_0", &err);
-	cl_kernel kernel_1 = clCreateKernel(program, "kernel_1", &err);
-	clReleaseProgram(program);
-
-	program_size = strlen(str_cl_clean_up);
-	program = clCreateProgramWithSource(m_context, 1,
-		&str_cl_clean_up, &program_size, &err);
-	if (err != CL_SUCCESS) return;
-	err = clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
-	if (err != CL_SUCCESS)
+	int kernel_index0 = -1;
+	int kernel_index1 = -1;
+	string name0 = "kernel_0";
+	string name1 = "kernel_1";
+	if (kernel_prog1->valid())
 	{
-		char *program_log;
-		size_t log_size;
-		clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG,
-			0, NULL, &log_size);
-		program_log = new char[log_size + 1];
-		program_log[log_size] = '\0';
-		clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG,
-			log_size + 1, program_log, NULL);
-		cout << program_log;
-		delete[]program_log;
-		return;
+		kernel_index0 = kernel_prog1->findKernel(name0);
+		kernel_index1 = kernel_prog1->findKernel(name1);
 	}
-	cl_kernel kernel_2 = clCreateKernel(program, "kernel_0", &err);
+	else
+	{
+		kernel_index0 = kernel_prog1->createKernel(name0);
+		kernel_index1 = kernel_prog1->createKernel(name1);
+	}
+	KernelProgram* kernel_prog2 = VolumeRenderer::
+		vol_kernel_factory_.kernel(str_cl_clean_up);
+	if (!kernel_prog2)
+		return;
+	int kernel_index2 = -1;
+	string name2 = "kernel_0";
+	if (kernel_prog2->valid())
+		kernel_index2 = kernel_prog2->findKernel(name2);
+	else
+		kernel_index2 = kernel_prog2->createKernel(name2);
+	kernel_index2 = kernel_prog1->addKernel(
+		kernel_prog2, kernel_index2);
 
 	for (size_t i = 0; i < bricks->size(); ++i)
 	{
 		GET_VOLDATA_STREAM
 
-			unsigned int* mask32 = new unsigned int[nx*ny];
+		unsigned int* mask32 = new unsigned int[nx*ny];
 		memset(mask32, 0, sizeof(unsigned int)*nx*ny);
 
 		unsigned int* cur_page_label = val32;
@@ -1438,40 +1409,58 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 			len++;
 		}
 
-		//mask
-		cl_mem mask_buffer = clCreateBuffer(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny, mask32, &err);
-		//label
-		cl_mem label_buffer = clCreateBuffer(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny, cur_page_label, &err);
+		////mask
+		//cl_mem mask_buffer = clCreateBuffer(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+		//	sizeof(unsigned int)*nx*ny, mask32, &err);
+		////label
+		//cl_mem label_buffer = clCreateBuffer(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+		//	sizeof(unsigned int)*nx*ny, cur_page_label, &err);
 		//set
 		//kernel 0
-		err = clSetKernelArg(kernel_0, 0, sizeof(cl_mem), &mask_buffer);
-		err = clSetKernelArg(kernel_0, 1, sizeof(cl_mem), &label_buffer);
-		err = clSetKernelArg(kernel_0, 2, sizeof(unsigned int), (void*)(&nx));
-		err = clSetKernelArg(kernel_0, 3, sizeof(unsigned int), (void*)(&ny));
-		err = clSetKernelArg(kernel_0, 4, sizeof(unsigned int), (void*)(&len));
+		cl_mem mask_buffer = kernel_prog1->setKernelArgBuf(kernel_index0, 0,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*nx*ny, mask32);
+		cl_mem label_buffer = kernel_prog1->setKernelArgBuf(kernel_index0, 1,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*nx*ny, cur_page_label);
+		kernel_prog1->setKernelArgConst(kernel_index0, 2,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog1->setKernelArgConst(kernel_index0, 3,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog1->setKernelArgConst(kernel_index0, 4,
+			sizeof(unsigned int), (void*)(&len));
 		//kernel 1
-		err = clSetKernelArg(kernel_1, 0, sizeof(cl_mem), &mask_buffer);
-		err = clSetKernelArg(kernel_1, 1, sizeof(cl_mem), &label_buffer);
-		err = clSetKernelArg(kernel_1, 2, sizeof(unsigned int), (void*)(&nx));
-		err = clSetKernelArg(kernel_1, 3, sizeof(unsigned int), (void*)(&ny));
-		err = clSetKernelArg(kernel_1, 4, sizeof(unsigned int), (void*)(&len));
+		mask_buffer = kernel_prog1->setKernelArgBuf(kernel_index1, 0,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*nx*ny, mask32);
+		label_buffer = kernel_prog1->setKernelArgBuf(kernel_index1, 1,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*nx*ny, cur_page_label);
+		kernel_prog1->setKernelArgConst(kernel_index1, 2,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog1->setKernelArgConst(kernel_index1, 3,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog1->setKernelArgConst(kernel_index1, 4,
+			sizeof(unsigned int), (void*)(&len));
 		//kernel 2
-		err = clSetKernelArg(kernel_2, 0, sizeof(cl_mem), &mask_buffer);
-		err = clSetKernelArg(kernel_2, 1, sizeof(cl_mem), &label_buffer);
-		err = clSetKernelArg(kernel_2, 2, sizeof(unsigned int), (void*)(&nx));
-		err = clSetKernelArg(kernel_2, 3, sizeof(unsigned int), (void*)(&ny));
-		err = clSetKernelArg(kernel_2, 4, sizeof(unsigned int), (void*)(&size_lm));
+		mask_buffer = kernel_prog1->setKernelArgBuf(kernel_index2, 0,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*nx*ny, mask32);
+		label_buffer = kernel_prog1->setKernelArgBuf(kernel_index2, 1,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*nx*ny, cur_page_label);
+		kernel_prog1->setKernelArgConst(kernel_index2, 2,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog1->setKernelArgConst(kernel_index2, 3,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog1->setKernelArgConst(kernel_index2, 4,
+			sizeof(unsigned int), (void*)(&size_lm));
 
 		size_t count = 0;
 		for (size_t i = 0; i < nz; ++i)
 		{
 			if (i)
-				err = clEnqueueWriteBuffer(
-					queue, label_buffer,
-					CL_TRUE, 0, sizeof(unsigned int)*nx*ny,
-					cur_page_label, 0, NULL, NULL);
+				kernel_prog1->writeBuffer(label_buffer, cur_page_label);
 
 			for (int j = 0; j < iter; ++j)
 			{
@@ -1480,16 +1469,10 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 				//	j << "\n";
 				//OutputDebugString(os.str().c_str());
 
-				err = clEnqueueWriteBuffer(
-					queue, mask_buffer,
-					CL_TRUE, 0, sizeof(unsigned int)*nx*ny,
-					mask32, 0, NULL, NULL);
-				err = clEnqueueNDRangeKernel(queue, kernel_0, 2, NULL, global_size,
-					local_size, 0, NULL, NULL);
-				err = clEnqueueNDRangeKernel(queue, kernel_1, 2, NULL, global_size,
-					local_size, 0, NULL, NULL);
-				err = clEnqueueNDRangeKernel(queue, kernel_2, 2, NULL, global_size,
-					local_size, 0, NULL, NULL);
+				kernel_prog1->writeBuffer(mask_buffer, mask32);
+				kernel_prog1->executeKernel(kernel_index0, 2, global_size, local_size);
+				kernel_prog1->executeKernel(kernel_index1, 2, global_size, local_size);
+				kernel_prog1->executeKernel(kernel_index2, 2, global_size, local_size);
 
 				count++;
 				if (count == nz - 1)
@@ -1498,32 +1481,19 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 				}
 			}
 
-			err = clEnqueueReadBuffer(
-				queue, label_buffer,
-				CL_TRUE, 0, sizeof(unsigned int)*nx*ny,
-				cur_page_label, 0, NULL, NULL);
-			clFlush(queue);
-			clFinish(queue);
+			kernel_prog1->readBuffer(label_buffer, cur_page_label);
+
 			cur_page_label += nx*ny;
 		}
 
-		clFlush(queue);
-		clFinish(queue);
-		clReleaseMemObject(label_buffer);
-		clReleaseMemObject(mask_buffer);
+		kernel_prog1->releaseMemObject(label_buffer);
+		kernel_prog1->releaseMemObject(mask_buffer);
 		delete[]mask32;
 
 		m_sig_progress();
 
 		RELEASE_DATA_STREAM
 	}
-
-	//release kernels and program
-	clReleaseKernel(kernel_0);
-	clReleaseKernel(kernel_1);
-	clReleaseKernel(kernel_2);
-	clReleaseCommandQueue(queue);
-	clReleaseProgram(program);
 }
 
 void ComponentGenerator::MatchSlices_CPU(bool backwards, unsigned int size_thresh,
