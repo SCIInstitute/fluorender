@@ -3580,12 +3580,8 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 			}
 			double lo, hi;
 			vd->GetColormapValues(lo, hi);
-			if (vd->GetColormapProj())
-				img_shader->setLocalParam(
-					0, lo, hi, hi - lo, 1.0);
-			else
-				img_shader->setLocalParam(
-					0, lo, hi, hi - lo, enable_alpha ? 0.0 : 1.0);
+			img_shader->setLocalParam(
+				0, lo, hi, hi - lo, enable_alpha ? 0.0 : 1.0);
 			//2d adjustment
 		}
 		else

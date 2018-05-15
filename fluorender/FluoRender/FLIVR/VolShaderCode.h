@@ -522,7 +522,7 @@ namespace FLIVR
 
 #define VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT \
 	"		//VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ\n" \
-	"		c = vec4(vec3(tf_alp*300.0+valu), tf_alp);\n" \
+	"		c = vec4(vec3(tf_alp*260.0+valu), tf_alp);\n" \
 	"	}\n" \
 	"\n"
 
