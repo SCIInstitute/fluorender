@@ -3517,6 +3517,10 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 		if (vd->GetVR())
 			vd->GetVR()->set_depth_peel(peel);
 		vd->GetVR()->set_shading(false);
+		//turn off colormap proj
+		int saved_colormap_proj = vd->GetColormapProj();
+		if (color_mode == 0)
+			vd->SetColormapProj(0);
 		if (color_mode == 1)
 		{
 			vd->SetMode(3);
@@ -3537,7 +3541,9 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 		vd->SetClearColor(clear_color);
 		vd->SetCurFramebuffer(m_cur_framebuffer);
 		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor);
-		//
+		//restore
+		if (color_mode == 0)
+			vd->SetColormapProj(saved_colormap_proj);
 		if (color_mode == 1)
 		{
 			vd->RestoreMode();
@@ -3558,8 +3564,12 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 		if (color_mode == 1)
 		{
 			//2d adjustment
-			img_shader =
-				m_img_shader_factory.shader(IMG_SHDR_GRADIENT_MAP, vd->GetColormap());
+			if (vd->GetColormapProj())
+				img_shader = m_img_shader_factory.shader(
+					IMG_SHDR_GRADIENT_PROJ_MAP, vd->GetColormap());
+			else
+				img_shader = m_img_shader_factory.shader(
+					IMG_SHDR_GRADIENT_MAP, vd->GetColormap());
 			if (img_shader)
 			{
 				if (!img_shader->valid())
@@ -3570,7 +3580,12 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 			}
 			double lo, hi;
 			vd->GetColormapValues(lo, hi);
-			img_shader->setLocalParam(0, lo, hi, hi - lo, enable_alpha ? 0.0 : 1.0);
+			if (vd->GetColormapProj())
+				img_shader->setLocalParam(
+					0, lo, hi, hi - lo, 1.0);
+			else
+				img_shader->setLocalParam(
+					0, lo, hi, hi - lo, enable_alpha ? 0.0 : 1.0);
 			//2d adjustment
 		}
 		else

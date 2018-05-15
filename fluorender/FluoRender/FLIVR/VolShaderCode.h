@@ -506,6 +506,26 @@ namespace FLIVR
 	"	}\n" \
 	"\n"
 
+#define VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ \
+	"	//VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ\n" \
+	"	vec4 c;\n" \
+	"	float tf_alp = 0.0;\n" \
+	"	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;\n" \
+	"	if (v.x<loc2.z-loc3.w || (loc2.w<1.0 && v.x>loc2.w+loc3.w) || v.y<loc3.y)\n" \
+	"		c = vec4(0.0, 0.0, 0.0, 0.0);\n" \
+	"	else\n" \
+	"	{\n" \
+	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
+	"		tf_alp = pow(clamp(v.x/loc3.z,\n" \
+	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0,\n" \
+	"			loc3.x>1.0?0.9999:1.0), loc3.x);\n"
+
+#define VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT \
+	"		//VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ\n" \
+	"		c = vec4(vec3(tf_alp*300.0+valu), tf_alp);\n" \
+	"	}\n" \
+	"\n"
+
 #define VOL_TRANSFER_FUNCTION_DEPTHMAP \
 	"	//VOL_TRANSFER_FUNCTION_DEPTHMAP\n" \
 	"	vec4 c;\n" \

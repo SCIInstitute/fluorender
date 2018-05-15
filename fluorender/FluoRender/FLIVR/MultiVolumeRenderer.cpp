@@ -381,7 +381,7 @@ namespace FLIVR
 			vr_list_[0]->tex_->nc(),
 			use_shading, use_fog,
 			depth_peel_, true,
-			hiqual_, ml_mode,
+			hiqual_, ml_mode, mode_==TextureRenderer::MODE_MIP,
 			colormap_mode_, colormap_, colormap_proj_,
 			false, 1);
 		if (shader)
@@ -1083,7 +1083,7 @@ namespace FLIVR
 			true, 0,
 			false, false,
 			false, false,
-			false, 0,
+			false, 0, false,
 			0, 0, 0,
 			false, 1);
 		if (shader)

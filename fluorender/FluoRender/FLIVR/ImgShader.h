@@ -51,6 +51,7 @@ namespace FLIVR
 #define	IMG_SHDR_DRAW_GEOMETRY				14
 #define	IMG_SHDR_DRAW_GEOMETRY_COLOR3		15
 #define	IMG_SHDR_DRAW_GEOMETRY_COLOR4		16
+#define	IMG_SHDR_GRADIENT_PROJ_MAP			17
 
 	class ShaderProgram;
 
@@ -69,7 +70,8 @@ namespace FLIVR
 		{
 			if (type_ == type)
 			{
-				if (type_ == IMG_SHDR_GRADIENT_MAP)
+				if (type_ == IMG_SHDR_GRADIENT_MAP ||
+					type_ == IMG_SHDR_GRADIENT_PROJ_MAP)
 					return (colormap_==colormap);
 				else
 					return true;

@@ -726,7 +726,7 @@ namespace FLIVR
 			false, tex_->nc(),
 			shading_, use_fog,
 			depth_peel_, true,
-			hiqual_, ml_mode_,
+			hiqual_, ml_mode_, mode_ == TextureRenderer::MODE_MIP,
 			colormap_mode_, colormap_, colormap_proj_,
 			solid_, 1);
 		if (shader)
@@ -755,21 +755,28 @@ namespace FLIVR
 		//transfer function
 		shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
 		shader->setLocalParam(3, 1.0/gamma3d_, gm_thresh_, offset_, sw_);
-		switch (colormap_mode_)
-		{
-		case 0://normal
-			if (mask_ && !label_)
-				shader->setLocalParam(6, mask_color_.r(), mask_color_.g(), mask_color_.b(), mask_thresh_);
-			else
-				shader->setLocalParam(6, color_.r(), color_.g(), color_.b(), 0.0);
-			break;
-		case 1://colormap
+		if (mode_==TextureRenderer::MODE_MIP &&
+			colormap_proj_)
 			shader->setLocalParam(6, colormap_low_value_, colormap_hi_value_,
-				colormap_hi_value_-colormap_low_value_, 0.0);
-			break;
-		case 2://depth map
-			shader->setLocalParam(6, color_.r(), color_.g(), color_.b(), 0.0);
-			break;
+				colormap_hi_value_ - colormap_low_value_, 0.0);
+		else
+		{
+			switch (colormap_mode_)
+			{
+			case 0://normal
+				if (mask_ && !label_)
+					shader->setLocalParam(6, mask_color_.r(), mask_color_.g(), mask_color_.b(), mask_thresh_);
+				else
+					shader->setLocalParam(6, color_.r(), color_.g(), color_.b(), 0.0);
+				break;
+			case 1://colormap
+				shader->setLocalParam(6, colormap_low_value_, colormap_hi_value_,
+					colormap_hi_value_-colormap_low_value_, 0.0);
+				break;
+			case 2://depth map
+				shader->setLocalParam(6, color_.r(), color_.g(), color_.b(), 0.0);
+				break;
+			}
 		}
 
 		//setup depth peeling
@@ -855,7 +862,9 @@ namespace FLIVR
 				continue;
 			}
 
-			if (colormap_mode_==1 && colormap_proj_)
+			if ((colormap_mode_==1 ||
+				mode_==TextureRenderer::MODE_MIP) &&
+				colormap_proj_)
 			{
 				BBox bbox = b->dbox();
 				float matrix[16];
@@ -1149,7 +1158,7 @@ namespace FLIVR
 			true, 0,
 			false, false,
 			0, false,
-			false, 0,
+			false, 0, false,
 			0, 0, 0,
 			false, 1);
 		if (shader)
