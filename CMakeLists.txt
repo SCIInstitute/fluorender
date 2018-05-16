@@ -267,8 +267,9 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Formats)
 file(GLOB fmt_src fluorender/FluoRender/Formats/*.cpp)
 file(GLOB fmt_hdr fluorender/FluoRender/Formats/*.h)
+file(GLOB fmt_rsc fluorender/FluoRender/Formats/*.class)
 add_library(FORMATS_OBJ OBJECT
-  ${fmt_src} ${fmt_hdr})
+  ${fmt_src} ${fmt_hdr} ${fmt_rsc})
 
 # Video
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Video)
@@ -564,33 +565,60 @@ elseif(WIN32)
       $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>
       $<TARGET_OBJECTS:WACUTILS_OBJ>)
+	#TODO: Look into this later:
     add_executable(SynthBB
       ${synthbb_src} ${synthbb_hdr}
+      $<TARGET_OBJECTS:IMAGES_OBJ>
+      $<TARGET_OBJECTS:CONVERTERS_OBJ>
       $<TARGET_OBJECTS:FLIVR_OBJ>
+      $<TARGET_OBJECTS:ANIMATORS_OBJ>
+      $<TARGET_OBJECTS:NV_OBJ>
       $<TARGET_OBJECTS:FORMATS_OBJ>
+      $<TARGET_OBJECTS:VIDEO_OBJ>
       $<TARGET_OBJECTS:TRACKING_OBJ>
       $<TARGET_OBJECTS:COMPONENTS_OBJ>
       $<TARGET_OBJECTS:CLUSTER_OBJ>
       $<TARGET_OBJECTS:CALCULATE_OBJ>
       $<TARGET_OBJECTS:GLEW_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
-      $<TARGET_OBJECTS:TEEM_OBJ>)
+      $<TARGET_OBJECTS:TEEM_OBJ>
+      $<TARGET_OBJECTS:WACUTILS_OBJ>) 
+	#TODO: Look into this later.
     add_executable(MaskInt
       ${maskint_src} ${maskint_hdr}
+      $<TARGET_OBJECTS:IMAGES_OBJ>
+      $<TARGET_OBJECTS:CONVERTERS_OBJ>
       $<TARGET_OBJECTS:FLIVR_OBJ>
+      $<TARGET_OBJECTS:ANIMATORS_OBJ>
+      $<TARGET_OBJECTS:NV_OBJ>
       $<TARGET_OBJECTS:FORMATS_OBJ>
-      $<TARGET_OBJECTS:POLE_OBJ>
+      $<TARGET_OBJECTS:VIDEO_OBJ>
+      $<TARGET_OBJECTS:TRACKING_OBJ>
+      $<TARGET_OBJECTS:COMPONENTS_OBJ>
+      $<TARGET_OBJECTS:CLUSTER_OBJ>
+      $<TARGET_OBJECTS:CALCULATE_OBJ>
       $<TARGET_OBJECTS:GLEW_OBJ>
-      $<TARGET_OBJECTS:TEEM_OBJ>)
+      $<TARGET_OBJECTS:POLE_OBJ>
+      $<TARGET_OBJECTS:TEEM_OBJ>
+      $<TARGET_OBJECTS:WACUTILS_OBJ>) 
+	  #TODO: Look into this later.
     add_executable(ReadGMM
       ${readgmm_src} ${readgmm_hdr}
+      $<TARGET_OBJECTS:IMAGES_OBJ>
+      $<TARGET_OBJECTS:CONVERTERS_OBJ>
       $<TARGET_OBJECTS:FLIVR_OBJ>
+      $<TARGET_OBJECTS:ANIMATORS_OBJ>
+      $<TARGET_OBJECTS:NV_OBJ>
       $<TARGET_OBJECTS:FORMATS_OBJ>
-      $<TARGET_OBJECTS:CLUSTER_OBJ>
+      $<TARGET_OBJECTS:VIDEO_OBJ>
       $<TARGET_OBJECTS:TRACKING_OBJ>
-      $<TARGET_OBJECTS:POLE_OBJ>
+      $<TARGET_OBJECTS:COMPONENTS_OBJ>
+      $<TARGET_OBJECTS:CLUSTER_OBJ>
+      $<TARGET_OBJECTS:CALCULATE_OBJ>
       $<TARGET_OBJECTS:GLEW_OBJ>
-      $<TARGET_OBJECTS:TEEM_OBJ>)
+      $<TARGET_OBJECTS:POLE_OBJ>
+      $<TARGET_OBJECTS:TEEM_OBJ>
+      $<TARGET_OBJECTS:WACUTILS_OBJ>) 
   endif()
 endif()
 
@@ -664,7 +692,12 @@ target_link_libraries(ReadGMM
   ${wxWidgets_LIBRARIES})
 
 
-
+# copy Java code dir to the binary directory
+add_custom_command(TARGET FluoRender POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  "${FluoRender_SOURCE_DIR}/Java_Code/ImageJ_Reader/target/classes"
+  "$<TARGET_FILE_DIR:FluoRender>/Java_Code")
+  
 # copy openCL examples to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
