@@ -4516,29 +4516,30 @@ int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_
 	{
 		//RGB tiff
 		//TODO: Loading with imageJ irrespective of the file type.
-		if (type == LOAD_TYPE_TIFF)
-			reader = new TIFReader();
-		else if (type == LOAD_TYPE_NRRD)
-			reader = new NRRDReader();
-		else if (type == LOAD_TYPE_OIB)
-			reader = new OIBReader();
-		else if (type == LOAD_TYPE_OIF)
-			reader = new OIFReader();
-		else if (type == LOAD_TYPE_LSM)
-			reader = new LSMReader();
-		else if (type == LOAD_TYPE_PVXML)
-		{
-			reader = new PVXMLReader();
-			((PVXMLReader*)reader)->SetFlipX(m_pvxml_flip_x);
-			((PVXMLReader*)reader)->SetFlipY(m_pvxml_flip_y);
-		}
-		else if (type == LOAD_TYPE_BRKXML)
-			reader = new BRKXMLReader();
-
+		reader = new ImageJReader();
+		//if (type == LOAD_TYPE_TIFF)
+		//	reader = new TIFReader();
+		//else if (type == LOAD_TYPE_NRRD)
+		//	reader = new NRRDReader();
+		//else if (type == LOAD_TYPE_OIB)
+		//	reader = new OIBReader();
+		//else if (type == LOAD_TYPE_OIF)
+		//	reader = new OIFReader();
+		//else if (type == LOAD_TYPE_LSM)
+		//	reader = new LSMReader();
+		//else if (type == LOAD_TYPE_PVXML)
+		//{
+		//	reader = new PVXMLReader();
+		//	((PVXMLReader*)reader)->SetFlipX(m_pvxml_flip_x);
+		//	((PVXMLReader*)reader)->SetFlipY(m_pvxml_flip_y);
+		//}
+		//else if (type == LOAD_TYPE_BRKXML)
+		//	reader = new BRKXMLReader();
+		
 		m_reader_list.push_back(reader);
 		wstring str_w = pathname.ToStdWstring();
 		reader->SetFile(str_w);
-		reader->SetSliceSeq(m_sliceSequence);
+		reader->SetSliceSeq(m_sliceSequence); //TODO: What is slice sequence ?
 		str_w = m_timeId.ToStdWstring();
 		reader->SetTimeId(str_w);
 		reader_return = reader->Preprocess();

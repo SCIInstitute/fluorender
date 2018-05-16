@@ -50,6 +50,7 @@ DEALINGS IN THE SOFTWARE.
 #include "Formats/lbl_reader.h"
 #include "Formats/pvxml_reader.h"
 #include "Formats/brkxml_reader.h"
+#include "Formats/imageJ_reader.h"
 #include "Tracking/TrackMap.h"
 
 #ifndef _DATAMANAGER_H_
