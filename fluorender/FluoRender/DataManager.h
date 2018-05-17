@@ -1385,8 +1385,9 @@ public:
 	double m_vol_ysp;	//y_spacing
 	double m_vol_zsp;	//z_spacing
 	double m_vol_lum;	//luminance
-	int m_vol_cmm;		//colormap mode
-	int m_vol_cmp;		//colormap
+	int m_vol_cmp;		//colormap type (rainbow, warm, etc)
+	int m_vol_cmm;		//colormap mode (enable)
+	int m_vol_cmj;		//colormap projection
 	double m_vol_lcm;	//colormap low value
 	double m_vol_hcm;	//colormap high value
 	bool m_vol_eap;		//enable alpha

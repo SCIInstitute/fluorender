@@ -4337,6 +4337,7 @@ m_vol_exb(0.0),
 	m_vol_lum(1.0),
 	m_vol_cmm(0),
 	m_vol_cmp(0),
+	m_vol_cmj(0),
 	m_vol_lcm(0.0),
 	m_vol_hcm(1.0),
 	m_vol_eap(true),
@@ -4352,8 +4353,8 @@ m_vol_exb(0.0),
 	m_override_vox(true)
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-    expath = wxPathOnly(expath);
-    wxString dft = expath + "/default_volume_settings.dft";
+	expath = wxPathOnly(expath);
+	wxString dft = expath + "/default_volume_settings.dft";
 	wxFileInputStream is(dft);
 	if (!is.IsOk())
 		return;
@@ -4393,6 +4394,9 @@ m_vol_exb(0.0),
 		m_vol_cmm = ival;
 	if (fconfig.Read("colormap", &ival))
 		m_vol_cmp = ival;
+	if (fconfig.Read("colormap_proj", &ival))
+		m_vol_cmj = ival;
+
 	if (fconfig.Read("colormap_low", &val))
 		m_vol_lcm = val;
 	if (fconfig.Read("colormap_hi", &val))
@@ -4491,6 +4495,7 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 			vd->SetBaseSpacings(m_vol_xsp, m_vol_ysp, m_vol_zsp);
 		vd->SetColormapMode(m_vol_cmm);
 		vd->SetColormap(m_vol_cmp);
+		vd->SetColormapProj(m_vol_cmj);
 		vd->SetColormapValues(m_vol_lcm, m_vol_hcm);
 
 		vd->SetEnableAlpha(m_vol_eap);

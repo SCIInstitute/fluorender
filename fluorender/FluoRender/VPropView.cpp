@@ -2361,9 +2361,18 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
 	val /= m_max_val;
 	fconfig.Write("luminance", val);
 	mgr->m_vol_lum = val;
-	//colormap
+	//colormap enable
+	bool bval = m_colormap_tool->GetToolState(ID_ColormapEnableChk);
+	fconfig.Write("colormap_mode", bval);
+	mgr->m_vol_cmm = bval;
+	//colormap type
 	ival = m_colormap_combo->GetCurrentSelection();
 	fconfig.Write("colormap", ival);
+	mgr->m_vol_cmp = ival;
+	//colormap projection
+	ival = m_colormap_combo2->GetCurrentSelection();
+	fconfig.Write("colormap_proj", ival);
+	mgr->m_vol_cmj = ival;
 	//colormap low value
 	str = m_colormap_low_value_text->GetValue();
 	str.ToDouble(&val);
@@ -2411,8 +2420,8 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
 	fconfig.Write("shadow_intensity", swi);
 	mgr->m_vol_swi = swi;
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-    expath = wxPathOnly(expath);
-    wxString dft = expath + "/default_volume_settings.dft";
+	expath = wxPathOnly(expath);
+	wxString dft = expath + "/default_volume_settings.dft";
 	wxFileOutputStream os(dft);
 	fconfig.Save(os);
 }
@@ -2531,6 +2540,9 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 	//colormap
 	m_colormap_combo->SetSelection(mgr->m_vol_cmp);
 	m_vd->SetColormap(mgr->m_vol_cmp);
+	//colormap projection
+	m_colormap_combo2->SetSelection(mgr->m_vol_cmj);
+	m_vd->SetColormapProj(mgr->m_vol_cmj);
 	//colormap low value
 	dval = mgr->m_vol_lcm;
 	ival = int(dval*m_max_val+0.5);
