@@ -480,6 +480,11 @@ namespace FLIVR
 	"		vec4 tt = matrix5 * t;\n" \
 	"		float valu = (1.0-tt.x-loc6.x)/loc6.z;\n"
 
+#define VOL_TRANSFER_FUNCTION_COLORMAP_VALU4 \
+	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_GM\n" \
+	"		vec4 tt = matrix5 * t;\n" \
+	"		float valu = (v.y-loc6.x)/loc6.z;\n"
+
 #define VOL_TRANSFER_FUNCTION_COLORMAP_RESULT \
 	"		//VOL_TRANSFER_FUNCTION_COLORMAP_RESULT\n" \
 	"		float alpha = 1.0 - pow(1.0-tf_alp, loc4.w);\n" \

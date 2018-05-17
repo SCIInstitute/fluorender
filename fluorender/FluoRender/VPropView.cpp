@@ -531,6 +531,7 @@ wxPanel(parent, id, pos, size,style, name),
 	colormap_list2.push_back("Z Value");
 	colormap_list2.push_back("Y Value");
 	colormap_list2.push_back("X Value");
+	colormap_list2.push_back("Gradient");
 	for (size_t i=0; i<colormap_list2.size(); ++i)
 		m_colormap_combo2->Append(colormap_list2[i]);
 	sizer_r5->Add(st, 0, wxALIGN_CENTER, 0);

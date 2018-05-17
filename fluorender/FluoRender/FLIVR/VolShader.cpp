@@ -169,6 +169,8 @@ VolShader::VolShader(
 			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU2);
 		case 3:
 			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU3);
+		case 4:
+			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU4);
 		}
 		return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU0);
 	}
