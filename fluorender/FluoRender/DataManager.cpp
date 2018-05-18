@@ -983,8 +983,7 @@ double VolumeData::GetTransferedValue(int i, int j, int k, TextureBrick* b)
 			gm = sqrt(normal_x*normal_x + normal_y*normal_y + normal_z*normal_z)*0.53;
 		}
 		if (new_value<m_lo_thresh-m_sw ||
-			new_value>m_hi_thresh+m_sw ||
-			gm<m_gm_thresh)
+			new_value>m_hi_thresh+m_sw)
 			new_value = 0.0;
 		else
 		{
@@ -994,6 +993,9 @@ double VolumeData::GetTransferedValue(int i, int j, int k, TextureBrick* b)
 			(new_value>m_hi_thresh?
 				(m_sw-new_value+m_hi_thresh)/m_sw:1.0))
 				*new_value;
+			new_value *= (m_gm_thresh > 0.0 ?
+				Clamp(gm / m_gm_thresh, 0.0,
+					1.0 + m_gm_thresh*10.0) : 1.0);
 			new_value = pow(Clamp(new_value/m_offset,
 				gamma<1.0?-(gamma-1.0)*0.00001:0.0,
 				gamma>1.0?0.9999:1.0), gamma);
@@ -1026,8 +1028,7 @@ double VolumeData::GetTransferedValue(int i, int j, int k, TextureBrick* b)
 			gm = sqrt(normal_x*normal_x + normal_y*normal_y + normal_z*normal_z)*0.53;
 		}
 		if (new_value<m_lo_thresh-m_sw ||
-			new_value>m_hi_thresh+m_sw ||
-			gm<m_gm_thresh)
+			new_value>m_hi_thresh+m_sw)
 			new_value = 0.0;
 		else
 		{
@@ -1037,6 +1038,9 @@ double VolumeData::GetTransferedValue(int i, int j, int k, TextureBrick* b)
 			(new_value>m_hi_thresh?
 				(m_sw-new_value+m_hi_thresh)/m_sw:1.0))
 				*new_value;
+			new_value *= (m_gm_thresh > 0.0 ?
+				Clamp(gm / m_gm_thresh, 0.0,
+					1.0 + m_gm_thresh*10.0) : 1.0);
 			new_value = pow(Clamp(new_value/m_offset,
 				gamma<1.0?-(gamma-1.0)*0.00001:0.0,
 				gamma>1.0?0.9999:1.0), gamma);
