@@ -9432,6 +9432,24 @@ void VRenderGLView::SetColormapColors(int colormap)
 		m_color_6 = Color(0.7, 0.0, 0.15);
 		m_color_7 = Color(0.7, 0.0, 0.15);
 		break;
+	case 5://monochrome
+		m_color_1 = Color(0.0, 0.0, 0.0);
+		m_color_2 = Color(0.0, 0.0, 0.0);
+		m_color_3 = Color(0.25, 0.25, 0.25);
+		m_color_4 = Color(0.5, 0.5, 0.5);
+		m_color_5 = Color(0.75, 0.75, 0.75);
+		m_color_6 = Color(1.0, 1.0, 1.0);
+		m_color_7 = Color(1.0, 1.0, 1.0);
+		break;
+	case 6://reverse mono
+		m_color_1 = Color(1.0, 1.0, 1.0);
+		m_color_2 = Color(1.0, 1.0, 1.0);
+		m_color_3 = Color(0.75, 0.75, 0.75);
+		m_color_4 = Color(0.5, 0.5, 0.5);
+		m_color_5 = Color(0.25, 0.25, 0.25);
+		m_color_6 = Color(0.0, 0.0, 0.0);
+		m_color_7 = Color(0.0, 0.0, 0.0);
+		break;
 	}
 }
 

@@ -451,6 +451,14 @@ namespace FLIVR
 	"		rb.g = clamp(valu<0.5?valu*0.8+0.3:(1.0-valu)*1.4, 0.0, 1.0);\n" \
 	"		rb.b = clamp(valu<0.5?valu*(-0.1)+0.75:(1.0-valu)*1.1+0.15, 0.0, 1.0);\n"
 
+#define VOL_COLORMAP_CALC5 \
+	"		//VOL_COLORMAP_CALC5\n" \
+	"		rb.rgb = vec3(clamp(valu, 0.0, 1.0));\n"
+
+#define VOL_COLORMAP_CALC6 \
+	"		//VOL_COLORMAP_CALC6\n" \
+	"		rb.rgb = vec3(1.0 - clamp(valu, 0.0, 1.0));\n"
+
 #define VOL_TRANSFER_FUNCTION_COLORMAP \
 	"	//VOL_TRANSFER_FUNCTION_COLORMAP\n" \
 	"	vec4 c;\n" \

@@ -1992,6 +1992,16 @@ Color VolumeData::GetColorFromColormap(double value)
 		color.g(Clamp(v<0.5 ? v*0.8 + 0.3 : (1.0 - v)*1.4, 0.0, 1.0));
 		color.b(Clamp(v<0.5 ? v*(-0.1) + 0.75 : (1.0 - v)*1.1 + 0.15, 0.0, 1.0));
 		break;
+	case 5:
+		color.r(Clamp(v, 0.0, 1.0));
+		color.g(Clamp(v, 0.0, 1.0));
+		color.b(Clamp(v, 0.0, 1.0));
+		break;
+	case 6:
+		color.r(1.0 - Clamp(v, 0.0, 1.0));
+		color.g(1.0 - Clamp(v, 0.0, 1.0));
+		color.b(1.0 - Clamp(v, 0.0, 1.0));
+		break;
 	}
 	return color;
 }
