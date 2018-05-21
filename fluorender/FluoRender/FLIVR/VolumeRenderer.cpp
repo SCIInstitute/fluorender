@@ -891,18 +891,6 @@ namespace FLIVR
 			index.clear();
 			size.clear();
 			b->compute_polygons(snapview, dt, vertex, index, size, multibricks);
-			//if (vertex.size() == 0) {
-			//	if (mem_swap_ && start_update_loop_ && !done_update_loop_)
-			//	{
-			//		if (!b->drawn(mode))
-			//		{
-			//			b->set_drawn(mode, true);
-			//			cur_brick_num_++;
-			//			cur_chan_brick_num_++;
-			//		}
-			//	}
-			//	continue;
-			//}
 
 			num_slices_ += vertex.size()/12;
 

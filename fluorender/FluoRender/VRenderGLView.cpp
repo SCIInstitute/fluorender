@@ -3415,6 +3415,16 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, bool mask, int peel)
 
 	if (img_shader && img_shader->valid())
 		img_shader->release();
+
+	//if vd is duplicated
+	if (TextureRenderer::get_mem_swap() &&
+		vd->GetDup())
+	{
+		vector<TextureBrick*> *bricks =
+			vd->GetTexture()->get_bricks();
+		for (int i = 0; i < bricks->size(); i++)
+			(*bricks)[i]->set_drawn(false);
+	}
 }
 
 void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
@@ -3684,6 +3694,16 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 
 	vd->GetVR()->set_shading(shading);
 	vd->SetColormapMode(color_mode);
+
+	//if vd is duplicated
+	if (TextureRenderer::get_mem_swap() &&
+		vd->GetDup())
+	{
+		vector<TextureBrick*> *bricks =
+			vd->GetTexture()->get_bricks();
+		for (int i = 0; i < bricks->size(); i++)
+			(*bricks)[i]->set_drawn(false);
+	}
 }
 
 void VRenderGLView::DrawOLShading(VolumeData* vd)
