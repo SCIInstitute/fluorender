@@ -7445,41 +7445,110 @@ void VRenderGLView::ReplaceVolumeData(wxString &name, VolumeData *dst)
 
 void VRenderGLView::RemoveVolumeData(wxString &name)
 {
-	int i, j;
-
-	if (m_cur_vol && m_cur_vol->GetName() == name)
-		m_cur_vol = 0;
-
-	for (i = 0; i<(int)m_layer_list.size(); i++)
+	VolumeData* vd_main = 0;
+	for (auto iter = m_layer_list.begin();
+		iter != m_layer_list.end() && !vd_main;
+		++iter)
 	{
-		if (!m_layer_list[i])
+		if (!(*iter))
 			continue;
-		switch (m_layer_list[i]->IsA())
+		switch ((*iter)->IsA())
 		{
 		case 2://volume data
 		{
-			VolumeData* vd = (VolumeData*)m_layer_list[i];
+			VolumeData* vd = (VolumeData*)(*iter);
 			if (vd && vd->GetName() == name)
 			{
-				m_layer_list.erase(m_layer_list.begin() + i);
+				vd_main = vd;
 				m_vd_pop_dirty = true;
-				return;
 			}
 		}
 		break;
 		case 5://group
 		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
-			for (j = 0; j<group->GetVolumeNum(); j++)
+			DataGroup* group = (DataGroup*)(*iter);
+			for (int j = 0; j<group->GetVolumeNum(); j++)
 			{
 				VolumeData* vd = group->GetVolumeData(j);
 				if (vd && vd->GetName() == name)
 				{
-					group->RemoveVolumeData(j);
+					vd_main = vd;
 					m_vd_pop_dirty = true;
-					return;
 				}
 			}
+		}
+		break;
+		}
+	}
+
+	if (!vd_main)
+		return;
+	
+	for (auto iter = m_layer_list.begin();
+		iter != m_layer_list.end();)
+	{
+		if (!(*iter))
+		{
+			++iter;
+			continue;
+		}
+		switch ((*iter)->IsA())
+		{
+		case 2://volume data
+		{
+			VolumeData* vd = (VolumeData*)(*iter);
+			bool del = false;
+			if (vd)
+			{
+				if (vd->GetDup())
+				{
+					if (vd->GetDupData() == vd_main)
+						del = true;
+				}
+				else
+				{
+					if (vd == vd_main)
+						del = true;
+				}
+			}
+			if (del)
+			{
+				iter = m_layer_list.erase(iter);
+				if (m_cur_vol = vd)
+					m_cur_vol = 0;
+			}
+			else
+				++iter;
+		}
+		break;
+		case 5://group
+		{
+			DataGroup* group = (DataGroup*)(*iter);
+			for (int j = group->GetVolumeNum()-1; j >= 0; --j)
+			{
+				VolumeData* vd = group->GetVolumeData(j);
+				if (vd)
+				{
+					bool del = false;
+					if (vd->GetDup())
+					{
+						if (vd->GetDupData() == vd_main)
+							del = true;
+					}
+					else
+					{
+						if (vd == vd_main)
+							del = true;
+					}
+					if (del)
+					{
+						group->RemoveVolumeData(j);
+						if (m_cur_vol = vd)
+							m_cur_vol = 0;
+					}
+				}
+			}
+			++iter;
 		}
 		break;
 		}

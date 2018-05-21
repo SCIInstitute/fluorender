@@ -68,6 +68,7 @@ VolumeData::VolumeData()
 
 	m_dup = false;
 	m_dup_counter = 0;
+	m_dup_data = 0;
 
 	type = 2;//volume
 
@@ -175,6 +176,10 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_dup = true;
 	copy.m_dup_counter++;
 	m_dup_counter = copy.m_dup_counter;
+	if (copy.m_dup_data)
+		m_dup_data = copy.m_dup_data;
+	else
+		m_dup_data = &copy;
 
 	//layer properties
 	type = 2;//volume
@@ -327,6 +332,12 @@ bool VolumeData::GetDup()
 void VolumeData::IncDupCounter()
 {
 	m_dup_counter++;
+}
+
+//get from
+VolumeData* VolumeData::GetDupData()
+{
+	return m_dup_data;
 }
 
 //data related
@@ -4887,11 +4898,34 @@ int DataManager::GetMeshIndex(wxString &name)
 void DataManager::RemoveVolumeData(int index)
 {
 	VolumeData* data = m_vd_list[index];
-	if (data)
+	if (!data)
+		return;
+	
+	for (auto iter = m_vd_list.begin();
+		iter != m_vd_list.end();)
 	{
-		m_vd_list.erase(m_vd_list.begin()+index);
-		delete data;
-		data = 0;
+		VolumeData* vd = *iter;
+		bool del = false;
+		if (vd)
+		{
+			if (vd->GetDup())
+			{
+				if (vd->GetDupData() == data)
+					del = true;
+			}
+			else
+			{
+				if (vd == data)
+					del = true;
+			}
+		}
+		if (del)
+		{
+			iter = m_vd_list.erase(iter);
+			delete vd;
+		}
+		else
+			++iter;
 	}	
 }
 

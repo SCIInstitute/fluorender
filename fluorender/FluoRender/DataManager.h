@@ -187,6 +187,8 @@ public:
 	bool GetDup();
 	//increase duplicate counter
 	void IncDupCounter();
+	//get duplicated from
+	VolumeData* GetDupData();
 
 	//data related
 	//reader
@@ -433,6 +435,7 @@ private:
 	//duplication indicator and counter
 	bool m_dup;
 	int m_dup_counter;
+	VolumeData* m_dup_data;//duplicated from
 
 	wxString m_tex_path;
 	BBox m_bounds;
