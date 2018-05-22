@@ -1423,10 +1423,15 @@ void VRenderFrame::OnInfo(wxCommandEvent& WXUNUSED(event))
 	// FluoRender Image (rows 4-5)
 	wxToolBar * logo= new wxToolBar(d, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+    wxBitmap bitmap;
 	if (psJan!=wxNOT_FOUND || psDec!=wxNOT_FOUND)
-		logo->AddTool(wxID_ANY, "", wxGetBitmapFromMemory(logo_snow));
+        bitmap = wxGetBitmapFromMemory(logo_snow);
 	else
-		logo->AddTool(wxID_ANY, "", wxGetBitmapFromMemory(logo));
+		bitmap = wxGetBitmapFromMemory(logo);
+#ifdef _DARWIN
+    logo->SetToolBitmapSize(bitmap.GetSize());
+#endif
+    logo->AddTool(wxID_ANY, "", bitmap);
 	logo->Realize();
 	left->Add(logo,0,wxEXPAND);
 	//right
