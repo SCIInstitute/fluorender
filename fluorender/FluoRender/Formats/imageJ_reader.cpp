@@ -42,6 +42,7 @@ ImageJReader::ImageJReader()
 	m_slice_num = 0;
 	m_x_size = 0;
 	m_y_size = 0;
+	m_eight_bit = true;
 
 	m_valid_spc = false;
 	m_xspc = 1.0;
@@ -71,49 +72,10 @@ ImageJReader::ImageJReader()
 	printf("%s", imageJPath.c_str());
 	fflush(stdout);
 
-	//TODO: Move this part of the code.
 	m_imageJ_cls = m_pJVMInstance->m_pEnv->FindClass("ImageJ_Reader");
 	if (m_imageJ_cls == nullptr) {
 		cerr << "ERROR: class not found !";
 	}
-	/*
-	else {
-		// getting depth of the image.
-		jmethodID mid = m_pJVMInstance->m_pEnv->GetStaticMethodID(imageJ_cls, "getDepth", "([Ljava/lang/String;)I");
-		if (mid == nullptr)
-			cerr << "ERROR: method void getDepth() not found !" << endl;
-		else {
-			// This part goes in setFile.
-
-			jobjectArray arr = m_pJVMInstance->m_pEnv->NewObjectArray(2,      // constructs java array of 2
-				m_pJVMInstance->m_pEnv->FindClass("java/lang/String"),    // Strings
-				m_pJVMInstance->m_pEnv->NewStringUTF("str"));   // each initialized with value "str"
-			m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 0, m_pJVMInstance->m_pEnv->NewStringUTF("D:\\Dev_Environment\\Test_Files\\7.lsm"));  // change an element
-			m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 1, m_pJVMInstance->m_pEnv->NewStringUTF("4D_1ch.lsm"));  // change an element
-			jint depth = (jint)(m_pJVMInstance->m_pEnv->CallStaticIntMethod(imageJ_cls, mid, arr));   // call the method with the arr as argument.
-			m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);     // release the object			
-		}
-
-		// Getting the first slice of data.
-		mid = m_pJVMInstance->m_pEnv->GetStaticMethodID(imageJ_cls, "getIntData", "([Ljava/lang/String;)[I");
-		if (mid == nullptr) 
-			cerr << "ERROR: method void mymain() not found !" << endl;
-		else {
-			jobjectArray arr = m_pJVMInstance->m_pEnv->NewObjectArray(2,      // constructs java array of 2
-				m_pJVMInstance->m_pEnv->FindClass("java/lang/String"),    // Strings
-				m_pJVMInstance->m_pEnv->NewStringUTF("str"));   // each initialized with value "str"
-			m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 0, m_pJVMInstance->m_pEnv->NewStringUTF("D:\\Dev_Environment\\Test_Files\\"));  // change an element
-			m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 1, m_pJVMInstance->m_pEnv->NewStringUTF("4D_1ch.lsm"));  // change an element
-			jintArray val = (jintArray)(m_pJVMInstance->m_pEnv->CallStaticObjectMethod(imageJ_cls, mid, arr));   // call the method with the arr as argument.
-			jsize len = m_pJVMInstance->m_pEnv->GetArrayLength(val);
-			jint* body = m_pJVMInstance->m_pEnv->GetIntArrayElements(val, 0);
-			//for (int i = 0; i < len; i++) {
-			//	int test = *(body + i);
-			//	cout << test;
-			//}
-			m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);     // release the object
-		}
-	}	*/
 }
 
 ImageJReader::~ImageJReader()
@@ -182,7 +144,7 @@ int ImageJReader::Preprocess()
 			//jint depth = (jint)(m_pJVMInstance->m_pEnv->CallStaticIntMethod(imageJ_cls, mid, arr));   // call the method with the arr as argument.
 			//m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);     // release the object
 
-			jintArray val = (jintArray)(m_pJVMInstance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_handle, arr));   // call the method with the arr as argument.
+			jintArray val = (jintArray)(m_pJVMInstance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_handle, arr));   // call the method with the arr as argument.					
 			jsize len = m_pJVMInstance->m_pEnv->GetArrayLength(val);
 			jint* body = m_pJVMInstance->m_pEnv->GetIntArrayElements(val, 0);
 			for (int i = 0; i < len; i++) {
@@ -207,7 +169,11 @@ int ImageJReader::Preprocess()
 					m_time_num = test;
 					break;				
 				case 6:
-					//m_bits_per_pixel = test
+					int m_bits_per_pixel = test;
+					if (m_bits_per_pixel == 1)
+						m_eight_bit = true;
+					else
+						m_eight_bit = false;
 					break;
 				// TODO: What is m_max_value.
 				}
@@ -215,8 +181,7 @@ int ImageJReader::Preprocess()
 			m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);     // release the object
 		}
 	}
-	m_cur_time = 0;
-	//TODO: do stuff here.
+	m_cur_time = 0;	
 	// ImageJ ends here..................
 
 	//determine if it is an ImageJ hyperstack
@@ -1542,15 +1507,23 @@ Nrrd* ImageJReader::ReadFromImageJ(int i, int c, bool get_max) {
 	char* path_cstr = new char[m_path_name.length() + 1];
 	sprintf(path_cstr, "%ws", m_path_name.c_str());
 
-	jmethodID method_id = m_pJVMInstance->m_pEnv->GetStaticMethodID(m_imageJ_cls, "getByteData", "([Ljava/lang/String;II)[B");
-	//jint* t_data = NULL;
-	unsigned char* t_data = NULL;
+	jmethodID method_id = NULL;
+	if (m_eight_bit == true){
+		method_id = m_pJVMInstance->m_pEnv->GetStaticMethodID(m_imageJ_cls, "getByteData", "([Ljava/lang/String;II)[B");
+	}
+	else {
+		method_id = m_pJVMInstance->m_pEnv->GetStaticMethodID(m_imageJ_cls, "getIntDataB", "([Ljava/lang/String;II)[S");
+	}
 
+	
+	//jint* t_data = NULL;
+	//TODO: Fixing here.
+	void* t_data = NULL;
 	if (method_id == nullptr) {
 		cerr << "ERROR: method void mymain() not found !" << endl;
 		return NULL;
 	}
-	else {
+	else if (m_eight_bit == true){
 		jobjectArray arr = m_pJVMInstance->m_pEnv->NewObjectArray(2,      // constructs java array of 3
 			m_pJVMInstance->m_pEnv->FindClass("java/lang/String"),    // Strings
 			m_pJVMInstance->m_pEnv->NewStringUTF("str"));   // each initialized with value "str"
@@ -1562,20 +1535,45 @@ Nrrd* ImageJReader::ReadFromImageJ(int i, int c, bool get_max) {
 		// t_data = body;
 
 		jbyteArray val = (jbyteArray)(m_pJVMInstance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_id, arr, (jint)0, (jint)c));   // call the method with the arr as argument.
+		jboolean flag = m_pJVMInstance->m_pEnv->ExceptionCheck();
+		if (flag) {
+			m_pJVMInstance->m_pEnv->ExceptionClear();
+			/* code to handle exception */
+		}
+
 		jsize len = m_pJVMInstance->m_pEnv->GetArrayLength(val);
-		jbyte* body = m_pJVMInstance->m_pEnv->GetByteArrayElements(val, 0);		
-		t_data = reinterpret_cast<unsigned char*>(body);
+		jbyte* body = m_pJVMInstance->m_pEnv->GetByteArrayElements(val, 0);	
+		unsigned char* dummy = reinterpret_cast<unsigned char*>(body);
+		t_data = dummy;
 		/*for (int i = 0; i < len; i++) {
 			int test = *(body + i);
 			int test1 = *(t_data + i);			
 		}*/
 		m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);     // release the object
-	}	
+	}
+	else if (m_eight_bit == false)
+	{
+		jobjectArray arr = m_pJVMInstance->m_pEnv->NewObjectArray(2,      // constructs java array of 3
+			m_pJVMInstance->m_pEnv->FindClass("java/lang/String"),    // Strings
+			m_pJVMInstance->m_pEnv->NewStringUTF("str"));   // each initialized with value "str"
+		m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 0, m_pJVMInstance->m_pEnv->NewStringUTF(path_cstr));  // change an element
+		m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 1, m_pJVMInstance->m_pEnv->NewStringUTF("4D_1ch.lsm"));  // change an element
+																													
+		jshortArray val = (jshortArray)(m_pJVMInstance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_id, arr, (jint)0, (jint)c));   // call the method with the arr as argument.
+		jsize len = m_pJVMInstance->m_pEnv->GetArrayLength(val);
+		jshort* body = m_pJVMInstance->m_pEnv->GetShortArrayElements(val, 0);		
+		unsigned short int* dummy = reinterpret_cast<unsigned short int*>(body);
+		t_data = dummy;
+		/*for (int i = 0; i < len; i++) {
+		int test = *(body + i);
+		int test1 = *(t_data + i);
+		}*/
+		m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);     // release the object
+	}
 
 	// Creating Nrrd out of the data.
-	Nrrd *nrrdout = nrrdNew();
+	Nrrd *nrrdout = nrrdNew();	
 	
-	bool eight_bit = true;
 	int numPages = m_slice_num;	
 	unsigned long long total_size = (unsigned long long)m_x_size*(unsigned long long)m_y_size*(unsigned long long)numPages;
 	//val = malloc(total_size * (eight_bit?1:2));
@@ -1583,7 +1581,7 @@ Nrrd* ImageJReader::ReadFromImageJ(int i, int c, bool get_max) {
 	if (!t_data)
 		throw std::runtime_error("No data received from imageJ.");
 	
-	if (eight_bit)
+	if (m_eight_bit)
 		nrrdWrap(nrrdout, (uint8_t*)t_data, nrrdTypeUChar, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
 	else
 		nrrdWrap(nrrdout, (uint16_t*)t_data, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
@@ -1592,7 +1590,7 @@ Nrrd* ImageJReader::ReadFromImageJ(int i, int c, bool get_max) {
 	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
 	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
 
-	if (!eight_bit) {
+	if (!m_eight_bit) {
 		if (get_max) {
 			//if (samples > 1)
 			//	m_max_value = max_value;
@@ -1607,8 +1605,10 @@ Nrrd* ImageJReader::ReadFromImageJ(int i, int c, bool get_max) {
 			}
 			//}
 		}
-		if (m_max_value > 0.0) m_scalar_scale = 65535.0 / m_max_value;
-		else m_scalar_scale = 1.0;		
+		if (m_max_value > 0.0) 
+			m_scalar_scale = 65535.0 / m_max_value;
+		else 
+			m_scalar_scale = 1.0;		
 	}
 	else 
 		m_max_value = 255.0;

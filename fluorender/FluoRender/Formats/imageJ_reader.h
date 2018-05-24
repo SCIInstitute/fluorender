@@ -186,7 +186,8 @@ public:
 private:
 	// ImageJ related variables.
 	JVMInitializer* m_pJVMInstance;
-	jclass m_imageJ_cls;	
+	jclass m_imageJ_cls;
+	bool m_eight_bit;
 
 	wstring m_data_name;
 	bool isBig_;
