@@ -694,13 +694,13 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 		kernel_prog->releaseMemObject(0,
 			bits == 8 ? (void*)(val8) : (void*)(val16));
 		kernel_prog->releaseMemObject(sizeof(unsigned int)*nx*ny*nz,
-			val32);
+			(void*)(val32));
 		kernel_prog->releaseMemObject(sizeof(unsigned int),
 			(void*)(&rcnt));
 		if (clean_iter)
 		{
 			kernel_prog->releaseMemObject(sizeof(unsigned int)*nx*ny*nz,
-				(void*)(&mask32));
+				(void*)(mask32));
 			delete[] mask32;
 		}
 
@@ -911,9 +911,9 @@ void ComponentGenerator::Grow3DSized(
 		kernel_prog->releaseMemObject(0,
 			bits == 8 ? (void*)(val8) : (void*)(val16));
 		kernel_prog->releaseMemObject(sizeof(unsigned int)*nx*ny*nz,
-			val32);
+			(void*)(val32));
 		kernel_prog->releaseMemObject(sizeof(unsigned int)*nx*ny*nz,
-			(void*)(&mask32));
+			(void*)(mask32));
 		kernel_prog->releaseMemObject(sizeof(unsigned int),
 			(void*)(&rcnt));
 		delete[] mask32;
