@@ -1,5 +1,5 @@
 ver_major=2
-ver_minor=22.3
+ver_minor=23
 [gm\ calculation]
 mode=2
 [peeling\ layers]
@@ -20,6 +20,8 @@ mode=1
 mode=1
 x=0.587785
 y=0.809017
+[pin\ threshold]
+value=10
 [test\ mode]
 speed=0
 param=0
@@ -88,12 +90,10 @@ samples=4
 gl_major_ver=4
 gl_minor_ver=4
 gl_profile_mask=1
-[cl\ device]
-device_id=0
-[pin\ threshold]
-value=10
 [max\ texture\ size]
 use_max_texture_size=0
 max_texture_size=2048
+[cl\ device]
+device_id=0
 [clipping\ planes]
 mode=0
