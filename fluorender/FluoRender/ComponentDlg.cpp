@@ -3319,6 +3319,9 @@ void ComponentDlg::GenerateAdv(bool refine)
 	if (m_cleanup)
 		cg.Cleanup(m_cl_iterations, (unsigned int)(m_cl_size_limiter));
 
+	if (bn > 1)
+		cg.FillBorder2D(0.1);
+
 	if (m_match_slices)
 	{
 		cg.MatchSlices_CPU(false,

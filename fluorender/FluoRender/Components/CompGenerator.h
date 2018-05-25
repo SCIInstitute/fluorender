@@ -55,11 +55,13 @@ namespace FL
 		void ShuffleID_3D();
 		void ShuffleID_2D();
 		void ClearBorders3D();
+		void ClearBorders2D();
+		void FillBorder3D(float);
+		void FillBorder2D(float);
 		void Grow3D(bool, int, float, float,
 			float, int, int);
 		void Grow3DSized(bool, int, float, float,
 			int, float, int, int);
-		void FillBorder3D(float);
 		void InitialGrow(bool, int,
 			float, float,
 			float, float,

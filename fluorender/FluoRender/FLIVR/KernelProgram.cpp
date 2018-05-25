@@ -255,15 +255,14 @@ namespace FLIVR
 	{
 		if (kernel_index < 0 ||
 			kernel_index >= kernel_prog->kernels_.size())
-		{
-			Kernel s_kernel;
-			s_kernel.kernel = kernel_prog->kernels_[kernel_index].kernel;
-			s_kernel.name = kernel_prog->kernels_[kernel_index].name;
-			s_kernel.external = true;
-			kernels_.push_back(s_kernel);
-			return kernels_.size() - 1;
-		}
-		return -1;
+			return -1;
+
+		Kernel s_kernel;
+		s_kernel.kernel = kernel_prog->kernels_[kernel_index].kernel;
+		s_kernel.name = kernel_prog->kernels_[kernel_index].name;
+		s_kernel.external = true;
+		kernels_.push_back(s_kernel);
+		return kernels_.size() - 1;
 	}
 
 	void KernelProgram::removeExternalKernels()
@@ -273,6 +272,8 @@ namespace FLIVR
 		{
 			if (it->external)
 				it = kernels_.erase(it);
+			else
+				++it;
 		}
 	}
 
