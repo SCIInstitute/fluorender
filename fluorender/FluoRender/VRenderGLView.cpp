@@ -6512,17 +6512,47 @@ void VRenderGLView::RunRulerProfile(wxFileConfig &fconfig)
 	for (size_t i = 0; i<m_ruler_list.size(); ++i)
 		RulerProfile(i);
 
-	wxString path;
-	if (m_cur_vol)
+	if (m_tseq_cur_num == 0 ||
+		m_script_output.IsEmpty())
 	{
-		path = m_cur_vol->GetPath();
-		path = wxPathOnly(path);
+		wxString path;
+		if (m_cur_vol)
+		{
+			path = m_cur_vol->GetPath();
+			path = wxPathOnly(path);
+		}
+		path += GETSLASH();
+		path += "profiles_1.txt";
+
+		while (wxFileExists(path))
+		{
+			int pos = path.Find('_', true);
+			if (pos == wxNOT_FOUND)
+			{
+				path = path.SubString(0, path.Length() - 4);
+				path += "_1.txt";
+			}
+			else
+			{
+				wxString digits;
+				for (int i = pos+1; i < path.Length() - 1; ++i)
+				{
+					if (wxIsdigit(path[i]))
+						digits += path[i];
+					else
+						break;
+				}
+				long num = 0;
+				digits.ToLong(&num);
+				path = path.SubString(0, pos);
+				path += wxString::Format("%d.txt", num + 1);
+			}
+		}
+		m_script_output = path;
 	}
-	path += GETSLASH();
-	path += "profiles.txt";
 
 	//save append
-	wxFile file(path, m_sf_script ? wxFile::write : wxFile::write_append);
+	wxFile file(m_script_output, m_sf_script ? wxFile::write : wxFile::write_append);
 	if (!file.IsOpened())
 		return;
 	for (size_t i = 0; i<m_ruler_list.size(); ++i)
@@ -6542,10 +6572,11 @@ void VRenderGLView::RunRulerProfile(wxFileConfig &fconfig)
 				else
 					str += wxString::Format("%f\t", (*profile)[j].m_accum / pixels);
 			}
-			str += "\n";
 		}
+		str += "\t";
 		file.Write(str);
 	}
+	file.Write("\n");
 	file.Close();
 }
 

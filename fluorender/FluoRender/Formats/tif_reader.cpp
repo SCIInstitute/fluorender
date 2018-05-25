@@ -117,6 +117,9 @@ int TIFReader::Preprocess()
 	string search_str = "hyperstack=true";
 	int64_t str_pos = img_desc.find(search_str);
 	bool hyperstack = str_pos != -1;
+	search_str = "frames=";
+	str_pos = img_desc.find(search_str);
+	hyperstack = hyperstack || str_pos != -1;
 	search_str = "ImageJ=";
 	str_pos = img_desc.find(search_str);
 	bool imagej = str_pos != -1;

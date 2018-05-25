@@ -959,6 +959,9 @@ private:
 	//is full screen
 	bool m_full_screen;
 
+	//file path for script
+	wxString m_script_output;
+
 private:
 #ifdef _WIN32
 	//wacom tablet
