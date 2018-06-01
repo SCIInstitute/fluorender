@@ -252,6 +252,9 @@ void ComponentSelector::Append(bool all, bool rmask)
 					else
 						data_mask[index] = 255;
 				}
+				else if (!m_use_min && m_use_max)
+					//analyzer filters small comps, make sure they are also selected here
+					data_mask[index] = 255;
 				else
 					data_mask[index] = 0;
 			}
