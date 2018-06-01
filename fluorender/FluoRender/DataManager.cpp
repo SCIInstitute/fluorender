@@ -4908,14 +4908,11 @@ void DataManager::RemoveVolumeData(int index)
 		bool del = false;
 		if (vd)
 		{
+			if (vd == data)
+				del = true;
 			if (vd->GetDup())
 			{
 				if (vd->GetDupData() == data)
-					del = true;
-			}
-			else
-			{
-				if (vd == data)
 					del = true;
 			}
 		}

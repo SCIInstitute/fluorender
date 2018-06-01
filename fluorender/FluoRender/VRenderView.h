@@ -118,6 +118,7 @@ public:
 	MeshGroup* AddOrGetMGroup();
 	MeshGroup* GetMGroup(wxString &name);
 	void RemoveVolumeData(wxString &name);
+	void RemoveVolumeDataDup(wxString &name);
 	void RemoveMeshData(wxString &name);
 	void RemoveAnnotations(wxString &name);
 	void RemoveGroup(wxString &name);

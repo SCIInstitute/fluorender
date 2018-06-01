@@ -165,6 +165,7 @@ public:
 	MeshGroup* AddOrGetMGroup();
 	//remove
 	void RemoveVolumeData(wxString &name);
+	void RemoveVolumeDataDup(wxString &name);//remove all duplicated data
 	void ReplaceVolumeData(wxString &name, VolumeData *dst);
 	void RemoveMeshData(wxString &name);
 	void RemoveAnnotations(wxString &name);

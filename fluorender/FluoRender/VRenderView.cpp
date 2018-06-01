@@ -865,6 +865,12 @@ void VRenderView::RemoveVolumeData(wxString &name)
 		m_glview->RemoveVolumeData(name);
 }
 
+void VRenderView::RemoveVolumeDataDup(wxString &name)
+{
+	if (m_glview)
+		m_glview->RemoveVolumeDataDup(name);
+}
+
 void VRenderView::RemoveMeshData(wxString &name)
 {
 	if (m_glview)

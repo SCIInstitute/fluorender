@@ -7476,6 +7476,48 @@ void VRenderGLView::ReplaceVolumeData(wxString &name, VolumeData *dst)
 
 void VRenderGLView::RemoveVolumeData(wxString &name)
 {
+	for (auto iter = m_layer_list.begin();
+		iter != m_layer_list.end(); ++iter)
+	{
+		if (!(*iter))
+			continue;
+		switch ((*iter)->IsA())
+		{
+		case 2://volume data
+		{
+			VolumeData* vd = (VolumeData*)(*iter);
+			if (vd && vd->GetName() == name)
+			{
+				m_layer_list.erase(iter);
+				if (m_cur_vol = vd)
+					m_cur_vol = 0;
+				m_vd_pop_dirty = true;
+				return;
+			}
+		}
+		break;
+		case 5://group
+		{
+			DataGroup* group = (DataGroup*)(*iter);
+			for (int j = 0; j < group->GetVolumeNum(); ++j)
+			{
+				VolumeData* vd = group->GetVolumeData(j);
+				if (vd && vd->GetName() == name)
+				{
+					group->RemoveVolumeData(j);
+					if (m_cur_vol = vd)
+						m_cur_vol = 0;
+					m_vd_pop_dirty = true;
+					return;
+				}
+			}
+		}
+		}
+	}
+}
+
+void VRenderGLView::RemoveVolumeDataDup(wxString &name)
+{
 	VolumeData* vd_main = 0;
 	for (auto iter = m_layer_list.begin();
 		iter != m_layer_list.end() && !vd_main;
@@ -7531,14 +7573,11 @@ void VRenderGLView::RemoveVolumeData(wxString &name)
 			bool del = false;
 			if (vd)
 			{
+				if (vd == vd_main)
+					del = true;
 				if (vd->GetDup())
 				{
 					if (vd->GetDupData() == vd_main)
-						del = true;
-				}
-				else
-				{
-					if (vd == vd_main)
 						del = true;
 				}
 			}
