@@ -1853,7 +1853,7 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 		FL::ComponentSelector comp_selector(vd);
 		comp_selector.SetId(id);
 		comp_selector.SetMinNum(true, slimit);
-		comp_selector.Append(get_all);
+		comp_selector.Select(get_all);
 	}
 
 	//update view

@@ -588,7 +588,7 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer11->Add(m_analysis_max_spin, 0, wxALIGN_CENTER);
 	//buttons
 	wxBoxSizer* sizer12 = new wxBoxSizer(wxHORIZONTAL);
-	m_comp_append_btn = new wxButton(page, ID_CompAppendBtn, "Append",
+	m_comp_append_btn = new wxButton(page, ID_CompAppendBtn, "Select",
 		wxDefaultPosition, wxSize(65, 23));
 	m_comp_all_btn = new wxButton(page, ID_CompAllBtn, "All",
 		wxDefaultPosition, wxSize(65, 23));
@@ -2969,7 +2969,7 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 	num = (unsigned int)(m_analysis_max_spin->GetValue());
 	comp_selector.SetMaxNum(use, num);
 	comp_selector.SetAnalyzer(&m_comp_analyzer);
-	comp_selector.Append(get_all);
+	comp_selector.Select(get_all);
 
 	m_view->RefreshGL();
 
