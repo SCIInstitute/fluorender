@@ -1039,7 +1039,7 @@ uint64_t ImageJReader::GetTiffNextPageOffset()
 	}
 	return results;
 }
-
+/*
 uint64_t ImageJReader::TurnToPage(uint64_t page)
 {
 	uint64_t page_save = current_page_;
@@ -1064,7 +1064,7 @@ uint64_t ImageJReader::TurnToPage(uint64_t page)
 		InvalidatePageInfo();
 	return current_page_;
 }
-
+*/
 uint16_t ImageJReader::SwapShort(uint16_t num) {
 	return ((num & 0x00FF) << 8) | ((num & 0xFF00) >> 8);
 }
@@ -1201,23 +1201,21 @@ int ImageJReader::LoadBatch(int index)
 	return result;
 }
 
-//TODO: Convert is being called for t = -1. :(
 Nrrd* ImageJReader::Convert(int t, int c, bool get_max)
 {	
-	//if (t < 0 || t >= m_time_num ||
-	//	c < 0 || c >= m_chan_num)
-	//	return 0;
+	if (t < 0 || t >= m_time_num || c < 0 || c >= m_chan_num)
+		return 0;
 
 	//if (isHyperstack_ && m_max_value)
 	//	get_max = false;
 
 	Nrrd* data = 0;
+	//TODO: Fix the m_data_name.
 	//TimeDataInfo chan_info = m_4d_seq[t];
 	//if (!isHyperstack_ || isHsTimeSeq_)
-	//	m_data_name = GET_NAME(chan_info.slices[0].slice);
-
-	//data = ReadTiff(chan_info.slices, c, get_max);
-	data = ReadFromImageJ(0, c, get_max);
+		//m_data_name = GET_NAME(chan_info.slices[0].slice);
+	
+	data = ReadFromImageJ(t, c, get_max);
 	m_cur_time = t;
 	return data;
 }
@@ -1293,122 +1291,6 @@ wstring ImageJReader::GetCurLabelName(int t, int c)
 	}
 }
 
-bool ImageJReader::tif_sort(const TimeDataInfo& info1, const TimeDataInfo& info2)
-{
-	return info1.filenumber < info2.filenumber;
-}
-
-bool ImageJReader::tif_slice_sort(const SliceInfo& info1, const SliceInfo& info2)
-{
-	return info1.slicenumber < info2.slicenumber;
-}
-
-uint64_t ImageJReader::GetNumTiffPages()
-{
-	if (!m_b_page_num)
-	{
-		uint64_t count = 0;
-		uint64_t save_offset = current_offset_;
-		uint64_t save_page = current_page_;
-		ResetTiff();
-		while (true)
-		{
-			// count it if it's not a thumbnail
-			if (GetTiffField(kSubFileTypeTag) != 1) count++;
-			current_offset_ = GetTiffNextPageOffset();
-			if (current_offset_ == 0) break;
-		}
-		current_offset_ = save_offset;
-		current_page_ = save_page;
-		m_ull_page_num = count;
-		m_b_page_num = true;
-	}
-
-	return m_ull_page_num;
-}
-
-void ImageJReader::GetTiffStrip(uint64_t page, uint64_t strip,
-	void * data, uint64_t strip_size)
-{
-	//make sure we are on the correct page,
-	//reset if ahead
-	if (current_page_ > page)
-		ResetTiff();
-	// fast forward if we are behind.
-	if (!imagej_raw_)
-	{
-		while (current_page_ < page)
-		{
-			tiff_stream.seekg(current_offset_, tiff_stream.beg);
-			if (GetTiffField(kSubFileTypeTag) != 1) current_page_++;
-			current_offset_ = GetTiffNextPageOffset();
-		}
-	}
-	//get the byte count and the strip offset to read data from.
-	uint64_t byte_count = 0;
-	if (current_offset_ && !imagej_raw_)
-	{
-		uint64_t strip_byte_count = GetTiffStripCount(strip);
-		if (!strip_byte_count)
-		{
-			uint64_t bits = GetTiffField(kBitsPerSampleTag);
-			m_page_info.ull_strip_byte_counts.resize(1);
-			m_page_info.ull_strip_byte_counts[0] = strip_size * bits /8;
-			m_page_info.b_strip_byte_counts = true;
-			m_page_info.b_strip_offsets = true;
-		}
-		byte_count = GetTiffStripCount(strip);
-		tiff_stream.seekg(GetTiffStripOffset(strip), tiff_stream.beg);
-	}
-	else
-	{
-		//if (m_page_info.b_strip_byte_count)
-		byte_count = m_page_info.ull_strip_byte_counts[0];
-		//if (m_page_info.b_strip_offset)
-		tiff_stream.seekg(m_page_info.ull_strip_offsets[0] + page * byte_count, tiff_stream.beg);
-		imagej_raw_ = true;
-	}
-	//actually read the data now
-	char *temp = new char[byte_count];
-	//unsigned long long pos = tiff_stream.tellg();
-	tiff_stream.read((char*)temp, byte_count);
-	bool eight_bits = 8 == GetTiffField(kBitsPerSampleTag);
-	//get compression tag, decompress if necessary
-	uint64_t tmp = GetTiffField(kCompressionTag);
-	uint64_t prediction = GetTiffField(kPredictionTag);
-	uint64_t samples = GetTiffField(kSamplesPerPixelTag);
-	samples = samples == 0 ? 1 : samples;
-	tsize_t stride = (GetTiffField(kPlanarConfigurationTag) == 2) ? 1 : samples;
-	//uint64_t rows_per_strip = GetTiffField(kRowsPerStripTag,NULL,0);
-	uint64_t rows_per_strip = strip_size /
-		GetTiffField(kImageWidthTag) /
-		samples;
-	bool isCompressed = tmp == 5;
-	if (isCompressed)
-	{
-		LZWDecode((tidata_t)temp, (tidata_t)data, strip_size);
-		if (prediction == 2)
-		{
-			for (size_t j = 0; j < rows_per_strip; j++)
-				if (eight_bits)
-					DecodeAcc8((tidata_t)data + j*m_x_size*samples, m_x_size*samples, stride);
-				else
-					DecodeAcc16((tidata_t)data + j*m_x_size*samples * 2, m_x_size*samples * 2, stride);
-		}
-	}
-	else
-		memcpy(data, temp, byte_count);
-	delete[] temp;
-
-	//swap after decompression
-	if (swap_ && !eight_bits)
-	{
-		short * data2 = reinterpret_cast<short*>(data);
-		for (uint64_t sh = 0; sh < strip_size / 2; sh++)
-			data2[sh] = SwapShort(data2[sh]);
-	}
-}
-
 //read a tile
 void ImageJReader::GetTiffTile(uint64_t page, uint64_t tile,
 	void *data, uint64_t tile_size, uint64_t tile_height)
@@ -1452,57 +1334,7 @@ void ImageJReader::GetTiffTile(uint64_t page, uint64_t tile,
 	}
 }
 
-void ImageJReader::ResetTiff()
-{
-	if (!tiff_stream.is_open())
-		throw std::runtime_error("TIFF file not open for reading.");
-	//find the first IFD block/page
-	if (!isBig_) {
-		tiff_stream.seekg(4, tiff_stream.beg);
-		uint32_t temp;
-		tiff_stream.read((char*)&temp, sizeof(uint32_t));
-		if (swap_) temp = SwapWord(temp);
-		current_offset_ = static_cast<uint64_t>(temp);
-	}
-	else {
-		tiff_stream.seekg(8, tiff_stream.beg);
-		tiff_stream.read((char*)&current_offset_, sizeof(uint64_t));
-		if (swap_) current_offset_ = SwapLong(current_offset_);
-	}
-	current_page_ = 0;
-}
-
-//TODO: Remove this method ? Maybe you can call setting up JNI here.
-void ImageJReader::OpenTiff(std::wstring name)
-{
-	//open the stream
-#ifdef _WIN32
-	tiff_stream.open(name.c_str(), std::ifstream::binary);
-#else
-	tiff_stream.open((ws2s(name)).c_str(), std::ifstream::binary);
-#endif
-	if (!tiff_stream.is_open())
-		throw std::runtime_error("Unable to open TIFF File for reading.");
-	tiff_stream.seekg(2, tiff_stream.beg);
-	uint16_t tiff_num = 0;
-	tiff_stream.read((char*)&tiff_num, sizeof(uint16_t));
-	swap_ = SwapShort(tiff_num) == kRegularTiff;
-	swap_ |= SwapShort(tiff_num) == kBigTiff;
-	isBig_ = (SwapShort(tiff_num) == kBigTiff) || (tiff_num == kBigTiff);
-	// make sure this is a proper tiff and set the state.
-	if (isBig_ || tiff_num == kRegularTiff || swap_) {
-		ResetTiff();
-	}
-	else {
-		throw std::runtime_error("TIFF file formatted incorrectly. Wrong Type.");
-	}
-}
-
-//TODO: remove the JNI and variables here.
-void ImageJReader::CloseTiff() { if (tiff_stream.is_open()) tiff_stream.close(); }
-
-// TOOD: Check if we need to convert jint array to int array before passing.
-Nrrd* ImageJReader::ReadFromImageJ(int i, int c, bool get_max) {	
+Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {	
 	// ImageJ code to read the data.	
 	char* path_cstr = new char[m_path_name.length() + 1];
 	sprintf(path_cstr, "%ws", m_path_name.c_str());
@@ -1514,10 +1346,7 @@ Nrrd* ImageJReader::ReadFromImageJ(int i, int c, bool get_max) {
 	else {
 		method_id = m_pJVMInstance->m_pEnv->GetStaticMethodID(m_imageJ_cls, "getIntDataB", "([Ljava/lang/String;II)[S");
 	}
-
 	
-	//jint* t_data = NULL;
-	//TODO: Fixing here.
 	void* t_data = NULL;
 	if (method_id == nullptr) {
 		cerr << "ERROR: method void mymain() not found !" << endl;
@@ -1528,13 +1357,9 @@ Nrrd* ImageJReader::ReadFromImageJ(int i, int c, bool get_max) {
 			m_pJVMInstance->m_pEnv->FindClass("java/lang/String"),    // Strings
 			m_pJVMInstance->m_pEnv->NewStringUTF("str"));   // each initialized with value "str"
 		m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 0, m_pJVMInstance->m_pEnv->NewStringUTF(path_cstr));  // change an element
-		m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 1, m_pJVMInstance->m_pEnv->NewStringUTF("4D_1ch.lsm"));  // change an element
-		//jintArray val = (jintArray)(m_pJVMInstance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_id, arr, (jint)0, (jint)c));   // call the method with the arr as argument.
-		//jsize len = m_pJVMInstance->m_pEnv->GetArrayLength(val);
-		//jint* body = m_pJVMInstance->m_pEnv->GetIntArrayElements(val, 0);
-		// t_data = body;
+		m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 1, m_pJVMInstance->m_pEnv->NewStringUTF("4D_1ch.lsm"));  // change an element		
 
-		jbyteArray val = (jbyteArray)(m_pJVMInstance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_id, arr, (jint)0, (jint)c));   // call the method with the arr as argument.
+		jbyteArray val = (jbyteArray)(m_pJVMInstance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_id, arr, (jint)t, (jint)c));   // call the method with the arr as argument.
 		jboolean flag = m_pJVMInstance->m_pEnv->ExceptionCheck();
 		if (flag) {
 			m_pJVMInstance->m_pEnv->ExceptionClear();
@@ -1544,40 +1369,41 @@ Nrrd* ImageJReader::ReadFromImageJ(int i, int c, bool get_max) {
 		jsize len = m_pJVMInstance->m_pEnv->GetArrayLength(val);
 		jbyte* body = m_pJVMInstance->m_pEnv->GetByteArrayElements(val, 0);	
 		unsigned char* dummy = reinterpret_cast<unsigned char*>(body);
-		t_data = dummy;
-		/*for (int i = 0; i < len; i++) {
+		//t_data = dummy;
+		t_data = new unsigned char[len];
+		for (int i = 0; i < len; i++) {
 			int test = *(body + i);
-			int test1 = *(t_data + i);			
-		}*/
-		m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);     // release the object
+			*((unsigned char*)t_data + i) = test;
+		}		
+		m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);
 	}
 	else if (m_eight_bit == false)
 	{
+		//m_pJVMInstance->m_pEnv->PushLocalFrame();
 		jobjectArray arr = m_pJVMInstance->m_pEnv->NewObjectArray(2,      // constructs java array of 3
 			m_pJVMInstance->m_pEnv->FindClass("java/lang/String"),    // Strings
 			m_pJVMInstance->m_pEnv->NewStringUTF("str"));   // each initialized with value "str"
 		m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 0, m_pJVMInstance->m_pEnv->NewStringUTF(path_cstr));  // change an element
 		m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 1, m_pJVMInstance->m_pEnv->NewStringUTF("4D_1ch.lsm"));  // change an element
 																													
-		jshortArray val = (jshortArray)(m_pJVMInstance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_id, arr, (jint)0, (jint)c));   // call the method with the arr as argument.
+		jshortArray val = (jshortArray)(m_pJVMInstance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_id, arr, (jint)t, (jint)c));   // call the method with the arr as argument.
 		jsize len = m_pJVMInstance->m_pEnv->GetArrayLength(val);
 		jshort* body = m_pJVMInstance->m_pEnv->GetShortArrayElements(val, 0);		
 		unsigned short int* dummy = reinterpret_cast<unsigned short int*>(body);
-		t_data = dummy;
-		/*for (int i = 0; i < len; i++) {
-		int test = *(body + i);
-		int test1 = *(t_data + i);
-		}*/
-		m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);     // release the object
+		//t_data = dummy;
+		t_data = new unsigned short int[len];
+		for (int i = 0; i < len; i++) {
+			int test = *(body + i);
+			*((unsigned short int*)t_data + i) = test;
+		}
+		m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);
 	}
 
 	// Creating Nrrd out of the data.
 	Nrrd *nrrdout = nrrdNew();	
 	
 	int numPages = m_slice_num;	
-	unsigned long long total_size = (unsigned long long)m_x_size*(unsigned long long)m_y_size*(unsigned long long)numPages;
-	//val = malloc(total_size * (eight_bit?1:2));
-	//val = eight_bit ? (void*)(new unsigned char[total_size]) : (void*)(new unsigned short[total_size]);
+	unsigned long long total_size = (unsigned long long)m_x_size*(unsigned long long)m_y_size*(unsigned long long)numPages;	
 	if (!t_data)
 		throw std::runtime_error("No data received from imageJ.");
 	
@@ -1592,9 +1418,6 @@ Nrrd* ImageJReader::ReadFromImageJ(int i, int c, bool get_max) {
 
 	if (!m_eight_bit) {
 		if (get_max) {
-			//if (samples > 1)
-			//	m_max_value = max_value;
-			//else {
 			double value;
 			unsigned long long totali = (unsigned long long)m_slice_num*
 				(unsigned long long)m_x_size*(unsigned long long)m_y_size;
@@ -1602,8 +1425,7 @@ Nrrd* ImageJReader::ReadFromImageJ(int i, int c, bool get_max) {
 			{
 				value = ((unsigned short*)nrrdout->data)[i];
 				m_max_value = value > m_max_value ? value : m_max_value;
-			}
-			//}
+			}			
 		}
 		if (m_max_value > 0.0) 
 			m_scalar_scale = 65535.0 / m_max_value;
@@ -1615,382 +1437,3 @@ Nrrd* ImageJReader::ReadFromImageJ(int i, int c, bool get_max) {
 
 	return nrrdout;
 }
-
-Nrrd* ImageJReader::ReadTiff(std::vector<SliceInfo> &filelist,
-	int c, bool get_max)
-{
-	uint64_t numPages = static_cast<uint64_t>(filelist.size());
-	if (numPages <= 0)
-		return 0;
-	wstring filename;
-	if (isHyperstack_ && !isHsTimeSeq_)
-		filename = m_path_name;
-	else
-		filename = filelist[0].slice;
-	OpenTiff(filename.c_str());
-	bool sequence = numPages > 1;
-	if (!sequence)
-	{
-		if (get_max && !isHyperstack_ && !imagej_raw_possible_)
-			numPages = GetNumTiffPages();
-		else
-			numPages = m_slice_num;
-	}
-
-	//cache for page info
-	//reading first page
-	InvalidatePageInfo();
-
-	uint64_t width = GetTiffField(kImageWidthTag);
-	uint64_t height = GetTiffField(kImageLengthTag);
-	uint64_t bits = GetTiffField(kBitsPerSampleTag);
-	uint64_t samples = GetTiffField(kSamplesPerPixelTag);
-	if (samples == 0 && width > 0 && height > 0) samples = 1;
-
-	double x_res = 0.0, y_res = 0.0, z_res = 0.0;
-	x_res = GetTiffXResolution();
-	y_res = GetTiffYResolution();
-
-	string img_desc;
-	GetImageDescription(img_desc);
-	int64_t start = img_desc.find("spacing=");
-	if (start != -1) {
-		string spacing = img_desc.substr(start + 8);
-		int64_t end = spacing.find("\n");
-		if (end != -1)
-			z_res = static_cast<float>(
-				atof(spacing.substr(0, end).c_str()));
-	}
-
-	if (x_res > 0.0 && y_res > 0.0 && z_res > 0.0) {
-		m_xspc = 1 / x_res;
-		m_yspc = 1 / y_res;
-		m_zspc = z_res;
-		if (m_zspc < 1e-3) m_zspc = m_xspc;
-		m_valid_spc = true;
-	}
-	else {
-		m_valid_spc = false;
-		m_xspc = 1.0;
-		m_yspc = 1.0;
-		m_zspc = 1.0;
-	}
-
-	if (m_resize_type == 1 && m_alignment > 1) {
-		m_x_size = (width / m_alignment + (width%m_alignment ? 1 : 0))*m_alignment;
-		m_y_size = (height / m_alignment + (height%m_alignment ? 1 : 0))*m_alignment;
-	}
-	else {
-		m_x_size = width;
-		m_y_size = height;
-	}
-
-	m_slice_num = numPages;
-	int64_t pagepixels = (unsigned long long)m_x_size*(unsigned long long)m_y_size;
-
-	if (sequence && !isHyperstack_) CloseTiff();
-
-	Nrrd *nrrdout = nrrdNew();
-
-	//allocate memory. TODO: Look here.
-	void *val = 0;
-	bool eight_bit = bits == 8;
-
-	unsigned long long total_size = (unsigned long long)m_x_size*
-		(unsigned long long)m_y_size*(unsigned long long)numPages;
-	//val = malloc(total_size * (eight_bit?1:2));
-	val = eight_bit ? (void*)(new unsigned char[total_size]) :
-		(void*)(new unsigned short[total_size]);
-	if (!val)
-		throw std::runtime_error("Unable to allocate memory to read TIFF.");
-
-	int max_value = 0;
-
-	void* buf = 0;
-	uint64_t strip_size;
-	uint64_t tile_size;
-	uint64_t tile_w;
-	uint64_t tile_h;
-	uint64_t tile_w_last;//last tile width
-	uint64_t x_tile_num;
-	uint64_t y_tile_num;
-	if (GetTiffUseTiles())
-	{
-		uint64_t tile_num = GetTiffTileNum();
-		if (tile_num > 0)
-		{
-			tile_w = GetTiffField(kTileWidthTag);
-			tile_h = GetTiffField(kTileLengthTag);
-			tile_size = tile_w * tile_h * samples * (bits / 8);
-			x_tile_num = (width + tile_w - 1) / tile_w;
-			y_tile_num = (height + tile_h - 1) / tile_h;
-			tile_w_last = width - tile_w * (x_tile_num - 1);
-		}
-		else
-		{
-			tile_size = height * width * samples * (bits / 8);
-			tile_w = width;
-			tile_h = height;
-			tile_w_last = width;
-			x_tile_num = y_tile_num = 1;
-		}
-	}
-	else
-	{
-		uint64_t rowsperstrip = GetTiffField(kRowsPerStripTag);
-		if (rowsperstrip > 0)
-			strip_size = rowsperstrip * width * samples * (bits / 8);
-		else
-			strip_size = height * width * samples * (bits / 8);
-	}
-
-	if (isHyperstack_)
-	{
-		uint64_t pageindex = filelist[0].pagenumber + c;
-		for (int i = 0; i < numPages; ++i)
-		{
-			if (!imagej_raw_)
-				TurnToPage(pageindex);
-			if (!imagej_raw_)
-				ReadTiffFields();
-			uint64_t num_strips = GetTiffStripNum();
-
-			//read file
-			for (uint64_t strip = 0; strip < num_strips; strip++)
-			{
-				unsigned long long valindex;
-				valindex = (unsigned long long)pagepixels * (unsigned long long)i +
-					(unsigned long long)strip * (unsigned long long)strip_size /
-					(unsigned long long)(eight_bit ? 1 : 2);
-
-				if (eight_bit)
-					GetTiffStrip(pageindex, strip,
-					(uint8_t*)val + valindex, strip_size);
-				else
-					GetTiffStrip(pageindex, strip,
-					(uint16_t*)val + valindex, strip_size);
-			}
-			pageindex += m_chan_num;
-			//if (!imagej_raw_)
-			//	InvalidatePageInfo();
-		}
-	}
-	else
-	{
-		for (uint64_t pageindex = 0; pageindex < numPages; pageindex++)
-		{
-			if (sequence)
-			{
-				filename = filelist[pageindex].slice;
-				OpenTiff(filename);
-				InvalidatePageInfo();
-			}
-
-			if (!imagej_raw_ && !sequence)
-				TurnToPage(pageindex);
-			if (!imagej_raw_)
-				ReadTiffFields();
-
-			//this is a thumbnail, skip
-			if (GetTiffField(kSubFileTypeTag) == 1)
-			{
-				if (sequence) CloseTiff();
-				continue;
-			}
-
-			//tile storage
-			if (GetTiffUseTiles())
-			{
-				if (!buf)
-					buf = malloc(tile_size);
-
-				uint64_t num_tiles = GetTiffTileNum();
-				num_tiles = num_tiles ? num_tiles : 1;
-
-				//read file
-				for (uint64_t tile = 0; tile < num_tiles; ++tile)
-				{
-					uint64_t valindex;
-					uint64_t indexinpage;
-					if (samples > 1)
-					{
-						GetTiffTile(sequence ? 0 : pageindex, tile, buf, tile_size, tile_h);
-						int num_pixels = tile_size / samples / (eight_bit ? 1 : 2);
-						uint64_t tx, ty;//tile coord
-						tx = tile % x_tile_num;
-						ty = tile / x_tile_num;
-						indexinpage = width * ty * tile_h + tx * tile_w;
-						valindex = pageindex * pagepixels + indexinpage;
-						for (int i = 0; i<num_pixels; i++)
-						{
-							if (tx == x_tile_num - 1)
-							{
-								if (i % tile_w == tile_w_last)
-									i += tile_w - tile_w_last;
-							}
-							if (i % tile_w == 0 && i)
-							{
-								if (tx < x_tile_num - 1)
-								{
-									indexinpage += width - tile_w;
-									valindex += width - tile_w;
-								}
-								else
-								{
-									indexinpage += width - tile_w_last;
-									valindex += width - tile_w_last;
-								}
-							}
-							if (indexinpage >= pagepixels) break;
-							if (eight_bit)
-								memcpy((uint8_t*)val + valindex,
-								(uint8_t*)buf + samples*i + c,
-									sizeof(uint8_t));
-							else
-								memcpy((uint16_t*)val + valindex,
-								(uint16_t*)buf + samples*i + c,
-									sizeof(uint16_t));
-							indexinpage++;
-							valindex++;
-						}
-					}
-					else
-					{
-						GetTiffTile(sequence ? 0 : pageindex, tile, buf, tile_size, tile_h);
-						uint64_t tx, ty;//tile coord
-						tx = tile % x_tile_num;
-						ty = tile / x_tile_num;
-						indexinpage = width * ty * tile_h + tx * tile_w;
-						valindex = pageindex * pagepixels + indexinpage;
-						//copy tile
-						for (int i = 0; i < tile_h; ++i)
-						{
-							if (indexinpage >= pagepixels) break;
-							if (tx < x_tile_num-1)
-							{
-								if (eight_bit)
-									memcpy((uint8_t*)val + valindex,
-									(uint8_t*)buf + i*tile_w,
-										sizeof(uint8_t)*tile_w);
-								else
-									memcpy((uint16_t*)val + valindex,
-									(uint16_t*)buf + i*tile_w,
-										sizeof(uint16_t)*tile_w);
-							}
-							else
-							{
-								if (eight_bit)
-									memcpy((uint8_t*)val + valindex,
-									(uint8_t*)buf + i*tile_w,
-										sizeof(uint8_t)*tile_w_last);
-								else
-									memcpy((uint16_t*)val + valindex,
-									(uint16_t*)buf + i*tile_w,
-										sizeof(uint16_t)*tile_w_last);
-							}
-							indexinpage += width;
-							valindex += width;
-						}
-					}
-				}
-			}
-			else//strip storage
-			{
-				if (samples > 1 && !buf)
-					buf = malloc(strip_size);
-
-				uint64_t num_strips = GetTiffStripNum();
-				num_strips = num_strips ? num_strips : 1;
-
-				//read file
-				for (uint64_t strip = 0; strip < num_strips; ++strip)
-				{
-					long long valindex;
-					int indexinpage;
-					if (samples > 1)
-					{
-						GetTiffStrip(sequence ? 0 : pageindex, strip, buf, strip_size);
-						int num_pixels = strip_size / samples / (eight_bit ? 1 : 2);
-						indexinpage = strip*num_pixels;
-						valindex = pageindex*pagepixels + indexinpage;
-						for (int i = 0; i<num_pixels; i++)
-						{
-							if (indexinpage++ >= pagepixels) break;
-							if (eight_bit)
-								memcpy((uint8_t*)val + valindex,
-									(uint8_t*)buf + samples*i + c, sizeof(uint8_t));
-							else
-								memcpy((uint16_t*)val + valindex,
-									(uint16_t*)buf + samples*i + c, sizeof(uint16_t));
-							if (!eight_bit && get_max &&
-								*((uint16_t*)val + valindex) > max_value)
-								max_value = *((uint16_t*)val + valindex);
-							valindex++;
-						}
-					}
-					else
-					{
-						valindex = pageindex*pagepixels +
-							strip*strip_size / (eight_bit ? 1 : 2);
-						uint64_t strip_size_used = strip_size;
-						if (valindex + strip_size / (eight_bit ? 1 : 2) >= total_size)
-							strip_size_used = (total_size - valindex) * (eight_bit ? 1 : 2);
-						if (strip_size_used > 0)
-						{
-							if (eight_bit)
-								GetTiffStrip(sequence ? 0 : pageindex, strip,
-									(uint8_t*)val + valindex, strip_size_used);
-							else
-								GetTiffStrip(sequence ? 0 : pageindex, strip,
-									(uint16_t*)val + valindex, strip_size_used);
-						}
-					}
-				}
-			}
-			if (sequence) CloseTiff();
-			//if (!imagej_raw_)
-			//	InvalidatePageInfo();
-		}
-	}
-
-	if (buf)
-		free(buf);
-	if (!sequence || isHyperstack_) CloseTiff();
-
-	//write to nrrd. TODO: look here.
-	if (eight_bit)
-		nrrdWrap(nrrdout, (uint8_t*)val, nrrdTypeUChar,
-			3, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
-	else
-		nrrdWrap(nrrdout, (uint16_t*)val, nrrdTypeUShort,
-			3, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
-	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoMax, m_xspc*m_x_size,
-		m_yspc*m_y_size, m_zspc*numPages);
-	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoSize, (size_t)m_x_size,
-		(size_t)m_y_size, (size_t)numPages);
-
-	if (!eight_bit) {
-		if (get_max) {
-			if (samples > 1)
-				m_max_value = max_value;
-			else {
-				double value;
-				unsigned long long totali = (unsigned long long)m_slice_num*
-					(unsigned long long)m_x_size*(unsigned long long)m_y_size;
-				for (unsigned long long i = 0; i < totali; ++i)
-				{
-					value = ((unsigned short*)nrrdout->data)[i];
-					m_max_value = value > m_max_value ? value : m_max_value;
-				}
-			}
-		}
-		if (m_max_value > 0.0) m_scalar_scale = 65535.0 / m_max_value;
-		else m_scalar_scale = 1.0;
-	}
-	else m_max_value = 255.0;
-
-	return nrrdout;
-}
-

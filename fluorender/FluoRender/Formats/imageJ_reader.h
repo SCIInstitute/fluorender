@@ -132,7 +132,7 @@ public:
 	/**
 	 * Resets the tiff reader to the start of the file.
 	 */
-	void ResetTiff();
+	//void ResetTiff();
 	/**
 	 * This method swaps the byte order of a short.
 	 * @param num The short to swap byte order.

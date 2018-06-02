@@ -4539,7 +4539,7 @@ int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_
 		m_reader_list.push_back(reader);
 		wstring str_w = pathname.ToStdWstring();
 		reader->SetFile(str_w);
-		reader->SetSliceSeq(m_sliceSequence); //TODO: What is slice sequence ?
+		reader->SetSliceSeq(m_sliceSequence);
 		str_w = m_timeId.ToStdWstring();
 		reader->SetTimeId(str_w);
 		reader_return = reader->Preprocess();
