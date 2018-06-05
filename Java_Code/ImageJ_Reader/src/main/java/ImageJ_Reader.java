@@ -6,7 +6,9 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.CompositeImage;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 import ij.IJ;
@@ -20,10 +22,9 @@ import loci.plugins.util.LociPrefs;
 //TODO: Add threads to load the images fast.
 public class ImageJ_Reader {
     public static void main(String[] args) {
-        System.out.println("Yes!!!");
-        int[] test = getIntDataB(args, 0, 2);
+        //short[] test = getIntDataB(args, 0, 1);
         int[] test2 = getMetaData(args);
-        byte[] test3 = getByteData(args, 0, 2);
+        byte[] test3 = getByteData(args, 0, 0);
     }
 
     private static ImagePlus applyLookupTables(IFormatReader r, ImagePlus imp, byte[][][] lookupTable) {
@@ -60,8 +61,8 @@ public class ImageJ_Reader {
             metadata[3] = ip_reader.getSizeZ();
             metadata[4] = ip_reader.getSizeC();
             metadata[5] = ip_reader.getSizeT();
-            metadata[6] = ip_reader.getBitsPerPixel();
-            //int test = ip_reader.getPixelType();
+            metadata[6] = ip_reader.getPixelType();
+            int test = ip_reader.getPixelType();
             return metadata;
         } catch (FormatException exc) {
             dump[0] = -2;
@@ -86,7 +87,7 @@ public class ImageJ_Reader {
         return test;
     }
 
-    public static int[] getIntDataB(String[] args, int time_id, int channel_id) {
+    public static short[] getIntDataB(String[] args, int time_id, int channel_id) {
         String id = args[0];
         ImageProcessorReader ip_reader = new ImageProcessorReader(new ChannelSeparator(LociPrefs.makeImageReader()));
 
@@ -102,15 +103,13 @@ public class ImageJ_Reader {
             ImageStack stack = new ImageStack(width, height);
             byte[][][] lookupTable = new byte[ip_reader.getSizeC()][][];
 
-            //TODO: Don't know how to handle multiple channels i.e RGb images currently.
             // Adding all the slices into a 2D array and returning those values.
             int time_step = channels * depth;
             //int offset = time_id * time_step + depth_id * channels;
             int time_offset = time_id * time_step;
 
-            int[] test_array = new int[width * height * depth];
+            short[] test_array = new short[width * height * depth];
 
-            //TODO: Convert to byte.
             int pixel_offset = 0;
             for (int d = 0; d < depth; ++d){
                 pixel_offset = d * width * height;
@@ -120,7 +119,7 @@ public class ImageJ_Reader {
                 int[][] temp_array = ip.getIntArray();
                 for (int h = 0; h < height; h++) {
                     for (int w = 0; w < width; w++) {
-                        test_array[pixel_offset + (h * width) + w] = temp_array[h][w];
+                        test_array[pixel_offset + (h * width) + w] = (short)temp_array[w][h];
                     }
                 }
                 //java.awt.image.BufferedImage awt_Ip = ip.getBufferedImage();
@@ -128,20 +127,21 @@ public class ImageJ_Reader {
             }
             return test_array;
         } catch (FormatException exc) {
-            int[] test = new int[1];
+            short[] test = new short[1];
             test[0] = 1;
             return test;
-            //IJ.error("Sorry, an error occurred: " + exc.getMessage());
         } catch (IOException exc) {
-            int[] test = new int[1];
+            short[] test = new short[1];
             test[0] = 2;
             return test;
-            //IJ.error("Sorry, an error occurred: " + exc.getMessage());
+        } catch (Exception exc){
+            return null;
         }
     }
 
     public static byte[] getByteData(String[] args, int time_id, int channel_id) {
-        String id = args[0];
+        //String id = args[0];
+        String id = "D:\\Dev_Environment\\Test_Files\\7.lsm";
         ImageProcessorReader ip_reader = new ImageProcessorReader(new ChannelSeparator(LociPrefs.makeImageReader()));
 
         try {
@@ -160,6 +160,9 @@ public class ImageJ_Reader {
             int time_step = channels * depth;
             //int offset = time_id * time_step + depth_id * channels;
             int time_offset = time_id * time_step;
+
+            String str = "Hello";
+            BufferedWriter writer = new BufferedWriter(new FileWriter("D:\\Debug.txt"));
 
             byte[] test_array = new byte[width * height * depth];
             int pixel_offset = 0;
@@ -171,12 +174,14 @@ public class ImageJ_Reader {
                 int[][] temp_array = ip.getIntArray();
                 for (int h = 0; h < height; h++) {
                     for (int w = 0; w < width; w++) {
-                        test_array[pixel_offset + (h * width) + w] = (byte)temp_array[h][w];
+                        test_array[pixel_offset + (h * width) + w] = (byte)temp_array[w][h];
                     }
                 }
                 //java.awt.image.BufferedImage awt_Ip = ip.getBufferedImage();
                 //ImageIO.write(awt_Ip, "jpg", new File("D:\\Dev_Environment\\Test_Files\\Test_Folder\\outNB" + Integer.toString(depth_offset) + ".jpg"));
+                writer.write(str);
             }
+            writer.close();
             return test_array;
         } catch (FormatException exc) {
             byte[] test = new byte[1];
@@ -185,6 +190,10 @@ public class ImageJ_Reader {
         } catch (IOException exc) {
             byte[] test = new byte[1];
             test[0] = 2;
+            return test;
+        } catch (Exception exc) {
+            byte[] test = new byte[1];
+            test[0] = 3;
             return test;
         }
     }
