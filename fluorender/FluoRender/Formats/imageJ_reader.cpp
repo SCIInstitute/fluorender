@@ -1370,11 +1370,18 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 		jbyte* body = m_pJVMInstance->m_pEnv->GetByteArrayElements(val, 0);	
 		unsigned char* dummy = reinterpret_cast<unsigned char*>(body);
 		//t_data = dummy;
+		ofstream myfile;
+		myfile.open("D:\\example.txt");		
 		t_data = new unsigned char[len];
 		for (int i = 0; i < len; i++) {
 			int test = *(body + i);
 			*((unsigned char*)t_data + i) = test;
+			if (i < 10000) {
+				myfile << test;
+				myfile << " ";
+			}			
 		}		
+		myfile.close();
 		m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);
 	}
 	else if (m_eight_bit == false)
