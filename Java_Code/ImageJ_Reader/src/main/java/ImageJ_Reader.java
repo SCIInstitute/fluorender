@@ -141,7 +141,7 @@ public class ImageJ_Reader {
 
     public static byte[] getByteData(String[] args, int time_id, int channel_id) {
         //String id = args[0];
-        String id = "D:\\Dev_Environment\\Test_Files\\7.lsm";
+        String id = "E:\\DATA\\Chinchun\\7.lsm";
         ImageProcessorReader ip_reader = new ImageProcessorReader(new ChannelSeparator(LociPrefs.makeImageReader()));
 
         try {
