@@ -1,4 +1,6 @@
 #include "JVMInitializer.h"
+#include <wx/stdpaths.h>
+#include "../compatibility.h"
 
 JVMInitializer* JVMInitializer::m_pJVMInstance = nullptr;
 JavaVM* JVMInitializer::m_pJvm = nullptr;
@@ -14,13 +16,23 @@ JVMInitializer* JVMInitializer::getInstance(){
 }
 
 void JVMInitializer::create_JVM(){
-	using namespace std;
-	//JavaVM *jvm;                      // Pointer to the JVM (Java Virtual Machine)
-	//JNIEnv *env;                      // Pointer to native interface
-									  
-	//JavaVMInitArgs m_VMargs;                        // Initialization arguments
-	JavaVMOption* options = new JavaVMOption[1];   // JVM invocation options
-	options[0].optionString = "-Djava.class.path=D:\\Dev_Environment\\fluorender\\build\\bin\\Debug\\Java_Code\\;D:\\Dev_Environment\\fluorender\\build\\bin\\Debug\\Java_Code\\ij.jar;D:\\Dev_Environment\\fluorender\\build\\bin\\Debug\\Java_Code\\SlideBook6Reader.jar;D:\\Dev_Environment\\fluorender\\build\\bin\\Debug\\Java_Code\\bioformats_package.jar";   // where to find java .class
+	using namespace std;	
+	JavaVMOption* options = new JavaVMOption[1];
+	//options[0].optionString = "-Djava.class.path=D:\\Dev_Environment\\fluorender\\build\\bin\\Debug\\Java_Code\\;D:\\Dev_Environment\\fluorender\\build\\bin\\Debug\\Java_Code\\ij.jar;D:\\Dev_Environment\\fluorender\\build\\bin\\Debug\\Java_Code\\SlideBook6Reader.jar;D:\\Dev_Environment\\fluorender\\build\\bin\\Debug\\Java_Code\\bioformats_package.jar";   // where to find java .class	
+	//Geting absolute path to class file.
+	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+	exePath = wxPathOnly(exePath);
+	string imageJPath = "-Djava.class.path=" + exePath + GETSLASH() + "Java_Code" + GETSLASH() + ";";
+	imageJPath.append(exePath + GETSLASH() + "Java_Code" + GETSLASH() + "ij.jar;");
+	imageJPath.append(exePath + GETSLASH() + "Java_Code" + GETSLASH() + "SlideBook6Reader.jar;");
+	imageJPath.append(exePath + GETSLASH() + "Java_Code" + GETSLASH() + "bioformats_package.jar;");
+
+	char * writable = new char[imageJPath.size() + 1];
+	std::copy(imageJPath.begin(), imageJPath.end(), writable);
+	writable[imageJPath.size()] = '\0';
+
+	options[0].optionString = writable;
+
 	m_VMargs.version = JNI_VERSION_1_6;             // minimum Java version
 	m_VMargs.nOptions = 1;                          // number of options
 	m_VMargs.options = options;
@@ -31,13 +43,7 @@ void JVMInitializer::create_JVM(){
 	if (rc != JNI_OK) {
 		//TODO: error processing... 		
 		//exit(EXIT_FAILURE);
-	}
-
-	cout << "JVM load succeeded: Version ";
-	jint ver = m_pEnv->GetVersion();
-	cout << ((ver >> 16) & 0x0f) << "." << (ver & 0x0f) << endl;
-
-	// TO DO: add the code that will use JVM <============  (see next steps)
+	}	
 }
 
 void JVMInitializer::destroyJVM() {
