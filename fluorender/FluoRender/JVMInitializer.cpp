@@ -1,6 +1,6 @@
+#include "../compatibility.h"
 #include "JVMInitializer.h"
 #include <wx/stdpaths.h>
-#include "../compatibility.h"
 
 JVMInitializer* JVMInitializer::m_pJVMInstance = nullptr;
 JavaVM* JVMInitializer::m_pJvm = nullptr;
@@ -31,7 +31,7 @@ void JVMInitializer::create_JVM(){
 	std::copy(imageJPath.begin(), imageJPath.end(), writable);
 	writable[imageJPath.size()] = '\0';
 
-	options[0].optionString = writable;
+	options[0].optionString = writable;	
 
 	m_VMargs.version = JNI_VERSION_1_6;             // minimum Java version
 	m_VMargs.nOptions = 1;                          // number of options
