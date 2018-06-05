@@ -140,8 +140,8 @@ public class ImageJ_Reader {
     }
 
     public static byte[] getByteData(String[] args, int time_id, int channel_id) {
-        //String id = args[0];
-        String id = "E:\\DATA\\Chinchun\\7.lsm";
+        String id = args[0];
+        //String id = "E:\\DATA\\Chinchun\\7.lsm";
         ImageProcessorReader ip_reader = new ImageProcessorReader(new ChannelSeparator(LociPrefs.makeImageReader()));
 
         try {
@@ -161,9 +161,6 @@ public class ImageJ_Reader {
             //int offset = time_id * time_step + depth_id * channels;
             int time_offset = time_id * time_step;
 
-            String str = "Hello";
-            BufferedWriter writer = new BufferedWriter(new FileWriter("D:\\Debug.txt"));
-
             byte[] test_array = new byte[width * height * depth];
             int pixel_offset = 0;
             for (int d = 0; d < depth; ++d){
@@ -179,9 +176,7 @@ public class ImageJ_Reader {
                 }
                 //java.awt.image.BufferedImage awt_Ip = ip.getBufferedImage();
                 //ImageIO.write(awt_Ip, "jpg", new File("D:\\Dev_Environment\\Test_Files\\Test_Folder\\outNB" + Integer.toString(depth_offset) + ".jpg"));
-                writer.write(str);
             }
-            writer.close();
             return test_array;
         } catch (FormatException exc) {
             byte[] test = new byte[1];
