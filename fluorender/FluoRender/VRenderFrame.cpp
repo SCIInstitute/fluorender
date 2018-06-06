@@ -2656,6 +2656,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			//colormap settings
 			fconfig.Write("colormap_mode", vd->GetColormapMode());
 			fconfig.Write("colormap", vd->GetColormap());
+			fconfig.Write("colormap_proj", vd->GetColormapProj());
 			double low, high;
 			vd->GetColormapValues(low, high);
 			fconfig.Write("colormap_lo_value", low);
@@ -3498,6 +3499,8 @@ void VRenderFrame::OpenProject(wxString& filename)
 							vd->SetColormapMode(iVal);
 						if (fconfig.Read("colormap", &iVal))
 							vd->SetColormap(iVal);
+						if (fconfig.Read("colormap_proj", &iVal))
+							vd->SetColormapProj(iVal);
 						double low, high;
 						if (fconfig.Read("colormap_lo_value", &low) &&
 							fconfig.Read("colormap_hi_value", &high))
