@@ -179,6 +179,14 @@ namespace FLIVR
 		}
 	}
 
+	//set matrices
+	void MultiVolumeRenderer::set_matrices(glm::mat4 &mv_mat2, glm::mat4 &proj_mat, glm::mat4 &tex_mat)
+	{
+		mv_mat2_ = mv_mat2;
+		proj_mat_ = proj_mat;
+		tex_mat_ = tex_mat;
+	}
+
 	//manages volume renderers for rendering
 	void MultiVolumeRenderer::add_vr(VolumeRenderer* vr)
 	{
@@ -404,19 +412,9 @@ namespace FLIVR
 
 		//--------------------------------------------------------------------------
 		// render bricks
-		// Set up transform
-		Transform *tform = vr_list_[0]->tex_->transform();
-		float mvmat[16];
-		tform->get_trans(mvmat);
-		vr_list_[0]->m_mv_mat2 = glm::mat4(
-			mvmat[0], mvmat[4], mvmat[8], mvmat[12],
-			mvmat[1], mvmat[5], mvmat[9], mvmat[13],
-			mvmat[2], mvmat[6], mvmat[10], mvmat[14],
-			mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
-		vr_list_[0]->m_mv_mat2 = vr_list_[0]->m_mv_mat * vr_list_[0]->m_mv_mat2;
-		shader->setLocalParamMatrix(0, glm::value_ptr(vr_list_[0]->m_proj_mat));
-		shader->setLocalParamMatrix(1, glm::value_ptr(vr_list_[0]->m_mv_mat2));
-		shader->setLocalParamMatrix(5, glm::value_ptr(vr_list_[0]->m_tex_mat));
+		shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat_));
+		shader->setLocalParamMatrix(1, glm::value_ptr(mv_mat2_));
+		shader->setLocalParamMatrix(5, glm::value_ptr(tex_mat_));
 
 		int quota_bricks_chan = vr_list_[0]->get_quota_bricks_chan();
 		vector<TextureBrick*> *bs = 0;
@@ -1095,19 +1093,9 @@ namespace FLIVR
 
 		//--------------------------------------------------------------------------
 		// render bricks
-		// Set up transform
-		Transform *tform = vr_list_[0]->tex_->transform();
-		double mvmat[16];
-		tform->get_trans(mvmat);
-		vr_list_[0]->m_mv_mat2 = glm::mat4(
-			mvmat[0], mvmat[4], mvmat[8], mvmat[12],
-			mvmat[1], mvmat[5], mvmat[9], mvmat[13],
-			mvmat[2], mvmat[6], mvmat[10], mvmat[14],
-			mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
-		vr_list_[0]->m_mv_mat2 = vr_list_[0]->m_mv_mat * vr_list_[0]->m_mv_mat2;
-		shader->setLocalParamMatrix(0, glm::value_ptr(vr_list_[0]->m_proj_mat));
-		shader->setLocalParamMatrix(1, glm::value_ptr(vr_list_[0]->m_mv_mat2));
-		shader->setLocalParamMatrix(5, glm::value_ptr(vr_list_[0]->m_tex_mat));
+		shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat_));
+		shader->setLocalParamMatrix(1, glm::value_ptr(mv_mat2_));
+		shader->setLocalParamMatrix(5, glm::value_ptr(tex_mat_));
 		shader->setLocalParam(0, vr_list_[0]->color_.r(), vr_list_[0]->color_.g(), vr_list_[0]->color_.b(), 1.0);
 
 		glEnable(GL_DEPTH_TEST);

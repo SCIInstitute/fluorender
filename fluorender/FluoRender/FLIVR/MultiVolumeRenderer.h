@@ -110,6 +110,9 @@ namespace FLIVR
 		//soft threshold
 		static void set_soft_threshold(double val) {sw_ = val;}
 
+		//set matrices
+		void set_matrices(glm::mat4 &mv_mat2, glm::mat4 &proj_mat, glm::mat4 &tex_mat);
+
 	private:
 		//viewport
 		GLint vp_[4];
@@ -118,6 +121,11 @@ namespace FLIVR
 
 		//volume renderer list
 		vector<VolumeRenderer*> vr_list_;
+
+		//unified matrices
+		glm::mat4 mv_mat2_;
+		glm::mat4 proj_mat_;
+		glm::mat4 tex_mat_;
 
 		//mode and quality control
 		TextureRenderer::RenderMode mode_;
