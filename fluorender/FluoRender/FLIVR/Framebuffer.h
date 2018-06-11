@@ -33,37 +33,69 @@
 
 namespace FLIVR
 {
+	enum FBTexType
+	{
+		FBTex_Render_RGBA = 0,
+		FBTex_3D_Int,
+	};
+	class Framebuffer;
 	class FramebufferTexture
 	{
 	public:
-		FramebufferTexture();
+		FramebufferTexture(FBTexType type, int nx, int ny);
 		~FramebufferTexture();
 
 		bool create();
-		void bind();
-		bool valid();
+		void destroy();
+		inline bool bind();
+		inline void unbind();
+		inline bool valid();
+		inline void resize(int nx, int ny);
 
 	private:
 		unsigned int id_;
+		FBTexType type_;
+		int nx_;
+		int ny_;
+		bool valid_;
+
+		friend class Framebuffer;
 	};
 
+	enum FBType
+	{
+		FB_Render_RGBA = 0,
+		FB_3D_Int,
+	};
 	class Framebuffer
 	{
 	public:
-		Framebuffer();
+		Framebuffer(FBType type, int nx, int ny);
 		~Framebuffer();
 
 		bool create();
-		void bind();
-		bool valid();
+		void destroy();
+		inline void bind();
+		inline void unbind();
+		inline void protect();
+		inline void unprotect();
+		inline bool valid();
 
-		bool attach_texture();
-		bool detach_texture();
+		inline bool attach_texture(int ap, FramebufferTexture* tex);
+		inline bool attach_texture(int ap, unsigned int tex_id, int layer=0);
+		inline void detach_texture(int ap);
+		inline void detach_texture(FramebufferTexture* tex);
 
-		bool resize();
+		inline void resize(int nx, int ny);
 
 	private:
 		unsigned int id_;
+		FBType type_;
+		int nx_;
+		int ny_;
+		bool valid_;
+		bool protected_;
+		std::vector<std::pair<int, FramebufferTexture*>> tex_list_;
 	};
 
 	class FramebufferManager
