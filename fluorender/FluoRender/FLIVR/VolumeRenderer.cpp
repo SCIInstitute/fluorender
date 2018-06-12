@@ -34,6 +34,7 @@
 #include <FLIVR/TextureBrick.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
+#include <FLIVR/Framebuffer.h>
 #include "utility.h"
 #include "../compatibility.h"
 #include <fstream>
@@ -52,6 +53,7 @@ namespace FLIVR
 	VolCalShaderFactory TextureRenderer::cal_shader_factory_;
 	ImgShaderFactory VolumeRenderer::m_img_shader_factory;
 	VolKernelFactory TextureRenderer::vol_kernel_factory_;
+	FramebufferManager TextureRenderer::framebuffer_manager_;
 	double VolumeRenderer::sw_ = 0.0;
 
 	VolumeRenderer::VolumeRenderer(Texture* tex,
@@ -1217,9 +1219,10 @@ namespace FLIVR
 			return;
 
 		//mask frame buffer object
-		if (!glIsFramebuffer(fbo_mask_))
-			glGenFramebuffers(1, &fbo_mask_);
-		glBindFramebuffer(GL_FRAMEBUFFER, fbo_mask_);
+		Framebuffer* fbo_mask =
+			framebuffer_manager_.framebuffer(FB_3D_Int, 0, 0, GL_COLOR_ATTACHMENT0);
+		if (fbo_mask)
+			fbo_mask->bind();
 
 		//--------------------------------------------------------------------------
 		// Set up shaders
@@ -1379,13 +1382,7 @@ namespace FLIVR
 			//draw each slice
 			for (int z=0; z<b->nz(); z++)
 			{
-				glFramebufferTexture3D(GL_FRAMEBUFFER, 
-					GL_COLOR_ATTACHMENT0,
-					GL_TEXTURE_3D,
-					tex_id,
-					0,
-					z);
-
+				fbo_mask->attach_texture(GL_COLOR_ATTACHMENT0, tex_id, z);
 				draw_view_quad(double(z+0.5) / double(b->nz()));
 			}
 
@@ -1441,10 +1438,11 @@ namespace FLIVR
 			return;
 
 		glActiveTexture(GL_TEXTURE0);
-		//label frame buffer object
-		if (!glIsFramebuffer(fbo_label_))
-			glGenFramebuffers(1, &fbo_label_);
-		glBindFramebuffer(GL_FRAMEBUFFER, fbo_label_);
+		//mask frame buffer object
+		Framebuffer* fbo_label =
+			framebuffer_manager_.framebuffer(FB_3D_Int, 0, 0, GL_COLOR_ATTACHMENT0);
+		if (fbo_label)
+			fbo_label->bind();
 
 		bool has_mask = tex_->nmask()!=-1;
 
@@ -1536,13 +1534,7 @@ namespace FLIVR
 			int z;
 			for (z=0; z<b->nz(); z++)
 			{
-				glFramebufferTexture3D(GL_FRAMEBUFFER, 
-					GL_COLOR_ATTACHMENT0,
-					GL_TEXTURE_3D,
-					label_id,
-					0,
-					z);
-
+				fbo_label->attach_texture(GL_COLOR_ATTACHMENT0, label_id, z);
 				draw_view_quad(double(z+0.5) / double(b->nz()));
 			}
 		}
@@ -1660,9 +1652,10 @@ namespace FLIVR
 
 		glActiveTexture(GL_TEXTURE0);
 		//mask frame buffer object
-		if (!glIsFramebuffer(fbo_label_))
-			glGenFramebuffers(1, &fbo_label_);
-		glBindFramebuffer(GL_FRAMEBUFFER, fbo_label_);
+		Framebuffer* fbo_calc =
+			framebuffer_manager_.framebuffer(FB_3D_Int, 0, 0, GL_COLOR_ATTACHMENT0);
+		if (fbo_calc)
+			fbo_calc->bind();
 
 		//--------------------------------------------------------------------------
 		// Set up shaders
@@ -1719,12 +1712,7 @@ namespace FLIVR
 			//draw each slice
 			for (int z=0; z<b->nz(); z++)
 			{
-				glFramebufferTexture3D(GL_FRAMEBUFFER,
-					GL_COLOR_ATTACHMENT0,
-					GL_TEXTURE_3D,
-					tex_id,
-					0,
-					z);
+				fbo_calc->attach_texture(GL_COLOR_ATTACHMENT0, tex_id, z);
 				draw_view_quad(double(z+0.5) / double(b->nz()));
 			}
 		}

@@ -88,6 +88,8 @@ namespace FLIVR
 
 		inline void resize(int nx, int ny);
 
+		inline bool match(FBType, int, int, int);
+
 	private:
 		unsigned int id_;
 		FBType type_;
@@ -104,11 +106,195 @@ namespace FLIVR
 		FramebufferManager();
 		~FramebufferManager();
 
-		Framebuffer* framebuffer();
+		Framebuffer* framebuffer(FBType type, int nx, int ny, int ap);
 
 	private:
 		std::vector<Framebuffer*> fb_list_;
 		std::vector<FramebufferTexture*> tex_list_;
 	};
+
+	inline bool FramebufferTexture::bind()
+	{
+		if (valid_)
+		{
+			switch (type_)
+			{
+			case FBTex_Render_RGBA:
+			default:
+				glBindTexture(GL_TEXTURE_2D, id_);
+				break;
+			}
+			return true;
+		}
+		else
+			return false;
+	}
+
+	inline void FramebufferTexture::unbind()
+	{
+		if (valid_)
+		{
+			switch (type_)
+			{
+			case FBTex_Render_RGBA:
+			default:
+				glBindTexture(GL_TEXTURE_2D, 0);
+				break;
+			}
+		}
+	}
+
+	inline bool FramebufferTexture::valid()
+	{
+		return valid_;
+	}
+
+	inline void FramebufferTexture::resize(int nx, int ny)
+	{
+		if (valid_)
+		{
+			nx_ = nx; ny_ = ny;
+			switch (type_)
+			{
+			case FBTex_Render_RGBA:
+			default:
+				glBindTexture(GL_TEXTURE_2D, id_);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx_, ny_, 0,
+					GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
+				break;
+			}
+		}
+	}
+
+	inline void Framebuffer::bind()
+	{
+		if (valid_)
+			glBindFramebuffer(GL_FRAMEBUFFER, id_);
+	}
+
+	inline void Framebuffer::unbind()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	inline void Framebuffer::protect()
+	{
+		protected_ = true;
+	}
+
+	inline void Framebuffer::unprotect()
+	{
+		protected_ = false;
+	}
+
+	inline bool Framebuffer::valid()
+	{
+		return valid_;
+	}
+
+	inline bool Framebuffer::attach_texture(int ap, FramebufferTexture* tex)
+	{
+		if (!valid_)
+			return false;
+		switch (type_)
+		{
+		case FB_Render_RGBA:
+		{
+			glFramebufferTexture2D(GL_FRAMEBUFFER,
+				ap, GL_TEXTURE_2D, tex->id_, 0);
+			std::pair<int, FramebufferTexture*> item(ap, tex);
+			auto it = std::find(tex_list_.begin(),
+				tex_list_.end(), item);
+			if (it == tex_list_.end())
+				tex_list_.push_back(item);
+
+		}
+		break;
+		}
+		return true;
+	}
+
+	inline bool Framebuffer::attach_texture(int ap, unsigned int tex_id, int layer)
+	{
+		if (!valid_)
+			return false;
+		switch (type_)
+		{
+		case FB_Render_RGBA:
+			glFramebufferTexture(GL_FRAMEBUFFER,
+				ap, tex_id, 0);
+			break;
+		case FB_3D_Int:
+			glFramebufferTexture3D(GL_FRAMEBUFFER,
+				ap, GL_TEXTURE_3D,
+				tex_id, 0, layer);
+			break;
+		}
+		return true;
+	}
+
+	inline void Framebuffer::detach_texture(int ap)
+	{
+		glFramebufferTexture(GL_FRAMEBUFFER,
+			ap, 0, 0);
+		for (auto it = tex_list_.begin();
+			it != tex_list_.end();)
+		{
+			if ((*it).first == ap)
+				it = tex_list_.erase(it);
+			else
+				++it;
+		}
+	}
+
+	inline void Framebuffer::detach_texture(FramebufferTexture* tex)
+	{
+		for (auto it = tex_list_.begin();
+			it != tex_list_.end();)
+		{
+			if ((*it).second == tex)
+			{
+				glFramebufferTexture(GL_FRAMEBUFFER,
+					(*it).first, 0, 0);
+				it = tex_list_.erase(it);
+			}
+			else
+				++it;
+		}
+	}
+
+	inline void Framebuffer::resize(int nx, int ny)
+	{
+		for (auto it = tex_list_.begin();
+			it != tex_list_.end(); ++it)
+		{
+			if ((*it).second->valid())
+				(*it).second->resize(nx, ny);
+		}
+		nx_ = nx; ny_ = ny;
+	}
+
+	inline bool Framebuffer::match(FBType type,
+		int nx, int ny, int ap)
+	{
+		if (protected_)
+			return false;
+		if (type_ == type &&
+			nx_ == nx &&
+			ny_ == ny)
+		{
+			if (type == FB_3D_Int)
+				return true;
+			for (auto it = tex_list_.begin();
+				it != tex_list_.end(); ++it)
+			{
+				if ((*it).first == ap &&
+					(*it).second->valid())
+					return true;
+			}
+		}
+		return false;
+	}
+
 }
 #endif//Framebuffer_h

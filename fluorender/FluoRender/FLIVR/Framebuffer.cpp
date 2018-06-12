@@ -44,8 +44,8 @@ namespace FLIVR
 	bool FramebufferTexture::create()
 	{
 		glGenTextures(1, &id_);
-		if (!glIsTexture(id_))
-			return false;
+		//if (!glIsTexture(id_))
+		//	return false;
 		glBindTexture(GL_TEXTURE_2D, id_);
 		switch (type_)
 		{
@@ -71,59 +71,6 @@ namespace FLIVR
 		valid_ = false;
 	}
 
-	bool FramebufferTexture::bind()
-	{
-		if (valid_)
-		{
-			switch (type_)
-			{
-			case FBTex_Render_RGBA:
-			default:
-				glBindTexture(GL_TEXTURE_2D, id_);
-				break;
-			}
-			return true;
-		}
-		else
-			return false;
-	}
-
-	void FramebufferTexture::unbind()
-	{
-		if (valid_)
-		{
-			switch (type_)
-			{
-			case FBTex_Render_RGBA:
-			default:
-				glBindTexture(GL_TEXTURE_2D, 0);
-				break;
-			}
-		}
-	}
-
-	bool FramebufferTexture::valid()
-	{
-		return valid_;
-	}
-
-	void FramebufferTexture::resize(int nx, int ny)
-	{
-		if (valid_)
-		{
-			nx_ = nx; ny_ = ny;
-			switch (type_)
-			{
-			case FBTex_Render_RGBA:
-			default:
-				glBindTexture(GL_TEXTURE_2D, id_);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx_, ny_, 0,
-					GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
-				break;
-			}
-		}
-	}
-
 	Framebuffer::Framebuffer(FBType type, int nx, int ny):
 		id_(0), type_(type), nx_(nx), ny_(ny), valid_(false), protected_(false)
 	{
@@ -137,8 +84,8 @@ namespace FLIVR
 	bool Framebuffer::create()
 	{
 		glGenFramebuffers(1, &id_);
-		if (!glIsFramebuffer(id_))
-			return false;
+		//if (!glIsFramebuffer(id_))
+		//	return false;
 		valid_ = true;
 		return true;
 	}
@@ -150,111 +97,48 @@ namespace FLIVR
 		valid_ = false;
 	}
 
-	void Framebuffer::bind()
+	FramebufferManager::FramebufferManager()
 	{
-		if (valid_)
-			glBindFramebuffer(GL_FRAMEBUFFER, id_);
 	}
 
-	void Framebuffer::unbind()
+	FramebufferManager::~FramebufferManager()
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	}
-
-	void Framebuffer::protect()
-	{
-		protected_ = true;
-	}
-
-	void Framebuffer::unprotect()
-	{
-		protected_ = false;
-	}
-
-	bool Framebuffer::valid()
-	{
-		return valid_;
-	}
-
-	bool Framebuffer::attach_texture(int ap, FramebufferTexture* tex)
-	{
-		if (!valid_)
-			return false;
-		switch (type_)
-		{
-		case FB_Render_RGBA:
-			{
-				glFramebufferTexture2D(GL_FRAMEBUFFER,
-					ap, GL_TEXTURE_2D, tex->id_, 0);
-				std::pair<int, FramebufferTexture*> item(ap, tex);
-				auto it = std::find(tex_list_.begin(),
-					tex_list_.end(), item);
-				if (it == tex_list_.end())
-					tex_list_.push_back(item);
-
-			}
-			break;
-		}
-		return true;
-	}
-
-	bool Framebuffer::attach_texture(int ap, unsigned int tex_id, int layer)
-	{
-		if (!valid_)
-			return false;
-		switch (type_)
-		{
-		case FB_Render_RGBA:
-			glFramebufferTexture(GL_FRAMEBUFFER,
-				ap, tex_id, 0);
-			break;
-		case FB_3D_Int:
-			glFramebufferTexture3D(GL_FRAMEBUFFER,
-				ap, GL_TEXTURE_3D,
-				tex_id, 0, layer);
-			break;
-		}
-		return true;
-	}
-
-	void Framebuffer::detach_texture(int ap)
-	{
-		glFramebufferTexture(GL_FRAMEBUFFER,
-			ap, 0, 0);
-		for (auto it = tex_list_.begin();
-			it != tex_list_.end();)
-		{
-			if ((*it).first == ap)
-				it = tex_list_.erase(it);
-			else
-				++it;
-		}
-	}
-
-	void Framebuffer::detach_texture(FramebufferTexture* tex)
-	{
-		for (auto it = tex_list_.begin();
-			it != tex_list_.end();)
-		{
-			if ((*it).second == tex)
-			{
-				glFramebufferTexture(GL_FRAMEBUFFER,
-					(*it).first, 0, 0);
-				it = tex_list_.erase(it);
-			}
-			else
-				++it;
-		}
-	}
-
-	void Framebuffer::resize(int nx, int ny)
-	{
+		//release all opengl resources managed by the manager
+		for (auto it = fb_list_.begin();
+			it != fb_list_.end(); ++it)
+			delete *it;
 		for (auto it = tex_list_.begin();
 			it != tex_list_.end(); ++it)
+			delete *it;
+	}
+
+	Framebuffer* FramebufferManager::framebuffer(
+		FBType type, int nx, int ny, int ap)
+	{
+		for (auto it = fb_list_.rbegin();
+			it != fb_list_.rend(); ++it)
 		{
-			if ((*it).second->valid())
-				(*it).second->resize(nx, ny);
+			if ((*it)->match(type, nx, ny, ap))
+				return *it;
 		}
-		nx_ = nx; ny_ = ny;
+
+		//create new framebuffer
+		Framebuffer* fb = new Framebuffer(type, nx, ny);
+		if (!fb->create())
+			return 0;
+		//add to lists
+		fb_list_.push_back(fb);
+		if (type == FB_Render_RGBA)
+		{
+			//create new texture
+			FramebufferTexture* tex = new FramebufferTexture(FBTexType(type), nx, ny);
+			if (!tex->create())
+				return 0;
+			//attach texture
+			fb->attach_texture(ap, tex);
+			//add to lists
+			tex_list_.push_back(tex);
+		}
+		return fb;
 	}
 }

@@ -35,6 +35,7 @@
 #include <FLIVR/VolShader.h>
 #include <FLIVR/SegShader.h>
 #include <FLIVR/VolCalShader.h>
+#include <FLIVR/Framebuffer.h>
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
 #include "compatibility.h"
@@ -101,8 +102,6 @@ namespace FLIVR
 		filter_buffer_resize_(false),
 		filter_buffer_(0),
 		filter_tex_id_(0),
-		fbo_mask_(0),
-		fbo_label_(0),
 		tex_2d_mask_(0),
 		tex_2d_weight1_(0),
 		tex_2d_weight2_(0),
@@ -136,8 +135,6 @@ namespace FLIVR
 		filter_buffer_resize_(false),
 		filter_buffer_(0),
 		filter_tex_id_(0),
-		fbo_mask_(0),
-		fbo_label_(0),
 		tex_2d_mask_(0),
 		tex_2d_weight1_(0),
 		tex_2d_weight2_(0),

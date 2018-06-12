@@ -47,50 +47,52 @@ namespace FLIVR
 	class BrickQueue
 	{
 	public:
-		BrickQueue(int limit):
-		  m_queue(0),
-			  m_limit(limit),
-			  m_pos(0)
-		  {
-			  if (m_limit >=0)
-			  {
-				  m_queue = new int[m_limit];
-				  memset(m_queue, 0, m_limit*sizeof(int));
-			  }
-		  }
-		  ~BrickQueue()
-		  {
-			  if (m_queue)
-				  delete []m_queue;
-		  }
+		BrickQueue(int limit) :
+			m_queue(0),
+			m_limit(limit),
+			m_pos(0)
+		{
+			if (m_limit >= 0)
+			{
+				m_queue = new int[m_limit];
+				memset(m_queue, 0, m_limit * sizeof(int));
+			}
+		}
+		~BrickQueue()
+		{
+			if (m_queue)
+				delete[]m_queue;
+		}
 
-		  int GetLimit()
-		  {return m_limit;}
-		  int Push(int value)
-		  {
-			  if (m_queue)
-			  {
-				  m_queue[m_pos] = value;
-				  if (m_pos < m_limit-1)
-					  m_pos++;
-				  else
-					  m_pos = 0;
-				  return 1;
-			  }
-			  else
-				  return 0;
-		  }
-		  int Get(int index)
-		  {
-			  if (index>=0 && index<m_limit)
-				  return m_queue[m_pos+index<m_limit?m_pos+index:m_pos+index-m_limit];
-			  else
-				  return 0;
-		  }
-		  int GetLast()
-		  {
-			  return m_queue[m_pos==0?m_limit-1:m_pos-1];
-		  }
+		int GetLimit()
+		{
+			return m_limit;
+		}
+		int Push(int value)
+		{
+			if (m_queue)
+			{
+				m_queue[m_pos] = value;
+				if (m_pos < m_limit - 1)
+					m_pos++;
+				else
+					m_pos = 0;
+				return 1;
+			}
+			else
+				return 0;
+		}
+		int Get(int index)
+		{
+			if (index >= 0 && index < m_limit)
+				return m_queue[m_pos + index < m_limit ? m_pos + index : m_pos + index - m_limit];
+			else
+				return 0;
+		}
+		int GetLast()
+		{
+			return m_queue[m_pos == 0 ? m_limit - 1 : m_pos - 1];
+		}
 
 	private:
 		int *m_queue;
@@ -103,6 +105,7 @@ namespace FLIVR
 	class SegShaderFactory;
 	class VolCalShaderFactory;
 	class VolKernelFactory;
+	class FramebufferManager;
 
 	struct TexParam
 	{
@@ -275,6 +278,15 @@ namespace FLIVR
 		double irate_;
 		bool imode_;
 
+		//sahder for volume rendering
+		static VolShaderFactory vol_shader_factory_;
+		//shader for segmentation
+		static SegShaderFactory seg_shader_factory_;
+		//shader for calculation
+		static VolCalShaderFactory cal_shader_factory_;
+		//framebuffers for everything
+		static FramebufferManager framebuffer_manager_;
+
 		//saved framebuffer
 		GLuint cur_framebuffer_;
 		//blend frame buffer for output
@@ -286,17 +298,6 @@ namespace FLIVR
 		GLuint filter_buffer_;
 		GLuint filter_tex_id_;
 
-		//sahder for volume rendering
-		static VolShaderFactory vol_shader_factory_;
-		//shader for segmentation
-		static SegShaderFactory seg_shader_factory_;
-		//shader for calculation
-		static VolCalShaderFactory cal_shader_factory_;
-
-		//3d frame buffer object for mask
-		GLuint fbo_mask_;
-		//3d frame buffer object for label
-		GLuint fbo_label_;
 		//2d mask texture
 		GLuint tex_2d_mask_;
 		//2d weight map
