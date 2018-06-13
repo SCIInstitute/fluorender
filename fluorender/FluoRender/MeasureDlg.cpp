@@ -508,7 +508,8 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	EVT_RADIOBUTTON(ID_AccIntensityRd, MeasureDlg::OnIntensityMethodCheck)
 	EVT_CHECKBOX(ID_UseTransferChk, MeasureDlg::OnUseTransferCheck)
 	EVT_CHECKBOX(ID_TransientChk, MeasureDlg::OnTransientCheck)
-END_EVENT_TABLE()
+	EVT_CHECKBOX(ID_DF_FChk, MeasureDlg::OnDF_FCheck)
+	END_EVENT_TABLE()
 
 MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	: wxPanel(parent,wxID_ANY,
@@ -588,10 +589,14 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	wxBoxSizer* sizer_12 = new wxBoxSizer(wxHORIZONTAL);
 	m_transient_chk = new wxCheckBox(this, ID_TransientChk, "Transient",
 		wxDefaultPosition, wxDefaultSize);
+	m_df_f_chk = new wxCheckBox(this, ID_DF_FChk, L"Compute \u2206F/F for Probe Tool",
+		wxDefaultPosition, wxDefaultSize);
 	m_use_transfer_chk = new wxCheckBox(this, ID_UseTransferChk, "Use Volume Properties",
 		wxDefaultPosition, wxDefaultSize);
 	sizer_12->Add(10, 10);
 	sizer_12->Add(m_transient_chk, 0, wxALIGN_CENTER);
+	sizer_12->Add(10, 10);
+	sizer_12->Add(m_df_f_chk, 0, wxALIGN_CENTER);
 	sizer_12->Add(10, 10);
 	sizer_12->Add(m_use_transfer_chk, 0, wxALIGN_CENTER);
 	//
@@ -918,4 +923,16 @@ void MeasureDlg::OnTransientCheck(wxCommandEvent& event)
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 	if (frame && frame->GetSettingDlg())
 		frame->GetSettingDlg()->SetRulerTimeDep(val);
+}
+
+void MeasureDlg::OnDF_FCheck(wxCommandEvent& event)
+{
+	if (!m_view || !m_view->m_glview)
+		return;
+
+	bool val = m_df_f_chk->GetValue();
+	//m_view->SetRulerTimeDep(val);
+	//VRenderFrame* frame = (VRenderFrame*)m_frame;
+	//if (frame && frame->GetSettingDlg())
+	//	frame->GetSettingDlg()->SetRulerTimeDep(val);
 }

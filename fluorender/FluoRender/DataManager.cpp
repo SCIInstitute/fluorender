@@ -3269,6 +3269,9 @@ Ruler::Ruler()
 	//time-dependent
 	m_time_dep = false;
 	m_time = 0;
+
+	//brush size
+	m_brush_size = 0.0;
 }
 
 Ruler::~Ruler()

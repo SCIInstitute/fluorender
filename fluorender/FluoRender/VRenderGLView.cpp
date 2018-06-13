@@ -11512,6 +11512,11 @@ void VRenderGLView::AddRulerPoint(int mx, int my)
 		ruler->SetTimeDep(m_ruler_time_dep);
 		ruler->SetTime(m_tseq_cur_num);
 		m_ruler_list.push_back(ruler);
+		//store brush size in ruler
+		if (m_brush_size_data)
+			ruler->SetBrushSize(m_brush_radius1);
+		else
+			ruler->SetBrushSize(m_brush_radius1 / Get121ScaleFactor());
 	}
 	else
 	{
@@ -11854,35 +11859,41 @@ int VRenderGLView::RulerProfile(int index)
 		for (unsigned int b = 0; b<bins; ++b)
 			profile->push_back(ProfileBin());
 
+		double brush_radius = ruler->GetBrushSize()+1.0;
+
 		int i, j, k;
 		long long vol_index;
 		//go through data
 		for (i = 0; i<nx; ++i)
-			for (j = 0; j<ny; ++j)
-				for (k = 0; k<nz; ++k)
-				{
-					vol_index = (long long)nx*ny*k + nx*j + i;
-					unsigned char mask_value = ((unsigned char*)mask)[vol_index];
-					if (mask_value)
-					{
-						double intensity = 0.0;
-						if (nrrd_data->type == nrrdTypeUChar)
-							intensity = double(((unsigned char*)data)[vol_index]) / 255.0;
-						else if (nrrd_data->type == nrrdTypeUShort)
-							intensity = double(((unsigned short*)data)[vol_index]) * scale / 65535.0;
+		for (j = 0; j<ny; ++j)
+		for (k = 0; k<nz; ++k)
+		{
+			vol_index = (long long)nx*ny*k + nx*j + i;
+			unsigned char mask_value = ((unsigned char*)mask)[vol_index];
+			if (mask_value)
+			{
+				//find bin
+				Point p(i, j, k);
+				Vector pdir = p - p1;
+				double proj = Dot(pdir, dir);
+				int bin_num = int(proj / bin_dist);
+				if (bin_num<0 || bin_num >= bins)
+					continue;
+				//make sure it's within the brush radius
+				Point p_ruler = p1 + proj * dir;
+				if ((p_ruler - p).length() > brush_radius)
+					continue;
 
-						//find bin
-						Point p(i, j, k);
-						Vector pdir = p - p1;
-						double proj = Dot(pdir, dir);
-						int bin_num = int(proj / bin_dist);
-						if (bin_num<0 || bin_num >= bins)
-							continue;
+				double intensity = 0.0;
+				if (nrrd_data->type == nrrdTypeUChar)
+					intensity = double(((unsigned char*)data)[vol_index]) / 255.0;
+				else if (nrrd_data->type == nrrdTypeUShort)
+					intensity = double(((unsigned short*)data)[vol_index]) * scale / 65535.0;
 
-						(*profile)[bin_num].m_pixels++;
-						(*profile)[bin_num].m_accum += intensity;
-					}
-				}
+				(*profile)[bin_num].m_pixels++;
+				(*profile)[bin_num].m_accum += intensity;
+			}
+		}
 	}
 	else
 	{

@@ -116,7 +116,8 @@ public:
 		ID_MaxIntensityRd,
 		ID_AccIntensityRd,
 		ID_UseTransferChk,
-		ID_TransientChk
+		ID_TransientChk,
+		ID_DF_FChk
 	};
 
 	MeasureDlg(wxWindow* frame,
@@ -142,6 +143,7 @@ private:
 	wxRadioButton *m_acc_intensity_rd;
 	wxCheckBox *m_use_transfer_chk;
 	wxCheckBox *m_transient_chk;
+	wxCheckBox *m_df_f_chk;
 
 private:
 	void OnNewLocator(wxCommandEvent& event);
@@ -157,6 +159,7 @@ private:
 	void OnIntensityMethodCheck(wxCommandEvent& event);
 	void OnUseTransferCheck(wxCommandEvent& event);
 	void OnTransientCheck(wxCommandEvent& event);
+	void OnDF_FCheck(wxCommandEvent& event);
 
 	DECLARE_EVENT_TABLE()
 };

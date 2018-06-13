@@ -903,6 +903,12 @@ public:
 	Color &GetColor()
 	{ return m_color; }
 
+	//brush size
+	void SetBrushSize(double size)
+	{ m_brush_size = size; }
+	double GetBrushSize()
+	{ return m_brush_size; }
+
 private:
 	static int m_num;
 	int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe; 4: protractor
@@ -925,6 +931,8 @@ private:
 	wxString m_info_names;
 	wxString m_info_values;
 
+	//brush size if brush is used along with the ruler
+	double m_brush_size;
 };
 
 typedef std::vector<Ruler*> RulerList;
