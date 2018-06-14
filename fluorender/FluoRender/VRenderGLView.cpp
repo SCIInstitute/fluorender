@@ -6568,8 +6568,17 @@ void VRenderGLView::RunRulerProfile(wxFileConfig &fconfig)
 	wxFile file(m_script_output, m_sf_script ? wxFile::write : wxFile::write_append);
 	if (!file.IsOpened())
 		return;
+
+	//get df/f setting
+	bool df_f = false;
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (frame && frame->GetSettingDlg())
+		df_f = frame->GetSettingDlg()->GetRulerDF_F();
+	double f = 0.0;
+
 	for (size_t i = 0; i<m_ruler_list.size(); ++i)
 	{
+		//for each ruler
 		wxString str;
 		Ruler* ruler = m_ruler_list[i];
 		if (!ruler) continue;
@@ -6577,13 +6586,39 @@ void VRenderGLView::RunRulerProfile(wxFileConfig &fconfig)
 		vector<ProfileBin>* profile = ruler->GetProfile();
 		if (profile && profile->size())
 		{
+			double sumd = 0.0;
+			unsigned long long sumull = 0;
 			for (size_t j = 0; j<profile->size(); ++j)
 			{
+				//for each profile
 				int pixels = (*profile)[j].m_pixels;
 				if (pixels <= 0)
 					str += "0.0\t";
 				else
+				{
 					str += wxString::Format("%f\t", (*profile)[j].m_accum / pixels);
+					sumd += (*profile)[j].m_accum;
+					sumull += pixels;
+				}
+			}
+			if (df_f)
+			{
+				double avg = 0.0;
+				if (sumull != 0)
+					avg = sumd / double(sumull);
+				if (i == 0)
+				{
+					f = avg;
+					str += wxString::Format("\t%f\t", f);
+				}
+				else
+				{
+					double df = avg - f;
+					if (f == 0.0)
+						str += wxString::Format("\t%f\t", df);
+					else
+						str += wxString::Format("\t%f\t", df / f);
+				}
 			}
 		}
 		str += "\t";

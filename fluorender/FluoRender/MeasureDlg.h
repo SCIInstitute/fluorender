@@ -78,6 +78,7 @@ private:
 	wxTextCtrl *m_name_text;
 	wxColourPickerCtrl *m_color_picker;
 	long m_editing_item;
+	bool m_ruler_df_f;
 
 private:
 	void EndEdit(bool update=true);

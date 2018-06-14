@@ -666,6 +666,7 @@ void SettingDlg::GetSettings()
 	m_point_volume_mode = 0;
 	m_ruler_use_transf = false;
 	m_ruler_time_dep = true;
+	m_ruler_df_f = false;
 	m_pvxml_flip_x = false;
 	m_pvxml_flip_y = false;
 	m_red_bit = 8;
@@ -889,6 +890,12 @@ void SettingDlg::GetSettings()
 	{
 		fconfig.SetPath("/ruler time dependent");
 		fconfig.Read("value", &m_ruler_time_dep);
+	}
+	//ruler exports df/f
+	if (fconfig.Exists("/ruler df_f"))
+	{
+		fconfig.SetPath("/ruler df_f");
+		fconfig.Read("value", &m_ruler_df_f);
 	}
 	//flags for pvxml flipping
 	if (fconfig.Exists("/pvxml flip"))
@@ -1166,6 +1173,10 @@ void SettingDlg::SaveSettings()
 	//ruler time dependent
 	fconfig.SetPath("/ruler time dependent");
 	fconfig.Write("value", m_ruler_time_dep);
+
+	//ruler exports df/f
+	fconfig.SetPath("/ruler df_f");
+	fconfig.Write("value", m_ruler_df_f);
 
 	//flags for flipping pvxml
 	fconfig.SetPath("/pvxml flip");

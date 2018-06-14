@@ -190,6 +190,9 @@ public:
 	//ruler time dependent
 	bool GetRulerTimeDep() {return m_ruler_time_dep;}
 	void SetRulerTimeDep(bool val) {m_ruler_time_dep = val;}
+	//ruler exports df/f
+	bool GetRulerDF_F() { return m_ruler_df_f; }
+	void SetRulerDF_F(bool val) { m_ruler_df_f = val; }
 	//flags for pvxml flipping
 	bool GetPvxmlFlipX() {return m_pvxml_flip_x;}
 	void SetPvxmlFlipX(bool flip) {m_pvxml_flip_x = flip;}
@@ -279,6 +282,8 @@ private:
 	bool m_ruler_use_transf;
 	//ruler time dependent
 	bool m_ruler_time_dep;
+	//ruler exports df/f
+	bool m_ruler_df_f;
 	//flip pvxml frame
 	bool m_pvxml_flip_x;
 	bool m_pvxml_flip_y;

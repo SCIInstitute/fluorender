@@ -97,6 +97,8 @@ wxListCtrl(parent, id, pos, size, style)//,
 	m_color_picker = new wxColourPickerCtrl(this, 
 		ID_ColorPicker);
 	m_color_picker->Hide();
+
+	m_ruler_df_f = false;
 }
 
 RulerListCtrl::~RulerListCtrl()
@@ -299,9 +301,11 @@ void RulerListCtrl::Export(wxString filename)
 
 		tos << "Name\tColor\tLength(" << unit << ")\tAngle/Pitch(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
 
+		double f = 0.0;
 		Color color;
 		for (size_t i=0; i<ruler_list->size(); i++)
 		{
+			//for each ruler
 			ruler = (*ruler_list)[i];
 			if (!ruler) continue;
 
@@ -343,14 +347,40 @@ void RulerListCtrl::Export(wxString filename)
 			vector<ProfileBin>* profile = ruler->GetProfile();
 			if (profile && profile->size())
 			{
+				double sumd = 0.0;
+				unsigned long long sumull = 0;
 				tos << ruler->GetInfoProfile() << "\n";
 				for (size_t j=0; j<profile->size(); ++j)
 				{
+					//for each profile
 					int pixels = (*profile)[j].m_pixels;
 					if (pixels <= 0)
 						tos << "0.0\t";
 					else
+					{
 						tos << (*profile)[j].m_accum / pixels << "\t";
+						sumd += (*profile)[j].m_accum;
+						sumull += pixels;
+					}
+				}
+				if (m_ruler_df_f)
+				{
+					double avg = 0.0;
+					if (sumull != 0)
+						avg = sumd / double(sumull);
+					if (i == 0)
+					{
+						f = avg;
+						tos << "\t" << f << "\t";
+					}
+					else
+					{
+						double df = avg - f;
+						if (f == 0.0)
+							tos << "\t" << df << "\t";
+						else
+							tos << "\t" << df / f << "\t";
+					}
 				}
 				tos << "\n";
 			}
@@ -688,6 +718,14 @@ void MeasureDlg::GetSettings(VRenderView* vrv)
 
 		m_use_transfer_chk->SetValue(m_view->m_glview->m_ruler_use_transf);
 		m_transient_chk->SetValue(m_view->m_glview->m_ruler_time_dep);
+		//ruler exports df/f
+		VRenderFrame* frame = (VRenderFrame*)m_frame;
+		if (frame && frame->GetSettingDlg())
+		{
+			bool bval = frame->GetSettingDlg()->GetRulerDF_F();
+			m_df_f_chk->SetValue(bval);
+			m_rulerlist->m_ruler_df_f = bval;
+		}
 	}
 }
 
@@ -843,7 +881,15 @@ void MeasureDlg::OnProfile(wxCommandEvent& event)
 {
 	if (m_view)
 	{
-		m_view->RulerProfile(m_rulerlist->GetCurrSelection());
+		int index = m_rulerlist->GetCurrSelection();
+		if (index > -1)
+			m_view->RulerProfile(index);
+		else
+		{
+			vector<Ruler*>* ruler_list = m_view->GetRulerList();
+			for (size_t i = 0; i < ruler_list->size(); ++i)
+				m_view->RulerProfile(i);
+		}
 	}
 }
 
@@ -931,8 +977,9 @@ void MeasureDlg::OnDF_FCheck(wxCommandEvent& event)
 		return;
 
 	bool val = m_df_f_chk->GetValue();
-	//m_view->SetRulerTimeDep(val);
-	//VRenderFrame* frame = (VRenderFrame*)m_frame;
-	//if (frame && frame->GetSettingDlg())
-	//	frame->GetSettingDlg()->SetRulerTimeDep(val);
+	m_rulerlist->m_ruler_df_f = val;
+
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (frame && frame->GetSettingDlg())
+		frame->GetSettingDlg()->SetRulerDF_F(val);
 }
