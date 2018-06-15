@@ -119,7 +119,12 @@ namespace FLIVR
 			it != fb_list_.rend(); ++it)
 		{
 			if ((*it)->match(type, ap))
+			{
+				//size may not match
+				if (!(*it)->match_size(nx, ny))
+					(*it)->resize(nx, ny);
 				return *it;
+			}
 		}
 
 		//create new framebuffer

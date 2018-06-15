@@ -96,8 +96,6 @@ namespace FLIVR
 		irate_(0.5),
 		imode_(false),
 		cur_framebuffer_(0),
-		blend_framebuffer_resize_(false),
-		filter_buffer_resize_(false),
 		tex_2d_mask_(0),
 		tex_2d_weight1_(0),
 		tex_2d_weight2_(0),
@@ -125,8 +123,6 @@ namespace FLIVR
 		num_slices_(0),
 		irate_(copy.irate_),
 		imode_(copy.imode_),
-		blend_framebuffer_resize_(false),
-		filter_buffer_resize_(false),
 		tex_2d_mask_(0),
 		tex_2d_weight1_(0),
 		tex_2d_weight2_(0),
@@ -249,13 +245,6 @@ namespace FLIVR
 				tex_pool_.erase(tex_pool_.begin() + i);
 			}
 		}
-	}
-
-	//resize the fbo texture
-	void TextureRenderer::resize()
-	{
-		blend_framebuffer_resize_ = true;
-		filter_buffer_resize_ = true;
 	}
 
 	//set the 2d texture mask for segmentation

@@ -106,6 +106,7 @@ namespace FLIVR
 	class VolCalShaderFactory;
 	class VolKernelFactory;
 	class FramebufferManager;
+	class ImgShaderFactory;
 
 	struct TexParam
 	{
@@ -166,9 +167,6 @@ namespace FLIVR
 		static void clear_tex_pool();
 		void clear_tex_current();
 		void clear_tex_mask();
-
-		//resize the fbo texture
-		void resize();
 
 		//set the 2d texture mask for segmentation
 		void set_2d_mask(GLuint id);
@@ -286,13 +284,11 @@ namespace FLIVR
 		static VolCalShaderFactory cal_shader_factory_;
 		//framebuffers for everything
 		static FramebufferManager framebuffer_manager_;
+		//smooth filter
+		static ImgShaderFactory m_img_shader_factory;
 
 		//saved framebuffer
 		GLuint cur_framebuffer_;
-		//blend frame buffer for output
-		bool blend_framebuffer_resize_;
-		//2nd buffer for multiple filtering
-		bool filter_buffer_resize_;
 
 		//2d mask texture
 		GLuint tex_2d_mask_;

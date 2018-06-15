@@ -51,7 +51,7 @@ namespace FLIVR
 	VolShaderFactory TextureRenderer::vol_shader_factory_;
 	SegShaderFactory TextureRenderer::seg_shader_factory_;
 	VolCalShaderFactory TextureRenderer::cal_shader_factory_;
-	ImgShaderFactory VolumeRenderer::m_img_shader_factory;
+	ImgShaderFactory TextureRenderer::m_img_shader_factory;
 	VolKernelFactory TextureRenderer::vol_kernel_factory_;
 	FramebufferManager TextureRenderer::framebuffer_manager_;
 	double VolumeRenderer::sw_ = 0.0;
@@ -648,17 +648,9 @@ namespace FLIVR
 		{
 			double sf = CalcScaleFactor(w, h, tex_->nx(), tex_->ny(), zoom);
 			if (fabs(sf-sfactor_)>0.05)
-			{
 				sfactor_ = sf;
-				blend_framebuffer_resize_ = true;
-				filter_buffer_resize_ = true;
-			}
 			else if (sf==1.0 && sfactor_!=1.0)
-			{
 				sfactor_ = sf;
-				blend_framebuffer_resize_ = true;
-				filter_buffer_resize_ = true;
-			}
 
 			w2 = int(w*sfactor_+0.5);
 			h2 = int(h*sfactor_+0.5);
@@ -666,11 +658,7 @@ namespace FLIVR
 		else
 		{
 			if (sfactor_ != 1.0)
-			{
 				sfactor_ = 1.0;
-				blend_framebuffer_resize_ = true;
-				filter_buffer_resize_ = true;
-			}
 		}
 
 		Framebuffer* blend_buffer = 0;
@@ -680,12 +668,6 @@ namespace FLIVR
 				FB_Render_RGBA, w2, h2, GL_COLOR_ATTACHMENT0);
 			if (!blend_buffer)
 				return;
-			if (blend_framebuffer_resize_)
-			{
-				// resize texture color renderbuffer
-				blend_buffer->resize(w2, h2);
-				blend_framebuffer_resize_ = false;
-			}
 			blend_buffer->bind();
 			blend_buffer->protect();
 
@@ -986,11 +968,6 @@ namespace FLIVR
 				//FILTERING/////////////////////////////////////////////////////////////////
 				filter_buffer = framebuffer_manager_.framebuffer(
 					FB_Render_RGBA, w2, h2, GL_COLOR_ATTACHMENT0);
-				if (filter_buffer_resize_)
-				{
-					filter_buffer->resize(w2, h2);
-					filter_buffer_resize_ = false;
-				}
 				filter_buffer->bind();
 
 				glClear(GL_COLOR_BUFFER_BIT);

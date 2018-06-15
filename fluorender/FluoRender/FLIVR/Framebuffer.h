@@ -87,6 +87,7 @@ namespace FLIVR
 		inline void detach_texture(FramebufferTexture* tex);
 		inline void bind_texture(int ap);
 
+		inline bool match_size(int nx, int ny);
 		inline void resize(int nx, int ny);
 
 		//match without size
@@ -276,6 +277,11 @@ namespace FLIVR
 			if ((*it).first == ap)
 				(*it).second->bind();
 		}
+	}
+
+	inline bool Framebuffer::match_size(int nx, int ny)
+	{
+		return (nx == nx_) && (ny == ny_);
 	}
 
 	inline void Framebuffer::resize(int nx, int ny)

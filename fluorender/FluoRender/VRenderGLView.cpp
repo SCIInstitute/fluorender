@@ -583,17 +583,17 @@ VRenderGLView::~VRenderGLView()
 
 void VRenderGLView::ResizeFramebuffers()
 {
-	int i;
-	for (i = 0; i<(int)m_vd_pop_list.size(); i++)
-	{
-		VolumeData* vd = m_vd_pop_list[i];
-		if (vd)
-		{
-			VolumeRenderer* vr = vd->GetVR();
-			if (vr)
-				vr->resize();
-		}
-	}
+	//int i;
+	//for (i = 0; i<(int)m_vd_pop_list.size(); i++)
+	//{
+	//	VolumeData* vd = m_vd_pop_list[i];
+	//	if (vd)
+	//	{
+	//		VolumeRenderer* vr = vd->GetVR();
+	//		if (vr)
+	//			vr->resize();
+	//	}
+	//}
 
 	if (m_mvr)
 		m_mvr->resize();
@@ -605,17 +605,17 @@ void VRenderGLView::ResizeFramebuffers()
 
 void VRenderGLView::OnResize(wxSizeEvent& event)
 {
-	int i;
-	for (i = 0; i<(int)m_vd_pop_list.size(); i++)
-	{
-		VolumeData* vd = m_vd_pop_list[i];
-		if (vd)
-		{
-			VolumeRenderer* vr = vd->GetVR();
-			if (vr)
-				vr->resize();
-		}
-	}
+	//int i;
+	//for (i = 0; i<(int)m_vd_pop_list.size(); i++)
+	//{
+	//	VolumeData* vd = m_vd_pop_list[i];
+	//	if (vd)
+	//	{
+	//		VolumeRenderer* vr = vd->GetVR();
+	//		if (vr)
+	//			vr->resize();
+	//	}
+	//}
 
 	wxSize size = GetGLSize();
 	if (m_size == size)

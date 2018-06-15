@@ -260,8 +260,6 @@ namespace FLIVR
 						//3-random color with label, 4-random color with label+mask
 		bool mask_;
 		bool label_;
-		//smooth filter
-		static ImgShaderFactory m_img_shader_factory;
 
 		//noise reduction
 		bool noise_red_;
