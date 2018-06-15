@@ -673,41 +673,21 @@ namespace FLIVR
 			}
 		}
 
+		Framebuffer* blend_buffer = 0;
 		if(blend_num_bits_ > 8)
 		{
-			if (!glIsFramebuffer(blend_framebuffer_))
-			{
-				glGenFramebuffers(1, &blend_framebuffer_);
-				glGenTextures(1, &blend_tex_id_);
-
-				glBindFramebuffer(GL_FRAMEBUFFER, blend_framebuffer_);
-
-				// Initialize texture color renderbuffer
-				glBindTexture(GL_TEXTURE_2D, blend_tex_id_);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w2, h2, 0,
-					GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
-				glFramebufferTexture2D(GL_FRAMEBUFFER,
-					GL_COLOR_ATTACHMENT0,
-					GL_TEXTURE_2D, blend_tex_id_, 0);
-			}
-
+			blend_buffer = framebuffer_manager_.framebuffer(
+				FB_Render_RGBA, w2, h2, GL_COLOR_ATTACHMENT0);
+			if (!blend_buffer)
+				return;
 			if (blend_framebuffer_resize_)
 			{
 				// resize texture color renderbuffer
-				glBindTexture(GL_TEXTURE_2D, blend_tex_id_);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w2, h2, 0,
-					GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
-
+				blend_buffer->resize(w2, h2);
 				blend_framebuffer_resize_ = false;
 			}
-
-			glBindTexture(GL_TEXTURE_2D, 0);
-
-			glBindFramebuffer(GL_FRAMEBUFFER, blend_framebuffer_);
+			blend_buffer->bind();
+			blend_buffer->protect();
 
 			glClearColor(clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3]);
 			glClear(GL_COLOR_BUFFER_BIT);
@@ -1000,40 +980,22 @@ namespace FLIVR
 
 			ShaderProgram* img_shader = 0;
 
+			Framebuffer* filter_buffer = 0;
 			if (noise_red_ && colormap_mode_!=2)
 			{
 				//FILTERING/////////////////////////////////////////////////////////////////
-				if (!filter_tex_id_)
-				{
-					glGenTextures(1, &filter_tex_id_);
-					glBindTexture(GL_TEXTURE_2D, filter_tex_id_);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-					glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w2, h2, 0,
-						GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
-				}
-				if (!glIsFramebuffer(filter_buffer_))
-				{
-					glGenFramebuffers(1, &filter_buffer_);
-					glBindFramebuffer(GL_FRAMEBUFFER, filter_buffer_);
-					glFramebufferTexture2D(GL_FRAMEBUFFER,
-						GL_COLOR_ATTACHMENT0,
-						GL_TEXTURE_2D, filter_tex_id_, 0);
-				}
+				filter_buffer = framebuffer_manager_.framebuffer(
+					FB_Render_RGBA, w2, h2, GL_COLOR_ATTACHMENT0);
 				if (filter_buffer_resize_)
 				{
-					glBindTexture(GL_TEXTURE_2D, filter_tex_id_);
-					glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w2, h2, 0,
-						GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
+					filter_buffer->resize(w2, h2);
 					filter_buffer_resize_ = false;
 				}
+				filter_buffer->bind();
 
-				glBindFramebuffer(GL_FRAMEBUFFER, filter_buffer_);
 				glClear(GL_COLOR_BUFFER_BIT);
 
-				glBindTexture(GL_TEXTURE_2D, blend_tex_id_);
+				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 				img_shader = 
 					m_img_shader_factory.shader(IMG_SHDR_FILTER_BLUR);
 				if (img_shader)
@@ -1058,10 +1020,10 @@ namespace FLIVR
 
 			glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 
-			if (noise_red_ && colormap_mode_!=2)
-				glBindTexture(GL_TEXTURE_2D, filter_tex_id_);
+			if (noise_red_ && colormap_mode_ != 2)
+				filter_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 			else
-				glBindTexture(GL_TEXTURE_2D, blend_tex_id_);
+				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 
 			if (noise_red_ && colormap_mode_!=2)
 				img_shader = 
@@ -1088,18 +1050,12 @@ namespace FLIVR
 			if (img_shader && img_shader->valid())
 				img_shader->release();
 
-			if (TextureRenderer::get_invalidate_tex())
-			{
-#ifdef _WIN32
-				glInvalidateTexImage(blend_tex_id_, 0);
-				glInvalidateTexImage(filter_tex_id_, 0);
-#endif
-			}
 			if (depth_test) glEnable(GL_DEPTH_TEST);
 			if (cull_face) glEnable(GL_CULL_FACE);
-
 		}
 
+		if (blend_buffer)
+			blend_buffer->unprotect();
 		// Reset the blend functions after MIP
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);

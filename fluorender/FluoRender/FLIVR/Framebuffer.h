@@ -85,9 +85,13 @@ namespace FLIVR
 		inline bool attach_texture(int ap, unsigned int tex_id, int layer=0);
 		inline void detach_texture(int ap);
 		inline void detach_texture(FramebufferTexture* tex);
+		inline void bind_texture(int ap);
 
 		inline void resize(int nx, int ny);
 
+		//match without size
+		inline bool match(FBType, int);
+		//match with size
 		inline bool match(FBType, int, int, int);
 
 	private:
@@ -200,6 +204,7 @@ namespace FLIVR
 		{
 		case FB_Render_RGBA:
 		{
+			glBindFramebuffer(GL_FRAMEBUFFER, id_);
 			glFramebufferTexture2D(GL_FRAMEBUFFER,
 				ap, GL_TEXTURE_2D, tex->id_, 0);
 			std::pair<int, FramebufferTexture*> item(ap, tex);
@@ -263,6 +268,16 @@ namespace FLIVR
 		}
 	}
 
+	inline void Framebuffer::bind_texture(int ap)
+	{
+		for (auto it = tex_list_.begin();
+			it != tex_list_.end(); ++it)
+		{
+			if ((*it).first == ap)
+				(*it).second->bind();
+		}
+	}
+
 	inline void Framebuffer::resize(int nx, int ny)
 	{
 		for (auto it = tex_list_.begin();
@@ -272,6 +287,26 @@ namespace FLIVR
 				(*it).second->resize(nx, ny);
 		}
 		nx_ = nx; ny_ = ny;
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	inline bool Framebuffer::match(FBType type, int ap)
+	{
+		if (protected_)
+			return false;
+		if (type_ == type)
+		{
+			if (type == FB_3D_Int)
+				return true;
+			for (auto it = tex_list_.begin();
+				it != tex_list_.end(); ++it)
+			{
+				if ((*it).first == ap &&
+					(*it).second->valid())
+					return true;
+			}
+		}
+		return false;
 	}
 
 	inline bool Framebuffer::match(FBType type,

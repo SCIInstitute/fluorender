@@ -97,11 +97,7 @@ namespace FLIVR
 		imode_(false),
 		cur_framebuffer_(0),
 		blend_framebuffer_resize_(false),
-		blend_framebuffer_(0),
-		blend_tex_id_(0),
 		filter_buffer_resize_(false),
-		filter_buffer_(0),
-		filter_tex_id_(0),
 		tex_2d_mask_(0),
 		tex_2d_weight1_(0),
 		tex_2d_weight2_(0),
@@ -130,11 +126,7 @@ namespace FLIVR
 		irate_(copy.irate_),
 		imode_(copy.imode_),
 		blend_framebuffer_resize_(false),
-		blend_framebuffer_(0),
-		blend_tex_id_(0),
 		filter_buffer_resize_(false),
-		filter_buffer_(0),
-		filter_tex_id_(0),
 		tex_2d_mask_(0),
 		tex_2d_weight1_(0),
 		tex_2d_weight2_(0),
@@ -161,14 +153,6 @@ namespace FLIVR
 		clear_brick_buf();
 		//clear_tex_pool();
 		clear_tex_current();
-		if (glIsFramebuffer(blend_framebuffer_))
-			glDeleteFramebuffers(1, &blend_framebuffer_);
-		if (glIsTexture(blend_tex_id_))
-			glDeleteTextures(1, &blend_tex_id_);
-		if (glIsFramebuffer(filter_buffer_))
-			glDeleteFramebuffers(1, &filter_buffer_);
-		if (glIsTexture(filter_tex_id_))
-			glDeleteTextures(1, &filter_tex_id_);
 
 		//buffers
 		if (glIsBuffer(m_slices_vbo))

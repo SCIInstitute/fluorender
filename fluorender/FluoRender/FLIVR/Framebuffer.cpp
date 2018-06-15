@@ -118,7 +118,7 @@ namespace FLIVR
 		for (auto it = fb_list_.rbegin();
 			it != fb_list_.rend(); ++it)
 		{
-			if ((*it)->match(type, nx, ny, ap))
+			if ((*it)->match(type, ap))
 				return *it;
 		}
 
@@ -138,6 +138,7 @@ namespace FLIVR
 			fb->attach_texture(ap, tex);
 			//add to lists
 			tex_list_.push_back(tex);
+			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 		return fb;
 	}

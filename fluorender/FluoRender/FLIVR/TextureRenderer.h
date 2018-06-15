@@ -291,12 +291,8 @@ namespace FLIVR
 		GLuint cur_framebuffer_;
 		//blend frame buffer for output
 		bool blend_framebuffer_resize_;
-		GLuint blend_framebuffer_;
-		GLuint blend_tex_id_;
 		//2nd buffer for multiple filtering
 		bool filter_buffer_resize_;
-		GLuint filter_buffer_;
-		GLuint filter_tex_id_;
 
 		//2d mask texture
 		GLuint tex_2d_mask_;
