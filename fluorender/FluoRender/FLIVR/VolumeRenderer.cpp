@@ -1029,10 +1029,11 @@ namespace FLIVR
 
 			if (depth_test) glEnable(GL_DEPTH_TEST);
 			if (cull_face) glEnable(GL_CULL_FACE);
+
+			if (blend_buffer)
+				blend_buffer->unprotect();
 		}
 
-		if (blend_buffer)
-			blend_buffer->unprotect();
 		// Reset the blend functions after MIP
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);

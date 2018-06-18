@@ -40,6 +40,7 @@ using namespace std;
 
 namespace FLIVR
 {
+	class Framebuffer;
 	class MultiVolumeRenderer
 	{
 	public:
@@ -96,9 +97,6 @@ namespace FLIVR
 		bool get_blend_slices() {return blend_slices_;}
 		void set_blend_slices(bool bs) {blend_slices_ = bs;}
 
-		//resize fbo texture
-		void resize();
-
 		//set noise reduction
 		void SetNoiseRed(bool nd) {noise_red_ = nd;}
 		bool GetNoiseRed() {return noise_red_;}
@@ -136,18 +134,6 @@ namespace FLIVR
 
 		//saved framebuffer
 		GLuint cur_framebuffer_;
-		//blend frame buffers
-		bool blend_framebuffer_resize_;
-		GLuint blend_framebuffer_;
-		GLuint blend_tex_id_;
-		//2nd buffer for multiple filtering
-		bool filter_buffer_resize_;
-		GLuint filter_buffer_;
-		GLuint filter_tex_id_;
-		//micro blending
-		bool blend_fbo_resize_;
-		GLuint blend_fbo_;
-		GLuint blend_tex_;
 
 		//scale factor
 		bool noise_red_;
@@ -189,7 +175,8 @@ namespace FLIVR
 			ShaderProgram *shader,
 			int bi, bool orthographic_p,
 			int w, int h, bool intp,
-			int quota_bricks_chan);
+			int quota_bricks_chan,
+			Framebuffer* blend_buffer);
 
 		//find out combined bricks in interactive mode
 		vector<TextureBrick*> *get_combined_bricks(

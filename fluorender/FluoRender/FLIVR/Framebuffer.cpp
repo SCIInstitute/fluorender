@@ -121,6 +121,7 @@ namespace FLIVR
 			if ((*it)->match(type, ap))
 			{
 				//size may not match
+				//how to manage size change more efficiently needs further consideration
 				if (!(*it)->match_size(nx, ny))
 					(*it)->resize(nx, ny);
 				return *it;
