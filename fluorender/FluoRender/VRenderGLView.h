@@ -722,8 +722,6 @@ private:
 	GLuint m_tex_ol1;
 	GLuint m_tex_ol2;
 	//paint buffer
-	GLuint m_fbo_paint;
-	GLuint m_tex_paint;
 	bool m_clear_paint;
 	//depth peeling buffers
 	vector<GLuint> m_dp_fbo_list;

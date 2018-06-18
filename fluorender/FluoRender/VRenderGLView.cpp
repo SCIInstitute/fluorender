@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderGLView.h"
 #include "VRenderView.h"
 #include "VRenderFrame.h"
+#include <FLIVR/Framebuffer.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
@@ -184,8 +185,6 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_tex_ol1(0),
 	m_tex_ol2(0),
 	//paint buffer
-	m_fbo_paint(0),
-	m_tex_paint(0),
 	m_clear_paint(true),
 	//pick buffer
 	m_fbo_pick(0),
@@ -523,8 +522,6 @@ VRenderGLView::~VRenderGLView()
 		glDeleteFramebuffers(1, &m_fbo_final);
 	if (glIsFramebuffer(m_fbo_temp))
 		glDeleteFramebuffers(1, &m_fbo_temp);
-	if (glIsFramebuffer(m_fbo_paint))
-		glDeleteFramebuffers(1, &m_fbo_paint);
 	if (glIsFramebuffer(m_fbo_ol1))
 		glDeleteFramebuffers(1, &m_fbo_ol1);
 	if (glIsFramebuffer(m_fbo_ol2))
@@ -535,8 +532,6 @@ VRenderGLView::~VRenderGLView()
 		glDeleteTextures(1, &m_tex_final);
 	if (glIsTexture(m_tex_temp))
 		glDeleteTextures(1, &m_tex_temp);
-	if (glIsTexture(m_tex_paint))
-		glDeleteTextures(1, &m_tex_paint);
 	if (glIsTexture(m_tex_ol1))
 		glDeleteTextures(1, &m_tex_ol1);
 	if (glIsTexture(m_tex_ol2))
@@ -1909,25 +1904,12 @@ void VRenderGLView::PaintStroke()
 
 	//generate texture and buffer objects
 	//painting fbo
-	if (!glIsFramebuffer(m_fbo_paint))
-		glGenFramebuffers(1, &m_fbo_paint);
-	//painting texture
-	if (!glIsTexture(m_tex_paint))
-		glGenTextures(1, &m_tex_paint);
-
-	//set up the painting fbo
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_paint);
-	//color buffer of painting
-	glBindTexture(GL_TEXTURE_2D, m_tex_paint);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, nx, ny, 0,
-		GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glFramebufferTexture2D(GL_FRAMEBUFFER,
-		GL_COLOR_ATTACHMENT0,
-		GL_TEXTURE_2D, m_tex_paint, 0);
+	Framebuffer* paint_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+		FB_Render_RGBA, nx, ny, GL_COLOR_ATTACHMENT0, "paint brush");
+	if (!paint_buffer)
+		return;
+	paint_buffer->bind();
+	paint_buffer->protect();
 	//clear if asked so
 	if (m_clear_paint)
 	{
@@ -1947,9 +1929,6 @@ void VRenderGLView::PaintStroke()
 			paint_shader->bind();
 		}
 
-		//paint to texture
-		//bind fbo for final composition
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_paint);
 		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
 		glBlendEquation(GL_MAX);
@@ -2029,12 +2008,13 @@ void VRenderGLView::PaintStroke()
 void VRenderGLView::DisplayStroke()
 {
 	//painting texture
-	if (!glIsTexture(m_tex_paint))
+	Framebuffer* paint_buffer = TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
+	if (!paint_buffer)
 		return;
 
 	//draw the final buffer to the windows buffer
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_tex_paint);
+	paint_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST);
@@ -2081,7 +2061,9 @@ void VRenderGLView::Segment()
 	//center object
 	m_mv_mat = glm::translate(m_mv_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
 
-	m_selector.Set2DMask(m_tex_paint);
+	Framebuffer* paint_buffer = TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
+	if (paint_buffer)
+		m_selector.Set2DMask(paint_buffer->tex_id(GL_COLOR_ATTACHMENT0));
 	m_selector.Set2DWeight(m_tex_final, glIsTexture(m_tex_wt2) ? m_tex_wt2 : m_tex);
 	//orthographic
 	m_selector.SetOrthographic(!m_persp);
@@ -2245,7 +2227,9 @@ int VRenderGLView::CompAnalysis(double min_voxels, double max_voxels,
 
 	if (!select)
 	{
-		m_selector.Set2DMask(m_tex_paint);
+		Framebuffer* paint_buffer = TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
+		if (paint_buffer)
+			m_selector.Set2DMask(paint_buffer->tex_id(GL_COLOR_ATTACHMENT0));
 		m_selector.Set2DWeight(m_tex_final, glIsTexture(m_tex_wt2) ? m_tex_wt2 : m_tex);
 		m_selector.SetSizeMap(size_map);
 		return_val = m_selector.CompAnalysis(min_voxels, max_voxels, thresh, falloff, select, gen_ann);
@@ -2363,7 +2347,9 @@ int VRenderGLView::NoiseAnalysis(double min_voxels, double max_voxels, double th
 {
 	int return_val = 0;
 
-	m_selector.Set2DMask(m_tex_paint);
+	Framebuffer* paint_buffer = TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
+	if (paint_buffer)
+		m_selector.Set2DMask(paint_buffer->tex_id(GL_COLOR_ATTACHMENT0));
 	m_selector.Set2DWeight(m_tex_final, glIsTexture(m_tex_wt2) ? m_tex_wt2 : m_tex);
 	return_val = m_selector.NoiseAnalysis(min_voxels, max_voxels, 10.0, thresh);
 
@@ -6791,19 +6777,19 @@ void VRenderGLView::ForceDraw()
 
 	if (TextureRenderer::get_invalidate_tex())
 	{
-#ifdef _WIN32
-		for (int i = 0; i < m_dp_tex_list.size(); ++i)
-			glInvalidateTexImage(m_dp_tex_list[i], 0);
-		glInvalidateTexImage(m_tex_paint, 0);
-		glInvalidateTexImage(m_tex_final, 0);
-		glInvalidateTexImage(m_tex, 0);
-		glInvalidateTexImage(m_tex_temp, 0);
-		glInvalidateTexImage(m_tex_wt2, 0);
-		glInvalidateTexImage(m_tex_ol1, 0);
-		glInvalidateTexImage(m_tex_ol2, 0);
-		glInvalidateTexImage(m_tex_pick, 0);
-		glInvalidateTexImage(m_tex_pick_depth, 0);
-#endif
+//#ifdef _WIN32
+//		for (int i = 0; i < m_dp_tex_list.size(); ++i)
+//			glInvalidateTexImage(m_dp_tex_list[i], 0);
+//		glInvalidateTexImage(m_tex_paint, 0);
+//		glInvalidateTexImage(m_tex_final, 0);
+//		glInvalidateTexImage(m_tex, 0);
+//		glInvalidateTexImage(m_tex_temp, 0);
+//		glInvalidateTexImage(m_tex_wt2, 0);
+//		glInvalidateTexImage(m_tex_ol1, 0);
+//		glInvalidateTexImage(m_tex_ol2, 0);
+//		glInvalidateTexImage(m_tex_pick, 0);
+//		glInvalidateTexImage(m_tex_pick_depth, 0);
+//#endif
 	}
 
 	SwapBuffers();

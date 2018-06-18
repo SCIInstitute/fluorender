@@ -279,9 +279,7 @@ namespace FLIVR
 		else
 		{
 			if (sfactor_ != 1.0)
-			{
 				sfactor_ = 1.0;
-			}
 		}
 
 		Framebuffer* blend_buffer = 0;

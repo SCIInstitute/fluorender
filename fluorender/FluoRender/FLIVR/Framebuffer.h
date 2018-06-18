@@ -39,6 +39,7 @@ namespace FLIVR
 		FBTex_3D_Int,
 	};
 	class Framebuffer;
+	class FramebufferManager;
 	class FramebufferTexture
 	{
 	public:
@@ -70,7 +71,7 @@ namespace FLIVR
 	class Framebuffer
 	{
 	public:
-		Framebuffer(FBType type, int nx, int ny);
+		Framebuffer(FBType type, int nx, int ny, const std::string &name);
 		~Framebuffer();
 
 		bool create();
@@ -86,6 +87,7 @@ namespace FLIVR
 		inline void detach_texture(int ap);
 		inline void detach_texture(FramebufferTexture* tex);
 		inline void bind_texture(int ap);
+		inline unsigned int tex_id(int ap);
 
 		inline bool match_size(int nx, int ny);
 		inline void resize(int nx, int ny);
@@ -94,15 +96,24 @@ namespace FLIVR
 		inline bool match(FBType, int);
 		//match with size
 		inline bool match(FBType, int, int, int);
+		//match by name
+		inline bool match(const std::string &name);
+
+		//name represents its use
+		inline void set_name(const std::string &name);
+		inline void clear_name();
 
 	private:
 		unsigned int id_;
 		FBType type_;
 		int nx_;
 		int ny_;
+		std::string name_;//specify its use
 		bool valid_;
 		bool protected_;
 		std::vector<std::pair<int, FramebufferTexture*>> tex_list_;
+
+		friend class FramebufferManager;
 	};
 
 	class FramebufferManager
@@ -111,7 +122,8 @@ namespace FLIVR
 		FramebufferManager();
 		~FramebufferManager();
 
-		Framebuffer* framebuffer(FBType type, int nx, int ny, int ap);
+		Framebuffer* framebuffer(FBType type, int nx, int ny, int ap, const std::string &name="");
+		Framebuffer* framebuffer(const std::string &name);
 
 	private:
 		std::vector<Framebuffer*> fb_list_;
@@ -279,6 +291,17 @@ namespace FLIVR
 		}
 	}
 
+	inline unsigned int Framebuffer::tex_id(int ap)
+	{
+		for (auto it = tex_list_.begin();
+			it != tex_list_.end(); ++it)
+		{
+			if ((*it).first == ap)
+				return (*it).second->id_;
+		}
+		return 0;
+	}
+
 	inline bool Framebuffer::match_size(int nx, int ny)
 	{
 		return (nx == nx_) && (ny == ny_);
@@ -335,6 +358,24 @@ namespace FLIVR
 			}
 		}
 		return false;
+	}
+
+	inline bool Framebuffer::match(const std::string &name)
+	{
+		if (name == "")
+			return false;
+		if (name_ == name)
+			return true;
+	}
+
+	inline void Framebuffer::set_name(const std::string &name)
+	{
+		name_ = name;
+	}
+
+	inline void Framebuffer::clear_name()
+	{
+		name_ = "";
 	}
 
 }

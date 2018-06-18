@@ -71,8 +71,11 @@ namespace FLIVR
 		valid_ = false;
 	}
 
-	Framebuffer::Framebuffer(FBType type, int nx, int ny):
-		id_(0), type_(type), nx_(nx), ny_(ny), valid_(false), protected_(false)
+	Framebuffer::Framebuffer(FBType type, int nx, int ny,
+		const std::string &name):
+		id_(0), type_(type), nx_(nx), ny_(ny),
+		name_(name),
+		valid_(false), protected_(false)
 	{
 	}
 
@@ -113,10 +116,26 @@ namespace FLIVR
 	}
 
 	Framebuffer* FramebufferManager::framebuffer(
-		FBType type, int nx, int ny, int ap)
+		FBType type, int nx, int ny, int ap,
+		const std::string &name)
 	{
-		for (auto it = fb_list_.rbegin();
-			it != fb_list_.rend(); ++it)
+		if (name != "")
+		{
+			for (auto it = fb_list_.begin();
+				it != fb_list_.end(); ++it)
+			{
+				if ((*it)->match(name))
+				{
+					//size may not match
+					//how to manage size change more efficiently needs further consideration
+					if (!(*it)->match_size(nx, ny))
+						(*it)->resize(nx, ny);
+					return *it;
+				}
+			}
+		}
+		for (auto it = fb_list_.begin();
+			it != fb_list_.end(); ++it)
 		{
 			if ((*it)->match(type, ap))
 			{
@@ -124,12 +143,13 @@ namespace FLIVR
 				//how to manage size change more efficiently needs further consideration
 				if (!(*it)->match_size(nx, ny))
 					(*it)->resize(nx, ny);
+				(*it)->set_name(name);
 				return *it;
 			}
 		}
 
 		//create new framebuffer
-		Framebuffer* fb = new Framebuffer(type, nx, ny);
+		Framebuffer* fb = new Framebuffer(type, nx, ny, name);
 		if (!fb->create())
 			return 0;
 		//add to lists
@@ -146,6 +166,20 @@ namespace FLIVR
 			tex_list_.push_back(tex);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
+		fb->set_name(name);
 		return fb;
+	}
+
+	Framebuffer* FramebufferManager::framebuffer(const std::string &name)
+	{
+		if (name == "")
+			return 0;
+		for (auto it = fb_list_.begin();
+			it != fb_list_.end(); ++it)
+		{
+			if ((*it)->name_ == name)
+				return *it;
+		}
+		return 0;
 	}
 }
