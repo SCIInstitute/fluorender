@@ -711,8 +711,6 @@ private:
 	GLuint m_fbo;
 	GLuint m_tex;
 	GLuint m_tex_wt2;  //use this texture instead of m_tex when the volume for segmentation is rendered
-	GLuint m_fbo_final;
-	GLuint m_tex_final;
 	//temp buffer for large data compositing
 	GLuint m_fbo_temp;
 	GLuint m_tex_temp;

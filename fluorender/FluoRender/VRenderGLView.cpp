@@ -174,8 +174,6 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_fbo(0),
 	m_tex(0),
 	m_tex_wt2(0),
-	m_fbo_final(0),
-	m_tex_final(0),
 	//temp buffer for large data comp
 	m_fbo_temp(0),
 	m_tex_temp(0),
@@ -518,8 +516,6 @@ VRenderGLView::~VRenderGLView()
 	//delete buffers and textures
 	if (glIsFramebuffer(m_fbo))
 		glDeleteFramebuffers(1, &m_fbo);
-	if (glIsFramebuffer(m_fbo_final))
-		glDeleteFramebuffers(1, &m_fbo_final);
 	if (glIsFramebuffer(m_fbo_temp))
 		glDeleteFramebuffers(1, &m_fbo_temp);
 	if (glIsFramebuffer(m_fbo_ol1))
@@ -528,8 +524,6 @@ VRenderGLView::~VRenderGLView()
 		glDeleteFramebuffers(1, &m_fbo_ol2);
 	if (glIsTexture(m_tex))
 		glDeleteTextures(1, &m_tex);
-	if (glIsTexture(m_tex_final))
-		glDeleteTextures(1, &m_tex_final);
 	if (glIsTexture(m_tex_temp))
 		glDeleteTextures(1, &m_tex_temp);
 	if (glIsTexture(m_tex_ol1))
@@ -2038,7 +2032,13 @@ void VRenderGLView::DisplayStroke()
 //set 2d weights
 void VRenderGLView::Set2dWeights()
 {
-	m_selector.Set2DWeight(m_tex_final, glIsTexture(m_tex_wt2) ? m_tex_wt2 : m_tex);
+	Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+		"final");
+	unsigned int tex_id = 0;
+	if (final_buffer)
+		tex_id = final_buffer->tex_id(GL_COLOR_ATTACHMENT0);
+	m_selector.Set2DWeight(
+		tex_id, glIsTexture(m_tex_wt2) ? m_tex_wt2 : m_tex);
 }
 
 //segment volumes in current view
@@ -2064,7 +2064,10 @@ void VRenderGLView::Segment()
 	Framebuffer* paint_buffer = TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
 	if (paint_buffer)
 		m_selector.Set2DMask(paint_buffer->tex_id(GL_COLOR_ATTACHMENT0));
-	m_selector.Set2DWeight(m_tex_final, glIsTexture(m_tex_wt2) ? m_tex_wt2 : m_tex);
+	Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer("final");
+	if (final_buffer)
+		m_selector.Set2DWeight(final_buffer->tex_id(GL_COLOR_ATTACHMENT0),
+			glIsTexture(m_tex_wt2) ? m_tex_wt2 : m_tex);
 	//orthographic
 	m_selector.SetOrthographic(!m_persp);
 
@@ -2230,7 +2233,10 @@ int VRenderGLView::CompAnalysis(double min_voxels, double max_voxels,
 		Framebuffer* paint_buffer = TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
 		if (paint_buffer)
 			m_selector.Set2DMask(paint_buffer->tex_id(GL_COLOR_ATTACHMENT0));
-		m_selector.Set2DWeight(m_tex_final, glIsTexture(m_tex_wt2) ? m_tex_wt2 : m_tex);
+		Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer("final");
+		if (final_buffer)
+			m_selector.Set2DWeight(final_buffer->tex_id(GL_COLOR_ATTACHMENT0),
+				glIsTexture(m_tex_wt2) ? m_tex_wt2 : m_tex);
 		m_selector.SetSizeMap(size_map);
 		return_val = m_selector.CompAnalysis(min_voxels, max_voxels, thresh, falloff, select, gen_ann);
 	}
@@ -2350,7 +2356,10 @@ int VRenderGLView::NoiseAnalysis(double min_voxels, double max_voxels, double th
 	Framebuffer* paint_buffer = TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
 	if (paint_buffer)
 		m_selector.Set2DMask(paint_buffer->tex_id(GL_COLOR_ATTACHMENT0));
-	m_selector.Set2DWeight(m_tex_final, glIsTexture(m_tex_wt2) ? m_tex_wt2 : m_tex);
+	Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer("final");
+	if (final_buffer)
+		m_selector.Set2DWeight(final_buffer->tex_id(GL_COLOR_ATTACHMENT0),
+			glIsTexture(m_tex_wt2) ? m_tex_wt2 : m_tex);
 	return_val = m_selector.NoiseAnalysis(min_voxels, max_voxels, 10.0, thresh);
 
 	return return_val;
@@ -2947,39 +2956,18 @@ void VRenderGLView::PrepFinalBuffer()
 	glActiveTexture(GL_TEXTURE0);
 	//glEnable(GL_TEXTURE_2D);
 	//frame buffer for final
-	if (!glIsFramebuffer(m_fbo_final))
-	{
-		glGenFramebuffers(1, &m_fbo_final);
-		//color buffer/texture for final
-		if (!glIsTexture(m_tex_final))
-			glGenTextures(1, &m_tex_final);
-		//fbo_final
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_final);
-		//color buffer for final
-		glBindTexture(GL_TEXTURE_2D, m_tex_final);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
-			GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
-		glFramebufferTexture2D(GL_FRAMEBUFFER,
-			GL_COLOR_ATTACHMENT0,
-			GL_TEXTURE_2D, m_tex_final, 0);
-	}
-
-	if (m_resize)
-	{
-		glBindTexture(GL_TEXTURE_2D, m_tex_final);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
-			GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
-									 //m_resize = false;
-	}
+	Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+		FB_Render_RGBA, nx, ny, GL_COLOR_ATTACHMENT0, "final");
+	if (final_buffer)
+		final_buffer->protect();
 }
 
 void VRenderGLView::ClearFinalBuffer()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_final);
+	Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+		"final");
+	if (final_buffer)
+		final_buffer->bind();
 	//clear color buffer to black for compositing
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -2995,7 +2983,9 @@ void VRenderGLView::DrawFinalBuffer()
 
 	//draw the final buffer to the windows buffer
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_tex_final);
+	Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer("final");
+	if (final_buffer)
+		final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	//glBlendFunc(GL_ONE, GL_ONE);
@@ -3261,7 +3251,9 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, bool mask, int peel)
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, m_tex_final);
+			Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer("final");
+			if (final_buffer)
+				final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 			glDisable(GL_BLEND);
 			glDisable(GL_DEPTH_TEST);
 
@@ -3314,7 +3306,10 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, bool mask, int peel)
 	}
 
 	//bind fbo for final composition
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_final);
+	Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+		"final");
+	if (final_buffer)
+		final_buffer->bind();
 
 	if (TextureRenderer::get_mem_swap())
 	{
@@ -3425,7 +3420,9 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, m_tex_final);
+			Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer("final");
+			if (final_buffer)
+				final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 			glDisable(GL_BLEND);
 			glDisable(GL_DEPTH_TEST);
 
@@ -3590,7 +3587,10 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 	}
 
 	//bind fbo for final composition
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_final);
+	Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+		"final");
+	if (final_buffer)
+		final_buffer->bind();
 
 	if (TextureRenderer::get_mem_swap())
 	{
@@ -3850,7 +3850,9 @@ void VRenderGLView::DrawOLShadowsMesh(GLuint tex_depth, double darkness)
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, tex_depth);
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, m_tex_final);
+	Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer("final");
+	if (final_buffer)
+		final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 	//2d adjustment
 
 	DrawViewQuad();
@@ -4269,7 +4271,10 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	DrawOLShadows(list, use_tex_wt2 ? m_tex_wt2 : m_tex);
 
 	//bind fbo for final composition
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_final);
+	Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+		"final");
+	if (final_buffer)
+		final_buffer->bind();
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, use_tex_wt2 ? m_tex_wt2 : m_tex);
 	//build mipmap
@@ -5757,10 +5762,15 @@ void VRenderGLView::PostDraw()
 
 		if (m_enlarge)
 		{
-			glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_final);
-			//draw the final buffer to itself
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, m_tex_final);
+			Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+				"final");
+			if (final_buffer)
+			{
+				//draw the final buffer to itself
+				final_buffer->bind();
+				final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+			}
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 			glDisable(GL_DEPTH_TEST);
