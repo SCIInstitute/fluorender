@@ -82,26 +82,27 @@ namespace FLIVR
 		inline void unprotect();
 		inline bool valid();
 
-		inline bool attach_texture(int ap, FramebufferTexture* tex);
+		bool attach_texture(int ap, FramebufferTexture* tex);
 		inline bool attach_texture(int ap, unsigned int tex_id, int layer=0);
-		inline void detach_texture(int ap);
-		inline void detach_texture(FramebufferTexture* tex);
-		inline void bind_texture(int ap);
-		inline unsigned int tex_id(int ap);
+		void detach_texture(int ap);
+		void detach_texture(FramebufferTexture* tex);
+		void bind_texture(int ap);
+		unsigned int tex_id(int ap);
 
 		inline bool match_size(int nx, int ny);
-		inline void resize(int nx, int ny);
+		void resize(int nx, int ny);
 
 		//match without size
-		inline bool match(FBType, int);
+		bool match(FBType, int);
 		//match with size
-		inline bool match(FBType, int, int, int);
+		bool match(FBType, int, int, int);
 		//match by name
 		inline bool match(const std::string &name);
 
 		//name represents its use
 		inline void set_name(const std::string &name);
 		inline void clear_name();
+		std::string &get_name() { return name_; }
 
 	private:
 		unsigned int id_;
@@ -209,29 +210,6 @@ namespace FLIVR
 		return valid_;
 	}
 
-	inline bool Framebuffer::attach_texture(int ap, FramebufferTexture* tex)
-	{
-		if (!valid_)
-			return false;
-		switch (type_)
-		{
-		case FB_Render_RGBA:
-		{
-			glBindFramebuffer(GL_FRAMEBUFFER, id_);
-			glFramebufferTexture2D(GL_FRAMEBUFFER,
-				ap, GL_TEXTURE_2D, tex->id_, 0);
-			std::pair<int, FramebufferTexture*> item(ap, tex);
-			auto it = std::find(tex_list_.begin(),
-				tex_list_.end(), item);
-			if (it == tex_list_.end())
-				tex_list_.push_back(item);
-
-		}
-		break;
-		}
-		return true;
-	}
-
 	inline bool Framebuffer::attach_texture(int ap, unsigned int tex_id, int layer)
 	{
 		if (!valid_)
@@ -251,113 +229,9 @@ namespace FLIVR
 		return true;
 	}
 
-	inline void Framebuffer::detach_texture(int ap)
-	{
-		glFramebufferTexture(GL_FRAMEBUFFER,
-			ap, 0, 0);
-		for (auto it = tex_list_.begin();
-			it != tex_list_.end();)
-		{
-			if ((*it).first == ap)
-				it = tex_list_.erase(it);
-			else
-				++it;
-		}
-	}
-
-	inline void Framebuffer::detach_texture(FramebufferTexture* tex)
-	{
-		for (auto it = tex_list_.begin();
-			it != tex_list_.end();)
-		{
-			if ((*it).second == tex)
-			{
-				glFramebufferTexture(GL_FRAMEBUFFER,
-					(*it).first, 0, 0);
-				it = tex_list_.erase(it);
-			}
-			else
-				++it;
-		}
-	}
-
-	inline void Framebuffer::bind_texture(int ap)
-	{
-		for (auto it = tex_list_.begin();
-			it != tex_list_.end(); ++it)
-		{
-			if ((*it).first == ap)
-				(*it).second->bind();
-		}
-	}
-
-	inline unsigned int Framebuffer::tex_id(int ap)
-	{
-		for (auto it = tex_list_.begin();
-			it != tex_list_.end(); ++it)
-		{
-			if ((*it).first == ap)
-				return (*it).second->id_;
-		}
-		return 0;
-	}
-
 	inline bool Framebuffer::match_size(int nx, int ny)
 	{
 		return (nx == nx_) && (ny == ny_);
-	}
-
-	inline void Framebuffer::resize(int nx, int ny)
-	{
-		for (auto it = tex_list_.begin();
-			it != tex_list_.end(); ++it)
-		{
-			if ((*it).second->valid())
-				(*it).second->resize(nx, ny);
-		}
-		nx_ = nx; ny_ = ny;
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-
-	inline bool Framebuffer::match(FBType type, int ap)
-	{
-		if (protected_)
-			return false;
-		if (type_ == type)
-		{
-			if (type == FB_3D_Int)
-				return true;
-			for (auto it = tex_list_.begin();
-				it != tex_list_.end(); ++it)
-			{
-				if ((*it).first == ap &&
-					(*it).second->valid())
-					return true;
-			}
-		}
-		return false;
-	}
-
-	inline bool Framebuffer::match(FBType type,
-		int nx, int ny, int ap)
-	{
-		if (protected_)
-			return false;
-		if (type_ == type &&
-			nx_ == nx &&
-			ny_ == ny)
-		{
-			if (type == FB_3D_Int)
-				return true;
-			for (auto it = tex_list_.begin();
-				it != tex_list_.end(); ++it)
-			{
-				if ((*it).first == ap &&
-					(*it).second->valid())
-					return true;
-			}
-		}
-		return false;
 	}
 
 	inline bool Framebuffer::match(const std::string &name)
@@ -366,6 +240,7 @@ namespace FLIVR
 			return false;
 		if (name_ == name)
 			return true;
+		return false;
 	}
 
 	inline void Framebuffer::set_name(const std::string &name)

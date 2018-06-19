@@ -182,4 +182,132 @@ namespace FLIVR
 		}
 		return 0;
 	}
+
+	bool Framebuffer::attach_texture(int ap, FramebufferTexture* tex)
+	{
+		if (!valid_)
+			return false;
+		switch (type_)
+		{
+		case FB_Render_RGBA:
+		{
+			glBindFramebuffer(GL_FRAMEBUFFER, id_);
+			glFramebufferTexture2D(GL_FRAMEBUFFER,
+				ap, GL_TEXTURE_2D, tex->id_, 0);
+			std::pair<int, FramebufferTexture*> item(ap, tex);
+			auto it = std::find(tex_list_.begin(),
+				tex_list_.end(), item);
+			if (it == tex_list_.end())
+				tex_list_.push_back(item);
+
+		}
+		break;
+		}
+		return true;
+	}
+
+	void Framebuffer::detach_texture(int ap)
+	{
+		glFramebufferTexture(GL_FRAMEBUFFER,
+			ap, 0, 0);
+		for (auto it = tex_list_.begin();
+			it != tex_list_.end();)
+		{
+			if ((*it).first == ap)
+				it = tex_list_.erase(it);
+			else
+				++it;
+		}
+	}
+
+	void Framebuffer::detach_texture(FramebufferTexture* tex)
+	{
+		for (auto it = tex_list_.begin();
+			it != tex_list_.end();)
+		{
+			if ((*it).second == tex)
+			{
+				glFramebufferTexture(GL_FRAMEBUFFER,
+					(*it).first, 0, 0);
+				it = tex_list_.erase(it);
+			}
+			else
+				++it;
+		}
+	}
+
+	void Framebuffer::bind_texture(int ap)
+	{
+		for (auto it = tex_list_.begin();
+			it != tex_list_.end(); ++it)
+		{
+			if ((*it).first == ap)
+				(*it).second->bind();
+		}
+	}
+
+	unsigned int Framebuffer::tex_id(int ap)
+	{
+		for (auto it = tex_list_.begin();
+			it != tex_list_.end(); ++it)
+		{
+			if ((*it).first == ap)
+				return (*it).second->id_;
+		}
+		return 0;
+	}
+
+	void Framebuffer::resize(int nx, int ny)
+	{
+		for (auto it = tex_list_.begin();
+			it != tex_list_.end(); ++it)
+		{
+			if ((*it).second->valid())
+				(*it).second->resize(nx, ny);
+		}
+		nx_ = nx; ny_ = ny;
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	bool Framebuffer::match(FBType type, int ap)
+	{
+		if (protected_)
+			return false;
+		if (type_ == type)
+		{
+			if (type == FB_3D_Int)
+				return true;
+			for (auto it = tex_list_.begin();
+				it != tex_list_.end(); ++it)
+			{
+				if ((*it).first == ap &&
+					(*it).second->valid())
+					return true;
+			}
+		}
+		return false;
+	}
+
+	bool Framebuffer::match(FBType type,
+		int nx, int ny, int ap)
+	{
+		if (protected_)
+			return false;
+		if (type_ == type &&
+			nx_ == nx &&
+			ny_ == ny)
+		{
+			if (type == FB_3D_Int)
+				return true;
+			for (auto it = tex_list_.begin();
+				it != tex_list_.end(); ++it)
+			{
+				if ((*it).first == ap &&
+					(*it).second->valid())
+					return true;
+			}
+		}
+		return false;
+	}
+
 }
