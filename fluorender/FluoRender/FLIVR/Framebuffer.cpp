@@ -168,7 +168,8 @@ namespace FLIVR
 		if (type == FB_Render_RGBA)
 		{
 			//create new texture
-			FramebufferTexture* tex = new FramebufferTexture(FBTexType(type), nx, ny);
+			FramebufferTexture* tex =
+				new FramebufferTexture(FBTex_Render_RGBA, nx, ny);
 			if (!tex->create())
 				return 0;
 			//attach texture
@@ -193,6 +194,19 @@ namespace FLIVR
 			//add to lists
 			tex_list_.push_back(tex_color);
 			tex_list_.push_back(tex_depth);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+		else if (type == FB_Depth_Float)
+		{
+			//create new texture
+			FramebufferTexture* tex =
+				new FramebufferTexture(FBTex_Depth_Float, nx, ny);
+			if (!tex->create())
+				return 0;
+			//attach texture
+			fb->attach_texture(GL_DEPTH_ATTACHMENT, tex);
+			//add to lists
+			tex_list_.push_back(tex);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 		fb->set_name(name);
@@ -220,6 +234,7 @@ namespace FLIVR
 		{
 		case FB_Render_RGBA:
 		case FB_Pick_Int32_Float:
+		case FB_Depth_Float:
 		default:
 		{
 			glBindFramebuffer(GL_FRAMEBUFFER, id_);
@@ -230,7 +245,6 @@ namespace FLIVR
 				tex_list_.end(), item);
 			if (it == tex_list_.end())
 				tex_list_.push_back(item);
-
 		}
 		break;
 		}

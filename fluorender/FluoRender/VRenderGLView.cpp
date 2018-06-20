@@ -828,6 +828,8 @@ void VRenderGLView::DrawDP()
 	int i;
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
+	string name;
+	Framebuffer* peel_buffer = 0;
 
 	//clear
 	//	glDrawBuffer(GL_BACK);
@@ -867,58 +869,6 @@ void VRenderGLView::DrawDP()
 		if (m_draw_clip)
 			DrawClippingPlanes(true, BACK_FACE);
 
-		//generate depth peeling buffers
-		for (i = 0; i<m_peeling_layers; i++)
-		{
-			if (i >= (int)m_dp_fbo_list.size())
-			{
-				GLuint fbo_id;
-				GLuint tex_id;
-				glGenFramebuffers(1, &fbo_id);
-				glGenTextures(1, &tex_id);
-				glBindFramebuffer(GL_FRAMEBUFFER, fbo_id);
-				glBindTexture(GL_TEXTURE_2D, tex_id);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, nx, ny, 0,
-					GL_DEPTH_COMPONENT, GL_FLOAT, NULL);//GL_RGBA16F
-				glFramebufferTexture2D(GL_FRAMEBUFFER,
-					GL_DEPTH_ATTACHMENT,
-					GL_TEXTURE_2D, tex_id, 0);
-				m_dp_fbo_list.push_back(fbo_id);
-				m_dp_tex_list.push_back(tex_id);
-			}
-			else if (i >= 0 && !glIsFramebuffer(m_dp_fbo_list[i]))
-			{
-				GLuint fbo_id;
-				GLuint tex_id;
-				glGenFramebuffers(1, &fbo_id);
-				glGenTextures(1, &tex_id);
-				glBindFramebuffer(GL_FRAMEBUFFER, fbo_id);
-				glBindTexture(GL_TEXTURE_2D, tex_id);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, nx, ny, 0,
-					GL_DEPTH_COMPONENT, GL_FLOAT, NULL);//GL_RGBA16F
-				glFramebufferTexture2D(GL_FRAMEBUFFER,
-					GL_DEPTH_ATTACHMENT,
-					GL_TEXTURE_2D, tex_id, 0);
-				m_dp_fbo_list[i] = fbo_id;
-				m_dp_tex_list[i] = tex_id;
-			}
-			if (m_resize)
-			{
-				glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[i]);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, nx, ny, 0,
-					GL_DEPTH_COMPONENT, GL_FLOAT, NULL);//GL_RGBA16F
-														//m_resize = false;
-			}
-		}
-
 		//setup
 		glDisable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
@@ -928,9 +878,15 @@ void VRenderGLView::DrawDP()
 		//draw depth values of each layer into the buffers
 		for (i = 0; i<m_peeling_layers; i++)
 		{
-			glBindFramebuffer(GL_FRAMEBUFFER, m_dp_fbo_list[i]);
-			//glDrawBuffer(GL_NONE);
-			//glReadBuffer(GL_NONE);
+			name = "peel buffer" + std::to_string(i);
+			peel_buffer =
+				TextureRenderer::framebuffer_manager_.framebuffer(
+					FB_Depth_Float, nx, ny, name);
+			if (peel_buffer)
+			{
+				peel_buffer->bind();
+				peel_buffer->protect();
+			}
 
 			glClearDepth(1.0);
 			glClear(GL_DEPTH_BUFFER_BIT);
@@ -942,7 +898,11 @@ void VRenderGLView::DrawDP()
 			else
 			{
 				glActiveTexture(GL_TEXTURE15);
-				glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[i - 1]);
+				name = "peel buffer" + std::to_string(i-1);
+				peel_buffer =
+					TextureRenderer::framebuffer_manager_.framebuffer(name);
+				if (peel_buffer)
+					peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 				glActiveTexture(GL_TEXTURE0);
 				DrawMeshes(1);
 				glActiveTexture(GL_TEXTURE15);
@@ -964,7 +924,11 @@ void VRenderGLView::DrawDP()
 			{
 				//draw volumes before the depth
 				glActiveTexture(GL_TEXTURE15);
-				glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[0]);
+				name = "peel buffer" + std::to_string(0);
+				peel_buffer =
+					TextureRenderer::framebuffer_manager_.framebuffer(name);
+				if (peel_buffer)
+					peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 				glActiveTexture(GL_TEXTURE0);
 				DrawVolumes(1);
 				glActiveTexture(GL_TEXTURE15);
@@ -977,15 +941,27 @@ void VRenderGLView::DrawDP()
 				{
 					//i == m_peeling_layers == 1
 					glActiveTexture(GL_TEXTURE15);
-					glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[0]);
+					name = "peel buffer" + std::to_string(0);
+					peel_buffer =
+						TextureRenderer::framebuffer_manager_.framebuffer(name);
+					if (peel_buffer)
+						peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 					glActiveTexture(GL_TEXTURE0);
 				}
 				else if (m_peeling_layers == 2)
 				{
 					glActiveTexture(GL_TEXTURE14);
-					glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[0]);
+					name = "peel buffer" + std::to_string(0);
+					peel_buffer =
+						TextureRenderer::framebuffer_manager_.framebuffer(name);
+					if (peel_buffer)
+						peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 					glActiveTexture(GL_TEXTURE15);
-					glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[1]);
+					name = "peel buffer" + std::to_string(1);
+					peel_buffer =
+						TextureRenderer::framebuffer_manager_.framebuffer(name);
+					if (peel_buffer)
+						peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 					glActiveTexture(GL_TEXTURE0);
 				}
 				else if (m_peeling_layers > 2)
@@ -993,27 +969,55 @@ void VRenderGLView::DrawDP()
 					if (i == m_peeling_layers)
 					{
 						glActiveTexture(GL_TEXTURE14);
-						glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[i - 2]);
+						name = "peel buffer" + std::to_string(i-2);
+						peel_buffer =
+							TextureRenderer::framebuffer_manager_.framebuffer(name);
+						if (peel_buffer)
+							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 						glActiveTexture(GL_TEXTURE15);
-						glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[i - 1]);
+						name = "peel buffer" + std::to_string(i-1);
+						peel_buffer =
+							TextureRenderer::framebuffer_manager_.framebuffer(name);
+						if (peel_buffer)
+							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 						glActiveTexture(GL_TEXTURE0);
 					}
 					else if (i == 1)
 					{
 						glActiveTexture(GL_TEXTURE14);
-						glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[0]);
+						name = "peel buffer" + std::to_string(0);
+						peel_buffer =
+							TextureRenderer::framebuffer_manager_.framebuffer(name);
+						if (peel_buffer)
+							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 						glActiveTexture(GL_TEXTURE15);
-						glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[1]);
+						name = "peel buffer" + std::to_string(1);
+						peel_buffer =
+							TextureRenderer::framebuffer_manager_.framebuffer(name);
+						if (peel_buffer)
+							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 						glActiveTexture(GL_TEXTURE0);
 					}
 					else
 					{
 						glActiveTexture(GL_TEXTURE13);
-						glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[i - 2]);
+						name = "peel buffer" + std::to_string(i-2);
+						peel_buffer =
+							TextureRenderer::framebuffer_manager_.framebuffer(name);
+						if (peel_buffer)
+							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 						glActiveTexture(GL_TEXTURE14);
-						glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[i - 1]);
+						name = "peel buffer" + std::to_string(i-1);
+						peel_buffer =
+							TextureRenderer::framebuffer_manager_.framebuffer(name);
+						if (peel_buffer)
+							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 						glActiveTexture(GL_TEXTURE15);
-						glBindTexture(GL_TEXTURE_2D, m_dp_tex_list[i]);
+						name = "peel buffer" + std::to_string(i);
+						peel_buffer =
+							TextureRenderer::framebuffer_manager_.framebuffer(name);
+						if (peel_buffer)
+							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 						glActiveTexture(GL_TEXTURE0);
 					}
 				}
@@ -1077,12 +1081,9 @@ void VRenderGLView::DrawDP()
 			}
 		}
 
-		if (m_dp_tex_list.size()>0)
-		{
-			double darkness;
-			if (GetMeshShadow(darkness))
-				DrawOLShadowsMesh(m_dp_tex_list[0], darkness);
-		}
+		double darkness;
+		if (GetMeshShadow(darkness))
+			DrawOLShadowsMesh(darkness);
 
 		if (m_draw_clip)
 			DrawClippingPlanes(false, FRONT_FACE);
@@ -3682,7 +3683,7 @@ bool VRenderGLView::GetMeshShadow(double &val)
 	return false;
 }
 
-void VRenderGLView::DrawOLShadowsMesh(GLuint tex_depth, double darkness)
+void VRenderGLView::DrawOLShadowsMesh(double darkness)
 {
 	int nx, ny;
 	nx = GetGLSize().x;
@@ -3701,7 +3702,11 @@ void VRenderGLView::DrawOLShadowsMesh(GLuint tex_depth, double darkness)
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, tex_depth);
+	string name = "peel buffer" + std::to_string(0);
+	Framebuffer* peel_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer(name);
+	if (peel_buffer)
+		peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 	glDisable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 
@@ -3754,7 +3759,8 @@ void VRenderGLView::DrawOLShadowsMesh(GLuint tex_depth, double darkness)
 	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, max(m_scale_factor, 1.0), 0.0);
 	img_shader->setLocalParam(1, darkness, 0.0, 0.0, 0.0);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, tex_depth);
+	if (peel_buffer)
+		peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 	glActiveTexture(GL_TEXTURE2);
 	Framebuffer* final_buffer =
 		TextureRenderer::framebuffer_manager_.framebuffer("final");

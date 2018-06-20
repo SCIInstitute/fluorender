@@ -708,9 +708,6 @@ private:
 	GLuint m_cur_framebuffer;
 	//paint buffer
 	bool m_clear_paint;
-	//depth peeling buffers
-	vector<GLuint> m_dp_fbo_list;
-	vector<GLuint> m_dp_tex_list;
 	//vert buffer
 	GLuint m_quad_vbo, m_quad_vao;
 	GLuint m_misc_vbo, m_misc_ibo, m_misc_vao;
@@ -999,7 +996,7 @@ private:
 	//overlay passes
 	void DrawOLShading(VolumeData* vd);
 	void DrawOLShadows(vector<VolumeData*> &vlist);
-	void DrawOLShadowsMesh(GLuint tex_depth, double darkenss);
+	void DrawOLShadowsMesh(double darkenss);
 
 	//get mesh shadow
 	bool GetMeshShadow(double &val);

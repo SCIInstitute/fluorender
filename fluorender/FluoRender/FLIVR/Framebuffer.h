@@ -70,6 +70,7 @@ namespace FLIVR
 		FB_Render_RGBA = 0,
 		FB_3D_Int,
 		FB_Pick_Int32_Float,
+		FB_Depth_Float,
 	};
 	class Framebuffer
 	{
@@ -245,6 +246,7 @@ namespace FLIVR
 		{
 		case FB_Render_RGBA:
 		case FB_Pick_Int32_Float:
+		case FB_Depth_Float:
 		default:
 			glFramebufferTexture(GL_FRAMEBUFFER,
 				ap, tex_id, 0);
