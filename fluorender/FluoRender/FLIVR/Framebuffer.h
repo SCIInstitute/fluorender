@@ -37,6 +37,8 @@ namespace FLIVR
 	{
 		FBTex_Render_RGBA = 0,
 		FBTex_3D_Int,
+		FBTex_Render_Int32,
+		FBTex_Depth_Float,
 	};
 	class Framebuffer;
 	class FramebufferManager;
@@ -67,6 +69,7 @@ namespace FLIVR
 	{
 		FB_Render_RGBA = 0,
 		FB_3D_Int,
+		FB_Pick_Int32_Float,
 	};
 	class Framebuffer
 	{
@@ -94,9 +97,9 @@ namespace FLIVR
 		void resize(int nx, int ny);
 
 		//match without size
-		bool match(FBType, int);
+		bool match(FBType);
 		//match with size
-		bool match(FBType, int, int, int);
+		bool match(FBType, int, int);
 		//match by name
 		inline bool match(const std::string &name);
 
@@ -104,6 +107,9 @@ namespace FLIVR
 		inline void set_name(const std::string &name);
 		inline void clear_name();
 		std::string &get_name() { return name_; }
+
+		//read pick value
+		inline unsigned int read_value(int, int);
 
 	private:
 		unsigned int id_;
@@ -124,7 +130,8 @@ namespace FLIVR
 		FramebufferManager();
 		~FramebufferManager();
 
-		Framebuffer* framebuffer(FBType type, int nx, int ny, int ap, const std::string &name="");
+		Framebuffer* framebuffer(FBType type, int nx, int ny,
+			const std::string &name="");
 		Framebuffer* framebuffer(const std::string &name);
 
 	private:
@@ -139,6 +146,8 @@ namespace FLIVR
 			switch (type_)
 			{
 			case FBTex_Render_RGBA:
+			case FBTex_Render_Int32:
+			case FBTex_Depth_Float:
 			default:
 				glBindTexture(GL_TEXTURE_2D, id_);
 				break;
@@ -156,6 +165,8 @@ namespace FLIVR
 			switch (type_)
 			{
 			case FBTex_Render_RGBA:
+			case FBTex_Render_Int32:
+			case FBTex_Depth_Float:
 			default:
 				glBindTexture(GL_TEXTURE_2D, 0);
 				break;
@@ -180,6 +191,16 @@ namespace FLIVR
 				glBindTexture(GL_TEXTURE_2D, id_);
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx_, ny_, 0,
 					GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
+				break;
+			case FBTex_Render_Int32:
+				glBindTexture(GL_TEXTURE_2D, id_);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, nx_, ny_, 0,
+					GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
+				break;
+			case FBTex_Depth_Float:
+				glBindTexture(GL_TEXTURE_2D, id_);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, nx_, ny_, 0,
+					GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 				break;
 			}
 		}
@@ -223,6 +244,8 @@ namespace FLIVR
 		switch (type_)
 		{
 		case FB_Render_RGBA:
+		case FB_Pick_Int32_Float:
+		default:
 			glFramebufferTexture(GL_FRAMEBUFFER,
 				ap, tex_id, 0);
 			break;
@@ -259,5 +282,14 @@ namespace FLIVR
 		name_ = "";
 	}
 
+	inline unsigned int Framebuffer::read_value(int px, int py)
+	{
+		if (type_ != FB_Pick_Int32_Float)
+			return 0;
+		unsigned int value = 0;
+		glReadPixels(px, py, 1, 1, GL_RED_INTEGER,
+			GL_UNSIGNED_INT, (GLvoid*)&value);
+		return value;
+	}
 }
 #endif//Framebuffer_h

@@ -286,7 +286,7 @@ namespace FLIVR
 		if(blend_num_bits_ > 8)
 		{
 			blend_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
-				FB_Render_RGBA, w2, h2, GL_COLOR_ATTACHMENT0);
+				FB_Render_RGBA, w2, h2);
 			if (!blend_buffer)
 				return;
 			blend_buffer->bind();
@@ -494,7 +494,7 @@ namespace FLIVR
 			{
 				//FILTERING/////////////////////////////////////////////////////////////////
 				filter_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
-					FB_Render_RGBA, w2, h2, GL_COLOR_ATTACHMENT0);
+					FB_Render_RGBA, w2, h2);
 				filter_buffer->bind();
 				glClear(GL_COLOR_BUFFER_BIT);
 
@@ -595,7 +595,7 @@ namespace FLIVR
 		Framebuffer* micro_blend_buffer = 0;
 		if (blend_slices_ && colormap_mode_!=2)
 			micro_blend_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
-				FB_Render_RGBA, w, h, GL_COLOR_ATTACHMENT0);
+				FB_Render_RGBA, w, h);
 
 		//link to the new data
 		glBindBuffer(GL_ARRAY_BUFFER, m_slices_vbo);

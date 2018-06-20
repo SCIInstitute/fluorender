@@ -665,7 +665,7 @@ namespace FLIVR
 		if(blend_num_bits_ > 8)
 		{
 			blend_buffer = framebuffer_manager_.framebuffer(
-				FB_Render_RGBA, w2, h2, GL_COLOR_ATTACHMENT0);
+				FB_Render_RGBA, w2, h2);
 			if (!blend_buffer)
 				return;
 			blend_buffer->bind();
@@ -967,7 +967,7 @@ namespace FLIVR
 			{
 				//FILTERING/////////////////////////////////////////////////////////////////
 				filter_buffer = framebuffer_manager_.framebuffer(
-					FB_Render_RGBA, w2, h2, GL_COLOR_ATTACHMENT0);
+					FB_Render_RGBA, w2, h2);
 				filter_buffer->bind();
 
 				glClear(GL_COLOR_BUFFER_BIT);
@@ -1154,7 +1154,7 @@ namespace FLIVR
 
 		//mask frame buffer object
 		Framebuffer* fbo_mask =
-			framebuffer_manager_.framebuffer(FB_3D_Int, 0, 0, GL_COLOR_ATTACHMENT0);
+			framebuffer_manager_.framebuffer(FB_3D_Int, 0, 0);
 		if (fbo_mask)
 			fbo_mask->bind();
 
@@ -1374,7 +1374,7 @@ namespace FLIVR
 		glActiveTexture(GL_TEXTURE0);
 		//mask frame buffer object
 		Framebuffer* fbo_label =
-			framebuffer_manager_.framebuffer(FB_3D_Int, 0, 0, GL_COLOR_ATTACHMENT0);
+			framebuffer_manager_.framebuffer(FB_3D_Int, 0, 0);
 		if (fbo_label)
 			fbo_label->bind();
 
@@ -1587,7 +1587,7 @@ namespace FLIVR
 		glActiveTexture(GL_TEXTURE0);
 		//mask frame buffer object
 		Framebuffer* fbo_calc =
-			framebuffer_manager_.framebuffer(FB_3D_Int, 0, 0, GL_COLOR_ATTACHMENT0);
+			framebuffer_manager_.framebuffer(FB_3D_Int, 0, 0);
 		if (fbo_calc)
 			fbo_calc->bind();
 

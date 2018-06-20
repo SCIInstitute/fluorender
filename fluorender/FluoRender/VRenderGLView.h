@@ -714,8 +714,6 @@ private:
 	//vert buffer
 	GLuint m_quad_vbo, m_quad_vao;
 	GLuint m_misc_vbo, m_misc_ibo, m_misc_vao;
-	//mesh picking buffer
-	GLuint m_fbo_pick, m_tex_pick, m_tex_pick_depth;
 
 	//camera controls
 	bool m_persp;

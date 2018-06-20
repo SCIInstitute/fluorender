@@ -171,9 +171,9 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	//paint buffer
 	m_clear_paint(true),
 	//pick buffer
-	m_fbo_pick(0),
-	m_tex_pick(0),
-	m_tex_pick_depth(0),
+	//m_fbo_pick(0),
+	//m_tex_pick(0),
+	//m_tex_pick_depth(0),
 	//camera controls
 	m_persp(false),
 	m_free(false),
@@ -511,12 +511,12 @@ VRenderGLView::~VRenderGLView()
 		glDeleteVertexArrays(1, &m_misc_vao);
 
 	//pick buffer
-	if (glIsFramebuffer(m_fbo_pick))
-		glDeleteFramebuffers(1, &m_fbo_pick);
-	if (glIsTexture(m_tex_pick))
-		glDeleteTextures(1, &m_tex_pick);
-	if (glIsTexture(m_tex_pick_depth))
-		glDeleteTextures(1, &m_tex_pick_depth);
+	//if (glIsFramebuffer(m_fbo_pick))
+	//	glDeleteFramebuffers(1, &m_fbo_pick);
+	//if (glIsTexture(m_tex_pick))
+	//	glDeleteTextures(1, &m_tex_pick);
+	//if (glIsTexture(m_tex_pick_depth))
+	//	glDeleteTextures(1, &m_tex_pick_depth);
 
 	if (!m_sharedRC)
 		delete m_glRC;
@@ -1864,8 +1864,9 @@ void VRenderGLView::PaintStroke()
 
 	//generate texture and buffer objects
 	//painting fbo
-	Framebuffer* paint_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
-		FB_Render_RGBA, nx, ny, GL_COLOR_ATTACHMENT0, "paint brush");
+	Framebuffer* paint_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer(
+		FB_Render_RGBA, nx, ny, "paint brush");
 	if (!paint_buffer)
 		return;
 	paint_buffer->bind();
@@ -1968,7 +1969,8 @@ void VRenderGLView::PaintStroke()
 void VRenderGLView::DisplayStroke()
 {
 	//painting texture
-	Framebuffer* paint_buffer = TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
+	Framebuffer* paint_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
 	if (!paint_buffer)
 		return;
 
@@ -1998,9 +2000,11 @@ void VRenderGLView::DisplayStroke()
 //set 2d weights
 void VRenderGLView::Set2dWeights()
 {
-	Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+	Framebuffer* final_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer(
 		"final");
-	Framebuffer* chann_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+	Framebuffer* chann_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer(
 		"channel");
 	if (final_buffer && chann_buffer)
 		m_selector.Set2DWeight(
@@ -2028,7 +2032,8 @@ void VRenderGLView::Segment()
 	//center object
 	m_mv_mat = glm::translate(m_mv_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
 
-	Framebuffer* paint_buffer = TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
+	Framebuffer* paint_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
 	if (paint_buffer)
 		m_selector.Set2DMask(paint_buffer->tex_id(GL_COLOR_ATTACHMENT0));
 	Set2dWeights();
@@ -2194,7 +2199,8 @@ int VRenderGLView::CompAnalysis(double min_voxels, double max_voxels,
 
 	if (!select)
 	{
-		Framebuffer* paint_buffer = TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
+		Framebuffer* paint_buffer =
+			TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
 		if (paint_buffer)
 			m_selector.Set2DMask(paint_buffer->tex_id(GL_COLOR_ATTACHMENT0));
 		Set2dWeights();
@@ -2314,7 +2320,8 @@ int VRenderGLView::NoiseAnalysis(double min_voxels, double max_voxels, double th
 {
 	int return_val = 0;
 
-	Framebuffer* paint_buffer = TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
+	Framebuffer* paint_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
 	if (paint_buffer)
 		m_selector.Set2DMask(paint_buffer->tex_id(GL_COLOR_ATTACHMENT0));
 	Set2dWeights();
@@ -2914,15 +2921,17 @@ void VRenderGLView::PrepFinalBuffer()
 	glActiveTexture(GL_TEXTURE0);
 	//glEnable(GL_TEXTURE_2D);
 	//frame buffer for final
-	Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
-		FB_Render_RGBA, nx, ny, GL_COLOR_ATTACHMENT0, "final");
+	Framebuffer* final_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer(
+		FB_Render_RGBA, nx, ny, "final");
 	if (final_buffer)
 		final_buffer->protect();
 }
 
 void VRenderGLView::ClearFinalBuffer()
 {
-	Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+	Framebuffer* final_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer(
 		"final");
 	if (final_buffer)
 		final_buffer->bind();
@@ -2941,7 +2950,8 @@ void VRenderGLView::DrawFinalBuffer()
 
 	//draw the final buffer to the windows buffer
 	glActiveTexture(GL_TEXTURE0);
-	Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer("final");
+	Framebuffer* final_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer("final");
 	if (final_buffer)
 		final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 	glEnable(GL_BLEND);
@@ -3014,8 +3024,9 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 
 	//generate textures & buffer objects
 	//frame buffer for each volume
-	Framebuffer* chann_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
-		FB_Render_RGBA, nx, ny, GL_COLOR_ATTACHMENT0, "channel");
+	Framebuffer* chann_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer(
+		FB_Render_RGBA, nx, ny, "channel");
 	if (chann_buffer)
 		chann_buffer->protect();
 
@@ -3101,7 +3112,8 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 		}
 	}
 
-	Framebuffer* chann_buffer = TextureRenderer::framebuffer_manager_.framebuffer("channel");
+	Framebuffer* chann_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer("channel");
 	Framebuffer* temp_buffer = 0;
 	if (do_over)
 	{
@@ -3113,8 +3125,9 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 			TextureRenderer::reset_save_final_buffer();
 
 			//bind temporary framebuffer for comp in stream mode
-			temp_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
-				FB_Render_RGBA, nx, ny, GL_COLOR_ATTACHMENT0);
+			temp_buffer =
+				TextureRenderer::framebuffer_manager_.framebuffer(
+				FB_Render_RGBA, nx, ny);
 			if (temp_buffer)
 			{
 				temp_buffer->bind();
@@ -3123,7 +3136,8 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
 			glActiveTexture(GL_TEXTURE0);
-			Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer("final");
+			Framebuffer* final_buffer =
+				TextureRenderer::framebuffer_manager_.framebuffer("final");
 			if (final_buffer)
 				final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 			glDisable(GL_BLEND);
@@ -3181,7 +3195,8 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 	}
 
 	//bind fbo for final composition
-	Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+	Framebuffer* final_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer(
 		"final");
 	if (final_buffer)
 		final_buffer->bind();
@@ -3289,7 +3304,8 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 	bool enable_alpha = vd->GetEnableAlpha();
 	ShaderProgram* img_shader = 0;
 
-	Framebuffer* chann_buffer = TextureRenderer::framebuffer_manager_.framebuffer("channel");
+	Framebuffer* chann_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer("channel");
 	Framebuffer* temp_buffer = 0;
 	Framebuffer* overlay_buffer = 0;
 	if (do_mip)
@@ -3302,8 +3318,9 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 			TextureRenderer::reset_save_final_buffer();
 
 			//bind temporary framebuffer for comp in stream mode
-			temp_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
-				FB_Render_RGBA, nx, ny, GL_COLOR_ATTACHMENT0);
+			temp_buffer =
+				TextureRenderer::framebuffer_manager_.framebuffer(
+				FB_Render_RGBA, nx, ny);
 			if (temp_buffer)
 			{
 				temp_buffer->bind();
@@ -3312,7 +3329,8 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
 			glActiveTexture(GL_TEXTURE0);
-			Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer("final");
+			Framebuffer* final_buffer =
+				TextureRenderer::framebuffer_manager_.framebuffer("final");
 			if (final_buffer)
 				final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 			glDisable(GL_BLEND);
@@ -3334,8 +3352,9 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 		}
 
 		//bind the fbo
-		overlay_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
-			FB_Render_RGBA, nx, ny, GL_COLOR_ATTACHMENT0);
+		overlay_buffer =
+			TextureRenderer::framebuffer_manager_.framebuffer(
+			FB_Render_RGBA, nx, ny);
 		if (overlay_buffer)
 		{
 			overlay_buffer->bind();
@@ -3465,7 +3484,8 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 	}
 
 	//bind fbo for final composition
-	Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+	Framebuffer* final_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer(
 		"final");
 	if (final_buffer)
 		final_buffer->bind();
@@ -3568,8 +3588,9 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 	}
 
 	//shading pass
-	Framebuffer* overlay_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
-		FB_Render_RGBA, nx, ny, GL_COLOR_ATTACHMENT0);
+	Framebuffer* overlay_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer(
+		FB_Render_RGBA, nx, ny);
 	if (overlay_buffer)
 	{
 		overlay_buffer->bind();
@@ -3592,7 +3613,8 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 	vd->SetEnableAlpha(alpha);
 
 	//bind fbo for final composition
-	Framebuffer* chann_buffer = TextureRenderer::framebuffer_manager_.framebuffer("channel");
+	Framebuffer* chann_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer("channel");
 	if (chann_buffer)
 		chann_buffer->bind();
 	glActiveTexture(GL_TEXTURE0);
@@ -3668,8 +3690,9 @@ void VRenderGLView::DrawOLShadowsMesh(GLuint tex_depth, double darkness)
 
 	//shadow pass
 	//bind the fbo
-	Framebuffer* overlay_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
-		FB_Render_RGBA, nx, ny, GL_COLOR_ATTACHMENT0);
+	Framebuffer* overlay_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer(
+		FB_Render_RGBA, nx, ny);
 	if (overlay_buffer)
 	{
 		overlay_buffer->bind();
@@ -3733,7 +3756,8 @@ void VRenderGLView::DrawOLShadowsMesh(GLuint tex_depth, double darkness)
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, tex_depth);
 	glActiveTexture(GL_TEXTURE2);
-	Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer("final");
+	Framebuffer* final_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer("final");
 	if (final_buffer)
 		final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 	//2d adjustment
@@ -3798,8 +3822,9 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 				return;
 	}
 
-	Framebuffer* overlay_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
-		FB_Render_RGBA, nx, ny, GL_COLOR_ATTACHMENT0);
+	Framebuffer* overlay_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer(
+		FB_Render_RGBA, nx, ny);
 	if (overlay_buffer)
 	{
 		overlay_buffer->bind();
@@ -3897,8 +3922,9 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 	{
 		//shadow pass
 		//bind the fbo
-		Framebuffer* temp_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
-			FB_Render_RGBA, nx, ny, GL_COLOR_ATTACHMENT0);
+		Framebuffer* temp_buffer =
+			TextureRenderer::framebuffer_manager_.framebuffer(
+			FB_Render_RGBA, nx, ny);
 		if (temp_buffer)
 		{
 			temp_buffer->bind();
@@ -3939,7 +3965,8 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 			img_shader->release();
 
 		//bind fbo for final composition
-		Framebuffer* chann_buffer = TextureRenderer::framebuffer_manager_.framebuffer("channel");
+		Framebuffer* chann_buffer =
+			TextureRenderer::framebuffer_manager_.framebuffer("channel");
 		if (chann_buffer)
 			chann_buffer->bind();
 		glActiveTexture(GL_TEXTURE0);
@@ -4046,8 +4073,9 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 
 	//generate textures & buffer objects
 	//frame buffer for each volume
-	Framebuffer* chann_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
-		FB_Render_RGBA, nx, ny, GL_COLOR_ATTACHMENT0, "channel");
+	Framebuffer* chann_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer(
+		FB_Render_RGBA, nx, ny, "channel");
 	//bind the fbo
 	if (chann_buffer)
 	{
@@ -4074,7 +4102,8 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	DrawOLShadows(list);
 
 	//bind fbo for final composition
-	Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+	Framebuffer* final_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer(
 		"final");
 	if (final_buffer)
 		final_buffer->bind();
@@ -4329,46 +4358,13 @@ void VRenderGLView::PickMesh()
 
 	//set up fbo
 	m_cur_framebuffer = 0;
-	if (glIsFramebuffer(m_fbo_pick) != GL_TRUE)
-	{
-		glGenFramebuffers(1, &m_fbo_pick);
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_pick);
-		if (glIsTexture(m_tex_pick) != GL_TRUE)
-			glGenTextures(1, &m_tex_pick);
-		glBindTexture(GL_TEXTURE_2D, m_tex_pick);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, nx, ny, 0,
-			GL_RED_INTEGER, GL_UNSIGNED_INT, 0);
-		glFramebufferTexture2D(GL_FRAMEBUFFER,
-			GL_COLOR_ATTACHMENT0,
-			GL_TEXTURE_2D, m_tex_pick, 0);
-		if (glIsTexture(m_tex_pick_depth) != GL_TRUE)
-			glGenTextures(1, &m_tex_pick_depth);
-		glBindTexture(GL_TEXTURE_2D, m_tex_pick_depth);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, nx, ny, 0,
-			GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-		glFramebufferTexture2D(GL_FRAMEBUFFER,
-			GL_DEPTH_ATTACHMENT,
-			GL_TEXTURE_2D, m_tex_pick_depth, 0);
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-	if (m_resize)
-	{
-		glBindTexture(GL_TEXTURE_2D, m_tex_pick);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, nx, ny, 0,
-			GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
-		glBindTexture(GL_TEXTURE_2D, m_tex_pick_depth);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, nx, ny, 0,
-			GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-
 	//bind
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_pick);
-	//GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	Framebuffer* pick_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer(
+			FB_Pick_Int32_Float, nx, ny);
+	if (pick_buffer)
+		pick_buffer->bind();
+
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glClearDepth(1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -4389,8 +4385,8 @@ void VRenderGLView::PickMesh()
 	glDisable(GL_SCISSOR_TEST);
 
 	unsigned int choose = 0;
-	glReadPixels(mouse_pos.x, ny - mouse_pos.y, 1, 1, GL_RED_INTEGER,
-		GL_UNSIGNED_INT, (GLvoid*)&choose);
+	if (pick_buffer)
+		choose = pick_buffer->read_value(mouse_pos.x, ny - mouse_pos.y);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_cur_framebuffer);
 
 	if (choose >0 && choose <= (int)m_md_pop_list.size())
@@ -5559,7 +5555,8 @@ void VRenderGLView::PostDraw()
 		if (m_enlarge)
 		{
 			glActiveTexture(GL_TEXTURE0);
-			Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+			Framebuffer* final_buffer =
+				TextureRenderer::framebuffer_manager_.framebuffer(
 				"final");
 			if (final_buffer)
 			{

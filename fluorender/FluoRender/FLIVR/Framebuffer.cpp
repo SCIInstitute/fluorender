@@ -51,13 +51,24 @@ namespace FLIVR
 		{
 		case FBTex_Render_RGBA:
 		default:
-			glBindTexture(GL_TEXTURE_2D, id_);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx_, ny_, 0,
 				GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
+			break;
+		case FBTex_Render_Int32:
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, nx_, ny_, 0,
+				GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
+			break;
+		case FBTex_Depth_Float:
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, nx_, ny_, 0,
+				GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 			break;
 		}
 		valid_ = true;
@@ -116,7 +127,7 @@ namespace FLIVR
 	}
 
 	Framebuffer* FramebufferManager::framebuffer(
-		FBType type, int nx, int ny, int ap,
+		FBType type, int nx, int ny,
 		const std::string &name)
 	{
 		if (name != "")
@@ -137,7 +148,7 @@ namespace FLIVR
 		for (auto it = fb_list_.begin();
 			it != fb_list_.end(); ++it)
 		{
-			if ((*it)->match(type, ap))
+			if ((*it)->match(type))
 			{
 				//size may not match
 				//how to manage size change more efficiently needs further consideration
@@ -161,9 +172,27 @@ namespace FLIVR
 			if (!tex->create())
 				return 0;
 			//attach texture
-			fb->attach_texture(ap, tex);
+			fb->attach_texture(GL_COLOR_ATTACHMENT0, tex);
 			//add to lists
 			tex_list_.push_back(tex);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+		else if (type == FB_Pick_Int32_Float)
+		{
+			FramebufferTexture* tex_color =
+				new FramebufferTexture(FBTex_Render_Int32, nx, ny);
+			if (!tex_color->create())
+				return 0;
+			FramebufferTexture* tex_depth =
+				new FramebufferTexture(FBTex_Depth_Float, nx, ny);
+			if (!tex_depth->create())
+				return 0;
+			//attach textures
+			fb->attach_texture(GL_COLOR_ATTACHMENT0, tex_color);
+			fb->attach_texture(GL_DEPTH_ATTACHMENT, tex_depth);
+			//add to lists
+			tex_list_.push_back(tex_color);
+			tex_list_.push_back(tex_depth);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 		fb->set_name(name);
@@ -190,6 +219,8 @@ namespace FLIVR
 		switch (type_)
 		{
 		case FB_Render_RGBA:
+		case FB_Pick_Int32_Float:
+		default:
 		{
 			glBindFramebuffer(GL_FRAMEBUFFER, id_);
 			glFramebufferTexture2D(GL_FRAMEBUFFER,
@@ -269,44 +300,24 @@ namespace FLIVR
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	bool Framebuffer::match(FBType type, int ap)
+	bool Framebuffer::match(FBType type)
 	{
 		if (protected_)
 			return false;
 		if (type_ == type)
-		{
-			if (type == FB_3D_Int)
-				return true;
-			for (auto it = tex_list_.begin();
-				it != tex_list_.end(); ++it)
-			{
-				if ((*it).first == ap &&
-					(*it).second->valid())
-					return true;
-			}
-		}
+			return true;
 		return false;
 	}
 
 	bool Framebuffer::match(FBType type,
-		int nx, int ny, int ap)
+		int nx, int ny)
 	{
 		if (protected_)
 			return false;
 		if (type_ == type &&
 			nx_ == nx &&
 			ny_ == ny)
-		{
-			if (type == FB_3D_Int)
-				return true;
-			for (auto it = tex_list_.begin();
-				it != tex_list_.end(); ++it)
-			{
-				if ((*it).first == ap &&
-					(*it).second->valid())
-					return true;
-			}
-		}
+			return true;
 		return false;
 	}
 
