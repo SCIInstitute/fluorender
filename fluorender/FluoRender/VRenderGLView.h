@@ -708,9 +708,6 @@ private:
 	bool m_paint_display;
 	//2d frame buffers
 	GLuint m_cur_framebuffer;
-	//temp buffer for large data compositing
-	GLuint m_fbo_temp;
-	GLuint m_tex_temp;
 	//shading (shadow) overlay
 	GLuint m_fbo_ol1;
 	GLuint m_fbo_ol2;

@@ -170,9 +170,6 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_draw_brush(false),
 	m_paint_enable(false),
 	m_paint_display(false),
-	//temp buffer for large data comp
-	m_fbo_temp(0),
-	m_tex_temp(0),
 	//shading (shadow) overlay
 	m_fbo_ol1(0),
 	m_fbo_ol2(0),
@@ -510,14 +507,10 @@ VRenderGLView::~VRenderGLView()
 	}
 
 	//delete buffers and textures
-	if (glIsFramebuffer(m_fbo_temp))
-		glDeleteFramebuffers(1, &m_fbo_temp);
 	if (glIsFramebuffer(m_fbo_ol1))
 		glDeleteFramebuffers(1, &m_fbo_ol1);
 	if (glIsFramebuffer(m_fbo_ol2))
 		glDeleteFramebuffers(1, &m_fbo_ol2);
-	if (glIsTexture(m_tex_temp))
-		glDeleteTextures(1, &m_tex_temp);
 	if (glIsTexture(m_tex_ol1))
 		glDeleteTextures(1, &m_tex_ol1);
 	if (glIsTexture(m_tex_ol2))
@@ -3044,27 +3037,6 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 		FB_Render_RGBA, nx, ny, GL_COLOR_ATTACHMENT0, "channel");
 	if (chann_buffer)
 		chann_buffer->protect();
-	if (TextureRenderer::get_mem_swap())
-	{
-		if (glIsFramebuffer(m_fbo_temp) != GL_TRUE)
-		{
-			glGenFramebuffers(1, &m_fbo_temp);
-			if (glIsTexture(m_tex_temp) != GL_TRUE)
-				glGenTextures(1, &m_tex_temp);
-			glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_temp);
-			//color buffer for each volume
-			glBindTexture(GL_TEXTURE_2D, m_tex_temp);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
-				GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
-			glFramebufferTexture2D(GL_FRAMEBUFFER,
-				GL_COLOR_ATTACHMENT0,
-				GL_TEXTURE_2D, m_tex_temp, 0);
-		}
-	}
 
 	//draw each volume to fbo
 	for (i = 0; i<(int)list.size(); i++)
@@ -3149,16 +3121,24 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 	}
 
 	Framebuffer* chann_buffer = TextureRenderer::framebuffer_manager_.framebuffer("channel");
+	Framebuffer* temp_buffer = 0;
 	if (do_over)
 	{
-		//before rendering this channel, save m_fbo_final to m_fbo_temp
+		//before rendering this channel, save final buffer to temp buffer
 		if (TextureRenderer::get_mem_swap() &&
 			TextureRenderer::get_start_update_loop() &&
 			TextureRenderer::get_save_final_buffer())
 		{
 			TextureRenderer::reset_save_final_buffer();
 
-			glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_temp);
+			//bind temporary framebuffer for comp in stream mode
+			temp_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+				FB_Render_RGBA, nx, ny, GL_COLOR_ATTACHMENT0);
+			if (temp_buffer)
+			{
+				temp_buffer->bind();
+				temp_buffer->protect();
+			}
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
 			glActiveTexture(GL_TEXTURE0);
@@ -3227,11 +3207,17 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 
 	if (TextureRenderer::get_mem_swap())
 	{
-		//restore m_fbo_temp to m_fbo_final
+		//restore temp buffer to final buffer
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m_tex_temp);
+		if (temp_buffer)
+		{
+			//temp buffer becomes unused after texture is bound
+			//ok to unprotect
+			temp_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+			temp_buffer->unprotect();
+		}
 		glDisable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
 
@@ -3323,16 +3309,24 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 	ShaderProgram* img_shader = 0;
 
 	Framebuffer* chann_buffer = TextureRenderer::framebuffer_manager_.framebuffer("channel");
+	Framebuffer* temp_buffer = 0;
 	if (do_mip)
 	{
-		//before rendering this channel, save m_fbo_final to m_fbo_temp
+		//before rendering this channel, save final buffer to temp buffer
 		if (TextureRenderer::get_mem_swap() &&
 			TextureRenderer::get_start_update_loop() &&
 			TextureRenderer::get_save_final_buffer())
 		{
 			TextureRenderer::reset_save_final_buffer();
 
-			glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_temp);
+			//bind temporary framebuffer for comp in stream mode
+			temp_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+				FB_Render_RGBA, nx, ny, GL_COLOR_ATTACHMENT0);
+			if (temp_buffer)
+			{
+				temp_buffer->bind();
+				temp_buffer->protect();
+			}
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
 			glActiveTexture(GL_TEXTURE0);
@@ -3511,11 +3505,17 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 
 	if (TextureRenderer::get_mem_swap())
 	{
-		//restore m_fbo_temp to m_fbo_final
+		//restore temp buffer to final buffer
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m_tex_temp);
+		if (temp_buffer)
+		{
+			//bind tex from temp buffer
+			//it becomes unprotected afterwards
+			temp_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+			temp_buffer->unprotect();
+		}
 		glDisable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
 
