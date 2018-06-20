@@ -171,9 +171,9 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_paint_enable(false),
 	m_paint_display(false),
 	//2d frame buffers
-	m_fbo(0),
-	m_tex(0),
-	m_tex_wt2(0),
+	//m_fbo(0),
+	//m_tex(0),
+	//m_tex_wt2(0),
 	//temp buffer for large data comp
 	m_fbo_temp(0),
 	m_tex_temp(0),
@@ -514,16 +514,16 @@ VRenderGLView::~VRenderGLView()
 	}
 
 	//delete buffers and textures
-	if (glIsFramebuffer(m_fbo))
-		glDeleteFramebuffers(1, &m_fbo);
+	//if (glIsFramebuffer(m_fbo))
+	//	glDeleteFramebuffers(1, &m_fbo);
 	if (glIsFramebuffer(m_fbo_temp))
 		glDeleteFramebuffers(1, &m_fbo_temp);
 	if (glIsFramebuffer(m_fbo_ol1))
 		glDeleteFramebuffers(1, &m_fbo_ol1);
 	if (glIsFramebuffer(m_fbo_ol2))
 		glDeleteFramebuffers(1, &m_fbo_ol2);
-	if (glIsTexture(m_tex))
-		glDeleteTextures(1, &m_tex);
+	//if (glIsTexture(m_tex))
+	//	glDeleteTextures(1, &m_tex);
 	if (glIsTexture(m_tex_temp))
 		glDeleteTextures(1, &m_tex_temp);
 	if (glIsTexture(m_tex_ol1))
@@ -2034,11 +2034,12 @@ void VRenderGLView::Set2dWeights()
 {
 	Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
 		"final");
-	unsigned int tex_id = 0;
-	if (final_buffer)
-		tex_id = final_buffer->tex_id(GL_COLOR_ATTACHMENT0);
-	m_selector.Set2DWeight(
-		tex_id, glIsTexture(m_tex_wt2) ? m_tex_wt2 : m_tex);
+	Framebuffer* chann_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+		"channel");
+	if (final_buffer && chann_buffer)
+		m_selector.Set2DWeight(
+			final_buffer->tex_id(GL_COLOR_ATTACHMENT0),
+			chann_buffer->tex_id(GL_COLOR_ATTACHMENT0));
 }
 
 //segment volumes in current view
@@ -2064,10 +2065,7 @@ void VRenderGLView::Segment()
 	Framebuffer* paint_buffer = TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
 	if (paint_buffer)
 		m_selector.Set2DMask(paint_buffer->tex_id(GL_COLOR_ATTACHMENT0));
-	Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer("final");
-	if (final_buffer)
-		m_selector.Set2DWeight(final_buffer->tex_id(GL_COLOR_ATTACHMENT0),
-			glIsTexture(m_tex_wt2) ? m_tex_wt2 : m_tex);
+	Set2dWeights();
 	//orthographic
 	m_selector.SetOrthographic(!m_persp);
 
@@ -2233,10 +2231,7 @@ int VRenderGLView::CompAnalysis(double min_voxels, double max_voxels,
 		Framebuffer* paint_buffer = TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
 		if (paint_buffer)
 			m_selector.Set2DMask(paint_buffer->tex_id(GL_COLOR_ATTACHMENT0));
-		Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer("final");
-		if (final_buffer)
-			m_selector.Set2DWeight(final_buffer->tex_id(GL_COLOR_ATTACHMENT0),
-				glIsTexture(m_tex_wt2) ? m_tex_wt2 : m_tex);
+		Set2dWeights();
 		m_selector.SetSizeMap(size_map);
 		return_val = m_selector.CompAnalysis(min_voxels, max_voxels, thresh, falloff, select, gen_ann);
 	}
@@ -2356,10 +2351,7 @@ int VRenderGLView::NoiseAnalysis(double min_voxels, double max_voxels, double th
 	Framebuffer* paint_buffer = TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
 	if (paint_buffer)
 		m_selector.Set2DMask(paint_buffer->tex_id(GL_COLOR_ATTACHMENT0));
-	Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer("final");
-	if (final_buffer)
-		m_selector.Set2DWeight(final_buffer->tex_id(GL_COLOR_ATTACHMENT0),
-			glIsTexture(m_tex_wt2) ? m_tex_wt2 : m_tex);
+	Set2dWeights();
 	return_val = m_selector.NoiseAnalysis(min_voxels, max_voxels, 10.0, thresh);
 
 	return return_val;
@@ -3038,7 +3030,7 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 
 	//count volumes with mask
 	int cnt_mask = 0;
-	bool use_tex_wt2 = false;
+	//bool use_tex_wt2 = false;
 	for (i = 0; i<(int)list.size(); i++)
 	{
 		VolumeData* vd = list[i];
@@ -3047,10 +3039,10 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 		if (vd->GetTexture() && vd->GetTexture()->nmask() != -1)
 		{
 			cnt_mask++;
-			if (vr_frame &&
-				vd == vr_frame->GetCurSelVol() &&
-				!mask)
-				use_tex_wt2 = true;
+			//if (vr_frame &&
+			//	vd == vr_frame->GetCurSelVol() &&
+			//	!mask)
+			//	use_tex_wt2 = true;
 		}
 	}
 
@@ -3063,26 +3055,30 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 
 	//generate textures & buffer objects
 	//frame buffer for each volume
-	if (glIsFramebuffer(m_fbo) != GL_TRUE)
-	{
-		glGenFramebuffers(1, &m_fbo);
-		//color buffer/texture for each volume
-		if (glIsTexture(m_tex) != GL_TRUE)
-			glGenTextures(1, &m_tex);
-		//fbo
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-		//color buffer for each volume
-		glBindTexture(GL_TEXTURE_2D, m_tex);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
-			GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
-		glFramebufferTexture2D(GL_FRAMEBUFFER,
-			GL_COLOR_ATTACHMENT0,
-			GL_TEXTURE_2D, m_tex, 0);
-	}
+	Framebuffer* chann_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+		FB_Render_RGBA, nx, ny, GL_COLOR_ATTACHMENT0, "channel");
+	if (chann_buffer)
+		chann_buffer->protect();
+	//if (glIsFramebuffer(m_fbo) != GL_TRUE)
+	//{
+	//	glGenFramebuffers(1, &m_fbo);
+	//	//color buffer/texture for each volume
+	//	if (glIsTexture(m_tex) != GL_TRUE)
+	//		glGenTextures(1, &m_tex);
+	//	//fbo
+	//	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+	//	//color buffer for each volume
+	//	glBindTexture(GL_TEXTURE_2D, m_tex);
+	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
+	//		GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
+	//	glFramebufferTexture2D(GL_FRAMEBUFFER,
+	//		GL_COLOR_ATTACHMENT0,
+	//		GL_TEXTURE_2D, m_tex, 0);
+	//}
 	if (TextureRenderer::get_mem_swap())
 	{
 		if (glIsFramebuffer(m_fbo_temp) != GL_TRUE)
@@ -3104,40 +3100,40 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 				GL_TEXTURE_2D, m_tex_temp, 0);
 		}
 	}
-	if (use_tex_wt2)
-	{
-		if (glIsTexture(m_tex_wt2) != GL_TRUE)
-		{
-			glGenTextures(1, &m_tex_wt2);
-			//color buffer for current segmented volume
-			glBindTexture(GL_TEXTURE_2D, m_tex_wt2);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
-				GL_RGBA, GL_FLOAT, NULL);
-		}
-	}
+	//if (use_tex_wt2)
+	//{
+	//	if (glIsTexture(m_tex_wt2) != GL_TRUE)
+	//	{
+	//		glGenTextures(1, &m_tex_wt2);
+	//		//color buffer for current segmented volume
+	//		glBindTexture(GL_TEXTURE_2D, m_tex_wt2);
+	//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
+	//			GL_RGBA, GL_FLOAT, NULL);
+	//	}
+	//}
 
-	if (m_resize)
-	{
-		if (TextureRenderer::get_mem_swap())
-		{
-			glBindTexture(GL_TEXTURE_2D, m_tex_temp);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
-				GL_RGBA, GL_FLOAT, NULL);
-		}
-		if (use_tex_wt2)
-		{
-			glBindTexture(GL_TEXTURE_2D, m_tex_wt2);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
-				GL_RGBA, GL_FLOAT, NULL);
-		}
-		glBindTexture(GL_TEXTURE_2D, m_tex);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
-			GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
-	}
+	//if (m_resize)
+	//{
+	//	if (TextureRenderer::get_mem_swap())
+	//	{
+	//		glBindTexture(GL_TEXTURE_2D, m_tex_temp);
+	//		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
+	//			GL_RGBA, GL_FLOAT, NULL);
+	//	}
+	//	if (use_tex_wt2)
+	//	{
+	//		glBindTexture(GL_TEXTURE_2D, m_tex_wt2);
+	//		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
+	//			GL_RGBA, GL_FLOAT, NULL);
+	//	}
+	//	glBindTexture(GL_TEXTURE_2D, m_tex);
+	//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
+	//		GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
+	//}
 
 	//draw each volume to fbo
 	for (i = 0; i<(int)list.size(); i++)
@@ -3162,25 +3158,25 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 				int vol_method = m_vol_method;
 				m_vol_method = VOL_METHOD_COMP;
 				if (vd->GetMode() == 1)
-					DrawMIP(vd, m_tex, peel);
+					DrawMIP(vd, peel);
 				else
-					DrawOVER(vd, m_tex, mask, peel);
+					DrawOVER(vd, mask, peel);
 				vd->SetMaskMode(0);
 				m_vol_method = vol_method;
 			}
 		}
 		else
 		{
-			GLuint tex = m_tex;
-			if (vr_frame && vd == vr_frame->GetCurSelVol() &&
-				vd->GetTexture() && vd->GetTexture()->nmask() != -1)
-			{
-				glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-				glFramebufferTexture2D(GL_FRAMEBUFFER,
-					GL_COLOR_ATTACHMENT0,
-					GL_TEXTURE_2D, m_tex_wt2, 0);
-				tex = m_tex_wt2;
-			}
+			//GLuint tex = m_tex;
+			//if (vr_frame && vd == vr_frame->GetCurSelVol() &&
+			//	vd->GetTexture() && vd->GetTexture()->nmask() != -1)
+			//{
+			//	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+			//	glFramebufferTexture2D(GL_FRAMEBUFFER,
+			//		GL_COLOR_ATTACHMENT0,
+			//		GL_TEXTURE_2D, m_tex_wt2, 0);
+			//	tex = m_tex_wt2;
+			//}
 			if (vd->GetBlendMode() != 2)
 			{
 				//when run script
@@ -3193,22 +3189,22 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 					vd->SetMaskMode(4);
 
 				if (vd->GetMode() == 1)
-					DrawMIP(vd, tex, peel);
+					DrawMIP(vd, peel);
 				else
-					DrawOVER(vd, tex, mask, peel);
+					DrawOVER(vd, mask, peel);
 			}
-			if (tex == m_tex_wt2)
-			{
-				glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-				glFramebufferTexture2D(GL_FRAMEBUFFER,
-					GL_COLOR_ATTACHMENT0,
-					GL_TEXTURE_2D, m_tex, 0);
-			}
+			//if (tex == m_tex_wt2)
+			//{
+			//	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+			//	glFramebufferTexture2D(GL_FRAMEBUFFER,
+			//		GL_COLOR_ATTACHMENT0,
+			//		GL_TEXTURE_2D, m_tex, 0);
+			//}
 		}
 	}
 }
 
-void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, bool mask, int peel)
+void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 {
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
@@ -3238,6 +3234,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, bool mask, int peel)
 		}
 	}
 
+	Framebuffer* chann_buffer = TextureRenderer::framebuffer_manager_.framebuffer("channel");
 	if (do_over)
 	{
 		//before rendering this channel, save m_fbo_final to m_fbo_temp
@@ -3272,8 +3269,12 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, bool mask, int peel)
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 		//bind the fbo
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-		m_cur_framebuffer = m_fbo;
+		//glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+		if (chann_buffer)
+		{
+			chann_buffer->bind();
+			m_cur_framebuffer = chann_buffer->id();
+		}
 
 		if (!TextureRenderer::get_mem_swap() ||
 			(TextureRenderer::get_mem_swap() &&
@@ -3302,7 +3303,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, bool mask, int peel)
 	{
 		vector<VolumeData*> list;
 		list.push_back(vd);
-		DrawOLShadows(list, tex);
+		DrawOLShadows(list);
 	}
 
 	//bind fbo for final composition
@@ -3337,7 +3338,9 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, bool mask, int peel)
 	}
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, tex);
+	if (chann_buffer)
+		chann_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+	//glBindTexture(GL_TEXTURE_2D, tex);
 	//build mipmap
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -3381,7 +3384,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, GLuint tex, bool mask, int peel)
 	}
 }
 
-void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
+void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 {
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
@@ -3407,6 +3410,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 	bool enable_alpha = vd->GetEnableAlpha();
 	ShaderProgram* img_shader = 0;
 
+	Framebuffer* chann_buffer = TextureRenderer::framebuffer_manager_.framebuffer("channel");
 	if (do_mip)
 	{
 		//before rendering this channel, save m_fbo_final to m_fbo_temp
@@ -3518,7 +3522,9 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 		}
 
 		//bind fbo for final composition
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+		//glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+		if (chann_buffer)
+			chann_buffer->bind();
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
@@ -3583,7 +3589,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 	{
 		vector<VolumeData*> list;
 		list.push_back(vd);
-		DrawOLShadows(list, tex);
+		DrawOLShadows(list);
 	}
 
 	//bind fbo for final composition
@@ -3618,7 +3624,9 @@ void VRenderGLView::DrawMIP(VolumeData* vd, GLuint tex, int peel)
 	}
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, tex);
+	if (chann_buffer)
+		chann_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+	//glBindTexture(GL_TEXTURE_2D, tex);
 	//build mipmap
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -3698,7 +3706,10 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 	vd->SetEnableAlpha(alpha);
 
 	//bind fbo for final composition
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+	Framebuffer* chann_buffer = TextureRenderer::framebuffer_manager_.framebuffer("channel");
+	if (chann_buffer)
+		chann_buffer->bind();
+	//glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_tex_ol1);
 	glEnable(GL_BLEND);
@@ -3871,7 +3882,7 @@ void VRenderGLView::DrawOLShadowsMesh(GLuint tex_depth, double darkness)
 	glEnable(GL_DEPTH_TEST);
 }
 
-void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
+void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 {
 	if (vlist.empty())
 		return;
@@ -4089,7 +4100,10 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 			img_shader->release();
 
 		//bind fbo for final composition
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+		Framebuffer* chann_buffer = TextureRenderer::framebuffer_manager_.framebuffer("channel");
+		if (chann_buffer)
+			chann_buffer->bind();
+		//glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, m_tex_ol2);
 		glEnable(GL_BLEND);
@@ -4108,7 +4122,9 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex)
 		img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, max(m_scale_factor, 1.0), 0.0);
 		img_shader->setLocalParam(1, shadow_darkness, 0.0, 0.0, 0.0);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, tex);
+		//glBindTexture(GL_TEXTURE_2D, tex);
+		if (chann_buffer)
+			chann_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 		//2d adjustment
 
 		DrawViewQuad();
@@ -4144,7 +4160,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	m_mvr->set_blend_slices(m_blend_slices);
 
 	int i;
-	bool use_tex_wt2 = false;
+	//bool use_tex_wt2 = false;
 	m_mvr->clear_vr();
 	for (i = 0; i<(int)list.size(); i++)
 	{
@@ -4196,62 +4212,71 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 
 	//generate textures & buffer objects
 	//frame buffer for each volume
-	if (glIsFramebuffer(m_fbo) != GL_TRUE)
-	{
-		glGenFramebuffers(1, &m_fbo);
-		//fbo
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-		//color buffer/texture for each volume
-		if (glIsTexture(m_tex) != GL_TRUE)
-			glGenTextures(1, &m_tex);
-		//color buffer for each volume
-		glBindTexture(GL_TEXTURE_2D, m_tex);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
-			GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
-		glFramebufferTexture2D(GL_FRAMEBUFFER,
-			GL_COLOR_ATTACHMENT0,
-			GL_TEXTURE_2D, m_tex, 0);
-	}
-	if (use_tex_wt2)
-	{
-		if (glIsTexture(m_tex_wt2) != GL_TRUE)
-		{
-			glGenTextures(1, &m_tex_wt2);
-			//color buffer for current segmented volume
-			glBindTexture(GL_TEXTURE_2D, m_tex_wt2);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
-				GL_RGBA, GL_FLOAT, NULL);
-			glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-			glFramebufferTexture2D(GL_FRAMEBUFFER,
-				GL_COLOR_ATTACHMENT0,
-				GL_TEXTURE_2D, m_tex_wt2, 0);
-		}
-	}
+	Framebuffer* chann_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+		FB_Render_RGBA, nx, ny, GL_COLOR_ATTACHMENT0, "channel");
+	if (chann_buffer)
+		chann_buffer->protect();
+	//if (glIsFramebuffer(m_fbo) != GL_TRUE)
+	//{
+	//	glGenFramebuffers(1, &m_fbo);
+	//	//fbo
+	//	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+	//	//color buffer/texture for each volume
+	//	if (glIsTexture(m_tex) != GL_TRUE)
+	//		glGenTextures(1, &m_tex);
+	//	//color buffer for each volume
+	//	glBindTexture(GL_TEXTURE_2D, m_tex);
+	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
+	//		GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
+	//	glFramebufferTexture2D(GL_FRAMEBUFFER,
+	//		GL_COLOR_ATTACHMENT0,
+	//		GL_TEXTURE_2D, m_tex, 0);
+	//}
+	//if (use_tex_wt2)
+	//{
+	//	if (glIsTexture(m_tex_wt2) != GL_TRUE)
+	//	{
+	//		glGenTextures(1, &m_tex_wt2);
+	//		//color buffer for current segmented volume
+	//		glBindTexture(GL_TEXTURE_2D, m_tex_wt2);
+	//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
+	//			GL_RGBA, GL_FLOAT, NULL);
+	//		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+	//		glFramebufferTexture2D(GL_FRAMEBUFFER,
+	//			GL_COLOR_ATTACHMENT0,
+	//			GL_TEXTURE_2D, m_tex_wt2, 0);
+	//	}
+	//}
 
-	if (m_resize)
-	{
-		if (use_tex_wt2)
-		{
-			glBindTexture(GL_TEXTURE_2D, m_tex_wt2);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
-				GL_RGBA, GL_FLOAT, NULL);
-		}
-		glBindTexture(GL_TEXTURE_2D, m_tex);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
-			GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
-	}
+	//if (m_resize)
+	//{
+	//	if (use_tex_wt2)
+	//	{
+	//		glBindTexture(GL_TEXTURE_2D, m_tex_wt2);
+	//		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
+	//			GL_RGBA, GL_FLOAT, NULL);
+	//	}
+	//	glBindTexture(GL_TEXTURE_2D, m_tex);
+	//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
+	//		GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
+	//}
 
 	//bind the fbo
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-	m_cur_framebuffer = m_fbo;
+	if (chann_buffer)
+	{
+		chann_buffer->bind();
+		m_cur_framebuffer = chann_buffer->id();
+	}
+	//glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+	//m_cur_framebuffer = m_fbo;
 	if (!TextureRenderer::get_mem_swap() ||
 		(TextureRenderer::get_mem_swap() &&
 			TextureRenderer::get_clear_chan_buffer()))
@@ -4268,7 +4293,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	m_mvr->draw(m_test_wiref, m_adaptive, m_interactive, !m_persp, m_scale_factor, m_intp);
 
 	//draw shadows
-	DrawOLShadows(list, use_tex_wt2 ? m_tex_wt2 : m_tex);
+	DrawOLShadows(list);
 
 	//bind fbo for final composition
 	Framebuffer* final_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
@@ -4276,7 +4301,9 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	if (final_buffer)
 		final_buffer->bind();
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, use_tex_wt2 ? m_tex_wt2 : m_tex);
+	if (chann_buffer)
+		chann_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+	//glBindTexture(GL_TEXTURE_2D, use_tex_wt2 ? m_tex_wt2 : m_tex);
 	//build mipmap
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -4313,13 +4340,13 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	if (img_shader && img_shader->valid())
 		img_shader->release();
 
-	if (use_tex_wt2)
-	{
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-		glFramebufferTexture2D(GL_FRAMEBUFFER,
-			GL_COLOR_ATTACHMENT0,
-			GL_TEXTURE_2D, m_tex, 0);
-	}
+	//if (use_tex_wt2)
+	//{
+	//	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+	//	glFramebufferTexture2D(GL_FRAMEBUFFER,
+	//		GL_COLOR_ATTACHMENT0,
+	//		GL_TEXTURE_2D, m_tex, 0);
+	//}
 }
 
 void VRenderGLView::SetBrush(int mode)

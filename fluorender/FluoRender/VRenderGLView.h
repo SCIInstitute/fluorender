@@ -708,9 +708,9 @@ private:
 	bool m_paint_display;
 	//2d frame buffers
 	GLuint m_cur_framebuffer;
-	GLuint m_fbo;
-	GLuint m_tex;
-	GLuint m_tex_wt2;  //use this texture instead of m_tex when the volume for segmentation is rendered
+	//GLuint m_fbo;
+	//GLuint m_tex;
+	//GLuint m_tex_wt2;  //use this texture instead of m_tex when the volume for segmentation is rendered
 	//temp buffer for large data compositing
 	GLuint m_fbo_temp;
 	GLuint m_tex_temp;
@@ -1009,11 +1009,11 @@ private:
 	//different volume drawing modes
 	void DrawVolumesMulti(vector<VolumeData*> &list, int peel = 0);
 	void DrawVolumesComp(vector<VolumeData*> &list, bool mask = false, int peel = 0);
-	void DrawMIP(VolumeData* vd, GLuint tex, int peel = 0);
-	void DrawOVER(VolumeData* vd, GLuint tex, bool mask, int peel = 0);
+	void DrawMIP(VolumeData* vd, int peel = 0);
+	void DrawOVER(VolumeData* vd, bool mask, int peel = 0);
 	//overlay passes
 	void DrawOLShading(VolumeData* vd);
-	void DrawOLShadows(vector<VolumeData*> &vlist, GLuint tex);
+	void DrawOLShadows(vector<VolumeData*> &vlist);
 	void DrawOLShadowsMesh(GLuint tex_depth, double darkenss);
 
 	//get mesh shadow

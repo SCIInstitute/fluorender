@@ -81,6 +81,7 @@ namespace FLIVR
 		inline void protect();
 		inline void unprotect();
 		inline bool valid();
+		inline unsigned int id();
 
 		bool attach_texture(int ap, FramebufferTexture* tex);
 		inline bool attach_texture(int ap, unsigned int tex_id, int layer=0);
@@ -208,6 +209,11 @@ namespace FLIVR
 	inline bool Framebuffer::valid()
 	{
 		return valid_;
+	}
+
+	inline unsigned int Framebuffer::id()
+	{
+		return id_;
 	}
 
 	inline bool Framebuffer::attach_texture(int ap, unsigned int tex_id, int layer)
