@@ -10678,7 +10678,10 @@ void VRenderGLView::StartLoopUpdate()
 		if (total_num > 0)
 		{
 			TextureRenderer::set_update_loop();
-			TextureRenderer::set_total_brick_num(total_num);
+			if (m_draw_type == 1)
+				TextureRenderer::set_total_brick_num(total_num);
+			else if (m_draw_type == 2)
+				TextureRenderer::set_total_brick_num(total_num*(m_peeling_layers+1));
 			TextureRenderer::reset_done_current_chan();
 		}
 	}
