@@ -164,17 +164,10 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_brush_state(0),
 	//resizing
 	m_resize(false),
-	m_resize_ol1(false),
-	m_resize_ol2(false),
 	//brush tools
 	m_draw_brush(false),
 	m_paint_enable(false),
 	m_paint_display(false),
-	//shading (shadow) overlay
-	m_fbo_ol1(0),
-	m_fbo_ol2(0),
-	m_tex_ol1(0),
-	m_tex_ol2(0),
 	//paint buffer
 	m_clear_paint(true),
 	//pick buffer
@@ -506,16 +499,6 @@ VRenderGLView::~VRenderGLView()
 			delete m_ruler_list[i];
 	}
 
-	//delete buffers and textures
-	if (glIsFramebuffer(m_fbo_ol1))
-		glDeleteFramebuffers(1, &m_fbo_ol1);
-	if (glIsFramebuffer(m_fbo_ol2))
-		glDeleteFramebuffers(1, &m_fbo_ol2);
-	if (glIsTexture(m_tex_ol1))
-		glDeleteTextures(1, &m_tex_ol1);
-	if (glIsTexture(m_tex_ol2))
-		glDeleteTextures(1, &m_tex_ol2);
-
 	if (glIsBuffer(m_quad_vbo))
 		glDeleteBuffers(1, &m_quad_vbo);
 	if (glIsVertexArray(m_quad_vao))
@@ -558,8 +541,6 @@ VRenderGLView::~VRenderGLView()
 void VRenderGLView::ResizeFramebuffers()
 {
 	m_resize = true;
-	m_resize_ol1 = true;
-	m_resize_ol2 = true;
 }
 
 void VRenderGLView::OnResize(wxSizeEvent& event)
@@ -3310,6 +3291,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 
 	Framebuffer* chann_buffer = TextureRenderer::framebuffer_manager_.framebuffer("channel");
 	Framebuffer* temp_buffer = 0;
+	Framebuffer* overlay_buffer = 0;
 	if (do_mip)
 	{
 		//before rendering this channel, save final buffer to temp buffer
@@ -3351,35 +3333,15 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
-		if (!glIsFramebuffer(m_fbo_ol1))
-		{
-			glGenFramebuffers(1, &m_fbo_ol1);
-			if (!glIsTexture(m_tex_ol1))
-				glGenTextures(1, &m_tex_ol1);
-			glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_ol1);
-			glBindTexture(GL_TEXTURE_2D, m_tex_ol1);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
-				GL_RGBA, GL_FLOAT, NULL);
-			glFramebufferTexture2D(GL_FRAMEBUFFER,
-				GL_COLOR_ATTACHMENT0,
-				GL_TEXTURE_2D, m_tex_ol1, 0);
-		}
-
-		if (m_resize_ol1)
-		{
-			glBindTexture(GL_TEXTURE_2D, m_tex_ol1);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
-				GL_RGBA, GL_FLOAT, NULL);
-			m_resize_ol1 = false;
-		}
-
 		//bind the fbo
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_ol1);
-		m_cur_framebuffer = m_fbo_ol1;
+		overlay_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+			FB_Render_RGBA, nx, ny, GL_COLOR_ATTACHMENT0);
+		if (overlay_buffer)
+		{
+			overlay_buffer->bind();
+			overlay_buffer->protect();
+			m_cur_framebuffer = overlay_buffer->id();
+		}
 
 		if (!TextureRenderer::get_mem_swap() ||
 			(TextureRenderer::get_mem_swap() &&
@@ -3433,7 +3395,12 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m_tex_ol1);
+		if (overlay_buffer)
+		{
+			//ok to unprotect
+			overlay_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+			overlay_buffer->unprotect();
+		}
 		glEnable(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -3585,6 +3552,9 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 
 void VRenderGLView::DrawOLShading(VolumeData* vd)
 {
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
+
 	if (TextureRenderer::get_mem_swap() &&
 		TextureRenderer::get_start_update_loop() &&
 		!TextureRenderer::get_done_update_loop())
@@ -3598,7 +3568,13 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 	}
 
 	//shading pass
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_ol1);
+	Framebuffer* overlay_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+		FB_Render_RGBA, nx, ny, GL_COLOR_ATTACHMENT0);
+	if (overlay_buffer)
+	{
+		overlay_buffer->bind();
+		overlay_buffer->protect();
+	}
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -3620,7 +3596,12 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 	if (chann_buffer)
 		chann_buffer->bind();
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_tex_ol1);
+	if (overlay_buffer)
+	{
+		//ok to unprotect
+		overlay_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+		overlay_buffer->unprotect();
+	}
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ZERO, GL_SRC_COLOR);
 	//glBlendEquation(GL_MIN);
@@ -3686,34 +3667,14 @@ void VRenderGLView::DrawOLShadowsMesh(GLuint tex_depth, double darkness)
 	ny = GetGLSize().y;
 
 	//shadow pass
-	if (!glIsFramebuffer(m_fbo_ol2))
-	{
-		glGenFramebuffers(1, &m_fbo_ol2);
-		if (!glIsTexture(m_tex_ol2))
-			glGenTextures(1, &m_tex_ol2);
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_ol2);
-		glBindTexture(GL_TEXTURE_2D, m_tex_ol2);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
-			GL_RGBA, GL_FLOAT, NULL);
-		glFramebufferTexture2D(GL_FRAMEBUFFER,
-			GL_COLOR_ATTACHMENT0,
-			GL_TEXTURE_2D, m_tex_ol2, 0);
-	}
-
-	if (m_resize_ol2)
-	{
-		glBindTexture(GL_TEXTURE_2D, m_tex_ol2);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
-			GL_RGBA, GL_FLOAT, NULL);
-		m_resize_ol2 = false;
-	}
-
 	//bind the fbo
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_ol2);
+	Framebuffer* overlay_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+		FB_Render_RGBA, nx, ny, GL_COLOR_ATTACHMENT0);
+	if (overlay_buffer)
+	{
+		overlay_buffer->bind();
+		overlay_buffer->protect();
+	}
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glActiveTexture(GL_TEXTURE0);
@@ -3743,15 +3704,17 @@ void VRenderGLView::DrawOLShadowsMesh(GLuint tex_depth, double darkness)
 	DrawViewQuad();
 
 	if (img_shader && img_shader->valid())
-	{
 		img_shader->release();
-	}
 
 	//
 	//bind fbo for final composition
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_tex_ol2);
+	if (overlay_buffer)
+	{
+		overlay_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+		overlay_buffer->unprotect();
+	}
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ZERO, GL_SRC_COLOR);
 	glDisable(GL_DEPTH_TEST);
@@ -3806,7 +3769,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 	vector<int> colormodes;
 	vector<bool> shadings;
 	vector<VolumeData*> list;
-	//geenerate list
+	//generate list
 	for (i = 0; i<vlist.size(); i++)
 	{
 		VolumeData* vd = vlist[i];
@@ -3835,35 +3798,15 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 				return;
 	}
 
-	//gradient pass
-	if (!glIsFramebuffer(m_fbo_ol1))
+	Framebuffer* overlay_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+		FB_Render_RGBA, nx, ny, GL_COLOR_ATTACHMENT0);
+	if (overlay_buffer)
 	{
-		glGenFramebuffers(1, &m_fbo_ol1);
-		if (!glIsTexture(m_tex_ol1))
-			glGenTextures(1, &m_tex_ol1);
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_ol1);
-		glBindTexture(GL_TEXTURE_2D, m_tex_ol1);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
-			GL_RGBA, GL_FLOAT, NULL);
-		glFramebufferTexture2D(GL_FRAMEBUFFER,
-			GL_COLOR_ATTACHMENT0,
-			GL_TEXTURE_2D, m_tex_ol1, 0);
+		overlay_buffer->bind();
+		overlay_buffer->protect();
+		m_cur_framebuffer = overlay_buffer->id();
 	}
 
-	if (m_resize_ol1)
-	{
-		glBindTexture(GL_TEXTURE_2D, m_tex_ol1);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
-			GL_RGBA, GL_FLOAT, NULL);
-		m_resize_ol1 = false;
-	}
-
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_ol1);
-	m_cur_framebuffer = m_fbo_ol1;
 	if (!TextureRenderer::get_mem_swap() ||
 		(TextureRenderer::get_mem_swap() &&
 			TextureRenderer::get_clear_chan_buffer()))
@@ -3889,7 +3832,8 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 		vd->GetVR()->set_shading(false);
 		vd->SetMode(0);
 		vd->SetColormapMode(2);
-		vd->Set2dDmap(m_tex_ol1);
+		if (overlay_buffer)
+			vd->Set2dDmap(overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0));
 		int msk_mode = vd->GetMaskMode();
 		vd->SetMaskMode(0);
 		//draw
@@ -3916,7 +3860,8 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 			vd->GetVR()->set_shading(false);
 			vd->SetMode(0);
 			vd->SetColormapMode(2);
-			vd->Set2dDmap(m_tex_ol1);
+			if (overlay_buffer)
+				vd->Set2dDmap(overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0));
 			VolumeRenderer* vr = list[i]->GetVR();
 			if (vr)
 			{
@@ -3951,38 +3896,23 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 			TextureRenderer::get_clear_chan_buffer()))
 	{
 		//shadow pass
-		if (!glIsFramebuffer(m_fbo_ol2))
-		{
-			glGenFramebuffers(1, &m_fbo_ol2);
-			if (!glIsTexture(m_tex_ol2))
-				glGenTextures(1, &m_tex_ol2);
-			glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_ol2);
-			glBindTexture(GL_TEXTURE_2D, m_tex_ol2);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
-				GL_RGBA, GL_FLOAT, NULL);
-			glFramebufferTexture2D(GL_FRAMEBUFFER,
-				GL_COLOR_ATTACHMENT0,
-				GL_TEXTURE_2D, m_tex_ol2, 0);
-		}
-
-		if (m_resize_ol2)
-		{
-			glBindTexture(GL_TEXTURE_2D, m_tex_ol2);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx, ny, 0,
-				GL_RGBA, GL_FLOAT, NULL);
-			m_resize_ol2 = false;
-		}
-
 		//bind the fbo
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_ol2);
+		Framebuffer* temp_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
+			FB_Render_RGBA, nx, ny, GL_COLOR_ATTACHMENT0);
+		if (temp_buffer)
+		{
+			temp_buffer->bind();
+			temp_buffer->protect();
+		}
 		glClearColor(1.0, 1.0, 1.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m_tex_ol1);
+		if (overlay_buffer)
+		{
+			//ok to unprotect
+			overlay_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+			overlay_buffer->unprotect();
+		}
 		glDisable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
 
@@ -4013,7 +3943,11 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 		if (chann_buffer)
 			chann_buffer->bind();
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m_tex_ol2);
+		if (temp_buffer)
+		{
+			temp_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+			temp_buffer->unprotect();
+		}
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ZERO, GL_SRC_COLOR);
 		glDisable(GL_DEPTH_TEST);
@@ -4030,7 +3964,6 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 		img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, max(m_scale_factor, 1.0), 0.0);
 		img_shader->setLocalParam(1, shadow_darkness, 0.0, 0.0, 0.0);
 		glActiveTexture(GL_TEXTURE1);
-		//glBindTexture(GL_TEXTURE_2D, tex);
 		if (chann_buffer)
 			chann_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 		//2d adjustment

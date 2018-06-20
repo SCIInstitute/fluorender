@@ -700,19 +700,12 @@ private:
 
 						//resizing
 	bool m_resize;
-	bool m_resize_ol1;
-	bool m_resize_ol2;
 	//brush tools
 	bool m_draw_brush;
 	bool m_paint_enable;
 	bool m_paint_display;
 	//2d frame buffers
 	GLuint m_cur_framebuffer;
-	//shading (shadow) overlay
-	GLuint m_fbo_ol1;
-	GLuint m_fbo_ol2;
-	GLuint m_tex_ol1;
-	GLuint m_tex_ol2;
 	//paint buffer
 	bool m_clear_paint;
 	//depth peeling buffers
