@@ -3270,7 +3270,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 
 	//if vd is duplicated
 	if (TextureRenderer::get_mem_swap() &&
-		vd->GetDup())
+		TextureRenderer::get_done_current_chan())
 	{
 		vector<TextureBrick*> *bricks =
 			vd->GetTexture()->get_bricks();
@@ -3562,7 +3562,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 
 	//if vd is duplicated
 	if (TextureRenderer::get_mem_swap() &&
-		vd->GetDup())
+		TextureRenderer::get_done_current_chan())
 	{
 		vector<TextureBrick*> *bricks =
 			vd->GetTexture()->get_bricks();
