@@ -51,7 +51,7 @@ BEGIN_EVENT_TABLE(VRenderFrame, wxFrame)
 	EVT_MENU(wxID_EXIT, VRenderFrame::OnExit)
 	EVT_MENU(ID_ViewNew, VRenderFrame::OnNewView)
 	EVT_MENU(ID_FullScreen, VRenderFrame::OnFullScreen)
-	EVT_MENU(ID_OpenVolume, VRenderFrame::OnOpenVolume)
+	EVT_MENU(ID_OpenVolume, VRenderFrame::OnOpenVolume)	
 	EVT_MENU(ID_OpenMesh, VRenderFrame::OnOpenMesh)
 	EVT_MENU(ID_ViewOrganize, VRenderFrame::OnOrganize)
 	EVT_MENU(ID_CheckUpdates, VRenderFrame::OnCheckUpdates)
@@ -62,6 +62,7 @@ BEGIN_EVENT_TABLE(VRenderFrame, wxFrame)
 	EVT_MENU(ID_SaveProject, VRenderFrame::OnSaveProject)
 	EVT_MENU(ID_OpenProject, VRenderFrame::OnOpenProject)
 	EVT_MENU(ID_Settings, VRenderFrame::OnSettings)
+	EVT_MENU(ID_ImportVolume, VRenderFrame::OnImportVolume)
 	//tools
 	EVT_MENU(ID_LastTool, VRenderFrame::OnLastTool)
 	EVT_MENU(ID_PaintTool, VRenderFrame::OnPaintTool)
@@ -217,6 +218,18 @@ VRenderFrame::VRenderFrame(
 	//add tools
 	wxBitmap bitmap;
 	bitmap = wxGetBitmapFromMemory(icon_open_volume);
+
+#ifdef _DARWIN
+	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
+#endif
+	if (JVMInitializer::getInstance() != nullptr) {
+		m_main_tb->AddTool(ID_ImportVolume, "Import Volume",
+			bitmap, wxNullBitmap, wxITEM_NORMAL,
+			"Import single or multiple volume data file(s) using ImageJ",
+			"Import single or multiple volume data file(s) using ImageJ");
+		bitmap = wxGetBitmapFromMemory(icon_open_volume);
+	}
+
 #ifdef _DARWIN
 	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
 #endif
@@ -225,6 +238,7 @@ VRenderFrame::VRenderFrame(
 		"Open single or multiple volume data file(s)",
 		"Open single or multiple volume data file(s)");
 	bitmap = wxGetBitmapFromMemory(icon_open_project);
+
 #ifdef _DARWIN
 	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
 #endif
@@ -233,6 +247,7 @@ VRenderFrame::VRenderFrame(
 		"Open a saved project",
 		"Open a saved project");
 	bitmap = wxGetBitmapFromMemory(icon_save_project);
+
 #ifdef _DARWIN
 	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
 #endif
@@ -242,6 +257,7 @@ VRenderFrame::VRenderFrame(
 		"Save current work as a project");
 	m_main_tb->AddSeparator();
 	bitmap = wxGetBitmapFromMemory(icon_new_view);
+
 #ifdef _DARWIN
 	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
 #endif
@@ -623,19 +639,28 @@ VRenderFrame::VRenderFrame(
 	m_top_tools = new wxMenu;
 	m_top_window = new wxMenu;
 	m_top_help = new wxMenu;
+
 	//file options
 	m = new wxMenuItem(m_top_file,ID_OpenVolume, wxT("Open &Volume"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_open_volume_mini));
 	m_top_file->Append(m);
+
+	m = new wxMenuItem(m_top_file, ID_ImportVolume, wxT("Import &Volume"));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_open_volume_mini));
+	m_top_file->Append(m);
+
 	m = new wxMenuItem(m_top_file,ID_OpenMesh, wxT("Open &Mesh"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_open_mesh_mini));
 	m_top_file->Append(m);
+
 	m = new wxMenuItem(m_top_file,ID_OpenProject, wxT("Open &Project"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_open_project_mini));
 	m_top_file->Append(m);
+
 	m = new wxMenuItem(m_top_file,ID_SaveProject, wxT("&Save Project"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_save_project_mini));
 	m_top_file->Append(m);
+
 	m_top_file->Append(wxID_SEPARATOR);
 	wxMenuItem *quit = new wxMenuItem(m_top_file, wxID_EXIT);
 	quit->SetBitmap(wxArtProvider::GetBitmap(wxART_QUIT));
@@ -1073,7 +1098,7 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 
 		wxArrayString paths;
 		fopendlg->GetPaths(paths);
-		LoadVolumes(paths, vrv);
+		LoadVolumes(paths, false, vrv);
 
 		if (m_setting_dlg)
 		{
@@ -1086,7 +1111,40 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 	delete fopendlg;
 }
 
-void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
+void VRenderFrame::OnImportVolume(wxCommandEvent& WXUNUSED(event))
+{
+	if (m_setting_dlg)
+	{
+		m_compression = m_setting_dlg->GetRealtimeCompress();
+		m_skip_brick = m_setting_dlg->GetSkipBricks();
+	}
+
+	wxFileDialog *fopendlg = new wxFileDialog(
+		this, "Choose the volume data file", "", "", "All Files|*.*",
+		wxFD_OPEN | wxFD_MULTIPLE);
+	fopendlg->SetExtraControlCreator(CreateExtraControlVolume);
+
+	int rval = fopendlg->ShowModal();
+	if (rval == wxID_OK)
+	{
+		VRenderView* vrv = GetView(0);
+
+		wxArrayString paths;
+		fopendlg->GetPaths(paths);
+		LoadVolumes(paths, true, vrv);
+
+		if (m_setting_dlg)
+		{
+			m_setting_dlg->SetRealtimeCompress(m_compression);
+			m_setting_dlg->SetSkipBricks(m_skip_brick);
+			m_setting_dlg->UpdateUI();
+		}
+	}
+
+	delete fopendlg;
+}
+
+void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView* view)
 {
 	int j;
 
@@ -1143,20 +1201,22 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
 			wxString filename = files[j];
 			wxString suffix = filename.Mid(filename.Find('.', true)).MakeLower();
 
-			if (suffix == ".nrrd")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_NRRD);
+			if (withImageJ == true)
+				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_BRKXML, withImageJ); //The type of data doesnt matter.
+			else if (suffix == ".nrrd")
+				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_NRRD, withImageJ);
 			else if (suffix==".tif" || suffix==".tiff")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_TIFF);
+				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_TIFF, withImageJ);
 			else if (suffix == ".oib")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_OIB);
+				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_OIB, withImageJ);
 			else if (suffix == ".oif")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_OIF);
+				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_OIF, withImageJ);
 			else if (suffix==".lsm")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_LSM);
+				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_LSM, withImageJ);
 			else if (suffix==".xml")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_PVXML);
+				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_PVXML, withImageJ);
 			else if (suffix == ".vvd")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_BRKXML);
+				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_BRKXML, withImageJ);			
 
 			if (ch_num > 1)
 			{
@@ -1264,7 +1324,7 @@ void VRenderFrame::StartupLoad(wxArrayString files)
 			suffix == ".xml" ||
 			suffix == ".vvd")
 		{
-			LoadVolumes(files);
+			LoadVolumes(files, false);
 		}
 		else if (suffix == ".obj")
 		{

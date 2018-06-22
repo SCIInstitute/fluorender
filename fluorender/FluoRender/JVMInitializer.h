@@ -42,14 +42,14 @@ class JVMInitializer {
 		static JavaVMInitArgs m_VMargs;
 
 	private:
-		static JVMInitializer* m_pJVMInstance;
+		static JVMInitializer* m_pJVMInstance;		
 
 		JVMInitializer() {};
 		~JVMInitializer() {};
 		JVMInitializer(JVMInitializer const&);
 		JVMInitializer& operator=(JVMInitializer const&);
 
-		void static create_JVM();
+		bool static create_JVM();
 };
 
 #endif //_JVMINITIALIZER_H_

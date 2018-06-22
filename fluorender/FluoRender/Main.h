@@ -36,7 +36,7 @@ class VRenderApp : public wxApp
 public:
 	virtual bool OnInit();
 	void OnInitCmdLine(wxCmdLineParser& parser);
-	bool OnCmdLineParsed(wxCmdLineParser& parser);
+	bool OnCmdLineParsed(wxCmdLineParser& parser);	
 
 private:
 	wxArrayString m_files;

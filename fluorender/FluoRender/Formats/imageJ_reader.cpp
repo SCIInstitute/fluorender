@@ -80,8 +80,8 @@ ImageJReader::ImageJReader()
 
 ImageJReader::~ImageJReader()
 {
-	if (tiff_stream.is_open())
-		tiff_stream.close();
+	//if (tiff_stream.is_open())
+	//	tiff_stream.close();
 }
 
 void ImageJReader::SetFile(string &file)
@@ -119,7 +119,7 @@ int ImageJReader::Preprocess()
 	wstring path, name;
 	if (!SEP_PATH_NAME(m_path_name, path, name))
 		return READER_OPEN_FAIL;
-	//std::wstring suffix = GET_SUFFIX(m_path_name);
+	m_data_name = name;	
 
 	// ImageJ code here..................
 	if (m_imageJ_cls == nullptr) {
@@ -147,6 +147,18 @@ int ImageJReader::Preprocess()
 			jintArray val = (jintArray)(m_pJVMInstance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_handle, arr));   // call the method with the arr as argument.					
 			jsize len = m_pJVMInstance->m_pEnv->GetArrayLength(val);
 			jint* body = m_pJVMInstance->m_pEnv->GetIntArrayElements(val, 0);
+
+			//Checking if the right format was loaded.
+			if (len == 1) {
+				int test = *body;
+				if (test == 1)
+					return READER_FORMAT_ERROR;
+				else if (test == 2)
+					return READER_OPEN_FAIL;
+				else
+					return READER_EMPTY_DATA; //This is for unkown exception on java side.
+			}
+
 			for (int i = 0; i < len; i++) {
 				int test = *(body + i);
 				switch (i)
@@ -182,287 +194,7 @@ int ImageJReader::Preprocess()
 		}
 	}
 	m_cur_time = 0;	
-	// ImageJ ends here..................
-
-	//determine if it is an ImageJ hyperstack
-	//string img_desc;
-	//OpenTiff(m_path_name.c_str());
-	//uint64_t bits = GetTiffField(kBitsPerSampleTag);
-	//if (bits > 16)
-	//{
-	//	CloseTiff();
-	//	return READER_FP32_DATA;
-	//}
-	//GetImageDescription(img_desc);
-	//string search_str = "hyperstack=true";
-	//int64_t str_pos = img_desc.find(search_str);
-	//bool hyperstack = str_pos != -1;
-	//search_str = "ImageJ=";
-	//str_pos = img_desc.find(search_str);
-	//bool imagej = str_pos != -1;
-	//search_str = "images=";
-	//bool imagej_raw = str_pos != -1;
-	//if (imagej && hyperstack)
-	//{
-	//	//it is an ImageJ hyperstack, get information from the description
-	//	int num;
-	//	//channels
-	//	search_str = "channels=";
-	//	str_pos = img_desc.find(search_str);
-	//	if (str_pos != -1)
-	//		num = get_number(img_desc, str_pos + search_str.length());
-	//	else
-	//		num = 1;
-	//	if (num)
-	//		m_chan_num = num;
-	//	else
-	//		m_chan_num = 1;
-	//	//slices
-	//	search_str = "slices=";
-	//	str_pos = img_desc.find(search_str);
-	//	if (str_pos != -1)
-	//		num = get_number(img_desc, str_pos + search_str.length());
-	//	else
-	//		num = 1;
-	//	if (num)
-	//		m_slice_num = num;
-	//	else
-	//		m_slice_num = 1;
-	//	//frames
-	//	search_str = "frames=";
-	//	str_pos = img_desc.find(search_str);
-	//	if (str_pos != -1)
-	//		num = get_number(img_desc, str_pos + search_str.length());
-	//	else
-	//		num = 1;
-	//	if (num)
-	//		m_time_num = num;
-	//	else
-	//		m_time_num = 1;
-	//	//max
-	//	if (bits == 16)
-	//	{
-	//		search_str = "max=";
-	//		str_pos = img_desc.find(search_str);
-	//		if (str_pos != -1)
-	//			num = get_number(img_desc, str_pos + search_str.length());
-	//		else
-	//			num = 0;
-	//		if (num)
-	//		{
-	//			m_max_value = num;
-	//			m_scalar_scale = 65535.0 / m_max_value;
-	//		}
-	//	}
-
-	//	std::vector<std::wstring> list;
-	//	if (m_time_num == 1)
-	//	{
-	//		if (FIND_FILES_4D(m_path_name, m_time_id, list, m_cur_time))
-	//		{
-	//			isHsTimeSeq_ = true;
-	//			m_time_num = list.size();
-	//		}
-	//	}
-
-	//	//build sequence information for the hyperstack
-	//	isHyperstack_ = true;
-	//	m_data_name = name;
-	//	int page_cnt = 0;
-	//	for (int i = 0; i < m_time_num; ++i)
-	//	{
-	//		TimeDataInfo info;
-
-	//		info.type = 0;
-	//		std::wstring str;
-	//		if (isHsTimeSeq_)
-	//		{
-	//			page_cnt = 0;
-	//			int64_t begin = m_path_name.find(m_time_id);
-	//			size_t id_len = m_time_id.length();
-	//			str = list.at(i);
-	//			std::wstring t_num;
-	//			for (size_t j = begin + id_len; j < str.size(); j++)
-	//			{
-	//				wchar_t c = str[j];
-	//				if (iswdigit(c))
-	//					t_num.push_back(c);
-	//				else break;
-	//			}
-	//			if (t_num.size() > 0)
-	//				info.filenumber = WSTOI(t_num);
-	//			else
-	//				info.filenumber = 0;
-	//		}
-	//		else
-	//		{
-	//			info.filenumber = 0;
-	//		}
-
-	//		//add slices
-	//		for (int j = 0; j < m_slice_num; ++j)
-	//		{
-	//			SliceInfo sliceinfo;
-	//			sliceinfo.slicenumber = 0;
-	//			if (isHsTimeSeq_)
-	//				sliceinfo.slice = str;
-	//			sliceinfo.pagenumber = page_cnt;
-	//			page_cnt += m_chan_num;
-	//			info.slices.push_back(sliceinfo);
-	//		}
-	//		m_4d_seq.push_back(info);
-	//	}
-	//	if (isHsTimeSeq_ && m_4d_seq.size() > 0)
-	//		std::sort(m_4d_seq.begin(), m_4d_seq.end(), ImageJReader::tif_sort);
-
-	//	m_cur_time = 0;
-	//}
-	//else if (imagej && imagej_raw)
-	//{
-	//	int num;
-	//	//slices
-	//	search_str = "images=";
-	//	str_pos = img_desc.find(search_str);
-	//	if (str_pos != -1)
-	//		num = get_number(img_desc, str_pos + search_str.length());
-	//	else
-	//		num = 1;
-	//	if (num)
-	//	{
-	//		m_slice_num = num;
-	//		imagej_raw_possible_ = true;
-	//	}
-	//	else
-	//		m_slice_num = 1;
-	//}
-	//CloseTiff();
-	//
-	//if (!isHyperstack_)
-	//{
-	//	//it is not an ImageJ hyperstack, do the usual processing
-	//	//build 4d sequence
-	//	//search time sequence files
-	//	std::vector<std::wstring> list;
-	//	if (!FIND_FILES_4D(m_path_name, m_time_id, list, m_cur_time))
-	//	{
-	//		TimeDataInfo info;
-	//		SliceInfo sliceinfo;
-	//		sliceinfo.slice = path + name;  //temporary name
-	//		sliceinfo.slicenumber = 0;
-	//		info.slices.push_back(sliceinfo);
-	//		info.filenumber = 0;
-	//		m_4d_seq.push_back(info);
-	//		m_cur_time = 0;
-	//	}
-	//	else
-	//	{
-	//		int64_t begin = m_path_name.find(m_time_id);
-	//		size_t id_len = m_time_id.length();
-	//		for (size_t i = 0; i < list.size(); i++) {
-	//			TimeDataInfo info;
-	//			std::wstring str = list.at(i);
-	//			std::wstring t_num;
-	//			for (size_t j = begin + id_len; j < str.size(); j++)
-	//			{
-	//				wchar_t c = str[j];
-	//				if (iswdigit(c))
-	//					t_num.push_back(c);
-	//				else break;
-	//			}
-	//			if (t_num.size() > 0)
-	//				info.filenumber = WSTOI(t_num);
-	//			else
-	//				info.filenumber = 0;
-	//			SliceInfo sliceinfo;
-	//			sliceinfo.slice = str;
-	//			sliceinfo.slicenumber = 0;
-	//			info.slices.push_back(sliceinfo);
-	//			m_4d_seq.push_back(info);
-	//		}
-	//	}
-	//	if (m_4d_seq.size() > 0)
-	//		std::sort(m_4d_seq.begin(), m_4d_seq.end(), ImageJReader::tif_sort);
-
-	//	//build 3d slice sequence
-	//	for (int t = 0; t < (int)m_4d_seq.size(); t++)
-	//	{
-	//		wstring slice_str = m_4d_seq[t].slices[0].slice;
-
-	//		if (m_slice_seq)
-	//		{
-	//			//extract common string in name
-	//			size_t pos2 = slice_str.find_last_of(L'.');
-	//			size_t begin2 = 0;
-	//			int64_t end2 = -1;
-	//			for (i = int(pos2) - 1; i >= 0; i--)
-	//			{
-	//				if (iswdigit(slice_str[i]) && end2 == -1)
-	//					end2 = i;
-	//				if (!iswdigit(slice_str[i]) && end2 != -1)
-	//				{
-	//					begin2 = i;
-	//					break;
-	//				}
-	//			}
-	//			if (end2 != -1)
-	//			{
-	//				//search slice sequence
-	//				std::vector<std::wstring> list;
-	//				std::wstring search_ext = slice_str.substr(end2 + 1);
-	//				std::wstring regex = slice_str.substr(0, begin2 + 1);
-	//				FIND_FILES(path, search_ext, list, m_cur_time, regex);
-	//				m_4d_seq[t].type = 1;
-	//				m_4d_seq[t].slices.clear();
-	//				for (size_t f = 0; f < list.size(); f++) {
-	//					size_t start_idx = begin2 + 1;
-	//					size_t end_idx = list.at(f).find(search_ext);
-	//					size_t size = end_idx - start_idx;
-	//					std::wstring fileno = list.at(f).substr(start_idx, size);
-	//					SliceInfo slice;
-	//					slice.slice = list.at(f);
-	//					slice.slicenumber = WSTOI(fileno);
-	//					m_4d_seq[t].slices.push_back(slice);
-	//				}
-	//				if (m_4d_seq[t].slices.size() > 0)
-	//					std::sort(m_4d_seq[t].slices.begin(),
-	//						m_4d_seq[t].slices.end(),
-	//						ImageJReader::tif_slice_sort);
-	//			}
-	//		}
-	//		else
-	//		{
-	//			m_4d_seq[t].type = 0;
-	//			m_4d_seq[t].slices[0].slice = slice_str;
-	//			if (m_4d_seq[t].slices[0].slice == m_path_name)
-	//				m_cur_time = t;
-	//		}
-	//	}
-
-	//	//get time number and channel number
-	//	m_time_num = (int)m_4d_seq.size();
-	//	if (m_4d_seq.size() > 0 &&
-	//		m_cur_time >= 0 &&
-	//		m_cur_time < (int)m_4d_seq.size() &&
-	//		m_4d_seq[m_cur_time].slices.size()>0)
-	//	{
-	//		wstring tiff_name = m_4d_seq[m_cur_time].slices[0].slice;
-	//		if (tiff_name.size() > 0)
-	//		{
-	//			InvalidatePageInfo();
-	//			OpenTiff(tiff_name);
-	//			m_chan_num = GetTiffField(kSamplesPerPixelTag);
-	//			if (m_chan_num == 0 &&
-	//				GetTiffField(kImageWidthTag) > 0 &&
-	//				GetTiffField(kImageLengthTag) > 0) {
-	//				m_chan_num = 1;
-	//			}
-	//			CloseTiff();
-	//		}
-	//		else m_chan_num = 0;
-	//	}
-	//	else m_chan_num = 0;
-	//}
-
+	
 	return READER_OK;
 }
 
@@ -524,54 +256,6 @@ uint64_t ImageJReader::GetTiffField(const uint64_t in_tag)
 
 	return 0;
 }
-
-/*uint64_t ImageJReader::GetTiffStripOffsetOrCount(uint64_t tag, uint64_t strip)
-{
-	//search for the offset that tells us the byte count for this strip
-	uint64_t type = GetTiffField(tag, NULL, kType);
-	switch (type) {
-	case kLong8:
-		type = 8;
-		break;
-	case kLong:
-		type = 4;
-		break;
-	default:
-		type = 2;
-		break;
-	}
-	uint64_t offset = GetTiffField(tag, NULL, kOffset);
-	if (offset == 0 && tag == kStripBytesCountTag)
-		return 0;
-	uint64_t address = GetTiffField(tag, NULL, kValueAddress);
-	uint64_t cnt = GetTiffField(tag, NULL, kCount);
-	// if the values do not fit into the tag data, jump to them
-	if (cnt * type > (isBig_ ? 8 : 4)) {
-		tiff_stream.seekg(offset + type*strip, tiff_stream.beg);
-	}
-	else {
-		//otherwise, return the value of interest within the tag
-		tiff_stream.seekg(address + type*strip, tiff_stream.beg);
-	}
-	uint64_t value = 0;
-	uint32_t tmp = 0;
-	uint16_t tmp2 = 0;
-	switch (type) {
-	case kLong8:
-		tiff_stream.read((char*)&value, sizeof(uint64_t));
-		value = (swap_) ? SwapLong(value) : value;
-		break;
-	case kLong:
-		tiff_stream.read((char*)&tmp, sizeof(uint32_t));
-		value = static_cast<uint64_t>((swap_) ? SwapWord(tmp) : tmp);
-		break;
-	default:
-		tiff_stream.read((char*)&tmp2, sizeof(uint16_t));
-		value = static_cast<uint64_t>((swap_) ? SwapShort(tmp2) : tmp2);
-		break;
-	}
-	return value;
-}*/
 
 bool ImageJReader::TagInInfo(uint16_t tag)
 {
@@ -1363,25 +1047,20 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 		jboolean flag = m_pJVMInstance->m_pEnv->ExceptionCheck();
 		if (flag) {
 			m_pJVMInstance->m_pEnv->ExceptionClear();
-			/* code to handle exception */
+			//TODO: code to handle exception.
 		}
 
 		jsize len = m_pJVMInstance->m_pEnv->GetArrayLength(val);
 		jbyte* body = m_pJVMInstance->m_pEnv->GetByteArrayElements(val, 0);	
 		unsigned char* dummy = reinterpret_cast<unsigned char*>(body);
 		//t_data = dummy;
-		ofstream myfile;
-		myfile.open("D:\\example.txt");		
+		//TODO: There is a better way to do this with ReleaseShortArrayElements.
+		//Link: https://stackoverflow.com/questions/50613889/how-to-free-memory-allocated-with-jshortarray-jbytearray-from-jni-java-and-c 
 		t_data = new unsigned char[len];
 		for (int i = 0; i < len; i++) {
 			int test = *(body + i);
-			*((unsigned char*)t_data + i) = test;
-			if (i < 10000) {
-				myfile << test;
-				myfile << " ";
-			}			
+			*((unsigned char*)t_data + i) = test;			
 		}		
-		myfile.close();
 		m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);
 	}
 	else if (m_eight_bit == false)

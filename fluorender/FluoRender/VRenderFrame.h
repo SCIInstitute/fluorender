@@ -53,6 +53,7 @@ DEALINGS IN THE SOFTWARE.
 #include "Animator/Interpolator.h"
 #include "TextRenderer.h"
 #include "compatibility.h"
+#include "JVMInitializer.h"
 
 #include <wx/wx.h>
 #include <wx/menu.h>
@@ -114,6 +115,8 @@ class VRenderFrame: public wxFrame
 		ID_OpenProject,
 		ID_OpenVolume,
 		ID_OpenMesh,
+		//ImageJ\open
+		ID_ImportVolume,
 		//Mesh
 		//Mesh\Create
 		ID_Create,
@@ -274,7 +277,7 @@ public:
 	void StartupLoad(wxArrayString files);
 	void OpenProject(wxString& filename);
 	void SaveProject(wxString& filename);
-	void LoadVolumes(wxArrayString files, VRenderView* view = 0);
+	void LoadVolumes(wxArrayString files, bool withImageJ, VRenderView* view = 0);
 	void LoadMeshes(wxArrayString files, VRenderView* view = 0);
 
 	//compression
@@ -446,6 +449,7 @@ private:
 	void OnNewView(wxCommandEvent& WXUNUSED(event));
 	void OnFullScreen(wxCommandEvent& WXUNUSED(event));
 	void OnOpenVolume(wxCommandEvent& WXUNUSED(event));
+	void OnImportVolume(wxCommandEvent& WXUNUSED(event));
 	void OnOpenMesh(wxCommandEvent& WXUNUSED(event));
 	void OnOrganize(wxCommandEvent& WXUNUSED(event));
 	void OnCheckUpdates(wxCommandEvent& WXUNUSED(event));

@@ -85,7 +85,7 @@ bool VRenderApp::OnInit()
 
 	// Adding JVm initialization.
 	// TODO: Need to call destroy JVM after this on destruction.
-	JVMInitializer::getInstance();
+	JVMInitializer*	pInstance = JVMInitializer::getInstance();
 	return true;
 }
 

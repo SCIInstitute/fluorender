@@ -4464,7 +4464,7 @@ wxString DataManager::SearchProjectPath(wxString &filename)
 	return "";
 }
 
-int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_num)
+int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, int ch_num, int t_num)
 {
 	bool isURL = false;
 	bool downloaded = false;
@@ -4516,25 +4516,29 @@ int DataManager::LoadVolumeData(wxString &filename, int type, int ch_num, int t_
 	{
 		//RGB tiff
 		//TODO: Loading with imageJ irrespective of the file type.
-		reader = new ImageJReader();
-		//if (type == LOAD_TYPE_TIFF)
-		//	reader = new TIFReader();
-		//else if (type == LOAD_TYPE_NRRD)
-		//	reader = new NRRDReader();
-		//else if (type == LOAD_TYPE_OIB)
-		//	reader = new OIBReader();
-		//else if (type == LOAD_TYPE_OIF)
-		//	reader = new OIFReader();
-		//else if (type == LOAD_TYPE_LSM)
-		//	reader = new LSMReader();
-		//else if (type == LOAD_TYPE_PVXML)
-		//{
-		//	reader = new PVXMLReader();
-		//	((PVXMLReader*)reader)->SetFlipX(m_pvxml_flip_x);
-		//	((PVXMLReader*)reader)->SetFlipY(m_pvxml_flip_y);
-		//}
-		//else if (type == LOAD_TYPE_BRKXML)
-		//	reader = new BRKXMLReader();
+		if (withImageJ == true)
+			reader = new ImageJReader();
+		else {
+			if (type == LOAD_TYPE_TIFF)
+				reader = new TIFReader();
+			else if (type == LOAD_TYPE_NRRD)
+				reader = new NRRDReader();
+			else if (type == LOAD_TYPE_OIB)
+				reader = new OIBReader();
+			else if (type == LOAD_TYPE_OIF)
+				reader = new OIFReader();
+			else if (type == LOAD_TYPE_LSM)
+				reader = new LSMReader();
+			else if (type == LOAD_TYPE_PVXML)
+			{
+				reader = new PVXMLReader();
+				((PVXMLReader*)reader)->SetFlipX(m_pvxml_flip_x);
+				((PVXMLReader*)reader)->SetFlipY(m_pvxml_flip_y);
+			}
+			else if (type == LOAD_TYPE_BRKXML)
+				reader = new BRKXMLReader();
+		}
+		
 		
 		m_reader_list.push_back(reader);
 		wstring str_w = pathname.ToStdWstring();

@@ -9,13 +9,13 @@ JavaVMInitArgs JVMInitializer::m_VMargs;
 
 JVMInitializer* JVMInitializer::getInstance(){
 	if (m_pJVMInstance == nullptr){
-		m_pJVMInstance = new JVMInitializer();
-		create_JVM();
+		if(create_JVM() == true)
+			m_pJVMInstance = new JVMInitializer();		
 	}
 	return m_pJVMInstance;
 }
 
-void JVMInitializer::create_JVM(){
+bool JVMInitializer::create_JVM(){
 	using namespace std;	
 	JavaVMOption* options = new JavaVMOption[1];
 	//options[0].optionString = "-Djava.class.path=D:\\Dev_Environment\\fluorender\\build\\bin\\Debug\\Java_Code\\;D:\\Dev_Environment\\fluorender\\build\\bin\\Debug\\Java_Code\\ij.jar;D:\\Dev_Environment\\fluorender\\build\\bin\\Debug\\Java_Code\\SlideBook6Reader.jar;D:\\Dev_Environment\\fluorender\\build\\bin\\Debug\\Java_Code\\bioformats_package.jar";   // where to find java .class	
@@ -38,12 +38,12 @@ void JVMInitializer::create_JVM(){
 	m_VMargs.options = options;
 	m_VMargs.ignoreUnrecognized = false;     // invalid options make the JVM init fail
 
-	jint rc = JNI_CreateJavaVM(&m_pJvm, (void**)&m_pEnv, &m_VMargs);  // YES !!	
-	delete options;    // we then no longer need the initialisation options. 
+	jint rc = JNI_CreateJavaVM(&m_pJvm, (void**)&m_pEnv, &m_VMargs);
+	delete options;
 	if (rc != JNI_OK) {
-		//TODO: error processing... 		
-		//exit(EXIT_FAILURE);
-	}	
+		return false;
+	}
+	return true;
 }
 
 void JVMInitializer::destroyJVM() {
