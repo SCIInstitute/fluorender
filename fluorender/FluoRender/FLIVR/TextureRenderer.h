@@ -107,6 +107,7 @@ namespace FLIVR
 	class VolKernelFactory;
 	class FramebufferManager;
 	class ImgShaderFactory;
+	class VertexArrayManager;
 
 	struct TexParam
 	{
@@ -276,14 +277,16 @@ namespace FLIVR
 		double irate_;
 		bool imode_;
 
+		//framebuffers for everything
+		static FramebufferManager framebuffer_manager_;
+		//vertex arrays
+		static VertexArrayManager vertex_array_manager_;
 		//sahder for volume rendering
 		static VolShaderFactory vol_shader_factory_;
 		//shader for segmentation
 		static SegShaderFactory seg_shader_factory_;
 		//shader for calculation
 		static VolCalShaderFactory cal_shader_factory_;
-		//framebuffers for everything
-		static FramebufferManager framebuffer_manager_;
 		//smooth filter
 		static ImgShaderFactory m_img_shader_factory;
 
@@ -364,7 +367,6 @@ namespace FLIVR
 
 		//vertex and index buffer bind points
 		GLuint m_slices_vbo, m_slices_ibo, m_slices_vao;
-		GLuint m_quad_vbo, m_quad_vao;
 
 		//compute view
 		Ray compute_view();

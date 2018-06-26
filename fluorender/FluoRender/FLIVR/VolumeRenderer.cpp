@@ -35,6 +35,7 @@
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
 #include <FLIVR/Framebuffer.h>
+#include <FLIVR/VertexArray.h>
 #include "utility.h"
 #include "../compatibility.h"
 #include <fstream>
@@ -54,6 +55,7 @@ namespace FLIVR
 	ImgShaderFactory TextureRenderer::m_img_shader_factory;
 	VolKernelFactory TextureRenderer::vol_kernel_factory_;
 	FramebufferManager TextureRenderer::framebuffer_manager_;
+	VertexArrayManager TextureRenderer::vertex_array_manager_;
 	double VolumeRenderer::sw_ = 0.0;
 
 	VolumeRenderer::VolumeRenderer(Texture* tex,

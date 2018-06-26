@@ -36,6 +36,7 @@
 #include <FLIVR/SegShader.h>
 #include <FLIVR/VolCalShader.h>
 #include <FLIVR/Framebuffer.h>
+#include <FLIVR/VertexArray.h>
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
 #include "compatibility.h"
@@ -110,9 +111,6 @@ namespace FLIVR
 		glGenBuffers(1, &m_slices_vbo);
 		glGenBuffers(1, &m_slices_ibo);
 		glGenVertexArrays(1, &m_slices_vao);
-		glGenBuffers(1, &m_quad_vbo);
-		glGenVertexArrays(1, &m_quad_vao);
-		//glGenBuffers(1, &m_quad_ibo);
 	}
 
 	TextureRenderer::TextureRenderer(const TextureRenderer& copy)
@@ -136,9 +134,6 @@ namespace FLIVR
 		glGenBuffers(1, &m_slices_vbo);
 		glGenBuffers(1, &m_slices_ibo);
 		glGenVertexArrays(1, &m_slices_vao);
-		glGenBuffers(1, &m_quad_vbo);
-		glGenVertexArrays(1, &m_quad_vao);
-		//glGenBuffers(1, &m_quad_ibo);
 	}
 
 	TextureRenderer::~TextureRenderer()
@@ -157,10 +152,6 @@ namespace FLIVR
 			glDeleteBuffers(1, &m_slices_ibo);
 		if (glIsVertexArray(m_slices_vao))
 			glDeleteVertexArrays(1, &m_slices_vao);
-		if (glIsBuffer(m_quad_vbo))
-			glDeleteBuffers(1, &m_quad_vbo);
-		if (glIsVertexArray(m_quad_vao))
-			glDeleteVertexArrays(1, &m_quad_vao);
 	}
 
 	//set the texture for rendering
@@ -1215,27 +1206,24 @@ namespace FLIVR
 
 	void TextureRenderer::draw_view_quad(double d)
 	{
-		float points[] = {
-			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, float(d),
-			1.0f, -1.0f, 0.0f, 1.0f, 0.0f, float(d),
-			-1.0f, 1.0f, 0.0f, 0.0f, 1.0f, float(d),
-			1.0f, 1.0f, 0.0f, 1.0f, 1.0f, float(d) };
-
-		glBindBuffer(GL_ARRAY_BUFFER, m_quad_vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 24, points, GL_STREAM_DRAW);
-
-		glBindVertexArray(m_quad_vao);
-		glBindBuffer(GL_ARRAY_BUFFER, m_quad_vbo);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)0);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)12);
-
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		glDisableVertexAttribArray(0);
-		glDisableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
+		VertexArray* quad_va = 0;
+		if (d == 0.0)
+		{
+			quad_va =
+				vertex_array_manager_.vertex_array(VA_Norm_Square);
+			if (quad_va)
+				quad_va->draw();
+		}
+		else
+		{
+			quad_va =
+				vertex_array_manager_.vertex_array(VA_Norm_Square_d);
+			if (quad_va)
+			{
+				quad_va->set_param(d);
+				quad_va->draw();
+			}
+		}
 	}
 
 	void TextureRenderer::draw_polygons(vector<float>& vertex,

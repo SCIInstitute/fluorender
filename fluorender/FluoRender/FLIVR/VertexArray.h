@@ -36,22 +36,23 @@ namespace FLIVR
 {
 	enum VABufferType
 	{
-		VABuf_Norm_Square = 0,
+		VABuf_Coord = 0,
+		VABuf_index,
 	};
 	class VertexArray;
 	class VertexArrayManager;
 	class VertexBuffer
 	{
 	public:
-		VertexBuffer();
+		VertexBuffer(VABufferType type);
 		~VertexBuffer();
 
-		bool create();
+		void create();
 		void destroy();
 		inline bool bind();
 		inline void unbind();
 		inline bool valid();
-		inline void data(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage);
+		inline void data(GLsizeiptr size, const GLvoid* data, GLenum usage);
 
 	private:
 		unsigned int id_;
@@ -64,14 +65,15 @@ namespace FLIVR
 	enum VAType
 	{
 		VA_Norm_Square = 0,
+		VA_Norm_Square_d,
 	};
 	class VertexArray
 	{
 	public:
-		VertexArray();
+		VertexArray(VAType type);
 		~VertexArray();
 
-		bool create();
+		void create();
 		void destroy();
 		inline void bind();
 		inline void unbind();
@@ -80,21 +82,24 @@ namespace FLIVR
 		inline bool valid();
 		inline unsigned int id();
 
+		inline bool attach_buffer(VertexBuffer* buf);
+		void buffer_data(VABufferType type,
+			GLsizeiptr size, const GLvoid* data, GLenum usage);
 		inline void attrib_pointer(GLuint index,
 			GLint size, GLenum type, GLboolean normalized,
 			GLsizei stride, const GLvoid* pointer);
-		inline void draw(GLenum mode,
-			GLint first, GLsizei count);
 
-		inline bool match();
+		void set_param(double);
+		inline void draw();
+
+		inline bool match(VAType);
 
 	private:
 		unsigned int id_;
 		VAType type_;
 		bool valid_;
 		bool protected_;
-		std::vector<std::pair<unsigned int, VertexBuffer*>> buffer_list_;
-		std::vector<GLuint> attrib_ptr_list_;
+		std::vector<VertexBuffer*> buffer_list_;
 
 		friend class VertexArrayManager;
 	};
@@ -133,13 +138,23 @@ namespace FLIVR
 		return valid_;
 	}
 
-	inline void VertexBuffer::data(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage)
+	inline void VertexBuffer::data(GLsizeiptr size, const GLvoid* data, GLenum usage)
 	{
 		if (valid_)
 		{
-			glBindBuffer(target, id_);
-			glBufferData(target,
-				size, data, usage);
+			switch (type_)
+			{
+			case VABuf_Coord:
+				glBindBuffer(GL_ARRAY_BUFFER, id_);
+				glBufferData(GL_ARRAY_BUFFER,
+					size, data, usage);
+				break;
+			case VABuf_index:
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id_);
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+					size, data, usage);
+				break;
+			}
 		}
 	}
 
@@ -174,6 +189,15 @@ namespace FLIVR
 		return id_;
 	}
 
+	inline bool VertexArray::attach_buffer(VertexBuffer* buf)
+	{
+		if (!valid_)
+			return false;
+		//doesn't do anything here, just remembers the relationship
+		buffer_list_.push_back(buf);
+		return true;
+	}
+
 	inline void VertexArray::attrib_pointer(GLuint index,
 		GLint size, GLenum type, GLboolean normalized,
 		GLsizei stride, const GLvoid* pointer)
@@ -182,10 +206,28 @@ namespace FLIVR
 		glVertexAttribPointer(index, size, type, normalized, stride, pointer);
 	}
 
-	inline void VertexArray::draw(GLenum mode,
-		GLint first, GLsizei count)
+	inline void VertexArray::draw()
 	{
+		if (!valid_)
+			return;
+		glBindVertexArray(id_);
+		switch (type_)
+		{
+		case VA_Norm_Square:
+		case VA_Norm_Square_d:
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			break;
+		}
+		glBindVertexArray(0);
+	}
 
+	inline bool VertexArray::match(VAType type)
+	{
+		if (protected_)
+			return false;
+		if (type_ == type)
+			return true;
+		return false;
 	}
 }
 

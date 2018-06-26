@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderView.h"
 #include "VRenderFrame.h"
 #include <FLIVR/Framebuffer.h>
+#include <FLIVR/VertexArray.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
@@ -499,24 +500,12 @@ VRenderGLView::~VRenderGLView()
 			delete m_ruler_list[i];
 	}
 
-	if (glIsBuffer(m_quad_vbo))
-		glDeleteBuffers(1, &m_quad_vbo);
-	if (glIsVertexArray(m_quad_vao))
-		glDeleteVertexArrays(1, &m_quad_vao);
 	if (glIsBuffer(m_misc_vbo))
 		glDeleteBuffers(1, &m_misc_vbo);
 	if (glIsBuffer(m_misc_ibo))
 		glDeleteBuffers(1, &m_misc_ibo);
 	if (glIsVertexArray(m_misc_vao))
 		glDeleteVertexArrays(1, &m_misc_vao);
-
-	//pick buffer
-	//if (glIsFramebuffer(m_fbo_pick))
-	//	glDeleteFramebuffers(1, &m_fbo_pick);
-	//if (glIsTexture(m_tex_pick))
-	//	glDeleteTextures(1, &m_tex_pick);
-	//if (glIsTexture(m_tex_pick_depth))
-	//	glDeleteTextures(1, &m_tex_pick_depth);
 
 	if (!m_sharedRC)
 		delete m_glRC;
@@ -580,8 +569,6 @@ void VRenderGLView::Init()
 			vr_frame->GetSettingDlg()->UpdateTextureSize();
 		}
 		//glViewport(0, 0, (GLint)(GetSize().x), (GLint)(GetSize().y));
-		glGenBuffers(1, &m_quad_vbo);
-		m_quad_vao = 0;
 		glGenBuffers(1, &m_misc_vbo);
 		glGenBuffers(1, &m_misc_ibo);
 		glGenVertexArrays(1, &m_misc_vao);
@@ -12728,31 +12715,10 @@ void VRenderGLView::CalcFrame()
 
 void VRenderGLView::DrawViewQuad()
 {
-	if (!m_quad_vao)
-	{
-		float points[] = {
-			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-			1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-			-1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-			1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f };
-
-		glBindBuffer(GL_ARRAY_BUFFER, m_quad_vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 24, points, GL_STATIC_DRAW);
-
-		glGenVertexArrays(1, &m_quad_vao);
-		glBindVertexArray(m_quad_vao);
-
-		glBindBuffer(GL_ARRAY_BUFFER, m_quad_vbo);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)0);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)12);
-	}
-
-	glBindVertexArray(m_quad_vao);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	VertexArray* quad_va =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Norm_Square);
+	if (quad_va)
+		quad_va->draw();
 }
 
 void VRenderGLView::switchLevel(VolumeData *vd)

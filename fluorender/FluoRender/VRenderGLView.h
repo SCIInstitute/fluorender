@@ -709,7 +709,6 @@ private:
 	//paint buffer
 	bool m_clear_paint;
 	//vert buffer
-	GLuint m_quad_vbo, m_quad_vao;
 	GLuint m_misc_vbo, m_misc_ibo, m_misc_vao;
 
 	//camera controls

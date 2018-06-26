@@ -27,3 +27,142 @@
 //  
 
 #include "VertexArray.h"
+
+namespace FLIVR
+{
+	VertexBuffer::VertexBuffer(VABufferType type) :
+		id_(0), type_(type), valid_(false)
+	{
+	}
+
+	VertexBuffer::~VertexBuffer()
+	{
+		destroy();
+	}
+
+	void VertexBuffer::create()
+	{
+		glGenBuffers(1, &id_);
+		valid_ = true;
+	}
+
+	void VertexBuffer::destroy()
+	{
+		glDeleteBuffers(1, &id_);
+		id_ = 0;
+		valid_ = false;
+	}
+
+	VertexArray::VertexArray(VAType type) :
+		id_(0), type_(type), valid_(false), protected_(false)
+	{
+	}
+
+	VertexArray::~VertexArray()
+	{
+		destroy();
+	}
+
+	void VertexArray::create()
+	{
+		glGenVertexArrays(1, &id_);
+		valid_ = true;
+	}
+
+	void VertexArray::destroy()
+	{
+		glDeleteVertexArrays(1, &id_);
+		id_ = 0;
+		valid_ = false;
+		protected_ = false;
+	}
+
+	void VertexArray::buffer_data(
+		VABufferType type, GLsizeiptr size,
+		const GLvoid* data, GLenum usage)
+	{
+		VertexBuffer* vb = 0;
+		for (auto it = buffer_list_.begin();
+			it != buffer_list_.end(); ++it)
+		{
+			if ((*it)->type_ == type)
+			{
+				vb = *it;
+				break;
+			}
+		}
+		if (vb)
+			vb->data(size, data, usage);
+	}
+
+	void VertexArray::set_param(double val)
+	{
+		if (type_ == VA_Norm_Square_d)
+		{
+			float points[] = {
+				-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, float(val),
+				1.0f, -1.0f, 0.0f, 1.0f, 0.0f, float(val),
+				-1.0f, 1.0f, 0.0f, 0.0f, 1.0f, float(val),
+				1.0f, 1.0f, 0.0f, 1.0f, 1.0f, float(val) };
+			buffer_data(VABuf_Coord,
+				sizeof(float) * 24, points, GL_STREAM_DRAW);
+		}
+	}
+
+	VertexArrayManager::VertexArrayManager()
+	{
+	}
+
+	VertexArrayManager::~VertexArrayManager()
+	{
+		//release all opengl resources managed by the manager
+		for (auto it = va_list_.begin();
+			it != va_list_.end(); ++it)
+			delete *it;
+		for (auto it = vb_list_.begin();
+			it != vb_list_.end(); ++it)
+			delete *it;
+	}
+
+	VertexArray* VertexArrayManager::vertex_array(VAType type)
+	{
+		//find one that matches and return
+		for (auto it = va_list_.begin();
+			it != va_list_.end(); ++it)
+		{
+			if ((*it)->match(type))
+				return *it;
+		}
+
+		//create new vertex array
+		VertexArray* va = new VertexArray(type);
+		va->create();
+		//add to list
+		va_list_.push_back(va);
+		va->bind();
+		if (type == VA_Norm_Square ||
+			type == VA_Norm_Square_d)
+		{
+			//create vertex buffer
+			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
+			vb->create();
+			//assign data
+			float points[] = {
+				-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+				1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+				-1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+				1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f };
+			vb->data(sizeof(float) * 24, points, GL_STATIC_DRAW);
+			//attach buffer
+			va->attach_buffer(vb);
+			//set attrib
+			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)0);
+			va->attrib_pointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)12);
+			vb_list_.push_back(vb);
+		}
+		//unbind
+		va->unbind();
+
+		return va;
+	}
+}
