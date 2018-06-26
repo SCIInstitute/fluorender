@@ -95,7 +95,7 @@ namespace FLIVR
 			vb->data(size, data, usage);
 	}
 
-	void VertexArray::set_param(double val)
+	void VertexArray::set_param(unsigned int index, double val)
 	{
 		if (type_ == VA_Norm_Square_d)
 		{

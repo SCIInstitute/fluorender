@@ -66,6 +66,7 @@ namespace FLIVR
 	{
 		VA_Norm_Square = 0,
 		VA_Norm_Square_d,
+		VA_Brush_Circles,
 	};
 	class VertexArray
 	{
@@ -89,7 +90,7 @@ namespace FLIVR
 			GLint size, GLenum type, GLboolean normalized,
 			GLsizei stride, const GLvoid* pointer);
 
-		void set_param(double);
+		void set_param(unsigned int, double);
 		inline void draw();
 
 		inline bool match(VAType);
@@ -100,6 +101,7 @@ namespace FLIVR
 		bool valid_;
 		bool protected_;
 		std::vector<VertexBuffer*> buffer_list_;
+		std::vector<GLuint> attrib_pointer_list_;
 
 		friend class VertexArrayManager;
 	};
@@ -202,8 +204,9 @@ namespace FLIVR
 		GLint size, GLenum type, GLboolean normalized,
 		GLsizei stride, const GLvoid* pointer)
 	{
-		glEnableVertexAttribArray(index);
+		//glEnableVertexAttribArray(index);
 		glVertexAttribPointer(index, size, type, normalized, stride, pointer);
+		attrib_pointer_list_.push_back(index);
 	}
 
 	inline void VertexArray::draw()
@@ -211,13 +214,24 @@ namespace FLIVR
 		if (!valid_)
 			return;
 		glBindVertexArray(id_);
+		//enable attrib array
+		for (auto it = attrib_pointer_list_.begin();
+			it != attrib_pointer_list_.end(); ++it)
+			glEnableVertexAttribArray(*it);
 		switch (type_)
 		{
 		case VA_Norm_Square:
 		case VA_Norm_Square_d:
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			break;
+		case VA_Brush_Circles:
+			glDrawArrays(GL_LINE_LOOP, 0, 0);
+			break;
 		}
+		//disable attrib array
+		for (auto it = attrib_pointer_list_.begin();
+			it != attrib_pointer_list_.end(); ++it)
+			glDisableVertexAttribArray(*it);
 		glBindVertexArray(0);
 	}
 

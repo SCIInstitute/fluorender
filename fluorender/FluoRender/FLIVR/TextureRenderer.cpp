@@ -1220,7 +1220,7 @@ namespace FLIVR
 				vertex_array_manager_.vertex_array(VA_Norm_Square_d);
 			if (quad_va)
 			{
-				quad_va->set_param(d);
+				quad_va->set_param(0, d);
 				quad_va->draw();
 			}
 		}

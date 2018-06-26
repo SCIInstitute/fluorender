@@ -1721,8 +1721,8 @@ void VRenderGLView::DrawCircle(double cx, double cy,
 	for (size_t i = 0; i<secs; ++i)
 	{
 		deg = i * 2 * PI / secs;
-		vertex.push_back(cx + radius*sin(deg));
-		vertex.push_back(cy + radius*cos(deg));
+		vertex.push_back(radius*sin(deg));
+		vertex.push_back(radius*cos(deg));
 		vertex.push_back(0.0f);
 	}
 
@@ -1736,7 +1736,10 @@ void VRenderGLView::DrawCircle(double cx, double cy,
 	}
 
 	shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0);
-	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+	//apply translate first
+	glm::mat4 mat0 = matrix * glm::translate(
+			glm::mat4(), glm::vec3(cx, cy, 0.0));
+	shader->setLocalParamMatrix(0, glm::value_ptr(mat0));
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
