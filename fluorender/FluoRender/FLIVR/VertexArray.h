@@ -32,6 +32,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <FLIVR/BBox.h>
 
 namespace FLIVR
 {
@@ -68,6 +69,7 @@ namespace FLIVR
 		VA_Norm_Square = 0,
 		VA_Norm_Square_d,
 		VA_Brush_Circles,
+		VA_Bound_Cube,
 	};
 	class VertexArray
 	{
@@ -91,11 +93,15 @@ namespace FLIVR
 			GLint size, GLenum type, GLboolean normalized,
 			GLsizei stride, const GLvoid* pointer);
 
+		//set parameters to generate vertices
 		void set_param(unsigned int, double);
 		void set_param(std::vector<std::pair<unsigned int, double>>& params);
+		void set_param(BBox &box);
+
 		inline void draw();
 		inline void draw_norm_square();
 		inline void draw_circles();
+		inline void draw_bound_cube();
 
 		inline bool match(VAType);
 
@@ -105,6 +111,8 @@ namespace FLIVR
 		void update_buffer_norm_square_d();
 		//parameters: 0-r1; 1-r2; 2-sections
 		void update_buffer_circles();
+		//parameters: the bounding box
+		void update_bound_cube();
 
 	private:
 		unsigned int id_;
@@ -113,7 +121,9 @@ namespace FLIVR
 		bool protected_;
 		std::vector<VertexBuffer*> buffer_list_;
 		std::vector<GLuint> attrib_pointer_list_;
+		//parameters
 		std::map<unsigned int, double> param_list_;
+		BBox bbox_;
 
 		friend class VertexArrayManager;
 	};
@@ -239,6 +249,9 @@ namespace FLIVR
 		case VA_Brush_Circles:
 			draw_circles();
 			break;
+		case VA_Bound_Cube:
+			draw_bound_cube();
+			break;
 		}
 		//disable attrib array
 		for (auto it = attrib_pointer_list_.begin();
@@ -273,6 +286,11 @@ namespace FLIVR
 		//draw
 		for (int i=0; i<count; ++i)
 			glDrawArrays(GL_LINE_LOOP, i*secs, secs);
+	}
+
+	inline void VertexArray::draw_bound_cube()
+	{
+		glDrawArrays(GL_LINES, 0, 24);
 	}
 
 	inline bool VertexArray::match(VAType type)

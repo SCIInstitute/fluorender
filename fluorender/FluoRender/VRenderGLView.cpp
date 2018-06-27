@@ -8361,28 +8361,6 @@ void VRenderGLView::DrawBounds()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
-	vector<float> vertex;
-	vertex.reserve(16 * 3);
-
-	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.min().z());
-	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.min().z());
-	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.min().z());
-	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.min().z());
-
-	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.max().z());
-	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.max().z());
-	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.max().z());
-	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.max().z());
-
-	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.min().z());
-	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.max().z());
-	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.min().z());
-	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.max().z());
-	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.min().z());
-	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.max().z());
-	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.min().z());
-	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.max().z());
-
 	ShaderProgram* shader =
 		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
@@ -8395,18 +8373,13 @@ void VRenderGLView::DrawBounds()
 	glm::mat4 matrix = m_proj_mat * m_mv_mat;
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
-	glBindVertexArray(m_misc_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
-	glDrawArrays(GL_LINE_LOOP, 0, 4);
-	glDrawArrays(GL_LINE_LOOP, 4, 4);
-	glDrawArrays(GL_LINES, 8, 8);
-	glDisableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	VertexArray* va_cube =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Bound_Cube);
+	if (va_cube)
+	{
+		va_cube->set_param(m_bounds);
+		va_cube->draw();
+	}
 
 	if (shader && shader->valid())
 		shader->release();

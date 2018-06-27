@@ -150,6 +150,15 @@ namespace FLIVR
 			update_buffer();
 	}
 
+	void VertexArray::set_param(BBox &box)
+	{
+		if (bbox_ != box)
+		{
+			bbox_ = box;
+			update_bound_cube();
+		}
+	}
+
 	void VertexArray::update_buffer()
 	{
 		switch (type_)
@@ -162,6 +171,9 @@ namespace FLIVR
 			break;
 		case VA_Brush_Circles:
 			update_buffer_circles();
+			break;
+		case VA_Bound_Cube:
+			update_bound_cube();
 			break;
 		}
 	}
@@ -231,6 +243,54 @@ namespace FLIVR
 				vertex.push_back(0.0f);
 			}
 		}
+		buffer_data(VABuf_Coord,
+			sizeof(float) * vertex.size(),
+			&vertex[0], GL_STREAM_DRAW);
+	}
+
+	void VertexArray::update_bound_cube()
+	{
+		//draw 12 sides
+		std::vector<float> vertex;
+		vertex.reserve(24 * 3);
+
+		//s1-000-100
+		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.min().z());
+		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.min().z());
+		//s2-100-101
+		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.min().z());
+		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.max().z());
+		//s3-101-001
+		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.max().z());
+		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.max().z());
+		//s4-001-000
+		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.max().z());
+		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.min().z());
+		//s5-000-010
+		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.min().z());
+		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.min().z());
+		//s6-100-110
+		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.min().z());
+		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.min().z());
+		//s7-101-111
+		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.max().z());
+		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.max().z());
+		//s8-001-011
+		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.max().z());
+		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.max().z());
+		//s9-010-110
+		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.min().z());
+		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.min().z());
+		//s10-110-111
+		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.min().z());
+		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.max().z());
+		//s11-111-011
+		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.max().z());
+		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.max().z());
+		//s12-011-010
+		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.max().z());
+		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.min().z());
+
 		buffer_data(VABuf_Coord,
 			sizeof(float) * vertex.size(),
 			&vertex[0], GL_STREAM_DRAW);
@@ -314,6 +374,20 @@ namespace FLIVR
 			params.push_back(std::pair<unsigned int, double>(1, 10.0));
 			params.push_back(std::pair<unsigned int, double>(2, 60.0));
 			va->set_param(params);
+			//set attrib
+			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
+		}
+		else if (type == VA_Bound_Cube)
+		{
+			//create vertex buffer
+			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
+			vb->create();
+			vb_list_.push_back(vb);
+			//attach buffer
+			va->attach_buffer(vb);
+			//set param
+			BBox bbox(Point(0.0), Point(1.0));
+			va->set_param(bbox);
 			//set attrib
 			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
 		}

@@ -45,6 +45,7 @@ class Point {
 public:
   inline explicit Point(const Vector& v);
   inline Point(double x, double y, double z): x_(x), y_(y), z_(z) {}
+  inline Point(double v) : x_(v), y_(v), z_(v) {}
   Point(double, double, double, double);
   Point(const Point&);
   inline Point();
