@@ -27,6 +27,7 @@
 //  
 
 #include "VertexArray.h"
+#include "utility.h"
 
 namespace FLIVR
 {
@@ -97,16 +98,142 @@ namespace FLIVR
 
 	void VertexArray::set_param(unsigned int index, double val)
 	{
-		if (type_ == VA_Norm_Square_d)
+		bool changed = false;
+		//add to list
+		auto param = param_list_.find(index);
+		if (param == param_list_.end())
 		{
-			float points[] = {
-				-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, float(val),
-				1.0f, -1.0f, 0.0f, 1.0f, 0.0f, float(val),
-				-1.0f, 1.0f, 0.0f, 0.0f, 1.0f, float(val),
-				1.0f, 1.0f, 0.0f, 1.0f, 1.0f, float(val) };
-			buffer_data(VABuf_Coord,
-				sizeof(float) * 24, points, GL_STREAM_DRAW);
+			param_list_.insert(
+				std::pair<unsigned int,
+				double>(index, val));
+			changed = true;
 		}
+		else
+		{
+			if (param->second != val)
+			{
+				param->second = val;
+				changed = true;
+			}
+		}
+
+		//change buffer data according to the parameter
+		if (changed)
+			update_buffer();
+	}
+
+	void VertexArray::set_param(
+		std::vector<std::pair<unsigned int, double>> &params)
+	{
+		bool changed = false;
+		for (auto it = params.begin();
+			it != params.end(); ++it)
+		{
+			auto param = param_list_.find(it->first);
+			if (param == param_list_.end())
+			{
+				param_list_.insert(*it);
+				changed = true;
+			}
+			else
+			{
+				if (param->second != it->second)
+				{
+					param->second = it->second;
+					changed = true;
+				}
+			}
+		}
+
+		//change buffer data according to the parameter
+		if (changed)
+			update_buffer();
+	}
+
+	void VertexArray::update_buffer()
+	{
+		switch (type_)
+		{
+		case VA_Norm_Square:
+		default:
+			break;
+		case VA_Norm_Square_d:
+			update_buffer_norm_square_d();
+			break;
+		case VA_Brush_Circles:
+			update_buffer_circles();
+			break;
+		}
+	}
+
+	void VertexArray::update_buffer_norm_square_d()
+	{
+		double d = 0.0;
+		auto param = param_list_.find(0);
+		if (param != param_list_.end())
+			d = param->second;
+
+		float points[] = {
+			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, float(d),
+			1.0f, -1.0f, 0.0f, 1.0f, 0.0f, float(d),
+			-1.0f, 1.0f, 0.0f, 0.0f, 1.0f, float(d),
+			1.0f, 1.0f, 0.0f, 1.0f, 1.0f, float(d) };
+		buffer_data(VABuf_Coord,
+			sizeof(float) * 24, points, GL_STREAM_DRAW);
+	}
+
+	void VertexArray::update_buffer_circles()
+	{
+		//get parameters
+		double r1 = -1.0;
+		double r2 = -1.0;
+		int secs = 0;
+		auto param = param_list_.find(0);
+		if (param != param_list_.end())
+			r1 = param->second;
+		param = param_list_.find(1);
+		if (param != param_list_.end())
+			r2 = param->second;
+		param = param_list_.find(2);
+		if (param != param_list_.end())
+			secs = int(param->second + 0.5);
+
+		if (r1 < 0.0 && r2 < 0.0)
+			return;
+
+		//generate vertex data for circles
+		std::vector<float> vertex;
+		if (r1 < 0.0 || r2 < 0.0)
+			vertex.reserve(secs * 3);//just one circle
+		else
+			vertex.reserve(secs * 6);//two circles
+
+		double deg = 0.0;
+		//first circle
+		if (r1 >= 0.0)
+		{
+			for (size_t i = 0; i<secs; ++i)
+			{
+				deg = i * 2 * PI / secs;
+				vertex.push_back(r1*sin(deg));
+				vertex.push_back(r1*cos(deg));
+				vertex.push_back(0.0f);
+			}
+		}
+		if (r2 >= 0.0)
+		{
+			//second circle
+			for (size_t i = 0; i<secs; ++i)
+			{
+				deg = i * 2 * PI / secs;
+				vertex.push_back(r2*sin(deg));
+				vertex.push_back(r2*cos(deg));
+				vertex.push_back(0.0f);
+			}
+		}
+		buffer_data(VABuf_Coord,
+			sizeof(float) * vertex.size(),
+			&vertex[0], GL_STREAM_DRAW);
 	}
 
 	VertexArrayManager::VertexArrayManager()
@@ -140,12 +267,12 @@ namespace FLIVR
 		//add to list
 		va_list_.push_back(va);
 		va->bind();
-		if (type == VA_Norm_Square ||
-			type == VA_Norm_Square_d)
+		if (type == VA_Norm_Square)
 		{
 			//create vertex buffer
 			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
 			vb->create();
+			vb_list_.push_back(vb);
 			//assign data
 			float points[] = {
 				-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
@@ -158,7 +285,37 @@ namespace FLIVR
 			//set attrib
 			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)0);
 			va->attrib_pointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)12);
+		}
+		else if (type == VA_Norm_Square_d)
+		{
+			//create vertex buffer
+			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
+			vb->create();
 			vb_list_.push_back(vb);
+			//attach buffer
+			va->attach_buffer(vb);
+			//set param
+			va->set_param(0, 0.0);
+			//set attrib
+			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)0);
+			va->attrib_pointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)12);
+		}
+		else if (type == VA_Brush_Circles)
+		{
+			//create vertex buffer
+			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
+			vb->create();
+			vb_list_.push_back(vb);
+			//attach buffer
+			va->attach_buffer(vb);
+			//set param
+			std::vector<std::pair<unsigned int, double>> params;
+			params.push_back(std::pair<unsigned int, double>(0, 10.0));
+			params.push_back(std::pair<unsigned int, double>(1, 10.0));
+			params.push_back(std::pair<unsigned int, double>(2, 60.0));
+			va->set_param(params);
+			//set attrib
+			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
 		}
 		//unbind
 		va->unbind();

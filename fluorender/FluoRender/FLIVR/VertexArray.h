@@ -31,6 +31,7 @@
 #include <GL/glew.h>
 #include <string>
 #include <vector>
+#include <map>
 
 namespace FLIVR
 {
@@ -91,9 +92,19 @@ namespace FLIVR
 			GLsizei stride, const GLvoid* pointer);
 
 		void set_param(unsigned int, double);
+		void set_param(std::vector<std::pair<unsigned int, double>>& params);
 		inline void draw();
+		inline void draw_norm_square();
+		inline void draw_circles();
 
 		inline bool match(VAType);
+
+	private:
+		void update_buffer();
+		//parameters: 0-tex z depth
+		void update_buffer_norm_square_d();
+		//parameters: 0-r1; 1-r2; 2-sections
+		void update_buffer_circles();
 
 	private:
 		unsigned int id_;
@@ -102,6 +113,7 @@ namespace FLIVR
 		bool protected_;
 		std::vector<VertexBuffer*> buffer_list_;
 		std::vector<GLuint> attrib_pointer_list_;
+		std::map<unsigned int, double> param_list_;
 
 		friend class VertexArrayManager;
 	};
@@ -222,10 +234,10 @@ namespace FLIVR
 		{
 		case VA_Norm_Square:
 		case VA_Norm_Square_d:
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			draw_norm_square();
 			break;
 		case VA_Brush_Circles:
-			glDrawArrays(GL_LINE_LOOP, 0, 0);
+			draw_circles();
 			break;
 		}
 		//disable attrib array
@@ -233,6 +245,34 @@ namespace FLIVR
 			it != attrib_pointer_list_.end(); ++it)
 			glDisableVertexAttribArray(*it);
 		glBindVertexArray(0);
+	}
+
+	inline void VertexArray::draw_norm_square()
+	{
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	}
+
+	inline void VertexArray::draw_circles()
+	{
+		int count = 0;
+		//first, determine how many circles to draw
+		auto param = param_list_.find(0);
+		if (param != param_list_.end() &&
+			param->second >= 0.0)
+			count++;
+		param = param_list_.find(1);
+		if (param != param_list_.end() &&
+			param->second >= 0.0)
+			count++;
+		//determine secs
+		int secs = 0;
+		param = param_list_.find(2);
+		if (param != param_list_.end())
+			secs = int(param->second + 0.5);
+
+		//draw
+		for (int i=0; i<count; ++i)
+			glDrawArrays(GL_LINE_LOOP, i*secs, secs);
 	}
 
 	inline bool VertexArray::match(VAType type)

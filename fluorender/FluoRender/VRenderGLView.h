@@ -1001,8 +1001,11 @@ private:
 	bool GetMeshShadow(double &val);
 
 	//painting
-	void DrawCircle(double cx, double cy,
-		double radius, Color &color, glm::mat4 &matrix);
+	void DrawCircles(
+		double cx, double cy,
+		double r1, double r2,
+		Color &color,
+		glm::mat4 &matrix);
 	void DrawBrush();
 	void PaintStroke();
 	void DisplayStroke();

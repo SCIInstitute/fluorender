@@ -1709,23 +1709,9 @@ int VRenderGLView::GetPaintMode()
 	return m_selector.GetMode();
 }
 
-void VRenderGLView::DrawCircle(double cx, double cy,
-	double radius, Color &color, glm::mat4 &matrix)
+void VRenderGLView::DrawCircles(double cx, double cy,
+	double r1, double r2, Color &color, glm::mat4 &matrix)
 {
-	int secs = 60;
-	double deg = 0.0;
-
-	vector<float> vertex;
-	vertex.reserve(secs * 3);
-
-	for (size_t i = 0; i<secs; ++i)
-	{
-		deg = i * 2 * PI / secs;
-		vertex.push_back(radius*sin(deg));
-		vertex.push_back(radius*cos(deg));
-		vertex.push_back(0.0f);
-	}
-
 	ShaderProgram* shader =
 		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
@@ -1741,16 +1727,18 @@ void VRenderGLView::DrawCircle(double cx, double cy,
 			glm::mat4(), glm::vec3(cx, cy, 0.0));
 	shader->setLocalParamMatrix(0, glm::value_ptr(mat0));
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
-	glBindVertexArray(m_misc_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
-	glDrawArrays(GL_LINE_LOOP, 0, secs);
-	glDisableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	VertexArray* va_circles =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Brush_Circles);
+	if (va_circles)
+	{
+		//set parameters
+		std::vector<std::pair<unsigned int, double>> params;
+		params.push_back(std::pair<unsigned int, double>(0, r1));
+		params.push_back(std::pair<unsigned int, double>(1, r2));
+		params.push_back(std::pair<unsigned int, double>(2, 60.0));
+		va_circles->set_param(params);
+		va_circles->draw();
+	}
 
 	if (shader && shader->valid())
 		shader->release();
@@ -1801,17 +1789,16 @@ void VRenderGLView::DrawBrush()
 		Color text_color = GetTextColor();
 
 		if (mode == 1 ||
-			mode == 2 ||
-			mode == 8)
-			DrawCircle(cx, cy, m_brush_radius1*pressure,
-				text_color, proj_mat);
-
-		if (mode == 1 ||
-			mode == 2 ||
-			mode == 3 ||
+			mode == 2)
+			DrawCircles(cx, cy, m_brush_radius1*pressure,
+				m_brush_radius2*pressure, text_color, proj_mat);
+		else if (mode == 8)
+			DrawCircles(cx, cy, m_brush_radius1*pressure,
+				-1.0, text_color, proj_mat);
+		else if (mode == 3 ||
 			mode == 4)
-			DrawCircle(cx, cy, m_brush_radius2*pressure,
-				text_color, proj_mat);
+			DrawCircles(cx, cy, -1.0,
+				m_brush_radius2*pressure, text_color, proj_mat);
 
 		float cx2 = pos1.x;
 		float cy2 = ny - pos1.y;
