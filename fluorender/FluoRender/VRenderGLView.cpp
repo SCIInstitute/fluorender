@@ -8570,43 +8570,13 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		glm::mat4 matrix = m_proj_mat * mv_mat;
 		shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 
-		vector<float> vertex;
-		vertex.reserve(8 * 3);
-		vector<uint32_t> index;
-		index.reserve(6 * 4 * 2);
-
-		//vertices
-		for (size_t pi = 0; pi<8; ++pi)
-		{
-			vertex.push_back(pp[pi].x());
-			vertex.push_back(pp[pi].y());
-			vertex.push_back(pp[pi].z());
-		}
-		//indices
-		index.push_back(4); index.push_back(0); index.push_back(5); index.push_back(1);
-		index.push_back(4); index.push_back(0); index.push_back(1); index.push_back(5);
-		index.push_back(7); index.push_back(3); index.push_back(6); index.push_back(2);
-		index.push_back(7); index.push_back(3); index.push_back(2); index.push_back(6);
-		index.push_back(1); index.push_back(0); index.push_back(3); index.push_back(2);
-		index.push_back(1); index.push_back(0); index.push_back(2); index.push_back(3);
-		index.push_back(4); index.push_back(5); index.push_back(6); index.push_back(7);
-		index.push_back(4); index.push_back(5); index.push_back(7); index.push_back(6);
-		index.push_back(0); index.push_back(4); index.push_back(2); index.push_back(6);
-		index.push_back(0); index.push_back(4); index.push_back(6); index.push_back(2);
-		index.push_back(5); index.push_back(1); index.push_back(7); index.push_back(3);
-		index.push_back(5); index.push_back(1); index.push_back(3); index.push_back(7);
-
-		glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_misc_ibo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t)*index.size(), &index[0], GL_DYNAMIC_DRAW);
-
-		glBindVertexArray(m_misc_vao);
-		glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_misc_ibo);
-
+		VertexArray* va_clipp =
+			TextureRenderer::vertex_array_manager_.vertex_array(VA_Clip_Planes);
+		if (!va_clipp)
+			return;
+		std::vector<Point> clip_points(pp, pp+8);
+		va_clipp->set_param(clip_points);
+		va_clipp->draw_begin();
 		//draw
 		//x1 = (p4, p0, p1, p5)
 		if (m_clip_mask & 1)
@@ -8618,12 +8588,12 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 					shader->setLocalParam(0, 1.0, 0.5, 0.5, plane_trans);
 				else
 					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)0);
+				va_clipp->draw_clip_plane(0, false);
 			}
 			if (border)
 			{
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, (const GLvoid*)(4 * 4));
+				va_clipp->draw_clip_plane(16, true);
 			}
 		}
 		//x2 = (p7, p3, p2, p6)
@@ -8636,12 +8606,12 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 					shader->setLocalParam(0, 1.0, 0.5, 1.0, plane_trans);
 				else
 					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(8 * 4));
+				va_clipp->draw_clip_plane(32, false);
 			}
 			if (border)
 			{
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, (const GLvoid*)(12 * 4));
+				va_clipp->draw_clip_plane(48, true);
 			}
 		}
 		//y1 = (p1, p0, p2, p3)
@@ -8654,12 +8624,12 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 					shader->setLocalParam(0, 0.5, 1.0, 0.5, plane_trans);
 				else
 					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(16 * 4));
+				va_clipp->draw_clip_plane(64, false);
 			}
 			if (border)
 			{
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, (const GLvoid*)(20 * 4));
+				va_clipp->draw_clip_plane(80, true);
 			}
 		}
 		//y2 = (p4, p5, p7, p6)
@@ -8672,12 +8642,12 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 					shader->setLocalParam(0, 1.0, 1.0, 0.5, plane_trans);
 				else
 					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(24 * 4));
+				va_clipp->draw_clip_plane(96, false);
 			}
 			if (border)
 			{
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, (const GLvoid*)(28 * 4));
+				va_clipp->draw_clip_plane(112, true);
 			}
 		}
 		//z1 = (p0, p4, p6, p2)
@@ -8690,12 +8660,12 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 					shader->setLocalParam(0, 0.5, 0.5, 1.0, plane_trans);
 				else
 					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(32 * 4));
+				va_clipp->draw_clip_plane(128, false);
 			}
 			if (border)
 			{
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, (const GLvoid*)(36 * 4));
+				va_clipp->draw_clip_plane(144, true);
 			}
 		}
 		//z2 = (p5, p1, p3, p7)
@@ -8708,20 +8678,15 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 					shader->setLocalParam(0, 0.5, 1.0, 1.0, plane_trans);
 				else
 					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(40 * 4));
+				va_clipp->draw_clip_plane(160, false);
 			}
 			if (border)
 			{
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, (const GLvoid*)(44 * 4));
+				va_clipp->draw_clip_plane(176, true);
 			}
 		}
-
-		glDisableVertexAttribArray(0);
-		//unbind
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
+		va_clipp->draw_end();
 	}
 
 	if (shader && shader->valid())

@@ -159,6 +159,45 @@ namespace FLIVR
 		}
 	}
 
+	void VertexArray::set_param(std::vector<Point> &pp)
+	{
+		bool update_vertex = false;
+		bool update_index = false;
+		if (clip_points_.empty())
+		{
+			//first time
+			clip_points_.push_back(0); clip_points_.push_back(0); clip_points_.push_back(0);
+			clip_points_.push_back(0); clip_points_.push_back(0); clip_points_.push_back(1);
+			clip_points_.push_back(1); clip_points_.push_back(0); clip_points_.push_back(0);
+			clip_points_.push_back(1); clip_points_.push_back(0); clip_points_.push_back(1);
+			clip_points_.push_back(0); clip_points_.push_back(1); clip_points_.push_back(0);
+			clip_points_.push_back(0); clip_points_.push_back(1); clip_points_.push_back(1);
+			clip_points_.push_back(1); clip_points_.push_back(1); clip_points_.push_back(0);
+			clip_points_.push_back(1); clip_points_.push_back(1); clip_points_.push_back(1);
+			update_vertex = true;
+			update_index = true;
+		}
+		else if (pp.size() == 8 && clip_points_.size() == 24)
+		{
+			for (size_t i = 0; i < 8; ++i)
+			{
+				if (pp[i] !=
+					Point(clip_points_[i*3],
+						clip_points_[i*3+1],
+						clip_points_[i*3+2]))
+				{
+					clip_points_[i * 3] = pp[i].x();
+					clip_points_[i * 3+1] = pp[i].y();
+					clip_points_[i * 3+2] = pp[i].z();
+					update_vertex = true;
+				}
+			}
+		}
+
+		if (update_vertex)
+			update_clip_planes(update_index);
+	}
+
 	void VertexArray::update_buffer()
 	{
 		switch (type_)
@@ -296,6 +335,34 @@ namespace FLIVR
 			&vertex[0], GL_STREAM_DRAW);
 	}
 
+	void VertexArray::update_clip_planes(bool update_index)
+	{
+		buffer_data(VABuf_Coord,
+			sizeof(float)*clip_points_.size(),
+			&clip_points_[0], GL_STREAM_DRAW);
+		if (update_index)
+		{
+			std::vector<uint32_t> index;
+			index.reserve(6 * 4 * 2);
+			//indices
+			index.push_back(4); index.push_back(0); index.push_back(5); index.push_back(1);
+			index.push_back(4); index.push_back(0); index.push_back(1); index.push_back(5);
+			index.push_back(7); index.push_back(3); index.push_back(6); index.push_back(2);
+			index.push_back(7); index.push_back(3); index.push_back(2); index.push_back(6);
+			index.push_back(1); index.push_back(0); index.push_back(3); index.push_back(2);
+			index.push_back(1); index.push_back(0); index.push_back(2); index.push_back(3);
+			index.push_back(4); index.push_back(5); index.push_back(6); index.push_back(7);
+			index.push_back(4); index.push_back(5); index.push_back(7); index.push_back(6);
+			index.push_back(0); index.push_back(4); index.push_back(2); index.push_back(6);
+			index.push_back(0); index.push_back(4); index.push_back(6); index.push_back(2);
+			index.push_back(5); index.push_back(1); index.push_back(7); index.push_back(3);
+			index.push_back(5); index.push_back(1); index.push_back(3); index.push_back(7);
+			buffer_data(VABuf_index,
+				sizeof(uint32_t)*index.size(),
+				&index[0], GL_STATIC_DRAW);
+		}
+	}
+
 	VertexArrayManager::VertexArrayManager()
 	{
 	}
@@ -388,6 +455,26 @@ namespace FLIVR
 			//set param
 			BBox bbox(Point(0.0), Point(1.0));
 			va->set_param(bbox);
+			//set attrib
+			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
+		}
+		else if (type == VA_Clip_Planes)
+		{
+			//create vertex buffer
+			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
+			vb->create();
+			vb_list_.push_back(vb);
+			//attach buffer
+			va->attach_buffer(vb);
+			//index buffer
+			vb = new VertexBuffer(VABuf_index);
+			vb->create();
+			vb_list_.push_back(vb);
+			//attach buffer
+			va->attach_buffer(vb);
+			//set param
+			std::vector<Point> pp;
+			va->set_param(pp);
 			//set attrib
 			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
 		}

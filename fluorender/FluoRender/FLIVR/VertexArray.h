@@ -33,6 +33,7 @@
 #include <vector>
 #include <map>
 #include <FLIVR/BBox.h>
+#include <FLIVR/Point.h>
 
 namespace FLIVR
 {
@@ -70,6 +71,7 @@ namespace FLIVR
 		VA_Norm_Square_d,
 		VA_Brush_Circles,
 		VA_Bound_Cube,
+		VA_Clip_Planes,
 	};
 	class VertexArray
 	{
@@ -96,12 +98,17 @@ namespace FLIVR
 		//set parameters to generate vertices
 		void set_param(unsigned int, double);
 		void set_param(std::vector<std::pair<unsigned int, double>>& params);
-		void set_param(BBox &box);
+		void set_param(BBox &box);//for bounding box
+		void set_param(std::vector<Point> &pp);//for clipping planes
 
+		inline void draw_begin();
+		inline void draw_end();
 		inline void draw();
 		inline void draw_norm_square();
 		inline void draw_circles();
 		inline void draw_bound_cube();
+		//clipping planes are drawn differently
+		inline void draw_clip_plane(int plane, bool border);
 
 		inline bool match(VAType);
 
@@ -113,6 +120,8 @@ namespace FLIVR
 		void update_buffer_circles();
 		//parameters: the bounding box
 		void update_bound_cube();
+		//parameters: vector of points (8)
+		void update_clip_planes(bool update_index = false);
 
 	private:
 		unsigned int id_;
@@ -122,8 +131,9 @@ namespace FLIVR
 		std::vector<VertexBuffer*> buffer_list_;
 		std::vector<GLuint> attrib_pointer_list_;
 		//parameters
-		std::map<unsigned int, double> param_list_;
-		BBox bbox_;
+		std::map<unsigned int, double> param_list_;//generic
+		BBox bbox_;//for bounding box
+		std::vector<float> clip_points_;//for clipping planes
 
 		friend class VertexArrayManager;
 	};
@@ -231,6 +241,28 @@ namespace FLIVR
 		attrib_pointer_list_.push_back(index);
 	}
 
+	inline void VertexArray::draw_begin()
+	{
+		if (!valid_)
+			return;
+		glBindVertexArray(id_);
+		//enable attrib array
+		for (auto it = attrib_pointer_list_.begin();
+			it != attrib_pointer_list_.end(); ++it)
+			glEnableVertexAttribArray(*it);
+	}
+
+	inline void VertexArray::draw_end()
+	{
+		if (!valid_)
+			return;
+		//disable attrib array
+		for (auto it = attrib_pointer_list_.begin();
+			it != attrib_pointer_list_.end(); ++it)
+			glDisableVertexAttribArray(*it);
+		glBindVertexArray(0);
+	}
+
 	inline void VertexArray::draw()
 	{
 		if (!valid_)
@@ -291,6 +323,16 @@ namespace FLIVR
 	inline void VertexArray::draw_bound_cube()
 	{
 		glDrawArrays(GL_LINES, 0, 24);
+	}
+
+	inline void VertexArray::draw_clip_plane(int plane, bool border)
+	{
+		if (border)
+			glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT,
+				(const GLvoid*)plane);
+		else
+			glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT,
+				reinterpret_cast<const GLvoid*>(plane));
 	}
 
 	inline bool VertexArray::match(VAType type)
