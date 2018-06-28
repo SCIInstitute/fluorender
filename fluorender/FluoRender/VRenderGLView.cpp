@@ -8815,40 +8815,37 @@ void VRenderGLView::DrawFrame()
 
 void VRenderGLView::DrawScaleBar()
 {
+	VertexArray* va_scale_bar =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Scale_Bar);
+	if (!va_scale_bar)
+		return;
+
 	double offset = 0.0;
 	if (m_draw_legend)
 		offset = m_sb_height;
-
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
 	float sx, sy;
 	sx = 2.0 / nx;
 	sy = 2.0 / ny;
 	float px, py, ph;
-
 	glm::mat4 proj_mat = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f);
-
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_BLEND);
-
 	double len = m_sb_length / (m_ortho_right - m_ortho_left);
 	wstring wsb_text = m_sb_text.ToStdWstring();
 	double textlen = m_text_renderer ?
 		m_text_renderer->RenderTextLen(wsb_text) : 0.0;
-	vector<float> vertex;
-	vertex.reserve(4 * 3);
-
 	Color text_color = GetTextColor();
 
+	std::vector<std::pair<unsigned int, double>> params;
 	if (m_draw_frame)
 	{
 		px = (0.95*m_frame_w + m_frame_x) / nx;
 		py = (0.05*m_frame_h + m_frame_y + offset) / ny;
 		ph = 5.0 / ny;
-		vertex.push_back(px); vertex.push_back(py); vertex.push_back(0.0);
-		vertex.push_back(px - len); vertex.push_back(py); vertex.push_back(0.0);
-		vertex.push_back(px); vertex.push_back(py - ph); vertex.push_back(0.0);
-		vertex.push_back(px - len); vertex.push_back(py - ph); vertex.push_back(0.0);
+		params.push_back(std::pair<unsigned int, double>(0, px));
+		params.push_back(std::pair<unsigned int, double>(1, py));
+		params.push_back(std::pair<unsigned int, double>(2, len));
+		params.push_back(std::pair<unsigned int, double>(3, ph));
 
 		if (m_disp_scale_bar_text)
 		{
@@ -8865,10 +8862,10 @@ void VRenderGLView::DrawScaleBar()
 		px = 0.95;
 		py = 0.05 + offset / ny;
 		ph = 5.0 / ny;
-		vertex.push_back(px); vertex.push_back(py); vertex.push_back(0.0);
-		vertex.push_back(px - len); vertex.push_back(py); vertex.push_back(0.0);
-		vertex.push_back(px); vertex.push_back(py - ph); vertex.push_back(0.0);
-		vertex.push_back(px - len); vertex.push_back(py - ph); vertex.push_back(0.0);
+		params.push_back(std::pair<unsigned int, double>(0, px));
+		params.push_back(std::pair<unsigned int, double>(1, py));
+		params.push_back(std::pair<unsigned int, double>(2, len));
+		params.push_back(std::pair<unsigned int, double>(3, ph));
 
 		if (m_disp_scale_bar_text)
 		{
@@ -8881,6 +8878,8 @@ void VRenderGLView::DrawScaleBar()
 		}
 	}
 
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
 	ShaderProgram* shader =
 		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
@@ -8890,24 +8889,12 @@ void VRenderGLView::DrawScaleBar()
 		shader->bind();
 	}
 	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
-	glBindVertexArray(m_misc_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
-
 	shader->setLocalParam(0, text_color.r(), text_color.g(), text_color.b(), 1.0);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-	glDisableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	va_scale_bar->set_param(params);
+	va_scale_bar->draw();
 
 	if (shader && shader->valid())
 		shader->release();
-
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 }

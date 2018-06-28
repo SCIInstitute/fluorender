@@ -75,6 +75,7 @@ namespace FLIVR
 		VA_Grid,
 		VA_Cam_Jack,
 		VA_Crop_Frame,
+		VA_Scale_Bar,
 	};
 	class VertexArray
 	{
@@ -112,6 +113,7 @@ namespace FLIVR
 		inline void draw_bound_cube();
 		inline void draw_grid();
 		inline void draw_crop_frame();
+		inline void draw_scale_bar();
 		//clipping planes are drawn differently
 		inline void draw_clip_plane(int plane, bool border);
 		inline void draw_cam_jack(int axis);//0-x; 1-y; 2-z
@@ -134,6 +136,8 @@ namespace FLIVR
 		void update_cam_jack();
 		//parameters: x, y, w, h
 		void update_crop_frame();
+		//parameters: x, y, w, h
+		void update_scale_bar();
 
 	private:
 		unsigned int id_;
@@ -302,6 +306,9 @@ namespace FLIVR
 		case VA_Crop_Frame:
 			draw_crop_frame();
 			break;
+		case VA_Scale_Bar:
+			draw_scale_bar();
+			break;
 		}
 		//disable attrib array
 		for (auto it = attrib_pointer_list_.begin();
@@ -384,6 +391,11 @@ namespace FLIVR
 	inline void VertexArray::draw_crop_frame()
 	{
 		glDrawArrays(GL_LINE_LOOP, 0, 4);
+	}
+
+	inline void VertexArray::draw_scale_bar()
+	{
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
 
 	inline bool VertexArray::match(VAType type)

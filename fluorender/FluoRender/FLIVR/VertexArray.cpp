@@ -223,6 +223,9 @@ namespace FLIVR
 		case VA_Crop_Frame:
 			update_crop_frame();
 			break;
+		case VA_Scale_Bar:
+			update_scale_bar();
+			break;
 		}
 	}
 
@@ -464,6 +467,37 @@ namespace FLIVR
 			&vertex[0], GL_STREAM_DRAW);
 	}
 
+	void VertexArray::update_scale_bar()
+	{
+		double x = 0.0;
+		double y = 0.0;
+		double w = 1.0;
+		double h = 1.0;
+		auto param = param_list_.find(0);
+		if (param != param_list_.end())
+			x = param->second;
+		param = param_list_.find(1);
+		if (param != param_list_.end())
+			y = param->second;
+		param = param_list_.find(2);
+		if (param != param_list_.end())
+			w = param->second;
+		param = param_list_.find(3);
+		if (param != param_list_.end())
+			h = param->second;
+
+		std::vector<float> vertex;
+		vertex.reserve(4 * 3);
+
+		vertex.push_back(x); vertex.push_back(y); vertex.push_back(0.0);
+		vertex.push_back(x - w); vertex.push_back(y); vertex.push_back(0.0);
+		vertex.push_back(x); vertex.push_back(y - h); vertex.push_back(0.0);
+		vertex.push_back(x - w); vertex.push_back(y - h); vertex.push_back(0.0);
+		buffer_data(VABuf_Coord,
+			sizeof(float) * vertex.size(),
+			&vertex[0], GL_STREAM_DRAW);
+	}
+
 	VertexArrayManager::VertexArrayManager()
 	{
 	}
@@ -608,7 +642,8 @@ namespace FLIVR
 			//set attrib
 			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
 		}
-		else if (type == VA_Crop_Frame)
+		else if (type == VA_Crop_Frame ||
+			type == VA_Scale_Bar)
 		{
 			//create vertex buffer
 			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
