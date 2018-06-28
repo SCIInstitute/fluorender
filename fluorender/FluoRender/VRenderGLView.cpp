@@ -9042,34 +9042,19 @@ void VRenderGLView::DrawName(
 	double font_height,
 	bool highlighted)
 {
+	VertexArray* va_legend_squares =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Legend_Squares);
+	if (!va_legend_squares)
+		return;
+
+	wstring wstr;
 	float sx, sy;
 	sx = 2.0 / nx;
 	sy = 2.0 / ny;
-
-	wstring wstr;
+	glm::mat4 proj_mat = glm::ortho(0.0f, float(nx), 0.0f, float(ny));
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
-
-	glm::mat4 proj_mat = glm::ortho(0.0f, float(nx), 0.0f, float(ny));
-	vector<float> vertex;
-	vertex.reserve(8 * 3);
-
-	float px1, py1, px2, py2;
-	px1 = x + 0.2*font_height;
-	py1 = ny - y + 0.2*font_height;
-	px2 = x + 0.8*font_height;
-	py2 = ny - y + 0.8*font_height;
-	vertex.push_back(px1 - 1.0); vertex.push_back(py2 + 1.0); vertex.push_back(0.0);
-	vertex.push_back(px2 + 1.0); vertex.push_back(py2 + 1.0); vertex.push_back(0.0);
-	vertex.push_back(px1 - 1.0); vertex.push_back(py1 - 1.0); vertex.push_back(0.0);
-	vertex.push_back(px2 + 1.0); vertex.push_back(py1 - 1.0); vertex.push_back(0.0);
-
-	vertex.push_back(px1); vertex.push_back(py2); vertex.push_back(0.0);
-	vertex.push_back(px2); vertex.push_back(py2); vertex.push_back(0.0);
-	vertex.push_back(px1); vertex.push_back(py1); vertex.push_back(0.0);
-	vertex.push_back(px2); vertex.push_back(py1); vertex.push_back(0.0);
-
 	ShaderProgram* shader =
 		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
@@ -9080,28 +9065,25 @@ void VRenderGLView::DrawName(
 	}
 	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
-	glBindVertexArray(m_misc_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
-
+	std::vector<std::pair<unsigned int, double>> params;
+	params.push_back(std::pair<unsigned int, double>(0, x + 0.2*font_height));
+	params.push_back(std::pair<unsigned int, double>(1, ny - y + 0.2*font_height));
+	params.push_back(std::pair<unsigned int, double>(2, x + 0.8*font_height));
+	params.push_back(std::pair<unsigned int, double>(3, ny - y + 0.8*font_height));
+	va_legend_squares->set_param(params);
+	va_legend_squares->draw_begin();
 	Color text_color = GetTextColor();
 	shader->setLocalParam(0, text_color.r(), text_color.g(), text_color.b(), 1.0);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	va_legend_squares->draw_legend_square(0);
 	shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0);
-	glDrawArrays(GL_TRIANGLE_STRIP, 4, 4);
-
-	glDisableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	va_legend_squares->draw_legend_square(1);
+	va_legend_squares->draw_end();
 
 	if (shader && shader->valid())
 		shader->release();
 
-	px1 = x + font_height - nx / 2;
-	py1 = ny / 2 - y + 0.25*font_height;
+	float px1 = x + font_height - nx / 2;
+	float py1 = ny / 2 - y + 0.25*font_height;
 	wstr = name.ToStdWstring();
 	m_text_renderer->RenderText(
 		wstr, text_color,

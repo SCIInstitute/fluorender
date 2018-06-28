@@ -76,6 +76,7 @@ namespace FLIVR
 		VA_Cam_Jack,
 		VA_Crop_Frame,
 		VA_Scale_Bar,
+		VA_Legend_Squares,
 	};
 	class VertexArray
 	{
@@ -117,6 +118,7 @@ namespace FLIVR
 		//clipping planes are drawn differently
 		inline void draw_clip_plane(int plane, bool border);
 		inline void draw_cam_jack(int axis);//0-x; 1-y; 2-z
+		inline void draw_legend_square(int index);//0-outside; 1-inside
 
 		inline bool match(VAType);
 
@@ -138,6 +140,8 @@ namespace FLIVR
 		void update_crop_frame();
 		//parameters: x, y, w, h
 		void update_scale_bar();
+		//parameters: px1, py1, px2, py2
+		void update_legend_squares();
 
 	private:
 		unsigned int id_;
@@ -396,6 +400,14 @@ namespace FLIVR
 	inline void VertexArray::draw_scale_bar()
 	{
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	}
+
+	inline void VertexArray::draw_legend_square(int index)
+	{
+		if (index == 0)
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		else if (index == 1)
+			glDrawArrays(GL_TRIANGLE_STRIP, 4, 4);
 	}
 
 	inline bool VertexArray::match(VAType type)

@@ -226,6 +226,9 @@ namespace FLIVR
 		case VA_Scale_Bar:
 			update_scale_bar();
 			break;
+		case VA_Legend_Squares:
+			update_legend_squares();
+			break;
 		}
 	}
 
@@ -498,6 +501,41 @@ namespace FLIVR
 			&vertex[0], GL_STREAM_DRAW);
 	}
 
+	void VertexArray::update_legend_squares()
+	{
+		double px1 = 0.0;
+		double py1 = 0.0;
+		double px2 = 1.0;
+		double py2 = 1.0;
+		auto param = param_list_.find(0);
+		if (param != param_list_.end())
+			px1 = param->second;
+		param = param_list_.find(1);
+		if (param != param_list_.end())
+			py1 = param->second;
+		param = param_list_.find(2);
+		if (param != param_list_.end())
+			px2 = param->second;
+		param = param_list_.find(3);
+		if (param != param_list_.end())
+			py2 = param->second;
+
+		std::vector<float> vertex;
+		vertex.reserve(8 * 3);
+
+		vertex.push_back(px1 - 1.0); vertex.push_back(py2 + 1.0); vertex.push_back(0.0);
+		vertex.push_back(px2 + 1.0); vertex.push_back(py2 + 1.0); vertex.push_back(0.0);
+		vertex.push_back(px1 - 1.0); vertex.push_back(py1 - 1.0); vertex.push_back(0.0);
+		vertex.push_back(px2 + 1.0); vertex.push_back(py1 - 1.0); vertex.push_back(0.0);
+		vertex.push_back(px1); vertex.push_back(py2); vertex.push_back(0.0);
+		vertex.push_back(px2); vertex.push_back(py2); vertex.push_back(0.0);
+		vertex.push_back(px1); vertex.push_back(py1); vertex.push_back(0.0);
+		vertex.push_back(px2); vertex.push_back(py1); vertex.push_back(0.0);
+		buffer_data(VABuf_Coord,
+			sizeof(float) * vertex.size(),
+			&vertex[0], GL_STREAM_DRAW);
+	}
+
 	VertexArrayManager::VertexArrayManager()
 	{
 	}
@@ -643,7 +681,8 @@ namespace FLIVR
 			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
 		}
 		else if (type == VA_Crop_Frame ||
-			type == VA_Scale_Bar)
+			type == VA_Scale_Bar ||
+			type == VA_Legend_Squares)
 		{
 			//create vertex buffer
 			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
