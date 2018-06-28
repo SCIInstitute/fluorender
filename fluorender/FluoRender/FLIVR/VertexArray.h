@@ -73,6 +73,7 @@ namespace FLIVR
 		VA_Bound_Cube,
 		VA_Clip_Planes,
 		VA_Grid,
+		VA_Cam_Jack,
 	};
 	class VertexArray
 	{
@@ -111,6 +112,7 @@ namespace FLIVR
 		inline void draw_grid();
 		//clipping planes are drawn differently
 		inline void draw_clip_plane(int plane, bool border);
+		inline void draw_cam_jack(int axis);//0-x; 1-y; 2-z
 
 		inline bool match(VAType);
 
@@ -126,6 +128,8 @@ namespace FLIVR
 		void update_clip_planes(bool update_index = false);
 		//parameters: 0-grid num; 1-distance
 		void update_grid();
+		//parameters: 0-length
+		void update_cam_jack();
 
 	private:
 		unsigned int id_;
@@ -352,6 +356,22 @@ namespace FLIVR
 
 		//draw
 		glDrawArrays(GL_LINES, 0, line_num * 4);
+	}
+
+	inline void VertexArray::draw_cam_jack(int axis)
+	{
+		switch (axis)
+		{
+		case 0:
+			glDrawArrays(GL_LINES, 0, 2);
+			break;
+		case 1:
+			glDrawArrays(GL_LINES, 2, 2);
+			break;
+		case 2:
+			glDrawArrays(GL_LINES, 4, 2);
+			break;
+		}
 	}
 
 	inline bool VertexArray::match(VAType type)

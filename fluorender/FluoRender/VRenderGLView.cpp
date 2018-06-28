@@ -8743,16 +8743,11 @@ void VRenderGLView::DrawCamCtr()
 		len = m_distance*tan(d2r(m_aov / 2.0))*m_camctr_size / 10.0;
 	else
 		len = fabs(m_camctr_size);
-
-	vector<float> vertex;
-	vertex.reserve(6 * 3);
-
-	vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(0.0);
-	vertex.push_back(len); vertex.push_back(0.0); vertex.push_back(0.0);
-	vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(0.0);
-	vertex.push_back(0.0); vertex.push_back(len); vertex.push_back(0.0);
-	vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(0.0);
-	vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(len);
+	VertexArray* va_jack =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Cam_Jack);
+	if (!va_jack)
+		return;
+	va_jack->set_param(0, len);
 
 	ShaderProgram* shader =
 		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
@@ -8765,23 +8760,14 @@ void VRenderGLView::DrawCamCtr()
 	glm::mat4 matrix = m_proj_mat * m_mv_mat;
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
-	glBindVertexArray(m_misc_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
-
+	va_jack->draw_begin();
 	shader->setLocalParam(0, 1.0, 0.0, 0.0, 1.0);
-	glDrawArrays(GL_LINES, 0, 2);
+	va_jack->draw_cam_jack(0);
 	shader->setLocalParam(0, 0.0, 1.0, 0.0, 1.0);
-	glDrawArrays(GL_LINES, 2, 2);
+	va_jack->draw_cam_jack(1);
 	shader->setLocalParam(0, 0.0, 0.0, 1.0, 1.0);
-	glDrawArrays(GL_LINES, 4, 2);
-
-	glDisableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	va_jack->draw_cam_jack(2);
+	va_jack->draw_end();
 
 	if (shader && shader->valid())
 		shader->release();

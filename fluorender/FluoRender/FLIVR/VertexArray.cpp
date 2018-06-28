@@ -217,6 +217,9 @@ namespace FLIVR
 		case VA_Grid:
 			update_grid();
 			break;
+		case VA_Cam_Jack:
+			update_cam_jack();
+			break;
 		}
 	}
 
@@ -406,6 +409,27 @@ namespace FLIVR
 			&vertex[0], GL_STREAM_DRAW);
 	}
 
+	void VertexArray::update_cam_jack()
+	{
+		double len = 1.0;
+		auto param = param_list_.find(0);
+		if (param != param_list_.end())
+			len = param->second;
+
+		std::vector<float> vertex;
+		vertex.reserve(6 * 3);
+
+		vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(0.0);
+		vertex.push_back(len); vertex.push_back(0.0); vertex.push_back(0.0);
+		vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(0.0);
+		vertex.push_back(0.0); vertex.push_back(len); vertex.push_back(0.0);
+		vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(0.0);
+		vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(len);
+		buffer_data(VABuf_Coord,
+			sizeof(float) * vertex.size(),
+			&vertex[0], GL_STATIC_DRAW);
+	}
+
 	VertexArrayManager::VertexArrayManager()
 	{
 	}
@@ -534,6 +558,19 @@ namespace FLIVR
 			params.push_back(std::pair<unsigned int, double>(0, 5.0));
 			params.push_back(std::pair<unsigned int, double>(1, 10.0));
 			va->set_param(params);
+			//set attrib
+			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
+		}
+		else if (type == VA_Cam_Jack)
+		{
+			//create vertex buffer
+			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
+			vb->create();
+			vb_list_.push_back(vb);
+			//attach buffer
+			va->attach_buffer(vb);
+			//set param
+			va->set_param(0, 1.0);
 			//set attrib
 			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
 		}
