@@ -8701,32 +8701,6 @@ void VRenderGLView::DrawGrid()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
-	size_t grid_num = 5;
-	size_t line_num = grid_num * 2 + 1;
-	size_t i;
-	vector<float> vertex;
-	vertex.reserve(line_num * 4 * 3);
-
-	double gap = m_distance / grid_num;
-	for (i = 0; i<line_num; ++i)
-	{
-		vertex.push_back(float(-m_distance + gap*i));
-		vertex.push_back(float(0.0));
-		vertex.push_back(float(-m_distance));
-		vertex.push_back(float(-m_distance + gap*i));
-		vertex.push_back(float(0.0));
-		vertex.push_back(float(m_distance));
-	}
-	for (i = 0; i<line_num; ++i)
-	{
-		vertex.push_back(float(-m_distance));
-		vertex.push_back(float(0.0));
-		vertex.push_back(float(-m_distance + gap*i));
-		vertex.push_back(float(m_distance));
-		vertex.push_back(float(0.0));
-		vertex.push_back(float(-m_distance + gap*i));
-	}
-
 	ShaderProgram* shader =
 		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
@@ -8740,16 +8714,17 @@ void VRenderGLView::DrawGrid()
 	glm::mat4 matrix = m_proj_mat * m_mv_mat;
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
-	glBindVertexArray(m_misc_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
-	glDrawArrays(GL_LINES, 0, line_num * 4);
-	glDisableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	VertexArray* va_grid =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Grid);
+	if (va_grid)
+	{
+		//set parameters
+		std::vector<std::pair<unsigned int, double>> params;
+		params.push_back(std::pair<unsigned int, double>(0, 5.0));
+		params.push_back(std::pair<unsigned int, double>(1, m_distance));
+		va_grid->set_param(params);
+		va_grid->draw();
+	}
 
 	if (shader && shader->valid())
 		shader->release();

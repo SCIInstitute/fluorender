@@ -214,6 +214,9 @@ namespace FLIVR
 		case VA_Bound_Cube:
 			update_bound_cube();
 			break;
+		case VA_Grid:
+			update_grid();
+			break;
 		}
 	}
 
@@ -363,6 +366,46 @@ namespace FLIVR
 		}
 	}
 
+	void VertexArray::update_grid()
+	{
+		//get parameters
+		int grid_num = 0;
+		double distance = 1.0;
+		auto param = param_list_.find(0);
+		if (param != param_list_.end())
+			grid_num = int(param->second+0.5);
+		param = param_list_.find(1);
+		if (param != param_list_.end())
+			distance = param->second;
+		int line_num = grid_num * 2 + 1;
+		std::vector<float> vertex;
+		vertex.reserve(line_num * 4 * 3);
+
+		double gap = distance / grid_num;
+		int i;
+		for (i = 0; i<line_num; ++i)
+		{
+			vertex.push_back(float(-distance + gap*i));
+			vertex.push_back(float(0.0));
+			vertex.push_back(float(-distance));
+			vertex.push_back(float(-distance + gap*i));
+			vertex.push_back(float(0.0));
+			vertex.push_back(float(distance));
+		}
+		for (i = 0; i<line_num; ++i)
+		{
+			vertex.push_back(float(-distance));
+			vertex.push_back(float(0.0));
+			vertex.push_back(float(-distance + gap*i));
+			vertex.push_back(float(distance));
+			vertex.push_back(float(0.0));
+			vertex.push_back(float(-distance + gap*i));
+		}
+		buffer_data(VABuf_Coord,
+			sizeof(float) * vertex.size(),
+			&vertex[0], GL_STREAM_DRAW);
+	}
+
 	VertexArrayManager::VertexArrayManager()
 	{
 	}
@@ -475,6 +518,22 @@ namespace FLIVR
 			//set param
 			std::vector<Point> pp;
 			va->set_param(pp);
+			//set attrib
+			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
+		}
+		else if (type == VA_Grid)
+		{
+			//create vertex buffer
+			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
+			vb->create();
+			vb_list_.push_back(vb);
+			//attach buffer
+			va->attach_buffer(vb);
+			//set param
+			std::vector<std::pair<unsigned int, double>> params;
+			params.push_back(std::pair<unsigned int, double>(0, 5.0));
+			params.push_back(std::pair<unsigned int, double>(1, 10.0));
+			va->set_param(params);
 			//set attrib
 			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
 		}

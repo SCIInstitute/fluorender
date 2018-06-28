@@ -72,6 +72,7 @@ namespace FLIVR
 		VA_Brush_Circles,
 		VA_Bound_Cube,
 		VA_Clip_Planes,
+		VA_Grid,
 	};
 	class VertexArray
 	{
@@ -107,6 +108,7 @@ namespace FLIVR
 		inline void draw_norm_square();
 		inline void draw_circles();
 		inline void draw_bound_cube();
+		inline void draw_grid();
 		//clipping planes are drawn differently
 		inline void draw_clip_plane(int plane, bool border);
 
@@ -122,6 +124,8 @@ namespace FLIVR
 		void update_bound_cube();
 		//parameters: vector of points (8)
 		void update_clip_planes(bool update_index = false);
+		//parameters: 0-grid num; 1-distance
+		void update_grid();
 
 	private:
 		unsigned int id_;
@@ -284,6 +288,9 @@ namespace FLIVR
 		case VA_Bound_Cube:
 			draw_bound_cube();
 			break;
+		case VA_Grid:
+			draw_grid();
+			break;
 		}
 		//disable attrib array
 		for (auto it = attrib_pointer_list_.begin();
@@ -333,6 +340,18 @@ namespace FLIVR
 		else
 			glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT,
 				reinterpret_cast<const GLvoid*>(plane));
+	}
+
+	inline void VertexArray::draw_grid()
+	{
+		//get line number
+		int line_num = 0;
+		auto param = param_list_.find(0);
+		if (param != param_list_.end())
+			line_num = int(param->second+0.5) * 2 + 1;
+
+		//draw
+		glDrawArrays(GL_LINES, 0, line_num * 4);
 	}
 
 	inline bool VertexArray::match(VAType type)
