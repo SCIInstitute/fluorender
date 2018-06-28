@@ -220,6 +220,9 @@ namespace FLIVR
 		case VA_Cam_Jack:
 			update_cam_jack();
 			break;
+		case VA_Crop_Frame:
+			update_crop_frame();
+			break;
 		}
 	}
 
@@ -430,6 +433,37 @@ namespace FLIVR
 			&vertex[0], GL_STATIC_DRAW);
 	}
 
+	void VertexArray::update_crop_frame()
+	{
+		double x = 0.0;
+		double y = 0.0;
+		double w = 1.0;
+		double h = 1.0;
+		auto param = param_list_.find(0);
+		if (param != param_list_.end())
+			x = param->second;
+		param = param_list_.find(1);
+		if (param != param_list_.end())
+			y = param->second;
+		param = param_list_.find(2);
+		if (param != param_list_.end())
+			w = param->second;
+		param = param_list_.find(3);
+		if (param != param_list_.end())
+			h = param->second;
+
+		std::vector<float> vertex;
+		vertex.reserve(4 * 3);
+
+		vertex.push_back(x - 1); vertex.push_back(y - 1); vertex.push_back(0.0);
+		vertex.push_back(x + w + 1); vertex.push_back(y - 1); vertex.push_back(0.0);
+		vertex.push_back(x + w + 1); vertex.push_back(y + h + 1); vertex.push_back(0.0);
+		vertex.push_back(x - 1); vertex.push_back(y + h + 1); vertex.push_back(0.0);
+		buffer_data(VABuf_Coord,
+			sizeof(float) * vertex.size(),
+			&vertex[0], GL_STREAM_DRAW);
+	}
+
 	VertexArrayManager::VertexArrayManager()
 	{
 	}
@@ -571,6 +605,24 @@ namespace FLIVR
 			va->attach_buffer(vb);
 			//set param
 			va->set_param(0, 1.0);
+			//set attrib
+			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
+		}
+		else if (type == VA_Crop_Frame)
+		{
+			//create vertex buffer
+			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
+			vb->create();
+			vb_list_.push_back(vb);
+			//attach buffer
+			va->attach_buffer(vb);
+			//set param
+			std::vector<std::pair<unsigned int, double>> params;
+			params.push_back(std::pair<unsigned int, double>(0, 0.0));
+			params.push_back(std::pair<unsigned int, double>(1, 0.0));
+			params.push_back(std::pair<unsigned int, double>(2, 1.0));
+			params.push_back(std::pair<unsigned int, double>(3, 1.0));
+			va->set_param(params);
 			//set attrib
 			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
 		}

@@ -8735,20 +8735,19 @@ void VRenderGLView::DrawGrid()
 
 void VRenderGLView::DrawCamCtr()
 {
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_BLEND);
-
+	VertexArray* va_jack =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Cam_Jack);
+	if (!va_jack)
+		return;
 	double len;
 	if (m_camctr_size > 0.0)
 		len = m_distance*tan(d2r(m_aov / 2.0))*m_camctr_size / 10.0;
 	else
 		len = fabs(m_camctr_size);
-	VertexArray* va_jack =
-		TextureRenderer::vertex_array_manager_.vertex_array(VA_Cam_Jack);
-	if (!va_jack)
-		return;
 	va_jack->set_param(0, len);
 
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
 	ShaderProgram* shader =
 		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
@@ -8783,17 +8782,12 @@ void VRenderGLView::DrawFrame()
 	ny = GetGLSize().y;
 	glm::mat4 proj_mat = glm::ortho(float(0), float(nx), float(0), float(ny));
 
+	VertexArray* va_frame =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Crop_Frame);
+	if (!va_frame)
+		return;
+
 	glDisable(GL_DEPTH_TEST);
-	//GLfloat line_width = 1.0f;
-
-	vector<float> vertex;
-	vertex.reserve(4 * 3);
-
-	vertex.push_back(m_frame_x - 1); vertex.push_back(m_frame_y - 1); vertex.push_back(0.0);
-	vertex.push_back(m_frame_x + m_frame_w + 1); vertex.push_back(m_frame_y - 1); vertex.push_back(0.0);
-	vertex.push_back(m_frame_x + m_frame_w + 1); vertex.push_back(m_frame_y + m_frame_h + 1); vertex.push_back(0.0);
-	vertex.push_back(m_frame_x - 1); vertex.push_back(m_frame_y + m_frame_h + 1); vertex.push_back(0.0);
-
 	ShaderProgram* shader =
 		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
@@ -8806,20 +8800,16 @@ void VRenderGLView::DrawFrame()
 	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 
 	//draw frame
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
-	glBindVertexArray(m_misc_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
-	glDrawArrays(GL_LINE_LOOP, 0, 4);
-	glDisableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	vector<std::pair<unsigned int, double>> params;
+	params.push_back(std::pair<unsigned int, double>(0, m_frame_x));
+	params.push_back(std::pair<unsigned int, double>(1, m_frame_y));
+	params.push_back(std::pair<unsigned int, double>(2, m_frame_w));
+	params.push_back(std::pair<unsigned int, double>(3, m_frame_h));
+	va_frame->set_param(params);
+	va_frame->draw();
 
 	if (shader && shader->valid())
 		shader->release();
-
 	glEnable(GL_DEPTH_TEST);
 }
 
