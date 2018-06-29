@@ -3466,7 +3466,6 @@ TraceGroup::~TraceGroup()
 void TraceGroup::SetCurTime(int time)
 {
 	m_cur_time = time;
-	//TextureRenderer::vertex_array_manager_.set_all_dirty();
 }
 
 int TraceGroup::GetCurTime()
