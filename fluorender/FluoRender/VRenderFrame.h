@@ -438,6 +438,7 @@ private:
 	wxString CreateView(int row=1);
 	VRenderView* GetLastView() {return m_vrv_list[m_vrv_list.size()-1];}
 	static wxWindow* CreateExtraControlVolume(wxWindow* parent);
+	static wxWindow* CreateExtraControlVolumeForImport(wxWindow* parent);
 	static wxWindow* CreateExtraControlProjectSave(wxWindow* parent);
 
 	//open dialog options

@@ -218,8 +218,17 @@ VRenderFrame::VRenderFrame(
 	//build the main toolbar
 	//add tools
 	wxBitmap bitmap;
-	bitmap = wxGetBitmapFromMemory(icon_open_volume);
 
+	bitmap = wxGetBitmapFromMemory(icon_open_volume);
+#ifdef _DARWIN
+	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
+#endif
+	m_main_tb->AddTool(ID_OpenVolume, "Open Volume",
+		bitmap, wxNullBitmap, wxITEM_NORMAL,
+		"Open single or multiple volume data file(s)",
+		"Open single or multiple volume data file(s)");
+
+	bitmap = wxGetBitmapFromMemory(importvolume);
 #ifdef _DARWIN
 	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
 #endif
@@ -228,18 +237,9 @@ VRenderFrame::VRenderFrame(
 			bitmap, wxNullBitmap, wxITEM_NORMAL,
 			"Import single or multiple volume data file(s) using ImageJ",
 			"Import single or multiple volume data file(s) using ImageJ");
-		bitmap = wxGetBitmapFromMemory(importvolume);
 	}
 
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
-	m_main_tb->AddTool(ID_OpenVolume, "Open Volume",
-		bitmap, wxNullBitmap, wxITEM_NORMAL,
-		"Open single or multiple volume data file(s)",
-		"Open single or multiple volume data file(s)");
 	bitmap = wxGetBitmapFromMemory(icon_open_project);
-
 #ifdef _DARWIN
 	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
 #endif
@@ -1114,6 +1114,67 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 	return panel;
 }
 
+wxWindow* VRenderFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
+{
+	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(640, 110));
+
+	wxBoxSizer *group1 = new wxStaticBoxSizer(
+		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
+
+	//slice sequence check box. TODO: Not suppotred as of now.
+	/*
+	wxCheckBox* ch1 = new wxCheckBox(panel, ID_READ_ZSLICES,
+		"Read a sequence as Z slices (the last digits in filenames are used to identify the sequence)");
+	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(VRenderFrame::OnCh1Check), NULL, panel);
+	ch1->SetValue(m_sliceSequence);
+	*/
+
+	//compression
+	wxCheckBox* ch2 = new wxCheckBox(panel, ID_COMPRESS,
+		"Compress data (loading will take longer time and data are compressed in graphics memory)");
+	ch2->Connect(ch2->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(VRenderFrame::OnCh2Check), NULL, panel);
+	ch2->SetValue(m_compression);
+
+	//empty brick skipping
+	wxCheckBox* ch3 = new wxCheckBox(panel, ID_SKIP_BRICKS,
+		"Skip empty bricks during rendering (loading takes longer time)");
+	ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(VRenderFrame::OnCh3Check), NULL, panel);
+	ch3->SetValue(m_skip_brick);
+
+	//time sequence identifier. TODO: Not supported as of now.
+	/*
+	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
+	wxTextCtrl* txt1 = new wxTextCtrl(panel, ID_TSEQ_ID,
+		"", wxDefaultPosition, wxSize(80, 20));
+	txt1->SetValue(m_time_id);
+	txt1->Connect(txt1->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
+		wxCommandEventHandler(VRenderFrame::OnTxt1Change), NULL, panel);
+	wxStaticText* st = new wxStaticText(panel, 0,
+		"Time sequence identifier (digits after the identifier in filenames are used as time index)");
+	sizer1->Add(txt1);
+	sizer1->Add(10, 10);
+	sizer1->Add(st);
+	*/
+
+	//group1->Add(10, 10);
+	//group1->Add(ch1);
+	group1->Add(10, 10);
+	group1->Add(ch2);
+	group1->Add(10, 10);
+	group1->Add(ch3);
+	//group1->Add(10, 10);
+	//group1->Add(sizer1);
+	//group1->Add(10, 10);
+
+	panel->SetSizerAndFit(group1);
+	panel->Layout();
+
+	return panel;
+}
+
 void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 {
 	if (m_setting_dlg)
@@ -1166,7 +1227,7 @@ void VRenderFrame::OnImportVolume(wxCommandEvent& WXUNUSED(event))
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Choose the volume data file", "", "", "All Files|*.*",
 		wxFD_OPEN | wxFD_MULTIPLE);
-	fopendlg->SetExtraControlCreator(CreateExtraControlVolume);
+	fopendlg->SetExtraControlCreator(CreateExtraControlVolumeForImport);
 
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)

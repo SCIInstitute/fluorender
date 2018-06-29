@@ -197,7 +197,7 @@ find_package(Boost COMPONENTS system chrono filesystem REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
 # JNI includes
-find_package(JNI)
+find_package(JNI REQUIRED)
 if (JNI_FOUND)
    message (STATUS "JNI_INCLUDE_DIRS=${JNI_INCLUDE_DIRS}")
    message (STATUS "JNI_LIBRARIES=${JNI_LIBRARIES}")
@@ -624,7 +624,8 @@ elseif(WIN32)
     ${Boost_LIBRARIES}
     ${OpenCL_LIBRARIES}
     ${FREETYPE_LIBRARIES}
-    ${wxWidgets_LIBRARIES})
+    ${wxWidgets_LIBRARIES}
+	${JNI_LIBRARIES})
   target_link_libraries(SynthBB
     ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
