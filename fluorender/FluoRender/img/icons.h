@@ -35,6 +35,8 @@ public:
 	const static unsigned char icon_open_volume_png[3527];
 	/* icon_open_volume_mini.png - 859 bytes */
 	const static unsigned char icon_open_volume_mini_png[859];
+	/* importvolume.png - 1701 bytes */
+	static const unsigned char importvolume_png[1701];
 	/* icon_open_project.png - 4213 bytes */
 	const static unsigned char icon_open_project_png[4213];
 	/* icon_open_project_mini.png - 902 bytes */

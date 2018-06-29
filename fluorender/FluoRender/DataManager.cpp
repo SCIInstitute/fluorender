@@ -4553,6 +4553,11 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 	{
 		string err_str = BaseReader::GetError(reader_return);
 		wxMessageBox(err_str);
+		int i = (int)m_reader_list.size() - 1;		
+		if (m_reader_list[i]) {
+			delete m_reader_list[i];
+			m_reader_list.erase(m_reader_list.begin() + (int)m_reader_list.size() - 1);
+		}
 		return result;
 	}
 

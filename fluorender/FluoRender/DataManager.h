@@ -70,6 +70,7 @@ using namespace FLIVR;
 #define LOAD_TYPE_LSM		5
 #define LOAD_TYPE_PVXML		6
 #define LOAD_TYPE_BRKXML	7
+#define LOAD_TYPE_IMAGEJ    0
 
 class TreeLayer
 {

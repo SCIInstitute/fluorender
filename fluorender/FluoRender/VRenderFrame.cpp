@@ -227,7 +227,7 @@ VRenderFrame::VRenderFrame(
 			bitmap, wxNullBitmap, wxITEM_NORMAL,
 			"Import single or multiple volume data file(s) using ImageJ",
 			"Import single or multiple volume data file(s) using ImageJ");
-		bitmap = wxGetBitmapFromMemory(icon_open_volume);
+		bitmap = wxGetBitmapFromMemory(importvolume);
 	}
 
 #ifdef _DARWIN
@@ -646,7 +646,7 @@ VRenderFrame::VRenderFrame(
 	m_top_file->Append(m);
 
 	m = new wxMenuItem(m_top_file, ID_ImportVolume, wxT("Import &Volume"));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_open_volume_mini));
+	m->SetBitmap(wxGetBitmapFromMemory(importvolume));
 	m_top_file->Append(m);
 
 	m = new wxMenuItem(m_top_file,ID_OpenMesh, wxT("Open &Mesh"));
@@ -1202,7 +1202,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 			wxString suffix = filename.Mid(filename.Find('.', true)).MakeLower();
 
 			if (withImageJ == true)
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_BRKXML, withImageJ); //The type of data doesnt matter.
+				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_IMAGEJ, withImageJ); //The type of data doesnt matter.
 			else if (suffix == ".nrrd")
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_NRRD, withImageJ);
 			else if (suffix==".tif" || suffix==".tiff")
@@ -1278,7 +1278,11 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 					}
 				}
 			}
+			else { //TODO: Consult Wan here.
+
+			}
 		}
+
 		UpdateList();
 		if (vd_sel)
 			UpdateTree(vd_sel->GetName());
