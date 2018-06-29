@@ -87,6 +87,8 @@ namespace FLIVR
     CGLContextObj TextureRenderer::gl_context_ = 0;
 #endif
 	bool TextureRenderer::clear_pool_ = false;
+	FramebufferManager TextureRenderer::framebuffer_manager_;
+	VertexArrayManager TextureRenderer::vertex_array_manager_;
 
 	TextureRenderer::TextureRenderer(Texture* tex)
 		:

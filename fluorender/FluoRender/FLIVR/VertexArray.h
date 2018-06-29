@@ -79,6 +79,7 @@ namespace FLIVR
 		VA_Legend_Squares,
 		VA_Grad_Bkg,
 		VA_Color_Map,
+		VA_Traces,
 	};
 	class VertexArray
 	{
@@ -108,6 +109,7 @@ namespace FLIVR
 		void set_param(BBox &box);//for bounding box
 		void set_param(std::vector<Point> &pp);//for clipping planes
 		void set_param(std::vector<float> &vts);//for floats
+		inline bool get_dirty();//dirty array needs new data and update
 
 		inline void draw_begin();
 		inline void draw_end();
@@ -120,6 +122,7 @@ namespace FLIVR
 		inline void draw_scale_bar();
 		inline void draw_grad_bkg();
 		inline void draw_color_map();
+		inline void draw_traces();
 		//clipping planes are drawn differently
 		inline void draw_clip_plane(int plane, bool border);
 		inline void draw_cam_jack(int axis);//0-x; 1-y; 2-z
@@ -155,6 +158,7 @@ namespace FLIVR
 		VAType type_;
 		bool valid_;
 		bool protected_;
+		bool dirty_;
 		std::vector<VertexBuffer*> buffer_list_;
 		std::vector<GLuint> attrib_pointer_list_;
 		//parameters
@@ -172,6 +176,8 @@ namespace FLIVR
 		~VertexArrayManager();
 
 		VertexArray* vertex_array(VAType type);
+		void set_dirty(VAType type);
+		void set_all_dirty();
 
 	private:
 		std::vector<VertexArray*> va_list_;
@@ -268,6 +274,11 @@ namespace FLIVR
 		attrib_pointer_list_.push_back(index);
 	}
 
+	inline bool VertexArray::get_dirty()
+	{
+		return dirty_;
+	}
+
 	inline void VertexArray::draw_begin()
 	{
 		if (!valid_)
@@ -325,6 +336,9 @@ namespace FLIVR
 			break;
 		case VA_Color_Map:
 			draw_color_map();
+			break;
+		case VA_Traces:
+			draw_traces();
 			break;
 		}
 		//disable attrib array
@@ -433,6 +447,18 @@ namespace FLIVR
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
 	}
 
+	inline void VertexArray::draw_traces()
+	{
+		//get array number
+		int num = 0;
+		auto param = param_list_.find(0);
+		if (param != param_list_.end())
+			num = int(param->second + 0.5);
+
+		//draw
+		glDrawArrays(GL_LINES, 0, num);
+	}
+
 	inline bool VertexArray::match(VAType type)
 	{
 		if (protected_)
@@ -440,6 +466,23 @@ namespace FLIVR
 		if (type_ == type)
 			return true;
 		return false;
+	}
+
+	inline void VertexArrayManager::set_dirty(VAType type)
+	{
+		for (auto it = va_list_.begin();
+			it != va_list_.end(); ++it)
+		{
+			if ((*it)->type_ == type)
+				(*it)->dirty_ = true;
+		}
+	}
+
+	inline void VertexArrayManager::set_all_dirty()
+	{
+		for (auto it = va_list_.begin();
+			it != va_list_.end(); ++it)
+			(*it)->dirty_ = true;
 	}
 }
 

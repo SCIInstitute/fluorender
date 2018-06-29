@@ -11658,53 +11658,49 @@ void VRenderGLView::DrawTraces()
 {
 	if (m_cur_vol && m_trace_group && m_text_renderer)
 	{
-		vector<float> verts;
-		unsigned int num = m_trace_group->Draw(verts);
+		glEnable(GL_LINE_SMOOTH);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-		if (!verts.empty())
+		double spcx, spcy, spcz;
+		m_cur_vol->GetSpacings(spcx, spcy, spcz);
+		glm::mat4 matrix = glm::scale(m_mv_mat,
+			glm::vec3(float(spcx), float(spcy), float(spcz)));
+		matrix = m_proj_mat*matrix;
+
+		ShaderProgram* shader =
+			m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR3);
+		if (shader)
 		{
-			glEnable(GL_LINE_SMOOTH);
-			glEnable(GL_DEPTH_TEST);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
-			double spcx, spcy, spcz;
-			m_cur_vol->GetSpacings(spcx, spcy, spcz);
-			glm::mat4 matrix = glm::scale(m_mv_mat,
-				glm::vec3(float(spcx), float(spcy), float(spcz)));
-			matrix = m_proj_mat*matrix;
-
-			ShaderProgram* shader =
-				m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR3);
-			if (shader)
-			{
-				if (!shader->valid())
-					shader->create();
-				shader->bind();
-			}
-			shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
-
-			glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(float)*verts.size(), &verts[0], GL_DYNAMIC_DRAW);
-			glBindVertexArray(m_misc_vao);
-			glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)0);
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)12);
-
-			glDrawArrays(GL_LINES, 0, num);
-
-			glDisableVertexAttribArray(0);
-			glDisableVertexAttribArray(1);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-			glBindVertexArray(0);
-
-			if (shader && shader->valid())
-				shader->release();
-
-			glDisable(GL_LINE_SMOOTH);
+			if (!shader->valid())
+				shader->create();
+			shader->bind();
 		}
+		shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+
+		VertexArray* va_traces =
+			TextureRenderer::vertex_array_manager_.vertex_array(VA_Traces);
+		if (va_traces)
+		{
+			if (va_traces->get_dirty())
+			{
+				vector<float> verts;
+				unsigned int num = m_trace_group->Draw(verts);
+				if (num)
+				{
+					va_traces->buffer_data(VABuf_Coord,
+						sizeof(float)*verts.size(),
+						&verts[0], GL_STREAM_DRAW);
+					va_traces->set_param(0, num);
+				}
+			}
+			va_traces->draw();
+		}
+
+		if (shader && shader->valid())
+			shader->release();
+		glDisable(GL_LINE_SMOOTH);
 	}
 }
 
@@ -12302,7 +12298,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 
 		m_retain_finalbuffer = true;
 #ifdef _WIN32
-        RefreshGL(38, false, false);
+		RefreshGL(38, false, false);
 #else
 		RefreshGL(38, false, true);
 #endif
@@ -12435,21 +12431,6 @@ void VRenderGLView::SetRotations(double rotx, double roty, double rotz, bool ui_
 		if (!m_master_linked_view)
 			m_master_linked_view = this;
 	}
-}
-
-char* VRenderGLView::wxStringToChar(wxString input)
-{
-#if (wxUSE_UNICODE)
-	size_t size = input.size() + 1;
-	char *buffer = new char[size];//No need to multiply by 4, converting to 1 byte char only.
-	memset(buffer, 0, size); //Good Practice, Can use buffer[0] = '&#65533;' also.
-	wxEncodingConverter wxec;
-	wxec.Init(wxFONTENCODING_ISO8859_1, wxFONTENCODING_ISO8859_1, wxCONVERT_SUBSTITUTE);
-	wxec.Convert(input.mb_str(), buffer);
-	return buffer; //To free this buffer memory is user responsibility.
-#else
-	return (char *)(input.c_str());
-#endif
 }
 
 void VRenderGLView::GetFrame(int &x, int &y, int &w, int &h)

@@ -954,7 +954,6 @@ private:
 	void DrawName(double x, double y, int nx, int ny,
 		wxString name, Color color,
 		double font_height, bool hilighted = false);
-	char* wxStringToChar(wxString input);
 	void DrawFrame();
 	void DrawClippingPlanes(bool border, int face_winding);
 	void SetColormapColors(int colormap);

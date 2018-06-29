@@ -55,7 +55,11 @@ namespace FLIVR
 	}
 
 	VertexArray::VertexArray(VAType type) :
-		id_(0), type_(type), valid_(false), protected_(false)
+		id_(0),
+		type_(type),
+		valid_(false),
+		protected_(false),
+		dirty_(false)
 	{
 	}
 
@@ -94,6 +98,7 @@ namespace FLIVR
 		}
 		if (vb)
 			vb->data(size, data, usage);
+		dirty_ = false;
 	}
 
 	void VertexArray::set_param(unsigned int index, double val)
@@ -768,6 +773,24 @@ namespace FLIVR
 			//set attrib
 			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const GLvoid*)0);
 			va->attrib_pointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const GLvoid*)12);
+		}
+		else if (type == VA_Traces)
+		{
+			//create vertex buffer
+			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
+			vb->create();
+			vb_list_.push_back(vb);
+			//attach buffer
+			va->attach_buffer(vb);
+			//set param
+			std::vector<float> vertex(12, 0.0);
+			va->buffer_data(VABuf_Coord,
+				sizeof(float) * vertex.size(),
+				&vertex[0], GL_STREAM_DRAW);
+			//set attrib
+			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)0);
+			va->attrib_pointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)12);
+			va->dirty_ = true;
 		}
 		//unbind
 		va->unbind();
