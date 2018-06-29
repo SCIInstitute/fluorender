@@ -163,32 +163,32 @@ namespace FLIVR
 	{
 		bool update_vertex = false;
 		bool update_index = false;
-		if (clip_points_.empty())
+		if (float_list_.empty())
 		{
 			//first time
-			clip_points_.push_back(0); clip_points_.push_back(0); clip_points_.push_back(0);
-			clip_points_.push_back(0); clip_points_.push_back(0); clip_points_.push_back(1);
-			clip_points_.push_back(1); clip_points_.push_back(0); clip_points_.push_back(0);
-			clip_points_.push_back(1); clip_points_.push_back(0); clip_points_.push_back(1);
-			clip_points_.push_back(0); clip_points_.push_back(1); clip_points_.push_back(0);
-			clip_points_.push_back(0); clip_points_.push_back(1); clip_points_.push_back(1);
-			clip_points_.push_back(1); clip_points_.push_back(1); clip_points_.push_back(0);
-			clip_points_.push_back(1); clip_points_.push_back(1); clip_points_.push_back(1);
+			float_list_.push_back(0); float_list_.push_back(0); float_list_.push_back(0);
+			float_list_.push_back(0); float_list_.push_back(0); float_list_.push_back(1);
+			float_list_.push_back(1); float_list_.push_back(0); float_list_.push_back(0);
+			float_list_.push_back(1); float_list_.push_back(0); float_list_.push_back(1);
+			float_list_.push_back(0); float_list_.push_back(1); float_list_.push_back(0);
+			float_list_.push_back(0); float_list_.push_back(1); float_list_.push_back(1);
+			float_list_.push_back(1); float_list_.push_back(1); float_list_.push_back(0);
+			float_list_.push_back(1); float_list_.push_back(1); float_list_.push_back(1);
 			update_vertex = true;
 			update_index = true;
 		}
-		else if (pp.size() == 8 && clip_points_.size() == 24)
+		else if (pp.size() == 8 && float_list_.size() == 24)
 		{
 			for (size_t i = 0; i < 8; ++i)
 			{
 				if (pp[i] !=
-					Point(clip_points_[i*3],
-						clip_points_[i*3+1],
-						clip_points_[i*3+2]))
+					Point(float_list_[i*3],
+						float_list_[i*3+1],
+						float_list_[i*3+2]))
 				{
-					clip_points_[i * 3] = pp[i].x();
-					clip_points_[i * 3+1] = pp[i].y();
-					clip_points_[i * 3+2] = pp[i].z();
+					float_list_[i * 3] = pp[i].x();
+					float_list_[i * 3+1] = pp[i].y();
+					float_list_[i * 3+2] = pp[i].z();
 					update_vertex = true;
 				}
 			}
@@ -196,6 +196,34 @@ namespace FLIVR
 
 		if (update_vertex)
 			update_clip_planes(update_index);
+	}
+
+	void VertexArray::set_param(std::vector<float> &vts)
+	{
+		bool update_vertex = false;
+		if (float_list_.empty())
+		{
+			for (auto i = vts.begin(); i != vts.end(); ++i)
+				float_list_.push_back(*i);
+			update_vertex = true;
+		}
+		else
+		{
+			auto i = float_list_.begin();
+			auto j = vts.begin();
+			while (i != float_list_.end() && j != vts.end())
+			{
+				if (*i != *j)
+				{
+					*i = *j;
+					update_vertex = true;
+				}
+				++i; ++j;
+			}
+		}
+
+		if (update_vertex)
+			update_buffer();
 	}
 
 	void VertexArray::update_buffer()
@@ -228,6 +256,10 @@ namespace FLIVR
 			break;
 		case VA_Legend_Squares:
 			update_legend_squares();
+			break;
+		case VA_Grad_Bkg:
+		case VA_Color_Map:
+			update_grad_bkg();
 			break;
 		}
 	}
@@ -353,8 +385,8 @@ namespace FLIVR
 	void VertexArray::update_clip_planes(bool update_index)
 	{
 		buffer_data(VABuf_Coord,
-			sizeof(float)*clip_points_.size(),
-			&clip_points_[0], GL_STREAM_DRAW);
+			sizeof(float)*float_list_.size(),
+			&float_list_[0], GL_STREAM_DRAW);
 		if (update_index)
 		{
 			std::vector<uint32_t> index;
@@ -536,6 +568,13 @@ namespace FLIVR
 			&vertex[0], GL_STREAM_DRAW);
 	}
 
+	void VertexArray::update_grad_bkg()
+	{
+		buffer_data(VABuf_Coord,
+			sizeof(float) * float_list_.size(),
+			&float_list_[0], GL_STREAM_DRAW);
+	}
+
 	VertexArrayManager::VertexArrayManager()
 	{
 	}
@@ -699,6 +738,36 @@ namespace FLIVR
 			va->set_param(params);
 			//set attrib
 			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
+		}
+		else if (type == VA_Grad_Bkg)
+		{
+			//create vertex buffer
+			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
+			vb->create();
+			vb_list_.push_back(vb);
+			//attach buffer
+			va->attach_buffer(vb);
+			//set param
+			std::vector<float> list(48, 0.0);
+			va->set_param(list);
+			//set attrib
+			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)0);
+			va->attrib_pointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)12);
+		}
+		else if (type == VA_Color_Map)
+		{
+			//create vertex buffer
+			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
+			vb->create();
+			vb_list_.push_back(vb);
+			//attach buffer
+			va->attach_buffer(vb);
+			//set param
+			std::vector<float> list(98, 0.0);
+			va->set_param(list);
+			//set attrib
+			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const GLvoid*)0);
+			va->attrib_pointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const GLvoid*)12);
 		}
 		//unbind
 		va->unbind();

@@ -77,6 +77,8 @@ namespace FLIVR
 		VA_Crop_Frame,
 		VA_Scale_Bar,
 		VA_Legend_Squares,
+		VA_Grad_Bkg,
+		VA_Color_Map,
 	};
 	class VertexArray
 	{
@@ -105,6 +107,7 @@ namespace FLIVR
 		void set_param(std::vector<std::pair<unsigned int, double>>& params);
 		void set_param(BBox &box);//for bounding box
 		void set_param(std::vector<Point> &pp);//for clipping planes
+		void set_param(std::vector<float> &vts);//for floats
 
 		inline void draw_begin();
 		inline void draw_end();
@@ -115,6 +118,8 @@ namespace FLIVR
 		inline void draw_grid();
 		inline void draw_crop_frame();
 		inline void draw_scale_bar();
+		inline void draw_grad_bkg();
+		inline void draw_color_map();
 		//clipping planes are drawn differently
 		inline void draw_clip_plane(int plane, bool border);
 		inline void draw_cam_jack(int axis);//0-x; 1-y; 2-z
@@ -142,6 +147,8 @@ namespace FLIVR
 		void update_scale_bar();
 		//parameters: px1, py1, px2, py2
 		void update_legend_squares();
+		//parameters:vector
+		void update_grad_bkg();
 
 	private:
 		unsigned int id_;
@@ -153,7 +160,7 @@ namespace FLIVR
 		//parameters
 		std::map<unsigned int, double> param_list_;//generic
 		BBox bbox_;//for bounding box
-		std::vector<float> clip_points_;//for clipping planes
+		std::vector<float> float_list_;//for clipping planes
 
 		friend class VertexArrayManager;
 	};
@@ -313,6 +320,12 @@ namespace FLIVR
 		case VA_Scale_Bar:
 			draw_scale_bar();
 			break;
+		case VA_Grad_Bkg:
+			draw_grad_bkg();
+			break;
+		case VA_Color_Map:
+			draw_color_map();
+			break;
 		}
 		//disable attrib array
 		for (auto it = attrib_pointer_list_.begin();
@@ -408,6 +421,16 @@ namespace FLIVR
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		else if (index == 1)
 			glDrawArrays(GL_TRIANGLE_STRIP, 4, 4);
+	}
+
+	inline void VertexArray::draw_grad_bkg()
+	{
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 8);
+	}
+
+	inline void VertexArray::draw_color_map()
+	{
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
 	}
 
 	inline bool VertexArray::match(VAType type)

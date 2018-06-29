@@ -9055,6 +9055,7 @@ void VRenderGLView::DrawName(
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
+	glDisable(GL_CULL_FACE);
 	ShaderProgram* shader =
 		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
@@ -9170,25 +9171,16 @@ void VRenderGLView::DrawGradBg()
 	}
 	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
-	glBindVertexArray(m_misc_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)12);
-
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 8);
-
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	VertexArray* va_bkg =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Grad_Bkg);
+	if (va_bkg)
+	{
+		va_bkg->set_param(vertex);
+		va_bkg->draw();
+	}
 
 	if (shader && shader->valid())
 		shader->release();
-
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 }
@@ -9527,21 +9519,13 @@ void VRenderGLView::DrawColormap()
 	}
 	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
-	glBindVertexArray(m_misc_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const GLvoid*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const GLvoid*)12);
-
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
-
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	VertexArray* va_colormap =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Color_Map);
+	if (va_colormap)
+	{
+		va_colormap->set_param(vertex);
+		va_colormap->draw();
+	}
 
 	if (shader && shader->valid())
 		shader->release();
