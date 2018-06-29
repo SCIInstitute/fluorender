@@ -63,6 +63,9 @@ class SettingDlg : public wxPanel
 		ID_ShadowDirText,
 		//gradient background
 		ID_GradBgChk,
+		//auto rot center anchor threshold
+		ID_PinThreshSldr,
+		ID_PinThreshText,
 		//link rotations
 		ID_RotLinkChk,
 		//override vox
@@ -86,6 +89,8 @@ class SettingDlg : public wxPanel
 		ID_BlockSizeText,
 		ID_ResponseTimeSldr,
 		ID_ResponseTimeText,
+		ID_DetailLevelOffsetSldr,
+		ID_DetailLevelOffsetText,
 		//texture size
 		ID_MaxTextureSizeChk,
 		ID_MaxTextureSizeText,
@@ -133,6 +138,8 @@ public:
 	//gradient background
 	bool GetGradBg() {return m_grad_bg;}
 	void SetGradBg(bool val) {m_grad_bg = val;}
+	//rot center anchor thresh
+	double GetPinThreshold() { return m_pin_threshold; }
 	//override vox
 	bool GetOverrideVox() {return m_override_vox;}
 	void SetOverrideVox(bool val) {m_override_vox = val;}
@@ -172,6 +179,8 @@ public:
 	void SetUpdateOrder(int val) {m_update_order = val;}
 	bool GetInvalidateTex() { return m_invalidate_tex; }
 	void SetInvalidateTex(bool val) { m_invalidate_tex = val; }
+	int GetDetailLevelOffset() { return m_detail_level_offset; }
+	void SetDetailLevelOffset(int val) { m_detail_level_offset = val; }
 	//point volume mode
 	int GetPointVolumeMode() {return m_point_volume_mode;}
 	void SetPointVolumeMode(int mode) {m_point_volume_mode = mode;}
@@ -181,6 +190,9 @@ public:
 	//ruler time dependent
 	bool GetRulerTimeDep() {return m_ruler_time_dep;}
 	void SetRulerTimeDep(bool val) {m_ruler_time_dep = val;}
+	//ruler exports df/f
+	bool GetRulerDF_F() { return m_ruler_df_f; }
+	void SetRulerDF_F(bool val) { m_ruler_df_f = val; }
 	//flags for pvxml flipping
 	bool GetPvxmlFlipX() {return m_pvxml_flip_x;}
 	void SetPvxmlFlipX(bool flip) {m_pvxml_flip_x = flip;}
@@ -214,6 +226,7 @@ public:
 	bool GetUseMaxTextureSize() { return m_use_max_texture_size; }
 	void SetMaxTextureSize(int size) { m_max_texture_size = size; }
 	int GetMaxTextureSize() { return m_max_texture_size; }
+	int GetPlaneMode() { return m_plane_mode; }
 
 private:
 	wxWindow* m_frame;
@@ -262,12 +275,15 @@ private:
 	int m_up_time;			//response time in ms
 	int m_update_order;		//0:back-to-front; 1:front-to-back
 	bool m_invalidate_tex;	//invalidate texture in every loop
+	int m_detail_level_offset;	//an offset value to current level of detail (for multiresolution data only)
 	//point volume mode
 	int m_point_volume_mode;
 	//ruler use transfer function
 	bool m_ruler_use_transf;
 	//ruler time dependent
 	bool m_ruler_time_dep;
+	//ruler exports df/f
+	bool m_ruler_df_f;
 	//flip pvxml frame
 	bool m_pvxml_flip_x;
 	bool m_pvxml_flip_y;
@@ -298,6 +314,10 @@ private:
 	//max texture size
 	bool m_use_max_texture_size;
 	int m_max_texture_size;
+	//rot center anchor thresh
+	double m_pin_threshold;
+	//clipping plane display mode
+	int m_plane_mode;
 
 private:
 	//save project
@@ -317,8 +337,10 @@ private:
 	wxTextCtrl *m_shadow_dir_text;
 	//gradient background
 	wxCheckBox *m_grad_bg_chk;
+	//rot center anchor
+	wxSlider *m_pin_threshold_sldr;
+	wxTextCtrl *m_pin_threshold_text;
 	//rotations link
-	
 	wxCheckBox *m_rot_link_chk;
 	//override vox
 	wxCheckBox *m_override_vox_chk;
@@ -341,6 +363,8 @@ private:
 	wxTextCtrl *m_block_size_text;
 	wxSlider *m_response_time_sldr;
 	wxTextCtrl *m_response_time_text;
+	wxSlider *m_detail_level_offset_sldr;
+	wxTextCtrl *m_detail_level_offset_text;
 	//font
 	wxComboBox *m_font_cmb;
 	wxComboBox *m_font_size_cmb;
@@ -388,6 +412,9 @@ private:
 	void OnShadowDirEdit(wxCommandEvent &event);
 	//gradient background
 	void OnGradBgCheck(wxCommandEvent &event);
+	//rot center anchor threshold
+	void OnPinThresholdChange(wxScrollEvent &event);
+	void OnPinThresholdEdit(wxCommandEvent &event);
 	//link rotations
 	void OnRotLink(wxCommandEvent& event);
 	//override vox
@@ -411,6 +438,8 @@ private:
 	void OnBlockSizeEdit(wxCommandEvent &event);
 	void OnResponseTimeChange(wxScrollEvent &event);
 	void OnResponseTimeEdit(wxCommandEvent &event);
+	void OnDetailLevelOffsetChange(wxScrollEvent &event);
+	void OnDetailLevelOffsetEdit(wxCommandEvent &event);
 	//font
 	void OnFontChange(wxCommandEvent &event);
 	void OnFontSizeChange(wxCommandEvent &event);

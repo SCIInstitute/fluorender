@@ -67,7 +67,7 @@ namespace FL
 
 		void CompFull();
 		void All();
-		void Append(bool all, bool rmask = true);
+		void Select(bool all, bool rmask = true);
 		void Exclusive();
 		void Clear(bool invalidate=true);
 		void Delete();

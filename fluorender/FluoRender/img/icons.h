@@ -152,10 +152,14 @@ public:
 	const static unsigned char freefly_png[1143];
 	/* gear_45.png - 979 bytes */
 	const static unsigned char gear_45_png[979];
+	/* gear_dark.png - 1018 bytes */
+	const static unsigned char gear_dark_png[1018];
 	/* legend.png - 1142 bytes */
 	const static unsigned char legend_png[1142];
 	/* pin.png - 881 bytes */
 	const static unsigned char pin_png[881];
+	/* anchor_dark.png - 828 bytes */
+	const static unsigned char anchor_dark_png[828];
 	/* ratio.png - 361 bytes */
 	const static unsigned char ratio_png[361];
 	/* scalebar.png - 803 bytes */
@@ -191,6 +195,8 @@ public:
 	const static unsigned char clip_normal_png[790];
 	/* clip_normal_back.png - 773 bytes */
 	const static unsigned char clip_normal_back_png[773];
+	/* clip_none.png - 1286 bytes */
+	const static unsigned char clip_none_png[1286];
 
 
 	//list view icons

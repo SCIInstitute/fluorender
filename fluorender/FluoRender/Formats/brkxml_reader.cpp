@@ -1117,7 +1117,7 @@ void BRKXMLReader::build_bricks(vector<FLIVR::TextureBrick*> &tbrks, int lv)
 			0, 0, (*bite)->x_size, (*bite)->y_size, (*bite)->z_size, 1, numb, 
 			(*bite)->x_start, (*bite)->y_start, (*bite)->z_start,
 			(*bite)->x_size, (*bite)->y_size, (*bite)->z_size, bbox, tbox, dbox,
-			0, (*bite)->id, (*bite)->offset, (*bite)->fsize);
+			tbrks.size(), (*bite)->id, (*bite)->offset, (*bite)->fsize);
 		tbrks.push_back(b);
 		
 		bite++;
@@ -1158,6 +1158,21 @@ void BRKXMLReader::build_pyramid(vector<FLIVR::Pyramid_Level> &pyramid, vector<v
 		build_bricks(pyramid[i].bricks);
 		pyramid[i].filenames = &m_pyramid[i].filename[t][c];
 		pyramid[i].filetype = GetFileType();
+		pyramid[i].szx = m_pyramid[i].imageW;
+		pyramid[i].szy = m_pyramid[i].imageH;
+		pyramid[i].szz = m_pyramid[i].imageD;
+		pyramid[i].bszx = m_pyramid[i].brick_baseW;
+		pyramid[i].bszy = m_pyramid[i].brick_baseH;
+		pyramid[i].bszz = m_pyramid[i].brick_baseD;
+		pyramid[i].bnx = pyramid[i].bszx>1 ?
+			((pyramid[i].szx - 1) / (pyramid[i].bszx - 1) +
+			(((pyramid[i].szx - 1) % (pyramid[i].bszx - 1)) ? 1 : 0)) : 1;
+		pyramid[i].bny = pyramid[i].bszy>1 ?
+			((pyramid[i].szy - 1) / (pyramid[i].bszy - 1) +
+			(((pyramid[i].szy - 1) % (pyramid[i].bszy - 1)) ? 1 : 0)) : 1;
+		pyramid[i].bnz = pyramid[i].bszz>1 ?
+			((pyramid[i].szz - 1) / (pyramid[i].bszz - 1) +
+			(((pyramid[i].szz - 1) % (pyramid[i].bszz - 1)) ? 1 : 0)) : 1;
 	}
 
 	filenames.resize(m_pyramid.size());

@@ -310,11 +310,13 @@ bool KernelExecutor::ExecuteKernel(KernelProgram* kernel,
 {
 	if (!kernel)
 		return false;
+	int kernel_index = -1;
 
 	if (!kernel->valid())
 	{
 		string name = "kernel_main";
-		if (kernel->create(name))
+		kernel_index = kernel->createKernel(name);
+		if (kernel_index >= 0)
 			m_message += "Kernel program compiled successfully on " +
 			kernel->get_device_name() + ".\n";
 		else
@@ -326,24 +328,24 @@ bool KernelExecutor::ExecuteKernel(KernelProgram* kernel,
 		}
 	}
 	//textures
-	kernel->setKernelArgTex3D(0, CL_MEM_READ_ONLY, data_id);
+	kernel->setKernelArgTex3D(kernel_index, 0, CL_MEM_READ_ONLY, data_id);
 	size_t result_size = brick_x*brick_y*brick_z*sizeof(unsigned char);
-	kernel->setKernelArgBuf(1, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, result_size, result);
-	kernel->setKernelArgConst(2, sizeof(unsigned int), (void*)(&brick_x));
-	kernel->setKernelArgConst(3, sizeof(unsigned int), (void*)(&brick_y));
-	kernel->setKernelArgConst(4, sizeof(unsigned int), (void*)(&brick_z));
+	kernel->setKernelArgBuf(kernel_index, 1, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, result_size, result);
+	kernel->setKernelArgConst(kernel_index, 2, sizeof(unsigned int), (void*)(&brick_x));
+	kernel->setKernelArgConst(kernel_index, 3, sizeof(unsigned int), (void*)(&brick_y));
+	kernel->setKernelArgConst(kernel_index, 4, sizeof(unsigned int), (void*)(&brick_z));
 	//execute
 	size_t global_size[3] = { brick_x, brick_y, brick_z };
 	size_t local_size[3] = { 1, 1, 1 };
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	kernel->execute(3, global_size, local_size);
+	kernel->executeKernel(kernel_index, 3, global_size, local_size);
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 	wxString stime = wxString::Format("%.4f", time_span.count());
 	m_message += "OpenCL time on " +
 		kernel->get_device_name() +
 		": " + stime + " sec.\n";
-	kernel->readBuffer(1, result);
+	kernel->readBuffer(result_size, result, result);
 
 	return true;
 }

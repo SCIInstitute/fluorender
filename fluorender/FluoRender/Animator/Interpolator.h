@@ -93,6 +93,11 @@ public:
 	bool GetQuaternion(FlKeyCode keycode, double t, Quaternion &qval);
 	bool GetBoolean(FlKeyCode keycode, double t, bool &bval);
 	bool GetInt(FlKeyCode keycode, double t, int &ival);
+	//get values at index
+	bool GetDouble(FlKeyCode keycode, int index, double &dval);
+	bool GetQuaternion(FlKeyCode keycode, int index, Quaternion &qval);
+	bool GetBoolean(FlKeyCode keycode, int index, bool &bval);
+	bool GetInt(FlKeyCode keycode, int index, int &ival);
 
 	static int m_id;
 

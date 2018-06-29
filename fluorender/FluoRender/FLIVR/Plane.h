@@ -38,8 +38,8 @@ namespace FLIVR
 	class Quaternion;
 	class Plane
 	{
-		Vector n;
-		double d;
+		Vector n_;
+		double d_;
 
 		//copy of the values for restoration
 		Vector n_copy;
@@ -52,6 +52,11 @@ namespace FLIVR
 		Plane();
 		Plane(double a, double b, double c, double d);
 		~Plane();
+
+		inline double d() const
+		{ return d_; }
+		inline Vector n() const
+		{ return n_; }
 
 		Plane& operator=(const Plane&);
 		double eval_point(const Point &p) const;
@@ -85,8 +90,8 @@ namespace FLIVR
 		void Scale(Vector &v);
 
 		//remember and restore
-		void Remember() {n_copy = n; d_copy = d;};
-		void Restore() {n = n_copy; d = d_copy;};
+		void Remember() {n_copy = n_; d_copy = d_;};
+		void Restore() {n_ = n_copy; d_ = d_copy;};
 	};
 
 } // End namespace FLIVR

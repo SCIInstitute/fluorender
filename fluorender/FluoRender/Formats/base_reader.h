@@ -40,6 +40,8 @@ using namespace std;
 	#define nrrdAxisInfoSet nrrdAxisInfoSet_va
 #endif
 
+//error codes
+//return to notify caller if fail
 #define READER_OK	0
 #define READER_OPEN_FAIL	1
 #define READER_FORMAT_ERROR	2
@@ -52,67 +54,135 @@ public:
 	//BaseReader();
 	virtual ~BaseReader() {};
 
+	//get the reader type
+	//see the header of each reader implementation for the actual value
 	virtual int GetType() = 0;	//get reader type
 
-	virtual void SetFile(string &file) = 0;	//set the file name
-	virtual void SetFile(wstring &file) = 0;//set the file name in wide string
-	virtual void SetSliceSeq(bool ss) = 0;	//slices are stored as a file sequence
-	virtual bool GetSliceSeq() = 0;			//get slice sequence
-	virtual void SetTimeId(wstring &id) = 0;	//time sequence identifier
-	virtual wstring GetTimeId() = 0;			//get time id
-	virtual int Preprocess() = 0;			//preprocess
-	virtual void SetBatch(bool batch) = 0;	//set batch mode
-	virtual bool GetBatch() = 0;			//get batch mode
-	virtual int LoadBatch(int index) = 0;	//load file for 3D batch mode
-	virtual int LoadOffset(int offset);	//load offset index for 3D batch
-	virtual int GetOffset();	//load offset index for 3D batch
-	virtual Nrrd* Convert(bool get_max);			//Convert the data to nrrd
-	virtual Nrrd* Convert(int c, bool get_max);		//convert the specified channel to nrrd
-	virtual Nrrd* Convert(int t, int c, bool get_max) = 0;//convert the specified channel and time point to nrrd
-	virtual wstring GetCurDataName(int t, int c) = 0;//for a 4d sequence, get the file name for specified time and channel
-	virtual wstring GetCurMaskName(int t, int c) = 0;//for a 4d sequence, get the file name for the mask of specified time and channel
-	virtual wstring GetCurLabelName(int t, int c) = 0;//for a 4d sequence, get the file name for the label of specified time and channel
+	//set the file name and path to open and read
+	virtual void SetFile(string &file) = 0;
+	//set the file name and path to open and read (in wide string for foreign languages)
+	virtual void SetFile(wstring &file) = 0;
+	//set reader flag to read a 3D stack as a file sequence, each file being a slice
+	//in UI, it is set in the open file dialog as "read a sequence as z slices..."
+	//not all reader types use this flag, basically for a tiff sequence
+	virtual void SetSliceSeq(bool ss) = 0;
+	//get the reader flag to read z stack sequence
+	virtual bool GetSliceSeq() = 0;
+	//set time identifier
+	//time identifier is a string to identify each file in a sequence as a time point
+	//in UI, it is set in the open file dialog as option "time sequence identifier"
+	//default value is "_T", which means any digits after the string in a file name is used as its time value
+	virtual void SetTimeId(wstring &id) = 0;
+	//get current time identifier
+	virtual wstring GetTimeId() = 0;
+	//preprocess the file
+	//get the structure of the data without reading actual volume
+	virtual int Preprocess() = 0;
+	//a sequence of similar files can be put in one folder
+	//once batch mode is turn on, those files can be "played back" as if they were in a time sequence
+	//a time sequence assumes all files are of the same size, therefore no memory releasing (simple replacing) when time changes
+	//a batch sequence can have files with different sizes. memory is released every time when time changes
+	//batch mode is set in the movie export panel when time sequence is checked for a non-time-sequence
+	virtual void SetBatch(bool batch) = 0;
+	//get batch mode
+	virtual bool GetBatch() = 0;
+	//batch sequence is determined when SetBatch(true) is called
+	//a stl vector containing file names is created
+	//LoadBatch() loads a new file in the vector to replace the current one
+	//usually called when the time value is changed from the movie export panel
+	virtual int LoadBatch(int index) = 0;
+	//similar to LoadBatch(). instead of using an absolute index value
+	//it uses an offset value, telling the reader to load a file n indices after/before the current one
+	virtual int LoadOffset(int offset);
+	//get the current offest index value
+	virtual int GetOffset();
+	//read the acutual volume data from file and convert it to a nrrd
+	//if get_max is true, it will find the maximum value within the volume
+	//the max value is used to change the silder range in UI
+	virtual Nrrd* Convert(bool get_max);
+	//c is the channel index to load
+	virtual Nrrd* Convert(int c, bool get_max);
+	//t is the time point value to load
+	virtual Nrrd* Convert(int t, int c, bool get_max) = 0;
+	//for a time sequence, get the file name for specified time and channel
+	virtual wstring GetCurDataName(int t, int c) = 0;
+	//for a 4d sequence, get the file name for the mask of specified time and channel
+	virtual wstring GetCurMaskName(int t, int c) = 0;
+	//for a 4d sequence, get the file name for the label of specified time and channel
+	virtual wstring GetCurLabelName(int t, int c) = 0;
 
+	//get a string for only the path of the file
 	virtual wstring GetPathName() = 0;
+	//get a string for only the file name without its path
 	virtual wstring GetDataName() = 0;
+	//get the total number of time points
 	virtual int GetTimeNum() = 0;
+	//get the time point value of last/current loaded file
 	virtual int GetCurTime() = 0;
+	//get the total number of channels
 	virtual int GetChanNum() = 0;
+	//get the excitation wave length for a channel, read from meta data
+	//the wave length value can be used to set the color of a channel
+	//the settings are set in the setting dialog
+	//not all file formats can provide this information
 	virtual double GetExcitationWavelength(int chan) = 0;
+	//get the total number of z slices in a stack
 	virtual int GetSliceNum() = 0;
+	//get the number of voxels/pixels of the x dimension
 	virtual int GetXSize() = 0;
+	//get the number of voxels/pixels in the y dimension
 	virtual int GetYSize() = 0;
+	//sometimes the spacing info in the file is incorrect (too small or big)
+	//if the flag is set to false, default spacing values will be applied after reading
 	virtual bool IsSpcInfoValid() = 0;
+	//get the x spacing value, the physical size of the voxel
 	virtual double GetXSpc() = 0;
+	//get the y spacing value
 	virtual double GetYSpc() = 0;
+	//get the z spacing value
 	virtual double GetZSpc() = 0;
+	//get the max intensity value
+	//for 8-bit data, the max value is usually 255
+	//for 16-bit data, the microscope sensor may not generate full range, a smaller number is usually used
 	virtual double GetMaxValue() = 0;
+	//intensity values (0-255 for 8-bit, 0-max value for 16-bit) are normalized to (0.0-1.0) for OpenGL
+	//the scalar-value scaling factor is usually the inverse of the max value (1/max) for 16-bit data
 	virtual double GetScalarScale() = 0;
+	//get the total number of files in a batch when batch is turned on with SetBatch(true)
 	virtual int GetBatchNum() = 0;
+	//get the index of the current file when the batch mode is turned on
 	virtual int GetCurBatch() = 0;
 
+	//check if two readers are the same
 	bool operator==(BaseReader& reader)
 	{
 		return m_id_string == reader.m_id_string;
 	}
+	//another way to check if two readers are the same
 	bool Match(wstring &id_string)
 	{
 		return m_id_string == id_string;
 	}
 
-	//resizing
+	//a volume can be resized using a sampler
+	//this is usually used when the mask of a volume has a different size
+	//it can also change the size of a volume when it is resaved
+	//this sets the type of resizing
 	void SetResize(int type)
 	{
 		m_resize_type = type;
 	}
+	//get the type of resizing
 	int GetResize()
 	{
 		return m_resize_type;
 	}
+	//specify the sampler to use for resizing
 	void SetResample(int type)
 	{
 		m_resample_type = type;
 	}
+	//get the current smapler's type
 	int GetResample()
 	{
 		return m_resample_type;
@@ -144,7 +214,7 @@ protected:
 
 	wstring m_info;
 
-	//all the decoding stuff
+	//all the lzw decoding stuff
 	#define MAXCODE(n)	((1L<<(n))-1)
 	#define	BITS_MIN	9		/* start with 9 bits */
 	#define	BITS_MAX	12		/* max of 12 bit strings */

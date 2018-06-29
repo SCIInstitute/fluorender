@@ -189,6 +189,8 @@ public:
 	bool GetDup();
 	//increase duplicate counter
 	void IncDupCounter();
+	//get duplicated from
+	VolumeData* GetDupData();
 
 	//data related
 	//reader
@@ -225,8 +227,8 @@ public:
 	bool SearchLabel(unsigned int label);
 
 	//save
-	double GetOriginalValue(int i, int j, int k);
-	double GetTransferedValue(int i, int j, int k);
+	double GetOriginalValue(int i, int j, int k, TextureBrick* b = 0);
+	double GetTransferedValue(int i, int j, int k, TextureBrick* b=0);
 	void SetResize(int resize, int nx, int ny, int nz);
 	void Save(wxString &filename, int mode=0, bool bake=false, bool compress=false);
 	void SaveMask(bool use_reader, int t, int c);
@@ -240,6 +242,7 @@ public:
 
 	//bounding box
 	BBox GetBounds();
+	BBox GetClippedBounds();
 	//path
 	void SetPath(wxString path);
 	wxString GetPath();
@@ -338,11 +341,11 @@ public:
 	Color GetColorFromColormap(double value);
 
 	//resolution  scaling and spacing
-	void GetResolution(int &res_x, int &res_y, int &res_z);
+	void GetResolution(int &res_x, int &res_y, int &res_z, int lv = -1);
 	void SetScalings(double sclx, double scly, double sclz);
 	void GetScalings(double &sclx, double &scly, double &sclz);
 	void SetSpacings(double spcx, double spcy, double spcz);
-	void GetSpacings(double &spcx, double &spcy, double & spcz);
+	void GetSpacings(double &spcx, double &spcy, double & spcz, int lv = -1);
 	void GetFileSpacings(double &spcx, double &spcy, double &spcz);
 	//read resolutions from file
 	void SetSpcFromFile(bool val=true) {m_spc_from_file = val;}
@@ -434,6 +437,7 @@ private:
 	//duplication indicator and counter
 	bool m_dup;
 	int m_dup_counter;
+	VolumeData* m_dup_data;//duplicated from
 
 	wxString m_tex_path;
 	BBox m_bounds;
@@ -901,6 +905,12 @@ public:
 	Color &GetColor()
 	{ return m_color; }
 
+	//brush size
+	void SetBrushSize(double size)
+	{ m_brush_size = size; }
+	double GetBrushSize()
+	{ return m_brush_size; }
+
 private:
 	static int m_num;
 	int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe; 4: protractor
@@ -923,6 +933,8 @@ private:
 	wxString m_info_names;
 	wxString m_info_values;
 
+	//brush size if brush is used along with the ruler
+	double m_brush_size;
 };
 
 typedef std::vector<Ruler*> RulerList;
@@ -1386,8 +1398,9 @@ public:
 	double m_vol_ysp;	//y_spacing
 	double m_vol_zsp;	//z_spacing
 	double m_vol_lum;	//luminance
-	int m_vol_cmm;		//colormap mode
-	int m_vol_cmp;		//colormap
+	int m_vol_cmp;		//colormap type (rainbow, warm, etc)
+	int m_vol_cmm;		//colormap mode (enable)
+	int m_vol_cmj;		//colormap projection
 	double m_vol_lcm;	//colormap low value
 	double m_vol_hcm;	//colormap high value
 	bool m_vol_eap;		//enable alpha

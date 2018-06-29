@@ -476,6 +476,59 @@ void ClippingView::SetChannLink(bool chann)
 	m_toolbar->ToggleTool(ID_LinkChannelsBtn,chann);
 }
 
+void ClippingView::SetHoldPlanes(bool hold)
+{
+	m_hold_planes = hold;
+	m_toolbar->ToggleTool(ID_HoldPlanesBtn, hold);
+	if (hold)
+	{
+		VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
+		if (!vrender_frame)
+			return;
+		vector <VRenderView*>* vrv_list = vrender_frame->GetViewList();
+		for (int i = 0; i<(int)vrv_list->size(); i++)
+		{
+			if ((*vrv_list)[i])
+			{
+				(*vrv_list)[i]->m_glview->m_draw_clip = true;
+				(*vrv_list)[i]->m_glview->m_clip_mask = -1;
+			}
+		}
+	}
+}
+
+void ClippingView::SetPlaneMode(PLANE_MODES mode)
+{
+	m_plane_mode = mode;
+	switch (m_plane_mode)
+	{
+	case kNormal:
+		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_normal));
+		break;
+	case kFrame:
+		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_frame));
+		break;
+	case kLowTrans:
+		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_low));
+		break;
+	case kLowTransBack:
+		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_low_back));
+		break;
+	case kNormalBack:
+		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_normal_back));
+		break;
+	case kNone:
+		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_none));
+		break;
+	}
+}
+
 int ClippingView::GetSelType()
 {
 	return m_sel_type;
@@ -774,6 +827,11 @@ void ClippingView::OnPlaneModesBtn(wxCommandEvent &event)
 			wxGetBitmapFromMemory(clip_normal_back));
 		break;
 	case kNormalBack:
+		m_plane_mode = kNone;
+		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_none));
+		break;
+	case kNone:
 		m_plane_mode = kNormal;
 		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 			wxGetBitmapFromMemory(clip_normal));

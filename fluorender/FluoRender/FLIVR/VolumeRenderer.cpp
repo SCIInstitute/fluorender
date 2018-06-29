@@ -34,6 +34,7 @@
 #include <FLIVR/TextureBrick.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
+#include <FLIVR/Framebuffer.h>
 #include "utility.h"
 #include "../compatibility.h"
 #include <fstream>
@@ -50,8 +51,9 @@ namespace FLIVR
 	VolShaderFactory TextureRenderer::vol_shader_factory_;
 	SegShaderFactory TextureRenderer::seg_shader_factory_;
 	VolCalShaderFactory TextureRenderer::cal_shader_factory_;
-	ImgShaderFactory VolumeRenderer::m_img_shader_factory;
+	ImgShaderFactory TextureRenderer::m_img_shader_factory;
 	VolKernelFactory TextureRenderer::vol_kernel_factory_;
+	FramebufferManager TextureRenderer::framebuffer_manager_;
 	double VolumeRenderer::sw_ = 0.0;
 
 	VolumeRenderer::VolumeRenderer(Texture* tex,
@@ -328,8 +330,7 @@ namespace FLIVR
 	void VolumeRenderer::set_sampling_rate(double rate)
 	{
 		sampling_rate_ = rate;
-		//irate_ = rate>1.0 ? max(rate / 2.0, 1.0) : rate;
-		irate_ = max(rate / 2.0, 0.1);
+		irate_ = rate / 2.0;
 	}
 
 	double VolumeRenderer::get_sampling_rate()
@@ -596,8 +597,17 @@ namespace FLIVR
 			diag.x() / tex_->nx(),
 			diag.y() / tex_->ny(),
 			diag.z() / tex_->nz());
-		double dt = cell_diag.length()/compute_rate_scale(snapview.direction())/rate;
-		num_slices_ = (int)(diag.length()/dt);
+		double dt;
+		if (rate > 0.0)
+		{
+			dt = cell_diag.length() / compute_rate_scale(snapview.direction()) / rate;
+			num_slices_ = (int)(diag.length()/dt);
+		}
+		else
+		{
+			dt = 0.0;
+			num_slices_ = 0;
+		}
 
 		vector<float> vertex;
 		vector<uint32_t> index;
@@ -638,17 +648,9 @@ namespace FLIVR
 		{
 			double sf = CalcScaleFactor(w, h, tex_->nx(), tex_->ny(), zoom);
 			if (fabs(sf-sfactor_)>0.05)
-			{
 				sfactor_ = sf;
-				blend_framebuffer_resize_ = true;
-				filter_buffer_resize_ = true;
-			}
 			else if (sf==1.0 && sfactor_!=1.0)
-			{
 				sfactor_ = sf;
-				blend_framebuffer_resize_ = true;
-				filter_buffer_resize_ = true;
-			}
 
 			w2 = int(w*sfactor_+0.5);
 			h2 = int(h*sfactor_+0.5);
@@ -656,48 +658,18 @@ namespace FLIVR
 		else
 		{
 			if (sfactor_ != 1.0)
-			{
 				sfactor_ = 1.0;
-				blend_framebuffer_resize_ = true;
-				filter_buffer_resize_ = true;
-			}
 		}
 
+		Framebuffer* blend_buffer = 0;
 		if(blend_num_bits_ > 8)
 		{
-			if (!glIsFramebuffer(blend_framebuffer_))
-			{
-				glGenFramebuffers(1, &blend_framebuffer_);
-				glGenTextures(1, &blend_tex_id_);
-
-				glBindFramebuffer(GL_FRAMEBUFFER, blend_framebuffer_);
-
-				// Initialize texture color renderbuffer
-				glBindTexture(GL_TEXTURE_2D, blend_tex_id_);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w2, h2, 0,
-					GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
-				glFramebufferTexture2D(GL_FRAMEBUFFER,
-					GL_COLOR_ATTACHMENT0,
-					GL_TEXTURE_2D, blend_tex_id_, 0);
-			}
-
-			if (blend_framebuffer_resize_)
-			{
-				// resize texture color renderbuffer
-				glBindTexture(GL_TEXTURE_2D, blend_tex_id_);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w2, h2, 0,
-					GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
-
-				blend_framebuffer_resize_ = false;
-			}
-
-			glBindTexture(GL_TEXTURE_2D, 0);
-
-			glBindFramebuffer(GL_FRAMEBUFFER, blend_framebuffer_);
+			blend_buffer = framebuffer_manager_.framebuffer(
+				FB_Render_RGBA, w2, h2);
+			if (!blend_buffer)
+				return;
+			blend_buffer->bind();
+			blend_buffer->protect();
 
 			glClearColor(clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3]);
 			glClear(GL_COLOR_BUFFER_BIT);
@@ -718,7 +690,7 @@ namespace FLIVR
 			false, tex_->nc(),
 			shading_, use_fog,
 			depth_peel_, true,
-			hiqual_, ml_mode_,
+			hiqual_, ml_mode_, mode_ == TextureRenderer::MODE_MIP,
 			colormap_mode_, colormap_, colormap_proj_,
 			solid_, 1);
 		if (shader)
@@ -747,21 +719,28 @@ namespace FLIVR
 		//transfer function
 		shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
 		shader->setLocalParam(3, 1.0/gamma3d_, gm_thresh_, offset_, sw_);
-		switch (colormap_mode_)
-		{
-		case 0://normal
-			if (mask_ && !label_)
-				shader->setLocalParam(6, mask_color_.r(), mask_color_.g(), mask_color_.b(), mask_thresh_);
-			else
-				shader->setLocalParam(6, color_.r(), color_.g(), color_.b(), 0.0);
-			break;
-		case 1://colormap
+		if (mode_==TextureRenderer::MODE_MIP &&
+			colormap_proj_)
 			shader->setLocalParam(6, colormap_low_value_, colormap_hi_value_,
-				colormap_hi_value_-colormap_low_value_, 0.0);
-			break;
-		case 2://depth map
-			shader->setLocalParam(6, color_.r(), color_.g(), color_.b(), 0.0);
-			break;
+				colormap_hi_value_ - colormap_low_value_, 0.0);
+		else
+		{
+			switch (colormap_mode_)
+			{
+			case 0://normal
+				if (mask_ && !label_)
+					shader->setLocalParam(6, mask_color_.r(), mask_color_.g(), mask_color_.b(), mask_thresh_);
+				else
+					shader->setLocalParam(6, color_.r(), color_.g(), color_.b(), 0.0);
+				break;
+			case 1://colormap
+				shader->setLocalParam(6, colormap_low_value_, colormap_hi_value_,
+					colormap_hi_value_-colormap_low_value_, 0.0);
+				break;
+			case 2://depth map
+				shader->setLocalParam(6, color_.r(), color_.g(), color_.b(), 0.0);
+				break;
+			}
 		}
 
 		//setup depth peeling
@@ -819,7 +798,12 @@ namespace FLIVR
 
 			TextureBrick* b = (*bricks)[i];
 			if (tex_->isBrxml() && !b->isLoaded())
+			{
+				if (!test_against_view(b->bbox(), !orthographic_p) ||
+					b->get_priority() > 0)
+					cur_chan_brick_num_++;
 				continue;
+			}
 
 			if (mem_swap_ && start_update_loop_ && !done_update_loop_)
 			{
@@ -842,9 +826,11 @@ namespace FLIVR
 				continue;
 			}
 
-			if (colormap_mode_==1 && colormap_proj_)
+			if ((colormap_mode_==1 ||
+				mode_==TextureRenderer::MODE_MIP) &&
+				colormap_proj_)
 			{
-				BBox bbox = b->bbox();
+				BBox bbox = b->dbox();
 				float matrix[16];
 				matrix[0] = float(bbox.max().x()-bbox.min().x());
 				matrix[1] = 0.0f;
@@ -869,75 +855,74 @@ namespace FLIVR
 			index.clear();
 			size.clear();
 			b->compute_polygons(snapview, dt, vertex, index, size, multibricks);
-			//if (vertex.size() == 0) {
-			//	if (mem_swap_ && start_update_loop_ && !done_update_loop_)
-			//	{
-			//		if (!b->drawn(mode))
-			//		{
-			//			b->set_drawn(mode, true);
-			//			cur_brick_num_++;
-			//			cur_chan_brick_num_++;
-			//		}
-			//	}
-			//	continue;
-			//}
 
 			num_slices_ += vertex.size()/12;
 
-			if (vertex.size() == 0) continue;
-			GLint filter;
-			if (interpolate_)
-				filter = GL_LINEAR;
+			if (vertex.size() == 0)
+			{
+				if (mem_swap_ &&
+					start_update_loop_ &&
+					!done_update_loop_)
+				{
+					if (!(*bricks)[i]->drawn(mode))
+					{
+						(*bricks)[i]->set_drawn(mode, true);
+						cur_brick_num_++;
+						cur_chan_brick_num_++;
+					}
+				}
+			}
 			else
-				filter = GL_NEAREST;
+			{
+				GLint filter;
+				if (interpolate_)
+					filter = GL_LINEAR;
+				else
+					filter = GL_NEAREST;
 
-			if (!load_brick(0, 0, bricks, i, filter, compression_, mode))
-				continue;
-			if (mask_)
-				load_brick_mask(bricks, i, filter);
-			if (label_)
-				load_brick_label(bricks, i);
-			shader->setLocalParam(4, 1.0/b->nx(), 1.0/b->ny(), 1.0/b->nz(),
-				mode_==MODE_OVER?1.0/rate:1.0);
+				if (!load_brick(0, 0, bricks, i, filter, compression_, mode))
+					continue;
+				if (mask_)
+					load_brick_mask(bricks, i, filter);
+				if (label_)
+					load_brick_label(bricks, i);
+				shader->setLocalParam(4, 1.0 / b->nx(), 1.0 / b->ny(), 1.0 / b->nz(),
+					mode_ == MODE_OVER ? 1.0 / rate : 1.0);
 
-			//for brick transformation
-			float matrix[16];
-			BBox bbox = b->bbox();
-			matrix[0] = float(bbox.max().x()-bbox.min().x());
-			matrix[1] = 0.0f;
-			matrix[2] = 0.0f;
-			matrix[3] = 0.0f;
-			matrix[4] = 0.0f;
-			matrix[5] = float(bbox.max().y()-bbox.min().y());
-			matrix[6] = 0.0f;
-			matrix[7] = 0.0f;
-			matrix[8] = 0.0f;
-			matrix[9] = 0.0f;
-			matrix[10] = float(bbox.max().z()-bbox.min().z());
-			matrix[11] = 0.0f;
-			matrix[12] = float(bbox.min().x());
-			matrix[13] = float(bbox.min().y());
-			matrix[14] = float(bbox.min().z());
-			matrix[15] = 1.0f;
-			shader->setLocalParamMatrix(2, matrix);
+				//for brick transformation
+				float matrix[16];
+				BBox bbox = b->dbox();
+				matrix[0] = float(bbox.max().x() - bbox.min().x());
+				matrix[1] = 0.0f;
+				matrix[2] = 0.0f;
+				matrix[3] = 0.0f;
+				matrix[4] = 0.0f;
+				matrix[5] = float(bbox.max().y() - bbox.min().y());
+				matrix[6] = 0.0f;
+				matrix[7] = 0.0f;
+				matrix[8] = 0.0f;
+				matrix[9] = 0.0f;
+				matrix[10] = float(bbox.max().z() - bbox.min().z());
+				matrix[11] = 0.0f;
+				matrix[12] = float(bbox.min().x());
+				matrix[13] = float(bbox.min().y());
+				matrix[14] = float(bbox.min().z());
+				matrix[15] = 1.0f;
+				shader->setLocalParamMatrix(2, matrix);
 
-			draw_polygons(vertex, index);
+				draw_polygons(vertex, index);
+			}
 
 			if (mem_swap_)
 				finished_bricks_++;
-
-			////this is for debug_ds, comment when done
-			//if (mem_swap_)
-			//{
-			//	uint32_t rn_time = GET_TICK_COUNT();
-			//	if (rn_time - st_time_ > get_up_time())
-			//		break;
-			//}
 		}
 
 		if (mem_swap_ &&
 			cur_brick_num_ == total_brick_num_)
+		{
 			done_update_loop_ = true;
+			active_view_ = -1;
+		}
 		if (mem_swap_ &&
 			(size_t)cur_chan_brick_num_ == (*bricks).size())
 		{
@@ -977,40 +962,17 @@ namespace FLIVR
 
 			ShaderProgram* img_shader = 0;
 
+			Framebuffer* filter_buffer = 0;
 			if (noise_red_ && colormap_mode_!=2)
 			{
 				//FILTERING/////////////////////////////////////////////////////////////////
-				if (!filter_tex_id_)
-				{
-					glGenTextures(1, &filter_tex_id_);
-					glBindTexture(GL_TEXTURE_2D, filter_tex_id_);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-					glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w2, h2, 0,
-						GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
-				}
-				if (!glIsFramebuffer(filter_buffer_))
-				{
-					glGenFramebuffers(1, &filter_buffer_);
-					glBindFramebuffer(GL_FRAMEBUFFER, filter_buffer_);
-					glFramebufferTexture2D(GL_FRAMEBUFFER,
-						GL_COLOR_ATTACHMENT0,
-						GL_TEXTURE_2D, filter_tex_id_, 0);
-				}
-				if (filter_buffer_resize_)
-				{
-					glBindTexture(GL_TEXTURE_2D, filter_tex_id_);
-					glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w2, h2, 0,
-						GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
-					filter_buffer_resize_ = false;
-				}
+				filter_buffer = framebuffer_manager_.framebuffer(
+					FB_Render_RGBA, w2, h2);
+				filter_buffer->bind();
 
-				glBindFramebuffer(GL_FRAMEBUFFER, filter_buffer_);
 				glClear(GL_COLOR_BUFFER_BIT);
 
-				glBindTexture(GL_TEXTURE_2D, blend_tex_id_);
+				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 				img_shader = 
 					m_img_shader_factory.shader(IMG_SHDR_FILTER_BLUR);
 				if (img_shader)
@@ -1035,10 +997,10 @@ namespace FLIVR
 
 			glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 
-			if (noise_red_ && colormap_mode_!=2)
-				glBindTexture(GL_TEXTURE_2D, filter_tex_id_);
+			if (noise_red_ && colormap_mode_ != 2)
+				filter_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 			else
-				glBindTexture(GL_TEXTURE_2D, blend_tex_id_);
+				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 
 			if (noise_red_ && colormap_mode_!=2)
 				img_shader = 
@@ -1065,16 +1027,11 @@ namespace FLIVR
 			if (img_shader && img_shader->valid())
 				img_shader->release();
 
-			if (TextureRenderer::get_invalidate_tex())
-			{
-#ifdef _WIN32
-				glInvalidateTexImage(blend_tex_id_, 0);
-				glInvalidateTexImage(filter_tex_id_, 0);
-#endif
-			}
 			if (depth_test) glEnable(GL_DEPTH_TEST);
 			if (cull_face) glEnable(GL_CULL_FACE);
 
+			if (blend_buffer)
+				blend_buffer->unprotect();
 		}
 
 		// Reset the blend functions after MIP
@@ -1098,8 +1055,18 @@ namespace FLIVR
 		Vector cell_diag(diag.x()/tex_->nx(),
 			diag.y()/tex_->ny(),
 			diag.z()/tex_->nz());
-		double dt = cell_diag.length()/compute_rate_scale(snapview.direction())/rate;
-		int num_slices = (int)(diag.length()/dt);
+		double dt;
+		int num_slices;
+		if (rate > 0.0)
+		{
+			dt = cell_diag.length() / compute_rate_scale(snapview.direction()) / rate;
+			num_slices = (int)(diag.length()/dt);
+		}
+		else
+		{
+			dt = 0.0;
+			num_slices = 0;
+		}
 
 		vector<float> vertex;
 		vector<uint32_t> index;
@@ -1115,7 +1082,7 @@ namespace FLIVR
 			true, 0,
 			false, false,
 			0, false,
-			false, 0,
+			false, 0, false,
 			0, 0, 0,
 			false, 1);
 		if (shader)
@@ -1186,9 +1153,10 @@ namespace FLIVR
 			return;
 
 		//mask frame buffer object
-		if (!glIsFramebuffer(fbo_mask_))
-			glGenFramebuffers(1, &fbo_mask_);
-		glBindFramebuffer(GL_FRAMEBUFFER, fbo_mask_);
+		Framebuffer* fbo_mask =
+			framebuffer_manager_.framebuffer(FB_3D_Int, 0, 0);
+		if (fbo_mask)
+			fbo_mask->bind();
 
 		//--------------------------------------------------------------------------
 		// Set up shaders
@@ -1348,13 +1316,7 @@ namespace FLIVR
 			//draw each slice
 			for (int z=0; z<b->nz(); z++)
 			{
-				glFramebufferTexture3D(GL_FRAMEBUFFER, 
-					GL_COLOR_ATTACHMENT0,
-					GL_TEXTURE_3D,
-					tex_id,
-					0,
-					z);
-
+				fbo_mask->attach_texture(GL_COLOR_ATTACHMENT0, tex_id, z);
 				draw_view_quad(double(z+0.5) / double(b->nz()));
 			}
 
@@ -1410,10 +1372,11 @@ namespace FLIVR
 			return;
 
 		glActiveTexture(GL_TEXTURE0);
-		//label frame buffer object
-		if (!glIsFramebuffer(fbo_label_))
-			glGenFramebuffers(1, &fbo_label_);
-		glBindFramebuffer(GL_FRAMEBUFFER, fbo_label_);
+		//mask frame buffer object
+		Framebuffer* fbo_label =
+			framebuffer_manager_.framebuffer(FB_3D_Int, 0, 0);
+		if (fbo_label)
+			fbo_label->bind();
 
 		bool has_mask = tex_->nmask()!=-1;
 
@@ -1505,13 +1468,7 @@ namespace FLIVR
 			int z;
 			for (z=0; z<b->nz(); z++)
 			{
-				glFramebufferTexture3D(GL_FRAMEBUFFER, 
-					GL_COLOR_ATTACHMENT0,
-					GL_TEXTURE_3D,
-					label_id,
-					0,
-					z);
-
+				fbo_label->attach_texture(GL_COLOR_ATTACHMENT0, label_id, z);
 				draw_view_quad(double(z+0.5) / double(b->nz()));
 			}
 		}
@@ -1547,16 +1504,17 @@ namespace FLIVR
 		size_t brick_x, size_t brick_y, size_t brick_z)
 	{
 		double result = 0.0;
+		int kernel_index = -1;
 		KernelProgram* kernel = vol_kernel_factory_.kernel(KERNEL_HIST_3D);
 		if (kernel)
 		{
 			if (!kernel->valid())
 			{
 				string name = "hist_3d";
-				kernel->create(name);
+				kernel_index = kernel->createKernel(name);
 			}
-			kernel->setKernelArgTex3D(0, CL_MEM_READ_ONLY, data_id);
-			kernel->setKernelArgTex3D(1, CL_MEM_READ_ONLY, mask_id);
+			kernel->setKernelArgTex3D(kernel_index, 0, CL_MEM_READ_ONLY, data_id);
+			kernel->setKernelArgTex3D(kernel_index, 1, CL_MEM_READ_ONLY, mask_id);
 			unsigned int hist_size = 64;
 			if (tex_ && tex_->get_nrrd(0))
 			{
@@ -1567,12 +1525,12 @@ namespace FLIVR
 			}
 			float* hist = new float[hist_size];
 			memset(hist, 0, hist_size*sizeof(float));
-			kernel->setKernelArgBuf(2, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, hist_size*sizeof(float), hist);
-			kernel->setKernelArgConst(3, sizeof(unsigned int), (void*)(&hist_size));
+			kernel->setKernelArgBuf(kernel_index, 2, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, hist_size*sizeof(float), hist);
+			kernel->setKernelArgConst(kernel_index, 3, sizeof(unsigned int), (void*)(&hist_size));
 			size_t global_size[3] = {brick_x, brick_y, brick_z};
 			size_t local_size[3] = {1, 1, 1};
-			kernel->execute(3, global_size, local_size);
-			kernel->readBuffer(2, hist);
+			kernel->executeKernel(kernel_index, 3, global_size, local_size);
+			kernel->readBuffer(hist_size * sizeof(float), (void*)hist, (void*)hist);
 			//analyze hist
 			int i;
 			float sum = 0;
@@ -1628,9 +1586,10 @@ namespace FLIVR
 
 		glActiveTexture(GL_TEXTURE0);
 		//mask frame buffer object
-		if (!glIsFramebuffer(fbo_label_))
-			glGenFramebuffers(1, &fbo_label_);
-		glBindFramebuffer(GL_FRAMEBUFFER, fbo_label_);
+		Framebuffer* fbo_calc =
+			framebuffer_manager_.framebuffer(FB_3D_Int, 0, 0);
+		if (fbo_calc)
+			fbo_calc->bind();
 
 		//--------------------------------------------------------------------------
 		// Set up shaders
@@ -1687,12 +1646,7 @@ namespace FLIVR
 			//draw each slice
 			for (int z=0; z<b->nz(); z++)
 			{
-				glFramebufferTexture3D(GL_FRAMEBUFFER,
-					GL_COLOR_ATTACHMENT0,
-					GL_TEXTURE_3D,
-					tex_id,
-					0,
-					z);
+				fbo_calc->attach_texture(GL_COLOR_ATTACHMENT0, tex_id, z);
 				draw_view_quad(double(z+0.5) / double(b->nz()));
 			}
 		}

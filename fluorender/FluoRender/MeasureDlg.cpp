@@ -97,6 +97,8 @@ wxListCtrl(parent, id, pos, size, style)//,
 	m_color_picker = new wxColourPickerCtrl(this, 
 		ID_ColorPicker);
 	m_color_picker->Hide();
+
+	m_ruler_df_f = false;
 }
 
 RulerListCtrl::~RulerListCtrl()
@@ -299,9 +301,11 @@ void RulerListCtrl::Export(wxString filename)
 
 		tos << "Name\tColor\tLength(" << unit << ")\tAngle/Pitch(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
 
+		double f = 0.0;
 		Color color;
 		for (size_t i=0; i<ruler_list->size(); i++)
 		{
+			//for each ruler
 			ruler = (*ruler_list)[i];
 			if (!ruler) continue;
 
@@ -343,14 +347,40 @@ void RulerListCtrl::Export(wxString filename)
 			vector<ProfileBin>* profile = ruler->GetProfile();
 			if (profile && profile->size())
 			{
+				double sumd = 0.0;
+				unsigned long long sumull = 0;
 				tos << ruler->GetInfoProfile() << "\n";
 				for (size_t j=0; j<profile->size(); ++j)
 				{
+					//for each profile
 					int pixels = (*profile)[j].m_pixels;
 					if (pixels <= 0)
 						tos << "0.0\t";
 					else
+					{
 						tos << (*profile)[j].m_accum / pixels << "\t";
+						sumd += (*profile)[j].m_accum;
+						sumull += pixels;
+					}
+				}
+				if (m_ruler_df_f)
+				{
+					double avg = 0.0;
+					if (sumull != 0)
+						avg = sumd / double(sumull);
+					if (i == 0)
+					{
+						f = avg;
+						tos << "\t" << f << "\t";
+					}
+					else
+					{
+						double df = avg - f;
+						if (f == 0.0)
+							tos << "\t" << df << "\t";
+						else
+							tos << "\t" << df / f << "\t";
+					}
 				}
 				tos << "\n";
 			}
@@ -508,7 +538,8 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	EVT_RADIOBUTTON(ID_AccIntensityRd, MeasureDlg::OnIntensityMethodCheck)
 	EVT_CHECKBOX(ID_UseTransferChk, MeasureDlg::OnUseTransferCheck)
 	EVT_CHECKBOX(ID_TransientChk, MeasureDlg::OnTransientCheck)
-END_EVENT_TABLE()
+	EVT_CHECKBOX(ID_DF_FChk, MeasureDlg::OnDF_FCheck)
+	END_EVENT_TABLE()
 
 MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	: wxPanel(parent,wxID_ANY,
@@ -588,10 +619,14 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	wxBoxSizer* sizer_12 = new wxBoxSizer(wxHORIZONTAL);
 	m_transient_chk = new wxCheckBox(this, ID_TransientChk, "Transient",
 		wxDefaultPosition, wxDefaultSize);
+	m_df_f_chk = new wxCheckBox(this, ID_DF_FChk, L"Compute \u2206F/F for Probe Tool",
+		wxDefaultPosition, wxDefaultSize);
 	m_use_transfer_chk = new wxCheckBox(this, ID_UseTransferChk, "Use Volume Properties",
 		wxDefaultPosition, wxDefaultSize);
 	sizer_12->Add(10, 10);
 	sizer_12->Add(m_transient_chk, 0, wxALIGN_CENTER);
+	sizer_12->Add(10, 10);
+	sizer_12->Add(m_df_f_chk, 0, wxALIGN_CENTER);
 	sizer_12->Add(10, 10);
 	sizer_12->Add(m_use_transfer_chk, 0, wxALIGN_CENTER);
 	//
@@ -683,6 +718,14 @@ void MeasureDlg::GetSettings(VRenderView* vrv)
 
 		m_use_transfer_chk->SetValue(m_view->m_glview->m_ruler_use_transf);
 		m_transient_chk->SetValue(m_view->m_glview->m_ruler_time_dep);
+		//ruler exports df/f
+		VRenderFrame* frame = (VRenderFrame*)m_frame;
+		if (frame && frame->GetSettingDlg())
+		{
+			bool bval = frame->GetSettingDlg()->GetRulerDF_F();
+			m_df_f_chk->SetValue(bval);
+			m_rulerlist->m_ruler_df_f = bval;
+		}
 	}
 }
 
@@ -838,7 +881,15 @@ void MeasureDlg::OnProfile(wxCommandEvent& event)
 {
 	if (m_view)
 	{
-		m_view->RulerProfile(m_rulerlist->GetCurrSelection());
+		int index = m_rulerlist->GetCurrSelection();
+		if (index > -1)
+			m_view->RulerProfile(index);
+		else
+		{
+			vector<Ruler*>* ruler_list = m_view->GetRulerList();
+			for (size_t i = 0; i < ruler_list->size(); ++i)
+				m_view->RulerProfile(i);
+		}
 	}
 }
 
@@ -918,4 +969,17 @@ void MeasureDlg::OnTransientCheck(wxCommandEvent& event)
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 	if (frame && frame->GetSettingDlg())
 		frame->GetSettingDlg()->SetRulerTimeDep(val);
+}
+
+void MeasureDlg::OnDF_FCheck(wxCommandEvent& event)
+{
+	if (!m_view || !m_view->m_glview)
+		return;
+
+	bool val = m_df_f_chk->GetValue();
+	m_rulerlist->m_ruler_df_f = val;
+
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (frame && frame->GetSettingDlg())
+		frame->GetSettingDlg()->SetRulerDF_F(val);
 }

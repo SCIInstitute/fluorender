@@ -25,27 +25,66 @@ namespace FLIVR
 		KernelProgram(const std::string& source);
 		~KernelProgram();
 
-		bool create(std::string &name);
 		bool valid();
 		void destroy();
 
-		void execute(cl_uint, size_t*, size_t*);
+		//create a kernel in the program
+		//return kernel index; -1 unsuccessful
+		int createKernel(std::string &name);
+		int findKernel(std::string &name);
+		//add a kernel from another program
+		//for sharing buffers...
+		int addKernel(KernelProgram*, int);
+		void removeExternalKernels();
+		//execute kernel
+		bool executeKernel(int, cl_uint, size_t*, size_t*);
+		bool executeKernel(std::string &name,
+			cl_uint, size_t*, size_t*);
 
+		//argument
 		typedef struct
 		{
+			int kernel_index;
 			cl_uint index;
 			size_t size;
 			GLuint texture;
 			cl_mem buffer;
+			void* orgn_addr;
 		} Argument;
+		bool matchArg(cl_mem, unsigned int&);//find buffer
 		bool matchArg(Argument*, unsigned int&);
-		void setKernelArgConst(int, size_t, void*);
-		void setKernelArgBuf(int, cl_mem_flags, size_t, void*);
-		void setKernelArgBufWrite(int, cl_mem_flags, size_t, void*);
-		void setKernelArgTex2D(int, cl_mem_flags, GLuint);
-		void setKernelArgTex3D(int, cl_mem_flags, GLuint);
-		void readBuffer(int, void*);
-		void writeBuffer(int, void*, size_t, size_t, size_t);
+		bool matchArgTex(Argument*, unsigned int&);//use texture id to match
+		bool matchArgAddr(Argument*, unsigned int&);//use data address to match
+		//set argument
+		void setKernelArgConst(int, int, size_t, void*);
+		void setKernelArgConst(std::string &name, int, size_t, void*);
+		cl_mem setKernelArgBuf(int, int, cl_mem_flags, size_t, void*);
+		cl_mem setKernelArgBuf(std::string &name, int, cl_mem_flags, size_t, void*);
+		cl_mem setKernelArgBufWrite(int, int, cl_mem_flags, size_t, void*);
+		cl_mem setKernelArgBufWrite(std::string &name, int, cl_mem_flags, size_t, void*);
+		cl_mem setKernelArgTex2D(int, int, cl_mem_flags, GLuint);
+		cl_mem setKernelArgTex2D(std::string &name, int, cl_mem_flags, GLuint);
+		cl_mem setKernelArgTex3D(int, int, cl_mem_flags, GLuint);
+		cl_mem setKernelArgTex3D(std::string &name, int, cl_mem_flags, GLuint);
+		cl_mem setKernelArgImage(int, int, cl_mem_flags, cl_image_format, cl_image_desc, void*);
+		cl_mem setKernelArgImage(std::string &name, int, cl_mem_flags, cl_image_format, cl_image_desc, void*);
+
+		//read/write
+		void readBuffer(size_t size,
+			void* buf_data, void* data);
+		void readBuffer(cl_mem buffer, void* data);
+		void writeBuffer(size_t size,
+			void* buf_data, void* data);
+		void writeBuffer(cl_mem buffer, void* data);
+		void writeImage(const size_t* origin, const size_t* region,
+			void* img_data, void* data);
+		void writeImage(const size_t* origin, const size_t* region,
+			cl_mem image, void* data);
+
+		//release mem obj
+		void releaseMemObject(cl_mem);
+		void releaseMemObject(int, int, size_t, GLuint);
+		void releaseMemObject(size_t, void* orgn_addr);
 
 		//initialization
 		static void init_kernels_supported();
@@ -60,13 +99,21 @@ namespace FLIVR
 
 		friend class VolKernel;
 #ifdef _DARWIN
-        static CGLContextObj gl_context_;
+		static CGLContextObj gl_context_;
 #endif
 	protected:
 		std::string source_;
 		cl_program program_;
-		cl_kernel kernel_;
 		cl_command_queue queue_;
+
+		//there can be multiple kernels in one program
+		typedef struct
+		{
+			cl_kernel kernel;
+			std::string name;
+			bool external;
+		} Kernel;
+		std::vector<Kernel> kernels_;
 
 		std::string info_;
 

@@ -24,10 +24,6 @@
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 //  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 //  DEALINGS IN THE SOFTWARE.
-//  
-//    File   : VolShader.h
-//    Author : Milan Ikits
-//    Date   : Tue Jul 13 02:27:58 2004
 
 #ifndef VolShader_h
 #define VolShader_h
@@ -45,7 +41,7 @@ namespace FLIVR
 		VolShader(bool poly, int channels,
 				bool shading, bool fog,
 				int peel, bool clip,
-				bool hiqual, int mask,
+				bool hiqual, int mask, bool mip,
 				int color_mode, int colormap, int colormap_proj,
 				bool solid, int vertex_shader);
 		~VolShader();
@@ -60,6 +56,7 @@ namespace FLIVR
 		inline bool clip() { return clip_; }
 		inline bool hiqual() {return hiqual_; }
 		inline int mask() {return mask_;}
+		inline bool mip() { return mip_; }
 		inline int color_mode() {return color_mode_;}
 		inline int colormap() {return colormap_;}
 		inline int colormap_proj() {return colormap_proj_;}
@@ -68,7 +65,7 @@ namespace FLIVR
 		inline bool match(bool poly, int channels,
 						bool shading, bool fog,
 						int peel, bool clip,
-						bool hiqual, int mask,
+						bool hiqual, int mask, bool mip,
 						int color_mode, int colormap, int colormap_proj,
 						bool solid, int vertex_shader)
 		{ 
@@ -80,6 +77,7 @@ namespace FLIVR
 				clip_ == clip &&
 				hiqual_ == hiqual &&
 				mask_ == mask &&
+				mip_ == mip &&
 				color_mode_ == color_mode &&
 				colormap_ == colormap &&
 				colormap_proj_ == colormap_proj &&
@@ -104,6 +102,7 @@ namespace FLIVR
 		bool hiqual_;
 		int mask_;	//0-normal, 1-render with mask, 2-render with mask excluded
 					//3-random color with label, 4-random color with label+mask
+		bool mip_;
 		int color_mode_;//0-normal; 1-rainbow; 2-depth
 		int colormap_;//index
 		int colormap_proj_;//projection direction
@@ -122,7 +121,7 @@ namespace FLIVR
 		ShaderProgram* shader(bool poly, int channels,
 								bool shading, bool fog,
 								int peel, bool clip,
-								bool hiqual, int mask,
+								bool hiqual, int mask, bool mip,
 								int color_mode, int colormap, int colormap_proj,
 								bool solid, int vertex_type);
 		//mask: 0-no mask, 1-segmentation mask, 2-labeling mask

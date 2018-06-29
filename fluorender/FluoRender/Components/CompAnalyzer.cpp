@@ -319,10 +319,15 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 			}
 		}
 
+		unsigned int size_limit;
 		for (iter = comp_list_brick.begin();
 			iter != comp_list_brick.end(); ++iter)
 		{
-			if (bn > 1 && iter->second->sumi < SIZE_LIMIT)
+			if (bn > 1)
+				size_limit = SIZE_LIMIT;
+			else
+				size_limit = 2;
+			if (iter->second->sumi < size_limit)
 				continue;
 			iter->second->var = sqrt(iter->second->m2 / (iter->second->sumi));
 			iter->second->mean *= scale;
@@ -355,7 +360,8 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 
 	m_comp_list_dirty = false;
 	m_colocal = colocal && m_vd_list.size();
-	m_analyzed = true;
+	if (!sel)
+		m_analyzed = true;
 }
 
 void ComponentAnalyzer::MatchBricks(bool sel)

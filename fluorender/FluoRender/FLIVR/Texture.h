@@ -74,7 +74,7 @@ namespace FLIVR
 		inline unsigned int posxid(unsigned int id);
 		inline unsigned int posyid(unsigned int id);
 		inline unsigned int poszid(unsigned int id);
-		//get brick id by index
+		//get brick id by voxel index
 		inline unsigned int get_brick_id(unsigned long long index);
 		TextureBrick* get_brick(unsigned int bid);
 
@@ -199,7 +199,20 @@ namespace FLIVR
 			b_spcz_ = z;
 			Transform tform;
 			tform.load_identity();
-			Point nmax(nx_*x, ny_*y, nz_*z);
+			int nx, ny, nz;
+			if (brkxml_)
+			{
+				nx = pyramid_[0].data->axis[0].size;
+				ny = pyramid_[0].data->axis[1].size;
+				nz = pyramid_[0].data->axis[2].size;
+			}
+			else
+			{
+				nx = nx_;
+				ny = ny_;
+				nz = nz_;
+			}
+			Point nmax(nx*x, ny*y, nz*z);
 			tform.pre_scale(Vector(nmax));
 			set_transform(tform);
 		}
@@ -438,9 +451,9 @@ namespace FLIVR
 		x = y % nx_;
 		y = y / nx_;
 		//get brick indices
-		x = x / (bszx_-1);
-		y = y / (bszy_-1);
-		z = z / (bszz_-1);
+		x = bszx_ <= 1 ? 0 : x / (bszx_-1);
+		y = bszy_ <= 1 ? 0 : y / (bszy_-1);
+		z = bszz_ <= 1 ? 0 : z / (bszz_-1);
 		return z * bnx_ * bny_ + y * bnx_ + x;
 	}
 

@@ -28,20 +28,12 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_CompGenerator_h
 #define FL_CompGenerator_h
 
-#if defined(_WIN32) || defined(__linux__)
-#include <CL/cl.h>
-#include <CL/cl_gl.h>
-#include <CL/cl_gl_ext.h>
-#endif
-#ifdef _DARWIN
-#include <OpenCL/cl.h>
-#include <OpenCL/cl_gl.h>
-#include <OpenCL/cl_gl_ext.h>
-#include <OpenGL/CGLCurrent.h>
-#endif
 #include <vector>
 #include <boost/unordered_map.hpp>
 #include <boost/signals2.hpp>
+#include "DataManager.h"
+#include <FLIVR/KernelProgram.h>
+#include <FLIVR/VolKernel.h>
 
 using namespace std;
 
@@ -51,7 +43,7 @@ namespace FL
 	class ComponentGenerator
 	{
 	public:
-		ComponentGenerator(VolumeData* vd, int device_id = 0);
+		ComponentGenerator(VolumeData* vd);
 		~ComponentGenerator();
 
 		void SetUseMask(bool use_mask)
@@ -63,11 +55,13 @@ namespace FL
 		void ShuffleID_3D();
 		void ShuffleID_2D();
 		void ClearBorders3D();
+		void ClearBorders2D();
+		void FillBorder3D(float);
+		void FillBorder2D(float);
 		void Grow3D(bool, int, float, float,
 			float, int, int);
 		void Grow3DSized(bool, int, float, float,
 			int, float, int, int);
-		void FillBorder3D(float);
 		void InitialGrow(bool, int,
 			float, float,
 			float, float,
@@ -93,8 +87,6 @@ namespace FL
 		VolumeData *m_vd;
 		bool m_use_mask;//use mask instead of data
 		bool m_init;
-		cl_device_id m_device;
-		cl_context m_context;
 
 		struct Cell;
 		struct Edge

@@ -835,7 +835,7 @@ void DataListCtrl::DeleteSelection()
 					VRenderView* view = (*vr_frame->GetViewList())[i];
 					if (view)
 					{
-						view->RemoveVolumeData(name);
+						view->RemoveVolumeDataDup(name);
 					}
 				}
 				//from datamanager
@@ -917,7 +917,7 @@ void DataListCtrl::DeleteAll()
 			{
 				VRenderView* view = (*vr_frame->GetViewList())[i];
 				if (view)
-					view->RemoveVolumeData(name);
+					view->RemoveVolumeDataDup(name);
 			}
 			//from datamanager
 			DataManager* mgr = vr_frame->GetDataManager();

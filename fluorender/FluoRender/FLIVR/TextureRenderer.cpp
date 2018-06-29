@@ -35,19 +35,22 @@
 #include <FLIVR/VolShader.h>
 #include <FLIVR/SegShader.h>
 #include <FLIVR/VolCalShader.h>
+#include <FLIVR/Framebuffer.h>
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
 #include "compatibility.h"
+#include <wx/utils.h>
 
 using namespace std;
 
 namespace FLIVR
 {
 	bool TextureRenderer::mem_swap_ = false;
+	int TextureRenderer::active_view_ = -1;
 	bool TextureRenderer::use_mem_limit_ = false;
 	double TextureRenderer::mem_limit_ = 0.0;
 	double TextureRenderer::available_mem_ = 0.0;
-	double TextureRenderer::mainmem_buf_size_ = 9000.0;
+	double TextureRenderer::mainmem_buf_size_ = 4000.0;
 	double TextureRenderer::available_mainmem_buf_size_ = 0.0;
 	double TextureRenderer::large_data_size_ = 0.0;
 	int TextureRenderer::force_brick_size_ = 0;
@@ -71,7 +74,7 @@ namespace FLIVR
 	unsigned long TextureRenderer::consumed_time_ = 0;
 	bool TextureRenderer::interactive_ = false;
 	int TextureRenderer::finished_bricks_ = 0;
-	BrickQueue TextureRenderer::brick_queue_(15);
+	BrickQueue TextureRenderer::brick_queue_(5);
 	int TextureRenderer::quota_bricks_ = 0;
 	Point TextureRenderer::quota_center_;
 	int TextureRenderer::update_order_ = 0;
@@ -93,14 +96,6 @@ namespace FLIVR
 		irate_(0.5),
 		imode_(false),
 		cur_framebuffer_(0),
-		blend_framebuffer_resize_(false),
-		blend_framebuffer_(0),
-		blend_tex_id_(0),
-		filter_buffer_resize_(false),
-		filter_buffer_(0),
-		filter_tex_id_(0),
-		fbo_mask_(0),
-		fbo_label_(0),
 		tex_2d_mask_(0),
 		tex_2d_weight1_(0),
 		tex_2d_weight2_(0),
@@ -128,14 +123,6 @@ namespace FLIVR
 		num_slices_(0),
 		irate_(copy.irate_),
 		imode_(copy.imode_),
-		blend_framebuffer_resize_(false),
-		blend_framebuffer_(0),
-		blend_tex_id_(0),
-		filter_buffer_resize_(false),
-		filter_buffer_(0),
-		filter_tex_id_(0),
-		fbo_mask_(0),
-		fbo_label_(0),
 		tex_2d_mask_(0),
 		tex_2d_weight1_(0),
 		tex_2d_weight2_(0),
@@ -162,14 +149,6 @@ namespace FLIVR
 		clear_brick_buf();
 		//clear_tex_pool();
 		clear_tex_current();
-		if (glIsFramebuffer(blend_framebuffer_))
-			glDeleteFramebuffers(1, &blend_framebuffer_);
-		if (glIsTexture(blend_tex_id_))
-			glDeleteTextures(1, &blend_tex_id_);
-		if (glIsFramebuffer(filter_buffer_))
-			glDeleteFramebuffers(1, &filter_buffer_);
-		if (glIsTexture(filter_tex_id_))
-			glDeleteTextures(1, &filter_tex_id_);
 
 		//buffers
 		if (glIsBuffer(m_slices_vbo))
@@ -268,13 +247,6 @@ namespace FLIVR
 		}
 	}
 
-	//resize the fbo texture
-	void TextureRenderer::resize()
-	{
-		blend_framebuffer_resize_ = true;
-		filter_buffer_resize_ = true;
-	}
-
 	//set the 2d texture mask for segmentation
 	void TextureRenderer::set_2d_mask(GLuint id)
 	{
@@ -312,44 +284,45 @@ namespace FLIVR
 	void TextureRenderer::set_cor_up_time(int speed)
 	{
 		//cor_up_time_ = speed;
-		if (speed < 10) speed = 10;
-		cor_up_time_ = (unsigned long)(log10(1000.0 / speed)*up_time_);
+		if (speed < 5) speed = 5;
+		if (speed > 20) speed = 20;
+		cor_up_time_ = (unsigned long)(log10(100.0 / speed)*up_time_);
 	}
 
 	//number of bricks rendered before time is up
 	void TextureRenderer::reset_finished_bricks()
 	{
-		if (finished_bricks_ > 0 && consumed_time_ > 0)
-		{
-			brick_queue_.Push(int(double(finished_bricks_)*double(up_time_) / double(consumed_time_)));
-		}
+		//if (finished_bricks_ > 0 && consumed_time_ > 0)
+		//{
+		//	brick_queue_.Push(int(double(finished_bricks_)*double(up_time_) / double(consumed_time_)));
+		//}
 		finished_bricks_ = 0;
 	}
 
-	//get the maximum finished bricks in queue
-	int TextureRenderer::get_finished_bricks_max()
+	void TextureRenderer::push_quota_brick(int bricks)
 	{
-		int max = 0;
-		int temp;
-		for (int i = 0; i < brick_queue_.GetLimit(); i++)
-		{
-			temp = brick_queue_.Get(i);
-			max = temp > max ? temp : max;
-		}
-		return max;
+		brick_queue_.Push(bricks);
 	}
 
 	//estimate next brick number
-	int TextureRenderer::get_est_bricks(int mode)
+	int TextureRenderer::get_est_bricks(int mode, int init)
 	{
 		double result = 0.0;
 		if (mode == 0)
 		{
 			//mean
 			double sum = 0.0;
+			int count = 0;
 			for (int i = 0; i < brick_queue_.GetLimit(); i++)
-				sum += brick_queue_.Get(i);
-			result = sum / brick_queue_.GetLimit();
+			{
+				int quota = brick_queue_.Get(i);
+				if (quota)
+				{
+					sum += quota;
+					count++;
+				}
+			}
+			result = (sum + init) / (count + 1);
 		}
 		else if (mode == 1)
 		{
@@ -427,10 +400,7 @@ namespace FLIVR
 			delete[]sorted_queue;
 		}
 
-		if (interactive_)
-			return Max(1, int(cor_up_time_*result / up_time_));
-		else
-			return int(result);
+		return int(result);
 	}
 
 	Ray TextureRenderer::compute_view()

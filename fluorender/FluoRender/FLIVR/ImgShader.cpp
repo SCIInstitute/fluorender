@@ -219,6 +219,30 @@ namespace FLIVR
 	"	FragColor = vec4(rb.rgb*rb.a, rb.a);\n" \
 	"}\n"
 
+#define IMG_SHADER_CODE_GRADIENT_PROJ_MAP \
+	"//IMG_SHADER_CODE_GRADIENT_MAP\n" \
+	"in vec3 OutVertex;\n" \
+	"in vec3 OutTexCoord;\n" \
+	"out vec4 FragColor;\n" \
+	"\n" \
+	"// IMG_SHADER_CODE_GRADIENT_MAP\n" \
+	"uniform vec4 loc0; //(lo, hi, hi-lo, alpha) \n" \
+	"uniform sampler2D tex0;\n" \
+	"\n" \
+	"void main()\n" \
+	"{\n" \
+	"	vec4 rb;\n" \
+	"	vec4 t = vec4(OutTexCoord, 1.0);\n" \
+	"	vec4 c = texture(tex0, t.xy);\n" \
+	"	rb.a = c.a;\n" \
+	"	float valu = c.r - c.a * 260.0;\n" \
+	"	valu = (valu-loc0.x)/loc0.z;\n" \
+
+#define IMG_SHADER_CODE_GRADIENT_PROJ_MAP_RESULT \
+	"	//IMG_SHADER_CODE_GRADIENT_MAP_RESULT\n" \
+	"	FragColor = vec4(rb.rgb*(loc0.w>0.5?(rb.a==0.0?0.0:1.0):rb.a), rb.a);\n" \
+	"}\n"
+
 #define IMG_SHADER_CODE_FILTER_MIN \
 	"//IMG_SHADER_CODE_FILTER_MIN\n" \
 	"in vec3 OutVertex;\n" \
@@ -605,6 +629,7 @@ namespace FLIVR
 		case IMG_SHDR_BRIGHTNESS_CONTRAST:
 		case IMG_SHDR_BRIGHTNESS_CONTRAST_HDR:
 		case IMG_SHDR_GRADIENT_MAP:
+		case IMG_SHDR_GRADIENT_PROJ_MAP:
 		case IMG_SHDR_FILTER_BLUR:
 		case IMG_SHDR_FILTER_MAX:
 		case IMG_SHDR_FILTER_SHARPEN:
@@ -637,6 +662,10 @@ namespace FLIVR
 			return string(VOL_COLORMAP_CALC3);
 		case 4:
 			return string(VOL_COLORMAP_CALC4);
+		case 5:
+			return string(VOL_COLORMAP_CALC5);
+		case 6:
+			return string(VOL_COLORMAP_CALC6);
 		}
 		return string(VOL_COLORMAP_CALC0);
 	}
@@ -670,6 +699,11 @@ namespace FLIVR
 			z << IMG_SHADER_CODE_GRADIENT_MAP;
 			z << get_colormap_code();
 			z << IMG_SHADER_CODE_GRADIENT_MAP_RESULT;
+			break;
+		case IMG_SHDR_GRADIENT_PROJ_MAP:
+			z << IMG_SHADER_CODE_GRADIENT_PROJ_MAP;
+			z << get_colormap_code();
+			z << IMG_SHADER_CODE_GRADIENT_PROJ_MAP_RESULT;
 			break;
 		case IMG_SHDR_FILTER_BLUR:
 			z << IMG_SHADER_CODE_FILTER_BLUR;

@@ -235,6 +235,9 @@ private:
 	void EnableMip();
 	void DisableMip();
 
+	//update max value
+	void UpdateMaxVal(double value);
+
 	//1
 	void OnGammaSync(wxMouseEvent& event);
 	void OnGammaChange(wxScrollEvent &event);

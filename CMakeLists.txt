@@ -71,14 +71,14 @@ endif()
 add_definitions(-DFLUORENDER_TITLE="FluoRender")
 
 add_definitions(-DVERSION_MAJOR=2)							# Be sure to update the Versions and Date for each release!!!!
-add_definitions(-DVERSION_MINOR=22.2)						# 
+add_definitions(-DVERSION_MINOR=23)							# 
 add_definitions(-DVERSION_MAJOR_TAG="2")					# 
-add_definitions(-DVERSION_MINOR_TAG="22.2")					# 
-add_definitions(-DVERSION_COPYRIGHT="December 2017")		# Up to here!
+add_definitions(-DVERSION_MINOR_TAG="23")					# 
+add_definitions(-DVERSION_COPYRIGHT="May 2018")				# Up to here!
 
 #windows
 if(WIN32)
-add_definitions(-D_WIN32_WINNT=0x0501)
+add_definitions(-D_WIN32_WINNT=0x0602)
 endif()
 
 #UI IDs
@@ -114,7 +114,7 @@ add_definitions(-DID_VRENDER_FRAME=ID_VPROP_VIEW+71)
 add_definitions(-DID_VRENDER_VIEW1=ID_VRENDER_FRAME+51)
 add_definitions(-DID_VRENDER_VIEW2=ID_VRENDER_VIEW1+11)
 #dialog common IDs
-add_definitions(-DID_LZW_COMP=ID_VRENDER_VIEW2+41)
+add_definitions(-DID_LZW_COMP=ID_VRENDER_VIEW2+51)
 add_definitions(-DID_RESIZE_CHK=ID_LZW_COMP+1)
 add_definitions(-DID_RESIZE_X_TXT=ID_RESIZE_CHK+1)
 add_definitions(-DID_RESIZE_Y_TXT=ID_RESIZE_X_TXT+1)
@@ -427,31 +427,6 @@ if(APPLE)
     $<TARGET_OBJECTS:GLEW_OBJ>
     $<TARGET_OBJECTS:POLE_OBJ>
     $<TARGET_OBJECTS:TEEM_OBJ>)
-  add_executable(SynthBB
-    ${synthbb_src} ${synthbb_hdr}
-    $<TARGET_OBJECTS:FLIVR_OBJ>
-    $<TARGET_OBJECTS:FORMATS_OBJ>
-    $<TARGET_OBJECTS:TRACKING_OBJ>
-    $<TARGET_OBJECTS:COMPONENTS_OBJ>
-    $<TARGET_OBJECTS:CLUSTER_OBJ>
-    $<TARGET_OBJECTS:CALCULATE_OBJ>
-    $<TARGET_OBJECTS:GLEW_OBJ>
-    $<TARGET_OBJECTS:POLE_OBJ>
-    $<TARGET_OBJECTS:TEEM_OBJ>)
-  add_executable(MaskInt
-    ${maskint_src} ${maskint_hdr}
-    $<TARGET_OBJECTS:FLIVR_OBJ>
-    $<TARGET_OBJECTS:FORMATS_OBJ>
-    $<TARGET_OBJECTS:POLE_OBJ>
-    $<TARGET_OBJECTS:TEEM_OBJ>)
-  add_executable(ReadGMM
-    ${readgmm_src} ${readgmm_hdr}
-    $<TARGET_OBJECTS:FLIVR_OBJ>
-    $<TARGET_OBJECTS:FORMATS_OBJ>
-    $<TARGET_OBJECTS:CLUSTER_OBJ>
-    $<TARGET_OBJECTS:TRACKING_OBJ>
-    $<TARGET_OBJECTS:POLE_OBJ>
-    $<TARGET_OBJECTS:TEEM_OBJ>)
 elseif(UNIX OR MINGW)
   # Linux
   #if(NOT OPEN_GL_HEADER_LOC)
@@ -478,31 +453,6 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:CLUSTER_OBJ>
     $<TARGET_OBJECTS:CALCULATE_OBJ>
     $<TARGET_OBJECTS:GLEW_OBJ>
-    $<TARGET_OBJECTS:POLE_OBJ>
-    $<TARGET_OBJECTS:TEEM_OBJ>)
-  add_executable(SynthBB
-    ${synthbb_src} ${synthbb_hdr}
-    $<TARGET_OBJECTS:FLIVR_OBJ>
-    $<TARGET_OBJECTS:FORMATS_OBJ>
-    $<TARGET_OBJECTS:TRACKING_OBJ>
-    $<TARGET_OBJECTS:COMPONENTS_OBJ>
-    $<TARGET_OBJECTS:CLUSTER_OBJ>
-    $<TARGET_OBJECTS:CALCULATE_OBJ>
-    $<TARGET_OBJECTS:GLEW_OBJ>
-    $<TARGET_OBJECTS:POLE_OBJ>
-    $<TARGET_OBJECTS:TEEM_OBJ>)
-  add_executable(MaskInt
-    ${maskint_src} ${maskint_hdr}
-    $<TARGET_OBJECTS:FLIVR_OBJ>
-    $<TARGET_OBJECTS:FORMATS_OBJ>
-    $<TARGET_OBJECTS:POLE_OBJ>
-    $<TARGET_OBJECTS:TEEM_OBJ>)
-  add_executable(ReadGMM
-    ${readgmm_src} ${readgmm_hdr}
-    $<TARGET_OBJECTS:FLIVR_OBJ>
-    $<TARGET_OBJECTS:FORMATS_OBJ>
-    $<TARGET_OBJECTS:CLUSTER_OBJ>
-    $<TARGET_OBJECTS:TRACKING_OBJ>
     $<TARGET_OBJECTS:POLE_OBJ>
     $<TARGET_OBJECTS:TEEM_OBJ>)
 elseif(WIN32)
@@ -542,10 +492,9 @@ elseif(WIN32)
       SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -MD")
       SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -MD")
     endif()
-    include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/WacUtils)
     include_directories(${FluoRender_SOURCE_DIR}/fluorender/Wacom/Include)
-    file(GLOB wac_src fluorender/FluoRender/WacUtils/*.cpp)
-    file(GLOB wac_hdr fluorender/FluoRender/WacUtils/*.h)
+    file(GLOB wac_src fluorender/Wacom/*.cpp)
+    file(GLOB wac_hdr fluorender/Wacom/*.h)
     add_library(WACUTILS_OBJ OBJECT
       ${wac_src} ${wac_hdr})
     add_executable(FluoRender WIN32
@@ -670,6 +619,27 @@ if(UNIX OR APPLE OR MINGW)
 elseif(WIN32)
   target_link_libraries(FluoRender
     secur32.lib
+    ${FFMPEG_LIBRARIES}
+    ${OPENGL_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${OpenCL_LIBRARIES}
+    ${FREETYPE_LIBRARIES}
+    ${wxWidgets_LIBRARIES})
+  target_link_libraries(SynthBB
+    ${FFMPEG_LIBRARIES}
+    ${OPENGL_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${OpenCL_LIBRARIES}
+    ${FREETYPE_LIBRARIES}
+    ${wxWidgets_LIBRARIES})
+  target_link_libraries(MaskInt
+    ${FFMPEG_LIBRARIES}
+    ${OPENGL_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${OpenCL_LIBRARIES}
+    ${FREETYPE_LIBRARIES}
+    ${wxWidgets_LIBRARIES})
+  target_link_libraries(ReadGMM
     ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${Boost_LIBRARIES}

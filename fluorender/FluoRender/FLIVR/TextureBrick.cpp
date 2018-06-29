@@ -34,6 +34,7 @@
 #include <utility>
 #include <iostream>
 #include <fstream>
+#include <wx/filefn.h>
 
 using namespace std;
 
@@ -202,6 +203,9 @@ namespace FLIVR
 		vector<float>& vertex, vector<uint32_t>& index,
 		vector<uint32_t>& size, bool bricks)
 	{
+		if (dt <= 0.0)
+			return;
+
 		Point corner[8];
 		corner[0] = bbox_.min();
 		corner[1] = Point(bbox_.min().x(), bbox_.min().y(), bbox_.max().z());
@@ -248,6 +252,9 @@ namespace FLIVR
 		vector<float>& vertex, vector<uint32_t>& index,
 		vector<uint32_t>& size)
 	{
+		if (dt <= 0.0)
+			return;
+
 		Vector vv[12], tt[12]; // temp storage for vertices and texcoords
 
 		uint32_t degree = 0;

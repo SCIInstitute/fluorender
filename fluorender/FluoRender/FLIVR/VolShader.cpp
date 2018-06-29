@@ -91,7 +91,7 @@ VolShader::VolShader(
 	bool poly, int channels,
 	bool shading, bool fog,
 	int peel, bool clip,
-	bool hiqual, int mask,
+	bool hiqual, int mask, bool mip,
 	int color_mode, int colormap, int colormap_proj,
 	bool solid, int vertex_shader)
 	: poly_(poly),
@@ -102,6 +102,7 @@ VolShader::VolShader(
 	clip_(clip),
 	hiqual_(hiqual),
 	mask_(mask),
+	mip_(mip),
 	color_mode_(color_mode),
 	colormap_(colormap),
 	colormap_proj_(colormap_proj),
@@ -143,15 +144,25 @@ VolShader::VolShader(
 		switch (colormap_)
 		{
 		case 0:
-			return string(VOL_COLORMAP_CALC0);
+			if (colormap_proj_ == 5)
+				return string(VOL_COLORMAP_DIFF_CALC0);
+			else
+				return string(VOL_COLORMAP_CALC0);
 		case 1:
-			return string(VOL_COLORMAP_CALC1);
+			if (colormap_proj_ == 5)
+				return string(VOL_COLORMAP_DIFF_CALC1);
+			else
+				return string(VOL_COLORMAP_CALC1);
 		case 2:
 			return string(VOL_COLORMAP_CALC2);
 		case 3:
 			return string(VOL_COLORMAP_CALC3);
 		case 4:
 			return string(VOL_COLORMAP_CALC4);
+		case 5:
+			return string(VOL_COLORMAP_CALC5);
+		case 6:
+			return string(VOL_COLORMAP_CALC6);
 		}
 		return string(VOL_COLORMAP_CALC0);
 	}
@@ -168,6 +179,10 @@ VolShader::VolShader(
 			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU2);
 		case 3:
 			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU3);
+		case 4:
+			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU4);
+		case 5:
+			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU5);
 		}
 		return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU0);
 	}
@@ -340,86 +355,99 @@ VolShader::VolShader(
 				z << VOL_TEXTURE_GM_LOOKUP;
 			}
 
-			switch (color_mode_)
+			if (mip_ && colormap_proj_)
 			{
-			case 0://normal
-				if (solid_)
-					z << VOL_TRANSFER_FUNCTION_SIN_COLOR_SOLID;
-				else
-					z << VOL_TRANSFER_FUNCTION_SIN_COLOR;
-				break;
-			case 1://colormap
-				if (solid_)
+				z << VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ;
+				z << get_colormap_proj();
+				z << VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT;
+				z << VOL_RASTER_BLEND_SOLID;
+			}
+			else
+			{
+				switch (color_mode_)
 				{
-					z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID;
-					z << get_colormap_proj();
-					z << get_colormap_code();
-					z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
-					z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT;
+				case 0://normal
+					if (solid_)
+						z << VOL_TRANSFER_FUNCTION_SIN_COLOR_SOLID;
+					else
+						z << VOL_TRANSFER_FUNCTION_SIN_COLOR;
+					break;
+				case 1://colormap
+					if (solid_)
+					{
+						z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID;
+						z << get_colormap_proj();
+						z << get_colormap_code();
+						z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
+						z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT;
+					}
+					else
+					{
+						z << VOL_TRANSFER_FUNCTION_COLORMAP;
+						z << get_colormap_proj();
+						z << get_colormap_code();
+						z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
+						z << VOL_TRANSFER_FUNCTION_COLORMAP_RESULT;
+					}
+					break;
+				case 2://depth map
+					z << VOL_TRANSFER_FUNCTION_DEPTHMAP;
+					break;
 				}
-				else
-				{
-					z << VOL_TRANSFER_FUNCTION_COLORMAP;
-					z << get_colormap_proj();
-					z << get_colormap_code();
-					z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
-					z << VOL_TRANSFER_FUNCTION_COLORMAP_RESULT;
-				}
-				break;
-			case 2://depth map
-				z << VOL_TRANSFER_FUNCTION_DEPTHMAP;
-				break;
 			}
 		}
 
-		// fog
-		if (fog_)
+		if (!(mip_ && colormap_proj_))
 		{
-			z << VOL_FOG_BODY;
-		}
+			// fog
+			if (fog_)
+			{
+				z << VOL_FOG_BODY;
+			}
 
-		//final blend
-		switch (mask_)
-		{
-		case 0:
-			if (color_mode_ == 2)
-				z << VOL_RASTER_BLEND_DMAP;
-			else
+			//final blend
+			switch (mask_)
 			{
-				if (solid_)
-					z << VOL_RASTER_BLEND_SOLID;
+			case 0:
+				if (color_mode_ == 2)
+					z << VOL_RASTER_BLEND_DMAP;
 				else
-					z << VOL_RASTER_BLEND;
-			}
-			break;
-		case 1:
-			if (color_mode_ == 2)
-				z << VOL_RASTER_BLEND_MASK_DMAP;
-			else
-			{
-				if (solid_)
-					z << VOL_RASTER_BLEND_MASK_SOLID;
+				{
+					if (solid_)
+						z << VOL_RASTER_BLEND_SOLID;
+					else
+						z << VOL_RASTER_BLEND;
+				}
+				break;
+			case 1:
+				if (color_mode_ == 2)
+					z << VOL_RASTER_BLEND_MASK_DMAP;
 				else
-					z << VOL_RASTER_BLEND_MASK;
-			}
-			break;
-		case 2:
-			if (color_mode_ == 2)
-				z << VOL_RASTER_BLEND_NOMASK_DMAP;
-			else
-			{
-				if (solid_)
-					z << VOL_RASTER_BLEND_NOMASK_SOLID;
+				{
+					if (solid_)
+						z << VOL_RASTER_BLEND_MASK_SOLID;
+					else
+						z << VOL_RASTER_BLEND_MASK;
+				}
+				break;
+			case 2:
+				if (color_mode_ == 2)
+					z << VOL_RASTER_BLEND_NOMASK_DMAP;
 				else
-					z << VOL_RASTER_BLEND_NOMASK;
+				{
+					if (solid_)
+						z << VOL_RASTER_BLEND_NOMASK_SOLID;
+					else
+						z << VOL_RASTER_BLEND_NOMASK;
+				}
+				break;
+			case 3:
+				z << VOL_RASTER_BLEND_LABEL;
+				break;
+			case 4:
+				z << VOL_RASTER_BLEND_LABEL_MASK;
+				break;
 			}
-			break;
-		case 3:
-			z << VOL_RASTER_BLEND_LABEL;
-			break;
-		case 4:
-			z << VOL_RASTER_BLEND_LABEL_MASK;
-			break;
 		}
 
 		//the common tail
@@ -445,7 +473,7 @@ VolShader::VolShader(
 		bool poly, int channels,
 		bool shading, bool fog,
 		int peel, bool clip,
-		bool hiqual, int mask,
+		bool hiqual, int mask, bool mip,
 		int color_mode, int colormap, int colormap_proj,
 		bool solid, int vertex_shader)
 	{
@@ -455,7 +483,7 @@ VolShader::VolShader(
 				poly, channels,
 				shading, fog,
 				peel, clip,
-				hiqual, mask,
+				hiqual, mask, mip,
 				color_mode, colormap, colormap_proj,
 				solid,vertex_shader))
 			{
@@ -468,7 +496,7 @@ VolShader::VolShader(
 				poly, channels,
 				shading, fog,
 				peel, clip,
-				hiqual, mask,
+				hiqual, mask, mip,
 				color_mode, colormap, colormap_proj,
 				solid,vertex_shader))
 			{
@@ -480,7 +508,7 @@ VolShader::VolShader(
 		VolShader* s = new VolShader(poly, channels,
 			shading, fog,
 			peel, clip,
-			hiqual, mask,
+			hiqual, mask, mip,
 			color_mode, colormap, colormap_proj,
 			solid, vertex_shader);
 		if(s->create())

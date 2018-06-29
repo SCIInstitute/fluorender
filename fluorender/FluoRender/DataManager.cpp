@@ -68,6 +68,7 @@ VolumeData::VolumeData()
 
 	m_dup = false;
 	m_dup_counter = 0;
+	m_dup_data = 0;
 
 	type = 2;//volume
 
@@ -175,6 +176,10 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_dup = true;
 	copy.m_dup_counter++;
 	m_dup_counter = copy.m_dup_counter;
+	if (copy.m_dup_data)
+		m_dup_data = copy.m_dup_data;
+	else
+		m_dup_data = &copy;
 
 	//layer properties
 	type = 2;//volume
@@ -327,6 +332,12 @@ bool VolumeData::GetDup()
 void VolumeData::IncDupCounter()
 {
 	m_dup_counter++;
+}
+
+//get from
+VolumeData* VolumeData::GetDupData()
+{
+	return m_dup_data;
 }
 
 //data related
@@ -870,53 +881,98 @@ Nrrd* VolumeData::GetLabel(bool ret)
 	return 0;
 }
 
-double VolumeData::GetOriginalValue(int i, int j, int k)
+double VolumeData::GetOriginalValue(int i, int j, int k, TextureBrick* b)
 {
-	Nrrd* data = m_tex->get_nrrd(0);
-	if (!data) return 0.0;
+	void *data_data = 0;
+	int bits = 8;
+	int64_t nx, ny, nz;
 
-	int bits = data->type;
-	int64_t nx = (int64_t)(data->axis[0].size);
-	int64_t ny = (int64_t)(data->axis[1].size);
-	int64_t nz = (int64_t)(data->axis[2].size);
+	if (isBrxml())
+	{
+		if (!b || !b->isLoaded()) return 0.0;
+		FileLocInfo *finfo = m_tex->GetFileName(b->getID());
+		data_data = b->tex_data_brk(0, finfo);
+		if (!data_data) return 0.0;
+		bits = b->nb(0) * 8;
+		nx = b->nx();
+		ny = b->ny();
+		nz = b->nz();
+	}
+	else
+	{
+		Nrrd* data = 0;
+		data = m_tex->get_nrrd(0);
+		if (!data || !data->data) return 0.0;
+		data_data = data->data;
+		if (data->type == nrrdTypeUChar)
+			bits = 8;
+		else if (data->type == nrrdTypeUShort)
+			bits = 16;
+		nx = (int64_t)(data->axis[0].size);
+		ny = (int64_t)(data->axis[1].size);
+		nz = (int64_t)(data->axis[2].size);
+	}
 
 	if (i<0 || i>=nx || j<0 || j>=ny || k<0 || k>=nz)
 		return 0.0;
 	uint64_t ii = i, jj = j, kk = k;
 
-	if (bits == nrrdTypeUChar)
+	if (bits == 8)
 	{
 		uint64_t index = (nx)*(ny)*(kk) + (nx)*(jj) + (ii);
-		uint8 old_value = ((uint8*)(data->data))[index];
+		uint8 old_value = ((uint8*)(data_data))[index];
 		return double(old_value)/255.0;
 	}
-	else if (bits == nrrdTypeUShort)
+	else if (bits == 16)
 	{
 		uint64_t index = (nx)*(ny)*(kk) + (nx)*(jj) + (ii);
-		uint16 old_value = ((uint16*)(data->data))[index];
+		uint16 old_value = ((uint16*)(data_data))[index];
 		return double(old_value)*m_scalar_scale/65535.0;
 	}
 
 	return 0.0;
 }
 
-double VolumeData::GetTransferedValue(int i, int j, int k)
+double VolumeData::GetTransferedValue(int i, int j, int k, TextureBrick* b)
 {
-	Nrrd* data = m_tex->get_nrrd(0);
-	if (!data) return 0.0;
+	void *data_data = 0;
+	int bits = 8;
+	int64_t nx, ny, nz;
 
-	int bits = data->type;
-	int64_t nx = (int64_t)(data->axis[0].size);
-	int64_t ny = (int64_t)(data->axis[1].size);
-	int64_t nz = (int64_t)(data->axis[2].size);
+	if (isBrxml())
+	{
+		if (!b || !b->isLoaded()) return 0.0;
+		FileLocInfo *finfo = m_tex->GetFileName(b->getID());
+		data_data = b->tex_data_brk(0, finfo);
+		if (!data_data) return 0.0;
+		bits = b->nb(0) * 8;
+		nx = b->nx();
+		ny = b->ny();
+		nz = b->nz();
+	}
+	else
+	{
+		Nrrd* data = 0;
+		data = m_tex->get_nrrd(0);
+		if (!data || !data->data) return 0.0;
+		data_data = data->data;
+		if (data->type == nrrdTypeUChar)
+			bits = 8;
+		else if (data->type == nrrdTypeUShort)
+			bits = 16;
+		nx = (int64_t)(data->axis[0].size);
+		ny = (int64_t)(data->axis[1].size);
+		nz = (int64_t)(data->axis[2].size);
+	}
+
 	if (i<0 || i>=nx || j<0 || j>=ny || k<0 || k>=nz)
 		return 0.0;
 	int64_t ii = i, jj = j, kk = k;
 
-	if (bits == nrrdTypeUChar)
+	if (bits == 8)
 	{
 		uint64_t index = nx*ny*kk + nx*jj + ii;
-		uint8 old_value = ((uint8*)(data->data))[index];
+		uint8 old_value = ((uint8*)(data_data))[index];
 		double gm = 0.0;
 		double new_value = double(old_value)/255.0;
 		if (m_vr->get_inversion())
@@ -925,12 +981,12 @@ double VolumeData::GetTransferedValue(int i, int j, int k)
 			j>0 && j<ny-1 &&
 			k>0 && k<nz-1)
 		{
-			double v1 = ((uint8*)(data->data))[nx*ny*kk + nx*jj + ii-1];
-			double v2 = ((uint8*)(data->data))[nx*ny*kk + nx*jj + ii+1];
-			double v3 = ((uint8*)(data->data))[nx*ny*kk + nx*(jj-1) + ii];
-			double v4 = ((uint8*)(data->data))[nx*ny*kk + nx*(jj+1) + ii];
-			double v5 = ((uint8*)(data->data))[nx*ny*(kk-1) + nx*jj + ii];
-			double v6 = ((uint8*)(data->data))[nx*ny*(kk+1) + nx*jj + ii];
+			double v1 = ((uint8*)(data_data))[nx*ny*kk + nx*jj + ii-1];
+			double v2 = ((uint8*)(data_data))[nx*ny*kk + nx*jj + ii+1];
+			double v3 = ((uint8*)(data_data))[nx*ny*kk + nx*(jj-1) + ii];
+			double v4 = ((uint8*)(data_data))[nx*ny*kk + nx*(jj+1) + ii];
+			double v5 = ((uint8*)(data_data))[nx*ny*(kk-1) + nx*jj + ii];
+			double v6 = ((uint8*)(data_data))[nx*ny*(kk+1) + nx*jj + ii];
 			double normal_x, normal_y, normal_z;
 			normal_x = (v2 - v1) / 255.0;
 			normal_y = (v4 - v3) / 255.0;
@@ -938,8 +994,7 @@ double VolumeData::GetTransferedValue(int i, int j, int k)
 			gm = sqrt(normal_x*normal_x + normal_y*normal_y + normal_z*normal_z)*0.53;
 		}
 		if (new_value<m_lo_thresh-m_sw ||
-			new_value>m_hi_thresh+m_sw ||
-			gm<m_gm_thresh)
+			new_value>m_hi_thresh+m_sw)
 			new_value = 0.0;
 		else
 		{
@@ -949,6 +1004,9 @@ double VolumeData::GetTransferedValue(int i, int j, int k)
 			(new_value>m_hi_thresh?
 				(m_sw-new_value+m_hi_thresh)/m_sw:1.0))
 				*new_value;
+			new_value *= (m_gm_thresh > 0.0 ?
+				Clamp(gm / m_gm_thresh, 0.0,
+					1.0 + m_gm_thresh*10.0) : 1.0);
 			new_value = pow(Clamp(new_value/m_offset,
 				gamma<1.0?-(gamma-1.0)*0.00001:0.0,
 				gamma>1.0?0.9999:1.0), gamma);
@@ -956,10 +1014,10 @@ double VolumeData::GetTransferedValue(int i, int j, int k)
 		}
 		return new_value;
 	}
-	else if (bits == nrrdTypeUShort)
+	else if (bits == 16)
 	{
 		uint64_t index = nx*ny*kk + nx*jj + ii;
-		uint16 old_value = ((uint16*)(data->data))[index];
+		uint16 old_value = ((uint16*)(data_data))[index];
 		double gm = 0.0;
 		double new_value = double(old_value)*m_scalar_scale/65535.0;
 		if (m_vr->get_inversion())
@@ -968,12 +1026,12 @@ double VolumeData::GetTransferedValue(int i, int j, int k)
 			jj>0 && jj<ny-1 &&
 			kk>0 && kk<nz-1)
 		{
-			double v1 = ((uint8*)(data->data))[nx*ny*kk + nx*jj + ii-1];
-			double v2 = ((uint8*)(data->data))[nx*ny*kk + nx*jj + ii+1];
-			double v3 = ((uint8*)(data->data))[nx*ny*kk + nx*(jj-1) + ii];
-			double v4 = ((uint8*)(data->data))[nx*ny*kk + nx*(jj+1) + ii];
-			double v5 = ((uint8*)(data->data))[nx*ny*(kk-1) + nx*jj + ii];
-			double v6 = ((uint8*)(data->data))[nx*ny*(kk+1) + nx*jj + ii];
+			double v1 = ((uint8*)(data_data))[nx*ny*kk + nx*jj + ii-1];
+			double v2 = ((uint8*)(data_data))[nx*ny*kk + nx*jj + ii+1];
+			double v3 = ((uint8*)(data_data))[nx*ny*kk + nx*(jj-1) + ii];
+			double v4 = ((uint8*)(data_data))[nx*ny*kk + nx*(jj+1) + ii];
+			double v5 = ((uint8*)(data_data))[nx*ny*(kk-1) + nx*jj + ii];
+			double v6 = ((uint8*)(data_data))[nx*ny*(kk+1) + nx*jj + ii];
 			double normal_x, normal_y, normal_z;
 			normal_x = (v2 - v1)*m_scalar_scale/65535.0;
 			normal_y = (v4 - v3)*m_scalar_scale/65535.0;
@@ -981,8 +1039,7 @@ double VolumeData::GetTransferedValue(int i, int j, int k)
 			gm = sqrt(normal_x*normal_x + normal_y*normal_y + normal_z*normal_z)*0.53;
 		}
 		if (new_value<m_lo_thresh-m_sw ||
-			new_value>m_hi_thresh+m_sw ||
-			gm<m_gm_thresh)
+			new_value>m_hi_thresh+m_sw)
 			new_value = 0.0;
 		else
 		{
@@ -992,6 +1049,9 @@ double VolumeData::GetTransferedValue(int i, int j, int k)
 			(new_value>m_hi_thresh?
 				(m_sw-new_value+m_hi_thresh)/m_sw:1.0))
 				*new_value;
+			new_value *= (m_gm_thresh > 0.0 ?
+				Clamp(gm / m_gm_thresh, 0.0,
+					1.0 + m_gm_thresh*10.0) : 1.0);
 			new_value = pow(Clamp(new_value/m_offset,
 				gamma<1.0?-(gamma-1.0)*0.00001:0.0,
 				gamma>1.0?0.9999:1.0), gamma);
@@ -1293,6 +1353,32 @@ void VolumeData::SaveLabel(bool use_reader, int t, int c)
 BBox VolumeData::GetBounds()
 {
 	return m_bounds;
+}
+
+BBox VolumeData::GetClippedBounds()
+{
+	vector<Plane*> *planes = m_vr->get_planes();
+	if (planes->size() != 6)
+		return m_bounds;
+
+	//calculating planes
+	//get six planes
+	Plane* px1 = (*planes)[0];
+	Plane* px2 = (*planes)[1];
+	Plane* py1 = (*planes)[2];
+	Plane* py2 = (*planes)[3];
+	Plane* pz1 = (*planes)[4];
+	Plane* pz2 = (*planes)[5];
+
+	Vector diff = m_bounds.max() - m_bounds.min();
+	Point min = Point(m_bounds.min().x() - diff.x()*px1->d(),
+		m_bounds.min().y() - diff.y()*py1->d(),
+		m_bounds.min().z() - diff.z()*pz1->d());
+	Point max = Point(m_bounds.min().x() + diff.x()*px2->d(),
+		m_bounds.min().y() + diff.y()*py2->d(),
+		m_bounds.min().z() + diff.z()*pz2->d());
+
+	return BBox(min, max);
 }
 
 //path
@@ -1917,16 +2003,35 @@ Color VolumeData::GetColorFromColormap(double value)
 		color.g(Clamp(v<0.5 ? v*0.8 + 0.3 : (1.0 - v)*1.4, 0.0, 1.0));
 		color.b(Clamp(v<0.5 ? v*(-0.1) + 0.75 : (1.0 - v)*1.1 + 0.15, 0.0, 1.0));
 		break;
+	case 5:
+		color.r(Clamp(v, 0.0, 1.0));
+		color.g(Clamp(v, 0.0, 1.0));
+		color.b(Clamp(v, 0.0, 1.0));
+		break;
+	case 6:
+		color.r(1.0 - Clamp(v, 0.0, 1.0));
+		color.g(1.0 - Clamp(v, 0.0, 1.0));
+		color.b(1.0 - Clamp(v, 0.0, 1.0));
+		break;
 	}
 	return color;
 }
 
 //resolution  scaling and spacing
-void VolumeData::GetResolution(int &res_x, int &res_y, int &res_z)
+void VolumeData::GetResolution(int &res_x, int &res_y, int &res_z, int lv)
 {
-	res_x = m_res_x;
-	res_y = m_res_y;
-	res_z = m_res_z;
+	if (lv >= 0 && isBrxml() && m_tex)
+	{
+		res_x = m_tex->nx();
+		res_y = m_tex->ny();
+		res_z = m_tex->nz();
+	}
+	else
+	{
+		res_x = m_res_x;
+		res_y = m_res_y;
+		res_z = m_res_z;
+	}
 }
 
 void VolumeData::SetScalings(double sclx, double scly, double sclz)
@@ -1949,10 +2054,10 @@ void VolumeData::SetSpacings(double spcx, double spcy, double spcz)
 	}
 }
 
-void VolumeData::GetSpacings(double &spcx, double &spcy, double & spcz)
+void VolumeData::GetSpacings(double &spcx, double &spcy, double & spcz, int lv)
 {
 	if (GetTexture())
-		GetTexture()->get_spacings(spcx, spcy, spcz);
+		GetTexture()->get_spacings(spcx, spcy, spcz, lv);
 }
 
 void VolumeData::GetFileSpacings(double &spcx, double &spcy, double &spcz)
@@ -3164,6 +3269,9 @@ Ruler::Ruler()
 	//time-dependent
 	m_time_dep = false;
 	m_time = 0;
+
+	//brush size
+	m_brush_size = 0.0;
 }
 
 Ruler::~Ruler()
@@ -4257,6 +4365,7 @@ m_vol_exb(0.0),
 	m_vol_lum(1.0),
 	m_vol_cmm(0),
 	m_vol_cmp(0),
+	m_vol_cmj(0),
 	m_vol_lcm(0.0),
 	m_vol_hcm(1.0),
 	m_vol_eap(true),
@@ -4272,8 +4381,8 @@ m_vol_exb(0.0),
 	m_override_vox(true)
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-    expath = wxPathOnly(expath);
-    wxString dft = expath + "/default_volume_settings.dft";
+	expath = wxPathOnly(expath);
+	wxString dft = expath + "/default_volume_settings.dft";
 	wxFileInputStream is(dft);
 	if (!is.IsOk())
 		return;
@@ -4313,6 +4422,9 @@ m_vol_exb(0.0),
 		m_vol_cmm = ival;
 	if (fconfig.Read("colormap", &ival))
 		m_vol_cmp = ival;
+	if (fconfig.Read("colormap_proj", &ival))
+		m_vol_cmj = ival;
+
 	if (fconfig.Read("colormap_low", &val))
 		m_vol_lcm = val;
 	if (fconfig.Read("colormap_hi", &val))
@@ -4408,9 +4520,10 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 		vd->GetMaterial(amb, diff, spec, shine);
 		vd->SetMaterial(m_vol_lsh, diff, spec, m_vol_hsh);
 		if (!vd->GetSpcFromFile())
-			vd->SetSpacings(m_vol_xsp, m_vol_ysp, m_vol_zsp);
+			vd->SetBaseSpacings(m_vol_xsp, m_vol_ysp, m_vol_zsp);
 		vd->SetColormapMode(m_vol_cmm);
 		vd->SetColormap(m_vol_cmp);
+		vd->SetColormapProj(m_vol_cmj);
 		vd->SetColormapValues(m_vol_lcm, m_vol_hcm);
 
 		vd->SetEnableAlpha(m_vol_eap);
@@ -4451,15 +4564,17 @@ wxString DataManager::SearchProjectPath(wxString &filename)
 	if (m_prj_path == "")
 		return "";
 	wxString search_str;
-	for (i=pathname.Length()-1; i>=0; i--)
+	for (i = pathname.Length() - 1; i >= 0; i--)
 	{
-		search_str.Prepend(pathname[i]);
-		if (pathname[i]=='\\' || pathname[i]=='/')
+		if (pathname[i] == '\\' || pathname[i] == '/')
 		{
+			search_str.Prepend(GETSLASH());
 			wxString name_temp = m_prj_path + search_str;
 			if (wxFileExists(name_temp))
 				return name_temp;
 		}
+		else
+			search_str.Prepend(pathname[i]);
 	}
 	return "";
 }
@@ -4644,8 +4759,8 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 			continue;
 		}
 
-		AddVolumeData(vd);
 		SetVolumeDefault(vd);
+		AddVolumeData(vd);
 
 		//get excitation wavelength
 		double wavelength = reader->GetExcitationWavelength(i);
@@ -4797,11 +4912,31 @@ int DataManager::GetMeshIndex(wxString &name)
 void DataManager::RemoveVolumeData(int index)
 {
 	VolumeData* data = m_vd_list[index];
-	if (data)
+	if (!data)
+		return;
+	
+	for (auto iter = m_vd_list.begin();
+		iter != m_vd_list.end();)
 	{
-		m_vd_list.erase(m_vd_list.begin()+index);
-		delete data;
-		data = 0;
+		VolumeData* vd = *iter;
+		bool del = false;
+		if (vd)
+		{
+			if (vd == data)
+				del = true;
+			if (vd->GetDup())
+			{
+				if (vd->GetDupData() == data)
+					del = true;
+			}
+		}
+		if (del)
+		{
+			iter = m_vd_list.erase(iter);
+			delete vd;
+		}
+		else
+			++iter;
 	}	
 }
 
@@ -4858,8 +4993,9 @@ void DataManager::AddVolumeData(VolumeData* vd)
 		{
 			double spcx, spcy, spcz;
 			m_vd_list[0]->GetBaseSpacings(spcx, spcy, spcz);
+			vd->SetSpacings(spcx, spcy, spcz);
 			vd->SetBaseSpacings(spcx, spcy, spcz);
-			vd->SetSpcFromFile(true);
+			//vd->SetSpcFromFile(true);
 		}
 	}
 	m_vd_list.push_back(vd);

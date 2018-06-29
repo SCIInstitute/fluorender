@@ -326,58 +326,6 @@ const char* str_cl_brainbow_3d = \
 "		label[index] = label[max_nb_index];\n" \
 "}\n";
 
-const char* str_cl_fill_borders_3d = \
-"const sampler_t samp =\n" \
-"	CLK_NORMALIZED_COORDS_FALSE|\n" \
-"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
-"	CLK_FILTER_NEAREST;\n" \
-"\n" \
-"__kernel void kernel_0(\n" \
-"	__read_only image3d_t data,\n" \
-"	__global unsigned int* label,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nz,\n" \
-"	float tol)\n" \
-"{\n" \
-"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
-"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
-"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
-"	if (i == 0)\n" \
-"	{\n" \
-"		float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
-"		float nb_value = read_imagef(data, samp, (int4)(i+1, j, k, 1)).x;\n" \
-"		if (fabs(value - nb_value) < tol)\n" \
-"		{\n" \
-"			unsigned int index = nx*ny*k + nx*j + i;\n" \
-"			unsigned int nb_index = index + 1;\n" \
-"			label[index] = label[nb_index];\n" \
-"		}\n" \
-"	}\n" \
-"	if (j == 0)\n" \
-"	{\n" \
-"		float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
-"		float nb_value = read_imagef(data, samp, (int4)(i, j+1, k, 1)).x;\n" \
-"		if (fabs(value - nb_value) < tol)\n" \
-"		{\n" \
-"			unsigned int index = nx*ny*k + nx*j + i;\n" \
-"			unsigned int nb_index = index + nx;\n" \
-"			label[index] = label[nb_index];\n" \
-"		}\n" \
-"	}\n" \
-"	if (k == 0)\n" \
-"	{\n" \
-"		float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
-"		float nb_value = read_imagef(data, samp, (int4)(i, j, k+1, 1)).x;\n" \
-"		if (fabs(value - nb_value) < tol)\n" \
-"		{\n" \
-"			unsigned int index = nx*ny*k + nx*j + i;\n" \
-"			unsigned int nb_index = index + nx*ny;\n" \
-"			label[index] = label[nb_index];\n" \
-"		}\n" \
-"	}\n" \
-"}\n";
-
 const char* str_cl_brainbow_3d_sized = \
 "const sampler_t samp =\n" \
 "	CLK_NORMALIZED_COORDS_FALSE|\n" \
@@ -615,6 +563,118 @@ const char* str_cl_clear_borders_3d = \
 "		j == 0 || j == ny-1 ||\n" \
 "		k == 0 || k == nz-1)\n" \
 "		label[index] = 0;\n" \
+"}\n";
+
+const char* str_cl_clear_borders_2d = \
+"const sampler_t samp =\n" \
+"	CLK_NORMALIZED_COORDS_FALSE|\n" \
+"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
+"	CLK_FILTER_NEAREST;\n" \
+"\n" \
+"\n" \
+"__kernel void kernel_0(\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny)\n" \
+"{\n" \
+"	unsigned int x, y;\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int index = nx*j + i;\n" \
+"	if (i == 0 || i == nx-1 ||\n" \
+"		j == 0 || j == ny-1)\n" \
+"		label[index] = 0;\n" \
+"}\n";
+
+const char* str_cl_fill_borders_3d = \
+"const sampler_t samp =\n" \
+"	CLK_NORMALIZED_COORDS_FALSE|\n" \
+"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
+"	CLK_FILTER_NEAREST;\n" \
+"\n" \
+"__kernel void kernel_0(\n" \
+"	__read_only image3d_t data,\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	float tol)\n" \
+"{\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
+"	if (i == 0)\n" \
+"	{\n" \
+"		float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
+"		float nb_value = read_imagef(data, samp, (int4)(i+1, j, k, 1)).x;\n" \
+"		if (fabs(value - nb_value) < tol)\n" \
+"		{\n" \
+"			unsigned int index = nx*ny*k + nx*j + i;\n" \
+"			unsigned int nb_index = index + 1;\n" \
+"			label[index] = label[nb_index];\n" \
+"		}\n" \
+"	}\n" \
+"	if (j == 0)\n" \
+"	{\n" \
+"		float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
+"		float nb_value = read_imagef(data, samp, (int4)(i, j+1, k, 1)).x;\n" \
+"		if (fabs(value - nb_value) < tol)\n" \
+"		{\n" \
+"			unsigned int index = nx*ny*k + nx*j + i;\n" \
+"			unsigned int nb_index = index + nx;\n" \
+"			label[index] = label[nb_index];\n" \
+"		}\n" \
+"	}\n" \
+"	if (k == 0)\n" \
+"	{\n" \
+"		float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
+"		float nb_value = read_imagef(data, samp, (int4)(i, j, k+1, 1)).x;\n" \
+"		if (fabs(value - nb_value) < tol)\n" \
+"		{\n" \
+"			unsigned int index = nx*ny*k + nx*j + i;\n" \
+"			unsigned int nb_index = index + nx*ny;\n" \
+"			label[index] = label[nb_index];\n" \
+"		}\n" \
+"	}\n" \
+"}\n";
+
+const char* str_cl_fill_borders_2d = \
+"const sampler_t samp =\n" \
+"	CLK_NORMALIZED_COORDS_FALSE|\n" \
+"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
+"	CLK_FILTER_NEAREST;\n" \
+"\n" \
+"__kernel void kernel_0(\n" \
+"	__read_only image2d_t data,\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	float tol)\n" \
+"{\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	if (i == 0)\n" \
+"	{\n" \
+"		float value = read_imagef(data, samp, (int2)(i, j)).x;\n" \
+"		float nb_value = read_imagef(data, samp, (int2)(i+1, j)).x;\n" \
+"		if (fabs(value - nb_value) < tol)\n" \
+"		{\n" \
+"			unsigned int index = nx*j + i;\n" \
+"			unsigned int nb_index = index + 1;\n" \
+"			label[index] = label[nb_index];\n" \
+"		}\n" \
+"	}\n" \
+"	if (j == 0)\n" \
+"	{\n" \
+"		float value = read_imagef(data, samp, (int2)(i, j)).x;\n" \
+"		float nb_value = read_imagef(data, samp, (int2)(i, j+1)).x;\n" \
+"		if (fabs(value - nb_value) < tol)\n" \
+"		{\n" \
+"			unsigned int index = nx*j + i;\n" \
+"			unsigned int nb_index = index + nx;\n" \
+"			label[index] = label[nb_index];\n" \
+"		}\n" \
+"	}\n" \
 "}\n";
 
 const char* str_cl_shuffle_id_3d = \

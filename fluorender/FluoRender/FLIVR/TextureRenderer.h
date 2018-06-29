@@ -47,50 +47,52 @@ namespace FLIVR
 	class BrickQueue
 	{
 	public:
-		BrickQueue(int limit):
-		  m_queue(0),
-			  m_limit(limit),
-			  m_pos(0)
-		  {
-			  if (m_limit >=0)
-			  {
-				  m_queue = new int[m_limit];
-				  memset(m_queue, 0, m_limit*sizeof(int));
-			  }
-		  }
-		  ~BrickQueue()
-		  {
-			  if (m_queue)
-				  delete []m_queue;
-		  }
+		BrickQueue(int limit) :
+			m_queue(0),
+			m_limit(limit),
+			m_pos(0)
+		{
+			if (m_limit >= 0)
+			{
+				m_queue = new int[m_limit];
+				memset(m_queue, 0, m_limit * sizeof(int));
+			}
+		}
+		~BrickQueue()
+		{
+			if (m_queue)
+				delete[]m_queue;
+		}
 
-		  int GetLimit()
-		  {return m_limit;}
-		  int Push(int value)
-		  {
-			  if (m_queue)
-			  {
-				  m_queue[m_pos] = value;
-				  if (m_pos < m_limit-1)
-					  m_pos++;
-				  else
-					  m_pos = 0;
-				  return 1;
-			  }
-			  else
-				  return 0;
-		  }
-		  int Get(int index)
-		  {
-			  if (index>=0 && index<m_limit)
-				  return m_queue[m_pos+index<m_limit?m_pos+index:m_pos+index-m_limit];
-			  else
-				  return 0;
-		  }
-		  int GetLast()
-		  {
-			  return m_queue[m_pos==0?m_limit-1:m_pos-1];
-		  }
+		int GetLimit()
+		{
+			return m_limit;
+		}
+		int Push(int value)
+		{
+			if (m_queue)
+			{
+				m_queue[m_pos] = value;
+				if (m_pos < m_limit - 1)
+					m_pos++;
+				else
+					m_pos = 0;
+				return 1;
+			}
+			else
+				return 0;
+		}
+		int Get(int index)
+		{
+			if (index >= 0 && index < m_limit)
+				return m_queue[m_pos + index < m_limit ? m_pos + index : m_pos + index - m_limit];
+			else
+				return 0;
+		}
+		int GetLast()
+		{
+			return m_queue[m_pos == 0 ? m_limit - 1 : m_pos - 1];
+		}
 
 	private:
 		int *m_queue;
@@ -103,6 +105,8 @@ namespace FLIVR
 	class SegShaderFactory;
 	class VolCalShaderFactory;
 	class VolKernelFactory;
+	class FramebufferManager;
+	class ImgShaderFactory;
 
 	struct TexParam
 	{
@@ -164,9 +168,6 @@ namespace FLIVR
 		void clear_tex_current();
 		void clear_tex_mask();
 
-		//resize the fbo texture
-		void resize();
-
 		//set the 2d texture mask for segmentation
 		void set_2d_mask(GLuint id);
 		//set 2d weight map for segmentation
@@ -192,6 +193,9 @@ namespace FLIVR
 		//available memory
 		static void set_available_mem(double val) {available_mem_ = val;}
 		static double get_available_mem() {return available_mem_;}
+		//main(cpu) memory limit
+		static void set_mainmem_buf_size(double val) { mainmem_buf_size_ = val; }
+		static double get_mainmem_buf_size() { return mainmem_buf_size_; }
 		//large data size
 		static void set_large_data_size(double val) {large_data_size_ = val;}
 		static double get_large_data_size() {return large_data_size_;}
@@ -212,6 +216,7 @@ namespace FLIVR
 		static int get_cur_chan_brick_num() {return cur_chan_brick_num_;}
 		static void set_total_brick_num(int num) {total_brick_num_ = num; cur_brick_num_ = 0;}
 		static int get_total_brick_num() {return total_brick_num_;}
+		static void set_clear_chan_buffer() { clear_chan_buffer_ = true; }
 		static void reset_clear_chan_buffer() {clear_chan_buffer_ = false;}
 		static bool get_clear_chan_buffer() {return clear_chan_buffer_;}
 		static void reset_save_final_buffer() {save_final_buffer_ = false;}
@@ -232,8 +237,8 @@ namespace FLIVR
 		//number of bricks rendered before time is up
 		static void reset_finished_bricks();
 		static int get_finished_bricks() {return finished_bricks_;}
-		static int get_finished_bricks_max();
-		static int get_est_bricks(int mode);
+		static void push_quota_brick(int bricks);
+		static int get_est_bricks(int mode, int init=0);
 		static int get_queue_last() {return brick_queue_.GetLast();}
 		//quota bricks in interactive mode
 		static void set_quota_bricks(int quota) {quota_bricks_ = quota;}
@@ -243,6 +248,7 @@ namespace FLIVR
 		int get_quota_bricks_chan() {return quota_bricks_chan_;}
 		//quota center
 		static void set_qutoa_center(Point &point) {quota_center_ = point;}
+		static Point& get_quota_center() { return quota_center_; }
 		//update order
 		static void set_update_order(int val) {update_order_ = val;}
 		static int get_update_order() {return update_order_;}
@@ -270,28 +276,20 @@ namespace FLIVR
 		double irate_;
 		bool imode_;
 
-		//saved framebuffer
-		GLuint cur_framebuffer_;
-		//blend frame buffer for output
-		bool blend_framebuffer_resize_;
-		GLuint blend_framebuffer_;
-		GLuint blend_tex_id_;
-		//2nd buffer for multiple filtering
-		bool filter_buffer_resize_;
-		GLuint filter_buffer_;
-		GLuint filter_tex_id_;
-
 		//sahder for volume rendering
 		static VolShaderFactory vol_shader_factory_;
 		//shader for segmentation
 		static SegShaderFactory seg_shader_factory_;
 		//shader for calculation
 		static VolCalShaderFactory cal_shader_factory_;
+		//framebuffers for everything
+		static FramebufferManager framebuffer_manager_;
+		//smooth filter
+		static ImgShaderFactory m_img_shader_factory;
 
-		//3d frame buffer object for mask
-		GLuint fbo_mask_;
-		//3d frame buffer object for label
-		GLuint fbo_label_;
+		//saved framebuffer
+		GLuint cur_framebuffer_;
+
 		//2d mask texture
 		GLuint tex_2d_mask_;
 		//2d weight map
@@ -308,6 +306,7 @@ namespace FLIVR
 #endif
 		//memory management
 		static bool mem_swap_;
+		static int active_view_;
 		static bool use_mem_limit_;
 		static double mem_limit_;
 		static double available_mem_;

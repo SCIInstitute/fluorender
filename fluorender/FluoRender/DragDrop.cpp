@@ -69,7 +69,8 @@ bool DnDFile::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString &filenames)
 					 suffix == ".oib" ||
 					 suffix == ".oif" ||
 					 suffix == ".lsm" ||
-					 suffix == ".xml")
+					 suffix == ".xml" ||
+					 suffix == ".vvd")
 			{
 				vr_frame->LoadVolumes(filenames, (VRenderView*)m_view);
 			}

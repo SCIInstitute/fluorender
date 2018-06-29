@@ -126,6 +126,7 @@ class VRenderFrame: public wxFrame
 		//view
 		ID_FullScreen,
 		ID_ViewNew,
+		ID_Layout,
 		ID_ShowHideUI,
 		//tools
 		ID_LastTool,
@@ -343,6 +344,9 @@ public:
 	bool GetBenchmark()
 	{ return m_benchmark; }
 
+	void ClearVrvList()
+	{ m_vrv_list.clear(); }
+
 public: //public so export window can see it and set it. 
 	RecorderDlg* m_recorder_dlg;
 	VMovieView* m_movie_view;
@@ -447,6 +451,7 @@ private:
 	void OnClose(wxCloseEvent &event);
 	void OnExit(wxCommandEvent& WXUNUSED(event));
 	void OnNewView(wxCommandEvent& WXUNUSED(event));
+	void OnLayout(wxCommandEvent& WXUNUSED(event));
 	void OnFullScreen(wxCommandEvent& WXUNUSED(event));
 	void OnOpenVolume(wxCommandEvent& WXUNUSED(event));
 	void OnImportVolume(wxCommandEvent& WXUNUSED(event));

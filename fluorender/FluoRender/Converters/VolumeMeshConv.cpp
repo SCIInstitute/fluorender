@@ -320,17 +320,18 @@ double VolumeMeshConv::GetValue(int x, int y, int z)
 				gm = sqrt(normal_x*normal_x + normal_y*normal_y + normal_z*normal_z)*0.53;
 			}
 			if (value<m_lo_thresh-m_sw ||
-				value>m_hi_thresh+m_sw ||
-				gm<m_gm_thresh)
+				value>m_hi_thresh+m_sw)
 				value = 0.0;
 			else
 			{
 				double gamma = 1.0 / m_gamma;
-				value = (value<m_lo_thresh?
-					(m_sw-m_lo_thresh+value)/m_sw:
-					(value>m_hi_thresh?
-					(m_sw-value+m_hi_thresh)/m_sw:1.0))
-					*value;
+				value *= (value < m_lo_thresh ?
+					(m_sw - m_lo_thresh + value) / m_sw :
+					(value > m_hi_thresh ?
+					(m_sw - value + m_hi_thresh) / m_sw : 1.0));
+				value *= (m_gm_thresh > 0.0 ?
+					Clamp(gm / m_gm_thresh, 0.0,
+					1.0 + m_gm_thresh*10.0) : 1.0);
 				value = pow(Clamp(value/m_offset,
 					gamma<1.0?-(gamma-1.0)*0.00001:0.0,
 					gamma>1.0?0.9999:1.0), gamma);
@@ -361,17 +362,18 @@ double VolumeMeshConv::GetValue(int x, int y, int z)
 				gm = sqrt(normal_x*normal_x + normal_y*normal_y + normal_z*normal_z)*0.53;
 			}
 			if (value<m_lo_thresh-m_sw ||
-				value>m_hi_thresh+m_sw ||
-				gm<m_gm_thresh)
+				value>m_hi_thresh+m_sw)
 				value = 0.0;
 			else
 			{
 				double gamma = 1.0 / m_gamma;
-				value = (value<m_lo_thresh?
-					(m_sw-m_lo_thresh+value)/m_sw:
-					(value>m_hi_thresh?
-					(m_sw-value+m_hi_thresh)/m_sw:1.0))
-					*value;
+				value *= (value < m_lo_thresh ?
+					(m_sw - m_lo_thresh + value) / m_sw :
+					(value > m_hi_thresh ?
+					(m_sw - value + m_hi_thresh) / m_sw : 1.0));
+				value *= (m_gm_thresh > 0.0 ?
+					Clamp(gm / m_gm_thresh, 0.0,
+						1.0 + m_gm_thresh*10.0) : 1.0);
 				value = pow(Clamp(value/m_offset,
 					gamma<1.0?-(gamma-1.0)*0.00001:0.0,
 					gamma>1.0?0.9999:1.0), gamma);

@@ -113,6 +113,8 @@ namespace FLIVR {
 		virtual ~TextureBrick();
 
 		inline BBox &bbox() { return bbox_; }
+		inline BBox &tbox() { return tbox_; }
+		inline BBox &dbox() { return dbox_; }
 
 		inline int nx() { return nx_; }
 		inline int ny() { return ny_; }
@@ -308,6 +310,19 @@ namespace FLIVR {
 		int filetype;
 		Nrrd* data;
 		std::vector<TextureBrick *> bricks;
+		//some information
+		//total size
+		int szx;
+		int szy;
+		int szz;
+		//typical brick size
+		int bszx;
+		int bszy;
+		int bszz;
+		//brick num along axes
+		int bnx;
+		int bny;
+		int bnz;
 	};
 } // namespace FLIVR
 

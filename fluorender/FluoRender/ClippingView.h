@@ -41,7 +41,8 @@ enum PLANE_MODES
 	kFrame,
 	kLowTrans,
 	kLowTransBack,
-	kNormalBack
+	kNormalBack,
+	kNone
 };
 
 class ClippingView: public wxPanel
@@ -112,8 +113,11 @@ public:
 	void SetChannLink(bool chann);
 	bool GetHoldPlanes()
 	{ return m_hold_planes; }
+	void SetHoldPlanes(bool hold);
 	PLANE_MODES GetPlaneMode()
 	{ return m_plane_mode; }
+	void SetPlaneMode(PLANE_MODES mode);
+
 	bool GetXLink()
 	{
 		return m_check_tb->GetToolState(ID_LinkXChk);

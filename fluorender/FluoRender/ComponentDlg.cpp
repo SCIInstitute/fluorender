@@ -588,7 +588,7 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer11->Add(m_analysis_max_spin, 0, wxALIGN_CENTER);
 	//buttons
 	wxBoxSizer* sizer12 = new wxBoxSizer(wxHORIZONTAL);
-	m_comp_append_btn = new wxButton(page, ID_CompAppendBtn, "Append",
+	m_comp_append_btn = new wxButton(page, ID_CompAppendBtn, "Select",
 		wxDefaultPosition, wxSize(65, 23));
 	m_comp_all_btn = new wxButton(page, ID_CompAllBtn, "All",
 		wxDefaultPosition, wxSize(65, 23));
@@ -1245,6 +1245,7 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	m_stat_text = new wxTextCtrl(this, ID_StatText, "",
 		wxDefaultPosition, wxSize(-1, 150), wxTE_MULTILINE);
 	m_stat_text->SetEditable(false);
+	m_stat_text->Connect(wxID_ANY, wxEVT_KEY_DOWN, wxKeyEventHandler(ComponentDlg::OnKey), 0L, this);
 	sizer2->Add(m_stat_text, 1, wxEXPAND);
 
 	//all controls
@@ -2968,7 +2969,7 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 	num = (unsigned int)(m_analysis_max_spin->GetValue());
 	comp_selector.SetMaxNum(use, num);
 	comp_selector.SetAnalyzer(&m_comp_analyzer);
-	comp_selector.Append(get_all);
+	comp_selector.Select(get_all);
 
 	m_view->RefreshGL();
 
@@ -3267,7 +3268,7 @@ void ComponentDlg::GenerateAdv(bool refine)
 	m_prog = 0.0f;
 	m_generate_prg->SetValue(0);
 
-	FL::ComponentGenerator cg(vd, KernelProgram::get_device_id());
+	FL::ComponentGenerator cg(vd);
 	boost::signals2::connection connection =
 		cg.m_sig_progress.connect(boost::bind(
 			&ComponentDlg::UpdateProgress, this));
@@ -3317,6 +3318,9 @@ void ComponentDlg::GenerateAdv(bool refine)
 
 	if (m_cleanup)
 		cg.Cleanup(m_cl_iterations, (unsigned int)(m_cl_size_limiter));
+
+	if (bn > 1)
+		cg.FillBorder2D(0.1);
 
 	if (m_match_slices)
 	{
@@ -3372,7 +3376,7 @@ void ComponentDlg::GenerateBsc(bool refine)
 	m_prog = 0.0f;
 	m_generate_prg->SetValue(0);
 
-	FL::ComponentGenerator cg(vd, KernelProgram::get_device_id());
+	FL::ComponentGenerator cg(vd);
 	boost::signals2::connection connection =
 		cg.m_sig_progress.connect(boost::bind(
 			&ComponentDlg::UpdateProgress, this));
@@ -3566,7 +3570,7 @@ void ComponentDlg::GenerateComp(int type, int mode)
 			VolumeData* vd = m_view->m_glview->m_cur_vol;
 			if (!vd)
 				return;
-			FL::ComponentGenerator cg(vd, KernelProgram::get_device_id());
+			FL::ComponentGenerator cg(vd);
 			bool use_mask = m_use_sel_chk->GetValue();
 			cg.SetUseMask(use_mask);
 			if (use_mask)
@@ -3730,3 +3734,22 @@ void ComponentDlg::Analyze(bool sel)
 	connection.disconnect();
 }
 
+void ComponentDlg::OnKey(wxKeyEvent &event)
+{
+	switch (event.GetKeyCode())
+	{
+	case wxKeyCode('a'):
+	case wxKeyCode('A'):
+		if (event.ControlDown())
+		{
+			m_stat_text->SetSelection(-1, -1);
+		}
+		else
+			event.Skip();
+		break;
+
+	default:
+		event.Skip();
+		break;
+	}
+}

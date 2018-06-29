@@ -112,12 +112,12 @@ void ComponentSelector::CompFull()
 				CompInfo* info = new CompInfo;
 				info->id = label_value;
 				info->brick_id = brick_id;
-				if (!m_analyzer)
+				if (!m_analyzer || !m_analyzer->GetAnalyzed())
 					info->sumi = 1;
 				sel_labels.insert(std::pair<unsigned long long, pCompInfo>
 					(GetKey(label_value, brick_id), pCompInfo(info)));
 			}
-			else if (!m_analyzer)
+			else if (!m_analyzer || !m_analyzer->GetAnalyzed())
 				label_iter->second->sumi++;
 		}
 	}
@@ -158,7 +158,7 @@ void ComponentSelector::CompFull()
 	m_vd->GetVR()->clear_tex_pool();
 }
 
-void ComponentSelector::Append(bool all, bool rmask)
+void ComponentSelector::Select(bool all, bool rmask)
 {
 	//get current mask
 	if (!m_vd)
@@ -200,36 +200,34 @@ void ComponentSelector::Append(bool all, bool rmask)
 	unsigned int size;
 	if (all)
 	{
-		int i, j, k;
 		CompList sel_labels;
-		for (i = 0; i < nx; ++i)
-		for (j = 0; j < ny; ++j)
-		for (k = 0; k < nz; ++k)
+		CompList* comp_list = 0;
+		if (m_analyzer && m_analyzer->GetAnalyzed())
+			comp_list = m_analyzer->GetCompList();
+		else
 		{
-			index = (unsigned long long)nx*(unsigned long long)ny*(unsigned long long)k +
-				(unsigned long long)nx*(unsigned long long)j + (unsigned long long)i;
-			if (data_label[index])
+			for (index = 0; index < for_size; ++index)
 			{
-				label_value = data_label[index];
-				brick_id = tex->get_brick_id(index);
-				label_iter = sel_labels.find(GetKey(label_value, brick_id));
-				if (label_iter == sel_labels.end())
+				if (data_label[index])
 				{
-					CompInfo* info = new CompInfo;
-					info->id = label_value;
-					info->brick_id = brick_id;
-					if (!m_analyzer)
+					label_value = data_label[index];
+					brick_id = tex->get_brick_id(index);
+					label_iter = sel_labels.find(GetKey(label_value, brick_id));
+					if (label_iter == sel_labels.end())
+					{
+						CompInfo* info = new CompInfo;
+						info->id = label_value;
+						info->brick_id = brick_id;
 						info->sumi = 1;
-					sel_labels.insert(std::pair<unsigned long long, pCompInfo>
-						(GetKey(label_value, brick_id), pCompInfo(info)));
+						sel_labels.insert(std::pair<unsigned long long, pCompInfo>
+							(GetKey(label_value, brick_id), pCompInfo(info)));
+					}
+					else
+						label_iter->second->sumi++;
 				}
-				else if (!m_analyzer)
-					label_iter->second->sumi++;
 			}
+			comp_list = &sel_labels;
 		}
-
-		CompList list_out;
-		CompList* comp_list = GetListFromAnalyzer(sel_labels, list_out);
 
 		//reselect
 		for (index = 0; index < for_size; ++index)
@@ -252,6 +250,9 @@ void ComponentSelector::Append(bool all, bool rmask)
 					else
 						data_mask[index] = 255;
 				}
+				else if (!m_use_min && m_use_max)
+					//analyzer filters small comps, make sure they are also selected here
+					data_mask[index] = 255;
 				else
 					data_mask[index] = 0;
 			}
@@ -353,7 +354,7 @@ void ComponentSelector::Append(bool all, bool rmask)
 void ComponentSelector::Exclusive()
 {
 	Clear(false);
-	Append(false, false);
+	Select(false, false);
 }
 
 void ComponentSelector::All()

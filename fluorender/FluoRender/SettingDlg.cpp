@@ -52,6 +52,9 @@ EVT_COMMAND_SCROLL(ID_ShadowDirSldr, SettingDlg::OnShadowDirChange)
 EVT_TEXT(ID_ShadowDirText, SettingDlg::OnShadowDirEdit)
 //gradient background
 EVT_CHECKBOX(ID_GradBgChk, SettingDlg::OnGradBgCheck)
+//rot center anchor threshold
+EVT_COMMAND_SCROLL(ID_PinThreshSldr, SettingDlg::OnPinThresholdChange)
+EVT_TEXT(ID_PinThreshText, SettingDlg::OnPinThresholdEdit)
 //link render views rotations
 EVT_CHECKBOX(ID_RotLinkChk, SettingDlg::OnRotLink)
 //override vox
@@ -75,6 +78,8 @@ EVT_COMMAND_SCROLL(ID_BlockSizeSldr, SettingDlg::OnBlockSizeChange)
 EVT_TEXT(ID_BlockSizeText, SettingDlg::OnBlockSizeEdit)
 EVT_COMMAND_SCROLL(ID_ResponseTimeSldr, SettingDlg::OnResponseTimeChange)
 EVT_TEXT(ID_ResponseTimeText, SettingDlg::OnResponseTimeEdit)
+EVT_COMMAND_SCROLL(ID_DetailLevelOffsetSldr, SettingDlg::OnDetailLevelOffsetChange)
+EVT_TEXT(ID_DetailLevelOffsetText, SettingDlg::OnDetailLevelOffsetEdit)
 //font
 EVT_COMBOBOX(ID_FontCmb, SettingDlg::OnFontChange)
 EVT_COMBOBOX(ID_FontSizeCmb, SettingDlg::OnFontSizeChange)
@@ -197,7 +202,6 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	vald_fp2.SetRange(-180.0, 180.0);
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
-	vald_int.SetRange(1, 10);
 	wxStaticText* st;
 
 	wxPanel *page = new wxPanel(parent);
@@ -258,31 +262,38 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	group3->Add(st);
 	group3->Add(10, 5);
 
-	//gradient background
-	wxBoxSizer *group4 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Gradient Background"), wxVERTICAL);
+	//link rotations
+	wxBoxSizer* group4 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "Rotations"), wxVERTICAL);
 	wxBoxSizer *sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_grad_bg_chk = new wxCheckBox(page, ID_GradBgChk,
-		"Enable gradient background");
-	sizer4_1->Add(m_grad_bg_chk, 0, wxALIGN_CENTER);
+	st = new wxStaticText(page, 0, "Rot. center anchor start");
+	m_pin_threshold_sldr = new wxSlider(page, ID_PinThreshSldr, 100, 10, 500,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_pin_threshold_text = new wxTextCtrl(page, ID_PinThreshText, "1000",
+		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+	sizer4_1->Add(st, 0, wxALIGN_CENTER);
+	sizer4_1->Add(m_pin_threshold_sldr, 1, wxEXPAND);
+	sizer4_1->Add(m_pin_threshold_text, 0, wxALIGN_CENTER);
+	wxBoxSizer *sizer4_2 = new wxBoxSizer(wxHORIZONTAL);
+	m_rot_link_chk = new wxCheckBox(page, ID_RotLinkChk,
+		"Link all rendering views' rotations.");
+	sizer4_2->Add(m_rot_link_chk, 0, wxALIGN_CENTER);
 	group4->Add(10, 5);
 	group4->Add(sizer4_1, 0, wxEXPAND);
 	group4->Add(10, 5);
-	//link rotations
-	wxBoxSizer* group5 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Rotations"), wxVERTICAL);
+	group4->Add(sizer4_2, 0, wxEXPAND);
+	group4->Add(10, 5);
+
+	//gradient background
+	wxBoxSizer *group5 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "Gradient Background"), wxVERTICAL);
 	wxBoxSizer *sizer5_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_rot_link_chk = new wxCheckBox(page, ID_RotLinkChk,
-		"Link all rendering views' rotations.");
-	sizer5_1->Add(m_rot_link_chk, 0, wxALIGN_CENTER);
+	m_grad_bg_chk = new wxCheckBox(page, ID_GradBgChk,
+		"Enable gradient background");
+	sizer5_1->Add(m_grad_bg_chk, 0, wxALIGN_CENTER);
 	group5->Add(10, 5);
 	group5->Add(sizer5_1, 0, wxEXPAND);
 	group5->Add(10, 5);
-	// combine gradient and rotations checks
-	wxBoxSizer* group4_5 = new wxBoxSizer(wxHORIZONTAL);
-	group4_5->Add(group4, 0, wxEXPAND);
-	group4_5->AddStretchSpacer();
-	group4_5->Add(group5, 0, wxEXPAND);
 
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 
@@ -293,7 +304,9 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	sizerV->Add(10, 10);
 	sizerV->Add(group3, 0, wxEXPAND);
 	sizerV->Add(10, 10);
-	sizerV->Add(group4_5, 0, wxEXPAND);
+	sizerV->Add(group4, 0, wxEXPAND);
+	sizerV->Add(10, 10);
+	sizerV->Add(group5, 0, wxEXPAND);
 
 	page->SetSizer(sizerV);
 	return page;
@@ -303,6 +316,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 {
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
+	wxIntegerValidator<int> vald_int2;
 	wxStaticText* st;
 	wxPanel *page = new wxPanel(parent);
 
@@ -377,6 +391,17 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	sizer2_4->Add(m_response_time_sldr, 1, wxEXPAND);
 	sizer2_4->Add(m_response_time_text, 0, wxALIGN_CENTER);
 	sizer2_4->Add(st);
+	wxBoxSizer *sizer2_5 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Detail Level Offset:",
+		wxDefaultPosition, wxSize(110, -1));
+	sizer2_5->Add(st);
+	m_detail_level_offset_sldr = new wxSlider(page, ID_DetailLevelOffsetSldr, 0, -5, 5,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_detail_level_offset_text = new wxTextCtrl(page, ID_DetailLevelOffsetText, "0",
+		wxDefaultPosition, wxSize(40, -1), 0, vald_int2);
+	sizer2_5->Add(m_detail_level_offset_sldr, 1, wxEXPAND);
+	sizer2_5->Add(m_detail_level_offset_text, 0, wxALIGN_CENTER);
+	sizer2_5->Add(20, 5);
 	group2->Add(10, 5);
 	group2->Add(m_streaming_chk);
 	group2->Add(10, 10);
@@ -389,6 +414,8 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	group2->Add(sizer2_3, 0, wxEXPAND);
 	group2->Add(10, 5);
 	group2->Add(sizer2_4, 0, wxEXPAND);
+	group2->Add(10, 5);
+	group2->Add(sizer2_5, 0, wxEXPAND);
 	group2->Add(10, 5);
 	st = new wxStaticText(page, 0,
 		"Note: Configure these settings before loading data.\n"\
@@ -620,6 +647,7 @@ void SettingDlg::GetSettings()
 	m_wav_color4 = 5;
 	m_time_id = "_T";
 	m_grad_bg = false;
+	m_pin_threshold = 10.0;
 	m_override_vox = true;
 	m_soft_threshold = 0.0;
 	m_run_script = false;
@@ -634,9 +662,11 @@ void SettingDlg::GetSettings()
 	m_up_time = 100;
 	m_update_order = 0;
 	m_invalidate_tex = false;
+	m_detail_level_offset = 0;
 	m_point_volume_mode = 0;
 	m_ruler_use_transf = false;
 	m_ruler_time_dep = true;
+	m_ruler_df_f = false;
 	m_pvxml_flip_x = false;
 	m_pvxml_flip_y = false;
 	m_red_bit = 8;
@@ -655,9 +685,10 @@ void SettingDlg::GetSettings()
 	m_last_tool = 0;
 	m_component_size = 25.0;
 	m_contact_factor = 0.6;
-	m_similarity = 0.3;
+	m_similarity = 0.5;
 	m_use_max_texture_size = false;
 	m_max_texture_size = 2048;
+	m_plane_mode = 0;
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
@@ -722,6 +753,12 @@ void SettingDlg::GetSettings()
 		fconfig.Read("mode", &m_shadow_dir, false);
 		fconfig.Read("x", &m_shadow_dir_x, 0.0);
 		fconfig.Read("y", &m_shadow_dir_y, 0.0);
+	}
+	//rot center anchor thresh
+	if (fconfig.Exists("/pin threshold"))
+	{
+		fconfig.SetPath("/pin threshold");
+		fconfig.Read("value", &m_pin_threshold, 10.0);
 	}
 	//test mode
 	if (fconfig.Exists("/test mode"))
@@ -820,6 +857,8 @@ void SettingDlg::GetSettings()
 		fconfig.Read("force brick size", &m_force_brick_size);
 		//response time
 		fconfig.Read("up time", &m_up_time);
+		//detail level offset
+		fconfig.Read("detail level offset", &m_detail_level_offset);
 	}
 	EnableStreaming(m_mem_swap);
 	//update order
@@ -851,6 +890,12 @@ void SettingDlg::GetSettings()
 	{
 		fconfig.SetPath("/ruler time dependent");
 		fconfig.Read("value", &m_ruler_time_dep);
+	}
+	//ruler exports df/f
+	if (fconfig.Exists("/ruler df_f"))
+	{
+		fconfig.SetPath("/ruler df_f");
+		fconfig.Read("value", &m_ruler_df_f);
 	}
 	//flags for pvxml flipping
 	if (fconfig.Exists("/pvxml flip"))
@@ -899,6 +944,12 @@ void SettingDlg::GetSettings()
 		fconfig.SetPath("/cl device");
 		fconfig.Read("device_id", &m_cl_device_id);
 	}
+	//clipping plane display mode
+	if (fconfig.Exists("/clipping planes"))
+	{
+		fconfig.SetPath("/clipping planes");
+		fconfig.Read("mode", &m_plane_mode);
+	}
 
 	UpdateUI();
 }
@@ -935,6 +986,9 @@ void SettingDlg::UpdateUI()
 	double deg = GetShadowDir();
 	m_shadow_dir_sldr->SetValue(int(deg + 0.5));
 	m_shadow_dir_text->ChangeValue(wxString::Format("%.2f", deg));
+	//rot center anchor thresh
+	m_pin_threshold_sldr->SetValue(int(m_pin_threshold*10.0));
+	m_pin_threshold_text->ChangeValue(wxString::Format("%.0f", m_pin_threshold*100.0));
 	//gradient background
 	m_grad_bg_chk->SetValue(m_grad_bg);
 	//override vox
@@ -989,6 +1043,8 @@ void SettingDlg::UpdateUI()
 	m_block_size_sldr->SetValue(int(log(m_force_brick_size) / log(2.0) + 0.5));
 	m_response_time_text->ChangeValue(wxString::Format("%d", m_up_time));
 	m_response_time_sldr->SetValue(int(m_up_time / 10.0));
+	m_detail_level_offset_text->ChangeValue(wxString::Format("%d", -m_detail_level_offset));
+	m_detail_level_offset_sldr->SetValue(-m_detail_level_offset);
 }
 
 void SettingDlg::SaveSettings()
@@ -1031,6 +1087,9 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("mode", m_shadow_dir);
 	fconfig.Write("x", m_shadow_dir_x);
 	fconfig.Write("y", m_shadow_dir_y);
+
+	fconfig.SetPath("/pin threshold");
+	fconfig.Write("value", m_pin_threshold);
 
 	fconfig.SetPath("/test mode");
 	fconfig.Write("speed", m_test_speed);
@@ -1092,6 +1151,7 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("large data size", m_large_data_size);
 	fconfig.Write("force brick size", m_force_brick_size);
 	fconfig.Write("up time", m_up_time);
+	fconfig.Write("detail level offset", m_detail_level_offset);
 	EnableStreaming(m_mem_swap);
 
 	//update order
@@ -1113,6 +1173,10 @@ void SettingDlg::SaveSettings()
 	//ruler time dependent
 	fconfig.SetPath("/ruler time dependent");
 	fconfig.Write("value", m_ruler_time_dep);
+
+	//ruler exports df/f
+	fconfig.SetPath("/ruler df_f");
+	fconfig.Write("value", m_ruler_df_f);
 
 	//flags for flipping pvxml
 	fconfig.SetPath("/pvxml flip");
@@ -1142,6 +1206,13 @@ void SettingDlg::SaveSettings()
 	//cl device
 	fconfig.SetPath("/cl device");
 	fconfig.Write("device_id", m_cl_device_id);
+
+	//clipping plane mode
+	fconfig.SetPath("/clipping planes");
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetClippingView())
+		m_plane_mode = vr_frame->GetClippingView()->GetPlaneMode();
+	fconfig.Write("mode", m_plane_mode);
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
@@ -1385,6 +1456,8 @@ void SettingDlg::EnableStreaming(bool enable)
 		m_block_size_text->Enable();
 		m_response_time_sldr->Enable();
 		m_response_time_text->Enable();
+		m_detail_level_offset_sldr->Enable();
+		m_detail_level_offset_text->Enable();
 	}
 	else
 	{
@@ -1398,6 +1471,8 @@ void SettingDlg::EnableStreaming(bool enable)
 		m_block_size_text->Disable();
 		m_response_time_sldr->Disable();
 		m_response_time_text->Disable();
+		m_detail_level_offset_sldr->Disable();
+		m_detail_level_offset_text->Disable();
 	}
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
@@ -1438,6 +1513,34 @@ void SettingDlg::OnGradBgCheck(wxCommandEvent &event)
 				vrv->SetGradBg(m_grad_bg);
 				vrv->RefreshGL();
 			}
+		}
+	}
+}
+
+//rot center anchor thresh
+void SettingDlg::OnPinThresholdChange(wxScrollEvent &event)
+{
+	double dval = double(m_pin_threshold_sldr->GetValue());
+	wxString str = wxString::Format("%.0f", dval*10.0);
+	m_pin_threshold_text->SetValue(str);
+}
+
+void SettingDlg::OnPinThresholdEdit(wxCommandEvent &event)
+{
+	wxString str = m_pin_threshold_text->GetValue();
+	double dval;
+	str.ToDouble(&dval);
+	m_pin_threshold_sldr->SetValue(int(dval/10.0));
+	m_pin_threshold = dval / 100.0;
+
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+	{
+		for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
+		{
+			VRenderView* vrv = (*vr_frame->GetViewList())[i];
+			if (vrv)
+				vrv->m_pin_scale_thresh = m_pin_threshold;
 		}
 	}
 }
@@ -1672,6 +1775,33 @@ void SettingDlg::OnResponseTimeEdit(wxCommandEvent &event)
 		return;
 	m_response_time_sldr->SetValue(int(val / 10.0));
 	m_up_time = val;
+}
+
+void SettingDlg::OnDetailLevelOffsetChange(wxScrollEvent &event)
+{
+	int ival = event.GetPosition();
+	wxString str = wxString::Format("%d", ival);
+	m_detail_level_offset_text->SetValue(str);
+}
+
+void SettingDlg::OnDetailLevelOffsetEdit(wxCommandEvent &event)
+{
+	wxString str = m_detail_level_offset_text->GetValue();
+	long val;
+	str.ToLong(&val);
+	m_detail_level_offset_sldr->SetValue(val);
+	m_detail_level_offset = -val;
+
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+	{
+		for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
+		{
+			VRenderView* vrv = (*vr_frame->GetViewList())[i];
+			if (vrv)
+				vrv->RefreshGL();
+		}
+	}
 }
 
 //font

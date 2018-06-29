@@ -347,10 +347,10 @@ wxPanel(parent, id, pos, size,style, name),
 		wxMouseEventHandler(VPropView::OnSampleSync), NULL, this);
 	m_sample_st->Connect(ID_SampleSync, wxEVT_RIGHT_DCLICK,
 		wxMouseEventHandler(VPropView::OnSampleSync), NULL, this);
-	m_sample_sldr = new wxSlider(this, ID_SampleSldr, 10, 0, 50,
+	m_sample_sldr = new wxSlider(this, ID_SampleSldr, 10, 1, 50,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_sample_text = new wxTextCtrl(this, ID_SampleText, "1.0",
-		wxDefaultPosition, wxSize(50, 20), 0, vald_fp1);
+		wxDefaultPosition, wxSize(50, 20), 0, vald_fp2);
 	sizer_m4->Add(m_sample_st, 0, wxALIGN_CENTER);
 	sizer_m4->Add(m_sample_text, 0, wxALIGN_CENTER);
 	sizer_m4->Add(m_sample_sldr, 1, wxEXPAND);
@@ -522,6 +522,8 @@ wxPanel(parent, id, pos, size,style, name),
 	colormap_list.push_back("Hot");
 	colormap_list.push_back("Cool");
 	colormap_list.push_back("Diverging");
+	colormap_list.push_back("Monochrome");
+	colormap_list.push_back("Reverse Mono");
 	for (size_t i=0; i<colormap_list.size(); ++i)
 		m_colormap_combo->Append(colormap_list[i]);
 	m_colormap_combo2 = new wxComboBox(this, ID_ColormapCombo2, "",
@@ -531,6 +533,8 @@ wxPanel(parent, id, pos, size,style, name),
 	colormap_list2.push_back("Z Value");
 	colormap_list2.push_back("Y Value");
 	colormap_list2.push_back("X Value");
+	colormap_list2.push_back("Gradient");
+	colormap_list2.push_back("Differential");
 	for (size_t i=0; i<colormap_list2.size(); ++i)
 		m_colormap_combo2->Append(colormap_list2[i]);
 	sizer_r5->Add(st, 0, wxALIGN_CENTER, 0);
@@ -604,7 +608,7 @@ void VPropView::GetSettings()
 	m_boundary_text->ChangeValue(str);
 	//contrast
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_saturation_text->GetValidator()))
-		vald_i->SetRange(0, int(m_max_val)*10);
+		vald_i->SetMin(0);
 	dval = m_vd->GetOffset();
 	ival = int(dval*m_max_val+0.5);
 	m_saturation_sldr->SetRange(0, int(m_max_val));
@@ -613,7 +617,7 @@ void VPropView::GetSettings()
 	m_saturation_text->ChangeValue(str);
 	//left threshold
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_left_thresh_text->GetValidator()))
-		vald_i->SetRange(0, int(m_max_val));
+		vald_i->SetMin(0);
 	dval = m_vd->GetLeftThresh();
 	ival = int(dval*m_max_val+0.5);
 	m_left_thresh_sldr->SetRange(0, int(m_max_val));
@@ -622,7 +626,7 @@ void VPropView::GetSettings()
 	m_left_thresh_text->ChangeValue(str);
 	//right threshold
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_right_thresh_text->GetValidator()))
-		vald_i->SetRange(0, int(m_max_val));
+		vald_i->SetMin(0);
 	dval = m_vd->GetRightThresh();
 	ival = int(dval*m_max_val+0.5);
 	m_right_thresh_sldr->SetRange(0, int(m_max_val));
@@ -631,7 +635,7 @@ void VPropView::GetSettings()
 	m_right_thresh_text->ChangeValue(str);
 	//luminance
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_luminance_text->GetValidator()))
-		vald_i->SetRange(0, int(m_max_val));
+		vald_i->SetMin(0);
 	dval = m_vd->GetLuminance();
 	ival = int(dval*m_max_val+0.5);
 	m_luminance_sldr->SetRange(0, int(m_max_val));
@@ -655,7 +659,7 @@ void VPropView::GetSettings()
 	m_color2_btn->SetColour(wxc);
 	//alpha
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_alpha_text->GetValidator()))
-		vald_i->SetRange(0, int(m_max_val));
+		vald_i->SetMin(0);
 	dval = m_vd->GetAlpha();
 	ival = int(dval*m_max_val+0.5);
 	m_alpha_sldr->SetRange(0, int(m_max_val));
@@ -702,7 +706,7 @@ void VPropView::GetSettings()
 
 	//spacings
 	double spcx, spcy, spcz;
-	m_vd->GetSpacings(spcx, spcy, spcz);
+	m_vd->GetBaseSpacings(spcx, spcy, spcz);
 	if ((vald_fp = (wxFloatingPointValidator<double>*)m_space_x_text->GetValidator()))
 		vald_fp->SetMin(0.0);
 	str = wxString::Format("%.3f", spcx);
@@ -739,7 +743,7 @@ void VPropView::GetSettings()
 	m_vd->GetColormapValues(low, high);
 	//low
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_colormap_low_value_text->GetValidator()))
-		vald_i->SetRange(0, int(m_max_val));
+		vald_i->SetMin(0);
 	ival = int(low*m_max_val+0.5);
 	m_colormap_low_value_sldr->SetRange(0, int(m_max_val));
 	str = wxString::Format("%d", ival);
@@ -747,7 +751,7 @@ void VPropView::GetSettings()
 	m_colormap_low_value_text->ChangeValue(str);
 	//high
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_colormap_high_value_text->GetValidator()))
-		vald_i->SetRange(0, int(m_max_val));
+		vald_i->SetMin(0);
 	ival = int(high*m_max_val+0.5);
 	m_colormap_high_value_sldr->SetRange(0, int(m_max_val));
 	str = wxString::Format("%d", ival);
@@ -984,8 +988,14 @@ void VPropView::OnSaturationText(wxCommandEvent& event)
 	wxString str = m_saturation_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
-	double val = double(ival) / m_max_val;
+	if (double(ival) > m_max_val)
+	{
+		UpdateMaxVal(ival);
+		str = wxString::Format("%d", ival);
+		m_saturation_text->ChangeValue(str);
+	}
 	m_saturation_sldr->SetValue(ival);
+	double val = double(ival) / m_max_val;
 
 	//set contrast value
 	if (m_sync_group && m_group)
@@ -1024,6 +1034,12 @@ void VPropView::OnLeftThreshText(wxCommandEvent &event)
 	wxString str = m_left_thresh_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
+	if (double(ival) > m_max_val)
+	{
+		UpdateMaxVal(ival);
+		str = wxString::Format("%d", ival);
+		m_left_thresh_text->ChangeValue(str);
+	}
 	double val = double(ival) / m_max_val;
 	double right_val = (double)m_right_thresh_sldr->GetValue() / m_max_val;
 
@@ -1064,6 +1080,12 @@ void VPropView::OnRightThreshText(wxCommandEvent &event)
 	wxString str = m_right_thresh_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
+	if (double(ival) > m_max_val)
+	{
+		UpdateMaxVal(ival);
+		str = wxString::Format("%d", ival);
+		m_right_thresh_text->ChangeValue(str);
+	}
 	double val = double(ival) / m_max_val;
 	double left_val = (double)m_left_thresh_sldr->GetValue() / m_max_val;
 
@@ -1105,6 +1127,12 @@ void VPropView::OnLuminanceText(wxCommandEvent &event)
 	wxString str = m_luminance_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
+	if (double(ival) > m_max_val)
+	{
+		UpdateMaxVal(ival);
+		str = wxString::Format("%d", ival);
+		m_luminance_text->ChangeValue(str);
+	}
 	double val = double(ival) / m_max_val;
 	m_luminance_sldr->SetValue(ival);
 
@@ -1260,6 +1288,12 @@ void VPropView::OnAlphaText(wxCommandEvent& event)
 	wxString str = m_alpha_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
+	if (double(ival) > m_max_val)
+	{
+		UpdateMaxVal(ival);
+		str = wxString::Format("%d", ival);
+		m_alpha_text->ChangeValue(str);
+	}
 	double val = double(ival) / m_max_val;
 	m_alpha_sldr->SetValue(ival);
 
@@ -1446,6 +1480,12 @@ void VPropView::OnColormapHighValueText(wxCommandEvent &event)
 	wxString str = m_colormap_high_value_text->GetValue();
 	long iVal = 0;
 	str.ToLong(&iVal);
+	if (double(iVal) > m_max_val)
+	{
+		UpdateMaxVal(iVal);
+		str = wxString::Format("%d", iVal);
+		m_colormap_high_value_text->ChangeValue(str);
+	}
 	long iVal2 = m_colormap_low_value_sldr->GetValue();
 
 	if (iVal >= iVal2)
@@ -1479,6 +1519,12 @@ void VPropView::OnColormapLowValueText(wxCommandEvent &event)
 	wxString str = m_colormap_low_value_text->GetValue();
 	long iVal = 0;
 	str.ToLong(&iVal);
+	if (double(iVal) > m_max_val)
+	{
+		UpdateMaxVal(iVal);
+		str = wxString::Format("%d", iVal);
+		m_colormap_low_value_text->ChangeValue(str);
+	}
 	long iVal2 = m_colormap_high_value_sldr->GetValue();
 
 	if (iVal > iVal2)
@@ -1927,22 +1973,25 @@ bool VPropView::SetSpacings()
 	str.ToDouble(&spcz);
 	if (spcz<=0.0)
 		return false;
-
-	wxString v_name;
-	if (m_vd)
-		v_name = m_vd->GetName();
+	bool override_vox = true;
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (vr_frame && vr_frame->GetSettingDlg())
+		override_vox = vr_frame->GetSettingDlg()->GetOverrideVox();
+
+	if ((m_sync_group || override_vox) && m_group)
 	{
-		for (int i=0; i<(int)vr_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < m_group->GetVolumeNum(); i++)
 		{
-			VRenderView *vrv = (*vr_frame->GetViewList())[i];
-			if (vrv)
-				if (vrv->GetVolumeData(v_name))
-					for (int j=0; j<vrv->GetAllVolumeNum(); j++)
-						vrv->GetAllVolumeData(j)->SetSpacings(spcx, spcy, spcz);
+			m_group->GetVolumeData(i)->SetSpacings(spcx, spcy, spcz);
+			m_group->GetVolumeData(i)->SetBaseSpacings(spcx, spcy, spcz);
 		}
 	}
+	else if (m_vd)
+	{
+		m_vd->SetSpacings(spcx, spcy, spcz);
+		m_vd->SetBaseSpacings(spcx, spcy, spcz);
+	}
+	else return false;
 
 	return true;
 }
@@ -2070,6 +2119,26 @@ void VPropView::DisableMip()
 	m_left_thresh_text->Enable();
 	m_right_thresh_sldr->Enable();
 	m_right_thresh_text->Enable();
+}
+
+//update max value
+void VPropView::UpdateMaxVal(double value)
+{
+	if (!m_vd) return;
+	int bits = m_vd->GetBits();
+	if (bits == 8)
+		return;
+	else if (bits > 8)
+	{
+		if (value < 255.0)
+			value = 255.0;
+		if (value > 65535.0)
+			value = 65535.0;
+	}
+	m_max_val = value;
+	m_vd->SetMaxValue(m_max_val);
+	m_vd->SetScalarScale(65535.0 / m_max_val);
+	GetSettings();
 }
 
 void VPropView::OnSpaceText(wxCommandEvent& event)
@@ -2296,9 +2365,18 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
 	val /= m_max_val;
 	fconfig.Write("luminance", val);
 	mgr->m_vol_lum = val;
-	//colormap
+	//colormap enable
+	bool bval = m_colormap_tool->GetToolState(ID_ColormapEnableChk);
+	fconfig.Write("colormap_mode", bval);
+	mgr->m_vol_cmm = bval;
+	//colormap type
 	ival = m_colormap_combo->GetCurrentSelection();
 	fconfig.Write("colormap", ival);
+	mgr->m_vol_cmp = ival;
+	//colormap projection
+	ival = m_colormap_combo2->GetCurrentSelection();
+	fconfig.Write("colormap_proj", ival);
+	mgr->m_vol_cmj = ival;
 	//colormap low value
 	str = m_colormap_low_value_text->GetValue();
 	str.ToDouble(&val);
@@ -2346,8 +2424,8 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
 	fconfig.Write("shadow_intensity", swi);
 	mgr->m_vol_swi = swi;
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-    expath = wxPathOnly(expath);
-    wxString dft = expath + "/default_volume_settings.dft";
+	expath = wxPathOnly(expath);
+	wxString dft = expath + "/default_volume_settings.dft";
 	wxFileOutputStream os(dft);
 	fconfig.Save(os);
 }
@@ -2466,6 +2544,9 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 	//colormap
 	m_colormap_combo->SetSelection(mgr->m_vol_cmp);
 	m_vd->SetColormap(mgr->m_vol_cmp);
+	//colormap projection
+	m_colormap_combo2->SetSelection(mgr->m_vol_cmj);
+	m_vd->SetColormapProj(mgr->m_vol_cmj);
 	//colormap low value
 	dval = mgr->m_vol_lcm;
 	ival = int(dval*m_max_val+0.5);

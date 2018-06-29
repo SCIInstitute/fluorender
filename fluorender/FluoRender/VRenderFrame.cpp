@@ -50,6 +50,7 @@ DEALINGS IN THE SOFTWARE.
 BEGIN_EVENT_TABLE(VRenderFrame, wxFrame)
 	EVT_MENU(wxID_EXIT, VRenderFrame::OnExit)
 	EVT_MENU(ID_ViewNew, VRenderFrame::OnNewView)
+	EVT_MENU(ID_Layout, VRenderFrame::OnLayout)
 	EVT_MENU(ID_FullScreen, VRenderFrame::OnFullScreen)
 	EVT_MENU(ID_OpenVolume, VRenderFrame::OnOpenVolume)	
 	EVT_MENU(ID_OpenMesh, VRenderFrame::OnOpenMesh)
@@ -374,6 +375,8 @@ VRenderFrame::VRenderFrame(
 	m_clip_view = new ClippingView(this, this, wxID_ANY,
 		wxDefaultPosition, wxSize(130,700));
 	m_clip_view->SetDataManager(&m_data_mgr);
+	m_clip_view->SetPlaneMode(static_cast<PLANE_MODES>(
+		m_setting_dlg->GetPlaneMode()));
 
 	//adjust view
 	m_adjust_view = new AdjustView(this, this, wxID_ANY,
@@ -411,6 +414,7 @@ VRenderFrame::VRenderFrame(
 	m_vrv_list[0]->SetBlendSlices(m_setting_dlg->GetMicroBlend());
 	m_vrv_list[0]->SetAdaptive(m_setting_dlg->GetMouseInt());
 	m_vrv_list[0]->SetGradBg(m_setting_dlg->GetGradBg());
+	m_vrv_list[0]->SetPinThreshold(m_setting_dlg->GetPinThreshold());
 	m_vrv_list[0]->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
 	m_vrv_list[0]->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
 	m_vrv_list[0]->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
@@ -727,7 +731,9 @@ VRenderFrame::VRenderFrame(
 	m_top_window->Append(m);
 	m_top_window->Check(ID_UIPropView, true);
 	m_top_window->Append(wxID_SEPARATOR);
-	m = new wxMenuItem(m_top_window,ID_ViewNew, wxT("&New View"));
+	m = new wxMenuItem(m_top_window, ID_Layout, wxT("Layout"));
+	m_top_window->Append(m);
+	m = new wxMenuItem(m_top_window, ID_ViewNew, wxT("&New View"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_new_view_mini));
 	m_top_window->Append(m);
 #ifndef _DARWIN
@@ -815,6 +821,11 @@ VRenderFrame::VRenderFrame(
 		vrv->SetFullScreen();
 		Iconize();
 	}
+
+	wxMemorySize free_mem_size = wxGetFreeMemory();
+	double mainmem_buf_size = free_mem_size.ToDouble() * 0.8 / 1024.0 / 1024.0;
+	if (mainmem_buf_size > TextureRenderer::get_mainmem_buf_size())
+		TextureRenderer::set_mainmem_buf_size(mainmem_buf_size);
 }
 
 VRenderFrame::~VRenderFrame()
@@ -846,7 +857,7 @@ void VRenderFrame::OnClose(wxCloseEvent &event)
 			break;
 		}
 	}
-	if (!vrv_saved)
+	if (!vrv_saved && !m_vrv_list.empty())
 		m_vrv_list[0]->SaveDefault(0xaff);
 	event.Skip();
 }
@@ -858,20 +869,10 @@ wxString VRenderFrame::CreateView(int row)
 	{
 		wxGLContext* sharedContext = m_vrv_list[0]->GetContext();
 		vrv = new VRenderView(this, this, wxID_ANY, sharedContext);
-		m_aui_mgr.AddPane(vrv, wxAuiPaneInfo().
-			Name(vrv->GetName()).Caption(vrv->GetName()).
-			Dockable(true).CloseButton(false).
-			FloatingSize(wxSize(600, 400)).MinSize(wxSize(300, 200)).
-			Layer(0).Centre().Right());
 	}
 	else
 	{
 		vrv = new VRenderView(this, this, wxID_ANY);
-		m_aui_mgr.AddPane(vrv, wxAuiPaneInfo().
-			Name(vrv->GetName()).Caption(vrv->GetName()).
-			Dockable(true).CloseButton(false).
-			FloatingSize(wxSize(600, 400)).MinSize(wxSize(300, 200)).
-			Layer(0).Centre());
 	}
 
 	if (vrv)
@@ -890,6 +891,7 @@ wxString VRenderFrame::CreateView(int row)
 		vrv->SetBlendSlices(m_setting_dlg->GetMicroBlend());
 		vrv->SetAdaptive(m_setting_dlg->GetMouseInt());
 		vrv->SetGradBg(m_setting_dlg->GetGradBg());
+		vrv->SetPinThreshold(m_setting_dlg->GetPinThreshold());
 		vrv->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
 		vrv->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
 		vrv->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
@@ -905,7 +907,6 @@ wxString VRenderFrame::CreateView(int row)
 
 	//m_aui_mgr.Update();
 	OrganizeVRenderViews(1);
-	UpdateTree();
 
 	//set view default settings
 	if (m_adjust_view && vrv)
@@ -920,6 +921,44 @@ wxString VRenderFrame::CreateView(int row)
 		vrv->m_glview->SetSyncG(sync_g);
 		vrv->m_glview->SetSyncB(sync_b);
 	}
+
+	//add volumes
+	if (m_vrv_list.size() > 0 && vrv)
+	{
+		VRenderView* vrv0 = m_vrv_list[0];
+		if (vrv0)
+		{
+			for (int i = 0; i < vrv0->GetDispVolumeNum(); ++i)
+			{
+				VolumeData* vd = vrv0->GetDispVolumeData(i);
+				if (vd)
+				{
+					VolumeData* vd_add = m_data_mgr.DuplicateVolumeData(vd);
+
+					if (vd_add)
+					{
+						int chan_num = vrv->GetAny();
+						Color color(1.0, 1.0, 1.0);
+						if (chan_num == 0)
+							color = Color(1.0, 0.0, 0.0);
+						else if (chan_num == 1)
+							color = Color(0.0, 1.0, 0.0);
+						else if (chan_num == 2)
+							color = Color(0.0, 0.0, 1.0);
+
+						if (chan_num >= 0 && chan_num < 3)
+							vd_add->SetColor(color);
+
+						vrv->AddVolumeData(vd_add);
+					}
+				}
+			}
+		}
+		//update
+		vrv->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
+	}
+
+	UpdateTree();
 
 	if (vrv)
 		return vrv->GetName();
@@ -962,6 +1001,11 @@ VRenderView* VRenderFrame::GetView(wxString& name)
 void VRenderFrame::OnNewView(wxCommandEvent& WXUNUSED(event))
 {
 	wxString str = CreateView();
+}
+
+void VRenderFrame::OnLayout(wxCommandEvent& WXUNUSED(event))
+{
+	OrganizeVRenderViews(1);
 }
 
 void VRenderFrame::OnFullScreen(wxCommandEvent& WXUNUSED(event))
@@ -1443,10 +1487,15 @@ void VRenderFrame::OnInfo(wxCommandEvent& WXUNUSED(event))
 	// FluoRender Image (rows 4-5)
 	wxToolBar * logo= new wxToolBar(d, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	wxBitmap bitmap;
 	if (psJan!=wxNOT_FOUND || psDec!=wxNOT_FOUND)
-		logo->AddTool(wxID_ANY, "", wxGetBitmapFromMemory(logo_snow));
+		bitmap = wxGetBitmapFromMemory(logo_snow);
 	else
-		logo->AddTool(wxID_ANY, "", wxGetBitmapFromMemory(logo));
+		bitmap = wxGetBitmapFromMemory(logo);
+#ifdef _DARWIN
+	logo->SetToolBitmapSize(bitmap.GetSize());
+#endif
+	logo->AddTool(wxID_ANY, "", bitmap);
 	logo->Realize();
 	left->Add(logo,0,wxEXPAND);
 	//right
@@ -2212,7 +2261,7 @@ void VRenderFrame::DeleteVRenderView(wxString &name)
 	for (int i=0; i<GetViewNum(); i++)
 	{
 		VRenderView* vrv = GetView(i);
-		if (vrv && name == vrv->GetName())
+		if (vrv && name == vrv->GetName() && vrv->m_id > 1)
 		{
 			DeleteVRenderView(i);
 			return;
@@ -2230,24 +2279,91 @@ void VRenderFrame::OrganizeVRenderViews(int mode)
 {
 	int width = 800;
 	int height = 600;
+	int minx = 0;
+	int miny = 0;
+	int maxx = 0;
+	int maxy = 0;
 	int paneNum = (int)m_vrv_list.size();
 	int i;
-	for (i=0; i<paneNum; i++)
+	//get total area
+	for (i = 0; i < paneNum; i++)
 	{
-		wxAuiPaneInfo auiInfo;
+		VRenderView* vrv = m_vrv_list[i];
+		if (vrv && m_aui_mgr.GetPane(vrv).IsOk())
+		{
+			wxPoint pos = vrv->GetPosition();
+			wxSize size = vrv->GetSize();
+			int x1 = pos.x;
+			int y1 = pos.y;
+			int x2 = x1 + size.x;
+			int y2 = y1 + size.y;
+			if (i == 0)
+			{
+				minx = x1;
+				miny = y1;
+				maxx = x2;
+				maxy = y2;
+			}
+			else
+			{
+				minx = x1 < minx ? x1 : minx;
+				miny = y1 < miny ? y1 : miny;
+				maxx = x2 > maxx ? x2 : maxx;
+				maxy = y2 > maxy ? y2 : maxy;
+			}
+		}
+	}
+	if (maxx - minx > 0 && maxy - miny > 0)
+	{
+		width = maxx - minx;
+		height = maxy - miny;
+	}
+	//detach all panes
+	for (i = 0; i < paneNum; ++i)
+	{
 		VRenderView* vrv = m_vrv_list[i];
 		if (vrv)
-			auiInfo = m_aui_mgr.GetPane(vrv);
-
-		if (auiInfo.IsOk())
+			m_aui_mgr.DetachPane(vrv);
+	}
+	//add back
+	for (i=0; i<paneNum; i++)
+	{
+		VRenderView* vrv = m_vrv_list[i];
+		if (vrv)
 		{
 			switch (mode)
 			{
 			case 0://top-bottom
-				auiInfo.MinSize(width, height/paneNum);
+				vrv->SetSize(width, height / paneNum);
+				m_aui_mgr.AddPane(vrv, wxAuiPaneInfo().
+					Name(vrv->GetName()).Caption(vrv->GetName()).
+					Dockable(true).CloseButton(false).Resizable().
+					FloatingSize(width, height / paneNum).
+					//MinSize(width, height / paneNum).
+					//MaxSize(width, height / paneNum).
+					BestSize(width, height / paneNum).
+					Layer(0).Centre());
 				break;
 			case 1://left-right
-				auiInfo.MinSize(width/paneNum, height);
+				vrv->SetSize(width / paneNum, height);
+				if (i == 0)
+					m_aui_mgr.AddPane(vrv, wxAuiPaneInfo().
+						Name(vrv->GetName()).Caption(vrv->GetName()).
+						Dockable(true).CloseButton(false).Resizable().
+						FloatingSize(width / paneNum, height).
+						//MinSize(width / paneNum, height).
+						//MaxSize(width / paneNum, height).
+						BestSize(width / paneNum, height).
+						Layer(0).Centre());
+				else
+				m_aui_mgr.AddPane(vrv, wxAuiPaneInfo().
+					Name(vrv->GetName()).Caption(vrv->GetName()).
+					Dockable(true).CloseButton(false).Resizable().
+					FloatingSize(width / paneNum, height).
+					//MinSize(width / paneNum, height).
+					//MaxSize(width / paneNum, height).
+					BestSize(width / paneNum, height).
+					Layer(0).Centre().Right());
 				break;
 			}
 		}
@@ -2539,15 +2655,21 @@ void VRenderFrame::SaveProject(wxString& filename)
 
 			//resolution scale
 			double resx, resy, resz;
+			double b_resx, b_resy, b_resz;
+			double s_resx, s_resy, s_resz;
 			double sclx, scly, sclz;
 			vd->GetSpacings(resx, resy, resz);
+			vd->GetBaseSpacings(b_resx, b_resy, b_resz);
+			vd->GetSpacingScales(s_resx, s_resy, s_resz);
 			vd->GetScalings(sclx, scly, sclz);
-			fconfig.Write("x_res", resx);
-			fconfig.Write("y_res", resy);
-			fconfig.Write("z_res", resz);
-			fconfig.Write("x_scl", sclx);
-			fconfig.Write("y_scl", scly);
-			fconfig.Write("z_scl", sclz);
+			str = wxString::Format("%lf %lf %lf", resx, resy, resz);
+			fconfig.Write("res", str);
+			str = wxString::Format("%lf %lf %lf", b_resx, b_resy, b_resz);
+			fconfig.Write("b_res", str);
+			str = wxString::Format("%lf %lf %lf", s_resx, s_resy, s_resz);
+			fconfig.Write("s_res", str);
+			str = wxString::Format("%lf %lf %lf", sclx, scly, sclz);
+			fconfig.Write("scl", str);
 
 			//planes
 			vector<Plane*> *planes = 0;
@@ -2598,6 +2720,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			//colormap settings
 			fconfig.Write("colormap_mode", vd->GetColormapMode());
 			fconfig.Write("colormap", vd->GetColormap());
+			fconfig.Write("colormap_proj", vd->GetColormapProj());
 			double low, high;
 			vd->GetColormapValues(low, high);
 			fconfig.Write("colormap_lo_value", low);
@@ -2943,6 +3066,8 @@ void VRenderFrame::SaveProject(wxString& filename)
 	fconfig.Write("cur_sel_vol", m_cur_sel_vol);
 	fconfig.Write("cur_sel_mesh", m_cur_sel_mesh);
 	fconfig.Write("chann_link", m_clip_view->GetChannLink());
+	fconfig.Write("hold planes", m_clip_view->GetHoldPlanes());
+	fconfig.Write("plane mode", int(m_clip_view->GetPlaneMode()));
 	fconfig.Write("x_link", m_clip_view->GetXLink());
 	fconfig.Write("y_link", m_clip_view->GetYLink());
 	fconfig.Write("z_link", m_clip_view->GetZLink());
@@ -3197,6 +3322,8 @@ void VRenderFrame::OpenProject(wxString& filename)
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_LSM, cur_chan, cur_time);
 					else if (suffix == ".xml")
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_PVXML, cur_chan, cur_time);
+					else if (suffix == ".vvd")
+						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_BRKXML, cur_chan, cur_time);
 				}
 				VolumeData* vd = 0;
 				if (loaded_num)
@@ -3306,16 +3433,39 @@ void VRenderFrame::OpenProject(wxString& filename)
 							else
 								vd->SetSampleRate(srate);
 						}
-						double resx, resy, resz;
-						if (fconfig.Read("x_res", &resx) &&
-							fconfig.Read("y_res", &resy) &&
-							fconfig.Read("z_res", &resz))
-							vd->SetSpacings(resx, resy, resz);
-						double sclx, scly, sclz;
-						if (fconfig.Read("x_scl", &sclx) &&
-							fconfig.Read("y_scl", &scly) &&
-							fconfig.Read("z_scl", &sclz))
-							vd->SetScalings(sclx, scly, sclz);
+
+						//spacings and scales
+						if (!vd->isBrxml())
+						{
+							if (fconfig.Read("res", &str))
+							{
+								double resx, resy, resz;
+								if (SSCANF(str.c_str(), "%lf%lf%lf", &resx, &resy, &resz))
+									vd->SetSpacings(resx, resy, resz);
+							}
+						}
+						else
+						{
+							if (fconfig.Read("b_res", &str))
+							{
+								double b_resx, b_resy, b_resz;
+								if (SSCANF(str.c_str(), "%lf%lf%lf", &b_resx, &b_resy, &b_resz))
+									vd->SetBaseSpacings(b_resx, b_resy, b_resz);
+							}
+							if (fconfig.Read("s_res", &str))
+							{
+								double s_resx, s_resy, s_resz;
+								if (SSCANF(str.c_str(), "%lf%lf%lf", &s_resx, &s_resy, &s_resz))
+									vd->SetSpacingScales(s_resx, s_resy, s_resz);
+							}
+						}
+						if (fconfig.Read("scl", &str))
+						{
+							double sclx, scly, sclz;
+							if (SSCANF(str.c_str(), "%lf%lf%lf", &sclx, &scly, &sclz))
+								vd->SetScalings(sclx, scly, sclz);
+						}
+
 						vector<Plane*> *planes = 0;
 						if (vd->GetVR())
 							planes = vd->GetVR()->get_planes();
@@ -3413,6 +3563,8 @@ void VRenderFrame::OpenProject(wxString& filename)
 							vd->SetColormapMode(iVal);
 						if (fconfig.Read("colormap", &iVal))
 							vd->SetColormap(iVal);
+						if (fconfig.Read("colormap_proj", &iVal))
+							vd->SetColormapProj(iVal);
 						double low, high;
 						if (fconfig.Read("colormap_lo_value", &low) &&
 							fconfig.Read("colormap_hi_value", &high))
@@ -4124,15 +4276,20 @@ void VRenderFrame::OpenProject(wxString& filename)
 				OnSelection(2, 0, 0, vd);
 			}
 		}
-		bool link;
-		if (fconfig.Read("chann_link", &link))
-			m_clip_view->SetChannLink(link);
-		if (fconfig.Read("x_link", &link))
-			m_clip_view->SetXLink(link);
-		if (fconfig.Read("y_link", &link))
-			m_clip_view->SetYLink(link);
-		if (fconfig.Read("z_link", &link))
-			m_clip_view->SetZLink(link);
+		bool bval;
+		if (fconfig.Read("chann_link", &bval))
+			m_clip_view->SetChannLink(bval);
+		if (fconfig.Read("hold planes", &bval))
+			m_clip_view->SetHoldPlanes(bval);
+		int mode;
+		if (fconfig.Read("plane mode", &mode))
+			m_clip_view->SetPlaneMode(static_cast<PLANE_MODES>(mode));
+		if (fconfig.Read("x_link", &bval))
+			m_clip_view->SetXLink(bval);
+		if (fconfig.Read("y_link", &bval))
+			m_clip_view->SetYLink(bval);
+		if (fconfig.Read("z_link", &bval))
+			m_clip_view->SetZLink(bval);
 	}
 
 	//movie panel
