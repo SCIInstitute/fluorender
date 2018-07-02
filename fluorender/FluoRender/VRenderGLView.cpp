@@ -500,13 +500,6 @@ VRenderGLView::~VRenderGLView()
 			delete m_ruler_list[i];
 	}
 
-	if (glIsBuffer(m_misc_vbo))
-		glDeleteBuffers(1, &m_misc_vbo);
-	if (glIsBuffer(m_misc_ibo))
-		glDeleteBuffers(1, &m_misc_ibo);
-	if (glIsVertexArray(m_misc_vao))
-		glDeleteVertexArrays(1, &m_misc_vao);
-
 	if (!m_sharedRC)
 		delete m_glRC;
 
@@ -569,9 +562,6 @@ void VRenderGLView::Init()
 			vr_frame->GetSettingDlg()->UpdateTextureSize();
 		}
 		//glViewport(0, 0, (GLint)(GetSize().x), (GLint)(GetSize().y));
-		glGenBuffers(1, &m_misc_vbo);
-		glGenBuffers(1, &m_misc_ibo);
-		glGenVertexArrays(1, &m_misc_vao);
 		glEnable(GL_MULTISAMPLE);
 
 		m_initialized = true;
@@ -11189,6 +11179,8 @@ void VRenderGLView::AddRulerPoint(int mx, int my)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
 		vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
+
+	TextureRenderer::vertex_array_manager_.set_dirty(VA_Rulers);
 }
 
 void VRenderGLView::AddPaintRulerPoint()
@@ -11233,12 +11225,15 @@ void VRenderGLView::AddPaintRulerPoint()
 		if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
 			vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
 	}
+
+	TextureRenderer::vertex_array_manager_.set_dirty(VA_Rulers);
 }
 
-void VRenderGLView::DrawRulers()
+unsigned int VRenderGLView::DrawRulersVerts(
+	vector<float> &verts, vector<unsigned int> &nums)
 {
 	if (!m_text_renderer)
-		return;
+		return 0;
 
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
@@ -11248,22 +11243,20 @@ void VRenderGLView::DrawRulers()
 	float w = m_text_renderer->GetSize() / 4.0f;
 	float px, py, p2x, p2y;
 
-	vector<float> verts;
-	int vert_num = 0;
-	for (size_t i = 0; i<m_ruler_list.size(); ++i)
-		if (m_ruler_list[i])
-			vert_num += m_ruler_list[i]->GetNumPoint();
-	verts.reserve(vert_num * 10 * 3);
-
+	unsigned int num = 0;
 	Transform mv;
 	Transform p;
 	mv.set(glm::value_ptr(m_mv_mat));
 	p.set(glm::value_ptr(m_proj_mat));
 	Point p1, p2;
-	unsigned int num;
-	vector<unsigned int> nums;
-	Color color;
+	Color c;
 	Color text_color = GetTextColor();
+
+	int vert_num = 0;
+	for (size_t i = 0; i<m_ruler_list.size(); ++i)
+		if (m_ruler_list[i])
+			vert_num += m_ruler_list[i]->GetNumPoint();
+	verts.reserve(vert_num * 10 * 3 * 2);
 
 	for (size_t i = 0; i<m_ruler_list.size(); i++)
 	{
@@ -11275,9 +11268,9 @@ void VRenderGLView::DrawRulers()
 		{
 			num = 0;
 			if (ruler->GetUseColor())
-				color = ruler->GetColor();
+				c = ruler->GetColor();
 			else
-				color = text_color;
+				c = text_color;
 			for (size_t j = 0; j<ruler->GetNumPoint(); ++j)
 			{
 				p2 = *(ruler->GetPoint(j));
@@ -11289,23 +11282,31 @@ void VRenderGLView::DrawRulers()
 				px = (p2.x() + 1.0)*nx / 2.0;
 				py = (p2.y() + 1.0)*ny / 2.0;
 				verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
+				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 				verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
+				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 				verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
+				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 				verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
+				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 				verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
+				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 				verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
+				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 				verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
+				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 				verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
+				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 				num += 8;
-				if (j + 1 == ruler->GetNumPoint())
-				{
-					p2x = p2.x()*nx / 2.0;
-					p2y = p2.y()*ny / 2.0;
-					m_text_renderer->RenderText(
-						ruler->GetName().ToStdWstring(),
-						color,
-						(p2x + w)*sx, (p2y + w)*sy, sx, sy);
-				}
+				//if (j + 1 == ruler->GetNumPoint())
+				//{
+				//	p2x = p2.x()*nx / 2.0;
+				//	p2y = p2.y()*ny / 2.0;
+				//	m_text_renderer->RenderText(
+				//		ruler->GetName().ToStdWstring(),
+				//		color,
+				//		(p2x + w)*sx, (p2y + w)*sy, sx, sy);
+				//}
 				if (j > 0)
 				{
 					p1 = *(ruler->GetPoint(j - 1));
@@ -11315,9 +11316,11 @@ void VRenderGLView::DrawRulers()
 						(!m_persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
 						continue;
 					verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 					px = (p1.x() + 1.0)*nx / 2.0;
 					py = (p1.y() + 1.0)*ny / 2.0;
 					verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 					num += 2;
 				}
 			}
@@ -11338,12 +11341,14 @@ void VRenderGLView::DrawRulers()
 					px = (p1.x() + 1.0)*nx / 2.0;
 					py = (p1.y() + 1.0)*ny / 2.0;
 					verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 					p1 = center + v2*w;
 					p1 = mv.transform(p1);
 					p1 = p.transform(p1);
 					px = (p1.x() + 1.0)*nx / 2.0;
 					py = (p1.y() + 1.0)*ny / 2.0;
 					verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 					num += 2;
 				}
 			}
@@ -11351,62 +11356,50 @@ void VRenderGLView::DrawRulers()
 		}
 	}
 
-	if (!verts.empty())
+	return num;
+}
+
+void VRenderGLView::DrawRulers()
+{
+	glEnable(GL_LINE_SMOOTH);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	ShaderProgram* shader =
+		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR3);
+	if (shader)
 	{
-		glEnable(GL_LINE_SMOOTH);
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
-		glm::mat4 matrix = glm::ortho(float(0), float(nx), float(0), float(ny));
-
-		ShaderProgram* shader =
-			m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
-		if (shader)
-		{
-			if (!shader->valid())
-				shader->create();
-			shader->bind();
-		}
-		shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
-
-		glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float)*verts.size(), &verts[0], GL_DYNAMIC_DRAW);
-		glBindVertexArray(m_misc_vao);
-		glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
-
-		GLint pos = 0;
-		size_t j = 0;
-		for (size_t i = 0; i<m_ruler_list.size(); i++)
-		{
-			Ruler* ruler = m_ruler_list[i];
-			if (!ruler) continue;
-			if (!ruler->GetTimeDep() ||
-				(ruler->GetTimeDep() &&
-					ruler->GetTime() == m_tseq_cur_num))
-			{
-				num = 0;
-				if (ruler->GetUseColor())
-					color = ruler->GetColor();
-				else
-					color = text_color;
-				shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0);
-				glDrawArrays(GL_LINES, pos, (GLsizei)(nums[j++]));
-				pos += nums[j - 1];
-			}
-		}
-
-		glDisableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-
-		if (shader && shader->valid())
-			shader->release();
-
-		glDisable(GL_LINE_SMOOTH);
+		if (!shader->valid())
+			shader->create();
+		shader->bind();
 	}
+	glm::mat4 matrix = glm::ortho(float(0),
+		float(GetGLSize().x), float(0), float(GetGLSize().y));
+	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+
+	VertexArray* va_rulers =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Rulers);
+	if (va_rulers)
+	{
+		if (va_rulers->get_dirty())
+		{
+			vector<float> verts;
+			vector<unsigned int> nums;
+			unsigned int num = DrawRulersVerts(verts, nums);
+			if (num)
+			{
+				va_rulers->buffer_data(VABuf_Coord,
+					sizeof(float)*verts.size(),
+					&verts[0], GL_STREAM_DRAW);
+				va_rulers->set_param(0, num);
+			}
+			va_rulers->draw();
+		}
+	}
+
+	if (shader && shader->valid())
+		shader->release();
+	glDisable(GL_LINE_SMOOTH);
 }
 
 vector<Ruler*>* VRenderGLView::GetRulerList()

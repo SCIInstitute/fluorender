@@ -520,6 +520,7 @@ public:
 	bool GetRulerFinished();
 	void AddRulerPoint(int mx, int my);
 	void AddPaintRulerPoint();
+	unsigned int DrawRulersVerts(vector<float> &verts, vector<unsigned int> &nums);
 	void DrawRulers();
 	vector<Ruler*>* GetRulerList();
 	Ruler* GetRuler(unsigned int id);
@@ -708,8 +709,6 @@ private:
 	GLuint m_cur_framebuffer;
 	//paint buffer
 	bool m_clear_paint;
-	//vert buffer
-	GLuint m_misc_vbo, m_misc_ibo, m_misc_vao;
 
 	//camera controls
 	bool m_persp;

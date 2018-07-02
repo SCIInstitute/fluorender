@@ -774,7 +774,8 @@ namespace FLIVR
 			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const GLvoid*)0);
 			va->attrib_pointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const GLvoid*)12);
 		}
-		else if (type == VA_Traces)
+		else if (type == VA_Traces ||
+			type == VA_Rulers)
 		{
 			//create vertex buffer
 			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);

@@ -1315,6 +1315,7 @@ void TraceDlg::OnConvertToRulers(wxCommandEvent& event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetMeasureDlg())
 		vr_frame->GetMeasureDlg()->GetSettings(m_view);
+	TextureRenderer::vertex_array_manager_.set_dirty(VA_Rulers);
 }
 
 void TraceDlg::OnConvertConsistent(wxCommandEvent &event)

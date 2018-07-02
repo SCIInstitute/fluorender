@@ -80,6 +80,7 @@ namespace FLIVR
 		VA_Grad_Bkg,
 		VA_Color_Map,
 		VA_Traces,
+		VA_Rulers,
 	};
 	class VertexArray
 	{
@@ -123,6 +124,7 @@ namespace FLIVR
 		inline void draw_grad_bkg();
 		inline void draw_color_map();
 		inline void draw_traces();
+		inline void draw_rulers();
 		//clipping planes are drawn differently
 		inline void draw_clip_plane(int plane, bool border);
 		inline void draw_cam_jack(int axis);//0-x; 1-y; 2-z
@@ -340,6 +342,9 @@ namespace FLIVR
 		case VA_Traces:
 			draw_traces();
 			break;
+		case VA_Rulers:
+			draw_rulers();
+			break;
 		}
 		//disable attrib array
 		for (auto it = attrib_pointer_list_.begin();
@@ -448,6 +453,18 @@ namespace FLIVR
 	}
 
 	inline void VertexArray::draw_traces()
+	{
+		//get array number
+		int num = 0;
+		auto param = param_list_.find(0);
+		if (param != param_list_.end())
+			num = int(param->second + 0.5);
+
+		//draw
+		glDrawArrays(GL_LINES, 0, num);
+	}
+
+	inline void VertexArray::draw_rulers()
 	{
 		//get array number
 		int num = 0;
