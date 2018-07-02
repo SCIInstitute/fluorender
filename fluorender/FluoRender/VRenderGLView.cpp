@@ -11754,7 +11754,6 @@ void VRenderGLView::GetTraces(bool update)
 	m_trace_group->SetCurTime(m_tseq_cur_num);
 	m_trace_group->SetPrvTime(m_tseq_cur_num);
 	m_trace_group->UpdateCellList(sel_labels);
-	TextureRenderer::vertex_array_manager_.set_dirty(VA_Traces);
 
 	//add traces to trace dialog
 	if (update)

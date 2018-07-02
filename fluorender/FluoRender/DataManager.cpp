@@ -3466,6 +3466,7 @@ TraceGroup::~TraceGroup()
 void TraceGroup::SetCurTime(int time)
 {
 	m_cur_time = time;
+	TextureRenderer::vertex_array_manager_.set_dirty(VA_Traces);
 }
 
 int TraceGroup::GetCurTime()
@@ -3510,6 +3511,7 @@ void TraceGroup::GetLinkLists(size_t frame,
 void TraceGroup::ClearCellList()
 {
 	m_cell_list.clear();
+	TextureRenderer::vertex_array_manager_.set_dirty(VA_Traces);
 }
 
 //cur_sel_list: ids from previous time point
@@ -3546,6 +3548,8 @@ void TraceGroup::UpdateCellList(FL::CellList &cur_sel_list)
 		cur_sel_list, m_cell_list,
 		(unsigned int)m_prv_time,
 		(unsigned int)m_cur_time);
+
+	TextureRenderer::vertex_array_manager_.set_dirty(VA_Traces);
 }
 
 FL::CellList &TraceGroup::GetCellList()
