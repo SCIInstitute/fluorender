@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _TEXTRENDERER_H_
 #define _TEXTRENDERER_H_
 
-#include <glew.h>
 #include <string>
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -63,10 +62,7 @@ private:
 
 	bool m_init_gl;
 	//gl
-	GLuint m_tex;
-	GLuint m_vbo, m_vao;
-	GLuint m_prog;
-	GLint m_color_loc;
+	unsigned int m_tex;
 };
 
 #endif//_TEXTRENDERER_H_

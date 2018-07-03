@@ -236,6 +236,7 @@ namespace FLIVR
 		switch (type_)
 		{
 		case VA_Norm_Square:
+		case VA_Text:
 		default:
 			break;
 		case VA_Norm_Square_d:
@@ -792,6 +793,24 @@ namespace FLIVR
 			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)0);
 			va->attrib_pointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)12);
 			va->dirty_ = true;
+		}
+		if (type == VA_Text)
+		{
+			//create vertex buffer
+			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
+			vb->create();
+			vb_list_.push_back(vb);
+			//assign data
+			float points[] = {
+				0.0f, 0.0f, 0.0f, 0.0f,
+				1.0f, 0.0f, 1.0f, 0.0f,
+				0.0f, 1.0f, 0.0f, 1.0f,
+				1.0f, 1.0f, 1.0f, 1.0f};
+			vb->data(sizeof(float) * 16, points, GL_STATIC_DRAW);
+			//attach buffer
+			va->attach_buffer(vb);
+			//set attrib
+			va->attrib_pointer(0, 4, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)0);
 		}
 		//unbind
 		va->unbind();

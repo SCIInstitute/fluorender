@@ -81,6 +81,7 @@ namespace FLIVR
 		VA_Color_Map,
 		VA_Traces,
 		VA_Rulers,
+		VA_Text,
 	};
 	class VertexArray
 	{
@@ -316,6 +317,7 @@ namespace FLIVR
 		{
 		case VA_Norm_Square:
 		case VA_Norm_Square_d:
+		case VA_Text:
 			draw_norm_square();
 			break;
 		case VA_Brush_Circles:
