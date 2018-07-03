@@ -158,6 +158,7 @@ void TextRenderer::RenderText(const wstring& text, Color &color,
 		TextureRenderer::vertex_array_manager_.vertex_array(VA_Text);
 	if (va_text && shader)
 	{
+		va_text->draw_begin();
 		const wchar_t *p;
 		for(p = text.c_str(); *p; p++)
 		{
@@ -190,11 +191,12 @@ void TextRenderer::RenderText(const wstring& text, Color &color,
 				x2, -y2, 0.0f, 1.0f
 			};
 			shader->setLocalParamMatrix(0, mat);
-			va_text->draw();
+			va_text->draw_norm_square();
 
 			x += (g->advance.x >> 6) * sx;
 			y += (g->advance.y >> 6) * sy;
 		}
+		va_text->draw_end();
 	}
 
 	glBindTexture(GL_TEXTURE_2D, 0);
