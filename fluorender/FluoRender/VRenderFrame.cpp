@@ -228,7 +228,7 @@ VRenderFrame::VRenderFrame(
 		"Open single or multiple volume data file(s)",
 		"Open single or multiple volume data file(s)");
 
-	bitmap = wxGetBitmapFromMemory(importvolume);
+	bitmap = wxGetBitmapFromMemory(icon_import);
 #ifdef _DARWIN
 	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
 #endif
@@ -650,7 +650,7 @@ VRenderFrame::VRenderFrame(
 	m_top_file->Append(m);
 
 	m = new wxMenuItem(m_top_file, ID_ImportVolume, wxT("Import &Volume"));
-	m->SetBitmap(wxGetBitmapFromMemory(importvolume));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_import_mini));
 	m_top_file->Append(m);
 
 	m = new wxMenuItem(m_top_file,ID_OpenMesh, wxT("Open &Mesh"));
