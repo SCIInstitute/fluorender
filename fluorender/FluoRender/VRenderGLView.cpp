@@ -11179,8 +11179,6 @@ void VRenderGLView::AddRulerPoint(int mx, int my)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
 		vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
-
-	TextureRenderer::vertex_array_manager_.set_dirty(VA_Rulers);
 }
 
 void VRenderGLView::AddPaintRulerPoint()
@@ -11225,39 +11223,33 @@ void VRenderGLView::AddPaintRulerPoint()
 		if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
 			vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
 	}
-
-	TextureRenderer::vertex_array_manager_.set_dirty(VA_Rulers);
 }
 
-unsigned int VRenderGLView::DrawRulersVerts(
-	vector<float> &verts, vector<unsigned int> &nums)
+unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 {
-	if (!m_text_renderer)
-		return 0;
-
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
-	float sx, sy;
-	sx = 2.0 / nx;
-	sy = 2.0 / ny;
-	float w = m_text_renderer->GetSize() / 4.0f;
-	float px, py, p2x, p2y;
+	float w = 3.5;
+	if (m_text_renderer)
+		w = m_text_renderer->GetSize() / 4.0f;
+	float px, py;
 
-	unsigned int num = 0;
 	Transform mv;
 	Transform p;
 	mv.set(glm::value_ptr(m_mv_mat));
 	p.set(glm::value_ptr(m_proj_mat));
-	Point p1, p2;
-	Color c;
-	Color text_color = GetTextColor();
 
+	//estimate
 	int vert_num = 0;
 	for (size_t i = 0; i<m_ruler_list.size(); ++i)
 		if (m_ruler_list[i])
 			vert_num += m_ruler_list[i]->GetNumPoint();
 	verts.reserve(vert_num * 10 * 3 * 2);
 
+	unsigned int num = 0;
+	Point p1, p2;
+	Color c;
+	Color text_color = GetTextColor();
 	for (size_t i = 0; i<m_ruler_list.size(); i++)
 	{
 		Ruler* ruler = m_ruler_list[i];
@@ -11266,7 +11258,6 @@ unsigned int VRenderGLView::DrawRulersVerts(
 			(ruler->GetTimeDep() &&
 				ruler->GetTime() == m_tseq_cur_num))
 		{
-			num = 0;
 			if (ruler->GetUseColor())
 				c = ruler->GetColor();
 			else
@@ -11298,15 +11289,6 @@ unsigned int VRenderGLView::DrawRulersVerts(
 				verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
 				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 				num += 8;
-				//if (j + 1 == ruler->GetNumPoint())
-				//{
-				//	p2x = p2.x()*nx / 2.0;
-				//	p2y = p2.y()*ny / 2.0;
-				//	m_text_renderer->RenderText(
-				//		ruler->GetName().ToStdWstring(),
-				//		color,
-				//		(p2x + w)*sx, (p2y + w)*sy, sx, sy);
-				//}
 				if (j > 0)
 				{
 					p1 = *(ruler->GetPoint(j - 1));
@@ -11352,7 +11334,6 @@ unsigned int VRenderGLView::DrawRulersVerts(
 					num += 2;
 				}
 			}
-			nums.push_back(num);
 		}
 	}
 
@@ -11361,6 +11342,8 @@ unsigned int VRenderGLView::DrawRulersVerts(
 
 void VRenderGLView::DrawRulers()
 {
+	if (m_ruler_list.empty())
+		return;
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -11381,18 +11364,14 @@ void VRenderGLView::DrawRulers()
 		TextureRenderer::vertex_array_manager_.vertex_array(VA_Rulers);
 	if (va_rulers)
 	{
-		if (va_rulers->get_dirty())
+		vector<float> verts;
+		unsigned int num = DrawRulersVerts(verts);
+		if (num)
 		{
-			vector<float> verts;
-			vector<unsigned int> nums;
-			unsigned int num = DrawRulersVerts(verts, nums);
-			if (num)
-			{
-				va_rulers->buffer_data(VABuf_Coord,
-					sizeof(float)*verts.size(),
-					&verts[0], GL_STREAM_DRAW);
-				va_rulers->set_param(0, num);
-			}
+			va_rulers->buffer_data(VABuf_Coord,
+				sizeof(float)*verts.size(),
+				&verts[0], GL_DYNAMIC_DRAW);
+			va_rulers->set_param(0, num);
 			va_rulers->draw();
 		}
 	}
@@ -11400,6 +11379,48 @@ void VRenderGLView::DrawRulers()
 	if (shader && shader->valid())
 		shader->release();
 	glDisable(GL_LINE_SMOOTH);
+
+	//draw text
+	if (!m_text_renderer)
+		return;
+	float w = m_text_renderer->GetSize() / 4.0f;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
+	float sx, sy;
+	sx = 2.0 / nx;
+	sy = 2.0 / ny;
+	Color c;
+	Color text_color = GetTextColor();
+	Point p2;
+	float px, py, p2x, p2y;
+	Transform mv;
+	Transform p;
+	mv.set(glm::value_ptr(m_mv_mat));
+	p.set(glm::value_ptr(m_proj_mat));
+	for (size_t i = 0; i < m_ruler_list.size(); i++)
+	{
+		Ruler* ruler = m_ruler_list[i];
+		if (!ruler) continue;
+		if (!ruler->GetTimeDep() ||
+			(ruler->GetTimeDep() &&
+				ruler->GetTime() == m_tseq_cur_num))
+		{
+			if (ruler->GetUseColor())
+				c = ruler->GetColor();
+			else
+				c = text_color;
+			size_t j = ruler->GetNumPoint() - 1;
+			p2 = *(ruler->GetPoint(j));
+			p2 = mv.transform(p2);
+			p2 = p.transform(p2);
+			p2x = p2.x()*nx / 2.0;
+			p2y = p2.y()*ny / 2.0;
+			m_text_renderer->RenderText(
+				ruler->GetName().ToStdWstring(),
+				c,
+				(p2x + w)*sx, (p2y + w)*sy, sx, sy);
+		}
+	}
 }
 
 vector<Ruler*>* VRenderGLView::GetRulerList()
@@ -11650,7 +11671,8 @@ void VRenderGLView::ExportTrace(wxString filename, unsigned int id)
 
 void VRenderGLView::DrawTraces()
 {
-	if (m_cur_vol && m_trace_group && m_text_renderer)
+	if (m_cur_vol &&
+		m_trace_group)
 	{
 		glEnable(GL_LINE_SMOOTH);
 		glEnable(GL_DEPTH_TEST);

@@ -520,7 +520,7 @@ public:
 	bool GetRulerFinished();
 	void AddRulerPoint(int mx, int my);
 	void AddPaintRulerPoint();
-	unsigned int DrawRulersVerts(vector<float> &verts, vector<unsigned int> &nums);
+	unsigned int DrawRulersVerts(vector<float> &verts);
 	void DrawRulers();
 	vector<Ruler*>* GetRulerList();
 	Ruler* GetRuler(unsigned int id);
