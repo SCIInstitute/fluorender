@@ -258,7 +258,7 @@ void TextRenderer::RenderText(const wstring& text, Color &color,
 			{x2 + w, -y2 - h, 1, 1},
 		};
 
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*16, box, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*16, box, GL_STREAM_DRAW);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 		x += (g->advance.x >> 6) * sx;

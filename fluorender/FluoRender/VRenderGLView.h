@@ -784,7 +784,6 @@ private:
 	int m_frame_h;
 
 	//post image processing
-	static ImgShaderFactory m_img_shader_factory;
 	Color m_gamma;
 	Color m_brightness;
 	Color m_hdr;

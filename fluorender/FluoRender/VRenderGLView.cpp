@@ -39,7 +39,6 @@ DEALINGS IN THE SOFTWARE.
 #include "png_resource.h"
 #include "img/icons.h"
 
-ImgShaderFactory VRenderGLView::m_img_shader_factory;
 bool VRenderGLView::m_linked_rot = false;
 VRenderGLView* VRenderGLView::m_master_linked_view = 0;
 bool VRenderGLView::m_enlarge = false;
@@ -1703,7 +1702,7 @@ void VRenderGLView::DrawCircles(double cx, double cy,
 	double r1, double r2, Color &color, glm::mat4 &matrix)
 {
 	ShaderProgram* shader =
-		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+		TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -1850,7 +1849,7 @@ void VRenderGLView::PaintStroke()
 	{
 		//paint shader
 		ShaderProgram* paint_shader =
-			m_img_shader_factory.shader(IMG_SHDR_PAINT);
+			TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_PAINT);
 		if (paint_shader)
 		{
 			if (!paint_shader->valid())
@@ -1950,7 +1949,7 @@ void VRenderGLView::DisplayStroke()
 	glDisable(GL_DEPTH_TEST);
 
 	ShaderProgram* img_shader =
-		m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+		TextureRenderer::m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -2929,7 +2928,7 @@ void VRenderGLView::DrawFinalBuffer()
 
 	//2d adjustment
 	ShaderProgram* img_shader =
-		m_img_shader_factory.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
+		TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -3112,7 +3111,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 			glDisable(GL_DEPTH_TEST);
 
 			img_shader =
-				m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+				TextureRenderer::m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 			if (img_shader)
 			{
 				if (!img_shader->valid())
@@ -3186,7 +3185,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 		glDisable(GL_DEPTH_TEST);
 
 		img_shader =
-			m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+			TextureRenderer::m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 		if (img_shader)
 		{
 			if (!img_shader->valid())
@@ -3215,7 +3214,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 
 	//2d adjustment
 	img_shader =
-		m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+		TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -3305,7 +3304,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 			glDisable(GL_DEPTH_TEST);
 
 			img_shader =
-				m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+				TextureRenderer::m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 			if (img_shader)
 			{
 				if (!img_shader->valid())
@@ -3396,10 +3395,10 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 		{
 			//2d adjustment
 			if (vd->GetColormapProj())
-				img_shader = m_img_shader_factory.shader(
+				img_shader = TextureRenderer::m_img_shader_factory.shader(
 					IMG_SHDR_GRADIENT_PROJ_MAP, vd->GetColormap());
 			else
-				img_shader = m_img_shader_factory.shader(
+				img_shader = TextureRenderer::m_img_shader_factory.shader(
 					IMG_SHDR_GRADIENT_MAP, vd->GetColormap());
 			if (img_shader)
 			{
@@ -3418,7 +3417,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 		else
 		{
 			img_shader =
-				m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+				TextureRenderer::m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 		}
 
 		if (img_shader)
@@ -3475,7 +3474,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 		glDisable(GL_DEPTH_TEST);
 
 		img_shader =
-			m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+			TextureRenderer::m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 		if (img_shader)
 		{
 			if (!img_shader->valid())
@@ -3504,7 +3503,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 
 	//2d adjustment
 	img_shader =
-		m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+		TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -3598,7 +3597,7 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 	glDisable(GL_DEPTH_TEST);
 
 	ShaderProgram* img_shader =
-		m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+		TextureRenderer::m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -3679,7 +3678,7 @@ void VRenderGLView::DrawOLShadowsMesh(double darkness)
 
 	//2d adjustment
 	ShaderProgram* img_shader =
-		m_img_shader_factory.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
+		TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -3716,7 +3715,7 @@ void VRenderGLView::DrawOLShadowsMesh(double darkness)
 
 	//2d adjustment
 	img_shader =
-		m_img_shader_factory.shader(IMG_SHDR_GRADIENT_TO_SHADOW_MESH);
+		TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_GRADIENT_TO_SHADOW_MESH);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -3917,7 +3916,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 
 		//2d adjustment
 		ShaderProgram* img_shader =
-			m_img_shader_factory.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
+			TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
 		if (img_shader)
 		{
 			if (!img_shader->valid())
@@ -3954,7 +3953,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 
 		//2d adjustment
 		img_shader =
-			m_img_shader_factory.shader(IMG_SHDR_GRADIENT_TO_SHADOW);
+			TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_GRADIENT_TO_SHADOW);
 		if (img_shader)
 		{
 			if (!img_shader->valid())
@@ -4095,7 +4094,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 
 	//2d adjustment
 	ShaderProgram* img_shader =
-		m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+		TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -5543,7 +5542,7 @@ void VRenderGLView::PostDraw()
 
 			//2d adjustment
 			ShaderProgram* img_shader =
-				m_img_shader_factory.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
+				TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
 			if (img_shader)
 			{
 				if (!img_shader->valid())
@@ -8353,7 +8352,7 @@ void VRenderGLView::DrawBounds()
 	glDisable(GL_BLEND);
 
 	ShaderProgram* shader =
-		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+		TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -8429,7 +8428,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		glDisable(GL_CULL_FACE);
 
 	ShaderProgram* shader =
-		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+		TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -8693,7 +8692,7 @@ void VRenderGLView::DrawGrid()
 	glDisable(GL_BLEND);
 
 	ShaderProgram* shader =
-		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+		TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -8740,7 +8739,7 @@ void VRenderGLView::DrawCamCtr()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 	ShaderProgram* shader =
-		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+		TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -8780,7 +8779,7 @@ void VRenderGLView::DrawFrame()
 
 	glDisable(GL_DEPTH_TEST);
 	ShaderProgram* shader =
-		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+		TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -8872,7 +8871,7 @@ void VRenderGLView::DrawScaleBar()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 	ShaderProgram* shader =
-		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+		TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -9048,7 +9047,7 @@ void VRenderGLView::DrawName(
 	glDisable(GL_BLEND);
 	glDisable(GL_CULL_FACE);
 	ShaderProgram* shader =
-		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+		TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -9153,7 +9152,7 @@ void VRenderGLView::DrawGradBg()
 	vertex.push_back(m_bg_color.r()); vertex.push_back(m_bg_color.g()); vertex.push_back(m_bg_color.b());
 
 	ShaderProgram* shader =
-		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR3);
+		TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR3);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -9501,7 +9500,7 @@ void VRenderGLView::DrawColormap()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	ShaderProgram* shader =
-		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR4);
+		TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR4);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -11349,7 +11348,7 @@ void VRenderGLView::DrawRulers()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	ShaderProgram* shader =
-		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR3);
+		TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR3);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -11370,7 +11369,7 @@ void VRenderGLView::DrawRulers()
 		{
 			va_rulers->buffer_data(VABuf_Coord,
 				sizeof(float)*verts.size(),
-				&verts[0], GL_DYNAMIC_DRAW);
+				&verts[0], GL_STREAM_DRAW);
 			va_rulers->set_param(0, num);
 			va_rulers->draw();
 		}
@@ -11686,7 +11685,7 @@ void VRenderGLView::DrawTraces()
 		matrix = m_proj_mat*matrix;
 
 		ShaderProgram* shader =
-			m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR3);
+			TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR3);
 		if (shader)
 		{
 			if (!shader->valid())
