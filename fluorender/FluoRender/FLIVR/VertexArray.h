@@ -410,10 +410,10 @@ namespace FLIVR
 	{
 		if (border)
 			glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT,
-				reinterpret_cast<const GLvoid*>(plane));
+				reinterpret_cast<const GLvoid*>(__int64(plane)));
 		else
 			glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT,
-				reinterpret_cast<const GLvoid*>(plane));
+				reinterpret_cast<const GLvoid*>(__int64(plane)));
 	}
 
 	inline void VertexArray::draw_grid()

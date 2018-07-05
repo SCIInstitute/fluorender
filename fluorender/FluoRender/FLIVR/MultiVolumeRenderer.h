@@ -41,6 +41,7 @@ using namespace std;
 namespace FLIVR
 {
 	class Framebuffer;
+	class VertexArray;
 	class MultiVolumeRenderer
 	{
 	public:
@@ -165,7 +166,8 @@ namespace FLIVR
 		//soft threshold
 		static double sw_;
 
-		GLuint m_slices_vbo, m_slices_ibo, m_slices_vao;
+		//vertex array for rendering slices
+		VertexArray* va_slices_;
 		void draw_polygons_vol(
 			vector<float>& vertex,
 			vector<uint32_t>& index,

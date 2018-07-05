@@ -1222,9 +1222,9 @@ namespace FLIVR
 	}
 
 	void TextureRenderer::draw_polygons(vector<float>& vertex,
-		vector<uint32_t>& triangle_verts)
+		vector<uint32_t>& index)
 	{
-		if (vertex.empty() || triangle_verts.empty())
+		if (vertex.empty() || index.empty())
 			return;
 
 		bool set_pointers = false;
@@ -1239,8 +1239,8 @@ namespace FLIVR
 				VABuf_Coord, sizeof(float)*vertex.size(),
 				&vertex[0], GL_STREAM_DRAW);
 			va_slices_->buffer_data(
-				VABuf_Index, sizeof(uint32_t)*triangle_verts.size(),
-				&triangle_verts[0], GL_STREAM_DRAW);
+				VABuf_Index, sizeof(uint32_t)*index.size(),
+				&index[0], GL_STREAM_DRAW);
 			if (set_pointers)
 			{
 				va_slices_->attrib_pointer(
@@ -1254,7 +1254,7 @@ namespace FLIVR
 			}
 			va_slices_->draw_begin();
 			va_slices_->draw_elements(
-				GL_TRIANGLES, triangle_verts.size(),
+				GL_TRIANGLES, index.size(),
 				GL_UNSIGNED_INT, 0);
 			va_slices_->draw_end();
 		}
@@ -1298,10 +1298,9 @@ namespace FLIVR
 			for (unsigned int i = 0, k = 0; i < size.size(); ++i)
 			{
 				idx_num = (size[i] - 2) * 3;
-				//glDrawElements(GL_TRIANGLES, idx_num, GL_UNSIGNED_INT, reinterpret_cast<const GLvoid*> (k));
 				va_wirefm_->draw_elements(
 					GL_TRIANGLES, idx_num, GL_UNSIGNED_INT,
-					reinterpret_cast<const GLvoid*> (k));
+					reinterpret_cast<const GLvoid*>(__int64(k)));
 				k += idx_num * 4;
 			}
 			va_wirefm_->draw_end();
