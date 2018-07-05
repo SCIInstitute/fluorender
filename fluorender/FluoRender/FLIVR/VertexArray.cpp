@@ -76,6 +76,12 @@ namespace FLIVR
 
 	void VertexArray::destroy()
 	{
+		if (type_ == VA_Unmanaged)
+		{
+			for (auto it = buffer_list_.begin();
+				it != buffer_list_.end(); ++it)
+				delete *it;
+		}
 		glDeleteVertexArrays(1, &id_);
 		id_ = 0;
 		valid_ = false;
@@ -410,7 +416,7 @@ namespace FLIVR
 			index.push_back(0); index.push_back(4); index.push_back(6); index.push_back(2);
 			index.push_back(5); index.push_back(1); index.push_back(7); index.push_back(3);
 			index.push_back(5); index.push_back(1); index.push_back(3); index.push_back(7);
-			buffer_data(VABuf_index,
+			buffer_data(VABuf_Index,
 				sizeof(uint32_t)*index.size(),
 				&index[0], GL_STATIC_DRAW);
 		}
@@ -612,12 +618,15 @@ namespace FLIVR
 		//add to list
 		va_list_.push_back(va);
 		va->bind();
+		//create vertex buffer
+		VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
+		vb->create();
+		//add to list
+		vb_list_.push_back(vb);
+		//attach buffer
+		va->attach_buffer(vb);
 		if (type == VA_Norm_Square)
 		{
-			//create vertex buffer
-			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
-			vb->create();
-			vb_list_.push_back(vb);
 			//assign data
 			float points[] = {
 				-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
@@ -625,20 +634,12 @@ namespace FLIVR
 				-1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
 				1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f };
 			vb->data(sizeof(float) * 24, points, GL_STATIC_DRAW);
-			//attach buffer
-			va->attach_buffer(vb);
 			//set attrib
 			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)0);
 			va->attrib_pointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)12);
 		}
 		else if (type == VA_Norm_Square_d)
 		{
-			//create vertex buffer
-			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
-			vb->create();
-			vb_list_.push_back(vb);
-			//attach buffer
-			va->attach_buffer(vb);
 			//set param
 			va->set_param(0, 0.0);
 			//set attrib
@@ -647,12 +648,6 @@ namespace FLIVR
 		}
 		else if (type == VA_Brush_Circles)
 		{
-			//create vertex buffer
-			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
-			vb->create();
-			vb_list_.push_back(vb);
-			//attach buffer
-			va->attach_buffer(vb);
 			//set param
 			std::vector<std::pair<unsigned int, double>> params;
 			params.push_back(std::pair<unsigned int, double>(0, 10.0));
@@ -664,12 +659,6 @@ namespace FLIVR
 		}
 		else if (type == VA_Bound_Cube)
 		{
-			//create vertex buffer
-			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
-			vb->create();
-			vb_list_.push_back(vb);
-			//attach buffer
-			va->attach_buffer(vb);
 			//set param
 			BBox bbox(Point(0.0), Point(1.0));
 			va->set_param(bbox);
@@ -678,14 +667,8 @@ namespace FLIVR
 		}
 		else if (type == VA_Clip_Planes)
 		{
-			//create vertex buffer
-			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
-			vb->create();
-			vb_list_.push_back(vb);
-			//attach buffer
-			va->attach_buffer(vb);
 			//index buffer
-			vb = new VertexBuffer(VABuf_index);
+			vb = new VertexBuffer(VABuf_Index);
 			vb->create();
 			vb_list_.push_back(vb);
 			//attach buffer
@@ -698,12 +681,6 @@ namespace FLIVR
 		}
 		else if (type == VA_Grid)
 		{
-			//create vertex buffer
-			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
-			vb->create();
-			vb_list_.push_back(vb);
-			//attach buffer
-			va->attach_buffer(vb);
 			//set param
 			std::vector<std::pair<unsigned int, double>> params;
 			params.push_back(std::pair<unsigned int, double>(0, 5.0));
@@ -714,12 +691,6 @@ namespace FLIVR
 		}
 		else if (type == VA_Cam_Jack)
 		{
-			//create vertex buffer
-			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
-			vb->create();
-			vb_list_.push_back(vb);
-			//attach buffer
-			va->attach_buffer(vb);
 			//set param
 			va->set_param(0, 1.0);
 			//set attrib
@@ -729,12 +700,6 @@ namespace FLIVR
 			type == VA_Scale_Bar ||
 			type == VA_Legend_Squares)
 		{
-			//create vertex buffer
-			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
-			vb->create();
-			vb_list_.push_back(vb);
-			//attach buffer
-			va->attach_buffer(vb);
 			//set param
 			std::vector<std::pair<unsigned int, double>> params;
 			params.push_back(std::pair<unsigned int, double>(0, 0.0));
@@ -747,12 +712,6 @@ namespace FLIVR
 		}
 		else if (type == VA_Grad_Bkg)
 		{
-			//create vertex buffer
-			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
-			vb->create();
-			vb_list_.push_back(vb);
-			//attach buffer
-			va->attach_buffer(vb);
 			//set param
 			std::vector<float> list(48, 0.0);
 			va->set_param(list);
@@ -762,12 +721,6 @@ namespace FLIVR
 		}
 		else if (type == VA_Color_Map)
 		{
-			//create vertex buffer
-			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
-			vb->create();
-			vb_list_.push_back(vb);
-			//attach buffer
-			va->attach_buffer(vb);
 			//set param
 			std::vector<float> list(98, 0.0);
 			va->set_param(list);
@@ -778,12 +731,6 @@ namespace FLIVR
 		else if (type == VA_Traces ||
 			type == VA_Rulers)
 		{
-			//create vertex buffer
-			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
-			vb->create();
-			vb_list_.push_back(vb);
-			//attach buffer
-			va->attach_buffer(vb);
 			//set param
 			std::vector<float> vertex(12, 0.0);
 			va->buffer_data(VABuf_Coord,
@@ -796,10 +743,6 @@ namespace FLIVR
 		}
 		if (type == VA_Text)
 		{
-			//create vertex buffer
-			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
-			vb->create();
-			vb_list_.push_back(vb);
 			//assign data
 			float points[] = {
 				0.0f, 0.0f, 0.0f, 0.0f,
@@ -807,13 +750,40 @@ namespace FLIVR
 				0.0f, 1.0f, 0.0f, 1.0f,
 				1.0f, 1.0f, 1.0f, 1.0f};
 			vb->data(sizeof(float) * 16, points, GL_STATIC_DRAW);
-			//attach buffer
-			va->attach_buffer(vb);
 			//set attrib
 			va->attrib_pointer(0, 4, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)0);
 		}
 		//unbind
 		va->unbind();
+
+		return va;
+	}
+
+	VertexArray* VertexArrayManager::vertex_array(bool vbuf, bool ibuf)
+	{
+		//create new vertex array
+		VertexArray* va = new VertexArray(VA_Unmanaged);
+		va->create();
+		va->bind();
+
+		if (vbuf)
+		{
+			//create vertex buffer
+			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
+			vb->create();
+			//attach buffer
+			va->attach_buffer(vb);
+		}
+		if (ibuf)
+		{
+			//create vertex buffer
+			VertexBuffer* vb = new VertexBuffer(VABuf_Index);
+			vb->create();
+			//attach buffer
+			va->attach_buffer(vb);
+		}
+		//unbind
+		//va->unbind();
 
 		return va;
 	}

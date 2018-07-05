@@ -40,7 +40,7 @@ namespace FLIVR
 	enum VABufferType
 	{
 		VABuf_Coord = 0,
-		VABuf_index,
+		VABuf_Index,
 	};
 	class VertexArray;
 	class VertexArrayManager;
@@ -67,7 +67,8 @@ namespace FLIVR
 
 	enum VAType
 	{
-		VA_Norm_Square = 0,
+		VA_Unmanaged = 1,
+		VA_Norm_Square,
 		VA_Norm_Square_d,
 		VA_Brush_Circles,
 		VA_Bound_Cube,
@@ -115,6 +116,8 @@ namespace FLIVR
 
 		inline void draw_begin();
 		inline void draw_end();
+		inline void draw_arrays(GLenum, GLint, GLsizei);
+		inline void draw_elements(GLenum, GLsizei, GLenum, const GLvoid*);
 		inline void draw();
 		inline void draw_norm_square();
 		inline void draw_circles();
@@ -178,7 +181,8 @@ namespace FLIVR
 		VertexArrayManager();
 		~VertexArrayManager();
 
-		VertexArray* vertex_array(VAType type);
+		VertexArray* vertex_array(VAType type);//managed
+		VertexArray* vertex_array(bool, bool);//unmanaged
 		void set_dirty(VAType type);
 		void set_all_dirty();
 
@@ -219,7 +223,7 @@ namespace FLIVR
 				glBufferData(GL_ARRAY_BUFFER,
 					size, data, usage);
 				break;
-			case VABuf_index:
+			case VABuf_Index:
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id_);
 				glBufferData(GL_ELEMENT_ARRAY_BUFFER,
 					size, data, usage);
@@ -291,6 +295,20 @@ namespace FLIVR
 		for (auto it = attrib_pointer_list_.begin();
 			it != attrib_pointer_list_.end(); ++it)
 			glEnableVertexAttribArray(*it);
+	}
+
+	inline void VertexArray::draw_arrays(GLenum mode, GLint first, GLsizei count)
+	{
+		if (!valid_)
+			return;
+		glDrawArrays(mode, first, count);
+	}
+
+	inline void VertexArray::draw_elements(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices)
+	{
+		if (!valid_)
+			return;
+		glDrawElements(mode, count, type, indices);
 	}
 
 	inline void VertexArray::draw_end()

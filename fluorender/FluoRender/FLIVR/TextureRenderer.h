@@ -107,6 +107,7 @@ namespace FLIVR
 	class VolKernelFactory;
 	class FramebufferManager;
 	class ImgShaderFactory;
+	class VertexArray;
 	class VertexArrayManager;
 
 	struct TexParam
@@ -365,8 +366,9 @@ namespace FLIVR
 		glm::mat4 m_proj_mat;
 		glm::mat4 m_tex_mat;
 
-		//vertex and index buffer bind points
-		GLuint m_slices_vbo, m_slices_ibo, m_slices_vao;
+		//renderer manages vertex array objects
+		VertexArray* va_slices_;
+		VertexArray* va_wirefm_;
 
 		//compute view
 		Ray compute_view();
