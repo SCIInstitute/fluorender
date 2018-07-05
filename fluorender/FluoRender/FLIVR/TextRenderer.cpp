@@ -165,95 +165,22 @@ namespace FLIVR
 		return result;
 	}
 
-	//bool TextRenderer::m_init = false;
-	//FT_Library TextRenderer::m_ft;
 	TextTextureManager TextRenderer::text_texture_manager_;
 	TextRenderer::TextRenderer()
-		//: m_valid(false),
-		//m_size(14),
-		//m_init_gl(false),
-		//m_tex(0)
 	{
 	}
 
 	TextRenderer::~TextRenderer()
 	{
-		//if (glIsTexture(m_tex))
-		//	glDeleteTextures(1, &m_tex);
 	}
-
-	//void TextRenderer::LoadNewFace(const std::string &lib_name)
-	//{
-	//	FT_Error err;
-	//	if (!m_init)
-	//	{
-	//		err = FT_Init_FreeType(&m_ft);
-	//		if (!err)
-	//			m_init = true;
-	//	}
-
-	//	if (!m_init) return;
-
-	//	if (m_valid)
-	//	{
-	//		FT_Done_Face(m_face);
-	//		m_valid = false;
-	//	}
-
-	//	err = FT_New_Face(m_ft, lib_name.c_str(), 0, &m_face);
-	//	if (!err)
-	//		m_valid = true;
-
-	//	if (m_valid)
-	//	{
-	//		err = FT_Select_Charmap(m_face, FT_ENCODING_UNICODE);
-	//		err = FT_Set_Pixel_Sizes(m_face, 0, m_size);
-	//	}
-	//}
-
-	//void TextRenderer::SetSize(unsigned int size)
-	//{
-	//	if (!m_valid)
-	//		return;
-
-	//	FT_Set_Pixel_Sizes(m_face, 0, size);
-	//	m_size = size;
-	//}
-
-	//unsigned int TextRenderer::GetSize()
-	//{
-	//	if (!m_valid)
-	//		return 0;
-	//	else
-	//		return m_size;
-	//}
 
 	void TextRenderer::RenderText(const std::wstring& text, Color &color,
 		float x, float y, float sx, float sy)
 	{
-		//if (!m_valid)
-		//	return;
-
-		//GLint loc;
-		//if (!m_init_gl)
-		//{
-		//	//texture
-		//	glActiveTexture(GL_TEXTURE0);
-		//	glGenTextures(1, &m_tex);
-		//	glBindTexture(GL_TEXTURE_2D, m_tex);
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		//	m_init_gl = true;
-		//}
-
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		//glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 		ShaderProgram* shader =
 			TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_DRAW_TEXT);
@@ -265,9 +192,6 @@ namespace FLIVR
 			shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0f);
 		}
 
-		//texture
-		//glActiveTexture(GL_TEXTURE0);
-		//glBindTexture(GL_TEXTURE_2D, m_tex);
 		VertexArray* va_text =
 			TextureRenderer::vertex_array_manager_.vertex_array(VA_Text);
 		if (va_text && shader)
@@ -276,22 +200,6 @@ namespace FLIVR
 			const wchar_t *p;
 			for (p = text.c_str(); *p; p++)
 			{
-				//if (FT_Load_Char(m_face, *p, FT_LOAD_RENDER))
-				//	continue;
-
-				//FT_GlyphSlot g = m_face->glyph;
-
-				//glTexImage2D(
-				//	GL_TEXTURE_2D,
-				//	0,
-				//	GL_RED,
-				//	g->bitmap.width,
-				//	g->bitmap.rows,
-				//	0,
-				//	GL_RED,
-				//	GL_UNSIGNED_BYTE,
-				//	g->bitmap.buffer
-				//);
 				TextTexture* tex_p =
 					text_texture_manager_.text_texture(*p);
 				if (tex_p)
@@ -322,7 +230,6 @@ namespace FLIVR
 		glBindTexture(GL_TEXTURE_2D, 0);
 		if (shader && shader->valid())
 			shader->release();
-		//glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 		glDisable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
 	}
@@ -330,19 +237,13 @@ namespace FLIVR
 	float TextRenderer::RenderTextLen(std::wstring& text)
 	{
 		float len = 0.0f;
-		//if (!m_valid)
-		//	return len;
 
 		const wchar_t *p;
 		for (p = text.c_str(); *p; p++)
 		{
-			//if (FT_Load_Char(m_face, *p, FT_LOAD_RENDER))
-			//	continue;
 			TextTexture* tex_p =
 				text_texture_manager_.text_texture(*p);
 			if (tex_p)
-			//{
-			//FT_GlyphSlot g = m_face->glyph;
 				len += tex_p->width_;
 		}
 		return len;

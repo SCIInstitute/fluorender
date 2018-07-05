@@ -376,8 +376,6 @@ VRenderFrame::VRenderFrame(
 	else
 		font_file = exePath + GETSLASH() + "Fonts" +
 			GETSLASH() + "FreeSans.ttf";
-	//m_text_renderer = new FLIVR::TextRenderer(font_file.ToStdString());
-	//m_text_renderer->SetSize(m_setting_dlg->GetTextSize());
 	TextRenderer::text_texture_manager_.load_face(font_file.ToStdString());
 	TextRenderer::text_texture_manager_.SetSize(m_setting_dlg->GetTextSize());
 
@@ -813,8 +811,6 @@ VRenderFrame::~VRenderFrame()
 		VRenderView* vrv = m_vrv_list[i];
 		if (vrv) vrv->Clear();
 	}
-	//if (m_text_renderer)
-	//	delete m_text_renderer;
 	m_aui_mgr.UnInit();
 }
 

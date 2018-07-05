@@ -128,27 +128,12 @@ namespace FLIVR
 		TextRenderer();
 		~TextRenderer();
 
-		//void LoadNewFace(const std::string &lib_name);
-		//void SetSize(unsigned int size);
-		//unsigned int GetSize();
-
 		void RenderText(const std::wstring& text, Color &color,
 			float x, float y, float sx, float sy);
 		float RenderTextLen(std::wstring& text);
 
 	public:
 		static TextTextureManager text_texture_manager_;
-		//static FT_Library m_ft;
-		//static bool m_init;
-
-		//bool m_valid;
-		//FT_Face m_face;
-
-		//unsigned int m_size;
-
-		//bool m_init_gl;
-		////gl
-		//unsigned int m_tex;
 	};
 
 }
