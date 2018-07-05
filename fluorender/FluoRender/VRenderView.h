@@ -560,7 +560,7 @@ public:
 	void SaveDefault(unsigned int mask = 0xffffffff);
 
 	//text renderer
-	void SetTextRenderer(TextRenderer* text_renderer)
+	void SetTextRenderer(FLIVR::TextRenderer* text_renderer)
 	{ if (m_glview) m_glview->SetTextRenderer(text_renderer); }
 
 	//set full screen

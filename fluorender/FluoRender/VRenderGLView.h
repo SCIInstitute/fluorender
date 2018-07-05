@@ -33,7 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include "VolumeLoader.h"
 #include "utility.h"
 #include "VolumeSelector.h"
-#include "TextRenderer.h"
 #include "KernelExecutor.h"
 #include "Calculate/VolumeCalculator.h"
 
@@ -45,6 +44,7 @@ DEALINGS IN THE SOFTWARE.
 #include "FLIVR/Quaternion.h"
 #include "FLIVR/ImgShader.h"
 #include "FLIVR/VolKernel.h"
+#include <FLIVR/TextRenderer.h>
 #include "compatibility.h"
 
 #include <wx/wx.h>
@@ -539,7 +539,7 @@ public:
 	void GetTraces(bool update = false);
 
 	//text renderer
-	void SetTextRenderer(TextRenderer* text_renderer)
+	void SetTextRenderer(FLIVR::TextRenderer* text_renderer)
 	{
 		m_text_renderer = text_renderer;
 	}
@@ -896,7 +896,7 @@ private:
 	glm::mat4 m_tex_mat;
 
 	//text renderer
-	TextRenderer* m_text_renderer;
+	FLIVR::TextRenderer* m_text_renderer;
 
 	//starting frame for 4d script
 	bool m_sf_script;

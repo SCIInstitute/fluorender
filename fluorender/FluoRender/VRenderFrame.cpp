@@ -39,6 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include "Formats/msk_reader.h"
 #include "Converters/VolumeMeshConv.h"
 #include "compatibility.h"
+#include <FLIVR/TextRenderer.h>
 #include <cstdio>
 #include <iostream>
 #include <sstream>
@@ -375,8 +376,10 @@ VRenderFrame::VRenderFrame(
 	else
 		font_file = exePath + GETSLASH() + "Fonts" +
 			GETSLASH() + "FreeSans.ttf";
-	m_text_renderer = new TextRenderer(font_file.ToStdString());
-	m_text_renderer->SetSize(m_setting_dlg->GetTextSize());
+	//m_text_renderer = new FLIVR::TextRenderer(font_file.ToStdString());
+	//m_text_renderer->SetSize(m_setting_dlg->GetTextSize());
+	TextRenderer::text_texture_manager_.load_face(font_file.ToStdString());
+	TextRenderer::text_texture_manager_.SetSize(m_setting_dlg->GetTextSize());
 
 	//settings dialog
 	if (m_setting_dlg->GetTestMode(1))
@@ -402,7 +405,7 @@ VRenderFrame::VRenderFrame(
 	m_vrv_list[0]->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
 	m_vrv_list[0]->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
 	m_vrv_list[0]->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
-	m_vrv_list[0]->SetTextRenderer(m_text_renderer);
+	m_vrv_list[0]->SetTextRenderer(&m_text_renderer);
 	m_time_id = m_setting_dlg->GetTimeId();
 	m_data_mgr.SetOverrideVox(m_setting_dlg->GetOverrideVox());
 	m_data_mgr.SetPvxmlFlipX(m_setting_dlg->GetPvxmlFlipX());
@@ -810,8 +813,8 @@ VRenderFrame::~VRenderFrame()
 		VRenderView* vrv = m_vrv_list[i];
 		if (vrv) vrv->Clear();
 	}
-	if (m_text_renderer)
-		delete m_text_renderer;
+	//if (m_text_renderer)
+	//	delete m_text_renderer;
 	m_aui_mgr.UnInit();
 }
 
@@ -870,7 +873,7 @@ wxString VRenderFrame::CreateView(int row)
 		vrv->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
 		vrv->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
 		vrv->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
-		vrv->SetTextRenderer(m_text_renderer);
+		vrv->SetTextRenderer(&m_text_renderer);
 	}
 
 	//reset gl

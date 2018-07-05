@@ -84,7 +84,7 @@ namespace FLIVR
 	int TextureRenderer::del_id = 0;
 	bool TextureRenderer::invalidate_tex_ = false;
 #ifdef _DARWIN
-    CGLContextObj TextureRenderer::gl_context_ = 0;
+	CGLContextObj TextureRenderer::gl_context_ = 0;
 #endif
 	bool TextureRenderer::clear_pool_ = false;
 	FramebufferManager TextureRenderer::framebuffer_manager_;
@@ -110,7 +110,7 @@ namespace FLIVR
 		if (!ShaderProgram::init())
 			return;
 #ifdef _DARWIN
-        CGLSetCurrentContext(TextureRenderer::gl_context_);
+		CGLSetCurrentContext(TextureRenderer::gl_context_);
 #endif
 	}
 

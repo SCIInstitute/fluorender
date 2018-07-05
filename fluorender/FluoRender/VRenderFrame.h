@@ -51,7 +51,6 @@ DEALINGS IN THE SOFTWARE.
 #include "CalculationDlg.h"
 #include "Tester.h"
 #include "Animator/Interpolator.h"
-#include "TextRenderer.h"
 #include "compatibility.h"
 
 #include <wx/wx.h>
@@ -101,6 +100,7 @@ using namespace std;
 #define UITEXT_CLIPPING		"Clipping Planes"
 #define UITEXT_PROPERTIES	"Properties"
 
+class FLIVR::TextRenderer;
 class VRenderFrame: public wxFrame
 {
 	enum
@@ -335,8 +335,8 @@ public:
 	//show info
 	void OnInfo(wxCommandEvent& WXUNUSED(event));
 
-	TextRenderer* GetTextRenderer()
-	{ return m_text_renderer; }
+	FLIVR::TextRenderer* GetTextRenderer()
+	{ return &m_text_renderer; }
 
 	bool GetBenchmark()
 	{ return m_benchmark; }
@@ -425,7 +425,7 @@ private:
 	wxString m_address;
 
 	//draw text
-	TextRenderer *m_text_renderer;
+	FLIVR::TextRenderer m_text_renderer;
 
 	//benchmark mode
 	bool m_benchmark;

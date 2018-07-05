@@ -371,7 +371,9 @@ HCTX VRenderGLView::TabletInit(HWND hWnd, HINSTANCE hInst)
 	WACOM_ASSERT(m_lc.lcOptions & CXO_SYSTEM);
 
 	// modify the digitizing region
-	sprintf(m_lc.lcName, "FluoRender Digitizing %x", hInst);
+	sprintf(m_lc.lcName,
+		"FluoRender Digitizing %x",
+		reinterpret_cast<unsigned int>(hInst));
 
 	// We process WT_PACKET (CXO_MESSAGES) messages.
 	m_lc.lcOptions |= CXO_MESSAGES;
@@ -8897,7 +8899,8 @@ void VRenderGLView::DrawLegend()
 	if (!vr_frame)
 		return;
 
-	double font_height = m_text_renderer->GetSize() + 3.0;
+	double font_height =
+		TextRenderer::text_texture_manager_.GetSize() + 3.0;
 
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
@@ -9532,7 +9535,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	sx = 2.0 / nx;
 	sy = 2.0 / ny;
 	float px, py;
-	float gapw = m_text_renderer->GetSize();
+	float gapw = TextRenderer::text_texture_manager_.GetSize();
 	float gaph = gapw * 2;
 
 	double fps_ = 1.0 / m_timer->average();
@@ -11230,7 +11233,7 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 	int ny = GetGLSize().y;
 	float w = 3.5;
 	if (m_text_renderer)
-		w = m_text_renderer->GetSize() / 4.0f;
+		w = TextRenderer::text_texture_manager_.GetSize() / 4.0f;
 	float px, py;
 
 	Transform mv;
@@ -11382,7 +11385,7 @@ void VRenderGLView::DrawRulers()
 	//draw text
 	if (!m_text_renderer)
 		return;
-	float w = m_text_renderer->GetSize() / 4.0f;
+	float w = TextRenderer::text_texture_manager_.GetSize() / 4.0f;
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
 	float sx, sy;
