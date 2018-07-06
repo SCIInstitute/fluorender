@@ -170,10 +170,6 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_paint_display(false),
 	//paint buffer
 	m_clear_paint(true),
-	//pick buffer
-	//m_fbo_pick(0),
-	//m_tex_pick(0),
-	//m_tex_pick_depth(0),
 	//camera controls
 	m_persp(false),
 	m_free(false),
@@ -521,11 +517,6 @@ VRenderGLView::~VRenderGLView()
 	}
 }
 
-void VRenderGLView::ResizeFramebuffers()
-{
-	m_resize = true;
-}
-
 void VRenderGLView::OnResize(wxSizeEvent& event)
 {
 	wxSize size = GetGLSize();
@@ -533,8 +524,6 @@ void VRenderGLView::OnResize(wxSizeEvent& event)
 		return;
 	else
 		m_size = size;
-
-	ResizeFramebuffers();
 
 	m_vrv->UpdateScaleFactor(false);
 
@@ -1436,9 +1425,6 @@ void VRenderGLView::DrawVolumes(int peel)
 
 void VRenderGLView::DrawAnnotations()
 {
-	if (!m_text_renderer)
-		return;
-
 	int nx, ny;
 	nx = GetGLSize().x;
 	ny = GetGLSize().y;
@@ -1486,7 +1472,7 @@ void VRenderGLView::DrawAnnotations()
 							continue;
 						px = pos.x()*nx / 2.0;
 						py = pos.y()*ny / 2.0;
-						m_text_renderer->RenderText(
+						m_text_renderer.RenderText(
 							wstr, text_color,
 							px*sx, py*sy, sx, sy);
 					}
@@ -1812,7 +1798,7 @@ void VRenderGLView::DrawBrush()
 			wstr = L"*";
 			break;
 		}
-		m_text_renderer->RenderText(wstr, text_color, px*sx, py*sy, sx, sy);
+		m_text_renderer.RenderText(wstr, text_color, px*sx, py*sy, sx, sy);
 
 		glEnable(GL_DEPTH_TEST);
 
@@ -5617,7 +5603,6 @@ void VRenderGLView::ResetEnlarge()
 		!TextureRenderer::get_done_update_loop())
 		return;
 	m_enlarge = false;
-	ResizeFramebuffers();
 	RefreshGL(19);
 }
 
@@ -8824,8 +8809,8 @@ void VRenderGLView::DrawScaleBar()
 	glm::mat4 proj_mat = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f);
 	double len = m_sb_length / (m_ortho_right - m_ortho_left);
 	wstring wsb_text = m_sb_text.ToStdWstring();
-	double textlen = m_text_renderer ?
-		m_text_renderer->RenderTextLen(wsb_text) : 0.0;
+	double textlen =
+		m_text_renderer.RenderTextLen(wsb_text);
 	Color text_color = GetTextColor();
 
 	std::vector<std::pair<unsigned int, double>> params;
@@ -8843,10 +8828,9 @@ void VRenderGLView::DrawScaleBar()
 		{
 			px = 0.95*m_frame_w + m_frame_x - (len*nx + textlen + nx) / 2.0;
 			py = ny / 2.0 - ny + 0.065*m_frame_h + m_frame_y + offset;
-			if (m_text_renderer)
-				m_text_renderer->RenderText(
-					wsb_text, text_color,
-					px*sx, py*sy, sx, sy);
+			m_text_renderer.RenderText(
+				wsb_text, text_color,
+				px*sx, py*sy, sx, sy);
 		}
 	}
 	else
@@ -8863,10 +8847,9 @@ void VRenderGLView::DrawScaleBar()
 		{
 			px = 0.95*nx - (len*nx + textlen + nx) / 2.0;
 			py = ny / 2.0 - 0.935*ny + offset;
-			if (m_text_renderer)
-				m_text_renderer->RenderText(
-					wsb_text, text_color,
-					px*sx, py*sy, sx, sy);
+			m_text_renderer.RenderText(
+				wsb_text, text_color,
+				px*sx, py*sy, sx, sy);
 		}
 	}
 
@@ -8893,8 +8876,6 @@ void VRenderGLView::DrawScaleBar()
 
 void VRenderGLView::DrawLegend()
 {
-	if (!m_text_renderer)
-		return;
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (!vr_frame)
 		return;
@@ -8927,7 +8908,7 @@ void VRenderGLView::DrawLegend()
 		{
 			wxstr = m_vd_pop_list[i]->GetName();
 			wstr = wxstr.ToStdWstring();
-			name_len = m_text_renderer->RenderTextLen(wstr) + font_height;
+			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
 			length += name_len;
 			if (length < double(m_draw_frame ? m_frame_w : nx) - gap_width)
 			{
@@ -8946,7 +8927,7 @@ void VRenderGLView::DrawLegend()
 		{
 			wxstr = m_md_pop_list[i]->GetName();
 			wstr = wxstr.ToStdWstring();
-			name_len = m_text_renderer->RenderTextLen(wstr) + font_height;
+			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
 			length += name_len;
 			if (length < double(m_draw_frame ? m_frame_w : nx) - gap_width)
 			{
@@ -8971,7 +8952,7 @@ void VRenderGLView::DrawLegend()
 			wxstr = m_vd_pop_list[i]->GetName();
 			xpos = length;
 			wstr = wxstr.ToStdWstring();
-			name_len = m_text_renderer->RenderTextLen(wstr) + font_height;
+			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
 			length += name_len;
 			if (length < double(m_draw_frame ? m_frame_w : nx) - gap_width)
 			{
@@ -9000,7 +8981,7 @@ void VRenderGLView::DrawLegend()
 			wxstr = m_md_pop_list[i]->GetName();
 			xpos = length;
 			wstr = wxstr.ToStdWstring();
-			name_len = m_text_renderer->RenderTextLen(wstr) + font_height;
+			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
 			length += name_len;
 			if (length < double(m_draw_frame ? m_frame_w : nx) - gap_width)
 			{
@@ -9079,14 +9060,14 @@ void VRenderGLView::DrawName(
 	float px1 = x + font_height - nx / 2;
 	float py1 = ny / 2 - y + 0.25*font_height;
 	wstr = name.ToStdWstring();
-	m_text_renderer->RenderText(
+	m_text_renderer.RenderText(
 		wstr, text_color,
 		px1*sx, py1*sy, sx, sy);
 	if (highlighted)
 	{
 		px1 -= 0.5;
 		py1 += 0.5;
-		m_text_renderer->RenderText(
+		m_text_renderer.RenderText(
 			wstr, color,
 			px1*sx, py1*sy, sx, sy);
 	}
@@ -9368,54 +9349,51 @@ void VRenderGLView::DrawColormap()
 		vertex.push_back(py); vertex.push_back((0.5*m_frame_h + m_frame_y + offset) / ny); vertex.push_back(0.0);
 		vertex.push_back(m_color_7.r()); vertex.push_back(m_color_7.g()); vertex.push_back(m_color_7.b()); vertex.push_back(1.0);
 
-		if (m_text_renderer)
-		{
-			wxString str;
-			wstring wstr;
+		wxString str;
+		wstring wstr;
 
-			Color text_color = GetTextColor();
+		Color text_color = GetTextColor();
 
-			//value 1
-			px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
-			py = 0.1*m_frame_h + m_frame_y + offset - ny / 2.0;
-			str = wxString::Format("%d", 0);
-			wstr = str.ToStdWstring();
-			m_text_renderer->RenderText(
-				wstr, text_color,
-				px*sx, py*sy, sx, sy);
-			//value 2
-			px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
-			py = (0.1 + 0.4*m_value_2)*m_frame_h + m_frame_y + offset - ny / 2.0;
-			str = wxString::Format("%d", int(m_value_2*max_val));
-			wstr = str.ToStdWstring();
-			m_text_renderer->RenderText(
-				wstr, text_color,
-				px*sx, py*sy, sx, sy);
-			//value 4
-			px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
-			py = (0.1 + 0.4*m_value_4)*m_frame_h + m_frame_y + offset - ny / 2.0;
-			str = wxString::Format("%d", int(m_value_4*max_val));
-			wstr = str.ToStdWstring();
-			m_text_renderer->RenderText(
-				wstr, text_color,
-				px*sx, py*sy, sx, sy);
-			//value 6
-			px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
-			py = (0.1 + 0.4*m_value_6)*m_frame_h + m_frame_y + offset - ny / 2.0;
-			str = wxString::Format("%d", int(m_value_6*max_val));
-			wstr = str.ToStdWstring();
-			m_text_renderer->RenderText(
-				wstr, text_color,
-				px*sx, py*sy, sx, sy);
-			//value 7
-			px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
-			py = 0.5*m_frame_h + m_frame_y + offset - ny / 2.0;
-			str = wxString::Format("%d", int(max_val));
-			wstr = str.ToStdWstring();
-			m_text_renderer->RenderText(
-				wstr, text_color,
-				px*sx, py*sy, sx, sy);
-		}
+		//value 1
+		px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
+		py = 0.1*m_frame_h + m_frame_y + offset - ny / 2.0;
+		str = wxString::Format("%d", 0);
+		wstr = str.ToStdWstring();
+		m_text_renderer.RenderText(
+			wstr, text_color,
+			px*sx, py*sy, sx, sy);
+		//value 2
+		px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
+		py = (0.1 + 0.4*m_value_2)*m_frame_h + m_frame_y + offset - ny / 2.0;
+		str = wxString::Format("%d", int(m_value_2*max_val));
+		wstr = str.ToStdWstring();
+		m_text_renderer.RenderText(
+			wstr, text_color,
+			px*sx, py*sy, sx, sy);
+		//value 4
+		px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
+		py = (0.1 + 0.4*m_value_4)*m_frame_h + m_frame_y + offset - ny / 2.0;
+		str = wxString::Format("%d", int(m_value_4*max_val));
+		wstr = str.ToStdWstring();
+		m_text_renderer.RenderText(
+			wstr, text_color,
+			px*sx, py*sy, sx, sy);
+		//value 6
+		px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
+		py = (0.1 + 0.4*m_value_6)*m_frame_h + m_frame_y + offset - ny / 2.0;
+		str = wxString::Format("%d", int(m_value_6*max_val));
+		wstr = str.ToStdWstring();
+		m_text_renderer.RenderText(
+			wstr, text_color,
+			px*sx, py*sy, sx, sy);
+		//value 7
+		px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
+		py = 0.5*m_frame_h + m_frame_y + offset - ny / 2.0;
+		str = wxString::Format("%d", int(max_val));
+		wstr = str.ToStdWstring();
+		m_text_renderer.RenderText(
+			wstr, text_color,
+			px*sx, py*sy, sx, sy);
 	}
 	else
 	{
@@ -9448,54 +9426,51 @@ void VRenderGLView::DrawColormap()
 		vertex.push_back(0.05); vertex.push_back(0.5 + offset / ny); vertex.push_back(0.0);
 		vertex.push_back(m_color_7.r()); vertex.push_back(m_color_7.g()); vertex.push_back(m_color_7.b()); vertex.push_back(1.0);
 
-		if (m_text_renderer)
-		{
-			wxString str;
-			wstring wstr;
+		wxString str;
+		wstring wstr;
 
-			Color text_color = GetTextColor();
+		Color text_color = GetTextColor();
 
-			//value 1
-			px = 0.052*nx - nx / 2.0;
-			py = ny / 2.0 - 0.9*ny + offset;
-			str = wxString::Format("%d", 0);
-			wstr = str.ToStdWstring();
-			m_text_renderer->RenderText(
-				wstr, text_color,
-				px*sx, py*sy, sx, sy);
-			//value 2
-			px = 0.052*nx - nx / 2.0;
-			py = ny / 2.0 - (0.9 - 0.4*m_value_2)*ny + offset;
-			str = wxString::Format("%d", int(m_value_2*max_val));
-			wstr = str.ToStdWstring();
-			m_text_renderer->RenderText(
-				wstr, text_color,
-				px*sx, py*sy, sx, sy);
-			//value 4
-			px = 0.052*nx - nx / 2.0;
-			py = ny / 2.0 - (0.9 - 0.4*m_value_4)*ny + offset;
-			str = wxString::Format("%d", int(m_value_4*max_val));
-			wstr = str.ToStdWstring();
-			m_text_renderer->RenderText(
-				wstr, text_color,
-				px*sx, py*sy, sx, sy);
-			//value 6
-			px = 0.052*nx - nx / 2.0;
-			py = ny / 2.0 - (0.9 - 0.4*m_value_6)*ny + offset;
-			str = wxString::Format("%d", int(m_value_6*max_val));
-			wstr = str.ToStdWstring();
-			m_text_renderer->RenderText(
-				wstr, text_color,
-				px*sx, py*sy, sx, sy);
-			//value 7
-			px = 0.052*nx - nx / 2.0;
-			py = ny / 2.0 - 0.5*ny + offset;
-			str = wxString::Format("%d", int(max_val));
-			wstr = str.ToStdWstring();
-			m_text_renderer->RenderText(
-				wstr, text_color,
-				px*sx, py*sy, sx, sy);
-		}
+		//value 1
+		px = 0.052*nx - nx / 2.0;
+		py = ny / 2.0 - 0.9*ny + offset;
+		str = wxString::Format("%d", 0);
+		wstr = str.ToStdWstring();
+		m_text_renderer.RenderText(
+			wstr, text_color,
+			px*sx, py*sy, sx, sy);
+		//value 2
+		px = 0.052*nx - nx / 2.0;
+		py = ny / 2.0 - (0.9 - 0.4*m_value_2)*ny + offset;
+		str = wxString::Format("%d", int(m_value_2*max_val));
+		wstr = str.ToStdWstring();
+		m_text_renderer.RenderText(
+			wstr, text_color,
+			px*sx, py*sy, sx, sy);
+		//value 4
+		px = 0.052*nx - nx / 2.0;
+		py = ny / 2.0 - (0.9 - 0.4*m_value_4)*ny + offset;
+		str = wxString::Format("%d", int(m_value_4*max_val));
+		wstr = str.ToStdWstring();
+		m_text_renderer.RenderText(
+			wstr, text_color,
+			px*sx, py*sy, sx, sy);
+		//value 6
+		px = 0.052*nx - nx / 2.0;
+		py = ny / 2.0 - (0.9 - 0.4*m_value_6)*ny + offset;
+		str = wxString::Format("%d", int(m_value_6*max_val));
+		wstr = str.ToStdWstring();
+		m_text_renderer.RenderText(
+			wstr, text_color,
+			px*sx, py*sy, sx, sy);
+		//value 7
+		px = 0.052*nx - nx / 2.0;
+		py = ny / 2.0 - 0.5*ny + offset;
+		str = wxString::Format("%d", int(max_val));
+		wstr = str.ToStdWstring();
+		m_text_renderer.RenderText(
+			wstr, text_color,
+			px*sx, py*sy, sx, sy);
 	}
 
 	glDisable(GL_DEPTH_TEST);
@@ -9528,9 +9503,6 @@ void VRenderGLView::DrawColormap()
 
 void VRenderGLView::DrawInfo(int nx, int ny)
 {
-	if (!m_text_renderer)
-		return;
-
 	float sx, sy;
 	sx = 2.0 / nx;
 	sy = 2.0 / ny;
@@ -9586,7 +9558,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	wstring wstr_temp = str.ToStdWstring();
 	px = gapw - nx / 2;
 	py = ny / 2 - gaph / 2;
-	m_text_renderer->RenderText(
+	m_text_renderer.RenderText(
 		wstr_temp, text_color,
 		px*sx, py*sy, sx, sy);
 
@@ -9605,7 +9577,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 			wstr_temp = str.ToStdWstring();
 			px = gapw - nx / 2;
 			py = ny / 2 - gaph;
-			m_text_renderer->RenderText(
+			m_text_renderer.RenderText(
 				wstr_temp, text_color,
 				px*sx, py*sy, sx, sy);
 		}
@@ -9636,7 +9608,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 				px = 0.01*nx - nx / 2.0;
 				py = 0.04*ny - ny / 2.0;
 			}
-			m_text_renderer->RenderText(
+			m_text_renderer.RenderText(
 				wstr_temp, text_color,
 				px*sx, py*sy, sx, sy);
 		}
@@ -9650,7 +9622,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 			wstr_temp = str.ToStdWstring();
 			px = gapw - nx / 2;
 			py = ny / 2 - gaph*1.5;
-			m_text_renderer->RenderText(
+			m_text_renderer.RenderText(
 				wstr_temp, text_color,
 				px*sx, py*sy, sx, sy);
 		}
@@ -9665,10 +9637,9 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 					wstr_temp = str.ToStdWstring();
 					px = gapw - nx / 2;
 					py = ny / 2 - gaph*(3 + i) / 2;
-					if (m_text_renderer)
-						m_text_renderer->RenderText(
-							wstr_temp, text_color,
-							px*sx, py*sy, sx, sy);
+					m_text_renderer.RenderText(
+						wstr_temp, text_color,
+						px*sx, py*sy, sx, sy);
 				}
 			}
 		}
@@ -11231,9 +11202,7 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 {
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
-	float w = 3.5;
-	if (m_text_renderer)
-		w = TextRenderer::text_texture_manager_.GetSize() / 4.0f;
+	float w = TextRenderer::text_texture_manager_.GetSize() / 4.0f;
 	float px, py;
 
 	Transform mv;
@@ -11383,8 +11352,6 @@ void VRenderGLView::DrawRulers()
 	glDisable(GL_LINE_SMOOTH);
 
 	//draw text
-	if (!m_text_renderer)
-		return;
 	float w = TextRenderer::text_texture_manager_.GetSize() / 4.0f;
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
@@ -11417,7 +11384,7 @@ void VRenderGLView::DrawRulers()
 			p2 = p.transform(p2);
 			p2x = p2.x()*nx / 2.0;
 			p2y = p2.y()*ny / 2.0;
-			m_text_renderer->RenderText(
+			m_text_renderer.RenderText(
 				ruler->GetName().ToStdWstring(),
 				c,
 				(p2x + w)*sx, (p2y + w)*sy, sx, sy);

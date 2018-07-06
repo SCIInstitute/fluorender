@@ -1751,8 +1751,6 @@ void VRenderView::OnCapture(wxCommandEvent& event)
 	{
 		m_glview->m_cap_file = file_dlg.GetDirectory() + GETSLASH() + file_dlg.GetFilename();
 		m_glview->m_capture = true;
-		if (VRenderGLView::m_enlarge)
-			m_glview->ResizeFramebuffers();
 		RefreshGL();
 
 		if (vr_frame && vr_frame->GetSettingDlg())

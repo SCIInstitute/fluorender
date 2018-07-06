@@ -538,12 +538,6 @@ public:
 	void DrawTraces();
 	void GetTraces(bool update = false);
 
-	//text renderer
-	void SetTextRenderer(FLIVR::TextRenderer* text_renderer)
-	{
-		m_text_renderer = text_renderer;
-	}
-
 	//enlarge output image
 	static void SetEnlarge(bool value)
 	{
@@ -896,7 +890,7 @@ private:
 	glm::mat4 m_tex_mat;
 
 	//text renderer
-	FLIVR::TextRenderer* m_text_renderer;
+	FLIVR::TextRenderer m_text_renderer;
 
 	//starting frame for 4d script
 	bool m_sf_script;
@@ -1080,7 +1074,6 @@ private:
 
 	//get size, considering enlargement
 	wxSize GetGLSize();
-	void ResizeFramebuffers();
 
 	void switchLevel(VolumeData *vd);
 

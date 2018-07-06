@@ -100,7 +100,6 @@ using namespace std;
 #define UITEXT_CLIPPING		"Clipping Planes"
 #define UITEXT_PROPERTIES	"Properties"
 
-class FLIVR::TextRenderer;
 class VRenderFrame: public wxFrame
 {
 	enum
@@ -335,9 +334,6 @@ public:
 	//show info
 	void OnInfo(wxCommandEvent& WXUNUSED(event));
 
-	FLIVR::TextRenderer* GetTextRenderer()
-	{ return &m_text_renderer; }
-
 	bool GetBenchmark()
 	{ return m_benchmark; }
 
@@ -423,9 +419,6 @@ private:
 
 	//mac address
 	wxString m_address;
-
-	//draw text
-	FLIVR::TextRenderer m_text_renderer;
 
 	//benchmark mode
 	bool m_benchmark;

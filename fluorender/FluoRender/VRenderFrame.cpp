@@ -403,7 +403,6 @@ VRenderFrame::VRenderFrame(
 	m_vrv_list[0]->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
 	m_vrv_list[0]->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
 	m_vrv_list[0]->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
-	m_vrv_list[0]->SetTextRenderer(&m_text_renderer);
 	m_time_id = m_setting_dlg->GetTimeId();
 	m_data_mgr.SetOverrideVox(m_setting_dlg->GetOverrideVox());
 	m_data_mgr.SetPvxmlFlipX(m_setting_dlg->GetPvxmlFlipX());
@@ -869,7 +868,6 @@ wxString VRenderFrame::CreateView(int row)
 		vrv->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
 		vrv->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
 		vrv->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
-		vrv->SetTextRenderer(&m_text_renderer);
 	}
 
 	//reset gl

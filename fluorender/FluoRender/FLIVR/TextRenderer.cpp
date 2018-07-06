@@ -99,6 +99,10 @@ namespace FLIVR
 		for (auto it = tex_list_.begin();
 			it != tex_list_.end(); ++it)
 			delete it->second;
+		if (m_init && m_valid)
+			FT_Done_Face(m_face);
+		if (m_init)
+			FT_Done_FreeType(m_ft);
 	}
 
 	void TextTextureManager::load_face(const std::string &lib_name)
