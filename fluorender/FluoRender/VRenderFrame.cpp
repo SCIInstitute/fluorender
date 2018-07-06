@@ -811,6 +811,7 @@ VRenderFrame::VRenderFrame(
 VRenderFrame::~VRenderFrame()
 {
 	//release?
+	TextureRenderer::vol_kernel_factory_.clear();
 	TextureRenderer::framebuffer_manager_.clear();
 	TextureRenderer::vertex_array_manager_.clear();
 	TextureRenderer::vol_shader_factory_.clear();

@@ -261,9 +261,6 @@ namespace FLIVR
 		static void set_load_on_main_thread(bool val) { load_on_main_thread_ = val; }
 		static bool get_load_on_main_thread() { return load_on_main_thread_; }
 
-		//kernel for calculation
-		static VolKernelFactory vol_kernel_factory_;
-
 	public:
 		struct BrickDist
 		{
@@ -278,6 +275,8 @@ namespace FLIVR
 		double irate_;
 		bool imode_;
 
+		//kernel for calculation
+		static VolKernelFactory vol_kernel_factory_;
 		//framebuffers for everything
 		static FramebufferManager framebuffer_manager_;
 		//vertex arrays

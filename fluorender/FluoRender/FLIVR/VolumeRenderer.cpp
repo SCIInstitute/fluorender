@@ -1505,14 +1505,14 @@ namespace FLIVR
 	{
 		double result = 0.0;
 		int kernel_index = -1;
+		string name = "hist_3d";
 		KernelProgram* kernel = vol_kernel_factory_.kernel(KERNEL_HIST_3D);
 		if (kernel)
 		{
-			if (!kernel->valid())
-			{
-				string name = "hist_3d";
+			if (kernel->valid())
+				kernel_index = kernel->findKernel(name);
+			else
 				kernel_index = kernel->createKernel(name);
-			}
 			kernel->setKernelArgTex3D(kernel_index, 0, CL_MEM_READ_ONLY, data_id);
 			kernel->setKernelArgTex3D(kernel_index, 1, CL_MEM_READ_ONLY, mask_id);
 			unsigned int hist_size = 64;
@@ -1531,6 +1531,10 @@ namespace FLIVR
 			size_t local_size[3] = {1, 1, 1};
 			kernel->executeKernel(kernel_index, 3, global_size, local_size);
 			kernel->readBuffer(hist_size * sizeof(float), (void*)hist, (void*)hist);
+			//release buffer
+			kernel->releaseMemObject(kernel_index, 0, 0, data_id);
+			kernel->releaseMemObject(kernel_index, 1, 0, mask_id);
+			kernel->releaseMemObject(kernel_index, 2, hist_size * sizeof(float), 0);
 			//analyze hist
 			int i;
 			float sum = 0;
@@ -1544,18 +1548,7 @@ namespace FLIVR
 					break;
 				}
 			}
-			////save hist
-			//ofstream outfile;
-			//outfile.open("E:\\hist.txt");
-			//for (int i=0; i<hist_size; ++i)
-			//{
-			//	float value = hist[i];
-			//	outfile << value << "\n";
-			//}
-			//outfile.close();
-
 			delete []hist;
-			VolumeRenderer::vol_kernel_factory_.clean();
 		}
 		return result;
 	}

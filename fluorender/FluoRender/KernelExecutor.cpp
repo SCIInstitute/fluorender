@@ -284,8 +284,6 @@ bool KernelExecutor::Execute()
 			kernel_exe = false;
 			break;
 		}
-		//this is a problem needs to be solved
-		VolumeRenderer::vol_kernel_factory_.clean();
 	}
 
 	if (!kernel_exe)
@@ -296,9 +294,8 @@ bool KernelExecutor::Execute()
 		return false;
 	}
 
-	//update
 	if (!m_duplicate)
-		m_vd->GetVR()->clear_tex_pool();
+		m_vd->GetVR()->clear_tex_current();
 
 	return true;
 }
@@ -311,22 +308,13 @@ bool KernelExecutor::ExecuteKernel(KernelProgram* kernel,
 	if (!kernel)
 		return false;
 	int kernel_index = -1;
+	string name = "kernel_main";
 
-	if (!kernel->valid())
-	{
-		string name = "kernel_main";
+	if (kernel->valid())
+		kernel_index = kernel->findKernel(name);
+	else
 		kernel_index = kernel->createKernel(name);
-		if (kernel_index >= 0)
-			m_message += "Kernel program compiled successfully on " +
-			kernel->get_device_name() + ".\n";
-		else
-		{
-			m_message += "Kernel program failed to compile on " +
-				kernel->get_device_name() + ".\n";
-			m_message += kernel->getInfo() + "\n";
-			return false;
-		}
-	}
+
 	//textures
 	kernel->setKernelArgTex3D(kernel_index, 0, CL_MEM_READ_ONLY, data_id);
 	size_t result_size = brick_x*brick_y*brick_z*sizeof(unsigned char);
@@ -347,5 +335,8 @@ bool KernelExecutor::ExecuteKernel(KernelProgram* kernel,
 		": " + stime + " sec.\n";
 	kernel->readBuffer(result_size, result, result);
 
+	//release buffer
+	kernel->releaseMemObject(kernel_index, 0, 0, data_id);
+	kernel->releaseMemObject(kernel_index, 1, result_size, 0);
 	return true;
 }
