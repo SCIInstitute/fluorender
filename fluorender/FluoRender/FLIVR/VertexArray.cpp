@@ -602,6 +602,18 @@ namespace FLIVR
 			delete *it;
 	}
 
+	void VertexArrayManager::clear()
+	{
+		for (auto it = va_list_.begin();
+			it != va_list_.end(); ++it)
+			delete *it;
+		for (auto it = vb_list_.begin();
+			it != vb_list_.end(); ++it)
+			delete *it;
+		va_list_.clear();
+		vb_list_.clear();
+	}
+
 	VertexArray* VertexArrayManager::vertex_array(VAType type)
 	{
 		//find one that matches and return

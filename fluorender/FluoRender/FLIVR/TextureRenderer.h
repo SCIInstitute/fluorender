@@ -289,7 +289,7 @@ namespace FLIVR
 		//shader for calculation
 		static VolCalShaderFactory cal_shader_factory_;
 		//smooth filter
-		static ImgShaderFactory m_img_shader_factory;
+		static ImgShaderFactory img_shader_factory_;
 
 		//saved framebuffer
 		GLuint cur_framebuffer_;
@@ -306,7 +306,7 @@ namespace FLIVR
 		static bool clear_pool_;
 
 #ifdef _DARWIN
-        static CGLContextObj gl_context_;
+		static CGLContextObj gl_context_;
 #endif
 		//memory management
 		static bool mem_swap_;

@@ -130,6 +130,7 @@ namespace FLIVR
 	public:
 		FramebufferManager();
 		~FramebufferManager();
+		void clear();
 
 		Framebuffer* framebuffer(FBType type, int nx, int ny,
 			const std::string &name="");

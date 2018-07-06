@@ -99,6 +99,7 @@ namespace FLIVR
 	public:
 		ImgShaderFactory();
 		~ImgShaderFactory();
+		void clear();
 
 		ShaderProgram* shader(int type, int colormap_=0);
 

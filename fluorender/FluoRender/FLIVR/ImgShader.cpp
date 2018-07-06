@@ -784,9 +784,14 @@ namespace FLIVR
 	ImgShaderFactory::~ImgShaderFactory()
 	{
 		for(unsigned int i=0; i<shader_.size(); i++)
-		{
 			delete shader_[i];
-		}
+	}
+
+	void ImgShaderFactory::clear()
+	{
+		for (unsigned int i = 0; i<shader_.size(); i++)
+			delete shader_[i];
+		shader_.clear();
 	}
 
 	ShaderProgram*

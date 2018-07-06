@@ -238,9 +238,14 @@ namespace FLIVR
 	VolCalShaderFactory::~VolCalShaderFactory()
 	{
 		for(unsigned int i=0; i<shader_.size(); i++)
-		{
 			delete shader_[i];
-		}
+	}
+
+	void VolCalShaderFactory::clear()
+	{
+		for (unsigned int i = 0; i<shader_.size(); i++)
+			delete shader_[i];
+		shader_.clear();
 	}
 
 	ShaderProgram* VolCalShaderFactory::shader(int type)
@@ -248,9 +253,7 @@ namespace FLIVR
 		if(prev_shader_ >= 0)
 		{
 			if(shader_[prev_shader_]->match(type)) 
-			{
 				return shader_[prev_shader_]->program();
-			}
 		}
 		for(unsigned int i=0; i<shader_.size(); i++)
 		{

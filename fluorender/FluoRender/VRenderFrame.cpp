@@ -40,6 +40,11 @@ DEALINGS IN THE SOFTWARE.
 #include "Converters/VolumeMeshConv.h"
 #include "compatibility.h"
 #include <FLIVR/TextRenderer.h>
+#include <FLIVR/VertexArray.h>
+#include <FLIVR/Framebuffer.h>
+#include <FLIVR/VolShader.h>
+#include <FLIVR/SegShader.h>
+#include <FLIVR/VolCalShader.h>
 #include <cstdio>
 #include <iostream>
 #include <sstream>
@@ -805,12 +810,21 @@ VRenderFrame::VRenderFrame(
 
 VRenderFrame::~VRenderFrame()
 {
+	//release?
+	TextureRenderer::framebuffer_manager_.clear();
+	TextureRenderer::vertex_array_manager_.clear();
+	TextureRenderer::vol_shader_factory_.clear();
+	TextureRenderer::seg_shader_factory_.clear();
+	TextureRenderer::cal_shader_factory_.clear();
+	TextureRenderer::img_shader_factory_.clear();
+	TextRenderer::text_texture_manager_.clear();
 	for (int i=0; i<(int)m_vrv_list.size(); i++)
 	{
 		VRenderView* vrv = m_vrv_list[i];
 		if (vrv) vrv->Clear();
 	}
 	m_aui_mgr.UnInit();
+	KernelProgram::release();
 }
 
 void VRenderFrame::OnExit(wxCommandEvent& WXUNUSED(event))

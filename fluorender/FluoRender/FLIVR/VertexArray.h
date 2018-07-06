@@ -180,6 +180,7 @@ namespace FLIVR
 	public:
 		VertexArrayManager();
 		~VertexArrayManager();
+		void clear();
 
 		VertexArray* vertex_array(VAType type);//managed
 		VertexArray* vertex_array(bool, bool);//unmanaged

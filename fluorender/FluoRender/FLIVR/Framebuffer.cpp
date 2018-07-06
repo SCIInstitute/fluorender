@@ -126,6 +126,18 @@ namespace FLIVR
 			delete *it;
 	}
 
+	void FramebufferManager::clear()
+	{
+		for (auto it = fb_list_.begin();
+			it != fb_list_.end(); ++it)
+			delete *it;
+		for (auto it = tex_list_.begin();
+			it != tex_list_.end(); ++it)
+			delete *it;
+		fb_list_.clear();
+		tex_list_.clear();
+	}
+
 	Framebuffer* FramebufferManager::framebuffer(
 		FBType type, int nx, int ny,
 		const std::string &name)

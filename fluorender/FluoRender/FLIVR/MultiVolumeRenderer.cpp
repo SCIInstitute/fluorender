@@ -494,7 +494,7 @@ namespace FLIVR
 				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 
 				img_shader = vr_list_[0]->
-					m_img_shader_factory.shader(IMG_SHDR_FILTER_BLUR);
+					img_shader_factory_.shader(IMG_SHDR_FILTER_BLUR);
 				if (img_shader)
 				{
 					if (!img_shader->valid())
@@ -532,11 +532,11 @@ namespace FLIVR
 			if (noise_red_ && colormap_mode_!=2)
 			{
 				img_shader = vr_list_[0]->
-					m_img_shader_factory.shader(IMG_SHDR_FILTER_SHARPEN);
+					img_shader_factory_.shader(IMG_SHDR_FILTER_SHARPEN);
 			}
 			else
 				img_shader = vr_list_[0]->
-					m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+					img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
 
 			if (img_shader)
 			{
@@ -775,7 +775,7 @@ namespace FLIVR
 					glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
 				//draw
 				ShaderProgram* img_shader = vr_list_[0]->
-					m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+					img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
 				if (img_shader)
 				{
 					if (!img_shader->valid())

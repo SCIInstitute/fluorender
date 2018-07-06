@@ -93,6 +93,7 @@ namespace FLIVR
 		static void set_device_id(int id);
 		static int get_device_id();
 		static std::string& get_device_name();
+		static void release();
 
 		//info
 		std::string &getInfo();

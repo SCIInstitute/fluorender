@@ -714,9 +714,14 @@ namespace FLIVR
 	SegShaderFactory::~SegShaderFactory()
 	{
 		for(unsigned int i=0; i<shader_.size(); i++)
-		{
 			delete shader_[i];
-		}
+	}
+
+	void SegShaderFactory::clear()
+	{
+		for (unsigned int i = 0; i<shader_.size(); i++)
+			delete shader_[i];
+		shader_.clear();
 	}
 
 	ShaderProgram* SegShaderFactory::shader(int type, int paint_mode, int hr_mode,

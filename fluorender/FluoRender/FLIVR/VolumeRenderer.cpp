@@ -52,7 +52,7 @@ namespace FLIVR
 	VolShaderFactory TextureRenderer::vol_shader_factory_;
 	SegShaderFactory TextureRenderer::seg_shader_factory_;
 	VolCalShaderFactory TextureRenderer::cal_shader_factory_;
-	ImgShaderFactory TextureRenderer::m_img_shader_factory;
+	ImgShaderFactory TextureRenderer::img_shader_factory_;
 	VolKernelFactory TextureRenderer::vol_kernel_factory_;
 	double VolumeRenderer::sw_ = 0.0;
 
@@ -974,7 +974,7 @@ namespace FLIVR
 
 				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 				img_shader = 
-					m_img_shader_factory.shader(IMG_SHDR_FILTER_BLUR);
+					img_shader_factory_.shader(IMG_SHDR_FILTER_BLUR);
 				if (img_shader)
 				{
 					if (!img_shader->valid())
@@ -1004,10 +1004,10 @@ namespace FLIVR
 
 			if (noise_red_ && colormap_mode_!=2)
 				img_shader = 
-					m_img_shader_factory.shader(IMG_SHDR_FILTER_SHARPEN);
+					img_shader_factory_.shader(IMG_SHDR_FILTER_SHARPEN);
 			else
 				img_shader = 
-				m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+				img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
 
 			if (img_shader)
 			{

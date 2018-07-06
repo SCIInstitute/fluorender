@@ -187,7 +187,7 @@ namespace FLIVR
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		ShaderProgram* shader =
-			TextureRenderer::m_img_shader_factory.shader(IMG_SHDR_DRAW_TEXT);
+			TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_TEXT);
 		if (shader)
 		{
 			if (!shader->valid())

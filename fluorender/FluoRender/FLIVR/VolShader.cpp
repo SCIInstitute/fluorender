@@ -469,6 +469,13 @@ VolShader::VolShader(
 			delete shader_[i];
 	}
 
+	void VolShaderFactory::clear()
+	{
+		for (unsigned int i = 0; i<shader_.size(); i++)
+			delete shader_[i];
+		shader_.clear();
+	}
+
 	ShaderProgram* VolShaderFactory::shader(
 		bool poly, int channels,
 		bool shading, bool fog,
