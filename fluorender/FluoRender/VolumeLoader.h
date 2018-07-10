@@ -30,7 +30,6 @@
 #define _VOLUMELOADER_H_
 
 #include "DataManager.h"
-#include "TextRenderer.h"
 #include "TextureBrick.h"
 #include <wx/thread.h>
 

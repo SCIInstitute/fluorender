@@ -48,7 +48,7 @@ namespace FLIVR
 		FramebufferTexture(FBTexType type, int nx, int ny);
 		~FramebufferTexture();
 
-		bool create();
+		void create();
 		void destroy();
 		inline bool bind();
 		inline void unbind();
@@ -78,7 +78,7 @@ namespace FLIVR
 		Framebuffer(FBType type, int nx, int ny, const std::string &name);
 		~Framebuffer();
 
-		bool create();
+		void create();
 		void destroy();
 		inline void bind();
 		inline void unbind();
@@ -130,6 +130,7 @@ namespace FLIVR
 	public:
 		FramebufferManager();
 		~FramebufferManager();
+		void clear();
 
 		Framebuffer* framebuffer(FBType type, int nx, int ny,
 			const std::string &name="");

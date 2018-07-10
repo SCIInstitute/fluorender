@@ -1819,8 +1819,8 @@ void SettingDlg::OnFontChange(wxCommandEvent &event)
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vr_frame)
 		{
-			vr_frame->GetTextRenderer()->LoadNewFace(loc.ToStdString());
-			vr_frame->GetTextRenderer()->SetSize(m_text_size);
+			TextRenderer::text_texture_manager_.load_face(loc.ToStdString());
+			TextRenderer::text_texture_manager_.SetSize(m_text_size);
 			for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
 			{
 				VRenderView* vrv = (*vr_frame->GetViewList())[i];
@@ -1842,7 +1842,7 @@ void SettingDlg::OnFontSizeChange(wxCommandEvent &event)
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vr_frame)
 		{
-			vr_frame->GetTextRenderer()->SetSize(m_text_size);
+			TextRenderer::text_texture_manager_.SetSize(m_text_size);
 			for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
 			{
 				VRenderView* vrv = (*vr_frame->GetViewList())[i];

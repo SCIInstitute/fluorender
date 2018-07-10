@@ -192,6 +192,8 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 		Append(ruler->Id(), ruler->GetName(), color, ruler->GetLength(), unit,
 			ruler->GetAngle(), points, ruler->GetTimeDep(), ruler->GetTime(), ruler->GetDelInfoValues(", "));
 	}
+
+	TextureRenderer::vertex_array_manager_.set_dirty(VA_Rulers);
 }
 
 int RulerListCtrl::GetCurrSelection()

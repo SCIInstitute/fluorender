@@ -30,6 +30,7 @@
 #include "VolShader.h"
 #include "ShaderProgram.h"
 #include <FLIVR/Framebuffer.h>
+#include <FLIVR/VertexArray.h>
 #include "../compatibility.h"
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
@@ -60,11 +61,9 @@ namespace FLIVR
 		irate_(1.0),
 		sampling_rate_(1.0),
 		num_slices_(0),
-		colormap_mode_(0)
+		colormap_mode_(0),
+		va_slices_(0)
 	{
-		glGenBuffers(1, &m_slices_vbo);
-		glGenBuffers(1, &m_slices_ibo);
-		glGenVertexArrays(1, &m_slices_vao);
 	}
 
 	MultiVolumeRenderer::MultiVolumeRenderer(MultiVolumeRenderer& copy)
@@ -83,21 +82,15 @@ namespace FLIVR
 		irate_(copy.irate_),
 		sampling_rate_(copy.sampling_rate_),
 		num_slices_(0),
-		colormap_mode_(copy.colormap_mode_)
+		colormap_mode_(copy.colormap_mode_),
+		va_slices_(0)
 	{
-		glGenBuffers(1, &m_slices_vbo);
-		glGenBuffers(1, &m_slices_ibo);
-		glGenVertexArrays(1, &m_slices_vao);
 	}
 
 	MultiVolumeRenderer::~MultiVolumeRenderer()
 	{
-		if (glIsBuffer(m_slices_vbo))
-			glDeleteBuffers(1, &m_slices_vbo);
-		if (glIsBuffer(m_slices_ibo))
-			glDeleteBuffers(1, &m_slices_ibo);
-		if (glIsVertexArray(m_slices_vao))
-			glDeleteVertexArrays(1, &m_slices_vao);
+		if (va_slices_)
+			delete va_slices_;
 	}
 
 	//mode and sampling rate
@@ -501,7 +494,7 @@ namespace FLIVR
 				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 
 				img_shader = vr_list_[0]->
-					m_img_shader_factory.shader(IMG_SHDR_FILTER_BLUR);
+					img_shader_factory_.shader(IMG_SHDR_FILTER_BLUR);
 				if (img_shader)
 				{
 					if (!img_shader->valid())
@@ -539,11 +532,11 @@ namespace FLIVR
 			if (noise_red_ && colormap_mode_!=2)
 			{
 				img_shader = vr_list_[0]->
-					m_img_shader_factory.shader(IMG_SHDR_FILTER_SHARPEN);
+					img_shader_factory_.shader(IMG_SHDR_FILTER_SHARPEN);
 			}
 			else
 				img_shader = vr_list_[0]->
-					m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+					img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
 
 			if (img_shader)
 			{
@@ -597,19 +590,34 @@ namespace FLIVR
 			micro_blend_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
 				FB_Render_RGBA, w, h);
 
-		//link to the new data
-		glBindBuffer(GL_ARRAY_BUFFER, m_slices_vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_STREAM_DRAW);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_slices_ibo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t)*index.size(), 
-			&index[0], GL_STREAM_DRAW);
-
-		glBindVertexArray(m_slices_vao);
-		glBindBuffer(GL_ARRAY_BUFFER, m_slices_vbo);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)0);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (const GLvoid*)12);
+		bool set_pointers = false;
+		if (!va_slices_ || !va_slices_->valid())
+		{
+			va_slices_ =
+				TextureRenderer::vertex_array_manager_.vertex_array(true, true);
+			set_pointers = true;
+		}
+		if (va_slices_)
+		{
+			va_slices_->buffer_data(
+				VABuf_Coord, sizeof(float)*vertex.size(),
+				&vertex[0], GL_STREAM_DRAW);
+			va_slices_->buffer_data(
+				VABuf_Index, sizeof(uint32_t)*index.size(),
+				&index[0], GL_STREAM_DRAW);
+			if (set_pointers)
+			{
+				va_slices_->attrib_pointer(
+					0, 3, GL_FLOAT, GL_FALSE,
+					6 * sizeof(float),
+					(const GLvoid*)0);
+				va_slices_->attrib_pointer(
+					1, 3, GL_FLOAT, GL_FALSE,
+					6 * sizeof(float),
+					(const GLvoid*)12);
+			}
+			va_slices_->draw_begin();
+		}
 
 		unsigned int location = 0;
 		unsigned int idx_num;
@@ -628,9 +636,11 @@ namespace FLIVR
 				glBlendEquationSeparate(GL_FUNC_ADD, GL_MAX);
 				glBlendFunc(GL_ONE, GL_ONE);
 
-				glBindVertexArray(m_slices_vao);
 				glUseProgram(shader->id());
 			}
+
+			if (va_slices_)
+				va_slices_->draw_begin();
 
 			//draw a single slice
 			for (int tn=0 ; tn<(int)vr_list_.size() ; tn++)
@@ -726,9 +736,12 @@ namespace FLIVR
 				if (vr_list_[tn]->label_)
 					vr_list_[tn]->load_brick_label(bs, bi);
 
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_slices_ibo);
 				idx_num = (size[i]-2)*3;
-				glDrawElements(GL_TRIANGLES, idx_num, GL_UNSIGNED_INT, reinterpret_cast<const GLvoid*>(location));
+				if (va_slices_)
+					va_slices_->draw_elements(
+						GL_TRIANGLES, idx_num,
+						GL_UNSIGNED_INT,
+						reinterpret_cast<const GLvoid*>(__int64(location)));
 
 				//release depth texture for rendering shadows
 				if (colormap_mode_ == 2)
@@ -745,9 +758,11 @@ namespace FLIVR
 			}
 			location += idx_num*4;
 
+			if (va_slices_)
+				va_slices_->draw_end();
+
 			if (blend_slices_ && colormap_mode_!=2)
 			{
-				glBindVertexArray(0);
 				glUseProgram(0);
 				//set buffer back
 				glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_);
@@ -760,7 +775,7 @@ namespace FLIVR
 					glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
 				//draw
 				ShaderProgram* img_shader = vr_list_[0]->
-					m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+					img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
 				if (img_shader)
 				{
 					if (!img_shader->valid())
@@ -773,13 +788,6 @@ namespace FLIVR
 				glBindTexture(GL_TEXTURE_2D, 0);
 			}
 		}
-
-		glDisableVertexAttribArray(0);
-		glDisableVertexAttribArray(1);
-		//unbind
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
 
 		//if (TextureRenderer::mem_swap_)
 		//  TextureRenderer::finished_bricks_ += (int)vr_list_.size();

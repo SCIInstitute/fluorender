@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include "FLIVR/Point.h"
 #include "FLIVR/MeshRenderer.h"
 #include "FLIVR/VolumeRenderer.h"
+#include <FLIVR/VertexArray.h>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
 #include "Formats/base_reader.h"
@@ -972,11 +973,11 @@ public:
 	void SetPrvTime(int time);
 	int GetPrvTime();
 	//ghost num
-	void SetGhostNum(int num) {m_ghost_num = num;}
+	void SetGhostNum(int num) {m_ghost_num = num; TextureRenderer::vertex_array_manager_.set_dirty(VA_Traces);}
 	int GetGhostNum() {return m_ghost_num;}
-	void SetDrawTail(bool draw) {m_draw_tail = draw;}
+	void SetDrawTail(bool draw) {m_draw_tail = draw; TextureRenderer::vertex_array_manager_.set_dirty(VA_Traces);}
 	bool GetDrawTail() {return m_draw_tail;}
-	void SetDrawLead(bool draw) {m_draw_lead = draw;}
+	void SetDrawLead(bool draw) {m_draw_lead = draw; TextureRenderer::vertex_array_manager_.set_dirty(VA_Traces);}
 	bool GetDrawLead() {return m_draw_lead;}
 	//cells size filter
 	void SetCellSize(int size) {m_cell_size = size;}

@@ -107,6 +107,8 @@ namespace FLIVR
 	class VolKernelFactory;
 	class FramebufferManager;
 	class ImgShaderFactory;
+	class VertexArray;
+	class VertexArrayManager;
 
 	struct TexParam
 	{
@@ -259,9 +261,6 @@ namespace FLIVR
 		static void set_load_on_main_thread(bool val) { load_on_main_thread_ = val; }
 		static bool get_load_on_main_thread() { return load_on_main_thread_; }
 
-		//kernel for calculation
-		static VolKernelFactory vol_kernel_factory_;
-
 	public:
 		struct BrickDist
 		{
@@ -276,16 +275,20 @@ namespace FLIVR
 		double irate_;
 		bool imode_;
 
+		//kernel for calculation
+		static VolKernelFactory vol_kernel_factory_;
+		//framebuffers for everything
+		static FramebufferManager framebuffer_manager_;
+		//vertex arrays
+		static VertexArrayManager vertex_array_manager_;
 		//sahder for volume rendering
 		static VolShaderFactory vol_shader_factory_;
 		//shader for segmentation
 		static SegShaderFactory seg_shader_factory_;
 		//shader for calculation
 		static VolCalShaderFactory cal_shader_factory_;
-		//framebuffers for everything
-		static FramebufferManager framebuffer_manager_;
 		//smooth filter
-		static ImgShaderFactory m_img_shader_factory;
+		static ImgShaderFactory img_shader_factory_;
 
 		//saved framebuffer
 		GLuint cur_framebuffer_;
@@ -302,7 +305,7 @@ namespace FLIVR
 		static bool clear_pool_;
 
 #ifdef _DARWIN
-        static CGLContextObj gl_context_;
+		static CGLContextObj gl_context_;
 #endif
 		//memory management
 		static bool mem_swap_;
@@ -362,9 +365,9 @@ namespace FLIVR
 		glm::mat4 m_proj_mat;
 		glm::mat4 m_tex_mat;
 
-		//vertex and index buffer bind points
-		GLuint m_slices_vbo, m_slices_ibo, m_slices_vao;
-		GLuint m_quad_vbo, m_quad_vao;
+		//renderer manages vertex array objects
+		VertexArray* va_slices_;
+		VertexArray* va_wirefm_;
 
 		//compute view
 		Ray compute_view();

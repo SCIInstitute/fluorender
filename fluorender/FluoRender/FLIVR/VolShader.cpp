@@ -469,6 +469,14 @@ VolShader::VolShader(
 			delete shader_[i];
 	}
 
+	void VolShaderFactory::clear()
+	{
+		for (unsigned int i = 0; i<shader_.size(); i++)
+			delete shader_[i];
+		shader_.clear();
+		prev_shader_ = -1;
+	}
+
 	ShaderProgram* VolShaderFactory::shader(
 		bool poly, int channels,
 		bool shading, bool fog,
@@ -486,9 +494,7 @@ VolShader::VolShader(
 				hiqual, mask, mip,
 				color_mode, colormap, colormap_proj,
 				solid,vertex_shader))
-			{
 				return shader_[prev_shader_]->program();
-			}
 		}
 		for(unsigned int i=0; i<shader_.size(); i++)
 		{

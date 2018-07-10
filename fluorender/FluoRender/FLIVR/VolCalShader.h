@@ -75,6 +75,7 @@ namespace FLIVR
 	public:
 		VolCalShaderFactory();
 		~VolCalShaderFactory();
+		void clear();
 
 		ShaderProgram* shader(int type);
 

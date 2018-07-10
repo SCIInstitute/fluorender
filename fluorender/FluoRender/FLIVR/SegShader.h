@@ -96,6 +96,7 @@ namespace FLIVR
 	public:
 		SegShaderFactory();
 		~SegShaderFactory();
+		void clear();
 
 		ShaderProgram* shader(int type, int paint_mode, int hr_mode,
 			bool use_2d, bool shading, int peel, bool clip, bool hiqual);

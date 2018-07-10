@@ -559,10 +559,6 @@ public:
 	bool m_default_saved;
 	void SaveDefault(unsigned int mask = 0xffffffff);
 
-	//text renderer
-	void SetTextRenderer(TextRenderer* text_renderer)
-	{ if (m_glview) m_glview->SetTextRenderer(text_renderer); }
-
 	//set full screen
 	void SetFullScreen();
 

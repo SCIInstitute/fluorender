@@ -52,6 +52,7 @@ namespace FLIVR
 #define	IMG_SHDR_DRAW_GEOMETRY_COLOR3		15
 #define	IMG_SHDR_DRAW_GEOMETRY_COLOR4		16
 #define	IMG_SHDR_GRADIENT_PROJ_MAP			17
+#define IMG_SHDR_DRAW_TEXT					18
 
 	class ShaderProgram;
 
@@ -98,6 +99,7 @@ namespace FLIVR
 	public:
 		ImgShaderFactory();
 		~ImgShaderFactory();
+		void clear();
 
 		ShaderProgram* shader(int type, int colormap_=0);
 

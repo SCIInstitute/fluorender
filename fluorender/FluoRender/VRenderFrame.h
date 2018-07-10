@@ -51,7 +51,6 @@ DEALINGS IN THE SOFTWARE.
 #include "CalculationDlg.h"
 #include "Tester.h"
 #include "Animator/Interpolator.h"
-#include "TextRenderer.h"
 #include "compatibility.h"
 #include "JVMInitializer.h"
 
@@ -338,9 +337,6 @@ public:
 	//show info
 	void OnInfo(wxCommandEvent& WXUNUSED(event));
 
-	TextRenderer* GetTextRenderer()
-	{ return m_text_renderer; }
-
 	bool GetBenchmark()
 	{ return m_benchmark; }
 
@@ -426,9 +422,6 @@ private:
 
 	//mac address
 	wxString m_address;
-
-	//draw text
-	TextRenderer *m_text_renderer;
 
 	//benchmark mode
 	bool m_benchmark;

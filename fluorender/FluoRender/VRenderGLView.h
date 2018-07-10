@@ -33,7 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include "VolumeLoader.h"
 #include "utility.h"
 #include "VolumeSelector.h"
-#include "TextRenderer.h"
 #include "KernelExecutor.h"
 #include "Calculate/VolumeCalculator.h"
 
@@ -45,6 +44,7 @@ DEALINGS IN THE SOFTWARE.
 #include "FLIVR/Quaternion.h"
 #include "FLIVR/ImgShader.h"
 #include "FLIVR/VolKernel.h"
+#include <FLIVR/TextRenderer.h>
 #include "compatibility.h"
 
 #include <wx/wx.h>
@@ -520,6 +520,7 @@ public:
 	bool GetRulerFinished();
 	void AddRulerPoint(int mx, int my);
 	void AddPaintRulerPoint();
+	unsigned int DrawRulersVerts(vector<float> &verts);
 	void DrawRulers();
 	vector<Ruler*>* GetRulerList();
 	Ruler* GetRuler(unsigned int id);
@@ -536,12 +537,6 @@ public:
 	void ExportTrace(wxString filename, unsigned int id);
 	void DrawTraces();
 	void GetTraces(bool update = false);
-
-	//text renderer
-	void SetTextRenderer(TextRenderer* text_renderer)
-	{
-		m_text_renderer = text_renderer;
-	}
 
 	//enlarge output image
 	static void SetEnlarge(bool value)
@@ -708,9 +703,6 @@ private:
 	GLuint m_cur_framebuffer;
 	//paint buffer
 	bool m_clear_paint;
-	//vert buffer
-	GLuint m_quad_vbo, m_quad_vao;
-	GLuint m_misc_vbo, m_misc_ibo, m_misc_vao;
 
 	//camera controls
 	bool m_persp;
@@ -786,7 +778,6 @@ private:
 	int m_frame_h;
 
 	//post image processing
-	static ImgShaderFactory m_img_shader_factory;
 	Color m_gamma;
 	Color m_brightness;
 	Color m_hdr;
@@ -899,7 +890,7 @@ private:
 	glm::mat4 m_tex_mat;
 
 	//text renderer
-	TextRenderer* m_text_renderer;
+	FLIVR::TextRenderer m_text_renderer;
 
 	//starting frame for 4d script
 	bool m_sf_script;
@@ -955,7 +946,6 @@ private:
 	void DrawName(double x, double y, int nx, int ny,
 		wxString name, Color color,
 		double font_height, bool hilighted = false);
-	char* wxStringToChar(wxString input);
 	void DrawFrame();
 	void DrawClippingPlanes(bool border, int face_winding);
 	void SetColormapColors(int colormap);
@@ -1002,8 +992,11 @@ private:
 	bool GetMeshShadow(double &val);
 
 	//painting
-	void DrawCircle(double cx, double cy,
-		double radius, Color &color, glm::mat4 &matrix);
+	void DrawCircles(
+		double cx, double cy,
+		double r1, double r2,
+		Color &color,
+		glm::mat4 &matrix);
 	void DrawBrush();
 	void PaintStroke();
 	void DisplayStroke();
@@ -1081,7 +1074,6 @@ private:
 
 	//get size, considering enlargement
 	wxSize GetGLSize();
-	void ResizeFramebuffers();
 
 	void switchLevel(VolumeData *vd);
 

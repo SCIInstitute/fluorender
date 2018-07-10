@@ -117,6 +117,7 @@ namespace FLIVR
 	public:
 		VolShaderFactory();
 		~VolShaderFactory();
+		void clear();
 
 		ShaderProgram* shader(bool poly, int channels,
 								bool shading, bool fog,

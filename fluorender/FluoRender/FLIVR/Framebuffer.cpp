@@ -41,7 +41,7 @@ namespace FLIVR
 		destroy();
 	}
 
-	bool FramebufferTexture::create()
+	void FramebufferTexture::create()
 	{
 		glGenTextures(1, &id_);
 		//if (!glIsTexture(id_))
@@ -72,7 +72,6 @@ namespace FLIVR
 			break;
 		}
 		valid_ = true;
-		return true;
 	}
 
 	void FramebufferTexture::destroy()
@@ -95,13 +94,12 @@ namespace FLIVR
 		destroy();
 	}
 
-	bool Framebuffer::create()
+	void Framebuffer::create()
 	{
 		glGenFramebuffers(1, &id_);
 		//if (!glIsFramebuffer(id_))
 		//	return false;
 		valid_ = true;
-		return true;
 	}
 
 	void Framebuffer::destroy()
@@ -109,6 +107,8 @@ namespace FLIVR
 		glDeleteFramebuffers(1, &id_);
 		id_ = 0;
 		valid_ = false;
+		protected_ = false;
+		name_ = "";
 	}
 
 	FramebufferManager::FramebufferManager()
@@ -124,6 +124,18 @@ namespace FLIVR
 		for (auto it = tex_list_.begin();
 			it != tex_list_.end(); ++it)
 			delete *it;
+	}
+
+	void FramebufferManager::clear()
+	{
+		for (auto it = fb_list_.begin();
+			it != fb_list_.end(); ++it)
+			delete *it;
+		for (auto it = tex_list_.begin();
+			it != tex_list_.end(); ++it)
+			delete *it;
+		fb_list_.clear();
+		tex_list_.clear();
 	}
 
 	Framebuffer* FramebufferManager::framebuffer(
@@ -161,8 +173,7 @@ namespace FLIVR
 
 		//create new framebuffer
 		Framebuffer* fb = new Framebuffer(type, nx, ny, name);
-		if (!fb->create())
-			return 0;
+		fb->create();
 		//add to lists
 		fb_list_.push_back(fb);
 		if (type == FB_Render_RGBA)
@@ -170,8 +181,7 @@ namespace FLIVR
 			//create new texture
 			FramebufferTexture* tex =
 				new FramebufferTexture(FBTex_Render_RGBA, nx, ny);
-			if (!tex->create())
-				return 0;
+			tex->create();
 			//attach texture
 			fb->attach_texture(GL_COLOR_ATTACHMENT0, tex);
 			//add to lists
@@ -182,12 +192,10 @@ namespace FLIVR
 		{
 			FramebufferTexture* tex_color =
 				new FramebufferTexture(FBTex_Render_Int32, nx, ny);
-			if (!tex_color->create())
-				return 0;
+			tex_color->create();
 			FramebufferTexture* tex_depth =
 				new FramebufferTexture(FBTex_Depth_Float, nx, ny);
-			if (!tex_depth->create())
-				return 0;
+			tex_depth->create();
 			//attach textures
 			fb->attach_texture(GL_COLOR_ATTACHMENT0, tex_color);
 			fb->attach_texture(GL_DEPTH_ATTACHMENT, tex_depth);
@@ -201,8 +209,7 @@ namespace FLIVR
 			//create new texture
 			FramebufferTexture* tex =
 				new FramebufferTexture(FBTex_Depth_Float, nx, ny);
-			if (!tex->create())
-				return 0;
+			tex->create();
 			//attach texture
 			fb->attach_texture(GL_DEPTH_ATTACHMENT, tex);
 			//add to lists

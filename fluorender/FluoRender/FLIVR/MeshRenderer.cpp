@@ -27,6 +27,8 @@
 //  
 
 #include "MeshRenderer.h"
+#include <VertexArray.h>
+#include <TextureRenderer.h>
 #include <iostream>
 #include <vector>
 #include <glm/gtc/type_ptr.hpp>
@@ -46,10 +48,9 @@ namespace FLIVR
 		light_(true),
 		fog_(false),
 		alpha_(1.0),
-		update_(true)
+		update_(true),
+		va_model_(0)
 	{
-		glGenBuffers(1, &m_vbo);
-		glGenVertexArrays(1, &m_vao);
 	}
 
 	MeshRenderer::MeshRenderer(MeshRenderer &copy)
@@ -60,18 +61,15 @@ namespace FLIVR
 		light_(copy.light_),
 		fog_(copy.fog_),
 		alpha_(copy.alpha_),
-		update_(true)
+		update_(true),
+		va_model_(0)
 	{
-		glGenBuffers(1, &m_vbo);
-		glGenVertexArrays(1, &m_vao);
 	}
 
 	MeshRenderer::~MeshRenderer()
 	{
-		if (glIsBuffer(m_vbo))
-			glDeleteBuffers(1, &m_vbo);
-		if (glIsVertexArray(m_vao))
-			glDeleteVertexArrays(1, &m_vao);
+		if (va_model_)
+			delete va_model_;
 	}
 
 	//clipping planes
@@ -134,30 +132,29 @@ namespace FLIVR
 			group = group->next;
 		}
 
-		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float)*verts.size(), &verts[0], GL_STATIC_DRAW);
-		glBindVertexArray(m_vao);
-		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+		if (!va_model_ || !va_model_->valid())
+			va_model_ =
+				TextureRenderer::vertex_array_manager_.vertex_array(true, false);
+		if (!va_model_)
+			return;
+		va_model_->buffer_data(
+			VABuf_Coord, sizeof(float)*verts.size(),
+			&verts[0], GL_STATIC_DRAW);
+
 		GLsizei stride = sizeof(float)*(3+(bnormal?3:0)+(btexcoord?2:0));
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)0);
+		va_model_->attrib_pointer(
+			0, 3, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)0);
 		if (bnormal)
-		{
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)12);
-		}
+			va_model_->attrib_pointer(
+				1, 3, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)12);
 		if (btexcoord)
 		{
 			if (bnormal)
-			{
-				glEnableVertexAttribArray(2);
-				glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)24);
-			}
+				va_model_->attrib_pointer(
+					2, 2, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)24);
 			else
-			{
-				glEnableVertexAttribArray(1);
-				glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)12);
-			}
+				va_model_->attrib_pointer(
+					1, 2, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)12);
 		}
 	}
 
@@ -172,13 +169,14 @@ namespace FLIVR
 			update();
 			update_ = false;
 		}
-
+		if (!va_model_)
+			return;
 		ShaderProgram* shader = 0;
 
-		glBindVertexArray(m_vao);
 		GLMgroup* group = data_->groups;
 		GLint pos = 0;
 		bool tex = data_->hastexture==GL_TRUE;
+		va_model_->draw_begin();
 		while (group)
 		{
 			if (group->numtriangles == 0)
@@ -238,11 +236,11 @@ namespace FLIVR
 				shader->setLocalParam(7, 1.0/double(vp_[2]), 1.0/double(vp_[3]), 0.0, 0.0);
 
 			//draw
-			glDrawArrays(GL_TRIANGLES, pos, (GLsizei)(group->numtriangles*3));
+			va_model_->draw_arrays(GL_TRIANGLES, pos, (GLsizei)(group->numtriangles * 3));
 			pos += group->numtriangles*3;
 			group = group->next;
 		}
-		glBindVertexArray(0);
+		va_model_->draw_end();
 
 		// Release shader.
 		if (shader && shader->valid())
@@ -263,12 +261,11 @@ namespace FLIVR
 			update();
 			update_ = false;
 		}
+		if (!va_model_)
+			return;
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-		ShaderProgram* shader = 0;
-
-		glBindVertexArray(m_vao);
 		GLMgroup* group = data_->groups;
 		GLint pos = 0;
 		int peel = 0;
@@ -276,6 +273,7 @@ namespace FLIVR
 		bool light = false;
 		
 		//set up shader
+		ShaderProgram* shader = 0;
 		shader = msh_shader_factory_.shader(0,
 			peel, tex, fog_, light);
 		if (shader)
@@ -296,7 +294,7 @@ namespace FLIVR
 		if (fog_)
 			shader->setLocalParam(8, m_fog_intensity, m_fog_start, m_fog_end, 0.0);
 
-
+		va_model_->draw_begin();
 		while (group)
 		{
 			if (group->numtriangles == 0)
@@ -306,11 +304,11 @@ namespace FLIVR
 			}
 
 			//draw
-			glDrawArrays(GL_TRIANGLES, pos, (GLsizei)(group->numtriangles*3));
+			va_model_->draw_arrays(GL_TRIANGLES, pos, (GLsizei)(group->numtriangles * 3));
 			pos += group->numtriangles*3;
 			group = group->next;
 		}
-		glBindVertexArray(0);
+		va_model_->draw_end();
 
 		// Release shader.
 		if (shader && shader->valid())
@@ -329,14 +327,14 @@ namespace FLIVR
 			update();
 			update_ = false;
 		}
+		if (!va_model_)
+			return;
 
-		ShaderProgram* shader = 0;
-
-		glBindVertexArray(m_vao);
 		GLMgroup* group = data_->groups;
 		GLint pos = 0;
 
 		//set up shader
+		ShaderProgram* shader = 0;
 		shader = msh_shader_factory_.shader(1,
 			0, false, false, false);
 		if (shader)
@@ -350,6 +348,7 @@ namespace FLIVR
 		shader->setLocalParamMatrix(1, glm::value_ptr(m_mv_mat));
 		shader->setLocalParamUInt(0, name);
 
+		va_model_->draw_begin();
 		while (group)
 		{
 			if (group->numtriangles == 0)
@@ -359,11 +358,11 @@ namespace FLIVR
 			}
 
 			//draw
-			glDrawArrays(GL_TRIANGLES, pos, (GLsizei)(group->numtriangles*3));
+			va_model_->draw_arrays(GL_TRIANGLES, pos, (GLsizei)(group->numtriangles * 3));
 			pos += group->numtriangles*3;
 			group = group->next;
 		}
-		glBindVertexArray(0);
+		va_model_->draw_end();
 
 		// Release shader.
 		if (shader && shader->valid())

@@ -89,6 +89,18 @@ namespace FLIVR
 	"	OutColor = InColor;\n" \
 	"}\n"
 
+#define IMG_VTX_CODE_DRAW_TEXT \
+	"//IMG_VTX_CODE_DRAW_TEXT\n" \
+	"layout(location = 0) in vec4 coord;\n" \
+	"out vec2 texcoord;\n" \
+	"uniform mat4 matrix0;//transformation\n" \
+	"\n" \
+	"void main(void)\n" \
+	"{\n" \
+	"	gl_Position = matrix0 * vec4(coord.xy, 0, 1);\n" \
+	"	texcoord = coord.zw;\n" \
+	"}\n"
+
 #define IMG_FRG_CODE_DRAW_GEOMETRY \
 	"//IMG_FRG_CODE_DRAW_GEOMETRY\n" \
 	"out vec4 FragColor;\n" \
@@ -117,6 +129,18 @@ namespace FLIVR
 	"void main()\n" \
 	"{\n" \
 	"	FragColor = OutColor;\n" \
+	"}\n"
+
+#define IMG_FRG_CODE_DRAW_TEXT \
+	"//IMG_FRG_CODE_DRAW_TEXT\n" \
+	"in vec2 texcoord;\n" \
+	"out vec4 FragColor;\n" \
+	"uniform sampler2D tex0;\n" \
+	"uniform vec4 loc0;//color\n" \
+	"\n" \
+	"void main(void)\n" \
+	"{\n" \
+	"	FragColor = vec4(1, 1, 1, texture(tex0, texcoord).r) * loc0;\n" \
 	"}\n"
 
 #define IMG_SHADER_CODE_TEXTURE_LOOKUP \
@@ -625,6 +649,9 @@ namespace FLIVR
 		case IMG_SHDR_DRAW_GEOMETRY_COLOR4:
 			z << IMG_VTX_CODE_DRAW_GEOMETRY_COLOR4;
 			break;
+		case IMG_SHDR_DRAW_TEXT:
+			z << IMG_VTX_CODE_DRAW_TEXT;
+			break;
 		case IMG_SHADER_TEXTURE_LOOKUP:
 		case IMG_SHDR_BRIGHTNESS_CONTRAST:
 		case IMG_SHDR_BRIGHTNESS_CONTRAST_HDR:
@@ -642,6 +669,7 @@ namespace FLIVR
 		case IMG_SHDR_PAINT:
 		default:
 			z << IMG_VERTEX_CODE;
+			break;
 		}
 
 		s = z.str();
@@ -735,8 +763,12 @@ namespace FLIVR
 		case IMG_SHDR_PAINT:
 			z << PAINT_SHADER_CODE;
 			break;
+		case IMG_SHDR_DRAW_TEXT:
+			z << IMG_FRG_CODE_DRAW_TEXT;
+			break;
 		default:
 			z << IMG_SHADER_CODE_TEXTURE_LOOKUP;
+			break;
 		}
 
 		s = z.str();
@@ -752,9 +784,15 @@ namespace FLIVR
 	ImgShaderFactory::~ImgShaderFactory()
 	{
 		for(unsigned int i=0; i<shader_.size(); i++)
-		{
 			delete shader_[i];
-		}
+	}
+
+	void ImgShaderFactory::clear()
+	{
+		for (unsigned int i = 0; i<shader_.size(); i++)
+			delete shader_[i];
+		shader_.clear();
+		prev_shader_ = -1;
 	}
 
 	ShaderProgram*
@@ -762,10 +800,8 @@ namespace FLIVR
 	{
 		if(prev_shader_ >= 0)
 		{
-			if(shader_[prev_shader_]->match(type, colormap)) 
-			{
+			if(shader_[prev_shader_]->match(type, colormap))
 				return shader_[prev_shader_]->program();
-			}
 		}
 		for(unsigned int i=0; i<shader_.size(); i++)
 		{

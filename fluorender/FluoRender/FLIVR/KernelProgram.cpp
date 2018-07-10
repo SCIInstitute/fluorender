@@ -179,6 +179,11 @@ namespace FLIVR
 		return device_name_;
 	}
 
+	void KernelProgram::release()
+	{
+		clReleaseContext(context_);
+	}
+
 	//create a kernel in the program
 	//return kernel index; -1 unsuccessful
 	int KernelProgram::createKernel(std::string &name)

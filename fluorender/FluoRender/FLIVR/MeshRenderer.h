@@ -42,6 +42,7 @@ using namespace std;
 namespace FLIVR
 {
 	class MshShaderFactory;
+	class VertexArray;
 
 	class MeshRenderer
 	{
@@ -116,7 +117,7 @@ namespace FLIVR
 		double m_fog_end;
 		float alpha_;
 		//vertex buffer
-		GLuint m_vbo, m_vao;
+		VertexArray* va_model_;
 		//bool update
 		bool update_;
 

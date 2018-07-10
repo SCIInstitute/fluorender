@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderView.h"
 #include "VRenderFrame.h"
 #include <FLIVR/Framebuffer.h>
+#include <FLIVR/VertexArray.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
@@ -38,7 +39,6 @@ DEALINGS IN THE SOFTWARE.
 #include "png_resource.h"
 #include "img/icons.h"
 
-ImgShaderFactory VRenderGLView::m_img_shader_factory;
 bool VRenderGLView::m_linked_rot = false;
 VRenderGLView* VRenderGLView::m_master_linked_view = 0;
 bool VRenderGLView::m_enlarge = false;
@@ -170,10 +170,6 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_paint_display(false),
 	//paint buffer
 	m_clear_paint(true),
-	//pick buffer
-	//m_fbo_pick(0),
-	//m_tex_pick(0),
-	//m_tex_pick_depth(0),
 	//camera controls
 	m_persp(false),
 	m_free(false),
@@ -371,7 +367,9 @@ HCTX VRenderGLView::TabletInit(HWND hWnd, HINSTANCE hInst)
 	WACOM_ASSERT(m_lc.lcOptions & CXO_SYSTEM);
 
 	// modify the digitizing region
-	sprintf(m_lc.lcName, "FluoRender Digitizing %x", hInst);
+	sprintf(m_lc.lcName,
+		"FluoRender Digitizing %x",
+		reinterpret_cast<unsigned int>(hInst));
 
 	// We process WT_PACKET (CXO_MESSAGES) messages.
 	m_lc.lcOptions |= CXO_MESSAGES;
@@ -499,28 +497,6 @@ VRenderGLView::~VRenderGLView()
 			delete m_ruler_list[i];
 	}
 
-	if (glIsBuffer(m_quad_vbo))
-		glDeleteBuffers(1, &m_quad_vbo);
-	if (glIsVertexArray(m_quad_vao))
-		glDeleteVertexArrays(1, &m_quad_vao);
-	if (glIsBuffer(m_misc_vbo))
-		glDeleteBuffers(1, &m_misc_vbo);
-	if (glIsBuffer(m_misc_ibo))
-		glDeleteBuffers(1, &m_misc_ibo);
-	if (glIsVertexArray(m_misc_vao))
-		glDeleteVertexArrays(1, &m_misc_vao);
-
-	//pick buffer
-	//if (glIsFramebuffer(m_fbo_pick))
-	//	glDeleteFramebuffers(1, &m_fbo_pick);
-	//if (glIsTexture(m_tex_pick))
-	//	glDeleteTextures(1, &m_tex_pick);
-	//if (glIsTexture(m_tex_pick_depth))
-	//	glDeleteTextures(1, &m_tex_pick_depth);
-
-	if (!m_sharedRC)
-		delete m_glRC;
-
 	if (m_trace_group)
 		delete m_trace_group;
 
@@ -536,11 +512,9 @@ VRenderGLView::~VRenderGLView()
 			vr_frame->Close();
 		}
 	}
-}
 
-void VRenderGLView::ResizeFramebuffers()
-{
-	m_resize = true;
+	if (!m_sharedRC)
+		delete m_glRC;
 }
 
 void VRenderGLView::OnResize(wxSizeEvent& event)
@@ -550,8 +524,6 @@ void VRenderGLView::OnResize(wxSizeEvent& event)
 		return;
 	else
 		m_size = size;
-
-	ResizeFramebuffers();
 
 	m_vrv->UpdateScaleFactor(false);
 
@@ -580,11 +552,6 @@ void VRenderGLView::Init()
 			vr_frame->GetSettingDlg()->UpdateTextureSize();
 		}
 		//glViewport(0, 0, (GLint)(GetSize().x), (GLint)(GetSize().y));
-		glGenBuffers(1, &m_quad_vbo);
-		m_quad_vao = 0;
-		glGenBuffers(1, &m_misc_vbo);
-		glGenBuffers(1, &m_misc_ibo);
-		glGenVertexArrays(1, &m_misc_vao);
 		glEnable(GL_MULTISAMPLE);
 
 		m_initialized = true;
@@ -1458,9 +1425,6 @@ void VRenderGLView::DrawVolumes(int peel)
 
 void VRenderGLView::DrawAnnotations()
 {
-	if (!m_text_renderer)
-		return;
-
 	int nx, ny;
 	nx = GetGLSize().x;
 	ny = GetGLSize().y;
@@ -1508,7 +1472,7 @@ void VRenderGLView::DrawAnnotations()
 							continue;
 						px = pos.x()*nx / 2.0;
 						py = pos.y()*ny / 2.0;
-						m_text_renderer->RenderText(
+						m_text_renderer.RenderText(
 							wstr, text_color,
 							px*sx, py*sy, sx, sy);
 					}
@@ -1722,25 +1686,11 @@ int VRenderGLView::GetPaintMode()
 	return m_selector.GetMode();
 }
 
-void VRenderGLView::DrawCircle(double cx, double cy,
-	double radius, Color &color, glm::mat4 &matrix)
+void VRenderGLView::DrawCircles(double cx, double cy,
+	double r1, double r2, Color &color, glm::mat4 &matrix)
 {
-	int secs = 60;
-	double deg = 0.0;
-
-	vector<float> vertex;
-	vertex.reserve(secs * 3);
-
-	for (size_t i = 0; i<secs; ++i)
-	{
-		deg = i * 2 * PI / secs;
-		vertex.push_back(cx + radius*sin(deg));
-		vertex.push_back(cy + radius*cos(deg));
-		vertex.push_back(0.0f);
-	}
-
 	ShaderProgram* shader =
-		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -1749,18 +1699,23 @@ void VRenderGLView::DrawCircle(double cx, double cy,
 	}
 
 	shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0);
-	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+	//apply translate first
+	glm::mat4 mat0 = matrix * glm::translate(
+			glm::mat4(), glm::vec3(cx, cy, 0.0));
+	shader->setLocalParamMatrix(0, glm::value_ptr(mat0));
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
-	glBindVertexArray(m_misc_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
-	glDrawArrays(GL_LINE_LOOP, 0, secs);
-	glDisableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	VertexArray* va_circles =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Brush_Circles);
+	if (va_circles)
+	{
+		//set parameters
+		std::vector<std::pair<unsigned int, double>> params;
+		params.push_back(std::pair<unsigned int, double>(0, r1));
+		params.push_back(std::pair<unsigned int, double>(1, r2));
+		params.push_back(std::pair<unsigned int, double>(2, 60.0));
+		va_circles->set_param(params);
+		va_circles->draw();
+	}
 
 	if (shader && shader->valid())
 		shader->release();
@@ -1811,17 +1766,16 @@ void VRenderGLView::DrawBrush()
 		Color text_color = GetTextColor();
 
 		if (mode == 1 ||
-			mode == 2 ||
-			mode == 8)
-			DrawCircle(cx, cy, m_brush_radius1*pressure,
-				text_color, proj_mat);
-
-		if (mode == 1 ||
-			mode == 2 ||
-			mode == 3 ||
+			mode == 2)
+			DrawCircles(cx, cy, m_brush_radius1*pressure,
+				m_brush_radius2*pressure, text_color, proj_mat);
+		else if (mode == 8)
+			DrawCircles(cx, cy, m_brush_radius1*pressure,
+				-1.0, text_color, proj_mat);
+		else if (mode == 3 ||
 			mode == 4)
-			DrawCircle(cx, cy, m_brush_radius2*pressure,
-				text_color, proj_mat);
+			DrawCircles(cx, cy, -1.0,
+				m_brush_radius2*pressure, text_color, proj_mat);
 
 		float cx2 = pos1.x;
 		float cy2 = ny - pos1.y;
@@ -1844,7 +1798,7 @@ void VRenderGLView::DrawBrush()
 			wstr = L"*";
 			break;
 		}
-		m_text_renderer->RenderText(wstr, text_color, px*sx, py*sy, sx, sy);
+		m_text_renderer.RenderText(wstr, text_color, px*sx, py*sy, sx, sy);
 
 		glEnable(GL_DEPTH_TEST);
 
@@ -1883,7 +1837,7 @@ void VRenderGLView::PaintStroke()
 	{
 		//paint shader
 		ShaderProgram* paint_shader =
-			m_img_shader_factory.shader(IMG_SHDR_PAINT);
+			TextureRenderer::img_shader_factory_.shader(IMG_SHDR_PAINT);
 		if (paint_shader)
 		{
 			if (!paint_shader->valid())
@@ -1983,7 +1937,7 @@ void VRenderGLView::DisplayStroke()
 	glDisable(GL_DEPTH_TEST);
 
 	ShaderProgram* img_shader =
-		m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+		TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -2962,7 +2916,7 @@ void VRenderGLView::DrawFinalBuffer()
 
 	//2d adjustment
 	ShaderProgram* img_shader =
-		m_img_shader_factory.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
+		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -3145,7 +3099,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 			glDisable(GL_DEPTH_TEST);
 
 			img_shader =
-				m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+				TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
 			if (img_shader)
 			{
 				if (!img_shader->valid())
@@ -3219,7 +3173,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 		glDisable(GL_DEPTH_TEST);
 
 		img_shader =
-			m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+			TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
 		if (img_shader)
 		{
 			if (!img_shader->valid())
@@ -3248,7 +3202,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 
 	//2d adjustment
 	img_shader =
-		m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -3338,7 +3292,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 			glDisable(GL_DEPTH_TEST);
 
 			img_shader =
-				m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+				TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
 			if (img_shader)
 			{
 				if (!img_shader->valid())
@@ -3429,10 +3383,10 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 		{
 			//2d adjustment
 			if (vd->GetColormapProj())
-				img_shader = m_img_shader_factory.shader(
+				img_shader = TextureRenderer::img_shader_factory_.shader(
 					IMG_SHDR_GRADIENT_PROJ_MAP, vd->GetColormap());
 			else
-				img_shader = m_img_shader_factory.shader(
+				img_shader = TextureRenderer::img_shader_factory_.shader(
 					IMG_SHDR_GRADIENT_MAP, vd->GetColormap());
 			if (img_shader)
 			{
@@ -3451,7 +3405,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 		else
 		{
 			img_shader =
-				m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+				TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
 		}
 
 		if (img_shader)
@@ -3508,7 +3462,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 		glDisable(GL_DEPTH_TEST);
 
 		img_shader =
-			m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+			TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
 		if (img_shader)
 		{
 			if (!img_shader->valid())
@@ -3537,7 +3491,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 
 	//2d adjustment
 	img_shader =
-		m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -3631,7 +3585,7 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 	glDisable(GL_DEPTH_TEST);
 
 	ShaderProgram* img_shader =
-		m_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+		TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -3712,7 +3666,7 @@ void VRenderGLView::DrawOLShadowsMesh(double darkness)
 
 	//2d adjustment
 	ShaderProgram* img_shader =
-		m_img_shader_factory.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
+		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -3749,7 +3703,7 @@ void VRenderGLView::DrawOLShadowsMesh(double darkness)
 
 	//2d adjustment
 	img_shader =
-		m_img_shader_factory.shader(IMG_SHDR_GRADIENT_TO_SHADOW_MESH);
+		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_GRADIENT_TO_SHADOW_MESH);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -3950,7 +3904,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 
 		//2d adjustment
 		ShaderProgram* img_shader =
-			m_img_shader_factory.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
+			TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
 		if (img_shader)
 		{
 			if (!img_shader->valid())
@@ -3987,7 +3941,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 
 		//2d adjustment
 		img_shader =
-			m_img_shader_factory.shader(IMG_SHDR_GRADIENT_TO_SHADOW);
+			TextureRenderer::img_shader_factory_.shader(IMG_SHDR_GRADIENT_TO_SHADOW);
 		if (img_shader)
 		{
 			if (!img_shader->valid())
@@ -4128,7 +4082,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 
 	//2d adjustment
 	ShaderProgram* img_shader =
-		m_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -5576,7 +5530,7 @@ void VRenderGLView::PostDraw()
 
 			//2d adjustment
 			ShaderProgram* img_shader =
-				m_img_shader_factory.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
+				TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
 			if (img_shader)
 			{
 				if (!img_shader->valid())
@@ -5649,7 +5603,6 @@ void VRenderGLView::ResetEnlarge()
 		!TextureRenderer::get_done_update_loop())
 		return;
 	m_enlarge = false;
-	ResizeFramebuffers();
 	RefreshGL(19);
 }
 
@@ -5870,6 +5823,7 @@ void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 		m_trace_group->SetCurTime(m_tseq_cur_num);
 		m_trace_group->SetPrvTime(m_tseq_prv_num);
 		m_trace_group->UpdateCellList(sel_labels);
+		TextureRenderer::vertex_array_manager_.set_dirty(VA_Traces);
 	}
 	//load and replace the label
 	BaseReader* reader = m_cur_vol->GetReader();
@@ -8384,30 +8338,8 @@ void VRenderGLView::DrawBounds()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
-	vector<float> vertex;
-	vertex.reserve(16 * 3);
-
-	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.min().z());
-	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.min().z());
-	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.min().z());
-	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.min().z());
-
-	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.max().z());
-	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.max().z());
-	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.max().z());
-	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.max().z());
-
-	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.min().z());
-	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.max().z());
-	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.min().z());
-	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.min().y()); vertex.push_back(m_bounds.max().z());
-	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.min().z());
-	vertex.push_back(m_bounds.max().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.max().z());
-	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.min().z());
-	vertex.push_back(m_bounds.min().x()); vertex.push_back(m_bounds.max().y()); vertex.push_back(m_bounds.max().z());
-
 	ShaderProgram* shader =
-		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -8418,18 +8350,13 @@ void VRenderGLView::DrawBounds()
 	glm::mat4 matrix = m_proj_mat * m_mv_mat;
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
-	glBindVertexArray(m_misc_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
-	glDrawArrays(GL_LINE_LOOP, 0, 4);
-	glDrawArrays(GL_LINE_LOOP, 4, 4);
-	glDrawArrays(GL_LINES, 8, 8);
-	glDisableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	VertexArray* va_cube =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Bound_Cube);
+	if (va_cube)
+	{
+		va_cube->set_param(m_bounds);
+		va_cube->draw();
+	}
 
 	if (shader && shader->valid())
 		shader->release();
@@ -8488,7 +8415,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		glDisable(GL_CULL_FACE);
 
 	ShaderProgram* shader =
-		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -8620,43 +8547,13 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		glm::mat4 matrix = m_proj_mat * mv_mat;
 		shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 
-		vector<float> vertex;
-		vertex.reserve(8 * 3);
-		vector<uint32_t> index;
-		index.reserve(6 * 4 * 2);
-
-		//vertices
-		for (size_t pi = 0; pi<8; ++pi)
-		{
-			vertex.push_back(pp[pi].x());
-			vertex.push_back(pp[pi].y());
-			vertex.push_back(pp[pi].z());
-		}
-		//indices
-		index.push_back(4); index.push_back(0); index.push_back(5); index.push_back(1);
-		index.push_back(4); index.push_back(0); index.push_back(1); index.push_back(5);
-		index.push_back(7); index.push_back(3); index.push_back(6); index.push_back(2);
-		index.push_back(7); index.push_back(3); index.push_back(2); index.push_back(6);
-		index.push_back(1); index.push_back(0); index.push_back(3); index.push_back(2);
-		index.push_back(1); index.push_back(0); index.push_back(2); index.push_back(3);
-		index.push_back(4); index.push_back(5); index.push_back(6); index.push_back(7);
-		index.push_back(4); index.push_back(5); index.push_back(7); index.push_back(6);
-		index.push_back(0); index.push_back(4); index.push_back(2); index.push_back(6);
-		index.push_back(0); index.push_back(4); index.push_back(6); index.push_back(2);
-		index.push_back(5); index.push_back(1); index.push_back(7); index.push_back(3);
-		index.push_back(5); index.push_back(1); index.push_back(3); index.push_back(7);
-
-		glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_misc_ibo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t)*index.size(), &index[0], GL_DYNAMIC_DRAW);
-
-		glBindVertexArray(m_misc_vao);
-		glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_misc_ibo);
-
+		VertexArray* va_clipp =
+			TextureRenderer::vertex_array_manager_.vertex_array(VA_Clip_Planes);
+		if (!va_clipp)
+			return;
+		std::vector<Point> clip_points(pp, pp+8);
+		va_clipp->set_param(clip_points);
+		va_clipp->draw_begin();
 		//draw
 		//x1 = (p4, p0, p1, p5)
 		if (m_clip_mask & 1)
@@ -8668,12 +8565,12 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 					shader->setLocalParam(0, 1.0, 0.5, 0.5, plane_trans);
 				else
 					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)0);
+				va_clipp->draw_clip_plane(0, false);
 			}
 			if (border)
 			{
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, (const GLvoid*)(4 * 4));
+				va_clipp->draw_clip_plane(16, true);
 			}
 		}
 		//x2 = (p7, p3, p2, p6)
@@ -8686,12 +8583,12 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 					shader->setLocalParam(0, 1.0, 0.5, 1.0, plane_trans);
 				else
 					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(8 * 4));
+				va_clipp->draw_clip_plane(32, false);
 			}
 			if (border)
 			{
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, (const GLvoid*)(12 * 4));
+				va_clipp->draw_clip_plane(48, true);
 			}
 		}
 		//y1 = (p1, p0, p2, p3)
@@ -8704,12 +8601,12 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 					shader->setLocalParam(0, 0.5, 1.0, 0.5, plane_trans);
 				else
 					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(16 * 4));
+				va_clipp->draw_clip_plane(64, false);
 			}
 			if (border)
 			{
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, (const GLvoid*)(20 * 4));
+				va_clipp->draw_clip_plane(80, true);
 			}
 		}
 		//y2 = (p4, p5, p7, p6)
@@ -8722,12 +8619,12 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 					shader->setLocalParam(0, 1.0, 1.0, 0.5, plane_trans);
 				else
 					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(24 * 4));
+				va_clipp->draw_clip_plane(96, false);
 			}
 			if (border)
 			{
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, (const GLvoid*)(28 * 4));
+				va_clipp->draw_clip_plane(112, true);
 			}
 		}
 		//z1 = (p0, p4, p6, p2)
@@ -8740,12 +8637,12 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 					shader->setLocalParam(0, 0.5, 0.5, 1.0, plane_trans);
 				else
 					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(32 * 4));
+				va_clipp->draw_clip_plane(128, false);
 			}
 			if (border)
 			{
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, (const GLvoid*)(36 * 4));
+				va_clipp->draw_clip_plane(144, true);
 			}
 		}
 		//z2 = (p5, p1, p3, p7)
@@ -8758,20 +8655,15 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 					shader->setLocalParam(0, 0.5, 1.0, 1.0, plane_trans);
 				else
 					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, (const GLvoid*)(40 * 4));
+				va_clipp->draw_clip_plane(160, false);
 			}
 			if (border)
 			{
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-				glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, (const GLvoid*)(44 * 4));
+				va_clipp->draw_clip_plane(176, true);
 			}
 		}
-
-		glDisableVertexAttribArray(0);
-		//unbind
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
+		va_clipp->draw_end();
 	}
 
 	if (shader && shader->valid())
@@ -8786,34 +8678,8 @@ void VRenderGLView::DrawGrid()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
-	size_t grid_num = 5;
-	size_t line_num = grid_num * 2 + 1;
-	size_t i;
-	vector<float> vertex;
-	vertex.reserve(line_num * 4 * 3);
-
-	double gap = m_distance / grid_num;
-	for (i = 0; i<line_num; ++i)
-	{
-		vertex.push_back(float(-m_distance + gap*i));
-		vertex.push_back(float(0.0));
-		vertex.push_back(float(-m_distance));
-		vertex.push_back(float(-m_distance + gap*i));
-		vertex.push_back(float(0.0));
-		vertex.push_back(float(m_distance));
-	}
-	for (i = 0; i<line_num; ++i)
-	{
-		vertex.push_back(float(-m_distance));
-		vertex.push_back(float(0.0));
-		vertex.push_back(float(-m_distance + gap*i));
-		vertex.push_back(float(m_distance));
-		vertex.push_back(float(0.0));
-		vertex.push_back(float(-m_distance + gap*i));
-	}
-
 	ShaderProgram* shader =
-		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -8825,16 +8691,17 @@ void VRenderGLView::DrawGrid()
 	glm::mat4 matrix = m_proj_mat * m_mv_mat;
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
-	glBindVertexArray(m_misc_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
-	glDrawArrays(GL_LINES, 0, line_num * 4);
-	glDisableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	VertexArray* va_grid =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Grid);
+	if (va_grid)
+	{
+		//set parameters
+		std::vector<std::pair<unsigned int, double>> params;
+		params.push_back(std::pair<unsigned int, double>(0, 5.0));
+		params.push_back(std::pair<unsigned int, double>(1, m_distance));
+		va_grid->set_param(params);
+		va_grid->draw();
+	}
 
 	if (shader && shader->valid())
 		shader->release();
@@ -8845,27 +8712,21 @@ void VRenderGLView::DrawGrid()
 
 void VRenderGLView::DrawCamCtr()
 {
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_BLEND);
-
+	VertexArray* va_jack =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Cam_Jack);
+	if (!va_jack)
+		return;
 	double len;
 	if (m_camctr_size > 0.0)
 		len = m_distance*tan(d2r(m_aov / 2.0))*m_camctr_size / 10.0;
 	else
 		len = fabs(m_camctr_size);
+	va_jack->set_param(0, len);
 
-	vector<float> vertex;
-	vertex.reserve(6 * 3);
-
-	vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(0.0);
-	vertex.push_back(len); vertex.push_back(0.0); vertex.push_back(0.0);
-	vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(0.0);
-	vertex.push_back(0.0); vertex.push_back(len); vertex.push_back(0.0);
-	vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(0.0);
-	vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(len);
-
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
 	ShaderProgram* shader =
-		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -8875,23 +8736,14 @@ void VRenderGLView::DrawCamCtr()
 	glm::mat4 matrix = m_proj_mat * m_mv_mat;
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
-	glBindVertexArray(m_misc_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
-
+	va_jack->draw_begin();
 	shader->setLocalParam(0, 1.0, 0.0, 0.0, 1.0);
-	glDrawArrays(GL_LINES, 0, 2);
+	va_jack->draw_cam_jack(0);
 	shader->setLocalParam(0, 0.0, 1.0, 0.0, 1.0);
-	glDrawArrays(GL_LINES, 2, 2);
+	va_jack->draw_cam_jack(1);
 	shader->setLocalParam(0, 0.0, 0.0, 1.0, 1.0);
-	glDrawArrays(GL_LINES, 4, 2);
-
-	glDisableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	va_jack->draw_cam_jack(2);
+	va_jack->draw_end();
 
 	if (shader && shader->valid())
 		shader->release();
@@ -8907,19 +8759,14 @@ void VRenderGLView::DrawFrame()
 	ny = GetGLSize().y;
 	glm::mat4 proj_mat = glm::ortho(float(0), float(nx), float(0), float(ny));
 
+	VertexArray* va_frame =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Crop_Frame);
+	if (!va_frame)
+		return;
+
 	glDisable(GL_DEPTH_TEST);
-	//GLfloat line_width = 1.0f;
-
-	vector<float> vertex;
-	vertex.reserve(4 * 3);
-
-	vertex.push_back(m_frame_x - 1); vertex.push_back(m_frame_y - 1); vertex.push_back(0.0);
-	vertex.push_back(m_frame_x + m_frame_w + 1); vertex.push_back(m_frame_y - 1); vertex.push_back(0.0);
-	vertex.push_back(m_frame_x + m_frame_w + 1); vertex.push_back(m_frame_y + m_frame_h + 1); vertex.push_back(0.0);
-	vertex.push_back(m_frame_x - 1); vertex.push_back(m_frame_y + m_frame_h + 1); vertex.push_back(0.0);
-
 	ShaderProgram* shader =
-		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -8930,68 +8777,60 @@ void VRenderGLView::DrawFrame()
 	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 
 	//draw frame
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
-	glBindVertexArray(m_misc_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
-	glDrawArrays(GL_LINE_LOOP, 0, 4);
-	glDisableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	vector<std::pair<unsigned int, double>> params;
+	params.push_back(std::pair<unsigned int, double>(0, m_frame_x));
+	params.push_back(std::pair<unsigned int, double>(1, m_frame_y));
+	params.push_back(std::pair<unsigned int, double>(2, m_frame_w));
+	params.push_back(std::pair<unsigned int, double>(3, m_frame_h));
+	va_frame->set_param(params);
+	va_frame->draw();
 
 	if (shader && shader->valid())
 		shader->release();
-
 	glEnable(GL_DEPTH_TEST);
 }
 
 void VRenderGLView::DrawScaleBar()
 {
+	VertexArray* va_scale_bar =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Scale_Bar);
+	if (!va_scale_bar)
+		return;
+
 	double offset = 0.0;
 	if (m_draw_legend)
 		offset = m_sb_height;
-
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
 	float sx, sy;
 	sx = 2.0 / nx;
 	sy = 2.0 / ny;
 	float px, py, ph;
-
 	glm::mat4 proj_mat = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f);
-
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_BLEND);
-
 	double len = m_sb_length / (m_ortho_right - m_ortho_left);
 	wstring wsb_text = m_sb_text.ToStdWstring();
-	double textlen = m_text_renderer ?
-		m_text_renderer->RenderTextLen(wsb_text) : 0.0;
-	vector<float> vertex;
-	vertex.reserve(4 * 3);
-
+	double textlen =
+		m_text_renderer.RenderTextLen(wsb_text);
 	Color text_color = GetTextColor();
 
+	std::vector<std::pair<unsigned int, double>> params;
 	if (m_draw_frame)
 	{
 		px = (0.95*m_frame_w + m_frame_x) / nx;
 		py = (0.05*m_frame_h + m_frame_y + offset) / ny;
 		ph = 5.0 / ny;
-		vertex.push_back(px); vertex.push_back(py); vertex.push_back(0.0);
-		vertex.push_back(px - len); vertex.push_back(py); vertex.push_back(0.0);
-		vertex.push_back(px); vertex.push_back(py - ph); vertex.push_back(0.0);
-		vertex.push_back(px - len); vertex.push_back(py - ph); vertex.push_back(0.0);
+		params.push_back(std::pair<unsigned int, double>(0, px));
+		params.push_back(std::pair<unsigned int, double>(1, py));
+		params.push_back(std::pair<unsigned int, double>(2, len));
+		params.push_back(std::pair<unsigned int, double>(3, ph));
 
 		if (m_disp_scale_bar_text)
 		{
 			px = 0.95*m_frame_w + m_frame_x - (len*nx + textlen + nx) / 2.0;
 			py = ny / 2.0 - ny + 0.065*m_frame_h + m_frame_y + offset;
-			if (m_text_renderer)
-				m_text_renderer->RenderText(
-					wsb_text, text_color,
-					px*sx, py*sy, sx, sy);
+			m_text_renderer.RenderText(
+				wsb_text, text_color,
+				px*sx, py*sy, sx, sy);
 		}
 	}
 	else
@@ -8999,24 +8838,25 @@ void VRenderGLView::DrawScaleBar()
 		px = 0.95;
 		py = 0.05 + offset / ny;
 		ph = 5.0 / ny;
-		vertex.push_back(px); vertex.push_back(py); vertex.push_back(0.0);
-		vertex.push_back(px - len); vertex.push_back(py); vertex.push_back(0.0);
-		vertex.push_back(px); vertex.push_back(py - ph); vertex.push_back(0.0);
-		vertex.push_back(px - len); vertex.push_back(py - ph); vertex.push_back(0.0);
+		params.push_back(std::pair<unsigned int, double>(0, px));
+		params.push_back(std::pair<unsigned int, double>(1, py));
+		params.push_back(std::pair<unsigned int, double>(2, len));
+		params.push_back(std::pair<unsigned int, double>(3, ph));
 
 		if (m_disp_scale_bar_text)
 		{
 			px = 0.95*nx - (len*nx + textlen + nx) / 2.0;
 			py = ny / 2.0 - 0.935*ny + offset;
-			if (m_text_renderer)
-				m_text_renderer->RenderText(
-					wsb_text, text_color,
-					px*sx, py*sy, sx, sy);
+			m_text_renderer.RenderText(
+				wsb_text, text_color,
+				px*sx, py*sy, sx, sy);
 		}
 	}
 
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
 	ShaderProgram* shader =
-		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -9024,37 +8864,24 @@ void VRenderGLView::DrawScaleBar()
 		shader->bind();
 	}
 	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
-	glBindVertexArray(m_misc_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
-
 	shader->setLocalParam(0, text_color.r(), text_color.g(), text_color.b(), 1.0);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-	glDisableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	va_scale_bar->set_param(params);
+	va_scale_bar->draw();
 
 	if (shader && shader->valid())
 		shader->release();
-
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 }
 
 void VRenderGLView::DrawLegend()
 {
-	if (!m_text_renderer)
-		return;
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (!vr_frame)
 		return;
 
-	double font_height = m_text_renderer->GetSize() + 3.0;
+	double font_height =
+		TextRenderer::text_texture_manager_.GetSize() + 3.0;
 
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
@@ -9081,7 +8908,7 @@ void VRenderGLView::DrawLegend()
 		{
 			wxstr = m_vd_pop_list[i]->GetName();
 			wstr = wxstr.ToStdWstring();
-			name_len = m_text_renderer->RenderTextLen(wstr) + font_height;
+			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
 			length += name_len;
 			if (length < double(m_draw_frame ? m_frame_w : nx) - gap_width)
 			{
@@ -9100,7 +8927,7 @@ void VRenderGLView::DrawLegend()
 		{
 			wxstr = m_md_pop_list[i]->GetName();
 			wstr = wxstr.ToStdWstring();
-			name_len = m_text_renderer->RenderTextLen(wstr) + font_height;
+			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
 			length += name_len;
 			if (length < double(m_draw_frame ? m_frame_w : nx) - gap_width)
 			{
@@ -9125,7 +8952,7 @@ void VRenderGLView::DrawLegend()
 			wxstr = m_vd_pop_list[i]->GetName();
 			xpos = length;
 			wstr = wxstr.ToStdWstring();
-			name_len = m_text_renderer->RenderTextLen(wstr) + font_height;
+			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
 			length += name_len;
 			if (length < double(m_draw_frame ? m_frame_w : nx) - gap_width)
 			{
@@ -9154,7 +8981,7 @@ void VRenderGLView::DrawLegend()
 			wxstr = m_md_pop_list[i]->GetName();
 			xpos = length;
 			wstr = wxstr.ToStdWstring();
-			name_len = m_text_renderer->RenderTextLen(wstr) + font_height;
+			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
 			length += name_len;
 			if (length < double(m_draw_frame ? m_frame_w : nx) - gap_width)
 			{
@@ -9189,36 +9016,22 @@ void VRenderGLView::DrawName(
 	double font_height,
 	bool highlighted)
 {
+	VertexArray* va_legend_squares =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Legend_Squares);
+	if (!va_legend_squares)
+		return;
+
+	wstring wstr;
 	float sx, sy;
 	sx = 2.0 / nx;
 	sy = 2.0 / ny;
-
-	wstring wstr;
+	glm::mat4 proj_mat = glm::ortho(0.0f, float(nx), 0.0f, float(ny));
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
-
-	glm::mat4 proj_mat = glm::ortho(0.0f, float(nx), 0.0f, float(ny));
-	vector<float> vertex;
-	vertex.reserve(8 * 3);
-
-	float px1, py1, px2, py2;
-	px1 = x + 0.2*font_height;
-	py1 = ny - y + 0.2*font_height;
-	px2 = x + 0.8*font_height;
-	py2 = ny - y + 0.8*font_height;
-	vertex.push_back(px1 - 1.0); vertex.push_back(py2 + 1.0); vertex.push_back(0.0);
-	vertex.push_back(px2 + 1.0); vertex.push_back(py2 + 1.0); vertex.push_back(0.0);
-	vertex.push_back(px1 - 1.0); vertex.push_back(py1 - 1.0); vertex.push_back(0.0);
-	vertex.push_back(px2 + 1.0); vertex.push_back(py1 - 1.0); vertex.push_back(0.0);
-
-	vertex.push_back(px1); vertex.push_back(py2); vertex.push_back(0.0);
-	vertex.push_back(px2); vertex.push_back(py2); vertex.push_back(0.0);
-	vertex.push_back(px1); vertex.push_back(py1); vertex.push_back(0.0);
-	vertex.push_back(px2); vertex.push_back(py1); vertex.push_back(0.0);
-
+	glDisable(GL_CULL_FACE);
 	ShaderProgram* shader =
-		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -9227,37 +9040,34 @@ void VRenderGLView::DrawName(
 	}
 	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
-	glBindVertexArray(m_misc_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
-
+	std::vector<std::pair<unsigned int, double>> params;
+	params.push_back(std::pair<unsigned int, double>(0, x + 0.2*font_height));
+	params.push_back(std::pair<unsigned int, double>(1, ny - y + 0.2*font_height));
+	params.push_back(std::pair<unsigned int, double>(2, x + 0.8*font_height));
+	params.push_back(std::pair<unsigned int, double>(3, ny - y + 0.8*font_height));
+	va_legend_squares->set_param(params);
+	va_legend_squares->draw_begin();
 	Color text_color = GetTextColor();
 	shader->setLocalParam(0, text_color.r(), text_color.g(), text_color.b(), 1.0);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	va_legend_squares->draw_legend_square(0);
 	shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0);
-	glDrawArrays(GL_TRIANGLE_STRIP, 4, 4);
-
-	glDisableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	va_legend_squares->draw_legend_square(1);
+	va_legend_squares->draw_end();
 
 	if (shader && shader->valid())
 		shader->release();
 
-	px1 = x + font_height - nx / 2;
-	py1 = ny / 2 - y + 0.25*font_height;
+	float px1 = x + font_height - nx / 2;
+	float py1 = ny / 2 - y + 0.25*font_height;
 	wstr = name.ToStdWstring();
-	m_text_renderer->RenderText(
+	m_text_renderer.RenderText(
 		wstr, text_color,
 		px1*sx, py1*sy, sx, sy);
 	if (highlighted)
 	{
 		px1 -= 0.5;
 		py1 += 0.5;
-		m_text_renderer->RenderText(
+		m_text_renderer.RenderText(
 			wstr, color,
 			px1*sx, py1*sy, sx, sy);
 	}
@@ -9326,7 +9136,7 @@ void VRenderGLView::DrawGradBg()
 	vertex.push_back(m_bg_color.r()); vertex.push_back(m_bg_color.g()); vertex.push_back(m_bg_color.b());
 
 	ShaderProgram* shader =
-		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR3);
+		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR3);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -9335,25 +9145,16 @@ void VRenderGLView::DrawGradBg()
 	}
 	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
-	glBindVertexArray(m_misc_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)12);
-
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 8);
-
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	VertexArray* va_bkg =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Grad_Bkg);
+	if (va_bkg)
+	{
+		va_bkg->set_param(vertex);
+		va_bkg->draw();
+	}
 
 	if (shader && shader->valid())
 		shader->release();
-
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 }
@@ -9548,54 +9349,51 @@ void VRenderGLView::DrawColormap()
 		vertex.push_back(py); vertex.push_back((0.5*m_frame_h + m_frame_y + offset) / ny); vertex.push_back(0.0);
 		vertex.push_back(m_color_7.r()); vertex.push_back(m_color_7.g()); vertex.push_back(m_color_7.b()); vertex.push_back(1.0);
 
-		if (m_text_renderer)
-		{
-			wxString str;
-			wstring wstr;
+		wxString str;
+		wstring wstr;
 
-			Color text_color = GetTextColor();
+		Color text_color = GetTextColor();
 
-			//value 1
-			px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
-			py = 0.1*m_frame_h + m_frame_y + offset - ny / 2.0;
-			str = wxString::Format("%d", 0);
-			wstr = str.ToStdWstring();
-			m_text_renderer->RenderText(
-				wstr, text_color,
-				px*sx, py*sy, sx, sy);
-			//value 2
-			px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
-			py = (0.1 + 0.4*m_value_2)*m_frame_h + m_frame_y + offset - ny / 2.0;
-			str = wxString::Format("%d", int(m_value_2*max_val));
-			wstr = str.ToStdWstring();
-			m_text_renderer->RenderText(
-				wstr, text_color,
-				px*sx, py*sy, sx, sy);
-			//value 4
-			px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
-			py = (0.1 + 0.4*m_value_4)*m_frame_h + m_frame_y + offset - ny / 2.0;
-			str = wxString::Format("%d", int(m_value_4*max_val));
-			wstr = str.ToStdWstring();
-			m_text_renderer->RenderText(
-				wstr, text_color,
-				px*sx, py*sy, sx, sy);
-			//value 6
-			px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
-			py = (0.1 + 0.4*m_value_6)*m_frame_h + m_frame_y + offset - ny / 2.0;
-			str = wxString::Format("%d", int(m_value_6*max_val));
-			wstr = str.ToStdWstring();
-			m_text_renderer->RenderText(
-				wstr, text_color,
-				px*sx, py*sy, sx, sy);
-			//value 7
-			px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
-			py = 0.5*m_frame_h + m_frame_y + offset - ny / 2.0;
-			str = wxString::Format("%d", int(max_val));
-			wstr = str.ToStdWstring();
-			m_text_renderer->RenderText(
-				wstr, text_color,
-				px*sx, py*sy, sx, sy);
-		}
+		//value 1
+		px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
+		py = 0.1*m_frame_h + m_frame_y + offset - ny / 2.0;
+		str = wxString::Format("%d", 0);
+		wstr = str.ToStdWstring();
+		m_text_renderer.RenderText(
+			wstr, text_color,
+			px*sx, py*sy, sx, sy);
+		//value 2
+		px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
+		py = (0.1 + 0.4*m_value_2)*m_frame_h + m_frame_y + offset - ny / 2.0;
+		str = wxString::Format("%d", int(m_value_2*max_val));
+		wstr = str.ToStdWstring();
+		m_text_renderer.RenderText(
+			wstr, text_color,
+			px*sx, py*sy, sx, sy);
+		//value 4
+		px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
+		py = (0.1 + 0.4*m_value_4)*m_frame_h + m_frame_y + offset - ny / 2.0;
+		str = wxString::Format("%d", int(m_value_4*max_val));
+		wstr = str.ToStdWstring();
+		m_text_renderer.RenderText(
+			wstr, text_color,
+			px*sx, py*sy, sx, sy);
+		//value 6
+		px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
+		py = (0.1 + 0.4*m_value_6)*m_frame_h + m_frame_y + offset - ny / 2.0;
+		str = wxString::Format("%d", int(m_value_6*max_val));
+		wstr = str.ToStdWstring();
+		m_text_renderer.RenderText(
+			wstr, text_color,
+			px*sx, py*sy, sx, sy);
+		//value 7
+		px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
+		py = 0.5*m_frame_h + m_frame_y + offset - ny / 2.0;
+		str = wxString::Format("%d", int(max_val));
+		wstr = str.ToStdWstring();
+		m_text_renderer.RenderText(
+			wstr, text_color,
+			px*sx, py*sy, sx, sy);
 	}
 	else
 	{
@@ -9628,54 +9426,51 @@ void VRenderGLView::DrawColormap()
 		vertex.push_back(0.05); vertex.push_back(0.5 + offset / ny); vertex.push_back(0.0);
 		vertex.push_back(m_color_7.r()); vertex.push_back(m_color_7.g()); vertex.push_back(m_color_7.b()); vertex.push_back(1.0);
 
-		if (m_text_renderer)
-		{
-			wxString str;
-			wstring wstr;
+		wxString str;
+		wstring wstr;
 
-			Color text_color = GetTextColor();
+		Color text_color = GetTextColor();
 
-			//value 1
-			px = 0.052*nx - nx / 2.0;
-			py = ny / 2.0 - 0.9*ny + offset;
-			str = wxString::Format("%d", 0);
-			wstr = str.ToStdWstring();
-			m_text_renderer->RenderText(
-				wstr, text_color,
-				px*sx, py*sy, sx, sy);
-			//value 2
-			px = 0.052*nx - nx / 2.0;
-			py = ny / 2.0 - (0.9 - 0.4*m_value_2)*ny + offset;
-			str = wxString::Format("%d", int(m_value_2*max_val));
-			wstr = str.ToStdWstring();
-			m_text_renderer->RenderText(
-				wstr, text_color,
-				px*sx, py*sy, sx, sy);
-			//value 4
-			px = 0.052*nx - nx / 2.0;
-			py = ny / 2.0 - (0.9 - 0.4*m_value_4)*ny + offset;
-			str = wxString::Format("%d", int(m_value_4*max_val));
-			wstr = str.ToStdWstring();
-			m_text_renderer->RenderText(
-				wstr, text_color,
-				px*sx, py*sy, sx, sy);
-			//value 6
-			px = 0.052*nx - nx / 2.0;
-			py = ny / 2.0 - (0.9 - 0.4*m_value_6)*ny + offset;
-			str = wxString::Format("%d", int(m_value_6*max_val));
-			wstr = str.ToStdWstring();
-			m_text_renderer->RenderText(
-				wstr, text_color,
-				px*sx, py*sy, sx, sy);
-			//value 7
-			px = 0.052*nx - nx / 2.0;
-			py = ny / 2.0 - 0.5*ny + offset;
-			str = wxString::Format("%d", int(max_val));
-			wstr = str.ToStdWstring();
-			m_text_renderer->RenderText(
-				wstr, text_color,
-				px*sx, py*sy, sx, sy);
-		}
+		//value 1
+		px = 0.052*nx - nx / 2.0;
+		py = ny / 2.0 - 0.9*ny + offset;
+		str = wxString::Format("%d", 0);
+		wstr = str.ToStdWstring();
+		m_text_renderer.RenderText(
+			wstr, text_color,
+			px*sx, py*sy, sx, sy);
+		//value 2
+		px = 0.052*nx - nx / 2.0;
+		py = ny / 2.0 - (0.9 - 0.4*m_value_2)*ny + offset;
+		str = wxString::Format("%d", int(m_value_2*max_val));
+		wstr = str.ToStdWstring();
+		m_text_renderer.RenderText(
+			wstr, text_color,
+			px*sx, py*sy, sx, sy);
+		//value 4
+		px = 0.052*nx - nx / 2.0;
+		py = ny / 2.0 - (0.9 - 0.4*m_value_4)*ny + offset;
+		str = wxString::Format("%d", int(m_value_4*max_val));
+		wstr = str.ToStdWstring();
+		m_text_renderer.RenderText(
+			wstr, text_color,
+			px*sx, py*sy, sx, sy);
+		//value 6
+		px = 0.052*nx - nx / 2.0;
+		py = ny / 2.0 - (0.9 - 0.4*m_value_6)*ny + offset;
+		str = wxString::Format("%d", int(m_value_6*max_val));
+		wstr = str.ToStdWstring();
+		m_text_renderer.RenderText(
+			wstr, text_color,
+			px*sx, py*sy, sx, sy);
+		//value 7
+		px = 0.052*nx - nx / 2.0;
+		py = ny / 2.0 - 0.5*ny + offset;
+		str = wxString::Format("%d", int(max_val));
+		wstr = str.ToStdWstring();
+		m_text_renderer.RenderText(
+			wstr, text_color,
+			px*sx, py*sy, sx, sy);
 	}
 
 	glDisable(GL_DEPTH_TEST);
@@ -9683,7 +9478,7 @@ void VRenderGLView::DrawColormap()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	ShaderProgram* shader =
-		m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR4);
+		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR4);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -9692,21 +9487,13 @@ void VRenderGLView::DrawColormap()
 	}
 	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
-	glBindVertexArray(m_misc_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const GLvoid*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const GLvoid*)12);
-
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
-
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	VertexArray* va_colormap =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Color_Map);
+	if (va_colormap)
+	{
+		va_colormap->set_param(vertex);
+		va_colormap->draw();
+	}
 
 	if (shader && shader->valid())
 		shader->release();
@@ -9716,14 +9503,11 @@ void VRenderGLView::DrawColormap()
 
 void VRenderGLView::DrawInfo(int nx, int ny)
 {
-	if (!m_text_renderer)
-		return;
-
 	float sx, sy;
 	sx = 2.0 / nx;
 	sy = 2.0 / ny;
 	float px, py;
-	float gapw = m_text_renderer->GetSize();
+	float gapw = TextRenderer::text_texture_manager_.GetSize();
 	float gaph = gapw * 2;
 
 	double fps_ = 1.0 / m_timer->average();
@@ -9774,7 +9558,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	wstring wstr_temp = str.ToStdWstring();
 	px = gapw - nx / 2;
 	py = ny / 2 - gaph / 2;
-	m_text_renderer->RenderText(
+	m_text_renderer.RenderText(
 		wstr_temp, text_color,
 		px*sx, py*sy, sx, sy);
 
@@ -9793,7 +9577,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 			wstr_temp = str.ToStdWstring();
 			px = gapw - nx / 2;
 			py = ny / 2 - gaph;
-			m_text_renderer->RenderText(
+			m_text_renderer.RenderText(
 				wstr_temp, text_color,
 				px*sx, py*sy, sx, sy);
 		}
@@ -9824,7 +9608,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 				px = 0.01*nx - nx / 2.0;
 				py = 0.04*ny - ny / 2.0;
 			}
-			m_text_renderer->RenderText(
+			m_text_renderer.RenderText(
 				wstr_temp, text_color,
 				px*sx, py*sy, sx, sy);
 		}
@@ -9838,7 +9622,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 			wstr_temp = str.ToStdWstring();
 			px = gapw - nx / 2;
 			py = ny / 2 - gaph*1.5;
-			m_text_renderer->RenderText(
+			m_text_renderer.RenderText(
 				wstr_temp, text_color,
 				px*sx, py*sy, sx, sy);
 		}
@@ -9853,10 +9637,9 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 					wstr_temp = str.ToStdWstring();
 					px = gapw - nx / 2;
 					py = ny / 2 - gaph*(3 + i) / 2;
-					if (m_text_renderer)
-						m_text_renderer->RenderText(
-							wstr_temp, text_color,
-							px*sx, py*sy, sx, sy);
+					m_text_renderer.RenderText(
+						wstr_temp, text_color,
+						px*sx, py*sy, sx, sy);
 				}
 			}
 		}
@@ -11415,36 +11198,29 @@ void VRenderGLView::AddPaintRulerPoint()
 	}
 }
 
-void VRenderGLView::DrawRulers()
+unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 {
-	if (!m_text_renderer)
-		return;
-
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
-	float sx, sy;
-	sx = 2.0 / nx;
-	sy = 2.0 / ny;
-	float w = m_text_renderer->GetSize() / 4.0f;
-	float px, py, p2x, p2y;
-
-	vector<float> verts;
-	int vert_num = 0;
-	for (size_t i = 0; i<m_ruler_list.size(); ++i)
-		if (m_ruler_list[i])
-			vert_num += m_ruler_list[i]->GetNumPoint();
-	verts.reserve(vert_num * 10 * 3);
+	float w = TextRenderer::text_texture_manager_.GetSize() / 4.0f;
+	float px, py;
 
 	Transform mv;
 	Transform p;
 	mv.set(glm::value_ptr(m_mv_mat));
 	p.set(glm::value_ptr(m_proj_mat));
-	Point p1, p2;
-	unsigned int num;
-	vector<unsigned int> nums;
-	Color color;
-	Color text_color = GetTextColor();
 
+	//estimate
+	int vert_num = 0;
+	for (size_t i = 0; i<m_ruler_list.size(); ++i)
+		if (m_ruler_list[i])
+			vert_num += m_ruler_list[i]->GetNumPoint();
+	verts.reserve(vert_num * 10 * 3 * 2);
+
+	unsigned int num = 0;
+	Point p1, p2;
+	Color c;
+	Color text_color = GetTextColor();
 	for (size_t i = 0; i<m_ruler_list.size(); i++)
 	{
 		Ruler* ruler = m_ruler_list[i];
@@ -11453,11 +11229,10 @@ void VRenderGLView::DrawRulers()
 			(ruler->GetTimeDep() &&
 				ruler->GetTime() == m_tseq_cur_num))
 		{
-			num = 0;
 			if (ruler->GetUseColor())
-				color = ruler->GetColor();
+				c = ruler->GetColor();
 			else
-				color = text_color;
+				c = text_color;
 			for (size_t j = 0; j<ruler->GetNumPoint(); ++j)
 			{
 				p2 = *(ruler->GetPoint(j));
@@ -11469,23 +11244,22 @@ void VRenderGLView::DrawRulers()
 				px = (p2.x() + 1.0)*nx / 2.0;
 				py = (p2.y() + 1.0)*ny / 2.0;
 				verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
+				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 				verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
+				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 				verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
+				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 				verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
+				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 				verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
+				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 				verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
+				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 				verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
+				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 				verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
+				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 				num += 8;
-				if (j + 1 == ruler->GetNumPoint())
-				{
-					p2x = p2.x()*nx / 2.0;
-					p2y = p2.y()*ny / 2.0;
-					m_text_renderer->RenderText(
-						ruler->GetName().ToStdWstring(),
-						color,
-						(p2x + w)*sx, (p2y + w)*sy, sx, sy);
-				}
 				if (j > 0)
 				{
 					p1 = *(ruler->GetPoint(j - 1));
@@ -11495,9 +11269,11 @@ void VRenderGLView::DrawRulers()
 						(!m_persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
 						continue;
 					verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 					px = (p1.x() + 1.0)*nx / 2.0;
 					py = (p1.y() + 1.0)*ny / 2.0;
 					verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 					num += 2;
 				}
 			}
@@ -11518,74 +11294,101 @@ void VRenderGLView::DrawRulers()
 					px = (p1.x() + 1.0)*nx / 2.0;
 					py = (p1.y() + 1.0)*ny / 2.0;
 					verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 					p1 = center + v2*w;
 					p1 = mv.transform(p1);
 					p1 = p.transform(p1);
 					px = (p1.x() + 1.0)*nx / 2.0;
 					py = (p1.y() + 1.0)*ny / 2.0;
 					verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 					num += 2;
 				}
 			}
-			nums.push_back(num);
 		}
 	}
 
-	if (!verts.empty())
+	return num;
+}
+
+void VRenderGLView::DrawRulers()
+{
+	if (m_ruler_list.empty())
+		return;
+	glEnable(GL_LINE_SMOOTH);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	ShaderProgram* shader =
+		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR3);
+	if (shader)
 	{
-		glEnable(GL_LINE_SMOOTH);
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		if (!shader->valid())
+			shader->create();
+		shader->bind();
+	}
+	glm::mat4 matrix = glm::ortho(float(0),
+		float(GetGLSize().x), float(0), float(GetGLSize().y));
+	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 
-		glm::mat4 matrix = glm::ortho(float(0), float(nx), float(0), float(ny));
-
-		ShaderProgram* shader =
-			m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
-		if (shader)
+	VertexArray* va_rulers =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Rulers);
+	if (va_rulers)
+	{
+		vector<float> verts;
+		unsigned int num = DrawRulersVerts(verts);
+		if (num)
 		{
-			if (!shader->valid())
-				shader->create();
-			shader->bind();
+			va_rulers->buffer_data(VABuf_Coord,
+				sizeof(float)*verts.size(),
+				&verts[0], GL_STREAM_DRAW);
+			va_rulers->set_param(0, num);
+			va_rulers->draw();
 		}
-		shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+	}
 
-		glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float)*verts.size(), &verts[0], GL_DYNAMIC_DRAW);
-		glBindVertexArray(m_misc_vao);
-		glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
+	if (shader && shader->valid())
+		shader->release();
+	glDisable(GL_LINE_SMOOTH);
 
-		GLint pos = 0;
-		size_t j = 0;
-		for (size_t i = 0; i<m_ruler_list.size(); i++)
+	//draw text
+	float w = TextRenderer::text_texture_manager_.GetSize() / 4.0f;
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
+	float sx, sy;
+	sx = 2.0 / nx;
+	sy = 2.0 / ny;
+	Color c;
+	Color text_color = GetTextColor();
+	Point p2;
+	float px, py, p2x, p2y;
+	Transform mv;
+	Transform p;
+	mv.set(glm::value_ptr(m_mv_mat));
+	p.set(glm::value_ptr(m_proj_mat));
+	for (size_t i = 0; i < m_ruler_list.size(); i++)
+	{
+		Ruler* ruler = m_ruler_list[i];
+		if (!ruler) continue;
+		if (!ruler->GetTimeDep() ||
+			(ruler->GetTimeDep() &&
+				ruler->GetTime() == m_tseq_cur_num))
 		{
-			Ruler* ruler = m_ruler_list[i];
-			if (!ruler) continue;
-			if (!ruler->GetTimeDep() ||
-				(ruler->GetTimeDep() &&
-					ruler->GetTime() == m_tseq_cur_num))
-			{
-				num = 0;
-				if (ruler->GetUseColor())
-					color = ruler->GetColor();
-				else
-					color = text_color;
-				shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0);
-				glDrawArrays(GL_LINES, pos, (GLsizei)(nums[j++]));
-				pos += nums[j - 1];
-			}
+			if (ruler->GetUseColor())
+				c = ruler->GetColor();
+			else
+				c = text_color;
+			size_t j = ruler->GetNumPoint() - 1;
+			p2 = *(ruler->GetPoint(j));
+			p2 = mv.transform(p2);
+			p2 = p.transform(p2);
+			p2x = p2.x()*nx / 2.0;
+			p2y = p2.y()*ny / 2.0;
+			m_text_renderer.RenderText(
+				ruler->GetName().ToStdWstring(),
+				c,
+				(p2x + w)*sx, (p2y + w)*sy, sx, sy);
 		}
-
-		glDisableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-
-		if (shader && shader->valid())
-			shader->release();
-
-		glDisable(GL_LINE_SMOOTH);
 	}
 }
 
@@ -11837,55 +11640,52 @@ void VRenderGLView::ExportTrace(wxString filename, unsigned int id)
 
 void VRenderGLView::DrawTraces()
 {
-	if (m_cur_vol && m_trace_group && m_text_renderer)
+	if (m_cur_vol &&
+		m_trace_group)
 	{
-		vector<float> verts;
-		unsigned int num = m_trace_group->Draw(verts);
+		glEnable(GL_LINE_SMOOTH);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-		if (!verts.empty())
+		double spcx, spcy, spcz;
+		m_cur_vol->GetSpacings(spcx, spcy, spcz);
+		glm::mat4 matrix = glm::scale(m_mv_mat,
+			glm::vec3(float(spcx), float(spcy), float(spcz)));
+		matrix = m_proj_mat*matrix;
+
+		ShaderProgram* shader =
+			TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR3);
+		if (shader)
 		{
-			glEnable(GL_LINE_SMOOTH);
-			glEnable(GL_DEPTH_TEST);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
-			double spcx, spcy, spcz;
-			m_cur_vol->GetSpacings(spcx, spcy, spcz);
-			glm::mat4 matrix = glm::scale(m_mv_mat,
-				glm::vec3(float(spcx), float(spcy), float(spcz)));
-			matrix = m_proj_mat*matrix;
-
-			ShaderProgram* shader =
-				m_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR3);
-			if (shader)
-			{
-				if (!shader->valid())
-					shader->create();
-				shader->bind();
-			}
-			shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
-
-			glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(float)*verts.size(), &verts[0], GL_DYNAMIC_DRAW);
-			glBindVertexArray(m_misc_vao);
-			glBindBuffer(GL_ARRAY_BUFFER, m_misc_vbo);
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)0);
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)12);
-
-			glDrawArrays(GL_LINES, 0, num);
-
-			glDisableVertexAttribArray(0);
-			glDisableVertexAttribArray(1);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-			glBindVertexArray(0);
-
-			if (shader && shader->valid())
-				shader->release();
-
-			glDisable(GL_LINE_SMOOTH);
+			if (!shader->valid())
+				shader->create();
+			shader->bind();
 		}
+		shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+
+		VertexArray* va_traces =
+			TextureRenderer::vertex_array_manager_.vertex_array(VA_Traces);
+		if (va_traces)
+		{
+			if (va_traces->get_dirty())
+			{
+				vector<float> verts;
+				unsigned int num = m_trace_group->Draw(verts);
+				if (num)
+				{
+					va_traces->buffer_data(VABuf_Coord,
+						sizeof(float)*verts.size(),
+						&verts[0], GL_STREAM_DRAW);
+					va_traces->set_param(0, num);
+				}
+			}
+			va_traces->draw();
+		}
+
+		if (shader && shader->valid())
+			shader->release();
+		glDisable(GL_LINE_SMOOTH);
 	}
 }
 
@@ -12483,7 +12283,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 
 		m_retain_finalbuffer = true;
 #ifdef _WIN32
-        RefreshGL(38, false, false);
+		RefreshGL(38, false, false);
 #else
 		RefreshGL(38, false, true);
 #endif
@@ -12618,21 +12418,6 @@ void VRenderGLView::SetRotations(double rotx, double roty, double rotz, bool ui_
 	}
 }
 
-char* VRenderGLView::wxStringToChar(wxString input)
-{
-#if (wxUSE_UNICODE)
-	size_t size = input.size() + 1;
-	char *buffer = new char[size];//No need to multiply by 4, converting to 1 byte char only.
-	memset(buffer, 0, size); //Good Practice, Can use buffer[0] = '&#65533;' also.
-	wxEncodingConverter wxec;
-	wxec.Init(wxFONTENCODING_ISO8859_1, wxFONTENCODING_ISO8859_1, wxCONVERT_SUBSTITUTE);
-	wxec.Convert(input.mb_str(), buffer);
-	return buffer; //To free this buffer memory is user responsibility.
-#else
-	return (char *)(input.c_str());
-#endif
-}
-
 void VRenderGLView::GetFrame(int &x, int &y, int &w, int &h)
 {
 	x = m_frame_x;
@@ -12728,31 +12513,10 @@ void VRenderGLView::CalcFrame()
 
 void VRenderGLView::DrawViewQuad()
 {
-	if (!m_quad_vao)
-	{
-		float points[] = {
-			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-			1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-			-1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-			1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f };
-
-		glBindBuffer(GL_ARRAY_BUFFER, m_quad_vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 24, points, GL_STATIC_DRAW);
-
-		glGenVertexArrays(1, &m_quad_vao);
-		glBindVertexArray(m_quad_vao);
-
-		glBindBuffer(GL_ARRAY_BUFFER, m_quad_vbo);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)0);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)12);
-	}
-
-	glBindVertexArray(m_quad_vao);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	VertexArray* quad_va =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Norm_Square);
+	if (quad_va)
+		quad_va->draw();
 }
 
 void VRenderGLView::switchLevel(VolumeData *vd)

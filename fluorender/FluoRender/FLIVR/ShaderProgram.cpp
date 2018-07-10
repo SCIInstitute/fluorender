@@ -238,7 +238,8 @@ namespace FLIVR
 
 			glUseProgram(id_);
 
-			//glBindFragDataLocation(id_, 0, "FragColor");
+			glDeleteShader(v_shader);
+			glDeleteShader(f_shader);
 
 			const char *loc_strings[] = {
 				"tex0", "tex1", "tex2", "tex3",

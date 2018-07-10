@@ -111,15 +111,14 @@ namespace FLIVR
 
 	VolKernelFactory::~VolKernelFactory()
 	{
-		clean();
+		for (unsigned int i = 0; i<kernels_.size(); ++i)
+			delete kernels_[i];
 	}
 
-	void VolKernelFactory::clean()
+	void VolKernelFactory::clear()
 	{
 		for (unsigned int i=0; i<kernels_.size(); ++i)
-		{
 			delete kernels_[i];
-		}
 		kernels_.clear();
 		prev_kernel_ = -1;
 	}
@@ -129,9 +128,7 @@ namespace FLIVR
 		if (prev_kernel_ >= 0)
 		{
 			if (kernels_[prev_kernel_]->match(type))
-			{
 				return kernels_[prev_kernel_]->program();
-			}
 		}
 
 		for (unsigned int i=0; i<kernels_.size(); ++i)
@@ -159,9 +156,7 @@ namespace FLIVR
 		if (prev_kernel_ >= 0)
 		{
 			if (kernels_[prev_kernel_]->match(s))
-			{
 				return kernels_[prev_kernel_]->program();
-			}
 		}
 
 		for (unsigned int i=0; i<kernels_.size(); ++i)

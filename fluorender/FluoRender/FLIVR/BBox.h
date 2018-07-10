@@ -63,6 +63,16 @@ namespace FLIVR
 			return *this;
 		}
 
+		inline bool operator==(const BBox& bbox) const
+		{
+			return (cmin_ == bbox.cmin_) && (cmax_ == bbox.cmax_);
+		}
+
+		inline bool operator!=(const BBox& bbox) const
+		{
+			return (cmin_ != bbox.cmin_) || (cmax_ != bbox.cmax_);
+		}
+
 		BBox(const Point& min, const Point& max)
 			: cmin_(min), cmax_(max), is_valid_(true) {}
 
