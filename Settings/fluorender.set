@@ -76,6 +76,8 @@ value=1
 value=0
 [ruler\ time\ dependent]
 value=1
+[ruler\ df_f]
+value=0
 [pvxml\ flip]
 x=0
 y=0
