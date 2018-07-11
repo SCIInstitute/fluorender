@@ -479,8 +479,8 @@ namespace FL
 		cell = pCell(new Cell(id));
 		if (ReadTag(ifs) == TAG_VER221)
 		{
-			id = ReadUint(ifs);
-			cell->SetBrickId(id);
+			unsigned int brick_id = ReadUint(ifs);
+			cell->SetBrickId(brick_id);
 		}
 		else
 			ifs.unget();

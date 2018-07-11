@@ -5758,7 +5758,7 @@ void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 	//old label is in system memory
 	//no label in graphics memory
 	//steps:
-	int ii, jj, kk;
+	//int ii, jj, kk;
 	int nx, ny, nz;
 	//return current mask (into system memory)
 	if (!m_cur_vol)
@@ -5785,28 +5785,27 @@ void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 	if (!label_data)
 		UPDATE_TRACE_DLG_AND_RETURN
 
-		FL::CellList sel_labels;
+	FL::CellList sel_labels;
 	FL::CellListIter label_iter;
-	for (ii = 0; ii<nx; ii++)
-		for (jj = 0; jj<ny; jj++)
-			for (kk = 0; kk<nz; kk++)
+	unsigned long long for_size = nx * ny * nz;
+	unsigned long long index;
+	for (index = 0; index < for_size; ++index)
+	{
+		unsigned int label_value = label_data[index];
+		if (mask_data[index] && label_value)
+		{
+			label_iter = sel_labels.find(label_value);
+			if (label_iter == sel_labels.end())
 			{
-				int index = nx*ny*kk + nx*jj + ii;
-				unsigned int label_value = label_data[index];
-				if (mask_data[index] && label_value)
-				{
-					label_iter = sel_labels.find(label_value);
-					if (label_iter == sel_labels.end())
-					{
-						FL::pCell cell(new FL::Cell(label_value));
-						cell->SetSizeUi(1);
-						sel_labels.insert(pair<unsigned int, FL::pCell>
-							(label_value, cell));
-					}
-					else
-						label_iter->second->Inc();
-				}
+				FL::pCell cell(new FL::Cell(label_value));
+				cell->SetSizeUi(1);
+				sel_labels.insert(pair<unsigned int, FL::pCell>
+					(label_value, cell));
 			}
+			else
+				label_iter->second->Inc();
+		}
+	}
 	//clean label list according to the size limit
 	label_iter = sel_labels.begin();
 	while (label_iter != sel_labels.end())
@@ -5830,7 +5829,7 @@ void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 	if (!reader)
 		UPDATE_TRACE_DLG_AND_RETURN
 
-		LBLReader lbl_reader;
+	LBLReader lbl_reader;
 	wstring lblname = reader->GetCurLabelName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
 	lbl_reader.SetFile(lblname);
 	Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
@@ -5845,27 +5844,24 @@ void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 	if (!label_data)
 		UPDATE_TRACE_DLG_AND_RETURN
 
-		//update the mask according to the new label
-		memset((void*)mask_data, 0, sizeof(uint8)*nx*ny*nz);
-	for (ii = 0; ii<nx; ii++)
-		for (jj = 0; jj<ny; jj++)
-			for (kk = 0; kk<nz; kk++)
-			{
-				int index = nx*ny*kk + nx*jj + ii;
-				unsigned int label_value = label_data[index];
-				if (m_trace_group &&
-					m_trace_group->GetTrackMap()->GetFrameNum())
-				{
-					if (m_trace_group->FindCell(label_value))
-						mask_data[index] = 255;
-				}
-				else
-				{
-					label_iter = sel_labels.find(label_value);
-					if (label_iter != sel_labels.end())
-						mask_data[index] = 255;
-				}
-			}
+	//update the mask according to the new label
+	memset((void*)mask_data, 0, sizeof(uint8)*nx*ny*nz);
+	for (index = 0; index < for_size; ++index)
+	{
+		unsigned int label_value = label_data[index];
+		if (m_trace_group &&
+			m_trace_group->GetTrackMap()->GetFrameNum())
+		{
+			if (m_trace_group->FindCell(label_value))
+				mask_data[index] = 255;
+		}
+		else
+		{
+			label_iter = sel_labels.find(label_value);
+			if (label_iter != sel_labels.end())
+				mask_data[index] = 255;
+		}
+	}
 
 	UPDATE_TRACE_DLG_AND_RETURN
 }
