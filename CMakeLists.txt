@@ -615,7 +615,8 @@ if(UNIX OR APPLE OR MINGW)
     ${OpenCL_LIBRARIES}
     ${wxWidgets_LIBRARIES}
     ${FREETYPE_LIBRARIES}
-    ${TIFF_LIBRARIES})
+    ${TIFF_LIBRARIES}
+    ${JNI_LIBRARIES})
 elseif(WIN32)
   target_link_libraries(FluoRender
     secur32.lib
@@ -625,7 +626,7 @@ elseif(WIN32)
     ${OpenCL_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${wxWidgets_LIBRARIES}
-	${JNI_LIBRARIES})
+    ${JNI_LIBRARIES})
   target_link_libraries(SynthBB
     ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
@@ -649,18 +650,18 @@ elseif(WIN32)
     ${wxWidgets_LIBRARIES})
 endif()
 
-target_link_libraries(SynthBB
-  ${Boost_LIBRARIES}
-  ${OpenCL_LIBRARIES}
-  ${wxWidgets_LIBRARIES})
-target_link_libraries(MaskInt
-  ${Boost_LIBRARIES}
-  ${OpenCL_LIBRARIES}
-  ${wxWidgets_LIBRARIES})
-target_link_libraries(ReadGMM
-  ${Boost_LIBRARIES}
-  ${OpenCL_LIBRARIES}
-  ${wxWidgets_LIBRARIES})
+#target_link_libraries(SynthBB
+#  ${Boost_LIBRARIES}
+#  ${OpenCL_LIBRARIES}
+#  ${wxWidgets_LIBRARIES})
+#target_link_libraries(MaskInt
+#  ${Boost_LIBRARIES}
+#  ${OpenCL_LIBRARIES}
+#  ${wxWidgets_LIBRARIES})
+#target_link_libraries(ReadGMM
+#  ${Boost_LIBRARIES}
+#  ${OpenCL_LIBRARIES}
+#  ${wxWidgets_LIBRARIES})
 
 
 # copy Java code dir to the binary directory
