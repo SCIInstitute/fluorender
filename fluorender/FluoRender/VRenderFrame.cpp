@@ -293,39 +293,64 @@ VRenderFrame::VRenderFrame(
 		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Settings of FluoRender",
 		"Settings of FluoRender");
+
 	m_main_tb->AddStretchableSpace();
+	m_tb_menu_update = new wxMenu;
+	m = new wxMenuItem(m_tb_menu_update, ID_CheckUpdates, wxT("Check Updates..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_check_updates_mini));
+	m_tb_menu_update->Append(m);
+	m = new wxMenuItem(m_tb_menu_update, ID_Facebook, wxT("Facebook..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_facebook_mini));
+	m_tb_menu_update->Append(m);
+	m = new wxMenuItem(m_tb_menu_update, ID_Twitter, wxT("Twitter..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_twitter_mini));
+	m_tb_menu_update->Append(m);
+	m = new wxMenuItem(m_tb_menu_update, ID_Info, wxT("About..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_about_mini));
+	m_tb_menu_update->Append(m);
 	bitmap = wxGetBitmapFromMemory(icon_check_updates);
 #ifdef _DARWIN
 	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
 #endif
-	m_main_tb->AddTool(ID_CheckUpdates, "Update",
-		bitmap, wxNullBitmap, wxITEM_NORMAL,
+	m_main_tb->AddTool(ID_CheckUpdates, "Check Updates",
+		bitmap, wxNullBitmap,
+		wxITEM_DROPDOWN,
 		"Check if there is a new release",
 		"Check if there is a new release (requires Internet connection)");
-	bitmap = wxGetBitmapFromMemory(icon_facebook);
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
-	m_main_tb->AddTool(ID_Facebook, "Facebook",
-		bitmap, wxNullBitmap, wxITEM_NORMAL,
-		"FluoRender's facebook page",
-		"FluoRender's facebook page (requires Internet connection)");
-	bitmap = wxGetBitmapFromMemory(icon_twitter);
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
-	m_main_tb->AddTool(ID_Twitter, "Twitter",
-		bitmap, wxNullBitmap, wxITEM_NORMAL,
-		"Follow FluoRender on Twitter",
-		"Follow FluoRender on Twitter (requires Internet connection)");
-	bitmap = wxGetBitmapFromMemory(icon_about);
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
-	m_main_tb->AddTool(ID_Info, "About",
-		bitmap, wxNullBitmap, wxITEM_NORMAL,
-		"FluoRender information",
-		"FluoRender information");
+	m_main_tb->SetDropdownMenu(ID_CheckUpdates, m_tb_menu_update);
+
+//	bitmap = wxGetBitmapFromMemory(icon_check_updates);
+//#ifdef _DARWIN
+//	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
+//#endif
+//	m_main_tb->AddTool(ID_CheckUpdates, "Update",
+//		bitmap, wxNullBitmap, wxITEM_NORMAL,
+//		"Check if there is a new release",
+//		"Check if there is a new release (requires Internet connection)");
+//	bitmap = wxGetBitmapFromMemory(icon_facebook);
+//#ifdef _DARWIN
+//	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
+//#endif
+//	m_main_tb->AddTool(ID_Facebook, "Facebook",
+//		bitmap, wxNullBitmap, wxITEM_NORMAL,
+//		"FluoRender's facebook page",
+//		"FluoRender's facebook page (requires Internet connection)");
+//	bitmap = wxGetBitmapFromMemory(icon_twitter);
+//#ifdef _DARWIN
+//	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
+//#endif
+//	m_main_tb->AddTool(ID_Twitter, "Twitter",
+//		bitmap, wxNullBitmap, wxITEM_NORMAL,
+//		"Follow FluoRender on Twitter",
+//		"Follow FluoRender on Twitter (requires Internet connection)");
+//	bitmap = wxGetBitmapFromMemory(icon_about);
+//#ifdef _DARWIN
+//	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
+//#endif
+//	m_main_tb->AddTool(ID_Info, "About",
+//		bitmap, wxNullBitmap, wxITEM_NORMAL,
+//		"FluoRender information",
+//		"FluoRender information");
 
 	m_main_tb->Realize();
 

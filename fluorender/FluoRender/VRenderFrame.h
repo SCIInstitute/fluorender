@@ -348,6 +348,7 @@ private:
 	wxAuiManager m_aui_mgr;
 	wxMenu* m_tb_menu_ui;
 	wxMenu* m_tb_menu_edit;
+	wxMenu* m_tb_menu_update;
 	wxToolBar* m_main_tb;
 	//main top menu
 	wxMenuBar* m_top_menu;
