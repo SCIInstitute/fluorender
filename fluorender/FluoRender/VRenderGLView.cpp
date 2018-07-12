@@ -11674,9 +11674,11 @@ void VRenderGLView::DrawTraces()
 						sizeof(float)*verts.size(),
 						&verts[0], GL_STREAM_DRAW);
 					va_traces->set_param(0, num);
+					va_traces->draw();
 				}
 			}
-			va_traces->draw();
+			else
+				va_traces->draw();
 		}
 
 		if (shader && shader->valid())
