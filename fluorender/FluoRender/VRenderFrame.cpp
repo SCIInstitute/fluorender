@@ -381,6 +381,11 @@ VRenderFrame::VRenderFrame(
 	m_mesh_prop = new MPropView(this, m_prop_panel, wxID_ANY);
 	m_mesh_manip = new MManipulator(this, m_prop_panel, wxID_ANY);
 	m_annotation_prop = new APropView(this, m_prop_panel, wxID_ANY);
+	m_prop_panel->SetSizer(m_prop_sizer);
+	m_prop_sizer->Add(m_volume_prop, 1, wxEXPAND, 0);
+	m_prop_sizer->Add(m_mesh_prop, 1, wxEXPAND, 0);
+	m_prop_sizer->Add(m_mesh_manip, 1, wxEXPAND, 0);
+	m_prop_sizer->Add(m_annotation_prop, 1, wxEXPAND, 0);
 	m_volume_prop->Show(false);
 	m_mesh_prop->Show(false);
 	m_mesh_manip->Show(false);

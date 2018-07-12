@@ -105,7 +105,7 @@ namespace FLIVR
 
 				if (!existInPyramid)
 				{
-					if (ntype_[i] == TYPE_MASK)
+					if (ntype_[i] == TYPE_MASK && mask_undo_num_)
 						nrrdNix(data_[i]);
 					else
 						nrrdNuke(data_[i]);
@@ -123,9 +123,9 @@ namespace FLIVR
 		{
 			if (mask_undos_[i])
 				delete[] (unsigned char*)(mask_undos_[i]);
-			mask_undos_.clear();
-			mask_undo_pointer_ = -1;
 		}
+		mask_undos_.clear();
+		mask_undo_pointer_ = -1;
 	}
 
 	vector<TextureBrick*>* Texture::get_sorted_bricks(
@@ -756,7 +756,7 @@ namespace FLIVR
 
 			if (data_[index] && data && !existInPyramid)
 			{
-				if (index == nmask_)
+				if (index == nmask_ && mask_undo_num_)
 					nrrdNix(data_[index]);
 				else
 					nrrdNuke(data_[index]);
