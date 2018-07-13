@@ -1357,6 +1357,13 @@ void VRenderFrame::StartupLoad(wxArrayString files)
 			LoadMeshes(files);
 		}
 	}
+
+	//if (m_movie_view)
+	//{
+	//	wxString str = "E:\\DOCUMENTS\\IBBM\\DATA\\example2\\test.mov";
+	//	m_movie_view->SetFileName(str);
+	//	m_movie_view->Run();
+	//}
 }
 
 void VRenderFrame::LoadMeshes(wxArrayString files, VRenderView* vrv)

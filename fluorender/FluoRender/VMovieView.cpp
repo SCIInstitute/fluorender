@@ -761,18 +761,8 @@ void VMovieView::OnPrev(wxCommandEvent& event)
 	vrv->m_glview->Run4DScript();
 }
 
-void VMovieView::OnRun(wxCommandEvent& event) {
-	wxString str = m_views_cmb->GetValue();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
-	if (vr_frame && vr_frame->GetSettingDlg())
-	{
-		VRenderFrame::SetSaveProject(vr_frame->GetSettingDlg()->GetProjSave());
-		VRenderFrame::SetSaveAlpha(vr_frame->GetSettingDlg()->GetSaveAlpha());
-	}
-
-	VRenderView* vrv = vr_frame->GetView(str);
-	if (!vrv) return;
+void VMovieView::OnRun(wxCommandEvent& event)
+{
 	wxFileDialog *fopendlg = new wxFileDialog(
 		m_frame, "Save Movie Sequence",
 		"", "output", "MOV file (*.mov)|*.mov|TIF files (*.tif)|*.tif",
@@ -781,50 +771,10 @@ void VMovieView::OnRun(wxCommandEvent& event) {
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		wxCommandEvent e;
-		OnRewind(e);
 		m_filename = fopendlg->GetPath();
-		filetype_ = m_filename.SubString(m_filename.Len() - 4,
-			m_filename.Len() - 1);
-		if (filetype_.IsSameAs(wxString(".mov"))) {
-			int x, y, w, h;
-			if (m_frame_chk->GetValue())
-				vrv->GetFrame(x, y, w, h);
-			else {
-				x = 0;
-				y = 0;
-				w = vrv->GetGLSize().x;
-				h = vrv->GetGLSize().y;
-			}
-			long fps;
-			m_fps_text->GetValue().ToLong(&fps);
-			encoder_.open(m_filename.ToStdString(), w, h, fps,
-				m_Mbitrate * 1000000);
-		}
-		m_filename = m_filename.SubString(0, m_filename.Len() - 5);
-		m_record = true;
-		if (vr_frame && vr_frame->GetSettingDlg())
-		{
-			vr_frame->GetSettingDlg()->SetSaveAlpha(VRenderFrame::GetSaveAlpha());
-			if (vr_frame->GetSettingDlg()->GetProjSave())
-			{
-				wxString new_folder;
-				new_folder = m_filename + "_project";
-				wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
-				wxString prop_file = new_folder + GETSLASH()
-					+ fopendlg->GetFilename() + "_project.vrp";
-				vr_frame->SaveProject(prop_file);
-			}
-		}
-		delete fopendlg;
+		Run();
 	}
-	else
-	{
-		delete fopendlg;
-		return;
-	}
-	wxCommandEvent e;
-	OnPrev(e);
+	delete fopendlg;
 }
 
 void VMovieView::OnStop(wxCommandEvent& event)
@@ -1301,7 +1251,8 @@ void VMovieView::WriteFrameToFile(int total_frames) {
 	glReadPixels(x, y, w, h, chann == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, image);
 	glPixelStorei(GL_PACK_ROW_LENGTH, 0);
 	string str_fn = outputfilename.ToStdString();
-	if (filetype_.IsSameAs(".mov")) {
+	if (filetype_.IsSameAs(".mov"))
+	{
 		//flip vertically 
 		unsigned char *flip = new unsigned char[w*h * 3];
 		for (size_t yy = 0; yy < (size_t)h; yy++)
@@ -1309,7 +1260,10 @@ void VMovieView::WriteFrameToFile(int total_frames) {
 				memcpy(flip + 3 * (w * yy + xx), image + chann * (w * (h - yy - 1) + xx), 3);
 		bool worked = encoder_.set_frame_rgb_data(flip);
 		worked = encoder_.write_video_frame(m_last_frame);
-		delete[]flip;
+		if (flip)
+			delete[]flip;
+		if (image)
+			delete[]image;
 		return;
 	}
 	TIFF *out = TIFFOpen(str_fn.c_str(), "wb");
@@ -1353,6 +1307,60 @@ void VMovieView::SetCurrentTime(size_t t) {
 	m_time_current_text->ChangeValue(wxString::Format(wxT("%i"), (int)t));
 	wxCommandEvent e;
 	OnTimeText(e);
+}
+
+void VMovieView::Run()
+{
+	wxString str = m_views_cmb->GetValue();
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (!vr_frame) return;
+	if (vr_frame && vr_frame->GetSettingDlg())
+	{
+		VRenderFrame::SetSaveProject(vr_frame->GetSettingDlg()->GetProjSave());
+		VRenderFrame::SetSaveAlpha(vr_frame->GetSettingDlg()->GetSaveAlpha());
+	}
+	VRenderView* vrv = vr_frame->GetView(str);
+	if (!vrv) return;
+
+	wxCommandEvent e;
+	OnRewind(e);
+
+	filetype_ = m_filename.SubString(m_filename.Len() - 4,
+		m_filename.Len() - 1);
+	if (filetype_.IsSameAs(wxString(".mov"))) {
+		int x, y, w, h;
+		if (m_frame_chk->GetValue())
+			vrv->GetFrame(x, y, w, h);
+		else {
+			x = 0;
+			y = 0;
+			w = vrv->GetGLSize().x;
+			h = vrv->GetGLSize().y;
+		}
+		long fps;
+		m_fps_text->GetValue().ToLong(&fps);
+		encoder_.open(m_filename.ToStdString(), w, h, fps,
+			m_Mbitrate * 1000000);
+	}
+	m_filename = m_filename.SubString(0, m_filename.Len() - 5);
+	m_record = true;
+	if (vr_frame && vr_frame->GetSettingDlg())
+	{
+		vr_frame->GetSettingDlg()->SetSaveAlpha(VRenderFrame::GetSaveAlpha());
+		if (vr_frame->GetSettingDlg()->GetProjSave())
+		{
+			wxString new_folder;
+			new_folder = m_filename + "_project";
+			wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+			wstring name = m_filename.ToStdWstring();
+			name = GET_NAME(name);
+			wxString prop_file = new_folder + GETSLASH()
+				+ name + "_project.vrp";
+			vr_frame->SaveProject(prop_file);
+		}
+	}
+
+	OnPrev(e);
 }
 
 void VMovieView::OnTimeText(wxCommandEvent& event) {
