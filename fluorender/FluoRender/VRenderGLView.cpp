@@ -513,6 +513,9 @@ VRenderGLView::~VRenderGLView()
 		}
 	}
 
+	if (m_mvr)
+		delete m_mvr;
+
 	if (!m_sharedRC)
 		delete m_glRC;
 }

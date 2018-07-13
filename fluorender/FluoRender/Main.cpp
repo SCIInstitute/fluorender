@@ -58,7 +58,7 @@ static const wxCmdLineEntryDesc g_cmdLineDesc[] =
 
 bool VRenderApp::OnInit()
 {
-	//_CrtSetBreakAlloc(804780);
+	//_CrtSetBreakAlloc(331430);
 	char cpath[FILENAME_MAX];
 	GETCURRENTDIR(cpath, sizeof(cpath));
 	::wxSetWorkingDirectory(wxString(s2ws(std::string(cpath))));
