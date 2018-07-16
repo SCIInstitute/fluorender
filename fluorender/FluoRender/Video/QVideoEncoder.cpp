@@ -241,7 +241,10 @@ void QVideoEncoder::close() {
 			break;
 		}
 		if (got_packet)
+		{
 			ret = write_frame(&c->time_base, &pkt);
+			ffmpeg::av_free_packet(&pkt);
+		}
 	}
 	//ffmpeg::avcodec_flush_buffers(c);
 	/* Write the trailer, if any. The trailer must be written before you
@@ -311,7 +314,10 @@ bool QVideoEncoder::write_video_frame(size_t frame_num) {
 			return false;
 		}
 		if (got_packet)
+		{
 			ret = write_frame(&c->time_base, &pkt);
+			ffmpeg::av_free_packet(&pkt);
+		}
 		else
 			ret = 0;
 	}
