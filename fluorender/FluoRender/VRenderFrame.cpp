@@ -308,49 +308,49 @@ VRenderFrame::VRenderFrame(
 	m = new wxMenuItem(m_tb_menu_update, ID_Info, wxT("About..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_about_mini));
 	m_tb_menu_update->Append(m);
-	bitmap = wxGetBitmapFromMemory(icon_check_updates);
+	//last item
+	int num = rand() % 4;
+	wxString str1, str2, str3;
+	int item_id;
+	switch (num)
+	{
+	case 0:
+		bitmap = wxGetBitmapFromMemory(icon_check_updates);
+		str1 = "Check Updates";
+		str2 = "Check if there is a new release";
+		str3 = "Check if there is a new release (requires Internet connection)";
+		item_id = ID_CheckUpdates;
+		break;
+	case 1:
+		bitmap = wxGetBitmapFromMemory(icon_facebook);
+		str1 = "Facebook";
+		str2 = "FluoRender's facebook page";
+		str3 = "FluoRender's facebook page (requires Internet connection)";
+		item_id = ID_Facebook;
+		break;
+	case 2:
+		bitmap = wxGetBitmapFromMemory(icon_twitter);
+		str1 = "Twitter";
+		str2 = "Follow FluoRender on Twitter";
+		str3 = "Follow FluoRender on Twitter (requires Internet connection)";
+		item_id = ID_Twitter;
+		break;
+	case 3:
+	default:
+		bitmap = wxGetBitmapFromMemory(icon_about);
+		str1 = "About";
+		str2 = "FluoRender information";
+		str3 = "FluoRender information";
+		item_id = ID_Info;
+		break;
+	}
 #ifdef _DARWIN
 	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
 #endif
-	m_main_tb->AddTool(ID_CheckUpdates, "Check Updates",
-		bitmap, wxNullBitmap,
-		wxITEM_DROPDOWN,
-		"Check if there is a new release",
-		"Check if there is a new release (requires Internet connection)");
-	m_main_tb->SetDropdownMenu(ID_CheckUpdates, m_tb_menu_update);
-
-//	bitmap = wxGetBitmapFromMemory(icon_check_updates);
-//#ifdef _DARWIN
-//	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-//#endif
-//	m_main_tb->AddTool(ID_CheckUpdates, "Update",
-//		bitmap, wxNullBitmap, wxITEM_NORMAL,
-//		"Check if there is a new release",
-//		"Check if there is a new release (requires Internet connection)");
-//	bitmap = wxGetBitmapFromMemory(icon_facebook);
-//#ifdef _DARWIN
-//	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-//#endif
-//	m_main_tb->AddTool(ID_Facebook, "Facebook",
-//		bitmap, wxNullBitmap, wxITEM_NORMAL,
-//		"FluoRender's facebook page",
-//		"FluoRender's facebook page (requires Internet connection)");
-//	bitmap = wxGetBitmapFromMemory(icon_twitter);
-//#ifdef _DARWIN
-//	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-//#endif
-//	m_main_tb->AddTool(ID_Twitter, "Twitter",
-//		bitmap, wxNullBitmap, wxITEM_NORMAL,
-//		"Follow FluoRender on Twitter",
-//		"Follow FluoRender on Twitter (requires Internet connection)");
-//	bitmap = wxGetBitmapFromMemory(icon_about);
-//#ifdef _DARWIN
-//	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-//#endif
-//	m_main_tb->AddTool(ID_Info, "About",
-//		bitmap, wxNullBitmap, wxITEM_NORMAL,
-//		"FluoRender information",
-//		"FluoRender information");
+	m_main_tb->AddTool(item_id, str1,
+		bitmap, wxNullBitmap, wxITEM_DROPDOWN,
+		str2, str3);
+	m_main_tb->SetDropdownMenu(item_id, m_tb_menu_update);
 
 	m_main_tb->Realize();
 
@@ -1327,7 +1327,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, VRenderView* view)
 	vrv->RefreshGL();//added by Takashi
 }
 
-void VRenderFrame::StartupLoad(wxArrayString files)
+void VRenderFrame::StartupLoad(wxArrayString files, bool run_mov)
 {
 	if (m_vrv_list[0])
 		m_vrv_list[0]->m_glview->Init();
@@ -1358,12 +1358,8 @@ void VRenderFrame::StartupLoad(wxArrayString files)
 		}
 	}
 
-	//if (m_movie_view)
-	//{
-	//	wxString str = "E:\\DOCUMENTS\\IBBM\\DATA\\example2\\test.mov";
-	//	m_movie_view->SetFileName(str);
-	//	m_movie_view->Run();
-	//}
+	if (run_mov && m_movie_view)
+		m_movie_view->Run();
 }
 
 void VRenderFrame::LoadMeshes(wxArrayString files, VRenderView* vrv)
@@ -3058,6 +3054,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 	fconfig.Write("z_link", m_clip_view->GetZLink());
 	//movie view
 	fconfig.SetPath("/movie_panel");
+	fconfig.Write("cur_page", m_movie_view->GetCurrentPage());
 	fconfig.Write("views_cmb", m_movie_view->m_views_cmb->GetCurrentSelection());
 	fconfig.Write("rot_check", m_movie_view->m_rot_chk->GetValue());
 	fconfig.Write("seq_check", m_movie_view->m_seq_chk->GetValue());
@@ -4287,6 +4284,10 @@ void VRenderFrame::OpenProject(wxString& filename)
 
 		//set settings for frame
 		VRenderView* vrv = 0;
+		if (fconfig.Read("cur_page", &iVal))
+		{
+			m_movie_view->SetCurrentPage(iVal);
+		}
 		if (fconfig.Read("views_cmb", &iVal))
 		{
 			m_movie_view->m_views_cmb->SetSelection(iVal);

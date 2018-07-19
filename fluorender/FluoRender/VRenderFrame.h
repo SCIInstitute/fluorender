@@ -271,7 +271,7 @@ public:
 	MeshData* GetCurSelMesh()
 	{ return m_data_mgr.GetMeshData(m_cur_sel_mesh); }
 
-	void StartupLoad(wxArrayString files);
+	void StartupLoad(wxArrayString files, bool run_mov);
 	void OpenProject(wxString& filename);
 	void SaveProject(wxString& filename);
 	void LoadVolumes(wxArrayString files, VRenderView* view = 0);

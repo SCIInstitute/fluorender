@@ -48,6 +48,10 @@ private:
 	bool m_hidepanels;
 	int m_win_width;
 	int m_win_height;
+	wxString m_mov_file;
+	double m_bitrate;
+	bool m_lzw;
+	bool m_alpha;
 };
 
 DECLARE_APP(VRenderApp)

@@ -135,9 +135,6 @@ namespace FLIVR
 			// Check for non-power-of-two texture support.
 			non_2_textures_ = true;//GLEW_ARB_texture_non_power_of_two!=0;
 
-			//random numbers
-			srand((unsigned int)TIME(NULL));
-
 			init_ = true;
 		}
 	}

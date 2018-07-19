@@ -126,10 +126,13 @@ public:
 	void DownFrame();
 	void SetCurrentTime(size_t t);
 
+	void SetBitRate(double value) { m_Mbitrate = value; }
 	void SetFileName(wxString &filename) { m_filename = filename; }
 	void Run();
 	bool GetRunning() { return m_running; }
 	void GetScriptSettings();
+	int GetCurrentPage() { return m_current_page; }
+	void SetCurrentPage(int page);
 
 public:
 	//controls

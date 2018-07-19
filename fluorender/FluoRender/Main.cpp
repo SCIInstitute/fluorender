@@ -47,11 +47,19 @@ static const wxCmdLineEntryDesc g_cmdLineDesc[] =
 		wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL },
 	{ wxCMD_LINE_SWITCH, "hp", "hidepanels", "start FluoRender without showing its ui panels",
 		wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL },
+	{ wxCMD_LINE_SWITCH, "lzw", "lzw", "compress images of the exported movie using LZW",
+		wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL },
+	{ wxCMD_LINE_SWITCH, "a", "alpha", "save alpha channel of the exported movie",
+		wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL },
 	{ wxCMD_LINE_OPTION, "w", "width", "width of FluoRender's start window",
 		wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL },
 	{ wxCMD_LINE_OPTION, "h", "height", "height of FluoRender's start window",
 		wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL },
-	{ wxCMD_LINE_PARAM, NULL, NULL, "a volume file to load",
+	{ wxCMD_LINE_OPTION, "br", "bitrate", "bit rate of the exported movie",
+		wxCMD_LINE_VAL_DOUBLE, wxCMD_LINE_PARAM_OPTIONAL },
+	{ wxCMD_LINE_OPTION, "m", "movie", "export movie",
+		wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL },
+	{ wxCMD_LINE_PARAM, NULL, NULL, "a file to load",
 		wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL | wxCMD_LINE_PARAM_MULTIPLE },
 	{ wxCMD_LINE_NONE }
 };
@@ -69,6 +77,9 @@ bool VRenderApp::OnInit()
 		return false;
 	//add png handler
 	wxImage::AddHandler(new wxPNGHandler);
+	//random numbers
+	srand((unsigned int)TIME(NULL));
+
 	//the frame
 	std::string title = std::string(FLUORENDER_TITLE) + std::string(" ") +
 		std::string(VERSION_MAJOR_TAG) + std::string(".") +
@@ -82,8 +93,20 @@ bool VRenderApp::OnInit()
 		m_windowed, m_hidepanels);
 	SetTopWindow(frame);
 	frame->Show();
+	bool run_mov = false;
+	if (m_mov_file != "")
+	{
+		VRenderFrame::SetCompression(m_lzw);
+		VRenderFrame::SetSaveAlpha(m_alpha);
+		if (((VRenderFrame*)frame)->GetMovieView())
+		{
+			((VRenderFrame*)frame)->GetMovieView()->SetBitRate(m_bitrate);
+			((VRenderFrame*)frame)->GetMovieView()->SetFileName(m_mov_file);
+		}
+		run_mov = true;
+	}
 	if (m_file_num > 0)
-		((VRenderFrame*)frame)->StartupLoad(m_files);
+		((VRenderFrame*)frame)->StartupLoad(m_files, run_mov);
 	return true;
 }
 
@@ -102,6 +125,10 @@ bool VRenderApp::OnCmdLineParsed(wxCmdLineParser& parser)
 	m_hidepanels = false;
 	m_win_width = 1600;
 	m_win_height = 1000;
+	m_lzw = false;
+	m_alpha = false;
+	m_bitrate = 10.0;
+	m_mov_file = "";
 
 	//control string
 	if (parser.Found("b"))
@@ -112,12 +139,21 @@ bool VRenderApp::OnCmdLineParsed(wxCmdLineParser& parser)
 		m_windowed = true;
 	if (parser.Found("hp"))
 		m_hidepanels = true;
+	if (parser.Found("lzw"))
+		m_lzw = true;
+	if (parser.Found("a"))
+		m_alpha = true;
 	long lVal;
 	if (parser.Found("w", &lVal))
 		m_win_width = lVal;
 	if (parser.Found("h", &lVal))
 		m_win_height = lVal;
-
+	double dVal;
+	if (parser.Found("br", &dVal))
+		m_bitrate = dVal;
+	wxString str;
+	if (parser.Found("m", &str))
+		m_mov_file = str;
 	//volumes to load
 	for (size_t i = 0; i < parser.GetParamCount(); ++i)
 		m_files.Add(parser.GetParam(i));

@@ -563,6 +563,12 @@ void VMovieView::GetScriptSettings()
 	}
 }
 
+void VMovieView::SetCurrentPage(int page)
+{
+	if (m_notebook)
+		m_notebook->SetSelection(page);
+}
+
 void VMovieView::AddScriptToList()
 {
 	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
