@@ -52,6 +52,7 @@ private:
 	double m_bitrate;
 	bool m_lzw;
 	bool m_alpha;
+	bool m_imagej;
 };
 
 DECLARE_APP(VRenderApp)

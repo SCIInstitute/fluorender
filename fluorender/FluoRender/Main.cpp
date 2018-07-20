@@ -39,6 +39,8 @@ IMPLEMENT_APP(VRenderApp)
 
 static const wxCmdLineEntryDesc g_cmdLineDesc[] =
 {
+	{ wxCMD_LINE_SWITCH, "u", "usage", "list command line usage",
+		wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL },
 	{ wxCMD_LINE_SWITCH, "b", "benchmark", "start FluoRender in the benchmark mode",
 		wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL},
 	{ wxCMD_LINE_SWITCH, "f", "fullscreen", "start FluoRender in the full screen mode",
@@ -50,6 +52,8 @@ static const wxCmdLineEntryDesc g_cmdLineDesc[] =
 	{ wxCMD_LINE_SWITCH, "lzw", "lzw", "compress images of the exported movie using LZW",
 		wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL },
 	{ wxCMD_LINE_SWITCH, "a", "alpha", "save alpha channel of the exported movie",
+		wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL },
+	{ wxCMD_LINE_SWITCH, "j", "imagej", "use imagej to load volume files",
 		wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL },
 	{ wxCMD_LINE_OPTION, "w", "width", "width of FluoRender's start window",
 		wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL },
@@ -129,8 +133,11 @@ bool VRenderApp::OnCmdLineParsed(wxCmdLineParser& parser)
 	m_alpha = false;
 	m_bitrate = 10.0;
 	m_mov_file = "";
+	m_imagej = false;
 
 	//control string
+	if (parser.Found("u"))
+		parser.Usage();
 	if (parser.Found("b"))
 		m_benchmark = true;
 	if (parser.Found("f"))
@@ -143,6 +150,8 @@ bool VRenderApp::OnCmdLineParsed(wxCmdLineParser& parser)
 		m_lzw = true;
 	if (parser.Found("a"))
 		m_alpha = true;
+	if (parser.Found("j"))
+		m_imagej = true;
 	long lVal;
 	if (parser.Found("w", &lVal))
 		m_win_width = lVal;
