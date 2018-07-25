@@ -82,6 +82,7 @@ BEGIN_EVENT_TABLE(VRenderFrame, wxFrame)
 	EVT_MENU(ID_Component, VRenderFrame::OnComponent)
 	EVT_MENU(ID_Calculations, VRenderFrame::OnCalculations)
 	//
+	EVT_MENU(ID_Youtube, VRenderFrame::OnYoutube)
 	EVT_MENU(ID_Twitter, VRenderFrame::OnTwitter)
 	EVT_MENU(ID_Facebook, VRenderFrame::OnFacebook)
 	EVT_MENU(ID_Manual, VRenderFrame::OnManual)
@@ -299,6 +300,9 @@ VRenderFrame::VRenderFrame(
 	m = new wxMenuItem(m_tb_menu_update, ID_CheckUpdates, wxT("Check Updates..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_check_updates_mini));
 	m_tb_menu_update->Append(m);
+	m = new wxMenuItem(m_tb_menu_update, ID_Youtube, wxT("YouTube..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_youtube_mini));
+	m_tb_menu_update->Append(m);
 	m = new wxMenuItem(m_tb_menu_update, ID_Facebook, wxT("Facebook..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_facebook_mini));
 	m_tb_menu_update->Append(m);
@@ -309,7 +313,7 @@ VRenderFrame::VRenderFrame(
 	m->SetBitmap(wxGetBitmapFromMemory(icon_about_mini));
 	m_tb_menu_update->Append(m);
 	//last item
-	int num = rand() % 4;
+	int num = rand() % 5;
 	wxString str1, str2, str3;
 	int item_id;
 	switch (num)
@@ -322,20 +326,27 @@ VRenderFrame::VRenderFrame(
 		item_id = ID_CheckUpdates;
 		break;
 	case 1:
+		bitmap = wxGetBitmapFromMemory(icon_youtube);
+		str1 = "YouTube";
+		str2 = "FluoRender's YouTube channel & Tutorials";
+		str3 = "FluoRender's YouTube channel & Tutorials (requires Internet connection)";
+		item_id = ID_Youtube;
+		break;
+	case 2:
 		bitmap = wxGetBitmapFromMemory(icon_facebook);
 		str1 = "Facebook";
 		str2 = "FluoRender's facebook page";
 		str3 = "FluoRender's facebook page (requires Internet connection)";
 		item_id = ID_Facebook;
 		break;
-	case 2:
+	case 3:
 		bitmap = wxGetBitmapFromMemory(icon_twitter);
 		str1 = "Twitter";
 		str2 = "Follow FluoRender on Twitter";
 		str3 = "Follow FluoRender on Twitter (requires Internet connection)";
 		item_id = ID_Twitter;
 		break;
-	case 3:
+	case 4:
 	default:
 		bitmap = wxGetBitmapFromMemory(icon_about);
 		str1 = "About";
@@ -754,6 +765,9 @@ VRenderFrame::VRenderFrame(
 	//help menu
 	m = new wxMenuItem(m_top_help,ID_CheckUpdates, wxT("&Check for Updates"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_check_updates_mini));
+	m_top_help->Append(m);
+	m = new wxMenuItem(m_top_help, ID_Youtube, wxT("&YouTube"));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_youtube_mini));
 	m_top_help->Append(m);
 	m = new wxMenuItem(m_top_help,ID_Twitter, wxT("&Twitter"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_twitter_mini));
@@ -4968,7 +4982,7 @@ void VRenderFrame::SetTextureRendererSettings()
 
 void VRenderFrame::OnFacebook(wxCommandEvent& WXUNUSED(event))
 {
-	::wxLaunchDefaultBrowser("http://www.facebook.com/fluorender");
+	::wxLaunchDefaultBrowser(FACEBOOK_URL);
 }
 
 void VRenderFrame::OnManual(wxCommandEvent& WXUNUSED(event))
@@ -4984,7 +4998,12 @@ void VRenderFrame::OnTutorial(wxCommandEvent& WXUNUSED(event))
 
 void VRenderFrame::OnTwitter(wxCommandEvent& WXUNUSED(event))
 {
-	::wxLaunchDefaultBrowser("http://twitter.com/FluoRender");
+	::wxLaunchDefaultBrowser(TWITTER_URL);
+}
+
+void VRenderFrame::OnYoutube(wxCommandEvent& WXUNUSED(event))
+{
+	::wxLaunchDefaultBrowser(YOUTUBE_URL);
 }
 
 void VRenderFrame::OnShowHideUI(wxCommandEvent& WXUNUSED(event))

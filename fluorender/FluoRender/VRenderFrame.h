@@ -68,28 +68,31 @@ using namespace std;
 #define VERSION_AUTHORS "YONG WAN\t\tHIDEO OTSUNA\nCHUCK HANSEN\tCHI-BIN CHIEN\n"\
 						"BRIG BAGLEY\t\tTAKASHI KAWASE\nKEI ITO"
 #define VERSION_UPDATES "http://www.sci.utah.edu/releases/fluorender_v" \
-	               VERSION_MAJOR_TAG \
+				   VERSION_MAJOR_TAG \
 				   "." \
 				   VERSION_MINOR_TAG \
 				   "/"
 #define HELP_MANUAL "http://www.sci.utah.edu/releases/fluorender_v"\
-	               VERSION_MAJOR_TAG \
+				   VERSION_MAJOR_TAG \
 				   "." \
 				   VERSION_MINOR_TAG \
 				   "/FluoRender" \
-	               VERSION_MAJOR_TAG \
+				   VERSION_MAJOR_TAG \
 				   "." \
 				   VERSION_MINOR_TAG \
 				   "_Manual.pdf"
 #define HELP_TUTORIAL "http://www.sci.utah.edu/releases/fluorender_v"\
-	               VERSION_MAJOR_TAG \
+				   VERSION_MAJOR_TAG \
 				   "." \
 				   VERSION_MINOR_TAG \
 				   "/FluoRender" \
-	               VERSION_MAJOR_TAG \
+				   VERSION_MAJOR_TAG \
 				   "." \
 				   VERSION_MINOR_TAG \
 				   "_Tutorials.pdf"
+#define YOUTUBE_URL "https://www.youtube.com/user/basisunus/playlists"
+#define TWITTER_URL "https://twitter.com/FluoRender"
+#define FACEBOOK_URL "https://www.facebook.com/fluorender"
 #define BATCH_INFO HELP_MANUAL
 #define HELP_PAINT HELP_MANUAL
 
@@ -148,6 +151,7 @@ class VRenderFrame: public wxFrame
 		ID_ViewOrganize,
 		//right aligned items
 		ID_CheckUpdates,
+		ID_Youtube,
 		ID_Facebook,
 		ID_Manual,
 		ID_Tutorial,
@@ -450,7 +454,8 @@ private:
 	void OnCheckUpdates(wxCommandEvent& WXUNUSED(event));
 	void OnFacebook(wxCommandEvent& WXUNUSED(event));
 	void OnManual(wxCommandEvent& WXUNUSED(event));
-    void OnTutorial(wxCommandEvent& WXUNUSED(event));
+	void OnTutorial(wxCommandEvent& WXUNUSED(event));
+	void OnYoutube(wxCommandEvent& WXUNUSED(event));
 	void OnTwitter(wxCommandEvent& WXUNUSED(event));
 	void OnShowHideUI(wxCommandEvent& WXUNUSED(event));
 	void OnShowHideToolbar(wxCommandEvent& WXUNUSED(event));

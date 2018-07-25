@@ -77,6 +77,10 @@ public:
 	const static unsigned char icon_about_mini_png[731];
 	/* web_pdf_mini.png - 779 bytes */
 	const static unsigned char web_pdf_mini_png[779];
+	/* icon_youtube.png - 2142 bytes */
+	const static unsigned char icon_youtube_png[2142];
+	/* icon_youtube_mini.png - 591 bytes */
+	const static unsigned char icon_youtube_mini_png[591];
 	//tools
 	/* icon_paint_brush.png - 3330 bytes */
 	const static unsigned char icon_paint_brush_png[3330];
