@@ -260,9 +260,10 @@ void ComponentSelector::Select(bool all, bool rmask)
 	}
 	else
 	{
-		bool simple_select = false;
+		bool simple_select = true;
 		if (m_analyzer)
 		{
+			simple_select = false;
 			CompList* analyzer_list = m_analyzer->GetCompList();
 			auto iter = analyzer_list->find(GetKey(m_id, m_brick_id));
 			if (iter == analyzer_list->end())
