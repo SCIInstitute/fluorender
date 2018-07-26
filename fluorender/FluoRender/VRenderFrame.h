@@ -66,7 +66,7 @@ using namespace std;
 
 #define VERSION_CONTACT "http://www.sci.utah.edu/software/fluorender.html"
 #define VERSION_AUTHORS "YONG WAN\t\tHIDEO OTSUNA\nCHUCK HANSEN\tCHI-BIN CHIEN\n"\
-						"BRIG BAGLEY\t\tTAKASHI KAWASE\nKEI ITO"
+						"BRIG BAGLEY\t\tTAKASHI KAWASE\nKEI ITO\t\tREMALDEEP SINGH"
 #define VERSION_UPDATES "http://www.sci.utah.edu/releases/fluorender_v" \
 				   VERSION_MAJOR_TAG \
 				   "." \
