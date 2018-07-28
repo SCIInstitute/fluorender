@@ -51,7 +51,7 @@ file=FreeSans.ttf
 value=14
 color=0
 [full\ screen]
-stay\ top=0
+stay\ top=1
 show\ cursor=1
 [last\ tool]
 value=1
