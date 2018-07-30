@@ -624,8 +624,8 @@ elseif(WIN32)
     ${Boost_LIBRARIES}
     ${OpenCL_LIBRARIES}
     ${FREETYPE_LIBRARIES}
-    ${wxWidgets_LIBRARIES}
-	${JNI_LIBRARIES})
+    ${wxWidgets_LIBRARIES})
+	#${JNI_LIBRARIES}
   target_link_libraries(SynthBB
     ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}

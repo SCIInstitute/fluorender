@@ -103,7 +103,14 @@ class SettingDlg : public wxPanel
 		ID_PaintHistDepthText,
 		//save/close
 		ID_SaveBtn,
-		ID_CloseBtn
+		ID_CloseBtn,
+		//Java settings
+		ID_JavaJVMText,
+		ID_JavaIJText,
+		ID_JavaBioformatsText,
+		ID_JavaJvmBrowseBtn,
+		ID_JavaIJBrowseBtn,
+		ID_JavaBioformatsBrowseBtn
 	};
 
 public:
@@ -227,6 +234,11 @@ public:
 	void SetMaxTextureSize(int size) { m_max_texture_size = size; }
 	int GetMaxTextureSize() { return m_max_texture_size; }
 	int GetPlaneMode() { return m_plane_mode; }
+	
+	//Getting the java paths.
+	wxString getJVMPath() { return m_java_jvm_text->GetValue(); };
+	wxString getIJPath() { return m_java_ij_text->GetValue(); };
+	wxString getBioformatsPath() { return m_java_bioformats_text->GetValue(); };
 
 private:
 	wxWindow* m_frame;
@@ -319,6 +331,11 @@ private:
 	//clipping plane display mode
 	int m_plane_mode;
 
+	// java settings strings.
+	wxString m_jvm_path;
+	wxString m_ij_path;
+	wxString m_bioformats_path;
+
 private:
 	//save project
 	wxCheckBox *m_prj_save_chk;
@@ -372,6 +389,14 @@ private:
 	//history depth
 	wxSlider *m_paint_hist_depth_sldr;
 	wxTextCtrl *m_paint_hist_depth_text;
+
+	// Java settings.
+	wxTextCtrl *m_java_jvm_text;
+	wxTextCtrl *m_java_ij_text;
+	wxTextCtrl *m_java_bioformats_text;
+	wxButton* m_browse_jvm_btn;
+	wxButton* m_browse_ij_btn;
+	wxButton* m_browse_bioformats_btn;
 
 	//save
 	wxButton *m_save_btn;
@@ -447,6 +472,13 @@ private:
 	//paint history depth
 	void OnPaintHistDepthChange(wxScrollEvent &event);
 	void OnPaintHistDepthEdit(wxCommandEvent &event);
+	// Java settings.
+	void OnJavaJvmEdit(wxCommandEvent &event);
+	void OnJavaIJEdit(wxCommandEvent &event);
+	void OnJavaBioformatsEdit(wxCommandEvent &event);
+	void onJavaJvmBrowse(wxCommandEvent &event);
+	void onJavaIJBrowse(wxCommandEvent &event);
+	void onJavaBioformatsBrowse(wxCommandEvent &event);
 
 	DECLARE_EVENT_TABLE()
 };

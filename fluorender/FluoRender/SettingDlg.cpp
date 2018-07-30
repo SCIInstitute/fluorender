@@ -87,6 +87,14 @@ EVT_COMBOBOX(ID_TextColorCmb, SettingDlg::OnTextColorChange)
 //paint history depth
 EVT_COMMAND_SCROLL(ID_PaintHistDepthSldr, SettingDlg::OnPaintHistDepthChange)
 EVT_TEXT(ID_PaintHistDepthText, SettingDlg::OnPaintHistDepthEdit)
+//Java settings
+EVT_TEXT(ID_JavaJVMText, SettingDlg::OnJavaJvmEdit)
+EVT_TEXT(ID_JavaIJText, SettingDlg::OnJavaIJEdit)
+EVT_TEXT(ID_JavaBioformatsText, SettingDlg::OnJavaBioformatsEdit)
+EVT_BUTTON(ID_JavaJvmBrowseBtn, SettingDlg::onJavaJvmBrowse)
+EVT_BUTTON(ID_JavaIJBrowseBtn, SettingDlg::onJavaIJBrowse)
+EVT_BUTTON(ID_JavaBioformatsBrowseBtn, SettingDlg::onJavaBioformatsBrowse)
+
 //show
 EVT_SHOW(SettingDlg::OnShow)
 END_EVENT_TABLE()
@@ -183,6 +191,45 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	group3->Add(st);
 	group3->Add(10, 5);
 
+	//JVM settings.	
+	wxBoxSizer *group4 = new wxStaticBoxSizer( new wxStaticBox(page, wxID_ANY, "Java Settings"), wxVERTICAL);
+	wxBoxSizer *sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer4_2 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer4_3 = new wxBoxSizer(wxHORIZONTAL);
+
+	m_java_jvm_text = new wxTextCtrl(page, ID_JavaJVMText);
+	m_java_ij_text = new wxTextCtrl(page, ID_JavaIJText);
+	m_java_bioformats_text = new wxTextCtrl(page, ID_JavaBioformatsText);
+	m_browse_jvm_btn = new wxButton(page, ID_JavaJvmBrowseBtn, "Browse", wxDefaultPosition);
+	m_browse_ij_btn = new wxButton(page, ID_JavaIJBrowseBtn, "Browse", wxDefaultPosition);
+	m_browse_bioformats_btn = new wxButton(page, ID_JavaBioformatsBrowseBtn, "Browse", wxDefaultPosition);
+
+	sizer4_1->Add(m_java_jvm_text, 1, wxEXPAND);
+	sizer4_1->Add(m_browse_jvm_btn, 0, wxALIGN_CENTER);
+	sizer4_2->Add(m_java_ij_text, 1, wxEXPAND);
+	sizer4_2->Add(m_browse_ij_btn, 0, wxALIGN_CENTER);
+	sizer4_3->Add(m_java_bioformats_text, 1, wxEXPAND);
+	sizer4_3->Add(m_browse_bioformats_btn, 0, wxALIGN_CENTER);
+
+	st = new wxStaticText(page, 0, "Specify the path to the jvm dll inside ImageJ.");	
+	wxStaticText* st1 = new wxStaticText(page, 0, "Specify the path to ij.jar inside ImageJ.");
+	wxStaticText* st2 = new wxStaticText(page, 0, "Specify the path to bioformats package jar.");
+
+	group4->Add(10, 5);	
+	group4->Add(sizer4_1, 0 , wxEXPAND);
+	group4->Add(10, 5);
+	group4->Add(st);
+	group4->Add(10, 5);
+	group4->Add(sizer4_2, 0, wxEXPAND);
+	group4->Add(10, 5);
+	group4->Add(st1);
+	group4->Add(10, 5);
+	group4->Add(sizer4_3, 0, wxEXPAND);
+	group4->Add(10, 5);
+	group4->Add(st2);
+	group4->Add(10, 5);
+	
+
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(10, 10);
 	sizerV->Add(group1, 0, wxEXPAND);
@@ -190,6 +237,8 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	sizerV->Add(group2, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 	sizerV->Add(group3, 0, wxEXPAND);
+	sizerV->Add(10, 10);
+	sizerV->Add(group4, 0, wxEXPAND);
 
 	page->SetSizer(sizerV);
 	return page;
@@ -951,6 +1000,19 @@ void SettingDlg::GetSettings()
 		fconfig.Read("mode", &m_plane_mode);
 	}
 
+	// java paths load.
+	if (fconfig.Exists("/Java")) 
+	{
+		fconfig.SetPath("/Java");
+		fconfig.Read("jvm_path", &m_jvm_path);
+		fconfig.Read("ij_path", &m_ij_path);
+		fconfig.Read("bioformats_path", &m_bioformats_path);
+
+		m_java_jvm_text->SetValue(m_jvm_path);
+		m_java_ij_text->SetValue(m_ij_path);
+		m_java_bioformats_text->SetValue(m_bioformats_path);
+	}	
+
 	UpdateUI();
 }
 
@@ -1206,6 +1268,12 @@ void SettingDlg::SaveSettings()
 	//cl device
 	fconfig.SetPath("/cl device");
 	fconfig.Write("device_id", m_cl_device_id);
+
+	// java paths
+	fconfig.SetPath("/Java");	
+	fconfig.Write("jvm_path", getJVMPath());
+	fconfig.Write("ij_path", getIJPath());
+	fconfig.Write("bioformats_path", getBioformatsPath());
 
 	//clipping plane mode
 	fconfig.SetPath("/clipping planes");
@@ -1886,5 +1954,93 @@ void SettingDlg::OnPaintHistDepthEdit(wxCommandEvent &event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 		vr_frame->SetTextureUndos();
+}
+
+// Java settings.
+void SettingDlg::OnJavaJvmEdit(wxCommandEvent &event)
+{
+	wxString str = m_java_jvm_text->GetValue();
+	unsigned long ival;
+	str.ToULong(&ival);
+	/*m_paint_hist_depth_sldr->SetValue(ival);
+	m_paint_hist_depth = ival;
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+		vr_frame->SetTextureUndos();*/
+}
+
+void SettingDlg::OnJavaIJEdit(wxCommandEvent &event)
+{
+	wxString str = m_java_ij_text->GetValue();
+	unsigned long ival;
+	str.ToULong(&ival);
+	/*m_paint_hist_depth_sldr->SetValue(ival);
+	m_paint_hist_depth = ival;
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+	vr_frame->SetTextureUndos();*/
+}
+
+void SettingDlg::OnJavaBioformatsEdit(wxCommandEvent &event)
+{
+	wxString str = m_java_bioformats_text->GetValue();
+	unsigned long ival;
+	str.ToULong(&ival);
+	/*m_paint_hist_depth_sldr->SetValue(ival);
+	m_paint_hist_depth = ival;
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+	vr_frame->SetTextureUndos();*/
+}
+
+void SettingDlg::onJavaJvmBrowse(wxCommandEvent &event)
+{
+	wxFileDialog *fopendlg = new wxFileDialog(
+		m_frame, "Choose the jvm dll file",
+		"", "", "*.dll", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+
+	int rval = fopendlg->ShowModal();
+	if (rval == wxID_OK)
+	{
+		wxString filename = fopendlg->GetPath();
+		m_java_jvm_text->SetValue(filename);
+	}
+
+	if (fopendlg)
+		delete fopendlg;
+}
+
+void SettingDlg::onJavaIJBrowse(wxCommandEvent &event)
+{
+	wxFileDialog *fopendlg = new wxFileDialog(
+		m_frame, "Choose the imageJ jar",
+		"", "", "*.jar", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+
+	int rval = fopendlg->ShowModal();
+	if (rval == wxID_OK)
+	{
+		wxString filename = fopendlg->GetPath();
+		m_java_ij_text->SetValue(filename);
+	}
+
+	if (fopendlg)
+		delete fopendlg;
+}
+
+void SettingDlg::onJavaBioformatsBrowse(wxCommandEvent &event)
+{
+	wxFileDialog *fopendlg = new wxFileDialog(
+		m_frame, "Choose the bioformats jar",
+		"", "", "*.jar", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+
+	int rval = fopendlg->ShowModal();
+	if (rval == wxID_OK)
+	{
+		wxString filename = fopendlg->GetPath();
+		m_java_bioformats_text->SetValue(filename);
+	}
+
+	if (fopendlg)
+		delete fopendlg;
 }
 

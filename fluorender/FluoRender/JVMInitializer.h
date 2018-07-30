@@ -27,29 +27,35 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <jni.h>
-#include "iostream"
+#include <iostream>
+#include "../compatibility.h"
+//#include "VRenderFrame.h"
 
 #ifndef _JVMINITIALIZER_H_
 #define _JVMINITIALIZER_H_
 
-
+class SettingDlg;
 class JVMInitializer {
 	public:
-		static JVMInitializer* getInstance();
+		static JVMInitializer* getInstance(SettingDlg* inp_settingDlg = 0);
 		static void destroyJVM();
+
+		static HMODULE m_jvm_dll;
 		static JavaVM *m_pJvm;                      // Pointer to the JVM (Java Virtual Machine)
 		static JNIEnv *m_pEnv;                      // Pointer to native interface
 		static JavaVMInitArgs m_VMargs;
+		static decltype(&JNI_CreateJavaVM) m_createJVM_Ptr;		
 
 	private:
-		static JVMInitializer* m_pJVMInstance;		
+		static JVMInitializer* m_pJVMInstance;				
 
 		JVMInitializer() {};
 		~JVMInitializer() {};
 		JVMInitializer(JVMInitializer const&);
 		JVMInitializer& operator=(JVMInitializer const&);
 
-		bool static create_JVM();
+		static char JVMInitializer::getPathSeparator();
+		bool static create_JVM(SettingDlg* inp_settingDlg);
 };
 
 #endif //_JVMINITIALIZER_H_

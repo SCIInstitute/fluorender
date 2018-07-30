@@ -238,7 +238,7 @@ VRenderFrame::VRenderFrame(
 #ifdef _DARWIN
 	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
 #endif
-	if (JVMInitializer::getInstance() != nullptr) {
+	if (JVMInitializer::getInstance(m_setting_dlg) != nullptr) {
 		m_main_tb->AddTool(ID_ImportVolume, "Import Volume",
 			bitmap, wxNullBitmap, wxITEM_NORMAL,
 			"Import single or multiple volume data file(s) using ImageJ",
@@ -654,9 +654,11 @@ VRenderFrame::VRenderFrame(
 	m->SetBitmap(wxGetBitmapFromMemory(icon_open_volume_mini));
 	m_top_file->Append(m);
 
-	m = new wxMenuItem(m_top_file, ID_ImportVolume, wxT("Import &Volume"));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_import_mini));
-	m_top_file->Append(m);
+	if (JVMInitializer::getInstance(m_setting_dlg) != nullptr) {
+		m = new wxMenuItem(m_top_file, ID_ImportVolume, wxT("Import &Volume"));
+		m->SetBitmap(wxGetBitmapFromMemory(icon_import_mini));
+		m_top_file->Append(m);
+	}	
 
 	m = new wxMenuItem(m_top_file,ID_OpenMesh, wxT("Open &Mesh"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_open_mesh_mini));
