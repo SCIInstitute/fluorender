@@ -2443,7 +2443,6 @@ bool TrackMapProcessor::Import(std::string &filename)
 		num = ReadUint(ifs);
 	}
 
-
 	size_t vertex_num;
 	size_t edge_num;
 	unsigned id1, id2;

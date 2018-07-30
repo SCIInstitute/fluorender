@@ -771,7 +771,7 @@ TraceDlg::TraceDlg(wxWindow* frame, wxWindow* parent)
 		0, "TraceDlg"),
 	m_frame(parent),
 	m_view(0),
-	m_mask(0),
+	//m_mask(0),
 	m_cur_time(-1),
 	m_prv_time(-1),
 	m_manual_assist(false),
@@ -871,11 +871,11 @@ TraceDlg::TraceDlg(wxWindow* frame, wxWindow* parent)
 
 TraceDlg::~TraceDlg()
 {
-	if (m_mask)
-	{
-		delete[] reinterpret_cast<char*>(m_mask->data);
-		nrrdNix(m_mask);
-	}
+	//if (m_mask)
+	//{
+	//	delete[] reinterpret_cast<char*>(m_mask->data);
+	//	nrrdNix(m_mask);
+	//}
 }
 
 void TraceDlg::GetSettings(VRenderView* vrv)

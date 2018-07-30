@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
+//#include "Debug.h"
 #include <wx/wx.h>
 
 #ifndef _MAIN_H_
@@ -47,6 +48,11 @@ private:
 	bool m_hidepanels;
 	int m_win_width;
 	int m_win_height;
+	wxString m_mov_file;
+	double m_bitrate;
+	bool m_lzw;
+	bool m_alpha;
+	bool m_imagej;
 };
 
 DECLARE_APP(VRenderApp)

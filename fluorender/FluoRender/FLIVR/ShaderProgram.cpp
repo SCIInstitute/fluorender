@@ -135,9 +135,6 @@ namespace FLIVR
 			// Check for non-power-of-two texture support.
 			non_2_textures_ = true;//GLEW_ARB_texture_non_power_of_two!=0;
 
-			//random numbers
-			srand((unsigned int)TIME(NULL));
-
 			init_ = true;
 		}
 	}
@@ -170,8 +167,7 @@ namespace FLIVR
 		return non_2_textures_;
 	}
 
-	bool
-		ShaderProgram::create()
+	bool ShaderProgram::create()
 	{
 		if (shaders_supported())
 		{
@@ -201,7 +197,8 @@ namespace FLIVR
 			GLint shader_length[1];
 			bool attach_vert = strcmp(*v_source,"") != 0;
 			glGetShaderiv(v_shader, GL_COMPILE_STATUS, shader_status);
-			if (shader_status[0] == GL_FALSE) {
+			if (shader_status[0] == GL_FALSE)
+			{
 				glGetShaderInfoLog(v_shader, sizeof(shader_log), shader_length, shader_log);
 				std::cerr << "Error compiling vertex shader: " << shader_log << std::endl;
 				attach_vert = false;
@@ -216,7 +213,8 @@ namespace FLIVR
 			// check the compilation of the shader
 			bool attach_frag = true;
 			glGetShaderiv(f_shader, GL_COMPILE_STATUS, shader_status);
-			if (shader_status[0] == GL_FALSE) {
+			if (shader_status[0] == GL_FALSE)
+			{
 				glGetShaderInfoLog(f_shader, sizeof(shader_log), shader_length, shader_log);
 				std::cerr << "Error compiling fragment shader: " << shader_log << std::endl;
 				attach_frag = false;
@@ -230,14 +228,18 @@ namespace FLIVR
 			//link time
 			glLinkProgram(id_);
 			glGetProgramiv(id_, GL_LINK_STATUS, shader_status);
-			if (shader_status[0] == GL_FALSE) {
+			if (shader_status[0] == GL_FALSE)
+			{
 				glGetProgramInfoLog(id_, sizeof(shader_log), shader_length, shader_log);
 				std::cerr << "Error linking shaders: " << shader_log << std::endl;
 				return true;
 			}
 
 			glUseProgram(id_);
-
+			if (attach_vert)
+				glDetachShader(id_, v_shader);
+			if (attach_frag)
+				glDetachShader(id_, f_shader);
 			glDeleteShader(v_shader);
 			glDeleteShader(f_shader);
 
@@ -257,13 +259,14 @@ namespace FLIVR
 			}
 			glActiveTexture(GL_TEXTURE0);
 
-			glValidateProgram(id_);
-			glGetProgramiv(id_, GL_VALIDATE_STATUS, shader_status);
-			if (shader_status[0] == GL_FALSE) {
-				glGetProgramInfoLog(id_, sizeof(shader_log), shader_length, shader_log);
-				std::cerr << "Invalid shader program: " << shader_log << std::endl;
-				return true;
-			}
+			//glValidateProgram(id_);
+			//glGetProgramiv(id_, GL_VALIDATE_STATUS, shader_status);
+			//if (shader_status[0] == GL_FALSE)
+			//{
+			//	glGetProgramInfoLog(id_, sizeof(shader_log), shader_length, shader_log);
+			//	std::cerr << "Invalid shader program: " << shader_log << std::endl;
+			//	return true;
+			//}
 
 			return false;
 		}

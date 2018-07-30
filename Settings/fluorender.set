@@ -51,7 +51,7 @@ file=FreeSans.ttf
 value=14
 color=0
 [full\ screen]
-stay\ top=0
+stay\ top=1
 show\ cursor=1
 [last\ tool]
 value=1
@@ -76,6 +76,8 @@ value=1
 value=0
 [ruler\ time\ dependent]
 value=1
+[ruler\ df_f]
+value=0
 [pvxml\ flip]
 x=0
 y=0

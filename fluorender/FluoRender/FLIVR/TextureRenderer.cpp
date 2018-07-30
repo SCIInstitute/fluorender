@@ -1300,7 +1300,7 @@ namespace FLIVR
 				idx_num = (size[i] - 2) * 3;
 				va_wirefm_->draw_elements(
 					GL_TRIANGLES, idx_num, GL_UNSIGNED_INT,
-					reinterpret_cast<const GLvoid*>(__int64(k)));
+					reinterpret_cast<const GLvoid*>((long long)(k)));
 				k += idx_num * 4;
 			}
 			va_wirefm_->draw_end();

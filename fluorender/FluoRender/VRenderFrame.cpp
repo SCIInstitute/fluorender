@@ -83,6 +83,7 @@ BEGIN_EVENT_TABLE(VRenderFrame, wxFrame)
 	EVT_MENU(ID_Component, VRenderFrame::OnComponent)
 	EVT_MENU(ID_Calculations, VRenderFrame::OnCalculations)
 	//
+	EVT_MENU(ID_Youtube, VRenderFrame::OnYoutube)
 	EVT_MENU(ID_Twitter, VRenderFrame::OnTwitter)
 	EVT_MENU(ID_Facebook, VRenderFrame::OnFacebook)
 	EVT_MENU(ID_Manual, VRenderFrame::OnManual)
@@ -152,7 +153,8 @@ VRenderFrame::VRenderFrame(
 	m_cur_sel_type(-1),
 	m_cur_sel_vol(-1),
 	m_cur_sel_mesh(-1),
-	m_benchmark(benchmark)
+	m_benchmark(benchmark),
+	m_open_with_imagej(false)
 {
 	//create this first to read the settings
 	m_setting_dlg = new SettingDlg(this, this);
@@ -309,39 +311,74 @@ VRenderFrame::VRenderFrame(
 		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Settings of FluoRender",
 		"Settings of FluoRender");
+
 	m_main_tb->AddStretchableSpace();
-	bitmap = wxGetBitmapFromMemory(icon_check_updates);
+	m_tb_menu_update = new wxMenu;
+	m = new wxMenuItem(m_tb_menu_update, ID_CheckUpdates, wxT("Check Updates..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_check_updates_mini));
+	m_tb_menu_update->Append(m);
+	m = new wxMenuItem(m_tb_menu_update, ID_Youtube, wxT("YouTube..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_youtube_mini));
+	m_tb_menu_update->Append(m);
+	m = new wxMenuItem(m_tb_menu_update, ID_Facebook, wxT("Facebook..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_facebook_mini));
+	m_tb_menu_update->Append(m);
+	m = new wxMenuItem(m_tb_menu_update, ID_Twitter, wxT("Twitter..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_twitter_mini));
+	m_tb_menu_update->Append(m);
+	m = new wxMenuItem(m_tb_menu_update, ID_Info, wxT("About..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_about_mini));
+	m_tb_menu_update->Append(m);
+	//last item
+	int num = rand() % 5;
+	wxString str1, str2, str3;
+	int item_id;
+	switch (num)
+	{
+	case 0:
+		bitmap = wxGetBitmapFromMemory(icon_check_updates);
+		str1 = "Check Updates";
+		str2 = "Check if there is a new release";
+		str3 = "Check if there is a new release (requires Internet connection)";
+		item_id = ID_CheckUpdates;
+		break;
+	case 1:
+		bitmap = wxGetBitmapFromMemory(icon_youtube);
+		str1 = "YouTube";
+		str2 = "FluoRender's YouTube channel & Tutorials";
+		str3 = "FluoRender's YouTube channel & Tutorials (requires Internet connection)";
+		item_id = ID_Youtube;
+		break;
+	case 2:
+		bitmap = wxGetBitmapFromMemory(icon_facebook);
+		str1 = "Facebook";
+		str2 = "FluoRender's facebook page";
+		str3 = "FluoRender's facebook page (requires Internet connection)";
+		item_id = ID_Facebook;
+		break;
+	case 3:
+		bitmap = wxGetBitmapFromMemory(icon_twitter);
+		str1 = "Twitter";
+		str2 = "Follow FluoRender on Twitter";
+		str3 = "Follow FluoRender on Twitter (requires Internet connection)";
+		item_id = ID_Twitter;
+		break;
+	case 4:
+	default:
+		bitmap = wxGetBitmapFromMemory(icon_about);
+		str1 = "About";
+		str2 = "FluoRender information";
+		str3 = "FluoRender information";
+		item_id = ID_Info;
+		break;
+	}
 #ifdef _DARWIN
 	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
 #endif
-	m_main_tb->AddTool(ID_CheckUpdates, "Update",
-		bitmap, wxNullBitmap, wxITEM_NORMAL,
-		"Check if there is a new release",
-		"Check if there is a new release (requires Internet connection)");
-	bitmap = wxGetBitmapFromMemory(icon_facebook);
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
-	m_main_tb->AddTool(ID_Facebook, "Facebook",
-		bitmap, wxNullBitmap, wxITEM_NORMAL,
-		"FluoRender's facebook page",
-		"FluoRender's facebook page (requires Internet connection)");
-	bitmap = wxGetBitmapFromMemory(icon_twitter);
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
-	m_main_tb->AddTool(ID_Twitter, "Twitter",
-		bitmap, wxNullBitmap, wxITEM_NORMAL,
-		"Follow FluoRender on Twitter",
-		"Follow FluoRender on Twitter (requires Internet connection)");
-	bitmap = wxGetBitmapFromMemory(icon_about);
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
-	m_main_tb->AddTool(ID_Info, "About",
-		bitmap, wxNullBitmap, wxITEM_NORMAL,
-		"FluoRender information",
-		"FluoRender information");
+	m_main_tb->AddTool(item_id, str1,
+		bitmap, wxNullBitmap, wxITEM_DROPDOWN,
+		str2, str3);
+	m_main_tb->SetDropdownMenu(item_id, m_tb_menu_update);
 
 	m_main_tb->Realize();
 
@@ -372,6 +409,11 @@ VRenderFrame::VRenderFrame(
 	m_mesh_prop = new MPropView(this, m_prop_panel, wxID_ANY);
 	m_mesh_manip = new MManipulator(this, m_prop_panel, wxID_ANY);
 	m_annotation_prop = new APropView(this, m_prop_panel, wxID_ANY);
+	m_prop_panel->SetSizer(m_prop_sizer);
+	m_prop_sizer->Add(m_volume_prop, 1, wxEXPAND, 0);
+	m_prop_sizer->Add(m_mesh_prop, 1, wxEXPAND, 0);
+	m_prop_sizer->Add(m_mesh_manip, 1, wxEXPAND, 0);
+	m_prop_sizer->Add(m_annotation_prop, 1, wxEXPAND, 0);
 	m_volume_prop->Show(false);
 	m_mesh_prop->Show(false);
 	m_mesh_manip->Show(false);
@@ -751,6 +793,9 @@ VRenderFrame::VRenderFrame(
 	//help menu
 	m = new wxMenuItem(m_top_help,ID_CheckUpdates, wxT("&Check for Updates"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_check_updates_mini));
+	m_top_help->Append(m);
+	m = new wxMenuItem(m_top_help, ID_Youtube, wxT("&YouTube"));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_youtube_mini));
 	m_top_help->Append(m);
 	m = new wxMenuItem(m_top_help,ID_Twitter, wxT("&Twitter"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_twitter_mini));
@@ -1320,8 +1365,10 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 			wxString filename = files[j];
 			wxString suffix = filename.Mid(filename.Find('.', true)).MakeLower();
 
-			if (withImageJ == true)
+			if (withImageJ == true || m_open_with_imagej) {
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_IMAGEJ, withImageJ); //The type of data doesnt matter.
+				m_open_with_imagej = false;
+			}
 			else if (suffix == ".nrrd")
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_NRRD, withImageJ);
 			else if (suffix==".tif" || suffix==".tiff")
@@ -1424,10 +1471,12 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 	vrv->RefreshGL();//added by Takashi
 }
 
-void VRenderFrame::StartupLoad(wxArrayString files)
+void VRenderFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imagej)
 {
 	if (m_vrv_list[0])
 		m_vrv_list[0]->m_glview->Init();
+
+	m_open_with_imagej = with_imagej;
 
 	if (files.Count())
 	{
@@ -1454,6 +1503,9 @@ void VRenderFrame::StartupLoad(wxArrayString files)
 			LoadMeshes(files);
 		}
 	}
+
+	if (run_mov && m_movie_view)
+		m_movie_view->Run();
 }
 
 void VRenderFrame::LoadMeshes(wxArrayString files, VRenderView* vrv)
@@ -3148,6 +3200,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 	fconfig.Write("z_link", m_clip_view->GetZLink());
 	//movie view
 	fconfig.SetPath("/movie_panel");
+	fconfig.Write("cur_page", m_movie_view->GetCurrentPage());
 	fconfig.Write("views_cmb", m_movie_view->m_views_cmb->GetCurrentSelection());
 	fconfig.Write("rot_check", m_movie_view->m_rot_chk->GetValue());
 	fconfig.Write("seq_check", m_movie_view->m_seq_chk->GetValue());
@@ -4377,6 +4430,10 @@ void VRenderFrame::OpenProject(wxString& filename)
 
 		//set settings for frame
 		VRenderView* vrv = 0;
+		if (fconfig.Read("cur_page", &iVal))
+		{
+			m_movie_view->SetCurrentPage(iVal);
+		}
 		if (fconfig.Read("views_cmb", &iVal))
 		{
 			m_movie_view->m_views_cmb->SetSelection(iVal);
@@ -5057,7 +5114,7 @@ void VRenderFrame::SetTextureRendererSettings()
 
 void VRenderFrame::OnFacebook(wxCommandEvent& WXUNUSED(event))
 {
-	::wxLaunchDefaultBrowser("http://www.facebook.com/fluorender");
+	::wxLaunchDefaultBrowser(FACEBOOK_URL);
 }
 
 void VRenderFrame::OnManual(wxCommandEvent& WXUNUSED(event))
@@ -5073,7 +5130,12 @@ void VRenderFrame::OnTutorial(wxCommandEvent& WXUNUSED(event))
 
 void VRenderFrame::OnTwitter(wxCommandEvent& WXUNUSED(event))
 {
-	::wxLaunchDefaultBrowser("http://twitter.com/FluoRender");
+	::wxLaunchDefaultBrowser(TWITTER_URL);
+}
+
+void VRenderFrame::OnYoutube(wxCommandEvent& WXUNUSED(event))
+{
+	::wxLaunchDefaultBrowser(YOUTUBE_URL);
 }
 
 void VRenderFrame::OnShowHideUI(wxCommandEvent& WXUNUSED(event))

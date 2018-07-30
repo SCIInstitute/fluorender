@@ -741,7 +741,7 @@ namespace FLIVR
 					va_slices_->draw_elements(
 						GL_TRIANGLES, idx_num,
 						GL_UNSIGNED_INT,
-						reinterpret_cast<const GLvoid*>(__int64(location)));
+						reinterpret_cast<const GLvoid*>((long long)(location)));
 
 				//release depth texture for rendering shadows
 				if (colormap_mode_ == 2)

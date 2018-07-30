@@ -68,30 +68,33 @@ using namespace std;
 
 #define VERSION_CONTACT "http://www.sci.utah.edu/software/fluorender.html"
 #define VERSION_AUTHORS "YONG WAN\t\tHIDEO OTSUNA\nCHUCK HANSEN\tCHI-BIN CHIEN\n"\
-						"BRIG BAGLEY\t\tTAKASHI KAWASE\nKEI ITO"
+						"BRIG BAGLEY\t\tTAKASHI KAWASE\nKEI ITO\t\tREMALDEEP SINGH"
 #define VERSION_UPDATES "http://www.sci.utah.edu/releases/fluorender_v" \
-	               VERSION_MAJOR_TAG \
+				   VERSION_MAJOR_TAG \
 				   "." \
 				   VERSION_MINOR_TAG \
 				   "/"
 #define HELP_MANUAL "http://www.sci.utah.edu/releases/fluorender_v"\
-	               VERSION_MAJOR_TAG \
+				   VERSION_MAJOR_TAG \
 				   "." \
 				   VERSION_MINOR_TAG \
 				   "/FluoRender" \
-	               VERSION_MAJOR_TAG \
+				   VERSION_MAJOR_TAG \
 				   "." \
 				   VERSION_MINOR_TAG \
 				   "_Manual.pdf"
 #define HELP_TUTORIAL "http://www.sci.utah.edu/releases/fluorender_v"\
-	               VERSION_MAJOR_TAG \
+				   VERSION_MAJOR_TAG \
 				   "." \
 				   VERSION_MINOR_TAG \
 				   "/FluoRender" \
-	               VERSION_MAJOR_TAG \
+				   VERSION_MAJOR_TAG \
 				   "." \
 				   VERSION_MINOR_TAG \
 				   "_Tutorials.pdf"
+#define YOUTUBE_URL "https://www.youtube.com/user/basisunus/playlists"
+#define TWITTER_URL "https://twitter.com/FluoRender"
+#define FACEBOOK_URL "https://www.facebook.com/fluorender"
 #define BATCH_INFO HELP_MANUAL
 #define HELP_PAINT HELP_MANUAL
 
@@ -152,6 +155,7 @@ class VRenderFrame: public wxFrame
 		ID_ViewOrganize,
 		//right aligned items
 		ID_CheckUpdates,
+		ID_Youtube,
 		ID_Facebook,
 		ID_Manual,
 		ID_Tutorial,
@@ -275,7 +279,7 @@ public:
 	MeshData* GetCurSelMesh()
 	{ return m_data_mgr.GetMeshData(m_cur_sel_mesh); }
 
-	void StartupLoad(wxArrayString files);
+	void StartupLoad(wxArrayString files, bool run_mov, bool with_imagej);
 	void OpenProject(wxString& filename);
 	void SaveProject(wxString& filename);
 	void LoadVolumes(wxArrayString files, bool withImageJ, VRenderView* view = 0);
@@ -352,6 +356,7 @@ private:
 	wxAuiManager m_aui_mgr;
 	wxMenu* m_tb_menu_ui;
 	wxMenu* m_tb_menu_edit;
+	wxMenu* m_tb_menu_update;
 	wxToolBar* m_main_tb;
 	//main top menu
 	wxMenuBar* m_top_menu;
@@ -427,6 +432,9 @@ private:
 	//benchmark mode
 	bool m_benchmark;
 
+	//Open the file with imageJ on startup.
+	bool m_open_with_imagej;
+
 private:
 	//views
 	wxString CreateView(int row=1);
@@ -455,7 +463,8 @@ private:
 	void OnCheckUpdates(wxCommandEvent& WXUNUSED(event));
 	void OnFacebook(wxCommandEvent& WXUNUSED(event));
 	void OnManual(wxCommandEvent& WXUNUSED(event));
-    void OnTutorial(wxCommandEvent& WXUNUSED(event));
+	void OnTutorial(wxCommandEvent& WXUNUSED(event));
+	void OnYoutube(wxCommandEvent& WXUNUSED(event));
 	void OnTwitter(wxCommandEvent& WXUNUSED(event));
 	void OnShowHideUI(wxCommandEvent& WXUNUSED(event));
 	void OnShowHideToolbar(wxCommandEvent& WXUNUSED(event));

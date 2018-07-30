@@ -3877,7 +3877,8 @@ unsigned int TraceGroup::Draw(vector<float> &verts)
 	size_t frame_num = m_track_map->GetFrameNum();
 	if (m_ghost_num <= 0 ||
 		m_cur_time < 0 ||
-		m_cur_time >= frame_num)
+		m_cur_time >= frame_num ||
+		m_cell_list.empty())
 		return result;
 
 	//estimate verts size

@@ -221,7 +221,7 @@ private:
 	wxNotebook *m_notebook;
 
 	//temporary mask
-	Nrrd* m_mask;
+	//Nrrd* m_mask;
 
 	//time sequence setting
 	int m_cur_time;
