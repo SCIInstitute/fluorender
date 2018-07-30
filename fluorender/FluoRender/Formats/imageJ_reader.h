@@ -116,7 +116,7 @@ private:
 
 private:	
 	// read from imageJ
-	Nrrd* ImageJReader::ReadFromImageJ(int i, int c, bool get_max);
+	Nrrd* ReadFromImageJ(int i, int c, bool get_max);
 };
 
 #endif//_IMAGEJ_READER_H_
