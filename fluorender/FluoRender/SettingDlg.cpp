@@ -191,45 +191,6 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	group3->Add(st);
 	group3->Add(10, 5);
 
-	//JVM settings.	
-	wxBoxSizer *group4 = new wxStaticBoxSizer( new wxStaticBox(page, wxID_ANY, "Java Settings"), wxVERTICAL);
-	wxBoxSizer *sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer *sizer4_2 = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer *sizer4_3 = new wxBoxSizer(wxHORIZONTAL);
-
-	m_java_jvm_text = new wxTextCtrl(page, ID_JavaJVMText);
-	m_java_ij_text = new wxTextCtrl(page, ID_JavaIJText);
-	m_java_bioformats_text = new wxTextCtrl(page, ID_JavaBioformatsText);
-	m_browse_jvm_btn = new wxButton(page, ID_JavaJvmBrowseBtn, "Browse", wxDefaultPosition);
-	m_browse_ij_btn = new wxButton(page, ID_JavaIJBrowseBtn, "Browse", wxDefaultPosition);
-	m_browse_bioformats_btn = new wxButton(page, ID_JavaBioformatsBrowseBtn, "Browse", wxDefaultPosition);
-
-	sizer4_1->Add(m_java_jvm_text, 1, wxEXPAND);
-	sizer4_1->Add(m_browse_jvm_btn, 0, wxALIGN_CENTER);
-	sizer4_2->Add(m_java_ij_text, 1, wxEXPAND);
-	sizer4_2->Add(m_browse_ij_btn, 0, wxALIGN_CENTER);
-	sizer4_3->Add(m_java_bioformats_text, 1, wxEXPAND);
-	sizer4_3->Add(m_browse_bioformats_btn, 0, wxALIGN_CENTER);
-
-	st = new wxStaticText(page, 0, "Specify the path to the jvm dll inside ImageJ.");	
-	wxStaticText* st1 = new wxStaticText(page, 0, "Specify the path to ij.jar inside ImageJ.");
-	wxStaticText* st2 = new wxStaticText(page, 0, "Specify the path to bioformats package jar.");
-
-	group4->Add(10, 5);	
-	group4->Add(sizer4_1, 0 , wxEXPAND);
-	group4->Add(10, 5);
-	group4->Add(st);
-	group4->Add(10, 5);
-	group4->Add(sizer4_2, 0, wxEXPAND);
-	group4->Add(10, 5);
-	group4->Add(st1);
-	group4->Add(10, 5);
-	group4->Add(sizer4_3, 0, wxEXPAND);
-	group4->Add(10, 5);
-	group4->Add(st2);
-	group4->Add(10, 5);
-	
-
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(10, 10);
 	sizerV->Add(group1, 0, wxEXPAND);
@@ -238,7 +199,6 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	sizerV->Add(10, 10);
 	sizerV->Add(group3, 0, wxEXPAND);
 	sizerV->Add(10, 10);
-	sizerV->Add(group4, 0, wxEXPAND);
 
 	page->SetSizer(sizerV);
 	return page;
@@ -634,6 +594,59 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	return page;
 }
 
+wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
+{
+	wxStaticText* st;
+	wxPanel *page = new wxPanel(parent);
+
+	//JVM settings.	
+	wxBoxSizer *group1 = new wxStaticBoxSizer(new wxStaticBox(page, wxID_ANY, "Java Settings"), wxVERTICAL);
+	wxBoxSizer *sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer1_2 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer1_3 = new wxBoxSizer(wxHORIZONTAL);
+
+	m_java_jvm_text = new wxTextCtrl(page, ID_JavaJVMText);
+	m_java_ij_text = new wxTextCtrl(page, ID_JavaIJText);
+	m_java_bioformats_text = new wxTextCtrl(page, ID_JavaBioformatsText);
+	m_browse_jvm_btn = new wxButton(page, ID_JavaJvmBrowseBtn, "Browse", wxDefaultPosition);
+	m_browse_ij_btn = new wxButton(page, ID_JavaIJBrowseBtn, "Browse", wxDefaultPosition);
+	m_browse_bioformats_btn = new wxButton(page, ID_JavaBioformatsBrowseBtn, "Browse", wxDefaultPosition);
+
+	sizer1_1->Add(m_java_jvm_text, 1, wxEXPAND);
+	sizer1_1->Add(m_browse_jvm_btn, 0, wxALIGN_CENTER);
+	sizer1_2->Add(m_java_ij_text, 1, wxEXPAND);
+	sizer1_2->Add(m_browse_ij_btn, 0, wxALIGN_CENTER);
+	sizer1_3->Add(m_java_bioformats_text, 1, wxEXPAND);
+	sizer1_3->Add(m_browse_bioformats_btn, 0, wxALIGN_CENTER);
+
+	group1->Add(10, 5);
+	st = new wxStaticText(page, 0, "Path to file \"jvm.dll\" (e.g., \"ImageJ/jre/bin/server/jvm.dll\"):");
+	group1->Add(st);
+	group1->Add(sizer1_1, 0, wxEXPAND);
+	group1->Add(10, 10);
+	st = new wxStaticText(page, 0, "Path to file \"ij.jar\" (e.g., \"ImageJ/ij.jar\"):");
+	group1->Add(st);
+	group1->Add(sizer1_2, 0, wxEXPAND);
+	group1->Add(10, 10);
+	st = new wxStaticText(page, 0, "Path to file \"bioformats_package.jar\" (e.g., \"ImageJ/plugins/bioformats_package.jar\"):");
+	group1->Add(st);
+	group1->Add(sizer1_3, 0, wxEXPAND);
+	group1->Add(10, 10);
+	st = new wxStaticText(page, 0,
+		"Note:\n"\
+		"Restart FluoRender for Java settings to take effect.\n");
+	group1->Add(st);
+	group1->Add(10, 5);
+
+	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
+	sizerV->Add(10, 10);
+	sizerV->Add(group1, 0, wxEXPAND);
+	sizerV->Add(10, 10);
+
+	page->SetSizer(sizerV);
+	return page;
+}
+
 SettingDlg::SettingDlg(wxWindow *frame, wxWindow *parent) :
 	wxPanel(parent, wxID_ANY,
 		wxDefaultPosition, wxSize(450, 750),
@@ -649,6 +662,7 @@ SettingDlg::SettingDlg(wxWindow *frame, wxWindow *parent) :
 	notebook->AddPage(CreateRenderingPage(notebook), "Rendering");
 	notebook->AddPage(CreatePerformancePage(notebook), "Performance");
 	notebook->AddPage(CreateFormatPage(notebook), "File format");
+	notebook->AddPage(CreateJavaPage(notebook), "ImageJ Link");
 
 	//buttons
 	wxBoxSizer *group_b = new wxBoxSizer(wxHORIZONTAL);

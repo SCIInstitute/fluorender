@@ -420,6 +420,7 @@ private:
 	wxWindow* CreatePerformancePage(wxWindow *parent);
 	wxWindow* CreateRenderingPage(wxWindow *parent);
 	wxWindow* CreateFormatPage(wxWindow *parent);
+	wxWindow* CreateJavaPage(wxWindow *parent);
 
 	//projec save
 	void OnProjectSaveCheck(wxCommandEvent &event);
