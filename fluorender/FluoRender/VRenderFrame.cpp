@@ -236,15 +236,16 @@ VRenderFrame::VRenderFrame(
 		"Open single or multiple volume data file(s)",
 		"Open single or multiple volume data file(s)");
 
-	bitmap = wxGetBitmapFromMemory(icon_import);
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
 	if (JVMInitializer::getInstance(m_setting_dlg) != nullptr) {
+		bitmap = wxGetBitmapFromMemory(icon_import);
+#ifdef _DARWIN
+		m_main_tb->SetToolBitmapSize(bitmap.GetSize());
+#endif
 		m_main_tb->AddTool(ID_ImportVolume, "Import Volume",
 			bitmap, wxNullBitmap, wxITEM_NORMAL,
 			"Import single or multiple volume data file(s) using ImageJ",
 			"Import single or multiple volume data file(s) using ImageJ");
+		m_main_tb->AddSeparator();
 	}
 
 	bitmap = wxGetBitmapFromMemory(icon_open_project);
@@ -256,7 +257,6 @@ VRenderFrame::VRenderFrame(
 		"Open a saved project",
 		"Open a saved project");
 	bitmap = wxGetBitmapFromMemory(icon_save_project);
-
 #ifdef _DARWIN
 	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
 #endif
@@ -266,7 +266,6 @@ VRenderFrame::VRenderFrame(
 		"Save current work as a project");
 	m_main_tb->AddSeparator();
 	bitmap = wxGetBitmapFromMemory(icon_new_view);
-
 #ifdef _DARWIN
 	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
 #endif
@@ -2736,6 +2735,8 @@ void VRenderFrame::SaveProject(wxString& filename)
 				fconfig.Write("path", str);
 			if (vd->GetReader())
 			{
+				//reader type
+				fconfig.Write("reader_type", vd->GetReader()->GetType());
 				fconfig.Write("slice_seq", vd->GetReader()->GetSliceSeq());
 				str = vd->GetReader()->GetTimeId();
 				fconfig.Write("time_id", str);
@@ -3431,6 +3432,9 @@ void VRenderFrame::OpenProject(wxString& filename)
 							cur_chan--;
 					int cur_time = 0;
 					fconfig.Read("cur_time", &cur_time);
+					//reader type
+					int reader_type = 0;
+					fconfig.Read("reader_type", &reader_type);
 					bool slice_seq = 0;
 					fconfig.Read("slice_seq", &slice_seq);
 					m_data_mgr.SetSliceSequence(slice_seq);
@@ -3438,7 +3442,9 @@ void VRenderFrame::OpenProject(wxString& filename)
 					fconfig.Read("time_id", &time_id);
 					m_data_mgr.SetTimeId(time_id);
 					wxString suffix = str.Mid(str.Find('.', true)).MakeLower();
-					if (suffix == ".nrrd")
+					if (reader_type == READER_IMAGEJ_TYPE)
+						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_IMAGEJ, true, cur_chan, cur_time);
+					else if (suffix == ".nrrd")
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_NRRD, cur_chan, cur_time);
 					else if (suffix == ".tif"||suffix == ".tiff")
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_TIFF, cur_chan, cur_time);
