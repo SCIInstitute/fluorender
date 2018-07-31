@@ -620,15 +620,27 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 	sizer1_3->Add(m_browse_bioformats_btn, 0, wxALIGN_CENTER);
 
 	group1->Add(10, 5);
-	st = new wxStaticText(page, 0, "Path to file \"jvm.dll\" (e.g., \"ImageJ/jre/bin/server/jvm.dll\"):");
+#ifdef _WIN32
+	st = new wxStaticText(page, 0, "Path to file \"jvm.dll\" (e.g., \"ImageJ\\jre\\bin\\server\\jvm.dll\"):");
+#else
+	st = new wxStaticText(page, 0, "Path to file \"libjvm.dylib\" (e.g., \"ImageJ/jre/bin/server/libjvm.dylib\"):");
+#endif
 	group1->Add(st);
 	group1->Add(sizer1_1, 0, wxEXPAND);
 	group1->Add(10, 10);
+#ifdef _WIN32
+	st = new wxStaticText(page, 0, "Path to file \"ij.jar\" (e.g., \"ImageJ\\ij.jar\"):");
+#else
 	st = new wxStaticText(page, 0, "Path to file \"ij.jar\" (e.g., \"ImageJ/ij.jar\"):");
+#endif
 	group1->Add(st);
 	group1->Add(sizer1_2, 0, wxEXPAND);
 	group1->Add(10, 10);
+#ifdef _WIN32
+	st = new wxStaticText(page, 0, "Path to file \"bioformats_package.jar\" (e.g., \"ImageJ\\plugins\\bioformats_package.jar\"):");
+#else
 	st = new wxStaticText(page, 0, "Path to file \"bioformats_package.jar\" (e.g., \"ImageJ/plugins/bioformats_package.jar\"):");
+#endif
 	group1->Add(st);
 	group1->Add(sizer1_3, 0, wxEXPAND);
 	group1->Add(10, 10);
