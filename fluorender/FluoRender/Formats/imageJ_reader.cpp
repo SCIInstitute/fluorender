@@ -125,10 +125,11 @@ int ImageJReader::Preprocess()
 				m_pJVMInstance->m_pEnv->FindClass("java/lang/String"),    // Strings
 				m_pJVMInstance->m_pEnv->NewStringUTF("str"));   // each initialized with value "str"
 			
-			char* cstr = new char[m_path_name.length() + 1];
-			sprintf(cstr, "%ws", m_path_name.c_str());
+			//char* cstr = new char[m_path_name.length() + 1];
+			//sprintf(cstr, "%ws", m_path_name.c_str());
+			string path_name = ws2s(m_path_name);
 
-			m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 0, m_pJVMInstance->m_pEnv->NewStringUTF(cstr));  // change an element
+			m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 0, m_pJVMInstance->m_pEnv->NewStringUTF(const_cast<char*>(path_name.c_str())));  // change an element
 			m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 1, m_pJVMInstance->m_pEnv->NewStringUTF("4D_1ch.lsm"));  // change an element
 			//jint depth = (jint)(m_pJVMInstance->m_pEnv->CallStaticIntMethod(imageJ_cls, mid, arr));   // call the method with the arr as argument.
 			//m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);     // release the object
@@ -282,8 +283,9 @@ Nrrd* ImageJReader::Convert(int t, int c, bool get_max)
 
 Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {	
 	// ImageJ code to read the data.	
-	char* path_cstr = new char[m_path_name.length() + 1];
-	sprintf(path_cstr, "%ws", m_path_name.c_str());
+	//char* path_cstr = new char[m_path_name.length() + 1];
+	//sprintf(path_cstr, "%ws", m_path_name.c_str());
+	string path_name = ws2s(m_path_name);
 
 	jmethodID method_id = NULL;
 	if (m_eight_bit == true){
@@ -302,8 +304,7 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 		jobjectArray arr = m_pJVMInstance->m_pEnv->NewObjectArray(2,      // constructs java array of 3
 			m_pJVMInstance->m_pEnv->FindClass("java/lang/String"),    // Strings
 			m_pJVMInstance->m_pEnv->NewStringUTF("str"));   // each initialized with value "str"
-		m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 0, m_pJVMInstance->m_pEnv->NewStringUTF(path_cstr));  // change an element
-		m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 1, m_pJVMInstance->m_pEnv->NewStringUTF("4D_1ch.lsm"));  // change an element		
+		m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 0, m_pJVMInstance->m_pEnv->NewStringUTF(const_cast<char*>(path_name.c_str())));  // change an element		
 
 		jbyteArray val = (jbyteArray)(m_pJVMInstance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_id, arr, (jint)t, (jint)c));   // call the method with the arr as argument.
 		jboolean flag = m_pJVMInstance->m_pEnv->ExceptionCheck();
@@ -322,17 +323,18 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 		for (int i = 0; i < len; i++) {
 			int test = *(body + i);
 			*((unsigned char*)t_data + i) = test;			
-		}		
+		}
+		m_pJVMInstance->m_pEnv->ReleaseByteArrayElements(val, body, 0);
 		m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);
+		m_pJVMInstance->m_pEnv->DeleteLocalRef(val);		
 	}
 	else if (m_eight_bit == false)
 	{
-		//m_pJVMInstance->m_pEnv->PushLocalFrame();
+		//m_pJVMInstance->m_pEnv->PushLocalFrame(1000);
 		jobjectArray arr = m_pJVMInstance->m_pEnv->NewObjectArray(2,      // constructs java array of 3
 			m_pJVMInstance->m_pEnv->FindClass("java/lang/String"),    // Strings
 			m_pJVMInstance->m_pEnv->NewStringUTF("str"));   // each initialized with value "str"
-		m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 0, m_pJVMInstance->m_pEnv->NewStringUTF(path_cstr));  // change an element
-		m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 1, m_pJVMInstance->m_pEnv->NewStringUTF("4D_1ch.lsm"));  // change an element
+		m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 0, m_pJVMInstance->m_pEnv->NewStringUTF(const_cast<char*>(path_name.c_str())));  // change an element		
 																													
 		jshortArray val = (jshortArray)(m_pJVMInstance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_id, arr, (jint)t, (jint)c));   // call the method with the arr as argument.
 		jsize len = m_pJVMInstance->m_pEnv->GetArrayLength(val);
@@ -344,7 +346,10 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 			int test = *(body + i);
 			*((unsigned short int*)t_data + i) = test;
 		}
+		//m_pJVMInstance->m_pEnv->PopLocalFrame(NULL);
+		m_pJVMInstance->m_pEnv->ReleaseShortArrayElements(val, body, 0);
 		m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);
+		m_pJVMInstance->m_pEnv->DeleteLocalRef(val);
 	}
 
 	// Creating Nrrd out of the data.
