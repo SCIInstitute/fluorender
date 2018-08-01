@@ -324,7 +324,7 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 			int test = *(body + i);
 			*((unsigned char*)t_data + i) = test;			
 		}
-		m_pJVMInstance->m_pEnv->ReleaseByteArrayElements(val, body, 0);
+		m_pJVMInstance->m_pEnv->ReleaseByteArrayElements(val, body, JNI_ABORT);
 		m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);
 		m_pJVMInstance->m_pEnv->DeleteLocalRef(val);		
 	}
@@ -347,7 +347,7 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 			*((unsigned short int*)t_data + i) = test;
 		}
 		//m_pJVMInstance->m_pEnv->PopLocalFrame(NULL);
-		m_pJVMInstance->m_pEnv->ReleaseShortArrayElements(val, body, 0);
+		m_pJVMInstance->m_pEnv->ReleaseShortArrayElements(val, body, JNI_ABORT);
 		m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);
 		m_pJVMInstance->m_pEnv->DeleteLocalRef(val);
 	}
