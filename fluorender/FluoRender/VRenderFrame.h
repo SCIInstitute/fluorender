@@ -432,9 +432,6 @@ private:
 	//benchmark mode
 	bool m_benchmark;
 
-	//Open the file with imageJ on startup.
-	bool m_open_with_imagej;
-
 private:
 	//views
 	wxString CreateView(int row=1);

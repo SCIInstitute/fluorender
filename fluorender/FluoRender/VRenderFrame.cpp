@@ -153,8 +153,7 @@ VRenderFrame::VRenderFrame(
 	m_cur_sel_type(-1),
 	m_cur_sel_vol(-1),
 	m_cur_sel_mesh(-1),
-	m_benchmark(benchmark),
-	m_open_with_imagej(false)
+	m_benchmark(benchmark)
 {
 	//create this first to read the settings
 	m_setting_dlg = new SettingDlg(this, this);
@@ -1364,10 +1363,8 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 			wxString filename = files[j];
 			wxString suffix = filename.Mid(filename.Find('.', true)).MakeLower();
 
-			if (withImageJ == true || m_open_with_imagej) {
+			if (withImageJ)
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_IMAGEJ, true); //The type of data doesnt matter.
-				m_open_with_imagej = false;
-			}
 			else if (suffix == ".nrrd")
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_NRRD, false);
 			else if (suffix==".tif" || suffix==".tiff")
@@ -1475,8 +1472,6 @@ void VRenderFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imag
 	if (m_vrv_list[0])
 		m_vrv_list[0]->m_glview->Init();
 
-	m_open_with_imagej = with_imagej;
-
 	if (files.Count())
 	{
 		wxString filename = files[0];
@@ -1495,11 +1490,15 @@ void VRenderFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imag
 			suffix == ".xml" ||
 			suffix == ".vvd")
 		{
-			LoadVolumes(files, false);
+			LoadVolumes(files, with_imagej);
 		}
 		else if (suffix == ".obj")
 		{
 			LoadMeshes(files);
+		}
+		else if (with_imagej)
+		{
+			LoadVolumes(files, with_imagej);
 		}
 	}
 
