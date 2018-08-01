@@ -36,6 +36,7 @@ class VRenderApp : public wxApp
 {
 public:
 	virtual bool OnInit();
+	virtual int OnExit();
 	void OnInitCmdLine(wxCmdLineParser& parser);
 	bool OnCmdLineParsed(wxCmdLineParser& parser);	
 

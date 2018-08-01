@@ -110,13 +110,18 @@ bool VRenderApp::OnInit()
 		}
 		run_mov = true;
 	}
-	if (m_file_num > 0)		
+	if (m_file_num > 0)
 		((VRenderFrame*)frame)->StartupLoad(m_files, run_mov, m_imagej);
 
 	// Adding JVm initialization.
-	// TODO: Need to call destroy JVM after this on destruction.
 	JVMInitializer*	pInstance = JVMInitializer::getInstance(((VRenderFrame*)frame)->GetSettingDlg());
 	return true;
+}
+
+int VRenderApp::OnExit()
+{
+	JVMInitializer::destroyJVM();
+	return 0;
 }
 
 void VRenderApp::OnInitCmdLine(wxCmdLineParser& parser)
