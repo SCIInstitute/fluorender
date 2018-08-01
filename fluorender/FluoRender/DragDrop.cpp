@@ -72,11 +72,15 @@ bool DnDFile::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString &filenames)
 					 suffix == ".xml" ||
 					 suffix == ".vvd")
 			{
-				vr_frame->LoadVolumes(filenames, (VRenderView*)m_view);
+				vr_frame->LoadVolumes(filenames, false, (VRenderView*)m_view);
 			}
 			else if (suffix == ".obj")
 			{
 				vr_frame->LoadMeshes(filenames, (VRenderView*)m_view);
+			}
+			else
+			{
+				vr_frame->LoadVolumes(filenames, true, (VRenderView*)m_view);
 			}
 		}
 	}
