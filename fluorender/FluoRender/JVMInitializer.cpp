@@ -28,9 +28,15 @@ char JVMInitializer::getPathSeparator(){
 }
 
 bool JVMInitializer::create_JVM(SettingDlg* inp_settingDlg){
-	wxString jvm_path = inp_settingDlg->getJVMPath();
-	wxString ij_path = inp_settingDlg->getIJPath();
-	wxString bioformats_path = inp_settingDlg->getBioformatsPath();
+	wxString jvm_path;
+	wxString ij_path;
+	wxString bioformats_path;
+	if (inp_settingDlg)
+	{
+		jvm_path = inp_settingDlg->getJVMPath();
+		ij_path = inp_settingDlg->getIJPath();
+		bioformats_path = inp_settingDlg->getBioformatsPath();
+	}
 
 	////Loading JVM library and methods.
 	m_jvm_dll = LoadLibraryW(jvm_path.ToStdWstring().c_str());

@@ -31,6 +31,9 @@ DEALINGS IN THE SOFTWARE.
 
 ImageJReader::ImageJReader()
 {
+	m_pJVMInstance = 0;
+	m_imageJ_cls = 0;
+
 	m_resize_type = 0;
 	m_resample_type = 0;
 	m_alignment = 0;
@@ -57,15 +60,17 @@ ImageJReader::ImageJReader()
 
 	m_time_id = L"_T";
 	
-    //Geting absolute path to class file.
+	//Geting absolute path to class file.
 	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
 	exePath = wxPathOnly(exePath);
 	string imageJPath = exePath + GETSLASH() + "Java_Code" + GETSLASH() + "ImageJ_Reader";
 
 	//Java code to get the number of depth images.
 	m_pJVMInstance = JVMInitializer::getInstance();
-	printf("%s", imageJPath.c_str());
-	fflush(stdout);
+	if (m_pJVMInstance == nullptr)
+		return;
+	//printf("%s", imageJPath.c_str());
+	//fflush(stdout);
 
 	m_imageJ_cls = m_pJVMInstance->m_pEnv->FindClass("ImageJ_Reader");
 	if (m_imageJ_cls == nullptr) {

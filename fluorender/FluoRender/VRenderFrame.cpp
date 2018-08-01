@@ -1365,23 +1365,23 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 			wxString suffix = filename.Mid(filename.Find('.', true)).MakeLower();
 
 			if (withImageJ == true || m_open_with_imagej) {
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_IMAGEJ, withImageJ); //The type of data doesnt matter.
+				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_IMAGEJ, true); //The type of data doesnt matter.
 				m_open_with_imagej = false;
 			}
 			else if (suffix == ".nrrd")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_NRRD, withImageJ);
+				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_NRRD, false);
 			else if (suffix==".tif" || suffix==".tiff")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_TIFF, withImageJ);
+				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_TIFF, false);
 			else if (suffix == ".oib")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_OIB, withImageJ);
+				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_OIB, false);
 			else if (suffix == ".oif")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_OIF, withImageJ);
+				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_OIF, false);
 			else if (suffix==".lsm")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_LSM, withImageJ);
+				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_LSM, false);
 			else if (suffix==".xml")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_PVXML, withImageJ);
+				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_PVXML, false);
 			else if (suffix == ".vvd")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_BRKXML, withImageJ);			
+				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_BRKXML, false);
 
 			if (ch_num > 1)
 			{
