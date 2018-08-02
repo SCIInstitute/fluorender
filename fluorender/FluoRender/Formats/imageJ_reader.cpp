@@ -130,7 +130,7 @@ int ImageJReader::Preprocess()
 			string path_name = ws2s(m_path_name);
 
 			m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 0, m_pJVMInstance->m_pEnv->NewStringUTF(const_cast<char*>(path_name.c_str())));  // change an element
-			m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 1, m_pJVMInstance->m_pEnv->NewStringUTF("4D_1ch.lsm"));  // change an element
+			//m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 1, m_pJVMInstance->m_pEnv->NewStringUTF("4D_1ch.lsm"));  // change an element
 			//jint depth = (jint)(m_pJVMInstance->m_pEnv->CallStaticIntMethod(imageJ_cls, mid, arr));   // call the method with the arr as argument.
 			//m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);     // release the object
 
@@ -180,7 +180,10 @@ int ImageJReader::Preprocess()
 				// TODO: What is m_max_value.
 				}
 			}
-			m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);     // release the object
+			// release the object
+			m_pJVMInstance->m_pEnv->ReleaseIntArrayElements(val, body, JNI_ABORT);
+			m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);
+			m_pJVMInstance->m_pEnv->DeleteLocalRef(val);
 		}
 	}
 	m_cur_time = 0;	
