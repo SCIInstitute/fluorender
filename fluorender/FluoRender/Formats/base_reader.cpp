@@ -317,6 +317,9 @@ string BaseReader::GetError(int code)
 	case READER_FP32_DATA:
 		err_str = "Floating point data are unsupported.";
 		break;
+	case READER_JAVA_ARRAY_SIZE_ERROR:
+		err_str = "File size is too big for Java to read. Max is 2^32";
+		break;
 	}
 	return err_str;
 }

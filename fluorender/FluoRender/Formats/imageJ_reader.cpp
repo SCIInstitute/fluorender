@@ -141,10 +141,12 @@ int ImageJReader::Preprocess()
 			//Checking if the right format was loaded.
 			if (len == 1) {
 				int test = *body;
-				if (test == 1)
+				if (test == 4)
 					return READER_FORMAT_ERROR;
-				else if (test == 2)
+				else if (test == 5)
 					return READER_OPEN_FAIL;
+				else if (test == 7)
+					return READER_JAVA_ARRAY_SIZE_ERROR;
 				else
 					return READER_EMPTY_DATA; //This is for unkown exception on java side.
 			}
