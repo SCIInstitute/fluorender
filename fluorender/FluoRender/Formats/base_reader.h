@@ -47,6 +47,7 @@ using namespace std;
 #define READER_FORMAT_ERROR	2
 #define READER_EMPTY_DATA	3
 #define READER_FP32_DATA	4
+#define READER_JAVA_ARRAY_SIZE_ERROR 5
 
 class BaseReader
 {
