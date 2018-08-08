@@ -26,25 +26,16 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _GROUP_H_
-#define _GROUP_H_
-
 #include <Scenegraph/Node.h>
 
-namespace FL
+using namespace FL;
+
+Node::Node()
 {
-	typedef std::vector<std::shared_ptr<Node>> NodeList;
 
-	class Group : public Node
-	{
-	public:
-		Group();
-
-	protected:
-		virtual ~Group();
-
-		NodeList m_children;
-	};
 }
 
-#endif//_GROUP_H_
+Node::~Node()
+{
+
+}
