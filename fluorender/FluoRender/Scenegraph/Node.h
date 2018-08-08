@@ -31,18 +31,24 @@ DEALINGS IN THE SOFTWARE.
 
 #include <vector>
 #include <memory>
+#include <Scenegraph/CopyOp.h>
 
 namespace FL
 {
 	class Group;
+	class Node;
 
 	class Node
 	{
 	public:
 		Node();
+		Node(const Node&, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
+		virtual ~Node();
+
+		virtual pNode clone(const CopyOp& copyop) const
+		{ return pNode(new Node(*this, copyop)); }
 
 	protected:
-		virtual ~Node();
 	};
 }
 

@@ -26,22 +26,39 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Scenegraph/Node.h>
+#ifndef _COPYOP_H_
+#define _COPYOP_H_
 
-using namespace FL;
+#include <vector>
+#include <memory>
 
-Node::Node()
+namespace FL
 {
+	class Node;
+	typedef std::shared_ptr<Node> pNode;
+	class CopyOp
+	{
+	public:
+		enum Options
+		{
+			SHALLOW_COPY = 0,
+			DEEP_COPY_NODES = 1<<0,
+			DEEP_COPY_ALL = 0x7FFFFFFF
+		};
 
+		typedef unsigned int CopyFlags;
+
+		inline CopyOp(CopyFlags flags = SHALLOW_COPY) :
+			m_flags(flags) {}
+		virtual ~CopyOp() {}
+
+		void setCopyFlags(CopyFlags flags) { m_flags = flags; }
+		CopyFlags getCopyFlags() const { return m_flags; }
+
+		virtual pNode operator() (const pNode &node) const;
+
+	protected:
+		CopyFlags m_flags;
+	};
 }
-
-Node::Node(const Node& node, const CopyOp& copyop)
-{
-	//copy
-}
-
-Node::~Node()
-{
-
-}
-
+#endif//_COPYOP_H_

@@ -26,22 +26,15 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
+#include <Scenegraph/CopyOp.h>
 #include <Scenegraph/Node.h>
 
 using namespace FL;
 
-Node::Node()
+pNode CopyOp::operator() (const pNode &node) const
 {
-
+	if (node && m_flags&DEEP_COPY_NODES)
+		return node->clone(*this);
+	else
+		return node;
 }
-
-Node::Node(const Node& node, const CopyOp& copyop)
-{
-	//copy
-}
-
-Node::~Node()
-{
-
-}
-
