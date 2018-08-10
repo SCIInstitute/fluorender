@@ -32,12 +32,12 @@ DEALINGS IN THE SOFTWARE.
 #include <Flobject/ref_ptr.h>
 #include <Flobject/Observer.h>
 #include <Flobject/CopyOp.h>
-//#include "Value.h"
+#include <Flobject/Value.h>
 #include <stack>
 
 namespace FL
 {
-//typedef std::stack<ref_ptr<ValueSet> > ValueSetStack;
+typedef std::stack<ref_ptr<ValueSet> > ValueSetStack;
 
 class Object : public Referenced, public Observer
 {
@@ -61,7 +61,7 @@ public:
 	virtual void objectChanged(void*, const std::string &exp);
 
 	//add a value
-/*	virtual bool addValue(const std::string &name, Referenced* value);
+	virtual bool addValue(const std::string &name, Referenced* value);
 	virtual bool addValue(const std::string &name, bool value);
 	virtual bool addValue(const std::string &name, char value);
 	virtual bool addValue(const std::string &name, unsigned char value);
@@ -74,24 +74,24 @@ public:
 	virtual bool addValue(const std::string &name, float);
 	virtual bool addValue(const std::string &name, double);
 	virtual bool addValue(const std::string &name, const std::string &value);
-	virtual bool addValue(const std::string &name, const Vec2f &value);
-	virtual bool addValue(const std::string &name, const Vec3f &value);
-	virtual bool addValue(const std::string &name, const Vec4f &value);
-	virtual bool addValue(const std::string &name, const Vec2d &value);
-	virtual bool addValue(const std::string &name, const Vec3d &value);
-	virtual bool addValue(const std::string &name, const Vec4d &value);
-	virtual bool addValue(const std::string &name, const Quat &value);
-	virtual bool addValue(const std::string &name, const Planef &value);
-	virtual bool addValue(const std::string &name, const Planed &value);
-	virtual bool addValue(const std::string &name, const Matrixf &value);
-	virtual bool addValue(const std::string &name, const Matrixd &value);
-	virtual bool addValue(const std::string &name, const Color3f &value);
-	virtual bool addValue(const std::string &name, const Color3d &value);
-	virtual bool addValue(const std::string &name, const HsvColor3f &value);
-	virtual bool addValue(const std::string &name, const HsvColor3d &value);
-*/
+	//virtual bool addValue(const std::string &name, const Vec2f &value);
+	//virtual bool addValue(const std::string &name, const Vec3f &value);
+	//virtual bool addValue(const std::string &name, const Vec4f &value);
+	//virtual bool addValue(const std::string &name, const Vec2d &value);
+	//virtual bool addValue(const std::string &name, const Vec3d &value);
+	//virtual bool addValue(const std::string &name, const Vec4d &value);
+	//virtual bool addValue(const std::string &name, const Quat &value);
+	//virtual bool addValue(const std::string &name, const Planef &value);
+	//virtual bool addValue(const std::string &name, const Planed &value);
+	//virtual bool addValue(const std::string &name, const Matrixf &value);
+	//virtual bool addValue(const std::string &name, const Matrixd &value);
+	//virtual bool addValue(const std::string &name, const Color3f &value);
+	//virtual bool addValue(const std::string &name, const Color3d &value);
+	//virtual bool addValue(const std::string &name, const HsvColor3f &value);
+	//virtual bool addValue(const std::string &name, const HsvColor3d &value);
+
 	/** All the set value functions */
-/*	virtual bool setValue(const std::string &name, Referenced* value);
+	virtual bool setValue(const std::string &name, Referenced* value);
 	virtual bool setValue(const std::string &name, bool value);
 	virtual bool setValue(const std::string &name, char value);
 	virtual bool setValue(const std::string &name, unsigned char value);
@@ -104,24 +104,24 @@ public:
 	virtual bool setValue(const std::string &name, float value);
 	virtual bool setValue(const std::string &name, double value);
 	virtual bool setValue(const std::string &name, const std::string &value);
-	virtual bool setValue(const std::string &name, const Vec2f &value);
-	virtual bool setValue(const std::string &name, const Vec3f &value);
-	virtual bool setValue(const std::string &name, const Vec4f &value);
-	virtual bool setValue(const std::string &name, const Vec2d &value);
-	virtual bool setValue(const std::string &name, const Vec3d &value);
-	virtual bool setValue(const std::string &name, const Vec4d &value);
-	virtual bool setValue(const std::string &name, const Quat &value);
-	virtual bool setValue(const std::string &name, const Planef &value);
-	virtual bool setValue(const std::string &name, const Planed &value);
-	virtual bool setValue(const std::string &name, const Matrixf &value);
-	virtual bool setValue(const std::string &name, const Matrixd &value);
-	virtual bool setValue(const std::string &name, const Color3f &value);
-	virtual bool setValue(const std::string &name, const Color3d &value);
-	virtual bool setValue(const std::string &name, const HsvColor3f &value);
-	virtual bool setValue(const std::string &name, const HsvColor3d &value);
-*/
+	//virtual bool setValue(const std::string &name, const Vec2f &value);
+	//virtual bool setValue(const std::string &name, const Vec3f &value);
+	//virtual bool setValue(const std::string &name, const Vec4f &value);
+	//virtual bool setValue(const std::string &name, const Vec2d &value);
+	//virtual bool setValue(const std::string &name, const Vec3d &value);
+	//virtual bool setValue(const std::string &name, const Vec4d &value);
+	//virtual bool setValue(const std::string &name, const Quat &value);
+	//virtual bool setValue(const std::string &name, const Planef &value);
+	//virtual bool setValue(const std::string &name, const Planed &value);
+	//virtual bool setValue(const std::string &name, const Matrixf &value);
+	//virtual bool setValue(const std::string &name, const Matrixd &value);
+	//virtual bool setValue(const std::string &name, const Color3f &value);
+	//virtual bool setValue(const std::string &name, const Color3d &value);
+	//virtual bool setValue(const std::string &name, const HsvColor3f &value);
+	//virtual bool setValue(const std::string &name, const HsvColor3d &value);
+
 	/** All the get value functions */
-/*	virtual bool getValue(const std::string &name, Referenced** value);
+	virtual bool getValue(const std::string &name, Referenced** value);
 	virtual bool getValue(const std::string &name, bool &value);
 	virtual bool getValue(const std::string &name, char &value);
 	virtual bool getValue(const std::string &name, unsigned char &value);
@@ -134,22 +134,22 @@ public:
 	virtual bool getValue(const std::string &name, float &value);
 	virtual bool getValue(const std::string &name, double &value);
 	virtual bool getValue(const std::string &name, std::string &value);
-	virtual bool getValue(const std::string &name, Vec2f &value);
-	virtual bool getValue(const std::string &name, Vec3f &value);
-	virtual bool getValue(const std::string &name, Vec4f &value);
-	virtual bool getValue(const std::string &name, Vec2d &value);
-	virtual bool getValue(const std::string &name, Vec3d &value);
-	virtual bool getValue(const std::string &name, Vec4d &value);
-	virtual bool getValue(const std::string &name, Quat &value);
-	virtual bool getValue(const std::string &name, Planef &value);
-	virtual bool getValue(const std::string &name, Planed &value);
-	virtual bool getValue(const std::string &name, Matrixf &value);
-	virtual bool getValue(const std::string &name, Matrixd &value);
-	virtual bool getValue(const std::string &name, Color3f &value);
-	virtual bool getValue(const std::string &name, Color3d &value);
-	virtual bool getValue(const std::string &name, HsvColor3f &value);
-	virtual bool getValue(const std::string &name, HsvColor3d &value);
-*/
+	//virtual bool getValue(const std::string &name, Vec2f &value);
+	//virtual bool getValue(const std::string &name, Vec3f &value);
+	//virtual bool getValue(const std::string &name, Vec4f &value);
+	//virtual bool getValue(const std::string &name, Vec2d &value);
+	//virtual bool getValue(const std::string &name, Vec3d &value);
+	//virtual bool getValue(const std::string &name, Vec4d &value);
+	//virtual bool getValue(const std::string &name, Quat &value);
+	//virtual bool getValue(const std::string &name, Planef &value);
+	//virtual bool getValue(const std::string &name, Planed &value);
+	//virtual bool getValue(const std::string &name, Matrixf &value);
+	//virtual bool getValue(const std::string &name, Matrixd &value);
+	//virtual bool getValue(const std::string &name, Color3f &value);
+	//virtual bool getValue(const std::string &name, Color3d &value);
+	//virtual bool getValue(const std::string &name, HsvColor3f &value);
+	//virtual bool getValue(const std::string &name, HsvColor3d &value);
+
 	//sync value
 	virtual bool syncValue(const std::string &name, Observer* obsrvr);
 	virtual bool unsyncValue(const std::string &name, Observer* obsrvr);
@@ -161,7 +161,7 @@ protected:
 	unsigned int _id;
 
 	/** a stack of value sets */
-	//ValueSetStack _vs_stack;
+	ValueSetStack _vs_stack;
 
 private:
 

@@ -42,12 +42,18 @@ Group::Group(const Group& group, const CopyOp& copyop) :
 		it != m_children.end(); ++it)
 	{
 		//copy
+		Node* child = copyop(it->get());
+		if (child) addChild(child);
 	}
 }
 
 Group::~Group()
 {
-
+	for (auto it = m_children.begin();
+		it != m_children.end(); ++it)
+	{
+		(*it)->removeParent(this);
+	}
 }
 
 bool Group::addChild(Node* child)
@@ -64,6 +70,8 @@ bool Group::insertChild(size_t index, Node* child)
 		m_children.push_back(child);
 	else
 		m_children.insert(m_children.begin() + index, child);
+
+	child->addParent(this);
 
 	return true;
 }
@@ -101,7 +109,11 @@ bool Group::setChild(size_t i, Node* node)
 {
 	if (i < m_children.size() && node != nullptr)
 	{
+		ref_ptr<Node> origNode = m_children[i];
+		origNode->removeParent(this);
 		m_children[i] = node;
+		node->addParent(this);
+
 		return true;
 	}
 	return false;
