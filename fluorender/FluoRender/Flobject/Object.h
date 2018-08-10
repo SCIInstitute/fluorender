@@ -195,7 +195,7 @@ T* clone(const T* t, const CopyOp& copyop = CopyOp::SHALLOW_COPY)
 template<typename T>
 T* clone(const T* t, const std::string& name, const CopyOp& copyop = CopyOp::SHALLOW_COPY)
 {
-	T* newObject = osg::clone(t, copyop);
+	T* newObject = clone(t, copyop);
 	if (newObject)
 	{
 		newObject->setName(name);
