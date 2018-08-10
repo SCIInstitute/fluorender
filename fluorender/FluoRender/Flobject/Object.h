@@ -47,7 +47,7 @@ public:
 
 	Object(const Object& obj, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
 
-	virtual Object* clone(const CopyOp&) const = 0;
+	virtual Object* clone(const CopyOp&) const { return new Object(*this); };
 
 	virtual bool isSameKindAs(const Object*) const {return true;}
 

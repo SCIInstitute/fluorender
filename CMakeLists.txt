@@ -397,6 +397,11 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/ReadGMM)
 file(GLOB readgmm_hdr fluorender/ReadGMM/*.h)
 file(GLOB readgmm_src fluorender/ReadGMM/*.cpp)
 
+# Tester
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/Tester)
+file(GLOB tester_hdr fluorender/Tester/*.h)
+file(GLOB tester_src fluorender/Tester/*.cpp)
+
 # For Apple set the icns file containing icons
 IF(APPLE)
   # set how it shows up in the Info.plist file
@@ -534,6 +539,10 @@ elseif(WIN32)
       $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>
       $<TARGET_OBJECTS:WACUTILS_OBJ>)
+    add_executable(Tester
+      ${tester_src} ${tester_hdr}
+      $<TARGET_OBJECTS:FLOBJECT_OBJ>
+      $<TARGET_OBJECTS:SCENEGRAPH_OBJ>)
   endif()
 endif()
 
