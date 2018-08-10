@@ -561,8 +561,8 @@ if(UNIX OR APPLE OR MINGW)
     ${OpenCL_LIBRARIES}
     ${wxWidgets_LIBRARIES}
     ${FREETYPE_LIBRARIES}
-    ${TIFF_LIBRARIES}
-${JNI_LIBRARIES})   
+    ${TIFF_LIBRARIES})
+#${JNI_LIBRARIES})   
 elseif(WIN32)
   target_link_libraries(FluoRender
     secur32.lib

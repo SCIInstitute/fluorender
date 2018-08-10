@@ -50,8 +50,10 @@ bool JVMInitializer::create_JVM(SettingDlg* inp_settingDlg){
 	}
 
 	//Loading JVM library and methods.
+#ifdef _DARWIN
     if (const char *error = dlerror())
         std::cout << "Flushed existing error: " << error << std::endl;
+#endif
     
     //jvm_path = "/Users/dev/Downloads/ImageJ/jre/lib/server/libjvm.dylib";
 #ifdef _WIN32
@@ -64,8 +66,10 @@ bool JVMInitializer::create_JVM(SettingDlg* inp_settingDlg){
         return false;
     }
     
+#ifdef _DARWIN
     if (const char *error = dlerror())
         std::cout << "Err: " << error << std::endl;
+#endif
 
 #ifdef _WIN32
 	m_createJVM_Ptr = (decltype(&JNI_CreateJavaVM))GetProcAddress(m_jvm_dll, "JNI_CreateJavaVM");
@@ -77,9 +81,11 @@ bool JVMInitializer::create_JVM(SettingDlg* inp_settingDlg){
         return false;
     }
 
+#ifdef _DARWIN
     if (const char *error = dlerror())
         std::cout << "Err: " << error << std::endl;
-    
+#endif
+
 	using namespace std;	
 	JavaVMOption* options = new JavaVMOption[1];
 	//Geting absolute path to class file.
@@ -117,4 +123,9 @@ bool JVMInitializer::create_JVM(SettingDlg* inp_settingDlg){
 void JVMInitializer::destroyJVM() {
 	if (m_pJvm)
 		m_pJvm->DestroyJavaVM();
+#ifdef _WIN32
+	FreeLibrary(m_jvm_dll);
+#else
+	dlclose(m_jvm_dll);
+#endif
 }
