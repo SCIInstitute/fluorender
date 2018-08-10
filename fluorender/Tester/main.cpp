@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
 	Test1();
 
 	//char* leak = new char[1000];
-	//memset(leak, 0, 1000);
+	//memset(leak, 14, 1000);
 
 	printf("All done. Quit.\n");
 	cin.get();
