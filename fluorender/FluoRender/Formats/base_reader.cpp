@@ -318,7 +318,8 @@ string BaseReader::GetError(int code)
 		err_str = "Floating point data are unsupported.";
 		break;
 	case READER_JAVA_ARRAY_SIZE_ERROR:
-		err_str = "File size is too big for Java to read. Max is 2^32";
+		err_str = "File contains too many voxels for Java.\n" \
+			"Max is 2^31-1 (2,147,483,647) voxels.";
 		break;
 	}
 	return err_str;

@@ -131,8 +131,12 @@ void TIFWriter::SaveSingleFile(wstring filename)
 		if (m_compression)
 			TIFFSetField(outfile, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
 		ostringstream strs;
-		strs << z_res;
-		string desc = "spacing=" + strs.str() + "\n";
+		strs << "ImageJ=1.52a\n";
+		strs << "spacing=" << z_res << "\n";
+		strs << "images=" << numPages << "\n";
+		strs << "slices=" << numPages << "\n";
+		strs << "loop=false";
+		string desc = strs.str();
 		TIFFSetField(outfile, TIFFTAG_IMAGEDESCRIPTION, desc.c_str());
 
 		for (int j=0; j<height; j++)
@@ -224,8 +228,12 @@ void TIFWriter::SaveSequence(wstring filename)
 		TIFFSetField(outfile, TIFFTAG_PAGENUMBER, 0);
 		TIFFSetField(outfile, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(outfile, 0));
 		ostringstream strs;
-		strs << z_res;
-		string desc = "spacing=" + strs.str() + "\n";
+		strs << "ImageJ=1.52a\n";
+		strs << "spacing=" << z_res << "\n";
+		strs << "images=" << 1 << "\n";
+		strs << "slices=" << 1 << "\n";
+		strs << "loop=false";
+		string desc = strs.str();
 		TIFFSetField(outfile, TIFFTAG_IMAGEDESCRIPTION, desc.c_str());
 		if (m_compression)
 			TIFFSetField(outfile, TIFFTAG_COMPRESSION, COMPRESSION_LZW);

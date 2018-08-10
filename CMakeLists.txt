@@ -313,6 +313,20 @@ file(GLOB ani_hdr fluorender/FluoRender/Animator/*.h)
 add_library(ANIMATORS_OBJ OBJECT
   ${ani_src} ${ani_hdr})
 
+# Flobject
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Flobject)
+file(GLOB obj_src fluorender/FluoRender/Flobject/*.cpp)
+file(GLOB obj_hdr fluorender/FluoRender/Flobject/*.h)
+add_library(FLOBJECT_OBJ OBJECT
+  ${obj_src} ${obj_hdr})
+
+# Scenegraph
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Scenegraph)
+file(GLOB sg_src fluorender/FluoRender/Scenegraph/*.cpp)
+file(GLOB sg_hdr fluorender/FluoRender/Scenegraph/*.h)
+add_library(SCENEGRAPH_OBJ OBJECT
+  ${sg_src} ${sg_hdr})
+
 # NV
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/NV)
 file(GLOB nv_src fluorender/FluoRender/NV/*.cpp)
@@ -383,6 +397,11 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/ReadGMM)
 file(GLOB readgmm_hdr fluorender/ReadGMM/*.h)
 file(GLOB readgmm_src fluorender/ReadGMM/*.cpp)
 
+# Tester
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/Tester)
+file(GLOB tester_hdr fluorender/Tester/*.h)
+file(GLOB tester_src fluorender/Tester/*.cpp)
+
 # For Apple set the icns file containing icons
 IF(APPLE)
   # set how it shows up in the Info.plist file
@@ -417,6 +436,8 @@ if(APPLE)
     $<TARGET_OBJECTS:CONVERTERS_OBJ>
     $<TARGET_OBJECTS:FLIVR_OBJ>
     $<TARGET_OBJECTS:ANIMATORS_OBJ>
+    $<TARGET_OBJECTS:FLOBJECT_OBJ>
+    $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
     $<TARGET_OBJECTS:NV_OBJ>
     $<TARGET_OBJECTS:FORMATS_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
@@ -445,6 +466,8 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:CONVERTERS_OBJ>
     $<TARGET_OBJECTS:FLIVR_OBJ>
     $<TARGET_OBJECTS:ANIMATORS_OBJ>
+    $<TARGET_OBJECTS:FLOBJECT_OBJ>
+    $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
     $<TARGET_OBJECTS:NV_OBJ>
     $<TARGET_OBJECTS:FORMATS_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
@@ -503,6 +526,8 @@ elseif(WIN32)
       $<TARGET_OBJECTS:CONVERTERS_OBJ>
       $<TARGET_OBJECTS:FLIVR_OBJ>
       $<TARGET_OBJECTS:ANIMATORS_OBJ>
+      $<TARGET_OBJECTS:FLOBJECT_OBJ>
+      $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
       $<TARGET_OBJECTS:NV_OBJ>
       $<TARGET_OBJECTS:FORMATS_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
@@ -514,6 +539,10 @@ elseif(WIN32)
       $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>
       $<TARGET_OBJECTS:WACUTILS_OBJ>)
+    add_executable(Tester
+      ${tester_src} ${tester_hdr}
+      $<TARGET_OBJECTS:FLOBJECT_OBJ>
+      $<TARGET_OBJECTS:SCENEGRAPH_OBJ>)
   endif()
 endif()
 
