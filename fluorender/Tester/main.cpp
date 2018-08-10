@@ -16,8 +16,9 @@ void Test1()
 	//add the first object to the list
 	obj_list.push_back(obj1);
 	ASSERT_EQ(1, obj_list.size());
-/*	ASSERT_TRUE(obj_list[0]->isSameKindAs(obj1));
-	ASSERT_STREQ("Object", obj_list[0]->className());
+	ASSERT_TRUE(obj_list[0]->isSameKindAs(obj1));
+	string str = obj_list[0]->className();
+	ASSERT_EQ("Object", str);
 	unsigned int id = 10;
 	obj_list[0]->setId(id);
 	ASSERT_EQ(id, obj_list[0]->getId());
@@ -35,7 +36,7 @@ void Test1()
 	ASSERT_EQ(bval, bval2);
 
 	//creating a second object by cloning the first one
-	Object* obj2 = obj_list[0]->clone();
+	Object* obj2 = obj_list[0]->clone(CopyOp::DEEP_COPY_ALL);
 	//adding the second object to the list
 	obj_list.push_back(obj2);
 	ASSERT_EQ(2, obj_list.size());
@@ -66,14 +67,17 @@ void Test1()
 	//confirming the value pointing to the first object is reset
 	ASSERT_TRUE(obj_list[0]->getValue("friend", (Referenced**)&obj));
 	ASSERT_EQ(0, obj);
-*/
+
 }
 
 int main(int argc, char* argv[])
 {
 	Test1();
 
-	printf("All done. Quit.\n");
+	//char* leak = new char[1000];
+	//memset(leak, 0, 1000);
 
+	printf("All done. Quit.\n");
+	cin.get();
 	return 0;
 }
