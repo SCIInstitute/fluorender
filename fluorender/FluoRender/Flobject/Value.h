@@ -30,8 +30,10 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Flobject/Referenced.h>
 #include <Flobject/ref_ptr.h>
+#include <Flobject/CopyOp.h>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 namespace FL
 {
@@ -102,11 +104,11 @@ protected:
 class ValueSet : public Referenced
 {
 public:
-	typedef std::vector<ref_ptr<Value> > Values;
+	typedef std::unordered_map<std::string, ref_ptr<Value>> Values;
 
 	ValueSet() : Referenced() {}
 
-	ValueSet(const ValueSet& vs, bool ref_copy=false);
+	ValueSet(const ValueSet& vs, const CopyOp& copyop=CopyOp::SHALLOW_COPY);
 
 	ValueSet* clone() const {return new ValueSet(*this);}
 

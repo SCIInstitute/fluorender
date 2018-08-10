@@ -95,15 +95,16 @@ Value* Value::clone()
 		return 0;
 }
 
-ValueSet::ValueSet(const ValueSet& vs, bool ref_copy)
+ValueSet::ValueSet(const ValueSet& vs, const CopyOp& copyop)
 {
-	if (ref_copy)
+	if (copyop.getCopyFlags() & CopyOp::SHALLOW_COPY)
 		_values = vs._values;
 	else
 	{
-		for (size_t i=0; i<vs._values.size(); ++i)
+		for (auto it = vs._values.begin();
+			it != vs._values.end(); ++it)
 		{
-			Value* value = vs._values[i].get();
+			Value* value = it->second.get();
 			addValue(value->clone());
 		}
 	}
@@ -115,12 +116,9 @@ ValueSet::~ValueSet()
 
 Value* ValueSet::findValue(const std::string &name)
 {
-	for (Values::iterator it=_values.begin();
-		 it!=_values.end(); ++it)
-	{
-		if ((*it)->_name == name)
-			return (*it).get();
-	}
+	auto it = _values.find(name);
+	if (it != _values.end())
+		return it->second.get();
 
 	return 0;
 }
@@ -128,26 +126,21 @@ Value* ValueSet::findValue(const std::string &name)
 bool ValueSet::addValue(Value* value)
 {
 	if (!value) return false;
-	for (Values::iterator it=_values.begin();
-		it!=_values.end(); ++it)
-	{
-		if ((*it)->_name == value->_name)
-		{
-			return false;
-		}
-	}
+	auto it = _values.find(value->_name);
+	if (it != _values.end())
+		return false;
 
-	_values.push_back(value);
+	_values.insert(std::pair<std::string, ref_ptr<Value>>(value->_name, value));
 	return true;
 }
 
 bool ValueSet::removeValue(Value* value)
 {
 	if (!value) return false;
-	for (Values::iterator it=_values.begin();
-		it!=_values.end(); ++it)
+	auto it = _values.find(value->_name);
+	if (it != _values.end())
 	{
-		if ((*it).get() == value)
+		if (it->second.get() == value)
 		{
 			_values.erase(it);
 			return true;
@@ -173,10 +166,10 @@ bool ValueSet::resetRefPtr(Referenced* value)
 	for (Values::iterator it=_values.begin();
 		it!=_values.end(); ++it)
 	{
-		if ((*it)->getType() == "Referenced*" &&
-			(dynamic_cast<TemplateValue<Referenced*>*>((*it).get()))->getValue() == value)
+		if (it->second->getType() == "Referenced*" &&
+			(dynamic_cast<TemplateValue<Referenced*>*>(it->second.get()))->getValue() == value)
 		{
-			(dynamic_cast<TemplateValue<Referenced*>*>((*it).get()))->setValue(0);
+			(dynamic_cast<TemplateValue<Referenced*>*>(it->second.get()))->setValue(0);
 			return true;
 		}
 	}
@@ -188,13 +181,9 @@ bool ValueSet::resetRefPtr(Referenced* value)
 bool ValueSet::syncValue(Value* value)
 {
 	if (!value) return false;
-	for (Values::iterator it=_values.begin();
-		it!=_values.end(); ++it)
-	{
-		if ((*it)->getType() == value->getType() &&
-			(*it)->getName() == value->getName())
-			return (*it)->sync(value);
-	}
+	Value* my_value = findValue(value->_name);
+	if (my_value->getType() == value->getType())
+		return my_value->sync(value);
 
 	return false;
 }
@@ -209,7 +198,7 @@ bool ValueSet::addValue(const std::string &name, Referenced* value)
 		val->_name = name;
 		val->_type = "Referenced*";
 
-		_values.push_back(val);
+		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
 	else
@@ -225,7 +214,7 @@ bool ValueSet::addValue(const std::string &name, bool value)
 		val->_name = name;
 		val->_type = "bool";
 
-		_values.push_back(val);
+		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
 	else
@@ -241,7 +230,7 @@ bool ValueSet::addValue(const std::string &name, char value)
 		val->_name = name;
 		val->_type = "char";
 
-		_values.push_back(val);
+		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
 	else
@@ -257,7 +246,7 @@ bool ValueSet::addValue(const std::string &name, unsigned char value)
 		val->_name = name;
 		val->_type = "unsigned char";
 
-		_values.push_back(val);
+		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
 	else
@@ -273,7 +262,7 @@ bool ValueSet::addValue(const std::string &name, short value)
 		val->_name = name;
 		val->_type = "short";
 
-		_values.push_back(val);
+		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
 	else
@@ -289,7 +278,7 @@ bool ValueSet::addValue(const std::string &name, unsigned short value)
 		val->_name = name;
 		val->_type = "unsigned short";
 
-		_values.push_back(val);
+		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
 	else
@@ -305,7 +294,7 @@ bool ValueSet::addValue(const std::string &name, long value)
 		val->_name = name;
 		val->_type = "long";
 
-		_values.push_back(val);
+		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
 	else
@@ -321,7 +310,7 @@ bool ValueSet::addValue(const std::string &name, unsigned long value)
 		val->_name = name;
 		val->_type = "unsigned long";
 
-		_values.push_back(val);
+		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
 	else
@@ -337,7 +326,7 @@ bool ValueSet::addValue(const std::string &name, long long value)
 		val->_name = name;
 		val->_type = "long long";
 
-		_values.push_back(val);
+		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
 	else
@@ -353,7 +342,7 @@ bool ValueSet::addValue(const std::string &name, unsigned long long value)
 		val->_name = name;
 		val->_type = "unsigned long long";
 
-		_values.push_back(val);
+		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
 	else
@@ -369,7 +358,7 @@ bool ValueSet::addValue(const std::string &name, float value)
 		val->_name = name;
 		val->_type = "float";
 
-		_values.push_back(val);
+		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
 	else
@@ -385,7 +374,7 @@ bool ValueSet::addValue(const std::string &name, double value)
 		val->_name = name;
 		val->_type = "double";
 
-		_values.push_back(val);
+		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
 	else
@@ -401,7 +390,7 @@ bool ValueSet::addValue(const std::string &name, const std::string &value)
 		val->_name = name;
 		val->_type = "string";
 
-		_values.push_back(val);
+		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
 	else
