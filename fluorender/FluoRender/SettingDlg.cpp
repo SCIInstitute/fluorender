@@ -623,7 +623,7 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 #ifdef _WIN32
 	st = new wxStaticText(page, 0, "Path to file \"jvm.dll\" (e.g., \"ImageJ\\jre\\bin\\server\\jvm.dll\"):");
 #else
-	st = new wxStaticText(page, 0, "Path to file \"libjvm.dylib\" (e.g., \"ImageJ/jre/bin/server/libjvm.dylib\"):");
+	st = new wxStaticText(page, 0, "Path to file \"libjvm.dylib\" (e.g., \"ImageJ/jre/lib/server/libjvm.dylib\"):");
 #endif
 	group1->Add(st);
 	group1->Add(sizer1_1, 0, wxEXPAND);
@@ -631,7 +631,7 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 #ifdef _WIN32
 	st = new wxStaticText(page, 0, "Path to file \"ij.jar\" (e.g., \"ImageJ\\ij.jar\"):");
 #else
-	st = new wxStaticText(page, 0, "Path to file \"ij.jar\" (e.g., \"ImageJ/ij.jar\"):");
+	st = new wxStaticText(page, 0, "Path to file \"ImageJ.app\" (e.g., \"ImageJ/ImageJ.app\"):");
 #endif
 	group1->Add(st);
 	group1->Add(sizer1_2, 0, wxEXPAND);
@@ -2021,10 +2021,16 @@ void SettingDlg::OnJavaBioformatsEdit(wxCommandEvent &event)
 
 void SettingDlg::onJavaJvmBrowse(wxCommandEvent &event)
 {
+#ifdef _WIN32
 	wxFileDialog *fopendlg = new wxFileDialog(
 		m_frame, "Choose the jvm dll file",
 		"", "", "*.dll", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-
+#else
+    wxFileDialog *fopendlg = new wxFileDialog(
+                                              m_frame, "Choose the libjvm.dylib file",
+                                              "", "", "*.*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+#endif
+    
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
@@ -2038,14 +2044,23 @@ void SettingDlg::onJavaJvmBrowse(wxCommandEvent &event)
 
 void SettingDlg::onJavaIJBrowse(wxCommandEvent &event)
 {
+#ifdef _WIN32
 	wxFileDialog *fopendlg = new wxFileDialog(
 		m_frame, "Choose the imageJ jar",
 		"", "", "*.jar", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+#else
+    wxFileDialog *fopendlg = new wxFileDialog(
+                                              m_frame, "Choose the imageJ app",
+                                              "", "", "*.app", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+#endif
 
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
 		wxString filename = fopendlg->GetPath();
+#ifdef _DARWIN
+        filename = filename + "/Contents/Java/ij.jar";
+#endif
 		m_java_ij_text->SetValue(filename);
 	}
 

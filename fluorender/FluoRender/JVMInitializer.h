@@ -40,11 +40,21 @@ class JVMInitializer {
 		static JVMInitializer* getInstance(SettingDlg* inp_settingDlg = 0);
 		static void destroyJVM();
 
+#ifdef _WIN32
 		static HMODULE m_jvm_dll;
+#else
+    static void* m_jvm_dll;
+#endif
 		static JavaVM *m_pJvm;                      // Pointer to the JVM (Java Virtual Machine)
 		static JNIEnv *m_pEnv;                      // Pointer to native interface
 		static JavaVMInitArgs m_VMargs;
-		static decltype(&JNI_CreateJavaVM) m_createJVM_Ptr;		
+    
+#ifdef _WIN32
+		static decltype(&JNI_CreateJavaVM) m_createJVM_Ptr;
+#else
+    typedef jint (JNICALL CreateJavaVM_t)(JavaVM **pvm, void **env, void *args) ;
+    static CreateJavaVM_t* m_createJVM_Ptr;
+#endif
 
 	private:
 		static JVMInitializer* m_pJVMInstance;				
@@ -54,7 +64,7 @@ class JVMInitializer {
 		JVMInitializer(JVMInitializer const&);
 		JVMInitializer& operator=(JVMInitializer const&);
 
-		static char JVMInitializer::getPathSeparator();
+		static char getPathSeparator();
 		bool static create_JVM(SettingDlg* inp_settingDlg);
 };
 

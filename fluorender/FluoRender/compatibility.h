@@ -557,6 +557,7 @@ inline uint32_t GET_TICK_COUNT() {
 #endif
 //MAC OSX SPECIFIC
 #ifdef _DARWIN
+#include <dlfcn.h>
 #endif
 
 #endif //END_IF_DEF__WIN32__

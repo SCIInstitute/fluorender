@@ -6,8 +6,19 @@ JVMInitializer* JVMInitializer::m_pJVMInstance = nullptr;
 JavaVM* JVMInitializer::m_pJvm = nullptr;
 JNIEnv* JVMInitializer::m_pEnv = nullptr;
 JavaVMInitArgs JVMInitializer::m_VMargs;
+
+#ifdef _WIN32
 HMODULE JVMInitializer::m_jvm_dll = nullptr;
+#else
+void* JVMInitializer::m_jvm_dll = nullptr;
+#endif
+
+#ifdef _WIN32
 decltype(&JNI_CreateJavaVM) JVMInitializer::m_createJVM_Ptr = nullptr;
+#else
+JVMInitializer::CreateJavaVM_t* JVMInitializer::m_createJVM_Ptr = nullptr;
+#endif
+
 decltype(&JNIEnv::FindClass) m_FindClass_Ptr = nullptr;
 
 
@@ -38,15 +49,37 @@ bool JVMInitializer::create_JVM(SettingDlg* inp_settingDlg){
 		bioformats_path = inp_settingDlg->getBioformatsPath();
 	}
 
-	////Loading JVM library and methods.
+	//Loading JVM library and methods.
+    if (const char *error = dlerror())
+        std::cout << "Flushed existing error: " << error << std::endl;
+    
+    //jvm_path = "/Users/dev/Downloads/ImageJ/jre/lib/server/libjvm.dylib";
+#ifdef _WIN32
 	m_jvm_dll = LoadLibraryW(jvm_path.ToStdWstring().c_str());
-	if (m_jvm_dll == nullptr)
-		return false;
-	
-	m_createJVM_Ptr = (decltype(&JNI_CreateJavaVM))GetProcAddress(m_jvm_dll, "JNI_CreateJavaVM");
-	if (m_createJVM_Ptr == nullptr)
-		return false;
+#else
+    m_jvm_dll = dlopen((const char*)jvm_path.mb_str(wxConvUTF8), RTLD_NOW);
+#endif
+    if (m_jvm_dll == nullptr){
+        std::cout << "Error while opening jvm library." << std::endl;
+        return false;
+    }
+    
+    if (const char *error = dlerror())
+        std::cout << "Err: " << error << std::endl;
 
+#ifdef _WIN32
+	m_createJVM_Ptr = (decltype(&JNI_CreateJavaVM))GetProcAddress(m_jvm_dll, "JNI_CreateJavaVM");
+#else
+    m_createJVM_Ptr = (CreateJavaVM_t*) dlsym(m_jvm_dll, "JNI_CreateJavaVM");
+#endif
+    if (m_createJVM_Ptr == nullptr){
+        std::cout << "Error while getting JNI_CreateJavaVM funciton address." << std::endl;
+        return false;
+    }
+
+    if (const char *error = dlerror())
+        std::cout << "Err: " << error << std::endl;
+    
 	using namespace std;	
 	JavaVMOption* options = new JavaVMOption[1];
 	//Geting absolute path to class file.
@@ -55,6 +88,12 @@ bool JVMInitializer::create_JVM(SettingDlg* inp_settingDlg){
 	string imageJPath = "-Djava.class.path=" + exePath + GETSLASH() + "Java_Code" + GETSLASH() + getPathSeparator();
 	imageJPath.append(ij_path + getPathSeparator());
 	imageJPath.append(bioformats_path);
+    
+    //imageJPath.append(exePath + GETSLASH() + "Java_Code" + GETSLASH() + "ij.jar" + getPathSeparator());
+    //imageJPath.append(exePath + GETSLASH() + "Java_Code" + GETSLASH() + "SlideBook6Reader.jar" + getPathSeparator());
+    //imageJPath.append(exePath + GETSLASH() + "Java_Code" + GETSLASH() + "bioformats_package.jar" + getPathSeparator());
+    std::cout << imageJPath << std::endl;
+    
 	options[0].optionString = const_cast<char*>(imageJPath.c_str());
 
 	m_VMargs.version = JNI_VERSION_1_6;             // minimum Java version
@@ -65,8 +104,13 @@ bool JVMInitializer::create_JVM(SettingDlg* inp_settingDlg){
 	jint rc = m_createJVM_Ptr(&m_pJvm, (void**)&m_pEnv, &m_VMargs);
 	delete[] options;
 	if (rc != JNI_OK) {
+        std::cout << "Error while calling JNI_CreteJavaVM." << std::endl;
 		return false;
 	}
+    std::cout << "JVM created successfully." << std::endl;
+    jint ver = m_pEnv->GetVersion();
+    cout << ((ver>>16)&0x0f) << "."<<(ver&0x0f) << endl;
+    std::cout.flush();
 	return true;
 }
 

@@ -74,6 +74,7 @@ ImageJReader::ImageJReader()
 
 	m_imageJ_cls = m_pJVMInstance->m_pEnv->FindClass("ImageJ_Reader");
 	if (m_imageJ_cls == nullptr) {
+        m_pJVMInstance->m_pEnv->ExceptionDescribe();
 		cerr << "ERROR: class not found !";
 	}
 }
