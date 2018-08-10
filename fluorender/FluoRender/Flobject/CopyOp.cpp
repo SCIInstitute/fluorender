@@ -26,15 +26,30 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Scenegraph/CopyOp.h>
+#include <Flobject/CopyOp.h>
+#include <Flobject/Referenced.h>
+#include <Flobject/Object.h>
 #include <Scenegraph/Node.h>
 
 using namespace FL;
 
-pNode CopyOp::operator() (const pNode &node) const
+Referenced* CopyOp::operator() (const Referenced* ref) const
+{
+	return const_cast<Referenced*>(ref);
+}
+
+Object* CopyOp::operator() (const Object* obj) const
+{
+	if (obj && m_flags&DEEP_COPY_NODES)
+		return clone(obj, *this);
+	else
+		return const_cast<Object*>(obj);
+}
+
+Node* CopyOp::operator() (const Node* node) const
 {
 	if (node && m_flags&DEEP_COPY_NODES)
-		return node->clone(*this);
+		return clone(node, *this);
 	else
-		return node;
+		return const_cast<Node*>(node);
 }

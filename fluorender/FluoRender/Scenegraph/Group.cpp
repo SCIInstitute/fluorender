@@ -50,12 +50,12 @@ Group::~Group()
 
 }
 
-bool Group::addChild(pNode &child)
+bool Group::addChild(Node* child)
 {
 	return insertChild(m_children.size(), child);
 }
 
-bool Group::insertChild(size_t index, pNode &child)
+bool Group::insertChild(size_t index, Node* child)
 {
 	if (child == nullptr)
 		return false;
@@ -75,6 +75,9 @@ bool Group::removeChildren(size_t pos, size_t num)
 		size_t end = pos + num;
 		if (end > m_children.size())
 			end = m_children.size();
+
+		for (unsigned int i = pos; i<end; ++i)
+			m_children[i]->removeParent(this);
 		m_children.erase(m_children.begin() + pos, m_children.begin() + end);
 
 		return true;
@@ -82,7 +85,7 @@ bool Group::removeChildren(size_t pos, size_t num)
 	return false;
 }
 
-bool Group::replaceChild(pNode &orig_child, pNode &new_child)
+bool Group::replaceChild(Node* orig_child, Node* new_child)
 {
 	if (orig_child == nullptr ||
 		new_child == nullptr)
@@ -94,7 +97,7 @@ bool Group::replaceChild(pNode &orig_child, pNode &new_child)
 	return false;
 }
 
-bool Group::setChild(size_t i, pNode &node)
+bool Group::setChild(size_t i, Node* node)
 {
 	if (i < m_children.size() && node != nullptr)
 	{

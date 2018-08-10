@@ -33,18 +33,29 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FL
 {
-	typedef std::vector<pNode> NodeList;
-
 	class Group : public Node
 	{
 	public:
 		Group();
 		Group(const Group& group, const CopyOp& copyop=CopyOp::SHALLOW_COPY);
-		virtual ~Group();
 
-		virtual bool addChild(pNode &child);
-		virtual bool insertChild(size_t index, pNode &child);
-		inline bool removeChild(pNode &child)
+		virtual Object* clone(const CopyOp& copyop) const
+		{
+			return new Group(*this, copyop);
+		}
+
+		virtual bool isSameKindAs(const Object* obj) const
+		{
+			return dynamic_cast<const Group*>(obj) != NULL;
+		}
+
+		virtual const char* className() const { return "Group"; }
+
+		/* children
+		*/
+		virtual bool addChild(Node* child);
+		virtual bool insertChild(size_t index, Node* child);
+		inline bool removeChild(Node* child)
 		{
 			size_t pos = getChildIndex(child);
 			if (pos < m_children.size())
@@ -60,12 +71,12 @@ namespace FL
 				return false;
 		}
 		virtual bool removeChildren(size_t pos, size_t num);
-		virtual bool replaceChild(pNode &orig_child, pNode &new_child);
+		virtual bool replaceChild(Node* orig_child, Node* new_child);
 		inline size_t getNumChildren() const { return m_children.size(); }
-		virtual bool setChild(size_t i, pNode &node);
-		inline pNode getChild(size_t i) { return m_children[i]; }
-		inline const pNode getChild(size_t i) const { return m_children[i]; }
-		inline bool containsNode(const pNode &node) const
+		virtual bool setChild(size_t i, Node* node);
+		inline Node* getChild(size_t i) { return m_children[i].get(); }
+		inline const Node* getChild(size_t i) const { return m_children[i].get(); }
+		inline bool containsNode(const Node* node) const
 		{
 			for (auto it = m_children.begin();
 				it != m_children.end(); ++it)
@@ -75,7 +86,7 @@ namespace FL
 			}
 			return false;
 		}
-		inline size_t getChildIndex(const pNode &node) const
+		inline size_t getChildIndex(const Node* node) const
 		{
 			for (size_t i = 0; i < m_children.size(); ++i)
 			{
@@ -86,6 +97,7 @@ namespace FL
 		}
 
 	protected:
+		virtual ~Group();
 		NodeList m_children;
 	};
 }

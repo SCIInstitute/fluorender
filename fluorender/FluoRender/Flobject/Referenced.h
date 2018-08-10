@@ -25,55 +25,83 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef FL_REFERENCED
+#define FL_REFERENCED 1
 
-#ifndef _NODE_H_
-#define _NODE_H_
-
-#include <vector>
-#include <Flobject/CopyOp.h>
-#include <Flobject/Object.h>
+#include <string>
 
 namespace FL
 {
-	class Group;
-	class Node;
-	typedef std::vector<Node*> ParentList;
-	typedef std::vector<ref_ptr<Node>> NodeList;
+class Observer;
+class ObserverSet;
 
-	class Node : public Object
+class Referenced
+{
+public:
+
+	Referenced();
+
+	Referenced(const Referenced&);
+
+	inline Referenced& operator = (const Referenced&) { return *this; }
+
+	inline int ref() const;
+
+	inline int unref() const;
+
+	int unref_nodelete() const;
+
+	inline int referenceCount() const { return _refCount; }
+
+	ObserverSet* getObserverSet() const
 	{
-	public:
-		Node();
-		Node(const Node&, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
+		return static_cast<ObserverSet*>(_observerSet);
+	}
 
-		virtual Object* clone(const CopyOp& copyop) const
-		{ return new Node(*this, copyop); }
+	ObserverSet* getOrCreateObserverSet() const;
 
-		virtual bool isSameKindAs(const Object* obj) const
-		{ return dynamic_cast<const Node*>(obj) != NULL; }
+	void addObserver(Observer* observer) const;
 
-		virtual const char* className() const { return "Node"; }
+	void removeObserver(Observer* observer) const;
 
-		/* parents
-		*/
-		inline const ParentList& getParents() const { return m_parents; }
+	virtual const char* className() const { return "Referenced";}
 
-		inline ParentList getParents() { return m_parents; }
+	const std::string& getRefStr() const { return _refStr; }
 
-		inline const Node* getParent(unsigned int i) const { return m_parents[i]; }
+protected:
 
-		inline Node* getParent(unsigned int i) { return m_parents[i]; }
+	virtual ~Referenced();
 
-		inline unsigned int getNumParents() const { return static_cast<unsigned int>(m_parents.size()); }
+	void signalObserversAndDelete(bool signalDelete, bool doDelete) const;
 
-	protected:
-		virtual ~Node();
-		void addParent(Node* node);
-		void removeParent(Node* node);
+	void notifyObserversOfChange() const;
 
-		ParentList m_parents;
-		friend class Group;
-	};
+	std::string _refStr;
+
+	mutable int _refCount;
+
+	mutable void* _observerSet;
+};
+
+inline int Referenced::ref() const
+{
+	return ++_refCount;
 }
 
-#endif//_NODE_H_
+inline int Referenced::unref() const
+{
+	int newRef;
+	newRef = --_refCount;
+	bool needDelete = (newRef == 0);
+
+	if (needDelete)
+	{
+		signalObserversAndDelete(true, true);
+	}
+
+	return newRef;
+}
+
+}
+
+#endif

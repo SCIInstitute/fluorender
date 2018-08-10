@@ -26,32 +26,43 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Scenegraph/Node.h>
+#ifndef _COPYOP_H_
+#define _COPYOP_H_
 
-using namespace FL;
+#include <vector>
 
-Node::Node()
+namespace FL
 {
-}
+	class Referenced;
+	class Object;
+	class Node;
 
-Node::Node(const Node& node, const CopyOp& copyop)
-{
-	//copy
-}
+	class CopyOp
+	{
+	public:
+		enum Options
+		{
+			SHALLOW_COPY = 0,
+			DEEP_COPY_OBJECTS = 1<<0,
+			DEEP_COPY_NODES = 1<<1,
+			DEEP_COPY_ALL = 0x7FFFFFFF
+		};
 
-Node::~Node()
-{
-}
+		typedef unsigned int CopyFlags;
 
-void Node::addParent(Node* node)
-{
-	m_parents.push_back(node);
-}
+		inline CopyOp(CopyFlags flags = SHALLOW_COPY) :
+			m_flags(flags) {}
+		virtual ~CopyOp() {}
 
-void Node::removeParent(Node* node)
-{
-	auto pitr = std::find(m_parents.begin(), m_parents.end(), node);
-	if (pitr != m_parents.end())
-		m_parents.erase(pitr);
-}
+		void setCopyFlags(CopyFlags flags) { m_flags = flags; }
+		CopyFlags getCopyFlags() const { return m_flags; }
 
+		virtual Referenced* operator() (const Referenced* ref) const;
+		virtual Object* operator() (const Object* node) const;
+		virtual Node* operator() (const Node* node) const;
+
+	protected:
+		CopyFlags m_flags;
+	};
+}
+#endif//_COPYOP_H_

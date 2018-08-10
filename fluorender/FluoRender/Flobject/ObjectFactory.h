@@ -25,40 +25,29 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef FL_OBJECTFACTORY
+#define FL_OBJECTFACTORY
 
-#ifndef _COPYOP_H_
-#define _COPYOP_H_
-
-#include <vector>
-#include <memory>
+#include <Flobject/Referenced.h>
+#include <Flobject/ref_ptr.h>
+//#include "tinyxml2/tinyxml2.h"
 
 namespace FL
 {
-	class Node;
-	typedef std::shared_ptr<Node> pNode;
-	class CopyOp
-	{
-	public:
-		enum Options
-		{
-			SHALLOW_COPY = 0,
-			DEEP_COPY_NODES = 1<<0,
-			DEEP_COPY_ALL = 0x7FFFFFFF
-		};
+class ObjectFactory : public Referenced
+{
+public:
+	ObjectFactory();
 
-		typedef unsigned int CopyFlags;
+	virtual const char* className() const {return "ObjectFactory"; }
 
-		inline CopyOp(CopyFlags flags = SHALLOW_COPY) :
-			m_flags(flags) {}
-		virtual ~CopyOp() {}
+	//virtual Object* build();
 
-		void setCopyFlags(CopyFlags flags) { m_flags = flags; }
-		CopyFlags getCopyFlags() const { return m_flags; }
+protected:
+	virtual ~ObjectFactory();
+};
 
-		virtual pNode operator() (const pNode &node) const;
-
-	protected:
-		CopyFlags m_flags;
-	};
 }
-#endif//_COPYOP_H_
+
+
+#endif
