@@ -3444,19 +3444,19 @@ void VRenderFrame::OpenProject(wxString& filename)
 					if (reader_type == READER_IMAGEJ_TYPE)
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_IMAGEJ, true, cur_chan, cur_time);
 					else if (suffix == ".nrrd")
-						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_NRRD, cur_chan, cur_time);
+						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_NRRD, false, cur_chan, cur_time);
 					else if (suffix == ".tif"||suffix == ".tiff")
-						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_TIFF, cur_chan, cur_time);
+						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_TIFF, false, cur_chan, cur_time);
 					else if (suffix == ".oib")
-						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_OIB, cur_chan, cur_time);
+						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_OIB, false, cur_chan, cur_time);
 					else if (suffix == ".oif")
-						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_OIF, cur_chan, cur_time);
+						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_OIF, false, cur_chan, cur_time);
 					else if (suffix == ".lsm")
-						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_LSM, cur_chan, cur_time);
+						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_LSM, false, cur_chan, cur_time);
 					else if (suffix == ".xml")
-						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_PVXML, cur_chan, cur_time);
+						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_PVXML, false, cur_chan, cur_time);
 					else if (suffix == ".vvd")
-						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_BRKXML, cur_chan, cur_time);
+						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_BRKXML, false, cur_chan, cur_time);
 				}
 				VolumeData* vd = 0;
 				if (loaded_num)
