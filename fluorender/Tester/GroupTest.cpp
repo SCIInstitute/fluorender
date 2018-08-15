@@ -1,5 +1,6 @@
 #include "tests.h"
 #include "asserts.h"
+#include "VisitorTest.h"
 #include <vector>
 #include <Scenegraph/Group.h>
 
@@ -48,4 +49,6 @@ void GroupTest()
 	group4->addChild(group2.get());
 	group4->addChild(group3.get());
 	//traverse
+	InfoVisitor visitor;
+	group4->accept(visitor);
 }
