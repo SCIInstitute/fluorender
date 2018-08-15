@@ -38,8 +38,8 @@ Group::Group()
 Group::Group(const Group& group, const CopyOp& copyop) :
 	Node(group, copyop)
 {
-	for (auto it = m_children.begin();
-		it != m_children.end(); ++it)
+	for (auto it = group.m_children.begin();
+		it != group.m_children.end(); ++it)
 	{
 		//copy
 		Node* child = copyop(it->get());
