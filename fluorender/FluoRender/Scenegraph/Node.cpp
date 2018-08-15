@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2014 Scientific Computing and Imaging Institute,
+Copyright (c) 2018 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -27,14 +27,18 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Scenegraph/Node.h>
+#include <Scenegraph/NodeVisitor.h>
+#include <algorithm>
 
 using namespace FL;
 
-Node::Node()
+Node::Node() :
+	Object()
 {
 }
 
-Node::Node(const Node& node, const CopyOp& copyop)
+Node::Node(const Node& node, const CopyOp& copyop) :
+	Object(node, copyop)
 {
 	//copy
 }
@@ -55,3 +59,17 @@ void Node::removeParent(Node* node)
 		m_parents.erase(pitr);
 }
 
+void Node::accept(NodeVisitor& nv)
+{
+	if (nv.validNodeMask(*this))
+	{
+		nv.pushOntoNodePath(this);
+		nv.apply(*this);
+		nv.popFromNodePath();
+	}
+}
+
+void Node::ascend(NodeVisitor& nv)
+{
+	std::for_each(m_parents.begin(), m_parents.end(), NodeAcceptOp(nv));
+}

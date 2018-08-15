@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2014 Scientific Computing and Imaging Institute,
+Copyright (c) 2018 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -27,3 +27,39 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Scenegraph/NodeVisitor.h>
+#include <Scenegraph/Group.h>
+
+using namespace FL;
+
+NodeVisitor::NodeVisitor(TraversalMode tm) :
+	Referenced()
+{
+	m_visitor_type = NODE_VISITOR;
+	m_traversal_number = UNINITIALIZED_FRAME_NUMBER;
+
+	m_traversal_mode = tm;
+}
+
+NodeVisitor::NodeVisitor(VisitorType type, TraversalMode tm) :
+	Referenced()
+{
+	m_visitor_type = type;
+	m_traversal_number = UNINITIALIZED_FRAME_NUMBER;
+
+	m_traversal_mode = tm;
+}
+
+NodeVisitor::~NodeVisitor()
+{
+
+}
+
+void NodeVisitor::apply(Node& node)
+{
+	traverse(node);
+}
+
+void NodeVisitor::apply(Group& node)
+{
+	apply(static_cast<Group&>(node));
+}

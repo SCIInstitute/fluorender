@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2014 Scientific Computing and Imaging Institute,
+Copyright (c) 2018 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -33,6 +33,8 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FL
 {
+	const unsigned int UNINITIALIZED_FRAME_NUMBER = 0xffffffff;
+
 	class NodeVisitor : public virtual Referenced
 	{
 	public:
@@ -60,11 +62,78 @@ namespace FL
 
 		virtual void reset() {}
 
+		inline void setVisitorType(VisitorType type) { m_visitor_type = type; }
+		inline VisitorType getVisitorType() const { return m_visitor_type; }
+
+		inline void setTraversalNumber(unsigned int fn) { m_traversal_number = fn; }
+		inline unsigned int getTraversalNumber() const { return m_traversal_number; }
+
+		inline void setTraversalMask(Node::NodeMask mask) { m_traversal_mask = mask; }
+		inline Node::NodeMask getTraversalMask() const { return m_traversal_mask; }
+		inline void setNodeMaskOverride(Node::NodeMask mask) { m_node_mask_override = mask; }
+		inline Node::NodeMask getNodeMaskOverride() const { return m_node_mask_override; }
+		inline bool validNodeMask(const Node& node) const
+		{ return (getTraversalMask() & (getNodeMaskOverride() | node.getNodeMask())) !=0; }
+
+		inline void setTraversalMode(TraversalMode mode) { m_traversal_mode = mode; }
+		inline TraversalMode getTraversalMode() const { return m_traversal_mode; }
+
+		inline void setUserData(Referenced* obj) { m_user_data = obj; }
+		inline Referenced* getUserData() { return m_user_data.get(); }
+		inline const Referenced* getUserData() const { return m_user_data.get(); }
+
+		inline void traverse(Node& node)
+		{
+			if (m_traversal_mode == TRAVERSE_PARENTS) node.ascend(*this);
+			else if (m_traversal_mode != TRAVERSE_NONE) node.traverse(*this);
+		}
+		inline void pushOntoNodePath(Node* node)
+		{
+			if (m_traversal_mode != TRAVERSE_PARENTS)
+				m_node_path.push_back(node);
+			else
+				m_node_path.insert(m_node_path.begin(), node);
+		}
+		inline void popFromNodePath()
+		{
+			if (m_traversal_mode != TRAVERSE_PARENTS)
+				m_node_path.pop_back();
+			else
+				m_node_path.erase(m_node_path.begin());
+		}
+		NodePath& getNodePath() { return m_node_path; }
+		const NodePath& getNodePath() const { return m_node_path; }
+
+		virtual void apply(Node& node);
+		virtual void apply(Group& node);
+
 	protected:
 
 		VisitorType m_visitor_type;
 		unsigned int m_traversal_number;
 		TraversalMode m_traversal_mode;
+
+		Node::NodeMask m_traversal_mask;
+		Node::NodeMask m_node_mask_override;
+
+		NodePath m_node_path;
+
+		ref_ptr<Referenced> m_user_data;
+	};
+
+	class NodeAcceptOp
+	{
+	public:
+		NodeAcceptOp(NodeVisitor& nv) : m_nv(nv) {}
+		NodeAcceptOp(const NodeAcceptOp& naop) : m_nv(naop.m_nv) {}
+
+		void operator () (Node* node) { node->accept(m_nv); }
+		void operator () (ref_ptr<Node> node) { node->accept(m_nv); }
+
+	protected:
+		NodeAcceptOp& operator = (const NodeAcceptOp&) { return *this; }
+
+		NodeVisitor& m_nv;
 	};
 }
 

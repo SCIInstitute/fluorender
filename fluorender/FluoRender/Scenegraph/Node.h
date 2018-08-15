@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2014 Scientific Computing and Imaging Institute,
+Copyright (c) 2018 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -37,8 +37,12 @@ namespace FL
 {
 	class Group;
 	class Node;
+	class NodeVisitor;
+
 	typedef std::vector<Node*> ParentList;
 	typedef std::vector<ref_ptr<Node>> NodeList;
+	typedef std::vector<Node*> NodePath;
+	typedef std::vector<NodePath> NodePathList;
 
 	class Node : public Object
 	{
@@ -54,6 +58,13 @@ namespace FL
 
 		virtual const char* className() const { return "Node"; }
 
+		virtual Group* asGroup() { return 0; }
+		virtual const Group* asGroup() const { return 0; }
+
+		virtual void accept(NodeVisitor& nv);
+		virtual void ascend(NodeVisitor& nv);
+		virtual void traverse(NodeVisitor& nv) {}
+
 		/* parents
 		*/
 		inline const ParentList& getParents() const { return m_parents; }
@@ -66,6 +77,10 @@ namespace FL
 
 		inline unsigned int getNumParents() const { return static_cast<unsigned int>(m_parents.size()); }
 
+		typedef unsigned int NodeMask;
+		inline void setNodeMask(NodeMask nm) { m_node_mask = nm; }
+		inline NodeMask getNodeMask() const { return m_node_mask; }
+
 	protected:
 		virtual ~Node();
 		void addParent(Node* node);
@@ -73,6 +88,8 @@ namespace FL
 
 		ParentList m_parents;
 		friend class Group;
+
+		NodeMask m_node_mask;
 	};
 }
 

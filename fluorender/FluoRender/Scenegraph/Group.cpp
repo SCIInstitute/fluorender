@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2014 Scientific Computing and Imaging Institute,
+Copyright (c) 2018 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -54,6 +54,13 @@ Group::~Group()
 	{
 		(*it)->removeParent(this);
 	}
+}
+
+void Group::traverse(NodeVisitor& nv)
+{
+	for (auto it = m_children.begin();
+		it != m_children.end(); ++it)
+		(*it)->accept(nv);
 }
 
 bool Group::addChild(Node* child)

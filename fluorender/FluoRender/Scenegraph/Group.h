@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2014 Scientific Computing and Imaging Institute,
+Copyright (c) 2018 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -50,6 +50,11 @@ namespace FL
 		}
 
 		virtual const char* className() const { return "Group"; }
+
+		virtual Group* asGroup() { return this; }
+		virtual const Group* asGroup() const { return this; }
+
+		virtual void traverse(NodeVisitor& nv);
 
 		/* children
 		*/
