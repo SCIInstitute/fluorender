@@ -29,13 +29,44 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VOLUMEDATA_H_
 #define _VOLUMEDATA_H_
 
-#include <Scenegraph/Layer.h>
+#include <Scenegraph/Node.h>
 
+namespace FLIVR
+{
+class VolumeRenderer;
+class Texture;
+}
+class BaseReader;
 namespace FL
 {
-	class VolumeData : public Layer
+	class VolumeData : public Node
 	{
+	public:
+		VolumeData();
+		VolumeData(const VolumeData& data, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
 
+		virtual Object* clone(const CopyOp& copyop) const
+		{
+			return new VolumeData(*this, copyop);
+		}
+
+		virtual bool isSameKindAs(const Object* obj) const
+		{
+			return dynamic_cast<const VolumeData*>(obj) != NULL;
+		}
+
+		virtual const char* className() const { return "VolumeData"; }
+
+		virtual VolumeData* asVolumeData() { return this; }
+		virtual const VolumeData* asVolumeData() const { return this; }
+
+	protected:
+		virtual ~VolumeData();
+
+	private:
+		FLIVR::VolumeRenderer *m_vr;
+		FLIVR::Texture *m_tex;
+		BaseReader *m_reader;
 	};
 }
 

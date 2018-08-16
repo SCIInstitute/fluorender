@@ -26,38 +26,30 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _LAYER_H_
-#define _LAYER_H_
+#include <Scenegraph/MeshData.h>
+#include <FLIVR/glm.h>
+#include <FLIVR/MeshRenderer.h>
 
-#include <Scenegraph/Group.h>
+using namespace FL;
 
-namespace FL
+MeshData::MeshData() :
+	m_data(0),
+	m_mr(0)
 {
-	class Layer : public Node
-	{
-	public:
-		Layer();
-		Layer(const Layer& layer, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
 
-		virtual Object* clone(const CopyOp& copyop) const
-		{
-			return new Layer(*this, copyop);
-		}
-
-		virtual bool isSameKindAs(const Object* obj) const
-		{
-			return dynamic_cast<const Layer*>(obj) != NULL;
-		}
-
-		virtual const char* className() const { return "Layer"; }
-
-		virtual Layer* asLayer() { return this; }
-		virtual const Layer* asLayer() const { return this; }
-
-	protected:
-		virtual ~Layer();
-
-	};
 }
 
-#endif//_LAYER_H_
+MeshData::MeshData(const MeshData& data, const CopyOp& copyop):
+	Node(data, copyop)
+{
+	m_data = data.m_data;
+	m_mr = data.m_mr;
+}
+
+MeshData::~MeshData()
+{
+	if (m_mr)
+		delete m_mr;
+	if (m_data)
+		glmDelete(m_data);
+}

@@ -26,38 +26,20 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _LAYER_H_
-#define _LAYER_H_
+#include <Scenegraph/Annotations.h>
 
-#include <Scenegraph/Group.h>
+using namespace FL;
 
-namespace FL
+Annotations::Annotations()
 {
-	class Layer : public Node
-	{
-	public:
-		Layer();
-		Layer(const Layer& layer, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
 
-		virtual Object* clone(const CopyOp& copyop) const
-		{
-			return new Layer(*this, copyop);
-		}
-
-		virtual bool isSameKindAs(const Object* obj) const
-		{
-			return dynamic_cast<const Layer*>(obj) != NULL;
-		}
-
-		virtual const char* className() const { return "Layer"; }
-
-		virtual Layer* asLayer() { return this; }
-		virtual const Layer* asLayer() const { return this; }
-
-	protected:
-		virtual ~Layer();
-
-	};
 }
 
-#endif//_LAYER_H_
+Annotations::Annotations(const Annotations& data, const CopyOp& copyop) :
+	Node(data, copyop)
+{
+}
+
+Annotations::~Annotations()
+{
+}

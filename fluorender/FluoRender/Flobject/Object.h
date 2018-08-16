@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Flobject/CopyOp.h>
 #include <Flobject/Value.h>
 #include <stack>
+#include <string>
 
 namespace FL
 {
@@ -56,6 +57,10 @@ public:
 	inline void setId( const unsigned int id ) { _id = id; }
 
 	inline const unsigned int getId() const { return _id; }
+
+	inline void setName(const std::string& name) { m_name = name; }
+
+	inline const char* getName() const { return m_name.c_str(); }
 
 	virtual void objectDeleted(void*);
 	virtual void objectChanged(void*, const std::string &exp);
@@ -159,6 +164,8 @@ protected:
 
 	/** ID of an object is non-zero. */
 	unsigned int _id;
+	// object name
+	std::string m_name;
 
 	/** a stack of value sets */
 	ValueSetStack _vs_stack;

@@ -26,38 +26,64 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _LAYER_H_
-#define _LAYER_H_
+#ifndef _ANNOTATIONS_H_
+#define _ANNOTATIONS_H_
 
-#include <Scenegraph/Group.h>
+#include <Scenegraph/Node.h>
+#include <FLIVR/Point.h>
+#include <string>
+#include <vector>
 
 namespace FL
 {
-	class Layer : public Node
+	class AText
 	{
 	public:
-		Layer();
-		Layer(const Layer& layer, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
+		AText() {}
+		AText(const std::string &str, const FLIVR::Point &pos) { m_txt = str; m_pos = pos; }
+		~AText() {}
+
+		std::string GetText() { return m_txt; };
+		FLIVR::Point GetPos() { return m_pos; };
+		void SetText(std::string str) { m_txt = str; }
+		void SetPos(FLIVR::Point pos) { m_pos = pos; }
+		void SetInfo(std::string str) { m_info = str; }
+
+		friend class Annotations;
+
+	private:
+		std::string m_txt;
+		FLIVR::Point m_pos;
+		std::string m_info;
+	};
+
+	class Annotations : public Node
+	{
+	public:
+		Annotations();
+		Annotations(const Annotations& data, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
 
 		virtual Object* clone(const CopyOp& copyop) const
 		{
-			return new Layer(*this, copyop);
+			return new Annotations(*this, copyop);
 		}
 
 		virtual bool isSameKindAs(const Object* obj) const
 		{
-			return dynamic_cast<const Layer*>(obj) != NULL;
+			return dynamic_cast<const Annotations*>(obj) != NULL;
 		}
 
-		virtual const char* className() const { return "Layer"; }
+		virtual const char* className() const { return "Annotations"; }
 
-		virtual Layer* asLayer() { return this; }
-		virtual const Layer* asLayer() const { return this; }
+		virtual Annotations* asAnnotations() { return this; }
+		virtual const Annotations* asAnnotations() const { return this; }
 
 	protected:
-		virtual ~Layer();
+		virtual ~Annotations();
 
+	private:
+		std::vector<AText*> m_alist;
 	};
 }
 
-#endif//_LAYER_H_
+#endif//_ANNOTATIONS_H_

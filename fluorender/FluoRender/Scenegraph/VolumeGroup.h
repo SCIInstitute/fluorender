@@ -35,7 +35,27 @@ namespace FL
 {
 	class VolumeGroup : public Group
 	{
+	public:
+		VolumeGroup();
+		VolumeGroup(const VolumeGroup& group, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
 
+		virtual Object* clone(const CopyOp& copyop) const
+		{
+			return new VolumeGroup(*this, copyop);
+		}
+
+		virtual bool isSameKindAs(const Object* obj) const
+		{
+			return dynamic_cast<const VolumeGroup*>(obj) != NULL;
+		}
+
+		virtual const char* className() const { return "VolumeGroup"; }
+
+		virtual VolumeGroup* asVolumeGroup() { return this; }
+		virtual const VolumeGroup* asVolumeGroup() const { return this; }
+
+	protected:
+		virtual ~VolumeGroup();
 	};
 }
 

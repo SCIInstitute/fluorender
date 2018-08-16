@@ -26,38 +26,37 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _LAYER_H_
-#define _LAYER_H_
+#ifndef _MESHGROUP_H_
+#define _MESHGROUP_H_
 
 #include <Scenegraph/Group.h>
 
 namespace FL
 {
-	class Layer : public Node
+	class MeshGroup : public Group
 	{
 	public:
-		Layer();
-		Layer(const Layer& layer, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
+		MeshGroup();
+		MeshGroup(const MeshGroup& group, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
 
 		virtual Object* clone(const CopyOp& copyop) const
 		{
-			return new Layer(*this, copyop);
+			return new MeshGroup(*this, copyop);
 		}
 
 		virtual bool isSameKindAs(const Object* obj) const
 		{
-			return dynamic_cast<const Layer*>(obj) != NULL;
+			return dynamic_cast<const MeshGroup*>(obj) != NULL;
 		}
 
-		virtual const char* className() const { return "Layer"; }
+		virtual const char* className() const { return "MeshGroup"; }
 
-		virtual Layer* asLayer() { return this; }
-		virtual const Layer* asLayer() const { return this; }
+		virtual MeshGroup* asMeshGroup() { return this; }
+		virtual const MeshGroup* asMeshGroup() const { return this; }
 
 	protected:
-		virtual ~Layer();
-
+		virtual ~MeshGroup();
 	};
 }
 
-#endif//_LAYER_H_
+#endif//_MESHGROUP_H_

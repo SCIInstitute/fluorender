@@ -36,6 +36,12 @@ DEALINGS IN THE SOFTWARE.
 namespace FL
 {
 	class Group;
+	class Layer;
+	class VolumeData;
+	class MeshData;
+	class VolumeGroup;
+	class MeshGroup;
+	class Annotations;
 	class Node;
 	class NodeVisitor;
 
@@ -60,6 +66,18 @@ namespace FL
 
 		virtual Group* asGroup() { return 0; }
 		virtual const Group* asGroup() const { return 0; }
+		virtual Layer* asLayer() { return 0; }
+		virtual const Layer* asLayer() const { return 0; }
+		virtual VolumeData* asVolumeData() { return 0; }
+		virtual const VolumeData* asVolumeData() const { return 0; }
+		virtual MeshData* asMeshData() { return 0; }
+		virtual const MeshData* asMeshData() const { return 0; }
+		virtual VolumeGroup* asVolumeGroup() { return 0; }
+		virtual const VolumeGroup* asVolumeGroup() const { return 0; }
+		virtual MeshGroup* asMeshGroup() { return 0; }
+		virtual const MeshGroup* asMeshGroup() const { return 0; }
+		virtual Annotations* asAnnotations() { return 0; }
+		virtual const Annotations* asAnnotations() const { return 0; }
 
 		virtual void accept(NodeVisitor& nv);
 		virtual void ascend(NodeVisitor& nv);

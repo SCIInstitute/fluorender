@@ -26,38 +26,47 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _LAYER_H_
-#define _LAYER_H_
+#ifndef _MESHDATA_H_
+#define _MESHDATA_H_
 
-#include <Scenegraph/Group.h>
+#include <Scenegraph/Node.h>
 
+struct _GLMmodel;
+typedef _GLMmodel GLMmodel;
+namespace FLIVR
+{
+	class MeshRenderer;
+}
 namespace FL
 {
-	class Layer : public Node
+	class MeshData : public Node
 	{
 	public:
-		Layer();
-		Layer(const Layer& layer, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
+		MeshData();
+		MeshData(const MeshData& data, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
 
 		virtual Object* clone(const CopyOp& copyop) const
 		{
-			return new Layer(*this, copyop);
+			return new MeshData(*this, copyop);
 		}
 
 		virtual bool isSameKindAs(const Object* obj) const
 		{
-			return dynamic_cast<const Layer*>(obj) != NULL;
+			return dynamic_cast<const MeshData*>(obj) != NULL;
 		}
 
-		virtual const char* className() const { return "Layer"; }
+		virtual const char* className() const { return "MeshData"; }
 
-		virtual Layer* asLayer() { return this; }
-		virtual const Layer* asLayer() const { return this; }
+		virtual MeshData* asMeshData() { return this; }
+		virtual const MeshData* asMeshData() const { return this; }
 
 	protected:
-		virtual ~Layer();
+		virtual ~MeshData();
 
+	private:
+		GLMmodel* m_data;
+		FLIVR::MeshRenderer* m_mr;
 	};
 }
 
-#endif//_LAYER_H_
+#endif//_MESHDATA_H_

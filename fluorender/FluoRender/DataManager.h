@@ -1174,7 +1174,7 @@ public:
 	void SetShadowParams(double val);
 	void SetMode(int mode);
 	void SetNR(bool val);
-    void SetInterpolate(bool mode);
+	void SetInterpolate(bool mode);
 	void SetInvert(bool mode);
 
 	//blend mode
