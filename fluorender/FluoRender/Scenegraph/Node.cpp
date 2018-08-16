@@ -33,12 +33,15 @@ DEALINGS IN THE SOFTWARE.
 using namespace FL;
 
 Node::Node() :
-	Object()
+	Object(),
+	m_node_mask(0xffffffff)
 {
 }
 
 Node::Node(const Node& node, const CopyOp& copyop) :
-	Object(node, copyop)
+	Object(node, copyop),
+	m_parents(),
+	m_node_mask(node.m_node_mask)
 {
 	//copy
 }

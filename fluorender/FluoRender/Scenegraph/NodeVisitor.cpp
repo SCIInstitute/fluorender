@@ -38,6 +38,8 @@ NodeVisitor::NodeVisitor(TraversalMode tm) :
 	m_traversal_number = UNINITIALIZED_FRAME_NUMBER;
 
 	m_traversal_mode = tm;
+	m_traversal_mask = 0xffffffff;
+	m_node_mask_override = 0x0;
 }
 
 NodeVisitor::NodeVisitor(VisitorType type, TraversalMode tm) :
@@ -47,6 +49,8 @@ NodeVisitor::NodeVisitor(VisitorType type, TraversalMode tm) :
 	m_traversal_number = UNINITIALIZED_FRAME_NUMBER;
 
 	m_traversal_mode = tm;
+	m_traversal_mask = 0xffffffff;
+	m_node_mask_override = 0x0;
 }
 
 NodeVisitor::~NodeVisitor()
