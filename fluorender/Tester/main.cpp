@@ -14,6 +14,8 @@ int main(int argc, char* argv[])
 
 	GroupTest();
 
+	SceneGraphTest();
+
 	printf("All done. Quit.\n");
 	cin.get();
 	return 0;

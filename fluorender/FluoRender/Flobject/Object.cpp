@@ -84,73 +84,73 @@ void Object::objectChanged(void* ptr, const std::string &exp)
 		return result; \
 	} \
 	else \
-		return false; \
+		return false
 
 //actual add functions
 bool Object::addValue(const std::string &name, Referenced* value)
 {
 	if (value) value->addObserver(this);
-	OBJECT_ADD_VALUE_BODY
+	OBJECT_ADD_VALUE_BODY;
 }
 
 bool Object::addValue(const std::string &name, bool value)
 {
-	OBJECT_ADD_VALUE_BODY
+	OBJECT_ADD_VALUE_BODY;
 }
 
 bool Object::addValue(const std::string &name, char value)
 {
-	OBJECT_ADD_VALUE_BODY
+	OBJECT_ADD_VALUE_BODY;
 }
 
 bool Object::addValue(const std::string &name, unsigned char value)
 {
-	OBJECT_ADD_VALUE_BODY
+	OBJECT_ADD_VALUE_BODY;
 }
 
 bool Object::addValue(const std::string &name, short value)
 {
-	OBJECT_ADD_VALUE_BODY
+	OBJECT_ADD_VALUE_BODY;
 }
 
 bool Object::addValue(const std::string &name, unsigned short value)
 {
-	OBJECT_ADD_VALUE_BODY
+	OBJECT_ADD_VALUE_BODY;
 }
 
 bool Object::addValue(const std::string &name, long value)
 {
-	OBJECT_ADD_VALUE_BODY
+	OBJECT_ADD_VALUE_BODY;
 }
 
 bool Object::addValue(const std::string &name, unsigned long value)
 {
-	OBJECT_ADD_VALUE_BODY
+	OBJECT_ADD_VALUE_BODY;
 }
 
 bool Object::addValue(const std::string &name, long long value)
 {
-	OBJECT_ADD_VALUE_BODY
+	OBJECT_ADD_VALUE_BODY;
 }
 
 bool Object::addValue(const std::string &name, unsigned long long value)
 {
-	OBJECT_ADD_VALUE_BODY
+	OBJECT_ADD_VALUE_BODY;
 }
 
 bool Object::addValue(const std::string &name, float value)
 {
-	OBJECT_ADD_VALUE_BODY
+	OBJECT_ADD_VALUE_BODY;
 }
 
 bool Object::addValue(const std::string &name, double value)
 {
-	OBJECT_ADD_VALUE_BODY
+	OBJECT_ADD_VALUE_BODY;
 }
 
 bool Object::addValue(const std::string &name, const std::string &value)
 {
-	OBJECT_ADD_VALUE_BODY
+	OBJECT_ADD_VALUE_BODY;
 }
 
 //bool Object::addValue(const std::string &name, const Vec2f &value)
@@ -234,72 +234,72 @@ bool Object::addValue(const std::string &name, const std::string &value)
 	if (_vs_stack.top()) \
 		return _vs_stack.top()->setValue(name, value); \
 	else \
-		return false; \
+		return false
 
 //set functions
 bool Object::setValue(const std::string &name, Referenced* value)
 {
-	OBJECT_SET_VALUE_BODY
+	OBJECT_SET_VALUE_BODY;
 }
 
 bool Object::setValue(const std::string &name, bool value)
 {
-	OBJECT_SET_VALUE_BODY
+	OBJECT_SET_VALUE_BODY;
 }
 
 bool Object::setValue(const std::string &name, char value)
 {
-	OBJECT_SET_VALUE_BODY
+	OBJECT_SET_VALUE_BODY;
 }
 
 bool Object::setValue(const std::string &name, unsigned char value)
 {
-	OBJECT_SET_VALUE_BODY
+	OBJECT_SET_VALUE_BODY;
 }
 
 bool Object::setValue(const std::string &name, short value)
 {
-	OBJECT_SET_VALUE_BODY
+	OBJECT_SET_VALUE_BODY;
 }
 
 bool Object::setValue(const std::string &name, unsigned short value)
 {
-	OBJECT_SET_VALUE_BODY
+	OBJECT_SET_VALUE_BODY;
 }
 
 bool Object::setValue(const std::string &name, long value)
 {
-	OBJECT_SET_VALUE_BODY
+	OBJECT_SET_VALUE_BODY;
 }
 
 bool Object::setValue(const std::string &name, unsigned long value)
 {
-	OBJECT_SET_VALUE_BODY
+	OBJECT_SET_VALUE_BODY;
 }
 
 bool Object::setValue(const std::string &name, long long value)
 {
-	OBJECT_SET_VALUE_BODY
+	OBJECT_SET_VALUE_BODY;
 }
 
 bool Object::setValue(const std::string &name, unsigned long long value)
 {
-	OBJECT_SET_VALUE_BODY
+	OBJECT_SET_VALUE_BODY;
 }
 
 bool Object::setValue(const std::string &name, float value)
 {
-	OBJECT_SET_VALUE_BODY
+	OBJECT_SET_VALUE_BODY;
 }
 
 bool Object::setValue(const std::string &name, double value)
 {
-	OBJECT_SET_VALUE_BODY
+	OBJECT_SET_VALUE_BODY;
 }
 
 bool Object::setValue(const std::string &name, const std::string &value)
 {
-	OBJECT_SET_VALUE_BODY
+	OBJECT_SET_VALUE_BODY;
 }
 
 //bool Object::setValue(const std::string &name, const Vec2f &value)
@@ -383,72 +383,72 @@ bool Object::setValue(const std::string &name, const std::string &value)
 	if (_vs_stack.top()) \
 		return _vs_stack.top()->getValue(name, value); \
 	else \
-		return false; \
+		return false
 
 //get functions
 bool Object::getValue(const std::string &name, Referenced** value)
 {
-	OBJECT_GET_VALUE_BODY
+	OBJECT_GET_VALUE_BODY;
 }
 
 bool Object::getValue(const std::string &name, bool &value)
 {
-	OBJECT_GET_VALUE_BODY
+	OBJECT_GET_VALUE_BODY;
 }
 
 bool Object::getValue(const std::string &name, char &value)
 {
-	OBJECT_GET_VALUE_BODY
+	OBJECT_GET_VALUE_BODY;
 }
 
 bool Object::getValue(const std::string &name, unsigned char &value)
 {
-	OBJECT_GET_VALUE_BODY
+	OBJECT_GET_VALUE_BODY;
 }
 
 bool Object::getValue(const std::string &name, short &value)
 {
-	OBJECT_GET_VALUE_BODY
+	OBJECT_GET_VALUE_BODY;
 }
 
 bool Object::getValue(const std::string &name, unsigned short &value)
 {
-	OBJECT_GET_VALUE_BODY
+	OBJECT_GET_VALUE_BODY;
 }
 
 bool Object::getValue(const std::string &name, long &value)
 {
-	OBJECT_GET_VALUE_BODY
+	OBJECT_GET_VALUE_BODY;
 }
 
 bool Object::getValue(const std::string &name, unsigned long &value)
 {
-	OBJECT_GET_VALUE_BODY
+	OBJECT_GET_VALUE_BODY;
 }
 
 bool Object::getValue(const std::string &name, long long &value)
 {
-	OBJECT_GET_VALUE_BODY
+	OBJECT_GET_VALUE_BODY;
 }
 
 bool Object::getValue(const std::string &name, unsigned long long &value)
 {
-	OBJECT_GET_VALUE_BODY
+	OBJECT_GET_VALUE_BODY;
 }
 
 bool Object::getValue(const std::string &name, float &value)
 {
-	OBJECT_GET_VALUE_BODY
+	OBJECT_GET_VALUE_BODY;
 }
 
 bool Object::getValue(const std::string &name, double &value)
 {
-	OBJECT_GET_VALUE_BODY
+	OBJECT_GET_VALUE_BODY;
 }
 
 bool Object::getValue(const std::string &name, std::string &value)
 {
-	OBJECT_GET_VALUE_BODY
+	OBJECT_GET_VALUE_BODY;
 }
 
 //bool Object::getValue(const std::string &name, Vec2f &value)

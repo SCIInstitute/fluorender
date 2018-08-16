@@ -3,3 +3,5 @@
 void ObjectTest();
 
 void GroupTest();
+
+void SceneGraphTest();
