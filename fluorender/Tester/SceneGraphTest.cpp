@@ -1,5 +1,6 @@
 #include "tests.h"
 #include "asserts.h"
+#include <Scenegraph/Group.h>
 #include <Scenegraph/VolumeData.h>
 #include <Scenegraph/Annotations.h>
 
@@ -8,17 +9,27 @@ using namespace FL;
 
 void SceneGraphTest()
 {
-	ref_ptr<VolumeData> data(new VolumeData());
-	ref_ptr<Annotations> ann(new Annotations());
-	ann->setValue("volume", data.get());
+	//ref_ptr<VolumeData> data(new VolumeData());
+	VolumeData* data = new VolumeData();
+	//ref_ptr<Annotations> ann(new Annotations());
+	Annotations* ann = new Annotations();
+	ref_ptr<Group> group(new Group());
+	group->addChild(data);
+	group->addChild(ann);
+
+	ann->setValue("volume", data);
 	VolumeData* vd;
 	ann->getValue("volume", (Referenced**)&vd);
 	ASSERT_EQ(data, vd);
 	data->setValue("spacing x", 2.0);
-	//data->setValue("spacing y", 2.0);
-	//data->setValue("spacing z", 6.0);
-	ref_ptr<Annotations> ann2(new Annotations());
-	ann2->setValue("volume", data.get());
+	data->setValue("spacing y", 2.0);
+	data->setValue("spacing z", 6.0);
+
+	//ref_ptr<Annotations> ann2(new Annotations());
+	Annotations* ann2 = new Annotations();
+	group->addChild(ann2);
+
+	ann2->setValue("volume", data);
 	ann2->getValue("volume", (Referenced**)&vd);
 	ASSERT_EQ(data, vd);
 }
