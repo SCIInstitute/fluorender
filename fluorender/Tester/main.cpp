@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
 
 	//ObjectTest();
 
-	GroupTest();
+	//GroupTest();
 
 	SceneGraphTest();
 

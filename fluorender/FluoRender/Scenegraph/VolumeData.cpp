@@ -35,7 +35,9 @@ VolumeData::VolumeData():
 	m_vr(0),
 	m_tex(0)
 {
-
+	addValue("spacing x", 1.0);
+	addValue("spacing y", 1.0);
+	addValue("spacing z", 3.0);
 }
 
 VolumeData::VolumeData(const VolumeData& data, const CopyOp& copyop):

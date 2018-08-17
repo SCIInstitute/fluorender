@@ -44,7 +44,15 @@ Object::Object(const Object& obj, const CopyOp& copyop):
 	if (copyop.getCopyFlags() & CopyOp::SHALLOW_COPY)
 		_vs_stack.push(obj._vs_stack.top());
 	else
-		_vs_stack.push(obj._vs_stack.top()->clone());
+	{
+		_vs_stack.push(obj._vs_stack.top()->clone(copyop));
+		//also observe the values
+		for (auto it = _vs_stack.top()->getValues().begin();
+			it != _vs_stack.top()->getValues().end(); ++it)
+		{
+			it->second->addObserver(this);
+		}
+	}
 }
 
 Object::~Object()
@@ -66,7 +74,14 @@ void Object::objectChanged(void* ptr, const std::string &exp)
 {
 	Referenced* refd = static_cast<Referenced*>(ptr);
 	if (refd->className() == std::string("Value"))
+	{
 		_vs_stack.top()->syncValue(dynamic_cast<Value*>(refd));
+	}
+	else if (refd->className() == std::string("Object"))
+	{
+		//do something in response
+		
+	}
 }
 
 //define function bodies first
@@ -153,6 +168,11 @@ bool Object::addValue(const std::string &name, const std::string &value)
 	OBJECT_ADD_VALUE_BODY;
 }
 
+bool Object::addValue(const std::string &name, const std::wstring &value)
+{
+	OBJECT_ADD_VALUE_BODY;
+}
+
 //bool Object::addValue(const std::string &name, const Vec2f &value)
 //{
 //	OBJECT_ADD_VALUE_BODY
@@ -231,74 +251,110 @@ bool Object::addValue(const std::string &name, const std::string &value)
 //define function bodies first
 //set functions
 #define OBJECT_SET_VALUE_BODY \
-	if (_vs_stack.top()) \
-		return _vs_stack.top()->setValue(name, value); \
-	else \
-		return false
+	if (getValue(name, old_value) && value != old_value) \
+	{ \
+		notifyObserversOfChange(); \
+		if (_vs_stack.top()) \
+			return _vs_stack.top()->setValue(name, value); \
+		else \
+			return false; \
+	} \
+	return false
 
 //set functions
 bool Object::setValue(const std::string &name, Referenced* value)
 {
-	OBJECT_SET_VALUE_BODY;
+	Referenced* old_value;
+	if (getValue(name, &old_value) && value != old_value)
+	{
+		if (old_value)
+			old_value->removeObserver(this);
+		if (value)
+			value->addObserver(this);
+		notifyObserversOfChange();
+		if (_vs_stack.top())
+			return _vs_stack.top()->setValue(name, value);
+		else
+			return false;
+	}
+	return false;
 }
 
 bool Object::setValue(const std::string &name, bool value)
 {
+	bool old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
 bool Object::setValue(const std::string &name, char value)
 {
+	char old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
 bool Object::setValue(const std::string &name, unsigned char value)
 {
+	unsigned char old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
 bool Object::setValue(const std::string &name, short value)
 {
+	short old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
 bool Object::setValue(const std::string &name, unsigned short value)
 {
+	unsigned short old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
 bool Object::setValue(const std::string &name, long value)
 {
+	long old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
 bool Object::setValue(const std::string &name, unsigned long value)
 {
+	unsigned long old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
 bool Object::setValue(const std::string &name, long long value)
 {
+	long long old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
 bool Object::setValue(const std::string &name, unsigned long long value)
 {
+	unsigned long long old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
 bool Object::setValue(const std::string &name, float value)
 {
+	float old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
 bool Object::setValue(const std::string &name, double value)
 {
+	double old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
 bool Object::setValue(const std::string &name, const std::string &value)
 {
+	std::string old_value;
+	OBJECT_SET_VALUE_BODY;
+}
+
+bool Object::setValue(const std::string &name, const std::wstring &value)
+{
+	std::wstring old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
@@ -447,6 +503,11 @@ bool Object::getValue(const std::string &name, double &value)
 }
 
 bool Object::getValue(const std::string &name, std::string &value)
+{
+	OBJECT_GET_VALUE_BODY;
+}
+
+bool Object::getValue(const std::string &name, std::wstring &value)
 {
 	OBJECT_GET_VALUE_BODY;
 }

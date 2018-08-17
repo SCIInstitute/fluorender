@@ -9,13 +9,18 @@ using namespace FL;
 void ObjectTest()
 {
 	//creating first object
-	ref_ptr<Object> obj1(new Object());
+	//use simple pointer so that address can be printed easily
+	//also, reference count is set only when it's added to the list
+	//ref_ptr<Object> obj1(new Object());
+	Object *obj1 = new Object();
+	obj1->setId(1);
+	obj1->setName("obj1");
 	//declaring a list of objects
 	vector<ref_ptr<Object>> obj_list;
 	//add the first object to the list
 	obj_list.push_back(obj1);
 	ASSERT_EQ(1, obj_list.size());
-	ASSERT_TRUE(obj_list[0]->isSameKindAs(obj1.get()));
+	ASSERT_TRUE(obj_list[0]->isSameKindAs(obj1));
 	string str = obj_list[0]->className();
 	ASSERT_EQ("Object", str);
 	unsigned int id = 10;
@@ -36,6 +41,8 @@ void ObjectTest()
 
 	//creating a second object by cloning the first one
 	Object* obj2 = obj_list[0]->clone(CopyOp::DEEP_COPY_ALL);
+	obj2->setId(2);
+	obj2->setName("obj2");
 	//adding the second object to the list
 	obj_list.push_back(obj2);
 	ASSERT_EQ(2, obj_list.size());
@@ -44,8 +51,8 @@ void ObjectTest()
 	ASSERT_EQ(bval, bval2);
 
 	//sync the boolean value
+	//obj1's bval changes --> obj2's bval syncs
 	ASSERT_TRUE(obj_list[0]->syncValue("bval", (obj_list[1]).get()));
-	ASSERT_TRUE(obj_list[1]->syncValue("bval", (obj_list[0]).get()));
 	bval = false;
 	ASSERT_TRUE(obj_list[0]->setValue("bval", bval));
 	ASSERT_TRUE(obj_list[1]->getValue("bval", bval2));
@@ -54,13 +61,24 @@ void ObjectTest()
 	ASSERT_TRUE(obj_list[1]->setValue("bval", bval));
 	ASSERT_TRUE(obj_list[0]->getValue("bval", bval2));
 	ASSERT_EQ(bval, bval2);
+	//obj2's bval changes --> obj1's bval syncs
+	ASSERT_TRUE(obj_list[1]->syncValue("bval", (obj_list[0]).get()));
+	bval = false;
+	ASSERT_TRUE(obj_list[1]->setValue("bval", bval));
+	ASSERT_TRUE(obj_list[0]->getValue("bval", bval2));
+	ASSERT_EQ(bval, bval2);
 
 	//adding the first object as a value to the second
+	//obj2 is observing obj1
 	ASSERT_TRUE(obj_list[1]->addValue("friend", obj_list[0].get()));
+	ASSERT_TRUE(obj_list[1]->setValue("friend", obj_list[0].get()));
 	Object* obj;
 	//confirming the value has been added
 	ASSERT_TRUE(obj_list[1]->getValue("friend", (Referenced**)&obj));
 	ASSERT_EQ(obj1, obj);
+	//modify obj2's value
+	bval = true;
+	ASSERT_TRUE(obj_list[0]->setValue("bval", bval));
 	//erasing the first object
 	obj_list.erase(obj_list.begin());
 	//confirming the value pointing to the first object is reset

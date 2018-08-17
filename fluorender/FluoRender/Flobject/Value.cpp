@@ -61,6 +61,8 @@ Value* Value::clone()
 		return (dynamic_cast<TemplateValue<double>*>(this))->clone();
 	else if (_type == "string")
 		return (dynamic_cast<TemplateValue<std::string>*>(this))->clone();
+	else if (_type == "wstring")
+		return (dynamic_cast<TemplateValue<std::wstring>*>(this))->clone();
 	//else if (_type == "Vec2f")
 	//	return (dynamic_cast<TemplateValue<Vec2f>*>(this))->clone();
 	//else if (_type == "Vec3f")
@@ -389,6 +391,22 @@ bool ValueSet::addValue(const std::string &name, const std::string &value)
 		val->_value =value;
 		val->_name = name;
 		val->_type = "string";
+
+		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
+		return true;
+	}
+	else
+		return false;
+}
+
+bool ValueSet::addValue(const std::string &name, const std::wstring &value)
+{
+	if (!findValue(name))
+	{
+		TemplateValue<std::wstring>* val = new TemplateValue<std::wstring>;
+		val->_value = value;
+		val->_name = name;
+		val->_type = "wstring";
 
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
@@ -794,6 +812,18 @@ bool ValueSet::setValue(const std::string &name, const std::string &value)
 		return false;
 }
 
+bool ValueSet::setValue(const std::string &name, const std::wstring &value)
+{
+	Value* val = findValue(name);
+	if (val && val->_type == "wstring")
+	{
+		(dynamic_cast<TemplateValue<std::wstring>*>(val))->setValue(value);
+		return true;
+	}
+	else
+		return false;
+}
+
 //bool ValueSet::setValue(const std::string &name, const Vec2f &value)
 //{
 //	Value* val = findValue(name);
@@ -1125,6 +1155,18 @@ bool ValueSet::getValue(const std::string &name, std::string &value)
 	if (val && val->_type=="string")
 	{
 		value = (dynamic_cast<TemplateValue<std::string>*>(val))->getValue();
+		return true;
+	}
+	else
+		return false;
+}
+
+bool ValueSet::getValue(const std::string &name, std::wstring &value)
+{
+	Value* val = findValue(name);
+	if (val && val->_type == "wstring")
+	{
+		value = (dynamic_cast<TemplateValue<std::wstring>*>(val))->getValue();
 		return true;
 	}
 	else

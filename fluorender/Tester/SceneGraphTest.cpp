@@ -14,4 +14,11 @@ void SceneGraphTest()
 	VolumeData* vd;
 	ann->getValue("volume", (Referenced**)&vd);
 	ASSERT_EQ(data, vd);
+	data->setValue("spacing x", 2.0);
+	//data->setValue("spacing y", 2.0);
+	//data->setValue("spacing z", 6.0);
+	ref_ptr<Annotations> ann2(new Annotations());
+	ann2->setValue("volume", data.get());
+	ann2->getValue("volume", (Referenced**)&vd);
+	ASSERT_EQ(data, vd);
 }

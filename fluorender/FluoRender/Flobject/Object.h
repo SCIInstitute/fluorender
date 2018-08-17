@@ -79,6 +79,7 @@ public:
 	virtual bool addValue(const std::string &name, float);
 	virtual bool addValue(const std::string &name, double);
 	virtual bool addValue(const std::string &name, const std::string &value);
+	virtual bool addValue(const std::string &name, const std::wstring &value);
 	//virtual bool addValue(const std::string &name, const Vec2f &value);
 	//virtual bool addValue(const std::string &name, const Vec3f &value);
 	//virtual bool addValue(const std::string &name, const Vec4f &value);
@@ -109,6 +110,7 @@ public:
 	virtual bool setValue(const std::string &name, float value);
 	virtual bool setValue(const std::string &name, double value);
 	virtual bool setValue(const std::string &name, const std::string &value);
+	virtual bool setValue(const std::string &name, const std::wstring &value);
 	//virtual bool setValue(const std::string &name, const Vec2f &value);
 	//virtual bool setValue(const std::string &name, const Vec3f &value);
 	//virtual bool setValue(const std::string &name, const Vec4f &value);
@@ -139,6 +141,7 @@ public:
 	virtual bool getValue(const std::string &name, float &value);
 	virtual bool getValue(const std::string &name, double &value);
 	virtual bool getValue(const std::string &name, std::string &value);
+	virtual bool getValue(const std::string &name, std::wstring &value);
 	//virtual bool getValue(const std::string &name, Vec2f &value);
 	//virtual bool getValue(const std::string &name, Vec3f &value);
 	//virtual bool getValue(const std::string &name, Vec4f &value);

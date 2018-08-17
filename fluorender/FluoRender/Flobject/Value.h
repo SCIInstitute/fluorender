@@ -110,7 +110,7 @@ public:
 
 	ValueSet(const ValueSet& vs, const CopyOp& copyop=CopyOp::SHALLOW_COPY);
 
-	ValueSet* clone() const {return new ValueSet(*this);}
+	ValueSet* clone(const CopyOp& copyop) const {return new ValueSet(*this, copyop);}
 
 	virtual const char* className() const { return "ValueSet"; }
 
@@ -140,6 +140,7 @@ public:
 	bool addValue(const std::string &name, float=0.0f);
 	bool addValue(const std::string &name, double=0.0);
 	bool addValue(const std::string &name, const std::string &value="");
+	bool addValue(const std::string &name, const std::wstring &value = L"");
 	//bool addValue(const std::string &name, const Vec2f &value=Vec2f());
 	//bool addValue(const std::string &name, const Vec3f &value=Vec3f());
 	//bool addValue(const std::string &name, const Vec4f &value=Vec4f());
@@ -170,6 +171,7 @@ public:
 	bool setValue(const std::string &name, float value);
 	bool setValue(const std::string &name, double value);
 	bool setValue(const std::string &name, const std::string &value);
+	bool setValue(const std::string &name, const std::wstring &value);
 	//bool setValue(const std::string &name, const Vec2f &value);
 	//bool setValue(const std::string &name, const Vec3f &value);
 	//bool setValue(const std::string &name, const Vec4f &value);
@@ -200,6 +202,7 @@ public:
 	bool getValue(const std::string &name, float &value);
 	bool getValue(const std::string &name, double &value);
 	bool getValue(const std::string &name, std::string &value);
+	bool getValue(const std::string &name, std::wstring &value);
 	//bool getValue(const std::string &name, Vec2f &value);
 	//bool getValue(const std::string &name, Vec3f &value);
 	//bool getValue(const std::string &name, Vec4f &value);
@@ -299,6 +302,11 @@ inline bool Value::operator == (const Value& v) const
 	{
 		return dynamic_cast<const TemplateValue<std::string>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<std::string>*>(&v)->getValue();
+	}
+	else if (_type == "wstring")
+	{
+		return dynamic_cast<const TemplateValue<std::wstring>*>(this)->getValue() ==
+			dynamic_cast<const TemplateValue<std::wstring>*>(&v)->getValue();
 	}
 	//else if (_type == "Vec2f")
 	//{
@@ -453,6 +461,11 @@ inline bool Value::sync(Value* value)
 	{
 		dynamic_cast<TemplateValue<std::string>*>(this)->setValue(
 			dynamic_cast<TemplateValue<std::string>*>(value)->getValue());
+	}
+	else if (_type == "wstring")
+	{
+		dynamic_cast<TemplateValue<std::wstring>*>(this)->setValue(
+			dynamic_cast<TemplateValue<std::wstring>*>(value)->getValue());
 	}
 	//else if (_type == "Vec2f")
 	//{

@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Scenegraph/Annotations.h>
+#include <Scenegraph/VolumeData.h>
 
 using namespace FL;
 
@@ -43,3 +44,16 @@ Annotations::Annotations(const Annotations& data, const CopyOp& copyop) :
 Annotations::~Annotations()
 {
 }
+
+void Annotations::objectChanged(void* ptr, const std::string &exp)
+{
+	//Object::objectChanged(ptr, exp);
+	Referenced* refd = static_cast<Referenced*>(ptr);
+	if (refd->className() == std::string("VolumeData"))
+	{
+		//associated volume chnaged
+		VolumeData* vd = dynamic_cast<VolumeData*>(refd);
+		//std::string name = vd->className();
+	}
+}
+
