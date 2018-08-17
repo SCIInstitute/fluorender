@@ -27,13 +27,13 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Scenegraph/VolumeData.h>
-#include <FLIVR/VolumeRenderer.h>
+//#include <FLIVR/VolumeRenderer.h>
 
 using namespace FL;
 
-VolumeData::VolumeData():
-	m_vr(0),
-	m_tex(0)
+VolumeData::VolumeData()//:
+//	m_vr(0),
+//	m_tex(0)
 {
 	addValue("spacing x", 1.0);
 	addValue("spacing y", 1.0);
@@ -44,14 +44,14 @@ VolumeData::VolumeData(const VolumeData& data, const CopyOp& copyop):
 	Node(data, copyop)
 {
 	//volume renderer and texture
-	m_vr = new FLIVR::VolumeRenderer(*data.m_vr);
-	m_tex = data.m_tex;
+//	m_vr = new FLIVR::VolumeRenderer(*data.m_vr);
+//	m_tex = data.m_tex;
 }
 
 VolumeData::~VolumeData()
 {
-	if (m_vr)
-		delete m_vr;
-	if (m_tex)
-		delete m_tex;
+	//if (m_vr)
+	//	delete m_vr;
+	//if (m_tex)
+	//	delete m_tex;
 }

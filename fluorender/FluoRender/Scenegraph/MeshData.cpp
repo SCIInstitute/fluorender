@@ -27,14 +27,14 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Scenegraph/MeshData.h>
-#include <FLIVR/glm.h>
-#include <FLIVR/MeshRenderer.h>
+//#include <FLIVR/glm.h>
+//#include <FLIVR/MeshRenderer.h>
 
 using namespace FL;
 
-MeshData::MeshData() :
-	m_data(0),
-	m_mr(0)
+MeshData::MeshData() //:
+	//m_data(0),
+	//m_mr(0)
 {
 
 }
@@ -42,14 +42,14 @@ MeshData::MeshData() :
 MeshData::MeshData(const MeshData& data, const CopyOp& copyop):
 	Node(data, copyop)
 {
-	m_data = data.m_data;
-	m_mr = data.m_mr;
+	//m_data = data.m_data;
+	//m_mr = data.m_mr;
 }
 
 MeshData::~MeshData()
 {
-	if (m_mr)
-		delete m_mr;
-	if (m_data)
-		glmDelete(m_data);
+	//if (m_mr)
+	//	delete m_mr;
+	//if (m_data)
+	//	glmDelete(m_data);
 }

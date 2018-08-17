@@ -10,7 +10,8 @@ using namespace FL;
 void GroupTest()
 {
 	//create group
-	ref_ptr<Group> group1(new Group());
+	//ref_ptr<Group> group1(new Group());
+	Group* group1 = new Group();
 	//add nodes to group
 	int num1 = 10;
 	for (int i = 0; i < num1; ++i)
@@ -20,7 +21,8 @@ void GroupTest()
 	}
 	ASSERT_EQ(num1, group1->getNumChildren());
 	//duplicate group shallow copy
-	ref_ptr<Group> group2(new Group(*group1));
+	//ref_ptr<Group> group2(new Group(*group1));
+	Group* group2 = new Group(*group1);
 	ASSERT_EQ(num1, group2->getNumChildren());
 	//check children
 	for (int i = 0; i < num1; ++i)
@@ -34,7 +36,8 @@ void GroupTest()
 	group1->removeChildren(0, num2);
 	ASSERT_EQ(num1 - num2, group1->getNumChildren());
 	//duplicate group deep copy
-	ref_ptr<Group> group3(new Group(*group1, CopyOp::DEEP_COPY_ALL));
+	//ref_ptr<Group> group3(new Group(*group1, CopyOp::DEEP_COPY_ALL));
+	Group* group3 = new Group(*group1, CopyOp::DEEP_COPY_ALL);
 	ASSERT_EQ(num1 - num2, group3->getNumChildren());
 	//check children
 	for (int i = 0; i < num1 - num2; ++i)
@@ -45,9 +48,9 @@ void GroupTest()
 	}
 	//group of groups
 	ref_ptr<Group> group4(new Group());
-	group4->addChild(group1.get());
-	group4->addChild(group2.get());
-	group4->addChild(group3.get());
+	group4->addChild(group1);
+	group4->addChild(group2);
+	group4->addChild(group3);
 	//traverse
 	InfoVisitor visitor;
 	group4->accept(visitor);

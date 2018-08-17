@@ -10,9 +10,9 @@ int main(int argc, char* argv[])
 	//char* leak = new char[1000];
 	//memset(leak, 14, 1000);
 
-	//ObjectTest();
+	ObjectTest();
 
-	//GroupTest();
+	GroupTest();
 
 	SceneGraphTest();
 

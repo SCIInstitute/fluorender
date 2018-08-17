@@ -64,9 +64,9 @@ namespace FL
 		virtual ~VolumeData();
 
 	private:
-		FLIVR::VolumeRenderer *m_vr;
-		FLIVR::Texture *m_tex;
-		BaseReader *m_reader;
+		//FLIVR::VolumeRenderer *m_vr;
+		//FLIVR::Texture *m_tex;
+		//BaseReader *m_reader;
 	};
 }
 
