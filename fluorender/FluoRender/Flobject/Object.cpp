@@ -253,11 +253,11 @@ bool Object::addValue(const std::string &name, const std::wstring &value)
 #define OBJECT_SET_VALUE_BODY \
 	if (getValue(name, old_value) && value != old_value) \
 	{ \
-		notifyObserversOfChange(); \
+		bool result = false; \
 		if (_vs_stack.top()) \
-			return _vs_stack.top()->setValue(name, value); \
-		else \
-			return false; \
+			result = _vs_stack.top()->setValue(name, value); \
+		notifyObserversOfChange(name); \
+		return result; \
 	} \
 	return false
 
@@ -271,11 +271,11 @@ bool Object::setValue(const std::string &name, Referenced* value)
 			old_value->removeObserver(this);
 		if (value)
 			value->addObserver(this);
-		notifyObserversOfChange();
+		bool result = false;
 		if (_vs_stack.top())
-			return _vs_stack.top()->setValue(name, value);
-		else
-			return false;
+			result = _vs_stack.top()->setValue(name, value);
+		notifyObserversOfChange();
+		return result;
 	}
 	return false;
 }

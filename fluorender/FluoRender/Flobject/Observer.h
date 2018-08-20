@@ -74,7 +74,7 @@ public:
 	void removeObserver(Observer* observer);
 
 	void signalObjectDeleted(void* ptr);
-	void signalObjectChanged(void* ptr);
+	void signalObjectChanged(void* ptr, const std::string &exp);
 
 	typedef std::vector<ObserverInfo> Observers;
 	Observers& getObservers() { return _observers; }

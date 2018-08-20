@@ -35,10 +35,12 @@ Observer::Observer()
 
 Observer::~Observer()
 {
-	for (Observees::iterator it=_observees.begin();
-		it!=_observees.end(); ++it)
+	//take advantage of the vector and delete reversely
+	for (int i = _observees.size()-1;
+		i>=0; --i)
 	{
-		(*it)->removeObserver(this);
+		if (_observees[i])
+			_observees[i]->removeObserver(this);
 	}
 }
 
@@ -111,11 +113,12 @@ void ObserverSet::signalObjectDeleted(void* ptr)
 	_observedObject = 0;
 }
 
-void ObserverSet::signalObjectChanged(void* ptr)
+void ObserverSet::signalObjectChanged(void* ptr, const std::string &exp)
 {
 	for (Observers::iterator itr = _observers.begin();
 		itr != _observers.end(); ++itr)
 	{
+		(*itr).expression = exp;
 		(*itr).observer->objectChanged(ptr, (*itr).expression);
 	}
 }

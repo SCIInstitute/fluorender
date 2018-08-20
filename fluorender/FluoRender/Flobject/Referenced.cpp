@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <Flobject/Referenced.h>
 #include <Flobject/Observer.h>
+#include <algorithm>
 
 using namespace FL;
 
@@ -71,6 +72,10 @@ void Referenced::addObserver(Observer* observer) const
 void Referenced::removeObserver(Observer* observer) const
 {
 	getOrCreateObserverSet()->removeObserver(observer);
+	auto it = std::find(observer->_observees.begin(),
+		observer->_observees.end(), const_cast<Referenced*>(this));
+	if (it != observer->_observees.end())
+		observer->_observees.erase(it);
 }
 
 void Referenced::signalObserversAndDelete(bool signalDelete, bool doDelete) const
@@ -88,13 +93,13 @@ void Referenced::signalObserversAndDelete(bool signalDelete, bool doDelete) cons
 	}
 }
 
-void Referenced::notifyObserversOfChange() const
+void Referenced::notifyObserversOfChange(const std::string &exp) const
 {
 	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
 
 	if (observerSet)
 	{
-		observerSet->signalObjectChanged(const_cast<Referenced*>(this));
+		observerSet->signalObjectChanged(const_cast<Referenced*>(this), exp);
 	}
 
 }

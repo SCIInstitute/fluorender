@@ -74,7 +74,7 @@ protected:
 
 	void signalObserversAndDelete(bool signalDelete, bool doDelete) const;
 
-	void notifyObserversOfChange() const;
+	void notifyObserversOfChange(const std::string &exp = "") const;
 
 	std::string _refStr;
 
