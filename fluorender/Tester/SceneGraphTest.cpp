@@ -17,6 +17,7 @@ void SceneGraphTest()
 	group->addChild(ann1);
 	group->addChild(ann2);
 
+	//data->holdoffObserverNotification();
 	ann1->setValue("volume", data);
 	VolumeData* vd;
 	ann1->getValue("volume", (Referenced**)&vd);
@@ -27,6 +28,13 @@ void SceneGraphTest()
 	data->setValue("spacing x", 2.0);
 	data->setValue("spacing y", 2.0);
 	data->setValue("spacing z", 6.0);
+
+	//data->getValue("spacing x")->holdoffObserverNotification();
+	//data->holdoffObserverNotification();
+	data->setValue("spacing x", 1.0, false);
+	data->setValue("spacing x", 2.0);
+	//data->getValue("spacing x")->resumeObserverNotification();
+	//data->resumeObserverNotification();
 
 	ann2->setValue("volume", data);
 	ann2->getValue("volume", (Referenced**)&vd);

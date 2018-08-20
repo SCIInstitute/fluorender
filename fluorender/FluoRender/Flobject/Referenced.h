@@ -64,6 +64,15 @@ public:
 
 	void removeObserver(Observer* observer) const;
 
+	void holdoffObserverNotification()
+	{
+		_hold = true;
+	}
+	void resumeObserverNotification()
+	{
+		_hold = false;
+	}
+
 	virtual const char* className() const { return "Referenced";}
 
 	const std::string& getRefStr() const { return _refStr; }
@@ -81,6 +90,11 @@ protected:
 	mutable int _refCount;
 
 	mutable void* _observerSet;
+
+	bool _hold;
+
+	//typedef std::set<std::string> ExpSet;
+	//ExpSet _valueMask;
 };
 
 inline int Referenced::ref() const

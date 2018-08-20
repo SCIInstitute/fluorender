@@ -97,20 +97,20 @@ public:
 	//virtual bool addValue(const std::string &name, const HsvColor3d &value);
 
 	/** All the set value functions */
-	virtual bool setValue(const std::string &name, Referenced* value);
-	virtual bool setValue(const std::string &name, bool value);
-	virtual bool setValue(const std::string &name, char value);
-	virtual bool setValue(const std::string &name, unsigned char value);
-	virtual bool setValue(const std::string &name, short value);
-	virtual bool setValue(const std::string &name, unsigned short value);
-	virtual bool setValue(const std::string &name, long value);
-	virtual bool setValue(const std::string &name, unsigned long value);
-	virtual bool setValue(const std::string &name, long long value);
-	virtual bool setValue(const std::string &name, unsigned long long value);
-	virtual bool setValue(const std::string &name, float value);
-	virtual bool setValue(const std::string &name, double value);
-	virtual bool setValue(const std::string &name, const std::string &value);
-	virtual bool setValue(const std::string &name, const std::wstring &value);
+	virtual bool setValue(const std::string &name, Referenced* value, bool notify = true);
+	virtual bool setValue(const std::string &name, bool value, bool notify = true);
+	virtual bool setValue(const std::string &name, char value, bool notify = true);
+	virtual bool setValue(const std::string &name, unsigned char value, bool notify = true);
+	virtual bool setValue(const std::string &name, short value, bool notify = true);
+	virtual bool setValue(const std::string &name, unsigned short value, bool notify = true);
+	virtual bool setValue(const std::string &name, long value, bool notify = true);
+	virtual bool setValue(const std::string &name, unsigned long value, bool notify = true);
+	virtual bool setValue(const std::string &name, long long value, bool notify = true);
+	virtual bool setValue(const std::string &name, unsigned long long value, bool notify = true);
+	virtual bool setValue(const std::string &name, float value, bool notify = true);
+	virtual bool setValue(const std::string &name, double value, bool notify = true);
+	virtual bool setValue(const std::string &name, const std::string &value, bool notify = true);
+	virtual bool setValue(const std::string &name, const std::wstring &value, bool notify = true);
 	//virtual bool setValue(const std::string &name, const Vec2f &value);
 	//virtual bool setValue(const std::string &name, const Vec3f &value);
 	//virtual bool setValue(const std::string &name, const Vec4f &value);
@@ -157,6 +157,15 @@ public:
 	//virtual bool getValue(const std::string &name, Color3d &value);
 	//virtual bool getValue(const std::string &name, HsvColor3f &value);
 	//virtual bool getValue(const std::string &name, HsvColor3d &value);
+
+	//get value the class
+	virtual Value* getValue(const std::string &name)
+	{
+		if (_vs_stack.top())
+			return _vs_stack.top()->findValue(name);
+		else
+			return 0;
+	}
 
 	//sync value
 	virtual bool syncValue(const std::string &name, Observer* obsrvr);

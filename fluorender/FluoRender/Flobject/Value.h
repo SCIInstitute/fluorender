@@ -82,7 +82,7 @@ public:
 		return tv;
 	}
 
-	void setValue(const T& value, bool notify=true)
+	void setValue(const T& value, bool notify)
 	{
 		if (value != _value)
 		{
@@ -158,20 +158,20 @@ public:
 	//bool addValue(const std::string &name, const HsvColor3d &value=HsvColor3d());
 
 	/** All the set value functions */
-	bool setValue(const std::string &name, Referenced* value);
-	bool setValue(const std::string &name, bool value);
-	bool setValue(const std::string &name, char value);
-	bool setValue(const std::string &name, unsigned char value);
-	bool setValue(const std::string &name, short value);
-	bool setValue(const std::string &name, unsigned short value);
-	bool setValue(const std::string &name, long value);
-	bool setValue(const std::string &name, unsigned long value);
-	bool setValue(const std::string &name, long long value);
-	bool setValue(const std::string &name, unsigned long long value);
-	bool setValue(const std::string &name, float value);
-	bool setValue(const std::string &name, double value);
-	bool setValue(const std::string &name, const std::string &value);
-	bool setValue(const std::string &name, const std::wstring &value);
+	bool setValue(const std::string &name, Referenced* value, bool notify = true);
+	bool setValue(const std::string &name, bool value, bool notify = true);
+	bool setValue(const std::string &name, char value, bool notify = true);
+	bool setValue(const std::string &name, unsigned char value, bool notify = true);
+	bool setValue(const std::string &name, short value, bool notify = true);
+	bool setValue(const std::string &name, unsigned short value, bool notify = true);
+	bool setValue(const std::string &name, long value, bool notify = true);
+	bool setValue(const std::string &name, unsigned long value, bool notify = true);
+	bool setValue(const std::string &name, long long value, bool notify = true);
+	bool setValue(const std::string &name, unsigned long long value, bool notify = true);
+	bool setValue(const std::string &name, float value, bool notify = true);
+	bool setValue(const std::string &name, double value, bool notify = true);
+	bool setValue(const std::string &name, const std::string &value, bool notify = true);
+	bool setValue(const std::string &name, const std::wstring &value, bool notify = true);
 	//bool setValue(const std::string &name, const Vec2f &value);
 	//bool setValue(const std::string &name, const Vec3f &value);
 	//bool setValue(const std::string &name, const Vec4f &value);
@@ -400,72 +400,72 @@ inline bool Value::sync(Value* value)
 	if (_type == "Referenced*")
 	{
 		dynamic_cast<TemplateValue<Referenced*>*>(this)->setValue(
-			dynamic_cast<TemplateValue<Referenced*>*>(value)->getValue());
+			dynamic_cast<TemplateValue<Referenced*>*>(value)->getValue(), true);
 	}
 	else if (_type == "bool")
 	{
 		dynamic_cast<TemplateValue<bool>*>(this)->setValue(
-			dynamic_cast<TemplateValue<bool>*>(value)->getValue());
+			dynamic_cast<TemplateValue<bool>*>(value)->getValue(), true);
 	}
 	else if (_type == "char")
 	{
 		dynamic_cast<TemplateValue<char>*>(this)->setValue(
-			dynamic_cast<TemplateValue<char>*>(value)->getValue());
+			dynamic_cast<TemplateValue<char>*>(value)->getValue(), true);
 	}
 	else if (_type == "unsigned char")
 	{
 		dynamic_cast<TemplateValue<unsigned char>*>(this)->setValue(
-			dynamic_cast<TemplateValue<unsigned char>*>(value)->getValue());
+			dynamic_cast<TemplateValue<unsigned char>*>(value)->getValue(), true);
 	}
 	else if (_type == "short")
 	{
 		dynamic_cast<TemplateValue<short>*>(this)->setValue(
-			dynamic_cast<TemplateValue<short>*>(value)->getValue());
+			dynamic_cast<TemplateValue<short>*>(value)->getValue(), true);
 	}
 	else if (_type == "unsigned short")
 	{
 		dynamic_cast<TemplateValue<unsigned short>*>(this)->setValue(
-			dynamic_cast<TemplateValue<unsigned short>*>(value)->getValue());
+			dynamic_cast<TemplateValue<unsigned short>*>(value)->getValue(), true);
 	}
 	else if (_type == "long")
 	{
 		dynamic_cast<TemplateValue<long>*>(this)->setValue(
-			dynamic_cast<TemplateValue<long>*>(value)->getValue());
+			dynamic_cast<TemplateValue<long>*>(value)->getValue(), true);
 	}
 	else if (_type == "unsigned long")
 	{
 		dynamic_cast<TemplateValue<unsigned long>*>(this)->setValue(
-			dynamic_cast<TemplateValue<unsigned long>*>(value)->getValue());
+			dynamic_cast<TemplateValue<unsigned long>*>(value)->getValue(), true);
 	}
 	else if (_type == "long long")
 	{
 		dynamic_cast<TemplateValue<long long>*>(this)->setValue(
-			dynamic_cast<TemplateValue<long long>*>(value)->getValue());
+			dynamic_cast<TemplateValue<long long>*>(value)->getValue(), true);
 	}
 	else if (_type == "unsigned long long")
 	{
 		dynamic_cast<TemplateValue<unsigned long long>*>(this)->setValue(
-			dynamic_cast<TemplateValue<unsigned long long>*>(value)->getValue());
+			dynamic_cast<TemplateValue<unsigned long long>*>(value)->getValue(), true);
 	}
 	else if (_type == "float")
 	{
 		dynamic_cast<TemplateValue<float>*>(this)->setValue(
-			dynamic_cast<TemplateValue<float>*>(value)->getValue());
+			dynamic_cast<TemplateValue<float>*>(value)->getValue(), true);
 	}
 	else if (_type == "double")
 	{
 		dynamic_cast<TemplateValue<double>*>(this)->setValue(
-			dynamic_cast<TemplateValue<double>*>(value)->getValue());
+			dynamic_cast<TemplateValue<double>*>(value)->getValue(), true);
 	}
 	else if (_type == "string")
 	{
 		dynamic_cast<TemplateValue<std::string>*>(this)->setValue(
-			dynamic_cast<TemplateValue<std::string>*>(value)->getValue());
+			dynamic_cast<TemplateValue<std::string>*>(value)->getValue(), true);
 	}
 	else if (_type == "wstring")
 	{
 		dynamic_cast<TemplateValue<std::wstring>*>(this)->setValue(
-			dynamic_cast<TemplateValue<std::wstring>*>(value)->getValue());
+			dynamic_cast<TemplateValue<std::wstring>*>(value)->getValue(), true);
 	}
 	//else if (_type == "Vec2f")
 	//{

@@ -34,14 +34,16 @@ using namespace FL;
 Referenced::Referenced():
   _observerSet(0),
   _refCount(0),
-  _refStr("")
+  _refStr(""),
+  _hold(false)
 {
 }
 
 Referenced::Referenced(const Referenced&):
   _observerSet(0),
   _refCount(0),
-  _refStr("")
+  _refStr(""),
+  _hold(false)
 {
 }
 
@@ -97,7 +99,7 @@ void Referenced::notifyObserversOfChange(const std::string &exp) const
 {
 	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
 
-	if (observerSet)
+	if (observerSet && !_hold)
 	{
 		observerSet->signalObjectChanged(const_cast<Referenced*>(this), exp);
 	}

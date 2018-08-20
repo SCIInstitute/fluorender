@@ -255,14 +255,14 @@ bool Object::addValue(const std::string &name, const std::wstring &value)
 	{ \
 		bool result = false; \
 		if (_vs_stack.top()) \
-			result = _vs_stack.top()->setValue(name, value); \
+			result = _vs_stack.top()->setValue(name, value, notify); \
 		notifyObserversOfChange(name); \
 		return result; \
 	} \
 	return false
 
 //set functions
-bool Object::setValue(const std::string &name, Referenced* value)
+bool Object::setValue(const std::string &name, Referenced* value, bool notify)
 {
 	Referenced* old_value;
 	if (getValue(name, &old_value) && value != old_value)
@@ -273,86 +273,86 @@ bool Object::setValue(const std::string &name, Referenced* value)
 			value->addObserver(this);
 		bool result = false;
 		if (_vs_stack.top())
-			result = _vs_stack.top()->setValue(name, value);
+			result = _vs_stack.top()->setValue(name, value, notify);
 		notifyObserversOfChange();
 		return result;
 	}
 	return false;
 }
 
-bool Object::setValue(const std::string &name, bool value)
+bool Object::setValue(const std::string &name, bool value, bool notify)
 {
 	bool old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, char value)
+bool Object::setValue(const std::string &name, char value, bool notify)
 {
 	char old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, unsigned char value)
+bool Object::setValue(const std::string &name, unsigned char value, bool notify)
 {
 	unsigned char old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, short value)
+bool Object::setValue(const std::string &name, short value, bool notify)
 {
 	short old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, unsigned short value)
+bool Object::setValue(const std::string &name, unsigned short value, bool notify)
 {
 	unsigned short old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, long value)
+bool Object::setValue(const std::string &name, long value, bool notify)
 {
 	long old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, unsigned long value)
+bool Object::setValue(const std::string &name, unsigned long value, bool notify)
 {
 	unsigned long old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, long long value)
+bool Object::setValue(const std::string &name, long long value, bool notify)
 {
 	long long old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, unsigned long long value)
+bool Object::setValue(const std::string &name, unsigned long long value, bool notify)
 {
 	unsigned long long old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, float value)
+bool Object::setValue(const std::string &name, float value, bool notify)
 {
 	float old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, double value)
+bool Object::setValue(const std::string &name, double value, bool notify)
 {
 	double old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const std::string &value)
+bool Object::setValue(const std::string &name, const std::string &value, bool notify)
 {
 	std::string old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const std::wstring &value)
+bool Object::setValue(const std::string &name, const std::wstring &value, bool notify)
 {
 	std::wstring old_value;
 	OBJECT_SET_VALUE_BODY;

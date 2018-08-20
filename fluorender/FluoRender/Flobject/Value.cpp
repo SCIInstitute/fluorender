@@ -171,7 +171,7 @@ bool ValueSet::resetRefPtr(Referenced* value)
 		if (it->second->getType() == "Referenced*" &&
 			(dynamic_cast<TemplateValue<Referenced*>*>(it->second.get()))->getValue() == value)
 		{
-			(dynamic_cast<TemplateValue<Referenced*>*>(it->second.get()))->setValue(0);
+			(dynamic_cast<TemplateValue<Referenced*>*>(it->second.get()))->setValue(0, true);
 			return true;
 		}
 	}
@@ -656,168 +656,168 @@ bool ValueSet::addValue(const std::string &name, const std::wstring &value)
 //}
 
 //set value functions
-bool ValueSet::setValue(const std::string &name, Referenced* value)
+bool ValueSet::setValue(const std::string &name, Referenced* value, bool notify)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="Referenced*")
 	{
-		(dynamic_cast<TemplateValue<Referenced*>*>(val))->setValue(value);
+		(dynamic_cast<TemplateValue<Referenced*>*>(val))->setValue(value, notify);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, bool value)
+bool ValueSet::setValue(const std::string &name, bool value, bool notify)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="bool")
 	{
-		(dynamic_cast<TemplateValue<bool>*>(val))->setValue(value);
+		(dynamic_cast<TemplateValue<bool>*>(val))->setValue(value, notify);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, char value)
+bool ValueSet::setValue(const std::string &name, char value, bool notify)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="char")
 	{
-		(dynamic_cast<TemplateValue<char>*>(val))->setValue(value);
+		(dynamic_cast<TemplateValue<char>*>(val))->setValue(value, notify);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, unsigned char value)
+bool ValueSet::setValue(const std::string &name, unsigned char value, bool notify)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="unsigned char")
 	{
-		(dynamic_cast<TemplateValue<unsigned char>*>(val))->setValue(value);
+		(dynamic_cast<TemplateValue<unsigned char>*>(val))->setValue(value, notify);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, short value)
+bool ValueSet::setValue(const std::string &name, short value, bool notify)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="short")
 	{
-		(dynamic_cast<TemplateValue<short>*>(val))->setValue(value);
+		(dynamic_cast<TemplateValue<short>*>(val))->setValue(value, notify);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, unsigned short value)
+bool ValueSet::setValue(const std::string &name, unsigned short value, bool notify)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="unsigned short")
 	{
-		(dynamic_cast<TemplateValue<unsigned short>*>(val))->setValue(value);
+		(dynamic_cast<TemplateValue<unsigned short>*>(val))->setValue(value, notify);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, long value)
+bool ValueSet::setValue(const std::string &name, long value, bool notify)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="long")
 	{
-		(dynamic_cast<TemplateValue<long>*>(val))->setValue(value);
+		(dynamic_cast<TemplateValue<long>*>(val))->setValue(value, notify);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, unsigned long value)
+bool ValueSet::setValue(const std::string &name, unsigned long value, bool notify)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="unsigned long")
 	{
-		(dynamic_cast<TemplateValue<unsigned long>*>(val))->setValue(value);
+		(dynamic_cast<TemplateValue<unsigned long>*>(val))->setValue(value, notify);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, long long value)
+bool ValueSet::setValue(const std::string &name, long long value, bool notify)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="long long")
 	{
-		(dynamic_cast<TemplateValue<long long>*>(val))->setValue(value);
+		(dynamic_cast<TemplateValue<long long>*>(val))->setValue(value, notify);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, unsigned long long value)
+bool ValueSet::setValue(const std::string &name, unsigned long long value, bool notify)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="unsigned long long")
 	{
-		(dynamic_cast<TemplateValue<unsigned long long>*>(val))->setValue(value);
+		(dynamic_cast<TemplateValue<unsigned long long>*>(val))->setValue(value, notify);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, float value)
+bool ValueSet::setValue(const std::string &name, float value, bool notify)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="float")
 	{
-		(dynamic_cast<TemplateValue<float>*>(val))->setValue(value);
+		(dynamic_cast<TemplateValue<float>*>(val))->setValue(value, notify);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, double value)
+bool ValueSet::setValue(const std::string &name, double value, bool notify)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="double")
 	{
-		(dynamic_cast<TemplateValue<double>*>(val))->setValue(value);
+		(dynamic_cast<TemplateValue<double>*>(val))->setValue(value, notify);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const std::string &value)
+bool ValueSet::setValue(const std::string &name, const std::string &value, bool notify)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="string")
 	{
-		(dynamic_cast<TemplateValue<std::string>*>(val))->setValue(value);
+		(dynamic_cast<TemplateValue<std::string>*>(val))->setValue(value, notify);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const std::wstring &value)
+bool ValueSet::setValue(const std::string &name, const std::wstring &value, bool notify)
 {
 	Value* val = findValue(name);
 	if (val && val->_type == "wstring")
 	{
-		(dynamic_cast<TemplateValue<std::wstring>*>(val))->setValue(value);
+		(dynamic_cast<TemplateValue<std::wstring>*>(val))->setValue(value, notify);
 		return true;
 	}
 	else
