@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2004 Scientific Computing and Imaging Institute,
+Copyright (c) 2018 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -26,17 +26,16 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef SLIVR_Vector_h
-#define SLIVR_Vector_h
+#ifndef _FLVECTOR_H_
+#define _FLVECTOR_H_
 
 #include <string>
 #include <iosfwd>
 #include <math.h>
 #include <assert.h>
+#include <algorithm>
 
-#include "Utils.h"
-
-namespace FLIVR
+namespace FLTYPE
 {
 	using std::string;
 
@@ -174,12 +173,12 @@ namespace FLIVR
 
 	}; // end class Vector
 
-} // End namespace FLIVR
+} // End namespace FLTYPE
 
 // This cannot be above due to circular dependencies
-#include "Point.h"
+#include <Types/Point.h>
 
-namespace FLIVR
+namespace FLTYPE
 {
 	inline Vector::Vector(const Point& p)
 		: x_(p.x_), y_(p.y_), z_(p.z_)
@@ -474,19 +473,19 @@ namespace FLIVR
 
 	inline Vector Min(const Vector &v1, const Vector &v2)
 	{
-		return Vector(Min(v1.x(), v2.x()),
-			Min(v1.y(), v2.y()),
-			Min(v1.z(), v2.z()));
+		return Vector(std::min(v1.x(), v2.x()),
+			std::min(v1.y(), v2.y()),
+			std::min(v1.z(), v2.z()));
 	}
 
 	inline Vector Max(const Vector &v1, const Vector &v2)
 	{
-		return Vector(Max(v1.x(), v2.x()),
-			Max(v1.y(), v2.y()),
-			Max(v1.z(), v2.z()));
+		return Vector(std::max(v1.x(), v2.x()),
+			std::max(v1.y(), v2.y()),
+			std::max(v1.z(), v2.z()));
 	}
 
-} // End namespace FLIVR
+} // End namespace FLTYPE
 
 
-#endif
+#endif//_FLVECTOR_H_

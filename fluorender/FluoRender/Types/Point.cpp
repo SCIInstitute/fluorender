@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2004 Scientific Computing and Imaging Institute,
+Copyright (c) 2018 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "Point.h"
-#include "Vector.h"
+#include <Types/Point.h>
+#include <Types/Vector.h>
 #include <iostream>
 
 using std::cerr;
@@ -35,8 +35,8 @@ using std::endl;
 using std::istream;
 using std::ostream;
 
-namespace FLIVR
-{
+using namespace FLTYPE;
+
 	string Point::get_string() const
 	{
 		char buf[100];
@@ -59,31 +59,34 @@ namespace FLIVR
 		}
 	}
 
-	Point AffineCombination(const Point& p1, double w1,
-		const Point& p2, double w2)
+	namespace FLTYPE
 	{
-		return Point(p1.x_*w1+p2.x_*w2,
-			p1.y_*w1+p2.y_*w2,
-			p1.z_*w1+p2.z_*w2);
-	}
+		Point AffineCombination(const Point& p1, double w1,
+			const Point& p2, double w2)
+		{
+			return Point(p1.x_*w1 + p2.x_*w2,
+				p1.y_*w1 + p2.y_*w2,
+				p1.z_*w1 + p2.z_*w2);
+		}
 
-	Point AffineCombination(const Point& p1, double w1,
-		const Point& p2, double w2,
-		const Point& p3, double w3)
-	{
-		return Point(p1.x_*w1+p2.x_*w2+p3.x_*w3,
-			p1.y_*w1+p2.y_*w2+p3.y_*w3,
-			p1.z_*w1+p2.z_*w2+p3.z_*w3);
-	}
+		Point AffineCombination(const Point& p1, double w1,
+			const Point& p2, double w2,
+			const Point& p3, double w3)
+		{
+			return Point(p1.x_*w1 + p2.x_*w2 + p3.x_*w3,
+				p1.y_*w1 + p2.y_*w2 + p3.y_*w3,
+				p1.z_*w1 + p2.z_*w2 + p3.z_*w3);
+		}
 
-	Point AffineCombination(const Point& p1, double w1,
-		const Point& p2, double w2,
-		const Point& p3, double w3,
-		const Point& p4, double w4)
-	{
-		return Point(p1.x_*w1+p2.x_*w2+p3.x_*w3+p4.x_*w4,
-			p1.y_*w1+p2.y_*w2+p3.y_*w3+p4.y_*w4,
-			p1.z_*w1+p2.z_*w2+p3.z_*w3+p4.z_*w4);
+		Point AffineCombination(const Point& p1, double w1,
+			const Point& p2, double w2,
+			const Point& p3, double w3,
+			const Point& p4, double w4)
+		{
+			return Point(p1.x_*w1 + p2.x_*w2 + p3.x_*w3 + p4.x_*w4,
+				p1.y_*w1 + p2.y_*w2 + p3.y_*w3 + p4.y_*w4,
+				p1.z_*w1 + p2.z_*w2 + p3.z_*w3 + p4.z_*w4);
+		}
 	}
 
 	ostream& operator<<( ostream& os, const Point& p )
@@ -128,4 +131,3 @@ namespace FLIVR
 			return 0;
 	}
 
-} // End namespace FLIVR

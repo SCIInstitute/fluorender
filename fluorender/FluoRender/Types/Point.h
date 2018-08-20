@@ -3,7 +3,7 @@
 
    The MIT License
 
-   Copyright (c) 2004 Scientific Computing and Imaging Institute,
+   Copyright (c) 2018 Scientific Computing and Imaging Institute,
    University of Utah.
 
    
@@ -26,17 +26,16 @@
    DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef SLIVR_Point_h
-#define SLIVR_Point_h
-
-#include "Utils.h"
+#ifndef _FLPOINT_H_
+#define _FLPOINT_H_
 
 #include <string>
 #include <iosfwd>
+#include <algorithm>
 
-namespace FLIVR {
-
+namespace FLTYPE {
 using std::string;
+
     
 class Vector;
 
@@ -135,273 +134,272 @@ Point operator+(const Vector &v, const Point &p) {
 std::ostream& operator<<(std::ostream& os, const Point& p);
 std::istream& operator>>(std::istream& os, Point& p);
 
-} // End namespace FLIVR
+} // End namespace FLTYPE
 
 // This cannot be above due to circular dependencies
 #include "Vector.h"
 
-namespace FLIVR {
+namespace FLTYPE {
 
-inline Point::Point(const Vector& v)
-  : x_(v.x_), y_(v.y_), z_(v.z_)
-{
-}
+	inline Point::Point(const Vector& v)
+		: x_(v.x_), y_(v.y_), z_(v.z_)
+	{
+	}
 
-inline Point::Point(const Point& p)
-{
-  x_=p.x_;
-  y_=p.y_;
-  z_=p.z_;
-}
+	inline Point::Point(const Point& p)
+	{
+		x_ = p.x_;
+		y_ = p.y_;
+		z_ = p.z_;
+	}
 
-inline Point::Point()
-{
-	x_=y_=z_=0.0;
-}
+	inline Point::Point()
+	{
+		x_ = y_ = z_ = 0.0;
+	}
 
-inline int Point::operator==(const Point& p) const
-{
-	return p.x_ == x_ && p.y_ == y_ && p.z_ == z_;
-}
+	inline int Point::operator==(const Point& p) const
+	{
+		return p.x_ == x_ && p.y_ == y_ && p.z_ == z_;
+	}
 
-inline int Point::operator!=(const Point& p) const
-{
-	return p.x_ != x_ || p.y_ != y_ || p.z_ != z_;
-}
+	inline int Point::operator!=(const Point& p) const
+	{
+		return p.x_ != x_ || p.y_ != y_ || p.z_ != z_;
+	}
 
-inline bool Point::operator<(const Point& p) const
-{
-	if (x_ < p.x_ &&
-		y_ < p.y_ &&
-		z_ < p.z_)
-		return true;
-	else
-		return false;
-}
+	inline bool Point::operator<(const Point& p) const
+	{
+		if (x_ < p.x_ &&
+			y_ < p.y_ &&
+			z_ < p.z_)
+			return true;
+		else
+			return false;
+	}
 
-inline bool Point::operator>(const Point& p) const
-{
-	if (x_ > p.x_ &&
-		y_ > p.y_ &&
-		z_ > p.z_)
-		return true;
-	else
-		return false;
-}
+	inline bool Point::operator>(const Point& p) const
+	{
+		if (x_ > p.x_ &&
+			y_ > p.y_ &&
+			z_ > p.z_)
+			return true;
+		else
+			return false;
+	}
 
-inline bool Point::operator<=(const Point& p) const
-{
-	if (x_ <= p.x_ &&
-		y_ <= p.y_ &&
-		z_ <= p.z_)
-		return true;
-	else
-		return false;
-}
+	inline bool Point::operator<=(const Point& p) const
+	{
+		if (x_ <= p.x_ &&
+			y_ <= p.y_ &&
+			z_ <= p.z_)
+			return true;
+		else
+			return false;
+	}
 
-inline bool Point::operator>=(const Point& p) const
-{
-	if (x_ >= p.x_ &&
-		y_ >= p.y_ &&
-		z_ >= p.z_)
-		return true;
-	else
-		return false;
-}
+	inline bool Point::operator>=(const Point& p) const
+	{
+		if (x_ >= p.x_ &&
+			y_ >= p.y_ &&
+			z_ >= p.z_)
+			return true;
+		else
+			return false;
+	}
 
-inline Point& Point::operator=(const Point& p)
-{
-  x_=p.x_;
-  y_=p.y_;
-  z_=p.z_;
-  return *this;
-}
+	inline Point& Point::operator=(const Point& p)
+	{
+		x_ = p.x_;
+		y_ = p.y_;
+		z_ = p.z_;
+		return *this;
+	}
 
-inline Vector Point::operator+(const Point& p) const
-{
-  return Vector(x_+p.x_, y_+p.y_, z_+p.z_);
-}
+	inline Vector Point::operator+(const Point& p) const
+	{
+		return Vector(x_ + p.x_, y_ + p.y_, z_ + p.z_);
+	}
 
-inline Vector Point::operator-(const Point& p) const
-{
-  return Vector(x_-p.x_, y_-p.y_, z_-p.z_);
-}
+	inline Vector Point::operator-(const Point& p) const
+	{
+		return Vector(x_ - p.x_, y_ - p.y_, z_ - p.z_);
+	}
 
-inline Point Point::operator+(const Vector& v) const
-{
-  return Point(x_+v.x_, y_+v.y_, z_+v.z_);
-}
+	inline Point Point::operator+(const Vector& v) const
+	{
+		return Point(x_ + v.x_, y_ + v.y_, z_ + v.z_);
+	}
 
-inline Point Point::operator-(const Vector& v) const
-{
-  return Point(x_-v.x_, y_-v.y_, z_-v.z_);
-}
+	inline Point Point::operator-(const Vector& v) const
+	{
+		return Point(x_ - v.x_, y_ - v.y_, z_ - v.z_);
+	}
 
-inline Point& Point::operator+=(const Vector& v)
-{
-  x_+=v.x_;
-  y_+=v.y_;
-  z_+=v.z_;
-  return *this;
-}
+	inline Point& Point::operator+=(const Vector& v)
+	{
+		x_ += v.x_;
+		y_ += v.y_;
+		z_ += v.z_;
+		return *this;
+	}
 
-inline Point& Point::operator-=(const Vector& v)
-{
-  x_-=v.x_;
-  y_-=v.y_;
-  z_-=v.z_;
-  return *this;
-}
+	inline Point& Point::operator-=(const Vector& v)
+	{
+		x_ -= v.x_;
+		y_ -= v.y_;
+		z_ -= v.z_;
+		return *this;
+	}
 
-inline Point& Point::operator+=(const Point& v)
-{
-  x_+=v.x_;
-  y_+=v.y_;
-  z_+=v.z_;
-  return *this;
-}
+	inline Point& Point::operator+=(const Point& v)
+	{
+		x_ += v.x_;
+		y_ += v.y_;
+		z_ += v.z_;
+		return *this;
+	}
 
-inline Point& Point::operator-=(const Point& v)
-{
-  x_-=v.x_;
-  y_-=v.y_;
-  z_-=v.z_;
-  return *this;
-}
+	inline Point& Point::operator-=(const Point& v)
+	{
+		x_ -= v.x_;
+		y_ -= v.y_;
+		z_ -= v.z_;
+		return *this;
+	}
 
 
-inline Point& Point::operator*=(const double d)
-{
-  x_*=d;
-  y_*=d;
-  z_*=d;
-  return *this;
-}
+	inline Point& Point::operator*=(const double d)
+	{
+		x_ *= d;
+		y_ *= d;
+		z_ *= d;
+		return *this;
+	}
 
-inline Point& Point::operator/=(const double d)
-{
-  x_/=d;
-  y_/=d;
-  z_/=d;
-  return *this;
-}
+	inline Point& Point::operator/=(const double d)
+	{
+		x_ /= d;
+		y_ /= d;
+		z_ /= d;
+		return *this;
+	}
 
-inline Point Point::operator-() const
-{
-  return Point(-x_, -y_, -z_);
-}
+	inline Point Point::operator-() const
+	{
+		return Point(-x_, -y_, -z_);
+	}
 
-inline Point Point::operator*(double d) const
-{
-  return Point(x_*d, y_*d, z_*d);
-}
+	inline Point Point::operator*(double d) const
+	{
+		return Point(x_*d, y_*d, z_*d);
+	}
 
-inline Point Point::operator/(const double d) const
-{
-  return Point(x_/d,y_/d,z_/d);
-}
+	inline Point Point::operator/(const double d) const
+	{
+		return Point(x_ / d, y_ / d, z_ / d);
+	}
 
-inline double& Point::operator()(int idx) 
-{
-  return (&x_)[idx];
-}
+	inline double& Point::operator()(int idx)
+	{
+		return (&x_)[idx];
+	}
 
-inline double Point::operator()(int idx) const 
-{
-  return (&x_)[idx];
-}
+	inline double Point::operator()(int idx) const
+	{
+		return (&x_)[idx];
+	}
 
-inline Point Interpolate(const Point& v1, const Point& v2,
-                         double weight)
-{
-  double weight1 = 1.0 - weight;
-  return Point(v2.x_*weight+v1.x_*weight1,
-               v2.y_*weight+v1.y_*weight1,
-               v2.z_*weight+v1.z_*weight1);
-}
+	inline Point Interpolate(const Point& v1, const Point& v2,
+		double weight)
+	{
+		double weight1 = 1.0 - weight;
+		return Point(v2.x_*weight + v1.x_*weight1,
+			v2.y_*weight + v1.y_*weight1,
+			v2.z_*weight + v1.z_*weight1);
+	}
 
-inline void Point::addscaled(const Point& p, const double scale) 
-{
-  // this += p * w;
-  x_ += p.x_ * scale;
-  y_ += p.y_ * scale;
-  z_ += p.z_ * scale;
-}
+	inline void Point::addscaled(const Point& p, const double scale)
+	{
+		// this += p * w;
+		x_ += p.x_ * scale;
+		y_ += p.y_ * scale;
+		z_ += p.z_ * scale;
+	}
 
-inline void Point::scale(const double sx, const double sy, const double sz)
-{
-	x_ *= sx;
-	y_ *= sy;
-	z_ *= sz;
-}
+	inline void Point::scale(const double sx, const double sy, const double sz)
+	{
+		x_ *= sx;
+		y_ *= sy;
+		z_ *= sz;
+	}
 
-inline void Point::x(const double d)
-{
-  x_=d;
-}
+	inline void Point::x(const double d)
+	{
+		x_ = d;
+	}
 
-inline double Point::x() const
-{
-  return x_;
-}
+	inline double Point::x() const
+	{
+		return x_;
+	}
 
-inline void Point::y(const double d)
-{
-  y_=d;
-}
+	inline void Point::y(const double d)
+	{
+		y_ = d;
+	}
 
-inline double Point::y() const
-{
-  return y_;
-}
+	inline double Point::y() const
+	{
+		return y_;
+	}
 
-inline void Point::z(const double d)
-{
-  z_=d;
-}
+	inline void Point::z(const double d)
+	{
+		z_ = d;
+	}
 
-inline double Point::z() const
-{
-  return z_;
-}
+	inline double Point::z() const
+	{
+		return z_;
+	}
 
-inline const Vector &Point::vector() const
-{
-  return (const Vector &)(*this);
-}
+	inline const Vector &Point::vector() const
+	{
+		return (const Vector &)(*this);
+	}
 
-inline Vector &Point::asVector() const
-{
-  return (Vector &)(*this);
-}
+	inline Vector &Point::asVector() const
+	{
+		return (Vector &)(*this);
+	}
 
-inline Point Min(const Point& p1, const Point& p2)
-{
-  double x=Min(p1.x_, p2.x_);
-  double y=Min(p1.y_, p2.y_);
-  double z=Min(p1.z_, p2.z_);
-  return Point(x,y,z);
-}
+	inline Point Min(const Point& p1, const Point& p2)
+	{
+		double x = std::min(p1.x_, p2.x_);
+		double y = std::min(p1.y_, p2.y_);
+		double z = std::min(p1.z_, p2.z_);
+		return Point(x, y, z);
+	}
 
-inline Point Max(const Point& p1, const Point& p2)
-{
+	inline Point Max(const Point& p1, const Point& p2)
+	{
+		double x = std::max(p1.x_, p2.x_);
+		double y = std::max(p1.y_, p2.y_);
+		double z = std::max(p1.z_, p2.z_);
+		return Point(x, y, z);
+	}
 
-  double x=Max(p1.x_, p2.x_);
-  double y=Max(p1.y_, p2.y_);
-  double z=Max(p1.z_, p2.z_);
-  return Point(x,y,z);
-}
+	inline double Dot(const Point& p, const Vector& v)
+	{
+		return p.x_*v.x_ + p.y_*v.y_ + p.z_*v.z_;
+	}
 
-inline double Dot(const Point& p, const Vector& v)
-{
-  return p.x_*v.x_+p.y_*v.y_+p.z_*v.z_;
-}
+	inline double Dot(const Point& p1, const Point& p2)
+	{
+		return p1.x_*p2.x_ + p1.y_*p2.y_ + p1.z_*p2.z_;
+	}
 
-inline double Dot(const Point& p1, const Point& p2)
-{
-  return p1.x_*p2.x_ + p1.y_*p2.y_ + p1.z_*p2.z_;
-}
+} // End namespace FLTYPE
 
-} // End namespace FLIVR
-
-#endif //ifndef SLIVR_Point_h
+#endif//_FLPOINT_H_

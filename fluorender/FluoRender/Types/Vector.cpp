@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2004 Scientific Computing and Imaging Institute,
+Copyright (c) 2018 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -26,16 +26,15 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <FLIVR/Vector.h>
-#include <FLIVR/Point.h>
+#include <Types/Vector.h>
+#include <Types/Point.h>
 #include <assert.h>
 #include <iostream>
 
 using std::istream;
 using std::ostream;
 
-namespace FLIVR
-{
+using namespace FLTYPE;
 
 	string Vector::get_string() const
 	{
@@ -147,6 +146,5 @@ namespace FLIVR
 		}
 	}
 
-} // End namespace FLIVR
 
 
