@@ -327,6 +327,13 @@ file(GLOB sg_hdr fluorender/FluoRender/Scenegraph/*.h)
 add_library(SCENEGRAPH_OBJ OBJECT
   ${sg_src} ${sg_hdr})
 
+# Types
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Types)
+file(GLOB typ_src fluorender/FluoRender/Types/*.cpp)
+file(GLOB typ_hdr fluorender/FluoRender/Types/*.h)
+add_library(TYPES_OBJ OBJECT
+  ${typ_src} ${typ_hdr})
+
 # NV
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/NV)
 file(GLOB nv_src fluorender/FluoRender/NV/*.cpp)
@@ -436,6 +443,7 @@ if(APPLE)
     $<TARGET_OBJECTS:CONVERTERS_OBJ>
     $<TARGET_OBJECTS:FLIVR_OBJ>
     $<TARGET_OBJECTS:ANIMATORS_OBJ>
+    $<TARGET_OBJECTS:TYPES_OBJ>
     $<TARGET_OBJECTS:FLOBJECT_OBJ>
     $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
     $<TARGET_OBJECTS:NV_OBJ>
@@ -466,6 +474,7 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:CONVERTERS_OBJ>
     $<TARGET_OBJECTS:FLIVR_OBJ>
     $<TARGET_OBJECTS:ANIMATORS_OBJ>
+    $<TARGET_OBJECTS:TYPES_OBJ>
     $<TARGET_OBJECTS:FLOBJECT_OBJ>
     $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
     $<TARGET_OBJECTS:NV_OBJ>
@@ -526,6 +535,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:CONVERTERS_OBJ>
       $<TARGET_OBJECTS:FLIVR_OBJ>
       $<TARGET_OBJECTS:ANIMATORS_OBJ>
+      $<TARGET_OBJECTS:TYPES_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
       $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
       $<TARGET_OBJECTS:NV_OBJ>
@@ -542,6 +552,7 @@ elseif(WIN32)
     add_executable(Tester
       ${tester_src} ${tester_hdr}
       #$<TARGET_OBJECTS:FLIVR_OBJ>
+      $<TARGET_OBJECTS:TYPES_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
       $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
       $<TARGET_OBJECTS:GLEW_OBJ>)
