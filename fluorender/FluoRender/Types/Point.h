@@ -6,7 +6,7 @@
    Copyright (c) 2018 Scientific Computing and Imaging Institute,
    University of Utah.
 
-   
+
    Permission is hereby granted, free of charge, to any person obtaining a
    copy of this software and associated documentation files (the "Software"),
    to deal in the Software without restriction, including without limitation
@@ -34,113 +34,123 @@
 #include <algorithm>
 
 namespace FLTYPE {
-using std::string;
+	using std::string;
 
-    
-class Vector;
+	class Vector;
 
-class Point {
-  double x_,y_,z_;
-public:
-  inline explicit Point(const Vector& v);
-  inline Point(double x, double y, double z): x_(x), y_(y), z_(z) {}
-  inline Point(double v) : x_(v), y_(v), z_(v) {}
-  Point(double, double, double, double);
-  Point(const Point&);
-  inline Point();
-  inline int operator==(const Point&) const;
-  inline int operator!=(const Point&) const;
-  inline bool operator<(const Point&) const;
-  inline bool operator>(const Point&) const;
-  inline bool operator<=(const Point&) const;
-  inline bool operator>=(const Point&) const;
-  inline Point& operator=(const Point&);
-  inline Vector operator+(const Point&) const;
-  inline Vector operator-(const Point&) const;
-  inline Point operator+(const Vector&) const;
-  inline Point operator-(const Vector&) const;
-  inline Point operator*(double) const;
-  inline Point& operator*=(const double);
-  inline Point& operator+=(const Vector&);
-  inline Point& operator-=(const Vector&);
-  inline Point& operator+=(const Point&);
-  inline Point& operator-=(const Point&);
-  inline Point& operator/=(const double);
-  inline Point operator/(const double) const;
-  inline Point operator-() const;
-  inline double& operator()(int idx);
-  inline double operator()(int idx) const;
-  inline void addscaled(const Point& p, const double scale);  // this += p * w;
-  inline void scale(const double sx, const double sy, const double sz);
-  inline void x(const double);
-  inline double x() const;
-  inline void y(const double);
-  inline double y() const;
-  inline void z(const double);
-  inline double z() const;
-  inline const Vector &vector() const;
-  inline Vector &asVector() const;
-    
-  inline string get_string() const;
+	class Point {
+		double x_, y_, z_;
+	public:
+		inline explicit Point(const Vector& v);
+		inline Point(double x, double y, double z) : x_(x), y_(y), z_(z) {}
+		inline Point(double v) : x_(v), y_(v), z_(v) {}
+		Point(double, double, double, double);
+		Point(const Point&);
+		inline Point();
+		inline int operator==(const Point&) const;
+		inline int operator!=(const Point&) const;
+		inline bool operator<(const Point&) const;
+		inline bool operator>(const Point&) const;
+		inline bool operator<=(const Point&) const;
+		inline bool operator>=(const Point&) const;
+		inline Point& operator=(const Point&);
+		inline Vector operator+(const Point&) const;
+		inline Vector operator-(const Point&) const;
+		inline Point operator+(const Vector&) const;
+		inline Point operator-(const Vector&) const;
+		inline Point operator*(double) const;
+		inline Point& operator*=(const double);
+		inline Point& operator+=(const Vector&);
+		inline Point& operator-=(const Vector&);
+		inline Point& operator+=(const Point&);
+		inline Point& operator-=(const Point&);
+		inline Point& operator/=(const double);
+		inline Point operator/(const double) const;
+		inline Point operator-() const;
+		inline double& operator()(int idx);
+		inline double operator()(int idx) const;
+		inline void addscaled(const Point& p, const double scale);  // this += p * w;
+		inline void scale(const double sx, const double sy, const double sz);
+		inline void x(const double);
+		inline double x() const;
+		inline void y(const double);
+		inline double y() const;
+		inline void z(const double);
+		inline double z() const;
+		inline const Vector &vector() const;
+		inline Vector &asVector() const;
 
-  friend class Vector;
-  friend inline double Dot(const Point&, const Point&);
-  friend inline double Dot(const Vector&, const Point&);
-  friend inline double Dot(const Point&, const Vector&);
+		inline string get_string() const;
 
-  friend inline Point Min(const Point&, const Point&);
-  friend inline Point Max(const Point&, const Point&);
+		friend class Vector;
+		friend inline double Dot(const Point&, const Point&);
+		friend inline double Dot(const Vector&, const Point&);
+		friend inline double Dot(const Point&, const Vector&);
 
-  friend Point AffineCombination(const Point&, double,
-					   const Point&, double,
-					   const Point&, double,
-					   const Point&, double);
-  friend Point AffineCombination(const Point&, double,
-					   const Point&, double,
-					   const Point&, double);
-  friend Point AffineCombination(const Point&, double,
-					   const Point&, double);
+		friend inline Point Min(const Point&, const Point&);
+		friend inline Point Max(const Point&, const Point&);
 
-  friend inline Point Interpolate(const Point&, const Point&, double);
+		friend Point AffineCombination(const Point&, double,
+			const Point&, double,
+			const Point&, double,
+			const Point&, double);
+		friend Point AffineCombination(const Point&, double,
+			const Point&, double,
+			const Point&, double);
+		friend Point AffineCombination(const Point&, double,
+			const Point&, double);
 
-  // is one point within a small interval of another?
+		friend inline Point Interpolate(const Point&, const Point&, double);
 
-  int Overlap( double a, double b, double e );
-  int InInterval( Point a, double epsilon );
-    
-  friend std::ostream& operator<<(std::ostream& os, const Point& p);
-  friend std::istream& operator>>(std::istream& os, Point& p);
+		// is one point within a small interval of another?
+		int Overlap(double a, double b, double e);
+		int InInterval(Point a, double epsilon);
 
-}; // end class Point
+		inline void Set(double x, double y, double z)
+		{
+			x_ = x;
+			y_ = y;
+			z_ = z;
+		}
 
+		friend std::ostream& operator<<(std::ostream& os, const Point& p)
+		{
+			os << '[' << p.x() << ' ' << p.y() << ' ' << p.z() << ']';
+			return os;
+		}
+		friend std::istream& operator >> (std::istream& is, Point& p)
+		{
+			double x, y, z;
+			char st;
+			is >> st >> x >> st >> y >> st >> z >> st;
+			p = Point(x, y, z);
+			return is;
+		}
 
-// Actual declarations of these functions (as 'friend' above doesn't
-// (depending on the compiler) actually declare them.
-Point AffineCombination(const Point&, double, const Point&, double,
-				  const Point&, double, const Point&, double);
-Point AffineCombination(const Point&, double, const Point&, double, 
-				  const Point&, double);
-Point AffineCombination(const Point&, double, const Point&, double);
+	}; // end class Point
 
-inline 
-Point operator*(double d, const Point &p) {
-  return p*d;
-}
-inline 
-Point operator+(const Vector &v, const Point &p) {
-  return p+v;
-}
+	// Actual declarations of these functions (as 'friend' above doesn't
+	// (depending on the compiler) actually declare them.
+	Point AffineCombination(const Point&, double, const Point&, double,
+		const Point&, double, const Point&, double);
+	Point AffineCombination(const Point&, double, const Point&, double,
+		const Point&, double);
+	Point AffineCombination(const Point&, double, const Point&, double);
 
-std::ostream& operator<<(std::ostream& os, const Point& p);
-std::istream& operator>>(std::istream& os, Point& p);
+	inline Point operator*(double d, const Point &p) {
+		return p*d;
+	}
+	inline Point operator+(const Vector &v, const Point &p) {
+		return p + v;
+	}
 
 } // End namespace FLTYPE
 
 // This cannot be above due to circular dependencies
-#include "Vector.h"
+#include <Types/Vector.h>
 
-namespace FLTYPE {
-
+namespace FLTYPE
+{
 	inline Point::Point(const Vector& v)
 		: x_(v.x_), y_(v.y_), z_(v.z_)
 	{

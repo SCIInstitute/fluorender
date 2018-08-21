@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2004 Scientific Computing and Imaging Institute,
+Copyright (c) 2018 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -26,12 +26,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef SLIVR_Plane_h
-#define SLIVR_Plane_h
+#ifndef _FLPLANE_H_
+#define _FLPLANE_H_
 
-#include <FLIVR/Vector.h>
+#include <Types/Vector.h>
+#include <vector>
 
-namespace FLIVR
+namespace FLTYPE
 {
 
 	class Point;
@@ -69,7 +70,8 @@ namespace FLIVR
 		void get_copy(double (&abcd)[4]) const;
 
 		// Not a great ==, doesnt take into account for floating point error.
-		bool operator==(const Plane &rhs) const; 
+		bool operator==(const Plane &rhs) const;
+		bool operator!=(const Plane &rhs) const;
 		// changes the plane ( n and d )
 		void ChangePlane( const Point &p1, const Point &p2, const Point &p3 );
 		void ChangePlane( const Point &p1, const Vector &v); 
@@ -92,8 +94,31 @@ namespace FLIVR
 		//remember and restore
 		void Remember() {n_copy = n_; d_copy = d_;};
 		void Restore() {n_ = n_copy; d_ = d_copy;};
+
+		friend std::ostream& operator<<(std::ostream& os, const Plane& p)
+		{
+			os << '[[' << p.n_.x() << ' ' << p.n_.y() << ' ' << p.n_.z() << '] ' << p.d_ <<']';
+			return os;
+		}
 	};
 
-} // End namespace FLIVR
+	class PlaneSet
+	{
+		std::vector<Plane> planes_;
+	public:
+		PlaneSet(const PlaneSet &copy);
+		PlaneSet(const std::vector<Plane> &planes);
+		PlaneSet(unsigned int size);
+		PlaneSet();
+		~PlaneSet();
+
+		PlaneSet& operator=(const PlaneSet &ps);
+		bool operator==(const PlaneSet &ps) const;
+		bool operator!=(const PlaneSet &ps) const;
+		Plane &operator[](const size_t index);
+		Plane Get(const size_t index);
+	};
+
+} // End namespace FLTYPE
 
 #endif

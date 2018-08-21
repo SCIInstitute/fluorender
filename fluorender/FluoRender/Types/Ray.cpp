@@ -3,7 +3,7 @@
 
    The MIT License
 
-   Copyright (c) 2004 Scientific Computing and Imaging Institute,
+   Copyright (c) 2018 Scientific Computing and Imaging Institute,
    University of Utah.
 
 
@@ -26,54 +26,75 @@
    DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SLIVR_Ray_h
-#define SLIVR_Ray_h
+#include <Types/Ray.h>
+#include <Types/Utils.h>
 
-#include <FLIVR/Point.h>
-#include <FLIVR/Vector.h>
-
-namespace FLIVR
+namespace FLTYPE
 {
+	Ray::Ray(const Point& o, const Vector& d)
+		: o_(o), d_(d)
+	{
+	}
 
-   class Ray
-   {
-      Point o_;
-      Vector d_;
-      public:
-      //! Constructors
-      Ray(){}
-      Ray(const Point&, const Vector&);
-      Ray(const Ray&);
+	Ray::Ray(const Ray& copy)
+		: o_(copy.o_), d_(copy.d_)
+	{
+	}
 
-      //! Destructor
-      ~Ray();
+	Ray::~Ray()
+	{
+	}
 
-      //! Copy Constructor
-      Ray& operator=(const Ray&);
+	Ray& Ray::operator=(const Ray& copy)
+	{
+		o_ = copy.o_;
+		d_ = copy.d_;
+		return *this;
+	}
 
-      //! Return data
-      Point origin() { return o_; }
-      Vector direction() { return d_; }
+	bool Ray::operator==(const Ray& r) const
+	{
+		return (o_ == r.o_) && (d_ == r.d_);
+	}
 
-      /*!
-        Returns the Point at parameter t, but does not pre-normalize d
-       */
-      Point parameter(double t);
+	bool Ray::operator!=(const Ray& r) const
+	{
+		return (o_ != r.o_) || (d_ != r.d_);
+	}
 
-      /*!
-        Computes the ray parameter t at which the ray will
-        intersect the plane specified by the normal N and the
-        point P, such that the plane intersect point Ip:
-        Ip = o + d*t.  Returns true if there is an intersection,
-        false if the vector is parallel to the plane.
-       */
-      bool planeIntersectParameter(Vector& N, Point& P,
-            double& t);
+	Point Ray::parameter(double t)
+	{
+		return o_ + d_*t;
+	}
 
-      //! Modifiers
-      void normalize(); //! normalizes the direction vector d
-   };
+	bool
+		Ray::planeIntersectParameter(Vector& N, Point& P, double& t)
+	{
+		//! Computes the ray parameter t at which the ray R will
 
+		//! point P
 
-} // End namespace FLIVR
-#endif
+		/*  Dot(N, ((O + t0*V) - P)) = 0   solve for t0 */
+
+		Point O(o_);
+		Vector V(d_);
+		double D = -(N.x()*P.x() + N.y()*P.y() + N.z()*P.z());
+		double NO = (N.x()*O.x() + N.y()*O.y() + N.z()*O.z());
+
+		double NV = Dot(N, V);
+
+		if (fabs(NV) <= Epsilon()) // ray is parallel to plane
+			return false;
+		else {
+			t = -(D + NO) / NV;
+			return true;
+		}
+	}
+
+	void Ray::normalize()
+	{
+		d_.normalize();
+	}
+
+} // End namespace FLTYPE
+

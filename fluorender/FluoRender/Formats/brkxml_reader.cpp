@@ -2,7 +2,6 @@
 #include "FLIVR/TextureRenderer.h"
 #include "FLIVR/ShaderProgram.h"
 #include "FLIVR/Utils.h"
-//#include "FLIVR/Point.h"
 #include "../compatibility.h"
 #include <fstream>
 #include <iostream>

@@ -43,10 +43,10 @@ namespace FLTYPE
 
 	class Vector
 	{
-		double x_,y_,z_;
+		double x_, y_, z_;
 	public:
 		inline explicit Vector(const Point&);
-		inline Vector(double x, double y, double z): x_(x), y_(y), z_(z)
+		inline Vector(double x, double y, double z) : x_(x), y_(y), z_(z)
 		{ }
 		inline Vector(const Vector&);
 		inline Vector();
@@ -128,16 +128,16 @@ namespace FLTYPE
 		inline Point &asPoint() const;
 		inline double minComponent() const
 		{
-			if(x_<y_)
+			if (x_ < y_)
 			{
-				if(x_<z_)
+				if (x_ < z_)
 					return x_;
 				else
 					return z_;
 			}
 			else
 			{
-				if(y_<z_)
+				if (y_ < z_)
 					return y_;
 				else
 					return z_;
@@ -145,16 +145,16 @@ namespace FLTYPE
 		}
 		inline double maxComponent() const
 		{
-			if(x_>y_)
+			if (x_ > y_)
 			{
-				if(x_>z_)
+				if (x_ > z_)
 					return x_;
 				else
 					return z_;
 			}
 			else
 			{
-				if(y_>z_)
+				if (y_ > z_)
 					return y_;
 				else
 					return z_;
@@ -162,18 +162,30 @@ namespace FLTYPE
 		}
 
 		inline void Set(double x, double y, double z)
-		{ 
+		{
 			x_ = x;
 			y_ = y;
 			z_ = z;
 		}
 
-		friend std::ostream& operator<<(std::ostream& os, const Vector& p);
-		friend std::istream& operator>>(std::istream& os, Vector& p);
+		friend std::ostream& operator<<(std::ostream& os, const Vector& v)
+		{
+			os << '[' << v.x() << ' ' << v.y() << ' ' << v.z() << ']';
+			return os;
+		}
+		friend std::istream& operator >> (std::istream& is, Vector& v)
+		{
+			double x, y, z;
+			char st;
+			is >> st >> x >> st >> y >> st >> z >> st;
+			v=Vector(x,y,z);
+			return is;
+		}
 
 	}; // end class Vector
 
 } // End namespace FLTYPE
+
 
 // This cannot be above due to circular dependencies
 #include <Types/Point.h>
@@ -187,26 +199,26 @@ namespace FLTYPE
 
 	inline Vector::Vector()
 	{
-		x_=y_=z_=0.0;
+		x_ = y_ = z_ = 0.0;
 	}
 
 	inline Vector::Vector(const Vector& p)
 	{
-		x_=p.x_;
-		y_=p.y_;
-		z_=p.z_;
+		x_ = p.x_;
+		y_ = p.y_;
+		z_ = p.z_;
 	}
 
 	inline double Vector::length2() const
 	{
-		return x_*x_+y_*y_+z_*z_;
+		return x_*x_ + y_*y_ + z_*z_;
 	}
 
 	inline Vector& Vector::operator=(const Vector& v)
 	{
-		x_=v.x_;
-		y_=v.y_;
-		z_=v.z_;
+		x_ = v.x_;
+		y_ = v.y_;
+		z_ = v.z_;
 		return *this;
 	}
 
@@ -231,22 +243,22 @@ namespace FLTYPE
 
 	inline bool operator<(Vector v1, Vector v2)
 	{
-		return(v1.length()<v2.length());
+		return(v1.length() < v2.length());
 	}
 
 	inline bool operator<=(Vector v1, Vector v2)
 	{
-		return(v1.length()<=v2.length());
+		return(v1.length() <= v2.length());
 	}
 
 	inline bool operator>(Vector v1, Vector v2)
 	{
-		return(v1.length()>v2.length());
+		return(v1.length() > v2.length());
 	}
 
 	inline bool operator>=(Vector v1, Vector v2)
 	{
-		return(v1.length()>=v2.length());
+		return(v1.length() >= v2.length());
 	}
 
 	inline Vector Vector::operator*(const double s) const
@@ -271,17 +283,17 @@ namespace FLTYPE
 
 	inline Vector Vector::operator/(const double d) const
 	{
-		return Vector(x_/d, y_/d, z_/d);
+		return Vector(x_ / d, y_ / d, z_ / d);
 	}
 
 	inline Vector Vector::operator/(const Vector& v2) const
 	{
-		return Vector(x_/v2.x_, y_/v2.y_, z_/v2.z_);
+		return Vector(x_ / v2.x_, y_ / v2.y_, z_ / v2.z_);
 	}
 
 	inline Vector Vector::operator+(const Vector& v2) const
 	{
-		return Vector(x_+v2.x_, y_+v2.y_, z_+v2.z_);
+		return Vector(x_ + v2.x_, y_ + v2.y_, z_ + v2.z_);
 	}
 
 	inline Vector Vector::operator*(const Vector& v2) const
@@ -291,83 +303,83 @@ namespace FLTYPE
 
 	inline Vector Vector::operator-(const Vector& v2) const
 	{
-		return Vector(x_-v2.x_, y_-v2.y_, z_-v2.z_);
+		return Vector(x_ - v2.x_, y_ - v2.y_, z_ - v2.z_);
 	}
 
 	inline Vector Vector::operator-(const Point& v2) const
 	{
-		return Vector(x_-v2.x_, y_-v2.y_, z_-v2.z_);
+		return Vector(x_ - v2.x_, y_ - v2.y_, z_ - v2.z_);
 	}
 
 	inline Vector& Vector::operator+=(const Vector& v2)
 	{
-		x_+=v2.x_;
-		y_+=v2.y_;
-		z_+=v2.z_;
+		x_ += v2.x_;
+		y_ += v2.y_;
+		z_ += v2.z_;
 		return *this;
 	}
 
 	inline Vector& Vector::operator-=(const Vector& v2)
 	{
-		x_-=v2.x_;
-		y_-=v2.y_;
-		z_-=v2.z_;
+		x_ -= v2.x_;
+		y_ -= v2.y_;
+		z_ -= v2.z_;
 		return *this;
 	}
 
 	inline Vector Vector::operator-() const
 	{
-		return Vector(-x_,-y_,-z_);
+		return Vector(-x_, -y_, -z_);
 	}
 
 	inline double Vector::length() const
 	{
-		return sqrt(x_*x_+y_*y_+z_*z_);
+		return sqrt(x_*x_ + y_*y_ + z_*z_);
 	}
 
 	inline Vector Abs(const Vector& v)
 	{
-		double x=v.x_<0?-v.x_:v.x_;
-		double y=v.y_<0?-v.y_:v.y_;
-		double z=v.z_<0?-v.z_:v.z_;
-		return Vector(x,y,z);
+		double x = v.x_ < 0 ? -v.x_ : v.x_;
+		double y = v.y_ < 0 ? -v.y_ : v.y_;
+		double z = v.z_ < 0 ? -v.z_ : v.z_;
+		return Vector(x, y, z);
 	}
 
 	inline Vector Cross(const Vector& v1, const Vector& v2)
 	{
-		return Vector(v1.y_*v2.z_-v1.z_*v2.y_,
-			v1.z_*v2.x_-v1.x_*v2.z_,
-			v1.x_*v2.y_-v1.y_*v2.x_);
+		return Vector(v1.y_*v2.z_ - v1.z_*v2.y_,
+			v1.z_*v2.x_ - v1.x_*v2.z_,
+			v1.x_*v2.y_ - v1.y_*v2.x_);
 	}
 
 	inline Vector Interpolate(const Vector& v1, const Vector& v2,
 		double weight)
 	{
-		double weight1=1.0-weight;
-		return Vector(v2.x_*weight+v1.x_*weight1,
-			v2.y_*weight+v1.y_*weight1,
-			v2.z_*weight+v1.z_*weight1);
+		double weight1 = 1.0 - weight;
+		return Vector(v2.x_*weight + v1.x_*weight1,
+			v2.y_*weight + v1.y_*weight1,
+			v2.z_*weight + v1.z_*weight1);
 	}
 
 	inline Vector& Vector::operator*=(const double d)
 	{
-		x_*=d;
-		y_*=d;
-		z_*=d;
+		x_ *= d;
+		y_ *= d;
+		z_ *= d;
 		return *this;
 	}
 
 	inline Vector& Vector::operator/=(const double d)
 	{
-		x_/=d;
-		y_/=d;
-		z_/=d;
+		x_ /= d;
+		y_ /= d;
+		z_ /= d;
 		return *this;
 	}
 
 	inline void Vector::x(double d)
 	{
-		x_=d;
+		x_ = d;
 	}
 
 	inline double Vector::x() const
@@ -377,7 +389,7 @@ namespace FLTYPE
 
 	inline void Vector::y(double d)
 	{
-		y_=d;
+		y_ = d;
 	}
 
 	inline double Vector::y() const
@@ -387,7 +399,7 @@ namespace FLTYPE
 
 	inline void Vector::z(double d)
 	{
-		z_=d;
+		z_ = d;
 	}
 
 	inline double Vector::z() const
@@ -397,7 +409,7 @@ namespace FLTYPE
 
 	inline void Vector::u(double d)
 	{
-		x_=d;
+		x_ = d;
 	}
 
 	inline double Vector::u() const
@@ -407,7 +419,7 @@ namespace FLTYPE
 
 	inline void Vector::v(double d)
 	{
-		y_=d;
+		y_ = d;
 	}
 
 	inline double Vector::v() const
@@ -417,7 +429,7 @@ namespace FLTYPE
 
 	inline void Vector::w(double d)
 	{
-		z_=d;
+		z_ = d;
 	}
 
 	inline double Vector::w() const
@@ -427,23 +439,23 @@ namespace FLTYPE
 
 	inline double Dot(const Vector& v1, const Vector& v2)
 	{
-		return v1.x_*v2.x_+v1.y_*v2.y_+v1.z_*v2.z_;
+		return v1.x_*v2.x_ + v1.y_*v2.y_ + v1.z_*v2.z_;
 	}
 
 	inline double Dot(const Vector& v, const Point& p)
 	{
-		return v.x_*p.x_+v.y_*p.y_+v.z_*p.z_;
+		return v.x_*p.x_ + v.y_*p.y_ + v.z_*p.z_;
 	}
 
 	inline
 		double Vector::normalize()
 	{
-		double l=sqrt(x_*x_ + y_*y_ + z_*z_);
+		double l = sqrt(x_*x_ + y_*y_ + z_*z_);
 		if (l > 0.0)
 		{
-			x_/=l;
-			y_/=l;
-			z_/=l;
+			x_ /= l;
+			y_ /= l;
+			z_ /= l;
 		}
 		return l;
 	}
@@ -451,12 +463,12 @@ namespace FLTYPE
 	inline
 		double Vector::safe_normalize()
 	{
-		double l=sqrt(x_*x_ + y_*y_ + z_*z_);
+		double l = sqrt(x_*x_ + y_*y_ + z_*z_);
 		if (l > 0.0)
 		{
-			x_/=l;
-			y_/=l;
-			z_/=l;
+			x_ /= l;
+			y_ /= l;
+			z_ /= l;
 		}
 		return l;
 	}

@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Stencil_h
 #define FL_Stencil_h
 
-#include <BBox.h>
+#include <FLIVR/BBox.h>
 #include "boost/unordered_map.hpp"
 
 namespace FL

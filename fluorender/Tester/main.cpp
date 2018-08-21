@@ -14,7 +14,9 @@ int main(int argc, char* argv[])
 
 	//GroupTest();
 
-	SceneGraphTest();
+	//SceneGraphTest();
+
+	SpecialValueTest();
 
 	printf("All done. Quit.\n");
 	cin.get();

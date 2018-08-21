@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <math.h>
 #include <assert.h>
 
-#include "Utils.h"
+#include <FLIVR/Utils.h>
 
 namespace FLIVR
 {
@@ -177,7 +177,7 @@ namespace FLIVR
 } // End namespace FLIVR
 
 // This cannot be above due to circular dependencies
-#include "Point.h"
+#include <FLIVR/Point.h>
 
 namespace FLIVR
 {

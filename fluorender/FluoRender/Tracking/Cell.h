@@ -28,9 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Cell_h
 #define FL_Cell_h
 
-#include <Point.h>
-#include <BBox.h>
-#include <Color.h>
+#include <FLIVR/Point.h>
+#include <FLIVR/BBox.h>
+#include <FLIVR/Color.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/graph/graph_traits.hpp>

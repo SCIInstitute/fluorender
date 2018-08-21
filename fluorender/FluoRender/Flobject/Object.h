@@ -66,6 +66,7 @@ public:
 	virtual void objectChanged(void*, const std::string &exp);
 
 	//add a value
+	//generic types
 	virtual bool addValue(const std::string &name, Referenced* value);
 	virtual bool addValue(const std::string &name, bool value);
 	virtual bool addValue(const std::string &name, char value);
@@ -80,23 +81,12 @@ public:
 	virtual bool addValue(const std::string &name, double);
 	virtual bool addValue(const std::string &name, const std::string &value);
 	virtual bool addValue(const std::string &name, const std::wstring &value);
-	//virtual bool addValue(const std::string &name, const Vec2f &value);
-	//virtual bool addValue(const std::string &name, const Vec3f &value);
-	//virtual bool addValue(const std::string &name, const Vec4f &value);
-	//virtual bool addValue(const std::string &name, const Vec2d &value);
-	//virtual bool addValue(const std::string &name, const Vec3d &value);
-	//virtual bool addValue(const std::string &name, const Vec4d &value);
-	//virtual bool addValue(const std::string &name, const Quat &value);
-	//virtual bool addValue(const std::string &name, const Planef &value);
-	//virtual bool addValue(const std::string &name, const Planed &value);
-	//virtual bool addValue(const std::string &name, const Matrixf &value);
-	//virtual bool addValue(const std::string &name, const Matrixd &value);
-	//virtual bool addValue(const std::string &name, const Color3f &value);
-	//virtual bool addValue(const std::string &name, const Color3d &value);
-	//virtual bool addValue(const std::string &name, const HsvColor3f &value);
-	//virtual bool addValue(const std::string &name, const HsvColor3d &value);
+	//FluoRender's special types
+	virtual bool addValue(const std::string &name, const FLTYPE::Point &value);
+	virtual bool addValue(const std::string &name, const FLTYPE::Vector &value);
 
 	/** All the set value functions */
+	//generic types
 	virtual bool setValue(const std::string &name, Referenced* value, bool notify = true);
 	virtual bool setValue(const std::string &name, bool value, bool notify = true);
 	virtual bool setValue(const std::string &name, char value, bool notify = true);
@@ -111,23 +101,12 @@ public:
 	virtual bool setValue(const std::string &name, double value, bool notify = true);
 	virtual bool setValue(const std::string &name, const std::string &value, bool notify = true);
 	virtual bool setValue(const std::string &name, const std::wstring &value, bool notify = true);
-	//virtual bool setValue(const std::string &name, const Vec2f &value);
-	//virtual bool setValue(const std::string &name, const Vec3f &value);
-	//virtual bool setValue(const std::string &name, const Vec4f &value);
-	//virtual bool setValue(const std::string &name, const Vec2d &value);
-	//virtual bool setValue(const std::string &name, const Vec3d &value);
-	//virtual bool setValue(const std::string &name, const Vec4d &value);
-	//virtual bool setValue(const std::string &name, const Quat &value);
-	//virtual bool setValue(const std::string &name, const Planef &value);
-	//virtual bool setValue(const std::string &name, const Planed &value);
-	//virtual bool setValue(const std::string &name, const Matrixf &value);
-	//virtual bool setValue(const std::string &name, const Matrixd &value);
-	//virtual bool setValue(const std::string &name, const Color3f &value);
-	//virtual bool setValue(const std::string &name, const Color3d &value);
-	//virtual bool setValue(const std::string &name, const HsvColor3f &value);
-	//virtual bool setValue(const std::string &name, const HsvColor3d &value);
+	//FluoRender's special types
+	virtual bool setValue(const std::string &name, const FLTYPE::Point &value, bool notify = true);
+	virtual bool setValue(const std::string &name, const FLTYPE::Vector &value, bool notify = true);
 
 	/** All the get value functions */
+	//generic types
 	virtual bool getValue(const std::string &name, Referenced** value);
 	virtual bool getValue(const std::string &name, bool &value);
 	virtual bool getValue(const std::string &name, char &value);
@@ -142,21 +121,9 @@ public:
 	virtual bool getValue(const std::string &name, double &value);
 	virtual bool getValue(const std::string &name, std::string &value);
 	virtual bool getValue(const std::string &name, std::wstring &value);
-	//virtual bool getValue(const std::string &name, Vec2f &value);
-	//virtual bool getValue(const std::string &name, Vec3f &value);
-	//virtual bool getValue(const std::string &name, Vec4f &value);
-	//virtual bool getValue(const std::string &name, Vec2d &value);
-	//virtual bool getValue(const std::string &name, Vec3d &value);
-	//virtual bool getValue(const std::string &name, Vec4d &value);
-	//virtual bool getValue(const std::string &name, Quat &value);
-	//virtual bool getValue(const std::string &name, Planef &value);
-	//virtual bool getValue(const std::string &name, Planed &value);
-	//virtual bool getValue(const std::string &name, Matrixf &value);
-	//virtual bool getValue(const std::string &name, Matrixd &value);
-	//virtual bool getValue(const std::string &name, Color3f &value);
-	//virtual bool getValue(const std::string &name, Color3d &value);
-	//virtual bool getValue(const std::string &name, HsvColor3f &value);
-	//virtual bool getValue(const std::string &name, HsvColor3d &value);
+	//FluoRender's special types
+	virtual bool getValue(const std::string &name, FLTYPE::Point &value);
+	virtual bool getValue(const std::string &name, FLTYPE::Vector &value);
 
 	//get value the class
 	virtual Value* getValue(const std::string &name)

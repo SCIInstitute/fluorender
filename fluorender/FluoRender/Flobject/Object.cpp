@@ -173,80 +173,15 @@ bool Object::addValue(const std::string &name, const std::wstring &value)
 	OBJECT_ADD_VALUE_BODY;
 }
 
-//bool Object::addValue(const std::string &name, const Vec2f &value)
-//{
-//	OBJECT_ADD_VALUE_BODY
-//}
-//
-//bool Object::addValue(const std::string &name, const Vec3f &value)
-//{
-//	OBJECT_ADD_VALUE_BODY
-//}
-//
-//bool Object::addValue(const std::string &name, const Vec4f &value)
-//{
-//	OBJECT_ADD_VALUE_BODY
-//}
-//
-//bool Object::addValue(const std::string &name, const Vec2d &value)
-//{
-//	OBJECT_ADD_VALUE_BODY
-//}
-//
-//bool Object::addValue(const std::string &name, const Vec3d &value)
-//{
-//	OBJECT_ADD_VALUE_BODY
-//}
-//
-//bool Object::addValue(const std::string &name, const Vec4d &value)
-//{
-//	OBJECT_ADD_VALUE_BODY
-//}
-//
-//bool Object::addValue(const std::string &name, const Quat &value)
-//{
-//	OBJECT_ADD_VALUE_BODY
-//}
-//
-//bool Object::addValue(const std::string &name, const Planef &value)
-//{
-//	OBJECT_ADD_VALUE_BODY
-//}
-//
-//bool Object::addValue(const std::string &name, const Planed &value)
-//{
-//	OBJECT_ADD_VALUE_BODY
-//}
-//
-//bool Object::addValue(const std::string &name, const Matrixf &value)
-//{
-//	OBJECT_ADD_VALUE_BODY
-//}
-//
-//bool Object::addValue(const std::string &name, const Matrixd &value)
-//{
-//	OBJECT_ADD_VALUE_BODY
-//}
-//
-//bool Object::addValue(const std::string &name, const Color3f &value)
-//{
-//	OBJECT_ADD_VALUE_BODY
-//}
-//
-//bool Object::addValue(const std::string &name, const Color3d &value)
-//{
-//	OBJECT_ADD_VALUE_BODY
-//}
-//
-//bool Object::addValue(const std::string &name, const HsvColor3f &value)
-//{
-//	OBJECT_ADD_VALUE_BODY
-//}
-//
-//bool Object::addValue(const std::string &name, const HsvColor3d &value)
-//{
-//	OBJECT_ADD_VALUE_BODY
-//}
+bool Object::addValue(const std::string &name, const FLTYPE::Point &value)
+{
+	OBJECT_ADD_VALUE_BODY;
+}
+
+bool Object::addValue(const std::string &name, const FLTYPE::Vector &value)
+{
+	OBJECT_ADD_VALUE_BODY;
+}
 
 //define function bodies first
 //set functions
@@ -255,8 +190,11 @@ bool Object::addValue(const std::string &name, const std::wstring &value)
 	{ \
 		bool result = false; \
 		if (_vs_stack.top()) \
+		{ \
 			result = _vs_stack.top()->setValue(name, value, notify); \
-		notifyObserversOfChange(name); \
+			if (result) \
+				notifyObserversOfChange(name); \
+		} \
 		return result; \
 	} \
 	return false
@@ -273,8 +211,11 @@ bool Object::setValue(const std::string &name, Referenced* value, bool notify)
 			value->addObserver(this);
 		bool result = false;
 		if (_vs_stack.top())
+		{
 			result = _vs_stack.top()->setValue(name, value, notify);
-		notifyObserversOfChange();
+			if (result)
+				notifyObserversOfChange();
+		}
 		return result;
 	}
 	return false;
@@ -358,80 +299,17 @@ bool Object::setValue(const std::string &name, const std::wstring &value, bool n
 	OBJECT_SET_VALUE_BODY;
 }
 
-//bool Object::setValue(const std::string &name, const Vec2f &value)
-//{
-//	OBJECT_SET_VALUE_BODY
-//}
-//
-//bool Object::setValue(const std::string &name, const Vec3f &value)
-//{
-//	OBJECT_SET_VALUE_BODY
-//}
-//
-//bool Object::setValue(const std::string &name, const Vec4f &value)
-//{
-//	OBJECT_SET_VALUE_BODY
-//}
-//
-//bool Object::setValue(const std::string &name, const Vec2d &value)
-//{
-//	OBJECT_SET_VALUE_BODY
-//}
-//
-//bool Object::setValue(const std::string &name, const Vec3d &value)
-//{
-//	OBJECT_SET_VALUE_BODY
-//}
-//
-//bool Object::setValue(const std::string &name, const Vec4d &value)
-//{
-//	OBJECT_SET_VALUE_BODY
-//}
-//
-//bool Object::setValue(const std::string &name, const Quat &value)
-//{
-//	OBJECT_SET_VALUE_BODY
-//}
-//
-//bool Object::setValue(const std::string &name, const Planef &value)
-//{
-//	OBJECT_SET_VALUE_BODY
-//}
-//
-//bool Object::setValue(const std::string &name, const Planed &value)
-//{
-//	OBJECT_SET_VALUE_BODY
-//}
-//
-//bool Object::setValue(const std::string &name, const Matrixf &value)
-//{
-//	OBJECT_SET_VALUE_BODY
-//}
-//
-//bool Object::setValue(const std::string &name, const Matrixd &value)
-//{
-//	OBJECT_SET_VALUE_BODY
-//}
-//
-//bool Object::setValue(const std::string &name, const Color3f &value)
-//{
-//	OBJECT_SET_VALUE_BODY
-//}
-//
-//bool Object::setValue(const std::string &name, const Color3d &value)
-//{
-//	OBJECT_SET_VALUE_BODY
-//}
-//
-//bool Object::setValue(const std::string &name, const HsvColor3f &value)
-//{
-//	OBJECT_SET_VALUE_BODY
-//}
-//
-//bool Object::setValue(const std::string &name, const HsvColor3d &value)
-//{
-//	OBJECT_SET_VALUE_BODY
-//}
+bool Object::setValue(const std::string &name, const FLTYPE::Point &value, bool notify)
+{
+	FLTYPE::Point old_value;
+	OBJECT_SET_VALUE_BODY;
+}
+
+bool Object::setValue(const std::string &name, const FLTYPE::Vector &value, bool notify)
+{
+	FLTYPE::Vector old_value;
+	OBJECT_SET_VALUE_BODY;
+}
 
 //define function bodies first
 //get functions
@@ -512,16 +390,16 @@ bool Object::getValue(const std::string &name, std::wstring &value)
 	OBJECT_GET_VALUE_BODY;
 }
 
-//bool Object::getValue(const std::string &name, Vec2f &value)
-//{
-//	OBJECT_GET_VALUE_BODY
-//}
-//
-//bool Object::getValue(const std::string &name, Vec3f &value)
-//{
-//	OBJECT_GET_VALUE_BODY
-//}
-//
+bool Object::getValue(const std::string &name, FLTYPE::Point &value)
+{
+	OBJECT_GET_VALUE_BODY;
+}
+
+bool Object::getValue(const std::string &name, FLTYPE::Vector &value)
+{
+	OBJECT_GET_VALUE_BODY;
+}
+
 //bool Object::getValue(const std::string &name, Vec4f &value)
 //{
 //	OBJECT_GET_VALUE_BODY

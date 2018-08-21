@@ -26,10 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <FLIVR/Color.h>
-#include <FLIVR/Utils.h>
+#include <Types/Color.h>
+#include <Types/Utils.h>
 
-namespace FLIVR
+namespace FLTYPE
 {
 	Color::Color()
 		: r_(0), g_(0), b_(0)
@@ -246,4 +246,4 @@ namespace FLIVR
 			return 0;
 	}
 
-} // End namespace FLIVR
+} // End namespace FLTYPE

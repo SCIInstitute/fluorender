@@ -3,7 +3,7 @@
 
    The MIT License
 
-   Copyright (c) 2004 Scientific Computing and Imaging Institute,
+   Copyright (c) 2018 Scientific Computing and Imaging Institute,
    University of Utah.
 
 
@@ -26,14 +26,14 @@
    DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef SLIVR_Matrix_h
-#define SLIVR_Matrix_h
+#ifndef _FLMATRIX_H_
+#define _FLMATRIX_H_
 
-#include <FLIVR/Utils.h>
-#include <FLIVR/Vector.h>
-#include <FLIVR/Point.h>
+#include <Types/Utils.h>
+#include <Types/Vector.h>
+#include <Types/Point.h>
 
-namespace FLIVR
+namespace FLTYPE
 {
 	class Mat3
 	{
@@ -347,6 +347,6 @@ namespace FLIVR
 					v1[1] * v2[0], v1[1] * v2[1], v1[1] * v2[2],
 					v1[2] * v2[0], v1[2] * v2[1], v1[2] * v2[2]);
 	}
-} // End namespace FLIVR
+} // End namespace FLTYPE
 
-#endif //ifndef SLIVR_Point_h
+#endif //ifndef _FLMATRIX_H_

@@ -37,97 +37,80 @@ using std::ostream;
 
 using namespace FLTYPE;
 
-	string Point::get_string() const
+string Point::get_string() const
+{
+	char buf[100];
+	sprintf(buf, "[%10.3g, %10.3g, %10.3g]", x_, y_, z_);
+	return buf;
+}
+
+Point::Point(double x, double y, double z, double w)
+{
+	if(w==0)
 	{
-		char buf[100];
-		sprintf(buf, "[%10.3g, %10.3g, %10.3g]", x_, y_, z_);
-		return buf;
+		cerr << "degenerate point!" << endl;
+		x_=y_=z_=0;
+	}
+	else
+	{
+		x_=x/w;
+		y_=y/w;
+		z_=z/w;
+	}
+}
+
+namespace FLTYPE
+{
+	Point AffineCombination(const Point& p1, double w1,
+		const Point& p2, double w2)
+	{
+		return Point(p1.x_*w1 + p2.x_*w2,
+			p1.y_*w1 + p2.y_*w2,
+			p1.z_*w1 + p2.z_*w2);
 	}
 
-	Point::Point(double x, double y, double z, double w)
+	Point AffineCombination(const Point& p1, double w1,
+		const Point& p2, double w2,
+		const Point& p3, double w3)
 	{
-		if(w==0)
-		{
-			cerr << "degenerate point!" << endl;
-			x_=y_=z_=0;
-		}
-		else
-		{
-			x_=x/w;
-			y_=y/w;
-			z_=z/w;
-		}
+		return Point(p1.x_*w1 + p2.x_*w2 + p3.x_*w3,
+			p1.y_*w1 + p2.y_*w2 + p3.y_*w3,
+			p1.z_*w1 + p2.z_*w2 + p3.z_*w3);
 	}
 
-	namespace FLTYPE
+	Point AffineCombination(const Point& p1, double w1,
+		const Point& p2, double w2,
+		const Point& p3, double w3,
+		const Point& p4, double w4)
 	{
-		Point AffineCombination(const Point& p1, double w1,
-			const Point& p2, double w2)
-		{
-			return Point(p1.x_*w1 + p2.x_*w2,
-				p1.y_*w1 + p2.y_*w2,
-				p1.z_*w1 + p2.z_*w2);
-		}
-
-		Point AffineCombination(const Point& p1, double w1,
-			const Point& p2, double w2,
-			const Point& p3, double w3)
-		{
-			return Point(p1.x_*w1 + p2.x_*w2 + p3.x_*w3,
-				p1.y_*w1 + p2.y_*w2 + p3.y_*w3,
-				p1.z_*w1 + p2.z_*w2 + p3.z_*w3);
-		}
-
-		Point AffineCombination(const Point& p1, double w1,
-			const Point& p2, double w2,
-			const Point& p3, double w3,
-			const Point& p4, double w4)
-		{
-			return Point(p1.x_*w1 + p2.x_*w2 + p3.x_*w3 + p4.x_*w4,
-				p1.y_*w1 + p2.y_*w2 + p3.y_*w3 + p4.y_*w4,
-				p1.z_*w1 + p2.z_*w2 + p3.z_*w3 + p4.z_*w4);
-		}
+		return Point(p1.x_*w1 + p2.x_*w2 + p3.x_*w3 + p4.x_*w4,
+			p1.y_*w1 + p2.y_*w2 + p3.y_*w3 + p4.y_*w4,
+			p1.z_*w1 + p2.z_*w2 + p3.z_*w3 + p4.z_*w4);
 	}
+}
 
-	ostream& operator<<( ostream& os, const Point& p )
-	{
-		os << '[' << p.x() << ' ' << p.y() << ' ' << p.z() << ']';
-		return os;
-	}
+int Point::Overlap( double a, double b, double e )
+{
+	double hi, lo, h, l;
 
-	istream& operator>>( istream& is, Point& v)
-	{
-		double x, y, z;
-		char st;
-		is >> st >> x >> st >> y >> st >> z >> st;
-		v=Point(x,y,z);
-		return is;
-	}
+	hi = a + e;
+	lo = a - e;
+	h  = b + e;
+	l  = b - e;
 
-	int
-		Point::Overlap( double a, double b, double e )
-	{
-		double hi, lo, h, l;
+	if ( ( hi > l ) && ( lo < h ) )
+		return 1;
+	else
+		return 0;
+}
 
-		hi = a + e;
-		lo = a - e;
-		h  = b + e;
-		l  = b - e;
-
-		if ( ( hi > l ) && ( lo < h ) )
-			return 1;
-		else
-			return 0;
-	}
-
-	int
-		Point::InInterval( Point a, double epsilon )
-	{
-		if ( Overlap( x_, a.x(), epsilon ) &&
-			Overlap( y_, a.y(), epsilon )  &&
-			Overlap( z_, a.z(), epsilon ) )
-			return 1;
-		else
-			return 0;
-	}
+int Point::InInterval( Point a, double epsilon )
+{
+	if ( Overlap( x_, a.x(), epsilon ) &&
+		Overlap( y_, a.y(), epsilon )  &&
+		Overlap( z_, a.z(), epsilon ) )
+		return 1;
+	else
+		return 0;
+}
 

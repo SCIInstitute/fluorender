@@ -3,7 +3,7 @@
 
    The MIT License
 
-   Copyright (c) 2004 Scientific Computing and Imaging Institute,
+   Copyright (c) 2018 Scientific Computing and Imaging Institute,
    University of Utah.
 
    
@@ -29,13 +29,14 @@
 #ifndef _QUATERNION_H_
 #define _QUATERNION_H_
 
-#include <FLIVR/Vector.h>
-#include "../utility.h"
+#include <Types/Vector.h>
+#include <Types/Utils.h>
 #include <math.h>
 
 #pragma warning (disable : 4521 4522)
 
-namespace FLIVR{
+namespace FLTYPE
+{
 
 class Quaternion
 {
@@ -52,7 +53,7 @@ public:
 	// Set Quat from axis-angle
 	Quaternion(double d, Vector& axis)
 	{
-		double h_angle = d * PI / 360.0;
+		double h_angle = d * Pi() / 360.0;
 		double sin_a = sin(h_angle);
 		w = cos(h_angle);
 		x = sin_a * axis.x();
@@ -170,16 +171,21 @@ public:
 		return (x==q.x && y==q.y && z==q.z && w==q.w);
 	}
 
+	bool operator!=(const Quaternion& q)const
+	{
+		return (x != q.x || y != q.y || z != q.z || w != q.w);
+	}
+
 	bool AlmostEqual(const Quaternion& q)const
 	{
-		return (fabs(x - q.x) < EPS &&
-			fabs(y - q.y) < EPS &&
-			fabs(z - q.z) < EPS &&
-			fabs(w - q.w) < EPS) ||
-			(fabs(x + q.x) < EPS &&
-			fabs(y + q.y) < EPS &&
-			fabs(z + q.z) < EPS &&
-			fabs(w + q.w) < EPS);
+		return (fabs(x - q.x) < Epsilon() &&
+			fabs(y - q.y) < Epsilon() &&
+			fabs(z - q.z) < Epsilon() &&
+			fabs(w - q.w) < Epsilon()) ||
+			(fabs(x + q.x) < Epsilon() &&
+			fabs(y + q.y) < Epsilon() &&
+			fabs(z + q.z) < Epsilon() &&
+			fabs(w + q.w) < Epsilon());
 	}
 
 	bool IsIdentity()
@@ -228,7 +234,7 @@ public:
 		if (fabs(sp) > 0.9999)
 		{
 			// Looking straight up or down
-			rx = PI_2 * sp;
+			rx = PiHalf() * sp;
 
 			// Compute heading, slam bank to zero
 			ry = atan2(-x*z + w*y, 0.5 - y*y - z*z);
@@ -272,6 +278,13 @@ public:
 
 public:
 	double x, y, z, w;
+
+public:
+	friend std::ostream& operator<<(std::ostream& os, const Quaternion& q)
+	{
+		os << '[' << q.x << ' ' << q.y << ' ' << q.z << ' ' << q.w << ']';
+		return os;
+	}
 };
 
 inline Quaternion operator*(double s, Quaternion& q)
@@ -290,9 +303,9 @@ inline Quaternion Slerp(Quaternion& a, Quaternion& b, double t)
 	double cos_theta = Dot(a, b);
 	double theta;
 	double r_sin_theta;
-	if (cos_theta >= EPS)
+	if (cos_theta >= Epsilon())
 	{
-		if (1.0-cos_theta > EPS)
+		if (1.0-cos_theta > Epsilon())
 		{
 			theta = acos(cos_theta);
 			r_sin_theta = 1.0 / sin(theta);
@@ -307,7 +320,7 @@ inline Quaternion Slerp(Quaternion& a, Quaternion& b, double t)
 	}
 	else
 	{
-		if (1.0+cos_theta > EPS)
+		if (1.0+cos_theta > Epsilon())
 		{
 			theta = acos(-cos_theta);
 			r_sin_theta = 1.0 / sin(theta);

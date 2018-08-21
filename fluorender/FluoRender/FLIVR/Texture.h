@@ -30,9 +30,9 @@
 #define SLIVR_Texture_h
 
 #include <vector>
-#include "Transform.h"
+#include <FLIVR/Transform.h>
 #include "TextureBrick.h"
-#include "Utils.h"
+#include <FLIVR/Utils.h>
 #include <glm/glm.hpp>
 
 namespace FLIVR

@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2004 Scientific Computing and Imaging Institute,
+Copyright (c) 2018 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -26,18 +26,15 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef SLIVR_BBox_h
-#define SLIVR_BBox_h
+#ifndef _FLBBOX_H_
+#define _FLBBOX_H_
 
-#include <FLIVR/Point.h>
+#include <Types/Point.h>
+#include <Types/Utils.h>
 #include <ostream>
+#include <algorithm>
 
-#ifdef _WIN32
-#  undef min
-#  undef max
-#endif
-
-namespace FLIVR
+namespace FLTYPE
 {
 	class Vector;
 
@@ -86,8 +83,8 @@ namespace FLIVR
 		{
 			if(is_valid_)
 			{
-				cmin_=Min(p, cmin_);
-				cmax_=Max(p, cmax_);
+				cmin_=FLTYPE::Min(p, cmin_);
+				cmax_=FLTYPE::Max(p, cmax_);
 			} 
 			else 
 			{
@@ -104,12 +101,12 @@ namespace FLIVR
 		{
 			if (is_valid_)
 			{
-				cmin_.x(cmin_.x()-val); 
-				cmin_.y(cmin_.y()-val); 
-				cmin_.z(cmin_.z()-val); 
-				cmax_.x(cmax_.x()+val); 
-				cmax_.y(cmax_.y()+val); 
-				cmax_.z(cmax_.z()+val);     
+				cmin_.x(cmin_.x()-val);
+				cmin_.y(cmin_.y()-val);
+				cmin_.z(cmin_.z()-val);
+				cmax_.x(cmax_.x()+val);
+				cmax_.y(cmax_.y()+val);
+				cmax_.z(cmax_.z()+val);
 			}
 		}
 
@@ -139,8 +136,8 @@ namespace FLIVR
 			Vector r(radius,radius,radius);
 			if(is_valid_)
 			{
-				cmin_=Min(p-r, cmin_);
-				cmax_=Max(p+r, cmax_);
+				cmin_=FLTYPE::Min(p-r, cmin_);
+				cmax_=FLTYPE::Max(p+r, cmax_);
 			} 
 			else 
 			{
@@ -155,8 +152,8 @@ namespace FLIVR
 		{
 			if(b.valid())
 			{
-				extend(b.min());
-				extend(b.max());
+				extend(b.Min());
+				extend(b.Max());
 			}
 		}
 
@@ -180,8 +177,8 @@ namespace FLIVR
 		{
 			if (is_valid_)
 			{
-				cmin_ = Max(cmin_, box.min());
-				cmax_ = Min(cmax_, box.max());
+				cmin_ = FLTYPE::Max(cmin_, box.Min());
+				cmax_ = FLTYPE::Min(cmax_, box.Max());
 				if (!(cmin_ <= cmax_))
 					is_valid_ = false;
 			}
@@ -201,14 +198,14 @@ namespace FLIVR
 		{
 			assert(is_valid_);
 			Vector diagonal(cmax_-cmin_);
-			return Max(diagonal.x(), diagonal.y(), diagonal.z());
+			return FLTYPE::Max(diagonal.x(), diagonal.y(), diagonal.z());
 		}
 
 		inline double shortest_edge() const
 		{
 			assert(is_valid_);
 			Vector diagonal(cmax_-cmin_);
-			return Min(diagonal.x(), diagonal.y(), diagonal.z());
+			return FLTYPE::Min(diagonal.x(), diagonal.y(), diagonal.z());
 		}
 
 		//! Move the bounding box 
@@ -221,10 +218,10 @@ namespace FLIVR
 		//! Scale the bounding box by s, centered around o
 		void scale(double s, const Vector &o);
 
-		inline Point min() const
+		inline Point Min() const
 		{ return cmin_; }
 
-		inline Point max() const
+		inline Point Max() const
 		{ return cmax_; }
 
 		inline Vector diagonal() const
@@ -253,7 +250,11 @@ namespace FLIVR
 		//distance between two bboxes
 		double distance(const BBox& bb) const;
 
-		friend std::ostream& operator<<(std::ostream& out, const BBox& b);
+		friend std::ostream& operator<<(std::ostream& os, const BBox& b)
+		{
+			os << '[' << b.cmin_ << ' ' << b.cmax_ << ']';
+			return os;
+		}
 
 	private:
 		Point cmin_;
@@ -267,20 +268,20 @@ namespace FLIVR
 		BBox ibox;
 		if (!box1.valid() || !box2.valid())
 			return ibox;
-		if (box1.max().x() < box2.min().x())
+		if (box1.Max().x() < box2.Min().x())
 			return ibox;
-		if (box1.min().x() > box2.max().x())
+		if (box1.Min().x() > box2.Max().x())
 			return ibox;
-		if (box1.max().y() < box2.min().y())
+		if (box1.Max().y() < box2.Min().y())
 			return ibox;
-		if (box1.min().y() > box2.max().y())
+		if (box1.Min().y() > box2.Max().y())
 			return ibox;
-		if (box1.max().z() < box2.min().z())
+		if (box1.Max().z() < box2.Min().z())
 			return ibox;
-		if (box1.min().z() > box2.max().z())
+		if (box1.Min().z() > box2.Max().z())
 			return ibox;
-		Point min = Max(box1.min(), box2.min());
-		Point max = Min(box1.max(), box2.max());
+		Point min = Max(box1.Min(), box2.Min());
+		Point max = Min(box1.Max(), box2.Max());
 		ibox = BBox(min, max);
 		return ibox;
 	}
@@ -289,22 +290,20 @@ namespace FLIVR
 	{
 		if (!valid() || !box.valid())
 			return false;
-		if (max().x() < box.min().x())
+		if (Max().x() < box.Min().x())
 			return false;
-		if (min().x() > box.max().x())
+		if (Min().x() > box.Max().x())
 			return false;
-		if (max().y() < box.min().y())
+		if (Max().y() < box.Min().y())
 			return false;
-		if (min().y() > box.max().y())
+		if (Min().y() > box.Max().y())
 			return false;
-		if (max().z() < box.min().z())
+		if (Max().z() < box.Min().z())
 			return false;
-		if (min().z() > box.max().z())
+		if (Min().z() > box.Max().z())
 			return false;
 		return true;
 	}
+} // End namespace FLTYPE
 
-
-} // End namespace FLIVR
-
-#endif
+#endif//_FLBBOX_H_
