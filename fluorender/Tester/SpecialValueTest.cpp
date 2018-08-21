@@ -33,4 +33,9 @@ void SpecialValueTest()
 	vd->getValue("position", point2);
 	ASSERT_EQ(point, point2);
 
+	FLTYPE::PlaneSet ps(6);
+	vd->addValue("clipping_planes", ps);
+	FLTYPE::PlaneSet ps2;
+	vd->getValue("clipping_planes", ps2);
+	ASSERT_EQ(ps, ps2);
 }

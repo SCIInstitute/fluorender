@@ -84,6 +84,14 @@ public:
 	//FluoRender's special types
 	virtual bool addValue(const std::string &name, const FLTYPE::Point &value);
 	virtual bool addValue(const std::string &name, const FLTYPE::Vector &value);
+	virtual bool addValue(const std::string &name, const FLTYPE::BBox &value);
+	virtual bool addValue(const std::string &name, const FLTYPE::HSVColor &value);
+	virtual bool addValue(const std::string &name, const FLTYPE::Color &value);
+	virtual bool addValue(const std::string &name, const FLTYPE::Plane &value);
+	virtual bool addValue(const std::string &name, const FLTYPE::PlaneSet &value);
+	virtual bool addValue(const std::string &name, const FLTYPE::Quaternion &value);
+	virtual bool addValue(const std::string &name, const FLTYPE::Ray &value);
+	virtual bool addValue(const std::string &name, const FLTYPE::Transform &value);
 
 	/** All the set value functions */
 	//generic types
@@ -104,6 +112,14 @@ public:
 	//FluoRender's special types
 	virtual bool setValue(const std::string &name, const FLTYPE::Point &value, bool notify = true);
 	virtual bool setValue(const std::string &name, const FLTYPE::Vector &value, bool notify = true);
+	virtual bool setValue(const std::string &name, const FLTYPE::BBox &value, bool notify = true);
+	virtual bool setValue(const std::string &name, const FLTYPE::HSVColor &value, bool notify = true);
+	virtual bool setValue(const std::string &name, const FLTYPE::Color &value, bool notify = true);
+	virtual bool setValue(const std::string &name, const FLTYPE::Plane &value, bool notify = true);
+	virtual bool setValue(const std::string &name, const FLTYPE::PlaneSet &value, bool notify = true);
+	virtual bool setValue(const std::string &name, const FLTYPE::Quaternion &value, bool notify = true);
+	virtual bool setValue(const std::string &name, const FLTYPE::Ray &value, bool notify = true);
+	virtual bool setValue(const std::string &name, const FLTYPE::Transform &value, bool notify = true);
 
 	/** All the get value functions */
 	//generic types
@@ -124,6 +140,14 @@ public:
 	//FluoRender's special types
 	virtual bool getValue(const std::string &name, FLTYPE::Point &value);
 	virtual bool getValue(const std::string &name, FLTYPE::Vector &value);
+	virtual bool getValue(const std::string &name, FLTYPE::BBox &value);
+	virtual bool getValue(const std::string &name, FLTYPE::HSVColor &value);
+	virtual bool getValue(const std::string &name, FLTYPE::Color &value);
+	virtual bool getValue(const std::string &name, FLTYPE::Plane &value);
+	virtual bool getValue(const std::string &name, FLTYPE::PlaneSet &value);
+	virtual bool getValue(const std::string &name, FLTYPE::Quaternion &value);
+	virtual bool getValue(const std::string &name, FLTYPE::Ray &value);
+	virtual bool getValue(const std::string &name, FLTYPE::Transform &value);
 
 	//get value the class
 	virtual Value* getValue(const std::string &name)
