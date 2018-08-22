@@ -81,7 +81,7 @@ void GroupTest2()
 	group1->addValue("value3", 0.0);
 
 	//add nodes to group
-	int num1 = 2;
+	int num1 = 3;
 	for (int i = 0; i < num1; ++i)
 	{
 		Node* node = new Node();
@@ -138,6 +138,16 @@ void GroupTest2()
 	update.setValueName("value1");
 	group4->accept(update);
 	group1->getChild(0)->setValue("value1", 1.0);
+	//traverse
+	group4->accept(visitor);
+
+	//sync all
+	update.setType(SYNC_ALL_VALUES);
+	group4->accept(update);
+	group2->getChild(1)->setValue("value2", 2.0);
+	//traverse
+	group4->accept(visitor);
+	group3->getChild(2)->setValue("value3", 3.0);
 	//traverse
 	group4->accept(visitor);
 

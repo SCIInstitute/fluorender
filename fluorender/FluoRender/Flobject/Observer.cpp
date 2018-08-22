@@ -35,12 +35,13 @@ Observer::Observer()
 
 Observer::~Observer()
 {
-	//take advantage of the vector and delete reversely
-	for (int i = _observees.size()-1;
-		i>=0; --i)
+	//delete reversely
+	auto it = _observees.end();
+	while (it != _observees.begin())
 	{
-		if (_observees[i])
-			_observees[i]->removeObserver(this);
+		--it;
+		if (*it)
+			it = (*it)->removeObserver(this);
 	}
 }
 

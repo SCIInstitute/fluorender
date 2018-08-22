@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define FL_OBSERVER 1
 
 #include <Flobject/Referenced.h>
-#include <vector>
 #include <set>
 #include <string>
 
@@ -38,7 +37,6 @@ namespace FL
 class Observer
 {
 public:
-	typedef std::vector<Referenced*> Observees;
 
 	Observer();
 	virtual ~Observer();

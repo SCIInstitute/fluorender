@@ -68,16 +68,18 @@ ObserverSet* Referenced::getOrCreateObserverSet() const
 void Referenced::addObserver(Observer* observer) const
 {
 	getOrCreateObserverSet()->addObserver(observer);
-	observer->_observees.push_back(const_cast<Referenced*>(this));
+	observer->_observees.insert(const_cast<Referenced*>(this));
 }
 
-void Referenced::removeObserver(Observer* observer) const
+ObserveeIter Referenced::removeObserver(Observer* observer) const
 {
 	getOrCreateObserverSet()->removeObserver(observer);
 	auto it = std::find(observer->_observees.begin(),
 		observer->_observees.end(), const_cast<Referenced*>(this));
 	if (it != observer->_observees.end())
-		observer->_observees.erase(it);
+		return observer->_observees.erase(it);
+	else
+		return it;
 }
 
 void Referenced::signalObserversAndDelete(bool signalDelete, bool doDelete) const

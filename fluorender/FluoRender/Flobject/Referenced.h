@@ -29,12 +29,15 @@ DEALINGS IN THE SOFTWARE.
 #define FL_REFERENCED 1
 
 #include <string>
+#include <set>
 
 namespace FL
 {
 class Observer;
 class ObserverSet;
-
+class Referenced;
+typedef std::set<Referenced*> Observees;
+typedef std::set<Referenced*>::iterator ObserveeIter;
 class Referenced
 {
 public:
@@ -62,7 +65,7 @@ public:
 
 	void addObserver(Observer* observer) const;
 
-	void removeObserver(Observer* observer) const;
+	ObserveeIter removeObserver(Observer* observer) const;
 
 	void holdoffObserverNotification()
 	{

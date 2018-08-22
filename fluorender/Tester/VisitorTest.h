@@ -45,6 +45,7 @@ public:
 			std::cout << "value2 " << value << ' ';
 		if (group.getValue("value3", value))
 			std::cout << "value3 " << value << ' ';
+		std::cout << std::endl;
 
 		level_++;
 		traverse(group);
