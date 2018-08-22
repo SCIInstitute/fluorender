@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Scenegraph/Group.h>
+#include <Scenegraph/NodeVisitor.h>
 
 using namespace FL;
 
@@ -124,4 +125,14 @@ bool Group::setChild(size_t i, Node* node)
 		return true;
 	}
 	return false;
+}
+
+void Group::accept(NodeVisitor& nv)
+{
+	if (nv.validNodeMask(*this))
+	{
+		nv.pushOntoNodePath(this);
+		nv.apply(*this);
+		nv.popFromNodePath();
+	}
 }

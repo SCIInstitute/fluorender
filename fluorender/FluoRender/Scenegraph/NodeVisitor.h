@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #define _NODEVISITOR_H_
 
 #include <Scenegraph/Node.h>
+#include <algorithm>
 
 namespace FL
 {
@@ -84,6 +85,19 @@ namespace FL
 
 		inline void traverse(Node& node)
 		{
+			//break loop
+			if (m_node_path.size() == 2)
+			{
+				if (m_node_path[0] == m_node_path[1])
+					return;
+			}
+			else if (m_node_path.size() > 2)
+			{
+				Node* last_node = m_node_path.back();
+				if (std::find(m_node_path.begin(), m_node_path.end() - 2,
+					last_node) != m_node_path.end())
+					return;
+			}
 			if (m_traversal_mode == TRAVERSE_PARENTS) node.ascend(*this);
 			else if (m_traversal_mode != TRAVERSE_NONE) node.traverse(*this);
 		}

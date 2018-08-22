@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Flobject/Referenced.h>
 #include <vector>
+#include <set>
 #include <string>
 
 namespace FL
@@ -50,13 +51,7 @@ public:
 	friend Referenced;
 
 protected:
-	Observees _observees;
-};
-
-struct ObserverInfo 
-{
-	Observer* observer;
-	std::string expression;
+	//Observees _observees;
 };
 
 class ObserverSet : public Referenced
@@ -76,7 +71,7 @@ public:
 	void signalObjectDeleted(void* ptr);
 	void signalObjectChanged(void* ptr, const std::string &exp);
 
-	typedef std::vector<ObserverInfo> Observers;
+	typedef std::set<Observer*> Observers;
 	Observers& getObservers() { return _observers; }
 	const Observers& getObservers() const { return _observers; }
 

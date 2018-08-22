@@ -159,8 +159,17 @@ public:
 	}
 
 	//sync value
+	//observer's value updates when this updates
 	virtual bool syncValue(const std::string &name, Observer* obsrvr);
 	virtual bool unsyncValue(const std::string &name, Observer* obsrvr);
+	virtual bool syncValues(const std::vector<std::string> &names, Observer* obsrvr);
+	virtual bool unsyncValues(const std::vector<std::string> &names, Observer* obsrvr);
+	virtual bool syncAllValues(Observer* obsrvr);
+	virtual bool unsyncAllValues(Observer* obsrvr);
+	//propagate value
+	virtual bool propValue(const std::string &name, Object* obj);
+	virtual bool propValues(const std::vector<std::string> &names, Object* obj);
+	virtual bool propAllValues(Object* obj);
 
 protected:
 	virtual ~Object();

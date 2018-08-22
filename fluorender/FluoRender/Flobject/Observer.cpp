@@ -36,25 +36,25 @@ Observer::Observer()
 Observer::~Observer()
 {
 	//take advantage of the vector and delete reversely
-	for (int i = _observees.size()-1;
-		i>=0; --i)
-	{
-		if (_observees[i])
-			_observees[i]->removeObserver(this);
-	}
+	//for (int i = _observees.size()-1;
+	//	i>=0; --i)
+	//{
+	//	if (_observees[i])
+	//		_observees[i]->removeObserver(this);
+	//}
 }
 
 bool Observer::removeObservee(Referenced* observee)
 {
-	for (Observees::iterator it=_observees.begin();
-		it!=_observees.end(); ++it)
-	{
-		if ((*it) == observee)
-		{
-			_observees.erase(it);
-			return true;
-		}
-	}
+	//for (Observees::iterator it=_observees.begin();
+	//	it!=_observees.end(); ++it)
+	//{
+	//	if ((*it) == observee)
+	//	{
+	//		_observees.erase(it);
+	//		return true;
+	//	}
+	//}
 	return false;
 }
 
@@ -69,10 +69,7 @@ ObserverSet::~ObserverSet()
 
 void ObserverSet::addObserver(Observer* observer)
 {
-	ObserverInfo obs_info;
-	obs_info.observer = observer;
-	obs_info.expression = "";
-	_observers.push_back(obs_info);
+	_observers.insert(observer);
 }
 
 void ObserverSet::removeObserver(Observer* observer)
@@ -80,7 +77,7 @@ void ObserverSet::removeObserver(Observer* observer)
 	for (Observers::iterator itr = _observers.begin();
 		itr != _observers.end(); ++itr)
 	{
-		if ((*itr).observer == observer)
+		if ((*itr) == observer)
 		{
 			_observers.erase(itr);
 			return;
@@ -107,7 +104,7 @@ void ObserverSet::signalObjectDeleted(void* ptr)
 	for (Observers::iterator itr = _observers.begin();
 		itr != _observers.end(); ++itr)
 	{
-		(*itr).observer->objectDeleted(ptr);
+		(*itr)->objectDeleted(ptr);
 	}
 	_observers.clear();
 	_observedObject = 0;
@@ -118,7 +115,6 @@ void ObserverSet::signalObjectChanged(void* ptr, const std::string &exp)
 	for (Observers::iterator itr = _observers.begin();
 		itr != _observers.end(); ++itr)
 	{
-		(*itr).expression = exp;
-		(*itr).observer->objectChanged(ptr, (*itr).expression);
+		(*itr)->objectChanged(ptr, exp);
 	}
 }

@@ -101,6 +101,8 @@ namespace FL
 			return m_children.size();
 		}
 
+		virtual void accept(NodeVisitor& nv);
+
 	protected:
 		virtual ~Group();
 		NodeList m_children;

@@ -67,7 +67,7 @@ void Object::objectDeleted(void* ptr)
 		_vs_stack.top()->resetRefPtr(refd);
 
 	//remove observee
-	removeObservee(refd);
+	//removeObservee(refd);
 }
 
 void Object::objectChanged(void* ptr, const std::string &exp)
@@ -528,32 +528,132 @@ bool Object::getValue(const std::string &name, FLTYPE::Transform &value)
 	OBJECT_GET_VALUE_BODY;
 }
 
-//sync value
+//sync a value
+//observer's value updates when this updates
 bool Object::syncValue(const std::string &name, Observer* obsrvr)
 {
-	if (_vs_stack.top())
+	Value* value = getValue(name);
+	if (value)
 	{
-		Value* value = _vs_stack.top()->findValue(name);
-		if (value)
-		{
-			value->addObserver(obsrvr);
-			return true;
-		}
+		value->addObserver(obsrvr);
+		return true;
 	}
 	return false;
 }
 
-//unsync value
+//unsync a value
 bool Object::unsyncValue(const std::string &name, Observer* obsrvr)
 {
-	if (_vs_stack.top())
+	Value* value = getValue(name);
+	if (value)
 	{
-		Value* value = _vs_stack.top()->findValue(name);
-		if (value)
-		{
-			value->removeObserver(obsrvr);
-			return true;
-		}
+		value->removeObserver(obsrvr);
+		return true;
 	}
 	return false;
+}
+
+//sync a list of values
+bool Object::syncValues(const std::vector<std::string> &names, Observer* obsrvr)
+{
+	bool result = false;
+	for (auto it = names.begin();
+		it != names.end(); ++it)
+	{
+		result |= syncValue(*it, obsrvr);
+	}
+	return result;
+}
+
+//unsync a list of values
+bool Object::unsyncValues(const std::vector<std::string> &names, Observer* obsrvr)
+{
+	bool result = false;
+	for (auto it = names.begin();
+		it != names.end(); ++it)
+	{
+		result |= unsyncValue(*it, obsrvr);
+	}
+	return result;
+}
+
+//sync all values
+bool Object::syncAllValues(Observer* obsrvr)
+{
+	bool result = false;
+	if (_vs_stack.top())
+	{
+		for (auto it = _vs_stack.top()->getValues().begin();
+			it != _vs_stack.top()->getValues().end(); ++it)
+		{
+			if (it->second)
+			{
+				it->second->addObserver(obsrvr);
+				result = true;
+			}
+		}
+	}
+	return result;
+}
+
+//unsync all values
+bool Object::unsyncAllValues(Observer* obsrvr)
+{
+	bool result = false;
+	if (_vs_stack.top())
+	{
+		for (auto it = _vs_stack.top()->getValues().begin();
+			it != _vs_stack.top()->getValues().end(); ++it)
+		{
+			if (it->second)
+			{
+				it->second->removeObserver(obsrvr);
+				result = true;
+			}
+		}
+	}
+	return result;
+}
+
+//propagate a value
+bool Object::propValue(const std::string &name, Object* obj)
+{
+	Value* value = getValue(name);
+	if (value)
+	{
+		obj->objectChanged(value, "");
+		return true;
+	}
+	return false;
+}
+
+//propagate a list of values
+bool Object::propValues(const std::vector<std::string> &names, Object* obj)
+{
+	bool result = false;
+	for (auto it = names.begin();
+		it != names.end(); ++it)
+	{
+		result |= propValue(*it, obj);
+	}
+	return result;
+}
+
+//propagate all values
+bool Object::propAllValues(Object* obj)
+{
+	bool result = false;
+	if (_vs_stack.top())
+	{
+		for (auto it = _vs_stack.top()->getValues().begin();
+			it != _vs_stack.top()->getValues().end(); ++it)
+		{
+			if (it->second)
+			{
+				propValue(it->second->getName(), obj);
+				result = true;
+			}
+		}
+	}
+	return result;
 }

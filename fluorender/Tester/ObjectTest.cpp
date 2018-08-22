@@ -86,3 +86,65 @@ void ObjectTest()
 	ASSERT_EQ(0, obj);
 }
 
+void ObjectTest2()
+{
+	Object* obj1 = new Object();
+	vector<ref_ptr<Object>> obj_list;
+	obj_list.push_back(obj1);
+	obj1->addValue("value1", 0.0);
+	obj1->addValue("value2", 0.0);
+	obj1->addValue("value3", 0.0);
+	Object* obj2 = new Object(*obj1, CopyOp::DEEP_COPY_ALL);
+	obj_list.push_back(obj2);
+
+	obj1->syncAllValues(obj2);
+	obj1->setValue("value1", 1.0);
+	double value;
+	obj2->getValue("value1", value);
+	ASSERT_EQ(1.0, value);
+	obj1->setValue("value2", 2.0);
+	obj2->getValue("value2", value);
+	ASSERT_EQ(2.0, value);
+	obj1->unsyncAllValues(obj2);
+	obj1->setValue("value1", 3.0);
+	obj2->getValue("value1", value);
+	ASSERT_EQ(1.0, value);
+
+	std::vector<std::string> names = { "value1", "value2" };
+	obj1->syncValues(names, obj2);
+	obj1->setValue("value1", 4.0);
+	obj2->getValue("value1", value);
+	ASSERT_EQ(4.0, value);
+	obj1->setValue("value2", 5.0);
+	obj2->getValue("value2", value);
+	ASSERT_EQ(5.0, value);
+	obj1->setValue("value3", 6.0);
+	obj2->getValue("value3", value);
+	ASSERT_EQ(0.0, value);
+	obj1->unsyncAllValues(obj2);
+
+	obj2->setValue("value1", 0.0);
+	obj2->setValue("value2", 0.0);
+	obj2->setValue("value3", 0.0);
+	obj1->setValue("value1", 7.0);
+	obj1->propValue("value1", obj2);
+	obj2->getValue("value1", value);
+	ASSERT_EQ(7.0, value);
+	obj1->setValue("value1", 8.0);
+	obj1->setValue("value2", 9.0);
+	obj1->propValues(names, obj2);
+	obj2->getValue("value1", value);
+	ASSERT_EQ(8.0, value);
+	obj2->getValue("value2", value);
+	ASSERT_EQ(9.0, value);
+	obj1->setValue("value1", 10.0);
+	obj1->setValue("value2", 11.0);
+	obj1->setValue("value3", 12.0);
+	obj1->propAllValues(obj2);
+	obj2->getValue("value1", value);
+	ASSERT_EQ(10.0, value);
+	obj2->getValue("value2", value);
+	ASSERT_EQ(11.0, value);
+	obj2->getValue("value3", value);
+	ASSERT_EQ(12.0, value);
+}

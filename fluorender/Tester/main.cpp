@@ -11,12 +11,14 @@ int main(int argc, char* argv[])
 	//memset(leak, 14, 1000);
 
 	//ObjectTest();
+	//ObjectTest2();
 
 	//GroupTest();
+	GroupTest2();
 
 	//SceneGraphTest();
 
-	SpecialValueTest();
+	//SpecialValueTest();
 
 	printf("All done. Quit.\n");
 	cin.get();
