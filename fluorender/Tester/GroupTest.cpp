@@ -59,7 +59,7 @@ void GroupTest()
 	group4->addChild(group2);
 	group4->addChild(group3);
 	group4->addChild(group3);
-	//group3->addChild(group4);
+	group3->addChild(group4);
 
 	std::vector<ref_ptr<Node>> list;
 	list.push_back(group1);
@@ -142,6 +142,6 @@ void GroupTest2()
 	group4->accept(visitor);
 
 	//unsync
-	update.setType(UNSYNC_VALUE);
-	group4->accept(update);
+	//update.setType(UNSYNC_VALUE);
+	//group4->accept(update);
 }

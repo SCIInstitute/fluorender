@@ -67,7 +67,7 @@ void Object::objectDeleted(void* ptr)
 		_vs_stack.top()->resetRefPtr(refd);
 
 	//remove observee
-	//removeObservee(refd);
+	removeObservee(refd);
 }
 
 void Object::objectChanged(void* ptr, const std::string &exp)

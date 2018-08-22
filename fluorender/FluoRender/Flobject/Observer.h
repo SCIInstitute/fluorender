@@ -51,7 +51,7 @@ public:
 	friend Referenced;
 
 protected:
-	//Observees _observees;
+	Observees _observees;
 };
 
 class ObserverSet : public Referenced

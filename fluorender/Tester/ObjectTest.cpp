@@ -148,3 +148,19 @@ void ObjectTest2()
 	obj2->getValue("value3", value);
 	ASSERT_EQ(12.0, value);
 }
+
+void ObjectTest3()
+{
+	Object* obj1 = new Object();
+	vector<ref_ptr<Object>> obj_list;
+	obj_list.push_back(obj1);
+	obj1->addValue("value1", 0.0);
+	Object* obj2 = new Object(*obj1, CopyOp::DEEP_COPY_ALL);
+	obj_list.push_back(obj2);
+	Object* obj3 = new Object(*obj2, CopyOp::DEEP_COPY_ALL);
+	obj_list.push_back(obj3);
+
+	obj1->syncAllValues(obj2);
+	obj2->syncAllValues(obj1);
+	//obj3->syncAllValues(obj1);
+}

@@ -2,6 +2,7 @@
 
 void ObjectTest();
 void ObjectTest2();
+void ObjectTest3();
 
 void GroupTest();
 void GroupTest2();

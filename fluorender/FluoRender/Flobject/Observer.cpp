@@ -36,25 +36,25 @@ Observer::Observer()
 Observer::~Observer()
 {
 	//take advantage of the vector and delete reversely
-	//for (int i = _observees.size()-1;
-	//	i>=0; --i)
-	//{
-	//	if (_observees[i])
-	//		_observees[i]->removeObserver(this);
-	//}
+	for (int i = _observees.size()-1;
+		i>=0; --i)
+	{
+		if (_observees[i])
+			_observees[i]->removeObserver(this);
+	}
 }
 
 bool Observer::removeObservee(Referenced* observee)
 {
-	//for (Observees::iterator it=_observees.begin();
-	//	it!=_observees.end(); ++it)
-	//{
-	//	if ((*it) == observee)
-	//	{
-	//		_observees.erase(it);
-	//		return true;
-	//	}
-	//}
+	for (Observees::iterator it=_observees.begin();
+		it!=_observees.end(); ++it)
+	{
+		if ((*it) == observee)
+		{
+			_observees.erase(it);
+			return true;
+		}
+	}
 	return false;
 }
 

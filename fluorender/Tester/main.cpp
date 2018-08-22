@@ -12,6 +12,7 @@ int main(int argc, char* argv[])
 
 	//ObjectTest();
 	//ObjectTest2();
+	//ObjectTest3();
 
 	//GroupTest();
 	GroupTest2();
