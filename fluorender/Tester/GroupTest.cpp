@@ -1,10 +1,10 @@
 #include "tests.h"
 #include "asserts.h"
-#include "VisitorTest.h"
 #include <vector>
 #include <Scenegraph/Group.h>
 #include <Scenegraph/ValueUpdateVisitor.h>
 #include <Scenegraph/DecycleVisitor.h>
+#include <Scenegraph/InfoVisitor.h>
 
 using namespace std;
 using namespace FL;
@@ -20,6 +20,8 @@ void GroupTest()
 	for (int i = 0; i < num1; ++i)
 	{
 		Node* node = new Node();
+		string name = "node" + to_string(i + 1);
+		node->setName(name);
 		group1->addChild(node);
 	}
 	ASSERT_EQ(num1, group1->getNumChildren());
@@ -71,9 +73,18 @@ void GroupTest()
 	InfoVisitor visitor;
 	group4->accept(visitor);
 
+	visitor.setTraversalMode(NodeVisitor::TRAVERSE_PARENTS);
+	cin.get();
+	group1->getChild(0)->accept(visitor);
+
 	DecycleVisitor decycle;
 	group4->accept(decycle);
 	while (decycle.removeCycle()) {}
+
+	visitor.setTraversalMode(NodeVisitor::TRAVERSE_PARENTS);
+	cin.get();
+	group1->getChild(0)->accept(visitor);
+
 }
 
 void GroupTest2()

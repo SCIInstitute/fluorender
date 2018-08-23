@@ -40,7 +40,7 @@ Referenced* CopyOp::operator() (const Referenced* ref) const
 
 Object* CopyOp::operator() (const Object* obj) const
 {
-	if (obj && m_flags&DEEP_COPY_NODES)
+	if (obj && m_flags&DEEP_COPY_OBJECTS)
 		return clone(obj, *this);
 	else
 		return const_cast<Object*>(obj);
@@ -53,3 +53,4 @@ Node* CopyOp::operator() (const Node* node) const
 	else
 		return const_cast<Node*>(node);
 }
+

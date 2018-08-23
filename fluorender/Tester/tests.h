@@ -11,3 +11,5 @@ void GroupTest3();
 void SceneGraphTest();
 
 void SpecialValueTest();
+
+void FactoryTest();

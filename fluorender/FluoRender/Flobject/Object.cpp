@@ -30,16 +30,17 @@ DEALINGS IN THE SOFTWARE.
 using namespace FL;
 
 Object::Object():
-  Referenced(),
-  _id(0)
+	Referenced(),
+	_id(0)
 {
 	ValueSet* value_set = new ValueSet();
 	_vs_stack.push(value_set);
 }
 
 Object::Object(const Object& obj, const CopyOp& copyop):
-  Referenced(),
-  _id(0)
+	Referenced(),
+	_id(0),
+	m_name(obj.m_name)
 {
 	if (copyop.getCopyFlags() & CopyOp::SHALLOW_COPY)
 		_vs_stack.push(obj._vs_stack.top());

@@ -26,44 +26,57 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _COPYOP_H_
-#define _COPYOP_H_
+#include <Flobject/ObjectFactory.h>
 
-#include <vector>
+using namespace FL;
 
-namespace FL
+unsigned int ObjectFactory::global_id_ = 0;
+
+ObjectFactory::ObjectFactory() :
+	local_id_(0)
 {
-	class Referenced;
-	class Object;
-	class Node;
-	class Group;
-
-	class CopyOp
-	{
-	public:
-		enum Options
-		{
-			SHALLOW_COPY = 0,
-			DEEP_COPY_OBJECTS = 1<<0,
-			DEEP_COPY_NODES = 1<<1,
-			DEEP_COPY_ALL = 0x7FFFFFFF
-		};
-
-		typedef unsigned int CopyFlags;
-
-		inline CopyOp(CopyFlags flags = SHALLOW_COPY) :
-			m_flags(flags) {}
-		virtual ~CopyOp() {}
-
-		void setCopyFlags(CopyFlags flags) { m_flags = flags; }
-		CopyFlags getCopyFlags() const { return m_flags; }
-
-		virtual Referenced* operator() (const Referenced* ref) const;
-		virtual Object* operator() (const Object* obj) const;
-		virtual Node* operator() (const Node* node) const;
-
-	protected:
-		CopyFlags m_flags;
-	};
+	m_name = "object factory";
 }
-#endif//_COPYOP_H_
+
+ObjectFactory::~ObjectFactory()
+{
+
+}
+
+Object* ObjectFactory::build()
+{
+	incCounter();
+
+	Object* object = new Object();
+	object->setId(local_id_);
+	std::string name = "object" + std::to_string(local_id_);
+	object->setName(name);
+
+	objects_.push_back(object);
+
+	return object;
+}
+
+Object* ObjectFactory::clone(Object* object)
+{
+	incCounter();
+
+	Object* new_object = object->clone(CopyOp::DEEP_COPY_OBJECTS);
+	new_object->setId(local_id_);
+	std::string name = "object" + std::to_string(local_id_);
+	new_object->setName(name);
+
+	objects_.push_back(new_object);
+
+	return new_object;
+}
+
+Object* ObjectFactory::clone(const unsigned int id)
+{
+	Object* object = find(id);
+	if (object)
+		return clone(object);
+	else
+		return 0;
+}
+

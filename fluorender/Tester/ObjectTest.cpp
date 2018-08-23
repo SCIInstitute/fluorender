@@ -13,7 +13,6 @@ void ObjectTest()
 	//also, reference count is set only when it's added to the list
 	//ref_ptr<Object> obj1(new Object());
 	Object *obj1 = new Object();
-	obj1->setId(1);
 	obj1->setName("obj1");
 	//declaring a list of objects
 	vector<ref_ptr<Object>> obj_list;
@@ -23,9 +22,6 @@ void ObjectTest()
 	ASSERT_TRUE(obj_list[0]->isSameKindAs(obj1));
 	string str = obj_list[0]->className();
 	ASSERT_EQ("Object", str);
-	unsigned int id = 10;
-	obj_list[0]->setId(id);
-	ASSERT_EQ(id, obj_list[0]->getId());
 
 	bool bval = false;
 	//adding a boolean value to the first object
@@ -41,7 +37,6 @@ void ObjectTest()
 
 	//creating a second object by cloning the first one
 	Object* obj2 = obj_list[0]->clone(CopyOp::DEEP_COPY_ALL);
-	obj2->setId(2);
 	obj2->setName("obj2");
 	//adding the second object to the list
 	obj_list.push_back(obj2);

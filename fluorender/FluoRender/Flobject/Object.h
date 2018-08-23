@@ -35,10 +35,14 @@ DEALINGS IN THE SOFTWARE.
 #include <Flobject/Value.h>
 #include <stack>
 #include <string>
+#include <vector>
 
 namespace FL
 {
 typedef std::stack<ref_ptr<ValueSet> > ValueSetStack;
+class Object;
+typedef std::vector<Object*> ObjectList;
+class ObjectFactory;
 
 class Object : public Referenced, public Observer
 {
@@ -53,8 +57,6 @@ public:
 	virtual bool isSameKindAs(const Object*) const {return true;}
 
 	virtual const char* className() const { return "Object"; }
-
-	inline void setId( const unsigned int id ) { _id = id; }
 
 	inline const unsigned int getId() const { return _id; }
 
@@ -177,6 +179,8 @@ public:
 protected:
 	virtual ~Object();
 
+	inline void setId(const unsigned int id) { _id = id; }
+
 	/** ID of an object is non-zero. */
 	unsigned int _id;
 	// object name
@@ -184,6 +188,8 @@ protected:
 
 	/** a stack of value sets */
 	ValueSetStack _vs_stack;
+
+	friend class ObjectFactory;
 
 private:
 

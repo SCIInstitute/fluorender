@@ -9,7 +9,8 @@ class InfoVisitor : public FL::NodeVisitor
 public:
 	InfoVisitor() : level_(0)
 	{
-		setTraversalMode(FL::NodeVisitor::TRAVERSE_ALL_CHILDREN);
+		//setTraversalMode(FL::NodeVisitor::TRAVERSE_ALL_CHILDREN);
+		setTraversalMode(FL::NodeVisitor::TRAVERSE_PARENTS);
 	}
 
 	std::string spaces()
