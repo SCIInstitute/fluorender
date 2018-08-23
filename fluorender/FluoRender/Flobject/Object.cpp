@@ -399,6 +399,17 @@ bool Object::setValue(const std::string &name, const FLTYPE::Transform &value, b
 	OBJECT_SET_VALUE_BODY;
 }
 
+//toggle value for bool
+bool Object::toggleValue(const std::string &name, bool &value, bool notify)
+{
+	bool result = false;
+	if (_vs_stack.top())
+		result = _vs_stack.top()->toggleValue(name, value, notify);
+	if (result)
+		notifyObserversOfChange(name);
+	return result;
+}
+
 //define function bodies first
 //get functions
 #define OBJECT_GET_VALUE_BODY \

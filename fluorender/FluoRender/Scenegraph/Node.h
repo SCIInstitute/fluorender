@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #define _NODE_H_
 
 #include <vector>
+#include <set>
 #include <Flobject/CopyOp.h>
 #include <Flobject/Object.h>
 
@@ -49,6 +50,8 @@ namespace FL
 	typedef std::vector<ref_ptr<Node>> NodeList;
 	typedef std::vector<Node*> NodePath;
 	typedef std::vector<NodePath> NodePathList;
+	typedef std::set<Node*> NodeSet;
+	typedef std::set<Node*>::iterator NodeSetIter;
 
 	class Node : public Object
 	{

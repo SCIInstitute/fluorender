@@ -6,6 +6,7 @@ void ObjectTest3();
 
 void GroupTest();
 void GroupTest2();
+void GroupTest3();
 
 void SceneGraphTest();
 

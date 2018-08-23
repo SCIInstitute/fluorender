@@ -121,6 +121,9 @@ public:
 	virtual bool setValue(const std::string &name, const FLTYPE::Ray &value, bool notify = true);
 	virtual bool setValue(const std::string &name, const FLTYPE::Transform &value, bool notify = true);
 
+	//toggle value for bool
+	virtual bool toggleValue(const std::string &name, bool &value, bool notify = true);
+
 	/** All the get value functions */
 	//generic types
 	virtual bool getValue(const std::string &name, Referenced** value);

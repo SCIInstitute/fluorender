@@ -163,4 +163,14 @@ void ObjectTest3()
 	obj1->syncAllValues(obj2);
 	obj2->syncAllValues(obj1);
 	//obj3->syncAllValues(obj1);
+
+	bool bval = false;
+	obj1->addValue("boolean", bval);
+	bool bval2;
+	obj1->getValue("boolean", bval2);
+	ASSERT_EQ(bval, bval2);
+	obj1->toggleValue("boolean", bval2);
+	ASSERT_EQ(!bval, bval2);
+	obj1->toggleValue("boolean", bval2);
+	ASSERT_EQ(bval, bval2);
 }

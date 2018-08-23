@@ -4,6 +4,7 @@
 #include <vector>
 #include <Scenegraph/Group.h>
 #include <Scenegraph/ValueUpdateVisitor.h>
+#include <Scenegraph/DecycleVisitor.h>
 
 using namespace std;
 using namespace FL;
@@ -69,6 +70,10 @@ void GroupTest()
 	//traverse
 	InfoVisitor visitor;
 	group4->accept(visitor);
+
+	DecycleVisitor decycle;
+	group4->accept(decycle);
+	while (decycle.removeCycle()) {}
 }
 
 void GroupTest2()
@@ -121,6 +126,7 @@ void GroupTest2()
 	group4->addChild(group2);
 	group4->addChild(group3);
 	group4->addChild(group3);
+	//group3->addChild(group4);
 
 	std::vector<ref_ptr<Node>> list;
 	list.push_back(group1);
@@ -154,4 +160,19 @@ void GroupTest2()
 	//unsync
 	//update.setType(UNSYNC_VALUE);
 	//group4->accept(update);
+}
+
+void GroupTest3()
+{
+	ref_ptr<Group> group1 = new Group();
+	group1->setName("group1");
+	ref_ptr<Group> group2 = new Group();
+	group2->setName("group2");
+
+	group1->addChild(group2.get());
+	group2->addChild(group1.get());
+
+	DecycleVisitor decycle;
+	group1->accept(decycle);
+	while (decycle.removeCycle()) {}
 }

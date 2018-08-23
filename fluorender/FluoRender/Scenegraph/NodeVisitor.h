@@ -85,17 +85,14 @@ namespace FL
 
 		inline void traverse(Node& node)
 		{
-			//break loop
-			if (m_node_path.size() == 2)
+			//break loop if present
+			NodeSet node_set;
+			std::pair<NodeSetIter, bool> result;
+			for (auto it = m_node_path.begin();
+				it != m_node_path.end(); ++it)
 			{
-				if (m_node_path[0] == m_node_path[1])
-					return;
-			}
-			else if (m_node_path.size() > 2)
-			{
-				Node* last_node = m_node_path.back();
-				if (std::find(m_node_path.begin(), m_node_path.end() - 2,
-					last_node) != m_node_path.end())
+				result = node_set.insert(*it);
+				if (!result.second)
 					return;
 			}
 			if (m_traversal_mode == TRAVERSE_PARENTS) node.ascend(*this);

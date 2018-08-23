@@ -854,6 +854,21 @@ bool ValueSet::setValue(const std::string &name, const FLTYPE::Transform &value,
 		return false;
 }
 
+//toggle
+bool ValueSet::toggleValue(const std::string &name, bool &value, bool notify)
+{
+	Value* val = findValue(name);
+	if (val && val->_type == "bool")
+	{
+		value = (dynamic_cast<TemplateValue<bool>*>(val))->getValue();
+		value = !value;
+		(dynamic_cast<TemplateValue<bool>*>(val))->setValue(value, notify);
+		return true;
+	}
+	else
+		return false;
+}
+
 //get value functions
 bool ValueSet::getValue(const std::string &name, Referenced** value)
 {
