@@ -31,8 +31,14 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Scenegraph/NodeVisitor.h>
 #include <Scenegraph/Group.h>
+#include <Scenegraph/VolumeData.h>
+#include <Scenegraph/VolumeGroup.h>
+#include <Scenegraph/MeshData.h>
+#include <Scenegraph/MeshGroup.h>
+#include <Scenegraph/Annotations.h>
 #include <iostream>
 #include <string>
+#include <vector>
 
 namespace FL
 {
@@ -55,8 +61,90 @@ namespace FL
 			traverse(group);
 		}
 
-	protected:
+		virtual void reset()
+		{
+			results_.clear();
+			names_.clear();
+			ids_.clear();
+			class_names_.clear();
+		}
 
+		ObjectList* getResult() { return &results_; }
+		size_t getResultNum() { return results_.size(); }
+
+		Node* getNode()
+		{
+			if (!results_.empty())
+				return dynamic_cast<Node*>(results_[0]);
+			else
+				return 0;
+		}
+
+		Group* getGroup()
+		{
+			if (!results_.empty())
+				return dynamic_cast<Group*>(results_[0]);
+			else
+				return 0;
+		}
+
+		VolumeData* getVolumeData()
+		{
+			if (!results_.empty())
+				return dynamic_cast<VolumeData*>(results_[0]);
+			else
+				return 0;
+		}
+
+		VolumeGroup* getVolumeGroup()
+		{
+			if (!results_.empty())
+				return dynamic_cast<VolumeGroup*>(results_[0]);
+			else
+				return 0;
+		}
+
+		MeshData* getMeshData()
+		{
+			if (!results_.empty())
+				return dynamic_cast<MeshData*>(results_[0]);
+			else
+				return 0;
+		}
+
+		MeshGroup* getMeshGroup()
+		{
+			if (!results_.empty())
+				return dynamic_cast<MeshGroup*>(results_[0]);
+			else
+				return 0;
+		}
+
+		Annotations* getAnnotations()
+		{
+			if (!results_.empty())
+				return dynamic_cast<Annotations*>(results_[0]);
+			else
+				return 0;
+		}
+
+		void matchName(const std::string &name)
+		{ names_.push_back(name); }
+		void matchNames(const std::vector<std::string> &names)
+		{ names_.insert(names_.end(), names.begin(), names.end()); }
+
+		void matchId(const unsigned int id)
+		{ ids_.push_back(id); }
+		void matchIds(std::vector<unsigned int> &ids)
+		{ ids_.insert(ids_.end(), ids.begin(), ids.end()); }
+
+
+
+	protected:
+		ObjectList results_;
+		std::vector<std::string> names_;
+		std::vector<unsigned int> ids_;
+		std::vector<std::string> class_names_;
 	};
 }
 #endif//_SEARCHVISITOR_H_

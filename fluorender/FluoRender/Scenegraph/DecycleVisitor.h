@@ -59,6 +59,13 @@ namespace FL
 			traverse(group);
 		}
 
+		virtual void reset()
+		{
+			found_ = false;
+			parent_ = 0;
+			child_ = 0;
+		}
+
 		bool removeCycle()
 		{
 			if (found_)

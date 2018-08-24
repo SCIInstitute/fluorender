@@ -59,6 +59,13 @@ namespace FL
 		ValueUpdateVisitor(ValueUpdateVisitType type, Object* obj) : type_(type), object_(obj)
 		{ setTraversalMode(FL::NodeVisitor::TRAVERSE_ALL_CHILDREN); }
 
+		virtual void reset()
+		{
+			type_ = SYNC_VALUE;
+			object_ = 0;
+			setTraversalMode(FL::NodeVisitor::TRAVERSE_ALL_CHILDREN);
+		}
+
 		void setType(const ValueUpdateVisitType type)
 		{ type_ = type; }
 		void setObject(Object* obj)
