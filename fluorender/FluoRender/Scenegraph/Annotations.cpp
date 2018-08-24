@@ -47,7 +47,7 @@ Annotations::~Annotations()
 
 void Annotations::objectChanged(void* ptr, const std::string &exp)
 {
-	//Object::objectChanged(ptr, exp);
+	Object::objectChanged(ptr, exp);
 	Referenced* refd = static_cast<Referenced*>(ptr);
 	if (refd->className() == std::string("VolumeData"))
 	{

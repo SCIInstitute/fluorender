@@ -34,6 +34,8 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <ostream>
+#include <codecvt>
 //FluoRender's special types
 #include <Types/BBox.h>
 #include <Types/Color.h>
@@ -62,6 +64,8 @@ public:
 	inline bool operator != (const Value& v) const;
 
 	inline bool sync(Value* value);
+
+	friend inline std::ostream& operator<<(std::ostream& os, const Value& v);
 
 protected:
 	virtual ~Value();
@@ -498,6 +502,63 @@ inline bool Value::sync(Value* value)
 	else return false;
 
 	return true;
+}
+
+inline std::ostream& FL::operator<<(std::ostream& os, const Value& v)
+{
+	if (v._type == "Referenced*")
+		os << dynamic_cast<const TemplateValue<Referenced*>*>(&v)->getValue();
+	if (v._type == "bool")
+		os << dynamic_cast<const TemplateValue<bool>*>(&v)->getValue();
+	if (v._type == "char")
+		os << dynamic_cast<const TemplateValue<char>*>(&v)->getValue();
+	if (v._type == "unsigned char")
+		os << dynamic_cast<const TemplateValue<unsigned char>*>(&v)->getValue();
+	if (v._type == "short")
+		os << dynamic_cast<const TemplateValue<short>*>(&v)->getValue();
+	if (v._type == "unsigned short")
+		os << dynamic_cast<const TemplateValue<unsigned short>*>(&v)->getValue();
+	if (v._type == "long")
+		os << dynamic_cast<const TemplateValue<long>*>(&v)->getValue();
+	if (v._type == "unsigned long")
+		os << dynamic_cast<const TemplateValue<unsigned long>*>(&v)->getValue();
+	if (v._type == "long long")
+		os << dynamic_cast<const TemplateValue<long long>*>(&v)->getValue();
+	if (v._type == "unsigned long long")
+		os << dynamic_cast<const TemplateValue<unsigned long long>*>(&v)->getValue();
+	if (v._type == "float")
+		os << dynamic_cast<const TemplateValue<float>*>(&v)->getValue();
+	if (v._type == "double")
+		os << dynamic_cast<const TemplateValue<double>*>(&v)->getValue();
+	if (v._type == "string")
+		os << dynamic_cast<const TemplateValue<std::string>*>(&v)->getValue();
+	if (v._type == "wstring")
+	{
+		//convert for os
+		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
+		os << converter.to_bytes(dynamic_cast<const TemplateValue<std::wstring>*>(&v)->getValue());
+	}
+	if (v._type == "Point")
+		os << dynamic_cast<const TemplateValue<FLTYPE::Point>*>(&v)->getValue();
+	if (v._type == "Vector")
+		os << dynamic_cast<const TemplateValue<FLTYPE::Vector>*>(&v)->getValue();
+	if (v._type == "BBox")
+		os << dynamic_cast<const TemplateValue<FLTYPE::BBox>*>(&v)->getValue();
+	if (v._type == "HSVColor")
+		os << dynamic_cast<const TemplateValue<FLTYPE::HSVColor>*>(&v)->getValue();
+	if (v._type == "Color")
+		os << dynamic_cast<const TemplateValue<FLTYPE::Color>*>(&v)->getValue();
+	if (v._type == "Plane")
+		os << dynamic_cast<const TemplateValue<FLTYPE::Plane>*>(&v)->getValue();
+	if (v._type == "PlaneSet")
+		os << dynamic_cast<const TemplateValue<FLTYPE::PlaneSet>*>(&v)->getValue();
+	if (v._type == "Quaternion")
+		os << dynamic_cast<const TemplateValue<FLTYPE::Quaternion>*>(&v)->getValue();
+	if (v._type == "Ray")
+		os << dynamic_cast<const TemplateValue<FLTYPE::Ray>*>(&v)->getValue();
+	if (v._type == "Transform")
+		os << dynamic_cast<const TemplateValue<FLTYPE::Transform>*>(&v)->getValue();
+	return os;
 }
 
 inline bool ValueSet::operator == (const ValueSet &vs) const

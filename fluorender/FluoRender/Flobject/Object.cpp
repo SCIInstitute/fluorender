@@ -64,7 +64,7 @@ Object::~Object()
 void Object::objectDeleted(void* ptr)
 {
 	Referenced* refd = static_cast<Referenced*>(ptr);
-	if (refd->className() == std::string("Object"))
+	if (refd)
 		_vs_stack.top()->resetRefPtr(refd);
 
 	//remove observee
@@ -665,6 +665,21 @@ bool Object::propAllValues(Object* obj)
 				propValue(it->second->getName(), obj);
 				result = true;
 			}
+		}
+	}
+	return result;
+}
+
+std::vector<std::string> Object::getValueNames()
+{
+	std::vector<std::string> result;
+	if (_vs_stack.top())
+	{
+		ValueSet::Values values = _vs_stack.top()->getValues();
+		for (auto it = values.begin();
+			it != values.end(); ++it)
+		{
+			result.push_back((*it).first);
 		}
 	}
 	return result;

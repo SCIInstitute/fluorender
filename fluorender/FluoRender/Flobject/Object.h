@@ -69,93 +69,93 @@ public:
 
 	//add a value
 	//generic types
-	virtual bool addValue(const std::string &name, Referenced* value);
-	virtual bool addValue(const std::string &name, bool value);
-	virtual bool addValue(const std::string &name, char value);
-	virtual bool addValue(const std::string &name, unsigned char value);
-	virtual bool addValue(const std::string &name, short value);
-	virtual bool addValue(const std::string &name, unsigned short value);
-	virtual bool addValue(const std::string &name, long value);
-	virtual bool addValue(const std::string &name, unsigned long value);
-	virtual bool addValue(const std::string &name, long long value);
-	virtual bool addValue(const std::string &name, unsigned long long value);
-	virtual bool addValue(const std::string &name, float);
-	virtual bool addValue(const std::string &name, double);
-	virtual bool addValue(const std::string &name, const std::string &value);
-	virtual bool addValue(const std::string &name, const std::wstring &value);
+	bool addValue(const std::string &name, Referenced* value);
+	bool addValue(const std::string &name, bool value);
+	bool addValue(const std::string &name, char value);
+	bool addValue(const std::string &name, unsigned char value);
+	bool addValue(const std::string &name, short value);
+	bool addValue(const std::string &name, unsigned short value);
+	bool addValue(const std::string &name, long value);
+	bool addValue(const std::string &name, unsigned long value);
+	bool addValue(const std::string &name, long long value);
+	bool addValue(const std::string &name, unsigned long long value);
+	bool addValue(const std::string &name, float);
+	bool addValue(const std::string &name, double);
+	bool addValue(const std::string &name, const std::string &value);
+	bool addValue(const std::string &name, const std::wstring &value);
 	//FluoRender's special types
-	virtual bool addValue(const std::string &name, const FLTYPE::Point &value);
-	virtual bool addValue(const std::string &name, const FLTYPE::Vector &value);
-	virtual bool addValue(const std::string &name, const FLTYPE::BBox &value);
-	virtual bool addValue(const std::string &name, const FLTYPE::HSVColor &value);
-	virtual bool addValue(const std::string &name, const FLTYPE::Color &value);
-	virtual bool addValue(const std::string &name, const FLTYPE::Plane &value);
-	virtual bool addValue(const std::string &name, const FLTYPE::PlaneSet &value);
-	virtual bool addValue(const std::string &name, const FLTYPE::Quaternion &value);
-	virtual bool addValue(const std::string &name, const FLTYPE::Ray &value);
-	virtual bool addValue(const std::string &name, const FLTYPE::Transform &value);
+	bool addValue(const std::string &name, const FLTYPE::Point &value);
+	bool addValue(const std::string &name, const FLTYPE::Vector &value);
+	bool addValue(const std::string &name, const FLTYPE::BBox &value);
+	bool addValue(const std::string &name, const FLTYPE::HSVColor &value);
+	bool addValue(const std::string &name, const FLTYPE::Color &value);
+	bool addValue(const std::string &name, const FLTYPE::Plane &value);
+	bool addValue(const std::string &name, const FLTYPE::PlaneSet &value);
+	bool addValue(const std::string &name, const FLTYPE::Quaternion &value);
+	bool addValue(const std::string &name, const FLTYPE::Ray &value);
+	bool addValue(const std::string &name, const FLTYPE::Transform &value);
 
 	/** All the set value functions */
 	//generic types
-	virtual bool setValue(const std::string &name, Referenced* value, bool notify = true);
-	virtual bool setValue(const std::string &name, bool value, bool notify = true);
-	virtual bool setValue(const std::string &name, char value, bool notify = true);
-	virtual bool setValue(const std::string &name, unsigned char value, bool notify = true);
-	virtual bool setValue(const std::string &name, short value, bool notify = true);
-	virtual bool setValue(const std::string &name, unsigned short value, bool notify = true);
-	virtual bool setValue(const std::string &name, long value, bool notify = true);
-	virtual bool setValue(const std::string &name, unsigned long value, bool notify = true);
-	virtual bool setValue(const std::string &name, long long value, bool notify = true);
-	virtual bool setValue(const std::string &name, unsigned long long value, bool notify = true);
-	virtual bool setValue(const std::string &name, float value, bool notify = true);
-	virtual bool setValue(const std::string &name, double value, bool notify = true);
-	virtual bool setValue(const std::string &name, const std::string &value, bool notify = true);
-	virtual bool setValue(const std::string &name, const std::wstring &value, bool notify = true);
+	bool setValue(const std::string &name, Referenced* value, bool notify = true);
+	bool setValue(const std::string &name, bool value, bool notify = true);
+	bool setValue(const std::string &name, char value, bool notify = true);
+	bool setValue(const std::string &name, unsigned char value, bool notify = true);
+	bool setValue(const std::string &name, short value, bool notify = true);
+	bool setValue(const std::string &name, unsigned short value, bool notify = true);
+	bool setValue(const std::string &name, long value, bool notify = true);
+	bool setValue(const std::string &name, unsigned long value, bool notify = true);
+	bool setValue(const std::string &name, long long value, bool notify = true);
+	bool setValue(const std::string &name, unsigned long long value, bool notify = true);
+	bool setValue(const std::string &name, float value, bool notify = true);
+	bool setValue(const std::string &name, double value, bool notify = true);
+	bool setValue(const std::string &name, const std::string &value, bool notify = true);
+	bool setValue(const std::string &name, const std::wstring &value, bool notify = true);
 	//FluoRender's special types
-	virtual bool setValue(const std::string &name, const FLTYPE::Point &value, bool notify = true);
-	virtual bool setValue(const std::string &name, const FLTYPE::Vector &value, bool notify = true);
-	virtual bool setValue(const std::string &name, const FLTYPE::BBox &value, bool notify = true);
-	virtual bool setValue(const std::string &name, const FLTYPE::HSVColor &value, bool notify = true);
-	virtual bool setValue(const std::string &name, const FLTYPE::Color &value, bool notify = true);
-	virtual bool setValue(const std::string &name, const FLTYPE::Plane &value, bool notify = true);
-	virtual bool setValue(const std::string &name, const FLTYPE::PlaneSet &value, bool notify = true);
-	virtual bool setValue(const std::string &name, const FLTYPE::Quaternion &value, bool notify = true);
-	virtual bool setValue(const std::string &name, const FLTYPE::Ray &value, bool notify = true);
-	virtual bool setValue(const std::string &name, const FLTYPE::Transform &value, bool notify = true);
+	bool setValue(const std::string &name, const FLTYPE::Point &value, bool notify = true);
+	bool setValue(const std::string &name, const FLTYPE::Vector &value, bool notify = true);
+	bool setValue(const std::string &name, const FLTYPE::BBox &value, bool notify = true);
+	bool setValue(const std::string &name, const FLTYPE::HSVColor &value, bool notify = true);
+	bool setValue(const std::string &name, const FLTYPE::Color &value, bool notify = true);
+	bool setValue(const std::string &name, const FLTYPE::Plane &value, bool notify = true);
+	bool setValue(const std::string &name, const FLTYPE::PlaneSet &value, bool notify = true);
+	bool setValue(const std::string &name, const FLTYPE::Quaternion &value, bool notify = true);
+	bool setValue(const std::string &name, const FLTYPE::Ray &value, bool notify = true);
+	bool setValue(const std::string &name, const FLTYPE::Transform &value, bool notify = true);
 
 	//toggle value for bool
-	virtual bool toggleValue(const std::string &name, bool &value, bool notify = true);
+	bool toggleValue(const std::string &name, bool &value, bool notify = true);
 
 	/** All the get value functions */
 	//generic types
-	virtual bool getValue(const std::string &name, Referenced** value);
-	virtual bool getValue(const std::string &name, bool &value);
-	virtual bool getValue(const std::string &name, char &value);
-	virtual bool getValue(const std::string &name, unsigned char &value);
-	virtual bool getValue(const std::string &name, short &value);
-	virtual bool getValue(const std::string &name, unsigned short &value);
-	virtual bool getValue(const std::string &name, long &value);
-	virtual bool getValue(const std::string &name, unsigned long &value);
-	virtual bool getValue(const std::string &name, long long &value);
-	virtual bool getValue(const std::string &name, unsigned long long &value);
-	virtual bool getValue(const std::string &name, float &value);
-	virtual bool getValue(const std::string &name, double &value);
-	virtual bool getValue(const std::string &name, std::string &value);
-	virtual bool getValue(const std::string &name, std::wstring &value);
+	bool getValue(const std::string &name, Referenced** value);
+	bool getValue(const std::string &name, bool &value);
+	bool getValue(const std::string &name, char &value);
+	bool getValue(const std::string &name, unsigned char &value);
+	bool getValue(const std::string &name, short &value);
+	bool getValue(const std::string &name, unsigned short &value);
+	bool getValue(const std::string &name, long &value);
+	bool getValue(const std::string &name, unsigned long &value);
+	bool getValue(const std::string &name, long long &value);
+	bool getValue(const std::string &name, unsigned long long &value);
+	bool getValue(const std::string &name, float &value);
+	bool getValue(const std::string &name, double &value);
+	bool getValue(const std::string &name, std::string &value);
+	bool getValue(const std::string &name, std::wstring &value);
 	//FluoRender's special types
-	virtual bool getValue(const std::string &name, FLTYPE::Point &value);
-	virtual bool getValue(const std::string &name, FLTYPE::Vector &value);
-	virtual bool getValue(const std::string &name, FLTYPE::BBox &value);
-	virtual bool getValue(const std::string &name, FLTYPE::HSVColor &value);
-	virtual bool getValue(const std::string &name, FLTYPE::Color &value);
-	virtual bool getValue(const std::string &name, FLTYPE::Plane &value);
-	virtual bool getValue(const std::string &name, FLTYPE::PlaneSet &value);
-	virtual bool getValue(const std::string &name, FLTYPE::Quaternion &value);
-	virtual bool getValue(const std::string &name, FLTYPE::Ray &value);
-	virtual bool getValue(const std::string &name, FLTYPE::Transform &value);
+	bool getValue(const std::string &name, FLTYPE::Point &value);
+	bool getValue(const std::string &name, FLTYPE::Vector &value);
+	bool getValue(const std::string &name, FLTYPE::BBox &value);
+	bool getValue(const std::string &name, FLTYPE::HSVColor &value);
+	bool getValue(const std::string &name, FLTYPE::Color &value);
+	bool getValue(const std::string &name, FLTYPE::Plane &value);
+	bool getValue(const std::string &name, FLTYPE::PlaneSet &value);
+	bool getValue(const std::string &name, FLTYPE::Quaternion &value);
+	bool getValue(const std::string &name, FLTYPE::Ray &value);
+	bool getValue(const std::string &name, FLTYPE::Transform &value);
 
 	//get value the class
-	virtual Value* getValue(const std::string &name)
+	Value* getValue(const std::string &name)
 	{
 		if (_vs_stack.top())
 			return _vs_stack.top()->findValue(name);
@@ -165,16 +165,28 @@ public:
 
 	//sync value
 	//observer's value updates when this updates
-	virtual bool syncValue(const std::string &name, Observer* obsrvr);
-	virtual bool unsyncValue(const std::string &name, Observer* obsrvr);
-	virtual bool syncValues(const std::vector<std::string> &names, Observer* obsrvr);
-	virtual bool unsyncValues(const std::vector<std::string> &names, Observer* obsrvr);
-	virtual bool syncAllValues(Observer* obsrvr);
-	virtual bool unsyncAllValues(Observer* obsrvr);
+	bool syncValue(const std::string &name, Observer* obsrvr);
+	bool unsyncValue(const std::string &name, Observer* obsrvr);
+	bool syncValues(const std::vector<std::string> &names, Observer* obsrvr);
+	bool unsyncValues(const std::vector<std::string> &names, Observer* obsrvr);
+	bool syncAllValues(Observer* obsrvr);
+	bool unsyncAllValues(Observer* obsrvr);
 	//propagate value
-	virtual bool propValue(const std::string &name, Object* obj);
-	virtual bool propValues(const std::vector<std::string> &names, Object* obj);
-	virtual bool propAllValues(Object* obj);
+	bool propValue(const std::string &name, Object* obj);
+	bool propValues(const std::vector<std::string> &names, Object* obj);
+	bool propAllValues(Object* obj);
+
+	std::vector<std::string> getValueNames();
+	std::string getValueType(const std::string &name)
+	{
+		if (_vs_stack.top())
+		{
+			Value* value = _vs_stack.top()->findValue(name);
+			if (value)
+				return value->getType();
+		}
+		return "";
+	}
 
 protected:
 	virtual ~Object();

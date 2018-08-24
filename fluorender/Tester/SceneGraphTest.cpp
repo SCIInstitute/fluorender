@@ -1,6 +1,7 @@
 #include "tests.h"
 #include "asserts.h"
 #include "SceneGraphTest.h"
+#include <Scenegraph/InfoVisitor.h>
 
 void SceneGraphTest()
 {
@@ -54,4 +55,11 @@ void SceneGraphTest()
 	data->setValue("spacing x", 2.0);
 	data->setValue("spacing y", 2.0);
 	data->setValue("spacing z", 6.0);
+
+	InfoVisitor visitor;
+	group->accept(visitor);
+
+	group->removeChild(data);
+
+	group->accept(visitor);
 }

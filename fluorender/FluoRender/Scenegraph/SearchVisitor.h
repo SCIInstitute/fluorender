@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _INFOVISITOR_H_
-#define _INFOVISITOR_H_
+#ifndef _SEARCHVISITOR_H_
+#define _SEARCHVISITOR_H_
 
 #include <Scenegraph/NodeVisitor.h>
 #include <Scenegraph/Group.h>
@@ -36,64 +36,27 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FL
 {
-	class InfoVisitor : public FL::NodeVisitor
+	class SearchVisitor : public FL::NodeVisitor
 	{
 	public:
-		InfoVisitor() : level_(0)
+
+		SearchVisitor()
 		{
 			setTraversalMode(FL::NodeVisitor::TRAVERSE_ALL_CHILDREN);
 		}
 
-		std::string spaces()
-		{
-			return std::string(level_ * 2, ' ');
-		}
-
 		virtual void apply(FL::Node& node)
 		{
-			std::cout << spaces() << node.className() <<
-				"-" << node.getName() << "\t" << &node << std::endl;
-			std::cout << spaces() << "  Values: ";
-			printValues(&node);
-			std::cout << std::endl;
-			level_++;
 			traverse(node);
-			level_--;
 		}
 
 		virtual void apply(FL::Group& group)
 		{
-			std::cout << spaces() << group.className() <<
-				"-" << group.getName() << "\t" << &group << std::endl;
-			std::cout << spaces() << "  Values: ";
-			printValues(&group);
-			std::cout << std::endl;
-
-			level_++;
 			traverse(group);
-			level_--;
 		}
 
 	protected:
-		unsigned int level_;
 
-		void printValues(FL::Object* object)
-		{
-			if (!object)
-				return;
-			//get all value names
-			std::vector<std::string> names =
-				object->getValueNames();
-			for (auto it = names.begin();
-				it != names.end(); ++it)
-			{
-				Value* value = object->getValue(*it);
-				if (value)
-					std::cout << *it << "(" <<
-					value->getType() << ")[" <<
-					*value << "] ";
-			}
-		}
 	};
 }
-#endif//_INFOVISITOR_H_
+#endif//_SEARCHVISITOR_H_
