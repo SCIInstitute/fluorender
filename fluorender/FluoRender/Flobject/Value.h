@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <unordered_map>
 #include <ostream>
 #include <codecvt>
+#include <tuple>
 //FluoRender's special types
 #include <Types/BBox.h>
 #include <Types/Color.h>
@@ -48,6 +49,9 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FL
 {
+//name, type, value
+typedef std::tuple<std::string, std::string, std::string> ValueTuple;
+
 class Value : public Referenced
 {
 public:
@@ -140,34 +144,36 @@ public:
 	bool syncValue(Value* value);
 
 	//add value functions
+	bool addValue(ValueTuple&);
 	//generic types
-	bool addValue(const std::string &name, Referenced* value=0);
-	bool addValue(const std::string &name, bool value=false);
-	bool addValue(const std::string &name, char value=0);
-	bool addValue(const std::string &name, unsigned char value=0);
-	bool addValue(const std::string &name, short value=0);
-	bool addValue(const std::string &name, unsigned short value=0);
-	bool addValue(const std::string &name, long value=0);
-	bool addValue(const std::string &name, unsigned long value=0);
-	bool addValue(const std::string &name, long long value=0);
-	bool addValue(const std::string &name, unsigned long long value=0);
-	bool addValue(const std::string &name, float=0.0f);
-	bool addValue(const std::string &name, double=0.0);
-	bool addValue(const std::string &name, const std::string &value="");
-	bool addValue(const std::string &name, const std::wstring &value = L"");
+	bool addValue(const std::string &name, Referenced* value);
+	bool addValue(const std::string &name, bool value);
+	bool addValue(const std::string &name, char value);
+	bool addValue(const std::string &name, unsigned char value);
+	bool addValue(const std::string &name, short value);
+	bool addValue(const std::string &name, unsigned short value);
+	bool addValue(const std::string &name, long value);
+	bool addValue(const std::string &name, unsigned long value);
+	bool addValue(const std::string &name, long long value);
+	bool addValue(const std::string &name, unsigned long long value);
+	bool addValue(const std::string &name, float value);
+	bool addValue(const std::string &name, double value);
+	bool addValue(const std::string &name, const std::string &value);
+	bool addValue(const std::string &name, const std::wstring &value);
 	//add FluoRender's special types here
-	bool addValue(const std::string &name, const FLTYPE::Point &value = FLTYPE::Point());
-	bool addValue(const std::string &name, const FLTYPE::Vector &value = FLTYPE::Vector());
-	bool addValue(const std::string &name, const FLTYPE::BBox &value = FLTYPE::BBox());
-	bool addValue(const std::string &name, const FLTYPE::HSVColor &value = FLTYPE::HSVColor());
-	bool addValue(const std::string &name, const FLTYPE::Color &value = FLTYPE::Color());
-	bool addValue(const std::string &name, const FLTYPE::Plane &value = FLTYPE::Plane());
-	bool addValue(const std::string &name, const FLTYPE::PlaneSet &value = FLTYPE::PlaneSet());
-	bool addValue(const std::string &name, const FLTYPE::Quaternion &value = FLTYPE::Quaternion());
-	bool addValue(const std::string &name, const FLTYPE::Ray &value = FLTYPE::Ray());
-	bool addValue(const std::string &name, const FLTYPE::Transform &value = FLTYPE::Transform());
+	bool addValue(const std::string &name, const FLTYPE::Point &value);
+	bool addValue(const std::string &name, const FLTYPE::Vector &value);
+	bool addValue(const std::string &name, const FLTYPE::BBox &value);
+	bool addValue(const std::string &name, const FLTYPE::HSVColor &value);
+	bool addValue(const std::string &name, const FLTYPE::Color &value);
+	bool addValue(const std::string &name, const FLTYPE::Plane &value);
+	bool addValue(const std::string &name, const FLTYPE::PlaneSet &value);
+	bool addValue(const std::string &name, const FLTYPE::Quaternion &value);
+	bool addValue(const std::string &name, const FLTYPE::Ray &value);
+	bool addValue(const std::string &name, const FLTYPE::Transform &value);
 
 	/** All the set value functions */
+	bool setValue(ValueTuple&);
 	//generic types
 	bool setValue(const std::string &name, Referenced* value, bool notify = true);
 	bool setValue(const std::string &name, bool value, bool notify = true);
@@ -199,6 +205,7 @@ public:
 	bool toggleValue(const std::string &name, bool &value, bool notify = true);
 
 	/** All the get value functions */
+	bool getValue(ValueTuple&);
 	//generic types
 	bool getValue(const std::string &name, Referenced** value);
 	bool getValue(const std::string &name, bool &value);

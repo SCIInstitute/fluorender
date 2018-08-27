@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Flobject/Object.h>
 #include <vector>
 #include <string>
+#include <iostream>
 
 namespace FL
 {
@@ -46,6 +47,16 @@ namespace FL
 		{ return dynamic_cast<const ObjectFactory*>(obj) != NULL; }
 
 		virtual const char* className() const { return "ObjectFactory"; }
+
+		//read default settings for object
+		//to take advantage of the value management system,
+		//create a default object and use it to save settings
+		virtual bool readDefault(std::istream &is);
+		virtual bool writeDefault(std::ostream &os);
+		virtual bool readDefault(std::string &filename);
+		virtual bool writeDefault(std::string &filename);
+		virtual Object* getDefault()
+		{ return findFirst(default_object_name_); }
 
 		virtual Object* build();
 
@@ -75,14 +86,23 @@ namespace FL
 			return false;
 		}
 
-		inline size_t getNum() const { return objects_.size(); }
+		inline size_t getNum(bool include_default = false) const
+		{
+			if (include_default)
+				return objects_.size();
+			else
+				return objects_.empty() ? 0 : objects_.size() - 1;
+		}
 
-		inline ObjectList getAll()
+		inline ObjectList getAll(bool include_default = false)
 		{
 			ObjectList result;
 			for (auto it = objects_.begin();
 				it != objects_.end(); ++it)
-				result.push_back((*it).get());
+			{
+				if ((*it)->getName() != default_object_name_)
+					result.push_back((*it).get());
+			}
 			return result;
 		}
 
@@ -122,6 +142,17 @@ namespace FL
 			return 0;
 		}
 
+		inline Object* findFirst(const std::string &name)
+		{
+			for (auto it = objects_.begin();
+				it != objects_.end(); ++it)
+			{
+				if ((*it)->getName() == name)
+					return (*it).get();
+			}
+			return 0;
+		}
+
 		inline ObjectList find(const std::string &name)
 		{
 			ObjectList result;
@@ -134,21 +165,40 @@ namespace FL
 			return result;
 		}
 
+		//if we want to resolve naming conflicts, more code is needed
 		inline bool rename(Object* obj, const std::string &name)
 		{ if (obj) obj->setName(name); }
 
-		virtual void clear()
-		{ objects_.clear(); }
+		virtual void clear(bool clear_default = false)
+		{
+			if (clear_default)
+				objects_.clear();
+			else
+			{
+				for (auto it = objects_.begin();
+					it != objects_.end();)
+				{
+					if ((*it)->getName() != default_object_name_)
+						it = objects_.erase(it);
+					else
+						++it;
+				}
+			}
+		}
 
 		inline void incCounter()
 		{ ++global_id_; ++local_id_; }
 
 	protected:
 		virtual ~ObjectFactory();
+		virtual void createDefault();
 
+		std::string default_object_name_;
 		static unsigned int global_id_;
 		unsigned int local_id_;
 
+		//reserve the first object for default
+		//objects created later can be cloned from the first
 		std::vector<ref_ptr<Object>> objects_;
 	};
 

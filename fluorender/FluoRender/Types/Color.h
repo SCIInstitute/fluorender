@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #define _FLCOLOR_H_
 
 #include <stdlib.h>
-#include <ostream>
+#include <iostream>
 
 namespace FLTYPE
 {
@@ -84,6 +84,14 @@ namespace FLTYPE
 			os << '[' << c.hue_ << ' ' << c.sat_ << ' ' << c.val_ << ']';
 			return os;
 		}
+		friend std::istream& operator >> (std::istream& is, HSVColor& c)
+		{
+			double hue, sat, val;
+			char st;
+			is >> st >> hue >> st >> sat >> st >> val >> st;
+			c = HSVColor(hue, sat, val);
+			return is;
+		}
 
 		friend class Color;
 	};
@@ -95,6 +103,7 @@ namespace FLTYPE
 	public:
 		Color();
 		Color(double, double, double);
+		Color(double);
 		Color(double[3]);
 		Color(const Color&);
 		Color& operator=(const Color&);
@@ -165,6 +174,14 @@ namespace FLTYPE
 		{
 			os << '[' << c.r_ << ' ' << c.g_ << ' ' << c.b_ << ']';
 			return os;
+		}
+		friend std::istream& operator >> (std::istream& is, Color& c)
+		{
+			double r, g, b;
+			char st;
+			is >> st >> r >> st >> g >> st >> b >> st;
+			c = Color(r, g, b);
+			return is;
 		}
 
 		friend class HSVColor;

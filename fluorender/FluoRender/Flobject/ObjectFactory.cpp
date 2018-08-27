@@ -27,6 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Flobject/ObjectFactory.h>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
 using namespace FL;
 
@@ -36,11 +38,62 @@ ObjectFactory::ObjectFactory() :
 	local_id_(0)
 {
 	m_name = "object factory";
+	default_object_name_ = "default object";
+	createDefault();
 }
 
 ObjectFactory::~ObjectFactory()
 {
 
+}
+
+void ObjectFactory::createDefault()
+{
+	if (!getDefault())
+	{
+		Object* object = new Object();
+		object->setName(default_object_name_);
+		objects_.push_back(object);
+	}
+}
+
+bool ObjectFactory::readDefault(std::istream &is)
+{
+	return true;
+}
+
+bool ObjectFactory::writeDefault(std::ostream &os)
+{
+	return true;
+}
+
+bool ObjectFactory::readDefault(std::string &filename)
+{
+	Object* object = getDefault();
+	if (!object)
+		return false;
+
+	using boost::property_tree::ptree;
+	ptree pt;
+	read_xml(filename, pt);
+
+	//a default setting tree has two levels
+	//first level: type of the object
+	//second level: name="value name" type="value type" value="default value"
+	std::string parent_name;
+	auto parent = pt.begin();
+	parent_name = parent->first;
+	for (const auto& i : pt.get_child(parent_name))
+	{
+
+	}
+
+	return true;
+}
+
+bool ObjectFactory::writeDefault(std::string &filename)
+{
+	return true;
 }
 
 Object* ObjectFactory::build()

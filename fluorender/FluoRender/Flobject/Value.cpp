@@ -26,6 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <Flobject/Value.h>
+#include <iostream>
+#include <sstream>
 
 using namespace FL;
 
@@ -181,6 +183,158 @@ bool ValueSet::syncValue(Value* value)
 }
 
 //add value functions
+bool ValueSet::addValue(ValueTuple& vt)
+{
+	std::string name = std::get<0>(vt);
+	std::string type = std::get<1>(vt);
+	std::string value = std::get<2>(vt);
+	std::istringstream iss(value);
+	if (!findValue(name))
+	{
+		if (type == "Referenced*")
+		{
+			Referenced* v = 0;
+			return addValue(name, v);
+		}
+		else if (type == "bool")
+		{
+			bool v;
+			iss >> v;
+			return addValue(name, v);
+		}
+		else if (type == "char")
+		{
+			char v;
+			iss >> v;
+			return addValue(name, v);
+		}
+		else if (type == "unsigned char")
+		{
+			unsigned char v;
+			iss >> v;
+			return addValue(name, v);
+		}
+		else if (type == "short")
+		{
+			short v;
+			iss >> v;
+			return addValue(name, v);
+		}
+		else if (type == "unsigned short")
+		{
+			unsigned short v;
+			iss >> v;
+			return addValue(name, v);
+		}
+		else if (type == "long")
+		{
+			long v;
+			iss >> v;
+			return addValue(name, v);
+		}
+		else if (type == "unsigned long")
+		{
+			unsigned long v;
+			iss >> v;
+			return addValue(name, v);
+		}
+		else if (type == "long long")
+		{
+			long long v;
+			iss >> v;
+			return addValue(name, v);
+		}
+		else if (type == "unsigned long long")
+		{
+			unsigned long long v;
+			iss >> v;
+			return addValue(name, v);
+		}
+		else if (type == "float")
+		{
+			float v;
+			iss >> v;
+			return addValue(name, v);
+		}
+		else if (type == "double")
+		{
+			double v;
+			iss >> v;
+			return addValue(name, v);
+		}
+		else if (type == "string")
+		{
+			return addValue(name, value);
+		}
+		else if (type == "wstring")
+		{
+			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
+			return addValue(name, converter.from_bytes(value));
+		}
+		else if (type == "Point")
+		{
+			FLTYPE::Point v;
+			iss >> v;
+			return addValue(name, v);
+		}
+		else if (type == "Vector")
+		{
+			FLTYPE::Vector v;
+			iss >> v;
+			return addValue(name, v);
+		}
+		else if (type == "BBox")
+		{
+			FLTYPE::BBox v;
+			iss >> v;
+			return addValue(name, v);
+		}
+		else if (type == "HSVColor")
+		{
+			FLTYPE::HSVColor v;
+			iss >> v;
+			return addValue(name, v);
+		}
+		else if (type == "Color")
+		{
+			FLTYPE::Color v;
+			iss >> v;
+			return addValue(name, v);
+		}
+		else if (type == "Plane")
+		{
+			FLTYPE::Plane v;
+			iss >> v;
+			return addValue(name, v);
+		}
+		else if (type == "PlaneSet")
+		{
+			FLTYPE::PlaneSet v;
+			iss >> v;
+			return addValue(name, v);
+		}
+		else if (type == "Quaternion")
+		{
+			FLTYPE::Quaternion v;
+			iss >> v;
+			return addValue(name, v);
+		}
+		else if (type == "Ray")
+		{
+			FLTYPE::Ray v;
+			iss >> v;
+			return addValue(name, v);
+		}
+		else if (type == "Transform")
+		{
+			FLTYPE::Transform v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	}
+	return false;
+}
+
 bool ValueSet::addValue(const std::string &name, Referenced* value)
 {
 	if (!findValue(name))

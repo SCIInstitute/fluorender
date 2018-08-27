@@ -100,6 +100,14 @@ namespace FLTYPE
 			os << "[[" << p.n_.x() << ' ' << p.n_.y() << ' ' << p.n_.z() << "] " << p.d_ <<']';
 			return os;
 		}
+		friend std::istream& operator >> (std::istream& is, Plane& p)
+		{
+			double x, y, z, d;
+			char st;
+			is >> st >> st >> x >> st >> y >> st >> z >> st >> st >> d >> st;
+			p = Plane(x, y, z, d);
+			return is;
+		}
 	};
 
 	class PlaneSet
@@ -126,6 +134,18 @@ namespace FLTYPE
 				os << *it << "\n";
 			}
 			return os;
+		}
+		friend std::istream& operator >> (std::istream& is, PlaneSet& ps)
+		{
+			ps.planes_.clear();
+			while (!is.eof())
+			{
+				Plane p;
+				char st;
+				is >> p >> st;
+				ps.planes_.push_back(p);
+			}
+			return is;
 		}
 	};
 

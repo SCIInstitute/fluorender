@@ -285,6 +285,14 @@ public:
 		os << '[' << q.x << ' ' << q.y << ' ' << q.z << ' ' << q.w << ']';
 		return os;
 	}
+	friend std::istream& operator >> (std::istream& is, Quaternion& q)
+	{
+		double x, y, z, w;
+		char st;
+		is >> st >> x >> st >> y >> st >> z >> st >> w >> st;
+		q = Quaternion(x, y, z, w);
+		return is;
+	}
 };
 
 inline Quaternion operator*(double s, Quaternion& q)

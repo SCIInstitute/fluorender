@@ -41,6 +41,11 @@ namespace FLTYPE
 	{
 	}
 
+	Color::Color(double c)
+		: r_(c), g_(c), b_(c)
+	{
+	}
+
 	Color::Color(const Color& c)
 		: r_(c.r_), g_(c.g_), b_(c.b_)
 	{

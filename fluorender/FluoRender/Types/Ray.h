@@ -81,6 +81,15 @@ namespace FLTYPE
 			os << '[' << r.o_ << ' ' << r.d_ << ']';
 			return os;
 		}
+		friend std::istream& operator >> (std::istream& is, Ray& r)
+		{
+			Point o;
+			Vector d;
+			char st;
+			is >> st >> o >> st >> d >> st;
+			r = Ray(o, d);
+			return is;
+		}
 	};
 
 

@@ -255,6 +255,14 @@ namespace FLTYPE
 			os << '[' << b.cmin_ << ' ' << b.cmax_ << ']';
 			return os;
 		}
+		friend std::istream& operator >> (std::istream& is, BBox& b)
+		{
+			Point min, max;
+			char st;
+			is >> st >> min >> st >> max >> st;
+			b = BBox(min, max);
+			return is;
+		}
 
 	private:
 		Point cmin_;

@@ -140,6 +140,17 @@ namespace FLTYPE
 			os << " [" << t.mat[3][0] << ' ' << t.mat[3][1] << ' ' << t.mat[3][2] << ' ' << t.mat[3][3] << "]]\n";
 			return os;
 		}
+		friend std::istream& operator >> (std::istream& is, Transform& t)
+		{
+			double m[4][4];
+			char st;
+			is >> st >> st >> m[0][0] >> st >> m[0][1] >> st >> m[0][2] >> st >> m[0][3] >> st >> st;
+			is >> st >> st >> m[1][0] >> st >> m[1][1] >> st >> m[1][2] >> st >> m[1][3] >> st >> st;
+			is >> st >> st >> m[2][0] >> st >> m[2][1] >> st >> m[2][2] >> st >> m[2][3] >> st >> st;
+			is >> st >> st >> m[3][0] >> st >> m[3][1] >> st >> m[3][2] >> st >> m[3][3] >> st >> st >> st;
+			t.install_mat(m);
+			return is;
+		}
 	};
 
 	Point operator*(Transform &t, const Point &d);
