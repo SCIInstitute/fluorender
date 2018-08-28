@@ -33,7 +33,8 @@ using namespace FL;
 
 VolumeFactory::VolumeFactory()
 {
-
+	m_name = "volume factory";
+	default_object_name_ = "default volume";
 }
 
 VolumeFactory::~VolumeFactory()
@@ -41,15 +42,45 @@ VolumeFactory::~VolumeFactory()
 
 }
 
+void VolumeFactory::createDefault()
+{
+	if (!getDefault())
+	{
+		VolumeData* vd = new VolumeData();
+		vd->setName(default_object_name_);
+		objects_.push_back(vd);
+	}
+}
+
 VolumeData* VolumeFactory::build()
 {
-	VolumeData* vd = new VolumeData();
-
-	//add volume properties
-	FLTYPE::Color cval(1.0);
-	vd->addValue("gamma", cval);
-	//cval = 
-	vd->addValue("brightness", cval);
-
-	return vd;
+	unsigned int default_id = 0;
+	return clone(default_id);
 }
+
+VolumeData* VolumeFactory::clone(VolumeData* vd)
+{
+	incCounter();
+
+	Object* new_vd = vd->clone(CopyOp::DEEP_COPY_ALL);
+	new_vd->setId(local_id_);
+	std::string name = "volume" + std::to_string(local_id_);
+	new_vd->setName(name);
+
+	objects_.push_back(new_vd);
+
+	return dynamic_cast<VolumeData*>(new_vd);
+}
+
+VolumeData* VolumeFactory::clone(const unsigned int id)
+{
+	Object* object = find(id);
+	if (object)
+	{
+		VolumeData* vd = dynamic_cast<VolumeData*>(object);
+		if (vd)
+			return clone(vd);
+	}
+	return 0;
+}
+

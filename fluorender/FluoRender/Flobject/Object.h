@@ -58,6 +58,8 @@ public:
 
 	virtual const char* className() const { return "Object"; }
 
+	inline void setId(const unsigned int id) { _id = id; }
+
 	inline const unsigned int getId() const { return _id; }
 
 	inline void setName(const std::string& name) { m_name = name; }
@@ -193,8 +195,6 @@ public:
 
 protected:
 	virtual ~Object();
-
-	inline void setId(const unsigned int id) { _id = id; }
 
 	/** ID of an object is non-zero. */
 	unsigned int _id;

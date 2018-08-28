@@ -170,7 +170,7 @@ namespace FLTYPE
 
 		friend std::ostream& operator<<(std::ostream& os, const Vector& v)
 		{
-			os << '[' << v.x() << ' ' << v.y() << ' ' << v.z() << ']';
+			os << '[' << v.x() << ',' << v.y() << ',' << v.z() << ']';
 			return os;
 		}
 		friend std::istream& operator >> (std::istream& is, Vector& v)

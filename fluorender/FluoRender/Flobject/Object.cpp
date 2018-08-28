@@ -85,7 +85,7 @@ void Object::objectChanged(void* ptr, const std::string &exp)
 	}
 }
 
-//define function bodies first
+//add functions
 bool Object::addValue(ValueTuple &vt)
 {
 	if (_vs_stack.top())
@@ -103,7 +103,7 @@ bool Object::addValue(ValueTuple &vt)
 	return false;
 }
 
-//add functions
+//define function bodies first
 #define OBJECT_ADD_VALUE_BODY \
 	if (_vs_stack.top()) \
 	{ \

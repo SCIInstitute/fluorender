@@ -9,7 +9,7 @@
 <Value name="high shading" type="double" value="10"/>
 <Value name="alpha" type="double" value="0.701961"/>
 <Value name="sample rate" type="double" value="2"/>
-<Value name="spacing" type="Vector" value="1 1 3"/>
+<Value name="spacing" type="Vector" value="[1,1,3]"/>
 <Value name="luminance" type="double" value="1"/>
 <Value name="colormap enable" type="bool" value="0"/>
 <Value name="colormap style" type="unsigned long" value="0"/>

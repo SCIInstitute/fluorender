@@ -32,6 +32,8 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <string>
 #include <iostream>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
 namespace FL
 {
@@ -53,8 +55,8 @@ namespace FL
 		//create a default object and use it to save settings
 		virtual bool readDefault(std::istream &is);
 		virtual bool writeDefault(std::ostream &os);
-		virtual bool readDefault(std::string &filename);
-		virtual bool writeDefault(std::string &filename);
+		virtual bool readDefault();
+		virtual bool writeDefault();
 		virtual Object* getDefault()
 		{ return findFirst(default_object_name_); }
 
@@ -63,6 +65,8 @@ namespace FL
 		virtual Object* clone(Object*);
 
 		virtual Object* clone(const unsigned int);
+
+		virtual void objectChanged(void*, const std::string &exp);
 
 		inline bool remove(Object* object)
 		{
@@ -191,9 +195,13 @@ namespace FL
 
 	protected:
 		virtual ~ObjectFactory();
+
 		virtual void createDefault();
 
+		bool setDefaultValues(boost::property_tree::ptree &pt);
+
 		std::string default_object_name_;
+		std::string default_setting_filename_value_name_;
 		static unsigned int global_id_;
 		unsigned int local_id_;
 

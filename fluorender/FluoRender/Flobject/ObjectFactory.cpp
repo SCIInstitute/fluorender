@@ -27,8 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Flobject/ObjectFactory.h>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
 
 using namespace FL;
 
@@ -39,7 +37,9 @@ ObjectFactory::ObjectFactory() :
 {
 	m_name = "object factory";
 	default_object_name_ = "default object";
-	createDefault();
+	default_setting_filename_value_name_ = "default filename";//maybe not necessary
+	std::string filename = "";
+	addValue(default_setting_filename_value_name_, filename);
 }
 
 ObjectFactory::~ObjectFactory()
@@ -47,36 +47,30 @@ ObjectFactory::~ObjectFactory()
 
 }
 
-void ObjectFactory::createDefault()
+void ObjectFactory::objectChanged(void* ptr, const std::string &exp)
 {
-	if (!getDefault())
+	Object::objectChanged(ptr, exp);//actually unnecessary, since there is nothing to sync
+	Referenced* refd = static_cast<Referenced*>(ptr);
+	if (refd->className() == std::string("Value"))
 	{
-		Object* object = new Object();
-		object->setName(default_object_name_);
-		objects_.push_back(object);
+		Value* value = dynamic_cast<Value*>(refd);
+		if (value->getName() == default_setting_filename_value_name_)
+			readDefault();
 	}
 }
 
-bool ObjectFactory::readDefault(std::istream &is)
-{
-	return true;
-}
-
-bool ObjectFactory::writeDefault(std::ostream &os)
-{
-	return true;
-}
-
-bool ObjectFactory::readDefault(std::string &filename)
+bool ObjectFactory::setDefaultValues(boost::property_tree::ptree &pt)
 {
 	Object* object = getDefault();
 	if (!object)
-		return false;
+	{
+		createDefault();
+		object = getDefault();
+		if (!object)
+			return false;
+	}
 
 	using boost::property_tree::ptree;
-	ptree pt;
-	read_xml(filename, pt);
-
 	//a default setting tree has two levels
 	//first level: type of the object
 	//second level: name="value name" type="value type" value="default value"
@@ -94,29 +88,61 @@ bool ObjectFactory::readDefault(std::string &filename)
 		std::string type = sub_pt.get<std::string>("<xmlattr>.type");
 		std::string value = sub_pt.get<std::string>("<xmlattr>.value");
 		ValueTuple vt{name, type, value};
-		object->addValue(vt);
+		//if no this value, add one, otherwise change its value
+		if (!object->addValue(vt))
+			object->setValue(vt);
 	}
 
 	return true;
 }
 
-bool ObjectFactory::writeDefault(std::string &filename)
+bool ObjectFactory::readDefault(std::istream &is)
+{
+	using boost::property_tree::ptree;
+	ptree pt;
+	read_xml(is, pt);
+	setDefaultValues(pt);
+
+	return true;
+}
+
+bool ObjectFactory::writeDefault(std::ostream &os)
 {
 	return true;
 }
 
+bool ObjectFactory::readDefault()
+{
+	std::string filename;
+	getValue(default_setting_filename_value_name_, filename);
+
+	using boost::property_tree::ptree;
+	ptree pt;
+	read_xml(filename, pt);
+	setDefaultValues(pt);
+
+	return true;
+}
+
+bool ObjectFactory::writeDefault()
+{
+	return true;
+}
+
+void ObjectFactory::createDefault()
+{
+	if (!getDefault())
+	{
+		Object* object = new Object();
+		object->setName(default_object_name_);
+		objects_.push_back(object);
+	}
+}
+
 Object* ObjectFactory::build()
 {
-	incCounter();
-
-	Object* object = new Object();
-	object->setId(local_id_);
-	std::string name = "object" + std::to_string(local_id_);
-	object->setName(name);
-
-	objects_.push_back(object);
-
-	return object;
+	unsigned int default_id = 0;
+	return clone(default_id);
 }
 
 Object* ObjectFactory::clone(Object* object)

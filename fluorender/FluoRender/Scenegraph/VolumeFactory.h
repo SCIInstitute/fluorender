@@ -45,8 +45,13 @@ namespace FL
 
 		virtual VolumeData* build();
 
+		virtual VolumeData* clone(VolumeData*);
+
+		virtual VolumeData* clone(const unsigned int);
+
 	protected:
 		virtual ~VolumeFactory();
+		virtual void createDefault();
 	};
 }
 

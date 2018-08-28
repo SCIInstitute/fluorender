@@ -18,11 +18,11 @@ int main(int argc, char* argv[])
 	//GroupTest2();
 	//GroupTest3();
 
-	SceneGraphTest();
+	//SceneGraphTest();
 
 	//SpecialValueTest();
 
-	//FactoryTest();
+	FactoryTest();
 
 	printf("All done. Quit.\n");
 	cin.get();
