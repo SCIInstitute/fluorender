@@ -86,6 +86,23 @@ void Object::objectChanged(void* ptr, const std::string &exp)
 }
 
 //define function bodies first
+bool Object::addValue(ValueTuple &vt)
+{
+	if (_vs_stack.top())
+	{
+		bool result = _vs_stack.top()->addValue(vt);
+		if (result)
+		{
+			std::string name = std::get<0>(vt);
+			Value* vs_value = _vs_stack.top()->findValue(name);
+			if (vs_value)
+				vs_value->addObserver(this);
+		}
+		return result;
+	}
+	return false;
+}
+
 //add functions
 #define OBJECT_ADD_VALUE_BODY \
 	if (_vs_stack.top()) \
@@ -225,6 +242,25 @@ bool Object::addValue(const std::string &name, const FLTYPE::Transform &value)
 }
 
 //define function bodies first
+bool Object::setValue(ValueTuple &vt, bool notify)
+{
+	ValueTuple old_vt;
+	std::string name = std::get<0>(vt);
+	std::get<0>(old_vt) = name;
+	if (getValue(old_vt) && vt != old_vt)
+	{
+		bool result = false;
+		if (_vs_stack.top())
+		{
+			result = _vs_stack.top()->setValue(vt, notify);
+			if (result)
+				notifyObserversOfChange(name);
+		}
+		return result;
+	}
+	return false;
+}
+
 //set functions
 #define OBJECT_SET_VALUE_BODY \
 	if (getValue(name, old_value) && value != old_value) \
@@ -411,8 +447,16 @@ bool Object::toggleValue(const std::string &name, bool &value, bool notify)
 	return result;
 }
 
-//define function bodies first
 //get functions
+bool Object::getValue(ValueTuple &vt)
+{
+	if (_vs_stack.top())
+		return _vs_stack.top()->getValue(vt);
+	else
+		return false;
+}
+
+//define function bodies first
 #define OBJECT_GET_VALUE_BODY \
 	if (_vs_stack.top()) \
 		return _vs_stack.top()->getValue(name, value); \

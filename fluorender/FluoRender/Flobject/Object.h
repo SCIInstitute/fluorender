@@ -68,6 +68,7 @@ public:
 	virtual void objectChanged(void*, const std::string &exp);
 
 	//add a value
+	bool addValue(ValueTuple& vt);
 	//generic types
 	bool addValue(const std::string &name, Referenced* value);
 	bool addValue(const std::string &name, bool value);
@@ -96,6 +97,7 @@ public:
 	bool addValue(const std::string &name, const FLTYPE::Transform &value);
 
 	/** All the set value functions */
+	bool setValue(ValueTuple& vt, bool notify = true);
 	//generic types
 	bool setValue(const std::string &name, Referenced* value, bool notify = true);
 	bool setValue(const std::string &name, bool value, bool notify = true);
@@ -127,6 +129,7 @@ public:
 	bool toggleValue(const std::string &name, bool &value, bool notify = true);
 
 	/** All the get value functions */
+	bool getValue(ValueTuple& vt);
 	//generic types
 	bool getValue(const std::string &name, Referenced** value);
 	bool getValue(const std::string &name, bool &value);

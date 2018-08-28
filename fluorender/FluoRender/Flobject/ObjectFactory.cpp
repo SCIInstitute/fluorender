@@ -85,7 +85,16 @@ bool ObjectFactory::readDefault(std::string &filename)
 	parent_name = parent->first;
 	for (const auto& i : pt.get_child(parent_name))
 	{
-
+		std::string child_name;
+		ptree sub_pt;
+		std::tie(child_name, sub_pt) = i;
+		if (child_name != "Value")
+			continue;
+		std::string name = sub_pt.get<std::string>("<xmlattr>.name");
+		std::string type = sub_pt.get<std::string>("<xmlattr>.type");
+		std::string value = sub_pt.get<std::string>("<xmlattr>.value");
+		ValueTuple vt{name, type, value};
+		object->addValue(vt);
 	}
 
 	return true;

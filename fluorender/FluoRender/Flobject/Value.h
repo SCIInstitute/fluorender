@@ -173,7 +173,7 @@ public:
 	bool addValue(const std::string &name, const FLTYPE::Transform &value);
 
 	/** All the set value functions */
-	bool setValue(ValueTuple&);
+	bool setValue(ValueTuple& vt, bool notify = true);
 	//generic types
 	bool setValue(const std::string &name, Referenced* value, bool notify = true);
 	bool setValue(const std::string &name, bool value, bool notify = true);
