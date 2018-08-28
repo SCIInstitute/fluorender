@@ -53,10 +53,10 @@ namespace FL
 		//read default settings for object
 		//to take advantage of the value management system,
 		//create a default object and use it to save settings
-		virtual bool readDefault(std::istream &is);
-		virtual bool writeDefault(std::ostream &os);
-		virtual bool readDefault();
-		virtual bool writeDefault();
+		bool readDefault(std::istream &is);
+		bool writeDefault(std::ostream &os);
+		bool readDefault();
+		bool writeDefault();
 		virtual Object* getDefault()
 		{ return findFirst(default_object_name_); }
 
