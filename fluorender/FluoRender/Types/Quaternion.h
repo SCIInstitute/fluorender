@@ -282,7 +282,7 @@ public:
 public:
 	friend std::ostream& operator<<(std::ostream& os, const Quaternion& q)
 	{
-		os << '[' << q.x << ' ' << q.y << ' ' << q.z << ' ' << q.w << ']';
+		os << '[' << q.x << ',' << q.y << ',' << q.z << ',' << q.w << ']';
 		return os;
 	}
 	friend std::istream& operator >> (std::istream& is, Quaternion& q)

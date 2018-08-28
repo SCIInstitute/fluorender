@@ -97,7 +97,7 @@ namespace FLTYPE
 
 		friend std::ostream& operator<<(std::ostream& os, const Plane& p)
 		{
-			os << "[[" << p.n_.x() << ' ' << p.n_.y() << ' ' << p.n_.z() << "] " << p.d_ <<']';
+			os << "[[" << p.n_.x() << ',' << p.n_.y() << ',' << p.n_.z() << "]," << p.d_ << ']';
 			return os;
 		}
 		friend std::istream& operator >> (std::istream& is, Plane& p)
@@ -128,10 +128,11 @@ namespace FLTYPE
 
 		friend std::ostream& operator<<(std::ostream& os, const PlaneSet& ps)
 		{
-			for (auto it = ps.planes_.begin();
-				it != ps.planes_.end(); ++it)
+			for (size_t i=0; i<ps.planes_.size(); ++i)
 			{
-				os << *it << "\n";
+				os << ps.planes_[i];
+				if (i < ps.planes_.size() - 1)
+					os << ',';
 			}
 			return os;
 		}

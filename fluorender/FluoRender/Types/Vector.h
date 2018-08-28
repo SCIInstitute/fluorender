@@ -170,6 +170,7 @@ namespace FLTYPE
 
 		friend std::ostream& operator<<(std::ostream& os, const Vector& v)
 		{
+			//avoid using spaces so that it can be read correctly using >>
 			os << '[' << v.x() << ',' << v.y() << ',' << v.z() << ']';
 			return os;
 		}

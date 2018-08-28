@@ -252,7 +252,7 @@ namespace FLTYPE
 
 		friend std::ostream& operator<<(std::ostream& os, const BBox& b)
 		{
-			os << '[' << b.cmin_ << ' ' << b.cmax_ << ']';
+			os << '[' << b.cmin_ << ',' << b.cmax_ << ']';
 			return os;
 		}
 		friend std::istream& operator >> (std::istream& is, BBox& b)

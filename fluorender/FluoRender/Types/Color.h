@@ -81,7 +81,7 @@ namespace FLTYPE
 
 		friend std::ostream& operator<<(std::ostream& os, const HSVColor& c)
 		{
-			os << '[' << c.hue_ << ' ' << c.sat_ << ' ' << c.val_ << ']';
+			os << '[' << c.hue_ << ',' << c.sat_ << ',' << c.val_ << ']';
 			return os;
 		}
 		friend std::istream& operator >> (std::istream& is, HSVColor& c)
@@ -172,7 +172,7 @@ namespace FLTYPE
 
 		friend std::ostream& operator<<(std::ostream& os, const Color& c)
 		{
-			os << '[' << c.r_ << ' ' << c.g_ << ' ' << c.b_ << ']';
+			os << '[' << c.r_ << ',' << c.g_ << ',' << c.b_ << ']';
 			return os;
 		}
 		friend std::istream& operator >> (std::istream& is, Color& c)
