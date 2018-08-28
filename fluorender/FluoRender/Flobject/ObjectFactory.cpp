@@ -96,6 +96,11 @@ bool ObjectFactory::setDefaultValues(boost::property_tree::ptree &pt)
 	return true;
 }
 
+bool ObjectFactory::convDefaultValues(boost::property_tree::ptree &pt)
+{
+	return true;
+}
+
 bool ObjectFactory::readDefault(std::istream &is)
 {
 	using boost::property_tree::ptree;
@@ -108,6 +113,11 @@ bool ObjectFactory::readDefault(std::istream &is)
 
 bool ObjectFactory::writeDefault(std::ostream &os)
 {
+	using boost::property_tree::ptree;
+	ptree pt;
+	convDefaultValues(pt);
+	write_xml(os, pt);
+
 	return true;
 }
 
@@ -126,6 +136,14 @@ bool ObjectFactory::readDefault()
 
 bool ObjectFactory::writeDefault()
 {
+	std::string filename;
+	getValue(default_setting_filename_value_name_, filename);
+
+	using boost::property_tree::ptree;
+	ptree pt;
+	convDefaultValues(pt);
+	write_xml(filename, pt);
+
 	return true;
 }
 

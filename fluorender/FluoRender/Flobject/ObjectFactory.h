@@ -198,7 +198,10 @@ namespace FL
 
 		virtual void createDefault();
 
+		//update the values of the default volume
 		bool setDefaultValues(boost::property_tree::ptree &pt);
+		//convert the values of the default volume to ptree
+		bool convDefaultValues(boost::property_tree::ptree &pt);
 
 		std::string default_object_name_;
 		std::string default_setting_filename_value_name_;
