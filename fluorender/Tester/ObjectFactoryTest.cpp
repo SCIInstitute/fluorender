@@ -29,4 +29,8 @@ void FactoryTest()
 
 	InfoVisitor visitor;
 	group->accept(visitor);
+
+	factory->writeDefault();
+
+	factory->writeDefault(std::cout);
 }

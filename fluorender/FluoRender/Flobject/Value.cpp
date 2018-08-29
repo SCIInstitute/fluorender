@@ -1189,6 +1189,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		type = val->getType();
 		if (type == "Referenced*")
 		{
+			std::get<1>(vt) = type;
 			//tentative:
 			//get id if it's an object
 			Referenced* v;
@@ -1205,6 +1206,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		}
 		else if (type == "bool")
 		{
+			std::get<1>(vt) = type;
 			bool v;
 			if (getValue(name, v))
 			{
@@ -1215,6 +1217,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		}
 		else if (type == "char")
 		{
+			std::get<1>(vt) = type;
 			char v;
 			if (getValue(name, v))
 			{
@@ -1225,6 +1228,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		}
 		else if (type == "unsigned char")
 		{
+			std::get<1>(vt) = type;
 			unsigned char v;
 			if (getValue(name, v))
 			{
@@ -1235,6 +1239,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		}
 		else if (type == "short")
 		{
+			std::get<1>(vt) = type;
 			short v;
 			if (getValue(name, v))
 			{
@@ -1245,6 +1250,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		}
 		else if (type == "unsigned short")
 		{
+			std::get<1>(vt) = type;
 			unsigned short v;
 			if (getValue(name, v))
 			{
@@ -1255,6 +1261,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		}
 		else if (type == "long")
 		{
+			std::get<1>(vt) = type;
 			long v;
 			if (getValue(name, v))
 			{
@@ -1265,6 +1272,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		}
 		else if (type == "unsigned long")
 		{
+			std::get<1>(vt) = type;
 			unsigned long v;
 			if (getValue(name, v))
 			{
@@ -1275,6 +1283,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		}
 		else if (type == "long long")
 		{
+			std::get<1>(vt) = type;
 			long long v;
 			if (getValue(name, v))
 			{
@@ -1285,6 +1294,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		}
 		else if (type == "unsigned long long")
 		{
+			std::get<1>(vt) = type;
 			unsigned long long v;
 			if (getValue(name, v))
 			{
@@ -1295,6 +1305,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		}
 		else if (type == "float")
 		{
+			std::get<1>(vt) = type;
 			float v;
 			if (getValue(name, v))
 			{
@@ -1305,6 +1316,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		}
 		else if (type == "double")
 		{
+			std::get<1>(vt) = type;
 			double v;
 			if (getValue(name, v))
 			{
@@ -1315,6 +1327,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		}
 		else if (type == "string")
 		{
+			std::get<1>(vt) = type;
 			std::string v;
 			if (getValue(name, v))
 			{
@@ -1324,6 +1337,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		}
 		else if (type == "wstring")
 		{
+			std::get<1>(vt) = type;
 			std::wstring v;
 			if (getValue(name, v))
 			{
@@ -1335,6 +1349,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		}
 		else if (type == "Point")
 		{
+			std::get<1>(vt) = type;
 			FLTYPE::Point v;
 			if (getValue(name, v))
 			{
@@ -1345,6 +1360,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		}
 		else if (type == "Vector")
 		{
+			std::get<1>(vt) = type;
 			FLTYPE::Vector v;
 			if (getValue(name, v))
 			{
@@ -1355,6 +1371,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		}
 		else if (type == "BBox")
 		{
+			std::get<1>(vt) = type;
 			FLTYPE::BBox v;
 			if (getValue(name, v))
 			{
@@ -1365,6 +1382,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		}
 		else if (type == "HSVColor")
 		{
+			std::get<1>(vt) = type;
 			FLTYPE::HSVColor v;
 			if (getValue(name, v))
 			{
@@ -1375,6 +1393,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		}
 		else if (type == "Color")
 		{
+			std::get<1>(vt) = type;
 			FLTYPE::Color v;
 			if (getValue(name, v))
 			{
@@ -1385,6 +1404,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		}
 		else if (type == "Plane")
 		{
+			std::get<1>(vt) = type;
 			FLTYPE::Plane v;
 			if (getValue(name, v))
 			{
@@ -1395,6 +1415,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		}
 		else if (type == "PlaneSet")
 		{
+			std::get<1>(vt) = type;
 			FLTYPE::PlaneSet v;
 			if (getValue(name, v))
 			{
@@ -1405,6 +1426,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		}
 		else if (type == "Quaternion")
 		{
+			std::get<1>(vt) = type;
 			FLTYPE::Quaternion v;
 			if (getValue(name, v))
 			{
@@ -1415,6 +1437,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		}
 		else if (type == "Ray")
 		{
+			std::get<1>(vt) = type;
 			FLTYPE::Ray v;
 			if (getValue(name, v))
 			{
@@ -1425,6 +1448,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		}
 		else if (type == "Transform")
 		{
+			std::get<1>(vt) = type;
 			FLTYPE::Transform v;
 			if (getValue(name, v))
 			{

@@ -98,6 +98,37 @@ bool ObjectFactory::setDefaultValues(boost::property_tree::ptree &pt)
 
 bool ObjectFactory::convDefaultValues(boost::property_tree::ptree &pt)
 {
+	Object* object = getDefault();
+	if (!object)
+		return false;
+
+	using boost::property_tree::ptree;
+	if (!pt.empty())
+		pt.clear();
+	ptree parent;
+	//get all value names
+	std::vector<std::string> names =
+		object->getValueNames();
+	for (auto it = names.begin();
+		it != names.end(); ++it)
+	{
+		ValueTuple vt;
+		std::get<0>(vt) = *it;
+		if (object->getValue(vt))
+		{
+			std::string name = std::get<0>(vt);
+			std::string type = std::get<1>(vt);
+			std::string val = std::get<2>(vt);
+			ptree child;
+			child.put("<xmlattr>.name", name);
+			child.put("<xmlattr>.type", type);
+			child.put("<xmlattr>.value", val);
+			parent.add_child("Value", child);
+		}
+	}
+
+	//add parent
+	pt.add_child("ValueSet", parent);
 	return true;
 }
 
@@ -111,12 +142,15 @@ bool ObjectFactory::readDefault(std::istream &is)
 	return true;
 }
 
-bool ObjectFactory::writeDefault(std::ostream &os)
+bool ObjectFactory::writeDefault(std::ostream &os, int indent)
 {
 	using boost::property_tree::ptree;
 	ptree pt;
 	convDefaultValues(pt);
-	write_xml(os, pt);
+	//write_xml(os, pt,
+	//	boost::property_tree::xml_writer_make_settings< std::string >('\t', 1));
+	write_xml_element(os, ptree::key_type(), pt, -1,
+		boost::property_tree::xml_writer_make_settings< std::string >('\t', indent));
 
 	return true;
 }
@@ -142,7 +176,8 @@ bool ObjectFactory::writeDefault()
 	using boost::property_tree::ptree;
 	ptree pt;
 	convDefaultValues(pt);
-	write_xml(filename, pt);
+	write_xml(filename, pt, std::locale(),
+		boost::property_tree::xml_writer_make_settings< std::string >('\t', 1));
 
 	return true;
 }

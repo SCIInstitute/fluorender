@@ -54,7 +54,7 @@ namespace FL
 		//to take advantage of the value management system,
 		//create a default object and use it to save settings
 		bool readDefault(std::istream &is);
-		bool writeDefault(std::ostream &os);
+		bool writeDefault(std::ostream &os, int indent = 1);
 		bool readDefault();
 		bool writeDefault();
 		virtual Object* getDefault()
