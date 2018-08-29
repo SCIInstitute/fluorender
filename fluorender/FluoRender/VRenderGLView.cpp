@@ -3072,7 +3072,6 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 
 	Framebuffer* chann_buffer =
 		TextureRenderer::framebuffer_manager_.framebuffer("channel");
-	Framebuffer* temp_buffer = 0;
 	if (do_over)
 	{
 		//before rendering this channel, save final buffer to temp buffer
@@ -3083,9 +3082,9 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 			TextureRenderer::reset_save_final_buffer();
 
 			//bind temporary framebuffer for comp in stream mode
-			temp_buffer =
+			Framebuffer* temp_buffer =
 				TextureRenderer::framebuffer_manager_.framebuffer(
-				FB_Render_RGBA, nx, ny);
+				FB_Render_RGBA, nx, ny, "temporary");
 			if (temp_buffer)
 			{
 				temp_buffer->bind();
@@ -3165,6 +3164,9 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
+		Framebuffer* temp_buffer =
+			TextureRenderer::framebuffer_manager_.framebuffer(
+				"temporary");
 		if (temp_buffer)
 		{
 			//temp buffer becomes unused after texture is bound
@@ -3264,7 +3266,6 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 
 	Framebuffer* chann_buffer =
 		TextureRenderer::framebuffer_manager_.framebuffer("channel");
-	Framebuffer* temp_buffer = 0;
 	Framebuffer* overlay_buffer = 0;
 	if (do_mip)
 	{
@@ -3276,9 +3277,9 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 			TextureRenderer::reset_save_final_buffer();
 
 			//bind temporary framebuffer for comp in stream mode
-			temp_buffer =
+			Framebuffer* temp_buffer =
 				TextureRenderer::framebuffer_manager_.framebuffer(
-				FB_Render_RGBA, nx, ny);
+				FB_Render_RGBA, nx, ny, "temporary");
 			if (temp_buffer)
 			{
 				temp_buffer->bind();
@@ -3454,6 +3455,9 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
+		Framebuffer* temp_buffer =
+			TextureRenderer::framebuffer_manager_.framebuffer(
+				"temporary");
 		if (temp_buffer)
 		{
 			//bind tex from temp buffer
