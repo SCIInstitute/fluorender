@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ValueSet>
-	<Value name="shadow intensity" type="double" value="0.67"/>
+	<Value name="gamma 3d" type="double" value="0.7"/>
 	<Value name="extract boundary" type="double" value="0"/>
-	<Value name="low offset" type="double" value="1"/>
-	<Value name="interp enable" type="bool" value="1"/>
-	<Value name="gamma" type="double" value="0.7"/>
-	<Value name="colormap high" type="unsigned long" value="1"/>
-	<Value name="high threshold" type="double" value="1"/>
-	<Value name="high offset" type="double" value="1"/>
+	<Value name="saturation" type="double" value="1"/>
 	<Value name="low threshold" type="double" value="0"/>
+	<Value name="high threshold" type="double" value="1"/>
 	<Value name="alpha" type="double" value="0.701961"/>
+	<Value name="sample rate" type="double" value="2"/>
+	<Value name="shadow intensity" type="double" value="0.67"/>
+	<Value name="interp enable" type="bool" value="1"/>
+	<Value name="colormap high" type="unsigned long" value="1"/>
+	<Value name="high offset" type="double" value="1"/>
 	<Value name="low shading" type="double" value="1.5"/>
 	<Value name="high shading" type="double" value="10"/>
-	<Value name="sample rate" type="double" value="2"/>
 	<Value name="spacing" type="Vector" value="[1,1,3]"/>
 	<Value name="luminance" type="double" value="1"/>
 	<Value name="colormap enable" type="bool" value="0"/>

@@ -49,6 +49,45 @@ void VolumeFactory::createDefault()
 		VolumeData* vd = new VolumeData();
 		vd->setName(default_object_name_);
 		objects_.push_back(vd);
+
+		//add default values here
+		//output (2d) adjustments
+		vd->addValue("gamma r", double(1));
+		vd->addValue("gamma g", double(1));
+		vd->addValue("gamma b", double(1));
+		vd->addValue("brightness r", double(0));
+		vd->addValue("brightness g", double(0));
+		vd->addValue("brightness b", double(0));
+		vd->addValue("equalize r", double(0));
+		vd->addValue("equalize g", double(0));
+		vd->addValue("equalize b", double(0));
+
+		vd->addValue("bounds", FLTYPE::BBox());
+
+		vd->addValue("tex path", std::wstring());//path to original file
+		vd->addValue("channel", long(0));//channel index of the original file
+		vd->addValue("time", long(0));//time index of the original file
+
+		vd->addValue("mip mode", long(0));//0-normal; 1-MIP; 2-white shading; 3-white mip
+		vd->addValue("stream mode", long(0));//0-normal; 1-MIP; 2-shading; 3-shadow, 4-mask
+		vd->addValue("mask mode", long(0));//0-normal, 1-render with mask, 2-render with mask excluded,
+											//3-random color with label, 4-random color with label+mask
+		vd->addValue("use mask thresh", bool(false));// use mask threshold
+
+		//volume properties
+		vd->addValue("int scale", double(1));//scaling factor for intensity values
+		vd->addValue("gm scale", double(1));//scaling factor for gradient magnitude values
+		vd->addValue("max int", double(255));//max intensity value from integer reading
+		vd->addValue("gamma 3d", double(1));
+		vd->addValue("extract boundary", double(0));//previously called gm thresh
+		vd->addValue("saturation", double(1));//previously called offset, low offset
+		vd->addValue("low threshold", double(0));
+		vd->addValue("high threshold", double(1));
+		vd->addValue("alpha", double(1));
+		vd->addValue("sample rate", double(1));
+
+		vd->addValue("color", FLTYPE::Color(1.0));
+		vd->addValue("hsv", FLTYPE::HSVColor());
 	}
 }
 
@@ -63,7 +102,7 @@ VolumeData* VolumeFactory::clone(VolumeData* vd)
 	incCounter();
 
 	Object* new_vd = vd->clone(CopyOp::DEEP_COPY_ALL);
-	new_vd->setId(local_id_);
+	new_vd->setId(global_id_);
 	std::string name = "volume" + std::to_string(local_id_);
 	new_vd->setName(name);
 

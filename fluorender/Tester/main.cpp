@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <vld.h>
+//#include <vld.h>
 #include "asserts.h"
 #include "tests.h"
 
@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
 
 	//SpecialValueTest();
 
-	FactoryTest();
+	//FactoryTest();
 
 	printf("All done. Quit.\n");
 	cin.get();
