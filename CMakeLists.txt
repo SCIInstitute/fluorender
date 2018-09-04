@@ -551,12 +551,12 @@ elseif(WIN32)
       $<TARGET_OBJECTS:WACUTILS_OBJ>)
     add_executable(Tester
       ${tester_src} ${tester_hdr}
-      #$<TARGET_OBJECTS:FLIVR_OBJ>
+      $<TARGET_OBJECTS:FLIVR_OBJ>
       $<TARGET_OBJECTS:TYPES_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
       $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
-      $<TARGET_OBJECTS:GLEW_OBJ>)
-      #$<TARGET_OBJECTS:TEEM_OBJ>)
+      $<TARGET_OBJECTS:GLEW_OBJ>
+      $<TARGET_OBJECTS:TEEM_OBJ>)
   endif()
 endif()
 
@@ -618,6 +618,7 @@ elseif(WIN32)
   target_link_libraries(Tester
     ${OPENGL_LIBRARIES}
     ${OpenCL_LIBRARIES}
+    ${ZLIB_LIBRARIES}
     ${FREETYPE_LIBRARIES})
     #${wxWidgets_LIBRARIES})
 endif()

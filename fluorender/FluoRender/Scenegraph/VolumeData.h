@@ -39,6 +39,7 @@ class Texture;
 class BaseReader;
 namespace FL
 {
+	class VolumeFactory;
 	class VolumeData : public Node
 	{
 	public:
@@ -64,9 +65,11 @@ namespace FL
 		virtual ~VolumeData();
 
 	private:
-		//FLIVR::VolumeRenderer *m_vr;
-		//FLIVR::Texture *m_tex;
-		//BaseReader *m_reader;
+		FLIVR::VolumeRenderer *m_vr;
+		FLIVR::Texture *m_tex;
+		BaseReader *m_reader;
+
+		friend class VolumeFactory;
 	};
 }
 

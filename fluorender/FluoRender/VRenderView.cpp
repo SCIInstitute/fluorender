@@ -1944,11 +1944,11 @@ void VRenderView::UpdateView(bool ui_update)
 {
 	double rotx, roty, rotz;
 	wxString str_val = m_x_rot_text->GetValue();
-	rotx = STOD(str_val.fn_str());
+	str_val.ToDouble(&rotx);
 	str_val = m_y_rot_text->GetValue();
-	roty = STOD(str_val.fn_str());
+	str_val.ToDouble(&roty);
 	str_val = m_z_rot_text->GetValue();
-	rotz = STOD(str_val.fn_str());
+	str_val.ToDouble(&rotz);
 	SetRotations(rotx, roty, rotz, ui_update);
 	RefreshGL(true);
 }

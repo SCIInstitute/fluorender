@@ -1911,7 +1911,9 @@ void ClippingView::OnZRotEdit(wxCommandEvent &event)
 void ClippingView::OnXRotSpinUp(wxSpinEvent& event)
 {
 	wxString str_val = m_x_rot_text->GetValue();
-	double val = STOD(str_val.fn_str()) + 1.0;
+	double val;
+	str_val.ToDouble(&val);
+	val += 1.0;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);
@@ -1921,7 +1923,9 @@ void ClippingView::OnXRotSpinUp(wxSpinEvent& event)
 void ClippingView::OnXRotSpinDown(wxSpinEvent& event)
 {
 	wxString str_val = m_x_rot_text->GetValue();
-	double val = STOD(str_val.fn_str()) - 1.0;
+	double val;
+	str_val.ToDouble(&val);
+	val -= 1.0;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);
@@ -1931,7 +1935,9 @@ void ClippingView::OnXRotSpinDown(wxSpinEvent& event)
 void ClippingView::OnYRotSpinUp(wxSpinEvent& event)
 {
 	wxString str_val = m_y_rot_text->GetValue();
-	double val = STOD(str_val.fn_str()) + 1.0;
+	double val;
+	str_val.ToDouble(&val);
+	val += 1.0;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);
@@ -1941,7 +1947,9 @@ void ClippingView::OnYRotSpinUp(wxSpinEvent& event)
 void ClippingView::OnYRotSpinDown(wxSpinEvent& event)
 {
 	wxString str_val = m_y_rot_text->GetValue();
-	double val = STOD(str_val.fn_str()) - 1.0;
+	double val;
+	str_val.ToDouble(&val);
+	val -= 1.0;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);
@@ -1951,7 +1959,9 @@ void ClippingView::OnYRotSpinDown(wxSpinEvent& event)
 void ClippingView::OnZRotSpinUp(wxSpinEvent& event)
 {
 	wxString str_val = m_z_rot_text->GetValue();
-	double val = STOD(str_val.fn_str()) + 1.0;
+	double val;
+	str_val.ToDouble(&val);
+	val += 1.0;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);
@@ -1961,7 +1971,9 @@ void ClippingView::OnZRotSpinUp(wxSpinEvent& event)
 void ClippingView::OnZRotSpinDown(wxSpinEvent& event)
 {
 	wxString str_val = m_z_rot_text->GetValue();
-	double val = STOD(str_val.fn_str()) - 1.0;
+	double val;
+	str_val.ToDouble(&val);
+	val -= 1.0;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);

@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace FL;
 
-void CombineList::SetName(wxString &name)
+void CombineList::SetName(const std::string &name)
 {
 	m_name = name;
 }

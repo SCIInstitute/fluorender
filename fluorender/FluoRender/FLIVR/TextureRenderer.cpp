@@ -40,7 +40,9 @@
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
 #include "compatibility.h"
-#include <wx/utils.h>
+//#include <wx/utils.h>
+#include <chrono>
+#include <thread>
 
 using namespace std;
 
@@ -827,7 +829,7 @@ namespace FLIVR
 									rn_time = GET_TICK_COUNT();
 									elapsed = rn_time - st_time_;
 									t = up_time_ - elapsed;
-									if (t > 0) wxMilliSleep(t);
+									if (t > 0) std::this_thread::sleep_for(std::chrono::milliseconds(t));
 								} while (elapsed <= up_time_);
 
 								if (brick->isLoaded())

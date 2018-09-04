@@ -462,7 +462,7 @@ namespace FLIVR
 			{
 				double p1 = 0.26051+(-1.90542e-4)*cs;
 				double p2 = -0.29188+(2.45276e-4)*cs;
-				p2 = min(p2, 0.0);
+				p2 = p2<0.0?0.0:p2;
 				size = (p1*zoom+p2)*sf;
 				size = Clamp(size, 0.0, 2.0);
 			}
@@ -1324,7 +1324,7 @@ namespace FLIVR
 			if (estimate && type == 0)
 			{
 				double temp = calc_hist_3d(vd_id, mask_id, b->nx(), b->ny(), b->nz());
-				est_thresh_ = max(est_thresh_, temp);
+				est_thresh_ = est_thresh_>temp?est_thresh_:temp;
 			}
 
 		}

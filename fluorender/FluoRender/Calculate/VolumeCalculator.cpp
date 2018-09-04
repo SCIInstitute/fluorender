@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "VolumeCalculator.h"
 #include "DataManager.h"
-#include <wx/progdlg.h>
+//#include <wx/progdlg.h>
 
 using namespace FL;
 
@@ -239,11 +239,11 @@ void VolumeCalculator::FillHoles(double thresh)
 	int nx, ny, nz;
 	m_vd_a->GetResolution(nx, ny, nz);
 
-	wxProgressDialog *prog_diag = new wxProgressDialog(
-		"FluoRender: Voxel Consolidation",
-		"Consolidating... Please wait.",
-		100, 0,
-		wxPD_SMOOTH | wxPD_ELAPSED_TIME | wxPD_AUTO_HIDE);
+	//wxProgressDialog *prog_diag = new wxProgressDialog(
+	//	"FluoRender: Voxel Consolidation",
+	//	"Consolidating... Please wait.",
+	//	100, 0,
+	//	wxPD_SMOOTH | wxPD_ELAPSED_TIME | wxPD_AUTO_HIDE);
 	int progress = 0;
 	int total_prg = nx * 2;
 
@@ -267,11 +267,11 @@ void VolumeCalculator::FillHoles(double thresh)
 				((unsigned char*)data_r)[index] = 255;
 			}
 		}
-		if (prog_diag)
-		{
+		//if (prog_diag)
+		//{
 			progress++;
-			prog_diag->Update(95 * (progress + 1) / total_prg);
-		}
+		//	prog_diag->Update(95 * (progress + 1) / total_prg);
+		//}
 	}
 
 	double dx = (bbox.max() - bbox.min()).x() / 2.0;
@@ -396,11 +396,11 @@ void VolumeCalculator::FillHoles(double thresh)
 			}
 		}
 
-		if (prog_diag)
-		{
+		//if (prog_diag)
+		//{
 			progress++;
-			prog_diag->Update(95 * (progress + 1) / total_prg);
-		}
+		//	prog_diag->Update(95 * (progress + 1) / total_prg);
+		//}
 	}
-	delete prog_diag;
+	//delete prog_diag;
 }

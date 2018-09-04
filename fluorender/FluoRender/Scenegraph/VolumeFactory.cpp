@@ -85,9 +85,55 @@ void VolumeFactory::createDefault()
 		vd->addValue("high threshold", double(1));
 		vd->addValue("alpha", double(1));
 		vd->addValue("sample rate", double(1));
+		vd->addValue("mat amb", double(1));//materials
+		vd->addValue("mat diff", double(1));
+		vd->addValue("mat spec", double(1));
+		vd->addValue("mat_shine", double(10));
+		vd->addValue("noise redct", bool(false));//noise reduction
+		vd->addValue("shading", bool(false));//shading
+		vd->addValue("shadow", bool(false));//shadow
+		vd->addValue("shadow int", double(0));
+
+		//resolution
+		vd->addValue("res x", long(0));
+		vd->addValue("res y", long(0));
+		vd->addValue("res z", long(0));
+		//scaling
+		vd->addValue("scale x", double(1));
+		vd->addValue("scale y", double(1));
+		vd->addValue("scale z", double(1));
+		//spacing
+		vd->addValue("spc x", double(1));
+		vd->addValue("spc y", double(1));
+		vd->addValue("spc z", double(1));
+		vd->addValue("spc from file", bool(false));//if spacing value are from original file, otherwise use default settings
+
+		//color map settings
+		vd->addValue("colormap enable", bool(false));
+		vd->addValue("colormap mode", long(0));
+		vd->addValue("colormap type", long(0));
+		vd->addValue("colormap low", double(0));
+		vd->addValue("colormap high", double(1));
+		vd->addValue("colormap proj", long(0));
+
+		//save the mode for restoring
+		vd->addValue("saved mode", long(0));
+
+		//blend mode
+		vd->addValue("blend mode", long(0));//0: ignore; 1: layered; 2: depth; 3: composite
+
+		//texture ids will be removed later
+		vd->addValue("2d mask id", (unsigned long)(0));//2d mask texture for segmentation
+		//2d weight map for segmentation
+		vd->addValue("2d weight1 id", (unsigned long)(0));//after tone mapping
+		vd->addValue("2d weight2 id", (unsigned long)(0));//before tone mapping
+		vd->addValue("2d dmap id", (unsigned long)(0));//2d depth map texture for rendering shadows
+
+
 
 		vd->addValue("color", FLTYPE::Color(1.0));
 		vd->addValue("hsv", FLTYPE::HSVColor());
+
 	}
 }
 

@@ -481,21 +481,33 @@ void DataListCtrl::OnSizeXText(wxCommandEvent &event)
 {
 	wxTextCtrl* size_x_txt = (wxTextCtrl*)event.GetEventObject();
 	if (size_x_txt && m_vd)
-		m_vd->SetResize(-1, STOI(size_x_txt->GetValue().fn_str()), -1, -1);
+	{
+		long val;
+		size_x_txt->GetValue().ToLong(&val);
+		m_vd->SetResize(-1, val, -1, -1);
+	}
 }
 
 void DataListCtrl::OnSizeYText(wxCommandEvent &event)
 {
 	wxTextCtrl* size_y_txt = (wxTextCtrl*)event.GetEventObject();
 	if (size_y_txt && m_vd)
-		m_vd->SetResize(-1, -1, STOI(size_y_txt->GetValue().fn_str()), -1);
+	{
+		long val;
+		size_y_txt->GetValue().ToLong(&val);
+		m_vd->SetResize(-1, -1, val, -1);
+	}
 }
 
 void DataListCtrl::OnSizeZText(wxCommandEvent &event)
 {
 	wxTextCtrl* size_z_txt = (wxTextCtrl*)event.GetEventObject();
 	if (size_z_txt && m_vd)
-		m_vd->SetResize(-1, -1, -1, STOI(size_z_txt->GetValue().fn_str()));
+	{
+		long val;
+		size_z_txt->GetValue().ToLong(&val);
+		m_vd->SetResize(-1, -1, -1, val);
+	}
 }
 
 wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)

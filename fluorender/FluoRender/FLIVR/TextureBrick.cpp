@@ -570,7 +570,7 @@ namespace FLIVR
 		{
 			bool found_cache = false;
 			wxString wxcfname = finfo->cache_filename;
-			if (finfo->cached && wxFileExists(wxcfname))
+			if (finfo->cached && FILE_EXISTS(wxcfname.ToStdWstring()))
 				found_cache = true;
 			else
 			{
@@ -580,7 +580,7 @@ namespace FLIVR
 				if (itr != cache_table_.end())
 				{
 					wxcfname = itr->second;
-					if (wxFileExists(wxcfname))
+					if (FILE_EXISTS(wxcfname.ToStdWstring()))
 						found_cache = true;
 				}
 
@@ -644,7 +644,7 @@ namespace FLIVR
 					s[len] = 0;
 					test = dft;
 					test += s;
-				} while (wxFileExists(test));
+				} while (FILE_EXISTS(test.ToStdWstring()));
 				dft += s;
 
 				wstring cfname = dft.ToStdWstring();
@@ -666,7 +666,7 @@ namespace FLIVR
 				}
 				else
 				{
-					if (wxFileExists(cfname)) wxRemoveFile(cfname);
+					if (FILE_EXISTS(cfname.ToStdWstring())) wxRemoveFile(cfname);
 					return false;
 				}
 */			}

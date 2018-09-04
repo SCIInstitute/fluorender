@@ -349,7 +349,7 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 		return;
 
 	FL::CombineList Op;
-	wxString name = m_group->GetName() + "_combined";
+	std::string name = m_group->GetName().ToStdString() + "_combined";
 	Op.SetName(name);
 	std::list<VolumeData*> channs;
 	for (int i = 0; i < m_group->GetVolumeNum(); ++i)
