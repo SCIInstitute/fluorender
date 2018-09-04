@@ -40,6 +40,14 @@ class BaseReader;
 namespace FL
 {
 	class VolumeFactory;
+
+	struct VD_Landmark
+	{
+		std::wstring name;
+		double x, y, z;
+		double spcx, spcy, spcz;
+	};
+
 	class VolumeData : public Node
 	{
 	public:
@@ -68,6 +76,9 @@ namespace FL
 		FLIVR::VolumeRenderer *m_vr;
 		FLIVR::Texture *m_tex;
 		BaseReader *m_reader;
+
+		std::vector<VD_Landmark> m_landmarks;
+		std::wstring m_metadata_id;
 
 		friend class VolumeFactory;
 	};

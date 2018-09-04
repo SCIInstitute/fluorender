@@ -33,14 +33,16 @@ using namespace FL;
 
 VolumeData::VolumeData() :
 	m_vr(0),
-	m_tex(0)
+	m_tex(0),
+	m_reader(0)
 {
 }
 
 VolumeData::VolumeData(const VolumeData& data, const CopyOp& copyop):
 	Node(data, copyop),
 	m_vr(0),
-	m_tex(0)
+	m_tex(0),
+	m_reader(0)
 {
 	//volume renderer and texture
 	if (data.m_vr)

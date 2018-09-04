@@ -139,7 +139,8 @@ namespace FLTYPE
 		}
 	}
 
-	HSVColor::HSVColor()
+	HSVColor::HSVColor():
+		hue_(0), sat_(0), val_(0)
 	{
 	}
 

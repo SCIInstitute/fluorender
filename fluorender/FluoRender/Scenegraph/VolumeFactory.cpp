@@ -129,10 +129,37 @@ void VolumeFactory::createDefault()
 		vd->addValue("2d weight2 id", (unsigned long)(0));//before tone mapping
 		vd->addValue("2d dmap id", (unsigned long)(0));//2d depth map texture for rendering shadows
 
+		//clip distance
+		vd->addValue("clip dist x", long(0));
+		vd->addValue("clip dist y", long(0));
+		vd->addValue("clip dist z", long(0));
 
+		//compression
+		vd->addValue("compression", bool(false));
+
+		//resize
+		vd->addValue("resize", bool(false));
+		vd->addValue("resize x", long(0));
+		vd->addValue("resize y", long(0));
+		vd->addValue("resize z", long(0));
+
+		//brisk skipping
+		vd->addValue("skip brick", bool(false));
+
+		//shown in legend
+		vd->addValue("legend", bool(true));
+
+		//interpolate
+		vd->addValue("interpolate", bool(true));
+
+		//valid brick number
+		vd->addValue("brick num", long(0));
+
+		//estimate threshold
+		vd->addValue("estimate thresh", double(0));
 
 		vd->addValue("color", FLTYPE::Color(1.0));
-		vd->addValue("hsv", FLTYPE::HSVColor());
+		vd->addValue("hsv", FLTYPE::HSVColor(FLTYPE::Color(1.0)));
 
 	}
 }
