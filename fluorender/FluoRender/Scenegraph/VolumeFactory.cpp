@@ -27,7 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Scenegraph/VolumeFactory.h>
-#include <Types/Color.h>
 
 using namespace FL;
 
@@ -63,6 +62,8 @@ void VolumeFactory::createDefault()
 		vd->addValue("equalize b", double(0));
 
 		vd->addValue("bounds", FLTYPE::BBox());
+		vd->addValue("clip planes", FLTYPE::PlaneSet(6));
+		vd->addValue("clip bounds", FLTYPE::BBox());
 
 		vd->addValue("tex path", std::wstring());//path to original file
 		vd->addValue("channel", long(0));//channel index of the original file
@@ -73,6 +74,8 @@ void VolumeFactory::createDefault()
 		vd->addValue("mask mode", long(0));//0-normal, 1-render with mask, 2-render with mask excluded,
 											//3-random color with label, 4-random color with label+mask
 		vd->addValue("use mask thresh", bool(false));// use mask threshold
+		vd->addValue("mask thresh", double(0));//mask threshold
+		vd->addValue("invert", bool(false));//invert intensity values
 
 		//volume properties
 		vd->addValue("int scale", double(1));//scaling factor for intensity values
@@ -84,15 +87,24 @@ void VolumeFactory::createDefault()
 		vd->addValue("low threshold", double(0));
 		vd->addValue("high threshold", double(1));
 		vd->addValue("alpha", double(1));
-		vd->addValue("sample rate", double(1));
+		vd->addValue("alpha enable", bool(true));
 		vd->addValue("mat amb", double(1));//materials
 		vd->addValue("mat diff", double(1));
 		vd->addValue("mat spec", double(1));
 		vd->addValue("mat_shine", double(10));
 		vd->addValue("noise redct", bool(false));//noise reduction
-		vd->addValue("shading", bool(false));//shading
-		vd->addValue("shadow", bool(false));//shadow
+		vd->addValue("shading enable", bool(false));//shading
+		vd->addValue("low shading", double(0));//low shading
+		vd->addValue("high shading", double(0));//highg shading
+		vd->addValue("shadow enable", bool(false));//shadow
 		vd->addValue("shadow int", double(0));
+		vd->addValue("sample rate", double(1));//sample rate
+		//color
+		vd->addValue("color", FLTYPE::Color(1.0));
+		vd->addValue("hsv", FLTYPE::HSVColor(FLTYPE::Color(1.0)));
+		vd->addValue("luminance", double(1.0));
+		vd->addValue("sec color", FLTYPE::Color(1.0));//secondary color
+		vd->addValue("sec color set", bool(false));
 
 		//resolution
 		vd->addValue("res x", long(0));
@@ -107,6 +119,19 @@ void VolumeFactory::createDefault()
 		vd->addValue("spc y", double(1));
 		vd->addValue("spc z", double(1));
 		vd->addValue("spc from file", bool(false));//if spacing value are from original file, otherwise use default settings
+		//added for multires data
+		vd->addValue("base spc x", double(1));
+		vd->addValue("base spc y", double(1));
+		vd->addValue("base spc z", double(1));
+		vd->addValue("spc scl x", double(1));
+		vd->addValue("spc scl y", double(1));
+		vd->addValue("spc scl z", double(1));
+
+		//display control
+		vd->addValue("bits", long(8));//bits
+		vd->addValue("display", bool(true));
+		vd->addValue("draw bounds", bool(false));
+		vd->addValue("test wire", bool(false));
 
 		//color map settings
 		vd->addValue("colormap enable", bool(false));
@@ -152,14 +177,27 @@ void VolumeFactory::createDefault()
 		//interpolate
 		vd->addValue("interpolate", bool(true));
 
+		//depth attenuation, also called fog previously
+		vd->addValue("depth atten", bool(false));
+		vd->addValue("da int", double(0.5));
+		vd->addValue("da start", double(0));
+		vd->addValue("da end", double(1));
+
 		//valid brick number
 		vd->addValue("brick num", long(0));
 
 		//estimate threshold
 		vd->addValue("estimate thresh", double(0));
 
-		vd->addValue("color", FLTYPE::Color(1.0));
-		vd->addValue("hsv", FLTYPE::HSVColor(FLTYPE::Color(1.0)));
+		//parameters not in original class but passed to renderer
+		vd->addValue("viewport", FLTYPE::GLint4());//viewport
+		vd->addValue("clear color", FLTYPE::GLfloat4());//clear color
+		vd->addValue("cur framebuffer", (unsigned long)(0));//current framebuffer
+
+		//multires level
+		vd->addValue("multires", bool(false));
+		vd->addValue("level", long(0));
+		vd->addValue("level num", long(1));
 
 	}
 }

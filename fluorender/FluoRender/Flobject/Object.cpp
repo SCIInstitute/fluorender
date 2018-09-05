@@ -241,6 +241,16 @@ bool Object::addValue(const std::string &name, const FLTYPE::Transform &value)
 	OBJECT_ADD_VALUE_BODY;
 }
 
+bool Object::addValue(const std::string &name, const FLTYPE::GLfloat4 &value)
+{
+	OBJECT_ADD_VALUE_BODY;
+}
+
+bool Object::addValue(const std::string &name, const FLTYPE::GLint4 &value)
+{
+	OBJECT_ADD_VALUE_BODY;
+}
+
 //define function bodies first
 bool Object::setValue(ValueTuple &vt, bool notify)
 {
@@ -436,6 +446,18 @@ bool Object::setValue(const std::string &name, const FLTYPE::Transform &value, b
 	OBJECT_SET_VALUE_BODY;
 }
 
+bool Object::setValue(const std::string &name, const FLTYPE::GLfloat4 &value, bool notify)
+{
+	FLTYPE::GLfloat4 old_value;
+	OBJECT_SET_VALUE_BODY;
+}
+
+bool Object::setValue(const std::string &name, const FLTYPE::GLint4 &value, bool notify)
+{
+	FLTYPE::GLint4 old_value;
+	OBJECT_SET_VALUE_BODY;
+}
+
 //toggle value for bool
 bool Object::toggleValue(const std::string &name, bool &value, bool notify)
 {
@@ -580,6 +602,16 @@ bool Object::getValue(const std::string &name, FLTYPE::Ray &value)
 }
 
 bool Object::getValue(const std::string &name, FLTYPE::Transform &value)
+{
+	OBJECT_GET_VALUE_BODY;
+}
+
+bool Object::getValue(const std::string &name, FLTYPE::GLfloat4 &value)
+{
+	OBJECT_GET_VALUE_BODY;
+}
+
+bool Object::getValue(const std::string &name, FLTYPE::GLint4 &value)
 {
 	OBJECT_GET_VALUE_BODY;
 }

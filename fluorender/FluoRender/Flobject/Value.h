@@ -46,6 +46,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Ray.h>
 #include <Types/Transform.h>
 #include <Types/Vector.h>
+#include <Types/GLfloat4.h>
+#include <Types/GLint4.h>
 
 namespace FL
 {
@@ -171,6 +173,8 @@ public:
 	bool addValue(const std::string &name, const FLTYPE::Quaternion &value);
 	bool addValue(const std::string &name, const FLTYPE::Ray &value);
 	bool addValue(const std::string &name, const FLTYPE::Transform &value);
+	bool addValue(const std::string &name, const FLTYPE::GLfloat4 &value);
+	bool addValue(const std::string &name, const FLTYPE::GLint4 &value);
 
 	/** All the set value functions */
 	bool setValue(ValueTuple& vt, bool notify = true);
@@ -200,6 +204,8 @@ public:
 	bool setValue(const std::string &name, const FLTYPE::Quaternion &value, bool notify = true);
 	bool setValue(const std::string &name, const FLTYPE::Ray &value, bool notify = true);
 	bool setValue(const std::string &name, const FLTYPE::Transform &value, bool notify = true);
+	bool setValue(const std::string &name, const FLTYPE::GLfloat4 &value, bool notify = true);
+	bool setValue(const std::string &name, const FLTYPE::GLint4 &value, bool notify = true);
 
 	//toggle value for bool, result in value
 	bool toggleValue(const std::string &name, bool &value, bool notify = true);
@@ -232,6 +238,8 @@ public:
 	bool getValue(const std::string &name, FLTYPE::Quaternion &value);
 	bool getValue(const std::string &name, FLTYPE::Ray &value);
 	bool getValue(const std::string &name, FLTYPE::Transform &value);
+	bool getValue(const std::string &name, FLTYPE::GLfloat4 &value);
+	bool getValue(const std::string &name, FLTYPE::GLint4 &value);
 
 	Values& getValues() {return _values;}
 	const Values& getValues() const {return _values;}
@@ -372,6 +380,16 @@ inline bool Value::operator == (const Value& v) const
 		return dynamic_cast<const TemplateValue<FLTYPE::Transform>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<FLTYPE::Transform>*>(&v)->getValue();
 	}
+	else if (_type == "GLfloat4")
+	{
+		return dynamic_cast<const TemplateValue<FLTYPE::GLfloat4>*>(this)->getValue() ==
+			dynamic_cast<const TemplateValue<FLTYPE::GLfloat4>*>(&v)->getValue();
+	}
+	else if (_type == "GLint4")
+	{
+		return dynamic_cast<const TemplateValue<FLTYPE::GLint4>*>(this)->getValue() ==
+			dynamic_cast<const TemplateValue<FLTYPE::GLint4>*>(&v)->getValue();
+	}
 	else return false;
 }
 
@@ -506,6 +524,16 @@ inline bool Value::sync(Value* value)
 		dynamic_cast<TemplateValue<FLTYPE::Transform>*>(this)->setValue(
 			dynamic_cast<TemplateValue<FLTYPE::Transform>*>(value)->getValue(), true);
 	}
+	else if (_type == "GLfloat4")
+	{
+		dynamic_cast<TemplateValue<FLTYPE::GLfloat4>*>(this)->setValue(
+			dynamic_cast<TemplateValue<FLTYPE::GLfloat4>*>(value)->getValue(), true);
+	}
+	else if (_type == "GLint4")
+	{
+		dynamic_cast<TemplateValue<FLTYPE::GLint4>*>(this)->setValue(
+			dynamic_cast<TemplateValue<FLTYPE::GLint4>*>(value)->getValue(), true);
+	}
 	else return false;
 
 	return true;
@@ -565,6 +593,10 @@ inline std::ostream& FL::operator<<(std::ostream& os, const Value& v)
 		os << dynamic_cast<const TemplateValue<FLTYPE::Ray>*>(&v)->getValue();
 	if (v._type == "Transform")
 		os << dynamic_cast<const TemplateValue<FLTYPE::Transform>*>(&v)->getValue();
+	if (v._type == "GLfloat4")
+		os << dynamic_cast<const TemplateValue<FLTYPE::GLfloat4>*>(&v)->getValue();
+	if (v._type == "GLint4")
+		os << dynamic_cast<const TemplateValue<FLTYPE::GLint4>*>(&v)->getValue();
 	return os;
 }
 

@@ -86,6 +86,10 @@ Value* Value::clone()
 		return (dynamic_cast<TemplateValue<FLTYPE::Ray>*>(this))->clone();
 	else if (_type == "Transform")
 		return (dynamic_cast<TemplateValue<FLTYPE::Transform>*>(this))->clone();
+	else if (_type == "GLfloat4")
+		return (dynamic_cast<TemplateValue<FLTYPE::GLfloat4>*>(this))->clone();
+	else if (_type == "GLint4")
+		return (dynamic_cast<TemplateValue<FLTYPE::GLint4>*>(this))->clone();
 	else
 		return 0;
 }
@@ -328,6 +332,18 @@ bool ValueSet::addValue(ValueTuple& vt)
 	else if (type == "Transform")
 	{
 		FLTYPE::Transform v;
+		iss >> v;
+		return addValue(name, v);
+	}
+	else if (type == "GLfloat4")
+	{
+		FLTYPE::GLfloat4 v;
+		iss >> v;
+		return addValue(name, v);
+	}
+	else if (type == "GLint4")
+	{
+		FLTYPE::GLint4 v;
 		iss >> v;
 		return addValue(name, v);
 	}
@@ -719,6 +735,38 @@ bool ValueSet::addValue(const std::string &name, const FLTYPE::Transform &value)
 		return false;
 }
 
+bool ValueSet::addValue(const std::string &name, const FLTYPE::GLfloat4 &value)
+{
+	if (!findValue(name))
+	{
+		TemplateValue<FLTYPE::GLfloat4>* val = new TemplateValue<FLTYPE::GLfloat4>;
+		val->_value = value;
+		val->_name = name;
+		val->_type = "GLfloat4";
+
+		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
+		return true;
+	}
+	else
+		return false;
+}
+
+bool ValueSet::addValue(const std::string &name, const FLTYPE::GLint4 &value)
+{
+	if (!findValue(name))
+	{
+		TemplateValue<FLTYPE::GLint4>* val = new TemplateValue<FLTYPE::GLint4>;
+		val->_value = value;
+		val->_name = name;
+		val->_type = "GLint4";
+
+		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
+		return true;
+	}
+	else
+		return false;
+}
+
 //set value functions
 bool ValueSet::setValue(ValueTuple& vt, bool notify)
 {
@@ -866,6 +914,18 @@ bool ValueSet::setValue(ValueTuple& vt, bool notify)
 	else if (type == "Transform")
 	{
 		FLTYPE::Transform v;
+		iss >> v;
+		return setValue(name, v, notify);
+	}
+	else if (type == "GLfloat4")
+	{
+		FLTYPE::GLfloat4 v;
+		iss >> v;
+		return setValue(name, v, notify);
+	}
+	else if (type == "GLint4")
+	{
+		FLTYPE::GLint4 v;
 		iss >> v;
 		return setValue(name, v, notify);
 	}
@@ -1155,6 +1215,30 @@ bool ValueSet::setValue(const std::string &name, const FLTYPE::Transform &value,
 	if (val && val->_type == "Transform")
 	{
 		(dynamic_cast<TemplateValue<FLTYPE::Transform>*>(val))->setValue(value, notify);
+		return true;
+	}
+	else
+		return false;
+}
+
+bool ValueSet::setValue(const std::string &name, const FLTYPE::GLfloat4 &value, bool notify)
+{
+	Value* val = findValue(name);
+	if (val && val->_type == "GLfloat4")
+	{
+		(dynamic_cast<TemplateValue<FLTYPE::GLfloat4>*>(val))->setValue(value, notify);
+		return true;
+	}
+	else
+		return false;
+}
+
+bool ValueSet::setValue(const std::string &name, const FLTYPE::GLint4 &value, bool notify)
+{
+	Value* val = findValue(name);
+	if (val && val->_type == "GLint4")
+	{
+		(dynamic_cast<TemplateValue<FLTYPE::GLint4>*>(val))->setValue(value, notify);
 		return true;
 	}
 	else
@@ -1457,6 +1541,28 @@ bool ValueSet::getValue(ValueTuple& vt)
 				return true;
 			}
 		}
+		else if (type == "GLfloat4")
+		{
+			std::get<1>(vt) = type;
+			FLTYPE::GLfloat4 v;
+			if (getValue(name, v))
+			{
+				oss << v;
+				std::get<2>(vt) = oss.str();
+				return true;
+			}
+		}
+		else if (type == "GLint4")
+		{
+			std::get<1>(vt) = type;
+			FLTYPE::GLint4 v;
+			if (getValue(name, v))
+			{
+				oss << v;
+				std::get<2>(vt) = oss.str();
+				return true;
+			}
+		}
 	}
 
 	return false;
@@ -1744,6 +1850,30 @@ bool ValueSet::getValue(const std::string &name, FLTYPE::Transform &value)
 	if (val && val->_type == "Transform")
 	{
 		value = (dynamic_cast<TemplateValue<FLTYPE::Transform>*>(val))->getValue();
+		return true;
+	}
+	else
+		return false;
+}
+
+bool ValueSet::getValue(const std::string &name, FLTYPE::GLfloat4 &value)
+{
+	Value* val = findValue(name);
+	if (val && val->_type == "GLfloat4")
+	{
+		value = (dynamic_cast<TemplateValue<FLTYPE::GLfloat4>*>(val))->getValue();
+		return true;
+	}
+	else
+		return false;
+}
+
+bool ValueSet::getValue(const std::string &name, FLTYPE::GLint4 &value)
+{
+	Value* val = findValue(name);
+	if (val && val->_type == "GLint4")
+	{
+		value = (dynamic_cast<TemplateValue<FLTYPE::GLint4>*>(val))->getValue();
 		return true;
 	}
 	else

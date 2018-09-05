@@ -64,8 +64,8 @@ namespace FL
 		virtual ~MeshData();
 
 	private:
-		//GLMmodel* m_data;
-		//FLIVR::MeshRenderer* m_mr;
+		GLMmodel* m_data;
+		FLIVR::MeshRenderer* m_mr;
 	};
 }
 

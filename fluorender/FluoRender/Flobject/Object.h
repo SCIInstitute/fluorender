@@ -97,6 +97,8 @@ public:
 	bool addValue(const std::string &name, const FLTYPE::Quaternion &value);
 	bool addValue(const std::string &name, const FLTYPE::Ray &value);
 	bool addValue(const std::string &name, const FLTYPE::Transform &value);
+	bool addValue(const std::string &name, const FLTYPE::GLfloat4 &value);
+	bool addValue(const std::string &name, const FLTYPE::GLint4 &value);
 
 	/** All the set value functions */
 	bool setValue(ValueTuple& vt, bool notify = true);
@@ -126,6 +128,8 @@ public:
 	bool setValue(const std::string &name, const FLTYPE::Quaternion &value, bool notify = true);
 	bool setValue(const std::string &name, const FLTYPE::Ray &value, bool notify = true);
 	bool setValue(const std::string &name, const FLTYPE::Transform &value, bool notify = true);
+	bool setValue(const std::string &name, const FLTYPE::GLfloat4 &value, bool notify = true);
+	bool setValue(const std::string &name, const FLTYPE::GLint4 &value, bool notify = true);
 
 	//toggle value for bool
 	bool toggleValue(const std::string &name, bool &value, bool notify = true);
@@ -158,6 +162,8 @@ public:
 	bool getValue(const std::string &name, FLTYPE::Quaternion &value);
 	bool getValue(const std::string &name, FLTYPE::Ray &value);
 	bool getValue(const std::string &name, FLTYPE::Transform &value);
+	bool getValue(const std::string &name, FLTYPE::GLfloat4 &value);
+	bool getValue(const std::string &name, FLTYPE::GLint4 &value);
 
 	//get value the class
 	Value* getValue(const std::string &name)

@@ -25,33 +25,36 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef _ANNOTATIONFACTORY_H_
+#define _ANNOTATIONFACTORY_H_
 
-#include <Scenegraph/MeshData.h>
-#include <FLIVR/glm.h>
-#include <FLIVR/MeshRenderer.h>
+#include <Flobject/ObjectFactory.h>
+#include <Scenegraph/Annotations.h>
 
-using namespace FL;
-
-MeshData::MeshData() :
-	m_data(0),
-	m_mr(0)
+namespace FL
 {
+	class AnnotationFactory : public ObjectFactory
+	{
+	public:
+		AnnotationFactory();
+
+		virtual bool isSameKindAs(const Object* obj) const
+		{
+			return dynamic_cast<const AnnotationFactory*>(obj) != NULL;
+		}
+
+		virtual const char* className() const { return "AnnotationFactory"; }
+
+		virtual Annotations* build();
+
+		virtual Annotations* clone(Annotations*);
+
+		virtual Annotations* clone(const unsigned int);
+
+	protected:
+		virtual ~AnnotationFactory();
+		virtual void createDefault();
+	};
 }
 
-MeshData::MeshData(const MeshData& data, const CopyOp& copyop):
-	Node(data, copyop),
-	m_data(0),
-	m_mr(0)
-{
-	if (data.m_mr)
-		m_mr = new FLIVR::MeshRenderer(*data.m_mr);
-	m_data = data.m_data;
-}
-
-MeshData::~MeshData()
-{
-	if (m_mr)
-		delete m_mr;
-	if (m_data)
-		glmDelete(m_data);
-}
+#endif//_ANNOTATIONFACTORY_H_

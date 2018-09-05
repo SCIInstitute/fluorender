@@ -33,7 +33,6 @@ using namespace FL;
 
 Annotations::Annotations()
 {
-	addValue("volume", (Referenced*)0);
 }
 
 Annotations::Annotations(const Annotations& data, const CopyOp& copyop) :

@@ -33,4 +33,12 @@ void FactoryTest()
 	factory->writeDefault();
 
 	factory->writeDefault(std::cout);
+
+	VolumeData* vd = group->getChild(0)->asVolumeData();
+	if (vd)
+	{
+		long size;
+		vd->getValue("resize x", size);
+		ASSERT_EQ(0, size);
+	}
 }

@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #define _ANNOTATIONS_H_
 
 #include <Scenegraph/Node.h>
-#include <FLIVR/Point.h>
 #include <string>
 #include <vector>
 
@@ -40,20 +39,20 @@ namespace FL
 	{
 	public:
 		AText() {}
-		AText(const std::string &str, const FLIVR::Point &pos) { m_txt = str; m_pos = pos; }
+		AText(const std::string &str, const FLTYPE::Point &pos) { m_txt = str; m_pos = pos; }
 		~AText() {}
 
 		std::string GetText() { return m_txt; };
-		FLIVR::Point GetPos() { return m_pos; };
+		FLTYPE::Point GetPos() { return m_pos; };
 		void SetText(std::string str) { m_txt = str; }
-		void SetPos(FLIVR::Point pos) { m_pos = pos; }
+		void SetPos(FLTYPE::Point pos) { m_pos = pos; }
 		void SetInfo(std::string str) { m_info = str; }
 
 		friend class Annotations;
 
 	private:
 		std::string m_txt;
-		FLIVR::Point m_pos;
+		FLTYPE::Point m_pos;
 		std::string m_info;
 	};
 

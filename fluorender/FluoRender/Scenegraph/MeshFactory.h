@@ -25,33 +25,36 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef _MESHFACTORY_H_
+#define _MESHFACTORY_H_
 
+#include <Flobject/ObjectFactory.h>
 #include <Scenegraph/MeshData.h>
-#include <FLIVR/glm.h>
-#include <FLIVR/MeshRenderer.h>
 
-using namespace FL;
-
-MeshData::MeshData() :
-	m_data(0),
-	m_mr(0)
+namespace FL
 {
+	class MeshFactory : public ObjectFactory
+	{
+	public:
+		MeshFactory();
+
+		virtual bool isSameKindAs(const Object* obj) const
+		{
+			return dynamic_cast<const MeshFactory*>(obj) != NULL;
+		}
+
+		virtual const char* className() const { return "MeshFactory"; }
+
+		virtual MeshData* build();
+
+		virtual MeshData* clone(MeshData*);
+
+		virtual MeshData* clone(const unsigned int);
+
+	protected:
+		virtual ~MeshFactory();
+		virtual void createDefault();
+	};
 }
 
-MeshData::MeshData(const MeshData& data, const CopyOp& copyop):
-	Node(data, copyop),
-	m_data(0),
-	m_mr(0)
-{
-	if (data.m_mr)
-		m_mr = new FLIVR::MeshRenderer(*data.m_mr);
-	m_data = data.m_data;
-}
-
-MeshData::~MeshData()
-{
-	if (m_mr)
-		delete m_mr;
-	if (m_data)
-		glmDelete(m_data);
-}
+#endif//_MESHFACTORY_H_
