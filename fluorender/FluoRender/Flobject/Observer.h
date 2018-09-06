@@ -42,7 +42,8 @@ public:
 	virtual ~Observer();
 
 	virtual void objectDeleted(void*) {}
-	virtual void objectChanged(void*, const std::string &exp) {}
+	virtual void objectChanging(void*, const std::string &exp) {}//before change
+	virtual void objectChanged(void*, const std::string &exp) {}//after change
 
 	virtual bool removeObservee(Referenced* observee);
 
@@ -67,6 +68,7 @@ public:
 	void removeObserver(Observer* observer);
 
 	void signalObjectDeleted(void* ptr);
+	void signalObjectChanging(void* ptr, const std::string &exp);
 	void signalObjectChanged(void* ptr, const std::string &exp);
 
 	typedef std::set<Observer*> Observers;

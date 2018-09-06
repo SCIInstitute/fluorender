@@ -334,6 +334,13 @@ file(GLOB typ_hdr fluorender/FluoRender/Types/*.h)
 add_library(TYPES_OBJ OBJECT
   ${typ_src} ${typ_hdr})
 
+# Global
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Global)
+file(GLOB glb_src fluorender/FluoRender/Global/*.cpp)
+file(GLOB glb_hdr fluorender/FluoRender/Global/*.h)
+add_library(GLOBAL_OBJ OBJECT
+  ${glb_src} ${glb_hdr})
+
 # NV
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/NV)
 file(GLOB nv_src fluorender/FluoRender/NV/*.cpp)
@@ -443,6 +450,7 @@ if(APPLE)
     $<TARGET_OBJECTS:CONVERTERS_OBJ>
     $<TARGET_OBJECTS:FLIVR_OBJ>
     $<TARGET_OBJECTS:ANIMATORS_OBJ>
+    $<TARGET_OBJECTS:GLOBAL_OBJ>
     $<TARGET_OBJECTS:TYPES_OBJ>
     $<TARGET_OBJECTS:FLOBJECT_OBJ>
     $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
@@ -474,6 +482,7 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:CONVERTERS_OBJ>
     $<TARGET_OBJECTS:FLIVR_OBJ>
     $<TARGET_OBJECTS:ANIMATORS_OBJ>
+    $<TARGET_OBJECTS:GLOBAL_OBJ>
     $<TARGET_OBJECTS:TYPES_OBJ>
     $<TARGET_OBJECTS:FLOBJECT_OBJ>
     $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
@@ -531,9 +540,10 @@ elseif(WIN32)
       ${wac_src} ${wac_hdr})
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
-      #$<TARGET_OBJECTS:TYPES_OBJ>
-      #$<TARGET_OBJECTS:FLOBJECT_OBJ>
-      #$<TARGET_OBJECTS:SCENEGRAPH_OBJ>
+      $<TARGET_OBJECTS:GLOBAL_OBJ>
+      $<TARGET_OBJECTS:TYPES_OBJ>
+      $<TARGET_OBJECTS:FLOBJECT_OBJ>
+      $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
       $<TARGET_OBJECTS:IMAGES_OBJ>
       $<TARGET_OBJECTS:CONVERTERS_OBJ>
       $<TARGET_OBJECTS:FLIVR_OBJ>
@@ -549,14 +559,6 @@ elseif(WIN32)
       $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>
       $<TARGET_OBJECTS:WACUTILS_OBJ>)
-    add_executable(Tester
-      ${tester_src} ${tester_hdr}
-      $<TARGET_OBJECTS:FLIVR_OBJ>
-      $<TARGET_OBJECTS:TYPES_OBJ>
-      $<TARGET_OBJECTS:FLOBJECT_OBJ>
-      $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
-      $<TARGET_OBJECTS:GLEW_OBJ>
-      $<TARGET_OBJECTS:TEEM_OBJ>)
   endif()
 endif()
 
@@ -615,12 +617,6 @@ elseif(WIN32)
     ${OpenCL_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${wxWidgets_LIBRARIES})
-  target_link_libraries(Tester
-    ${OPENGL_LIBRARIES}
-    ${OpenCL_LIBRARIES}
-    ${ZLIB_LIBRARIES}
-    ${FREETYPE_LIBRARIES})
-    #${wxWidgets_LIBRARIES})
 endif()
 
 

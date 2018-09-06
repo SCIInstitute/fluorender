@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #define SLIVR_Color_h
 
 #include <stdlib.h>
+#include <Types/Color.h>
 
 namespace FLIVR
 {
@@ -80,8 +81,10 @@ namespace FLIVR
 		Color(double, double, double);
 		Color(double[3]);
 		Color(const Color&);
+		Color(const FLTYPE::Color&);
 		Color& operator=(const Color&);
 		Color(const HSVColor&);
+		Color(const FLTYPE::HSVColor&);
 		~Color();
 
 		Color operator*(const Color&) const;

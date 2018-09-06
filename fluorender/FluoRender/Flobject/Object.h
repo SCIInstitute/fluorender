@@ -67,6 +67,7 @@ public:
 	inline const char* getName() const { return m_name.c_str(); }
 
 	virtual void objectDeleted(void*);
+	virtual void objectChanging(void*, const std::string &exp);
 	virtual void objectChanged(void*, const std::string &exp);
 
 	//add a value

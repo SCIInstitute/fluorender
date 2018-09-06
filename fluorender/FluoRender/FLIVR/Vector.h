@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <assert.h>
 
 #include <FLIVR/Utils.h>
+#include <Types/Vector.h>
 
 namespace FLIVR
 {
@@ -50,6 +51,7 @@ namespace FLIVR
 		inline Vector(double x, double y, double z): x_(x), y_(y), z_(z)
 		{ }
 		inline Vector(const Vector&);
+		inline Vector(const FLTYPE::Vector&);
 		inline Vector();
 		inline explicit Vector(double init) : x_(init), y_(init), z_(init) {}
 		inline double length() const;
@@ -196,6 +198,13 @@ namespace FLIVR
 		x_=p.x_;
 		y_=p.y_;
 		z_=p.z_;
+	}
+
+	inline Vector::Vector(const FLTYPE::Vector& p)
+	{
+		x_ = p.x();
+		y_ = p.y();
+		z_ = p.z();
 	}
 
 	inline double Vector::length2() const

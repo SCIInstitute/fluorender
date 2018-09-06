@@ -65,6 +65,12 @@ namespace FLIVR
 		d_copy = copy.d_copy;
 	}
 
+	Plane::Plane(const FLTYPE::Plane &copy)
+		: n_(copy.n()), d_(copy.d()),
+		n_copy(copy.n_copy()), d_copy(copy.d_copy())
+	{
+	}
+
 	Plane::Plane(const Point &p1, const Point &p2, const Point &p3)
 	{
 		Vector v1(p2-p1);

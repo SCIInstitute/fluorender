@@ -25,37 +25,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _COMBINELIST_H_
-#define _COMBINELIST_H_
+#include <Global/Global.h>
 
-#include <list>
-#include <string>
+using namespace FL;
 
-namespace FL
+Global::Global()
 {
-	class VolumeData;
-	class CombineList
-	{
-	public:
-		CombineList() {};
-		~CombineList() {};
-
-		void SetName(const std::string &name);
-		void SetVolumes(std::list<VolumeData*> &channs);
-		void GetResults(std::list<VolumeData*> &results);
-		int Execute();
-
-	private:
-		std::list<VolumeData*> m_channs;
-		std::list<VolumeData*> m_results;
-		long m_resx, m_resy, m_resz;
-		double m_spcx, m_spcy, m_spcz;
-		long m_bits;
-		std::string m_name;
-
-	private:
-		unsigned char Inc(unsigned char base, unsigned char inc);
-		unsigned short Inc(unsigned short base, unsigned short inc);
-	};
+	volume_factory_ = ref_ptr<VolumeFactory>(new VolumeFactory());
 }
-#endif//_COMBINELIST_H_

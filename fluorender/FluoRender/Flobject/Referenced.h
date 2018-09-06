@@ -88,6 +88,8 @@ protected:
 
 	void notifyObserversOfChange(const std::string &exp = "") const;
 
+	void notifyObserversBeforeChange(const std::string &exp = "") const;
+
 	std::string _refStr;
 
 	mutable int _refCount;

@@ -30,11 +30,14 @@ DEALINGS IN THE SOFTWARE.
 #define _VOLUMEDATA_H_
 
 #include <Scenegraph/Node.h>
+#include <nrrd.h>
+#include <glm/glm.hpp>
 
 namespace FLIVR
 {
 class VolumeRenderer;
 class Texture;
+class TextureBrick;
 }
 class BaseReader;
 namespace FL
@@ -69,6 +72,83 @@ namespace FL
 		virtual VolumeData* asVolumeData() { return this; }
 		virtual const VolumeData* asVolumeData() const { return this; }
 
+		//response to value changes
+		virtual void objectChanging(void*, const std::string &exp);
+		virtual void objectChanged(void*, const std::string &exp);
+
+		//functions from old class
+		virtual void RandomizeColor();//randomize color
+
+		//reader
+		void SetReader(BaseReader* reader);
+		BaseReader* GetReader();
+
+		//load
+		int LoadData(Nrrd* data, const std::string &name, const std::wstring &path);
+		int ReplaceData(Nrrd* data, bool del_tex);
+		int ReplaceData(VolumeData* data);
+		Nrrd* GetData(bool ret);
+
+		//empty data
+		void AddEmptyData(int bits,
+			int nx, int ny, int nz,
+			double spcx, double spcy, double spcz,
+			int brick_size = 0);
+
+		//load mask
+		void LoadMask(Nrrd* mask);
+		Nrrd* GetMask(bool ret);
+
+		//empty mask
+		//mode: 0-zeros; 1-255; 2-leave as is
+		void AddEmptyMask(int mdoe);
+
+		//load label
+		void LoadLabel(Nrrd* label);
+		Nrrd* GetLabel(bool ret);
+
+		//empty label
+		//mode: 0-zeros; 1-ordered; 2-shuffled
+		void AddEmptyLabel(int mode);
+		bool SearchLabel(unsigned int label);
+
+		//save
+		double GetOriginalValue(int i, int j, int k, FLIVR::TextureBrick* b = 0);
+		double GetTransferValue(int i, int j, int k, FLIVR::TextureBrick* b = 0);
+		void SaveData(std::wstring &filename, int mode = 0, bool bake = false, bool compress = false);
+		void SaveMask(bool use_reader, int t, int c);
+		void SaveLabel(bool use_reader, int t, int c);
+
+		//volume renderer
+		FLIVR::VolumeRenderer* GetRenderer();
+
+		//texture
+		FLIVR::Texture* GetTexture();
+		void SetTexture();
+
+		//draw
+		void SetMatrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat, glm::mat4 &tex_mat);
+		void Draw(bool otho = false, bool adaptive = false, bool intactive = false, double zoom = 1.0);
+		void DrawBounds();
+		//draw mask (create the mask)
+		//type: 0-initial; 1-diffusion-based growing
+		//paint_mode: 1-select; 2-append; 3-erase; 4-diffuse; 5-flood; 6-clear
+		//hr_mode (hidden removal): 0-none; 1-ortho; 2-persp
+		//order (for updating instreaming mode): 0-no op; 1-normal order; 2-reversed order
+		void DrawMask(int type, int paint_mode, int hr_mode,
+			double ini_thresh, double gm_falloff, double scl_falloff, double scl_translate,
+			double w2d, double bins, int order, bool ortho = false, bool estimate = false);
+		//draw label (create the label)
+		//type: 0-initialize; 1-maximum intensity filtering
+		//mode: 0-normal; 1-posterized, 2-copy values
+		void DrawLabel(int type, int mode, double thresh, double gm_falloff);
+
+		//calculation
+		void Calculate(int type, VolumeData* vd_a, VolumeData* vd_b);
+
+		//color map
+		FLTYPE::Color GetColorFromColormap(double value);
+
 	protected:
 		virtual ~VolumeData();
 
@@ -79,6 +159,16 @@ namespace FL
 
 		std::vector<VD_Landmark> m_landmarks;
 		std::wstring m_metadata_id;
+
+	private:
+		//label functions
+		void SetOrderedID(unsigned int* val);
+		void SetReverseID(unsigned int* val);
+		void SetShuffledID(unsigned int* val);
+
+		//handle observer notifications
+		void OnMipModeChanging();
+		void OnMipModeChanged();//modes
 
 		friend class VolumeFactory;
 	};

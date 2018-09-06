@@ -111,6 +111,14 @@ void ObserverSet::signalObjectDeleted(void* ptr)
 	_observedObject = 0;
 }
 
+void ObserverSet::signalObjectChanging(void* ptr, const std::string &exp)
+{
+	for (Observers::iterator itr = _observers.begin();
+		itr != _observers.end(); ++itr)
+	{
+		(*itr)->objectChanging(ptr, exp);
+	}
+}
 void ObserverSet::signalObjectChanged(void* ptr, const std::string &exp)
 {
 	for (Observers::iterator itr = _observers.begin();

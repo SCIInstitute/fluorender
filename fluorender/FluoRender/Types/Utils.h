@@ -275,6 +275,23 @@ inline void sinCos(double *returnSin, double *returnCos, double theta)
 	*returnCos = cos(theta);
 }
 
+inline unsigned int reverse_bit(unsigned int val, unsigned int len)
+{
+	unsigned int res = val;
+	int s = len - 1;
+
+	for (val >>= 1; val; val >>= 1)
+	{
+		res <<= 1;
+		res |= val & 1;
+		s--;
+	}
+	res <<= s;
+	res <<= 32 - len;
+	res >>= 32 - len;
+	return res;
+}
+
 } // namespace FLTYPE
 
 #endif//_FLTYPEUTILS_H_

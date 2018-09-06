@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #define SLIVR_Plane_h
 
 #include <FLIVR/Vector.h>
+#include <Types/Plane.h>
 
 namespace FLIVR
 {
@@ -47,6 +48,7 @@ namespace FLIVR
 
 	public:
 		Plane(const Plane &copy);
+		Plane(const FLTYPE::Plane &copy);
 		Plane(const Point &p1, const Point &p2, const Point &p3);
 		Plane(const Point &p, const Vector &n);
 		Plane();

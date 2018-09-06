@@ -105,6 +105,8 @@ public:
 	{
 		if (value != _value)
 		{
+			if (notify)
+				notifyObserversBeforeChange();
 			_value = value;
 			if (notify)
 				notifyObserversOfChange();

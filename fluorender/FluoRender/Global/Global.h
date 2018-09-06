@@ -25,37 +25,29 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _COMBINELIST_H_
-#define _COMBINELIST_H_
+#ifndef _GLOBAL_H_
+#define _GLOBAL_H_
 
-#include <list>
-#include <string>
+#include <Scenegraph/VolumeFactory.h>
 
 namespace FL
 {
-	class VolumeData;
-	class CombineList
+	//automatically creates the factories and provide global access
+	class Global
 	{
 	public:
-		CombineList() {};
-		~CombineList() {};
+		static Global& instance() { return instance_; }
 
-		void SetName(const std::string &name);
-		void SetVolumes(std::list<VolumeData*> &channs);
-		void GetResults(std::list<VolumeData*> &results);
-		int Execute();
+		VolumeFactory& getVolumeFactory()
+		{ return *volume_factory_; }
 
 	private:
-		std::list<VolumeData*> m_channs;
-		std::list<VolumeData*> m_results;
-		long m_resx, m_resy, m_resz;
-		double m_spcx, m_spcy, m_spcz;
-		long m_bits;
-		std::string m_name;
+		Global();
 
-	private:
-		unsigned char Inc(unsigned char base, unsigned char inc);
-		unsigned short Inc(unsigned short base, unsigned short inc);
+		static Global instance_;
+
+		ref_ptr<VolumeFactory> volume_factory_;
 	};
 }
-#endif//_COMBINELIST_H_
+
+#endif

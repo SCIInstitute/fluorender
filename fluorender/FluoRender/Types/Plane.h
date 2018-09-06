@@ -43,8 +43,8 @@ namespace FLTYPE
 		double d_;
 
 		//copy of the values for restoration
-		Vector n_copy;
-		double d_copy;
+		Vector n_copy_;
+		double d_copy_;
 
 	public:
 		Plane(const Plane &copy);
@@ -58,6 +58,11 @@ namespace FLTYPE
 		{ return d_; }
 		inline Vector n() const
 		{ return n_; }
+		inline double d_copy() const
+		{ return d_copy_; }
+		inline Vector n_copy() const
+		{ return n_copy_; }
+
 
 		Plane& operator=(const Plane&);
 		double eval_point(const Point &p) const;
@@ -92,8 +97,8 @@ namespace FLTYPE
 		void Scale(Vector &v);
 
 		//remember and restore
-		void Remember() {n_copy = n_; d_copy = d_;};
-		void Restore() {n_ = n_copy; d_ = d_copy;};
+		void Remember() {n_copy_ = n_; d_copy_ = d_;};
+		void Restore() {n_ = n_copy_; d_ = d_copy_;};
 
 		friend std::ostream& operator<<(std::ostream& os, const Plane& p)
 		{
@@ -125,6 +130,7 @@ namespace FLTYPE
 		bool operator!=(const PlaneSet &ps) const;
 		Plane &operator[](const size_t index);
 		Plane Get(const size_t index);
+		size_t GetSize() { return planes_.size(); };
 
 		friend std::ostream& operator<<(std::ostream& os, const PlaneSet& ps)
 		{

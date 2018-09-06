@@ -46,6 +46,13 @@ namespace FLIVR
 	{
 	}
 
+	Color::Color(const FLTYPE::Color& c)
+	{
+		r_ = c.r();
+		g_ = c.g();
+		b_ = c.b();
+	}
+
 	Color::Color(double c[3])
 		: r_(c[0]), g_(c[1]), b_(c[2])
 	{
@@ -131,6 +138,36 @@ namespace FLIVR
 			r_=hsv.val_; g_=p1;       b_=p2;   break;
 		default:
 			r_=g_=b_=0;
+		}
+	}
+
+	Color::Color(const FLTYPE::HSVColor& hsv)
+	{
+		int hh((int)(hsv.hue() / 360.0));
+		double hue(hsv.hue() - hh*360.0);
+
+		double h6(hue / 60.0);
+		int i((int)h6);
+		double f(h6 - i);
+		double p1(hsv.val()*(1.0 - hsv.sat()));
+		double p2(hsv.val()*(1.0 - (hsv.sat()*f)));
+		double p3(hsv.val()*(1.0 - (hsv.sat()*(1 - f))));
+		switch (i)
+		{
+		case 0:
+			r_ = hsv.val(); g_ = p3;       b_ = p1;   break;
+		case 1:
+			r_ = p2;       g_ = hsv.val(); b_ = p1;   break;
+		case 2:
+			r_ = p1;       g_ = hsv.val(); b_ = p3;   break;
+		case 3:
+			r_ = p1;       g_ = p2;       b_ = hsv.val(); break;
+		case 4:
+			r_ = p3;       g_ = p1;       b_ = hsv.val(); break;
+		case 5:
+			r_ = hsv.val(); g_ = p1;       b_ = p2;   break;
+		default:
+			r_ = g_ = b_ = 0;
 		}
 	}
 

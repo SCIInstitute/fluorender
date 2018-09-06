@@ -71,6 +71,11 @@ void Object::objectDeleted(void* ptr)
 	removeObservee(refd);
 }
 
+void Object::objectChanging(void* ptr, const std::string &exp)
+{
+	//before change
+}
+
 void Object::objectChanged(void* ptr, const std::string &exp)
 {
 	Referenced* refd = static_cast<Referenced*>(ptr);
@@ -262,6 +267,7 @@ bool Object::setValue(ValueTuple &vt, bool notify)
 		bool result = false;
 		if (_vs_stack.top())
 		{
+			notifyObserversBeforeChange(name);
 			result = _vs_stack.top()->setValue(vt, notify);
 			if (result)
 				notifyObserversOfChange(name);
@@ -278,6 +284,7 @@ bool Object::setValue(ValueTuple &vt, bool notify)
 		bool result = false; \
 		if (_vs_stack.top()) \
 		{ \
+			notifyObserversBeforeChange(name); \
 			result = _vs_stack.top()->setValue(name, value, notify); \
 			if (result) \
 				notifyObserversOfChange(name); \
@@ -299,6 +306,7 @@ bool Object::setValue(const std::string &name, Referenced* value, bool notify)
 		bool result = false;
 		if (_vs_stack.top())
 		{
+			notifyObserversBeforeChange();
 			result = _vs_stack.top()->setValue(name, value, notify);
 			if (result)
 				notifyObserversOfChange();
@@ -463,7 +471,10 @@ bool Object::toggleValue(const std::string &name, bool &value, bool notify)
 {
 	bool result = false;
 	if (_vs_stack.top())
+	{
+		notifyObserversBeforeChange(name);
 		result = _vs_stack.top()->toggleValue(name, value, notify);
+	}
 	if (result)
 		notifyObserversOfChange(name);
 	return result;

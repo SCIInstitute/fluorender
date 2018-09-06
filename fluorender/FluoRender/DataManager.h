@@ -163,7 +163,7 @@ protected:
 	TreeLayer* m_associated;
 };
 
-struct VD_Landmark
+/*struct VD_Landmark
 {
 	wstring name;
 	double x, y, z;
@@ -554,7 +554,7 @@ private:
 	void SetOrderedID(unsigned int* val);
 	void SetReverseID(unsigned int* val);
 	void SetShuffledID(unsigned int* val);
-};
+};*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define MESH_COLOR_AMB	1
@@ -718,8 +718,8 @@ public:
 	string GetTextInfo(int index);
 	void AddText(std::string str, Point pos, std::string info);
 	void SetTransform(Transform *tform);
-	void SetVolume(VolumeData* vd);
-	VolumeData* GetVolume();
+	//void SetVolume(VolumeData* vd);
+	//VolumeData* GetVolume();
 
 	void Clear();
 
@@ -758,7 +758,7 @@ private:
 	static int m_num;
 	vector<AText*> m_alist;
 	Transform *m_tform;
-	VolumeData* m_vd;
+	//VolumeData* m_vd;
 
 	bool m_disp;
 
@@ -1065,7 +1065,7 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class DataGroup : public TreeLayer
+/*class DataGroup : public TreeLayer
 {
 public:
 	DataGroup();
@@ -1200,7 +1200,7 @@ private:
 	bool m_sync_volume_prop;
 
 	bool m_disp;
-};
+};*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class MeshGroup : public TreeLayer
@@ -1289,7 +1289,7 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class DataManager
+/*class DataManager
 {
 public:
 	DataManager();
@@ -1443,6 +1443,6 @@ private:
 	//flgs for pvxml flipping
 	bool m_pvxml_flip_x;
 	bool m_pvxml_flip_y;
-};
+};*/
 
 #endif//_DATAMANAGER_H_

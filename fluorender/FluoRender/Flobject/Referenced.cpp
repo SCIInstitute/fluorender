@@ -97,6 +97,17 @@ void Referenced::signalObserversAndDelete(bool signalDelete, bool doDelete) cons
 	}
 }
 
+void Referenced::notifyObserversBeforeChange(const std::string &exp) const
+{
+	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
+
+	if (observerSet && !_hold)
+	{
+		observerSet->signalObjectChanging(const_cast<Referenced*>(this), exp);
+	}
+
+}
+
 void Referenced::notifyObserversOfChange(const std::string &exp) const
 {
 	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);

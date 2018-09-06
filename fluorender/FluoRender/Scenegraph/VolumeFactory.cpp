@@ -69,7 +69,9 @@ void VolumeFactory::createDefault()
 		vd->addValue("channel", long(0));//channel index of the original file
 		vd->addValue("time", long(0));//time index of the original file
 
+		//modes
 		vd->addValue("mip mode", long(0));//0-normal; 1-MIP; 2-white shading; 3-white mip
+		vd->addValue("saved mode", long(0));//save the mode for restoring
 		vd->addValue("stream mode", long(0));//0-normal; 1-MIP; 2-shading; 3-shadow, 4-mask
 		vd->addValue("mask mode", long(0));//0-normal, 1-render with mask, 2-render with mask excluded,
 											//3-random color with label, 4-random color with label+mask
@@ -78,6 +80,7 @@ void VolumeFactory::createDefault()
 		vd->addValue("invert", bool(false));//invert intensity values
 
 		//volume properties
+		vd->addValue("soft thresh", double(0));//soft threshold
 		vd->addValue("int scale", double(1));//scaling factor for intensity values
 		vd->addValue("gm scale", double(1));//scaling factor for gradient magnitude values
 		vd->addValue("max int", double(255));//max intensity value from integer reading
@@ -110,6 +113,9 @@ void VolumeFactory::createDefault()
 		vd->addValue("res x", long(0));
 		vd->addValue("res y", long(0));
 		vd->addValue("res z", long(0));
+		vd->addValue("base res x", long(0));
+		vd->addValue("base res y", long(0));
+		vd->addValue("base res z", long(0));
 		//scaling
 		vd->addValue("scale x", double(1));
 		vd->addValue("scale y", double(1));
@@ -140,9 +146,6 @@ void VolumeFactory::createDefault()
 		vd->addValue("colormap low", double(0));
 		vd->addValue("colormap high", double(1));
 		vd->addValue("colormap proj", long(0));
-
-		//save the mode for restoring
-		vd->addValue("saved mode", long(0));
 
 		//blend mode
 		vd->addValue("blend mode", long(0));//0: ignore; 1: layered; 2: depth; 3: composite

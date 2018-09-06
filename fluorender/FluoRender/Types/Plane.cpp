@@ -37,8 +37,8 @@ namespace FLTYPE
 	Plane::Plane()
 		: n_(Vector(0,0,1)), d_(0)
 	{
-		n_copy = n_;
-		d_copy = d_;
+		n_copy_ = n_;
+		d_copy_ = d_;
 	}
 
 	Plane::Plane(double a, double b, double c, double d) : n_(Vector(a,b,c)), d_(d)
@@ -47,22 +47,22 @@ namespace FLTYPE
 		d_/=l;
 		n_.normalize();
 
-		n_copy = n_;
-		d_copy = d_;
+		n_copy_ = n_;
+		d_copy_ = d_;
 	}
 
 	Plane::Plane(const Point &p, const Vector &normal)
 		: n_(normal), d_(-Dot(p, normal))
 	{
-		n_copy = n_;
-		d_copy = d_;
+		n_copy_ = n_;
+		d_copy_ = d_;
 	}
 
 	Plane::Plane(const Plane &copy)
 		: n_(copy.n_), d_(copy.d_)
 	{
-		n_copy = copy.n_copy;
-		d_copy = copy.d_copy;
+		n_copy_ = copy.n_copy_;
+		d_copy_ = copy.d_copy_;
 	}
 
 	Plane::Plane(const Point &p1, const Point &p2, const Point &p3)
@@ -73,8 +73,8 @@ namespace FLTYPE
 		n_.normalize();
 		d_=-Dot(p1, n_);
 
-		n_copy = n_;
-		d_copy = d_;
+		n_copy_ = n_;
+		d_copy_ = d_;
 	}
 
 	Plane::~Plane()
@@ -85,8 +85,8 @@ namespace FLTYPE
 	{
 		n_ = copy.n_;
 		d_ = copy.d_;
-		n_copy = copy.n_copy;
-		d_copy = copy.d_copy;
+		n_copy_ = copy.n_copy_;
+		d_copy_ = copy.d_copy_;
 		return *this;
 	}
 
@@ -254,10 +254,10 @@ namespace FLTYPE
 
 	void Plane::get_copy(double (&abcd)[4]) const
 	{
-		abcd[0] = n_copy.x();
-		abcd[1] = n_copy.y();
-		abcd[2] = n_copy.z();
-		abcd[3] = d_copy;
+		abcd[0] = n_copy_.x();
+		abcd[1] = n_copy_.y();
+		abcd[2] = n_copy_.z();
+		abcd[3] = d_copy_;
 	}
 
 	bool Plane::operator==(const Plane &rhs) const
@@ -318,7 +318,31 @@ namespace FLTYPE
 	PlaneSet::PlaneSet(unsigned int size)
 	{
 		for (int i = 0; i < size; ++i)
-			planes_.push_back(Plane());
+		{
+			Plane plane;
+			switch (i)
+			{
+			case 0:
+				plane = Plane(Point(0.0, 0.0, 0.0), Vector(1.0, 0.0, 0.0));
+				break;
+			case 1:
+				plane = Plane(Point(1.0, 0.0, 0.0), Vector(-1.0, 0.0, 0.0));
+				break;
+			case 2:
+				plane = Plane(Point(0.0, 0.0, 0.0), Vector(0.0, 1.0, 0.0));
+				break;
+			case 3:
+				plane = Plane(Point(0.0, 1.0, 0.0), Vector(0.0, -1.0, 0.0));
+				break;
+			case 4:
+				plane = Plane(Point(0.0, 0.0, 0.0), Vector(0.0, 0.0, 1.0));
+				break;
+			case 5:
+				plane = Plane(Point(0.0, 0.0, 1.0), Vector(0.0, 0.0, -1.0));
+				break;
+			}
+			planes_.push_back(plane);
+		}
 	}
 
 	PlaneSet::~PlaneSet()
