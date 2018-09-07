@@ -31,6 +31,11 @@ DEALINGS IN THE SOFTWARE.
 
 #include "VRenderGLView.h"
 
+namespace FL
+{
+	class VolumeData;
+	class VolumeGroup;
+}
 class VRenderView: public wxPanel
 {
 public:
@@ -100,20 +105,20 @@ public:
 	int GetMeshNum();
 	int GetGroupNum();
 	int GetLayerNum();
-	VolumeData* GetAllVolumeData(int index);
-	VolumeData* GetDispVolumeData(int index);
+	FL::VolumeData* GetAllVolumeData(int index);
+	FL::VolumeData* GetDispVolumeData(int index);
 	MeshData* GetMeshData(int index);
 	TreeLayer* GetLayer(int index);
 	MultiVolumeRenderer* GetMultiVolumeData();
-	VolumeData* GetVolumeData(wxString &name);
+	FL::VolumeData* GetVolumeData(wxString &name);
 	MeshData* GetMeshData(wxString &name);
 	Annotations* GetAnnotations(wxString &name);
-	DataGroup* GetGroup(wxString &name);
-	DataGroup* AddVolumeData(VolumeData* vd, wxString group_name="");
+	FL::VolumeGroup* GetGroup(wxString &name);
+	FL::VolumeGroup* AddVolumeData(FL::VolumeData* vd, wxString group_name="");
 	void AddMeshData(MeshData* md);
 	void AddAnnotations(Annotations* ann);
 	wxString AddGroup(wxString str = "", wxString prev_group="");
-	DataGroup* AddOrGetGroup();
+	FL::VolumeGroup* AddOrGetGroup();
 	wxString AddMGroup(wxString str = "");
 	MeshGroup* AddOrGetMGroup();
 	MeshGroup* GetMGroup(wxString &name);
@@ -386,9 +391,9 @@ public:
 	{if (m_glview) m_glview->NoiseRemoval(iter, thresh);}
 
 	//calculations
-	void SetVolumeA(VolumeData* vd)
+	void SetVolumeA(FL::VolumeData* vd)
 	{if (m_glview) m_glview->SetVolumeA(vd);}
-	void SetVolumeB(VolumeData* vd)
+	void SetVolumeB(FL::VolumeData* vd)
 	{if (m_glview) m_glview->SetVolumeB(vd);}
 	void Calculate(int type, wxString prev_group="")
 	{if (m_glview) return m_glview->Calculate(type, prev_group);}

@@ -27,7 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "CompSelector.h"
 #include "CompAnalyzer.h"
-#include "DataManager.h"
+#include <Scenegraph/VolumeData.h>
+#include <FLIVR/Texture.h>
+#include <FLIVR/VolumeRenderer.h>
 
 using namespace FL;
 
@@ -65,7 +67,7 @@ void ComponentSelector::CompFull()
 	if (!m_vd)
 		return;
 
-	if (Texture::mask_undo_num_>0 &&
+	if (FLIVR::Texture::mask_undo_num_>0 &&
 		m_vd->GetTexture())
 		m_vd->GetTexture()->push_mask();
 
@@ -76,7 +78,7 @@ void ComponentSelector::CompFull()
 	if (!data_mask)
 		return;
 	//get current label
-	Texture* tex = m_vd->GetTexture();
+	FLIVR::Texture* tex = m_vd->GetTexture();
 	if (!tex)
 		return;
 	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
@@ -88,9 +90,12 @@ void ComponentSelector::CompFull()
 
 	//get selected IDs
 	int i, j, k;
-	int nx, ny, nz;
+	long nx, ny, nz;
 	unsigned long long index;
-	m_vd->GetResolution(nx, ny, nz);
+	//m_vd->GetResolution(nx, ny, nz);
+	m_vd->getValue("res x", nx);
+	m_vd->getValue("res y", ny);
+	m_vd->getValue("res z", nz);
 	unsigned int label_value;
 	unsigned int brick_id;
 	CompList sel_labels;
@@ -155,7 +160,7 @@ void ComponentSelector::CompFull()
 		}
 	}
 	//invalidate label mask in gpu
-	m_vd->GetVR()->clear_tex_pool();
+	m_vd->GetRenderer()->clear_tex_pool();
 }
 
 void ComponentSelector::Select(bool all, bool rmask)
@@ -164,7 +169,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 	if (!m_vd)
 		return;
 
-	if (Texture::mask_undo_num_>0 &&
+	if (FLIVR::Texture::mask_undo_num_>0 &&
 		m_vd->GetTexture())
 		m_vd->GetTexture()->push_mask();
 
@@ -178,7 +183,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 	if (!data_mask)
 		return;
 	//get current label
-	Texture* tex = m_vd->GetTexture();
+	FLIVR::Texture* tex = m_vd->GetTexture();
 	if (!tex)
 		return;
 	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
@@ -189,8 +194,11 @@ void ComponentSelector::Select(bool all, bool rmask)
 		return;
 
 	//select append
-	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	long nx, ny, nz;
+	//m_vd->GetResolution(nx, ny, nz);
+	m_vd->getValue("res x", nx);
+	m_vd->getValue("res y", ny);
+	m_vd->getValue("res z", nz);
 	unsigned long long for_size = (unsigned long long)nx*
 		(unsigned long long)ny * (unsigned long long)nz;
 	unsigned long long index;
@@ -349,7 +357,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 		}
 	}
 	//invalidate label mask in gpu
-	m_vd->GetVR()->clear_tex_pool();
+	m_vd->GetRenderer()->clear_tex_pool();
 }
 
 void ComponentSelector::Exclusive()
@@ -364,7 +372,7 @@ void ComponentSelector::All()
 	if (!m_vd)
 		return;
 
-	if (Texture::mask_undo_num_>0 &&
+	if (FLIVR::Texture::mask_undo_num_>0 &&
 		m_vd->GetTexture())
 		m_vd->GetTexture()->push_mask();
 
@@ -379,13 +387,16 @@ void ComponentSelector::All()
 		return;
 
 	//select append
-	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	long nx, ny, nz;
+	//m_vd->GetResolution(nx, ny, nz);
+	m_vd->getValue("res x", nx);
+	m_vd->getValue("res y", ny);
+	m_vd->getValue("res z", nz);
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
 	memset(data_mask, 255, for_size);
 	//invalidate label mask in gpu
-	m_vd->GetVR()->clear_tex_pool();
+	m_vd->GetRenderer()->clear_tex_pool();
 }
 
 void ComponentSelector::Clear(bool invalidate)
@@ -394,7 +405,7 @@ void ComponentSelector::Clear(bool invalidate)
 	if (!m_vd)
 		return;
 
-	if (Texture::mask_undo_num_>0 &&
+	if (FLIVR::Texture::mask_undo_num_>0 &&
 		m_vd->GetTexture())
 		m_vd->GetTexture()->push_mask();
 
@@ -406,14 +417,17 @@ void ComponentSelector::Clear(bool invalidate)
 		return;
 
 	//select append
-	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	long nx, ny, nz;
+	//m_vd->GetResolution(nx, ny, nz);
+	m_vd->getValue("res x", nx);
+	m_vd->getValue("res y", ny);
+	m_vd->getValue("res z", nz);
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
 	memset(data_mask, 0, for_size);
 	//invalidate label mask in gpu
 	if (invalidate)
-		m_vd->GetVR()->clear_tex_pool();
+		m_vd->GetRenderer()->clear_tex_pool();
 }
 
 void ComponentSelector::Delete()
@@ -428,7 +442,7 @@ void ComponentSelector::Delete()
 	if (!data_mask)
 		return;
 	//get current label
-	Texture* tex = m_vd->GetTexture();
+	FLIVR::Texture* tex = m_vd->GetTexture();
 	if (!tex)
 		return;
 	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
@@ -438,8 +452,11 @@ void ComponentSelector::Delete()
 	if (!data_label)
 		return;
 	//select append
-	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	long nx, ny, nz;
+	//m_vd->GetResolution(nx, ny, nz);
+	m_vd->getValue("res x", nx);
+	m_vd->getValue("res y", ny);
+	m_vd->getValue("res z", nz);
 	unsigned long long index;
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
@@ -451,7 +468,7 @@ void ComponentSelector::Delete()
 			data_mask[index] = 0;
 	}
 	//invalidate label mask in gpu
-	m_vd->GetVR()->clear_tex_pool();
+	m_vd->GetRenderer()->clear_tex_pool();
 }
 
 void ComponentSelector::Delete(std::vector<unsigned int> &ids)
@@ -468,7 +485,7 @@ void ComponentSelector::Delete(std::vector<unsigned int> &ids)
 	if (!data_mask)
 		return;
 	//get current label
-	Texture* tex = m_vd->GetTexture();
+	FLIVR::Texture* tex = m_vd->GetTexture();
 	if (!tex)
 		return;
 	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
@@ -478,8 +495,11 @@ void ComponentSelector::Delete(std::vector<unsigned int> &ids)
 	if (!data_label)
 		return;
 	//select append
-	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	long nx, ny, nz;
+	//m_vd->GetResolution(nx, ny, nz);
+	m_vd->getValue("res x", nx);
+	m_vd->getValue("res y", ny);
+	m_vd->getValue("res z", nz);
 	unsigned long long index;
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
@@ -494,7 +514,7 @@ void ComponentSelector::Delete(std::vector<unsigned int> &ids)
 			data_mask[index] = 0;
 	}
 	//invalidate label mask in gpu
-	m_vd->GetVR()->clear_tex_pool();
+	m_vd->GetRenderer()->clear_tex_pool();
 }
 
 void ComponentSelector::SelectList(CellList& list)
@@ -502,7 +522,7 @@ void ComponentSelector::SelectList(CellList& list)
 	if (!m_vd)
 		return;
 
-	if (Texture::mask_undo_num_>0 &&
+	if (FLIVR::Texture::mask_undo_num_>0 &&
 		m_vd->GetTexture())
 		m_vd->GetTexture()->push_mask();
 
@@ -516,7 +536,7 @@ void ComponentSelector::SelectList(CellList& list)
 	if (!data_mask)
 		return;
 	//get current label
-	Texture* tex = m_vd->GetTexture();
+	FLIVR::Texture* tex = m_vd->GetTexture();
 	if (!tex)
 		return;
 	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
@@ -527,8 +547,11 @@ void ComponentSelector::SelectList(CellList& list)
 		return;
 
 	//select append
-	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	long nx, ny, nz;
+	//m_vd->GetResolution(nx, ny, nz);
+	m_vd->getValue("res x", nx);
+	m_vd->getValue("res y", ny);
+	m_vd->getValue("res z", nz);
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
 	unsigned long long index;
@@ -542,7 +565,7 @@ void ComponentSelector::SelectList(CellList& list)
 	}
 
 	//invalidate label mask in gpu
-	m_vd->GetVR()->clear_tex_pool();
+	m_vd->GetRenderer()->clear_tex_pool();
 }
 
 inline CompList* ComponentSelector::GetListFromAnalyzer(CompList &list_in, CompList &list_out)

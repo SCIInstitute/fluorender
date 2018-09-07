@@ -273,8 +273,8 @@ public:
 	int GetCurSelType()
 	{ return m_cur_sel_type; }
 	//get current selected volume
-	VolumeData* GetCurSelVol()
-	{ return m_data_mgr.GetVolumeData(m_cur_sel_vol); }
+	//VolumeData* GetCurSelVol()
+	//{ return m_data_mgr.GetVolumeData(m_cur_sel_vol); }
 	//get current selected mesh
 	MeshData* GetCurSelMesh()
 	{ return m_data_mgr.GetMeshData(m_cur_sel_mesh); }

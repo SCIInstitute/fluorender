@@ -29,17 +29,24 @@
 #ifndef _VOLUMELOADER_H_
 #define _VOLUMELOADER_H_
 
-#include "DataManager.h"
-#include "TextureBrick.h"
 #include <wx/thread.h>
 
 class VolumeLoader;
+namespace FL
+{
+	class VolumeData;
+}
+namespace FLIVR
+{
+	class FileLocInfo;
+	class TextureBrick;
+}
 
 struct VolumeLoaderData
 {
-	FileLocInfo *finfo;
-	TextureBrick *brick;
-	VolumeData *vd;
+	FLIVR::FileLocInfo *finfo;
+	FLIVR::TextureBrick *brick;
+	FL::VolumeData *vd;
 	unsigned long long datasize;
 	int mode;
 };
@@ -48,9 +55,9 @@ struct VolumeDecompressorData
 {
 	char *in_data;
 	size_t in_size;
-	TextureBrick *b;
-	FileLocInfo *finfo;
-	VolumeData *vd;
+	FLIVR::TextureBrick *b;
+	FLIVR::FileLocInfo *finfo;
+	FL::VolumeData *vd;
 	unsigned long long datasize;
 	int mode;
 };
@@ -90,7 +97,7 @@ public:
 	void SetMemoryLimitByte(long long limit) { m_memory_limit = limit; }
 	void CleanupLoadedBrick();
 	void RemoveAllLoadedBrick();
-	void RemoveBrickVD(VolumeData *vd);
+	void RemoveBrickVD(FL::VolumeData *vd);
 	void GetPalams(long long &used_mem, int &running_decomp_th, int &queue_num, int &decomp_queue_num);
 
 	static bool sort_data_dsc(const VolumeLoaderData b1, const VolumeLoaderData b2)
@@ -109,7 +116,7 @@ protected:
 	vector<VolumeLoaderData> m_queued;
 	vector<VolumeDecompressorData> m_decomp_queues;
 	vector<VolumeDecompressorThread *> m_decomp_threads;
-	unordered_map<TextureBrick*, VolumeLoaderData> m_loaded;
+	unordered_map<FLIVR::TextureBrick*, VolumeLoaderData> m_loaded;
 	int m_running_decomp_th;
 	int m_max_decomp_th;
 	bool m_valid;

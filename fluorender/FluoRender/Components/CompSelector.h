@@ -32,9 +32,9 @@ DEALINGS IN THE SOFTWARE.
 #include <CellList.h>
 #include <CompGraph.h>
 
-class VolumeData;
 namespace FL
 {
+	class VolumeData;
 	class ComponentAnalyzer;
 	class ComponentSelector
 	{

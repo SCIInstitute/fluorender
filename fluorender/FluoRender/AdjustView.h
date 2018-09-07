@@ -25,14 +25,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef _ADJUSTVIEW_H_
+#define _ADJUSTVIEW_H_
+
 #include "DataManager.h"
 #include "VRenderView.h"
 #include <wx/wx.h>
 #include <wx/panel.h>
 #include <wx/slider.h>
-
-#ifndef _ADJUSTVIEW_H_
-#define _ADJUSTVIEW_H_
 
 //all convert v1 to v2
 #define GammaUI2(v1, v2) \
@@ -54,6 +54,11 @@ DEALINGS IN THE SOFTWARE.
 #define Hdr2UIP(v) \
 	int(v*100.0+0.5)
 
+namespace FL
+{
+	class VolumeData;
+	class VolumeGroup;
+}
 class AdjustView: public wxPanel
 {
 	enum
@@ -132,7 +137,7 @@ public:
 		return m_glview;
 	}
 	//set volume data
-	void SetVolumeData(VolumeData* vd)
+	void SetVolumeData(FL::VolumeData* vd)
 	{
 		if (vd)
 		{
@@ -146,12 +151,12 @@ public:
 			DisableAll();
 		}
 	}
-	VolumeData* GetVolumeData()
+	FL::VolumeData* GetVolumeData()
 	{
 		return m_vd;
 	}
 	//set group
-	void SetGroup(DataGroup *group)
+	void SetGroup(FL::VolumeGroup *group)
 	{
 		if (group)
 		{
@@ -165,12 +170,12 @@ public:
 			DisableAll();
 		}
 	}
-	DataGroup* GetGroup()
+	FL::VolumeGroup* GetGroup()
 	{
 		return m_group;
 	}
 	//set volume adjustment to link to group
-	void SetGroupLink(DataGroup *group)
+	void SetGroupLink(FL::VolumeGroup *group)
 	{
 		if (group)
 		{
@@ -215,8 +220,8 @@ private:
 	wxWindow* m_frame;
 	int m_type;
 	VRenderGLView *m_glview;
-	VolumeData* m_vd;
-	DataGroup* m_group;
+	FL::VolumeData* m_vd;
+	FL::VolumeGroup* m_group;
 	bool m_link_group;
 
 	//sync flags

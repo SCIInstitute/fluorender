@@ -590,8 +590,8 @@ void AdjustView::OnRGammaText(wxCommandEvent& event)
 		}
 		layer->SetGamma(gamma);
 
-		if (m_link_group && m_group)
-			m_group->SetGammaAll(gamma);
+		//if (m_link_group && m_group)
+		//	m_group->SetGammaAll(gamma);
 
 	}
 	RefreshVRenderViews(true);
@@ -657,8 +657,8 @@ void AdjustView::OnGGammaText(wxCommandEvent& event)
 		}
 		layer->SetGamma(gamma);
 
-		if (m_link_group && m_group)
-			m_group->SetGammaAll(gamma);
+		//if (m_link_group && m_group)
+		//	m_group->SetGammaAll(gamma);
 
 	}
 	RefreshVRenderViews(true);
@@ -724,8 +724,8 @@ void AdjustView::OnBGammaText(wxCommandEvent& event)
 		}
 		layer->SetGamma(gamma);
 
-		if (m_link_group && m_group)
-			m_group->SetGammaAll(gamma);
+		//if (m_link_group && m_group)
+		//	m_group->SetGammaAll(gamma);
 
 	}
 	RefreshVRenderViews(true);
@@ -792,8 +792,8 @@ void AdjustView::OnRBrightnessText(wxCommandEvent& event)
 		}
 		layer->SetBrightness(brightness);
 
-		if (m_link_group && m_group)
-			m_group->SetBrightnessAll(brightness);
+		//if (m_link_group && m_group)
+		//	m_group->SetBrightnessAll(brightness);
 
 	}
 	RefreshVRenderViews(true);
@@ -859,8 +859,8 @@ void AdjustView::OnGBrightnessText(wxCommandEvent& event)
 		}
 		layer->SetBrightness(brightness);
 
-		if (m_link_group && m_group)
-			m_group->SetBrightnessAll(brightness);
+		//if (m_link_group && m_group)
+		//	m_group->SetBrightnessAll(brightness);
 
 	}
 	RefreshVRenderViews(true);
@@ -926,8 +926,8 @@ void AdjustView::OnBBrightnessText(wxCommandEvent& event)
 		}
 		layer->SetBrightness(brightness);
 
-		if (m_link_group && m_group)
-			m_group->SetBrightnessAll(brightness);
+		//if (m_link_group && m_group)
+		//	m_group->SetBrightnessAll(brightness);
 
 	}
 	RefreshVRenderViews(true);
@@ -993,8 +993,8 @@ void AdjustView::OnRHdrText(wxCommandEvent &event)
 		}
 		layer->SetHdr(hdr);
 
-		if (m_link_group && m_group)
-			m_group->SetHdrAll(hdr);
+		//if (m_link_group && m_group)
+		//	m_group->SetHdrAll(hdr);
 
 	}
 	RefreshVRenderViews(true);
@@ -1060,8 +1060,8 @@ void AdjustView::OnGHdrText(wxCommandEvent &event)
 		}
 		layer->SetHdr(hdr);
 
-		if (m_link_group && m_group)
-			m_group->SetHdrAll(hdr);
+		//if (m_link_group && m_group)
+		//	m_group->SetHdrAll(hdr);
 
 	}
 	RefreshVRenderViews(true);
@@ -1127,8 +1127,8 @@ void AdjustView::OnBHdrText(wxCommandEvent &event)
 		}
 		layer->SetHdr(hdr);
 
-		if (m_link_group && m_group)
-			m_group->SetHdrAll(hdr);
+		//if (m_link_group && m_group)
+		//	m_group->SetHdrAll(hdr);
 
 	}
 	RefreshVRenderViews(true);

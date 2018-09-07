@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include "utility.h"
 #include "VolumeSelector.h"
 #include "KernelExecutor.h"
-#include "Calculate/VolumeCalculator.h"
+#include <Calculate/VolumeCalculator.h>
 
 #include "FLIVR/Color.h"
 #include "FLIVR/ShaderProgram.h"
@@ -107,8 +107,11 @@ DEALINGS IN THE SOFTWARE.
 
 #define ID_ftrigger	ID_VRENDER_VIEW1
 
-using namespace std;
-
+namespace FL
+{
+	class VolumeData;
+	class VolumeGroup;
+}
 class VRenderView;
 class VRenderFrame;
 class VRenderGLView : public wxGLCanvas
@@ -145,28 +148,28 @@ public:
 	int GetMeshNum();
 	int GetGroupNum();
 	int GetLayerNum();
-	VolumeData* GetAllVolumeData(int index);
-	VolumeData* GetDispVolumeData(int index);
+	FL::VolumeData* GetAllVolumeData(int index);
+	FL::VolumeData* GetDispVolumeData(int index);
 	MeshData* GetMeshData(int index);
 	TreeLayer* GetLayer(int index);
 	MultiVolumeRenderer* GetMultiVolumeData() { return m_mvr; };
-	VolumeData* GetVolumeData(wxString &name);
+	FL::VolumeData* GetVolumeData(wxString &name);
 	MeshData* GetMeshData(wxString &name);
 	Annotations* GetAnnotations(wxString &name);
-	DataGroup* GetGroup(wxString &name);
+	FL::VolumeGroup* GetGroup(wxString &name);
 	MeshGroup* GetMGroup(wxString str);
 	//add
-	DataGroup* AddVolumeData(VolumeData* vd, wxString group_name = "");
+	FL::VolumeGroup* AddVolumeData(FL::VolumeData* vd, wxString group_name = "");
 	void AddMeshData(MeshData* md);
 	void AddAnnotations(Annotations* ann);
 	wxString AddGroup(wxString str, wxString prev_group = "");
-	DataGroup* AddOrGetGroup();
+	FL::VolumeGroup* AddOrGetGroup();
 	wxString AddMGroup(wxString str);
 	MeshGroup* AddOrGetMGroup();
 	//remove
 	void RemoveVolumeData(wxString &name);
 	void RemoveVolumeDataDup(wxString &name);//remove all duplicated data
-	void ReplaceVolumeData(wxString &name, VolumeData *dst);
+	void ReplaceVolumeData(wxString &name, FL::VolumeData *dst);
 	void RemoveMeshData(wxString &name);
 	void RemoveAnnotations(wxString &name);
 	void RemoveGroup(wxString &name);
@@ -351,7 +354,7 @@ public:
 	void Get4DSeqFrames(int &start_frame, int &end_frame, int &cur_frame);
 	void Set4DSeqFrame(int frame, bool run_script);
 	void Set4DSeqFrameVd(int frame, bool run_script,
-		VolumeData* vd, VRenderFrame* vframe);
+		FL::VolumeData* vd, VRenderFrame* vframe);
 	//3d batch file calculation
 	void Get3DBatFrames(int &start_frame, int &end_frame, int &cur_frame);
 	void Set3DBatFrame(int offset);
@@ -412,8 +415,8 @@ public:
 	int GetPaintMode();
 
 	//calculations
-	void SetVolumeA(VolumeData* vd);
-	void SetVolumeB(VolumeData* vd);
+	void SetVolumeA(FL::VolumeData* vd);
+	void SetVolumeB(FL::VolumeData* vd);
 	//1-sub;2-add;3-div;4-and;5-new;6-new inv;7-clear
 	void Calculate(int type, wxString prev_group = "", bool add = true);
 	void CalculateSingle(int type, wxString prev_group, bool add);
@@ -592,7 +595,7 @@ public:
 	bool m_draw_grid;
 	bool m_draw_rulers;
 	//current volume
-	VolumeData *m_cur_vol;
+	FL::VolumeData *m_cur_vol;
 	//clipping settings
 	int m_clip_mask;
 	int m_clip_mode;//0-normal; 1-ortho planes; 2-rot difference
@@ -641,7 +644,7 @@ private:
 	VRenderView* m_vrv;
 	//populated lists of data
 	bool m_vd_pop_dirty;
-	vector <VolumeData*> m_vd_pop_list;
+	vector <FL::VolumeData*> m_vd_pop_list;
 	bool m_md_pop_dirty;
 	vector <MeshData*> m_md_pop_list;
 	//real data list
@@ -979,13 +982,13 @@ private:
 	void ClearFinalBuffer();
 	void DrawFinalBuffer();
 	//different volume drawing modes
-	void DrawVolumesMulti(vector<VolumeData*> &list, int peel = 0);
-	void DrawVolumesComp(vector<VolumeData*> &list, bool mask = false, int peel = 0);
-	void DrawMIP(VolumeData* vd, int peel = 0);
-	void DrawOVER(VolumeData* vd, bool mask, int peel = 0);
+	void DrawVolumesMulti(vector<FL::VolumeData*> &list, int peel = 0);
+	void DrawVolumesComp(vector<FL::VolumeData*> &list, bool mask = false, int peel = 0);
+	void DrawMIP(FL::VolumeData* vd, int peel = 0);
+	void DrawOVER(FL::VolumeData* vd, bool mask, int peel = 0);
 	//overlay passes
-	void DrawOLShading(VolumeData* vd);
-	void DrawOLShadows(vector<VolumeData*> &vlist);
+	void DrawOLShading(FL::VolumeData* vd);
+	void DrawOLShadows(vector<FL::VolumeData*> &vlist);
 	void DrawOLShadowsMesh(double darkenss);
 
 	//get mesh shadow
@@ -1017,7 +1020,7 @@ private:
 	void ResetEnlarge();
 
 	//run 4d script
-	void Run4DScript(wxString &scriptname, VolumeData* vd = 0);
+	void Run4DScript(wxString &scriptname, FL::VolumeData* vd = 0);
 	void RunNoiseReduction(wxFileConfig &fconfig);
 	void RunSelectionTracking(wxFileConfig &fconfig);
 	void RunSparseTracking(wxFileConfig &fconfig);
@@ -1049,9 +1052,9 @@ private:
 
 	//get mouse point in 3D
 	//mode: 0-maximum with original value; 1-maximum with transfered value; 2-accumulated with original value; 3-accumulated with transfered value
-	double GetPointVolume(Point &mp, double mx, double my, VolumeData* vd, int mode, bool use_transf, double thresh = 0.5);
-	double GetPointVolumeBox(Point &mp, double mx, double my, VolumeData* vd, bool calc_mats = true);
-	double GetPointVolumeBox2(Point &p1, Point &p2, double mx, double my, VolumeData* vd);
+	double GetPointVolume(Point &mp, double mx, double my, FL::VolumeData* vd, int mode, bool use_transf, double thresh = 0.5);
+	double GetPointVolumeBox(Point &mp, double mx, double my, FL::VolumeData* vd, bool calc_mats = true);
+	double GetPointVolumeBox2(Point &p1, Point &p2, double mx, double my, FL::VolumeData* vd);
 	double GetPointPlane(Point &mp, double mx, double my, Point *planep = 0, bool calc_mats = true);
 	Point* GetEditingRulerPoint(double mx, double my);
 
@@ -1075,7 +1078,7 @@ private:
 	//get size, considering enlargement
 	wxSize GetGLSize();
 
-	void switchLevel(VolumeData *vd);
+	void switchLevel(FL::VolumeData *vd);
 
 	DECLARE_EVENT_TABLE()
 

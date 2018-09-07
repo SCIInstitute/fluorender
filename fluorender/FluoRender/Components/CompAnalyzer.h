@@ -32,15 +32,25 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <boost/signals2.hpp>
 #include "CompGraph.h"
-#include "DataManager.h"
 
-class VolumeData;
 class Annotations;
+
+namespace FLTYPE
+{
+	class Color;
+}
+
+namespace FLIVR
+{
+	class TextureBrick;
+}
 
 namespace FL
 {
 #define SIZE_LIMIT 10
 
+	class VolumeData;
+	class Annotations;
 	class ComponentAnalyzer
 	{
 	public:
@@ -91,7 +101,7 @@ namespace FL
 		void OutputCompListStream(std::ostream &stream, int verbose, std::string comp_header = "");
 		void OutputCompListStr(std::string &str, int verbose, std::string comp_header="");
 		void OutputCompListFile(std::string &filename, int verbose, std::string comp_header = "");
-		bool GenAnnotations(Annotations &ann, bool consistent);
+		//bool GenAnnotations(Annotations &ann, bool consistent);
 		//color_type: 1-id-based; 2-size-based
 		bool GenMultiChannels(std::list<VolumeData*> &channs, int color_type, bool consistent);
 		bool GenRgbChannels(std::list<VolumeData*> &channs, int color_type, bool consistent);
@@ -126,7 +136,7 @@ namespace FL
 
 		bool GetColor(unsigned int id, int brick_id,
 			VolumeData* vd, int color_type,
-			FLIVR::Color &color);
+			FLTYPE::Color &color);
 		int GetColocalization(size_t bid,
 			unsigned int bi,
 			unsigned int bj,

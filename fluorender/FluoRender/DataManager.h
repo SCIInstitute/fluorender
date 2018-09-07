@@ -1289,7 +1289,7 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*class DataManager
+class DataManager
 {
 public:
 	DataManager();
@@ -1304,7 +1304,7 @@ public:
 	wxString SearchProjectPath(wxString &filename);
 
 	//load volume
-	int LoadVolumeData(wxString &filename, int type, bool withImageJ, int ch_num=-1, int t_num=-1);
+	/*int LoadVolumeData(wxString &filename, int type, bool withImageJ, int ch_num=-1, int t_num=-1);
 	//set default
 	void SetVolumeDefault(VolumeData* vd);
 	//load volume options
@@ -1328,7 +1328,7 @@ public:
 			return m_vd_list[num-1];
 		else
 			return 0;
-	};
+	};*/
 
 	//load mesh
 	int LoadMeshData(wxString &filename);
@@ -1367,7 +1367,7 @@ public:
 	bool CheckNames(wxString &str);
 
 	//wavelength to color
-	void SetWavelengthColor(int c1, int c2, int c3, int c4);
+	/*void SetWavelengthColor(int c1, int c2, int c3, int c4);
 	Color GetWavelengthColor(double wavelength);
 	Color GetColor(int);
 
@@ -1381,11 +1381,11 @@ public:
 	void SetPvxmlFlipX(bool flip) {m_pvxml_flip_x = flip;}
 	bool GetPvxmlFlipX() {return m_pvxml_flip_x;}
 	void SetPvxmlFlipY(bool flip) {m_pvxml_flip_y = flip;}
-	bool GetPvxmlFlipY() {return m_pvxml_flip_y;}
+	bool GetPvxmlFlipY() {return m_pvxml_flip_y;}*/
 public:
 	//default values
 	//volume
-	double m_vol_exb;	//extract_boundary
+/*	double m_vol_exb;	//extract_boundary
 	double m_vol_gam;	//gamma
 	double m_vol_of1;	//offset1
 	double m_vol_of2;	//offset2
@@ -1416,10 +1416,10 @@ public:
 	bool m_vol_test_wiref;		//wireframe mode
 
 	//wavelength to color table
-	Color m_vol_wav[4];
+	Color m_vol_wav[4];*/
 
 private:
-	vector <VolumeData*> m_vd_list;
+	//vector <VolumeData*> m_vd_list;
 	vector <MeshData*> m_md_list;
 	vector <BaseReader*> m_reader_list;
 	vector <Annotations*> m_annotation_list;
@@ -1427,7 +1427,7 @@ private:
 	bool m_use_defaults;
 
 	//slice sequence
-	bool m_sliceSequence;
+	/*bool m_sliceSequence;
 	//compression
 	bool m_compression;
 	//skip brick
@@ -1442,7 +1442,7 @@ private:
 	bool m_override_vox;
 	//flgs for pvxml flipping
 	bool m_pvxml_flip_x;
-	bool m_pvxml_flip_y;
-};*/
+	bool m_pvxml_flip_y;*/
+};
 
 #endif//_DATAMANAGER_H_

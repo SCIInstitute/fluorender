@@ -34,6 +34,8 @@ VolumeFactory::VolumeFactory()
 {
 	m_name = "volume factory";
 	default_object_name_ = "default volume";
+
+	addValue("current", (VolumeData*)(0));//current volume data
 }
 
 VolumeFactory::~VolumeFactory()
@@ -221,6 +223,7 @@ VolumeData* VolumeFactory::clone(VolumeData* vd)
 	new_vd->setName(name);
 
 	objects_.push_back(new_vd);
+	setValue("current", new_vd);
 
 	return dynamic_cast<VolumeData*>(new_vd);
 }

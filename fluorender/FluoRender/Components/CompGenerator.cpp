@@ -25,8 +25,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "DataManager.h"
 #include "CompGenerator.h"
+#include <Scenegraph/VolumeData.h>
+#include <FLIVR/TextureBrick.h>
+#include <FLIVR/Texture.h>
+#include <FLIVR/VolumeRenderer.h>
+#include <FLIVR/KernelProgram.h>
+#include <FLIVR/VolKernel.h>
 #include "cl_code.h"
 #include <algorithm>
 
@@ -54,13 +59,15 @@ void ComponentGenerator::OrderID_3D()
 #define GET_VOLDATA \
 	if (!m_vd) \
 		return; \
-	int nx, ny, nz; \
-	m_vd->GetResolution(nx, ny, nz); \
+	long nx, ny, nz; \
+	m_vd->getValue("res x", nx); \
+	m_vd->getValue("res y", ny); \
+	m_vd->getValue("res z", nz); \
 	Nrrd* nrrd_data = 0; \
 	if (m_use_mask) \
 		nrrd_data = m_vd->GetMask(true); \
 	if (!nrrd_data) \
-		nrrd_data = m_vd->GetVolume(false); \
+		nrrd_data = m_vd->GetData(false); \
 	if (!nrrd_data) \
 		return; \
 	Nrrd* nrrd_label = m_vd->GetLabel(false); \
@@ -84,17 +91,17 @@ void ComponentGenerator::OrderID_3D()
 #define CHECK_BRICKS \
 	if (!m_vd || !m_vd->GetTexture()) \
 		return; \
-	vector<TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks(); \
+	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks(); \
 	if (!bricks || bricks->size() == 0) \
 		return;
 
 #define GET_VOLDATA_STREAM \
-	int nx, ny, nz; \
+	long nx, ny, nz; \
 	unsigned char* val8 = 0; \
 	unsigned short* val16 = 0; \
 	int bits = 8; \
 	unsigned int* val32 = 0; \
-	TextureBrick* b = 0; \
+	FLIVR::TextureBrick* b = 0; \
 	int c = 0; \
 	int nb = 1; \
 	if (bricks->size() > 1) \
@@ -149,12 +156,14 @@ void ComponentGenerator::OrderID_3D()
 	} \
 	else \
 	{ \
-		m_vd->GetResolution(nx, ny, nz); \
+		m_vd->getValue("res x", nx); \
+		m_vd->getValue("res y", ny); \
+		m_vd->getValue("res z", nz); \
 		Nrrd* nrrd_data = 0; \
 		if (m_use_mask) \
 			nrrd_data = m_vd->GetMask(false); \
 		if (!nrrd_data) \
-			nrrd_data = m_vd->GetVolume(false); \
+			nrrd_data = m_vd->GetData(false); \
 		if (!nrrd_data) \
 			return; \
 		Nrrd* nrrd_label = m_vd->GetLabel(false); \
@@ -200,7 +209,7 @@ void ComponentGenerator::OrderID_2D()
 	CHECK_BRICKS
 
 	//create program and kernels
-	KernelProgram* kernel_prog = VolumeRenderer::
+	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_order_id_2d);
 	if (!kernel_prog)
 		return;
@@ -212,7 +221,7 @@ void ComponentGenerator::OrderID_2D()
 		kernel_index = kernel_prog->createKernel(name);
 
 	if (m_use_mask)
-		m_vd->GetVR()->return_mask();
+		m_vd->GetRenderer()->return_mask();
 
 	for (size_t i = 0; i < bricks->size(); ++i)
 	{
@@ -273,7 +282,7 @@ void ComponentGenerator::ShuffleID_3D()
 	CHECK_BRICKS
 
 	//create program and kernels
-	KernelProgram* kernel_prog = VolumeRenderer::
+	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_shuffle_id_3d);
 	if (!kernel_prog)
 		return;
@@ -285,7 +294,7 @@ void ComponentGenerator::ShuffleID_3D()
 		kernel_index = kernel_prog->createKernel(name);
 
 	if (m_use_mask)
-		m_vd->GetVR()->return_mask();
+		m_vd->GetRenderer()->return_mask();
 
 	for (size_t i = 0; i < bricks->size(); ++i)
 	{
@@ -295,7 +304,7 @@ void ComponentGenerator::ShuffleID_3D()
 		size_t local_size[3] = { 1, 1, 1 };
 		//bit length
 		unsigned int lenx = 0;
-		unsigned int r = Max(nx, ny);
+		unsigned int r = std::max(nx, ny);
 		while (r > 0)
 		{
 			r /= 2;
@@ -365,7 +374,7 @@ void ComponentGenerator::ShuffleID_2D()
 	CHECK_BRICKS
 
 	//create program and kernels
-	KernelProgram* kernel_prog = VolumeRenderer::
+	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_shuffle_id_2d);
 	if (!kernel_prog)
 		return;
@@ -377,7 +386,7 @@ void ComponentGenerator::ShuffleID_2D()
 		kernel_index = kernel_prog->createKernel(name);
 
 	if (m_use_mask)
-		m_vd->GetVR()->return_mask();
+		m_vd->GetRenderer()->return_mask();
 
 	for (size_t i = 0; i < bricks->size(); ++i)
 	{
@@ -386,7 +395,7 @@ void ComponentGenerator::ShuffleID_2D()
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
 		unsigned int len = 0;
-		unsigned int r = Max(nx, ny);
+		unsigned int r = std::max(nx, ny);
 		while (r > 0)
 		{
 			r /= 2;
@@ -447,7 +456,7 @@ void ComponentGenerator::ClearBorders3D()
 	CHECK_BRICKS
 
 	//create program and kernels
-	KernelProgram* kernel_prog = VolumeRenderer::
+	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_clear_borders_3d);
 	if (!kernel_prog)
 		return;
@@ -459,7 +468,7 @@ void ComponentGenerator::ClearBorders3D()
 		kernel_index = kernel_prog->createKernel(name);
 
 	if (m_use_mask)
-		m_vd->GetVR()->return_mask();
+		m_vd->GetRenderer()->return_mask();
 
 	for (size_t i = 0; i < bricks->size(); ++i)
 	{
@@ -496,7 +505,7 @@ void ComponentGenerator::ClearBorders2D()
 	CHECK_BRICKS
 
 	//create program and kernels
-	KernelProgram* kernel_prog = VolumeRenderer::
+	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_clear_borders_2d);
 	if (!kernel_prog)
 		return;
@@ -508,7 +517,7 @@ void ComponentGenerator::ClearBorders2D()
 		kernel_index = kernel_prog->createKernel(name);
 
 	if (m_use_mask)
-		m_vd->GetVR()->return_mask();
+		m_vd->GetRenderer()->return_mask();
 
 	for (size_t i = 0; i < bricks->size(); ++i)
 	{
@@ -553,7 +562,7 @@ void ComponentGenerator::FillBorder3D(float tol)
 	CHECK_BRICKS
 
 	//create program and kernels
-	KernelProgram* kernel_prog = VolumeRenderer::
+	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_fill_borders_3d);
 	if (!kernel_prog)
 		return;
@@ -626,7 +635,7 @@ void ComponentGenerator::FillBorder2D(float tol)
 	CHECK_BRICKS
 
 	//create program and kernels
-	KernelProgram* kernel_prog = VolumeRenderer::
+	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_fill_borders_2d);
 	if (!kernel_prog)
 		return;
@@ -719,7 +728,7 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 	CHECK_BRICKS
 
 	//create program and kernels
-	KernelProgram* kernel_prog = VolumeRenderer::
+	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_brainbow_3d);
 	if (!kernel_prog)
 		return;
@@ -753,7 +762,7 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 	}
 
 	if (m_use_mask)
-		m_vd->GetVR()->return_mask();
+		m_vd->GetRenderer()->return_mask();
 
 	for (size_t i = 0; i < bricks->size(); ++i)
 	{
@@ -818,7 +827,7 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 		{
 			//bit length
 			unsigned int lenx = 0;
-			unsigned int r = Max(nx, ny);
+			unsigned int r = std::max(nx, ny);
 			while (r > 0)
 			{
 				r /= 2;
@@ -939,7 +948,7 @@ void ComponentGenerator::Grow3DSized(
 	CHECK_BRICKS
 
 	//create program and kernels
-	KernelProgram* kernel_prog = VolumeRenderer::
+	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_brainbow_3d_sized);
 	if (!kernel_prog)
 		return;
@@ -969,7 +978,7 @@ void ComponentGenerator::Grow3DSized(
 	}
 
 	if (m_use_mask)
-		m_vd->GetVR()->return_mask();
+		m_vd->GetRenderer()->return_mask();
 
 	for (size_t i = 0; i < bricks->size(); ++i)
 	{
@@ -986,7 +995,7 @@ void ComponentGenerator::Grow3DSized(
 		float grad_ff = diffuse ? falloff : 0.0f;
 		//bit length
 		unsigned int lenx = 0;
-		unsigned int r = Max(nx, ny);
+		unsigned int r = std::max(nx, ny);
 		while (r > 0)
 		{
 			r /= 2;
@@ -1154,7 +1163,7 @@ void ComponentGenerator::InitialGrow(bool param_tr, int iter,
 	CHECK_BRICKS
 
 	//create program and kernels
-	KernelProgram* kernel_prog = VolumeRenderer::
+	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_slice_brainbow);
 	if (!kernel_prog)
 		return;
@@ -1166,7 +1175,7 @@ void ComponentGenerator::InitialGrow(bool param_tr, int iter,
 		kernel_index = kernel_prog->createKernel(name);
 
 	if (m_use_mask)
-		m_vd->GetVR()->return_mask();
+		m_vd->GetRenderer()->return_mask();
 
 	for (size_t i = 0; i < bricks->size(); ++i)
 	{
@@ -1301,7 +1310,7 @@ void ComponentGenerator::SizedGrow(bool param_tr, int iter,
 	CHECK_BRICKS
 
 	//create program and kernels
-	KernelProgram* kernel_prog = VolumeRenderer::
+	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_grow_size);
 	if (!kernel_prog)
 		return;
@@ -1325,7 +1334,7 @@ void ComponentGenerator::SizedGrow(bool param_tr, int iter,
 	}
 
 	if (m_use_mask)
-		m_vd->GetVR()->return_mask();
+		m_vd->GetRenderer()->return_mask();
 
 	for (size_t i = 0; i < bricks->size(); ++i)
 	{
@@ -1342,7 +1351,7 @@ void ComponentGenerator::SizedGrow(bool param_tr, int iter,
 		size_t global_size[2] = { size_t(nx), size_t(ny) };
 		size_t local_size[2] = { 1, 1 };
 		unsigned int len = 0;
-		unsigned int r = Max(nx, ny);
+		unsigned int r = std::max(nx, ny);
 		while (r > 0)
 		{
 			r /= 2;
@@ -1509,7 +1518,7 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 	CHECK_BRICKS
 
 	//create program and kernels
-	KernelProgram* kernel_prog1 = VolumeRenderer::
+	FLIVR::KernelProgram* kernel_prog1 = FLIVR::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_grow_size);
 	if (!kernel_prog1)
 		return;
@@ -1527,7 +1536,7 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 		kernel_index0 = kernel_prog1->createKernel(name0);
 		kernel_index1 = kernel_prog1->createKernel(name1);
 	}
-	KernelProgram* kernel_prog2 = VolumeRenderer::
+	FLIVR::KernelProgram* kernel_prog2 = FLIVR::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_clean_up);
 	if (!kernel_prog2)
 		return;
@@ -1551,7 +1560,7 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 		size_t global_size[2] = { size_t(nx), size_t(ny) };
 		size_t local_size[2] = { 1, 1 };
 		unsigned int len = 0;
-		unsigned int r = Max(nx, ny);
+		unsigned int r = std::max(nx, ny);
 		while (r > 0)
 		{
 			r /= 2;
@@ -1642,7 +1651,9 @@ void ComponentGenerator::MatchSlices_CPU(bool backwards, unsigned int size_thres
 	GET_VOLDATA
 
 	if (nz < 2) return;
-	float sscale = m_vd->GetScalarScale();
+	double int_scale;
+	m_vd->getValue("int scale", int_scale);
+	float sscale = float(int_scale);
 
 	CellList cell_list1, cell_list2;
 	unsigned int* page1 = val32;

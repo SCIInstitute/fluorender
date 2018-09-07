@@ -25,14 +25,21 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "DataManager.h"
 #include <wx/progdlg.h>
 #include <boost/unordered_map.hpp>
 
 #ifndef _VOLUMESELECTOR_H_
 #define _VOLUMESELECTOR_H_
 
-//using namespace stdext;
+namespace FL
+{
+	class VolumeData;
+	class Annotations;
+}
+namespace FLTYPE
+{
+	class Vector;
+}
 
 class VolumeSelector
 {
@@ -40,8 +47,8 @@ public:
 	VolumeSelector();
 	~VolumeSelector();
 
-	void SetVolume(VolumeData *vd);
-	VolumeData* GetVolume();
+	void SetVolume(FL::VolumeData *vd);
+	FL::VolumeData* GetVolume();
 	void Set2DMask(GLuint mask);
 	void Set2DWeight(GLuint weight1, GLuint weight2);
 	void SetProjection(double* mvmat, double *prjmat);
@@ -94,10 +101,10 @@ public:
 	int NoiseAnalysis(double min_voxels, double max_voxels, double bins, double thresh);
 	int CompIslandCount(double min_voxels, double max_voxels);
 	void CompExportMultiChann(bool select);
-	void CompExportRandomColor(int hmode, VolumeData* vd_r, VolumeData* vd_g, VolumeData* vd_b, bool select, bool hide=true);
+	void CompExportRandomColor(int hmode, FL::VolumeData* vd_r, FL::VolumeData* vd_g, FL::VolumeData* vd_b, bool select, bool hide=true);
 	//mode: 0-no duplicate; 1-duplicate
 	void NoiseRemoval(int iter, double thresh, int mode=0);
-	vector<VolumeData*>* GetResultVols();
+	vector<FL::VolumeData*>* GetResultVols();
 	//process current selection
 	int ProcessSel(double thresh);
 	int GetCenter(Point& p);
@@ -109,7 +116,7 @@ public:
 
 	//annotations
 	void GenerateAnnotations(bool use_sel);
-	Annotations* GetAnnotations();
+	FL::Annotations* GetAnnotations();
 
 	//estimate threshold
 	void SetEstimateThreshold(bool value)
@@ -121,7 +128,7 @@ public:
 	void Test();
 
 private:
-	VolumeData *m_vd;	//volume data for segmentation
+	FL::VolumeData *m_vd;	//volume data for segmentation
 	GLuint m_2d_mask;	//2d mask from painting
 	GLuint m_2d_weight1;//2d weight map (after tone mapping)
 	GLuint m_2d_weight2;//2d weight map	(before tone mapping)
@@ -158,19 +165,19 @@ private:
 	{
 		unsigned int id;
 		unsigned int counter;
-		Vector acc_pos;
+		FLTYPE::Vector acc_pos;
 		double acc_int;
 	};
 	boost::unordered_map <unsigned int, Component> m_comps;
 	double m_min_voxels, m_max_voxels;
 
 	//exported volumes
-	vector<VolumeData*> m_result_vols;
+	vector<FL::VolumeData*> m_result_vols;
 	//annotations
-	Annotations* m_annotations;
+	FL::Annotations* m_annotations;
 
 	//make progress
-	wxProgressDialog *m_prog_diag;
+	//wxProgressDialog *m_prog_diag;
 	int m_progress;
 	int m_total_pr;
 
@@ -189,7 +196,7 @@ private:
 	bool m_estimate_threshold;
 
 private:
-	bool SearchComponentList(unsigned int cval, Vector &pos, double intensity);
+	bool SearchComponentList(unsigned int cval, FLTYPE::Vector &pos, double intensity);
 	double HueCalculation(int mode, unsigned int label);
 };
 

@@ -31,15 +31,12 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <boost/unordered_map.hpp>
 #include <boost/signals2.hpp>
-#include "DataManager.h"
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
 
 using namespace std;
 
-class VolumeData;
 namespace FL
 {
+	class VolumeData;
 	class ComponentGenerator
 	{
 	public:
@@ -184,7 +181,7 @@ namespace FL
 					cell->size = data_value;
 					cell->x = i;
 					cell->y = j;
-					cell_list->insert(pair<unsigned int, Cell*>(label_value, cell));
+					cell_list->insert(std::pair<unsigned int, Cell*>(label_value, cell));
 				}
 			}
 		}

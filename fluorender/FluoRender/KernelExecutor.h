@@ -25,12 +25,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "DataManager.h"
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
-
 #ifndef _KERNELEXECUTOR_H_
 #define _KERNELEXECUTOR_H_
+
+#include <string>
+
+namespace FL
+{
+	class VolumeData;
+}
+
+namespace FLIVR
+{
+	class KernelProgram;
+}
 
 class KernelExecutor
 {
@@ -38,24 +46,24 @@ public:
 	KernelExecutor();
 	~KernelExecutor();
 
-	void SetCode(wxString &code);
-	void LoadCode(wxString &filename);
-	void SetVolume(VolumeData *vd);
+	void SetCode(std::string &code);
+	void LoadCode(std::string &filename);
+	void SetVolume(FL::VolumeData *vd);
 	void SetDuplicate(bool dup);
-	VolumeData* GetVolume();
-	VolumeData* GetResult();
+	FL::VolumeData* GetVolume();
+	FL::VolumeData* GetResult();
 	void DeleteResult();
-	bool GetMessage(wxString &msg);
+	bool GetMessage(std::string &msg);
 
 	bool Execute();
 
 private:
-	VolumeData *m_vd;
-	VolumeData *m_vd_r;//result
+	FL::VolumeData *m_vd;
+	FL::VolumeData *m_vd_r;//result
 	bool m_duplicate;//whether duplicate the input volume
 
-	wxString m_code;
-	wxString m_message;
+	std::string m_code;
+	std::string m_message;
 
 	bool ExecuteKernel(KernelProgram* kernel,
 		GLuint data_id, void* result,

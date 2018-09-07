@@ -81,13 +81,33 @@ void Object::objectChanged(void* ptr, const std::string &exp)
 	Referenced* refd = static_cast<Referenced*>(ptr);
 	if (refd->className() == std::string("Value"))
 	{
-		_vs_stack.top()->syncValue(dynamic_cast<Value*>(refd));
+		Value* value = dynamic_cast<Value*>(refd);
+		_vs_stack.top()->syncValue(value);
+		//check self sync list and see if there is any to sync
+		if (value)
+		{
+			std::string name1 = value->getName();
+			for (auto group = _sync_values.begin();
+				group != _sync_values.end(); ++group)
+			{
+				auto it = (*group).find(name1);
+				if (it != (*group).end())
+				{
+					//found in group
+					for (auto it2 = (*group).begin();
+						it2 != (*group).end(); ++it2)
+					{
+						std::string name2 = *it2;
+						if (name1 != name2)
+							propValues(name1, name2);
+					}
+				}
+			}
+		}
 	}
-	else if (refd->className() == std::string("Object"))
-	{
-		//do something in response
-		
-	}
+	//else if (refd->className() == std::string("Object"))
+	//{ //do something in response
+	//}
 }
 
 //add functions
@@ -757,17 +777,72 @@ bool Object::propAllValues(Object* obj)
 	return result;
 }
 
-std::vector<std::string> Object::getValueNames()
+//sync values belonging to the same object (mutual! hope this is not confusing)
+bool Object::syncValues(const std::string &name1, const std::string &name2)
 {
-	std::vector<std::string> result;
-	if (_vs_stack.top())
+	bool result = false;
+	//search the groups first
+	std::set<std::string>::iterator it1, it2;
+	for (auto group = _sync_values.begin();
+		group != _sync_values.end(); ++group)
 	{
-		ValueSet::Values values = _vs_stack.top()->getValues();
-		for (auto it = values.begin();
-			it != values.end(); ++it)
+		it1 = (*group).find(name1);
+		it2 = (*group).find(name2);
+		if (it1 != (*group).end())
 		{
-			result.push_back((*it).first);
+			result |= (*group).insert(name2).second;
+			break;
 		}
+		if (it2 != (*group).end())
+		{
+			result |= (*group).insert(name1).second;
+			break;
+		}
+	}
+	if (!result)
+	{
+		std::set<std::string> group;
+		result |= group.insert(name1).second;
+		result |= group.insert(name2).second;
+		_sync_values.push_back(group);
+	}
+	//see if there is anything to merge??
+	return result;
+}
+
+bool Object::unsyncValues(const std::string *name1, const std::string &name2)
+{
+	bool result = false;
+	return result;
+}
+
+//propagate values belonging to the same object (1 -> 2)
+bool Object::propValues(const std::string &name1, const std::string &name2)
+{
+	Value* value1 = getValue(name1);
+	Value* value2 = getValue(name2);
+	if (value1 && value2 &&
+		value1 != value2)
+	{
+		value2->sync(value1);
+		return true;
+	}
+	return false;
+}
+
+bool Object::propValues(const std::string &name1, const std::vector<std::string> &names)
+{
+	bool result = false;
+	Value* value1 = getValue(name1);
+	if (!value1)
+		return result;
+	for (auto it = names.begin();
+		it != names.end(); ++it)
+	{
+		Value* value2 = getValue(*it);
+		if (value2 && value2 != value1)
+			result |= value2->sync(value1);
 	}
 	return result;
 }
+

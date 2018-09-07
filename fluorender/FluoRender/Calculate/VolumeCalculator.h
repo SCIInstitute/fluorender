@@ -28,10 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VOLUMECALCULATOR_H_
 #define _VOLUMECALCULATOR_H_
 
-class VolumeData;
 
 namespace FL
 {
+	class VolumeData;
 	class VolumeCalculator
 	{
 	public:

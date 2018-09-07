@@ -25,6 +25,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef _VPROPVIEW_H_
+#define _VPROPVIEW_H_
+
 #include "DataManager.h"
 #include <wx/wx.h>
 #include <wx/panel.h>
@@ -39,13 +42,14 @@ DEALINGS IN THE SOFTWARE.
 #include "FLIVR/MultiVolumeRenderer.h"
 
 
-#ifndef _VPROPVIEW_H_
-#define _VPROPVIEW_H_
-
 using namespace std;
 
+namespace FL
+{
+	class VolumeData;
+	class VolumeGroup;
+}
 class VRenderView;
-
 class VPropView: public wxPanel
 {
 	enum
@@ -122,14 +126,14 @@ public:
 		const wxString& name = "VPropView");
 	~VPropView();
 
-	void SetVolumeData(VolumeData* vd);
-	VolumeData* GetVolumeData();
+	void SetVolumeData(FL::VolumeData* vd);
+	FL::VolumeData* GetVolumeData();
 	void RefreshVRenderViews(bool tree=false, bool interactive=false);
 	void InitVRenderViews(unsigned int type);
 
 	//sync group
-	void SetGroup(DataGroup* group);
-	DataGroup* GetGroup();
+	void SetGroup(FL::VolumeGroup* group);
+	FL::VolumeGroup* GetGroup();
 
 	//sync view in depth mode
 	void SetView(VRenderView* view);
@@ -137,11 +141,11 @@ public:
 
 private:
 	wxWindow* m_frame;
-	VolumeData* m_vd;
+	FL::VolumeData* m_vd;
 
 	bool m_lumi_change;
 	bool m_sync_group;
-	DataGroup* m_group;
+	FL::VolumeGroup* m_group;
 	VRenderView* m_vrv;
 	double m_max_val;
 

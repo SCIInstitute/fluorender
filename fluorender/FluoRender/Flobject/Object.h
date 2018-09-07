@@ -166,6 +166,25 @@ public:
 	bool getValue(const std::string &name, FLTYPE::GLfloat4 &value);
 	bool getValue(const std::string &name, FLTYPE::GLint4 &value);
 
+	//sync value
+	//observer's value updates when this updates (this -> observer)
+	bool syncValue(const std::string &name, Observer* obsrvr);
+	bool unsyncValue(const std::string &name, Observer* obsrvr);
+	bool syncValues(const std::vector<std::string> &names, Observer* obsrvr);
+	bool unsyncValues(const std::vector<std::string> &names, Observer* obsrvr);
+	bool syncAllValues(Observer* obsrvr);
+	bool unsyncAllValues(Observer* obsrvr);
+	//propagate value (this -> object)
+	bool propValue(const std::string &name, Object* obj);
+	bool propValues(const std::vector<std::string> &names, Object* obj);
+	bool propAllValues(Object* obj);
+	//sync values belonging to the same object (mutual!)
+	bool syncValues(const std::string &name1, const std::string &name2);
+	bool unsyncValues(const std::string *name1, const std::string &name2);
+	//propagate values belonging to the same object (1 -> 2)
+	bool propValues(const std::string &name1, const std::string &name2);
+	bool propValues(const std::string &name1, const std::vector<std::string> &names);
+
 	//get value the class
 	Value* getValue(const std::string &name)
 	{
@@ -175,20 +194,20 @@ public:
 			return 0;
 	}
 
-	//sync value
-	//observer's value updates when this updates
-	bool syncValue(const std::string &name, Observer* obsrvr);
-	bool unsyncValue(const std::string &name, Observer* obsrvr);
-	bool syncValues(const std::vector<std::string> &names, Observer* obsrvr);
-	bool unsyncValues(const std::vector<std::string> &names, Observer* obsrvr);
-	bool syncAllValues(Observer* obsrvr);
-	bool unsyncAllValues(Observer* obsrvr);
-	//propagate value
-	bool propValue(const std::string &name, Object* obj);
-	bool propValues(const std::vector<std::string> &names, Object* obj);
-	bool propAllValues(Object* obj);
-
-	std::vector<std::string> getValueNames();
+	std::vector<std::string> getValueNames()
+	{
+		std::vector<std::string> result;
+		if (_vs_stack.top())
+		{
+			ValueSet::Values values = _vs_stack.top()->getValues();
+			for (auto it = values.begin();
+				it != values.end(); ++it)
+			{
+				result.push_back((*it).first);
+			}
+		}
+		return result;
+	}
 	std::string getValueType(const std::string &name)
 	{
 		if (_vs_stack.top())
@@ -210,6 +229,12 @@ protected:
 
 	/** a stack of value sets */
 	ValueSetStack _vs_stack;
+
+	//sync values in the object itself
+	//each set is a group where values within are mutually synced
+	//since value is not an ovberver to prevent cyclic referencing
+	//this is how to handle it
+	std::vector<std::set<std::string>> _sync_values;
 
 	friend class ObjectFactory;
 
