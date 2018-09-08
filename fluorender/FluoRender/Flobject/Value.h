@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Flobject/Referenced.h>
 #include <Flobject/ref_ptr.h>
 #include <Flobject/CopyOp.h>
+#include <Flobject/Observer.h>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -54,7 +55,7 @@ namespace FL
 //name, type, value
 typedef std::tuple<std::string, std::string, std::string> ValueTuple;
 
-class Value : public Referenced
+class Value : public Referenced, public Observer
 {
 public:
 	Value(std::string name = "", std::string type = "") : Referenced(), _name(name), _type(type) {}
@@ -62,6 +63,9 @@ public:
 	Value* clone();
 
 	virtual const char* className() const { return "Value"; }
+
+	virtual void objectDeleted(void*);
+	virtual void objectChanged(void*, const std::string &exp);
 
 	std::string getName() { return _name; }
 	std::string getType() { return _type; }
@@ -402,8 +406,7 @@ inline bool Value::operator != (const Value& v) const
 
 inline bool Value::sync(Value* value)
 {
-	if (_type != value->_type ||
-		_name != value->_name)
+	if (_type != value->_type)
 		return false;
 
 	if (_type == "Referenced*")

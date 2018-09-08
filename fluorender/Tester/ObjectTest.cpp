@@ -2,6 +2,9 @@
 #include "asserts.h"
 #include <vector>
 #include <Flobject/Object.h>
+#include <Scenegraph/VolumeData.h>
+#include <Scenegraph/VolumeGroup.h>
+#include <Scenegraph/InfoVisitor.h>
 
 using namespace std;
 using namespace FL;
@@ -169,3 +172,82 @@ void ObjectTest3()
 	obj1->toggleValue("boolean", bval2);
 	ASSERT_EQ(bval, bval2);
 }
+
+void ObjectTest4()
+{
+	InfoVisitor visitor;
+	VolumeData* obj1 = new VolumeData();
+	ref_ptr<VolumeGroup> group(new VolumeGroup());
+	group->addChild(obj1);
+	obj1->addValue("value1", double(0));
+	obj1->addValue("value2", double(0));
+	obj1->addValue("value3", double(0));
+	obj1->addValue("object", (Referenced*)(0));
+
+	VolumeData* obj2 = new VolumeData(*obj1, CopyOp::DEEP_COPY_ALL);
+	group->addChild(obj2);
+	VolumeData* obj3 = new VolumeData(*obj2, CopyOp::DEEP_COPY_ALL);
+	group->addChild(obj3);
+
+	obj1->syncAllValues(obj2);
+	obj1->setValue("value1", 1.0);
+	double value;
+	obj2->getValue("value1", value);
+	ASSERT_EQ(1.0, value);
+
+	obj1->syncValues("value1", "value2");
+	obj2->syncValues("value1", "value2");
+	obj1->setValue("value1", 2.0);
+	obj1->getValue("value2", value);
+	ASSERT_EQ(2.0, value);
+	obj2->getValue("value1", value);
+	ASSERT_EQ(2.0, value);
+	obj2->getValue("value2", value);
+	ASSERT_EQ(2.0, value);
+	group->accept(visitor);
+	cin.get();
+
+	obj1->unsyncAllValues(obj2);
+	std::vector<std::string> names;
+	names.push_back("value1");
+	names.push_back("value2");
+	names.push_back("value3");
+	obj1->unsyncValues(names);
+	obj1->setValue("value1", 3.0);
+	obj1->setValue("value2", 4.0);
+	obj1->setValue("value3", 5.0);
+	obj2->setValue("value1", 6.0);
+	group->accept(visitor);
+	cin.get();
+
+	obj1->syncValue("object", obj2);
+	obj2->syncValue("object", obj1);
+	obj1->syncValue("object", obj3);
+	obj3->syncValue("object", obj1);
+	obj2->syncValue("object", obj3);
+	obj3->syncValue("object", obj2);
+	obj1->setValue("object", (Referenced*)obj1);
+	group->accept(visitor);
+	cin.get();
+
+	obj2->setValue("object", (Referenced*)obj2);
+	group->accept(visitor);
+	cin.get();
+
+	group->removeChild(obj2);
+	std::cout << "remove obj2" << endl;
+	group->accept(visitor);
+	cin.get();
+
+	obj3->setValue("object", (Referenced*)obj3);
+	std::cout << "set object to obj3" << endl;
+	group->accept(visitor);
+	cin.get();
+
+	group->removeChild(obj3);
+	std::cout << "remove obj3" << endl;
+	group->accept(visitor);
+	cin.get();
+
+}
+

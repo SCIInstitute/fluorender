@@ -180,7 +180,9 @@ public:
 	bool propAllValues(Object* obj);
 	//sync values belonging to the same object (mutual!)
 	bool syncValues(const std::string &name1, const std::string &name2);
-	bool unsyncValues(const std::string *name1, const std::string &name2);
+	bool unsyncValues(const std::string &name1, const std::string &name2);
+	bool syncValues(const std::vector<std::string> &names);
+	bool unsyncValues(const std::vector<std::string> &names);
 	//propagate values belonging to the same object (1 -> 2)
 	bool propValues(const std::string &name1, const std::string &name2);
 	bool propValues(const std::string &name1, const std::vector<std::string> &names);
@@ -229,12 +231,6 @@ protected:
 
 	/** a stack of value sets */
 	ValueSetStack _vs_stack;
-
-	//sync values in the object itself
-	//each set is a group where values within are mutually synced
-	//since value is not an ovberver to prevent cyclic referencing
-	//this is how to handle it
-	std::vector<std::set<std::string>> _sync_values;
 
 	friend class ObjectFactory;
 

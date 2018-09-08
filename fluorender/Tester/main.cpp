@@ -13,6 +13,7 @@ int main(int argc, char* argv[])
 	//ObjectTest();
 	//ObjectTest2();
 	//ObjectTest3();
+	ObjectTest4();
 
 	//GroupTest();
 	//GroupTest2();
@@ -22,7 +23,7 @@ int main(int argc, char* argv[])
 
 	//SpecialValueTest();
 
-	FactoryTest();
+	//FactoryTest();
 
 	printf("All done. Quit.\n");
 	cin.get();

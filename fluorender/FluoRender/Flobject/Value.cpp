@@ -94,6 +94,24 @@ Value* Value::clone()
 		return 0;
 }
 
+//observer functions
+void Value::objectDeleted(void* ptr)
+{
+	Referenced* refd = static_cast<Referenced*>(ptr);
+
+	//remove observee
+	removeObservee(refd);
+}
+
+void Value::objectChanged(void* ptr, const std::string &exp)
+{
+	Referenced* refd = static_cast<Referenced*>(ptr);
+	if (refd->className() == std::string("Value"))
+	{
+		sync(dynamic_cast<Value*>(refd));
+	}
+}
+
 ValueSet::ValueSet(const ValueSet& vs, const CopyOp& copyop)
 {
 	if (copyop.getCopyFlags() & CopyOp::SHALLOW_COPY)

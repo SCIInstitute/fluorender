@@ -78,36 +78,6 @@ void Object::objectChanging(void* ptr, const std::string &exp)
 
 void Object::objectChanged(void* ptr, const std::string &exp)
 {
-	Referenced* refd = static_cast<Referenced*>(ptr);
-	if (refd->className() == std::string("Value"))
-	{
-		Value* value = dynamic_cast<Value*>(refd);
-		_vs_stack.top()->syncValue(value);
-		//check self sync list and see if there is any to sync
-		if (value)
-		{
-			std::string name1 = value->getName();
-			for (auto group = _sync_values.begin();
-				group != _sync_values.end(); ++group)
-			{
-				auto it = (*group).find(name1);
-				if (it != (*group).end())
-				{
-					//found in group
-					for (auto it2 = (*group).begin();
-						it2 != (*group).end(); ++it2)
-					{
-						std::string name2 = *it2;
-						if (name1 != name2)
-							propValues(name1, name2);
-					}
-				}
-			}
-		}
-	}
-	//else if (refd->className() == std::string("Object"))
-	//{ //do something in response
-	//}
 }
 
 //add functions
@@ -651,25 +621,53 @@ bool Object::getValue(const std::string &name, FLTYPE::GLint4 &value)
 //observer's value updates when this updates
 bool Object::syncValue(const std::string &name, Observer* obsrvr)
 {
+	bool result = false;
 	Value* value = getValue(name);
 	if (value)
 	{
-		value->addObserver(obsrvr);
-		return true;
+		Object* obj = dynamic_cast<Object*>(obsrvr);
+		if (obj)
+		{
+			Value* value2 = obj->getValue(name);
+			if (value2)
+			{
+				value->addObserver(value2);
+				result = true;
+			}
+		}
+		else
+		{
+			value->addObserver(obsrvr);
+			result = true;
+		}
 	}
-	return false;
+	return result;
 }
 
 //unsync a value
 bool Object::unsyncValue(const std::string &name, Observer* obsrvr)
 {
+	bool result = false;
 	Value* value = getValue(name);
 	if (value)
 	{
-		value->removeObserver(obsrvr);
-		return true;
+		Object* obj = dynamic_cast<Object*>(obsrvr);
+		if (obj)
+		{
+			Value* value2 = obj->getValue(name);
+			if (value2)
+			{
+				value->removeObserver(value2);
+				result = true;
+			}
+		}
+		else
+		{
+			value->removeObserver(obsrvr);
+			result = true;
+		}
 	}
-	return false;
+	return result;
 }
 
 //sync a list of values
@@ -700,6 +698,7 @@ bool Object::unsyncValues(const std::vector<std::string> &names, Observer* obsrv
 bool Object::syncAllValues(Observer* obsrvr)
 {
 	bool result = false;
+	std::string name;
 	if (_vs_stack.top())
 	{
 		for (auto it = _vs_stack.top()->getValues().begin();
@@ -707,8 +706,8 @@ bool Object::syncAllValues(Observer* obsrvr)
 		{
 			if (it->second)
 			{
-				it->second->addObserver(obsrvr);
-				result = true;
+				name = it->second->getName();
+				result |= syncValue(name, obsrvr);
 			}
 		}
 	}
@@ -719,6 +718,7 @@ bool Object::syncAllValues(Observer* obsrvr)
 bool Object::unsyncAllValues(Observer* obsrvr)
 {
 	bool result = false;
+	std::string name;
 	if (_vs_stack.top())
 	{
 		for (auto it = _vs_stack.top()->getValues().begin();
@@ -726,8 +726,8 @@ bool Object::unsyncAllValues(Observer* obsrvr)
 		{
 			if (it->second)
 			{
-				it->second->removeObserver(obsrvr);
-				result = true;
+				name = it->second->getName();
+				result |= unsyncValue(name, obsrvr);
 			}
 		}
 	}
@@ -780,39 +780,54 @@ bool Object::propAllValues(Object* obj)
 //sync values belonging to the same object (mutual! hope this is not confusing)
 bool Object::syncValues(const std::string &name1, const std::string &name2)
 {
+	Value* value1 = getValue(name1);
+	Value* value2 = getValue(name2);
+	if (value1 && value2 &&
+		value1->getType() == value2->getType())
+	{
+		value1->addObserver(value2);
+		value2->addObserver(value1);
+		return true;
+	}
+	return false;
+}
+
+bool Object::unsyncValues(const std::string &name1, const std::string &name2)
+{
+	Value* value1 = getValue(name1);
+	Value* value2 = getValue(name2);
+	if (value1 && value2)
+	{
+		value1->removeObserver(value2);
+		value2->removeObserver(value1);
+		return true;
+	}
+	return false;
+}
+
+bool Object::syncValues(const std::vector<std::string> &names)
+{
 	bool result = false;
-	//search the groups first
-	std::set<std::string>::iterator it1, it2;
-	for (auto group = _sync_values.begin();
-		group != _sync_values.end(); ++group)
+	for (auto it1 = names.begin();
+		it1 != names.end(); ++it1)
 	{
-		it1 = (*group).find(name1);
-		it2 = (*group).find(name2);
-		if (it1 != (*group).end())
-		{
-			result |= (*group).insert(name2).second;
-			break;
-		}
-		if (it2 != (*group).end())
-		{
-			result |= (*group).insert(name1).second;
-			break;
-		}
+		for (auto it2 = it1 + 1;
+			it2 != names.end(); ++it2)
+			result |= syncValues(*it1, *it2);
 	}
-	if (!result)
-	{
-		std::set<std::string> group;
-		result |= group.insert(name1).second;
-		result |= group.insert(name2).second;
-		_sync_values.push_back(group);
-	}
-	//see if there is anything to merge??
 	return result;
 }
 
-bool Object::unsyncValues(const std::string *name1, const std::string &name2)
+bool Object::unsyncValues(const std::vector<std::string> &names)
 {
 	bool result = false;
+	for (auto it1 = names.begin();
+		it1 != names.end(); ++it1)
+	{
+		for (auto it2 = it1 + 1;
+			it2 != names.end(); ++it2)
+			result |= unsyncValues(*it1, *it2);
+	}
 	return result;
 }
 
@@ -845,4 +860,3 @@ bool Object::propValues(const std::string &name1, const std::vector<std::string>
 	}
 	return result;
 }
-
