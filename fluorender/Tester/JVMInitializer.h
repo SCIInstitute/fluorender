@@ -25,12 +25,43 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <Global/Global.h>
 
-using namespace FL;
+#include <jni.h>
+#include <iostream>
 
-Global Global::instance_;
-Global::Global()
+#ifndef _JVMINITIALIZER_H_
+#define _JVMINITIALIZER_H_
+
+class SettingDlg
 {
-	volume_factory_ = ref_ptr<VolumeFactory>(new VolumeFactory());
-}
+
+};
+class JVMInitializer {
+	public:
+		static JVMInitializer* getInstance(SettingDlg* inp_settingDlg = 0);
+		static void destroyJVM();
+
+		static JavaVM *m_pJvm;                      // Pointer to the JVM (Java Virtual Machine)
+		static JNIEnv *m_pEnv;                      // Pointer to native interface
+		static JavaVMInitArgs m_VMargs;
+    
+#ifdef _WIN32
+		static decltype(&JNI_CreateJavaVM) m_createJVM_Ptr;
+#else
+    typedef jint (JNICALL CreateJavaVM_t)(JavaVM **pvm, void **env, void *args) ;
+    static CreateJavaVM_t* m_createJVM_Ptr;
+#endif
+
+	private:
+		static JVMInitializer* m_pJVMInstance;				
+
+		JVMInitializer() {};
+		~JVMInitializer() {};
+		JVMInitializer(JVMInitializer const&);
+		JVMInitializer& operator=(JVMInitializer const&);
+
+		static char getPathSeparator();
+		bool static create_JVM(SettingDlg* inp_settingDlg);
+};
+
+#endif //_JVMINITIALIZER_H_
