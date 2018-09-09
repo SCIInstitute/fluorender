@@ -114,7 +114,7 @@ void Value::objectChanged(void* ptr, const std::string &exp)
 
 ValueSet::ValueSet(const ValueSet& vs, const CopyOp& copyop)
 {
-	if (copyop.getCopyFlags() & CopyOp::SHALLOW_COPY)
+	if (copyop.getCopyFlags() == CopyOp::SHALLOW_COPY)
 		_values = vs._values;
 	else
 	{

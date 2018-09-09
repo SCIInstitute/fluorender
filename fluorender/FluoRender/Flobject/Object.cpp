@@ -42,7 +42,7 @@ Object::Object(const Object& obj, const CopyOp& copyop):
 	_id(0),
 	m_name(obj.m_name)
 {
-	if (copyop.getCopyFlags() & CopyOp::SHALLOW_COPY)
+	if (copyop.getCopyFlags() == CopyOp::SHALLOW_COPY)
 		_vs_stack.push(obj._vs_stack.top());
 	else
 	{

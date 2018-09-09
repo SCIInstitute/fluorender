@@ -184,7 +184,7 @@ void ObjectTest4()
 	obj1->addValue("value3", double(0));
 	obj1->addValue("object", (Referenced*)(0));
 
-	VolumeData* obj2 = new VolumeData(*obj1, CopyOp::DEEP_COPY_ALL);
+	VolumeData* obj2 = new VolumeData(*obj1, CopyOp::SHALLOW_COPY);
 	group->addChild(obj2);
 	VolumeData* obj3 = new VolumeData(*obj2, CopyOp::DEEP_COPY_ALL);
 	group->addChild(obj3);
@@ -234,8 +234,8 @@ void ObjectTest4()
 	group->accept(visitor);
 	cin.get();
 
-	group->removeChild(obj2);
-	std::cout << "remove obj2" << endl;
+	group->removeChild(obj1);
+	std::cout << "remove obj1" << endl;
 	group->accept(visitor);
 	cin.get();
 
