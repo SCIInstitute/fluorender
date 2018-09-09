@@ -114,9 +114,7 @@ void Value::objectChanged(void* ptr, const std::string &exp)
 
 ValueSet::ValueSet(const ValueSet& vs, const CopyOp& copyop)
 {
-	if (copyop.getCopyFlags() == CopyOp::SHALLOW_COPY)
-		_values = vs._values;
-	else
+	if (copyop.getCopyFlags() & CopyOp::DEEP_COPY_VALUES)
 	{
 		for (auto it = vs._values.begin();
 			it != vs._values.end(); ++it)
@@ -125,6 +123,8 @@ ValueSet::ValueSet(const ValueSet& vs, const CopyOp& copyop)
 			addValue(value->clone());
 		}
 	}
+	else
+		_values = vs._values;
 }
 
 ValueSet::~ValueSet()

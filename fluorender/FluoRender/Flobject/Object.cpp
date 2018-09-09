@@ -42,17 +42,12 @@ Object::Object(const Object& obj, const CopyOp& copyop):
 	_id(0),
 	m_name(obj.m_name)
 {
-	if (copyop.getCopyFlags() == CopyOp::SHALLOW_COPY)
-		_vs_stack.push(obj._vs_stack.top());
-	else
+	_vs_stack.push(obj._vs_stack.top()->clone(copyop));
+	//also observe the values
+	for (auto it = _vs_stack.top()->getValues().begin();
+		it != _vs_stack.top()->getValues().end(); ++it)
 	{
-		_vs_stack.push(obj._vs_stack.top()->clone(copyop));
-		//also observe the values
-		for (auto it = _vs_stack.top()->getValues().begin();
-			it != _vs_stack.top()->getValues().end(); ++it)
-		{
-			it->second->addObserver(this);
-		}
+		it->second->addObserver(this);
 	}
 }
 

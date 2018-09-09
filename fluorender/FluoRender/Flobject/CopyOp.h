@@ -37,6 +37,8 @@ namespace FL
 	class Object;
 	class Node;
 	class Group;
+	class Value;
+	class ValueSet;
 
 	class CopyOp
 	{
@@ -46,6 +48,7 @@ namespace FL
 			SHALLOW_COPY = 0,
 			DEEP_COPY_OBJECTS = 1<<0,
 			DEEP_COPY_NODES = 1<<1,
+			DEEP_COPY_VALUES = 1<<2,
 			DEEP_COPY_ALL = 0x7FFFFFFF
 		};
 
