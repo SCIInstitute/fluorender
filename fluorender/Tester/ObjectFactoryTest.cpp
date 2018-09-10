@@ -61,6 +61,8 @@ void ObjectTest4()
 	VolumeData* obj3 = new VolumeData(*obj2, CopyOp::DEEP_COPY_ALL);
 	obj3->setName("obj3");
 	group->addChild(obj3);
+	group->accept(visitor);
+	cin.get();
 
 	obj1->syncAllValues(obj2); cout << "obj1->syncAllValues(obj2);" << endl;
 	obj1->syncAllValues(obj3); cout << "obj1->syncAllValues(obj3);" << endl;
