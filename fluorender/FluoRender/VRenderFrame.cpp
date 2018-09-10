@@ -3301,7 +3301,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 						break;
 					case FLKEY_TYPE_QUATER:
 						{
-							Quaternion qval = ((FlKeyQuaternion*)key)->GetValue();
+							FLTYPE::Quaternion qval = ((FlKeyQuaternion*)key)->GetValue();
 							str = wxString::Format("%lf %lf %lf %lf",
 								qval.x, qval.y, qval.z, qval.w);
 							fconfig.Write("val", str);
@@ -4801,7 +4801,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 											if (SSCANF(sVal.c_str(), "%lf%lf%lf%lf",
 												&x, &y, &z, &w))
 											{
-												Quaternion qval = Quaternion(x, y, z, w);
+												FLTYPE::Quaternion qval = FLTYPE::Quaternion(x, y, z, w);
 												FlKeyQuaternion* key = new FlKeyQuaternion(code, qval);
 												key_group->keys.push_back(key);
 											}

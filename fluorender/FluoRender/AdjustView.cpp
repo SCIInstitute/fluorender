@@ -27,6 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "AdjustView.h"
 #include "VRenderFrame.h"
+#include <Scenegraph/VolumeData.h>
+#include <Scenegraph/VolumeGroup.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include "png_resource.h"
@@ -1139,7 +1141,7 @@ void AdjustView::OnSyncRCheck(wxCommandEvent &event)
 	m_sync_r = m_sync_r_chk->GetToolState(ID_SyncRChk);
 	m_sync_r_chk->SetToolNormalBitmap(ID_SyncRChk,
 			m_sync_r?wxGetBitmapFromMemory(link):wxGetBitmapFromMemory(unlink));
-	switch (m_type)
+/*	switch (m_type)
 	{
 	case 1://view
 		if (m_glview)
@@ -1157,7 +1159,7 @@ void AdjustView::OnSyncRCheck(wxCommandEvent &event)
 
 	if ((m_type == 2 || m_type == 5) && 
 		m_link_group && m_group)
-		m_group->SetSyncRAll(m_sync_r);
+		m_group->SetSyncRAll(m_sync_r);*/
 }
 
 void AdjustView::OnSyncGCheck(wxCommandEvent &event)
@@ -1165,7 +1167,7 @@ void AdjustView::OnSyncGCheck(wxCommandEvent &event)
 	m_sync_g = m_sync_g_chk->GetToolState(ID_SyncGChk);
 	m_sync_g_chk->SetToolNormalBitmap(ID_SyncGChk,
 			m_sync_g?wxGetBitmapFromMemory(link):wxGetBitmapFromMemory(unlink));
-	switch (m_type)
+/*	switch (m_type)
 	{
 	case 1://view
 		if (m_glview)
@@ -1183,7 +1185,7 @@ void AdjustView::OnSyncGCheck(wxCommandEvent &event)
 
 	if ((m_type == 2 || m_type == 5) && 
 		m_link_group && m_group)
-		m_group->SetSyncGAll(m_sync_g);
+		m_group->SetSyncGAll(m_sync_g);*/
 }
 
 void AdjustView::OnSyncBCheck(wxCommandEvent &event)
@@ -1191,7 +1193,7 @@ void AdjustView::OnSyncBCheck(wxCommandEvent &event)
 	m_sync_b = m_sync_b_chk->GetToolState(ID_SyncBChk);
 	m_sync_b_chk->SetToolNormalBitmap(ID_SyncBChk,
 			m_sync_b?wxGetBitmapFromMemory(link):wxGetBitmapFromMemory(unlink));
-	switch (m_type)
+/*	switch (m_type)
 	{
 	case 1://view
 		if (m_glview)
@@ -1209,7 +1211,7 @@ void AdjustView::OnSyncBCheck(wxCommandEvent &event)
 
 	if ((m_type == 2 || m_type == 5) && 
 		m_link_group && m_group)
-		m_group->SetSyncBAll(m_sync_b);
+		m_group->SetSyncBAll(m_sync_b);*/
 }
 
 void AdjustView::OnSaveDefault(wxCommandEvent &event)
@@ -1425,8 +1427,7 @@ void AdjustView::ChangeBSync(bool sync_b)
 
 void AdjustView::UpdateSync()
 {
-	int i;
-	int cnt;
+/*	int cnt;
 	bool r_v = false;
 	bool g_v = false;
 	bool b_v = false;
@@ -1435,9 +1436,9 @@ void AdjustView::UpdateSync()
 		(m_type == 5 && m_group))
 	{
 		//use group
-		for (i=0; i<m_group->GetVolumeNum(); i++)
+		for (size_t i=0; i<m_group->getNumChildren(); i++)
 		{
-			VolumeData* vd = m_group->GetVolumeData(i);
+			FL::VolumeData* vd = m_group->getChild(i)->asVolumeData();
 			if (vd)
 			{
 				if (vd->GetColormapMode())
@@ -1581,7 +1582,7 @@ void AdjustView::UpdateSync()
 			}
 		}
 	}
-
+*/
 }
 
 void AdjustView::OnRReset(wxCommandEvent &event)
@@ -1640,8 +1641,8 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 		}
 		layer->SetGamma(gamma);
 
-		if (m_link_group && m_group)
-			m_group->SetGammaAll(gamma);
+		//if (m_link_group && m_group)
+		//	m_group->SetGammaAll(gamma);
 	}
 
 	//reset brightness
@@ -1693,8 +1694,8 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 		}
 		layer->SetBrightness(brightness);
 
-		if (m_link_group && m_group)
-			m_group->SetBrightnessAll(brightness);
+		//if (m_link_group && m_group)
+		//	m_group->SetBrightnessAll(brightness);
 	}
 
 	//reset hdr
@@ -1746,8 +1747,8 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 		}
 		layer->SetHdr(hdr);
 
-		if (m_link_group && m_group)
-			m_group->SetHdrAll(hdr);
+		//if (m_link_group && m_group)
+		//	m_group->SetHdrAll(hdr);
 	}
 
 	RefreshVRenderViews();
@@ -1809,8 +1810,8 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 		}
 		layer->SetGamma(gamma);
 
-		if (m_link_group && m_group)
-			m_group->SetGammaAll(gamma);
+		//if (m_link_group && m_group)
+		//	m_group->SetGammaAll(gamma);
 	}
 
 	//reset brightness
@@ -1862,8 +1863,8 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 		}
 		layer->SetBrightness(brightness);
 
-		if (m_link_group && m_group)
-			m_group->SetBrightnessAll(brightness);
+		//if (m_link_group && m_group)
+		//	m_group->SetBrightnessAll(brightness);
 	}
 
 	//reset hdr
@@ -1915,8 +1916,8 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 		}
 		layer->SetHdr(hdr);
 
-		if (m_link_group && m_group)
-			m_group->SetHdrAll(hdr);
+		//if (m_link_group && m_group)
+		//	m_group->SetHdrAll(hdr);
 	}
 
 	RefreshVRenderViews();
@@ -1978,8 +1979,8 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 		}
 		layer->SetGamma(gamma);
 
-		if (m_link_group && m_group)
-			m_group->SetGammaAll(gamma);
+		//if (m_link_group && m_group)
+		//	m_group->SetGammaAll(gamma);
 	}
 
 	//reset brightness
@@ -2031,8 +2032,8 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 		}
 		layer->SetBrightness(brightness);
 
-		if (m_link_group && m_group)
-			m_group->SetBrightnessAll(brightness);
+		//if (m_link_group && m_group)
+		//	m_group->SetBrightnessAll(brightness);
 	}
 
 	//reset hdr
@@ -2084,8 +2085,8 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 		}
 		layer->SetHdr(hdr);
 
-		if (m_link_group && m_group)
-			m_group->SetHdrAll(hdr);
+		//if (m_link_group && m_group)
+		//	m_group->SetHdrAll(hdr);
 	}
 
 	RefreshVRenderViews();

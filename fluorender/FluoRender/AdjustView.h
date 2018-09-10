@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _ADJUSTVIEW_H_
 #define _ADJUSTVIEW_H_
 
-#include "DataManager.h"
 #include "VRenderView.h"
 #include <wx/wx.h>
 #include <wx/panel.h>

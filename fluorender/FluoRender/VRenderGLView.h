@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VRENDERGLVIEW_H_
 #define _VRENDERGLVIEW_H_
 
+#include <Types/Quaternion.h>
 #include "DataManager.h"
 #include "VolumeLoader.h"
 #include "utility.h"
@@ -41,7 +42,6 @@ DEALINGS IN THE SOFTWARE.
 #include "FLIVR/KernelProgram.h"
 #include "FLIVR/BBox.h"
 #include "FLIVR/MultiVolumeRenderer.h"
-#include "FLIVR/Quaternion.h"
 #include "FLIVR/ImgShader.h"
 #include "FLIVR/VolKernel.h"
 #include <FLIVR/TextRenderer.h>
@@ -725,7 +725,7 @@ private:
 	double m_ctrx, m_ctry, m_ctrz;
 	//saved camera center
 	double m_ctrx_saved, m_ctry_saved, m_ctrz_saved;
-	Quaternion m_q;
+	FLTYPE::Quaternion m_q;
 	Vector m_up;
 	Vector m_head;
 
@@ -833,8 +833,8 @@ private:
 	bool m_brush_size_data;
 
 	//clipping plane rotations
-	Quaternion m_q_cl;
-	Quaternion m_q_cl_zero;
+	FLTYPE::Quaternion m_q_cl;
+	FLTYPE::Quaternion m_q_cl_zero;
 	double m_rotx_cl, m_roty_cl, m_rotz_cl;
 
 	//volume selector for segmentation
@@ -1007,8 +1007,8 @@ private:
 	//handle camera
 	void HandleProjection(int nx, int ny);
 	void HandleCamera();
-	Quaternion Trackball(int p1x, int p1y, int p2x, int p2y);
-	Quaternion TrackballClip(int p1x, int p1y, int p2x, int p2y);
+	FLTYPE::Quaternion Trackball(int p1x, int p1y, int p2x, int p2y);
+	FLTYPE::Quaternion TrackballClip(int p1x, int p1y, int p2x, int p2y);
 	void Q2A();
 	void A2Q();
 	//sort bricks after the view has been changed

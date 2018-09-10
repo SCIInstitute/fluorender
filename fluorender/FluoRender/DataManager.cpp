@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "DataManager.h"
+#include <Global/Global.h>
 #include "Calculate/VolumeSampler.h"
 #include "teem/Nrrd/nrrd.h"
 #include <wx/msgdlg.h>
@@ -2912,7 +2913,7 @@ Annotations::Annotations()
 	m_num++;
 	m_name = wxString::Format("Antn_%d", m_num);
 	m_tform = 0;
-	m_vd = 0;
+	//m_vd = 0;
 	m_disp = true;
 	m_memo_ro = false;
 }
@@ -2983,17 +2984,17 @@ void Annotations::SetTransform(Transform *tform)
 	m_tform = tform;
 }
 
-void Annotations::SetVolume(VolumeData *vd)
-{
-	m_vd = vd;
-	if (m_vd)
-		m_name += "_FROM_" + m_vd->GetName();
-}
+//void Annotations::SetVolume(VolumeData *vd)
+//{
+//	m_vd = vd;
+//	if (m_vd)
+//		m_name += "_FROM_" + m_vd->GetName();
+//}
 
-VolumeData* Annotations::GetVolume()
-{
-	return m_vd;
-}
+//VolumeData* Annotations::GetVolume()
+//{
+//	return m_vd;
+//}
 
 void Annotations::Clear()
 {
@@ -3075,10 +3076,13 @@ int Annotations::Load(wxString &filename, DataManager* mgr)
 		else if (sline.SubString(0, 7) == "Volume: ")
 		{
 			str = sline.SubString(8, sline.Length()-1);
-			VolumeData* vd = mgr->GetVolumeData(str);
+			FL::VolumeData* vd = dynamic_cast<FL::VolumeData*>(
+				FL::Global::instance().getVolumeFactory()->
+				findFirst(str.ToStdString()));
+			//mgr->GetVolumeData(str);
 			if (vd)
 			{
-				m_vd = vd;
+				//m_vd = vd;
 				m_tform = vd->GetTexture()->transform();
 			}
 		}
@@ -3129,21 +3133,21 @@ void Annotations::Save(wxString &filename)
 	int resx = 1;
 	int resy = 1;
 	int resz = 1;
-	if (m_vd)
-		m_vd->GetResolution(resx, resy, resz);
+	//if (m_vd)
+	//	m_vd->GetResolution(resx, resy, resz);
 
 	tos << "Name: " << m_name << "\n";
 	tos << "Display: " << m_disp << "\n";
 	tos << "Memo:\n" << m_memo << "\n";
 	tos << "Memo Update: " << m_memo_ro << "\n";
-	if (m_vd)
-	{
-		tos << "Volume: " << m_vd->GetName() << "\n";
-		tos << "Voxel size (X Y Z):\n";
-		double spcx, spcy, spcz;
-		m_vd->GetSpacings(spcx, spcy, spcz);
-		tos << spcx << "\t" << spcy << "\t" << spcz << "\n";
-	}
+	//if (m_vd)
+	//{
+	//	tos << "Volume: " << m_vd->GetName() << "\n";
+	//	tos << "Voxel size (X Y Z):\n";
+	//	double spcx, spcy, spcz;
+	//	m_vd->GetSpacings(spcx, spcy, spcz);
+	//	tos << spcx << "\t" << spcy << "\t" << spcz << "\n";
+	//}
 
 
 	tos << "\nComponents:\n";
@@ -3177,7 +3181,7 @@ void Annotations::SetInfoMeaning(wxString &str)
 //test if point is inside the clipping planes
 bool Annotations::InsideClippingPlanes(Point &pos)
 {
-	if (!m_vd)
+/*	if (!m_vd)
 		return true;
 
 	vector<Plane*> *planes = m_vd->GetVR()->get_planes();
@@ -3195,7 +3199,7 @@ bool Annotations::InsideClippingPlanes(Point &pos)
 		if (plane->eval_point(pos) < 0)
 			return false;
 	}
-
+*/
 	return true;
 }
 
@@ -3239,8 +3243,8 @@ AText* Annotations::GetAText(wxString str)
 		int resx = 1;
 		int resy = 1;
 		int resz = 1;
-		if (m_vd)
-			m_vd->GetResolution(resx, resy, resz);
+		//if (m_vd)
+		//	m_vd->GetResolution(resx, resy, resz);
 		x /= resx?resx:1;
 		y /= resy?resy:1;
 		z /= resz?resz:1;
@@ -4354,7 +4358,7 @@ void MeshGroup::RandomizeColor()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 DataManager::DataManager() :
-m_vol_exb(0.0),
+/*m_vol_exb(0.0),
 	m_vol_gam(1.0),
 	m_vol_of1(1.0),
 	m_vol_of2(1.0),
@@ -4381,11 +4385,11 @@ m_vol_exb(0.0),
 	m_vol_nrd(false),
 	m_vol_shw(false),
 	m_vol_swi(0.0),
-	m_vol_test_wiref(false),
-	m_use_defaults(true),
-	m_override_vox(true)
+	m_vol_test_wiref(false),*/
+	m_use_defaults(true)//,
+	//m_override_vox(true)
 {
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+/*	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
 	wxString dft = expath + "/default_volume_settings.dft";
 	wxFileInputStream is(dft);
@@ -4470,14 +4474,14 @@ m_vol_exb(0.0),
 	//time sequence identifier
 	m_timeId = "_T";
 	//load mask
-	m_load_mask = true;
+	m_load_mask = true;*/
 }
 
 DataManager::~DataManager()
 {
-	for (int i=0 ; i<(int)m_vd_list.size() ; i++)
-		if (m_vd_list[i])
-			delete m_vd_list[i];
+	//for (int i=0 ; i<(int)m_vd_list.size() ; i++)
+	//	if (m_vd_list[i])
+	//		delete m_vd_list[i];
 	for (int i=0 ; i<(int)m_md_list.size() ; i++)
 		if (m_md_list[i])
 			delete m_md_list[i];
@@ -4491,9 +4495,9 @@ DataManager::~DataManager()
 
 void DataManager::ClearAll()
 {
-	for (int i=0 ; i<(int)m_vd_list.size() ; i++)
-		if (m_vd_list[i])
-			delete m_vd_list[i];
+	//for (int i=0 ; i<(int)m_vd_list.size() ; i++)
+	//	if (m_vd_list[i])
+	//		delete m_vd_list[i];
 	for (int i=0 ; i<(int)m_md_list.size() ; i++)
 		if (m_md_list[i])
 			delete m_md_list[i];
@@ -4503,13 +4507,13 @@ void DataManager::ClearAll()
 	for (int i=0; i<(int)m_annotation_list.size(); i++)
 		if (m_annotation_list[i])
 			delete m_annotation_list[i];
-	m_vd_list.clear();
+	//m_vd_list.clear();
 	m_md_list.clear();
 	m_reader_list.clear();
 	m_annotation_list.clear();
 }
 
-void DataManager::SetVolumeDefault(VolumeData* vd)
+/*void DataManager::SetVolumeDefault(VolumeData* vd)
 {
 	if (m_use_defaults)
 	{
@@ -4549,20 +4553,20 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 		vd->SetShadow(m_vol_shw);
 		vd->SetShadowParams(m_vol_swi);
 	}
-}
+}*/
 
 //set project path
 //when data and project are moved, use project file's path
 //if data's directory doesn't exist
 void DataManager::SetProjectPath(wxString path)
 {
-	m_prj_path.Clear();
-	m_prj_path = wxPathOnly(path);
+	//m_prj_path.Clear();
+	//m_prj_path = wxPathOnly(path);
 }
 
 wxString DataManager::SearchProjectPath(wxString &filename)
 {
-	int i;
+/*	int i;
 
 	wxString pathname = filename;
 
@@ -4581,10 +4585,10 @@ wxString DataManager::SearchProjectPath(wxString &filename)
 		else
 			search_str.Prepend(pathname[i]);
 	}
-	return "";
+	return "";*/
 }
 
-int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, int ch_num, int t_num)
+/*int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, int ch_num, int t_num)
 {
 	bool isURL = false;
 	bool downloaded = false;
@@ -4802,7 +4806,7 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 	}
 
 	return result;
-}
+}*/
 
 int DataManager::LoadMeshData(wxString &filename)
 {
@@ -4848,13 +4852,13 @@ int DataManager::LoadMeshData(GLMmodel* mesh)
 	return 1;
 }
 
-VolumeData* DataManager::GetVolumeData(int index)
+/*VolumeData* DataManager::GetVolumeData(int index)
 {
 	if (index>=0 && index<(int)m_vd_list.size())
 		return m_vd_list[index];
 	else
 		return 0;
-}
+}*/
 
 MeshData* DataManager::GetMeshData(int index)
 {
@@ -4864,7 +4868,7 @@ MeshData* DataManager::GetMeshData(int index)
 		return 0;
 }
 
-VolumeData* DataManager::GetVolumeData(wxString &name)
+/*VolumeData* DataManager::GetVolumeData(wxString &name)
 {
 	for (int i=0 ; i<(int)m_vd_list.size() ; i++)
 	{
@@ -4874,7 +4878,7 @@ VolumeData* DataManager::GetVolumeData(wxString &name)
 		}
 	}
 	return 0;
-}
+}*/
 
 MeshData* DataManager::GetMeshData(wxString &name)
 {
@@ -4888,7 +4892,7 @@ MeshData* DataManager::GetMeshData(wxString &name)
 	return 0;
 }
 
-int DataManager::GetVolumeIndex(wxString &name)
+/*int DataManager::GetVolumeIndex(wxString &name)
 {
 	for (int i=0 ; i<(int)m_vd_list.size() ; i++)
 	{
@@ -4900,7 +4904,7 @@ int DataManager::GetVolumeIndex(wxString &name)
 		}
 	}
 	return -1;
-}
+}*/
 
 int DataManager::GetMeshIndex(wxString &name)
 {
@@ -4914,7 +4918,7 @@ int DataManager::GetMeshIndex(wxString &name)
 	return -1;
 }
 
-void DataManager::RemoveVolumeData(int index)
+/*void DataManager::RemoveVolumeData(int index)
 {
 	VolumeData* data = m_vd_list[index];
 	if (!data)
@@ -4943,9 +4947,9 @@ void DataManager::RemoveVolumeData(int index)
 		else
 			++iter;
 	}	
-}
+}*/
 
-void DataManager::RemoveVolumeData(const wxString &name)
+/*void DataManager::RemoveVolumeData(const wxString &name)
 {
 	for (int i = 0; i<(int)m_vd_list.size(); i++)
 	{
@@ -4954,7 +4958,7 @@ void DataManager::RemoveVolumeData(const wxString &name)
 			RemoveVolumeData(i);
 		}
 	}
-}
+}*/
 
 void DataManager::RemoveMeshData(int index)
 {
@@ -4967,17 +4971,17 @@ void DataManager::RemoveMeshData(int index)
 	}
 }
 
-int DataManager::GetVolumeNum()
+/*int DataManager::GetVolumeNum()
 {
 	return m_vd_list.size();
-}
+}*/
 
 int DataManager::GetMeshNum()
 {
 	return m_md_list.size();
 }
 
-void DataManager::AddVolumeData(VolumeData* vd)
+/*void DataManager::AddVolumeData(VolumeData* vd)
 {
 	if (!vd)
 		return;
@@ -5004,9 +5008,9 @@ void DataManager::AddVolumeData(VolumeData* vd)
 		}
 	}
 	m_vd_list.push_back(vd);
-}
+}*/
 
-VolumeData* DataManager::DuplicateVolumeData(VolumeData* vd)
+/*VolumeData* DataManager::DuplicateVolumeData(VolumeData* vd)
 {
 	VolumeData* vd_new = 0;
 
@@ -5017,7 +5021,7 @@ VolumeData* DataManager::DuplicateVolumeData(VolumeData* vd)
 	}
 
 	return vd_new;
-}
+}*/
 
 int DataManager::LoadAnnotations(wxString &filename)
 {
@@ -5108,7 +5112,7 @@ int DataManager::GetAnnotationIndex(wxString &name)
 	return -1;
 }
 
-bool DataManager::CheckNames(wxString &str)
+/*bool DataManager::CheckNames(wxString &str)
 {
 	bool result = false;
 	for (unsigned int i=0; i<m_vd_list.size(); i++)
@@ -5145,9 +5149,9 @@ bool DataManager::CheckNames(wxString &str)
 		}
 	}
 	return result;
-}
+}*/
 
-Color DataManager::GetColor(int c)
+/*Color DataManager::GetColor(int c)
 {
 	Color result(1.0, 1.0, 1.0);
 	switch (c)
@@ -5178,17 +5182,17 @@ Color DataManager::GetColor(int c)
 		break;
 	}
 	return result;
-}
+}*/
 
-void DataManager::SetWavelengthColor(int c1, int c2, int c3, int c4)
+/*void DataManager::SetWavelengthColor(int c1, int c2, int c3, int c4)
 {
 	m_vol_wav[0] = GetColor(c1);
 	m_vol_wav[1] = GetColor(c2);
 	m_vol_wav[2] = GetColor(c3);
 	m_vol_wav[3] = GetColor(c4);
-}
+}*/
 
-Color DataManager::GetWavelengthColor(double wavelength)
+/*Color DataManager::GetWavelengthColor(double wavelength)
 {
 	if (wavelength < 340.0)
 		return Color(1.0, 1.0, 1.0);
@@ -5202,4 +5206,4 @@ Color DataManager::GetWavelengthColor(double wavelength)
 		return m_vol_wav[3];
 	else
 		return Color(1.0, 1.0, 1.0);
-}
+}*/

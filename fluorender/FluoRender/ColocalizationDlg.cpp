@@ -27,6 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ColocalizationDlg.h"
 #include "VRenderFrame.h"
+#include <Scenegraph/VolumeData.h>
+#include <Global/Global.h>
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(ColocalizationDlg, wxPanel)
@@ -156,22 +158,22 @@ void ColocalizationDlg::GetSettings(VRenderView* vrv)
 
 }
 
-void ColocalizationDlg::SetVolumeA(VolumeData* vd)
+void ColocalizationDlg::SetVolumeA(FL::VolumeData* vd)
 {
 	if (!vd)
 		return;
 
 	m_vol_a = vd;
-	m_calc_a_text->SetValue(m_vol_a->GetName());
+	m_calc_a_text->SetValue(m_vol_a->getName());
 }
 
-void ColocalizationDlg::SetVolumeB(VolumeData* vd)
+void ColocalizationDlg::SetVolumeB(FL::VolumeData* vd)
 {
 	if (!vd)
 		return;
 
 	m_vol_b = vd;
-	m_calc_b_text->SetValue(m_vol_b->GetName());
+	m_calc_b_text->SetValue(m_vol_b->getName());
 
 	m_select_both_chk->SetValue(true);
 	wxCommandEvent event;
@@ -183,9 +185,10 @@ void ColocalizationDlg::OnLoadA(wxCommandEvent &event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 	{
-		m_vol_a = vr_frame->GetCurSelVol();
+		FL::Global::instance().getVolumeFactory()->
+			getValue("current", (FL::Referenced**)&m_vol_a);
 		if (m_vol_a)
-			m_calc_a_text->SetValue(m_vol_a->GetName());
+			m_calc_a_text->SetValue(m_vol_a->getName());
 	}
 }
 
@@ -194,9 +197,11 @@ void ColocalizationDlg::OnLoadB(wxCommandEvent &event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 	{
-		m_vol_b = vr_frame->GetCurSelVol();
+		//m_vol_b = vr_frame->GetCurSelVol();
+		FL::Global::instance().getVolumeFactory()->
+			getValue("current", (FL::Referenced**)&m_vol_b);
 		if (m_vol_b)
-			m_calc_b_text->SetValue(m_vol_b->GetName());
+			m_calc_b_text->SetValue(m_vol_b->getName());
 
 		m_select_both_chk->SetValue(true);
 		wxCommandEvent event;
@@ -274,8 +279,8 @@ void ColocalizationDlg::OnColocalizationBtn(wxCommandEvent &event)
 	double falloff = 1.0;
 
 	//save masks
-	m_vol_a->GetVR()->return_mask();
-	m_vol_b->GetVR()->return_mask();
+	m_vol_a->GetRenderer()->return_mask();
+	m_vol_b->GetRenderer()->return_mask();
 
 	//volume a
 	m_view->GetVolumeSelector()->SetVolume(m_vol_a);
@@ -289,14 +294,14 @@ void ColocalizationDlg::OnColocalizationBtn(wxCommandEvent &event)
 
 	m_view->m_glview->ForceDraw();
 
-	m_vol_a->SetDisp(false);
-	m_vol_b->SetDisp(false);
+	m_vol_a->setValue("display", false);
+	m_vol_b->setValue("display", false);
 
 	//volume c
 	m_view->GetVolumeCalculator()->SetVolumeA(m_vol_a);
 	m_view->GetVolumeCalculator()->SetVolumeB(m_vol_b);
 	m_view->Calculate(8);
-	VolumeData* vd = m_view->GetVolumeCalculator()->GetResult();
+	FL::VolumeData* vd = m_view->GetVolumeCalculator()->GetResult();
 	if (vd)
 	{
 		select = false;

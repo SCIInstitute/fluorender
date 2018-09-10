@@ -31,8 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 
 class VRenderView;
-class VolumeData;
-class DataGroup;
 
 class CountingDlg : public wxPanel
 {
@@ -65,10 +63,6 @@ private:
 
 	//current view
 	VRenderView *m_view;
-	//current group
-	//DataGroup *m_group;
-	//current volume
-	//VolumeData *m_vol;
 
 	//max volume value
 	double m_max_value;

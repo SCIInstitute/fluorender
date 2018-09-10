@@ -31,9 +31,11 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 
 class VRenderView;
-class VolumeData;
-class DataGroup;
 class Annotations;
+namespace FL
+{
+	class VolumeData;
+}
 
 class ColocalizationDlg : public wxPanel
 {
@@ -59,8 +61,8 @@ public:
 	~ColocalizationDlg();
 
 	void GetSettings(VRenderView* vrv);
-	void SetVolumeA(VolumeData* vd);
-	void SetVolumeB(VolumeData* vd);
+	void SetVolumeA(FL::VolumeData* vd);
+	void SetVolumeB(FL::VolumeData* vd);
 
 private:
 	wxWindow* m_frame;
@@ -68,9 +70,9 @@ private:
 	//current view
 	VRenderView *m_view;
 	//volume A
-	VolumeData *m_vol_a;
+	FL::VolumeData *m_vol_a;
 	//volume B
-	VolumeData *m_vol_b;
+	FL::VolumeData *m_vol_b;
 
 	//interface
 	wxButton *m_calc_load_a_btn;

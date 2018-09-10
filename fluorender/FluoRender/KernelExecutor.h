@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _KERNELEXECUTOR_H_
 #define _KERNELEXECUTOR_H_
 
+#include <glew/GL/glew.h>
 #include <string>
 
 namespace FL
@@ -65,7 +66,7 @@ private:
 	std::string m_code;
 	std::string m_message;
 
-	bool ExecuteKernel(KernelProgram* kernel,
+	bool ExecuteKernel(FLIVR::KernelProgram* kernel,
 		GLuint data_id, void* result,
 		size_t brick_x, size_t brick_y,
 		size_t brick_z);

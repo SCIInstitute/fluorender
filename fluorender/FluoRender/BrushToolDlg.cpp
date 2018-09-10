@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "BrushToolDlg.h"
 #include "VRenderFrame.h"
+#include <Global/Global.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include "Formats/png_resource.h"
@@ -327,11 +328,13 @@ void BrushToolDlg::GetSettings(VRenderView* vrv)
 	if (!vrv)
 		return;
 
-	VolumeData* sel_vol = 0;
+	FL::VolumeData* sel_vol = 0;
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 	{
-		sel_vol = vr_frame->GetCurSelVol();
+		//sel_vol = vr_frame->GetCurSelVol();
+		FL::Global::instance().getVolumeFactory()->
+			getValue("current", (FL::Referenced**)&sel_vol);
 		vr_frame->GetNoiseCancellingDlg()->GetSettings(vrv);
 		vr_frame->GetCountingDlg()->GetSettings(vrv);
 		vr_frame->GetColocalizationDlg()->GetSettings(vrv);
@@ -345,7 +348,8 @@ void BrushToolDlg::GetSettings(VRenderView* vrv)
 	//threshold range
 	if (sel_vol)
 	{
-		m_max_value = sel_vol->GetMaxValue();
+		//m_max_value = sel_vol->GetMaxValue();
+		sel_vol->getValue("max int", m_max_value);
 		//falloff
 		m_brush_scl_translate_sldr->SetRange(0, int(m_max_value*10.0+0.5));
 		//m_brush_scl_translate_text->SetValue(wxString::Format("%.1f", m_dft_scl_translate*m_max_value));
@@ -474,7 +478,10 @@ void BrushToolDlg::UpdateUndoRedo()
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 	{
-		VolumeData* vd = vr_frame->GetCurSelVol();
+		//VolumeData* vd = vr_frame->GetCurSelVol();
+		FL::VolumeData* vd;
+		FL::Global::instance().getVolumeFactory()->
+			getValue("current", (FL::Referenced**)&vd);
 		if (vd && vd->GetTexture())
 		{
 			m_toolbar->EnableTool(ID_BrushUndo,
@@ -585,14 +592,16 @@ void BrushToolDlg::OnBrushCreate(wxCommandEvent &event)
 
 void BrushToolDlg::OnBrushUndo(wxCommandEvent &event)
 {
-	VolumeData* sel_vol = 0;
+	FL::VolumeData* sel_vol = 0;
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
-		sel_vol = vr_frame->GetCurSelVol();
+		//sel_vol = vr_frame->GetCurSelVol();
+		FL::Global::instance().getVolumeFactory()->
+			getValue("current", (FL::Referenced**)&sel_vol);
 	if (sel_vol && sel_vol->GetTexture())
 	{
 		sel_vol->GetTexture()->mask_undos_backward();
-		sel_vol->GetVR()->clear_tex_pool();
+		sel_vol->GetRenderer()->clear_tex_pool();
 	}
 	vr_frame->RefreshVRenderViews();
 	UpdateUndoRedo();
@@ -600,14 +609,16 @@ void BrushToolDlg::OnBrushUndo(wxCommandEvent &event)
 
 void BrushToolDlg::OnBrushRedo(wxCommandEvent &event)
 {
-	VolumeData* sel_vol = 0;
+	FL::VolumeData* sel_vol = 0;
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
-		sel_vol = vr_frame->GetCurSelVol();
+		//sel_vol = vr_frame->GetCurSelVol();
+		FL::Global::instance().getVolumeFactory()->
+			getValue("current", (FL::Referenced**)&sel_vol);
 	if (sel_vol && sel_vol->GetTexture())
 	{
 		sel_vol->GetTexture()->mask_undos_forward();
-		sel_vol->GetVR()->clear_tex_pool();
+		sel_vol->GetRenderer()->clear_tex_pool();
 	}
 	vr_frame->RefreshVRenderViews();
 	UpdateUndoRedo();

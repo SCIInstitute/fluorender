@@ -31,8 +31,11 @@ DEALINGS IN THE SOFTWARE.
 #define _CALCULATIONDLG_H_
 
 class VRenderView;
-class VolumeData;
-class DataGroup;
+namespace FL
+{
+	class VolumeData;
+	class VolumeGroup;
+}
 
 class CalculationDlg : public wxPanel
 {
@@ -60,7 +63,7 @@ public:
 		wxWindow* parent);
 	~CalculationDlg();
 
-	void SetGroup(DataGroup* group);
+	void SetGroup(FL::VolumeGroup* group);
 
 private:
 	wxWindow* m_frame;
@@ -68,9 +71,9 @@ private:
 	//current view
 	VRenderView *m_cur_view;
 	//current volume
-	VolumeData *m_vol1;
-	VolumeData *m_vol2;
-	DataGroup *m_group;
+	FL::VolumeData *m_vol1;
+	FL::VolumeData *m_vol2;
+	FL::VolumeGroup *m_group;
 
 	//calculations
 	//operands

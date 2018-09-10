@@ -4777,17 +4777,17 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 	//update ortho rotation
 	if (!m_vrv->m_ortho_view_cmb->HasFocus())
 	{
-		if (m_q.AlmostEqual(Quaternion(0, sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
+		if (m_q.AlmostEqual(FLTYPE::Quaternion(0, sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
 			m_vrv->m_ortho_view_cmb->Select(0);
-		else if (m_q.AlmostEqual(Quaternion(0, -sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
+		else if (m_q.AlmostEqual(FLTYPE::Quaternion(0, -sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
 			m_vrv->m_ortho_view_cmb->Select(1);
-		else if (m_q.AlmostEqual(Quaternion(sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
+		else if (m_q.AlmostEqual(FLTYPE::Quaternion(sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
 			m_vrv->m_ortho_view_cmb->Select(2);
-		else if (m_q.AlmostEqual(Quaternion(-sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
+		else if (m_q.AlmostEqual(FLTYPE::Quaternion(-sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
 			m_vrv->m_ortho_view_cmb->Select(3);
-		else if (m_q.AlmostEqual(Quaternion(0, 0, 0, 1)))
+		else if (m_q.AlmostEqual(FLTYPE::Quaternion(0, 0, 0, 1)))
 			m_vrv->m_ortho_view_cmb->Select(4);
-		else if (m_q.AlmostEqual(Quaternion(0, -1, 0, 0)))
+		else if (m_q.AlmostEqual(FLTYPE::Quaternion(0, -1, 0, 0)))
 			m_vrv->m_ortho_view_cmb->Select(5);
 		else
 			m_vrv->m_ortho_view_cmb->Select(6);
@@ -5100,7 +5100,7 @@ void VRenderGLView::SetParams(double t)
 	//rotation
 	keycode.l2 = 0;
 	keycode.l2_name = "rotation";
-	Quaternion q;
+	FLTYPE::Quaternion q;
 	if (interpolator->GetQuaternion(keycode, t, q))
 	{
 		double rotx, roty, rotz;
@@ -8327,7 +8327,7 @@ void VRenderGLView::InitView(unsigned int type)
 	{
 		if (!m_vrv->m_use_dft_settings)
 		{
-			m_q = Quaternion(0, 0, 0, 1);
+			m_q = FLTYPE::Quaternion(0, 0, 0, 1);
 			m_q.ToEuler(m_rotx, m_roty, m_rotz);
 		}
 	}
@@ -9649,9 +9649,9 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	}
 }
 
-Quaternion VRenderGLView::Trackball(int p1x, int p1y, int p2x, int p2y)
+FLTYPE::Quaternion VRenderGLView::Trackball(int p1x, int p1y, int p2x, int p2y)
 {
-	Quaternion q;
+	FLTYPE::Quaternion q;
 	Vector a; /* Axis of rotation */
 	double phi;  /* how much to rotate about axis */
 
@@ -9671,13 +9671,13 @@ Quaternion VRenderGLView::Trackball(int p1x, int p1y, int p2x, int p2y)
 	a = Vector(p1y - p2y, p2x - p1x, 0.0);
 	phi = a.length() / 3.0;
 	a.normalize();
-	Quaternion q_a(a);
+	FLTYPE::Quaternion q_a(a);
 	//rotate back to local
-	Quaternion q_a2 = (-m_q) * q_a * m_q;
+	FLTYPE::Quaternion q_a2 = (-m_q) * q_a * m_q;
 	a = Vector(q_a2.x, q_a2.y, q_a2.z);
 	a.normalize();
 
-	q = Quaternion(phi, a);
+	q = FLTYPE::Quaternion(phi, a);
 	q.Normalize();
 
 	if (m_rot_lock)
@@ -9693,9 +9693,9 @@ Quaternion VRenderGLView::Trackball(int p1x, int p1y, int p2x, int p2y)
 	return q;
 }
 
-Quaternion VRenderGLView::TrackballClip(int p1x, int p1y, int p2x, int p2y)
+FLTYPE::Quaternion VRenderGLView::TrackballClip(int p1x, int p1y, int p2x, int p2y)
 {
-	Quaternion q;
+	FLTYPE::Quaternion q;
 	Vector a; /* Axis of rotation */
 	double phi;  /* how much to rotate about axis */
 
@@ -9708,16 +9708,16 @@ Quaternion VRenderGLView::TrackballClip(int p1x, int p1y, int p2x, int p2y)
 	a = Vector(p2y - p1y, p2x - p1x, 0.0);
 	phi = a.length() / 3.0;
 	a.normalize();
-	Quaternion q_a(a);
+	FLTYPE::Quaternion q_a(a);
 	//rotate back to local
-	Quaternion q2;
+	FLTYPE::Quaternion q2;
 	q2.FromEuler(-m_rotx, m_roty, m_rotz);
 	q_a = (q2)* q_a * (-q2);
 	q_a = (m_q_cl)* q_a * (-m_q_cl);
 	a = Vector(q_a.x, q_a.y, q_a.z);
 	a.normalize();
 
-	q = Quaternion(phi, a);
+	q = FLTYPE::Quaternion(phi, a);
 	q.Normalize();
 
 	return q;
@@ -12066,19 +12066,19 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			{
 				if (event.LeftIsDown() && !event.ControlDown())
 				{
-					Quaternion q_delta = Trackball(old_mouse_X, event.GetY(), event.GetX(), old_mouse_Y);
+					FLTYPE::Quaternion q_delta = Trackball(old_mouse_X, event.GetY(), event.GetX(), old_mouse_Y);
 					if (m_rot_lock && q_delta.IsIdentity())
 						hold_old = true;
 					m_q *= q_delta;
 					m_q.Normalize();
-					Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
-					Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
+					FLTYPE::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
+					FLTYPE::Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
 					m_transx = cam_pos2.x;
 					m_transy = cam_pos2.y;
 					m_transz = cam_pos2.z;
 
-					Quaternion up(0.0, 1.0, 0.0, 0.0);
-					Quaternion up2 = (-m_q) * up * m_q;
+					FLTYPE::Quaternion up(0.0, 1.0, 0.0, 0.0);
+					FLTYPE::Quaternion up2 = (-m_q) * up * m_q;
 					m_up = Vector(up2.x, up2.y, up2.z);
 
 					Q2A();
@@ -12172,7 +12172,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			{
 				if (event.LeftIsDown())
 				{
-					Quaternion q_delta = TrackballClip(old_mouse_X, event.GetY(), event.GetX(), old_mouse_Y);
+					FLTYPE::Quaternion q_delta = TrackballClip(old_mouse_X, event.GetY(), event.GetX(), old_mouse_Y);
 					m_q_cl = q_delta * m_q_cl;
 					m_q_cl.Normalize();
 					SetRotations(m_rotx, m_roty, m_rotz);
@@ -12384,14 +12384,14 @@ void VRenderGLView::SetRotations(double rotx, double roty, double rotz, bool ui_
 
 	A2Q();
 
-	Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
-	Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
+	FLTYPE::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
+	FLTYPE::Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
 	m_transx = cam_pos2.x;
 	m_transy = cam_pos2.y;
 	m_transz = cam_pos2.z;
 
-	Quaternion up(0.0, 1.0, 0.0, 0.0);
-	Quaternion up2 = (-m_q) * up * m_q;
+	FLTYPE::Quaternion up(0.0, 1.0, 0.0, 0.0);
+	FLTYPE::Quaternion up2 = (-m_q) * up * m_q;
 	m_up = Vector(up2.x, up2.y, up2.z);
 
 	if (ui_update)

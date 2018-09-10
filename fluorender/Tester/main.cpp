@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
 	//ObjectTest();
 	//ObjectTest2();
 	//ObjectTest3();
-	ObjectTest4();
+	//ObjectTest4();
 
 	//GroupTest();
 	//GroupTest2();
@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
 
 	//SceneGraphTest();
 
-	//SpecialValueTest();
+	SpecialValueTest();
 
 	//FactoryTest();
 

@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "KernelExecutor.h"
+#include <Scenegraph/VolumeData.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <boost/chrono.hpp>
@@ -43,12 +44,12 @@ KernelExecutor::~KernelExecutor()
 {
 }
 
-void KernelExecutor::SetCode(wxString &code)
+void KernelExecutor::SetCode(std::string &code)
 {
 	m_code = code;
 }
 
-void KernelExecutor::LoadCode(wxString &filename)
+void KernelExecutor::LoadCode(std::string &filename)
 {
 	if (!wxFileExists(filename))
 	{
@@ -74,7 +75,7 @@ void KernelExecutor::LoadCode(wxString &filename)
 		filename + " read.\n";
 }
 
-void KernelExecutor::SetVolume(VolumeData *vd)
+void KernelExecutor::SetVolume(FL::VolumeData *vd)
 {
 	m_vd = vd;
 }
@@ -84,20 +85,20 @@ void KernelExecutor::SetDuplicate(bool dup)
 	m_duplicate = dup;
 }
 
-VolumeData* KernelExecutor::GetVolume()
+FL::VolumeData* KernelExecutor::GetVolume()
 {
 	return m_vd;
 }
 
-VolumeData* KernelExecutor::GetResult()
+FL::VolumeData* KernelExecutor::GetResult()
 {
 	return m_vd_r;
 }
 
 void KernelExecutor::DeleteResult()
 {
-	if (m_vd_r)
-		delete m_vd_r;
+	//if (m_vd_r)
+	//	delete m_vd_r;
 	m_vd_r = 0;
 }
 

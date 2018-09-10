@@ -27,11 +27,13 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ComponentDlg.h"
 #include "VRenderFrame.h"
-#include "Components/CompGenerator.h"
-#include "Components/CompSelector.h"
-#include "Cluster/dbscan.h"
-#include "Cluster/kmeans.h"
-#include "Cluster/exmax.h"
+#include <Scenegraph/VolumeData.h>
+#include <Scenegraph/VolumeGroup.h>
+#include <Components/CompGenerator.h>
+#include <Components/CompSelector.h>
+#include <Cluster/dbscan.h>
+#include <Cluster/kmeans.h>
+#include <Cluster/exmax.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include <boost/signals2.hpp>
@@ -2916,7 +2918,7 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 	if (GetIds(sstr, id, brick_id))
 	{
 		//get current mask
-		VolumeData* vd = m_view->m_glview->m_cur_vol;
+		FL::VolumeData* vd = m_view->m_glview->m_cur_vol;
 		FL::ComponentSelector comp_selector(vd);
 		comp_selector.SetId(id);
 		comp_selector.SetBrickId(brick_id);
@@ -2956,7 +2958,7 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 	get_all = !get_all;
 
 	//get current mask
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	FL::VolumeData* vd = m_view->m_glview->m_cur_vol;
 	FL::ComponentSelector comp_selector(vd);
 	comp_selector.SetId(id);
 	comp_selector.SetBrickId(brick_id);
@@ -2985,7 +2987,7 @@ void ComponentDlg::OnCompAll(wxCommandEvent &event)
 		return;
 
 	//get current vd
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	FL::VolumeData* vd = m_view->m_glview->m_cur_vol;
 	FL::ComponentSelector comp_selector(vd);
 	comp_selector.All();
 
@@ -3003,7 +3005,7 @@ void ComponentDlg::OnCompClear(wxCommandEvent &event)
 		return;
 
 	//get current vd
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	FL::VolumeData* vd = m_view->m_glview->m_cur_vol;
 	FL::ComponentSelector comp_selector(vd);
 	comp_selector.Clear();
 
@@ -3079,22 +3081,22 @@ void ComponentDlg::OutputMulti(int color_type)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	FL::VolumeData* vd = m_view->m_glview->m_cur_vol;
 	m_comp_analyzer.SetVolume(vd);
-	list<VolumeData*> channs;
+	list<FL::VolumeData*> channs;
 	if (m_comp_analyzer.GenMultiChannels(channs, color_type, m_consistent))
 	{
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vr_frame)
 		{
 			wxString group_name = "";
-			DataGroup* group = 0;
+			FL::VolumeGroup* group = 0;
 			for (auto i = channs.begin(); i != channs.end(); ++i)
 			{
-				VolumeData* vd = *i;
+				FL::VolumeData* vd = *i;
 				if (vd)
 				{
-					vr_frame->GetDataManager()->AddVolumeData(vd);
+					//vr_frame->GetDataManager()->AddVolumeData(vd);
 					if (i == channs.begin())
 					{
 						group_name = m_view->AddGroup("");
@@ -3103,20 +3105,20 @@ void ComponentDlg::OutputMulti(int color_type)
 					m_view->AddVolumeData(vd, group_name);
 				}
 			}
-			if (group)
-			{
-				//group->SetSyncRAll(true);
-				//group->SetSyncGAll(true);
-				//group->SetSyncBAll(true);
-				FLIVR::Color col = vd->GetGamma();
-				group->SetGammaAll(col);
-				col = vd->GetBrightness();
-				group->SetBrightnessAll(col);
-				col = vd->GetHdr();
-				group->SetHdrAll(col);
-			}
+			//if (group)
+			//{
+			//	//group->SetSyncRAll(true);
+			//	//group->SetSyncGAll(true);
+			//	//group->SetSyncBAll(true);
+			//	FLIVR::Color col = vd->GetGamma();
+			//	group->SetGammaAll(col);
+			//	col = vd->GetBrightness();
+			//	group->SetBrightnessAll(col);
+			//	col = vd->GetHdr();
+			//	group->SetHdrAll(col);
+			//}
 			vr_frame->UpdateList();
-			vr_frame->UpdateTree(vd->GetName());
+			vr_frame->UpdateTree(vd->getName());
 			m_view->RefreshGL();
 		}
 	}
@@ -3126,22 +3128,22 @@ void ComponentDlg::OutputRgb(int color_type)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	FL::VolumeData* vd = m_view->m_glview->m_cur_vol;
 	m_comp_analyzer.SetVolume(vd);
-	list<VolumeData*> channs;
+	list<FL::VolumeData*> channs;
 	if (m_comp_analyzer.GenRgbChannels(channs, color_type, m_consistent))
 	{
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vr_frame)
 		{
 			wxString group_name = "";
-			DataGroup* group = 0;
+			FL::VolumeGroup* group = 0;
 			for (auto i = channs.begin(); i != channs.end(); ++i)
 			{
-				VolumeData* vd = *i;
+				FL::VolumeData* vd = *i;
 				if (vd)
 				{
-					vr_frame->GetDataManager()->AddVolumeData(vd);
+					//vr_frame->GetDataManager()->AddVolumeData(vd);
 					if (i == channs.begin())
 					{
 						group_name = m_view->AddGroup("");
@@ -3150,20 +3152,20 @@ void ComponentDlg::OutputRgb(int color_type)
 					m_view->AddVolumeData(vd, group_name);
 				}
 			}
-			if (group)
-			{
-				//group->SetSyncRAll(true);
-				//group->SetSyncGAll(true);
-				//group->SetSyncBAll(true);
-				FLIVR::Color col = vd->GetGamma();
-				group->SetGammaAll(col);
-				col = vd->GetBrightness();
-				group->SetBrightnessAll(col);
-				col = vd->GetHdr();
-				group->SetHdrAll(col);
-			}
+			//if (group)
+			//{
+			//	//group->SetSyncRAll(true);
+			//	//group->SetSyncGAll(true);
+			//	//group->SetSyncBAll(true);
+			//	FLIVR::Color col = vd->GetGamma();
+			//	group->SetGammaAll(col);
+			//	col = vd->GetBrightness();
+			//	group->SetBrightnessAll(col);
+			//	col = vd->GetHdr();
+			//	group->SetHdrAll(col);
+			//}
 			vr_frame->UpdateList();
-			vr_frame->UpdateTree(vd->GetName());
+			vr_frame->UpdateTree(vd->getName());
 			m_view->RefreshGL();
 		}
 	}
@@ -3188,9 +3190,9 @@ void ComponentDlg::OnOutputAnn(wxCommandEvent &event)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	FL::VolumeData* vd = m_view->m_glview->m_cur_vol;
 	m_comp_analyzer.SetVolume(vd);
-	Annotations* ann = new Annotations();
+/*	Annotations* ann = new Annotations();
 	if (m_comp_analyzer.GenAnnotations(*ann, m_consistent))
 	{
 		ann->SetVolume(vd);
@@ -3206,7 +3208,7 @@ void ComponentDlg::OnOutputAnn(wxCommandEvent &event)
 			vr_frame->UpdateTree(vd->GetName());
 		}
 		m_view->RefreshGL();
-	}
+	}*/
 }
 
 void ComponentDlg::OnNotebook(wxBookCtrlEvent &event)
@@ -3253,12 +3255,13 @@ void ComponentDlg::GenerateAdv(bool refine)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	FL::VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
 		return;
 	vd->AddEmptyMask(1);
 
-	int bn = vd->GetAllBrickNum();
+	long bn;
+	vd->getValue("brick num", bn);
 	m_prog_bit = 97.0f / float(bn * (1 +
 		(m_initial_grow ? 1 : 0) +
 		(m_sized_grow ? 1 : 0) +
@@ -3282,11 +3285,12 @@ void ComponentDlg::GenerateAdv(bool refine)
 	}
 	else
 	{
-		vd->AddEmptyLabel();
+		vd->AddEmptyLabel(0);
 		cg.ShuffleID_3D();
 	}
 
-	double scale = vd->GetScalarScale();
+	double scale;
+	vd->getValue("int scale", scale);
 	double scale2 = scale * scale;
 
 	if (m_initial_grow)
@@ -3335,7 +3339,7 @@ void ComponentDlg::GenerateAdv(bool refine)
 				float(m_angle_thresh));
 	}
 
-	vd->GetVR()->clear_tex_current();
+	vd->GetRenderer()->clear_tex_current();
 	m_view->RefreshGL();
 
 	m_generate_prg->SetValue(100);
@@ -3353,7 +3357,7 @@ void ComponentDlg::GenerateBsc(bool refine)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	FL::VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
 		return;
 	vd->AddEmptyMask(1);
@@ -3370,7 +3374,8 @@ void ComponentDlg::GenerateBsc(bool refine)
 	}
 
 	//get brick number
-	int bn = vd->GetAllBrickNum();
+	long bn;
+	vd->getValue("brick num", bn);
 	m_prog_bit = 97.0f / float(bn * 3);
 
 	m_prog = 0.0f;
@@ -3390,11 +3395,12 @@ void ComponentDlg::GenerateBsc(bool refine)
 	}
 	else
 	{
-		vd->AddEmptyLabel();
+		vd->AddEmptyLabel(0);
 		cg.ShuffleID_3D();
 	}
 
-	double scale = vd->GetScalarScale();
+	double scale;
+	vd->getValue("int scale", scale);
 	double scale2 = scale * scale;
 
 	if (m_basic_size)
@@ -3412,7 +3418,7 @@ void ComponentDlg::GenerateBsc(bool refine)
 	if (bn > 1)
 		cg.FillBorder3D(0.1);
 
-	vd->GetVR()->clear_tex_current();
+	vd->GetRenderer()->clear_tex_current();
 	m_view->RefreshGL();
 
 	m_generate_prg->SetValue(100);
@@ -3430,7 +3436,7 @@ void ComponentDlg::Cluster()
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	FL::VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
 		return;
 	Texture* tex = vd->GetTexture();
@@ -3439,7 +3445,8 @@ void ComponentDlg::Cluster()
 	Nrrd* nrrd_data = tex->get_nrrd(0);
 	if (!nrrd_data)
 		return;
-	int bits = vd->GetBits();
+	long bits;
+	vd->getValue("bits", bits);
 	void* data_data = nrrd_data->data;
 	if (!data_data)
 		return;
@@ -3453,16 +3460,20 @@ void ComponentDlg::Cluster()
 	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
 	if (!nrrd_label)
 	{
-		vd->AddEmptyLabel();
+		vd->AddEmptyLabel(0);
 		nrrd_label = tex->get_nrrd(tex->nlabel());
 	}
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
 	if (!data_label)
 		return;
 
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
-	double scale = vd->GetScalarScale();
+	long nx, ny, nz;
+	//vd->GetResolution(nx, ny, nz);
+	vd->getValue("res x", nx);
+	vd->getValue("res y", ny);
+	vd->getValue("res z", nz);
+	double scale;
+	vd->getValue("int scale", scale);
 
 	FL::ClusterMethod* method = 0;
 	//switch method
@@ -3516,7 +3527,7 @@ void ComponentDlg::Cluster()
 	if (method->Execute())
 	{
 		method->GenerateNewIDs(0, (void*)data_label, nx, ny, nz, 60);
-		vd->GetVR()->clear_tex_pool();
+		vd->GetRenderer()->clear_tex_pool();
 		m_view->RefreshGL();
 	}
 
@@ -3567,7 +3578,7 @@ void ComponentDlg::GenerateComp(int type, int mode)
 		{
 			if (!m_view)
 				return;
-			VolumeData* vd = m_view->m_glview->m_cur_vol;
+			FL::VolumeData* vd = m_view->m_glview->m_cur_vol;
 			if (!vd)
 				return;
 			FL::ComponentGenerator cg(vd);
@@ -3583,16 +3594,19 @@ void ComponentDlg::GenerateComp(int type, int mode)
 
 			if (mode == 0)
 			{
-				vd->AddEmptyLabel();
+				vd->AddEmptyLabel(0);
 				cg.ShuffleID_3D();
 			}
 			else
 			{
-				if (vd->GetAllBrickNum() > 1)
+				long bn;
+				vd->getValue("brick num", bn);
+				if (bn > 1)
 					cg.ClearBorders3D();
 			}
 
-			double scale = vd->GetScalarScale();
+			double scale;
+			vd->getValue("int scale", scale);
 			double scale2 = scale * scale;
 
 			float density = m_basic_density_vl;
@@ -3618,7 +3632,7 @@ void ComponentDlg::GenerateComp(int type, int mode)
 					float(m_basic_falloff / scale2),
 					density, clean_iter, clean_size);
 
-			vd->GetVR()->clear_tex_current();
+			vd->GetRenderer()->clear_tex_current();
 			m_view->RefreshGL();
 		}
 		break;
@@ -3634,7 +3648,7 @@ void ComponentDlg::SelectFullComp()
 		if (!m_view)
 			return;
 		//get current mask
-		VolumeData* vd = m_view->m_glview->m_cur_vol;
+		FL::VolumeData* vd = m_view->m_glview->m_cur_vol;
 		FL::ComponentSelector comp_selector(vd);
 		//cell size filter
 		bool use = m_analysis_min_check->GetValue();
@@ -3674,11 +3688,12 @@ void ComponentDlg::Analyze(bool sel)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	FL::VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
 		return;
 
-	int bn = vd->GetAllBrickNum();
+	long bn;
+	vd->getValue("brick num", bn);
 	m_prog_bit = 97.0f / float(bn * 2 + (m_consistent?1:0));
 	m_prog = 0.0f;
 	m_generate_prg->SetValue(0);
@@ -3693,7 +3708,7 @@ void ComponentDlg::Analyze(bool sel)
 		m_comp_analyzer.ClearCoVolumes();
 		for (int i = 0; i < m_view->GetDispVolumeNum(); ++i)
 		{
-			VolumeData* vdi = m_view->GetDispVolumeData(i);
+			FL::VolumeData* vdi = m_view->GetDispVolumeData(i);
 			if (vdi != vd)
 				m_comp_analyzer.AddCoVolume(vdi);
 		}
@@ -3703,7 +3718,7 @@ void ComponentDlg::Analyze(bool sel)
 	if (m_consistent)
 	{
 		//invalidate label mask in gpu
-		vd->GetVR()->clear_tex_pool();
+		vd->GetRenderer()->clear_tex_pool();
 		m_view->RefreshGL();
 	}
 

@@ -26,8 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "Main.h"
-#include "DataManager.h"
-#include "Components/CompAnalyzer.h"
+#include <Components/CompAnalyzer.h>
 #include <wx/wx.h>
 #include <wx/collpane.h>
 #include <wx/notebook.h>
@@ -37,7 +36,6 @@ DEALINGS IN THE SOFTWARE.
 #define _COMPONENTDLG_H_
 
 class VRenderView;
-class VolumeData;
 
 DECLARE_APP(VRenderApp)
 class ComponentDlg : public wxPanel

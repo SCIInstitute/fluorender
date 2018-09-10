@@ -30,13 +30,11 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _BRUSHTOOLDLG_H_
 #define _BRUSHTOOLDLG_H_
 
-class VRenderView;
-class VolumeData;
-
 #define BRUSH_TOOL_ITER_WEAK	10
 #define BRUSH_TOOL_ITER_NORMAL	30
 #define BRUSH_TOOL_ITER_STRONG	60
 
+class VRenderView;
 class BrushToolDlg : public wxPanel
 {
 public:

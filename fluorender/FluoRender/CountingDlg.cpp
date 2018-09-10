@@ -27,6 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "CountingDlg.h"
 #include "VRenderFrame.h"
+#include <Global/Global.h>
+#include <Scenegraph/VolumeData.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 
@@ -215,17 +217,16 @@ void CountingDlg::GetSettings(VRenderView* vrv)
 	if (!vrv)
 		return;
 
-	VolumeData* sel_vol = 0;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		sel_vol = vr_frame->GetCurSelVol();
+	FL::VolumeData* sel_vol = 0;
+	FL::Global::instance().getVolumeFactory()->
+		getValue("current", (FL::Referenced**)&sel_vol);
 
 	m_view = vrv;
 
 	//threshold range
 	if (sel_vol)
 	{
-		m_max_value = sel_vol->GetMaxValue();
+		sel_vol->getValue("max int", m_max_value);
 		//threshold
 		m_ca_thresh_sldr->SetRange(0, int(m_max_value*10.0));
 		m_ca_thresh_sldr->SetValue(int(m_dft_thresh*m_max_value*10.0+0.5));
@@ -250,12 +251,12 @@ void CountingDlg::OnCAThreshText(wxCommandEvent &event)
 	m_ca_thresh_sldr->SetValue(int(val*10.0+0.5));
 
 	//change mask threshold
-	VolumeData* sel_vol = 0;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		sel_vol = vr_frame->GetCurSelVol();
+	FL::VolumeData* sel_vol = 0;
+	FL::Global::instance().getVolumeFactory()->
+		getValue("current", (FL::Referenced**)&sel_vol);
 	if (sel_vol)
-		sel_vol->SetMaskThreshold(m_dft_thresh);
+		sel_vol->setValue("mask thresh", m_dft_thresh);
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	vr_frame->RefreshVRenderViews();
 }
 
@@ -274,18 +275,20 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 		int comps = m_view->CompAnalysis(min_voxels, ignore_max?-1.0:max_voxels, m_dft_thresh, 1.0, select, true, false);
 		int volume = m_view->GetVolumeSelector()->GetVolumeNum();
 		//change mask threshold
-		VolumeData* sel_vol = 0;
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
-			sel_vol = vr_frame->GetCurSelVol();
+		FL::VolumeData* sel_vol = 0;
+		FL::Global::instance().getVolumeFactory()->
+			getValue("current", (FL::Referenced**)&sel_vol);
 		if (sel_vol)
-			sel_vol->SetUseMaskThreshold(true);
+			sel_vol->setValue("use mask thresh", true);
 		m_ca_comps_text->SetValue(wxString::Format("%d", comps));
 		m_ca_volume_text->SetValue(wxString::Format("%d", volume));
 		if (sel_vol)
 		{
 			double spcx, spcy, spcz;
-			sel_vol->GetSpacings(spcx, spcy, spcz);
+			//sel_vol->GetSpacings(spcx, spcy, spcz);
+			sel_vol->getValue("spc x", spcx);
+			sel_vol->getValue("spc y", spcy);
+			sel_vol->getValue("spc z", spcz);
 			double vol_unit = volume*spcx*spcy*spcz;
 			wxString vol_unit_text;
 			vol_unit_text = wxString::Format("%.0f", vol_unit);
@@ -306,6 +309,7 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 
 			m_ca_vol_unit_text->SetValue(vol_unit_text);
 		}
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vr_frame)
 			vr_frame->RefreshVRenderViews();
 	}

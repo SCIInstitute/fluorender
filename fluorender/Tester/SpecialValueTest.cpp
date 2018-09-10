@@ -38,4 +38,10 @@ void SpecialValueTest()
 	FLTYPE::PlaneSet ps2;
 	vd->getValue("clipping_planes", ps2);
 	ASSERT_EQ(ps, ps2);
+
+	FLTYPE::Quaternion q1(1, 2, 3,4);
+	vd->addValue("rotation", q1);
+	FLTYPE::Quaternion q2;
+	vd->getValue("rotation", q2);
+	ASSERT_EQ(q1, q2);
 }

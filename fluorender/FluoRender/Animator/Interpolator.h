@@ -35,10 +35,8 @@ DEALINGS IN THE SOFTWARE.
 #include "FlKeyQuaternion.h"
 #include "FlKeyBoolean.h"
 #include "FlKeyInt.h"
-#include "../FLIVR/Quaternion.h"
 
 using namespace std;
-using namespace FLIVR;
 
 typedef struct
 {
@@ -90,12 +88,12 @@ public:
 
 	//get values
 	bool GetDouble(FlKeyCode keycode, double t, double &dval);
-	bool GetQuaternion(FlKeyCode keycode, double t, Quaternion &qval);
+	bool GetQuaternion(FlKeyCode keycode, double t, FLTYPE::Quaternion &qval);
 	bool GetBoolean(FlKeyCode keycode, double t, bool &bval);
 	bool GetInt(FlKeyCode keycode, double t, int &ival);
 	//get values at index
 	bool GetDouble(FlKeyCode keycode, int index, double &dval);
-	bool GetQuaternion(FlKeyCode keycode, int index, Quaternion &qval);
+	bool GetQuaternion(FlKeyCode keycode, int index, FLTYPE::Quaternion &qval);
 	bool GetBoolean(FlKeyCode keycode, int index, bool &bval);
 	bool GetInt(FlKeyCode keycode, int index, int &ival);
 
@@ -110,8 +108,8 @@ private:
 	FlKey* SearchKey(FlKeyCode keycode, FlKeyGroup* g);
 	bool StepDouble(FlKeyCode keycode, FlKeyGroup* g, double &dval);
 	bool LinearDouble(FlKeyCode keycode, FlKeyGroup* g1, FlKeyGroup* g2, double t, double &dval);
-	bool StepQuaternion(FlKeyCode keycode, FlKeyGroup* g, Quaternion &qval);
-	bool LinearQuaternion(FlKeyCode keycode, FlKeyGroup* g1, FlKeyGroup* g2, double t, Quaternion &qval);
+	bool StepQuaternion(FlKeyCode keycode, FlKeyGroup* g, FLTYPE::Quaternion &qval);
+	bool LinearQuaternion(FlKeyCode keycode, FlKeyGroup* g1, FlKeyGroup* g2, double t, FLTYPE::Quaternion &qval);
 	double Smooth(double ft, bool s1, bool s2);
 
 };

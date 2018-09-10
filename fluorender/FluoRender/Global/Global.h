@@ -38,8 +38,8 @@ namespace FL
 	public:
 		static Global& instance() { return instance_; }
 
-		VolumeFactory& getVolumeFactory()
-		{ return *volume_factory_; }
+		VolumeFactory* getVolumeFactory()
+		{ return volume_factory_.get(); }
 
 	private:
 		Global();

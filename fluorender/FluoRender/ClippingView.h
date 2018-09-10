@@ -25,14 +25,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "DataManager.h"
+#ifndef _CLIPPINGVIEW_H_
+#define _CLIPPINGVIEW_H_
+
 #include <wx/wx.h>
 #include <wx/panel.h>
 #include <wx/slider.h>
 #include <wx/spinbutt.h>
-
-#ifndef _CLIPPINGVIEW_H_
-#define _CLIPPINGVIEW_H_
+#include "DataManager.h"
 
 //plane modes
 enum PLANE_MODES
@@ -44,6 +44,11 @@ enum PLANE_MODES
 	kNormalBack,
 	kNone
 };
+
+namespace FL
+{
+	class VolumeData;
+}
 
 class ClippingView: public wxPanel
 {
@@ -100,11 +105,11 @@ public:
 		const wxString& name="ClippingView");
 	~ClippingView();
 
-	void SetVolumeData(VolumeData* vd);
+	void SetVolumeData(FL::VolumeData* vd);
 	void SetMeshData(MeshData* md);
 	void SetDataManager(DataManager* mgr);
 	int GetSelType();
-	VolumeData* GetVolumeData();
+	FL::VolumeData* GetVolumeData();
 	MeshData* GetMeshData();
 	void RefreshVRenderViews(bool interactive=true);
 
@@ -170,7 +175,7 @@ private:
 	wxWindow* m_frame;
 
 	int m_sel_type;		//curent selection type
-	VolumeData* m_vd;	//current volume data
+	FL::VolumeData* m_vd;	//current volume data
 	MeshData* m_md;		//current mesh data
 	DataManager* m_mgr;	//manage all if clipping planes are synced
 	bool m_draw_clip;

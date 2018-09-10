@@ -27,7 +27,10 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "CalculationDlg.h"
 #include "VRenderFrame.h"
-#include "Calculate/CombineList.h"
+#include <Calculate/CombineList.h>
+#include <Global/Global.h>
+#include <Scenegraph/VolumeData.h>
+#include <Scenegraph/VolumeGroup.h>
 
 BEGIN_EVENT_TABLE(CalculationDlg, wxPanel)
 	//calculations
@@ -128,7 +131,7 @@ CalculationDlg::~CalculationDlg()
 
 }
 
-void CalculationDlg::SetGroup(DataGroup* group)
+void CalculationDlg::SetGroup(FL::VolumeGroup* group)
 {
 	m_group = group;
 }
@@ -143,15 +146,17 @@ void CalculationDlg::OnLoadA(wxCommandEvent &event)
 		switch (vr_frame->GetCurSelType())
 		{
 		case 2://volume
-			m_vol1 = vr_frame->GetCurSelVol();
+			//m_vol1 = vr_frame->GetCurSelVol();
+			FL::Global::instance().getVolumeFactory()->
+				getValue("current", (FL::Referenced**)&m_vol1);
 			m_group = 0;
 			if (m_vol1)
-				m_calc_a_text->SetValue(m_vol1->GetName());
+				m_calc_a_text->SetValue(m_vol1->getName());
 			break;
 		case 5://volume group
 			m_vol1 = 0;
 			if (m_group)
-				m_calc_a_text->SetValue(m_group->GetName());
+				m_calc_a_text->SetValue(m_group->getName());
 			break;
 		}
 	}
@@ -165,13 +170,15 @@ void CalculationDlg::OnLoadB(wxCommandEvent &event)
 		switch (vr_frame->GetCurSelType())
 		{
 		case 2://volume
-			m_vol2 = vr_frame->GetCurSelVol();
+			//m_vol2 = vr_frame->GetCurSelVol();
+			FL::Global::instance().getVolumeFactory()->
+				getValue("current", (FL::Referenced**)&m_vol2);
 			if (m_vol2)
-				m_calc_b_text->SetValue(m_vol2->GetName());
+				m_calc_b_text->SetValue(m_vol2->getName());
 			break;
 		case 5://volume group
 			if (m_group)
-				m_calc_b_text->SetValue(m_group->GetName());
+				m_calc_b_text->SetValue(m_group->getName());
 			break;
 		}
 	}
@@ -190,7 +197,7 @@ void CalculationDlg::OnCalcSub(wxCommandEvent &event)
 		for (int i = 0; i<vr_frame->GetViewNum(); i++)
 		{
 			VRenderView* vrv = vr_frame->GetView(i);
-			wxString str = m_vol1->GetName();
+			wxString str = m_vol1->getName();
 			if (vrv && vrv->GetVolumeData(str))
 			{
 				m_cur_view = vrv;
@@ -222,7 +229,7 @@ void CalculationDlg::OnCalcAdd(wxCommandEvent &event)
 		for (int i = 0; i<vr_frame->GetViewNum(); i++)
 		{
 			VRenderView* vrv = vr_frame->GetView(i);
-			wxString str = m_vol1->GetName();
+			wxString str = m_vol1->getName();
 			if (vrv && vrv->GetVolumeData(str))
 			{
 				m_cur_view = vrv;
@@ -254,7 +261,7 @@ void CalculationDlg::OnCalcDiv(wxCommandEvent &event)
 		for (int i = 0; i<vr_frame->GetViewNum(); i++)
 		{
 			VRenderView* vrv = vr_frame->GetView(i);
-			wxString str = m_vol1->GetName();
+			wxString str = m_vol1->getName();
 			if (vrv && vrv->GetVolumeData(str))
 			{
 				m_cur_view = vrv;
@@ -286,7 +293,7 @@ void CalculationDlg::OnCalcIsc(wxCommandEvent &event)
 		for (int i = 0; i<vr_frame->GetViewNum(); i++)
 		{
 			VRenderView* vrv = vr_frame->GetView(i);
-			wxString str = m_vol1->GetName();
+			wxString str = m_vol1->getName();
 			if (vrv && vrv->GetVolumeData(str))
 			{
 				m_cur_view = vrv;
@@ -319,7 +326,7 @@ void CalculationDlg::OnCalcFill(wxCommandEvent &event)
 		for (int i = 0; i<vr_frame->GetViewNum(); i++)
 		{
 			VRenderView* vrv = vr_frame->GetView(i);
-			wxString str = m_vol1->GetName();
+			wxString str = m_vol1->getName();
 			if (vrv && vrv->GetVolumeData(str))
 			{
 				m_cur_view = vrv;
@@ -349,12 +356,12 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 		return;
 
 	FL::CombineList Op;
-	std::string name = m_group->GetName().ToStdString() + "_combined";
+	std::string name = std::string(m_group->getName()) + "_combined";
 	Op.SetName(name);
-	std::list<VolumeData*> channs;
-	for (int i = 0; i < m_group->GetVolumeNum(); ++i)
+	std::list<FL::VolumeData*> channs;
+	for (size_t i = 0; i < m_group->getNumChildren(); ++i)
 	{
-		VolumeData* vd = m_group->GetVolumeData(i);
+		FL::VolumeData* vd = m_group->getChild(i)->asVolumeData();
 		if (!vd)
 			continue;
 		channs.push_back(vd);
@@ -369,7 +376,7 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 		for (int i = 0; i < vr_frame->GetViewNum(); i++)
 		{
 			VRenderView* vrv = vr_frame->GetView(i);
-			wxString str = m_group->GetName();
+			wxString str = m_group->getName();
 			if (vrv && vrv->GetGroup(str))
 			{
 				m_cur_view = vrv;
@@ -380,21 +387,21 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 		if (!m_cur_view)
 			m_cur_view = vr_frame->GetView(0);
 
-		std::list<VolumeData*> results;
+		std::list<FL::VolumeData*> results;
 		Op.GetResults(results);
 		if (results.empty())
 			return;
 
 		wxString group_name = "";
-		DataGroup* group = 0;
-		VolumeData* volume = 0;
+		FL::VolumeGroup* group = 0;
+		FL::VolumeData* volume = 0;
 		for (auto i = results.begin(); i != results.end(); ++i)
 		{
-			VolumeData* vd = *i;
+			FL::VolumeData* vd = *i;
 			if (vd)
 			{
 				if (!volume) volume = vd;
-				vr_frame->GetDataManager()->AddVolumeData(vd);
+				//vr_frame->GetDataManager()->AddVolumeData(vd);
 				if (i == results.begin())
 				{
 					group_name = m_cur_view->AddGroup("");
@@ -403,17 +410,17 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 				m_cur_view->AddVolumeData(vd, group_name);
 			}
 		}
-		if (group && volume)
-		{
-			FLIVR::Color col = volume->GetGamma();
-			group->SetGammaAll(col);
-			col = volume->GetBrightness();
-			group->SetBrightnessAll(col);
-			col = volume->GetHdr();
-			group->SetHdrAll(col);
-		}
+		//if (group && volume)
+		//{
+		//	FLIVR::Color col = volume->GetGamma();
+		//	group->SetGammaAll(col);
+		//	col = volume->GetBrightness();
+		//	group->SetBrightnessAll(col);
+		//	col = volume->GetHdr();
+		//	group->SetHdrAll(col);
+		//}
 		vr_frame->UpdateList();
-		vr_frame->UpdateTree(m_group->GetName());
+		vr_frame->UpdateTree(m_group->getName());
 		m_cur_view->RefreshGL();
 	}
 
