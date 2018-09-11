@@ -25,12 +25,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <wx/wx.h>
-#include <wx/treectrl.h>
-#include "compatibility.h"
-
 #ifndef _TREEPANEL_H_
 #define _TREEPANEL_H_
+
+#include <wx/wx.h>
+#include <wx/treectrl.h>
 
 //tree icon
 #define icon_change	1

@@ -218,7 +218,7 @@ void CountingDlg::GetSettings(VRenderView* vrv)
 		return;
 
 	FL::VolumeData* sel_vol = 0;
-	FL::Global::instance().getVolumeFactory()->
+	FL::Global::instance().getVolumeFactory().
 		getValue("current", (FL::Referenced**)&sel_vol);
 
 	m_view = vrv;
@@ -252,7 +252,7 @@ void CountingDlg::OnCAThreshText(wxCommandEvent &event)
 
 	//change mask threshold
 	FL::VolumeData* sel_vol = 0;
-	FL::Global::instance().getVolumeFactory()->
+	FL::Global::instance().getVolumeFactory().
 		getValue("current", (FL::Referenced**)&sel_vol);
 	if (sel_vol)
 		sel_vol->setValue("mask thresh", m_dft_thresh);
@@ -276,7 +276,7 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 		int volume = m_view->GetVolumeSelector()->GetVolumeNum();
 		//change mask threshold
 		FL::VolumeData* sel_vol = 0;
-		FL::Global::instance().getVolumeFactory()->
+		FL::Global::instance().getVolumeFactory().
 			getValue("current", (FL::Referenced**)&sel_vol);
 		if (sel_vol)
 			sel_vol->setValue("use mask thresh", true);

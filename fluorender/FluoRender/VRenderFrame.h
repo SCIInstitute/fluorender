@@ -26,6 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
+#ifndef _VRENDERFRAME_H_
+#define _VRENDERFRAME_H_
+
 #include "DataManager.h"
 #include "TreePanel.h"
 #include "ListPanel.h"
@@ -60,9 +63,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/aui/aui.h>
 
 #include <vector>
-
-#ifndef _VRENDERFRAME_H_
-#define _VRENDERFRAME_H_
 
 using namespace std;
 
@@ -105,6 +105,11 @@ using namespace std;
 #define UITEXT_CLIPPING		"Clipping Planes"
 #define UITEXT_PROPERTIES	"Properties"
 
+namespace FL
+{
+	class VolumeData;
+	class VolumeGroup;
+}
 class VRenderFrame: public wxFrame
 {
 	enum
@@ -204,8 +209,8 @@ public:
 	//on selections
 	void OnSelection(int type,	//0: nothing; 1:view; 2: volume; 3:mesh; 4:annotations; 5:group; 6:mesh manip
 		VRenderView* vrv=0,
-		DataGroup* group=0,
-		VolumeData* vd=0,
+		FL::VolumeGroup* group=0,
+		FL::VolumeData* vd=0,
 		MeshData* md=0,
 		Annotations* ann=0);
 

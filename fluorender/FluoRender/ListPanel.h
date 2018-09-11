@@ -25,13 +25,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <wx/wx.h>
-#include <wx/listctrl.h>
-
 #ifndef _LISTPANEL_H_
 #define _LISTPANEL_H_
 
-class VolumeData;
+#include <wx/wx.h>
+#include <wx/listctrl.h>
+
+namespace FL
+{
+	class VolumeData;
+}
 class DataListCtrl : public wxListCtrl
 {
 	enum
@@ -67,7 +70,7 @@ public:
 
 private:
 	wxWindow* m_frame;
-	static VolumeData* m_vd;
+	static FL::VolumeData* m_vd;
 
 	wxTextCtrl *m_rename_text;
 

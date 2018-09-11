@@ -128,7 +128,7 @@ void VolumeCalculator::CreateVolumeResult1()
 	//  16:8;
 	int bits = 8;  //it has an unknown problem with 16 bit data
 
-	m_vd_r = Global::instance().getVolumeFactory()->clone(m_vd_a);
+	m_vd_r = Global::instance().getVolumeFactory().clone(m_vd_a);
 	m_vd_r->AddEmptyData(bits,
 		res_x, res_y, res_z,
 		spc_x, spc_y, spc_z,
@@ -193,7 +193,7 @@ void VolumeCalculator::CreateVolumeResult2()
 	spc_y = std::max(spc_y_a, spc_y_b);
 	spc_z = std::max(spc_z_a, spc_z_b);
 
-	m_vd_r = Global::instance().getVolumeFactory()->clone(m_vd_a);
+	m_vd_r = Global::instance().getVolumeFactory().clone(m_vd_a);
 	m_vd_r->AddEmptyData(bits,
 		res_x, res_y, res_z,
 		spc_x, spc_y, spc_z,

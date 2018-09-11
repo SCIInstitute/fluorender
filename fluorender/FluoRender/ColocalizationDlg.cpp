@@ -185,7 +185,7 @@ void ColocalizationDlg::OnLoadA(wxCommandEvent &event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 	{
-		FL::Global::instance().getVolumeFactory()->
+		FL::Global::instance().getVolumeFactory().
 			getValue("current", (FL::Referenced**)&m_vol_a);
 		if (m_vol_a)
 			m_calc_a_text->SetValue(m_vol_a->getName());
@@ -198,7 +198,7 @@ void ColocalizationDlg::OnLoadB(wxCommandEvent &event)
 	if (vr_frame)
 	{
 		//m_vol_b = vr_frame->GetCurSelVol();
-		FL::Global::instance().getVolumeFactory()->
+		FL::Global::instance().getVolumeFactory().
 			getValue("current", (FL::Referenced**)&m_vol_b);
 		if (m_vol_b)
 			m_calc_b_text->SetValue(m_vol_b->getName());

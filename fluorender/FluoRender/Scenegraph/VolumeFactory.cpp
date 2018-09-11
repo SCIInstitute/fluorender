@@ -36,6 +36,11 @@ VolumeFactory::VolumeFactory()
 	default_object_name_ = "default volume";
 
 	addValue("current", (VolumeData*)(0));//current volume data
+	addValue("override vox", bool(false));//
+	addValue("wav color1", long(0));//1-red; 2-green; 3-blue; 4-purple; 5-white
+	addValue("wav color2", long(0));
+	addValue("wav color3", long(0));
+	addValue("wav color4", long(0));
 }
 
 VolumeFactory::~VolumeFactory()
@@ -96,7 +101,7 @@ void VolumeFactory::createDefault()
 		vd->addValue("mat amb", double(1));//materials
 		vd->addValue("mat diff", double(1));
 		vd->addValue("mat spec", double(1));
-		vd->addValue("mat_shine", double(10));
+		vd->addValue("mat shine", double(10));
 		vd->addValue("noise redct", bool(false));//noise reduction
 		vd->addValue("shading enable", bool(false));//shading
 		vd->addValue("low shading", double(0));//low shading

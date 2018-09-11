@@ -778,11 +778,11 @@ void ClippingView::OnLinkChannelsBtn(wxCommandEvent &event)
 		long z2_val = 0;
 		str.ToLong(&z2_val);
 
-		size_t num = FL::Global::instance().getVolumeFactory()->getNum();
+		size_t num = FL::Global::instance().getVolumeFactory().getNum();
 		for (size_t i=0; i<num; i++)
 		{
-			FL::VolumeData* vd = dynamic_cast<FL::VolumeData*>(
-				FL::Global::instance().getVolumeFactory()->get(i));
+			FL::VolumeData* vd =
+				FL::Global::instance().getVolumeFactory().get(i);
 			if (!vd || vd == m_vd)
 				continue;
 
@@ -922,11 +922,11 @@ void ClippingView::OnClipResetBtn(wxCommandEvent &event)
 	{
 		if (m_mgr)
 		{
-			size_t num = FL::Global::instance().getVolumeFactory()->getNum();
+			size_t num = FL::Global::instance().getVolumeFactory().getNum();
 			for (size_t i=0; i<num; i++)
 			{
-				FL::VolumeData* vd = dynamic_cast<FL::VolumeData*>(
-					FL::Global::instance().getVolumeFactory()->get(i));
+				FL::VolumeData* vd =
+					FL::Global::instance().getVolumeFactory().get(i);
 				if (!vd || vd == m_vd)
 					continue;
 
@@ -1036,11 +1036,11 @@ void ClippingView::OnX1ClipEdit(wxCommandEvent &event)
 	{
 		if (m_mgr)
 		{
-			size_t num = FL::Global::instance().getVolumeFactory()->getNum();
+			size_t num = FL::Global::instance().getVolumeFactory().getNum();
 			for (size_t i=0; i<num; i++)
 			{
-				FL::VolumeData* vd = dynamic_cast<FL::VolumeData*>(
-					FL::Global::instance().getVolumeFactory()->get(i));
+				FL::VolumeData* vd =
+					FL::Global::instance().getVolumeFactory().get(i);
 				if (!vd || vd == m_vd)
 					continue;
 
@@ -1156,11 +1156,11 @@ void ClippingView::OnX2ClipEdit(wxCommandEvent &event)
 	{
 		if (m_mgr)
 		{
-			size_t num = FL::Global::instance().getVolumeFactory()->getNum();
+			size_t num = FL::Global::instance().getVolumeFactory().getNum();
 			for (size_t i=0; i<num; i++)
 			{
-				FL::VolumeData* vd = dynamic_cast<FL::VolumeData*>(
-					FL::Global::instance().getVolumeFactory()->get(i));
+				FL::VolumeData* vd =
+					FL::Global::instance().getVolumeFactory().get(i);
 				if (!vd || vd == m_vd)
 					continue;
 
@@ -1268,11 +1268,11 @@ void ClippingView::OnY1ClipEdit(wxCommandEvent &event)
 	{
 		if (m_mgr)
 		{
-			size_t num = FL::Global::instance().getVolumeFactory()->getNum();
+			size_t num = FL::Global::instance().getVolumeFactory().getNum();
 			for (size_t i = 0; i<num; i++)
 			{
-				FL::VolumeData* vd = dynamic_cast<FL::VolumeData*>(
-					FL::Global::instance().getVolumeFactory()->get(i));
+				FL::VolumeData* vd =
+					FL::Global::instance().getVolumeFactory().get(i);
 				if (!vd || vd == m_vd)
 					continue;
 
@@ -1389,11 +1389,11 @@ void ClippingView::OnY2ClipEdit(wxCommandEvent &event)
 	{
 		if (m_mgr)
 		{
-			size_t num = FL::Global::instance().getVolumeFactory()->getNum();
+			size_t num = FL::Global::instance().getVolumeFactory().getNum();
 			for (size_t i = 0; i<num; i++)
 			{
-				FL::VolumeData* vd = dynamic_cast<FL::VolumeData*>(
-					FL::Global::instance().getVolumeFactory()->get(i));
+				FL::VolumeData* vd =
+					FL::Global::instance().getVolumeFactory().get(i);
 				if (!vd || vd == m_vd)
 					continue;
 
@@ -1501,11 +1501,11 @@ void ClippingView::OnZ1ClipEdit(wxCommandEvent &event)
 	{
 		if (m_mgr)
 		{
-			size_t num = FL::Global::instance().getVolumeFactory()->getNum();
+			size_t num = FL::Global::instance().getVolumeFactory().getNum();
 			for (size_t i = 0; i<num; i++)
 			{
-				FL::VolumeData* vd = dynamic_cast<FL::VolumeData*>(
-					FL::Global::instance().getVolumeFactory()->get(i));
+				FL::VolumeData* vd =
+					FL::Global::instance().getVolumeFactory().get(i);
 				if (!vd || vd == m_vd)
 					continue;
 
@@ -1621,11 +1621,11 @@ void ClippingView::OnZ2ClipEdit(wxCommandEvent &event)
 	{
 		if (m_mgr)
 		{
-			size_t num = FL::Global::instance().getVolumeFactory()->getNum();
+			size_t num = FL::Global::instance().getVolumeFactory().getNum();
 			for (size_t i = 0; i<num; i++)
 			{
-				FL::VolumeData* vd = dynamic_cast<FL::VolumeData*>(
-					FL::Global::instance().getVolumeFactory()->get(i));
+				FL::VolumeData* vd =
+					FL::Global::instance().getVolumeFactory().get(i);
 				if (!vd || vd == m_vd)
 					continue;
 

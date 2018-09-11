@@ -25,6 +25,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef _VMovieView_H_
+#define _VMovieView_H_
+
 #include <wx/wx.h>
 #include <wx/panel.h>
 #include <wx/spinbutt.h>
@@ -34,9 +37,6 @@ DEALINGS IN THE SOFTWARE.
 #include "RecorderDlg.h"
 #include "compatibility.h"
 #include "QVideoEncoder.h"
-
-#ifndef _VMovieView_H_
-#define _VMovieView_H_
 
 class VMovieView : public wxPanel
 {

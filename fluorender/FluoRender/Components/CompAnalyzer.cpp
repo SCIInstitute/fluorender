@@ -1046,7 +1046,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 				continue;
 		}
 
-		VolumeData* vd = Global::instance().getVolumeFactory()->clone(m_vd);
+		VolumeData* vd = Global::instance().getVolumeFactory().clone(m_vd);
 		vd->AddEmptyData(bits,
 			nx, ny, nz,
 			spcx, spcy, spcz,
@@ -1165,7 +1165,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 			channs.push_back(vd);
 		}
 		else
-			Global::instance().getVolumeFactory()->remove(vd);
+			Global::instance().getVolumeFactory().remove(vd);
 	}
 	return true;
 }
@@ -1215,7 +1215,7 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 	int brick_size = m_vd->GetTexture()->get_build_max_tex_size();
 
 	//red volume
-	VolumeData* vd_r = Global::instance().getVolumeFactory()->clone(m_vd);
+	VolumeData* vd_r = Global::instance().getVolumeFactory().clone(m_vd);
 	vd_r->AddEmptyData(8,
 		nx, ny, nz,
 		spcx, spcy, spcz,
@@ -1224,7 +1224,7 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 	std::string name(m_vd->getName());
 	vd_r->setName(name + "_CH_R");
 	//green volume
-	VolumeData* vd_g = Global::instance().getVolumeFactory()->clone(m_vd);
+	VolumeData* vd_g = Global::instance().getVolumeFactory().clone(m_vd);
 	vd_g->AddEmptyData(8,
 		nx, ny, nz,
 		spcx, spcy, spcz,
@@ -1232,7 +1232,7 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 	//vd_g->SetSpcFromFile(true);
 	vd_r->setName(name + "_CH_G");
 	//blue volume
-	VolumeData* vd_b = Global::instance().getVolumeFactory()->clone(m_vd);
+	VolumeData* vd_b = Global::instance().getVolumeFactory().clone(m_vd);
 	vd_b->AddEmptyData(8,
 		nx, ny, nz,
 		spcx, spcy, spcz,

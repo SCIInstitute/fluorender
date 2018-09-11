@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #include "OclDlg.h"
 #include "VRenderFrame.h"
 #include "VRenderView.h"
+#include <Global/Global.h>
+#include <Scenegraph/VolumeData.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <wx/stdpaths.h>
@@ -325,14 +327,14 @@ void OclDlg::Execute()
 
 	//currently, this is expected to be a convolution/filering kernel
 	//get cl code
-	wxString code = m_kernel_edit_stc->GetText();
+	std::string code = m_kernel_edit_stc->GetText().ToStdString();
 
 	//get volume currently selected
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	FL::VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
 		return;
 	bool dup = true;
-	wxString vd_name = vd->GetName();
+	wxString vd_name = vd->getName();
 	if (vd_name.Find("_CL") != wxNOT_FOUND)
 		dup = false;
 
@@ -352,24 +354,25 @@ void OclDlg::Execute()
 	duration<double> time_span = duration_cast<duration<double>>(t2-t1);
 	(*m_output_txt) << "CPU time: " << time_span.count() << " sec.\n";*/
 
-	wxString str;
+	std::string str;
 	executor->GetMessage(str);
 	(*m_output_txt) << str;
 
 	//add result for rendering
 	if (dup)
 	{
-		VolumeData* vd_r = executor->GetResult();
+		FL::VolumeData* vd_r = executor->GetResult();
 		if (!vd_r)
 			return;
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vr_frame)
 		{
-			vr_frame->GetDataManager()->AddVolumeData(vd_r);
+			//vr_frame->GetDataManager()->AddVolumeData(vd_r);
 			m_view->AddVolumeData(vd_r);
-			vd->SetDisp(false);
+			//vd->SetDisp(false);
+			vd->setValue("display", false);
 			vr_frame->UpdateList();
-			vr_frame->UpdateTree(vd_r->GetName());
+			vr_frame->UpdateTree(vd_r->getName());
 		}
 	}
 

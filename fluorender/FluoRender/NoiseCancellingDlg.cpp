@@ -27,6 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "NoiseCancellingDlg.h"
 #include "VRenderFrame.h"
+#include <Global/Global.h>
+#include <Scenegraph/VolumeData.h>
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(NoiseCancellingDlg, wxPanel)
@@ -48,7 +50,10 @@ NoiseCancellingDlg::NoiseCancellingDlg(wxWindow *frame, wxWindow *parent)
 	m_max_value(255.0),
 	m_dft_thresh(0.5),
 	m_dft_size(50),
-	m_previewed(false)
+	m_previewed(false),
+	m_equalizer_r(0.0),
+	m_equalizer_g(0.0),
+	m_equalizer_b(0.0)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -129,26 +134,25 @@ void NoiseCancellingDlg::GetSettings(VRenderView* vrv)
 	if (!vrv)
 		return;
 
-	VolumeData* sel_vol = 0;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		sel_vol = vr_frame->GetCurSelVol();
-	else
-		return;
-
+	FL::VolumeData* sel_vol = 0;
+	FL::Global::instance().getVolumeFactory().getValue(
+		"current", (FL::Referenced**)&sel_vol);
 	m_view = vrv;
 
 	//threshold range
 	if (sel_vol)
 	{
-		m_max_value = sel_vol->GetMaxValue();
+		sel_vol->getValue("max int", m_max_value);
 		//threshold
 		m_threshold_sldr->SetRange(0, int(m_max_value*10.0));
 		m_threshold_sldr->SetValue(int(m_dft_thresh*m_max_value*10.0+0.5));
 		m_threshold_text->ChangeValue(wxString::Format("%.1f", m_dft_thresh*m_max_value));
 		//voxel
-		int nx, ny, nz;
-		sel_vol->GetResolution(nx, ny, nz);
+		long nx, ny, nz;
+		//sel_vol->GetResolution(nx, ny, nz);
+		sel_vol->getValue("res x", nx);
+		sel_vol->getValue("res y", ny);
+		sel_vol->getValue("res z", nz);
 		m_voxel_sldr->SetRange(1, nx);
 		m_voxel_sldr->SetValue(int(m_dft_size));
 		m_voxel_text->ChangeValue(wxString::Format("%d", int(m_dft_size)));
@@ -173,13 +177,14 @@ void NoiseCancellingDlg::OnThresholdText(wxCommandEvent &event)
 	m_threshold_sldr->SetValue(int(val*10.0+0.5));
 
 	//change mask threshold
-	VolumeData* sel_vol = 0;
+	FL::VolumeData* sel_vol = 0;
+	FL::Global::instance().getVolumeFactory().getValue(
+		"current", (FL::Referenced**)&sel_vol);
+	if (sel_vol)
+		sel_vol->setValue("mask thresh", m_dft_thresh);
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
-		sel_vol = vr_frame->GetCurSelVol();
-	if (sel_vol)
-		sel_vol->SetMaskThreshold(m_dft_thresh);
-	vr_frame->RefreshVRenderViews();
+		vr_frame->RefreshVRenderViews();
 }
 
 //voxel size
@@ -206,12 +211,12 @@ void NoiseCancellingDlg::OnPreviewBtn(wxCommandEvent &event)
 		m_view->CompAnalysis(0.0, m_dft_size, m_dft_thresh, 1.0, false, false, false);
 		//m_view->GetVolumeSelector()->GetVolumeNum();
 		//change mask threshold
-		VolumeData* sel_vol = 0;
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
-			sel_vol = vr_frame->GetCurSelVol();
+		FL::VolumeData* sel_vol = 0;
+		FL::Global::instance().getVolumeFactory().getValue(
+			"current", (FL::Referenced**)&sel_vol);
 		if (sel_vol)
-			sel_vol->SetUseMaskThreshold(true);
+			sel_vol->setValue("use mask thresh", true);
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vr_frame)
 			vr_frame->RefreshVRenderViews();
 		m_previewed = true;
@@ -233,13 +238,13 @@ void NoiseCancellingDlg::OnEnhanceSelChk(wxCommandEvent &event)
 
 	bool enhance = m_enhance_sel_chk->GetValue();
 
-	VolumeData* sel_vol = 0;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		sel_vol = vr_frame->GetCurSelVol();
+	FL::VolumeData* sel_vol = 0;
+	FL::Global::instance().getVolumeFactory().getValue(
+		"current", (FL::Referenced**)&sel_vol);
 	if (enhance && sel_vol)
 	{
-		Color mask_color = sel_vol->GetMaskColor();
+		FLTYPE::Color mask_color;
+		sel_vol->getValue("sec color", mask_color);
 		double hdr_r = 0.0;
 		double hdr_g = 0.0;
 		double hdr_b = 0.0;
@@ -249,14 +254,20 @@ void NoiseCancellingDlg::OnEnhanceSelChk(wxCommandEvent &event)
 			hdr_g = 0.4;
 		if (mask_color.b() > 0.0)
 			hdr_b = 0.4;
-		Color hdr_color = Color(hdr_r, hdr_g, hdr_b);
-		m_hdr = sel_vol->GetHdr();
-		sel_vol->SetHdr(hdr_color);
+		sel_vol->getValue("equalize r", m_equalizer_r);
+		sel_vol->getValue("equalize g", m_equalizer_g);
+		sel_vol->getValue("equalize b", m_equalizer_b);
+		sel_vol->setValue("equalize r", hdr_r);
+		sel_vol->setValue("equalize g", hdr_g);
+		sel_vol->setValue("equalize b", hdr_b);
 	}
 	else if (!enhance && sel_vol)
 	{
-		sel_vol->SetHdr(m_hdr);
+		sel_vol->setValue("equalize r", m_equalizer_r);
+		sel_vol->setValue("equalize g", m_equalizer_g);
+		sel_vol->setValue("equalize b", m_equalizer_b);
 	}
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 		vr_frame->RefreshVRenderViews();
 }

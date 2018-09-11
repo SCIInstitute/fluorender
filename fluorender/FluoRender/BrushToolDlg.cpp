@@ -333,7 +333,7 @@ void BrushToolDlg::GetSettings(VRenderView* vrv)
 	if (vr_frame)
 	{
 		//sel_vol = vr_frame->GetCurSelVol();
-		FL::Global::instance().getVolumeFactory()->
+		FL::Global::instance().getVolumeFactory().
 			getValue("current", (FL::Referenced**)&sel_vol);
 		vr_frame->GetNoiseCancellingDlg()->GetSettings(vrv);
 		vr_frame->GetCountingDlg()->GetSettings(vrv);
@@ -480,7 +480,7 @@ void BrushToolDlg::UpdateUndoRedo()
 	{
 		//VolumeData* vd = vr_frame->GetCurSelVol();
 		FL::VolumeData* vd;
-		FL::Global::instance().getVolumeFactory()->
+		FL::Global::instance().getVolumeFactory().
 			getValue("current", (FL::Referenced**)&vd);
 		if (vd && vd->GetTexture())
 		{
@@ -596,7 +596,7 @@ void BrushToolDlg::OnBrushUndo(wxCommandEvent &event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 		//sel_vol = vr_frame->GetCurSelVol();
-		FL::Global::instance().getVolumeFactory()->
+		FL::Global::instance().getVolumeFactory().
 			getValue("current", (FL::Referenced**)&sel_vol);
 	if (sel_vol && sel_vol->GetTexture())
 	{
@@ -613,7 +613,7 @@ void BrushToolDlg::OnBrushRedo(wxCommandEvent &event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 		//sel_vol = vr_frame->GetCurSelVol();
-		FL::Global::instance().getVolumeFactory()->
+		FL::Global::instance().getVolumeFactory().
 			getValue("current", (FL::Referenced**)&sel_vol);
 	if (sel_vol && sel_vol->GetTexture())
 	{

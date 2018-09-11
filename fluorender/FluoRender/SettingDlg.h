@@ -25,10 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <wx/wx.h>
-
 #ifndef _SETTINGDLG_H_
 #define _SETTINGDLG_H_
+
+#include <wx/wx.h>
 
 #define TOOL_PAINT_BRUSH	1
 #define TOOL_MEASUREMENT	2
@@ -260,10 +260,10 @@ private:
 	double m_shadow_dir_x;	//x comp of shadow direction
 	double m_shadow_dir_y;	//y comp of shadow direction
 	bool m_mouse_int;		//enable lower sample rate for mouse interactions
-	int m_wav_color1;		//wavelength to color
-	int m_wav_color2;		//1-red; 2-green; 3-blue; 4-purple; 5-white
-	int m_wav_color3;
-	int m_wav_color4;
+	long m_wav_color1;		//wavelength to color
+	long m_wav_color2;		//1-red; 2-green; 3-blue; 4-purple; 5-white
+	long m_wav_color3;
+	long m_wav_color4;
 	wxString m_time_id;		//identfier for time sequence
 	bool m_grad_bg;
 	bool m_override_vox;

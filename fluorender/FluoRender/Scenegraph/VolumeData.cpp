@@ -1125,10 +1125,15 @@ void VolumeData::SaveData(std::wstring &filename, int mode, bool bake, bool comp
 	SaveLabel(false, 0, 0);
 }
 
-void VolumeData::SaveMask(bool use_reader, int t, int c)
+void VolumeData::SaveMask(bool use_reader, long t, long c)
 {
 	if (!m_vr || !m_tex)
 		return;
+
+	if (t == -1)
+		getValue("time", t);
+	if (c == -1)
+		getValue("channel", c);
 
 	Nrrd* data = 0;
 	bool delete_data = false;
@@ -1186,10 +1191,15 @@ void VolumeData::SaveMask(bool use_reader, int t, int c)
 	}
 }
 
-void VolumeData::SaveLabel(bool use_reader, int t, int c)
+void VolumeData::SaveLabel(bool use_reader, long t, long c)
 {
 	if (!m_vr || !m_tex)
 		return;
+
+	if (t == -1)
+		getValue("time", t);
+	if (c == -1)
+		getValue("channel", c);
 
 	Nrrd* data = 0;
 	bool delete_data = false;

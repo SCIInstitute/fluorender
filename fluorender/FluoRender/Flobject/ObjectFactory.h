@@ -110,9 +110,9 @@ namespace FL
 			return result;
 		}
 
-		inline Object* get(size_t i) { return objects_[i].get(); }
+		inline virtual Object* get(size_t i) { return objects_[i].get(); }
 
-		inline const Object* get(size_t i) const { return objects_[i].get(); }
+		inline virtual const Object* get(size_t i) const { return objects_[i].get(); }
 
 		inline bool contains(const Object* object) const
 		{
@@ -135,7 +135,7 @@ namespace FL
 			return objects_.size();
 		}
 
-		inline Object* find(const unsigned int id)
+		inline virtual Object* find(const unsigned int id)
 		{
 			for (auto it = objects_.begin();
 				it != objects_.end(); ++it)
@@ -146,10 +146,21 @@ namespace FL
 			return 0;
 		}
 
-		inline Object* findFirst(const std::string &name)
+		inline virtual Object* findFirst(const std::string &name)
 		{
 			for (auto it = objects_.begin();
 				it != objects_.end(); ++it)
+			{
+				if ((*it)->getName() == name)
+					return (*it).get();
+			}
+			return 0;
+		}
+
+		inline virtual Object* findLast(const std::string &name)
+		{
+			for (auto it = objects_.rbegin();
+				it != objects_.rend(); ++it)
 			{
 				if ((*it)->getName() == name)
 					return (*it).get();

@@ -26,7 +26,12 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "KernelExecutor.h"
+#include <Global/Global.h>
 #include <Scenegraph/VolumeData.h>
+#include <FLIVR/VolumeRenderer.h>
+#include <FLIVR/KernelProgram.h>
+#include <FLIVR/VolKernel.h>
+#include <FLIVR/Texture.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <boost/chrono.hpp>
@@ -102,7 +107,7 @@ void KernelExecutor::DeleteResult()
 	m_vd_r = 0;
 }
 
-bool KernelExecutor::GetMessage(wxString &msg)
+bool KernelExecutor::GetMessage(std::string &msg)
 {
 	if (m_message == "")
 		return false;
@@ -133,27 +138,31 @@ bool KernelExecutor::Execute()
 		m_message = "No volume selected. Select a volume first.\n";
 		return false;
 	}
-	VolumeRenderer* vr = m_vd->GetVR();
+	FLIVR::VolumeRenderer* vr = m_vd->GetRenderer();
 	if (!vr)
 	{
 		m_message = "Volume corrupted.\n";
 		return false;
 	}
-	Texture* tex =m_vd->GetTexture();
+	FLIVR::Texture* tex =m_vd->GetTexture();
 	if (!tex)
 	{
 		m_message = "Volume corrupted.\n";
 		return false;
 	}
 
-	int res_x, res_y, res_z;
-	m_vd->GetResolution(res_x, res_y, res_z);
+	long res_x, res_y, res_z;
+	//m_vd->GetResolution(res_x, res_y, res_z);
+	m_vd->getValue("res x", res_x);
+	m_vd->getValue("res y", res_y);
+	m_vd->getValue("res z", res_z);
 	int brick_size = m_vd->GetTexture()->get_build_max_tex_size();
 
 	//get bricks
-	Ray view_ray(Point(0.802, 0.267, 0.534), Vector(0.802, 0.267, 0.534));
+	FLIVR::Ray view_ray(FLIVR::Point(0.802, 0.267, 0.534),
+		FLIVR::Vector(0.802, 0.267, 0.534));
 	tex->set_sort_bricks();
-	vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray);
+	std::vector<FLIVR::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray);
 	if (!bricks || bricks->size() == 0)
 	{
 		m_message = "Volume empty.\n";
@@ -162,24 +171,27 @@ bool KernelExecutor::Execute()
 
 	m_message = "";
 	//execute for each brick
-	TextureBrick *b, *b_r;
-	vector<TextureBrick*> *bricks_r;
+	FLIVR::TextureBrick *b, *b_r;
+	std::vector<FLIVR::TextureBrick*> *bricks_r;
 	void *result;
 
 	if (m_duplicate)
 	{
 		//result
 		double spc_x, spc_y, spc_z;
-		m_vd->GetSpacings(spc_x, spc_y, spc_z);
-		m_vd_r = new VolumeData();
+		//m_vd->GetSpacings(spc_x, spc_y, spc_z);
+		m_vd->getValue("spc x", spc_x);
+		m_vd->getValue("spc y", spc_y);
+		m_vd->getValue("spc z", spc_z);
+		m_vd_r = FL::Global::instance().getVolumeFactory().clone(m_vd);
 		m_vd_r->AddEmptyData(8,
 			res_x, res_y, res_z,
 			spc_x, spc_y, spc_z,
 			brick_size);
-		m_vd_r->SetSpcFromFile(true);
-		wxString name = m_vd->GetName();
-		m_vd_r->SetName(name + "_CL");
-		Texture* tex_r = m_vd_r->GetTexture();
+		//m_vd_r->SetSpcFromFile(true);
+		std::string name = m_vd->getName();
+		m_vd_r->setName(name + "_CL");
+		FLIVR::Texture* tex_r = m_vd_r->GetTexture();
 		if (!tex_r)
 			return false;
 		Nrrd* nrrd_r = tex_r->get_nrrd(0);
@@ -194,44 +206,44 @@ bool KernelExecutor::Execute()
 		if (!bricks_r || bricks_r->size() == 0)
 			return false;
 
-		if (m_vd)
-		{
-			//clipping planes
-			vector<Plane*> *planes = m_vd->GetVR() ? m_vd->GetVR()->get_planes() : 0;
-			if (planes && m_vd_r->GetVR())
-				m_vd_r->GetVR()->set_planes(planes);
-			//transfer function
-			m_vd_r->Set3DGamma(m_vd->Get3DGamma());
-			m_vd_r->SetBoundary(m_vd->GetBoundary());
-			m_vd_r->SetOffset(m_vd->GetOffset());
-			m_vd_r->SetLeftThresh(m_vd->GetLeftThresh());
-			m_vd_r->SetRightThresh(m_vd->GetRightThresh());
-			FLIVR::Color col = m_vd->GetColor();
-			m_vd_r->SetColor(col);
-			m_vd_r->SetAlpha(m_vd->GetAlpha());
-			//shading
-			m_vd_r->SetShading(m_vd->GetShading());
-			double amb, diff, spec, shine;
-			m_vd->GetMaterial(amb, diff, spec, shine);
-			m_vd_r->SetMaterial(amb, diff, spec, shine);
-			//shadow
-			m_vd_r->SetShadow(m_vd->GetShadow());
-			double shadow;
-			m_vd->GetShadowParams(shadow);
-			m_vd_r->SetShadowParams(shadow);
-			//sample rate
-			m_vd_r->SetSampleRate(m_vd->GetSampleRate());
-			//2d adjusts
-			col = m_vd->GetGamma();
-			m_vd_r->SetGamma(col);
-			col = m_vd->GetBrightness();
-			m_vd_r->SetBrightness(col);
-			col = m_vd->GetHdr();
-			m_vd_r->SetHdr(col);
-			m_vd_r->SetSyncR(m_vd->GetSyncR());
-			m_vd_r->SetSyncG(m_vd->GetSyncG());
-			m_vd_r->SetSyncB(m_vd->GetSyncB());
-		}
+		//if (m_vd)
+		//{
+		//	//clipping planes
+		//	vector<Plane*> *planes = m_vd->GetVR() ? m_vd->GetVR()->get_planes() : 0;
+		//	if (planes && m_vd_r->GetVR())
+		//		m_vd_r->GetVR()->set_planes(planes);
+		//	//transfer function
+		//	m_vd_r->Set3DGamma(m_vd->Get3DGamma());
+		//	m_vd_r->SetBoundary(m_vd->GetBoundary());
+		//	m_vd_r->SetOffset(m_vd->GetOffset());
+		//	m_vd_r->SetLeftThresh(m_vd->GetLeftThresh());
+		//	m_vd_r->SetRightThresh(m_vd->GetRightThresh());
+		//	FLIVR::Color col = m_vd->GetColor();
+		//	m_vd_r->SetColor(col);
+		//	m_vd_r->SetAlpha(m_vd->GetAlpha());
+		//	//shading
+		//	m_vd_r->SetShading(m_vd->GetShading());
+		//	double amb, diff, spec, shine;
+		//	m_vd->GetMaterial(amb, diff, spec, shine);
+		//	m_vd_r->SetMaterial(amb, diff, spec, shine);
+		//	//shadow
+		//	m_vd_r->SetShadow(m_vd->GetShadow());
+		//	double shadow;
+		//	m_vd->GetShadowParams(shadow);
+		//	m_vd_r->SetShadowParams(shadow);
+		//	//sample rate
+		//	m_vd_r->SetSampleRate(m_vd->GetSampleRate());
+		//	//2d adjusts
+		//	col = m_vd->GetGamma();
+		//	m_vd_r->SetGamma(col);
+		//	col = m_vd->GetBrightness();
+		//	m_vd_r->SetBrightness(col);
+		//	col = m_vd->GetHdr();
+		//	m_vd_r->SetHdr(col);
+		//	m_vd_r->SetSyncR(m_vd->GetSyncR());
+		//	m_vd_r->SetSyncG(m_vd->GetSyncG());
+		//	m_vd_r->SetSyncB(m_vd->GetSyncB());
+		//}
 	}
 	else
 		result = tex->get_nrrd(0)->data;
@@ -242,7 +254,8 @@ bool KernelExecutor::Execute()
 		b = (*bricks)[i];
 		if (m_duplicate) b_r = (*bricks_r)[i];
 		GLint data_id = vr->load_brick(0, 0, bricks, i);
-		KernelProgram* kernel = VolumeRenderer::vol_kernel_factory_.kernel(m_code.ToStdString());
+		FLIVR::KernelProgram* kernel = 
+			FLIVR::VolumeRenderer::vol_kernel_factory_.kernel(m_code);
 		if (kernel)
 		{
 			m_message += "OpenCL kernel created.\n";
@@ -290,18 +303,19 @@ bool KernelExecutor::Execute()
 	if (!kernel_exe)
 	{
 		if (m_duplicate && m_vd_r)
-			delete m_vd_r;
+			//delete m_vd_r;
+			FL::Global::instance().getVolumeFactory().remove(m_vd_r);
 		m_vd_r = 0;
 		return false;
 	}
 
 	if (!m_duplicate)
-		m_vd->GetVR()->clear_tex_current();
+		m_vd->GetRenderer()->clear_tex_current();
 
 	return true;
 }
 
-bool KernelExecutor::ExecuteKernel(KernelProgram* kernel,
+bool KernelExecutor::ExecuteKernel(FLIVR::KernelProgram* kernel,
 	GLuint data_id, void* result,
 	size_t brick_x, size_t brick_y,
 	size_t brick_z)
@@ -309,7 +323,7 @@ bool KernelExecutor::ExecuteKernel(KernelProgram* kernel,
 	if (!kernel)
 		return false;
 	int kernel_index = -1;
-	string name = "kernel_main";
+	std::string name = "kernel_main";
 
 	if (kernel->valid())
 		kernel_index = kernel->findKernel(name);

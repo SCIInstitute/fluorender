@@ -25,6 +25,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef _MPROPVIEW_H_
+#define _MPROPVIEW_H_
+
 #include "DataManager.h"
 #include "VRenderView.h"
 #include <wx/wx.h>
@@ -32,9 +35,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/glcanvas.h>
 #include <wx/clrpicker.h>
 #include <wx/slider.h>
-
-#ifndef _MPROPVIEW_H_
-#define _MPROPVIEW_H_
 
 using namespace std;
 

@@ -218,7 +218,7 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 
 	//sel_vol = vr_frame->GetCurSelVol();
 	FL::VolumeData* sel_vol = 0;
-	FL::Global::instance().getVolumeFactory()->
+	FL::Global::instance().getVolumeFactory().
 		getValue("current", (FL::Referenced**)&sel_vol);
 	if (!sel_vol)
 		return;

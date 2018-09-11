@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "RecorderDlg.h"
 #include "VRenderFrame.h"
+#include <Global/Global.h>
 #include <wx/artprov.h>
 #include <wx/valnum.h>
 #include "key.xpm"
@@ -684,19 +685,15 @@ void RecorderDlg::OnInsKey(wxCommandEvent &event)
 	}
 	//check if 4D
 	bool is_4d = false;
-	VolumeData* vd = 0;
-	DataManager* mgr = vr_frame->GetDataManager();
-	if (mgr)
+	FL::VolumeData* vd = 0;
+	for (size_t i = 0; i < FL::Global::instance().getVolumeFactory().getNum(); i++)
 	{
-		for (int i = 0; i < mgr->GetVolumeNum(); i++)
+		vd = FL::Global::instance().getVolumeFactory().get(i);
+		if (vd->GetReader() &&
+			vd->GetReader()->GetTimeNum() > 1)
 		{
-			vd = mgr->GetVolumeData(i);
-			if (vd->GetReader() &&
-				vd->GetReader()->GetTimeNum() > 1)
-			{
-				is_4d = true;
-				break;
-			}
+			is_4d = true;
+			break;
 		}
 	}
 	double duration = 0.0;
@@ -705,18 +702,19 @@ void RecorderDlg::OnInsKey(wxCommandEvent &event)
 		Interpolator *interpolator = vr_frame->GetInterpolator();
 		if (interpolator && m_view)
 		{
-			double ct = vd->GetCurTime();
+			long ct;
+			vd->getValue("time", ct);
 			FlKeyCode keycode;
 			keycode.l0 = 1;
 			keycode.l0_name = m_view->GetName();
 			keycode.l1 = 2;
-			keycode.l1_name = vd->GetName();
+			keycode.l1_name = vd->getName();
 			keycode.l2 = 0;
 			keycode.l2_name = "frame";
 			double frame;
 			if (interpolator->GetDouble(keycode, 
 				interpolator->GetLastIndex(), frame))
-				duration = fabs(ct - frame);
+				duration = fabs(double(ct) - frame);
 		}
 	}
 	else
@@ -744,9 +742,9 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 			return;
 	}
 
-	DataManager* mgr = vr_frame->GetDataManager();
-	if (!mgr)
-		return;
+	//DataManager* mgr = vr_frame->GetDataManager();
+	//if (!mgr)
+	//	return;
 	Interpolator *interpolator = vr_frame->GetInterpolator();
 	if (!interpolator)
 		return;
@@ -762,20 +760,23 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	interpolator->Begin(t);
 
 	//for all volumes
-	for (int i=0; i<mgr->GetVolumeNum() ; i++)
+	FL::VolumeData* vd = 0;
+	for (size_t i = 0; i < FL::Global::instance().getVolumeFactory().getNum(); i++)
 	{
-		VolumeData* vd = mgr->GetVolumeData(i);
+		vd = FL::Global::instance().getVolumeFactory().get(i);
 		keycode.l0 = 1;
 		keycode.l0_name = m_view->GetName();
 		keycode.l1 = 2;
-		keycode.l1_name = vd->GetName();
+		keycode.l1_name = vd->getName();
 		//display
 		keycode.l2 = 0;
 		keycode.l2_name = "display";
-		flkeyB = new FlKeyBoolean(keycode, vd->GetDisp());
+		bool disp;
+		vd->getValue("display", disp);
+		flkeyB = new FlKeyBoolean(keycode, disp);
 		interpolator->AddKey(flkeyB);
 		//clipping planes
-		vector<Plane*> * planes = vd->GetVR()->get_planes();
+		vector<Plane*> * planes = vd->GetRenderer()->get_planes();
 		if (!planes)
 			continue;
 		if (planes->size() != 6)
@@ -825,7 +826,8 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
 		interpolator->AddKey(flkey);
 		//t
-		int frame = vd->GetCurTime();
+		long frame;
+		vd->getValue("time", frame);
 		keycode.l2 = 0;
 		keycode.l2_name = "frame";
 		flkey = new FlKeyDouble(keycode, frame);
@@ -1015,11 +1017,11 @@ void RecorderDlg::AutoKeyChanComb(int comb)
 		//for all volumes
 		for (i=0; i<m_view->GetAllVolumeNum(); i++)
 		{
-			VolumeData* vd = m_view->GetAllVolumeData(i);
+			FL::VolumeData* vd = m_view->GetAllVolumeData(i);
 			keycode.l0 = 1;
 			keycode.l0_name = m_view->GetName();
 			keycode.l1 = 2;
-			keycode.l1_name = vd->GetName();
+			keycode.l1_name = vd->getName();
 			//display only
 			keycode.l2 = 0;
 			keycode.l2_name = "display";

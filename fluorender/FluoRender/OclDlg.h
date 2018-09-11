@@ -25,14 +25,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "DataManager.h"
+#ifndef _OCLDLG_H_
+#define _OCLDLG_H_
+
 #include <wx/wx.h>
 #include <wx/stc/stc.h>
 #include <wx/listctrl.h>
 #include <string>
-
-#ifndef _OCLDLG_H_
-#define _OCLDLG_H_
 
 class VRenderView;
 

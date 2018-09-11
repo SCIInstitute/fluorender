@@ -25,11 +25,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <wx/progdlg.h>
-#include <boost/unordered_map.hpp>
-
 #ifndef _VOLUMESELECTOR_H_
 #define _VOLUMESELECTOR_H_
+
+#include <wx/progdlg.h>
+#include <boost/unordered_map.hpp>
 
 namespace FL
 {

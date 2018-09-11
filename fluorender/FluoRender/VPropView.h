@@ -28,19 +28,12 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VPROPVIEW_H_
 #define _VPROPVIEW_H_
 
-#include "DataManager.h"
+#include <glew/GL/glew.h>
 #include <wx/wx.h>
 #include <wx/panel.h>
 #include <wx/glcanvas.h>
 #include <wx/clrpicker.h>
 #include <wx/slider.h>
-
-#include "FLIVR/Color.h"
-#include "FLIVR/VolumeRenderer.h"
-#include "FLIVR/BBox.h"
-#include "FLIVR/Point.h"
-#include "FLIVR/MultiVolumeRenderer.h"
-
 
 using namespace std;
 

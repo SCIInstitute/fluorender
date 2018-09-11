@@ -25,15 +25,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef _COMPONENTDLG_H_
+#define _COMPONENTDLG_H_
+
 #include "Main.h"
 #include <Components/CompAnalyzer.h>
 #include <wx/wx.h>
 #include <wx/collpane.h>
 #include <wx/notebook.h>
 #include <wx/spinctrl.h>
-
-#ifndef _COMPONENTDLG_H_
-#define _COMPONENTDLG_H_
 
 class VRenderView;
 

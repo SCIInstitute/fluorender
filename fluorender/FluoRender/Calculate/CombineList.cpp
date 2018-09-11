@@ -68,7 +68,7 @@ int CombineList::Execute()
 
 	//clone new volumes from vd so that properties are automatically copied
 	//red volume
-	VolumeData* vd_r = Global::instance().getVolumeFactory()->clone(vd);
+	VolumeData* vd_r = Global::instance().getVolumeFactory().clone(vd);
 	vd_r->AddEmptyData(m_bits,
 		m_resx, m_resy, m_resz,
 		m_spcx, m_spcy, m_spcz,
@@ -76,7 +76,7 @@ int CombineList::Execute()
 	vd_r->setValue("spc from file", bool(true));
 	vd_r->setName(m_name + "_CH_R");
 	//green volume
-	VolumeData* vd_g = Global::instance().getVolumeFactory()->clone(vd);
+	VolumeData* vd_g = Global::instance().getVolumeFactory().clone(vd);
 	vd_g->AddEmptyData(m_bits,
 		m_resx, m_resy, m_resz,
 		m_spcx, m_spcy, m_spcz,
@@ -84,7 +84,7 @@ int CombineList::Execute()
 	vd_g->setValue("spc from file", bool(true));
 	vd_g->setName(m_name + "_CH_G");
 	//blue volume
-	VolumeData* vd_b = Global::instance().getVolumeFactory()->clone(vd);
+	VolumeData* vd_b = Global::instance().getVolumeFactory().clone(vd);
 	vd_b->AddEmptyData(m_bits,
 		m_resx, m_resy, m_resz,
 		m_spcx, m_spcy, m_spcz,

@@ -27,6 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "VPropView.h"
 #include "VRenderFrame.h"
+#include <Scenegraph/VolumeData.h>
+#include <Scenegraph/VolumeGroup.h>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
 #include <wx/aboutdlg.h>
@@ -581,10 +583,12 @@ void VPropView::GetSettings()
 	wxString str;
 	double dval = 0.0;
 	int ival = 0;
+	bool bval = false;
+	long lval = 0;
 
 	//maximum value
-	m_max_val = m_vd->GetMaxValue();
-	m_max_val = Max(255.0, m_max_val);
+	m_vd->getValue("max int", m_max_val);
+	m_max_val = std::max(255.0, m_max_val);
 
 	//set range
 	wxFloatingPointValidator<double>* vald_fp;
@@ -595,21 +599,21 @@ void VPropView::GetSettings()
 	//gamma
 	if ((vald_fp = (wxFloatingPointValidator<double>*)m_gamma_text->GetValidator()))
 		vald_fp->SetRange(0.0, 10.0);
-	dval = m_vd->Get3DGamma();
+	m_vd->getValue("gamma 3d", dval);
 	m_gamma_sldr->SetValue(int(dval*100.0+0.5));
 	str = wxString::Format("%.2f", dval);
 	m_gamma_text->ChangeValue(str);
 	//boundary
 	if ((vald_fp = (wxFloatingPointValidator<double>*)m_boundary_text->GetValidator()))
 		vald_fp->SetRange(0.0, 1.0);
-	dval = m_vd->GetBoundary();
+	m_vd->getValue("extract boundary", dval);
 	m_boundary_sldr->SetValue(int(dval*2000.0+0.5));
 	str = wxString::Format("%.4f", dval);
 	m_boundary_text->ChangeValue(str);
 	//contrast
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_saturation_text->GetValidator()))
 		vald_i->SetMin(0);
-	dval = m_vd->GetOffset();
+	m_vd->getValue("saturation", dval);
 	ival = int(dval*m_max_val+0.5);
 	m_saturation_sldr->SetRange(0, int(m_max_val));
 	str = wxString::Format("%d", ival);
@@ -618,7 +622,7 @@ void VPropView::GetSettings()
 	//left threshold
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_left_thresh_text->GetValidator()))
 		vald_i->SetMin(0);
-	dval = m_vd->GetLeftThresh();
+	m_vd->getValue("low threshold", dval);
 	ival = int(dval*m_max_val+0.5);
 	m_left_thresh_sldr->SetRange(0, int(m_max_val));
 	str = wxString::Format("%d", ival);
@@ -627,7 +631,7 @@ void VPropView::GetSettings()
 	//right threshold
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_right_thresh_text->GetValidator()))
 		vald_i->SetMin(0);
-	dval = m_vd->GetRightThresh();
+	m_vd->getValue("high threshold", dval);
 	ival = int(dval*m_max_val+0.5);
 	m_right_thresh_sldr->SetRange(0, int(m_max_val));
 	str = wxString::Format("%d", ival);
@@ -636,21 +640,22 @@ void VPropView::GetSettings()
 	//luminance
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_luminance_text->GetValidator()))
 		vald_i->SetMin(0);
-	dval = m_vd->GetLuminance();
+	m_vd->getValue("luminance", dval);
 	ival = int(dval*m_max_val+0.5);
 	m_luminance_sldr->SetRange(0, int(m_max_val));
 	str = wxString::Format("%d", ival);
 	m_luminance_sldr->SetValue(ival);
 	m_luminance_text->ChangeValue(str);
 	//color
-	Color c = m_vd->GetColor();
+	FLTYPE::Color c;
+	m_vd->getValue("color", c);
 	wxColor wxc((unsigned char)(c.r()*255+0.5),
 		(unsigned char)(c.g()*255+0.5),
 		(unsigned char)(c.b()*255+0.5));
 	m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
 		wxc.Red(), wxc.Green(), wxc.Blue()));
 	m_color_btn->SetColour(wxc);
-	c = m_vd->GetMaskColor();
+	m_vd->getValue("sec color", c);
 	wxc = wxColor((unsigned char)(c.r()*255+0.5),
 		(unsigned char)(c.g()*255+0.5),
 		(unsigned char)(c.b()*255+0.5));
@@ -660,14 +665,15 @@ void VPropView::GetSettings()
 	//alpha
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_alpha_text->GetValidator()))
 		vald_i->SetMin(0);
-	dval = m_vd->GetAlpha();
+	m_vd->getValue("alpha", dval);
 	ival = int(dval*m_max_val+0.5);
 	m_alpha_sldr->SetRange(0, int(m_max_val));
 	str = wxString::Format("%d", ival);
 	m_alpha_sldr->SetValue(ival);
 	m_alpha_text->ChangeValue(str);
-	bool alpha = m_vd->GetEnableAlpha();
-	m_alpha_tool->ToggleTool(ID_AlphaChk,alpha);
+	bool alpha_enable;
+	m_vd->getValue("alpha enable", alpha_enable);
+	m_alpha_tool->ToggleTool(ID_AlphaChk, alpha_enable);
 
 	//shadings
 	if ((vald_fp = (wxFloatingPointValidator<double>*)m_low_shading_text->GetValidator()))
@@ -675,38 +681,46 @@ void VPropView::GetSettings()
 	if ((vald_fp = (wxFloatingPointValidator<double>*)m_hi_shading_text->GetValidator()))
 		vald_fp->SetRange(0.0, 100.0);
 	double amb, diff, spec, shine;
-	m_vd->GetMaterial(amb, diff, spec, shine);
+	//m_vd->GetMaterial(amb, diff, spec, shine);
+	m_vd->getValue("mat amb", amb);
+	m_vd->getValue("mat diff", diff);
+	m_vd->getValue("mat spec", spec);
+	m_vd->getValue("mat shine", shine);
 	m_low_shading_sldr->SetValue(amb*100.0);
 	str = wxString::Format("%.2f", amb);
 	m_low_shading_text->ChangeValue(str);
 	m_hi_shading_sldr->SetValue(shine*10.0);
 	str = wxString::Format("%.2f", shine);
 	m_hi_shading_text->ChangeValue(str);
-	bool shading = m_vd->GetVR()->get_shading();
-	m_shade_tool->ToggleTool(ID_ShadingEnableChk,shading);
+	bool shading_enable;
+	m_vd->getValue("shading enable", shading_enable);
+	m_shade_tool->ToggleTool(ID_ShadingEnableChk, shading_enable);
 
 	//shadow
 	if ((vald_fp = (wxFloatingPointValidator<double>*)m_shadow_text->GetValidator()))
 		vald_fp->SetRange(0.0, 1.0);
-	bool shadow = m_vd->GetShadow();
-	m_shadow_tool->ToggleTool(ID_ShadowChk, shadow);
-	double shadow_int;
-	m_vd->GetShadowParams(shadow_int);
-	m_shadow_sldr->SetValue(int(shadow_int*100.0+0.5));
-	str = wxString::Format("%.2f", shadow_int);
+	bool shadow_enable;
+	m_vd->getValue("shadow enable", shadow_enable);
+	m_shadow_tool->ToggleTool(ID_ShadowChk, shadow_enable);
+	m_vd->getValue("shadow int", dval);
+	m_shadow_sldr->SetValue(int(dval*100.0+0.5));
+	str = wxString::Format("%.2f", dval);
 	m_shadow_text->ChangeValue(str);
 
 	//smaple rate
 	if ((vald_fp = (wxFloatingPointValidator<double>*)m_sample_text->GetValidator()))
 		vald_fp->SetRange(0.0, 100.0);
-	double sr = m_vd->GetSampleRate();
-	m_sample_sldr->SetValue(sr*10.0);
-	str = wxString::Format("%.1f", sr);
+	m_vd->getValue("smaple rate", dval);
+	m_sample_sldr->SetValue(dval*10.0);
+	str = wxString::Format("%.1f", dval);
 	m_sample_text->ChangeValue(str);
 
 	//spacings
 	double spcx, spcy, spcz;
-	m_vd->GetBaseSpacings(spcx, spcy, spcz);
+	//m_vd->GetBaseSpacings(spcx, spcy, spcz);
+	m_vd->getValue("spc x", spcx);
+	m_vd->getValue("spc y", spcy);
+	m_vd->getValue("spc z", spcz);
 	if ((vald_fp = (wxFloatingPointValidator<double>*)m_space_x_text->GetValidator()))
 		vald_fp->SetMin(0.0);
 	str = wxString::Format("%.3f", spcx);
@@ -721,12 +735,13 @@ void VPropView::GetSettings()
 	m_space_z_text->ChangeValue(str);
 
 	//legend
-	m_options_toolbar->ToggleTool(ID_LegendChk,m_vd->GetLegend());
+	m_vd->getValue("legend", bval);
+	m_options_toolbar->ToggleTool(ID_LegendChk, bval);
 
 	//interpolate
-	bool interp = m_vd->GetInterpolate();
-	m_options_toolbar->ToggleTool(ID_InterpolateChk, interp);
-	if(interp) 
+	m_vd->getValue("interpolate", bval);
+	m_options_toolbar->ToggleTool(ID_InterpolateChk, bval);
+	if(bval) 
 		m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk, 
 		wxGetBitmapFromMemory(interpolate));
 	else
@@ -734,17 +749,18 @@ void VPropView::GetSettings()
 		wxGetBitmapFromMemory(interpolate_off));
 
 	//sync group
-	if (m_group)
-		m_sync_group = m_group->GetVolumeSyncProp();
+	//if (m_group)
+	//	m_sync_group = m_group->GetVolumeSyncProp();
 	m_options_toolbar->ToggleTool(ID_SyncGroupChk,m_sync_group);
 
 	//colormap
-	double low, high;
-	m_vd->GetColormapValues(low, high);
+	//double low, high;
+	//m_vd->GetColormapValues(low, high);
 	//low
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_colormap_low_value_text->GetValidator()))
 		vald_i->SetMin(0);
-	ival = int(low*m_max_val+0.5);
+	m_vd->getValue("colormap low", dval);
+	ival = int(dval*m_max_val+0.5);
 	m_colormap_low_value_sldr->SetRange(0, int(m_max_val));
 	str = wxString::Format("%d", ival);
 	m_colormap_low_value_sldr->SetValue(ival);
@@ -752,22 +768,26 @@ void VPropView::GetSettings()
 	//high
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_colormap_high_value_text->GetValidator()))
 		vald_i->SetMin(0);
-	ival = int(high*m_max_val+0.5);
+	m_vd->getValue("colormap high", dval);
+	ival = int(dval*m_max_val+0.5);
 	m_colormap_high_value_sldr->SetRange(0, int(m_max_val));
 	str = wxString::Format("%d", ival);
 	m_colormap_high_value_sldr->SetValue(ival);
 	m_colormap_high_value_text->ChangeValue(str);
 	//colormap
-	m_colormap_combo->SetSelection(m_vd->GetColormap());
-	m_colormap_combo2->SetSelection(m_vd->GetColormapProj());
+	m_vd->getValue("colormap type", lval);
+	m_colormap_combo->SetSelection(lval);
+	m_vd->getValue("colormap proj", lval);
+	m_colormap_combo2->SetSelection(lval);
 	//mode
-	bool colormap = m_vd->GetColormapMode() == 1;
-	m_colormap_tool->ToggleTool(ID_ColormapEnableChk, colormap);
+	m_vd->getValue("colormap mode", lval);
+	bool colormap_enable = lval == 1;
+	m_colormap_tool->ToggleTool(ID_ColormapEnableChk, colormap_enable);
 
 	//inversion
-	bool inv = m_vd->GetInvert();
-	m_options_toolbar->ToggleTool(ID_InvChk,inv);
-	if(inv) 
+	m_vd->getValue("invert", bval);
+	m_options_toolbar->ToggleTool(ID_InvChk, bval);
+	if(bval) 
 		m_options_toolbar->SetToolNormalBitmap(ID_InvChk, 
 		wxGetBitmapFromMemory(invert));
 	else
@@ -775,24 +795,18 @@ void VPropView::GetSettings()
 		wxGetBitmapFromMemory(invert_off));
 
 	//MIP
-	int mode = m_vd->GetMode();
-	if (mode == 1)
-	{
-		m_options_toolbar->ToggleTool(ID_MipChk,true);
-		if (m_threh_st)
-			m_threh_st->SetLabel("Shade Threshold : ");
-	}
+	m_vd->getValue("mip mode", lval);
+	bool mip_enable = lval == 1;
+	m_options_toolbar->ToggleTool(ID_MipChk, colormap_enable);
+	if (mip_enable)
+		m_threh_st->SetLabel("Shade Threshold : ");
 	else
-	{
-		m_options_toolbar->ToggleTool(ID_MipChk,false);
-		if (m_threh_st)
-			m_threh_st->SetLabel("Threshold : ");
-	}
+		m_threh_st->SetLabel("Threshold : ");
 
 	//noise reduction
-	bool nr = m_vd->GetNR();
-	m_options_toolbar->ToggleTool(ID_NRChk,nr);
-	if(nr) 
+	m_vd->getValue("noise redct", bval);
+	m_options_toolbar->ToggleTool(ID_NRChk, bval);
+	if(bval) 
 		m_options_toolbar->SetToolNormalBitmap(ID_NRChk, 
 		wxGetBitmapFromMemory(smooth));
 	else
@@ -800,8 +814,8 @@ void VPropView::GetSettings()
 		wxGetBitmapFromMemory(smooth_off));
 
 	//blend mode
-	int blend_mode = m_vd->GetBlendMode();
-	if (blend_mode == 2)
+	m_vd->getValue("blend mode", lval);
+	if (lval == 2)
 	{
 		m_options_toolbar->ToggleTool(ID_DepthChk,true);
 		m_options_toolbar->SetToolNormalBitmap(ID_DepthChk, wxGetBitmapFromMemory(depth));
@@ -812,23 +826,23 @@ void VPropView::GetSettings()
 		m_options_toolbar->SetToolNormalBitmap(ID_DepthChk, wxGetBitmapFromMemory(depth_off));
 	}
 
-	if (alpha)
+	if (alpha_enable)
 		EnableAlpha();
 	else
 		DisableAlpha();
-	if (shading)
+	if (shading_enable)
 		EnableShading();
 	else
 		DisableShading();
-	if (shadow)
+	if (shadow_enable)
 		EnableShadow();
 	else
 		DisableShadow();
-	if (colormap)
+	if (colormap_enable)
 		EnableColormap();
 	else
 		DisableColormap();
-	if (mode == 1)
+	if (mip_enable)
 		EnableMip();
 	else
 		DisableMip();
@@ -836,13 +850,13 @@ void VPropView::GetSettings()
 	Layout();
 }
 
-void VPropView::SetVolumeData(VolumeData* vd)
+void VPropView::SetVolumeData(FL::VolumeData* vd)
 {
 	m_vd = vd;
 	GetSettings();
 }
 
-VolumeData* VPropView::GetVolumeData()
+FL::VolumeData* VPropView::GetVolumeData()
 {
 	return m_vd;
 }
@@ -870,17 +884,17 @@ void VPropView::InitVRenderViews(unsigned int type)
 	}
 }
 
-void VPropView::SetGroup(DataGroup* group)
+void VPropView::SetGroup(FL::VolumeGroup* group)
 {
 	m_group = group;
 	if (m_group)
 	{
-		m_sync_group = m_group->GetVolumeSyncProp();
+		//m_sync_group = m_group->GetVolumeSyncProp();
 		m_options_toolbar->ToggleTool(ID_SyncGroupChk,m_sync_group);
 	}
 }
 
-DataGroup* VPropView::GetGroup()
+FL::VolumeGroup* VPropView::GetGroup()
 {
 	return m_group;
 }
@@ -901,8 +915,8 @@ void VPropView::OnGammaSync(wxMouseEvent& event)
 	wxString str = m_gamma_text->GetValue();
 	double dVal;
 	str.ToDouble(&dVal);
-	if (m_group)
-		m_group->Set3DGamma(dVal);
+	//if (m_group)
+	//	m_group->Set3DGamma(dVal);
 	RefreshVRenderViews(false, true);
 }
 
@@ -922,10 +936,11 @@ void VPropView::OnGammaText(wxCommandEvent& event)
 	m_gamma_sldr->SetValue(ival);
 
 	//set gamma value
-	if (m_sync_group && m_group)
-		m_group->Set3DGamma(val);
-	else if (m_vd)
-		m_vd->Set3DGamma(val);
+	//if (m_sync_group && m_group)
+	//	m_group->Set3DGamma(val);
+	//else if (m_vd)
+	//	m_vd->Set3DGamma(val);
+	m_vd->setValue("gamma 3d", val);
 
 	RefreshVRenderViews(false, true);
 }
@@ -935,8 +950,8 @@ void VPropView::OnBoundarySync(wxMouseEvent& event)
 	wxString str = m_boundary_text->GetValue();
 	double dVal;
 	str.ToDouble(&dVal);
-	if (m_group)
-		m_group->SetBoundary(dVal);
+	//if (m_group)
+	//	m_group->SetBoundary(dVal);
 	RefreshVRenderViews(false, true);
 }
 
@@ -956,10 +971,11 @@ void VPropView::OnBoundaryText(wxCommandEvent& event)
 	m_boundary_sldr->SetValue(ival);
 
 	//set boundary value
-	if (m_sync_group && m_group)
-		m_group->SetBoundary(val);
-	else if (m_vd)
-		m_vd->SetBoundary(val);
+	//if (m_sync_group && m_group)
+	//	m_group->SetBoundary(val);
+	//else if (m_vd)
+	//	m_vd->SetBoundary(val);
+	m_vd->setValue("extract boundary", val);
 
 	RefreshVRenderViews(false, true);
 }
@@ -971,8 +987,8 @@ void VPropView::OnSaturationSync(wxMouseEvent& event)
 	long iVal;
 	str.ToLong(&iVal);
 	double dVal = double(iVal) / m_max_val;
-	if (m_group)
-		m_group->SetOffset(dVal);
+	//if (m_group)
+	//	m_group->SetOffset(dVal);
 	RefreshVRenderViews(false, true);
 }
 
@@ -998,10 +1014,11 @@ void VPropView::OnSaturationText(wxCommandEvent& event)
 	double val = double(ival) / m_max_val;
 
 	//set contrast value
-	if (m_sync_group && m_group)
-		m_group->SetOffset(val);
-	else if (m_vd)
-		m_vd->SetOffset(val);
+	//if (m_sync_group && m_group)
+	//	m_group->SetOffset(val);
+	//else if (m_vd)
+	//	m_vd->SetOffset(val);
+	m_vd->setValue("saturation", val);
 
 	RefreshVRenderViews(false, true);
 }
@@ -1012,13 +1029,13 @@ void VPropView::OnThreshSync(wxMouseEvent& event)
 	long iVal;
 	str.ToLong(&iVal);
 	double dVal = double(iVal) / m_max_val;
-	if (m_group)
-		m_group->SetLeftThresh(dVal);
+	//if (m_group)
+	//	m_group->SetLeftThresh(dVal);
 	str = m_right_thresh_text->GetValue();
 	str.ToLong(&iVal);
 	dVal = double(iVal) / m_max_val;
-	if (m_group)
-		m_group->SetRightThresh(dVal);
+	//if (m_group)
+	//	m_group->SetRightThresh(dVal);
 	RefreshVRenderViews(false, true);
 }
 
@@ -1053,10 +1070,11 @@ void VPropView::OnLeftThreshText(wxCommandEvent &event)
 	m_left_thresh_sldr->SetValue(ival);
 
 	//set left threshold value
-	if (m_sync_group && m_group)
-		m_group->SetLeftThresh(val);
-	else if (m_vd)
-		m_vd->SetLeftThresh(val);
+	//if (m_sync_group && m_group)
+	//	m_group->SetLeftThresh(val);
+	//else if (m_vd)
+	//	m_vd->SetLeftThresh(val);
+	m_vd->setValue("low threshold", val);
 
 	RefreshVRenderViews(false, true);
 }
@@ -1094,10 +1112,11 @@ void VPropView::OnRightThreshText(wxCommandEvent &event)
 		m_right_thresh_sldr->SetValue(ival);
 
 		//set right threshold value
-		if (m_sync_group && m_group)
-			m_group->SetRightThresh(val);
-		else if (m_vd)
-			m_vd->SetRightThresh(val);
+		//if (m_sync_group && m_group)
+		//	m_group->SetRightThresh(val);
+		//else if (m_vd)
+		//	m_vd->SetRightThresh(val);
+		m_vd->setValue("high threshold", val);
 
 		RefreshVRenderViews(false, true);
 	}
@@ -1110,8 +1129,8 @@ void VPropView::OnLuminanceSync(wxMouseEvent& event)
 	long iVal;
 	str.ToLong(&iVal);
 	double dVal = double(iVal) / m_max_val;
-	if (m_group)
-		m_group->SetLuminance(dVal);
+	//if (m_group)
+	//	m_group->SetLuminance(dVal);
 	RefreshVRenderViews(true, true);
 }
 
@@ -1136,14 +1155,16 @@ void VPropView::OnLuminanceText(wxCommandEvent &event)
 	double val = double(ival) / m_max_val;
 	m_luminance_sldr->SetValue(ival);
 
-	if (m_sync_group && m_group)
-		m_group->SetLuminance(val);
-	else if (m_vd)
-		m_vd->SetLuminance(val);
+	//if (m_sync_group && m_group)
+	//	m_group->SetLuminance(val);
+	//else if (m_vd)
+	//	m_vd->SetLuminance(val);
+	m_vd->setValue("luminance", val);
 
 	if (m_vd)
 	{
-		Color color = m_vd->GetColor();
+		FLTYPE::Color color;
+		m_vd->getValue("color", color);
 		wxColor wxc((unsigned char)(color.r()*255),
 			(unsigned char)(color.g()*255),
 			(unsigned char)(color.b()*255));
@@ -1162,8 +1183,8 @@ void VPropView::OnHiShadingSync(wxMouseEvent& event)
 	wxString str = m_hi_shading_text->GetValue();
 	double dVal;
 	str.ToDouble(&dVal);
-	if (m_group)
-		m_group->SetHiShading(dVal);
+	//if (m_group)
+	//	m_group->SetHiShading(dVal);
 	RefreshVRenderViews(false, true);
 }
 
@@ -1182,10 +1203,11 @@ void VPropView::OnHiShadingText(wxCommandEvent &event)
 	m_hi_shading_sldr->SetValue(int(val*10.0 + 0.5));
 
 	//set high shading value
-	if (m_sync_group && m_group)
-		m_group->SetHiShading(val);
-	else if (m_vd)
-		m_vd->SetHiShading(val);
+	//if (m_sync_group && m_group)
+	//	m_group->SetHiShading(val);
+	//else if (m_vd)
+	//	m_vd->SetHiShading(val);
+	m_vd->setValue("high shading", val);
 
 	RefreshVRenderViews(false, true);
 }
@@ -1197,23 +1219,24 @@ void VPropView::OnShadowSync(wxMouseEvent& event)
 	wxString str = m_shadow_text->GetValue();
 	double dVal;
 	str.ToDouble(&dVal);
-	if (m_group)
-	{
-		m_group->SetShadow(bVal);
-		m_group->SetShadowParams(dVal);
-	}
+	//if (m_group)
+	//{
+	//	m_group->SetShadow(bVal);
+	//	m_group->SetShadowParams(dVal);
+	//}
 	RefreshVRenderViews(false, true);
 }
 
 void VPropView::OnShadowEnable(wxCommandEvent &event)
 {
 	bool shadow = m_shadow_tool->GetToolState(ID_ShadowChk);
-	if (m_sync_group && m_group)
-		m_group->SetShadow(shadow);
-	else if (m_group && m_group->GetBlendMode()==2)
-		m_vd->SetShadow(shadow);
-	else if (m_vd)
-		m_vd->SetShadow(shadow);
+	//if (m_sync_group && m_group)
+	//	m_group->SetShadow(shadow);
+	//else if (m_group && m_group->GetBlendMode()==2)
+	//	m_vd->SetShadow(shadow);
+	//else if (m_vd)
+	//	m_vd->SetShadow(shadow);
+	m_vd->setValue("shadow enable", shadow);
 
 	if (shadow)
 		EnableShadow();
@@ -1238,12 +1261,13 @@ void VPropView::OnShadowText(wxCommandEvent &event)
 	m_shadow_sldr->SetValue(int(val*100.0+0.5));
 
 	//set shadow darkness
-	if (m_sync_group && m_group)
-		m_group->SetShadowParams(val);
-	else if (m_group && m_group->GetBlendMode()==2)
-		m_group->SetShadowParams(val);
-	else if (m_vd)
-		m_vd->SetShadowParams(val);
+	//if (m_sync_group && m_group)
+	//	m_group->SetShadowParams(val);
+	//else if (m_group && m_group->GetBlendMode()==2)
+	//	m_group->SetShadowParams(val);
+	//else if (m_vd)
+	//	m_vd->SetShadowParams(val);
+	m_vd->setValue("shadow int", val);
 
 	RefreshVRenderViews(false, true);
 }
@@ -1255,18 +1279,19 @@ void VPropView::OnAlphaSync(wxMouseEvent& event)
 	long iVal;
 	str.ToLong(&iVal);
 	double dVal = double(iVal) / m_max_val;
-	if (m_group)
-		m_group->SetAlpha(dVal);
+	//if (m_group)
+	//	m_group->SetAlpha(dVal);
 	RefreshVRenderViews(false, true);
 }
 
 void VPropView::OnAlphaCheck(wxCommandEvent &event)
 {
 	bool alpha = m_alpha_tool->GetToolState(ID_AlphaChk);
-	if (m_sync_group && m_group)
-		m_group->SetEnableAlpha(alpha);
-	else if (m_vd)
-		m_vd->SetEnableAlpha(alpha);
+	//if (m_sync_group && m_group)
+	//	m_group->SetEnableAlpha(alpha);
+	//else if (m_vd)
+	//	m_vd->SetEnableAlpha(alpha);
+	m_vd->setValue("alpha enable", alpha);
 
 	if (alpha)
 		EnableAlpha();
@@ -1298,10 +1323,11 @@ void VPropView::OnAlphaText(wxCommandEvent& event)
 	m_alpha_sldr->SetValue(ival);
 
 	//set alpha value
-	if (m_sync_group && m_group)
-		m_group->SetAlpha(val);
-	else if (m_vd)
-		m_vd->SetAlpha(val);
+	//if (m_sync_group && m_group)
+	//	m_group->SetAlpha(val);
+	//else if (m_vd)
+	//	m_vd->SetAlpha(val);
+	m_vd->setValue("alpha", val);
 
 	RefreshVRenderViews(false, true);
 }
@@ -1311,8 +1337,8 @@ void VPropView::OnSampleSync(wxMouseEvent& event)
 	wxString str = m_sample_text->GetValue();
 	double srate = 0.0;
 	str.ToDouble(&srate);
-	if (m_group)
-		m_group->SetSampleRate(srate);
+	//if (m_group)
+	//	m_group->SetSampleRate(srate);
 	RefreshVRenderViews(false, true);
 }
 
@@ -1334,21 +1360,22 @@ void VPropView::OnSampleText(wxCommandEvent& event)
 	//set sample rate value
 	if (m_vrv && m_vrv->GetVolMethod()==VOL_METHOD_MULTI)
 	{
-		for (int i=0; i<m_vrv->GetAllVolumeNum(); i++)
-		{
-			VolumeData* vd = m_vrv->GetAllVolumeData(i);
-			if (vd)
-				vd->SetSampleRate(srate);
-		}
+		//for (int i=0; i<m_vrv->GetAllVolumeNum(); i++)
+		//{
+		//	VolumeData* vd = m_vrv->GetAllVolumeData(i);
+		//	if (vd)
+		//		vd->SetSampleRate(srate);
+		//}
 	}
 	else
 	{
-		if (m_sync_group && m_group)
-			m_group->SetSampleRate(srate);
-		else if (m_group && m_group->GetBlendMode()==2)
-			m_group->SetSampleRate(srate);
-		else if (m_vd)
-			m_vd->SetSampleRate(srate);
+		//if (m_sync_group && m_group)
+		//	m_group->SetSampleRate(srate);
+		//else if (m_group && m_group->GetBlendMode()==2)
+		//	m_group->SetSampleRate(srate);
+		//else if (m_vd)
+		//	m_vd->SetSampleRate(srate);
+		m_vd->setValue("sample rate", srate);
 	}
 
 	RefreshVRenderViews(false, true);
@@ -1361,11 +1388,11 @@ void VPropView::OnShadingSync(wxMouseEvent& event)
 	wxString str = m_low_shading_text->GetValue();
 	double dVal;
 	str.ToDouble(&dVal);
-	if (m_group)
-	{
-		m_group->SetShading(bVal);
-		m_group->SetLowShading(dVal);
-	}
+	//if (m_group)
+	//{
+	//	m_group->SetShading(bVal);
+	//	m_group->SetLowShading(dVal);
+	//}
 	RefreshVRenderViews(false, true);
 }
 
@@ -1384,10 +1411,11 @@ void VPropView::OnLowShadingText(wxCommandEvent &event)
 	m_low_shading_sldr->SetValue(int(val*100.0+0.5));
 
 	//set low shading value
-	if (m_sync_group && m_group)
-		m_group->SetLowShading(val);
-	else if (m_vd)
-		m_vd->SetLowShading(val);
+	//if (m_sync_group && m_group)
+	//	m_group->SetLowShading(val);
+	//else if (m_vd)
+	//	m_vd->SetLowShading(val);
+	m_vd->setValue("low shading", val);
 
 	RefreshVRenderViews(false, true);
 }
@@ -1395,10 +1423,11 @@ void VPropView::OnLowShadingText(wxCommandEvent &event)
 void VPropView::OnShadingEnable(wxCommandEvent &event)
 {
 	bool shading = m_shade_tool->GetToolState(ID_ShadingEnableChk);
-	if (m_sync_group && m_group)
-		m_group->SetShading(shading);
-	else if (m_vd)
-		m_vd->SetShading(shading);
+	//if (m_sync_group && m_group)
+	//	m_group->SetShading(shading);
+	//else if (m_vd)
+	//	m_vd->SetShading(shading);
+	m_vd->setValue("shading enable", shading);
 
 	if (shading)
 		EnableShading();
@@ -1420,12 +1449,12 @@ void VPropView::OnColormapSync(wxMouseEvent& event)
 	str = m_colormap_high_value_text->GetValue();
 	str.ToLong(&iVal);
 	dVal2 = double(iVal) / m_max_val;
-	if (m_group)
-	{
-		m_group->SetColormapMode(bVal ? 1 : 0);
-		m_group->SetColormapDisp(bVal);
-		m_group->SetColormapValues(dVal1, dVal2);
-	}
+	//if (m_group)
+	//{
+	//	m_group->SetColormapMode(bVal ? 1 : 0);
+	//	m_group->SetColormapDisp(bVal);
+	//	m_group->SetColormapValues(dVal1, dVal2);
+	//}
 	RefreshVRenderViews(false, true);
 }
 
@@ -1434,16 +1463,18 @@ void VPropView::OnEnableColormap(wxCommandEvent &event)
 	bool colormap = 
 		m_colormap_tool->GetToolState(ID_ColormapEnableChk);
 
-	if (m_sync_group && m_group)
-	{
-		m_group->SetColormapMode(colormap?1:0);
-		m_group->SetColormapDisp(colormap);
-	}
-	else if (m_vd)
-	{
-		m_vd->SetColormapMode(colormap?1:0);
-		m_vd->SetColormapDisp(colormap);
-	}
+	//if (m_sync_group && m_group)
+	//{
+	//	m_group->SetColormapMode(colormap?1:0);
+	//	m_group->SetColormapDisp(colormap);
+	//}
+	//else if (m_vd)
+	//{
+	//	m_vd->SetColormapMode(colormap?1:0);
+	//	m_vd->SetColormapDisp(colormap);
+	//}
+	m_vd->setValue("colormap enable", colormap);
+	m_vd->setValue("colormap mode", long(colormap ? 1 : 0));
 
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
@@ -1494,14 +1525,15 @@ void VPropView::OnColormapHighValueText(wxCommandEvent &event)
 
 		double val = double(iVal)/m_max_val;
 
-		if (m_sync_group && m_group)
-			m_group->SetColormapValues(-1, val);
-		else if (m_vd)
-		{
-			double low, high;
-			m_vd->GetColormapValues(low, high);
-			m_vd->SetColormapValues(low, val);
-		}
+		//if (m_sync_group && m_group)
+		//	m_group->SetColormapValues(-1, val);
+		//else if (m_vd)
+		//{
+		//	double low, high;
+		//	m_vd->GetColormapValues(low, high);
+		//	m_vd->SetColormapValues(low, val);
+		//}
+		m_vd->setValue("colormap high", val);
 
 		RefreshVRenderViews(false, true);
 	}
@@ -1537,38 +1569,41 @@ void VPropView::OnColormapLowValueText(wxCommandEvent &event)
 
 	double val = double(iVal)/m_max_val;
 
-	if (m_sync_group && m_group)
-		m_group->SetColormapValues(val, -1);
-	else if (m_vd)
-	{
-		double low, high;
-		m_vd->GetColormapValues(low, high);
-		m_vd->SetColormapValues(val, high);
-	}
+	//if (m_sync_group && m_group)
+	//	m_group->SetColormapValues(val, -1);
+	//else if (m_vd)
+	//{
+	//	double low, high;
+	//	m_vd->GetColormapValues(low, high);
+	//	m_vd->SetColormapValues(val, high);
+	//}
+	m_vd->setValue("colormap low", val);
 
 	RefreshVRenderViews(false, true);
 }
 
 void VPropView::OnColormapCombo(wxCommandEvent &event)
 {
-	int colormap = m_colormap_combo->GetCurrentSelection();
+	long colormap = m_colormap_combo->GetCurrentSelection();
 
-	if (m_sync_group && m_group)
-		m_group->SetColormap(colormap);
-	else if (m_vd)
-		m_vd->SetColormap(colormap);
+	//if (m_sync_group && m_group)
+	//	m_group->SetColormap(colormap);
+	//else if (m_vd)
+	//	m_vd->SetColormap(colormap);
+	m_vd->setValue("colormap type", colormap);
 
 	RefreshVRenderViews(false, true);
 }
 
 void VPropView::OnColormapCombo2(wxCommandEvent &event)
 {
-	int colormap_proj = m_colormap_combo2->GetCurrentSelection();
+	long colormap_proj = m_colormap_combo2->GetCurrentSelection();
 
-	if (m_sync_group && m_group)
-		m_group->SetColormapProj(colormap_proj);
-	else if (m_vd)
-		m_vd->SetColormapProj(colormap_proj);
+	//if (m_sync_group && m_group)
+	//	m_group->SetColormapProj(colormap_proj);
+	//else if (m_vd)
+	//	m_vd->SetColormapProj(colormap_proj);
+	m_vd->setValue("colormap proj", colormap_proj);
 
 	RefreshVRenderViews(false, true);
 }
@@ -1576,26 +1611,29 @@ void VPropView::OnColormapCombo2(wxCommandEvent &event)
 //6
 void VPropView::OnColorChange(wxColor c)
 {
-	Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
+	FLTYPE::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
 	if (m_vd)
 	{
-		if (m_lumi_change)
-		{
-			m_vd->SetColor(color, true);
-			m_lumi_change = false;
-		}
-		else
-			m_vd->SetColor(color);
+		//if (m_lumi_change)
+		//{
+		//	m_vd->SetColor(color, true);
+		//	m_lumi_change = false;
+		//}
+		//else
+		//	m_vd->SetColor(color);
+		m_vd->setValue("color", color);
 
-		double lum = m_vd->GetLuminance();
-		int ilum = int(lum*m_max_val+0.5);
-		m_luminance_sldr->SetValue(ilum);
-		wxString str = wxString::Format("%d", ilum);
-		m_luminance_text->ChangeValue(str);
+		//double lum = m_vd->GetLuminance();
+		//int ilum = int(lum*m_max_val+0.5);
+		//m_luminance_sldr->SetValue(ilum);
+		//wxString str = wxString::Format("%d", ilum);
+		//m_luminance_text->ChangeValue(str);
 
-		if (!m_vd->GetMaskColorSet())
+		bool sec_color_set;
+		m_vd->getValue("sec color set", sec_color_set);
+		if (!sec_color_set)
 		{
-			color = m_vd->GetMaskColor();
+			m_vd->getValue("sec color", color);
 			wxColor wxc((unsigned char)(color.r()*255),
 				(unsigned char)(color.g()*255),
 				(unsigned char)(color.b()*255));
@@ -1619,10 +1657,10 @@ void VPropView::OnColorChange(wxColor c)
 
 void VPropView::OnColor2Change(wxColor c)
 {
-	Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
+	FLTYPE::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
 	if (m_vd)
 	{
-		m_vd->SetMaskColor(color);
+		m_vd->setValue("sec color", color);
 		RefreshVRenderViews(true, true);
 	}
 }
@@ -1826,22 +1864,24 @@ void VPropView::OnInvCheck(wxCommandEvent &event)
 		m_options_toolbar->SetToolNormalBitmap(ID_InvChk, 
 		wxGetBitmapFromMemory(invert_off));
 
-	if (m_sync_group && m_group)
-		m_group->SetInvert(inv);
-	else if (m_vd)
-		m_vd->SetInvert(inv);
+	//if (m_sync_group && m_group)
+	//	m_group->SetInvert(inv);
+	//else if (m_vd)
+	//	m_vd->SetInvert(inv);
+	m_vd->setValue("invert", inv);
 
 	RefreshVRenderViews(false, true);
 }
 
 void VPropView::OnMIPCheck(wxCommandEvent &event)
 {
-	int val = m_options_toolbar->GetToolState(ID_MipChk)?1:0;
+	long val = m_options_toolbar->GetToolState(ID_MipChk)?1:0;
 
-	if (m_sync_group && m_group)
-		m_group->SetMode(val);
-	else if (m_vd)
-		m_vd->SetMode(val);
+	//if (m_sync_group && m_group)
+	//	m_group->SetMode(val);
+	//else if (m_vd)
+	//	m_vd->SetMode(val);
+	m_vd->setValue("mip mode", val);
 
 	if (val==1)
 	{
@@ -1888,21 +1928,22 @@ void VPropView::OnNRCheck(wxCommandEvent &event)
 
 	if (m_vrv && m_vrv->GetVolMethod()==VOL_METHOD_MULTI)
 	{
-		for (int i=0; i<m_vrv->GetAllVolumeNum(); i++)
-		{
-			VolumeData* vd = m_vrv->GetAllVolumeData(i);
-			if (vd)
-				vd->SetNR(val);
-		}
+		//for (int i=0; i<m_vrv->GetAllVolumeNum(); i++)
+		//{
+		//	VolumeData* vd = m_vrv->GetAllVolumeData(i);
+		//	if (vd)
+		//		vd->SetNR(val);
+		//}
 	}
 	else
 	{
-		if (m_sync_group && m_group)
-			m_group->SetNR(val);
-		else if (m_group && m_group->GetBlendMode()==2)
-			m_group->SetNR(val);
-		else if (m_vd)
-			m_vd->SetNR(val);
+		//if (m_sync_group && m_group)
+		//	m_group->SetNR(val);
+		//else if (m_group && m_group->GetBlendMode()==2)
+		//	m_group->SetNR(val);
+		//else if (m_vd)
+		//	m_vd->SetNR(val);
+		m_vd->setValue("noise redct", val);
 	}
 
 	RefreshVRenderViews(false, true);
@@ -1924,27 +1965,27 @@ void VPropView::OnDepthCheck(wxCommandEvent &event)
 	else
 		m_options_toolbar->SetToolNormalBitmap(ID_DepthChk, wxGetBitmapFromMemory(depth_off));
 
-	if (val)
-	{
-		if (m_group)
-		{
-			m_group->SetBlendMode(2);
-			if (m_vd)
-			{
-				m_group->SetNR(m_vd->GetNR());
-				m_group->SetSampleRate(m_vd->GetSampleRate());
-				m_group->SetShadow(m_vd->GetShadow());
-				double sp;
-				m_vd->GetShadowParams(sp);
-				m_group->SetShadowParams(sp);
-			}
-		}
-	}
-	else
-	{
-		if (m_group)
-			m_group->SetBlendMode(0);
-	}
+	//if (val)
+	//{
+	//	if (m_group)
+	//	{
+	//		m_group->SetBlendMode(2);
+	//		if (m_vd)
+	//		{
+	//			m_group->SetNR(m_vd->GetNR());
+	//			m_group->SetSampleRate(m_vd->GetSampleRate());
+	//			m_group->SetShadow(m_vd->GetShadow());
+	//			double sp;
+	//			m_vd->GetShadowParams(sp);
+	//			m_group->SetShadowParams(sp);
+	//		}
+	//	}
+	//}
+	//else
+	//{
+	//	if (m_group)
+	//		m_group->SetBlendMode(0);
+	//}
 
 	RefreshVRenderViews(false, true);
 }
@@ -1978,20 +2019,26 @@ bool VPropView::SetSpacings()
 	if (vr_frame && vr_frame->GetSettingDlg())
 		override_vox = vr_frame->GetSettingDlg()->GetOverrideVox();
 
-	if ((m_sync_group || override_vox) && m_group)
-	{
-		for (int i = 0; i < m_group->GetVolumeNum(); i++)
-		{
-			m_group->GetVolumeData(i)->SetSpacings(spcx, spcy, spcz);
-			m_group->GetVolumeData(i)->SetBaseSpacings(spcx, spcy, spcz);
-		}
-	}
-	else if (m_vd)
-	{
-		m_vd->SetSpacings(spcx, spcy, spcz);
-		m_vd->SetBaseSpacings(spcx, spcy, spcz);
-	}
-	else return false;
+	//if ((m_sync_group || override_vox) && m_group)
+	//{
+	//	for (int i = 0; i < m_group->GetVolumeNum(); i++)
+	//	{
+	//		m_group->GetVolumeData(i)->SetSpacings(spcx, spcy, spcz);
+	//		m_group->GetVolumeData(i)->SetBaseSpacings(spcx, spcy, spcz);
+	//	}
+	//}
+	//else if (m_vd)
+	//{
+	//	m_vd->SetSpacings(spcx, spcy, spcz);
+	//	m_vd->SetBaseSpacings(spcx, spcy, spcz);
+	//}
+	//else return false;
+	m_vd->setValue("spc x", spcx);
+	m_vd->setValue("spc y", spcy);
+	m_vd->setValue("spc z", spcz);
+	m_vd->setValue("base spc x", spcx);
+	m_vd->setValue("base spc y", spcy);
+	m_vd->setValue("base spc z", spcz);
 
 	return true;
 }
@@ -1999,7 +2046,9 @@ bool VPropView::SetSpacings()
 //enable/disable
 void VPropView::EnableAlpha()
 {
-	if (m_vd->GetMode() != 1)
+	long mip_mode;
+	m_vd->getValue("mip mode", mip_mode);
+	if (mip_mode != 1)
 	{
 		m_alpha_sldr->Enable();
 		m_alpha_text->Enable();
@@ -2018,7 +2067,9 @@ void VPropView::EnableShading()
 	m_low_shading_text->Enable();
 	m_hi_shading_sldr->Enable();
 	m_hi_shading_text->Enable();
-	if (m_vd->GetMode() == 1)
+	long mip_mode;
+	m_vd->getValue("mip mode", mip_mode);
+	if (mip_mode == 1)
 	{
 		m_left_thresh_sldr->Enable();
 		m_left_thresh_text->Enable();
@@ -2033,8 +2084,12 @@ void VPropView::DisableShading()
 	m_low_shading_text->Disable();
 	m_hi_shading_sldr->Disable();
 	m_hi_shading_text->Disable();
-	if (m_vd->GetMode() == 1 &&
-		!m_vd->GetShadow())
+	long mip_mode;
+	m_vd->getValue("mip mode", mip_mode);
+	bool shadow_enable;
+	m_vd->getValue("shadow enable", shadow_enable);
+	if (mip_mode == 1 &&
+		!shadow_enable)
 	{
 		m_left_thresh_sldr->Disable();
 		m_left_thresh_text->Disable();
@@ -2047,7 +2102,9 @@ void VPropView::EnableShadow()
 {
 	m_shadow_sldr->Enable();
 	m_shadow_text->Enable();
-	if (m_vd->GetMode() == 1)
+	long mip_mode;
+	m_vd->getValue("mip mode", mip_mode);
+	if (mip_mode == 1)
 	{
 		m_left_thresh_sldr->Enable();
 		m_left_thresh_text->Enable();
@@ -2060,8 +2117,12 @@ void VPropView::DisableShadow()
 {
 	m_shadow_sldr->Disable();
 	m_shadow_text->Disable();
-	if (m_vd->GetMode() == 1 &&
-		!m_vd->GetShading())
+	long mip_mode;
+	m_vd->getValue("mip mode", mip_mode);
+	bool shading_enable;
+	m_vd->getValue("shading enable", shading_enable);
+	if (mip_mode == 1 &&
+		!shading_enable)
 	{
 		m_left_thresh_sldr->Disable();
 		m_left_thresh_text->Disable();
@@ -2093,8 +2154,12 @@ void VPropView::EnableMip()
 	m_boundary_text->Disable();
 	m_luminance_sldr->Disable();
 	m_luminance_text->Disable();
-	if (m_vd->GetShading() ||
-		m_vd->GetShadow())
+	bool shading_enable;
+	m_vd->getValue("shading enable", shading_enable);
+	bool shadow_enable;
+	m_vd->getValue("shadow enable", shadow_enable);
+	if (shading_enable ||
+		shadow_enable)
 		EnableShading();
 	else
 		DisableShading();
@@ -2102,7 +2167,9 @@ void VPropView::EnableMip()
 
 void VPropView::DisableMip()
 {
-	if (m_vd->GetEnableAlpha())
+	bool alpha_enable;
+	m_vd->getValue("alpha enable", alpha_enable);
+	if (alpha_enable)
 		EnableAlpha();
 	else
 		DisableAlpha();
@@ -2110,8 +2177,12 @@ void VPropView::DisableMip()
 	m_boundary_text->Enable();
 	m_luminance_sldr->Enable();
 	m_luminance_text->Enable();
-	if (m_vd->GetShading() ||
-		m_vd->GetShadow())
+	bool shading_enable;
+	m_vd->getValue("shading enable", shading_enable);
+	bool shadow_enable;
+	m_vd->getValue("shadow enable", shadow_enable);
+	if (shading_enable ||
+		shadow_enable)
 		EnableShading();
 	else
 		DisableShading();
@@ -2125,7 +2196,8 @@ void VPropView::DisableMip()
 void VPropView::UpdateMaxVal(double value)
 {
 	if (!m_vd) return;
-	int bits = m_vd->GetBits();
+	long bits;
+	m_vd->getValue("bits", bits);
 	if (bits == 8)
 		return;
 	else if (bits > 8)
@@ -2136,8 +2208,8 @@ void VPropView::UpdateMaxVal(double value)
 			value = 65535.0;
 	}
 	m_max_val = value;
-	m_vd->SetMaxValue(m_max_val);
-	m_vd->SetScalarScale(65535.0 / m_max_val);
+	m_vd->setValue("max int", m_max_val);
+	m_vd->setValue("int scale", 65535.0 / m_max_val);
 	GetSettings();
 }
 
@@ -2152,7 +2224,7 @@ void VPropView::OnLegendCheck(wxCommandEvent& event)
 {
 	bool leg = m_options_toolbar->GetToolState(ID_LegendChk);
 	if (m_vd)
-		m_vd->SetLegend(leg);
+		m_vd->setValue("legend", leg);
 
 	RefreshVRenderViews(false, true);
 }
@@ -2167,10 +2239,11 @@ void VPropView::OnInterpolateCheck(wxCommandEvent& event)
 	else
 		m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk, 
 		wxGetBitmapFromMemory(interpolate_off));
-	if (m_sync_group && m_group)
-		m_group->SetInterpolate(inv);
-	else if (m_vd)
-		m_vd->SetInterpolate(inv);
+	//if (m_sync_group && m_group)
+	//	m_group->SetInterpolate(inv);
+	//else if (m_vd)
+	//	m_vd->SetInterpolate(inv);
+	m_vd->setValue("interpolate", inv);
 	if (m_vrv)
 		m_vrv->m_glview->SetIntp(inv);
 
@@ -2181,7 +2254,7 @@ void VPropView::OnInterpolateCheck(wxCommandEvent& event)
 void VPropView::OnSyncGroupCheck(wxCommandEvent& event)
 {
 	m_sync_group = m_options_toolbar->GetToolState(ID_SyncGroupChk);
-	if (m_group)
+/*	if (m_group)
 		m_group->SetVolumeSyncProp(m_sync_group);
 
 	if (m_sync_group && m_group)
@@ -2269,13 +2342,13 @@ void VPropView::OnSyncGroupCheck(wxCommandEvent& event)
 		bVal = m_options_toolbar->GetToolState(ID_InvChk);
 		m_group->SetNR(bVal);
 	}
-
+*/
 	RefreshVRenderViews(false, true);
 }
 
 void VPropView::OnSaveDefault(wxCommandEvent& event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+/*	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (!vr_frame)
 		return;
 	DataManager *mgr = vr_frame->GetDataManager();
@@ -2427,12 +2500,12 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
 	expath = wxPathOnly(expath);
 	wxString dft = expath + "/default_volume_settings.dft";
 	wxFileOutputStream os(dft);
-	fconfig.Save(os);
+	fconfig.Save(os);*/
 }
 
 void VPropView::OnResetDefault(wxCommandEvent &event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+/*	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (!vr_frame)
 		return;
 	DataManager *mgr = vr_frame->GetDataManager();
@@ -2633,5 +2706,5 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 		DisableMip();
 
 	//apply all
-	RefreshVRenderViews(false, true);
+	RefreshVRenderViews(false, true);*/
 }

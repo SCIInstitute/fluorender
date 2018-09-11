@@ -25,13 +25,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef _MEASUREDLG_H_
+#define _MEASUREDLG_H_
+
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 #include <wx/clrpicker.h>
 #include "FLIVR/Color.h"
-
-#ifndef _MEASUREDLG_H_
-#define _MEASUREDLG_H_
 
 using namespace std;
 using namespace FLIVR;

@@ -27,6 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "TreePanel.h"
 #include "VRenderFrame.h"
+#include <Global/Global.h>
+#include <Scenegraph/VolumeData.h>
 #include "tick.xpm"
 #include "cross.xpm"
 #include "Formats/png_resource.h"
@@ -164,10 +166,10 @@ void DataTreeCtrl::DeleteSelection()
 					{
 						if (item_data->type == 2)//volume data
 						{
-							VolumeData* vd = vrv->GetVolumeData(name_data);
+							FL::VolumeData* vd = vrv->GetVolumeData(name_data);
 							if (vd)
 							{
-								vd->SetDisp(true);
+								vd->setValue("display", true);
 								vrv->RemoveVolumeData(name_data);
 								if (vrv->GetVolMethod() == VOL_METHOD_MULTI)
 								{
@@ -924,7 +926,8 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 	else if (item_data->type == 2)
 	{
 		//volume
-		VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+		FL::VolumeData* vd = FL::Global::instance().
+			getVolumeFactory().findFirst(name.ToStdString());
 		if (vd)
 			vd->RandomizeColor();
 	}
@@ -942,9 +945,9 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 		VRenderView* vrv = vr_frame->GetView(par_name);
 		if (vrv)
 		{
-			DataGroup* group = vrv->GetGroup(name);
-			if (group)
-				group->RandomizeColor();
+			//FL::VolumeGroup* group = vrv->GetGroup(name);
+			//if (group)
+			//	group->RandomizeColor();
 		}
 	}
 	else if (item_data->type == 6)
@@ -1019,9 +1022,10 @@ void DataTreeCtrl::UpdateSelection()
 								VRenderView* vrv = vr_frame->GetView(str);
 								if (vrv)
 								{
-									VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+									FL::VolumeData* vd = FL::Global::instance().
+										getVolumeFactory().findFirst(name.ToStdString());
 									str = GetItemText(par_item);
-									DataGroup* group = vrv->GetGroup(str);
+									FL::VolumeGroup* group = vrv->GetGroup(str);
 									vr_frame->GetAdjustView()->SetGroupLink(group);
 									vr_frame->OnSelection(2, vrv, group, vd, 0);
 									vrv->SetVolumeA(vd);
@@ -1037,7 +1041,8 @@ void DataTreeCtrl::UpdateSelection()
 								VRenderView* vrv = vr_frame->GetView(str);
 								if (vrv)
 								{
-									VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+									FL::VolumeData* vd = FL::Global::instance().
+										getVolumeFactory().findFirst(name.ToStdString());
 									vr_frame->GetAdjustView()->SetGroupLink(0);
 									vr_frame->OnSelection(2, vrv, 0, vd);
 									vrv->SetVolumeA(vd);
@@ -1095,7 +1100,7 @@ void DataTreeCtrl::UpdateSelection()
 					VRenderView* vrv = vr_frame->GetView(par_name);
 					if (vrv)
 					{
-						DataGroup* group = vrv->GetGroup(name);
+						FL::VolumeGroup* group = vrv->GetGroup(name);
 						vr_frame->OnSelection(5, vrv, group);
 					}
 				}
@@ -1258,14 +1263,17 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 				break;
 			case 2://volume data
 				{
-					VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+					FL::VolumeData* vd = FL::Global::instance().
+						getVolumeFactory().findFirst(name.ToStdString());
 					if (vd)
 					{
 						if (rc)
 							vd->RandomizeColor();
 						else
 						{
-							vd->ToggleDisp();
+							//vd->ToggleDisp();
+							bool disp;
+							vd->toggleValue("display", disp);
 							for (int i=0; i<vr_frame->GetViewNum(); i++)
 							{
 								VRenderView* vrv = vr_frame->GetView(i);
@@ -1311,17 +1319,17 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 					VRenderView* vrv = vr_frame->GetView(par_name);
 					if (vrv)
 					{
-						DataGroup* group = vrv->GetGroup(name);
-						if (group)
-						{
-							if (rc)
-								group->RandomizeColor();
-							else
-							{
-								group->ToggleDisp();
-								vrv->SetVolPopDirty();
-							}
-						}
+						FL::VolumeGroup* group = vrv->GetGroup(name);
+						//if (group)
+						//{
+						//	if (rc)
+						//		group->RandomizeColor();
+						//	else
+						//	{
+						//		group->ToggleDisp();
+						//		vrv->SetVolPopDirty();
+						//	}
+						//}
 					}
 				}
 				break;
@@ -1875,7 +1883,8 @@ void DataTreeCtrl::BrushClear()
 					VRenderView* vrv = vr_frame->GetView(str);
 					if (vrv)
 					{
-						VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+						FL::VolumeData* vd = FL::Global::instance().
+							getVolumeFactory().findFirst(name.ToStdString());
 						if (vd)
 						{
 							int int_mode = vrv->GetIntMode();
@@ -1896,7 +1905,8 @@ void DataTreeCtrl::BrushClear()
 					VRenderView* vrv = vr_frame->GetView(str);
 					if (vrv)
 					{
-						VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+						FL::VolumeData* vd = FL::Global::instance().
+							getVolumeFactory().findFirst(name.ToStdString());
 						if (vd)
 						{
 							int int_mode = vrv->GetIntMode();
@@ -1939,7 +1949,8 @@ void DataTreeCtrl::BrushCreate()
 					VRenderView* vrv = vr_frame->GetView(str);
 					if (vrv)
 					{
-						VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+						FL::VolumeData* vd = FL::Global::instance().
+							getVolumeFactory().findFirst(name.ToStdString());
 						if (vd)
 						{
 							vrv->SetVolumeA(vd);
@@ -1954,7 +1965,8 @@ void DataTreeCtrl::BrushCreate()
 					VRenderView* vrv = vr_frame->GetView(str);
 					if (vrv)
 					{
-						VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+						FL::VolumeData* vd = FL::Global::instance().
+							getVolumeFactory().findFirst(name.ToStdString());
 						if (vd)
 						{
 							vrv->SetVolumeA(vd);
@@ -1997,7 +2009,8 @@ void DataTreeCtrl::BrushCreateInv()
 					VRenderView* vrv = vr_frame->GetView(str);
 					if (vrv)
 					{
-						VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+						FL::VolumeData* vd = FL::Global::instance().
+							getVolumeFactory().findFirst(name.ToStdString());
 						if (vd)
 						{
 							vrv->SetVolumeA(vd);
@@ -2012,7 +2025,8 @@ void DataTreeCtrl::BrushCreateInv()
 					VRenderView* vrv = vr_frame->GetView(str);
 					if (vrv)
 					{
-						VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+						FL::VolumeData* vd = FL::Global::instance().
+							getVolumeFactory().findFirst(name.ToStdString());
 						if (vd)
 						{
 							vrv->SetVolumeA(vd);

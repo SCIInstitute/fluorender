@@ -3076,9 +3076,8 @@ int Annotations::Load(wxString &filename, DataManager* mgr)
 		else if (sline.SubString(0, 7) == "Volume: ")
 		{
 			str = sline.SubString(8, sline.Length()-1);
-			FL::VolumeData* vd = dynamic_cast<FL::VolumeData*>(
-				FL::Global::instance().getVolumeFactory()->
-				findFirst(str.ToStdString()));
+			FL::VolumeData* vd =  FL::Global::instance().getVolumeFactory().
+				findFirst(str.ToStdString());
 			//mgr->GetVolumeData(str);
 			if (vd)
 			{
@@ -4584,8 +4583,8 @@ wxString DataManager::SearchProjectPath(wxString &filename)
 		}
 		else
 			search_str.Prepend(pathname[i]);
-	}
-	return "";*/
+	}*/
+	return "";
 }
 
 /*int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, int ch_num, int t_num)

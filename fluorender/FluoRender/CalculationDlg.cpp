@@ -147,7 +147,7 @@ void CalculationDlg::OnLoadA(wxCommandEvent &event)
 		{
 		case 2://volume
 			//m_vol1 = vr_frame->GetCurSelVol();
-			FL::Global::instance().getVolumeFactory()->
+			FL::Global::instance().getVolumeFactory().
 				getValue("current", (FL::Referenced**)&m_vol1);
 			m_group = 0;
 			if (m_vol1)
@@ -171,7 +171,7 @@ void CalculationDlg::OnLoadB(wxCommandEvent &event)
 		{
 		case 2://volume
 			//m_vol2 = vr_frame->GetCurSelVol();
-			FL::Global::instance().getVolumeFactory()->
+			FL::Global::instance().getVolumeFactory().
 				getValue("current", (FL::Referenced**)&m_vol2);
 			if (m_vol2)
 				m_calc_b_text->SetValue(m_vol2->getName());

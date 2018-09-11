@@ -26,6 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "ListPanel.h"
+#include <Global/Global.h>
+#include <Scenegraph/VolumeData.h>
 #include "DataManager.h"
 #include "VRenderFrame.h"
 #include "Formats/png_resource.h"
@@ -52,7 +54,7 @@ EVT_SCROLLWIN(DataListCtrl::OnScroll)
 EVT_MOUSEWHEEL(DataListCtrl::OnScroll)
 END_EVENT_TABLE()
 
-VolumeData* DataListCtrl::m_vd = 0;
+FL::VolumeData* DataListCtrl::m_vd = 0;
 
 DataListCtrl::DataListCtrl(
 	wxWindow* frame,
@@ -172,15 +174,13 @@ void DataListCtrl::SaveSelMask()
 	if (item != -1 && GetItemText(item) == "Volume")
 	{
 		wxString name = GetText(item, 1);
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		FL::VolumeData* vd = FL::Global::instance().getVolumeFactory().
+			findFirst(name.ToStdString());
+		if (vd)
 		{
-			VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
-			if (vd)
-			{
-				vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
-				vd->SaveLabel(true, vd->GetCurTime(), vd->GetCurChannel());
-			}
+			vd->SaveMask(true, -1, -1);
+			vd->SaveLabel(true, -1, -1);
 		}
 	}
 }
@@ -193,15 +193,13 @@ void DataListCtrl::SaveAllMasks()
 		if (GetItemText(item) == "Volume")
 		{
 			wxString name = GetText(item, 1);
-			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-			if (vr_frame)
+			//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+			FL::VolumeData* vd = FL::Global::instance().getVolumeFactory().
+				findFirst(name.ToStdString());
+			if (vd)
 			{
-				VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
-				if (vd)
-				{
-					vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
-					vd->SaveLabel(true, vd->GetCurTime(), vd->GetCurChannel());
-				}
+				vd->SaveMask(true, -1, -1);
+				vd->SaveLabel(true, -1, -1);
 			}
 		}
 		item = GetNextItem(item);
@@ -250,10 +248,13 @@ void DataListCtrl::OnContextMenu(wxContextMenuEvent &event)
 					if (GetItemText(item) == "Volume")
 					{
 						wxString name = GetText(item, 1);
-						VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+						FL::VolumeData* vd = FL::Global::instance().
+							getVolumeFactory().findFirst(name.ToStdString());
 						if (vd)
 						{
-							if (vd->GetPath() == "")
+							std::wstring path;
+							vd->getValue("tex path", path);
+							if (path.empty())
 								menu.Append(Menu_Save, "Save...");
 							else
 								menu.Append(Menu_Save, "Save As...");
@@ -304,38 +305,39 @@ void DataListCtrl::AddToView(int menu_index, long item)
 		if (GetItemText(item) == "Volume")
 		{
 			name = GetText(item, 1);
-			VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+			FL::VolumeData* vd = FL::Global::instance().getVolumeFactory().
+				findFirst(name.ToStdString());
 			if (vd)
 			{
 				VRenderView* view = (*vr_frame->GetViewList())[menu_index];
 				if (view)
 				{
-					VolumeData* vd_add = vd;
+					FL::VolumeData* vd_add = vd;
 
 					for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
 					{
 						VRenderView* vrv = (*vr_frame->GetViewList())[i];
 						if (vrv && vrv->GetVolumeData(name))
 						{
-							vd_add = vr_frame->GetDataManager()->DuplicateVolumeData(vd);
+							vd_add = FL::Global::instance().getVolumeFactory().clone(vd);
 							break;
 						}
 					}
 
 					int chan_num = view->GetAny();
 					view_empty = chan_num > 0 ? false : view_empty;
-					Color color(1.0, 1.0, 1.0);
+					FLTYPE::Color color(1.0, 1.0, 1.0);
 					if (chan_num == 0)
-						color = Color(1.0, 0.0, 0.0);
+						color = FLTYPE::Color(1.0, 0.0, 0.0);
 					else if (chan_num == 1)
-						color = Color(0.0, 1.0, 0.0);
+						color = FLTYPE::Color(0.0, 1.0, 0.0);
 					else if (chan_num == 2)
-						color = Color(0.0, 0.0, 1.0);
+						color = FLTYPE::Color(0.0, 0.0, 1.0);
 
 					if (chan_num >= 0 && chan_num < 3)
-						vd_add->SetColor(color);
+						vd_add->setValue("color", color);
 
-					DataGroup *group = view->AddVolumeData(vd_add);
+					FL::VolumeGroup *group = view->AddVolumeData(vd_add);
 					vr_frame->OnSelection(2, view, group, vd_add, 0);
 					if (view->GetVolMethod() == VOL_METHOD_MULTI)
 					{
@@ -460,8 +462,11 @@ void DataListCtrl::OnResizeCheck(wxCommandEvent &event)
 	{
 		if (m_vd && resize)
 		{
-			int nx, ny, nz;
-			m_vd->GetResolution(nx, ny, nz);
+			long nx, ny, nz;
+			//m_vd->GetResolution(nx, ny, nz);
+			m_vd->getValue("res x", nx);
+			m_vd->getValue("res y", ny);
+			m_vd->getValue("res z", nz);
 			size_x_txt->SetValue(wxString::Format("%d", nx));
 			size_y_txt->SetValue(wxString::Format("%d", ny));
 			size_z_txt->SetValue(wxString::Format("%d", nz));
@@ -474,7 +479,8 @@ void DataListCtrl::OnResizeCheck(wxCommandEvent &event)
 		}
 	}
 	if (m_vd)
-		m_vd->SetResize(resize ? 1 : 0, -1, -1, -1);
+		//m_vd->SetResize(resize ? 1 : 0, -1, -1, -1);
+		m_vd->setValue("resize", resize);
 }
 
 void DataListCtrl::OnSizeXText(wxCommandEvent &event)
@@ -484,7 +490,8 @@ void DataListCtrl::OnSizeXText(wxCommandEvent &event)
 	{
 		long val;
 		size_x_txt->GetValue().ToLong(&val);
-		m_vd->SetResize(-1, val, -1, -1);
+		//m_vd->SetResize(-1, val, -1, -1);
+		m_vd->setValue("resize x", val);
 	}
 }
 
@@ -495,7 +502,8 @@ void DataListCtrl::OnSizeYText(wxCommandEvent &event)
 	{
 		long val;
 		size_y_txt->GetValue().ToLong(&val);
-		m_vd->SetResize(-1, -1, val, -1);
+		//m_vd->SetResize(-1, -1, val, -1);
+		m_vd->setValue("resize y", val);
 	}
 }
 
@@ -506,7 +514,8 @@ void DataListCtrl::OnSizeZText(wxCommandEvent &event)
 	{
 		long val;
 		size_z_txt->GetValue().ToLong(&val);
-		m_vd->SetResize(-1, -1, -1, val);
+		//m_vd->SetResize(-1, -1, -1, val);
+		m_vd->setValue("resize z", val);
 	}
 }
 
@@ -579,15 +588,13 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 
 		if (GetItemText(item) == "Volume")
 		{
-
-			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-			if (vr_frame)
-				m_vd = vr_frame->GetDataManager()->GetVolumeData(name);
-			else
-				return;
+			//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+			m_vd = FL::Global::instance().getVolumeFactory().
+				findFirst(name.ToStdString());
 
 			if (m_vd)
-				m_vd->SetResize(0, -1, -1, -1);
+				//m_vd->SetResize(0, -1, -1, -1);
+				m_vd->setValue("resize", false);
 
 			wxFileDialog *fopendlg = new wxFileDialog(
 				m_frame, "Save Volume Data", "", "",
@@ -601,18 +608,19 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 
 			if (rval == wxID_OK)
 			{
-				wxString filename = fopendlg->GetPath();
+				std::wstring filename = fopendlg->GetPath().ToStdWstring();
 				if (m_vd)
 				{
-					m_vd->Save(filename, fopendlg->GetFilterIndex(), false, VRenderFrame::GetCompression());
-					wxString str = m_vd->GetPath();
-					SetText(item, 2, str);
+					m_vd->SaveData(filename, fopendlg->GetFilterIndex(), false, VRenderFrame::GetCompression());
+					m_vd->getValue("tex path", filename);
+					SetText(item, 2, wxString(filename));
 				}
 			}
 			delete fopendlg;
 
 			if (m_vd)
-				m_vd->SetResize(0, -1, -1, -1);
+				//m_vd->SetResize(0, -1, -1, -1);
+				m_vd->setValue("resize", false);
 		}
 		else if (GetItemText(item) == "Mesh")
 		{
@@ -692,18 +700,16 @@ void DataListCtrl::OnBake(wxCommandEvent& event)
 
 		if (rval == wxID_OK)
 		{
-			wxString filename = fopendlg->GetPath();
+			std::wstring filename = fopendlg->GetPath().ToStdWstring();
 
-			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-			if (vr_frame)
+			//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+			FL::VolumeData* vd = FL::Global::instance().getVolumeFactory().
+				findFirst(name.ToStdString());
+			if (vd)
 			{
-				VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
-				if (vd)
-				{
-					vd->Save(filename, fopendlg->GetFilterIndex(), true, VRenderFrame::GetCompression());
-					wxString str = vd->GetPath();
-					SetText(item, 2, str);
-				}
+				vd->SaveData(filename, fopendlg->GetFilterIndex(), true, VRenderFrame::GetCompression());
+				vd->getValue("tex path", filename);
+				SetText(item, 2, wxString(filename));
 			}
 		}
 
@@ -793,9 +799,10 @@ void DataListCtrl::EndEdit(bool update)
 
 				if (GetItemText(item) == "Volume")
 				{
-					VolumeData* vd = mgr->GetVolumeData(name);
+					FL::VolumeData* vd = FL::Global::instance().getVolumeFactory().
+						findFirst(name.ToStdString());
 					if (vd)
-						vd->SetName(new_name2);
+						vd->setName(new_name2.ToStdString());
 				}
 				else if (GetItemText(item) == "Mesh")
 				{
@@ -830,7 +837,7 @@ void DataListCtrl::DeleteSelection()
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	wxString name = "";
 
-	if (vr_frame && GetSelectedItemCount() > 0)
+/*	if (vr_frame && GetSelectedItemCount() > 0)
 	{
 		long item = GetNextItem(-1,
 			wxLIST_NEXT_ALL,
@@ -909,12 +916,12 @@ void DataListCtrl::DeleteSelection()
 		vr_frame->UpdateList();
 		vr_frame->UpdateTree(name);
 		vr_frame->RefreshVRenderViews();
-	}
+	}*/
 }
 
 void DataListCtrl::DeleteAll()
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+/*	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	wxString name = "";
 
 	long item = GetNextItem(-1);
@@ -989,7 +996,7 @@ void DataListCtrl::DeleteAll()
 	{
 		vr_frame->UpdateTree();
 		vr_frame->RefreshVRenderViews();
-	}
+	}*/
 }
 
 void DataListCtrl::OnScroll(wxScrollWinEvent& event)

@@ -27,11 +27,11 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "CompGenerator.h"
 #include <Scenegraph/VolumeData.h>
-#include <FLIVR/TextureBrick.h>
-#include <FLIVR/Texture.h>
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
+#include <FLIVR/TextureBrick.h>
+#include <FLIVR/Texture.h>
 #include "cl_code.h"
 #include <algorithm>
 

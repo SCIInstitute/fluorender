@@ -49,10 +49,36 @@ namespace FL
 
 		virtual VolumeData* clone(const unsigned int);
 
+		inline virtual VolumeData* get(size_t i)
+		{
+			return dynamic_cast<VolumeData*>(ObjectFactory::get(i));
+		}
+
+		inline virtual const VolumeData* get(size_t i) const
+		{
+			return dynamic_cast<VolumeData*>(const_cast<Object*>(ObjectFactory::get(i)));
+		}
+
+		inline virtual VolumeData* find(const unsigned int id)
+		{
+			return dynamic_cast<VolumeData*>(ObjectFactory::find(id));
+		}
+
+		inline virtual VolumeData* findFirst(const std::string &name)
+		{
+			return dynamic_cast<VolumeData*>(ObjectFactory::findFirst(name));
+		}
+
+		inline virtual VolumeData* findLast(const std::string &name)
+		{
+			return dynamic_cast<VolumeData*>(ObjectFactory::findLast(name));
+		}
+
 	protected:
 		virtual ~VolumeFactory();
 		virtual void createDefault();
 	};
+
 }
 
 #endif//_VOLUMEFACTORY_H_

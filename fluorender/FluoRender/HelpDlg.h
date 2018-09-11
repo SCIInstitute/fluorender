@@ -25,11 +25,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <wx/wx.h>
-#include <wx/html/htmlwin.h>
-
 #ifndef _HELPDLG_H_
 #define _HELPDLG_H_
+
+#include <wx/wx.h>
+#include <wx/html/htmlwin.h>
 
 class HelpDlg : public wxPanel
 {

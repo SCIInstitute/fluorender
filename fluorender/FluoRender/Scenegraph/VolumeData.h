@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Scenegraph/Node.h>
 #include <nrrd.h>
 #include <glm/glm.hpp>
+#include <vector>
 
 namespace FLIVR
 {
@@ -43,7 +44,8 @@ class BaseReader;
 namespace FL
 {
 	class VolumeFactory;
-
+	class VolumeData;
+	typedef std::vector<VolumeData*> VolumeList;
 	struct VD_Landmark
 	{
 		std::wstring name;
@@ -116,8 +118,8 @@ namespace FL
 		double GetOriginalValue(int i, int j, int k, FLIVR::TextureBrick* b = 0);
 		double GetTransferValue(int i, int j, int k, FLIVR::TextureBrick* b = 0);
 		void SaveData(std::wstring &filename, int mode = 0, bool bake = false, bool compress = false);
-		void SaveMask(bool use_reader, int t, int c);
-		void SaveLabel(bool use_reader, int t, int c);
+		void SaveMask(bool use_reader, long t, long c);
+		void SaveLabel(bool use_reader, long t, long c);
 
 		//volume renderer
 		FLIVR::VolumeRenderer* GetRenderer();

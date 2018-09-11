@@ -25,18 +25,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <wx/wx.h>
-#include "FLIVR/Color.h"
-
 #ifndef _NOISECANCELLINGDLG_H_
 #define _NOISECANCELLINGDLG_H_
 
+#include <wx/wx.h>
+
 class VRenderView;
-class VolumeData;
-class DataGroup;
-
-using namespace FLIVR;
-
 class NoiseCancellingDlg : public wxPanel
 {
 public:
@@ -64,10 +58,6 @@ private:
 
 	//current view
 	VRenderView *m_view;
-	//current group
-	//DataGroup *m_group;
-	//current volume
-	//VolumeData *m_vol;
 
 	//max volume value
 	double m_max_value;
@@ -78,7 +68,8 @@ private:
 
 	//remember previous hdr
 	bool m_previewed;
-	Color m_hdr;
+	//FLTYPE::Color m_hdr;
+	double m_equalizer_r, m_equalizer_g, m_equalizer_b;
 
 	//threshold
 	wxSlider *m_threshold_sldr;
