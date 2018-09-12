@@ -28,6 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VOLUMESELECTOR_H_
 #define _VOLUMESELECTOR_H_
 
+#include <glew/GL/glew.h>
+#include <Types/Vector.h>
+#include <Types/Point.h>
+#include <vector>
 #include <wx/progdlg.h>
 #include <boost/unordered_map.hpp>
 
@@ -35,10 +39,6 @@ namespace FL
 {
 	class VolumeData;
 	class Annotations;
-}
-namespace FLTYPE
-{
-	class Vector;
 }
 
 class VolumeSelector
@@ -104,10 +104,10 @@ public:
 	void CompExportRandomColor(int hmode, FL::VolumeData* vd_r, FL::VolumeData* vd_g, FL::VolumeData* vd_b, bool select, bool hide=true);
 	//mode: 0-no duplicate; 1-duplicate
 	void NoiseRemoval(int iter, double thresh, int mode=0);
-	vector<FL::VolumeData*>* GetResultVols();
+	std::vector<FL::VolumeData*>* GetResultVols();
 	//process current selection
 	int ProcessSel(double thresh);
-	int GetCenter(Point& p);
+	int GetCenter(FLTYPE::Point& p);
 	int GetSize(double& s);
 
 	//results
@@ -172,7 +172,7 @@ private:
 	double m_min_voxels, m_max_voxels;
 
 	//exported volumes
-	vector<FL::VolumeData*> m_result_vols;
+	std::vector<FL::VolumeData*> m_result_vols;
 	//annotations
 	FL::Annotations* m_annotations;
 
@@ -190,7 +190,7 @@ private:
 
 	//process selection
 	bool m_ps;
-	Point m_ps_center;
+	FLTYPE::Point m_ps_center;
 	double m_ps_size;
 
 	bool m_estimate_threshold;

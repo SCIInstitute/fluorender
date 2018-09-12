@@ -1664,12 +1664,11 @@ void SettingDlg::OnOverrideVoxCheck(wxCommandEvent &event)
 	else
 		m_override_vox = false;
 
-	FL::Global::instance().getVolumeFactory().setValue("override vox", m_override_vox);
-	//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	//if (vr_frame)
-	//{
-	//	vr_frame->GetDataManager()->SetOverrideVox(m_override_vox);
-	//}
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+	{
+		vr_frame->GetDataManager()->SetOverrideVox(m_override_vox);
+	}
 }
 
 //wavelength to color
@@ -1695,16 +1694,15 @@ void SettingDlg::OnWavColor1Change(wxCommandEvent &event)
 	if (m_wav_color1_cmb)
 		m_wav_color1 = m_wav_color1_cmb->GetCurrentSelection() + 1;
 
-	FL::Global::instance().getVolumeFactory().setValue("wav color1", m_wav_color1);
-	//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	//if (vr_frame && vr_frame->GetDataManager())
-	//{
-	//	vr_frame->GetDataManager()->SetWavelengthColor(
-	//		m_wav_color1,
-	//		m_wav_color2,
-	//		m_wav_color3,
-	//		m_wav_color4);
-	//}
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetDataManager())
+	{
+		vr_frame->GetDataManager()->SetWavelengthColor(
+			m_wav_color1,
+			m_wav_color2,
+			m_wav_color3,
+			m_wav_color4);
+	}
 }
 
 void SettingDlg::OnWavColor2Change(wxCommandEvent &event)
@@ -1712,16 +1710,15 @@ void SettingDlg::OnWavColor2Change(wxCommandEvent &event)
 	if (m_wav_color2_cmb)
 		m_wav_color2 = m_wav_color2_cmb->GetCurrentSelection() + 1;
 
-	FL::Global::instance().getVolumeFactory().setValue("wav color2", m_wav_color2);
-	//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	//if (vr_frame && vr_frame->GetDataManager())
-	//{
-	//	vr_frame->GetDataManager()->SetWavelengthColor(
-	//		m_wav_color1,
-	//		m_wav_color2,
-	//		m_wav_color3,
-	//		m_wav_color4);
-	//}
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetDataManager())
+	{
+		vr_frame->GetDataManager()->SetWavelengthColor(
+			m_wav_color1,
+			m_wav_color2,
+			m_wav_color3,
+			m_wav_color4);
+	}
 }
 
 void SettingDlg::OnWavColor3Change(wxCommandEvent &event)
@@ -1729,16 +1726,15 @@ void SettingDlg::OnWavColor3Change(wxCommandEvent &event)
 	if (m_wav_color3_cmb)
 		m_wav_color3 = m_wav_color3_cmb->GetCurrentSelection() + 1;
 
-	FL::Global::instance().getVolumeFactory().setValue("wav color3", m_wav_color3);
-	//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	//if (vr_frame && vr_frame->GetDataManager())
-	//{
-	//	vr_frame->GetDataManager()->SetWavelengthColor(
-	//		m_wav_color1,
-	//		m_wav_color2,
-	//		m_wav_color3,
-	//		m_wav_color4);
-	//}
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetDataManager())
+	{
+		vr_frame->GetDataManager()->SetWavelengthColor(
+			m_wav_color1,
+			m_wav_color2,
+			m_wav_color3,
+			m_wav_color4);
+	}
 }
 
 void SettingDlg::OnWavColor4Change(wxCommandEvent &event)
@@ -1746,16 +1742,15 @@ void SettingDlg::OnWavColor4Change(wxCommandEvent &event)
 	if (m_wav_color4_cmb)
 		m_wav_color4 = m_wav_color4_cmb->GetCurrentSelection() + 1;
 
-	FL::Global::instance().getVolumeFactory().setValue("wav color4", m_wav_color4);
-	//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	//if (vr_frame && vr_frame->GetDataManager())
-	//{
-	//	vr_frame->GetDataManager()->SetWavelengthColor(
-	//		m_wav_color1,
-	//		m_wav_color2,
-	//		m_wav_color3,
-	//		m_wav_color4);
-	//}
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetDataManager())
+	{
+		vr_frame->GetDataManager()->SetWavelengthColor(
+			m_wav_color1,
+			m_wav_color2,
+			m_wav_color3,
+			m_wav_color4);
+	}
 }
 
 //texture size

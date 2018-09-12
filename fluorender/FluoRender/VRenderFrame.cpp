@@ -26,14 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "VRenderFrame.h"
+#include <Global/Global.h>
+#include <Scenegraph/VolumeData.h>
+#include <Scenegraph/VolumeGroup.h>
 #include "DragDrop.h"
-#include <wx/artprov.h>
-#include <wx/wfstream.h>
-#include <wx/fileconf.h>
-#include <wx/aboutdlg.h>
-#include <wx/progdlg.h>
-#include <wx/hyperlink.h>
-#include <wx/stdpaths.h>
 #include "Formats/png_resource.h"
 #include "Formats/msk_writer.h"
 #include "Formats/msk_reader.h"
@@ -45,6 +41,13 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/VolShader.h>
 #include <FLIVR/SegShader.h>
 #include <FLIVR/VolCalShader.h>
+#include <wx/artprov.h>
+#include <wx/wfstream.h>
+#include <wx/fileconf.h>
+#include <wx/aboutdlg.h>
+#include <wx/progdlg.h>
+#include <wx/hyperlink.h>
+#include <wx/stdpaths.h>
 #include <cstdio>
 #include <iostream>
 #include <sstream>
@@ -450,12 +453,14 @@ VRenderFrame::VRenderFrame(
 		m_vrv_list[0]->m_glview->m_draw_grid = true;
 		m_data_mgr.m_vol_test_wiref = true;
 	}
-	int c1 = m_setting_dlg->GetWavelengthColor(1);
-	int c2 = m_setting_dlg->GetWavelengthColor(2);
-	int c3 = m_setting_dlg->GetWavelengthColor(3);
-	int c4 = m_setting_dlg->GetWavelengthColor(4);
-	if (c1 && c2 && c3 && c4)
-		m_data_mgr.SetWavelengthColor(c1, c2, c3, c4);
+	long c1 = m_setting_dlg->GetWavelengthColor(1);
+	long c2 = m_setting_dlg->GetWavelengthColor(2);
+	long c3 = m_setting_dlg->GetWavelengthColor(3);
+	long c4 = m_setting_dlg->GetWavelengthColor(4);
+	FL::Global::instance().getVolumeFactory().setValue("wave color1", c1);
+	FL::Global::instance().getVolumeFactory().setValue("wave color2", c2);
+	FL::Global::instance().getVolumeFactory().setValue("wave color3", c3);
+	FL::Global::instance().getVolumeFactory().setValue("wave color4", c4);
 	m_vrv_list[0]->SetPeelingLayers(m_setting_dlg->GetPeelingLyers());
 	m_vrv_list[0]->SetBlendSlices(m_setting_dlg->GetMicroBlend());
 	m_vrv_list[0]->SetAdaptive(m_setting_dlg->GetMouseInt());
@@ -987,24 +992,24 @@ wxString VRenderFrame::CreateView(int row)
 		{
 			for (int i = 0; i < vrv0->GetDispVolumeNum(); ++i)
 			{
-				VolumeData* vd = vrv0->GetDispVolumeData(i);
+				FL::VolumeData* vd = vrv0->GetDispVolumeData(i);
 				if (vd)
 				{
-					VolumeData* vd_add = m_data_mgr.DuplicateVolumeData(vd);
-
+					FL::VolumeData* vd_add =
+						FL::Global::instance().getVolumeFactory().clone(vd);
 					if (vd_add)
 					{
 						int chan_num = vrv->GetAny();
-						Color color(1.0, 1.0, 1.0);
+						FLTYPE::Color color(1.0, 1.0, 1.0);
 						if (chan_num == 0)
-							color = Color(1.0, 0.0, 0.0);
+							color = FLTYPE::Color(1.0, 0.0, 0.0);
 						else if (chan_num == 1)
-							color = Color(0.0, 1.0, 0.0);
+							color = FLTYPE::Color(0.0, 1.0, 0.0);
 						else if (chan_num == 2)
-							color = Color(0.0, 0.0, 1.0);
+							color = FLTYPE::Color(0.0, 0.0, 1.0);
 
 						if (chan_num >= 0 && chan_num < 3)
-							vd_add->SetColor(color);
+							vd_add->setValue("color", color);
 
 						vrv->AddVolumeData(vd_add);
 					}
@@ -1310,8 +1315,8 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 {
 	int j;
 
-	VolumeData* vd_sel = 0;
-	DataGroup* group_sel = 0;
+	FL::VolumeData* vd_sel = 0;
+	FL::VolumeGroup* group_sel = 0;
 	VRenderView* vrv = 0;
 
 	if (view)
@@ -1359,46 +1364,48 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 			prg_diag->Update(90*(j+1)/(int)files.Count(),
 				str_streaming);
 
-			int ch_num = 0;
+			std::vector<FL::VolumeData*> channels;
 			wxString filename = files[j];
 			wxString suffix = filename.Mid(filename.Find('.', true)).MakeLower();
 
 			if (withImageJ)
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_IMAGEJ, true); //The type of data doesnt matter.
+				channels = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_IMAGEJ, true); //The type of data doesnt matter.
 			else if (suffix == ".nrrd")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_NRRD, false);
+				channels = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_NRRD, false);
 			else if (suffix==".tif" || suffix==".tiff")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_TIFF, false);
+				channels = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_TIFF, false);
 			else if (suffix == ".oib")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_OIB, false);
+				channels = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_OIB, false);
 			else if (suffix == ".oif")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_OIF, false);
+				channels = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_OIF, false);
 			else if (suffix==".lsm")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_LSM, false);
+				channels = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_LSM, false);
 			else if (suffix==".xml")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_PVXML, false);
+				channels = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_PVXML, false);
 			else if (suffix == ".vvd")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_BRKXML, false);
+				channels = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_BRKXML, false);
 
-			if (ch_num > 1)
+			if (channels.size() > 1)
 			{
-				DataGroup* group = vrv->AddOrGetGroup();
+				FL::VolumeGroup* group = vrv->AddOrGetGroup();
 				if (group)
 				{
-					for (int i=ch_num; i>0; i--)
+					int i = 0;//counter of current channel
+					for (auto it = channels.begin();
+						it != channels.end(); ++it, ++i)
 					{
-						VolumeData* vd = m_data_mgr.GetVolumeData(m_data_mgr.GetVolumeNum()-i);
+						FL::VolumeData* vd = *it;
 						if (vd)
 						{
-							vrv->AddVolumeData(vd, group->GetName());
-							wxString vol_name = vd->GetName();
+							vrv->AddVolumeData(vd, group->getName());
+							wxString vol_name = vd->getName();
 							if (vol_name.Find("_1ch")!=-1 &&
 								(i==1 || i==2))
-								vd->SetDisp(false);
+								vd->setValue("display", false);
 							if (vol_name.Find("_2ch")!=-1 && i==1)
-								vd->SetDisp(false);
+								vd->setValue("display", false);
 
-							if (i==ch_num)
+							if (i==0)
 							{
 								vd_sel = vd;
 								group_sel = group;
@@ -1408,26 +1415,26 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 								enable_4d = true;
 						}
 					}
-					if (j > 0)
-						group->SetDisp(false);
+					//if (j > 0)
+					//	group->SetDisp(false);
 				}
 			}
-			else if (ch_num == 1)
+			else if (channels.size() == 1)
 			{
-				VolumeData* vd = m_data_mgr.GetVolumeData(m_data_mgr.GetVolumeNum()-1);
+				FL::VolumeData* vd = *channels.begin();
 				if (vd)
 				{
 					int chan_num = vrv->GetDispVolumeNum();
-					Color color(1.0, 1.0, 1.0);
+					FLTYPE::Color color(1.0, 1.0, 1.0);
 					if (chan_num == 0)
-						color = Color(1.0, 0.0, 0.0);
+						color = FLTYPE::Color(1.0, 0.0, 0.0);
 					else if (chan_num == 1)
-						color = Color(0.0, 1.0, 0.0);
+						color = FLTYPE::Color(0.0, 1.0, 0.0);
 					else if (chan_num == 2)
-						color = Color(0.0, 0.0, 1.0);
+						color = FLTYPE::Color(0.0, 0.0, 1.0);
 
 					if (chan_num >=0 && chan_num <3)
-						vd->SetColor(color);
+						vd->setValue("color", color);
 					else
 						vd->RandomizeColor();
 
@@ -1447,7 +1454,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 
 		UpdateList();
 		if (vd_sel)
-			UpdateTree(vd_sel->GetName());
+			UpdateTree(vd_sel->getName());
 		else
 			UpdateTree();
 		vrv->RefreshGL();
@@ -1660,7 +1667,7 @@ void VRenderFrame::OnInfo(wxCommandEvent& WXUNUSED(event))
 
 void VRenderFrame::UpdateTreeIcons()
 {
-	int i, j, k;
+/*	int i, j, k;
 	if (!m_tree_panel || !m_tree_panel->GetTreeCtrl())
 		return;
 
@@ -1699,7 +1706,7 @@ void VRenderFrame::UpdateTreeIcons()
 			{
 			case 2://volume
 				{
-					VolumeData* vd = (VolumeData*)layer;
+					FL::VolumeData* vd = (VolumeData*)layer;
 					if (!vd)
 						break;
 					counter++;
@@ -1775,12 +1782,12 @@ void VRenderFrame::UpdateTreeIcons()
 			}
 		}
 	}
-	m_tree_panel->Refresh(false);
+	m_tree_panel->Refresh(false);*/
 }
 
 void VRenderFrame::UpdateTreeColors()
 {
-	int i, j, k;
+/*	int i, j, k;
 	int counter = 0;
 	for (i=0 ; i<(int)m_vrv_list.size() ; i++)
 	{
@@ -1797,7 +1804,7 @@ void VRenderFrame::UpdateTreeColors()
 				break;
 			case 2://volume
 				{
-					VolumeData* vd = (VolumeData*)layer;
+					FL::VolumeData* vd = (VolumeData*)layer;
 					if (!vd)
 						break;
 					Color c = vd->GetColor();
@@ -1880,12 +1887,12 @@ void VRenderFrame::UpdateTreeColors()
 			}
 		}
 	}
-	m_tree_panel->Refresh(false);
+	m_tree_panel->Refresh(false);*/
 }
 
 void VRenderFrame::UpdateTree(wxString name)
 {
-	if (!m_tree_panel)
+/*	if (!m_tree_panel)
 		return;
 
 	m_tree_panel->DeleteAll();
@@ -2070,23 +2077,23 @@ void VRenderFrame::UpdateTree(wxString name)
 
 	if (sel_item.IsOk())
 		m_tree_panel->SelectItem(sel_item);
-	m_tree_panel->ExpandAll();
+	m_tree_panel->ExpandAll();*/
 }
 
 void VRenderFrame::UpdateList()
 {
 	m_list_panel->DeleteAllItems();
 
-	for (int i=0 ; i<m_data_mgr.GetVolumeNum() ; i++)
-	{
-		VolumeData* vd = m_data_mgr.GetVolumeData(i);
-		if (vd && !vd->GetDup())
-		{
-			wxString name = vd->GetName();
-			wxString path = vd->GetPath();
-			m_list_panel->Append(DATA_VOLUME, name, path);
-		}
-	}
+	//for (int i=0 ; i<m_data_mgr.GetVolumeNum() ; i++)
+	//{
+	//	VolumeData* vd = m_data_mgr.GetVolumeData(i);
+	//	if (vd && !vd->GetDup())
+	//	{
+	//		wxString name = vd->GetName();
+	//		wxString path = vd->GetPath();
+	//		m_list_panel->Append(DATA_VOLUME, name, path);
+	//	}
+	//}
 
 	for (int i=0 ; i<m_data_mgr.GetMeshNum() ; i++)
 	{
@@ -2129,12 +2136,12 @@ ListPanel *VRenderFrame::GetList()
 //on selections
 void VRenderFrame::OnSelection(int type,
 	VRenderView* vrv,
-	DataGroup* group,
-	VolumeData* vd,
+	FL::VolumeGroup* group,
+	FL::VolumeData* vd,
 	MeshData* md,
 	Annotations* ann)
 {
-	if (m_adjust_view)
+/*	if (m_adjust_view)
 	{
 		m_adjust_view->SetRenderView(vrv);
 		if (!vrv || vd)
@@ -2340,7 +2347,7 @@ void VRenderFrame::OnSelection(int type,
 			m_annotation_prop->Show(false);
 		m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
 		m_aui_mgr.Update();
-	}
+	}*/
 }
 
 void VRenderFrame::RefreshVRenderViews(bool tree, bool interactive)
@@ -2365,7 +2372,7 @@ void VRenderFrame::DeleteVRenderView(int i)
 		wxString str = m_vrv_list[i]->GetName();
 
 		for (j=0 ; j<m_vrv_list[i]->GetAllVolumeNum() ; j++)
-			m_vrv_list[i]->GetAllVolumeData(j)->SetDisp(true);
+			m_vrv_list[i]->GetAllVolumeData(j)->setValue("display", true);
 		for (j=0 ; j<m_vrv_list[i]->GetMeshNum() ; j++)
 			m_vrv_list[i]->GetMeshData(j)->SetDisp(true);
 		VRenderView* vrv = m_vrv_list[i];
@@ -2665,7 +2672,7 @@ void VRenderFrame::OnOpenProject(wxCommandEvent& WXUNUSED(event))
 
 void VRenderFrame::SaveProject(wxString& filename)
 {
-	wxString app_name = "FluoRender " +
+/*	wxString app_name = "FluoRender " +
 		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
 	wxString vendor_name = "FluoRender";
 	wxString local_name = filename;
@@ -3221,13 +3228,13 @@ void VRenderFrame::SaveProject(wxString& filename)
 	fconfig.Write("time_end_text", m_movie_view->m_time_end_text->GetValue());
 	fconfig.Write("run_script", m_setting_dlg->GetRunScript());
 	fconfig.Write("script_file", m_setting_dlg->GetScriptFile());
-/*	//brushtool diag
-	fconfig.SetPath("/brush_diag");
-	fconfig.Write("ca_min", m_brush_tool_dlg->GetDftCAMin());
-	fconfig.Write("ca_max", m_brush_tool_dlg->GetDftCAMax());
-	fconfig.Write("ca_thresh", m_brush_tool_dlg->GetDftCAThresh());
-	fconfig.Write("nr_thresh", m_brush_tool_dlg->GetDftNRThresh());
-	fconfig.Write("nr_size", m_brush_tool_dlg->GetDftNRSize());*/
+	//brushtool diag
+	//fconfig.SetPath("/brush_diag");
+	//fconfig.Write("ca_min", m_brush_tool_dlg->GetDftCAMin());
+	//fconfig.Write("ca_max", m_brush_tool_dlg->GetDftCAMax());
+	//fconfig.Write("ca_thresh", m_brush_tool_dlg->GetDftCAThresh());
+	//fconfig.Write("nr_thresh", m_brush_tool_dlg->GetDftNRThresh());
+	//fconfig.Write("nr_size", m_brush_tool_dlg->GetDftNRSize());
 	//ui layout
 	fconfig.SetPath("/ui_layout");
 	fconfig.Write("ui_main_tb", m_main_tb->IsShown());
@@ -3323,12 +3330,12 @@ void VRenderFrame::SaveProject(wxString& filename)
 	fconfig.Save(os);
 	UpdateList();
 
-	delete prg_diag;
+	delete prg_diag;*/
 }
 
 void VRenderFrame::OpenProject(wxString& filename)
 {
-	m_data_mgr.SetProjectPath(filename);
+/*	m_data_mgr.SetProjectPath(filename);
 
 	int iVal;
 	int i, j, k;
@@ -4541,29 +4548,29 @@ void VRenderFrame::OpenProject(wxString& filename)
 		m_movie_view->GetScriptSettings();
 	}
 
-/*	//brushtool diag
-	if (fconfig.Exists("/brush_diag"))
-	{
-		fconfig.SetPath("/brush_diag");
-		double dval;
+	//brushtool diag
+	//if (fconfig.Exists("/brush_diag"))
+	//{
+	//	fconfig.SetPath("/brush_diag");
+	//	double dval;
 
-		if (fconfig.Read("ca_min", &dval))
-			m_brush_tool_dlg->SetDftCAMin(dval);
-		if (fconfig.Read("ca_max", &dval))
-			m_brush_tool_dlg->SetDftCAMax(dval);
-		if (fconfig.Read("ca_thresh", &dval))
-			m_brush_tool_dlg->SetDftCAThresh(dval);
-		if (fconfig.Read("nr_thresh", &dval))
-		{
-			m_brush_tool_dlg->SetDftNRThresh(dval);
-			m_noise_cancelling_dlg->SetDftThresh(dval);
-		}
-		if (fconfig.Read("nr_size", &dval))
-		{
-			m_brush_tool_dlg->SetDftNRSize(dval);
-			m_noise_cancelling_dlg->SetDftSize(dval);
-		}
-	}*/
+	//	if (fconfig.Read("ca_min", &dval))
+	//		m_brush_tool_dlg->SetDftCAMin(dval);
+	//	if (fconfig.Read("ca_max", &dval))
+	//		m_brush_tool_dlg->SetDftCAMax(dval);
+	//	if (fconfig.Read("ca_thresh", &dval))
+	//		m_brush_tool_dlg->SetDftCAThresh(dval);
+	//	if (fconfig.Read("nr_thresh", &dval))
+	//	{
+	//		m_brush_tool_dlg->SetDftNRThresh(dval);
+	//		m_noise_cancelling_dlg->SetDftThresh(dval);
+	//	}
+	//	if (fconfig.Read("nr_size", &dval))
+	//	{
+	//		m_brush_tool_dlg->SetDftNRSize(dval);
+	//		m_noise_cancelling_dlg->SetDftSize(dval);
+	//	}
+	//}
 
 	//ui layout
 	if (fconfig.Exists("/ui_layout"))
@@ -4862,7 +4869,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 
 	if (m_movie_view)
 		m_movie_view->SetView(0);
-	delete prg_diag;
+	delete prg_diag;*/
 }
 
 void VRenderFrame::OnSettings(wxCommandEvent& WXUNUSED(event))

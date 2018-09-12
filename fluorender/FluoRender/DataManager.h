@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <string.h>
 #include <tiffio.h>
 #include "FLIVR/BBox.h"
-#include "FLIVR/Color.h"
+//#include "FLIVR/Color.h"
 #include "FLIVR/Point.h"
 #include "FLIVR/MeshRenderer.h"
 #include "FLIVR/VolumeRenderer.h"
@@ -1289,6 +1289,14 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+namespace FLTYPE
+{
+	class Color;
+}
+namespace FL
+{
+	class VolumeData;
+}
 class DataManager
 {
 public:
@@ -1304,15 +1312,15 @@ public:
 	wxString SearchProjectPath(wxString &filename);
 
 	//load volume
-	/*int LoadVolumeData(wxString &filename, int type, bool withImageJ, int ch_num=-1, int t_num=-1);
-	//set default
-	void SetVolumeDefault(VolumeData* vd);
+	std::vector<FL::VolumeData*> LoadVolumeData(wxString &filename, int type, bool withImageJ, int ch_num=-1, int t_num=-1);
 	//load volume options
 	void SetSliceSequence(bool ss) {m_sliceSequence = ss;}
 	void SetCompression(bool compression) {m_compression = compression;}
 	void SetSkipBrick(bool skip) {m_skip_brick = skip;}
 	void SetTimeId(wxString str) {m_timeId = str;}
 	void SetLoadMask(bool load_mask) {m_load_mask = load_mask;}
+	//set default
+	/*void SetVolumeDefault(VolumeData* vd);
 	void AddVolumeData(VolumeData* vd);
 	VolumeData* DuplicateVolumeData(VolumeData* vd);
 	void RemoveVolumeData(int index);
@@ -1329,6 +1337,7 @@ public:
 		else
 			return 0;
 	};*/
+	bool CheckNames(wxString &str);
 
 	//load mesh
 	int LoadMeshData(wxString &filename);
@@ -1364,12 +1373,11 @@ public:
 			return 0;
 	}
 
-	bool CheckNames(wxString &str);
 
 	//wavelength to color
-	/*void SetWavelengthColor(int c1, int c2, int c3, int c4);
-	Color GetWavelengthColor(double wavelength);
-	Color GetColor(int);
+	void SetWavelengthColor(int c1, int c2, int c3, int c4);
+	FLTYPE::Color GetWavelengthColor(double wavelength);
+	FLTYPE::Color GetColor(int);
 
 	//override voxel size
 	void SetOverrideVox(bool val)
@@ -1381,7 +1389,7 @@ public:
 	void SetPvxmlFlipX(bool flip) {m_pvxml_flip_x = flip;}
 	bool GetPvxmlFlipX() {return m_pvxml_flip_x;}
 	void SetPvxmlFlipY(bool flip) {m_pvxml_flip_y = flip;}
-	bool GetPvxmlFlipY() {return m_pvxml_flip_y;}*/
+	bool GetPvxmlFlipY() {return m_pvxml_flip_y;}
 public:
 	//default values
 	//volume
@@ -1411,12 +1419,12 @@ public:
 	bool m_vol_mip;		//enable_mip
 	bool m_vol_nrd;		//noise reduction
 	bool m_vol_shw;		//enable shadow
-	double m_vol_swi;	//shadow intensity
+	double m_vol_swi;	//shadow intensity*/
 
 	bool m_vol_test_wiref;		//wireframe mode
 
 	//wavelength to color table
-	Color m_vol_wav[4];*/
+	FLTYPE::Color m_vol_wav[4];
 
 private:
 	//vector <VolumeData*> m_vd_list;
@@ -1427,7 +1435,7 @@ private:
 	bool m_use_defaults;
 
 	//slice sequence
-	/*bool m_sliceSequence;
+	bool m_sliceSequence;
 	//compression
 	bool m_compression;
 	//skip brick
@@ -1442,7 +1450,7 @@ private:
 	bool m_override_vox;
 	//flgs for pvxml flipping
 	bool m_pvxml_flip_x;
-	bool m_pvxml_flip_y;*/
+	bool m_pvxml_flip_y;
 };
 
 #endif//_DATAMANAGER_H_

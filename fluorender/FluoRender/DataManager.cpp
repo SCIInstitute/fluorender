@@ -3538,7 +3538,7 @@ void TraceGroup::UpdateCellList(FL::CellList &cur_sel_list)
 		{
 			if (cell_iter->second->GetSizeUi() >
 				(unsigned int)m_cell_size)
-				m_cell_list.insert(pair<unsigned int, FL::pCell>
+				m_cell_list.insert(std::pair<unsigned int, FL::pCell>
 					(cell_iter->second->Id(), cell_iter->second));
 		}
 		return;
@@ -4587,8 +4587,10 @@ wxString DataManager::SearchProjectPath(wxString &filename)
 	return "";
 }
 
-/*int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, int ch_num, int t_num)
+std::vector<FL::VolumeData*> DataManager::LoadVolumeData(
+	wxString &filename, int type, bool withImageJ, int ch_num, int t_num)
 {
+	std::vector<FL::VolumeData*> result;
 	bool isURL = false;
 	bool downloaded = false;
 	wxString downloaded_filepath;
@@ -4600,11 +4602,10 @@ wxString DataManager::SearchProjectPath(wxString &filename)
 	{
 		pathname = SearchProjectPath(filename);
 		if (!wxFileExists(pathname))
-			return 0;
+			return result;
 	}
 
 	int i;
-	int result = 0;
 	BaseReader* reader = 0;
 
 	for (i=0; i<(int)m_reader_list.size(); i++)
@@ -4695,11 +4696,12 @@ wxString DataManager::SearchProjectPath(wxString &filename)
 	for (i=(ch_num>=0?ch_num:0);
 		i<(ch_num>=0?ch_num+1:chan); i++)
 	{
-		VolumeData *vd = new VolumeData();
+		FL::VolumeData *vd = FL::Global::instance().getVolumeFactory().build();
 		if (!vd)
 			continue;
 
-		vd->SetSkipBrick(m_skip_brick);
+		//vd->SetSkipBrick(m_skip_brick);
+		vd->setValue("skip brick", m_skip_brick);
 		Nrrd* data = reader->Convert(t_num>=0?t_num:reader->GetCurTime(), i, true);
 		if (!data)
 			continue;
@@ -4723,10 +4725,10 @@ wxString DataManager::SearchProjectPath(wxString &filename)
 		}
 
 		vd->SetReader(reader);
-		vd->SetCompression(m_compression);
+		vd->setValue("compression", m_compression);
 
 		bool valid_spc = reader->IsSpcInfoValid();
-		if (vd->Load(data, name, pathname))
+		if (vd->LoadData(data, name.ToStdString(), pathname.ToStdWstring()))
 		{
 			if (m_load_mask)
 			{
@@ -4747,65 +4749,79 @@ wxString DataManager::SearchProjectPath(wxString &filename)
 			}
 			if (type == LOAD_TYPE_BRKXML) ((BRKXMLReader*)reader)->SetLevel(0);
 			//for 2D data
-			int xres, yres, zres;
-			vd->GetResolution(xres, yres, zres);
+			long xres, yres, zres;
+			//vd->GetResolution(xres, yres, zres);
+			vd->getValue("res x", xres);
+			vd->getValue("res y", yres);
+			vd->getValue("res z", zres);
 			double zspcfac = (double)Max(xres, yres) / 256.0;
 			if (zspcfac < 1.0) zspcfac = 1.0;
-			if (zres == 1) vd->SetBaseSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetXSpc()*zspcfac);
-			else vd->SetBaseSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetZSpc());
-			vd->SetSpcFromFile(valid_spc);
-			vd->SetScalarScale(reader->GetScalarScale());
-			vd->SetMaxValue(reader->GetMaxValue());
-			vd->SetCurTime(reader->GetCurTime());
-			vd->SetCurChannel(i);
+			vd->setValue("base spc x", reader->GetXSpc());
+			vd->setValue("base spc y", reader->GetXSpc());
+			if (zres == 1)
+				//vd->SetBaseSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetXSpc()*zspcfac);
+				vd->setValue("base spc z", reader->GetXSpc()*zspcfac);
+			else
+				//vd->SetBaseSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetZSpc());
+				vd->setValue("base spc z", reader->GetXSpc());
+			//vd->SetSpcFromFile(valid_spc);
+			vd->setValue("spc from file", valid_spc);
+			//vd->SetScalarScale(reader->GetScalarScale());
+			vd->setValue("int scale", reader->GetScalarScale());
+			//vd->SetMaxValue(reader->GetMaxValue());
+			vd->setValue("max int", reader->GetMaxValue());
+			//vd->SetCurTime(reader->GetCurTime());
+			vd->setValue("time", long(reader->GetCurTime()));
+			//vd->SetCurChannel(i);
+			vd->setValue("channel", long(i));
 			//++
-			result++;
+			result.push_back(vd);
 		}
 		else
 		{
-			delete vd;
+			//delete vd;
+			FL::Global::instance().getVolumeFactory().remove(vd);
 			continue;
 		}
 
-		SetVolumeDefault(vd);
-		AddVolumeData(vd);
+		//SetVolumeDefault(vd);
+		//AddVolumeData(vd);
 
 		//get excitation wavelength
 		double wavelength = reader->GetExcitationWavelength(i);
 		if (wavelength > 0.0) {
-			FLIVR::Color col = GetWavelengthColor(wavelength);
-			vd->SetColor(col);
+			FLTYPE::Color col = GetWavelengthColor(wavelength);
+			vd->setValue("color", col);
 		}
 		else if (wavelength < 0.) {
-			FLIVR::Color white = Color(1.0, 1.0, 1.0);
-			vd->SetColor(white);
+			FLTYPE::Color white = FLTYPE::Color(1.0, 1.0, 1.0);
+			vd->setValue("color", white);
 		}
 		else
 		{
-			FLIVR::Color white = Color(1.0, 1.0, 1.0);
-			FLIVR::Color red   = Color(1.0, 0.0, 0.0);
-			FLIVR::Color green = Color(0.0, 1.0, 0.0);
-			FLIVR::Color blue  = Color(0.0, 0.0, 1.0);
+			FLTYPE::Color white = FLTYPE::Color(1.0, 1.0, 1.0);
+			FLTYPE::Color red   = FLTYPE::Color(1.0, 0.0, 0.0);
+			FLTYPE::Color green = FLTYPE::Color(0.0, 1.0, 0.0);
+			FLTYPE::Color blue  = FLTYPE::Color(0.0, 0.0, 1.0);
 			if (chan == 1) {
-				vd->SetColor(white);
+				vd->setValue("color", white);
 			}
 			else
 			{
 				if (i == 0)
-					vd->SetColor(red);
+					vd->setValue("color", red);
 				else if (i == 1)
-					vd->SetColor(green);
+					vd->setValue("color", green);
 				else if (i == 2)
-					vd->SetColor(blue);
+					vd->setValue("color", blue);
 				else
-					vd->SetColor(white);
+					vd->setValue("color", white);
 			}
 		}
-
 	}
 
 	return result;
-}*/
+}
 
 int DataManager::LoadMeshData(wxString &filename)
 {
@@ -5111,18 +5127,18 @@ int DataManager::GetAnnotationIndex(wxString &name)
 	return -1;
 }
 
-/*bool DataManager::CheckNames(wxString &str)
+bool DataManager::CheckNames(wxString &str)
 {
 	bool result = false;
-	for (unsigned int i=0; i<m_vd_list.size(); i++)
-	{
-		VolumeData* vd = m_vd_list[i];
-		if (vd && vd->GetName()==str)
-		{
-			result = true;
-			break;
-		}
-	}
+	//for (unsigned int i=0; i<m_vd_list.size(); i++)
+	//{
+	//	VolumeData* vd = m_vd_list[i];
+	//	if (vd && vd->GetName()==str)
+	//	{
+	//		result = true;
+	//		break;
+	//	}
+	//}
 	if (!result)
 	{
 		for (unsigned int i=0; i<m_md_list.size(); i++)
@@ -5148,53 +5164,53 @@ int DataManager::GetAnnotationIndex(wxString &name)
 		}
 	}
 	return result;
-}*/
+}
 
-/*Color DataManager::GetColor(int c)
+FLTYPE::Color DataManager::GetColor(int c)
 {
-	Color result(1.0, 1.0, 1.0);
+	FLTYPE::Color result(1.0, 1.0, 1.0);
 	switch (c)
 	{
 	case 1://red
-		result = Color(1.0, 0.0, 0.0);
+		result = FLTYPE::Color(1.0, 0.0, 0.0);
 		break;
 	case 2://green
-		result = Color(0.0, 1.0, 0.0);
+		result = FLTYPE::Color(0.0, 1.0, 0.0);
 		break;
 	case 3://blue
-		result = Color(0.0, 0.0, 1.0);
+		result = FLTYPE::Color(0.0, 0.0, 1.0);
 		break;
 	case 4://cyan
-		result = Color(0.0, 1.0, 1.0);
+		result = FLTYPE::Color(0.0, 1.0, 1.0);
 		break;
 	case 5://magenta
-		result = Color(1.0, 0.0, 1.0);
+		result = FLTYPE::Color(1.0, 0.0, 1.0);
 		break;
 	case 6://yellow
-		result = Color(1.0, 1.0, 0.0);
+		result = FLTYPE::Color(1.0, 1.0, 0.0);
 		break;
 	case 7://orange
-		result = Color(1.0, 0.5, 0.0);
+		result = FLTYPE::Color(1.0, 0.5, 0.0);
 		break;
 	case 8://white
-		result = Color(1.0, 1.0, 1.0);
+		result = FLTYPE::Color(1.0, 1.0, 1.0);
 		break;
 	}
 	return result;
-}*/
+}
 
-/*void DataManager::SetWavelengthColor(int c1, int c2, int c3, int c4)
+void DataManager::SetWavelengthColor(int c1, int c2, int c3, int c4)
 {
 	m_vol_wav[0] = GetColor(c1);
 	m_vol_wav[1] = GetColor(c2);
 	m_vol_wav[2] = GetColor(c3);
 	m_vol_wav[3] = GetColor(c4);
-}*/
+}
 
-/*Color DataManager::GetWavelengthColor(double wavelength)
+FLTYPE::Color DataManager::GetWavelengthColor(double wavelength)
 {
 	if (wavelength < 340.0)
-		return Color(1.0, 1.0, 1.0);
+		return FLTYPE::Color(1.0, 1.0, 1.0);
 	else if (wavelength < 440.0)
 		return m_vol_wav[0];
 	else if (wavelength < 500.0)
@@ -5204,5 +5220,5 @@ int DataManager::GetAnnotationIndex(wxString &name)
 	else if (wavelength < 750.0)
 		return m_vol_wav[3];
 	else
-		return Color(1.0, 1.0, 1.0);
-}*/
+		return FLTYPE::Color(1.0, 1.0, 1.0);
+}

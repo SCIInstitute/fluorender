@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #include "VolumeSelector.h"
 #include "VRenderFrame.h"
 #include "utility.h"
+#include <Global/Global.h>
+#include <Scenegraph/VolumeData.h>
 #include <wx/wx.h>
 
 VolumeSelector::VolumeSelector() :
@@ -55,7 +57,7 @@ m_vd(0),
 	m_min_voxels(0.0),
 	m_max_voxels(0.0),
 	m_annotations(0),
-	m_prog_diag(0),
+	//m_prog_diag(0),
 	m_progress(0),
 	m_total_pr(0),
 	m_ca_comps(0),
@@ -70,12 +72,12 @@ VolumeSelector::~VolumeSelector()
 {
 }
 
-void VolumeSelector::SetVolume(VolumeData *vd)
+void VolumeSelector::SetVolume(FL::VolumeData *vd)
 {
 	m_vd = vd;
 }
 
-VolumeData* VolumeSelector::GetVolume()
+FL::VolumeData* VolumeSelector::GetVolume()
 {
 	return m_vd;
 }
@@ -179,8 +181,8 @@ void VolumeSelector::Select(double radius)
 		m_vd->SetUseMaskThreshold(false);
 
 	if (Texture::mask_undo_num_>0 &&
-		m_vd->GetVR())
-		m_vd->GetVR()->return_mask();
+		m_vd->GetRenderer())
+		m_vd->GetRenderer()->return_mask();
 }
 
 //mode: 0-normal; 1-posterized; 2-noraml,copy; 3-poster, copy
@@ -202,11 +204,11 @@ void VolumeSelector::Label(int mode)
 	for (int i=0; i<m_iter_label; i++)
 	{
 		m_vd->DrawLabel(1, mode, m_label_thresh, m_label_falloff);
-		if (m_prog_diag)
-		{
-			m_progress++;
-			m_prog_diag->Update(95*(m_progress+1)/m_total_pr);
-		}
+		//if (m_prog_diag)
+		//{
+		//	m_progress++;
+		//	m_prog_diag->Update(95*(m_progress+1)/m_total_pr);
+		//}
 	}
 }
 
@@ -222,11 +224,11 @@ int VolumeSelector::CompAnalysis(double min_voxels, double max_voxels, double th
 	if (select && m_vd->GetTexture() && m_vd->GetTexture()->nmask()!=-1)
 		use_sel = true;
 
-	m_prog_diag = new wxProgressDialog(
-		"FluoRender: Component Analysis...",
-		"Analyzing... Please wait.",
-		100, 0,
-		wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
+	//m_prog_diag = new wxProgressDialog(
+	//	"FluoRender: Component Analysis...",
+	//	"Analyzing... Please wait.",
+	//	100, 0,
+	//	wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
 	m_progress = 0;
 
 	if (use_sel)
@@ -255,7 +257,7 @@ int VolumeSelector::CompAnalysis(double min_voxels, double max_voxels, double th
 		//next do the same as when it's selected by brush
 	}
 	Label(0);
-	m_vd->GetVR()->return_label();
+	m_vd->GetRenderer()->return_label();
 	return_val = CompIslandCount(min_voxels, max_voxels);
 
 
@@ -267,12 +269,12 @@ int VolumeSelector::CompAnalysis(double min_voxels, double max_voxels, double th
 	if (m_size_map)
 		SetLabelBySize();
 
-	if (m_prog_diag)
-	{
-		m_prog_diag->Update(100);
-		delete m_prog_diag;
-		m_prog_diag = 0;
-	}
+	//if (m_prog_diag)
+	//{
+	//	m_prog_diag->Update(100);
+	//	delete m_prog_diag;
+	//	m_prog_diag = 0;
+	//}
 
 	return return_val;
 }
@@ -418,11 +420,11 @@ int VolumeSelector::CompIslandCount(double min_voxels, double max_voxels)
 					}
 				}
 			}
-			if (m_prog_diag)
-			{
-				m_progress++;
-				m_prog_diag->Update(95*(m_progress+1)/m_total_pr);
-			}
+			//if (m_prog_diag)
+			//{
+			//	m_progress++;
+			//	m_prog_diag->Update(95*(m_progress+1)/m_total_pr);
+			//}
 	}
 
 	boost::unordered_map <unsigned int, Component> :: const_iterator comp_iter;
@@ -454,13 +456,13 @@ int VolumeSelector::CompIslandCount(double min_voxels, double max_voxels)
 				else
 					mask_data[index] = 0;
 			}
-			if (m_prog_diag)
-			{
-				m_progress++;
-				m_prog_diag->Update(95*(m_progress+1)/m_total_pr);
-			}
+			//if (m_prog_diag)
+			//{
+			//	m_progress++;
+			//	m_prog_diag->Update(95*(m_progress+1)/m_total_pr);
+			//}
 	}
-	m_vd->GetVR()->clear_tex_pool();
+	m_vd->GetRenderer()->clear_tex_pool();
 
 	//count
 	for (comp_iter=m_comps.begin(); comp_iter!=m_comps.end(); comp_iter++)
@@ -476,7 +478,7 @@ int VolumeSelector::CompIslandCount(double min_voxels, double max_voxels)
 	return m_ca_comps;
 }
 
-bool VolumeSelector::SearchComponentList(unsigned int cval, Vector &pos, double intensity)
+bool VolumeSelector::SearchComponentList(unsigned int cval, FLTYPE::Vector &pos, double intensity)
 {
 	boost::unordered_map <unsigned int, Component> :: iterator comp_iter;
 	comp_iter = m_comps.find(cval);
@@ -522,7 +524,7 @@ void VolumeSelector::CompExportMultiChann(bool select)
 	m_result_vols.clear();
 
 	if (select)
-		m_vd->GetVR()->return_mask();
+		m_vd->GetRenderer()->return_mask();
 
 	int i;
 	//get all the data from original volume
@@ -557,14 +559,16 @@ void VolumeSelector::CompExportMultiChann(bool select)
 			continue;
 
 		//create a new volume
-		VolumeData* vd = new VolumeData();
+		FL::VolumeData* vd = FL::Global::instance().getVolumeFactory().clone(m_vd);
 		vd->AddEmptyData(bits,
 			res_x, res_y, res_z,
 			spc_x, spc_y, spc_z,
 			brick_size);
 		vd->SetSpcFromFile(true);
-		vd->SetName(m_vd->GetName() +
-			wxString::Format("_COMP%d_SIZE%d", i++, comp_iter->second.counter));
+		std::string name = std::string(m_vd->getName()) +
+			"_COMP" + std::to_string(i++) +
+			"_SIZE" + std::to_string(comp_iter->second.counter);
+		vd->setName(name);
 
 		//populate the volume
 		//the actual data
@@ -612,25 +616,25 @@ void VolumeSelector::CompExportMultiChann(bool select)
 				Color color(HSVColor(hue, 1.0, 1.0));
 				vd->SetColor(color);
 
-				vd->SetEnableAlpha(m_vd->GetEnableAlpha());
-				vd->SetShading(m_vd->GetShading());
-				vd->SetShadow(false);
-				//other settings
-				vd->Set3DGamma(m_vd->Get3DGamma());
-				vd->SetBoundary(m_vd->GetBoundary());
-				vd->SetOffset(m_vd->GetOffset());
-				vd->SetLeftThresh(m_vd->GetLeftThresh());
-				vd->SetRightThresh(m_vd->GetRightThresh());
-				vd->SetAlpha(m_vd->GetAlpha());
-				vd->SetSampleRate(m_vd->GetSampleRate());
-				vd->SetMaterial(amb, diff, spec, shine);
+				//vd->SetEnableAlpha(m_vd->GetEnableAlpha());
+				//vd->SetShading(m_vd->GetShading());
+				//vd->SetShadow(false);
+				////other settings
+				//vd->Set3DGamma(m_vd->Get3DGamma());
+				//vd->SetBoundary(m_vd->GetBoundary());
+				//vd->SetOffset(m_vd->GetOffset());
+				//vd->SetLeftThresh(m_vd->GetLeftThresh());
+				//vd->SetRightThresh(m_vd->GetRightThresh());
+				//vd->SetAlpha(m_vd->GetAlpha());
+				//vd->SetSampleRate(m_vd->GetSampleRate());
+				//vd->SetMaterial(amb, diff, spec, shine);
 
 				m_result_vols.push_back(vd);
 	}
 }
 
-void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
-	VolumeData* vd_g, VolumeData* vd_b, bool select, bool hide)
+void VolumeSelector::CompExportRandomColor(int hmode, FL::VolumeData* vd_r,
+	FL::VolumeData* vd_g, FL::VolumeData* vd_b, bool select, bool hide)
 {
 	if (!m_vd ||
 		!m_vd->GetTexture() ||
@@ -639,7 +643,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 		return;
 
 	if (select)
-		m_vd->GetVR()->return_mask();
+		m_vd->GetRenderer()->return_mask();
 
 	m_result_vols.clear();
 
@@ -668,7 +672,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 	bool push_new = true;
 	//red volume
 	if (!vd_r)
-		vd_r = new VolumeData();
+		vd_r = FL::Global::instance().getVolumeFactory().clone(m_vd);
 	else
 		push_new = false;
 	vd_r->AddEmptyData(bits,
@@ -676,28 +680,25 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 		spc_x, spc_y, spc_z,
 		brick_size);
 	vd_r->SetSpcFromFile(true);
-	vd_r->SetName(m_vd->GetName() +
-		wxString::Format("_COMP1"));
+	vd_r->setName(std::string(m_vd->getName()) + "_COMP1");
 	//green volume
 	if (!vd_g)
-		vd_g = new VolumeData();
+		vd_g = FL::Global::instance().getVolumeFactory().clone(m_vd);
 	vd_g->AddEmptyData(bits,
 		res_x, res_y, res_z,
 		spc_x, spc_y, spc_z,
 		brick_size);
 	vd_g->SetSpcFromFile(true);
-	vd_g->SetName(m_vd->GetName() +
-		wxString::Format("_COMP2"));
+	vd_g->setName(std::string(m_vd->getName()) + "_COMP2");
 	//blue volume
 	if (!vd_b)
-		vd_b = new VolumeData();
+		vd_b = FL::Global::instance().getVolumeFactory().clone(m_vd);
 	vd_b->AddEmptyData(bits,
 		res_x, res_y, res_z,
 		spc_x, spc_y, spc_z,
 		brick_size);
 	vd_b->SetSpcFromFile(true);
-	vd_b->SetName(m_vd->GetName() +
-		wxString::Format("_COMP3"));
+	vd_b->setName(std::string(m_vd->getName()) + "_COMP3");
 
 	//get new data
 	//red volume
@@ -770,44 +771,44 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 			vd_r->SetColor(red);
 			vd_g->SetColor(green);
 			vd_b->SetColor(blue);
-			bool bval = m_vd->GetEnableAlpha();
-			vd_r->SetEnableAlpha(bval);
-			vd_g->SetEnableAlpha(bval);
-			vd_b->SetEnableAlpha(bval);
-			bval = m_vd->GetShading();
-			vd_r->SetShading(bval);
-			vd_g->SetShading(bval);
-			vd_b->SetShading(bval);
-			vd_r->SetShadow(false);
-			vd_g->SetShadow(false);
-			vd_b->SetShadow(false);
-			//other settings
-			double amb, diff, spec, shine;
-			m_vd->GetMaterial(amb, diff, spec, shine);
-			vd_r->Set3DGamma(m_vd->Get3DGamma());
-			vd_r->SetBoundary(m_vd->GetBoundary());
-			vd_r->SetOffset(m_vd->GetOffset());
-			vd_r->SetLeftThresh(m_vd->GetLeftThresh());
-			vd_r->SetRightThresh(m_vd->GetRightThresh());
-			vd_r->SetAlpha(m_vd->GetAlpha());
-			vd_r->SetSampleRate(m_vd->GetSampleRate());
-			vd_r->SetMaterial(amb, diff, spec, shine);
-			vd_g->Set3DGamma(m_vd->Get3DGamma());
-			vd_g->SetBoundary(m_vd->GetBoundary());
-			vd_g->SetOffset(m_vd->GetOffset());
-			vd_g->SetLeftThresh(m_vd->GetLeftThresh());
-			vd_g->SetRightThresh(m_vd->GetRightThresh());
-			vd_g->SetAlpha(m_vd->GetAlpha());
-			vd_g->SetSampleRate(m_vd->GetSampleRate());
-			vd_g->SetMaterial(amb, diff, spec, shine);
-			vd_b->Set3DGamma(m_vd->Get3DGamma());
-			vd_b->SetBoundary(m_vd->GetBoundary());
-			vd_b->SetOffset(m_vd->GetOffset());
-			vd_b->SetLeftThresh(m_vd->GetLeftThresh());
-			vd_b->SetRightThresh(m_vd->GetRightThresh());
-			vd_b->SetAlpha(m_vd->GetAlpha());
-			vd_b->SetSampleRate(m_vd->GetSampleRate());
-			vd_b->SetMaterial(amb, diff, spec, shine);
+			//bool bval = m_vd->GetEnableAlpha();
+			//vd_r->SetEnableAlpha(bval);
+			//vd_g->SetEnableAlpha(bval);
+			//vd_b->SetEnableAlpha(bval);
+			//bval = m_vd->GetShading();
+			//vd_r->SetShading(bval);
+			//vd_g->SetShading(bval);
+			//vd_b->SetShading(bval);
+			//vd_r->SetShadow(false);
+			//vd_g->SetShadow(false);
+			//vd_b->SetShadow(false);
+			////other settings
+			//double amb, diff, spec, shine;
+			//m_vd->GetMaterial(amb, diff, spec, shine);
+			//vd_r->Set3DGamma(m_vd->Get3DGamma());
+			//vd_r->SetBoundary(m_vd->GetBoundary());
+			//vd_r->SetOffset(m_vd->GetOffset());
+			//vd_r->SetLeftThresh(m_vd->GetLeftThresh());
+			//vd_r->SetRightThresh(m_vd->GetRightThresh());
+			//vd_r->SetAlpha(m_vd->GetAlpha());
+			//vd_r->SetSampleRate(m_vd->GetSampleRate());
+			//vd_r->SetMaterial(amb, diff, spec, shine);
+			//vd_g->Set3DGamma(m_vd->Get3DGamma());
+			//vd_g->SetBoundary(m_vd->GetBoundary());
+			//vd_g->SetOffset(m_vd->GetOffset());
+			//vd_g->SetLeftThresh(m_vd->GetLeftThresh());
+			//vd_g->SetRightThresh(m_vd->GetRightThresh());
+			//vd_g->SetAlpha(m_vd->GetAlpha());
+			//vd_g->SetSampleRate(m_vd->GetSampleRate());
+			//vd_g->SetMaterial(amb, diff, spec, shine);
+			//vd_b->Set3DGamma(m_vd->Get3DGamma());
+			//vd_b->SetBoundary(m_vd->GetBoundary());
+			//vd_b->SetOffset(m_vd->GetOffset());
+			//vd_b->SetLeftThresh(m_vd->GetLeftThresh());
+			//vd_b->SetRightThresh(m_vd->GetRightThresh());
+			//vd_b->SetAlpha(m_vd->GetAlpha());
+			//vd_b->SetSampleRate(m_vd->GetSampleRate());
+			//vd_b->SetMaterial(amb, diff, spec, shine);
 
 			if (push_new)
 			{
@@ -821,7 +822,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 				m_vd->SetDisp(false);
 }
 
-vector<VolumeData*>* VolumeSelector::GetResultVols()
+vector<FL::VolumeData*>* VolumeSelector::GetResultVols()
 {
 	return &m_result_vols;
 }
@@ -836,7 +837,7 @@ int VolumeSelector::ProcessSel(double thresh)
 		m_vd->GetTexture()->nmask()==-1)
 		return 0;
 
-	m_vd->GetVR()->return_mask();
+	m_vd->GetRenderer()->return_mask();
 
 	//get all the data from original volume
 	Texture* tex_mvd = m_vd->GetTexture();
@@ -900,7 +901,7 @@ int VolumeSelector::ProcessSel(double thresh)
 }
 
 //get center
-int VolumeSelector::GetCenter(Point& p)
+int VolumeSelector::GetCenter(FLTYPE::Point& p)
 {
 	p = m_ps_center;
 	return m_ps;
@@ -915,7 +916,7 @@ int VolumeSelector::GetSize(double &s)
 
 void VolumeSelector::GenerateAnnotations(bool use_sel)
 {
-	if (!m_vd ||
+/*	if (!m_vd ||
 		!m_vd->GetMask(false) ||
 		!m_vd->GetLabel(false) ||
 		m_comps.size()==0)
@@ -989,10 +990,10 @@ void VolumeSelector::GenerateAnnotations(bool use_sel)
 
 	std::string str1 = memo.ToStdString();
 	m_annotations->SetMemo(str1);
-	m_annotations->SetMemoRO(true);
+	m_annotations->SetMemoRO(true);*/
 }
 
-Annotations* VolumeSelector::GetAnnotations()
+FL::Annotations* VolumeSelector::GetAnnotations()
 {
 	return m_annotations;
 }
@@ -1002,11 +1003,11 @@ int VolumeSelector::NoiseAnalysis(double min_voxels, double max_voxels, double b
 	if (!m_vd)
 		return 0;
 
-	m_prog_diag = new wxProgressDialog(
-		"FluoRender: Noise Analysis...",
-		"Analyzing... Please wait.",
-		100, 0,
-		wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
+	//m_prog_diag = new wxProgressDialog(
+	//	"FluoRender: Noise Analysis...",
+	//	"Analyzing... Please wait.",
+	//	100, 0,
+	//	wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
 	m_progress = 0;
 
 	int nx, ny, nz;
@@ -1014,11 +1015,11 @@ int VolumeSelector::NoiseAnalysis(double min_voxels, double max_voxels, double b
 	m_iter_label = Max(nx, Max(ny, nz))/10;
 	m_total_pr = m_iter_label+nx*3+1;
 
-	if (m_prog_diag)
-	{
-		m_progress++;
-		m_prog_diag->Update(95*(m_progress+1)/m_total_pr);
-	}
+	//if (m_prog_diag)
+	//{
+	//	m_progress++;
+	//	m_prog_diag->Update(95*(m_progress+1)/m_total_pr);
+	//}
 
 	//first posterize the volume and put it into the mask
 	m_vd->AddEmptyMask(2);
@@ -1040,10 +1041,10 @@ int VolumeSelector::NoiseAnalysis(double min_voxels, double max_voxels, double b
 
 	//then label
 	Label(1);
-	m_vd->GetVR()->return_label();
+	m_vd->GetRenderer()->return_label();
 	int return_val = CompIslandCount(min_voxels, max_voxels);
 
-	delete m_prog_diag;
+	//delete m_prog_diag;
 
 	return return_val;
 }
@@ -1053,11 +1054,11 @@ void VolumeSelector::NoiseRemoval(int iter, double thresh, int mode)
 	if (!m_vd || !m_vd->GetMask(false))
 		return;
 
-	m_prog_diag = new wxProgressDialog(
-		"FluoRender: Component Analysis...",
-		"Analyzing... Please wait.",
-		100, 0,
-		wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
+	//m_prog_diag = new wxProgressDialog(
+	//	"FluoRender: Component Analysis...",
+	//	"Analyzing... Please wait.",
+	//	100, 0,
+	//	wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
 	m_progress = 0;
 	m_total_pr = iter+1;
 
@@ -1077,14 +1078,14 @@ void VolumeSelector::NoiseRemoval(int iter, double thresh, int mode)
 		for (int i=0; i<iter; i++)
 		{
 			m_vd->DrawMask(2, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0);
-			if (m_prog_diag)
-			{
-				m_progress++;
-				m_prog_diag->Update(95*(m_progress+1)/m_total_pr);
-			}
+			//if (m_prog_diag)
+			//{
+			//	m_progress++;
+			//	m_prog_diag->Update(95*(m_progress+1)/m_total_pr);
+			//}
 		}
 		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, thresh, m_w2d, 0.0, 0);
-		m_vd->GetVR()->return_volume();
+		m_vd->GetRenderer()->return_volume();
 	}
 	else if (mode == 1)
 	{
@@ -1101,7 +1102,7 @@ void VolumeSelector::NoiseRemoval(int iter, double thresh, int mode)
 		double spc_x, spc_y, spc_z;
 		m_vd->GetResolution(res_x, res_y, res_z);
 		m_vd->GetSpacings(spc_x, spc_y, spc_z);
-		VolumeData* vd_new = new VolumeData();
+		FL::VolumeData* vd_new = FL::Global::instance().getVolumeFactory().clone(m_vd);
 		//add data and mask
 		Nrrd *nrrd_new = nrrdNew();
 		unsigned long long mem_size = (unsigned long long)res_x*
@@ -1120,8 +1121,9 @@ void VolumeSelector::NoiseRemoval(int iter, double thresh, int mode)
 		nrrdAxisInfoSet(nrrd_new, nrrdAxisInfoMax, spc_x*res_x, spc_y*res_y, spc_z*res_z);
 		nrrdAxisInfoSet(nrrd_new, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
 		nrrdAxisInfoSet(nrrd_new, nrrdAxisInfoSize, (size_t)res_x, (size_t)res_y, (size_t)res_z);
-		wxString str = "";
-		vd_new->Load(nrrd_new, str, str);
+		std::string str = "";
+		std::wstring wstr = L"";
+		vd_new->LoadData(nrrd_new, str, wstr);
 		//
 		Nrrd *nrrd_new_mask = nrrdNew();
 		val8 = new (std::nothrow) uint8[mem_size];
@@ -1134,63 +1136,62 @@ void VolumeSelector::NoiseRemoval(int iter, double thresh, int mode)
 		vd_new->LoadMask(nrrd_new_mask);
 		//copy settings
 		//clipping planes
-		vector<Plane*> *planes = m_vd->GetVR()?m_vd->GetVR()->get_planes():0;
-		if (planes && vd_new->GetVR())
-			vd_new->GetVR()->set_planes(planes);
-		//transfer function
-		vd_new->Set3DGamma(m_vd->Get3DGamma());
-		vd_new->SetBoundary(m_vd->GetBoundary());
-		vd_new->SetOffset(m_vd->GetOffset());
-		vd_new->SetLeftThresh(m_vd->GetLeftThresh());
-		vd_new->SetRightThresh(m_vd->GetRightThresh());
-		FLIVR::Color col = m_vd->GetColor();
-		vd_new->SetColor(col);
-		vd_new->SetAlpha(m_vd->GetAlpha());
-		//shading
-		vd_new->SetShading(m_vd->GetShading());
-		vd_new->GetVR()->set_shading(m_vd->GetVR()->get_shading());
-		double amb, diff, spec, shine;
-		m_vd->GetMaterial(amb, diff, spec, shine);
-		vd_new->SetMaterial(amb, diff, spec, shine);
-		//shadow
-		vd_new->SetShadow(m_vd->GetShadow());
-		double shadow;
-		m_vd->GetShadowParams(shadow);
-		vd_new->SetShadowParams(shadow);
-		//sample rate
-		vd_new->SetSampleRate(m_vd->GetSampleRate());
-		//2d adjusts
-		col = m_vd->GetGamma();
-		vd_new->SetGamma(col);
-		col = m_vd->GetBrightness();
-		vd_new->SetBrightness(col);
-		col = m_vd->GetHdr();
-		vd_new->SetHdr(col);
-		vd_new->SetSyncR(m_vd->GetSyncR());
-		vd_new->SetSyncG(m_vd->GetSyncG());
-		vd_new->SetSyncB(m_vd->GetSyncB());
-		//spacings
-		vd_new->SetSpacings(spc_x, spc_y, spc_z);
-		vd_new->SetSpcFromFile(true);
+		//vector<Plane*> *planes = m_vd->GetVR()?m_vd->GetVR()->get_planes():0;
+		//if (planes && vd_new->GetVR())
+		//	vd_new->GetVR()->set_planes(planes);
+		////transfer function
+		//vd_new->Set3DGamma(m_vd->Get3DGamma());
+		//vd_new->SetBoundary(m_vd->GetBoundary());
+		//vd_new->SetOffset(m_vd->GetOffset());
+		//vd_new->SetLeftThresh(m_vd->GetLeftThresh());
+		//vd_new->SetRightThresh(m_vd->GetRightThresh());
+		//FLIVR::Color col = m_vd->GetColor();
+		//vd_new->SetColor(col);
+		//vd_new->SetAlpha(m_vd->GetAlpha());
+		////shading
+		//vd_new->SetShading(m_vd->GetShading());
+		//vd_new->GetVR()->set_shading(m_vd->GetVR()->get_shading());
+		//double amb, diff, spec, shine;
+		//m_vd->GetMaterial(amb, diff, spec, shine);
+		//vd_new->SetMaterial(amb, diff, spec, shine);
+		////shadow
+		//vd_new->SetShadow(m_vd->GetShadow());
+		//double shadow;
+		//m_vd->GetShadowParams(shadow);
+		//vd_new->SetShadowParams(shadow);
+		////sample rate
+		//vd_new->SetSampleRate(m_vd->GetSampleRate());
+		////2d adjusts
+		//col = m_vd->GetGamma();
+		//vd_new->SetGamma(col);
+		//col = m_vd->GetBrightness();
+		//vd_new->SetBrightness(col);
+		//col = m_vd->GetHdr();
+		//vd_new->SetHdr(col);
+		//vd_new->SetSyncR(m_vd->GetSyncR());
+		//vd_new->SetSyncG(m_vd->GetSyncG());
+		//vd_new->SetSyncB(m_vd->GetSyncB());
+		////spacings
+		//vd_new->SetSpacings(spc_x, spc_y, spc_z);
+		//vd_new->SetSpcFromFile(true);
 		//name etc
-		vd_new->SetName(m_vd->GetName() +
-			"_NR");
+		vd_new->setName(std::string(m_vd->getName()) + "_NR");
 
 		for (int i=0; i<iter; i++)
 		{
 			vd_new->DrawMask(2, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0);
-			if (m_prog_diag)
-			{
-				m_progress++;
-				m_prog_diag->Update(95*(m_progress+1)/m_total_pr);
-			}
+			//if (m_prog_diag)
+			//{
+			//	m_progress++;
+			//	m_prog_diag->Update(95*(m_progress+1)/m_total_pr);
+			//}
 		}
 		vd_new->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, thresh, m_w2d, 0.0, 0);
-		vd_new->GetVR()->return_volume();
+		vd_new->GetRenderer()->return_volume();
 
 		m_result_vols.push_back(vd_new);
 	}
-	delete m_prog_diag;
+	//delete m_prog_diag;
 }
 
 void VolumeSelector::Test()
