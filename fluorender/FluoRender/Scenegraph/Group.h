@@ -75,6 +75,7 @@ namespace FL
 			else
 				return false;
 		}
+		inline bool removeAllChildren() { return removeChildren(0, getNumChildren()); }
 		virtual bool removeChildren(size_t pos, size_t num);
 		virtual bool replaceChild(Node* orig_child, Node* new_child);
 		inline size_t getNumChildren() const { return m_children.size(); }

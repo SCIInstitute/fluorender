@@ -648,7 +648,10 @@ private:
 	bool m_md_pop_dirty;
 	vector <MeshData*> m_md_pop_list;
 	//real data list
-	vector <TreeLayer*> m_layer_list;
+	//vector <TreeLayer*> m_layer_list;
+	FL::ref_ptr<FL::Group> m_root;	//root of the scenegraph
+									//this is a temporary measure,
+									//as data will be managed by a new view object in the future
 	//ruler list
 	int m_ruler_type;//0: 2point ruler; 1:multi-point ruler; 2:locator
 	vector <Ruler*> m_ruler_list;

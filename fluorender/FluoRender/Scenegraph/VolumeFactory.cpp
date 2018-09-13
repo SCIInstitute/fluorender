@@ -72,6 +72,9 @@ void VolumeFactory::createDefault()
 		vd->addValue("time", long(0));//time index of the original file
 
 		//modes
+		//blend mode
+		vd->addValue("blend mode", long(0));//0: ignore; 1: layered; 2: depth; 3: composite
+		//mip
 		vd->addValue("mip mode", long(0));//0-normal; 1-MIP; 2-white shading; 3-white mip
 		vd->addValue("saved mode", long(0));//save the mode for restoring
 		vd->addValue("stream mode", long(0));//0-normal; 1-MIP; 2-shading; 3-shadow, 4-mask
@@ -148,9 +151,6 @@ void VolumeFactory::createDefault()
 		vd->addValue("colormap low", double(0));
 		vd->addValue("colormap high", double(1));
 		vd->addValue("colormap proj", long(0));
-
-		//blend mode
-		vd->addValue("blend mode", long(0));//0: ignore; 1: layered; 2: depth; 3: composite
 
 		//texture ids will be removed later
 		vd->addValue("2d mask id", (unsigned long)(0));//2d mask texture for segmentation

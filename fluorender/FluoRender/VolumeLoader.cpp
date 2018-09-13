@@ -27,7 +27,7 @@
 //  
 
 #include "VolumeLoader.h"
-#include <wx/utils.h> 
+#include <wx/utils.h>
 
 VolumeDecompressorThread::VolumeDecompressorThread(VolumeLoader *vl)
 	: wxThread(wxTHREAD_DETACHED), m_vl(vl)
@@ -179,7 +179,7 @@ wxThread::ExitCode VolumeLoaderThread::Entry()
 
 			char *ptr = NULL;
 			size_t readsize;
-			TextureBrick::read_brick_without_decomp(ptr, readsize, b.finfo, this);
+			FLIVR::TextureBrick::read_brick_without_decomp(ptr, readsize, b.finfo, this);
 			if (!ptr) continue;
 
 			if (b.finfo->type == BRICK_FILE_TYPE_RAW)
@@ -338,7 +338,7 @@ void VolumeLoader::ClearQueues()
 	}
 }
 
-void VolumeLoader::Set(vector<VolumeLoaderData> vld)
+void VolumeLoader::Set(std::vector<VolumeLoaderData> vld)
 {
 	Abort();
 	//StopAll();
@@ -394,17 +394,19 @@ void VolumeLoader::CleanupLoadedBrick()
 
 	for (int i = 0; i < m_queues.size(); i++)
 	{
-		TextureBrick *b = m_queues[i].brick;
+		FLIVR::TextureBrick *b = m_queues[i].brick;
 		if (!m_queues[i].brick->isLoaded())
 			required += (size_t)b->nx()*(size_t)b->ny()*(size_t)b->nz()*(size_t)b->nb(0);
 	}
 
-	vector<VolumeLoaderData> vd_undisp;
-	vector<VolumeLoaderData> b_undisp;
-	vector<VolumeLoaderData> b_drawn;
+	std::vector<VolumeLoaderData> vd_undisp;
+	std::vector<VolumeLoaderData> b_undisp;
+	std::vector<VolumeLoaderData> b_drawn;
 	for (auto elem : m_loaded)
 	{
-		if (!elem.second.vd->GetDisp())
+		bool disp;
+		elem.second.vd->getValue("display", disp);
+		if (!disp)
 			vd_undisp.push_back(elem.second);
 		else if (!elem.second.brick->get_disp())
 			b_undisp.push_back(elem.second);
@@ -457,7 +459,7 @@ void VolumeLoader::CleanupLoadedBrick()
 	{
 		for (int i = m_queues.size() - 1; i >= 0; i--)
 		{
-			TextureBrick *b = m_queues[i].brick;
+			FLIVR::TextureBrick *b = m_queues[i].brick;
 			if (b->isLoaded() && m_loaded.find(b) != m_loaded.end())
 			{
 				bool skip = false;
@@ -496,7 +498,7 @@ void VolumeLoader::RemoveAllLoadedBrick()
 	m_loaded.clear();
 }
 
-void VolumeLoader::RemoveBrickVD(VolumeData *vd)
+void VolumeLoader::RemoveBrickVD(FL::VolumeData *vd)
 {
 	StopAll();
 	auto ite = m_loaded.begin();

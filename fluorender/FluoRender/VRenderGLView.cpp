@@ -30,6 +30,10 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderGLView.h"
 #include "VRenderView.h"
 #include "VRenderFrame.h"
+#include <Global/Global.h>
+#include <Scenegraph/Group.h>
+#include <Scenegraph/DrawVolumeVisitor.h>
+#include <Scenegraph/PopVolumeVisitor.h>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -474,21 +478,21 @@ VRenderGLView::~VRenderGLView()
 
 	int i;
 	//delete groups
-	for (i = 0; i<(int)m_layer_list.size(); i++)
-	{
-		if (!m_layer_list[i])
-			continue;
-		if (m_layer_list[i]->IsA() == 5)//group
-		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
-			delete group;
-		}
-		else if (m_layer_list[i]->IsA() == 6)//mesh group
-		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
-			delete group;
-		}
-	}
+	//for (i = 0; i<(int)m_layer_list.size(); i++)
+	//{
+	//	if (!m_layer_list[i])
+	//		continue;
+	//	if (m_layer_list[i]->IsA() == 5)//group
+	//	{
+	//		DataGroup* group = (DataGroup*)m_layer_list[i];
+	//		delete group;
+	//	}
+	//	else if (m_layer_list[i]->IsA() == 6)//mesh group
+	//	{
+	//		MeshGroup* group = (MeshGroup*)m_layer_list[i];
+	//		delete group;
+	//	}
+	//}
 
 	//delete rulers
 	for (i = 0; i<(int)m_ruler_list.size(); i++)
@@ -569,23 +573,24 @@ void VRenderGLView::Clear()
 	TextureRenderer::clear_tex_pool();
 
 	//delete groups
-	for (int i = 0; i<(int)m_layer_list.size(); i++)
-	{
-		if (!m_layer_list[i])
-			continue;
-		if (m_layer_list[i]->IsA() == 5)//group
-		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
-			delete group;
-		}
-		else if (m_layer_list[i]->IsA() == 6)//mesh group
-		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
-			delete group;
-		}
-	}
+	m_root->removeAllChildren();
+	//for (int i = 0; i<(int)m_layer_list.size(); i++)
+	//{
+	//	if (!m_layer_list[i])
+	//		continue;
+	//	if (m_layer_list[i]->IsA() == 5)//group
+	//	{
+	//		DataGroup* group = (DataGroup*)m_layer_list[i];
+	//		delete group;
+	//	}
+	//	else if (m_layer_list[i]->IsA() == 6)//mesh group
+	//	{
+	//		MeshGroup* group = (MeshGroup*)m_layer_list[i];
+	//		delete group;
+	//	}
+	//}
 
-	m_layer_list.clear();
+	//m_layer_list.clear();
 }
 
 void VRenderGLView::HandleProjection(int nx, int ny)
@@ -658,23 +663,24 @@ double VRenderGLView::CalcZ(double z)
 
 void VRenderGLView::CalcFogRange()
 {
-	BBox bbox;
+	FLTYPE::BBox bbox;
 	bool use_box = false;
 	if (m_cur_vol)
 	{
-		bbox = m_cur_vol->GetClippedBounds();
+		m_cur_vol->getValue("bounds", bbox);
 		use_box = true;
 	}
 	else if (!m_md_pop_list.empty())
 	{
-		for (size_t i = 0; i<m_md_pop_list.size(); ++i)
-		{
-			if (m_md_pop_list[i]->GetDisp())
-			{
-				bbox.extend(m_md_pop_list[i]->GetBounds());
-				use_box = true;
-			}
-		}
+		//fix mesh later
+		//for (size_t i = 0; i<m_md_pop_list.size(); ++i)
+		//{
+		//	if (m_md_pop_list[i]->GetDisp())
+		//	{
+		//		bbox.extend(m_md_pop_list[i]->GetBounds());
+		//		use_box = true;
+		//	}
+		//}
 	}
 
 	if (use_box)
@@ -687,14 +693,14 @@ void VRenderGLView::CalcFogRange()
 		maxz = -numeric_limits<double>::max();
 
 		vector<Point> points;
-		points.push_back(Point(bbox.min().x(), bbox.min().y(), bbox.min().z()));
-		points.push_back(Point(bbox.min().x(), bbox.min().y(), bbox.max().z()));
-		points.push_back(Point(bbox.min().x(), bbox.max().y(), bbox.min().z()));
-		points.push_back(Point(bbox.min().x(), bbox.max().y(), bbox.max().z()));
-		points.push_back(Point(bbox.max().x(), bbox.min().y(), bbox.min().z()));
-		points.push_back(Point(bbox.max().x(), bbox.min().y(), bbox.max().z()));
-		points.push_back(Point(bbox.max().x(), bbox.max().y(), bbox.min().z()));
-		points.push_back(Point(bbox.max().x(), bbox.max().y(), bbox.max().z()));
+		points.push_back(Point(bbox.Min().x(), bbox.Min().y(), bbox.Min().z()));
+		points.push_back(Point(bbox.Min().x(), bbox.Min().y(), bbox.Max().z()));
+		points.push_back(Point(bbox.Min().x(), bbox.Max().y(), bbox.Min().z()));
+		points.push_back(Point(bbox.Min().x(), bbox.Max().y(), bbox.Max().z()));
+		points.push_back(Point(bbox.Max().x(), bbox.Min().y(), bbox.Min().z()));
+		points.push_back(Point(bbox.Max().x(), bbox.Min().y(), bbox.Max().z()));
+		points.push_back(Point(bbox.Max().x(), bbox.Max().y(), bbox.Min().z()));
+		points.push_back(Point(bbox.Max().x(), bbox.Max().y(), bbox.Max().z()));
 
 		Point p;
 		for (size_t i = 0; i<points.size(); ++i)
@@ -1082,7 +1088,8 @@ void VRenderGLView::DrawMeshes(int peel)
 	int ny = GetGLSize().y;
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 
-	for (int i = 0; i<(int)m_layer_list.size(); i++)
+	//fix mesh later
+/*	for (int i = 0; i<(int)m_layer_list.size(); i++)
 	{
 		if (!m_layer_list[i])
 			continue;
@@ -1115,7 +1122,7 @@ void VRenderGLView::DrawMeshes(int peel)
 				}
 			}
 		}
-	}
+	}*/
 }
 
 //draw volumes
@@ -1175,7 +1182,7 @@ void VRenderGLView::DrawVolumes(int peel)
 
 		PopVolumeList();
 
-		vector<VolumeData*> quota_vd_list;
+		std::vector<FL::VolumeData*> quota_vd_list;
 		if (TextureRenderer::get_mem_swap())
 		{
 			//set start time for the texture renderer
@@ -1225,18 +1232,19 @@ void VRenderGLView::DrawVolumes(int peel)
 				{
 					//priority: 1-selected channel; 2-group contains selected channel; 3-linear distance to above
 					//not considering mask for now
-					vector<VolumeData*>::iterator cur_iter;
+					std::vector<FL::VolumeData*>::iterator cur_iter;
 					cur_iter = find(m_vd_pop_list.begin(), m_vd_pop_list.end(), m_cur_vol);
 					size_t cur_index = distance(m_vd_pop_list.begin(), cur_iter);
 					int vd_index;
 					if (cur_iter != m_vd_pop_list.end())
 					{
-						VolumeData* vd;
+						FL::VolumeData* vd;
 						vd = *cur_iter;
 						quota_vd_list.push_back(vd);
-						int count_bricks = vd->GetBrickNum();
+						long count_bricks;
+						vd->getValue("brick num", count_bricks);
 						quota_bricks_chan = Min(count_bricks, quota_bricks);
-						vd->GetVR()->set_quota_bricks_chan(quota_bricks_chan);
+						vd->GetRenderer()->set_quota_bricks_chan(quota_bricks_chan);
 						int count = 0;
 						while (count_bricks < quota_bricks &&
 							quota_vd_list.size() < m_vd_pop_list.size())
@@ -1250,13 +1258,14 @@ void VRenderGLView::DrawVolumes(int peel)
 								(size_t)vd_index >= m_vd_pop_list.size())
 								continue;
 							vd = m_vd_pop_list[vd_index];
-							int brick_num = vd->GetBrickNum();
+							long brick_num;
+							vd->getValue("brick num", brick_num);
 							quota_vd_list.push_back(vd);
 							if (count_bricks + brick_num > quota_bricks)
 								quota_bricks_chan = quota_bricks - count_bricks;
 							else
 								quota_bricks_chan = brick_num;
-							vd->GetVR()->set_quota_bricks_chan(quota_bricks_chan);
+							vd->GetRenderer()->set_quota_bricks_chan(quota_bricks_chan);
 							count_bricks += quota_bricks_chan;
 						}
 					}
@@ -1264,13 +1273,13 @@ void VRenderGLView::DrawVolumes(int peel)
 				else if (m_vd_pop_list.size() == 1)
 				{
 					quota_bricks_chan = quota_bricks;
-					VolumeData* vd = m_vd_pop_list[0];
+					FL::VolumeData* vd = m_vd_pop_list[0];
 					if (vd)
-						vd->GetVR()->set_quota_bricks_chan(quota_bricks_chan);
+						vd->GetRenderer()->set_quota_bricks_chan(quota_bricks_chan);
 				}
 
 				//get and set center point
-				VolumeData* vd = m_cur_vol;
+				FL::VolumeData* vd = m_cur_vol;
 				if (!vd)
 					if (m_vd_pop_list.size())
 						vd = m_vd_pop_list[0];
@@ -1279,13 +1288,22 @@ void VRenderGLView::DrawVolumes(int peel)
 					(GetPointVolumeBox(p, nx / 2, ny / 2, vd, false) > 0.0 ||
 						GetPointPlane(p, nx / 2, ny / 2, 0, false) > 0.0))
 				{
-					int resx, resy, resz;
+					long resx, resy, resz;
 					double sclx, scly, sclz;
 					double spcx, spcy, spcz;
-					vd->GetResolution(resx, resy, resz);
-					vd->GetScalings(sclx, scly, sclz);
-					vd->GetSpacings(spcx, spcy, spcz);
-					p = Point(p.x() / (resx*sclx*spcx),
+					//vd->GetResolution(resx, resy, resz);
+					vd->getValue("res x", resx);
+					vd->getValue("res y", resy);
+					vd->getValue("res z", resz);
+					//vd->GetScalings(sclx, scly, sclz);
+					vd->getValue("scale x", sclx);
+					vd->getValue("scale y", scly);
+					vd->getValue("scale z", sclz);
+					//vd->GetSpacings(spcx, spcy, spcz);
+					vd->getValue("spc x", spcx);
+					vd->getValue("spc y", spcy);
+					vd->getValue("spc z", spcz);
+					p = FLIVR::Point(p.x() / (resx*sclx*spcx),
 						p.y() / (resy*scly*spcy),
 						p.z() / (resz*sclz*spcz));
 					TextureRenderer::set_qutoa_center(p);
@@ -1296,94 +1314,119 @@ void VRenderGLView::DrawVolumes(int peel)
 		}
 
 		//handle intermixing modes
-		if (m_vol_method == VOL_METHOD_MULTI)
+		FL::DrawVolumeVisitor visitor;
+		visitor.setBlendMode(m_vol_method);
+		visitor.setDrawMask(m_draw_mask);
+		if (TextureRenderer::get_mem_swap() &&
+			TextureRenderer::get_interactive())
+			visitor.setQuotaList(&quota_vd_list);
+		m_root->accept(visitor);
+		std::vector<FL::DrawVolumeVisitor::DrawVolumeGroupList> list =
+			visitor.getResult();
+		for (auto it = list.begin();
+			it != list.end(); ++it)
 		{
-			if (TextureRenderer::get_mem_swap() &&
-				TextureRenderer::get_interactive() &&
-				quota_vd_list.size() > 0)
-				DrawVolumesMulti(quota_vd_list, peel);
-			else
-				DrawVolumesMulti(m_vd_pop_list, peel);
-			//draw masks
-			if (m_draw_mask)
-				DrawVolumesComp(m_vd_pop_list, true, peel);
-		}
-		else
-		{
-			int i, j;
-			vector<VolumeData*> list;
-			for (i = (int)m_layer_list.size() - 1; i >= 0; i--)
+			switch (it->type)
 			{
-				if (!m_layer_list[i])
-					continue;
-				switch (m_layer_list[i]->IsA())
-				{
-				case 2://volume data (this won't happen now)
-				{
-					VolumeData* vd = (VolumeData*)m_layer_list[i];
-					if (vd && vd->GetDisp())
-					{
-						if (TextureRenderer::get_mem_swap() &&
-							TextureRenderer::get_interactive() &&
-							quota_vd_list.size() > 0)
-						{
-							if (find(quota_vd_list.begin(),
-								quota_vd_list.end(), vd) !=
-								quota_vd_list.end())
-								list.push_back(vd);
-						}
-						else
-							list.push_back(vd);
-					}
-				}
+			case FL::DrawVolumeVisitor::DVG_MULTI:
+				DrawVolumesMulti(it->group, peel);
 				break;
-				case 5://group
-				{
-					if (!list.empty())
-					{
-						DrawVolumesComp(list, false, peel);
-						//draw masks
-						if (m_draw_mask)
-							DrawVolumesComp(list, true, peel);
-						list.clear();
-					}
-					DataGroup* group = (DataGroup*)m_layer_list[i];
-					if (!group->GetDisp())
-						continue;
-					for (j = group->GetVolumeNum() - 1; j >= 0; j--)
-					{
-						VolumeData* vd = group->GetVolumeData(j);
-						if (vd && vd->GetDisp())
-						{
-							if (TextureRenderer::get_mem_swap() &&
-								TextureRenderer::get_interactive() &&
-								quota_vd_list.size() > 0)
-							{
-								if (find(quota_vd_list.begin(),
-									quota_vd_list.end(), vd) !=
-									quota_vd_list.end())
-									list.push_back(vd);
-							}
-							else
-								list.push_back(vd);
-						}
-					}
-					if (!list.empty())
-					{
-						if (group->GetBlendMode() == VOL_METHOD_MULTI)
-							DrawVolumesMulti(list, peel);
-						else
-							DrawVolumesComp(list, false, peel);
-						//draw masks
-						if (m_draw_mask)
-							DrawVolumesComp(list, true, peel);
-						list.clear();
-					}
-				}
+			case FL::DrawVolumeVisitor::DVG_COMP:
+				DrawVolumesComp(it->group, false, peel);
 				break;
-				}
+			case FL::DrawVolumeVisitor::DVG_MASK:
+				DrawVolumesComp(it->group, true, peel);
+				break;
 			}
 		}
+		//if (m_vol_method == VOL_METHOD_MULTI)
+		//{
+		//	if (TextureRenderer::get_mem_swap() &&
+		//		TextureRenderer::get_interactive() &&
+		//		quota_vd_list.size() > 0)
+		//		DrawVolumesMulti(quota_vd_list, peel);
+		//	else
+		//		DrawVolumesMulti(m_vd_pop_list, peel);
+		//	//draw masks
+		//	if (m_draw_mask)
+		//		DrawVolumesComp(m_vd_pop_list, true, peel);
+		//}
+		//else
+		//{
+		//	int i, j;
+		//	vector<VolumeData*> list;
+		//	for (i = (int)m_layer_list.size() - 1; i >= 0; i--)
+		//	{
+		//		if (!m_layer_list[i])
+		//			continue;
+		//		switch (m_layer_list[i]->IsA())
+		//		{
+		//		case 2://volume data (this won't happen now)
+		//		{
+		//			VolumeData* vd = (VolumeData*)m_layer_list[i];
+		//			if (vd && vd->GetDisp())
+		//			{
+		//				if (TextureRenderer::get_mem_swap() &&
+		//					TextureRenderer::get_interactive() &&
+		//					quota_vd_list.size() > 0)
+		//				{
+		//					if (find(quota_vd_list.begin(),
+		//						quota_vd_list.end(), vd) !=
+		//						quota_vd_list.end())
+		//						list.push_back(vd);
+		//				}
+		//				else
+		//					list.push_back(vd);
+		//			}
+		//		}
+		//		break;
+		//		case 5://group
+		//		{
+		//			if (!list.empty())
+		//			{
+		//				DrawVolumesComp(list, false, peel);
+		//				//draw masks
+		//				if (m_draw_mask)
+		//					DrawVolumesComp(list, true, peel);
+		//				list.clear();
+		//			}
+		//			DataGroup* group = (DataGroup*)m_layer_list[i];
+		//			if (!group->GetDisp())
+		//				continue;
+		//			for (j = group->GetVolumeNum() - 1; j >= 0; j--)
+		//			{
+		//				VolumeData* vd = group->GetVolumeData(j);
+		//				if (vd && vd->GetDisp())
+		//				{
+		//					if (TextureRenderer::get_mem_swap() &&
+		//						TextureRenderer::get_interactive() &&
+		//						quota_vd_list.size() > 0)
+		//					{
+		//						if (find(quota_vd_list.begin(),
+		//							quota_vd_list.end(), vd) !=
+		//							quota_vd_list.end())
+		//							list.push_back(vd);
+		//					}
+		//					else
+		//						list.push_back(vd);
+		//				}
+		//			}
+		//			if (!list.empty())
+		//			{
+		//				if (group->GetBlendMode() == VOL_METHOD_MULTI)
+		//					DrawVolumesMulti(list, peel);
+		//				else
+		//					DrawVolumesComp(list, false, peel);
+		//				//draw masks
+		//				if (m_draw_mask)
+		//					DrawVolumesComp(list, true, peel);
+		//				list.clear();
+		//			}
+		//		}
+		//		break;
+		//		}
+		//	}
+		//}
 
 		if (bCull) glEnable(GL_CULL_FACE);
 	}
@@ -1443,7 +1486,8 @@ void VRenderGLView::DrawAnnotations()
 
 	Color text_color = GetTextColor();
 
-	for (size_t i = 0; i<m_layer_list.size(); i++)
+	//fix annotations later
+/*	for (size_t i = 0; i<m_layer_list.size(); i++)
 	{
 		if (!m_layer_list[i])
 			continue;
@@ -1482,14 +1526,14 @@ void VRenderGLView::DrawAnnotations()
 				}
 			}
 		}
-	}
+	}*/
 }
 
 //get populated mesh list
 //stored in m_md_pop_list
 void VRenderGLView::PopMeshList()
 {
-	if (!m_md_pop_dirty)
+	/*if (!m_md_pop_dirty)
 		return;
 
 	int i, j;
@@ -1523,7 +1567,7 @@ void VRenderGLView::PopMeshList()
 		break;
 		}
 	}
-	m_md_pop_dirty = false;
+	m_md_pop_dirty = false;*/
 }
 
 //get populated volume list
@@ -1533,36 +1577,37 @@ void VRenderGLView::PopVolumeList()
 	if (!m_vd_pop_dirty)
 		return;
 
-	int i, j;
-	m_vd_pop_list.clear();
+	FL::PopVolumeVisitor visitor;
+	m_root->accept(visitor);
+	m_vd_pop_list = visitor.getResult();
 
-	for (i = 0; i<(int)m_layer_list.size(); i++)
-	{
-		if (!m_layer_list[i])
-			continue;
-		switch (m_layer_list[i]->IsA())
-		{
-		case 2://volume data
-		{
-			VolumeData* vd = (VolumeData*)m_layer_list[i];
-			if (vd->GetDisp())
-				m_vd_pop_list.push_back(vd);
-		}
-		break;
-		case 5://group
-		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
-			if (!group->GetDisp())
-				continue;
-			for (j = 0; j<group->GetVolumeNum(); j++)
-			{
-				if (group->GetVolumeData(j) && group->GetVolumeData(j)->GetDisp())
-					m_vd_pop_list.push_back(group->GetVolumeData(j));
-			}
-		}
-		break;
-		}
-	}
+	//for (i = 0; i<(int)m_layer_list.size(); i++)
+	//{
+	//	if (!m_layer_list[i])
+	//		continue;
+	//	switch (m_layer_list[i]->IsA())
+	//	{
+	//	case 2://volume data
+	//	{
+	//		VolumeData* vd = (VolumeData*)m_layer_list[i];
+	//		if (vd->GetDisp())
+	//			m_vd_pop_list.push_back(vd);
+	//	}
+	//	break;
+	//	case 5://group
+	//	{
+	//		DataGroup* group = (DataGroup*)m_layer_list[i];
+	//		if (!group->GetDisp())
+	//			continue;
+	//		for (j = 0; j<group->GetVolumeNum(); j++)
+	//		{
+	//			if (group->GetVolumeData(j) && group->GetVolumeData(j)->GetDisp())
+	//				m_vd_pop_list.push_back(group->GetVolumeData(j));
+	//		}
+	//	}
+	//	break;
+	//	}
+	//}
 	m_vd_pop_dirty = false;
 }
 
@@ -1571,7 +1616,7 @@ void VRenderGLView::PopVolumeList()
 //if no group in view
 void VRenderGLView::OrganizeLayers()
 {
-	DataGroup* le_group = 0;
+/*	DataGroup* le_group = 0;
 	int i;
 
 	//find last empty group
@@ -1625,16 +1670,16 @@ void VRenderGLView::OrganizeLayers()
 				}
 			}
 		}
-	}
+	}*/
 }
 
 void VRenderGLView::RandomizeColor()
 {
-	for (int i = 0; i<(int)m_layer_list.size(); i++)
-	{
-		if (m_layer_list[i])
-			m_layer_list[i]->RandomizeColor();
-	}
+	//for (int i = 0; i<(int)m_layer_list.size(); i++)
+	//{
+	//	if (m_layer_list[i])
+	//		m_layer_list[i]->RandomizeColor();
+	//}
 }
 
 void VRenderGLView::ClearVolList()
@@ -2027,7 +2072,7 @@ void VRenderGLView::Segment()
 
 	if (m_selector.GetSelectGroup())
 	{
-		VolumeData* vd = m_selector.GetVolume();
+		/*FL::VolumeData* vd = m_selector.GetVolume();
 		DataGroup* group = 0;
 		if (vd)
 		{
@@ -2071,16 +2116,16 @@ void VRenderGLView::Segment()
 			}
 			else
 				m_selector.Select(m_brush_radius2 - m_brush_radius1);
-		}
+		}*/
 	}
 	else if (m_selector.GetSelectBoth())
 	{
-		VolumeData* vd = m_calculator.GetVolumeA();
+		FL::VolumeData* vd = m_calculator.GetVolumeA();
 		if (vd)
 		{
 			vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-			vd->SetViewport(vp);
-			vd->SetClearColor(clear_color);
+			vd->setValue("viewport", FLTYPE::GLint4(vp));
+			vd->setValue("clear color", FLTYPE::GLfloat4(clear_color));
 			m_selector.SetVolume(vd);
 			m_selector.Select(m_brush_radius2 - m_brush_radius1);
 		}
@@ -2088,8 +2133,8 @@ void VRenderGLView::Segment()
 		if (vd)
 		{
 			vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-			vd->SetViewport(vp);
-			vd->SetClearColor(clear_color);
+			vd->setValue("viewport", FLTYPE::GLint4(vp));
+			vd->setValue("clear color", FLTYPE::GLfloat4(clear_color));
 			m_selector.SetVolume(vd);
 			m_selector.Select(m_brush_radius2 - m_brush_radius1);
 		}
@@ -2140,11 +2185,11 @@ void VRenderGLView::Label()
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 	GLfloat clear_color[4] = { 0, 0, 0, 0 };
 
-	VolumeData* vd = m_selector.GetVolume();
+	FL::VolumeData* vd = m_selector.GetVolume();
 	if (vd)
 	{
-		vd->SetViewport(vp);
-		vd->SetClearColor(clear_color);
+		vd->setValue("viewport", FLTYPE::GLint4(vp));
+		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color));
 		m_selector.Label(0);
 	}
 }
@@ -2171,15 +2216,15 @@ int VRenderGLView::CompAnalysis(double min_voxels, double max_voxels,
 		return_val = m_selector.CompAnalysis(min_voxels, max_voxels, thresh, falloff, select, gen_ann);
 	}
 
-	Annotations* ann = m_selector.GetAnnotations();
+	FL::Annotations* ann = m_selector.GetAnnotations();
 	if (ann)
 	{
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vr_frame)
 		{
-			DataManager* mgr = vr_frame->GetDataManager();
-			if (mgr)
-				mgr->AddAnnotations(ann);
+			//DataManager* mgr = vr_frame->GetDataManager();
+			//if (mgr)
+			//	mgr->AddAnnotations(ann);
 			vr_frame->UpdateList();
 		}
 	}
@@ -2189,14 +2234,14 @@ int VRenderGLView::CompAnalysis(double min_voxels, double max_voxels,
 
 void VRenderGLView::CompExport(int mode, bool select)
 {
-	switch (mode)
+/*	switch (mode)
 	{
 	case 0://multi channels
 		m_selector.CompExportMultiChann(select);
 		break;
 	case 1://random colors
 	{
-		wxString sel_name = m_selector.GetVolume()->GetName();
+		wxString sel_name = m_selector.GetVolume()->getName();
 		VolumeData* vd_r = 0;
 		VolumeData* vd_g = 0;
 		VolumeData* vd_b = 0;
@@ -2259,19 +2304,19 @@ void VRenderGLView::CompExport(int mode, bool select)
 		vr_frame->UpdateList();
 		vr_frame->UpdateTree(m_selector.GetVolume()->GetName());
 		RefreshGL(4);
-	}
+	}*/
 }
 
 void VRenderGLView::ShowAnnotations()
 {
-	Annotations* ann = m_selector.GetAnnotations();
+	/*Annotations* ann = m_selector.GetAnnotations();
 	if (ann)
 	{
 		AddAnnotations(ann);
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vr_frame)
 			vr_frame->UpdateTree(vr_frame->GetCurSelVol()->GetName());
-	}
+	}*/
 }
 
 int VRenderGLView::NoiseAnalysis(double min_voxels, double max_voxels, double thresh)
@@ -2290,24 +2335,24 @@ int VRenderGLView::NoiseAnalysis(double min_voxels, double max_voxels, double th
 
 void VRenderGLView::NoiseRemoval(int iter, double thresh)
 {
-	VolumeData* vd = m_selector.GetVolume();
+	FL::VolumeData* vd = m_selector.GetVolume();
 	if (!vd) return;
 
-	wxString name = vd->GetName();
+	wxString name = vd->getName();
 	if (name.Find("_NR") == wxNOT_FOUND)
 	{
 		m_selector.NoiseRemoval(iter, thresh, 1);
-		vector<VolumeData*> *vol_list = m_selector.GetResultVols();
-		VolumeData* vd_new = (*vol_list)[0];
+		vector<FL::VolumeData*> *vol_list = m_selector.GetResultVols();
+		FL::VolumeData* vd_new = (*vol_list)[0];
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vd_new && vr_frame)
 		{
-			vr_frame->GetDataManager()->AddVolumeData(vd_new);
+			//vr_frame->GetDataManager()->AddVolumeData(vd_new);
 			wxString group_name = AddGroup("");
 			AddVolumeData(vd_new, group_name);
-			vd->SetDisp(false);
+			vd->setValue("display", false);
 			vr_frame->UpdateList();
-			vr_frame->UpdateTree(vd_new->GetName());
+			vr_frame->UpdateTree(vd_new->getName());
 		}
 	}
 	else
@@ -2695,13 +2740,13 @@ bool VRenderGLView::GetSelectBoth()
 }
 
 //calculations
-void VRenderGLView::SetVolumeA(VolumeData* vd)
+void VRenderGLView::SetVolumeA(FL::VolumeData* vd)
 {
 	m_calculator.SetVolumeA(vd);
 	m_selector.SetVolume(vd);
 }
 
-void VRenderGLView::SetVolumeB(VolumeData* vd)
+void VRenderGLView::SetVolumeB(FL::VolumeData* vd)
 {
 	m_calculator.SetVolumeB(vd);
 }
@@ -2709,7 +2754,7 @@ void VRenderGLView::SetVolumeB(VolumeData* vd)
 void VRenderGLView::CalculateSingle(int type, wxString prev_group, bool add)
 {
 	m_calculator.Calculate(type);
-	VolumeData* vd = m_calculator.GetResult();
+	FL::VolumeData* vd = m_calculator.GetResult();
 	if (vd)
 	{
 		if (type == 1 ||
@@ -2725,49 +2770,49 @@ void VRenderGLView::CalculateSingle(int type, wxString prev_group, bool add)
 			if (vr_frame)
 			{
 				//copy 2d adjust & color
-				VolumeData* vd_a = m_calculator.GetVolumeA();
-				if (vd_a)
-				{
-					//clipping planes
-					vector<Plane*> *planes = vd_a->GetVR() ? vd_a->GetVR()->get_planes() : 0;
-					if (planes && vd->GetVR())
-						vd->GetVR()->set_planes(planes);
-					//transfer function
-					vd->Set3DGamma(vd_a->Get3DGamma());
-					vd->SetBoundary(vd_a->GetBoundary());
-					vd->SetOffset(vd_a->GetOffset());
-					vd->SetLeftThresh(vd_a->GetLeftThresh());
-					vd->SetRightThresh(vd_a->GetRightThresh());
-					FLIVR::Color col = vd_a->GetColor();
-					vd->SetColor(col);
-					vd->SetAlpha(vd_a->GetAlpha());
-					//shading
-					vd->SetShading(vd_a->GetShading());
-					double amb, diff, spec, shine;
-					vd_a->GetMaterial(amb, diff, spec, shine);
-					vd->SetMaterial(amb, diff, spec, shine);
-					//shadow
-					vd->SetShadow(vd_a->GetShadow());
-					double shadow;
-					vd_a->GetShadowParams(shadow);
-					vd->SetShadowParams(shadow);
-					//sample rate
-					vd->SetSampleRate(vd_a->GetSampleRate());
-					//2d adjusts
-					col = vd_a->GetGamma();
-					vd->SetGamma(col);
-					col = vd_a->GetBrightness();
-					vd->SetBrightness(col);
-					col = vd_a->GetHdr();
-					vd->SetHdr(col);
-					vd->SetSyncR(vd_a->GetSyncR());
-					vd->SetSyncG(vd_a->GetSyncG());
-					vd->SetSyncB(vd_a->GetSyncB());
-				}
+				FL::VolumeData* vd_a = m_calculator.GetVolumeA();
+				//if (vd_a)
+				//{
+				//	//clipping planes
+				//	vector<Plane*> *planes = vd_a->GetVR() ? vd_a->GetVR()->get_planes() : 0;
+				//	if (planes && vd->GetVR())
+				//		vd->GetVR()->set_planes(planes);
+				//	//transfer function
+				//	vd->Set3DGamma(vd_a->Get3DGamma());
+				//	vd->SetBoundary(vd_a->GetBoundary());
+				//	vd->SetOffset(vd_a->GetOffset());
+				//	vd->SetLeftThresh(vd_a->GetLeftThresh());
+				//	vd->SetRightThresh(vd_a->GetRightThresh());
+				//	FLIVR::Color col = vd_a->GetColor();
+				//	vd->SetColor(col);
+				//	vd->SetAlpha(vd_a->GetAlpha());
+				//	//shading
+				//	vd->SetShading(vd_a->GetShading());
+				//	double amb, diff, spec, shine;
+				//	vd_a->GetMaterial(amb, diff, spec, shine);
+				//	vd->SetMaterial(amb, diff, spec, shine);
+				//	//shadow
+				//	vd->SetShadow(vd_a->GetShadow());
+				//	double shadow;
+				//	vd_a->GetShadowParams(shadow);
+				//	vd->SetShadowParams(shadow);
+				//	//sample rate
+				//	vd->SetSampleRate(vd_a->GetSampleRate());
+				//	//2d adjusts
+				//	col = vd_a->GetGamma();
+				//	vd->SetGamma(col);
+				//	col = vd_a->GetBrightness();
+				//	vd->SetBrightness(col);
+				//	col = vd_a->GetHdr();
+				//	vd->SetHdr(col);
+				//	vd->SetSyncR(vd_a->GetSyncR());
+				//	vd->SetSyncG(vd_a->GetSyncG());
+				//	vd->SetSyncB(vd_a->GetSyncB());
+				//}
 
 				if (add)
 				{
-					vr_frame->GetDataManager()->AddVolumeData(vd);
+					//vr_frame->GetDataManager()->AddVolumeData(vd);
 					//vr_frame->GetDataManager()->SetVolumeDefault(vd);
 					AddVolumeData(vd, prev_group);
 
@@ -2776,7 +2821,7 @@ void VRenderGLView::CalculateSingle(int type, wxString prev_group, bool add)
 						type == 9)
 					{
 						if (vd_a)
-							vd_a->SetDisp(false);
+							vd_a->setValue("display", false);
 					}
 					else if (type == 1 ||
 						type == 2 ||
@@ -2784,23 +2829,24 @@ void VRenderGLView::CalculateSingle(int type, wxString prev_group, bool add)
 						type == 4)
 					{
 						if (vd_a)
-							vd_a->SetDisp(false);
-						VolumeData* vd_b = m_calculator.GetVolumeB();
+							vd_a->setValue("display", false);
+						FL::VolumeData* vd_b = m_calculator.GetVolumeB();
 						if (vd_b)
-							vd_b->SetDisp(false);
+							vd_b->setValue("display", false);
 					}
 					vr_frame->UpdateList();
-					vr_frame->UpdateTree(vd->GetName());
+					vr_frame->UpdateTree(vd->getName());
 				}
 			}
 		}
 		else if (type == 7)
 		{
-			VolumeData* vd_a = m_calculator.GetVolumeA();
+			FL::VolumeData* vd_a = m_calculator.GetVolumeA();
 			if (vd_a)
 			{
-				vd_a->Replace(vd);
-				delete vd;
+				vd_a->ReplaceData(vd);
+				FL::Global::instance().getVolumeFactory().remove(vd);
+				//delete vd;
 				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 				if (vr_frame)
 					vr_frame->GetPropView()->SetVolumeData(vd_a);
@@ -2816,39 +2862,41 @@ void VRenderGLView::Calculate(int type, wxString prev_group, bool add)
 		type == 6 ||
 		type == 7)
 	{
-		vector<VolumeData*> vd_list;
+		vector<FL::VolumeData*> vd_list;
 		if (m_selector.GetSelectGroup())
 		{
-			VolumeData* vd = m_calculator.GetVolumeA();
-			DataGroup* group = 0;
-			if (vd)
+			FL::VolumeData* vd = m_calculator.GetVolumeA();
+			FL::VolumeGroup* group = vd->getParent(0)->asVolumeGroup();
+			//if (vd)
+			//{
+			//	for (int i = 0; i<GetLayerNum(); i++)
+			//	{
+			//		TreeLayer* layer = GetLayer(i);
+			//		if (layer && layer->IsA() == 5)
+			//		{
+			//			DataGroup* tmp_group = (DataGroup*)layer;
+			//			for (int j = 0; j<tmp_group->GetVolumeNum(); j++)
+			//			{
+			//				VolumeData* tmp_vd = tmp_group->GetVolumeData(j);
+			//				if (tmp_vd && tmp_vd == vd)
+			//				{
+			//					group = tmp_group;
+			//					break;
+			//				}
+			//			}
+			//		}
+			//		if (group)
+			//			break;
+			//	}
+			//}
+			if (group && group->getNumChildren()>1)
 			{
-				for (int i = 0; i<GetLayerNum(); i++)
+				for (int i = 0; i<group->getNumChildren(); i++)
 				{
-					TreeLayer* layer = GetLayer(i);
-					if (layer && layer->IsA() == 5)
-					{
-						DataGroup* tmp_group = (DataGroup*)layer;
-						for (int j = 0; j<tmp_group->GetVolumeNum(); j++)
-						{
-							VolumeData* tmp_vd = tmp_group->GetVolumeData(j);
-							if (tmp_vd && tmp_vd == vd)
-							{
-								group = tmp_group;
-								break;
-							}
-						}
-					}
-					if (group)
-						break;
-				}
-			}
-			if (group && group->GetVolumeNum()>1)
-			{
-				for (int i = 0; i<group->GetVolumeNum(); i++)
-				{
-					VolumeData* tmp_vd = group->GetVolumeData(i);
-					if (tmp_vd && tmp_vd->GetDisp())
+					FL::VolumeData* tmp_vd = group->getChild(i)->asVolumeData();
+					bool disp;
+					tmp_vd->getValue("display", disp);
+					if (tmp_vd && disp)
 						vd_list.push_back(tmp_vd);
 				}
 				for (size_t i = 0; i<vd_list.size(); ++i)
@@ -2953,7 +3001,7 @@ void VRenderGLView::DrawFinalBuffer()
 
 //Draw the volmues with compositing
 //peel==true -- depth peeling
-void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int peel)
+void VRenderGLView::DrawVolumesComp(vector<FL::VolumeData*> &list, bool mask, int peel)
 {
 	if (list.size() <= 0)
 		return;
@@ -2966,8 +3014,10 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 	int cnt_mask = 0;
 	for (i = 0; i<(int)list.size(); i++)
 	{
-		VolumeData* vd = list[i];
-		if (!vd || !vd->GetDisp())
+		FL::VolumeData* vd = list[i];
+		bool disp;
+		vd->getValue("display", disp);
+		if (!vd || !disp)
 			continue;
 		if (vd->GetTexture() && vd->GetTexture()->nmask() != -1)
 			cnt_mask++;
@@ -2991,8 +3041,10 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 	//draw each volume to fbo
 	for (i = 0; i<(int)list.size(); i++)
 	{
-		VolumeData* vd = list[i];
-		if (!vd || !vd->GetDisp())
+		FL::VolumeData* vd = list[i];
+		bool disp;
+		vd->getValue("display", disp);
+		if (!vd || !disp)
 			continue;
 		if (mask)
 		{
@@ -3007,20 +3059,24 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 
 			if (vd->GetTexture() && vd->GetTexture()->nmask() != -1)
 			{
-				vd->SetMaskMode(1);
+				vd->setValue("mask mode", long(1));
 				int vol_method = m_vol_method;
 				m_vol_method = VOL_METHOD_COMP;
-				if (vd->GetMode() == 1)
+				long mip_mode;
+				vd->getValue("mip mode", mip_mode);
+				if (mip_mode == 1)
 					DrawMIP(vd, peel);
 				else
 					DrawOVER(vd, mask, peel);
-				vd->SetMaskMode(0);
+				vd->setValue("mask mode", long(0));
 				m_vol_method = vol_method;
 			}
 		}
 		else
 		{
-			if (vd->GetBlendMode() != 2)
+			long blend_mode;
+			vd->getValue("blend mode", blend_mode);
+			if (blend_mode != 2)
 			{
 				//when run script
 				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
@@ -3029,9 +3085,11 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 					vr_frame->GetSettingDlg()->GetRunScript() &&
 					vd->GetMask(false) &&
 					vd->GetLabel(false))
-					vd->SetMaskMode(4);
+					vd->setValue("mask mode", long(4));
 
-				if (vd->GetMode() == 1)
+				long mip_mode;
+				vd->getValue("mip mode", mip_mode);
+				if (mip_mode == 1)
 					DrawMIP(vd, peel);
 				else
 					DrawOVER(vd, mask, peel);
@@ -3040,7 +3098,7 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 	}
 }
 
-void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
+void VRenderGLView::DrawOVER(FL::VolumeData* vd, bool mask, int peel)
 {
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
@@ -3060,12 +3118,12 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 			return;
 		if (mask)
 		{
-			if (vd->GetVR()->get_done_loop(4))
+			if (vd->GetRenderer()->get_done_loop(4))
 				do_over = false;
 		}
 		else
 		{
-			if (vd->GetVR()->get_done_loop(0))
+			if (vd->GetRenderer()->get_done_loop(0))
 				do_over = false;
 		}
 	}
@@ -3130,23 +3188,29 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 			TextureRenderer::reset_clear_chan_buffer();
 		}
 
-		if (vd->GetVR())
-			vd->GetVR()->set_depth_peel(peel);
+		if (vd->GetRenderer())
+			vd->GetRenderer()->set_depth_peel(peel);
 		if (mask)
-			vd->SetStreamMode(4);
+			vd->setValue("stream mode", long(4));
 		else
-			vd->SetStreamMode(0);
+			vd->setValue("stream mode", long(0));
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-		vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-		vd->SetViewport(vp);
-		vd->SetClearColor(clear_color);
-		vd->SetCurFramebuffer(m_cur_framebuffer);
+		//vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+		vd->setValue("depth atten", m_use_fog);
+		vd->setValue("da int", m_fog_intensity);
+		vd->setValue("da start", m_fog_start);
+		vd->setValue("da end", m_fog_end);
+		vd->setValue("viewport", FLTYPE::GLint4(vp));
+		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color));
+		vd->setValue("cur framebuffer", (unsigned long)m_cur_framebuffer);
 		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor);
 	}
 
-	if (vd->GetShadow())
+	bool shadow_enable;
+	vd->getValue("shadow enable", shadow_enable);
+	if (shadow_enable)
 	{
-		vector<VolumeData*> list;
+		vector<FL::VolumeData*> list;
 		list.push_back(vd);
 		DrawOLShadows(list);
 	}
@@ -3214,12 +3278,21 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 			img_shader->create();
 		img_shader->bind();
 	}
-	Color gamma = vd->GetGamma();
-	Color brightness = vd->GetBrightness();
-	img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
-	img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
-	Color hdr = vd->GetHdr();
-	img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
+	double gamma_r, gamma_g, gamma_b;
+	vd->getValue("gamma r", gamma_r);
+	vd->getValue("gamma g", gamma_g);
+	vd->getValue("gamma b", gamma_b);
+	double brightness_r, brightness_g, brightness_b;
+	vd->getValue("brightness r", brightness_r);
+	vd->getValue("brightness g", brightness_g);
+	vd->getValue("brightness b", brightness_b);
+	double equalize_r, equalize_g, equalize_b;
+	vd->getValue("equalize r", equalize_r);
+	vd->getValue("equalize g", equalize_g);
+	vd->getValue("equalize b", equalize_b);
+	img_shader->setLocalParam(0, gamma_r, gamma_g, gamma_b, 1.0);
+	img_shader->setLocalParam(1, brightness_r, brightness_g, brightness_b, 1.0);
+	img_shader->setLocalParam(2, equalize_r, equalize_g, equalize_b, 0.0);
 	//2d adjustment
 
 	DrawViewQuad();
@@ -3238,7 +3311,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 	}
 }
 
-void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
+void VRenderGLView::DrawMIP(FL::VolumeData* vd, int peel)
 {
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
@@ -3254,14 +3327,18 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 		if (rn_time - TextureRenderer::get_st_time() >
 			TextureRenderer::get_up_time())
 			return;
-		if (vd->GetVR()->get_done_loop(1))
+		if (vd->GetRenderer()->get_done_loop(1))
 			do_mip = false;
 	}
 
-	bool shading = vd->GetVR()->get_shading();
-	bool shadow = vd->GetShadow();
-	int color_mode = vd->GetColormapMode();
-	bool enable_alpha = vd->GetEnableAlpha();
+	bool shading;
+	vd->getValue("shading enable", shading);
+	bool shadow;
+	vd->getValue("shadow enable", shadow);
+	long colormap_mode;
+	vd->getValue("colormap mode", colormap_mode);
+	bool enable_alpha;
+	vd->getValue("alpha enable", enable_alpha);
 	ShaderProgram* img_shader = 0;
 
 	Framebuffer* chann_buffer =
@@ -3330,41 +3407,44 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 			TextureRenderer::reset_clear_chan_buffer();
 		}
 
-		if (vd->GetVR())
-			vd->GetVR()->set_depth_peel(peel);
-		vd->GetVR()->set_shading(false);
+		if (vd->GetRenderer())
+			vd->GetRenderer()->set_depth_peel(peel);
+		vd->GetRenderer()->set_shading(false);
 		//turn off colormap proj
-		int saved_colormap_proj = vd->GetColormapProj();
-		if (color_mode == 0)
-			vd->SetColormapProj(0);
-		if (color_mode == 1)
+		long saved_colormap_proj;
+		vd->getValue("colormap proj", saved_colormap_proj);
+		if (colormap_mode == 0)
+			vd->setValue("colormap proj", long(0));
+		if (colormap_mode == 1)
 		{
-			vd->SetMode(3);
-			vd->SetFog(false, m_fog_intensity, m_fog_start, m_fog_end);
+			vd->setValue("mip mode", long(3));
+			vd->setValue("depth atten", false);
 		}
 		else
 		{
-			vd->SetMode(1);
-			vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+			vd->setValue("mip mode", long(1));
+			vd->setValue("depth atten", m_use_fog);
+			//vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 		}
 		//turn off alpha
-		if (color_mode == 1)
-			vd->SetEnableAlpha(false);
+		if (colormap_mode == 1)
+			vd->setValue("alpha enable", false);
 		//draw
-		vd->SetStreamMode(1);
+		vd->setValue("stream mode", long(1));
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-		vd->SetViewport(vp);
-		vd->SetClearColor(clear_color);
-		vd->SetCurFramebuffer(m_cur_framebuffer);
+		vd->setValue("viewport", FLTYPE::GLint4(vp));
+		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color));
+		vd->setValue("cur framebuffer", (unsigned long)m_cur_framebuffer);
 		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor);
 		//restore
-		if (color_mode == 0)
-			vd->SetColormapProj(saved_colormap_proj);
-		if (color_mode == 1)
+		if (colormap_mode == 0)
+			vd->setValue("colormap mode", saved_colormap_proj);
+		if (colormap_mode == 1)
 		{
-			vd->RestoreMode();
+			//mode management needs work
+			//vd->RestoreMode();
 			//restore alpha
-			vd->SetEnableAlpha(enable_alpha);
+			vd->setValue("alpha enable", enable_alpha);
 		}
 
 		//bind channel fbo for final composition
@@ -3383,15 +3463,19 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-		if (color_mode == 1)
+		if (colormap_mode == 1)
 		{
 			//2d adjustment
-			if (vd->GetColormapProj())
+			long colormap_proj;
+			vd->getValue("colormap proj", colormap_proj);
+			long colormap_type;
+			vd->getValue("colormap type", colormap_type);
+			if (colormap_proj)
 				img_shader = TextureRenderer::img_shader_factory_.shader(
-					IMG_SHDR_GRADIENT_PROJ_MAP, vd->GetColormap());
+					IMG_SHDR_GRADIENT_PROJ_MAP, colormap_type);
 			else
 				img_shader = TextureRenderer::img_shader_factory_.shader(
-					IMG_SHDR_GRADIENT_MAP, vd->GetColormap());
+					IMG_SHDR_GRADIENT_MAP, colormap_type);
 			if (img_shader)
 			{
 				if (!img_shader->valid())
@@ -3401,7 +3485,8 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 				img_shader->bind();
 			}
 			double lo, hi;
-			vd->GetColormapValues(lo, hi);
+			vd->getValue("colormap low", lo);
+			vd->getValue("colormap high", hi);
 			img_shader->setLocalParam(
 				0, lo, hi, hi - lo, enable_alpha ? 0.0 : 1.0);
 			//2d adjustment
@@ -3422,7 +3507,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 		if (img_shader && img_shader->valid())
 			img_shader->release();
 
-		if (color_mode == 1 &&
+		if (colormap_mode == 1 &&
 			img_shader &&
 			img_shader->valid())
 		{
@@ -3437,7 +3522,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 
 	if (shadow)
 	{
-		vector<VolumeData*> list;
+		vector<FL::VolumeData*> list;
 		list.push_back(vd);
 		DrawOLShadows(list);
 	}
@@ -3505,12 +3590,21 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 			img_shader->create();
 		img_shader->bind();
 	}
-	Color gamma = vd->GetGamma();
-	Color brightness = vd->GetBrightness();
-	img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
-	img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
-	Color hdr = vd->GetHdr();
-	img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
+	double gamma_r, gamma_g, gamma_b;
+	vd->getValue("gamma r", gamma_r);
+	vd->getValue("gamma g", gamma_g);
+	vd->getValue("gamma b", gamma_b);
+	double brightness_r, brightness_g, brightness_b;
+	vd->getValue("brightness r", brightness_r);
+	vd->getValue("brightness g", brightness_g);
+	vd->getValue("brightness b", brightness_b);
+	double equalize_r, equalize_g, equalize_b;
+	vd->getValue("equalize r", equalize_r);
+	vd->getValue("equalize g", equalize_g);
+	vd->getValue("equalize b", equalize_b);
+	img_shader->setLocalParam(0, gamma_r, gamma_g, gamma_b, 1.0);
+	img_shader->setLocalParam(1, brightness_r, brightness_g, brightness_b, 1.0);
+	img_shader->setLocalParam(2, equalize_r, equalize_g, equalize_b, 0.0);
 	//2d adjustment
 
 	DrawViewQuad();
@@ -3518,8 +3612,8 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 	if (img_shader && img_shader->valid())
 		img_shader->release();
 
-	vd->GetVR()->set_shading(shading);
-	vd->SetColormapMode(color_mode);
+	vd->GetRenderer()->set_shading(shading);
+	vd->setValue("colormap mode", colormap_mode);
 
 	//if vd is duplicated
 	if (TextureRenderer::get_mem_swap() &&
@@ -3532,7 +3626,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 	}
 }
 
-void VRenderGLView::DrawOLShading(VolumeData* vd)
+void VRenderGLView::DrawOLShading(FL::VolumeData* vd)
 {
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
@@ -3545,7 +3639,7 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 		if (rn_time - TextureRenderer::get_st_time() >
 			TextureRenderer::get_up_time())
 			return;
-		if (vd->GetVR()->get_done_loop(2))
+		if (vd->GetRenderer()->get_done_loop(2))
 			return;
 	}
 
@@ -3561,18 +3655,24 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	vd->GetVR()->set_shading(true);
-	bool alpha = vd->GetEnableAlpha();
-	vd->SetEnableAlpha(true);
-	vd->SetMode(2);
-	int colormode = vd->GetColormapMode();
-	vd->SetStreamMode(2);
+	vd->GetRenderer()->set_shading(true);
+	bool alpha_enable;
+	vd->getValue("alpha enable", alpha_enable);
+	vd->setValue("alpha enable", true);
+	vd->setValue("mip mode", long(2));
+	long colormap_mode;
+	vd->getValue("colormap mode", colormap_mode);
+	vd->setValue("stream mode", long(2));
 	vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-	vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+	vd->setValue("depth atten", m_use_fog);
+	vd->setValue("da int", m_fog_intensity);
+	vd->setValue("da start", m_fog_start);
+	vd->setValue("da end", m_fog_end);
 	vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor);
-	vd->RestoreMode();
-	vd->SetColormapMode(colormode);
-	vd->SetEnableAlpha(alpha);
+	//mode management not done yet
+	//vd->RestoreMode();
+	vd->setValue("colormap mode", colormap_mode);
+	vd->setValue("alpha enable", alpha_enable);
 
 	//bind fbo for final composition
 	Framebuffer* chann_buffer =
@@ -3610,7 +3710,7 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 //get mesh shadow
 bool VRenderGLView::GetMeshShadow(double &val)
 {
-	for (int i = 0; i<(int)m_layer_list.size(); i++)
+/*	for (int i = 0; i<(int)m_layer_list.size(); i++)
 	{
 		if (!m_layer_list[i])
 			continue;
@@ -3640,7 +3740,7 @@ bool VRenderGLView::GetMeshShadow(double &val)
 			}
 		}
 	}
-	val = 0.0;
+	val = 0.0;*/
 	return false;
 }
 
@@ -3745,7 +3845,7 @@ void VRenderGLView::DrawOLShadowsMesh(double darkness)
 	glEnable(GL_DEPTH_TEST);
 }
 
-void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
+void VRenderGLView::DrawOLShadows(vector<FL::VolumeData*> &vlist)
 {
 	if (vlist.empty())
 		return;
@@ -3757,17 +3857,23 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 
 	size_t i;
 	bool has_shadow = false;
-	vector<int> colormodes;
+	vector<long> colormap_modes;
 	vector<bool> shadings;
-	vector<VolumeData*> list;
+	vector<FL::VolumeData*> list;
 	//generate list
 	for (i = 0; i<vlist.size(); i++)
 	{
-		VolumeData* vd = vlist[i];
-		if (vd && vd->GetShadow())
+		FL::VolumeData* vd = vlist[i];
+		bool shadow_enable;
+		vd->getValue("shadow enable", shadow_enable);
+		if (vd && shadow_enable)
 		{
-			colormodes.push_back(vd->GetColormapMode());
-			shadings.push_back(vd->GetVR()->get_shading());
+			long colormap_mode;
+			vd->getValue("colormap mode", colormap_mode);
+			colormap_modes.push_back(colormap_mode);
+			bool shading_enable;
+			vd->getValue("shading enable", shading_enable);
+			shadings.push_back(shading_enable);
 			list.push_back(vd);
 			has_shadow = true;
 		}
@@ -3784,8 +3890,10 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 		if (rn_time - TextureRenderer::get_st_time() >
 			TextureRenderer::get_up_time())
 			return;
-		if (list.size() == 1 && list[0]->GetShadow())
-			if (list[0]->GetVR()->get_done_loop(3))
+		bool shadow_enable;
+		list[0]->getValue("shadow enable", shadow_enable);
+		if (list.size() == 1 && shadow_enable)
+			if (list[0]->GetRenderer()->get_done_loop(3))
 				return;
 	}
 
@@ -3816,49 +3924,60 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 		;
 	else if (list.size() == 1)
 	{
-		VolumeData* vd = list[0];
+		FL::VolumeData* vd = list[0];
 		//save
-		int colormode = vd->GetColormapMode();
-		bool shading = vd->GetVR()->get_shading();
+		long colormap_mode;
+		vd->getValue("colormap mode", colormap_mode);
+		bool shading_enable;
+		vd->getValue("shading enable", shading_enable);
 		//set to draw depth
-		vd->GetVR()->set_shading(false);
-		vd->SetMode(0);
-		vd->SetColormapMode(2);
+		vd->GetRenderer()->set_shading(false);
+		vd->setValue("mip mode", long(0));
+		vd->setValue("colormap mode", long(2));
 		if (overlay_buffer)
-			vd->Set2dDmap(overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0));
-		int msk_mode = vd->GetMaskMode();
-		vd->SetMaskMode(0);
+			vd->setValue("2d dmap id", (unsigned long)(
+				overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0)));
+		long mask_mode;
+		vd->getValue("mask mode", mask_mode);
+		vd->setValue("mask mode", long(0));
 		//draw
-		vd->SetStreamMode(3);
+		vd->setValue("stream mode", long(3));
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-		vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-		vd->SetViewport(vp);
-		vd->SetClearColor(clear_color);
-		vd->SetCurFramebuffer(m_cur_framebuffer);
+		vd->setValue("depth atten", m_use_fog);
+		vd->setValue("da int", m_fog_intensity);
+		vd->setValue("da start", m_fog_start);
+		vd->setValue("da end", m_fog_end);
+		vd->setValue("viewport", FLTYPE::GLint4(vp));
+		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color));
+		vd->setValue("curframebuffer", (unsigned long)m_cur_framebuffer);
 		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor);
 		//restore
-		vd->RestoreMode();
-		vd->SetMaskMode(msk_mode);
-		vd->SetColormapMode(colormode);
-		vd->GetVR()->set_shading(shading);
-		vd->GetShadowParams(shadow_darkness);
+		//vd->RestoreMode();
+		vd->setValue("mask mode", mask_mode);
+		vd->setValue("colormap mode", colormap_mode);
+		vd->setValue("shading enable", shading_enable);
+		vd->setValue("shadow int", shadow_darkness);
 	}
 	else
 	{
 		m_mvr->clear_vr();
 		for (i = 0; i<list.size(); i++)
 		{
-			VolumeData* vd = list[i];
-			vd->GetVR()->set_shading(false);
-			vd->SetMode(0);
-			vd->SetColormapMode(2);
+			FL::VolumeData* vd = list[i];
+			vd->GetRenderer()->set_shading(false);
+			vd->setValue("mip mode", long(0));
+			vd->setValue("colormap mode", long(2));
 			if (overlay_buffer)
-				vd->Set2dDmap(overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0));
-			VolumeRenderer* vr = list[i]->GetVR();
+				vd->setValue("2d dmap id", (unsigned long)(
+					overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0)));
+			VolumeRenderer* vr = list[i]->GetRenderer();
 			if (vr)
 			{
 				list[i]->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-				list[i]->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+				list[i]->setValue("depth atten", m_use_fog);
+				list[i]->setValue("da int", m_fog_intensity);
+				list[i]->setValue("da start", m_fog_start);
+				list[i]->setValue("da end", m_fog_end);
 				m_mvr->add_vr(vr);
 				m_mvr->set_sampling_rate(vr->get_sampling_rate());
 				m_mvr->SetNoiseRed(vr->GetNoiseRed());
@@ -3874,12 +3993,12 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 		m_mvr->set_colormap_mode(0);
 		for (i = 0; i<list.size(); i++)
 		{
-			VolumeData* vd = list[i];
-			vd->RestoreMode();
-			vd->SetColormapMode(colormodes[i]);
-			vd->GetVR()->set_shading(shadings[i]);
+			FL::VolumeData* vd = list[i];
+			//vd->RestoreMode();
+			vd->setValue("colormap mode", colormap_modes[i]);
+			vd->setValue("shading enable", shadings[i]);
 		}
-		list[0]->GetShadowParams(shadow_darkness);
+		list[0]->getValue("shadow int", shadow_darkness);
 	}
 
 	//
@@ -3977,7 +4096,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 
 //draw multi volumes with depth consideration
 //peel==true -- depth peeling
-void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
+void VRenderGLView::DrawVolumesMulti(vector<FL::VolumeData*> &list, int peel)
 {
 	if (list.empty())
 		return;
@@ -3998,10 +4117,12 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	m_mvr->clear_vr();
 	for (i = 0; i<(int)list.size(); i++)
 	{
-		VolumeData* vd = list[i];
-		if (vd && vd->GetDisp())
+		FL::VolumeData* vd = list[i];
+		bool disp;
+		vd->getValue("display", disp);
+		if (vd && disp)
 		{
-			VolumeRenderer* vr = vd->GetVR();
+			VolumeRenderer* vr = vd->GetRenderer();
 			if (vr)
 			{
 				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
@@ -4010,9 +4131,12 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 					vr_frame->GetSettingDlg()->GetRunScript() &&
 					vd->GetMask(false) &&
 					vd->GetLabel(false))
-					vd->SetMaskMode(4);
+					vd->setValue("mask mode", long(4));
 				vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-				vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+				vd->setValue("depth atten", m_use_fog);
+				vd->setValue("da int", m_fog_intensity);
+				vd->setValue("da start", m_fog_start);
+				vd->setValue("da end", m_fog_end);
 				m_mvr->add_vr(vr);
 				m_mvr->set_sampling_rate(vr->get_sampling_rate());
 				m_mvr->SetNoiseRed(vr->GetNoiseRed());
@@ -4033,10 +4157,10 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 		mvmat[1], mvmat[5], mvmat[9], mvmat[13],
 		mvmat[2], mvmat[6], mvmat[10], mvmat[14],
 		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
-	mv_mat2 = m_vd_pop_list[0]->GetVR()->m_mv_mat * mv_mat2;
+	mv_mat2 = m_vd_pop_list[0]->GetRenderer()->m_mv_mat * mv_mat2;
 	m_mvr->set_matrices(mv_mat2,
-		m_vd_pop_list[0]->GetVR()->m_proj_mat,
-		m_vd_pop_list[0]->GetVR()->m_tex_mat);
+		m_vd_pop_list[0]->GetRenderer()->m_proj_mat,
+		m_vd_pop_list[0]->GetRenderer()->m_tex_mat);
 
 	//generate textures & buffer objects
 	//frame buffer for each volume
@@ -4098,14 +4222,22 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 		}
 		img_shader->bind();
 	}
-	Color gamma, brightness, hdr;
-	VolumeData* vd = list[0];
-	gamma = vd->GetGamma();
-	brightness = vd->GetBrightness();
-	hdr = vd->GetHdr();
-	img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
-	img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
-	img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
+	FL::VolumeData* vd = list[0];
+	double gamma_r, gamma_g, gamma_b;
+	vd->getValue("gamma r", gamma_r);
+	vd->getValue("gamma g", gamma_g);
+	vd->getValue("gamma b", gamma_b);
+	double brightness_r, brightness_g, brightness_b;
+	vd->getValue("brightness r", brightness_r);
+	vd->getValue("brightness g", brightness_g);
+	vd->getValue("brightness b", brightness_b);
+	double equalize_r, equalize_g, equalize_b;
+	vd->getValue("equalize r", equalize_r);
+	vd->getValue("equalize g", equalize_g);
+	vd->getValue("equalize b", equalize_b);
+	img_shader->setLocalParam(0, gamma_r, gamma_g, gamma_b, 1.0);
+	img_shader->setLocalParam(1, brightness_r, brightness_g, brightness_b, 1.0);
+	img_shader->setLocalParam(2, equalize_r, equalize_g, equalize_b, 0.0);
 	//2d adjustment
 
 	DrawViewQuad();
@@ -4384,14 +4516,16 @@ void VRenderGLView::PickVolume()
 	double dist = 0.0;
 	double min_dist = -1.0;
 	Point p;
-	VolumeData* vd = 0;
-	VolumeData* picked_vd = 0;
+	FL::VolumeData* vd = 0;
+	FL::VolumeData* picked_vd = 0;
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
 		vd = m_vd_pop_list[i];
 		if (!vd) continue;
 		int mode = 2;
-		if (vd->GetMode() == 1) mode = 1;
+		long mip_mode;
+		vd->getValue("mip mode", mip_mode);
+		if (mip_mode == 1) mode = 1;
 		dist = GetPointVolume(p, old_mouse_X, old_mouse_Y, vd, mode, true, 0.5);
 		if (dist > 0.0)
 		{
@@ -4428,7 +4562,7 @@ void VRenderGLView::PickVolume()
 		if (frame && frame->GetTree())
 		{
 			frame->GetTree()->SetFocus();
-			frame->GetTree()->Select(m_vrv->GetName(), picked_vd->GetName());
+			frame->GetTree()->Select(m_vrv->GetName(), picked_vd->getName());
 		}
 	}
 }
@@ -4489,7 +4623,9 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		int nx = GetGLSize().x;
 		int ny = GetGLSize().y;
 		int mode = 2;
-		if (m_cur_vol->GetMode() == 1) mode = 1;
+		long mip_mode;
+		m_cur_vol->getValue("mip mode", mip_mode);
+		if (mip_mode == 1) mode = 1;
 		double dist = GetPointVolume(p,
 			nx / 2.0, ny / 2.0,
 			m_cur_vol, mode, true, m_pin_pick_thresh);
@@ -4986,21 +5122,21 @@ void VRenderGLView::SetParams(double t)
 
 	for (int i = 0; i<GetAllVolumeNum(); i++)
 	{
-		VolumeData* vd = GetAllVolumeData(i);
+		FL::VolumeData* vd = GetAllVolumeData(i);
 		if (!vd) continue;
 
 		keycode.l1 = 2;
-		keycode.l1_name = vd->GetName();
+		keycode.l1_name = vd->getName();
 
 		//display
 		keycode.l2 = 0;
 		keycode.l2_name = "display";
 		bool bval;
 		if (interpolator->GetBoolean(keycode, t, bval))
-			vd->SetDisp(bval);
+			vd->setValue("display", bval);
 
 		//clipping planes
-		vector<Plane*> *planes = vd->GetVR()->get_planes();
+		vector<Plane*> *planes = vd->GetRenderer()->get_planes();
 		if (!planes) continue;
 		if (planes->size() != 6) continue;
 		Plane *plane = 0;
@@ -5131,10 +5267,14 @@ void VRenderGLView::SetParams(double t)
 	}
 
 	if (clip_view)
-		clip_view->SetVolumeData(vr_frame->GetCurSelVol());
+	{
+		FL::VolumeData* vd;
+		FL::Global::instance().getVolumeFactory().getValue("current", (FL::Referenced**)&vd);
+		clip_view->SetVolumeData(vd);
+	}
 	if (vr_frame)
 	{
-		vr_frame->UpdateTree(m_cur_vol ? m_cur_vol->GetName() : "");
+		vr_frame->UpdateTree(m_cur_vol ? m_cur_vol->getName() : "");
 		int index = interpolator->GetKeyIndexFromTime(t);
 		vr_frame->GetRecorderDlg()->SetSelection(index);
 	}
@@ -5176,7 +5316,7 @@ void VRenderGLView::Get4DSeqFrames(int &start_frame, int &end_frame, int &cur_fr
 {
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
-		VolumeData* vd = m_vd_pop_list[i];
+		FL::VolumeData* vd = m_vd_pop_list[i];
 		if (vd && vd->GetReader())
 		{
 			BaseReader* reader = vd->GetReader();
@@ -5203,7 +5343,7 @@ void VRenderGLView::Get4DSeqFrames(int &start_frame, int &end_frame, int &cur_fr
 }
 
 void VRenderGLView::Set4DSeqFrameVd(int frame, bool run_script,
-	VolumeData* vd, VRenderFrame* vframe)
+	FL::VolumeData* vd, VRenderFrame* vframe)
 {
 	if (vd && vd->GetReader())
 	{

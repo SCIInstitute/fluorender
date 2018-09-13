@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include "VRenderView.h"
 #include "VRenderFrame.h"
+#include <Scenegraph/VolumeData.h>
 #include <tiffio.h>
 #include <wx/utils.h>
 #include <wx/valnum.h>
@@ -724,7 +725,7 @@ int VRenderView::GetLayerNum()
 		return 0;
 }
 
-VolumeData* VRenderView::GetAllVolumeData(int index)
+FL::VolumeData* VRenderView::GetAllVolumeData(int index)
 {
 	if (m_glview)
 		return m_glview->GetAllVolumeData(index);
@@ -732,7 +733,7 @@ VolumeData* VRenderView::GetAllVolumeData(int index)
 		return 0;
 }
 
-VolumeData* VRenderView::GetDispVolumeData(int index)
+FL::VolumeData* VRenderView::GetDispVolumeData(int index)
 {
 	if (m_glview)
 		return m_glview->GetDispVolumeData(index);
@@ -764,7 +765,7 @@ MultiVolumeRenderer* VRenderView::GetMultiVolumeData()
 		return 0;
 }
 
-VolumeData* VRenderView::GetVolumeData(wxString &name)
+FL::VolumeData* VRenderView::GetVolumeData(wxString &name)
 {
 	if (m_glview)
 		return m_glview->GetVolumeData(name);
@@ -788,7 +789,7 @@ Annotations* VRenderView::GetAnnotations(wxString &name)
 		return 0;
 }
 
-DataGroup* VRenderView::GetGroup(wxString &name)
+FL::VolumeGroup* VRenderView::GetGroup(wxString &name)
 {
 	if (m_glview)
 		return m_glview->GetGroup(name);
@@ -796,7 +797,7 @@ DataGroup* VRenderView::GetGroup(wxString &name)
 		return 0;
 }
 
-DataGroup* VRenderView::AddVolumeData(VolumeData* vd, wxString group_name)
+FL::VolumeGroup* VRenderView::AddVolumeData(FL::VolumeData* vd, wxString group_name)
 {
 	if (m_glview) {
 		double val = 50.;
@@ -828,7 +829,7 @@ wxString VRenderView::AddGroup(wxString str, wxString prev_group)
 		return "";
 }
 
-DataGroup* VRenderView::AddOrGetGroup()
+FL::VolumeGroup* VRenderView::AddOrGetGroup()
 {
 	if (m_glview)
 		return m_glview->AddOrGetGroup();
