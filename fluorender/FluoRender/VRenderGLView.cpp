@@ -6018,7 +6018,7 @@ void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 	Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, channel, true);
 	if (!label_nrrd_new)
 	{
-		m_cur_vol->AddEmptyLabel();
+		m_cur_vol->AddEmptyLabel(0);
 		label_nrrd_new = m_cur_vol->GetLabel(false);
 	}
 	else
