@@ -154,14 +154,14 @@ public:
 	TreeLayer* GetLayer(int index);
 	MultiVolumeRenderer* GetMultiVolumeData() { return m_mvr; };
 	FL::VolumeData* GetVolumeData(wxString &name);
-	MeshData* GetMeshData(wxString &name);
-	Annotations* GetAnnotations(wxString &name);
+	FL::MeshData* GetMeshData(wxString &name);
+	FL::Annotations* GetAnnotations(wxString &name);
 	FL::VolumeGroup* GetGroup(wxString &name);
 	MeshGroup* GetMGroup(wxString str);
 	//add
 	FL::VolumeGroup* AddVolumeData(FL::VolumeData* vd, wxString group_name = "");
-	void AddMeshData(MeshData* md);
-	void AddAnnotations(Annotations* ann);
+	void AddMeshData(FL::MeshData* md);
+	void AddAnnotations(FL::Annotations* ann);
 	wxString AddGroup(wxString str, wxString prev_group = "");
 	FL::VolumeGroup* AddOrGetGroup();
 	wxString AddMGroup(wxString str);

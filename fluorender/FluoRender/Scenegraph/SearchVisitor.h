@@ -53,11 +53,13 @@ namespace FL
 
 		virtual void apply(FL::Node& node)
 		{
+			conditions(&node);
 			traverse(node);
 		}
 
 		virtual void apply(FL::Group& group)
 		{
+			conditions(&group);
 			traverse(group);
 		}
 
@@ -67,6 +69,7 @@ namespace FL
 			names_.clear();
 			ids_.clear();
 			class_names_.clear();
+			values_.clear();
 		}
 
 		ObjectList* getResult() { return &results_; }
@@ -138,13 +141,84 @@ namespace FL
 		void matchIds(std::vector<unsigned int> &ids)
 		{ ids_.insert(ids_.end(), ids.begin(), ids.end()); }
 
+		void matchClassName(const std::string &class_name)
+		{ class_names_.push_back(class_name); }
+		void matchClassNames(const std::vector<std::string> &class_names)
+		{ class_names_.insert(class_names_.end(), class_names.begin(), class_names.end()); }
 
+		void matchValue(const ValueTuple& vt)
+		{ values_.push_back(vt); }
+		void matchValues(const std::vector<ValueTuple> & vts)
+		{ values_.insert(values_.end(), vts.begin(), vts.end()); }
 
 	protected:
 		ObjectList results_;
+		//and conditions
 		std::vector<std::string> names_;
 		std::vector<unsigned int> ids_;
 		std::vector<std::string> class_names_;
+		std::vector<ValueTuple> values_;
+
+		void conditions(Object* obj)
+		{
+			bool do_names = false;
+			bool names_matched = false;
+			if (!names_.empty())
+			{
+				do_names = true;
+				std::string name = obj->getName();
+				if (std::find(names_.begin(), names_.end(), name) != names_.end())
+					names_matched = true;
+			}
+
+			bool do_ids = false;
+			bool ids_matched = false;
+			if (!ids_.empty())
+			{
+				do_ids = true;
+				unsigned int id = obj->getId();
+				if (std::find(ids_.begin(), ids_.end(), id) != ids_.end())
+					ids_matched = true;
+			}
+
+			bool do_class_names = false;
+			bool class_names_matched = false;
+			if (!class_names_.empty())
+			{
+				do_class_names = true;
+				std::string class_name = obj->className();
+				if (std::find(class_names_.begin(), class_names_.end(), class_name) != class_names_.end())
+					class_names_matched = true;
+			}
+
+			bool do_values = false;
+			bool values_matched = false;
+			if (!values_.empty())
+			{
+				do_values = true;
+				size_t count = 0;
+				for (auto it = values_.begin();
+					it != values_.end(); ++it)
+				{
+					ValueTuple vt = *it;
+					if (obj->getValue(vt) && vt == *it)
+						count++;
+				}
+				if (count == values_.size())
+					values_matched = true;
+			}
+
+			//conditions may change
+			if (!do_names) names_matched = true;
+			if (!do_ids) ids_matched = true;
+			if (!do_class_names) class_names_matched = true;
+			if (!do_values) values_matched = true;
+			if (names_matched &&
+				ids_matched &&
+				class_names_matched &&
+				values_matched)
+				results_.push_back(obj);
+		}
 	};
 }
 #endif//_SEARCHVISITOR_H_

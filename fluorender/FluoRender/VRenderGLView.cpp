@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Scenegraph/Group.h>
 #include <Scenegraph/DrawVolumeVisitor.h>
 #include <Scenegraph/PopVolumeVisitor.h>
+#include <Scenegraph/SearchVisitor.h>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -42,6 +43,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/stdpaths.h>
 #include "png_resource.h"
 #include "img/icons.h"
+#include <utility>
 
 bool VRenderGLView::m_linked_rot = false;
 VRenderGLView* VRenderGLView::m_master_linked_view = 0;
@@ -5350,7 +5352,11 @@ void VRenderGLView::Set4DSeqFrameVd(int frame, bool run_script,
 		BaseReader* reader = vd->GetReader();
 		bool clear_pool = false;
 
-		if (vd->GetCurTime() != frame)
+		long time;
+		vd->getValue("time", time);
+		long channel;
+		vd->getValue("channel", channel);
+		if (time != frame)
 		{
 			Texture *tex = vd->GetTexture();
 			if (tex && tex->isBrxml())
@@ -5361,11 +5367,11 @@ void VRenderGLView::Set4DSeqFrameVd(int frame, bool run_script,
 				for (int j = 0; j < br->GetLevelNum(); j++)
 				{
 					tex->setLevel(j);
-					if (vd->GetVR()) vd->GetVR()->clear_brick_buf();
+					if (vd->GetRenderer()) vd->GetRenderer()->clear_brick_buf();
 				}
 				tex->setLevel(curlv);
-				tex->set_FrameAndChannel(frame, vd->GetCurChannel());
-				vd->SetCurTime(reader->GetCurTime());
+				tex->set_FrameAndChannel(frame, channel);
+				vd->setValue("time", long(reader->GetCurTime()));
 				//update rulers
 				if (vframe && vframe->GetMeasureDlg())
 					vframe->GetMeasureDlg()->UpdateList();
@@ -5373,14 +5379,20 @@ void VRenderGLView::Set4DSeqFrameVd(int frame, bool run_script,
 			else
 			{
 				double spcx, spcy, spcz;
-				vd->GetSpacings(spcx, spcy, spcz);
+				//vd->GetSpacings(spcx, spcy, spcz);
+				vd->getValue("spc x", spcx);
+				vd->getValue("spc y", spcy);
+				vd->getValue("spc z", spcz);
 
-				Nrrd* data = reader->Convert(frame, vd->GetCurChannel(), false);
-				if (!vd->Replace(data, false))
+				Nrrd* data = reader->Convert(frame, channel, false);
+				if (!vd->ReplaceData(data, false))
 					return;
 
-				vd->SetCurTime(reader->GetCurTime());
-				vd->SetSpacings(spcx, spcy, spcz);
+				vd->setValue("time", long(reader->GetCurTime()));
+				//vd->SetSpacings(spcx, spcy, spcz);
+				vd->setValue("spc x", spcx);
+				vd->setValue("spc y", spcy);
+				vd->setValue("spc z", spcz);
 
 				//update rulers
 				if (vframe && vframe->GetMeasureDlg())
@@ -5394,8 +5406,8 @@ void VRenderGLView::Set4DSeqFrameVd(int frame, bool run_script,
 			}
 		}
 
-		if (clear_pool && vd->GetVR())
-			vd->GetVR()->clear_tex_pool();
+		if (clear_pool && vd->GetRenderer())
+			vd->GetRenderer()->clear_tex_pool();
 	}
 }
 
@@ -5423,10 +5435,10 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 	}
 
 	//save currently selected volume
-	VolumeData* cur_vd_save = m_cur_vol;
+	FL::VolumeData* cur_vd_save = m_cur_vol;
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
-		VolumeData* vd = m_vd_pop_list[i];
+		FL::VolumeData* vd = m_vd_pop_list[i];
 		Set4DSeqFrameVd(frame, run_script,
 			vd, vframe);
 	}
@@ -5449,7 +5461,7 @@ void VRenderGLView::Get3DBatFrames(int &start_frame, int &end_frame, int &cur_fr
 
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
-		VolumeData* vd = m_vd_pop_list[i];
+		FL::VolumeData* vd = m_vd_pop_list[i];
 		if (vd && vd->GetReader())
 		{
 			BaseReader* reader = vd->GetReader();
@@ -5495,9 +5507,11 @@ void VRenderGLView::Set3DBatFrame(int offset)
 	m_tseq_cur_num = offset;
 	for (i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
-		VolumeData* vd = m_vd_pop_list[i];
+		FL::VolumeData* vd = m_vd_pop_list[i];
 		if (vd && vd->GetReader())
 		{
+			long channel;
+			vd->getValue("channel", channel);
 			Texture *tex = vd->GetTexture();
 			BaseReader* reader = vd->GetReader();
 			if (tex && tex->isBrxml())
@@ -5507,11 +5521,11 @@ void VRenderGLView::Set3DBatFrame(int offset)
 				for (int j = 0; j < br->GetLevelNum(); j++)
 				{
 					tex->setLevel(j);
-					if (vd->GetVR()) vd->GetVR()->clear_brick_buf();
+					if (vd->GetRenderer()) vd->GetRenderer()->clear_brick_buf();
 				}
 				tex->setLevel(curlv);
-				tex->set_FrameAndChannel(0, vd->GetCurChannel());
-				vd->SetCurTime(reader->GetCurTime());
+				tex->set_FrameAndChannel(0, channel);
+				vd->setValue("time", long(reader->GetCurTime()));
 				wxString data_name = wxString(reader->GetDataName());
 				if (i > 0)
 					m_bat_folder += "_";
@@ -5522,14 +5536,14 @@ void VRenderGLView::Set3DBatFrame(int offset)
 					chan_num = 1;
 				else if (data_name.Find("_2ch") != -1)
 					chan_num = 2;
-				if (chan_num>0 && vd->GetCurChannel() >= chan_num)
-					vd->SetDisp(false);
+				if (chan_num>0 && channel >= chan_num)
+					vd->setValue("display", false);
 				else
-					vd->SetDisp(true);
+					vd->setValue("display", true);
 
 				if (reader->GetChanNum() > 1)
-					data_name += wxString::Format("_%d", vd->GetCurChannel() + 1);
-				vd->SetName(data_name);
+					data_name += wxString::Format("_%d", channel + 1);
+				vd->setName(data_name.ToStdString());
 			}
 			else
 			{
@@ -5550,14 +5564,17 @@ void VRenderGLView::Set3DBatFrame(int offset)
 				}
 
 				double spcx, spcy, spcz;
-				vd->GetSpacings(spcx, spcy, spcz);
+				//vd->GetSpacings(spcx, spcy, spcz);
+				vd->getValue("spc x", spcx);
+				vd->getValue("spc y", spcy);
+				vd->getValue("spc z", spcz);
 
-				Nrrd* data = reader->Convert(0, vd->GetCurChannel(), true);
-				if (vd->Replace(data, true))
-					vd->SetDisp(true);
+				Nrrd* data = reader->Convert(0, channel, true);
+				if (vd->ReplaceData(data, true))
+					vd->setValue("display", true);
 				else
 				{
-					vd->SetDisp(false);
+					vd->setValue("display", false);
 					continue;
 				}
 
@@ -5571,22 +5588,32 @@ void VRenderGLView::Set3DBatFrame(int offset)
 					chan_num = 1;
 				else if (data_name.Find("_2ch") != -1)
 					chan_num = 2;
-				if (chan_num>0 && vd->GetCurChannel() >= chan_num)
-					vd->SetDisp(false);
+				if (chan_num>0 && channel >= chan_num)
+					vd->setValue("display", false);
 				else
-					vd->SetDisp(true);
+					vd->setValue("display", true);
 
 				if (reader->GetChanNum() > 1)
-					data_name += wxString::Format("_%d", vd->GetCurChannel() + 1);
-				vd->SetName(data_name);
-				vd->SetPath(wxString(reader->GetPathName()));
-				vd->SetCurTime(reader->GetCurTime());
+					data_name += wxString::Format("_%d", channel + 1);
+				vd->setName(data_name.ToStdString());
+				vd->setValue("tex path", reader->GetPathName());
+				vd->setValue("time", long(reader->GetCurTime()));
 				if (!reader->IsSpcInfoValid())
-					vd->SetSpacings(spcx, spcy, spcz);
+				{
+					//vd->SetSpacings(spcx, spcy, spcz);
+					vd->setValue("spc x", spcx);
+					vd->setValue("spc y", spcy);
+					vd->setValue("spc z", spcz);
+				}
 				else
-					vd->SetSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetZSpc());
-				if (vd->GetVR())
-					vd->GetVR()->clear_tex_pool();
+				{
+					//vd->SetSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetZSpc());
+					vd->setValue("spc x", reader->GetXSpc());
+					vd->setValue("spc y", reader->GetYSpc());
+					vd->setValue("spc z", reader->GetZSpc());
+				}
+				if (vd->GetRenderer())
+					vd->GetRenderer()->clear_tex_pool();
 			}
 		}
 	}
@@ -5598,11 +5625,11 @@ void VRenderGLView::Set3DBatFrame(int offset)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 	{
+		FL::VolumeData* vd = 0;
+		FL::Global::instance().getVolumeFactory().
+			getValue("current", (FL::Referenced**)&vd);
 		vr_frame->UpdateList();
-		vr_frame->UpdateTree(
-			vr_frame->GetCurSelVol() ?
-			vr_frame->GetCurSelVol()->GetName() :
-			"");
+		vr_frame->UpdateTree(vd ? vd->getName() : "");
 	}
 }
 
@@ -5754,7 +5781,7 @@ void VRenderGLView::ResetEnlarge()
 }
 
 //run 4d script
-void VRenderGLView::Run4DScript(wxString &scriptname, VolumeData* vd)
+void VRenderGLView::Run4DScript(wxString &scriptname, FL::VolumeData* vd)
 {
 	if (m_run_script)
 	{
@@ -5857,7 +5884,7 @@ void VRenderGLView::RunNoiseReduction(wxFileConfig &fconfig)
 	{
 		CompAnalysis(0.0, size, thresh, 1.0, false, false, false);
 		Calculate(6, "", false);
-		VolumeData* vd = m_calculator.GetResult();
+		FL::VolumeData* vd = m_calculator.GetResult();
 		if (vd)
 		{
 			str = pathname;
@@ -5874,11 +5901,15 @@ void VRenderGLView::RunNoiseReduction(wxFileConfig &fconfig)
 				format = wxString::Format("%d", chan_num);
 				int ch_length = format.Length();
 				format = wxString::Format("_CH%%0%dd", ch_length + 1);
-				str += wxString::Format(format, vd->GetCurChannel() + 1);
+				long channel;
+				vd->getValue("channel", channel);
+				str += wxString::Format(format, channel + 1);
 			}
 			str += ".tif";
-			vd->Save(str, mode, bake, compression);
-			delete vd;
+			std::wstring filename = str.ToStdWstring();
+			vd->SaveData(filename, mode, bake, compression);
+			//delete vd;
+			FL::Global::instance().getVolumeFactory().remove(vd);
 		}
 	}
 }
@@ -5906,13 +5937,16 @@ void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 	//no label in graphics memory
 	//steps:
 	//int ii, jj, kk;
-	int nx, ny, nz;
+	long nx, ny, nz;
 	//return current mask (into system memory)
 	if (!m_cur_vol)
 		UPDATE_TRACE_DLG_AND_RETURN
 
-		m_cur_vol->GetVR()->return_mask();
-	m_cur_vol->GetResolution(nx, ny, nz);
+	m_cur_vol->GetRenderer()->return_mask();
+	//m_cur_vol->GetResolution(nx, ny, nz);
+	m_cur_vol->getValue("res x", nx);
+	m_cur_vol->getValue("res y", ny);
+	m_cur_vol->getValue("res z", nz);
 	//find labels in the old that are selected by the current mask
 	Nrrd* mask_nrrd = m_cur_vol->GetMask(true);
 	if (!mask_nrrd)
@@ -5946,7 +5980,7 @@ void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 			{
 				FL::pCell cell(new FL::Cell(label_value));
 				cell->SetSizeUi(1);
-				sel_labels.insert(pair<unsigned int, FL::pCell>
+				sel_labels.insert(std::pair<unsigned int, FL::pCell>
 					(label_value, cell));
 			}
 			else
@@ -5976,10 +6010,12 @@ void VRenderGLView::RunSelectionTracking(wxFileConfig &fconfig)
 	if (!reader)
 		UPDATE_TRACE_DLG_AND_RETURN
 
+	long channel;
+	m_cur_vol->getValue("channel", channel);
 	LBLReader lbl_reader;
-	wstring lblname = reader->GetCurLabelName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
+	wstring lblname = reader->GetCurLabelName(m_tseq_cur_num, channel);
 	lbl_reader.SetFile(lblname);
-	Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
+	Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, channel, true);
 	if (!label_nrrd_new)
 	{
 		m_cur_vol->AddEmptyLabel();
@@ -6020,12 +6056,22 @@ void VRenderGLView::RunSparseTracking(wxFileConfig &fconfig)
 
 	FL::pTrackMap track_map = m_trace_group->GetTrackMap();
 	FL::TrackMapProcessor tm_processor(track_map);
-	int resx, resy, resz;
-	m_cur_vol->GetResolution(resx, resy, resz);
+	long resx, resy, resz;
+	//m_cur_vol->GetResolution(resx, resy, resz);
+	m_cur_vol->getValue("res x", resx);
+	m_cur_vol->getValue("res y", resy);
+	m_cur_vol->getValue("res z", resz);
 	double spcx, spcy, spcz;
-	m_cur_vol->GetSpacings(spcx, spcy, spcz);
-	tm_processor.SetBits(m_cur_vol->GetBits());
-	tm_processor.SetScale(m_cur_vol->GetScalarScale());
+	//m_cur_vol->GetSpacings(spcx, spcy, spcz);
+	m_cur_vol->getValue("spc x", spcx);
+	m_cur_vol->getValue("spc y", spcy);
+	m_cur_vol->getValue("spc z", spcz);
+	long bits;
+	m_cur_vol->getValue("bits", bits);
+	tm_processor.SetBits(bits);
+	double int_scale;
+	m_cur_vol->getValue("int scale", int_scale);
+	tm_processor.SetScale(int_scale);
 	tm_processor.SetSizes(resx, resy, resz);
 	tm_processor.SetSpacings(spcx, spcy, spcz);
 	//tm_processor.SetSizeThresh(component_size);
@@ -6060,21 +6106,23 @@ void VRenderGLView::RunRandomColors(wxFileConfig &fconfig)
 		//load and replace the label
 		if (!m_cur_vol)
 			return;
-		VolumeData* vd = m_cur_vol;
+		FL::VolumeData* vd = m_cur_vol;
 		BaseReader* reader = vd->GetReader();
 		if (!reader)
 			return;
+		long channel;
+		m_cur_vol->getValue("channel", channel);
 		LBLReader lbl_reader;
-		wstring lblname = reader->GetCurLabelName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
+		wstring lblname = reader->GetCurLabelName(m_tseq_cur_num, channel);
 		lbl_reader.SetFile(lblname);
-		Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
+		Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, channel, true);
 		if (!label_nrrd_new)
 			return;
 		vd->LoadLabel(label_nrrd_new);
 		int time_num = reader->GetTimeNum();
 		//generate RGB volumes
 		m_selector.CompExportRandomColor(hmode, 0, 0, 0, false, false);
-		vector<VolumeData*> *vol_list = m_selector.GetResultVols();
+		vector<FL::VolumeData*> *vol_list = m_selector.GetResultVols();
 		for (int ii = 0; ii < (int)vol_list->size(); ii++)
 		{
 			vd = (*vol_list)[ii];
@@ -6093,12 +6141,16 @@ void VRenderGLView::RunRandomColors(wxFileConfig &fconfig)
 				format = wxString::Format("%d", chan_num);
 				int ch_length = format.Length();
 				format = wxString::Format("_CH%%0%dd", ch_length + 1);
-				str += wxString::Format(format, vd->GetCurChannel() + 1);
+				long channel;
+				vd->getValue("channel", channel);
+				str += wxString::Format(format, channel + 1);
 			}
 			//comp
 			str += wxString::Format("_COMP%d", ii + 1) + ".tif";
-			vd->Save(str);
-			delete vd;
+			std::wstring filename = str.ToStdWstring();
+			vd->SaveData(filename);
+			//delete vd;
+			FL::Global::instance().getVolumeFactory().remove(vd);
 		}
 	}
 }
@@ -6122,7 +6174,7 @@ void VRenderGLView::RunSeparateChannels(wxFileConfig &fconfig)
 		if (!m_cur_vol)
 			return;
 
-		VolumeData* vd = m_cur_vol;
+		FL::VolumeData* vd = m_cur_vol;
 
 		str = pathname;
 		//time
@@ -6136,8 +6188,11 @@ void VRenderGLView::RunSeparateChannels(wxFileConfig &fconfig)
 		format = wxString::Format("%d", chan_num);
 		int ch_length = format.Length();
 		format = wxString::Format("_CH%%0%dd", ch_length + 1);
-		str += wxString::Format(format, vd->GetCurChannel() + 1) + ".tif";
-		vd->Save(str, mode, bake, compression);
+		long channel;
+		vd->getValue("channel", channel);
+		str += wxString::Format(format, channel + 1) + ".tif";
+		std::wstring filename = str.ToStdWstring();
+		vd->SaveData(filename, mode, bake, compression);
 	}
 }
 
@@ -6148,13 +6203,15 @@ void VRenderGLView::RunExternalExe(wxFileConfig &fconfig)
 	fconfig.Read("exepath", &pathname);
 	if (!wxFileExists(pathname))
 		return;
-	VolumeData* vd = m_cur_vol;
+	FL::VolumeData* vd = m_cur_vol;
 	if (!vd)
 		return;
 	BaseReader* reader = vd->GetReader();
 	if (!reader)
 		return;
-	wxString data_name = reader->GetCurDataName(m_tseq_cur_num, vd->GetCurChannel());
+	long channel;
+	vd->getValue("channel", channel);
+	wxString data_name = reader->GetCurDataName(m_tseq_cur_num, channel);
 
 	vector<string> args;
 	args.push_back(pathname.ToStdString());
@@ -6173,18 +6230,20 @@ void VRenderGLView::RunFetchMask(wxFileConfig &fconfig)
 	BaseReader* reader = m_cur_vol->GetReader();
 	if (!reader)
 		return;
+	long channel;
+	m_cur_vol->getValue("channel", channel);
 	MSKReader msk_reader;
-	wstring mskname = reader->GetCurMaskName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
+	wstring mskname = reader->GetCurMaskName(m_tseq_cur_num, channel);
 	msk_reader.SetFile(mskname);
-	Nrrd* mask_nrrd_new = msk_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
+	Nrrd* mask_nrrd_new = msk_reader.Convert(m_tseq_cur_num, channel, true);
 	if (mask_nrrd_new)
 		m_cur_vol->LoadMask(mask_nrrd_new);
 
 	//load and replace the label
 	LBLReader lbl_reader;
-	wstring lblname = reader->GetCurLabelName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
+	wstring lblname = reader->GetCurLabelName(m_tseq_cur_num, channel);
 	lbl_reader.SetFile(lblname);
-	Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
+	Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, channel, true);
 	if (label_nrrd_new)
 		m_cur_vol->LoadLabel(label_nrrd_new);
 }
@@ -6200,8 +6259,10 @@ void VRenderGLView::RunSaveMask(wxFileConfig &fconfig)
 		time = m_tseq_cur_num;
 	else
 		time = m_tseq_prv_num;
-	m_cur_vol->SaveMask(true, time, m_cur_vol->GetCurChannel());
-	m_cur_vol->SaveLabel(true, time, m_cur_vol->GetCurChannel());
+	long channel;
+	m_cur_vol->getValue("channel", channel);
+	m_cur_vol->SaveMask(true, time, channel);
+	m_cur_vol->SaveLabel(true, time, channel);
 }
 
 void VRenderGLView::RunSaveVolume(wxFileConfig &fconfig)
@@ -6221,7 +6282,7 @@ void VRenderGLView::RunSaveVolume(wxFileConfig &fconfig)
 		wxFileName::Mkdir(str, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 	if (wxDirExists(str))
 	{
-		VolumeData* vd = m_calculator.GetResult();
+		FL::VolumeData* vd = m_calculator.GetResult();
 		if (!vd || !m_vd_pop_list[0])
 			return;
 
@@ -6236,9 +6297,10 @@ void VRenderGLView::RunSaveVolume(wxFileConfig &fconfig)
 			str += ".tif";
 		else if (mode == 2)
 			str += ".nrrd";
-		vd->Save(str, mode, bake, compression);
+		std::wstring filename = str.ToStdWstring();
+		vd->SaveData(filename, mode, bake, compression);
 		if (del_vol)
-			delete vd;
+			FL::Global::instance().getVolumeFactory().remove(vd);
 	}
 }
 
@@ -6252,10 +6314,10 @@ void VRenderGLView::RunCalculation(wxFileConfig &fconfig)
 	fconfig.Read("operand", &sOperand, "");
 
 	//get volumes
-	VolumeData* vol_a = 0;
+	FL::VolumeData* vol_a = 0;
 	if (vol_a_index >= 0 && vol_a_index < (int)m_vd_pop_list.size())
 		vol_a = m_vd_pop_list[vol_a_index];
-	VolumeData* vol_b = 0;
+	FL::VolumeData* vol_b = 0;
 	if (vol_b_index >= 0 && vol_b_index < (int)m_vd_pop_list.size())
 		vol_b = m_vd_pop_list[vol_b_index];
 	//calculate
@@ -6296,14 +6358,14 @@ void VRenderGLView::RunOpenCL(wxFileConfig &fconfig)
 		if (!m_cur_vol)
 			return;
 
-		VolumeData* vd = m_cur_vol;
+		FL::VolumeData* vd = m_cur_vol;
 
-		m_cur_vol->GetVR()->clear_tex_current();
-		m_kernel_executor.LoadCode(clname);
+		m_cur_vol->GetRenderer()->clear_tex_current();
+		m_kernel_executor.LoadCode(clname.ToStdString());
 		m_kernel_executor.SetVolume(m_cur_vol);
 		m_kernel_executor.SetDuplicate(true);
 		bool result = m_kernel_executor.Execute();
-		VolumeData* vd_r = m_kernel_executor.GetResult();
+		FL::VolumeData* vd_r = m_kernel_executor.GetResult();
 		if (!result || !vd_r)
 			return;
 
@@ -6321,10 +6383,13 @@ void VRenderGLView::RunOpenCL(wxFileConfig &fconfig)
 			format = wxString::Format("%d", chan_num);
 			int ch_length = format.Length();
 			format = wxString::Format("_CH%%0%dd", ch_length + 1);
-			str += wxString::Format(format, vd->GetCurChannel() + 1);
+			long channel;
+			vd->getValue("channel", channel);
+			str += wxString::Format(format, channel + 1);
 		}
 		str += ".tif";
-		vd_r->Save(str, mode, bake, compression);
+		std::wstring filename = str.ToStdWstring();
+		vd_r->SaveData(filename, mode, bake, compression);
 
 		m_kernel_executor.DeleteResult();
 	}
@@ -6396,8 +6461,10 @@ void VRenderGLView::RunRulerProfile(wxFileConfig &fconfig)
 		wxString path;
 		if (m_cur_vol)
 		{
-			path = m_cur_vol->GetPath();
-			path = wxPathOnly(path);
+			std::wstring tex_path;
+			m_cur_vol->getValue("tex path", tex_path);
+			//path = m_cur_vol->GetPath();
+			path = wxPathOnly(tex_path);
 		}
 		path += GETSLASH();
 		path += "profiles_1.txt";
@@ -6504,21 +6571,28 @@ void VRenderGLView::ReadVolCache(FL::VolCache& vol_cache)
 		return;
 	LBLReader lbl_reader;
 
-	int chan = m_cur_vol->GetCurChannel();
+	long channel;
+	m_cur_vol->getValue("channel", channel);
 	int frame = vol_cache.frame;
 
-	Nrrd* data = reader->Convert(frame, chan, true);
+	Nrrd* data = reader->Convert(frame, channel, true);
 	vol_cache.nrrd_data = data;
 	vol_cache.data = data->data;
-	wstring lblname = reader->GetCurLabelName(frame, chan);
+	wstring lblname = reader->GetCurLabelName(frame, channel);
 	lbl_reader.SetFile(lblname);
-	Nrrd* label = lbl_reader.Convert(frame, chan, true);
+	Nrrd* label = lbl_reader.Convert(frame, channel, true);
 	if (!label)
 	{
-		int resx, resy, resz;
-		m_cur_vol->GetResolution(resx, resy, resz);
+		long resx, resy, resz;
+		//m_cur_vol->GetResolution(resx, resy, resz);
+		m_cur_vol->getValue("res x", resx);
+		m_cur_vol->getValue("res y", resy);
+		m_cur_vol->getValue("res z", resz);
 		double spcx, spcy, spcz;
-		m_cur_vol->GetSpacings(spcx, spcy, spcz);
+		//m_cur_vol->GetSpacings(spcx, spcy, spcz);
+		m_cur_vol->getValue("spc x", spcx);
+		m_cur_vol->getValue("spc y", spcy);
+		m_cur_vol->getValue("spc z", spcz);
 		label = nrrdNew();
 		unsigned long long mem_size = (unsigned long long)resx*
 			(unsigned long long)resy*(unsigned long long)resz;
@@ -6549,10 +6623,14 @@ void VRenderGLView::DelVolCache(FL::VolCache& vol_cache)
 	}
 	if (vol_cache.label)
 	{
-		int chan = m_cur_vol->GetCurChannel();
+		long channel;
+		m_cur_vol->getValue("channel", channel);
 		int frame = vol_cache.frame;
 		double spcx, spcy, spcz;
-		m_cur_vol->GetSpacings(spcx, spcy, spcz);
+		//m_cur_vol->GetSpacings(spcx, spcy, spcz);
+		m_cur_vol->getValue("spc x", spcx);
+		m_cur_vol->getValue("spc y", spcy);
+		m_cur_vol->getValue("spc z", spcz);
 
 		MSKWriter msk_writer;
 		msk_writer.SetData((Nrrd*)(vol_cache.nrrd_label));
@@ -6561,7 +6639,7 @@ void VRenderGLView::DelVolCache(FL::VolCache& vol_cache)
 		if (reader)
 		{
 			wstring filename;
-			filename = reader->GetCurLabelName(frame, chan);
+			filename = reader->GetCurLabelName(frame, channel);
 			msk_writer.Save(filename, 1);
 		}
 
@@ -6748,7 +6826,7 @@ void VRenderGLView::SetCenter()
 {
 	InitView(INIT_BOUNDS | INIT_CENTER | INIT_OBJ_TRANSL);
 
-	VolumeData *vd = 0;
+	FL::VolumeData *vd = 0;
 	if (m_cur_vol)
 		vd = m_cur_vol;
 	else if (m_vd_pop_list.size())
@@ -6756,25 +6834,26 @@ void VRenderGLView::SetCenter()
 
 	if (vd)
 	{
-		BBox bbox = vd->GetBounds();
-		VolumeRenderer *vr = vd->GetVR();
+		FLTYPE::BBox bbox;
+		vd->getValue("bounds", bbox);
+		VolumeRenderer *vr = vd->GetRenderer();
 		if (!vr) return;
 		vector<Plane*> *planes = vr->get_planes();
 		if (planes->size() != 6) return;
 		double x1, x2, y1, y2, z1, z2;
 		double abcd[4];
 		(*planes)[0]->get_copy(abcd);
-		x1 = fabs(abcd[3])*bbox.max().x();
+		x1 = fabs(abcd[3])*bbox.Max().x();
 		(*planes)[1]->get_copy(abcd);
-		x2 = fabs(abcd[3])*bbox.max().x();
+		x2 = fabs(abcd[3])*bbox.Max().x();
 		(*planes)[2]->get_copy(abcd);
-		y1 = fabs(abcd[3])*bbox.max().y();
+		y1 = fabs(abcd[3])*bbox.Max().y();
 		(*planes)[3]->get_copy(abcd);
-		y2 = fabs(abcd[3])*bbox.max().y();
+		y2 = fabs(abcd[3])*bbox.Max().y();
 		(*planes)[4]->get_copy(abcd);
-		z1 = fabs(abcd[3])*bbox.max().z();
+		z1 = fabs(abcd[3])*bbox.Max().z();
 		(*planes)[5]->get_copy(abcd);
-		z2 = fabs(abcd[3])*bbox.max().z();
+		z2 = fabs(abcd[3])*bbox.Max().z();
 
 		m_obj_ctrx = (x1 + x2) / 2.0;
 		m_obj_ctry = (y1 + y2) / 2.0;
@@ -6797,13 +6876,18 @@ double VRenderGLView::Get121ScaleFactor()
 	double spc_x = 1.0;
 	double spc_y = 1.0;
 	double spc_z = 1.0;
-	VolumeData *vd = 0;
+	FL::VolumeData *vd = 0;
 	if (m_cur_vol)
 		vd = m_cur_vol;
 	else if (m_vd_pop_list.size())
 		vd = m_vd_pop_list[0];
 	if (vd)
-		vd->GetSpacings(spc_x, spc_y, spc_z, vd->GetLevel());
+	{
+		//vd->GetSpacings(spc_x, spc_y, spc_z, vd->GetLevel());
+		vd->getValue("spc x", spc_x);
+		vd->getValue("spc y", spc_y);
+		vd->getValue("spc z", spc_z);
+	}
 	spc_x = spc_x<EPS ? 1.0 : spc_x;
 	spc_y = spc_y<EPS ? 1.0 : spc_y;
 
@@ -6999,40 +7083,47 @@ void VRenderGLView::SetVolMethod(int method)
 	}
 }
 
-VolumeData* VRenderGLView::GetAllVolumeData(int index)
+FL::VolumeData* VRenderGLView::GetAllVolumeData(int index)
 {
-	int cnt = 0;
-	int i, j;
-	for (i = 0; i<(int)m_layer_list.size(); i++)
-	{
-		if (!m_layer_list[i])
-			continue;
-		switch (m_layer_list[i]->IsA())
-		{
-		case 2:  //volume data
-			if (cnt == index)
-				return (VolumeData*)m_layer_list[i];
-			cnt++;
-			break;
-		case 5:  //group
-		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
-			if (!group)
-				break;
-			for (j = 0; j<group->GetVolumeNum(); j++)
-			{
-				if (cnt == index)
-					return group->GetVolumeData(j);
-				cnt++;
-			}
-		}
-		break;
-		}
-	}
-	return 0;
+	//this is not efficient
+	FL::SearchVisitor visitor;
+	visitor.matchClassName("VolumeData");
+	m_root->accept(visitor);
+	FL::ObjectList* list = visitor.getResult();
+	if (index >= 0 && index < list->size())
+		return dynamic_cast<FL::VolumeData*>((*list)[index]);
+	//int cnt = 0;
+	//int i, j;
+	//for (i = 0; i<(int)m_layer_list.size(); i++)
+	//{
+	//	if (!m_layer_list[i])
+	//		continue;
+	//	switch (m_layer_list[i]->IsA())
+	//	{
+	//	case 2:  //volume data
+	//		if (cnt == index)
+	//			return (VolumeData*)m_layer_list[i];
+	//		cnt++;
+	//		break;
+	//	case 5:  //group
+	//	{
+	//		DataGroup* group = (DataGroup*)m_layer_list[i];
+	//		if (!group)
+	//			break;
+	//		for (j = 0; j<group->GetVolumeNum(); j++)
+	//		{
+	//			if (cnt == index)
+	//				return group->GetVolumeData(j);
+	//			cnt++;
+	//		}
+	//	}
+	//	break;
+	//	}
+	//}
+	//return 0;
 }
 
-VolumeData* VRenderGLView::GetDispVolumeData(int index)
+FL::VolumeData* VRenderGLView::GetDispVolumeData(int index)
 {
 	if (GetDispVolumeNum() <= 0)
 		return 0;
@@ -7059,116 +7150,148 @@ MeshData* VRenderGLView::GetMeshData(int index)
 		return 0;
 }
 
-VolumeData* VRenderGLView::GetVolumeData(wxString &name)
+FL::VolumeData* VRenderGLView::GetVolumeData(wxString &name)
 {
-	int i, j;
-
-	for (i = 0; i<(int)m_layer_list.size(); i++)
-	{
-		if (!m_layer_list[i])
-			continue;
-		switch (m_layer_list[i]->IsA())
-		{
-		case 2://volume data
-		{
-			VolumeData* vd = (VolumeData*)m_layer_list[i];
-			if (vd && vd->GetName() == name)
-				return vd;
-		}
-		break;
-		case 5://group
-		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
-			if (!group)
-				break;
-			for (j = 0; j<group->GetVolumeNum(); j++)
-			{
-				VolumeData* vd = group->GetVolumeData(j);
-				if (vd && vd->GetName() == name)
-					return vd;
-			}
-		}
-		break;
-		}
-	}
-
+	FL::SearchVisitor visitor;
+	visitor.matchClassName("VolumeData");
+	visitor.matchName(name.ToStdString());
+	m_root->accept(visitor);
+	FL::ObjectList* list = visitor.getResult();
+	if (!list->empty())
+		return dynamic_cast<FL::VolumeData*>((*list)[0]);
 	return 0;
+	//int i, j;
+
+	//for (i = 0; i<(int)m_layer_list.size(); i++)
+	//{
+	//	if (!m_layer_list[i])
+	//		continue;
+	//	switch (m_layer_list[i]->IsA())
+	//	{
+	//	case 2://volume data
+	//	{
+	//		VolumeData* vd = (VolumeData*)m_layer_list[i];
+	//		if (vd && vd->GetName() == name)
+	//			return vd;
+	//	}
+	//	break;
+	//	case 5://group
+	//	{
+	//		DataGroup* group = (DataGroup*)m_layer_list[i];
+	//		if (!group)
+	//			break;
+	//		for (j = 0; j<group->GetVolumeNum(); j++)
+	//		{
+	//			VolumeData* vd = group->GetVolumeData(j);
+	//			if (vd && vd->GetName() == name)
+	//				return vd;
+	//		}
+	//	}
+	//	break;
+	//	}
+	//}
+
+	//return 0;
 }
 
-MeshData* VRenderGLView::GetMeshData(wxString &name)
+FL::MeshData* VRenderGLView::GetMeshData(wxString &name)
 {
-	int i, j;
-
-	for (i = 0; i<(int)m_layer_list.size(); i++)
-	{
-		if (!m_layer_list[i])
-			continue;
-		switch (m_layer_list[i]->IsA())
-		{
-		case 3://mesh data
-		{
-			MeshData* md = (MeshData*)m_layer_list[i];
-			if (md && md->GetName() == name)
-				return md;
-		}
-		break;
-		case 6://mesh group
-		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
-			if (!group) continue;
-			for (j = 0; j<group->GetMeshNum(); j++)
-			{
-				MeshData* md = group->GetMeshData(j);
-				if (md && md->GetName() == name)
-					return md;
-			}
-		}
-		break;
-		}
-	}
+	FL::SearchVisitor visitor;
+	visitor.matchClassName("MeshData");
+	visitor.matchName(name.ToStdString());
+	m_root->accept(visitor);
+	FL::ObjectList* list = visitor.getResult();
+	if (!list->empty())
+		return dynamic_cast<FL::MeshData*>((*list)[0]);
 	return 0;
+	//int i, j;
+
+	//for (i = 0; i<(int)m_layer_list.size(); i++)
+	//{
+	//	if (!m_layer_list[i])
+	//		continue;
+	//	switch (m_layer_list[i]->IsA())
+	//	{
+	//	case 3://mesh data
+	//	{
+	//		MeshData* md = (MeshData*)m_layer_list[i];
+	//		if (md && md->GetName() == name)
+	//			return md;
+	//	}
+	//	break;
+	//	case 6://mesh group
+	//	{
+	//		MeshGroup* group = (MeshGroup*)m_layer_list[i];
+	//		if (!group) continue;
+	//		for (j = 0; j<group->GetMeshNum(); j++)
+	//		{
+	//			MeshData* md = group->GetMeshData(j);
+	//			if (md && md->GetName() == name)
+	//				return md;
+	//		}
+	//	}
+	//	break;
+	//	}
+	//}
+	//return 0;
 }
 
-Annotations* VRenderGLView::GetAnnotations(wxString &name)
+FL::Annotations* VRenderGLView::GetAnnotations(wxString &name)
 {
-	int i;
-
-	for (i = 0; i<(int)m_layer_list.size(); i++)
-	{
-		if (!m_layer_list[i])
-			continue;
-		switch (m_layer_list[i]->IsA())
-		{
-		case 4://annotations
-		{
-			Annotations* ann = (Annotations*)m_layer_list[i];
-			if (ann && ann->GetName() == name)
-				return ann;
-		}
-		}
-	}
+	FL::SearchVisitor visitor;
+	visitor.matchClassName("Annotations");
+	visitor.matchName(name.ToStdString());
+	m_root->accept(visitor);
+	FL::ObjectList* list = visitor.getResult();
+	if (!list->empty())
+		return dynamic_cast<FL::Annotations*>((*list)[0]);
 	return 0;
+	//int i;
+
+	//for (i = 0; i<(int)m_layer_list.size(); i++)
+	//{
+	//	if (!m_layer_list[i])
+	//		continue;
+	//	switch (m_layer_list[i]->IsA())
+	//	{
+	//	case 4://annotations
+	//	{
+	//		Annotations* ann = (Annotations*)m_layer_list[i];
+	//		if (ann && ann->GetName() == name)
+	//			return ann;
+	//	}
+	//	}
+	//}
+	//return 0;
 }
 
-DataGroup* VRenderGLView::GetGroup(wxString &name)
+FL::VolumeGroup* VRenderGLView::GetGroup(wxString &name)
 {
-	int i;
-
-	for (i = 0; i<(int)m_layer_list.size(); i++)
-	{
-		if (!m_layer_list[i])
-			continue;
-		switch (m_layer_list[i]->IsA())
-		{
-		case 5://group
-		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
-			if (group && group->GetName() == name)
-				return group;
-		}
-		}
-	}
+	FL::SearchVisitor visitor;
+	visitor.matchClassName("VolumeGroup");
+	visitor.matchName(name.ToStdString());
+	m_root->accept(visitor);
+	FL::ObjectList* list = visitor.getResult();
+	if (!list->empty())
+		return dynamic_cast<FL::VolumeGroup*>((*list)[0]);
 	return 0;
+	//int i;
+
+	//for (i = 0; i<(int)m_layer_list.size(); i++)
+	//{
+	//	if (!m_layer_list[i])
+	//		continue;
+	//	switch (m_layer_list[i]->IsA())
+	//	{
+	//	case 5://group
+	//	{
+	//		DataGroup* group = (DataGroup*)m_layer_list[i];
+	//		if (group && group->GetName() == name)
+	//			return group;
+	//	}
+	//	}
+	//}
+	//return 0;
 }
 
 int VRenderGLView::GetAny()
@@ -7188,25 +7311,31 @@ int VRenderGLView::GetDispVolumeNum()
 
 int VRenderGLView::GetAllVolumeNum()
 {
-	int num = 0;
-	for (int i = 0; i<(int)m_layer_list.size(); i++)
-	{
-		if (!m_layer_list[i])
-			continue;
-		switch (m_layer_list[i]->IsA())
-		{
-		case 2:  //volume data
-			num++;
-			break;
-		case 5:  //group
-		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
-			num += group->GetVolumeNum();
-		}
-		break;
-		}
-	}
-	return num;
+	//this is not efficient
+	FL::SearchVisitor visitor;
+	visitor.matchClassName("VolumeData");
+	m_root->accept(visitor);
+	FL::ObjectList* list = visitor.getResult();
+	return int(list->size());
+	//int num = 0;
+	//for (int i = 0; i<(int)m_layer_list.size(); i++)
+	//{
+	//	if (!m_layer_list[i])
+	//		continue;
+	//	switch (m_layer_list[i]->IsA())
+	//	{
+	//	case 2:  //volume data
+	//		num++;
+	//		break;
+	//	case 5:  //group
+	//	{
+	//		DataGroup* group = (DataGroup*)m_layer_list[i];
+	//		num += group->GetVolumeNum();
+	//	}
+	//	break;
+	//	}
+	//}
+	//return num;
 }
 
 int VRenderGLView::GetMeshNum()
@@ -7215,10 +7344,23 @@ int VRenderGLView::GetMeshNum()
 	return m_md_pop_list.size();
 }
 
-DataGroup* VRenderGLView::AddVolumeData(VolumeData* vd, wxString group_name)
+FL::VolumeGroup* VRenderGLView::AddVolumeData(FL::VolumeData* vd, wxString group_name)
 {
+	FL::VolumeGroup* group = GetGroup(group_name);
+	if (!group)
+		group = new FL::VolumeGroup();
+
+	group->addChild(vd);
+	m_root->addChild(group);
+
+	m_vd_pop_dirty = true;
+	m_load_update = true;
+
+	return group;
+	//synchronization to be added
+
 	//m_layer_list.push_back(vd);
-	int i;
+/*	int i;
 	DataGroup* group = 0;
 	DataGroup* group_temp = 0;
 
@@ -7248,16 +7390,16 @@ DataGroup* VRenderGLView::AddVolumeData(VolumeData* vd, wxString group_name)
 			return 0;
 	}
 
-	/*for (i=0; i<1; i++)
-	{
-	VolumeData* vol_data = group->GetVolumeData(i);
-	if (vol_data)
-	{
-	double spcx, spcy, spcz;
-	vol_data->GetSpacings(spcx, spcy, spcz);
-	vd->SetSpacings(spcx, spcy, spcz);
-	}
-	}*/
+	//for (i=0; i<1; i++)
+	//{
+	//VolumeData* vol_data = group->GetVolumeData(i);
+	//if (vol_data)
+	//{
+	//double spcx, spcy, spcz;
+	//vol_data->GetSpacings(spcx, spcy, spcz);
+	//vd->SetSpacings(spcx, spcy, spcz);
+	//}
+	//}
 
 	group->InsertVolumeData(group->GetVolumeNum() - 1, vd);
 
@@ -7299,23 +7441,37 @@ DataGroup* VRenderGLView::AddVolumeData(VolumeData* vd, wxString group_name)
 
 	m_load_update = true;
 
-	return group;
+	return group;*/
 }
 
-void VRenderGLView::AddMeshData(MeshData* md)
+void VRenderGLView::AddMeshData(FL::MeshData* md)
 {
-	m_layer_list.push_back(md);
+	//m_layer_list.push_back(md);
+	m_root->addChild(md);
 	m_md_pop_dirty = true;
 }
 
-void VRenderGLView::AddAnnotations(Annotations* ann)
+void VRenderGLView::AddAnnotations(FL::Annotations* ann)
 {
-	m_layer_list.push_back(ann);
+	//m_layer_list.push_back(ann);
+	m_root->addChild(ann);
 }
 
-void VRenderGLView::ReplaceVolumeData(wxString &name, VolumeData *dst)
+void VRenderGLView::ReplaceVolumeData(wxString &name, FL::VolumeData *dst)
 {
-	int i, j;
+	//FL::VolumeData* vd = GetVolumeData(name);
+	//if (!vd)
+	//	return;
+	//if (m_cur_vol == vd)
+	//	m_cur_vol = dst;
+	//m_loader.RemoveBrickVD(vd);
+	//vd->GetRenderer()->clear_tex_current();
+	//m_layer_list[i] = dst;
+	//m_vd_pop_dirty = true;
+	//found = true;
+	//dm->RemoveVolumeData(name);
+	
+	/*	int i, j;
 
 	bool found = false;
 	DataGroup* group = 0;
@@ -7369,875 +7525,883 @@ void VRenderGLView::ReplaceVolumeData(wxString &name, VolumeData *dst)
 		}
 		break;
 		}
-	}
+	}*/
 
-	if (found)
-	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
-		{
-			AdjustView* adjust_view = vr_frame->GetAdjustView();
-			if (adjust_view)
-			{
-				adjust_view->SetVolumeData(dst);
-				if (!group) adjust_view->SetGroupLink(group);
-				adjust_view->UpdateSync();
-			}
-		}
-	}
+	//if (found)
+	//{
+	//	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	//	if (vr_frame)
+	//	{
+	//		AdjustView* adjust_view = vr_frame->GetAdjustView();
+	//		if (adjust_view)
+	//		{
+	//			adjust_view->SetVolumeData(dst);
+	//			if (!group) adjust_view->SetGroupLink(group);
+	//			adjust_view->UpdateSync();
+	//		}
+	//	}
+	//}
 }
 
 void VRenderGLView::RemoveVolumeData(wxString &name)
 {
-	for (auto iter = m_layer_list.begin();
-		iter != m_layer_list.end(); ++iter)
-	{
-		if (!(*iter))
-			continue;
-		switch ((*iter)->IsA())
-		{
-		case 2://volume data
-		{
-			VolumeData* vd = (VolumeData*)(*iter);
-			if (vd && vd->GetName() == name)
-			{
-				m_layer_list.erase(iter);
-				if (m_cur_vol = vd)
-					m_cur_vol = 0;
-				m_vd_pop_dirty = true;
-				return;
-			}
-		}
-		break;
-		case 5://group
-		{
-			DataGroup* group = (DataGroup*)(*iter);
-			for (int j = 0; j < group->GetVolumeNum(); ++j)
-			{
-				VolumeData* vd = group->GetVolumeData(j);
-				if (vd && vd->GetName() == name)
-				{
-					group->RemoveVolumeData(j);
-					if (m_cur_vol = vd)
-						m_cur_vol = 0;
-					m_vd_pop_dirty = true;
-					return;
-				}
-			}
-		}
-		}
-	}
+	FL::VolumeData* vd = GetVolumeData(name);
+	if (vd && vd->getParent(0))
+		vd->getParent(0)->asGroup()->removeChild(vd);
+	//for (auto iter = m_layer_list.begin();
+	//	iter != m_layer_list.end(); ++iter)
+	//{
+	//	if (!(*iter))
+	//		continue;
+	//	switch ((*iter)->IsA())
+	//	{
+	//	case 2://volume data
+	//	{
+	//		VolumeData* vd = (VolumeData*)(*iter);
+	//		if (vd && vd->GetName() == name)
+	//		{
+	//			m_layer_list.erase(iter);
+	//			if (m_cur_vol = vd)
+	//				m_cur_vol = 0;
+	//			m_vd_pop_dirty = true;
+	//			return;
+	//		}
+	//	}
+	//	break;
+	//	case 5://group
+	//	{
+	//		DataGroup* group = (DataGroup*)(*iter);
+	//		for (int j = 0; j < group->GetVolumeNum(); ++j)
+	//		{
+	//			VolumeData* vd = group->GetVolumeData(j);
+	//			if (vd && vd->GetName() == name)
+	//			{
+	//				group->RemoveVolumeData(j);
+	//				if (m_cur_vol = vd)
+	//					m_cur_vol = 0;
+	//				m_vd_pop_dirty = true;
+	//				return;
+	//			}
+	//		}
+	//	}
+	//	}
+	//}
 }
 
 void VRenderGLView::RemoveVolumeDataDup(wxString &name)
 {
-	VolumeData* vd_main = 0;
-	for (auto iter = m_layer_list.begin();
-		iter != m_layer_list.end() && !vd_main;
-		++iter)
-	{
-		if (!(*iter))
-			continue;
-		switch ((*iter)->IsA())
-		{
-		case 2://volume data
-		{
-			VolumeData* vd = (VolumeData*)(*iter);
-			if (vd && vd->GetName() == name)
-			{
-				vd_main = vd;
-				m_vd_pop_dirty = true;
-			}
-		}
-		break;
-		case 5://group
-		{
-			DataGroup* group = (DataGroup*)(*iter);
-			for (int j = 0; j<group->GetVolumeNum(); j++)
-			{
-				VolumeData* vd = group->GetVolumeData(j);
-				if (vd && vd->GetName() == name)
-				{
-					vd_main = vd;
-					m_vd_pop_dirty = true;
-				}
-			}
-		}
-		break;
-		}
-	}
+	//VolumeData* vd_main = 0;
+	//for (auto iter = m_layer_list.begin();
+	//	iter != m_layer_list.end() && !vd_main;
+	//	++iter)
+	//{
+	//	if (!(*iter))
+	//		continue;
+	//	switch ((*iter)->IsA())
+	//	{
+	//	case 2://volume data
+	//	{
+	//		VolumeData* vd = (VolumeData*)(*iter);
+	//		if (vd && vd->GetName() == name)
+	//		{
+	//			vd_main = vd;
+	//			m_vd_pop_dirty = true;
+	//		}
+	//	}
+	//	break;
+	//	case 5://group
+	//	{
+	//		DataGroup* group = (DataGroup*)(*iter);
+	//		for (int j = 0; j<group->GetVolumeNum(); j++)
+	//		{
+	//			VolumeData* vd = group->GetVolumeData(j);
+	//			if (vd && vd->GetName() == name)
+	//			{
+	//				vd_main = vd;
+	//				m_vd_pop_dirty = true;
+	//			}
+	//		}
+	//	}
+	//	break;
+	//	}
+	//}
 
-	if (!vd_main)
-		return;
-	
-	for (auto iter = m_layer_list.begin();
-		iter != m_layer_list.end();)
-	{
-		if (!(*iter))
-		{
-			++iter;
-			continue;
-		}
-		switch ((*iter)->IsA())
-		{
-		case 2://volume data
-		{
-			VolumeData* vd = (VolumeData*)(*iter);
-			bool del = false;
-			if (vd)
-			{
-				if (vd == vd_main)
-					del = true;
-				if (vd->GetDup())
-				{
-					if (vd->GetDupData() == vd_main)
-						del = true;
-				}
-			}
-			if (del)
-			{
-				iter = m_layer_list.erase(iter);
-				if (m_cur_vol = vd)
-					m_cur_vol = 0;
-			}
-			else
-				++iter;
-		}
-		break;
-		case 5://group
-		{
-			DataGroup* group = (DataGroup*)(*iter);
-			for (int j = group->GetVolumeNum()-1; j >= 0; --j)
-			{
-				VolumeData* vd = group->GetVolumeData(j);
-				if (vd)
-				{
-					bool del = false;
-					if (vd->GetDup())
-					{
-						if (vd->GetDupData() == vd_main)
-							del = true;
-					}
-					else
-					{
-						if (vd == vd_main)
-							del = true;
-					}
-					if (del)
-					{
-						group->RemoveVolumeData(j);
-						if (m_cur_vol = vd)
-							m_cur_vol = 0;
-					}
-				}
-			}
-			++iter;
-		}
-		break;
-		}
-	}
+	//if (!vd_main)
+	//	return;
+	//
+	//for (auto iter = m_layer_list.begin();
+	//	iter != m_layer_list.end();)
+	//{
+	//	if (!(*iter))
+	//	{
+	//		++iter;
+	//		continue;
+	//	}
+	//	switch ((*iter)->IsA())
+	//	{
+	//	case 2://volume data
+	//	{
+	//		VolumeData* vd = (VolumeData*)(*iter);
+	//		bool del = false;
+	//		if (vd)
+	//		{
+	//			if (vd == vd_main)
+	//				del = true;
+	//			if (vd->GetDup())
+	//			{
+	//				if (vd->GetDupData() == vd_main)
+	//					del = true;
+	//			}
+	//		}
+	//		if (del)
+	//		{
+	//			iter = m_layer_list.erase(iter);
+	//			if (m_cur_vol = vd)
+	//				m_cur_vol = 0;
+	//		}
+	//		else
+	//			++iter;
+	//	}
+	//	break;
+	//	case 5://group
+	//	{
+	//		DataGroup* group = (DataGroup*)(*iter);
+	//		for (int j = group->GetVolumeNum()-1; j >= 0; --j)
+	//		{
+	//			VolumeData* vd = group->GetVolumeData(j);
+	//			if (vd)
+	//			{
+	//				bool del = false;
+	//				if (vd->GetDup())
+	//				{
+	//					if (vd->GetDupData() == vd_main)
+	//						del = true;
+	//				}
+	//				else
+	//				{
+	//					if (vd == vd_main)
+	//						del = true;
+	//				}
+	//				if (del)
+	//				{
+	//					group->RemoveVolumeData(j);
+	//					if (m_cur_vol = vd)
+	//						m_cur_vol = 0;
+	//				}
+	//			}
+	//		}
+	//		++iter;
+	//	}
+	//	break;
+	//	}
+	//}
 }
 
 void VRenderGLView::RemoveMeshData(wxString &name)
 {
-	int i, j;
+	//int i, j;
 
-	for (i = 0; i<(int)m_layer_list.size(); i++)
-	{
-		if (!m_layer_list[i])
-			continue;
-		switch (m_layer_list[i]->IsA())
-		{
-		case 3://mesh data
-		{
-			MeshData* md = (MeshData*)m_layer_list[i];
-			if (md && md->GetName() == name)
-			{
-				m_layer_list.erase(m_layer_list.begin() + i);
-				m_md_pop_dirty = true;
-				return;
-			}
-		}
-		break;
-		case 6://mesh group
-		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
-			if (!group) continue;
-			for (j = 0; j<group->GetMeshNum(); j++)
-			{
-				MeshData* md = group->GetMeshData(j);
-				if (md && md->GetName() == name)
-				{
-					group->RemoveMeshData(j);
-					m_md_pop_dirty = true;
-					return;
-				}
-			}
-		}
-		break;
-		}
-	}
+	//for (i = 0; i<(int)m_layer_list.size(); i++)
+	//{
+	//	if (!m_layer_list[i])
+	//		continue;
+	//	switch (m_layer_list[i]->IsA())
+	//	{
+	//	case 3://mesh data
+	//	{
+	//		MeshData* md = (MeshData*)m_layer_list[i];
+	//		if (md && md->GetName() == name)
+	//		{
+	//			m_layer_list.erase(m_layer_list.begin() + i);
+	//			m_md_pop_dirty = true;
+	//			return;
+	//		}
+	//	}
+	//	break;
+	//	case 6://mesh group
+	//	{
+	//		MeshGroup* group = (MeshGroup*)m_layer_list[i];
+	//		if (!group) continue;
+	//		for (j = 0; j<group->GetMeshNum(); j++)
+	//		{
+	//			MeshData* md = group->GetMeshData(j);
+	//			if (md && md->GetName() == name)
+	//			{
+	//				group->RemoveMeshData(j);
+	//				m_md_pop_dirty = true;
+	//				return;
+	//			}
+	//		}
+	//	}
+	//	break;
+	//	}
+	//}
 }
 
 void VRenderGLView::RemoveAnnotations(wxString &name)
 {
-	for (int i = 0; i<(int)m_layer_list.size(); i++)
-	{
-		if (!m_layer_list[i])
-			continue;
-		if (m_layer_list[i]->IsA() == 4)
-		{
-			Annotations* ann = (Annotations*)m_layer_list[i];
-			if (ann && ann->GetName() == name)
-			{
-				m_layer_list.erase(m_layer_list.begin() + i);
-			}
-		}
-	}
+	//for (int i = 0; i<(int)m_layer_list.size(); i++)
+	//{
+	//	if (!m_layer_list[i])
+	//		continue;
+	//	if (m_layer_list[i]->IsA() == 4)
+	//	{
+	//		Annotations* ann = (Annotations*)m_layer_list[i];
+	//		if (ann && ann->GetName() == name)
+	//		{
+	//			m_layer_list.erase(m_layer_list.begin() + i);
+	//		}
+	//	}
+	//}
 }
 
 void VRenderGLView::RemoveGroup(wxString &name)
 {
-	int i, j;
-	for (i = 0; i<(int)m_layer_list.size(); i++)
-	{
-		if (!m_layer_list[i])
-			continue;
-		switch (m_layer_list[i]->IsA())
-		{
-		case 5://group
-		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
-			if (group && group->GetName() == name)
-			{
-				for (j = group->GetVolumeNum() - 1; j >= 0; j--)
-				{
-					VolumeData* vd = group->GetVolumeData(j);
-					if (vd)
-					{
-						group->RemoveVolumeData(j);
-						//if add back to view
-					}
-				}
-				m_layer_list.erase(m_layer_list.begin() + i);
-				delete group;
-				m_vd_pop_dirty = true;
-			}
-		}
-		break;
-		case 6://mesh group
-		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
-			if (group && group->GetName() == name)
-			{
-				for (j = group->GetMeshNum() - 1; j >= 0; j--)
-				{
-					MeshData* md = group->GetMeshData(j);
-					if (md)
-					{
-						group->RemoveMeshData(j);
-					}
-				}
-				m_layer_list.erase(m_layer_list.begin() + i);
-				delete group;
-				m_md_pop_dirty = true;
-			}
-		}
-		break;
-		}
-	}
+	//int i, j;
+	//for (i = 0; i<(int)m_layer_list.size(); i++)
+	//{
+	//	if (!m_layer_list[i])
+	//		continue;
+	//	switch (m_layer_list[i]->IsA())
+	//	{
+	//	case 5://group
+	//	{
+	//		DataGroup* group = (DataGroup*)m_layer_list[i];
+	//		if (group && group->GetName() == name)
+	//		{
+	//			for (j = group->GetVolumeNum() - 1; j >= 0; j--)
+	//			{
+	//				VolumeData* vd = group->GetVolumeData(j);
+	//				if (vd)
+	//				{
+	//					group->RemoveVolumeData(j);
+	//					//if add back to view
+	//				}
+	//			}
+	//			m_layer_list.erase(m_layer_list.begin() + i);
+	//			delete group;
+	//			m_vd_pop_dirty = true;
+	//		}
+	//	}
+	//	break;
+	//	case 6://mesh group
+	//	{
+	//		MeshGroup* group = (MeshGroup*)m_layer_list[i];
+	//		if (group && group->GetName() == name)
+	//		{
+	//			for (j = group->GetMeshNum() - 1; j >= 0; j--)
+	//			{
+	//				MeshData* md = group->GetMeshData(j);
+	//				if (md)
+	//				{
+	//					group->RemoveMeshData(j);
+	//				}
+	//			}
+	//			m_layer_list.erase(m_layer_list.begin() + i);
+	//			delete group;
+	//			m_md_pop_dirty = true;
+	//		}
+	//	}
+	//	break;
+	//	}
+	//}
 }
 
 //isolate
 void VRenderGLView::Isolate(int type, wxString name)
 {
-	for (int i = 0; i<(int)m_layer_list.size(); i++)
-	{
-		if (!m_layer_list[i]) continue;
+	//for (int i = 0; i<(int)m_layer_list.size(); i++)
+	//{
+	//	if (!m_layer_list[i]) continue;
 
-		switch (m_layer_list[i]->IsA())
-		{
-		case 2://volume
-		{
-			VolumeData* vd = (VolumeData*)m_layer_list[i];
-			if (vd)
-			{
-				if (type == 2 &&
-					vd->GetName() == name)
-					vd->SetDisp(true);
-				else
-					vd->SetDisp(false);
-			}
-		}
-		break;
-		case 3://mesh
-		{
-			MeshData* md = (MeshData*)m_layer_list[i];
-			if (md)
-			{
-				if (type == 3 &&
-					md->GetName() == name)
-					md->SetDisp(false);
-				else
-					md->SetDisp(false);
-			}
-		}
-		break;
-		case 4://annotation
-		{
-			Annotations* ann = (Annotations*)m_layer_list[i];
-			if (ann)
-			{
-				if (type == 4 &&
-					ann->GetName() == name)
-					ann->SetDisp(true);
-				else
-					ann->SetDisp(false);
-			}
-		}
-		break;
-		case 5://volume group
-		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
-			if (group)
-			{
-				if (type == 5)
-				{
-					if (group->GetName() == name)
-						group->SetDisp(true);
-					else
-						group->SetDisp(false);
-				}
-				else if (type == 6)
-					group->SetDisp(false);
-				else
-				{
-					for (int i = 0; i<(int)group->GetVolumeNum(); i++)
-					{
-						VolumeData* vd = group->GetVolumeData(i);
-						if (vd)
-						{
-							if (type == 2 &&
-								vd->GetName() == name)
-								vd->SetDisp(true);
-							else
-								vd->SetDisp(false);
-						}
-					}
-				}
-			}
-		}
-		break;
-		case 6://mesh group
-		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
-			if (group)
-			{
-				if (type == 6)
-				{
-					if (group->GetName() == name)
-						group->SetDisp(true);
-					else
-						group->SetDisp(false);
-				}
-				else if (type == 5)
-					group->SetDisp(false);
-				else
-				{
-					for (int i = 0; i < (int)group->GetMeshNum(); i++)
-					{
-						MeshData* md = group->GetMeshData(i);
-						if (md)
-						{
-							if (type == 3 &&
-								md->GetName() == name)
-								md->SetDisp(true);
-							else
-								md->SetDisp(false);
-						}
-					}
-				}
-			}
-		}
-		break;
-		}
-	}
-	m_vd_pop_dirty = true;
-	m_md_pop_dirty = true;
+	//	switch (m_layer_list[i]->IsA())
+	//	{
+	//	case 2://volume
+	//	{
+	//		VolumeData* vd = (VolumeData*)m_layer_list[i];
+	//		if (vd)
+	//		{
+	//			if (type == 2 &&
+	//				vd->GetName() == name)
+	//				vd->SetDisp(true);
+	//			else
+	//				vd->SetDisp(false);
+	//		}
+	//	}
+	//	break;
+	//	case 3://mesh
+	//	{
+	//		MeshData* md = (MeshData*)m_layer_list[i];
+	//		if (md)
+	//		{
+	//			if (type == 3 &&
+	//				md->GetName() == name)
+	//				md->SetDisp(false);
+	//			else
+	//				md->SetDisp(false);
+	//		}
+	//	}
+	//	break;
+	//	case 4://annotation
+	//	{
+	//		Annotations* ann = (Annotations*)m_layer_list[i];
+	//		if (ann)
+	//		{
+	//			if (type == 4 &&
+	//				ann->GetName() == name)
+	//				ann->SetDisp(true);
+	//			else
+	//				ann->SetDisp(false);
+	//		}
+	//	}
+	//	break;
+	//	case 5://volume group
+	//	{
+	//		DataGroup* group = (DataGroup*)m_layer_list[i];
+	//		if (group)
+	//		{
+	//			if (type == 5)
+	//			{
+	//				if (group->GetName() == name)
+	//					group->SetDisp(true);
+	//				else
+	//					group->SetDisp(false);
+	//			}
+	//			else if (type == 6)
+	//				group->SetDisp(false);
+	//			else
+	//			{
+	//				for (int i = 0; i<(int)group->GetVolumeNum(); i++)
+	//				{
+	//					VolumeData* vd = group->GetVolumeData(i);
+	//					if (vd)
+	//					{
+	//						if (type == 2 &&
+	//							vd->GetName() == name)
+	//							vd->SetDisp(true);
+	//						else
+	//							vd->SetDisp(false);
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//	break;
+	//	case 6://mesh group
+	//	{
+	//		MeshGroup* group = (MeshGroup*)m_layer_list[i];
+	//		if (group)
+	//		{
+	//			if (type == 6)
+	//			{
+	//				if (group->GetName() == name)
+	//					group->SetDisp(true);
+	//				else
+	//					group->SetDisp(false);
+	//			}
+	//			else if (type == 5)
+	//				group->SetDisp(false);
+	//			else
+	//			{
+	//				for (int i = 0; i < (int)group->GetMeshNum(); i++)
+	//				{
+	//					MeshData* md = group->GetMeshData(i);
+	//					if (md)
+	//					{
+	//						if (type == 3 &&
+	//							md->GetName() == name)
+	//							md->SetDisp(true);
+	//						else
+	//							md->SetDisp(false);
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//	break;
+	//	}
+	//}
+	//m_vd_pop_dirty = true;
+	//m_md_pop_dirty = true;
 }
 
 //move layer of the same level within this view
 //source is after the destination
 void VRenderGLView::MoveLayerinView(wxString &src_name, wxString &dst_name)
 {
-	int i, src_index;
-	TreeLayer* src = 0;
-	for (i = 0; i<(int)m_layer_list.size(); i++)
-	{
-		if (m_layer_list[i] && m_layer_list[i]->GetName() == src_name)
-		{
-			src = m_layer_list[i];
-			src_index = i;
-			m_layer_list.erase(m_layer_list.begin() + i);
-			break;
-		}
-	}
-	if (!src)
-		return;
-	for (i = 0; i<(int)m_layer_list.size(); i++)
-	{
-		if (m_layer_list[i] && m_layer_list[i]->GetName() == dst_name)
-		{
-			if (i >= src_index)
-				m_layer_list.insert(m_layer_list.begin() + i + 1, src);
-			else
-				m_layer_list.insert(m_layer_list.begin() + i, src);
-			break;
-		}
-	}
-	m_vd_pop_dirty = true;
-	m_md_pop_dirty = true;
+	//int i, src_index;
+	//TreeLayer* src = 0;
+	//for (i = 0; i<(int)m_layer_list.size(); i++)
+	//{
+	//	if (m_layer_list[i] && m_layer_list[i]->GetName() == src_name)
+	//	{
+	//		src = m_layer_list[i];
+	//		src_index = i;
+	//		m_layer_list.erase(m_layer_list.begin() + i);
+	//		break;
+	//	}
+	//}
+	//if (!src)
+	//	return;
+	//for (i = 0; i<(int)m_layer_list.size(); i++)
+	//{
+	//	if (m_layer_list[i] && m_layer_list[i]->GetName() == dst_name)
+	//	{
+	//		if (i >= src_index)
+	//			m_layer_list.insert(m_layer_list.begin() + i + 1, src);
+	//		else
+	//			m_layer_list.insert(m_layer_list.begin() + i, src);
+	//		break;
+	//	}
+	//}
+	//m_vd_pop_dirty = true;
+	//m_md_pop_dirty = true;
 }
 
 void VRenderGLView::ShowAll()
 {
-	for (unsigned int i = 0; i<m_layer_list.size(); ++i)
-	{
-		if (!m_layer_list[i]) continue;
+	//for (unsigned int i = 0; i<m_layer_list.size(); ++i)
+	//{
+	//	if (!m_layer_list[i]) continue;
 
-		switch (m_layer_list[i]->IsA())
-		{
-		case 2://volume
-		{
-			VolumeData* vd = (VolumeData*)m_layer_list[i];
-			if (vd)
-				vd->SetDisp(true);
-		}
-		break;
-		case 3://mesh
-		{
-			MeshData* md = (MeshData*)m_layer_list[i];
-			if (md)
-				md->SetDisp(true);
-		}
-		break;
-		case 4://annotation
-		{
-			Annotations* ann = (Annotations*)m_layer_list[i];
-			if (ann)
-				ann->SetDisp(true);
-		}
-		break;
-		case 5:
-		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
-			if (group)
-			{
-				group->SetDisp(true);
-				for (int j = 0; j<group->GetVolumeNum(); ++j)
-				{
-					VolumeData* vd = group->GetVolumeData(j);
-					if (vd)
-						vd->SetDisp(true);
-				}
-			}
-		}
-		break;
-		case 6://mesh group
-		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
-			if (group)
-			{
-				group->SetDisp(true);
-				for (int j = 0; j<group->GetMeshNum(); ++j)
-				{
-					MeshData* md = group->GetMeshData(j);
-					if (md)
-						md->SetDisp(true);
-				}
-			}
-		}
-		break;
-		}
-	}
-	m_vd_pop_dirty = true;
-	m_md_pop_dirty = true;
+	//	switch (m_layer_list[i]->IsA())
+	//	{
+	//	case 2://volume
+	//	{
+	//		VolumeData* vd = (VolumeData*)m_layer_list[i];
+	//		if (vd)
+	//			vd->SetDisp(true);
+	//	}
+	//	break;
+	//	case 3://mesh
+	//	{
+	//		MeshData* md = (MeshData*)m_layer_list[i];
+	//		if (md)
+	//			md->SetDisp(true);
+	//	}
+	//	break;
+	//	case 4://annotation
+	//	{
+	//		Annotations* ann = (Annotations*)m_layer_list[i];
+	//		if (ann)
+	//			ann->SetDisp(true);
+	//	}
+	//	break;
+	//	case 5:
+	//	{
+	//		DataGroup* group = (DataGroup*)m_layer_list[i];
+	//		if (group)
+	//		{
+	//			group->SetDisp(true);
+	//			for (int j = 0; j<group->GetVolumeNum(); ++j)
+	//			{
+	//				VolumeData* vd = group->GetVolumeData(j);
+	//				if (vd)
+	//					vd->SetDisp(true);
+	//			}
+	//		}
+	//	}
+	//	break;
+	//	case 6://mesh group
+	//	{
+	//		MeshGroup* group = (MeshGroup*)m_layer_list[i];
+	//		if (group)
+	//		{
+	//			group->SetDisp(true);
+	//			for (int j = 0; j<group->GetMeshNum(); ++j)
+	//			{
+	//				MeshData* md = group->GetMeshData(j);
+	//				if (md)
+	//					md->SetDisp(true);
+	//			}
+	//		}
+	//	}
+	//	break;
+	//	}
+	//}
+	//m_vd_pop_dirty = true;
+	//m_md_pop_dirty = true;
 }
 
 //move layer (volume) of the same level within the given group
 //source is after the destination
 void VRenderGLView::MoveLayerinGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
 {
-	DataGroup* group = GetGroup(group_name);
-	if (!group)
-		return;
+	//DataGroup* group = GetGroup(group_name);
+	//if (!group)
+	//	return;
 
-	VolumeData* src_vd = 0;
-	int i, src_index;
-	for (i = 0; i<group->GetVolumeNum(); i++)
-	{
-		wxString name = group->GetVolumeData(i)->GetName();
-		if (name == src_name)
-		{
-			src_index = i;
-			src_vd = group->GetVolumeData(i);
-			group->RemoveVolumeData(i);
-			break;
-		}
-	}
-	if (!src_vd)
-		return;
-	for (i = 0; i<group->GetVolumeNum(); i++)
-	{
-		wxString name = group->GetVolumeData(i)->GetName();
-		if (name == dst_name)
-		{
-			if (i >= src_index)
-				group->InsertVolumeData(i, src_vd);
-			else
-				group->InsertVolumeData(i - 1, src_vd);
-			break;
-		}
-	}
-	m_vd_pop_dirty = true;
-	m_md_pop_dirty = true;
+	//VolumeData* src_vd = 0;
+	//int i, src_index;
+	//for (i = 0; i<group->GetVolumeNum(); i++)
+	//{
+	//	wxString name = group->GetVolumeData(i)->GetName();
+	//	if (name == src_name)
+	//	{
+	//		src_index = i;
+	//		src_vd = group->GetVolumeData(i);
+	//		group->RemoveVolumeData(i);
+	//		break;
+	//	}
+	//}
+	//if (!src_vd)
+	//	return;
+	//for (i = 0; i<group->GetVolumeNum(); i++)
+	//{
+	//	wxString name = group->GetVolumeData(i)->GetName();
+	//	if (name == dst_name)
+	//	{
+	//		if (i >= src_index)
+	//			group->InsertVolumeData(i, src_vd);
+	//		else
+	//			group->InsertVolumeData(i - 1, src_vd);
+	//		break;
+	//	}
+	//}
+	//m_vd_pop_dirty = true;
+	//m_md_pop_dirty = true;
 }
 
 //move layer (volume) from the given group up one level to this view
 //source is after the destination
 void VRenderGLView::MoveLayertoView(wxString &group_name, wxString &src_name, wxString &dst_name)
 {
-	DataGroup* group = GetGroup(group_name);
-	if (!group)
-		return;
+	//DataGroup* group = GetGroup(group_name);
+	//if (!group)
+	//	return;
 
-	VolumeData* src_vd = 0;
-	int i;
-	for (i = 0; i<group->GetVolumeNum(); i++)
-	{
-		wxString name = group->GetVolumeData(i)->GetName();
-		if (name == src_name)
-		{
-			src_vd = group->GetVolumeData(i);
-			group->RemoveVolumeData(i);
-			break;
-		}
-	}
-	if (!src_vd)
-		return;
-	if (dst_name == "")
-	{
-		m_layer_list.push_back(src_vd);
-	}
-	else
-	{
-		for (i = 0; i<(int)m_layer_list.size(); i++)
-		{
-			wxString name = m_layer_list[i]->GetName();
-			if (name == dst_name)
-			{
-				m_layer_list.insert(m_layer_list.begin() + i + 1, src_vd);
-				break;
-			}
-		}
-	}
-	m_vd_pop_dirty = true;
-	m_md_pop_dirty = true;
+	//VolumeData* src_vd = 0;
+	//int i;
+	//for (i = 0; i<group->GetVolumeNum(); i++)
+	//{
+	//	wxString name = group->GetVolumeData(i)->GetName();
+	//	if (name == src_name)
+	//	{
+	//		src_vd = group->GetVolumeData(i);
+	//		group->RemoveVolumeData(i);
+	//		break;
+	//	}
+	//}
+	//if (!src_vd)
+	//	return;
+	//if (dst_name == "")
+	//{
+	//	m_layer_list.push_back(src_vd);
+	//}
+	//else
+	//{
+	//	for (i = 0; i<(int)m_layer_list.size(); i++)
+	//	{
+	//		wxString name = m_layer_list[i]->GetName();
+	//		if (name == dst_name)
+	//		{
+	//			m_layer_list.insert(m_layer_list.begin() + i + 1, src_vd);
+	//			break;
+	//		}
+	//	}
+	//}
+	//m_vd_pop_dirty = true;
+	//m_md_pop_dirty = true;
 }
 
 //move layer (volume) one level down to the given group
 //source is after the destination
 void VRenderGLView::MoveLayertoGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
 {
-	VolumeData* src_vd = 0;
-	int i;
+	//VolumeData* src_vd = 0;
+	//int i;
 
-	for (i = 0; i<(int)m_layer_list.size(); i++)
-	{
-		wxString name = m_layer_list[i]->GetName();
-		if (name == src_name && m_layer_list[i]->IsA() == 2)//is volume data
-		{
-			src_vd = (VolumeData*)m_layer_list[i];
-			m_layer_list.erase(m_layer_list.begin() + i);
-			break;
-		}
-	}
-	DataGroup* group = GetGroup(group_name);
-	if (!group || !src_vd)
-		return;
-	if (group->GetVolumeNum() == 0 || dst_name == "")
-	{
-		group->InsertVolumeData(0, src_vd);
-	}
-	else
-	{
-		for (i = 0; i<group->GetVolumeNum(); i++)
-		{
-			wxString name = group->GetVolumeData(i)->GetName();
-			if (name == dst_name)
-			{
-				group->InsertVolumeData(i, src_vd);
-				break;
-			}
-		}
-	}
+	//for (i = 0; i<(int)m_layer_list.size(); i++)
+	//{
+	//	wxString name = m_layer_list[i]->GetName();
+	//	if (name == src_name && m_layer_list[i]->IsA() == 2)//is volume data
+	//	{
+	//		src_vd = (VolumeData*)m_layer_list[i];
+	//		m_layer_list.erase(m_layer_list.begin() + i);
+	//		break;
+	//	}
+	//}
+	//DataGroup* group = GetGroup(group_name);
+	//if (!group || !src_vd)
+	//	return;
+	//if (group->GetVolumeNum() == 0 || dst_name == "")
+	//{
+	//	group->InsertVolumeData(0, src_vd);
+	//}
+	//else
+	//{
+	//	for (i = 0; i<group->GetVolumeNum(); i++)
+	//	{
+	//		wxString name = group->GetVolumeData(i)->GetName();
+	//		if (name == dst_name)
+	//		{
+	//			group->InsertVolumeData(i, src_vd);
+	//			break;
+	//		}
+	//	}
+	//}
 
-	//set the 2d adjustment settings of the volume the same as the group
-	Color gamma = group->GetGamma();
-	src_vd->SetGamma(gamma);
-	Color brightness = group->GetBrightness();
-	src_vd->SetBrightness(brightness);
-	Color hdr = group->GetHdr();
-	src_vd->SetHdr(hdr);
-	bool sync_r = group->GetSyncR();
-	src_vd->SetSyncR(sync_r);
-	bool sync_g = group->GetSyncG();
-	src_vd->SetSyncG(sync_g);
-	bool sync_b = group->GetSyncB();
-	src_vd->SetSyncB(sync_b);
+	////set the 2d adjustment settings of the volume the same as the group
+	//Color gamma = group->GetGamma();
+	//src_vd->SetGamma(gamma);
+	//Color brightness = group->GetBrightness();
+	//src_vd->SetBrightness(brightness);
+	//Color hdr = group->GetHdr();
+	//src_vd->SetHdr(hdr);
+	//bool sync_r = group->GetSyncR();
+	//src_vd->SetSyncR(sync_r);
+	//bool sync_g = group->GetSyncG();
+	//src_vd->SetSyncG(sync_g);
+	//bool sync_b = group->GetSyncB();
+	//src_vd->SetSyncB(sync_b);
 
-	m_vd_pop_dirty = true;
-	m_md_pop_dirty = true;
+	//m_vd_pop_dirty = true;
+	//m_md_pop_dirty = true;
 }
 
 //move layer (volume from one group to another different group
 //sourece is after the destination
 void VRenderGLView::MoveLayerfromtoGroup(wxString &src_group_name, wxString &dst_group_name, wxString &src_name, wxString &dst_name)
 {
-	DataGroup* src_group = GetGroup(src_group_name);
-	if (!src_group)
-		return;
-	int i;
-	VolumeData* src_vd = 0;
-	for (i = 0; i<src_group->GetVolumeNum(); i++)
-	{
-		wxString name = src_group->GetVolumeData(i)->GetName();
-		if (name == src_name)
-		{
-			src_vd = src_group->GetVolumeData(i);
-			src_group->RemoveVolumeData(i);
-			break;
-		}
-	}
-	DataGroup* dst_group = GetGroup(dst_group_name);
-	if (!dst_group || !src_vd)
-		return;
-	if (dst_group->GetVolumeNum() == 0 || dst_name == "")
-	{
-		dst_group->InsertVolumeData(0, src_vd);
-	}
-	else
-	{
-		for (i = 0; i<dst_group->GetVolumeNum(); i++)
-		{
-			wxString name = dst_group->GetVolumeData(i)->GetName();
-			if (name == dst_name)
-			{
-				dst_group->InsertVolumeData(i, src_vd);
-				break;
-			}
-		}
-	}
+	//DataGroup* src_group = GetGroup(src_group_name);
+	//if (!src_group)
+	//	return;
+	//int i;
+	//VolumeData* src_vd = 0;
+	//for (i = 0; i<src_group->GetVolumeNum(); i++)
+	//{
+	//	wxString name = src_group->GetVolumeData(i)->GetName();
+	//	if (name == src_name)
+	//	{
+	//		src_vd = src_group->GetVolumeData(i);
+	//		src_group->RemoveVolumeData(i);
+	//		break;
+	//	}
+	//}
+	//DataGroup* dst_group = GetGroup(dst_group_name);
+	//if (!dst_group || !src_vd)
+	//	return;
+	//if (dst_group->GetVolumeNum() == 0 || dst_name == "")
+	//{
+	//	dst_group->InsertVolumeData(0, src_vd);
+	//}
+	//else
+	//{
+	//	for (i = 0; i<dst_group->GetVolumeNum(); i++)
+	//	{
+	//		wxString name = dst_group->GetVolumeData(i)->GetName();
+	//		if (name == dst_name)
+	//		{
+	//			dst_group->InsertVolumeData(i, src_vd);
+	//			break;
+	//		}
+	//	}
+	//}
 
-	//reset the sync of the source group
-	//src_group->ResetSync();
+	////reset the sync of the source group
+	////src_group->ResetSync();
 
-	//set the 2d adjustment settings of the volume the same as the group
-	Color gamma = dst_group->GetGamma();
-	src_vd->SetGamma(gamma);
-	Color brightness = dst_group->GetBrightness();
-	src_vd->SetBrightness(brightness);
-	Color hdr = dst_group->GetHdr();
-	src_vd->SetHdr(hdr);
-	bool sync_r = dst_group->GetSyncR();
-	src_vd->SetSyncR(sync_r);
-	bool sync_g = dst_group->GetSyncG();
-	src_vd->SetSyncG(sync_g);
-	bool sync_b = dst_group->GetSyncB();
-	src_vd->SetSyncB(sync_b);
+	////set the 2d adjustment settings of the volume the same as the group
+	//Color gamma = dst_group->GetGamma();
+	//src_vd->SetGamma(gamma);
+	//Color brightness = dst_group->GetBrightness();
+	//src_vd->SetBrightness(brightness);
+	//Color hdr = dst_group->GetHdr();
+	//src_vd->SetHdr(hdr);
+	//bool sync_r = dst_group->GetSyncR();
+	//src_vd->SetSyncR(sync_r);
+	//bool sync_g = dst_group->GetSyncG();
+	//src_vd->SetSyncG(sync_g);
+	//bool sync_b = dst_group->GetSyncB();
+	//src_vd->SetSyncB(sync_b);
 
-	m_vd_pop_dirty = true;
-	m_md_pop_dirty = true;
+	//m_vd_pop_dirty = true;
+	//m_md_pop_dirty = true;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (m_frame)
-	{
-		AdjustView* adjust_view = vr_frame->GetAdjustView();
-		if (adjust_view)
-		{
-			adjust_view->SetVolumeData(src_vd);
-			adjust_view->SetGroupLink(dst_group);
-			adjust_view->UpdateSync();
-		}
-	}
+	//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	//if (m_frame)
+	//{
+	//	AdjustView* adjust_view = vr_frame->GetAdjustView();
+	//	if (adjust_view)
+	//	{
+	//		adjust_view->SetVolumeData(src_vd);
+	//		adjust_view->SetGroupLink(dst_group);
+	//		adjust_view->UpdateSync();
+	//	}
+	//}
 }
 
 //move mesh within a group
 void VRenderGLView::MoveMeshinGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
 {
-	MeshGroup* group = GetMGroup(group_name);
-	if (!group)
-		return;
+	//MeshGroup* group = GetMGroup(group_name);
+	//if (!group)
+	//	return;
 
-	MeshData* src_md = 0;
-	int i, src_index;
-	for (i = 0; i<group->GetMeshNum(); i++)
-	{
-		wxString name = group->GetMeshData(i)->GetName();
-		if (name == src_name)
-		{
-			src_index = i;
-			src_md = group->GetMeshData(i);
-			group->RemoveMeshData(i);
-			break;
-		}
-	}
-	if (!src_md)
-		return;
-	for (i = 0; i<group->GetMeshNum(); i++)
-	{
-		wxString name = group->GetMeshData(i)->GetName();
-		if (name == dst_name)
-		{
-			if (i >= src_index)
-				group->InsertMeshData(i, src_md);
-			else
-				group->InsertMeshData(i - 1, src_md);
-			break;
-		}
-	}
+	//MeshData* src_md = 0;
+	//int i, src_index;
+	//for (i = 0; i<group->GetMeshNum(); i++)
+	//{
+	//	wxString name = group->GetMeshData(i)->GetName();
+	//	if (name == src_name)
+	//	{
+	//		src_index = i;
+	//		src_md = group->GetMeshData(i);
+	//		group->RemoveMeshData(i);
+	//		break;
+	//	}
+	//}
+	//if (!src_md)
+	//	return;
+	//for (i = 0; i<group->GetMeshNum(); i++)
+	//{
+	//	wxString name = group->GetMeshData(i)->GetName();
+	//	if (name == dst_name)
+	//	{
+	//		if (i >= src_index)
+	//			group->InsertMeshData(i, src_md);
+	//		else
+	//			group->InsertMeshData(i - 1, src_md);
+	//		break;
+	//	}
+	//}
 
-	m_vd_pop_dirty = true;
-	m_md_pop_dirty = true;
+	//m_vd_pop_dirty = true;
+	//m_md_pop_dirty = true;
 }
 
 //move mesh out of a group
 void VRenderGLView::MoveMeshtoView(wxString &group_name, wxString &src_name, wxString &dst_name)
 {
-	MeshGroup* group = GetMGroup(group_name);
-	if (!group)
-		return;
+	//MeshGroup* group = GetMGroup(group_name);
+	//if (!group)
+	//	return;
 
-	MeshData* src_md = 0;
-	int i;
-	for (i = 0; i<group->GetMeshNum(); i++)
-	{
-		wxString name = group->GetMeshData(i)->GetName();
-		if (name == src_name)
-		{
-			src_md = group->GetMeshData(i);
-			group->RemoveMeshData(i);
-			break;
-		}
-	}
-	if (!src_md)
-		return;
-	if (dst_name == "")
-		m_layer_list.push_back(src_md);
-	else
-	{
-		for (i = 0; i<(int)m_layer_list.size(); i++)
-		{
-			wxString name = m_layer_list[i]->GetName();
-			if (name == dst_name)
-			{
-				m_layer_list.insert(m_layer_list.begin() + i + 1, src_md);
-				break;
-			}
-		}
-	}
-	m_vd_pop_dirty = true;
-	m_md_pop_dirty = true;
+	//MeshData* src_md = 0;
+	//int i;
+	//for (i = 0; i<group->GetMeshNum(); i++)
+	//{
+	//	wxString name = group->GetMeshData(i)->GetName();
+	//	if (name == src_name)
+	//	{
+	//		src_md = group->GetMeshData(i);
+	//		group->RemoveMeshData(i);
+	//		break;
+	//	}
+	//}
+	//if (!src_md)
+	//	return;
+	//if (dst_name == "")
+	//	m_layer_list.push_back(src_md);
+	//else
+	//{
+	//	for (i = 0; i<(int)m_layer_list.size(); i++)
+	//	{
+	//		wxString name = m_layer_list[i]->GetName();
+	//		if (name == dst_name)
+	//		{
+	//			m_layer_list.insert(m_layer_list.begin() + i + 1, src_md);
+	//			break;
+	//		}
+	//	}
+	//}
+	//m_vd_pop_dirty = true;
+	//m_md_pop_dirty = true;
 }
 
 //move mesh into a group
 void VRenderGLView::MoveMeshtoGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
 {
-	MeshData* src_md = 0;
-	int i;
+	//MeshData* src_md = 0;
+	//int i;
 
-	for (i = 0; i<(int)m_layer_list.size(); i++)
-	{
-		wxString name = m_layer_list[i]->GetName();
-		if (name == src_name && m_layer_list[i]->IsA() == 3)
-		{
-			src_md = (MeshData*)m_layer_list[i];
-			m_layer_list.erase(m_layer_list.begin() + i);
-			break;
-		}
-	}
-	MeshGroup* group = GetMGroup(group_name);
-	if (!group || !src_md)
-		return;
-	if (group->GetMeshNum() == 0 || dst_name == "")
-		group->InsertMeshData(0, src_md);
-	else
-	{
-		for (i = 0; i<group->GetMeshNum(); i++)
-		{
-			wxString name = group->GetMeshData(i)->GetName();
-			if (name == dst_name)
-			{
-				group->InsertMeshData(i, src_md);
-				break;
-			}
-		}
-	}
-	m_vd_pop_dirty = true;
-	m_md_pop_dirty = true;
+	//for (i = 0; i<(int)m_layer_list.size(); i++)
+	//{
+	//	wxString name = m_layer_list[i]->GetName();
+	//	if (name == src_name && m_layer_list[i]->IsA() == 3)
+	//	{
+	//		src_md = (MeshData*)m_layer_list[i];
+	//		m_layer_list.erase(m_layer_list.begin() + i);
+	//		break;
+	//	}
+	//}
+	//MeshGroup* group = GetMGroup(group_name);
+	//if (!group || !src_md)
+	//	return;
+	//if (group->GetMeshNum() == 0 || dst_name == "")
+	//	group->InsertMeshData(0, src_md);
+	//else
+	//{
+	//	for (i = 0; i<group->GetMeshNum(); i++)
+	//	{
+	//		wxString name = group->GetMeshData(i)->GetName();
+	//		if (name == dst_name)
+	//		{
+	//			group->InsertMeshData(i, src_md);
+	//			break;
+	//		}
+	//	}
+	//}
+	//m_vd_pop_dirty = true;
+	//m_md_pop_dirty = true;
 }
 
 //move mesh out of then into a group
 void VRenderGLView::MoveMeshfromtoGroup(wxString &src_group_name, wxString &dst_group_name, wxString &src_name, wxString &dst_name)
 {
-	MeshGroup* src_group = GetMGroup(src_group_name);
-	if (!src_group)
-		return;
-	int i;
-	MeshData* src_md = 0;
-	for (i = 0; i<src_group->GetMeshNum(); i++)
-	{
-		wxString name = src_group->GetMeshData(i)->GetName();
-		if (name == src_name)
-		{
-			src_md = src_group->GetMeshData(i);
-			src_group->RemoveMeshData(i);
-			break;
-		}
-	}
-	MeshGroup* dst_group = GetMGroup(dst_group_name);
-	if (!dst_group || !src_md)
-		return;
-	if (dst_group->GetMeshNum() == 0 || dst_name == "")
-		dst_group->InsertMeshData(0, src_md);
-	else
-	{
-		for (i = 0; i<dst_group->GetMeshNum(); i++)
-		{
-			wxString name = dst_group->GetMeshData(i)->GetName();
-			if (name == dst_name)
-			{
-				dst_group->InsertMeshData(i, src_md);
-				break;
-			}
-		}
-	}
-	m_vd_pop_dirty = true;
-	m_md_pop_dirty = true;
+	//MeshGroup* src_group = GetMGroup(src_group_name);
+	//if (!src_group)
+	//	return;
+	//int i;
+	//MeshData* src_md = 0;
+	//for (i = 0; i<src_group->GetMeshNum(); i++)
+	//{
+	//	wxString name = src_group->GetMeshData(i)->GetName();
+	//	if (name == src_name)
+	//	{
+	//		src_md = src_group->GetMeshData(i);
+	//		src_group->RemoveMeshData(i);
+	//		break;
+	//	}
+	//}
+	//MeshGroup* dst_group = GetMGroup(dst_group_name);
+	//if (!dst_group || !src_md)
+	//	return;
+	//if (dst_group->GetMeshNum() == 0 || dst_name == "")
+	//	dst_group->InsertMeshData(0, src_md);
+	//else
+	//{
+	//	for (i = 0; i<dst_group->GetMeshNum(); i++)
+	//	{
+	//		wxString name = dst_group->GetMeshData(i)->GetName();
+	//		if (name == dst_name)
+	//		{
+	//			dst_group->InsertMeshData(i, src_md);
+	//			break;
+	//		}
+	//	}
+	//}
+	//m_vd_pop_dirty = true;
+	//m_md_pop_dirty = true;
 }
 
 //layer control
 int VRenderGLView::GetGroupNum()
 {
-	int group_num = 0;
+	FL::SearchVisitor visitor;
+	visitor.matchClassName("VolumeGroup");
+	m_root->accept(visitor);
+	FL::ObjectList* list = visitor.getResult();
+	return int(list->size());
+	//int group_num = 0;
 
-	for (int i = 0; i<(int)m_layer_list.size(); i++)
-	{
-		TreeLayer *layer = m_layer_list[i];
-		if (layer && layer->IsA() == 5)
-			group_num++;
-	}
-	return group_num;
+	//for (int i = 0; i<(int)m_layer_list.size(); i++)
+	//{
+	//	TreeLayer *layer = m_layer_list[i];
+	//	if (layer && layer->IsA() == 5)
+	//		group_num++;
+	//}
+	//return group_num;
 }
 
 int VRenderGLView::GetLayerNum()
