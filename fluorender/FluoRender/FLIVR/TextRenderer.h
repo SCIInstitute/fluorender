@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <map>
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include <Types/Color.h>
 
 namespace FLIVR
 {
@@ -121,14 +122,13 @@ namespace FLIVR
 			return m_size;
 	}
 
-	class Color;
 	class TextRenderer
 	{
 	public:
 		TextRenderer();
 		~TextRenderer();
 
-		void RenderText(const std::wstring& text, Color &color,
+		void RenderText(const std::wstring& text, FLTYPE::Color &color,
 			float x, float y, float sx, float sy);
 		float RenderTextLen(std::wstring& text);
 

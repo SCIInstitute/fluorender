@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Scenegraph/DrawVolumeVisitor.h>
 #include <Scenegraph/PopVolumeVisitor.h>
 #include <Scenegraph/SearchVisitor.h>
+#include <FLIVR/Point.h>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -238,25 +239,25 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_frame_w(-1),
 	m_frame_h(-1),
 	//post image processing
-	m_gamma(Color(1.0, 1.0, 1.0)),
-	m_brightness(Color(1.0, 1.0, 1.0)),
+	m_gamma(FLTYPE::Color(1.0, 1.0, 1.0)),
+	m_brightness(FLTYPE::Color(1.0, 1.0, 1.0)),
 	m_hdr(0.0, 0.0, 0.0),
 	m_sync_r(false),
 	m_sync_g(false),
 	m_sync_b(false),
 	//volume color map
-	m_color_1(Color(0.0, 0.0, 1.0)),
+	m_color_1(FLTYPE::Color(0.0, 0.0, 1.0)),
 	m_value_2(0.0),
-	m_color_2(Color(0.0, 0.0, 1.0)),
+	m_color_2(FLTYPE::Color(0.0, 0.0, 1.0)),
 	m_value_3(0.25),
-	m_color_3(Color(0.0, 1.0, 1.0)),
+	m_color_3(FLTYPE::Color(0.0, 1.0, 1.0)),
 	m_value_4(0.5),
-	m_color_4(Color(0.0, 1.0, 0.0)),
+	m_color_4(FLTYPE::Color(0.0, 1.0, 0.0)),
 	m_value_5(0.75),
-	m_color_5(Color(1.0, 1.0, 0.0)),
+	m_color_5(FLTYPE::Color(1.0, 1.0, 0.0)),
 	m_value_6(1.0),
-	m_color_6(Color(1.0, 0.0, 0.0)),
-	m_color_7(Color(1.0, 0.0, 0.0)),
+	m_color_6(FLTYPE::Color(1.0, 0.0, 0.0)),
+	m_color_7(FLTYPE::Color(1.0, 0.0, 0.0)),
 	//paint brush presssure
 	m_use_press(true),
 	m_on_press(false),
@@ -1285,7 +1286,7 @@ void VRenderGLView::DrawVolumes(int peel)
 				if (!vd)
 					if (m_vd_pop_list.size())
 						vd = m_vd_pop_list[0];
-				Point p;
+				FLTYPE::Point p;
 				if (vd &&
 					(GetPointVolumeBox(p, nx / 2, ny / 2, vd, false) > 0.0 ||
 						GetPointPlane(p, nx / 2, ny / 2, 0, false) > 0.0))
@@ -1305,10 +1306,10 @@ void VRenderGLView::DrawVolumes(int peel)
 					vd->getValue("spc x", spcx);
 					vd->getValue("spc y", spcy);
 					vd->getValue("spc z", spcz);
-					p = FLIVR::Point(p.x() / (resx*sclx*spcx),
+					p = FLTYPE::Point(p.x() / (resx*sclx*spcx),
 						p.y() / (resy*scly*spcy),
 						p.z() / (resz*sclz*spcz));
-					TextureRenderer::set_qutoa_center(p);
+					TextureRenderer::set_qutoa_center(FLIVR::Point(p));
 				}
 				else
 					TextureRenderer::set_interactive(false);
@@ -1737,7 +1738,7 @@ int VRenderGLView::GetPaintMode()
 }
 
 void VRenderGLView::DrawCircles(double cx, double cy,
-	double r1, double r2, Color &color, glm::mat4 &matrix)
+	double r1, double r2, FLTYPE::Color &color, glm::mat4 &matrix)
 {
 	ShaderProgram* shader =
 		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
@@ -1813,7 +1814,7 @@ void VRenderGLView::DrawBrush()
 
 		int mode = m_selector.GetMode();
 
-		Color text_color = GetTextColor();
+		FLTYPE::Color text_color = GetTextColor();
 
 		if (mode == 1 ||
 			mode == 2)
@@ -4517,7 +4518,7 @@ void VRenderGLView::PickVolume()
 {
 	double dist = 0.0;
 	double min_dist = -1.0;
-	Point p;
+	FLTYPE::Point p;
 	FL::VolumeData* vd = 0;
 	FL::VolumeData* picked_vd = 0;
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
@@ -4621,7 +4622,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 	if (m_pin_rot_center && m_rot_center_dirty &&
 		m_cur_vol && !m_free)
 	{
-		Point p;
+		FLTYPE::Point p;
 		int nx = GetGLSize().x;
 		int ny = GetGLSize().y;
 		int mode = 2;
@@ -4639,7 +4640,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		{
 			m_pin_ctr = p;
 			double obj_transx, obj_transy, obj_transz;
-			p = Point(m_obj_ctrx - p.x(),
+			p = FLTYPE::Point(m_obj_ctrx - p.x(),
 				p.y() - m_obj_ctry,
 				p.z() - m_obj_ctrz);
 			obj_transx = p.x();
@@ -8406,20 +8407,24 @@ int VRenderGLView::GetGroupNum()
 
 int VRenderGLView::GetLayerNum()
 {
-	return m_layer_list.size();
+	//return m_layer_list.size();
+	FL::SearchVisitor visitor;
+	m_root->accept(visitor);
+	FL::ObjectList* list = visitor.getResult();
+	return int(list->size());
 }
 
 TreeLayer* VRenderGLView::GetLayer(int index)
 {
-	if (index >= 0 && index<(int)m_layer_list.size())
-		return m_layer_list[index];
-	else
+	//if (index >= 0 && index<(int)m_layer_list.size())
+	//	return m_layer_list[index];
+	//else
 		return 0;
 }
 
 wxString VRenderGLView::AddGroup(wxString str, wxString prev_group)
 {
-	DataGroup* group = new DataGroup();
+/*	DataGroup* group = new DataGroup();
 	if (group && str != "")
 		group->SetName(str);
 
@@ -8466,13 +8471,13 @@ wxString VRenderGLView::AddGroup(wxString str, wxString prev_group)
 
 	if (group)
 		return group->GetName();
-	else
+	else*/
 		return "";
 }
 
-DataGroup* VRenderGLView::AddOrGetGroup()
+FL::VolumeGroup* VRenderGLView::AddOrGetGroup()
 {
-	for (int i = 0; i < (int)m_layer_list.size(); i++)
+/*	for (int i = 0; i < (int)m_layer_list.size(); i++)
 	{
 		if (!m_layer_list[i])
 			continue;
@@ -8510,25 +8515,26 @@ DataGroup* VRenderGLView::AddOrGetGroup()
 		}
 	}
 	m_layer_list.push_back(group);
-	return group;
+	return group;*/
+	return 0;
 }
 
 wxString VRenderGLView::AddMGroup(wxString str)
 {
-	MeshGroup* group = new MeshGroup();
+/*	MeshGroup* group = new MeshGroup();
 	if (group && str != "")
 		group->SetName(str);
 	m_layer_list.push_back(group);
 
 	if (group)
 		return group->GetName();
-	else
+	else*/
 		return "";
 }
 
 MeshGroup* VRenderGLView::AddOrGetMGroup()
 {
-	for (int i = 0; i < (int)m_layer_list.size(); i++)
+/*	for (int i = 0; i < (int)m_layer_list.size(); i++)
 	{
 		if (!m_layer_list[i])
 			continue;
@@ -8548,12 +8554,13 @@ MeshGroup* VRenderGLView::AddOrGetMGroup()
 	if (!group)
 		return 0;
 	m_layer_list.push_back(group);
-	return group;
+	return group;*/
+	return 0;
 }
 
 MeshGroup* VRenderGLView::GetMGroup(wxString str)
 {
-	int i;
+/*	int i;
 
 	for (i = 0; i<(int)m_layer_list.size(); i++)
 	{
@@ -8568,7 +8575,7 @@ MeshGroup* VRenderGLView::GetMGroup(wxString str)
 				return group;
 		}
 		}
-	}
+	}*/
 	return 0;
 }
 
@@ -8583,10 +8590,14 @@ void VRenderGLView::InitView(unsigned int type)
 		PopVolumeList();
 		PopMeshList();
 
-		for (i = 0; i<(int)m_vd_pop_list.size(); i++)
-			m_bounds.extend(m_vd_pop_list[i]->GetBounds());
-		for (i = 0; i<(int)m_md_pop_list.size(); i++)
-			m_bounds.extend(m_md_pop_list[i]->GetBounds());
+		for (i = 0; i < (int)m_vd_pop_list.size(); i++)
+		{
+			FLTYPE::BBox box;
+			m_vd_pop_list[i]->getValue("bounds", box);
+			m_bounds.extend(box);
+		}
+		//for (i = 0; i<(int)m_md_pop_list.size(); i++)
+		//	m_bounds.extend(m_md_pop_list[i]->GetBounds());
 
 		if (m_bounds.valid())
 		{
@@ -8603,9 +8614,9 @@ void VRenderGLView::InitView(unsigned int type)
 	{
 		if (m_bounds.valid())
 		{
-			m_obj_ctrx = (m_bounds.min().x() + m_bounds.max().x()) / 2.0;
-			m_obj_ctry = (m_bounds.min().y() + m_bounds.max().y()) / 2.0;
-			m_obj_ctrz = (m_bounds.min().z() + m_bounds.max().z()) / 2.0;
+			m_obj_ctrx = (m_bounds.Min().x() + m_bounds.Max().x()) / 2.0;
+			m_obj_ctry = (m_bounds.Min().y() + m_bounds.Max().y()) / 2.0;
+			m_obj_ctrz = (m_bounds.Min().z() + m_bounds.Max().z()) / 2.0;
 		}
 	}
 
@@ -8732,33 +8743,35 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 
 	for (i = 0; i<GetDispVolumeNum(); i++)
 	{
-		VolumeData* vd = GetDispVolumeData(i);
+		FL::VolumeData* vd = GetDispVolumeData(i);
 		if (!vd)
 			continue;
 
 		if (vd != m_cur_vol)
 			continue;
 
-		VolumeRenderer *vr = vd->GetVR();
-		if (!vr)
-			continue;
+		//VolumeRenderer *vr = vd->GetRenderer();
+		//if (!vr)
+		//	continue;
 
-		vector<Plane*> *planes = vr->get_planes();
-		if (planes->size() != 6)
+		//vector<FLTYPE::Plane*> *planes = vr->get_planes();
+		FLTYPE::PlaneSet planes;
+		vd->getValue("clip planes", planes);
+		if (planes.GetSize() != 6)
 			continue;
 
 		//calculating planes
 		//get six planes
-		Plane* px1 = (*planes)[0];
-		Plane* px2 = (*planes)[1];
-		Plane* py1 = (*planes)[2];
-		Plane* py2 = (*planes)[3];
-		Plane* pz1 = (*planes)[4];
-		Plane* pz2 = (*planes)[5];
+		FLTYPE::Plane* px1 = &(planes[0]);
+		FLTYPE::Plane* px2 = &(planes[1]);
+		FLTYPE::Plane* py1 = &(planes[2]);
+		FLTYPE::Plane* py2 = &(planes[3]);
+		FLTYPE::Plane* pz1 = &(planes[4]);
+		FLTYPE::Plane* pz2 = &(planes[5]);
 
 		//calculate 4 lines
-		Vector lv_x1z1, lv_x1z2, lv_x2z1, lv_x2z2;
-		Point lp_x1z1, lp_x1z2, lp_x2z1, lp_x2z2;
+		FLTYPE::Vector lv_x1z1, lv_x1z2, lv_x2z1, lv_x2z2;
+		FLTYPE::Point lp_x1z1, lp_x1z2, lp_x2z1, lp_x2z2;
 		//x1z1
 		if (!px1->Intersect(*pz1, lp_x1z1, lv_x1z1))
 			continue;
@@ -8773,7 +8786,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 			continue;
 
 		//calculate 8 points
-		Point pp[8];
+		FLTYPE::Point pp[8];
 		//p0 = l_x1z1 * py1
 		if (!py1->Intersect(lp_x1z1, lv_x1z1, pp[0]))
 			continue;
@@ -8801,7 +8814,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 
 		//draw the six planes out of the eight points
 		//get color
-		Color color(1.0, 1.0, 1.0);
+		FLTYPE::Color color(1.0, 1.0, 1.0);
 		double plane_trans = 0.0;
 		if (face_winding == BACK_FACE &&
 			(m_clip_mask == 3 ||
@@ -8828,7 +8841,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 			plane_mode == kNormalBack)
 		{
 			if (!link)
-				color = vd->GetColor();
+				vd->getValue("color", color);
 		}
 		else
 			color = GetTextColor();
@@ -8842,7 +8855,10 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		double mvmat[16];
 		tform->get_trans(mvmat);
 		double sclx, scly, sclz;
-		vd->GetScalings(sclx, scly, sclz);
+		//vd->GetScalings(sclx, scly, sclz);
+		vd->getValue("scale x", sclx);
+		vd->getValue("scale y", scly);
+		vd->getValue("scale z", sclz);
 		glm::mat4 mv_mat = glm::scale(m_mv_mat,
 			glm::vec3(float(sclx), float(scly), float(sclz)));
 		glm::mat4 mv_mat2 = glm::mat4(
@@ -8858,7 +8874,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 			TextureRenderer::vertex_array_manager_.vertex_array(VA_Clip_Planes);
 		if (!va_clipp)
 			return;
-		std::vector<Point> clip_points(pp, pp+8);
+		std::vector<FLTYPE::Point> clip_points(pp, pp+8);
 		va_clipp->set_param(clip_points);
 		va_clipp->draw_begin();
 		//draw
@@ -9118,7 +9134,7 @@ void VRenderGLView::DrawScaleBar()
 	wstring wsb_text = m_sb_text.ToStdWstring();
 	double textlen =
 		m_text_renderer.RenderTextLen(wsb_text);
-	Color text_color = GetTextColor();
+	FLTYPE::Color text_color = GetTextColor();
 
 	std::vector<std::pair<unsigned int, double>> params;
 	if (m_draw_frame)
@@ -9211,9 +9227,11 @@ void VRenderGLView::DrawLegend()
 	//first pass
 	for (i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
-		if (m_vd_pop_list[i] && m_vd_pop_list[i]->GetLegend())
+		bool legend;
+		m_vd_pop_list[i]->getValue("legend", legend);
+		if (m_vd_pop_list[i] && legend)
 		{
-			wxstr = m_vd_pop_list[i]->GetName();
+			wxstr = m_vd_pop_list[i]->getName();
 			wstr = wxstr.ToStdWstring();
 			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
 			length += name_len;
@@ -9254,9 +9272,11 @@ void VRenderGLView::DrawLegend()
 	length = 0.0;
 	for (i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
-		if (m_vd_pop_list[i] && m_vd_pop_list[i]->GetLegend())
+		bool legend;
+		m_vd_pop_list[i]->getValue("legend", legend);
+		if (m_vd_pop_list[i] && legend)
 		{
-			wxstr = m_vd_pop_list[i]->GetName();
+			wxstr = m_vd_pop_list[i]->getName();
 			xpos = length;
 			wstr = wxstr.ToStdWstring();
 			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
@@ -9272,13 +9292,17 @@ void VRenderGLView::DrawLegend()
 				cur_line++;
 			}
 			bool highlighted = false;
+			FL::VolumeData* cur_vd;
+			FL::Global::instance().getVolumeFactory().getValue(
+				"current", (FL::Referenced**)&cur_vd);
+			wxString cur_name = cur_vd ? cur_vd->getName() : "";
 			if (vr_frame->GetCurSelType() == 2 &&
-				vr_frame->GetCurSelVol() &&
-				vr_frame->GetCurSelVol()->GetName() == wxstr)
+				cur_name == wxstr)
 				highlighted = true;
+			FLTYPE::Color cur_color;
+			m_vd_pop_list[i]->getValue("color", cur_color);
 			DrawName(xpos + xoffset, ny - (lines - cur_line + 0.1)*font_height - yoffset,
-				nx, ny, wxstr, m_vd_pop_list[i]->GetColor(),
-				font_height, highlighted);
+				nx, ny, wxstr, cur_color, font_height, highlighted);
 		}
 	}
 	for (i = 0; i<(int)m_md_pop_list.size(); i++)
@@ -9303,7 +9327,7 @@ void VRenderGLView::DrawLegend()
 			Color amb, diff, spec;
 			double shine, alpha;
 			m_md_pop_list[i]->GetMaterial(amb, diff, spec, shine, alpha);
-			Color c(diff.r(), diff.g(), diff.b());
+			FLTYPE::Color c(diff.r(), diff.g(), diff.b());
 			bool highlighted = false;
 			if (vr_frame->GetCurSelType() == 3 &&
 				vr_frame->GetCurSelMesh() &&
@@ -9319,7 +9343,7 @@ void VRenderGLView::DrawLegend()
 
 void VRenderGLView::DrawName(
 	double x, double y, int nx, int ny,
-	wxString name, Color color,
+	wxString name, FLTYPE::Color color,
 	double font_height,
 	bool highlighted)
 {
@@ -9354,7 +9378,7 @@ void VRenderGLView::DrawName(
 	params.push_back(std::pair<unsigned int, double>(3, ny - y + 0.8*font_height));
 	va_legend_squares->set_param(params);
 	va_legend_squares->draw_begin();
-	Color text_color = GetTextColor();
+	FLTYPE::Color text_color = GetTextColor();
 	shader->setLocalParam(0, text_color.r(), text_color.g(), text_color.b(), 1.0);
 	va_legend_squares->draw_legend_square(0);
 	shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0);
@@ -9471,67 +9495,67 @@ void VRenderGLView::SetColormapColors(int colormap)
 	switch (colormap)
 	{
 	case 0://rainbow
-		m_color_1 = Color(0.0, 0.0, 1.0);
-		m_color_2 = Color(0.0, 0.0, 1.0);
-		m_color_3 = Color(0.0, 1.0, 1.0);
-		m_color_4 = Color(0.0, 1.0, 0.0);
-		m_color_5 = Color(1.0, 1.0, 0.0);
-		m_color_6 = Color(1.0, 0.0, 0.0);
-		m_color_7 = Color(1.0, 0.0, 0.0);
+		m_color_1 = FLTYPE::Color(0.0, 0.0, 1.0);
+		m_color_2 = FLTYPE::Color(0.0, 0.0, 1.0);
+		m_color_3 = FLTYPE::Color(0.0, 1.0, 1.0);
+		m_color_4 = FLTYPE::Color(0.0, 1.0, 0.0);
+		m_color_5 = FLTYPE::Color(1.0, 1.0, 0.0);
+		m_color_6 = FLTYPE::Color(1.0, 0.0, 0.0);
+		m_color_7 = FLTYPE::Color(1.0, 0.0, 0.0);
 		break;
 	case 1://reverse rainbow
-		m_color_1 = Color(1.0, 0.0, 0.0);
-		m_color_2 = Color(1.0, 0.0, 0.0);
-		m_color_3 = Color(1.0, 1.0, 0.0);
-		m_color_4 = Color(0.0, 1.0, 0.0);
-		m_color_5 = Color(0.0, 1.0, 1.0);
-		m_color_6 = Color(0.0, 0.0, 1.0);
-		m_color_7 = Color(0.0, 0.0, 1.0);
+		m_color_1 = FLTYPE::Color(1.0, 0.0, 0.0);
+		m_color_2 = FLTYPE::Color(1.0, 0.0, 0.0);
+		m_color_3 = FLTYPE::Color(1.0, 1.0, 0.0);
+		m_color_4 = FLTYPE::Color(0.0, 1.0, 0.0);
+		m_color_5 = FLTYPE::Color(0.0, 1.0, 1.0);
+		m_color_6 = FLTYPE::Color(0.0, 0.0, 1.0);
+		m_color_7 = FLTYPE::Color(0.0, 0.0, 1.0);
 		break;
 	case 2://hot
-		m_color_1 = Color(0.0, 0.0, 0.0);
-		m_color_2 = Color(0.0, 0.0, 0.0);
-		m_color_3 = Color(0.5, 0.0, 0.0);
-		m_color_4 = Color(1.0, 0.0, 0.0);
-		m_color_5 = Color(1.0, 1.0, 0.0);
-		m_color_6 = Color(1.0, 1.0, 1.0);
-		m_color_7 = Color(1.0, 1.0, 1.0);
+		m_color_1 = FLTYPE::Color(0.0, 0.0, 0.0);
+		m_color_2 = FLTYPE::Color(0.0, 0.0, 0.0);
+		m_color_3 = FLTYPE::Color(0.5, 0.0, 0.0);
+		m_color_4 = FLTYPE::Color(1.0, 0.0, 0.0);
+		m_color_5 = FLTYPE::Color(1.0, 1.0, 0.0);
+		m_color_6 = FLTYPE::Color(1.0, 1.0, 1.0);
+		m_color_7 = FLTYPE::Color(1.0, 1.0, 1.0);
 		break;
 	case 3://cool
-		m_color_1 = Color(0.0, 1.0, 1.0);
-		m_color_2 = Color(0.0, 1.0, 1.0);
-		m_color_3 = Color(0.25, 0.75, 1.0);
-		m_color_4 = Color(0.5, 0.5, 1.0);
-		m_color_5 = Color(0.75, 0.25, 1.0);
-		m_color_6 = Color(1.0, 0.0, 1.0);
-		m_color_7 = Color(1.0, 0.0, 1.0);
+		m_color_1 = FLTYPE::Color(0.0, 1.0, 1.0);
+		m_color_2 = FLTYPE::Color(0.0, 1.0, 1.0);
+		m_color_3 = FLTYPE::Color(0.25, 0.75, 1.0);
+		m_color_4 = FLTYPE::Color(0.5, 0.5, 1.0);
+		m_color_5 = FLTYPE::Color(0.75, 0.25, 1.0);
+		m_color_6 = FLTYPE::Color(1.0, 0.0, 1.0);
+		m_color_7 = FLTYPE::Color(1.0, 0.0, 1.0);
 		break;
 	case 4://blue-red
-		m_color_1 = Color(0.25, 0.3, 0.75);
-		m_color_2 = Color(0.25, 0.3, 0.75);
-		m_color_3 = Color(0.475, 0.5, 0.725);
-		m_color_4 = Color(0.7, 0.7, 0.7);
-		m_color_5 = Color(0.7, 0.35, 0.425);
-		m_color_6 = Color(0.7, 0.0, 0.15);
-		m_color_7 = Color(0.7, 0.0, 0.15);
+		m_color_1 = FLTYPE::Color(0.25, 0.3, 0.75);
+		m_color_2 = FLTYPE::Color(0.25, 0.3, 0.75);
+		m_color_3 = FLTYPE::Color(0.475, 0.5, 0.725);
+		m_color_4 = FLTYPE::Color(0.7, 0.7, 0.7);
+		m_color_5 = FLTYPE::Color(0.7, 0.35, 0.425);
+		m_color_6 = FLTYPE::Color(0.7, 0.0, 0.15);
+		m_color_7 = FLTYPE::Color(0.7, 0.0, 0.15);
 		break;
 	case 5://monochrome
-		m_color_1 = Color(0.0, 0.0, 0.0);
-		m_color_2 = Color(0.0, 0.0, 0.0);
-		m_color_3 = Color(0.25, 0.25, 0.25);
-		m_color_4 = Color(0.5, 0.5, 0.5);
-		m_color_5 = Color(0.75, 0.75, 0.75);
-		m_color_6 = Color(1.0, 1.0, 1.0);
-		m_color_7 = Color(1.0, 1.0, 1.0);
+		m_color_1 = FLTYPE::Color(0.0, 0.0, 0.0);
+		m_color_2 = FLTYPE::Color(0.0, 0.0, 0.0);
+		m_color_3 = FLTYPE::Color(0.25, 0.25, 0.25);
+		m_color_4 = FLTYPE::Color(0.5, 0.5, 0.5);
+		m_color_5 = FLTYPE::Color(0.75, 0.75, 0.75);
+		m_color_6 = FLTYPE::Color(1.0, 1.0, 1.0);
+		m_color_7 = FLTYPE::Color(1.0, 1.0, 1.0);
 		break;
 	case 6://reverse mono
-		m_color_1 = Color(1.0, 1.0, 1.0);
-		m_color_2 = Color(1.0, 1.0, 1.0);
-		m_color_3 = Color(0.75, 0.75, 0.75);
-		m_color_4 = Color(0.5, 0.5, 0.5);
-		m_color_5 = Color(0.25, 0.25, 0.25);
-		m_color_6 = Color(0.0, 0.0, 0.0);
-		m_color_7 = Color(0.0, 0.0, 0.0);
+		m_color_1 = FLTYPE::Color(1.0, 1.0, 1.0);
+		m_color_2 = FLTYPE::Color(1.0, 1.0, 1.0);
+		m_color_3 = FLTYPE::Color(0.75, 0.75, 0.75);
+		m_color_4 = FLTYPE::Color(0.5, 0.5, 0.5);
+		m_color_5 = FLTYPE::Color(0.25, 0.25, 0.25);
+		m_color_6 = FLTYPE::Color(0.0, 0.0, 0.0);
+		m_color_7 = FLTYPE::Color(0.0, 0.0, 0.0);
 		break;
 	}
 }
@@ -9547,8 +9571,12 @@ void VRenderGLView::DrawColormap()
 
 	for (int i = 0; i<GetDispVolumeNum(); i++)
 	{
-		VolumeData* vd = GetDispVolumeData(i);
-		if (vd && vd->GetColormapMode() && vd->GetDisp())
+		FL::VolumeData* vd = GetDispVolumeData(i);
+		long colormap_mode;
+		vd->getValue("colormap mode", colormap_mode);
+		bool disp;
+		vd->getValue("display", disp);
+		if (vd && colormap_mode && disp)
 		{
 			num++;
 			vd_index = i;
@@ -9559,20 +9587,23 @@ void VRenderGLView::DrawColormap()
 		return;
 	else if (num == 1)
 	{
-		VolumeData* vd_view = GetDispVolumeData(vd_index);
+		FL::VolumeData* vd_view = GetDispVolumeData(vd_index);
 		if (vd_view)
 		{
 			draw = true;
 			double low, high;
-			vd_view->GetColormapValues(low, high);
+			vd_view->getValue("colormap low", low);
+			vd_view->getValue("colormap high", high);
 			m_value_2 = low;
 			m_value_6 = high;
 			m_value_4 = (low + high) / 2.0;
 			m_value_3 = (low + m_value_4) / 2.0;
 			m_value_5 = (m_value_4 + high) / 2.0;
-			max_val = vd_view->GetMaxValue();
-			enable_alpha = vd_view->GetEnableAlpha();
-			SetColormapColors(vd_view->GetColormap());
+			vd_view->getValue("max int", max_val);
+			vd_view->getValue("alpha enable", enable_alpha);
+			long colormap_type;
+			vd_view->getValue("colormap type", colormap_type);
+			SetColormapColors(colormap_type);
 		}
 	}
 	else if (num > 1)
@@ -9580,24 +9611,35 @@ void VRenderGLView::DrawColormap()
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vr_frame)
 		{
-			VolumeData* vd = vr_frame->GetCurSelVol();
-			if (vd && vd->GetDisp())
+			FL::VolumeData* vd;
+			FL::Global::instance().getVolumeFactory().
+				getValue("current", (FL::Referenced**)&vd);
+			bool disp = false;
+			if (vd)
+				vd->getValue("display", disp);
+			if (disp)
 			{
-				wxString str = vd->GetName();
-				VolumeData* vd_view = GetVolumeData(str);
-				if (vd_view && vd_view->GetColormapDisp())
+				wxString str = vd->getName();
+				FL::VolumeData* vd_view = GetVolumeData(str);
+				bool colormap_enable = false;
+				if (vd_view)
+					vd_view->getValue("colormap enable", colormap_enable);
+				if (colormap_enable)
 				{
 					draw = true;
 					double low, high;
-					vd_view->GetColormapValues(low, high);
+					vd_view->getValue("colormap low", low);
+					vd_view->getValue("colormap high", high);
 					m_value_2 = low;
 					m_value_6 = high;
 					m_value_4 = (low + high) / 2.0;
 					m_value_3 = (low + m_value_4) / 2.0;
 					m_value_5 = (m_value_4 + high) / 2.0;
-					max_val = vd_view->GetMaxValue();
-					enable_alpha = vd_view->GetEnableAlpha();
-					SetColormapColors(vd_view->GetColormap());
+					vd_view->getValue("max int", max_val);
+					vd_view->getValue("alpha enable", enable_alpha);
+					long colormap_type;
+					vd_view->getValue("colormap type", colormap_type);
+					SetColormapColors(colormap_type);
 				}
 			}
 		}
@@ -9659,7 +9701,7 @@ void VRenderGLView::DrawColormap()
 		wxString str;
 		wstring wstr;
 
-		Color text_color = GetTextColor();
+		FLTYPE::Color text_color = GetTextColor();
 
 		//value 1
 		px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
@@ -9736,7 +9778,7 @@ void VRenderGLView::DrawColormap()
 		wxString str;
 		wstring wstr;
 
-		Color text_color = GetTextColor();
+		FLTYPE::Color text_color = GetTextColor();
 
 		//value 1
 		px = 0.052*nx - nx / 2.0;
@@ -9819,7 +9861,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 
 	double fps_ = 1.0 / m_timer->average();
 	wxString str;
-	Color text_color = GetTextColor();
+	FLTYPE::Color text_color = GetTextColor();
 	if (TextureRenderer::get_mem_swap())
 	{
 		if (m_use_press)
@@ -9874,7 +9916,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 		(m_draw_info & INFO_Y) &&
 		(m_draw_info & INFO_Z))
 	{
-		Point p;
+		FLTYPE::Point p;
 		wxPoint mouse_pos = ScreenToClient(wxGetMousePosition());
 		if ((m_cur_vol && GetPointVolumeBox(p, mouse_pos.x, mouse_pos.y, m_cur_vol)>0.0) ||
 			GetPointPlane(p, mouse_pos.x, mouse_pos.y)>0.0)
@@ -9893,11 +9935,18 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	{
 		if (m_cur_vol)
 		{
-			int resx, resy, resz;
-			m_cur_vol->GetResolution(resx, resy, resz);
+			long resx, resy, resz;
+			//m_cur_vol->GetResolution(resx, resy, resz);
+			m_cur_vol->getValue("res x", resx);
+			m_cur_vol->getValue("res y", resy);
+			m_cur_vol->getValue("res z", resz);
 			double spcx, spcy, spcz;
-			m_cur_vol->GetSpacings(spcx, spcy, spcz);
-			vector<Plane*> *planes = m_cur_vol->GetVR()->get_planes();
+			//m_cur_vol->GetSpacings(spcx, spcy, spcz);
+			m_cur_vol->getValue("spc x", spcx);
+			m_cur_vol->getValue("spc y", spcy);
+			m_cur_vol->getValue("spc z", spcz);
+
+			vector<Plane*> *planes = m_cur_vol->GetRenderer()->get_planes();
 			Plane* plane = (*planes)[4];
 			double abcd[4];
 			plane->get_copy(abcd);
@@ -9937,10 +9986,10 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 		{
 			for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
 			{
-				VolumeData* vd = m_vd_pop_list[i];
-				if (vd && vd->GetVR())
+				FL::VolumeData* vd = m_vd_pop_list[i];
+				if (vd && vd->GetRenderer())
 				{
-					str = wxString::Format("SLICES_%d: %d", i + 1, vd->GetVR()->get_slice_num());
+					str = wxString::Format("SLICES_%d: %d", i + 1, vd->GetRenderer()->get_slice_num());
 					wstr_temp = str.ToStdWstring();
 					px = gapw - nx / 2;
 					py = ny / 2 - gaph*(3 + i) / 2;
@@ -9956,7 +10005,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 FLTYPE::Quaternion VRenderGLView::Trackball(int p1x, int p1y, int p2x, int p2y)
 {
 	FLTYPE::Quaternion q;
-	Vector a; /* Axis of rotation */
+	FLTYPE::Vector a; /* Axis of rotation */
 	double phi;  /* how much to rotate about axis */
 
 	if (p1x == p2x && p1y == p2y)
@@ -9972,13 +10021,13 @@ FLTYPE::Quaternion VRenderGLView::Trackball(int p1x, int p1y, int p2x, int p2y)
 			return q;
 	}
 
-	a = Vector(p1y - p2y, p2x - p1x, 0.0);
+	a = FLTYPE::Vector(p1y - p2y, p2x - p1x, 0.0);
 	phi = a.length() / 3.0;
 	a.normalize();
 	FLTYPE::Quaternion q_a(a);
 	//rotate back to local
 	FLTYPE::Quaternion q_a2 = (-m_q) * q_a * m_q;
-	a = Vector(q_a2.x, q_a2.y, q_a2.z);
+	a = FLTYPE::Vector(q_a2.x, q_a2.y, q_a2.z);
 	a.normalize();
 
 	q = FLTYPE::Quaternion(phi, a);
@@ -10000,7 +10049,7 @@ FLTYPE::Quaternion VRenderGLView::Trackball(int p1x, int p1y, int p2x, int p2y)
 FLTYPE::Quaternion VRenderGLView::TrackballClip(int p1x, int p1y, int p2x, int p2y)
 {
 	FLTYPE::Quaternion q;
-	Vector a; /* Axis of rotation */
+	FLTYPE::Vector a; /* Axis of rotation */
 	double phi;  /* how much to rotate about axis */
 
 	if (p1x == p2x && p1y == p2y)
@@ -10009,7 +10058,7 @@ FLTYPE::Quaternion VRenderGLView::TrackballClip(int p1x, int p1y, int p2x, int p
 		return q;
 	}
 
-	a = Vector(p2y - p1y, p2x - p1x, 0.0);
+	a = FLTYPE::Vector(p2y - p1y, p2x - p1x, 0.0);
 	phi = a.length() / 3.0;
 	a.normalize();
 	FLTYPE::Quaternion q_a(a);
@@ -10018,7 +10067,7 @@ FLTYPE::Quaternion VRenderGLView::TrackballClip(int p1x, int p1y, int p2x, int p
 	q2.FromEuler(-m_rotx, m_roty, m_rotz);
 	q_a = (q2)* q_a * (-q2);
 	q_a = (m_q_cl)* q_a * (-m_q_cl);
-	a = Vector(q_a.x, q_a.y, q_a.z);
+	a = FLTYPE::Vector(q_a.x, q_a.y, q_a.z);
 	a.normalize();
 
 	q = FLTYPE::Quaternion(phi, a);
@@ -10052,82 +10101,93 @@ void VRenderGLView::Q2A()
 		if (m_clip_mode == 1)
 			m_q_cl.FromEuler(m_rotx, -m_roty, -m_rotz);
 
-		vector<Plane*> *planes = 0;
+		//vector<Plane*> *planes = 0;
 		for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
 		{
 			if (!m_vd_pop_list[i])
 				continue;
 
 			double spcx, spcy, spcz;
-			int resx, resy, resz;
-			m_vd_pop_list[i]->GetSpacings(spcx, spcy, spcz);
-			m_vd_pop_list[i]->GetResolution(resx, resy, resz);
-			Vector scale;
+			long resx, resy, resz;
+			//m_vd_pop_list[i]->GetSpacings(spcx, spcy, spcz);
+			m_vd_pop_list[i]->getValue("spc x", spcx);
+			m_vd_pop_list[i]->getValue("spc y", spcy);
+			m_vd_pop_list[i]->getValue("spc z", spcz);
+			//m_vd_pop_list[i]->GetResolution(resx, resy, resz);
+			m_vd_pop_list[i]->getValue("res x", resx);
+			m_vd_pop_list[i]->getValue("res y", resy);
+			m_vd_pop_list[i]->getValue("res z", resz);
+			FLTYPE::Vector scale;
 			if (spcx>0.0 && spcy>0.0 && spcz>0.0)
 			{
-				scale = Vector(1.0 / resx / spcx, 1.0 / resy / spcy, 1.0 / resz / spcz);
+				scale = FLTYPE::Vector(1.0 / resx / spcx, 1.0 / resy / spcy, 1.0 / resz / spcz);
 				scale.safe_normalize();
 			}
 			else
-				scale = Vector(1.0, 1.0, 1.0);
+				scale = FLTYPE::Vector(1.0, 1.0, 1.0);
 
-			if (m_vd_pop_list[i]->GetVR())
-				planes = m_vd_pop_list[i]->GetVR()->get_planes();
-			if (planes && planes->size() == 6)
+			FLTYPE::PlaneSet planes;
+			m_vd_pop_list[i]->getValue("clip planes", planes);
+			//if (m_vd_pop_list[i]->GetRenderer())
+			//	planes = m_vd_pop_list[i]->GetRenderer()->get_planes();
+			if (planes.GetSize() == 6)
 			{
 				double x1, x2, y1, y2, z1, z2;
 				double abcd[4];
-				(*planes)[0]->get_copy(abcd);
+				planes[0].get_copy(abcd);
 				x1 = fabs(abcd[3]);
-				(*planes)[1]->get_copy(abcd);
+				planes[1].get_copy(abcd);
 				x2 = fabs(abcd[3]);
-				(*planes)[2]->get_copy(abcd);
+				planes[2].get_copy(abcd);
 				y1 = fabs(abcd[3]);
-				(*planes)[3]->get_copy(abcd);
+				planes[3].get_copy(abcd);
 				y2 = fabs(abcd[3]);
-				(*planes)[4]->get_copy(abcd);
+				planes[4].get_copy(abcd);
 				z1 = fabs(abcd[3]);
-				(*planes)[5]->get_copy(abcd);
+				planes[5].get_copy(abcd);
 				z2 = fabs(abcd[3]);
 
-				Vector trans1(-0.5, -0.5, -0.5);
-				Vector trans2(0.5, 0.5, 0.5);
+				FLTYPE::Vector trans1(-0.5, -0.5, -0.5);
+				FLTYPE::Vector trans2(0.5, 0.5, 0.5);
 
-				(*planes)[0]->Restore();
-				(*planes)[0]->Translate(trans1);
-				(*planes)[0]->Rotate(m_q_cl);
-				(*planes)[0]->Scale(scale);
-				(*planes)[0]->Translate(trans2);
+				planes[0].Restore();
+				planes[0].Translate(trans1);
+				planes[0].Rotate(m_q_cl);
+				planes[0].Scale(scale);
+				planes[0].Translate(trans2);
 
-				(*planes)[1]->Restore();
-				(*planes)[1]->Translate(trans1);
-				(*planes)[1]->Rotate(m_q_cl);
-				(*planes)[1]->Scale(scale);
-				(*planes)[1]->Translate(trans2);
+				planes[1].Restore();
+				planes[1].Translate(trans1);
+				planes[1].Rotate(m_q_cl);
+				planes[1].Scale(scale);
+				planes[1].Translate(trans2);
 
-				(*planes)[2]->Restore();
-				(*planes)[2]->Translate(trans1);
-				(*planes)[2]->Rotate(m_q_cl);
-				(*planes)[2]->Scale(scale);
-				(*planes)[2]->Translate(trans2);
+				planes[2].Restore();
+				planes[2].Translate(trans1);
+				planes[2].Rotate(m_q_cl);
+				planes[2].Scale(scale);
+				planes[2].Translate(trans2);
 
-				(*planes)[3]->Restore();
-				(*planes)[3]->Translate(trans1);
-				(*planes)[3]->Rotate(m_q_cl);
-				(*planes)[3]->Scale(scale);
-				(*planes)[3]->Translate(trans2);
+				planes[3].Restore();
+				planes[3].Translate(trans1);
+				planes[3].Rotate(m_q_cl);
+				planes[3].Scale(scale);
+				planes[3].Translate(trans2);
 
-				(*planes)[4]->Restore();
-				(*planes)[4]->Translate(trans1);
-				(*planes)[4]->Rotate(m_q_cl);
-				(*planes)[4]->Scale(scale);
-				(*planes)[4]->Translate(trans2);
+				planes[4].Restore();
+				planes[4].Translate(trans1);
+				planes[4].Rotate(m_q_cl);
+				planes[4].Scale(scale);
+				planes[4].Translate(trans2);
 
-				(*planes)[5]->Restore();
-				(*planes)[5]->Translate(trans1);
-				(*planes)[5]->Rotate(m_q_cl);
-				(*planes)[5]->Scale(scale);
-				(*planes)[5]->Translate(trans2);
+				planes[5].Restore();
+				planes[5].Translate(trans1);
+				planes[5].Rotate(m_q_cl);
+				planes[5].Scale(scale);
+				planes[5].Translate(trans2);
+
+				//if (m_vd_pop_list[i]->GetRenderer())
+				//	m_vd_pop_list[i]->GetRenderer()->set_planes();
 			}
 		}
 	}
@@ -10150,78 +10210,89 @@ void VRenderGLView::A2Q()
 			if (!m_vd_pop_list[i])
 				continue;
 
-			vector<Plane*> *planes = 0;
+			//vector<Plane*> *planes = 0;
 			double spcx, spcy, spcz;
-			int resx, resy, resz;
-			m_vd_pop_list[i]->GetSpacings(spcx, spcy, spcz);
-			m_vd_pop_list[i]->GetResolution(resx, resy, resz);
-			Vector scale;
+			long resx, resy, resz;
+			//m_vd_pop_list[i]->GetSpacings(spcx, spcy, spcz);
+			m_vd_pop_list[i]->getValue("spc x", spcx);
+			m_vd_pop_list[i]->getValue("spc y", spcy);
+			m_vd_pop_list[i]->getValue("spc z", spcz);
+			//m_vd_pop_list[i]->GetResolution(resx, resy, resz);
+			m_vd_pop_list[i]->getValue("res x", resx);
+			m_vd_pop_list[i]->getValue("res y", resy);
+			m_vd_pop_list[i]->getValue("res z", resz);
+			FLTYPE::Vector scale;
 			if (spcx>0.0 && spcy>0.0 && spcz>0.0)
 			{
-				scale = Vector(1.0 / resx / spcx, 1.0 / resy / spcy, 1.0 / resz / spcz);
+				scale = FLTYPE::Vector(1.0 / resx / spcx, 1.0 / resy / spcy, 1.0 / resz / spcz);
 				scale.safe_normalize();
 			}
 			else
-				scale = Vector(1.0, 1.0, 1.0);
+				scale = FLTYPE::Vector(1.0, 1.0, 1.0);
 
-			if (m_vd_pop_list[i]->GetVR())
-				planes = m_vd_pop_list[i]->GetVR()->get_planes();
-			if (planes && planes->size() == 6)
+			FLTYPE::PlaneSet planes;
+			m_vd_pop_list[i]->getValue("clip planes", planes);
+			//if (m_vd_pop_list[i]->GetVR())
+			//	planes = m_vd_pop_list[i]->GetVR()->get_planes();
+			if (planes.GetSize() == 6)
 			{
 				double x1, x2, y1, y2, z1, z2;
 				double abcd[4];
 
-				(*planes)[0]->get_copy(abcd);
+				planes[0].get_copy(abcd);
 				x1 = fabs(abcd[3]);
-				(*planes)[1]->get_copy(abcd);
+				planes[1].get_copy(abcd);
 				x2 = fabs(abcd[3]);
-				(*planes)[2]->get_copy(abcd);
+				planes[2].get_copy(abcd);
 				y1 = fabs(abcd[3]);
-				(*planes)[3]->get_copy(abcd);
+				planes[3].get_copy(abcd);
 				y2 = fabs(abcd[3]);
-				(*planes)[4]->get_copy(abcd);
+				planes[4].get_copy(abcd);
 				z1 = fabs(abcd[3]);
-				(*planes)[5]->get_copy(abcd);
+				planes[5].get_copy(abcd);
 				z2 = fabs(abcd[3]);
 
-				Vector trans1(-0.5, -0.5, -0.5);
-				Vector trans2(0.5, 0.5, 0.5);
+				FLTYPE::Vector trans1(-0.5, -0.5, -0.5);
+				FLTYPE::Vector trans2(0.5, 0.5, 0.5);
 
-				(*planes)[0]->Restore();
-				(*planes)[0]->Translate(trans1);
-				(*planes)[0]->Rotate(m_q_cl);
-				(*planes)[0]->Scale(scale);
-				(*planes)[0]->Translate(trans2);
+				planes[0].Restore();
+				planes[0].Translate(trans1);
+				planes[0].Rotate(m_q_cl);
+				planes[0].Scale(scale);
+				planes[0].Translate(trans2);
 
-				(*planes)[1]->Restore();
-				(*planes)[1]->Translate(trans1);
-				(*planes)[1]->Rotate(m_q_cl);
-				(*planes)[1]->Scale(scale);
-				(*planes)[1]->Translate(trans2);
+				planes[1].Restore();
+				planes[1].Translate(trans1);
+				planes[1].Rotate(m_q_cl);
+				planes[1].Scale(scale);
+				planes[1].Translate(trans2);
 
-				(*planes)[2]->Restore();
-				(*planes)[2]->Translate(trans1);
-				(*planes)[2]->Rotate(m_q_cl);
-				(*planes)[2]->Scale(scale);
-				(*planes)[2]->Translate(trans2);
+				planes[2].Restore();
+				planes[2].Translate(trans1);
+				planes[2].Rotate(m_q_cl);
+				planes[2].Scale(scale);
+				planes[2].Translate(trans2);
 
-				(*planes)[3]->Restore();
-				(*planes)[3]->Translate(trans1);
-				(*planes)[3]->Rotate(m_q_cl);
-				(*planes)[3]->Scale(scale);
-				(*planes)[3]->Translate(trans2);
+				planes[3].Restore();
+				planes[3].Translate(trans1);
+				planes[3].Rotate(m_q_cl);
+				planes[3].Scale(scale);
+				planes[3].Translate(trans2);
 
-				(*planes)[4]->Restore();
-				(*planes)[4]->Translate(trans1);
-				(*planes)[4]->Rotate(m_q_cl);
-				(*planes)[4]->Scale(scale);
-				(*planes)[4]->Translate(trans2);
+				planes[4].Restore();
+				planes[4].Translate(trans1);
+				planes[4].Rotate(m_q_cl);
+				planes[4].Scale(scale);
+				planes[4].Translate(trans2);
 
-				(*planes)[5]->Restore();
-				(*planes)[5]->Translate(trans1);
-				(*planes)[5]->Rotate(m_q_cl);
-				(*planes)[5]->Scale(scale);
-				(*planes)[5]->Translate(trans2);
+				planes[5].Restore();
+				planes[5].Translate(trans1);
+				planes[5].Rotate(m_q_cl);
+				planes[5].Scale(scale);
+				planes[5].Translate(trans2);
+
+				//if (m_vd_pop_list[i]->GetRenderer())
+				//	m_vd_pop_list[i]->GetRenderer()->set_planes();
 			}
 		}
 	}
@@ -10234,7 +10305,7 @@ void VRenderGLView::SetSortBricks()
 
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
-		VolumeData* vd = m_vd_pop_list[i];
+		FL::VolumeData* vd = m_vd_pop_list[i];
 		if (vd && vd->GetTexture())
 			vd->GetTexture()->set_sort_bricks();
 	}
@@ -10277,8 +10348,8 @@ void VRenderGLView::RestorePlanes()
 			continue;
 
 		planes = 0;
-		if (m_vd_pop_list[i]->GetVR())
-			planes = m_vd_pop_list[i]->GetVR()->get_planes();
+		if (m_vd_pop_list[i]->GetRenderer())
+			planes = m_vd_pop_list[i]->GetRenderer()->get_planes();
 		if (planes && planes->size() == 6)
 		{
 			(*planes)[0]->Restore();
@@ -10324,10 +10395,10 @@ bool VRenderGLView::GetIntp()
 void VRenderGLView::Run4DScript()
 {
 	//save currently selected volume
-	VolumeData* cur_vd_save = m_cur_vol;
+	FL::VolumeData* cur_vd_save = m_cur_vol;
 	for (int i = 0; i < (int)m_vd_pop_list.size(); ++i)
 	{
-		VolumeData* vd = m_vd_pop_list[i];
+		FL::VolumeData* vd = m_vd_pop_list[i];
 		if (vd)
 			Run4DScript(m_script_file, vd);
 	}
@@ -10378,7 +10449,7 @@ void VRenderGLView::StartLoopUpdate()
 		int i, j, k;
 		for (i = 0; i<m_vd_pop_list.size(); i++)
 		{
-			VolumeData* vd = m_vd_pop_list[i];
+			FL::VolumeData* vd = m_vd_pop_list[i];
 			if (vd)
 			{
 				switchLevel(vd);
@@ -10391,14 +10462,14 @@ void VRenderGLView::StartLoopUpdate()
 					Transform *tform = tex->transform();
 					double mvmat[16];
 					tform->get_trans(mvmat);
-					vd->GetVR()->m_mv_mat2 = glm::mat4(
+					vd->GetRenderer()->m_mv_mat2 = glm::mat4(
 						mvmat[0], mvmat[4], mvmat[8], mvmat[12],
 						mvmat[1], mvmat[5], mvmat[9], mvmat[13],
 						mvmat[2], mvmat[6], mvmat[10], mvmat[14],
 						mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
-					vd->GetVR()->m_mv_mat2 = vd->GetVR()->m_mv_mat * vd->GetVR()->m_mv_mat2;
+					vd->GetRenderer()->m_mv_mat2 = vd->GetRenderer()->m_mv_mat * vd->GetRenderer()->m_mv_mat2;
 
-					Ray view_ray = vd->GetVR()->compute_view();
+					Ray view_ray = vd->GetRenderer()->compute_view();
 					vector<TextureBrick*> *bricks = 0;
 					bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 					if (!bricks || bricks->size() == 0)
@@ -10407,7 +10478,7 @@ void VRenderGLView::StartLoopUpdate()
 					{
 						(*bricks)[j]->set_drawn(false);
 						if ((*bricks)[j]->get_priority() > 0 ||
-							!vd->GetVR()->test_against_view((*bricks)[j]->bbox(), m_persp))
+							!vd->GetRenderer()->test_against_view((*bricks)[j]->bbox(), m_persp))
 						{
 							(*bricks)[j]->set_disp(false);
 							continue;
@@ -10416,10 +10487,16 @@ void VRenderGLView::StartLoopUpdate()
 							(*bricks)[j]->set_disp(true);
 						total_num++;
 						num_chan++;
-						if (vd->GetMode() == 1 &&
-							vd->GetShading())
+
+						long mip_mode;
+						bool shading_enable;
+						vd->getValue("mip mode", mip_mode);
+						vd->getValue("shading enable", shading_enable);
+						if (mip_mode == 1 && shading_enable)
 							total_num++;
-						if (vd->GetShadow())
+						bool shadow_enable;
+						vd->getValue("shadow enable", shadow_enable);
+						if (shadow_enable)
 							total_num++;
 						//mask
 						if (vd->GetTexture() &&
@@ -10428,20 +10505,24 @@ void VRenderGLView::StartLoopUpdate()
 							total_num++;
 					}
 				}
-				vd->SetBrickNum(num_chan);
-				if (vd->GetVR())
-					vd->GetVR()->set_done_loop(false);
+				//vd->SetBrickNum(num_chan);
+				vd->setValue("brick num", long(num_chan));
+				if (vd->GetRenderer())
+					vd->GetRenderer()->set_done_loop(false);
 			}
 		}
 
 		vector<VolumeLoaderData> queues;
 		if (m_vol_method == VOL_METHOD_MULTI)
 		{
-			vector<VolumeData*> list;
+			vector<FL::VolumeData*> list;
 			for (i = 0; i<m_vd_pop_list.size(); i++)
 			{
-				VolumeData* vd = m_vd_pop_list[i];
-				if (!vd || !vd->GetDisp() || !vd->isBrxml())
+				FL::VolumeData* vd = m_vd_pop_list[i];
+				bool disp, multires;
+				vd->getValue("display", disp);
+				vd->getValue("multires", multires);
+				if (!vd || !disp || !multires)
 					continue;
 				Texture* tex = vd->GetTexture();
 				if (!tex)
@@ -10456,13 +10537,18 @@ void VRenderGLView::StartLoopUpdate()
 			vector<VolumeLoaderData> tmp_shadow;
 			for (i = 0; i < list.size(); i++)
 			{
-				VolumeData* vd = list[i];
+				FL::VolumeData* vd = list[i];
 				Texture* tex = vd->GetTexture();
-				Ray view_ray = vd->GetVR()->compute_view();
+				Ray view_ray = vd->GetRenderer()->compute_view();
 				vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
-				int mode = vd->GetMode() == 1 ? 1 : 0;
-				bool shade = (mode == 1 && vd->GetShading());
-				bool shadow = vd->GetShadow();
+				long mip_mode;
+				vd->getValue("mip mode", mip_mode);
+				int mode = mip_mode == 1 ? 1 : 0;
+				bool shading_enable;
+				vd->getValue("shading_enable", shading_enable);
+				bool shade = mode == 1 && shading_enable;
+				bool shadow;
+				vd->getValue("shadow enable", shadow);
 				for (j = 0; j < bricks->size(); j++)
 				{
 					VolumeLoaderData d;
@@ -10511,7 +10597,7 @@ void VRenderGLView::StartLoopUpdate()
 					TextureRenderer::set_update_order(0);
 					for (i = 0; i < list.size(); i++)
 					{
-						Ray view_ray = list[i]->GetVR()->compute_view();
+						Ray view_ray = list[i]->GetRenderer()->compute_view();
 						list[i]->GetTexture()->set_sort_bricks();
 						list[i]->GetTexture()->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
 						list[i]->GetTexture()->set_sort_bricks();
@@ -10524,7 +10610,7 @@ void VRenderGLView::StartLoopUpdate()
 				queues.insert(queues.end(), tmp_shadow.begin(), tmp_shadow.end());
 			}
 		}
-		else if (m_layer_list.size() > 0)
+/*		else if (m_layer_list.size() > 0)
 		{
 			for (i = (int)m_layer_list.size() - 1; i >= 0; i--)
 			{
@@ -10596,8 +10682,8 @@ void VRenderGLView::StartLoopUpdate()
 				break;
 				case 5://group
 				{
-					vector<VolumeData*> list;
-					DataGroup* group = (DataGroup*)m_layer_list[i];
+					vector<FL::VolumeData*> list;
+					FL::VolumeGroup* group = (FL::VolumeGroup*)m_layer_list[i];
 					if (!group->GetDisp())
 						continue;
 					for (j = group->GetVolumeNum() - 1; j >= 0; j--)
@@ -10624,13 +10710,18 @@ void VRenderGLView::StartLoopUpdate()
 					{
 						for (k = 0; k < list.size(); k++)
 						{
-							VolumeData* vd = list[k];
+							FL::VolumeData* vd = list[k];
 							Texture* tex = vd->GetTexture();
-							Ray view_ray = vd->GetVR()->compute_view();
+							Ray view_ray = vd->GetRenderer()->compute_view();
 							vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
-							int mode = vd->GetMode() == 1 ? 1 : 0;
-							bool shade = (mode == 1 && vd->GetShading());
-							bool shadow = vd->GetShadow();
+							long mip_mode;
+							vd->getValue("mip mode", mip_mode);
+							int mode = mip_mode == 1 ? 1 : 0;
+							bool shading_enable;
+							vd->getValue("shading enable", shading_enable);
+							bool shade = mode == 1 && shading_enable;
+							bool shadow;
+							vd->getValue("shadow enable", shadow);
 							for (j = 0; j < bricks->size(); j++)
 							{
 								VolumeLoaderData d;
@@ -10755,7 +10846,7 @@ void VRenderGLView::StartLoopUpdate()
 				break;
 				}
 			}
-		}
+		}*/
 
 		if (queues.size() > 0 /*&& !m_interactive*/)
 		{
@@ -10806,8 +10897,8 @@ void VRenderGLView::RefreshGL(int debug_code, bool erase, bool start_loop)
 	Refresh(erase);
 }
 
-double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
-	VolumeData* vd, int mode, bool use_transf, double thresh)
+double VRenderGLView::GetPointVolume(FLTYPE::Point& mp, double mx, double my,
+	FL::VolumeData* vd, int mode, bool use_transf, double thresh)
 {
 	if (!vd)
 		return -1.0;
@@ -10816,7 +10907,9 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 	Nrrd* nrrd = tex->get_nrrd(0);
 	if (!nrrd) return -1.0;
 	void* data = nrrd->data;
-	if (!data && vd->GetAllBrickNum()<1) return -1.0;
+	long brick_num;
+	vd->getValue("brick num", brick_num);
+	if (!data && brick_num < 1) return -1.0;
 
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
@@ -10838,8 +10931,8 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 	//center object
 	mv_temp = glm::translate(mv_temp, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
 
-	Transform mv;
-	Transform p;
+	FLTYPE::Transform mv;
+	FLTYPE::Transform p;
 	mv.set(glm::value_ptr(mv_temp));
 	p.set(glm::value_ptr(m_proj_mat));
 
@@ -10849,10 +10942,10 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 	p.invert();
 	mv.invert();
 	//transform mp1 and mp2 to object space
-	Point mp1(x, y, 0.0);
+	FLTYPE::Point mp1(x, y, 0.0);
 	mp1 = p.transform(mp1);
 	mp1 = mv.transform(mp1);
-	Point mp2(x, y, 1.0);
+	FLTYPE::Point mp2(x, y, 1.0);
 	mp2 = p.transform(mp2);
 	mp2 = mv.transform(mp2);
 
@@ -10863,23 +10956,32 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 	int tmp_xx, tmp_yy, tmp_zz;
 	Point nmp;
 	double spcx, spcy, spcz;
-	vd->GetSpacings(spcx, spcy, spcz);
-	int resx, resy, resz;
-	vd->GetResolution(resx, resy, resz, vd->GetLevel());
+	//vd->GetSpacings(spcx, spcy, spcz);
+	vd->getValue("spc x", spcx);
+	vd->getValue("spc y", spcy);
+	vd->getValue("spc z", spcz);
+	long resx, resy, resz;
+	//vd->GetResolution(resx, resy, resz, vd->GetLevel());
+	vd->getValue("res x", resx);
+	vd->getValue("res y", resy);
+	vd->getValue("res z", resz);
 	//volume bounding box
-	BBox bbox = vd->GetBounds();
-	Vector vv = mp2 - mp1;
+	FLTYPE::BBox bbox;
+	vd->getValue("bounds", bbox);
+	FLTYPE::Vector vv = mp2 - mp1;
 	vv.normalize();
-	Point hit;
+	FLTYPE::Point hit;
 	double max_int = 0.0;
 	double alpha = 0.0;
 	double value = 0.0;
 	vector<Plane*> *planes = 0;
 	double mspc = 1.0;
-	if (vd->GetSampleRate() > 0.0)
-		mspc = sqrt(spcx*spcx + spcy*spcy + spcz*spcz) / vd->GetSampleRate();
-	if (vd->GetVR())
-		planes = vd->GetVR()->get_planes();
+	double sample_rate;
+	vd->getValue("sample rate", sample_rate);
+	if (sample_rate > 0.0)
+		mspc = sqrt(spcx*spcx + spcy*spcy + spcz*spcz) / sample_rate;
+	if (vd->GetRenderer())
+		planes = vd->GetRenderer()->get_planes();
 	int counter = 0;//counter to determine if the ray casting has run
 	if (bbox.intersect(mp1, vv, hit))
 	{
@@ -10887,7 +10989,9 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 		TextureBrick* hit_brick = 0;
 		unsigned long long vindex;
 		int data_nx, data_ny, data_nz;
-		if (vd->isBrxml())
+		bool multires;
+		vd->getValue("multires", multires);
+		if (multires)
 		{
 			data_nx = tex->nx();
 			data_ny = tex->ny();
@@ -10918,9 +11022,9 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 				zz<0 || zz>resz)
 				break;
 			//normalize
-			nmp.x(hit.x() / bbox.max().x());
-			nmp.y(hit.y() / bbox.max().y());
-			nmp.z(hit.z() / bbox.max().z());
+			nmp.x(hit.x() / bbox.Max().x());
+			nmp.y(hit.y() / bbox.Max().y());
+			nmp.z(hit.z() / bbox.Max().z());
 			bool inside = true;
 			if (planes)
 			{
@@ -10939,7 +11043,7 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 				zz = zz == resz ? resz - 1 : zz;
 
 				//if it's multiresolution, get brick first
-				if (vd->isBrxml())
+				if (multires)
 				{
 					vindex = (unsigned long long)data_nx*(unsigned long long)data_ny*
 						(unsigned long long)zz + (unsigned long long)data_nx*
@@ -10959,7 +11063,7 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 						jj = yy - hit_brick->oy();
 						kk = zz - hit_brick->oz();
 						if (use_transf)
-							value = vd->GetTransferedValue(ii, jj, kk, hit_brick);
+							value = vd->GetTransferValue(ii, jj, kk, hit_brick);
 						else
 							value = vd->GetOriginalValue(ii, jj, kk, hit_brick);
 					}
@@ -10967,7 +11071,7 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 				else
 				{
 					if (use_transf)
-						value = vd->GetTransferedValue(xx, yy, zz);
+						value = vd->GetTransferValue(xx, yy, zz);
 					else
 						value = vd->GetOriginalValue(xx, yy, zz);
 				}
@@ -10976,7 +11080,7 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 				{
 					if (value > max_int)
 					{
-						mp = Point((xx + 0.5)*spcx, (yy + 0.5)*spcy, (zz + 0.5)*spcz);
+						mp = FLTYPE::Point((xx + 0.5)*spcx, (yy + 0.5)*spcy, (zz + 0.5)*spcz);
 						max_int = value;
 						counter++;
 					}
@@ -10986,9 +11090,10 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 					//accumulate
 					if (value > 0.0)
 					{
-						alpha = 1.0 - pow(Clamp(1.0 - value, 0.0, 1.0), vd->GetSampleRate());
+
+						alpha = 1.0 - pow(Clamp(1.0 - value, 0.0, 1.0), sample_rate);
 						max_int += alpha*(1.0 - max_int);
-						mp = Point((xx + 0.5)*spcx, (yy + 0.5)*spcy, (zz + 0.5)*spcz);
+						mp = FLTYPE::Point((xx + 0.5)*spcx, (yy + 0.5)*spcy, (zz + 0.5)*spcz);
 						counter++;
 					}
 					if (max_int > thresh || max_int >= 1.0)
@@ -11022,7 +11127,7 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 		return -1.0;
 }
 
-double VRenderGLView::GetPointVolumeBox(Point &mp, double mx, double my, VolumeData* vd, bool calc_mats)
+double VRenderGLView::GetPointVolumeBox(FLTYPE::Point &mp, double mx, double my, FL::VolumeData* vd, bool calc_mats)
 {
 	if (!vd)
 		return -1.0;
@@ -11030,12 +11135,16 @@ double VRenderGLView::GetPointVolumeBox(Point &mp, double mx, double my, VolumeD
 	int ny = GetGLSize().y;
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
-	vector<Plane*> *planes = vd->GetVR()->get_planes();
-	if (planes->size() != 6)
+	//vector<Plane*> *planes = vd->GetRenderer()->get_planes();
+	//if (planes->size() != 6)
+	//	return -1.0;
+	FLTYPE::PlaneSet planes;
+	vd->getValue("clip planes", planes);
+	if (planes.GetSize() != 6)
 		return -1.0;
 
-	Transform mv;
-	Transform p;
+	FLTYPE::Transform mv;
+	FLTYPE::Transform p;
 	glm::mat4 mv_temp = m_mv_mat;
 	Transform *tform = vd->GetTexture()->transform();
 	double mvmat[16];
@@ -11075,27 +11184,27 @@ double VRenderGLView::GetPointVolumeBox(Point &mp, double mx, double my, VolumeD
 	p.invert();
 	mv.invert();
 	//transform mp1 and mp2 to object space
-	Point mp1(x, y, 0.0);
+	FLTYPE::Point mp1(x, y, 0.0);
 	mp1 = p.transform(mp1);
 	mp1 = mv.transform(mp1);
-	Point mp2(x, y, 1.0);
+	FLTYPE::Point mp2(x, y, 1.0);
 	mp2 = p.transform(mp2);
 	mp2 = mv.transform(mp2);
-	Vector ray_d = mp1 - mp2;
+	FLTYPE::Vector ray_d = mp1 - mp2;
 	ray_d.normalize();
-	Ray ray(mp1, ray_d);
+	FLTYPE::Ray ray(mp1, ray_d);
 	double mint = -1.0;
 	double t;
 	//for each plane, calculate the intersection point
-	Plane* plane = 0;
-	Point pp;//a point on plane
+	FLTYPE::Plane plane;
+	FLTYPE::Point pp;//a point on plane
 	int i, j;
 	bool pp_out;
 	for (i = 0; i<6; i++)
 	{
-		plane = (*planes)[i];
-		FLIVR::Vector vec = plane->normal();
-		FLIVR::Point pnt = plane->get_point();
+		plane = planes[i];
+		FLTYPE::Vector vec = plane.normal();
+		FLTYPE::Point pnt = plane.get_point();
 		if (ray.planeIntersectParameter(vec, pnt, t))
 		{
 			pp = ray.parameter(t);
@@ -11106,7 +11215,7 @@ double VRenderGLView::GetPointVolumeBox(Point &mp, double mx, double my, VolumeD
 			{
 				if (j == i)
 					continue;
-				if ((*planes)[j]->eval_point(pp) < 0)
+				if (planes[j].eval_point(pp) < 0)
 				{
 					pp_out = true;
 					break;
@@ -11124,12 +11233,13 @@ double VRenderGLView::GetPointVolumeBox(Point &mp, double mx, double my, VolumeD
 		}
 	}
 
-	mp = tform->transform(mp);
+	//this should be fixed later
+	//mp = tform->transform(mp);
 
 	return mint;
 }
 
-double VRenderGLView::GetPointVolumeBox2(Point &p1, Point &p2, double mx, double my, VolumeData* vd)
+double VRenderGLView::GetPointVolumeBox2(FLTYPE::Point &p1, FLTYPE::Point &p2, double mx, double my, FL::VolumeData* vd)
 {
 	if (!vd)
 		return -1.0;
@@ -11137,8 +11247,12 @@ double VRenderGLView::GetPointVolumeBox2(Point &p1, Point &p2, double mx, double
 	int ny = GetGLSize().y;
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
-	vector<Plane*> *planes = vd->GetVR()->get_planes();
-	if (planes->size() != 6)
+	//vector<Plane*> *planes = vd->GetVR()->get_planes();
+	//if (planes->size() != 6)
+	//	return -1.0;
+	FLTYPE::PlaneSet planes;
+	vd->getValue("clip planes", planes);
+	if (planes.GetSize() != 6)
 		return -1.0;
 
 	//projection
@@ -11164,8 +11278,8 @@ double VRenderGLView::GetPointVolumeBox2(Point &p1, Point &p2, double mx, double
 		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
 	mv_temp = mv_temp * mv_mat2;
 
-	Transform mv;
-	Transform p;
+	FLTYPE::Transform mv;
+	FLTYPE::Transform p;
 	mv.set(glm::value_ptr(mv_temp));
 	p.set(glm::value_ptr(m_proj_mat));
 
@@ -11175,28 +11289,28 @@ double VRenderGLView::GetPointVolumeBox2(Point &p1, Point &p2, double mx, double
 	p.invert();
 	mv.invert();
 	//transform mp1 and mp2 to object space
-	Point mp1(x, y, 0.0);
+	FLTYPE::Point mp1(x, y, 0.0);
 	mp1 = p.transform(mp1);
 	mp1 = mv.transform(mp1);
-	Point mp2(x, y, 1.0);
+	FLTYPE::Point mp2(x, y, 1.0);
 	mp2 = p.transform(mp2);
 	mp2 = mv.transform(mp2);
-	Vector ray_d = mp1 - mp2;
+	FLTYPE::Vector ray_d = mp1 - mp2;
 	ray_d.normalize();
-	Ray ray(mp1, ray_d);
+	FLTYPE::Ray ray(mp1, ray_d);
 	double mint = -1.0;
 	double maxt = std::numeric_limits<double>::max();
 	double t;
 	//for each plane, calculate the intersection point
-	Plane* plane = 0;
-	Point pp;//a point on plane
+	FLTYPE::Plane plane;
+	FLTYPE::Point pp;//a point on plane
 	int i, j;
 	bool pp_out;
 	for (i = 0; i<6; i++)
 	{
-		plane = (*planes)[i];
-		FLIVR::Vector vec = plane->normal();
-		FLIVR::Point pnt = plane->get_point();
+		plane = planes[i];
+		FLTYPE::Vector vec = plane.normal();
+		FLTYPE::Point pnt = plane.get_point();
 		if (ray.planeIntersectParameter(vec, pnt, t))
 		{
 			pp = ray.parameter(t);
@@ -11207,7 +11321,7 @@ double VRenderGLView::GetPointVolumeBox2(Point &p1, Point &p2, double mx, double
 			{
 				if (j == i)
 					continue;
-				if ((*planes)[j]->eval_point(pp) < 0)
+				if (planes[j].eval_point(pp) < 0)
 				{
 					pp_out = true;
 					break;
@@ -11230,13 +11344,14 @@ double VRenderGLView::GetPointVolumeBox2(Point &p1, Point &p2, double mx, double
 		}
 	}
 
-	p1 = tform->transform(p1);
-	p2 = tform->transform(p2);
+	//fix this later
+	//p1 = tform->transform(p1);
+	//p2 = tform->transform(p2);
 
 	return mint;
 }
 
-double VRenderGLView::GetPointPlane(Point &mp, double mx, double my, Point* planep, bool calc_mats)
+double VRenderGLView::GetPointPlane(FLTYPE::Point &mp, double mx, double my, FLTYPE::Point* planep, bool calc_mats)
 {
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
@@ -11264,13 +11379,13 @@ double VRenderGLView::GetPointPlane(Point &mp, double mx, double my, Point* plan
 	else
 		mv_temp = m_mv_mat;
 
-	Transform mv;
-	Transform p;
+	FLTYPE::Transform mv;
+	FLTYPE::Transform p;
 	mv.set(glm::value_ptr(mv_temp));
 	p.set(glm::value_ptr(m_proj_mat));
 
-	Vector n(0.0, 0.0, 1.0);
-	Point center(0.0, 0.0, -m_distance);
+	FLTYPE::Vector n(0.0, 0.0, 1.0);
+	FLTYPE::Point center(0.0, 0.0, -m_distance);
 	if (planep)
 	{
 		center = *planep;
@@ -11282,12 +11397,12 @@ double VRenderGLView::GetPointPlane(Point &mp, double mx, double my, Point* plan
 	p.invert();
 	mv.invert();
 	//transform mp1 and mp2 to eye space
-	Point mp1(x, y, 0.0);
+	FLTYPE::Point mp1(x, y, 0.0);
 	mp1 = p.transform(mp1);
-	Point mp2(x, y, 1.0);
+	FLTYPE::Point mp2(x, y, 1.0);
 	mp2 = p.transform(mp2);
-	FLIVR::Vector vec = mp2 - mp1;
-	Ray ray(mp1, vec);
+	FLTYPE::Vector vec = mp2 - mp1;
+	FLTYPE::Ray ray(mp1, vec);
 	double t = 0.0;
 	if (ray.planeIntersectParameter(n, center, t))
 		mp = ray.parameter(t);
@@ -11297,9 +11412,9 @@ double VRenderGLView::GetPointPlane(Point &mp, double mx, double my, Point* plan
 	return (mp - mp1).length();
 }
 
-Point* VRenderGLView::GetEditingRulerPoint(double mx, double my)
+FLTYPE::Point* VRenderGLView::GetEditingRulerPoint(double mx, double my)
 {
-	Point* point = 0;
+	FLTYPE::Point* point = 0;
 
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
@@ -11332,14 +11447,14 @@ Point* VRenderGLView::GetEditingRulerPoint(double mx, double my)
 	p.set(glm::value_ptr(m_proj_mat));
 
 	int i, j;
-	Point ptemp;
+	FLTYPE::Point ptemp;
 	bool found = false;
 	for (i = 0; i<(int)m_ruler_list.size() && !found; i++)
 	{
 		Ruler* ruler = m_ruler_list[i];
 		if (!ruler) continue;
 
-		for (j = 0; j<ruler->GetNumPoint(); j++)
+/*		for (j = 0; j<ruler->GetNumPoint(); j++)
 		{
 			point = ruler->GetPoint(j);
 			if (!point) continue;
@@ -11358,7 +11473,7 @@ Point* VRenderGLView::GetEditingRulerPoint(double mx, double my)
 				break;
 			}
 		}
-	}
+*/	}
 
 	if (found)
 		return point;
@@ -11397,7 +11512,7 @@ bool VRenderGLView::GetRulerFinished()
 
 void VRenderGLView::AddRulerPoint(int mx, int my)
 {
-	if (m_ruler_type == 3)
+/*	if (m_ruler_type == 3)
 	{
 		Point p1, p2;
 		Ruler* ruler = new Ruler();
@@ -11458,12 +11573,12 @@ void VRenderGLView::AddRulerPoint(int mx, int my)
 
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
-		vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
+		vr_frame->GetMeasureDlg()->GetSettings(m_vrv);*/
 }
 
 void VRenderGLView::AddPaintRulerPoint()
 {
-	if (m_selector.ProcessSel(0.01))
+/*	if (m_selector.ProcessSel(0.01))
 	{
 		wxString str;
 		Point center;
@@ -11502,7 +11617,7 @@ void VRenderGLView::AddPaintRulerPoint()
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
 			vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
-	}
+	}*/
 }
 
 unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
@@ -11620,7 +11735,7 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 
 void VRenderGLView::DrawRulers()
 {
-	if (m_ruler_list.empty())
+/*	if (m_ruler_list.empty())
 		return;
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_DEPTH_TEST);
@@ -11696,7 +11811,7 @@ void VRenderGLView::DrawRulers()
 				c,
 				(p2x + w)*sx, (p2y + w)*sy, sx, sy);
 		}
-	}
+	}*/
 }
 
 vector<Ruler*>* VRenderGLView::GetRulerList()
@@ -11716,7 +11831,7 @@ Ruler* VRenderGLView::GetRuler(unsigned int id)
 
 int VRenderGLView::RulerProfile(int index)
 {
-	if (index < 0 ||
+/*	if (index < 0 ||
 		index >= m_ruler_list.size() ||
 		!m_cur_vol)
 		return 0;
@@ -11725,7 +11840,7 @@ int VRenderGLView::RulerProfile(int index)
 	if (ruler->GetNumPoint() < 1)
 		return 0;
 
-	VolumeData* vd = m_cur_vol;
+	FL::VolumeData* vd = m_cur_vol;
 	double spcx, spcy, spcz;
 	vd->GetSpacings(spcx, spcy, spcz);
 	int nx, ny, nz;
@@ -11903,9 +12018,9 @@ int VRenderGLView::RulerProfile(int index)
 		}
 	}
 	wxString str("Profile of volume ");
-	str = str + vd->GetName();
+	str = str + vd->getName();
 	ruler->SetInfoProfile(str);
-	return 1;
+*/	return 1;
 }
 
 //traces
@@ -11956,7 +12071,10 @@ void VRenderGLView::DrawTraces()
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 		double spcx, spcy, spcz;
-		m_cur_vol->GetSpacings(spcx, spcy, spcz);
+		//m_cur_vol->GetSpacings(spcx, spcy, spcz);
+		m_cur_vol->getValue("spc x", spcx);
+		m_cur_vol->getValue("spc y", spcy);
+		m_cur_vol->getValue("spc z", spcz);
 		glm::mat4 matrix = glm::scale(m_mv_mat,
 			glm::vec3(float(spcx), float(spcy), float(spcz)));
 		matrix = m_proj_mat*matrix;
@@ -12004,11 +12122,14 @@ void VRenderGLView::GetTraces(bool update)
 		return;
 
 	int ii, jj, kk;
-	int nx, ny, nz;
+	long nx, ny, nz;
 	//return current mask (into system memory)
 	if (!m_cur_vol) return;
-	m_cur_vol->GetVR()->return_mask();
-	m_cur_vol->GetResolution(nx, ny, nz);
+	m_cur_vol->GetRenderer()->return_mask();
+	//m_cur_vol->GetResolution(nx, ny, nz);
+	m_cur_vol->getValue("res x", nx);
+	m_cur_vol->getValue("res y", ny);
+	m_cur_vol->getValue("res z", nz);
 	//find labels in the old that are selected by the current mask
 	Nrrd* mask_nrrd = m_cur_vol->GetMask(true);
 	if (!mask_nrrd) return;
@@ -12020,28 +12141,26 @@ void VRenderGLView::GetTraces(bool update)
 	if (!label_data) return;
 	FL::CellList sel_labels;
 	FL::CellListIter label_iter;
-	for (ii = 0; ii<nx; ii++)
-		for (jj = 0; jj<ny; jj++)
-			for (kk = 0; kk<nz; kk++)
+	for (ii = 0; ii<nx; ii++) for (jj = 0; jj<ny; jj++) for (kk = 0; kk<nz; kk++)
+	{
+		int index = nx*ny*kk + nx*jj + ii;
+		unsigned int label_value = label_data[index];
+		if (mask_data[index] && label_value)
+		{
+			label_iter = sel_labels.find(label_value);
+			if (label_iter == sel_labels.end())
 			{
-				int index = nx*ny*kk + nx*jj + ii;
-				unsigned int label_value = label_data[index];
-				if (mask_data[index] && label_value)
-				{
-					label_iter = sel_labels.find(label_value);
-					if (label_iter == sel_labels.end())
-					{
-						FL::pCell cell(new FL::Cell(label_value));
-						cell->Inc(ii, jj, kk, 1.0f);
-						sel_labels.insert(pair<unsigned int, FL::pCell>
-							(label_value, cell));
-					}
-					else
-					{
-						label_iter->second->Inc(ii, jj, kk, 1.0f);
-					}
-				}
+				FL::pCell cell(new FL::Cell(label_value));
+				cell->Inc(ii, jj, kk, 1.0f);
+				sel_labels.insert(std::pair<unsigned int, FL::pCell>
+					(label_value, cell));
 			}
+			else
+			{
+				label_iter->second->Inc(ii, jj, kk, 1.0f);
+			}
+		}
+	}
 
 	//create id list
 	m_trace_group->SetCurTime(m_tseq_cur_num);
@@ -12489,7 +12608,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			if (event.LeftIsDown() &&
 				m_editing_ruler_point)
 			{
-				Point point;
+				FLTYPE::Point point;
 				bool failed = false;
 				if (m_point_volume_mode)
 				{
@@ -12615,12 +12734,12 @@ bool VRenderGLView::GetDraw()
 	return m_draw_all;
 }
 
-Color VRenderGLView::GetBackgroundColor()
+FLTYPE::Color VRenderGLView::GetBackgroundColor()
 {
 	return m_bg_color;
 }
 
-Color VRenderGLView::GetTextColor()
+FLTYPE::Color VRenderGLView::GetTextColor()
 {
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 	if (!frame || !frame->GetSettingDlg())
@@ -12633,32 +12752,36 @@ Color VRenderGLView::GetTextColor()
 		return m_bg_color;
 	case 2://secondary color of current volume
 		if (m_cur_vol)
-			return m_cur_vol->GetMaskColor();
+		{
+			FLTYPE::Color color;
+			m_cur_vol->getValue("color", color);
+			return color;
+		}
 		else
 			return m_bg_color_inv;
 	}
 	return m_bg_color_inv;
 }
 
-void VRenderGLView::SetBackgroundColor(Color &color)
+void VRenderGLView::SetBackgroundColor(FLTYPE::Color &color)
 {
 	m_bg_color = color;
-	HSVColor bg_color(m_bg_color);
+	FLTYPE::HSVColor bg_color(m_bg_color);
 	double hue, sat, val;
 	if (bg_color.val()>0.7 && bg_color.sat()>0.7)
 	{
 		hue = bg_color.hue() + 180.0;
 		sat = 1.0;
 		val = 1.0;
-		m_bg_color_inv = Color(HSVColor(hue, sat, val));
+		m_bg_color_inv = FLTYPE::Color(FLTYPE::HSVColor(hue, sat, val));
 	}
 	else if (bg_color.val()>0.7)
 	{
-		m_bg_color_inv = Color(0.0, 0.0, 0.0);
+		m_bg_color_inv = FLTYPE::Color(0.0, 0.0, 0.0);
 	}
 	else
 	{
-		m_bg_color_inv = Color(1.0, 1.0, 1.0);
+		m_bg_color_inv = FLTYPE::Color(1.0, 1.0, 1.0);
 	}
 }
 
@@ -12758,8 +12881,8 @@ void VRenderGLView::CalcFrame()
 		//center object
 		mv_temp = glm::translate(mv_temp, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
 
-		Transform mv;
-		Transform pr;
+		FLTYPE::Transform mv;
+		FLTYPE::Transform pr;
 		mv.set(glm::value_ptr(mv_temp));
 		pr.set(glm::value_ptr(m_proj_mat));
 
@@ -12768,18 +12891,19 @@ void VRenderGLView::CalcFrame()
 		maxx = -1.0;
 		miny = 1.0;
 		maxy = -1.0;
-		vector<Point> points;
-		BBox bbox = m_cur_vol->GetBounds();
-		points.push_back(Point(bbox.min().x(), bbox.min().y(), bbox.min().z()));
-		points.push_back(Point(bbox.min().x(), bbox.min().y(), bbox.max().z()));
-		points.push_back(Point(bbox.min().x(), bbox.max().y(), bbox.min().z()));
-		points.push_back(Point(bbox.min().x(), bbox.max().y(), bbox.max().z()));
-		points.push_back(Point(bbox.max().x(), bbox.min().y(), bbox.min().z()));
-		points.push_back(Point(bbox.max().x(), bbox.min().y(), bbox.max().z()));
-		points.push_back(Point(bbox.max().x(), bbox.max().y(), bbox.min().z()));
-		points.push_back(Point(bbox.max().x(), bbox.max().y(), bbox.max().z()));
+		vector<FLTYPE::Point> points;
+		FLTYPE::BBox bbox;
+		m_cur_vol->getValue("bounds", bbox);
+		points.push_back(FLTYPE::Point(bbox.Min().x(), bbox.Min().y(), bbox.Min().z()));
+		points.push_back(FLTYPE::Point(bbox.Min().x(), bbox.Min().y(), bbox.Max().z()));
+		points.push_back(FLTYPE::Point(bbox.Min().x(), bbox.Max().y(), bbox.Min().z()));
+		points.push_back(FLTYPE::Point(bbox.Min().x(), bbox.Max().y(), bbox.Max().z()));
+		points.push_back(FLTYPE::Point(bbox.Max().x(), bbox.Min().y(), bbox.Min().z()));
+		points.push_back(FLTYPE::Point(bbox.Max().x(), bbox.Min().y(), bbox.Max().z()));
+		points.push_back(FLTYPE::Point(bbox.Max().x(), bbox.Max().y(), bbox.Min().z()));
+		points.push_back(FLTYPE::Point(bbox.Max().x(), bbox.Max().y(), bbox.Max().z()));
 
-		Point p;
+		FLTYPE::Point p;
 		for (unsigned int i = 0; i<points.size(); ++i)
 		{
 			p = mv.transform(points[i]);
@@ -12828,7 +12952,7 @@ void VRenderGLView::DrawViewQuad()
 		quad_va->draw();
 }
 
-void VRenderGLView::switchLevel(VolumeData *vd)
+void VRenderGLView::switchLevel(FL::VolumeData *vd)
 {
 	if (!vd) return;
 
@@ -12844,8 +12968,9 @@ void VRenderGLView::switchLevel(VolumeData *vd)
 	Texture *vtex = vd->GetTexture();
 	if (vtex && vtex->isBrxml())
 	{
-		int prev_lv = vd->GetLevel();
-		int new_lv = 0;
+		long prev_lv;
+		vd->getValue("level", prev_lv);
+		long new_lv = 0;
 
 		if (m_res_mode > 0)
 		{
@@ -12918,7 +13043,8 @@ void VRenderGLView::switchLevel(VolumeData *vd)
 				for (int i = 0; i < bricks->size(); i++)
 					(*bricks)[i]->set_disp(false);
 			}
-			vd->SetLevel(new_lv);
+			//vd->SetLevel(new_lv);
+			vd->setValue("level", new_lv);
 			vtex->set_sort_bricks();
 		}
 	}

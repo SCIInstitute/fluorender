@@ -111,8 +111,8 @@ public:
 	TreeLayer* GetLayer(int index);
 	MultiVolumeRenderer* GetMultiVolumeData();
 	FL::VolumeData* GetVolumeData(wxString &name);
-	MeshData* GetMeshData(wxString &name);
-	Annotations* GetAnnotations(wxString &name);
+	FL::MeshData* GetMeshData(wxString &name);
+	FL::Annotations* GetAnnotations(wxString &name);
 	FL::VolumeGroup* GetGroup(wxString &name);
 	FL::VolumeGroup* AddVolumeData(FL::VolumeData* vd, wxString group_name="");
 	void AddMeshData(MeshData* md);

@@ -161,7 +161,7 @@ namespace FLIVR
 			update_buffer();
 	}
 
-	void VertexArray::set_param(BBox &box)
+	void VertexArray::set_param(FLTYPE::BBox &box)
 	{
 		if (bbox_ != box)
 		{
@@ -170,7 +170,7 @@ namespace FLIVR
 		}
 	}
 
-	void VertexArray::set_param(std::vector<Point> &pp)
+	void VertexArray::set_param(std::vector<FLTYPE::Point> &pp)
 	{
 		bool update_vertex = false;
 		bool update_index = false;
@@ -193,7 +193,7 @@ namespace FLIVR
 			for (size_t i = 0; i < 8; ++i)
 			{
 				if (pp[i] !=
-					Point(float_list_[i*3],
+					FLTYPE::Point(float_list_[i*3],
 						float_list_[i*3+1],
 						float_list_[i*3+2]))
 				{
@@ -353,41 +353,41 @@ namespace FLIVR
 		vertex.reserve(24 * 3);
 
 		//s1-000-100
-		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.min().z());
-		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.min().z());
+		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Min().z());
+		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Min().z());
 		//s2-100-101
-		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.min().z());
-		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.max().z());
+		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Min().z());
+		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Max().z());
 		//s3-101-001
-		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.max().z());
-		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.max().z());
+		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Max().z());
+		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Max().z());
 		//s4-001-000
-		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.max().z());
-		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.min().z());
+		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Max().z());
+		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Min().z());
 		//s5-000-010
-		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.min().z());
-		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.min().z());
+		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Min().z());
+		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Min().z());
 		//s6-100-110
-		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.min().z());
-		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.min().z());
+		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Min().z());
+		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Min().z());
 		//s7-101-111
-		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.max().z());
-		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.max().z());
+		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Max().z());
+		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Max().z());
 		//s8-001-011
-		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.min().y()); vertex.push_back(bbox_.max().z());
-		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.max().z());
+		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Max().z());
+		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Max().z());
 		//s9-010-110
-		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.min().z());
-		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.min().z());
+		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Min().z());
+		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Min().z());
 		//s10-110-111
-		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.min().z());
-		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.max().z());
+		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Min().z());
+		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Max().z());
 		//s11-111-011
-		vertex.push_back(bbox_.max().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.max().z());
-		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.max().z());
+		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Max().z());
+		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Max().z());
 		//s12-011-010
-		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.max().z());
-		vertex.push_back(bbox_.min().x()); vertex.push_back(bbox_.max().y()); vertex.push_back(bbox_.min().z());
+		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Max().z());
+		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Min().z());
 
 		buffer_data(VABuf_Coord,
 			sizeof(float) * vertex.size(),
@@ -672,7 +672,7 @@ namespace FLIVR
 		else if (type == VA_Bound_Cube)
 		{
 			//set param
-			BBox bbox(Point(0.0), Point(1.0));
+			FLTYPE::BBox bbox(FLTYPE::Point(0.0), FLTYPE::Point(1.0));
 			va->set_param(bbox);
 			//set attrib
 			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
@@ -686,7 +686,7 @@ namespace FLIVR
 			//attach buffer
 			va->attach_buffer(vb);
 			//set param
-			std::vector<Point> pp;
+			std::vector<FLTYPE::Point> pp;
 			va->set_param(pp);
 			//set attrib
 			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);

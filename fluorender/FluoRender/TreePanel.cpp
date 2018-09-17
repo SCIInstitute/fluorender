@@ -184,21 +184,21 @@ void DataTreeCtrl::DeleteSelection()
 						}
 						else if (item_data->type == 3)//mesh data
 						{
-							MeshData* md = vrv->GetMeshData(name_data);
-							if (md)
-							{
-								md->SetDisp(true);
-								vrv->RemoveMeshData(name_data);
-							}
+							//MeshData* md = vrv->GetMeshData(name_data);
+							//if (md)
+							//{
+							//	md->SetDisp(true);
+							//	vrv->RemoveMeshData(name_data);
+							//}
 						}
 						else if (item_data->type == 4)//annotations
 						{
-							Annotations* ann = vrv->GetAnnotations(name_data);
-							if (ann)
-							{
-								ann->SetDisp(true);
-								vrv->RemoveAnnotations(name_data);
-							}
+							//Annotations* ann = vrv->GetAnnotations(name_data);
+							//if (ann)
+							//{
+							//	ann->SetDisp(true);
+							//	vrv->RemoveAnnotations(name_data);
+							//}
 						}
 						else if (item_data->type == 5)//group
 						{

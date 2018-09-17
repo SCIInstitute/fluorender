@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #define _VRENDERGLVIEW_H_
 
 #include <Types/Quaternion.h>
+#include <Types/Color.h>
+#include <Types/BBox.h>
 #include "DataManager.h"
 #include "VolumeLoader.h"
 #include "utility.h"
@@ -37,10 +39,8 @@ DEALINGS IN THE SOFTWARE.
 #include "KernelExecutor.h"
 #include <Calculate/VolumeCalculator.h>
 
-#include "FLIVR/Color.h"
 #include "FLIVR/ShaderProgram.h"
 #include "FLIVR/KernelProgram.h"
-#include "FLIVR/BBox.h"
 #include "FLIVR/MultiVolumeRenderer.h"
 #include "FLIVR/ImgShader.h"
 #include "FLIVR/VolKernel.h"
@@ -310,9 +310,9 @@ public:
 	void SetFarClip(double fc) { m_far_clip = fc; }
 
 	//background color
-	Color GetBackgroundColor();
-	Color GetTextColor();
-	void SetBackgroundColor(Color &color);
+	FLTYPE::Color GetBackgroundColor();
+	FLTYPE::Color GetTextColor();
+	void SetBackgroundColor(FLTYPE::Color &color);
 	void SetGradBg(bool val);
 
 	//disply modes
@@ -378,14 +378,14 @@ public:
 	void SetSBText(wxString text) { m_sb_text = text; }
 
 	//gamma settings
-	Color GetGamma() { return m_gamma; }
-	void SetGamma(Color gamma) { m_gamma = gamma; }
+	FLTYPE::Color GetGamma() { return m_gamma; }
+	void SetGamma(FLTYPE::Color gamma) { m_gamma = gamma; }
 	//brightness adjustment
-	Color GetBrightness() { return m_brightness; }
-	void SetBrightness(Color brightness) { m_brightness = brightness; }
+	FLTYPE::Color GetBrightness() { return m_brightness; }
+	void SetBrightness(FLTYPE::Color brightness) { m_brightness = brightness; }
 	//hdr settings
-	Color GetHdr() { return m_hdr; }
-	void SetHdr(Color hdr) { m_hdr = hdr; }
+	FLTYPE::Color GetHdr() { return m_hdr; }
+	void SetHdr(FLTYPE::Color hdr) { m_hdr = hdr; }
 	//sync values
 	bool GetSyncR() { return m_sync_r; }
 	void SetSyncR(bool sync_r) { m_sync_r = sync_r; }
@@ -655,7 +655,7 @@ private:
 	//ruler list
 	int m_ruler_type;//0: 2point ruler; 1:multi-point ruler; 2:locator
 	vector <Ruler*> m_ruler_list;
-	Point* m_editing_ruler_point;
+	FLTYPE::Point* m_editing_ruler_point;
 	//traces
 	TraceGroup* m_trace_group;
 	//multivolume
@@ -666,8 +666,8 @@ private:
 	bool m_initialized;
 	bool m_init_view;
 	//bg color
-	Color m_bg_color;
-	Color m_bg_color_inv;
+	FLTYPE::Color m_bg_color;
+	FLTYPE::Color m_bg_color_inv;
 	bool m_grad_bg;
 	//frustrum
 	double m_aov;
@@ -744,7 +744,7 @@ private:
 	bool m_rot_lock;
 
 	//object bounding box
-	BBox m_bounds;
+	FLTYPE::BBox m_bounds;
 	double m_radius;
 
 	//mouse position
@@ -784,28 +784,28 @@ private:
 	int m_frame_h;
 
 	//post image processing
-	Color m_gamma;
-	Color m_brightness;
-	Color m_hdr;
+	FLTYPE::Color m_gamma;
+	FLTYPE::Color m_brightness;
+	FLTYPE::Color m_hdr;
 	bool m_sync_r;
 	bool m_sync_g;
 	bool m_sync_b;
 
 	//volume color map
 	//double m_value_1;
-	Color m_color_1;
+	FLTYPE::Color m_color_1;
 	double m_value_2;
-	Color m_color_2;
+	FLTYPE::Color m_color_2;
 	double m_value_3;
-	Color m_color_3;
+	FLTYPE::Color m_color_3;
 	double m_value_4;
-	Color m_color_4;
+	FLTYPE::Color m_color_4;
 	double m_value_5;
-	Color m_color_5;
+	FLTYPE::Color m_color_5;
 	double m_value_6;
-	Color m_color_6;
+	FLTYPE::Color m_color_6;
 	//double m_value_7;
-	Color m_color_7;
+	FLTYPE::Color m_color_7;
 
 	//paint brush use pressure
 	bool m_use_press;
@@ -950,7 +950,7 @@ private:
 	void DrawScaleBar();
 	void DrawLegend();
 	void DrawName(double x, double y, int nx, int ny,
-		wxString name, Color color,
+		wxString name, FLTYPE::Color color,
 		double font_height, bool hilighted = false);
 	void DrawFrame();
 	void DrawClippingPlanes(bool border, int face_winding);
@@ -1001,7 +1001,7 @@ private:
 	void DrawCircles(
 		double cx, double cy,
 		double r1, double r2,
-		Color &color,
+		FLTYPE::Color &color,
 		glm::mat4 &matrix);
 	void DrawBrush();
 	void PaintStroke();
@@ -1055,11 +1055,11 @@ private:
 
 	//get mouse point in 3D
 	//mode: 0-maximum with original value; 1-maximum with transfered value; 2-accumulated with original value; 3-accumulated with transfered value
-	double GetPointVolume(Point &mp, double mx, double my, FL::VolumeData* vd, int mode, bool use_transf, double thresh = 0.5);
-	double GetPointVolumeBox(Point &mp, double mx, double my, FL::VolumeData* vd, bool calc_mats = true);
-	double GetPointVolumeBox2(Point &p1, Point &p2, double mx, double my, FL::VolumeData* vd);
-	double GetPointPlane(Point &mp, double mx, double my, Point *planep = 0, bool calc_mats = true);
-	Point* GetEditingRulerPoint(double mx, double my);
+	double GetPointVolume(FLTYPE::Point &mp, double mx, double my, FL::VolumeData* vd, int mode, bool use_transf, double thresh = 0.5);
+	double GetPointVolumeBox(FLTYPE::Point &mp, double mx, double my, FL::VolumeData* vd, bool calc_mats = true);
+	double GetPointVolumeBox2(FLTYPE::Point &p1, FLTYPE::Point &p2, double mx, double my, FL::VolumeData* vd);
+	double GetPointPlane(FLTYPE::Point &mp, double mx, double my, FLTYPE::Point *planep = 0, bool calc_mats = true);
+	FLTYPE::Point* GetEditingRulerPoint(double mx, double my);
 
 	//brush sets
 	void ChangeBrushSetsIndex();

@@ -52,9 +52,9 @@ double TreeLayer::m_sw = 0.0;
 TreeLayer::TreeLayer()
 {
 	type = -1;
-	m_gamma = Color(1.0, 1.0, 1.0);
-	m_brightness = Color(1.0, 1.0, 1.0);
-	m_hdr = Color(0.0, 0.0, 0.0);
+	m_gamma = FLTYPE::Color(1.0, 1.0, 1.0);
+	m_brightness = FLTYPE::Color(1.0, 1.0, 1.0);
+	m_hdr = FLTYPE::Color(0.0, 0.0, 0.0);
 	m_sync_r = m_sync_g = m_sync_b = false;
 }
 

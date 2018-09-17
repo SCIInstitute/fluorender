@@ -773,7 +773,7 @@ FL::VolumeData* VRenderView::GetVolumeData(wxString &name)
 		return 0;
 }
 
-MeshData* VRenderView::GetMeshData(wxString &name)
+FL::MeshData* VRenderView::GetMeshData(wxString &name)
 {
 	if (m_glview)
 		return m_glview->GetMeshData(name);
@@ -781,7 +781,7 @@ MeshData* VRenderView::GetMeshData(wxString &name)
 		return 0;
 }
 
-Annotations* VRenderView::GetAnnotations(wxString &name)
+FL::Annotations* VRenderView::GetAnnotations(wxString &name)
 {
 	if (m_glview)
 		return m_glview->GetAnnotations(name);
@@ -811,14 +811,14 @@ FL::VolumeGroup* VRenderView::AddVolumeData(FL::VolumeData* vd, wxString group_n
 
 void VRenderView::AddMeshData(MeshData* md)
 {
-	if (m_glview)
-		m_glview->AddMeshData(md);
+	//if (m_glview)
+	//	m_glview->AddMeshData(md);
 }
 
 void VRenderView::AddAnnotations(Annotations* ann)
 {
-	if (m_glview)
-		m_glview->AddAnnotations(ann);
+	//if (m_glview)
+	//	m_glview->AddAnnotations(ann);
 }
 
 wxString VRenderView::AddGroup(wxString str, wxString prev_group)
@@ -1221,8 +1221,8 @@ Color VRenderView::GetBackgroundColor()
 
 void VRenderView::SetBackgroundColor(Color &color)
 {
-	if (m_glview)
-		m_glview->SetBackgroundColor(color);
+	//if (m_glview)
+	//	m_glview->SetBackgroundColor(color);
 	wxColor c(int(color.r()*255.0), int(color.g()*255.0), int(color.b()*255.0));
 	m_bg_color_picker->SetColour(c);
 }

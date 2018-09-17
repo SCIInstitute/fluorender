@@ -666,7 +666,7 @@ VRenderFrame::VRenderFrame(
 	//set view default settings
 	if (m_adjust_view && vrv)
 	{
-		Color gamma, brightness, hdr;
+		FLTYPE::Color gamma, brightness, hdr;
 		bool sync_r, sync_g, sync_b;
 		m_adjust_view->GetDefaults(gamma, brightness, hdr,
 			sync_r, sync_g, sync_b);
@@ -973,7 +973,7 @@ wxString VRenderFrame::CreateView(int row)
 	//set view default settings
 	if (m_adjust_view && vrv)
 	{
-		Color gamma, brightness, hdr;
+		FLTYPE::Color gamma, brightness, hdr;
 		bool sync_r, sync_g, sync_b;
 		m_adjust_view->GetDefaults(gamma, brightness, hdr, sync_r, sync_g, sync_b);
 		vrv->m_glview->SetGamma(gamma);

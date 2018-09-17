@@ -178,7 +178,7 @@ namespace FLIVR
 	{
 	}
 
-	void TextRenderer::RenderText(const std::wstring& text, Color &color,
+	void TextRenderer::RenderText(const std::wstring& text, FLTYPE::Color &color,
 		float x, float y, float sx, float sy)
 	{
 		glDisable(GL_DEPTH_TEST);

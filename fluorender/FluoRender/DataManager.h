@@ -73,6 +73,10 @@ using namespace FLIVR;
 #define LOAD_TYPE_BRKXML	7
 #define LOAD_TYPE_IMAGEJ    0
 
+namespace FLTYPE
+{
+	class Color;
+}
 class TreeLayer
 {
 public:
@@ -102,19 +106,19 @@ public:
 
 	//layer adjustment
 	//gamma
-	const Color GetGamma()
+	const FLTYPE::Color GetGamma()
 	{return m_gamma;}
-	void SetGamma(Color gamma)
+	void SetGamma(FLTYPE::Color gamma)
 	{m_gamma = gamma;}
 	//brightness
-	const Color GetBrightness()
+	const FLTYPE::Color GetBrightness()
 	{return m_brightness;}
-	void SetBrightness(Color brightness)
+	void SetBrightness(FLTYPE::Color brightness)
 	{m_brightness = brightness;}
 	//hdr settings
-	const Color GetHdr()
+	const FLTYPE::Color GetHdr()
 	{return m_hdr;}
-	void SetHdr(Color hdr)
+	void SetHdr(FLTYPE::Color hdr)
 	{m_hdr = hdr;}
 	//sync values
 	bool GetSyncR()
@@ -149,9 +153,9 @@ protected:
 	unsigned int m_id;
 
 	//layer adjustment
-	Color m_gamma;
-	Color m_brightness;
-	Color m_hdr;
+	FLTYPE::Color m_gamma;
+	FLTYPE::Color m_brightness;
+	FLTYPE::Color m_hdr;
 	bool m_sync_r;
 	bool m_sync_g;
 	bool m_sync_b;

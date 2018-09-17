@@ -30,6 +30,7 @@
 #define SLIVR_Point_h
 
 #include <FLIVR/Utils.h>
+#include <Types/Point.h>
 
 #include <string>
 #include <iosfwd>
@@ -48,6 +49,7 @@ public:
   inline Point(double v) : x_(v), y_(v), z_(v) {}
   Point(double, double, double, double);
   Point(const Point&);
+  inline Point(const FLTYPE::Point&);
   inline Point();
   inline int operator==(const Point&) const;
   inline int operator!=(const Point&) const;
@@ -152,6 +154,13 @@ inline Point::Point(const Point& p)
   x_=p.x_;
   y_=p.y_;
   z_=p.z_;
+}
+
+inline Point::Point(const FLTYPE::Point& p)
+{
+	x_ = p.x();
+	y_ = p.y();
+	z_ = p.z();
 }
 
 inline Point::Point()
