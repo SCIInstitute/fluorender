@@ -30,12 +30,27 @@ DEALINGS IN THE SOFTWARE.
 
 #include <wx/wx.h>
 #include <wx/dataview.h>
+#include <Fui/TreeModel.h>
 
 namespace FUI
 {
 	class TreePanel : public wxPanel
 	{
 	public:
+		enum
+		{
+			ID_ToggleView = ID_TREE_PANEL2,
+			ID_AddGroup,
+			ID_AddMGroup,
+			ID_RemoveData,
+			ID_BrushAppend,
+			ID_BrushDesel,
+			ID_BrushDiffuse,
+			ID_BrushErase,
+			ID_BrushClear,
+			ID_BrushCreate
+		};
+
 		TreePanel(wxWindow* frame,
 			wxWindow* parent,
 			wxWindowID id,
@@ -45,10 +60,29 @@ namespace FUI
 			const wxString& name = "TreePanel");
 		~TreePanel();
 
+		//seelction
+		void UpdateSelection();
+		wxString GetCurrentSel();
+		void Select(wxString view, wxString name);
+
+		//set the brush icon down
+		void SelectBrush(int id);
+		int GetBrushSelected();
+		//control from outside
+		void BrushAppend();
+		void BrushDiffuse();
+		void BrushDesel();
+		void BrushClear();
+		void BrushErase();
+		void BrushCreate();
+		void BrushSolid(bool state);
+
 	private:
 		wxWindow* m_frame;
-		wxDataViewCtrl* m_tree_ctrl;
 		wxToolBar* m_toolbar;
+
+		wxDataViewTreeCtrl* m_tree_ctrl;
+		wxObjectDataPtr<TreeModel> m_tree_model;
 
 		DECLARE_EVENT_TABLE()
 	};

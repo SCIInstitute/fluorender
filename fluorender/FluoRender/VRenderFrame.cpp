@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "VRenderFrame.h"
+#include <Fui/TreePanel.h>
 #include <Global/Global.h>
 #include <Scenegraph/VolumeData.h>
 #include <Scenegraph/VolumeGroup.h>
@@ -394,7 +395,7 @@ VRenderFrame::VRenderFrame(
 		wxDefaultPosition, wxSize(350, 300));
 
 	//create tree view
-	m_tree_panel = new TreePanel(this, this, wxID_ANY,
+	m_tree_panel = new FUI::TreePanel(this, this, wxID_ANY,
 		wxDefaultPosition, wxSize(350, 300));
 
 	//create movie view (sets the m_recorder_dlg)
@@ -2123,7 +2124,7 @@ DataManager* VRenderFrame::GetDataManager()
 	return &m_data_mgr;
 }
 
-TreePanel *VRenderFrame::GetTree()
+FUI::TreePanel *VRenderFrame::GetTree()
 {
 	return m_tree_panel;
 }

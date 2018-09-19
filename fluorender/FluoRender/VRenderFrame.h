@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #define _VRENDERFRAME_H_
 
 #include "DataManager.h"
-#include "TreePanel.h"
 #include "ListPanel.h"
 #include "VRenderView.h"
 #include "VPropView.h"
@@ -110,6 +109,10 @@ namespace FL
 	class VolumeData;
 	class VolumeGroup;
 }
+namespace FUI
+{
+	class TreePanel;
+}
 class VRenderFrame: public wxFrame
 {
 	enum
@@ -180,7 +183,7 @@ public:
 		bool hidepanels);
 	~VRenderFrame();
 
-	TreePanel *GetTree();
+	FUI::TreePanel *GetTree();
 	ListPanel *GetList();
 	void UpdateTree(wxString name = "");
 	void UpdateTreeColors();
@@ -370,7 +373,7 @@ private:
 	wxMenu* m_top_window;
 	wxMenu* m_top_help;
 
-	TreePanel *m_tree_panel;
+	FUI::TreePanel *m_tree_panel;
 	ListPanel *m_list_panel;
 	vector <VRenderView*> m_vrv_list;
 	DataManager m_data_mgr;

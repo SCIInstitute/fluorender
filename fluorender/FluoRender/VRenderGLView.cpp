@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderGLView.h"
 #include "VRenderView.h"
 #include "VRenderFrame.h"
+#include <Fui/TreePanel.h>
 #include <Global/Global.h>
 #include <Scenegraph/Group.h>
 #include <Scenegraph/DrawVolumeVisitor.h>
@@ -576,7 +577,8 @@ void VRenderGLView::Clear()
 	TextureRenderer::clear_tex_pool();
 
 	//delete groups
-	m_root->removeAllChildren();
+	if (m_root.get())
+		m_root->removeAllChildren();
 	//for (int i = 0; i<(int)m_layer_list.size(); i++)
 	//{
 	//	if (!m_layer_list[i])
@@ -1581,7 +1583,8 @@ void VRenderGLView::PopVolumeList()
 		return;
 
 	FL::PopVolumeVisitor visitor;
-	m_root->accept(visitor);
+	if (m_root.get())
+		m_root->accept(visitor);
 	m_vd_pop_list = visitor.getResult();
 
 	//for (i = 0; i<(int)m_layer_list.size(); i++)
@@ -4290,7 +4293,7 @@ void VRenderGLView::SetBrush(int mode)
 void VRenderGLView::UpdateBrushState()
 {
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	TreePanel* tree_panel = 0;
+	FUI::TreePanel* tree_panel = 0;
 	BrushToolDlg* brush_dlg = 0;
 	if (vr_frame)
 	{
@@ -4304,7 +4307,7 @@ void VRenderGLView::UpdateBrushState()
 		{
 			SetBrush(2);
 			if (tree_panel)
-				tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
+				tree_panel->SelectBrush(FUI::TreePanel::ID_BrushAppend);
 			if (brush_dlg)
 				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
 			RefreshGL(6);
@@ -4313,7 +4316,7 @@ void VRenderGLView::UpdateBrushState()
 		{
 			SetBrush(4);
 			if (tree_panel)
-				tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
+				tree_panel->SelectBrush(FUI::TreePanel::ID_BrushDiffuse);
 			if (brush_dlg)
 				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
 			RefreshGL(7);
@@ -4322,7 +4325,7 @@ void VRenderGLView::UpdateBrushState()
 		{
 			SetBrush(3);
 			if (tree_panel)
-				tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
+				tree_panel->SelectBrush(FUI::TreePanel::ID_BrushDesel);
 			if (brush_dlg)
 				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDesel);
 			RefreshGL(8);
@@ -4337,7 +4340,7 @@ void VRenderGLView::UpdateBrushState()
 				m_brush_state = 0;
 				SetBrush(2);
 				if (tree_panel)
-					tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
+					tree_panel->SelectBrush(FUI::TreePanel::ID_BrushAppend);
 				if (brush_dlg)
 					brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
 				RefreshGL(9);
@@ -4347,7 +4350,7 @@ void VRenderGLView::UpdateBrushState()
 				m_brush_state = 0;
 				SetBrush(4);
 				if (tree_panel)
-					tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
+					tree_panel->SelectBrush(FUI::TreePanel::ID_BrushDiffuse);
 				if (brush_dlg)
 					brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
 				RefreshGL(10);
@@ -4357,7 +4360,7 @@ void VRenderGLView::UpdateBrushState()
 				m_brush_state = 0;
 				SetBrush(3);
 				if (tree_panel)
-					tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
+					tree_panel->SelectBrush(FUI::TreePanel::ID_BrushDesel);
 				if (brush_dlg)
 					brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDesel);
 				RefreshGL(11);

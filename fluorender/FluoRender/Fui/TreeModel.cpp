@@ -28,3 +28,63 @@ DEALINGS IN THE SOFTWARE.
 #include <Fui/TreeModel.h>
 
 using namespace FUI;
+
+TreeModel::TreeModel()
+{
+
+}
+
+TreeModel::~TreeModel()
+{
+
+}
+
+int TreeModel::Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
+	unsigned int column, bool ascending) const
+{
+	return 0;
+}
+
+unsigned int TreeModel::GetColumnCount() const
+{
+	return 0;
+}
+
+wxString TreeModel::GetColumnType(unsigned int col) const
+{
+	return "";
+}
+
+void TreeModel::GetValue(wxVariant &variant,
+	const wxDataViewItem &item, unsigned int col) const
+{
+
+}
+
+bool TreeModel::SetValue(const wxVariant &variant,
+	const wxDataViewItem &item, unsigned int col)
+{
+	return true;
+}
+
+bool TreeModel::IsEnabled(const wxDataViewItem &item,
+	unsigned int col) const
+{
+	return true;
+}
+
+wxDataViewItem TreeModel::GetParent(const wxDataViewItem &item) const
+{
+	return wxDataViewItem(0);
+}
+
+bool TreeModel::IsContainer(const wxDataViewItem &item) const
+{
+	return true;
+}
+
+unsigned int TreeModel::GetChildren(const wxDataViewItem &parent,
+	wxDataViewItemArray &array) const
+{
+	return 0;
+}

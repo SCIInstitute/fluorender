@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "BrushToolDlg.h"
 #include "VRenderFrame.h"
+#include <Fui/TreePanel.h>
 #include <Global/Global.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
@@ -503,7 +504,7 @@ void BrushToolDlg::OnBrushAppend(wxCommandEvent &event)
 	if (frame && frame->GetTree())
 	{
 		if (m_toolbar->GetToolState(ID_BrushAppend))
-			frame->GetTree()->SelectBrush(TreePanel::ID_BrushAppend);
+			frame->GetTree()->SelectBrush(FUI::TreePanel::ID_BrushAppend);
 		else
 			frame->GetTree()->SelectBrush(0);
 		frame->GetTree()->BrushAppend();
@@ -521,7 +522,7 @@ void BrushToolDlg::OnBrushDiffuse(wxCommandEvent &event)
 	if (frame && frame->GetTree())
 	{
 		if (m_toolbar->GetToolState(ID_BrushDiffuse))
-			frame->GetTree()->SelectBrush(TreePanel::ID_BrushDiffuse);
+			frame->GetTree()->SelectBrush(FUI::TreePanel::ID_BrushDiffuse);
 		else
 			frame->GetTree()->SelectBrush(0);
 		frame->GetTree()->BrushDiffuse();
@@ -551,7 +552,7 @@ void BrushToolDlg::OnBrushDesel(wxCommandEvent &event)
 	if (frame && frame->GetTree())
 	{
 		if (m_toolbar->GetToolState(ID_BrushDesel))
-			frame->GetTree()->SelectBrush(TreePanel::ID_BrushDesel);
+			frame->GetTree()->SelectBrush(FUI::TreePanel::ID_BrushDesel);
 		else
 			frame->GetTree()->SelectBrush(0);
 		frame->GetTree()->BrushDesel();
