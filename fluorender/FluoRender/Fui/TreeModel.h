@@ -31,14 +31,23 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/dataview.h>
 #include <Flobject/Observer.h>
 #include <Scenegraph/Node.h>
+#include <Scenegraph/NodeVisitor.h>
 
 namespace FUI
 {
+	class TreeUpdater;
 	class TreeModel : public wxDataViewModel, public FL::Observer
 	{
 	public:
 		TreeModel();
 		~TreeModel();
+
+		void SetRoot(FL::Node* root);
+
+		//observer functions
+		virtual void objectDeleted(void*);
+		virtual void objectChanging(void*, const std::string &exp);
+		virtual void objectChanged(void*, const std::string &exp);
 
 		int Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 			unsigned int column, bool ascending) const override;
@@ -63,8 +72,30 @@ namespace FUI
 		virtual unsigned int GetChildren(const wxDataViewItem &parent,
 			wxDataViewItemArray &array) const override;
 
+		friend class TreeUpdater;
+
 	private:
 		FL::Node *m_root;//also observes root
+	};
+
+	class TreeUpdater : public FL::NodeVisitor
+	{
+	public:
+		TreeUpdater(TreeModel &tree_model) :
+			FL::NodeVisitor(),
+			m_tree_model(tree_model),
+			m_cur_parent(0)
+		{
+			setTraversalMode(FL::NodeVisitor::TRAVERSE_ALL_CHILDREN);
+		}
+
+		virtual void apply(FL::Node& node);
+
+		virtual void apply(FL::Group& group);
+
+	private:
+		TreeModel &m_tree_model;
+		FL::Node* m_cur_parent;
 	};
 }
 

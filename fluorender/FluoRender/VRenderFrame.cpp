@@ -397,6 +397,7 @@ VRenderFrame::VRenderFrame(
 	//create tree view
 	m_tree_panel = new FUI::TreePanel(this, this, wxID_ANY,
 		wxDefaultPosition, wxSize(350, 300));
+	m_tree_panel->SetScenegraph(vrv->m_glview->GetRoot());
 
 	//create movie view (sets the m_recorder_dlg)
 	m_movie_view = new VMovieView(this, this, wxID_ANY,

@@ -127,6 +127,9 @@ public:
 		long style = 0);
 	~VRenderGLView();
 
+	//root of the scenegraph
+	FL::Group* GetRoot() { return m_root.get(); }
+
 	//for degugging, this allows inspection of the pixel format actually given.
 #ifdef _WIN32
 	int GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd);

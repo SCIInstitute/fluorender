@@ -93,26 +93,33 @@ TreePanel::TreePanel(wxWindow* frame,
 	m_toolbar->Realize();
 
 	//create data tree
-	m_tree_ctrl = new wxDataViewTreeCtrl(this, wxID_ANY);
+	m_tree_ctrl = new wxDataViewCtrl(this, wxID_ANY);
 	m_tree_model = new TreeModel;
 	m_tree_ctrl->AssociateModel(m_tree_model.get());
 	m_tree_ctrl->EnableDragSource(wxDF_INVALID);
 	m_tree_ctrl->EnableDropTarget(wxDF_INVALID);
-	wxImageList *images = new wxImageList(16, 16, true);
-	wxIcon icons[2];
-	icons[0] = wxIcon(cross_xpm);
-	icons[1] = wxIcon(tick_xpm);
-	images->Add(icons[0]);
-	images->Add(icons[1]);
-	m_tree_ctrl->AssignImageList(images);
+	//wxImageList *images = new wxImageList(16, 16, true);
+	//wxIcon icons[2];
+	//icons[0] = wxIcon(cross_xpm);
+	//icons[1] = wxIcon(tick_xpm);
+	//images->Add(icons[0]);
+	//images->Add(icons[1]);
+	//m_tree_ctrl->AssignImageList(images);
 	m_tree_ctrl->SetDoubleBuffered(true);
 	//add columns
+	//name
 	wxDataViewTextRenderer *tr =
 		new wxDataViewTextRenderer("string");
 	wxDataViewColumn *column0 =
-		new wxDataViewColumn("name", tr, 0, 200, wxALIGN_LEFT,
+		new wxDataViewColumn("Name", tr, 0, 200, wxALIGN_LEFT,
 			wxDATAVIEW_COL_SORTABLE | wxDATAVIEW_COL_RESIZABLE);
 	m_tree_ctrl->AppendColumn(column0);
+	//type
+	tr = new wxDataViewTextRenderer("string");
+	wxDataViewColumn *column1 =
+		new wxDataViewColumn("Type", tr, 0, 200, wxALIGN_LEFT,
+			wxDATAVIEW_COL_SORTABLE | wxDATAVIEW_COL_RESIZABLE);
+	m_tree_ctrl->AppendColumn(column1);
 
 	//organize positions
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
@@ -124,6 +131,12 @@ TreePanel::TreePanel(wxWindow* frame,
 
 TreePanel::~TreePanel()
 {
+
+}
+
+void TreePanel::SetScenegraph(FL::Node* root)
+{
+	m_tree_model->SetRoot(root);
 
 }
 

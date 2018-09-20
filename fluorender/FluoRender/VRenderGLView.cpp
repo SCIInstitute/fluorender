@@ -314,6 +314,13 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_drawing(false),
 	m_refresh(false)
 {
+	//create root node
+	m_root = FL::ref_ptr<FL::Group>(new FL::Group());
+	std::string root_str = "Render View";
+	if (m_vrv)
+		root_str = m_vrv->GetName().ToStdString();
+	m_root->setName(root_str);
+
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;
 

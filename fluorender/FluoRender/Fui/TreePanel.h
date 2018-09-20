@@ -60,6 +60,8 @@ namespace FUI
 			const wxString& name = "TreePanel");
 		~TreePanel();
 
+		void SetScenegraph(FL::Node* root);
+
 		//seelction
 		void UpdateSelection();
 		wxString GetCurrentSel();
@@ -81,7 +83,7 @@ namespace FUI
 		wxWindow* m_frame;
 		wxToolBar* m_toolbar;
 
-		wxDataViewTreeCtrl* m_tree_ctrl;
+		wxDataViewCtrl* m_tree_ctrl;
 		wxObjectDataPtr<TreeModel> m_tree_model;
 
 		DECLARE_EVENT_TABLE()
