@@ -1325,7 +1325,8 @@ void VRenderGLView::DrawVolumes(int peel)
 		if (TextureRenderer::get_mem_swap() &&
 			TextureRenderer::get_interactive())
 			visitor.setQuotaList(&quota_vd_list);
-		m_root->accept(visitor);
+		if (m_root.get())
+			m_root->accept(visitor);
 		std::vector<FL::DrawVolumeVisitor::DrawVolumeGroupList> list =
 			visitor.getResult();
 		for (auto it = list.begin();

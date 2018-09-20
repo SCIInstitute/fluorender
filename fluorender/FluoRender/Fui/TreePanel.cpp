@@ -93,7 +93,7 @@ TreePanel::TreePanel(wxWindow* frame,
 	m_toolbar->Realize();
 
 	//create data tree
-	m_tree_ctrl = new wxDataViewTreeCtrl(frame, wxID_ANY);
+	m_tree_ctrl = new wxDataViewTreeCtrl(this, wxID_ANY);
 	m_tree_model = new TreeModel;
 	m_tree_ctrl->AssociateModel(m_tree_model.get());
 	m_tree_ctrl->EnableDragSource(wxDF_INVALID);
