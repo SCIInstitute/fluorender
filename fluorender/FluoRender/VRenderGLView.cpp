@@ -7104,6 +7104,7 @@ FL::VolumeData* VRenderGLView::GetAllVolumeData(int index)
 	FL::ObjectList* list = visitor.getResult();
 	if (index >= 0 && index < list->size())
 		return dynamic_cast<FL::VolumeData*>((*list)[index]);
+	return 0;
 	//int cnt = 0;
 	//int i, j;
 	//for (i = 0; i<(int)m_layer_list.size(); i++)

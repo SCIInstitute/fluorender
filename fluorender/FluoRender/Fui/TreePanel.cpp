@@ -136,7 +136,7 @@ TreePanel::~TreePanel()
 
 void TreePanel::SetScenegraph(FL::Node* root)
 {
-	m_tree_model->SetRoot(root);
+	m_tree_model->AddView(root);
 
 }
 

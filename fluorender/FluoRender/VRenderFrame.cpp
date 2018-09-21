@@ -1022,6 +1022,7 @@ wxString VRenderFrame::CreateView(int row)
 		vrv->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
 	}
 
+	m_tree_panel->SetScenegraph(vrv->m_glview->GetRoot());
 	UpdateTree();
 
 	if (vrv)

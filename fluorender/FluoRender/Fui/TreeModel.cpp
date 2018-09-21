@@ -40,25 +40,29 @@ TreeModel::~TreeModel()
 
 }
 
-void TreeModel::SetRoot(FL::Node* root)
+void TreeModel::AddView(FL::Node* node)
 {
-	if (m_root != root)
-	{
-		m_root = root;
-		m_root->addObserver(this);
-		Cleared();
-		//update
-		TreeUpdater updater(*this);
-		m_root->accept(updater);
-	}
+	node->addObserver(this);
+	//update
+	TreeUpdater updater(*this);
+	node->accept(updater);
 }
 
 //observer functions
 void TreeModel::objectDeleted(void* ptr)
 {
 	FL::Referenced* refd = static_cast<FL::Referenced*>(ptr);
-	if (refd && refd == m_root)
-		m_root = 0;
+	//delete from tree
+	FL::Node* node = dynamic_cast<FL::Node*>(refd);
+	if (node)
+	{
+		wxDataViewItem parent = wxDataViewItem(0);
+		FL::Node* parent_node = node->getParent(0);
+		if (parent_node)
+			wxDataViewItem parent = wxDataViewItem((void*)parent_node);
+		wxDataViewItem child((void*)node);
+		ItemDeleted(parent, child);
+	}
 
 	//remove observee
 	removeObservee(refd);
@@ -161,7 +165,7 @@ unsigned int TreeModel::GetChildren(const wxDataViewItem &parent,
 	FL::Node *node = (FL::Node*)parent.GetID();
 	if (!node)
 	{
-		array.Add(wxDataViewItem((void*)m_root));
+		array.Add(wxDataViewItem(0));
 		return 1;
 	}
 
@@ -182,18 +186,22 @@ unsigned int TreeModel::GetChildren(const wxDataViewItem &parent,
 //update tree model with the updater
 void TreeUpdater::apply(FL::Node& node)
 {
+	wxDataViewItem parent = wxDataViewItem(0);
+	wxDataViewItem child((void*)&node);
+	FL::Node* parent_node = node.getParent(0);
+	if (parent_node)
+		parent = wxDataViewItem((void*)parent_node);
+	m_tree_model.ItemAdded(parent, child);
 	traverse(node);
 }
 
 void TreeUpdater::apply(FL::Group& group)
 {
-	if (!m_cur_parent)
-	{
-		//we have the root here
-		wxDataViewItem parent = wxDataViewItem(0);
-		wxDataViewItem child((void*)&group);
-		m_cur_parent = &group;
-		m_tree_model.ItemAdded(parent, child);
-	}
+	wxDataViewItem parent = wxDataViewItem(0);
+	wxDataViewItem child((void*)&group);
+	FL::Node* parent_node = group.getParent(0);
+	if (parent_node)
+		parent = wxDataViewItem((void*)parent_node);
+	m_tree_model.ItemAdded(parent, child);
 	traverse(group);
 }

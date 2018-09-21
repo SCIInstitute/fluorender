@@ -92,9 +92,9 @@ namespace FL
 
 		inline ParentList getParents() { return m_parents; }
 
-		inline const Node* getParent(unsigned int i) const { return m_parents[i]; }
+		inline const Node* getParent(unsigned int i) const { if (getNumParents()) return m_parents[i]; else return 0; }
 
-		inline Node* getParent(unsigned int i) { return m_parents[i]; }
+		inline Node* getParent(unsigned int i) { if (getNumParents()) return m_parents[i]; else return 0; }
 
 		inline unsigned int getNumParents() const { return static_cast<unsigned int>(m_parents.size()); }
 

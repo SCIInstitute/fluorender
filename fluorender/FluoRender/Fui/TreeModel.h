@@ -42,7 +42,7 @@ namespace FUI
 		TreeModel();
 		~TreeModel();
 
-		void SetRoot(FL::Node* root);
+		void AddView(FL::Node* node);
 
 		//observer functions
 		virtual void objectDeleted(void*);
@@ -75,7 +75,7 @@ namespace FUI
 		friend class TreeUpdater;
 
 	private:
-		FL::Node *m_root;//also observes root
+		//FL::Node *m_root;//also observes root
 	};
 
 	class TreeUpdater : public FL::NodeVisitor
@@ -83,8 +83,7 @@ namespace FUI
 	public:
 		TreeUpdater(TreeModel &tree_model) :
 			FL::NodeVisitor(),
-			m_tree_model(tree_model),
-			m_cur_parent(0)
+			m_tree_model(tree_model)
 		{
 			setTraversalMode(FL::NodeVisitor::TRAVERSE_ALL_CHILDREN);
 		}
@@ -95,7 +94,6 @@ namespace FUI
 
 	private:
 		TreeModel &m_tree_model;
-		FL::Node* m_cur_parent;
 	};
 }
 
