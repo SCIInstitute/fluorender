@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Scenegraph/VolumeGroup.h>
+#include <Scenegraph/VolumeData.h>
 
 using namespace FL;
 
@@ -39,6 +40,12 @@ VolumeGroup::VolumeGroup(const VolumeGroup& group, const CopyOp& copyop) :
 	Group(group, copyop)
 {
 
+}
+
+VolumeGroup::VolumeGroup(const VolumeData& vd, const CopyOp& copyop) :
+	Group()
+{
+	copyValues(vd, copyop);
 }
 
 VolumeGroup::~VolumeGroup()

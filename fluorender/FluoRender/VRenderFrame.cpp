@@ -160,6 +160,8 @@ VRenderFrame::VRenderFrame(
 	m_cur_sel_mesh(-1),
 	m_benchmark(benchmark)
 {
+	//create default
+	FL::Global::instance().getVolumeFactory().createDefault();
 	//create root node
 	m_root = FL::ref_ptr<FL::Group>(new FL::Group());
 	std::string root_str = "Active Datasets";
@@ -2388,10 +2390,13 @@ void VRenderFrame::DeleteVRenderView(int i)
 			m_vrv_list[i]->GetMeshData(j)->SetDisp(true);
 		VRenderView* vrv = m_vrv_list[i];
 		m_vrv_list.erase(m_vrv_list.begin()+i);
+		m_root->removeChild(vrv->m_glview->GetGroup());
 		m_aui_mgr.DetachPane(vrv);
 		vrv->Close();
 		delete vrv;
 		m_aui_mgr.Update();
+
+
 		UpdateTree();
 
 		if (m_movie_view)

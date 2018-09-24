@@ -94,8 +94,8 @@ TreePanel::TreePanel(wxWindow* frame,
 
 	//create data tree
 	m_tree_ctrl = new wxDataViewCtrl(this, wxID_ANY);
-	m_tree_ctrl->EnableDragSource(wxDF_INVALID);
-	m_tree_ctrl->EnableDropTarget(wxDF_INVALID);
+	m_tree_ctrl->EnableDragSource(wxDF_UNICODETEXT);
+	m_tree_ctrl->EnableDropTarget(wxDF_UNICODETEXT);
 	//wxImageList *images = new wxImageList(16, 16, true);
 	//wxIcon icons[2];
 	//icons[0] = wxIcon(cross_xpm);
@@ -110,13 +110,17 @@ TreePanel::TreePanel(wxWindow* frame,
 		new wxDataViewTextRenderer("string");
 	wxDataViewColumn *column0 =
 		new wxDataViewColumn("Name", tr, 0, 200, wxALIGN_LEFT,
-			wxDATAVIEW_COL_SORTABLE | wxDATAVIEW_COL_RESIZABLE);
+			wxDATAVIEW_COL_SORTABLE |
+			wxDATAVIEW_COL_REORDERABLE |
+			wxDATAVIEW_COL_RESIZABLE);
 	m_tree_ctrl->AppendColumn(column0);
 	//type
 	tr = new wxDataViewTextRenderer("string");
 	wxDataViewColumn *column1 =
-		new wxDataViewColumn("Type", tr, 0, 200, wxALIGN_LEFT,
-			wxDATAVIEW_COL_SORTABLE | wxDATAVIEW_COL_RESIZABLE);
+		new wxDataViewColumn("Type", tr, 1, 200, wxALIGN_LEFT,
+			wxDATAVIEW_COL_SORTABLE |
+			wxDATAVIEW_COL_REORDERABLE |
+			wxDATAVIEW_COL_RESIZABLE);
 	m_tree_ctrl->AppendColumn(column1);
 
 	//organize positions
@@ -138,6 +142,9 @@ void TreePanel::SetScenegraph(FL::Node* root)
 	m_tree_model->SetRoot(root);
 
 	m_tree_ctrl->AssociateModel(m_tree_model.get());
+	m_tree_model->ItemAdded(
+		wxDataViewItem(0),
+		wxDataViewItem((void*)m_tree_model->GetRoot()));
 }
 
 //seelction

@@ -82,7 +82,7 @@ void TreeModel::nodeRemoved(void* ptr, void* parent, void* child)
 int TreeModel::Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 	unsigned int column, bool ascending) const
 {
-	return 0;
+	return wxDataViewModel::Compare(item1, item2, column, ascending);
 }
 
 unsigned int TreeModel::GetColumnCount() const
@@ -99,14 +99,14 @@ wxString TreeModel::GetColumnType(unsigned int col) const
 	case 1:
 		return "string";
 	}
-	return "";
+	return "string";
 }
 
 void TreeModel::GetValue(wxVariant &variant,
 	const wxDataViewItem &item, unsigned int col) const
 {
-	if (!item.IsOk())
-		return;
+	//if (!item.IsOk())
+	//	return;
 	FL::Node* node = (FL::Node*)item.GetID();
 	switch (col)
 	{
@@ -155,10 +155,11 @@ wxDataViewItem TreeModel::GetParent(const wxDataViewItem &item) const
 
 bool TreeModel::IsContainer(const wxDataViewItem &item) const
 {
-	if (!item.IsOk())
-		return wxDataViewItem(0);
-	FL::Node *node = (FL::Node*)item.GetID();
-	return node->asGroup();
+	return false;
+	//if (!item.IsOk())
+	//	return wxDataViewItem(0);
+	//FL::Node *node = (FL::Node*)item.GetID();
+	//return node->asGroup();
 }
 
 unsigned int TreeModel::GetChildren(const wxDataViewItem &parent,

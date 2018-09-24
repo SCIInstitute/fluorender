@@ -70,6 +70,21 @@ public:
 	virtual void objectChanging(void*, void* orig_node, const std::string &exp);
 	virtual void objectChanged(void*, void* orig_node, const std::string &exp);
 
+	inline void copyValues(const Object& obj, const CopyOp& copyop = CopyOp::SHALLOW_COPY)
+	{
+		for (auto it = obj._vs_stack.top()->getValues().begin();
+			it != obj._vs_stack.top()->getValues().end(); ++it)
+		{
+			if (copyop.getCopyFlags() & CopyOp::DEEP_COPY_VALUES)
+				addValue(it->second->clone());
+			else
+				addValue(it->second.get());
+
+			//also observe the values
+			it->second->addObserver(this);
+		}
+	}
+
 	//add a value
 	bool addValue(ValueTuple& vt);
 	//generic types
@@ -186,6 +201,16 @@ public:
 	//propagate values belonging to the same object (1 -> 2)
 	bool propValues(const std::string &name1, const std::string &name2);
 	bool propValues(const std::string &name1, const std::vector<std::string> &names);
+
+	//directly add
+	bool addValue(Value* value)
+	{
+		if (!value)
+			return false;
+		if (_vs_stack.top())
+			return _vs_stack.top()->addValue(value);
+		else return false;
+	}
 
 	//get value the class
 	Value* getValue(const std::string &name)

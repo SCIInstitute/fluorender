@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Scenegraph/VolumeFactory.h>
+#include <Scenegraph/VolumeGroup.h>
 
 using namespace FL;
 
@@ -215,6 +216,9 @@ VolumeData* VolumeFactory::build()
 
 VolumeData* VolumeFactory::clone(VolumeData* vd)
 {
+	if (!vd)
+		return 0;
+
 	incCounter();
 
 	Object* new_vd = vd->clone(CopyOp::DEEP_COPY_ALL);
@@ -240,3 +244,14 @@ VolumeData* VolumeFactory::clone(const unsigned int id)
 	return 0;
 }
 
+VolumeGroup* VolumeFactory::buildGroup(VolumeData* vd)
+{
+	VolumeGroup* group;
+	if (vd)
+		group = new VolumeGroup(*vd, CopyOp::DEEP_COPY_ALL);//shallow copy might be ok
+	else
+		group = new VolumeGroup(*getDefault(), CopyOp::DEEP_COPY_ALL);
+	if (group)
+		group->setName("Group");
+	return group;
+}

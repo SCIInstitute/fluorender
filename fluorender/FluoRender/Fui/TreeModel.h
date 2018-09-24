@@ -77,7 +77,6 @@ namespace FUI
 		{
 			m_root = root;
 			root->addObserver(this);
-			ItemAdded(wxDataViewItem(0), wxDataViewItem((void*)root));
 		}
 		FL::Node* GetRoot() { return m_root; }
 

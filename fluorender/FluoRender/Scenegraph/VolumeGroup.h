@@ -33,11 +33,13 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FL
 {
+	class VolumeData;
 	class VolumeGroup : public Group
 	{
 	public:
 		VolumeGroup();
 		VolumeGroup(const VolumeGroup& group, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
+		VolumeGroup(const VolumeData& vd, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
 
 		virtual Object* clone(const CopyOp& copyop) const
 		{

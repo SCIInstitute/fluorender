@@ -43,6 +43,13 @@ namespace FL
 
 		virtual const char* className() const { return "VolumeFactory"; }
 
+		virtual void createDefault();
+
+		virtual VolumeData* getDefault()
+		{
+			return dynamic_cast<VolumeData*>(ObjectFactory::getDefault());
+		}
+
 		virtual VolumeData* build();
 
 		virtual VolumeData* clone(VolumeData*);
@@ -74,9 +81,12 @@ namespace FL
 			return dynamic_cast<VolumeData*>(ObjectFactory::findLast(name));
 		}
 
+		//also builds volume group, whose typical use is to sync properties for volumes
+		//the volume group copies properties from the given volume
+		VolumeGroup* buildGroup(VolumeData* vd = 0);
+
 	protected:
 		virtual ~VolumeFactory();
-		virtual void createDefault();
 	};
 
 }

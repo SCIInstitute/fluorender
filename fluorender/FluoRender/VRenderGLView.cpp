@@ -7361,10 +7361,10 @@ FL::VolumeGroup* VRenderGLView::AddVolumeData(FL::VolumeData* vd, wxString group
 {
 	FL::VolumeGroup* group = GetGroup(group_name);
 	if (!group)
-		group = new FL::VolumeGroup();
+		group = FL::Global::instance().getVolumeFactory().buildGroup();
 
-	group->addChild(vd);
 	m_render_view->addChild(group);
+	group->addChild(vd);
 
 	m_vd_pop_dirty = true;
 	m_load_update = true;
@@ -8489,6 +8489,9 @@ wxString VRenderGLView::AddGroup(wxString str, wxString prev_group)
 
 FL::VolumeGroup* VRenderGLView::AddOrGetGroup()
 {
+	FL::VolumeGroup *group = FL::Global::instance().getVolumeFactory().buildGroup();
+	m_render_view->addChild(group);
+	return group;
 /*	for (int i = 0; i < (int)m_layer_list.size(); i++)
 	{
 		if (!m_layer_list[i])

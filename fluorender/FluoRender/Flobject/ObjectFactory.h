@@ -50,6 +50,8 @@ namespace FL
 
 		virtual const char* className() const { return "ObjectFactory"; }
 
+		virtual void createDefault();
+
 		//read default settings for object
 		//to take advantage of the value management system,
 		//create a default object and use it to save settings
@@ -206,8 +208,6 @@ namespace FL
 
 	protected:
 		virtual ~ObjectFactory();
-
-		virtual void createDefault();
 
 		//update the values of the default volume
 		bool setDefaultValues(boost::property_tree::ptree &pt);
