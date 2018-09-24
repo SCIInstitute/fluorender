@@ -241,7 +241,7 @@ bool Object::addValue(const std::string &name, const FLTYPE::GLint4 &value)
 	OBJECT_ADD_VALUE_BODY;
 }
 
-//define function bodies first
+//set functions
 bool Object::setValue(ValueTuple &vt, bool notify)
 {
 	ValueTuple old_vt;
@@ -262,7 +262,7 @@ bool Object::setValue(ValueTuple &vt, bool notify)
 	return false;
 }
 
-//set functions
+//define function bodies first
 #define OBJECT_SET_VALUE_BODY \
 	if (getValue(name, old_value) && value != old_value) \
 	{ \

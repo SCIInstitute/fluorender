@@ -81,6 +81,11 @@ bool Group::insertChild(size_t index, Node* child)
 
 	child->addParent(this);
 
+	//parent observes children
+	child->addObserver(this);
+	//notify observers of change
+	notifyObserversNodeAdded(this, child);
+
 	return true;
 }
 
@@ -92,8 +97,15 @@ bool Group::removeChildren(size_t pos, size_t num)
 		if (end > m_children.size())
 			end = m_children.size();
 
-		for (unsigned int i = pos; i<end; ++i)
+		for (unsigned int i = pos; i < end; ++i)
+		{
 			m_children[i]->removeParent(this);
+
+			//parent observes children
+			m_children[i]->removeObserver(this);
+			//notify observers of change
+			notifyObserversNodeRemoved(this, m_children[i].get());
+		}
 		m_children.erase(m_children.begin() + pos, m_children.begin() + end);
 
 		return true;
@@ -119,8 +131,15 @@ bool Group::setChild(size_t i, Node* node)
 	{
 		ref_ptr<Node> origNode = m_children[i];
 		origNode->removeParent(this);
+		//parent observes children
+		origNode->removeObserver(this);
+
 		m_children[i] = node;
 		node->addParent(this);
+		//parent observes children
+		node->addObserver(this);
+		//notify observers of change
+		notifyObserversNodeReplaced(origNode.get(), node);
 
 		return true;
 	}

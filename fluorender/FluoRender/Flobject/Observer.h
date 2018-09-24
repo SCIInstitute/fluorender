@@ -44,6 +44,10 @@ public:
 	virtual void objectDeleted(void*) {}
 	virtual void objectChanging(void*, const std::string &exp) {}//before change
 	virtual void objectChanged(void*, const std::string &exp) {}//after change
+	//events for scenegraph changes
+	virtual void nodeAdded(void* parent, void* child) {}
+	virtual void nodeRemoved(void* parent, void* child) {}
+	virtual void nodeReplaced(void* orig_node, void* new_node) {}
 
 	virtual bool removeObservee(Referenced* observee);
 
@@ -70,6 +74,10 @@ public:
 	void signalObjectDeleted(void* ptr);
 	void signalObjectChanging(void* ptr, const std::string &exp);
 	void signalObjectChanged(void* ptr, const std::string &exp);
+	//scenegraph events
+	void signalNodeAdded(void* parent, void* child);
+	void signalNodeRemoved(void* parent, void* child);
+	void signalNodeReplaced(void* orig_node, void* new_node);
 
 	typedef std::set<Observer*> Observers;
 	Observers& getObservers() { return _observers; }

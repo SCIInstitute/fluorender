@@ -119,11 +119,40 @@ void ObserverSet::signalObjectChanging(void* ptr, const std::string &exp)
 		(*itr)->objectChanging(ptr, exp);
 	}
 }
+
 void ObserverSet::signalObjectChanged(void* ptr, const std::string &exp)
 {
 	for (Observers::iterator itr = _observers.begin();
 		itr != _observers.end(); ++itr)
 	{
 		(*itr)->objectChanged(ptr, exp);
+	}
+}
+
+//scenegraph events
+void ObserverSet::signalNodeAdded(void* parent, void* child)
+{
+	for (Observers::iterator itr = _observers.begin();
+		itr != _observers.end(); ++itr)
+	{
+		(*itr)->nodeAdded(parent, child);
+	}
+}
+
+void ObserverSet::signalNodeRemoved(void* parent, void* child)
+{
+	for (Observers::iterator itr = _observers.begin();
+		itr != _observers.end(); ++itr)
+	{
+		(*itr)->nodeRemoved(parent, child);
+	}
+}
+
+void ObserverSet::signalNodeReplaced(void* orig_node, void* new_node)
+{
+	for (Observers::iterator itr = _observers.begin();
+		itr != _observers.end(); ++itr)
+	{
+		(*itr)->nodeReplaced(orig_node, new_node);
 	}
 }

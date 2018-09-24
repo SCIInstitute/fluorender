@@ -53,16 +53,16 @@ void TreeModel::objectDeleted(void* ptr)
 {
 	FL::Referenced* refd = static_cast<FL::Referenced*>(ptr);
 	//delete from tree
-	FL::Node* node = dynamic_cast<FL::Node*>(refd);
-	if (node)
-	{
-		wxDataViewItem parent = wxDataViewItem(0);
-		FL::Node* parent_node = node->getParent(0);
-		if (parent_node)
-			wxDataViewItem parent = wxDataViewItem((void*)parent_node);
-		wxDataViewItem child((void*)node);
-		ItemDeleted(parent, child);
-	}
+	//FL::Node* node = dynamic_cast<FL::Node*>(refd);
+	//if (node)
+	//{
+	//	wxDataViewItem parent = wxDataViewItem(0);
+	//	FL::Node* parent_node = node->getParent(0);
+	//	if (parent_node)
+	//		wxDataViewItem parent = wxDataViewItem((void*)parent_node);
+	//	wxDataViewItem child((void*)node);
+	//	ItemDeleted(parent, child);
+	//}
 
 	//remove observee
 	removeObservee(refd);

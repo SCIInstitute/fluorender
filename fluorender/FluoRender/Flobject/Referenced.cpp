@@ -119,6 +119,37 @@ void Referenced::notifyObserversOfChange(const std::string &exp) const
 
 }
 
+//scenegraph specific events via observers
+void Referenced::notifyObserversNodeAdded(void* parent, void* child) const
+{
+	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
+
+	if (observerSet && !_hold)
+	{
+		observerSet->signalNodeAdded(parent, child);
+	}
+}
+
+void Referenced::notifyObserversNodeRemoved(void* parent, void* child) const
+{
+	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
+
+	if (observerSet && !_hold)
+	{
+		observerSet->signalNodeRemoved(parent, child);
+	}
+}
+
+void Referenced::notifyObserversNodeReplaced(void* orig_node, void* new_node) const
+{
+	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
+
+	if (observerSet && !_hold)
+	{
+		observerSet->signalNodeReplaced(orig_node, new_node);
+	}
+}
+
 int Referenced::unref_nodelete() const
 {
 	return --_refCount;
