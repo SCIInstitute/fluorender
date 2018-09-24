@@ -103,7 +103,7 @@ void Value::objectDeleted(void* ptr)
 	removeObservee(refd);
 }
 
-void Value::objectChanged(void* ptr, const std::string &exp)
+void Value::objectChanged(void* ptr, void* orig_node, const std::string &exp)
 {
 	Referenced* refd = static_cast<Referenced*>(ptr);
 	if (refd->className() == std::string("Value"))

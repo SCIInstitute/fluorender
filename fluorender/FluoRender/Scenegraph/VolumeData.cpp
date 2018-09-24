@@ -75,9 +75,9 @@ VolumeData::~VolumeData()
 		delete m_tex;
 }
 
-void VolumeData::objectChanging(void* ptr, const std::string &exp)
+void VolumeData::objectChanging(void* ptr, void* orig_node, const std::string &exp)
 {
-	Object::objectChanged(ptr, exp);
+	Object::objectChanged(ptr, orig_node, exp);
 	Referenced* refd = static_cast<Referenced*>(ptr);
 	if (refd->className() == std::string("Value"))
 	{
@@ -91,9 +91,9 @@ void VolumeData::objectChanging(void* ptr, const std::string &exp)
 	}
 }
 
-void VolumeData::objectChanged(void* ptr, const std::string &exp)
+void VolumeData::objectChanged(void* ptr, void* orig_node, const std::string &exp)
 {
-	Object::objectChanged(ptr, exp);
+	Object::objectChanged(ptr, orig_node, exp);
 	Referenced* refd = static_cast<Referenced*>(ptr);
 	if (refd->className() == std::string("Value"))
 	{

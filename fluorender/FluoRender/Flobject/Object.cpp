@@ -66,12 +66,12 @@ void Object::objectDeleted(void* ptr)
 	removeObservee(refd);
 }
 
-void Object::objectChanging(void* ptr, const std::string &exp)
+void Object::objectChanging(void* ptr, void* orig_node, const std::string &exp)
 {
 	//before change
 }
 
-void Object::objectChanged(void* ptr, const std::string &exp)
+void Object::objectChanged(void* ptr, void* orig_node, const std::string &exp)
 {
 }
 
@@ -252,10 +252,10 @@ bool Object::setValue(ValueTuple &vt, bool notify)
 		bool result = false;
 		if (_vs_stack.top())
 		{
-			notifyObserversBeforeChange(name);
+			notifyObserversBeforeChange(this, name);
 			result = _vs_stack.top()->setValue(vt, notify);
 			if (result)
-				notifyObserversOfChange(name);
+				notifyObserversOfChange(this, name);
 		}
 		return result;
 	}
@@ -269,10 +269,10 @@ bool Object::setValue(ValueTuple &vt, bool notify)
 		bool result = false; \
 		if (_vs_stack.top()) \
 		{ \
-			notifyObserversBeforeChange(name); \
+			notifyObserversBeforeChange(this, name); \
 			result = _vs_stack.top()->setValue(name, value, notify); \
 			if (result) \
-				notifyObserversOfChange(name); \
+				notifyObserversOfChange(this, name); \
 		} \
 		return result; \
 	} \
@@ -291,10 +291,10 @@ bool Object::setValue(const std::string &name, Referenced* value, bool notify)
 		bool result = false;
 		if (_vs_stack.top())
 		{
-			notifyObserversBeforeChange();
+			notifyObserversBeforeChange(this);
 			result = _vs_stack.top()->setValue(name, value, notify);
 			if (result)
-				notifyObserversOfChange();
+				notifyObserversOfChange(this);
 		}
 		return result;
 	}
@@ -457,11 +457,11 @@ bool Object::toggleValue(const std::string &name, bool &value, bool notify)
 	bool result = false;
 	if (_vs_stack.top())
 	{
-		notifyObserversBeforeChange(name);
+		notifyObserversBeforeChange(this, name);
 		result = _vs_stack.top()->toggleValue(name, value, notify);
 	}
 	if (result)
-		notifyObserversOfChange(name);
+		notifyObserversOfChange(this, name);
 	return result;
 }
 
@@ -735,7 +735,9 @@ bool Object::propValue(const std::string &name, Object* obj)
 	Value* value = getValue(name);
 	if (value)
 	{
-		obj->objectChanged(value, "");
+		Value* obj_value = obj->getValue(name);
+		if (obj_value)
+			obj_value->sync(value);
 		return true;
 	}
 	return false;

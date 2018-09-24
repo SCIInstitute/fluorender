@@ -65,7 +65,7 @@ public:
 	virtual const char* className() const { return "Value"; }
 
 	virtual void objectDeleted(void*);
-	virtual void objectChanged(void*, const std::string &exp);
+	virtual void objectChanged(void*, void*, const std::string &exp);
 
 	std::string getName() { return _name; }
 	std::string getType() { return _type; }
@@ -110,10 +110,10 @@ public:
 		if (value != _value)
 		{
 			if (notify)
-				notifyObserversBeforeChange();
+				notifyObserversBeforeChange(this);
 			_value = value;
 			if (notify)
-				notifyObserversOfChange();
+				notifyObserversOfChange(this);
 		}
 	}
 

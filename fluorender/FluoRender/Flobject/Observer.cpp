@@ -111,48 +111,40 @@ void ObserverSet::signalObjectDeleted(void* ptr)
 	_observedObject = 0;
 }
 
-void ObserverSet::signalObjectChanging(void* ptr, const std::string &exp)
+void ObserverSet::signalObjectChanging(void* ptr, void* orig_node, const std::string &exp)
 {
 	for (Observers::iterator itr = _observers.begin();
 		itr != _observers.end(); ++itr)
 	{
-		(*itr)->objectChanging(ptr, exp);
+		(*itr)->objectChanging(ptr, orig_node, exp);
 	}
 }
 
-void ObserverSet::signalObjectChanged(void* ptr, const std::string &exp)
+void ObserverSet::signalObjectChanged(void* ptr, void* orig_node, const std::string &exp)
 {
 	for (Observers::iterator itr = _observers.begin();
 		itr != _observers.end(); ++itr)
 	{
-		(*itr)->objectChanged(ptr, exp);
+		(*itr)->objectChanged(ptr, orig_node, exp);
 	}
 }
 
 //scenegraph events
-void ObserverSet::signalNodeAdded(void* parent, void* child)
+void ObserverSet::signalNodeAdded(void* ptr, void* parent, void* child)
 {
 	for (Observers::iterator itr = _observers.begin();
 		itr != _observers.end(); ++itr)
 	{
-		(*itr)->nodeAdded(parent, child);
+		(*itr)->nodeAdded(ptr, parent, child);
 	}
 }
 
-void ObserverSet::signalNodeRemoved(void* parent, void* child)
+void ObserverSet::signalNodeRemoved(void* ptr, void* parent, void* child)
 {
 	for (Observers::iterator itr = _observers.begin();
 		itr != _observers.end(); ++itr)
 	{
-		(*itr)->nodeRemoved(parent, child);
+		(*itr)->nodeRemoved(ptr, parent, child);
 	}
 }
 
-void ObserverSet::signalNodeReplaced(void* orig_node, void* new_node)
-{
-	for (Observers::iterator itr = _observers.begin();
-		itr != _observers.end(); ++itr)
-	{
-		(*itr)->nodeReplaced(orig_node, new_node);
-	}
-}

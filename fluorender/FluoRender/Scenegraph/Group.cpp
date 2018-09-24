@@ -133,13 +133,15 @@ bool Group::setChild(size_t i, Node* node)
 		origNode->removeParent(this);
 		//parent observes children
 		origNode->removeObserver(this);
+		//notify observers of change
+		notifyObserversNodeRemoved(this, origNode.get());
 
 		m_children[i] = node;
 		node->addParent(this);
 		//parent observes children
 		node->addObserver(this);
 		//notify observers of change
-		notifyObserversNodeReplaced(origNode.get(), node);
+		notifyObserversNodeAdded(this, node);
 
 		return true;
 	}
@@ -155,3 +157,37 @@ void Group::accept(NodeVisitor& nv)
 		nv.popFromNodePath();
 	}
 }
+
+//as observer
+void Group::objectChanging(void* ptr, void* orig_node, const std::string &exp)
+{
+	Referenced* refd = static_cast<Referenced*>(ptr);
+	Node* node = dynamic_cast<Node*>(refd);
+	if (node && containsNode(node) && this != orig_node)
+		notifyObserversBeforeChange(orig_node, exp);
+}
+
+void Group::objectChanged(void* ptr, void* orig_node, const std::string &exp)
+{
+	Referenced* refd = static_cast<Referenced*>(ptr);
+	Node* node = dynamic_cast<Node*>(refd);
+	if (node && containsNode(node) && this != orig_node)
+		notifyObserversOfChange(orig_node, exp);
+}
+
+void Group::nodeAdded(void* ptr, void* parent, void* child)
+{
+	Referenced* refd = static_cast<Referenced*>(ptr);
+	Node* node = dynamic_cast<Node*>(refd);
+	if (node && containsNode(node) && this!=parent)
+		notifyObserversNodeAdded(parent, child);
+}
+
+void Group::nodeRemoved(void* ptr, void* parent, void* child)
+{
+	Referenced* refd = static_cast<Referenced*>(ptr);
+	Node* node = dynamic_cast<Node*>(refd);
+	if (node && containsNode(node) && this != parent)
+		notifyObserversNodeRemoved(parent, child);
+}
+

@@ -10,6 +10,7 @@ void GroupTest2();
 void GroupTest3();
 
 void SceneGraphTest();
+void SceneGraphTest2();
 
 void SpecialValueTest();
 

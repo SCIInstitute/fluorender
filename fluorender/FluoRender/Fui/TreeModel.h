@@ -46,8 +46,8 @@ namespace FUI
 
 		//observer functions
 		virtual void objectDeleted(void*);
-		virtual void objectChanging(void*, const std::string &exp);
-		virtual void objectChanged(void*, const std::string &exp);
+		virtual void objectChanging(void*, void* orig_node, const std::string &exp);
+		virtual void objectChanged(void*, void* orig_node, const std::string &exp);
 
 		int Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 			unsigned int column, bool ascending) const override;

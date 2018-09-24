@@ -97,26 +97,24 @@ void Referenced::signalObserversAndDelete(bool signalDelete, bool doDelete) cons
 	}
 }
 
-void Referenced::notifyObserversBeforeChange(const std::string &exp) const
+void Referenced::notifyObserversBeforeChange(void* orig_node, const std::string &exp) const
 {
 	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
 
 	if (observerSet && !_hold)
 	{
-		observerSet->signalObjectChanging(const_cast<Referenced*>(this), exp);
+		observerSet->signalObjectChanging(const_cast<Referenced*>(this), orig_node, exp);
 	}
-
 }
 
-void Referenced::notifyObserversOfChange(const std::string &exp) const
+void Referenced::notifyObserversOfChange(void* orig_node, const std::string &exp) const
 {
 	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
 
 	if (observerSet && !_hold)
 	{
-		observerSet->signalObjectChanged(const_cast<Referenced*>(this), exp);
+		observerSet->signalObjectChanged(const_cast<Referenced*>(this), orig_node, exp);
 	}
-
 }
 
 //scenegraph specific events via observers
@@ -126,7 +124,7 @@ void Referenced::notifyObserversNodeAdded(void* parent, void* child) const
 
 	if (observerSet && !_hold)
 	{
-		observerSet->signalNodeAdded(parent, child);
+		observerSet->signalNodeAdded(const_cast<Referenced*>(this), parent, child);
 	}
 }
 
@@ -136,17 +134,7 @@ void Referenced::notifyObserversNodeRemoved(void* parent, void* child) const
 
 	if (observerSet && !_hold)
 	{
-		observerSet->signalNodeRemoved(parent, child);
-	}
-}
-
-void Referenced::notifyObserversNodeReplaced(void* orig_node, void* new_node) const
-{
-	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
-
-	if (observerSet && !_hold)
-	{
-		observerSet->signalNodeReplaced(orig_node, new_node);
+		observerSet->signalNodeRemoved(const_cast<Referenced*>(this), parent, child);
 	}
 }
 

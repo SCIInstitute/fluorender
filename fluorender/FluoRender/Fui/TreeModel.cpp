@@ -68,12 +68,12 @@ void TreeModel::objectDeleted(void* ptr)
 	removeObservee(refd);
 }
 
-void TreeModel::objectChanging(void* ptr, const std::string &exp)
+void TreeModel::objectChanging(void* ptr, void* orig_node, const std::string &exp)
 {
 	//before change
 }
 
-void TreeModel::objectChanged(void* ptr, const std::string &exp)
+void TreeModel::objectChanged(void* ptr, void* orig_node, const std::string &exp)
 {
 }
 

@@ -2,6 +2,8 @@
 #include "asserts.h"
 #include "SceneGraphTest.h"
 #include <Scenegraph/InfoVisitor.h>
+#include <Scenegraph/VolumeGroup.h>
+#include <Scenegraph/DecycleVisitor.h>
 
 void SceneGraphTest()
 {
@@ -62,4 +64,26 @@ void SceneGraphTest()
 	group->removeChild(data);
 
 	group->accept(visitor);
+}
+
+void SceneGraphTest2()
+{
+	std::vector<ref_ptr<Node>> list;
+	VolumeGroup* group1 = new VolumeGroup();
+	group1->setName("group1");
+	VolumeGroup* group2 = new VolumeGroup();
+	group2->setName("group2");
+	VolumeGroup* group3 = new VolumeGroup();
+	group3->setName("group3");
+	list.push_back(group1);
+	list.push_back(group2);
+	list.push_back(group3);
+
+	group1->addChild(group2);
+	group2->addChild(group1);
+	group1->addChild(group3);
+
+	DecycleVisitor visitor;
+	group1->accept(visitor);
+	while (visitor.removeCycle()) {}
 }

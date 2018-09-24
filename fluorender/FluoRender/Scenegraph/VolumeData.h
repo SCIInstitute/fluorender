@@ -75,8 +75,8 @@ namespace FL
 		virtual const VolumeData* asVolumeData() const { return this; }
 
 		//response to value changes
-		virtual void objectChanging(void*, const std::string &exp);
-		virtual void objectChanged(void*, const std::string &exp);
+		virtual void objectChanging(void*, void* orig_node, const std::string &exp);
+		virtual void objectChanged(void*, void* orig_node, const std::string &exp);
 
 		//functions from old class
 		virtual void RandomizeColor();//randomize color

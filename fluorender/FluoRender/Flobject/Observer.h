@@ -42,12 +42,11 @@ public:
 	virtual ~Observer();
 
 	virtual void objectDeleted(void*) {}
-	virtual void objectChanging(void*, const std::string &exp) {}//before change
-	virtual void objectChanged(void*, const std::string &exp) {}//after change
+	virtual void objectChanging(void*, void* orig_node, const std::string &exp) {}//before change
+	virtual void objectChanged(void*, void* orig_node, const std::string &exp) {}//after change
 	//events for scenegraph changes
-	virtual void nodeAdded(void* parent, void* child) {}
-	virtual void nodeRemoved(void* parent, void* child) {}
-	virtual void nodeReplaced(void* orig_node, void* new_node) {}
+	virtual void nodeAdded(void*, void* parent, void* child) {}
+	virtual void nodeRemoved(void*, void* parent, void* child) {}
 
 	virtual bool removeObservee(Referenced* observee);
 
@@ -72,12 +71,11 @@ public:
 	void removeObserver(Observer* observer);
 
 	void signalObjectDeleted(void* ptr);
-	void signalObjectChanging(void* ptr, const std::string &exp);
-	void signalObjectChanged(void* ptr, const std::string &exp);
+	void signalObjectChanging(void* ptr, void* orig_node, const std::string &exp);
+	void signalObjectChanged(void* ptr, void* orig_node, const std::string &exp);
 	//scenegraph events
-	void signalNodeAdded(void* parent, void* child);
-	void signalNodeRemoved(void* parent, void* child);
-	void signalNodeReplaced(void* orig_node, void* new_node);
+	void signalNodeAdded(void* ptr, void* parent, void* child);
+	void signalNodeRemoved(void* ptr, void* parent, void* child);
 
 	typedef std::set<Observer*> Observers;
 	Observers& getObservers() { return _observers; }

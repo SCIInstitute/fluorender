@@ -76,3 +76,4 @@ void Node::ascend(NodeVisitor& nv)
 {
 	std::for_each(m_parents.begin(), m_parents.end(), NodeAcceptOp(nv));
 }
+

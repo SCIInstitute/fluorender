@@ -20,8 +20,9 @@ int main(int argc, char* argv[])
 	//GroupTest3();
 
 	//SceneGraphTest();
+	SceneGraphTest2();
 
-	SpecialValueTest();
+	//SpecialValueTest();
 
 	//FactoryTest();
 

@@ -47,9 +47,9 @@ ObjectFactory::~ObjectFactory()
 
 }
 
-void ObjectFactory::objectChanged(void* ptr, const std::string &exp)
+void ObjectFactory::objectChanged(void* ptr, void* orig_node, const std::string &exp)
 {
-	Object::objectChanged(ptr, exp);//actually unnecessary, since there is nothing to sync
+	Object::objectChanged(ptr, orig_node, exp);//actually unnecessary, since there is nothing to sync
 	Referenced* refd = static_cast<Referenced*>(ptr);
 	if (refd->className() == std::string("Value"))
 	{
