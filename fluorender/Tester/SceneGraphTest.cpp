@@ -83,7 +83,6 @@ void SceneGraphTest2()
 	group2->addChild(group1);
 	group1->addChild(group3);
 
-	DecycleVisitor visitor;
-	group1->accept(visitor);
-	while (visitor.removeCycle()) {}
+	DecycleVisitor visitor(*group1);
+	visitor.removeCycle();
 }

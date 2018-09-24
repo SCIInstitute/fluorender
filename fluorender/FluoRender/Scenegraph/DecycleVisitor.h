@@ -37,7 +37,8 @@ namespace FL
 	class DecycleVisitor : public NodeVisitor
 	{
 	public:
-		DecycleVisitor() :
+		DecycleVisitor(Node& node) :
+			node_(node),
 			found_(false),
 			parent_(0),
 			child_(0)
@@ -68,22 +69,24 @@ namespace FL
 
 		bool removeCycle()
 		{
-			if (found_)
+			while (!found_)
 			{
-				//remove cycle
-				Group* group = dynamic_cast<Group*>(parent_);
-				if (group && child_)
-					group->removeChild(child_);
-				found_ = false;
-				parent_ = 0;
-				child_ = 0;
-				return true;
+				node_.accept(*this);
+				if (found_)
+				{
+					Group* group = dynamic_cast<Group*>(parent_);
+					if (group && child_)
+						group->removeChild(child_);
+					reset();
+				}
+				else
+					return true;
 			}
-			else
-				return false;
+			return false;
 		}
 
 	private:
+		Node &node_;
 		bool found_;
 		Node* parent_;
 		Node* child_;
