@@ -315,11 +315,11 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_refresh(false)
 {
 	//create root node
-	m_root = FL::ref_ptr<FL::Group>(new FL::Group());
+	m_render_view = FL::ref_ptr<FL::Group>(new FL::Group());
 	std::string root_str = "Render View";
 	if (m_vrv)
 		root_str = m_vrv->GetName().ToStdString();
-	m_root->setName(root_str);
+	m_render_view->setName(root_str);
 
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;
@@ -584,8 +584,8 @@ void VRenderGLView::Clear()
 	TextureRenderer::clear_tex_pool();
 
 	//delete groups
-	if (m_root.get())
-		m_root->removeAllChildren();
+	if (m_render_view.get())
+		m_render_view->removeAllChildren();
 	//for (int i = 0; i<(int)m_layer_list.size(); i++)
 	//{
 	//	if (!m_layer_list[i])
@@ -1332,8 +1332,8 @@ void VRenderGLView::DrawVolumes(int peel)
 		if (TextureRenderer::get_mem_swap() &&
 			TextureRenderer::get_interactive())
 			visitor.setQuotaList(&quota_vd_list);
-		if (m_root.get())
-			m_root->accept(visitor);
+		if (m_render_view.get())
+			m_render_view->accept(visitor);
 		std::vector<FL::DrawVolumeVisitor::DrawVolumeGroupList> list =
 			visitor.getResult();
 		for (auto it = list.begin();
@@ -1591,8 +1591,8 @@ void VRenderGLView::PopVolumeList()
 		return;
 
 	FL::PopVolumeVisitor visitor;
-	if (m_root.get())
-		m_root->accept(visitor);
+	if (m_render_view.get())
+		m_render_view->accept(visitor);
 	m_vd_pop_list = visitor.getResult();
 
 	//for (i = 0; i<(int)m_layer_list.size(); i++)
@@ -7100,7 +7100,7 @@ FL::VolumeData* VRenderGLView::GetAllVolumeData(int index)
 	//this is not efficient
 	FL::SearchVisitor visitor;
 	visitor.matchClassName("VolumeData");
-	m_root->accept(visitor);
+	m_render_view->accept(visitor);
 	FL::ObjectList* list = visitor.getResult();
 	if (index >= 0 && index < list->size())
 		return dynamic_cast<FL::VolumeData*>((*list)[index]);
@@ -7168,7 +7168,7 @@ FL::VolumeData* VRenderGLView::GetVolumeData(wxString &name)
 	FL::SearchVisitor visitor;
 	visitor.matchClassName("VolumeData");
 	visitor.matchName(name.ToStdString());
-	m_root->accept(visitor);
+	m_render_view->accept(visitor);
 	FL::ObjectList* list = visitor.getResult();
 	if (!list->empty())
 		return dynamic_cast<FL::VolumeData*>((*list)[0]);
@@ -7212,7 +7212,7 @@ FL::MeshData* VRenderGLView::GetMeshData(wxString &name)
 	FL::SearchVisitor visitor;
 	visitor.matchClassName("MeshData");
 	visitor.matchName(name.ToStdString());
-	m_root->accept(visitor);
+	m_render_view->accept(visitor);
 	FL::ObjectList* list = visitor.getResult();
 	if (!list->empty())
 		return dynamic_cast<FL::MeshData*>((*list)[0]);
@@ -7254,7 +7254,7 @@ FL::Annotations* VRenderGLView::GetAnnotations(wxString &name)
 	FL::SearchVisitor visitor;
 	visitor.matchClassName("Annotations");
 	visitor.matchName(name.ToStdString());
-	m_root->accept(visitor);
+	m_render_view->accept(visitor);
 	FL::ObjectList* list = visitor.getResult();
 	if (!list->empty())
 		return dynamic_cast<FL::Annotations*>((*list)[0]);
@@ -7283,7 +7283,7 @@ FL::VolumeGroup* VRenderGLView::GetGroup(wxString &name)
 	FL::SearchVisitor visitor;
 	visitor.matchClassName("VolumeGroup");
 	visitor.matchName(name.ToStdString());
-	m_root->accept(visitor);
+	m_render_view->accept(visitor);
 	FL::ObjectList* list = visitor.getResult();
 	if (!list->empty())
 		return dynamic_cast<FL::VolumeGroup*>((*list)[0]);
@@ -7327,7 +7327,7 @@ int VRenderGLView::GetAllVolumeNum()
 	//this is not efficient
 	FL::SearchVisitor visitor;
 	visitor.matchClassName("VolumeData");
-	m_root->accept(visitor);
+	m_render_view->accept(visitor);
 	FL::ObjectList* list = visitor.getResult();
 	return int(list->size());
 	//int num = 0;
@@ -7364,7 +7364,7 @@ FL::VolumeGroup* VRenderGLView::AddVolumeData(FL::VolumeData* vd, wxString group
 		group = new FL::VolumeGroup();
 
 	group->addChild(vd);
-	m_root->addChild(group);
+	m_render_view->addChild(group);
 
 	m_vd_pop_dirty = true;
 	m_load_update = true;
@@ -7460,14 +7460,14 @@ FL::VolumeGroup* VRenderGLView::AddVolumeData(FL::VolumeData* vd, wxString group
 void VRenderGLView::AddMeshData(FL::MeshData* md)
 {
 	//m_layer_list.push_back(md);
-	m_root->addChild(md);
+	m_render_view->addChild(md);
 	m_md_pop_dirty = true;
 }
 
 void VRenderGLView::AddAnnotations(FL::Annotations* ann)
 {
 	//m_layer_list.push_back(ann);
-	m_root->addChild(ann);
+	m_render_view->addChild(ann);
 }
 
 void VRenderGLView::ReplaceVolumeData(wxString &name, FL::VolumeData *dst)
@@ -8403,7 +8403,7 @@ int VRenderGLView::GetGroupNum()
 {
 	FL::SearchVisitor visitor;
 	visitor.matchClassName("VolumeGroup");
-	m_root->accept(visitor);
+	m_render_view->accept(visitor);
 	FL::ObjectList* list = visitor.getResult();
 	return int(list->size());
 	//int group_num = 0;
@@ -8421,7 +8421,7 @@ int VRenderGLView::GetLayerNum()
 {
 	//return m_layer_list.size();
 	FL::SearchVisitor visitor;
-	m_root->accept(visitor);
+	m_render_view->accept(visitor);
 	FL::ObjectList* list = visitor.getResult();
 	return int(list->size());
 }

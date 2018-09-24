@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include <Fui/TreePanel.h>
 #include <Global/Global.h>
+#include <Scenegraph/Group.h>
 #include <Scenegraph/VolumeData.h>
 #include <Scenegraph/VolumeGroup.h>
 #include "DragDrop.h"
@@ -159,6 +160,11 @@ VRenderFrame::VRenderFrame(
 	m_cur_sel_mesh(-1),
 	m_benchmark(benchmark)
 {
+	//create root node
+	m_root = FL::ref_ptr<FL::Group>(new FL::Group());
+	std::string root_str = "Active Datasets";
+	m_root->setName(root_str);
+
 	//create this first to read the settings
 	m_setting_dlg = new SettingDlg(this, this);
 
@@ -397,7 +403,8 @@ VRenderFrame::VRenderFrame(
 	//create tree view
 	m_tree_panel = new FUI::TreePanel(this, this, wxID_ANY,
 		wxDefaultPosition, wxSize(350, 300));
-	m_tree_panel->SetScenegraph(vrv->m_glview->GetRoot());
+	m_tree_panel->SetScenegraph(m_root.get());
+	m_root->addChild(vrv->m_glview->GetGroup());
 
 	//create movie view (sets the m_recorder_dlg)
 	m_movie_view = new VMovieView(this, this, wxID_ANY,
@@ -942,6 +949,7 @@ wxString VRenderFrame::CreateView(int row)
 
 	if (vrv)
 	{
+		m_root->addChild(vrv->m_glview->GetGroup());
 		vrv->SetDropTarget(new DnDFile(this, vrv));
 		m_vrv_list.push_back(vrv);
 		if (m_movie_view)
@@ -1022,7 +1030,7 @@ wxString VRenderFrame::CreateView(int row)
 		vrv->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
 	}
 
-	m_tree_panel->SetScenegraph(vrv->m_glview->GetRoot());
+	//m_tree_panel->SetScenegraph(vrv->m_glview->GetRoot());
 	UpdateTree();
 
 	if (vrv)

@@ -42,12 +42,13 @@ namespace FUI
 		TreeModel();
 		~TreeModel();
 
-		void AddView(FL::Node* node);
-
 		//observer functions
 		virtual void objectDeleted(void*);
 		virtual void objectChanging(void*, void* orig_node, const std::string &exp);
 		virtual void objectChanged(void*, void* orig_node, const std::string &exp);
+		//scenegraph events
+		virtual void nodeAdded(void*, void* parent, void* child);
+		virtual void nodeRemoved(void*, void* parent, void* child);
 
 		int Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 			unsigned int column, bool ascending) const override;
@@ -72,29 +73,20 @@ namespace FUI
 		virtual unsigned int GetChildren(const wxDataViewItem &parent,
 			wxDataViewItemArray &array) const override;
 
+		void SetRoot(FL::Node* root)
+		{
+			m_root = root;
+			root->addObserver(this);
+			ItemAdded(wxDataViewItem(0), wxDataViewItem((void*)root));
+		}
+		FL::Node* GetRoot() { return m_root; }
+
 		friend class TreeUpdater;
 
 	private:
-		//FL::Node *m_root;//also observes root
+		FL::Node *m_root;//also observes root
 	};
 
-	class TreeUpdater : public FL::NodeVisitor
-	{
-	public:
-		TreeUpdater(TreeModel &tree_model) :
-			FL::NodeVisitor(),
-			m_tree_model(tree_model)
-		{
-			setTraversalMode(FL::NodeVisitor::TRAVERSE_ALL_CHILDREN);
-		}
-
-		virtual void apply(FL::Node& node);
-
-		virtual void apply(FL::Group& group);
-
-	private:
-		TreeModel &m_tree_model;
-	};
 }
 
 #endif//_TREEMODEL_H_

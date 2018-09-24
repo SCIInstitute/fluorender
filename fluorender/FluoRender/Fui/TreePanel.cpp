@@ -94,8 +94,6 @@ TreePanel::TreePanel(wxWindow* frame,
 
 	//create data tree
 	m_tree_ctrl = new wxDataViewCtrl(this, wxID_ANY);
-	m_tree_model = new TreeModel;
-	m_tree_ctrl->AssociateModel(m_tree_model.get());
 	m_tree_ctrl->EnableDragSource(wxDF_INVALID);
 	m_tree_ctrl->EnableDropTarget(wxDF_INVALID);
 	//wxImageList *images = new wxImageList(16, 16, true);
@@ -136,8 +134,10 @@ TreePanel::~TreePanel()
 
 void TreePanel::SetScenegraph(FL::Node* root)
 {
-	m_tree_model->AddView(root);
+	m_tree_model = new TreeModel;
+	m_tree_model->SetRoot(root);
 
+	m_tree_ctrl->AssociateModel(m_tree_model.get());
 }
 
 //seelction

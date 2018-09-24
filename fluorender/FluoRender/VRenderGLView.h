@@ -109,6 +109,7 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FL
 {
+	class Group;
 	class VolumeData;
 	class VolumeGroup;
 }
@@ -128,7 +129,7 @@ public:
 	~VRenderGLView();
 
 	//root of the scenegraph
-	FL::Group* GetRoot() { return m_root.get(); }
+	FL::Group* GetGroup() { return m_render_view.get(); }
 
 	//for degugging, this allows inspection of the pixel format actually given.
 #ifdef _WIN32
@@ -652,7 +653,7 @@ private:
 	vector <MeshData*> m_md_pop_list;
 	//real data list
 	//vector <TreeLayer*> m_layer_list;
-	FL::ref_ptr<FL::Group> m_root;	//root of the scenegraph
+	FL::ref_ptr<FL::Group> m_render_view;	//root of the render view
 									//this is a temporary measure,
 									//as data will be managed by a new view object in the future
 	//ruler list

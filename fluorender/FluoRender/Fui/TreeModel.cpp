@@ -30,7 +30,8 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace FUI;
 
-TreeModel::TreeModel()
+TreeModel::TreeModel():
+	m_root(0)
 {
 
 }
@@ -40,29 +41,10 @@ TreeModel::~TreeModel()
 
 }
 
-void TreeModel::AddView(FL::Node* node)
-{
-	node->addObserver(this);
-	//update
-	TreeUpdater updater(*this);
-	node->accept(updater);
-}
-
 //observer functions
 void TreeModel::objectDeleted(void* ptr)
 {
 	FL::Referenced* refd = static_cast<FL::Referenced*>(ptr);
-	//delete from tree
-	//FL::Node* node = dynamic_cast<FL::Node*>(refd);
-	//if (node)
-	//{
-	//	wxDataViewItem parent = wxDataViewItem(0);
-	//	FL::Node* parent_node = node->getParent(0);
-	//	if (parent_node)
-	//		wxDataViewItem parent = wxDataViewItem((void*)parent_node);
-	//	wxDataViewItem child((void*)node);
-	//	ItemDeleted(parent, child);
-	//}
 
 	//remove observee
 	removeObservee(refd);
@@ -75,6 +57,26 @@ void TreeModel::objectChanging(void* ptr, void* orig_node, const std::string &ex
 
 void TreeModel::objectChanged(void* ptr, void* orig_node, const std::string &exp)
 {
+}
+
+void TreeModel::nodeAdded(void* ptr, void* parent, void* child)
+{
+	if (parent && child)
+	{
+		wxDataViewItem parent_item = wxDataViewItem(parent);
+		wxDataViewItem child_item = wxDataViewItem(child);
+		ItemAdded(parent_item, child_item);
+	}
+}
+
+void TreeModel::nodeRemoved(void* ptr, void* parent, void* child)
+{
+	if (parent && child)
+	{
+		wxDataViewItem parent_item = wxDataViewItem(parent);
+		wxDataViewItem child_item = wxDataViewItem(child);
+		ItemDeleted(parent_item, child_item);
+	}
 }
 
 int TreeModel::Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
@@ -165,7 +167,7 @@ unsigned int TreeModel::GetChildren(const wxDataViewItem &parent,
 	FL::Node *node = (FL::Node*)parent.GetID();
 	if (!node)
 	{
-		array.Add(wxDataViewItem(0));
+		array.Add(wxDataViewItem((void*)m_root));
 		return 1;
 	}
 
@@ -183,25 +185,3 @@ unsigned int TreeModel::GetChildren(const wxDataViewItem &parent,
 	return size;
 }
 
-//update tree model with the updater
-void TreeUpdater::apply(FL::Node& node)
-{
-	wxDataViewItem parent = wxDataViewItem(0);
-	wxDataViewItem child((void*)&node);
-	FL::Node* parent_node = node.getParent(0);
-	if (parent_node)
-		parent = wxDataViewItem((void*)parent_node);
-	m_tree_model.ItemAdded(parent, child);
-	traverse(node);
-}
-
-void TreeUpdater::apply(FL::Group& group)
-{
-	wxDataViewItem parent = wxDataViewItem(0);
-	wxDataViewItem child((void*)&group);
-	FL::Node* parent_node = group.getParent(0);
-	if (parent_node)
-		parent = wxDataViewItem((void*)parent_node);
-	m_tree_model.ItemAdded(parent, child);
-	traverse(group);
-}
