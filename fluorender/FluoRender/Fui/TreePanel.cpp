@@ -30,9 +30,9 @@ DEALINGS IN THE SOFTWARE.
 #include <Global/Global.h>
 #include <Scenegraph/VolumeData.h>
 #include <Formats/png_resource.h>
+#include <img/icons.h>
 #include <img/tick.xpm>
 #include <img/cross.xpm>
-#include <img/icons.h>
 
 using namespace FUI;
 

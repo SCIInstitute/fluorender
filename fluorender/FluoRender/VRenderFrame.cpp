@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "VRenderFrame.h"
 #include <Fui/TreePanel.h>
+#include <Fui/ListPanel.h>
 #include <Global/Global.h>
 #include <Scenegraph/Group.h>
 #include <Scenegraph/VolumeData.h>
@@ -399,7 +400,7 @@ VRenderFrame::VRenderFrame(
 	m_vrv_list.push_back(vrv);
 
 	//create list view
-	m_list_panel = new ListPanel(this, this, wxID_ANY,
+	m_list_panel = new FUI::ListPanel(this, this, wxID_ANY,
 		wxDefaultPosition, wxSize(350, 300));
 
 	//create tree view
@@ -2095,7 +2096,7 @@ void VRenderFrame::UpdateTree(wxString name)
 
 void VRenderFrame::UpdateList()
 {
-	m_list_panel->DeleteAllItems();
+/*	m_list_panel->DeleteAllItems();
 
 	//for (int i=0 ; i<m_data_mgr.GetVolumeNum() ; i++)
 	//{
@@ -2128,7 +2129,7 @@ void VRenderFrame::UpdateList()
 			wxString path = ann->GetPath();
 			m_list_panel->Append(DATA_ANNOTATIONS, name, path);
 		}
-	}
+	}*/
 }
 
 DataManager* VRenderFrame::GetDataManager()
@@ -2141,7 +2142,7 @@ FUI::TreePanel *VRenderFrame::GetTree()
 	return m_tree_panel;
 }
 
-ListPanel *VRenderFrame::GetList()
+FUI::ListPanel *VRenderFrame::GetList()
 {
 	return m_list_panel;
 }

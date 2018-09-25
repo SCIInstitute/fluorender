@@ -25,63 +25,40 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _TREEMODEL_H_
-#define _TREEMODEL_H_
+#ifndef _LISTMODEL_H_
+#define _LISTMODEL_H_
 
 #include <wx/dataview.h>
 #include <Flobject/Observer.h>
-#include <Scenegraph/Node.h>
-#include <Scenegraph/NodeVisitor.h>
 
 namespace FUI
 {
-	class TreeModel : public wxDataViewModel, public FL::Observer
+	class ListModel : public wxDataViewVirtualListModel, public FL::Observer
 	{
 	public:
-		TreeModel();
+		ListModel();
 
 		//observer functions
 		virtual void objectDeleted(void*);
 		virtual void objectChanging(void*, void* orig_node, const std::string &exp);
 		virtual void objectChanged(void*, void* orig_node, const std::string &exp);
-		//scenegraph events
-		virtual void nodeAdded(void*, void* parent, void* child);
-		virtual void nodeRemoved(void*, void* parent, void* child);
 
-		int Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
-			unsigned int column, bool ascending) const override;
-
+		//model definition
 		virtual unsigned int GetColumnCount() const override;
 
 		virtual wxString GetColumnType(unsigned int col) const override;
 
-		virtual void GetValue(wxVariant &variant,
-			const wxDataViewItem &item, unsigned int col) const override;
+		virtual void GetValueByRow(wxVariant &vanriant,
+			unsigned int row, unsigned int col) const override;
 
-		virtual bool SetValue(const wxVariant &variant,
-			const wxDataViewItem &item, unsigned int col) override;
+		virtual bool GetAttrByRow(unsigned int row, unsigned int col,
+			wxDataViewItemAttr &attr) const override;
 
-		virtual bool IsEnabled(const wxDataViewItem &item,
-			unsigned int col) const override;
-
-		virtual wxDataViewItem GetParent(const wxDataViewItem &item) const override;
-
-		virtual bool IsContainer(const wxDataViewItem &item) const override;
-
-		virtual unsigned int GetChildren(const wxDataViewItem &parent,
-			wxDataViewItemArray &array) const override;
-
-		void SetRoot(FL::Node* root)
-		{
-			m_root = root;
-			root->addObserver(this);
-		}
-		FL::Node* GetRoot() { return m_root; }
+		virtual bool SetValueByRow(const wxVariant &variant,
+			unsigned int row, unsigned int col) override;
 
 	private:
-		FL::Node *m_root;//also observes root
 	};
-
 }
 
-#endif//_TREEMODEL_H_
+#endif//_LISTMODEL_H_

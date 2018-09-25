@@ -36,11 +36,6 @@ TreeModel::TreeModel():
 
 }
 
-TreeModel::~TreeModel()
-{
-
-}
-
 //observer functions
 void TreeModel::objectDeleted(void* ptr)
 {
