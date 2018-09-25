@@ -188,7 +188,7 @@ void ObjectFactory::createDefault()
 	{
 		Object* object = new Object();
 		object->setName(default_object_name_);
-		objects_.push_back(object);
+		objects_.push_front(object);
 	}
 }
 
@@ -207,7 +207,10 @@ Object* ObjectFactory::clone(Object* object)
 	std::string name = "object" + std::to_string(local_id_);
 	new_object->setName(name);
 
-	objects_.push_back(new_object);
+	objects_.push_front(new_object);
+
+	//notify observers
+	notifyObserversNodeAdded(this, object);
 
 	return new_object;
 }

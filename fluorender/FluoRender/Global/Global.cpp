@@ -33,4 +33,6 @@ Global Global::instance_;
 Global::Global()
 {
 	volume_factory_ = ref_ptr<VolumeFactory>(new VolumeFactory());
+	mesh_factory_ = ref_ptr<MeshFactory>(new MeshFactory());
+	annotations_factory_ = ref_ptr<AnnotationFactory>(new AnnotationFactory());
 }

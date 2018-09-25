@@ -80,6 +80,9 @@ ListPanel::ListPanel(wxWindow *frame,
 	m_list_ctrl->EnableDragSource(wxDF_UNICODETEXT);
 	m_list_ctrl->EnableDropTarget(wxDF_UNICODETEXT);
 	m_list_ctrl->SetDoubleBuffered(true);
+	m_list_model = new ListModel;
+	m_list_model->SetRoot();
+	m_list_ctrl->AssociateModel(m_list_model.get());
 
 	//append columns
 	m_list_ctrl->AppendTextColumn("Name", 0,

@@ -42,6 +42,9 @@ namespace FUI
 		virtual void objectDeleted(void*);
 		virtual void objectChanging(void*, void* orig_node, const std::string &exp);
 		virtual void objectChanged(void*, void* orig_node, const std::string &exp);
+		//scenegraph events
+		virtual void nodeAdded(void*, void* parent, void* child);
+		virtual void nodeRemoved(void*, void* parent, void* child);
 
 		//model definition
 		virtual unsigned int GetColumnCount() const override;
@@ -56,6 +59,8 @@ namespace FUI
 
 		virtual bool SetValueByRow(const wxVariant &variant,
 			unsigned int row, unsigned int col) override;
+
+		void SetRoot();
 
 	private:
 	};

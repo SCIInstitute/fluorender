@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <Fui/ListModel.h>
+#include <Global/Global.h>
 
 using namespace FUI;
 
@@ -52,6 +53,28 @@ void ListModel::objectChanged(void* ptr, void* orig_node, const std::string &exp
 {
 }
 
+void ListModel::nodeAdded(void* ptr, void* parent, void* child)
+{
+	if (child)
+	{
+		RowAppended();
+	}
+}
+
+void ListModel::nodeRemoved(void* ptr, void* parent, void* child)
+{
+	if (child)
+	{
+		FL::Referenced* refd = static_cast<FL::Referenced*>(child);
+		if (refd)
+		{
+			FL::Object* obj = dynamic_cast<FL::Object*>(refd);
+			size_t index = FL::Global::instance().getIndex(obj);
+			RowDeleted(index);
+		}
+	}
+}
+
 //model definition
 unsigned int ListModel::GetColumnCount() const
 {
@@ -66,6 +89,8 @@ wxString ListModel::GetColumnType(unsigned int col) const
 		return "string";
 	case 1:
 		return "string";
+	case 2:
+		return "string";
 	}
 	return "string";
 }
@@ -73,7 +98,25 @@ wxString ListModel::GetColumnType(unsigned int col) const
 void ListModel::GetValueByRow(wxVariant &variant,
 	unsigned int row, unsigned int col) const
 {
-
+	FL::Object* obj = FL::Global::instance().get(row);
+	if (!obj)
+		return;
+	switch (col)
+	{
+	case 0:
+		variant = obj->getName();
+		break;
+	case 1:
+		variant = obj->className();
+		break;
+	case 2:
+		{
+			std::wstring path;
+			obj->getValue("tex path", path);
+			variant = path;
+		}
+		break;
+	}
 }
 
 bool ListModel::GetAttrByRow(unsigned int row, unsigned int col,
@@ -86,4 +129,9 @@ bool ListModel::SetValueByRow(const wxVariant &variant,
 	unsigned int row, unsigned int col)
 {
 	return true;
+}
+
+void ListModel::SetRoot()
+{
+	FL::Global::instance().getVolumeFactory().addObserver(this);
 }

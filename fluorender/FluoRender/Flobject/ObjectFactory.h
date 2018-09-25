@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FL_OBJECTFACTORY
 
 #include <Flobject/Object.h>
-#include <vector>
+#include <deque>
 #include <string>
 #include <iostream>
 #include <boost/property_tree/ptree.hpp>
@@ -86,6 +86,11 @@ namespace FL
 				size_t end = pos + num;
 				if (end > objects_.size())
 					end = objects_.size();
+
+				//notify observers of change
+				for (auto it = objects_.begin() + pos;
+					it != objects_.begin() + end; ++it)
+					notifyObserversNodeRemoved(this, it->get());
 
 				objects_.erase(objects_.begin() + pos, objects_.begin() + end);
 			}
@@ -221,7 +226,7 @@ namespace FL
 
 		//reserve the first object for default
 		//objects created later can be cloned from the first
-		std::vector<ref_ptr<Object>> objects_;
+		std::deque<ref_ptr<Object>> objects_;
 	};
 
 }

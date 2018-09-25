@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #define _GLOBAL_H_
 
 #include <Scenegraph/VolumeFactory.h>
+#include <Scenegraph/MeshFactory.h>
+#include <Scenegraph/AnnotationFactory.h>
 
 namespace FL
 {
@@ -37,6 +39,54 @@ namespace FL
 	{
 	public:
 		static Global& instance() { return instance_; }
+
+		inline size_t getNum()
+		{
+			size_t volume_num = volume_factory_->getNum();
+			size_t mesh_num = mesh_factory_->getNum();
+			size_t annotations_num = annotations_factory_->getNum();
+
+			return volume_num + mesh_num + annotations_num;
+		}
+
+		inline Object* get(size_t i)
+		{
+			size_t volume_num = volume_factory_->getNum();
+			size_t mesh_num = mesh_factory_->getNum();
+			size_t annotations_num = annotations_factory_->getNum();
+
+			if (i < volume_num)
+				return volume_factory_->get(i);
+			else if (i < volume_num + mesh_num)
+				return mesh_factory_->get(i - volume_num);
+			else if (i < volume_num + mesh_num + annotations_num)
+				return annotations_factory_->get(i - volume_num - mesh_num);
+			return 0;
+		}
+
+		inline size_t getIndex(const Object* object) const
+		{
+			size_t volume_num = volume_factory_->getNum();
+			size_t mesh_num = mesh_factory_->getNum();
+			size_t annotations_num = annotations_factory_->getNum();
+
+			for (size_t i = 0; i < volume_num; ++i)
+			{
+				if (volume_factory_->get(i) == object)
+					return i;
+			}
+			for (size_t i = 0; i < mesh_num; ++i)
+			{
+				if (mesh_factory_->get(i) == object)
+					return i + volume_num;
+			}
+			for (size_t i = 0; i < annotations_num; ++i)
+			{
+				if (annotations_factory_->get(i) == object)
+					return i + volume_num + mesh_num;
+			}
+			return volume_num + mesh_num + annotations_num;
+		}
 
 		VolumeFactory& getVolumeFactory()
 		{ return *volume_factory_; }
@@ -47,6 +97,8 @@ namespace FL
 		static Global instance_;
 
 		ref_ptr<VolumeFactory> volume_factory_;
+		ref_ptr<MeshFactory> mesh_factory_;
+		ref_ptr<AnnotationFactory> annotations_factory_;
 	};
 }
 

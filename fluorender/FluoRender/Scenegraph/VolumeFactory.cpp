@@ -50,7 +50,7 @@ void VolumeFactory::createDefault()
 	{
 		VolumeData* vd = new VolumeData();
 		vd->setName(default_object_name_);
-		objects_.push_back(vd);
+		objects_.push_front(vd);
 
 		//add default values here
 		//output (2d) adjustments
@@ -226,8 +226,11 @@ VolumeData* VolumeFactory::clone(VolumeData* vd)
 	std::string name = "volume" + std::to_string(local_id_);
 	new_vd->setName(name);
 
-	objects_.push_back(new_vd);
+	objects_.push_front(new_vd);
 	setValue("current", new_vd);
+
+	//notify observers
+	notifyObserversNodeAdded(this, new_vd);
 
 	return dynamic_cast<VolumeData*>(new_vd);
 }

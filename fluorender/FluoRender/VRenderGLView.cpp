@@ -4885,9 +4885,9 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		if (wxGetKeyState(wxKeyCode('m')) &&
 			!m_save_mask)
 		{
-			if (frame && frame->GetList())
-				frame->GetList()->SaveAllMasks();
-			m_save_mask = true;
+			//if (frame && frame->GetList())
+			//	frame->GetList()->SaveAllMasks();
+			//m_save_mask = true;
 		}
 		if (!wxGetKeyState(wxKeyCode('m')) &&
 			m_save_mask)

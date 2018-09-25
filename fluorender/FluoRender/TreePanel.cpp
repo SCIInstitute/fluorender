@@ -1128,8 +1128,8 @@ void DataTreeCtrl::UpdateSelection()
 					list_type = DATA_MESH;
 				else if (item_data->type == 4)
 					list_type = DATA_ANNOTATIONS;
-				if (vr_frame->GetList())
-					vr_frame->GetList()->SetSelection(list_type, name);
+				//if (vr_frame->GetList())
+				//	vr_frame->GetList()->SetSelection(list_type, name);
 			}
 		}
 	}
