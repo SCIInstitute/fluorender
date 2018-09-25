@@ -171,6 +171,7 @@ namespace FL
 		//handle observer notifications
 		void OnMipModeChanging();
 		void OnMipModeChanged();//modes
+		void OnViewportChanged();
 
 		friend class VolumeFactory;
 	};

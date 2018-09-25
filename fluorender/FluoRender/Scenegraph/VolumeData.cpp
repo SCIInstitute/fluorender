@@ -104,6 +104,8 @@ void VolumeData::objectChanged(void* ptr, void* orig_node, const std::string &ex
 		//handle different value changes
 		if (name == "mip mode")
 			OnMipModeChanged();
+		if (name == "viewport")
+			OnViewportChanged();
 	}
 }
 
@@ -209,6 +211,17 @@ void VolumeData::OnMipModeChanged()
 		m_vr->set_offset(1.0);
 		break;
 	}
+}
+
+void VolumeData::OnViewportChanged()
+{
+	if (!m_vr)
+		return;
+
+	FLTYPE::GLint4 vp;
+	getValue("viewport", vp);
+
+	m_vr->set_viewport(vp.get());
 }
 
 //functions from old class
