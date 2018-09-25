@@ -57,14 +57,11 @@ void DrawVolumeVisitor::apply(Node& node)
 
 void DrawVolumeVisitor::apply(Group& group)
 {
-	VolumeGroup* vg = group.asVolumeGroup();
-	if (vg)
-	{
-		long blend_mode;
-		vg->getValue("blend mode", blend_mode);
-		m_draw_list.push_back(DrawVolumeGroupList(DVG_MULTI));
-		traverse(group);
-	}
+	long blend_mode;
+	bool result;
+	result = group.getValue("blend mode", blend_mode);
+	m_draw_list.push_back(DrawVolumeGroupList(DVG_MULTI));
+	traverse(group);
 }
 
 void DrawVolumeVisitor::addVolume(DrawVolumeGroupType type, VolumeData* vd)

@@ -64,14 +64,10 @@ namespace FL
 
 		virtual void apply(FL::Group& group)
 		{
-			VolumeGroup* vg = group.asVolumeGroup();
-			if (vg)
-			{
-				bool disp;
-				vg->getValue("display", disp);
-				if (disp)
-					traverse(group);
-			}
+			bool disp;
+			bool result = group.getValue("display", disp);
+			if (!result || disp)
+				traverse(group);
 		}
 
 		std::vector<VolumeData*> getResult() { return m_vd_pop_list; }
