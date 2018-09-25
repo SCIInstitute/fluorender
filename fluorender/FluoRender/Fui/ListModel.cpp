@@ -75,6 +75,12 @@ void ListModel::nodeRemoved(void* ptr, void* parent, void* child)
 	}
 }
 
+int ListModel::Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
+	unsigned int column, bool ascending) const
+{
+	return wxDataViewModel::Compare(item1, item2, column, ascending);
+}
+
 //model definition
 unsigned int ListModel::GetColumnCount() const
 {

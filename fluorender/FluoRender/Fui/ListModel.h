@@ -46,6 +46,9 @@ namespace FUI
 		virtual void nodeAdded(void*, void* parent, void* child);
 		virtual void nodeRemoved(void*, void* parent, void* child);
 
+		int Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
+			unsigned int column, bool ascending) const override;
+
 		//model definition
 		virtual unsigned int GetColumnCount() const override;
 

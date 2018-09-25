@@ -224,8 +224,8 @@ namespace FL
 		static unsigned int global_id_;
 		unsigned int local_id_;
 
-		//reserve the first object for default
-		//objects created later can be cloned from the first
+		//reserve the LAST object for default
+		//objects created later can be cloned from the default
 		std::deque<ref_ptr<Object>> objects_;
 	};
 
