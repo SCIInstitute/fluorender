@@ -62,9 +62,11 @@ VolumeData::VolumeData(const VolumeData& data, const CopyOp& copyop, bool copy_v
 	m_reader(0)
 {
 	//volume renderer and texture
-	if (data.m_vr)
-		m_vr = new FLIVR::VolumeRenderer(*data.m_vr);
-	m_tex = data.m_tex;
+	//if (data.m_vr)
+	//	m_vr = new FLIVR::VolumeRenderer(*data.m_vr);
+	//else
+	//	m_vr = new FLIVR::VolumeRenderer();
+	//m_tex = data.m_tex;
 	if (copy_values)
 		copyValues(data, copyop);
 }
@@ -176,6 +178,18 @@ void VolumeData::objectChanged(void* ptr, void* orig_node, const std::string &ex
 			OnSpacingChanged();
 		else if (name == "spc z")
 			OnSpacingChanged();
+		else if (name == "base spc x")
+			OnBaseSpacingChanged();
+		else if (name == "base spc y")
+			OnBaseSpacingChanged();
+		else if (name == "base spc z")
+			OnBaseSpacingChanged();
+		else if (name == "spc scl x")
+			OnSpacingScaleChanged();
+		else if (name == "spc scl y")
+			OnSpacingScaleChanged();
+		else if (name == "spc scl z")
+			OnSpacingScaleChanged();
 	}
 }
 
@@ -597,6 +611,28 @@ void VolumeData::OnSpacingChanged()
 	//m_tex->get_bounds(bbox);
 }
 
+void VolumeData::OnBaseSpacingChanged()
+{
+	if (!m_tex)
+		return;
+	double spc_x, spc_y, spc_z;
+	getValue("base spc x", spc_x);
+	getValue("base spc y", spc_y);
+	getValue("base spc z", spc_z);
+	m_tex->set_base_spacings(spc_x, spc_y, spc_z);
+}
+
+void VolumeData::OnSpacingScaleChanged()
+{
+	if (!m_tex)
+		return;
+	double spc_x, spc_y, spc_z;
+	getValue("spc scl x", spc_x);
+	getValue("spc scl y", spc_y);
+	getValue("spc scl z", spc_z);
+	m_tex->set_spacing_scales(spc_x, spc_y, spc_z);
+}
+
 //functions from old class
 //randomize color
 void VolumeData::RandomizeColor()
@@ -633,16 +669,6 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 	}
 
 	Nrrd *nv = data;
-	setValue("res x", long(nv->axis[0].size));
-	setValue("res y", long(nv->axis[1].size));
-	setValue("res z", long(nv->axis[2].size));
-
-	FLTYPE::BBox bounds;
-	FLTYPE::Point pmax(data->axis[0].max, data->axis[1].max, data->axis[2].max);
-	FLTYPE::Point pmin(data->axis[0].min, data->axis[1].min, data->axis[2].min);
-	bounds.extend(pmin);
-	bounds.extend(pmax);
-	setValue("bounds", bounds);
 
 	m_tex = new FLIVR::Texture();
 	bool skip_brick;
@@ -682,7 +708,6 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 			delete m_vr;
 
 		FLTYPE::PlaneSet planeset(6);
-		setValue("clip planes", planeset);
 
 		//this needs to be made consistent in the future
 		vector<FLIVR::Plane*> planelist(0);
@@ -693,6 +718,7 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 		}
 
 		m_vr = new FLIVR::VolumeRenderer(m_tex, planelist, true);
+		setValue("clip planes", planeset);
 		double sample_rate;
 		getValue("sample rate", sample_rate);
 		m_vr->set_sampling_rate(sample_rate);
@@ -711,6 +737,31 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 		m_vr->set_gm_scale(int_scale);
 
 		OnMipModeChanged();
+
+		setValue("res x", long(nv->axis[0].size));
+		setValue("res y", long(nv->axis[1].size));
+		setValue("res z", long(nv->axis[2].size));
+		FLTYPE::BBox bounds;
+		FLTYPE::Point pmax(data->axis[0].max, data->axis[1].max, data->axis[2].max);
+		FLTYPE::Point pmin(data->axis[0].min, data->axis[1].min, data->axis[2].min);
+		bounds.extend(pmin);
+		bounds.extend(pmax);
+		setValue("bounds", bounds);
+
+		bool depth_atten;
+		double da_int, da_start, da_end;
+		getValue("depth atten", depth_atten);
+		getValue("da int", da_int);
+		getValue("da start", da_start);
+		getValue("da end", da_end);
+		m_vr->set_fog(false, da_int, da_start, da_end);
+		
+		double spcx, spcy, spcz;
+		getValue("spc x", spcx);
+		getValue("spc y", spcy);
+		getValue("spc z", spcz);
+		m_tex->set_spacings(spcx, spcy, spcz);
+		m_tex->set_base_spacings(spcx, spcy, spcz);
 	}
 
 	return 1;

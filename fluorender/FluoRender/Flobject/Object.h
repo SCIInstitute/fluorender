@@ -75,14 +75,21 @@ public:
 		for (auto it = obj._vs_stack.top()->getValues().begin();
 			it != obj._vs_stack.top()->getValues().end(); ++it)
 		{
+			Value* value = 0;
 			if (copyop.getCopyFlags() & CopyOp::DEEP_COPY_VALUES)
-				addValue(it->second->clone());
+				value = it->second->clone();
 			else
-				addValue(it->second.get());
+				value = it->second.get();
+			if (value)
+			{
+				addValue(value);
+				//also observe the values
+				value->addObserver(this);
+				value->notify();
+			}
 
-			//also observe the values
-			it->second->addObserver(this);
-			it->second->notify();
+			//it->second->addObserver(this);
+			//it->second->notify();
 		}
 	}
 

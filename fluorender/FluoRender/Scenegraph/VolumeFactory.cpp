@@ -129,7 +129,7 @@ void VolumeFactory::createDefault()
 		//spacing
 		vd->addValue("spc x", double(1));
 		vd->addValue("spc y", double(1));
-		vd->addValue("spc z", double(1));
+		vd->addValue("spc z", double(3));
 		vd->addValue("spc from file", bool(false));//if spacing value are from original file, otherwise use default settings
 		//added for multires data
 		vd->addValue("base spc x", double(1));

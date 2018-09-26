@@ -3216,6 +3216,7 @@ void VRenderGLView::DrawOVER(FL::VolumeData* vd, bool mask, int peel)
 		vd->setValue("da end", m_fog_end);
 		vd->setValue("viewport", FLTYPE::GLint4(vp));
 		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color));
+		vd->GetRenderer()->set_clear_color(clear_color);
 		vd->setValue("cur framebuffer", (unsigned long)m_cur_framebuffer);
 		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor);
 	}

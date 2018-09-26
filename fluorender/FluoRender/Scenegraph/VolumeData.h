@@ -202,6 +202,8 @@ namespace FL
 		void OnColormapTypeChanged();
 		void OnColormapProjChanged();
 		void OnSpacingChanged();
+		void OnBaseSpacingChanged();
+		void OnSpacingScaleChanged();
 
 		friend class VolumeFactory;
 	};
