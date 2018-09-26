@@ -60,7 +60,7 @@ namespace FL
 	{
 	public:
 		Annotations();
-		Annotations(const Annotations& data, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
+		Annotations(const Annotations& data, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
 
 		virtual Object* clone(const CopyOp& copyop) const
 		{

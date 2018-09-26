@@ -57,7 +57,7 @@ namespace FL
 	{
 	public:
 		VolumeData();
-		VolumeData(const VolumeData& data, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
+		VolumeData(const VolumeData& data, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
 
 		virtual Object* clone(const CopyOp& copyop) const
 		{
@@ -169,9 +169,32 @@ namespace FL
 		void SetShuffledID(unsigned int* val);
 
 		//handle observer notifications
+		//most are for setting values in the renderer
+		//this will be changed when rendering pipeline is restructured
 		void OnMipModeChanging();
 		void OnMipModeChanged();//modes
 		void OnViewportChanged();
+		void OnClearColorChanged();
+		void OnCurFramebufferChanged();
+		void OnCompressionChanged();
+		void OnInvertChanged();
+		void OnMaskModeChanged();
+		void OnNoiseRedctChanged();
+		void On2dDmapIdChanged();
+		void OnGamma3dChanged();
+		void OnExtractBoundaryChanged();
+		void OnSaturationChanged();
+		void OnLowThresholdChanged();
+		void OnHighThresholdChanged();
+		void OnColorChanged();
+		void OnSecColorChanged();
+		void OnSecColorSetChanged();
+		void OnLuminanceChanged();
+		void OnAlphaChanged();
+		void OnAlphaEnableChanged();
+		void OnMaskThreshChanged();
+		void OnUseMaskThreshChanged();
+		void OnShadingEnableChanged();
 
 		friend class VolumeFactory;
 	};

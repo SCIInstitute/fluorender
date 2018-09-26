@@ -57,7 +57,7 @@ namespace FL
 	{
 	public:
 		Node();
-		Node(const Node&, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
+		Node(const Node&, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
 
 		virtual Object* clone(const CopyOp& copyop) const
 		{ return new Node(*this, copyop); }

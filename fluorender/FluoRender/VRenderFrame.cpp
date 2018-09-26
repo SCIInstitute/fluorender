@@ -1007,26 +1007,7 @@ wxString VRenderFrame::CreateView(int row)
 			{
 				FL::VolumeData* vd = vrv0->GetDispVolumeData(i);
 				if (vd)
-				{
-					FL::VolumeData* vd_add =
-						FL::Global::instance().getVolumeFactory().clone(vd);
-					if (vd_add)
-					{
-						int chan_num = vrv->GetAny();
-						FLTYPE::Color color(1.0, 1.0, 1.0);
-						if (chan_num == 0)
-							color = FLTYPE::Color(1.0, 0.0, 0.0);
-						else if (chan_num == 1)
-							color = FLTYPE::Color(0.0, 1.0, 0.0);
-						else if (chan_num == 2)
-							color = FLTYPE::Color(0.0, 0.0, 1.0);
-
-						if (chan_num >= 0 && chan_num < 3)
-							vd_add->setValue("color", color);
-
-						vrv->AddVolumeData(vd_add);
-					}
-				}
+					vrv->AddVolumeData(vd);
 			}
 		}
 		//update

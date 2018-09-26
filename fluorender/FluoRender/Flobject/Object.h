@@ -50,7 +50,7 @@ public:
 
 	Object();
 
-	Object(const Object& obj, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
+	Object(const Object& obj, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
 
 	virtual Object* clone(const CopyOp& copyop) const { return new Object(*this, copyop); };
 
@@ -82,6 +82,7 @@ public:
 
 			//also observe the values
 			it->second->addObserver(this);
+			it->second->notify();
 		}
 	}
 

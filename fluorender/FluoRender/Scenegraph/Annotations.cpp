@@ -35,9 +35,11 @@ Annotations::Annotations()
 {
 }
 
-Annotations::Annotations(const Annotations& data, const CopyOp& copyop) :
-	Node(data, copyop)
+Annotations::Annotations(const Annotations& data, const CopyOp& copyop, bool copy_values) :
+	Node(data, copyop, false)
 {
+	if (copy_values)
+		copyValues(data, copyop);
 }
 
 Annotations::~Annotations()

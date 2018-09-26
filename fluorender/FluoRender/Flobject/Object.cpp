@@ -37,18 +37,23 @@ Object::Object():
 	_vs_stack.push(value_set);
 }
 
-Object::Object(const Object& obj, const CopyOp& copyop):
+Object::Object(const Object& obj, const CopyOp& copyop, bool copy_values):
 	Referenced(),
 	_id(0),
 	m_name(obj.m_name)
 {
-	_vs_stack.push(obj._vs_stack.top()->clone(copyop));
-	//also observe the values
-	for (auto it = _vs_stack.top()->getValues().begin();
-		it != _vs_stack.top()->getValues().end(); ++it)
-	{
-		it->second->addObserver(this);
-	}
+	//_vs_stack.push(obj._vs_stack.top()->clone(copyop));
+	////also observe the values
+	//for (auto it = _vs_stack.top()->getValues().begin();
+	//	it != _vs_stack.top()->getValues().end(); ++it)
+	//{
+	//	it->second->addObserver(this);
+	//	it->second->notify();
+	//}
+	ValueSet* value_set = new ValueSet();
+	_vs_stack.push(value_set);
+	if (copy_values)
+		copyValues(obj, copyop);
 }
 
 Object::~Object()
@@ -86,7 +91,10 @@ bool Object::addValue(ValueTuple &vt)
 			std::string name = std::get<0>(vt);
 			Value* vs_value = _vs_stack.top()->findValue(name);
 			if (vs_value)
+			{
 				vs_value->addObserver(this);
+				vs_value->notify();
+			}
 		}
 		return result;
 	}
@@ -102,7 +110,10 @@ bool Object::addValue(ValueTuple &vt)
 		{ \
 			Value* vs_value = _vs_stack.top()->findValue(name); \
 			if (vs_value) \
+			{ \
 				vs_value->addObserver(this); \
+				vs_value->notify(); \
+			} \
 		} \
 		return result; \
 	} \

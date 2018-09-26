@@ -38,14 +38,16 @@ MeshData::MeshData() :
 {
 }
 
-MeshData::MeshData(const MeshData& data, const CopyOp& copyop):
-	Node(data, copyop),
+MeshData::MeshData(const MeshData& data, const CopyOp& copyop, bool copy_values):
+	Node(data, copyop, false),
 	m_data(0),
 	m_mr(0)
 {
 	if (data.m_mr)
 		m_mr = new FLIVR::MeshRenderer(*data.m_mr);
 	m_data = data.m_data;
+	if (copy_values)
+		copyValues(data, copyop);
 }
 
 MeshData::~MeshData()

@@ -136,7 +136,14 @@ bool ObjectFactory::readDefault(std::istream &is)
 {
 	using boost::property_tree::ptree;
 	ptree pt;
-	read_xml(is, pt);
+	try
+	{
+		read_xml(is, pt);
+	}
+	catch (...)
+	{
+		return false;
+	}
 	setDefaultValues(pt);
 
 	return true;
@@ -149,8 +156,15 @@ bool ObjectFactory::writeDefault(std::ostream &os, int indent)
 	convDefaultValues(pt);
 	//write_xml(os, pt,
 	//	boost::property_tree::xml_writer_make_settings< std::string >('\t', 1));
-	write_xml_element(os, ptree::key_type(), pt, -1,
-		boost::property_tree::xml_writer_make_settings< std::string >('\t', indent));
+	try
+	{
+		write_xml_element(os, ptree::key_type(), pt, -1,
+			boost::property_tree::xml_writer_make_settings< std::string >('\t', indent));
+	}
+	catch (...)
+	{
+		return false;
+	}
 
 	return true;
 }
@@ -162,7 +176,14 @@ bool ObjectFactory::readDefault()
 
 	using boost::property_tree::ptree;
 	ptree pt;
-	read_xml(filename, pt);
+	try
+	{
+		read_xml(filename, pt);
+	}
+	catch (...)
+	{
+		return false;
+	}
 	setDefaultValues(pt);
 
 	return true;
@@ -176,8 +197,15 @@ bool ObjectFactory::writeDefault()
 	using boost::property_tree::ptree;
 	ptree pt;
 	convDefaultValues(pt);
-	write_xml(filename, pt, std::locale(),
-		boost::property_tree::xml_writer_make_settings< std::string >('\t', 1));
+	try
+	{
+		write_xml(filename, pt, std::locale(),
+			boost::property_tree::xml_writer_make_settings< std::string >('\t', 1));
+	}
+	catch (...)
+	{
+		return false;
+	}
 
 	return true;
 }

@@ -55,8 +55,8 @@ VolumeData::VolumeData() :
 {
 }
 
-VolumeData::VolumeData(const VolumeData& data, const CopyOp& copyop):
-	Node(data, copyop),
+VolumeData::VolumeData(const VolumeData& data, const CopyOp& copyop, bool copy_values):
+	Node(data, copyop, false),
 	m_vr(0),
 	m_tex(0),
 	m_reader(0)
@@ -65,13 +65,15 @@ VolumeData::VolumeData(const VolumeData& data, const CopyOp& copyop):
 	if (data.m_vr)
 		m_vr = new FLIVR::VolumeRenderer(*data.m_vr);
 	m_tex = data.m_tex;
+	if (copy_values)
+		copyValues(data, copyop);
 }
 
 VolumeData::~VolumeData()
 {
-	if (m_vr)
+	if (m_vr && referenceCount() == 1)//if it's the last one
 		delete m_vr;
-	if (m_tex)
+	if (m_tex && referenceCount() == 1)
 		delete m_tex;
 }
 
@@ -104,8 +106,50 @@ void VolumeData::objectChanged(void* ptr, void* orig_node, const std::string &ex
 		//handle different value changes
 		if (name == "mip mode")
 			OnMipModeChanged();
-		if (name == "viewport")
+		else if (name == "viewport")
 			OnViewportChanged();
+		else if (name == "clear color")
+			OnClearColorChanged();
+		else if (name == "cur framebuffer")
+			OnCurFramebufferChanged();
+		else if (name == "compression")
+			OnCompressionChanged();
+		else if (name == "invert")
+			OnInvertChanged();
+		else if (name == "mask mode")
+			OnMaskModeChanged();
+		else if (name == "noise redct")
+			OnNoiseRedctChanged();
+		else if (name == "2d dmap id")
+			On2dDmapIdChanged();
+		else if (name == "gamma 3d")
+			OnGamma3dChanged();
+		else if (name == "extract boundary")
+			OnExtractBoundaryChanged();
+		else if (name == "saturation")
+			OnSaturationChanged();
+		else if (name == "low threshold")
+			OnLowThresholdChanged();
+		else if (name == "high threshold")
+			OnHighThresholdChanged();
+		else if (name == "color")
+			OnColorChanged();
+		else if (name == "sec color")
+			OnSecColorChanged();
+		else if (name == "sec color set")
+			OnSecColorSetChanged();
+		else if (name == "luminance")
+			OnLuminanceChanged();
+		else if (name == "alpha")
+			OnAlphaChanged();
+		else if (name == "alpah enable")
+			OnAlphaEnableChanged();
+		else if (name == "mask thresh")
+			OnMaskThreshChanged();
+		else if (name == "use mask thresh")
+			OnUseMaskThreshChanged();
+		else if (name == "shading enable")
+			OnShadingEnableChanged();
 	}
 }
 
@@ -222,6 +266,230 @@ void VolumeData::OnViewportChanged()
 	getValue("viewport", vp);
 
 	m_vr->set_viewport(vp.get());
+}
+
+void VolumeData::OnClearColorChanged()
+{
+	if (!m_vr)
+		return;
+
+	FLTYPE::GLfloat4 clear_color;
+	getValue("clear color", clear_color);
+	m_vr->set_clear_color(clear_color.get());
+}
+
+void VolumeData::OnCurFramebufferChanged()
+{
+	if (!m_vr)
+		return;
+
+	unsigned long cur_framebuffer;
+	getValue("cur framebuffer", cur_framebuffer);
+	m_vr->set_cur_framebuffer(cur_framebuffer);
+}
+
+void VolumeData::OnCompressionChanged()
+{
+	if (!m_vr)
+		return;
+
+	bool compression;
+	getValue("compression", compression);
+	m_vr->set_compression(compression);
+}
+
+void VolumeData::OnInvertChanged()
+{
+	if (!m_vr)
+		return;
+
+	bool invert;
+	getValue("invert", invert);
+	m_vr->set_inversion(invert);
+}
+
+void VolumeData::OnMaskModeChanged()
+{
+	if (!m_vr)
+		return;
+
+	long mask_mode;
+	getValue("mask mode", mask_mode);
+	m_vr->set_ml_mode(mask_mode);
+}
+
+void VolumeData::OnNoiseRedctChanged()
+{
+	if (!m_vr)
+		return;
+
+	bool noise_redct;
+	getValue("noise redct", noise_redct);
+	m_vr->SetNoiseRed(noise_redct);
+}
+
+void VolumeData::On2dDmapIdChanged()
+{
+	if (!m_vr)
+		return;
+
+	unsigned long dmap_id;
+	getValue("2d dmap id", dmap_id);
+	m_vr->set_2d_dmap(dmap_id);
+}
+
+void VolumeData::OnGamma3dChanged()
+{
+	if (!m_vr)
+		return;
+
+	double gamma_3d;
+	getValue("gamma 3d", gamma_3d);
+	m_vr->set_gamma3d(gamma_3d);
+}
+
+void VolumeData::OnExtractBoundaryChanged()
+{
+	if (!m_vr)
+		return;
+
+	double extract_boundary;
+	getValue("extract boundary", extract_boundary);
+	m_vr->set_gm_thresh(extract_boundary);
+}
+
+void VolumeData::OnSaturationChanged()
+{
+	if (!m_vr)
+		return;
+
+	double saturation;
+	getValue("saturation", saturation);
+	m_vr->set_offset(saturation);
+}
+
+void VolumeData::OnLowThresholdChanged()
+{
+	if (!m_vr)
+		return;
+
+	double low_threshold;
+	getValue("low threshold", low_threshold);
+	m_vr->set_lo_thresh(low_threshold);
+}
+
+void VolumeData::OnHighThresholdChanged()
+{
+	if (!m_vr)
+		return;
+
+	double high_threshold;
+	getValue("high threshold", high_threshold);
+	m_vr->set_hi_thresh(high_threshold);
+}
+
+void VolumeData::OnColorChanged()
+{
+	if (!m_vr)
+		return;
+	FLTYPE::Color color;
+	getValue("color", color);
+	m_vr->set_color(color);
+}
+
+void VolumeData::OnSecColorChanged()
+{
+	if (!m_vr)
+		return;
+
+	FLTYPE::Color sec_color;
+	getValue("sec color", sec_color);
+	m_vr->set_mask_color(sec_color);
+
+	setValue("sec color set", bool(true));
+}
+
+void VolumeData::OnSecColorSetChanged()
+{
+	if (!m_vr)
+		return;
+
+	bool sec_color_set;
+	getValue("sec color set", sec_color_set);
+	if (!sec_color_set)
+		m_vr->reset_mask_color_set();
+}
+
+void VolumeData::OnLuminanceChanged()
+{
+	if (!m_vr)
+		return;
+
+	double luminance;
+	getValue("luminance", luminance);
+	FLTYPE::HSVColor hsv;
+	getValue("hsv", hsv);
+	FLTYPE::Color color(hsv);
+	setValue("color", color);
+}
+
+void VolumeData::OnAlphaChanged()
+{
+	if (!m_vr)
+		return;
+
+	double alpha;
+	getValue("alpha", alpha);
+	m_vr->set_alpha(alpha);
+}
+
+void VolumeData::OnAlphaEnableChanged()
+{
+	if (!m_vr)
+		return;
+
+	bool alpha_enable;
+	getValue("alpha enable", alpha_enable);
+	m_vr->set_solid(!alpha_enable);
+	if (alpha_enable)
+	{
+		double alpha;
+		getValue("alpha", alpha);
+		m_vr->set_alpha(alpha);
+	}
+	else
+		m_vr->set_alpha(1.0);
+}
+
+void VolumeData::OnMaskThreshChanged()
+{
+	if (!m_vr)
+		return;
+
+	double mask_thresh;
+	getValue("mask thresh", mask_thresh);
+	m_vr->set_mask_thresh(mask_thresh);
+}
+
+void VolumeData::OnUseMaskThreshChanged()
+{
+	if (!m_vr)
+		return;
+
+	bool use_mask_thresh;
+	getValue("use mask thresh", use_mask_thresh);
+	if (!use_mask_thresh)
+		m_vr->set_mask_thresh(0.0);
+}
+
+void VolumeData::OnShadingEnableChanged()
+{
+	if (!m_vr)
+		return;
+
+	bool shading_enable;
+	getValue("shading enable", shading_enable);
+	m_vr->set_shading(shading_enable);
 }
 
 //functions from old class

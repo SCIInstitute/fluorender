@@ -38,12 +38,14 @@ Node::Node() :
 {
 }
 
-Node::Node(const Node& node, const CopyOp& copyop) :
-	Object(node, copyop),
+Node::Node(const Node& node, const CopyOp& copyop, bool copy_values) :
+	Object(node, copyop, false),
 	m_parents(),
 	m_node_mask(node.m_node_mask)
 {
 	//copy
+	if (copy_values)
+		copyValues(node, copyop);
 }
 
 Node::~Node()

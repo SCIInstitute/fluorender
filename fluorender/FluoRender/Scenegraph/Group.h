@@ -37,7 +37,7 @@ namespace FL
 	{
 	public:
 		Group();
-		Group(const Group& group, const CopyOp& copyop=CopyOp::SHALLOW_COPY);
+		Group(const Group& group, const CopyOp& copyop=CopyOp::SHALLOW_COPY, bool copy_values = true);
 
 		virtual Object* clone(const CopyOp& copyop) const
 		{

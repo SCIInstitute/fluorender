@@ -43,7 +43,7 @@ namespace FL
 	{
 	public:
 		MeshData();
-		MeshData(const MeshData& data, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
+		MeshData(const MeshData& data, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
 
 		virtual Object* clone(const CopyOp& copyop) const
 		{

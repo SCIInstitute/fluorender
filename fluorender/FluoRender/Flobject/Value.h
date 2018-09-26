@@ -75,6 +75,8 @@ public:
 
 	inline bool sync(Value* value);
 
+	inline void notify();//notify observers when a value is just added
+
 	friend inline std::ostream& operator<<(std::ostream& os, const Value& v);
 
 protected:
@@ -542,6 +544,11 @@ inline bool Value::sync(Value* value)
 	else return false;
 
 	return true;
+}
+
+inline void Value::notify()
+{
+	notifyObserversOfChange(this);
 }
 
 inline std::ostream& FL::operator<<(std::ostream& os, const Value& v)

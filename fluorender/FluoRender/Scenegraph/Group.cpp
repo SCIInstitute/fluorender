@@ -36,8 +36,8 @@ Group::Group()
 
 }
 
-Group::Group(const Group& group, const CopyOp& copyop) :
-	Node(group, copyop)
+Group::Group(const Group& group, const CopyOp& copyop, bool copy_values) :
+	Node(group, copyop, false)
 {
 	for (auto it = group.m_children.begin();
 		it != group.m_children.end(); ++it)
@@ -46,6 +46,8 @@ Group::Group(const Group& group, const CopyOp& copyop) :
 		Node* child = copyop(it->get());
 		if (child) addChild(child);
 	}
+	if (copy_values)
+		copyValues(group, copyop);
 }
 
 Group::~Group()
