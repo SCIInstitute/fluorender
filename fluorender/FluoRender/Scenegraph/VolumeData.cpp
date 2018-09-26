@@ -755,6 +755,10 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 		getValue("da start", da_start);
 		getValue("da end", da_end);
 		m_vr->set_fog(false, da_int, da_start, da_end);
+
+		double high_threshold;
+		getValue("high threshold", high_threshold);
+		m_vr->set_hi_thresh(high_threshold);
 		
 		double spcx, spcy, spcz;
 		getValue("spc x", spcx);
