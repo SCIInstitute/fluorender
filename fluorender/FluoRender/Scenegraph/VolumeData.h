@@ -195,6 +195,13 @@ namespace FL
 		void OnMaskThreshChanged();
 		void OnUseMaskThreshChanged();
 		void OnShadingEnableChanged();
+		void OnMaterialChanged();
+		void OnSampleRateChanged();
+		void OnColormapModeChanged();
+		void OnColormapValueChanged();
+		void OnColormapTypeChanged();
+		void OnColormapProjChanged();
+		void OnSpacingChanged();
 
 		friend class VolumeFactory;
 	};

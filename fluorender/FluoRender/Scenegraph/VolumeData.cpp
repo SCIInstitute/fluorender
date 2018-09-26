@@ -150,6 +150,32 @@ void VolumeData::objectChanged(void* ptr, void* orig_node, const std::string &ex
 			OnUseMaskThreshChanged();
 		else if (name == "shading enable")
 			OnShadingEnableChanged();
+		else if (name == "mat amb")
+			OnMaterialChanged();
+		else if (name == "mat diff")
+			OnMaterialChanged();
+		else if (name == "mat spec")
+			OnMaterialChanged();
+		else if (name == "mat shine")
+			OnMaterialChanged();
+		else if (name == "sample rate")
+			OnSampleRateChanged();
+		else if (name == "colormap mode")
+			OnColormapModeChanged();
+		else if (name == "colormap low")
+			OnColormapValueChanged();
+		else if (name == "colormap high")
+			OnColormapValueChanged();
+		else if (name == "colormap type")
+			OnColormapTypeChanged();
+		else if (name == "colormap proj")
+			OnColormapProjChanged();
+		else if (name == "spc x")
+			OnSpacingChanged();
+		else if (name == "spc y")
+			OnSpacingChanged();
+		else if (name == "spc z")
+			OnSpacingChanged();
 	}
 }
 
@@ -490,6 +516,85 @@ void VolumeData::OnShadingEnableChanged()
 	bool shading_enable;
 	getValue("shading enable", shading_enable);
 	m_vr->set_shading(shading_enable);
+}
+
+void VolumeData::OnMaterialChanged()
+{
+	if (!m_vr)
+		return;
+
+	double mat_amb, mat_diff, mat_spec, mat_shine;
+	getValue("mat amb", mat_amb);
+	getValue("mat diff", mat_diff);
+	getValue("mat spec", mat_spec);
+	getValue("mat shine", mat_shine);
+	m_vr->set_material(mat_amb, mat_diff, mat_spec, mat_shine);
+}
+
+void VolumeData::OnSampleRateChanged()
+{
+	if (!m_vr)
+		return;
+
+	double sample_rate;
+	getValue("sample rate", sample_rate);
+	m_vr->set_sampling_rate(sample_rate);
+}
+
+void VolumeData::OnColormapModeChanged()
+{
+	if (!m_vr)
+		return;
+
+	long colormap_mode;
+	getValue("colormap mode", colormap_mode);
+	FLTYPE::Color color;
+	getValue("color", color);
+	m_vr->set_colormap_mode(colormap_mode);
+	m_vr->set_color(color);
+}
+
+void VolumeData::OnColormapValueChanged()
+{
+	if (!m_vr)
+		return;
+
+	double colormap_low, colormap_high;
+	getValue("colormap low", colormap_low);
+	getValue("colormap high", colormap_high);
+	m_vr->set_colormap_values(colormap_low, colormap_high);
+}
+
+void VolumeData::OnColormapTypeChanged()
+{
+	if (!m_vr)
+		return;
+	long colormap_type;
+	getValue("colormap type", colormap_type);
+	m_vr->set_colormap(colormap_type);
+}
+
+void VolumeData::OnColormapProjChanged()
+{
+	if (!m_vr)
+		return;
+
+	long colormap_proj;
+	getValue("colormap proj", colormap_proj);
+	m_vr->set_colormap_proj(colormap_proj);
+}
+
+void VolumeData::OnSpacingChanged()
+{
+	if (!m_tex)
+		return;
+	double spc_x, spc_y, spc_z;
+	getValue("spc x", spc_x);
+	getValue("spc y", spc_y);
+	getValue("spc z", spc_z);
+	m_tex->set_spacings(spc_x, spc_y, spc_z);
+	//FLTYPE::BBox bbox;
+	//m_tex->get_bounds(bbox);
 }
 
 //functions from old class

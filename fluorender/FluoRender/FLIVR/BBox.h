@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #define SLIVR_BBox_h
 
 #include <FLIVR/Point.h>
+#include <Types/BBox.h>
 #include <ostream>
 
 #ifdef _WIN32
@@ -55,11 +56,22 @@ namespace FLIVR
 		BBox(const BBox& copy) 
 			: cmin_(copy.cmin_), cmax_(copy.cmax_), is_valid_(copy.is_valid_) {}
 
+		BBox(const FLTYPE::BBox& copy)
+			: cmin_(copy.Min()), cmax_(copy.Max()), is_valid_(copy.valid()) {}
+
 		BBox& operator=(const BBox& copy)
 		{
 			is_valid_ = copy.is_valid_;
 			cmin_ = copy.cmin_;
 			cmax_ = copy.cmax_;
+			return *this;
+		}
+
+		BBox& operator=(const FLTYPE::BBox& copy)
+		{
+			is_valid_ = copy.valid();
+			cmin_ = copy.Min();
+			cmax_ = copy.Max();
 			return *this;
 		}
 
