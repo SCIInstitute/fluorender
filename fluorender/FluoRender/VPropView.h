@@ -28,10 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VPROPVIEW_H_
 #define _VPROPVIEW_H_
 
-#include <glew/GL/glew.h>
 #include <wx/wx.h>
 #include <wx/panel.h>
-#include <wx/glcanvas.h>
+//#include <wx/glcanvas.h>
 #include <wx/clrpicker.h>
 #include <wx/slider.h>
 

@@ -664,6 +664,11 @@ void VolumeData::OnSpacingChanged()
 	FLTYPE::Point box_max(bbox.max().x(), bbox.max().y(), bbox.max().z());
 	FLTYPE::BBox bounds(box_min, box_max);
 	setValue("bounds", bounds);
+
+	m_tex->get_base_spacings(spc_x, spc_y, spc_z);
+	setValue("base spc x", spc_x);
+	setValue("base spc y", spc_y);
+	setValue("base spc z", spc_z);
 }
 
 void VolumeData::OnBaseSpacingChanged()

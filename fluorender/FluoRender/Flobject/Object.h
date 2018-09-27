@@ -87,10 +87,13 @@ public:
 				value->addObserver(this);
 				value->notify();
 			}
-
-			//it->second->addObserver(this);
-			//it->second->notify();
 		}
+	}
+
+	inline void clearValues()
+	{
+		if (_vs_stack.top())
+			_vs_stack.top()->clear();
 	}
 
 	//add a value

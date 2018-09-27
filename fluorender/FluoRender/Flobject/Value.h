@@ -144,6 +144,8 @@ public:
 	inline bool operator == (const ValueSet& vs) const;
 	inline bool operator != (const ValueSet& vs) const;
 
+	void clear();
+
 	Value* findValue(const std::string &name);
 	bool addValue(Value* value);
 	bool removeValue(Value* value);

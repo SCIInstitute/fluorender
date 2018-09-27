@@ -131,6 +131,11 @@ ValueSet::~ValueSet()
 {
 }
 
+void ValueSet::clear()
+{
+	_values.clear();
+}
+
 Value* ValueSet::findValue(const std::string &name)
 {
 	auto it = _values.find(name);

@@ -4710,6 +4710,7 @@ std::vector<FL::VolumeData*> DataManager::LoadVolumeData(
 			name = wxString(reader->GetDataName());
 			if (chan > 1)
 				name += wxString::Format("_Ch%d", i + 1);
+			vd->setValue("multires", bool(false));
 		}
 		else
 		{
@@ -4720,8 +4721,8 @@ std::vector<FL::VolumeData*> DataManager::LoadVolumeData(
 			pathname = filename;
 			breader->SetCurChan(i);
 			breader->SetCurTime(0);
+			vd->setValue("multires", bool(true));
 		}
-
 
 		if (vd->LoadData(data, name.ToStdString(), pathname.ToStdWstring()))
 		{
