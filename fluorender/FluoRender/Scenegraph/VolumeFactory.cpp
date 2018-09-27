@@ -57,9 +57,9 @@ void VolumeFactory::createDefault()
 		vd->addValue("gamma r", double(1));
 		vd->addValue("gamma g", double(1));
 		vd->addValue("gamma b", double(1));
-		vd->addValue("brightness r", double(0));
-		vd->addValue("brightness g", double(0));
-		vd->addValue("brightness b", double(0));
+		vd->addValue("brightness r", double(1));
+		vd->addValue("brightness g", double(1));
+		vd->addValue("brightness b", double(1));
 		vd->addValue("equalize r", double(0));
 		vd->addValue("equalize g", double(0));
 		vd->addValue("equalize b", double(0));
@@ -134,7 +134,7 @@ void VolumeFactory::createDefault()
 		//added for multires data
 		vd->addValue("base spc x", double(1));
 		vd->addValue("base spc y", double(1));
-		vd->addValue("base spc z", double(1));
+		vd->addValue("base spc z", double(3));
 		vd->addValue("spc scl x", double(1));
 		vd->addValue("spc scl y", double(1));
 		vd->addValue("spc scl z", double(1));

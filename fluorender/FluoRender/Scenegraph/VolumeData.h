@@ -168,6 +168,7 @@ namespace FL
 		void SetReverseID(unsigned int* val);
 		void SetShuffledID(unsigned int* val);
 
+		void Initialize();//called after renderer is set
 		//handle observer notifications
 		//most are for setting values in the renderer
 		//this will be changed when rendering pipeline is restructured
@@ -204,6 +205,11 @@ namespace FL
 		void OnSpacingChanged();
 		void OnBaseSpacingChanged();
 		void OnSpacingScaleChanged();
+		void OnLevelChanged();
+		void OnDisplayChanged();
+		void OnInterpolateChanged();
+		void OnDepthAttenChanged();
+		void OnSkipBrickChanged();
 
 		friend class VolumeFactory;
 	};

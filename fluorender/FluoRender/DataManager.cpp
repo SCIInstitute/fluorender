@@ -4700,8 +4700,6 @@ std::vector<FL::VolumeData*> DataManager::LoadVolumeData(
 		if (!vd)
 			continue;
 
-		//vd->SetSkipBrick(m_skip_brick);
-		vd->setValue("skip brick", m_skip_brick);
 		Nrrd* data = reader->Convert(t_num>=0?t_num:reader->GetCurTime(), i, true);
 		if (!data)
 			continue;
@@ -4724,12 +4722,15 @@ std::vector<FL::VolumeData*> DataManager::LoadVolumeData(
 			breader->SetCurTime(0);
 		}
 
-		vd->SetReader(reader);
-		vd->setValue("compression", m_compression);
 
-		bool valid_spc = reader->IsSpcInfoValid();
 		if (vd->LoadData(data, name.ToStdString(), pathname.ToStdWstring()))
 		{
+			bool valid_spc = reader->IsSpcInfoValid();
+			vd->SetReader(reader);
+			//vd->SetSkipBrick(m_skip_brick);
+			vd->setValue("skip brick", m_skip_brick);
+			vd->setValue("compression", m_compression);
+
 			if (m_load_mask)
 			{
 				//mask
@@ -4754,18 +4755,21 @@ std::vector<FL::VolumeData*> DataManager::LoadVolumeData(
 			vd->getValue("res x", xres);
 			vd->getValue("res y", yres);
 			vd->getValue("res z", zres);
-			double zspcfac = (double)Max(xres, yres) / 256.0;
-			if (zspcfac < 1.0) zspcfac = 1.0;
-			vd->setValue("base spc x", reader->GetXSpc());
-			vd->setValue("base spc y", reader->GetXSpc());
-			if (zres == 1)
-				//vd->SetBaseSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetXSpc()*zspcfac);
-				vd->setValue("base spc z", reader->GetXSpc()*zspcfac);
-			else
-				//vd->SetBaseSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetZSpc());
-				vd->setValue("base spc z", reader->GetXSpc());
-			//vd->SetSpcFromFile(valid_spc);
 			vd->setValue("spc from file", valid_spc);
+			if (valid_spc)
+			{
+				double zspcfac = (double)Max(xres, yres) / 256.0;
+				if (zspcfac < 1.0) zspcfac = 1.0;
+				vd->setValue("base spc x", reader->GetXSpc());
+				vd->setValue("base spc y", reader->GetYSpc());
+				if (zres == 1)
+					//vd->SetBaseSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetXSpc()*zspcfac);
+					vd->setValue("base spc z", reader->GetXSpc()*zspcfac);
+				else
+					//vd->SetBaseSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetZSpc());
+					vd->setValue("base spc z", reader->GetZSpc());
+			}
+			//vd->SetSpcFromFile(valid_spc);
 			//vd->SetScalarScale(reader->GetScalarScale());
 			vd->setValue("int scale", reader->GetScalarScale());
 			//vd->SetMaxValue(reader->GetMaxValue());

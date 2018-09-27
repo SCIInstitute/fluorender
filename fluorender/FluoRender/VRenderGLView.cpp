@@ -1348,7 +1348,7 @@ void VRenderGLView::DrawVolumes(int peel)
 				DrawVolumesComp(it->group, false, peel);
 				break;
 			case FL::DrawVolumeVisitor::DVG_MASK:
-				DrawVolumesComp(it->group, true, peel);
+				//DrawVolumesComp(it->group, true, peel);
 				break;
 			}
 		}

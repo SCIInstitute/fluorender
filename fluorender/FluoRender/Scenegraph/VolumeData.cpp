@@ -190,7 +190,58 @@ void VolumeData::objectChanged(void* ptr, void* orig_node, const std::string &ex
 			OnSpacingScaleChanged();
 		else if (name == "spc scl z")
 			OnSpacingScaleChanged();
+		else if (name == "level")
+			OnLevelChanged();
+		else if (name == "display")
+			OnDisplayChanged();
+		else if (name == "interpolate")
+			OnInterpolateChanged();
+		else if (name == "depth atten")
+			OnDepthAttenChanged();
+		else if (name == "skip brick")
+			OnSkipBrickChanged();
 	}
+}
+
+void VolumeData::Initialize()
+{
+	OnMipModeChanged();//modes
+	OnViewportChanged();
+	OnClearColorChanged();
+	OnCurFramebufferChanged();
+	OnCompressionChanged();
+	OnInvertChanged();
+	OnMaskModeChanged();
+	OnNoiseRedctChanged();
+	On2dDmapIdChanged();
+	OnGamma3dChanged();
+	OnExtractBoundaryChanged();
+	OnSaturationChanged();
+	OnLowThresholdChanged();
+	OnHighThresholdChanged();
+	OnColorChanged();
+	OnSecColorChanged();
+	OnSecColorSetChanged();
+	OnLuminanceChanged();
+	OnAlphaChanged();
+	OnAlphaEnableChanged();
+	OnMaskThreshChanged();
+	OnUseMaskThreshChanged();
+	OnShadingEnableChanged();
+	OnMaterialChanged();
+	OnSampleRateChanged();
+	OnColormapModeChanged();
+	OnColormapValueChanged();
+	OnColormapTypeChanged();
+	OnColormapProjChanged();
+	OnSpacingChanged();
+	OnBaseSpacingChanged();
+	OnSpacingScaleChanged();
+	OnLevelChanged();
+	OnDisplayChanged();
+	OnInterpolateChanged();
+	OnDepthAttenChanged();
+	OnSkipBrickChanged();
 }
 
 void VolumeData::OnMipModeChanging()
@@ -607,8 +658,12 @@ void VolumeData::OnSpacingChanged()
 	getValue("spc y", spc_y);
 	getValue("spc z", spc_z);
 	m_tex->set_spacings(spc_x, spc_y, spc_z);
-	//FLTYPE::BBox bbox;
-	//m_tex->get_bounds(bbox);
+	FLIVR::BBox bbox;
+	m_tex->get_bounds(bbox);
+	FLTYPE::Point box_min(bbox.min().x(), bbox.min().y(), bbox.min().z());
+	FLTYPE::Point box_max(bbox.max().x(), bbox.max().y(), bbox.max().z());
+	FLTYPE::BBox bounds(box_min, box_max);
+	setValue("bounds", bounds);
 }
 
 void VolumeData::OnBaseSpacingChanged()
@@ -620,6 +675,13 @@ void VolumeData::OnBaseSpacingChanged()
 	getValue("base spc y", spc_y);
 	getValue("base spc z", spc_z);
 	m_tex->set_base_spacings(spc_x, spc_y, spc_z);
+
+	long level;
+	getValue("level", level);
+	m_tex->get_spacings(spc_x, spc_y, spc_z, level);
+	setValue("spc x", spc_x);
+	setValue("spc y", spc_y);
+	setValue("spc z", spc_z);
 }
 
 void VolumeData::OnSpacingScaleChanged()
@@ -631,6 +693,65 @@ void VolumeData::OnSpacingScaleChanged()
 	getValue("spc scl y", spc_y);
 	getValue("spc scl z", spc_z);
 	m_tex->set_spacing_scales(spc_x, spc_y, spc_z);
+}
+
+void VolumeData::OnLevelChanged()
+{
+	if (!m_tex)
+		return;
+	bool multires = false;
+	getValue("multires", multires);
+	if (!multires)
+		return;
+	long level;
+	getValue("level", level);
+	m_tex->setLevel(level);
+	FLIVR::BBox bbox;
+	m_tex->get_bounds(bbox);
+	FLTYPE::Point box_min(bbox.min().x(), bbox.min().y(), bbox.min().z());
+	FLTYPE::Point box_max(bbox.max().x(), bbox.max().y(), bbox.max().z());
+	FLTYPE::BBox bounds(box_min, box_max);
+	setValue("bounds", bounds);
+}
+
+void VolumeData::OnDisplayChanged()
+{
+	if (!m_tex)
+		return;
+	m_tex->set_sort_bricks();
+}
+
+void VolumeData::OnInterpolateChanged()
+{
+	if (!m_vr)
+		return;
+
+	bool interpolate;
+	getValue("interpolate", interpolate);
+	m_vr->set_interpolate(interpolate);
+}
+
+void VolumeData::OnDepthAttenChanged()
+{
+	if (!m_vr)
+		return;
+
+	bool depth_atten;
+	double da_int, da_start, da_end;
+	getValue("depth atten", depth_atten);
+	getValue("da int", da_int);
+	getValue("da start", da_start);
+	getValue("da end", da_end);
+	m_vr->set_fog(depth_atten, da_int, da_start, da_end);
+}
+
+void VolumeData::OnSkipBrickChanged()
+{
+	if (!m_tex)
+		return;
+	bool skip_brick;
+	getValue("skip brick", skip_brick);
+	m_tex->set_use_priority(skip_brick);
 }
 
 //functions from old class
@@ -671,9 +792,9 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 	Nrrd *nv = data;
 
 	m_tex = new FLIVR::Texture();
-	bool skip_brick;
-	getValue("skip brick", skip_brick);
-	m_tex->set_use_priority(skip_brick);
+	//bool skip_brick;
+	//getValue("skip brick", skip_brick);
+	//m_tex->set_use_priority(skip_brick);
 
 	if (m_reader && m_reader->GetType() == READER_BRKXML_TYPE)
 	{
@@ -713,59 +834,61 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 		vector<FLIVR::Plane*> planelist(0);
 		for (int i = 0; i < planeset.GetSize(); ++i)
 		{
-			FLIVR::Plane* plane = new FLIVR::Plane(planeset.Get(0));
+			FLIVR::Plane* plane = new FLIVR::Plane(planeset.Get(i));
 			planelist.push_back(plane);
 		}
 
 		m_vr = new FLIVR::VolumeRenderer(m_tex, planelist, true);
 		setValue("clip planes", planeset);
-		double sample_rate;
-		getValue("sample rate", sample_rate);
-		m_vr->set_sampling_rate(sample_rate);
-		double mat_amb, mat_diff, mat_spec, mat_shine;
-		getValue("mat amb", mat_amb);
-		getValue("mat diff", mat_diff);
-		getValue("mat spec", mat_spec);
-		getValue("mat shine", mat_shine);
-		m_vr->set_material(mat_amb, mat_diff, mat_spec, mat_shine);
-		bool shading;
-		getValue("shading enable", shading);
-		m_vr->set_shading(shading);
-		double int_scale;
-		getValue("int scale", int_scale);
-		m_vr->set_scalar_scale(int_scale);
-		m_vr->set_gm_scale(int_scale);
-
-		OnMipModeChanged();
-
-		setValue("res x", long(nv->axis[0].size));
-		setValue("res y", long(nv->axis[1].size));
-		setValue("res z", long(nv->axis[2].size));
 		FLTYPE::BBox bounds;
 		FLTYPE::Point pmax(data->axis[0].max, data->axis[1].max, data->axis[2].max);
 		FLTYPE::Point pmin(data->axis[0].min, data->axis[1].min, data->axis[2].min);
 		bounds.extend(pmin);
 		bounds.extend(pmax);
 		setValue("bounds", bounds);
+		setValue("res x", long(nv->axis[0].size));
+		setValue("res y", long(nv->axis[1].size));
+		setValue("res z", long(nv->axis[2].size));
+		Initialize();
 
-		bool depth_atten;
-		double da_int, da_start, da_end;
-		getValue("depth atten", depth_atten);
-		getValue("da int", da_int);
-		getValue("da start", da_start);
-		getValue("da end", da_end);
-		m_vr->set_fog(false, da_int, da_start, da_end);
+		//double sample_rate;
+		//getValue("sample rate", sample_rate);
+		//m_vr->set_sampling_rate(sample_rate);
+		//double mat_amb, mat_diff, mat_spec, mat_shine;
+		//getValue("mat amb", mat_amb);
+		//getValue("mat diff", mat_diff);
+		//getValue("mat spec", mat_spec);
+		//getValue("mat shine", mat_shine);
+		//m_vr->set_material(mat_amb, mat_diff, mat_spec, mat_shine);
+		//bool shading;
+		//getValue("shading enable", shading);
+		//m_vr->set_shading(shading);
+		//double int_scale;
+		//getValue("int scale", int_scale);
+		//m_vr->set_scalar_scale(int_scale);
+		//m_vr->set_gm_scale(int_scale);
 
-		double high_threshold;
-		getValue("high threshold", high_threshold);
-		m_vr->set_hi_thresh(high_threshold);
-		
-		double spcx, spcy, spcz;
-		getValue("spc x", spcx);
-		getValue("spc y", spcy);
-		getValue("spc z", spcz);
-		m_tex->set_spacings(spcx, spcy, spcz);
-		m_tex->set_base_spacings(spcx, spcy, spcz);
+		//OnMipModeChanged();
+
+
+		//bool depth_atten;
+		//double da_int, da_start, da_end;
+		//getValue("depth atten", depth_atten);
+		//getValue("da int", da_int);
+		//getValue("da start", da_start);
+		//getValue("da end", da_end);
+		//m_vr->set_fog(false, da_int, da_start, da_end);
+
+		//double high_threshold;
+		//getValue("high threshold", high_threshold);
+		//m_vr->set_hi_thresh(high_threshold);
+		//
+		//double spcx, spcy, spcz;
+		//getValue("spc x", spcx);
+		//getValue("spc y", spcy);
+		//getValue("spc z", spcz);
+		//m_tex->set_spacings(spcx, spcy, spcz);
+		//m_tex->set_base_spacings(spcx, spcy, spcz);
 	}
 
 	return 1;
