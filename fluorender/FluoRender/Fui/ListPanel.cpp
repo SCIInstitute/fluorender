@@ -76,13 +76,17 @@ ListPanel::ListPanel(wxWindow *frame,
 		bitmap, "Delete All: Delete all datasets");
 	m_toolbar->Realize();
 
-	m_list_ctrl = new wxDataViewCtrl(this, wxID_ANY);
+	m_list_ctrl = new wxDataViewCtrl(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize,
+		wxDV_MULTIPLE | wxDV_ROW_LINES);
 	m_list_ctrl->EnableDragSource(wxDF_UNICODETEXT);
 	m_list_ctrl->EnableDropTarget(wxDF_UNICODETEXT);
 	m_list_ctrl->SetDoubleBuffered(true);
-	m_list_model = new ListModel;
-	m_list_model->SetRoot();
-	m_list_ctrl->AssociateModel(m_list_model.get());
+	m_list_model = dynamic_cast<ListModel*>(
+		FL::Global::instance().getAgentFactory().
+		getOrAddAgent("ListModel", *this));
+	m_list_model->setObject(0);
+	m_list_ctrl->AssociateModel(m_list_model);
 
 	//append columns
 	m_list_ctrl->AppendTextColumn("Name", 0,

@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <Fui/VolumePropPanel.h>
+#include <Global/Global.h>
 #include <wx/valnum.h>
 #include <png_resource.h>
 #include <img/icons.h>
@@ -117,7 +118,9 @@ VolumePropPanel::VolumePropPanel(wxWindow* frame,
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
-	m_agent = new VolumePropAgent(*this);
+	m_agent = dynamic_cast<VolumePropAgent*>(
+		FL::Global::instance().getAgentFactory().
+		getOrAddAgent("VolumePropAgent", *this));
 
 	wxBoxSizer* sizer_all = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* sizer_left = new wxBoxSizer(wxVERTICAL);

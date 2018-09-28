@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/cmdline.h>
 #include <wx/stdpaths.h>
 #include <wx/filefn.h>
-#include "VRenderFrame.h"
+#include <VRenderFrame.h>
 #include "compatibility.h"
 #include "JVMInitializer.h"
 

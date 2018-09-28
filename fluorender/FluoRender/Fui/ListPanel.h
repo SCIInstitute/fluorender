@@ -61,7 +61,7 @@ namespace FUI
 		wxToolBar* m_toolbar;
 
 		wxDataViewCtrl* m_list_ctrl;
-		wxObjectDataPtr<ListModel> m_list_model;
+		ListModel* m_list_model;
 
 		DECLARE_EVENT_TABLE()
 	};

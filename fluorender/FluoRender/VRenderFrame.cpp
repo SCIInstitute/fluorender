@@ -25,9 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "VRenderFrame.h"
+#include <VRenderFrame.h>
 #include <Fui/TreePanel.h>
 #include <Fui/ListPanel.h>
+#include <Fui/VolumePropPanel.h>
 #include <Global/Global.h>
 #include <Scenegraph/Group.h>
 #include <Scenegraph/VolumeData.h>
@@ -418,7 +419,7 @@ VRenderFrame::VRenderFrame(
 		wxDefaultPosition, wxDefaultSize, 0, "PropPanel");
 	//prop panel chidren
 	m_prop_sizer = new wxBoxSizer(wxHORIZONTAL);
-	m_volume_prop = new VPropView(this, m_prop_panel, wxID_ANY);
+	m_volume_prop = new FUI::VolumePropPanel(this, m_prop_panel, wxID_ANY);
 	m_mesh_prop = new MPropView(this, m_prop_panel, wxID_ANY);
 	m_mesh_manip = new MManipulator(this, m_prop_panel, wxID_ANY);
 	m_annotation_prop = new APropView(this, m_prop_panel, wxID_ANY);
@@ -2129,67 +2130,67 @@ FUI::ListPanel *VRenderFrame::GetList()
 }
 
 //on selections
-void VRenderFrame::OnSelection(int type,
-	VRenderView* vrv,
-	FL::VolumeGroup* group,
-	FL::VolumeData* vd,
-	MeshData* md,
-	Annotations* ann)
+void VRenderFrame::OnSelection(FL::Node *node)
 {
-/*	if (m_adjust_view)
-	{
-		m_adjust_view->SetRenderView(vrv);
-		if (!vrv || vd)
-			m_adjust_view->SetVolumeData(vd);
-	}
+	if (!node)
+		return;
 
-	if (m_clip_view)
-	{
-		switch (type)
-		{
-		case 2:
-			m_clip_view->SetVolumeData(vd);
-			break;
-		case 3:
-			m_clip_view->SetMeshData(md);
-			break;
-		case 4:
-			if (ann)
-			{
-				VolumeData* vd_ann = ann->GetVolume();
-				m_clip_view->SetVolumeData(vd_ann);
-			}
-			break;
-		}
-	}
+	//if (m_adjust_view)
+	//{
+	//	m_adjust_view->SetRenderView(vrv);
+	//	if (!vrv || vd)
+	//		m_adjust_view->SetVolumeData(vd);
+	//}
 
-	m_cur_sel_type = type;
+	//if (m_clip_view)
+	//{
+	//	switch (type)
+	//	{
+	//	case 2:
+	//		m_clip_view->SetVolumeData(vd);
+	//		break;
+	//	case 3:
+	//		m_clip_view->SetMeshData(md);
+	//		break;
+	//	case 4:
+	//		if (ann)
+	//		{
+	//			VolumeData* vd_ann = ann->GetVolume();
+	//			m_clip_view->SetVolumeData(vd_ann);
+	//		}
+	//		break;
+	//	}
+	//}
+
+	//m_cur_sel_type = type;
 	//clear mesh boundbox
 	if (m_data_mgr.GetMeshData(m_cur_sel_mesh))
 		m_data_mgr.GetMeshData(m_cur_sel_mesh)->SetDrawBounds(false);
 
-	switch (type)
+	std::string type(node->className());
+	if (type == "VolumeData")
 	{
-	case 0:  //root
-		break;
-	case 1:  //view
-		if (m_volume_prop)
-			m_volume_prop->Show(false);
-		if (m_mesh_prop)
-			m_mesh_prop->Show(false);
-		if (m_mesh_manip)
-			m_mesh_manip->Show(false);
-		if (m_annotation_prop)
-			m_annotation_prop->Show(false);
-		m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
-		m_aui_mgr.Update();
-		break;
-	case 2:  //volume
-		if (vd && vd->GetDisp())
+		//	if (m_volume_prop)
+		//		m_volume_prop->Show(false);
+		//	if (m_mesh_prop)
+		//		m_mesh_prop->Show(false);
+		//	if (m_mesh_manip)
+		//		m_mesh_manip->Show(false);
+		//	if (m_annotation_prop)
+		//		m_annotation_prop->Show(false);
+		//	m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
+		//	m_aui_mgr.Update();
+		//	break;
+		//case 2:  //volume
+		FL::VolumeData* vd = node->asVolumeData();
+		bool display = false;
+		if (vd)
+			vd->getValue("display", display);
+		if (display)
 		{
-			m_volume_prop->SetVolumeData(vd);
-			m_volume_prop->SetGroup(group);
-			m_volume_prop->SetView(vrv);
+			m_volume_prop->AssociateVolumeData(vd);
+			//m_volume_prop->SetGroup(group);
+			//m_volume_prop->SetView(vrv);
 			if (!m_volume_prop->IsShown())
 			{
 				m_volume_prop->Show(true);
@@ -2199,12 +2200,12 @@ void VRenderFrame::OnSelection(int type,
 				m_prop_panel->Layout();
 			}
 			m_aui_mgr.GetPane(m_prop_panel).Caption(
-				wxString(UITEXT_PROPERTIES)+wxString(" - ")+vd->GetName());
+				wxString(UITEXT_PROPERTIES) + wxString(" - ") + vd->getName());
 			m_aui_mgr.Update();
-			wxString str = vd->GetName();
-			m_cur_sel_vol = m_data_mgr.GetVolumeIndex(str);
+			//wxString str = vd->getName();
+			//m_cur_sel_vol = m_data_mgr.GetVolumeIndex(str);
 
-			for (int i=0; i<(int)m_vrv_list.size(); i++)
+			for (int i = 0; i < (int)m_vrv_list.size(); i++)
 			{
 				VRenderView* vrv = m_vrv_list[i];
 				if (!vrv)
@@ -2220,6 +2221,12 @@ void VRenderFrame::OnSelection(int type,
 				m_mesh_manip->Show(false);
 			if (m_annotation_prop)
 				m_annotation_prop->Show(false);
+
+			if (m_adjust_view)
+				m_adjust_view->SetVolumeData(vd);
+
+			if (m_clip_view)
+				m_clip_view->SetVolumeData(vd);
 		}
 		else
 		{
@@ -2232,67 +2239,109 @@ void VRenderFrame::OnSelection(int type,
 			if (m_annotation_prop)
 				m_annotation_prop->Show(false);
 		}
-		break;
-	case 3:  //mesh
-		if (md)
-		{
-			m_mesh_prop->SetMeshData(md, vrv);
-			if (!m_mesh_prop->IsShown())
-			{
-				m_mesh_prop->Show(true);
-				m_prop_sizer->Clear();
-				m_prop_sizer->Add(m_mesh_prop, 1, wxEXPAND, 0);
-				m_prop_panel->SetSizer(m_prop_sizer);
-				m_prop_panel->Layout();
-			}
-			m_aui_mgr.GetPane(m_prop_panel).Caption(
-				wxString(UITEXT_PROPERTIES)+wxString(" - ")+md->GetName());
-			m_aui_mgr.Update();
-			wxString str = md->GetName();
-			m_cur_sel_mesh = m_data_mgr.GetMeshIndex(str);
-			md->SetDrawBounds(true);
-		}
+	}
+	//	break;
+	//case 3:  //mesh
+	//	if (md)
+	//	{
+	//		m_mesh_prop->SetMeshData(md, vrv);
+	//		if (!m_mesh_prop->IsShown())
+	//		{
+	//			m_mesh_prop->Show(true);
+	//			m_prop_sizer->Clear();
+	//			m_prop_sizer->Add(m_mesh_prop, 1, wxEXPAND, 0);
+	//			m_prop_panel->SetSizer(m_prop_sizer);
+	//			m_prop_panel->Layout();
+	//		}
+	//		m_aui_mgr.GetPane(m_prop_panel).Caption(
+	//			wxString(UITEXT_PROPERTIES)+wxString(" - ")+md->GetName());
+	//		m_aui_mgr.Update();
+	//		wxString str = md->GetName();
+	//		m_cur_sel_mesh = m_data_mgr.GetMeshIndex(str);
+	//		md->SetDrawBounds(true);
+	//	}
 
-		if (m_volume_prop)
-			m_volume_prop->Show(false);
-		if (m_mesh_prop && md)
-			m_mesh_prop->Show(true);
-		if (m_mesh_manip)
-			m_mesh_manip->Show(false);
-		if (m_annotation_prop)
-			m_annotation_prop->Show(false);
-		break;
-	case 4:  //annotations
-		if (ann)
-		{
-			m_annotation_prop->SetAnnotations(ann, vrv);
-			if (!m_annotation_prop->IsShown())
-			{
-				m_annotation_prop->Show(true);
-				m_prop_sizer->Clear();
-				m_prop_sizer->Add(m_annotation_prop, 1, wxEXPAND, 0);
-				m_prop_panel->SetSizer(m_prop_sizer);
-				m_prop_panel->Layout();
-			}
-			m_aui_mgr.GetPane(m_prop_panel).Caption(
-				wxString(UITEXT_PROPERTIES)+wxString(" - ")+ann->GetName());
-			m_aui_mgr.Update();
-		}
+	//	if (m_volume_prop)
+	//		m_volume_prop->Show(false);
+	//	if (m_mesh_prop && md)
+	//		m_mesh_prop->Show(true);
+	//	if (m_mesh_manip)
+	//		m_mesh_manip->Show(false);
+	//	if (m_annotation_prop)
+	//		m_annotation_prop->Show(false);
+	//	break;
+	//case 4:  //annotations
+	//	if (ann)
+	//	{
+	//		m_annotation_prop->SetAnnotations(ann, vrv);
+	//		if (!m_annotation_prop->IsShown())
+	//		{
+	//			m_annotation_prop->Show(true);
+	//			m_prop_sizer->Clear();
+	//			m_prop_sizer->Add(m_annotation_prop, 1, wxEXPAND, 0);
+	//			m_prop_panel->SetSizer(m_prop_sizer);
+	//			m_prop_panel->Layout();
+	//		}
+	//		m_aui_mgr.GetPane(m_prop_panel).Caption(
+	//			wxString(UITEXT_PROPERTIES)+wxString(" - ")+ann->GetName());
+	//		m_aui_mgr.Update();
+	//	}
 
-		if (m_volume_prop)
-			m_volume_prop->Show(false);
-		if (m_mesh_prop)
-			m_mesh_prop->Show(false);
-		if (m_mesh_manip)
-			m_mesh_manip->Show(false);
-		if (m_annotation_prop && ann)
-			m_annotation_prop->Show(true);
-		break;
-	case 5:  //group
-		if (m_adjust_view)
-			m_adjust_view->SetGroup(group);
-		if (m_calculation_dlg)
-			m_calculation_dlg->SetGroup(group);
+	//	if (m_volume_prop)
+	//		m_volume_prop->Show(false);
+	//	if (m_mesh_prop)
+	//		m_mesh_prop->Show(false);
+	//	if (m_mesh_manip)
+	//		m_mesh_manip->Show(false);
+	//	if (m_annotation_prop && ann)
+	//		m_annotation_prop->Show(true);
+	//	break;
+	//case 5:  //group
+	//	if (m_adjust_view)
+	//		m_adjust_view->SetGroup(group);
+	//	if (m_calculation_dlg)
+	//		m_calculation_dlg->SetGroup(group);
+	//	if (m_volume_prop)
+	//		m_volume_prop->Show(false);
+	//	if (m_mesh_prop)
+	//		m_mesh_prop->Show(false);
+	//	if (m_mesh_manip)
+	//		m_mesh_manip->Show(false);
+	//	if (m_annotation_prop)
+	//		m_annotation_prop->Show(false);
+	//	m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
+	//	m_aui_mgr.Update();
+	//	break;
+	//case 6:  //mesh manip
+	//	if (md)
+	//	{
+	//		m_mesh_manip->SetMeshData(md);
+	//		m_mesh_manip->GetData();
+	//		if (!m_mesh_manip->IsShown())
+	//		{
+	//			m_mesh_manip->Show(true);
+	//			m_prop_sizer->Clear();
+	//			m_prop_sizer->Add(m_mesh_manip, 1, wxEXPAND, 0);
+	//			m_prop_panel->SetSizer(m_prop_sizer);
+	//			m_prop_panel->Layout();
+	//		}
+	//		m_aui_mgr.GetPane(m_prop_panel).Caption(
+	//			wxString("Manipulations - ")+md->GetName());
+	//		m_aui_mgr.Update();
+	//	}
+
+	//	if (m_volume_prop)
+	//		m_volume_prop->Show(false);
+	//	if (m_mesh_prop)
+	//		m_mesh_prop->Show(false);
+	//	if (m_mesh_manip && md)
+	//		m_mesh_manip->Show(true);
+	//	if (m_annotation_prop)
+	//		m_annotation_prop->Show(false);
+	//	break;
+	//default:
+	else
+	{
 		if (m_volume_prop)
 			m_volume_prop->Show(false);
 		if (m_mesh_prop)
@@ -2303,46 +2352,7 @@ void VRenderFrame::OnSelection(int type,
 			m_annotation_prop->Show(false);
 		m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
 		m_aui_mgr.Update();
-		break;
-	case 6:  //mesh manip
-		if (md)
-		{
-			m_mesh_manip->SetMeshData(md);
-			m_mesh_manip->GetData();
-			if (!m_mesh_manip->IsShown())
-			{
-				m_mesh_manip->Show(true);
-				m_prop_sizer->Clear();
-				m_prop_sizer->Add(m_mesh_manip, 1, wxEXPAND, 0);
-				m_prop_panel->SetSizer(m_prop_sizer);
-				m_prop_panel->Layout();
-			}
-			m_aui_mgr.GetPane(m_prop_panel).Caption(
-				wxString("Manipulations - ")+md->GetName());
-			m_aui_mgr.Update();
-		}
-
-		if (m_volume_prop)
-			m_volume_prop->Show(false);
-		if (m_mesh_prop)
-			m_mesh_prop->Show(false);
-		if (m_mesh_manip && md)
-			m_mesh_manip->Show(true);
-		if (m_annotation_prop)
-			m_annotation_prop->Show(false);
-		break;
-	default:
-		if (m_volume_prop)
-			m_volume_prop->Show(false);
-		if (m_mesh_prop)
-			m_mesh_prop->Show(false);
-		if (m_mesh_manip)
-			m_mesh_manip->Show(false);
-		if (m_annotation_prop)
-			m_annotation_prop->Show(false);
-		m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
-		m_aui_mgr.Update();
-	}*/
+	}
 }
 
 void VRenderFrame::RefreshVRenderViews(bool tree, bool interactive)

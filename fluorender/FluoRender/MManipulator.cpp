@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "MManipulator.h"
-#include "VRenderFrame.h"
+#include <VRenderFrame.h>
 
 BEGIN_EVENT_TABLE(MManipulator, wxPanel)
 	EVT_SPIN_UP(wxID_ANY, MManipulator::OnSpinUp)

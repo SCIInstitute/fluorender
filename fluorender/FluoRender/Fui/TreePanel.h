@@ -39,6 +39,7 @@ namespace FUI
 	public:
 		enum
 		{
+			ID_TreeCtrl = ID_TREE_PANEL1,
 			ID_ToggleView = ID_TREE_PANEL2,
 			ID_AddGroup,
 			ID_AddMGroup,
@@ -79,12 +80,17 @@ namespace FUI
 		void BrushCreate();
 		void BrushSolid(bool state);
 
+		friend class TreeModel;
+
 	private:
 		wxWindow* m_frame;
 		wxToolBar* m_toolbar;
 
 		wxDataViewCtrl* m_tree_ctrl;
-		wxObjectDataPtr<TreeModel> m_tree_model;
+		TreeModel* m_tree_model;
+
+	private:
+		void OnSelectionChanged(wxDataViewEvent &event);
 
 		DECLARE_EVENT_TABLE()
 	};

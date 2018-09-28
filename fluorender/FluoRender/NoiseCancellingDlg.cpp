@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "NoiseCancellingDlg.h"
 #include <Fui/TreePanel.h>
-#include "VRenderFrame.h"
+#include <VRenderFrame.h>
 #include <Global/Global.h>
 #include <Scenegraph/VolumeData.h>
 #include <wx/valnum.h>

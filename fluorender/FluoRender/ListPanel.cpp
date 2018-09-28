@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global/Global.h>
 #include <Scenegraph/VolumeData.h>
 #include "DataManager.h"
-#include "VRenderFrame.h"
+#include <VRenderFrame.h>
 #include "Formats/png_resource.h"
 #include <wx/valnum.h>
 
@@ -339,7 +339,7 @@ void DataListCtrl::AddToView(int menu_index, long item)
 						vd_add->setValue("color", color);
 
 					FL::VolumeGroup *group = view->AddVolumeData(vd_add);
-					vr_frame->OnSelection(2, view, group, vd_add, 0);
+					//vr_frame->OnSelection(2, view, group, vd_add, 0);
 					if (view->GetVolMethod() == VOL_METHOD_MULTI)
 					{
 						AdjustView* adjust_view = vr_frame->GetAdjustView();

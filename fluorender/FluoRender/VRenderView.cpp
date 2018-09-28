@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "VRenderView.h"
-#include "VRenderFrame.h"
+#include <VRenderFrame.h>
 #include <Scenegraph/VolumeData.h>
 #include <tiffio.h>
 #include <wx/utils.h>

@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "ColocalizationDlg.h"
-#include "VRenderFrame.h"
+#include <VRenderFrame.h>
 #include <Scenegraph/VolumeData.h>
 #include <Global/Global.h>
 #include <wx/valnum.h>

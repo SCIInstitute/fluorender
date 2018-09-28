@@ -34,5 +34,7 @@ Global::Global()
 {
 	volume_factory_ = ref_ptr<VolumeFactory>(new VolumeFactory());
 	mesh_factory_ = ref_ptr<MeshFactory>(new MeshFactory());
-	annotations_factory_ = ref_ptr<AnnotationFactory>(new AnnotationFactory());
+	annotation_factory_ = ref_ptr<AnnotationFactory>(new AnnotationFactory());
+
+	agent_factory_ = ref_ptr<FUI::AgentFactory>(new FUI::AgentFactory());
 }

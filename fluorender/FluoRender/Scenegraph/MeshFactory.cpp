@@ -93,7 +93,7 @@ void MeshFactory::createDefault()
 	}
 }
 
-MeshData* MeshFactory::build()
+MeshData* MeshFactory::build(const std::string &exp)
 {
 	unsigned int default_id = 0;
 	return clone(default_id);

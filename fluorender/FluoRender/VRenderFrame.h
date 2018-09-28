@@ -31,7 +31,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include "DataManager.h"
 #include "VRenderView.h"
-#include "VPropView.h"
 #include "MPropView.h"
 #include "APropView.h"
 #include "MManipulator.h"
@@ -113,6 +112,7 @@ namespace FUI
 {
 	class TreePanel;
 	class ListPanel;
+	class VolumePropPanel;
 }
 class VRenderFrame: public wxFrame
 {
@@ -214,12 +214,7 @@ public:
 	void ShowPane(wxPanel* pane, bool show=true);
 
 	//on selections
-	void OnSelection(int type,	//0: nothing; 1:view; 2: volume; 3:mesh; 4:annotations; 5:group; 6:mesh manip
-		VRenderView* vrv=0,
-		FL::VolumeGroup* group=0,
-		FL::VolumeData* vd=0,
-		MeshData* md=0,
-		Annotations* ann=0);
+	void OnSelection(FL::Node *node);
 
 	//settings
 	//make movie settings
@@ -234,7 +229,7 @@ public:
 	//prop view
 	AdjustView* GetAdjustView();
 	//tool views
-	VPropView* GetPropView()
+	FUI::VolumePropPanel* GetPropView()
 	{ return m_volume_prop; }
 	//movie view
 	VMovieView* GetMovieView()
@@ -398,7 +393,7 @@ private:
 	CalculationDlg* m_calculation_dlg;
 	//prop panel children
 	wxBoxSizer* m_prop_sizer;
-	VPropView* m_volume_prop;
+	FUI::VolumePropPanel* m_volume_prop;
 	MPropView* m_mesh_prop;
 	MManipulator* m_mesh_manip;
 	APropView* m_annotation_prop;

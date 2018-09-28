@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "ComponentDlg.h"
-#include "VRenderFrame.h"
+#include <VRenderFrame.h>
 #include <Scenegraph/VolumeData.h>
 #include <Scenegraph/VolumeGroup.h>
 #include <Components/CompGenerator.h>

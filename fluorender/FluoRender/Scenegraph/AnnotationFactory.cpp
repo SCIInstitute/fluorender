@@ -60,7 +60,7 @@ void AnnotationFactory::createDefault()
 	}
 }
 
-Annotations* AnnotationFactory::build()
+Annotations* AnnotationFactory::build(const std::string &exp)
 {
 	unsigned int default_id = 0;
 	return clone(default_id);

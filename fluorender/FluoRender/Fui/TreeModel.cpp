@@ -26,25 +26,19 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <Fui/TreeModel.h>
+#include <Fui/TreePanel.h>
 #include <Scenegraph/Group.h>
 
 using namespace FUI;
 
-TreeModel::TreeModel():
-	m_root(0)
+TreeModel::TreeModel(TreePanel &panel):
+	InterfaceAgent(),
+	panel_(panel)
 {
 
 }
 
 //observer functions
-void TreeModel::objectDeleted(void* ptr)
-{
-	FL::Referenced* refd = static_cast<FL::Referenced*>(ptr);
-
-	//remove observee
-	removeObservee(refd);
-}
-
 void TreeModel::objectChanging(void* ptr, void* orig_node, const std::string &exp)
 {
 	//before change
@@ -61,6 +55,7 @@ void TreeModel::nodeAdded(void* ptr, void* parent, void* child)
 		wxDataViewItem parent_item = wxDataViewItem(parent);
 		wxDataViewItem child_item = wxDataViewItem(child);
 		ItemAdded(parent_item, child_item);
+		panel_.m_tree_ctrl->Expand(parent_item);
 	}
 }
 
@@ -163,7 +158,8 @@ unsigned int TreeModel::GetChildren(const wxDataViewItem &parent,
 	FL::Node *node = (FL::Node*)parent.GetID();
 	if (!node)
 	{
-		array.Add(wxDataViewItem((void*)m_root));
+		FL::Node* root = const_cast<TreeModel*>(this)->getObject();
+		array.Add(wxDataViewItem((void*)root));
 		return 1;
 	}
 

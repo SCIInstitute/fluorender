@@ -220,7 +220,7 @@ void ObjectFactory::createDefault()
 	}
 }
 
-Object* ObjectFactory::build()
+Object* ObjectFactory::build(const std::string &exp)
 {
 	unsigned int default_id = 0;
 	return clone(default_id);

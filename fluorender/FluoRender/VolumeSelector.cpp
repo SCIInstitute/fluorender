@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "VolumeSelector.h"
-#include "VRenderFrame.h"
+#include <VRenderFrame.h>
 #include "utility.h"
 #include <Global/Global.h>
 #include <Scenegraph/VolumeData.h>

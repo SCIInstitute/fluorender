@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Scenegraph/VolumeFactory.h>
 #include <Scenegraph/MeshFactory.h>
 #include <Scenegraph/AnnotationFactory.h>
+#include <Fui/AgentFactory.h>
 
 namespace FL
 {
@@ -44,7 +45,7 @@ namespace FL
 		{
 			size_t volume_num = volume_factory_->getNum();
 			size_t mesh_num = mesh_factory_->getNum();
-			size_t annotations_num = annotations_factory_->getNum();
+			size_t annotations_num = annotation_factory_->getNum();
 
 			return volume_num + mesh_num + annotations_num;
 		}
@@ -53,14 +54,14 @@ namespace FL
 		{
 			size_t volume_num = volume_factory_->getNum();
 			size_t mesh_num = mesh_factory_->getNum();
-			size_t annotations_num = annotations_factory_->getNum();
+			size_t annotations_num = annotation_factory_->getNum();
 
 			if (i < volume_num)
 				return volume_factory_->get(i);
 			else if (i < volume_num + mesh_num)
 				return mesh_factory_->get(i - volume_num);
 			else if (i < volume_num + mesh_num + annotations_num)
-				return annotations_factory_->get(i - volume_num - mesh_num);
+				return annotation_factory_->get(i - volume_num - mesh_num);
 			return 0;
 		}
 
@@ -68,7 +69,7 @@ namespace FL
 		{
 			size_t volume_num = volume_factory_->getNum();
 			size_t mesh_num = mesh_factory_->getNum();
-			size_t annotations_num = annotations_factory_->getNum();
+			size_t annotations_num = annotation_factory_->getNum();
 
 			for (size_t i = 0; i < volume_num; ++i)
 			{
@@ -82,7 +83,7 @@ namespace FL
 			}
 			for (size_t i = 0; i < annotations_num; ++i)
 			{
-				if (annotations_factory_->get(i) == object)
+				if (annotation_factory_->get(i) == object)
 					return i + volume_num + mesh_num;
 			}
 			return volume_num + mesh_num + annotations_num;
@@ -91,6 +92,15 @@ namespace FL
 		VolumeFactory& getVolumeFactory()
 		{ return *volume_factory_; }
 
+		MeshFactory& getMeshFactory()
+		{ return *mesh_factory_; }
+
+		AnnotationFactory& getAnnotationFactory()
+		{ return *annotation_factory_;}
+
+		FUI::AgentFactory& getAgentFactory()
+		{ return *agent_factory_; }
+
 	private:
 		Global();
 
@@ -98,7 +108,10 @@ namespace FL
 
 		ref_ptr<VolumeFactory> volume_factory_;
 		ref_ptr<MeshFactory> mesh_factory_;
-		ref_ptr<AnnotationFactory> annotations_factory_;
+		ref_ptr<AnnotationFactory> annotation_factory_;
+
+		//list of agent
+		ref_ptr<FUI::AgentFactory> agent_factory_;
 	};
 }
 

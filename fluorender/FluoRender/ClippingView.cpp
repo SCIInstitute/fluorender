@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "ClippingView.h"
-#include "VRenderFrame.h"
+#include <VRenderFrame.h>
 #include "compatibility.h"
 #include <wx/valnum.h>
 #include "png_resource.h"

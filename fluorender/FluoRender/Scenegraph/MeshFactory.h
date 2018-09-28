@@ -45,7 +45,7 @@ namespace FL
 
 		virtual const char* className() const { return "MeshFactory"; }
 
-		virtual MeshData* build();
+		virtual MeshData* build(const std::string &exp);
 
 		virtual MeshData* clone(MeshData*);
 

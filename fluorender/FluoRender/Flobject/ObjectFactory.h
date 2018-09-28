@@ -62,7 +62,7 @@ namespace FL
 		virtual Object* getDefault()
 		{ return findFirst(default_object_name_); }
 
-		virtual Object* build();
+		virtual Object* build(const std::string &exp = "");
 
 		virtual Object* clone(Object*);
 

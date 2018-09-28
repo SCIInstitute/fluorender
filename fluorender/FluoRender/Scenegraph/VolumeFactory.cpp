@@ -208,7 +208,7 @@ void VolumeFactory::createDefault()
 	}
 }
 
-VolumeData* VolumeFactory::build()
+VolumeData* VolumeFactory::build(const std::string &exp)
 {
 	unsigned int default_id = 0;
 	return clone(default_id);

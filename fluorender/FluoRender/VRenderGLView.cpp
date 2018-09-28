@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <boost/process.hpp>
 #include "VRenderGLView.h"
 #include "VRenderView.h"
-#include "VRenderFrame.h"
+#include <VRenderFrame.h>
 #include <Fui/TreePanel.h>
 #include <Global/Global.h>
 #include <Scenegraph/Group.h>
@@ -2862,8 +2862,8 @@ void VRenderGLView::CalculateSingle(int type, wxString prev_group, bool add)
 				FL::Global::instance().getVolumeFactory().remove(vd);
 				//delete vd;
 				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-				if (vr_frame)
-					vr_frame->GetPropView()->SetVolumeData(vd_a);
+				//if (vr_frame)
+				//	vr_frame->GetPropView()->SetVolumeData(vd_a);
 			}
 		}
 		RefreshGL(5);
@@ -7283,11 +7283,19 @@ FL::VolumeGroup* VRenderGLView::GetGroup(wxString &name)
 {
 	FL::SearchVisitor visitor;
 	visitor.matchClassName("VolumeGroup");
-	visitor.matchName(name.ToStdString());
+	//visitor.matchName(name.ToStdString());
 	m_render_view->accept(visitor);
 	FL::ObjectList* list = visitor.getResult();
 	if (!list->empty())
+	{
+		for (auto it = list->begin();
+			it != list->end(); ++it)
+		{
+			if ((*it)->getName() == name.ToStdString())
+				return dynamic_cast<FL::VolumeGroup*>(*it);
+		}
 		return dynamic_cast<FL::VolumeGroup*>((*list)[0]);
+	}
 	return 0;
 	//int i;
 
@@ -7362,9 +7370,11 @@ FL::VolumeGroup* VRenderGLView::AddVolumeData(FL::VolumeData* vd, wxString group
 {
 	FL::VolumeGroup* group = GetGroup(group_name);
 	if (!group)
+	{
 		group = FL::Global::instance().getVolumeFactory().buildGroup();
+		m_render_view->addChild(group);
+	}
 
-	m_render_view->addChild(group);
 	group->addChild(vd);
 
 	m_vd_pop_dirty = true;

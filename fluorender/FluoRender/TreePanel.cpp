@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "TreePanel.h"
-#include "VRenderFrame.h"
+#include <VRenderFrame.h>
 #include <Global/Global.h>
 #include <Scenegraph/VolumeData.h>
 #include "tick.xpm"
@@ -211,7 +211,7 @@ void DataTreeCtrl::DeleteSelection()
 					}
 					vr_frame->UpdateTree();
 					vr_frame->RefreshVRenderViews();
-					vr_frame->OnSelection(1);
+					//vr_frame->OnSelection(1);
 				}
 				break;
 			case 5://group
@@ -226,7 +226,7 @@ void DataTreeCtrl::DeleteSelection()
 						vrv->RemoveVolumeData(name_data);
 					vr_frame->UpdateTree();
 					vr_frame->RefreshVRenderViews();
-					vr_frame->OnSelection(1);
+					//vr_frame->OnSelection(1);
 
 					if (vrv->GetVolMethod() == VOL_METHOD_MULTI)
 					{
@@ -251,7 +251,7 @@ void DataTreeCtrl::DeleteSelection()
 						vrv->RemoveMeshData(name_data);
 					vr_frame->UpdateTree();
 					vr_frame->RefreshVRenderViews();
-					vr_frame->OnSelection(1);
+					//vr_frame->OnSelection(1);
 				}
 				break;
 			}
@@ -543,7 +543,7 @@ void DataTreeCtrl::OnManipulateData(wxCommandEvent& event)
 		{
 			wxString name = GetItemText(sel_item);
 			MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
-			vr_frame->OnSelection(6, 0, 0, 0, md);
+			//vr_frame->OnSelection(6, 0, 0, 0, md);
 		}
 	}
 }
@@ -1004,7 +1004,7 @@ void DataTreeCtrl::UpdateSelection()
 				{
 					wxString str = GetItemText(sel_item);
 					VRenderView* vrv = vr_frame->GetView(str);
-					vr_frame->OnSelection(1, vrv, 0, 0, 0);
+					//vr_frame->OnSelection(1, vrv, 0, 0, 0);
 				}
 				break;
 			case 2://volume data
@@ -1027,7 +1027,7 @@ void DataTreeCtrl::UpdateSelection()
 									str = GetItemText(par_item);
 									FL::VolumeGroup* group = vrv->GetGroup(str);
 									vr_frame->GetAdjustView()->SetGroupLink(group);
-									vr_frame->OnSelection(2, vrv, group, vd, 0);
+									//vr_frame->OnSelection(2, vrv, group, vd, 0);
 									vrv->SetVolumeA(vd);
 									vr_frame->GetBrushToolDlg()->GetSettings(vrv);
 									vr_frame->GetMeasureDlg()->GetSettings(vrv);
@@ -1044,7 +1044,7 @@ void DataTreeCtrl::UpdateSelection()
 									FL::VolumeData* vd = FL::Global::instance().
 										getVolumeFactory().findFirst(name.ToStdString());
 									vr_frame->GetAdjustView()->SetGroupLink(0);
-									vr_frame->OnSelection(2, vrv, 0, vd);
+									//vr_frame->OnSelection(2, vrv, 0, vd);
 									vrv->SetVolumeA(vd);
 									vr_frame->GetBrushToolDlg()->GetSettings(vrv);
 									vr_frame->GetMeasureDlg()->GetSettings(vrv);
@@ -1069,7 +1069,7 @@ void DataTreeCtrl::UpdateSelection()
 							if (vrv)
 							{
 								MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
-								vr_frame->OnSelection(3, vrv, 0, 0, md);
+								//vr_frame->OnSelection(3, vrv, 0, 0, md);
 							}
 						}
 						else if (par_item_data && par_item_data->type == 1)
@@ -1080,7 +1080,7 @@ void DataTreeCtrl::UpdateSelection()
 							if (vrv)
 							{
 								MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
-								vr_frame->OnSelection(3, vrv, 0, 0, md);
+								//vr_frame->OnSelection(3, vrv, 0, 0, md);
 							}
 						}
 					}
@@ -1091,7 +1091,7 @@ void DataTreeCtrl::UpdateSelection()
 					wxString par_name = GetItemText(GetItemParent(sel_item));
 					VRenderView* vrv = vr_frame->GetView(par_name);
 					Annotations* ann = vr_frame->GetDataManager()->GetAnnotations(name);
-					vr_frame->OnSelection(4, vrv, 0, 0, 0, ann);
+					//vr_frame->OnSelection(4, vrv, 0, 0, 0, ann);
 				}
 				break;
 			case 5://group
@@ -1101,7 +1101,7 @@ void DataTreeCtrl::UpdateSelection()
 					if (vrv)
 					{
 						FL::VolumeGroup* group = vrv->GetGroup(name);
-						vr_frame->OnSelection(5, vrv, group);
+						//vr_frame->OnSelection(5, vrv, group);
 					}
 				}
 				break;

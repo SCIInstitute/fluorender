@@ -117,7 +117,7 @@ namespace FUI
 	private:
 		wxWindow* m_frame;
 
-		FL::ref_ptr<VolumePropAgent> m_agent;
+		VolumePropAgent* m_agent;
 
 		double m_max_val;
 

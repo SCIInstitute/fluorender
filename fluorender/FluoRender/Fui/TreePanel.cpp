@@ -37,6 +37,7 @@ DEALINGS IN THE SOFTWARE.
 using namespace FUI;
 
 BEGIN_EVENT_TABLE(TreePanel, wxPanel)
+EVT_DATAVIEW_SELECTION_CHANGED(ID_TreeCtrl, TreePanel::OnSelectionChanged)
 END_EVENT_TABLE()
 
 TreePanel::TreePanel(wxWindow* frame,
@@ -93,7 +94,9 @@ TreePanel::TreePanel(wxWindow* frame,
 	m_toolbar->Realize();
 
 	//create data tree
-	m_tree_ctrl = new wxDataViewCtrl(this, wxID_ANY);
+	m_tree_ctrl = new wxDataViewCtrl(this, ID_TreeCtrl,
+		wxDefaultPosition, wxDefaultSize,
+		wxDV_MULTIPLE | wxDV_ROW_LINES);
 	m_tree_ctrl->EnableDragSource(wxDF_UNICODETEXT);
 	m_tree_ctrl->EnableDropTarget(wxDF_UNICODETEXT);
 	//wxImageList *images = new wxImageList(16, 16, true);
@@ -138,13 +141,18 @@ TreePanel::~TreePanel()
 
 void TreePanel::SetScenegraph(FL::Node* root)
 {
-	m_tree_model = new TreeModel;
-	m_tree_model->SetRoot(root);
+	m_tree_model = dynamic_cast<TreeModel*>(
+		FL::Global::instance().getAgentFactory().
+		getOrAddAgent("TreeModel", *this));
+	if (!m_tree_model)
+		return;
+	m_tree_model->setObject(root);
 
-	m_tree_ctrl->AssociateModel(m_tree_model.get());
+	m_tree_ctrl->AssociateModel(m_tree_model);
 	m_tree_model->ItemAdded(
 		wxDataViewItem(0),
-		wxDataViewItem((void*)m_tree_model->GetRoot()));
+		wxDataViewItem((void*)m_tree_model->getObject()));
+	m_tree_ctrl->Expand(wxDataViewItem((void*)root));
 }
 
 //seelction
@@ -232,4 +240,15 @@ void TreePanel::BrushCreate()
 void TreePanel::BrushSolid(bool state)
 {
 
+}
+
+void TreePanel::OnSelectionChanged(wxDataViewEvent &event)
+{
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+
+	if (!vr_frame)
+		return;
+
+	wxDataViewItem item = event.GetItem();
+	vr_frame->OnSelection(static_cast<FL::Node*>(item.GetID()));
 }

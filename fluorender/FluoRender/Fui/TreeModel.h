@@ -29,24 +29,17 @@ DEALINGS IN THE SOFTWARE.
 #define _TREEMODEL_H_
 
 #include <wx/dataview.h>
-#include <Flobject/Observer.h>
+#include <Fui/InterfaceAgent.h>
 #include <Scenegraph/Node.h>
 #include <Scenegraph/NodeVisitor.h>
 
 namespace FUI
 {
-	class TreeModel : public wxDataViewModel, public FL::Observer
+	class TreePanel;
+	class TreeModel : public wxDataViewModel, public InterfaceAgent
 	{
 	public:
-		TreeModel();
-
-		//observer functions
-		virtual void objectDeleted(void*);
-		virtual void objectChanging(void*, void* orig_node, const std::string &exp);
-		virtual void objectChanged(void*, void* orig_node, const std::string &exp);
-		//scenegraph events
-		virtual void nodeAdded(void*, void* parent, void* child);
-		virtual void nodeRemoved(void*, void* parent, void* child);
+		TreeModel(TreePanel &panel);
 
 		int Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 			unsigned int column, bool ascending) const override;
@@ -71,15 +64,28 @@ namespace FUI
 		virtual unsigned int GetChildren(const wxDataViewItem &parent,
 			wxDataViewItemArray &array) const override;
 
-		void SetRoot(FL::Node* root)
+		virtual bool isSameKindAs(const Object* obj) const
 		{
-			m_root = root;
-			root->addObserver(this);
+			return dynamic_cast<const TreeModel*>(obj) != NULL;
 		}
-		FL::Node* GetRoot() { return m_root; }
 
-	private:
-		FL::Node *m_root;//also observes root
+		virtual const char* className() const { return "TreeModel"; }
+
+		//observer functions
+		virtual void objectChanging(void*, void* orig_node, const std::string &exp);
+		virtual void objectChanged(void*, void* orig_node, const std::string &exp);
+		//scenegraph events
+		virtual void nodeAdded(void*, void* parent, void* child);
+		virtual void nodeRemoved(void*, void* parent, void* child);
+
+		//interface agent functions
+		virtual void setObject(FL::Node* root)
+		{ InterfaceAgent::setObject(root); }
+		virtual FL::Node* getObject()
+		{ return dynamic_cast<FL::Node*>(InterfaceAgent::getObject()); }
+
+	protected:
+		TreePanel &panel_;
 	};
 
 }

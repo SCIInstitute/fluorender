@@ -25,36 +25,60 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _ANNOTATIONFACTORY_H_
-#define _ANNOTATIONFACTORY_H_
 
-#include <Flobject/ObjectFactory.h>
-#include <Scenegraph/Annotations.h>
+#include <Fui/AgentFactory.h>
+#include <Fui/ListModel.h>
+#include <Fui/TreeModel.h>
+#include <Fui/VolumePropAgent.h>
+#include <Fui/VolumePropPanel.h>
+#include <Fui/TreePanel.h>
 
-namespace FL
+using namespace FUI;
+
+AgentFactory::AgentFactory()
 {
-	class AnnotationFactory : public ObjectFactory
-	{
-	public:
-		AnnotationFactory();
-
-		virtual bool isSameKindAs(const Object* obj) const
-		{
-			return dynamic_cast<const AnnotationFactory*>(obj) != NULL;
-		}
-
-		virtual const char* className() const { return "AnnotationFactory"; }
-
-		virtual Annotations* build(const std::string &exp);
-
-		virtual Annotations* clone(Annotations*);
-
-		virtual Annotations* clone(const unsigned int);
-
-	protected:
-		virtual ~AnnotationFactory();
-		virtual void createDefault();
-	};
+	m_name = "agent factory";
 }
 
-#endif//_ANNOTATIONFACTORY_H_
+AgentFactory::~AgentFactory()
+{
+
+}
+
+InterfaceAgent* AgentFactory::getOrAddAgent(const std::string &name, wxPanel &panel)
+{
+	InterfaceAgent* result = findFirst(name);
+	if (result)
+		return result;
+
+	//not found
+	if (name == "ListModel")
+	{
+		ListModel* list_model = new ListModel();
+		list_model->setName(name);
+		result = list_model;
+	}
+	else if (name == "TreeModel")
+	{
+		TreeModel* tree_model =
+			new TreeModel(static_cast<TreePanel&>(panel));
+		tree_model->setName(name);
+		result = tree_model;
+	}
+	else if (name == "VolumePropAgent")
+	{
+		VolumePropAgent* volume_prop_agent =
+			new VolumePropAgent(static_cast<VolumePropPanel&>(panel));
+		volume_prop_agent->setName(name);
+		result = volume_prop_agent;
+	}
+
+	if (result)
+	{
+		objects_.push_front(result);
+		notifyObserversNodeAdded(this, result);
+	}
+
+	return result;
+}
+

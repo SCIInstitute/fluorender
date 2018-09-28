@@ -137,7 +137,8 @@ bool ListModel::SetValueByRow(const wxVariant &variant,
 	return true;
 }
 
-void ListModel::SetRoot()
+void ListModel::setObject(FL::Node* root)
 {
 	FL::Global::instance().getVolumeFactory().addObserver(this);
 }
+

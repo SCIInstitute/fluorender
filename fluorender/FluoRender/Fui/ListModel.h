@@ -29,22 +29,15 @@ DEALINGS IN THE SOFTWARE.
 #define _LISTMODEL_H_
 
 #include <wx/dataview.h>
-#include <Flobject/Observer.h>
+#include <Fui/InterfaceAgent.h>
+#include <Scenegraph/Node.h>
 
 namespace FUI
 {
-	class ListModel : public wxDataViewVirtualListModel, public FL::Observer
+	class ListModel : public wxDataViewVirtualListModel, public InterfaceAgent
 	{
 	public:
 		ListModel();
-
-		//observer functions
-		virtual void objectDeleted(void*);
-		virtual void objectChanging(void*, void* orig_node, const std::string &exp);
-		virtual void objectChanged(void*, void* orig_node, const std::string &exp);
-		//scenegraph events
-		virtual void nodeAdded(void*, void* parent, void* child);
-		virtual void nodeRemoved(void*, void* parent, void* child);
 
 		int Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 			unsigned int column, bool ascending) const override;
@@ -63,7 +56,27 @@ namespace FUI
 		virtual bool SetValueByRow(const wxVariant &variant,
 			unsigned int row, unsigned int col) override;
 
-		void SetRoot();
+		virtual bool isSameKindAs(const Object* obj) const
+		{
+			return dynamic_cast<const ListModel*>(obj) != NULL;
+		}
+
+		virtual const char* className() const { return "ListModel"; }
+
+		//observer functions
+		virtual void objectDeleted(void*);
+		virtual void objectChanging(void*, void* orig_node, const std::string &exp);
+		virtual void objectChanged(void*, void* orig_node, const std::string &exp);
+		//scenegraph events
+		virtual void nodeAdded(void*, void* parent, void* child);
+		virtual void nodeRemoved(void*, void* parent, void* child);
+
+		//interface agent functions
+		virtual void setObject(FL::Node* root);
+		virtual FL::Node* getObject()
+		{
+			return dynamic_cast<FL::Node*>(InterfaceAgent::getObject());
+		}
 
 	private:
 	};
