@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Fui/TreePanel.h>
 #include <Fui/ListPanel.h>
 #include <Fui/VolumePropPanel.h>
+#include <Fui/OutAdjustPanel.h>
 #include <Global/Global.h>
 #include <Scenegraph/Group.h>
 #include <Scenegraph/VolumeData.h>
@@ -441,7 +442,7 @@ VRenderFrame::VRenderFrame(
 		m_setting_dlg->GetPlaneMode()));
 
 	//adjust view
-	m_adjust_view = new AdjustView(this, this, wxID_ANY,
+	m_adjust_view = new FUI::OutAdjustPanel(this, this, wxID_ANY,
 		wxDefaultPosition, wxSize(130, 700));
 
 	wxString font_file = m_setting_dlg->GetFontFile();
@@ -677,19 +678,19 @@ VRenderFrame::VRenderFrame(
 	m_mov_rewind = false;
 
 	//set view default settings
-	if (m_adjust_view && vrv)
-	{
-		FLTYPE::Color gamma, brightness, hdr;
-		bool sync_r, sync_g, sync_b;
-		m_adjust_view->GetDefaults(gamma, brightness, hdr,
-			sync_r, sync_g, sync_b);
-		vrv->m_glview->SetGamma(gamma);
-		vrv->m_glview->SetBrightness(brightness);
-		vrv->m_glview->SetHdr(hdr);
-		vrv->m_glview->SetSyncR(sync_r);
-		vrv->m_glview->SetSyncG(sync_g);
-		vrv->m_glview->SetSyncB(sync_b);
-	}
+	//if (m_adjust_view && vrv)
+	//{
+	//	FLTYPE::Color gamma, brightness, hdr;
+	//	bool sync_r, sync_g, sync_b;
+	//	m_adjust_view->GetDefaults(gamma, brightness, hdr,
+	//		sync_r, sync_g, sync_b);
+	//	vrv->m_glview->SetGamma(gamma);
+	//	vrv->m_glview->SetBrightness(brightness);
+	//	vrv->m_glview->SetHdr(hdr);
+	//	vrv->m_glview->SetSyncR(sync_r);
+	//	vrv->m_glview->SetSyncG(sync_g);
+	//	vrv->m_glview->SetSyncB(sync_b);
+	//}
 
 	//drop target
 	SetDropTarget(new DnDFile(this));
@@ -985,18 +986,18 @@ wxString VRenderFrame::CreateView(int row)
 	OrganizeVRenderViews(1);
 
 	//set view default settings
-	if (m_adjust_view && vrv)
-	{
-		FLTYPE::Color gamma, brightness, hdr;
-		bool sync_r, sync_g, sync_b;
-		m_adjust_view->GetDefaults(gamma, brightness, hdr, sync_r, sync_g, sync_b);
-		vrv->m_glview->SetGamma(gamma);
-		vrv->m_glview->SetBrightness(brightness);
-		vrv->m_glview->SetHdr(hdr);
-		vrv->m_glview->SetSyncR(sync_r);
-		vrv->m_glview->SetSyncG(sync_g);
-		vrv->m_glview->SetSyncB(sync_b);
-	}
+	//if (m_adjust_view && vrv)
+	//{
+	//	FLTYPE::Color gamma, brightness, hdr;
+	//	bool sync_r, sync_g, sync_b;
+	//	m_adjust_view->GetDefaults(gamma, brightness, hdr, sync_r, sync_g, sync_b);
+	//	vrv->m_glview->SetGamma(gamma);
+	//	vrv->m_glview->SetBrightness(brightness);
+	//	vrv->m_glview->SetHdr(hdr);
+	//	vrv->m_glview->SetSyncR(sync_r);
+	//	vrv->m_glview->SetSyncG(sync_g);
+	//	vrv->m_glview->SetSyncB(sync_b);
+	//}
 
 	//add volumes
 	if (m_vrv_list.size() > 0 && vrv)
@@ -2135,7 +2136,8 @@ void VRenderFrame::OnSelection(FL::Node *node)
 	if (!node)
 		return;
 
-	//if (m_adjust_view)
+	if (m_adjust_view)
+		m_adjust_view->AssociateNode(node);
 	//{
 	//	m_adjust_view->SetRenderView(vrv);
 	//	if (!vrv || vd)
@@ -2222,8 +2224,8 @@ void VRenderFrame::OnSelection(FL::Node *node)
 			if (m_annotation_prop)
 				m_annotation_prop->Show(false);
 
-			if (m_adjust_view)
-				m_adjust_view->SetVolumeData(vd);
+			//if (m_adjust_view)
+			//	m_adjust_view->SetVolumeData(vd);
 
 			if (m_clip_view)
 				m_clip_view->SetVolumeData(vd);
@@ -2407,11 +2409,6 @@ void VRenderFrame::DeleteVRenderView(wxString &name)
 			return;
 		}
 	}
-}
-
-AdjustView* VRenderFrame::GetAdjustView()
-{
-	return m_adjust_view;
 }
 
 //organize render views

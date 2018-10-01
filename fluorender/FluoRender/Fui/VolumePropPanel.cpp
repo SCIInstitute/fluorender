@@ -110,17 +110,14 @@ VolumePropPanel::VolumePropPanel(wxWindow* frame,
 	const wxString& name) :
 	wxPanel(parent, id, pos, size, style, name),
 	m_frame(frame),
-	m_max_val(255.0),
-	m_space_x_text(0),
-	m_space_y_text(0),
-	m_space_z_text(0)
+	m_max_val(255.0)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
 	m_agent = 
 		FL::Global::instance().getAgentFactory().
-		getOrAddVolumePropAgent("VolumePropAgent", *this);
+		getOrAddVolumePropAgent("VolumePropPanel", *this);
 
 	wxBoxSizer* sizer_all = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* sizer_left = new wxBoxSizer(wxVERTICAL);

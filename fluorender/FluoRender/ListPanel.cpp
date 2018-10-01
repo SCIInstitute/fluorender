@@ -340,15 +340,15 @@ void DataListCtrl::AddToView(int menu_index, long item)
 
 					FL::VolumeGroup *group = view->AddVolumeData(vd_add);
 					//vr_frame->OnSelection(2, view, group, vd_add, 0);
-					if (view->GetVolMethod() == VOL_METHOD_MULTI)
-					{
-						AdjustView* adjust_view = vr_frame->GetAdjustView();
-						if (adjust_view)
-						{
-							adjust_view->SetRenderView(view);
-							adjust_view->UpdateSync();
-						}
-					}
+					//if (view->GetVolMethod() == VOL_METHOD_MULTI)
+					//{
+					//	AdjustView* adjust_view = vr_frame->GetAdjustView();
+					//	if (adjust_view)
+					//	{
+					//		adjust_view->SetRenderView(view);
+					//		adjust_view->UpdateSync();
+					//	}
+					//}
 				}
 			}
 		}

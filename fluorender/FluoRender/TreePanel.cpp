@@ -171,15 +171,15 @@ void DataTreeCtrl::DeleteSelection()
 							{
 								vd->setValue("display", true);
 								vrv->RemoveVolumeData(name_data);
-								if (vrv->GetVolMethod() == VOL_METHOD_MULTI)
-								{
-									AdjustView* adjust_view = vr_frame->GetAdjustView();
-									if (adjust_view)
-									{
-										adjust_view->SetRenderView(vrv);
-										adjust_view->UpdateSync();
-									}
-								}
+								//if (vrv->GetVolMethod() == VOL_METHOD_MULTI)
+								//{
+								//	AdjustView* adjust_view = vr_frame->GetAdjustView();
+								//	if (adjust_view)
+								//	{
+								//		adjust_view->SetRenderView(vrv);
+								//		adjust_view->UpdateSync();
+								//	}
+								//}
 							}
 						}
 						else if (item_data->type == 3)//mesh data
@@ -228,15 +228,15 @@ void DataTreeCtrl::DeleteSelection()
 					vr_frame->RefreshVRenderViews();
 					//vr_frame->OnSelection(1);
 
-					if (vrv->GetVolMethod() == VOL_METHOD_MULTI)
-					{
-						AdjustView* adjust_view = vr_frame->GetAdjustView();
-						if (adjust_view)
-						{
-							adjust_view->SetRenderView(vrv);
-							adjust_view->UpdateSync();
-						}
-					}
+					//if (vrv->GetVolMethod() == VOL_METHOD_MULTI)
+					//{
+					//	AdjustView* adjust_view = vr_frame->GetAdjustView();
+					//	if (adjust_view)
+					//	{
+					//		adjust_view->SetRenderView(vrv);
+					//		adjust_view->UpdateSync();
+					//	}
+					//}
 				}
 				break;
 			case 6://mesh group
@@ -1026,7 +1026,7 @@ void DataTreeCtrl::UpdateSelection()
 										getVolumeFactory().findFirst(name.ToStdString());
 									str = GetItemText(par_item);
 									FL::VolumeGroup* group = vrv->GetGroup(str);
-									vr_frame->GetAdjustView()->SetGroupLink(group);
+									//vr_frame->GetAdjustView()->SetGroupLink(group);
 									//vr_frame->OnSelection(2, vrv, group, vd, 0);
 									vrv->SetVolumeA(vd);
 									vr_frame->GetBrushToolDlg()->GetSettings(vrv);
@@ -1043,7 +1043,7 @@ void DataTreeCtrl::UpdateSelection()
 								{
 									FL::VolumeData* vd = FL::Global::instance().
 										getVolumeFactory().findFirst(name.ToStdString());
-									vr_frame->GetAdjustView()->SetGroupLink(0);
+									//vr_frame->GetAdjustView()->SetGroupLink(0);
 									//vr_frame->OnSelection(2, vrv, 0, vd);
 									vrv->SetVolumeA(vd);
 									vr_frame->GetBrushToolDlg()->GetSettings(vrv);

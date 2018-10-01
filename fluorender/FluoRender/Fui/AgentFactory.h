@@ -38,6 +38,7 @@ namespace FUI
 	class TreeModel;
 	class VolumePropAgent;
 	class RenderCanvasAgent;
+	class OutAdjustAgent;
 	class AgentFactory : public FL::ObjectFactory
 	{
 	public:
@@ -90,6 +91,7 @@ namespace FUI
 		TreeModel* getOrAddTreeModel(const std::string &name, wxWindow &window);
 		VolumePropAgent* getOrAddVolumePropAgent(const std::string &name, wxWindow &window);
 		RenderCanvasAgent* getOrAddRenderCanvasAgent(const std::string &name, wxWindow &window);
+		OutAdjustAgent* getOrAddOutAdjustAgent(const std::string &name, wxWindow &window);
 
 	protected:
 		virtual ~AgentFactory();

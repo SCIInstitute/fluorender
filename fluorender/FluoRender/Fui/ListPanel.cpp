@@ -84,7 +84,7 @@ ListPanel::ListPanel(wxWindow *frame,
 	m_list_ctrl->SetDoubleBuffered(true);
 	m_list_model =
 		FL::Global::instance().getAgentFactory().
-		getOrAddListModel("ListModel", *this);
+		getOrAddListModel("ListPanel", *this);
 	if (m_list_model)
 	{
 		m_list_model->setObject(0);

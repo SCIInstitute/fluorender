@@ -143,7 +143,7 @@ void TreePanel::SetScenegraph(FL::Node* root)
 {
 	m_tree_model =
 		FL::Global::instance().getAgentFactory().
-		getOrAddTreeModel("TreeModel", *this);
+		getOrAddTreeModel("TreePanel", *this);
 	if (!m_tree_model)
 		return;
 	m_tree_model->setObject(root);

@@ -36,7 +36,6 @@ DEALINGS IN THE SOFTWARE.
 #include "MManipulator.h"
 #include "VMovieView.h"
 #include "ClippingView.h"
-#include "AdjustView.h"
 #include "SettingDlg.h"
 #include "HelpDlg.h"
 #include "BrushToolDlg.h"
@@ -113,6 +112,7 @@ namespace FUI
 	class TreePanel;
 	class ListPanel;
 	class VolumePropPanel;
+	class OutAdjustPanel;
 }
 class VRenderFrame: public wxFrame
 {
@@ -227,7 +227,8 @@ public:
 	wxString m_mov_frames;
 
 	//prop view
-	AdjustView* GetAdjustView();
+	FUI::OutAdjustPanel* GetAdjustView()
+	{ return m_adjust_view; }
 	//tool views
 	FUI::VolumePropPanel* GetPropView()
 	{ return m_volume_prop; }
@@ -378,7 +379,7 @@ private:
 	DataManager m_data_mgr;
 	wxPanel *m_prop_panel;
 	ClippingView *m_clip_view;
-	AdjustView* m_adjust_view;
+	FUI::OutAdjustPanel* m_adjust_view;
 	SettingDlg* m_setting_dlg;
 	HelpDlg* m_help_dlg;
 	BrushToolDlg* m_brush_tool_dlg;

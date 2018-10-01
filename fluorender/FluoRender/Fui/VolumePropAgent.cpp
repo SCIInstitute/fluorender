@@ -332,6 +332,6 @@ void VolumePropAgent::UpdateAllSettings()
 	else
 		panel_.DisableMip();
 
-	//Layout();
+	//panel_.Layout();
 }
 

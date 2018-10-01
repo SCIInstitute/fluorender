@@ -34,6 +34,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Fui/VolumePropPanel.h>
 #include <Fui/RenderCanvasAgent.h>
 #include <VRenderGLView.h>
+#include <Fui/OutAdjustAgent.h>
+#include <Fui/OutAdjustPanel.h>
 
 using namespace FUI;
 
@@ -120,4 +122,23 @@ RenderCanvasAgent* AgentFactory::getOrAddRenderCanvasAgent(const std::string &na
 	}
 
 	return render_canvas_agent;
+}
+
+OutAdjustAgent* AgentFactory::getOrAddOutAdjustAgent(const std::string &name, wxWindow &window)
+{
+	InterfaceAgent* result = findFirst(name);
+	if (result)
+		return dynamic_cast<OutAdjustAgent*>(result);
+
+	//not found
+	OutAdjustAgent* out_adjust_agent =
+		new OutAdjustAgent(static_cast<OutAdjustPanel&>(window));
+	if (out_adjust_agent)
+	{
+		out_adjust_agent->setName(name);
+		objects_.push_front(out_adjust_agent);
+		notifyObserversNodeAdded(this, out_adjust_agent);
+	}
+
+	return out_adjust_agent;
 }

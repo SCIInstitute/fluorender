@@ -1476,13 +1476,13 @@ void VPropView::OnEnableColormap(wxCommandEvent &event)
 	m_vd->setValue("colormap enable", colormap);
 	m_vd->setValue("colormap mode", long(colormap ? 1 : 0));
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		AdjustView *adjust_view = vr_frame->GetAdjustView();
-		if (adjust_view)
-			adjust_view->UpdateSync();
-	}
+	//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	//if (vr_frame)
+	//{
+	//	AdjustView *adjust_view = vr_frame->GetAdjustView();
+	//	if (adjust_view)
+	//		adjust_view->UpdateSync();
+	//}
 
 	if (colormap)
 		EnableColormap();
@@ -1642,14 +1642,14 @@ void VPropView::OnColorChange(wxColor c)
 			m_color2_btn->SetColour(wxc);
 		}
 
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 
-		if (vr_frame)
-		{
-			AdjustView *adjust_view = vr_frame->GetAdjustView();
-			if (adjust_view)
-				adjust_view->UpdateSync();
-		}
+		//if (vr_frame)
+		//{
+		//	AdjustView *adjust_view = vr_frame->GetAdjustView();
+		//	if (adjust_view)
+		//		adjust_view->UpdateSync();
+		//}
 
 		RefreshVRenderViews(true, true);
 	}
