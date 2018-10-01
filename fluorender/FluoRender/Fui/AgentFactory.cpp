@@ -36,6 +36,8 @@ DEALINGS IN THE SOFTWARE.
 #include <VRenderGLView.h>
 #include <Fui/OutAdjustAgent.h>
 #include <Fui/OutAdjustPanel.h>
+#include <Fui/ClipPlaneAgent.h>
+#include <Fui/ClipPlanePanel.h>
 
 using namespace FUI;
 
@@ -141,4 +143,23 @@ OutAdjustAgent* AgentFactory::getOrAddOutAdjustAgent(const std::string &name, wx
 	}
 
 	return out_adjust_agent;
+}
+
+ClipPlaneAgent* AgentFactory::getOrAddClipPlaneAgent(const std::string &name, wxWindow &window)
+{
+	InterfaceAgent* result = findFirst(name);
+	if (result)
+		return dynamic_cast<ClipPlaneAgent*>(result);
+
+	//not found
+	ClipPlaneAgent* clip_plane_agent =
+		new ClipPlaneAgent(static_cast<ClipPlanePanel&>(window));
+	if (clip_plane_agent)
+	{
+		clip_plane_agent->setName(name);
+		objects_.push_front(clip_plane_agent);
+		notifyObserversNodeAdded(this, clip_plane_agent);
+	}
+
+	return clip_plane_agent;
 }

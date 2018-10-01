@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Fui/ListPanel.h>
 #include <Fui/VolumePropPanel.h>
 #include <Fui/OutAdjustPanel.h>
+#include <Fui/ClipPlanePanel.h>
 #include <Global/Global.h>
 #include <Scenegraph/Group.h>
 #include <Scenegraph/VolumeData.h>
@@ -435,11 +436,11 @@ VRenderFrame::VRenderFrame(
 	m_annotation_prop->Show(false);
 
 	//clipping view
-	m_clip_view = new ClippingView(this, this, wxID_ANY,
+	m_clip_view = new FUI::ClipPlanePanel(this, this, wxID_ANY,
 		wxDefaultPosition, wxSize(130,700));
-	m_clip_view->SetDataManager(&m_data_mgr);
-	m_clip_view->SetPlaneMode(static_cast<PLANE_MODES>(
-		m_setting_dlg->GetPlaneMode()));
+	//m_clip_view->SetDataManager(&m_data_mgr);
+	//m_clip_view->SetPlaneMode(static_cast<PLANE_MODES>(
+	//	m_setting_dlg->GetPlaneMode()));
 
 	//adjust view
 	m_adjust_view = new FUI::OutAdjustPanel(this, this, wxID_ANY,
@@ -2138,6 +2139,8 @@ void VRenderFrame::OnSelection(FL::Node *node)
 
 	if (m_adjust_view)
 		m_adjust_view->AssociateNode(node);
+	if (m_clip_view)
+		m_clip_view->AssociateNode(node);
 	//{
 	//	m_adjust_view->SetRenderView(vrv);
 	//	if (!vrv || vd)
@@ -2227,8 +2230,8 @@ void VRenderFrame::OnSelection(FL::Node *node)
 			//if (m_adjust_view)
 			//	m_adjust_view->SetVolumeData(vd);
 
-			if (m_clip_view)
-				m_clip_view->SetVolumeData(vd);
+			//if (m_clip_view)
+			//	m_clip_view->SetVolumeData(vd);
 		}
 		else
 		{

@@ -2382,12 +2382,12 @@ void VRenderView::OnScaleBar(wxCommandEvent& event)
 
 void VRenderView::OnAovSldrIdle(wxIdleEvent& event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetClippingView())
-	{
-		if (vr_frame->GetClippingView()->GetHoldPlanes())
-			return;
-	}
+	//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	//if (vr_frame && vr_frame->GetClippingView())
+	//{
+	//	if (vr_frame->GetClippingView()->GetHoldPlanes())
+	//		return;
+	//}
 	if (m_glview->m_capture)
 		return;
 

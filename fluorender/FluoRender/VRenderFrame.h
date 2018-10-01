@@ -35,7 +35,6 @@ DEALINGS IN THE SOFTWARE.
 #include "APropView.h"
 #include "MManipulator.h"
 #include "VMovieView.h"
-#include "ClippingView.h"
 #include "SettingDlg.h"
 #include "HelpDlg.h"
 #include "BrushToolDlg.h"
@@ -113,6 +112,7 @@ namespace FUI
 	class ListPanel;
 	class VolumePropPanel;
 	class OutAdjustPanel;
+	class ClipPlanePanel;
 }
 class VRenderFrame: public wxFrame
 {
@@ -242,7 +242,7 @@ public:
 	HelpDlg* GetHelpDlg()
 	{ return m_help_dlg; }
 	//clipping view
-	ClippingView* GetClippingView()
+	FUI::ClipPlanePanel* GetClippingView()
 	{ return m_clip_view; }
 	//brush dialog
 	BrushToolDlg* GetBrushToolDlg()
@@ -378,7 +378,7 @@ private:
 	vector <VRenderView*> m_vrv_list;
 	DataManager m_data_mgr;
 	wxPanel *m_prop_panel;
-	ClippingView *m_clip_view;
+	FUI::ClipPlanePanel *m_clip_view;
 	FUI::OutAdjustPanel* m_adjust_view;
 	SettingDlg* m_setting_dlg;
 	HelpDlg* m_help_dlg;

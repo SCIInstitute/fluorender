@@ -1304,9 +1304,9 @@ void SettingDlg::SaveSettings()
 
 	//clipping plane mode
 	fconfig.SetPath("/clipping planes");
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetClippingView())
-		m_plane_mode = vr_frame->GetClippingView()->GetPlaneMode();
+	//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	//if (vr_frame && vr_frame->GetClippingView())
+	//	m_plane_mode = vr_frame->GetClippingView()->GetPlaneMode();
 	fconfig.Write("mode", m_plane_mode);
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
