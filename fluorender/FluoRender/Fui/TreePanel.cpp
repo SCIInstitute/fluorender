@@ -141,9 +141,9 @@ TreePanel::~TreePanel()
 
 void TreePanel::SetScenegraph(FL::Node* root)
 {
-	m_tree_model = dynamic_cast<TreeModel*>(
+	m_tree_model =
 		FL::Global::instance().getAgentFactory().
-		getOrAddAgent("TreeModel", *this));
+		getOrAddTreeModel("TreeModel", *this);
 	if (!m_tree_model)
 		return;
 	m_tree_model->setObject(root);

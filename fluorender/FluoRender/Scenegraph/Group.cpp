@@ -163,6 +163,7 @@ void Group::accept(NodeVisitor& nv)
 //as observer
 void Group::objectChanging(void* ptr, void* orig_node, const std::string &exp)
 {
+	Object::objectChanging(ptr, orig_node, exp);
 	Referenced* refd = static_cast<Referenced*>(ptr);
 	Node* node = dynamic_cast<Node*>(refd);
 	if (node && containsNode(node) && this != orig_node)
@@ -171,6 +172,7 @@ void Group::objectChanging(void* ptr, void* orig_node, const std::string &exp)
 
 void Group::objectChanged(void* ptr, void* orig_node, const std::string &exp)
 {
+	Object::objectChanged(ptr, orig_node, exp);
 	Referenced* refd = static_cast<Referenced*>(ptr);
 	Node* node = dynamic_cast<Node*>(refd);
 	if (node && containsNode(node) && this != orig_node)

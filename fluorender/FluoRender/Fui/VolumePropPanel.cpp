@@ -118,9 +118,9 @@ VolumePropPanel::VolumePropPanel(wxWindow* frame,
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
-	m_agent = dynamic_cast<VolumePropAgent*>(
+	m_agent = 
 		FL::Global::instance().getAgentFactory().
-		getOrAddAgent("VolumePropAgent", *this));
+		getOrAddVolumePropAgent("VolumePropAgent", *this);
 
 	wxBoxSizer* sizer_all = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* sizer_left = new wxBoxSizer(wxVERTICAL);

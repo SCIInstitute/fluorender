@@ -29,9 +29,11 @@ DEALINGS IN THE SOFTWARE.
 #include <Fui/AgentFactory.h>
 #include <Fui/ListModel.h>
 #include <Fui/TreeModel.h>
+#include <Fui/TreePanel.h>
 #include <Fui/VolumePropAgent.h>
 #include <Fui/VolumePropPanel.h>
-#include <Fui/TreePanel.h>
+#include <Fui/RenderCanvasAgent.h>
+#include <VRenderGLView.h>
 
 using namespace FUI;
 
@@ -45,40 +47,77 @@ AgentFactory::~AgentFactory()
 
 }
 
-InterfaceAgent* AgentFactory::getOrAddAgent(const std::string &name, wxPanel &panel)
+ListModel* AgentFactory::getOrAddListModel(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
-		return result;
+		return dynamic_cast<ListModel*>(result);
 
 	//not found
-	if (name == "ListModel")
+	ListModel* list_model = new ListModel();
+	if (list_model)
 	{
-		ListModel* list_model = new ListModel();
 		list_model->setName(name);
-		result = list_model;
-	}
-	else if (name == "TreeModel")
-	{
-		TreeModel* tree_model =
-			new TreeModel(static_cast<TreePanel&>(panel));
-		tree_model->setName(name);
-		result = tree_model;
-	}
-	else if (name == "VolumePropAgent")
-	{
-		VolumePropAgent* volume_prop_agent =
-			new VolumePropAgent(static_cast<VolumePropPanel&>(panel));
-		volume_prop_agent->setName(name);
-		result = volume_prop_agent;
+		objects_.push_front(list_model);
+		notifyObserversNodeAdded(this, list_model);
 	}
 
-	if (result)
-	{
-		objects_.push_front(result);
-		notifyObserversNodeAdded(this, result);
-	}
-
-	return result;
+	return list_model;
 }
 
+TreeModel* AgentFactory::getOrAddTreeModel(const std::string &name, wxWindow &window)
+{
+	InterfaceAgent* result = findFirst(name);
+	if (result)
+		return dynamic_cast<TreeModel*>(result);
+
+	//not found
+	TreeModel* tree_model =
+			new TreeModel(static_cast<TreePanel&>(window));
+	if (tree_model)
+	{
+		tree_model->setName(name);
+		objects_.push_front(tree_model);
+		notifyObserversNodeAdded(this, tree_model);
+	}
+
+	return tree_model;
+}
+
+VolumePropAgent* AgentFactory::getOrAddVolumePropAgent(const std::string &name, wxWindow &window)
+{
+	InterfaceAgent* result = findFirst(name);
+	if (result)
+		return dynamic_cast<VolumePropAgent*>(result);
+
+	//not found
+	VolumePropAgent* volume_prop_agent =
+			new VolumePropAgent(static_cast<VolumePropPanel&>(window));
+	if (volume_prop_agent)
+	{
+		volume_prop_agent->setName(name);
+		objects_.push_front(volume_prop_agent);
+		notifyObserversNodeAdded(this, volume_prop_agent);
+	}
+
+	return volume_prop_agent;
+}
+
+RenderCanvasAgent* AgentFactory::getOrAddRenderCanvasAgent(const std::string &name, wxWindow &window)
+{
+	InterfaceAgent* result = findFirst(name);
+	if (result)
+		return dynamic_cast<RenderCanvasAgent*>(result);
+
+	//not found
+	RenderCanvasAgent* render_canvas_agent =
+		new RenderCanvasAgent(static_cast<VRenderGLView&>(window));
+	if (render_canvas_agent)
+	{
+		render_canvas_agent->setName(name);
+		objects_.push_front(render_canvas_agent);
+		notifyObserversNodeAdded(this, render_canvas_agent);
+	}
+
+	return render_canvas_agent;
+}

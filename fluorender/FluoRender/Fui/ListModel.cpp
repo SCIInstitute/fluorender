@@ -36,14 +36,6 @@ ListModel::ListModel()
 }
 
 //observer functions
-void ListModel::objectDeleted(void* ptr)
-{
-	FL::Referenced* refd = static_cast<FL::Referenced*>(ptr);
-
-	//remove observee
-	removeObservee(refd);
-}
-
 void ListModel::objectChanging(void* ptr, void* orig_node, const std::string &exp)
 {
 	//before change

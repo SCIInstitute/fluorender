@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VRENDERGLVIEW_H_
 #define _VRENDERGLVIEW_H_
 
+#include <Fui/RenderCanvasAgent.h>
 #include <Types/Quaternion.h>
 #include <Types/Color.h>
 #include <Types/BBox.h>
@@ -129,7 +130,7 @@ public:
 	~VRenderGLView();
 
 	//root of the scenegraph
-	FL::Group* GetGroup() { return m_render_view.get(); }
+	FL::Group* GetGroup() { return m_agent->getObject(); }
 
 	//for degugging, this allows inspection of the pixel format actually given.
 #ifdef _WIN32
@@ -638,6 +639,12 @@ public:
 	static VRenderGLView* m_master_linked_view;
 
 private:
+	FUI::RenderCanvasAgent* m_agent;
+	FL::ref_ptr<FL::Group> m_render_view;	//root of the render view
+									//this is a temporary measure,
+									//as data will be managed by a new view object in the future
+
+
 	bool m_drawing;
 	bool m_refresh;//own refresh command
 	wxSize m_size;
@@ -653,9 +660,6 @@ private:
 	vector <MeshData*> m_md_pop_list;
 	//real data list
 	//vector <TreeLayer*> m_layer_list;
-	FL::ref_ptr<FL::Group> m_render_view;	//root of the render view
-									//this is a temporary measure,
-									//as data will be managed by a new view object in the future
 	//ruler list
 	int m_ruler_type;//0: 2point ruler; 1:multi-point ruler; 2:locator
 	vector <Ruler*> m_ruler_list;

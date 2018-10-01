@@ -30,10 +30,14 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Flobject/ObjectFactory.h>
 #include <Fui/InterfaceAgent.h>
-#include <wx/panel.h>
+#include <wx/window.h>
 
 namespace FUI
 {
+	class ListModel;
+	class TreeModel;
+	class VolumePropAgent;
+	class RenderCanvasAgent;
 	class AgentFactory : public FL::ObjectFactory
 	{
 	public:
@@ -81,7 +85,11 @@ namespace FUI
 			return dynamic_cast<InterfaceAgent*>(ObjectFactory::findLast(name));
 		}
 
-		InterfaceAgent* getOrAddAgent(const std::string &name, wxPanel &panel);
+		//each agent type has a function
+		ListModel* getOrAddListModel(const std::string &name, wxWindow &window);
+		TreeModel* getOrAddTreeModel(const std::string &name, wxWindow &window);
+		VolumePropAgent* getOrAddVolumePropAgent(const std::string &name, wxWindow &window);
+		RenderCanvasAgent* getOrAddRenderCanvasAgent(const std::string &name, wxWindow &window);
 
 	protected:
 		virtual ~AgentFactory();

@@ -25,60 +25,38 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _LISTMODEL_H_
-#define _LISTMODEL_H_
+#ifndef _RENDERCANVASAGENT_H_
+#define _RENDERCANVASAGENT_H_
 
-#include <wx/dataview.h>
 #include <Fui/InterfaceAgent.h>
-#include <Scenegraph/Node.h>
+#include <Scenegraph/Group.h>
 
+class VRenderGLView;
 namespace FUI
 {
-	class ListModel : public wxDataViewVirtualListModel, public InterfaceAgent
+	class RenderCanvasAgent : public InterfaceAgent
 	{
 	public:
-		ListModel();
+		RenderCanvasAgent(VRenderGLView &gl_view);
 
-		int Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
-			unsigned int column, bool ascending) const override;
-
-		//model definition
-		virtual unsigned int GetColumnCount() const override;
-
-		virtual wxString GetColumnType(unsigned int col) const override;
-
-		virtual void GetValueByRow(wxVariant &vanriant,
-			unsigned int row, unsigned int col) const override;
-
-		virtual bool GetAttrByRow(unsigned int row, unsigned int col,
-			wxDataViewItemAttr &attr) const override;
-
-		virtual bool SetValueByRow(const wxVariant &variant,
-			unsigned int row, unsigned int col) override;
-
-		virtual bool isSameKindAs(const Object* obj) const
+		virtual bool isSameKindAs(const FL::Object* obj) const
 		{
-			return dynamic_cast<const ListModel*>(obj) != NULL;
+			return dynamic_cast<const RenderCanvasAgent*>(obj) != NULL;
 		}
 
-		virtual const char* className() const { return "ListModel"; }
+		virtual const char* className() const { return "RenderCanvasAgent"; }
 
-		//observer functions
+		//observer
 		virtual void objectChanging(void*, void* orig_node, const std::string &exp);
 		virtual void objectChanged(void*, void* orig_node, const std::string &exp);
-		//scenegraph events
-		virtual void nodeAdded(void*, void* parent, void* child);
-		virtual void nodeRemoved(void*, void* parent, void* child);
 
-		//interface agent functions
-		virtual void setObject(FL::Node* root);
-		virtual FL::Node* getObject()
-		{
-			return dynamic_cast<FL::Node*>(InterfaceAgent::getObject());
-		}
+		virtual void setObject(FL::Group* group);
+		virtual FL::Group* getObject();
 
-	private:
+		virtual void UpdateAllSettings();
+
+	protected:
+		VRenderGLView &gl_view_;
 	};
 }
-
-#endif//_LISTMODEL_H_
+#endif//_RENDERCANVASAGENT_H_

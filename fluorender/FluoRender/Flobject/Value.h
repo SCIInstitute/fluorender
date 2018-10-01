@@ -147,6 +147,7 @@ public:
 	void clear();
 
 	Value* findValue(const std::string &name);
+	bool containsValue(Value* value);
 	bool addValue(Value* value);
 	bool removeValue(Value* value);
 	bool removeValue(const std::string &name);

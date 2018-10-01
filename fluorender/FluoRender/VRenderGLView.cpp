@@ -321,6 +321,12 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 		root_str = m_vrv->GetName().ToStdString();
 	m_render_view->setName(root_str);
 
+	//create agent
+	m_agent =
+		FL::Global::instance().getAgentFactory().
+		getOrAddRenderCanvasAgent(root_str, *this);
+	m_agent->setObject(m_render_view.get());
+
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;
 
@@ -10532,7 +10538,7 @@ void VRenderGLView::StartLoopUpdate()
 					}
 				}
 				//vd->SetBrickNum(num_chan);
-				vd->setValue("brick num", long(num_chan));
+				vd->setValue("brick num", long(num_chan), false);
 				if (vd->GetRenderer())
 					vd->GetRenderer()->set_done_loop(false);
 			}

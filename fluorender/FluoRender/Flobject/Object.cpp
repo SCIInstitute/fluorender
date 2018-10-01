@@ -74,10 +74,26 @@ void Object::objectDeleted(void* ptr)
 void Object::objectChanging(void* ptr, void* orig_node, const std::string &exp)
 {
 	//before change
+	Referenced* refd = static_cast<Referenced*>(ptr);
+	if (refd->className() == std::string("Value") &&
+		this != orig_node)
+	{
+		Value* value = dynamic_cast<Value*>(refd);
+		if (value && containsValue(value))
+			notifyObserversBeforeChange(orig_node, exp);
+	}
 }
 
 void Object::objectChanged(void* ptr, void* orig_node, const std::string &exp)
 {
+	Referenced* refd = static_cast<Referenced*>(ptr);
+	if (refd->className() == std::string("Value")
+		&& this != orig_node)
+	{
+		Value* value = dynamic_cast<Value*>(refd);
+		if (value && containsValue(value))
+			notifyObserversOfChange(orig_node, exp);
+	}
 }
 
 //add functions

@@ -257,6 +257,13 @@ public:
 		return "";
 	}
 
+	bool containsValue(Value* value)
+	{
+		if (_vs_stack.top())
+			return _vs_stack.top()->containsValue(value);
+		return false;
+	}
+
 protected:
 	virtual ~Object();
 

@@ -145,6 +145,16 @@ Value* ValueSet::findValue(const std::string &name)
 	return 0;
 }
 
+bool ValueSet::containsValue(Value* value)
+{
+	if (!value)
+		return false;
+	Value* result = findValue(value->getName());
+	if (result && result == value)
+		return true;
+	return false;
+}
+
 bool ValueSet::addValue(Value* value)
 {
 	if (!value) return false;

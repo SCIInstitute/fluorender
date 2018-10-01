@@ -82,11 +82,14 @@ ListPanel::ListPanel(wxWindow *frame,
 	m_list_ctrl->EnableDragSource(wxDF_UNICODETEXT);
 	m_list_ctrl->EnableDropTarget(wxDF_UNICODETEXT);
 	m_list_ctrl->SetDoubleBuffered(true);
-	m_list_model = dynamic_cast<ListModel*>(
+	m_list_model =
 		FL::Global::instance().getAgentFactory().
-		getOrAddAgent("ListModel", *this));
-	m_list_model->setObject(0);
-	m_list_ctrl->AssociateModel(m_list_model);
+		getOrAddListModel("ListModel", *this);
+	if (m_list_model)
+	{
+		m_list_model->setObject(0);
+		m_list_ctrl->AssociateModel(m_list_model);
+	}
 
 	//append columns
 	m_list_ctrl->AppendTextColumn("Name", 0,
