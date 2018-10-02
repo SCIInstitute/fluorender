@@ -45,6 +45,8 @@ namespace FL
 
 		virtual void createDefault();
 
+		virtual void setEventHandler(VolumeData* vd);
+
 		virtual VolumeData* getDefault()
 		{
 			return dynamic_cast<VolumeData*>(ObjectFactory::getDefault());

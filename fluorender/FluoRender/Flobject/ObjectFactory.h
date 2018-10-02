@@ -52,6 +52,8 @@ namespace FL
 
 		virtual void createDefault();
 
+		virtual void setEventHandler(Object* obj) {};
+
 		//read default settings for object
 		//to take advantage of the value management system,
 		//create a default object and use it to save settings

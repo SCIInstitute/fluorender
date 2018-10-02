@@ -33,9 +33,11 @@ DEALINGS IN THE SOFTWARE.
 #include <Flobject/Observer.h>
 #include <Flobject/CopyOp.h>
 #include <Flobject/Value.h>
+#include <Flobject/EventHandler.h>
 #include <stack>
 #include <string>
 #include <vector>
+#include <functional>
 
 namespace FL
 {
@@ -44,7 +46,7 @@ class Object;
 typedef std::vector<Object*> ObjectList;
 class ObjectFactory;
 
-class Object : public Referenced, public Observer
+class Object : public Referenced, public Observer, public EventHandler
 {
 public:
 
@@ -69,6 +71,15 @@ public:
 	virtual void objectDeleted(void*);
 	virtual void objectChanging(void*, void* orig_node, const std::string &exp);
 	virtual void objectChanged(void*, void* orig_node, const std::string &exp);
+
+	//void setOwnBeforeFunction(std::string name, eventFunctionType func)
+	//{
+	//	setBeforeFunction(name, std::bind(func, this));
+	//}
+	//void setOwnAfterFunction(std::string name, eventFunctionType func)
+	//{
+	//	setAfterFunction(name, std::bind(func, this));
+	//}
 
 	inline void copyValues(const Object& obj, const CopyOp& copyop = CopyOp::SHALLOW_COPY)
 	{

@@ -208,6 +208,12 @@ void VolumeFactory::createDefault()
 	}
 }
 
+void VolumeFactory::setEventHandler(VolumeData* vd)
+{
+	eventFunctionType before_func = std::bind(&VolumeData::OnMipModeChanging, vd);
+	vd->setBeforeFunction("mip mode", before_func);
+}
+
 VolumeData* VolumeFactory::build(const std::string &exp)
 {
 	unsigned int default_id = 0;

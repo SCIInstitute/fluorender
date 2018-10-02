@@ -80,7 +80,12 @@ void Object::objectChanging(void* ptr, void* orig_node, const std::string &exp)
 	{
 		Value* value = dynamic_cast<Value*>(refd);
 		if (value && containsValue(value))
+		{
+			//notify others
 			notifyObserversBeforeChange(orig_node, exp);
+			//take actions myself
+			onBefore(value->getName());
+		}
 	}
 }
 
@@ -92,7 +97,12 @@ void Object::objectChanged(void* ptr, void* orig_node, const std::string &exp)
 	{
 		Value* value = dynamic_cast<Value*>(refd);
 		if (value && containsValue(value))
+		{
+			//notify others
 			notifyObserversOfChange(orig_node, exp);
+			//take action myself
+			onAfter(value->getName());
+		}
 	}
 }
 
