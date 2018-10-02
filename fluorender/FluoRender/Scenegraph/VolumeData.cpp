@@ -200,6 +200,8 @@ void VolumeData::objectChanged(void* ptr, void* orig_node, const std::string &ex
 			OnDepthAttenChanged();
 		else if (name == "skip brick")
 			OnSkipBrickChanged();
+		else if (name == "clip planes")
+			OnClipPlanesChanged();
 	}
 }
 
@@ -242,6 +244,7 @@ void VolumeData::Initialize()
 	OnInterpolateChanged();
 	OnDepthAttenChanged();
 	OnSkipBrickChanged();
+	OnClipPlanesChanged();
 }
 
 void VolumeData::OnMipModeChanging()
@@ -757,6 +760,24 @@ void VolumeData::OnSkipBrickChanged()
 	bool skip_brick;
 	getValue("skip brick", skip_brick);
 	m_tex->set_use_priority(skip_brick);
+}
+
+void VolumeData::OnClipPlanesChanged()
+{
+	if (!m_vr)
+		return;
+
+	FLTYPE::PlaneSet planeset;
+	getValue("clip planes", planeset);
+
+	//this needs to be made consistent in the future
+	std::vector<FLIVR::Plane*> planelist(0);
+	for (int i = 0; i < planeset.GetSize(); ++i)
+	{
+		FLIVR::Plane* plane = new FLIVR::Plane(planeset.Get(i));
+		planelist.push_back(plane);
+	}
+	m_vr->set_planes(&planelist);
 }
 
 //functions from old class

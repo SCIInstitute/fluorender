@@ -210,6 +210,7 @@ namespace FL
 		void OnInterpolateChanged();
 		void OnDepthAttenChanged();
 		void OnSkipBrickChanged();
+		void OnClipPlanesChanged();
 
 		friend class VolumeFactory;
 	};
