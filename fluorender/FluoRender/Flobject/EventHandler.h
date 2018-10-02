@@ -43,17 +43,17 @@ namespace FL
 	class EventHandler
 	{
 	public:
-		void setBeforeFunction(std::string name, eventFunctionType func)
+		void setBeforeFunction(const std::string &name, eventFunctionType func)
 		{
 			before_functions_.insert(std::make_pair(name, func));
 		}
 
-		void setAfterFunction(std::string name, eventFunctionType func)
+		void setAfterFunction(const std::string &name, eventFunctionType func)
 		{
 			after_functions_.insert(std::make_pair(name, func));
 		}
 
-		void onBefore(std::string name)
+		void onBefore(const std::string &name)
 		{
 			auto map_it = before_functions_.find(name);
 			if (map_it != before_functions_.end())
@@ -64,7 +64,7 @@ namespace FL
 			}
 		}
 
-		void onAfter(std::string name)
+		void onAfter(const std::string &name)
 		{
 			auto map_it = after_functions_.find(name);
 			if (map_it != after_functions_.end())

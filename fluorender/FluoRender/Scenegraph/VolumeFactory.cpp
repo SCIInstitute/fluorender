@@ -235,6 +235,8 @@ VolumeData* VolumeFactory::clone(VolumeData* vd)
 	objects_.push_front(new_vd);
 	setValue("current", new_vd);
 
+	setEventHandler(dynamic_cast<VolumeData*>(new_vd));
+
 	//notify observers
 	notifyObserversNodeAdded(this, new_vd);
 
