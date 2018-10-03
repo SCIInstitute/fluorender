@@ -88,121 +88,19 @@ void VolumeData::objectChanging(void* ptr, void* orig_node, const std::string &e
 	//	Value* value = dynamic_cast<Value*>(refd);
 	//	if (!value)
 	//		return;
-	//	std::string name = value->getName();
-	//	//handle different value changes
-	//	//if (name == "mip mode")
-	//	//	OnMipModeChanging();
 	//}
 }
 
 void VolumeData::objectChanged(void* ptr, void* orig_node, const std::string &exp)
 {
 	Object::objectChanged(ptr, orig_node, exp);
-	Referenced* refd = static_cast<Referenced*>(ptr);
-	if (refd->className() == std::string("Value"))
-	{
-		Value* value = dynamic_cast<Value*>(refd);
-		if (!value)
-			return;
-		std::string name = value->getName();
-		//handle different value changes
-		if (name == "mip mode")
-			OnMipModeChanged();
-		else if (name == "viewport")
-			OnViewportChanged();
-		else if (name == "clear color")
-			OnClearColorChanged();
-		else if (name == "cur framebuffer")
-			OnCurFramebufferChanged();
-		else if (name == "compression")
-			OnCompressionChanged();
-		else if (name == "invert")
-			OnInvertChanged();
-		else if (name == "mask mode")
-			OnMaskModeChanged();
-		else if (name == "noise redct")
-			OnNoiseRedctChanged();
-		else if (name == "2d dmap id")
-			On2dDmapIdChanged();
-		else if (name == "gamma 3d")
-			OnGamma3dChanged();
-		else if (name == "extract boundary")
-			OnExtractBoundaryChanged();
-		else if (name == "saturation")
-			OnSaturationChanged();
-		else if (name == "low threshold")
-			OnLowThresholdChanged();
-		else if (name == "high threshold")
-			OnHighThresholdChanged();
-		else if (name == "color")
-			OnColorChanged();
-		else if (name == "sec color")
-			OnSecColorChanged();
-		else if (name == "sec color set")
-			OnSecColorSetChanged();
-		else if (name == "luminance")
-			OnLuminanceChanged();
-		else if (name == "alpha")
-			OnAlphaChanged();
-		else if (name == "alpah enable")
-			OnAlphaEnableChanged();
-		else if (name == "mask thresh")
-			OnMaskThreshChanged();
-		else if (name == "use mask thresh")
-			OnUseMaskThreshChanged();
-		else if (name == "shading enable")
-			OnShadingEnableChanged();
-		else if (name == "mat amb")
-			OnMaterialChanged();
-		else if (name == "mat diff")
-			OnMaterialChanged();
-		else if (name == "mat spec")
-			OnMaterialChanged();
-		else if (name == "mat shine")
-			OnMaterialChanged();
-		else if (name == "sample rate")
-			OnSampleRateChanged();
-		else if (name == "colormap mode")
-			OnColormapModeChanged();
-		else if (name == "colormap low")
-			OnColormapValueChanged();
-		else if (name == "colormap high")
-			OnColormapValueChanged();
-		else if (name == "colormap type")
-			OnColormapTypeChanged();
-		else if (name == "colormap proj")
-			OnColormapProjChanged();
-		else if (name == "spc x")
-			OnSpacingChanged();
-		else if (name == "spc y")
-			OnSpacingChanged();
-		else if (name == "spc z")
-			OnSpacingChanged();
-		else if (name == "base spc x")
-			OnBaseSpacingChanged();
-		else if (name == "base spc y")
-			OnBaseSpacingChanged();
-		else if (name == "base spc z")
-			OnBaseSpacingChanged();
-		else if (name == "spc scl x")
-			OnSpacingScaleChanged();
-		else if (name == "spc scl y")
-			OnSpacingScaleChanged();
-		else if (name == "spc scl z")
-			OnSpacingScaleChanged();
-		else if (name == "level")
-			OnLevelChanged();
-		else if (name == "display")
-			OnDisplayChanged();
-		else if (name == "interpolate")
-			OnInterpolateChanged();
-		else if (name == "depth atten")
-			OnDepthAttenChanged();
-		else if (name == "skip brick")
-			OnSkipBrickChanged();
-		else if (name == "clip planes")
-			OnClipPlanesChanged();
-	}
+	//Referenced* refd = static_cast<Referenced*>(ptr);
+	//if (refd->className() == std::string("Value"))
+	//{
+	//	Value* value = dynamic_cast<Value*>(refd);
+	//	if (!value)
+	//		return;
+	//}
 }
 
 void VolumeData::Initialize()

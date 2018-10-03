@@ -208,10 +208,66 @@ void VolumeFactory::createDefault()
 	}
 }
 
+#define ADD_BEFORE_EVENT(obj, name, funct) \
+	obj->setBeforeFunction(name, std::bind(&VolumeData::funct, obj))
+
+#define ADD_AFTER_EVENT(obj, name, funct) \
+	obj->setAfterFunction(name, std::bind(&VolumeData::funct, obj))
+
 void VolumeFactory::setEventHandler(VolumeData* vd)
 {
-	eventFunctionType before_func = std::bind(&VolumeData::OnMipModeChanging, vd);
-	vd->setBeforeFunction("mip mode", before_func);
+	//handle before events
+	ADD_BEFORE_EVENT(vd, "mip mode", OnMipModeChanging);
+
+	//handle after events
+	ADD_AFTER_EVENT(vd, "mip mode", OnMipModeChanged);
+	ADD_AFTER_EVENT(vd, "viewport", OnViewportChanged);
+	ADD_AFTER_EVENT(vd, "clear color", OnClearColorChanged);
+	ADD_AFTER_EVENT(vd, "cur framebuffer", OnCurFramebufferChanged);
+	ADD_AFTER_EVENT(vd, "compression", OnCompressionChanged);
+	ADD_AFTER_EVENT(vd, "invert", OnInvertChanged);
+	ADD_AFTER_EVENT(vd, "mask mode", OnMaskModeChanged);
+	ADD_AFTER_EVENT(vd, "noise redct", OnNoiseRedctChanged);
+	ADD_AFTER_EVENT(vd, "2d dmap id", On2dDmapIdChanged);
+	ADD_AFTER_EVENT(vd, "gamma 3d", OnGamma3dChanged);
+	ADD_AFTER_EVENT(vd, "extract boundary", OnExtractBoundaryChanged);
+	ADD_AFTER_EVENT(vd, "saturation", OnSaturationChanged);
+	ADD_AFTER_EVENT(vd, "low threshold", OnLowThresholdChanged);
+	ADD_AFTER_EVENT(vd, "high threshold", OnHighThresholdChanged);
+	ADD_AFTER_EVENT(vd, "color", OnColorChanged);
+	ADD_AFTER_EVENT(vd, "sec color", OnSecColorChanged);
+	ADD_AFTER_EVENT(vd, "sec color set", OnSecColorSetChanged);
+	ADD_AFTER_EVENT(vd, "luminance", OnLuminanceChanged);
+	ADD_AFTER_EVENT(vd, "alpha", OnAlphaChanged);
+	ADD_AFTER_EVENT(vd, "alpah enable", OnAlphaEnableChanged);
+	ADD_AFTER_EVENT(vd, "mask thresh", OnMaskThreshChanged);
+	ADD_AFTER_EVENT(vd, "use mask thresh", OnUseMaskThreshChanged);
+	ADD_AFTER_EVENT(vd, "shading enable", OnShadingEnableChanged);
+	ADD_AFTER_EVENT(vd, "mat amb", OnMaterialChanged);
+	ADD_AFTER_EVENT(vd, "mat diff", OnMaterialChanged);
+	ADD_AFTER_EVENT(vd, "mat spec", OnMaterialChanged);
+	ADD_AFTER_EVENT(vd, "mat shine", OnMaterialChanged);
+	ADD_AFTER_EVENT(vd, "sample rate", OnSampleRateChanged);
+	ADD_AFTER_EVENT(vd, "colormap mode", OnColormapModeChanged);
+	ADD_AFTER_EVENT(vd, "colormap low", OnColormapValueChanged);
+	ADD_AFTER_EVENT(vd, "colormap high", OnColormapValueChanged);
+	ADD_AFTER_EVENT(vd, "colormap type", OnColormapTypeChanged);
+	ADD_AFTER_EVENT(vd, "colormap proj", OnColormapProjChanged);
+	ADD_AFTER_EVENT(vd, "spc x", OnSpacingChanged);
+	ADD_AFTER_EVENT(vd, "spc y", OnSpacingChanged);
+	ADD_AFTER_EVENT(vd, "spc z", OnSpacingChanged);
+	ADD_AFTER_EVENT(vd, "base spc x", OnBaseSpacingChanged);
+	ADD_AFTER_EVENT(vd, "base spc y", OnBaseSpacingChanged);
+	ADD_AFTER_EVENT(vd, "base spc z", OnBaseSpacingChanged);
+	ADD_AFTER_EVENT(vd, "spc scl x", OnSpacingScaleChanged);
+	ADD_AFTER_EVENT(vd, "spc scl y", OnSpacingScaleChanged);
+	ADD_AFTER_EVENT(vd, "spc scl z", OnSpacingScaleChanged);
+	ADD_AFTER_EVENT(vd, "level", OnLevelChanged);
+	ADD_AFTER_EVENT(vd, "display", OnDisplayChanged);
+	ADD_AFTER_EVENT(vd, "interpolate", OnInterpolateChanged);
+	ADD_AFTER_EVENT(vd, "depth atten", OnDepthAttenChanged);
+	ADD_AFTER_EVENT(vd, "skip brick", OnSkipBrickChanged);
+	ADD_AFTER_EVENT(vd, "clip planes", OnClipPlanesChanged);
 }
 
 VolumeData* VolumeFactory::build(const std::string &exp)
