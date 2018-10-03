@@ -63,4 +63,124 @@ FL::Node* ClipPlaneAgent::getObject()
 
 void ClipPlaneAgent::UpdateAllSettings()
 {
+	if (!getObject())
+	{
+		panel_.DisableAll();
+		return;
+	}
+	else
+		panel_.EnableAll();
+
+	//ranges
+	long resx, resy, resz;
+	getValue("res x", resx);
+	getValue("res y", resy);
+	getValue("res z", resz);
+	//slider range
+	panel_.m_x1_clip_sldr->SetRange(0, resx);
+	panel_.m_x2_clip_sldr->SetRange(0, resx);
+	panel_.m_y1_clip_sldr->SetRange(0, resy);
+	panel_.m_y2_clip_sldr->SetRange(0, resy);
+	panel_.m_z1_clip_sldr->SetRange(0, resz);
+	panel_.m_z2_clip_sldr->SetRange(0, resz);
+	//text range
+	wxIntegerValidator<int>* vald_i;
+	if ((vald_i = (wxIntegerValidator<int>*)panel_.m_x1_clip_text->GetValidator()))
+		vald_i->SetRange(0, int(resx));
+	if ((vald_i = (wxIntegerValidator<int>*)panel_.m_x2_clip_text->GetValidator()))
+		vald_i->SetRange(0, int(resx));
+	if ((vald_i = (wxIntegerValidator<int>*)panel_.m_y1_clip_text->GetValidator()))
+		vald_i->SetRange(0, int(resy));
+	if ((vald_i = (wxIntegerValidator<int>*)panel_.m_y2_clip_text->GetValidator()))
+		vald_i->SetRange(0, int(resy));
+	if ((vald_i = (wxIntegerValidator<int>*)panel_.m_z1_clip_text->GetValidator()))
+		vald_i->SetRange(0, int(resz));
+	if ((vald_i = (wxIntegerValidator<int>*)panel_.m_z2_clip_text->GetValidator()))
+		vald_i->SetRange(0, int(resz));
+
+	long distx, disty, distz;
+	//m_vd->GetClipDistance(distx, disty, distz);
+	getValue("clip dist x", distx);
+	getValue("clip dist y", disty);
+	getValue("clip dist z", distz);
+	if (distx == 0)
+	{
+		distx = resx / 20;
+		distx = distx == 0 ? 1 : distx;
+	}
+	if (disty == 0)
+	{
+		disty = resy / 20;
+		disty = disty == 0 ? 1 : disty;
+	}
+	if (distz == 0)
+	{
+		distz = resz / 20;
+		distz = distz == 0 ? 1 : distz;
+	}
+	panel_.m_yz_dist_text->SetValue(
+		wxString::Format("%d", distx));
+	panel_.m_xz_dist_text->SetValue(
+		wxString::Format("%d", disty));
+	panel_.m_xy_dist_text->SetValue(
+		wxString::Format("%d", distz));
+	//m_vd->SetClipDistance(distx, disty, distz);
+	setValue("clip dist x", distx);
+	setValue("clip dist y", disty);
+	setValue("clip dist z", distz);
+
+	FLTYPE::PlaneSet planes;
+	getValue("clip planes", planes);
+	if (planes.GetSize() != 6)
+		return;
+
+	//set values in ui
+	int ival = 0;
+	wxString str;
+	//x1
+	ival = int(fabs(planes[0].d() * resx) + 0.499);
+	panel_.m_x1_clip_sldr->SetValue(ival);
+	double percent = (double)ival / (double)panel_.m_x1_clip_sldr->GetMax();
+	int barsize = (panel_.m_x1_clip_sldr->GetSize().GetHeight() - 20);
+	str = wxString::Format("%d", ival);
+	panel_.m_x1_clip_text->ChangeValue(str);
+	//x2
+	ival = fabs(planes[1].d() * resx) + 0.499;
+	panel_.m_x2_clip_sldr->SetValue(ival);
+	panel_.m_xBar->SetPosition(wxPoint(20, 10 + percent*barsize));
+	panel_.m_xBar->SetSize(wxSize(3, barsize*((double)
+		(ival - panel_.m_x1_clip_sldr->GetValue()) / (double)panel_.m_x1_clip_sldr->GetMax())));
+	str = wxString::Format("%d", ival);
+	panel_.m_x2_clip_text->ChangeValue(str);
+	//y1
+	ival = fabs(planes[2].d() * resy) + 0.499;
+	panel_.m_y1_clip_sldr->SetValue(ival);
+	percent = (double)ival / (double)panel_.m_y1_clip_sldr->GetMax();
+	barsize = (panel_.m_y1_clip_sldr->GetSize().GetHeight() - 20);
+	str = wxString::Format("%d", ival);
+	panel_.m_y1_clip_text->ChangeValue(str);
+	//y2
+	ival = fabs(planes[3].d() * resy) + 0.499;
+	panel_.m_y2_clip_sldr->SetValue(ival);
+	panel_.m_yBar->SetPosition(wxPoint(20, 10 + percent*barsize));
+	panel_.m_yBar->SetSize(wxSize(3, barsize*((double)
+		(ival - panel_.m_y1_clip_sldr->GetValue()) / (double)panel_.m_y1_clip_sldr->GetMax())));
+	str = wxString::Format("%d", ival);
+	panel_.m_y2_clip_text->ChangeValue(str);
+	//z1
+	ival = fabs(planes[4].d() * resz) + 0.499;
+	panel_.m_z1_clip_sldr->SetValue(ival);
+	percent = (double)ival / (double)panel_.m_z1_clip_sldr->GetMax();
+	barsize = (panel_.m_z1_clip_sldr->GetSize().GetHeight() - 20);
+	str = wxString::Format("%d", ival);
+	panel_.m_z1_clip_text->ChangeValue(str);
+	//z2
+	ival = fabs(planes[5].d() * resz) + 0.499;
+	panel_.m_zBar->SetPosition(wxPoint(20, 10 + percent*barsize));
+	panel_.m_zBar->SetSize(wxSize(3, barsize*((double)
+		(ival - panel_.m_z1_clip_sldr->GetValue()) / (double)panel_.m_z1_clip_sldr->GetMax())));
+	panel_.m_z2_clip_sldr->SetValue(ival);
+	str = wxString::Format("%d", ival);
+	panel_.m_z2_clip_text->ChangeValue(str);
+
 }

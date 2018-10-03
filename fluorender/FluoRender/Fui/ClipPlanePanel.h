@@ -238,6 +238,8 @@ namespace FUI
 		wxTextCtrl *m_xz_dist_text;
 		wxTextCtrl *m_xy_dist_text;
 
+		friend class ClipPlaneAgent;
+
 	private:
 		void OnIdle(wxIdleEvent &event);
 

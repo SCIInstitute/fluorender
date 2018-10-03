@@ -769,27 +769,25 @@ void ClipPlanePanel::OnX1ClipChange(wxScrollEvent &event)
 
 void ClipPlanePanel::OnX1ClipEdit(wxCommandEvent &event)
 {
-	//if (!m_vd)
-	//	return;
-	//long resx, resy, resz;
-	////m_vd->GetResolution(resx, resy, resz);
-	//m_vd->getValue("res x", resx);
-	//m_vd->getValue("res y", resy);
-	//m_vd->getValue("res z", resz);
+	long resx;
+	m_agent->getValue("res x", resx);
 
-	//vector<Plane*> *planes = 0;
-	//if (m_vd->GetRenderer())
-	//	planes = m_vd->GetRenderer()->get_planes();
-	//if (!planes)
-	//	return;
-	//if (planes->size() != 6)
-	//	return;
-
-	//wxString str = m_x1_clip_text->GetValue();
-	//long ival = 0;
-	//str.ToLong(&ival);
-	//int ival2 = m_x2_clip_sldr->GetValue();
-	//double val, val2;
+	wxString str = m_x1_clip_text->GetValue();
+	long ival = 0;
+	double dval = 0.0;
+	str.ToLong(&ival);
+	dval = (double)ival / (double)resx;
+	m_x1_clip_sldr->SetValue(ival);
+	int barsize = (m_x1_clip_sldr->GetSize().GetHeight() - 20);
+	m_xBar->SetPosition(wxPoint(20, 10 + dval*barsize));
+	m_xBar->SetSize(wxSize(3, barsize*((double)
+		(m_x2_clip_sldr->GetValue() - ival) / (double)m_x1_clip_sldr->GetMax())));
+	FLTYPE::PlaneSet planes;
+	m_agent->getValue("clip planes", planes);
+	if (planes.GetSize() != 6)
+		return;
+	planes[0].ChangePlane(FLTYPE::Point(dval, 0.0, 0.0), FLTYPE::Vector(1.0, 0.0, 0.0));
+	m_agent->setValue("clip planes", planes);
 
 	//if (m_link_x)
 	//{
@@ -888,6 +886,26 @@ void ClipPlanePanel::OnX2ClipChange(wxScrollEvent &event)
 
 void ClipPlanePanel::OnX2ClipEdit(wxCommandEvent &event)
 {
+	long resx;
+	m_agent->getValue("res x", resx);
+
+	wxString str = m_x2_clip_text->GetValue();
+	long ival = 0;
+	double dval = 0.0;
+	str.ToLong(&ival);
+	dval = (double)ival / (double)resx;
+	m_x2_clip_sldr->SetValue(ival);
+	int barsize = (m_x1_clip_sldr->GetSize().GetHeight() - 20);
+	m_xBar->SetPosition(wxPoint(20, 10 + ((double)m_x1_clip_sldr->GetValue() /
+		(double)m_x1_clip_sldr->GetMax())*barsize));
+	m_xBar->SetSize(wxSize(3, barsize*((double)
+		(ival - m_x1_clip_sldr->GetValue()) / (double)m_x1_clip_sldr->GetMax())));
+	FLTYPE::PlaneSet planes;
+	m_agent->getValue("clip planes", planes);
+	if (planes.GetSize() != 6)
+		return;
+	planes[1].ChangePlane(FLTYPE::Point(dval, 0.0, 0.0), FLTYPE::Vector(-1.0, 0.0, 0.0));
+	m_agent->setValue("clip planes", planes);
 	//if (!m_vd)
 	//	return;
 	//long resx, resy, resz;
@@ -1001,6 +1019,25 @@ void ClipPlanePanel::OnY1ClipChange(wxScrollEvent &event)
 
 void ClipPlanePanel::OnY1ClipEdit(wxCommandEvent &event)
 {
+	long resy;
+	m_agent->getValue("res y", resy);
+
+	wxString str = m_y1_clip_text->GetValue();
+	long ival = 0;
+	double dval = 0.0;
+	str.ToLong(&ival);
+	dval = (double)ival / (double)resy;
+	m_y1_clip_sldr->SetValue(ival);
+	int barsize = (m_y1_clip_sldr->GetSize().GetHeight() - 20);
+	m_yBar->SetPosition(wxPoint(20, 10 + dval*barsize));
+	m_yBar->SetSize(wxSize(3, barsize*((double)
+		(m_y2_clip_sldr->GetValue() - ival) / (double)m_y1_clip_sldr->GetMax())));
+	FLTYPE::PlaneSet planes;
+	m_agent->getValue("clip planes", planes);
+	if (planes.GetSize() != 6)
+		return;
+	planes[2].ChangePlane(FLTYPE::Point(0.0, dval, 0.0), FLTYPE::Vector(0.0, 1.0, 0.0));
+	m_agent->setValue("clip planes", planes);
 	//if (!m_vd)
 	//	return;
 	//long resx, resy, resz;
@@ -1121,6 +1158,26 @@ void ClipPlanePanel::OnY2ClipChange(wxScrollEvent &event)
 
 void ClipPlanePanel::OnY2ClipEdit(wxCommandEvent &event)
 {
+	long resy;
+	m_agent->getValue("res y", resy);
+
+	wxString str = m_y2_clip_text->GetValue();
+	long ival = 0;
+	double dval = 0.0;
+	str.ToLong(&ival);
+	dval = (double)ival / (double)resy;
+	m_y2_clip_sldr->SetValue(ival);
+	int barsize = (m_y1_clip_sldr->GetSize().GetHeight() - 20);
+	m_yBar->SetPosition(wxPoint(20, 10 + ((double)m_y1_clip_sldr->GetValue() /
+		(double)m_y1_clip_sldr->GetMax())*barsize));
+	m_yBar->SetSize(wxSize(3, barsize*((double)
+		(ival - m_y1_clip_sldr->GetValue()) / (double)m_y1_clip_sldr->GetMax())));
+	FLTYPE::PlaneSet planes;
+	m_agent->getValue("clip planes", planes);
+	if (planes.GetSize() != 6)
+		return;
+	planes[3].ChangePlane(FLTYPE::Point(0.0, dval, 0.0), FLTYPE::Vector(0.0, -1.0, 0.0));
+	m_agent->setValue("clip planes", planes);
 	//if (!m_vd)
 	//	return;
 	//long resx, resy, resz;
@@ -1235,6 +1292,25 @@ void ClipPlanePanel::OnZ1ClipChange(wxScrollEvent &event)
 
 void ClipPlanePanel::OnZ1ClipEdit(wxCommandEvent &event)
 {
+	long resz;
+	m_agent->getValue("res z", resz);
+
+	wxString str = m_z1_clip_text->GetValue();
+	long ival = 0;
+	double dval = 0.0;
+	str.ToLong(&ival);
+	dval = (double)ival / (double)resz;
+	m_z1_clip_sldr->SetValue(ival);
+	int barsize = (m_z1_clip_sldr->GetSize().GetHeight() - 20);
+	m_zBar->SetPosition(wxPoint(20, 10 + dval*barsize));
+	m_zBar->SetSize(wxSize(3, barsize*((double)
+		(m_z2_clip_sldr->GetValue() - ival) / (double)m_z1_clip_sldr->GetMax())));
+	FLTYPE::PlaneSet planes;
+	m_agent->getValue("clip planes", planes);
+	if (planes.GetSize() != 6)
+		return;
+	planes[4].ChangePlane(FLTYPE::Point(0.0, 0.0, dval), FLTYPE::Vector(0.0, 0.0, 1.0));
+	m_agent->setValue("clip planes", planes);
 	//if (!m_vd)
 	//	return;
 	//long resx, resy, resz;
@@ -1354,6 +1430,26 @@ void ClipPlanePanel::OnZ2ClipChange(wxScrollEvent &event)
 
 void ClipPlanePanel::OnZ2ClipEdit(wxCommandEvent &event)
 {
+	long resz;
+	m_agent->getValue("res z", resz);
+
+	wxString str = m_z2_clip_text->GetValue();
+	long ival = 0;
+	double dval = 0.0;
+	str.ToLong(&ival);
+	dval = (double)ival / (double)resz;
+	m_z2_clip_sldr->SetValue(ival);
+	int barsize = (m_z1_clip_sldr->GetSize().GetHeight() - 20);
+	m_zBar->SetPosition(wxPoint(20, 10 + ((double)m_z1_clip_sldr->GetValue() /
+		(double)m_z1_clip_sldr->GetMax())*barsize));
+	m_zBar->SetSize(wxSize(3, barsize*((double)
+		(ival - m_z1_clip_sldr->GetValue()) / (double)m_z1_clip_sldr->GetMax())));
+	FLTYPE::PlaneSet planes;
+	m_agent->getValue("clip planes", planes);
+	if (planes.GetSize() != 6)
+		return;
+	planes[5].ChangePlane(FLTYPE::Point(0.0, 0.0, dval), FLTYPE::Vector(0.0, 0.0, -1.0));
+	m_agent->setValue("clip planes", planes);
 	//if (!m_vd)
 	//	return;
 	//long resx, resy, resz;

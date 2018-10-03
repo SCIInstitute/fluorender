@@ -79,30 +79,6 @@ VolumeData::~VolumeData()
 		delete m_tex;
 }
 
-void VolumeData::objectChanging(void* ptr, void* orig_node, const std::string &exp)
-{
-	Object::objectChanging(ptr, orig_node, exp);
-	//Referenced* refd = static_cast<Referenced*>(ptr);
-	//if (refd->className() == std::string("Value"))
-	//{
-	//	Value* value = dynamic_cast<Value*>(refd);
-	//	if (!value)
-	//		return;
-	//}
-}
-
-void VolumeData::objectChanged(void* ptr, void* orig_node, const std::string &exp)
-{
-	Object::objectChanged(ptr, orig_node, exp);
-	//Referenced* refd = static_cast<Referenced*>(ptr);
-	//if (refd->className() == std::string("Value"))
-	//{
-	//	Value* value = dynamic_cast<Value*>(refd);
-	//	if (!value)
-	//		return;
-	//}
-}
-
 void VolumeData::Initialize()
 {
 	OnMipModeChanged();//modes

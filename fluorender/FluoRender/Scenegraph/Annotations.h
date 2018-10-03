@@ -77,9 +77,6 @@ namespace FL
 		virtual Annotations* asAnnotations() { return this; }
 		virtual const Annotations* asAnnotations() const { return this; }
 
-		//volume changed
-		virtual void objectChanged(void*, void* orig_node, const std::string &exp);
-
 	protected:
 		virtual ~Annotations();
 
