@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _RENDERCANVASAGENT_H_
 
 #include <Fui/InterfaceAgent.h>
-#include <Scenegraph/Group.h>
+#include <Scenegraph/RenderView.h>
 
 class VRenderGLView;
 namespace FUI
@@ -50,8 +50,8 @@ namespace FUI
 		virtual void objectChanging(void*, void* orig_node, const std::string &exp);
 		virtual void objectChanged(void*, void* orig_node, const std::string &exp);
 
-		virtual void setObject(FL::Group* group);
-		virtual FL::Group* getObject();
+		virtual void setObject(FL::RenderView* view);
+		virtual FL::RenderView* getObject();
 
 		virtual void UpdateAllSettings();
 

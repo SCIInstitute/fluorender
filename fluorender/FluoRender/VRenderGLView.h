@@ -110,9 +110,11 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FL
 {
-	class Group;
+	class RenderView;
 	class VolumeData;
 	class VolumeGroup;
+	class MeshData;
+	class MeshGroup;
 }
 class VRenderView;
 class VRenderFrame;
@@ -130,7 +132,7 @@ public:
 	~VRenderGLView();
 
 	//root of the scenegraph
-	FL::Group* GetGroup() { return m_agent->getObject(); }
+	FL::RenderView* GetRenderView() { return m_agent->getObject(); }
 
 	//for degugging, this allows inspection of the pixel format actually given.
 #ifdef _WIN32
@@ -155,14 +157,14 @@ public:
 	int GetLayerNum();
 	FL::VolumeData* GetAllVolumeData(int index);
 	FL::VolumeData* GetDispVolumeData(int index);
-	MeshData* GetMeshData(int index);
+	FL::MeshData* GetMeshData(int index);
 	TreeLayer* GetLayer(int index);
 	MultiVolumeRenderer* GetMultiVolumeData() { return m_mvr; };
 	FL::VolumeData* GetVolumeData(wxString &name);
 	FL::MeshData* GetMeshData(wxString &name);
 	FL::Annotations* GetAnnotations(wxString &name);
 	FL::VolumeGroup* GetGroup(wxString &name);
-	MeshGroup* GetMGroup(wxString str);
+	FL::MeshGroup* GetMGroup(wxString str);
 	//add
 	FL::VolumeGroup* AddVolumeData(FL::VolumeData* vd, wxString group_name = "");
 	void AddMeshData(FL::MeshData* md);
@@ -170,7 +172,7 @@ public:
 	wxString AddGroup(wxString str, wxString prev_group = "");
 	FL::VolumeGroup* AddOrGetGroup();
 	wxString AddMGroup(wxString str);
-	MeshGroup* AddOrGetMGroup();
+	FL::MeshGroup* AddOrGetMGroup();
 	//remove
 	void RemoveVolumeData(wxString &name);
 	void RemoveVolumeDataDup(wxString &name);//remove all duplicated data
@@ -640,7 +642,7 @@ public:
 
 private:
 	FUI::RenderCanvasAgent* m_agent;
-	FL::ref_ptr<FL::Group> m_render_view;	//root of the render view
+	FL::ref_ptr<FL::RenderView> m_render_view;	//root of the render view
 									//this is a temporary measure,
 									//as data will be managed by a new view object in the future
 
@@ -657,7 +659,7 @@ private:
 	bool m_vd_pop_dirty;
 	vector <FL::VolumeData*> m_vd_pop_list;
 	bool m_md_pop_dirty;
-	vector <MeshData*> m_md_pop_list;
+	vector <FL::MeshData*> m_md_pop_list;
 	//real data list
 	//vector <TreeLayer*> m_layer_list;
 	//ruler list

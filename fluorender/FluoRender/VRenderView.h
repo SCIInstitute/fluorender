@@ -107,7 +107,7 @@ public:
 	int GetLayerNum();
 	FL::VolumeData* GetAllVolumeData(int index);
 	FL::VolumeData* GetDispVolumeData(int index);
-	MeshData* GetMeshData(int index);
+	FL::MeshData* GetMeshData(int index);
 	TreeLayer* GetLayer(int index);
 	MultiVolumeRenderer* GetMultiVolumeData();
 	FL::VolumeData* GetVolumeData(wxString &name);
@@ -115,13 +115,13 @@ public:
 	FL::Annotations* GetAnnotations(wxString &name);
 	FL::VolumeGroup* GetGroup(wxString &name);
 	FL::VolumeGroup* AddVolumeData(FL::VolumeData* vd, wxString group_name="");
-	void AddMeshData(MeshData* md);
+	void AddMeshData(FL::MeshData* md);
 	void AddAnnotations(Annotations* ann);
 	wxString AddGroup(wxString str = "", wxString prev_group="");
 	FL::VolumeGroup* AddOrGetGroup();
 	wxString AddMGroup(wxString str = "");
-	MeshGroup* AddOrGetMGroup();
-	MeshGroup* GetMGroup(wxString &name);
+	FL::MeshGroup* AddOrGetMGroup();
+	FL::MeshGroup* GetMGroup(wxString &name);
 	void RemoveVolumeData(wxString &name);
 	void RemoveVolumeDataDup(wxString &name);
 	void RemoveMeshData(wxString &name);

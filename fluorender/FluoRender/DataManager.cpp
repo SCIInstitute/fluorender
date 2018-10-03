@@ -39,12 +39,12 @@ DEALINGS IN THE SOFTWARE.
 #include <fstream>
 #include <algorithm>
 #include <set>
-#include <glm/gtc/matrix_transform.hpp>
+//#include <glm/gtc/matrix_transform.hpp>
 
-#ifdef _WIN32
-#  undef min
-#  undef max
-#endif
+//#ifdef _WIN32
+//#  undef min
+//#  undef max
+//#endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 double TreeLayer::m_sw = 0.0;
@@ -2260,7 +2260,7 @@ bool VolumeData::isBrxml()
 }*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-MeshData::MeshData() :
+/*MeshData::MeshData() :
 m_data(0),
 	m_mr(0),
 	m_center(0.0, 0.0, 0.0),
@@ -2338,7 +2338,7 @@ int MeshData::Load(GLMmodel* mesh)
 		m_data->nummaterials = 1;
 	}
 
-	/* set the default material */
+	// set the default material
 	m_data->materials[0].name = NULL;
 	m_data->materials[0].ambient[0] = m_mat_amb.r();
 	m_data->materials[0].ambient[1] = m_mat_amb.g();
@@ -2419,7 +2419,7 @@ int MeshData::Load(wxString &filename)
 		m_data->nummaterials = 1;
 	}
 
-	/* set the default material */
+	// set the default material
 	m_data->materials[0].name = NULL;
 	m_data->materials[0].ambient[0] = m_mat_amb.r();
 	m_data->materials[0].ambient[1] = m_mat_amb.g();
@@ -2864,7 +2864,7 @@ int MeshData::GetLimitNumber()
 {
 	return m_limit;
 }
-
+*/
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 AText::AText()
 {
@@ -4324,7 +4324,7 @@ void DataGroup::RandomizeColor()
 }*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int MeshGroup::m_num = 0;
+/*int MeshGroup::m_num = 0;
 MeshGroup::MeshGroup()
 {
 	type = 6;//mesh group
@@ -4353,7 +4353,7 @@ void MeshGroup::RandomizeColor()
 			md->SetColor(amb, MESH_COLOR_AMB);
 		}
 	}
-}
+}*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 DataManager::DataManager() :
@@ -4481,9 +4481,9 @@ DataManager::~DataManager()
 	//for (int i=0 ; i<(int)m_vd_list.size() ; i++)
 	//	if (m_vd_list[i])
 	//		delete m_vd_list[i];
-	for (int i=0 ; i<(int)m_md_list.size() ; i++)
-		if (m_md_list[i])
-			delete m_md_list[i];
+	//for (int i=0 ; i<(int)m_md_list.size() ; i++)
+	//	if (m_md_list[i])
+	//		delete m_md_list[i];
 	for (int i=0; i<(int)m_reader_list.size(); i++)
 		if (m_reader_list[i])
 			delete m_reader_list[i];
@@ -4497,9 +4497,9 @@ void DataManager::ClearAll()
 	//for (int i=0 ; i<(int)m_vd_list.size() ; i++)
 	//	if (m_vd_list[i])
 	//		delete m_vd_list[i];
-	for (int i=0 ; i<(int)m_md_list.size() ; i++)
-		if (m_md_list[i])
-			delete m_md_list[i];
+	//for (int i=0 ; i<(int)m_md_list.size() ; i++)
+	//	if (m_md_list[i])
+	//		delete m_md_list[i];
 	for (int i=0; i<(int)m_reader_list.size(); i++)
 		if (m_reader_list[i])
 			delete m_reader_list[i];
@@ -4507,7 +4507,7 @@ void DataManager::ClearAll()
 		if (m_annotation_list[i])
 			delete m_annotation_list[i];
 	//m_vd_list.clear();
-	m_md_list.clear();
+	//m_md_list.clear();
 	m_reader_list.clear();
 	m_annotation_list.clear();
 }
@@ -4838,17 +4838,21 @@ int DataManager::LoadMeshData(wxString &filename)
 			return 0;
 	}
 
-	MeshData *md = new MeshData();
-	md->Load(pathname);
-
-	wxString name = md->GetName();
-	wxString new_name = name;
-	int i;
-	for (i=1; CheckNames(new_name); i++)
-		new_name = name+wxString::Format("_%d", i);
-	if (i>1)
-		md->SetName(new_name);
-	m_md_list.push_back(md);
+	FL::MeshData *md = FL::Global::instance().getMeshFactory().build();
+	if (!md)
+		return 0;
+	md->LoadData(pathname.ToStdString());
+	std::wstring name = pathname.ToStdWstring();
+	name = GET_NAME(name);
+	md->setName(ws2s(name));
+	//wxString name = md->GetName();
+	//wxString new_name = name;
+	//int i;
+	//for (i=1; CheckNames(new_name); i++)
+	//	new_name = name+wxString::Format("_%d", i);
+	//if (i>1)
+	//	md->SetName(new_name);
+	//m_md_list.push_back(md);
 
 	return 1;
 }
@@ -4857,17 +4861,19 @@ int DataManager::LoadMeshData(GLMmodel* mesh)
 {
 	if (!mesh) return 0;
 
-	MeshData *md = new MeshData();
-	md->Load(mesh);
+	FL::MeshData *md = FL::Global::instance().getMeshFactory().build();
+	if (!md)
+		return 0;
+	md->LoadData(mesh);
 
-	wxString name = md->GetName();
-	wxString new_name = name;
-	int i;
-	for (i=1; CheckNames(new_name); i++)
-		new_name = name+wxString::Format("_%d", i);
-	if (i>1)
-		md->SetName(new_name);
-	m_md_list.push_back(md);
+	//wxString name = md->GetName();
+	//wxString new_name = name;
+	//int i;
+	//for (i=1; CheckNames(new_name); i++)
+	//	new_name = name+wxString::Format("_%d", i);
+	//if (i>1)
+	//	md->SetName(new_name);
+	//m_md_list.push_back(md);
 
 	return 1;
 }
@@ -4880,13 +4886,13 @@ int DataManager::LoadMeshData(GLMmodel* mesh)
 		return 0;
 }*/
 
-MeshData* DataManager::GetMeshData(int index)
-{
-	if (index>=0 && index<(int)m_md_list.size())
-		return m_md_list[index];
-	else
-		return 0;
-}
+//MeshData* DataManager::GetMeshData(int index)
+//{
+//	if (index>=0 && index<(int)m_md_list.size())
+//		return m_md_list[index];
+//	else
+//		return 0;
+//}
 
 /*VolumeData* DataManager::GetVolumeData(wxString &name)
 {
@@ -4900,17 +4906,17 @@ MeshData* DataManager::GetMeshData(int index)
 	return 0;
 }*/
 
-MeshData* DataManager::GetMeshData(wxString &name)
-{
-	for (int i=0 ; i<(int)m_md_list.size() ; i++)
-	{
-		if (name == m_md_list[i]->GetName())
-		{
-			return m_md_list[i];
-		}
-	}
-	return 0;
-}
+//MeshData* DataManager::GetMeshData(wxString &name)
+//{
+//	for (int i=0 ; i<(int)m_md_list.size() ; i++)
+//	{
+//		if (name == m_md_list[i]->GetName())
+//		{
+//			return m_md_list[i];
+//		}
+//	}
+//	return 0;
+//}
 
 /*int DataManager::GetVolumeIndex(wxString &name)
 {
@@ -4926,17 +4932,17 @@ MeshData* DataManager::GetMeshData(wxString &name)
 	return -1;
 }*/
 
-int DataManager::GetMeshIndex(wxString &name)
-{
-	for (int i=0 ; i<(int)m_md_list.size() ; i++)
-	{
-		if (name == m_md_list[i]->GetName())
-		{
-			return i;
-		}
-	}
-	return -1;
-}
+//int DataManager::GetMeshIndex(wxString &name)
+//{
+//	for (int i=0 ; i<(int)m_md_list.size() ; i++)
+//	{
+//		if (name == m_md_list[i]->GetName())
+//		{
+//			return i;
+//		}
+//	}
+//	return -1;
+//}
 
 /*void DataManager::RemoveVolumeData(int index)
 {
@@ -4980,26 +4986,26 @@ int DataManager::GetMeshIndex(wxString &name)
 	}
 }*/
 
-void DataManager::RemoveMeshData(int index)
-{
-	MeshData* data = m_md_list[index];
-	if (data)
-	{
-		m_md_list.erase(m_md_list.begin()+index);
-		delete data;
-		data = 0;
-	}
-}
+//void DataManager::RemoveMeshData(int index)
+//{
+//	MeshData* data = m_md_list[index];
+//	if (data)
+//	{
+//		m_md_list.erase(m_md_list.begin()+index);
+//		delete data;
+//		data = 0;
+//	}
+//}
 
 /*int DataManager::GetVolumeNum()
 {
 	return m_vd_list.size();
 }*/
 
-int DataManager::GetMeshNum()
-{
-	return m_md_list.size();
-}
+//int DataManager::GetMeshNum()
+//{
+//	return m_md_list.size();
+//}
 
 /*void DataManager::AddVolumeData(VolumeData* vd)
 {
@@ -5144,18 +5150,18 @@ bool DataManager::CheckNames(wxString &str)
 	//		break;
 	//	}
 	//}
-	if (!result)
-	{
-		for (unsigned int i=0; i<m_md_list.size(); i++)
-		{
-			MeshData* md = m_md_list[i];
-			if (md && md->GetName()==str)
-			{
-				result = true;
-				break;
-			}
-		}
-	}
+	//if (!result)
+	//{
+	//	for (unsigned int i=0; i<m_md_list.size(); i++)
+	//	{
+	//		MeshData* md = m_md_list[i];
+	//		if (md && md->GetName()==str)
+	//		{
+	//			result = true;
+	//			break;
+	//		}
+	//	}
+	//}
 	if (!result)
 	{
 		for (unsigned int i=0; i<m_annotation_list.size(); i++)

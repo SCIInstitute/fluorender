@@ -28,16 +28,18 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MPROPVIEW_H_
 #define _MPROPVIEW_H_
 
-#include "DataManager.h"
-#include "VRenderView.h"
 #include <wx/wx.h>
 #include <wx/panel.h>
-#include <wx/glcanvas.h>
 #include <wx/clrpicker.h>
 #include <wx/slider.h>
 
 using namespace std;
 
+namespace FL
+{
+	class MeshData;
+	class MeshGroup;
+}
 class MPropView: public wxPanel
 {
 	enum
@@ -68,16 +70,16 @@ public:
 		const wxString& name = "MPropView");
 	~MPropView();
 
-	void SetMeshData(MeshData* md, VRenderView* vrv);
-	MeshData* GetMeshData();
+	void SetMeshData(FL::MeshData* md);
+	FL::MeshData* GetMeshData();
 	void RefreshVRenderViews(bool tree=false);
 
 	void GetSettings();
 
 private:
 	wxWindow* m_frame;
-	MeshData* m_md;
-	VRenderView* m_vrv;
+	FL::MeshData* m_md;
+	//VRenderView* m_vrv;
 
 	wxCheckBox *m_light_chk;
 	wxColourPickerCtrl *m_diff_picker;

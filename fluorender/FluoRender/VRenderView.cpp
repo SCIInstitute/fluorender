@@ -741,7 +741,7 @@ FL::VolumeData* VRenderView::GetDispVolumeData(int index)
 		return 0;
 }
 
-MeshData* VRenderView::GetMeshData(int index)
+FL::MeshData* VRenderView::GetMeshData(int index)
 {
 	if (m_glview)
 		return m_glview->GetMeshData(index);
@@ -809,10 +809,10 @@ FL::VolumeGroup* VRenderView::AddVolumeData(FL::VolumeData* vd, wxString group_n
 		return 0;
 }
 
-void VRenderView::AddMeshData(MeshData* md)
+void VRenderView::AddMeshData(FL::MeshData* md)
 {
-	//if (m_glview)
-	//	m_glview->AddMeshData(md);
+	if (m_glview)
+		m_glview->AddMeshData(md);
 }
 
 void VRenderView::AddAnnotations(Annotations* ann)
@@ -845,7 +845,7 @@ wxString VRenderView::AddMGroup(wxString str)
 		return "";
 }
 
-MeshGroup* VRenderView::AddOrGetMGroup()
+FL::MeshGroup* VRenderView::AddOrGetMGroup()
 {
 	if (m_glview)
 		return m_glview->AddOrGetMGroup();
@@ -853,7 +853,7 @@ MeshGroup* VRenderView::AddOrGetMGroup()
 		return 0;
 }
 
-MeshGroup* VRenderView::GetMGroup(wxString &str)
+FL::MeshGroup* VRenderView::GetMGroup(wxString &str)
 {
 	if (m_glview)
 		return m_glview->GetMGroup(str);

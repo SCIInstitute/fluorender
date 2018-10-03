@@ -67,15 +67,15 @@ public:
 		const wxString& name = "MManipulator");
 	~MManipulator();
 
-	void SetMeshData(MeshData* md);
-	MeshData* GetMeshData();
+	//void SetMeshData(MeshData* md);
+	//MeshData* GetMeshData();
 	void RefreshVRenderViews();
 	void GetData();
 	void UpdateData();
 
 private:
 	wxWindow* m_frame;
-	MeshData* m_md;
+	//MeshData* m_md;
 
 	wxStaticText* m_trans_st;
 	wxStaticText* m_x_trans_st;

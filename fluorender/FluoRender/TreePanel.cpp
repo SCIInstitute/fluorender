@@ -542,7 +542,7 @@ void DataTreeCtrl::OnManipulateData(wxCommandEvent& event)
 		if (item_data && item_data->type == 3)//mesh data
 		{
 			wxString name = GetItemText(sel_item);
-			MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
+			//MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
 			//vr_frame->OnSelection(6, 0, 0, 0, md);
 		}
 	}
@@ -934,9 +934,9 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 	else if (item_data->type == 3)
 	{
 		//mesh
-		MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
-		if (md)
-			md->RandomizeColor();
+		//MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
+		//if (md)
+		//	md->RandomizeColor();
 	}
 	else if (item_data->type == 5)
 	{
@@ -957,9 +957,9 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 		VRenderView* vrv = vr_frame->GetView(par_name);
 		if (vrv)
 		{
-			MeshGroup* group = vrv->GetMGroup(name);
-			if (group)
-				group->RandomizeColor();
+			//MeshGroup* group = vrv->GetMGroup(name);
+			//if (group)
+			//	group->RandomizeColor();
 		}
 	}
 
@@ -1068,7 +1068,7 @@ void DataTreeCtrl::UpdateSelection()
 							VRenderView* vrv = vr_frame->GetView(str);
 							if (vrv)
 							{
-								MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
+								//MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
 								//vr_frame->OnSelection(3, vrv, 0, 0, md);
 							}
 						}
@@ -1079,7 +1079,7 @@ void DataTreeCtrl::UpdateSelection()
 							VRenderView* vrv = vr_frame->GetView(str);
 							if (vrv)
 							{
-								MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
+								//MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
 								//vr_frame->OnSelection(3, vrv, 0, 0, md);
 							}
 						}
@@ -1286,22 +1286,22 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 				break;
 			case 3://mesh data
 				{
-					MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
-					if (md)
-					{
-						if (rc)
-							md->RandomizeColor();
-						else
-						{
-							md->ToggleDisp();
-							for (int i=0; i<vr_frame->GetViewNum(); i++)
-							{
-								VRenderView* vrv = vr_frame->GetView(i);
-								if (vrv)
-									vrv->SetMeshPopDirty();
-							}
-						}
-					}
+					//MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
+					//if (md)
+					//{
+					//	if (rc)
+					//		md->RandomizeColor();
+					//	else
+					//	{
+					//		md->ToggleDisp();
+					//		for (int i=0; i<vr_frame->GetViewNum(); i++)
+					//		{
+					//			VRenderView* vrv = vr_frame->GetView(i);
+					//			if (vrv)
+					//				vrv->SetMeshPopDirty();
+					//		}
+					//	}
+					//}
 				}
 				break;
 			case 4://annotations
@@ -1339,17 +1339,17 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 					VRenderView* vrv = vr_frame->GetView(par_name);
 					if (vrv)
 					{
-						MeshGroup* group = vrv->GetMGroup(name);
-						if (group)
-						{
-							if (rc)
-								group->RandomizeColor();
-							else
-							{
-								group->ToggleDisp();
-								vrv->SetMeshPopDirty();
-							}
-						}
+						//MeshGroup* group = vrv->GetMGroup(name);
+						//if (group)
+						//{
+						//	if (rc)
+						//		group->RandomizeColor();
+						//	else
+						//	{
+						//		group->ToggleDisp();
+						//		vrv->SetMeshPopDirty();
+						//	}
+						//}
 					}
 				}
 				break;

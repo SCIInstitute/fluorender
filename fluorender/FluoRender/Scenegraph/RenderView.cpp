@@ -26,40 +26,23 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Fui/RenderCanvasAgent.h>
-#include <VRenderGLView.h>
+#include <Scenegraph/RenderView.h>
 
-using namespace FUI;
+using namespace FL;
 
-RenderCanvasAgent::RenderCanvasAgent(VRenderGLView &gl_view) :
-	InterfaceAgent(),
-	gl_view_(gl_view)
+RenderView::RenderView()
 {
 
 }
 
-void RenderCanvasAgent::objectChanging(void* ptr, void* orig_node, const std::string &exp)
-{
-	//before change
-}
-
-void RenderCanvasAgent::objectChanged(void* ptr, void* orig_node, const std::string &exp)
-{
-	//set values in ui
-	gl_view_.RefreshGL(41);
-}
-
-void RenderCanvasAgent::setObject(FL::RenderView* view)
-{
-	InterfaceAgent::setObject(view);
-}
-
-FL::RenderView* RenderCanvasAgent::getObject()
-{
-	return dynamic_cast<FL::RenderView*>(InterfaceAgent::getObject());
-}
-
-void RenderCanvasAgent::UpdateAllSettings()
+RenderView::RenderView(const RenderView& view, const CopyOp& copyop) :
+	Group(view, copyop)
 {
 
 }
+
+RenderView::~RenderView()
+{
+
+}
+

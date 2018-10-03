@@ -95,7 +95,7 @@ wxPanel(parent, id, pos, size, style, name),
 m_frame(frame),
 m_sel_type(0),
 m_vd(0),
-m_md(0),
+//m_md(0),
 m_draw_clip(false),
 m_hold_planes(false),
 m_plane_mode(kNormal),
@@ -542,10 +542,10 @@ FL::VolumeData* ClippingView::GetVolumeData()
 	return m_vd;
 }
 
-MeshData* ClippingView::GetMeshData()
-{
-	return m_md;
-}
+//MeshData* ClippingView::GetMeshData()
+//{
+//	return m_md;
+//}
 
 void ClippingView::SetVolumeData(FL::VolumeData* vd)
 {
@@ -555,13 +555,13 @@ void ClippingView::SetVolumeData(FL::VolumeData* vd)
 	GetSettings();
 }
 
-void ClippingView::SetMeshData(MeshData* md)
-{
-	if (!md) return;
-	m_md = md;
-	m_sel_type = 3;
-	GetSettings();
-}
+//void ClippingView::SetMeshData(MeshData* md)
+//{
+//	if (!md) return;
+//	m_md = md;
+//	m_sel_type = 3;
+//	GetSettings();
+//}
 
 void ClippingView::SetDataManager(DataManager* mgr)
 {
@@ -576,7 +576,7 @@ void ClippingView::RefreshVRenderViews(bool interactive)
 
 void ClippingView::GetSettings()
 {
-	if (!m_vd && !m_md)
+	//if (!m_vd && !m_md)
 	{
 		DisableAll();
 		return;
@@ -671,8 +671,8 @@ void ClippingView::GetSettings()
 			planes = m_vd->GetRenderer()->get_planes();
 		break;
 	case 3:	//mesh
-		if (m_md->GetMR())
-			planes = m_md->GetMR()->get_planes();
+		//if (m_md->GetMR())
+		//	planes = m_md->GetMR()->get_planes();
 		break;
 	}
 	if (!planes)

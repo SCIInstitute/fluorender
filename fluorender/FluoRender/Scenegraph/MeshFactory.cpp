@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Scenegraph/MeshFactory.h>
+#include <Scenegraph/MeshGroup.h>
 
 using namespace FL;
 
@@ -34,6 +35,8 @@ MeshFactory::MeshFactory()
 {
 	m_name = "mesh factory";
 	default_object_name_ = "default mesh";
+
+	addValue("current", (MeshData*)(0));//current mesh data (for processing etc)
 }
 
 MeshFactory::~MeshFactory()
@@ -52,7 +55,12 @@ void MeshFactory::createDefault()
 		//add default values here
 		md->addValue("data path", std::wstring());//path to obj file
 		md->addValue("bounds", FLTYPE::BBox());//bounding box
+		md->addValue("bounds tf", FLTYPE::BBox());//bounding box after transformation
 		md->addValue("center", FLTYPE::Point());
+		//resolution for clipping planes
+		md->addValue("res x", long(0));
+		md->addValue("res y", long(0));
+		md->addValue("res z", long(0));
 
 		md->addValue("display", bool(true));
 		md->addValue("draw bounds", bool(false));
@@ -60,6 +68,9 @@ void MeshFactory::createDefault()
 		//lighting
 		md->addValue("light enable", bool(true));
 		md->addValue("depth atten", bool(false));
+		md->addValue("da int", double(0.5));
+		md->addValue("da start", double(0));
+		md->addValue("da end", double(1));
 		md->addValue("mat amb", FLTYPE::Color());
 		md->addValue("mat diff", FLTYPE::Color());
 		md->addValue("mat spec", FLTYPE::Color());
@@ -93,6 +104,28 @@ void MeshFactory::createDefault()
 	}
 }
 
+#define ADD_BEFORE_EVENT(obj, name, funct) \
+	obj->setBeforeFunction(name, std::bind(&MeshData::funct, obj))
+
+#define ADD_AFTER_EVENT(obj, name, funct) \
+	obj->setAfterFunction(name, std::bind(&MeshData::funct, obj))
+
+void MeshFactory::setEventHandler(MeshData* md)
+{
+	ADD_AFTER_EVENT(md, "viewport", OnViewportChanged);
+	ADD_AFTER_EVENT(md, "light enable", OnLightEnableChanged);
+	ADD_AFTER_EVENT(md, "depth atten", OnDepthAttenChanged);
+	ADD_AFTER_EVENT(md, "da int", OnDepthAttenChanged);
+	ADD_AFTER_EVENT(md, "da start", OnDepthAttenChanged);
+	ADD_AFTER_EVENT(md, "da end", OnDepthAttenChanged);
+	ADD_AFTER_EVENT(md, "mat amb", OnMaterialChanged);
+	ADD_AFTER_EVENT(md, "mat diff", OnMaterialChanged);
+	ADD_AFTER_EVENT(md, "mat spec", OnMaterialChanged);
+	ADD_AFTER_EVENT(md, "mat shine", OnMaterialChanged);
+	ADD_AFTER_EVENT(md, "alpha", OnMaterialChanged);
+	ADD_AFTER_EVENT(md, "bounds", OnBoundsChanged);
+}
+
 MeshData* MeshFactory::build(const std::string &exp)
 {
 	unsigned int default_id = 0;
@@ -101,6 +134,9 @@ MeshData* MeshFactory::build(const std::string &exp)
 
 MeshData* MeshFactory::clone(MeshData* md)
 {
+	if (!md)
+		return 0;
+
 	incCounter();
 
 	Object* new_md = md->clone(CopyOp::DEEP_COPY_ALL);
@@ -109,6 +145,12 @@ MeshData* MeshFactory::clone(MeshData* md)
 	new_md->setName(name);
 
 	objects_.push_back(new_md);
+	setValue("current", new_md);
+
+	setEventHandler(dynamic_cast<MeshData*>(new_md));
+
+	//notify observers
+	notifyObserversNodeAdded(this, new_md);
 
 	return dynamic_cast<MeshData*>(new_md);
 }
@@ -125,3 +167,14 @@ MeshData* MeshFactory::clone(const unsigned int id)
 	return 0;
 }
 
+MeshGroup* MeshFactory::buildGroup(MeshData* md)
+{
+	MeshGroup* group;
+	if (md)
+		group = new MeshGroup(*md, CopyOp::DEEP_COPY_ALL);//shallow copy might be ok
+	else
+		group = new MeshGroup(*getDefault(), CopyOp::DEEP_COPY_ALL);
+	if (group)
+		group->setName("Group");
+	return group;
+}

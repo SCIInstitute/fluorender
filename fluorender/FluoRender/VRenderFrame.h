@@ -284,8 +284,8 @@ public:
 	//VolumeData* GetCurSelVol()
 	//{ return m_data_mgr.GetVolumeData(m_cur_sel_vol); }
 	//get current selected mesh
-	MeshData* GetCurSelMesh()
-	{ return m_data_mgr.GetMeshData(m_cur_sel_mesh); }
+	//MeshData* GetCurSelMesh()
+	//{ return m_data_mgr.GetMeshData(m_cur_sel_mesh); }
 
 	void StartupLoad(wxArrayString files, bool run_mov, bool with_imagej);
 	void OpenProject(wxString& filename);

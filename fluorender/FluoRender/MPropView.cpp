@@ -27,6 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "MPropView.h"
 #include <VRenderFrame.h>
+#include <Scenegraph/MeshData.h>
+#include <Scenegraph/MeshGroup.h>
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(MPropView, wxPanel)
@@ -58,8 +60,7 @@ MPropView::MPropView(wxWindow* frame, wxWindow* parent,
 	const wxString& name) :
 wxPanel(parent, id, pos, size,style, name),
 m_frame(frame),
-m_md(0),
-m_vrv(0)
+m_md(0)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -188,7 +189,7 @@ MPropView::~MPropView()
 
 void MPropView::GetSettings()
 {
-	if (!m_md)
+/*	if (!m_md)
 		return;
 
 	wxString str;
@@ -229,18 +230,18 @@ void MPropView::GetSettings()
 	m_size_chk->SetValue(m_md->GetLimit());
 	int limit = m_md->GetLimitNumber();
 	m_size_sldr->SetValue(limit);
-	m_size_text->SetValue(wxString::Format("%d", limit));
+	m_size_text->SetValue(wxString::Format("%d", limit));*/
 }
 
-void MPropView::SetMeshData(MeshData* md, VRenderView* vrv)
+void MPropView::SetMeshData(FL::MeshData* md)
 {
-	m_md = md;
-	GetSettings();
+	//m_md = md;
+	//GetSettings();
 
-	m_vrv = vrv;
+	//m_vrv = vrv;
 }
 
-MeshData* MPropView::GetMeshData()
+FL::MeshData* MPropView::GetMeshData()
 {
 	return m_md;
 }
@@ -255,42 +256,42 @@ void MPropView::RefreshVRenderViews(bool tree)
 //lighting
 void MPropView::OnLightingCheck(wxCommandEvent& event)
 {
-	if (m_md && m_vrv)
-	{
-		bool val = m_light_chk->GetValue();
-		m_md->SetLighting(val);
-		for (int i=0; i<m_vrv->GetMeshNum(); i++)
-		{
-			MeshData* md = m_vrv->GetMeshData(i);
-			if (md)
-				md->SetLighting(val);
-		}
-		RefreshVRenderViews();
-	}
+	//if (m_md && m_vrv)
+	//{
+	//	bool val = m_light_chk->GetValue();
+	//	m_md->SetLighting(val);
+	//	for (int i=0; i<m_vrv->GetMeshNum(); i++)
+	//	{
+	//		MeshData* md = m_vrv->GetMeshData(i);
+	//		if (md)
+	//			md->SetLighting(val);
+	//	}
+	//	RefreshVRenderViews();
+	//}
 }
 
 void MPropView::OnDiffChange(wxColourPickerEvent& event)
 {
-	wxColor c = event.GetColour();
-	Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
-	if (m_md)
-	{
-		m_md->SetColor(color, MESH_COLOR_DIFF);
-        Color amb = color * 0.3;
-		m_md->SetColor(amb, MESH_COLOR_AMB);
-		RefreshVRenderViews(true);
-	}
+	//wxColor c = event.GetColour();
+	//Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
+	//if (m_md)
+	//{
+	//	m_md->SetColor(color, MESH_COLOR_DIFF);
+ //       Color amb = color * 0.3;
+	//	m_md->SetColor(amb, MESH_COLOR_AMB);
+	//	RefreshVRenderViews(true);
+	//}
 }
 
 void MPropView::OnSpecChange(wxColourPickerEvent& event)
 {
-	wxColor c = event.GetColour();
-	Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
-	if (m_md)
-	{
-		m_md->SetColor(color, MESH_COLOR_SPEC);
-		RefreshVRenderViews();
-	}
+	//wxColor c = event.GetColour();
+	//Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
+	//if (m_md)
+	//{
+	//	m_md->SetColor(color, MESH_COLOR_SPEC);
+	//	RefreshVRenderViews();
+	//}
 }
 
 void MPropView::OnShineChange(wxScrollEvent & event)
@@ -307,11 +308,11 @@ void MPropView::OnShineText(wxCommandEvent& event)
 	str.ToDouble(&shine);
 	m_shine_sldr->SetValue(int(shine));
 
-	if (m_md)
-	{
-		m_md->SetFloat(shine, MESH_FLOAT_SHN);
-		RefreshVRenderViews();
-	}
+	//if (m_md)
+	//{
+	//	m_md->SetFloat(shine, MESH_FLOAT_SHN);
+	//	RefreshVRenderViews();
+	//}
 }
 
 void MPropView::OnAlphaChange(wxScrollEvent & event)
@@ -328,11 +329,11 @@ void MPropView::OnAlphaText(wxCommandEvent& event)
 	str.ToDouble(&alpha);
 	m_alpha_sldr->SetValue(int(alpha*255.0+0.5));
 
-	if (m_md)
-	{
-		m_md->SetFloat(alpha, MESH_FLOAT_ALPHA);
-		RefreshVRenderViews();
-	}
+	//if (m_md)
+	//{
+	//	m_md->SetFloat(alpha, MESH_FLOAT_ALPHA);
+	//	RefreshVRenderViews();
+	//}
 }
 
 void MPropView::OnScaleChange(wxScrollEvent & event)
@@ -349,28 +350,28 @@ void MPropView::OnScaleText(wxCommandEvent& event)
 	str.ToDouble(&dval);
 	m_scale_sldr->SetValue(int(dval*100.0+0.5));
 
-	if (m_md)
-	{
-		m_md->SetScaling(dval, dval, dval);
-		RefreshVRenderViews();
-	}
+	//if (m_md)
+	//{
+	//	m_md->SetScaling(dval, dval, dval);
+	//	RefreshVRenderViews();
+	//}
 }
 
 //shadow
 void MPropView::OnShadowCheck(wxCommandEvent& event)
 {
-	if (m_md && m_vrv)
-	{
-		bool val = m_shadow_chk->GetValue();
-		m_md->SetShadow(val);
-		for (int i=0; i<m_vrv->GetMeshNum(); i++)
-		{
-			MeshData* md = m_vrv->GetMeshData(i);
-			if (md)
-				md->SetShadow(val);
-		}
-		RefreshVRenderViews();
-	}
+	//if (m_md && m_vrv)
+	//{
+	//	bool val = m_shadow_chk->GetValue();
+	//	m_md->SetShadow(val);
+	//	for (int i=0; i<m_vrv->GetMeshNum(); i++)
+	//	{
+	//		MeshData* md = m_vrv->GetMeshData(i);
+	//		if (md)
+	//			md->SetShadow(val);
+	//	}
+	//	RefreshVRenderViews();
+	//}
 }
 
 void MPropView::OnShadowChange(wxScrollEvent& event)
@@ -382,33 +383,33 @@ void MPropView::OnShadowChange(wxScrollEvent& event)
 
 void MPropView::OnShadowText(wxCommandEvent& event)
 {
-	wxString str = m_shadow_text->GetValue();
-	double dval;
-	str.ToDouble(&dval);
-	m_shadow_sldr->SetValue(int(dval*100.0+0.5));
+	//wxString str = m_shadow_text->GetValue();
+	//double dval;
+	//str.ToDouble(&dval);
+	//m_shadow_sldr->SetValue(int(dval*100.0+0.5));
 
-	if (m_md && m_vrv)
-	{
-		m_md->SetShadowParams(dval);
-		for (int i=0; i<m_vrv->GetMeshNum(); i++)
-		{
-			MeshData* md = m_vrv->GetMeshData(i);
-			if (md)
-				md->SetShadowParams(dval);
-		}
-		RefreshVRenderViews();
-	}
+	//if (m_md && m_vrv)
+	//{
+	//	m_md->SetShadowParams(dval);
+	//	for (int i=0; i<m_vrv->GetMeshNum(); i++)
+	//	{
+	//		MeshData* md = m_vrv->GetMeshData(i);
+	//		if (md)
+	//			md->SetShadowParams(dval);
+	//	}
+	//	RefreshVRenderViews();
+	//}
 }
 
 //size limiter
 void MPropView::OnSizeCheck(wxCommandEvent& event)
 {
 	bool bval = m_size_chk->GetValue();
-	if (m_md)
-	{
-		m_md->SetLimit(bval);
-		RefreshVRenderViews();
-	}
+	//if (m_md)
+	//{
+	//	m_md->SetLimit(bval);
+	//	RefreshVRenderViews();
+	//}
 }
 
 void MPropView::OnSizeChange(wxScrollEvent& event)
@@ -425,10 +426,10 @@ void MPropView::OnSizeText(wxCommandEvent& event)
 	str.ToLong(&val);
 	m_size_sldr->SetValue(val);
 
-	if (m_md)
-	{
-		m_md->SetLimitNumer(val);
-		if (m_md->GetLimit())
-			RefreshVRenderViews();
-	}
+	//if (m_md)
+	//{
+	//	m_md->SetLimitNumer(val);
+	//	if (m_md->GetLimit())
+	//		RefreshVRenderViews();
+	//}
 }

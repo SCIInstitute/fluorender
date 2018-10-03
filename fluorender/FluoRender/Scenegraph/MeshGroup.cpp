@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Scenegraph/MeshGroup.h>
+#include <Scenegraph/MeshData.h>
 
 using namespace FL;
 
@@ -39,6 +40,12 @@ MeshGroup::MeshGroup(const MeshGroup& group, const CopyOp& copyop) :
 	Group(group, copyop)
 {
 
+}
+
+MeshGroup::MeshGroup(const MeshData& md, const CopyOp& copyop) :
+	Group()
+{
+	copyValues(md, copyop);
 }
 
 MeshGroup::~MeshGroup()

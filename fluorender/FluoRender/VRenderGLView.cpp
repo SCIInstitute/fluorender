@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VRenderFrame.h>
 #include <Fui/TreePanel.h>
 #include <Global/Global.h>
-#include <Scenegraph/Group.h>
+#include <Scenegraph/RenderView.h>
 #include <Scenegraph/DrawVolumeVisitor.h>
 #include <Scenegraph/PopVolumeVisitor.h>
 #include <Scenegraph/SearchVisitor.h>
@@ -315,7 +315,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_refresh(false)
 {
 	//create root node
-	m_render_view = FL::ref_ptr<FL::Group>(new FL::Group());
+	m_render_view = FL::ref_ptr<FL::RenderView>(new FL::RenderView());
 	std::string root_str = "Render View";
 	if (m_vrv)
 		root_str = m_vrv->GetName().ToStdString();
@@ -4495,7 +4495,7 @@ void VRenderGLView::PickMesh()
 	glDepthFunc(GL_LEQUAL);
 	for (i = 0; i<(int)m_md_pop_list.size(); i++)
 	{
-		MeshData* md = m_md_pop_list[i];
+		FL::MeshData* md = m_md_pop_list[i];
 		if (md)
 		{
 			md->SetMatrices(m_mv_mat, m_proj_mat);
@@ -4511,14 +4511,14 @@ void VRenderGLView::PickMesh()
 
 	if (choose >0 && choose <= (int)m_md_pop_list.size())
 	{
-		MeshData* md = m_md_pop_list[choose - 1];
+		FL::MeshData* md = m_md_pop_list[choose - 1];
 		if (md)
 		{
 			VRenderFrame* frame = (VRenderFrame*)m_frame;
 			if (frame && frame->GetTree())
 			{
 				frame->GetTree()->SetFocus();
-				frame->GetTree()->Select(m_vrv->GetName(), md->GetName());
+				frame->GetTree()->Select(m_vrv->GetName(), md->getName());
 			}
 			RefreshGL(27);
 		}
@@ -7157,7 +7157,7 @@ FL::VolumeData* VRenderGLView::GetDispVolumeData(int index)
 		return 0;
 }
 
-MeshData* VRenderGLView::GetMeshData(int index)
+FL::MeshData* VRenderGLView::GetMeshData(int index)
 {
 	if (GetMeshNum() <= 0)
 		return 0;
@@ -8564,8 +8564,11 @@ wxString VRenderGLView::AddMGroup(wxString str)
 		return "";
 }
 
-MeshGroup* VRenderGLView::AddOrGetMGroup()
+FL::MeshGroup* VRenderGLView::AddOrGetMGroup()
 {
+	FL::MeshGroup *group = FL::Global::instance().getMeshFactory().buildGroup();
+	m_render_view->addChild(group);
+	return group;
 /*	for (int i = 0; i < (int)m_layer_list.size(); i++)
 	{
 		if (!m_layer_list[i])
@@ -8590,7 +8593,7 @@ MeshGroup* VRenderGLView::AddOrGetMGroup()
 	return 0;
 }
 
-MeshGroup* VRenderGLView::GetMGroup(wxString str)
+FL::MeshGroup* VRenderGLView::GetMGroup(wxString str)
 {
 /*	int i;
 
@@ -9280,9 +9283,11 @@ void VRenderGLView::DrawLegend()
 	}
 	for (i = 0; i<(int)m_md_pop_list.size(); i++)
 	{
-		if (m_md_pop_list[i] && m_md_pop_list[i]->GetLegend())
+		bool legend;
+		m_md_pop_list[i]->getValue("legend", legend);
+		if (m_md_pop_list[i] && legend)
 		{
-			wxstr = m_md_pop_list[i]->GetName();
+			wxstr = m_md_pop_list[i]->getName();
 			wstr = wxstr.ToStdWstring();
 			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
 			length += name_len;
@@ -9339,9 +9344,11 @@ void VRenderGLView::DrawLegend()
 	}
 	for (i = 0; i<(int)m_md_pop_list.size(); i++)
 	{
-		if (m_md_pop_list[i] && m_md_pop_list[i]->GetLegend())
+		bool legend;
+		m_md_pop_list[i]->getValue("legend", legend);
+		if (m_md_pop_list[i] && legend)
 		{
-			wxstr = m_md_pop_list[i]->GetName();
+			wxstr = m_md_pop_list[i]->getName();
 			xpos = length;
 			wstr = wxstr.ToStdWstring();
 			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
@@ -9356,14 +9363,15 @@ void VRenderGLView::DrawLegend()
 				xpos = 0.0;
 				cur_line++;
 			}
-			Color amb, diff, spec;
+			FLTYPE::Color diff;
 			double shine, alpha;
-			m_md_pop_list[i]->GetMaterial(amb, diff, spec, shine, alpha);
+			m_md_pop_list[i]->getValue("mat diff", diff);
 			FLTYPE::Color c(diff.r(), diff.g(), diff.b());
+			FL::MeshData* md = 0;
+			FL::Global::instance().getMeshFactory().getValue("current", (FL::Referenced**)&md);
 			bool highlighted = false;
 			if (vr_frame->GetCurSelType() == 3 &&
-				vr_frame->GetCurSelMesh() &&
-				vr_frame->GetCurSelMesh()->GetName() == wxstr)
+				md && md->getName() == wxstr)
 				highlighted = true;
 			DrawName(xpos + xoffset, ny - (lines - cur_line + 0.1)*font_height - yoffset,
 				nx, ny, wxstr, c, font_height, highlighted);

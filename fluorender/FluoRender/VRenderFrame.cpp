@@ -35,6 +35,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Scenegraph/Group.h>
 #include <Scenegraph/VolumeData.h>
 #include <Scenegraph/VolumeGroup.h>
+#include <Scenegraph/MeshData.h>
+#include <Scenegraph/MeshGroup.h>
 #include "DragDrop.h"
 #include "Formats/png_resource.h"
 #include "Formats/msk_writer.h"
@@ -409,8 +411,6 @@ VRenderFrame::VRenderFrame(
 	//create tree view
 	m_tree_panel = new FUI::TreePanel(this, this, wxID_ANY,
 		wxDefaultPosition, wxSize(350, 300));
-	m_tree_panel->SetScenegraph(m_root.get());
-	m_root->addChild(vrv->m_glview->GetGroup());
 
 	//create movie view (sets the m_recorder_dlg)
 	m_movie_view = new VMovieView(this, this, wxID_ANY,
@@ -658,7 +658,9 @@ VRenderFrame::VRenderFrame(
 	m_aui_mgr.GetPane(m_help_dlg).Hide();
 
 
-	UpdateTree();
+	m_tree_panel->SetScenegraph(m_root.get());
+	m_root->addChild(vrv->m_glview->GetRenderView());
+	//UpdateTree();
 
 	SetMinSize(wxSize(800,600));
 
@@ -955,7 +957,7 @@ wxString VRenderFrame::CreateView(int row)
 
 	if (vrv)
 	{
-		m_root->addChild(vrv->m_glview->GetGroup());
+		m_root->addChild(vrv->m_glview->GetRenderView());
 		vrv->SetDropTarget(new DnDFile(this, vrv));
 		m_vrv_list.push_back(vrv);
 		if (m_movie_view)
@@ -1516,14 +1518,14 @@ void VRenderFrame::LoadMeshes(wxArrayString files, VRenderView* vrv)
 	if (!vrv)
 		vrv = GetView(0);
 
-	MeshData* md_sel = 0;
+	FL::MeshData* md_sel = 0;
 
 	wxProgressDialog *prg_diag = new wxProgressDialog(
 		"FluoRender: Loading mesh data...",
 		"Reading and processing selected mesh data. Please wait.",
 		100, 0, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
 
-	MeshGroup* group = 0;
+	FL::MeshGroup* group = 0;
 	if (files.Count() > 1)
 		group = vrv->AddOrGetMGroup();
 
@@ -1534,12 +1536,14 @@ void VRenderFrame::LoadMeshes(wxArrayString files, VRenderView* vrv)
 		wxString filename = files[i];
 		m_data_mgr.LoadMeshData(filename);
 
-		MeshData* md = m_data_mgr.GetLastMeshData();
+		FL::MeshData* md = 0;
+		//m_data_mgr.GetLastMeshData();
+		FL::Global::instance().getMeshFactory().getValue("current", (FL::Referenced**)&md);
 		if (vrv && md)
 		{
 			if (group)
 			{
-				group->InsertMeshData(group->GetMeshNum()-1, md);
+				group->addChild(md);
 				vrv->SetMeshPopDirty();
 			}
 			else
@@ -1552,7 +1556,7 @@ void VRenderFrame::LoadMeshes(wxArrayString files, VRenderView* vrv)
 
 	UpdateList();
 	if (md_sel)
-		UpdateTree(md_sel->GetName());
+		UpdateTree(md_sel->getName());
 	else
 		UpdateTree();
 
@@ -2169,8 +2173,8 @@ void VRenderFrame::OnSelection(FL::Node *node)
 
 	//m_cur_sel_type = type;
 	//clear mesh boundbox
-	if (m_data_mgr.GetMeshData(m_cur_sel_mesh))
-		m_data_mgr.GetMeshData(m_cur_sel_mesh)->SetDrawBounds(false);
+	//if (m_data_mgr.GetMeshData(m_cur_sel_mesh))
+	//	m_data_mgr.GetMeshData(m_cur_sel_mesh)->SetDrawBounds(false);
 
 	std::string type(node->className());
 	if (type == "VolumeData")
@@ -2384,10 +2388,10 @@ void VRenderFrame::DeleteVRenderView(int i)
 		for (j=0 ; j<m_vrv_list[i]->GetAllVolumeNum() ; j++)
 			m_vrv_list[i]->GetAllVolumeData(j)->setValue("display", true);
 		for (j=0 ; j<m_vrv_list[i]->GetMeshNum() ; j++)
-			m_vrv_list[i]->GetMeshData(j)->SetDisp(true);
+			m_vrv_list[i]->GetMeshData(j)->setValue("display", true);
 		VRenderView* vrv = m_vrv_list[i];
 		m_vrv_list.erase(m_vrv_list.begin()+i);
-		m_root->removeChild(vrv->m_glview->GetGroup());
+		m_root->removeChild(vrv->m_glview->GetRenderView());
 		m_aui_mgr.DetachPane(vrv);
 		vrv->Close();
 		delete vrv;

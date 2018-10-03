@@ -33,11 +33,13 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FL
 {
+	class MeshData;
 	class MeshGroup : public Group
 	{
 	public:
 		MeshGroup();
 		MeshGroup(const MeshGroup& group, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
+		MeshGroup(const MeshData& md, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
 
 		virtual Object* clone(const CopyOp& copyop) const
 		{

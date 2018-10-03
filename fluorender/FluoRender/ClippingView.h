@@ -106,11 +106,11 @@ public:
 	~ClippingView();
 
 	void SetVolumeData(FL::VolumeData* vd);
-	void SetMeshData(MeshData* md);
+	//void SetMeshData(MeshData* md);
 	void SetDataManager(DataManager* mgr);
 	int GetSelType();
 	FL::VolumeData* GetVolumeData();
-	MeshData* GetMeshData();
+	//MeshData* GetMeshData();
 	void RefreshVRenderViews(bool interactive=true);
 
 	bool GetChannLink()
@@ -176,7 +176,7 @@ private:
 
 	int m_sel_type;		//curent selection type
 	FL::VolumeData* m_vd;	//current volume data
-	MeshData* m_md;		//current mesh data
+	//MeshData* m_md;		//current mesh data
 	DataManager* m_mgr;	//manage all if clipping planes are synced
 	bool m_draw_clip;
 	bool m_hold_planes;

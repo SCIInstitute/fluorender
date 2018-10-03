@@ -26,80 +26,37 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _MESHDATA_H_
-#define _MESHDATA_H_
+#ifndef _RENDERVIEW_H_
+#define _RENDERVIEW_H_
 
-#include <Scenegraph/Node.h>
-#include <glm/glm.hpp>
+#include <Scenegraph/Group.h>
 
-struct _GLMmodel;
-typedef _GLMmodel GLMmodel;
-namespace FLIVR
-{
-	class MeshRenderer;
-}
 namespace FL
 {
-	class MeshFactory;
-	class MeshData;
-	typedef std::vector<MeshData*> MeshList;
-	class MeshData : public Node
+	class RenderView : public Group
 	{
 	public:
-		MeshData();
-		MeshData(const MeshData& data, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
+		RenderView();
+		RenderView(const RenderView& view, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
 
 		virtual Object* clone(const CopyOp& copyop) const
 		{
-			return new MeshData(*this, copyop);
+			return new RenderView(*this, copyop);
 		}
 
 		virtual bool isSameKindAs(const Object* obj) const
 		{
-			return dynamic_cast<const MeshData*>(obj) != NULL;
+			return dynamic_cast<const RenderView*>(obj) != NULL;
 		}
 
-		virtual const char* className() const { return "MeshData"; }
+		virtual const char* className() const { return "RenderView"; }
 
-		virtual MeshData* asMeshData() { return this; }
-		virtual const MeshData* asMeshData() const { return this; }
-
-		//load
-		int LoadData(GLMmodel* mesh);
-		int LoadData(std::string &filename);
-
-		//save
-		void SaveData(std::string &filename);
-
-		//mesh renderer
-		FLIVR::MeshRenderer* GetRenderer();
-
-		//draw
-		void SetMatrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat);
-		void Draw(int peel);
-		void DrawBounds();
-		void DrawInt(unsigned int name);
-
-		void RandomizeColor();
+		virtual RenderView* asRenderView() { return this; }
+		virtual const RenderView* asRenderView() const { return this; }
 
 	protected:
-		virtual ~MeshData();
-
-	private:
-		GLMmodel* m_data;
-		FLIVR::MeshRenderer* m_mr;
-
-	private:
-		void Initialize();
-
-		void OnViewportChanged();
-		void OnLightEnableChanged();
-		void OnDepthAttenChanged();
-		void OnMaterialChanged();
-		void OnBoundsChanged();
-
-		friend class MeshFactory;
+		virtual ~RenderView();
 	};
 }
 
-#endif//_MESHDATA_H_
+#endif//_RENDERVIEW_H_

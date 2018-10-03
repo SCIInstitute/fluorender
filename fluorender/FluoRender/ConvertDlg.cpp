@@ -298,7 +298,9 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 		glmArea(mesh, scale, &area);
 		DataManager* mgr = vr_frame->GetDataManager();
 		mgr->LoadMeshData(mesh);
-		MeshData* md = mgr->GetLastMeshData();
+		//MeshData* md = mgr->GetLastMeshData();
+		FL::MeshData* md = 0;
+		FL::Global::instance().getMeshFactory().getValue("current", (FL::Referenced**)&md);
 		if (md && vr_frame->GetView(0))
 		{
 			vr_frame->GetView(0)->AddMeshData(md);
@@ -308,7 +310,7 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 		vr_frame->UpdateTree();
 		(*m_stat_text) <<
 			"The surface area of mesh object " <<
-			md->GetName() << " is " <<
+			md->getName() << " is " <<
 			wxString::Format("%f", area) << "\n";
 	}
 

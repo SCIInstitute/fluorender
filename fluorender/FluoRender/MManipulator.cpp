@@ -41,8 +41,7 @@ MManipulator::MManipulator(wxWindow* frame, wxWindow* parent,
 	long style,
 	const wxString& name) :
 wxPanel(parent, id, pos, size, style, name),
-m_frame(frame),
-m_md(0)
+m_frame(frame)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -138,15 +137,15 @@ MManipulator::~MManipulator()
 {
 }
 
-void MManipulator::SetMeshData(MeshData* md)
-{
-	m_md = md;
-}
-
-MeshData* MManipulator::GetMeshData()
-{
-	return m_md;
-}
+//void MManipulator::SetMeshData(MeshData* md)
+//{
+//	m_md = md;
+//}
+//
+//MeshData* MManipulator::GetMeshData()
+//{
+//	return m_md;
+//}
 
 void MManipulator::RefreshVRenderViews()
 {
@@ -156,41 +155,41 @@ void MManipulator::RefreshVRenderViews()
 
 void MManipulator::GetData()
 {
-	if (!m_md)
-		return;
+	//if (!m_md)
+	//	return;
 
-	double x, y, z;
-	wxString str;
-	m_md->GetTranslation(x, y, z);
-	//sprintf(str, "%.2f", x);
-	str = wxString::Format("%.2f", x);
-	m_x_trans_text->SetValue(str);
-	//sprintf(str, "%.2f", y);
-	str = wxString::Format("%.2f", y);
-	m_y_trans_text->SetValue(str);
-	//sprintf(str, "%.2f", z);
-	str = wxString::Format("%.2f", z);
-	m_z_trans_text->SetValue(str);
-	m_md->GetRotation(x, y, z);
-	//sprintf(str, "%.2f", x);
-	str = wxString::Format("%.2f", x);
-	m_x_rot_text->SetValue(str);
-	//sprintf(str, "%.2f", y);
-	str = wxString::Format("%.2f", y);
-	m_y_rot_text->SetValue(str);
-	//sprintf(str, "%.2f", z);
-	str = wxString::Format("%.2f", z);
-	m_z_rot_text->SetValue(str);
-	m_md->GetScaling(x, y, z);
-	//sprintf(str, "%.2f", x);
-	str = wxString::Format("%.2f", x);
-	m_x_scl_text->SetValue(str);
-	//sprintf(str, "%.2f", y);
-	str = wxString::Format("%.2f", y);
-	m_y_scl_text->SetValue(str);
-	//sprintf(str, "%.2f", z);
-	str = wxString::Format("%.2f", z);
-	m_z_scl_text->SetValue(str);
+	//double x, y, z;
+	//wxString str;
+	//m_md->GetTranslation(x, y, z);
+	////sprintf(str, "%.2f", x);
+	//str = wxString::Format("%.2f", x);
+	//m_x_trans_text->SetValue(str);
+	////sprintf(str, "%.2f", y);
+	//str = wxString::Format("%.2f", y);
+	//m_y_trans_text->SetValue(str);
+	////sprintf(str, "%.2f", z);
+	//str = wxString::Format("%.2f", z);
+	//m_z_trans_text->SetValue(str);
+	//m_md->GetRotation(x, y, z);
+	////sprintf(str, "%.2f", x);
+	//str = wxString::Format("%.2f", x);
+	//m_x_rot_text->SetValue(str);
+	////sprintf(str, "%.2f", y);
+	//str = wxString::Format("%.2f", y);
+	//m_y_rot_text->SetValue(str);
+	////sprintf(str, "%.2f", z);
+	//str = wxString::Format("%.2f", z);
+	//m_z_rot_text->SetValue(str);
+	//m_md->GetScaling(x, y, z);
+	////sprintf(str, "%.2f", x);
+	//str = wxString::Format("%.2f", x);
+	//m_x_scl_text->SetValue(str);
+	////sprintf(str, "%.2f", y);
+	//str = wxString::Format("%.2f", y);
+	//m_y_scl_text->SetValue(str);
+	////sprintf(str, "%.2f", z);
+	//str = wxString::Format("%.2f", z);
+	//m_z_scl_text->SetValue(str);
 }
 
 void MManipulator::OnSpinUp(wxSpinEvent& event)
@@ -285,35 +284,35 @@ void MManipulator::OnSpinDown(wxSpinEvent& event)
 
 void MManipulator::UpdateData()
 {
-	if (!m_md)
-		return;
+	//if (!m_md)
+	//	return;
 
-	double x, y, z;
-	wxString str = m_x_trans_text->GetValue();
-	str.ToDouble(&x);
-	str = m_y_trans_text->GetValue();
-	str.ToDouble(&y);
-	str = m_z_trans_text->GetValue();
-	str.ToDouble(&z);
-	m_md->SetTranslation(x, y, z);
+	//double x, y, z;
+	//wxString str = m_x_trans_text->GetValue();
+	//str.ToDouble(&x);
+	//str = m_y_trans_text->GetValue();
+	//str.ToDouble(&y);
+	//str = m_z_trans_text->GetValue();
+	//str.ToDouble(&z);
+	//m_md->SetTranslation(x, y, z);
 
-	str = m_x_rot_text->GetValue();
-	str.ToDouble(&x);
-	str = m_y_rot_text->GetValue();
-	str.ToDouble(&y);
-	str = m_z_rot_text->GetValue();
-	str.ToDouble(&z);
-	m_md->SetRotation(x, y, z);
+	//str = m_x_rot_text->GetValue();
+	//str.ToDouble(&x);
+	//str = m_y_rot_text->GetValue();
+	//str.ToDouble(&y);
+	//str = m_z_rot_text->GetValue();
+	//str.ToDouble(&z);
+	//m_md->SetRotation(x, y, z);
 
-	str = m_x_scl_text->GetValue();
-	str.ToDouble(&x);
-	str = m_y_scl_text->GetValue();
-	str.ToDouble(&y);
-	str = m_z_scl_text->GetValue();
-	str.ToDouble(&z);
-	m_md->SetScaling(x, y, z);
+	//str = m_x_scl_text->GetValue();
+	//str.ToDouble(&x);
+	//str = m_y_scl_text->GetValue();
+	//str.ToDouble(&y);
+	//str = m_z_scl_text->GetValue();
+	//str.ToDouble(&z);
+	//m_md->SetScaling(x, y, z);
 
-	RefreshVRenderViews();
+	//RefreshVRenderViews();
 }
 
 void MManipulator::OnValueEnter(wxCommandEvent& event)

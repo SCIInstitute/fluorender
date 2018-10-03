@@ -73,7 +73,12 @@ void ClipPlaneAgent::UpdateAllSettings()
 
 	//ranges
 	long resx, resy, resz;
-	getValue("res x", resx);
+	bool result = getValue("res x", resx);
+	if (!result)
+	{
+		panel_.DisableAll();
+		return;
+	}
 	getValue("res y", resy);
 	getValue("res z", resz);
 	//slider range

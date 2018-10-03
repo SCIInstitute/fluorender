@@ -45,6 +45,7 @@ namespace FL
 	class Annotations;
 	class Node;
 	class NodeVisitor;
+	class RenderView;
 
 	typedef std::vector<Node*> ParentList;
 	typedef std::vector<ref_ptr<Node>> NodeList;
@@ -81,6 +82,8 @@ namespace FL
 		virtual const MeshGroup* asMeshGroup() const { return 0; }
 		virtual Annotations* asAnnotations() { return 0; }
 		virtual const Annotations* asAnnotations() const { return 0; }
+		virtual RenderView* asRenderView() { return 0; }
+		virtual const RenderView* asRenderView() const { return 0; }
 
 		virtual void accept(NodeVisitor& nv);
 		virtual void ascend(NodeVisitor& nv);

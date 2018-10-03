@@ -30,9 +30,9 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <string.h>
 #include <tiffio.h>
-#include "FLIVR/BBox.h"
+//#include "FLIVR/BBox.h"
 //#include "FLIVR/Color.h"
-#include "FLIVR/Point.h"
+//#include "FLIVR/Point.h"
 #include "FLIVR/MeshRenderer.h"
 #include "FLIVR/VolumeRenderer.h"
 #include <FLIVR/VertexArray.h>
@@ -561,7 +561,7 @@ private:
 };*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define MESH_COLOR_AMB	1
+/*#define MESH_COLOR_AMB	1
 #define MESH_COLOR_DIFF	2
 #define MESH_COLOR_SPEC	3
 #define MESH_FLOAT_SHN	4
@@ -670,7 +670,7 @@ private:
 
 	//legend
 	bool m_legend;
-};
+};*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class AText
@@ -1207,7 +1207,7 @@ private:
 };*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class MeshGroup : public TreeLayer
+/*class MeshGroup : public TreeLayer
 {
 public:
 	MeshGroup();
@@ -1290,7 +1290,7 @@ private:
 	vector<MeshData*> m_md_list;
 	bool m_sync_mesh_prop;
 	bool m_disp;
-};
+};*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 namespace FLTYPE
@@ -1300,6 +1300,7 @@ namespace FLTYPE
 namespace FL
 {
 	class VolumeData;
+	class MeshData;
 }
 class DataManager
 {
@@ -1346,8 +1347,8 @@ public:
 	//load mesh
 	int LoadMeshData(wxString &filename);
 	int LoadMeshData(GLMmodel* mesh);
-	int GetMeshNum();
-	MeshData* GetMeshData(int index);
+	/*int GetMeshNum();
+	FL::MeshData* GetMeshData(int index);
 	MeshData* GetMeshData(wxString &name);
 	int GetMeshIndex(wxString &name);
 	MeshData* GetLastMeshData()
@@ -1358,7 +1359,7 @@ public:
 		else
 			return 0;
 	};
-	void RemoveMeshData(int index);
+	void RemoveMeshData(int index);*/
 
 	//annotations
 	int LoadAnnotations(wxString &filename);
@@ -1432,7 +1433,7 @@ public:
 
 private:
 	//vector <VolumeData*> m_vd_list;
-	vector <MeshData*> m_md_list;
+	//vector <MeshData*> m_md_list;
 	vector <BaseReader*> m_reader_list;
 	vector <Annotations*> m_annotation_list;
 

@@ -45,15 +45,52 @@ namespace FL
 
 		virtual const char* className() const { return "MeshFactory"; }
 
-		virtual MeshData* build(const std::string &exp);
+		virtual void createDefault();
+
+		virtual void setEventHandler(MeshData* md);
+
+		virtual MeshData* getDefault()
+		{
+			return dynamic_cast<MeshData*>(ObjectFactory::getDefault());
+		}
+
+		virtual MeshData* build(const std::string &exp = "");
 
 		virtual MeshData* clone(MeshData*);
 
 		virtual MeshData* clone(const unsigned int);
 
+		inline virtual MeshData* get(size_t i)
+		{
+			return dynamic_cast<MeshData*>(ObjectFactory::get(i));
+		}
+
+		inline virtual const MeshData* get(size_t i) const
+		{
+			return dynamic_cast<MeshData*>(const_cast<Object*>(ObjectFactory::get(i)));
+		}
+
+		inline virtual MeshData* find(const unsigned int id)
+		{
+			return dynamic_cast<MeshData*>(ObjectFactory::find(id));
+		}
+
+		inline virtual MeshData* findFirst(const std::string &name)
+		{
+			return dynamic_cast<MeshData*>(ObjectFactory::findFirst(name));
+		}
+
+		inline virtual MeshData* findLast(const std::string &name)
+		{
+			return dynamic_cast<MeshData*>(ObjectFactory::findLast(name));
+		}
+
+		//also builds volume group, whose typical use is to sync properties for volumes
+		//the volume group copies properties from the given volume
+		MeshGroup* buildGroup(MeshData* md = 0);
+
 	protected:
 		virtual ~MeshFactory();
-		virtual void createDefault();
 	};
 }
 

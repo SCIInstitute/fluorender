@@ -265,15 +265,15 @@ void DataListCtrl::OnContextMenu(wxContextMenuEvent &event)
 					}
 					else if (GetItemText(item) == "Mesh")
 					{
-						wxString name = GetText(item, 1);
-						MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
-						if (md)
-						{
-							if (md->GetPath() == "")
-								menu.Append(Menu_Save, "Save...");
-							else
-								menu.Append(Menu_Save, "Save As...");
-						}
+						//wxString name = GetText(item, 1);
+						//FL::MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
+						//if (md)
+						//{
+						//	if (md->GetPath() == "")
+						//		menu.Append(Menu_Save, "Save...");
+						//	else
+						//		menu.Append(Menu_Save, "Save As...");
+						//}
 					}
 					else if (GetItemText(item) == "Annotations")
 					{
@@ -354,18 +354,18 @@ void DataListCtrl::AddToView(int menu_index, long item)
 		}
 		else if (GetItemText(item) == "Mesh")
 		{
-			name = GetText(item, 1);
-			MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
-			if (md)
-			{
-				VRenderView* view = (*vr_frame->GetViewList())[menu_index];
-				if (view)
-				{
-					int chan_num = view->GetAny();
-					view_empty = chan_num > 0 ? false : view_empty;
-					view->AddMeshData(md);
-				}
-			}
+			//name = GetText(item, 1);
+			//MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
+			//if (md)
+			//{
+			//	VRenderView* view = (*vr_frame->GetViewList())[menu_index];
+			//	if (view)
+			//	{
+			//		int chan_num = view->GetAny();
+			//		view_empty = chan_num > 0 ? false : view_empty;
+			//		view->AddMeshData(md);
+			//	}
+			//}
 		}
 		else if (GetItemText(item) == "Annotations")
 		{
@@ -639,13 +639,13 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 				if (vr_frame)
 				{
-					MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
-					if (md)
-					{
-						md->Save(filename);
-						wxString str = md->GetPath();
-						SetText(item, 2, str);
-					}
+					//MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
+					//if (md)
+					//{
+					//	md->Save(filename);
+					//	wxString str = md->GetPath();
+					//	SetText(item, 2, str);
+					//}
 				}
 			}
 			delete fopendlg;
@@ -807,9 +807,9 @@ void DataListCtrl::EndEdit(bool update)
 				}
 				else if (GetItemText(item) == "Mesh")
 				{
-					MeshData* md = mgr->GetMeshData(name);
-					if (md)
-						md->SetName(new_name2);
+					//MeshData* md = mgr->GetMeshData(name);
+					//if (md)
+					//	md->SetName(new_name2);
 				}
 				else if (GetItemText(item) == "Annotations")
 				{
