@@ -168,6 +168,7 @@ VRenderFrame::VRenderFrame(
 {
 	//create default
 	FL::Global::instance().getVolumeFactory().createDefault();
+	FL::Global::instance().getMeshFactory().createDefault();
 	//create root node
 	m_root = FL::ref_ptr<FL::Group>(new FL::Group());
 	std::string root_str = "Active Datasets";
@@ -1526,8 +1527,8 @@ void VRenderFrame::LoadMeshes(wxArrayString files, VRenderView* vrv)
 		100, 0, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
 
 	FL::MeshGroup* group = 0;
-	if (files.Count() > 1)
-		group = vrv->AddOrGetMGroup();
+	//if (files.Count() > 1)
+	group = vrv->AddOrGetMGroup();
 
 	for (int i=0; i<(int)files.Count(); i++)
 	{
