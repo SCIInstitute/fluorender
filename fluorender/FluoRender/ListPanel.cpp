@@ -254,7 +254,7 @@ void DataListCtrl::OnContextMenu(wxContextMenuEvent &event)
 						if (vd)
 						{
 							std::wstring path;
-							vd->getValue("tex path", path);
+							vd->getValue("data path", path);
 							if (path.empty())
 								menu.Append(Menu_Save, "Save...");
 							else
@@ -613,7 +613,7 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 				if (m_vd)
 				{
 					m_vd->SaveData(filename, fopendlg->GetFilterIndex(), false, VRenderFrame::GetCompression());
-					m_vd->getValue("tex path", filename);
+					m_vd->getValue("data path", filename);
 					SetText(item, 2, wxString(filename));
 				}
 			}
@@ -709,7 +709,7 @@ void DataListCtrl::OnBake(wxCommandEvent& event)
 			if (vd)
 			{
 				vd->SaveData(filename, fopendlg->GetFilterIndex(), true, VRenderFrame::GetCompression());
-				vd->getValue("tex path", filename);
+				vd->getValue("data path", filename);
 				SetText(item, 2, wxString(filename));
 			}
 		}

@@ -1106,6 +1106,31 @@ void VRenderGLView::DrawMeshes(int peel)
 	int ny = GetGLSize().y;
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 
+	FL::SearchVisitor visitor;
+	visitor.matchClassName("MeshData");
+	m_render_view->accept(visitor);
+	FL::ObjectList* list = visitor.getResult();
+	for (auto it = list->begin();
+		it != list->end(); ++it)
+	{
+		FL::MeshData* md = dynamic_cast<FL::MeshData*>(*it);
+		bool display = false;
+		if (md)
+			md->getValue("display", display);
+		if (display)
+		{
+			md->SetMatrices(m_mv_mat, m_proj_mat);
+			//md->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+			md->setValue("depth atten", m_use_fog);
+			md->setValue("da int", m_fog_intensity);
+			md->setValue("da start", m_fog_start);
+			md->setValue("da end", m_fog_end);
+			//md->SetViewport(vp);
+			md->setValue("viewport", FLTYPE::GLint4(vp));
+			md->Draw(peel);
+		}
+	}
+
 	//fix mesh later
 /*	for (int i = 0; i<(int)m_layer_list.size(); i++)
 	{
@@ -1552,10 +1577,56 @@ void VRenderGLView::DrawAnnotations()
 //stored in m_md_pop_list
 void VRenderGLView::PopMeshList()
 {
-	/*if (!m_md_pop_dirty)
+	if (!m_md_pop_dirty)
 		return;
 
-	int i, j;
+	class PopMeshVisitor : public FL::NodeVisitor
+	{
+	public:
+		PopMeshVisitor() : NodeVisitor()
+		{
+			setTraversalMode(FL::NodeVisitor::TRAVERSE_ALL_CHILDREN);
+		}
+
+		virtual void reset()
+		{
+			m_md_pop_list.clear();
+		}
+
+		virtual void apply(FL::Node& node)
+		{
+			FL::MeshData* md = node.asMeshData();
+			if (md)
+			{
+				bool disp;
+				md->getValue("display", disp);
+				if (disp)
+					m_md_pop_list.push_back(md);
+			}
+			traverse(node);
+		}
+
+		virtual void apply(FL::Group& group)
+		{
+			bool disp;
+			bool result = group.getValue("display", disp);
+			if (!result || disp)
+				traverse(group);
+		}
+
+		std::vector<FL::MeshData*> getResult() { return m_md_pop_list; }
+
+	private:
+		std::vector<FL::MeshData*> m_md_pop_list;
+
+	};
+
+	PopMeshVisitor visitor;
+	if (m_render_view.get())
+		m_render_view->accept(visitor);
+	m_md_pop_list = visitor.getResult();
+
+	/*int i, j;
 	m_md_pop_list.clear();
 
 	for (i = 0; i<(int)m_layer_list.size(); i++)
@@ -5615,7 +5686,7 @@ void VRenderGLView::Set3DBatFrame(int offset)
 				if (reader->GetChanNum() > 1)
 					data_name += wxString::Format("_%d", channel + 1);
 				vd->setName(data_name.ToStdString());
-				vd->setValue("tex path", reader->GetPathName());
+				vd->setValue("data path", reader->GetPathName());
 				vd->setValue("time", long(reader->GetCurTime()));
 				if (!reader->IsSpcInfoValid())
 				{
@@ -6481,7 +6552,7 @@ void VRenderGLView::RunRulerProfile(wxFileConfig &fconfig)
 		if (m_cur_vol)
 		{
 			std::wstring tex_path;
-			m_cur_vol->getValue("tex path", tex_path);
+			m_cur_vol->getValue("data path", tex_path);
 			//path = m_cur_vol->GetPath();
 			path = wxPathOnly(tex_path);
 		}
@@ -8631,8 +8702,12 @@ void VRenderGLView::InitView(unsigned int type)
 			m_vd_pop_list[i]->getValue("bounds", box);
 			m_bounds.extend(box);
 		}
-		//for (i = 0; i<(int)m_md_pop_list.size(); i++)
-		//	m_bounds.extend(m_md_pop_list[i]->GetBounds());
+		for (i = 0; i < (int)m_md_pop_list.size(); i++)
+		{
+			FLTYPE::BBox box;
+			m_md_pop_list[i]->getValue("bounds", box);
+			m_bounds.extend(box);
+		}
 
 		if (m_bounds.valid())
 		{

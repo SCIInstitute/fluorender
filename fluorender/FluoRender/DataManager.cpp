@@ -4843,6 +4843,7 @@ int DataManager::LoadMeshData(wxString &filename)
 		return 0;
 	md->LoadData(pathname.ToStdString());
 	std::wstring name = pathname.ToStdWstring();
+	md->setValue("data path", name);
 	name = GET_NAME(name);
 	md->setName(ws2s(name));
 	//wxString name = md->GetName();

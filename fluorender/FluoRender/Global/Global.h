@@ -101,11 +101,19 @@ namespace FL
 		FUI::AgentFactory& getAgentFactory()
 		{ return *agent_factory_; }
 
+		void addListObserver(Observer* obsrvr)
+		{
+			volume_factory_->addObserver(obsrvr);
+			mesh_factory_->addObserver(obsrvr);
+			annotation_factory_->addObserver(obsrvr);
+		}
+
 	private:
 		Global();
 
 		static Global instance_;
 
+		//objects in these will be shown in the list panel
 		ref_ptr<VolumeFactory> volume_factory_;
 		ref_ptr<MeshFactory> mesh_factory_;
 		ref_ptr<AnnotationFactory> annotation_factory_;

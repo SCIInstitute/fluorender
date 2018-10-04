@@ -680,7 +680,7 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 	if (!data || data->dim != 3)
 		return 0;
 
-	setValue("tex path", path);
+	setValue("data path", path);
 	setName(name);
 
 	if (m_tex)
@@ -1584,7 +1584,7 @@ void VolumeData::SaveData(std::wstring &filename, int mode, bool bake, bool comp
 	}
 	delete writer;
 
-	setValue("tex path", filename);
+	setValue("data path", filename);
 	SaveMask(false, 0, 0);
 	SaveLabel(false, 0, 0);
 }
@@ -1643,7 +1643,7 @@ void VolumeData::SaveMask(bool use_reader, long t, long c)
 			msk_writer.SetData(data);
 			msk_writer.SetSpacings(spcx, spcy, spcz);
 			wstring filename, tex_path;
-			getValue("tex path", tex_path);
+			getValue("data path", tex_path);
 			if (use_reader && m_reader)
 				filename = m_reader->GetCurMaskName(t, c);
 			else
@@ -1706,7 +1706,7 @@ void VolumeData::SaveLabel(bool use_reader, long t, long c)
 			msk_writer.SetData(data);
 			msk_writer.SetSpacings(spcx, spcy, spcz);
 			wstring filename, tex_path;
-			getValue("tex path", tex_path);
+			getValue("data path", tex_path);
 			if (use_reader && m_reader)
 				filename = m_reader->GetCurLabelName(t, c);
 			else

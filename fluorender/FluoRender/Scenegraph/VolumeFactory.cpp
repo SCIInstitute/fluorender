@@ -68,7 +68,7 @@ void VolumeFactory::createDefault()
 		vd->addValue("clip planes", FLTYPE::PlaneSet(6));
 		vd->addValue("clip bounds", FLTYPE::BBox());
 
-		vd->addValue("tex path", std::wstring());//path to original file
+		vd->addValue("data path", std::wstring());//path to original file
 		vd->addValue("channel", long(0));//channel index of the original file
 		vd->addValue("time", long(0));//time index of the original file
 

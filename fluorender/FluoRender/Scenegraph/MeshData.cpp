@@ -83,7 +83,7 @@ void MeshData::OnLightEnableChanged()
 		return;
 
 	bool light_enable;
-	getValue("light enable");
+	getValue("light enable", light_enable);
 	m_mr->set_lighting(light_enable);
 }
 

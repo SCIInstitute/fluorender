@@ -110,7 +110,7 @@ void ListModel::GetValueByRow(wxVariant &variant,
 	case 2:
 		{
 			std::wstring path;
-			obj->getValue("tex path", path);
+			obj->getValue("data path", path);
 			variant = path;
 		}
 		break;
@@ -131,6 +131,6 @@ bool ListModel::SetValueByRow(const wxVariant &variant,
 
 void ListModel::setObject(FL::Node* root)
 {
-	FL::Global::instance().getVolumeFactory().addObserver(this);
+	FL::Global::instance().addListObserver(this);
 }
 

@@ -50,7 +50,7 @@ void MeshFactory::createDefault()
 	{
 		MeshData* md = new MeshData();
 		md->setName(default_object_name_);
-		objects_.push_back(md);
+		objects_.push_front(md);
 
 		//add default values here
 		md->addValue("data path", std::wstring());//path to obj file
@@ -144,7 +144,7 @@ MeshData* MeshFactory::clone(MeshData* md)
 	std::string name = "mesh" + std::to_string(local_id_);
 	new_md->setName(name);
 
-	objects_.push_back(new_md);
+	objects_.push_front(new_md);
 	setValue("current", new_md);
 
 	setEventHandler(dynamic_cast<MeshData*>(new_md));
