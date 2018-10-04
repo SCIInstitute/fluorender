@@ -40,6 +40,7 @@ namespace FUI
 	class RenderCanvasAgent;
 	class OutAdjustAgent;
 	class ClipPlaneAgent;
+	class MeshPropAgent;
 	class AgentFactory : public FL::ObjectFactory
 	{
 	public:
@@ -94,6 +95,7 @@ namespace FUI
 		RenderCanvasAgent* getOrAddRenderCanvasAgent(const std::string &name, wxWindow &window);
 		OutAdjustAgent* getOrAddOutAdjustAgent(const std::string &name, wxWindow &window);
 		ClipPlaneAgent* getOrAddClipPlaneAgent(const std::string &name, wxWindow &window);
+		MeshPropAgent* getOrAddMeshPropAgent(const std::string &name, wxWindow &window);
 
 	protected:
 		virtual ~AgentFactory();

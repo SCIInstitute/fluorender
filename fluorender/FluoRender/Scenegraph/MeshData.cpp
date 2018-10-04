@@ -145,9 +145,9 @@ void MeshData::OnBoundsChanged()
 
 	//res
 	FLTYPE::Vector diag = bounds.diagonal();
-	setValue("res x", diag.x());
-	setValue("res y", diag.y());
-	setValue("res z", diag.z());
+	setValue("res x", long(diag.x()+0.5));
+	setValue("res y", long(diag.y()+0.5));
+	setValue("res z", long(diag.z()+0.5));
 
 	//transformed bounds
 	FLTYPE::Point p[8];

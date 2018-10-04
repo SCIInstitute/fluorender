@@ -57,10 +57,16 @@ void MeshFactory::createDefault()
 		md->addValue("bounds", FLTYPE::BBox());//bounding box
 		md->addValue("bounds tf", FLTYPE::BBox());//bounding box after transformation
 		md->addValue("center", FLTYPE::Point());
+
 		//resolution for clipping planes
+		md->addValue("clip planes", FLTYPE::PlaneSet(6));
 		md->addValue("res x", long(0));
 		md->addValue("res y", long(0));
 		md->addValue("res z", long(0));
+		//clip distance
+		md->addValue("clip dist x", long(0));
+		md->addValue("clip dist y", long(0));
+		md->addValue("clip dist z", long(0));
 
 		md->addValue("display", bool(true));
 		md->addValue("draw bounds", bool(false));
@@ -79,7 +85,7 @@ void MeshFactory::createDefault()
 
 		//shadow
 		md->addValue("shadow enable", bool(false));
-		md->addValue("shadoe int", double(1));
+		md->addValue("shadow int", double(1));
 
 		//size limiter
 		md->addValue("limit enable", bool(false));

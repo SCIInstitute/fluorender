@@ -38,6 +38,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Fui/OutAdjustPanel.h>
 #include <Fui/ClipPlaneAgent.h>
 #include <Fui/ClipPlanePanel.h>
+#include <Fui/MeshPropAgent.h>
+#include <Fui/MeshPropPanel.h>
 
 using namespace FUI;
 
@@ -162,4 +164,23 @@ ClipPlaneAgent* AgentFactory::getOrAddClipPlaneAgent(const std::string &name, wx
 	}
 
 	return clip_plane_agent;
+}
+
+MeshPropAgent* AgentFactory::getOrAddMeshPropAgent(const std::string &name, wxWindow &window)
+{
+	InterfaceAgent* result = findFirst(name);
+	if (result)
+		return dynamic_cast<MeshPropAgent*>(result);
+
+	//not found
+	MeshPropAgent* mesh_prop_agent =
+		new MeshPropAgent(static_cast<MeshPropPanel&>(window));
+	if (mesh_prop_agent)
+	{
+		mesh_prop_agent->setName(name);
+		objects_.push_front(mesh_prop_agent);
+		notifyObserversNodeAdded(this, mesh_prop_agent);
+	}
+
+	return mesh_prop_agent;
 }

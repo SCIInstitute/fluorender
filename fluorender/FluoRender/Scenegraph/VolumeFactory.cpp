@@ -67,6 +67,10 @@ void VolumeFactory::createDefault()
 		vd->addValue("bounds", FLTYPE::BBox());
 		vd->addValue("clip planes", FLTYPE::PlaneSet(6));
 		vd->addValue("clip bounds", FLTYPE::BBox());
+		//clip distance
+		vd->addValue("clip dist x", long(0));
+		vd->addValue("clip dist y", long(0));
+		vd->addValue("clip dist z", long(0));
 
 		vd->addValue("data path", std::wstring());//path to original file
 		vd->addValue("channel", long(0));//channel index of the original file
@@ -159,11 +163,6 @@ void VolumeFactory::createDefault()
 		vd->addValue("2d weight1 id", (unsigned long)(0));//after tone mapping
 		vd->addValue("2d weight2 id", (unsigned long)(0));//before tone mapping
 		vd->addValue("2d dmap id", (unsigned long)(0));//2d depth map texture for rendering shadows
-
-		//clip distance
-		vd->addValue("clip dist x", long(0));
-		vd->addValue("clip dist y", long(0));
-		vd->addValue("clip dist z", long(0));
 
 		//compression
 		vd->addValue("compression", bool(false));

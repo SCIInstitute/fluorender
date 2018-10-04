@@ -3802,6 +3802,67 @@ void VRenderGLView::DrawOLShading(FL::VolumeData* vd)
 //get mesh shadow
 bool VRenderGLView::GetMeshShadow(double &val)
 {
+	class PopMeshVisitor : public FL::NodeVisitor
+	{
+	public:
+		PopMeshVisitor() : NodeVisitor(),
+			shadow_enable_(false),
+			shadow_int_(0.0)
+		{
+			setTraversalMode(FL::NodeVisitor::TRAVERSE_ALL_CHILDREN);
+		}
+
+		virtual void reset()
+		{
+			shadow_enable_ = false;
+			shadow_int_ = 1.0;
+		}
+
+		virtual void apply(FL::Node& node)
+		{
+			FL::MeshData* md = node.asMeshData();
+			if (md)
+			{
+				bool disp;
+				md->getValue("display", disp);
+				if (disp)
+				{
+					bool shadow_enable;
+					md->getValue("shadow enable", shadow_enable);
+					shadow_enable_ |= shadow_enable;
+					if (shadow_enable)
+					{
+						double shadow_int;
+						md->getValue("shadow int", shadow_int);
+						shadow_int_ = std::max(shadow_int_, shadow_int);
+					}
+				}
+			}
+			traverse(node);
+		}
+
+		virtual void apply(FL::Group& group)
+		{
+			bool disp;
+			bool result = group.getValue("display", disp);
+			if (!result || disp)
+				traverse(group);
+		}
+
+		bool getEnable() { return shadow_enable_; }
+		double getIntensity() { return shadow_int_; }
+
+	private:
+		bool shadow_enable_;
+		double shadow_int_;
+	};
+
+	PopMeshVisitor visitor;
+	if (m_render_view.get())
+		m_render_view->accept(visitor);
+	val = visitor.getIntensity();
+	return visitor.getEnable();
+
 /*	for (int i = 0; i<(int)m_layer_list.size(); i++)
 	{
 		if (!m_layer_list[i])
@@ -3832,8 +3893,8 @@ bool VRenderGLView::GetMeshShadow(double &val)
 			}
 		}
 	}
-	val = 0.0;*/
-	return false;
+	val = 0.0;
+	return false;*/
 }
 
 void VRenderGLView::DrawOLShadowsMesh(double darkness)

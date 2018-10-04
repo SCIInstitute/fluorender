@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Fui/VolumePropPanel.h>
 #include <Fui/OutAdjustPanel.h>
 #include <Fui/ClipPlanePanel.h>
+#include <Fui/MeshPropPanel.h>
 #include <Global/Global.h>
 #include <Scenegraph/Group.h>
 #include <Scenegraph/VolumeData.h>
@@ -423,7 +424,7 @@ VRenderFrame::VRenderFrame(
 	//prop panel chidren
 	m_prop_sizer = new wxBoxSizer(wxHORIZONTAL);
 	m_volume_prop = new FUI::VolumePropPanel(this, m_prop_panel, wxID_ANY);
-	m_mesh_prop = new MPropView(this, m_prop_panel, wxID_ANY);
+	m_mesh_prop = new FUI::MeshPropPanel(this, m_prop_panel, wxID_ANY);
 	m_mesh_manip = new MManipulator(this, m_prop_panel, wxID_ANY);
 	m_annotation_prop = new APropView(this, m_prop_panel, wxID_ANY);
 	m_prop_panel->SetSizer(m_prop_sizer);
@@ -2244,6 +2245,38 @@ void VRenderFrame::OnSelection(FL::Node *node)
 				m_volume_prop->Show(false);
 			if (m_mesh_prop)
 				m_mesh_prop->Show(false);
+			if (m_mesh_manip)
+				m_mesh_manip->Show(false);
+			if (m_annotation_prop)
+				m_annotation_prop->Show(false);
+		}
+	}
+	else if (type == "MeshData")
+	{
+		FL::MeshData* md = node->asMeshData();
+		bool display = false;
+		if (md)
+			md->getValue("display", display);
+		if (display)
+		{
+			m_mesh_prop->AssociateMeshData(md);
+			if (!m_mesh_prop->IsShown())
+			{
+				m_mesh_prop->Show(true);
+				m_prop_sizer->Clear();
+				m_prop_sizer->Add(m_mesh_prop, 1, wxEXPAND, 0);
+				m_prop_panel->SetSizer(m_prop_sizer);
+				m_prop_panel->Layout();
+			}
+			m_aui_mgr.GetPane(m_prop_panel).Caption(
+				wxString(UITEXT_PROPERTIES) + wxString(" - ") + md->getName());
+			m_aui_mgr.Update();
+			md->setValue("draw bounds", true);
+
+			if (m_volume_prop)
+				m_volume_prop->Show(false);
+			if (m_mesh_prop && md)
+				m_mesh_prop->Show(true);
 			if (m_mesh_manip)
 				m_mesh_manip->Show(false);
 			if (m_annotation_prop)

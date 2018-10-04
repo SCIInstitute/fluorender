@@ -31,7 +31,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include "DataManager.h"
 #include "VRenderView.h"
-#include "MPropView.h"
 #include "APropView.h"
 #include "MManipulator.h"
 #include "VMovieView.h"
@@ -113,6 +112,7 @@ namespace FUI
 	class VolumePropPanel;
 	class OutAdjustPanel;
 	class ClipPlanePanel;
+	class MeshPropPanel;
 }
 class VRenderFrame: public wxFrame
 {
@@ -395,7 +395,7 @@ private:
 	//prop panel children
 	wxBoxSizer* m_prop_sizer;
 	FUI::VolumePropPanel* m_volume_prop;
-	MPropView* m_mesh_prop;
+	FUI::MeshPropPanel* m_mesh_prop;
 	MManipulator* m_mesh_manip;
 	APropView* m_annotation_prop;
 	//tester
