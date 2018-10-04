@@ -79,6 +79,10 @@ namespace FLTYPE
 		inline double sat() const {return sat_;}
 		inline double val() const {return val_;}
 
+		inline void hue(const double v) { hue_ = v; }
+		inline void sat(const double v) { sat_ = v; }
+		inline void val(const double v) { val_ = v; }
+
 		friend std::ostream& operator<<(std::ostream& os, const HSVColor& c)
 		{
 			os << '[' << c.hue_ << ',' << c.sat_ << ',' << c.val_ << ']';

@@ -363,6 +363,8 @@ void VolumeData::OnColorChanged()
 	FLTYPE::Color color;
 	getValue("color", color);
 	m_vr->set_color(color);
+	FLTYPE::HSVColor hsv(color);
+	setValue("hsv", hsv, false);
 }
 
 void VolumeData::OnSecColorChanged()
@@ -397,8 +399,9 @@ void VolumeData::OnLuminanceChanged()
 	getValue("luminance", luminance);
 	FLTYPE::HSVColor hsv;
 	getValue("hsv", hsv);
+	hsv.val(luminance);
 	FLTYPE::Color color(hsv);
-	setValue("color", color);
+	setValue("color", color, false);
 }
 
 void VolumeData::OnAlphaChanged()
