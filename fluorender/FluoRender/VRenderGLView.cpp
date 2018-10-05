@@ -3281,10 +3281,10 @@ void VRenderGLView::DrawOVER(FL::VolumeData* vd, bool mask, int peel)
 
 		if (vd->GetRenderer())
 			vd->GetRenderer()->set_depth_peel(peel);
-		if (mask)
-			vd->setValue("stream mode", long(4));
-		else
-			vd->setValue("stream mode", long(0));
+		//if (mask)
+		//	vd->setValue("stream mode", long(4));
+		//else
+		//	vd->setValue("stream mode", long(0));
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 		//vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 		vd->setValue("depth atten", m_use_fog);
@@ -3295,7 +3295,9 @@ void VRenderGLView::DrawOVER(FL::VolumeData* vd, bool mask, int peel)
 		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color));
 		vd->GetRenderer()->set_clear_color(clear_color);
 		vd->setValue("cur framebuffer", (unsigned long)m_cur_framebuffer);
-		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor);
+		vd->Draw(!m_persp, m_adaptive,
+			m_interactive, m_scale_factor,
+			mask?4:0);
 	}
 
 	bool shadow_enable;
@@ -3522,12 +3524,13 @@ void VRenderGLView::DrawMIP(FL::VolumeData* vd, int peel)
 		if (colormap_mode == 1)
 			vd->setValue("alpha enable", false);
 		//draw
-		vd->setValue("stream mode", long(1));
+		//vd->setValue("stream mode", long(1));
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 		vd->setValue("viewport", FLTYPE::GLint4(vp));
 		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color));
 		vd->setValue("cur framebuffer", (unsigned long)m_cur_framebuffer);
-		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor);
+		vd->Draw(!m_persp, m_adaptive,
+			m_interactive, m_scale_factor, 1);
 		//restore
 		if (colormap_mode == 0)
 			vd->setValue("colormap mode", saved_colormap_proj);
@@ -3754,13 +3757,14 @@ void VRenderGLView::DrawOLShading(FL::VolumeData* vd)
 	vd->setValue("mip mode", long(2));
 	long colormap_mode;
 	vd->getValue("colormap mode", colormap_mode);
-	vd->setValue("stream mode", long(2));
+	//vd->setValue("stream mode", long(2));
 	vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 	vd->setValue("depth atten", m_use_fog);
 	vd->setValue("da int", m_fog_intensity);
 	vd->setValue("da start", m_fog_start);
 	vd->setValue("da end", m_fog_end);
-	vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor);
+	vd->Draw(!m_persp, m_adaptive,
+		m_interactive, m_scale_factor, 2);
 	//mode management not done yet
 	//vd->RestoreMode();
 	vd->setValue("colormap mode", colormap_mode);
@@ -4078,38 +4082,50 @@ void VRenderGLView::DrawOLShadows(vector<FL::VolumeData*> &vlist)
 	else if (list.size() == 1)
 	{
 		FL::VolumeData* vd = list[0];
-		//save
-		long colormap_mode;
-		vd->getValue("colormap mode", colormap_mode);
-		bool shading_enable;
-		vd->getValue("shading enable", shading_enable);
-		//set to draw depth
-		vd->GetRenderer()->set_shading(false);
-		vd->setValue("mip mode", long(0));
-		vd->setValue("colormap mode", long(2));
+		vd->setValue("overlay mode", long(1));
 		if (overlay_buffer)
-			vd->setValue("2d dmap id", (unsigned long)(
-				overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0)));
-		long mask_mode;
-		vd->getValue("mask mode", mask_mode);
-		vd->setValue("mask mode", long(0));
-		//draw
-		vd->setValue("stream mode", long(3));
+			vd->GetRenderer()->set_2d_dmap(
+				overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0));
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-		vd->setValue("depth atten", m_use_fog);
-		vd->setValue("da int", m_fog_intensity);
-		vd->setValue("da start", m_fog_start);
-		vd->setValue("da end", m_fog_end);
 		vd->setValue("viewport", FLTYPE::GLint4(vp));
 		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color));
 		vd->setValue("curframebuffer", (unsigned long)m_cur_framebuffer);
-		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor);
+		//vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, 3);
 		//restore
-		//vd->RestoreMode();
-		vd->setValue("mask mode", mask_mode);
-		vd->setValue("colormap mode", colormap_mode);
-		vd->setValue("shading enable", shading_enable);
-		vd->setValue("shadow int", shadow_darkness);
+		vd->setValue("overlay mode", long(0));
+
+		//save
+		//long colormap_mode;
+		//vd->getValue("colormap mode", colormap_mode);
+		//bool shading_enable;
+		//vd->getValue("shading enable", shading_enable);
+		////set to draw depth
+		//vd->GetRenderer()->set_shading(false);
+		//vd->setValue("mip mode", long(0));
+		//vd->setValue("colormap mode", long(2));
+		//if (overlay_buffer)
+		//	vd->setValue("2d dmap id", (unsigned long)(
+		//		overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0)));
+		//long mask_mode;
+		//vd->getValue("mask mode", mask_mode);
+		//vd->setValue("mask mode", long(0));
+		////draw
+		//vd->setValue("stream mode", long(3));
+		//vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+		//vd->setValue("depth atten", m_use_fog);
+		//vd->setValue("da int", m_fog_intensity);
+		//vd->setValue("da start", m_fog_start);
+		//vd->setValue("da end", m_fog_end);
+		//vd->setValue("viewport", FLTYPE::GLint4(vp));
+		//vd->setValue("clear color", FLTYPE::GLfloat4(clear_color));
+		//vd->setValue("curframebuffer", (unsigned long)m_cur_framebuffer);
+		//vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor);
+		////restore
+		////vd->RestoreMode();
+		//vd->setValue("mask mode", mask_mode);
+		//vd->setValue("colormap mode", colormap_mode);
+		//vd->setValue("shading enable", shading_enable);
+		//vd->setValue("shadow int", shadow_darkness);
 	}
 	else
 	{

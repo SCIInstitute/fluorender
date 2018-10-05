@@ -98,7 +98,7 @@ void VolumeData::Initialize()
 	OnColorChanged();
 	OnSecColorChanged();
 	OnSecColorSetChanged();
-	OnLuminanceChanged();
+	//OnLuminanceChanged();
 	OnAlphaChanged();
 	OnAlphaEnableChanged();
 	OnMaskThreshChanged();
@@ -111,8 +111,8 @@ void VolumeData::Initialize()
 	OnColormapTypeChanged();
 	OnColormapProjChanged();
 	OnSpacingChanged();
-	OnBaseSpacingChanged();
-	OnSpacingScaleChanged();
+	//OnBaseSpacingChanged();
+	//OnSpacingScaleChanged();
 	OnLevelChanged();
 	OnDisplayChanged();
 	OnInterpolateChanged();
@@ -121,13 +121,13 @@ void VolumeData::Initialize()
 	OnClipPlanesChanged();
 }
 
-void VolumeData::OnMipModeChanging()
-{
-	//save mode
-	long mode;
-	getValue("mip mode", mode);
-	setValue("saved mode", mode);
-}
+//void VolumeData::OnMipModeChanging()
+//{
+//	//save mode
+//	long mode;
+//	getValue("mip mode", mode);
+//	setValue("saved mode", mode);
+//}
 
 //MIP & normal modes
 void VolumeData::OnMipModeChanged()
@@ -142,86 +142,132 @@ void VolumeData::OnMipModeChanged()
 	{
 	case 0://normal
 		m_vr->set_mode(FLIVR::TextureRenderer::MODE_OVER);
-		{
-			FLTYPE::Color color;
-			getValue("color", color);
-			FLIVR::Color color2(color);
-			m_vr->set_color(color2);
-			double alpha;
-			getValue("alpha", alpha);
-			m_vr->set_alpha(alpha);
-			double low_threshold;
-			getValue("low threshold", low_threshold);
-			m_vr->set_lo_thresh(low_threshold);
-			double high_threshold;
-			getValue("high threhsold", high_threshold);
-			m_vr->set_hi_thresh(high_threshold);
-			double extract_boundary;
-			getValue("extract boundary", extract_boundary);
-			m_vr->set_gm_thresh(extract_boundary);
-			double gamma_3d;
-			getValue("gamma 3d", gamma_3d);
-			m_vr->set_gamma3d(gamma_3d);
-			double saturation;
-			getValue("saturation", saturation);
-			m_vr->set_offset(saturation);
-		}
+		//{
+		//	FLTYPE::Color color;
+		//	getValue("color", color);
+		//	FLIVR::Color color2(color);
+		//	m_vr->set_color(color2);
+		//	double alpha;
+		//	getValue("alpha", alpha);
+		//	m_vr->set_alpha(alpha);
+		//	double low_threshold;
+		//	getValue("low threshold", low_threshold);
+		//	m_vr->set_lo_thresh(low_threshold);
+		//	double high_threshold;
+		//	getValue("high threhsold", high_threshold);
+		//	m_vr->set_hi_thresh(high_threshold);
+		//	double extract_boundary;
+		//	getValue("extract boundary", extract_boundary);
+		//	m_vr->set_gm_thresh(extract_boundary);
+		//	double gamma_3d;
+		//	getValue("gamma 3d", gamma_3d);
+		//	m_vr->set_gamma3d(gamma_3d);
+		//	double saturation;
+		//	getValue("saturation", saturation);
+		//	m_vr->set_offset(saturation);
+		//}
 		break;
 	case 1://MIP
 		m_vr->set_mode(FLIVR::TextureRenderer::MODE_MIP);
-		{
-			FLTYPE::HSVColor hsv;
-			getValue("hsv", hsv);
-			FLIVR::Color rgb = FLIVR::Color(hsv);
-			m_vr->set_color(rgb);
-		}
-		m_vr->set_alpha(1.0);
-		m_vr->set_lo_thresh(0.0);
-		m_vr->set_hi_thresh(1.0);
-		m_vr->set_gm_thresh(0.0);
-		{
-			double gamma_3d;
-			getValue("gamma 3d", gamma_3d);
-			m_vr->set_gamma3d(gamma_3d);
-			double saturation;
-			getValue("saturation", saturation);
-			m_vr->set_offset(saturation);
-		}
+		//{
+		//	FLTYPE::HSVColor hsv;
+		//	getValue("hsv", hsv);
+		//	FLIVR::Color rgb = FLIVR::Color(hsv);
+		//	m_vr->set_color(rgb);
+		//}
+		//m_vr->set_alpha(1.0);
+		//m_vr->set_lo_thresh(0.0);
+		//m_vr->set_hi_thresh(1.0);
+		//m_vr->set_gm_thresh(0.0);
+		//{
+		//	double gamma_3d;
+		//	getValue("gamma 3d", gamma_3d);
+		//	m_vr->set_gamma3d(gamma_3d);
+		//	double saturation;
+		//	getValue("saturation", saturation);
+		//	m_vr->set_offset(saturation);
+		//}
 		break;
-	case 2://white shading
-		m_vr->set_mode(FLIVR::TextureRenderer::MODE_OVER);
-		m_vr->set_colormap_mode(0);
-		m_vr->set_color(FLIVR::Color(1.0, 1.0, 1.0));
-		m_vr->set_alpha(1.0);
-		{
-			double low_threshold;
-			getValue("low threshold", low_threshold);
-			m_vr->set_lo_thresh(low_threshold);
-			double high_threshold;
-			getValue("high threhsold", high_threshold);
-			m_vr->set_hi_thresh(high_threshold);
-			double extract_boundary;
-			getValue("extract boundary", extract_boundary);
-			m_vr->set_gm_thresh(extract_boundary);
-			double gamma_3d;
-			getValue("gamma 3d", gamma_3d);
-			m_vr->set_gamma3d(gamma_3d);
-			double saturation;
-			getValue("saturation", saturation);
-			m_vr->set_offset(saturation);
-		}
-		break;
-	case 3://white mip
-		m_vr->set_mode(FLIVR::TextureRenderer::MODE_MIP);
-		m_vr->set_colormap_mode(0);
-		m_vr->set_color(FLIVR::Color(1.0, 1.0, 1.0));
-		m_vr->set_alpha(1.0);
-		m_vr->set_lo_thresh(0.0);
-		m_vr->set_hi_thresh(1.0);
-		m_vr->set_gm_thresh(0.0);
-		m_vr->set_gamma3d(1.0);
-		m_vr->set_offset(1.0);
-		break;
+	//case 2://white shading
+	//	m_vr->set_mode(FLIVR::TextureRenderer::MODE_OVER);
+	//	m_vr->set_colormap_mode(0);
+	//	m_vr->set_color(FLIVR::Color(1.0, 1.0, 1.0));
+	//	m_vr->set_alpha(1.0);
+	//	{
+	//		double low_threshold;
+	//		getValue("low threshold", low_threshold);
+	//		m_vr->set_lo_thresh(low_threshold);
+	//		double high_threshold;
+	//		getValue("high threhsold", high_threshold);
+	//		m_vr->set_hi_thresh(high_threshold);
+	//		double extract_boundary;
+	//		getValue("extract boundary", extract_boundary);
+	//		m_vr->set_gm_thresh(extract_boundary);
+	//		double gamma_3d;
+	//		getValue("gamma 3d", gamma_3d);
+	//		m_vr->set_gamma3d(gamma_3d);
+	//		double saturation;
+	//		getValue("saturation", saturation);
+	//		m_vr->set_offset(saturation);
+	//	}
+	//	break;
+	//case 3://white mip
+	//	m_vr->set_mode(FLIVR::TextureRenderer::MODE_MIP);
+	//	m_vr->set_colormap_mode(0);
+	//	m_vr->set_color(FLIVR::Color(1.0, 1.0, 1.0));
+	//	m_vr->set_alpha(1.0);
+	//	m_vr->set_lo_thresh(0.0);
+	//	m_vr->set_hi_thresh(1.0);
+	//	m_vr->set_gm_thresh(0.0);
+	//	m_vr->set_gamma3d(1.0);
+	//	m_vr->set_offset(1.0);
+	//	break;
+	}
+}
+
+void VolumeData::OnOverlayModeChanged()
+{
+	if (!m_vr)
+		return;
+
+	long mode;
+	getValue("overlay mode", mode);
+
+	switch (mode)
+	{
+	case 0://restore
+	{
+		FLTYPE::Color color;
+		getValue("color", color);
+		FLIVR::Color color2(color);
+		m_vr->set_color(color2);
+		double alpha;
+		getValue("alpha", alpha);
+		m_vr->set_alpha(alpha);
+		double low_threshold;
+		getValue("low threshold", low_threshold);
+		m_vr->set_lo_thresh(low_threshold);
+		double high_threshold;
+		getValue("high threhsold", high_threshold);
+		m_vr->set_hi_thresh(high_threshold);
+		double extract_boundary;
+		getValue("extract boundary", extract_boundary);
+		m_vr->set_gm_thresh(extract_boundary);
+		double gamma_3d;
+		getValue("gamma 3d", gamma_3d);
+		m_vr->set_gamma3d(gamma_3d);
+		double saturation;
+		getValue("saturation", saturation);
+		m_vr->set_offset(saturation);
+	}
+	break;
+	case 1:
+	{
+		m_vr->set_shading(false);
+		m_vr->set_colormap_mode(2);
+		m_vr->set_ml_mode(0);
+	}
+	break;
 	}
 }
 
@@ -364,7 +410,7 @@ void VolumeData::OnColorChanged()
 	getValue("color", color);
 	m_vr->set_color(color);
 	FLTYPE::HSVColor hsv(color);
-	setValue("hsv", hsv, false);
+	setValue("hsv", hsv);
 }
 
 void VolumeData::OnSecColorChanged()
@@ -401,7 +447,7 @@ void VolumeData::OnLuminanceChanged()
 	getValue("hsv", hsv);
 	hsv.val(luminance);
 	FLTYPE::Color color(hsv);
-	setValue("color", color, false);
+	setValue("color", color);
 }
 
 void VolumeData::OnAlphaChanged()
@@ -545,7 +591,7 @@ void VolumeData::OnSpacingChanged()
 	FLTYPE::BBox bounds(box_min, box_max);
 	setValue("bounds", bounds);
 
-	m_tex->get_base_spacings(spc_x, spc_y, spc_z);
+	//m_tex->get_base_spacings(spc_x, spc_y, spc_z);
 	setValue("base spc x", spc_x);
 	setValue("base spc y", spc_y);
 	setValue("base spc z", spc_z);
@@ -1753,12 +1799,11 @@ void VolumeData::SetMatrices(glm::mat4 &mv_mat,
 }
 
 //draw volume
-void VolumeData::Draw(bool ortho, bool adaptive, bool interactive, double zoom)
+void VolumeData::Draw(bool ortho, bool adaptive,
+	bool interactive, double zoom, int stream_mode)
 {
 	bool test_wire;
 	getValue("test wire", test_wire);
-	long stream_mode;
-	getValue("stream mode", stream_mode);
 	bool draw_bounds;
 	getValue("draw bounds", draw_bounds);
 

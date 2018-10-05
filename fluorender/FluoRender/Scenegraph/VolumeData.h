@@ -126,7 +126,9 @@ namespace FL
 
 		//draw
 		void SetMatrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat, glm::mat4 &tex_mat);
-		void Draw(bool otho = false, bool adaptive = false, bool intactive = false, double zoom = 1.0);
+		void Draw(bool otho = false, bool adaptive = false,
+			bool intactive = false, double zoom = 1.0,
+			int stream_mode = 0);
 		void DrawBounds();
 		//draw mask (create the mask)
 		//type: 0-initial; 1-diffusion-based growing
@@ -168,8 +170,9 @@ namespace FL
 		//handle observer notifications
 		//most are for setting values in the renderer
 		//this will be changed when rendering pipeline is restructured
-		void OnMipModeChanging();
+		//void OnMipModeChanging();
 		void OnMipModeChanged();//modes
+		void OnOverlayModeChanged();//overlay mode changes temporarily for rendering overlayed effects
 		void OnViewportChanged();
 		void OnClearColorChanged();
 		void OnCurFramebufferChanged();
