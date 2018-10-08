@@ -64,6 +64,8 @@ public:
 		NOTIFY_SELF = 1<<0,
 		NOTIFY_OTHERS = 1<<1,
 		NOTIFY_PARENT = 1<<2,
+		NOTIFY_AGENT = 1<<3,
+		NOTIFY_FACTORY = 1<<4,
 		NOTIFY_ALL = 0x7FFFFFFF
 	};
 
@@ -74,7 +76,7 @@ public:
 	virtual const char* className() const { return "Value"; }
 
 	virtual void objectDeleted(void*);
-	virtual void objectChanged(void*, void*, const std::string &exp);
+	virtual void objectChanged(int notify_level, void*, void*, const std::string &exp);
 
 	std::string getName() { return _name; }
 	std::string getType() { return _type; }

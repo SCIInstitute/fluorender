@@ -110,7 +110,7 @@ void VolumeFactory::createDefault()
 		vd->addValue("low shading", double(0));//low shading
 		vd->addValue("high shading", double(0));//highg shading
 		vd->addValue("shadow enable", bool(false));//shadow
-		vd->addValue("shadow int", double(0));
+		vd->addValue("shadow int", double(1));
 		vd->addValue("sample rate", double(1));//sample rate
 		//color
 		vd->addValue("color", FLTYPE::Color(1.0));

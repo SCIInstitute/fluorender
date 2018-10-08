@@ -36,13 +36,19 @@ ListModel::ListModel()
 }
 
 //observer functions
-void ListModel::objectChanging(void* ptr, void* orig_node, const std::string &exp)
+void ListModel::objectChanging(int notify_level, void* ptr, void* orig_node, const std::string &exp)
 {
 	//before change
+	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
+	{
+	}
 }
 
-void ListModel::objectChanged(void* ptr, void* orig_node, const std::string &exp)
+void ListModel::objectChanged(int notify_level, void* ptr, void* orig_node, const std::string &exp)
 {
+	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
+	{
+	}
 }
 
 void ListModel::nodeAdded(void* ptr, void* parent, void* child)

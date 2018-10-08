@@ -38,14 +38,20 @@ MeshPropAgent::MeshPropAgent(MeshPropPanel &panel) :
 {
 }
 
-void MeshPropAgent::objectChanging(void* ptr, void* orig_node, const std::string &exp)
+void MeshPropAgent::objectChanging(int notify_level, void* ptr, void* orig_node, const std::string &exp)
 {
 	//before change
+	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
+	{
+	}
 }
 
-void MeshPropAgent::objectChanged(void* ptr, void* orig_node, const std::string &exp)
+void MeshPropAgent::objectChanged(int notify_level, void* ptr, void* orig_node, const std::string &exp)
 {
 	//set values in ui
+	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
+	{
+	}
 }
 
 void MeshPropAgent::setObject(FL::MeshData* obj)

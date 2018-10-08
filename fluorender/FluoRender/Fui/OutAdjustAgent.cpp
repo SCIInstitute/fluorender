@@ -41,14 +41,20 @@ OutAdjustAgent::OutAdjustAgent(OutAdjustPanel &panel) :
 
 }
 
-void OutAdjustAgent::objectChanging(void* ptr, void* orig_node, const std::string &exp)
+void OutAdjustAgent::objectChanging(int notify_level, void* ptr, void* orig_node, const std::string &exp)
 {
 	//before change
+	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
+	{
+	}
 }
 
-void OutAdjustAgent::objectChanged(void* ptr, void* orig_node, const std::string &exp)
+void OutAdjustAgent::objectChanged(int notify_level, void* ptr, void* orig_node, const std::string &exp)
 {
 	//set values in ui
+	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
+	{
+	}
 }
 
 void OutAdjustAgent::setObject(FL::Node* obj)

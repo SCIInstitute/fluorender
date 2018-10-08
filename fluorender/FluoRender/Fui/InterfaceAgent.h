@@ -49,8 +49,8 @@ namespace FUI
 		virtual const char* className() const { return "InterfaceAgent"; }
 
 		//observer
-		virtual void objectChanging(void*, void* orig_node, const std::string &exp) {};
-		virtual void objectChanged(void*, void* orig_node, const std::string &exp) {};
+		virtual void objectChanging(int notify_level, void*, void* orig_node, const std::string &exp) {};
+		virtual void objectChanged(int notify_level, void*, void* orig_node, const std::string &exp) {};
 
 		virtual void setObject(FL::Object* obj)
 		{

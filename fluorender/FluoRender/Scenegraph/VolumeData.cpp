@@ -239,6 +239,7 @@ void VolumeData::OnOverlayModeChanged()
 	{
 		FLTYPE::Color color;
 		getValue("color", color);
+		m_vr->set_color(color);
 		FLIVR::Color color2(color);
 		m_vr->set_color(color2);
 		double alpha;
@@ -248,7 +249,7 @@ void VolumeData::OnOverlayModeChanged()
 		getValue("low threshold", low_threshold);
 		m_vr->set_lo_thresh(low_threshold);
 		double high_threshold;
-		getValue("high threhsold", high_threshold);
+		getValue("high threshold", high_threshold);
 		m_vr->set_hi_thresh(high_threshold);
 		double extract_boundary;
 		getValue("extract boundary", extract_boundary);
@@ -259,6 +260,15 @@ void VolumeData::OnOverlayModeChanged()
 		double saturation;
 		getValue("saturation", saturation);
 		m_vr->set_offset(saturation);
+		bool shading_enable;
+		getValue("shading enable", shading_enable);
+		m_vr->set_shading(shading_enable);
+		long colormap_mode;
+		getValue("colormap mode", colormap_mode);
+		m_vr->set_colormap_mode(colormap_mode);
+		long mask_mode;
+		getValue("mask mode", mask_mode);
+		m_vr->set_ml_mode(mask_mode);
 	}
 	break;
 	case 1:
@@ -410,7 +420,7 @@ void VolumeData::OnColorChanged()
 	getValue("color", color);
 	m_vr->set_color(color);
 	FLTYPE::HSVColor hsv(color);
-	setValue("hsv", hsv);
+	setValue("hsv", hsv, Value::NotifyLevel::NOTIFY_SELF);
 }
 
 void VolumeData::OnSecColorChanged()
@@ -422,7 +432,7 @@ void VolumeData::OnSecColorChanged()
 	getValue("sec color", sec_color);
 	m_vr->set_mask_color(sec_color);
 
-	setValue("sec color set", bool(true));
+	setValue("sec color set", bool(true), Value::NotifyLevel::NOTIFY_SELF);
 }
 
 void VolumeData::OnSecColorSetChanged()
@@ -447,7 +457,7 @@ void VolumeData::OnLuminanceChanged()
 	getValue("hsv", hsv);
 	hsv.val(luminance);
 	FLTYPE::Color color(hsv);
-	setValue("color", color);
+	setValue("color", color, Value::NotifyLevel::NOTIFY_SELF);
 }
 
 void VolumeData::OnAlphaChanged()
@@ -589,12 +599,12 @@ void VolumeData::OnSpacingChanged()
 	FLTYPE::Point box_min(bbox.min().x(), bbox.min().y(), bbox.min().z());
 	FLTYPE::Point box_max(bbox.max().x(), bbox.max().y(), bbox.max().z());
 	FLTYPE::BBox bounds(box_min, box_max);
-	setValue("bounds", bounds);
+	setValue("bounds", bounds, Value::NotifyLevel::NOTIFY_SELF);
 
 	//m_tex->get_base_spacings(spc_x, spc_y, spc_z);
-	setValue("base spc x", spc_x);
-	setValue("base spc y", spc_y);
-	setValue("base spc z", spc_z);
+	setValue("base spc x", spc_x, Value::NotifyLevel::NOTIFY_SELF);
+	setValue("base spc y", spc_y, Value::NotifyLevel::NOTIFY_SELF);
+	setValue("base spc z", spc_z, Value::NotifyLevel::NOTIFY_SELF);
 }
 
 void VolumeData::OnBaseSpacingChanged()
@@ -610,9 +620,9 @@ void VolumeData::OnBaseSpacingChanged()
 	long level;
 	getValue("level", level);
 	m_tex->get_spacings(spc_x, spc_y, spc_z, level);
-	setValue("spc x", spc_x);
-	setValue("spc y", spc_y);
-	setValue("spc z", spc_z);
+	setValue("spc x", spc_x, Value::NotifyLevel::NOTIFY_SELF);
+	setValue("spc y", spc_y, Value::NotifyLevel::NOTIFY_SELF);
+	setValue("spc z", spc_z, Value::NotifyLevel::NOTIFY_SELF);
 }
 
 void VolumeData::OnSpacingScaleChanged()
@@ -642,7 +652,7 @@ void VolumeData::OnLevelChanged()
 	FLTYPE::Point box_min(bbox.min().x(), bbox.min().y(), bbox.min().z());
 	FLTYPE::Point box_max(bbox.max().x(), bbox.max().y(), bbox.max().z());
 	FLTYPE::BBox bounds(box_min, box_max);
-	setValue("bounds", bounds);
+	setValue("bounds", bounds, Value::NotifyLevel::NOTIFY_SELF);
 }
 
 void VolumeData::OnDisplayChanged()
@@ -1845,7 +1855,7 @@ void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 		if (estimate)
 		{
 			double est_thresh = m_vr->get_estimated_thresh();
-			setValue("estimate thresh", est_thresh);
+			setValue("estimate thresh", est_thresh, Value::NotifyLevel::NOTIFY_SELF);
 		}
 	}
 }

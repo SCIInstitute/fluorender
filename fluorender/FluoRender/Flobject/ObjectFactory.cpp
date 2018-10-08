@@ -49,13 +49,16 @@ ObjectFactory::~ObjectFactory()
 
 void ObjectFactory::objectChanged(int notify_level, void* ptr, void* orig_node, const std::string &exp)
 {
-	Object::objectChanged(notify_level, ptr, orig_node, exp);//actually unnecessary, since there is nothing to sync
-	Referenced* refd = static_cast<Referenced*>(ptr);
-	if (refd->className() == std::string("Value"))
+	if (notify_level & Value::NotifyLevel::NOTIFY_FACTORY)
 	{
-		Value* value = dynamic_cast<Value*>(refd);
-		if (value->getName() == default_setting_filename_value_name_)
-			readDefault();
+		Object::objectChanged(notify_level, ptr, orig_node, exp);//actually unnecessary, since there is nothing to sync
+		Referenced* refd = static_cast<Referenced*>(ptr);
+		if (refd->className() == std::string("Value"))
+		{
+			Value* value = dynamic_cast<Value*>(refd);
+			if (value->getName() == default_setting_filename_value_name_)
+				readDefault();
+		}
 	}
 }
 

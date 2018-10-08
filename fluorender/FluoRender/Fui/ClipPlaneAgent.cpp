@@ -41,14 +41,19 @@ ClipPlaneAgent::ClipPlaneAgent(ClipPlanePanel &panel) :
 
 }
 
-void ClipPlaneAgent::objectChanging(void* ptr, void* orig_node, const std::string &exp)
+void ClipPlaneAgent::objectChanging(int notify_level, void* ptr, void* orig_node, const std::string &exp)
 {
 	//before change
+	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
+	{ }
 }
 
-void ClipPlaneAgent::objectChanged(void* ptr, void* orig_node, const std::string &exp)
+void ClipPlaneAgent::objectChanged(int notify_level, void* ptr, void* orig_node, const std::string &exp)
 {
 	//set values in ui
+	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
+	{
+	}
 }
 
 void ClipPlaneAgent::setObject(FL::Node* obj)

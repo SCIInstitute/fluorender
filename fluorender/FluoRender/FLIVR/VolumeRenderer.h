@@ -93,7 +93,10 @@ namespace FLIVR
 		double get_alpha();
 
 		//shading
-		void set_shading(bool shading) { shading_ = shading; }
+		void set_shading(bool shading)
+		{
+			shading_ = shading;
+		}
 		bool get_shading() { return shading_; }
 		void set_material(double amb, double diff, double spec, double shine)
 		{ ambient_ = amb; diffuse_ = amb+0.7;
@@ -102,7 +105,9 @@ namespace FLIVR
 
 		//colormap mode
 		void set_colormap_mode(int mode)
-		{colormap_mode_ = mode;}
+		{
+			colormap_mode_ = mode;
+		}
 		void set_colormap_values(double low, double hi)
 		{colormap_low_value_ = low; colormap_hi_value_ = hi;}
 		void set_colormap(int value)
@@ -179,7 +184,10 @@ namespace FLIVR
 
 		//mask and label
 		int get_ml_mode() {return ml_mode_;}
-		void set_ml_mode(int mode) {ml_mode_ = mode;}
+		void set_ml_mode(int mode)
+		{
+			ml_mode_ = mode;
+		}
 
 		//set noise reduction
 		void SetNoiseRed(bool nd) {noise_red_ = nd;}

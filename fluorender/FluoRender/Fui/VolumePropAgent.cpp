@@ -41,14 +41,20 @@ VolumePropAgent::VolumePropAgent(VolumePropPanel &panel) :
 
 }
 
-void VolumePropAgent::objectChanging(void* ptr, void* orig_node, const std::string &exp)
+void VolumePropAgent::objectChanging(int notify_level, void* ptr, void* orig_node, const std::string &exp)
 {
 	//before change
+	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
+	{
+	}
 }
 
-void VolumePropAgent::objectChanged(void* ptr, void* orig_node, const std::string &exp)
+void VolumePropAgent::objectChanged(int notify_level, void* ptr, void* orig_node, const std::string &exp)
 {
 	//set values in ui
+	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
+	{
+	}
 }
 
 void VolumePropAgent::setObject(FL::VolumeData* obj)

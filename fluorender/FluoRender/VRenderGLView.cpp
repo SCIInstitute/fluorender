@@ -1121,12 +1121,12 @@ void VRenderGLView::DrawMeshes(int peel)
 		{
 			md->SetMatrices(m_mv_mat, m_proj_mat);
 			//md->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-			md->setValue("depth atten", m_use_fog);
-			md->setValue("da int", m_fog_intensity);
-			md->setValue("da start", m_fog_start);
-			md->setValue("da end", m_fog_end);
+			md->setValue("depth atten", m_use_fog, FL::Value::NotifyLevel::NOTIFY_SELF);
+			md->setValue("da int", m_fog_intensity, FL::Value::NotifyLevel::NOTIFY_SELF);
+			md->setValue("da start", m_fog_start, FL::Value::NotifyLevel::NOTIFY_SELF);
+			md->setValue("da end", m_fog_end, FL::Value::NotifyLevel::NOTIFY_SELF);
 			//md->SetViewport(vp);
-			md->setValue("viewport", FLTYPE::GLint4(vp));
+			md->setValue("viewport", FLTYPE::GLint4(vp), FL::Value::NotifyLevel::NOTIFY_SELF);
 			md->Draw(peel);
 		}
 	}
@@ -2215,8 +2215,8 @@ void VRenderGLView::Segment()
 		if (vd)
 		{
 			vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-			vd->setValue("viewport", FLTYPE::GLint4(vp));
-			vd->setValue("clear color", FLTYPE::GLfloat4(clear_color));
+			vd->setValue("viewport", FLTYPE::GLint4(vp), FL::Value::NotifyLevel::NOTIFY_SELF);
+			vd->setValue("clear color", FLTYPE::GLfloat4(clear_color), FL::Value::NotifyLevel::NOTIFY_SELF);
 			m_selector.SetVolume(vd);
 			m_selector.Select(m_brush_radius2 - m_brush_radius1);
 		}
@@ -2224,8 +2224,8 @@ void VRenderGLView::Segment()
 		if (vd)
 		{
 			vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-			vd->setValue("viewport", FLTYPE::GLint4(vp));
-			vd->setValue("clear color", FLTYPE::GLfloat4(clear_color));
+			vd->setValue("viewport", FLTYPE::GLint4(vp), FL::Value::NotifyLevel::NOTIFY_SELF);
+			vd->setValue("clear color", FLTYPE::GLfloat4(clear_color), FL::Value::NotifyLevel::NOTIFY_SELF);
 			m_selector.SetVolume(vd);
 			m_selector.Select(m_brush_radius2 - m_brush_radius1);
 		}
@@ -2279,8 +2279,8 @@ void VRenderGLView::Label()
 	FL::VolumeData* vd = m_selector.GetVolume();
 	if (vd)
 	{
-		vd->setValue("viewport", FLTYPE::GLint4(vp));
-		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color));
+		vd->setValue("viewport", FLTYPE::GLint4(vp), FL::Value::NotifyLevel::NOTIFY_SELF);
+		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color), FL::Value::NotifyLevel::NOTIFY_SELF);
 		m_selector.Label(0);
 	}
 }
@@ -2441,7 +2441,7 @@ void VRenderGLView::NoiseRemoval(int iter, double thresh)
 			//vr_frame->GetDataManager()->AddVolumeData(vd_new);
 			wxString group_name = AddGroup("");
 			AddVolumeData(vd_new, group_name);
-			vd->setValue("display", false);
+			vd->setValue("display", false, FL::Value::NotifyLevel::NOTIFY_SELF);
 			vr_frame->UpdateList();
 			vr_frame->UpdateTree(vd_new->getName());
 		}
@@ -2912,7 +2912,7 @@ void VRenderGLView::CalculateSingle(int type, wxString prev_group, bool add)
 						type == 9)
 					{
 						if (vd_a)
-							vd_a->setValue("display", false);
+							vd_a->setValue("display", false, FL::Value::NotifyLevel::NOTIFY_SELF);
 					}
 					else if (type == 1 ||
 						type == 2 ||
@@ -2920,10 +2920,10 @@ void VRenderGLView::CalculateSingle(int type, wxString prev_group, bool add)
 						type == 4)
 					{
 						if (vd_a)
-							vd_a->setValue("display", false);
+							vd_a->setValue("display", false, FL::Value::NotifyLevel::NOTIFY_SELF);
 						FL::VolumeData* vd_b = m_calculator.GetVolumeB();
 						if (vd_b)
-							vd_b->setValue("display", false);
+							vd_b->setValue("display", false, FL::Value::NotifyLevel::NOTIFY_SELF);
 					}
 					vr_frame->UpdateList();
 					vr_frame->UpdateTree(vd->getName());
@@ -3150,7 +3150,7 @@ void VRenderGLView::DrawVolumesComp(vector<FL::VolumeData*> &list, bool mask, in
 
 			if (vd->GetTexture() && vd->GetTexture()->nmask() != -1)
 			{
-				vd->setValue("mask mode", long(1));
+				vd->setValue("mask mode", long(1), FL::Value::NotifyLevel::NOTIFY_SELF);
 				int vol_method = m_vol_method;
 				m_vol_method = VOL_METHOD_COMP;
 				long mip_mode;
@@ -3159,7 +3159,7 @@ void VRenderGLView::DrawVolumesComp(vector<FL::VolumeData*> &list, bool mask, in
 					DrawMIP(vd, peel);
 				else
 					DrawOVER(vd, mask, peel);
-				vd->setValue("mask mode", long(0));
+				vd->setValue("mask mode", long(0), FL::Value::NotifyLevel::NOTIFY_SELF);
 				m_vol_method = vol_method;
 			}
 		}
@@ -3176,7 +3176,7 @@ void VRenderGLView::DrawVolumesComp(vector<FL::VolumeData*> &list, bool mask, in
 					vr_frame->GetSettingDlg()->GetRunScript() &&
 					vd->GetMask(false) &&
 					vd->GetLabel(false))
-					vd->setValue("mask mode", long(4));
+					vd->setValue("mask mode", long(4), FL::Value::NotifyLevel::NOTIFY_SELF);
 
 				long mip_mode;
 				vd->getValue("mip mode", mip_mode);
@@ -3287,14 +3287,14 @@ void VRenderGLView::DrawOVER(FL::VolumeData* vd, bool mask, int peel)
 		//	vd->setValue("stream mode", long(0));
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 		//vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-		vd->setValue("depth atten", m_use_fog);
-		vd->setValue("da int", m_fog_intensity);
-		vd->setValue("da start", m_fog_start);
-		vd->setValue("da end", m_fog_end);
-		vd->setValue("viewport", FLTYPE::GLint4(vp));
-		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color));
+		vd->setValue("depth atten", m_use_fog, FL::Value::NotifyLevel::NOTIFY_SELF);
+		vd->setValue("da int", m_fog_intensity, FL::Value::NotifyLevel::NOTIFY_SELF);
+		vd->setValue("da start", m_fog_start, FL::Value::NotifyLevel::NOTIFY_SELF);
+		vd->setValue("da end", m_fog_end, FL::Value::NotifyLevel::NOTIFY_SELF);
+		vd->setValue("viewport", FLTYPE::GLint4(vp), FL::Value::NotifyLevel::NOTIFY_SELF);
+		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color), FL::Value::NotifyLevel::NOTIFY_SELF);
 		vd->GetRenderer()->set_clear_color(clear_color);
-		vd->setValue("cur framebuffer", (unsigned long)m_cur_framebuffer);
+		vd->setValue("cur framebuffer", (unsigned long)m_cur_framebuffer, FL::Value::NotifyLevel::NOTIFY_SELF);
 		vd->Draw(!m_persp, m_adaptive,
 			m_interactive, m_scale_factor,
 			mask?4:0);
@@ -3508,38 +3508,38 @@ void VRenderGLView::DrawMIP(FL::VolumeData* vd, int peel)
 		long saved_colormap_proj;
 		vd->getValue("colormap proj", saved_colormap_proj);
 		if (colormap_mode == 0)
-			vd->setValue("colormap proj", long(0));
+			vd->setValue("colormap proj", long(0), FL::Value::NotifyLevel::NOTIFY_SELF);
 		if (colormap_mode == 1)
 		{
-			vd->setValue("mip mode", long(3));
-			vd->setValue("depth atten", false);
+			vd->setValue("mip mode", long(3), FL::Value::NotifyLevel::NOTIFY_SELF);
+			vd->setValue("depth atten", false, FL::Value::NotifyLevel::NOTIFY_SELF);
 		}
 		else
 		{
-			vd->setValue("mip mode", long(1));
-			vd->setValue("depth atten", m_use_fog);
+			vd->setValue("mip mode", long(1), FL::Value::NotifyLevel::NOTIFY_SELF);
+			vd->setValue("depth atten", m_use_fog, FL::Value::NotifyLevel::NOTIFY_SELF);
 			//vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 		}
 		//turn off alpha
 		if (colormap_mode == 1)
-			vd->setValue("alpha enable", false);
+			vd->setValue("alpha enable", false, FL::Value::NotifyLevel::NOTIFY_SELF);
 		//draw
 		//vd->setValue("stream mode", long(1));
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-		vd->setValue("viewport", FLTYPE::GLint4(vp));
-		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color));
-		vd->setValue("cur framebuffer", (unsigned long)m_cur_framebuffer);
+		vd->setValue("viewport", FLTYPE::GLint4(vp), FL::Value::NotifyLevel::NOTIFY_SELF);
+		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color), FL::Value::NotifyLevel::NOTIFY_SELF);
+		vd->setValue("cur framebuffer", (unsigned long)m_cur_framebuffer, FL::Value::NotifyLevel::NOTIFY_SELF);
 		vd->Draw(!m_persp, m_adaptive,
 			m_interactive, m_scale_factor, 1);
 		//restore
 		if (colormap_mode == 0)
-			vd->setValue("colormap mode", saved_colormap_proj);
+			vd->setValue("colormap mode", saved_colormap_proj, FL::Value::NotifyLevel::NOTIFY_SELF);
 		if (colormap_mode == 1)
 		{
 			//mode management needs work
 			//vd->RestoreMode();
 			//restore alpha
-			vd->setValue("alpha enable", enable_alpha);
+			vd->setValue("alpha enable", enable_alpha, FL::Value::NotifyLevel::NOTIFY_SELF);
 		}
 
 		//bind channel fbo for final composition
@@ -3708,7 +3708,7 @@ void VRenderGLView::DrawMIP(FL::VolumeData* vd, int peel)
 		img_shader->release();
 
 	vd->GetRenderer()->set_shading(shading);
-	vd->setValue("colormap mode", colormap_mode);
+	vd->setValue("colormap mode", colormap_mode, FL::Value::NotifyLevel::NOTIFY_SELF);
 
 	//if vd is duplicated
 	if (TextureRenderer::get_mem_swap() &&
@@ -3753,22 +3753,22 @@ void VRenderGLView::DrawOLShading(FL::VolumeData* vd)
 	vd->GetRenderer()->set_shading(true);
 	bool alpha_enable;
 	vd->getValue("alpha enable", alpha_enable);
-	vd->setValue("alpha enable", true);
-	vd->setValue("mip mode", long(2));
+	vd->setValue("alpha enable", true, FL::Value::NotifyLevel::NOTIFY_SELF);
+	vd->setValue("mip mode", long(2), FL::Value::NotifyLevel::NOTIFY_SELF);
 	long colormap_mode;
 	vd->getValue("colormap mode", colormap_mode);
 	//vd->setValue("stream mode", long(2));
 	vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-	vd->setValue("depth atten", m_use_fog);
-	vd->setValue("da int", m_fog_intensity);
-	vd->setValue("da start", m_fog_start);
-	vd->setValue("da end", m_fog_end);
+	vd->setValue("depth atten", m_use_fog, FL::Value::NotifyLevel::NOTIFY_SELF);
+	vd->setValue("da int", m_fog_intensity, FL::Value::NotifyLevel::NOTIFY_SELF);
+	vd->setValue("da start", m_fog_start, FL::Value::NotifyLevel::NOTIFY_SELF);
+	vd->setValue("da end", m_fog_end, FL::Value::NotifyLevel::NOTIFY_SELF);
 	vd->Draw(!m_persp, m_adaptive,
 		m_interactive, m_scale_factor, 2);
 	//mode management not done yet
 	//vd->RestoreMode();
-	vd->setValue("colormap mode", colormap_mode);
-	vd->setValue("alpha enable", alpha_enable);
+	vd->setValue("colormap mode", colormap_mode, FL::Value::NotifyLevel::NOTIFY_SELF);
+	vd->setValue("alpha enable", alpha_enable, FL::Value::NotifyLevel::NOTIFY_SELF);
 
 	//bind fbo for final composition
 	Framebuffer* chann_buffer =
@@ -4075,57 +4075,20 @@ void VRenderGLView::DrawOLShadows(vector<FL::VolumeData*> &vlist)
 	glDisable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 
-	double shadow_darkness = 0.0;
+	double shadow_int = 1.0;
 
 	if (list.empty())
 		;
 	else if (list.size() == 1)
 	{
 		FL::VolumeData* vd = list[0];
-		vd->setValue("overlay mode", long(1));
-		if (overlay_buffer)
-			vd->GetRenderer()->set_2d_dmap(
-				overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0));
-		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-		vd->setValue("viewport", FLTYPE::GLint4(vp));
-		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color));
-		vd->setValue("curframebuffer", (unsigned long)m_cur_framebuffer);
-		//vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, 3);
+		vd->setValue("overlay mode", long(1), FL::Value::NotifyLevel::NOTIFY_SELF);
+		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color), FL::Value::NotifyLevel::NOTIFY_SELF);
+		vd->setValue("cur framebuffer", (unsigned long)m_cur_framebuffer, FL::Value::NotifyLevel::NOTIFY_SELF);
+		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, 3);
 		//restore
-		vd->setValue("overlay mode", long(0));
-
-		//save
-		//long colormap_mode;
-		//vd->getValue("colormap mode", colormap_mode);
-		//bool shading_enable;
-		//vd->getValue("shading enable", shading_enable);
-		////set to draw depth
-		//vd->GetRenderer()->set_shading(false);
-		//vd->setValue("mip mode", long(0));
-		//vd->setValue("colormap mode", long(2));
-		//if (overlay_buffer)
-		//	vd->setValue("2d dmap id", (unsigned long)(
-		//		overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0)));
-		//long mask_mode;
-		//vd->getValue("mask mode", mask_mode);
-		//vd->setValue("mask mode", long(0));
-		////draw
-		//vd->setValue("stream mode", long(3));
-		//vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-		//vd->setValue("depth atten", m_use_fog);
-		//vd->setValue("da int", m_fog_intensity);
-		//vd->setValue("da start", m_fog_start);
-		//vd->setValue("da end", m_fog_end);
-		//vd->setValue("viewport", FLTYPE::GLint4(vp));
-		//vd->setValue("clear color", FLTYPE::GLfloat4(clear_color));
-		//vd->setValue("curframebuffer", (unsigned long)m_cur_framebuffer);
-		//vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor);
-		////restore
-		////vd->RestoreMode();
-		//vd->setValue("mask mode", mask_mode);
-		//vd->setValue("colormap mode", colormap_mode);
-		//vd->setValue("shading enable", shading_enable);
-		//vd->setValue("shadow int", shadow_darkness);
+		vd->setValue("overlay mode", long(0), FL::Value::NotifyLevel::NOTIFY_SELF);
+		vd->getValue("shadow int", shadow_int);
 	}
 	else
 	{
@@ -4133,20 +4096,10 @@ void VRenderGLView::DrawOLShadows(vector<FL::VolumeData*> &vlist)
 		for (i = 0; i<list.size(); i++)
 		{
 			FL::VolumeData* vd = list[i];
-			vd->GetRenderer()->set_shading(false);
-			vd->setValue("mip mode", long(0));
-			vd->setValue("colormap mode", long(2));
-			if (overlay_buffer)
-				vd->setValue("2d dmap id", (unsigned long)(
-					overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0)));
+			vd->setValue("overlay mode", long(1), FL::Value::NotifyLevel::NOTIFY_SELF);
 			VolumeRenderer* vr = list[i]->GetRenderer();
 			if (vr)
 			{
-				list[i]->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-				list[i]->setValue("depth atten", m_use_fog);
-				list[i]->setValue("da int", m_fog_intensity);
-				list[i]->setValue("da start", m_fog_start);
-				list[i]->setValue("da end", m_fog_end);
 				m_mvr->add_vr(vr);
 				m_mvr->set_sampling_rate(vr->get_sampling_rate());
 				m_mvr->SetNoiseRed(vr->GetNoiseRed());
@@ -4163,11 +4116,9 @@ void VRenderGLView::DrawOLShadows(vector<FL::VolumeData*> &vlist)
 		for (i = 0; i<list.size(); i++)
 		{
 			FL::VolumeData* vd = list[i];
-			//vd->RestoreMode();
-			vd->setValue("colormap mode", colormap_modes[i]);
-			vd->setValue("shading enable", shadings[i]);
+			vd->setValue("overlay mode", long(0), FL::Value::NotifyLevel::NOTIFY_SELF);
 		}
-		list[0]->getValue("shadow int", shadow_darkness);
+		list[0]->getValue("shadow int", shadow_int);
 	}
 
 	//
@@ -4189,13 +4140,11 @@ void VRenderGLView::DrawOLShadows(vector<FL::VolumeData*> &vlist)
 		glClear(GL_COLOR_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
 		if (overlay_buffer)
-		{
-			//ok to unprotect
 			overlay_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-			overlay_buffer->unprotect();
-		}
 		glDisable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
+
+		glHint(GL_LINE_SMOOTH, GL_DONT_CARE);
 
 		//2d adjustment
 		ShaderProgram* img_shader =
@@ -4244,7 +4193,7 @@ void VRenderGLView::DrawOLShadows(vector<FL::VolumeData*> &vlist)
 			img_shader->bind();
 		}
 		img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, max(m_scale_factor, 1.0), 0.0);
-		img_shader->setLocalParam(1, shadow_darkness, 0.0, 0.0, 0.0);
+		img_shader->setLocalParam(1, shadow_int, 0.0, 0.0, 0.0);
 		glActiveTexture(GL_TEXTURE1);
 		if (chann_buffer)
 			chann_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
@@ -4256,6 +4205,8 @@ void VRenderGLView::DrawOLShadows(vector<FL::VolumeData*> &vlist)
 			img_shader->release();
 	}
 
+	if (overlay_buffer)
+		overlay_buffer->unprotect();//ok to unprotect
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glActiveTexture(GL_TEXTURE0);
@@ -4300,12 +4251,12 @@ void VRenderGLView::DrawVolumesMulti(vector<FL::VolumeData*> &list, int peel)
 					vr_frame->GetSettingDlg()->GetRunScript() &&
 					vd->GetMask(false) &&
 					vd->GetLabel(false))
-					vd->setValue("mask mode", long(4));
+					vd->setValue("mask mode", long(4), FL::Value::NotifyLevel::NOTIFY_SELF);
 				vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-				vd->setValue("depth atten", m_use_fog);
-				vd->setValue("da int", m_fog_intensity);
-				vd->setValue("da start", m_fog_start);
-				vd->setValue("da end", m_fog_end);
+				vd->setValue("depth atten", m_use_fog, FL::Value::NotifyLevel::NOTIFY_SELF);
+				vd->setValue("da int", m_fog_intensity, FL::Value::NotifyLevel::NOTIFY_SELF);
+				vd->setValue("da start", m_fog_start, FL::Value::NotifyLevel::NOTIFY_SELF);
+				vd->setValue("da end", m_fog_end, FL::Value::NotifyLevel::NOTIFY_SELF);
 				m_mvr->add_vr(vr);
 				m_mvr->set_sampling_rate(vr->get_sampling_rate());
 				m_mvr->SetNoiseRed(vr->GetNoiseRed());
@@ -10698,7 +10649,7 @@ void VRenderGLView::StartLoopUpdate()
 					}
 				}
 				//vd->SetBrickNum(num_chan);
-				vd->setValue("brick num", long(num_chan), false);
+				vd->setValue("brick num", long(num_chan), FL::Value::NotifyLevel::NOTIFY_NONE);
 				if (vd->GetRenderer())
 					vd->GetRenderer()->set_done_loop(false);
 			}
@@ -13236,7 +13187,7 @@ void VRenderGLView::switchLevel(FL::VolumeData *vd)
 					(*bricks)[i]->set_disp(false);
 			}
 			//vd->SetLevel(new_lv);
-			vd->setValue("level", new_lv);
+			vd->setValue("level", new_lv, FL::Value::NotifyLevel::NOTIFY_NONE);
 			vtex->set_sort_bricks();
 		}
 	}

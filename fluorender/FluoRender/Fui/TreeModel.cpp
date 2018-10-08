@@ -39,13 +39,19 @@ TreeModel::TreeModel(TreePanel &panel):
 }
 
 //observer functions
-void TreeModel::objectChanging(void* ptr, void* orig_node, const std::string &exp)
+void TreeModel::objectChanging(int notify_level, void* ptr, void* orig_node, const std::string &exp)
 {
 	//before change
+	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
+	{
+	}
 }
 
-void TreeModel::objectChanged(void* ptr, void* orig_node, const std::string &exp)
+void TreeModel::objectChanged(int notify_level, void* ptr, void* orig_node, const std::string &exp)
 {
+	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
+	{
+	}
 }
 
 void TreeModel::nodeAdded(void* ptr, void* parent, void* child)

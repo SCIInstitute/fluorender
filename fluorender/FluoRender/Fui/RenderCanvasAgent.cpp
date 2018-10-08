@@ -38,15 +38,21 @@ RenderCanvasAgent::RenderCanvasAgent(VRenderGLView &gl_view) :
 
 }
 
-void RenderCanvasAgent::objectChanging(void* ptr, void* orig_node, const std::string &exp)
+void RenderCanvasAgent::objectChanging(int notify_level, void* ptr, void* orig_node, const std::string &exp)
 {
 	//before change
+	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
+	{
+	}
 }
 
-void RenderCanvasAgent::objectChanged(void* ptr, void* orig_node, const std::string &exp)
+void RenderCanvasAgent::objectChanged(int notify_level, void* ptr, void* orig_node, const std::string &exp)
 {
 	//set values in ui
-	gl_view_.RefreshGL(41);
+	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
+	{
+		gl_view_.RefreshGL(41);
+	}
 }
 
 void RenderCanvasAgent::setObject(FL::RenderView* view)

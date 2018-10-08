@@ -163,24 +163,28 @@ void Group::accept(NodeVisitor& nv)
 //as observer
 void Group::objectChanging(int notify_level, void* ptr, void* orig_node, const std::string &exp)
 {
-	Object::objectChanging(notify_level, ptr, orig_node, exp);
 	Referenced* refd = static_cast<Referenced*>(ptr);
 	Node* node = dynamic_cast<Node*>(refd);
 	if (node && containsNode(node) &&
 		this != orig_node &&
 		notify_level & Value::NotifyLevel::NOTIFY_PARENT)
+	{
+		Object::objectChanging(notify_level, ptr, orig_node, exp);
 		notifyObserversBeforeChange(notify_level, orig_node, exp);
+	}
 }
 
 void Group::objectChanged(int notify_level, void* ptr, void* orig_node, const std::string &exp)
 {
-	Object::objectChanged(notify_level, ptr, orig_node, exp);
 	Referenced* refd = static_cast<Referenced*>(ptr);
 	Node* node = dynamic_cast<Node*>(refd);
 	if (node && containsNode(node) &&
 		this != orig_node &&
 		notify_level & Value::NotifyLevel::NOTIFY_PARENT)
+	{
+		Object::objectChanged(notify_level, ptr, orig_node, exp);
 		notifyObserversOfChange(notify_level, orig_node, exp);
+	}
 }
 
 void Group::nodeAdded(void* ptr, void* parent, void* child)
