@@ -107,8 +107,8 @@ void VolumeFactory::createDefault()
 		vd->addValue("mat shine", double(10));
 		vd->addValue("noise redct", bool(false));//noise reduction
 		vd->addValue("shading enable", bool(false));//shading
-		vd->addValue("low shading", double(0));//low shading
-		vd->addValue("high shading", double(0));//highg shading
+		vd->addValue("low shading", double(1));//low shading
+		vd->addValue("high shading", double(10));//highg shading
 		vd->addValue("shadow enable", bool(false));//shadow
 		vd->addValue("shadow int", double(1));
 		vd->addValue("sample rate", double(1));//sample rate
@@ -244,9 +244,11 @@ void VolumeFactory::setEventHandler(VolumeData* vd)
 	ADD_AFTER_EVENT(vd, "use mask thresh", OnUseMaskThreshChanged);
 	ADD_AFTER_EVENT(vd, "shading enable", OnShadingEnableChanged);
 	ADD_AFTER_EVENT(vd, "mat amb", OnMaterialChanged);
+	ADD_AFTER_EVENT(vd, "low shading", OnLowShadingChanged);
 	ADD_AFTER_EVENT(vd, "mat diff", OnMaterialChanged);
 	ADD_AFTER_EVENT(vd, "mat spec", OnMaterialChanged);
 	ADD_AFTER_EVENT(vd, "mat shine", OnMaterialChanged);
+	ADD_AFTER_EVENT(vd, "high shading", OnHighShadingChanged);
 	ADD_AFTER_EVENT(vd, "sample rate", OnSampleRateChanged);
 	ADD_AFTER_EVENT(vd, "colormap mode", OnColormapModeChanged);
 	ADD_AFTER_EVENT(vd, "colormap low", OnColormapValueChanged);

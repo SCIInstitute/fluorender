@@ -532,6 +532,20 @@ void VolumeData::OnMaterialChanged()
 	m_vr->set_material(mat_amb, mat_diff, mat_spec, mat_shine);
 }
 
+void VolumeData::OnLowShadingChanged()
+{
+	double low_shading;
+	getValue("low shading", low_shading);
+	setValue("mat amb", low_shading, Value::NotifyLevel::NOTIFY_SELF);
+}
+
+void VolumeData::OnHighShadingChanged()
+{
+	double high_shading;
+	getValue("high shading", high_shading);
+	setValue("mat shine", high_shading, Value::NotifyLevel::NOTIFY_SELF);
+}
+
 void VolumeData::OnSampleRateChanged()
 {
 	if (!m_vr)
