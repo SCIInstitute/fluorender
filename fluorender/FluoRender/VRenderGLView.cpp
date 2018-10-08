@@ -3750,25 +3750,28 @@ void VRenderGLView::DrawOLShading(FL::VolumeData* vd)
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	vd->GetRenderer()->set_shading(true);
-	bool alpha_enable;
-	vd->getValue("alpha enable", alpha_enable);
-	vd->setValue("alpha enable", true, FL::Value::NotifyLevel::NOTIFY_SELF);
-	vd->setValue("mip mode", long(2), FL::Value::NotifyLevel::NOTIFY_SELF);
-	long colormap_mode;
-	vd->getValue("colormap mode", colormap_mode);
-	//vd->setValue("stream mode", long(2));
-	vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-	vd->setValue("depth atten", m_use_fog, FL::Value::NotifyLevel::NOTIFY_SELF);
-	vd->setValue("da int", m_fog_intensity, FL::Value::NotifyLevel::NOTIFY_SELF);
-	vd->setValue("da start", m_fog_start, FL::Value::NotifyLevel::NOTIFY_SELF);
-	vd->setValue("da end", m_fog_end, FL::Value::NotifyLevel::NOTIFY_SELF);
+	//vd->GetRenderer()->set_shading(true);
+	//bool alpha_enable;
+	//vd->getValue("alpha enable", alpha_enable);
+	//vd->setValue("alpha enable", true, FL::Value::NotifyLevel::NOTIFY_SELF);
+	//vd->setValue("mip mode", long(2), FL::Value::NotifyLevel::NOTIFY_SELF);
+	//long colormap_mode;
+	//vd->getValue("colormap mode", colormap_mode);
+	////vd->setValue("stream mode", long(2));
+	//vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+	//vd->setValue("depth atten", m_use_fog, FL::Value::NotifyLevel::NOTIFY_SELF);
+	//vd->setValue("da int", m_fog_intensity, FL::Value::NotifyLevel::NOTIFY_SELF);
+	//vd->setValue("da start", m_fog_start, FL::Value::NotifyLevel::NOTIFY_SELF);
+	//vd->setValue("da end", m_fog_end, FL::Value::NotifyLevel::NOTIFY_SELF);
+	vd->setValue("overlay mode", long(2), FL::Value::NotifyLevel::NOTIFY_SELF);
 	vd->Draw(!m_persp, m_adaptive,
 		m_interactive, m_scale_factor, 2);
+	//restore
+	vd->setValue("overlay mode", long(0), FL::Value::NotifyLevel::NOTIFY_SELF);
 	//mode management not done yet
 	//vd->RestoreMode();
-	vd->setValue("colormap mode", colormap_mode, FL::Value::NotifyLevel::NOTIFY_SELF);
-	vd->setValue("alpha enable", alpha_enable, FL::Value::NotifyLevel::NOTIFY_SELF);
+	//vd->setValue("colormap mode", colormap_mode, FL::Value::NotifyLevel::NOTIFY_SELF);
+	//vd->setValue("alpha enable", alpha_enable, FL::Value::NotifyLevel::NOTIFY_SELF);
 
 	//bind fbo for final composition
 	Framebuffer* chann_buffer =

@@ -240,26 +240,9 @@ void VolumeData::OnOverlayModeChanged()
 		FLTYPE::Color color;
 		getValue("color", color);
 		m_vr->set_color(color);
-		FLIVR::Color color2(color);
-		m_vr->set_color(color2);
 		double alpha;
 		getValue("alpha", alpha);
 		m_vr->set_alpha(alpha);
-		double low_threshold;
-		getValue("low threshold", low_threshold);
-		m_vr->set_lo_thresh(low_threshold);
-		double high_threshold;
-		getValue("high threshold", high_threshold);
-		m_vr->set_hi_thresh(high_threshold);
-		double extract_boundary;
-		getValue("extract boundary", extract_boundary);
-		m_vr->set_gm_thresh(extract_boundary);
-		double gamma_3d;
-		getValue("gamma 3d", gamma_3d);
-		m_vr->set_gamma3d(gamma_3d);
-		double saturation;
-		getValue("saturation", saturation);
-		m_vr->set_offset(saturation);
 		bool shading_enable;
 		getValue("shading enable", shading_enable);
 		m_vr->set_shading(shading_enable);
@@ -269,13 +252,32 @@ void VolumeData::OnOverlayModeChanged()
 		long mask_mode;
 		getValue("mask mode", mask_mode);
 		m_vr->set_ml_mode(mask_mode);
+		long mip_mode;
+		getValue("mip mode", mip_mode);
+		if (mip_mode == 1)
+			m_vr->set_mode(FLIVR::TextureRenderer::MODE_MIP);
+		else
+			m_vr->set_mode(FLIVR::TextureRenderer::MODE_OVER);
+		bool alpha_enable;
+		getValue("alpha enable", alpha_enable);
+		m_vr->set_solid(!alpha_enable);
 	}
 	break;
-	case 1:
+	case 1://for shadow
 	{
 		m_vr->set_shading(false);
 		m_vr->set_colormap_mode(2);
 		m_vr->set_ml_mode(0);
+	}
+	break;
+	case 2://for shading
+	{
+		m_vr->set_mode(FLIVR::TextureRenderer::MODE_OVER);
+		m_vr->set_shading(true);
+		m_vr->set_solid(false);
+		m_vr->set_alpha(1.0);
+		m_vr->set_colormap_mode(0);
+		m_vr->set_color(FLIVR::Color(1.0));
 	}
 	break;
 	}
