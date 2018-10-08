@@ -142,86 +142,10 @@ void VolumeData::OnMipModeChanged()
 	{
 	case 0://normal
 		m_vr->set_mode(FLIVR::TextureRenderer::MODE_OVER);
-		//{
-		//	FLTYPE::Color color;
-		//	getValue("color", color);
-		//	FLIVR::Color color2(color);
-		//	m_vr->set_color(color2);
-		//	double alpha;
-		//	getValue("alpha", alpha);
-		//	m_vr->set_alpha(alpha);
-		//	double low_threshold;
-		//	getValue("low threshold", low_threshold);
-		//	m_vr->set_lo_thresh(low_threshold);
-		//	double high_threshold;
-		//	getValue("high threhsold", high_threshold);
-		//	m_vr->set_hi_thresh(high_threshold);
-		//	double extract_boundary;
-		//	getValue("extract boundary", extract_boundary);
-		//	m_vr->set_gm_thresh(extract_boundary);
-		//	double gamma_3d;
-		//	getValue("gamma 3d", gamma_3d);
-		//	m_vr->set_gamma3d(gamma_3d);
-		//	double saturation;
-		//	getValue("saturation", saturation);
-		//	m_vr->set_offset(saturation);
-		//}
 		break;
 	case 1://MIP
 		m_vr->set_mode(FLIVR::TextureRenderer::MODE_MIP);
-		//{
-		//	FLTYPE::HSVColor hsv;
-		//	getValue("hsv", hsv);
-		//	FLIVR::Color rgb = FLIVR::Color(hsv);
-		//	m_vr->set_color(rgb);
-		//}
-		//m_vr->set_alpha(1.0);
-		//m_vr->set_lo_thresh(0.0);
-		//m_vr->set_hi_thresh(1.0);
-		//m_vr->set_gm_thresh(0.0);
-		//{
-		//	double gamma_3d;
-		//	getValue("gamma 3d", gamma_3d);
-		//	m_vr->set_gamma3d(gamma_3d);
-		//	double saturation;
-		//	getValue("saturation", saturation);
-		//	m_vr->set_offset(saturation);
-		//}
 		break;
-	//case 2://white shading
-	//	m_vr->set_mode(FLIVR::TextureRenderer::MODE_OVER);
-	//	m_vr->set_colormap_mode(0);
-	//	m_vr->set_color(FLIVR::Color(1.0, 1.0, 1.0));
-	//	m_vr->set_alpha(1.0);
-	//	{
-	//		double low_threshold;
-	//		getValue("low threshold", low_threshold);
-	//		m_vr->set_lo_thresh(low_threshold);
-	//		double high_threshold;
-	//		getValue("high threhsold", high_threshold);
-	//		m_vr->set_hi_thresh(high_threshold);
-	//		double extract_boundary;
-	//		getValue("extract boundary", extract_boundary);
-	//		m_vr->set_gm_thresh(extract_boundary);
-	//		double gamma_3d;
-	//		getValue("gamma 3d", gamma_3d);
-	//		m_vr->set_gamma3d(gamma_3d);
-	//		double saturation;
-	//		getValue("saturation", saturation);
-	//		m_vr->set_offset(saturation);
-	//	}
-	//	break;
-	//case 3://white mip
-	//	m_vr->set_mode(FLIVR::TextureRenderer::MODE_MIP);
-	//	m_vr->set_colormap_mode(0);
-	//	m_vr->set_color(FLIVR::Color(1.0, 1.0, 1.0));
-	//	m_vr->set_alpha(1.0);
-	//	m_vr->set_lo_thresh(0.0);
-	//	m_vr->set_hi_thresh(1.0);
-	//	m_vr->set_gm_thresh(0.0);
-	//	m_vr->set_gamma3d(1.0);
-	//	m_vr->set_offset(1.0);
-	//	break;
 	}
 }
 
