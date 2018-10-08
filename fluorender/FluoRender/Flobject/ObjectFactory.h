@@ -70,7 +70,7 @@ namespace FL
 
 		virtual Object* clone(const unsigned int);
 
-		virtual void objectChanged(void*, void*, const std::string &exp);
+		virtual void objectChanged(int notify_level, void*, void*, const std::string &exp);
 
 		inline bool remove(Object* object)
 		{

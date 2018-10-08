@@ -111,21 +111,21 @@ void ObserverSet::signalObjectDeleted(void* ptr)
 	_observedObject = 0;
 }
 
-void ObserverSet::signalObjectChanging(void* ptr, void* orig_node, const std::string &exp)
+void ObserverSet::signalObjectChanging(int notify_level, void* ptr, void* orig_node, const std::string &exp)
 {
 	for (Observers::iterator itr = _observers.begin();
 		itr != _observers.end(); ++itr)
 	{
-		(*itr)->objectChanging(ptr, orig_node, exp);
+		(*itr)->objectChanging(notify_level, ptr, orig_node, exp);
 	}
 }
 
-void ObserverSet::signalObjectChanged(void* ptr, void* orig_node, const std::string &exp)
+void ObserverSet::signalObjectChanged(int notify_level, void* ptr, void* orig_node, const std::string &exp)
 {
 	for (Observers::iterator itr = _observers.begin();
 		itr != _observers.end(); ++itr)
 	{
-		(*itr)->objectChanged(ptr, orig_node, exp);
+		(*itr)->objectChanged(notify_level, ptr, orig_node, exp);
 	}
 }
 

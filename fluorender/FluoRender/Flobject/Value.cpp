@@ -801,7 +801,7 @@ bool ValueSet::addValue(const std::string &name, const FLTYPE::GLint4 &value)
 }
 
 //set value functions
-bool ValueSet::setValue(ValueTuple& vt, bool notify)
+bool ValueSet::setValue(ValueTuple& vt, int notify_level)
 {
 	std::string name = std::get<0>(vt);
 	std::string type = std::get<1>(vt);
@@ -819,459 +819,459 @@ bool ValueSet::setValue(ValueTuple& vt, bool notify)
 	{
 		bool v;
 		iss >> v;
-		return setValue(name, v, notify);
+		return setValue(name, v, notify_level);
 	}
 	else if (type == "char")
 	{
 		char v;
 		iss >> v;
-		return setValue(name, v, notify);
+		return setValue(name, v, notify_level);
 	}
 	else if (type == "unsigned char")
 	{
 		unsigned char v;
 		iss >> v;
-		return setValue(name, v, notify);
+		return setValue(name, v, notify_level);
 	}
 	else if (type == "short")
 	{
 		short v;
 		iss >> v;
-		return setValue(name, v, notify);
+		return setValue(name, v, notify_level);
 	}
 	else if (type == "unsigned short")
 	{
 		unsigned short v;
 		iss >> v;
-		return setValue(name, v, notify);
+		return setValue(name, v, notify_level);
 	}
 	else if (type == "long")
 	{
 		long v;
 		iss >> v;
-		return setValue(name, v, notify);
+		return setValue(name, v, notify_level);
 	}
 	else if (type == "unsigned long")
 	{
 		unsigned long v;
 		iss >> v;
-		return setValue(name, v, notify);
+		return setValue(name, v, notify_level);
 	}
 	else if (type == "long long")
 	{
 		long long v;
 		iss >> v;
-		return setValue(name, v, notify);
+		return setValue(name, v, notify_level);
 	}
 	else if (type == "unsigned long long")
 	{
 		unsigned long long v;
 		iss >> v;
-		return setValue(name, v, notify);
+		return setValue(name, v, notify_level);
 	}
 	else if (type == "float")
 	{
 		float v;
 		iss >> v;
-		return setValue(name, v, notify);
+		return setValue(name, v, notify_level);
 	}
 	else if (type == "double")
 	{
 		double v;
 		iss >> v;
-		return setValue(name, v, notify);
+		return setValue(name, v, notify_level);
 	}
 	else if (type == "string")
 	{
-		return setValue(name, value, notify);
+		return setValue(name, value, notify_level);
 	}
 	else if (type == "wstring")
 	{
 		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
-		return setValue(name, converter.from_bytes(value), notify);
+		return setValue(name, converter.from_bytes(value), notify_level);
 	}
 	else if (type == "Point")
 	{
 		FLTYPE::Point v;
 		iss >> v;
-		return setValue(name, v, notify);
+		return setValue(name, v, notify_level);
 	}
 	else if (type == "Vector")
 	{
 		FLTYPE::Vector v;
 		iss >> v;
-		return setValue(name, v, notify);
+		return setValue(name, v, notify_level);
 	}
 	else if (type == "BBox")
 	{
 		FLTYPE::BBox v;
 		iss >> v;
-		return setValue(name, v, notify);
+		return setValue(name, v, notify_level);
 	}
 	else if (type == "HSVColor")
 	{
 		FLTYPE::HSVColor v;
 		iss >> v;
-		return setValue(name, v, notify);
+		return setValue(name, v, notify_level);
 	}
 	else if (type == "Color")
 	{
 		FLTYPE::Color v;
 		iss >> v;
-		return setValue(name, v, notify);
+		return setValue(name, v, notify_level);
 	}
 	else if (type == "Plane")
 	{
 		FLTYPE::Plane v;
 		iss >> v;
-		return setValue(name, v, notify);
+		return setValue(name, v, notify_level);
 	}
 	else if (type == "PlaneSet")
 	{
 		FLTYPE::PlaneSet v;
 		iss >> v;
-		return setValue(name, v, notify);
+		return setValue(name, v, notify_level);
 	}
 	else if (type == "Quaternion")
 	{
 		FLTYPE::Quaternion v;
 		iss >> v;
-		return setValue(name, v, notify);
+		return setValue(name, v, notify_level);
 	}
 	else if (type == "Ray")
 	{
 		FLTYPE::Ray v;
 		iss >> v;
-		return setValue(name, v, notify);
+		return setValue(name, v, notify_level);
 	}
 	else if (type == "Transform")
 	{
 		FLTYPE::Transform v;
 		iss >> v;
-		return setValue(name, v, notify);
+		return setValue(name, v, notify_level);
 	}
 	else if (type == "GLfloat4")
 	{
 		FLTYPE::GLfloat4 v;
 		iss >> v;
-		return setValue(name, v, notify);
+		return setValue(name, v, notify_level);
 	}
 	else if (type == "GLint4")
 	{
 		FLTYPE::GLint4 v;
 		iss >> v;
-		return setValue(name, v, notify);
+		return setValue(name, v, notify_level);
 	}
 
 	return false;
 }
 
-bool ValueSet::setValue(const std::string &name, Referenced* value, bool notify)
+bool ValueSet::setValue(const std::string &name, Referenced* value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="Referenced*")
 	{
-		(dynamic_cast<TemplateValue<Referenced*>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<Referenced*>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, bool value, bool notify)
+bool ValueSet::setValue(const std::string &name, bool value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="bool")
 	{
-		(dynamic_cast<TemplateValue<bool>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<bool>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, char value, bool notify)
+bool ValueSet::setValue(const std::string &name, char value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="char")
 	{
-		(dynamic_cast<TemplateValue<char>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<char>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, unsigned char value, bool notify)
+bool ValueSet::setValue(const std::string &name, unsigned char value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="unsigned char")
 	{
-		(dynamic_cast<TemplateValue<unsigned char>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<unsigned char>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, short value, bool notify)
+bool ValueSet::setValue(const std::string &name, short value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="short")
 	{
-		(dynamic_cast<TemplateValue<short>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<short>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, unsigned short value, bool notify)
+bool ValueSet::setValue(const std::string &name, unsigned short value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="unsigned short")
 	{
-		(dynamic_cast<TemplateValue<unsigned short>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<unsigned short>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, long value, bool notify)
+bool ValueSet::setValue(const std::string &name, long value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="long")
 	{
-		(dynamic_cast<TemplateValue<long>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<long>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, unsigned long value, bool notify)
+bool ValueSet::setValue(const std::string &name, unsigned long value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="unsigned long")
 	{
-		(dynamic_cast<TemplateValue<unsigned long>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<unsigned long>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, long long value, bool notify)
+bool ValueSet::setValue(const std::string &name, long long value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="long long")
 	{
-		(dynamic_cast<TemplateValue<long long>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<long long>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, unsigned long long value, bool notify)
+bool ValueSet::setValue(const std::string &name, unsigned long long value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="unsigned long long")
 	{
-		(dynamic_cast<TemplateValue<unsigned long long>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<unsigned long long>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, float value, bool notify)
+bool ValueSet::setValue(const std::string &name, float value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="float")
 	{
-		(dynamic_cast<TemplateValue<float>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<float>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, double value, bool notify)
+bool ValueSet::setValue(const std::string &name, double value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="double")
 	{
-		(dynamic_cast<TemplateValue<double>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<double>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const std::string &value, bool notify)
+bool ValueSet::setValue(const std::string &name, const std::string &value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="string")
 	{
-		(dynamic_cast<TemplateValue<std::string>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<std::string>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const std::wstring &value, bool notify)
+bool ValueSet::setValue(const std::string &name, const std::wstring &value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type == "wstring")
 	{
-		(dynamic_cast<TemplateValue<std::wstring>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<std::wstring>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const FLTYPE::Point &value, bool notify)
+bool ValueSet::setValue(const std::string &name, const FLTYPE::Point &value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type=="Point")
 	{
-		(dynamic_cast<TemplateValue<FLTYPE::Point>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<FLTYPE::Point>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const FLTYPE::Vector &value, bool notify)
+bool ValueSet::setValue(const std::string &name, const FLTYPE::Vector &value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type == "Vector")
 	{
-		(dynamic_cast<TemplateValue<FLTYPE::Vector>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<FLTYPE::Vector>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const FLTYPE::BBox &value, bool notify)
+bool ValueSet::setValue(const std::string &name, const FLTYPE::BBox &value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type == "BBox")
 	{
-		(dynamic_cast<TemplateValue<FLTYPE::BBox>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<FLTYPE::BBox>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const FLTYPE::HSVColor &value, bool notify)
+bool ValueSet::setValue(const std::string &name, const FLTYPE::HSVColor &value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type == "HSVColor")
 	{
-		(dynamic_cast<TemplateValue<FLTYPE::HSVColor>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<FLTYPE::HSVColor>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const FLTYPE::Color &value, bool notify)
+bool ValueSet::setValue(const std::string &name, const FLTYPE::Color &value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type == "Color")
 	{
-		(dynamic_cast<TemplateValue<FLTYPE::Color>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<FLTYPE::Color>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const FLTYPE::Plane &value, bool notify)
+bool ValueSet::setValue(const std::string &name, const FLTYPE::Plane &value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type == "Plane")
 	{
-		(dynamic_cast<TemplateValue<FLTYPE::Plane>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<FLTYPE::Plane>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const FLTYPE::PlaneSet &value, bool notify)
+bool ValueSet::setValue(const std::string &name, const FLTYPE::PlaneSet &value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type == "PlaneSet")
 	{
-		(dynamic_cast<TemplateValue<FLTYPE::PlaneSet>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<FLTYPE::PlaneSet>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const FLTYPE::Quaternion &value, bool notify)
+bool ValueSet::setValue(const std::string &name, const FLTYPE::Quaternion &value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type == "Quaternion")
 	{
-		(dynamic_cast<TemplateValue<FLTYPE::Quaternion>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<FLTYPE::Quaternion>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const FLTYPE::Ray &value, bool notify)
+bool ValueSet::setValue(const std::string &name, const FLTYPE::Ray &value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type == "Ray")
 	{
-		(dynamic_cast<TemplateValue<FLTYPE::Ray>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<FLTYPE::Ray>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const FLTYPE::Transform &value, bool notify)
+bool ValueSet::setValue(const std::string &name, const FLTYPE::Transform &value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type == "Transform")
 	{
-		(dynamic_cast<TemplateValue<FLTYPE::Transform>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<FLTYPE::Transform>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const FLTYPE::GLfloat4 &value, bool notify)
+bool ValueSet::setValue(const std::string &name, const FLTYPE::GLfloat4 &value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type == "GLfloat4")
 	{
-		(dynamic_cast<TemplateValue<FLTYPE::GLfloat4>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<FLTYPE::GLfloat4>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const FLTYPE::GLint4 &value, bool notify)
+bool ValueSet::setValue(const std::string &name, const FLTYPE::GLint4 &value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type == "GLint4")
 	{
-		(dynamic_cast<TemplateValue<FLTYPE::GLint4>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<FLTYPE::GLint4>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else
@@ -1279,14 +1279,14 @@ bool ValueSet::setValue(const std::string &name, const FLTYPE::GLint4 &value, bo
 }
 
 //toggle
-bool ValueSet::toggleValue(const std::string &name, bool &value, bool notify)
+bool ValueSet::toggleValue(const std::string &name, bool &value, int notify_level)
 {
 	Value* val = findValue(name);
 	if (val && val->_type == "bool")
 	{
 		value = (dynamic_cast<TemplateValue<bool>*>(val))->getValue();
 		value = !value;
-		(dynamic_cast<TemplateValue<bool>*>(val))->setValue(value, notify);
+		(dynamic_cast<TemplateValue<bool>*>(val))->setValue(value, notify_level);
 		return true;
 	}
 	else

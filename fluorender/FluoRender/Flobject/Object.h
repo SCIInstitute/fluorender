@@ -69,8 +69,8 @@ public:
 	inline const char* getName() const { return m_name.c_str(); }
 
 	virtual void objectDeleted(void*);
-	virtual void objectChanging(void*, void* orig_node, const std::string &exp);
-	virtual void objectChanged(void*, void* orig_node, const std::string &exp);
+	virtual void objectChanging(int notify_level, void*, void* orig_node, const std::string &exp);
+	virtual void objectChanged(int notify_level, void*, void* orig_node, const std::string &exp);
 
 	//void setOwnBeforeFunction(std::string name, eventFunctionType func)
 	//{
@@ -139,38 +139,38 @@ public:
 	bool addValue(const std::string &name, const FLTYPE::GLint4 &value);
 
 	/** All the set value functions */
-	bool setValue(ValueTuple& vt, bool notify = true);
+	bool setValue(ValueTuple& vt, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
 	//generic types
-	bool setValue(const std::string &name, Referenced* value, bool notify = true);
-	bool setValue(const std::string &name, bool value, bool notify = true);
-	bool setValue(const std::string &name, char value, bool notify = true);
-	bool setValue(const std::string &name, unsigned char value, bool notify = true);
-	bool setValue(const std::string &name, short value, bool notify = true);
-	bool setValue(const std::string &name, unsigned short value, bool notify = true);
-	bool setValue(const std::string &name, long value, bool notify = true);
-	bool setValue(const std::string &name, unsigned long value, bool notify = true);
-	bool setValue(const std::string &name, long long value, bool notify = true);
-	bool setValue(const std::string &name, unsigned long long value, bool notify = true);
-	bool setValue(const std::string &name, float value, bool notify = true);
-	bool setValue(const std::string &name, double value, bool notify = true);
-	bool setValue(const std::string &name, const std::string &value, bool notify = true);
-	bool setValue(const std::string &name, const std::wstring &value, bool notify = true);
+	bool setValue(const std::string &name, Referenced* value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, bool value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, char value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, unsigned char value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, short value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, unsigned short value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, long value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, unsigned long value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, long long value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, unsigned long long value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, float value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, double value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, const std::string &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, const std::wstring &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
 	//FluoRender's special types
-	bool setValue(const std::string &name, const FLTYPE::Point &value, bool notify = true);
-	bool setValue(const std::string &name, const FLTYPE::Vector &value, bool notify = true);
-	bool setValue(const std::string &name, const FLTYPE::BBox &value, bool notify = true);
-	bool setValue(const std::string &name, const FLTYPE::HSVColor &value, bool notify = true);
-	bool setValue(const std::string &name, const FLTYPE::Color &value, bool notify = true);
-	bool setValue(const std::string &name, const FLTYPE::Plane &value, bool notify = true);
-	bool setValue(const std::string &name, const FLTYPE::PlaneSet &value, bool notify = true);
-	bool setValue(const std::string &name, const FLTYPE::Quaternion &value, bool notify = true);
-	bool setValue(const std::string &name, const FLTYPE::Ray &value, bool notify = true);
-	bool setValue(const std::string &name, const FLTYPE::Transform &value, bool notify = true);
-	bool setValue(const std::string &name, const FLTYPE::GLfloat4 &value, bool notify = true);
-	bool setValue(const std::string &name, const FLTYPE::GLint4 &value, bool notify = true);
+	bool setValue(const std::string &name, const FLTYPE::Point &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, const FLTYPE::Vector &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, const FLTYPE::BBox &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, const FLTYPE::HSVColor &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, const FLTYPE::Color &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, const FLTYPE::Plane &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, const FLTYPE::PlaneSet &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, const FLTYPE::Quaternion &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, const FLTYPE::Ray &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, const FLTYPE::Transform &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, const FLTYPE::GLfloat4 &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, const FLTYPE::GLint4 &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
 
 	//toggle value for bool
-	bool toggleValue(const std::string &name, bool &value, bool notify = true);
+	bool toggleValue(const std::string &name, bool &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
 
 	/** All the get value functions */
 	bool getValue(ValueTuple& vt);

@@ -86,9 +86,9 @@ protected:
 
 	void signalObserversAndDelete(bool signalDelete, bool doDelete) const;
 
-	void notifyObserversOfChange(void* orig_node = 0, const std::string &exp = "") const;
+	void notifyObserversOfChange(int notify_level, void* orig_node = 0, const std::string &exp = "") const;
 
-	void notifyObserversBeforeChange(void* orig_node = 0, const std::string &exp = "") const;
+	void notifyObserversBeforeChange(int notify_level, void* orig_node = 0, const std::string &exp = "") const;
 
 	//scenegraph specific events via observers
 	void notifyObserversNodeAdded(void* parent, void* child) const;

@@ -97,23 +97,23 @@ void Referenced::signalObserversAndDelete(bool signalDelete, bool doDelete) cons
 	}
 }
 
-void Referenced::notifyObserversBeforeChange(void* orig_node, const std::string &exp) const
+void Referenced::notifyObserversBeforeChange(int notify_level, void* orig_node, const std::string &exp) const
 {
 	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
 
 	if (observerSet && !_hold)
 	{
-		observerSet->signalObjectChanging(const_cast<Referenced*>(this), orig_node, exp);
+		observerSet->signalObjectChanging(notify_level, const_cast<Referenced*>(this), orig_node, exp);
 	}
 }
 
-void Referenced::notifyObserversOfChange(void* orig_node, const std::string &exp) const
+void Referenced::notifyObserversOfChange(int notify_level, void* orig_node, const std::string &exp) const
 {
 	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
 
 	if (observerSet && !_hold)
 	{
-		observerSet->signalObjectChanged(const_cast<Referenced*>(this), orig_node, exp);
+		observerSet->signalObjectChanged(notify_level, const_cast<Referenced*>(this), orig_node, exp);
 	}
 }
 
