@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Fui/VolumePropAgent.h>
 #include <Fui/VolumePropPanel.h>
+#include <Scenegraph/ValueUpdateVisitor.h>
 #include <wx/valnum.h>
 #include <png_resource.h>
 #include <img/icons.h>
@@ -46,6 +47,7 @@ void VolumePropAgent::objectChanging(int notify_level, void* ptr, void* orig_nod
 	//before change
 	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
 	{
+		InterfaceAgent::objectChanging(notify_level, ptr, orig_node, exp);
 	}
 }
 
@@ -54,6 +56,7 @@ void VolumePropAgent::objectChanged(int notify_level, void* ptr, void* orig_node
 	//set values in ui
 	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
 	{
+		InterfaceAgent::objectChanged(notify_level, ptr, orig_node, exp);
 	}
 }
 
@@ -65,6 +68,20 @@ void VolumePropAgent::setObject(FL::VolumeData* obj)
 FL::VolumeData* VolumePropAgent::getObject()
 {
 	return dynamic_cast<FL::VolumeData*>(InterfaceAgent::getObject());
+}
+
+void VolumePropAgent::propParentValue(const std::string& name)
+{
+	//get obj parent
+	FL::Node* parent = getObjParent();
+	if (parent)
+	{
+		FL::ValueUpdateVisitor update;
+		update.setType(FL::ValueUpdateVisitor::ValueUpdateVisitType::PROP_VALUE);
+		update.setValueName(name);
+		update.setObject(this);
+		parent->accept(update);
+	}
 }
 
 void VolumePropAgent::UpdateAllSettings()
@@ -341,3 +358,25 @@ void VolumePropAgent::UpdateAllSettings()
 	//panel_.Layout();
 }
 
+void VolumePropAgent::OnLuminanceChanged()
+{
+	double luminance;
+	getValue("luminance", luminance);
+	int ival = int(luminance*panel_.m_max_val + 0.5);
+	panel_.m_luminance_sldr->SetRange(0, int(panel_.m_max_val));
+	wxString str = wxString::Format("%d", ival);
+	panel_.m_luminance_sldr->SetValue(ival);
+	panel_.m_luminance_text->ChangeValue(str);
+}
+
+void VolumePropAgent::OnColorChanged()
+{
+	FLTYPE::Color color;
+	getValue("color", color);
+	wxColor wxc((unsigned char)(color.r() * 255 + 0.5),
+		(unsigned char)(color.g() * 255 + 0.5),
+		(unsigned char)(color.b() * 255 + 0.5));
+	panel_.m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
+		wxc.Red(), wxc.Green(), wxc.Blue()));
+	panel_.m_color_btn->SetColour(wxc);
+}

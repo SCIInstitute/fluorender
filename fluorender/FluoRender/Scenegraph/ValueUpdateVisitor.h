@@ -34,22 +34,22 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FL
 {
-	enum ValueUpdateVisitType
-	{
-		SYNC_VALUE = 0,
-		SYNC_VALUES,
-		SYNC_ALL_VALUES,
-		UNSYNC_VALUE,
-		UNSYNC_VALUES,
-		UNSYNC_ALL_VALUES,
-		PROP_VALUE,
-		PROP_VALUES,
-		PROP_ALL_VALUES,
-	};
-
 	class ValueUpdateVisitor : public NodeVisitor
 	{
 	public:
+		enum ValueUpdateVisitType
+		{
+			SYNC_VALUE = 0,
+			SYNC_VALUES,
+			SYNC_ALL_VALUES,
+			UNSYNC_VALUE,
+			UNSYNC_VALUES,
+			UNSYNC_ALL_VALUES,
+			PROP_VALUE,
+			PROP_VALUES,
+			PROP_ALL_VALUES,
+		};
+
 		ValueUpdateVisitor() : type_(SYNC_VALUE), object_(0)
 		{ setTraversalMode(FL::NodeVisitor::TRAVERSE_ALL_CHILDREN); }
 		ValueUpdateVisitor(ValueUpdateVisitType type) : type_(type), object_(0)

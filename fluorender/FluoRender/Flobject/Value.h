@@ -428,132 +428,132 @@ inline bool Value::sync(Value* value)
 	if (_type == "Referenced*")
 	{
 		dynamic_cast<TemplateValue<Referenced*>*>(this)->setValue(
-			dynamic_cast<TemplateValue<Referenced*>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<Referenced*>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "bool")
 	{
 		dynamic_cast<TemplateValue<bool>*>(this)->setValue(
-			dynamic_cast<TemplateValue<bool>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<bool>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "char")
 	{
 		dynamic_cast<TemplateValue<char>*>(this)->setValue(
-			dynamic_cast<TemplateValue<char>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<char>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "unsigned char")
 	{
 		dynamic_cast<TemplateValue<unsigned char>*>(this)->setValue(
-			dynamic_cast<TemplateValue<unsigned char>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<unsigned char>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "short")
 	{
 		dynamic_cast<TemplateValue<short>*>(this)->setValue(
-			dynamic_cast<TemplateValue<short>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<short>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "unsigned short")
 	{
 		dynamic_cast<TemplateValue<unsigned short>*>(this)->setValue(
-			dynamic_cast<TemplateValue<unsigned short>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<unsigned short>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "long")
 	{
 		dynamic_cast<TemplateValue<long>*>(this)->setValue(
-			dynamic_cast<TemplateValue<long>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<long>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "unsigned long")
 	{
 		dynamic_cast<TemplateValue<unsigned long>*>(this)->setValue(
-			dynamic_cast<TemplateValue<unsigned long>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<unsigned long>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "long long")
 	{
 		dynamic_cast<TemplateValue<long long>*>(this)->setValue(
-			dynamic_cast<TemplateValue<long long>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<long long>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "unsigned long long")
 	{
 		dynamic_cast<TemplateValue<unsigned long long>*>(this)->setValue(
-			dynamic_cast<TemplateValue<unsigned long long>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<unsigned long long>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "float")
 	{
 		dynamic_cast<TemplateValue<float>*>(this)->setValue(
-			dynamic_cast<TemplateValue<float>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<float>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "double")
 	{
 		dynamic_cast<TemplateValue<double>*>(this)->setValue(
-			dynamic_cast<TemplateValue<double>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<double>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "string")
 	{
 		dynamic_cast<TemplateValue<std::string>*>(this)->setValue(
-			dynamic_cast<TemplateValue<std::string>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<std::string>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "wstring")
 	{
 		dynamic_cast<TemplateValue<std::wstring>*>(this)->setValue(
-			dynamic_cast<TemplateValue<std::wstring>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<std::wstring>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "Point")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::Point>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::Point>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<FLTYPE::Point>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "Vector")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::Vector>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::Vector>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<FLTYPE::Vector>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "BBox")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::BBox>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::BBox>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<FLTYPE::BBox>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "HSVColor")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::HSVColor>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::HSVColor>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<FLTYPE::HSVColor>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "Color")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::Color>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::Color>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<FLTYPE::Color>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "Plane")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::Plane>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::Plane>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<FLTYPE::Plane>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "PlaneSet")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::PlaneSet>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::PlaneSet>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<FLTYPE::PlaneSet>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "Quaternion")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::Quaternion>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::Quaternion>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<FLTYPE::Quaternion>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "Ray")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::Ray>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::Ray>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<FLTYPE::Ray>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "Transform")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::Transform>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::Transform>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<FLTYPE::Transform>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "GLfloat4")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::GLfloat4>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::GLfloat4>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<FLTYPE::GLfloat4>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else if (_type == "GLint4")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::GLint4>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::GLint4>*>(value)->getValue(), true);
+			dynamic_cast<TemplateValue<FLTYPE::GLint4>*>(value)->getValue(), NOTIFY_ALL);
 	}
 	else return false;
 

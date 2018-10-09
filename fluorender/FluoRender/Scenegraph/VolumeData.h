@@ -212,6 +212,7 @@ namespace FL
 		void OnClipPlanesChanged();
 		void OnLowShadingChanged();
 		void OnHighShadingChanged();
+		void OnIntScaleChanged();
 
 		friend class VolumeFactory;
 	};

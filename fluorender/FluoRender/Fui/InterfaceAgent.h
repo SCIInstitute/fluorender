@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _INTERFACEAGENT_H_
 
 #include <Flobject/Object.h>
+#include <Scenegraph/Node.h>
 
 namespace FUI
 {
@@ -49,8 +50,14 @@ namespace FUI
 		virtual const char* className() const { return "InterfaceAgent"; }
 
 		//observer
-		virtual void objectChanging(int notify_level, void*, void* orig_node, const std::string &exp) {};
-		virtual void objectChanged(int notify_level, void*, void* orig_node, const std::string &exp) {};
+		virtual void objectChanging(int notify_level, void* ptr, void* orig_node, const std::string &exp)
+		{
+			FL::Object::objectChanging(notify_level, ptr, orig_node, exp);
+		}
+		virtual void objectChanged(int notify_level, void* ptr, void* orig_node, const std::string &exp)
+		{
+			FL::Object::objectChanged(notify_level, ptr, orig_node, exp);
+		}
 
 		virtual void setObject(FL::Object* obj)
 		{
@@ -64,10 +71,24 @@ namespace FUI
 		}
 		virtual FL::Object* getObject()
 		{
-			FL::Object* obj;
+			FL::Object* obj = 0;
 			getValue("asset", (FL::Referenced**)&obj);
 			return obj;
 		}
+
+		virtual FL::Node* getObjParent()
+		{
+			FL::Object* obj = getObject();
+			if (obj)
+			{
+				FL::Node* node = dynamic_cast<FL::Node*>(obj);
+				if (node)
+					return node->getParent(0);
+			}
+			return 0;
+		}
+
+		virtual void propParentValue(const std::string& name) {}
 
 		virtual void UpdateAllSettings() {};
 

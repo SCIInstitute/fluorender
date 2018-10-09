@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FUI
 {
+	class AgentFactory;
 	class VolumePropPanel;
 	class VolumePropAgent : public InterfaceAgent
 	{
@@ -53,10 +54,18 @@ namespace FUI
 		virtual void setObject(FL::VolumeData* vd);
 		virtual FL::VolumeData* getObject();
 
+		virtual void propParentValue(const std::string& name);
+
 		virtual void UpdateAllSettings();
+
+		friend class AgentFactory;
 
 	protected:
 		VolumePropPanel &panel_;
+
+		//update functions
+		void OnLuminanceChanged();
+		void OnColorChanged();
 
 	private:
 	};

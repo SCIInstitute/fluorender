@@ -119,6 +119,7 @@ void VolumeData::Initialize()
 	OnDepthAttenChanged();
 	OnSkipBrickChanged();
 	OnClipPlanesChanged();
+	OnIntScaleChanged();
 }
 
 //void VolumeData::OnMipModeChanging()
@@ -347,6 +348,9 @@ void VolumeData::OnColorChanged()
 	m_vr->set_color(color);
 	FLTYPE::HSVColor hsv(color);
 	setValue("hsv", hsv, Value::NotifyLevel::NOTIFY_SELF);
+	setValue("luminance", hsv.val(),
+		Value::NotifyLevel::NOTIFY_SELF|
+		Value::NotifyLevel::NOTIFY_AGENT);
 }
 
 void VolumeData::OnSecColorChanged()
@@ -383,7 +387,9 @@ void VolumeData::OnLuminanceChanged()
 	getValue("hsv", hsv);
 	hsv.val(luminance);
 	FLTYPE::Color color(hsv);
-	setValue("color", color, Value::NotifyLevel::NOTIFY_SELF);
+	setValue("color", color,
+		Value::NotifyLevel::NOTIFY_SELF |
+		Value::NotifyLevel::NOTIFY_AGENT);
 }
 
 void VolumeData::OnAlphaChanged()
@@ -651,6 +657,17 @@ void VolumeData::OnClipPlanesChanged()
 		planelist.push_back(plane);
 	}
 	m_vr->set_planes(&planelist);
+}
+
+void VolumeData::OnIntScaleChanged()
+{
+	if (!m_vr)
+		return;
+
+	double int_scale;
+	getValue("int scale", int_scale);
+	m_vr->set_scalar_scale(int_scale);
+	m_vr->set_gm_scale(int_scale);
 }
 
 //functions from old class

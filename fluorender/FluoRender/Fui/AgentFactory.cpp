@@ -102,6 +102,10 @@ VolumePropAgent* AgentFactory::getOrAddVolumePropAgent(const std::string &name, 
 	if (volume_prop_agent)
 	{
 		volume_prop_agent->setName(name);
+		volume_prop_agent->setAfterFunction("luminance",
+			std::bind(&VolumePropAgent::OnLuminanceChanged, volume_prop_agent));
+		volume_prop_agent->setAfterFunction("color",
+			std::bind(&VolumePropAgent::OnColorChanged, volume_prop_agent));
 		objects_.push_front(volume_prop_agent);
 		notifyObserversNodeAdded(this, volume_prop_agent);
 	}

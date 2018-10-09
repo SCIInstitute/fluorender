@@ -4704,6 +4704,7 @@ std::vector<FL::VolumeData*> DataManager::LoadVolumeData(
 		if (!data)
 			continue;
 
+		//set some settings before load it to the obj
 		wxString name;
 		if (type != LOAD_TYPE_BRKXML)
 		{
@@ -4723,6 +4724,10 @@ std::vector<FL::VolumeData*> DataManager::LoadVolumeData(
 			breader->SetCurTime(0);
 			vd->setValue("multires", bool(true));
 		}
+		vd->setValue("int scale", reader->GetScalarScale());
+		vd->setValue("max int", reader->GetMaxValue());
+		vd->setValue("time", long(reader->GetCurTime()));
+		vd->setValue("channel", long(i));
 
 		if (vd->LoadData(data, name.ToStdString(), pathname.ToStdWstring()))
 		{
@@ -4770,15 +4775,6 @@ std::vector<FL::VolumeData*> DataManager::LoadVolumeData(
 					//vd->SetBaseSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetZSpc());
 					vd->setValue("base spc z", reader->GetZSpc());
 			}
-			//vd->SetSpcFromFile(valid_spc);
-			//vd->SetScalarScale(reader->GetScalarScale());
-			vd->setValue("int scale", reader->GetScalarScale());
-			//vd->SetMaxValue(reader->GetMaxValue());
-			vd->setValue("max int", reader->GetMaxValue());
-			//vd->SetCurTime(reader->GetCurTime());
-			vd->setValue("time", long(reader->GetCurTime()));
-			//vd->SetCurChannel(i);
-			vd->setValue("channel", long(i));
 			//++
 			result.push_back(vd);
 		}
