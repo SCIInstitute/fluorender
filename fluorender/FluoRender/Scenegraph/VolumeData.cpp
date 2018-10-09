@@ -190,7 +190,9 @@ void VolumeData::OnOverlayModeChanged()
 	break;
 	case 1://for shadow
 	{
+		m_vr->set_mode(FLIVR::TextureRenderer::MODE_OVER);
 		m_vr->set_shading(false);
+		m_vr->set_solid(false);
 		m_vr->set_colormap_mode(2);
 		m_vr->set_ml_mode(0);
 	}

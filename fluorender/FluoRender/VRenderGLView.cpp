@@ -3533,7 +3533,7 @@ void VRenderGLView::DrawMIP(FL::VolumeData* vd, int peel)
 			m_interactive, m_scale_factor, 1);
 		//restore
 		if (colormap_mode == 0)
-			vd->setValue("colormap mode", saved_colormap_proj, FL::Value::NotifyLevel::NOTIFY_SELF);
+			vd->setValue("colormap proj", saved_colormap_proj, FL::Value::NotifyLevel::NOTIFY_SELF);
 		if (colormap_mode == 1)
 		{
 			//mode management needs work

@@ -239,7 +239,7 @@ void VolumeFactory::setEventHandler(VolumeData* vd)
 	ADD_AFTER_EVENT(vd, "sec color set", OnSecColorSetChanged);
 	ADD_AFTER_EVENT(vd, "luminance", OnLuminanceChanged);
 	ADD_AFTER_EVENT(vd, "alpha", OnAlphaChanged);
-	ADD_AFTER_EVENT(vd, "alpah enable", OnAlphaEnableChanged);
+	ADD_AFTER_EVENT(vd, "alpha enable", OnAlphaEnableChanged);
 	ADD_AFTER_EVENT(vd, "mask thresh", OnMaskThreshChanged);
 	ADD_AFTER_EVENT(vd, "use mask thresh", OnUseMaskThreshChanged);
 	ADD_AFTER_EVENT(vd, "shading enable", OnShadingEnableChanged);
