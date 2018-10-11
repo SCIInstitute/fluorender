@@ -61,6 +61,8 @@ namespace FUI
 
 		virtual bool IsContainer(const wxDataViewItem &item) const override;
 
+		virtual bool HasContainerColumns(const wxDataViewItem & item) const override;
+
 		virtual unsigned int GetChildren(const wxDataViewItem &parent,
 			wxDataViewItemArray &array) const override;
 

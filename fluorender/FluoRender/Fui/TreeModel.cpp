@@ -151,11 +151,16 @@ wxDataViewItem TreeModel::GetParent(const wxDataViewItem &item) const
 
 bool TreeModel::IsContainer(const wxDataViewItem &item) const
 {
-	return false;
-	//if (!item.IsOk())
-	//	return wxDataViewItem(0);
-	//FL::Node *node = (FL::Node*)item.GetID();
-	//return node->asGroup();
+	//return false;
+	if (!item.IsOk())
+		return wxDataViewItem(0);
+	FL::Node *node = (FL::Node*)item.GetID();
+	return node->asGroup();
+}
+
+bool TreeModel::HasContainerColumns(const wxDataViewItem & item) const
+{
+	return true;
 }
 
 unsigned int TreeModel::GetChildren(const wxDataViewItem &parent,
