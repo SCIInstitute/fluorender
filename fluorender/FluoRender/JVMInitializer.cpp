@@ -1,11 +1,16 @@
 #include "JVMInitializer.h"
 #include "SettingDlg.h"
 #include <wx/stdpaths.h>
+#include <wx/dir.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
+static struct stat info;
 JVMInitializer* JVMInitializer::m_pJVMInstance = nullptr;
 JavaVM* JVMInitializer::m_pJvm = nullptr;
 JNIEnv* JVMInitializer::m_pEnv = nullptr;
 JavaVMInitArgs JVMInitializer::m_VMargs;
+bool JVMInitializer::m_with_fiji = false;
 
 #ifdef _WIN32
 HMODULE JVMInitializer::m_jvm_dll = nullptr;
@@ -42,11 +47,80 @@ bool JVMInitializer::create_JVM(SettingDlg* inp_settingDlg){
 	wxString jvm_path;
 	wxString ij_path;
 	wxString bioformats_path;
+	std::string jvm_ij_path = ij_path;
+	std::string jvm_bioformats_path = "";
+
 	if (inp_settingDlg)
 	{
 		jvm_path = inp_settingDlg->getJVMPath();
 		ij_path = inp_settingDlg->getIJPath();
-		bioformats_path = inp_settingDlg->getBioformatsPath();
+		bioformats_path = inp_settingDlg->getBioformatsPath();	
+
+		std::string name = ij_path;		
+		if(FILE *file = fopen((name + GETSLASH() +"ij.jar").c_str(), "r")) {
+			fclose(file);
+			m_with_fiji = false;
+			jvm_ij_path += GETSLASH() + "ij.jar";
+			jvm_bioformats_path = bioformats_path;
+		}
+		else {			
+			name += GETSLASH() + std::string("jars") + GETSLASH() + std::string("bio-formats");
+			wxDir dir(name);
+			if (!dir.IsOpened()) {
+				m_with_fiji = false;
+				return false;
+			}
+			else {			
+				m_with_fiji = true;
+				wxString filename;
+				bool cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
+				while (cont) {
+					if (filename.Matches("formats-*.jar") || filename.Matches("turbojpeg-*.jar") ||
+						filename.Matches("ome-xml*.jar") || filename.Matches("ome-codecs*.jar") ||
+						filename.Matches("ome-common*.jar")) {
+						if (jvm_bioformats_path == "")
+							jvm_bioformats_path = dir.GetNameWithSep() + filename;
+						else
+							jvm_bioformats_path += getPathSeparator() + dir.GetNameWithSep() + filename;
+					}
+					cont = dir.GetNext(&filename);
+				}
+
+				dir.Open(ij_path + GETSLASH() + std::string("jars"));
+				cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
+				while (cont) {
+					if (filename.Matches("commons-collections-*.jar") || filename.Matches("commons-lang-*.jar") ||
+						filename.Matches("commons-logging-*.jar") || filename.Matches("guava-*.jar") ||
+						filename.Matches("jcommander-*.jar") || filename.Matches("jgoodies-common-*.jar") ||
+						filename.Matches("jgoodies-forms-*.jar") || filename.Matches("jhdf5-*.jar") ||
+						filename.Matches("joda-time-*.jar") || filename.Matches("kryo-*.jar") ||
+						filename.Matches("log4j-*.jar") || filename.Matches("logback-classic*.jar") ||
+						filename.Matches("logback-core*.jar") || filename.Matches("metadata-extractor-*.jar") ||
+						filename.Matches("minlog-*.jar") || filename.Matches("native-lib-loader-*.jar") ||
+						filename.Matches("netcdf-*.jar") || filename.Matches("objenesis-*.jar") ||
+						filename.Matches("perf4j-*.jar") || filename.Matches("slf4j-api-*.jar") ||
+						filename.Matches("snakeyaml-*.jar") || filename.Matches("xercesImpl-*.jar") ||
+						filename.Matches("xml-apis-ext-*.jar") || filename.Matches("xmpcore-*.jar")){
+						if (jvm_bioformats_path == "")
+							jvm_bioformats_path = dir.GetNameWithSep() + filename;
+						else
+							jvm_bioformats_path += getPathSeparator() + dir.GetNameWithSep() + filename;
+					}
+					else if (filename.Matches("ij-*.jar"))
+						jvm_ij_path = dir.GetNameWithSep() + filename;
+					cont = dir.GetNext(&filename);
+				}
+
+				dir.Open(ij_path + GETSLASH() + std::string("plugins"));
+				cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
+				while (cont)
+				{
+					if (filename.Matches("bio-formats_plugins-*.jar"))
+						jvm_bioformats_path += getPathSeparator() + dir.GetNameWithSep() + filename;
+					cont = dir.GetNext(&filename);
+				}				
+			}			
+		}
 	}
 
 	//Loading JVM library and methods.
@@ -92,8 +166,8 @@ bool JVMInitializer::create_JVM(SettingDlg* inp_settingDlg){
 	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
 	exePath = wxPathOnly(exePath);
 	string imageJPath = "-Djava.class.path=" + exePath + GETSLASH() + "Java_Code" + GETSLASH() + getPathSeparator();
-	imageJPath.append(ij_path + getPathSeparator());
-	imageJPath.append(bioformats_path);
+	imageJPath.append(jvm_ij_path + getPathSeparator());
+	imageJPath.append(jvm_bioformats_path);
     
     //imageJPath.append(exePath + GETSLASH() + "Java_Code" + GETSLASH() + "ij.jar" + getPathSeparator());
     //imageJPath.append(exePath + GETSLASH() + "Java_Code" + GETSLASH() + "SlideBook6Reader.jar" + getPathSeparator());

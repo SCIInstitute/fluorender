@@ -66,6 +66,7 @@ class JVMInitializer {
 
 		static char getPathSeparator();
 		bool static create_JVM(SettingDlg* inp_settingDlg);
+		bool static m_with_fiji;
 };
 
 #endif //_JVMINITIALIZER_H_

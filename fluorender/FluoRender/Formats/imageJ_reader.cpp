@@ -176,11 +176,32 @@ int ImageJReader::Preprocess()
 						m_time_num = test;
 						break;				
 					case 6:
-						int m_bits_per_pixel = test;
-						if (m_bits_per_pixel == 1)
+						if (test == 1)
 							m_eight_bit = true;
 						else
 							m_eight_bit = false;
+						break;
+					case 7:						
+						m_xspc = test;
+						break;
+					case 8:
+						m_xspc += (test*0.0001);
+						break;
+					case 9:
+						m_yspc = test;
+						break;
+					case 10:
+						m_yspc += (test*0.0001);
+						break;
+					case 11:
+						m_zspc = test;
+						break;
+					case 12:
+						m_zspc += (test*0.0001);
+						if (!double_equals(m_xspc, 0.0) && !double_equals(m_yspc, 0.0) && !double_equals(m_zspc, 0.0))
+						{
+							m_valid_spc = true;
+						}						
 						break;
 					// TODO: What is m_max_value.
 					}
@@ -299,10 +320,10 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 
 	jmethodID method_id = NULL;
 	if (m_eight_bit == true){
-		method_id = m_pJVMInstance->m_pEnv->GetStaticMethodID(m_imageJ_cls, "getByteData", "([Ljava/lang/String;II)[B");
+		method_id = m_pJVMInstance->m_pEnv->GetStaticMethodID(m_imageJ_cls, "getByteData2D", "([Ljava/lang/String;II)[[B");
 	}
 	else {
-		method_id = m_pJVMInstance->m_pEnv->GetStaticMethodID(m_imageJ_cls, "getIntDataB", "([Ljava/lang/String;II)[S");
+		method_id = m_pJVMInstance->m_pEnv->GetStaticMethodID(m_imageJ_cls, "getIntData2D", "([Ljava/lang/String;II)[[S");
 	}
 	
 	void* t_data = NULL;
@@ -316,7 +337,7 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 			m_pJVMInstance->m_pEnv->NewStringUTF("str"));   // each initialized with value "str"
 		m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 0, m_pJVMInstance->m_pEnv->NewStringUTF(const_cast<char*>(path_name.c_str())));  // change an element		
 
-		jbyteArray val = (jbyteArray)(m_pJVMInstance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_id, arr, (jint)t, (jint)c));   // call the method with the arr as argument.
+		jobjectArray  val = (jobjectArray)(m_pJVMInstance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_id, arr, (jint)t, (jint)c));   // call the method with the arr as argument.
 		//jboolean flag = m_pJVMInstance->m_pEnv->ExceptionCheck();
 		//if (flag) {
 		//	m_pJVMInstance->m_pEnv->ExceptionClear();
@@ -326,17 +347,21 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 		jsize len = m_pJVMInstance->m_pEnv->GetArrayLength(val);
 		if (len > 1)
 		{
-			jbyte* body = m_pJVMInstance->m_pEnv->GetByteArrayElements(val, 0);	
-			unsigned char* dummy = reinterpret_cast<unsigned char*>(body);
-			//t_data = dummy;
-			//TODO: There is a better way to do this with ReleaseShortArrayElements.
-			//Link: https://stackoverflow.com/questions/50613889/how-to-free-memory-allocated-with-jshortarray-jbytearray-from-jni-java-and-c 
-			t_data = new unsigned char[len];
-			for (int i = 0; i < len; i++) {
-				int test = *(body + i);
-				*((unsigned char*)t_data + i) = test;
-			}
-			m_pJVMInstance->m_pEnv->ReleaseByteArrayElements(val, body, JNI_ABORT);
+			int offset = 0;			
+			for (int i = 0; i < len; i++) {				
+				jbyteArray inner_data = static_cast<jbyteArray>(m_pJVMInstance->m_pEnv->GetObjectArrayElement(val, i));
+				jsize len2 = m_pJVMInstance->m_pEnv->GetArrayLength(inner_data);				
+				offset = i*len2;
+				if (t_data == NULL)
+					t_data = new unsigned char[len*len2];
+
+				jbyte* body = (jbyte*)(m_pJVMInstance->m_pEnv->GetByteArrayElements(inner_data, 0));
+				for (int j = 0; j < len2; ++j) {
+					int test = *(body + j);					
+					*((unsigned char*)t_data + offset + j) = test;
+				}
+				m_pJVMInstance->m_pEnv->ReleaseByteArrayElements(inner_data, body, JNI_ABORT);						
+			}			
 		}
 		m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);
 		m_pJVMInstance->m_pEnv->DeleteLocalRef(val);
@@ -348,10 +373,26 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 			m_pJVMInstance->m_pEnv->FindClass("java/lang/String"),    // Strings
 			m_pJVMInstance->m_pEnv->NewStringUTF("str"));   // each initialized with value "str"
 		m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 0, m_pJVMInstance->m_pEnv->NewStringUTF(const_cast<char*>(path_name.c_str())));  // change an element		
-		jshortArray val = (jshortArray)(m_pJVMInstance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_id, arr, (jint)t, (jint)c));   // call the method with the arr as argument.
+		jobjectArray val = (jobjectArray)(m_pJVMInstance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_id, arr, (jint)t, (jint)c));   // call the method with the arr as argument.
 		jsize len = m_pJVMInstance->m_pEnv->GetArrayLength(val);
 		if (len > 1)
 		{
+			int offset = 0;
+			for (int i = 0; i < len; i++) {
+				jshortArray inner_data = static_cast<jshortArray>(m_pJVMInstance->m_pEnv->GetObjectArrayElement(val, 0));
+				jsize len2 = m_pJVMInstance->m_pEnv->GetArrayLength(inner_data);
+				offset = i*len2;
+				if (t_data == NULL)
+					t_data = t_data = new unsigned short int[len*len2];
+
+				jshort* body = (jshort*)(m_pJVMInstance->m_pEnv->GetShortArrayElements(inner_data, 0));
+				for (int j = 0; j < len2; ++j) {
+					int test = *(body + j);
+					*((unsigned short int*)t_data + offset + j) = test;
+				}
+				m_pJVMInstance->m_pEnv->ReleaseShortArrayElements(inner_data, body, JNI_ABORT);
+			}
+			/*
 			jshort* body = m_pJVMInstance->m_pEnv->GetShortArrayElements(val, 0);
 			unsigned short int* dummy = reinterpret_cast<unsigned short int*>(body);
 			t_data = new unsigned short int[len];
@@ -360,6 +401,7 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 				*((unsigned short int*)t_data + i) = test;
 			}
 			m_pJVMInstance->m_pEnv->ReleaseShortArrayElements(val, body, JNI_ABORT);
+			*/
 		}
 		m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);
 		m_pJVMInstance->m_pEnv->DeleteLocalRef(val);
