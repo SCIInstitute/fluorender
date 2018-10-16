@@ -3505,24 +3505,25 @@ void VRenderGLView::DrawMIP(FL::VolumeData* vd, int peel)
 			vd->GetRenderer()->set_depth_peel(peel);
 		vd->GetRenderer()->set_shading(false);
 		//turn off colormap proj
-		long saved_colormap_proj;
-		vd->getValue("colormap proj", saved_colormap_proj);
-		if (colormap_mode == 0)
-			vd->setValue("colormap proj", long(0), FL::Value::NotifyLevel::NOTIFY_SELF);
-		if (colormap_mode == 1)
-		{
-			vd->setValue("mip mode", long(3), FL::Value::NotifyLevel::NOTIFY_SELF);
-			vd->setValue("depth atten", false, FL::Value::NotifyLevel::NOTIFY_SELF);
-		}
-		else
-		{
-			vd->setValue("mip mode", long(1), FL::Value::NotifyLevel::NOTIFY_SELF);
-			vd->setValue("depth atten", m_use_fog, FL::Value::NotifyLevel::NOTIFY_SELF);
-			//vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-		}
-		//turn off alpha
-		if (colormap_mode == 1)
-			vd->setValue("alpha enable", false, FL::Value::NotifyLevel::NOTIFY_SELF);
+		//long saved_colormap_proj;
+		//vd->getValue("colormap proj", saved_colormap_proj);
+		//if (colormap_mode == 0)
+		//	vd->setValue("colormap proj", long(0), FL::Value::NotifyLevel::NOTIFY_SELF);
+		//if (colormap_mode == 1)
+		//{
+		//	vd->setValue("mip mode", long(3), FL::Value::NotifyLevel::NOTIFY_SELF);
+		//	vd->setValue("depth atten", false, FL::Value::NotifyLevel::NOTIFY_SELF);
+		//}
+		//else
+		//{
+		//	vd->setValue("mip mode", long(1), FL::Value::NotifyLevel::NOTIFY_SELF);
+		//	vd->setValue("depth atten", m_use_fog, FL::Value::NotifyLevel::NOTIFY_SELF);
+		//	//vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+		//}
+		////turn off alpha
+		//if (colormap_mode == 1)
+		//	vd->setValue("alpha enable", false, FL::Value::NotifyLevel::NOTIFY_SELF);
+		vd->setValue("overlay mode", long(3), FL::Value::NotifyLevel::NOTIFY_SELF);
 		//draw
 		//vd->setValue("stream mode", long(1));
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
@@ -3532,15 +3533,16 @@ void VRenderGLView::DrawMIP(FL::VolumeData* vd, int peel)
 		vd->Draw(!m_persp, m_adaptive,
 			m_interactive, m_scale_factor, 1);
 		//restore
-		if (colormap_mode == 0)
-			vd->setValue("colormap proj", saved_colormap_proj, FL::Value::NotifyLevel::NOTIFY_SELF);
-		if (colormap_mode == 1)
-		{
-			//mode management needs work
-			//vd->RestoreMode();
-			//restore alpha
-			vd->setValue("alpha enable", enable_alpha, FL::Value::NotifyLevel::NOTIFY_SELF);
-		}
+		vd->setValue("overlay mode", long(0), FL::Value::NotifyLevel::NOTIFY_SELF);
+		//if (colormap_mode == 0)
+		//	vd->setValue("colormap proj", saved_colormap_proj, FL::Value::NotifyLevel::NOTIFY_SELF);
+		//if (colormap_mode == 1)
+		//{
+		//	//mode management needs work
+		//	//vd->RestoreMode();
+		//	//restore alpha
+		//	vd->setValue("alpha enable", enable_alpha, FL::Value::NotifyLevel::NOTIFY_SELF);
+		//}
 
 		//bind channel fbo for final composition
 		if (chann_buffer)

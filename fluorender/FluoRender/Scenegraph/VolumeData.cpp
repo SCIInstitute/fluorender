@@ -171,9 +171,9 @@ void VolumeData::OnOverlayModeChanged()
 		bool shading_enable;
 		getValue("shading enable", shading_enable);
 		m_vr->set_shading(shading_enable);
-		long colormap_mode;
-		getValue("colormap mode", colormap_mode);
-		m_vr->set_colormap_mode(colormap_mode);
+		bool colormap_enable;
+		getValue("colormap enable", colormap_enable);
+		m_vr->set_colormap_mode(colormap_enable?1:0);
 		long mask_mode;
 		getValue("mask mode", mask_mode);
 		m_vr->set_ml_mode(mask_mode);
@@ -207,6 +207,19 @@ void VolumeData::OnOverlayModeChanged()
 		m_vr->set_color(FLIVR::Color(1.0));
 	}
 	break;
+	case 3://white mip
+	{
+		bool colormap_enable;
+		getValue("colormap enable", colormap_enable);
+		if (colormap_enable)
+		{
+			m_vr->set_mode(FLIVR::TextureRenderer::MODE_MIP);
+			m_vr->set_colormap_mode(0);
+			m_vr->set_color(FLIVR::Color(1.0));
+			//m_vr->set_alpha(1.0);
+			m_vr->set_solid(true);
+		}
+	}
 	}
 }
 
