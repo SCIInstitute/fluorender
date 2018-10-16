@@ -1367,6 +1367,8 @@ namespace FLIVR
 	//Texture‚ÖˆÚ“®—\’è
 	void TextureRenderer::clear_brick_buf()
 	{
+		if (!tex_)
+			return;
 		int cur_lv = tex_->GetCurLevel();
 		for (unsigned int lv = 0; lv < tex_->GetLevelNum(); lv++)
 		{
