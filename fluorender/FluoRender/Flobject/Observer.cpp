@@ -73,6 +73,14 @@ void ObserverSet::addObserver(Observer* observer)
 	_observers.insert(observer);
 }
 
+bool ObserverSet::hasObserver(Observer* observer)
+{
+	auto result = _observers.find(observer);
+	if (result != _observers.end())
+		return true;
+	return false;
+}
+
 void ObserverSet::removeObserver(Observer* observer)
 {
 	for (Observers::iterator itr = _observers.begin();

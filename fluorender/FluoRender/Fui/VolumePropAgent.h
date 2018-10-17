@@ -54,7 +54,14 @@ namespace FUI
 		virtual void setObject(FL::VolumeData* vd);
 		virtual FL::VolumeData* getObject();
 
+		virtual bool testSyncParentValue(const std::string& name);
+		virtual bool testSyncParentValues(const std::vector<std::string> &names);
+		virtual void syncParentValue(const std::string& name);
+		virtual void unsyncParentValue(const std::string& name);
+		virtual void syncParentValues(const std::vector<std::string> &names);
+		virtual void unsyncParentValues(const std::vector<std::string> &names);
 		virtual void propParentValue(const std::string& name);
+		virtual void propParentValues(const std::vector<std::string> &names);
 
 		virtual void UpdateAllSettings();
 

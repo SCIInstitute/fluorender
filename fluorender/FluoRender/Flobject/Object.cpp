@@ -338,10 +338,10 @@ bool Object::setValue(const std::string &name, Referenced* value, int notify_lev
 		bool result = false;
 		if (_vs_stack.top())
 		{
-			notifyObserversBeforeChange(notify_level, this);
+			notifyObserversBeforeChange(notify_level, this, name);
 			result = _vs_stack.top()->setValue(name, value, notify_level);
 			if (result)
-				notifyObserversOfChange(notify_level, this);
+				notifyObserversOfChange(notify_level, this, name);
 		}
 		return result;
 	}

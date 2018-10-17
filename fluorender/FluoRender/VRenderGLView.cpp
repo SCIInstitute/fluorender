@@ -7381,13 +7381,13 @@ FL::VolumeGroup* VRenderGLView::GetGroup(wxString &name)
 	FL::ObjectList* list = visitor.getResult();
 	if (!list->empty())
 	{
-		for (auto it = list->begin();
-			it != list->end(); ++it)
+		for (auto it = list->rbegin();
+			it != list->rend(); ++it)
 		{
 			if ((*it)->getName() == name.ToStdString())
 				return dynamic_cast<FL::VolumeGroup*>(*it);
 		}
-		return dynamic_cast<FL::VolumeGroup*>((*list)[0]);
+		return dynamic_cast<FL::VolumeGroup*>(list->back());
 	}
 	return 0;
 	//int i;

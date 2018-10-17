@@ -71,6 +71,13 @@ void Referenced::addObserver(Observer* observer) const
 	observer->_observees.insert(const_cast<Referenced*>(this));
 }
 
+bool Referenced::hasObserver(Observer* observer) const
+{
+	if (!_observerSet)
+		return false;
+	return static_cast<ObserverSet*>(_observerSet)->hasObserver(observer);
+}
+
 ObserveeIter Referenced::removeObserver(Observer* observer) const
 {
 	getOrCreateObserverSet()->removeObserver(observer);

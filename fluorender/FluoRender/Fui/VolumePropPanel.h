@@ -87,6 +87,7 @@ namespace FUI
 			ID_Color2Text,
 			ID_ColorBtn,
 			ID_Color2Btn,
+			ID_SpaceSync,
 			ID_SpaceXText,
 			ID_SpaceYText,
 			ID_SpaceZText,
@@ -186,6 +187,7 @@ namespace FUI
 		wxTextCtrl *m_color2_text;
 		wxColourPickerCtrl *m_color2_btn;
 		//space
+		wxStaticText* m_space_st;
 		wxTextCtrl *m_space_x_text;
 		wxTextCtrl *m_space_y_text;
 		wxTextCtrl *m_space_z_text;
@@ -213,7 +215,7 @@ namespace FUI
 		//update max value
 		void UpdateMaxVal(double value);
 
-		bool SetSpacings();
+		//bool SetSpacings();
 
 		//1
 		void OnGammaSync(wxMouseEvent& event);
@@ -278,6 +280,7 @@ namespace FUI
 		void OnColor2TextFocus(wxCommandEvent& event);
 		void OnColor2Btn(wxColourPickerEvent& event);
 		//spacings
+		void OnSpaceSync(wxMouseEvent& event);
 		void OnSpaceText(wxCommandEvent& event);
 		//legend
 		void OnLegendCheck(wxCommandEvent& event);

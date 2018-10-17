@@ -450,10 +450,15 @@ VolumePropPanel::VolumePropPanel(wxWindow* frame,
 	m_options_toolbar->Realize();
 	//spacings
 	//x
-	st = new wxStaticText(this, 0, "Spacing");
+	m_space_st = new wxStaticText(this, ID_SpaceSync, "Spacing",
+		wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER);
+	m_space_st->Connect(ID_SpaceSync, wxEVT_LEFT_DCLICK,
+		wxMouseEventHandler(VolumePropPanel::OnSpaceSync), NULL, this);
+	m_space_st->Connect(ID_SpaceSync, wxEVT_RIGHT_DCLICK,
+		wxMouseEventHandler(VolumePropPanel::OnSpaceSync), NULL, this);
 	m_space_x_text = new wxTextCtrl(this, ID_SpaceXText, "1.000",
 		wxDefaultPosition, wxSize(45, -1), 0, vald_fp3);
-	sizer_r2->Add(st, 0, wxALIGN_CENTER);
+	sizer_r2->Add(m_space_st, 0, wxALIGN_CENTER);
 	sizer_r2->AddStretchSpacer();
 	st = new wxStaticText(this, 0, "X:");
 	sizer_r2->Add(st, 0, wxALIGN_CENTER);
@@ -1041,47 +1046,6 @@ void VolumePropPanel::OnColorChange(wxColor c)
 {
 	FLTYPE::Color color(c.Red() / 255.0, c.Green() / 255.0, c.Blue() / 255.0);
 	m_agent->setValue("color", color);
-	//if (m_vd)
-	//{
-	//	//if (m_lumi_change)
-	//	//{
-	//	//	m_vd->SetColor(color, true);
-	//	//	m_lumi_change = false;
-	//	//}
-	//	//else
-	//	//	m_vd->SetColor(color);
-	//	m_vd->setValue("color", color);
-
-	//	//double lum = m_vd->GetLuminance();
-	//	//int ilum = int(lum*m_max_val+0.5);
-	//	//m_luminance_sldr->SetValue(ilum);
-	//	//wxString str = wxString::Format("%d", ilum);
-	//	//m_luminance_text->ChangeValue(str);
-
-	//	bool sec_color_set;
-	//	m_vd->getValue("sec color set", sec_color_set);
-	//	if (!sec_color_set)
-	//	{
-	//		m_vd->getValue("sec color", color);
-	//		wxColor wxc((unsigned char)(color.r() * 255),
-	//			(unsigned char)(color.g() * 255),
-	//			(unsigned char)(color.b() * 255));
-	//		m_color2_text->ChangeValue(wxString::Format("%d , %d , %d",
-	//			wxc.Red(), wxc.Green(), wxc.Blue()));
-	//		m_color2_btn->SetColour(wxc);
-	//	}
-
-	//	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-
-	//	if (vr_frame)
-	//	{
-	//		AdjustView *adjust_view = vr_frame->GetAdjustView();
-	//		if (adjust_view)
-	//			adjust_view->UpdateSync();
-	//	}
-
-	//	RefreshVRenderViews(true, true);
-	//}
 }
 
 void VolumePropPanel::OnColor2Change(wxColor c)
@@ -1291,13 +1255,7 @@ void VolumePropPanel::OnInvCheck(wxCommandEvent &event)
 		m_options_toolbar->SetToolNormalBitmap(ID_InvChk,
 			wxGetBitmapFromMemory(invert_off));
 
-	//if (m_sync_group && m_group)
-	//	m_group->SetInvert(inv);
-	//else if (m_vd)
-	//	m_vd->SetInvert(inv);
 	m_agent->setValue("invert", inv);
-
-	//RefreshVRenderViews(false, true);
 }
 
 void VolumePropPanel::OnMIPCheck(wxCommandEvent &event)
@@ -1337,9 +1295,7 @@ void VolumePropPanel::OnMIPCheck(wxCommandEvent &event)
 	//		m_threh_st->SetLabel("Threshold : ");
 	//}
 
-	Layout();
-
-	//RefreshVRenderViews(false, true);
+	//Layout();
 }
 
 //noise reduction
@@ -1411,58 +1367,58 @@ void VolumePropPanel::OnDepthCheck(wxCommandEvent &event)
 	//RefreshVRenderViews(false, true);
 }
 
-bool VolumePropPanel::SetSpacings()
-{
-	if (!m_space_x_text || !m_space_y_text || !m_space_z_text)
-		return false;
-
-	wxString str, str_new;
-	double spcx = 0.0;
-	double spcy = 0.0;
-	double spcz = 0.0;
-
-	str = m_space_x_text->GetValue();
-	str.ToDouble(&spcx);
-	if (spcx <= 0.0)
-		return false;
-
-	str = m_space_y_text->GetValue();
-	str.ToDouble(&spcy);
-	if (spcy <= 0.0)
-		return false;
-
-	str = m_space_z_text->GetValue();
-	str.ToDouble(&spcz);
-	if (spcz <= 0.0)
-		return false;
-	bool override_vox = true;
-	//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	//if (vr_frame && vr_frame->GetSettingDlg())
-	//	override_vox = vr_frame->GetSettingDlg()->GetOverrideVox();
-
-	//if ((m_sync_group || override_vox) && m_group)
-	//{
-	//	for (int i = 0; i < m_group->GetVolumeNum(); i++)
-	//	{
-	//		m_group->GetVolumeData(i)->SetSpacings(spcx, spcy, spcz);
-	//		m_group->GetVolumeData(i)->SetBaseSpacings(spcx, spcy, spcz);
-	//	}
-	//}
-	//else if (m_vd)
-	//{
-	//	m_vd->SetSpacings(spcx, spcy, spcz);
-	//	m_vd->SetBaseSpacings(spcx, spcy, spcz);
-	//}
-	//else return false;
-	m_agent->setValue("spc x", spcx);
-	m_agent->setValue("spc y", spcy);
-	m_agent->setValue("spc z", spcz);
-	m_agent->setValue("base spc x", spcx);
-	m_agent->setValue("base spc y", spcy);
-	m_agent->setValue("base spc z", spcz);
-
-	return true;
-}
+//bool VolumePropPanel::SetSpacings()
+//{
+//	if (!m_space_x_text || !m_space_y_text || !m_space_z_text)
+//		return false;
+//
+//	wxString str, str_new;
+//	double spcx = 0.0;
+//	double spcy = 0.0;
+//	double spcz = 0.0;
+//
+//	str = m_space_x_text->GetValue();
+//	str.ToDouble(&spcx);
+//	if (spcx <= 0.0)
+//		return false;
+//
+//	str = m_space_y_text->GetValue();
+//	str.ToDouble(&spcy);
+//	if (spcy <= 0.0)
+//		return false;
+//
+//	str = m_space_z_text->GetValue();
+//	str.ToDouble(&spcz);
+//	if (spcz <= 0.0)
+//		return false;
+//	bool override_vox = true;
+//	//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+//	//if (vr_frame && vr_frame->GetSettingDlg())
+//	//	override_vox = vr_frame->GetSettingDlg()->GetOverrideVox();
+//
+//	//if ((m_sync_group || override_vox) && m_group)
+//	//{
+//	//	for (int i = 0; i < m_group->GetVolumeNum(); i++)
+//	//	{
+//	//		m_group->GetVolumeData(i)->SetSpacings(spcx, spcy, spcz);
+//	//		m_group->GetVolumeData(i)->SetBaseSpacings(spcx, spcy, spcz);
+//	//	}
+//	//}
+//	//else if (m_vd)
+//	//{
+//	//	m_vd->SetSpacings(spcx, spcy, spcz);
+//	//	m_vd->SetBaseSpacings(spcx, spcy, spcz);
+//	//}
+//	//else return false;
+//	m_agent->setValue("spc x", spcx);
+//	m_agent->setValue("spc y", spcy);
+//	m_agent->setValue("spc z", spcz);
+//	m_agent->setValue("base spc x", spcx);
+//	m_agent->setValue("base spc y", spcy);
+//	m_agent->setValue("base spc z", spcz);
+//
+//	return true;
+//}
 
 //enable/disable
 void VolumePropPanel::EnableAlpha()
@@ -1583,13 +1539,46 @@ void VolumePropPanel::UpdateMaxVal(double value)
 	m_max_val = value;
 	m_agent->setValue("max int", m_max_val);
 	m_agent->setValue("int scale", 65535.0 / m_max_val);
-	//GetSettings();
+}
+
+void VolumePropPanel::OnSpaceSync(wxMouseEvent& event)
+{
+	m_agent->propParentValue("spc x");
+	m_agent->propParentValue("spc y");
+	m_agent->propParentValue("spc z");
+	m_agent->propParentValue("base spc x");
+	m_agent->propParentValue("base spc y");
+	m_agent->propParentValue("base spc z");
 }
 
 void VolumePropPanel::OnSpaceText(wxCommandEvent& event)
 {
-	//if (SetSpacings())
-	//	InitVRenderViews(INIT_BOUNDS | INIT_CENTER);
+	wxString str;
+	double dval;
+	//x
+	str = m_space_x_text->GetValue();
+	str.ToDouble(&dval);
+	if (dval > 0.0)
+	{
+		m_agent->setValue("spc x", dval);
+		m_agent->setValue("base spc x", dval);
+	}
+	//y
+	str = m_space_y_text->GetValue();
+	str.ToDouble(&dval);
+	if (dval > 0.0)
+	{
+		m_agent->setValue("spc y", dval);
+		m_agent->setValue("base spc y", dval);
+	}
+	//z
+	str = m_space_z_text->GetValue();
+	str.ToDouble(&dval);
+	if (dval > 0.0)
+	{
+		m_agent->setValue("spc z", dval);
+		m_agent->setValue("base spc z", dval);
+	}
 }
 
 //legend
@@ -1597,8 +1586,6 @@ void VolumePropPanel::OnLegendCheck(wxCommandEvent& event)
 {
 	bool leg = m_options_toolbar->GetToolState(ID_LegendChk);
 	m_agent->setValue("legend", leg);
-
-	//RefreshVRenderViews(false, true);
 }
 
 //interpolation
@@ -1611,111 +1598,48 @@ void VolumePropPanel::OnInterpolateCheck(wxCommandEvent& event)
 	else
 		m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk,
 			wxGetBitmapFromMemory(interpolate_off));
-	//if (m_sync_group && m_group)
-	//	m_group->SetInterpolate(inv);
-	//else if (m_vd)
-	//	m_vd->SetInterpolate(inv);
 	m_agent->setValue("interpolate", inv);
 	//if (m_vrv)
 	//	m_vrv->m_glview->SetIntp(inv);
-
-	//RefreshVRenderViews(false, true);
 }
 
 //sync within group
 void VolumePropPanel::OnSyncGroupCheck(wxCommandEvent& event)
 {
-	//m_sync_group = m_options_toolbar->GetToolState(ID_SyncGroupChk);
-	/*	if (m_group)
-	m_group->SetVolumeSyncProp(m_sync_group);
-
-	if (m_sync_group && m_group)
+	bool sync = m_options_toolbar->GetToolState(ID_SyncGroupChk);
+	std::string ss[] = {
+		"gamma 3d",
+		"extract boundary",
+		"saturation",
+		"low threshold",
+		"high threshold",
+		"shadow enable",
+		"shadow int",
+		"alpha",
+		"alpha enable",
+		"sample rate",
+		"shading enable",
+		"low shading",
+		"high shading",
+		"colormap enable",
+		"colormap mode",
+		"colormap type",
+		"colormap low",
+		"colormap high",
+		"colormap proj",
+		"invert",
+		"interpolate",
+		"mip mode",
+		"noise redct"
+	};
+	std::vector<std::string> names(std::begin(ss), std::end(ss));//values to sync
+	if (sync)
 	{
-	wxString str;
-	double dVal;
-	long iVal;
-	bool bVal;
-
-	//gamma
-	str = m_gamma_text->GetValue();
-	str.ToDouble(&dVal);
-	m_group->Set3DGamma(dVal);
-	//boundary
-	str = m_boundary_text->GetValue();
-	str.ToDouble(&dVal);
-	m_group->SetBoundary(dVal);
-	//saturation
-	str = m_saturation_text->GetValue();
-	str.ToLong(&iVal);
-	dVal = double(iVal) / m_max_val;
-	m_group->SetOffset(dVal);
-	//left threshold
-	str = m_left_thresh_text->GetValue();
-	str.ToLong(&iVal);
-	dVal = double(iVal) / m_max_val;
-	m_group->SetLeftThresh(dVal);
-	//right thresh
-	str = m_right_thresh_text->GetValue();
-	str.ToLong(&iVal);
-	dVal = double(iVal) / m_max_val;
-	m_group->SetRightThresh(dVal);
-	//luminance
-	//str = m_luminance_text->GetValue();
-	//str.ToLong(&iVal);
-	//dVal = double(iVal)/m_max_val;
-	//m_group->SetLuminance(dVal);
-	//shadow
-	bVal = m_shadow_tool->GetToolState(ID_ShadowChk);
-	m_group->SetShadow(bVal);
-	str = m_shadow_text->GetValue();
-	str.ToDouble(&dVal);
-	m_group->SetShadowParams(dVal);
-	//high shading
-	str = m_hi_shading_text->GetValue();
-	str.ToDouble(&dVal);
-	m_group->SetHiShading(dVal);
-	//alpha
-	str = m_alpha_text->GetValue();
-	str.ToLong(&iVal);
-	dVal = double(iVal) / m_max_val;
-	m_group->SetAlpha(dVal);
-	//sample rate
-	str = m_sample_text->GetValue();
-	str.ToDouble(&dVal);
-	m_group->SetSampleRate(dVal);
-	//shading
-	bVal = m_shade_tool->GetToolState(ID_ShadingEnableChk);
-	m_group->SetShading(bVal);
-	str = m_low_shading_text->GetValue();
-	str.ToDouble(&dVal);
-	m_group->SetLowShading(dVal);
-	//colormap low
-	str = m_colormap_low_value_text->GetValue();
-	str.ToLong(&iVal);
-	dVal = double(iVal)/m_max_val;
-	m_group->SetColormapValues(dVal, -1);
-	//colormap high
-	str = m_colormap_high_value_text->GetValue();
-	str.ToLong(&iVal);
-	dVal = double(iVal)/m_max_val;
-	m_group->SetColormapValues(-1, dVal);
-	//inversion
-	bVal = m_options_toolbar->GetToolState(ID_InvChk);
-	m_group->SetInvert(bVal);
-	//interpolation
-	bVal = m_options_toolbar->GetToolState(ID_InterpolateChk);
-	m_group->SetInterpolate(bVal);
-	if (m_vrv)
-	m_vrv->m_glview->SetIntp(bVal);
-	//MIP
-	bVal = m_options_toolbar->GetToolState(ID_MipChk);
-	m_group->SetMode(bVal?1:0);
-	//noise reduction
-	bVal = m_options_toolbar->GetToolState(ID_InvChk);
-	m_group->SetNR(bVal);
+		m_agent->propParentValues(names);
+		m_agent->syncParentValues(names);
 	}
-	*/
-	//RefreshVRenderViews(false, true);
+	else
+		m_agent->unsyncParentValues(names);
 }
 
 void VolumePropPanel::OnSaveDefault(wxCommandEvent& event)

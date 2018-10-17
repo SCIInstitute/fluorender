@@ -65,6 +65,8 @@ public:
 
 	void addObserver(Observer* observer) const;
 
+	bool hasObserver(Observer* observer) const;
+
 	ObserveeIter removeObserver(Observer* observer) const;
 
 	void holdoffObserverNotification()

@@ -68,6 +68,7 @@ public:
 	Referenced* addRefLock();
 
 	void addObserver(Observer* observer);
+	bool hasObserver(Observer* observer);
 	void removeObserver(Observer* observer);
 
 	void signalObjectDeleted(void* ptr);

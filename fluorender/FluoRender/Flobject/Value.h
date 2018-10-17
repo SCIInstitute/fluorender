@@ -123,10 +123,10 @@ public:
 		if (value != _value)
 		{
 			if (notify_level)
-				notifyObserversBeforeChange(notify_level, this);
+				notifyObserversBeforeChange(notify_level, this, _name);
 			_value = value;
 			if (notify_level)
-				notifyObserversOfChange(notify_level, this);
+				notifyObserversOfChange(notify_level, this, _name);
 		}
 	}
 
@@ -562,7 +562,7 @@ inline bool Value::sync(Value* value)
 
 inline void Value::notify()
 {
-	notifyObserversOfChange(NOTIFY_ALL, this);
+	notifyObserversOfChange(NOTIFY_ALL, this, _name);
 }
 
 inline std::ostream& FL::operator<<(std::ostream& os, const Value& v)

@@ -43,6 +43,7 @@ void RenderCanvasAgent::objectChanging(int notify_level, void* ptr, void* orig_n
 	//before change
 	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
 	{
+		InterfaceAgent::objectChanging(notify_level, ptr, orig_node, exp);
 	}
 }
 
@@ -51,6 +52,9 @@ void RenderCanvasAgent::objectChanged(int notify_level, void* ptr, void* orig_no
 	//set values in ui
 	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
 	{
+		InterfaceAgent::objectChanged(notify_level, ptr, orig_node, exp);
+		if (exp.find("bounds") != std::string::npos)
+			gl_view_.InitView(INIT_BOUNDS | INIT_CENTER);
 		gl_view_.RefreshGL(41);
 	}
 }
