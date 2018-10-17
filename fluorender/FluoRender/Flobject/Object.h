@@ -39,6 +39,10 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <functional>
 
+namespace FUI
+{
+	class InterfaceAgent;
+}
 namespace FL
 {
 typedef std::stack<ref_ptr<ValueSet> > ValueSetStack;
@@ -68,6 +72,9 @@ public:
 
 	inline const char* getName() const { return m_name.c_str(); }
 
+	virtual FUI::InterfaceAgent* asAgent() { return 0; }
+	virtual ObjectFactory* asFactory() { return 0; }
+
 	virtual void objectDeleted(void*);
 	virtual void objectChanging(int notify_level, void*, void* orig_node, const std::string &exp);
 	virtual void objectChanged(int notify_level, void*, void* orig_node, const std::string &exp);
@@ -96,7 +103,7 @@ public:
 				addValue(value);
 				//also observe the values
 				value->addObserver(this);
-				value->notify();
+				//value->notify();//not sure why it needs notification, removed
 			}
 		}
 	}

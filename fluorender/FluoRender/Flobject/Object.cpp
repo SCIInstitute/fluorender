@@ -106,6 +106,12 @@ void Object::objectChanged(int notify_level, void* ptr, void* orig_node, const s
 			//take action myself
 			if (notify_level & Value::NotifyLevel::NOTIFY_SELF)
 				onAfter(value->getName());
+			else if (asFactory() &&
+				(notify_level & Value::NotifyLevel::NOTIFY_FACTORY))
+				onAfter(value->getName());
+			else if (asAgent() &&
+				(notify_level & Value::NotifyLevel::NOTIFY_AGENT))
+				onAfter(value->getName());
 		}
 	}
 }

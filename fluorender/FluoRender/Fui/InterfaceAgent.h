@@ -49,6 +49,8 @@ namespace FUI
 
 		virtual const char* className() const { return "InterfaceAgent"; }
 
+		virtual InterfaceAgent* asAgent() { return this; }
+
 		//observer
 		virtual void objectChanging(int notify_level, void* ptr, void* orig_node, const std::string &exp)
 		{

@@ -403,8 +403,8 @@ void VolumeData::OnLuminanceChanged()
 	hsv.val(luminance);
 	FLTYPE::Color color(hsv);
 	setValue("color", color,
-		Value::NotifyLevel::NOTIFY_SELF |
 		Value::NotifyLevel::NOTIFY_AGENT);
+	m_vr->set_color(color);
 }
 
 void VolumeData::OnAlphaChanged()
