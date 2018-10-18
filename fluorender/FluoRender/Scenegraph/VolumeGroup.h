@@ -56,6 +56,11 @@ namespace FL
 		virtual VolumeGroup* asVolumeGroup() { return this; }
 		virtual const VolumeGroup* asVolumeGroup() const { return this; }
 
+		//manage value syncs
+		virtual bool insertChild(size_t index, Node* child);
+		virtual bool setChild(size_t i, Node* node);
+		virtual bool removeChildren(size_t pos, size_t num);
+
 	protected:
 		virtual ~VolumeGroup();
 	};

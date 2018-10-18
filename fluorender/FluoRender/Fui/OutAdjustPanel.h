@@ -35,25 +35,18 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FUI
 {
-	//all convert v1 to v2
-#define GammaUI2(v1, v2) \
-	{v2 = 1.0/v1;}
-#define Gamma2UI(v1, v2) \
-	{v2 = 1.0/v1;}
-#define Gamma2UIP(v) \
+#define Gamma2UiS(v) \
+	int(100.0/v+0.5)
+#define Brigt2UiS(v) \
+	int((v-1.0)*256.0+0.5)
+#define Equal2UiS(v) \
 	int(v*100.0+0.5)
-#define BrightnessUI2(v1, v2) \
-	{v2 = v1/256.0 + 1.0;}
-#define Brightness2UI(v1, v2) \
-	{v2 = (v1-1.0)*256.0;}
-#define Brightness2UIP(v) \
-	int(v+0.5)
-#define HdrUI2(v1, v2) \
-	{v2 = v1;}
-#define Hdr2UI(v1, v2) \
-	{v2 = v1;}
-#define Hdr2UIP(v) \
-	int(v*100.0+0.5)
+#define Gamma2UiT(v) \
+	1.0/v
+#define Brigt2UiT(v) \
+	(v-1.0)*256.0
+//#define Equal2UiT(v) \
+//	v
 
 	class OutAdjustPanel : public wxPanel
 	{

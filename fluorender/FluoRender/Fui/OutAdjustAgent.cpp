@@ -81,13 +81,13 @@ void OutAdjustAgent::UpdateAllSettings()
 		sync_r ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
 	panel_.m_sync_r = sync_r;
 	bval = getValue("gamma r", dval);
-	panel_.m_r_gamma_sldr->SetValue(Gamma2UIP(dval));
-	panel_.m_r_gamma_text->ChangeValue(wxString::Format("%.2f", dval));
+	panel_.m_r_gamma_sldr->SetValue(Gamma2UiS(dval));
+	panel_.m_r_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
 	getValue("brightness r", dval);
-	panel_.m_r_brightness_sldr->SetValue(Brightness2UIP(dval));
-	panel_.m_r_brightness_text->ChangeValue(wxString::Format("%d", Brightness2UIP(dval)));
+	panel_.m_r_brightness_sldr->SetValue(Brigt2UiS(dval));
+	panel_.m_r_brightness_text->ChangeValue(wxString::Format("%.0f", Brigt2UiT(dval)));
 	getValue("equalize r", dval);
-	panel_.m_r_hdr_sldr->SetValue(Hdr2UIP(dval));
+	panel_.m_r_hdr_sldr->SetValue(Equal2UiS(dval));
 	panel_.m_r_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
 	//green
 	panel_.m_sync_g_chk->ToggleTool(OutAdjustPanel::ID_SyncGChk, sync_g);
@@ -95,13 +95,13 @@ void OutAdjustAgent::UpdateAllSettings()
 		sync_g ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
 	panel_.m_sync_g = sync_g;
 	getValue("gamma g", dval);
-	panel_.m_g_gamma_sldr->SetValue(Gamma2UIP(dval));
-	panel_.m_g_gamma_text->ChangeValue(wxString::Format("%.2f", dval));
+	panel_.m_g_gamma_sldr->SetValue(Gamma2UiS(dval));
+	panel_.m_g_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
 	getValue("brightness g", dval);
-	panel_.m_g_brightness_sldr->SetValue(Brightness2UIP(dval));
-	panel_.m_g_brightness_text->ChangeValue(wxString::Format("%d", int(dval)));
+	panel_.m_g_brightness_sldr->SetValue(Brigt2UiS(dval));
+	panel_.m_g_brightness_text->ChangeValue(wxString::Format("%.0f", Brigt2UiT(dval)));
 	getValue("equalize g", dval);
-	panel_.m_g_hdr_sldr->SetValue(Hdr2UIP(dval));
+	panel_.m_g_hdr_sldr->SetValue(Equal2UiS(dval));
 	panel_.m_g_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
 	//blue
 	panel_.m_sync_b_chk->ToggleTool(OutAdjustPanel::ID_SyncBChk, sync_b);
@@ -109,13 +109,13 @@ void OutAdjustAgent::UpdateAllSettings()
 		sync_b ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
 	panel_.m_sync_b = sync_b;
 	getValue("gamma b", dval);
-	panel_.m_b_gamma_sldr->SetValue(Gamma2UIP(dval));
-	panel_.m_b_gamma_text->ChangeValue(wxString::Format("%.2f", dval));
+	panel_.m_b_gamma_sldr->SetValue(Gamma2UiS(dval));
+	panel_.m_b_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
 	getValue("brightness b", dval);
-	panel_.m_b_brightness_sldr->SetValue(Brightness2UIP(dval));
-	panel_.m_b_brightness_text->ChangeValue(wxString::Format("%d", Brightness2UIP(dval)));
+	panel_.m_b_brightness_sldr->SetValue(Brigt2UiS(dval));
+	panel_.m_b_brightness_text->ChangeValue(wxString::Format("%.0f", Brigt2UiT(dval)));
 	getValue("equalize b", dval);
-	panel_.m_b_hdr_sldr->SetValue(Hdr2UIP(dval));
+	panel_.m_b_hdr_sldr->SetValue(Equal2UiS(dval));
 	panel_.m_b_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
 
 	if (bval)

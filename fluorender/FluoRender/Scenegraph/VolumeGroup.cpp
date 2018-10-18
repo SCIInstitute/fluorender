@@ -53,3 +53,89 @@ VolumeGroup::~VolumeGroup()
 
 }
 
+bool VolumeGroup::insertChild(size_t index, Node* child)
+{
+	if (child)
+	{
+		std::string ss[] = {
+			"gamma r",
+			"gamma g",
+			"gamma b",
+			"brightness r",
+			"brightness g",
+			"brightness b",
+			"equalize r",
+			"equalize g",
+			"equalize b"
+		};
+		std::vector<std::string> names(std::begin(ss), std::end(ss));
+		syncValues(names, child);
+		child->syncValues(names, this);
+	}
+	return Group::insertChild(index, child);
+}
+
+bool VolumeGroup::removeChildren(size_t pos, size_t num)
+{
+	if (pos < m_children.size() && num > 0)
+	{
+		size_t end = pos + num;
+		if (end > m_children.size())
+			end = m_children.size();
+
+		std::string ss[] = {
+			"gamma r",
+			"gamma g",
+			"gamma b",
+			"brightness r",
+			"brightness g",
+			"brightness b",
+			"equalize r",
+			"equalize g",
+			"equalize b"
+		};
+		std::vector<std::string> names(std::begin(ss), std::end(ss));
+
+		for (unsigned int i = pos; i < end; ++i)
+		{
+			Node* child = m_children[i].get();
+			if (child)
+			{
+				unsyncValues(names, child);
+				child->unsyncValues(names, this);
+			}
+		}
+	}
+	return Group::removeChildren(pos, num);
+}
+
+bool VolumeGroup::setChild(size_t i, Node* node)
+{
+	if (i < m_children.size() && node)
+	{
+		std::string ss[] = {
+			"gamma r",
+			"gamma g",
+			"gamma b",
+			"brightness r",
+			"brightness g",
+			"brightness b",
+			"equalize r",
+			"equalize g",
+			"equalize b"
+		};
+		std::vector<std::string> names(std::begin(ss), std::end(ss));
+
+		Node* orig_node = m_children[i].get();
+		if (orig_node)
+		{
+			unsyncValues(names, orig_node);
+			orig_node->unsyncValues(names, this);
+		}
+
+		syncValues(names, node);
+		node->syncValues(names, this);
+	}
+	return Group::setChild(i, node);
+}
+
