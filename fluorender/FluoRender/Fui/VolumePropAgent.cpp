@@ -318,7 +318,7 @@ void VolumePropAgent::UpdateAllSettings()
 	//smaple rate
 	if ((vald_fp = (wxFloatingPointValidator<double>*)panel_.m_sample_text->GetValidator()))
 		vald_fp->SetRange(0.0, 100.0);
-	getValue("smaple rate", dval);
+	getValue("sample rate", dval);
 	panel_.m_sample_sldr->SetValue(dval*10.0);
 	str = wxString::Format("%.1f", dval);
 	panel_.m_sample_text->ChangeValue(str);

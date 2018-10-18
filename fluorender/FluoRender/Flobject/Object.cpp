@@ -661,83 +661,63 @@ bool Object::getValue(const std::string &name, FLTYPE::GLint4 &value)
 
 //sync a value
 //observer's value updates when this updates
-bool Object::syncValue(const std::string &name, Observer* obsrvr)
+bool Object::syncValue(const std::string &name, Object* obj)
 {
-	bool result = false;
-	Value* value = getValue(name);
-	if (value)
+	if (obj)
 	{
-		Object* obj = dynamic_cast<Object*>(obsrvr);
-		if (obj)
+		Value* value = getValue(name);
+		Value* value2 = obj->getValue(name);
+		if (value && value2)
 		{
-			Value* value2 = obj->getValue(name);
-			if (value2)
-			{
-				value->addObserver(value2);
-				result = true;
-			}
-		}
-		else
-		{
-			value->addObserver(obsrvr);
-			result = true;
+			value->addObserver(value2);
+			return true;
 		}
 	}
-	return result;
+	return false;
 }
 
 //unsync a value
-bool Object::unsyncValue(const std::string &name, Observer* obsrvr)
+bool Object::unsyncValue(const std::string &name, Object* obj)
 {
-	bool result = false;
-	Value* value = getValue(name);
-	if (value)
+	if (obj)
 	{
-		Object* obj = dynamic_cast<Object*>(obsrvr);
-		if (obj)
+		Value* value = getValue(name);
+		Value* value2 = obj->getValue(name);
+		if (value && value2)
 		{
-			Value* value2 = obj->getValue(name);
-			if (value2)
-			{
-				value->removeObserver(value2);
-				result = true;
-			}
-		}
-		else
-		{
-			value->removeObserver(obsrvr);
-			result = true;
+			value->removeObserver(value2);
+			return true;
 		}
 	}
-	return result;
+	return false;
 }
 
 //sync a list of values
-bool Object::syncValues(const std::vector<std::string> &names, Observer* obsrvr)
+bool Object::syncValues(const std::vector<std::string> &names, Object* obj)
 {
 	bool result = false;
 	for (auto it = names.begin();
 		it != names.end(); ++it)
 	{
-		result |= syncValue(*it, obsrvr);
+		result |= syncValue(*it, obj);
 	}
 	return result;
 }
 
 //unsync a list of values
-bool Object::unsyncValues(const std::vector<std::string> &names, Observer* obsrvr)
+bool Object::unsyncValues(const std::vector<std::string> &names, Object* obj)
 {
 	bool result = false;
 	for (auto it = names.begin();
 		it != names.end(); ++it)
 	{
-		result |= unsyncValue(*it, obsrvr);
+		result |= unsyncValue(*it, obj);
 	}
 	return result;
 }
 
 //sync all values
-bool Object::syncAllValues(Observer* obsrvr)
+bool Object::syncAllValues(Object* obj)
 {
 	bool result = false;
 	std::string name;
@@ -749,7 +729,7 @@ bool Object::syncAllValues(Observer* obsrvr)
 			if (it->second)
 			{
 				name = it->second->getName();
-				result |= syncValue(name, obsrvr);
+				result |= syncValue(name, obj);
 			}
 		}
 	}
@@ -757,7 +737,7 @@ bool Object::syncAllValues(Observer* obsrvr)
 }
 
 //unsync all values
-bool Object::unsyncAllValues(Observer* obsrvr)
+bool Object::unsyncAllValues(Object* obj)
 {
 	bool result = false;
 	std::string name;
@@ -769,7 +749,7 @@ bool Object::unsyncAllValues(Observer* obsrvr)
 			if (it->second)
 			{
 				name = it->second->getName();
-				result |= unsyncValue(name, obsrvr);
+				result |= unsyncValue(name, obj);
 			}
 		}
 	}

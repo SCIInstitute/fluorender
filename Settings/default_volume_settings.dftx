@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ValueSet>
+	<Value name="mip mode" type="long" value="0"/>
+	<Value name="invert" type="bool" value="0"/>
+	<Value name="colormap enable" type="bool" value="0"/>
+	<Value name="saturation" type="double" value="1"/>
+	<Value name="gamma 3d" type="double" value="0.7"/>
+	<Value name="extract boundary" type="double" value="0"/>
+	<Value name="low threshold" type="double" value="0"/>
+	<Value name="high threshold" type="double" value="1"/>
+	<Value name="alpha" type="double" value="0.701961"/>
+	<Value name="alpha enable" type="bool" value="1"/>
+	<Value name="spc y" type="double" value="1"/>
+	<Value name="spc z" type="double" value="3"/>
+	<Value name="noise redct" type="bool" value="0"/>
+	<Value name="shading enable" type="bool" value="0"/>
+	<Value name="low shading" type="double" value="1.5"/>
+	<Value name="sample rate" type="double" value="2"/>
+	<Value name="high shading" type="double" value="10"/>
+	<Value name="shadow int" type="double" value="1"/>
+	<Value name="shadow enable" type="bool" value="0"/>
+	<Value name="spc x" type="double" value="1"/>
+	<Value name="colormap mode" type="long" value="0"/>
+	<Value name="colormap type" type="long" value="0"/>
+	<Value name="colormap low" type="double" value="0"/>
+	<Value name="colormap high" type="double" value="1"/>
+	<Value name="colormap proj" type="long" value="0"/>
+	<Value name="interpolate" type="bool" value="1"/>
+</ValueSet>

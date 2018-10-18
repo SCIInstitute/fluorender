@@ -211,13 +211,13 @@ public:
 	bool getValue(const std::string &name, FLTYPE::GLint4 &value);
 
 	//sync value
-	//observer's value updates when this updates (this -> observer)
-	bool syncValue(const std::string &name, Observer* obsrvr);
-	bool unsyncValue(const std::string &name, Observer* obsrvr);
-	bool syncValues(const std::vector<std::string> &names, Observer* obsrvr);
-	bool unsyncValues(const std::vector<std::string> &names, Observer* obsrvr);
-	bool syncAllValues(Observer* obsrvr);
-	bool unsyncAllValues(Observer* obsrvr);
+	//observer's value updates when this updates (this -> obj)
+	bool syncValue(const std::string &name, Object* obj);
+	bool unsyncValue(const std::string &name, Object* obj);
+	bool syncValues(const std::vector<std::string> &names, Object* obj);
+	bool unsyncValues(const std::vector<std::string> &names, Object* obj);
+	bool syncAllValues(Object* obj);
+	bool unsyncAllValues(Object* obj);
 	//propagate value (this -> object)
 	bool propValue(const std::string &name, Object* obj);
 	bool propValues(const std::vector<std::string> &names, Object* obj);

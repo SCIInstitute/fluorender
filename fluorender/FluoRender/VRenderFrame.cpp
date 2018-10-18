@@ -168,7 +168,10 @@ VRenderFrame::VRenderFrame(
 	m_benchmark(benchmark)
 {
 	//create default
-	FL::Global::instance().getVolumeFactory().createDefault();
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = wxPathOnly(expath);
+	wxString dft = expath + "/default_volume_settings.dftx";
+	FL::Global::instance().getVolumeFactory().setValue("default filename", dft.ToStdString());
 	FL::Global::instance().getMeshFactory().createDefault();
 	//create root node
 	m_root = FL::ref_ptr<FL::Group>(new FL::Group());

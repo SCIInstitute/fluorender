@@ -57,12 +57,15 @@ void ObjectFactory::objectChanged(int notify_level, void* ptr, void* orig_node, 
 		{
 			Value* value = dynamic_cast<Value*>(refd);
 			if (value->getName() == default_setting_filename_value_name_)
-				readDefault();
+			{
+				if (!readDefault())
+					createDefault();
+			}
 		}
 	}
 }
 
-bool ObjectFactory::setDefaultValues(boost::property_tree::ptree &pt)
+bool ObjectFactory::setDefaultValues(boost::property_tree::ptree &pt, const std::set<std::string> &names)
 {
 	Object* object = getDefault();
 	if (!object)
@@ -88,6 +91,8 @@ bool ObjectFactory::setDefaultValues(boost::property_tree::ptree &pt)
 		if (child_name != "Value")
 			continue;
 		std::string name = sub_pt.get<std::string>("<xmlattr>.name");
+		if (!names.empty() && names.find(name) == names.end())
+			continue;
 		std::string type = sub_pt.get<std::string>("<xmlattr>.type");
 		std::string value = sub_pt.get<std::string>("<xmlattr>.value");
 		ValueTuple vt{name, type, value};
@@ -99,7 +104,7 @@ bool ObjectFactory::setDefaultValues(boost::property_tree::ptree &pt)
 	return true;
 }
 
-bool ObjectFactory::convDefaultValues(boost::property_tree::ptree &pt)
+bool ObjectFactory::convDefaultValues(boost::property_tree::ptree &pt, const std::set<std::string> &names)
 {
 	Object* object = getDefault();
 	if (!object)
@@ -110,16 +115,18 @@ bool ObjectFactory::convDefaultValues(boost::property_tree::ptree &pt)
 		pt.clear();
 	ptree parent;
 	//get all value names
-	std::vector<std::string> names =
+	std::vector<std::string> all_names =
 		object->getValueNames();
-	for (auto it = names.begin();
-		it != names.end(); ++it)
+	for (auto it = all_names.begin();
+		it != all_names.end(); ++it)
 	{
 		ValueTuple vt;
 		std::get<0>(vt) = *it;
 		if (object->getValue(vt))
 		{
 			std::string name = std::get<0>(vt);
+			if (!names.empty() && names.find(name) == names.end())
+				continue;
 			std::string type = std::get<1>(vt);
 			std::string val = std::get<2>(vt);
 			ptree child;
@@ -135,7 +142,31 @@ bool ObjectFactory::convDefaultValues(boost::property_tree::ptree &pt)
 	return true;
 }
 
-bool ObjectFactory::readDefault(std::istream &is)
+void ObjectFactory::propValuesToDefault(Object* obj, const std::vector<std::string> &names)
+{
+	Object* def_obj = getDefault();
+	if (!def_obj || ! obj)
+		return;
+
+	if (names.empty())
+		obj->propAllValues(def_obj);
+	else
+		obj->propValues(names, def_obj);
+}
+
+void ObjectFactory::propValuesFromDefault(Object* obj, const std::vector<std::string> &names)
+{
+	Object* def_obj = getDefault();
+	if (!def_obj || !obj)
+		return;
+
+	if (names.empty())
+		def_obj->propAllValues(obj);
+	else
+		def_obj->propValues(names, obj);
+}
+
+bool ObjectFactory::readDefault(std::istream &is, const std::set<std::string> &names)
 {
 	using boost::property_tree::ptree;
 	ptree pt;
@@ -147,16 +178,16 @@ bool ObjectFactory::readDefault(std::istream &is)
 	{
 		return false;
 	}
-	setDefaultValues(pt);
+	setDefaultValues(pt, names);
 
 	return true;
 }
 
-bool ObjectFactory::writeDefault(std::ostream &os, int indent)
+bool ObjectFactory::writeDefault(std::ostream &os, const std::set<std::string> &names, int indent)
 {
 	using boost::property_tree::ptree;
 	ptree pt;
-	convDefaultValues(pt);
+	convDefaultValues(pt, names);
 	//write_xml(os, pt,
 	//	boost::property_tree::xml_writer_make_settings< std::string >('\t', 1));
 	try
@@ -172,7 +203,7 @@ bool ObjectFactory::writeDefault(std::ostream &os, int indent)
 	return true;
 }
 
-bool ObjectFactory::readDefault()
+bool ObjectFactory::readDefault(const std::set<std::string> &names)
 {
 	std::string filename;
 	getValue(default_setting_filename_value_name_, filename);
@@ -187,19 +218,19 @@ bool ObjectFactory::readDefault()
 	{
 		return false;
 	}
-	setDefaultValues(pt);
+	setDefaultValues(pt, names);
 
 	return true;
 }
 
-bool ObjectFactory::writeDefault()
+bool ObjectFactory::writeDefault(const std::set<std::string> &names)
 {
 	std::string filename;
 	getValue(default_setting_filename_value_name_, filename);
 
 	using boost::property_tree::ptree;
 	ptree pt;
-	convDefaultValues(pt);
+	convDefaultValues(pt, names);
 	try
 	{
 		write_xml(filename, pt, std::locale(),
