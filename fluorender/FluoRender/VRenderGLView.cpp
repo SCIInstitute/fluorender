@@ -1279,38 +1279,38 @@ void VRenderGLView::DrawVolumes(int peel)
 					cur_iter = find(m_vd_pop_list.begin(), m_vd_pop_list.end(), m_cur_vol);
 					size_t cur_index = distance(m_vd_pop_list.begin(), cur_iter);
 					int vd_index;
+					FL::VolumeData* vd = 0;
 					if (cur_iter != m_vd_pop_list.end())
-					{
-						FL::VolumeData* vd;
 						vd = *cur_iter;
+					else
+						vd = m_vd_pop_list[0];
+					quota_vd_list.push_back(vd);
+					long count_bricks;
+					vd->getValue("brick num", count_bricks);
+					quota_bricks_chan = Min(count_bricks, quota_bricks);
+					vd->GetRenderer()->set_quota_bricks_chan(quota_bricks_chan);
+					int count = 0;
+					while (count_bricks < quota_bricks &&
+						quota_vd_list.size() < m_vd_pop_list.size())
+					{
+						if (count % 2 == 0)
+							vd_index = cur_index + count / 2 + 1;
+						else
+							vd_index = cur_index - count / 2 - 1;
+						count++;
+						if (vd_index < 0 ||
+							(size_t)vd_index >= m_vd_pop_list.size())
+							continue;
+						vd = m_vd_pop_list[vd_index];
+						long brick_num;
+						vd->getValue("brick num", brick_num);
 						quota_vd_list.push_back(vd);
-						long count_bricks;
-						vd->getValue("brick num", count_bricks);
-						quota_bricks_chan = Min(count_bricks, quota_bricks);
+						if (count_bricks + brick_num > quota_bricks)
+							quota_bricks_chan = quota_bricks - count_bricks;
+						else
+							quota_bricks_chan = brick_num;
 						vd->GetRenderer()->set_quota_bricks_chan(quota_bricks_chan);
-						int count = 0;
-						while (count_bricks < quota_bricks &&
-							quota_vd_list.size() < m_vd_pop_list.size())
-						{
-							if (count % 2 == 0)
-								vd_index = cur_index + count / 2 + 1;
-							else
-								vd_index = cur_index - count / 2 - 1;
-							count++;
-							if (vd_index < 0 ||
-								(size_t)vd_index >= m_vd_pop_list.size())
-								continue;
-							vd = m_vd_pop_list[vd_index];
-							long brick_num;
-							vd->getValue("brick num", brick_num);
-							quota_vd_list.push_back(vd);
-							if (count_bricks + brick_num > quota_bricks)
-								quota_bricks_chan = quota_bricks - count_bricks;
-							else
-								quota_bricks_chan = brick_num;
-							vd->GetRenderer()->set_quota_bricks_chan(quota_bricks_chan);
-							count_bricks += quota_bricks_chan;
-						}
+						count_bricks += quota_bricks_chan;
 					}
 				}
 				else if (m_vd_pop_list.size() == 1)
@@ -1318,7 +1318,10 @@ void VRenderGLView::DrawVolumes(int peel)
 					quota_bricks_chan = quota_bricks;
 					FL::VolumeData* vd = m_vd_pop_list[0];
 					if (vd)
+					{
 						vd->GetRenderer()->set_quota_bricks_chan(quota_bricks_chan);
+						quota_vd_list.push_back(vd);
+					}
 				}
 
 				//get and set center point
@@ -3293,7 +3296,7 @@ void VRenderGLView::DrawOVER(FL::VolumeData* vd, bool mask, int peel)
 		vd->setValue("da end", m_fog_end, FL::Value::NotifyLevel::NOTIFY_SELF);
 		vd->setValue("viewport", FLTYPE::GLint4(vp), FL::Value::NotifyLevel::NOTIFY_SELF);
 		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color), FL::Value::NotifyLevel::NOTIFY_SELF);
-		vd->GetRenderer()->set_clear_color(clear_color);
+		//vd->GetRenderer()->set_clear_color(clear_color);
 		vd->setValue("cur framebuffer", (unsigned long)m_cur_framebuffer, FL::Value::NotifyLevel::NOTIFY_SELF);
 		vd->Draw(!m_persp, m_adaptive,
 			m_interactive, m_scale_factor,

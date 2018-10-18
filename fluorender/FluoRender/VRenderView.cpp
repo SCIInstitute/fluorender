@@ -1221,8 +1221,8 @@ Color VRenderView::GetBackgroundColor()
 
 void VRenderView::SetBackgroundColor(Color &color)
 {
-	//if (m_glview)
-	//	m_glview->SetBackgroundColor(color);
+	if (m_glview)
+		m_glview->SetBackgroundColor(FLTYPE::Color(color.r(), color.g(), color.b()));
 	wxColor c(int(color.r()*255.0), int(color.g()*255.0), int(color.b()*255.0));
 	m_bg_color_picker->SetColour(c);
 }
