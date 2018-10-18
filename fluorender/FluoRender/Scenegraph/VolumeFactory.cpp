@@ -63,6 +63,9 @@ void VolumeFactory::createDefault()
 		vd->addValue("equalize r", double(0));
 		vd->addValue("equalize g", double(0));
 		vd->addValue("equalize b", double(0));
+		vd->addValue("sync r", bool(false));
+		vd->addValue("sync g", bool(false));
+		vd->addValue("sync b", bool(false));
 
 		vd->addValue("bounds", FLTYPE::BBox());
 		vd->addValue("clip planes", FLTYPE::PlaneSet(6));
@@ -270,6 +273,9 @@ void VolumeFactory::setEventHandler(VolumeData* vd)
 	ADD_AFTER_EVENT(vd, "depth atten", OnDepthAttenChanged);
 	ADD_AFTER_EVENT(vd, "skip brick", OnSkipBrickChanged);
 	ADD_AFTER_EVENT(vd, "clip planes", OnClipPlanesChanged);
+	ADD_AFTER_EVENT(vd, "sync r", OnSyncOutputChannels);
+	ADD_AFTER_EVENT(vd, "sync g", OnSyncOutputChannels);
+	ADD_AFTER_EVENT(vd, "sync b", OnSyncOutputChannels);
 }
 
 VolumeData* VolumeFactory::build(const std::string &exp)

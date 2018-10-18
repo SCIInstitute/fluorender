@@ -69,18 +69,11 @@ FL::Node* OutAdjustAgent::getObject()
 
 void OutAdjustAgent::UpdateAllSettings()
 {
-	bool sync_r = false;
-	bool sync_g = false;
-	bool sync_b = false;
 	double dval = 0.0;
 	bool bval = false;
 
 	//red
-	panel_.m_sync_r_chk->ToggleTool(OutAdjustPanel::ID_SyncRChk, sync_r);
-	panel_.m_sync_r_chk->SetToolNormalBitmap(OutAdjustPanel::ID_SyncRChk,
-		sync_r ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
-	panel_.m_sync_r = sync_r;
-	bval = getValue("gamma r", dval);
+	bool result = getValue("gamma r", dval);
 	panel_.m_r_gamma_sldr->SetValue(Gamma2UiS(dval));
 	panel_.m_r_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
 	getValue("brightness r", dval);
@@ -90,10 +83,6 @@ void OutAdjustAgent::UpdateAllSettings()
 	panel_.m_r_hdr_sldr->SetValue(Equal2UiS(dval));
 	panel_.m_r_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
 	//green
-	panel_.m_sync_g_chk->ToggleTool(OutAdjustPanel::ID_SyncGChk, sync_g);
-	panel_.m_sync_g_chk->SetToolNormalBitmap(OutAdjustPanel::ID_SyncGChk,
-		sync_g ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
-	panel_.m_sync_g = sync_g;
 	getValue("gamma g", dval);
 	panel_.m_g_gamma_sldr->SetValue(Gamma2UiS(dval));
 	panel_.m_g_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
@@ -104,10 +93,6 @@ void OutAdjustAgent::UpdateAllSettings()
 	panel_.m_g_hdr_sldr->SetValue(Equal2UiS(dval));
 	panel_.m_g_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
 	//blue
-	panel_.m_sync_b_chk->ToggleTool(OutAdjustPanel::ID_SyncBChk, sync_b);
-	panel_.m_sync_b_chk->SetToolNormalBitmap(OutAdjustPanel::ID_SyncBChk,
-		sync_b ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
-	panel_.m_sync_b = sync_b;
 	getValue("gamma b", dval);
 	panel_.m_b_gamma_sldr->SetValue(Gamma2UiS(dval));
 	panel_.m_b_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
@@ -118,7 +103,24 @@ void OutAdjustAgent::UpdateAllSettings()
 	panel_.m_b_hdr_sldr->SetValue(Equal2UiS(dval));
 	panel_.m_b_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
 
-	if (bval)
+	//sync
+	//r
+	getValue("sync r", bval);
+	panel_.m_sync_r_chk->ToggleTool(OutAdjustPanel::ID_SyncRChk, bval);
+	panel_.m_sync_r_chk->SetToolNormalBitmap(OutAdjustPanel::ID_SyncRChk,
+		result ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
+	//g
+	getValue("sync g", bval);
+	panel_.m_sync_g_chk->ToggleTool(OutAdjustPanel::ID_SyncGChk, bval);
+	panel_.m_sync_g_chk->SetToolNormalBitmap(OutAdjustPanel::ID_SyncGChk,
+		bval ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
+	//b
+	getValue("sync b", bval);
+	panel_.m_sync_b_chk->ToggleTool(OutAdjustPanel::ID_SyncBChk, bval);
+	panel_.m_sync_b_chk->SetToolNormalBitmap(OutAdjustPanel::ID_SyncBChk,
+		bval ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
+
+	if (result)
 		panel_.EnableAll();
 	else
 		panel_.DisableAll();

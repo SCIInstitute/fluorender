@@ -57,8 +57,6 @@ namespace FUI
 
 	protected:
 		OutAdjustPanel &panel_;
-
-	private:
 	};
 }
 

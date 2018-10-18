@@ -213,6 +213,7 @@ namespace FL
 		void OnLowShadingChanged();
 		void OnHighShadingChanged();
 		void OnIntScaleChanged();
+		void OnSyncOutputChannels();
 
 		friend class VolumeFactory;
 	};

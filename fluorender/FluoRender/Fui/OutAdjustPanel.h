@@ -105,11 +105,6 @@ namespace FUI
 
 		OutAdjustAgent* m_agent;
 
-		//sync flags
-		bool m_sync_r;
-		bool m_sync_g;
-		bool m_sync_b;
-
 		//sync red
 		wxToolBar *m_sync_r_chk;
 		//red sliders

@@ -687,6 +687,60 @@ void VolumeData::OnIntScaleChanged()
 	m_vr->set_gm_scale(int_scale);
 }
 
+void VolumeData::OnSyncOutputChannels()
+{
+	std::vector<std::string> ss_gamma = {
+		"gamma r",
+		"gamma g",
+		"gamma b"
+	};
+	std::vector<std::string> ss_brigt = {
+		"brightness r",
+		"brightness g",
+		"brightness b"
+	};
+	std::vector<std::string> ss_equal = {
+		"equalize r",
+		"equalize g",
+		"equalize b"
+	};
+	bool sync_r, sync_g, sync_b;
+	getValue("sync r", sync_r);
+	getValue("sync g", sync_g);
+	getValue("sync b", sync_b);
+
+	//unsync all for the sake of simplicity
+	unsyncValues(ss_gamma);
+	unsyncValues(ss_brigt);
+	unsyncValues(ss_equal);
+
+	//then sync
+	ss_gamma.clear();
+	ss_brigt.clear();
+	ss_equal.clear();
+	if (sync_r)
+	{
+		ss_gamma.push_back("gamma r");
+		ss_brigt.push_back("brightness r");
+		ss_equal.push_back("equalize r");
+	}
+	if (sync_g)
+	{
+		ss_gamma.push_back("gamma g");
+		ss_brigt.push_back("brightness g");
+		ss_equal.push_back("equalize g");
+	}
+	if (sync_b)
+	{
+		ss_gamma.push_back("gamma b");
+		ss_brigt.push_back("brightness b");
+		ss_equal.push_back("equalize b");
+	}
+	syncValues(ss_gamma);
+	syncValues(ss_brigt);
+	syncValues(ss_equal);
+}
+
 //functions from old class
 //randomize color
 void VolumeData::RandomizeColor()

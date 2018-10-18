@@ -66,7 +66,10 @@ bool VolumeGroup::insertChild(size_t index, Node* child)
 			"brightness b",
 			"equalize r",
 			"equalize g",
-			"equalize b"
+			"equalize b",
+			"sync r",
+			"sync g",
+			"sync b"
 		};
 		std::vector<std::string> names(std::begin(ss), std::end(ss));
 		syncValues(names, child);
@@ -92,7 +95,10 @@ bool VolumeGroup::removeChildren(size_t pos, size_t num)
 			"brightness b",
 			"equalize r",
 			"equalize g",
-			"equalize b"
+			"equalize b",
+			"sync r",
+			"sync g",
+			"sync b"
 		};
 		std::vector<std::string> names(std::begin(ss), std::end(ss));
 
@@ -122,7 +128,10 @@ bool VolumeGroup::setChild(size_t i, Node* node)
 			"brightness b",
 			"equalize r",
 			"equalize g",
-			"equalize b"
+			"equalize b",
+			"sync r",
+			"sync g",
+			"sync b"
 		};
 		std::vector<std::string> names(std::begin(ss), std::end(ss));
 

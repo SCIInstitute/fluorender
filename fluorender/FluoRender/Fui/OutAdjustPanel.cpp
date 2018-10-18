@@ -75,10 +75,7 @@ OutAdjustPanel::OutAdjustPanel(wxWindow* frame,
 	long style,
 	const wxString& name) :
 	wxPanel(parent, id, pos, size, style, name),
-	m_frame(frame),
-	m_sync_r(false),
-	m_sync_g(false),
-	m_sync_b(false)
+	m_frame(frame)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -556,80 +553,26 @@ void OutAdjustPanel::OnBHdrText(wxCommandEvent &event)
 
 void OutAdjustPanel::OnSyncRCheck(wxCommandEvent &event)
 {
-	m_sync_r = m_sync_r_chk->GetToolState(ID_SyncRChk);
+	bool bval = m_sync_r_chk->GetToolState(ID_SyncRChk);
 	m_sync_r_chk->SetToolNormalBitmap(ID_SyncRChk,
-		m_sync_r ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
-	/*	switch (m_type)
-	{
-	case 1://view
-	if (m_glview)
-	m_glview->SetSyncR(m_sync_r);
-	break;
-	case 2://volume data
-	if (m_vd)
-	m_vd->SetSyncR(m_sync_r);
-	break;
-	case 5://group
-	if (m_group)
-	m_group->SetSyncR(m_sync_r);
-	break;
-	}
-
-	if ((m_type == 2 || m_type == 5) &&
-	m_link_group && m_group)
-	m_group->SetSyncRAll(m_sync_r);*/
+		bval ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
+	m_agent->setValue("sync r", bval);
 }
 
 void OutAdjustPanel::OnSyncGCheck(wxCommandEvent &event)
 {
-	m_sync_g = m_sync_g_chk->GetToolState(ID_SyncGChk);
+	bool bval = m_sync_g_chk->GetToolState(ID_SyncGChk);
 	m_sync_g_chk->SetToolNormalBitmap(ID_SyncGChk,
-		m_sync_g ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
-	/*	switch (m_type)
-	{
-	case 1://view
-	if (m_glview)
-	m_glview->SetSyncG(m_sync_g);
-	break;
-	case 2://volume data
-	if (m_vd)
-	m_vd->SetSyncG(m_sync_g);
-	break;
-	case 5://group
-	if (m_group)
-	m_group->SetSyncG(m_sync_g);
-	break;
-	}
-
-	if ((m_type == 2 || m_type == 5) &&
-	m_link_group && m_group)
-	m_group->SetSyncGAll(m_sync_g);*/
+		bval ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
+	m_agent->setValue("sync g", bval);
 }
 
 void OutAdjustPanel::OnSyncBCheck(wxCommandEvent &event)
 {
-	m_sync_b = m_sync_b_chk->GetToolState(ID_SyncBChk);
+	bool bval = m_sync_b_chk->GetToolState(ID_SyncBChk);
 	m_sync_b_chk->SetToolNormalBitmap(ID_SyncBChk,
-		m_sync_b ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
-	/*	switch (m_type)
-	{
-	case 1://view
-	if (m_glview)
-	m_glview->SetSyncB(m_sync_b);
-	break;
-	case 2://volume data
-	if (m_vd)
-	m_vd->SetSyncB(m_sync_b);
-	break;
-	case 5://group
-	if (m_group)
-	m_group->SetSyncB(m_sync_b);
-	break;
-	}
-
-	if ((m_type == 2 || m_type == 5) &&
-	m_link_group && m_group)
-	m_group->SetSyncBAll(m_sync_b);*/
+		bval ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
+	m_agent->setValue("sync b", bval);
 }
 
 void OutAdjustPanel::OnRReset(wxCommandEvent &event)
