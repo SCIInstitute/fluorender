@@ -144,6 +144,24 @@ OutAdjustAgent* AgentFactory::getOrAddOutAdjustAgent(const std::string &name, wx
 	if (out_adjust_agent)
 	{
 		out_adjust_agent->setName(name);
+		out_adjust_agent->setAfterFunction("gamma r",
+			std::bind(&OutAdjustAgent::OnGammaRChanged, out_adjust_agent));
+		out_adjust_agent->setAfterFunction("gamma g",
+			std::bind(&OutAdjustAgent::OnGammaGChanged, out_adjust_agent));
+		out_adjust_agent->setAfterFunction("gamma b",
+			std::bind(&OutAdjustAgent::OnGammaBChanged, out_adjust_agent));
+		out_adjust_agent->setAfterFunction("brightness r",
+			std::bind(&OutAdjustAgent::OnBrightnessRChanged, out_adjust_agent));
+		out_adjust_agent->setAfterFunction("brightness g",
+			std::bind(&OutAdjustAgent::OnBrightnessGChanged, out_adjust_agent));
+		out_adjust_agent->setAfterFunction("brightness b",
+			std::bind(&OutAdjustAgent::OnBrightnessBChanged, out_adjust_agent));
+		out_adjust_agent->setAfterFunction("equalize r",
+			std::bind(&OutAdjustAgent::OnEqualizeRChanged, out_adjust_agent));
+		out_adjust_agent->setAfterFunction("equalize g",
+			std::bind(&OutAdjustAgent::OnEqualizeGChanged, out_adjust_agent));
+		out_adjust_agent->setAfterFunction("equalize b",
+			std::bind(&OutAdjustAgent::OnEqualizeBChanged, out_adjust_agent));
 		objects_.push_front(out_adjust_agent);
 		notifyObserversNodeAdded(this, out_adjust_agent);
 	}

@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 namespace FUI
 {
 	class OutAdjustPanel;
+	class AgentFactory;
 	class OutAdjustAgent : public InterfaceAgent
 	{
 	public:
@@ -55,8 +56,21 @@ namespace FUI
 
 		virtual void UpdateAllSettings();
 
+		friend class AgentFactory;
+
 	protected:
 		OutAdjustPanel &panel_;
+
+		//update functions
+		void OnGammaRChanged();
+		void OnGammaGChanged();
+		void OnGammaBChanged();
+		void OnBrightnessRChanged();
+		void OnBrightnessGChanged();
+		void OnBrightnessBChanged();
+		void OnEqualizeRChanged();
+		void OnEqualizeGChanged();
+		void OnEqualizeBChanged();
 	};
 }
 
