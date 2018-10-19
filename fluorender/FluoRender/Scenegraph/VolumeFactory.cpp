@@ -74,6 +74,10 @@ void VolumeFactory::createDefault()
 		vd->addValue("clip dist x", long(0));
 		vd->addValue("clip dist y", long(0));
 		vd->addValue("clip dist z", long(0));
+		//clip link
+		vd->addValue("clip link x", bool(false));
+		vd->addValue("clip link y", bool(false));
+		vd->addValue("clip link z", bool(false));
 
 		vd->addValue("data path", std::wstring());//path to original file
 		vd->addValue("channel", long(0));//channel index of the original file
@@ -222,6 +226,9 @@ void VolumeFactory::setEventHandler(VolumeData* vd)
 	//ADD_BEFORE_EVENT(vd, "mip mode", OnMipModeChanging);
 
 	//handle after events
+	ADD_AFTER_EVENT(vd, "res x", OnResChanged);
+	ADD_AFTER_EVENT(vd, "res y", OnResChanged);
+	ADD_AFTER_EVENT(vd, "res z", OnResChanged);
 	ADD_AFTER_EVENT(vd, "mip mode", OnMipModeChanged);
 	ADD_AFTER_EVENT(vd, "overlay mode", OnOverlayModeChanged);
 	ADD_AFTER_EVENT(vd, "viewport", OnViewportChanged);

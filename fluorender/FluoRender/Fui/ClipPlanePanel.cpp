@@ -94,10 +94,7 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 	m_sel_type(0),
 	m_draw_clip(false),
 	m_hold_planes(false),
-	m_plane_mode(kNormal),
-	m_link_x(false),
-	m_link_y(false),
-	m_link_z(false)
+	m_plane_mode(kNormal)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -443,7 +440,7 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 	sizer_v->Add(sizer_3, 0, wxEXPAND);
 	sizer_v->AddSpacer(5);
 	sizer_v->Add(new wxStaticText(this, 0,
-		"Set Clip Slab Width"), 0, wxALIGN_CENTER);
+		"Set Clip Range"), 0, wxALIGN_CENTER);
 	sizer_v->Add(5, 5, 0);
 	sizer_v->Add(sizer_4, 0, wxALIGN_CENTER);
 	sizer_v->Add(5, 5, 0);
@@ -780,109 +777,17 @@ void ClipPlanePanel::OnX1ClipEdit(wxCommandEvent &event)
 	str.ToLong(&ival);
 	dval = (double)ival / (double)resx;
 	m_x1_clip_sldr->SetValue(ival);
-	int barsize = (m_x1_clip_sldr->GetSize().GetHeight() - 20);
-	m_xBar->SetPosition(wxPoint(20, 10 + dval*barsize));
-	m_xBar->SetSize(wxSize(3, barsize*((double)
-		(m_x2_clip_sldr->GetValue() - ival) / (double)m_x1_clip_sldr->GetMax())));
 	FLTYPE::PlaneSet planes;
 	m_agent->getValue("clip planes", planes);
 	if (planes.GetSize() != 6)
 		return;
 	planes[0].ChangePlane(FLTYPE::Point(dval, 0.0, 0.0), FLTYPE::Vector(1.0, 0.0, 0.0));
 	m_agent->setValue("clip planes", planes);
-
-	//if (m_link_x)
-	//{
-	//	if (ival + m_x_sldr_dist > resx)
-	//	{
-	//		ival = resx - m_x_sldr_dist;
-	//		ival2 = resx;
-	//	}
-	//	else
-	//		ival2 = ival + m_x_sldr_dist;
-	//}
-	//else if (ival > ival2)
-	//	ival = ival2;
-
-	//val = (double)ival / (double)resx;
-	////str = wxString::Format("%d", ival);
-	////m_x1_clip_text->ChangeValue(str);
-	//m_x1_clip_sldr->SetValue(ival);
-	//int barsize = (m_x1_clip_sldr->GetSize().GetHeight() - 20);
-	//m_xBar->SetPosition(wxPoint(20, 10 + val*barsize));
-	//m_xBar->SetSize(wxSize(3, barsize*((double)
-	//	(m_x2_clip_sldr->GetValue() - ival) / (double)m_x1_clip_sldr->GetMax())));
-	//Plane* plane = (*planes)[0];
-	//plane->ChangePlane(Point(val, 0.0, 0.0), Vector(1.0, 0.0, 0.0));
-	//if (m_link_x)
-	//{
-	//	val2 = (double)ival2 / (double)resx;
-	//	str = wxString::Format("%d", ival2);
-	//	m_x2_clip_text->ChangeValue(str);
-	//	m_x2_clip_sldr->SetValue(ival2);
-	//	plane = (*planes)[1];
-	//	plane->ChangePlane(Point(val2, 0.0, 0.0), Vector(-1.0, 0.0, 0.0));
-	//}
-
-	//if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
-	//{
-	//	if (m_mgr)
-	//	{
-	//		size_t num = FL::Global::instance().getVolumeFactory().getNum();
-	//		for (size_t i = 0; i<num; i++)
-	//		{
-	//			FL::VolumeData* vd =
-	//				FL::Global::instance().getVolumeFactory().get(i);
-	//			if (!vd || vd == m_vd)
-	//				continue;
-
-	//			planes = 0;
-	//			if (m_vd->GetRenderer())
-	//				planes = vd->GetRenderer()->get_planes();
-	//			if (!planes)
-	//				continue;
-	//			if (planes->size() != 6)
-	//				continue;
-
-	//			(*planes)[0]->ChangePlane(Point(val, 0.0, 0.0), Vector(1.0, 0.0, 0.0));
-	//			if (m_link_x)
-	//				(*planes)[1]->ChangePlane(Point(val2, 0.0, 0.0), Vector(-1.0, 0.0, 0.0));
-	//		}
-	//	}
-	//}
-
-	//VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
-	//if (vrender_frame)
-	//{
-	//	for (int i = 0; i<(int)vrender_frame->GetViewList()->size(); i++)
-	//	{
-	//		VRenderView *vrv = (*vrender_frame->GetViewList())[i];
-	//		if (vrv)
-	//		{
-	//			if (m_link_x)
-	//				vrv->m_glview->m_clip_mask = 3;
-	//			else
-	//				vrv->m_glview->m_clip_mask = 1;
-
-	//			double rotx, roty, rotz;
-	//			vrv->GetRotations(rotx, roty, rotz);
-	//			vrv->SetRotations(rotx, roty, rotz);
-	//		}
-	//	}
-	//}
-	//RefreshVRenderViews(true);
 }
 
 void ClipPlanePanel::OnX2ClipChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
-	int ival2 = m_x1_clip_sldr->GetValue();
-
-	if (!m_link_x && ival<ival2)
-	{
-		ival = ival2;
-		m_x2_clip_sldr->SetValue(ival);
-	}
 	m_x2_clip_text->SetValue(wxString::Format("%d", ival));
 }
 
@@ -897,120 +802,12 @@ void ClipPlanePanel::OnX2ClipEdit(wxCommandEvent &event)
 	str.ToLong(&ival);
 	dval = (double)ival / (double)resx;
 	m_x2_clip_sldr->SetValue(ival);
-	int barsize = (m_x1_clip_sldr->GetSize().GetHeight() - 20);
-	m_xBar->SetPosition(wxPoint(20, 10 + ((double)m_x1_clip_sldr->GetValue() /
-		(double)m_x1_clip_sldr->GetMax())*barsize));
-	m_xBar->SetSize(wxSize(3, barsize*((double)
-		(ival - m_x1_clip_sldr->GetValue()) / (double)m_x1_clip_sldr->GetMax())));
 	FLTYPE::PlaneSet planes;
 	m_agent->getValue("clip planes", planes);
 	if (planes.GetSize() != 6)
 		return;
 	planes[1].ChangePlane(FLTYPE::Point(dval, 0.0, 0.0), FLTYPE::Vector(-1.0, 0.0, 0.0));
 	m_agent->setValue("clip planes", planes);
-	//if (!m_vd)
-	//	return;
-	//long resx, resy, resz;
-	////m_vd->GetResolution(resx, resy, resz);
-	//m_vd->getValue("res x", resx);
-	//m_vd->getValue("res y", resy);
-	//m_vd->getValue("res z", resz);
-
-	//vector<Plane*> *planes = 0;
-	//if (m_vd->GetRenderer())
-	//	planes = m_vd->GetRenderer()->get_planes();
-	//if (!planes)
-	//	return;
-	//if (planes->size() != 6)
-	//	return;
-
-	//wxString str = m_x2_clip_text->GetValue();
-	//long ival = 0;
-	//str.ToLong(&ival);
-	//int ival2 = m_x1_clip_sldr->GetValue();
-	//double val, val2;
-
-	//if (m_link_x)
-	//{
-	//	if (ival - m_x_sldr_dist < 0)
-	//	{
-	//		ival = m_x_sldr_dist;
-	//		ival2 = 0;
-	//	}
-	//	else
-	//		ival2 = ival - m_x_sldr_dist;
-	//}
-	//else if (ival < ival2)
-	//	return;
-
-	//val = (double)ival / (double)resx;
-	////str = wxString::Format("%d", ival);
-	////m_x2_clip_text->ChangeValue(str);
-	//m_x2_clip_sldr->SetValue(ival);
-	//int barsize = (m_x1_clip_sldr->GetSize().GetHeight() - 20);
-	//m_xBar->SetPosition(wxPoint(20, 10 + ((double)m_x1_clip_sldr->GetValue() /
-	//	(double)m_x1_clip_sldr->GetMax())*barsize));
-	//m_xBar->SetSize(wxSize(3, barsize*((double)
-	//	(ival - m_x1_clip_sldr->GetValue()) / (double)m_x1_clip_sldr->GetMax())));
-	//Plane* plane = (*planes)[1];
-	//plane->ChangePlane(Point(val, 0.0, 0.0), Vector(-1.0, 0.0, 0.0));
-	//if (m_link_x)
-	//{
-	//	val2 = (double)ival2 / (double)resx;
-	//	str = wxString::Format("%d", ival2);
-	//	m_x1_clip_text->ChangeValue(str);
-	//	m_x1_clip_sldr->SetValue(ival2);
-	//	plane = (*planes)[0];
-	//	plane->ChangePlane(Point(val2, 0.0, 0.0), Vector(1.0, 0.0, 0.0));
-	//}
-
-	//if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
-	//{
-	//	if (m_mgr)
-	//	{
-	//		size_t num = FL::Global::instance().getVolumeFactory().getNum();
-	//		for (size_t i = 0; i<num; i++)
-	//		{
-	//			FL::VolumeData* vd =
-	//				FL::Global::instance().getVolumeFactory().get(i);
-	//			if (!vd || vd == m_vd)
-	//				continue;
-
-	//			planes = 0;
-	//			if (m_vd->GetRenderer())
-	//				planes = vd->GetRenderer()->get_planes();
-	//			if (!planes)
-	//				continue;
-	//			if (planes->size() != 6)
-	//				continue;
-	//			(*planes)[1]->ChangePlane(Point(val, 0.0, 0.0), Vector(-1.0, 0.0, 0.0));
-	//			if (m_link_x)
-	//				(*planes)[0]->ChangePlane(Point(val2, 0.0, 0.0), Vector(1.0, 0.0, 0.0));
-	//		}
-	//	}
-	//}
-
-	//VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
-	//if (vrender_frame)
-	//{
-	//	for (int i = 0; i<(int)vrender_frame->GetViewList()->size(); i++)
-	//	{
-	//		VRenderView *vrv = (*vrender_frame->GetViewList())[i];
-	//		if (vrv)
-	//		{
-	//			if (m_link_x)
-	//				vrv->m_glview->m_clip_mask = 3;
-	//			else
-	//				vrv->m_glview->m_clip_mask = 2;
-
-	//			double rotx, roty, rotz;
-	//			vrv->GetRotations(rotx, roty, rotz);
-	//			vrv->SetRotations(rotx, roty, rotz);
-	//		}
-	//	}
-	//}
-
-	//RefreshVRenderViews(true);
 }
 
 void ClipPlanePanel::OnY1ClipChange(wxScrollEvent &event)
@@ -1030,131 +827,17 @@ void ClipPlanePanel::OnY1ClipEdit(wxCommandEvent &event)
 	str.ToLong(&ival);
 	dval = (double)ival / (double)resy;
 	m_y1_clip_sldr->SetValue(ival);
-	int barsize = (m_y1_clip_sldr->GetSize().GetHeight() - 20);
-	m_yBar->SetPosition(wxPoint(20, 10 + dval*barsize));
-	m_yBar->SetSize(wxSize(3, barsize*((double)
-		(m_y2_clip_sldr->GetValue() - ival) / (double)m_y1_clip_sldr->GetMax())));
 	FLTYPE::PlaneSet planes;
 	m_agent->getValue("clip planes", planes);
 	if (planes.GetSize() != 6)
 		return;
 	planes[2].ChangePlane(FLTYPE::Point(0.0, dval, 0.0), FLTYPE::Vector(0.0, 1.0, 0.0));
 	m_agent->setValue("clip planes", planes);
-	//if (!m_vd)
-	//	return;
-	//long resx, resy, resz;
-	////m_vd->GetResolution(resx, resy, resz);
-	//m_vd->getValue("res x", resx);
-	//m_vd->getValue("res y", resy);
-	//m_vd->getValue("res z", resz);
-
-	//vector<Plane*> *planes = 0;
-	//if (m_vd->GetRenderer())
-	//	planes = m_vd->GetRenderer()->get_planes();
-	//if (!planes)
-	//	return;
-	//if (planes->size() != 6)
-	//	return;
-
-	//wxString str = m_y1_clip_text->GetValue();
-	//long ival = 0;
-	//str.ToLong(&ival);
-	//int ival2 = m_y2_clip_sldr->GetValue();
-	//double val, val2;
-
-	//if (m_link_y)
-	//{
-	//	if (ival + m_y_sldr_dist >resy)
-	//	{
-	//		ival = resy - m_y_sldr_dist;
-	//		ival2 = resy;
-	//	}
-	//	else
-	//		ival2 = ival + m_y_sldr_dist;
-	//}
-	//else if (ival > ival2)
-	//	ival = ival2;
-
-	//val = (double)ival / (double)resy;
-	////str = wxString::Format("%d", ival);
-	////m_y1_clip_text->ChangeValue(str);
-	//m_y1_clip_sldr->SetValue(ival);
-	//int barsize = (m_y1_clip_sldr->GetSize().GetHeight() - 20);
-	//m_yBar->SetPosition(wxPoint(20, 10 + val*barsize));
-	//m_yBar->SetSize(wxSize(3, barsize*((double)
-	//	(m_y2_clip_sldr->GetValue() - ival) / (double)m_y1_clip_sldr->GetMax())));
-	//Plane* plane = (*planes)[2];
-	//plane->ChangePlane(Point(0.0, val, 0.0), Vector(0.0, 1.0, 0.0));
-	//if (m_link_y)
-	//{
-	//	val2 = (double)ival2 / (double)resy;
-	//	str = wxString::Format("%d", ival2);
-	//	m_y2_clip_text->ChangeValue(str);
-	//	m_y2_clip_sldr->SetValue(ival2);
-	//	plane = (*planes)[3];
-	//	plane->ChangePlane(Point(0.0, val2, 0.0), Vector(0.0, -1.0, 0.0));
-	//}
-
-	//if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
-	//{
-	//	if (m_mgr)
-	//	{
-	//		size_t num = FL::Global::instance().getVolumeFactory().getNum();
-	//		for (size_t i = 0; i<num; i++)
-	//		{
-	//			FL::VolumeData* vd =
-	//				FL::Global::instance().getVolumeFactory().get(i);
-	//			if (!vd || vd == m_vd)
-	//				continue;
-
-	//			planes = 0;
-	//			if (m_vd->GetRenderer())
-	//				planes = vd->GetRenderer()->get_planes();
-	//			if (!planes)
-	//				continue;
-	//			if (planes->size() != 6)
-	//				continue;
-
-	//			(*planes)[2]->ChangePlane(Point(0.0, val, 0.0), Vector(0.0, 1.0, 0.0));
-	//			if (m_link_y)
-	//				(*planes)[3]->ChangePlane(Point(0.0, val2, 0.0), Vector(0.0, -1.0, 0.0));
-	//		}
-	//	}
-	//}
-
-	//VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
-	//if (vrender_frame)
-	//{
-	//	for (int i = 0; i<(int)vrender_frame->GetViewList()->size(); i++)
-	//	{
-	//		VRenderView *vrv = (*vrender_frame->GetViewList())[i];
-	//		if (vrv)
-	//		{
-	//			if (m_link_y)
-	//				vrv->m_glview->m_clip_mask = 12;
-	//			else
-	//				vrv->m_glview->m_clip_mask = 4;
-
-	//			double rotx, roty, rotz;
-	//			vrv->GetRotations(rotx, roty, rotz);
-	//			vrv->SetRotations(rotx, roty, rotz);
-	//		}
-	//	}
-	//}
-
-	//RefreshVRenderViews(true);
 }
 
 void ClipPlanePanel::OnY2ClipChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
-	int ival2 = m_y1_clip_sldr->GetValue();
-
-	if (!m_link_y && ival<ival2)
-	{
-		ival = ival2;
-		m_y2_clip_sldr->SetValue(ival);
-	}
 	m_y2_clip_text->SetValue(wxString::Format("%d", ival));
 }
 
@@ -1169,121 +852,12 @@ void ClipPlanePanel::OnY2ClipEdit(wxCommandEvent &event)
 	str.ToLong(&ival);
 	dval = (double)ival / (double)resy;
 	m_y2_clip_sldr->SetValue(ival);
-	int barsize = (m_y1_clip_sldr->GetSize().GetHeight() - 20);
-	m_yBar->SetPosition(wxPoint(20, 10 + ((double)m_y1_clip_sldr->GetValue() /
-		(double)m_y1_clip_sldr->GetMax())*barsize));
-	m_yBar->SetSize(wxSize(3, barsize*((double)
-		(ival - m_y1_clip_sldr->GetValue()) / (double)m_y1_clip_sldr->GetMax())));
 	FLTYPE::PlaneSet planes;
 	m_agent->getValue("clip planes", planes);
 	if (planes.GetSize() != 6)
 		return;
 	planes[3].ChangePlane(FLTYPE::Point(0.0, dval, 0.0), FLTYPE::Vector(0.0, -1.0, 0.0));
 	m_agent->setValue("clip planes", planes);
-	//if (!m_vd)
-	//	return;
-	//long resx, resy, resz;
-	////m_vd->GetResolution(resx, resy, resz);
-	//m_vd->getValue("res x", resx);
-	//m_vd->getValue("res y", resy);
-	//m_vd->getValue("res z", resz);
-	//FLTYPE::PlaneSet planeset;
-	//vector<Plane*> *planes = 0;
-	//if (m_vd->GetRenderer())
-	//	planes = m_vd->GetRenderer()->get_planes();
-	//if (!planes)
-	//	return;
-	//if (planes->size() != 6)
-	//	return;
-
-	//wxString str = m_y2_clip_text->GetValue();
-	//long ival = 0;
-	//str.ToLong(&ival);
-	//int ival2 = m_y1_clip_sldr->GetValue();
-	//double val, val2;
-
-	//if (m_link_y)
-	//{
-	//	if (ival - m_y_sldr_dist < 0)
-	//	{
-	//		ival = m_y_sldr_dist;
-	//		ival2 = 0;
-	//	}
-	//	else
-	//		ival2 = ival - m_y_sldr_dist;
-	//}
-	//else if (ival < ival2)
-	//	return;
-
-	//val = (double)ival / (double)resy;
-	////str = wxString::Format("%d", ival);
-	////m_y2_clip_text->ChangeValue(str);
-	//m_y2_clip_sldr->SetValue(ival);
-	//int barsize = (m_y1_clip_sldr->GetSize().GetHeight() - 20);
-	//m_yBar->SetPosition(wxPoint(20, 10 + ((double)m_y1_clip_sldr->GetValue() /
-	//	(double)m_y1_clip_sldr->GetMax())*barsize));
-	//m_yBar->SetSize(wxSize(3, barsize*((double)
-	//	(ival - m_y1_clip_sldr->GetValue()) / (double)m_y1_clip_sldr->GetMax())));
-	//Plane* plane = (*planes)[3];
-	//plane->ChangePlane(Point(0.0, val, 0.0), Vector(0.0, -1.0, 0.0));
-	//if (m_link_y)
-	//{
-	//	val2 = (double)ival2 / (double)resy;
-	//	str = wxString::Format("%d", ival2);
-	//	m_y1_clip_text->ChangeValue(str);
-	//	m_y1_clip_sldr->SetValue(ival2);
-	//	plane = (*planes)[2];
-	//	plane->ChangePlane(Point(0.0, val2, 0.0), Vector(0.0, 1.0, 0.0));
-	//}
-
-	//if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
-	//{
-	//	if (m_mgr)
-	//	{
-	//		size_t num = FL::Global::instance().getVolumeFactory().getNum();
-	//		for (size_t i = 0; i<num; i++)
-	//		{
-	//			FL::VolumeData* vd =
-	//				FL::Global::instance().getVolumeFactory().get(i);
-	//			if (!vd || vd == m_vd)
-	//				continue;
-
-	//			planes = 0;
-	//			if (m_vd->GetRenderer())
-	//				planes = vd->GetRenderer()->get_planes();
-	//			if (!planes)
-	//				continue;
-	//			if (planes->size() != 6)
-	//				continue;
-
-	//			(*planes)[3]->ChangePlane(Point(0.0, val, 0.0), Vector(0.0, -1.0, 0.0));
-	//			if (m_link_y)
-	//				(*planes)[2]->ChangePlane(Point(0.0, val2, 0.0), Vector(0.0, 1.0, 0.0));
-	//		}
-	//	}
-	//}
-
-	//VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
-	//if (vrender_frame)
-	//{
-	//	for (int i = 0; i<(int)vrender_frame->GetViewList()->size(); i++)
-	//	{
-	//		VRenderView *vrv = (*vrender_frame->GetViewList())[i];
-	//		if (vrv)
-	//		{
-	//			if (m_link_y)
-	//				vrv->m_glview->m_clip_mask = 12;
-	//			else
-	//				vrv->m_glview->m_clip_mask = 8;
-
-	//			double rotx, roty, rotz;
-	//			vrv->GetRotations(rotx, roty, rotz);
-	//			vrv->SetRotations(rotx, roty, rotz);
-	//		}
-	//	}
-	//}
-
-	//RefreshVRenderViews(true);
 }
 
 void ClipPlanePanel::OnZ1ClipChange(wxScrollEvent &event)
@@ -1303,130 +877,17 @@ void ClipPlanePanel::OnZ1ClipEdit(wxCommandEvent &event)
 	str.ToLong(&ival);
 	dval = (double)ival / (double)resz;
 	m_z1_clip_sldr->SetValue(ival);
-	int barsize = (m_z1_clip_sldr->GetSize().GetHeight() - 20);
-	m_zBar->SetPosition(wxPoint(20, 10 + dval*barsize));
-	m_zBar->SetSize(wxSize(3, barsize*((double)
-		(m_z2_clip_sldr->GetValue() - ival) / (double)m_z1_clip_sldr->GetMax())));
 	FLTYPE::PlaneSet planes;
 	m_agent->getValue("clip planes", planes);
 	if (planes.GetSize() != 6)
 		return;
 	planes[4].ChangePlane(FLTYPE::Point(0.0, 0.0, dval), FLTYPE::Vector(0.0, 0.0, 1.0));
 	m_agent->setValue("clip planes", planes);
-	//if (!m_vd)
-	//	return;
-	//long resx, resy, resz;
-	////m_vd->GetResolution(resx, resy, resz);
-	//m_vd->getValue("res x", resx);
-	//m_vd->getValue("res y", resy);
-	//m_vd->getValue("res z", resz);
-	//vector<Plane*> *planes = 0;
-	//if (m_vd->GetRenderer())
-	//	planes = m_vd->GetRenderer()->get_planes();
-	//if (!planes)
-	//	return;
-	//if (planes->size() != 6)
-	//	return;
-
-	//wxString str = m_z1_clip_text->GetValue();
-	//long ival = 0;
-	//str.ToLong(&ival);
-	//int ival2 = m_z2_clip_sldr->GetValue();
-	//double val, val2;
-
-	//if (m_link_z)
-	//{
-	//	if (ival + m_z_sldr_dist > resz)
-	//	{
-	//		ival = resz - m_z_sldr_dist;
-	//		ival2 = resz;
-	//	}
-	//	else
-	//		ival2 = ival + m_z_sldr_dist;
-	//}
-	//else if (ival > ival2)
-	//	ival = ival2;
-
-	//val = (double)ival / (double)resz;
-	////str = wxString::Format("%d", ival);
-	////m_z1_clip_text->ChangeValue(str);
-	//m_z1_clip_sldr->SetValue(ival);
-	//int barsize = (m_z1_clip_sldr->GetSize().GetHeight() - 20);
-	//m_zBar->SetPosition(wxPoint(20, 10 + val*barsize));
-	//m_zBar->SetSize(wxSize(3, barsize*((double)
-	//	(m_z2_clip_sldr->GetValue() - ival) / (double)m_z1_clip_sldr->GetMax())));
-	//Plane* plane = (*planes)[4];
-	//plane->ChangePlane(Point(0.0, 0.0, val), Vector(0.0, 0.0, 1.0));
-	//if (m_link_z)
-	//{
-	//	val2 = (double)ival2 / (double)resz;
-	//	str = wxString::Format("%d", ival2);
-	//	m_z2_clip_text->ChangeValue(str);
-	//	m_z2_clip_sldr->SetValue(ival2);
-	//	plane = (*planes)[5];
-	//	plane->ChangePlane(Point(0.0, 0.0, val2), Vector(0.0, 0.0, -1.0));
-	//}
-
-	//if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
-	//{
-	//	if (m_mgr)
-	//	{
-	//		size_t num = FL::Global::instance().getVolumeFactory().getNum();
-	//		for (size_t i = 0; i<num; i++)
-	//		{
-	//			FL::VolumeData* vd =
-	//				FL::Global::instance().getVolumeFactory().get(i);
-	//			if (!vd || vd == m_vd)
-	//				continue;
-
-	//			planes = 0;
-	//			if (m_vd->GetRenderer())
-	//				planes = vd->GetRenderer()->get_planes();
-	//			if (!planes)
-	//				continue;
-	//			if (planes->size() != 6)
-	//				continue;
-
-	//			(*planes)[4]->ChangePlane(Point(0.0, 0.0, val), Vector(0.0, 0.0, 1.0));
-	//			if (m_link_z)
-	//				(*planes)[5]->ChangePlane(Point(0.0, 0.0, val2), Vector(0.0, 0.0, -1.0));
-	//		}
-	//	}
-	//}
-
-	//VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
-	//if (vrender_frame)
-	//{
-	//	for (int i = 0; i<(int)vrender_frame->GetViewList()->size(); i++)
-	//	{
-	//		VRenderView *vrv = (*vrender_frame->GetViewList())[i];
-	//		if (vrv)
-	//		{
-	//			if (m_link_z)
-	//				vrv->m_glview->m_clip_mask = 48;
-	//			else
-	//				vrv->m_glview->m_clip_mask = 16;
-
-	//			double rotx, roty, rotz;
-	//			vrv->GetRotations(rotx, roty, rotz);
-	//			vrv->SetRotations(rotx, roty, rotz);
-	//		}
-	//	}
-	//}
-
-	//RefreshVRenderViews(true);
 }
 
 void ClipPlanePanel::OnZ2ClipChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
-	int ival2 = m_z1_clip_sldr->GetValue();
-
-	if (!m_link_z && ival<ival2)
-	{
-		ival = ival2;
-		m_z2_clip_sldr->SetValue(ival);
-	}
 	m_z2_clip_text->SetValue(wxString::Format("%d", ival));
 }
 
@@ -1441,166 +902,222 @@ void ClipPlanePanel::OnZ2ClipEdit(wxCommandEvent &event)
 	str.ToLong(&ival);
 	dval = (double)ival / (double)resz;
 	m_z2_clip_sldr->SetValue(ival);
-	int barsize = (m_z1_clip_sldr->GetSize().GetHeight() - 20);
-	m_zBar->SetPosition(wxPoint(20, 10 + ((double)m_z1_clip_sldr->GetValue() /
-		(double)m_z1_clip_sldr->GetMax())*barsize));
-	m_zBar->SetSize(wxSize(3, barsize*((double)
-		(ival - m_z1_clip_sldr->GetValue()) / (double)m_z1_clip_sldr->GetMax())));
 	FLTYPE::PlaneSet planes;
 	m_agent->getValue("clip planes", planes);
 	if (planes.GetSize() != 6)
 		return;
 	planes[5].ChangePlane(FLTYPE::Point(0.0, 0.0, dval), FLTYPE::Vector(0.0, 0.0, -1.0));
 	m_agent->setValue("clip planes", planes);
-	//if (!m_vd)
+}
+
+void ClipPlanePanel::OnYZClipBtn(wxCommandEvent& event)
+{
+	long clip_dist;
+	getValue("clip dist x", clip_dist);
+	//reset
+	setValue("clip link y", false);
+	setValue("clip link z", false);
+
+	////reset yz
+	//m_link_y = false;
+	//m_check_tb->ToggleTool(ID_LinkYChk, false);
+	//m_check_tb->SetToolNormalBitmap(ID_LinkYChk,
+	//	wxGetBitmapFromMemory(unlink));
+	//m_link_z = false;
+	//m_check_tb->ToggleTool(ID_LinkZChk, false);
+	//m_check_tb->SetToolNormalBitmap(ID_LinkZChk,
+	//	wxGetBitmapFromMemory(unlink));
+	//m_y1_clip_text->SetValue("0");
+	//m_y2_clip_text->SetValue(
+	//	wxString::Format("%d", resy));
+	//m_z1_clip_text->SetValue("0");
+	//m_z2_clip_text->SetValue(
+	//	wxString::Format("%d", resz));
+
+	////set x
+	//SetXLink(false);
+	//if (dist < resx)
+	//{
+	//	int x1 = resx / 2 - dist / 2;
+	//	int x2 = x1 + dist;
+	//	m_x1_clip_text->SetValue(
+	//		wxString::Format("%d", x1));
+	//	m_x2_clip_text->SetValue(
+	//		wxString::Format("%d", x2));
+	//	SetXLink(true);
+	//	//int distx, disty, distz;
+	//	//m_vd->GetClipDistance(distx, disty, distz);
+	//	//m_vd->SetClipDistance(dist, disty, distz);
+	//	m_vd->setValue("clip dist x", dist);
+	//}
+	//else
+	//{
+	//	m_x1_clip_text->SetValue("0");
+	//	m_x2_clip_text->SetValue(
+	//		wxString::Format("%d", resx));
+	//}
+
+	//m_x1_clip_sldr->SetFocus();
+}
+
+void ClipPlanePanel::OnXZClipBtn(wxCommandEvent& event)
+{
+	//if (m_sel_type != 2 || !m_vd)
 	//	return;
+
 	//long resx, resy, resz;
 	////m_vd->GetResolution(resx, resy, resz);
 	//m_vd->getValue("res x", resx);
 	//m_vd->getValue("res y", resy);
 	//m_vd->getValue("res z", resz);
-	//vector<Plane*> *planes = 0;
-	//if (m_vd->GetRenderer())
-	//	planes = m_vd->GetRenderer()->get_planes();
-	//if (!planes)
+
+	//wxString str = m_xz_dist_text->GetValue();
+	//long dist;
+	//str.ToLong(&dist);
+
+	////reset xz
+	//m_link_x = false;
+	//m_check_tb->ToggleTool(ID_LinkXChk, false);
+	//m_check_tb->SetToolNormalBitmap(ID_LinkXChk,
+	//	wxGetBitmapFromMemory(unlink));
+	//m_link_z = false;
+	//m_check_tb->ToggleTool(ID_LinkZChk, false);
+	//m_check_tb->SetToolNormalBitmap(ID_LinkZChk,
+	//	wxGetBitmapFromMemory(unlink));
+	//m_x1_clip_text->SetValue("0");
+	//m_x2_clip_text->SetValue(
+	//	wxString::Format("%d", resx));
+	//m_z1_clip_text->SetValue("0");
+	//m_z2_clip_text->SetValue(
+	//	wxString::Format("%d", resz));
+
+	////set y
+	//SetYLink(false);
+	//if (dist < resy)
+	//{
+	//	int y1 = resy / 2 - dist / 2;
+	//	int y2 = y1 + dist;
+	//	m_y1_clip_text->SetValue(
+	//		wxString::Format("%d", y1));
+	//	m_y2_clip_text->SetValue(
+	//		wxString::Format("%d", y2));
+	//	SetYLink(true);
+	//	//int distx, disty, distz;
+	//	//m_vd->GetClipDistance(distx, disty, distz);
+	//	//m_vd->SetClipDistance(distx, dist, distz);
+	//	m_vd->setValue("clip dist y", dist);
+	//}
+	//else
+	//{
+	//	m_y1_clip_text->SetValue("0");
+	//	m_y2_clip_text->SetValue(
+	//		wxString::Format("%d", resy));
+	//}
+
+	//m_y1_clip_sldr->SetFocus();
+}
+
+void ClipPlanePanel::OnXYClipBtn(wxCommandEvent& event)
+{
+	//if (m_sel_type != 2 || !m_vd)
 	//	return;
-	//if (planes->size() != 6)
-	//	return;
 
-	//wxString str = m_z2_clip_text->GetValue();
-	//long ival = 0;
-	//str.ToLong(&ival);
-	//int ival2 = m_z1_clip_sldr->GetValue();
-	//double val, val2;
+	//long resx, resy, resz;
+	////m_vd->GetResolution(resx, resy, resz);
+	//m_vd->getValue("res x", resx);
+	//m_vd->getValue("res y", resy);
+	//m_vd->getValue("res z", resz);
 
-	//if (m_link_z)
+	//wxString str = m_xy_dist_text->GetValue();
+	//long dist;
+	//str.ToLong(&dist);
+
+	////reset xy
+	//m_link_x = false;
+	//m_check_tb->ToggleTool(ID_LinkXChk, false);
+	//m_check_tb->SetToolNormalBitmap(ID_LinkXChk,
+	//	wxGetBitmapFromMemory(unlink));
+	//m_link_y = false;
+	//m_check_tb->ToggleTool(ID_LinkYChk, false);
+	//m_check_tb->SetToolNormalBitmap(ID_LinkYChk,
+	//	wxGetBitmapFromMemory(unlink));
+	//m_x1_clip_text->SetValue("0");
+	//m_x2_clip_text->SetValue(
+	//	wxString::Format("%d", resx));
+	//m_y1_clip_text->SetValue("0");
+	//m_y2_clip_text->SetValue(
+	//	wxString::Format("%d", resy));
+
+	////set z
+	//SetZLink(false);
+	//if (dist < resz)
 	//{
-	//	if (ival - m_z_sldr_dist < 0)
-	//	{
-	//		ival = m_z_sldr_dist;
-	//		ival2 = 0;
-	//	}
-	//	else
-	//		ival2 = ival - m_z_sldr_dist;
+	//	int z1 = resz / 2 - dist / 2;
+	//	int z2 = z1 + dist;
+	//	m_z1_clip_text->SetValue(
+	//		wxString::Format("%d", z1));
+	//	m_z2_clip_text->SetValue(
+	//		wxString::Format("%d", z2));
+	//	SetZLink(true);
+	//	//int distx, disty, distz;
+	//	//m_vd->GetClipDistance(distx, disty, distz);
+	//	//m_vd->SetClipDistance(distx, disty, dist);
+	//	m_vd->setValue("clip dist z", dist);
 	//}
-	//else if (ival < ival2)
-	//	return;
-
-	//val = (double)ival / (double)resz;
-	////str = wxString::Format("%d", ival);
-	////m_z2_clip_text->ChangeValue(str);
-	//m_z2_clip_sldr->SetValue(ival);
-	//int barsize = (m_z1_clip_sldr->GetSize().GetHeight() - 20);
-	//m_zBar->SetPosition(wxPoint(20, 10 + ((double)m_z1_clip_sldr->GetValue() /
-	//	(double)m_z1_clip_sldr->GetMax())*barsize));
-	//m_zBar->SetSize(wxSize(3, barsize*((double)
-	//	(ival - m_z1_clip_sldr->GetValue()) / (double)m_z1_clip_sldr->GetMax())));
-	//Plane* plane = (*planes)[5];
-	//plane->ChangePlane(Point(0.0, 0.0, val), Vector(0.0, 0.0, -1.0));
-	//if (m_link_z)
+	//else
 	//{
-	//	val2 = (double)ival2 / (double)resz;
-	//	str = wxString::Format("%d", ival2);
-	//	m_z1_clip_text->ChangeValue(str);
-	//	m_z1_clip_sldr->SetValue(ival2);
-	//	plane = (*planes)[4];
-	//	plane->ChangePlane(Point(0.0, 0.0, val2), Vector(0.0, 0.0, 1.0));
-	//}
-
-	//if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
-	//{
-	//	if (m_mgr)
-	//	{
-	//		size_t num = FL::Global::instance().getVolumeFactory().getNum();
-	//		for (size_t i = 0; i<num; i++)
-	//		{
-	//			FL::VolumeData* vd =
-	//				FL::Global::instance().getVolumeFactory().get(i);
-	//			if (!vd || vd == m_vd)
-	//				continue;
-
-	//			planes = 0;
-	//			if (vd->GetRenderer())
-	//				planes = vd->GetRenderer()->get_planes();
-	//			if (!planes)
-	//				continue;
-	//			if (planes->size() != 6)
-	//				continue;
-
-	//			(*planes)[5]->ChangePlane(Point(0.0, 0.0, val), Vector(0.0, 0.0, -1.0));
-	//			if (m_link_z)
-	//				(*planes)[4]->ChangePlane(Point(0.0, 0.0, val2), Vector(0.0, 0.0, 1.0));
-	//		}
-	//	}
+	//	m_z1_clip_text->SetValue("0");
+	//	m_z2_clip_text->SetValue(
+	//		wxString::Format("%d", resz));
 	//}
 
-	//VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
-	//if (vrender_frame)
-	//{
-	//	for (int i = 0; i<(int)vrender_frame->GetViewList()->size(); i++)
-	//	{
-	//		VRenderView *vrv = (*vrender_frame->GetViewList())[i];
-	//		if (vrv)
-	//		{
-	//			if (m_link_z)
-	//				vrv->m_glview->m_clip_mask = 48;
-	//			else
-	//				vrv->m_glview->m_clip_mask = 32;
-
-	//			double rotx, roty, rotz;
-	//			vrv->GetRotations(rotx, roty, rotz);
-	//			vrv->SetRotations(rotx, roty, rotz);
-	//		}
-	//	}
-	//}
-
-	//RefreshVRenderViews(true);
+	//m_z1_clip_sldr->SetFocus();
 }
 
 void ClipPlanePanel::OnIdle(wxIdleEvent &event)
 {
-	if (!IsShown())
-		return;
-	int sz = m_xpanel->GetSize().GetHeight();
-	if (m_x1_clip_sldr->GetSize().GetHeight() != sz) {
-		m_x1_clip_sldr->SetSize(20, sz);
-		m_x2_clip_sldr->SetSize(20, sz);
-		m_y1_clip_sldr->SetSize(20, sz);
-		m_y2_clip_sldr->SetSize(20, sz);
-		m_z1_clip_sldr->SetSize(20, sz);
-		m_z2_clip_sldr->SetSize(20, sz);
-		int barsize = sz - 20;
-		//x
-		int mx = m_x1_clip_sldr->GetMax();
-		int v1 = m_x1_clip_sldr->GetValue();
-		int v2 = m_x2_clip_sldr->GetValue();
-		double clipSz = ((double)(v2 - v1)) / ((double)mx);
-		double pct = ((double)v1) / ((double)mx);
-		m_xBar->SetPosition(wxPoint(20, 10 + pct*barsize));
-		m_xBar->SetSize(wxSize(3, barsize*clipSz));
-		//y
-		mx = m_y1_clip_sldr->GetMax();
-		v1 = m_y1_clip_sldr->GetValue();
-		v2 = m_y2_clip_sldr->GetValue();
-		clipSz = ((double)(v2 - v1)) / ((double)mx);
-		pct = ((double)v1) / ((double)mx);
-		m_yBar->SetPosition(wxPoint(20, 10 + pct*barsize));
-		m_yBar->SetSize(wxSize(3, barsize*clipSz));
-		//z
-		mx = m_z1_clip_sldr->GetMax();
-		v1 = m_z1_clip_sldr->GetValue();
-		v2 = m_z2_clip_sldr->GetValue();
-		clipSz = ((double)(v2 - v1)) / ((double)mx);
-		pct = ((double)v1) / ((double)mx);
-		m_zBar->SetPosition(wxPoint(20, 10 + pct*barsize));
-		m_zBar->SetSize(wxSize(3, barsize*clipSz));
-	}
+	//if (!IsShown())
+	//	return;
+	//int sz = m_xpanel->GetSize().GetHeight();
+	//if (m_x1_clip_sldr->GetSize().GetHeight() != sz) {
+	//	m_x1_clip_sldr->SetSize(20, sz);
+	//	m_x2_clip_sldr->SetSize(20, sz);
+	//	m_y1_clip_sldr->SetSize(20, sz);
+	//	m_y2_clip_sldr->SetSize(20, sz);
+	//	m_z1_clip_sldr->SetSize(20, sz);
+	//	m_z2_clip_sldr->SetSize(20, sz);
+	//	int barsize = sz - 20;
+	//	//x
+	//	int mx = m_x1_clip_sldr->GetMax();
+	//	int v1 = m_x1_clip_sldr->GetValue();
+	//	int v2 = m_x2_clip_sldr->GetValue();
+	//	double clipSz = ((double)(v2 - v1)) / ((double)mx);
+	//	double pct = ((double)v1) / ((double)mx);
+	//	m_xBar->SetPosition(wxPoint(20, 10 + pct*barsize));
+	//	m_xBar->SetSize(wxSize(3, barsize*clipSz));
+	//	//y
+	//	mx = m_y1_clip_sldr->GetMax();
+	//	v1 = m_y1_clip_sldr->GetValue();
+	//	v2 = m_y2_clip_sldr->GetValue();
+	//	clipSz = ((double)(v2 - v1)) / ((double)mx);
+	//	pct = ((double)v1) / ((double)mx);
+	//	m_yBar->SetPosition(wxPoint(20, 10 + pct*barsize));
+	//	m_yBar->SetSize(wxSize(3, barsize*clipSz));
+	//	//z
+	//	mx = m_z1_clip_sldr->GetMax();
+	//	v1 = m_z1_clip_sldr->GetValue();
+	//	v2 = m_z2_clip_sldr->GetValue();
+	//	clipSz = ((double)(v2 - v1)) / ((double)mx);
+	//	pct = ((double)v1) / ((double)mx);
+	//	m_zBar->SetPosition(wxPoint(20, 10 + pct*barsize));
+	//	m_zBar->SetSize(wxSize(3, barsize*clipSz));
+	//}
 
-	if (m_hold_planes)
-	{
-		m_draw_clip = true;
-		return;
-	}
+	//if (m_hold_planes)
+	//{
+	//	m_draw_clip = true;
+	//	return;
+	//}
 
 	//int i;
 	//VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
@@ -1656,50 +1173,53 @@ void ClipPlanePanel::OnIdle(wxIdleEvent &event)
 
 void ClipPlanePanel::OnLinkXCheck(wxCommandEvent &event)
 {
-	m_link_x = m_check_tb->GetToolState(ID_LinkXChk);
-	if (m_link_x)
+	bool bval = m_check_tb->GetToolState(ID_LinkXChk);
+	m_agent->setValue("clip link x", bval);
+	if (bval)
 	{
-		m_x_sldr_dist = m_x2_clip_sldr->GetValue() -
+		long lval = m_x2_clip_sldr->GetValue() -
 			m_x1_clip_sldr->GetValue();
+		m_agent->setValue("clip dist x", lval);
 		m_check_tb->SetToolNormalBitmap(ID_LinkXChk,
 			wxGetBitmapFromMemory(link));
 	}
-	else {
+	else
 		m_check_tb->SetToolNormalBitmap(ID_LinkXChk,
 			wxGetBitmapFromMemory(unlink));
-	}
 }
 
 void ClipPlanePanel::OnLinkYCheck(wxCommandEvent &event)
 {
-	m_link_y = m_check_tb->GetToolState(ID_LinkYChk);
-	if (m_link_y)
+	bool bval = m_check_tb->GetToolState(ID_LinkYChk);
+	m_agent->setValue("clip link y", bval);
+	if (bval)
 	{
-		m_y_sldr_dist = m_y2_clip_sldr->GetValue() -
+		long lval = m_y2_clip_sldr->GetValue() -
 			m_y1_clip_sldr->GetValue();
+		m_agent->setValue("clip dist y", lval);
 		m_check_tb->SetToolNormalBitmap(ID_LinkYChk,
 			wxGetBitmapFromMemory(link));
 	}
-	else {
+	else
 		m_check_tb->SetToolNormalBitmap(ID_LinkYChk,
 			wxGetBitmapFromMemory(unlink));
-	}
 }
 
 void ClipPlanePanel::OnLinkZCheck(wxCommandEvent &event)
 {
-	m_link_z = m_check_tb->GetToolState(ID_LinkZChk);
-	if (m_link_z)
+	bool bval = m_check_tb->GetToolState(ID_LinkZChk);
+	m_agent->setValue("clip link z", bval);
+	if (bval)
 	{
-		m_z_sldr_dist = m_z2_clip_sldr->GetValue() -
+		long lval = m_z2_clip_sldr->GetValue() -
 			m_z1_clip_sldr->GetValue();
+		m_agent->setValue("clip dist z", lval);
 		m_check_tb->SetToolNormalBitmap(ID_LinkZChk,
 			wxGetBitmapFromMemory(link));
 	}
-	else {
+	else
 		m_check_tb->SetToolNormalBitmap(ID_LinkZChk,
 			wxGetBitmapFromMemory(unlink));
-	}
 }
 
 void ClipPlanePanel::OnSetZeroBtn(wxCommandEvent &event)
@@ -2099,177 +1619,6 @@ void ClipPlanePanel::OnSliderRClick(wxCommandEvent& event)
 	//	m_y2_clip_text->SetValue(
 	//		wxString::Format("%d", resy));
 	//}
-}
-
-void ClipPlanePanel::OnYZClipBtn(wxCommandEvent& event)
-{
-	//if (m_sel_type != 2 || !m_vd)
-	//	return;
-
-	//long resx, resy, resz;
-	////m_vd->GetResolution(resx, resy, resz);
-	//m_vd->getValue("res x", resx);
-	//m_vd->getValue("res y", resy);
-	//m_vd->getValue("res z", resz);
-
-	//wxString str = m_yz_dist_text->GetValue();
-	//long dist;
-	//str.ToLong(&dist);
-
-	////reset yz
-	//m_link_y = false;
-	//m_check_tb->ToggleTool(ID_LinkYChk, false);
-	//m_check_tb->SetToolNormalBitmap(ID_LinkYChk,
-	//	wxGetBitmapFromMemory(unlink));
-	//m_link_z = false;
-	//m_check_tb->ToggleTool(ID_LinkZChk, false);
-	//m_check_tb->SetToolNormalBitmap(ID_LinkZChk,
-	//	wxGetBitmapFromMemory(unlink));
-	//m_y1_clip_text->SetValue("0");
-	//m_y2_clip_text->SetValue(
-	//	wxString::Format("%d", resy));
-	//m_z1_clip_text->SetValue("0");
-	//m_z2_clip_text->SetValue(
-	//	wxString::Format("%d", resz));
-
-	////set x
-	//SetXLink(false);
-	//if (dist < resx)
-	//{
-	//	int x1 = resx / 2 - dist / 2;
-	//	int x2 = x1 + dist;
-	//	m_x1_clip_text->SetValue(
-	//		wxString::Format("%d", x1));
-	//	m_x2_clip_text->SetValue(
-	//		wxString::Format("%d", x2));
-	//	SetXLink(true);
-	//	//int distx, disty, distz;
-	//	//m_vd->GetClipDistance(distx, disty, distz);
-	//	//m_vd->SetClipDistance(dist, disty, distz);
-	//	m_vd->setValue("clip dist x", dist);
-	//}
-	//else
-	//{
-	//	m_x1_clip_text->SetValue("0");
-	//	m_x2_clip_text->SetValue(
-	//		wxString::Format("%d", resx));
-	//}
-
-	//m_x1_clip_sldr->SetFocus();
-}
-
-void ClipPlanePanel::OnXZClipBtn(wxCommandEvent& event)
-{
-	//if (m_sel_type != 2 || !m_vd)
-	//	return;
-
-	//long resx, resy, resz;
-	////m_vd->GetResolution(resx, resy, resz);
-	//m_vd->getValue("res x", resx);
-	//m_vd->getValue("res y", resy);
-	//m_vd->getValue("res z", resz);
-
-	//wxString str = m_xz_dist_text->GetValue();
-	//long dist;
-	//str.ToLong(&dist);
-
-	////reset xz
-	//m_link_x = false;
-	//m_check_tb->ToggleTool(ID_LinkXChk, false);
-	//m_check_tb->SetToolNormalBitmap(ID_LinkXChk,
-	//	wxGetBitmapFromMemory(unlink));
-	//m_link_z = false;
-	//m_check_tb->ToggleTool(ID_LinkZChk, false);
-	//m_check_tb->SetToolNormalBitmap(ID_LinkZChk,
-	//	wxGetBitmapFromMemory(unlink));
-	//m_x1_clip_text->SetValue("0");
-	//m_x2_clip_text->SetValue(
-	//	wxString::Format("%d", resx));
-	//m_z1_clip_text->SetValue("0");
-	//m_z2_clip_text->SetValue(
-	//	wxString::Format("%d", resz));
-
-	////set y
-	//SetYLink(false);
-	//if (dist < resy)
-	//{
-	//	int y1 = resy / 2 - dist / 2;
-	//	int y2 = y1 + dist;
-	//	m_y1_clip_text->SetValue(
-	//		wxString::Format("%d", y1));
-	//	m_y2_clip_text->SetValue(
-	//		wxString::Format("%d", y2));
-	//	SetYLink(true);
-	//	//int distx, disty, distz;
-	//	//m_vd->GetClipDistance(distx, disty, distz);
-	//	//m_vd->SetClipDistance(distx, dist, distz);
-	//	m_vd->setValue("clip dist y", dist);
-	//}
-	//else
-	//{
-	//	m_y1_clip_text->SetValue("0");
-	//	m_y2_clip_text->SetValue(
-	//		wxString::Format("%d", resy));
-	//}
-
-	//m_y1_clip_sldr->SetFocus();
-}
-
-void ClipPlanePanel::OnXYClipBtn(wxCommandEvent& event)
-{
-	//if (m_sel_type != 2 || !m_vd)
-	//	return;
-
-	//long resx, resy, resz;
-	////m_vd->GetResolution(resx, resy, resz);
-	//m_vd->getValue("res x", resx);
-	//m_vd->getValue("res y", resy);
-	//m_vd->getValue("res z", resz);
-
-	//wxString str = m_xy_dist_text->GetValue();
-	//long dist;
-	//str.ToLong(&dist);
-
-	////reset xy
-	//m_link_x = false;
-	//m_check_tb->ToggleTool(ID_LinkXChk, false);
-	//m_check_tb->SetToolNormalBitmap(ID_LinkXChk,
-	//	wxGetBitmapFromMemory(unlink));
-	//m_link_y = false;
-	//m_check_tb->ToggleTool(ID_LinkYChk, false);
-	//m_check_tb->SetToolNormalBitmap(ID_LinkYChk,
-	//	wxGetBitmapFromMemory(unlink));
-	//m_x1_clip_text->SetValue("0");
-	//m_x2_clip_text->SetValue(
-	//	wxString::Format("%d", resx));
-	//m_y1_clip_text->SetValue("0");
-	//m_y2_clip_text->SetValue(
-	//	wxString::Format("%d", resy));
-
-	////set z
-	//SetZLink(false);
-	//if (dist < resz)
-	//{
-	//	int z1 = resz / 2 - dist / 2;
-	//	int z2 = z1 + dist;
-	//	m_z1_clip_text->SetValue(
-	//		wxString::Format("%d", z1));
-	//	m_z2_clip_text->SetValue(
-	//		wxString::Format("%d", z2));
-	//	SetZLink(true);
-	//	//int distx, disty, distz;
-	//	//m_vd->GetClipDistance(distx, disty, distz);
-	//	//m_vd->SetClipDistance(distx, disty, dist);
-	//	m_vd->setValue("clip dist z", dist);
-	//}
-	//else
-	//{
-	//	m_z1_clip_text->SetValue("0");
-	//	m_z2_clip_text->SetValue(
-	//		wxString::Format("%d", resz));
-	//}
-
-	//m_z1_clip_sldr->SetFocus();
 }
 
 //move linked clipping planes

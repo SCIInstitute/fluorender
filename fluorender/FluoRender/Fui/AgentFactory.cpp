@@ -181,6 +181,16 @@ ClipPlaneAgent* AgentFactory::getOrAddClipPlaneAgent(const std::string &name, wx
 	if (clip_plane_agent)
 	{
 		clip_plane_agent->setName(name);
+		clip_plane_agent->setBeforeFunction("clip planes",
+			std::bind(&ClipPlaneAgent::OnClipPlanesChanging, clip_plane_agent));
+		clip_plane_agent->setAfterFunction("clip planes",
+			std::bind(&ClipPlaneAgent::OnClipPlanesChanged, clip_plane_agent));
+		clip_plane_agent->setAfterFunction("clip dist x",
+			std::bind(&ClipPlaneAgent::OnClipDistXChanged, clip_plane_agent));
+		clip_plane_agent->setAfterFunction("clip dist y",
+			std::bind(&ClipPlaneAgent::OnClipDistYChanged, clip_plane_agent));
+		clip_plane_agent->setAfterFunction("clip dist z",
+			std::bind(&ClipPlaneAgent::OnClipDistZChanged, clip_plane_agent));
 		objects_.push_front(clip_plane_agent);
 		notifyObserversNodeAdded(this, clip_plane_agent);
 	}

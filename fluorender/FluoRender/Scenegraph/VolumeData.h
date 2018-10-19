@@ -171,6 +171,7 @@ namespace FL
 		//most are for setting values in the renderer
 		//this will be changed when rendering pipeline is restructured
 		//void OnMipModeChanging();
+		void OnResChanged();//resolution
 		void OnMipModeChanged();//modes
 		void OnOverlayModeChanged();//overlay mode changes temporarily for rendering overlayed effects
 		void OnViewportChanged();

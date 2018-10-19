@@ -130,6 +130,25 @@ void VolumeData::Initialize()
 //	setValue("saved mode", mode);
 //}
 
+//resolution changed
+void VolumeData::OnResChanged()
+{
+	long res_x, res_y, res_z;
+	getValue("res x", res_x);
+	getValue("res y", res_y);
+	getValue("res z", res_z);
+	long clip_dist_x, clip_dist_y, clip_dist_z;
+	clip_dist_x = res_x / 20;
+	clip_dist_x = clip_dist_x <= 0 ? 1 : clip_dist_x;
+	clip_dist_y = res_y / 20;
+	clip_dist_y = clip_dist_y <= 0 ? 1 : clip_dist_y;
+	clip_dist_z = res_z / 20;
+	clip_dist_z = clip_dist_z <= 0 ? 1 : clip_dist_z;
+	setValue("clip dist x", clip_dist_x);
+	setValue("clip dist y", clip_dist_y);
+	setValue("clip dist z", clip_dist_z);
+}
+
 //MIP & normal modes
 void VolumeData::OnMipModeChanged()
 {

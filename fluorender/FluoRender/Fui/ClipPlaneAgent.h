@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FUI
 {
+	class AgentFactory;
 	class ClipPlanePanel;
 	class ClipPlaneAgent : public InterfaceAgent
 	{
@@ -55,10 +56,19 @@ namespace FUI
 
 		virtual void UpdateAllSettings();
 
+		friend class AgentFactory;
+
 	protected:
 		ClipPlanePanel &panel_;
+		FLTYPE::PlaneSet old_planes_;
 
-	private:
+		//update functions
+		void UpdatePlanes(FLTYPE::PlaneSet &planes, long, long, long);
+		void OnClipPlanesChanging();
+		void OnClipPlanesChanged();
+		void OnClipDistXChanged();
+		void OnClipDistYChanged();
+		void OnClipDistZChanged();
 	};
 }
 
