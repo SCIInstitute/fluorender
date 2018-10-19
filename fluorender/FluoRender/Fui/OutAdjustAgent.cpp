@@ -74,8 +74,34 @@ void OutAdjustAgent::UpdateAllSettings()
 	double dval = 0.0;
 	bool bval = false;
 
-	//test
+	//values
 	bool result = getValue("gamma r", dval);
+	panel_.m_r_gamma_sldr->SetValue(Gamma2UiS(dval));
+	panel_.m_r_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
+	getValue("gamma g", dval);
+	panel_.m_g_gamma_sldr->SetValue(Gamma2UiS(dval));
+	panel_.m_g_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
+	getValue("gamma b", dval);
+	panel_.m_b_gamma_sldr->SetValue(Gamma2UiS(dval));
+	panel_.m_b_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
+	getValue("brightness r", dval);
+	panel_.m_r_brightness_sldr->SetValue(Brigt2UiS(dval));
+	panel_.m_r_brightness_text->ChangeValue(wxString::Format("%.0f", Brigt2UiT(dval)));
+	getValue("brightness g", dval);
+	panel_.m_g_brightness_sldr->SetValue(Brigt2UiS(dval));
+	panel_.m_g_brightness_text->ChangeValue(wxString::Format("%.0f", Brigt2UiT(dval)));
+	getValue("brightness b", dval);
+	panel_.m_b_brightness_sldr->SetValue(Brigt2UiS(dval));
+	panel_.m_b_brightness_text->ChangeValue(wxString::Format("%.0f", Brigt2UiT(dval)));
+	getValue("equalize r", dval);
+	panel_.m_r_hdr_sldr->SetValue(Equal2UiS(dval));
+	panel_.m_r_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
+	getValue("equalize g", dval);
+	panel_.m_g_hdr_sldr->SetValue(Equal2UiS(dval));
+	panel_.m_g_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
+	getValue("equalize b", dval);
+	panel_.m_b_hdr_sldr->SetValue(Equal2UiS(dval));
+	panel_.m_b_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
 
 	//sync
 	//r
@@ -105,7 +131,7 @@ void OutAdjustAgent::UpdateAllSettings()
 void OutAdjustAgent::OnGammaRChanged()
 {
 	double dval;
-	bool result = getValue("gamma r", dval);
+	getValue("gamma r", dval);
 	panel_.m_r_gamma_sldr->SetValue(Gamma2UiS(dval));
 	panel_.m_r_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
 }

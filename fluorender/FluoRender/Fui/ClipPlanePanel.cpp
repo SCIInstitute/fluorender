@@ -114,6 +114,8 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 
 	wxStaticText *st = 0;
 
+	SetDoubleBuffered(true);
+
 	//sync channels 1
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_toolbar = new wxToolBar(this, wxID_ANY,

@@ -94,6 +94,8 @@ OutAdjustPanel::OutAdjustPanel(wxWindow* frame,
 	wxBoxSizer *sizer_v = new wxBoxSizer(wxVERTICAL);
 	wxStaticText *st;
 
+	SetDoubleBuffered(true);
+
 	//first line: text
 	wxBoxSizer *sizer_h_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Gam.",
@@ -577,20 +579,49 @@ void OutAdjustPanel::OnSyncBCheck(wxCommandEvent &event)
 
 void OutAdjustPanel::OnRReset(wxCommandEvent &event)
 {
-
+	std::vector<std::string> names{
+		"gamma r",
+		"brightness r",
+		"equalize r"
+	};
+	FL::Global::instance().getVolumeFactory().propValuesFromDefault(m_agent, names);
 }
 
 void OutAdjustPanel::OnGReset(wxCommandEvent &event)
 {
-
+	std::vector<std::string> names{
+		"gamma g",
+		"brightness g",
+		"equalize g"
+	};
+	FL::Global::instance().getVolumeFactory().propValuesFromDefault(m_agent, names);
 }
 
 void OutAdjustPanel::OnBReset(wxCommandEvent &event)
 {
-
+	std::vector<std::string> names{
+		"gamma b",
+		"brightness b",
+		"equalize b"
+	};
+	FL::Global::instance().getVolumeFactory().propValuesFromDefault(m_agent, names);
 }
 
 void OutAdjustPanel::OnSaveDefault(wxCommandEvent &event)
 {
-
+	std::string ss[] = {
+		"gamma r",
+		"gamma g",
+		"gamma b",
+		"brightness r",
+		"brightness g",
+		"brightness b",
+		"equalize r",
+		"equalize g",
+		"equalize b"
+	};
+	std::vector<std::string> names_v(std::begin(ss), std::end(ss));//values to save
+	FL::Global::instance().getVolumeFactory().propValuesToDefault(m_agent, names_v);
+	std::set<std::string> names_s(std::begin(ss), std::end(ss));//values to save
+	FL::Global::instance().getVolumeFactory().writeDefault(names_s);
 }

@@ -142,6 +142,54 @@ bool ObjectFactory::convDefaultValues(boost::property_tree::ptree &pt, const std
 	return true;
 }
 
+bool ObjectFactory::replaceDefaultValues(boost::property_tree::ptree &pt, const std::set<std::string> &names)
+{
+	Object* object = getDefault();
+	if (!object)
+		return false;
+
+	using boost::property_tree::ptree;
+	auto parent = pt.begin();
+	//sub tree of value set
+	ptree pt_vs = parent->second;
+	ptree pt_vs2;
+
+	for (auto& i : pt_vs)
+	{
+		std::string child_name;
+		ptree pt_child;
+		std::tie(child_name, pt_child) = i;
+		if (child_name != "Value")
+			continue;
+		std::string value_name = pt_child.get<std::string>("<xmlattr>.name");
+		ValueTuple vt;
+		std::get<0>(vt) = value_name;
+		if (object->getValue(vt))
+		{
+			std::string type;
+			std::string val;
+			if (names.find(value_name) != names.end())
+			{
+				type = std::get<1>(vt);
+				val = std::get<2>(vt);
+			}
+			else
+			{
+				type = pt_child.get<std::string>("<xmlattr>.type");
+				val = pt_child.get<std::string>("<xmlattr>.value");
+			}
+			ptree child;
+			child.put("<xmlattr>.name", value_name);
+			child.put("<xmlattr>.type", type);
+			child.put("<xmlattr>.value", val);
+			pt_vs2.add_child("Value", child);
+		}
+	}
+	pt.clear();
+	pt.add_child("ValueSet", pt_vs2);
+	return true;
+}
+
 void ObjectFactory::propValuesToDefault(Object* obj, const std::vector<std::string> &names)
 {
 	Object* def_obj = getDefault();
@@ -230,7 +278,16 @@ bool ObjectFactory::writeDefault(const std::set<std::string> &names)
 
 	using boost::property_tree::ptree;
 	ptree pt;
-	convDefaultValues(pt, names);
+	//read original first
+	try
+	{
+		read_xml(filename, pt);
+	}
+	catch (...)
+	{
+		return false;
+	}
+	replaceDefaultValues(pt, names);
 	try
 	{
 		write_xml(filename, pt, std::locale(),

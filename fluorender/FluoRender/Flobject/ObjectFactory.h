@@ -226,6 +226,8 @@ namespace FL
 		bool setDefaultValues(boost::property_tree::ptree &pt, const std::set<std::string> &names);
 		//convert the values of the default volume to ptree
 		bool convDefaultValues(boost::property_tree::ptree &pt, const std::set<std::string> &names);
+		//replace values in an existing tree, assuming values are immediate children of the tree
+		bool replaceDefaultValues(boost::property_tree::ptree &pt, const std::set<std::string> &names);
 
 		std::string default_object_name_;
 		std::string default_setting_filename_value_name_;

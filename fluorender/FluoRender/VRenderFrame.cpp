@@ -170,7 +170,7 @@ VRenderFrame::VRenderFrame(
 	//create default
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
-	wxString dft = expath + "/default_volume_settings.dftx";
+	wxString dft = expath + "/Defaults/volume_data.dftx";
 	FL::Global::instance().getVolumeFactory().setValue("default filename", dft.ToStdString());
 	FL::Global::instance().getMeshFactory().createDefault();
 	//create root node

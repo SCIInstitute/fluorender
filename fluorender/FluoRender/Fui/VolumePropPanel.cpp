@@ -155,6 +155,8 @@ VolumePropPanel::VolumePropPanel(wxWindow* frame,
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 
+	SetDoubleBuffered(true);
+
 	//left///////////////////////////////////////////////////
 	//gamma
 	m_gamma_st = new wxStaticText(this, ID_GammaSync, " : Gamma",

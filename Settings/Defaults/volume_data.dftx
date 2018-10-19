@@ -26,4 +26,13 @@
 	<Value name="colormap high" type="double" value="1"/>
 	<Value name="colormap proj" type="long" value="0"/>
 	<Value name="interpolate" type="bool" value="1"/>
+	<Value name="gamma r" type="double" value="1"/>
+	<Value name="gamma g" type="double" value="1"/>
+	<Value name="gamma b" type="double" value="1"/>
+	<Value name="brightness r" type="double" value="1.13672"/>
+	<Value name="brightness g" type="double" value="1.13672"/>
+	<Value name="brightness b" type="double" value="1.13672"/>
+	<Value name="equalize r" type="double" value="0"/>
+	<Value name="equalize g" type="double" value="0"/>
+	<Value name="equalize b" type="double" value="0"/>
 </ValueSet>
