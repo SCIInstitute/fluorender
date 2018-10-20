@@ -778,9 +778,9 @@ void ClipPlanePanel::OnX1ClipEdit(wxCommandEvent &event)
 	dval = (double)ival / (double)resx;
 	m_x1_clip_sldr->SetValue(ival);
 	int barsize = (m_x1_clip_sldr->GetSize().GetHeight() - 20);
-	m_xBar->SetPosition(wxPoint(20, 10 + dval * barsize));
-	m_xBar->SetSize(wxSize(3, barsize*((double)
-		(m_x2_clip_sldr->GetValue() - ival) / (double)m_x1_clip_sldr->GetMax())));
+	//m_xBar->SetPosition(wxPoint(20, 10 + dval * barsize));
+	//m_xBar->SetSize(wxSize(3, barsize*((double)
+	//	(m_x2_clip_sldr->GetValue() - ival) / (double)m_x1_clip_sldr->GetMax())));
 	FLTYPE::PlaneSet planes;
 	m_agent->getValue("clip planes", planes);
 	if (planes.GetSize() != 6)
@@ -814,10 +814,10 @@ void ClipPlanePanel::OnX2ClipEdit(wxCommandEvent &event)
 	dval = (double)ival / (double)resx;
 	m_x2_clip_sldr->SetValue(ival);
 	int barsize = (m_x1_clip_sldr->GetSize().GetHeight() - 20);
-	m_xBar->SetPosition(wxPoint(20, 10 + ((double)m_x1_clip_sldr->GetValue() /
-		(double)m_x1_clip_sldr->GetMax())*barsize));
-	m_xBar->SetSize(wxSize(3, barsize*((double)
-		(ival - m_x1_clip_sldr->GetValue()) / (double)m_x1_clip_sldr->GetMax())));
+	//m_xBar->SetPosition(wxPoint(20, 10 + ((double)m_x1_clip_sldr->GetValue() /
+	//	(double)m_x1_clip_sldr->GetMax())*barsize));
+	//m_xBar->SetSize(wxSize(3, barsize*((double)
+	//	(ival - m_x1_clip_sldr->GetValue()) / (double)m_x1_clip_sldr->GetMax())));
 	FLTYPE::PlaneSet planes;
 	m_agent->getValue("clip planes", planes);
 	if (planes.GetSize() != 6)
@@ -1127,39 +1127,40 @@ void ClipPlanePanel::OnIdle(wxIdleEvent &event)
 	if (!IsShown())
 		return;
 	int sz = m_xpanel->GetSize().GetHeight();
-	if (m_x1_clip_sldr->GetSize().GetHeight() != sz) {
+	if (m_x1_clip_sldr->GetSize().GetHeight() != sz)
+	{
 		m_x1_clip_sldr->SetSize(20, sz);
 		m_x2_clip_sldr->SetSize(20, sz);
 		m_y1_clip_sldr->SetSize(20, sz);
 		m_y2_clip_sldr->SetSize(20, sz);
 		m_z1_clip_sldr->SetSize(20, sz);
 		m_z2_clip_sldr->SetSize(20, sz);
-		int barsize = sz - 20;
-		//x
-		int mx = m_x1_clip_sldr->GetMax();
-		int v1 = m_x1_clip_sldr->GetValue();
-		int v2 = m_x2_clip_sldr->GetValue();
-		double clipSz = ((double)(v2 - v1)) / ((double)mx);
-		double pct = ((double)v1) / ((double)mx);
-		m_xBar->SetPosition(wxPoint(20, 10 + pct*barsize));
-		m_xBar->SetSize(wxSize(3, barsize*clipSz));
-		//y
-		mx = m_y1_clip_sldr->GetMax();
-		v1 = m_y1_clip_sldr->GetValue();
-		v2 = m_y2_clip_sldr->GetValue();
-		clipSz = ((double)(v2 - v1)) / ((double)mx);
-		pct = ((double)v1) / ((double)mx);
-		m_yBar->SetPosition(wxPoint(20, 10 + pct*barsize));
-		m_yBar->SetSize(wxSize(3, barsize*clipSz));
-		//z
-		mx = m_z1_clip_sldr->GetMax();
-		v1 = m_z1_clip_sldr->GetValue();
-		v2 = m_z2_clip_sldr->GetValue();
-		clipSz = ((double)(v2 - v1)) / ((double)mx);
-		pct = ((double)v1) / ((double)mx);
-		m_zBar->SetPosition(wxPoint(20, 10 + pct*barsize));
-		m_zBar->SetSize(wxSize(3, barsize*clipSz));
 	}
+	//int barsize = sz - 20;
+	////x
+	//int mx = m_x1_clip_sldr->GetMax();
+	//int v1 = m_x1_clip_sldr->GetValue();
+	//int v2 = m_x2_clip_sldr->GetValue();
+	//double clipSz = ((double)(v2 - v1)) / ((double)mx);
+	//double pct = ((double)v1) / ((double)mx);
+	//m_xBar->SetPosition(wxPoint(20, 10 + pct*barsize));
+	//m_xBar->SetSize(wxSize(3, barsize*clipSz));
+	////y
+	//mx = m_y1_clip_sldr->GetMax();
+	//v1 = m_y1_clip_sldr->GetValue();
+	//v2 = m_y2_clip_sldr->GetValue();
+	//clipSz = ((double)(v2 - v1)) / ((double)mx);
+	//pct = ((double)v1) / ((double)mx);
+	//m_yBar->SetPosition(wxPoint(20, 10 + pct*barsize));
+	//m_yBar->SetSize(wxSize(3, barsize*clipSz));
+	////z
+	//mx = m_z1_clip_sldr->GetMax();
+	//v1 = m_z1_clip_sldr->GetValue();
+	//v2 = m_z2_clip_sldr->GetValue();
+	//clipSz = ((double)(v2 - v1)) / ((double)mx);
+	//pct = ((double)v1) / ((double)mx);
+	//m_zBar->SetPosition(wxPoint(20, 10 + pct*barsize));
+	//m_zBar->SetSize(wxSize(3, barsize*clipSz));
 
 	//if (m_hold_planes)
 	//{

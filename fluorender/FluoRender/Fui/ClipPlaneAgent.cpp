@@ -348,10 +348,8 @@ void ClipPlaneAgent::OnClipPlanesChanged()
 		}
 	}
 	if (clip_link_x || clip_link_y || clip_link_z)
-	{
 		setValue("clip planes", planes);
-		UpdatePlanes(planes, resx, resy, resz);
-	}
+	UpdatePlanes(planes, resx, resy, resz);
 }
 
 void ClipPlaneAgent::OnClipDistXChanged()

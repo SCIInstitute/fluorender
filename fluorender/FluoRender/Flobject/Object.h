@@ -90,6 +90,8 @@ public:
 
 	inline void copyValues(const Object& obj, const CopyOp& copyop = CopyOp::SHALLOW_COPY)
 	{
+		if (!obj._vs_stack.top())
+			return;
 		for (auto it = obj._vs_stack.top()->getValues().begin();
 			it != obj._vs_stack.top()->getValues().end(); ++it)
 		{
@@ -110,8 +112,17 @@ public:
 
 	inline void clearValues()
 	{
-		if (_vs_stack.top())
-			_vs_stack.top()->clear();
+		if (!_vs_stack.top())
+			return;
+		//remove observer
+		for (auto it = _vs_stack.top()->getValues().begin();
+			it != _vs_stack.top()->getValues().end(); ++it)
+		{
+			Value * value = it->second.get();
+			if (value)
+				value->removeObserver(this);
+		}
+		_vs_stack.top()->clear();
 	}
 
 	//add a value
