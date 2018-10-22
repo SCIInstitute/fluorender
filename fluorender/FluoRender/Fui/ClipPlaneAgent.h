@@ -69,6 +69,9 @@ namespace FUI
 		void OnClipDistXChanged();
 		void OnClipDistYChanged();
 		void OnClipDistZChanged();
+		void OnClipLinkXChanged();
+		void OnClipLinkYChanged();
+		void OnClipLinkZChanged();
 	};
 }
 

@@ -375,3 +375,27 @@ void ClipPlaneAgent::OnClipDistZChanged()
 	panel_.m_xy_dist_text->SetValue(
 		wxString::Format("%d", lval));
 }
+
+void ClipPlaneAgent::OnClipLinkXChanged()
+{
+	bool bval;
+	getValue("clip link x", bval);
+	panel_.m_link_x_tb->ToggleTool(
+		ClipPlanePanel::ID_LinkXChk, bval);
+}
+
+void ClipPlaneAgent::OnClipLinkYChanged()
+{
+	bool bval;
+	getValue("clip link y", bval);
+	panel_.m_link_y_tb->ToggleTool(
+		ClipPlanePanel::ID_LinkYChk, bval);
+}
+
+void ClipPlaneAgent::OnClipLinkZChanged()
+{
+	bool bval;
+	getValue("clip link z", bval);
+	panel_.m_link_z_tb->ToggleTool(
+		ClipPlanePanel::ID_LinkZChk, bval);
+}

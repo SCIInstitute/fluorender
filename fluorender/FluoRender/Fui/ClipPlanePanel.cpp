@@ -1011,172 +1011,94 @@ void ClipPlanePanel::OnYZClipBtn(wxCommandEvent& event)
 		ival = ival2 - clip_dist;
 	}
 
+	//reset
+	m_agent->setValue("clip link x", true);
+	m_agent->setValue("clip link y", false);
+	m_agent->setValue("clip link z", false);
+	m_agent->setValue("clip dist x", clip_dist);
+	//then set
 	FLTYPE::PlaneSet planes(6);
 	planes[0].ChangePlane(FLTYPE::Point((double)ival / (double)res, 0.0, 0.0),
 		FLTYPE::Vector(1.0, 0.0, 0.0));
 	planes[1].ChangePlane(FLTYPE::Point((double)ival2 / (double)res, 0.0, 0.0),
 		FLTYPE::Vector(-1.0, 0.0, 0.0));
 	m_agent->setValue("clip planes", planes);
-	//reset
-	m_agent->setValue("clip dist x", clip_dist);
-	m_agent->setValue("clip link x", true);
-	m_agent->setValue("clip link y", false);
-	m_agent->setValue("clip link z", false);
 
-	////reset yz
-	//m_link_y = false;
-	//m_check_tb->ToggleTool(ID_LinkYChk, false);
-	//m_check_tb->SetToolNormalBitmap(ID_LinkYChk,
-	//	wxGetBitmapFromMemory(unlink));
-	//m_link_z = false;
-	//m_check_tb->ToggleTool(ID_LinkZChk, false);
-	//m_check_tb->SetToolNormalBitmap(ID_LinkZChk,
-	//	wxGetBitmapFromMemory(unlink));
-	//m_y1_clip_text->SetValue("0");
-	//m_y2_clip_text->SetValue(
-	//	wxString::Format("%d", resy));
-	//m_z1_clip_text->SetValue("0");
-	//m_z2_clip_text->SetValue(
-	//	wxString::Format("%d", resz));
-
-	////set x
-	//SetXLink(false);
-	//if (dist < resx)
-	//{
-	//	int x1 = resx / 2 - dist / 2;
-	//	int x2 = x1 + dist;
-	//	m_x1_clip_text->SetValue(
-	//		wxString::Format("%d", x1));
-	//	m_x2_clip_text->SetValue(
-	//		wxString::Format("%d", x2));
-	//	SetXLink(true);
-	//	//int distx, disty, distz;
-	//	//m_vd->GetClipDistance(distx, disty, distz);
-	//	//m_vd->SetClipDistance(dist, disty, distz);
-	//	m_vd->setValue("clip dist x", dist);
-	//}
-	//else
-	//{
-	//	m_x1_clip_text->SetValue("0");
-	//	m_x2_clip_text->SetValue(
-	//		wxString::Format("%d", resx));
-	//}
-
-	//m_x1_clip_sldr->SetFocus();
+	m_x1_clip_sldr->SetFocus();
 }
 
 void ClipPlanePanel::OnXZClipBtn(wxCommandEvent& event)
 {
-	//if (m_sel_type != 2 || !m_vd)
-	//	return;
+	long res;
+	m_agent->getValue("res y", res);
+	long clip_dist;
+	wxString str = m_xz_dist_text->GetValue();
+	str.ToLong(&clip_dist);
+	if (clip_dist >= res || clip_dist <= 0)
+		clip_dist = std::max(long(1), res / 20);
+	long ival = m_y1_clip_sldr->GetValue();
+	long ival2 = m_y2_clip_sldr->GetValue();
+	long center = (ival + ival2) / 2;
+	ival = center - clip_dist / 2;
+	ival = ival < 0 ? 0 : ival;
+	ival2 = ival + clip_dist;
+	if (ival2 > res)
+	{
+		ival2 = res;
+		ival = ival2 - clip_dist;
+	}
 
-	//long resx, resy, resz;
-	////m_vd->GetResolution(resx, resy, resz);
-	//m_vd->getValue("res x", resx);
-	//m_vd->getValue("res y", resy);
-	//m_vd->getValue("res z", resz);
+	//reset
+	m_agent->setValue("clip link x", false);
+	m_agent->setValue("clip link y", true);
+	m_agent->setValue("clip link z", false);
+	m_agent->setValue("clip dist y", clip_dist);
+	//then set
+	FLTYPE::PlaneSet planes(6);
+	planes[2].ChangePlane(FLTYPE::Point(0.0, (double)ival / (double)res, 0.0),
+		FLTYPE::Vector(0.0, 1.0, 0.0));
+	planes[3].ChangePlane(FLTYPE::Point(0.0, (double)ival2 / (double)res, 0.0),
+		FLTYPE::Vector(0.0, -1.0, 0.0));
+	m_agent->setValue("clip planes", planes);
 
-	//wxString str = m_xz_dist_text->GetValue();
-	//long dist;
-	//str.ToLong(&dist);
-
-	////reset xz
-	//m_link_x = false;
-	//m_check_tb->ToggleTool(ID_LinkXChk, false);
-	//m_check_tb->SetToolNormalBitmap(ID_LinkXChk,
-	//	wxGetBitmapFromMemory(unlink));
-	//m_link_z = false;
-	//m_check_tb->ToggleTool(ID_LinkZChk, false);
-	//m_check_tb->SetToolNormalBitmap(ID_LinkZChk,
-	//	wxGetBitmapFromMemory(unlink));
-	//m_x1_clip_text->SetValue("0");
-	//m_x2_clip_text->SetValue(
-	//	wxString::Format("%d", resx));
-	//m_z1_clip_text->SetValue("0");
-	//m_z2_clip_text->SetValue(
-	//	wxString::Format("%d", resz));
-
-	////set y
-	//SetYLink(false);
-	//if (dist < resy)
-	//{
-	//	int y1 = resy / 2 - dist / 2;
-	//	int y2 = y1 + dist;
-	//	m_y1_clip_text->SetValue(
-	//		wxString::Format("%d", y1));
-	//	m_y2_clip_text->SetValue(
-	//		wxString::Format("%d", y2));
-	//	SetYLink(true);
-	//	//int distx, disty, distz;
-	//	//m_vd->GetClipDistance(distx, disty, distz);
-	//	//m_vd->SetClipDistance(distx, dist, distz);
-	//	m_vd->setValue("clip dist y", dist);
-	//}
-	//else
-	//{
-	//	m_y1_clip_text->SetValue("0");
-	//	m_y2_clip_text->SetValue(
-	//		wxString::Format("%d", resy));
-	//}
-
-	//m_y1_clip_sldr->SetFocus();
+	m_y1_clip_sldr->SetFocus();
 }
 
 void ClipPlanePanel::OnXYClipBtn(wxCommandEvent& event)
 {
-	//if (m_sel_type != 2 || !m_vd)
-	//	return;
+	long res;
+	m_agent->getValue("res z", res);
+	long clip_dist;
+	wxString str = m_xy_dist_text->GetValue();
+	str.ToLong(&clip_dist);
+	if (clip_dist >= res || clip_dist <= 0)
+		clip_dist = std::max(long(1), res / 20);
+	long ival = m_z1_clip_sldr->GetValue();
+	long ival2 = m_z2_clip_sldr->GetValue();
+	long center = (ival + ival2) / 2;
+	ival = center - clip_dist / 2;
+	ival = ival < 0 ? 0 : ival;
+	ival2 = ival + clip_dist;
+	if (ival2 > res)
+	{
+		ival2 = res;
+		ival = ival2 - clip_dist;
+	}
 
-	//long resx, resy, resz;
-	////m_vd->GetResolution(resx, resy, resz);
-	//m_vd->getValue("res x", resx);
-	//m_vd->getValue("res y", resy);
-	//m_vd->getValue("res z", resz);
+	//reset
+	m_agent->setValue("clip link x", false);
+	m_agent->setValue("clip link y", false);
+	m_agent->setValue("clip link z", true);
+	m_agent->setValue("clip dist z", clip_dist);
+	//then set
+	FLTYPE::PlaneSet planes(6);
+	planes[4].ChangePlane(FLTYPE::Point(0.0, 0.0, (double)ival / (double)res),
+		FLTYPE::Vector(0.0, 0.0, 1.0));
+	planes[5].ChangePlane(FLTYPE::Point(0.0, 0.0, (double)ival2 / (double)res),
+		FLTYPE::Vector(0.0, 0.0, -1.0));
+	m_agent->setValue("clip planes", planes);
 
-	//wxString str = m_xy_dist_text->GetValue();
-	//long dist;
-	//str.ToLong(&dist);
-
-	////reset xy
-	//m_link_x = false;
-	//m_check_tb->ToggleTool(ID_LinkXChk, false);
-	//m_check_tb->SetToolNormalBitmap(ID_LinkXChk,
-	//	wxGetBitmapFromMemory(unlink));
-	//m_link_y = false;
-	//m_check_tb->ToggleTool(ID_LinkYChk, false);
-	//m_check_tb->SetToolNormalBitmap(ID_LinkYChk,
-	//	wxGetBitmapFromMemory(unlink));
-	//m_x1_clip_text->SetValue("0");
-	//m_x2_clip_text->SetValue(
-	//	wxString::Format("%d", resx));
-	//m_y1_clip_text->SetValue("0");
-	//m_y2_clip_text->SetValue(
-	//	wxString::Format("%d", resy));
-
-	////set z
-	//SetZLink(false);
-	//if (dist < resz)
-	//{
-	//	int z1 = resz / 2 - dist / 2;
-	//	int z2 = z1 + dist;
-	//	m_z1_clip_text->SetValue(
-	//		wxString::Format("%d", z1));
-	//	m_z2_clip_text->SetValue(
-	//		wxString::Format("%d", z2));
-	//	SetZLink(true);
-	//	//int distx, disty, distz;
-	//	//m_vd->GetClipDistance(distx, disty, distz);
-	//	//m_vd->SetClipDistance(distx, disty, dist);
-	//	m_vd->setValue("clip dist z", dist);
-	//}
-	//else
-	//{
-	//	m_z1_clip_text->SetValue("0");
-	//	m_z2_clip_text->SetValue(
-	//		wxString::Format("%d", resz));
-	//}
-
-	//m_z1_clip_sldr->SetFocus();
+	m_z1_clip_sldr->SetFocus();
 }
 
 void ClipPlanePanel::OnResize(wxSizeEvent &event)
