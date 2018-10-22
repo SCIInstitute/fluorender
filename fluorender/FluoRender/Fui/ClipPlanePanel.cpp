@@ -138,6 +138,9 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 	bitmap = wxGetBitmapFromMemory(clip_normal);
 	m_toolbar->AddTool(ID_PlaneModesBtn, "Display Modes",
 		bitmap, "Toggle clipping plane display modes");
+	bitmap = wxGetBitmapFromMemory(save_settings);
+	m_toolbar->AddTool(ID_SaveBtn, "Save Default Settings",
+		bitmap, "Save default settings");
 	m_toolbar->Realize();
 	sizer_1->Add(5, 5, 0);
 	sizer_1->Add(m_toolbar, 0, wxALIGN_CENTER, 0);
@@ -173,6 +176,7 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 #endif
 	m_link_x_tb->AddCheckTool(ID_LinkXChk, "Lock X Planes",
 		bitmap, wxNullBitmap, "Lock X Planes");
+	m_link_x_tb->Realize();
 	//add the items
 	sizer_cx->Add(5, 5, 0);
 	sizer_cx->Add(st, 0, wxALIGN_CENTER, 0);
@@ -217,6 +221,7 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 #endif
 	m_link_y_tb->AddCheckTool(ID_LinkYChk, "Lock Y Planes",
 		bitmap, wxNullBitmap, "Lock Y Planes");
+	m_link_y_tb->Realize();
 	//add the items
 	sizer_cy->Add(5, 5, 0);
 	sizer_cy->Add(st, 0, wxALIGN_CENTER, 0);
@@ -261,6 +266,7 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 #endif
 	m_link_z_tb->AddCheckTool(ID_LinkZChk, "Lock Z Planes",
 		bitmap, wxNullBitmap, "Lock Z Planes");
+	m_link_z_tb->Realize();
 	//add the items
 	sizer_cz->Add(5, 5, 0);
 	sizer_cz->Add(st, 0, wxALIGN_CENTER, 0);
@@ -323,43 +329,38 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 	sizer_2->Add(sizer_cy, 1, wxEXPAND);
 	sizer_2->Add(sizer_cz, 1, wxEXPAND);
 
+	//clip distance
+	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
+	m_yz_dist_text = new wxTextCtrl(this, ID_YZDistText, "1",
+		wxDefaultPosition, wxSize(40, 22), 0, vald_int);
+	m_xz_dist_text = new wxTextCtrl(this, ID_XZDistText, "1",
+		wxDefaultPosition, wxSize(40, 22), 0, vald_int);
+	m_xy_dist_text = new wxTextCtrl(this, ID_XYDistText, "1",
+		wxDefaultPosition, wxSize(40, 22), 0, vald_int);
+	sizer_3->Add(m_yz_dist_text, 1, wxEXPAND);
+	sizer_3->Add(5, 5);
+	sizer_3->Add(m_xz_dist_text, 1, wxEXPAND);
+	sizer_3->Add(5, 5);
+	sizer_3->Add(m_xy_dist_text, 1, wxEXPAND);
+
 	//clip buttons 4
 	wxBoxSizer* sizer_4 = new wxBoxSizer(wxHORIZONTAL);
-	m_yz_clip_btn = new wxButton(this, ID_YZClipBtn, "YZ",
-		wxDefaultPosition, wxSize(34, 22));
-	m_xz_clip_btn = new wxButton(this, ID_XZClipBtn, "XZ",
-		wxDefaultPosition, wxSize(34, 22));
-	m_xy_clip_btn = new wxButton(this, ID_XYClipBtn, "XY",
-		wxDefaultPosition, wxSize(34, 22));
+	m_yz_clip_btn = new wxButton(this, ID_YZClipBtn, "Set X",
+		wxDefaultPosition, wxSize(40, 22));
+	m_xz_clip_btn = new wxButton(this, ID_XZClipBtn, "Set Y",
+		wxDefaultPosition, wxSize(40, 22));
+	m_xy_clip_btn = new wxButton(this, ID_XYClipBtn, "Set Z",
+		wxDefaultPosition, wxSize(40, 22));
 	sizer_4->Add(m_yz_clip_btn, 1, wxEXPAND);
-	sizer_4->AddSpacer(5);
+	sizer_4->Add(5, 5);
 	sizer_4->Add(m_xz_clip_btn, 1, wxEXPAND);
-	sizer_4->AddSpacer(5);
+	sizer_4->Add(5, 5);
 	sizer_4->Add(m_xy_clip_btn, 1, wxEXPAND);
-
-	//clip distance 5
-	wxBoxSizer* sizer_5 = new wxBoxSizer(wxHORIZONTAL);
-	m_yz_dist_text = new wxTextCtrl(this, ID_YZDistText, "1",
-		wxDefaultPosition, wxSize(34, 22), 0, vald_int);
-	m_xz_dist_text = new wxTextCtrl(this, ID_XZDistText, "1",
-		wxDefaultPosition, wxSize(34, 22), 0, vald_int);
-	m_xy_dist_text = new wxTextCtrl(this, ID_XYDistText, "1",
-		wxDefaultPosition, wxSize(34, 22), 0, vald_int);
-	sizer_5->Add(m_yz_dist_text, 1, wxEXPAND);
-	sizer_5->AddSpacer(5);
-	sizer_5->Add(m_xz_dist_text, 1, wxEXPAND);
-	sizer_5->AddSpacer(5);
-	sizer_5->Add(m_xy_dist_text, 1, wxEXPAND);
 
 	//reset clipping 6
 	wxBoxSizer* sizer_6 = new wxBoxSizer(wxHORIZONTAL);
-#ifndef _DARWIN
 	m_clip_reset_btn = new wxButton(this, ID_ClipResetBtn, "Reset Clips",
-		wxDefaultPosition, wxSize(120, 22));
-#else
-	m_clip_reset_btn = new wxButton(this, ID_ClipResetBtn, "Reset Clips",
-		wxDefaultPosition, wxSize(125, 30));
-#endif
+		wxDefaultPosition, wxSize(125, 33));
 	m_clip_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	sizer_6->Add(5, 5, 0);
 	sizer_6->Add(m_clip_reset_btn, 0, wxALIGN_CENTER);
@@ -438,7 +439,6 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 	sizer_rz->Add(m_z_rot_spin, 0, wxALIGN_CENTER, 0);
 	sizer_rz->Add(m_z_rot_sldr, 1, wxALIGN_CENTER, 0);
 
-
 	//sizer 9
 	wxBoxSizer *sizer_9 = new wxBoxSizer(wxHORIZONTAL);
 	sizer_9->Add(sizer_rx, 1, wxEXPAND);
@@ -450,16 +450,14 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 	sizer_v->Add(sizer_1, 0, wxALIGN_CENTER);
 	sizer_v->Add(5, 5, 0);
 	sizer_v->Add(sizer_2, 1, wxEXPAND);
-	//sizer_v->Add(5, 5, 0);
-	//sizer_v->Add(sizer_3, 0, wxEXPAND);
 	sizer_v->AddSpacer(5);
 	sizer_v->Add(new wxStaticText(this, 0,
-		"Set Clip Range"), 0, wxALIGN_CENTER);
+		"Set Clip Ranges"), 0, wxALIGN_CENTER);
+	sizer_v->Add(5, 5, 0);
+	sizer_v->Add(sizer_3, 0, wxEXPAND);
 	sizer_v->Add(5, 5, 0);
 	sizer_v->Add(sizer_4, 0, wxALIGN_CENTER);
-	sizer_v->Add(5, 5, 0);
-	sizer_v->Add(sizer_5, 0, wxALIGN_CENTER);
-	sizer_v->Add(5, 5, 0);
+	sizer_v->Add(5, 10, 0);
 	sizer_v->Add(sizer_6, 0, wxALIGN_CENTER);
 	sizer_v->Add(5, 5, 0);
 
@@ -663,115 +661,28 @@ void ClipPlanePanel::OnPlaneModesBtn(wxCommandEvent &event)
 
 void ClipPlanePanel::OnClipResetBtn(wxCommandEvent &event)
 {
-	//if (!m_vd)
-	//	return;
-	//long resx, resy, resz;
-	////m_vd->GetResolution(resx, resy, resz);
-	//m_vd->getValue("res x", resx);
-	//m_vd->getValue("res y", resy);
-	//m_vd->getValue("res z", resz);
+	long resx, resy, resz, clip_dist;
+	m_agent->getValue("res x", resx);
+	m_agent->getValue("res y", resy);
+	m_agent->getValue("res z", resz);
 
-	//vector<Plane*> *planes = 0;
-	//if (m_vd->GetRenderer())
-	//	planes = m_vd->GetRenderer()->get_planes();
-	//if (!planes)
-	//	return;
-	//if (planes->size() != 6)
-	//	return;
-
-	//Plane* plane = (*planes)[0];
-	//plane->ChangePlane(Point(0.0, 0.0, 0.0), Vector(1.0, 0.0, 0.0));
-	//plane = (*planes)[1];
-	//plane->ChangePlane(Point(1.0, 0.0, 0.0), Vector(-1.0, 0.0, 0.0));
-	//plane = (*planes)[2];
-	//plane->ChangePlane(Point(0.0, 0.0, 0.0), Vector(0.0, 1.0, 0.0));
-	//plane = (*planes)[3];
-	//plane->ChangePlane(Point(0.0, 1.0, 0.0), Vector(0.0, -1.0, 0.0));
-	//plane = (*planes)[4];
-	//plane->ChangePlane(Point(0.0, 0.0, 0.0), Vector(0.0, 0.0, 1.0));
-	//plane = (*planes)[5];
-	//plane->ChangePlane(Point(0.0, 0.0, 1.0), Vector(0.0, 0.0, -1.0));
-
-	////links
-	//m_link_x = false;
-	//m_link_y = false;
-	//m_link_z = false;
-	//m_check_tb->ToggleTool(ID_LinkXChk, false);
-	//m_check_tb->ToggleTool(ID_LinkYChk, false);
-	//m_check_tb->ToggleTool(ID_LinkZChk, false);
-	//m_check_tb->SetToolNormalBitmap(ID_LinkXChk,
-	//	wxGetBitmapFromMemory(unlink));
-	//m_check_tb->SetToolNormalBitmap(ID_LinkYChk,
-	//	wxGetBitmapFromMemory(unlink));
-	//m_check_tb->SetToolNormalBitmap(ID_LinkZChk,
-	//	wxGetBitmapFromMemory(unlink));
-
-	////controls
-	////sliders
-	//m_x1_clip_sldr->SetValue(0);
-	//m_x2_clip_sldr->SetValue(resx);
-	//m_y1_clip_sldr->SetValue(0);
-	//m_y2_clip_sldr->SetValue(resy);
-	//m_z1_clip_sldr->SetValue(0);
-	//m_z2_clip_sldr->SetValue(resz);
-	////texts
-	//m_x1_clip_text->SetValue("0");
-	//m_x2_clip_text->SetValue(wxString::Format("%d", resx));
-	//m_y1_clip_text->SetValue("0");
-	//m_y2_clip_text->SetValue(wxString::Format("%d", resy));
-	//m_z1_clip_text->SetValue("0");
-	//m_z2_clip_text->SetValue(wxString::Format("%d", resz));
-
-	////link
-	//if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
-	//{
-	//	if (m_mgr)
-	//	{
-	//		size_t num = FL::Global::instance().getVolumeFactory().getNum();
-	//		for (size_t i = 0; i<num; i++)
-	//		{
-	//			FL::VolumeData* vd =
-	//				FL::Global::instance().getVolumeFactory().get(i);
-	//			if (!vd || vd == m_vd)
-	//				continue;
-
-	//			planes = 0;
-	//			if (m_vd->GetRenderer())
-	//				planes = vd->GetRenderer()->get_planes();
-	//			if (!planes)
-	//				continue;
-	//			if (planes->size() != 6)
-	//				continue;
-
-	//			(*planes)[0]->ChangePlane(Point(0.0, 0.0, 0.0), Vector(1.0, 0.0, 0.0));
-	//			(*planes)[1]->ChangePlane(Point(1.0, 0.0, 0.0), Vector(-1.0, 0.0, 0.0));
-	//			(*planes)[2]->ChangePlane(Point(0.0, 0.0, 0.0), Vector(0.0, 1.0, 0.0));
-	//			(*planes)[3]->ChangePlane(Point(0.0, 1.0, 0.0), Vector(0.0, -1.0, 0.0));
-	//			(*planes)[4]->ChangePlane(Point(0.0, 0.0, 0.0), Vector(0.0, 0.0, 1.0));
-	//			(*planes)[5]->ChangePlane(Point(0.0, 0.0, 1.0), Vector(0.0, 0.0, -1.0));
-	//		}
-	//	}
-	//}
-
-	////views
-	//VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
-	//if (vrender_frame)
-	//{
-	//	for (int i = 0; i<(int)vrender_frame->GetViewList()->size(); i++)
-	//	{
-	//		VRenderView *vrv = (*vrender_frame->GetViewList())[i];
-	//		if (vrv)
-	//		{
-	//			vrv->m_glview->m_clip_mask = -1;
-
-	//			double rotx, roty, rotz;
-	//			vrv->GetRotations(rotx, roty, rotz);
-	//			vrv->SetRotations(rotx, roty, rotz);
-
-	//			vrv->RefreshGL();
-	//		}
-	//	}
-	//}
+	m_agent->setValue("clip link x", false);
+	m_agent->setValue("clip link y", false);
+	m_agent->setValue("clip link z", false);
+	clip_dist = std::max(long(1), resx / 20);
+	m_agent->setValue("clip dist x", clip_dist);
+	m_yz_dist_text->SetValue(
+		wxString::Format("%d", clip_dist));
+	clip_dist = std::max(long(1), resy / 20);
+	m_agent->setValue("clip dist y", clip_dist);
+	m_xz_dist_text->SetValue(
+		wxString::Format("%d", clip_dist));
+	clip_dist = std::max(long(1), resz / 20);
+	m_agent->setValue("clip dist z", clip_dist);
+	m_xy_dist_text->SetValue(
+		wxString::Format("%d", clip_dist));
+	FLTYPE::PlaneSet planes(6);
+	m_agent->setValue("clip planes", planes);
 }
 
 void ClipPlanePanel::OnX1ClipChange(wxScrollEvent &event)

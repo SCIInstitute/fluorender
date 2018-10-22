@@ -43,6 +43,7 @@ namespace FUI
 			ID_LinkChannelsBtn = ID_CLIP_VIEW,
 			ID_HoldPlanesBtn,
 			ID_PlaneModesBtn,
+			ID_SaveBtn,
 			ID_RotatePlanesChk,
 			ID_ClipResetBtn,
 			ID_SetZeroBtn,
@@ -119,40 +120,6 @@ namespace FUI
 			return m_plane_mode;
 		}
 		void SetPlaneMode(PLANE_MODES mode);
-
-		//bool GetXLink()
-		//{
-		//	return m_check_tb->GetToolState(ID_LinkXChk);
-		//}
-		//bool GetYLink()
-		//{
-		//	return m_check_tb->GetToolState(ID_LinkYChk);
-		//}
-		//bool GetZLink()
-		//{
-		//	return m_check_tb->GetToolState(ID_LinkZChk);
-		//}
-		//void SetXLink(bool link)
-		//{
-		//	//m_check_tb->ToggleTool(ID_LinkXChk, link);
-		//	//m_link_x = link;
-		//	//wxCommandEvent ev;
-		//	//OnLinkXCheck(ev);
-		//}
-		//void SetYLink(bool link)
-		//{
-		//	//m_check_tb->ToggleTool(ID_LinkYChk, link);
-		//	//m_link_y = link;
-		//	//wxCommandEvent ev;
-		//	//OnLinkYCheck(ev);
-		//}
-		//void SetZLink(bool link)
-		//{
-		//	//m_check_tb->ToggleTool(ID_LinkZChk, link);
-		//	//m_link_z = link;
-		//	//wxCommandEvent ev;
-		//	//OnLinkZCheck(ev);
-		//}
 
 		void SetClippingPlaneRotations(double rotx, double roty, double rotz)
 		{

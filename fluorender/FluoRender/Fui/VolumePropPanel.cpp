@@ -446,10 +446,8 @@ VolumePropPanel::VolumePropPanel(wxWindow* frame,
 	bitmap = wxGetBitmapFromMemory(save_settings);
 	m_options_toolbar->AddTool(ID_SaveDefault, "Save",
 		bitmap, "Set as default settings");
-	sizer_r1->AddStretchSpacer();
-	sizer_r1->Add(m_options_toolbar, 0, wxALIGN_CENTER);
-	sizer_r1->AddStretchSpacer();
 	m_options_toolbar->Realize();
+	sizer_r1->Add(m_options_toolbar, 0, wxALIGN_CENTER);
 	//spacings
 	//x
 	m_space_st = new wxStaticText(this, ID_SpaceSync, "Spacing",
@@ -553,6 +551,7 @@ VolumePropPanel::VolumePropPanel(wxWindow* frame,
 	sizer_middle->Add(sizer_m5, 0, wxEXPAND);
 	//right
 	sizer_right->Add(sizer_r1, 0, wxEXPAND);
+	sizer_right->Add(3, 3);
 	sizer_right->Add(sizer_r2, 0, wxEXPAND);
 	sizer_right->Add(sizer_r3, 0, wxEXPAND);
 	sizer_right->Add(sizer_r4, 0, wxEXPAND);
