@@ -97,8 +97,8 @@ namespace FLTYPE
 		void Scale(Vector &v);
 
 		//remember and restore
-		void Remember() {n_copy_ = n_; d_copy_ = d_;};
-		void Restore() {n_ = n_copy_; d_ = d_copy_;};
+		void Remember() {n_copy_ = n_; d_copy_ = d_;}
+		void Restore() {n_ = n_copy_; d_ = d_copy_;}
 
 		friend std::ostream& operator<<(std::ostream& os, const Plane& p)
 		{
@@ -131,6 +131,17 @@ namespace FLTYPE
 		Plane &operator[](const size_t index);
 		Plane Get(const size_t index);
 		size_t GetSize() { return planes_.size(); };
+
+		//translate the plane by a vector
+		void Translate(Vector &v);
+		//rotate the plane around origin by a quaternion
+		void Rotate(Quaternion &q);
+		//scale the plane from the origin by a vector
+		void Scale(Vector &v);
+
+		//remember and restore
+		void Remember();
+		void Restore();
 
 		friend std::ostream& operator<<(std::ostream& os, const PlaneSet& ps)
 		{

@@ -760,6 +760,47 @@ void VolumeData::OnSyncOutputChannels()
 	syncValues(ss_equal);
 }
 
+void VolumeData::OnClipRot()
+{
+	FLTYPE::PlaneSet planes;
+	getValue("clip planes", planes);
+	double clip_rot_x, clip_rot_y, clip_rot_z;
+	getValue("clip rot x", clip_rot_x);
+	getValue("clip rot y", clip_rot_y);
+	getValue("clip rot z", clip_rot_z);
+	FLTYPE::Quaternion cl_quat;
+	cl_quat.FromEuler(clip_rot_x, clip_rot_y, clip_rot_z);
+	double spc_x, spc_y, spc_z;
+	long res_x, res_y, res_z;
+	getValue("spc x", spc_x);
+	getValue("spc y", spc_y);
+	getValue("spc z", spc_z);
+	getValue("res x", res_x);
+	getValue("res y", res_y);
+	getValue("res z", res_z);
+	FLTYPE::Vector scale;
+	if (spc_x > 0.0 && spc_y > 0.0 && spc_z > 0.0)
+	{
+		scale = FLTYPE::Vector(
+			1.0 / res_x / spc_x,
+			1.0 / res_y / spc_y,
+			1.0 / res_z / spc_z);
+		scale.safe_normalize();
+	}
+	else
+		scale = FLTYPE::Vector(1.0);
+
+	FLTYPE::Vector trans1(-0.5);
+	FLTYPE::Vector trans2(0.5);
+
+	planes.Restore();
+	planes.Translate(trans1);
+	planes.Rotate(cl_quat);
+	planes.Scale(scale);
+	planes.Translate(trans2);
+	setValue("clip planes", planes);
+}
+
 //functions from old class
 //randomize color
 void VolumeData::RandomizeColor()

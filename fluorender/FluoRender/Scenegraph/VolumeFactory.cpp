@@ -78,6 +78,10 @@ void VolumeFactory::createDefault()
 		vd->addValue("clip link x", bool(false));
 		vd->addValue("clip link y", bool(false));
 		vd->addValue("clip link z", bool(false));
+		//clip rotation
+		vd->addValue("clip rot x", double(0));
+		vd->addValue("clip rot y", double(0));
+		vd->addValue("clip rot z", double(0));
 
 		vd->addValue("data path", std::wstring());//path to original file
 		vd->addValue("channel", long(0));//channel index of the original file
@@ -283,6 +287,9 @@ void VolumeFactory::setEventHandler(VolumeData* vd)
 	ADD_AFTER_EVENT(vd, "sync r", OnSyncOutputChannels);
 	ADD_AFTER_EVENT(vd, "sync g", OnSyncOutputChannels);
 	ADD_AFTER_EVENT(vd, "sync b", OnSyncOutputChannels);
+	ADD_AFTER_EVENT(vd, "clip rot x", OnClipRot);
+	ADD_AFTER_EVENT(vd, "clip rot y", OnClipRot);
+	ADD_AFTER_EVENT(vd, "clip rot z", OnClipRot);
 }
 
 VolumeData* VolumeFactory::build(const std::string &exp)

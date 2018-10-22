@@ -1198,26 +1198,11 @@ void ClipPlanePanel::OnXRotChange(wxScrollEvent &event)
 
 void ClipPlanePanel::OnXRotEdit(wxCommandEvent &event)
 {
-	//wxString str = m_x_rot_text->GetValue();
-	//double val = 0.0;
-	//str.ToDouble(&val);
-	//m_x_rot_sldr->SetValue(int(val));
-
-	//VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
-	//if (vrender_frame)
-	//{
-	//	for (int i = 0; i<(int)vrender_frame->GetViewList()->size(); i++)
-	//	{
-	//		VRenderView *vrv = (*vrender_frame->GetViewList())[i];
-	//		if (vrv)
-	//		{
-	//			double rotx, roty, rotz;
-	//			vrv->GetClippingPlaneRotations(rotx, roty, rotz);
-	//			vrv->SetClippingPlaneRotations(val, roty, rotz);
-	//			vrv->RefreshGL();
-	//		}
-	//	}
-	//}
+	wxString str = m_x_rot_text->GetValue();
+	double dval = 0.0;
+	str.ToDouble(&dval);
+	m_x_rot_sldr->SetValue(int(dval + 0.5));
+	m_agent->setValue("clip rot x", dval);
 }
 
 void ClipPlanePanel::OnYRotChange(wxScrollEvent &event)
@@ -1229,26 +1214,11 @@ void ClipPlanePanel::OnYRotChange(wxScrollEvent &event)
 
 void ClipPlanePanel::OnYRotEdit(wxCommandEvent &event)
 {
-	//wxString str = m_y_rot_text->GetValue();
-	//double val = 0.0;
-	//str.ToDouble(&val);
-	//m_y_rot_sldr->SetValue(int(val));
-
-	//VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
-	//if (vrender_frame)
-	//{
-	//	for (int i = 0; i<(int)vrender_frame->GetViewList()->size(); i++)
-	//	{
-	//		VRenderView *vrv = (*vrender_frame->GetViewList())[i];
-	//		if (vrv)
-	//		{
-	//			double rotx, roty, rotz;
-	//			vrv->GetClippingPlaneRotations(rotx, roty, rotz);
-	//			vrv->SetClippingPlaneRotations(rotx, val, rotz);
-	//			vrv->RefreshGL();
-	//		}
-	//	}
-	//}
+	wxString str = m_y_rot_text->GetValue();
+	double dval = 0.0;
+	str.ToDouble(&dval);
+	m_y_rot_sldr->SetValue(int(dval + 0.5));
+	m_agent->setValue("clip rot y", dval);
 }
 
 void ClipPlanePanel::OnZRotChange(wxScrollEvent &event)
@@ -1260,26 +1230,11 @@ void ClipPlanePanel::OnZRotChange(wxScrollEvent &event)
 
 void ClipPlanePanel::OnZRotEdit(wxCommandEvent &event)
 {
-	//wxString str = m_z_rot_text->GetValue();
-	//double val = 0.0;
-	//str.ToDouble(&val);
-	//m_z_rot_sldr->SetValue(int(val));
-
-	//VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
-	//if (vrender_frame)
-	//{
-	//	for (int i = 0; i<(int)vrender_frame->GetViewList()->size(); i++)
-	//	{
-	//		VRenderView *vrv = (*vrender_frame->GetViewList())[i];
-	//		if (vrv)
-	//		{
-	//			double rotx, roty, rotz;
-	//			vrv->GetClippingPlaneRotations(rotx, roty, rotz);
-	//			vrv->SetClippingPlaneRotations(rotx, roty, val);
-	//			vrv->RefreshGL();
-	//		}
-	//	}
-	//}
+	wxString str = m_z_rot_text->GetValue();
+	double dval = 0.0;
+	str.ToDouble(&dval);
+	m_z_rot_sldr->SetValue(int(dval + 0.5));
+	m_agent->setValue("clip rot z", dval);
 }
 
 void ClipPlanePanel::OnXRotSpinUp(wxSpinEvent& event)

@@ -215,6 +215,7 @@ namespace FL
 		void OnHighShadingChanged();
 		void OnIntScaleChanged();
 		void OnSyncOutputChannels();
+		void OnClipRot();
 
 		friend class VolumeFactory;
 	};

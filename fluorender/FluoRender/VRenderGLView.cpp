@@ -12638,7 +12638,20 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					FLTYPE::Quaternion up2 = (-m_q) * up * m_q;
 					m_up = Vector(up2.x, up2.y, up2.z);
 
-					Q2A();
+					m_q.ToEuler(m_rotx, m_roty, m_rotz);
+
+					if (m_roty > 360.0)
+						m_roty -= 360.0;
+					if (m_roty < 0.0)
+						m_roty += 360.0;
+					if (m_rotx > 360.0)
+						m_rotx -= 360.0;
+					if (m_rotx < 0.0)
+						m_rotx += 360.0;
+					if (m_rotz > 360.0)
+						m_rotz -= 360.0;
+					if (m_rotz < 0.0)
+						m_rotz += 360.0;
 
 					wxString str = wxString::Format("%.1f", m_rotx);
 					m_vrv->m_x_rot_text->ChangeValue(str);
@@ -12943,7 +12956,7 @@ void VRenderGLView::SetRotations(double rotx, double roty, double rotz, bool ui_
 	if (m_rotz<0.0)
 		m_rotz += 360.0;
 
-	A2Q();
+	m_q.FromEuler(m_rotx, m_roty, m_rotz);
 
 	FLTYPE::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
 	FLTYPE::Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
