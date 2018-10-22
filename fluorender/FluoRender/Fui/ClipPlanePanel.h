@@ -219,12 +219,14 @@ namespace FUI
 		//z2
 		wxSlider *m_z2_clip_sldr;
 		wxTextCtrl *m_z2_clip_text;
-		//keep 1 panel for sizing reasons
-		wxPanel * m_xpanel;
 		//highlighters
 		wxStaticText * m_xBar, *m_yBar, *m_zBar;
-
-		wxToolBar * m_check_tb;
+		//slider panels
+		wxPanel *m_xpanel, *m_ypanel, *m_zpanel;
+		//link position
+		wxToolBar *m_link_x_tb;
+		wxToolBar *m_link_y_tb;
+		wxToolBar *m_link_z_tb;
 
 		//buttons
 		wxButton *m_yz_clip_btn;
@@ -238,6 +240,7 @@ namespace FUI
 		friend class ClipPlaneAgent;
 
 	private:
+		void OnResize(wxSizeEvent &event);
 		void OnIdle(wxIdleEvent &event);
 
 		void OnLinkChannelsBtn(wxCommandEvent &event);

@@ -134,34 +134,34 @@ void ClipPlaneAgent::UpdateAllSettings()
 	getValue("clip link x", clip_link_x);
 	getValue("clip link y", clip_link_y);
 	getValue("clip link z", clip_link_z);
-	panel_.m_check_tb->ToggleTool(
+	panel_.m_link_x_tb->ToggleTool(
 		ClipPlanePanel::ID_LinkXChk, clip_link_x);
 	if (clip_link_x)
-		panel_.m_check_tb->SetToolNormalBitmap(
+		panel_.m_link_x_tb->SetToolNormalBitmap(
 			ClipPlanePanel::ID_LinkXChk,
 			wxGetBitmapFromMemory(link));
 	else
-		panel_.m_check_tb->SetToolNormalBitmap(
+		panel_.m_link_x_tb->SetToolNormalBitmap(
 			ClipPlanePanel::ID_LinkXChk,
 			wxGetBitmapFromMemory(unlink));
-	panel_.m_check_tb->ToggleTool(
+	panel_.m_link_y_tb->ToggleTool(
 		ClipPlanePanel::ID_LinkYChk, clip_link_y);
 	if (clip_link_y)
-		panel_.m_check_tb->SetToolNormalBitmap(
+		panel_.m_link_y_tb->SetToolNormalBitmap(
 			ClipPlanePanel::ID_LinkYChk,
 			wxGetBitmapFromMemory(link));
 	else
-		panel_.m_check_tb->SetToolNormalBitmap(
+		panel_.m_link_y_tb->SetToolNormalBitmap(
 			ClipPlanePanel::ID_LinkYChk,
 			wxGetBitmapFromMemory(unlink));
-	panel_.m_check_tb->ToggleTool(
+	panel_.m_link_z_tb->ToggleTool(
 		ClipPlanePanel::ID_LinkZChk, clip_link_z);
 	if (clip_link_z)
-		panel_.m_check_tb->SetToolNormalBitmap(
+		panel_.m_link_z_tb->SetToolNormalBitmap(
 			ClipPlanePanel::ID_LinkZChk,
 			wxGetBitmapFromMemory(link));
 	else
-		panel_.m_check_tb->SetToolNormalBitmap(
+		panel_.m_link_z_tb->SetToolNormalBitmap(
 			ClipPlanePanel::ID_LinkZChk,
 			wxGetBitmapFromMemory(unlink));
 }
