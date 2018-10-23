@@ -74,9 +74,6 @@ namespace FUI
 			ID_LinkXChk,
 			ID_LinkYChk,
 			ID_LinkZChk,
-			ID_YZClipBtn,
-			ID_XZClipBtn,
-			ID_XYClipBtn,
 			ID_YZDistText,
 			ID_XZDistText,
 			ID_XYDistText
@@ -156,17 +153,6 @@ namespace FUI
 		wxButton *m_set_zero_btn;
 		wxButton *m_rot_reset_btn;
 
-		//sliders for rotating clipping planes
-		wxSlider *m_x_rot_sldr;
-		wxSlider *m_y_rot_sldr;
-		wxSlider *m_z_rot_sldr;
-		wxTextCtrl *m_x_rot_text;
-		wxTextCtrl *m_y_rot_text;
-		wxTextCtrl *m_z_rot_text;
-		wxSpinButton* m_x_rot_spin;
-		wxSpinButton* m_y_rot_spin;
-		wxSpinButton* m_z_rot_spin;
-
 		//sliders for clipping planes
 		//x1
 		wxSlider *m_x1_clip_sldr;
@@ -194,15 +180,21 @@ namespace FUI
 		wxToolBar *m_link_x_tb;
 		wxToolBar *m_link_y_tb;
 		wxToolBar *m_link_z_tb;
-
-		//buttons
-		wxButton *m_yz_clip_btn;
-		wxButton *m_xz_clip_btn;
-		wxButton *m_xy_clip_btn;
 		//distance text
 		wxTextCtrl *m_yz_dist_text;
 		wxTextCtrl *m_xz_dist_text;
 		wxTextCtrl *m_xy_dist_text;
+
+		//sliders for rotating clipping planes
+		wxSlider *m_x_rot_sldr;
+		wxSlider *m_y_rot_sldr;
+		wxSlider *m_z_rot_sldr;
+		wxTextCtrl *m_x_rot_text;
+		wxTextCtrl *m_y_rot_text;
+		wxTextCtrl *m_z_rot_text;
+		wxSpinButton* m_x_rot_spin;
+		wxSpinButton* m_y_rot_spin;
+		wxSpinButton* m_z_rot_spin;
 
 		friend class ClipPlaneAgent;
 
@@ -235,6 +227,10 @@ namespace FUI
 		void OnLinkYCheck(wxCommandEvent &event);
 		void OnLinkZCheck(wxCommandEvent &event);
 
+		void OnClipDistXEdit(wxCommandEvent &event);
+		void OnClipDistYEdit(wxCommandEvent &event);
+		void OnClipDistZEdit(wxCommandEvent &event);
+
 		void OnSetZeroBtn(wxCommandEvent &event);
 		void OnRotResetBtn(wxCommandEvent &event);
 
@@ -255,11 +251,6 @@ namespace FUI
 
 		//mouse
 		void OnSliderRClick(wxCommandEvent& event);
-
-		//clip buttons
-		void OnYZClipBtn(wxCommandEvent& event);
-		void OnXZClipBtn(wxCommandEvent& event);
-		void OnXYClipBtn(wxCommandEvent& event);
 
 		//key down
 		void OnSliderKeyDown(wxKeyEvent& event);

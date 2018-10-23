@@ -111,16 +111,16 @@ void ClipPlaneAgent::UpdateAllSettings()
 	if ((vald_i = (wxIntegerValidator<int>*)panel_.m_z2_clip_text->GetValidator()))
 		vald_i->SetRange(0, int(resz));
 
-	long distx, disty, distz;
+	double distx, disty, distz;
 	getValue("clip dist x", distx);
 	getValue("clip dist y", disty);
 	getValue("clip dist z", distz);
 	panel_.m_yz_dist_text->SetValue(
-		wxString::Format("%d", distx));
+		wxString::Format("%d", int(distx*resx + 0.5)));
 	panel_.m_xz_dist_text->SetValue(
-		wxString::Format("%d", disty));
+		wxString::Format("%d", int(distx*resy + 0.5)));
 	panel_.m_xy_dist_text->SetValue(
-		wxString::Format("%d", distz));
+		wxString::Format("%d", int(distx*resz + 0.5)));
 
 	//clip values
 	int ival = 0;
@@ -315,26 +315,92 @@ void ClipPlaneAgent::OnClipZChanged()
 
 void ClipPlaneAgent::OnClipDistXChanged()
 {
-	long lval;
-	getValue("clip dist x", lval);
-	panel_.m_yz_dist_text->SetValue(
-		wxString::Format("%d", lval));
+	double clip_dist;
+	getValue("clip dist x", clip_dist);
+	long res;
+	getValue("res x", res);
+	if (clip_dist > 1.0)
+		clip_dist = 1.0;
+	if (clip_dist <= 0.0)
+		clip_dist = 1.0 / res;
+	double x1, x2, center;
+	getValue("clip x1", x1);
+	getValue("clip x2", x2);
+	center = (x1 + x2) / 2;
+	x1 = center - clip_dist / 2;
+	x1 = x1 < 0.0 ? 0.0 : x1;
+	x2 = x1 + clip_dist;
+	if (x2 > 1.0)
+	{
+		x2 = 1.0;
+		x1 = x2 - clip_dist;
+	}
+
+	setValue("clip x1", x1);
+	setValue("clip x2", x2);
+	if (!panel_.m_yz_dist_text->HasFocus())
+		panel_.m_yz_dist_text->ChangeValue(
+			wxString::Format("%d", int(clip_dist * res + 0.5)));
 }
 
 void ClipPlaneAgent::OnClipDistYChanged()
 {
-	long lval;
-	getValue("clip dist y", lval);
-	panel_.m_xz_dist_text->SetValue(
-		wxString::Format("%d", lval));
+	double clip_dist;
+	getValue("clip dist y", clip_dist);
+	long res;
+	getValue("res y", res);
+	if (clip_dist > 1.0)
+		clip_dist = 1.0;
+	if (clip_dist <= 0.0)
+		clip_dist = 1.0 / res;
+	double y1, y2, center;
+	getValue("clip y1", y1);
+	getValue("clip y2", y2);
+	center = (y1 + y2) / 2;
+	y1 = center - clip_dist / 2;
+	y1 = y1 < 0.0 ? 0.0 : y1;
+	y2 = y1 + clip_dist;
+	if (y2 > 1.0)
+	{
+		y2 = 1.0;
+		y1 = y2 - clip_dist;
+	}
+
+	setValue("clip y1", y1);
+	setValue("clip y2", y2);
+	if (!panel_.m_xz_dist_text->HasFocus())
+		panel_.m_xz_dist_text->ChangeValue(
+			wxString::Format("%d", int(clip_dist * res + 0.5)));
 }
 
 void ClipPlaneAgent::OnClipDistZChanged()
 {
-	long lval;
-	getValue("clip dist z", lval);
-	panel_.m_xy_dist_text->SetValue(
-		wxString::Format("%d", lval));
+	double clip_dist;
+	getValue("clip dist z", clip_dist);
+	long res;
+	getValue("res z", res);
+	if (clip_dist > 1.0)
+		clip_dist = 1.0;
+	if (clip_dist <= 0.0)
+		clip_dist = 1.0 / res;
+	double z1, z2, center;
+	getValue("clip z1", z1);
+	getValue("clip z2", z2);
+	center = (z1 + z2) / 2;
+	z1 = center - clip_dist / 2;
+	z1 = z1 < 0.0 ? 0.0 : z1;
+	z2 = z1 + clip_dist;
+	if (z2 > 1.0)
+	{
+		z2 = 1.0;
+		z1 = z2 - clip_dist;
+	}
+
+	setValue("clip z1", z1);
+	setValue("clip z2", z2);
+	if (!panel_.m_xy_dist_text->HasFocus())
+		panel_.m_xy_dist_text->ChangeValue(
+			wxString::Format("%d", int(clip_dist * res + 0.5)));
 }
 
 void ClipPlaneAgent::OnClipLinkXChanged()
@@ -343,6 +409,14 @@ void ClipPlaneAgent::OnClipLinkXChanged()
 	getValue("clip link x", bval);
 	panel_.m_link_x_tb->ToggleTool(
 		ClipPlanePanel::ID_LinkXChk, bval);
+	if (bval)
+		panel_.m_link_x_tb->SetToolNormalBitmap(
+			ClipPlanePanel::ID_LinkXChk,
+			wxGetBitmapFromMemory(link));
+	else
+		panel_.m_link_x_tb->SetToolNormalBitmap(
+			ClipPlanePanel::ID_LinkXChk,
+			wxGetBitmapFromMemory(unlink));
 }
 
 void ClipPlaneAgent::OnClipLinkYChanged()
@@ -351,6 +425,14 @@ void ClipPlaneAgent::OnClipLinkYChanged()
 	getValue("clip link y", bval);
 	panel_.m_link_y_tb->ToggleTool(
 		ClipPlanePanel::ID_LinkYChk, bval);
+	if (bval)
+		panel_.m_link_y_tb->SetToolNormalBitmap(
+			ClipPlanePanel::ID_LinkYChk,
+			wxGetBitmapFromMemory(link));
+	else
+		panel_.m_link_y_tb->SetToolNormalBitmap(
+			ClipPlanePanel::ID_LinkYChk,
+			wxGetBitmapFromMemory(unlink));
 }
 
 void ClipPlaneAgent::OnClipLinkZChanged()
@@ -359,4 +441,12 @@ void ClipPlaneAgent::OnClipLinkZChanged()
 	getValue("clip link z", bval);
 	panel_.m_link_z_tb->ToggleTool(
 		ClipPlanePanel::ID_LinkZChk, bval);
+	if (bval)
+		panel_.m_link_z_tb->SetToolNormalBitmap(
+			ClipPlanePanel::ID_LinkZChk,
+			wxGetBitmapFromMemory(link));
+	else
+		panel_.m_link_z_tb->SetToolNormalBitmap(
+			ClipPlanePanel::ID_LinkZChk,
+			wxGetBitmapFromMemory(unlink));
 }

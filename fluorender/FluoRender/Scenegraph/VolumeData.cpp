@@ -130,25 +130,6 @@ void VolumeData::Initialize()
 //	setValue("saved mode", mode);
 //}
 
-//resolution changed
-void VolumeData::OnResChanged()
-{
-	long res_x, res_y, res_z;
-	getValue("res x", res_x);
-	getValue("res y", res_y);
-	getValue("res z", res_z);
-	long clip_dist_x, clip_dist_y, clip_dist_z;
-	clip_dist_x = res_x / 20;
-	clip_dist_x = clip_dist_x <= 0 ? 1 : clip_dist_x;
-	clip_dist_y = res_y / 20;
-	clip_dist_y = clip_dist_y <= 0 ? 1 : clip_dist_y;
-	clip_dist_z = res_z / 20;
-	clip_dist_z = clip_dist_z <= 0 ? 1 : clip_dist_z;
-	setValue("clip dist x", clip_dist_x);
-	setValue("clip dist y", clip_dist_y);
-	setValue("clip dist z", clip_dist_z);
-}
-
 //MIP & normal modes
 void VolumeData::OnMipModeChanged()
 {
@@ -764,24 +745,29 @@ void VolumeData::OnClipX1Changed()
 {
 	bool clip_link;
 	getValue("clip link x", clip_link);
+	double value1, value2;
+	double clip_dist;
 	if (clip_link)
 	{
-		long res;
-		getValue("res x", res);
-		long clip_dist;
 		getValue("clip dist x", clip_dist);
-		double dist = double(clip_dist) / double(res);
-		double value1, value2;
 		getValue("clip x1", value1);
-		value2 = value1 + dist;
+		value2 = value1 + clip_dist;
 		if (value2 > 1.0)
 		{
-			setValue("clip x1", 1.0 - dist);
+			setValue("clip x1", 1.0 - clip_dist);
 			setValue("clip x2", 1.0);
 		}
 		else
 			setValue("clip x2", value2);
 	}
+	else
+	{
+		getValue("clip x1", value1);
+		getValue("clip x2", value2);
+		clip_dist = value2 - value1;
+		setValue("clip dist x", clip_dist);
+	}
+
 	UpdateClippingPlanes();
 }
 
@@ -789,24 +775,29 @@ void VolumeData::OnClipX2Changed()
 {
 	bool clip_link;
 	getValue("clip link x", clip_link);
+	double value1, value2;
+	double clip_dist;
 	if (clip_link)
 	{
-		long res;
-		getValue("res x", res);
-		long clip_dist;
 		getValue("clip dist x", clip_dist);
-		double dist = double(clip_dist) / double(res);
-		double value1, value2;
 		getValue("clip x2", value2);
-		value1 = value2 - dist;
+		value1 = value2 - clip_dist;
 		if (value1 < 0.0)
 		{
 			setValue("clip x1", 0.0);
-			setValue("clip x2", dist);
+			setValue("clip x2", clip_dist);
 		}
 		else
 			setValue("clip x1", value1);
 	}
+	else
+	{
+		getValue("clip x1", value1);
+		getValue("clip x2", value2);
+		clip_dist = value2 - value1;
+		setValue("clip dist x", clip_dist);
+	}
+
 	UpdateClippingPlanes();
 }
 
@@ -814,24 +805,29 @@ void VolumeData::OnClipY1Changed()
 {
 	bool clip_link;
 	getValue("clip link y", clip_link);
+	double value1, value2;
+	double clip_dist;
 	if (clip_link)
 	{
-		long res;
-		getValue("res y", res);
-		long clip_dist;
 		getValue("clip dist y", clip_dist);
-		double dist = double(clip_dist) / double(res);
-		double value1, value2;
 		getValue("clip y1", value1);
-		value2 = value1 + dist;
+		value2 = value1 + clip_dist;
 		if (value2 > 1.0)
 		{
-			setValue("clip y1", 1.0 - dist);
+			setValue("clip y1", 1.0 - clip_dist);
 			setValue("clip y2", 1.0);
 		}
 		else
 			setValue("clip y2", value2);
 	}
+	else
+	{
+		getValue("clip y1", value1);
+		getValue("clip y2", value2);
+		clip_dist = value2 - value1;
+		setValue("clip dist y", clip_dist);
+	}
+
 	UpdateClippingPlanes();
 }
 
@@ -839,24 +835,29 @@ void VolumeData::OnClipY2Changed()
 {
 	bool clip_link;
 	getValue("clip link y", clip_link);
+	double value1, value2;
+	double clip_dist;
 	if (clip_link)
 	{
-		long res;
-		getValue("res y", res);
-		long clip_dist;
 		getValue("clip dist y", clip_dist);
-		double dist = double(clip_dist) / double(res);
-		double value1, value2;
 		getValue("clip y2", value2);
-		value1 = value2 - dist;
+		value1 = value2 - clip_dist;
 		if (value1 < 0.0)
 		{
 			setValue("clip y1", 0.0);
-			setValue("clip y2", dist);
+			setValue("clip y2", clip_dist);
 		}
 		else
 			setValue("clip y1", value1);
 	}
+	else
+	{
+		getValue("clip y1", value1);
+		getValue("clip y2", value2);
+		clip_dist = value2 - value1;
+		setValue("clip dist y", clip_dist);
+	}
+
 	UpdateClippingPlanes();
 }
 
@@ -864,24 +865,29 @@ void VolumeData::OnClipZ1Changed()
 {
 	bool clip_link;
 	getValue("clip link z", clip_link);
+	double value1, value2;
+	double clip_dist;
 	if (clip_link)
 	{
-		long res;
-		getValue("res z", res);
-		long clip_dist;
 		getValue("clip dist z", clip_dist);
-		double dist = double(clip_dist) / double(res);
-		double value1, value2;
 		getValue("clip z1", value1);
-		value2 = value1 + dist;
+		value2 = value1 + clip_dist;
 		if (value2 > 1.0)
 		{
-			setValue("clip z1", 1.0 - dist);
+			setValue("clip z1", 1.0 - clip_dist);
 			setValue("clip z2", 1.0);
 		}
 		else
 			setValue("clip z2", value2);
 	}
+	else
+	{
+		getValue("clip z1", value1);
+		getValue("clip z2", value2);
+		clip_dist = value2 - value1;
+		setValue("clip dist z", clip_dist);
+	}
+
 	UpdateClippingPlanes();
 }
 
@@ -889,24 +895,29 @@ void VolumeData::OnClipZ2Changed()
 {
 	bool clip_link;
 	getValue("clip link z", clip_link);
+	double value1, value2;
+	double clip_dist;
 	if (clip_link)
 	{
-		long res;
-		getValue("res z", res);
-		long clip_dist;
 		getValue("clip dist z", clip_dist);
-		double dist = double(clip_dist) / double(res);
-		double value1, value2;
 		getValue("clip z2", value2);
-		value1 = value2 - dist;
+		value1 = value2 - clip_dist;
 		if (value1 < 0.0)
 		{
 			setValue("clip z1", 0.0);
-			setValue("clip z2", dist);
+			setValue("clip z2", clip_dist);
 		}
 		else
 			setValue("clip z1", value1);
 	}
+	else
+	{
+		getValue("clip z1", value1);
+		getValue("clip z2", value2);
+		clip_dist = value2 - value1;
+		setValue("clip dist z", clip_dist);
+	}
+
 	UpdateClippingPlanes();
 }
 

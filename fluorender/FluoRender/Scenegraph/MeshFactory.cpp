@@ -64,9 +64,9 @@ void MeshFactory::createDefault()
 		md->addValue("res y", long(0));
 		md->addValue("res z", long(0));
 		//clip distance
-		md->addValue("clip dist x", long(0));
-		md->addValue("clip dist y", long(0));
-		md->addValue("clip dist z", long(0));
+		md->addValue("clip dist x", double(1));
+		md->addValue("clip dist y", double(1));
+		md->addValue("clip dist z", double(1));
 
 		md->addValue("display", bool(true));
 		md->addValue("draw bounds", bool(false));

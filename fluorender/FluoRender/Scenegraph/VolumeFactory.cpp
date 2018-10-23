@@ -80,10 +80,10 @@ void VolumeFactory::createDefault()
 		vd->addValue("clip y2", double(1));
 		vd->addValue("clip z1", double(0));
 		vd->addValue("clip z2", double(1));
-		//clip distance (from ui using integers)
-		vd->addValue("clip dist x", long(0));
-		vd->addValue("clip dist y", long(0));
-		vd->addValue("clip dist z", long(0));
+		//clip distance (normalized)
+		vd->addValue("clip dist x", double(1));
+		vd->addValue("clip dist y", double(1));
+		vd->addValue("clip dist z", double(1));
 		//clip link
 		vd->addValue("clip link x", bool(false));
 		vd->addValue("clip link y", bool(false));
@@ -240,9 +240,6 @@ void VolumeFactory::setEventHandler(VolumeData* vd)
 	//ADD_BEFORE_EVENT(vd, "mip mode", OnMipModeChanging);
 
 	//handle after events
-	ADD_AFTER_EVENT(vd, "res x", OnResChanged);
-	ADD_AFTER_EVENT(vd, "res y", OnResChanged);
-	ADD_AFTER_EVENT(vd, "res z", OnResChanged);
 	ADD_AFTER_EVENT(vd, "mip mode", OnMipModeChanged);
 	ADD_AFTER_EVENT(vd, "overlay mode", OnOverlayModeChanged);
 	ADD_AFTER_EVENT(vd, "viewport", OnViewportChanged);
