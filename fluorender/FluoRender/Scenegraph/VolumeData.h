@@ -215,7 +215,17 @@ namespace FL
 		void OnHighShadingChanged();
 		void OnIntScaleChanged();
 		void OnSyncOutputChannels();
+		void OnClipX1Changed();
+		void OnClipX2Changed();
+		void OnClipY1Changed();
+		void OnClipY2Changed();
+		void OnClipZ1Changed();
+		void OnClipZ2Changed();
 		void OnClipRot();
+
+		//update clipping planes
+		//any value changes -> set clip values and then rotate
+		void UpdateClippingPlanes();
 
 		friend class VolumeFactory;
 	};

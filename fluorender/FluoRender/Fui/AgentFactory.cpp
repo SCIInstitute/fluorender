@@ -181,10 +181,18 @@ ClipPlaneAgent* AgentFactory::getOrAddClipPlaneAgent(const std::string &name, wx
 	if (clip_plane_agent)
 	{
 		clip_plane_agent->setName(name);
-		clip_plane_agent->setBeforeFunction("clip planes",
-			std::bind(&ClipPlaneAgent::OnClipPlanesChanging, clip_plane_agent));
-		clip_plane_agent->setAfterFunction("clip planes",
-			std::bind(&ClipPlaneAgent::OnClipPlanesChanged, clip_plane_agent));
+		clip_plane_agent->setAfterFunction("clip x1",
+			std::bind(&ClipPlaneAgent::OnClipXChanged, clip_plane_agent));
+		clip_plane_agent->setAfterFunction("clip x2",
+			std::bind(&ClipPlaneAgent::OnClipXChanged, clip_plane_agent));
+		clip_plane_agent->setAfterFunction("clip y1",
+			std::bind(&ClipPlaneAgent::OnClipYChanged, clip_plane_agent));
+		clip_plane_agent->setAfterFunction("clip y2",
+			std::bind(&ClipPlaneAgent::OnClipYChanged, clip_plane_agent));
+		clip_plane_agent->setAfterFunction("clip z1",
+			std::bind(&ClipPlaneAgent::OnClipZChanged, clip_plane_agent));
+		clip_plane_agent->setAfterFunction("clip z2",
+			std::bind(&ClipPlaneAgent::OnClipZChanged, clip_plane_agent));
 		clip_plane_agent->setAfterFunction("clip dist x",
 			std::bind(&ClipPlaneAgent::OnClipDistXChanged, clip_plane_agent));
 		clip_plane_agent->setAfterFunction("clip dist y",

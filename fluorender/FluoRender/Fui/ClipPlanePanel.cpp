@@ -681,8 +681,13 @@ void ClipPlanePanel::OnClipResetBtn(wxCommandEvent &event)
 	m_agent->setValue("clip dist z", clip_dist);
 	m_xy_dist_text->SetValue(
 		wxString::Format("%d", clip_dist));
-	FLTYPE::PlaneSet planes(6);
-	m_agent->setValue("clip planes", planes);
+
+	m_agent->setValue("clip x1", double(0));
+	m_agent->setValue("clip x2", double(1));
+	m_agent->setValue("clip y1", double(0));
+	m_agent->setValue("clip y2", double(1));
+	m_agent->setValue("clip z1", double(0));
+	m_agent->setValue("clip z2", double(1));
 }
 
 void ClipPlanePanel::OnX1ClipChange(wxScrollEvent &event)
@@ -713,12 +718,7 @@ void ClipPlanePanel::OnX1ClipEdit(wxCommandEvent &event)
 	m_x1_clip_sldr->SetValue(ival);
 	dval = (double)ival / (double)resx;
 
-	FLTYPE::PlaneSet planes;
-	m_agent->getValue("clip planes", planes);
-	if (planes.GetSize() != 6)
-		return;
-	planes[0].ChangePlane(FLTYPE::Point(dval, 0.0, 0.0), FLTYPE::Vector(1.0, 0.0, 0.0));
-	m_agent->setValue("clip planes", planes);
+	m_agent->setValue("clip x1", dval);
 }
 
 void ClipPlanePanel::OnX2ClipChange(wxScrollEvent &event)
@@ -749,12 +749,7 @@ void ClipPlanePanel::OnX2ClipEdit(wxCommandEvent &event)
 	m_x2_clip_sldr->SetValue(ival);
 	dval = (double)ival / (double)resx;
 
-	FLTYPE::PlaneSet planes;
-	m_agent->getValue("clip planes", planes);
-	if (planes.GetSize() != 6)
-		return;
-	planes[1].ChangePlane(FLTYPE::Point(dval, 0.0, 0.0), FLTYPE::Vector(-1.0, 0.0, 0.0));
-	m_agent->setValue("clip planes", planes);
+	m_agent->setValue("clip x2", dval);
 }
 
 void ClipPlanePanel::OnY1ClipChange(wxScrollEvent &event)
@@ -785,12 +780,7 @@ void ClipPlanePanel::OnY1ClipEdit(wxCommandEvent &event)
 	m_y1_clip_sldr->SetValue(ival);
 	dval = (double)ival / (double)resy;
 
-	FLTYPE::PlaneSet planes;
-	m_agent->getValue("clip planes", planes);
-	if (planes.GetSize() != 6)
-		return;
-	planes[2].ChangePlane(FLTYPE::Point(0.0, dval, 0.0), FLTYPE::Vector(0.0, 1.0, 0.0));
-	m_agent->setValue("clip planes", planes);
+	m_agent->setValue("clip y1", dval);
 }
 
 void ClipPlanePanel::OnY2ClipChange(wxScrollEvent &event)
@@ -821,12 +811,7 @@ void ClipPlanePanel::OnY2ClipEdit(wxCommandEvent &event)
 	m_y2_clip_sldr->SetValue(ival);
 	dval = (double)ival / (double)resy;
 
-	FLTYPE::PlaneSet planes;
-	m_agent->getValue("clip planes", planes);
-	if (planes.GetSize() != 6)
-		return;
-	planes[3].ChangePlane(FLTYPE::Point(0.0, dval, 0.0), FLTYPE::Vector(0.0, -1.0, 0.0));
-	m_agent->setValue("clip planes", planes);
+	m_agent->setValue("clip y2", dval);
 }
 
 void ClipPlanePanel::OnZ1ClipChange(wxScrollEvent &event)
@@ -857,12 +842,7 @@ void ClipPlanePanel::OnZ1ClipEdit(wxCommandEvent &event)
 	m_z1_clip_sldr->SetValue(ival);
 	dval = (double)ival / (double)resz;
 
-	FLTYPE::PlaneSet planes;
-	m_agent->getValue("clip planes", planes);
-	if (planes.GetSize() != 6)
-		return;
-	planes[4].ChangePlane(FLTYPE::Point(0.0, 0.0, dval), FLTYPE::Vector(0.0, 0.0, 1.0));
-	m_agent->setValue("clip planes", planes);
+	m_agent->setValue("clip z1", dval);
 }
 
 void ClipPlanePanel::OnZ2ClipChange(wxScrollEvent &event)
@@ -893,12 +873,7 @@ void ClipPlanePanel::OnZ2ClipEdit(wxCommandEvent &event)
 	m_z2_clip_sldr->SetValue(ival);
 	dval = (double)ival / (double)resz;
 
-	FLTYPE::PlaneSet planes;
-	m_agent->getValue("clip planes", planes);
-	if (planes.GetSize() != 6)
-		return;
-	planes[5].ChangePlane(FLTYPE::Point(0.0, 0.0, dval), FLTYPE::Vector(0.0, 0.0, -1.0));
-	m_agent->setValue("clip planes", planes);
+	m_agent->setValue("clip z2", dval);
 }
 
 void ClipPlanePanel::OnYZClipBtn(wxCommandEvent& event)
@@ -928,12 +903,12 @@ void ClipPlanePanel::OnYZClipBtn(wxCommandEvent& event)
 	m_agent->setValue("clip link z", false);
 	m_agent->setValue("clip dist x", clip_dist);
 	//then set
-	FLTYPE::PlaneSet planes(6);
-	planes[0].ChangePlane(FLTYPE::Point((double)ival / (double)res, 0.0, 0.0),
-		FLTYPE::Vector(1.0, 0.0, 0.0));
-	planes[1].ChangePlane(FLTYPE::Point((double)ival2 / (double)res, 0.0, 0.0),
-		FLTYPE::Vector(-1.0, 0.0, 0.0));
-	m_agent->setValue("clip planes", planes);
+	m_agent->setValue("clip x1", (double)ival / (double)res);
+	m_agent->setValue("clip x2", (double)ival2 / (double)res);
+	m_agent->setValue("clip y1", double(0));
+	m_agent->setValue("clip y2", double(1));
+	m_agent->setValue("clip z1", double(0));
+	m_agent->setValue("clip z2", double(1));
 
 	m_x1_clip_sldr->SetFocus();
 }
@@ -965,12 +940,12 @@ void ClipPlanePanel::OnXZClipBtn(wxCommandEvent& event)
 	m_agent->setValue("clip link z", false);
 	m_agent->setValue("clip dist y", clip_dist);
 	//then set
-	FLTYPE::PlaneSet planes(6);
-	planes[2].ChangePlane(FLTYPE::Point(0.0, (double)ival / (double)res, 0.0),
-		FLTYPE::Vector(0.0, 1.0, 0.0));
-	planes[3].ChangePlane(FLTYPE::Point(0.0, (double)ival2 / (double)res, 0.0),
-		FLTYPE::Vector(0.0, -1.0, 0.0));
-	m_agent->setValue("clip planes", planes);
+	m_agent->setValue("clip x1", double(0));
+	m_agent->setValue("clip x2", double(1));
+	m_agent->setValue("clip y1", (double)ival / (double)res);
+	m_agent->setValue("clip y2", (double)ival2 / (double)res);
+	m_agent->setValue("clip z1", double(0));
+	m_agent->setValue("clip z2", double(1));
 
 	m_y1_clip_sldr->SetFocus();
 }
@@ -1002,12 +977,12 @@ void ClipPlanePanel::OnXYClipBtn(wxCommandEvent& event)
 	m_agent->setValue("clip link z", true);
 	m_agent->setValue("clip dist z", clip_dist);
 	//then set
-	FLTYPE::PlaneSet planes(6);
-	planes[4].ChangePlane(FLTYPE::Point(0.0, 0.0, (double)ival / (double)res),
-		FLTYPE::Vector(0.0, 0.0, 1.0));
-	planes[5].ChangePlane(FLTYPE::Point(0.0, 0.0, (double)ival2 / (double)res),
-		FLTYPE::Vector(0.0, 0.0, -1.0));
-	m_agent->setValue("clip planes", planes);
+	m_agent->setValue("clip x1", double(0));
+	m_agent->setValue("clip x2", double(1));
+	m_agent->setValue("clip y1", double(0));
+	m_agent->setValue("clip y2", double(1));
+	m_agent->setValue("clip z1", (double)ival / (double)res);
+	m_agent->setValue("clip z2", (double)ival2 / (double)res);
 
 	m_z1_clip_sldr->SetFocus();
 }

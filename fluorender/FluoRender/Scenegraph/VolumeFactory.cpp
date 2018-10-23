@@ -68,9 +68,19 @@ void VolumeFactory::createDefault()
 		vd->addValue("sync b", bool(false));
 
 		vd->addValue("bounds", FLTYPE::BBox());
+		//clipping planes
 		vd->addValue("clip planes", FLTYPE::PlaneSet(6));
 		vd->addValue("clip bounds", FLTYPE::BBox());
-		//clip distance
+		//save clip values individually
+		//actual clipping planes are calculated after either
+		//clip values or rotations are changed
+		vd->addValue("clip x1", double(0));
+		vd->addValue("clip x2", double(1));
+		vd->addValue("clip y1", double(0));
+		vd->addValue("clip y2", double(1));
+		vd->addValue("clip z1", double(0));
+		vd->addValue("clip z2", double(1));
+		//clip distance (from ui using integers)
 		vd->addValue("clip dist x", long(0));
 		vd->addValue("clip dist y", long(0));
 		vd->addValue("clip dist z", long(0));
@@ -287,6 +297,12 @@ void VolumeFactory::setEventHandler(VolumeData* vd)
 	ADD_AFTER_EVENT(vd, "sync r", OnSyncOutputChannels);
 	ADD_AFTER_EVENT(vd, "sync g", OnSyncOutputChannels);
 	ADD_AFTER_EVENT(vd, "sync b", OnSyncOutputChannels);
+	ADD_AFTER_EVENT(vd, "clip x1", OnClipX1Changed);
+	ADD_AFTER_EVENT(vd, "clip x2", OnClipX2Changed);
+	ADD_AFTER_EVENT(vd, "clip y1", OnClipY1Changed);
+	ADD_AFTER_EVENT(vd, "clip y2", OnClipY2Changed);
+	ADD_AFTER_EVENT(vd, "clip z1", OnClipZ1Changed);
+	ADD_AFTER_EVENT(vd, "clip z2", OnClipZ2Changed);
 	ADD_AFTER_EVENT(vd, "clip rot x", OnClipRot);
 	ADD_AFTER_EVENT(vd, "clip rot y", OnClipRot);
 	ADD_AFTER_EVENT(vd, "clip rot z", OnClipRot);

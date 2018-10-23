@@ -1022,8 +1022,6 @@ private:
 	void HandleCamera();
 	FLTYPE::Quaternion Trackball(int p1x, int p1y, int p2x, int p2y);
 	FLTYPE::Quaternion TrackballClip(int p1x, int p1y, int p2x, int p2y);
-	void Q2A();
-	void A2Q();
 	//sort bricks after the view has been changed
 	void SetSortBricks();
 

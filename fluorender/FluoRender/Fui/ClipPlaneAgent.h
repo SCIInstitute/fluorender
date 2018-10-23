@@ -60,12 +60,11 @@ namespace FUI
 
 	protected:
 		ClipPlanePanel &panel_;
-		FLTYPE::PlaneSet old_planes_;
 
 		//update functions
-		void UpdatePlanes(FLTYPE::PlaneSet &planes, long, long, long);
-		void OnClipPlanesChanging();
-		void OnClipPlanesChanged();
+		void OnClipXChanged();
+		void OnClipYChanged();
+		void OnClipZChanged();
 		void OnClipDistXChanged();
 		void OnClipDistYChanged();
 		void OnClipDistZChanged();

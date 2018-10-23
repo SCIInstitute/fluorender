@@ -760,16 +760,174 @@ void VolumeData::OnSyncOutputChannels()
 	syncValues(ss_equal);
 }
 
+void VolumeData::OnClipX1Changed()
+{
+	bool clip_link;
+	getValue("clip link x", clip_link);
+	if (clip_link)
+	{
+		long res;
+		getValue("res x", res);
+		long clip_dist;
+		getValue("clip dist x", clip_dist);
+		double dist = double(clip_dist) / double(res);
+		double value1, value2;
+		getValue("clip x1", value1);
+		value2 = value1 + dist;
+		if (value2 > 1.0)
+		{
+			setValue("clip x1", 1.0 - dist);
+			setValue("clip x2", 1.0);
+		}
+		else
+			setValue("clip x2", value2);
+	}
+	UpdateClippingPlanes();
+}
+
+void VolumeData::OnClipX2Changed()
+{
+	bool clip_link;
+	getValue("clip link x", clip_link);
+	if (clip_link)
+	{
+		long res;
+		getValue("res x", res);
+		long clip_dist;
+		getValue("clip dist x", clip_dist);
+		double dist = double(clip_dist) / double(res);
+		double value1, value2;
+		getValue("clip x2", value2);
+		value1 = value2 - dist;
+		if (value1 < 0.0)
+		{
+			setValue("clip x1", 0.0);
+			setValue("clip x2", dist);
+		}
+		else
+			setValue("clip x1", value1);
+	}
+	UpdateClippingPlanes();
+}
+
+void VolumeData::OnClipY1Changed()
+{
+	bool clip_link;
+	getValue("clip link y", clip_link);
+	if (clip_link)
+	{
+		long res;
+		getValue("res y", res);
+		long clip_dist;
+		getValue("clip dist y", clip_dist);
+		double dist = double(clip_dist) / double(res);
+		double value1, value2;
+		getValue("clip y1", value1);
+		value2 = value1 + dist;
+		if (value2 > 1.0)
+		{
+			setValue("clip y1", 1.0 - dist);
+			setValue("clip y2", 1.0);
+		}
+		else
+			setValue("clip y2", value2);
+	}
+	UpdateClippingPlanes();
+}
+
+void VolumeData::OnClipY2Changed()
+{
+	bool clip_link;
+	getValue("clip link y", clip_link);
+	if (clip_link)
+	{
+		long res;
+		getValue("res y", res);
+		long clip_dist;
+		getValue("clip dist y", clip_dist);
+		double dist = double(clip_dist) / double(res);
+		double value1, value2;
+		getValue("clip y2", value2);
+		value1 = value2 - dist;
+		if (value1 < 0.0)
+		{
+			setValue("clip y1", 0.0);
+			setValue("clip y2", dist);
+		}
+		else
+			setValue("clip y1", value1);
+	}
+	UpdateClippingPlanes();
+}
+
+void VolumeData::OnClipZ1Changed()
+{
+	bool clip_link;
+	getValue("clip link z", clip_link);
+	if (clip_link)
+	{
+		long res;
+		getValue("res z", res);
+		long clip_dist;
+		getValue("clip dist z", clip_dist);
+		double dist = double(clip_dist) / double(res);
+		double value1, value2;
+		getValue("clip z1", value1);
+		value2 = value1 + dist;
+		if (value2 > 1.0)
+		{
+			setValue("clip z1", 1.0 - dist);
+			setValue("clip z2", 1.0);
+		}
+		else
+			setValue("clip z2", value2);
+	}
+	UpdateClippingPlanes();
+}
+
+void VolumeData::OnClipZ2Changed()
+{
+	bool clip_link;
+	getValue("clip link z", clip_link);
+	if (clip_link)
+	{
+		long res;
+		getValue("res z", res);
+		long clip_dist;
+		getValue("clip dist z", clip_dist);
+		double dist = double(clip_dist) / double(res);
+		double value1, value2;
+		getValue("clip z2", value2);
+		value1 = value2 - dist;
+		if (value1 < 0.0)
+		{
+			setValue("clip z1", 0.0);
+			setValue("clip z2", dist);
+		}
+		else
+			setValue("clip z1", value1);
+	}
+	UpdateClippingPlanes();
+}
+
 void VolumeData::OnClipRot()
 {
-	FLTYPE::PlaneSet planes;
-	getValue("clip planes", planes);
+	UpdateClippingPlanes();
+}
+
+void VolumeData::UpdateClippingPlanes()
+{
+	double clip_x1, clip_x2, clip_y1, clip_y2, clip_z1, clip_z2;
+	getValue("clip x1", clip_x1);
+	getValue("clip x2", clip_x2);
+	getValue("clip y1", clip_y1);
+	getValue("clip y2", clip_y2);
+	getValue("clip z1", clip_z1);
+	getValue("clip z2", clip_z2);
 	double clip_rot_x, clip_rot_y, clip_rot_z;
 	getValue("clip rot x", clip_rot_x);
 	getValue("clip rot y", clip_rot_y);
 	getValue("clip rot z", clip_rot_z);
-	FLTYPE::Quaternion cl_quat;
-	cl_quat.FromEuler(clip_rot_x, clip_rot_y, clip_rot_z);
 	double spc_x, spc_y, spc_z;
 	long res_x, res_y, res_z;
 	getValue("spc x", spc_x);
@@ -778,6 +936,9 @@ void VolumeData::OnClipRot()
 	getValue("res x", res_x);
 	getValue("res y", res_y);
 	getValue("res z", res_z);
+
+	FLTYPE::Quaternion cl_quat;
+	cl_quat.FromEuler(clip_rot_x, clip_rot_y, clip_rot_z);
 	FLTYPE::Vector scale;
 	if (spc_x > 0.0 && spc_y > 0.0 && spc_z > 0.0)
 	{
@@ -790,14 +951,22 @@ void VolumeData::OnClipRot()
 	else
 		scale = FLTYPE::Vector(1.0);
 
+	FLTYPE::PlaneSet planes(6);
+	//clip first
+	planes[0].ChangePlane(FLTYPE::Point(clip_x1, 0, 0), FLTYPE::Vector(1, 0, 0));
+	planes[1].ChangePlane(FLTYPE::Point(clip_x2, 0, 0), FLTYPE::Vector(-1, 0, 0));
+	planes[2].ChangePlane(FLTYPE::Point(0, clip_y1, 0), FLTYPE::Vector(0, 1, 0));
+	planes[3].ChangePlane(FLTYPE::Point(0, clip_y2, 0), FLTYPE::Vector(0, -1, 0));
+	planes[4].ChangePlane(FLTYPE::Point(0, 0, clip_z1), FLTYPE::Vector(0, 0, 1));
+	planes[5].ChangePlane(FLTYPE::Point(0, 0, clip_z2), FLTYPE::Vector(0, 0, -1));
+	//then rotate
 	FLTYPE::Vector trans1(-0.5);
 	FLTYPE::Vector trans2(0.5);
-
-	planes.Restore();
 	planes.Translate(trans1);
 	planes.Rotate(cl_quat);
 	planes.Scale(scale);
 	planes.Translate(trans2);
+	//set and update to the renderer
 	setValue("clip planes", planes);
 }
 
@@ -875,8 +1044,8 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 		if (m_vr)
 			delete m_vr;
 
-		FLTYPE::PlaneSet planeset(6);
-
+		FLTYPE::PlaneSet planeset;
+		getValue("clip planes", planeset);
 		//this needs to be made consistent in the future
 		vector<FLIVR::Plane*> planelist(0);
 		for (int i = 0; i < planeset.GetSize(); ++i)
@@ -886,7 +1055,6 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 		}
 
 		m_vr = new FLIVR::VolumeRenderer(m_tex, planelist, true);
-		setValue("clip planes", planeset);
 		FLTYPE::BBox bounds;
 		FLTYPE::Point pmax(data->axis[0].max, data->axis[1].max, data->axis[2].max);
 		FLTYPE::Point pmin(data->axis[0].min, data->axis[1].min, data->axis[2].min);
@@ -1095,8 +1263,8 @@ void VolumeData::AddEmptyData(int bits,
 
 	//clipping planes
 	//this needs to be made consistent in the future
-	FLTYPE::PlaneSet planeset(6);
-	setValue("clip planes", planeset);
+	FLTYPE::PlaneSet planeset;
+	getValue("clip planes", planeset);
 	vector<FLIVR::Plane*> planelist(0);
 	for (int i = 0; i < planeset.GetSize(); ++i)
 	{

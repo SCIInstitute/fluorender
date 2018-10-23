@@ -122,12 +122,69 @@ void ClipPlaneAgent::UpdateAllSettings()
 	panel_.m_xy_dist_text->SetValue(
 		wxString::Format("%d", distz));
 
-	FLTYPE::PlaneSet planes;
-	getValue("clip planes", planes);
-	if (planes.GetSize() != 6)
-		return;
-
-	UpdatePlanes(planes, resx, resy, resz);
+	//clip values
+	int ival = 0;
+	wxString str;
+	double x1, x2, y1, y2, z1, z2;
+	getValue("clip x1", x1);
+	getValue("clip x2", x2);
+	getValue("clip y1", y1);
+	getValue("clip y2", y2);
+	getValue("clip z1", z1);
+	getValue("clip z2", z2);
+	double percent;
+	int barsize;
+	//x1
+	ival = int(x1 * resx + 0.5);
+	panel_.m_x1_clip_sldr->SetValue(ival);
+	str = wxString::Format("%d", ival);
+	panel_.m_x1_clip_text->ChangeValue(str);
+	percent = (double)ival / (double)panel_.m_x1_clip_sldr->GetMax();
+	//x2
+	ival = int(x2 * resx + 0.5);
+	panel_.m_x2_clip_sldr->SetValue(ival);
+	str = wxString::Format("%d", ival);
+	panel_.m_x2_clip_text->ChangeValue(str);
+	//xbar
+	barsize = (panel_.m_x1_clip_sldr->GetSize().GetHeight() - 20);
+	panel_.m_xBar->SetPosition(wxPoint(20, 10 + percent * barsize));
+	panel_.m_xBar->SetSize(wxSize(3, barsize*((double)
+		(ival - panel_.m_x1_clip_sldr->GetValue()) /
+		(double)panel_.m_x1_clip_sldr->GetMax())));
+	//y1
+	ival = int(y1 * resy + 0.5);
+	panel_.m_y1_clip_sldr->SetValue(ival);
+	str = wxString::Format("%d", ival);
+	panel_.m_y1_clip_text->ChangeValue(str);
+	percent = (double)ival / (double)panel_.m_y1_clip_sldr->GetMax();
+	//y2
+	ival = int(y2 * resy + 0.5);
+	panel_.m_y2_clip_sldr->SetValue(ival);
+	str = wxString::Format("%d", ival);
+	panel_.m_y2_clip_text->ChangeValue(str);
+	//ybar
+	barsize = (panel_.m_y1_clip_sldr->GetSize().GetHeight() - 20);
+	panel_.m_yBar->SetPosition(wxPoint(20, 10 + percent * barsize));
+	panel_.m_yBar->SetSize(wxSize(3, barsize*((double)
+		(ival - panel_.m_y1_clip_sldr->GetValue()) /
+		(double)panel_.m_y1_clip_sldr->GetMax())));
+	//z1
+	ival = int(z1 * resz + 0.5);
+	panel_.m_z1_clip_sldr->SetValue(ival);
+	str = wxString::Format("%d", ival);
+	panel_.m_z1_clip_text->ChangeValue(str);
+	percent = (double)ival / (double)panel_.m_z1_clip_sldr->GetMax();
+	//z2
+	ival = int(z2 * resz + 0.5);
+	panel_.m_z2_clip_sldr->SetValue(ival);
+	str = wxString::Format("%d", ival);
+	panel_.m_z2_clip_text->ChangeValue(str);
+	//zbar
+	barsize = (panel_.m_z1_clip_sldr->GetSize().GetHeight() - 20);
+	panel_.m_zBar->SetPosition(wxPoint(20, 10 + percent * barsize));
+	panel_.m_zBar->SetSize(wxSize(3, barsize*((double)
+		(ival - panel_.m_z1_clip_sldr->GetValue()) /
+		(double)panel_.m_z1_clip_sldr->GetMax())));
 
 	//clip link
 	bool clip_link_x, clip_link_y, clip_link_z;
@@ -164,192 +221,96 @@ void ClipPlaneAgent::UpdateAllSettings()
 		panel_.m_link_z_tb->SetToolNormalBitmap(
 			ClipPlanePanel::ID_LinkZChk,
 			wxGetBitmapFromMemory(unlink));
+
+	//clip rotations
+	double clip_rot_x, clip_rot_y, clip_rot_z;
+	getValue("clip rot x", clip_rot_x);
+	getValue("clip rot y", clip_rot_y);
+	getValue("clip rot z", clip_rot_z);
+	panel_.m_x_rot_sldr->SetValue(int(clip_rot_x + 0.5));
+	panel_.m_x_rot_text->ChangeValue(wxString::Format("%.1f", clip_rot_x));
+	panel_.m_y_rot_sldr->SetValue(int(clip_rot_y + 0.5));
+	panel_.m_y_rot_text->ChangeValue(wxString::Format("%.1f", clip_rot_y));
+	panel_.m_z_rot_sldr->SetValue(int(clip_rot_z + 0.5));
+	panel_.m_z_rot_text->ChangeValue(wxString::Format("%.1f", clip_rot_z));
 }
 
-void ClipPlaneAgent::UpdatePlanes(FLTYPE::PlaneSet &planes,
-	long resx, long resy, long resz)
+void ClipPlaneAgent::OnClipXChanged()
 {
-	//set values in ui
-	int ival = 0;
-	wxString str;
+	long res;
+	getValue("res x", res);
+	double x1, x2;
+	getValue("clip x1", x1);
+	getValue("clip x2", x2);
+	int ival;
+
 	//x1
-	ival = int(fabs(planes[0].d() * resx) + 0.499);
+	ival = int(x1 * res + 0.5);
 	panel_.m_x1_clip_sldr->SetValue(ival);
+	panel_.m_x1_clip_text->ChangeValue(wxString::Format("%d", ival));
 	double percent = (double)ival / (double)panel_.m_x1_clip_sldr->GetMax();
-	int barsize = (panel_.m_x1_clip_sldr->GetSize().GetHeight() - 20);
-	str = wxString::Format("%d", ival);
-	panel_.m_x1_clip_text->ChangeValue(str);
 	//x2
-	ival = fabs(planes[1].d() * resx) + 0.499;
+	ival = int(x2 * res + 0.5);
 	panel_.m_x2_clip_sldr->SetValue(ival);
+	panel_.m_x2_clip_text->ChangeValue(wxString::Format("%d", ival));
+	//bar
+	int barsize = (panel_.m_x1_clip_sldr->GetSize().GetHeight() - 20);
 	panel_.m_xBar->SetPosition(wxPoint(20, 10 + percent * barsize));
 	panel_.m_xBar->SetSize(wxSize(3, barsize*((double)
-		(ival - panel_.m_x1_clip_sldr->GetValue()) / (double)panel_.m_x1_clip_sldr->GetMax())));
-	str = wxString::Format("%d", ival);
-	panel_.m_x2_clip_text->ChangeValue(str);
+		(ival - panel_.m_x1_clip_sldr->GetValue()) /
+		(double)panel_.m_x1_clip_sldr->GetMax())));
+}
+
+void ClipPlaneAgent::OnClipYChanged()
+{
+	long res;
+	getValue("res y", res);
+	double y1, y2;
+	getValue("clip y1", y1);
+	getValue("clip y2", y2);
+	int ival;
+
 	//y1
-	ival = fabs(planes[2].d() * resy) + 0.499;
+	ival = int(y1 * res + 0.5);
 	panel_.m_y1_clip_sldr->SetValue(ival);
-	percent = (double)ival / (double)panel_.m_y1_clip_sldr->GetMax();
-	barsize = (panel_.m_y1_clip_sldr->GetSize().GetHeight() - 20);
-	str = wxString::Format("%d", ival);
-	panel_.m_y1_clip_text->ChangeValue(str);
+	panel_.m_y1_clip_text->ChangeValue(wxString::Format("%d", ival));
+	double percent = (double)ival / (double)panel_.m_y1_clip_sldr->GetMax();
 	//y2
-	ival = fabs(planes[3].d() * resy) + 0.499;
+	ival = int(y2 * res + 0.5);
 	panel_.m_y2_clip_sldr->SetValue(ival);
+	panel_.m_y2_clip_text->ChangeValue(wxString::Format("%d", ival));
+	//ybar
+	double barsize = (panel_.m_y1_clip_sldr->GetSize().GetHeight() - 20);
 	panel_.m_yBar->SetPosition(wxPoint(20, 10 + percent * barsize));
 	panel_.m_yBar->SetSize(wxSize(3, barsize*((double)
-		(ival - panel_.m_y1_clip_sldr->GetValue()) / (double)panel_.m_y1_clip_sldr->GetMax())));
-	str = wxString::Format("%d", ival);
-	panel_.m_y2_clip_text->ChangeValue(str);
+		(ival - panel_.m_y1_clip_sldr->GetValue()) /
+		(double)panel_.m_y1_clip_sldr->GetMax())));
+}
+
+void ClipPlaneAgent::OnClipZChanged()
+{
+	long res;
+	getValue("res z", res);
+	double z1, z2;
+	getValue("clip z1", z1);
+	getValue("clip z2", z2);
+	int ival;
+
 	//z1
-	ival = fabs(planes[4].d() * resz) + 0.499;
+	ival = int(z1 * res + 0.5);
 	panel_.m_z1_clip_sldr->SetValue(ival);
-	percent = (double)ival / (double)panel_.m_z1_clip_sldr->GetMax();
-	barsize = (panel_.m_z1_clip_sldr->GetSize().GetHeight() - 20);
-	str = wxString::Format("%d", ival);
-	panel_.m_z1_clip_text->ChangeValue(str);
+	panel_.m_z1_clip_text->ChangeValue(wxString::Format("%d", ival));
+	double percent = (double)ival / (double)panel_.m_z1_clip_sldr->GetMax();
 	//z2
-	ival = fabs(planes[5].d() * resz) + 0.499;
+	ival = int(z2 * res + 0.5);
+	panel_.m_z2_clip_sldr->SetValue(ival);
+	panel_.m_z2_clip_text->ChangeValue(wxString::Format("%d", ival));
+	//zbar
+	double barsize = (panel_.m_z1_clip_sldr->GetSize().GetHeight() - 20);
 	panel_.m_zBar->SetPosition(wxPoint(20, 10 + percent * barsize));
 	panel_.m_zBar->SetSize(wxSize(3, barsize*((double)
-		(ival - panel_.m_z1_clip_sldr->GetValue()) / (double)panel_.m_z1_clip_sldr->GetMax())));
-	panel_.m_z2_clip_sldr->SetValue(ival);
-	str = wxString::Format("%d", ival);
-	panel_.m_z2_clip_text->ChangeValue(str);
-}
-
-void ClipPlaneAgent::OnClipPlanesChanging()
-{
-	getValue("clip planes", old_planes_);
-}
-
-void ClipPlaneAgent::OnClipPlanesChanged()
-{
-	FLTYPE::PlaneSet planes;
-	getValue("clip planes", planes);
-	if (planes.GetSize() != 6)
-		return;
-
-	long resx, resy, resz;
-	getValue("res x", resx);
-	getValue("res y", resy);
-	getValue("res z", resz);
-	bool clip_link_x, clip_link_y, clip_link_z;
-	getValue("clip link x", clip_link_x);
-	getValue("clip link y", clip_link_y);
-	getValue("clip link z", clip_link_z);
-	if (clip_link_x)
-	{
-		long clip_dist_x;
-		getValue("clip dist x", clip_dist_x);
-		double dist = double(clip_dist_x) / double(resx);
-		double ox1 = fabs(old_planes_[0].d());
-		double ox2 = fabs(old_planes_[1].d());
-		double nx1 = fabs(planes[0].d());
-		double nx2 = fabs(planes[1].d());
-		if (ox1 != nx1)
-		{
-			//plane 0 changed, sync plane1
-			nx2 = nx1 + dist;
-			if (nx2 > 1.0)
-				planes[0].ChangePlane(
-					FLTYPE::Point(ox1, 0.0, 0.0),
-					FLTYPE::Vector(1.0, 0.0, 0.0));
-			else
-				planes[1].ChangePlane(
-					FLTYPE::Point(nx2, 0.0, 0.0),
-					FLTYPE::Vector(-1.0, 0.0, 0.0));
-		}
-		else if (ox2 != nx2)
-		{
-			//plane 1 changed, sync plane 0
-			nx1 = nx2 - dist;
-			if (nx1 < 0.0)
-				planes[1].ChangePlane(
-					FLTYPE::Point(ox2, 0.0, 0.0),
-					FLTYPE::Vector(-1.0, 0.0, 0.0));
-			else
-				planes[0].ChangePlane(
-					FLTYPE::Point(nx1, 0.0, 0.0),
-					FLTYPE::Vector(1.0, 0.0, 0.0));
-		}
-	}
-	if (clip_link_y)
-	{
-		long clip_dist_y;
-		getValue("clip dist y", clip_dist_y);
-		double dist = double(clip_dist_y) / double(resy);
-		double oy1 = fabs(old_planes_[2].d());
-		double oy2 = fabs(old_planes_[3].d());
-		double ny1 = fabs(planes[2].d());
-		double ny2 = fabs(planes[3].d());
-		if (oy1 != ny1)
-		{
-			//plane 2 changed, sync plane3
-			ny2 = ny1 + dist;
-			if (ny2 > 1.0)
-				planes[2].ChangePlane(
-					FLTYPE::Point(0.0, oy1, 0.0),
-					FLTYPE::Vector(0.0, 1.0, 0.0));
-			else
-				planes[3].ChangePlane(
-					FLTYPE::Point(0.0, ny2, 0.0),
-					FLTYPE::Vector(0.0, -1.0, 0.0));
-		}
-		else if (oy2 != ny2)
-		{
-			//plane 3 changed, sync plane 2
-			ny1 = ny2 - dist;
-			if (ny1 < 0.0)
-				planes[3].ChangePlane(
-					FLTYPE::Point(0.0, oy2, 0.0),
-					FLTYPE::Vector(0.0, -1.0, 0.0));
-			else
-				planes[2].ChangePlane(
-					FLTYPE::Point(0.0, ny1, 0.0),
-					FLTYPE::Vector(0.0, 1.0, 0.0));
-		}
-	}
-	if (clip_link_z)
-	{
-		long clip_dist_z;
-		getValue("clip dist z", clip_dist_z);
-		double dist = double(clip_dist_z) / double(resz);
-		double oz1 = fabs(old_planes_[4].d());
-		double oz2 = fabs(old_planes_[5].d());
-		double nz1 = fabs(planes[4].d());
-		double nz2 = fabs(planes[5].d());
-		if (oz1 != nz1)
-		{
-			//plane 4 changed, sync plane 5
-			nz2 = nz1 + dist;
-			if (nz2 > 1.0)
-				planes[4].ChangePlane(
-					FLTYPE::Point(0.0, 0.0, oz1),
-					FLTYPE::Vector(0.0, 0.0, 1.0));
-			else
-				planes[5].ChangePlane(
-					FLTYPE::Point(0.0, 0.0, nz2),
-					FLTYPE::Vector(0.0, 0.0, -1.0));
-		}
-		else if (oz2 != nz2)
-		{
-			//plane 1 changed, sync plane 0
-			nz1 = nz2 - dist;
-			if (nz1 < 0.0)
-				planes[5].ChangePlane(
-					FLTYPE::Point(0.0, 0.0, oz2),
-					FLTYPE::Vector(0.0, 0.0, -1.0));
-			else
-				planes[4].ChangePlane(
-					FLTYPE::Point(0.0, 0.0, nz1),
-					FLTYPE::Vector(0.0, 0.0, 1.0));
-		}
-	}
-	if (clip_link_x || clip_link_y || clip_link_z)
-		setValue("clip planes", planes);
-	UpdatePlanes(planes, resx, resy, resz);
+		(ival - panel_.m_z1_clip_sldr->GetValue()) /
+		(double)panel_.m_z1_clip_sldr->GetMax())));
 }
 
 void ClipPlaneAgent::OnClipDistXChanged()
