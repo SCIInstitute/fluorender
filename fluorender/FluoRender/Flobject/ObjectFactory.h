@@ -76,7 +76,7 @@ namespace FL
 
 		virtual Object* clone(const unsigned int);
 
-		virtual void objectChanged(int notify_level, void*, void*, const std::string &exp);
+		virtual void objectChanged(Event& event);
 
 		inline bool remove(Object* object)
 		{
@@ -98,7 +98,14 @@ namespace FL
 				//notify observers of change
 				for (auto it = objects_.begin() + pos;
 					it != objects_.begin() + end; ++it)
-					notifyObserversNodeRemoved(this, it->get());
+				{
+					Event event;
+					event.sender = this;
+					event.origin = this;
+					event.parent = this;
+					event.child = it->get();
+					notifyObserversNodeRemoved(event);
+				}
 
 				objects_.erase(objects_.begin() + pos, objects_.begin() + end);
 			}

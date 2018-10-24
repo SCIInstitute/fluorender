@@ -156,7 +156,12 @@ MeshData* MeshFactory::clone(MeshData* md)
 	setEventHandler(dynamic_cast<MeshData*>(new_md));
 
 	//notify observers
-	notifyObserversNodeAdded(this, new_md);
+	Event event;
+	event.sender = this;
+	event.origin = this;
+	event.parent = this;
+	event.child = new_md;
+	notifyObserversNodeAdded(event);
 
 	return dynamic_cast<MeshData*>(new_md);
 }

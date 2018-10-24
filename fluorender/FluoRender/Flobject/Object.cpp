@@ -61,9 +61,9 @@ Object::~Object()
 }
 
 //observer functions
-void Object::objectDeleted(void* ptr)
+void Object::objectDeleted(Event& event)
 {
-	Referenced* refd = static_cast<Referenced*>(ptr);
+	Referenced* refd = static_cast<Referenced*>(event.sender);
 	if (refd)
 		_vs_stack.top()->resetRefPtr(refd);
 
@@ -71,46 +71,46 @@ void Object::objectDeleted(void* ptr)
 	removeObservee(refd);
 }
 
-void Object::objectChanging(int notify_level, void* ptr, void* orig_node, const std::string &exp)
+void Object::objectChanging(Event& event)
 {
 	//before change
-	Referenced* refd = static_cast<Referenced*>(ptr);
+	Referenced* refd = static_cast<Referenced*>(event.sender);
 	if (refd->className() == std::string("Value") &&
-		this != orig_node)
+		this != event.origin)
 	{
 		Value* value = dynamic_cast<Value*>(refd);
 		if (value && containsValue(value))
 		{
 			//notify others
-			if (notify_level & Value::NotifyLevel::NOTIFY_OTHERS)
-				notifyObserversBeforeChange(notify_level, orig_node, exp);
+			if (event.getNotifyFlags() & Event::NOTIFY_OTHERS)
+				notifyObserversBeforeChange(event);
 			//take actions myself
-			if (notify_level & Value::NotifyLevel::NOTIFY_SELF)
+			if (event.getNotifyFlags() & Event::NOTIFY_SELF)
 				onBefore(value->getName());
 		}
 	}
 }
 
-void Object::objectChanged(int notify_level, void* ptr, void* orig_node, const std::string &exp)
+void Object::objectChanged(Event& event)
 {
-	Referenced* refd = static_cast<Referenced*>(ptr);
+	Referenced* refd = static_cast<Referenced*>(event.sender);
 	if (refd->className() == std::string("Value")
-		&& this != orig_node)
+		&& this != event.origin)
 	{
 		Value* value = dynamic_cast<Value*>(refd);
 		if (value && containsValue(value))
 		{
 			//notify others
-			if (notify_level & Value::NotifyLevel::NOTIFY_OTHERS)
-				notifyObserversOfChange(notify_level, orig_node, exp);
+			if (event.getNotifyFlags() & Event::NOTIFY_OTHERS)
+				notifyObserversOfChange(event);
 			//take action myself
-			if (notify_level & Value::NotifyLevel::NOTIFY_SELF)
+			if (event.getNotifyFlags() & Event::NOTIFY_SELF)
 				onAfter(value->getName());
 			else if (asFactory() &&
-				(notify_level & Value::NotifyLevel::NOTIFY_FACTORY))
+				(event.getNotifyFlags() & Event::NOTIFY_FACTORY))
 				onAfter(value->getName());
 			else if (asAgent() &&
-				(notify_level & Value::NotifyLevel::NOTIFY_AGENT))
+				(event.getNotifyFlags() & Event::NOTIFY_AGENT))
 				onAfter(value->getName());
 		}
 	}
@@ -129,7 +129,11 @@ bool Object::addValue(ValueTuple &vt)
 			if (vs_value)
 			{
 				vs_value->addObserver(this);
-				vs_value->notify();
+				Event event(this);
+				event.origin = this;
+				event.value = vs_value;
+				event.value_name = name;
+				vs_value->notify(event);
 			}
 		}
 		return result;
@@ -148,7 +152,11 @@ bool Object::addValue(ValueTuple &vt)
 			if (vs_value) \
 			{ \
 				vs_value->addObserver(this); \
-				vs_value->notify(); \
+				Event event(this); \
+				event.origin = this; \
+				event.value = vs_value; \
+				event.value_name = name; \
+				vs_value->notify(event); \
 			} \
 		} \
 		return result; \
@@ -289,20 +297,28 @@ bool Object::addValue(const std::string &name, const FLTYPE::GLint4 &value)
 }
 
 //set functions
-bool Object::setValue(ValueTuple &vt, int notify_level)
+bool Object::setValue(ValueTuple &vt, Event& event)
 {
 	ValueTuple old_vt;
 	std::string name = std::get<0>(vt);
 	std::get<0>(old_vt) = name;
+	Value* value = getValue(name);
 	if (getValue(old_vt) && vt != old_vt)
 	{
 		bool result = false;
 		if (_vs_stack.top())
 		{
-			notifyObserversBeforeChange(notify_level, this, name);
-			result = _vs_stack.top()->setValue(vt, notify_level);
+			if (!event.sender)
+			{
+				event.sender = this;
+				event.origin = this;
+				event.value = value;
+				event.value_name = name;
+			}
+			notifyObserversBeforeChange(event);
+			result = _vs_stack.top()->setValue(vt, event);
 			if (result)
-				notifyObserversOfChange(notify_level, this, name);
+				notifyObserversOfChange(event);
 		}
 		return result;
 	}
@@ -316,17 +332,24 @@ bool Object::setValue(ValueTuple &vt, int notify_level)
 		bool result = false; \
 		if (_vs_stack.top()) \
 		{ \
-			notifyObserversBeforeChange(notify_level, this, name); \
-			result = _vs_stack.top()->setValue(name, value, notify_level); \
+			if (!event.sender) \
+			{ \
+				event.sender = this; \
+				event.origin = this; \
+				event.value = getValue(name); \
+				event.value_name = name; \
+			} \
+			notifyObserversBeforeChange(event); \
+			result = _vs_stack.top()->setValue(name, value, event); \
 			if (result) \
-				notifyObserversOfChange(notify_level, this, name); \
+				notifyObserversOfChange(event); \
 		} \
 		return result; \
 	} \
 	return false
 
 //set functions
-bool Object::setValue(const std::string &name, Referenced* value, int notify_level)
+bool Object::setValue(const std::string &name, Referenced* value, Event& event)
 {
 	Referenced* old_value;
 	if (getValue(name, &old_value) && value != old_value)
@@ -338,177 +361,191 @@ bool Object::setValue(const std::string &name, Referenced* value, int notify_lev
 		bool result = false;
 		if (_vs_stack.top())
 		{
-			notifyObserversBeforeChange(notify_level, this, name);
-			result = _vs_stack.top()->setValue(name, value, notify_level);
+			if (!event.sender)
+			{
+				event.sender = this;
+				event.origin = this;
+				event.value = getValue(name);
+				event.value_name = name;
+			}
+			notifyObserversBeforeChange(event);
+			result = _vs_stack.top()->setValue(name, value, event);
 			if (result)
-				notifyObserversOfChange(notify_level, this, name);
+				notifyObserversOfChange(event);
 		}
 		return result;
 	}
 	return false;
 }
 
-bool Object::setValue(const std::string &name, bool value, int notify_level)
+bool Object::setValue(const std::string &name, bool value, Event& event)
 {
 	bool old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, char value, int notify_level)
+bool Object::setValue(const std::string &name, char value, Event& event)
 {
 	char old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, unsigned char value, int notify_level)
+bool Object::setValue(const std::string &name, unsigned char value, Event& event)
 {
 	unsigned char old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, short value, int notify_level)
+bool Object::setValue(const std::string &name, short value, Event& event)
 {
 	short old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, unsigned short value, int notify_level)
+bool Object::setValue(const std::string &name, unsigned short value, Event& event)
 {
 	unsigned short old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, long value, int notify_level)
+bool Object::setValue(const std::string &name, long value, Event& event)
 {
 	long old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, unsigned long value, int notify_level)
+bool Object::setValue(const std::string &name, unsigned long value, Event& event)
 {
 	unsigned long old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, long long value, int notify_level)
+bool Object::setValue(const std::string &name, long long value, Event& event)
 {
 	long long old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, unsigned long long value, int notify_level)
+bool Object::setValue(const std::string &name, unsigned long long value, Event& event)
 {
 	unsigned long long old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, float value, int notify_level)
+bool Object::setValue(const std::string &name, float value, Event& event)
 {
 	float old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, double value, int notify_level)
+bool Object::setValue(const std::string &name, double value, Event& event)
 {
 	double old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const std::string &value, int notify_level)
+bool Object::setValue(const std::string &name, const std::string &value, Event& event)
 {
 	std::string old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const std::wstring &value, int notify_level)
+bool Object::setValue(const std::string &name, const std::wstring &value, Event& event)
 {
 	std::wstring old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const FLTYPE::Point &value, int notify_level)
+bool Object::setValue(const std::string &name, const FLTYPE::Point &value, Event& event)
 {
 	FLTYPE::Point old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const FLTYPE::Vector &value, int notify_level)
+bool Object::setValue(const std::string &name, const FLTYPE::Vector &value, Event& event)
 {
 	FLTYPE::Vector old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const FLTYPE::BBox &value, int notify_level)
+bool Object::setValue(const std::string &name, const FLTYPE::BBox &value, Event& event)
 {
 	FLTYPE::BBox old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const FLTYPE::HSVColor &value, int notify_level)
+bool Object::setValue(const std::string &name, const FLTYPE::HSVColor &value, Event& event)
 {
 	FLTYPE::HSVColor old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const FLTYPE::Color &value, int notify_level)
+bool Object::setValue(const std::string &name, const FLTYPE::Color &value, Event& event)
 {
 	FLTYPE::Color old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const FLTYPE::Plane &value, int notify_level)
+bool Object::setValue(const std::string &name, const FLTYPE::Plane &value, Event& event)
 {
 	FLTYPE::Plane old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const FLTYPE::PlaneSet &value, int notify_level)
+bool Object::setValue(const std::string &name, const FLTYPE::PlaneSet &value, Event& event)
 {
 	FLTYPE::PlaneSet old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const FLTYPE::Quaternion &value, int notify_level)
+bool Object::setValue(const std::string &name, const FLTYPE::Quaternion &value, Event& event)
 {
 	FLTYPE::Quaternion old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const FLTYPE::Ray &value, int notify_level)
+bool Object::setValue(const std::string &name, const FLTYPE::Ray &value, Event& event)
 {
 	FLTYPE::Ray old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const FLTYPE::Transform &value, int notify_level)
+bool Object::setValue(const std::string &name, const FLTYPE::Transform &value, Event& event)
 {
 	FLTYPE::Transform old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const FLTYPE::GLfloat4 &value, int notify_level)
+bool Object::setValue(const std::string &name, const FLTYPE::GLfloat4 &value, Event& event)
 {
 	FLTYPE::GLfloat4 old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const FLTYPE::GLint4 &value, int notify_level)
+bool Object::setValue(const std::string &name, const FLTYPE::GLint4 &value, Event& event)
 {
 	FLTYPE::GLint4 old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
 //toggle value for bool
-bool Object::toggleValue(const std::string &name, bool &value, int notify_level)
+bool Object::toggleValue(const std::string &name, bool &value, Event& event)
 {
 	bool result = false;
 	if (_vs_stack.top())
 	{
-		notifyObserversBeforeChange(notify_level, this, name);
-		result = _vs_stack.top()->toggleValue(name, value, notify_level);
+		if (!event.sender)
+		{
+			event.sender = this;
+			event.origin = this;
+			event.value = getValue(name);
+			event.value_name = name;
+		}
+		notifyObserversBeforeChange(event);
+		result = _vs_stack.top()->toggleValue(name, value, event);
 	}
 	if (result)
-		notifyObserversOfChange(notify_level, this, name);
+		notifyObserversOfChange(event);
 	return result;
 }
 
@@ -764,7 +801,14 @@ bool Object::propValue(const std::string &name, Object* obj)
 	{
 		Value* obj_value = obj->getValue(name);
 		if (obj_value)
-			obj_value->sync(value);
+		{
+			Event event;
+			event.sender = this;
+			event.origin = this;
+			event.value = obj_value;
+			event.value_name = name;
+			obj_value->sync(event);
+		}
 		return true;
 	}
 	return false;
@@ -863,7 +907,12 @@ bool Object::propValues(const std::string &name1, const std::string &name2)
 	if (value1 && value2 &&
 		value1 != value2)
 	{
-		value2->sync(value1);
+		Event event;
+		event.sender = this;
+		event.origin = this;
+		event.value = value1;
+		event.value_name = name1;
+		value2->sync(event);
 		return true;
 	}
 	return false;
@@ -875,12 +924,17 @@ bool Object::propValues(const std::string &name1, const std::vector<std::string>
 	Value* value1 = getValue(name1);
 	if (!value1)
 		return result;
+	Event event;
+	event.sender = this;
+	event.origin = this;
+	event.value = value1;
+	event.value_name = name1;
 	for (auto it = names.begin();
 		it != names.end(); ++it)
 	{
 		Value* value2 = getValue(*it);
 		if (value2 && value2 != value1)
-			result |= value2->sync(value1);
+			result |= value2->sync(event);
 	}
 	return result;
 }

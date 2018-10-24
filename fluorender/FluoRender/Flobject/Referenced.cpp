@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <Flobject/Referenced.h>
 #include <Flobject/Observer.h>
+#include <Flobject/Event.h>
 #include <algorithm>
 
 using namespace FL;
@@ -95,7 +96,11 @@ void Referenced::signalObserversAndDelete(bool signalDelete, bool doDelete) cons
 
 	if (observerSet && signalDelete)
 	{
-		observerSet->signalObjectDeleted(const_cast<Referenced*>(this));
+		Event event;
+		event.type = Event::EVENT_DELETED;
+		event.sender = const_cast<Referenced*>(this);
+		event.origin = const_cast<Referenced*>(this);
+		observerSet->signalObjectDeleted(event);
 	}
 
 	if (doDelete)
@@ -104,44 +109,52 @@ void Referenced::signalObserversAndDelete(bool signalDelete, bool doDelete) cons
 	}
 }
 
-void Referenced::notifyObserversBeforeChange(int notify_level, void* orig_node, const std::string &exp) const
+void Referenced::notifyObserversBeforeChange(Event& event) const
 {
 	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
+	event.sender = const_cast<Referenced*>(this);
+	++event;
 
-	if (observerSet && !_hold)
+	if (observerSet && !_hold && event.pass())
 	{
-		observerSet->signalObjectChanging(notify_level, const_cast<Referenced*>(this), orig_node, exp);
+		observerSet->signalObjectChanging(event);
 	}
 }
 
-void Referenced::notifyObserversOfChange(int notify_level, void* orig_node, const std::string &exp) const
+void Referenced::notifyObserversOfChange(Event& event) const
 {
 	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
+	event.sender = const_cast<Referenced*>(this);
+	++event;
 
-	if (observerSet && !_hold)
+	if (observerSet && !_hold && event.pass())
 	{
-		observerSet->signalObjectChanged(notify_level, const_cast<Referenced*>(this), orig_node, exp);
+		observerSet->signalObjectChanged(event);
 	}
 }
 
 //scenegraph specific events via observers
-void Referenced::notifyObserversNodeAdded(void* parent, void* child) const
+void Referenced::notifyObserversNodeAdded(Event& event) const
 {
 	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
+	event.sender = const_cast<Referenced*>(this);
+	++event;
 
-	if (observerSet && !_hold)
+	if (observerSet && !_hold && event.pass())
 	{
-		observerSet->signalNodeAdded(const_cast<Referenced*>(this), parent, child);
+		observerSet->signalNodeAdded(event);
 	}
 }
 
-void Referenced::notifyObserversNodeRemoved(void* parent, void* child) const
+void Referenced::notifyObserversNodeRemoved(Event& event) const
 {
 	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
+	event.sender = const_cast<Referenced*>(this);
+	++event;
 
-	if (observerSet && !_hold)
+	if (observerSet && !_hold && event.pass())
 	{
-		observerSet->signalNodeRemoved(const_cast<Referenced*>(this), parent, child);
+		observerSet->signalNodeRemoved(event);
 	}
 }
 

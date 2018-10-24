@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <Flobject/Observer.h>
+#include <Flobject/Event.h>
 
 using namespace FL;
 
@@ -108,51 +109,51 @@ Referenced* ObserverSet::addRefLock()
 	return _observedObject;
 }
 
-void ObserverSet::signalObjectDeleted(void* ptr)
+void ObserverSet::signalObjectDeleted(Event& event)
 {
 	for (Observers::iterator itr = _observers.begin();
 		itr != _observers.end(); ++itr)
 	{
-		(*itr)->objectDeleted(ptr);
+		(*itr)->objectDeleted(event);
 	}
 	_observers.clear();
 	_observedObject = 0;
 }
 
-void ObserverSet::signalObjectChanging(int notify_level, void* ptr, void* orig_node, const std::string &exp)
+void ObserverSet::signalObjectChanging(Event& event)
 {
 	for (Observers::iterator itr = _observers.begin();
 		itr != _observers.end(); ++itr)
 	{
-		(*itr)->objectChanging(notify_level, ptr, orig_node, exp);
+		(*itr)->objectChanging(event);
 	}
 }
 
-void ObserverSet::signalObjectChanged(int notify_level, void* ptr, void* orig_node, const std::string &exp)
+void ObserverSet::signalObjectChanged(Event& event)
 {
 	for (Observers::iterator itr = _observers.begin();
 		itr != _observers.end(); ++itr)
 	{
-		(*itr)->objectChanged(notify_level, ptr, orig_node, exp);
+		(*itr)->objectChanged(event);
 	}
 }
 
 //scenegraph events
-void ObserverSet::signalNodeAdded(void* ptr, void* parent, void* child)
+void ObserverSet::signalNodeAdded(Event& event)
 {
 	for (Observers::iterator itr = _observers.begin();
 		itr != _observers.end(); ++itr)
 	{
-		(*itr)->nodeAdded(ptr, parent, child);
+		(*itr)->nodeAdded(event);
 	}
 }
 
-void ObserverSet::signalNodeRemoved(void* ptr, void* parent, void* child)
+void ObserverSet::signalNodeRemoved(Event& event)
 {
 	for (Observers::iterator itr = _observers.begin();
 		itr != _observers.end(); ++itr)
 	{
-		(*itr)->nodeRemoved(ptr, parent, child);
+		(*itr)->nodeRemoved(event);
 	}
 }
 

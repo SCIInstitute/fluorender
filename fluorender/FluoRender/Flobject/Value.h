@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Flobject/ref_ptr.h>
 #include <Flobject/CopyOp.h>
 #include <Flobject/Observer.h>
+#include <Flobject/Event.h>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -58,25 +59,14 @@ typedef std::tuple<std::string, std::string, std::string> ValueTuple;
 class Value : public Referenced, public Observer
 {
 public:
-	enum NotifyLevel
-	{
-		NOTIFY_NONE = 0,
-		NOTIFY_SELF = 1<<0,
-		NOTIFY_OTHERS = 1<<1,
-		NOTIFY_PARENT = 1<<2,
-		NOTIFY_AGENT = 1<<3,
-		NOTIFY_FACTORY = 1<<4,
-		NOTIFY_ALL = 0x7FFFFFFF
-	};
-
 	Value(std::string name = "", std::string type = "") : Referenced(), _name(name), _type(type) {}
 
 	Value* clone();
 
 	virtual const char* className() const { return "Value"; }
 
-	virtual void objectDeleted(void*);
-	virtual void objectChanged(int notify_level, void*, void*, const std::string &exp);
+	virtual void objectDeleted(Event& event);
+	virtual void objectChanged(Event& event);
 
 	std::string getName() { return _name; }
 	std::string getType() { return _type; }
@@ -84,9 +74,9 @@ public:
 	inline bool operator == (const Value& v) const;
 	inline bool operator != (const Value& v) const;
 
-	inline bool sync(Value* value);
+	inline bool sync(Event& event);
 
-	inline void notify();//notify observers when a value is just added
+	inline void notify(Event& event);//notify observers when a value is just added
 
 	friend inline std::ostream& operator<<(std::ostream& os, const Value& v);
 
@@ -118,15 +108,15 @@ public:
 		return tv;
 	}
 
-	void setValue(const T& value, int notify_level)
+	void setValue(const T& value, Event& event)
 	{
 		if (value != _value)
 		{
-			if (notify_level)
-				notifyObserversBeforeChange(notify_level, this, _name);
+			if (event.getNotifyFlags() & Event::NOTIFY_VALUE)
+				notifyObserversBeforeChange(event);
 			_value = value;
-			if (notify_level)
-				notifyObserversOfChange(notify_level, this, _name);
+			if (event.getNotifyFlags() & Event::NOTIFY_VALUE)
+				notifyObserversOfChange(event);
 		}
 	}
 
@@ -165,7 +155,7 @@ public:
 	//reset Referenced pointer to NULL
 	bool resetRefPtr(Referenced* value);
 	//value sync
-	bool syncValue(Value* value);
+	bool syncValue(Event& event);
 
 	//add value functions
 	bool addValue(ValueTuple&);
@@ -199,38 +189,38 @@ public:
 	bool addValue(const std::string &name, const FLTYPE::GLint4 &value);
 
 	/** All the set value functions */
-	bool setValue(ValueTuple& vt, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(ValueTuple& vt, Event& event);
 	//generic types
-	bool setValue(const std::string &name, Referenced* value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, bool value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, char value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, unsigned char value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, short value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, unsigned short value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, long value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, unsigned long value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, long long value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, unsigned long long value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, float value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, double value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, const std::string &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, const std::wstring &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, Referenced* value, Event& event);
+	bool setValue(const std::string &name, bool value, Event& event);
+	bool setValue(const std::string &name, char value, Event& event);
+	bool setValue(const std::string &name, unsigned char value, Event& event);
+	bool setValue(const std::string &name, short value, Event& event);
+	bool setValue(const std::string &name, unsigned short value, Event& event);
+	bool setValue(const std::string &name, long value, Event& event);
+	bool setValue(const std::string &name, unsigned long value, Event& event);
+	bool setValue(const std::string &name, long long value, Event& event);
+	bool setValue(const std::string &name, unsigned long long value, Event& event);
+	bool setValue(const std::string &name, float value, Event& event);
+	bool setValue(const std::string &name, double value, Event& event);
+	bool setValue(const std::string &name, const std::string &value, Event& event);
+	bool setValue(const std::string &name, const std::wstring &value, Event& event);
 	//add FluoRender's special types here
-	bool setValue(const std::string &name, const FLTYPE::Point &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, const FLTYPE::Vector &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, const FLTYPE::BBox &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, const FLTYPE::HSVColor &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, const FLTYPE::Color &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, const FLTYPE::Plane &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, const FLTYPE::PlaneSet &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, const FLTYPE::Quaternion &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, const FLTYPE::Ray &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, const FLTYPE::Transform &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, const FLTYPE::GLfloat4 &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
-	bool setValue(const std::string &name, const FLTYPE::GLint4 &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool setValue(const std::string &name, const FLTYPE::Point &value, Event& event);
+	bool setValue(const std::string &name, const FLTYPE::Vector &value, Event& event);
+	bool setValue(const std::string &name, const FLTYPE::BBox &value, Event& event);
+	bool setValue(const std::string &name, const FLTYPE::HSVColor &value, Event& event);
+	bool setValue(const std::string &name, const FLTYPE::Color &value, Event& event);
+	bool setValue(const std::string &name, const FLTYPE::Plane &value, Event& event);
+	bool setValue(const std::string &name, const FLTYPE::PlaneSet &value, Event& event);
+	bool setValue(const std::string &name, const FLTYPE::Quaternion &value, Event& event);
+	bool setValue(const std::string &name, const FLTYPE::Ray &value, Event& event);
+	bool setValue(const std::string &name, const FLTYPE::Transform &value, Event& event);
+	bool setValue(const std::string &name, const FLTYPE::GLfloat4 &value, Event& event);
+	bool setValue(const std::string &name, const FLTYPE::GLint4 &value, Event& event);
 
 	//toggle value for bool, result in value
-	bool toggleValue(const std::string &name, bool &value, int notify_level = Value::NotifyLevel::NOTIFY_ALL);
+	bool toggleValue(const std::string &name, bool &value, Event& event);
 
 	/** All the get value functions */
 	bool getValue(ValueTuple&);
@@ -420,149 +410,150 @@ inline bool Value::operator != (const Value& v) const
 	return !(*this == v);
 }
 
-inline bool Value::sync(Value* value)
+inline bool Value::sync(Event& event)
 {
-	if (_type != value->_type)
+	Value* value = dynamic_cast<Value*>(event.value);
+	if (!value || _type != value->_type)
 		return false;
 
 	if (_type == "Referenced*")
 	{
 		dynamic_cast<TemplateValue<Referenced*>*>(this)->setValue(
-			dynamic_cast<TemplateValue<Referenced*>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<Referenced*>*>(value)->getValue(), event);
 	}
 	else if (_type == "bool")
 	{
 		dynamic_cast<TemplateValue<bool>*>(this)->setValue(
-			dynamic_cast<TemplateValue<bool>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<bool>*>(value)->getValue(), event);
 	}
 	else if (_type == "char")
 	{
 		dynamic_cast<TemplateValue<char>*>(this)->setValue(
-			dynamic_cast<TemplateValue<char>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<char>*>(value)->getValue(), event);
 	}
 	else if (_type == "unsigned char")
 	{
 		dynamic_cast<TemplateValue<unsigned char>*>(this)->setValue(
-			dynamic_cast<TemplateValue<unsigned char>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<unsigned char>*>(value)->getValue(), event);
 	}
 	else if (_type == "short")
 	{
 		dynamic_cast<TemplateValue<short>*>(this)->setValue(
-			dynamic_cast<TemplateValue<short>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<short>*>(value)->getValue(), event);
 	}
 	else if (_type == "unsigned short")
 	{
 		dynamic_cast<TemplateValue<unsigned short>*>(this)->setValue(
-			dynamic_cast<TemplateValue<unsigned short>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<unsigned short>*>(value)->getValue(), event);
 	}
 	else if (_type == "long")
 	{
 		dynamic_cast<TemplateValue<long>*>(this)->setValue(
-			dynamic_cast<TemplateValue<long>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<long>*>(value)->getValue(), event);
 	}
 	else if (_type == "unsigned long")
 	{
 		dynamic_cast<TemplateValue<unsigned long>*>(this)->setValue(
-			dynamic_cast<TemplateValue<unsigned long>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<unsigned long>*>(value)->getValue(), event);
 	}
 	else if (_type == "long long")
 	{
 		dynamic_cast<TemplateValue<long long>*>(this)->setValue(
-			dynamic_cast<TemplateValue<long long>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<long long>*>(value)->getValue(), event);
 	}
 	else if (_type == "unsigned long long")
 	{
 		dynamic_cast<TemplateValue<unsigned long long>*>(this)->setValue(
-			dynamic_cast<TemplateValue<unsigned long long>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<unsigned long long>*>(value)->getValue(), event);
 	}
 	else if (_type == "float")
 	{
 		dynamic_cast<TemplateValue<float>*>(this)->setValue(
-			dynamic_cast<TemplateValue<float>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<float>*>(value)->getValue(), event);
 	}
 	else if (_type == "double")
 	{
 		dynamic_cast<TemplateValue<double>*>(this)->setValue(
-			dynamic_cast<TemplateValue<double>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<double>*>(value)->getValue(), event);
 	}
 	else if (_type == "string")
 	{
 		dynamic_cast<TemplateValue<std::string>*>(this)->setValue(
-			dynamic_cast<TemplateValue<std::string>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<std::string>*>(value)->getValue(), event);
 	}
 	else if (_type == "wstring")
 	{
 		dynamic_cast<TemplateValue<std::wstring>*>(this)->setValue(
-			dynamic_cast<TemplateValue<std::wstring>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<std::wstring>*>(value)->getValue(), event);
 	}
 	else if (_type == "Point")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::Point>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::Point>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<FLTYPE::Point>*>(value)->getValue(), event);
 	}
 	else if (_type == "Vector")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::Vector>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::Vector>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<FLTYPE::Vector>*>(value)->getValue(), event);
 	}
 	else if (_type == "BBox")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::BBox>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::BBox>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<FLTYPE::BBox>*>(value)->getValue(), event);
 	}
 	else if (_type == "HSVColor")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::HSVColor>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::HSVColor>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<FLTYPE::HSVColor>*>(value)->getValue(), event);
 	}
 	else if (_type == "Color")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::Color>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::Color>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<FLTYPE::Color>*>(value)->getValue(), event);
 	}
 	else if (_type == "Plane")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::Plane>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::Plane>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<FLTYPE::Plane>*>(value)->getValue(), event);
 	}
 	else if (_type == "PlaneSet")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::PlaneSet>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::PlaneSet>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<FLTYPE::PlaneSet>*>(value)->getValue(), event);
 	}
 	else if (_type == "Quaternion")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::Quaternion>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::Quaternion>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<FLTYPE::Quaternion>*>(value)->getValue(), event);
 	}
 	else if (_type == "Ray")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::Ray>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::Ray>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<FLTYPE::Ray>*>(value)->getValue(), event);
 	}
 	else if (_type == "Transform")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::Transform>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::Transform>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<FLTYPE::Transform>*>(value)->getValue(), event);
 	}
 	else if (_type == "GLfloat4")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::GLfloat4>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::GLfloat4>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<FLTYPE::GLfloat4>*>(value)->getValue(), event);
 	}
 	else if (_type == "GLint4")
 	{
 		dynamic_cast<TemplateValue<FLTYPE::GLint4>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::GLint4>*>(value)->getValue(), NOTIFY_ALL);
+			dynamic_cast<TemplateValue<FLTYPE::GLint4>*>(value)->getValue(), event);
 	}
 	else return false;
 
 	return true;
 }
 
-inline void Value::notify()
+inline void Value::notify(Event& event)
 {
-	notifyObserversOfChange(NOTIFY_ALL, this, _name);
+	notifyObserversOfChange(event);
 }
 
 inline std::ostream& FL::operator<<(std::ostream& os, const Value& v)

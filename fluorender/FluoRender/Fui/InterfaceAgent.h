@@ -53,13 +53,13 @@ namespace FUI
 		virtual InterfaceAgent* asAgent() { return this; }
 
 		//observer
-		virtual void objectChanging(int notify_level, void* ptr, void* orig_node, const std::string &exp)
+		virtual void objectChanging(FL::Event& event)
 		{
-			FL::Object::objectChanging(notify_level, ptr, orig_node, exp);
+			FL::Object::objectChanging(event);
 		}
-		virtual void objectChanged(int notify_level, void* ptr, void* orig_node, const std::string &exp)
+		virtual void objectChanged(FL::Event& event)
 		{
-			FL::Object::objectChanged(notify_level, ptr, orig_node, exp);
+			FL::Object::objectChanged(event);
 		}
 
 		virtual void setObject(FL::Object* obj)

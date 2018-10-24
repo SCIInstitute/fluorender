@@ -57,10 +57,10 @@ namespace FL
 		virtual void traverse(NodeVisitor& nv);
 
 		//as observer
-		virtual void objectChanging(int notify_level, void*, void* orig_node, const std::string &exp);
-		virtual void objectChanged(int notify_level, void*, void* orig_node, const std::string &exp);
-		virtual void nodeAdded(void*, void* parent, void* child);
-		virtual void nodeRemoved(void*, void* parent, void* child);
+		virtual void objectChanging(Event& event);
+		virtual void objectChanged(Event& event);
+		virtual void nodeAdded(Event& event);
+		virtual void nodeRemoved(Event& event);
 
 		/* children
 		*/

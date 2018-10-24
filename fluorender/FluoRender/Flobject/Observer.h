@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FL
 {
+class Event;
 class Observer
 {
 public:
@@ -41,12 +42,12 @@ public:
 	Observer();
 	virtual ~Observer();
 
-	virtual void objectDeleted(void*) {}
-	virtual void objectChanging(int notify_level, void*, void* orig_node, const std::string &exp) {}//before change
-	virtual void objectChanged(int notify_level, void*, void* orig_node, const std::string &exp) {}//after change
+	virtual void objectDeleted(Event& event) {}
+	virtual void objectChanging(Event& event) {}//before change
+	virtual void objectChanged(Event& event) {}//after change
 	//events for scenegraph changes
-	virtual void nodeAdded(void*, void* parent, void* child) {}
-	virtual void nodeRemoved(void*, void* parent, void* child) {}
+	virtual void nodeAdded(Event& event) {}
+	virtual void nodeRemoved(Event& event) {}
 
 	virtual bool removeObservee(Referenced* observee);
 
@@ -71,12 +72,12 @@ public:
 	bool hasObserver(Observer* observer);
 	void removeObserver(Observer* observer);
 
-	void signalObjectDeleted(void* ptr);
-	void signalObjectChanging(int notofy_level, void* ptr, void* orig_node, const std::string &exp);
-	void signalObjectChanged(int notofy_level, void* ptr, void* orig_node, const std::string &exp);
+	void signalObjectDeleted(Event& event);
+	void signalObjectChanging(Event& event);
+	void signalObjectChanged(Event& event);
 	//scenegraph events
-	void signalNodeAdded(void* ptr, void* parent, void* child);
-	void signalNodeRemoved(void* ptr, void* parent, void* child);
+	void signalNodeAdded(Event& event);
+	void signalNodeRemoved(Event& event);
 
 	typedef std::set<Observer*> Observers;
 	Observers& getObservers() { return _observers; }

@@ -47,12 +47,12 @@ ObjectFactory::~ObjectFactory()
 
 }
 
-void ObjectFactory::objectChanged(int notify_level, void* ptr, void* orig_node, const std::string &exp)
+void ObjectFactory::objectChanged(Event& event)
 {
-	if (notify_level & Value::NotifyLevel::NOTIFY_FACTORY)
+	if (event.getNotifyFlags() & Event::NOTIFY_FACTORY)
 	{
-		Object::objectChanged(notify_level, ptr, orig_node, exp);//actually unnecessary, since there is nothing to sync
-		Referenced* refd = static_cast<Referenced*>(ptr);
+		Object::objectChanged(event);//actually unnecessary, since there is nothing to sync
+		Referenced* refd = static_cast<Referenced*>(event.sender);
 		if (refd->className() == std::string("Value"))
 		{
 			Value* value = dynamic_cast<Value*>(refd);
@@ -329,7 +329,12 @@ Object* ObjectFactory::clone(Object* object)
 	objects_.push_front(new_object);
 
 	//notify observers
-	notifyObserversNodeAdded(this, object);
+	Event event;
+	event.sender = this;
+	event.origin = this;
+	event.parent = this;
+	event.child = object;
+	notifyObserversNodeAdded(event);
 
 	return new_object;
 }

@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FL
 {
+class Event;
 class Observer;
 class ObserverSet;
 class Referenced;
@@ -88,14 +89,14 @@ protected:
 
 	void signalObserversAndDelete(bool signalDelete, bool doDelete) const;
 
-	void notifyObserversOfChange(int notify_level, void* orig_node = 0, const std::string &exp = "") const;
+	void notifyObserversOfChange(Event& event) const;
 
-	void notifyObserversBeforeChange(int notify_level, void* orig_node = 0, const std::string &exp = "") const;
+	void notifyObserversBeforeChange(Event& event) const;
 
 	//scenegraph specific events via observers
-	void notifyObserversNodeAdded(void* parent, void* child) const;
+	void notifyObserversNodeAdded(Event& event) const;
 
-	void notifyObserversNodeRemoved(void* parent, void* child) const;
+	void notifyObserversNodeRemoved(Event& event) const;
 
 	std::string _refStr;
 
