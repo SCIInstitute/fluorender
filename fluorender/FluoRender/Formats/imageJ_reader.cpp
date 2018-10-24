@@ -51,6 +51,7 @@ ImageJReader::ImageJReader()
 	m_xspc = 1.0;
 	m_yspc = 1.0;
 	m_zspc = 1.0;
+	m_excitation_wavelength = nullptr;
 
 	m_max_value = 0.0;
 	m_scalar_scale = 1.0;
@@ -171,6 +172,7 @@ int ImageJReader::Preprocess()
 						break;
 					case 4:
 						m_chan_num = test;
+						m_excitation_wavelength = new int[m_chan_num];
 						break;
 					case 5:
 						m_time_num = test;
@@ -201,6 +203,14 @@ int ImageJReader::Preprocess()
 						if (!double_equals(m_xspc, 0.0) && !double_equals(m_yspc, 0.0) && !double_equals(m_zspc, 0.0))
 						{
 							m_valid_spc = true;
+						}						
+						break;
+					default:
+						if (i >= 13 && i <= (13 + m_chan_num - 1)) {
+							if(test == -1)
+								m_excitation_wavelength[i - 13] = 0.0;
+							else	
+								m_excitation_wavelength[i - 13] = test;
 						}						
 						break;
 					// TODO: What is m_max_value.

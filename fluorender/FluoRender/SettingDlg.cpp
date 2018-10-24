@@ -1297,7 +1297,7 @@ void SettingDlg::SaveSettings()
 
 	// java paths
 	fconfig.SetPath("/Java");	
-	fconfig.Write("jvm_path", getJVMPath());
+ 	fconfig.Write("jvm_path", getJVMPath());
 	fconfig.Write("ij_path", getIJPath());
 	fconfig.Write("bioformats_path", getBioformatsPath());
 
@@ -1610,6 +1610,25 @@ void SettingDlg::OnGradBgCheck(wxCommandEvent &event)
 		}
 	}
 }
+
+// Get jvm paths.
+wxString SettingDlg::getJVMPath() {
+	return m_java_jvm_text->GetValue(); 
+}
+wxString SettingDlg::getIJPath() {
+	return m_java_ij_text->GetValue(); 
+}
+wxString SettingDlg::getBioformatsPath() {
+	return m_java_bioformats_text->GetValue(); 
+}
+std::vector<std::string> SettingDlg::GetJvmArgs() {
+	std::vector<std::string> args;
+	args.push_back(getJVMPath().ToStdString());
+	args.push_back(getIJPath().ToStdString());
+	args.push_back(getBioformatsPath().ToStdString());
+	return args;
+}
+
 
 //rot center anchor thresh
 void SettingDlg::OnPinThresholdChange(wxScrollEvent &event)

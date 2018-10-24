@@ -114,7 +114,7 @@ bool VRenderApp::OnInit()
 		((VRenderFrame*)frame)->StartupLoad(m_files, run_mov, m_imagej);
 
 	// Adding JVm initialization.
-	JVMInitializer*	pInstance = JVMInitializer::getInstance(((VRenderFrame*)frame)->GetSettingDlg());
+	JVMInitializer*	pInstance = JVMInitializer::getInstance((((VRenderFrame*)frame)->GetSettingDlg())->GetJvmArgs());
 	return true;
 }
 

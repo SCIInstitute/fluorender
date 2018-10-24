@@ -235,7 +235,7 @@ VRenderFrame::VRenderFrame(
 		"Open single or multiple volume data file(s)",
 		"Open single or multiple volume data file(s)");
 
-	if (JVMInitializer::getInstance(m_setting_dlg) != nullptr) {
+	if (JVMInitializer::getInstance(m_setting_dlg->GetJvmArgs()) != nullptr) {
 		bitmap = wxGetBitmapFromMemory(icon_import);
 #ifdef _DARWIN
 		m_main_tb->SetToolBitmapSize(bitmap.GetSize());
@@ -694,7 +694,7 @@ VRenderFrame::VRenderFrame(
 	m->SetBitmap(wxGetBitmapFromMemory(icon_open_volume_mini));
 	m_top_file->Append(m);
 
-	if (JVMInitializer::getInstance(m_setting_dlg) != nullptr) {
+	if (JVMInitializer::getInstance(m_setting_dlg->GetJvmArgs()) != nullptr) {
 		m = new wxMenuItem(m_top_file, ID_ImportVolume, wxT("Import &Volume"));
 		m->SetBitmap(wxGetBitmapFromMemory(icon_import_mini));
 		m_top_file->Append(m);

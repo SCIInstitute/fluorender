@@ -236,9 +236,10 @@ public:
 	int GetPlaneMode() { return m_plane_mode; }
 	
 	//Getting the java paths.
-	wxString getJVMPath() { return m_java_jvm_text->GetValue(); };
-	wxString getIJPath() { return m_java_ij_text->GetValue(); };
-	wxString getBioformatsPath() { return m_java_bioformats_text->GetValue(); };
+	wxString getJVMPath();
+	wxString getIJPath();
+	wxString getBioformatsPath();
+	std::vector<std::string> GetJvmArgs();
 
 private:
 	wxWindow* m_frame;

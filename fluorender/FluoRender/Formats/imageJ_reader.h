@@ -74,7 +74,7 @@ public:
 	int GetCurTime() {return m_cur_time;}
 	int GetTimeNum() {return m_time_num;}
 	int GetChanNum() {return m_chan_num;}
-	double GetExcitationWavelength(int chan) {return 0.0;}
+	double GetExcitationWavelength(int chan) {return m_excitation_wavelength[chan];}
 	int GetSliceNum() {return m_slice_num;}
 	int GetXSize() {return m_x_size;}
 	int GetYSize() {return m_y_size;}
@@ -104,6 +104,7 @@ private:
 	int m_slice_num;
 	int m_x_size;
 	int m_y_size;
+	int* m_excitation_wavelength;
 	bool m_valid_spc;
 	double m_xspc;
 	double m_yspc;
