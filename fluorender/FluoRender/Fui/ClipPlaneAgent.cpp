@@ -260,9 +260,10 @@ void ClipPlaneAgent::alignRenderViewRot()
 		return;
 	double rot_x, rot_y, rot_z;
 	agent->getView().GetRotations(rot_x, rot_y, rot_z);
-	rot_x = -rot_x;
-	rot_y = -rot_y;
-	rot_z = -rot_z;
+	//convert
+	FLTYPE::Quaternion q_cl;
+	q_cl.FromEuler(rot_x, -rot_y, -rot_z);
+	q_cl.ToEuler(rot_x, rot_y, rot_z);
 	if (rot_x > 180.0) rot_x -= 360.0;
 	if (rot_y > 180.0) rot_y -= 360.0;
 	if (rot_z > 180.0) rot_z -= 360.0;
