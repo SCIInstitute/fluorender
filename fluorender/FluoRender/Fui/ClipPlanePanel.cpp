@@ -1098,6 +1098,7 @@ void ClipPlanePanel::OnYRotSpinDown(wxSpinEvent& event)
 
 void ClipPlanePanel::OnZRotSpinUp(wxSpinEvent& event)
 {
+	m_z_rot_spin->SetValue(10);
 	wxString str_val = m_z_rot_text->GetValue();
 	double val;
 	str_val.ToDouble(&val);
@@ -1110,6 +1111,7 @@ void ClipPlanePanel::OnZRotSpinUp(wxSpinEvent& event)
 
 void ClipPlanePanel::OnZRotSpinDown(wxSpinEvent& event)
 {
+	m_z_rot_spin->SetValue(10);
 	wxString str_val = m_z_rot_text->GetValue();
 	double val;
 	str_val.ToDouble(&val);

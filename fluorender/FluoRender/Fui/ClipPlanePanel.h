@@ -176,12 +176,12 @@ namespace FUI
 		wxTextCtrl *m_xy_dist_text;
 
 		//sliders for rotating clipping planes
-		wxSlider *m_x_rot_sldr;
-		wxSlider *m_y_rot_sldr;
-		wxSlider *m_z_rot_sldr;
 		wxTextCtrl *m_x_rot_text;
 		wxTextCtrl *m_y_rot_text;
 		wxTextCtrl *m_z_rot_text;
+		wxSlider *m_x_rot_sldr;
+		wxSlider *m_y_rot_sldr;
+		wxSlider *m_z_rot_sldr;
 		wxSpinButton* m_x_rot_spin;
 		wxSpinButton* m_y_rot_spin;
 		wxSpinButton* m_z_rot_spin;
