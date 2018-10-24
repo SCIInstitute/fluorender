@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Fui/VolumePropAgent.h>
 #include <Fui/VolumePropPanel.h>
-#include <Scenegraph/ValueUpdateVisitor.h>
 #include <wx/valnum.h>
 #include <png_resource.h>
 #include <img/icons.h>
@@ -68,120 +67,6 @@ void VolumePropAgent::setObject(FL::VolumeData* obj)
 FL::VolumeData* VolumePropAgent::getObject()
 {
 	return dynamic_cast<FL::VolumeData*>(InterfaceAgent::getObject());
-}
-
-bool VolumePropAgent::testSyncParentValue(const std::string& name)
-{
-	FL::VolumeData* vd = getObject();
-	FL::Node* parent = getObjParent();
-	if (vd && parent)
-	{
-		FL::Value* value1 = vd->getValue(name);
-		FL::Value* value2 = parent->getValue(name);
-		return value1->hasObserver(value2) &&
-			value2->hasObserver(value1);
-	}
-	return false;
-}
-
-bool VolumePropAgent::testSyncParentValues(const std::vector<std::string> &names)
-{
-	FL::VolumeData* vd = getObject();
-	FL::Node* parent = getObjParent();
-	if (vd && parent)
-	{
-		for (auto it = names.begin();
-			it != names.end(); ++it)
-		{
-			FL::Value* value1 = vd->getValue(*it);
-			FL::Value* value2 = parent->getValue(*it);
-			if (!value1->hasObserver(value2) ||
-				!value2->hasObserver(value1))
-				return false;
-		}
-		return true;
-	}
-	return false;
-}
-
-void VolumePropAgent::syncParentValue(const std::string& name)
-{
-	//get obj parent
-	FL::Node* parent = getObjParent();
-	if (parent)
-	{
-		FL::ValueUpdateVisitor update;
-		update.setType(FL::ValueUpdateVisitor::ValueUpdateVisitType::SYNC_VALUE);
-		update.setValueName(name);
-		parent->accept(update);
-	}
-}
-
-void VolumePropAgent::unsyncParentValue(const std::string& name)
-{
-	//get obj parent
-	FL::Node* parent = getObjParent();
-	if (parent)
-	{
-		FL::ValueUpdateVisitor update;
-		update.setType(FL::ValueUpdateVisitor::ValueUpdateVisitType::UNSYNC_VALUE);
-		update.setValueName(name);
-		parent->accept(update);
-	}
-}
-
-void VolumePropAgent::syncParentValues(const std::vector<std::string> &names)
-{
-	//get obj parent
-	FL::Node* parent = getObjParent();
-	if (parent)
-	{
-		FL::ValueUpdateVisitor update;
-		update.setType(FL::ValueUpdateVisitor::ValueUpdateVisitType::SYNC_VALUES);
-		update.setValueNames(names);
-		parent->accept(update);
-	}
-}
-
-void VolumePropAgent::unsyncParentValues(const std::vector<std::string> &names)
-{
-	//get obj parent
-	FL::Node* parent = getObjParent();
-	if (parent)
-	{
-		FL::ValueUpdateVisitor update;
-		update.setType(FL::ValueUpdateVisitor::ValueUpdateVisitType::UNSYNC_VALUES);
-		update.setValueNames(names);
-		parent->accept(update);
-	}
-}
-
-void VolumePropAgent::propParentValue(const std::string& name)
-{
-	//get obj parent
-	FL::Node* parent = getObjParent();
-	if (parent)
-	{
-		FL::ValueUpdateVisitor update;
-		update.setType(FL::ValueUpdateVisitor::ValueUpdateVisitType::PROP_VALUE);
-		update.setValueName(name);
-		update.setObject(this);
-		parent->accept(update);
-	}
-}
-
-void VolumePropAgent::propParentValues(const std::vector<std::string> &names)
-{
-	//get obj parent
-	FL::Node* parent = getObjParent();
-	if (parent)
-	{
-		FL::ValueUpdateVisitor update;
-		update.setType(FL::ValueUpdateVisitor::ValueUpdateVisitType::PROP_VALUES);
-		update.setValueNames(names);
-		update.setObject(this);
-		parent->accept(update);
-	}
 }
 
 void VolumePropAgent::UpdateAllSettings()

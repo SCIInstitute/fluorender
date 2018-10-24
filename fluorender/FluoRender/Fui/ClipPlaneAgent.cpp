@@ -231,11 +231,11 @@ void ClipPlaneAgent::UpdateAllSettings()
 	getValue("clip rot x", clip_rot_x);
 	getValue("clip rot y", clip_rot_y);
 	getValue("clip rot z", clip_rot_z);
-	panel_.m_x_rot_sldr->SetValue(int(clip_rot_x + 0.5));
+	panel_.m_x_rot_sldr->SetThumbPosition(int(180.5 - clip_rot_x));
 	panel_.m_x_rot_text->ChangeValue(wxString::Format("%.1f", clip_rot_x));
-	panel_.m_y_rot_sldr->SetValue(int(clip_rot_y + 0.5));
+	panel_.m_y_rot_sldr->SetThumbPosition(int(180.5 - clip_rot_y));
 	panel_.m_y_rot_text->ChangeValue(wxString::Format("%.1f", clip_rot_y));
-	panel_.m_z_rot_sldr->SetValue(int(clip_rot_z + 0.5));
+	panel_.m_z_rot_sldr->SetThumbPosition(int(180.5 - clip_rot_z));
 	panel_.m_z_rot_text->ChangeValue(wxString::Format("%.1f", clip_rot_z));
 }
 
@@ -492,7 +492,7 @@ void ClipPlaneAgent::OnClipRotXChanged()
 {
 	double dval;
 	getValue("clip rot x", dval);
-	panel_.m_x_rot_sldr->SetValue(int(dval + 0.5));
+	panel_.m_x_rot_sldr->SetThumbPosition(int(180.5 - dval));
 	if (!panel_.m_x_rot_text->HasFocus())
 		panel_.m_x_rot_text->ChangeValue(wxString::Format("%.1f", dval));
 }
@@ -501,7 +501,7 @@ void ClipPlaneAgent::OnClipRotYChanged()
 {
 	double dval;
 	getValue("clip rot y", dval);
-	panel_.m_y_rot_sldr->SetValue(int(dval + 0.5));
+	panel_.m_y_rot_sldr->SetThumbPosition(int(180.5 - dval));
 	if (!panel_.m_y_rot_text->HasFocus())
 		panel_.m_y_rot_text->ChangeValue(wxString::Format("%.1f", dval));
 }
@@ -510,7 +510,7 @@ void ClipPlaneAgent::OnClipRotZChanged()
 {
 	double dval;
 	getValue("clip rot z", dval);
-	panel_.m_z_rot_sldr->SetValue(int(dval + 0.5));
+	panel_.m_z_rot_sldr->SetThumbPosition(int(180.5 - dval));
 	if (!panel_.m_z_rot_text->HasFocus())
 		panel_.m_z_rot_text->ChangeValue(wxString::Format("%.1f", dval));
 }

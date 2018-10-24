@@ -179,12 +179,9 @@ namespace FUI
 		wxTextCtrl *m_x_rot_text;
 		wxTextCtrl *m_y_rot_text;
 		wxTextCtrl *m_z_rot_text;
-		wxSlider *m_x_rot_sldr;
-		wxSlider *m_y_rot_sldr;
-		wxSlider *m_z_rot_sldr;
-		wxSpinButton* m_x_rot_spin;
-		wxSpinButton* m_y_rot_spin;
-		wxSpinButton* m_z_rot_spin;
+		wxScrollBar *m_x_rot_sldr;
+		wxScrollBar *m_y_rot_sldr;
+		wxScrollBar *m_z_rot_sldr;
 
 		friend class ClipPlaneAgent;
 
@@ -230,14 +227,6 @@ namespace FUI
 		void OnXRotEdit(wxCommandEvent &event);
 		void OnYRotEdit(wxCommandEvent &event);
 		void OnZRotEdit(wxCommandEvent &event);
-
-		//spin buttons
-		void OnXRotSpinUp(wxSpinEvent& event);
-		void OnXRotSpinDown(wxSpinEvent& event);
-		void OnYRotSpinUp(wxSpinEvent& event);
-		void OnYRotSpinDown(wxSpinEvent& event);
-		void OnZRotSpinUp(wxSpinEvent& event);
-		void OnZRotSpinDown(wxSpinEvent& event);
 
 		//mouse
 		void OnSliderRClick(wxCommandEvent& event);

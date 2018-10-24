@@ -74,13 +74,6 @@ EVT_TEXT(ID_XRotText, ClipPlanePanel::OnXRotEdit)
 EVT_TEXT(ID_YRotText, ClipPlanePanel::OnYRotEdit)
 EVT_TEXT(ID_ZRotText, ClipPlanePanel::OnZRotEdit)
 
-//spin buttons
-EVT_SPIN_UP(ID_XRotSpin, ClipPlanePanel::OnXRotSpinUp)
-EVT_SPIN_DOWN(ID_XRotSpin, ClipPlanePanel::OnXRotSpinDown)
-EVT_SPIN_UP(ID_YRotSpin, ClipPlanePanel::OnYRotSpinUp)
-EVT_SPIN_DOWN(ID_YRotSpin, ClipPlanePanel::OnYRotSpinDown)
-EVT_SPIN_UP(ID_ZRotSpin, ClipPlanePanel::OnZRotSpinUp)
-EVT_SPIN_DOWN(ID_ZRotSpin, ClipPlanePanel::OnZRotSpinDown)
 END_EVENT_TABLE()
 
 ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
@@ -367,10 +360,10 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 	//reset rotations 8
 	wxBoxSizer* sizer_8 = new wxBoxSizer(wxHORIZONTAL);
 #ifndef _DARWIN
-	m_rot_reset_btn = new wxButton(this, ID_RotResetBtn, "Reset to 0",
+	m_rot_reset_btn = new wxButton(this, ID_RotResetBtn, "Reset Rotations",
 		wxDefaultPosition, wxSize(120, 22));
 #else
-	m_rot_reset_btn = new wxButton(this, ID_RotResetBtn, "Reset to 0",
+	m_rot_reset_btn = new wxButton(this, ID_RotResetBtn, "Reset Rotations",
 		wxDefaultPosition, wxSize(125, 30));
 #endif
 	m_rot_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
@@ -381,47 +374,41 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 	//x
 	wxBoxSizer* sizer_rx = new wxBoxSizer(wxVERTICAL);
 	st = new wxStaticText(this, 0, "X");
-	m_x_rot_sldr = new wxSlider(this, ID_XRotSldr, 0, -180, 180,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL | wxSL_INVERSE);
+	m_x_rot_sldr = new wxScrollBar(this, ID_XRotSldr,
+		wxDefaultPosition, wxDefaultSize, wxSB_VERTICAL);
+	m_x_rot_sldr->SetScrollbar(180, 60, 420, 15);
 	m_x_rot_text = new wxTextCtrl(this, ID_XRotText, "0.0",
 		wxDefaultPosition, wxSize(34, 20), 0, vald_fp1);
-	m_x_rot_spin = new wxSpinButton(this, ID_XRotSpin,
-		wxDefaultPosition, wxSize(30, 20), wxSP_VERTICAL);
 	sizer_rx->Add(5, 5, 0);
-	sizer_rx->Add(m_x_rot_text, 0, wxALIGN_CENTER, 0);
 	sizer_rx->Add(st, 0, wxALIGN_CENTER, 0);
+	sizer_rx->Add(m_x_rot_text, 0, wxALIGN_CENTER, 0);
 	sizer_rx->Add(5, 5, 0);
-	sizer_rx->Add(m_x_rot_spin, 0, wxALIGN_CENTER, 0);
 	sizer_rx->Add(m_x_rot_sldr, 1, wxALIGN_CENTER, 0);
 	//y
 	wxBoxSizer* sizer_ry = new wxBoxSizer(wxVERTICAL);
 	st = new wxStaticText(this, 0, "Y");
-	m_y_rot_sldr = new wxSlider(this, ID_YRotSldr, 0, -180, 180,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL | wxSL_INVERSE);
+	m_y_rot_sldr = new wxScrollBar(this, ID_YRotSldr,
+		wxDefaultPosition, wxDefaultSize, wxSB_VERTICAL);
+	m_y_rot_sldr->SetScrollbar(180, 60, 420, 15);
 	m_y_rot_text = new wxTextCtrl(this, ID_YRotText, "0.0",
 		wxDefaultPosition, wxSize(34, 20), 0, vald_fp1);
-	m_y_rot_spin = new wxSpinButton(this, ID_YRotSpin,
-		wxDefaultPosition, wxSize(30, 20), wxSP_VERTICAL);
 	sizer_ry->Add(5, 5, 0);
-	sizer_ry->Add(m_y_rot_text, 0, wxALIGN_CENTER, 0);
 	sizer_ry->Add(st, 0, wxALIGN_CENTER, 0);
+	sizer_ry->Add(m_y_rot_text, 0, wxALIGN_CENTER, 0);
 	sizer_ry->Add(5, 5, 0);
-	sizer_ry->Add(m_y_rot_spin, 0, wxALIGN_CENTER, 0);
 	sizer_ry->Add(m_y_rot_sldr, 1, wxALIGN_CENTER, 0);
 	//z
 	wxBoxSizer* sizer_rz = new wxBoxSizer(wxVERTICAL);
 	st = new wxStaticText(this, 0, "Z");
-	m_z_rot_sldr = new wxSlider(this, ID_ZRotSldr, 0, -180, 180,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL | wxSL_INVERSE);
+	m_z_rot_sldr = new wxScrollBar(this, ID_ZRotSldr,
+		wxDefaultPosition, wxDefaultSize, wxSB_VERTICAL);
+	m_z_rot_sldr->SetScrollbar(180, 60, 420, 15);
 	m_z_rot_text = new wxTextCtrl(this, ID_ZRotText, "0.0",
 		wxDefaultPosition, wxSize(34, 20), 0, vald_fp1);
-	m_z_rot_spin = new wxSpinButton(this, ID_ZRotSpin,
-		wxDefaultPosition, wxSize(30, 20), wxSP_VERTICAL);
 	sizer_rz->Add(5, 5, 0);
-	sizer_rz->Add(m_z_rot_text, 0, wxALIGN_CENTER, 0);
 	sizer_rz->Add(st, 0, wxALIGN_CENTER, 0);
+	sizer_rz->Add(m_z_rot_text, 0, wxALIGN_CENTER, 0);
 	sizer_rz->Add(5, 5, 0);
-	sizer_rz->Add(m_z_rot_spin, 0, wxALIGN_CENTER, 0);
 	sizer_rz->Add(m_z_rot_sldr, 1, wxALIGN_CENTER, 0);
 
 	//sizer 9
@@ -533,69 +520,31 @@ void ClipPlanePanel::SetPlaneMode(PLANE_MODES mode)
 
 void ClipPlanePanel::OnLinkChannelsBtn(wxCommandEvent &event)
 {
-	if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
+	bool sync = m_toolbar->GetToolState(ID_LinkChannelsBtn);
+	std::vector<std::string> names{
+		"clip dist x",
+		"clip dist y",
+		"clip dist z",
+		"clip x1",
+		"clip x2",
+		"clip y1",
+		"clip y2",
+		"clip z1",
+		"clip z2",
+		"clip link x",
+		"clip link y",
+		"clip link z",
+		"clip rot x",
+		"clip rot y",
+		"clip rot z"
+	};
+	if (sync)
 	{
-		//if (!m_mgr)
-		//	return;
-
-		//wxString str;
-		////x1
-		//str = m_x1_clip_text->GetValue();
-		//long x1_val = 0;
-		//str.ToLong(&x1_val);
-		////x2
-		//str = m_x2_clip_text->GetValue();
-		//long x2_val = 0;
-		//str.ToLong(&x2_val);
-		////y1
-		//str = m_y1_clip_text->GetValue();
-		//long y1_val = 0;
-		//str.ToLong(&y1_val);
-		////y2
-		//str = m_y2_clip_text->GetValue();
-		//long y2_val = 0;
-		//str.ToLong(&y2_val);
-		////z1
-		//str = m_z1_clip_text->GetValue();
-		//long z1_val = 0;
-		//str.ToLong(&z1_val);
-		////z2
-		//str = m_z2_clip_text->GetValue();
-		//long z2_val = 0;
-		//str.ToLong(&z2_val);
-
-		//size_t num = FL::Global::instance().getVolumeFactory().getNum();
-		//for (size_t i = 0; i<num; i++)
-		//{
-		//	FL::VolumeData* vd =
-		//		FL::Global::instance().getVolumeFactory().get(i);
-		//	if (!vd || vd == m_vd)
-		//		continue;
-
-		//	vector<Plane*> *planes = 0;
-		//	if (vd->GetRenderer())
-		//		planes = vd->GetRenderer()->get_planes();
-		//	if (!planes)
-		//		continue;
-		//	if (planes->size() != 6)
-		//		continue;
-
-		//	long resx, resy, resz;
-		//	//vd->GetResolution(resx, resy, resz);
-		//	vd->getValue("res x", resx);
-		//	vd->getValue("res y", resy);
-		//	vd->getValue("res z", resz);
-
-		//	(*planes)[0]->ChangePlane(Point(double(x1_val) / double(resx), 0.0, 0.0), Vector(1.0, 0.0, 0.0));
-		//	(*planes)[1]->ChangePlane(Point(double(x2_val) / double(resx), 0.0, 0.0), Vector(-1.0, 0.0, 0.0));
-		//	(*planes)[2]->ChangePlane(Point(0.0, double(y1_val) / double(resy), 0.0), Vector(0.0, 1.0, 0.0));
-		//	(*planes)[3]->ChangePlane(Point(0.0, double(y2_val) / double(resy), 0.0), Vector(0.0, -1.0, 0.0));
-		//	(*planes)[4]->ChangePlane(Point(0.0, 0.0, double(z1_val) / double(resz)), Vector(0.0, 0.0, 1.0));
-		//	(*planes)[5]->ChangePlane(Point(0.0, 0.0, double(z2_val) / double(resz)), Vector(0.0, 0.0, -1.0));
-		//}
-
-		//RefreshVRenderViews();
+		m_agent->propParentValues(names);
+		m_agent->syncParentValues(names);
 	}
+	else
+		m_agent->unsyncParentValues(names);
 }
 
 void ClipPlanePanel::OnHoldPlanesBtn(wxCommandEvent &event)
@@ -1003,6 +952,7 @@ void ClipPlanePanel::OnRotResetBtn(wxCommandEvent &event)
 void ClipPlanePanel::OnXRotChange(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
+	val = 180 - val;
 	wxString str = wxString::Format("%.1f", double(val));
 	m_x_rot_text->SetValue(str);
 }
@@ -1012,13 +962,13 @@ void ClipPlanePanel::OnXRotEdit(wxCommandEvent &event)
 	wxString str = m_x_rot_text->GetValue();
 	double dval = 0.0;
 	str.ToDouble(&dval);
-	m_x_rot_sldr->SetValue(int(dval + 0.5));
 	m_agent->setValue("clip rot x", dval);
 }
 
 void ClipPlanePanel::OnYRotChange(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
+	val = 180 - val;
 	wxString str = wxString::Format("%.1f", double(val));
 	m_y_rot_text->SetValue(str);
 }
@@ -1028,13 +978,13 @@ void ClipPlanePanel::OnYRotEdit(wxCommandEvent &event)
 	wxString str = m_y_rot_text->GetValue();
 	double dval = 0.0;
 	str.ToDouble(&dval);
-	m_y_rot_sldr->SetValue(int(dval + 0.5));
 	m_agent->setValue("clip rot y", dval);
 }
 
 void ClipPlanePanel::OnZRotChange(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
+	val = 180 - val;
 	wxString str = wxString::Format("%.1f", double(val));
 	m_z_rot_text->SetValue(str);
 }
@@ -1044,82 +994,7 @@ void ClipPlanePanel::OnZRotEdit(wxCommandEvent &event)
 	wxString str = m_z_rot_text->GetValue();
 	double dval = 0.0;
 	str.ToDouble(&dval);
-	m_z_rot_sldr->SetValue(int(dval + 0.5));
 	m_agent->setValue("clip rot z", dval);
-}
-
-void ClipPlanePanel::OnXRotSpinUp(wxSpinEvent& event)
-{
-	wxString str_val = m_x_rot_text->GetValue();
-	double val;
-	str_val.ToDouble(&val);
-	val += 1.0;
-	if (val > 180.0) val -= 360.0;
-	if (val <-180.0) val += 360.0;
-	wxString str = wxString::Format("%.1f", val);
-	m_x_rot_text->SetValue(str);
-}
-
-void ClipPlanePanel::OnXRotSpinDown(wxSpinEvent& event)
-{
-	wxString str_val = m_x_rot_text->GetValue();
-	double val;
-	str_val.ToDouble(&val);
-	val -= 1.0;
-	if (val > 180.0) val -= 360.0;
-	if (val <-180.0) val += 360.0;
-	wxString str = wxString::Format("%.1f", val);
-	m_x_rot_text->SetValue(str);
-}
-
-void ClipPlanePanel::OnYRotSpinUp(wxSpinEvent& event)
-{
-	wxString str_val = m_y_rot_text->GetValue();
-	double val;
-	str_val.ToDouble(&val);
-	val += 1.0;
-	if (val > 180.0) val -= 360.0;
-	if (val <-180.0) val += 360.0;
-	wxString str = wxString::Format("%.1f", val);
-	m_y_rot_text->SetValue(str);
-}
-
-void ClipPlanePanel::OnYRotSpinDown(wxSpinEvent& event)
-{
-	wxString str_val = m_y_rot_text->GetValue();
-	double val;
-	str_val.ToDouble(&val);
-	val -= 1.0;
-	if (val > 180.0) val -= 360.0;
-	if (val <-180.0) val += 360.0;
-	wxString str = wxString::Format("%.1f", val);
-	m_y_rot_text->SetValue(str);
-}
-
-void ClipPlanePanel::OnZRotSpinUp(wxSpinEvent& event)
-{
-	m_z_rot_spin->SetValue(10);
-	wxString str_val = m_z_rot_text->GetValue();
-	double val;
-	str_val.ToDouble(&val);
-	val += 1.0;
-	if (val > 180.0) val -= 360.0;
-	if (val <-180.0) val += 360.0;
-	wxString str = wxString::Format("%.1f", val);
-	m_z_rot_text->SetValue(str);
-}
-
-void ClipPlanePanel::OnZRotSpinDown(wxSpinEvent& event)
-{
-	m_z_rot_spin->SetValue(10);
-	wxString str_val = m_z_rot_text->GetValue();
-	double val;
-	str_val.ToDouble(&val);
-	val -= 1.0;
-	if (val > 180.0) val -= 360.0;
-	if (val <-180.0) val += 360.0;
-	wxString str = wxString::Format("%.1f", val);
-	m_z_rot_text->SetValue(str);
 }
 
 void ClipPlanePanel::OnSliderRClick(wxCommandEvent& event)
@@ -1568,9 +1443,6 @@ void ClipPlanePanel::EnableAll()
 	m_x_rot_text->Enable();
 	m_y_rot_text->Enable();
 	m_z_rot_text->Enable();
-	m_x_rot_spin->Enable();
-	m_y_rot_spin->Enable();
-	m_z_rot_spin->Enable();
 	m_x1_clip_sldr->Enable();
 	m_x1_clip_text->Enable();
 	m_x2_clip_sldr->Enable();
@@ -1603,9 +1475,6 @@ void ClipPlanePanel::DisableAll()
 	m_x_rot_text->Disable();
 	m_y_rot_text->Disable();
 	m_z_rot_text->Disable();
-	m_x_rot_spin->Disable();
-	m_y_rot_spin->Disable();
-	m_z_rot_spin->Disable();
 	m_x1_clip_sldr->Disable();
 	m_x1_clip_text->Disable();
 	m_x2_clip_sldr->Disable();

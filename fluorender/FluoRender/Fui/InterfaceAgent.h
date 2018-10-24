@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Flobject/Object.h>
 #include <Scenegraph/Node.h>
+#include <Scenegraph/ValueUpdateVisitor.h>
 
 namespace FUI
 {
@@ -90,21 +91,119 @@ namespace FUI
 			return 0;
 		}
 
-		virtual bool testSyncParentValue(const std::string& name) { return false; }
+		virtual bool testSyncParentValue(const std::string& name)
+		{
+			FL::Object* obj = getObject();
+			FL::Node* parent = getObjParent();
+			if (obj && parent)
+			{
+				FL::Value* value1 = obj->getValue(name);
+				FL::Value* value2 = parent->getValue(name);
+				return value1->hasObserver(value2) &&
+					value2->hasObserver(value1);
+			}
+			return false;
+		}
 
-		virtual bool testSyncParentValues(const std::vector<std::string> &names) { return false; }
+		virtual bool testSyncParentValues(const std::vector<std::string> &names)
+		{
+			FL::Object* obj = getObject();
+			FL::Node* parent = getObjParent();
+			if (obj && parent)
+			{
+				for (auto it = names.begin();
+					it != names.end(); ++it)
+				{
+					FL::Value* value1 = obj->getValue(*it);
+					FL::Value* value2 = parent->getValue(*it);
+					if (!value1->hasObserver(value2) ||
+						!value2->hasObserver(value1))
+						return false;
+				}
+				return true;
+			}
+			return false;
+		}
 
-		virtual void syncParentValue(const std::string& name) {}
+		virtual void syncParentValue(const std::string& name)
+		{
+			//get obj parent
+			FL::Node* parent = getObjParent();
+			if (parent)
+			{
+				FL::ValueUpdateVisitor update;
+				update.setType(FL::ValueUpdateVisitor::ValueUpdateVisitType::SYNC_VALUE);
+				update.setValueName(name);
+				parent->accept(update);
+			}
+		}
 
-		virtual void unsyncParentValue(const std::string& name) {}
+		virtual void unsyncParentValue(const std::string& name)
+		{
+			//get obj parent
+			FL::Node* parent = getObjParent();
+			if (parent)
+			{
+				FL::ValueUpdateVisitor update;
+				update.setType(FL::ValueUpdateVisitor::ValueUpdateVisitType::UNSYNC_VALUE);
+				update.setValueName(name);
+				parent->accept(update);
+			}
+		}
 
-		virtual void syncParentValues(const std::vector<std::string> &names) {}
+		virtual void syncParentValues(const std::vector<std::string> &names)
+		{
+			//get obj parent
+			FL::Node* parent = getObjParent();
+			if (parent)
+			{
+				FL::ValueUpdateVisitor update;
+				update.setType(FL::ValueUpdateVisitor::ValueUpdateVisitType::SYNC_VALUES);
+				update.setValueNames(names);
+				parent->accept(update);
+			}
+		}
 
-		virtual void unsyncParentValues(const std::vector<std::string> &names) {}
+		virtual void unsyncParentValues(const std::vector<std::string> &names)
+		{
+			//get obj parent
+			FL::Node* parent = getObjParent();
+			if (parent)
+			{
+				FL::ValueUpdateVisitor update;
+				update.setType(FL::ValueUpdateVisitor::ValueUpdateVisitType::UNSYNC_VALUES);
+				update.setValueNames(names);
+				parent->accept(update);
+			}
+		}
 
-		virtual void propParentValue(const std::string& name) {}
+		virtual void propParentValue(const std::string& name)
+		{
+			//get obj parent
+			FL::Node* parent = getObjParent();
+			if (parent)
+			{
+				FL::ValueUpdateVisitor update;
+				update.setType(FL::ValueUpdateVisitor::ValueUpdateVisitType::PROP_VALUE);
+				update.setValueName(name);
+				update.setObject(this);
+				parent->accept(update);
+			}
+		}
 
-		virtual void propParentValues(const std::vector<std::string> &names) {}
+		virtual void propParentValues(const std::vector<std::string> &names)
+		{
+			//get obj parent
+			FL::Node* parent = getObjParent();
+			if (parent)
+			{
+				FL::ValueUpdateVisitor update;
+				update.setType(FL::ValueUpdateVisitor::ValueUpdateVisitType::PROP_VALUES);
+				update.setValueNames(names);
+				update.setObject(this);
+				parent->accept(update);
+			}
+		}
 
 		virtual void UpdateAllSettings() {};
 
