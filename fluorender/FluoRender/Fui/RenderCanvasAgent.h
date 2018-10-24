@@ -55,6 +55,8 @@ namespace FUI
 
 		virtual void UpdateAllSettings();
 
+		VRenderGLView &getView();
+
 	protected:
 		VRenderGLView &gl_view_;
 	};

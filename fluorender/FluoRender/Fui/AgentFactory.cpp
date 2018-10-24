@@ -205,6 +205,12 @@ ClipPlaneAgent* AgentFactory::getOrAddClipPlaneAgent(const std::string &name, wx
 			std::bind(&ClipPlaneAgent::OnClipLinkYChanged, clip_plane_agent));
 		clip_plane_agent->setAfterFunction("clip link z",
 			std::bind(&ClipPlaneAgent::OnClipLinkZChanged, clip_plane_agent));
+		clip_plane_agent->setAfterFunction("clip rot x",
+			std::bind(&ClipPlaneAgent::OnClipRotXChanged, clip_plane_agent));
+		clip_plane_agent->setAfterFunction("clip rot y",
+			std::bind(&ClipPlaneAgent::OnClipRotYChanged, clip_plane_agent));
+		clip_plane_agent->setAfterFunction("clip rot z",
+			std::bind(&ClipPlaneAgent::OnClipRotZChanged, clip_plane_agent));
 		objects_.push_front(clip_plane_agent);
 		notifyObserversNodeAdded(this, clip_plane_agent);
 	}

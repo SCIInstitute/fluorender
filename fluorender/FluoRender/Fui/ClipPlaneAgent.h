@@ -56,6 +56,8 @@ namespace FUI
 
 		virtual void UpdateAllSettings();
 
+		void alignRenderViewRot();
+
 		friend class AgentFactory;
 
 	protected:
@@ -71,6 +73,9 @@ namespace FUI
 		void OnClipLinkXChanged();
 		void OnClipLinkYChanged();
 		void OnClipLinkZChanged();
+		void OnClipRotXChanged();
+		void OnClipRotYChanged();
+		void OnClipRotZChanged();
 	};
 }
 

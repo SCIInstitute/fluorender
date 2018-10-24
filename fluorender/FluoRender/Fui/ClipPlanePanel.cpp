@@ -989,52 +989,15 @@ void ClipPlanePanel::OnClipDistZEdit(wxCommandEvent &event)
 
 void ClipPlanePanel::OnSetZeroBtn(wxCommandEvent &event)
 {
-	//VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
-	//if (vrender_frame)
-	//{
-	//	for (int i = 0; i<(int)vrender_frame->GetViewList()->size(); i++)
-	//	{
-	//		VRenderView *vrv = (*vrender_frame->GetViewList())[i];
-	//		if (vrv)
-	//		{
-	//			vrv->SetClipMode(2);
-	//			vrv->RefreshGL();
-	//			double rotx, roty, rotz;
-	//			vrv->GetClippingPlaneRotations(rotx, roty, rotz);
-	//			m_x_rot_sldr->SetValue(int(rotx));
-	//			m_y_rot_sldr->SetValue(int(roty));
-	//			m_z_rot_sldr->SetValue(int(rotz));
-	//			m_x_rot_text->ChangeValue(wxString::Format("%.1f", rotx));
-	//			m_y_rot_text->ChangeValue(wxString::Format("%.1f", roty));
-	//			m_z_rot_text->ChangeValue(wxString::Format("%.1f", rotz));
-	//		}
-	//	}
-	//}
+	//get its view
+	m_agent->alignRenderViewRot();
 }
 
 void ClipPlanePanel::OnRotResetBtn(wxCommandEvent &event)
 {
-	//VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
-	//if (vrender_frame)
-	//{
-	//	for (int i = 0; i<(int)vrender_frame->GetViewList()->size(); i++)
-	//	{
-	//		VRenderView *vrv = (*vrender_frame->GetViewList())[i];
-	//		if (vrv)
-	//		{
-	//			//reset rotations
-	//			vrv->SetClippingPlaneRotations(0.0, 0.0, 0.0);
-	//			vrv->RefreshGL();
-	//		}
-	//	}
-	//}
-	//wxString str = "0.0";
-	//m_x_rot_sldr->SetValue(0);
-	//m_x_rot_text->ChangeValue(str);
-	//m_y_rot_sldr->SetValue(0);
-	//m_y_rot_text->ChangeValue(str);
-	//m_z_rot_sldr->SetValue(0);
-	//m_z_rot_text->ChangeValue(str);
+	m_agent->setValue("clip rot x", double(0));
+	m_agent->setValue("clip rot y", double(0));
+	m_agent->setValue("clip rot z", double(0));
 }
 
 void ClipPlanePanel::OnXRotChange(wxScrollEvent &event)

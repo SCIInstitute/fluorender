@@ -73,3 +73,8 @@ void RenderCanvasAgent::UpdateAllSettings()
 {
 
 }
+
+VRenderGLView &RenderCanvasAgent::getView()
+{
+	return gl_view_;
+}

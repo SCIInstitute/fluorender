@@ -28,6 +28,10 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Fui/ClipPlaneAgent.h>
 #include <Fui/ClipPlanePanel.h>
+#include <Scenegraph/SearchVisitor.h>
+#include <Fui/RenderCanvasAgent.h>
+#include <Global/Global.h>
+#include <VRenderGLView.h>
 #include <wx/valnum.h>
 #include <png_resource.h>
 #include <img/icons.h>
@@ -115,12 +119,12 @@ void ClipPlaneAgent::UpdateAllSettings()
 	getValue("clip dist x", distx);
 	getValue("clip dist y", disty);
 	getValue("clip dist z", distz);
-	panel_.m_yz_dist_text->SetValue(
+	panel_.m_yz_dist_text->ChangeValue(
 		wxString::Format("%d", int(distx*resx + 0.5)));
-	panel_.m_xz_dist_text->SetValue(
-		wxString::Format("%d", int(distx*resy + 0.5)));
-	panel_.m_xy_dist_text->SetValue(
-		wxString::Format("%d", int(distx*resz + 0.5)));
+	panel_.m_xz_dist_text->ChangeValue(
+		wxString::Format("%d", int(disty*resy + 0.5)));
+	panel_.m_xy_dist_text->ChangeValue(
+		wxString::Format("%d", int(distz*resz + 0.5)));
 
 	//clip values
 	int ival = 0;
@@ -233,6 +237,38 @@ void ClipPlaneAgent::UpdateAllSettings()
 	panel_.m_y_rot_text->ChangeValue(wxString::Format("%.1f", clip_rot_y));
 	panel_.m_z_rot_sldr->SetValue(int(clip_rot_z + 0.5));
 	panel_.m_z_rot_text->ChangeValue(wxString::Format("%.1f", clip_rot_z));
+}
+
+void ClipPlaneAgent::alignRenderViewRot()
+{
+	FL::Node* obj = getObject();
+	if (!obj)
+		return;
+	FL::SearchVisitor visitor;
+	visitor.setTraversalMode(FL::NodeVisitor::TRAVERSE_PARENTS);
+	visitor.matchClassName("RenderView");
+	obj->accept(visitor);
+	FL::RenderView* rv = visitor.getRenderView();
+	if (!rv)
+		return;
+	InterfaceAgent* rv_agent =
+		FL::Global::instance().getAgentFactory().findFirst(rv->getName());
+	if (!rv_agent)
+		return;
+	RenderCanvasAgent* agent = dynamic_cast<RenderCanvasAgent*>(rv_agent);
+	if (!agent)
+		return;
+	double rot_x, rot_y, rot_z;
+	agent->getView().GetRotations(rot_x, rot_y, rot_z);
+	rot_x = -rot_x;
+	rot_y = -rot_y;
+	rot_z = -rot_z;
+	if (rot_x > 180.0) rot_x -= 360.0;
+	if (rot_y > 180.0) rot_y -= 360.0;
+	if (rot_z > 180.0) rot_z -= 360.0;
+	setValue("clip rot x", rot_x);
+	setValue("clip rot y", rot_y);
+	setValue("clip rot z", rot_z);
 }
 
 void ClipPlaneAgent::OnClipXChanged()
@@ -449,4 +485,31 @@ void ClipPlaneAgent::OnClipLinkZChanged()
 		panel_.m_link_z_tb->SetToolNormalBitmap(
 			ClipPlanePanel::ID_LinkZChk,
 			wxGetBitmapFromMemory(unlink));
+}
+
+void ClipPlaneAgent::OnClipRotXChanged()
+{
+	double dval;
+	getValue("clip rot x", dval);
+	panel_.m_x_rot_sldr->SetValue(int(dval + 0.5));
+	if (!panel_.m_x_rot_text->HasFocus())
+		panel_.m_x_rot_text->ChangeValue(wxString::Format("%.1f", dval));
+}
+
+void ClipPlaneAgent::OnClipRotYChanged()
+{
+	double dval;
+	getValue("clip rot y", dval);
+	panel_.m_y_rot_sldr->SetValue(int(dval + 0.5));
+	if (!panel_.m_y_rot_text->HasFocus())
+		panel_.m_y_rot_text->ChangeValue(wxString::Format("%.1f", dval));
+}
+
+void ClipPlaneAgent::OnClipRotZChanged()
+{
+	double dval;
+	getValue("clip rot z", dval);
+	panel_.m_z_rot_sldr->SetValue(int(dval + 0.5));
+	if (!panel_.m_z_rot_text->HasFocus())
+		panel_.m_z_rot_text->ChangeValue(wxString::Format("%.1f", dval));
 }

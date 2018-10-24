@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Scenegraph/MeshData.h>
 #include <Scenegraph/MeshGroup.h>
 #include <Scenegraph/Annotations.h>
+#include <Scenegraph/RenderView.h>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -127,6 +128,14 @@ namespace FL
 		{
 			if (!results_.empty())
 				return dynamic_cast<Annotations*>(results_[0]);
+			else
+				return 0;
+		}
+
+		RenderView* getRenderView()
+		{
+			if (!results_.empty())
+				return dynamic_cast<RenderView*>(results_[0]);
 			else
 				return 0;
 		}

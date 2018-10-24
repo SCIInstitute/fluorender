@@ -118,16 +118,6 @@ namespace FUI
 		}
 		void SetPlaneMode(PLANE_MODES mode);
 
-		void SetClippingPlaneRotations(double rotx, double roty, double rotz)
-		{
-			m_x_rot_sldr->SetValue(int(rotx));
-			m_y_rot_sldr->SetValue(int(roty));
-			m_z_rot_sldr->SetValue(int(rotz));
-			m_x_rot_text->SetValue(wxString::Format("%.1f", rotx));
-			m_y_rot_text->SetValue(wxString::Format("%.1f", roty));
-			m_z_rot_text->SetValue(wxString::Format("%.1f", rotz));
-		}
-
 		//move linked clipping planes
 		//dir: 0-lower; 1-higher
 		void MoveLinkedClippingPlanes(int dir);
