@@ -41,24 +41,6 @@ VolumePropAgent::VolumePropAgent(VolumePropPanel &panel) :
 
 }
 
-void VolumePropAgent::objectChanging(int notify_level, void* ptr, void* orig_node, const std::string &exp)
-{
-	//before change
-	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
-	{
-		InterfaceAgent::objectChanging(notify_level, ptr, orig_node, exp);
-	}
-}
-
-void VolumePropAgent::objectChanged(int notify_level, void* ptr, void* orig_node, const std::string &exp)
-{
-	//set values in ui
-	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
-	{
-		InterfaceAgent::objectChanged(notify_level, ptr, orig_node, exp);
-	}
-}
-
 void VolumePropAgent::setObject(FL::VolumeData* obj)
 {
 	InterfaceAgent::setObject(obj);
@@ -344,7 +326,7 @@ void VolumePropAgent::UpdateAllSettings()
 	//panel_.Layout();
 }
 
-void VolumePropAgent::OnLuminanceChanged()
+void VolumePropAgent::OnLuminanceChanged(FL::Event& event)
 {
 	double luminance;
 	getValue("luminance", luminance);
@@ -355,7 +337,7 @@ void VolumePropAgent::OnLuminanceChanged()
 	panel_.m_luminance_text->ChangeValue(str);
 }
 
-void VolumePropAgent::OnColorChanged()
+void VolumePropAgent::OnColorChanged(FL::Event& event)
 {
 	FLTYPE::Color color;
 	getValue("color", color);

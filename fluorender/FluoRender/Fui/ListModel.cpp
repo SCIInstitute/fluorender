@@ -35,35 +35,19 @@ ListModel::ListModel()
 
 }
 
-//observer functions
-void ListModel::objectChanging(int notify_level, void* ptr, void* orig_node, const std::string &exp)
+void ListModel::nodeAdded(FL::Event& event)
 {
-	//before change
-	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
-	{
-	}
-}
-
-void ListModel::objectChanged(int notify_level, void* ptr, void* orig_node, const std::string &exp)
-{
-	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
-	{
-	}
-}
-
-void ListModel::nodeAdded(void* ptr, void* parent, void* child)
-{
-	if (child)
+	if (event.child)
 	{
 		RowAppended();
 	}
 }
 
-void ListModel::nodeRemoved(void* ptr, void* parent, void* child)
+void ListModel::nodeRemoved(FL::Event& event)
 {
-	if (child)
+	if (event.child)
 	{
-		FL::Referenced* refd = static_cast<FL::Referenced*>(child);
+		FL::Referenced* refd = static_cast<FL::Referenced*>(event.child);
 		if (refd)
 		{
 			FL::Object* obj = dynamic_cast<FL::Object*>(refd);

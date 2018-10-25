@@ -76,8 +76,6 @@ namespace FL
 
 		virtual Object* clone(const unsigned int);
 
-		virtual void objectChanged(Event& event);
-
 		inline bool remove(Object* object)
 		{
 			size_t pos = getIndex(object);

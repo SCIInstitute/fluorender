@@ -38,39 +38,23 @@ TreeModel::TreeModel(TreePanel &panel):
 
 }
 
-//observer functions
-void TreeModel::objectChanging(int notify_level, void* ptr, void* orig_node, const std::string &exp)
+void TreeModel::nodeAdded(FL::Event& event)
 {
-	//before change
-	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
+	if (event.parent && event.child)
 	{
-	}
-}
-
-void TreeModel::objectChanged(int notify_level, void* ptr, void* orig_node, const std::string &exp)
-{
-	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
-	{
-	}
-}
-
-void TreeModel::nodeAdded(void* ptr, void* parent, void* child)
-{
-	if (parent && child)
-	{
-		wxDataViewItem parent_item = wxDataViewItem(parent);
-		wxDataViewItem child_item = wxDataViewItem(child);
+		wxDataViewItem parent_item = wxDataViewItem(event.parent);
+		wxDataViewItem child_item = wxDataViewItem(event.child);
 		ItemAdded(parent_item, child_item);
 		panel_.m_tree_ctrl->Expand(parent_item);
 	}
 }
 
-void TreeModel::nodeRemoved(void* ptr, void* parent, void* child)
+void TreeModel::nodeRemoved(FL::Event& event)
 {
-	if (parent && child)
+	if (event.parent && event.child)
 	{
-		wxDataViewItem parent_item = wxDataViewItem(parent);
-		wxDataViewItem child_item = wxDataViewItem(child);
+		wxDataViewItem parent_item = wxDataViewItem(event.parent);
+		wxDataViewItem child_item = wxDataViewItem(event.child);
 		ItemDeleted(parent_item, child_item);
 	}
 }

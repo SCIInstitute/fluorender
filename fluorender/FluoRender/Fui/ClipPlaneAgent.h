@@ -47,10 +47,6 @@ namespace FUI
 
 		virtual const char* className() const { return "ClipPlaneAgent"; }
 
-		//observer
-		virtual void objectChanging(int notify_level, void*, void* orig_node, const std::string &exp);
-		virtual void objectChanged(int notify_level, void*, void* orig_node, const std::string &exp);
-
 		virtual void setObject(FL::Node* vd);
 		virtual FL::Node* getObject();
 
@@ -64,18 +60,18 @@ namespace FUI
 		ClipPlanePanel &panel_;
 
 		//update functions
-		void OnClipXChanged();
-		void OnClipYChanged();
-		void OnClipZChanged();
-		void OnClipDistXChanged();
-		void OnClipDistYChanged();
-		void OnClipDistZChanged();
-		void OnClipLinkXChanged();
-		void OnClipLinkYChanged();
-		void OnClipLinkZChanged();
-		void OnClipRotXChanged();
-		void OnClipRotYChanged();
-		void OnClipRotZChanged();
+		void OnClipXChanged(FL::Event& event);
+		void OnClipYChanged(FL::Event& event);
+		void OnClipZChanged(FL::Event& event);
+		void OnClipDistXChanged(FL::Event& event);
+		void OnClipDistYChanged(FL::Event& event);
+		void OnClipDistZChanged(FL::Event& event);
+		void OnClipLinkXChanged(FL::Event& event);
+		void OnClipLinkYChanged(FL::Event& event);
+		void OnClipLinkZChanged(FL::Event& event);
+		void OnClipRotXChanged(FL::Event& event);
+		void OnClipRotYChanged(FL::Event& event);
+		void OnClipRotZChanged(FL::Event& event);
 	};
 }
 

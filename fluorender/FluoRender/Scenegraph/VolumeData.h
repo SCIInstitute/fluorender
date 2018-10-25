@@ -171,56 +171,56 @@ namespace FL
 		//most are for setting values in the renderer
 		//this will be changed when rendering pipeline is restructured
 		//void OnMipModeChanging();
-		void OnMipModeChanged();//modes
-		void OnOverlayModeChanged();//overlay mode changes temporarily for rendering overlayed effects
-		void OnViewportChanged();
-		void OnClearColorChanged();
-		void OnCurFramebufferChanged();
-		void OnCompressionChanged();
-		void OnInvertChanged();
-		void OnMaskModeChanged();
-		void OnNoiseRedctChanged();
-		void On2dDmapIdChanged();
-		void OnGamma3dChanged();
-		void OnExtractBoundaryChanged();
-		void OnSaturationChanged();
-		void OnLowThresholdChanged();
-		void OnHighThresholdChanged();
-		void OnColorChanged();
-		void OnSecColorChanged();
-		void OnSecColorSetChanged();
-		void OnLuminanceChanged();
-		void OnAlphaChanged();
-		void OnAlphaEnableChanged();
-		void OnMaskThreshChanged();
-		void OnUseMaskThreshChanged();
-		void OnShadingEnableChanged();
-		void OnMaterialChanged();
-		void OnSampleRateChanged();
-		void OnColormapModeChanged();
-		void OnColormapValueChanged();
-		void OnColormapTypeChanged();
-		void OnColormapProjChanged();
-		void OnSpacingChanged();
-		void OnBaseSpacingChanged();
-		void OnSpacingScaleChanged();
-		void OnLevelChanged();
-		void OnDisplayChanged();
-		void OnInterpolateChanged();
-		void OnDepthAttenChanged();
-		void OnSkipBrickChanged();
-		void OnClipPlanesChanged();
-		void OnLowShadingChanged();
-		void OnHighShadingChanged();
-		void OnIntScaleChanged();
-		void OnSyncOutputChannels();
-		void OnClipX1Changed();
-		void OnClipX2Changed();
-		void OnClipY1Changed();
-		void OnClipY2Changed();
-		void OnClipZ1Changed();
-		void OnClipZ2Changed();
-		void OnClipRot();
+		void OnMipModeChanged(Event& event);//modes
+		void OnOverlayModeChanged(Event& event);//overlay mode changes temporarily for rendering overlayed effects
+		void OnViewportChanged(Event& event);
+		void OnClearColorChanged(Event& event);
+		void OnCurFramebufferChanged(Event& event);
+		void OnCompressionChanged(Event& event);
+		void OnInvertChanged(Event& event);
+		void OnMaskModeChanged(Event& event);
+		void OnNoiseRedctChanged(Event& event);
+		void On2dDmapIdChanged(Event& event);
+		void OnGamma3dChanged(Event& event);
+		void OnExtractBoundaryChanged(Event& event);
+		void OnSaturationChanged(Event& event);
+		void OnLowThresholdChanged(Event& event);
+		void OnHighThresholdChanged(Event& event);
+		void OnColorChanged(Event& event);
+		void OnSecColorChanged(Event& event);
+		void OnSecColorSetChanged(Event& event);
+		void OnLuminanceChanged(Event& event);
+		void OnAlphaChanged(Event& event);
+		void OnAlphaEnableChanged(Event& event);
+		void OnMaskThreshChanged(Event& event);
+		void OnUseMaskThreshChanged(Event& event);
+		void OnShadingEnableChanged(Event& event);
+		void OnMaterialChanged(Event& event);
+		void OnSampleRateChanged(Event& event);
+		void OnColormapModeChanged(Event& event);
+		void OnColormapValueChanged(Event& event);
+		void OnColormapTypeChanged(Event& event);
+		void OnColormapProjChanged(Event& event);
+		void OnSpacingChanged(Event& event);
+		void OnBaseSpacingChanged(Event& event);
+		void OnSpacingScaleChanged(Event& event);
+		void OnLevelChanged(Event& event);
+		void OnDisplayChanged(Event& event);
+		void OnInterpolateChanged(Event& event);
+		void OnDepthAttenChanged(Event& event);
+		void OnSkipBrickChanged(Event& event);
+		void OnClipPlanesChanged(Event& event);
+		void OnLowShadingChanged(Event& event);
+		void OnHighShadingChanged(Event& event);
+		void OnIntScaleChanged(Event& event);
+		void OnSyncOutputChannels(Event& event);
+		void OnClipX1Changed(Event& event);
+		void OnClipX2Changed(Event& event);
+		void OnClipY1Changed(Event& event);
+		void OnClipY2Changed(Event& event);
+		void OnClipZ1Changed(Event& event);
+		void OnClipZ2Changed(Event& event);
+		void OnClipRot(Event& event);
 
 		//update clipping planes
 		//any value changes -> set clip values and then rotate

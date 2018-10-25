@@ -45,24 +45,6 @@ ClipPlaneAgent::ClipPlaneAgent(ClipPlanePanel &panel) :
 
 }
 
-void ClipPlaneAgent::objectChanging(int notify_level, void* ptr, void* orig_node, const std::string &exp)
-{
-	//before change
-	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
-	{
-		InterfaceAgent::objectChanging(notify_level, ptr, orig_node, exp);
-	}
-}
-
-void ClipPlaneAgent::objectChanged(int notify_level, void* ptr, void* orig_node, const std::string &exp)
-{
-	//set values in ui
-	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
-	{
-		InterfaceAgent::objectChanged(notify_level, ptr, orig_node, exp);
-	}
-}
-
 void ClipPlaneAgent::setObject(FL::Node* obj)
 {
 	InterfaceAgent::setObject(obj);
@@ -272,7 +254,7 @@ void ClipPlaneAgent::alignRenderViewRot()
 	setValue("clip rot z", rot_z);
 }
 
-void ClipPlaneAgent::OnClipXChanged()
+void ClipPlaneAgent::OnClipXChanged(FL::Event& event)
 {
 	long res;
 	getValue("res x", res);
@@ -298,7 +280,7 @@ void ClipPlaneAgent::OnClipXChanged()
 		(double)panel_.m_x1_clip_sldr->GetMax())));
 }
 
-void ClipPlaneAgent::OnClipYChanged()
+void ClipPlaneAgent::OnClipYChanged(FL::Event& event)
 {
 	long res;
 	getValue("res y", res);
@@ -324,7 +306,7 @@ void ClipPlaneAgent::OnClipYChanged()
 		(double)panel_.m_y1_clip_sldr->GetMax())));
 }
 
-void ClipPlaneAgent::OnClipZChanged()
+void ClipPlaneAgent::OnClipZChanged(FL::Event& event)
 {
 	long res;
 	getValue("res z", res);
@@ -350,7 +332,7 @@ void ClipPlaneAgent::OnClipZChanged()
 		(double)panel_.m_z1_clip_sldr->GetMax())));
 }
 
-void ClipPlaneAgent::OnClipDistXChanged()
+void ClipPlaneAgent::OnClipDistXChanged(FL::Event& event)
 {
 	double clip_dist;
 	getValue("clip dist x", clip_dist);
@@ -380,7 +362,7 @@ void ClipPlaneAgent::OnClipDistXChanged()
 			wxString::Format("%d", int(clip_dist * res + 0.5)));
 }
 
-void ClipPlaneAgent::OnClipDistYChanged()
+void ClipPlaneAgent::OnClipDistYChanged(FL::Event& event)
 {
 	double clip_dist;
 	getValue("clip dist y", clip_dist);
@@ -410,7 +392,7 @@ void ClipPlaneAgent::OnClipDistYChanged()
 			wxString::Format("%d", int(clip_dist * res + 0.5)));
 }
 
-void ClipPlaneAgent::OnClipDistZChanged()
+void ClipPlaneAgent::OnClipDistZChanged(FL::Event& event)
 {
 	double clip_dist;
 	getValue("clip dist z", clip_dist);
@@ -440,7 +422,7 @@ void ClipPlaneAgent::OnClipDistZChanged()
 			wxString::Format("%d", int(clip_dist * res + 0.5)));
 }
 
-void ClipPlaneAgent::OnClipLinkXChanged()
+void ClipPlaneAgent::OnClipLinkXChanged(FL::Event& event)
 {
 	bool bval;
 	getValue("clip link x", bval);
@@ -456,7 +438,7 @@ void ClipPlaneAgent::OnClipLinkXChanged()
 			wxGetBitmapFromMemory(unlink));
 }
 
-void ClipPlaneAgent::OnClipLinkYChanged()
+void ClipPlaneAgent::OnClipLinkYChanged(FL::Event& event)
 {
 	bool bval;
 	getValue("clip link y", bval);
@@ -472,7 +454,7 @@ void ClipPlaneAgent::OnClipLinkYChanged()
 			wxGetBitmapFromMemory(unlink));
 }
 
-void ClipPlaneAgent::OnClipLinkZChanged()
+void ClipPlaneAgent::OnClipLinkZChanged(FL::Event& event)
 {
 	bool bval;
 	getValue("clip link z", bval);
@@ -488,7 +470,7 @@ void ClipPlaneAgent::OnClipLinkZChanged()
 			wxGetBitmapFromMemory(unlink));
 }
 
-void ClipPlaneAgent::OnClipRotXChanged()
+void ClipPlaneAgent::OnClipRotXChanged(FL::Event& event)
 {
 	double dval;
 	getValue("clip rot x", dval);
@@ -497,7 +479,7 @@ void ClipPlaneAgent::OnClipRotXChanged()
 		panel_.m_x_rot_text->ChangeValue(wxString::Format("%.1f", dval));
 }
 
-void ClipPlaneAgent::OnClipRotYChanged()
+void ClipPlaneAgent::OnClipRotYChanged(FL::Event& event)
 {
 	double dval;
 	getValue("clip rot y", dval);
@@ -506,7 +488,7 @@ void ClipPlaneAgent::OnClipRotYChanged()
 		panel_.m_y_rot_text->ChangeValue(wxString::Format("%.1f", dval));
 }
 
-void ClipPlaneAgent::OnClipRotZChanged()
+void ClipPlaneAgent::OnClipRotZChanged(FL::Event& event)
 {
 	double dval;
 	getValue("clip rot z", dval);

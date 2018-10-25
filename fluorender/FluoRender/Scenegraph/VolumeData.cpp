@@ -81,48 +81,49 @@ VolumeData::~VolumeData()
 
 void VolumeData::Initialize()
 {
-	OnMipModeChanged();//modes
-	OnViewportChanged();
-	OnClearColorChanged();
-	OnCurFramebufferChanged();
-	OnCompressionChanged();
-	OnInvertChanged();
-	OnMaskModeChanged();
-	OnNoiseRedctChanged();
-	On2dDmapIdChanged();
-	OnGamma3dChanged();
-	OnExtractBoundaryChanged();
-	OnSaturationChanged();
-	OnLowThresholdChanged();
-	OnHighThresholdChanged();
-	OnColorChanged();
-	OnSecColorChanged();
-	OnSecColorSetChanged();
-	//OnLuminanceChanged();
-	OnAlphaChanged();
-	OnAlphaEnableChanged();
-	OnMaskThreshChanged();
-	OnUseMaskThreshChanged();
-	OnShadingEnableChanged();
-	OnMaterialChanged();
-	OnSampleRateChanged();
-	OnColormapModeChanged();
-	OnColormapValueChanged();
-	OnColormapTypeChanged();
-	OnColormapProjChanged();
-	OnSpacingChanged();
-	//OnBaseSpacingChanged();
-	//OnSpacingScaleChanged();
-	OnLevelChanged();
-	OnDisplayChanged();
-	OnInterpolateChanged();
-	OnDepthAttenChanged();
-	OnSkipBrickChanged();
-	OnClipPlanesChanged();
-	OnIntScaleChanged();
+	Event event;
+	OnMipModeChanged(event);//modes
+	OnViewportChanged(event);
+	OnClearColorChanged(event);
+	OnCurFramebufferChanged(event);
+	OnCompressionChanged(event);
+	OnInvertChanged(event);
+	OnMaskModeChanged(event);
+	OnNoiseRedctChanged(event);
+	On2dDmapIdChanged(event);
+	OnGamma3dChanged(event);
+	OnExtractBoundaryChanged(event);
+	OnSaturationChanged(event);
+	OnLowThresholdChanged(event);
+	OnHighThresholdChanged(event);
+	OnColorChanged(event);
+	OnSecColorChanged(event);
+	OnSecColorSetChanged(event);
+	//OnLuminanceChanged(event);
+	OnAlphaChanged(event);
+	OnAlphaEnableChanged(event);
+	OnMaskThreshChanged(event);
+	OnUseMaskThreshChanged(event);
+	OnShadingEnableChanged(event);
+	OnMaterialChanged(event);
+	OnSampleRateChanged(event);
+	OnColormapModeChanged(event);
+	OnColormapValueChanged(event);
+	OnColormapTypeChanged(event);
+	OnColormapProjChanged(event);
+	OnSpacingChanged(event);
+	//OnBaseSpacingChanged(event);
+	//OnSpacingScaleChanged(event);
+	OnLevelChanged(event);
+	OnDisplayChanged(event);
+	OnInterpolateChanged(event);
+	OnDepthAttenChanged(event);
+	OnSkipBrickChanged(event);
+	OnClipPlanesChanged(event);
+	OnIntScaleChanged(event);
 }
 
-//void VolumeData::OnMipModeChanging()
+//void VolumeData::OnMipModeChanging(Event& event)
 //{
 //	//save mode
 //	long mode;
@@ -131,7 +132,7 @@ void VolumeData::Initialize()
 //}
 
 //MIP & normal modes
-void VolumeData::OnMipModeChanged()
+void VolumeData::OnMipModeChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -150,7 +151,7 @@ void VolumeData::OnMipModeChanged()
 	}
 }
 
-void VolumeData::OnOverlayModeChanged()
+void VolumeData::OnOverlayModeChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -223,7 +224,7 @@ void VolumeData::OnOverlayModeChanged()
 	}
 }
 
-void VolumeData::OnViewportChanged()
+void VolumeData::OnViewportChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -234,7 +235,7 @@ void VolumeData::OnViewportChanged()
 	m_vr->set_viewport(vp.get());
 }
 
-void VolumeData::OnClearColorChanged()
+void VolumeData::OnClearColorChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -244,7 +245,7 @@ void VolumeData::OnClearColorChanged()
 	m_vr->set_clear_color(clear_color.get());
 }
 
-void VolumeData::OnCurFramebufferChanged()
+void VolumeData::OnCurFramebufferChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -254,7 +255,7 @@ void VolumeData::OnCurFramebufferChanged()
 	m_vr->set_cur_framebuffer(cur_framebuffer);
 }
 
-void VolumeData::OnCompressionChanged()
+void VolumeData::OnCompressionChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -264,7 +265,7 @@ void VolumeData::OnCompressionChanged()
 	m_vr->set_compression(compression);
 }
 
-void VolumeData::OnInvertChanged()
+void VolumeData::OnInvertChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -274,7 +275,7 @@ void VolumeData::OnInvertChanged()
 	m_vr->set_inversion(invert);
 }
 
-void VolumeData::OnMaskModeChanged()
+void VolumeData::OnMaskModeChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -284,7 +285,7 @@ void VolumeData::OnMaskModeChanged()
 	m_vr->set_ml_mode(mask_mode);
 }
 
-void VolumeData::OnNoiseRedctChanged()
+void VolumeData::OnNoiseRedctChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -294,7 +295,7 @@ void VolumeData::OnNoiseRedctChanged()
 	m_vr->SetNoiseRed(noise_redct);
 }
 
-void VolumeData::On2dDmapIdChanged()
+void VolumeData::On2dDmapIdChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -304,7 +305,7 @@ void VolumeData::On2dDmapIdChanged()
 	m_vr->set_2d_dmap(dmap_id);
 }
 
-void VolumeData::OnGamma3dChanged()
+void VolumeData::OnGamma3dChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -314,7 +315,7 @@ void VolumeData::OnGamma3dChanged()
 	m_vr->set_gamma3d(gamma_3d);
 }
 
-void VolumeData::OnExtractBoundaryChanged()
+void VolumeData::OnExtractBoundaryChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -324,7 +325,7 @@ void VolumeData::OnExtractBoundaryChanged()
 	m_vr->set_gm_thresh(extract_boundary);
 }
 
-void VolumeData::OnSaturationChanged()
+void VolumeData::OnSaturationChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -334,7 +335,7 @@ void VolumeData::OnSaturationChanged()
 	m_vr->set_offset(saturation);
 }
 
-void VolumeData::OnLowThresholdChanged()
+void VolumeData::OnLowThresholdChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -344,7 +345,7 @@ void VolumeData::OnLowThresholdChanged()
 	m_vr->set_lo_thresh(low_threshold);
 }
 
-void VolumeData::OnHighThresholdChanged()
+void VolumeData::OnHighThresholdChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -354,7 +355,7 @@ void VolumeData::OnHighThresholdChanged()
 	m_vr->set_hi_thresh(high_threshold);
 }
 
-void VolumeData::OnColorChanged()
+void VolumeData::OnColorChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -362,13 +363,13 @@ void VolumeData::OnColorChanged()
 	getValue("color", color);
 	m_vr->set_color(color);
 	FLTYPE::HSVColor hsv(color);
-	setValue("hsv", hsv, Value::NotifyLevel::NOTIFY_SELF);
-	setValue("luminance", hsv.val(),
-		Value::NotifyLevel::NOTIFY_SELF|
-		Value::NotifyLevel::NOTIFY_AGENT);
+	event.setNotifyFlags(Event::NOTIFY_SELF);
+	setValue("hsv", hsv, event);
+	event.setNotifyFlags(Event::NOTIFY_SELF | Event::NOTIFY_AGENT);
+	setValue("luminance", hsv.val(), event);
 }
 
-void VolumeData::OnSecColorChanged()
+void VolumeData::OnSecColorChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -376,11 +377,11 @@ void VolumeData::OnSecColorChanged()
 	FLTYPE::Color sec_color;
 	getValue("sec color", sec_color);
 	m_vr->set_mask_color(sec_color);
-
-	setValue("sec color set", bool(true), Value::NotifyLevel::NOTIFY_SELF);
+	event.setNotifyFlags(Event::NOTIFY_SELF);
+	setValue("sec color set", bool(true), event);
 }
 
-void VolumeData::OnSecColorSetChanged()
+void VolumeData::OnSecColorSetChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -391,7 +392,7 @@ void VolumeData::OnSecColorSetChanged()
 		m_vr->reset_mask_color_set();
 }
 
-void VolumeData::OnLuminanceChanged()
+void VolumeData::OnLuminanceChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -402,12 +403,12 @@ void VolumeData::OnLuminanceChanged()
 	getValue("hsv", hsv);
 	hsv.val(luminance);
 	FLTYPE::Color color(hsv);
-	setValue("color", color,
-		Value::NotifyLevel::NOTIFY_AGENT);
+	event.setNotifyFlags(Event::NOTIFY_SELF);
+	setValue("color", color, event);
 	m_vr->set_color(color);
 }
 
-void VolumeData::OnAlphaChanged()
+void VolumeData::OnAlphaChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -417,7 +418,7 @@ void VolumeData::OnAlphaChanged()
 	m_vr->set_alpha(alpha);
 }
 
-void VolumeData::OnAlphaEnableChanged()
+void VolumeData::OnAlphaEnableChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -435,7 +436,7 @@ void VolumeData::OnAlphaEnableChanged()
 		m_vr->set_alpha(1.0);
 }
 
-void VolumeData::OnMaskThreshChanged()
+void VolumeData::OnMaskThreshChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -445,7 +446,7 @@ void VolumeData::OnMaskThreshChanged()
 	m_vr->set_mask_thresh(mask_thresh);
 }
 
-void VolumeData::OnUseMaskThreshChanged()
+void VolumeData::OnUseMaskThreshChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -456,7 +457,7 @@ void VolumeData::OnUseMaskThreshChanged()
 		m_vr->set_mask_thresh(0.0);
 }
 
-void VolumeData::OnShadingEnableChanged()
+void VolumeData::OnShadingEnableChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -466,7 +467,7 @@ void VolumeData::OnShadingEnableChanged()
 	m_vr->set_shading(shading_enable);
 }
 
-void VolumeData::OnMaterialChanged()
+void VolumeData::OnMaterialChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -479,21 +480,23 @@ void VolumeData::OnMaterialChanged()
 	m_vr->set_material(mat_amb, mat_diff, mat_spec, mat_shine);
 }
 
-void VolumeData::OnLowShadingChanged()
+void VolumeData::OnLowShadingChanged(Event& event)
 {
 	double low_shading;
 	getValue("low shading", low_shading);
-	setValue("mat amb", low_shading, Value::NotifyLevel::NOTIFY_SELF);
+	event.setNotifyFlags(Event::NOTIFY_SELF);
+	setValue("mat amb", low_shading, event);
 }
 
-void VolumeData::OnHighShadingChanged()
+void VolumeData::OnHighShadingChanged(Event& event)
 {
 	double high_shading;
 	getValue("high shading", high_shading);
-	setValue("mat shine", high_shading, Value::NotifyLevel::NOTIFY_SELF);
+	event.setNotifyFlags(Event::NOTIFY_SELF);
+	setValue("mat shine", high_shading, event);
 }
 
-void VolumeData::OnSampleRateChanged()
+void VolumeData::OnSampleRateChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -503,7 +506,7 @@ void VolumeData::OnSampleRateChanged()
 	m_vr->set_sampling_rate(sample_rate);
 }
 
-void VolumeData::OnColormapModeChanged()
+void VolumeData::OnColormapModeChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -516,7 +519,7 @@ void VolumeData::OnColormapModeChanged()
 	m_vr->set_color(color);
 }
 
-void VolumeData::OnColormapValueChanged()
+void VolumeData::OnColormapValueChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -527,7 +530,7 @@ void VolumeData::OnColormapValueChanged()
 	m_vr->set_colormap_values(colormap_low, colormap_high);
 }
 
-void VolumeData::OnColormapTypeChanged()
+void VolumeData::OnColormapTypeChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -536,7 +539,7 @@ void VolumeData::OnColormapTypeChanged()
 	m_vr->set_colormap(colormap_type);
 }
 
-void VolumeData::OnColormapProjChanged()
+void VolumeData::OnColormapProjChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -546,7 +549,7 @@ void VolumeData::OnColormapProjChanged()
 	m_vr->set_colormap_proj(colormap_proj);
 }
 
-void VolumeData::OnSpacingChanged()
+void VolumeData::OnSpacingChanged(Event& event)
 {
 	if (!m_tex)
 		return;
@@ -560,17 +563,17 @@ void VolumeData::OnSpacingChanged()
 	FLTYPE::Point box_min(bbox.min().x(), bbox.min().y(), bbox.min().z());
 	FLTYPE::Point box_max(bbox.max().x(), bbox.max().y(), bbox.max().z());
 	FLTYPE::BBox bounds(box_min, box_max);
-	setValue("bounds", bounds,
-		Value::NotifyLevel::NOTIFY_PARENT |
-		Value::NotifyLevel::NOTIFY_AGENT);
+	event.setNotifyFlags(Event::NOTIFY_PARENT | Event::NOTIFY_AGENT);
+	setValue("bounds", bounds, event);
 
 	//m_tex->get_base_spacings(spc_x, spc_y, spc_z);
-	setValue("base spc x", spc_x, Value::NotifyLevel::NOTIFY_SELF);
-	setValue("base spc y", spc_y, Value::NotifyLevel::NOTIFY_SELF);
-	setValue("base spc z", spc_z, Value::NotifyLevel::NOTIFY_SELF);
+	event.setNotifyFlags(Event::NOTIFY_SELF);
+	setValue("base spc x", spc_x, event);
+	setValue("base spc y", spc_y, event);
+	setValue("base spc z", spc_z, event);
 }
 
-void VolumeData::OnBaseSpacingChanged()
+void VolumeData::OnBaseSpacingChanged(Event& event)
 {
 	if (!m_tex)
 		return;
@@ -583,12 +586,13 @@ void VolumeData::OnBaseSpacingChanged()
 	long level;
 	getValue("level", level);
 	m_tex->get_spacings(spc_x, spc_y, spc_z, level);
-	setValue("spc x", spc_x, Value::NotifyLevel::NOTIFY_SELF);
-	setValue("spc y", spc_y, Value::NotifyLevel::NOTIFY_SELF);
-	setValue("spc z", spc_z, Value::NotifyLevel::NOTIFY_SELF);
+	event.setNotifyFlags(Event::NOTIFY_SELF);
+	setValue("spc x", spc_x, event);
+	setValue("spc y", spc_y, event);
+	setValue("spc z", spc_z, event);
 }
 
-void VolumeData::OnSpacingScaleChanged()
+void VolumeData::OnSpacingScaleChanged(Event& event)
 {
 	if (!m_tex)
 		return;
@@ -599,7 +603,7 @@ void VolumeData::OnSpacingScaleChanged()
 	m_tex->set_spacing_scales(spc_x, spc_y, spc_z);
 }
 
-void VolumeData::OnLevelChanged()
+void VolumeData::OnLevelChanged(Event& event)
 {
 	if (!m_tex)
 		return;
@@ -615,17 +619,18 @@ void VolumeData::OnLevelChanged()
 	FLTYPE::Point box_min(bbox.min().x(), bbox.min().y(), bbox.min().z());
 	FLTYPE::Point box_max(bbox.max().x(), bbox.max().y(), bbox.max().z());
 	FLTYPE::BBox bounds(box_min, box_max);
-	setValue("bounds", bounds, Value::NotifyLevel::NOTIFY_SELF);
+	event.setNotifyFlags(Event::NOTIFY_SELF);
+	setValue("bounds", bounds, event);
 }
 
-void VolumeData::OnDisplayChanged()
+void VolumeData::OnDisplayChanged(Event& event)
 {
 	if (!m_tex)
 		return;
 	m_tex->set_sort_bricks();
 }
 
-void VolumeData::OnInterpolateChanged()
+void VolumeData::OnInterpolateChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -635,7 +640,7 @@ void VolumeData::OnInterpolateChanged()
 	m_vr->set_interpolate(interpolate);
 }
 
-void VolumeData::OnDepthAttenChanged()
+void VolumeData::OnDepthAttenChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -649,7 +654,7 @@ void VolumeData::OnDepthAttenChanged()
 	m_vr->set_fog(depth_atten, da_int, da_start, da_end);
 }
 
-void VolumeData::OnSkipBrickChanged()
+void VolumeData::OnSkipBrickChanged(Event& event)
 {
 	if (!m_tex)
 		return;
@@ -658,7 +663,7 @@ void VolumeData::OnSkipBrickChanged()
 	m_tex->set_use_priority(skip_brick);
 }
 
-void VolumeData::OnClipPlanesChanged()
+void VolumeData::OnClipPlanesChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -676,7 +681,7 @@ void VolumeData::OnClipPlanesChanged()
 	m_vr->set_planes(&planelist);
 }
 
-void VolumeData::OnIntScaleChanged()
+void VolumeData::OnIntScaleChanged(Event& event)
 {
 	if (!m_vr)
 		return;
@@ -687,7 +692,7 @@ void VolumeData::OnIntScaleChanged()
 	m_vr->set_gm_scale(int_scale);
 }
 
-void VolumeData::OnSyncOutputChannels()
+void VolumeData::OnSyncOutputChannels(Event& event)
 {
 	std::vector<std::string> ss_gamma = {
 		"gamma r",
@@ -741,7 +746,7 @@ void VolumeData::OnSyncOutputChannels()
 	syncValues(ss_equal);
 }
 
-void VolumeData::OnClipX1Changed()
+void VolumeData::OnClipX1Changed(Event& event)
 {
 	bool clip_link;
 	getValue("clip link x", clip_link);
@@ -771,7 +776,7 @@ void VolumeData::OnClipX1Changed()
 	UpdateClippingPlanes();
 }
 
-void VolumeData::OnClipX2Changed()
+void VolumeData::OnClipX2Changed(Event& event)
 {
 	bool clip_link;
 	getValue("clip link x", clip_link);
@@ -801,7 +806,7 @@ void VolumeData::OnClipX2Changed()
 	UpdateClippingPlanes();
 }
 
-void VolumeData::OnClipY1Changed()
+void VolumeData::OnClipY1Changed(Event& event)
 {
 	bool clip_link;
 	getValue("clip link y", clip_link);
@@ -831,7 +836,7 @@ void VolumeData::OnClipY1Changed()
 	UpdateClippingPlanes();
 }
 
-void VolumeData::OnClipY2Changed()
+void VolumeData::OnClipY2Changed(Event& event)
 {
 	bool clip_link;
 	getValue("clip link y", clip_link);
@@ -861,7 +866,7 @@ void VolumeData::OnClipY2Changed()
 	UpdateClippingPlanes();
 }
 
-void VolumeData::OnClipZ1Changed()
+void VolumeData::OnClipZ1Changed(Event& event)
 {
 	bool clip_link;
 	getValue("clip link z", clip_link);
@@ -891,7 +896,7 @@ void VolumeData::OnClipZ1Changed()
 	UpdateClippingPlanes();
 }
 
-void VolumeData::OnClipZ2Changed()
+void VolumeData::OnClipZ2Changed(Event& event)
 {
 	bool clip_link;
 	getValue("clip link z", clip_link);
@@ -921,7 +926,7 @@ void VolumeData::OnClipZ2Changed()
 	UpdateClippingPlanes();
 }
 
-void VolumeData::OnClipRot()
+void VolumeData::OnClipRot(Event& event)
 {
 	UpdateClippingPlanes();
 }
@@ -1302,7 +1307,7 @@ void VolumeData::AddEmptyData(int bits,
 	m_vr->set_scalar_scale(int_scale);
 	m_vr->set_gm_scale(int_scale);
 
-	OnMipModeChanged();
+	OnMipModeChanged(Event());
 }
 
 void VolumeData::LoadMask(Nrrd* mask)
@@ -2122,7 +2127,7 @@ void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 		if (estimate)
 		{
 			double est_thresh = m_vr->get_estimated_thresh();
-			setValue("estimate thresh", est_thresh, Value::NotifyLevel::NOTIFY_SELF);
+			setValue("estimate thresh", est_thresh, Event(0, Event::NOTIFY_SELF));
 		}
 	}
 }

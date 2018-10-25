@@ -336,11 +336,6 @@ public:
 	void SetScaleBarLen(double len)
 	{if (m_glview) m_glview->SetScaleBarLen(len);}
 
-	//set dirty
-	void SetVolPopDirty()
-	{if (m_glview) m_glview->SetVolPopDirty();}
-	void SetMeshPopDirty()
-	{if (m_glview) m_glview->SetMeshPopDirty();}
 	//clear
 	void ClearVolList()
 	{if (m_glview) m_glview->ClearVolList();}

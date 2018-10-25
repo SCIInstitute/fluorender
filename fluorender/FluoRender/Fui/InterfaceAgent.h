@@ -55,11 +55,13 @@ namespace FUI
 		//observer
 		virtual void objectChanging(FL::Event& event)
 		{
-			FL::Object::objectChanging(event);
+			if (event.getNotifyFlags() & FL::Event::NOTIFY_AGENT)
+				FL::Object::objectChanging(event);
 		}
 		virtual void objectChanged(FL::Event& event)
 		{
-			FL::Object::objectChanged(event);
+			if (event.getNotifyFlags() & FL::Event::NOTIFY_AGENT)
+				FL::Object::objectChanged(event);
 		}
 
 		virtual void setObject(FL::Object* obj)

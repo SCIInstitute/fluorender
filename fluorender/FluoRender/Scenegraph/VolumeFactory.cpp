@@ -37,6 +37,11 @@ VolumeFactory::VolumeFactory()
 	default_object_name_ = "default volume";
 
 	addValue("current", (VolumeData*)(0));//current volume data
+
+	setAfterFunction(
+		default_setting_filename_value_name_,
+		std::bind(&VolumeFactory::OnSetDefault,
+		this, std::placeholders::_1));
 }
 
 VolumeFactory::~VolumeFactory()
@@ -229,10 +234,10 @@ void VolumeFactory::createDefault()
 }
 
 #define ADD_BEFORE_EVENT(obj, name, funct) \
-	obj->setBeforeFunction(name, std::bind(&VolumeData::funct, obj))
+	obj->setBeforeFunction(name, std::bind(&VolumeData::funct, obj, std::placeholders::_1))
 
 #define ADD_AFTER_EVENT(obj, name, funct) \
-	obj->setAfterFunction(name, std::bind(&VolumeData::funct, obj))
+	obj->setAfterFunction(name, std::bind(&VolumeData::funct, obj, std::placeholders::_1))
 
 void VolumeFactory::setEventHandler(VolumeData* vd)
 {
@@ -318,7 +323,10 @@ VolumeData* VolumeFactory::clone(VolumeData* vd)
 
 	incCounter();
 
-	Object* new_vd = vd->clone(CopyOp::DEEP_COPY_ALL);
+	VolumeData* new_vd = dynamic_cast<VolumeData*>(
+		vd->clone(CopyOp::DEEP_COPY_ALL));
+	if (!new_vd)
+		return 0;
 	new_vd->setId(global_id_);
 	std::string name = "volume" + std::to_string(local_id_);
 	new_vd->setName(name);
@@ -326,12 +334,17 @@ VolumeData* VolumeFactory::clone(VolumeData* vd)
 	objects_.push_front(new_vd);
 	setValue("current", new_vd);
 
-	setEventHandler(dynamic_cast<VolumeData*>(new_vd));
+	setEventHandler(new_vd);
 
 	//notify observers
-	notifyObserversNodeAdded(this, new_vd);
+	Event event;
+	event.sender = this;
+	event.origin = this;
+	event.parent = this;
+	event.child = new_vd;
+	notifyObserversNodeAdded(event);
 
-	return dynamic_cast<VolumeData*>(new_vd);
+	return new_vd;
 }
 
 VolumeData* VolumeFactory::clone(const unsigned int id)
@@ -356,4 +369,10 @@ VolumeGroup* VolumeFactory::buildGroup(VolumeData* vd)
 	if (group)
 		group->setName("Group");
 	return group;
+}
+
+void VolumeFactory::OnSetDefault(Event& event)
+{
+	if (!readDefault())
+		createDefault();
 }

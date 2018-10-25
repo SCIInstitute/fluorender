@@ -106,7 +106,8 @@ void Value::objectDeleted(Event& event)
 void Value::objectChanged(Event& event)
 {
 	Referenced* refd = static_cast<Referenced*>(event.sender);
-	if (refd->className() == std::string("Value"))
+	if (refd->className() == std::string("Value") &&
+		event.origin != this)
 	{
 		sync(event);
 	}

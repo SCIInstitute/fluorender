@@ -41,24 +41,6 @@ OutAdjustAgent::OutAdjustAgent(OutAdjustPanel &panel) :
 
 }
 
-void OutAdjustAgent::objectChanging(int notify_level, void* ptr, void* orig_node, const std::string &exp)
-{
-	//before change
-	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
-	{
-		InterfaceAgent::objectChanging(notify_level, ptr, orig_node, exp);
-	}
-}
-
-void OutAdjustAgent::objectChanged(int notify_level, void* ptr, void* orig_node, const std::string &exp)
-{
-	//set values in ui
-	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
-	{
-		InterfaceAgent::objectChanged(notify_level, ptr, orig_node, exp);
-	}
-}
-
 void OutAdjustAgent::setObject(FL::Node* obj)
 {
 	InterfaceAgent::setObject(obj);
@@ -128,7 +110,7 @@ void OutAdjustAgent::UpdateAllSettings()
 	//panel_.Layout();
 }
 
-void OutAdjustAgent::OnGammaRChanged()
+void OutAdjustAgent::OnGammaRChanged(FL::Event& event)
 {
 	double dval;
 	getValue("gamma r", dval);
@@ -136,7 +118,7 @@ void OutAdjustAgent::OnGammaRChanged()
 	panel_.m_r_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
 }
 
-void OutAdjustAgent::OnGammaGChanged()
+void OutAdjustAgent::OnGammaGChanged(FL::Event& event)
 {
 	double dval;
 	getValue("gamma g", dval);
@@ -144,7 +126,7 @@ void OutAdjustAgent::OnGammaGChanged()
 	panel_.m_g_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
 }
 
-void OutAdjustAgent::OnGammaBChanged()
+void OutAdjustAgent::OnGammaBChanged(FL::Event& event)
 {
 	double dval;
 	getValue("gamma b", dval);
@@ -152,7 +134,7 @@ void OutAdjustAgent::OnGammaBChanged()
 	panel_.m_b_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
 }
 
-void OutAdjustAgent::OnBrightnessRChanged()
+void OutAdjustAgent::OnBrightnessRChanged(FL::Event& event)
 {
 	double dval;
 	getValue("brightness r", dval);
@@ -160,7 +142,7 @@ void OutAdjustAgent::OnBrightnessRChanged()
 	panel_.m_r_brightness_text->ChangeValue(wxString::Format("%.0f", Brigt2UiT(dval)));
 }
 
-void OutAdjustAgent::OnBrightnessGChanged()
+void OutAdjustAgent::OnBrightnessGChanged(FL::Event& event)
 {
 	double dval;
 	getValue("brightness g", dval);
@@ -168,7 +150,7 @@ void OutAdjustAgent::OnBrightnessGChanged()
 	panel_.m_g_brightness_text->ChangeValue(wxString::Format("%.0f", Brigt2UiT(dval)));
 }
 
-void OutAdjustAgent::OnBrightnessBChanged()
+void OutAdjustAgent::OnBrightnessBChanged(FL::Event& event)
 {
 	double dval;
 	getValue("brightness b", dval);
@@ -176,7 +158,7 @@ void OutAdjustAgent::OnBrightnessBChanged()
 	panel_.m_b_brightness_text->ChangeValue(wxString::Format("%.0f", Brigt2UiT(dval)));
 }
 
-void OutAdjustAgent::OnEqualizeRChanged()
+void OutAdjustAgent::OnEqualizeRChanged(FL::Event& event)
 {
 	double dval;
 	getValue("equalize r", dval);
@@ -184,7 +166,7 @@ void OutAdjustAgent::OnEqualizeRChanged()
 	panel_.m_r_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
 }
 
-void OutAdjustAgent::OnEqualizeGChanged()
+void OutAdjustAgent::OnEqualizeGChanged(FL::Event& event)
 {
 	double dval;
 	getValue("equalize g", dval);
@@ -192,7 +174,7 @@ void OutAdjustAgent::OnEqualizeGChanged()
 	panel_.m_g_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
 }
 
-void OutAdjustAgent::OnEqualizeBChanged()
+void OutAdjustAgent::OnEqualizeBChanged(FL::Event& event)
 {
 	double dval;
 	getValue("equalize b", dval);

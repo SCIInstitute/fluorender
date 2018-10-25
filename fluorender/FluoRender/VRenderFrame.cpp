@@ -1547,10 +1547,7 @@ void VRenderFrame::LoadMeshes(wxArrayString files, VRenderView* vrv)
 		if (vrv && md)
 		{
 			if (group)
-			{
 				group->addChild(md);
-				vrv->SetMeshPopDirty();
-			}
 			else
 				vrv->AddMeshData(md);
 

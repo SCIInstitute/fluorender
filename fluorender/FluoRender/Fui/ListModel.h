@@ -64,11 +64,9 @@ namespace FUI
 		virtual const char* className() const { return "ListModel"; }
 
 		//observer functions
-		virtual void objectChanging(int notify_level, void*, void* orig_node, const std::string &exp);
-		virtual void objectChanged(int notify_level, void*, void* orig_node, const std::string &exp);
 		//scenegraph events
-		virtual void nodeAdded(void*, void* parent, void* child);
-		virtual void nodeRemoved(void*, void* parent, void* child);
+		virtual void nodeAdded(FL::Event& event);
+		virtual void nodeRemoved(FL::Event& event);
 
 		//interface agent functions
 		virtual void setObject(FL::Node* root);

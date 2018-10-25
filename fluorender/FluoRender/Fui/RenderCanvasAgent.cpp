@@ -38,23 +38,32 @@ RenderCanvasAgent::RenderCanvasAgent(VRenderGLView &gl_view) :
 
 }
 
-void RenderCanvasAgent::objectChanging(int notify_level, void* ptr, void* orig_node, const std::string &exp)
+void RenderCanvasAgent::objectChanged(FL::Event& event)
 {
-	//before change
-	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
+	//set values in ui
+	InterfaceAgent::objectChanged(event);
+	if (event.getNotifyFlags() & FL::Event::NOTIFY_AGENT)
 	{
-		InterfaceAgent::objectChanging(notify_level, ptr, orig_node, exp);
+		gl_view_.RefreshGL(41);
 	}
 }
 
-void RenderCanvasAgent::objectChanged(int notify_level, void* ptr, void* orig_node, const std::string &exp)
+void RenderCanvasAgent::nodeAdded(FL::Event& event)
 {
-	//set values in ui
-	if (notify_level & FL::Value::NotifyLevel::NOTIFY_AGENT)
+	if (event.getNotifyFlags() & FL::Event::NOTIFY_AGENT)
 	{
-		InterfaceAgent::objectChanged(notify_level, ptr, orig_node, exp);
-		if (exp.find("bounds") != std::string::npos)
-			gl_view_.InitView(INIT_BOUNDS | INIT_CENTER);
+		gl_view_.PopMeshList();
+		gl_view_.PopVolumeList();
+		gl_view_.RefreshGL(41);
+	}
+}
+
+void RenderCanvasAgent::nodeRemoved(FL::Event& event)
+{
+	if (event.getNotifyFlags() & FL::Event::NOTIFY_AGENT)
+	{
+		gl_view_.PopMeshList();
+		gl_view_.PopVolumeList();
 		gl_view_.RefreshGL(41);
 	}
 }
@@ -77,4 +86,9 @@ void RenderCanvasAgent::UpdateAllSettings()
 VRenderGLView &RenderCanvasAgent::getView()
 {
 	return gl_view_;
+}
+
+void RenderCanvasAgent::OnBoundsChanged(FL::Event& event)
+{
+	gl_view_.InitView(INIT_BOUNDS | INIT_CENTER);
 }

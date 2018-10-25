@@ -47,24 +47,6 @@ ObjectFactory::~ObjectFactory()
 
 }
 
-void ObjectFactory::objectChanged(Event& event)
-{
-	if (event.getNotifyFlags() & Event::NOTIFY_FACTORY)
-	{
-		Object::objectChanged(event);//actually unnecessary, since there is nothing to sync
-		Referenced* refd = static_cast<Referenced*>(event.sender);
-		if (refd->className() == std::string("Value"))
-		{
-			Value* value = dynamic_cast<Value*>(refd);
-			if (value->getName() == default_setting_filename_value_name_)
-			{
-				if (!readDefault())
-					createDefault();
-			}
-		}
-	}
-}
-
 bool ObjectFactory::setDefaultValues(boost::property_tree::ptree &pt, const std::set<std::string> &names)
 {
 	Object* object = getDefault();

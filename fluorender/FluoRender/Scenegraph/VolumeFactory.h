@@ -89,6 +89,8 @@ namespace FL
 
 	protected:
 		virtual ~VolumeFactory();
+
+		void OnSetDefault(Event& event);
 	};
 
 }

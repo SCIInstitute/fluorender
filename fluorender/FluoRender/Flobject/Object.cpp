@@ -75,6 +75,8 @@ void Object::objectChanging(Event& event)
 {
 	//before change
 	Referenced* refd = static_cast<Referenced*>(event.sender);
+	if (!refd)
+		return;
 	if (refd->className() == std::string("Value") &&
 		this != event.origin)
 	{
@@ -86,7 +88,7 @@ void Object::objectChanging(Event& event)
 				notifyObserversBeforeChange(event);
 			//take actions myself
 			if (event.getNotifyFlags() & Event::NOTIFY_SELF)
-				onBefore(value->getName());
+				onBefore(value->getName(), event);
 		}
 	}
 }
@@ -94,8 +96,10 @@ void Object::objectChanging(Event& event)
 void Object::objectChanged(Event& event)
 {
 	Referenced* refd = static_cast<Referenced*>(event.sender);
-	if (refd->className() == std::string("Value")
-		&& this != event.origin)
+	if (!refd)
+		return;
+	if (refd->className() == std::string("Value"))
+		//&& this != event.origin)
 	{
 		Value* value = dynamic_cast<Value*>(refd);
 		if (value && containsValue(value))
@@ -105,13 +109,13 @@ void Object::objectChanged(Event& event)
 				notifyObserversOfChange(event);
 			//take action myself
 			if (event.getNotifyFlags() & Event::NOTIFY_SELF)
-				onAfter(value->getName());
+				onAfter(value->getName(), event);
 			else if (asFactory() &&
 				(event.getNotifyFlags() & Event::NOTIFY_FACTORY))
-				onAfter(value->getName());
+				onAfter(value->getName(), event);
 			else if (asAgent() &&
 				(event.getNotifyFlags() & Event::NOTIFY_AGENT))
-				onAfter(value->getName());
+				onAfter(value->getName(), event);
 		}
 	}
 }

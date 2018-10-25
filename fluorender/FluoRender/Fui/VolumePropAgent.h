@@ -47,10 +47,6 @@ namespace FUI
 
 		virtual const char* className() const { return "VolumePropAgent"; }
 
-		//observer
-		virtual void objectChanging(int notify_level, void*, void* orig_node, const std::string &exp);
-		virtual void objectChanged(int notify_level, void*, void* orig_node, const std::string &exp);
-
 		virtual void setObject(FL::VolumeData* vd);
 		virtual FL::VolumeData* getObject();
 
@@ -62,8 +58,8 @@ namespace FUI
 		VolumePropPanel &panel_;
 
 		//update functions
-		void OnLuminanceChanged();
-		void OnColorChanged();
+		void OnLuminanceChanged(FL::Event& event);
+		void OnColorChanged(FL::Event& event);
 
 	private:
 	};

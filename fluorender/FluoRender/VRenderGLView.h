@@ -401,10 +401,6 @@ public:
 	bool GetSyncB() { return m_sync_b; }
 	void SetSyncB(bool sync_b) { m_sync_b = sync_b; }
 
-	//reload volume list
-	void SetVolPopDirty() { m_vd_pop_dirty = true; }
-	//reload mesh list
-	void SetMeshPopDirty() { m_md_pop_dirty = true; }
 	//clear
 	void ClearVolList();
 	void ClearMeshList();
@@ -656,12 +652,8 @@ private:
 	wxWindow* m_frame;
 	VRenderView* m_vrv;
 	//populated lists of data
-	bool m_vd_pop_dirty;
 	vector <FL::VolumeData*> m_vd_pop_list;
-	bool m_md_pop_dirty;
 	vector <FL::MeshData*> m_md_pop_list;
-	//real data list
-	//vector <TreeLayer*> m_layer_list;
 	//ruler list
 	int m_ruler_type;//0: 2point ruler; 1:multi-point ruler; 2:locator
 	vector <Ruler*> m_ruler_list;

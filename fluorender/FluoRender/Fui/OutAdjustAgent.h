@@ -47,10 +47,6 @@ namespace FUI
 
 		virtual const char* className() const { return "OutAdjustAgent"; }
 
-		//observer
-		virtual void objectChanging(int notify_level, void*, void* orig_node, const std::string &exp);
-		virtual void objectChanged(int notify_level, void*, void* orig_node, const std::string &exp);
-
 		virtual void setObject(FL::Node* vd);
 		virtual FL::Node* getObject();
 
@@ -62,15 +58,15 @@ namespace FUI
 		OutAdjustPanel &panel_;
 
 		//update functions
-		void OnGammaRChanged();
-		void OnGammaGChanged();
-		void OnGammaBChanged();
-		void OnBrightnessRChanged();
-		void OnBrightnessGChanged();
-		void OnBrightnessBChanged();
-		void OnEqualizeRChanged();
-		void OnEqualizeGChanged();
-		void OnEqualizeBChanged();
+		void OnGammaRChanged(FL::Event& event);
+		void OnGammaGChanged(FL::Event& event);
+		void OnGammaBChanged(FL::Event& event);
+		void OnBrightnessRChanged(FL::Event& event);
+		void OnBrightnessGChanged(FL::Event& event);
+		void OnBrightnessBChanged(FL::Event& event);
+		void OnEqualizeRChanged(FL::Event& event);
+		void OnEqualizeGChanged(FL::Event& event);
+		void OnEqualizeBChanged(FL::Event& event);
 	};
 }
 

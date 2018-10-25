@@ -112,24 +112,28 @@ void Referenced::signalObserversAndDelete(bool signalDelete, bool doDelete) cons
 void Referenced::notifyObserversBeforeChange(Event& event) const
 {
 	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
-	event.sender = const_cast<Referenced*>(this);
-	++event;
 
 	if (observerSet && !_hold && event.pass())
 	{
+		++event;
+		Referenced* temp = event.sender;
+		event.sender = const_cast<Referenced*>(this);
 		observerSet->signalObjectChanging(event);
+		event.sender = temp;
 	}
 }
 
 void Referenced::notifyObserversOfChange(Event& event) const
 {
 	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
-	event.sender = const_cast<Referenced*>(this);
-	++event;
 
 	if (observerSet && !_hold && event.pass())
 	{
+		++event;
+		Referenced* temp = event.sender;
+		event.sender = const_cast<Referenced*>(this);
 		observerSet->signalObjectChanged(event);
+		event.sender = temp;
 	}
 }
 
@@ -137,24 +141,28 @@ void Referenced::notifyObserversOfChange(Event& event) const
 void Referenced::notifyObserversNodeAdded(Event& event) const
 {
 	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
-	event.sender = const_cast<Referenced*>(this);
-	++event;
 
 	if (observerSet && !_hold && event.pass())
 	{
+		++event;
+		Referenced* temp = event.sender;
+		event.sender = const_cast<Referenced*>(this);
 		observerSet->signalNodeAdded(event);
+		event.sender = temp;
 	}
 }
 
 void Referenced::notifyObserversNodeRemoved(Event& event) const
 {
 	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
-	event.sender = const_cast<Referenced*>(this);
-	++event;
 
 	if (observerSet && !_hold && event.pass())
 	{
+		++event;
+		Referenced* temp = event.sender;
+		event.sender = const_cast<Referenced*>(this);
 		observerSet->signalNodeRemoved(event);
+		event.sender = temp;
 	}
 }
 

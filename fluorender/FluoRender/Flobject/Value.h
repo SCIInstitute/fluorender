@@ -112,11 +112,9 @@ public:
 	{
 		if (value != _value)
 		{
-			if (event.getNotifyFlags() & Event::NOTIFY_VALUE)
-				notifyObserversBeforeChange(event);
+			notifyObserversBeforeChange(event);
 			_value = value;
-			if (event.getNotifyFlags() & Event::NOTIFY_VALUE)
-				notifyObserversOfChange(event);
+			notifyObserversOfChange(event);
 		}
 	}
 

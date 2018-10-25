@@ -47,8 +47,9 @@ namespace FUI
 		virtual const char* className() const { return "RenderCanvasAgent"; }
 
 		//observer
-		virtual void objectChanging(int notify_level, void*, void* orig_node, const std::string &exp);
-		virtual void objectChanged(int notify_level, void*, void* orig_node, const std::string &exp);
+		virtual void objectChanged(FL::Event& event);
+		virtual void nodeAdded(FL::Event& event);
+		virtual void nodeRemoved(FL::Event& event);
 
 		virtual void setObject(FL::RenderView* view);
 		virtual FL::RenderView* getObject();
@@ -57,8 +58,12 @@ namespace FUI
 
 		VRenderGLView &getView();
 
+		friend class AgentFactory;
+
 	protected:
 		VRenderGLView &gl_view_;
+
+		void OnBoundsChanged(FL::Event& event);
 	};
 }
 #endif//_RENDERCANVASAGENT_H_

@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _EVENTHANDLER_H_
 #define _EVENTHANDLER_H_
 
+#include <Flobject/Event.h>
 #include <unordered_map>
 #include <string>
 #include <typeindex>
@@ -38,7 +39,7 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FL
 {
-	typedef std::function<void()> eventFunctionType;
+	typedef std::function<void(Event&)> eventFunctionType;
 
 	class EventHandler
 	{
@@ -53,25 +54,25 @@ namespace FL
 			after_functions_.insert(std::make_pair(name, func));
 		}
 
-		void onBefore(const std::string &name)
+		void onBefore(const std::string &name, Event& event)
 		{
 			auto map_it = before_functions_.find(name);
 			if (map_it != before_functions_.end())
 			{
 				auto map_val = map_it->second;
 				//return map_val(std::forward<Args>(args)...);
-				return map_val();
+				return map_val(event);
 			}
 		}
 
-		void onAfter(const std::string &name)
+		void onAfter(const std::string &name, Event& event)
 		{
 			auto map_it = after_functions_.find(name);
 			if (map_it != after_functions_.end())
 			{
 				auto map_val = map_it->second;
 				//return map_val(std::forward<Args>(args)...);
-				return map_val();
+				return map_val(event);
 			}
 		}
 
