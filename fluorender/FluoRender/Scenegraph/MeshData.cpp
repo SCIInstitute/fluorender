@@ -67,7 +67,7 @@ void MeshData::Initialize()
 	//OnMaterialChanged();
 }
 
-void MeshData::OnViewportChanged()
+void MeshData::OnViewportChanged(Event& event)
 {
 	if (!m_mr)
 		return;
@@ -77,7 +77,7 @@ void MeshData::OnViewportChanged()
 	m_mr->set_viewport(vp.get());
 }
 
-void MeshData::OnLightEnableChanged()
+void MeshData::OnLightEnableChanged(Event& event)
 {
 	if (!m_mr)
 		return;
@@ -87,7 +87,7 @@ void MeshData::OnLightEnableChanged()
 	m_mr->set_lighting(light_enable);
 }
 
-void MeshData::OnDepthAttenChanged()
+void MeshData::OnDepthAttenChanged(Event& event)
 {
 	if (!m_mr)
 		return;
@@ -101,7 +101,7 @@ void MeshData::OnDepthAttenChanged()
 	m_mr->set_fog(depth_atten, da_int, da_start, da_end);
 }
 
-void MeshData::OnMaterialChanged()
+void MeshData::OnMaterialChanged(Event& event)
 {
 	if (!m_data)
 		return;
@@ -138,16 +138,16 @@ void MeshData::OnMaterialChanged()
 	}
 }
 
-void MeshData::OnBoundsChanged()
+void MeshData::OnBoundsChanged(Event& event)
 {
 	FLTYPE::BBox bounds;
 	getValue("bounds", bounds);
 
 	//res
 	FLTYPE::Vector diag = bounds.diagonal();
-	setValue("res x", long(diag.x()+0.5));
-	setValue("res y", long(diag.y()+0.5));
-	setValue("res z", long(diag.z()+0.5));
+	setValue("res x", long(diag.x()+0.5), event);
+	setValue("res y", long(diag.y()+0.5), event);
+	setValue("res z", long(diag.z()+0.5), event);
 
 	//transformed bounds
 	FLTYPE::Point p[8];
@@ -192,7 +192,7 @@ void MeshData::OnBoundsChanged()
 		p[i] = FLTYPE::Point(temp.x() + trans_x, temp.y() + trans_y, temp.z() + trans_z);
 		bounds.extend(p[i]);
 	}
-	setValue("bounds tf", bounds);
+	setValue("bounds tf", bounds, event);
 }
 
 void MeshData::RandomizeColor()

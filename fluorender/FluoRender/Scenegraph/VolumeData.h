@@ -224,7 +224,7 @@ namespace FL
 
 		//update clipping planes
 		//any value changes -> set clip values and then rotate
-		void UpdateClippingPlanes();
+		void UpdateClippingPlanes(Event& event);
 
 		friend class VolumeFactory;
 	};

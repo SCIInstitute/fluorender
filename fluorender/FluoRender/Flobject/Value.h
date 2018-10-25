@@ -329,6 +329,8 @@ inline bool Value::operator == (const Value& v) const
 	{
 		return dynamic_cast<const TemplateValue<double>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<double>*>(&v)->getValue();
+		//return fabs(dynamic_cast<const TemplateValue<double>*>(this)->getValue() -
+		//	dynamic_cast<const TemplateValue<double>*>(&v)->getValue()) > 1e-6;
 	}
 	else if (_type == "string")
 	{

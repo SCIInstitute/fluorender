@@ -77,7 +77,13 @@ namespace FL
 			m_level++;
 			return *this;
 		}
-		bool pass() { return m_level < m_limit; }
+		bool pass(unsigned int limit = 0)
+		{
+			if (limit)
+				return m_level < limit;
+			else
+				return m_level < m_limit;
+		}
 
 		EventType type;
 		Referenced* sender;

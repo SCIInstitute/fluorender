@@ -92,11 +92,11 @@ namespace FL
 	private:
 		void Initialize();
 
-		void OnViewportChanged();
-		void OnLightEnableChanged();
-		void OnDepthAttenChanged();
-		void OnMaterialChanged();
-		void OnBoundsChanged();
+		void OnViewportChanged(Event& event);
+		void OnLightEnableChanged(Event& event);
+		void OnDepthAttenChanged(Event& event);
+		void OnMaterialChanged(Event& event);
+		void OnBoundsChanged(Event& event);
 
 		friend class MeshFactory;
 	};

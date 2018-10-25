@@ -759,21 +759,21 @@ void VolumeData::OnClipX1Changed(Event& event)
 		value2 = value1 + clip_dist;
 		if (value2 > 1.0)
 		{
-			setValue("clip x1", 1.0 - clip_dist);
-			setValue("clip x2", 1.0);
+			setValue("clip x1", 1.0 - clip_dist, event);
+			setValue("clip x2", 1.0, event);
 		}
 		else
-			setValue("clip x2", value2);
+			setValue("clip x2", value2, event);
 	}
 	else
 	{
 		getValue("clip x1", value1);
 		getValue("clip x2", value2);
 		clip_dist = value2 - value1;
-		setValue("clip dist x", clip_dist);
+		setValue("clip dist x", clip_dist, event);
 	}
 
-	UpdateClippingPlanes();
+	UpdateClippingPlanes(event);
 }
 
 void VolumeData::OnClipX2Changed(Event& event)
@@ -789,21 +789,21 @@ void VolumeData::OnClipX2Changed(Event& event)
 		value1 = value2 - clip_dist;
 		if (value1 < 0.0)
 		{
-			setValue("clip x1", 0.0);
-			setValue("clip x2", clip_dist);
+			setValue("clip x1", 0.0, event);
+			setValue("clip x2", clip_dist, event);
 		}
 		else
-			setValue("clip x1", value1);
+			setValue("clip x1", value1, event);
 	}
 	else
 	{
 		getValue("clip x1", value1);
 		getValue("clip x2", value2);
 		clip_dist = value2 - value1;
-		setValue("clip dist x", clip_dist);
+		setValue("clip dist x", clip_dist, event);
 	}
 
-	UpdateClippingPlanes();
+	UpdateClippingPlanes(event);
 }
 
 void VolumeData::OnClipY1Changed(Event& event)
@@ -819,21 +819,21 @@ void VolumeData::OnClipY1Changed(Event& event)
 		value2 = value1 + clip_dist;
 		if (value2 > 1.0)
 		{
-			setValue("clip y1", 1.0 - clip_dist);
-			setValue("clip y2", 1.0);
+			setValue("clip y1", 1.0 - clip_dist, event);
+			setValue("clip y2", 1.0, event);
 		}
 		else
-			setValue("clip y2", value2);
+			setValue("clip y2", value2, event);
 	}
 	else
 	{
 		getValue("clip y1", value1);
 		getValue("clip y2", value2);
 		clip_dist = value2 - value1;
-		setValue("clip dist y", clip_dist);
+		setValue("clip dist y", clip_dist, event);
 	}
 
-	UpdateClippingPlanes();
+	UpdateClippingPlanes(event);
 }
 
 void VolumeData::OnClipY2Changed(Event& event)
@@ -849,21 +849,21 @@ void VolumeData::OnClipY2Changed(Event& event)
 		value1 = value2 - clip_dist;
 		if (value1 < 0.0)
 		{
-			setValue("clip y1", 0.0);
-			setValue("clip y2", clip_dist);
+			setValue("clip y1", 0.0, event);
+			setValue("clip y2", clip_dist, event);
 		}
 		else
-			setValue("clip y1", value1);
+			setValue("clip y1", value1, event);
 	}
 	else
 	{
 		getValue("clip y1", value1);
 		getValue("clip y2", value2);
 		clip_dist = value2 - value1;
-		setValue("clip dist y", clip_dist);
+		setValue("clip dist y", clip_dist, event);
 	}
 
-	UpdateClippingPlanes();
+	UpdateClippingPlanes(event);
 }
 
 void VolumeData::OnClipZ1Changed(Event& event)
@@ -879,21 +879,21 @@ void VolumeData::OnClipZ1Changed(Event& event)
 		value2 = value1 + clip_dist;
 		if (value2 > 1.0)
 		{
-			setValue("clip z1", 1.0 - clip_dist);
-			setValue("clip z2", 1.0);
+			setValue("clip z1", 1.0 - clip_dist, event);
+			setValue("clip z2", 1.0, event);
 		}
 		else
-			setValue("clip z2", value2);
+			setValue("clip z2", value2, event);
 	}
 	else
 	{
 		getValue("clip z1", value1);
 		getValue("clip z2", value2);
 		clip_dist = value2 - value1;
-		setValue("clip dist z", clip_dist);
+		setValue("clip dist z", clip_dist, event);
 	}
 
-	UpdateClippingPlanes();
+	UpdateClippingPlanes(event);
 }
 
 void VolumeData::OnClipZ2Changed(Event& event)
@@ -909,29 +909,29 @@ void VolumeData::OnClipZ2Changed(Event& event)
 		value1 = value2 - clip_dist;
 		if (value1 < 0.0)
 		{
-			setValue("clip z1", 0.0);
-			setValue("clip z2", clip_dist);
+			setValue("clip z1", 0.0, event);
+			setValue("clip z2", clip_dist, event);
 		}
 		else
-			setValue("clip z1", value1);
+			setValue("clip z1", value1, event);
 	}
 	else
 	{
 		getValue("clip z1", value1);
 		getValue("clip z2", value2);
 		clip_dist = value2 - value1;
-		setValue("clip dist z", clip_dist);
+		setValue("clip dist z", clip_dist, event);
 	}
 
-	UpdateClippingPlanes();
+	UpdateClippingPlanes(event);
 }
 
 void VolumeData::OnClipRot(Event& event)
 {
-	UpdateClippingPlanes();
+	UpdateClippingPlanes(event);
 }
 
-void VolumeData::UpdateClippingPlanes()
+void VolumeData::UpdateClippingPlanes(Event& event)
 {
 	double clip_x1, clip_x2, clip_y1, clip_y2, clip_z1, clip_z2;
 	getValue("clip x1", clip_x1);
@@ -983,7 +983,7 @@ void VolumeData::UpdateClippingPlanes()
 	planes.Scale(scale);
 	planes.Translate(trans2);
 	//set and update to the renderer
-	setValue("clip planes", planes);
+	setValue("clip planes", planes, event);
 }
 
 //functions from old class

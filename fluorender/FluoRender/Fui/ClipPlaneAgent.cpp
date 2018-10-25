@@ -355,8 +355,8 @@ void ClipPlaneAgent::OnClipDistXChanged(FL::Event& event)
 		x1 = x2 - clip_dist;
 	}
 
-	setValue("clip x1", x1);
-	setValue("clip x2", x2);
+	setValue("clip x1", x1, event);
+	setValue("clip x2", x2, event);
 	if (!panel_.m_yz_dist_text->HasFocus())
 		panel_.m_yz_dist_text->ChangeValue(
 			wxString::Format("%d", int(clip_dist * res + 0.5)));
@@ -385,8 +385,8 @@ void ClipPlaneAgent::OnClipDistYChanged(FL::Event& event)
 		y1 = y2 - clip_dist;
 	}
 
-	setValue("clip y1", y1);
-	setValue("clip y2", y2);
+	setValue("clip y1", y1, event);
+	setValue("clip y2", y2, event);
 	if (!panel_.m_xz_dist_text->HasFocus())
 		panel_.m_xz_dist_text->ChangeValue(
 			wxString::Format("%d", int(clip_dist * res + 0.5)));
@@ -415,8 +415,8 @@ void ClipPlaneAgent::OnClipDistZChanged(FL::Event& event)
 		z1 = z2 - clip_dist;
 	}
 
-	setValue("clip z1", z1);
-	setValue("clip z2", z2);
+	setValue("clip z1", z1, event);
+	setValue("clip z2", z2, event);
 	if (!panel_.m_xy_dist_text->HasFocus())
 		panel_.m_xy_dist_text->ChangeValue(
 			wxString::Format("%d", int(clip_dist * res + 0.5)));
