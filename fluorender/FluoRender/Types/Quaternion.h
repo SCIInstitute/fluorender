@@ -178,14 +178,14 @@ public:
 
 	bool AlmostEqual(const Quaternion& q)const
 	{
-		return (fabs(x - q.x) < Epsilon() &&
-			fabs(y - q.y) < Epsilon() &&
-			fabs(z - q.z) < Epsilon() &&
-			fabs(w - q.w) < Epsilon()) ||
-			(fabs(x + q.x) < Epsilon() &&
-			fabs(y + q.y) < Epsilon() &&
-			fabs(z + q.z) < Epsilon() &&
-			fabs(w + q.w) < Epsilon());
+		return (fabs(x - q.x) < Epsld() &&
+			fabs(y - q.y) < Epsld() &&
+			fabs(z - q.z) < Epsld() &&
+			fabs(w - q.w) < Epsld()) ||
+			(fabs(x + q.x) < Epsld() &&
+			fabs(y + q.y) < Epsld() &&
+			fabs(z + q.z) < Epsld() &&
+			fabs(w + q.w) < Epsld());
 	}
 
 	bool IsIdentity()
@@ -311,9 +311,9 @@ inline Quaternion Slerp(Quaternion& a, Quaternion& b, double t)
 	double cos_theta = Dot(a, b);
 	double theta;
 	double r_sin_theta;
-	if (cos_theta >= Epsilon())
+	if (cos_theta >= Epsld())
 	{
-		if (1.0-cos_theta > Epsilon())
+		if (1.0-cos_theta > Epsld())
 		{
 			theta = acos(cos_theta);
 			r_sin_theta = 1.0 / sin(theta);
@@ -328,7 +328,7 @@ inline Quaternion Slerp(Quaternion& a, Quaternion& b, double t)
 	}
 	else
 	{
-		if (1.0+cos_theta > Epsilon())
+		if (1.0+cos_theta > Epsld())
 		{
 			theta = acos(-cos_theta);
 			r_sin_theta = 1.0 / sin(theta);

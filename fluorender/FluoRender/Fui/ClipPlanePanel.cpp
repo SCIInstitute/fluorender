@@ -522,18 +522,18 @@ void ClipPlanePanel::OnLinkChannelsBtn(wxCommandEvent &event)
 {
 	bool sync = m_toolbar->GetToolState(ID_LinkChannelsBtn);
 	std::vector<std::string> names{
-		"clip dist x",
-		"clip dist y",
-		"clip dist z",
+		//"clip dist x",
+		//"clip dist y",
+		//"clip dist z",
 		"clip x1",
 		"clip x2",
 		"clip y1",
 		"clip y2",
 		"clip z1",
 		"clip z2",
-		"clip link x",
-		"clip link y",
-		"clip link z",
+		//"clip link x",
+		//"clip link y",
+		//"clip link z",
 		"clip rot x",
 		"clip rot y",
 		"clip rot z"
@@ -1178,110 +1178,6 @@ void ClipPlanePanel::OnSliderRClick(wxCommandEvent& event)
 	//	m_y1_clip_text->SetValue("0");
 	//	m_y2_clip_text->SetValue(
 	//		wxString::Format("%d", resy));
-	//}
-}
-
-//move linked clipping planes
-//dir: 0-lower; 1-higher
-void ClipPlanePanel::MoveLinkedClippingPlanes(int dir)
-{
-	//if (m_sel_type != 2 || !m_vd)
-	//	return;
-
-	//long resx, resy, resz;
-	////m_vd->GetResolution(resx, resy, resz);
-	//m_vd->getValue("res x", resx);
-	//m_vd->getValue("res y", resy);
-	//m_vd->getValue("res z", resz);
-
-	//wxString str;
-	//long dist;
-
-	//if (dir == 0)
-	//{
-	//	//moving lower
-	//	if (m_link_x)
-	//	{
-	//		str = m_yz_dist_text->GetValue();
-	//		str.ToLong(&dist);
-	//		dist = dist<2 ? dist + 1 : dist;
-	//		str = m_x1_clip_text->GetValue();
-	//		long x1;
-	//		str.ToLong(&x1);
-	//		x1 = x1 - dist + 1;
-	//		x1 = x1<0 ? 0 : x1;
-	//		m_x1_clip_text->SetValue(
-	//			wxString::Format("%d", x1));
-	//	}
-	//	if (m_link_y)
-	//	{
-	//		str = m_xz_dist_text->GetValue();
-	//		str.ToLong(&dist);
-	//		dist = dist<2 ? dist + 1 : dist;
-	//		str = m_y1_clip_text->GetValue();
-	//		long y1;
-	//		str.ToLong(&y1);
-	//		y1 = y1 - dist + 1;
-	//		y1 = y1<0 ? 0 : y1;
-	//		m_y1_clip_text->SetValue(
-	//			wxString::Format("%d", y1));
-	//	}
-	//	if (m_link_z)
-	//	{
-	//		str = m_xy_dist_text->GetValue();
-	//		str.ToLong(&dist);
-	//		dist = dist<2 ? dist + 1 : dist;
-	//		str = m_z1_clip_text->GetValue();
-	//		long z1;
-	//		str.ToLong(&z1);
-	//		z1 = z1 - dist + 1;
-	//		z1 = z1<0 ? 0 : z1;
-	//		m_z1_clip_text->SetValue(
-	//			wxString::Format("%d", z1));
-	//	}
-	//}
-	//else
-	//{
-	//	//moving higher
-	//	if (m_link_x)
-	//	{
-	//		str = m_yz_dist_text->GetValue();
-	//		str.ToLong(&dist);
-	//		dist = dist<2 ? dist + 1 : dist;
-	//		str = m_x2_clip_text->GetValue();
-	//		long x2;
-	//		str.ToLong(&x2);
-	//		x2 = x2 + dist - 1;
-	//		x2 = x2>resx ? resx : x2;
-	//		m_x2_clip_text->SetValue(
-	//			wxString::Format("%d", x2));
-	//	}
-	//	if (m_link_y)
-	//	{
-	//		str = m_xz_dist_text->GetValue();
-	//		str.ToLong(&dist);
-	//		dist = dist<2 ? dist + 1 : dist;
-	//		str = m_y2_clip_text->GetValue();
-	//		long y2;
-	//		str.ToLong(&y2);
-	//		y2 = y2 + dist - 1;
-	//		y2 = y2>resy ? resy : y2;
-	//		m_y2_clip_text->SetValue(
-	//			wxString::Format("%d", y2));
-	//	}
-	//	if (m_link_z)
-	//	{
-	//		str = m_xy_dist_text->GetValue();
-	//		str.ToLong(&dist);
-	//		dist = dist<2 ? dist + 1 : dist;
-	//		str = m_z2_clip_text->GetValue();
-	//		long z2;
-	//		str.ToLong(&z2);
-	//		z2 = z2 + dist - 1;
-	//		z2 = z2>resz ? resz : z2;
-	//		m_z2_clip_text->SetValue(
-	//			wxString::Format("%d", z2));
-	//	}
 	//}
 }
 

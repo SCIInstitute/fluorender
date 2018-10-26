@@ -251,9 +251,14 @@ inline double PiHalf()
 	return 1.5707963267948966192313216916398;
 }
 
-inline double Epsilon(int p=6)
+inline double Epsld(int p=10)
 {
 	return pow(10.0, double(-p));
+}
+
+inline float Epslf(int p = 6)
+{
+	return pow(10.0f, float(-p));
 }
 
 inline double d2r(double d)

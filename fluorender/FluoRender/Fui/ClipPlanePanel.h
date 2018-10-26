@@ -118,10 +118,6 @@ namespace FUI
 		}
 		void SetPlaneMode(PLANE_MODES mode);
 
-		//move linked clipping planes
-		//dir: 0-lower; 1-higher
-		void MoveLinkedClippingPlanes(int dir);
-
 	private:
 		wxWindow* m_frame;
 

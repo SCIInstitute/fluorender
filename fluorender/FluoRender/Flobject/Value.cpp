@@ -32,6 +32,8 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace FL;
 
+bool Value::_precise = false;
+
 Value::~Value()
 {
 }

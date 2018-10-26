@@ -265,7 +265,7 @@ namespace FLTYPE
 		double cosine = Dot(this->n_, rhs.n_);
 		double d1 = this->eval_point(Point(0,0,0));
 		double d2 = rhs.eval_point(Point(0,0,0));
-		return (fabs(double(d1-d2)) < Epsilon()) && (fabs(double(cosine-1.0)) < Epsilon());
+		return (fabs(double(d1-d2)) < Epsld()) && (fabs(double(cosine-1.0)) < Epsld());
 	}
 
 	bool Plane::operator!=(const Plane &rhs) const
@@ -273,7 +273,7 @@ namespace FLTYPE
 		double cosine = Dot(this->n_, rhs.n_);
 		double d1 = this->eval_point(Point(0, 0, 0));
 		double d2 = rhs.eval_point(Point(0, 0, 0));
-		return (fabs(double(d1 - d2)) > Epsilon()) || (fabs(double(cosine - 1.0)) > Epsilon());
+		return (fabs(double(d1 - d2)) > Epsld()) || (fabs(double(cosine - 1.0)) > Epsld());
 	}
 
 	void Plane::Translate(Vector &v)

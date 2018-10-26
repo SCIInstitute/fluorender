@@ -59,7 +59,8 @@ typedef std::tuple<std::string, std::string, std::string> ValueTuple;
 class Value : public Referenced, public Observer
 {
 public:
-	Value(std::string name = "", std::string type = "") : Referenced(), _name(name), _type(type) {}
+	Value(std::string name = "", std::string type = "") :
+		Referenced(), _name(name), _type(type) {}
 
 	Value* clone();
 
@@ -85,6 +86,7 @@ protected:
 
 	std::string _name;
 	std::string _type;
+	static bool _precise;//if equal is precise
 
 	friend class ValueSet;
 };
@@ -322,15 +324,21 @@ inline bool Value::operator == (const Value& v) const
 	}
 	else if (_type == "float")
 	{
-		return dynamic_cast<const TemplateValue<float>*>(this)->getValue() ==
-			dynamic_cast<const TemplateValue<float>*>(&v)->getValue();
+		if (_precise)
+			return dynamic_cast<const TemplateValue<float>*>(this)->getValue() ==
+				dynamic_cast<const TemplateValue<float>*>(&v)->getValue();
+		else
+			return fabs(dynamic_cast<const TemplateValue<float>*>(this)->getValue() -
+				dynamic_cast<const TemplateValue<float>*>(&v)->getValue()) < FLTYPE::Epslf();
 	}
 	else if (_type == "double")
 	{
-		return dynamic_cast<const TemplateValue<double>*>(this)->getValue() ==
-			dynamic_cast<const TemplateValue<double>*>(&v)->getValue();
-		//return fabs(dynamic_cast<const TemplateValue<double>*>(this)->getValue() -
-		//	dynamic_cast<const TemplateValue<double>*>(&v)->getValue()) > 1e-6;
+		if (_precise)
+			return dynamic_cast<const TemplateValue<double>*>(this)->getValue() ==
+				dynamic_cast<const TemplateValue<double>*>(&v)->getValue();
+		else
+			return fabs(dynamic_cast<const TemplateValue<double>*>(this)->getValue() -
+				dynamic_cast<const TemplateValue<double>*>(&v)->getValue()) < FLTYPE::Epsld();
 	}
 	else if (_type == "string")
 	{

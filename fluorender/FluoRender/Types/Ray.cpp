@@ -83,7 +83,7 @@ namespace FLTYPE
 
 		double NV = Dot(N, V);
 
-		if (fabs(NV) <= Epsilon()) // ray is parallel to plane
+		if (fabs(NV) <= Epsld()) // ray is parallel to plane
 			return false;
 		else {
 			t = -(D + NO) / NV;
