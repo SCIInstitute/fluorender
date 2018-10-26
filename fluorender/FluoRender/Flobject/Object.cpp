@@ -88,8 +88,8 @@ void Object::objectChanging(Event& event)
 				notifyObserversBeforeChange(event);
 			//take actions myself
 			//prevent self updating
-			if (this == event.origin && value == event.value && !event.pass(10))
-				return;
+			//if (this == event.origin && value == event.value && !event.pass(10))
+			//	return;
 			if (event.getNotifyFlags() & Event::NOTIFY_SELF)
 				onBefore(value->getName(), event);
 			else if (asFactory() &&
@@ -116,8 +116,8 @@ void Object::objectChanged(Event& event)
 			if (event.getNotifyFlags() & Event::NOTIFY_OTHERS)
 				notifyObserversOfChange(event);
 			//prevent self updating
-			if (this == event.origin && value == event.value && !event.pass(10))
-				return;
+			//if (this == event.origin && value == event.value && !event.pass(10))
+			//	return;
 			//take action myself
 			if (event.getNotifyFlags() & Event::NOTIFY_SELF)
 				onAfter(value->getName(), event);

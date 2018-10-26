@@ -112,7 +112,8 @@ void Referenced::notifyObserversBeforeChange(Event& event) const
 {
 	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
 
-	if (observerSet && !_hold && event.pass())
+	if (observerSet && !_hold &&
+		event.pass(const_cast<Referenced*>(this)))
 	{
 		event.push(const_cast<Referenced*>(this));
 		observerSet->signalObjectChanging(event);
@@ -124,7 +125,8 @@ void Referenced::notifyObserversOfChange(Event& event) const
 {
 	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
 
-	if (observerSet && !_hold && event.pass())
+	if (observerSet && !_hold &&
+		event.pass(const_cast<Referenced*>(this)))
 	{
 		event.push(const_cast<Referenced*>(this));
 		observerSet->signalObjectChanged(event);
@@ -137,7 +139,8 @@ void Referenced::notifyObserversNodeAdded(Event& event) const
 {
 	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
 
-	if (observerSet && !_hold && event.pass())
+	if (observerSet && !_hold &&
+		event.pass(const_cast<Referenced*>(this)))
 	{
 		event.push(const_cast<Referenced*>(this));
 		observerSet->signalNodeAdded(event);
@@ -149,7 +152,8 @@ void Referenced::notifyObserversNodeRemoved(Event& event) const
 {
 	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
 
-	if (observerSet && !_hold && event.pass())
+	if (observerSet && !_hold &&
+		event.pass(const_cast<Referenced*>(this)))
 	{
 		event.push(const_cast<Referenced*>(this));
 		observerSet->signalNodeRemoved(event);
