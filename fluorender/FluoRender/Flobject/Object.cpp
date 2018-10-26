@@ -812,7 +812,7 @@ bool Object::propValue(const std::string &name, Object* obj)
 		{
 			Event event;
 			event.init(Event::EVENT_SYNC_VALUE,
-				this, obj_value, true);
+				this, value, true);
 			obj_value->sync(event);
 		}
 		return true;
