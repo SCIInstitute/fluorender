@@ -87,10 +87,8 @@ bool Group::insertChild(size_t index, Node* child)
 	child->addObserver(this);
 	//notify observers of change
 	Event event;
-	event.sender = this;
-	event.origin = this;
-	event.parent = this;
-	event.child = child;
+	event.init(Event::EVENT_NODE_ADDED,
+		this, child);
 	notifyObserversNodeAdded(event);
 
 	return true;
@@ -112,10 +110,8 @@ bool Group::removeChildren(size_t pos, size_t num)
 			m_children[i]->removeObserver(this);
 			//notify observers of change
 			Event event;
-			event.sender = this;
-			event.origin = this;
-			event.parent = this;
-			event.child = m_children[i].get();
+			event.init(Event::EVENT_NODE_REMOVED,
+				this, m_children[i].get());
 			notifyObserversNodeRemoved(event);
 		}
 		m_children.erase(m_children.begin() + pos, m_children.begin() + end);
@@ -147,10 +143,8 @@ bool Group::setChild(size_t i, Node* node)
 		origNode->removeObserver(this);
 		//notify observers of change
 		Event event;
-		event.sender = this;
-		event.origin = this;
-		event.parent = this;
-		event.child = origNode.get();
+		event.init(Event::EVENT_NODE_REMOVED,
+			this, origNode.get());
 		notifyObserversNodeRemoved(event);
 
 		m_children[i] = node;
@@ -158,10 +152,8 @@ bool Group::setChild(size_t i, Node* node)
 		//parent observes children
 		node->addObserver(this);
 		//notify observers of change
-		event.sender = this;
-		event.origin = this;
-		event.parent = this;
-		event.child = node;
+		event.init(Event::EVENT_NODE_ADDED,
+			this, node);
 		notifyObserversNodeAdded(event);
 
 		return true;
@@ -182,8 +174,7 @@ void Group::accept(NodeVisitor& nv)
 //as observer
 void Group::objectChanging(Event& event)
 {
-	Referenced* refd = static_cast<Referenced*>(event.sender);
-	Node* node = dynamic_cast<Node*>(refd);
+	Node* node = dynamic_cast<Node*>(event.sender);
 	if (node && containsNode(node) &&
 		this != event.origin &&
 		event.getNotifyFlags() & Event::NOTIFY_PARENT)
@@ -195,8 +186,7 @@ void Group::objectChanging(Event& event)
 
 void Group::objectChanged(Event& event)
 {
-	Referenced* refd = static_cast<Referenced*>(event.sender);
-	Node* node = dynamic_cast<Node*>(refd);
+	Node* node = dynamic_cast<Node*>(event.sender);
 	if (node && containsNode(node) &&
 		this != event.origin &&
 		event.getNotifyFlags() & Event::NOTIFY_PARENT)
@@ -208,16 +198,14 @@ void Group::objectChanged(Event& event)
 
 void Group::nodeAdded(Event& event)
 {
-	Referenced* refd = static_cast<Referenced*>(event.sender);
-	Node* node = dynamic_cast<Node*>(refd);
+	Node* node = dynamic_cast<Node*>(event.sender);
 	if (node && containsNode(node) && this != event.parent)
 		notifyObserversNodeAdded(event);
 }
 
 void Group::nodeRemoved(Event& event)
 {
-	Referenced* refd = static_cast<Referenced*>(event.sender);
-	Node* node = dynamic_cast<Node*>(refd);
+	Node* node = dynamic_cast<Node*>(event.sender);
 	if (node && containsNode(node) && this != event.parent)
 		notifyObserversNodeRemoved(event);
 }

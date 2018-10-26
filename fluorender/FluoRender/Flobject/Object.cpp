@@ -63,7 +63,7 @@ Object::~Object()
 //observer functions
 void Object::objectDeleted(Event& event)
 {
-	Referenced* refd = static_cast<Referenced*>(event.sender);
+	Referenced* refd = event.sender;
 	if (refd)
 		_vs_stack.top()->resetRefPtr(refd);
 
@@ -74,7 +74,7 @@ void Object::objectDeleted(Event& event)
 void Object::objectChanging(Event& event)
 {
 	//before change
-	Referenced* refd = static_cast<Referenced*>(event.sender);
+	Referenced* refd = event.sender;
 	if (!refd)
 		return;
 	if (refd->className() == std::string("Value") &&
@@ -104,7 +104,7 @@ void Object::objectChanging(Event& event)
 
 void Object::objectChanged(Event& event)
 {
-	Referenced* refd = static_cast<Referenced*>(event.sender);
+	Referenced* refd = event.sender;
 	if (!refd)
 		return;
 	if (refd->className() == std::string("Value"))
@@ -144,10 +144,8 @@ bool Object::addValue(ValueTuple &vt)
 			if (vs_value)
 			{
 				vs_value->addObserver(this);
-				Event event(this);
-				event.origin = this;
-				event.value = vs_value;
-				event.value_name = name;
+				Event event;
+				event.init(Event::EVENT_VALUE_ADDED, this, vs_value, true);
 				vs_value->notify(event);
 			}
 		}
@@ -167,10 +165,9 @@ bool Object::addValue(ValueTuple &vt)
 			if (vs_value) \
 			{ \
 				vs_value->addObserver(this); \
-				Event event(this); \
-				event.origin = this; \
-				event.value = vs_value; \
-				event.value_name = name; \
+				Event event; \
+				event.init(Event::EVENT_VALUE_ADDED, \
+					this, vs_value, true); \
 				vs_value->notify(event); \
 			} \
 		} \
@@ -324,14 +321,13 @@ bool Object::setValue(ValueTuple &vt, Event& event)
 		if (_vs_stack.top())
 		{
 			if (!event.sender)
-			{
-				event.sender = this;
-				event.origin = this;
-				event.value = value;
-				event.value_name = name;
-			}
+				event.init(Event::EVENT_VALUE_CHANGING,
+					this, value);
 			notifyObserversBeforeChange(event);
+			event.push(this);//not pushed by default
 			result = _vs_stack.top()->setValue(vt, event);
+			event.pop();
+			event.type = Event::EVENT_VALUE_CHANGED;
 			if (result)
 				notifyObserversOfChange(event);
 		}
@@ -348,14 +344,13 @@ bool Object::setValue(ValueTuple &vt, Event& event)
 		if (_vs_stack.top()) \
 		{ \
 			if (!event.sender) \
-			{ \
-				event.sender = this; \
-				event.origin = this; \
-				event.value = getValue(name); \
-				event.value_name = name; \
-			} \
+				event.init(Event::EVENT_VALUE_CHANGING, \
+					this, getValue(name)); \
 			notifyObserversBeforeChange(event); \
+			event.push(this); \
 			result = _vs_stack.top()->setValue(name, value, event); \
+			event.pop(); \
+			event.type = Event::EVENT_VALUE_CHANGED; \
 			if (result) \
 				notifyObserversOfChange(event); \
 		} \
@@ -377,14 +372,13 @@ bool Object::setValue(const std::string &name, Referenced* value, Event& event)
 		if (_vs_stack.top())
 		{
 			if (!event.sender)
-			{
-				event.sender = this;
-				event.origin = this;
-				event.value = getValue(name);
-				event.value_name = name;
-			}
+				event.init(Event::EVENT_VALUE_CHANGING,
+					this, getValue(name));
 			notifyObserversBeforeChange(event);
+			event.push(this);
 			result = _vs_stack.top()->setValue(name, value, event);
+			event.pop();
+			event.type = Event::EVENT_VALUE_CHANGED;
 			if (result)
 				notifyObserversOfChange(event);
 		}
@@ -550,15 +544,14 @@ bool Object::toggleValue(const std::string &name, bool &value, Event& event)
 	if (_vs_stack.top())
 	{
 		if (!event.sender)
-		{
-			event.sender = this;
-			event.origin = this;
-			event.value = getValue(name);
-			event.value_name = name;
-		}
+			event.init(Event::EVENT_VALUE_CHANGING,
+				this, getValue(name));
 		notifyObserversBeforeChange(event);
+		event.push(this);
 		result = _vs_stack.top()->toggleValue(name, value, event);
+		event.pop();
 	}
+	event.type = Event::EVENT_VALUE_CHANGED;
 	if (result)
 		notifyObserversOfChange(event);
 	return result;
@@ -818,10 +811,8 @@ bool Object::propValue(const std::string &name, Object* obj)
 		if (obj_value)
 		{
 			Event event;
-			event.sender = this;
-			event.origin = this;
-			event.value = obj_value;
-			event.value_name = name;
+			event.init(Event::EVENT_SYNC_VALUE,
+				this, obj_value, true);
 			obj_value->sync(event);
 		}
 		return true;
@@ -923,10 +914,8 @@ bool Object::propValues(const std::string &name1, const std::string &name2)
 		value1 != value2)
 	{
 		Event event;
-		event.sender = this;
-		event.origin = this;
-		event.value = value1;
-		event.value_name = name1;
+		event.init(Event::EVENT_SYNC_VALUE,
+			this, value1, true);
 		value2->sync(event);
 		return true;
 	}
@@ -940,10 +929,8 @@ bool Object::propValues(const std::string &name1, const std::vector<std::string>
 	if (!value1)
 		return result;
 	Event event;
-	event.sender = this;
-	event.origin = this;
-	event.value = value1;
-	event.value_name = name1;
+	event.init(Event::EVENT_SYNC_VALUE,
+		this, value1, true);
 	for (auto it = names.begin();
 		it != names.end(); ++it)
 	{

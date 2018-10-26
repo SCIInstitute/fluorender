@@ -1118,12 +1118,12 @@ void VRenderGLView::DrawMeshes(int peel)
 		{
 			md->SetMatrices(m_mv_mat, m_proj_mat);
 			//md->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-			md->setValue("depth atten", m_use_fog, FL::Event(0, FL::Event::NOTIFY_SELF));
-			md->setValue("da int", m_fog_intensity, FL::Event(0, FL::Event::NOTIFY_SELF));
-			md->setValue("da start", m_fog_start, FL::Event(0, FL::Event::NOTIFY_SELF));
-			md->setValue("da end", m_fog_end, FL::Event(0, FL::Event::NOTIFY_SELF));
+			md->setValue("depth atten", m_use_fog, FL::Event(FL::Event::NOTIFY_SELF));
+			md->setValue("da int", m_fog_intensity, FL::Event(FL::Event::NOTIFY_SELF));
+			md->setValue("da start", m_fog_start, FL::Event(FL::Event::NOTIFY_SELF));
+			md->setValue("da end", m_fog_end, FL::Event(FL::Event::NOTIFY_SELF));
 			//md->SetViewport(vp);
-			md->setValue("viewport", FLTYPE::GLint4(vp), FL::Event(0, FL::Event::NOTIFY_SELF));
+			md->setValue("viewport", FLTYPE::GLint4(vp), FL::Event(FL::Event::NOTIFY_SELF));
 			md->Draw(peel);
 		}
 	}
@@ -2147,8 +2147,8 @@ void VRenderGLView::Segment()
 		if (vd)
 		{
 			vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-			vd->setValue("viewport", FLTYPE::GLint4(vp), FL::Event(0, FL::Event::NOTIFY_SELF));
-			vd->setValue("clear color", FLTYPE::GLfloat4(clear_color), FL::Event(0, FL::Event::NOTIFY_SELF));
+			vd->setValue("viewport", FLTYPE::GLint4(vp), FL::Event(FL::Event::NOTIFY_SELF));
+			vd->setValue("clear color", FLTYPE::GLfloat4(clear_color), FL::Event(FL::Event::NOTIFY_SELF));
 			m_selector.SetVolume(vd);
 			m_selector.Select(m_brush_radius2 - m_brush_radius1);
 		}
@@ -2156,8 +2156,8 @@ void VRenderGLView::Segment()
 		if (vd)
 		{
 			vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-			vd->setValue("viewport", FLTYPE::GLint4(vp), FL::Event(0, FL::Event::NOTIFY_SELF));
-			vd->setValue("clear color", FLTYPE::GLfloat4(clear_color), FL::Event(0, FL::Event::NOTIFY_SELF));
+			vd->setValue("viewport", FLTYPE::GLint4(vp), FL::Event(FL::Event::NOTIFY_SELF));
+			vd->setValue("clear color", FLTYPE::GLfloat4(clear_color), FL::Event(FL::Event::NOTIFY_SELF));
 			m_selector.SetVolume(vd);
 			m_selector.Select(m_brush_radius2 - m_brush_radius1);
 		}
@@ -2211,8 +2211,8 @@ void VRenderGLView::Label()
 	FL::VolumeData* vd = m_selector.GetVolume();
 	if (vd)
 	{
-		vd->setValue("viewport", FLTYPE::GLint4(vp), FL::Event(0, FL::Event::NOTIFY_SELF));
-		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color), FL::Event(0, FL::Event::NOTIFY_SELF));
+		vd->setValue("viewport", FLTYPE::GLint4(vp), FL::Event(FL::Event::NOTIFY_SELF));
+		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color), FL::Event(FL::Event::NOTIFY_SELF));
 		m_selector.Label(0);
 	}
 }
@@ -2373,7 +2373,7 @@ void VRenderGLView::NoiseRemoval(int iter, double thresh)
 			//vr_frame->GetDataManager()->AddVolumeData(vd_new);
 			wxString group_name = AddGroup("");
 			AddVolumeData(vd_new, group_name);
-			vd->setValue("display", false, FL::Event(0, FL::Event::NOTIFY_SELF));
+			vd->setValue("display", false, FL::Event(FL::Event::NOTIFY_SELF));
 			vr_frame->UpdateList();
 			vr_frame->UpdateTree(vd_new->getName());
 		}
@@ -2844,7 +2844,7 @@ void VRenderGLView::CalculateSingle(int type, wxString prev_group, bool add)
 						type == 9)
 					{
 						if (vd_a)
-							vd_a->setValue("display", false, FL::Event(0, FL::Event::NOTIFY_SELF));
+							vd_a->setValue("display", false, FL::Event(FL::Event::NOTIFY_SELF));
 					}
 					else if (type == 1 ||
 						type == 2 ||
@@ -2852,10 +2852,10 @@ void VRenderGLView::CalculateSingle(int type, wxString prev_group, bool add)
 						type == 4)
 					{
 						if (vd_a)
-							vd_a->setValue("display", false, FL::Event(0, FL::Event::NOTIFY_SELF));
+							vd_a->setValue("display", false, FL::Event(FL::Event::NOTIFY_SELF));
 						FL::VolumeData* vd_b = m_calculator.GetVolumeB();
 						if (vd_b)
-							vd_b->setValue("display", false, FL::Event(0, FL::Event::NOTIFY_SELF));
+							vd_b->setValue("display", false, FL::Event(FL::Event::NOTIFY_SELF));
 					}
 					vr_frame->UpdateList();
 					vr_frame->UpdateTree(vd->getName());
@@ -3082,7 +3082,7 @@ void VRenderGLView::DrawVolumesComp(vector<FL::VolumeData*> &list, bool mask, in
 
 			if (vd->GetTexture() && vd->GetTexture()->nmask() != -1)
 			{
-				vd->setValue("mask mode", long(1), FL::Event(0, FL::Event::NOTIFY_SELF));
+				vd->setValue("mask mode", long(1), FL::Event(FL::Event::NOTIFY_SELF));
 				int vol_method = m_vol_method;
 				m_vol_method = VOL_METHOD_COMP;
 				long mip_mode;
@@ -3091,7 +3091,7 @@ void VRenderGLView::DrawVolumesComp(vector<FL::VolumeData*> &list, bool mask, in
 					DrawMIP(vd, peel);
 				else
 					DrawOVER(vd, mask, peel);
-				vd->setValue("mask mode", long(0), FL::Event(0, FL::Event::NOTIFY_SELF));
+				vd->setValue("mask mode", long(0), FL::Event(FL::Event::NOTIFY_SELF));
 				m_vol_method = vol_method;
 			}
 		}
@@ -3108,7 +3108,7 @@ void VRenderGLView::DrawVolumesComp(vector<FL::VolumeData*> &list, bool mask, in
 					vr_frame->GetSettingDlg()->GetRunScript() &&
 					vd->GetMask(false) &&
 					vd->GetLabel(false))
-					vd->setValue("mask mode", long(4), FL::Event(0, FL::Event::NOTIFY_SELF));
+					vd->setValue("mask mode", long(4), FL::Event(FL::Event::NOTIFY_SELF));
 
 				long mip_mode;
 				vd->getValue("mip mode", mip_mode);
@@ -3219,14 +3219,14 @@ void VRenderGLView::DrawOVER(FL::VolumeData* vd, bool mask, int peel)
 		//	vd->setValue("stream mode", long(0));
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 		//vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-		vd->setValue("depth atten", m_use_fog, FL::Event(0, FL::Event::NOTIFY_SELF));
-		vd->setValue("da int", m_fog_intensity, FL::Event(0, FL::Event::NOTIFY_SELF));
-		vd->setValue("da start", m_fog_start, FL::Event(0, FL::Event::NOTIFY_SELF));
-		vd->setValue("da end", m_fog_end, FL::Event(0, FL::Event::NOTIFY_SELF));
-		vd->setValue("viewport", FLTYPE::GLint4(vp), FL::Event(0, FL::Event::NOTIFY_SELF));
-		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color), FL::Event(0, FL::Event::NOTIFY_SELF));
+		vd->setValue("depth atten", m_use_fog, FL::Event(FL::Event::NOTIFY_SELF));
+		vd->setValue("da int", m_fog_intensity, FL::Event(FL::Event::NOTIFY_SELF));
+		vd->setValue("da start", m_fog_start, FL::Event(FL::Event::NOTIFY_SELF));
+		vd->setValue("da end", m_fog_end, FL::Event(FL::Event::NOTIFY_SELF));
+		vd->setValue("viewport", FLTYPE::GLint4(vp), FL::Event(FL::Event::NOTIFY_SELF));
+		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color), FL::Event(FL::Event::NOTIFY_SELF));
 		//vd->GetRenderer()->set_clear_color(clear_color);
-		vd->setValue("cur framebuffer", (unsigned long)m_cur_framebuffer, FL::Event(0, FL::Event::NOTIFY_SELF));
+		vd->setValue("cur framebuffer", (unsigned long)m_cur_framebuffer, FL::Event(FL::Event::NOTIFY_SELF));
 		vd->Draw(!m_persp, m_adaptive,
 			m_interactive, m_scale_factor,
 			mask?4:0);
@@ -3436,17 +3436,17 @@ void VRenderGLView::DrawMIP(FL::VolumeData* vd, int peel)
 		if (vd->GetRenderer())
 			vd->GetRenderer()->set_depth_peel(peel);
 		vd->GetRenderer()->set_shading(false);
-		vd->setValue("overlay mode", long(3), FL::Event(0, FL::Event::NOTIFY_SELF));
+		vd->setValue("overlay mode", long(3), FL::Event(FL::Event::NOTIFY_SELF));
 		//draw
 		//vd->setValue("stream mode", long(1));
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-		vd->setValue("viewport", FLTYPE::GLint4(vp), FL::Event(0, FL::Event::NOTIFY_SELF));
-		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color), FL::Event(0, FL::Event::NOTIFY_SELF));
-		vd->setValue("cur framebuffer", (unsigned long)m_cur_framebuffer, FL::Event(0, FL::Event::NOTIFY_SELF));
+		vd->setValue("viewport", FLTYPE::GLint4(vp), FL::Event(FL::Event::NOTIFY_SELF));
+		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color), FL::Event(FL::Event::NOTIFY_SELF));
+		vd->setValue("cur framebuffer", (unsigned long)m_cur_framebuffer, FL::Event(FL::Event::NOTIFY_SELF));
 		vd->Draw(!m_persp, m_adaptive,
 			m_interactive, m_scale_factor, 1);
 		//restore
-		vd->setValue("overlay mode", long(0), FL::Event(0, FL::Event::NOTIFY_SELF));
+		vd->setValue("overlay mode", long(0), FL::Event(FL::Event::NOTIFY_SELF));
 
 		//bind channel fbo for final composition
 		if (chann_buffer)
@@ -3614,7 +3614,7 @@ void VRenderGLView::DrawMIP(FL::VolumeData* vd, int peel)
 		img_shader->release();
 
 	vd->GetRenderer()->set_shading(shading);
-	vd->setValue("colormap mode", colormap_mode, FL::Event(0, FL::Event::NOTIFY_SELF));
+	vd->setValue("colormap mode", colormap_mode, FL::Event(FL::Event::NOTIFY_SELF));
 
 	//if vd is duplicated
 	if (TextureRenderer::get_mem_swap() &&
@@ -3656,11 +3656,11 @@ void VRenderGLView::DrawOLShading(FL::VolumeData* vd)
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	vd->setValue("overlay mode", long(2), FL::Event(0, FL::Event::NOTIFY_SELF));
+	vd->setValue("overlay mode", long(2), FL::Event(FL::Event::NOTIFY_SELF));
 	vd->Draw(!m_persp, m_adaptive,
 		m_interactive, m_scale_factor, 2);
 	//restore
-	vd->setValue("overlay mode", long(0), FL::Event(0, FL::Event::NOTIFY_SELF));
+	vd->setValue("overlay mode", long(0), FL::Event(FL::Event::NOTIFY_SELF));
 
 	//bind fbo for final composition
 	Framebuffer* chann_buffer =
@@ -3974,12 +3974,12 @@ void VRenderGLView::DrawOLShadows(vector<FL::VolumeData*> &vlist)
 	else if (list.size() == 1)
 	{
 		FL::VolumeData* vd = list[0];
-		vd->setValue("overlay mode", long(1), FL::Event(0, FL::Event::NOTIFY_SELF));
-		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color), FL::Event(0, FL::Event::NOTIFY_SELF));
-		vd->setValue("cur framebuffer", (unsigned long)m_cur_framebuffer, FL::Event(0, FL::Event::NOTIFY_SELF));
+		vd->setValue("overlay mode", long(1), FL::Event(FL::Event::NOTIFY_SELF));
+		vd->setValue("clear color", FLTYPE::GLfloat4(clear_color), FL::Event(FL::Event::NOTIFY_SELF));
+		vd->setValue("cur framebuffer", (unsigned long)m_cur_framebuffer, FL::Event(FL::Event::NOTIFY_SELF));
 		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, 3);
 		//restore
-		vd->setValue("overlay mode", long(0), FL::Event(0, FL::Event::NOTIFY_SELF));
+		vd->setValue("overlay mode", long(0), FL::Event(FL::Event::NOTIFY_SELF));
 		vd->getValue("shadow int", shadow_int);
 	}
 	else
@@ -3988,7 +3988,7 @@ void VRenderGLView::DrawOLShadows(vector<FL::VolumeData*> &vlist)
 		for (i = 0; i<list.size(); i++)
 		{
 			FL::VolumeData* vd = list[i];
-			vd->setValue("overlay mode", long(1), FL::Event(0, FL::Event::NOTIFY_SELF));
+			vd->setValue("overlay mode", long(1), FL::Event(FL::Event::NOTIFY_SELF));
 			VolumeRenderer* vr = list[i]->GetRenderer();
 			if (vr)
 			{
@@ -4008,7 +4008,7 @@ void VRenderGLView::DrawOLShadows(vector<FL::VolumeData*> &vlist)
 		for (i = 0; i<list.size(); i++)
 		{
 			FL::VolumeData* vd = list[i];
-			vd->setValue("overlay mode", long(0), FL::Event(0, FL::Event::NOTIFY_SELF));
+			vd->setValue("overlay mode", long(0), FL::Event(FL::Event::NOTIFY_SELF));
 		}
 		list[0]->getValue("shadow int", shadow_int);
 	}
@@ -4143,12 +4143,12 @@ void VRenderGLView::DrawVolumesMulti(vector<FL::VolumeData*> &list, int peel)
 					vr_frame->GetSettingDlg()->GetRunScript() &&
 					vd->GetMask(false) &&
 					vd->GetLabel(false))
-					vd->setValue("mask mode", long(4), FL::Event(0, FL::Event::NOTIFY_SELF));
+					vd->setValue("mask mode", long(4), FL::Event(FL::Event::NOTIFY_SELF));
 				vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-				vd->setValue("depth atten", m_use_fog, FL::Event(0, FL::Event::NOTIFY_SELF));
-				vd->setValue("da int", m_fog_intensity, FL::Event(0, FL::Event::NOTIFY_SELF));
-				vd->setValue("da start", m_fog_start, FL::Event(0, FL::Event::NOTIFY_SELF));
-				vd->setValue("da end", m_fog_end, FL::Event(0, FL::Event::NOTIFY_SELF));
+				vd->setValue("depth atten", m_use_fog, FL::Event(FL::Event::NOTIFY_SELF));
+				vd->setValue("da int", m_fog_intensity, FL::Event(FL::Event::NOTIFY_SELF));
+				vd->setValue("da start", m_fog_start, FL::Event(FL::Event::NOTIFY_SELF));
+				vd->setValue("da end", m_fog_end, FL::Event(FL::Event::NOTIFY_SELF));
 				m_mvr->add_vr(vr);
 				m_mvr->set_sampling_rate(vr->get_sampling_rate());
 				m_mvr->SetNoiseRed(vr->GetNoiseRed());
@@ -10316,7 +10316,7 @@ void VRenderGLView::StartLoopUpdate()
 					}
 				}
 				//vd->SetBrickNum(num_chan);
-				vd->setValue("brick num", long(num_chan), FL::Event(0, FL::Event::NOTIFY_NONE));
+				vd->setValue("brick num", long(num_chan), FL::Event(FL::Event::NOTIFY_NONE));
 				if (vd->GetRenderer())
 					vd->GetRenderer()->set_done_loop(false);
 			}
@@ -12867,7 +12867,7 @@ void VRenderGLView::switchLevel(FL::VolumeData *vd)
 					(*bricks)[i]->set_disp(false);
 			}
 			//vd->SetLevel(new_lv);
-			vd->setValue("level", new_lv, FL::Event(0, FL::Event::NOTIFY_NONE));
+			vd->setValue("level", new_lv, FL::Event(FL::Event::NOTIFY_NONE));
 			vtex->set_sort_bricks();
 		}
 	}

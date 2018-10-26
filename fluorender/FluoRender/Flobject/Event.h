@@ -31,9 +31,12 @@ DEALINGS IN THE SOFTWARE.
 #include <Flobject/Referenced.h>
 #include <limits>
 #include <string>
+#include <vector>
 
 namespace FL
 {
+	class Value;
+	class Object;
 	class Event
 	{
 	public:
@@ -54,48 +57,87 @@ namespace FL
 			EVENT_DELETED = 1,
 			EVENT_CHANGING,
 			EVENT_CHANGED,
-			EVENT_NODE_REMOVED,
+			EVENT_VALUE_CHANGING,
+			EVENT_VALUE_CHANGED,
+			EVENT_VALUE_ADDED,
+			EVENT_SYNC_VALUE,
 			EVENT_NODE_ADDED,
+			EVENT_NODE_REMOVED
 		};
 
 		typedef unsigned int NotifyFlags;
 		typedef unsigned int EventType;
 
-		inline Event(Referenced* ptr = 0, NotifyFlags flags = NOTIFY_ALL) :
-			m_flags(flags), m_level(0),
-			m_limit(std::numeric_limits<unsigned int>::max()),
-			type(0),
-			sender(ptr), origin(0), value(0),
-			parent(0), child(0) {}
+		inline Event(NotifyFlags flags = NOTIFY_ALL) :
+			id(0), type(0), m_flags(flags),
+			sender(0), origin(0), value(0),
+			parent(0), child(0),
+			m_cur_level(0), m_sum_level(0),
+			m_limit(std::numeric_limits<unsigned int>::max()) {}
+			
 		virtual ~Event() {}
+
+		//for delete, changing, changed (general)
+		void init(EventType tp, Referenced* sndr, bool push_sender = false);
+		// value added, changing and changed
+		void init(EventType tp, Referenced* sndr, Value* va, bool push_sender = false);
+		// node added and removed
+		void init(EventType tp, Object* prt, Object* chd, bool push_sender = false);
 
 		void setNotifyFlags(NotifyFlags flags) { m_flags = flags; }
 		NotifyFlags getNotifyFlags() const { return m_flags; }
 
 		inline Event& operator++()
 		{
-			m_level++;
+			++m_cur_level;
+			++m_sum_level;
 			return *this;
 		}
-		bool pass(unsigned int limit = 0)
+		inline Event& operator--()
+		{
+			--m_cur_level;
+			return *this;
+		}
+		inline void push(Referenced* sndr)
+		{
+			sender = sndr;
+			sender_chain.push_back(sender);
+			++(*this);
+		}
+		inline void pop()
+		{
+			if (!sender_chain.empty())
+			{
+				sender_chain.pop_back();
+				--(*this);
+			}
+			if (!sender_chain.empty())
+				sender = sender_chain.back();
+			else
+				sender = 0;
+		}
+		inline bool pass(unsigned int limit = 0)
 		{
 			if (limit)
-				return m_level < limit;
+				return m_cur_level < limit;
 			else
-				return m_level < m_limit;
+				return m_cur_level < m_limit;
 		}
 
+		unsigned int id;
 		EventType type;
 		Referenced* sender;
 		Referenced* origin;
-		Referenced* value;
-		Referenced* parent;
-		Referenced* child;
+		Value* value;
+		Object* parent;
+		Object* child;
 		std::string value_name;
+		std::vector<Referenced*> sender_chain;
 
 	protected:
 		NotifyFlags m_flags;
-		unsigned int m_level;
+		unsigned int m_cur_level;
+		unsigned int m_sum_level;
 		unsigned int m_limit;
 	};
 }

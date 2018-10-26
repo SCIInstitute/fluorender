@@ -97,7 +97,7 @@ Value* Value::clone()
 //observer functions
 void Value::objectDeleted(Event& event)
 {
-	Referenced* refd = static_cast<Referenced*>(event.sender);
+	Referenced* refd = event.sender;
 
 	//remove observee
 	removeObservee(refd);
@@ -105,9 +105,8 @@ void Value::objectDeleted(Event& event)
 
 void Value::objectChanged(Event& event)
 {
-	Referenced* refd = static_cast<Referenced*>(event.sender);
-	if (refd->className() == std::string("Value") &&
-		event.origin != this)
+	Referenced* refd = event.sender;
+	if (refd->className() == std::string("Value"))
 	{
 		sync(event);
 	}

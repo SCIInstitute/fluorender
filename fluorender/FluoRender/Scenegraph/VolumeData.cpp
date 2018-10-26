@@ -2127,7 +2127,7 @@ void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 		if (estimate)
 		{
 			double est_thresh = m_vr->get_estimated_thresh();
-			setValue("estimate thresh", est_thresh, Event(0, Event::NOTIFY_SELF));
+			setValue("estimate thresh", est_thresh, Event(Event::NOTIFY_SELF));
 		}
 	}
 }

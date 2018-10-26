@@ -66,10 +66,8 @@ ListModel* AgentFactory::getOrAddListModel(const std::string &name, wxWindow &wi
 		list_model->setName(name);
 		objects_.push_front(list_model);
 		FL::Event event;
-		event.sender = this;
-		event.origin = this;
-		event.parent = this;
-		event.child = list_model;
+		event.init(FL::Event::EVENT_NODE_ADDED,
+			this, list_model);
 		notifyObserversNodeAdded(event);
 	}
 
@@ -90,10 +88,8 @@ TreeModel* AgentFactory::getOrAddTreeModel(const std::string &name, wxWindow &wi
 		tree_model->setName(name);
 		objects_.push_front(tree_model);
 		FL::Event event;
-		event.sender = this;
-		event.origin = this;
-		event.parent = this;
-		event.child = tree_model;
+		event.init(FL::Event::EVENT_NODE_ADDED,
+			this, tree_model);
 		notifyObserversNodeAdded(event);
 	}
 
@@ -120,10 +116,8 @@ VolumePropAgent* AgentFactory::getOrAddVolumePropAgent(const std::string &name, 
 				volume_prop_agent, std::placeholders::_1));
 		objects_.push_front(volume_prop_agent);
 		FL::Event event;
-		event.sender = this;
-		event.origin = this;
-		event.parent = this;
-		event.child = volume_prop_agent;
+		event.init(FL::Event::EVENT_NODE_ADDED,
+			this, volume_prop_agent);
 		notifyObserversNodeAdded(event);
 	}
 
@@ -147,10 +141,8 @@ RenderCanvasAgent* AgentFactory::getOrAddRenderCanvasAgent(const std::string &na
 				render_canvas_agent, std::placeholders::_1));
 		objects_.push_front(render_canvas_agent);
 		FL::Event event;
-		event.sender = this;
-		event.origin = this;
-		event.parent = this;
-		event.child = render_canvas_agent;
+		event.init(FL::Event::EVENT_NODE_ADDED,
+			this, render_canvas_agent);
 		notifyObserversNodeAdded(event);
 	}
 
@@ -198,10 +190,8 @@ OutAdjustAgent* AgentFactory::getOrAddOutAdjustAgent(const std::string &name, wx
 				out_adjust_agent, std::placeholders::_1));
 		objects_.push_front(out_adjust_agent);
 		FL::Event event;
-		event.sender = this;
-		event.origin = this;
-		event.parent = this;
-		event.child = out_adjust_agent;
+		event.init(FL::Event::EVENT_NODE_ADDED,
+			this, out_adjust_agent);
 		notifyObserversNodeAdded(event);
 	}
 
@@ -267,10 +257,8 @@ ClipPlaneAgent* AgentFactory::getOrAddClipPlaneAgent(const std::string &name, wx
 				clip_plane_agent, std::placeholders::_1));
 		objects_.push_front(clip_plane_agent);
 		FL::Event event;
-		event.sender = this;
-		event.origin = this;
-		event.parent = this;
-		event.child = clip_plane_agent;
+		event.init(FL::Event::EVENT_NODE_ADDED,
+			this, clip_plane_agent);
 		notifyObserversNodeAdded(event);
 	}
 
@@ -291,10 +279,8 @@ MeshPropAgent* AgentFactory::getOrAddMeshPropAgent(const std::string &name, wxWi
 		mesh_prop_agent->setName(name);
 		objects_.push_front(mesh_prop_agent);
 		FL::Event event;
-		event.sender = this;
-		event.origin = this;
-		event.parent = this;
-		event.child = mesh_prop_agent;
+		event.init(FL::Event::EVENT_NODE_ADDED,
+			this, mesh_prop_agent);
 		notifyObserversNodeAdded(event);
 	}
 

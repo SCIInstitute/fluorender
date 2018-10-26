@@ -312,10 +312,8 @@ Object* ObjectFactory::clone(Object* object)
 
 	//notify observers
 	Event event;
-	event.sender = this;
-	event.origin = this;
-	event.parent = this;
-	event.child = object;
+	event.init(Event::EVENT_NODE_ADDED,
+		this, object);
 	notifyObserversNodeAdded(event);
 
 	return new_object;

@@ -98,10 +98,8 @@ namespace FL
 					it != objects_.begin() + end; ++it)
 				{
 					Event event;
-					event.sender = this;
-					event.origin = this;
-					event.parent = this;
-					event.child = it->get();
+					event.init(Event::EVENT_NODE_REMOVED,
+						this, it->get());
 					notifyObserversNodeRemoved(event);
 				}
 
