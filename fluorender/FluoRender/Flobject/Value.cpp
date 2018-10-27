@@ -211,16 +211,6 @@ bool ValueSet::resetRefPtr(Referenced* value)
 	return false;
 }
 
-//value sync
-bool ValueSet::syncValue(Event& event)
-{
-	Value* my_value = findValue(event.value_name);
-	if (my_value)
-		return my_value->sync(event);
-
-	return false;
-}
-
 //add value functions
 bool ValueSet::addValue(ValueTuple& vt)
 {

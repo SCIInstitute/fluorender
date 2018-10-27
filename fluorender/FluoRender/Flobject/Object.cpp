@@ -788,7 +788,7 @@ bool Object::propValue(const std::string &name, Object* obj)
 		{
 			Event event;
 			event.init(Event::EVENT_SYNC_VALUE,
-				this, value, true);
+				value, value, true);
 			obj_value->sync(event);
 		}
 		return true;
@@ -891,7 +891,7 @@ bool Object::propValues(const std::string &name1, const std::string &name2)
 	{
 		Event event;
 		event.init(Event::EVENT_SYNC_VALUE,
-			this, value1, true);
+			value1, value1, true);
 		value2->sync(event);
 		return true;
 	}
@@ -906,7 +906,7 @@ bool Object::propValues(const std::string &name1, const std::vector<std::string>
 		return result;
 	Event event;
 	event.init(Event::EVENT_SYNC_VALUE,
-		this, value1, true);
+		value1, value1, true);
 	for (auto it = names.begin();
 		it != names.end(); ++it)
 	{

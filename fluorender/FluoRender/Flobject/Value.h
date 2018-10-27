@@ -165,8 +165,6 @@ public:
 	bool removeValue(const std::string &name);
 	//reset Referenced pointer to NULL
 	bool resetRefPtr(Referenced* value);
-	//value sync
-	bool syncValue(Event& event);
 
 	//add value functions
 	bool addValue(ValueTuple&);
@@ -431,7 +429,7 @@ inline bool Value::operator != (const Value& v) const
 
 inline bool Value::sync(Event& event)
 {
-	Value* value = dynamic_cast<Value*>(event.value);
+	Value* value = dynamic_cast<Value*>(event.sender);
 	if (!value || _type != value->_type)
 		return false;
 

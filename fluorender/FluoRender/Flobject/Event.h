@@ -74,7 +74,7 @@ namespace FL
 			sender(0), origin(0), value(0),
 			parent(0), child(0),
 			m_cur_level(0), m_sum_level(0),
-			m_limit(10)
+			m_limit(100)
 			//m_limit(std::numeric_limits<unsigned int>::max())
 		{}
 			
