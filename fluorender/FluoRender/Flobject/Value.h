@@ -112,7 +112,7 @@ public:
 
 	void setValue(const T& value, Event& event)
 	{
-		if (value != _value)
+		if (!equal(value))
 		{
 			notifyObserversBeforeChange(event);
 			_value = value;
@@ -121,6 +121,17 @@ public:
 	}
 
 	const T& getValue() const {return _value;}
+
+	bool equal(const T& value) const
+	{
+		if (_precise)
+			return _value == value;
+		else
+		{
+			ref_ptr<TemplateValue<T>> pvalue(new TemplateValue<T>(_name, _type, value));
+			return *this == *pvalue;
+		}
+	}
 
 	T _value;
 

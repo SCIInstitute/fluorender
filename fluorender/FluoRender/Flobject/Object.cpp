@@ -321,15 +321,9 @@ bool Object::setValue(ValueTuple &vt, Event& event)
 		if (_vs_stack.top())
 		{
 			if (!event.sender)
-				event.init(Event::EVENT_VALUE_CHANGING,
-					this, value);
-			notifyObserversBeforeChange(event);
-			event.push(this);//not pushed by default
+				event.init(Event::EVENT_VALUE_CHANGED,
+					this, value, true);
 			result = _vs_stack.top()->setValue(vt, event);
-			event.pop();
-			event.type = Event::EVENT_VALUE_CHANGED;
-			if (result)
-				notifyObserversOfChange(event);
 		}
 		return result;
 	}
@@ -344,15 +338,9 @@ bool Object::setValue(ValueTuple &vt, Event& event)
 		if (_vs_stack.top()) \
 		{ \
 			if (!event.sender) \
-				event.init(Event::EVENT_VALUE_CHANGING, \
-					this, getValue(name)); \
-			notifyObserversBeforeChange(event); \
-			event.push(this); \
+				event.init(Event::EVENT_VALUE_CHANGED, \
+					this, getValue(name), true); \
 			result = _vs_stack.top()->setValue(name, value, event); \
-			event.pop(); \
-			event.type = Event::EVENT_VALUE_CHANGED; \
-			if (result) \
-				notifyObserversOfChange(event); \
 		} \
 		return result; \
 	} \
@@ -372,15 +360,9 @@ bool Object::setValue(const std::string &name, Referenced* value, Event& event)
 		if (_vs_stack.top())
 		{
 			if (!event.sender)
-				event.init(Event::EVENT_VALUE_CHANGING,
-					this, getValue(name));
-			notifyObserversBeforeChange(event);
-			event.push(this);
+				event.init(Event::EVENT_VALUE_CHANGED,
+					this, getValue(name), true);
 			result = _vs_stack.top()->setValue(name, value, event);
-			event.pop();
-			event.type = Event::EVENT_VALUE_CHANGED;
-			if (result)
-				notifyObserversOfChange(event);
 		}
 		return result;
 	}
@@ -544,16 +526,10 @@ bool Object::toggleValue(const std::string &name, bool &value, Event& event)
 	if (_vs_stack.top())
 	{
 		if (!event.sender)
-			event.init(Event::EVENT_VALUE_CHANGING,
-				this, getValue(name));
-		notifyObserversBeforeChange(event);
-		event.push(this);
+			event.init(Event::EVENT_VALUE_CHANGED,
+				this, getValue(name), true);
 		result = _vs_stack.top()->toggleValue(name, value, event);
-		event.pop();
 	}
-	event.type = Event::EVENT_VALUE_CHANGED;
-	if (result)
-		notifyObserversOfChange(event);
 	return result;
 }
 

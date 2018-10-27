@@ -522,18 +522,18 @@ void ClipPlanePanel::OnLinkChannelsBtn(wxCommandEvent &event)
 {
 	bool sync = m_toolbar->GetToolState(ID_LinkChannelsBtn);
 	std::vector<std::string> names{
-		//"clip dist x",
-		//"clip dist y",
-		//"clip dist z",
+		"clip dist x",
+		"clip dist y",
+		"clip dist z",
 		"clip x1",
 		"clip x2",
 		"clip y1",
 		"clip y2",
 		"clip z1",
 		"clip z2",
-		//"clip link x",
-		//"clip link y",
-		//"clip link z",
+		"clip link x",
+		"clip link y",
+		"clip link z",
 		"clip rot x",
 		"clip rot y",
 		"clip rot z"
