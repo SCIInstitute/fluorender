@@ -74,7 +74,7 @@ namespace FL
 			sender(0), origin(0), value(0),
 			parent(0), child(0),
 			m_cur_level(0), m_sum_level(0),
-			m_limit(100)
+			m_limit(10)
 			//m_limit(std::numeric_limits<unsigned int>::max())
 		{}
 			
@@ -121,9 +121,9 @@ namespace FL
 		}
 		inline bool pass(Referenced* sndr, unsigned int limit = 0)
 		{
-			auto it = std::find(sender_chain.begin(),
-				sender_chain.end(), sndr);
-			if (it != sender_chain.end())
+			auto it = std::find(sender_chain.rbegin(),
+				sender_chain.rend(), sndr);
+			if (it != sender_chain.rend())
 			{
 				if (limit)
 					return m_cur_level < limit;
