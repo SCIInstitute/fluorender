@@ -54,9 +54,18 @@ namespace FL
 
 		virtual void setEventHandler(Object* obj) {};
 
-		virtual ObjectFactory* asFactory() { return this; }
-
 		virtual unsigned int getPriority() const { return 300; }
+
+		virtual void objectChanging(FL::Event& event)
+		{
+			if (event.getNotifyFlags() & FL::Event::NOTIFY_FACTORY)
+				FL::Object::objectChanging(event);
+		}
+		virtual void objectChanged(FL::Event& event)
+		{
+			if (event.getNotifyFlags() & FL::Event::NOTIFY_FACTORY)
+				FL::Object::objectChanged(event);
+		}
 
 		//propagate values from object to the default
 		virtual void propValuesToDefault(Object*, const std::vector<std::string> &names = {});

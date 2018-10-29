@@ -176,7 +176,6 @@ void Group::objectChanging(Event& event)
 {
 	Node* node = dynamic_cast<Node*>(event.sender);
 	if (node && containsNode(node) &&
-		this != event.origin &&
 		event.getNotifyFlags() & Event::NOTIFY_PARENT)
 	{
 		Object::objectChanging(event);
@@ -188,7 +187,6 @@ void Group::objectChanged(Event& event)
 {
 	Node* node = dynamic_cast<Node*>(event.sender);
 	if (node && containsNode(node) &&
-		this != event.origin &&
 		event.getNotifyFlags() & Event::NOTIFY_PARENT)
 	{
 		Object::objectChanged(event);

@@ -72,9 +72,6 @@ public:
 
 	inline const char* getName() const { return m_name.c_str(); }
 
-	virtual FUI::InterfaceAgent* asAgent() { return 0; }
-	virtual ObjectFactory* asFactory() { return 0; }
-
 	virtual unsigned int getPriority() const { return 999; }
 
 	virtual void objectDeleted(Event& event);

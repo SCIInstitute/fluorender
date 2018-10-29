@@ -50,8 +50,6 @@ namespace FUI
 
 		virtual const char* className() const { return "InterfaceAgent"; }
 
-		virtual InterfaceAgent* asAgent() { return this; }
-
 		//observer
 		virtual unsigned int getPriority() const { return 200; }
 
