@@ -42,6 +42,7 @@ public:
 	Observer();
 	virtual ~Observer();
 
+	virtual unsigned int getPriority() const { return 9999; }//priority number to sort observers
 	virtual void objectDeleted(Event& event) {}
 	virtual void objectChanging(Event& event) {}//before change
 	virtual void objectChanged(Event& event) {}//after change
@@ -55,6 +56,19 @@ public:
 
 protected:
 	Observees _observees;
+};
+
+//determines which observer to notify first
+class ObserverComparator
+{
+public:
+	bool operator() (const Observer* obsrvr1, const Observer* obsrvr2) const
+	{
+		if (obsrvr1->getPriority() != obsrvr2->getPriority())
+			return obsrvr1->getPriority() < obsrvr2->getPriority();
+		else
+			return obsrvr1 < obsrvr2;
+	}
 };
 
 class ObserverSet : public Referenced
@@ -79,7 +93,7 @@ public:
 	void signalNodeAdded(Event& event);
 	void signalNodeRemoved(Event& event);
 
-	typedef std::set<Observer*> Observers;
+	typedef std::set<Observer*, ObserverComparator> Observers;
 	Observers& getObservers() { return _observers; }
 	const Observers& getObservers() const { return _observers; }
 

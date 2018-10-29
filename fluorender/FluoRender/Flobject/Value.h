@@ -66,6 +66,8 @@ public:
 
 	virtual const char* className() const { return "Value"; }
 
+	virtual unsigned int getPriority() const { return 10; }
+
 	virtual void objectDeleted(Event& event);
 	virtual void objectChanged(Event& event);
 

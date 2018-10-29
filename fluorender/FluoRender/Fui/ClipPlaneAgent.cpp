@@ -338,10 +338,17 @@ void ClipPlaneAgent::OnClipDistXChanged(FL::Event& event)
 	getValue("clip dist x", clip_dist);
 	long res;
 	getValue("res x", res);
+	bool set_dist = false;
 	if (clip_dist > 1.0)
+	{
 		clip_dist = 1.0;
+		set_dist = true;
+	}
 	if (clip_dist <= 0.0)
+	{
 		clip_dist = 1.0 / res;
+		set_dist = true;
+	}
 	double x1, x2, center;
 	getValue("clip x1", x1);
 	getValue("clip x2", x2);
@@ -355,6 +362,7 @@ void ClipPlaneAgent::OnClipDistXChanged(FL::Event& event)
 		x1 = x2 - clip_dist;
 	}
 
+	if (set_dist) setValue("clip dist x", clip_dist, event);
 	setValue("clip x1", x1, event);
 	setValue("clip x2", x2, event);
 	if (!panel_.m_yz_dist_text->HasFocus())
@@ -368,10 +376,17 @@ void ClipPlaneAgent::OnClipDistYChanged(FL::Event& event)
 	getValue("clip dist y", clip_dist);
 	long res;
 	getValue("res y", res);
+	bool set_dist = false;
 	if (clip_dist > 1.0)
+	{
 		clip_dist = 1.0;
+		set_dist = true;
+	}
 	if (clip_dist <= 0.0)
+	{
 		clip_dist = 1.0 / res;
+		set_dist = true;
+	}
 	double y1, y2, center;
 	getValue("clip y1", y1);
 	getValue("clip y2", y2);
@@ -385,6 +400,7 @@ void ClipPlaneAgent::OnClipDistYChanged(FL::Event& event)
 		y1 = y2 - clip_dist;
 	}
 
+	if (set_dist) setValue("clip dist y", clip_dist, event);
 	setValue("clip y1", y1, event);
 	setValue("clip y2", y2, event);
 	if (!panel_.m_xz_dist_text->HasFocus())
@@ -398,10 +414,17 @@ void ClipPlaneAgent::OnClipDistZChanged(FL::Event& event)
 	getValue("clip dist z", clip_dist);
 	long res;
 	getValue("res z", res);
+	bool set_dist = false;
 	if (clip_dist > 1.0)
+	{
 		clip_dist = 1.0;
+		set_dist = true;
+	}
 	if (clip_dist <= 0.0)
+	{
 		clip_dist = 1.0 / res;
+		set_dist = true;
+	}
 	double z1, z2, center;
 	getValue("clip z1", z1);
 	getValue("clip z2", z2);
@@ -415,6 +438,7 @@ void ClipPlaneAgent::OnClipDistZChanged(FL::Event& event)
 		z1 = z2 - clip_dist;
 	}
 
+	if (set_dist) setValue("clip dist z", clip_dist, event);
 	setValue("clip z1", z1, event);
 	setValue("clip z2", z2, event);
 	if (!panel_.m_xy_dist_text->HasFocus())

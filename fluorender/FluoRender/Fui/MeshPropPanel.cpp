@@ -231,10 +231,11 @@ void MeshPropPanel::OnShineText(wxCommandEvent& event)
 {
 	wxString str = m_shine_text->GetValue();
 	double shine;
-	str.ToDouble(&shine);
-	m_shine_sldr->SetValue(int(shine));
-
-	m_agent->setValue("mat shine", shine);
+	if (str.ToDouble(&shine))
+	{
+		m_shine_sldr->SetValue(int(shine));
+		m_agent->setValue("mat shine", shine);
+	}
 }
 
 void MeshPropPanel::OnAlphaChange(wxScrollEvent & event)
@@ -248,10 +249,11 @@ void MeshPropPanel::OnAlphaText(wxCommandEvent& event)
 {
 	wxString str = m_alpha_text->GetValue();
 	double alpha;
-	str.ToDouble(&alpha);
-	m_alpha_sldr->SetValue(int(alpha*255.0 + 0.5));
-
-	m_agent->setValue("alpha", alpha);
+	if (str.ToDouble(&alpha))
+	{
+		m_alpha_sldr->SetValue(int(alpha*255.0 + 0.5));
+		m_agent->setValue("alpha", alpha);
+	}
 }
 
 void MeshPropPanel::OnScaleChange(wxScrollEvent & event)
@@ -265,12 +267,13 @@ void MeshPropPanel::OnScaleText(wxCommandEvent& event)
 {
 	wxString str = m_scale_text->GetValue();
 	double dval;
-	str.ToDouble(&dval);
-	m_scale_sldr->SetValue(int(dval*100.0 + 0.5));
-
-	m_agent->setValue("scale x", dval);
-	m_agent->setValue("scale y", dval);
-	m_agent->setValue("scale z", dval);
+	if (str.ToDouble(&dval))
+	{
+		m_scale_sldr->SetValue(int(dval*100.0 + 0.5));
+		m_agent->setValue("scale x", dval);
+		m_agent->setValue("scale y", dval);
+		m_agent->setValue("scale z", dval);
+	}
 }
 
 //shadow
@@ -291,10 +294,11 @@ void MeshPropPanel::OnShadowText(wxCommandEvent& event)
 {
 	wxString str = m_shadow_text->GetValue();
 	double dval;
-	str.ToDouble(&dval);
-	m_shadow_sldr->SetValue(int(dval*100.0+0.5));
-
-	m_agent->setValue("shadow int", dval);
+	if (str.ToDouble(&dval))
+	{
+		m_shadow_sldr->SetValue(int(dval*100.0 + 0.5));
+		m_agent->setValue("shadow int", dval);
+	}
 }
 
 //size limiter
@@ -315,8 +319,9 @@ void MeshPropPanel::OnSizeText(wxCommandEvent& event)
 {
 	wxString str = m_size_text->GetValue();
 	long val;
-	str.ToLong(&val);
-	m_size_sldr->SetValue(val);
-
-	m_agent->setValue("limit", val);
+	if (str.ToLong(&val))
+	{
+		m_size_sldr->SetValue(val);
+		m_agent->setValue("limit", val);
+	}
 }

@@ -56,6 +56,8 @@ namespace FL
 
 		virtual ObjectFactory* asFactory() { return this; }
 
+		virtual unsigned int getPriority() const { return 300; }
+
 		//propagate values from object to the default
 		virtual void propValuesToDefault(Object*, const std::vector<std::string> &names = {});
 		virtual void propValuesFromDefault(Object*, const std::vector<std::string> &names = {});

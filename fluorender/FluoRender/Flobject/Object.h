@@ -75,6 +75,8 @@ public:
 	virtual FUI::InterfaceAgent* asAgent() { return 0; }
 	virtual ObjectFactory* asFactory() { return 0; }
 
+	virtual unsigned int getPriority() const { return 999; }
+
 	virtual void objectDeleted(Event& event);
 	virtual void objectChanging(Event& event);
 	virtual void objectChanged(Event& event);

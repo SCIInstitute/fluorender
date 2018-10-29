@@ -61,7 +61,8 @@ bool Observer::removeObservee(Referenced* observee)
 }
 
 ObserverSet::ObserverSet(const Referenced* observedObject):
-	_observedObject(const_cast<Referenced*>(observedObject))
+	_observedObject(const_cast<Referenced*>(observedObject)),
+	_observers(ObserverComparator())
 {
 }
 

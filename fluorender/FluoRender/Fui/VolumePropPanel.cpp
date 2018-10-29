@@ -590,11 +590,12 @@ void VolumePropPanel::OnGammaText(wxCommandEvent& event)
 {
 	wxString str = m_gamma_text->GetValue();
 	double val = 0.0;
-	str.ToDouble(&val);
-	int ival = int(val*100.0 + 0.5);
-	m_gamma_sldr->SetValue(ival);
-
-	m_agent->setValue("gamma 3d", val);
+	if (str.ToDouble(&val))
+	{
+		int ival = int(val*100.0 + 0.5);
+		m_gamma_sldr->SetValue(ival);
+		m_agent->setValue("gamma 3d", val);
+	}
 }
 
 void VolumePropPanel::OnBoundarySync(wxMouseEvent& event)
@@ -613,11 +614,12 @@ void VolumePropPanel::OnBoundaryText(wxCommandEvent& event)
 {
 	wxString str = m_boundary_text->GetValue();
 	double val = 0.0;
-	str.ToDouble(&val);
-	int ival = int(val*2000.0 + 0.5);
-	m_boundary_sldr->SetValue(ival);
-
-	m_agent->setValue("extract boundary", val);
+	if (str.ToDouble(&val))
+	{
+		int ival = int(val*2000.0 + 0.5);
+		m_boundary_sldr->SetValue(ival);
+		m_agent->setValue("extract boundary", val);
+	}
 }
 
 //2
@@ -637,17 +639,19 @@ void VolumePropPanel::OnSaturationText(wxCommandEvent& event)
 {
 	wxString str = m_saturation_text->GetValue();
 	long ival = 0;
-	str.ToLong(&ival);
-	if (double(ival) > m_max_val)
+	if (str.ToLong(&ival))
 	{
-		UpdateMaxVal(ival);
-		str = wxString::Format("%d", ival);
-		m_saturation_text->ChangeValue(str);
-	}
-	m_saturation_sldr->SetValue(ival);
-	double val = double(ival) / m_max_val;
+		if (double(ival) > m_max_val)
+		{
+			UpdateMaxVal(ival);
+			str = wxString::Format("%d", ival);
+			m_saturation_text->ChangeValue(str);
+		}
+		m_saturation_sldr->SetValue(ival);
+		double val = double(ival) / m_max_val;
 
-	m_agent->setValue("saturation", val);
+		m_agent->setValue("saturation", val);
+	}
 }
 
 void VolumePropPanel::OnThreshSync(wxMouseEvent& event)
@@ -667,26 +671,28 @@ void VolumePropPanel::OnLeftThreshText(wxCommandEvent &event)
 {
 	wxString str = m_left_thresh_text->GetValue();
 	long ival = 0;
-	str.ToLong(&ival);
-	if (double(ival) > m_max_val)
+	if (str.ToLong(&ival))
 	{
-		UpdateMaxVal(ival);
-		str = wxString::Format("%d", ival);
-		m_left_thresh_text->ChangeValue(str);
-	}
-	double val = double(ival) / m_max_val;
-	double right_val = (double)m_right_thresh_sldr->GetValue() / m_max_val;
+		if (double(ival) > m_max_val)
+		{
+			UpdateMaxVal(ival);
+			str = wxString::Format("%d", ival);
+			m_left_thresh_text->ChangeValue(str);
+		}
+		double val = double(ival) / m_max_val;
+		double right_val = (double)m_right_thresh_sldr->GetValue() / m_max_val;
 
-	if (val > right_val)
-	{
-		val = right_val;
-		ival = int(val*m_max_val + 0.5);
-		wxString str2 = wxString::Format("%d", ival);
-		m_left_thresh_text->ChangeValue(str2);
-	}
-	m_left_thresh_sldr->SetValue(ival);
+		if (val > right_val)
+		{
+			val = right_val;
+			ival = int(val*m_max_val + 0.5);
+			wxString str2 = wxString::Format("%d", ival);
+			m_left_thresh_text->ChangeValue(str2);
+		}
+		m_left_thresh_sldr->SetValue(ival);
 
-	m_agent->setValue("low threshold", val);
+		m_agent->setValue("low threshold", val);
+	}
 }
 
 void VolumePropPanel::OnRightThreshChange(wxScrollEvent & event)
@@ -707,21 +713,23 @@ void VolumePropPanel::OnRightThreshText(wxCommandEvent &event)
 {
 	wxString str = m_right_thresh_text->GetValue();
 	long ival = 0;
-	str.ToLong(&ival);
-	if (double(ival) > m_max_val)
+	if (str.ToLong(&ival))
 	{
-		UpdateMaxVal(ival);
-		str = wxString::Format("%d", ival);
-		m_right_thresh_text->ChangeValue(str);
-	}
-	double val = double(ival) / m_max_val;
-	double left_val = (double)m_left_thresh_sldr->GetValue() / m_max_val;
+		if (double(ival) > m_max_val)
+		{
+			UpdateMaxVal(ival);
+			str = wxString::Format("%d", ival);
+			m_right_thresh_text->ChangeValue(str);
+		}
+		double val = double(ival) / m_max_val;
+		double left_val = (double)m_left_thresh_sldr->GetValue() / m_max_val;
 
-	if (val >= left_val)
-	{
-		m_right_thresh_sldr->SetValue(ival);
+		if (val >= left_val)
+		{
+			m_right_thresh_sldr->SetValue(ival);
 
-		m_agent->setValue("high threshold", val);
+			m_agent->setValue("high threshold", val);
+		}
 	}
 }
 
@@ -742,17 +750,19 @@ void VolumePropPanel::OnLuminanceText(wxCommandEvent &event)
 {
 	wxString str = m_luminance_text->GetValue();
 	long ival = 0;
-	str.ToLong(&ival);
-	if (double(ival) > m_max_val)
+	if (str.ToLong(&ival))
 	{
-		UpdateMaxVal(ival);
-		str = wxString::Format("%d", ival);
-		m_luminance_text->ChangeValue(str);
-	}
-	double val = double(ival) / m_max_val;
-	m_luminance_sldr->SetValue(ival);
+		if (double(ival) > m_max_val)
+		{
+			UpdateMaxVal(ival);
+			str = wxString::Format("%d", ival);
+			m_luminance_text->ChangeValue(str);
+		}
+		double val = double(ival) / m_max_val;
+		m_luminance_sldr->SetValue(ival);
 
-	m_agent->setValue("luminance", val);
+		m_agent->setValue("luminance", val);
+	}
 }
 
 //hi shading
@@ -772,10 +782,11 @@ void VolumePropPanel::OnHiShadingText(wxCommandEvent &event)
 {
 	wxString str = m_hi_shading_text->GetValue();
 	double val = 0.0;
-	str.ToDouble(&val);
-	m_hi_shading_sldr->SetValue(int(val*10.0 + 0.5));
-
-	m_agent->setValue("high shading", val);
+	if (str.ToDouble(&val))
+	{
+		m_hi_shading_sldr->SetValue(int(val*10.0 + 0.5));
+		m_agent->setValue("high shading", val);
+	}
 }
 
 //shadow
@@ -807,10 +818,11 @@ void VolumePropPanel::OnShadowText(wxCommandEvent &event)
 {
 	wxString str = m_shadow_text->GetValue();
 	double val = 0.0;
-	str.ToDouble(&val);
-	m_shadow_sldr->SetValue(int(val*100.0 + 0.5));
-
-	m_agent->setValue("shadow int", val);
+	if (str.ToDouble(&val))
+	{
+		m_shadow_sldr->SetValue(int(val*100.0 + 0.5));
+		m_agent->setValue("shadow int", val);
+	}
 }
 
 //4
@@ -842,17 +854,19 @@ void VolumePropPanel::OnAlphaText(wxCommandEvent& event)
 {
 	wxString str = m_alpha_text->GetValue();
 	long ival = 0;
-	str.ToLong(&ival);
-	if (double(ival) > m_max_val)
+	if (str.ToLong(&ival))
 	{
-		UpdateMaxVal(ival);
-		str = wxString::Format("%d", ival);
-		m_alpha_text->ChangeValue(str);
-	}
-	double val = double(ival) / m_max_val;
-	m_alpha_sldr->SetValue(ival);
+		if (double(ival) > m_max_val)
+		{
+			UpdateMaxVal(ival);
+			str = wxString::Format("%d", ival);
+			m_alpha_text->ChangeValue(str);
+		}
+		double val = double(ival) / m_max_val;
+		m_alpha_sldr->SetValue(ival);
 
-	m_agent->setValue("alpha", val);
+		m_agent->setValue("alpha", val);
+	}
 }
 
 void VolumePropPanel::OnSampleSync(wxMouseEvent& event)
@@ -871,31 +885,33 @@ void VolumePropPanel::OnSampleText(wxCommandEvent& event)
 {
 	wxString str = m_sample_text->GetValue();
 	double srate = 0.0;
-	str.ToDouble(&srate);
-	double val = srate*10.0;
-	m_sample_sldr->SetValue(int(val));
+	if (str.ToDouble(&srate))
+	{
+		double val = srate * 10.0;
+		m_sample_sldr->SetValue(int(val));
 
-	//set sample rate value
-	m_agent->setValue("sample rate", srate);
-	//if (m_vrv && m_vrv->GetVolMethod() == VOL_METHOD_MULTI)
-	//{
-	//	//for (int i=0; i<m_vrv->GetAllVolumeNum(); i++)
-	//	//{
-	//	//	VolumeData* vd = m_vrv->GetAllVolumeData(i);
-	//	//	if (vd)
-	//	//		vd->SetSampleRate(srate);
-	//	//}
-	//}
-	//else
-	//{
-	//	//if (m_sync_group && m_group)
-	//	//	m_group->SetSampleRate(srate);
-	//	//else if (m_group && m_group->GetBlendMode()==2)
-	//	//	m_group->SetSampleRate(srate);
-	//	//else if (m_vd)
-	//	//	m_vd->SetSampleRate(srate);
-	//	m_vd->setValue("sample rate", srate);
-	//}
+		//set sample rate value
+		m_agent->setValue("sample rate", srate);
+		//if (m_vrv && m_vrv->GetVolMethod() == VOL_METHOD_MULTI)
+		//{
+		//	//for (int i=0; i<m_vrv->GetAllVolumeNum(); i++)
+		//	//{
+		//	//	VolumeData* vd = m_vrv->GetAllVolumeData(i);
+		//	//	if (vd)
+		//	//		vd->SetSampleRate(srate);
+		//	//}
+		//}
+		//else
+		//{
+		//	//if (m_sync_group && m_group)
+		//	//	m_group->SetSampleRate(srate);
+		//	//else if (m_group && m_group->GetBlendMode()==2)
+		//	//	m_group->SetSampleRate(srate);
+		//	//else if (m_vd)
+		//	//	m_vd->SetSampleRate(srate);
+		//	m_vd->setValue("sample rate", srate);
+		//}
+	}
 }
 
 //5
@@ -916,10 +932,11 @@ void VolumePropPanel::OnLowShadingText(wxCommandEvent &event)
 {
 	wxString str = m_low_shading_text->GetValue();
 	double val = 0.0;
-	str.ToDouble(&val);
-	m_low_shading_sldr->SetValue(int(val*100.0 + 0.5));
-
-	m_agent->setValue("low shading", val);
+	if (str.ToDouble(&val))
+	{
+		m_low_shading_sldr->SetValue(int(val*100.0 + 0.5));
+		m_agent->setValue("low shading", val);
+	}
 }
 
 void VolumePropPanel::OnShadingEnable(wxCommandEvent &event)
@@ -976,22 +993,24 @@ void VolumePropPanel::OnColormapHighValueText(wxCommandEvent &event)
 {
 	wxString str = m_colormap_high_value_text->GetValue();
 	long iVal = 0;
-	str.ToLong(&iVal);
-	if (double(iVal) > m_max_val)
+	if (str.ToLong(&iVal))
 	{
-		UpdateMaxVal(iVal);
-		str = wxString::Format("%d", iVal);
-		m_colormap_high_value_text->ChangeValue(str);
-	}
-	long iVal2 = m_colormap_low_value_sldr->GetValue();
+		if (double(iVal) > m_max_val)
+		{
+			UpdateMaxVal(iVal);
+			str = wxString::Format("%d", iVal);
+			m_colormap_high_value_text->ChangeValue(str);
+		}
+		long iVal2 = m_colormap_low_value_sldr->GetValue();
 
-	if (iVal >= iVal2)
-	{
-		m_colormap_high_value_sldr->SetValue(iVal);
+		if (iVal >= iVal2)
+		{
+			m_colormap_high_value_sldr->SetValue(iVal);
 
-		double val = double(iVal) / m_max_val;
+			double val = double(iVal) / m_max_val;
 
-		m_agent->setValue("colormap high", val);
+			m_agent->setValue("colormap high", val);
+		}
 	}
 }
 
@@ -1006,26 +1025,28 @@ void VolumePropPanel::OnColormapLowValueText(wxCommandEvent &event)
 {
 	wxString str = m_colormap_low_value_text->GetValue();
 	long iVal = 0;
-	str.ToLong(&iVal);
-	if (double(iVal) > m_max_val)
+	if (str.ToLong(&iVal))
 	{
-		UpdateMaxVal(iVal);
-		str = wxString::Format("%d", iVal);
-		m_colormap_low_value_text->ChangeValue(str);
+		if (double(iVal) > m_max_val)
+		{
+			UpdateMaxVal(iVal);
+			str = wxString::Format("%d", iVal);
+			m_colormap_low_value_text->ChangeValue(str);
+		}
+		long iVal2 = m_colormap_high_value_sldr->GetValue();
+
+		if (iVal > iVal2)
+		{
+			iVal = iVal2;
+			str = wxString::Format("%d", iVal);
+			m_colormap_low_value_text->ChangeValue(str);
+		}
+		m_colormap_low_value_sldr->SetValue(iVal);
+
+		double val = double(iVal) / m_max_val;
+
+		m_agent->setValue("colormap low", val);
 	}
-	long iVal2 = m_colormap_high_value_sldr->GetValue();
-
-	if (iVal > iVal2)
-	{
-		iVal = iVal2;
-		str = wxString::Format("%d", iVal);
-		m_colormap_low_value_text->ChangeValue(str);
-	}
-	m_colormap_low_value_sldr->SetValue(iVal);
-
-	double val = double(iVal) / m_max_val;
-
-	m_agent->setValue("colormap low", val);
 }
 
 void VolumePropPanel::OnColormapCombo(wxCommandEvent &event)
@@ -1558,24 +1579,21 @@ void VolumePropPanel::OnSpaceText(wxCommandEvent& event)
 	double dval;
 	//x
 	str = m_space_x_text->GetValue();
-	str.ToDouble(&dval);
-	if (dval > 0.0)
+	if (str.ToDouble(&dval) && dval > 0.0)
 	{
 		m_agent->setValue("spc x", dval);
 		m_agent->setValue("base spc x", dval);
 	}
 	//y
 	str = m_space_y_text->GetValue();
-	str.ToDouble(&dval);
-	if (dval > 0.0)
+	if (str.ToDouble(&dval) && dval > 0.0)
 	{
 		m_agent->setValue("spc y", dval);
 		m_agent->setValue("base spc y", dval);
 	}
 	//z
 	str = m_space_z_text->GetValue();
-	str.ToDouble(&dval);
-	if (dval > 0.0)
+	if (str.ToDouble(&dval) && dval > 0.0)
 	{
 		m_agent->setValue("spc z", dval);
 		m_agent->setValue("base spc z", dval);

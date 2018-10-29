@@ -419,9 +419,11 @@ void OutAdjustPanel::OnRGammaText(wxCommandEvent& event)
 {
 	wxString str = m_r_gamma_text->GetValue();
 	double val;
-	str.ToDouble(&val);
-	m_r_gamma_sldr->SetValue(int(val * 100));
-	m_agent->setValue("gamma r", double(1.0/val));
+	if (str.ToDouble(&val))
+	{
+		m_r_gamma_sldr->SetValue(int(val * 100));
+		m_agent->setValue("gamma r", double(1.0 / val));
+	}
 }
 
 void OutAdjustPanel::OnGGammaChange(wxScrollEvent & event)
@@ -435,9 +437,11 @@ void OutAdjustPanel::OnGGammaText(wxCommandEvent& event)
 {
 	wxString str = m_g_gamma_text->GetValue();
 	double val;
-	str.ToDouble(&val);
-	m_g_gamma_sldr->SetValue(int(val * 100));
-	m_agent->setValue("gamma g", double(1.0/val));
+	if (str.ToDouble(&val))
+	{
+		m_g_gamma_sldr->SetValue(int(val * 100));
+		m_agent->setValue("gamma g", double(1.0 / val));
+	}
 }
 
 void OutAdjustPanel::OnBGammaChange(wxScrollEvent & event)
@@ -451,9 +455,11 @@ void OutAdjustPanel::OnBGammaText(wxCommandEvent& event)
 {
 	wxString str = m_b_gamma_text->GetValue();
 	double val;
-	str.ToDouble(&val);
-	m_b_gamma_sldr->SetValue(int(val * 100));
-	m_agent->setValue("gamma b", double(1.0/val));
+	if (str.ToDouble(&val))
+	{
+		m_b_gamma_sldr->SetValue(int(val * 100));
+		m_agent->setValue("gamma b", double(1.0 / val));
+	}
 }
 
 //brightness
@@ -468,9 +474,11 @@ void OutAdjustPanel::OnRBrightnessText(wxCommandEvent& event)
 {
 	wxString str = m_r_brightness_text->GetValue();
 	double val;
-	str.ToDouble(&val);
-	m_r_brightness_sldr->SetValue(int(val));
-	m_agent->setValue("brightness r", double(val/256.0+1.0));
+	if (str.ToDouble(&val))
+	{
+		m_r_brightness_sldr->SetValue(int(val));
+		m_agent->setValue("brightness r", double(val / 256.0 + 1.0));
+	}
 }
 
 void OutAdjustPanel::OnGBrightnessChange(wxScrollEvent & event)
@@ -484,9 +492,11 @@ void OutAdjustPanel::OnGBrightnessText(wxCommandEvent& event)
 {
 	wxString str = m_g_brightness_text->GetValue();
 	double val;
-	str.ToDouble(&val);
-	m_g_brightness_sldr->SetValue(int(val));
-	m_agent->setValue("brightness g", double(val/256.0+1.0));
+	if (str.ToDouble(&val))
+	{
+		m_g_brightness_sldr->SetValue(int(val));
+		m_agent->setValue("brightness g", double(val / 256.0 + 1.0));
+	}
 }
 
 void OutAdjustPanel::OnBBrightnessChange(wxScrollEvent & event)
@@ -500,9 +510,11 @@ void OutAdjustPanel::OnBBrightnessText(wxCommandEvent& event)
 {
 	wxString str = m_b_brightness_text->GetValue();
 	double val;
-	str.ToDouble(&val);
-	m_b_brightness_sldr->SetValue(int(val));
-	m_agent->setValue("brightness b", double(val/256.0+1.0));
+	if (str.ToDouble(&val))
+	{
+		m_b_brightness_sldr->SetValue(int(val));
+		m_agent->setValue("brightness b", double(val / 256.0 + 1.0));
+	}
 }
 
 void OutAdjustPanel::OnRHdrChange(wxScrollEvent &event)
@@ -516,9 +528,11 @@ void OutAdjustPanel::OnRHdrText(wxCommandEvent &event)
 {
 	wxString str = m_r_hdr_text->GetValue();
 	double val;
-	str.ToDouble(&val);
-	m_r_hdr_sldr->SetValue(int(val * 100));
-	m_agent->setValue("equalize r", val);
+	if (str.ToDouble(&val))
+	{
+		m_r_hdr_sldr->SetValue(int(val * 100));
+		m_agent->setValue("equalize r", val);
+	}
 }
 
 void OutAdjustPanel::OnGHdrChange(wxScrollEvent &event)
@@ -532,9 +546,11 @@ void OutAdjustPanel::OnGHdrText(wxCommandEvent &event)
 {
 	wxString str = m_g_hdr_text->GetValue();
 	double val;
-	str.ToDouble(&val);
-	m_g_hdr_sldr->SetValue(int(val * 100));
-	m_agent->setValue("equalize g", val);
+	if (str.ToDouble(&val))
+	{
+		m_g_hdr_sldr->SetValue(int(val * 100));
+		m_agent->setValue("equalize g", val);
+	}
 }
 
 void OutAdjustPanel::OnBHdrChange(wxScrollEvent &event)
@@ -548,9 +564,11 @@ void OutAdjustPanel::OnBHdrText(wxCommandEvent &event)
 {
 	wxString str = m_b_hdr_text->GetValue();
 	double val;
-	str.ToDouble(&val);
-	m_b_hdr_sldr->SetValue(int(val * 100));
-	m_agent->setValue("equalize b", val);
+	if (str.ToDouble(&val))
+	{
+		m_b_hdr_sldr->SetValue(int(val * 100));
+		m_agent->setValue("equalize b", val);
+	}
 }
 
 void OutAdjustPanel::OnSyncRCheck(wxCommandEvent &event)
