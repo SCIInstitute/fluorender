@@ -68,7 +68,7 @@ namespace FL
 
 		virtual const char* className() const { return "Node"; }
 
-		virtual unsigned int getPriority() const { return 200; }
+		virtual unsigned int getPriority() const { return 100; }
 
 		virtual Group* asGroup() { return 0; }
 		virtual const Group* asGroup() const { return 0; }

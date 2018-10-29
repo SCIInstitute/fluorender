@@ -619,21 +619,8 @@ void ClipPlanePanel::OnX1ClipEdit(wxCommandEvent &event)
 	{
 		long resx;
 		m_agent->getValue("res x", resx);
-		bool link;
-		m_agent->getValue("clip link x", link);
-
-		double dval = 0.0;
-		if (!link)
-		{
-			str = m_x2_clip_text->GetValue();
-			long ival2;
-			str.ToLong(&ival2);
-			if (ival >= ival2)
-				ival = ival2 - 1;
-		}
 		m_x1_clip_sldr->SetValue(ival);
-		dval = (double)ival / (double)resx;
-
+		double dval = (double)ival / (double)resx;
 		m_agent->setValue("clip x1", dval);
 	}
 }
@@ -652,21 +639,8 @@ void ClipPlanePanel::OnX2ClipEdit(wxCommandEvent &event)
 	{
 		long resx;
 		m_agent->getValue("res x", resx);
-		bool link;
-		m_agent->getValue("clip link x", link);
-
-		double dval = 0.0;
-		if (!link)
-		{
-			str = m_x1_clip_text->GetValue();
-			long ival2;
-			str.ToLong(&ival2);
-			if (ival <= ival2)
-				ival = ival2 + 1;
-		}
 		m_x2_clip_sldr->SetValue(ival);
-		dval = (double)ival / (double)resx;
-
+		double dval = (double)ival / (double)resx;
 		m_agent->setValue("clip x2", dval);
 	}
 }
@@ -685,21 +659,8 @@ void ClipPlanePanel::OnY1ClipEdit(wxCommandEvent &event)
 	{
 		long resy;
 		m_agent->getValue("res y", resy);
-		bool link;
-		m_agent->getValue("clip link y", link);
-
-		double dval = 0.0;
-		if (!link)
-		{
-			str = m_y2_clip_text->GetValue();
-			long ival2;
-			str.ToLong(&ival2);
-			if (ival >= ival2)
-				ival = ival2 - 1;
-		}
 		m_y1_clip_sldr->SetValue(ival);
-		dval = (double)ival / (double)resy;
-
+		double dval = (double)ival / (double)resy;
 		m_agent->setValue("clip y1", dval);
 	}
 }
@@ -718,21 +679,8 @@ void ClipPlanePanel::OnY2ClipEdit(wxCommandEvent &event)
 	{
 		long resy;
 		m_agent->getValue("res y", resy);
-		bool link;
-		m_agent->getValue("clip link y", link);
-
-		double dval = 0.0;
-		if (!link)
-		{
-			str = m_y1_clip_text->GetValue();
-			long ival2;
-			str.ToLong(&ival2);
-			if (ival <= ival2)
-				ival = ival2 + 1;
-		}
 		m_y2_clip_sldr->SetValue(ival);
-		dval = (double)ival / (double)resy;
-
+		double dval = (double)ival / (double)resy;
 		m_agent->setValue("clip y2", dval);
 	}
 }
@@ -751,21 +699,8 @@ void ClipPlanePanel::OnZ1ClipEdit(wxCommandEvent &event)
 	{
 		long resz;
 		m_agent->getValue("res z", resz);
-		bool link;
-		m_agent->getValue("clip link z", link);
-
-		double dval = 0.0;
-		if (!link)
-		{
-			str = m_z2_clip_text->GetValue();
-			long ival2;
-			str.ToLong(&ival2);
-			if (ival >= ival2)
-				ival = ival2 - 1;
-		}
 		m_z1_clip_sldr->SetValue(ival);
-		dval = (double)ival / (double)resz;
-
+		double dval = (double)ival / (double)resz;
 		m_agent->setValue("clip z1", dval);
 	}
 }
@@ -784,21 +719,8 @@ void ClipPlanePanel::OnZ2ClipEdit(wxCommandEvent &event)
 	{
 		long resz;
 		m_agent->getValue("res z", resz);
-		bool link;
-		m_agent->getValue("clip link z", link);
-
-		double dval = 0.0;
-		if (!link)
-		{
-			str = m_z1_clip_text->GetValue();
-			long ival2;
-			str.ToLong(&ival2);
-			if (ival <= ival2)
-				ival = ival2 + 1;
-		}
 		m_z2_clip_sldr->SetValue(ival);
-		dval = (double)ival / (double)resz;
-
+		double dval = (double)ival / (double)resz;
 		m_agent->setValue("clip z2", dval);
 	}
 }

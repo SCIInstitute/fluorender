@@ -769,6 +769,13 @@ void VolumeData::OnClipX1Changed(Event& event)
 	{
 		getValue("clip x1", value1);
 		getValue("clip x2", value2);
+		if (value1 >= value2)
+		{
+			long resx;
+			getValue("res x", resx);
+			value1 = value2 - 1.0 / resx;
+			setValue("clip x1", value1);
+		}
 		clip_dist = value2 - value1;
 		setValue("clip dist x", clip_dist, event);
 	}
@@ -799,6 +806,13 @@ void VolumeData::OnClipX2Changed(Event& event)
 	{
 		getValue("clip x1", value1);
 		getValue("clip x2", value2);
+		if (value1 >= value2)
+		{
+			long resx;
+			getValue("res x", resx);
+			value2 = value1 + 1.0 / resx;
+			setValue("clip x2", value2);
+		}
 		clip_dist = value2 - value1;
 		setValue("clip dist x", clip_dist, event);
 	}
@@ -829,6 +843,13 @@ void VolumeData::OnClipY1Changed(Event& event)
 	{
 		getValue("clip y1", value1);
 		getValue("clip y2", value2);
+		if (value1 >= value2)
+		{
+			long resy;
+			getValue("res y", resy);
+			value1 = value2 - 1.0 / resy;
+			setValue("clip y1", value1);
+		}
 		clip_dist = value2 - value1;
 		setValue("clip dist y", clip_dist, event);
 	}
@@ -859,6 +880,13 @@ void VolumeData::OnClipY2Changed(Event& event)
 	{
 		getValue("clip y1", value1);
 		getValue("clip y2", value2);
+		if (value1 >= value2)
+		{
+			long resy;
+			getValue("res y", resy);
+			value2 = value1 + 1.0 / resy;
+			setValue("clip y2", value2);
+		}
 		clip_dist = value2 - value1;
 		setValue("clip dist y", clip_dist, event);
 	}
@@ -889,6 +917,13 @@ void VolumeData::OnClipZ1Changed(Event& event)
 	{
 		getValue("clip z1", value1);
 		getValue("clip z2", value2);
+		if (value1 >= value2)
+		{
+			long resz;
+			getValue("res z", resz);
+			value1 = value2 - 1.0 / resz;
+			setValue("clip z1", value1);
+		}
 		clip_dist = value2 - value1;
 		setValue("clip dist z", clip_dist, event);
 	}
@@ -919,6 +954,13 @@ void VolumeData::OnClipZ2Changed(Event& event)
 	{
 		getValue("clip z1", value1);
 		getValue("clip z2", value2);
+		if (value1 >= value2)
+		{
+			long resz;
+			getValue("res z", resz);
+			value2 = value1 + 1.0 / resz;
+			setValue("clip z2", value2);
+		}
 		clip_dist = value2 - value1;
 		setValue("clip dist z", clip_dist, event);
 	}

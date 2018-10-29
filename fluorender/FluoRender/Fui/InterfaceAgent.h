@@ -53,7 +53,7 @@ namespace FUI
 		virtual InterfaceAgent* asAgent() { return this; }
 
 		//observer
-		virtual unsigned int getPriority() const { return 100; }
+		virtual unsigned int getPriority() const { return 200; }
 
 		virtual void objectChanging(FL::Event& event)
 		{
