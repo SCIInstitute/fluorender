@@ -87,7 +87,7 @@ namespace FL
 		// node added and removed
 		void init(EventType tp, Object* prt, Object* chd, bool push_sender = false);
 
-		void setNotifyFlags(NotifyFlags flags) { m_flags = flags; }
+		void setNotifyFlags(NotifyFlags flags) { m_flags |= flags; }
 		NotifyFlags getNotifyFlags() const { return m_flags; }
 
 		inline Event& operator++()
