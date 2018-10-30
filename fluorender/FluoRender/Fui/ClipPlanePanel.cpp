@@ -85,7 +85,6 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 	const wxString& name) :
 	wxPanel(parent, id, pos, size, style, name),
 	m_frame(frame),
-	m_sel_type(0),
 	m_draw_clip(false),
 	m_hold_planes(false),
 	m_plane_mode(kNormal)
@@ -295,26 +294,6 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 		wxCommandEventHandler(ClipPlanePanel::OnSliderRClick),
 		NULL, this);
 
-	//keys
-	m_x1_clip_sldr->Connect(ID_X1ClipSldr, wxEVT_KEY_DOWN,
-		wxKeyEventHandler(ClipPlanePanel::OnSliderKeyDown),
-		NULL, this);
-	m_x2_clip_sldr->Connect(ID_X2ClipSldr, wxEVT_KEY_DOWN,
-		wxKeyEventHandler(ClipPlanePanel::OnSliderKeyDown),
-		NULL, this);
-	m_y1_clip_sldr->Connect(ID_Y1ClipSldr, wxEVT_KEY_DOWN,
-		wxKeyEventHandler(ClipPlanePanel::OnSliderKeyDown),
-		NULL, this);
-	m_y2_clip_sldr->Connect(ID_Y2ClipSldr, wxEVT_KEY_DOWN,
-		wxKeyEventHandler(ClipPlanePanel::OnSliderKeyDown),
-		NULL, this);
-	m_z1_clip_sldr->Connect(ID_Z1ClipSldr, wxEVT_KEY_DOWN,
-		wxKeyEventHandler(ClipPlanePanel::OnSliderKeyDown),
-		NULL, this);
-	m_z2_clip_sldr->Connect(ID_Z2ClipSldr, wxEVT_KEY_DOWN,
-		wxKeyEventHandler(ClipPlanePanel::OnSliderKeyDown),
-		NULL, this);
-
 	//2
 	wxBoxSizer *sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	sizer_2->Add(sizer_cx, 1, wxEXPAND);
@@ -458,11 +437,6 @@ ClipPlanePanel::~ClipPlanePanel()
 void ClipPlanePanel::AssociateNode(FL::Node* node)
 {
 	m_agent->setObject(node);
-}
-
-void ClipPlanePanel::SetChannLink(bool chann)
-{
-	m_toolbar->ToggleTool(ID_LinkChannelsBtn, chann);
 }
 
 void ClipPlanePanel::SetHoldPlanes(bool hold)
@@ -967,13 +941,7 @@ void ClipPlanePanel::OnZRotEdit(wxCommandEvent &event)
 
 void ClipPlanePanel::OnSliderRClick(wxCommandEvent& event)
 {
-	//if (m_sel_type != 2 || !m_vd)
-	//	return;
-
-	//int id = event.GetId();
-
-	//wxString str;
-	//double val;
+	int id = event.GetId();
 
 	////good rate
 	//double sample_rate;
@@ -999,301 +967,51 @@ void ClipPlanePanel::OnSliderRClick(wxCommandEvent& event)
 	//	}
 	//}
 
-	//long resx, resy, resz;
-	////m_vd->GetResolution(resx, resy, resz);
-	//m_vd->getValue("res x", resx);
-	//m_vd->getValue("res y", resy);
-	//m_vd->getValue("res z", resz);
+	long resx, resy, resz;
+	m_agent->getValue("res x", resx);
+	m_agent->getValue("res y", resy);
+	m_agent->getValue("res z", resz);
 
-	//if (id == ID_X1ClipSldr)
-	//{
-	//	str = m_x1_clip_text->GetValue();
-	//	str.ToDouble(&val);
-	//	if (val < resx)
-	//	{
-	//		SetXLink(false);
-	//		m_x2_clip_text->SetValue(
-	//			wxString::Format("%d", (int)(val + 1.0)));
-	//		SetXLink(true);
-	//	}
-	//	m_x1_clip_sldr->SetFocus();
-	//}
-	//else if (id == ID_X2ClipSldr)
-	//{
-	//	str = m_x2_clip_text->GetValue();
-	//	str.ToDouble(&val);
-	//	if (val > 0)
-	//	{
-	//		SetXLink(false);
-	//		m_x1_clip_text->SetValue(
-	//			wxString::Format("%d", (int)(val - 1.0)));
-	//		SetXLink(true);
-	//	}
-	//	m_x2_clip_sldr->SetFocus();
-	//}
-	//else if (id == ID_Y1ClipSldr)
-	//{
-	//	str = m_y1_clip_text->GetValue();
-	//	str.ToDouble(&val);
-	//	if (val < resy)
-	//	{
-	//		SetYLink(false);
-	//		m_y2_clip_text->SetValue(
-	//			wxString::Format("%d", (int)(val + 1.0)));
-	//		SetYLink(true);
-	//	}
-	//	m_y1_clip_sldr->SetFocus();
-	//}
-	//else if (id == ID_Y2ClipSldr)
-	//{
-	//	str = m_y2_clip_text->GetValue();
-	//	str.ToDouble(&val);
-	//	if (val > 0)
-	//	{
-	//		SetYLink(false);
-	//		m_y1_clip_text->SetValue(
-	//			wxString::Format("%d", (int)(val - 1.0)));
-	//		SetYLink(true);
-	//	}
-	//	m_y2_clip_sldr->SetFocus();
-	//}
-	//else if (id == ID_Z1ClipSldr)
-	//{
-	//	str = m_z1_clip_text->GetValue();
-	//	str.ToDouble(&val);
-	//	if (val < resz)
-	//	{
-	//		SetZLink(false);
-	//		m_z2_clip_text->SetValue(
-	//			wxString::Format("%d", (int)(val + 1.0)));
-	//		SetZLink(true);
-	//	}
-	//	m_z1_clip_sldr->SetFocus();
-	//}
-	//else if (id == ID_Z2ClipSldr)
-	//{
-	//	str = m_z2_clip_text->GetValue();
-	//	str.ToDouble(&val);
-	//	if (val > 0)
-	//	{
-	//		SetZLink(false);
-	//		m_z1_clip_text->SetValue(
-	//			wxString::Format("%d", (int)(val - 1.0)));
-	//		SetZLink(true);
-	//	}
-	//	m_z2_clip_sldr->SetFocus();
-	//}
+	switch (id)
+	{
+	case ID_X1ClipSldr:
+	case ID_X2ClipSldr:
+		m_agent->setValue("clip dist x", 1.0 / resx);
+		m_agent->setValue("clip link x", true);
+		m_agent->setValue("clip link y", false);
+		m_agent->setValue("clip link z", false);
+		m_agent->setValue("clip y1", double(0));
+		m_agent->setValue("clip y2", double(1));
+		m_agent->setValue("clip z1", double(0));
+		m_agent->setValue("clip z2", double(1));
+		break;
+	case ID_Y1ClipSldr:
+	case ID_Y2ClipSldr:
+		m_agent->setValue("clip dist y", 1.0 / resy);
+		m_agent->setValue("clip link y", true);
+		m_agent->setValue("clip link x", false);
+		m_agent->setValue("clip link z", false);
+		m_agent->setValue("clip x1", double(0));
+		m_agent->setValue("clip x2", double(1));
+		m_agent->setValue("clip z1", double(0));
+		m_agent->setValue("clip z2", double(1));
+		break;
+	case ID_Z1ClipSldr:
+	case ID_Z2ClipSldr:
+		m_agent->setValue("clip dist z", 1.0 / resz);
+		m_agent->setValue("clip link z", true);
+		m_agent->setValue("clip link x", false);
+		m_agent->setValue("clip link y", false);
+		m_agent->setValue("clip x1", double(0));
+		m_agent->setValue("clip x2", double(1));
+		m_agent->setValue("clip y1", double(0));
+		m_agent->setValue("clip y2", double(1));
+		break;
+	}
 
-	////reset others
-	//vector<Plane*> *planes = 0;
-	//if (m_vd->GetRenderer())
-	//	planes = m_vd->GetRenderer()->get_planes();
-	//if (!planes)
-	//	return;
-	//if (planes->size() != 6)
-	//	return;
-
-	//if (id == ID_X1ClipSldr ||
-	//	id == ID_X2ClipSldr)
-	//{
-	//	m_link_y = false;
-	//	m_check_tb->ToggleTool(ID_LinkYChk, false);
-	//	m_check_tb->SetToolNormalBitmap(ID_LinkYChk,
-	//		wxGetBitmapFromMemory(unlink));
-	//	m_link_z = false;
-	//	m_check_tb->ToggleTool(ID_LinkZChk, false);
-	//	m_check_tb->SetToolNormalBitmap(ID_LinkZChk,
-	//		wxGetBitmapFromMemory(unlink));
-	//	m_y1_clip_text->SetValue("0");
-	//	m_y2_clip_text->SetValue(
-	//		wxString::Format("%d", resy));
-	//	m_z1_clip_text->SetValue("0");
-	//	m_z2_clip_text->SetValue(
-	//		wxString::Format("%d", resz));
-	//}
-	//else if (id == ID_Y1ClipSldr ||
-	//	id == ID_Y2ClipSldr)
-	//{
-	//	m_link_x = false;
-	//	m_check_tb->ToggleTool(ID_LinkXChk, false);
-	//	m_check_tb->SetToolNormalBitmap(ID_LinkXChk,
-	//		wxGetBitmapFromMemory(unlink));
-	//	m_link_z = false;
-	//	m_check_tb->ToggleTool(ID_LinkZChk, false);
-	//	m_check_tb->SetToolNormalBitmap(ID_LinkZChk,
-	//		wxGetBitmapFromMemory(unlink));
-	//	m_x1_clip_text->SetValue("0");
-	//	m_x2_clip_text->SetValue(
-	//		wxString::Format("%d", resx));
-	//	m_z1_clip_text->SetValue("0");
-	//	m_z2_clip_text->SetValue(
-	//		wxString::Format("%d", resz));
-	//}
-	//else if (id == ID_Z1ClipSldr ||
-	//	id == ID_Z2ClipSldr)
-	//{
-	//	m_link_x = false;
-	//	m_check_tb->ToggleTool(ID_LinkXChk, false);
-	//	m_check_tb->SetToolNormalBitmap(ID_LinkXChk,
-	//		wxGetBitmapFromMemory(unlink));
-	//	m_link_y = false;
-	//	m_check_tb->ToggleTool(ID_LinkYChk, false);
-	//	m_check_tb->SetToolNormalBitmap(ID_LinkYChk,
-	//		wxGetBitmapFromMemory(unlink));
-	//	m_x1_clip_text->SetValue("0");
-	//	m_x2_clip_text->SetValue(
-	//		wxString::Format("%d", resx));
-	//	m_y1_clip_text->SetValue("0");
-	//	m_y2_clip_text->SetValue(
-	//		wxString::Format("%d", resy));
-	//}
-}
-
-void ClipPlanePanel::OnSliderKeyDown(wxKeyEvent& event)
-{
-	//if (m_sel_type != 2 || !m_vd)
-	//	return;
-
-	//long resx, resy, resz;
-	////m_vd->GetResolution(resx, resy, resz);
-	//m_vd->getValue("res x", resx);
-	//m_vd->getValue("res y", resy);
-	//m_vd->getValue("res z", resz);
-
-	//int id = event.GetId();
-	//int key = event.GetKeyCode();
-
-	//wxString str;
-	//long dist;
-
-	//if (key == wxKeyCode(','))
-	//{
-	//	if (id == ID_X1ClipSldr ||
-	//		id == ID_X2ClipSldr)
-	//	{
-	//		if (!m_link_x)
-	//		{
-	//			event.Skip();
-	//			return;
-	//		}
-
-	//		str = m_yz_dist_text->GetValue();
-	//		str.ToLong(&dist);
-	//		dist = dist<2 ? dist + 1 : dist;
-	//		str = m_x1_clip_text->GetValue();
-	//		long x1;
-	//		str.ToLong(&x1);
-	//		x1 = x1 - dist + 1;
-	//		x1 = x1<0 ? 0 : x1;
-	//		m_x1_clip_text->SetValue(
-	//			wxString::Format("%d", x1));
-	//	}
-	//	else if (id == ID_Y1ClipSldr ||
-	//		id == ID_Y2ClipSldr)
-	//	{
-	//		if (!m_link_y)
-	//		{
-	//			event.Skip();
-	//			return;
-	//		}
-
-	//		str = m_xz_dist_text->GetValue();
-	//		str.ToLong(&dist);
-	//		dist = dist<2 ? dist + 1 : dist;
-	//		str = m_y1_clip_text->GetValue();
-	//		long y1;
-	//		str.ToLong(&y1);
-	//		y1 = y1 - dist + 1;
-	//		y1 = y1<0 ? 0 : y1;
-	//		m_y1_clip_text->SetValue(
-	//			wxString::Format("%d", y1));
-	//	}
-	//	else if (id == ID_Z1ClipSldr ||
-	//		id == ID_Z2ClipSldr)
-	//	{
-	//		if (!m_link_z)
-	//		{
-	//			event.Skip();
-	//			return;
-	//		}
-
-	//		str = m_xy_dist_text->GetValue();
-	//		str.ToLong(&dist);
-	//		dist = dist<2 ? dist + 1 : dist;
-	//		str = m_z1_clip_text->GetValue();
-	//		long z1;
-	//		str.ToLong(&z1);
-	//		z1 = z1 - dist + 1;
-	//		z1 = z1<0 ? 0 : z1;
-	//		m_z1_clip_text->SetValue(
-	//			wxString::Format("%d", z1));
-	//	}
-	//}
-	//else if (key == wxKeyCode('.'))
-	//{
-	//	if (id == ID_X1ClipSldr ||
-	//		id == ID_X2ClipSldr)
-	//	{
-	//		if (!m_link_x)
-	//		{
-	//			event.Skip();
-	//			return;
-	//		}
-
-	//		str = m_yz_dist_text->GetValue();
-	//		str.ToLong(&dist);
-	//		dist = dist<2 ? dist + 1 : dist;
-	//		str = m_x2_clip_text->GetValue();
-	//		long x2;
-	//		str.ToLong(&x2);
-	//		x2 = x2 + dist - 1;
-	//		x2 = x2>resx ? resx : x2;
-	//		m_x2_clip_text->SetValue(
-	//			wxString::Format("%d", x2));
-	//	}
-	//	else if (id == ID_Y1ClipSldr ||
-	//		id == ID_Y2ClipSldr)
-	//	{
-	//		if (!m_link_y)
-	//		{
-	//			event.Skip();
-	//			return;
-	//		}
-
-	//		str = m_xz_dist_text->GetValue();
-	//		str.ToLong(&dist);
-	//		dist = dist<2 ? dist + 1 : dist;
-	//		str = m_y2_clip_text->GetValue();
-	//		long y2;
-	//		str.ToLong(&y2);
-	//		y2 = y2 + dist - 1;
-	//		y2 = y2>resy ? resy : y2;
-	//		m_y2_clip_text->SetValue(
-	//			wxString::Format("%d", y2));
-	//	}
-	//	else if (id == ID_Z1ClipSldr ||
-	//		id == ID_Z2ClipSldr)
-	//	{
-	//		if (!m_link_z)
-	//		{
-	//			event.Skip();
-	//			return;
-	//		}
-
-	//		str = m_xy_dist_text->GetValue();
-	//		str.ToLong(&dist);
-	//		dist = dist<2 ? dist + 1 : dist;
-	//		str = m_z2_clip_text->GetValue();
-	//		long z2;
-	//		str.ToLong(&z2);
-	//		z2 = z2 + dist - 1;
-	//		z2 = z2>resz ? resz : z2;
-	//		m_z2_clip_text->SetValue(
-	//			wxString::Format("%d", z2));
-	//	}
-	//}
-
-	event.Skip();
+	wxWindow* win = dynamic_cast<wxWindow*>(event.GetEventObject());
+	if (win)
+		win->SetFocus();
 }
 
 void ClipPlanePanel::EnableAll()

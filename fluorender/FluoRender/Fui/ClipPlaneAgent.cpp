@@ -180,33 +180,57 @@ void ClipPlaneAgent::UpdateAllSettings()
 	panel_.m_link_x_tb->ToggleTool(
 		ClipPlanePanel::ID_LinkXChk, clip_link_x);
 	if (clip_link_x)
+	{
 		panel_.m_link_x_tb->SetToolNormalBitmap(
 			ClipPlanePanel::ID_LinkXChk,
 			wxGetBitmapFromMemory(link));
+		panel_.m_x1_clip_sldr->SetPageSize(int(distx*resx + 0.5));
+		panel_.m_x2_clip_sldr->SetPageSize(int(distx*resx + 0.5));
+	}
 	else
+	{
 		panel_.m_link_x_tb->SetToolNormalBitmap(
 			ClipPlanePanel::ID_LinkXChk,
 			wxGetBitmapFromMemory(unlink));
+		panel_.m_x1_clip_sldr->SetPageSize(std::max(int(resx) / 20, 1));
+		panel_.m_x2_clip_sldr->SetPageSize(std::max(int(resx) / 20, 1));
+	}
 	panel_.m_link_y_tb->ToggleTool(
 		ClipPlanePanel::ID_LinkYChk, clip_link_y);
 	if (clip_link_y)
+	{
 		panel_.m_link_y_tb->SetToolNormalBitmap(
 			ClipPlanePanel::ID_LinkYChk,
 			wxGetBitmapFromMemory(link));
+		panel_.m_y1_clip_sldr->SetPageSize(int(disty*resy + 0.5));
+		panel_.m_y2_clip_sldr->SetPageSize(int(disty*resy + 0.5));
+	}
 	else
+	{
 		panel_.m_link_y_tb->SetToolNormalBitmap(
 			ClipPlanePanel::ID_LinkYChk,
 			wxGetBitmapFromMemory(unlink));
+		panel_.m_y1_clip_sldr->SetPageSize(std::max(int(resy) / 20, 1));
+		panel_.m_y2_clip_sldr->SetPageSize(std::max(int(resy) / 20, 1));
+	}
 	panel_.m_link_z_tb->ToggleTool(
 		ClipPlanePanel::ID_LinkZChk, clip_link_z);
 	if (clip_link_z)
+	{
 		panel_.m_link_z_tb->SetToolNormalBitmap(
 			ClipPlanePanel::ID_LinkZChk,
 			wxGetBitmapFromMemory(link));
+		panel_.m_z1_clip_sldr->SetPageSize(int(distz*resz + 0.5));
+		panel_.m_z2_clip_sldr->SetPageSize(int(distz*resz + 0.5));
+	}
 	else
+	{
 		panel_.m_link_z_tb->SetToolNormalBitmap(
 			ClipPlanePanel::ID_LinkZChk,
 			wxGetBitmapFromMemory(unlink));
+		panel_.m_z1_clip_sldr->SetPageSize(std::max(int(resz) / 20, 1));
+		panel_.m_z2_clip_sldr->SetPageSize(std::max(int(resz) / 20, 1));
+	}
 
 	//clip rotations
 	double clip_rot_x, clip_rot_y, clip_rot_z;
@@ -368,6 +392,14 @@ void ClipPlaneAgent::OnClipDistXChanged(FL::Event& event)
 	if (!panel_.m_yz_dist_text->HasFocus())
 		panel_.m_yz_dist_text->ChangeValue(
 			wxString::Format("%d", int(clip_dist * res + 0.5)));
+
+	bool clip_link;
+	getValue("clip link x", clip_link);
+	if (clip_link)
+	{
+		panel_.m_x1_clip_sldr->SetPageSize(int(clip_dist*res + 0.5));
+		panel_.m_x2_clip_sldr->SetPageSize(int(clip_dist*res + 0.5));
+	}
 }
 
 void ClipPlaneAgent::OnClipDistYChanged(FL::Event& event)
@@ -406,6 +438,14 @@ void ClipPlaneAgent::OnClipDistYChanged(FL::Event& event)
 	if (!panel_.m_xz_dist_text->HasFocus())
 		panel_.m_xz_dist_text->ChangeValue(
 			wxString::Format("%d", int(clip_dist * res + 0.5)));
+
+	bool clip_link;
+	getValue("clip link y", clip_link);
+	if (clip_link)
+	{
+		panel_.m_y1_clip_sldr->SetPageSize(int(clip_dist*res + 0.5));
+		panel_.m_y2_clip_sldr->SetPageSize(int(clip_dist*res + 0.5));
+	}
 }
 
 void ClipPlaneAgent::OnClipDistZChanged(FL::Event& event)
@@ -444,6 +484,14 @@ void ClipPlaneAgent::OnClipDistZChanged(FL::Event& event)
 	if (!panel_.m_xy_dist_text->HasFocus())
 		panel_.m_xy_dist_text->ChangeValue(
 			wxString::Format("%d", int(clip_dist * res + 0.5)));
+
+	bool clip_link;
+	getValue("clip link z", clip_link);
+	if (clip_link)
+	{
+		panel_.m_z1_clip_sldr->SetPageSize(int(clip_dist*res + 0.5));
+		panel_.m_z2_clip_sldr->SetPageSize(int(clip_dist*res + 0.5));
+	}
 }
 
 void ClipPlaneAgent::OnClipLinkXChanged(FL::Event& event)
@@ -452,14 +500,26 @@ void ClipPlaneAgent::OnClipLinkXChanged(FL::Event& event)
 	getValue("clip link x", bval);
 	panel_.m_link_x_tb->ToggleTool(
 		ClipPlanePanel::ID_LinkXChk, bval);
+	long res;
+	getValue("res x", res);
+	double clip_dist;
+	getValue("clip dist x", clip_dist);
 	if (bval)
+	{
 		panel_.m_link_x_tb->SetToolNormalBitmap(
 			ClipPlanePanel::ID_LinkXChk,
 			wxGetBitmapFromMemory(link));
+		panel_.m_x1_clip_sldr->SetPageSize(int(clip_dist*res + 0.5));
+		panel_.m_x2_clip_sldr->SetPageSize(int(clip_dist*res + 0.5));
+	}
 	else
+	{
 		panel_.m_link_x_tb->SetToolNormalBitmap(
 			ClipPlanePanel::ID_LinkXChk,
 			wxGetBitmapFromMemory(unlink));
+		panel_.m_x1_clip_sldr->SetPageSize(std::max(int(res) / 20, 1));
+		panel_.m_x2_clip_sldr->SetPageSize(std::max(int(res) / 20, 1));
+	}
 }
 
 void ClipPlaneAgent::OnClipLinkYChanged(FL::Event& event)
@@ -468,14 +528,26 @@ void ClipPlaneAgent::OnClipLinkYChanged(FL::Event& event)
 	getValue("clip link y", bval);
 	panel_.m_link_y_tb->ToggleTool(
 		ClipPlanePanel::ID_LinkYChk, bval);
+	long res;
+	getValue("res y", res);
+	double clip_dist;
+	getValue("clip dist y", clip_dist);
 	if (bval)
+	{
 		panel_.m_link_y_tb->SetToolNormalBitmap(
 			ClipPlanePanel::ID_LinkYChk,
 			wxGetBitmapFromMemory(link));
+		panel_.m_y1_clip_sldr->SetPageSize(int(clip_dist*res + 0.5));
+		panel_.m_y2_clip_sldr->SetPageSize(int(clip_dist*res + 0.5));
+	}
 	else
+	{
 		panel_.m_link_y_tb->SetToolNormalBitmap(
 			ClipPlanePanel::ID_LinkYChk,
 			wxGetBitmapFromMemory(unlink));
+		panel_.m_y1_clip_sldr->SetPageSize(std::max(int(res) / 20, 1));
+		panel_.m_y2_clip_sldr->SetPageSize(std::max(int(res) / 20, 1));
+	}
 }
 
 void ClipPlaneAgent::OnClipLinkZChanged(FL::Event& event)
@@ -484,14 +556,26 @@ void ClipPlaneAgent::OnClipLinkZChanged(FL::Event& event)
 	getValue("clip link z", bval);
 	panel_.m_link_z_tb->ToggleTool(
 		ClipPlanePanel::ID_LinkZChk, bval);
+	long res;
+	getValue("res z", res);
+	double clip_dist;
+	getValue("clip dist z", clip_dist);
 	if (bval)
+	{
 		panel_.m_link_z_tb->SetToolNormalBitmap(
 			ClipPlanePanel::ID_LinkZChk,
 			wxGetBitmapFromMemory(link));
+		panel_.m_z1_clip_sldr->SetPageSize(int(clip_dist*res + 0.5));
+		panel_.m_z2_clip_sldr->SetPageSize(int(clip_dist*res + 0.5));
+	}
 	else
+	{
 		panel_.m_link_z_tb->SetToolNormalBitmap(
 			ClipPlanePanel::ID_LinkZChk,
 			wxGetBitmapFromMemory(unlink));
+		panel_.m_z1_clip_sldr->SetPageSize(std::max(int(res) / 20, 1));
+		panel_.m_z2_clip_sldr->SetPageSize(std::max(int(res) / 20, 1));
+	}
 }
 
 void ClipPlaneAgent::OnClipRotXChanged(FL::Event& event)

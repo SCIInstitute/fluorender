@@ -102,11 +102,6 @@ namespace FUI
 
 		void AssociateNode(FL::Node* node);
 
-		bool GetChannLink()
-		{
-			return m_toolbar->GetToolState(ID_LinkChannelsBtn);
-		}
-		void SetChannLink(bool chann);
 		bool GetHoldPlanes()
 		{
 			return m_hold_planes;
@@ -123,14 +118,9 @@ namespace FUI
 
 		ClipPlaneAgent* m_agent;
 
-		int m_sel_type;		//curent selection type
 		bool m_draw_clip;
 		bool m_hold_planes;
 		PLANE_MODES m_plane_mode;
-
-		int m_x_sldr_dist;
-		int m_y_sldr_dist;
-		int m_z_sldr_dist;
 
 		//1st line
 		wxToolBar *m_toolbar;
@@ -226,9 +216,6 @@ namespace FUI
 
 		//mouse
 		void OnSliderRClick(wxCommandEvent& event);
-
-		//key down
-		void OnSliderKeyDown(wxKeyEvent& event);
 
 		DECLARE_EVENT_TABLE()
 
