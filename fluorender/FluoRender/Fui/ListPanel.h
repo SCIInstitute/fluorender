@@ -63,6 +63,14 @@ namespace FUI
 		wxDataViewCtrl* m_list_ctrl;
 		ListModel* m_list_model;
 
+		void OnAddToView(wxCommandEvent& event);
+		void OnRename(wxCommandEvent& event);
+		void OnSave(wxCommandEvent& event);
+		void OnBake(wxCommandEvent& event);
+		void OnSaveMask(wxCommandEvent& event);
+		void OnDelete(wxCommandEvent& event);
+		void OnDeleteAll(wxCommandEvent& event);
+
 		DECLARE_EVENT_TABLE()
 	};
 }

@@ -35,6 +35,13 @@ DEALINGS IN THE SOFTWARE.
 using namespace FUI;
 
 BEGIN_EVENT_TABLE(ListPanel, wxPanel)
+EVT_TOOL(ID_AddToView, ListPanel::OnAddToView)
+EVT_TOOL(ID_Rename, ListPanel::OnRename)
+EVT_TOOL(ID_Save, ListPanel::OnSave)
+EVT_TOOL(ID_Bake, ListPanel::OnBake)
+EVT_TOOL(ID_SaveMask, ListPanel::OnSaveMask)
+EVT_TOOL(ID_Delete, ListPanel::OnDelete)
+EVT_TOOL(ID_DeleteAll, ListPanel::OnDeleteAll)
 END_EVENT_TABLE()
 
 ListPanel::ListPanel(wxWindow *frame,
@@ -127,3 +134,30 @@ ListPanel::~ListPanel()
 
 }
 
+void ListPanel::OnAddToView(wxCommandEvent& event)
+{
+}
+
+void ListPanel::OnRename(wxCommandEvent& event)
+{
+}
+
+void ListPanel::OnSave(wxCommandEvent& event)
+{
+}
+
+void ListPanel::OnBake(wxCommandEvent& event)
+{
+}
+
+void ListPanel::OnSaveMask(wxCommandEvent& event)
+{
+}
+
+void ListPanel::OnDelete(wxCommandEvent& event)
+{
+}
+
+void ListPanel::OnDeleteAll(wxCommandEvent &event)
+{
+}

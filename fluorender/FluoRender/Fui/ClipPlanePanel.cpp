@@ -143,7 +143,7 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 	wxBoxSizer* sizer_cx = new wxBoxSizer(wxVERTICAL);
 	st = new wxStaticText(this, 0, "X");
 	m_x1_clip_text = new wxTextCtrl(this, ID_X1ClipText, "0",
-		wxDefaultPosition, wxSize(34, 20), 0, vald_int);
+		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
 	m_xpanel = new wxPanel(this);
 	m_x1_clip_sldr = new wxSlider(m_xpanel, ID_X1ClipSldr, 0, 0, 512,
 		wxPoint(0, 0), wxSize(20, -1), wxSL_RIGHT);
@@ -157,7 +157,7 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 		wxDefaultPosition, wxSize(5, 5));
 	st_cb->SetBackgroundColour(wxColor(255, 128, 128));
 	m_x2_clip_text = new wxTextCtrl(this, ID_X2ClipText, "512",
-		wxDefaultPosition, wxSize(34, 20), 0, vald_int);
+		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
 	//link x
 	m_link_x_tb = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
@@ -188,7 +188,7 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 	wxBoxSizer* sizer_cy = new wxBoxSizer(wxVERTICAL);
 	st = new wxStaticText(this, 0, "Y");
 	m_y1_clip_text = new wxTextCtrl(this, ID_Y1ClipText, "0",
-		wxDefaultPosition, wxSize(34, 20), 0, vald_int);
+		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
 	m_ypanel = new wxPanel(this);
 	m_y1_clip_sldr = new wxSlider(m_ypanel, ID_Y1ClipSldr, 0, 0, 512,
 		wxPoint(0, 0), wxSize(20, -1), wxSL_RIGHT);
@@ -202,7 +202,7 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 		wxDefaultPosition, wxSize(5, 5));
 	st_cb->SetBackgroundColour(wxColor(128, 255, 128));
 	m_y2_clip_text = new wxTextCtrl(this, ID_Y2ClipText, "512",
-		wxDefaultPosition, wxSize(34, 20), 0, vald_int);
+		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
 	//link y
 	m_link_y_tb = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
@@ -233,7 +233,7 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 	wxBoxSizer* sizer_cz = new wxBoxSizer(wxVERTICAL);
 	st = new wxStaticText(this, 0, "Z");
 	m_z1_clip_text = new wxTextCtrl(this, ID_Z1ClipText, "0",
-		wxDefaultPosition, wxSize(34, 20), 0, vald_int);
+		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
 	m_zpanel = new wxPanel(this);
 	m_z1_clip_sldr = new wxSlider(m_zpanel, ID_Z1ClipSldr, 0, 0, 512,
 		wxPoint(0, 0), wxSize(20, -1), wxSL_RIGHT);
@@ -247,7 +247,7 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 		wxDefaultPosition, wxSize(5, 5));
 	st_cb->SetBackgroundColour(wxColor(128, 128, 255));
 	m_z2_clip_text = new wxTextCtrl(this, ID_Z2ClipText, "512",
-		wxDefaultPosition, wxSize(34, 20), 0, vald_int);
+		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
 	//link z
 	m_link_z_tb = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
@@ -357,7 +357,7 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 		wxDefaultPosition, wxDefaultSize, wxSB_VERTICAL);
 	m_x_rot_sldr->SetScrollbar(180, 60, 420, 15);
 	m_x_rot_text = new wxTextCtrl(this, ID_XRotText, "0.0",
-		wxDefaultPosition, wxSize(34, 20), 0, vald_fp1);
+		wxDefaultPosition, wxSize(40, 20), 0, vald_fp1);
 	sizer_rx->Add(5, 5, 0);
 	sizer_rx->Add(st, 0, wxALIGN_CENTER, 0);
 	sizer_rx->Add(m_x_rot_text, 0, wxALIGN_CENTER, 0);
@@ -370,7 +370,7 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 		wxDefaultPosition, wxDefaultSize, wxSB_VERTICAL);
 	m_y_rot_sldr->SetScrollbar(180, 60, 420, 15);
 	m_y_rot_text = new wxTextCtrl(this, ID_YRotText, "0.0",
-		wxDefaultPosition, wxSize(34, 20), 0, vald_fp1);
+		wxDefaultPosition, wxSize(40, 20), 0, vald_fp1);
 	sizer_ry->Add(5, 5, 0);
 	sizer_ry->Add(st, 0, wxALIGN_CENTER, 0);
 	sizer_ry->Add(m_y_rot_text, 0, wxALIGN_CENTER, 0);
@@ -383,7 +383,7 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 		wxDefaultPosition, wxDefaultSize, wxSB_VERTICAL);
 	m_z_rot_sldr->SetScrollbar(180, 60, 420, 15);
 	m_z_rot_text = new wxTextCtrl(this, ID_ZRotText, "0.0",
-		wxDefaultPosition, wxSize(34, 20), 0, vald_fp1);
+		wxDefaultPosition, wxSize(40, 20), 0, vald_fp1);
 	sizer_rz->Add(5, 5, 0);
 	sizer_rz->Add(st, 0, wxALIGN_CENTER, 0);
 	sizer_rz->Add(m_z_rot_text, 0, wxALIGN_CENTER, 0);
@@ -591,6 +591,16 @@ void ClipPlanePanel::OnX1ClipEdit(wxCommandEvent &event)
 	long ival = 0;
 	if (str.ToLong(&ival))
 	{
+		bool clip_link;
+		m_agent->getValue("clip link x", clip_link);
+		if (!clip_link)
+		{
+			str = m_x2_clip_text->GetValue();
+			long ival2;
+			str.ToLong(&ival2);
+			if (ival >= ival2)
+				ival = ival2 - 1;
+		}
 		long resx;
 		m_agent->getValue("res x", resx);
 		m_x1_clip_sldr->SetValue(ival);
@@ -611,6 +621,16 @@ void ClipPlanePanel::OnX2ClipEdit(wxCommandEvent &event)
 	long ival = 0;
 	if (str.ToLong(&ival))
 	{
+		bool clip_link;
+		m_agent->getValue("clip link x", clip_link);
+		if (!clip_link)
+		{
+			str = m_x1_clip_text->GetValue();
+			long ival2;
+			str.ToLong(&ival2);
+			if (ival <= ival2)
+				ival = ival2 + 1;
+		}
 		long resx;
 		m_agent->getValue("res x", resx);
 		m_x2_clip_sldr->SetValue(ival);
@@ -631,6 +651,16 @@ void ClipPlanePanel::OnY1ClipEdit(wxCommandEvent &event)
 	long ival = 0;
 	if (str.ToLong(&ival))
 	{
+		bool clip_link;
+		m_agent->getValue("clip link y", clip_link);
+		if (!clip_link)
+		{
+			str = m_y2_clip_text->GetValue();
+			long ival2;
+			str.ToLong(&ival2);
+			if (ival >= ival2)
+				ival = ival2 - 1;
+		}
 		long resy;
 		m_agent->getValue("res y", resy);
 		m_y1_clip_sldr->SetValue(ival);
@@ -651,6 +681,16 @@ void ClipPlanePanel::OnY2ClipEdit(wxCommandEvent &event)
 	long ival = 0;
 	if (str.ToLong(&ival))
 	{
+		bool clip_link;
+		m_agent->getValue("clip link y", clip_link);
+		if (!clip_link)
+		{
+			str = m_y1_clip_text->GetValue();
+			long ival2;
+			str.ToLong(&ival2);
+			if (ival <= ival2)
+				ival = ival2 + 1;
+		}
 		long resy;
 		m_agent->getValue("res y", resy);
 		m_y2_clip_sldr->SetValue(ival);
@@ -671,6 +711,16 @@ void ClipPlanePanel::OnZ1ClipEdit(wxCommandEvent &event)
 	long ival = 0;
 	if (str.ToLong(&ival))
 	{
+		bool clip_link;
+		m_agent->getValue("clip link z", clip_link);
+		if (!clip_link)
+		{
+			str = m_z2_clip_text->GetValue();
+			long ival2;
+			str.ToLong(&ival2);
+			if (ival >= ival2)
+				ival = ival2 - 1;
+		}
 		long resz;
 		m_agent->getValue("res z", resz);
 		m_z1_clip_sldr->SetValue(ival);
@@ -691,6 +741,16 @@ void ClipPlanePanel::OnZ2ClipEdit(wxCommandEvent &event)
 	long ival = 0;
 	if (str.ToLong(&ival))
 	{
+		bool clip_link;
+		m_agent->getValue("clip link z", clip_link);
+		if (!clip_link)
+		{
+			str = m_z1_clip_text->GetValue();
+			long ival2;
+			str.ToLong(&ival2);
+			if (ival <= ival2)
+				ival = ival2 + 1;
+		}
 		long resz;
 		m_agent->getValue("res z", resz);
 		m_z2_clip_sldr->SetValue(ival);
@@ -943,29 +1003,9 @@ void ClipPlanePanel::OnSliderRClick(wxCommandEvent& event)
 {
 	int id = event.GetId();
 
-	////good rate
-	//double sample_rate;
-	//m_vd->getValue("sample rate", sample_rate);
-	//if (sample_rate < 2.0)
-	//{
-	//	sample_rate = 2.0;
-	//	m_vd->setValue("sample rate", sample_rate);
-	//}
-	//if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
-	//{
-	//	if (m_mgr)
-	//	{
-	//		//int i;
-	//		//for (i=0; i<m_mgr->GetVolumeNum(); i++)
-	//		//{
-	//		//	VolumeData* vd = m_mgr->GetVolumeData(i);
-	//		//	if (!vd || vd == m_vd)
-	//		//		continue;
-	//		//	if (vd->GetSampleRate()<2.0)
-	//		//		vd->SetSampleRate(2.0);
-	//		//}
-	//	}
-	//}
+	wxWindow* win = dynamic_cast<wxWindow*>(event.GetEventObject());
+	if (win)
+		win->SetFocus();
 
 	long resx, resy, resz;
 	m_agent->getValue("res x", resx);
@@ -1008,10 +1048,6 @@ void ClipPlanePanel::OnSliderRClick(wxCommandEvent& event)
 		m_agent->setValue("clip y2", double(1));
 		break;
 	}
-
-	wxWindow* win = dynamic_cast<wxWindow*>(event.GetEventObject());
-	if (win)
-		win->SetFocus();
 }
 
 void ClipPlanePanel::EnableAll()

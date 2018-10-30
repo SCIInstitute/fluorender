@@ -44,6 +44,8 @@ void RenderCanvasAgent::objectChanged(FL::Event& event)
 	InterfaceAgent::objectChanged(event);
 	if (event.getNotifyFlags() & FL::Event::NOTIFY_AGENT)
 	{
+		gl_view_.m_force_clear = true;
+		gl_view_.m_interactive = true;
 		gl_view_.RefreshGL(41);
 	}
 }
@@ -54,7 +56,7 @@ void RenderCanvasAgent::nodeAdded(FL::Event& event)
 	{
 		gl_view_.PopMeshList();
 		gl_view_.PopVolumeList();
-		gl_view_.RefreshGL(41);
+		gl_view_.RefreshGL(42);
 	}
 }
 
@@ -64,7 +66,7 @@ void RenderCanvasAgent::nodeRemoved(FL::Event& event)
 	{
 		gl_view_.PopMeshList();
 		gl_view_.PopVolumeList();
-		gl_view_.RefreshGL(41);
+		gl_view_.RefreshGL(43);
 	}
 }
 

@@ -290,12 +290,14 @@ void ClipPlaneAgent::OnClipXChanged(FL::Event& event)
 	//x1
 	ival = int(x1 * res + 0.5);
 	panel_.m_x1_clip_sldr->SetValue(ival);
-	panel_.m_x1_clip_text->ChangeValue(wxString::Format("%d", ival));
+	if (!panel_.m_x1_clip_text->HasFocus())
+		panel_.m_x1_clip_text->ChangeValue(wxString::Format("%d", ival));
 	double percent = (double)ival / (double)panel_.m_x1_clip_sldr->GetMax();
 	//x2
 	ival = int(x2 * res + 0.5);
 	panel_.m_x2_clip_sldr->SetValue(ival);
-	panel_.m_x2_clip_text->ChangeValue(wxString::Format("%d", ival));
+	if (!panel_.m_x2_clip_text->HasFocus())
+		panel_.m_x2_clip_text->ChangeValue(wxString::Format("%d", ival));
 	//bar
 	int barsize = (panel_.m_x1_clip_sldr->GetSize().GetHeight() - 20);
 	panel_.m_xBar->SetPosition(wxPoint(20, 10 + percent * barsize));
@@ -316,12 +318,14 @@ void ClipPlaneAgent::OnClipYChanged(FL::Event& event)
 	//y1
 	ival = int(y1 * res + 0.5);
 	panel_.m_y1_clip_sldr->SetValue(ival);
-	panel_.m_y1_clip_text->ChangeValue(wxString::Format("%d", ival));
+	if (!panel_.m_y1_clip_text->HasFocus())
+		panel_.m_y1_clip_text->ChangeValue(wxString::Format("%d", ival));
 	double percent = (double)ival / (double)panel_.m_y1_clip_sldr->GetMax();
 	//y2
 	ival = int(y2 * res + 0.5);
 	panel_.m_y2_clip_sldr->SetValue(ival);
-	panel_.m_y2_clip_text->ChangeValue(wxString::Format("%d", ival));
+	if (!panel_.m_y2_clip_text->HasFocus())
+		panel_.m_y2_clip_text->ChangeValue(wxString::Format("%d", ival));
 	//ybar
 	double barsize = (panel_.m_y1_clip_sldr->GetSize().GetHeight() - 20);
 	panel_.m_yBar->SetPosition(wxPoint(20, 10 + percent * barsize));
@@ -342,12 +346,14 @@ void ClipPlaneAgent::OnClipZChanged(FL::Event& event)
 	//z1
 	ival = int(z1 * res + 0.5);
 	panel_.m_z1_clip_sldr->SetValue(ival);
-	panel_.m_z1_clip_text->ChangeValue(wxString::Format("%d", ival));
+	if (!panel_.m_z1_clip_text->HasFocus())
+		panel_.m_z1_clip_text->ChangeValue(wxString::Format("%d", ival));
 	double percent = (double)ival / (double)panel_.m_z1_clip_sldr->GetMax();
 	//z2
 	ival = int(z2 * res + 0.5);
 	panel_.m_z2_clip_sldr->SetValue(ival);
-	panel_.m_z2_clip_text->ChangeValue(wxString::Format("%d", ival));
+	if (!panel_.m_z2_clip_text->HasFocus())
+		panel_.m_z2_clip_text->ChangeValue(wxString::Format("%d", ival));
 	//zbar
 	double barsize = (panel_.m_z1_clip_sldr->GetSize().GetHeight() - 20);
 	panel_.m_zBar->SetPosition(wxPoint(20, 10 + percent * barsize));
@@ -379,6 +385,7 @@ void ClipPlaneAgent::OnClipDistXChanged(FL::Event& event)
 	center = (x1 + x2) / 2;
 	x1 = center - clip_dist / 2;
 	x1 = x1 < 0.0 ? 0.0 : x1;
+	x1 = std::round(x1 * res) / res;
 	x2 = x1 + clip_dist;
 	if (x2 > 1.0)
 	{
@@ -425,6 +432,7 @@ void ClipPlaneAgent::OnClipDistYChanged(FL::Event& event)
 	center = (y1 + y2) / 2;
 	y1 = center - clip_dist / 2;
 	y1 = y1 < 0.0 ? 0.0 : y1;
+	y1 = std::round(y1 * res) / res;
 	y2 = y1 + clip_dist;
 	if (y2 > 1.0)
 	{
@@ -471,6 +479,7 @@ void ClipPlaneAgent::OnClipDistZChanged(FL::Event& event)
 	center = (z1 + z2) / 2;
 	z1 = center - clip_dist / 2;
 	z1 = z1 < 0.0 ? 0.0 : z1;
+	z1 = std::round(z1 * res) / res;
 	z2 = z1 + clip_dist;
 	if (z2 > 1.0)
 	{

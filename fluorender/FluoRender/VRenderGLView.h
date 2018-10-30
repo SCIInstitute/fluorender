@@ -1086,6 +1086,7 @@ private:
 	DECLARE_EVENT_TABLE()
 
 	friend class VRenderView;
+	friend class FUI::RenderCanvasAgent;
 };
 
 inline wxSize VRenderGLView::GetGLSize()

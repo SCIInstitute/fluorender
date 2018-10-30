@@ -442,7 +442,7 @@ VRenderFrame::VRenderFrame(
 
 	//clipping view
 	m_clip_view = new FUI::ClipPlanePanel(this, this, wxID_ANY,
-		wxDefaultPosition, wxSize(130,700));
+		wxDefaultPosition, wxSize(140,700));
 	//m_clip_view->SetDataManager(&m_data_mgr);
 	//m_clip_view->SetPlaneMode(static_cast<PLANE_MODES>(
 	//	m_setting_dlg->GetPlaneMode()));
