@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VRenderFrame.h>
 #include <Global/Global.h>
 #include <Scenegraph/VolumeData.h>
+#include <boost/algorithm/string.hpp>
 #include <Formats/png_resource.h>
 #include <img/icons.h>
 #include <img/tick.xpm>
@@ -38,6 +39,9 @@ using namespace FUI;
 
 BEGIN_EVENT_TABLE(TreePanel, wxPanel)
 EVT_DATAVIEW_SELECTION_CHANGED(ID_TreeCtrl, TreePanel::OnSelectionChanged)
+EVT_DATAVIEW_ITEM_BEGIN_DRAG(ID_TreeCtrl, TreePanel::OnBeginDrag)
+EVT_DATAVIEW_ITEM_DROP_POSSIBLE(ID_TreeCtrl, TreePanel::OnDropPossible)
+EVT_DATAVIEW_ITEM_DROP(ID_TreeCtrl, TreePanel::OnDrop)
 END_EVENT_TABLE()
 
 TreePanel::TreePanel(wxWindow* frame,
@@ -252,3 +256,59 @@ void TreePanel::OnSelectionChanged(wxDataViewEvent &event)
 	wxDataViewItem item = event.GetItem();
 	vr_frame->OnSelection(static_cast<FL::Node*>(item.GetID()));
 }
+
+void TreePanel::OnBeginDrag(wxDataViewEvent &event)
+{
+	wxDataViewItem item(event.GetItem());
+	FL::Node* node = (FL::Node*)item.GetID();
+	if (!node)
+	{
+		event.Veto();
+		return;
+	}
+	//multiple selections
+	wxDataViewItemArray sel;
+	m_tree_ctrl->GetSelections(sel);
+	wxString names;
+	for (auto it = sel.begin();
+		it != sel.end(); ++it)
+	{
+		FL::Node* sel_node = (FL::Node*)it->GetID();
+		if (sel_node)
+		{
+			names += sel_node->getName();
+			if (it != std::prev(sel.end()))
+				names += '\n';
+		}
+	}
+
+	wxTextDataObject *wxobj = new wxTextDataObject;
+	wxobj->SetText(names);
+	event.SetDataObject(wxobj);
+	event.SetDragFlags(wxDrag_AllowMove); // allows both copy and move
+}
+
+void TreePanel::OnDropPossible(wxDataViewEvent &event)
+{
+	event.Allow();
+	//wxDataViewItem item(event.GetItem());
+	//FL::Node* node = (FL::Node*)item.GetID();
+	//if (!node)
+	//	event.Veto();
+}
+
+void TreePanel::OnDrop(wxDataViewEvent &event)
+{
+	wxDataViewItem item(event.GetItem());
+	FL::Node* target_node = (FL::Node*)item.GetID();
+
+	wxTextDataObject wxobj;
+	wxobj.SetData(wxDF_UNICODETEXT, event.GetDataSize(), event.GetDataBuffer());
+	wxString source_names = wxobj.GetText();
+	std::vector<std::string> source_name_list;
+	boost::split(source_name_list, source_names.ToStdString(), [](char c) {return c == '\n'; });
+	for (auto it = source_name_list.begin();
+		it != source_name_list.end(); ++it)
+		m_tree_model->MoveNode(*it, target_node);
+}
+

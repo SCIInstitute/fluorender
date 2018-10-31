@@ -91,6 +91,9 @@ namespace FUI
 
 	private:
 		void OnSelectionChanged(wxDataViewEvent &event);
+		void OnBeginDrag(wxDataViewEvent &event);
+		void OnDropPossible(wxDataViewEvent &event);
+		void OnDrop(wxDataViewEvent &event);
 
 		DECLARE_EVENT_TABLE()
 	};

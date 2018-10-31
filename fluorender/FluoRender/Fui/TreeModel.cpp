@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Fui/TreeModel.h>
 #include <Fui/TreePanel.h>
 #include <Scenegraph/Group.h>
+#include <Scenegraph/SearchVisitor.h>
 
 using namespace FUI;
 
@@ -178,3 +179,14 @@ unsigned int TreeModel::GetChildren(const wxDataViewItem &parent,
 	return size;
 }
 
+//operations
+void TreeModel::MoveNode(const std::string &source, FL::Node* target)
+{
+	FL::Node* root = getObject();
+	if (!root)
+		return;
+	FL::SearchVisitor visitor;
+	visitor.matchName(source);
+	root->accept(visitor);
+	FL::ObjectList* list = visitor.getResult();
+}

@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VRenderFrame.h>
 #include <Global/Global.h>
 #include <Scenegraph/VolumeData.h>
+#include <boost/algorithm/string.hpp>
 #include <Formats/png_resource.h>
 #include <img/icons.h>
 
@@ -42,6 +43,9 @@ EVT_TOOL(ID_Bake, ListPanel::OnBake)
 EVT_TOOL(ID_SaveMask, ListPanel::OnSaveMask)
 EVT_TOOL(ID_Delete, ListPanel::OnDelete)
 EVT_TOOL(ID_DeleteAll, ListPanel::OnDeleteAll)
+EVT_DATAVIEW_ITEM_BEGIN_DRAG(ID_ListCtrl, ListPanel::OnBeginDrag)
+EVT_DATAVIEW_ITEM_DROP_POSSIBLE(ID_ListCtrl, ListPanel::OnDropPossible)
+EVT_DATAVIEW_ITEM_DROP(ID_ListCtrl, ListPanel::OnDrop)
 END_EVENT_TABLE()
 
 ListPanel::ListPanel(wxWindow *frame,
@@ -83,7 +87,7 @@ ListPanel::ListPanel(wxWindow *frame,
 		bitmap, "Delete All: Delete all datasets");
 	m_toolbar->Realize();
 
-	m_list_ctrl = new wxDataViewCtrl(this, wxID_ANY,
+	m_list_ctrl = new wxDataViewCtrl(this, ID_ListCtrl,
 		wxDefaultPosition, wxDefaultSize,
 		wxDV_MULTIPLE | wxDV_ROW_LINES);
 	m_list_ctrl->EnableDragSource(wxDF_UNICODETEXT);
@@ -161,3 +165,61 @@ void ListPanel::OnDelete(wxCommandEvent& event)
 void ListPanel::OnDeleteAll(wxCommandEvent &event)
 {
 }
+
+void ListPanel::OnBeginDrag(wxDataViewEvent &event)
+{
+	wxDataViewItem item(event.GetItem());
+	size_t row = m_list_model->GetRow(item);
+	FL::Object *obj = FL::Global::instance().get(row);
+	if (!obj)
+	{
+		event.Veto();
+		return;
+	}
+	//multiple selections
+	wxDataViewItemArray sel;
+	m_list_ctrl->GetSelections(sel);
+	wxString names;
+	for (auto it = sel.begin();
+		it != sel.end(); ++it)
+	{
+		FL::Node* sel_node = (FL::Node*)it->GetID();
+		if (sel_node)
+		{
+			names += sel_node->getName();
+			if (it != std::prev(sel.end()))
+				names += '\n';
+		}
+	}
+
+	wxTextDataObject *wxobj = new wxTextDataObject;
+	wxobj->SetText(names);
+	event.SetDataObject(wxobj);
+	event.SetDragFlags(wxDrag_AllowMove); // allows both copy and move
+}
+
+void ListPanel::OnDropPossible(wxDataViewEvent &event)
+{
+	event.Allow();
+	//wxDataViewItem item(event.GetItem());
+	//size_t row = m_list_model->GetRow(item);
+	//FL::Object *obj = FL::Global::instance().get(row);
+	//if (!obj)
+	//	event.Veto();
+}
+
+void ListPanel::OnDrop(wxDataViewEvent &event)
+{
+	wxDataViewItem item(event.GetItem());
+
+	wxTextDataObject wxobj;
+	wxobj.SetData(wxDF_UNICODETEXT, event.GetDataSize(), event.GetDataBuffer());
+	wxString source_names = wxobj.GetText();
+	std::vector<std::string> source_name_list;
+	boost::split(source_name_list, source_names.ToStdString(), [](char c) {return c == '\n'; });
+	for (auto it = source_name_list.begin();
+		it != source_name_list.end(); ++it)
+		;
+		//m_list_model->MoveNode(*it, target_node);
+}
+

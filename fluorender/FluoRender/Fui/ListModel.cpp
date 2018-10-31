@@ -60,7 +60,17 @@ void ListModel::nodeRemoved(FL::Event& event)
 int ListModel::Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 	unsigned int column, bool ascending) const
 {
-	return wxDataViewModel::Compare(item1, item2, column, ascending);
+	//return wxDataViewModel::Compare(item1, item2, column, ascending);
+	unsigned int row1 = GetRow(item1);
+	unsigned int row2 = GetRow(item2);
+	wxVariant var1, var2;
+	GetValueByRow(var1, row1, column);
+	GetValueByRow(var2, row2, column);
+	if (var1.GetString() < var2.GetString())
+		return -1;
+	else if (var1.GetString() > var2.GetString())
+		return 1;
+	else return 0;
 }
 
 //model definition

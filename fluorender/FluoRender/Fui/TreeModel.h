@@ -66,6 +66,7 @@ namespace FUI
 		virtual unsigned int GetChildren(const wxDataViewItem &parent,
 			wxDataViewItemArray &array) const override;
 
+		//ref
 		virtual bool isSameKindAs(const Object* obj) const
 		{
 			return dynamic_cast<const TreeModel*>(obj) != NULL;
@@ -83,6 +84,9 @@ namespace FUI
 		{ InterfaceAgent::setObject(root); }
 		virtual FL::Node* getObject()
 		{ return dynamic_cast<FL::Node*>(InterfaceAgent::getObject()); }
+
+		//operations
+		void MoveNode(const std::string &source, FL::Node* target);
 
 	protected:
 		TreePanel &panel_;

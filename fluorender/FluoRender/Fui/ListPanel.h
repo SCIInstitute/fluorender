@@ -39,7 +39,8 @@ namespace FUI
 	public:
 		enum
 		{
-			ID_AddToView = ID_LIST_PANEL2,
+			ID_ListCtrl = ID_LIST_PANEL2,
+			ID_AddToView,
 			ID_Rename,
 			ID_Save,
 			ID_Bake,
@@ -70,6 +71,9 @@ namespace FUI
 		void OnSaveMask(wxCommandEvent& event);
 		void OnDelete(wxCommandEvent& event);
 		void OnDeleteAll(wxCommandEvent& event);
+		void OnBeginDrag(wxDataViewEvent &event);
+		void OnDropPossible(wxDataViewEvent &event);
+		void OnDrop(wxDataViewEvent &event);
 
 		DECLARE_EVENT_TABLE()
 	};
