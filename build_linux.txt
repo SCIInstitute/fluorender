@@ -53,3 +53,17 @@ CMakeFiles/FluoRender.dir/link.txt
 $ make
 $ make install
 
+Issues
+
+- works with OpenCL shipped with Nvidia driver 390, but segfaults in /lib64/libnvidia-opencl.so.1 with driver 410
+- the same crash seems to happen even with 390 when using hardware OpenGL.
+- with driver 390, even though the GUI starts, there are several errors:
+Error while getting JNI_CreateJavaVM funciton address.
+./src/unix/glx11.cpp(565): assert ""xid"" failed in SetCurrent(): window must be shown
+Error while getting JNI_CreateJavaVM funciton address.
+16:02:08: Debug: Failed to connect to session manager: SESSION_MANAGER environment variable not defined
+Error while getting JNI_CreateJavaVM funciton address.
+Error compiling vertex shader: 0(3) : error C0000: syntax error, unexpected '(', expecting "::" at token "("
+0(10) : error C1503: undefined variable "InVertex"
+0(11) : error C1503: undefined variable "InTexCoord"
+0(12) : error C1503: undefined variable "InVertex" 
