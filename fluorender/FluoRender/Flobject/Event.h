@@ -121,8 +121,9 @@ namespace FL
 		}
 		inline bool pass(Referenced* sndr, unsigned int limit = 0)
 		{
-			if (!sender_chain.empty() &&
-				sndr == sender_chain.back())
+			if (sender_chain.size() > 1 &&
+				sndr == *std::prev(sender_chain.end()) &&
+				sndr == *std::prev(sender_chain.end()-1))
 				return false;
 			else
 			{
