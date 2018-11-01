@@ -97,18 +97,12 @@ ListPanel::ListPanel(wxWindow *frame,
 	m_list_model =
 		FL::Global::instance().getAgentFactory().
 		getOrAddListModel("ListPanel", *this);
-	if (m_list_model)
-	{
-		m_list_model->setObject(0);
-		m_list_ctrl->AssociateModel(m_list_model);
-	}
-
 	//append columns
 	//name
 	wxDataViewTextRenderer *tr =
 		new wxDataViewTextRenderer("string");
 	wxDataViewColumn *column0 =
-		new wxDataViewColumn("Name", tr, 0, 20, wxALIGN_LEFT,
+		new wxDataViewColumn("Name", tr, 0, 120, wxALIGN_LEFT,
 			wxDATAVIEW_COL_SORTABLE |
 			wxDATAVIEW_COL_REORDERABLE |
 			wxDATAVIEW_COL_RESIZABLE);
@@ -116,7 +110,7 @@ ListPanel::ListPanel(wxWindow *frame,
 	//type
 	tr = new wxDataViewTextRenderer("string");
 	wxDataViewColumn *column1 =
-		new wxDataViewColumn("Type", tr, 1, 20, wxALIGN_LEFT,
+		new wxDataViewColumn("Type", tr, 1, 80, wxALIGN_LEFT,
 			wxDATAVIEW_COL_SORTABLE |
 			wxDATAVIEW_COL_REORDERABLE |
 			wxDATAVIEW_COL_RESIZABLE);
@@ -124,12 +118,17 @@ ListPanel::ListPanel(wxWindow *frame,
 	//path
 	tr = new wxDataViewTextRenderer("string");
 	wxDataViewColumn *column2 =
-		new wxDataViewColumn("Path", tr, 2, 20, wxALIGN_LEFT,
+		new wxDataViewColumn("Path", tr, 2, 200, wxALIGN_LEFT,
 			wxDATAVIEW_COL_SORTABLE |
 			wxDATAVIEW_COL_REORDERABLE |
 			wxDATAVIEW_COL_RESIZABLE);
 	m_list_ctrl->AppendColumn(column2);
 	m_list_ctrl->AllowMultiColumnSort(true);
+	if (m_list_model)
+	{
+		m_list_model->setObject(0);
+		m_list_ctrl->AssociateModel(m_list_model);
+	}
 
 	//organize positions
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
@@ -181,12 +180,13 @@ void ListPanel::OnBeginDrag(wxDataViewEvent &event)
 	for (auto it = sel.begin();
 		it != sel.end(); ++it)
 	{
-		unsigned int row = m_list_model->GetRow(*it);
-		wxVariant var;
-		m_list_model->GetValueByRow(var, row, 0);
-		names += var.GetString();
-		if (it != std::prev(sel.end()))
-			names += '\n';
+		FL::Node* sel_node = (FL::Node*)it->GetID();
+		if (sel_node)
+		{
+			names += sel_node->getName();
+			if (it != std::prev(sel.end()))
+				names += '\n';
+		}
 	}
 
 	wxTextDataObject *wxobj = new wxTextDataObject;

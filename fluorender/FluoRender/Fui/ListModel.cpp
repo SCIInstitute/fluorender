@@ -39,7 +39,9 @@ void ListModel::nodeAdded(FL::Event& event)
 {
 	if (event.child)
 	{
-		RowAppended();
+		wxDataViewItem parent_item = wxDataViewItem(0);
+		wxDataViewItem child_item = wxDataViewItem(event.child);
+		ItemAdded(parent_item, child_item);
 	}
 }
 
@@ -47,13 +49,9 @@ void ListModel::nodeRemoved(FL::Event& event)
 {
 	if (event.child)
 	{
-		FL::Referenced* refd = static_cast<FL::Referenced*>(event.child);
-		if (refd)
-		{
-			FL::Object* obj = dynamic_cast<FL::Object*>(refd);
-			size_t index = FL::Global::instance().getIndex(obj);
-			RowDeleted(index);
-		}
+		wxDataViewItem parent_item = wxDataViewItem(0);
+		wxDataViewItem child_item = wxDataViewItem(event.child);
+		ItemDeleted(parent_item, child_item);
 	}
 }
 
@@ -61,17 +59,12 @@ int ListModel::Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 	unsigned int column, bool ascending) const
 {
 	//return wxDataViewModel::Compare(item1, item2, column, ascending);
-	unsigned int row1 = GetRow(item1);
-	unsigned int row2 = GetRow(item2);
 	wxVariant var1, var2;
-	GetValueByRow(var1, row1, column);
-	GetValueByRow(var2, row2, column);
+	GetValue(var1, item1, column);
+	GetValue(var2, item2, column);
 	wxString str1 = var1.GetString();
 	wxString str2 = var2.GetString();
-	if (ascending)
-		return str2.Cmp(str1);
-	else
-		return str1.Cmp(str2);
+	return ascending ? str1.CmpNoCase(str2) : str2.CmpNoCase(str1);
 }
 
 //model definition
@@ -94,38 +87,53 @@ wxString ListModel::GetColumnType(unsigned int col) const
 	return "string";
 }
 
-void ListModel::GetValueByRow(wxVariant &variant,
-	unsigned int row, unsigned int col) const
+void ListModel::GetValue(wxVariant &variant,
+	const wxDataViewItem &item, unsigned int col) const
 {
-	FL::Object* obj = FL::Global::instance().get(row);
-	if (!obj)
-		return;
+	//if (!item.IsOk())
+	//	return;
+	FL::Node* node = (FL::Node*)item.GetID();
 	switch (col)
 	{
 	case 0:
-		variant = obj->getName();
+		variant = wxString(node->getName());
 		break;
 	case 1:
-		variant = obj->className();
+		variant = wxString(node->className());
 		break;
 	case 2:
-		{
-			std::wstring path;
-			obj->getValue("data path", path);
-			variant = path;
-		}
+	{
+		std::wstring path;
+		node->getValue("data path", path);
+		variant = wxString(path);
 		break;
+
+	}
 	}
 }
 
-bool ListModel::GetAttrByRow(unsigned int row, unsigned int col,
-	wxDataViewItemAttr &attr) const
+bool ListModel::SetValue(const wxVariant &variant,
+	const wxDataViewItem &item, unsigned int col)
 {
-	return true;
+	if (!item.IsOk())
+		return false;
+	FL::Node* node = (FL::Node*)item.GetID();
+	switch (col)
+	{
+	case 0:
+		node->setName(variant.GetString().ToStdString());
+		return true;
+	case 1:
+		return false;
+	case 2:
+		return false;
+	}
+	return false;
 }
 
-bool ListModel::SetValueByRow(const wxVariant &variant,
-	unsigned int row, unsigned int col)
+
+bool ListModel::IsEnabled(const wxDataViewItem &item,
+	unsigned int col) const
 {
 	return true;
 }
@@ -138,6 +146,29 @@ bool ListModel::IsContainer(const wxDataViewItem &item) const
 bool ListModel::HasContainerColumns(const wxDataViewItem & item) const
 {
 	return true;
+}
+
+wxDataViewItem ListModel::GetParent(const wxDataViewItem &item) const
+{
+	return wxDataViewItem(0);
+}
+
+unsigned int ListModel::GetChildren(const wxDataViewItem &parent,
+	wxDataViewItemArray &array) const
+{
+	FL::Node *node = (FL::Node*)parent.GetID();
+	if (!node)
+	{
+		size_t size = FL::Global::instance().getNum();
+		for (size_t i = 0; i < size; ++i)
+		{
+			FL::Object* obj = FL::Global::instance().get(i);
+			array.Add(wxDataViewItem((void*)obj));
+		}
+		return size;
+	}
+	else
+		return 0;
 }
 
 void ListModel::setObject(FL::Node* root)

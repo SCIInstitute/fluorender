@@ -129,6 +129,7 @@ TreePanel::TreePanel(wxWindow* frame,
 			wxDATAVIEW_COL_REORDERABLE |
 			wxDATAVIEW_COL_RESIZABLE);
 	m_tree_ctrl->AppendColumn(column1);
+	m_tree_ctrl->AllowMultiColumnSort(true);
 
 	//organize positions
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);

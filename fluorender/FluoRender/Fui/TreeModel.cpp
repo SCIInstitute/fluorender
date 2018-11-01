@@ -69,10 +69,7 @@ int TreeModel::Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 	GetValue(var2, item2, column);
 	wxString str1 = var1.GetString();
 	wxString str2 = var2.GetString();
-	if (ascending)
-		return str2.Cmp(str1);
-	else
-		return str1.Cmp(str2);
+	return ascending ? str1.CmpNoCase(str2) : str2.CmpNoCase(str1);
 }
 
 unsigned int TreeModel::GetColumnCount() const
@@ -132,17 +129,6 @@ bool TreeModel::IsEnabled(const wxDataViewItem &item,
 	return true;
 }
 
-wxDataViewItem TreeModel::GetParent(const wxDataViewItem &item) const
-{
-	if (!item.IsOk())
-		return wxDataViewItem(0);
-	FL::Node *node = (FL::Node*)item.GetID();
-	if (node->getNumParents())
-		return wxDataViewItem((void*)node->getParent(0));
-	else
-		return wxDataViewItem(0);
-}
-
 bool TreeModel::IsContainer(const wxDataViewItem &item) const
 {
 	//return false;
@@ -161,6 +147,17 @@ bool TreeModel::HasContainerColumns(const wxDataViewItem & item) const
 		return false;
 	else
 		return true;
+}
+
+wxDataViewItem TreeModel::GetParent(const wxDataViewItem &item) const
+{
+	if (!item.IsOk())
+		return wxDataViewItem(0);
+	FL::Node *node = (FL::Node*)item.GetID();
+	if (node->getNumParents())
+		return wxDataViewItem((void*)node->getParent(0));
+	else
+		return wxDataViewItem(0);
 }
 
 unsigned int TreeModel::GetChildren(const wxDataViewItem &parent,

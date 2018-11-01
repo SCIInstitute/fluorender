@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FUI
 {
-	class ListModel : public wxDataViewVirtualListModel, public InterfaceAgent
+	class ListModel : public wxDataViewModel, public InterfaceAgent
 	{
 	public:
 		ListModel();
@@ -47,18 +47,23 @@ namespace FUI
 
 		virtual wxString GetColumnType(unsigned int col) const override;
 
-		virtual void GetValueByRow(wxVariant &vanriant,
-			unsigned int row, unsigned int col) const override;
+		virtual void GetValue(wxVariant &variant,
+			const wxDataViewItem &item, unsigned int col) const override;
 
-		virtual bool GetAttrByRow(unsigned int row, unsigned int col,
-			wxDataViewItemAttr &attr) const override;
+		virtual bool SetValue(const wxVariant &variant,
+			const wxDataViewItem &item, unsigned int col) override;
 
-		virtual bool SetValueByRow(const wxVariant &variant,
-			unsigned int row, unsigned int col) override;
+		virtual bool IsEnabled(const wxDataViewItem &item,
+			unsigned int col) const override;
 
 		virtual bool IsContainer(const wxDataViewItem &item) const override;
 
 		virtual bool HasContainerColumns(const wxDataViewItem & item) const override;
+
+		virtual wxDataViewItem GetParent(const wxDataViewItem &item) const override;
+
+		virtual unsigned int GetChildren(const wxDataViewItem &parent,
+			wxDataViewItemArray &array) const override;
 
 		virtual bool isSameKindAs(const Object* obj) const
 		{
