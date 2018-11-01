@@ -62,8 +62,22 @@ int ListModel::Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 	wxVariant var1, var2;
 	GetValue(var1, item1, column);
 	GetValue(var2, item2, column);
-	wxString str1 = var1.GetString();
-	wxString str2 = var2.GetString();
+	wxString str1, str2;
+	switch (column)
+	{
+	case 0:
+	{
+		wxDataViewIconText it1, it2;
+		it1 << var1;
+		it2 << var2;
+		str1 = it1.GetText();
+		str2 = it2.GetText();
+	}
+		break;
+	default:
+		str1 = var1.GetString();
+		str2 = var2.GetString();
+	}
 	return ascending ? str1.CmpNoCase(str2) : str2.CmpNoCase(str1);
 }
 
@@ -78,7 +92,7 @@ wxString ListModel::GetColumnType(unsigned int col) const
 	switch (col)
 	{
 	case 0:
-		return "string";
+		return wxDataViewIconTextRenderer::GetDefaultType();
 	case 1:
 		return "string";
 	case 2:
@@ -93,10 +107,15 @@ void ListModel::GetValue(wxVariant &variant,
 	//if (!item.IsOk())
 	//	return;
 	FL::Node* node = (FL::Node*)item.GetID();
+	if (!node)
+		return;
 	switch (col)
 	{
 	case 0:
-		variant = wxString(node->getName());
+		variant << wxDataViewIconText(
+			wxString(node->getName()),
+			FL::Global::instance().getIconList().
+			get(node->className()));
 		break;
 	case 1:
 		variant = wxString(node->className());
@@ -118,10 +137,16 @@ bool ListModel::SetValue(const wxVariant &variant,
 	if (!item.IsOk())
 		return false;
 	FL::Node* node = (FL::Node*)item.GetID();
+	if (!node)
+		return false;
 	switch (col)
 	{
 	case 0:
-		node->setName(variant.GetString().ToStdString());
+		{
+			wxDataViewIconText it;
+			it << variant;
+			node->setName(it.GetText().ToStdString());
+		}
 		return true;
 	case 1:
 		return false;

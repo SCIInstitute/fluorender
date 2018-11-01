@@ -94,21 +94,22 @@ ListPanel::ListPanel(wxWindow *frame,
 	m_list_ctrl->EnableDragSource(wxDF_UNICODETEXT);
 	m_list_ctrl->EnableDropTarget(wxDF_UNICODETEXT);
 	m_list_ctrl->SetDoubleBuffered(true);
+	m_list_ctrl->SetIndent(1);
 	m_list_model =
 		FL::Global::instance().getAgentFactory().
 		getOrAddListModel("ListPanel", *this);
 	//append columns
 	//name
-	wxDataViewTextRenderer *tr =
-		new wxDataViewTextRenderer("string");
+	wxDataViewIconTextRenderer *itr =
+		new wxDataViewIconTextRenderer();
 	wxDataViewColumn *column0 =
-		new wxDataViewColumn("Name", tr, 0, 120, wxALIGN_LEFT,
+		new wxDataViewColumn("Name", itr, 0, 120, wxALIGN_LEFT,
 			wxDATAVIEW_COL_SORTABLE |
 			wxDATAVIEW_COL_REORDERABLE |
 			wxDATAVIEW_COL_RESIZABLE);
 	m_list_ctrl->AppendColumn(column0);
 	//type
-	tr = new wxDataViewTextRenderer("string");
+	wxDataViewTextRenderer *tr = new wxDataViewTextRenderer("string");
 	wxDataViewColumn *column1 =
 		new wxDataViewColumn("Type", tr, 1, 80, wxALIGN_LEFT,
 			wxDATAVIEW_COL_SORTABLE |

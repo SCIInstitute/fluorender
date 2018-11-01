@@ -113,16 +113,16 @@ TreePanel::TreePanel(wxWindow* frame,
 	m_tree_ctrl->SetDoubleBuffered(true);
 	//add columns
 	//name
-	wxDataViewTextRenderer *tr =
-		new wxDataViewTextRenderer("string");
+	wxDataViewIconTextRenderer *itr =
+		new wxDataViewIconTextRenderer();
 	wxDataViewColumn *column0 =
-		new wxDataViewColumn("Name", tr, 0, 200, wxALIGN_LEFT,
+		new wxDataViewColumn("Name", itr, 0, 200, wxALIGN_LEFT,
 			wxDATAVIEW_COL_SORTABLE |
 			wxDATAVIEW_COL_REORDERABLE |
 			wxDATAVIEW_COL_RESIZABLE);
 	m_tree_ctrl->AppendColumn(column0);
 	//type
-	tr = new wxDataViewTextRenderer("string");
+	wxDataViewTextRenderer *tr = new wxDataViewTextRenderer("string");
 	wxDataViewColumn *column1 =
 		new wxDataViewColumn("Type", tr, 1, 200, wxALIGN_LEFT,
 			wxDATAVIEW_COL_SORTABLE |

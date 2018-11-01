@@ -336,6 +336,18 @@ public:
 	const static unsigned char full_screen_back_menu_png[921];
 	/* full_screen_menu.png - 952 bytes */
 	const static unsigned char full_screen_menu_png[952];
+	/* volume_data.png - 581 bytes */
+	const static unsigned char volume_data_png[581];
+	/* mesh_data.png - 705 bytes */
+	const static unsigned char mesh_data_png[705];
+	/* render_view.png - 524 bytes */
+	const static unsigned char render_view_png[524];
+	/* volume_group.png - 522 bytes */
+	const static unsigned char volume_group_png[522];
+	/* mesh_group.png - 481 bytes */
+	const static unsigned char mesh_group_png[481];
+	/* default.png - 810 bytes */
+	const static unsigned char default_png[810];
 };
 
 #endif//_ICONS_H_

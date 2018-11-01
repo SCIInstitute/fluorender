@@ -173,6 +173,8 @@ VRenderFrame::VRenderFrame(
 	wxString dft = expath + "/Defaults/volume_data.dftx";
 	FL::Global::instance().getVolumeFactory().setValue("default filename", dft.ToStdString());
 	FL::Global::instance().getMeshFactory().createDefault();
+	//create icon list
+	FL::Global::instance().getIconList().init();
 	//create root node
 	m_root = FL::ref_ptr<FL::Group>(new FL::Group());
 	std::string root_str = "Active Datasets";

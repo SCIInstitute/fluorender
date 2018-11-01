@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Scenegraph/MeshFactory.h>
 #include <Scenegraph/AnnotationFactory.h>
 #include <Fui/AgentFactory.h>
+#include <Fui/IconList.h>
 
 namespace FL
 {
@@ -101,6 +102,9 @@ namespace FL
 		FUI::AgentFactory& getAgentFactory()
 		{ return *agent_factory_; }
 
+		FUI::IconList& getIconList()
+		{ return icon_list_; }
+
 		void addListObserver(Observer* obsrvr)
 		{
 			volume_factory_->addObserver(obsrvr);
@@ -120,6 +124,9 @@ namespace FL
 
 		//list of agent
 		ref_ptr<FUI::AgentFactory> agent_factory_;
+
+		//icon list
+		FUI::IconList icon_list_;
 	};
 }
 
