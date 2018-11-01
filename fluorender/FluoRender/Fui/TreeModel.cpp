@@ -63,7 +63,16 @@ void TreeModel::nodeRemoved(FL::Event& event)
 int TreeModel::Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 	unsigned int column, bool ascending) const
 {
-	return wxDataViewModel::Compare(item1, item2, column, ascending);
+	//return wxDataViewModel::Compare(item1, item2, column, ascending);
+	wxVariant var1, var2;
+	GetValue(var1, item1, column);
+	GetValue(var2, item2, column);
+	wxString str1 = var1.GetString();
+	wxString str2 = var2.GetString();
+	if (ascending)
+		return str2.Cmp(str1);
+	else
+		return str1.Cmp(str2);
 }
 
 unsigned int TreeModel::GetColumnCount() const

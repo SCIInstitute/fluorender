@@ -66,11 +66,12 @@ int ListModel::Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 	wxVariant var1, var2;
 	GetValueByRow(var1, row1, column);
 	GetValueByRow(var2, row2, column);
-	if (var1.GetString() < var2.GetString())
-		return -1;
-	else if (var1.GetString() > var2.GetString())
-		return 1;
-	else return 0;
+	wxString str1 = var1.GetString();
+	wxString str2 = var2.GetString();
+	if (ascending)
+		return str2.Cmp(str1);
+	else
+		return str1.Cmp(str2);
 }
 
 //model definition
@@ -125,6 +126,16 @@ bool ListModel::GetAttrByRow(unsigned int row, unsigned int col,
 
 bool ListModel::SetValueByRow(const wxVariant &variant,
 	unsigned int row, unsigned int col)
+{
+	return true;
+}
+
+bool ListModel::IsContainer(const wxDataViewItem &item) const
+{
+	return false;
+}
+
+bool ListModel::HasContainerColumns(const wxDataViewItem & item) const
 {
 	return true;
 }

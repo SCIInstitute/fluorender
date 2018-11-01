@@ -56,6 +56,10 @@ namespace FUI
 		virtual bool SetValueByRow(const wxVariant &variant,
 			unsigned int row, unsigned int col) override;
 
+		virtual bool IsContainer(const wxDataViewItem &item) const override;
+
+		virtual bool HasContainerColumns(const wxDataViewItem & item) const override;
+
 		virtual bool isSameKindAs(const Object* obj) const
 		{
 			return dynamic_cast<const ListModel*>(obj) != NULL;

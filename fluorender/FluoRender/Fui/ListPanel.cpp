@@ -46,6 +46,7 @@ EVT_TOOL(ID_DeleteAll, ListPanel::OnDeleteAll)
 EVT_DATAVIEW_ITEM_BEGIN_DRAG(ID_ListCtrl, ListPanel::OnBeginDrag)
 EVT_DATAVIEW_ITEM_DROP_POSSIBLE(ID_ListCtrl, ListPanel::OnDropPossible)
 EVT_DATAVIEW_ITEM_DROP(ID_ListCtrl, ListPanel::OnDrop)
+EVT_DATAVIEW_COLUMN_SORTED(ID_ListCtrl, ListPanel::OnListSorted)
 END_EVENT_TABLE()
 
 ListPanel::ListPanel(wxWindow *frame,
@@ -103,27 +104,32 @@ ListPanel::ListPanel(wxWindow *frame,
 	}
 
 	//append columns
-	m_list_ctrl->AppendTextColumn("Name", 0,
-		wxDATAVIEW_CELL_ACTIVATABLE,
-		wxCOL_WIDTH_AUTOSIZE,
-		wxALIGN_LEFT,
-		wxDATAVIEW_COL_SORTABLE |
-		wxDATAVIEW_COL_REORDERABLE |
-		wxDATAVIEW_COL_RESIZABLE);
-	m_list_ctrl->AppendTextColumn("Type", 1,
-		wxDATAVIEW_CELL_ACTIVATABLE,
-		wxCOL_WIDTH_AUTOSIZE,
-		wxALIGN_LEFT,
-		wxDATAVIEW_COL_SORTABLE |
-		wxDATAVIEW_COL_REORDERABLE |
-		wxDATAVIEW_COL_RESIZABLE);
-	m_list_ctrl->AppendTextColumn("Path", 2,
-		wxDATAVIEW_CELL_ACTIVATABLE,
-		wxCOL_WIDTH_AUTOSIZE,
-		wxALIGN_LEFT,
-		wxDATAVIEW_COL_SORTABLE |
-		wxDATAVIEW_COL_REORDERABLE |
-		wxDATAVIEW_COL_RESIZABLE);
+	//name
+	wxDataViewTextRenderer *tr =
+		new wxDataViewTextRenderer("string");
+	wxDataViewColumn *column0 =
+		new wxDataViewColumn("Name", tr, 0, 20, wxALIGN_LEFT,
+			wxDATAVIEW_COL_SORTABLE |
+			wxDATAVIEW_COL_REORDERABLE |
+			wxDATAVIEW_COL_RESIZABLE);
+	m_list_ctrl->AppendColumn(column0);
+	//type
+	tr = new wxDataViewTextRenderer("string");
+	wxDataViewColumn *column1 =
+		new wxDataViewColumn("Type", tr, 1, 20, wxALIGN_LEFT,
+			wxDATAVIEW_COL_SORTABLE |
+			wxDATAVIEW_COL_REORDERABLE |
+			wxDATAVIEW_COL_RESIZABLE);
+	m_list_ctrl->AppendColumn(column1);
+	//path
+	tr = new wxDataViewTextRenderer("string");
+	wxDataViewColumn *column2 =
+		new wxDataViewColumn("Path", tr, 2, 20, wxALIGN_LEFT,
+			wxDATAVIEW_COL_SORTABLE |
+			wxDATAVIEW_COL_REORDERABLE |
+			wxDATAVIEW_COL_RESIZABLE);
+	m_list_ctrl->AppendColumn(column2);
+	m_list_ctrl->AllowMultiColumnSort(true);
 
 	//organize positions
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
@@ -168,14 +174,6 @@ void ListPanel::OnDeleteAll(wxCommandEvent &event)
 
 void ListPanel::OnBeginDrag(wxDataViewEvent &event)
 {
-	wxDataViewItem item(event.GetItem());
-	size_t row = m_list_model->GetRow(item);
-	FL::Object *obj = FL::Global::instance().get(row);
-	if (!obj)
-	{
-		event.Veto();
-		return;
-	}
 	//multiple selections
 	wxDataViewItemArray sel;
 	m_list_ctrl->GetSelections(sel);
@@ -183,13 +181,12 @@ void ListPanel::OnBeginDrag(wxDataViewEvent &event)
 	for (auto it = sel.begin();
 		it != sel.end(); ++it)
 	{
-		FL::Node* sel_node = (FL::Node*)it->GetID();
-		if (sel_node)
-		{
-			names += sel_node->getName();
-			if (it != std::prev(sel.end()))
-				names += '\n';
-		}
+		unsigned int row = m_list_model->GetRow(*it);
+		wxVariant var;
+		m_list_model->GetValueByRow(var, row, 0);
+		names += var.GetString();
+		if (it != std::prev(sel.end()))
+			names += '\n';
 	}
 
 	wxTextDataObject *wxobj = new wxTextDataObject;
@@ -201,11 +198,6 @@ void ListPanel::OnBeginDrag(wxDataViewEvent &event)
 void ListPanel::OnDropPossible(wxDataViewEvent &event)
 {
 	event.Allow();
-	//wxDataViewItem item(event.GetItem());
-	//size_t row = m_list_model->GetRow(item);
-	//FL::Object *obj = FL::Global::instance().get(row);
-	//if (!obj)
-	//	event.Veto();
 }
 
 void ListPanel::OnDrop(wxDataViewEvent &event)
@@ -223,3 +215,7 @@ void ListPanel::OnDrop(wxDataViewEvent &event)
 		//m_list_model->MoveNode(*it, target_node);
 }
 
+void ListPanel::OnListSorted(wxDataViewEvent &event)
+{
+
+}
