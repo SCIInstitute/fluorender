@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _EVENTHANDLER_H_
 #define _EVENTHANDLER_H_
 
+#include <Flobject/Referenced.h>
 #include <Flobject/Event.h>
 #include <unordered_map>
 #include <string>
@@ -41,9 +42,13 @@ namespace FL
 {
 	typedef std::function<void(Event&)> eventFunctionType;
 
-	class EventHandler
+	class EventHandler :public Referenced
 	{
 	public:
+		EventHandler() : Referenced() {}
+
+		virtual const char* className() const { return "EventHandler"; }
+
 		void setBeforeFunction(const std::string &name, eventFunctionType func)
 		{
 			before_functions_.insert(std::make_pair(name, func));
@@ -54,25 +59,31 @@ namespace FL
 			after_functions_.insert(std::make_pair(name, func));
 		}
 
-		void onBefore(const std::string &name, Event& event)
+		void onBefore(const std::string &name, Event& event) const
 		{
 			auto map_it = before_functions_.find(name);
-			if (map_it != before_functions_.end())
+			if (map_it != before_functions_.end() && !_hold &&
+				event.pass(const_cast<EventHandler*>(this)))
 			{
 				auto map_val = map_it->second;
 				//return map_val(std::forward<Args>(args)...);
-				return map_val(event);
+				event.push(const_cast<EventHandler*>(this));
+				map_val(event);
+				event.pop();
 			}
 		}
 
-		void onAfter(const std::string &name, Event& event)
+		void onAfter(const std::string &name, Event& event) const
 		{
 			auto map_it = after_functions_.find(name);
-			if (map_it != after_functions_.end())
+			if (map_it != after_functions_.end() && !_hold &&
+				event.pass(const_cast<EventHandler*>(this)))
 			{
 				auto map_val = map_it->second;
 				//return map_val(std::forward<Args>(args)...);
-				return map_val(event);
+				event.push(const_cast<EventHandler*>(this));
+				map_val(event);
+				event.pop();
 			}
 		}
 

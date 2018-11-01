@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_OBJECT
 #define FL_OBJECT 1
 
-#include <Flobject/Referenced.h>
 #include <Flobject/ref_ptr.h>
 #include <Flobject/Observer.h>
 #include <Flobject/CopyOp.h>
@@ -50,7 +49,7 @@ class Object;
 typedef std::vector<Object*> ObjectList;
 class ObjectFactory;
 
-class Object : public Referenced, public Observer, public EventHandler
+class Object : public EventHandler, public Observer
 {
 public:
 

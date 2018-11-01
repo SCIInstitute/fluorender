@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 using namespace FL;
 
 Object::Object():
-	Referenced(),
+	EventHandler(),
 	_id(0)
 {
 	ValueSet* value_set = new ValueSet();
@@ -38,7 +38,7 @@ Object::Object():
 }
 
 Object::Object(const Object& obj, const CopyOp& copyop, bool copy_values):
-	Referenced(),
+	EventHandler(),
 	_id(0),
 	m_name(obj.m_name)
 {
