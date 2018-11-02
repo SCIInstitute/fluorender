@@ -40,6 +40,26 @@ TreeModel::TreeModel(TreePanel &panel):
 
 }
 
+void TreeModel::objectChanging(FL::Event& event)
+{
+	InterfaceAgent::objectChanging(event);
+	//if (event.getNotifyFlags() & FL::Event::NOTIFY_AGENT)
+	//{
+	//}
+}
+
+void TreeModel::objectChanged(FL::Event& event)
+{
+	InterfaceAgent::objectChanged(event);
+	if (event.getNotifyFlags() & FL::Event::NOTIFY_AGENT &&
+		event.sender == getObject() &&
+		dynamic_cast<FL::Node*>(event.origin))
+	{
+		wxDataViewItem item = wxDataViewItem(event.origin);
+		ItemChanged(item);
+	}
+}
+
 void TreeModel::nodeAdded(FL::Event& event)
 {
 	if (event.parent && event.child)
@@ -107,17 +127,19 @@ wxString TreeModel::GetColumnType(unsigned int col) const
 void TreeModel::GetValue(wxVariant &variant,
 	const wxDataViewItem &item, unsigned int col) const
 {
-	//if (!item.IsOk())
-	//	return;
+	if (!item.IsOk())
+		return;
 	FL::Node* node = (FL::Node*)item.GetID();
 	if (!node)
 		return;
+	bool display = true;
+	node->getValue("display", display);
 	switch (col)
 	{
 	case 0:
 		variant << wxDataViewIconText(
 			wxString(node->getName()),
-			FL::Global::instance().getIconList().
+			FL::Global::instance().getIconList(display).
 			get(node->className()));
 		break;
 	case 1:

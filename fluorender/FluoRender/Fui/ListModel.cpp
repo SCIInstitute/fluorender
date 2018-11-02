@@ -114,7 +114,7 @@ void ListModel::GetValue(wxVariant &variant,
 	case 0:
 		variant << wxDataViewIconText(
 			wxString(node->getName()),
-			FL::Global::instance().getIconList().
+			FL::Global::instance().getIconList(true).
 			get(node->className()));
 		break;
 	case 1:

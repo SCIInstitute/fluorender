@@ -39,27 +39,51 @@ namespace FUI
 	public:
 		IconList() {}
 
-		void init()
+		void init(bool shown = true)
 		{
 			wxIcon icon;
-			icon.CopyFromBitmap(wxGetBitmapFromMemory(volume_data));
-			list_.insert(std::pair<std::string, wxIcon>(
-				"VolumeData", icon));
-			icon.CopyFromBitmap(wxGetBitmapFromMemory(mesh_data));
-			list_.insert(std::pair<std::string, wxIcon>(
-				"MeshData", icon));
-			icon.CopyFromBitmap(wxGetBitmapFromMemory(volume_group));
-			list_.insert(std::pair<std::string, wxIcon>(
-				"VolumeGroup", icon));
-			icon.CopyFromBitmap(wxGetBitmapFromMemory(mesh_group));
-			list_.insert(std::pair<std::string, wxIcon>(
-				"MeshGroup", icon));
-			icon.CopyFromBitmap(wxGetBitmapFromMemory(render_view));
-			list_.insert(std::pair<std::string, wxIcon>(
-				"RenderView", icon));
-			icon.CopyFromBitmap(wxGetBitmapFromMemory(default));
-			list_.insert(std::pair<std::string, wxIcon>(
-				"default", icon));
+			if (shown)
+			{
+				icon.CopyFromBitmap(wxGetBitmapFromMemory(volume_data_shown));
+				list_.insert(std::pair<std::string, wxIcon>(
+					"VolumeData", icon));
+				icon.CopyFromBitmap(wxGetBitmapFromMemory(mesh_data_shown));
+				list_.insert(std::pair<std::string, wxIcon>(
+					"MeshData", icon));
+				icon.CopyFromBitmap(wxGetBitmapFromMemory(volume_group_shown));
+				list_.insert(std::pair<std::string, wxIcon>(
+					"VolumeGroup", icon));
+				icon.CopyFromBitmap(wxGetBitmapFromMemory(mesh_group_shown));
+				list_.insert(std::pair<std::string, wxIcon>(
+					"MeshGroup", icon));
+				icon.CopyFromBitmap(wxGetBitmapFromMemory(render_view_shown));
+				list_.insert(std::pair<std::string, wxIcon>(
+					"RenderView", icon));
+				icon.CopyFromBitmap(wxGetBitmapFromMemory(default_shown));
+				list_.insert(std::pair<std::string, wxIcon>(
+					"default", icon));
+			}
+			else
+			{
+				icon.CopyFromBitmap(wxGetBitmapFromMemory(volume_data_hidden));
+				list_.insert(std::pair<std::string, wxIcon>(
+					"VolumeData", icon));
+				icon.CopyFromBitmap(wxGetBitmapFromMemory(mesh_data_hidden));
+				list_.insert(std::pair<std::string, wxIcon>(
+					"MeshData", icon));
+				icon.CopyFromBitmap(wxGetBitmapFromMemory(volume_group_hidden));
+				list_.insert(std::pair<std::string, wxIcon>(
+					"VolumeGroup", icon));
+				icon.CopyFromBitmap(wxGetBitmapFromMemory(mesh_group_hidden));
+				list_.insert(std::pair<std::string, wxIcon>(
+					"MeshGroup", icon));
+				icon.CopyFromBitmap(wxGetBitmapFromMemory(render_view_hidden));
+				list_.insert(std::pair<std::string, wxIcon>(
+					"RenderView", icon));
+				icon.CopyFromBitmap(wxGetBitmapFromMemory(default_hidden));
+				list_.insert(std::pair<std::string, wxIcon>(
+					"default", icon));
+			}
 		}
 
 		wxIcon get(const std::string &name) const

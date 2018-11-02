@@ -174,7 +174,8 @@ VRenderFrame::VRenderFrame(
 	FL::Global::instance().getVolumeFactory().setValue("default filename", dft.ToStdString());
 	FL::Global::instance().getMeshFactory().createDefault();
 	//create icon list
-	FL::Global::instance().getIconList().init();
+	FL::Global::instance().getIconList(true).init(true);
+	FL::Global::instance().getIconList(false).init(false);
 	//create root node
 	m_root = FL::ref_ptr<FL::Group>(new FL::Group());
 	std::string root_str = "Active Datasets";

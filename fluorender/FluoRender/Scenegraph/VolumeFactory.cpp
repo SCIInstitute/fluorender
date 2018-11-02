@@ -361,7 +361,7 @@ VolumeGroup* VolumeFactory::buildGroup(VolumeData* vd)
 {
 	VolumeGroup* group;
 	if (vd)
-		group = new VolumeGroup(*vd, CopyOp::DEEP_COPY_ALL);//shallow copy might be ok
+		group = new VolumeGroup(*vd, CopyOp::DEEP_COPY_ALL);
 	else
 		group = new VolumeGroup(*getDefault(), CopyOp::DEEP_COPY_ALL);
 	if (group)

@@ -38,30 +38,40 @@ void DrawVolumeVisitor::apply(Node& node)
 	VolumeData* vd = dynamic_cast<VolumeData*>(&node);
 	if (vd)
 	{
-		if (m_blend_mode == 2)//multi
-			addVolume(DVG_MULTI, vd);
-		else
+		bool disp;
+		vd->getValue("display", disp);
+		if (disp)
 		{
-			long blend_mode;
-			vd->getValue("blend mode", blend_mode);
-			if (blend_mode == 2)
+			if (m_blend_mode == 2)//multi
 				addVolume(DVG_MULTI, vd);
 			else
-				addVolume(DVG_COMP, vd);
+			{
+				long blend_mode;
+				vd->getValue("blend mode", blend_mode);
+				if (blend_mode == 2)
+					addVolume(DVG_MULTI, vd);
+				else
+					addVolume(DVG_COMP, vd);
+			}
+			if (m_draw_mask)
+				addVolume(DVG_MASK, vd);
 		}
-		if (m_draw_mask)
-			addVolume(DVG_MASK, vd);
 	}
 	traverse(node);
 }
 
 void DrawVolumeVisitor::apply(Group& group)
 {
-	long blend_mode;
 	bool result;
-	result = group.getValue("blend mode", blend_mode);
-	m_draw_list.push_back(DrawVolumeGroupList(DVG_MULTI));
-	traverse(group);
+	bool disp;
+	result = group.getValue("display", disp);
+	if (!result || disp)
+	{
+		long blend_mode;
+		result = group.getValue("blend mode", blend_mode);
+		m_draw_list.push_back(DrawVolumeGroupList(DVG_MULTI));
+		traverse(group);
+	}
 }
 
 void DrawVolumeVisitor::addVolume(DrawVolumeGroupType type, VolumeData* vd)

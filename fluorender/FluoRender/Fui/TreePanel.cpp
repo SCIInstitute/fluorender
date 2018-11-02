@@ -42,6 +42,7 @@ EVT_DATAVIEW_SELECTION_CHANGED(ID_TreeCtrl, TreePanel::OnSelectionChanged)
 EVT_DATAVIEW_ITEM_BEGIN_DRAG(ID_TreeCtrl, TreePanel::OnBeginDrag)
 EVT_DATAVIEW_ITEM_DROP_POSSIBLE(ID_TreeCtrl, TreePanel::OnDropPossible)
 EVT_DATAVIEW_ITEM_DROP(ID_TreeCtrl, TreePanel::OnDrop)
+EVT_DATAVIEW_ITEM_ACTIVATED(ID_TreeCtrl, TreePanel::OnActivated)
 END_EVENT_TABLE()
 
 TreePanel::TreePanel(wxWindow* frame,
@@ -261,7 +262,13 @@ void TreePanel::OnSelectionChanged(wxDataViewEvent &event)
 void TreePanel::OnBeginDrag(wxDataViewEvent &event)
 {
 	wxDataViewItem item(event.GetItem());
-	FL::Node* node = (FL::Node*)item.GetID();
+	FL::Referenced* refd = static_cast<FL::Referenced*>(item.GetID());
+	if (!refd)
+	{
+		event.Veto();
+		return;
+	}
+	FL::Node* node = dynamic_cast<FL::Node*>(refd);
 	if (!node)
 	{
 		event.Veto();
@@ -292,10 +299,6 @@ void TreePanel::OnBeginDrag(wxDataViewEvent &event)
 void TreePanel::OnDropPossible(wxDataViewEvent &event)
 {
 	event.Allow();
-	//wxDataViewItem item(event.GetItem());
-	//FL::Node* node = (FL::Node*)item.GetID();
-	//if (!node)
-	//	event.Veto();
 }
 
 void TreePanel::OnDrop(wxDataViewEvent &event)
@@ -313,3 +316,24 @@ void TreePanel::OnDrop(wxDataViewEvent &event)
 		m_tree_model->MoveNode(*it, target_node);
 }
 
+void TreePanel::OnActivated(wxDataViewEvent &event)
+{
+	wxDataViewItem item(event.GetItem());
+	int col = event.GetColumn();
+	switch (col)
+	{
+	case 0:
+		{
+			FL::Node* node = (FL::Node*)item.GetID();
+			if (node)
+			{
+				bool display;
+				node->toggleValue("display", display);
+				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+				if (vr_frame)
+					vr_frame->OnSelection(node);
+			}
+		}
+		break;
+	}
+}

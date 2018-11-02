@@ -336,18 +336,30 @@ public:
 	const static unsigned char full_screen_back_menu_png[921];
 	/* full_screen_menu.png - 952 bytes */
 	const static unsigned char full_screen_menu_png[952];
-	/* volume_data.png - 581 bytes */
-	const static unsigned char volume_data_png[581];
-	/* mesh_data.png - 705 bytes */
-	const static unsigned char mesh_data_png[705];
-	/* render_view.png - 524 bytes */
-	const static unsigned char render_view_png[524];
-	/* volume_group.png - 522 bytes */
-	const static unsigned char volume_group_png[522];
-	/* mesh_group.png - 481 bytes */
-	const static unsigned char mesh_group_png[481];
-	/* default.png - 810 bytes */
-	const static unsigned char default_png[810];
+	/* volume_data_hidden.png - 633 bytes */
+	const static unsigned char volume_data_hidden_png[633];
+	/* volume_data_shown.png - 711 bytes */
+	const static unsigned char icons::volume_data_shown_png[711];
+	/* mesh_data_hidden.png - 692 bytes */
+	const static unsigned char icons::mesh_data_hidden_png[692];
+	/* mesh_data_shown.png - 521 bytes */
+	const static unsigned char icons::mesh_data_shown_png[521];
+	/* volume_group_hidden.png - 529 bytes */
+	const static unsigned char icons::volume_group_hidden_png[529];
+	/* volume_group_shown.png - 703 bytes */
+	const static unsigned char icons::volume_group_shown_png[703];
+	/* mesh_group_hidden.png - 565 bytes */
+	const static unsigned char icons::mesh_group_hidden_png[565];
+	/* mesh_group_shown.png - 641 bytes */
+	const static unsigned char icons::mesh_group_shown_png[641];
+	/* render_view_hidden.png - 621 bytes */
+	const static unsigned char icons::render_view_hidden_png[621];
+	/* render_view_shown.png - 731 bytes */
+	const static unsigned char icons::render_view_shown_png[731];
+	/* default_hidden.png - 794 bytes */
+	const static unsigned char icons::default_hidden_png[794];
+	/* default_shown.png - 761 bytes */
+	const static unsigned char icons::default_shown_png[761];
 };
 
 #endif//_ICONS_H_

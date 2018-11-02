@@ -102,8 +102,8 @@ namespace FL
 		FUI::AgentFactory& getAgentFactory()
 		{ return *agent_factory_; }
 
-		FUI::IconList& getIconList()
-		{ return icon_list_; }
+		FUI::IconList& getIconList(bool shown)
+		{ return shown?shown_icon_list_:hidden_icon_list_; }
 
 		void addListObserver(Observer* obsrvr)
 		{
@@ -126,7 +126,8 @@ namespace FL
 		ref_ptr<FUI::AgentFactory> agent_factory_;
 
 		//icon list
-		FUI::IconList icon_list_;
+		FUI::IconList shown_icon_list_;
+		FUI::IconList hidden_icon_list_;
 	};
 }
 

@@ -174,23 +174,23 @@ void Group::accept(NodeVisitor& nv)
 //as observer
 void Group::objectChanging(Event& event)
 {
-	Node* node = dynamic_cast<Node*>(event.sender);
-	if (node && containsNode(node) &&
-		event.getNotifyFlags() & Event::NOTIFY_PARENT)
+	if (event.getNotifyFlags() & Event::NOTIFY_PARENT)
 	{
 		Object::objectChanging(event);
-		notifyObserversBeforeChange(event);
+		Node* node = dynamic_cast<Node*>(event.sender);
+		if (node && containsNode(node))
+			notifyObserversBeforeChange(event);
 	}
 }
 
 void Group::objectChanged(Event& event)
 {
-	Node* node = dynamic_cast<Node*>(event.sender);
-	if (node && containsNode(node) &&
-		event.getNotifyFlags() & Event::NOTIFY_PARENT)
+	if (event.getNotifyFlags() & Event::NOTIFY_PARENT)
 	{
 		Object::objectChanged(event);
-		notifyObserversOfChange(event);
+		Node* node = dynamic_cast<Node*>(event.sender);
+		if (node && containsNode(node))
+			notifyObserversOfChange(event);
 	}
 }
 
