@@ -52,11 +52,15 @@ void TreeModel::objectChanged(FL::Event& event)
 {
 	InterfaceAgent::objectChanged(event);
 	if (event.getNotifyFlags() & FL::Event::NOTIFY_AGENT &&
-		event.sender == getObject() &&
-		dynamic_cast<FL::Node*>(event.origin))
+		event.sender == getObject())
 	{
-		wxDataViewItem item = wxDataViewItem(event.origin);
-		ItemChanged(item);
+		FL::Node* node = dynamic_cast<FL::Node*>(event.origin);
+		if (node &&
+			event.value_name == "display")
+		{
+			wxDataViewItem item = wxDataViewItem(event.origin);
+			ItemChanged(item);
+		}
 	}
 }
 
