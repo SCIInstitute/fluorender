@@ -59,6 +59,36 @@ typedef std::tuple<std::string, std::string, std::string> ValueTuple;
 class Value : public Referenced, public Observer
 {
 public:
+	enum ValueType
+	{
+		vt_null = 0,
+		vt_pReferenced = 1,
+		vt_bool,
+		vt_char,
+		vt_unsigned_char,
+		vt_short,
+		vt_unsigned_short,
+		vt_long,
+		vt_unsigned_long,
+		vt_long_long,
+		vt_unsigned_long_long,
+		vt_float,
+		vt_double,
+		vt_string,
+		vt_wstring,
+		vt_Point,
+		vt_Vector,
+		vt_BBox,
+		vt_HSVColor,
+		vt_Color,
+		vt_Plane,
+		vt_PlaneSet,
+		vt_Quaternion,
+		vt_Ray,
+		vt_Transform,
+		vt_GLfloat4,
+		vt_GLint4,
+	};
 	Value(std::string name = "", std::string type = "") :
 		Referenced(), _name(name), _type(type) {}
 
@@ -88,7 +118,9 @@ protected:
 
 	std::string _name;
 	std::string _type;
+	ValueType _etype;
 	static bool _precise;//if equal is precise
+	static std::unordered_map<std::string, ValueType> _value_map;
 
 	friend class ValueSet;
 };
@@ -98,17 +130,23 @@ class TemplateValue : public Value
 {
 public:
 
-	TemplateValue() : Value() {}
-
 	TemplateValue(const std::string& name, const std::string& type, const T& value) :
-	Value(name,type), _value(value) {}
+	Value(name,type), _value(value)
+	{
+		if (_value_map.empty())
+		{
+			_etype = vt_null;
+			return;
+		}
+		auto it = _value_map.find(type);
+		if (it != _value_map.end())
+			_etype = it->second;
+	}
 
 	TemplateValue<T>* clone()
 	{
-		TemplateValue<T>* tv = new TemplateValue<T>;
-		tv->_value = _value;
-		tv->_name = _name;
-		tv->_type = _type;
+		TemplateValue<T>* tv = new TemplateValue<T>(
+			_name, _type, _value);
 		return tv;
 	}
 
@@ -283,145 +321,97 @@ inline bool Value::operator == (const Value& v) const
 	if (_type != v._type)
 		return false;
 
-	if (_type == "Referenced*")
+	switch (_etype)
 	{
+	case vt_pReferenced:
 		return dynamic_cast<const TemplateValue<Referenced*>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<Referenced*>*>(&v)->getValue();
-	}
-	else if (_type == "bool")
-	{
+	case vt_bool:
 		return dynamic_cast<const TemplateValue<bool>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<bool>*>(&v)->getValue();
-	}
-	else if (_type == "char")
-	{
+	case vt_char:
 		return dynamic_cast<const TemplateValue<char>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<char>*>(&v)->getValue();
-	}
-	else if (_type == "unsigned char")
-	{
+	case vt_unsigned_char:
 		return dynamic_cast<const TemplateValue<unsigned char>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<unsigned char>*>(&v)->getValue();
-	}
-	else if (_type == "short")
-	{
+	case vt_short:
 		return dynamic_cast<const TemplateValue<short>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<short>*>(&v)->getValue();
-	}
-	else if (_type == "unsigned short")
-	{
+	case vt_unsigned_short:
 		return dynamic_cast<const TemplateValue<unsigned short>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<unsigned short>*>(&v)->getValue();
-	}
-	else if (_type == "long")
-	{
+	case vt_long:
 		return dynamic_cast<const TemplateValue<long>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<long>*>(&v)->getValue();
-	}
-	else if (_type == "unsigned long")
-	{
+	case vt_unsigned_long:
 		return dynamic_cast<const TemplateValue<unsigned long>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<unsigned long>*>(&v)->getValue();
-	}
-	else if (_type == "long long")
-	{
+	case vt_long_long:
 		return dynamic_cast<const TemplateValue<long long>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<long long>*>(&v)->getValue();
-	}
-	else if (_type == "unsigned long long")
-	{
+	case vt_unsigned_long_long:
 		return dynamic_cast<const TemplateValue<unsigned long long>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<unsigned long long>*>(&v)->getValue();
-	}
-	else if (_type == "float")
-	{
+	case vt_float:
 		if (_precise)
 			return dynamic_cast<const TemplateValue<float>*>(this)->getValue() ==
 				dynamic_cast<const TemplateValue<float>*>(&v)->getValue();
 		else
 			return fabs(dynamic_cast<const TemplateValue<float>*>(this)->getValue() -
 				dynamic_cast<const TemplateValue<float>*>(&v)->getValue()) < FLTYPE::Epslf();
-	}
-	else if (_type == "double")
-	{
+	case vt_double:
 		if (_precise)
 			return dynamic_cast<const TemplateValue<double>*>(this)->getValue() ==
 				dynamic_cast<const TemplateValue<double>*>(&v)->getValue();
 		else
 			return fabs(dynamic_cast<const TemplateValue<double>*>(this)->getValue() -
 				dynamic_cast<const TemplateValue<double>*>(&v)->getValue()) < FLTYPE::Epsld();
-	}
-	else if (_type == "string")
-	{
+	case vt_string:
 		return dynamic_cast<const TemplateValue<std::string>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<std::string>*>(&v)->getValue();
-	}
-	else if (_type == "wstring")
-	{
+	case vt_wstring:
 		return dynamic_cast<const TemplateValue<std::wstring>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<std::wstring>*>(&v)->getValue();
-	}
-	else if (_type == "Point")
-	{
+	case vt_Point:
 		return dynamic_cast<const TemplateValue<FLTYPE::Point>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<FLTYPE::Point>*>(&v)->getValue();
-	}
-	else if (_type == "Vector")
-	{
+	case vt_Vector:
 		return dynamic_cast<const TemplateValue<FLTYPE::Vector>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<FLTYPE::Vector>*>(&v)->getValue();
-	}
-	else if (_type == "BBox")
-	{
+	case vt_BBox:
 		return dynamic_cast<const TemplateValue<FLTYPE::BBox>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<FLTYPE::BBox>*>(&v)->getValue();
-	}
-	else if (_type == "HSVColor")
-	{
+	case vt_HSVColor:
 		return dynamic_cast<const TemplateValue<FLTYPE::HSVColor>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<FLTYPE::HSVColor>*>(&v)->getValue();
-	}
-	else if (_type == "Color")
-	{
+	case vt_Color:
 		return dynamic_cast<const TemplateValue<FLTYPE::Color>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<FLTYPE::Color>*>(&v)->getValue();
-	}
-	else if (_type == "Plane")
-	{
+	case vt_Plane:
 		return dynamic_cast<const TemplateValue<FLTYPE::Plane>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<FLTYPE::Plane>*>(&v)->getValue();
-	}
-	else if (_type == "PlaneSet")
-	{
+	case vt_PlaneSet:
 		return dynamic_cast<const TemplateValue<FLTYPE::PlaneSet>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<FLTYPE::PlaneSet>*>(&v)->getValue();
-	}
-	else if (_type == "Quaternion")
-	{
+	case vt_Quaternion:
 		return dynamic_cast<const TemplateValue<FLTYPE::Quaternion>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<FLTYPE::Quaternion>*>(&v)->getValue();
-	}
-	else if (_type == "Ray")
-	{
+	case vt_Ray:
 		return dynamic_cast<const TemplateValue<FLTYPE::Ray>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<FLTYPE::Ray>*>(&v)->getValue();
-	}
-	else if (_type == "Transform")
-	{
+	case vt_Transform:
 		return dynamic_cast<const TemplateValue<FLTYPE::Transform>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<FLTYPE::Transform>*>(&v)->getValue();
-	}
-	else if (_type == "GLfloat4")
-	{
+	case vt_GLfloat4:
 		return dynamic_cast<const TemplateValue<FLTYPE::GLfloat4>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<FLTYPE::GLfloat4>*>(&v)->getValue();
-	}
-	else if (_type == "GLint4")
-	{
+	case vt_GLint4:
 		return dynamic_cast<const TemplateValue<FLTYPE::GLint4>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<FLTYPE::GLint4>*>(&v)->getValue();
+	default:
+		return false;
 	}
-	else return false;
 }
 
 inline bool Value::operator != (const Value& v) const
@@ -435,137 +425,115 @@ inline bool Value::sync(Event& event)
 	if (!value || _type != value->_type)
 		return false;
 
-	if (_type == "Referenced*")
+	switch (_etype)
 	{
+	case vt_pReferenced:
 		dynamic_cast<TemplateValue<Referenced*>*>(this)->setValue(
 			dynamic_cast<TemplateValue<Referenced*>*>(value)->getValue(), event);
-	}
-	else if (_type == "bool")
-	{
+		break;
+	case vt_bool:
 		dynamic_cast<TemplateValue<bool>*>(this)->setValue(
 			dynamic_cast<TemplateValue<bool>*>(value)->getValue(), event);
-	}
-	else if (_type == "char")
-	{
+		break;
+	case vt_char:
 		dynamic_cast<TemplateValue<char>*>(this)->setValue(
 			dynamic_cast<TemplateValue<char>*>(value)->getValue(), event);
-	}
-	else if (_type == "unsigned char")
-	{
+		break;
+	case vt_unsigned_char:
 		dynamic_cast<TemplateValue<unsigned char>*>(this)->setValue(
 			dynamic_cast<TemplateValue<unsigned char>*>(value)->getValue(), event);
-	}
-	else if (_type == "short")
-	{
+		break;
+	case vt_short:
 		dynamic_cast<TemplateValue<short>*>(this)->setValue(
 			dynamic_cast<TemplateValue<short>*>(value)->getValue(), event);
-	}
-	else if (_type == "unsigned short")
-	{
+		break;
+	case vt_unsigned_short:
 		dynamic_cast<TemplateValue<unsigned short>*>(this)->setValue(
 			dynamic_cast<TemplateValue<unsigned short>*>(value)->getValue(), event);
-	}
-	else if (_type == "long")
-	{
+		break;
+	case vt_long:
 		dynamic_cast<TemplateValue<long>*>(this)->setValue(
 			dynamic_cast<TemplateValue<long>*>(value)->getValue(), event);
-	}
-	else if (_type == "unsigned long")
-	{
+		break;
+	case vt_unsigned_long:
 		dynamic_cast<TemplateValue<unsigned long>*>(this)->setValue(
 			dynamic_cast<TemplateValue<unsigned long>*>(value)->getValue(), event);
-	}
-	else if (_type == "long long")
-	{
+		break;
+	case vt_long_long:
 		dynamic_cast<TemplateValue<long long>*>(this)->setValue(
 			dynamic_cast<TemplateValue<long long>*>(value)->getValue(), event);
-	}
-	else if (_type == "unsigned long long")
-	{
+		break;
+	case vt_unsigned_long_long:
 		dynamic_cast<TemplateValue<unsigned long long>*>(this)->setValue(
 			dynamic_cast<TemplateValue<unsigned long long>*>(value)->getValue(), event);
-	}
-	else if (_type == "float")
-	{
+		break;
+	case vt_float:
 		dynamic_cast<TemplateValue<float>*>(this)->setValue(
 			dynamic_cast<TemplateValue<float>*>(value)->getValue(), event);
-	}
-	else if (_type == "double")
-	{
+		break;
+	case vt_double:
 		dynamic_cast<TemplateValue<double>*>(this)->setValue(
 			dynamic_cast<TemplateValue<double>*>(value)->getValue(), event);
-	}
-	else if (_type == "string")
-	{
+		break;
+	case vt_string:
 		dynamic_cast<TemplateValue<std::string>*>(this)->setValue(
 			dynamic_cast<TemplateValue<std::string>*>(value)->getValue(), event);
-	}
-	else if (_type == "wstring")
-	{
+		break;
+	case vt_wstring:
 		dynamic_cast<TemplateValue<std::wstring>*>(this)->setValue(
 			dynamic_cast<TemplateValue<std::wstring>*>(value)->getValue(), event);
-	}
-	else if (_type == "Point")
-	{
+		break;
+	case vt_Point:
 		dynamic_cast<TemplateValue<FLTYPE::Point>*>(this)->setValue(
 			dynamic_cast<TemplateValue<FLTYPE::Point>*>(value)->getValue(), event);
-	}
-	else if (_type == "Vector")
-	{
+		break;
+	case vt_Vector:
 		dynamic_cast<TemplateValue<FLTYPE::Vector>*>(this)->setValue(
 			dynamic_cast<TemplateValue<FLTYPE::Vector>*>(value)->getValue(), event);
-	}
-	else if (_type == "BBox")
-	{
+		break;
+	case vt_BBox:
 		dynamic_cast<TemplateValue<FLTYPE::BBox>*>(this)->setValue(
 			dynamic_cast<TemplateValue<FLTYPE::BBox>*>(value)->getValue(), event);
-	}
-	else if (_type == "HSVColor")
-	{
+		break;
+	case vt_HSVColor:
 		dynamic_cast<TemplateValue<FLTYPE::HSVColor>*>(this)->setValue(
 			dynamic_cast<TemplateValue<FLTYPE::HSVColor>*>(value)->getValue(), event);
-	}
-	else if (_type == "Color")
-	{
+		break;
+	case vt_Color:
 		dynamic_cast<TemplateValue<FLTYPE::Color>*>(this)->setValue(
 			dynamic_cast<TemplateValue<FLTYPE::Color>*>(value)->getValue(), event);
-	}
-	else if (_type == "Plane")
-	{
+		break;
+	case vt_Plane:
 		dynamic_cast<TemplateValue<FLTYPE::Plane>*>(this)->setValue(
 			dynamic_cast<TemplateValue<FLTYPE::Plane>*>(value)->getValue(), event);
-	}
-	else if (_type == "PlaneSet")
-	{
+		break;
+	case vt_PlaneSet:
 		dynamic_cast<TemplateValue<FLTYPE::PlaneSet>*>(this)->setValue(
 			dynamic_cast<TemplateValue<FLTYPE::PlaneSet>*>(value)->getValue(), event);
-	}
-	else if (_type == "Quaternion")
-	{
+		break;
+	case vt_Quaternion:
 		dynamic_cast<TemplateValue<FLTYPE::Quaternion>*>(this)->setValue(
 			dynamic_cast<TemplateValue<FLTYPE::Quaternion>*>(value)->getValue(), event);
-	}
-	else if (_type == "Ray")
-	{
+		break;
+	case vt_Ray:
 		dynamic_cast<TemplateValue<FLTYPE::Ray>*>(this)->setValue(
 			dynamic_cast<TemplateValue<FLTYPE::Ray>*>(value)->getValue(), event);
-	}
-	else if (_type == "Transform")
-	{
+		break;
+	case vt_Transform:
 		dynamic_cast<TemplateValue<FLTYPE::Transform>*>(this)->setValue(
 			dynamic_cast<TemplateValue<FLTYPE::Transform>*>(value)->getValue(), event);
-	}
-	else if (_type == "GLfloat4")
-	{
+		break;
+	case vt_GLfloat4:
 		dynamic_cast<TemplateValue<FLTYPE::GLfloat4>*>(this)->setValue(
 			dynamic_cast<TemplateValue<FLTYPE::GLfloat4>*>(value)->getValue(), event);
-	}
-	else if (_type == "GLint4")
-	{
+		break;
+	case vt_GLint4:
 		dynamic_cast<TemplateValue<FLTYPE::GLint4>*>(this)->setValue(
 			dynamic_cast<TemplateValue<FLTYPE::GLint4>*>(value)->getValue(), event);
+		break;
+	default:
+		return false;
 	}
-	else return false;
 
 	return true;
 }
@@ -577,63 +545,93 @@ inline void Value::notify(Event& event)
 
 inline std::ostream& FL::operator<<(std::ostream& os, const Value& v)
 {
-	if (v._type == "Referenced*")
-		os << dynamic_cast<const TemplateValue<Referenced*>*>(&v)->getValue();
-	if (v._type == "bool")
-		os << dynamic_cast<const TemplateValue<bool>*>(&v)->getValue();
-	if (v._type == "char")
-		os << dynamic_cast<const TemplateValue<char>*>(&v)->getValue();
-	if (v._type == "unsigned char")
-		os << dynamic_cast<const TemplateValue<unsigned char>*>(&v)->getValue();
-	if (v._type == "short")
-		os << dynamic_cast<const TemplateValue<short>*>(&v)->getValue();
-	if (v._type == "unsigned short")
-		os << dynamic_cast<const TemplateValue<unsigned short>*>(&v)->getValue();
-	if (v._type == "long")
-		os << dynamic_cast<const TemplateValue<long>*>(&v)->getValue();
-	if (v._type == "unsigned long")
-		os << dynamic_cast<const TemplateValue<unsigned long>*>(&v)->getValue();
-	if (v._type == "long long")
-		os << dynamic_cast<const TemplateValue<long long>*>(&v)->getValue();
-	if (v._type == "unsigned long long")
-		os << dynamic_cast<const TemplateValue<unsigned long long>*>(&v)->getValue();
-	if (v._type == "float")
-		os << dynamic_cast<const TemplateValue<float>*>(&v)->getValue();
-	if (v._type == "double")
-		os << dynamic_cast<const TemplateValue<double>*>(&v)->getValue();
-	if (v._type == "string")
-		os << dynamic_cast<const TemplateValue<std::string>*>(&v)->getValue();
-	if (v._type == "wstring")
+	switch (v._etype)
 	{
-		//convert for os
-		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
-		os << converter.to_bytes(dynamic_cast<const TemplateValue<std::wstring>*>(&v)->getValue());
-	}
-	if (v._type == "Point")
+	case Value::vt_pReferenced:
+		os << dynamic_cast<const TemplateValue<Referenced*>*>(&v)->getValue();
+		break;
+	case Value::vt_bool:
+		os << dynamic_cast<const TemplateValue<bool>*>(&v)->getValue();
+		break;
+	case Value::vt_char:
+		os << dynamic_cast<const TemplateValue<char>*>(&v)->getValue();
+		break;
+	case Value::vt_unsigned_char:
+		os << dynamic_cast<const TemplateValue<unsigned char>*>(&v)->getValue();
+		break;
+	case Value::vt_short:
+		os << dynamic_cast<const TemplateValue<short>*>(&v)->getValue();
+		break;
+	case Value::vt_unsigned_short:
+		os << dynamic_cast<const TemplateValue<unsigned short>*>(&v)->getValue();
+		break;
+	case Value::vt_long:
+		os << dynamic_cast<const TemplateValue<long>*>(&v)->getValue();
+		break;
+	case Value::vt_unsigned_long:
+		os << dynamic_cast<const TemplateValue<unsigned long>*>(&v)->getValue();
+		break;
+	case Value::vt_long_long:
+		os << dynamic_cast<const TemplateValue<long long>*>(&v)->getValue();
+		break;
+	case Value::vt_unsigned_long_long:
+		os << dynamic_cast<const TemplateValue<unsigned long long>*>(&v)->getValue();
+		break;
+	case Value::vt_float:
+		os << dynamic_cast<const TemplateValue<float>*>(&v)->getValue();
+		break;
+	case Value::vt_double:
+		os << dynamic_cast<const TemplateValue<double>*>(&v)->getValue();
+		break;
+	case Value::vt_string:
+		os << dynamic_cast<const TemplateValue<std::string>*>(&v)->getValue();
+		break;
+	case Value::vt_wstring:
+		{
+			//convert for os
+			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
+			os << converter.to_bytes(dynamic_cast<const TemplateValue<std::wstring>*>(&v)->getValue());
+		}
+		break;
+	case Value::vt_Point:
 		os << dynamic_cast<const TemplateValue<FLTYPE::Point>*>(&v)->getValue();
-	if (v._type == "Vector")
+		break;
+	case Value::vt_Vector:
 		os << dynamic_cast<const TemplateValue<FLTYPE::Vector>*>(&v)->getValue();
-	if (v._type == "BBox")
+		break;
+	case Value::vt_BBox:
 		os << dynamic_cast<const TemplateValue<FLTYPE::BBox>*>(&v)->getValue();
-	if (v._type == "HSVColor")
+		break;
+	case Value::vt_HSVColor:
 		os << dynamic_cast<const TemplateValue<FLTYPE::HSVColor>*>(&v)->getValue();
-	if (v._type == "Color")
+		break;
+	case Value::vt_Color:
 		os << dynamic_cast<const TemplateValue<FLTYPE::Color>*>(&v)->getValue();
-	if (v._type == "Plane")
+		break;
+	case Value::vt_Plane:
 		os << dynamic_cast<const TemplateValue<FLTYPE::Plane>*>(&v)->getValue();
-	if (v._type == "PlaneSet")
+		break;
+	case Value::vt_PlaneSet:
 		os << dynamic_cast<const TemplateValue<FLTYPE::PlaneSet>*>(&v)->getValue();
-	if (v._type == "Quaternion")
+		break;
+	case Value::vt_Quaternion:
 		os << dynamic_cast<const TemplateValue<FLTYPE::Quaternion>*>(&v)->getValue();
-	if (v._type == "Ray")
+		break;
+	case Value::vt_Ray:
 		os << dynamic_cast<const TemplateValue<FLTYPE::Ray>*>(&v)->getValue();
-	if (v._type == "Transform")
+		break;
+	case Value::vt_Transform:
 		os << dynamic_cast<const TemplateValue<FLTYPE::Transform>*>(&v)->getValue();
-	if (v._type == "GLfloat4")
+		break;
+	case Value::vt_GLfloat4:
 		os << dynamic_cast<const TemplateValue<FLTYPE::GLfloat4>*>(&v)->getValue();
-	if (v._type == "GLint4")
+		break;
+	case Value::vt_GLint4:
 		os << dynamic_cast<const TemplateValue<FLTYPE::GLint4>*>(&v)->getValue();
+		break;
+	}
 	return os;
+
 }
 
 inline bool ValueSet::operator == (const ValueSet &vs) const

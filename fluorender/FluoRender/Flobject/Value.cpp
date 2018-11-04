@@ -32,68 +32,69 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace FL;
 
-bool Value::_precise = false;
-
 Value::~Value()
 {
 }
 
 Value* Value::clone()
 {
-	if (_type == "Referenced*")
+	switch (_etype)
+	{
+	case vt_pReferenced:
 		return (dynamic_cast<TemplateValue<Referenced*>*>(this))->clone();
-	else if (_type == "bool")
+	case vt_bool:
 		return (dynamic_cast<TemplateValue<bool>*>(this))->clone();
-	else if (_type == "char")
+	case vt_char:
 		return (dynamic_cast<TemplateValue<char>*>(this))->clone();
-	else if (_type == "unsigned char")
+	case vt_unsigned_char:
 		return (dynamic_cast<TemplateValue<unsigned char>*>(this))->clone();
-	else if (_type == "short")
+	case vt_short:
 		return (dynamic_cast<TemplateValue<short>*>(this))->clone();
-	else if (_type == "unsigned short")
+	case vt_unsigned_short:
 		return (dynamic_cast<TemplateValue<unsigned short>*>(this))->clone();
-	else if (_type == "long")
+	case vt_long:
 		return (dynamic_cast<TemplateValue<long>*>(this))->clone();
-	else if (_type == "unsigned long")
+	case vt_unsigned_long:
 		return (dynamic_cast<TemplateValue<unsigned long>*>(this))->clone();
-	else if (_type == "long long")
+	case vt_long_long:
 		return (dynamic_cast<TemplateValue<long long>*>(this))->clone();
-	else if (_type == "unsigned long long")
+	case vt_unsigned_long_long:
 		return (dynamic_cast<TemplateValue<unsigned long long>*>(this))->clone();
-	else if (_type == "float")
+	case vt_float:
 		return (dynamic_cast<TemplateValue<float>*>(this))->clone();
-	else if (_type == "double")
+	case vt_double:
 		return (dynamic_cast<TemplateValue<double>*>(this))->clone();
-	else if (_type == "string")
+	case vt_string:
 		return (dynamic_cast<TemplateValue<std::string>*>(this))->clone();
-	else if (_type == "wstring")
+	case vt_wstring:
 		return (dynamic_cast<TemplateValue<std::wstring>*>(this))->clone();
-	else if (_type == "Point")
+	case vt_Point:
 		return (dynamic_cast<TemplateValue<FLTYPE::Point>*>(this))->clone();
-	else if (_type == "Vector")
+	case vt_Vector:
 		return (dynamic_cast<TemplateValue<FLTYPE::Vector>*>(this))->clone();
-	else if (_type == "BBox")
+	case vt_BBox:
 		return (dynamic_cast<TemplateValue<FLTYPE::BBox>*>(this))->clone();
-	else if (_type == "HSVColor")
+	case vt_HSVColor:
 		return (dynamic_cast<TemplateValue<FLTYPE::HSVColor>*>(this))->clone();
-	else if (_type == "Color")
+	case vt_Color:
 		return (dynamic_cast<TemplateValue<FLTYPE::Color>*>(this))->clone();
-	else if (_type == "Plane")
+	case vt_Plane:
 		return (dynamic_cast<TemplateValue<FLTYPE::Plane>*>(this))->clone();
-	else if (_type == "PlaneSet")
+	case vt_PlaneSet:
 		return (dynamic_cast<TemplateValue<FLTYPE::PlaneSet>*>(this))->clone();
-	else if (_type == "Quaternion")
+	case vt_Quaternion:
 		return (dynamic_cast<TemplateValue<FLTYPE::Quaternion>*>(this))->clone();
-	else if (_type == "Ray")
+	case vt_Ray:
 		return (dynamic_cast<TemplateValue<FLTYPE::Ray>*>(this))->clone();
-	else if (_type == "Transform")
+	case vt_Transform:
 		return (dynamic_cast<TemplateValue<FLTYPE::Transform>*>(this))->clone();
-	else if (_type == "GLfloat4")
+	case vt_GLfloat4:
 		return (dynamic_cast<TemplateValue<FLTYPE::GLfloat4>*>(this))->clone();
-	else if (_type == "GLint4")
+	case vt_GLint4:
 		return (dynamic_cast<TemplateValue<FLTYPE::GLint4>*>(this))->clone();
-	else
+	default:
 		return 0;
+	}
 }
 
 //observer functions
@@ -200,7 +201,7 @@ bool ValueSet::resetRefPtr(Referenced* value)
 	for (Values::iterator it=_values.begin();
 		it!=_values.end(); ++it)
 	{
-		if (it->second->getType() == "Referenced*" &&
+		if (it->second->_etype == Value::vt_pReferenced &&
 			(dynamic_cast<TemplateValue<Referenced*>*>(it->second.get()))->getValue() == value)
 		{
 			(dynamic_cast<TemplateValue<Referenced*>*>(it->second.get()))->setValue(0, Event());
@@ -219,159 +220,166 @@ bool ValueSet::addValue(ValueTuple& vt)
 	std::string value = std::get<2>(vt);
 	std::istringstream iss(value);
 
-	if (type == "Referenced*")
-	{
-		Referenced* v = 0;
-		return addValue(name, v);
-	}
-	else if (type == "bool")
-	{
-		bool v;
-		iss >> v;
-		return addValue(name, v);
-	}
-	else if (type == "char")
-	{
-		char v;
-		iss >> v;
-		return addValue(name, v);
-	}
-	else if (type == "unsigned char")
-	{
-		unsigned char v;
-		iss >> v;
-		return addValue(name, v);
-	}
-	else if (type == "short")
-	{
-		short v;
-		iss >> v;
-		return addValue(name, v);
-	}
-	else if (type == "unsigned short")
-	{
-		unsigned short v;
-		iss >> v;
-		return addValue(name, v);
-	}
-	else if (type == "long")
-	{
-		long v;
-		iss >> v;
-		return addValue(name, v);
-	}
-	else if (type == "unsigned long")
-	{
-		unsigned long v;
-		iss >> v;
-		return addValue(name, v);
-	}
-	else if (type == "long long")
-	{
-		long long v;
-		iss >> v;
-		return addValue(name, v);
-	}
-	else if (type == "unsigned long long")
-	{
-		unsigned long long v;
-		iss >> v;
-		return addValue(name, v);
-	}
-	else if (type == "float")
-	{
-		float v;
-		iss >> v;
-		return addValue(name, v);
-	}
-	else if (type == "double")
-	{
-		double v;
-		iss >> v;
-		return addValue(name, v);
-	}
-	else if (type == "string")
-	{
-		return addValue(name, value);
-	}
-	else if (type == "wstring")
-	{
-		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
-		return addValue(name, converter.from_bytes(value));
-	}
-	else if (type == "Point")
-	{
-		FLTYPE::Point v;
-		iss >> v;
-		return addValue(name, v);
-	}
-	else if (type == "Vector")
-	{
-		FLTYPE::Vector v;
-		iss >> v;
-		return addValue(name, v);
-	}
-	else if (type == "BBox")
-	{
-		FLTYPE::BBox v;
-		iss >> v;
-		return addValue(name, v);
-	}
-	else if (type == "HSVColor")
-	{
-		FLTYPE::HSVColor v;
-		iss >> v;
-		return addValue(name, v);
-	}
-	else if (type == "Color")
-	{
-		FLTYPE::Color v;
-		iss >> v;
-		return addValue(name, v);
-	}
-	else if (type == "Plane")
-	{
-		FLTYPE::Plane v;
-		iss >> v;
-		return addValue(name, v);
-	}
-	else if (type == "PlaneSet")
-	{
-		FLTYPE::PlaneSet v;
-		iss >> v;
-		return addValue(name, v);
-	}
-	else if (type == "Quaternion")
-	{
-		FLTYPE::Quaternion v;
-		iss >> v;
-		return addValue(name, v);
-	}
-	else if (type == "Ray")
-	{
-		FLTYPE::Ray v;
-		iss >> v;
-		return addValue(name, v);
-	}
-	else if (type == "Transform")
-	{
-		FLTYPE::Transform v;
-		iss >> v;
-		return addValue(name, v);
-	}
-	else if (type == "GLfloat4")
-	{
-		FLTYPE::GLfloat4 v;
-		iss >> v;
-		return addValue(name, v);
-	}
-	else if (type == "GLint4")
-	{
-		FLTYPE::GLint4 v;
-		iss >> v;
-		return addValue(name, v);
-	}
+	Value::ValueType etype(Value::vt_null);
+	auto it = Value::_value_map.find(type);
+	if (it != Value::_value_map.end())
+		etype = it->second;
 
+	switch (etype)
+	{
+	case Value::vt_pReferenced:
+		{
+			Referenced* v = 0;
+			return addValue(name, v);
+		}
+	case Value::vt_bool:
+		{
+			bool v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	case Value::vt_char:
+		{
+			char v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	case Value::vt_unsigned_char:
+		{
+			unsigned char v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	case Value::vt_short:
+		{
+			short v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	case Value::vt_unsigned_short:
+		{
+			unsigned short v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	case Value::vt_long:
+		{
+			long v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	case Value::vt_unsigned_long:
+		{
+			unsigned long v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	case Value::vt_long_long:
+		{
+			long long v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	case Value::vt_unsigned_long_long:
+		{
+			unsigned long long v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	case Value::vt_float:
+		{
+			float v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	case Value::vt_double:
+		{
+			double v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	case Value::vt_string:
+		{
+			return addValue(name, value);
+		}
+	case Value::vt_wstring:
+		{
+			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
+			return addValue(name, converter.from_bytes(value));
+		}
+	case Value::vt_Point:
+		{
+			FLTYPE::Point v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	case Value::vt_Vector:
+		{
+			FLTYPE::Vector v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	case Value::vt_BBox:
+		{
+			FLTYPE::BBox v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	case Value::vt_HSVColor:
+		{
+			FLTYPE::HSVColor v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	case Value::vt_Color:
+		{
+			FLTYPE::Color v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	case Value::vt_Plane:
+		{
+			FLTYPE::Plane v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	case Value::vt_PlaneSet:
+		{
+			FLTYPE::PlaneSet v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	case Value::vt_Quaternion:
+		{
+			FLTYPE::Quaternion v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	case Value::vt_Ray:
+		{
+			FLTYPE::Ray v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	case Value::vt_Transform:
+		{
+			FLTYPE::Transform v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	case Value::vt_GLfloat4:
+		{
+			FLTYPE::GLfloat4 v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	case Value::vt_GLint4:
+		{
+			FLTYPE::GLint4 v;
+			iss >> v;
+			return addValue(name, v);
+		}
+	}
 	return false;
 }
 
@@ -379,11 +387,8 @@ bool ValueSet::addValue(const std::string &name, Referenced* value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<Referenced*>* val = new TemplateValue<Referenced*>;
-		val->_value = value;
-		val->_name = name;
-		val->_type = "Referenced*";
-
+		TemplateValue<Referenced*>* val = new TemplateValue<Referenced*>(
+			name, "Referenced*", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -395,11 +400,8 @@ bool ValueSet::addValue(const std::string &name, bool value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<bool>* val = new TemplateValue<bool>;
-		val->_value =value;
-		val->_name = name;
-		val->_type = "bool";
-
+		TemplateValue<bool>* val = new TemplateValue<bool>(
+			name, "bool", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -411,11 +413,8 @@ bool ValueSet::addValue(const std::string &name, char value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<char>* val = new TemplateValue<char>;
-		val->_value =value;
-		val->_name = name;
-		val->_type = "char";
-
+		TemplateValue<char>* val = new TemplateValue<char>(
+			name, "char", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -427,11 +426,8 @@ bool ValueSet::addValue(const std::string &name, unsigned char value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<unsigned char>* val = new TemplateValue<unsigned char>;
-		val->_value =value;
-		val->_name = name;
-		val->_type = "unsigned char";
-
+		TemplateValue<unsigned char>* val = new TemplateValue<unsigned char>(
+			name, "unsigned char", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -443,11 +439,8 @@ bool ValueSet::addValue(const std::string &name, short value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<short>* val = new TemplateValue<short>;
-		val->_value =value;
-		val->_name = name;
-		val->_type = "short";
-
+		TemplateValue<short>* val = new TemplateValue<short>(
+			name, "short", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -459,11 +452,8 @@ bool ValueSet::addValue(const std::string &name, unsigned short value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<unsigned short>* val = new TemplateValue<unsigned short>;
-		val->_value =value;
-		val->_name = name;
-		val->_type = "unsigned short";
-
+		TemplateValue<unsigned short>* val = new TemplateValue<unsigned short>(
+			name, "unsigned short", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -475,11 +465,8 @@ bool ValueSet::addValue(const std::string &name, long value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<long>* val = new TemplateValue<long>;
-		val->_value =value;
-		val->_name = name;
-		val->_type = "long";
-
+		TemplateValue<long>* val = new TemplateValue<long>(
+			name, "long", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -491,11 +478,8 @@ bool ValueSet::addValue(const std::string &name, unsigned long value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<unsigned long>* val = new TemplateValue<unsigned long>;
-		val->_value =value;
-		val->_name = name;
-		val->_type = "unsigned long";
-
+		TemplateValue<unsigned long>* val = new TemplateValue<unsigned long>(
+			name, "unsigned long", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -507,11 +491,8 @@ bool ValueSet::addValue(const std::string &name, long long value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<long long>* val = new TemplateValue<long long>;
-		val->_value =value;
-		val->_name = name;
-		val->_type = "long long";
-
+		TemplateValue<long long>* val = new TemplateValue<long long>(
+			name, "long long", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -523,11 +504,8 @@ bool ValueSet::addValue(const std::string &name, unsigned long long value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<unsigned long long>* val = new TemplateValue<unsigned long long>;
-		val->_value =value;
-		val->_name = name;
-		val->_type = "unsigned long long";
-
+		TemplateValue<unsigned long long>* val = new TemplateValue<unsigned long long>(
+			name, "unsigned long long", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -539,11 +517,8 @@ bool ValueSet::addValue(const std::string &name, float value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<float>* val = new TemplateValue<float>;
-		val->_value =value;
-		val->_name = name;
-		val->_type = "float";
-
+		TemplateValue<float>* val = new TemplateValue<float>(
+			name, "float", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -555,11 +530,8 @@ bool ValueSet::addValue(const std::string &name, double value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<double>* val = new TemplateValue<double>;
-		val->_value =value;
-		val->_name = name;
-		val->_type = "double";
-
+		TemplateValue<double>* val = new TemplateValue<double>(
+			name, "double", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -571,11 +543,8 @@ bool ValueSet::addValue(const std::string &name, const std::string &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<std::string>* val = new TemplateValue<std::string>;
-		val->_value =value;
-		val->_name = name;
-		val->_type = "string";
-
+		TemplateValue<std::string>* val = new TemplateValue<std::string>(
+			name, "string", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -587,11 +556,8 @@ bool ValueSet::addValue(const std::string &name, const std::wstring &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<std::wstring>* val = new TemplateValue<std::wstring>;
-		val->_value = value;
-		val->_name = name;
-		val->_type = "wstring";
-
+		TemplateValue<std::wstring>* val = new TemplateValue<std::wstring>(
+			name, "wstring", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -603,11 +569,8 @@ bool ValueSet::addValue(const std::string &name, const FLTYPE::Point &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<FLTYPE::Point>* val = new TemplateValue<FLTYPE::Point>;
-		val->_value =value;
-		val->_name = name;
-		val->_type = "Point";
-
+		TemplateValue<FLTYPE::Point>* val = new TemplateValue<FLTYPE::Point>(
+			name, "Point", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -619,11 +582,8 @@ bool ValueSet::addValue(const std::string &name, const FLTYPE::Vector &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<FLTYPE::Vector>* val = new TemplateValue<FLTYPE::Vector>;
-		val->_value = value;
-		val->_name = name;
-		val->_type = "Vector";
-
+		TemplateValue<FLTYPE::Vector>* val = new TemplateValue<FLTYPE::Vector>(
+			name, "Vector", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -635,11 +595,8 @@ bool ValueSet::addValue(const std::string &name, const FLTYPE::BBox &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<FLTYPE::BBox>* val = new TemplateValue<FLTYPE::BBox>;
-		val->_value = value;
-		val->_name = name;
-		val->_type = "BBox";
-
+		TemplateValue<FLTYPE::BBox>* val = new TemplateValue<FLTYPE::BBox>(
+			name, "BBox", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -651,11 +608,8 @@ bool ValueSet::addValue(const std::string &name, const FLTYPE::HSVColor &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<FLTYPE::HSVColor>* val = new TemplateValue<FLTYPE::HSVColor>;
-		val->_value = value;
-		val->_name = name;
-		val->_type = "HSVColor";
-
+		TemplateValue<FLTYPE::HSVColor>* val = new TemplateValue<FLTYPE::HSVColor>(
+			name, "HSVColor", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -667,11 +621,8 @@ bool ValueSet::addValue(const std::string &name, const FLTYPE::Color &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<FLTYPE::Color>* val = new TemplateValue<FLTYPE::Color>;
-		val->_value = value;
-		val->_name = name;
-		val->_type = "Color";
-
+		TemplateValue<FLTYPE::Color>* val = new TemplateValue<FLTYPE::Color>(
+			name, "Color", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -683,11 +634,8 @@ bool ValueSet::addValue(const std::string &name, const FLTYPE::Plane &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<FLTYPE::Plane>* val = new TemplateValue<FLTYPE::Plane>;
-		val->_value = value;
-		val->_name = name;
-		val->_type = "Plane";
-
+		TemplateValue<FLTYPE::Plane>* val = new TemplateValue<FLTYPE::Plane>(
+			name, "Plane", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -699,11 +647,8 @@ bool ValueSet::addValue(const std::string &name, const FLTYPE::PlaneSet &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<FLTYPE::PlaneSet>* val = new TemplateValue<FLTYPE::PlaneSet>;
-		val->_value = value;
-		val->_name = name;
-		val->_type = "PlaneSet";
-
+		TemplateValue<FLTYPE::PlaneSet>* val = new TemplateValue<FLTYPE::PlaneSet>(
+			name, "PlaneSet", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -715,11 +660,8 @@ bool ValueSet::addValue(const std::string &name, const FLTYPE::Quaternion &value
 {
 	if (!findValue(name))
 	{
-		TemplateValue<FLTYPE::Quaternion>* val = new TemplateValue<FLTYPE::Quaternion>;
-		val->_value = value;
-		val->_name = name;
-		val->_type = "Quaternion";
-
+		TemplateValue<FLTYPE::Quaternion>* val = new TemplateValue<FLTYPE::Quaternion>(
+			name, "Quaternion", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -731,11 +673,8 @@ bool ValueSet::addValue(const std::string &name, const FLTYPE::Ray &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<FLTYPE::Ray>* val = new TemplateValue<FLTYPE::Ray>;
-		val->_value = value;
-		val->_name = name;
-		val->_type = "Ray";
-
+		TemplateValue<FLTYPE::Ray>* val = new TemplateValue<FLTYPE::Ray>(
+			name, "Ray", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -747,10 +686,8 @@ bool ValueSet::addValue(const std::string &name, const FLTYPE::Transform &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<FLTYPE::Transform>* val = new TemplateValue<FLTYPE::Transform>;
-		val->_value = value;
-		val->_name = name;
-		val->_type = "Transform";
+		TemplateValue<FLTYPE::Transform>* val = new TemplateValue<FLTYPE::Transform>(
+			name, "Transform", value);
 
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
@@ -763,11 +700,8 @@ bool ValueSet::addValue(const std::string &name, const FLTYPE::GLfloat4 &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<FLTYPE::GLfloat4>* val = new TemplateValue<FLTYPE::GLfloat4>;
-		val->_value = value;
-		val->_name = name;
-		val->_type = "GLfloat4";
-
+		TemplateValue<FLTYPE::GLfloat4>* val = new TemplateValue<FLTYPE::GLfloat4>(
+			name, "GLfloat4", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -779,11 +713,8 @@ bool ValueSet::addValue(const std::string &name, const FLTYPE::GLint4 &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<FLTYPE::GLint4>* val = new TemplateValue<FLTYPE::GLint4>;
-		val->_value = value;
-		val->_name = name;
-		val->_type = "GLint4";
-
+		TemplateValue<FLTYPE::GLint4>* val = new TemplateValue<FLTYPE::GLint4>(
+			name, "GLint4", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -799,168 +730,175 @@ bool ValueSet::setValue(ValueTuple& vt, Event& event)
 	std::string value = std::get<2>(vt);
 	std::istringstream iss(value);
 
-	if (type == "Referenced*")
-	{
-		//cannot set value without the address
-		//Referenced* v = 0;
-		//return setValue(name, v);
-		return false;
-	}
-	else if (type == "bool")
-	{
-		bool v;
-		iss >> v;
-		return setValue(name, v, event);
-	}
-	else if (type == "char")
-	{
-		char v;
-		iss >> v;
-		return setValue(name, v, event);
-	}
-	else if (type == "unsigned char")
-	{
-		unsigned char v;
-		iss >> v;
-		return setValue(name, v, event);
-	}
-	else if (type == "short")
-	{
-		short v;
-		iss >> v;
-		return setValue(name, v, event);
-	}
-	else if (type == "unsigned short")
-	{
-		unsigned short v;
-		iss >> v;
-		return setValue(name, v, event);
-	}
-	else if (type == "long")
-	{
-		long v;
-		iss >> v;
-		return setValue(name, v, event);
-	}
-	else if (type == "unsigned long")
-	{
-		unsigned long v;
-		iss >> v;
-		return setValue(name, v, event);
-	}
-	else if (type == "long long")
-	{
-		long long v;
-		iss >> v;
-		return setValue(name, v, event);
-	}
-	else if (type == "unsigned long long")
-	{
-		unsigned long long v;
-		iss >> v;
-		return setValue(name, v, event);
-	}
-	else if (type == "float")
-	{
-		float v;
-		iss >> v;
-		return setValue(name, v, event);
-	}
-	else if (type == "double")
-	{
-		double v;
-		iss >> v;
-		return setValue(name, v, event);
-	}
-	else if (type == "string")
-	{
-		return setValue(name, value, event);
-	}
-	else if (type == "wstring")
-	{
-		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
-		return setValue(name, converter.from_bytes(value), event);
-	}
-	else if (type == "Point")
-	{
-		FLTYPE::Point v;
-		iss >> v;
-		return setValue(name, v, event);
-	}
-	else if (type == "Vector")
-	{
-		FLTYPE::Vector v;
-		iss >> v;
-		return setValue(name, v, event);
-	}
-	else if (type == "BBox")
-	{
-		FLTYPE::BBox v;
-		iss >> v;
-		return setValue(name, v, event);
-	}
-	else if (type == "HSVColor")
-	{
-		FLTYPE::HSVColor v;
-		iss >> v;
-		return setValue(name, v, event);
-	}
-	else if (type == "Color")
-	{
-		FLTYPE::Color v;
-		iss >> v;
-		return setValue(name, v, event);
-	}
-	else if (type == "Plane")
-	{
-		FLTYPE::Plane v;
-		iss >> v;
-		return setValue(name, v, event);
-	}
-	else if (type == "PlaneSet")
-	{
-		FLTYPE::PlaneSet v;
-		iss >> v;
-		return setValue(name, v, event);
-	}
-	else if (type == "Quaternion")
-	{
-		FLTYPE::Quaternion v;
-		iss >> v;
-		return setValue(name, v, event);
-	}
-	else if (type == "Ray")
-	{
-		FLTYPE::Ray v;
-		iss >> v;
-		return setValue(name, v, event);
-	}
-	else if (type == "Transform")
-	{
-		FLTYPE::Transform v;
-		iss >> v;
-		return setValue(name, v, event);
-	}
-	else if (type == "GLfloat4")
-	{
-		FLTYPE::GLfloat4 v;
-		iss >> v;
-		return setValue(name, v, event);
-	}
-	else if (type == "GLint4")
-	{
-		FLTYPE::GLint4 v;
-		iss >> v;
-		return setValue(name, v, event);
-	}
+	Value::ValueType etype(Value::vt_null);
+	auto it = Value::_value_map.find(type);
+	if (it != Value::_value_map.end())
+		etype = it->second;
 
+	switch (etype)
+	{
+	case Value::vt_pReferenced:
+		{
+			//cannot set value without the address
+			//Referenced* v = 0;
+			//return setValue(name, v);
+			return false;
+		}
+	case Value::vt_bool:
+		{
+			bool v;
+			iss >> v;
+			return setValue(name, v, event);
+		}
+	case Value::vt_char:
+		{
+			char v;
+			iss >> v;
+			return setValue(name, v, event);
+		}
+	case Value::vt_unsigned_char:
+		{
+			unsigned char v;
+			iss >> v;
+			return setValue(name, v, event);
+		}
+	case Value::vt_short:
+		{
+			short v;
+			iss >> v;
+			return setValue(name, v, event);
+		}
+	case Value::vt_unsigned_short:
+		{
+			unsigned short v;
+			iss >> v;
+			return setValue(name, v, event);
+		}
+	case Value::vt_long:
+		{
+			long v;
+			iss >> v;
+			return setValue(name, v, event);
+		}
+	case Value::vt_unsigned_long:
+		{
+			unsigned long v;
+			iss >> v;
+			return setValue(name, v, event);
+		}
+	case Value::vt_long_long:
+		{
+			long long v;
+			iss >> v;
+			return setValue(name, v, event);
+		}
+	case Value::vt_unsigned_long_long:
+		{
+			unsigned long long v;
+			iss >> v;
+			return setValue(name, v, event);
+		}
+	case Value::vt_float:
+		{
+			float v;
+			iss >> v;
+			return setValue(name, v, event);
+		}
+	case Value::vt_double:
+		{
+			double v;
+			iss >> v;
+			return setValue(name, v, event);
+		}
+	case Value::vt_string:
+		{
+			return setValue(name, value, event);
+		}
+	case Value::vt_wstring:
+		{
+			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
+			return setValue(name, converter.from_bytes(value), event);
+		}
+	case Value::vt_Point:
+		{
+			FLTYPE::Point v;
+			iss >> v;
+			return setValue(name, v, event);
+		}
+	case Value::vt_Vector:
+		{
+			FLTYPE::Vector v;
+			iss >> v;
+			return setValue(name, v, event);
+		}
+	case Value::vt_BBox:
+		{
+			FLTYPE::BBox v;
+			iss >> v;
+			return setValue(name, v, event);
+		}
+	case Value::vt_HSVColor:
+		{
+			FLTYPE::HSVColor v;
+			iss >> v;
+			return setValue(name, v, event);
+		}
+	case Value::vt_Color:
+		{
+			FLTYPE::Color v;
+			iss >> v;
+			return setValue(name, v, event);
+		}
+	case Value::vt_Plane:
+		{
+			FLTYPE::Plane v;
+			iss >> v;
+			return setValue(name, v, event);
+		}
+	case Value::vt_PlaneSet:
+		{
+			FLTYPE::PlaneSet v;
+			iss >> v;
+			return setValue(name, v, event);
+		}
+	case Value::vt_Quaternion:
+		{
+			FLTYPE::Quaternion v;
+			iss >> v;
+			return setValue(name, v, event);
+		}
+	case Value::vt_Ray:
+		{
+			FLTYPE::Ray v;
+			iss >> v;
+			return setValue(name, v, event);
+		}
+	case Value::vt_Transform:
+		{
+			FLTYPE::Transform v;
+			iss >> v;
+			return setValue(name, v, event);
+		}
+	case Value::vt_GLfloat4:
+		{
+			FLTYPE::GLfloat4 v;
+			iss >> v;
+			return setValue(name, v, event);
+		}
+	case Value::vt_GLint4:
+		{
+			FLTYPE::GLint4 v;
+			iss >> v;
+			return setValue(name, v, event);
+		}
+	}
 	return false;
 }
 
 bool ValueSet::setValue(const std::string &name, Referenced* value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="Referenced*")
+	if (val && val->_etype == Value::vt_pReferenced)
 	{
 		(dynamic_cast<TemplateValue<Referenced*>*>(val))->setValue(value, event);
 		return true;
@@ -972,7 +910,7 @@ bool ValueSet::setValue(const std::string &name, Referenced* value, Event& event
 bool ValueSet::setValue(const std::string &name, bool value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="bool")
+	if (val && val->_etype == Value::vt_bool)
 	{
 		(dynamic_cast<TemplateValue<bool>*>(val))->setValue(value, event);
 		return true;
@@ -984,7 +922,7 @@ bool ValueSet::setValue(const std::string &name, bool value, Event& event)
 bool ValueSet::setValue(const std::string &name, char value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="char")
+	if (val && val->_etype == Value::vt_char)
 	{
 		(dynamic_cast<TemplateValue<char>*>(val))->setValue(value, event);
 		return true;
@@ -996,7 +934,7 @@ bool ValueSet::setValue(const std::string &name, char value, Event& event)
 bool ValueSet::setValue(const std::string &name, unsigned char value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="unsigned char")
+	if (val && val->_etype == Value::vt_unsigned_char)
 	{
 		(dynamic_cast<TemplateValue<unsigned char>*>(val))->setValue(value, event);
 		return true;
@@ -1008,7 +946,7 @@ bool ValueSet::setValue(const std::string &name, unsigned char value, Event& eve
 bool ValueSet::setValue(const std::string &name, short value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="short")
+	if (val && val->_etype == Value::vt_short)
 	{
 		(dynamic_cast<TemplateValue<short>*>(val))->setValue(value, event);
 		return true;
@@ -1020,7 +958,7 @@ bool ValueSet::setValue(const std::string &name, short value, Event& event)
 bool ValueSet::setValue(const std::string &name, unsigned short value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="unsigned short")
+	if (val && val->_etype == Value::vt_unsigned_short)
 	{
 		(dynamic_cast<TemplateValue<unsigned short>*>(val))->setValue(value, event);
 		return true;
@@ -1032,7 +970,7 @@ bool ValueSet::setValue(const std::string &name, unsigned short value, Event& ev
 bool ValueSet::setValue(const std::string &name, long value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="long")
+	if (val && val->_etype == Value::vt_long)
 	{
 		(dynamic_cast<TemplateValue<long>*>(val))->setValue(value, event);
 		return true;
@@ -1044,7 +982,7 @@ bool ValueSet::setValue(const std::string &name, long value, Event& event)
 bool ValueSet::setValue(const std::string &name, unsigned long value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="unsigned long")
+	if (val && val->_etype == Value::vt_unsigned_long)
 	{
 		(dynamic_cast<TemplateValue<unsigned long>*>(val))->setValue(value, event);
 		return true;
@@ -1056,7 +994,7 @@ bool ValueSet::setValue(const std::string &name, unsigned long value, Event& eve
 bool ValueSet::setValue(const std::string &name, long long value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="long long")
+	if (val && val->_etype == Value::vt_long_long)
 	{
 		(dynamic_cast<TemplateValue<long long>*>(val))->setValue(value, event);
 		return true;
@@ -1068,7 +1006,7 @@ bool ValueSet::setValue(const std::string &name, long long value, Event& event)
 bool ValueSet::setValue(const std::string &name, unsigned long long value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="unsigned long long")
+	if (val && val->_etype == Value::vt_unsigned_long_long)
 	{
 		(dynamic_cast<TemplateValue<unsigned long long>*>(val))->setValue(value, event);
 		return true;
@@ -1080,7 +1018,7 @@ bool ValueSet::setValue(const std::string &name, unsigned long long value, Event
 bool ValueSet::setValue(const std::string &name, float value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="float")
+	if (val && val->_etype == Value::vt_float)
 	{
 		(dynamic_cast<TemplateValue<float>*>(val))->setValue(value, event);
 		return true;
@@ -1092,7 +1030,7 @@ bool ValueSet::setValue(const std::string &name, float value, Event& event)
 bool ValueSet::setValue(const std::string &name, double value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="double")
+	if (val && val->_etype == Value::vt_double)
 	{
 		(dynamic_cast<TemplateValue<double>*>(val))->setValue(value, event);
 		return true;
@@ -1104,7 +1042,7 @@ bool ValueSet::setValue(const std::string &name, double value, Event& event)
 bool ValueSet::setValue(const std::string &name, const std::string &value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="string")
+	if (val && val->_etype == Value::vt_string)
 	{
 		(dynamic_cast<TemplateValue<std::string>*>(val))->setValue(value, event);
 		return true;
@@ -1116,7 +1054,7 @@ bool ValueSet::setValue(const std::string &name, const std::string &value, Event
 bool ValueSet::setValue(const std::string &name, const std::wstring &value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "wstring")
+	if (val && val->_etype == Value::vt_wstring)
 	{
 		(dynamic_cast<TemplateValue<std::wstring>*>(val))->setValue(value, event);
 		return true;
@@ -1128,7 +1066,7 @@ bool ValueSet::setValue(const std::string &name, const std::wstring &value, Even
 bool ValueSet::setValue(const std::string &name, const FLTYPE::Point &value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="Point")
+	if (val && val->_etype == Value::vt_Point)
 	{
 		(dynamic_cast<TemplateValue<FLTYPE::Point>*>(val))->setValue(value, event);
 		return true;
@@ -1140,7 +1078,7 @@ bool ValueSet::setValue(const std::string &name, const FLTYPE::Point &value, Eve
 bool ValueSet::setValue(const std::string &name, const FLTYPE::Vector &value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "Vector")
+	if (val && val->_etype == Value::vt_Vector)
 	{
 		(dynamic_cast<TemplateValue<FLTYPE::Vector>*>(val))->setValue(value, event);
 		return true;
@@ -1152,7 +1090,7 @@ bool ValueSet::setValue(const std::string &name, const FLTYPE::Vector &value, Ev
 bool ValueSet::setValue(const std::string &name, const FLTYPE::BBox &value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "BBox")
+	if (val && val->_etype == Value::vt_BBox)
 	{
 		(dynamic_cast<TemplateValue<FLTYPE::BBox>*>(val))->setValue(value, event);
 		return true;
@@ -1164,7 +1102,7 @@ bool ValueSet::setValue(const std::string &name, const FLTYPE::BBox &value, Even
 bool ValueSet::setValue(const std::string &name, const FLTYPE::HSVColor &value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "HSVColor")
+	if (val && val->_etype == Value::vt_HSVColor)
 	{
 		(dynamic_cast<TemplateValue<FLTYPE::HSVColor>*>(val))->setValue(value, event);
 		return true;
@@ -1176,7 +1114,7 @@ bool ValueSet::setValue(const std::string &name, const FLTYPE::HSVColor &value, 
 bool ValueSet::setValue(const std::string &name, const FLTYPE::Color &value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "Color")
+	if (val && val->_etype == Value::vt_Color)
 	{
 		(dynamic_cast<TemplateValue<FLTYPE::Color>*>(val))->setValue(value, event);
 		return true;
@@ -1188,7 +1126,7 @@ bool ValueSet::setValue(const std::string &name, const FLTYPE::Color &value, Eve
 bool ValueSet::setValue(const std::string &name, const FLTYPE::Plane &value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "Plane")
+	if (val && val->_etype == Value::vt_Plane)
 	{
 		(dynamic_cast<TemplateValue<FLTYPE::Plane>*>(val))->setValue(value, event);
 		return true;
@@ -1200,7 +1138,7 @@ bool ValueSet::setValue(const std::string &name, const FLTYPE::Plane &value, Eve
 bool ValueSet::setValue(const std::string &name, const FLTYPE::PlaneSet &value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "PlaneSet")
+	if (val && val->_etype == Value::vt_PlaneSet)
 	{
 		(dynamic_cast<TemplateValue<FLTYPE::PlaneSet>*>(val))->setValue(value, event);
 		return true;
@@ -1212,7 +1150,7 @@ bool ValueSet::setValue(const std::string &name, const FLTYPE::PlaneSet &value, 
 bool ValueSet::setValue(const std::string &name, const FLTYPE::Quaternion &value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "Quaternion")
+	if (val && val->_etype == Value::vt_Quaternion)
 	{
 		(dynamic_cast<TemplateValue<FLTYPE::Quaternion>*>(val))->setValue(value, event);
 		return true;
@@ -1224,7 +1162,7 @@ bool ValueSet::setValue(const std::string &name, const FLTYPE::Quaternion &value
 bool ValueSet::setValue(const std::string &name, const FLTYPE::Ray &value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "Ray")
+	if (val && val->_etype == Value::vt_Ray)
 	{
 		(dynamic_cast<TemplateValue<FLTYPE::Ray>*>(val))->setValue(value, event);
 		return true;
@@ -1236,7 +1174,7 @@ bool ValueSet::setValue(const std::string &name, const FLTYPE::Ray &value, Event
 bool ValueSet::setValue(const std::string &name, const FLTYPE::Transform &value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "Transform")
+	if (val && val->_etype == Value::vt_Transform)
 	{
 		(dynamic_cast<TemplateValue<FLTYPE::Transform>*>(val))->setValue(value, event);
 		return true;
@@ -1248,7 +1186,7 @@ bool ValueSet::setValue(const std::string &name, const FLTYPE::Transform &value,
 bool ValueSet::setValue(const std::string &name, const FLTYPE::GLfloat4 &value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "GLfloat4")
+	if (val && val->_etype == Value::vt_GLfloat4)
 	{
 		(dynamic_cast<TemplateValue<FLTYPE::GLfloat4>*>(val))->setValue(value, event);
 		return true;
@@ -1260,7 +1198,7 @@ bool ValueSet::setValue(const std::string &name, const FLTYPE::GLfloat4 &value, 
 bool ValueSet::setValue(const std::string &name, const FLTYPE::GLint4 &value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "GLint4")
+	if (val && val->_etype == Value::vt_GLint4)
 	{
 		(dynamic_cast<TemplateValue<FLTYPE::GLint4>*>(val))->setValue(value, event);
 		return true;
@@ -1273,7 +1211,7 @@ bool ValueSet::setValue(const std::string &name, const FLTYPE::GLint4 &value, Ev
 bool ValueSet::toggleValue(const std::string &name, bool &value, Event& event)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "bool")
+	if (val && val->_etype == Value::vt_bool)
 	{
 		value = (dynamic_cast<TemplateValue<bool>*>(val))->getValue();
 		value = !value;
@@ -1294,297 +1232,299 @@ bool ValueSet::getValue(ValueTuple& vt)
 	Value* val = findValue(name);
 	if (val)
 	{
-		type = val->getType();
-		if (type == "Referenced*")
+		switch (val->_etype)
 		{
-			std::get<1>(vt) = type;
-			//tentative:
-			//get id if it's an object
-			Referenced* v;
-			if (getValue(name, &v))
+		case Value::vt_pReferenced:
 			{
-				Object* obj = dynamic_cast<Object*>(v);
-				if (obj)
+				std::get<1>(vt) = type;
+				//tentative:
+				//get id if it's an object
+				Referenced* v;
+				if (getValue(name, &v))
 				{
-					oss << obj->getId();
+					Object* obj = dynamic_cast<Object*>(v);
+					if (obj)
+					{
+						oss << obj->getId();
+						std::get<2>(vt) = oss.str();
+						return true;
+					}
+				}
+			}
+		case Value::vt_bool:
+			{
+				std::get<1>(vt) = type;
+				bool v;
+				if (getValue(name, v))
+				{
+					oss << v;
 					std::get<2>(vt) = oss.str();
 					return true;
 				}
 			}
-		}
-		else if (type == "bool")
-		{
-			std::get<1>(vt) = type;
-			bool v;
-			if (getValue(name, v))
+		case Value::vt_char:
 			{
-				oss << v;
-				std::get<2>(vt) = oss.str();
-				return true;
+				std::get<1>(vt) = type;
+				char v;
+				if (getValue(name, v))
+				{
+					oss << v;
+					std::get<2>(vt) = oss.str();
+					return true;
+				}
 			}
-		}
-		else if (type == "char")
-		{
-			std::get<1>(vt) = type;
-			char v;
-			if (getValue(name, v))
+		case Value::vt_unsigned_char:
 			{
-				oss << v;
-				std::get<2>(vt) = oss.str();
-				return true;
+				std::get<1>(vt) = type;
+				unsigned char v;
+				if (getValue(name, v))
+				{
+					oss << v;
+					std::get<2>(vt) = oss.str();
+					return true;
+				}
 			}
-		}
-		else if (type == "unsigned char")
-		{
-			std::get<1>(vt) = type;
-			unsigned char v;
-			if (getValue(name, v))
+		case Value::vt_short:
 			{
-				oss << v;
-				std::get<2>(vt) = oss.str();
-				return true;
+				std::get<1>(vt) = type;
+				short v;
+				if (getValue(name, v))
+				{
+					oss << v;
+					std::get<2>(vt) = oss.str();
+					return true;
+				}
 			}
-		}
-		else if (type == "short")
-		{
-			std::get<1>(vt) = type;
-			short v;
-			if (getValue(name, v))
+		case Value::vt_unsigned_short:
 			{
-				oss << v;
-				std::get<2>(vt) = oss.str();
-				return true;
+				std::get<1>(vt) = type;
+				unsigned short v;
+				if (getValue(name, v))
+				{
+					oss << v;
+					std::get<2>(vt) = oss.str();
+					return true;
+				}
 			}
-		}
-		else if (type == "unsigned short")
-		{
-			std::get<1>(vt) = type;
-			unsigned short v;
-			if (getValue(name, v))
+		case Value::vt_long:
 			{
-				oss << v;
-				std::get<2>(vt) = oss.str();
-				return true;
+				std::get<1>(vt) = type;
+				long v;
+				if (getValue(name, v))
+				{
+					oss << v;
+					std::get<2>(vt) = oss.str();
+					return true;
+				}
 			}
-		}
-		else if (type == "long")
-		{
-			std::get<1>(vt) = type;
-			long v;
-			if (getValue(name, v))
+		case Value::vt_unsigned_long:
 			{
-				oss << v;
-				std::get<2>(vt) = oss.str();
-				return true;
+				std::get<1>(vt) = type;
+				unsigned long v;
+				if (getValue(name, v))
+				{
+					oss << v;
+					std::get<2>(vt) = oss.str();
+					return true;
+				}
 			}
-		}
-		else if (type == "unsigned long")
-		{
-			std::get<1>(vt) = type;
-			unsigned long v;
-			if (getValue(name, v))
+		case Value::vt_long_long:
 			{
-				oss << v;
-				std::get<2>(vt) = oss.str();
-				return true;
+				std::get<1>(vt) = type;
+				long long v;
+				if (getValue(name, v))
+				{
+					oss << v;
+					std::get<2>(vt) = oss.str();
+					return true;
+				}
 			}
-		}
-		else if (type == "long long")
-		{
-			std::get<1>(vt) = type;
-			long long v;
-			if (getValue(name, v))
+		case Value::vt_unsigned_long_long:
 			{
-				oss << v;
-				std::get<2>(vt) = oss.str();
-				return true;
+				std::get<1>(vt) = type;
+				unsigned long long v;
+				if (getValue(name, v))
+				{
+					oss << v;
+					std::get<2>(vt) = oss.str();
+					return true;
+				}
 			}
-		}
-		else if (type == "unsigned long long")
-		{
-			std::get<1>(vt) = type;
-			unsigned long long v;
-			if (getValue(name, v))
+		case Value::vt_float:
 			{
-				oss << v;
-				std::get<2>(vt) = oss.str();
-				return true;
+				std::get<1>(vt) = type;
+				float v;
+				if (getValue(name, v))
+				{
+					oss << v;
+					std::get<2>(vt) = oss.str();
+					return true;
+				}
 			}
-		}
-		else if (type == "float")
-		{
-			std::get<1>(vt) = type;
-			float v;
-			if (getValue(name, v))
+		case Value::vt_double:
 			{
-				oss << v;
-				std::get<2>(vt) = oss.str();
-				return true;
+				std::get<1>(vt) = type;
+				double v;
+				if (getValue(name, v))
+				{
+					oss << v;
+					std::get<2>(vt) = oss.str();
+					return true;
+				}
 			}
-		}
-		else if (type == "double")
-		{
-			std::get<1>(vt) = type;
-			double v;
-			if (getValue(name, v))
+		case Value::vt_string:
 			{
-				oss << v;
-				std::get<2>(vt) = oss.str();
-				return true;
+				std::get<1>(vt) = type;
+				std::string v;
+				if (getValue(name, v))
+				{
+					std::get<2>(vt) = v;
+					return true;
+				}
 			}
-		}
-		else if (type == "string")
-		{
-			std::get<1>(vt) = type;
-			std::string v;
-			if (getValue(name, v))
+		case Value::vt_wstring:
 			{
-				std::get<2>(vt) = v;
-				return true;
+				std::get<1>(vt) = type;
+				std::wstring v;
+				if (getValue(name, v))
+				{
+					std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
+					oss << converter.to_bytes(v);
+					std::get<2>(vt) = oss.str();
+					return true;
+				}
 			}
-		}
-		else if (type == "wstring")
-		{
-			std::get<1>(vt) = type;
-			std::wstring v;
-			if (getValue(name, v))
+		case Value::vt_Point:
 			{
-				std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
-				oss << converter.to_bytes(v);
-				std::get<2>(vt) = oss.str();
-				return true;
+				std::get<1>(vt) = type;
+				FLTYPE::Point v;
+				if (getValue(name, v))
+				{
+					oss << v;
+					std::get<2>(vt) = oss.str();
+					return true;
+				}
 			}
-		}
-		else if (type == "Point")
-		{
-			std::get<1>(vt) = type;
-			FLTYPE::Point v;
-			if (getValue(name, v))
+		case Value::vt_Vector:
 			{
-				oss << v;
-				std::get<2>(vt) = oss.str();
-				return true;
+				std::get<1>(vt) = type;
+				FLTYPE::Vector v;
+				if (getValue(name, v))
+				{
+					oss << v;
+					std::get<2>(vt) = oss.str();
+					return true;
+				}
 			}
-		}
-		else if (type == "Vector")
-		{
-			std::get<1>(vt) = type;
-			FLTYPE::Vector v;
-			if (getValue(name, v))
+		case Value::vt_BBox:
 			{
-				oss << v;
-				std::get<2>(vt) = oss.str();
-				return true;
+				std::get<1>(vt) = type;
+				FLTYPE::BBox v;
+				if (getValue(name, v))
+				{
+					oss << v;
+					std::get<2>(vt) = oss.str();
+					return true;
+				}
 			}
-		}
-		else if (type == "BBox")
-		{
-			std::get<1>(vt) = type;
-			FLTYPE::BBox v;
-			if (getValue(name, v))
+		case Value::vt_HSVColor:
 			{
-				oss << v;
-				std::get<2>(vt) = oss.str();
-				return true;
+				std::get<1>(vt) = type;
+				FLTYPE::HSVColor v;
+				if (getValue(name, v))
+				{
+					oss << v;
+					std::get<2>(vt) = oss.str();
+					return true;
+				}
 			}
-		}
-		else if (type == "HSVColor")
-		{
-			std::get<1>(vt) = type;
-			FLTYPE::HSVColor v;
-			if (getValue(name, v))
+		case Value::vt_Color:
 			{
-				oss << v;
-				std::get<2>(vt) = oss.str();
-				return true;
+				std::get<1>(vt) = type;
+				FLTYPE::Color v;
+				if (getValue(name, v))
+				{
+					oss << v;
+					std::get<2>(vt) = oss.str();
+					return true;
+				}
 			}
-		}
-		else if (type == "Color")
-		{
-			std::get<1>(vt) = type;
-			FLTYPE::Color v;
-			if (getValue(name, v))
+		case Value::vt_Plane:
 			{
-				oss << v;
-				std::get<2>(vt) = oss.str();
-				return true;
+				std::get<1>(vt) = type;
+				FLTYPE::Plane v;
+				if (getValue(name, v))
+				{
+					oss << v;
+					std::get<2>(vt) = oss.str();
+					return true;
+				}
 			}
-		}
-		else if (type == "Plane")
-		{
-			std::get<1>(vt) = type;
-			FLTYPE::Plane v;
-			if (getValue(name, v))
+		case Value::vt_PlaneSet:
 			{
-				oss << v;
-				std::get<2>(vt) = oss.str();
-				return true;
+				std::get<1>(vt) = type;
+				FLTYPE::PlaneSet v;
+				if (getValue(name, v))
+				{
+					oss << v;
+					std::get<2>(vt) = oss.str();
+					return true;
+				}
 			}
-		}
-		else if (type == "PlaneSet")
-		{
-			std::get<1>(vt) = type;
-			FLTYPE::PlaneSet v;
-			if (getValue(name, v))
+		case Value::vt_Quaternion:
 			{
-				oss << v;
-				std::get<2>(vt) = oss.str();
-				return true;
+				std::get<1>(vt) = type;
+				FLTYPE::Quaternion v;
+				if (getValue(name, v))
+				{
+					oss << v;
+					std::get<2>(vt) = oss.str();
+					return true;
+				}
 			}
-		}
-		else if (type == "Quaternion")
-		{
-			std::get<1>(vt) = type;
-			FLTYPE::Quaternion v;
-			if (getValue(name, v))
+		case Value::vt_Ray:
 			{
-				oss << v;
-				std::get<2>(vt) = oss.str();
-				return true;
+				std::get<1>(vt) = type;
+				FLTYPE::Ray v;
+				if (getValue(name, v))
+				{
+					oss << v;
+					std::get<2>(vt) = oss.str();
+					return true;
+				}
 			}
-		}
-		else if (type == "Ray")
-		{
-			std::get<1>(vt) = type;
-			FLTYPE::Ray v;
-			if (getValue(name, v))
+		case Value::vt_Transform:
 			{
-				oss << v;
-				std::get<2>(vt) = oss.str();
-				return true;
+				std::get<1>(vt) = type;
+				FLTYPE::Transform v;
+				if (getValue(name, v))
+				{
+					oss << v;
+					std::get<2>(vt) = oss.str();
+					return true;
+				}
 			}
-		}
-		else if (type == "Transform")
-		{
-			std::get<1>(vt) = type;
-			FLTYPE::Transform v;
-			if (getValue(name, v))
+		case Value::vt_GLfloat4:
 			{
-				oss << v;
-				std::get<2>(vt) = oss.str();
-				return true;
+				std::get<1>(vt) = type;
+				FLTYPE::GLfloat4 v;
+				if (getValue(name, v))
+				{
+					oss << v;
+					std::get<2>(vt) = oss.str();
+					return true;
+				}
 			}
-		}
-		else if (type == "GLfloat4")
-		{
-			std::get<1>(vt) = type;
-			FLTYPE::GLfloat4 v;
-			if (getValue(name, v))
+		case Value::vt_GLint4:
 			{
-				oss << v;
-				std::get<2>(vt) = oss.str();
-				return true;
-			}
-		}
-		else if (type == "GLint4")
-		{
-			std::get<1>(vt) = type;
-			FLTYPE::GLint4 v;
-			if (getValue(name, v))
-			{
-				oss << v;
-				std::get<2>(vt) = oss.str();
-				return true;
+				std::get<1>(vt) = type;
+				FLTYPE::GLint4 v;
+				if (getValue(name, v))
+				{
+					oss << v;
+					std::get<2>(vt) = oss.str();
+					return true;
+				}
 			}
 		}
 	}
@@ -1595,7 +1535,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 bool ValueSet::getValue(const std::string &name, Referenced** value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="Referenced*")
+	if (val && val->_etype == Value::vt_pReferenced)
 	{
 		*value = const_cast<Referenced*>((dynamic_cast< TemplateValue< Referenced * > * >(val))->getValue());
 		return true;
@@ -1607,7 +1547,7 @@ bool ValueSet::getValue(const std::string &name, Referenced** value)
 bool ValueSet::getValue(const std::string &name, bool &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="bool")
+	if (val && val->_etype == Value::vt_bool)
 	{
 		value = (dynamic_cast<TemplateValue<bool>*>(val))->getValue();
 		return true;
@@ -1619,7 +1559,7 @@ bool ValueSet::getValue(const std::string &name, bool &value)
 bool ValueSet::getValue(const std::string &name, char &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="char")
+	if (val && val->_etype == Value::vt_char)
 	{
 		value = (dynamic_cast<TemplateValue<char>*>(val))->getValue();
 		return true;
@@ -1631,7 +1571,7 @@ bool ValueSet::getValue(const std::string &name, char &value)
 bool ValueSet::getValue(const std::string &name, unsigned char &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="unsigned char")
+	if (val && val->_etype == Value::vt_unsigned_char)
 	{
 		value = (dynamic_cast<TemplateValue<unsigned char>*>(val))->getValue();
 		return true;
@@ -1643,7 +1583,7 @@ bool ValueSet::getValue(const std::string &name, unsigned char &value)
 bool ValueSet::getValue(const std::string &name, short &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="short")
+	if (val && val->_etype == Value::vt_short)
 	{
 		value = (dynamic_cast<TemplateValue<short>*>(val))->getValue();
 		return true;
@@ -1655,7 +1595,7 @@ bool ValueSet::getValue(const std::string &name, short &value)
 bool ValueSet::getValue(const std::string &name, unsigned short &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="unsigned short")
+	if (val && val->_etype == Value::vt_unsigned_short)
 	{
 		value = (dynamic_cast<TemplateValue<unsigned short>*>(val))->getValue();
 		return true;
@@ -1667,7 +1607,7 @@ bool ValueSet::getValue(const std::string &name, unsigned short &value)
 bool ValueSet::getValue(const std::string &name, long &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="long")
+	if (val && val->_etype == Value::vt_long)
 	{
 		value = (dynamic_cast<TemplateValue<long>*>(val))->getValue();
 		return true;
@@ -1679,7 +1619,7 @@ bool ValueSet::getValue(const std::string &name, long &value)
 bool ValueSet::getValue(const std::string &name, unsigned long &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="unsigned long")
+	if (val && val->_etype == Value::vt_unsigned_long)
 	{
 		value = (dynamic_cast<TemplateValue<unsigned long>*>(val))->getValue();
 		return true;
@@ -1691,7 +1631,7 @@ bool ValueSet::getValue(const std::string &name, unsigned long &value)
 bool ValueSet::getValue(const std::string &name, long long &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="long long")
+	if (val && val->_etype == Value::vt_long_long)
 	{
 		value = (dynamic_cast<TemplateValue<long long>*>(val))->getValue();
 		return true;
@@ -1703,7 +1643,7 @@ bool ValueSet::getValue(const std::string &name, long long &value)
 bool ValueSet::getValue(const std::string &name, unsigned long long &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="unsigned long long")
+	if (val && val->_etype == Value::vt_unsigned_long_long)
 	{
 		value = (dynamic_cast<TemplateValue<unsigned long long>*>(val))->getValue();
 		return true;
@@ -1715,7 +1655,7 @@ bool ValueSet::getValue(const std::string &name, unsigned long long &value)
 bool ValueSet::getValue(const std::string &name, float &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="float")
+	if (val && val->_etype == Value::vt_float)
 	{
 		value = (dynamic_cast<TemplateValue<float>*>(val))->getValue();
 		return true;
@@ -1727,7 +1667,7 @@ bool ValueSet::getValue(const std::string &name, float &value)
 bool ValueSet::getValue(const std::string &name, double &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="double")
+	if (val && val->_etype == Value::vt_double)
 	{
 		value = (dynamic_cast<TemplateValue<double>*>(val))->getValue();
 		return true;
@@ -1739,7 +1679,7 @@ bool ValueSet::getValue(const std::string &name, double &value)
 bool ValueSet::getValue(const std::string &name, std::string &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="string")
+	if (val && val->_etype == Value::vt_string)
 	{
 		value = (dynamic_cast<TemplateValue<std::string>*>(val))->getValue();
 		return true;
@@ -1751,7 +1691,7 @@ bool ValueSet::getValue(const std::string &name, std::string &value)
 bool ValueSet::getValue(const std::string &name, std::wstring &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "wstring")
+	if (val && val->_etype == Value::vt_wstring)
 	{
 		value = (dynamic_cast<TemplateValue<std::wstring>*>(val))->getValue();
 		return true;
@@ -1763,7 +1703,7 @@ bool ValueSet::getValue(const std::string &name, std::wstring &value)
 bool ValueSet::getValue(const std::string &name, FLTYPE::Point &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type=="Point")
+	if (val && val->_etype == Value::vt_Point)
 	{
 		value = (dynamic_cast<TemplateValue<FLTYPE::Point>*>(val))->getValue();
 		return true;
@@ -1775,7 +1715,7 @@ bool ValueSet::getValue(const std::string &name, FLTYPE::Point &value)
 bool ValueSet::getValue(const std::string &name, FLTYPE::Vector &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "Vector")
+	if (val && val->_etype == Value::vt_Vector)
 	{
 		value = (dynamic_cast<TemplateValue<FLTYPE::Vector>*>(val))->getValue();
 		return true;
@@ -1787,7 +1727,7 @@ bool ValueSet::getValue(const std::string &name, FLTYPE::Vector &value)
 bool ValueSet::getValue(const std::string &name, FLTYPE::BBox &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "BBox")
+	if (val && val->_etype == Value::vt_BBox)
 	{
 		value = (dynamic_cast<TemplateValue<FLTYPE::BBox>*>(val))->getValue();
 		return true;
@@ -1799,7 +1739,7 @@ bool ValueSet::getValue(const std::string &name, FLTYPE::BBox &value)
 bool ValueSet::getValue(const std::string &name, FLTYPE::HSVColor &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "HSVColor")
+	if (val && val->_etype == Value::vt_HSVColor)
 	{
 		value = (dynamic_cast<TemplateValue<FLTYPE::HSVColor>*>(val))->getValue();
 		return true;
@@ -1811,7 +1751,7 @@ bool ValueSet::getValue(const std::string &name, FLTYPE::HSVColor &value)
 bool ValueSet::getValue(const std::string &name, FLTYPE::Color &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "Color")
+	if (val && val->_etype == Value::vt_Color)
 	{
 		value = (dynamic_cast<TemplateValue<FLTYPE::Color>*>(val))->getValue();
 		return true;
@@ -1823,7 +1763,7 @@ bool ValueSet::getValue(const std::string &name, FLTYPE::Color &value)
 bool ValueSet::getValue(const std::string &name, FLTYPE::Plane &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "Plane")
+	if (val && val->_etype == Value::vt_Plane)
 	{
 		value = (dynamic_cast<TemplateValue<FLTYPE::Plane>*>(val))->getValue();
 		return true;
@@ -1835,7 +1775,7 @@ bool ValueSet::getValue(const std::string &name, FLTYPE::Plane &value)
 bool ValueSet::getValue(const std::string &name, FLTYPE::PlaneSet &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "PlaneSet")
+	if (val && val->_etype == Value::vt_PlaneSet)
 	{
 		value = (dynamic_cast<TemplateValue<FLTYPE::PlaneSet>*>(val))->getValue();
 		return true;
@@ -1847,7 +1787,7 @@ bool ValueSet::getValue(const std::string &name, FLTYPE::PlaneSet &value)
 bool ValueSet::getValue(const std::string &name, FLTYPE::Quaternion &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "Quaternion")
+	if (val && val->_etype == Value::vt_Quaternion)
 	{
 		value = (dynamic_cast<TemplateValue<FLTYPE::Quaternion>*>(val))->getValue();
 		return true;
@@ -1859,7 +1799,7 @@ bool ValueSet::getValue(const std::string &name, FLTYPE::Quaternion &value)
 bool ValueSet::getValue(const std::string &name, FLTYPE::Ray &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "Ray")
+	if (val && val->_etype == Value::vt_Ray)
 	{
 		value = (dynamic_cast<TemplateValue<FLTYPE::Ray>*>(val))->getValue();
 		return true;
@@ -1871,7 +1811,7 @@ bool ValueSet::getValue(const std::string &name, FLTYPE::Ray &value)
 bool ValueSet::getValue(const std::string &name, FLTYPE::Transform &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "Transform")
+	if (val && val->_etype == Value::vt_Transform)
 	{
 		value = (dynamic_cast<TemplateValue<FLTYPE::Transform>*>(val))->getValue();
 		return true;
@@ -1883,7 +1823,7 @@ bool ValueSet::getValue(const std::string &name, FLTYPE::Transform &value)
 bool ValueSet::getValue(const std::string &name, FLTYPE::GLfloat4 &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "GLfloat4")
+	if (val && val->_etype == Value::vt_GLfloat4)
 	{
 		value = (dynamic_cast<TemplateValue<FLTYPE::GLfloat4>*>(val))->getValue();
 		return true;
@@ -1895,7 +1835,7 @@ bool ValueSet::getValue(const std::string &name, FLTYPE::GLfloat4 &value)
 bool ValueSet::getValue(const std::string &name, FLTYPE::GLint4 &value)
 {
 	Value* val = findValue(name);
-	if (val && val->_type == "GLint4")
+	if (val && val->_etype == Value::vt_GLint4)
 	{
 		value = (dynamic_cast<TemplateValue<FLTYPE::GLint4>*>(val))->getValue();
 		return true;
