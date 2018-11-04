@@ -57,10 +57,7 @@ namespace FL
 		virtual void traverse(NodeVisitor& nv);
 
 		//as observer
-		virtual void objectChanging(Event& event);
-		virtual void objectChanged(Event& event);
-		virtual void nodeAdded(Event& event);
-		virtual void nodeRemoved(Event& event);
+		virtual void processNotification(Event& event);
 
 		/* children
 		*/

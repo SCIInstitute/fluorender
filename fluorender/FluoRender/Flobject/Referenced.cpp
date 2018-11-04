@@ -108,7 +108,7 @@ void Referenced::signalObserversAndDelete(bool signalDelete, bool doDelete) cons
 	}
 }
 
-void Referenced::notifyObserversBeforeChange(Event& event) const
+void Referenced::notifyObservers(Event& event) const
 {
 	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
 
@@ -116,47 +116,7 @@ void Referenced::notifyObserversBeforeChange(Event& event) const
 		event.pass(const_cast<Referenced*>(this)))
 	{
 		event.push(const_cast<Referenced*>(this));
-		observerSet->signalObjectChanging(event);
-		event.pop();
-	}
-}
-
-void Referenced::notifyObserversOfChange(Event& event) const
-{
-	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
-
-	if (observerSet && !_hold &&
-		event.pass(const_cast<Referenced*>(this)))
-	{
-		event.push(const_cast<Referenced*>(this));
-		observerSet->signalObjectChanged(event);
-		event.pop();
-	}
-}
-
-//scenegraph specific events via observers
-void Referenced::notifyObserversNodeAdded(Event& event) const
-{
-	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
-
-	if (observerSet && !_hold &&
-		event.pass(const_cast<Referenced*>(this)))
-	{
-		event.push(const_cast<Referenced*>(this));
-		observerSet->signalNodeAdded(event);
-		event.pop();
-	}
-}
-
-void Referenced::notifyObserversNodeRemoved(Event& event) const
-{
-	ObserverSet* observerSet = static_cast<ObserverSet*>(_observerSet);
-
-	if (observerSet && !_hold &&
-		event.pass(const_cast<Referenced*>(this)))
-	{
-		event.push(const_cast<Referenced*>(this));
-		observerSet->signalNodeRemoved(event);
+		observerSet->notifyObserver(event);
 		event.pop();
 	}
 }

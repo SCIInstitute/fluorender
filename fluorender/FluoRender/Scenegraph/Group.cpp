@@ -89,7 +89,7 @@ bool Group::insertChild(size_t index, Node* child)
 	Event event;
 	event.init(Event::EVENT_NODE_ADDED,
 		this, child);
-	notifyObserversNodeAdded(event);
+	notifyObservers(event);
 
 	return true;
 }
@@ -112,7 +112,7 @@ bool Group::removeChildren(size_t pos, size_t num)
 			Event event;
 			event.init(Event::EVENT_NODE_REMOVED,
 				this, m_children[i].get());
-			notifyObserversNodeRemoved(event);
+			notifyObservers(event);
 		}
 		m_children.erase(m_children.begin() + pos, m_children.begin() + end);
 
@@ -145,7 +145,7 @@ bool Group::setChild(size_t i, Node* node)
 		Event event;
 		event.init(Event::EVENT_NODE_REMOVED,
 			this, origNode.get());
-		notifyObserversNodeRemoved(event);
+		notifyObservers(event);
 
 		m_children[i] = node;
 		node->addParent(this);
@@ -154,7 +154,7 @@ bool Group::setChild(size_t i, Node* node)
 		//notify observers of change
 		event.init(Event::EVENT_NODE_ADDED,
 			this, node);
-		notifyObserversNodeAdded(event);
+		notifyObservers(event);
 
 		return true;
 	}
@@ -172,39 +172,13 @@ void Group::accept(NodeVisitor& nv)
 }
 
 //as observer
-void Group::objectChanging(Event& event)
+void Group::processNotification(Event& event)
 {
 	if (event.getNotifyFlags() & Event::NOTIFY_PARENT)
 	{
-		Object::objectChanging(event);
+		Object::processNotification(event);
 		Node* node = dynamic_cast<Node*>(event.sender);
 		if (node && containsNode(node))
-			notifyObserversBeforeChange(event);
+			notifyObservers(event);
 	}
 }
-
-void Group::objectChanged(Event& event)
-{
-	if (event.getNotifyFlags() & Event::NOTIFY_PARENT)
-	{
-		Object::objectChanged(event);
-		Node* node = dynamic_cast<Node*>(event.sender);
-		if (node && containsNode(node))
-			notifyObserversOfChange(event);
-	}
-}
-
-void Group::nodeAdded(Event& event)
-{
-	Node* node = dynamic_cast<Node*>(event.sender);
-	if (node && containsNode(node) && this != event.parent)
-		notifyObserversNodeAdded(event);
-}
-
-void Group::nodeRemoved(Event& event)
-{
-	Node* node = dynamic_cast<Node*>(event.sender);
-	if (node && containsNode(node) && this != event.parent)
-		notifyObserversNodeRemoved(event);
-}
-

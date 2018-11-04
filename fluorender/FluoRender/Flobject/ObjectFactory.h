@@ -56,15 +56,11 @@ namespace FL
 
 		virtual unsigned int getPriority() const { return 300; }
 
-		virtual void objectChanging(FL::Event& event)
+		//as observer
+		virtual void processNotification(FL::Event& event)
 		{
 			if (event.getNotifyFlags() & FL::Event::NOTIFY_FACTORY)
-				FL::Object::objectChanging(event);
-		}
-		virtual void objectChanged(FL::Event& event)
-		{
-			if (event.getNotifyFlags() & FL::Event::NOTIFY_FACTORY)
-				FL::Object::objectChanged(event);
+				FL::Object::processNotification(event);
 		}
 
 		//propagate values from object to the default
@@ -111,7 +107,7 @@ namespace FL
 					Event event;
 					event.init(Event::EVENT_NODE_REMOVED,
 						this, it->get());
-					notifyObserversNodeRemoved(event);
+					notifyObservers(event);
 				}
 
 				objects_.erase(objects_.begin() + pos, objects_.begin() + end);

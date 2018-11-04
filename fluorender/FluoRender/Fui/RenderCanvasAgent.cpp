@@ -38,35 +38,25 @@ RenderCanvasAgent::RenderCanvasAgent(VRenderGLView &gl_view) :
 
 }
 
-void RenderCanvasAgent::objectChanged(FL::Event& event)
+void RenderCanvasAgent::processNotification(FL::Event& event)
 {
 	//set values in ui
-	InterfaceAgent::objectChanged(event);
+	InterfaceAgent::processNotification(event);
 	if (event.getNotifyFlags() & FL::Event::NOTIFY_AGENT)
 	{
-		gl_view_.m_force_clear = true;
-		gl_view_.m_interactive = true;
+		switch (event.type)
+		{
+		case FL::Event::EVENT_VALUE_CHANGED:
+			gl_view_.m_force_clear = true;
+			gl_view_.m_interactive = true;
+			break;
+		case FL::Event::EVENT_NODE_ADDED:
+		case FL::Event::EVENT_NODE_REMOVED:
+			gl_view_.PopMeshList();
+			gl_view_.PopVolumeList();
+			break;
+		}
 		gl_view_.RefreshGL(41);
-	}
-}
-
-void RenderCanvasAgent::nodeAdded(FL::Event& event)
-{
-	if (event.getNotifyFlags() & FL::Event::NOTIFY_AGENT)
-	{
-		gl_view_.PopMeshList();
-		gl_view_.PopVolumeList();
-		gl_view_.RefreshGL(42);
-	}
-}
-
-void RenderCanvasAgent::nodeRemoved(FL::Event& event)
-{
-	if (event.getNotifyFlags() & FL::Event::NOTIFY_AGENT)
-	{
-		gl_view_.PopMeshList();
-		gl_view_.PopVolumeList();
-		gl_view_.RefreshGL(43);
 	}
 }
 

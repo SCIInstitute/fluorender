@@ -73,9 +73,9 @@ public:
 
 	virtual unsigned int getPriority() const { return 999; }
 
+	//observer
 	virtual void objectDeleted(Event& event);
-	virtual void objectChanging(Event& event);
-	virtual void objectChanged(Event& event);
+	virtual void processNotification(Event& event);
 
 	//void setOwnBeforeFunction(std::string name, eventFunctionType func)
 	//{

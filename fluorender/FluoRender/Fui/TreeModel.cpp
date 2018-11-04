@@ -40,48 +40,43 @@ TreeModel::TreeModel(TreePanel &panel):
 
 }
 
-void TreeModel::objectChanging(FL::Event& event)
+void TreeModel::processNotification(FL::Event& event)
 {
-	InterfaceAgent::objectChanging(event);
-	//if (event.getNotifyFlags() & FL::Event::NOTIFY_AGENT)
-	//{
-	//}
-}
-
-void TreeModel::objectChanged(FL::Event& event)
-{
-	InterfaceAgent::objectChanged(event);
-	if (event.getNotifyFlags() & FL::Event::NOTIFY_AGENT &&
-		event.sender == getObject())
+	InterfaceAgent::processNotification(event);
+	if (event.getNotifyFlags() & FL::Event::NOTIFY_AGENT)
 	{
-		FL::Node* node = dynamic_cast<FL::Node*>(event.origin);
-		if (node &&
-			event.value_name == "display")
+		switch (event.type)
 		{
-			wxDataViewItem item = wxDataViewItem(event.origin);
-			ItemChanged(item);
+		case FL::Event::EVENT_VALUE_CHANGED:
+			if (event.sender == getObject())
+			{
+				FL::Node* node = dynamic_cast<FL::Node*>(event.origin);
+				if (node &&
+					event.value_name == "display")
+				{
+					wxDataViewItem item = wxDataViewItem(event.origin);
+					ItemChanged(item);
+				}
+			}
+			break;
+		case FL::Event::EVENT_NODE_ADDED:
+			if (event.parent && event.child)
+			{
+				wxDataViewItem parent_item = wxDataViewItem(event.parent);
+				wxDataViewItem child_item = wxDataViewItem(event.child);
+				ItemAdded(parent_item, child_item);
+				panel_.m_tree_ctrl->Expand(parent_item);
+			}
+			break;
+		case FL::Event::EVENT_NODE_REMOVED:
+			if (event.parent && event.child)
+			{
+				wxDataViewItem parent_item = wxDataViewItem(event.parent);
+				wxDataViewItem child_item = wxDataViewItem(event.child);
+				ItemDeleted(parent_item, child_item);
+			}
+			break;
 		}
-	}
-}
-
-void TreeModel::nodeAdded(FL::Event& event)
-{
-	if (event.parent && event.child)
-	{
-		wxDataViewItem parent_item = wxDataViewItem(event.parent);
-		wxDataViewItem child_item = wxDataViewItem(event.child);
-		ItemAdded(parent_item, child_item);
-		panel_.m_tree_ctrl->Expand(parent_item);
-	}
-}
-
-void TreeModel::nodeRemoved(FL::Event& event)
-{
-	if (event.parent && event.child)
-	{
-		wxDataViewItem parent_item = wxDataViewItem(event.parent);
-		wxDataViewItem child_item = wxDataViewItem(event.child);
-		ItemDeleted(parent_item, child_item);
 	}
 }
 

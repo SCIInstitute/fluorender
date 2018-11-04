@@ -53,15 +53,10 @@ namespace FUI
 		//observer
 		virtual unsigned int getPriority() const { return 200; }
 
-		virtual void objectChanging(FL::Event& event)
+		virtual void processNotification(FL::Event& event)
 		{
 			if (event.getNotifyFlags() & FL::Event::NOTIFY_AGENT)
-				FL::Object::objectChanging(event);
-		}
-		virtual void objectChanged(FL::Event& event)
-		{
-			if (event.getNotifyFlags() & FL::Event::NOTIFY_AGENT)
-				FL::Object::objectChanged(event);
+				FL::Object::processNotification(event);
 		}
 
 		virtual void setObject(FL::Object* obj)

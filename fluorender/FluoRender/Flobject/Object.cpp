@@ -71,29 +71,7 @@ void Object::objectDeleted(Event& event)
 	removeObservee(refd);
 }
 
-void Object::objectChanging(Event& event)
-{
-	//before change
-	Referenced* refd = event.sender;
-	if (!refd)
-		return;
-	if (refd->className() == std::string("Value") &&
-		this != event.origin)
-	{
-		Value* value = dynamic_cast<Value*>(refd);
-		if (value && containsValue(value))
-		{
-			//notify others
-			if (event.getNotifyFlags() & Event::NOTIFY_OTHERS)
-				notifyObserversBeforeChange(event);
-			//take actions myself
-			if (event.getNotifyFlags() & Event::NOTIFY_SELF)
-				onBefore(value->getName(), event);
-		}
-	}
-}
-
-void Object::objectChanged(Event& event)
+void Object::processNotification(Event& event)
 {
 	Referenced* refd = event.sender;
 	if (!refd)
@@ -105,7 +83,7 @@ void Object::objectChanged(Event& event)
 		{
 			//notify others
 			if (event.getNotifyFlags() & Event::NOTIFY_OTHERS)
-				notifyObserversOfChange(event);
+				notifyObservers(event);
 			//take action myself
 			if (event.getNotifyFlags() & Event::NOTIFY_SELF)
 				onAfter(value->getName(), event);

@@ -314,7 +314,7 @@ Object* ObjectFactory::clone(Object* object)
 	Event event;
 	event.init(Event::EVENT_NODE_ADDED,
 		this, object);
-	notifyObserversNodeAdded(event);
+	notifyObservers(event);
 
 	return new_object;
 }

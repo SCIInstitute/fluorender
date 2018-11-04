@@ -340,7 +340,7 @@ VolumeData* VolumeFactory::clone(VolumeData* vd)
 	Event event;
 	event.init(Event::EVENT_NODE_ADDED,
 		this, new_vd);
-	notifyObserversNodeAdded(event);
+	notifyObservers(event);
 
 	return new_vd;
 }

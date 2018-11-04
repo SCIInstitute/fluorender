@@ -121,40 +121,12 @@ void ObserverSet::signalObjectDeleted(Event& event)
 	_observedObject = 0;
 }
 
-void ObserverSet::signalObjectChanging(Event& event)
+void ObserverSet::notifyObserver(Event& event)
 {
 	for (Observers::iterator itr = _observers.begin();
 		itr != _observers.end(); ++itr)
 	{
-		(*itr)->objectChanging(event);
-	}
-}
-
-void ObserverSet::signalObjectChanged(Event& event)
-{
-	for (Observers::iterator itr = _observers.begin();
-		itr != _observers.end(); ++itr)
-	{
-		(*itr)->objectChanged(event);
-	}
-}
-
-//scenegraph events
-void ObserverSet::signalNodeAdded(Event& event)
-{
-	for (Observers::iterator itr = _observers.begin();
-		itr != _observers.end(); ++itr)
-	{
-		(*itr)->nodeAdded(event);
-	}
-}
-
-void ObserverSet::signalNodeRemoved(Event& event)
-{
-	for (Observers::iterator itr = _observers.begin();
-		itr != _observers.end(); ++itr)
-	{
-		(*itr)->nodeRemoved(event);
+		(*itr)->processNotification(event);
 	}
 }
 

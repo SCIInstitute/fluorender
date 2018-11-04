@@ -47,9 +47,7 @@ namespace FUI
 		virtual const char* className() const { return "RenderCanvasAgent"; }
 
 		//observer
-		virtual void objectChanged(FL::Event& event);
-		virtual void nodeAdded(FL::Event& event);
-		virtual void nodeRemoved(FL::Event& event);
+		virtual void processNotification(FL::Event& event);
 
 		virtual void setObject(FL::RenderView* view);
 		virtual FL::RenderView* getObject();

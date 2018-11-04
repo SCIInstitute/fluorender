@@ -98,8 +98,9 @@ public:
 
 	virtual unsigned int getPriority() const { return 10; }
 
+	//observer
 	virtual void objectDeleted(Event& event);
-	virtual void objectChanged(Event& event);
+	virtual void processNotification(Event& event);
 
 	std::string getName() { return _name; }
 	std::string getType() { return _type; }
@@ -154,9 +155,12 @@ public:
 	{
 		if (!equal(value))
 		{
-			notifyObserversBeforeChange(event);
+			unsigned int type_save = event.type;
+			event.type = Event::EVENT_VALUE_CHANGING;
+			notifyObservers(event);
 			_value = value;
-			notifyObserversOfChange(event);
+			event.type = type_save;
+			notifyObservers(event);
 		}
 	}
 
@@ -540,7 +544,7 @@ inline bool Value::sync(Event& event)
 
 inline void Value::notify(Event& event)
 {
-	notifyObserversOfChange(event);
+	notifyObservers(event);
 }
 
 inline std::ostream& FL::operator<<(std::ostream& os, const Value& v)

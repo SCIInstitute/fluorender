@@ -44,11 +44,7 @@ public:
 
 	virtual unsigned int getPriority() const { return 9999; }//priority number to sort observers
 	virtual void objectDeleted(Event& event) {}
-	virtual void objectChanging(Event& event) {}//before change
-	virtual void objectChanged(Event& event) {}//after change
-	//events for scenegraph changes
-	virtual void nodeAdded(Event& event) {}
-	virtual void nodeRemoved(Event& event) {}
+	virtual void processNotification(Event& event) {}
 
 	virtual bool removeObservee(Referenced* observee);
 
@@ -87,11 +83,7 @@ public:
 	void removeObserver(Observer* observer);
 
 	void signalObjectDeleted(Event& event);
-	void signalObjectChanging(Event& event);
-	void signalObjectChanged(Event& event);
-	//scenegraph events
-	void signalNodeAdded(Event& event);
-	void signalNodeRemoved(Event& event);
+	void notifyObserver(Event& event);
 
 	typedef std::set<Observer*, ObserverComparator> Observers;
 	Observers& getObservers() { return _observers; }

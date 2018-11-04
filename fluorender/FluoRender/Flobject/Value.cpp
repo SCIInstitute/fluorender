@@ -106,7 +106,7 @@ void Value::objectDeleted(Event& event)
 	removeObservee(refd);
 }
 
-void Value::objectChanged(Event& event)
+void Value::processNotification(Event& event)
 {
 	Referenced* refd = event.sender;
 	if (refd->className() == std::string("Value"))

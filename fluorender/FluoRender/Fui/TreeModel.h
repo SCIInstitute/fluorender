@@ -75,11 +75,7 @@ namespace FUI
 		virtual const char* className() const { return "TreeModel"; }
 
 		//observer functions
-		virtual void objectChanging(FL::Event& event);
-		virtual void objectChanged(FL::Event& event);
-		//scenegraph events
-		virtual void nodeAdded(FL::Event& event);
-		virtual void nodeRemoved(FL::Event& event);
+		virtual void processNotification(FL::Event& event);
 
 		//interface agent functions
 		virtual void setObject(FL::Node* root)
