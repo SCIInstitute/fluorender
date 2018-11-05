@@ -40,46 +40,6 @@ TreeModel::TreeModel(TreePanel &panel):
 
 }
 
-void TreeModel::processNotification(FL::Event& event)
-{
-	InterfaceAgent::processNotification(event);
-	if (event.getNotifyFlags() & FL::Event::NOTIFY_AGENT)
-	{
-		switch (event.type)
-		{
-		case FL::Event::EVENT_VALUE_CHANGED:
-			if (event.sender == getObject())
-			{
-				FL::Node* node = dynamic_cast<FL::Node*>(event.origin);
-				if (node &&
-					event.value_name == "display")
-				{
-					wxDataViewItem item = wxDataViewItem(event.origin);
-					ItemChanged(item);
-				}
-			}
-			break;
-		case FL::Event::EVENT_NODE_ADDED:
-			if (event.parent && event.child)
-			{
-				wxDataViewItem parent_item = wxDataViewItem(event.parent);
-				wxDataViewItem child_item = wxDataViewItem(event.child);
-				ItemAdded(parent_item, child_item);
-				panel_.m_tree_ctrl->Expand(parent_item);
-			}
-			break;
-		case FL::Event::EVENT_NODE_REMOVED:
-			if (event.parent && event.child)
-			{
-				wxDataViewItem parent_item = wxDataViewItem(event.parent);
-				wxDataViewItem child_item = wxDataViewItem(event.child);
-				ItemDeleted(parent_item, child_item);
-			}
-			break;
-		}
-	}
-}
-
 int TreeModel::Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 	unsigned int column, bool ascending) const
 {
@@ -242,4 +202,36 @@ void TreeModel::MoveNode(const std::string &source, FL::Node* target)
 	visitor.matchName(source);
 	root->accept(visitor);
 	FL::ObjectList* list = visitor.getResult();
+}
+
+void TreeModel::OnItemAdded(FL::Event& event)
+{
+	if (event.parent && event.child)
+	{
+		wxDataViewItem parent_item = wxDataViewItem(event.parent);
+		wxDataViewItem child_item = wxDataViewItem(event.child);
+		ItemAdded(parent_item, child_item);
+		panel_.m_tree_ctrl->Expand(parent_item);
+	}
+}
+
+void TreeModel::OnItemRemoved(FL::Event& event)
+{
+	if (event.parent && event.child)
+	{
+		wxDataViewItem parent_item = wxDataViewItem(event.parent);
+		wxDataViewItem child_item = wxDataViewItem(event.child);
+		ItemDeleted(parent_item, child_item);
+	}
+}
+
+void TreeModel::OnDisplayChanged(FL::Event& event)
+{
+	FL::Node* node = dynamic_cast<FL::Node*>(event.origin);
+	if (node &&
+		event.value_name == "display")
+	{
+		wxDataViewItem item = wxDataViewItem(event.origin);
+		ItemChanged(item);
+	}
 }

@@ -38,7 +38,7 @@ VolumeFactory::VolumeFactory()
 
 	addValue("current", (VolumeData*)(0));//current volume data
 
-	setAfterFunction(
+	setValueChangedFunction(
 		default_setting_filename_value_name_,
 		std::bind(&VolumeFactory::OnSetDefault,
 		this, std::placeholders::_1));
@@ -234,10 +234,10 @@ void VolumeFactory::createDefault()
 }
 
 #define ADD_BEFORE_EVENT(obj, name, funct) \
-	obj->setBeforeFunction(name, std::bind(&VolumeData::funct, obj, std::placeholders::_1))
+	obj->setValueChangingFunction(name, std::bind(&VolumeData::funct, obj, std::placeholders::_1))
 
 #define ADD_AFTER_EVENT(obj, name, funct) \
-	obj->setAfterFunction(name, std::bind(&VolumeData::funct, obj, std::placeholders::_1))
+	obj->setValueChangedFunction(name, std::bind(&VolumeData::funct, obj, std::placeholders::_1))
 
 void VolumeFactory::setEventHandler(VolumeData* vd)
 {

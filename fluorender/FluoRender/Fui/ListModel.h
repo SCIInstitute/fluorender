@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FUI
 {
+	class AgentFactory;
 	class ListModel : public wxDataViewModel, public InterfaceAgent
 	{
 	public:
@@ -72,11 +73,6 @@ namespace FUI
 
 		virtual const char* className() const { return "ListModel"; }
 
-		//observer functions
-		//scenegraph events
-		virtual void nodeAdded(FL::Event& event);
-		virtual void nodeRemoved(FL::Event& event);
-
 		//interface agent functions
 		virtual void setObject(FL::Node* root);
 		virtual FL::Node* getObject()
@@ -84,7 +80,11 @@ namespace FUI
 			return dynamic_cast<FL::Node*>(InterfaceAgent::getObject());
 		}
 
-	private:
+		friend class AgentFactory;
+
+	protected:
+		void OnItemAdded(FL::Event& event);
+		void OnItemRemoved(FL::Event& event);
 	};
 }
 

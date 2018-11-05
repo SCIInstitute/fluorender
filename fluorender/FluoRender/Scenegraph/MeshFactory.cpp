@@ -111,10 +111,10 @@ void MeshFactory::createDefault()
 }
 
 #define ADD_BEFORE_EVENT(obj, name, funct) \
-	obj->setBeforeFunction(name, std::bind(&MeshData::funct, obj, std::placeholders::_1))
+	obj->setValueChangingFunction(name, std::bind(&MeshData::funct, obj, std::placeholders::_1))
 
 #define ADD_AFTER_EVENT(obj, name, funct) \
-	obj->setAfterFunction(name, std::bind(&MeshData::funct, obj, std::placeholders::_1))
+	obj->setValueChangedFunction(name, std::bind(&MeshData::funct, obj, std::placeholders::_1))
 
 void MeshFactory::setEventHandler(MeshData* md)
 {

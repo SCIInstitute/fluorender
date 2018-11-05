@@ -45,24 +45,42 @@ namespace FL
 	class EventHandler :public Referenced
 	{
 	public:
-		EventHandler() : Referenced() {}
+		EventHandler() : Referenced(),
+			node_added_function_(0),
+			node_removed_function_(0),
+			default_value_changed_function_(0) {}
 
 		virtual const char* className() const { return "EventHandler"; }
 
-		void setBeforeFunction(const std::string &name, eventFunctionType func)
+		void setValueChangingFunction(const std::string &name, eventFunctionType func)
 		{
-			before_functions_.insert(std::make_pair(name, func));
+			value_changing_functions_.insert(std::make_pair(name, func));
 		}
 
-		void setAfterFunction(const std::string &name, eventFunctionType func)
+		void setValueChangedFunction(const std::string &name, eventFunctionType func)
 		{
-			after_functions_.insert(std::make_pair(name, func));
+			value_changed_functions_.insert(std::make_pair(name, func));
 		}
 
-		void onBefore(const std::string &name, Event& event) const
+		void setDefaultValueChangedFunction(eventFunctionType func)
 		{
-			auto map_it = before_functions_.find(name);
-			if (map_it != before_functions_.end() && !_hold &&
+			default_value_changed_function_ = func;
+		}
+
+		void setNodeAddedFunction(eventFunctionType func)
+		{
+			node_added_function_ = func;
+		}
+
+		void setNodeRemovedFunction(eventFunctionType func)
+		{
+			node_removed_function_ = func;
+		}
+
+		void onValueChanging(const std::string &name, Event& event) const
+		{
+			auto map_it = value_changing_functions_.find(name);
+			if (map_it != value_changing_functions_.end() && !_hold &&
 				event.pass(const_cast<EventHandler*>(this)))
 			{
 				auto map_val = map_it->second;
@@ -73,23 +91,55 @@ namespace FL
 			}
 		}
 
-		void onAfter(const std::string &name, Event& event) const
+		void onValueChanged(const std::string &name, Event& event) const
 		{
-			auto map_it = after_functions_.find(name);
-			if (map_it != after_functions_.end() && !_hold &&
-				event.pass(const_cast<EventHandler*>(this)))
+			if (_hold ||
+				!event.pass(const_cast<EventHandler*>(this)))
+				return;
+
+			auto map_it = value_changed_functions_.find(name);
+			if (map_it != value_changed_functions_.end())
 			{
 				auto map_val = map_it->second;
 				//return map_val(std::forward<Args>(args)...);
 				event.push(const_cast<EventHandler*>(this));
 				map_val(event);
+				event.pop();
+			}
+			else if (default_value_changed_function_)
+			{
+				event.push(const_cast<EventHandler*>(this));
+				default_value_changed_function_(event);
+				event.pop();
+			}
+		}
+
+		void onNodeAdded(Event& event) const
+		{
+			if (node_added_function_)
+			{
+				event.push(const_cast<EventHandler*>(this));
+				node_added_function_(event);
+				event.pop();
+			}
+		}
+
+		void onNodeRemoved(Event& event) const
+		{
+			if (node_removed_function_)
+			{
+				event.push(const_cast<EventHandler*>(this));
+				node_removed_function_(event);
 				event.pop();
 			}
 		}
 
 	protected:
-		std::unordered_map<std::string, eventFunctionType> before_functions_;
-		std::unordered_map<std::string, eventFunctionType> after_functions_;
+		std::unordered_map<std::string, eventFunctionType> value_changing_functions_;
+		std::unordered_map<std::string, eventFunctionType> value_changed_functions_;
+		eventFunctionType default_value_changed_function_;
+		eventFunctionType node_added_function_;
+		eventFunctionType node_removed_function_;
 	};
 }
 #endif

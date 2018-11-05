@@ -77,18 +77,26 @@ void Object::handleEvent(Event& event)
 	if (!refd)
 		return;
 
-	//take action myself
 	Value* value = dynamic_cast<Value*>(refd);
-	if (!value)
-		return;
+	std::string value_name;
+	if (value)
+		value_name = value->getName();
+	else
+		value_name = event.value_name;
 
 	switch (event.type)
 	{
 	case Event::EVENT_VALUE_CHANGING:
-		onBefore(value->getName(), event);
+		onValueChanging(value_name, event);
 		break;
 	case Event::EVENT_VALUE_CHANGED:
-		onAfter(value->getName(), event);
+		onValueChanged(value_name, event);
+		break;
+	case Event::EVENT_NODE_ADDED:
+		onNodeAdded(event);
+		break;
+	case Event::EVENT_NODE_REMOVED:
+		onNodeRemoved(event);
 		break;
 	}
 }

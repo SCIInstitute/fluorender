@@ -77,15 +77,6 @@ public:
 	virtual void objectDeleted(Event& event);
 	virtual void processNotification(Event& event);
 
-	//void setOwnBeforeFunction(std::string name, eventFunctionType func)
-	//{
-	//	setBeforeFunction(name, std::bind(func, this));
-	//}
-	//void setOwnAfterFunction(std::string name, eventFunctionType func)
-	//{
-	//	setAfterFunction(name, std::bind(func, this));
-	//}
-
 	inline void copyValues(const Object& obj, const CopyOp& copyop = CopyOp::SHALLOW_COPY)
 	{
 		if (!obj._vs_stack.top())
@@ -118,7 +109,16 @@ public:
 		{
 			Value * value = it->second.get();
 			if (value)
+			{
+				if (value->isReferenced())
+				{
+					Referenced* refd;
+					getValue(value->getName(), &refd);
+					if (refd)
+						refd->removeObserver(this);
+				}
 				value->removeObserver(this);
+			}
 		}
 		_vs_stack.top()->clear();
 	}

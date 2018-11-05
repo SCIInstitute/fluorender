@@ -61,6 +61,11 @@ namespace FUI
 
 		virtual void setObject(FL::Object* obj)
 		{
+			FL::Object* old_obj;
+			if (getValue("asset", (FL::Referenced**)&old_obj) &&
+				old_obj == obj)
+				return;
+
 			clearValues();
 			addValue("asset", obj);
 			if (obj)

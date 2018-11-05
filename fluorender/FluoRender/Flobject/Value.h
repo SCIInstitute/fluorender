@@ -104,6 +104,7 @@ public:
 
 	std::string getName() { return _name; }
 	std::string getType() { return _type; }
+	bool isReferenced() { return _etype == vt_pReferenced; }
 
 	inline bool operator == (const Value& v) const;
 	inline bool operator != (const Value& v) const;

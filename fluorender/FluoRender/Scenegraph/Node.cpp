@@ -79,3 +79,11 @@ void Node::ascend(NodeVisitor& nv)
 	std::for_each(m_parents.begin(), m_parents.end(), NodeAcceptOp(nv));
 }
 
+//as observer
+void Node::processNotification(Event& event)
+{
+	Object::handleEvent(event);
+	//notify only if event is from child
+	if (event.getNotifyFlags() & Event::NOTIFY_PARENT)
+		notifyObservers(event);
+}

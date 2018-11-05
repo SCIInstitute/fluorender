@@ -44,7 +44,7 @@ namespace FL
 		enum NotifyOptions
 		{
 			NOTIFY_NONE = 0,//for:
-			NOTIFY_SELF = 1 << 0,	//Object-EventHandler, handling value change (onBefore, onAfter)
+			NOTIFY_SELF = 1 << 0,	//Object-EventHandler, handling value change (onValueChanging, onValueChanged)
 									//value is contained in the object it self
 			NOTIFY_OTHERS = 1 << 1,	//value is from somewhere else
 			NOTIFY_VALUE = 1 << 2,//Value, setting and syncing

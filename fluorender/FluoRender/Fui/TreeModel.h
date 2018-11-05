@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FUI
 {
+	class AgentFactory;
 	class TreePanel;
 	class TreeModel : public wxDataViewModel, public InterfaceAgent
 	{
@@ -74,9 +75,6 @@ namespace FUI
 
 		virtual const char* className() const { return "TreeModel"; }
 
-		//observer functions
-		virtual void processNotification(FL::Event& event);
-
 		//interface agent functions
 		virtual void setObject(FL::Node* root)
 		{ InterfaceAgent::setObject(root); }
@@ -86,8 +84,14 @@ namespace FUI
 		//operations
 		void MoveNode(const std::string &source, FL::Node* target);
 
+		friend class AgentFactory;
+
 	protected:
 		TreePanel &panel_;
+
+		void OnItemAdded(FL::Event& event);
+		void OnItemRemoved(FL::Event& event);
+		void OnDisplayChanged(FL::Event& event);
 	};
 
 }

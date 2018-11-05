@@ -35,26 +35,6 @@ ListModel::ListModel()
 
 }
 
-void ListModel::nodeAdded(FL::Event& event)
-{
-	if (event.child)
-	{
-		wxDataViewItem parent_item = wxDataViewItem(0);
-		wxDataViewItem child_item = wxDataViewItem(event.child);
-		ItemAdded(parent_item, child_item);
-	}
-}
-
-void ListModel::nodeRemoved(FL::Event& event)
-{
-	if (event.child)
-	{
-		wxDataViewItem parent_item = wxDataViewItem(0);
-		wxDataViewItem child_item = wxDataViewItem(event.child);
-		ItemDeleted(parent_item, child_item);
-	}
-}
-
 int ListModel::Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 	unsigned int column, bool ascending) const
 {
@@ -199,5 +179,25 @@ unsigned int ListModel::GetChildren(const wxDataViewItem &parent,
 void ListModel::setObject(FL::Node* root)
 {
 	FL::Global::instance().addListObserver(this);
+}
+
+void ListModel::OnItemAdded(FL::Event& event)
+{
+	if (event.child)
+	{
+		wxDataViewItem parent_item = wxDataViewItem(0);
+		wxDataViewItem child_item = wxDataViewItem(event.child);
+		ItemAdded(parent_item, child_item);
+	}
+}
+
+void ListModel::OnItemRemoved(FL::Event& event)
+{
+	if (event.child)
+	{
+		wxDataViewItem parent_item = wxDataViewItem(0);
+		wxDataViewItem child_item = wxDataViewItem(event.child);
+		ItemDeleted(parent_item, child_item);
+	}
 }
 

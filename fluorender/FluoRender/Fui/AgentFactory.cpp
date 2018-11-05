@@ -64,6 +64,12 @@ ListModel* AgentFactory::getOrAddListModel(const std::string &name, wxWindow &wi
 	if (list_model)
 	{
 		list_model->setName(name);
+		list_model->setNodeAddedFunction(
+			std::bind(&ListModel::OnItemAdded,
+				list_model, std::placeholders::_1));
+		list_model->setNodeRemovedFunction(
+			std::bind(&ListModel::OnItemRemoved,
+				list_model, std::placeholders::_1));
 		objects_.push_front(list_model);
 		FL::Event event;
 		event.init(FL::Event::EVENT_NODE_ADDED,
@@ -86,6 +92,15 @@ TreeModel* AgentFactory::getOrAddTreeModel(const std::string &name, wxWindow &wi
 	if (tree_model)
 	{
 		tree_model->setName(name);
+		tree_model->setValueChangedFunction("display",
+			std::bind(&TreeModel::OnDisplayChanged,
+				tree_model, std::placeholders::_1));
+		tree_model->setNodeAddedFunction(
+			std::bind(&TreeModel::OnItemAdded,
+				tree_model, std::placeholders::_1));
+		tree_model->setNodeRemovedFunction(
+			std::bind(&TreeModel::OnItemRemoved,
+				tree_model, std::placeholders::_1));
 		objects_.push_front(tree_model);
 		FL::Event event;
 		event.init(FL::Event::EVENT_NODE_ADDED,
@@ -108,10 +123,10 @@ VolumePropAgent* AgentFactory::getOrAddVolumePropAgent(const std::string &name, 
 	if (volume_prop_agent)
 	{
 		volume_prop_agent->setName(name);
-		volume_prop_agent->setAfterFunction("luminance",
+		volume_prop_agent->setValueChangedFunction("luminance",
 			std::bind(&VolumePropAgent::OnLuminanceChanged,
 				volume_prop_agent, std::placeholders::_1));
-		volume_prop_agent->setAfterFunction("color",
+		volume_prop_agent->setValueChangedFunction("color",
 			std::bind(&VolumePropAgent::OnColorChanged,
 				volume_prop_agent, std::placeholders::_1));
 		objects_.push_front(volume_prop_agent);
@@ -136,8 +151,17 @@ RenderCanvasAgent* AgentFactory::getOrAddRenderCanvasAgent(const std::string &na
 	if (render_canvas_agent)
 	{
 		render_canvas_agent->setName(name);
-		render_canvas_agent->setAfterFunction("bounds",
+		render_canvas_agent->setValueChangedFunction("bounds",
 			std::bind(&RenderCanvasAgent::OnBoundsChanged,
+				render_canvas_agent, std::placeholders::_1));
+		render_canvas_agent->setDefaultValueChangedFunction(
+			std::bind(&RenderCanvasAgent::OnValueChanged,
+				render_canvas_agent, std::placeholders::_1));
+		render_canvas_agent->setNodeAddedFunction(
+			std::bind(&RenderCanvasAgent::OnSceneChanged,
+				render_canvas_agent, std::placeholders::_1));
+		render_canvas_agent->setNodeRemovedFunction(
+			std::bind(&RenderCanvasAgent::OnSceneChanged,
 				render_canvas_agent, std::placeholders::_1));
 		objects_.push_front(render_canvas_agent);
 		FL::Event event;
@@ -161,31 +185,31 @@ OutAdjustAgent* AgentFactory::getOrAddOutAdjustAgent(const std::string &name, wx
 	if (out_adjust_agent)
 	{
 		out_adjust_agent->setName(name);
-		out_adjust_agent->setAfterFunction("gamma r",
+		out_adjust_agent->setValueChangedFunction("gamma r",
 			std::bind(&OutAdjustAgent::OnGammaRChanged,
 				out_adjust_agent, std::placeholders::_1));
-		out_adjust_agent->setAfterFunction("gamma g",
+		out_adjust_agent->setValueChangedFunction("gamma g",
 			std::bind(&OutAdjustAgent::OnGammaGChanged,
 				out_adjust_agent, std::placeholders::_1));
-		out_adjust_agent->setAfterFunction("gamma b",
+		out_adjust_agent->setValueChangedFunction("gamma b",
 			std::bind(&OutAdjustAgent::OnGammaBChanged,
 				out_adjust_agent, std::placeholders::_1));
-		out_adjust_agent->setAfterFunction("brightness r",
+		out_adjust_agent->setValueChangedFunction("brightness r",
 			std::bind(&OutAdjustAgent::OnBrightnessRChanged,
 				out_adjust_agent, std::placeholders::_1));
-		out_adjust_agent->setAfterFunction("brightness g",
+		out_adjust_agent->setValueChangedFunction("brightness g",
 			std::bind(&OutAdjustAgent::OnBrightnessGChanged,
 				out_adjust_agent, std::placeholders::_1));
-		out_adjust_agent->setAfterFunction("brightness b",
+		out_adjust_agent->setValueChangedFunction("brightness b",
 			std::bind(&OutAdjustAgent::OnBrightnessBChanged,
 				out_adjust_agent, std::placeholders::_1));
-		out_adjust_agent->setAfterFunction("equalize r",
+		out_adjust_agent->setValueChangedFunction("equalize r",
 			std::bind(&OutAdjustAgent::OnEqualizeRChanged,
 				out_adjust_agent, std::placeholders::_1));
-		out_adjust_agent->setAfterFunction("equalize g",
+		out_adjust_agent->setValueChangedFunction("equalize g",
 			std::bind(&OutAdjustAgent::OnEqualizeGChanged,
 				out_adjust_agent, std::placeholders::_1));
-		out_adjust_agent->setAfterFunction("equalize b",
+		out_adjust_agent->setValueChangedFunction("equalize b",
 			std::bind(&OutAdjustAgent::OnEqualizeBChanged,
 				out_adjust_agent, std::placeholders::_1));
 		objects_.push_front(out_adjust_agent);
@@ -210,49 +234,49 @@ ClipPlaneAgent* AgentFactory::getOrAddClipPlaneAgent(const std::string &name, wx
 	if (clip_plane_agent)
 	{
 		clip_plane_agent->setName(name);
-		clip_plane_agent->setAfterFunction("clip x1",
+		clip_plane_agent->setValueChangedFunction("clip x1",
 			std::bind(&ClipPlaneAgent::OnClipXChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setAfterFunction("clip x2",
+		clip_plane_agent->setValueChangedFunction("clip x2",
 			std::bind(&ClipPlaneAgent::OnClipXChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setAfterFunction("clip y1",
+		clip_plane_agent->setValueChangedFunction("clip y1",
 			std::bind(&ClipPlaneAgent::OnClipYChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setAfterFunction("clip y2",
+		clip_plane_agent->setValueChangedFunction("clip y2",
 			std::bind(&ClipPlaneAgent::OnClipYChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setAfterFunction("clip z1",
+		clip_plane_agent->setValueChangedFunction("clip z1",
 			std::bind(&ClipPlaneAgent::OnClipZChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setAfterFunction("clip z2",
+		clip_plane_agent->setValueChangedFunction("clip z2",
 			std::bind(&ClipPlaneAgent::OnClipZChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setAfterFunction("clip dist x",
+		clip_plane_agent->setValueChangedFunction("clip dist x",
 			std::bind(&ClipPlaneAgent::OnClipDistXChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setAfterFunction("clip dist y",
+		clip_plane_agent->setValueChangedFunction("clip dist y",
 			std::bind(&ClipPlaneAgent::OnClipDistYChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setAfterFunction("clip dist z",
+		clip_plane_agent->setValueChangedFunction("clip dist z",
 			std::bind(&ClipPlaneAgent::OnClipDistZChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setAfterFunction("clip link x",
+		clip_plane_agent->setValueChangedFunction("clip link x",
 			std::bind(&ClipPlaneAgent::OnClipLinkXChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setAfterFunction("clip link y",
+		clip_plane_agent->setValueChangedFunction("clip link y",
 			std::bind(&ClipPlaneAgent::OnClipLinkYChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setAfterFunction("clip link z",
+		clip_plane_agent->setValueChangedFunction("clip link z",
 			std::bind(&ClipPlaneAgent::OnClipLinkZChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setAfterFunction("clip rot x",
+		clip_plane_agent->setValueChangedFunction("clip rot x",
 			std::bind(&ClipPlaneAgent::OnClipRotXChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setAfterFunction("clip rot y",
+		clip_plane_agent->setValueChangedFunction("clip rot y",
 			std::bind(&ClipPlaneAgent::OnClipRotYChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setAfterFunction("clip rot z",
+		clip_plane_agent->setValueChangedFunction("clip rot z",
 			std::bind(&ClipPlaneAgent::OnClipRotZChanged,
 				clip_plane_agent, std::placeholders::_1));
 		objects_.push_front(clip_plane_agent);

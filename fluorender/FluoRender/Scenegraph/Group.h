@@ -56,9 +56,6 @@ namespace FL
 
 		virtual void traverse(NodeVisitor& nv);
 
-		//as observer
-		virtual void processNotification(Event& event);
-
 		/* children
 		*/
 		virtual bool addChild(Node* child);

@@ -91,6 +91,9 @@ namespace FL
 		virtual void ascend(NodeVisitor& nv);
 		virtual void traverse(NodeVisitor& nv) {}
 
+		//as observer
+		virtual void processNotification(Event& event);
+
 		/* parents
 		*/
 		inline const ParentList& getParents() const { return m_parents; }
