@@ -155,11 +155,10 @@ public:
 	{
 		if (!equal(value))
 		{
-			//unsigned int type_save = event.type;
-			//event.type = Event::EVENT_VALUE_CHANGING;
-			//notifyObservers(event);
+			event.type = Event::EVENT_VALUE_CHANGING;
+			notifyObservers(event);
 			_value = value;
-			//event.type = type_save;
+			event.type = Event::EVENT_VALUE_CHANGED;
 			notifyObservers(event);
 		}
 	}

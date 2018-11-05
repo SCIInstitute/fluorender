@@ -71,24 +71,34 @@ void Object::objectDeleted(Event& event)
 	removeObservee(refd);
 }
 
-void Object::processNotification(Event& event)
+void Object::handleEvent(Event& event)
 {
 	Referenced* refd = event.sender;
 	if (!refd)
 		return;
-	if (refd->className() == std::string("Value"))
+
+	//take action myself
+	Value* value = dynamic_cast<Value*>(refd);
+	if (!value)
+		return;
+
+	switch (event.type)
 	{
-		Value* value = dynamic_cast<Value*>(refd);
-		if (value && containsValue(value))
-		{
-			//notify others
-			if (event.getNotifyFlags() & Event::NOTIFY_OTHERS)
-				notifyObservers(event);
-			//take action myself
-			if (event.getNotifyFlags() & Event::NOTIFY_SELF)
-				onAfter(value->getName(), event);
-		}
+	case Event::EVENT_VALUE_CHANGING:
+		onBefore(value->getName(), event);
+		break;
+	case Event::EVENT_VALUE_CHANGED:
+		onAfter(value->getName(), event);
+		break;
 	}
+}
+
+void Object::processNotification(Event& event)
+{
+	//handle event
+	handleEvent(event);
+	//notify observers
+	notifyObservers(event);
 }
 
 //add functions
@@ -281,7 +291,7 @@ bool Object::setValue(ValueTuple &vt, Event& event)
 		if (_vs_stack.top())
 		{
 			if (!event.sender)
-				event.init(Event::EVENT_VALUE_CHANGED,
+				event.init(Event::EVENT_VALUE_CHANGING,
 					this, value, true);
 			result = _vs_stack.top()->setValue(vt, event);
 		}
@@ -298,7 +308,7 @@ bool Object::setValue(ValueTuple &vt, Event& event)
 		if (_vs_stack.top()) \
 		{ \
 			if (!event.sender) \
-				event.init(Event::EVENT_VALUE_CHANGED, \
+				event.init(Event::EVENT_VALUE_CHANGING, \
 					this, getValue(name), true); \
 			result = _vs_stack.top()->setValue(name, value, event); \
 		} \
@@ -320,7 +330,7 @@ bool Object::setValue(const std::string &name, Referenced* value, Event& event)
 		if (_vs_stack.top())
 		{
 			if (!event.sender)
-				event.init(Event::EVENT_VALUE_CHANGED,
+				event.init(Event::EVENT_VALUE_CHANGING,
 					this, getValue(name), true);
 			result = _vs_stack.top()->setValue(name, value, event);
 		}
@@ -486,7 +496,7 @@ bool Object::toggleValue(const std::string &name, bool &value, Event& event)
 	if (_vs_stack.top())
 	{
 		if (!event.sender)
-			event.init(Event::EVENT_VALUE_CHANGED,
+			event.init(Event::EVENT_VALUE_CHANGING,
 				this, getValue(name), true);
 		result = _vs_stack.top()->toggleValue(name, value, event);
 	}

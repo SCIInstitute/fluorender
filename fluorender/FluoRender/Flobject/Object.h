@@ -294,6 +294,8 @@ public:
 protected:
 	virtual ~Object();
 
+	virtual void handleEvent(Event& event);
+
 	/** ID of an object is non-zero. */
 	unsigned int _id;
 	// object name

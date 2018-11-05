@@ -174,9 +174,10 @@ void Group::accept(NodeVisitor& nv)
 //as observer
 void Group::processNotification(Event& event)
 {
+	Object::handleEvent(event);
+	//notify only if event is from child
 	if (event.getNotifyFlags() & Event::NOTIFY_PARENT)
 	{
-		Object::processNotification(event);
 		Node* node = dynamic_cast<Node*>(event.sender);
 		if (node && containsNode(node))
 			notifyObservers(event);

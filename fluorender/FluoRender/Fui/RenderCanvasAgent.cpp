@@ -49,14 +49,15 @@ void RenderCanvasAgent::processNotification(FL::Event& event)
 		case FL::Event::EVENT_VALUE_CHANGED:
 			gl_view_.m_force_clear = true;
 			gl_view_.m_interactive = true;
+			gl_view_.RefreshGL(41);
 			break;
 		case FL::Event::EVENT_NODE_ADDED:
 		case FL::Event::EVENT_NODE_REMOVED:
 			gl_view_.PopMeshList();
 			gl_view_.PopVolumeList();
+			gl_view_.RefreshGL(41);
 			break;
 		}
-		gl_view_.RefreshGL(41);
 	}
 }
 

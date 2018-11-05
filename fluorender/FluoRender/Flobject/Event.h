@@ -43,13 +43,14 @@ namespace FL
 	public:
 		enum NotifyOptions
 		{
-			NOTIFY_NONE = 0,
-			NOTIFY_SELF = 1 << 0,
-			NOTIFY_OTHERS = 1 << 1,
-			NOTIFY_VALUE = 1 << 2,
-			NOTIFY_PARENT = 1 << 3,
-			NOTIFY_AGENT = 1 << 4,
-			NOTIFY_FACTORY = 1 << 5,
+			NOTIFY_NONE = 0,//for:
+			NOTIFY_SELF = 1 << 0,	//Object-EventHandler, handling value change (onBefore, onAfter)
+									//value is contained in the object it self
+			NOTIFY_OTHERS = 1 << 1,	//value is from somewhere else
+			NOTIFY_VALUE = 1 << 2,//Value, setting and syncing
+			NOTIFY_PARENT = 1 << 3,//Node-Group, pass event to parent
+			NOTIFY_AGENT = 1 << 4,//InterfaceAgent, process notification
+			NOTIFY_FACTORY = 1 << 5,//ObjectFactory, process notification
 			NOTIFY_ALL = 0x7FFFFFFF
 		};
 

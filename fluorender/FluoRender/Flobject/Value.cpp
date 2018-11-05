@@ -109,9 +109,17 @@ void Value::objectDeleted(Event& event)
 void Value::processNotification(Event& event)
 {
 	Referenced* refd = event.sender;
-	if (refd->className() == std::string("Value"))
+	if (!refd)
+		return;
+
+	if (event.getNotifyFlags() & Event::NOTIFY_VALUE)
 	{
-		sync(event);
+		switch (event.type)
+		{
+		case Event::EVENT_VALUE_CHANGED:
+			sync(event);
+			break;
+		}
 	}
 }
 
