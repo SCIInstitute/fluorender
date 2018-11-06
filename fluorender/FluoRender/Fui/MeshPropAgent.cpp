@@ -55,7 +55,7 @@ void MeshPropAgent::UpdateAllSettings()
 	double shine, alpha;
 	//m_md->GetMaterial(amb, diff, spec, shine, alpha);
 	getValue("mat amb", amb);
-	getValue("mat diff", diff);
+	getValue("color", diff);
 	getValue("mat spec", spec);
 	getValue("mat shine", shine);
 	getValue("alpha", alpha);

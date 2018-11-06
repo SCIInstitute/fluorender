@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <Fui/TreeModel.h>
 #include <Fui/TreePanel.h>
+#include <Fui/DataViewColorRenderer.h>
 #include <Scenegraph/Group.h>
 #include <Scenegraph/SearchVisitor.h>
 #include <Global/Global.h>
@@ -78,7 +79,7 @@ wxString TreeModel::GetColumnType(unsigned int col) const
 	case 0:
 		return wxDataViewIconTextRenderer::GetDefaultType();
 	case 1:
-		return "string";
+		return "string";// DataViewColorRenderer::GetDefaultType();
 	}
 	return "string";
 }
@@ -102,7 +103,18 @@ void TreeModel::GetValue(wxVariant &variant,
 			get(node->className()));
 		break;
 	case 1:
-		variant = wxString(node->className());
+	{
+		FLTYPE::Color color;
+		if (node->getValue("color", color))
+		{
+			//wxColor wxc((unsigned char)(color.r() * 255 + 0.5),
+			//	(unsigned char)(color.g() * 255 + 0.5),
+			//	(unsigned char)(color.b() * 255 + 0.5));
+			std::ostringstream oss;
+			oss << color;
+			variant = oss.str();
+		}
+	}
 		break;
 	}
 }
@@ -228,10 +240,11 @@ void TreeModel::OnItemRemoved(FL::Event& event)
 void TreeModel::OnDisplayChanged(FL::Event& event)
 {
 	FL::Node* node = dynamic_cast<FL::Node*>(event.origin);
-	if (node &&
-		event.value_name == "display")
+	if (node)
 	{
 		wxDataViewItem item = wxDataViewItem(event.origin);
 		ItemChanged(item);
 	}
+	panel_.m_tree_ctrl->Refresh();
 }
+

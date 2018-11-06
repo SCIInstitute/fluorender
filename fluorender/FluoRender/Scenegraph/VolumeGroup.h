@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FL
 {
+	class VolumeFactory;
 	class VolumeData;
 	class VolumeGroup : public Group
 	{
@@ -61,8 +62,13 @@ namespace FL
 		virtual bool setChild(size_t i, Node* node);
 		virtual bool removeChildren(size_t pos, size_t num);
 
+		friend class VolumeFactory;
+
 	protected:
 		virtual ~VolumeGroup();
+
+	private:
+		void OnRandomizeColor(Event& event);//randomize color
 	};
 }
 

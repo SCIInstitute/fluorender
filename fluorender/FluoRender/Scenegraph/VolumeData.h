@@ -74,9 +74,8 @@ namespace FL
 		virtual VolumeData* asVolumeData() { return this; }
 		virtual const VolumeData* asVolumeData() const { return this; }
 
-		//functions from old class
-		virtual void RandomizeColor();//randomize color
 
+		//functions from old class
 		//reader
 		void SetReader(BaseReader* reader);
 		BaseReader* GetReader();
@@ -148,6 +147,8 @@ namespace FL
 
 		//color map
 		FLTYPE::Color GetColorFromColormap(double value);
+
+		friend class VolumeFactory;
 
 	protected:
 		virtual ~VolumeData();
@@ -221,12 +222,12 @@ namespace FL
 		void OnClipZ1Changed(Event& event);
 		void OnClipZ2Changed(Event& event);
 		void OnClipRot(Event& event);
+		void OnRandomizeColor(Event& event);//randomize color
 
 		//update clipping planes
 		//any value changes -> set clip values and then rotate
 		void UpdateClippingPlanes(Event& event);
 
-		friend class VolumeFactory;
 	};
 }
 

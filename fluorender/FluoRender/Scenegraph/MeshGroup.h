@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FL
 {
+	class MeshFactory;
 	class MeshData;
 	class MeshGroup : public Group
 	{
@@ -56,8 +57,13 @@ namespace FL
 		virtual MeshGroup* asMeshGroup() { return this; }
 		virtual const MeshGroup* asMeshGroup() const { return this; }
 
+		friend class MeshFactory;
+
 	protected:
 		virtual ~MeshGroup();
+
+	private:
+		void OnRandomizeColor(Event& event);//randomize color
 	};
 }
 

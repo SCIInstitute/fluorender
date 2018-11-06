@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <Fui/TreePanel.h>
+#include <Fui/DataViewColorRenderer.h>
 #include <VRenderFrame.h>
 #include <Global/Global.h>
 #include <Scenegraph/VolumeData.h>
@@ -104,13 +105,6 @@ TreePanel::TreePanel(wxWindow* frame,
 		wxDV_MULTIPLE | wxDV_ROW_LINES);
 	m_tree_ctrl->EnableDragSource(wxDF_UNICODETEXT);
 	m_tree_ctrl->EnableDropTarget(wxDF_UNICODETEXT);
-	//wxImageList *images = new wxImageList(16, 16, true);
-	//wxIcon icons[2];
-	//icons[0] = wxIcon(cross_xpm);
-	//icons[1] = wxIcon(tick_xpm);
-	//images->Add(icons[0]);
-	//images->Add(icons[1]);
-	//m_tree_ctrl->AssignImageList(images);
 	m_tree_ctrl->SetDoubleBuffered(true);
 	//add columns
 	//name
@@ -123,10 +117,9 @@ TreePanel::TreePanel(wxWindow* frame,
 			wxDATAVIEW_COL_RESIZABLE);
 	m_tree_ctrl->AppendColumn(column0);
 	//type
-	wxDataViewTextRenderer *tr = new wxDataViewTextRenderer("string");
+	DataViewColorRenderer *cr = new DataViewColorRenderer(wxDATAVIEW_CELL_ACTIVATABLE);
 	wxDataViewColumn *column1 =
-		new wxDataViewColumn("Type", tr, 1, 200, wxALIGN_LEFT,
-			wxDATAVIEW_COL_SORTABLE |
+		new wxDataViewColumn("Color", cr, 1, 200, wxALIGN_LEFT,
 			wxDATAVIEW_COL_REORDERABLE |
 			wxDATAVIEW_COL_RESIZABLE);
 	m_tree_ctrl->AppendColumn(column1);
@@ -323,17 +316,29 @@ void TreePanel::OnActivated(wxDataViewEvent &event)
 	switch (col)
 	{
 	case 0:
+	{
+		FL::Node* node = (FL::Node*)item.GetID();
+		if (node)
 		{
-			FL::Node* node = (FL::Node*)item.GetID();
-			if (node)
-			{
-				bool display;
-				node->toggleValue("display", display);
-				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-				if (vr_frame)
-					vr_frame->OnSelection(node);
-			}
+			bool display;
+			node->toggleValue("display", display);
+			//for showing/hiding the property panel
+			//this should be improved when frame has its agent
+			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+			if (vr_frame)
+				vr_frame->OnSelection(node);
 		}
-		break;
+	}
+	break;
+	case 1:
+	{
+		FL::Node* node = (FL::Node*)item.GetID();
+		if (node)
+		{
+			bool rc;
+			node->toggleValue("randomize color", rc);
+		}
+	}
+	break;
 	}
 }

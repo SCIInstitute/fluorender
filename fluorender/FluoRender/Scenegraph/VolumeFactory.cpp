@@ -144,6 +144,7 @@ void VolumeFactory::createDefault()
 		vd->addValue("luminance", double(1.0));
 		vd->addValue("sec color", FLTYPE::Color(1.0));//secondary color
 		vd->addValue("sec color set", bool(false));
+		vd->addValue("randomize color", bool(false));//set to change color
 
 		//resolution
 		vd->addValue("res x", long(0));
@@ -308,6 +309,7 @@ void VolumeFactory::setEventHandler(VolumeData* vd)
 	ADD_AFTER_EVENT(vd, "clip rot x", OnClipRot);
 	ADD_AFTER_EVENT(vd, "clip rot y", OnClipRot);
 	ADD_AFTER_EVENT(vd, "clip rot z", OnClipRot);
+	ADD_AFTER_EVENT(vd, "randomize color", OnRandomizeColor);
 }
 
 VolumeData* VolumeFactory::build(const std::string &exp)
@@ -365,7 +367,13 @@ VolumeGroup* VolumeFactory::buildGroup(VolumeData* vd)
 	else
 		group = new VolumeGroup(*getDefault(), CopyOp::DEEP_COPY_ALL);
 	if (group)
+	{
 		group->setName("Group");
+		group->setValueChangedFunction(
+			"randomize color", std::bind(
+				&VolumeGroup::OnRandomizeColor,
+				group, std::placeholders::_1));
+	}
 	return group;
 }
 

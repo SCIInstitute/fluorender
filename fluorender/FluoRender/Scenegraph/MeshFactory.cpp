@@ -78,10 +78,11 @@ void MeshFactory::createDefault()
 		md->addValue("da start", double(0));
 		md->addValue("da end", double(1));
 		md->addValue("mat amb", FLTYPE::Color());
-		md->addValue("mat diff", FLTYPE::Color());
+		md->addValue("color", FLTYPE::Color());
 		md->addValue("mat spec", FLTYPE::Color());
 		md->addValue("mat shine", double(0));
 		md->addValue("alpha", double(1));
+		md->addValue("randomize color", bool(false));
 
 		//shadow
 		md->addValue("shadow enable", bool(false));
@@ -125,11 +126,12 @@ void MeshFactory::setEventHandler(MeshData* md)
 	ADD_AFTER_EVENT(md, "da start", OnDepthAttenChanged);
 	ADD_AFTER_EVENT(md, "da end", OnDepthAttenChanged);
 	ADD_AFTER_EVENT(md, "mat amb", OnMaterialChanged);
-	ADD_AFTER_EVENT(md, "mat diff", OnMaterialChanged);
+	ADD_AFTER_EVENT(md, "color", OnMaterialChanged);
 	ADD_AFTER_EVENT(md, "mat spec", OnMaterialChanged);
 	ADD_AFTER_EVENT(md, "mat shine", OnMaterialChanged);
 	ADD_AFTER_EVENT(md, "alpha", OnMaterialChanged);
 	ADD_AFTER_EVENT(md, "bounds", OnBoundsChanged);
+	ADD_AFTER_EVENT(md, "randomize color", OnRandomizeColor);
 }
 
 MeshData* MeshFactory::build(const std::string &exp)
@@ -184,6 +186,12 @@ MeshGroup* MeshFactory::buildGroup(MeshData* md)
 	else
 		group = new MeshGroup(*getDefault(), CopyOp::DEEP_COPY_ALL);
 	if (group)
+	{
 		group->setName("Group");
+		group->setValueChangedFunction(
+			"randomize color", std::bind(
+				&MeshGroup::OnRandomizeColor,
+				group, std::placeholders::_1));
+	}
 	return group;
 }

@@ -148,3 +148,18 @@ bool VolumeGroup::setChild(size_t i, Node* node)
 	return Group::setChild(i, node);
 }
 
+void VolumeGroup::OnRandomizeColor(Event& event)
+{
+	//maybe there is a better solution?
+	Node* node = dynamic_cast<Node*>(event.penultimate());
+	if (node && containsNode(node))
+		return;
+
+	for (auto it = m_children.begin();
+		it != m_children.end(); ++it)
+	{
+		bool bval;
+		(*it)->toggleValue("randomize color", bval, event);
+	}
+}
+

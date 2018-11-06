@@ -80,7 +80,7 @@ namespace FL
 		void DrawBounds();
 		void DrawInt(unsigned int name);
 
-		void RandomizeColor();
+		friend class MeshFactory;
 
 	protected:
 		virtual ~MeshData();
@@ -97,8 +97,8 @@ namespace FL
 		void OnDepthAttenChanged(Event& event);
 		void OnMaterialChanged(Event& event);
 		void OnBoundsChanged(Event& event);
+		void OnRandomizeColor(Event& event);
 
-		friend class MeshFactory;
 	};
 }
 

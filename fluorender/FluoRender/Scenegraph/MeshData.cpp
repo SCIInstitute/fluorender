@@ -109,7 +109,7 @@ void MeshData::OnMaterialChanged(Event& event)
 	FLTYPE::Color amb, diff, spec;
 	double shine, alpha;
 	getValue("mat amb", amb);
-	getValue("mat diff", diff);
+	getValue("color", diff);
 	getValue("mat spec", spec);
 	getValue("mat shine", shine);
 	getValue("alpha", alpha);
@@ -195,13 +195,13 @@ void MeshData::OnBoundsChanged(Event& event)
 	setValue("bounds tf", bounds, event);
 }
 
-void MeshData::RandomizeColor()
+void MeshData::OnRandomizeColor(Event& event)
 {
 	double hue = (double)rand() / (RAND_MAX) * 360.0;
 	FLTYPE::Color color(FLTYPE::HSVColor(hue, 1.0, 1.0));
-	setValue("mat diff", color);
+	setValue("color", color, event);
 	FLTYPE::Color amb = color * 0.3;
-	setValue("mat amb", amb);
+	setValue("mat amb", amb, event);
 }
 
 int MeshData::LoadData(GLMmodel* mesh)

@@ -9357,7 +9357,7 @@ void VRenderGLView::DrawLegend()
 			}
 			FLTYPE::Color diff;
 			double shine, alpha;
-			m_md_pop_list[i]->getValue("mat diff", diff);
+			m_md_pop_list[i]->getValue("color", diff);
 			FLTYPE::Color c(diff.r(), diff.g(), diff.b());
 			FL::MeshData* md = 0;
 			FL::Global::instance().getMeshFactory().getValue("current", (FL::Referenced**)&md);

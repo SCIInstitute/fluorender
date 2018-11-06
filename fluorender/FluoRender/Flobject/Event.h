@@ -73,7 +73,8 @@ namespace FL
 			sender(0), origin(0), value(0),
 			parent(0), child(0),
 			m_cur_level(0), m_sum_level(0),
-			m_limit(100)
+			m_limit(100),
+			m_terminated(false)
 			//m_limit(std::numeric_limits<unsigned int>::max())
 		{}
 			
@@ -120,16 +121,48 @@ namespace FL
 		}
 		inline bool pass(Referenced* sndr, unsigned int limit = 0)
 		{
+			if (m_terminated)
+				return false;
 			if (!sender_chain.empty() &&
 				sndr == sender_chain.back())
+			{
+				m_terminated = true;
 				return false;
+			}
 			else
 			{
 				if (limit)
-					return m_cur_level < limit;
+				{
+					if (m_cur_level < limit)
+						return true;
+					else
+					{
+						m_terminated = true;
+						return false;
+					}
+				}
 				else
-					return m_cur_level < m_limit;
+				{
+					if (m_cur_level < m_limit)
+						return true;
+					else
+					{
+						m_terminated = true;
+						return false;
+					}
+				}
 			}
+		}
+		inline int count(Referenced* sndr)
+		{
+			return std::count(sender_chain.begin(), sender_chain.end(), sndr);
+		}
+		inline Referenced* penultimate()
+		{
+			if (sender_chain.size() > 1)
+				return sender_chain[sender_chain.size() - 2];
+			else
+				return 0;
 		}
 
 		unsigned int id;
@@ -147,6 +180,7 @@ namespace FL
 		unsigned int m_cur_level;
 		unsigned int m_sum_level;
 		unsigned int m_limit;
+		bool m_terminated;
 	};
 }
 

@@ -1444,7 +1444,10 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 					if (chan_num >=0 && chan_num <3)
 						vd->setValue("color", color);
 					else
-						vd->RandomizeColor();
+					{
+						bool rc;
+						vd->toggleValue("randomize color", rc);
+					}
 
 					vrv->AddVolumeData(vd);
 					vd_sel = vd;

@@ -209,7 +209,7 @@ void MeshPropPanel::OnDiffChange(wxColourPickerEvent& event)
 	wxColor c = event.GetColour();
 	FLTYPE::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
 	FLTYPE::Color amb = color * 0.3;
-	m_agent->setValue("mat diff", color);
+	m_agent->setValue("color", color);
 	m_agent->setValue("mat amb", amb);
 }
 

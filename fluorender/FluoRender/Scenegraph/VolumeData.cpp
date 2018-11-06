@@ -1028,15 +1028,15 @@ void VolumeData::UpdateClippingPlanes(Event& event)
 	setValue("clip planes", planes, event);
 }
 
-//functions from old class
 //randomize color
-void VolumeData::RandomizeColor()
+void VolumeData::OnRandomizeColor(Event& event)
 {
 	double hue = (double)rand() / (RAND_MAX) * 360.0;
 	FLTYPE::Color color(FLTYPE::HSVColor(hue, 1.0, 1.0));
-	setValue("color", color);
+	setValue("color", color, event);
 }
 
+//functions from old class
 //reader
 void VolumeData::SetReader(BaseReader* reader)
 {
