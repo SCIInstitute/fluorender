@@ -150,7 +150,7 @@ void GroupTest2()
 
 	//sync value1
 	ValueUpdateVisitor update;
-	update.setType(SYNC_VALUE);
+	update.setType(ValueUpdateVisitor::SYNC_VALUE);
 	update.setValueName("value1");
 	group4->accept(update);
 	group1->getChild(0)->setValue("value1", 1.0);
@@ -158,7 +158,7 @@ void GroupTest2()
 	group4->accept(visitor);
 
 	//sync all
-	update.setType(SYNC_ALL_VALUES);
+	update.setType(ValueUpdateVisitor::SYNC_ALL_VALUES);
 	group4->accept(update);
 	group2->getChild(1)->setValue("value2", 2.0);
 	//traverse
@@ -168,7 +168,7 @@ void GroupTest2()
 	group4->accept(visitor);
 
 	//unsync
-	//update.setType(UNSYNC_VALUE);
+	//update.setType(ValueUpdateVisitor::UNSYNC_VALUE);
 	//group4->accept(update);
 }
 

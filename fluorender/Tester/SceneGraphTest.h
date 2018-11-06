@@ -12,10 +12,10 @@ using namespace FL;
 class VolumeDataTest : public VolumeData
 {
 public:
-	virtual void objectDeleted(void* ptr)
+	virtual void objectDeleted(Event& event)
 	{
-		Object::objectDeleted(ptr);
-		Referenced* refd = static_cast<Referenced*>(ptr);
+		Object::objectDeleted(event);
+		Referenced* refd = event.sender;
 		if (refd->className() == std::string("Value"))
 		{
 			Value* value = dynamic_cast<Value*>(refd);
@@ -39,10 +39,10 @@ public:
 		}
 	}
 
-	virtual void objectChanged(void* ptr, void* orig_node, const std::string &exp)
+	virtual void processNotification(Event& event)
 	{
-		Object::objectChanged(ptr, orig_node, exp);
-		Referenced* refd = static_cast<Referenced*>(ptr);
+		Object::processNotification(event);
+		Referenced* refd = event.sender;
 		if (refd->className() == std::string("Value"))
 		{
 			Value* value = dynamic_cast<Value*>(refd);
@@ -63,7 +63,7 @@ public:
 			std::cout << this->className() << ":" << this->getName() <<
 				" was notified that " <<
 				vd->className() << ":" << vd->getName() <<
-				":" << exp << " has changed." << std::endl;
+				":" << event.value_name << " has changed." << std::endl;
 		}
 	}
 };
@@ -71,10 +71,10 @@ public:
 class AnnotationsTest : public Annotations
 {
 public:
-	virtual void objectDeleted(void* ptr)
+	virtual void objectDeleted(Event& event)
 	{
-		Object::objectDeleted(ptr);
-		Referenced* refd = static_cast<Referenced*>(ptr);
+		Object::objectDeleted(event);
+		Referenced* refd = event.sender;
 		if (refd->className() == std::string("Value"))
 		{
 			Value* value = dynamic_cast<Value*>(refd);
@@ -98,10 +98,10 @@ public:
 		}
 	}
 
-	virtual void objectChanged(void* ptr, void* orig_node, const std::string &exp)
+	virtual void processNotification(Event& event)
 	{
-		Object::objectChanged(ptr, orig_node, exp);
-		Referenced* refd = static_cast<Referenced*>(ptr);
+		Object::processNotification(event);
+		Referenced* refd = event.sender;
 		if (refd->className() == std::string("Value"))
 		{
 			Value* value = dynamic_cast<Value*>(refd);
@@ -122,7 +122,7 @@ public:
 			std::cout << this->className() << ":" << this->getName() <<
 				" was notified that " <<
 				vd->className() << ":" << vd->getName() <<
-				":" << exp << " has changed." << std::endl;
+				":" << event.value_name << " has changed." << std::endl;
 		}
 	}
 };

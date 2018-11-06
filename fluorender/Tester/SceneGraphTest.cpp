@@ -34,7 +34,7 @@ void SceneGraphTest()
 
 	//data->getValue("spacing x")->holdoffObserverNotification();
 	//data->holdoffObserverNotification();
-	data->setValue("spacing x", 1.0, false);
+	data->setValue("spacing x", 1.0);
 	data->setValue("spacing x", 2.0);
 	//data->getValue("spacing x")->resumeObserverNotification();
 	//data->resumeObserverNotification();

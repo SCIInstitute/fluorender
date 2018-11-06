@@ -1,5 +1,7 @@
 #pragma once
 
+void MyTest();
+
 void ObjectTest();
 void ObjectTest2();
 void ObjectTest3();

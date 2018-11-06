@@ -7,24 +7,7 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-	//char* leak = new char[1000];
-	//memset(leak, 14, 1000);
-
-	//ObjectTest();
-	//ObjectTest2();
-	//ObjectTest3();
-	//ObjectTest4();
-
-	//GroupTest();
-	//GroupTest2();
-	//GroupTest3();
-
-	//SceneGraphTest();
-	SceneGraphTest2();
-
-	//SpecialValueTest();
-
-	//FactoryTest();
+	MyTest();
 
 	printf("All done. Quit.\n");
 	cin.get();
