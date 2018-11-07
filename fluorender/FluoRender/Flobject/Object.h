@@ -33,7 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Flobject/CopyOp.h>
 #include <Flobject/Value.h>
 #include <Flobject/EventHandler.h>
-#include <stack>
 #include <string>
 #include <vector>
 #include <functional>
@@ -44,7 +43,6 @@ namespace FUI
 }
 namespace FL
 {
-typedef std::stack<ref_ptr<ValueSet> > ValueSetStack;
 class Object;
 typedef std::vector<Object*> ObjectList;
 class ObjectFactory;
@@ -79,10 +77,10 @@ public:
 
 	inline void copyValues(const Object& obj, const CopyOp& copyop = CopyOp::SHALLOW_COPY)
 	{
-		if (!obj._vs_stack.top())
+		if (!obj._value_set)
 			return;
-		for (auto it = obj._vs_stack.top()->getValues().begin();
-			it != obj._vs_stack.top()->getValues().end(); ++it)
+		for (auto it = obj._value_set->getValues().begin();
+			it != obj._value_set->getValues().end(); ++it)
 		{
 			Value* value = 0;
 			if (copyop.getCopyFlags() & CopyOp::DEEP_COPY_VALUES)
@@ -101,11 +99,11 @@ public:
 
 	inline void clearValues()
 	{
-		if (!_vs_stack.top())
+		if (!_value_set)
 			return;
 		//remove observer
-		for (auto it = _vs_stack.top()->getValues().begin();
-			it != _vs_stack.top()->getValues().end(); ++it)
+		for (auto it = _value_set->getValues().begin();
+			it != _value_set->getValues().end(); ++it)
 		{
 			Value * value = it->second.get();
 			if (value)
@@ -120,7 +118,7 @@ public:
 				value->removeObserver(this);
 			}
 		}
-		_vs_stack.top()->clear();
+		_value_set->clear();
 	}
 
 	//add a value
@@ -245,16 +243,16 @@ public:
 	{
 		if (!value)
 			return false;
-		if (_vs_stack.top())
-			return _vs_stack.top()->addValue(value);
+		if (_value_set)
+			return _value_set->addValue(value);
 		else return false;
 	}
 
 	//get value the class
 	Value* getValue(const std::string &name)
 	{
-		if (_vs_stack.top())
-			return _vs_stack.top()->findValue(name);
+		if (_value_set)
+			return _value_set->findValue(name);
 		else
 			return 0;
 	}
@@ -262,9 +260,9 @@ public:
 	std::vector<std::string> getValueNames()
 	{
 		std::vector<std::string> result;
-		if (_vs_stack.top())
+		if (_value_set)
 		{
-			ValueSet::Values values = _vs_stack.top()->getValues();
+			ValueSet::Values values = _value_set->getValues();
 			for (auto it = values.begin();
 				it != values.end(); ++it)
 			{
@@ -275,9 +273,9 @@ public:
 	}
 	std::string getValueType(const std::string &name)
 	{
-		if (_vs_stack.top())
+		if (_value_set)
 		{
-			Value* value = _vs_stack.top()->findValue(name);
+			Value* value = _value_set->findValue(name);
 			if (value)
 				return value->getType();
 		}
@@ -286,8 +284,8 @@ public:
 
 	bool containsValue(Value* value)
 	{
-		if (_vs_stack.top())
-			return _vs_stack.top()->containsValue(value);
+		if (_value_set)
+			return _value_set->containsValue(value);
 		return false;
 	}
 
@@ -301,8 +299,7 @@ protected:
 	// object name
 	std::string m_name;
 
-	/** a stack of value sets */
-	ValueSetStack _vs_stack;
+	ref_ptr<ValueSet> _value_set;
 
 	friend class ObjectFactory;
 

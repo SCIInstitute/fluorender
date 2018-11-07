@@ -33,8 +33,7 @@ Object::Object():
 	EventHandler(),
 	_id(0)
 {
-	ValueSet* value_set = new ValueSet();
-	_vs_stack.push(value_set);
+	_value_set = new ValueSet();
 }
 
 Object::Object(const Object& obj, const CopyOp& copyop, bool copy_values):
@@ -42,16 +41,7 @@ Object::Object(const Object& obj, const CopyOp& copyop, bool copy_values):
 	_id(0),
 	m_name(obj.m_name)
 {
-	//_vs_stack.push(obj._vs_stack.top()->clone(copyop));
-	////also observe the values
-	//for (auto it = _vs_stack.top()->getValues().begin();
-	//	it != _vs_stack.top()->getValues().end(); ++it)
-	//{
-	//	it->second->addObserver(this);
-	//	it->second->notify();
-	//}
-	ValueSet* value_set = new ValueSet();
-	_vs_stack.push(value_set);
+	_value_set = new ValueSet();
 	if (copy_values)
 		copyValues(obj, copyop);
 }
@@ -65,7 +55,7 @@ void Object::objectDeleted(Event& event)
 {
 	Referenced* refd = event.sender;
 	if (refd)
-		_vs_stack.top()->resetRefPtr(refd);
+		_value_set->resetRefPtr(refd);
 
 	//remove observee
 	removeObservee(refd);
@@ -112,13 +102,13 @@ void Object::processNotification(Event& event)
 //add functions
 bool Object::addValue(ValueTuple &vt)
 {
-	if (_vs_stack.top())
+	if (_value_set)
 	{
-		bool result = _vs_stack.top()->addValue(vt);
+		bool result = _value_set->addValue(vt);
 		if (result)
 		{
 			std::string name = std::get<0>(vt);
-			Value* vs_value = _vs_stack.top()->findValue(name);
+			Value* vs_value = _value_set->findValue(name);
 			if (vs_value)
 			{
 				vs_value->addObserver(this);
@@ -134,12 +124,12 @@ bool Object::addValue(ValueTuple &vt)
 
 //define function bodies first
 #define OBJECT_ADD_VALUE_BODY \
-	if (_vs_stack.top()) \
+	if (_value_set) \
 	{ \
-		bool result = _vs_stack.top()->addValue(name, value); \
+		bool result = _value_set->addValue(name, value); \
 		if (result) \
 		{ \
-			Value* vs_value = _vs_stack.top()->findValue(name); \
+			Value* vs_value = _value_set->findValue(name); \
 			if (vs_value) \
 			{ \
 				vs_value->addObserver(this); \
@@ -296,12 +286,12 @@ bool Object::setValue(ValueTuple &vt, Event& event)
 	if (getValue(old_vt) && vt != old_vt)
 	{
 		bool result = false;
-		if (_vs_stack.top())
+		if (_value_set)
 		{
 			if (!event.sender)
 				event.init(Event::EVENT_VALUE_CHANGING,
 					this, value, true);
-			result = _vs_stack.top()->setValue(vt, event);
+			result = _value_set->setValue(vt, event);
 		}
 		return result;
 	}
@@ -313,12 +303,12 @@ bool Object::setValue(ValueTuple &vt, Event& event)
 	if (getValue(name, old_value) && value != old_value) \
 	{ \
 		bool result = false; \
-		if (_vs_stack.top()) \
+		if (_value_set) \
 		{ \
 			if (!event.sender) \
 				event.init(Event::EVENT_VALUE_CHANGING, \
 					this, getValue(name), true); \
-			result = _vs_stack.top()->setValue(name, value, event); \
+			result = _value_set->setValue(name, value, event); \
 		} \
 		return result; \
 	} \
@@ -335,12 +325,12 @@ bool Object::setValue(const std::string &name, Referenced* value, Event& event)
 		if (value)
 			value->addObserver(this);
 		bool result = false;
-		if (_vs_stack.top())
+		if (_value_set)
 		{
 			if (!event.sender)
 				event.init(Event::EVENT_VALUE_CHANGING,
 					this, getValue(name), true);
-			result = _vs_stack.top()->setValue(name, value, event);
+			result = _value_set->setValue(name, value, event);
 		}
 		return result;
 	}
@@ -501,12 +491,12 @@ bool Object::setValue(const std::string &name, const FLTYPE::GLint4 &value, Even
 bool Object::toggleValue(const std::string &name, bool &value, Event& event)
 {
 	bool result = false;
-	if (_vs_stack.top())
+	if (_value_set)
 	{
 		if (!event.sender)
 			event.init(Event::EVENT_VALUE_CHANGING,
 				this, getValue(name), true);
-		result = _vs_stack.top()->toggleValue(name, value, event);
+		result = _value_set->toggleValue(name, value, event);
 	}
 	return result;
 }
@@ -514,16 +504,16 @@ bool Object::toggleValue(const std::string &name, bool &value, Event& event)
 //get functions
 bool Object::getValue(ValueTuple &vt)
 {
-	if (_vs_stack.top())
-		return _vs_stack.top()->getValue(vt);
+	if (_value_set)
+		return _value_set->getValue(vt);
 	else
 		return false;
 }
 
 //define function bodies first
 #define OBJECT_GET_VALUE_BODY \
-	if (_vs_stack.top()) \
-		return _vs_stack.top()->getValue(name, value); \
+	if (_value_set) \
+		return _value_set->getValue(name, value); \
 	else \
 		return false
 
@@ -720,10 +710,10 @@ bool Object::syncAllValues(Object* obj)
 {
 	bool result = false;
 	std::string name;
-	if (_vs_stack.top())
+	if (_value_set)
 	{
-		for (auto it = _vs_stack.top()->getValues().begin();
-			it != _vs_stack.top()->getValues().end(); ++it)
+		for (auto it = _value_set->getValues().begin();
+			it != _value_set->getValues().end(); ++it)
 		{
 			if (it->second)
 			{
@@ -740,10 +730,10 @@ bool Object::unsyncAllValues(Object* obj)
 {
 	bool result = false;
 	std::string name;
-	if (_vs_stack.top())
+	if (_value_set)
 	{
-		for (auto it = _vs_stack.top()->getValues().begin();
-			it != _vs_stack.top()->getValues().end(); ++it)
+		for (auto it = _value_set->getValues().begin();
+			it != _value_set->getValues().end(); ++it)
 		{
 			if (it->second)
 			{
@@ -790,10 +780,10 @@ bool Object::propValues(const std::vector<std::string> &names, Object* obj)
 bool Object::propAllValues(Object* obj)
 {
 	bool result = false;
-	if (_vs_stack.top())
+	if (_value_set)
 	{
-		for (auto it = _vs_stack.top()->getValues().begin();
-			it != _vs_stack.top()->getValues().end(); ++it)
+		for (auto it = _value_set->getValues().begin();
+			it != _value_set->getValues().end(); ++it)
 		{
 			if (it->second)
 			{
