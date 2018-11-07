@@ -174,6 +174,19 @@ void ListPanel::OnDeleteAll(wxCommandEvent &event)
 
 void ListPanel::OnBeginDrag(wxDataViewEvent &event)
 {
+	wxDataViewItem item(event.GetItem());
+	FL::Referenced* refd = static_cast<FL::Referenced*>(item.GetID());
+	if (!refd)
+	{
+		event.Veto();
+		return;
+	}
+	FL::Node* node = dynamic_cast<FL::Node*>(refd);
+	if (!node)
+	{
+		event.Veto();
+		return;
+	}
 	//multiple selections
 	wxDataViewItemArray sel;
 	m_list_ctrl->GetSelections(sel);
@@ -208,7 +221,7 @@ void ListPanel::OnDrop(wxDataViewEvent &event)
 	wxTextDataObject wxobj;
 	wxobj.SetData(wxDF_UNICODETEXT, event.GetDataSize(), event.GetDataBuffer());
 	wxString source_names = wxobj.GetText();
-	std::vector<std::string> source_name_list;
+	FL::ValueCollection source_name_list;
 	boost::split(source_name_list, source_names.ToStdString(), [](char c) {return c == '\n'; });
 	for (auto it = source_name_list.begin();
 		it != source_name_list.end(); ++it)

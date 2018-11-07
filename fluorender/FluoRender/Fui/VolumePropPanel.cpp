@@ -510,7 +510,7 @@ VolumePropPanel::VolumePropPanel(wxWindow* frame,
 		wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER);
 	m_colormap_combo = new wxComboBox(this, ID_ColormapCombo, "",
 		wxDefaultPosition, wxSize(85, 25), 0, NULL, wxCB_READONLY);
-	std::vector<std::string>colormap_list;
+	std::vector<std::string> colormap_list;
 	colormap_list.push_back("Rainbow");
 	colormap_list.push_back("Reverse Rainbow");
 	colormap_list.push_back("Hot");
@@ -522,7 +522,7 @@ VolumePropPanel::VolumePropPanel(wxWindow* frame,
 		m_colormap_combo->Append(colormap_list[i]);
 	m_colormap_combo2 = new wxComboBox(this, ID_ColormapCombo2, "",
 		wxDefaultPosition, wxSize(85, 25), 0, NULL, wxCB_READONLY);
-	std::vector<std::string>colormap_list2;
+	std::vector<std::string> colormap_list2;
 	colormap_list2.push_back("Intensity");
 	colormap_list2.push_back("Z Value");
 	colormap_list2.push_back("Y Value");
@@ -1626,7 +1626,7 @@ void VolumePropPanel::OnInterpolateCheck(wxCommandEvent& event)
 void VolumePropPanel::OnSyncGroupCheck(wxCommandEvent& event)
 {
 	bool sync = m_options_toolbar->GetToolState(ID_SyncGroupChk);
-	std::string ss[] = {
+	FL::ValueCollection names{
 		"gamma 3d",
 		"extract boundary",
 		"saturation",
@@ -1651,7 +1651,6 @@ void VolumePropPanel::OnSyncGroupCheck(wxCommandEvent& event)
 		"mip mode",
 		"noise redct"
 	};
-	std::vector<std::string> names(std::begin(ss), std::end(ss));//values to sync
 	if (sync)
 	{
 		m_agent->propParentValues(names);
@@ -1663,7 +1662,7 @@ void VolumePropPanel::OnSyncGroupCheck(wxCommandEvent& event)
 
 void VolumePropPanel::OnSaveDefault(wxCommandEvent& event)
 {
-	std::string ss[] = {
+	FL::ValueCollection names{
 		"gamma 3d",
 		"extract boundary",
 		"saturation",
@@ -1691,15 +1690,13 @@ void VolumePropPanel::OnSaveDefault(wxCommandEvent& event)
 		"spc y",
 		"spc z"
 	};
-	std::vector<std::string> names_v(std::begin(ss), std::end(ss));//values to save
-	FL::Global::instance().getVolumeFactory().propValuesToDefault(m_agent, names_v);
-	std::set<std::string> names_s(std::begin(ss), std::end(ss));//values to save
-	FL::Global::instance().getVolumeFactory().writeDefault(names_s);
+	FL::Global::instance().getVolumeFactory().propValuesToDefault(m_agent, names);
+	FL::Global::instance().getVolumeFactory().writeDefault(names);
 }
 
 void VolumePropPanel::OnResetDefault(wxCommandEvent &event)
 {
-	std::string ss[] = {
+	FL::ValueCollection names{
 		"gamma 3d",
 		"extract boundary",
 		"saturation",
@@ -1724,6 +1721,5 @@ void VolumePropPanel::OnResetDefault(wxCommandEvent &event)
 		"mip mode",
 		"noise redct"
 	};
-	std::vector<std::string> names_v(std::begin(ss), std::end(ss));//values to save
-	FL::Global::instance().getVolumeFactory().propValuesFromDefault(m_agent, names_v);
+	FL::Global::instance().getVolumeFactory().propValuesFromDefault(m_agent, names);
 }

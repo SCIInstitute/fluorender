@@ -495,7 +495,7 @@ void ClipPlanePanel::SetPlaneMode(PLANE_MODES mode)
 void ClipPlanePanel::OnLinkChannelsBtn(wxCommandEvent &event)
 {
 	bool sync = m_toolbar->GetToolState(ID_LinkChannelsBtn);
-	std::vector<std::string> names{
+	FL::ValueCollection names{
 		"clip dist x",
 		"clip dist y",
 		"clip dist z",

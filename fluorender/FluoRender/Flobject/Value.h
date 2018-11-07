@@ -39,6 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ostream>
 #include <codecvt>
 #include <tuple>
+#include <set>
 //FluoRender's special types
 #include <Types/BBox.h>
 #include <Types/Color.h>
@@ -55,6 +56,54 @@ namespace FL
 {
 //name, type, value
 typedef std::tuple<std::string, std::string, std::string> ValueTuple;
+class ValueSet;
+typedef std::vector<ref_ptr<ValueSet>> ValueSetStack;
+typedef std::set<std::string> ValueCollection;
+
+class ValueCache : public Referenced
+{
+	ValueCache() : Referenced() {}
+	ValueCache(const ValueCollection &names) :
+		Referenced(),
+		names_(names)
+	{}
+	ValueCache(const std::string &name, const ValueCollection &names) :
+		Referenced(),
+		name_(name),
+		names_(names)
+	{}
+
+	virtual const char* className() const { return "ValueCache"; }
+
+	void setName(const std::string &name) { name_ = name; }
+
+	std::string getName() const { return name_; }
+
+	void setValueCollection(const ValueCollection &names) { names_ = names; }
+
+	ValueCollection getValueCollection() const { return names_; }
+
+	ValueSet* getValueSet() { if (vs_stack_.empty()) return 0; else return vs_stack_.back().get(); }
+
+	void pushValueSet(ValueSet* vs)
+	{
+
+	}
+
+	void popValueSet()
+	{
+		if (!vs_stack_.empty())
+		{
+			//
+			vs_stack_.pop_back();
+		}
+	}
+
+private:
+	std::string name_;
+	ValueCollection names_;
+	ValueSetStack vs_stack_;
+};
 
 class Value : public Referenced, public Observer
 {

@@ -107,7 +107,7 @@ namespace FUI
 			return false;
 		}
 
-		virtual bool testSyncParentValues(const std::vector<std::string> &names)
+		virtual bool testSyncParentValues(const FL::ValueCollection &names)
 		{
 			FL::Object* obj = getObject();
 			FL::Node* parent = getObjParent();
@@ -153,7 +153,7 @@ namespace FUI
 			}
 		}
 
-		virtual void syncParentValues(const std::vector<std::string> &names)
+		virtual void syncParentValues(const FL::ValueCollection &names)
 		{
 			//get obj parent
 			FL::Node* parent = getObjParent();
@@ -166,7 +166,7 @@ namespace FUI
 			}
 		}
 
-		virtual void unsyncParentValues(const std::vector<std::string> &names)
+		virtual void unsyncParentValues(const FL::ValueCollection &names)
 		{
 			//get obj parent
 			FL::Node* parent = getObjParent();
@@ -193,7 +193,7 @@ namespace FUI
 			}
 		}
 
-		virtual void propParentValues(const std::vector<std::string> &names)
+		virtual void propParentValues(const FL::ValueCollection &names)
 		{
 			//get obj parent
 			FL::Node* parent = getObjParent();

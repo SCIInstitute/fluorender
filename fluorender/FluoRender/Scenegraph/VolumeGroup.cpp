@@ -71,7 +71,7 @@ bool VolumeGroup::insertChild(size_t index, Node* child)
 			"sync g",
 			"sync b"
 		};
-		std::vector<std::string> names(std::begin(ss), std::end(ss));
+		ValueCollection names(std::begin(ss), std::end(ss));
 		syncValues(names, child);
 		child->syncValues(names, this);
 	}
@@ -100,7 +100,7 @@ bool VolumeGroup::removeChildren(size_t pos, size_t num)
 			"sync g",
 			"sync b"
 		};
-		std::vector<std::string> names(std::begin(ss), std::end(ss));
+		ValueCollection names(std::begin(ss), std::end(ss));
 
 		for (unsigned int i = pos; i < end; ++i)
 		{
@@ -133,7 +133,7 @@ bool VolumeGroup::setChild(size_t i, Node* node)
 			"sync g",
 			"sync b"
 		};
-		std::vector<std::string> names(std::begin(ss), std::end(ss));
+		ValueCollection names(std::begin(ss), std::end(ss));
 
 		Node* orig_node = m_children[i].get();
 		if (orig_node)

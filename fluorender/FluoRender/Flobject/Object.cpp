@@ -682,7 +682,7 @@ bool Object::unsyncValue(const std::string &name, Object* obj)
 }
 
 //sync a list of values
-bool Object::syncValues(const std::vector<std::string> &names, Object* obj)
+bool Object::syncValues(const ValueCollection &names, Object* obj)
 {
 	bool result = false;
 	for (auto it = names.begin();
@@ -694,7 +694,7 @@ bool Object::syncValues(const std::vector<std::string> &names, Object* obj)
 }
 
 //unsync a list of values
-bool Object::unsyncValues(const std::vector<std::string> &names, Object* obj)
+bool Object::unsyncValues(const ValueCollection &names, Object* obj)
 {
 	bool result = false;
 	for (auto it = names.begin();
@@ -765,7 +765,7 @@ bool Object::propValue(const std::string &name, Object* obj)
 }
 
 //propagate a list of values
-bool Object::propValues(const std::vector<std::string> &names, Object* obj)
+bool Object::propValues(const ValueCollection &names, Object* obj)
 {
 	bool result = false;
 	for (auto it = names.begin();
@@ -823,26 +823,26 @@ bool Object::unsyncValues(const std::string &name1, const std::string &name2)
 	return false;
 }
 
-bool Object::syncValues(const std::vector<std::string> &names)
+bool Object::syncValues(const ValueCollection &names)
 {
 	bool result = false;
 	for (auto it1 = names.begin();
 		it1 != names.end(); ++it1)
 	{
-		for (auto it2 = it1 + 1;
+		for (auto it2 = std::next(it1);
 			it2 != names.end(); ++it2)
 			result |= syncValues(*it1, *it2);
 	}
 	return result;
 }
 
-bool Object::unsyncValues(const std::vector<std::string> &names)
+bool Object::unsyncValues(const ValueCollection &names)
 {
 	bool result = false;
 	for (auto it1 = names.begin();
 		it1 != names.end(); ++it1)
 	{
-		for (auto it2 = it1 + 1;
+		for (auto it2 = std::next(it1);
 			it2 != names.end(); ++it2)
 			result |= unsyncValues(*it1, *it2);
 	}
@@ -866,7 +866,7 @@ bool Object::propValues(const std::string &name1, const std::string &name2)
 	return false;
 }
 
-bool Object::propValues(const std::string &name1, const std::vector<std::string> &names)
+bool Object::propValues(const std::string &name1, const ValueCollection &names)
 {
 	bool result = false;
 	Value* value1 = getValue(name1);

@@ -82,7 +82,7 @@ namespace FL
 			if (!object)
 				return;
 			//get all value names
-			std::vector<std::string> names =
+			ValueCollection names =
 				object->getValueNames();
 			for (auto it = names.begin();
 				it != names.end(); ++it)

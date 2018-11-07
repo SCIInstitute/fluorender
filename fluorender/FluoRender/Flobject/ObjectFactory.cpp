@@ -47,7 +47,7 @@ ObjectFactory::~ObjectFactory()
 
 }
 
-bool ObjectFactory::setDefaultValues(boost::property_tree::ptree &pt, const std::set<std::string> &names)
+bool ObjectFactory::setDefaultValues(boost::property_tree::ptree &pt, const ValueCollection &names)
 {
 	Object* object = getDefault();
 	if (!object)
@@ -86,7 +86,7 @@ bool ObjectFactory::setDefaultValues(boost::property_tree::ptree &pt, const std:
 	return true;
 }
 
-bool ObjectFactory::convDefaultValues(boost::property_tree::ptree &pt, const std::set<std::string> &names)
+bool ObjectFactory::convDefaultValues(boost::property_tree::ptree &pt, const ValueCollection &names)
 {
 	Object* object = getDefault();
 	if (!object)
@@ -97,7 +97,7 @@ bool ObjectFactory::convDefaultValues(boost::property_tree::ptree &pt, const std
 		pt.clear();
 	ptree parent;
 	//get all value names
-	std::vector<std::string> all_names =
+	ValueCollection all_names =
 		object->getValueNames();
 	for (auto it = all_names.begin();
 		it != all_names.end(); ++it)
@@ -124,7 +124,7 @@ bool ObjectFactory::convDefaultValues(boost::property_tree::ptree &pt, const std
 	return true;
 }
 
-bool ObjectFactory::replaceDefaultValues(boost::property_tree::ptree &pt, const std::set<std::string> &names)
+bool ObjectFactory::replaceDefaultValues(boost::property_tree::ptree &pt, const ValueCollection &names)
 {
 	Object* object = getDefault();
 	if (!object)
@@ -172,7 +172,7 @@ bool ObjectFactory::replaceDefaultValues(boost::property_tree::ptree &pt, const 
 	return true;
 }
 
-void ObjectFactory::propValuesToDefault(Object* obj, const std::vector<std::string> &names)
+void ObjectFactory::propValuesToDefault(Object* obj, const ValueCollection &names)
 {
 	Object* def_obj = getDefault();
 	if (!def_obj || ! obj)
@@ -184,7 +184,7 @@ void ObjectFactory::propValuesToDefault(Object* obj, const std::vector<std::stri
 		obj->propValues(names, def_obj);
 }
 
-void ObjectFactory::propValuesFromDefault(Object* obj, const std::vector<std::string> &names)
+void ObjectFactory::propValuesFromDefault(Object* obj, const ValueCollection &names)
 {
 	Object* def_obj = getDefault();
 	if (!def_obj || !obj)
@@ -196,7 +196,7 @@ void ObjectFactory::propValuesFromDefault(Object* obj, const std::vector<std::st
 		def_obj->propValues(names, obj);
 }
 
-bool ObjectFactory::readDefault(std::istream &is, const std::set<std::string> &names)
+bool ObjectFactory::readDefault(std::istream &is, const ValueCollection &names)
 {
 	using boost::property_tree::ptree;
 	ptree pt;
@@ -213,7 +213,7 @@ bool ObjectFactory::readDefault(std::istream &is, const std::set<std::string> &n
 	return true;
 }
 
-bool ObjectFactory::writeDefault(std::ostream &os, const std::set<std::string> &names, int indent)
+bool ObjectFactory::writeDefault(std::ostream &os, const ValueCollection &names, int indent)
 {
 	using boost::property_tree::ptree;
 	ptree pt;
@@ -233,7 +233,7 @@ bool ObjectFactory::writeDefault(std::ostream &os, const std::set<std::string> &
 	return true;
 }
 
-bool ObjectFactory::readDefault(const std::set<std::string> &names)
+bool ObjectFactory::readDefault(const ValueCollection &names)
 {
 	std::string filename;
 	getValue(default_setting_filename_value_name_, filename);
@@ -253,7 +253,7 @@ bool ObjectFactory::readDefault(const std::set<std::string> &names)
 	return true;
 }
 
-bool ObjectFactory::writeDefault(const std::set<std::string> &names)
+bool ObjectFactory::writeDefault(const ValueCollection &names)
 {
 	std::string filename;
 	getValue(default_setting_filename_value_name_, filename);

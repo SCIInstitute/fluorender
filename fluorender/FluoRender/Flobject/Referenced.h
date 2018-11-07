@@ -98,9 +98,6 @@ protected:
 	mutable void* _observerSet;
 
 	bool _hold;
-
-	//typedef std::set<std::string> ExpSet;
-	//ExpSet _valueMask;
 };
 
 inline int Referenced::ref() const

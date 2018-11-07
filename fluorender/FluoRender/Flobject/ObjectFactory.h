@@ -64,15 +64,15 @@ namespace FL
 		}
 
 		//propagate values from object to the default
-		virtual void propValuesToDefault(Object*, const std::vector<std::string> &names = {});
-		virtual void propValuesFromDefault(Object*, const std::vector<std::string> &names = {});
+		virtual void propValuesToDefault(Object*, const ValueCollection &names = {});
+		virtual void propValuesFromDefault(Object*, const ValueCollection &names = {});
 		//read default settings for object
 		//to take advantage of the value management system,
 		//create a default object and use it to save settings
-		bool readDefault(std::istream &is, const std::set<std::string> &names = {});
-		bool writeDefault(std::ostream &os, const std::set<std::string> &names = {}, int indent = 1);
-		bool readDefault(const std::set<std::string> &names = {});
-		bool writeDefault(const std::set<std::string> &names = {});
+		bool readDefault(std::istream &is, const ValueCollection &names = {});
+		bool writeDefault(std::ostream &os, const ValueCollection &names = {}, int indent = 1);
+		bool readDefault(const ValueCollection &names = {});
+		bool writeDefault(const ValueCollection &names = {});
 
 		virtual Object* getDefault()
 		{ return findFirst(default_object_name_); }
@@ -233,11 +233,11 @@ namespace FL
 		virtual ~ObjectFactory();
 
 		//update the values of the default volume
-		bool setDefaultValues(boost::property_tree::ptree &pt, const std::set<std::string> &names);
+		bool setDefaultValues(boost::property_tree::ptree &pt, const ValueCollection &names);
 		//convert the values of the default volume to ptree
-		bool convDefaultValues(boost::property_tree::ptree &pt, const std::set<std::string> &names);
+		bool convDefaultValues(boost::property_tree::ptree &pt, const ValueCollection &names);
 		//replace values in an existing tree, assuming values are immediate children of the tree
-		bool replaceDefaultValues(boost::property_tree::ptree &pt, const std::set<std::string> &names);
+		bool replaceDefaultValues(boost::property_tree::ptree &pt, const ValueCollection &names);
 
 		std::string default_object_name_;
 		std::string default_setting_filename_value_name_;

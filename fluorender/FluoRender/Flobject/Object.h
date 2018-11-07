@@ -221,22 +221,22 @@ public:
 	//observer's value updates when this updates (this -> obj)
 	bool syncValue(const std::string &name, Object* obj);
 	bool unsyncValue(const std::string &name, Object* obj);
-	bool syncValues(const std::vector<std::string> &names, Object* obj);
-	bool unsyncValues(const std::vector<std::string> &names, Object* obj);
+	bool syncValues(const ValueCollection &names, Object* obj);
+	bool unsyncValues(const ValueCollection &names, Object* obj);
 	bool syncAllValues(Object* obj);
 	bool unsyncAllValues(Object* obj);
 	//propagate value (this -> object)
 	bool propValue(const std::string &name, Object* obj);
-	bool propValues(const std::vector<std::string> &names, Object* obj);
+	bool propValues(const ValueCollection &names, Object* obj);
 	bool propAllValues(Object* obj);
 	//sync values belonging to the same object (mutual!)
 	bool syncValues(const std::string &name1, const std::string &name2);
 	bool unsyncValues(const std::string &name1, const std::string &name2);
-	bool syncValues(const std::vector<std::string> &names);
-	bool unsyncValues(const std::vector<std::string> &names);
+	bool syncValues(const ValueCollection &names);
+	bool unsyncValues(const ValueCollection &names);
 	//propagate values belonging to the same object (1 -> 2)
 	bool propValues(const std::string &name1, const std::string &name2);
-	bool propValues(const std::string &name1, const std::vector<std::string> &names);
+	bool propValues(const std::string &name1, const ValueCollection &names);
 
 	//directly add
 	bool addValue(Value* value)
@@ -257,16 +257,16 @@ public:
 			return 0;
 	}
 
-	std::vector<std::string> getValueNames()
+	ValueCollection getValueNames()
 	{
-		std::vector<std::string> result;
+		ValueCollection result;
 		if (_value_set)
 		{
 			ValueSet::Values values = _value_set->getValues();
 			for (auto it = values.begin();
 				it != values.end(); ++it)
 			{
-				result.push_back((*it).first);
+				result.insert((*it).first);
 			}
 		}
 		return result;

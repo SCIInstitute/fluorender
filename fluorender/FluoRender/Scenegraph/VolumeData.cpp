@@ -694,17 +694,17 @@ void VolumeData::OnIntScaleChanged(Event& event)
 
 void VolumeData::OnSyncOutputChannels(Event& event)
 {
-	std::vector<std::string> ss_gamma = {
+	ValueCollection ss_gamma = {
 		"gamma r",
 		"gamma g",
 		"gamma b"
 	};
-	std::vector<std::string> ss_brigt = {
+	ValueCollection ss_brigt = {
 		"brightness r",
 		"brightness g",
 		"brightness b"
 	};
-	std::vector<std::string> ss_equal = {
+	ValueCollection ss_equal = {
 		"equalize r",
 		"equalize g",
 		"equalize b"
@@ -725,21 +725,21 @@ void VolumeData::OnSyncOutputChannels(Event& event)
 	ss_equal.clear();
 	if (sync_r)
 	{
-		ss_gamma.push_back("gamma r");
-		ss_brigt.push_back("brightness r");
-		ss_equal.push_back("equalize r");
+		ss_gamma.insert("gamma r");
+		ss_brigt.insert("brightness r");
+		ss_equal.insert("equalize r");
 	}
 	if (sync_g)
 	{
-		ss_gamma.push_back("gamma g");
-		ss_brigt.push_back("brightness g");
-		ss_equal.push_back("equalize g");
+		ss_gamma.insert("gamma g");
+		ss_brigt.insert("brightness g");
+		ss_equal.insert("equalize g");
 	}
 	if (sync_b)
 	{
-		ss_gamma.push_back("gamma b");
-		ss_brigt.push_back("brightness b");
-		ss_equal.push_back("equalize b");
+		ss_gamma.insert("gamma b");
+		ss_brigt.insert("brightness b");
+		ss_equal.insert("equalize b");
 	}
 	syncValues(ss_gamma);
 	syncValues(ss_brigt);
@@ -1229,10 +1229,10 @@ int VolumeData::ReplaceData(VolumeData* data)
 	}
 	m_tex = data->GetTexture();
 	data->SetTexture();
-	std::vector<std::string> names;
-	names.push_back("int scale");
-	names.push_back("gm scale");
-	names.push_back("max int");
+	ValueCollection names;
+	names.insert("int scale");
+	names.insert("gm scale");
+	names.insert("max int");
 	data->propValues(names, this);
 	if (m_vr)
 		m_vr->set_texture(m_tex);

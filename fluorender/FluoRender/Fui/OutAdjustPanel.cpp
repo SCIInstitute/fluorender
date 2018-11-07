@@ -597,7 +597,7 @@ void OutAdjustPanel::OnSyncBCheck(wxCommandEvent &event)
 
 void OutAdjustPanel::OnRReset(wxCommandEvent &event)
 {
-	std::vector<std::string> names{
+	FL::ValueCollection names{
 		"gamma r",
 		"brightness r",
 		"equalize r"
@@ -607,7 +607,7 @@ void OutAdjustPanel::OnRReset(wxCommandEvent &event)
 
 void OutAdjustPanel::OnGReset(wxCommandEvent &event)
 {
-	std::vector<std::string> names{
+	FL::ValueCollection names{
 		"gamma g",
 		"brightness g",
 		"equalize g"
@@ -617,7 +617,7 @@ void OutAdjustPanel::OnGReset(wxCommandEvent &event)
 
 void OutAdjustPanel::OnBReset(wxCommandEvent &event)
 {
-	std::vector<std::string> names{
+	FL::ValueCollection names{
 		"gamma b",
 		"brightness b",
 		"equalize b"
@@ -638,8 +638,7 @@ void OutAdjustPanel::OnSaveDefault(wxCommandEvent &event)
 		"equalize g",
 		"equalize b"
 	};
-	std::vector<std::string> names_v(std::begin(ss), std::end(ss));//values to save
-	FL::Global::instance().getVolumeFactory().propValuesToDefault(m_agent, names_v);
-	std::set<std::string> names_s(std::begin(ss), std::end(ss));//values to save
-	FL::Global::instance().getVolumeFactory().writeDefault(names_s);
+	FL::ValueCollection names(std::begin(ss), std::end(ss));//values to save
+	FL::Global::instance().getVolumeFactory().propValuesToDefault(m_agent, names);
+	FL::Global::instance().getVolumeFactory().writeDefault(names);
 }

@@ -73,19 +73,19 @@ namespace FL
 		void setValueName(const std::string &name)
 		{
 			value_names_.clear();
-			value_names_.push_back(name);
+			value_names_.insert(name);
 		}
-		void setValueNames(const std::vector<std::string> &names)
+		void setValueNames(const ValueCollection &names)
 		{
 			value_names_ = names;
 		}
 		void addValueName(const std::string &name)
 		{
-			value_names_.push_back(name);
+			value_names_.insert(name);
 		}
-		void addValueNames(const std::vector<std::string> &names)
+		void addValueNames(const ValueCollection &names)
 		{
-			value_names_.insert(value_names_.end(), names.begin(), names.end());
+			value_names_.insert(names.begin(), names.end());
 		}
 
 		virtual void apply(FL::Node& node)
@@ -147,7 +147,7 @@ namespace FL
 
 	private:
 		ValueUpdateVisitType type_;
-		std::vector<std::string> value_names_;
+		ValueCollection value_names_;
 		Object* object_;
 
 		void syncValues(FL::Group& group)
