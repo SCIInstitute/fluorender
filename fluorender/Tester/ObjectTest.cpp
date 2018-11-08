@@ -105,8 +105,8 @@ void ObjectTest2()
 	obj2->getValue("value1", value);
 	ASSERT_EQ(1.0, value);
 
-	std::vector<std::string> names = { "value1", "value2" };
-	obj1->syncValues(names, obj2);
+	ValueCollection vc{"value1", "value2"};
+	obj1->syncValues(vc, obj2);
 	obj1->setValue("value1", 4.0);
 	obj2->getValue("value1", value);
 	ASSERT_EQ(4.0, value);
@@ -127,7 +127,7 @@ void ObjectTest2()
 	ASSERT_EQ(7.0, value);
 	obj1->setValue("value1", 8.0);
 	obj1->setValue("value2", 9.0);
-	obj1->propValues(names, obj2);
+	obj1->propValues(vc, obj2);
 	obj2->getValue("value1", value);
 	ASSERT_EQ(8.0, value);
 	obj2->getValue("value2", value);
