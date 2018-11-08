@@ -84,6 +84,7 @@ void Node::processNotification(Event& event)
 {
 	Object::handleEvent(event);
 	//notify only if event is from child
-	if (event.getNotifyFlags() & Event::NOTIFY_PARENT)
+	if (event.getNotifyFlags() & Event::NOTIFY_PARENT &&
+		event.type != Event::EVENT_VALUE_CHANGING)
 		notifyObservers(event);
 }

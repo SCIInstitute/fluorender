@@ -96,6 +96,8 @@ void Object::processNotification(Event& event)
 	//handle event
 	handleEvent(event);
 	//notify observers
+	if (event.type == Event::EVENT_VALUE_CHANGING)
+		return;
 	notifyObservers(event);
 }
 
@@ -801,7 +803,8 @@ bool Object::syncValues(const std::string &name1, const std::string &name2)
 	Value* value1 = getValue(name1);
 	Value* value2 = getValue(name2);
 	if (value1 && value2 &&
-		value1->getType() == value2->getType())
+		value1->getType() ==
+		value2->getType())
 	{
 		value1->addObserver(value2);
 		value2->addObserver(value1);

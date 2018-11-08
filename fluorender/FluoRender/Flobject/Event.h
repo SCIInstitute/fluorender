@@ -75,7 +75,6 @@ namespace FL
 			m_cur_level(0), m_sum_level(0),
 			m_limit(100),
 			m_terminated(false)
-			//m_limit(std::numeric_limits<unsigned int>::max())
 		{}
 			
 		virtual ~Event() {}
@@ -163,6 +162,15 @@ namespace FL
 				return sender_chain[sender_chain.size() - 2];
 			else
 				return 0;
+		}
+		inline void reset()
+		{
+			m_terminated = false;
+			m_cur_level = 0;
+			m_sum_level = 0;
+			sender_chain.clear();
+			if (sender)
+				push(sender);
 		}
 
 		unsigned int id;

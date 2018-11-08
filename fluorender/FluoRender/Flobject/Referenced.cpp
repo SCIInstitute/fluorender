@@ -68,6 +68,9 @@ ObserverSet* Referenced::getOrCreateObserverSet() const
 
 void Referenced::addObserver(Observer* observer) const
 {
+	if (const_cast<Referenced*>(this) ==
+		dynamic_cast<Referenced*>(observer))
+		return;
 	getOrCreateObserverSet()->addObserver(observer);
 	observer->_observees.insert(const_cast<Referenced*>(this));
 }

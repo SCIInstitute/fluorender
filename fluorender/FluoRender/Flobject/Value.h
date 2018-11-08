@@ -156,10 +156,12 @@ public:
 	{
 		if (!equal(value))
 		{
+			//may need more work
 			event.type = Event::EVENT_VALUE_CHANGING;
 			notifyObservers(event);
 			_value = value;
 			event.type = Event::EVENT_VALUE_CHANGED;
+			//event.reset();
 			notifyObservers(event);
 		}
 	}
