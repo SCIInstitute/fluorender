@@ -83,11 +83,9 @@ void MyTest()
 
 	obj1->unsyncAllValues(obj2); cout << "obj1->unsyncAllValues(obj2);" << endl;
 	obj1->unsyncAllValues(obj3); cout << "obj1->unsyncAllValues(obj3);" << endl;
-	std::vector<std::string> names;
-	names.push_back("value1");
-	names.push_back("value2");
-	names.push_back("value3");
-	obj1->unsyncValues(names); cout << "obj1->unsyncValues(names);" << endl;
+	ValueCollection vc{
+		"value1", "value2", "value3"};
+	obj1->unsyncValues(vc); cout << "obj1->unsyncValues(vc);" << endl;
 	obj1->setValue("value1", 5.0); cout << "obj1->setValue(\"value1\", 5.0);" << endl;
 	obj1->setValue("value3", 7.0); cout << "obj1->setValue(\"value3\", 7.0);" << endl;
 	obj2->setValue("value1", 8.0); cout << "obj2->setValue(\"value1\", 8.0);" << endl;
