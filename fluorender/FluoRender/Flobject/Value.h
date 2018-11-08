@@ -56,55 +56,6 @@ namespace FL
 {
 //name, type, value
 typedef std::tuple<std::string, std::string, std::string> ValueTuple;
-class ValueSet;
-typedef std::vector<ref_ptr<ValueSet>> ValueSetStack;
-typedef std::set<std::string> ValueCollection;
-
-class ValueCache : public Referenced
-{
-	ValueCache() : Referenced() {}
-	ValueCache(const ValueCollection &names) :
-		Referenced(),
-		names_(names)
-	{}
-	ValueCache(const std::string &name, const ValueCollection &names) :
-		Referenced(),
-		name_(name),
-		names_(names)
-	{}
-
-	virtual const char* className() const { return "ValueCache"; }
-
-	void setName(const std::string &name) { name_ = name; }
-
-	std::string getName() const { return name_; }
-
-	void setValueCollection(const ValueCollection &names) { names_ = names; }
-
-	ValueCollection getValueCollection() const { return names_; }
-
-	ValueSet* getValueSet() { if (vs_stack_.empty()) return 0; else return vs_stack_.back().get(); }
-
-	void pushValueSet(ValueSet* vs)
-	{
-
-	}
-
-	void popValueSet()
-	{
-		if (!vs_stack_.empty())
-		{
-			//
-			vs_stack_.pop_back();
-		}
-	}
-
-private:
-	std::string name_;
-	ValueCollection names_;
-	ValueSetStack vs_stack_;
-};
-
 class Value : public Referenced, public Observer
 {
 public:
@@ -365,6 +316,46 @@ protected:
 
 	template<typename T>
 	friend class TemplateValue;
+};
+
+typedef std::vector<ref_ptr<ValueSet>> ValueSetStack;
+typedef std::set<std::string> ValueCollection;
+
+//A value cache canbe seen as a group of values with
+//temporary saving/restoring capabilities, i.e., the value set stack
+class ValueCache : public Referenced
+{
+	ValueCache() : Referenced() {}
+	ValueCache(const ValueCollection &names) :
+		Referenced(),
+		names_(names)
+	{}
+	ValueCache(const std::string &name, const ValueCollection &names) :
+		Referenced(),
+		name_(name),
+		names_(names)
+	{}
+
+	virtual const char* className() const { return "ValueCache"; }
+
+	void setName(const std::string &name) { name_ = name; }
+
+	std::string getName() const { return name_; }
+
+	void setValueCollection(const ValueCollection &names) { names_ = names; }
+
+	ValueCollection getValueCollection() const { return names_; }
+
+	ValueSet* getValueSet() { if (vs_stack_.empty()) return 0; else return vs_stack_.back().get(); }
+
+	inline void pushValueSet(ValueSet* vs = 0);
+
+	inline void popValueSet();
+
+private:
+	std::string name_;
+	ValueCollection names_;
+	ValueSetStack vs_stack_;
 };
 
 inline bool Value::operator == (const Value& v) const
@@ -708,6 +699,57 @@ inline bool ValueSet::operator != (const ValueSet &vs) const
 	return !(*this == vs);
 }
 
+inline void ValueCache::pushValueSet(ValueSet* vs)
+{
+	if (vs_stack_.empty())
+	{
+		if (!vs)
+			return;
+		ValueSet* vs_pushed = new ValueSet(*vs, CopyOp::DEEP_COPY_ALL);
+		vs_stack_.push_back(vs_pushed);
+	}
+	else
+	{
+		bool copy_values = true;
+		if (!vs)
+		{
+			copy_values = false;
+			vs = getValueSet();
+		}
+		ValueSet* vs_pushed = new ValueSet(*(vs_stack_.back()), CopyOp::DEEP_COPY_ALL);
+		vs_stack_.insert(vs_stack_.end() - 2, vs_pushed);
+		//copy values
+		for (auto it = vs->getValues().begin();
+			it != vs->getValues().end(); ++it)
+		{
+			ValueTuple vt;
+			std::get<0>(vt) = it->second->getName();
+			vs->getValue(vt);
+			vs_stack_.back()->setValue(vt, Event(Event::NOTIFY_NONE));
+		}
+	}
+}
+
+inline void ValueCache::popValueSet()
+{
+	if (vs_stack_.size() > 1)
+	{
+		//copy values
+		ValueSet* vs = (*(vs_stack_.end() - 2)).get();
+		for (auto it = vs->getValues().begin();
+			it != vs->getValues().end(); ++it)
+		{
+			ValueTuple vt;
+			std::get<0>(vt) = it->second->getName();
+			vs->getValue(vt);
+			vs_stack_.back()->setValue(vt, Event());
+		}
+		//pop
+		vs_stack_.erase(vs_stack_.end() - 2);
+	}
+	else if (vs_stack_.size() == 1)
+		vs_stack_.pop_back();
+}
 }
 
 #endif
