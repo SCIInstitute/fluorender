@@ -34,6 +34,9 @@ Object::Object():
 	_id(0)
 {
 	_value_set = new ValueSet();
+	setDefaultValueChangingFunction(
+		std::bind(&Object::handleValueChanging,
+			this, std::placeholders::_1));
 }
 
 Object::Object(const Object& obj, const CopyOp& copyop, bool copy_values):
@@ -44,6 +47,9 @@ Object::Object(const Object& obj, const CopyOp& copyop, bool copy_values):
 	_value_set = new ValueSet();
 	if (copy_values)
 		copyValues(obj, copyop);
+	setDefaultValueChangingFunction(
+		std::bind(&Object::handleValueChanging,
+			this, std::placeholders::_1));
 }
 
 Object::~Object()
@@ -99,6 +105,16 @@ void Object::processNotification(Event& event)
 	if (event.type == Event::EVENT_VALUE_CHANGING)
 		return;
 	notifyObservers(event);
+}
+
+void Object::handleValueChanging(Event& event)
+{
+	Value* value = dynamic_cast<Value*>(event.sender);
+	if (!value)
+		return;
+	if (value->isReferenced() &&
+		containsValue(value))
+		value->removeObserver(this);
 }
 
 //add functions
@@ -291,7 +307,7 @@ bool Object::setValue(ValueTuple &vt, Event& event)
 		if (_value_set)
 		{
 			if (!event.sender)
-				event.init(Event::EVENT_VALUE_CHANGING,
+				event.init(Event::EVENT_VALUE_CHANGED,
 					this, value, true);
 			result = _value_set->setValue(vt, event);
 		}
@@ -308,7 +324,7 @@ bool Object::setValue(ValueTuple &vt, Event& event)
 		if (_value_set) \
 		{ \
 			if (!event.sender) \
-				event.init(Event::EVENT_VALUE_CHANGING, \
+				event.init(Event::EVENT_VALUE_CHANGED, \
 					this, getValue(name), true); \
 			result = _value_set->setValue(name, value, event); \
 		} \
@@ -330,7 +346,7 @@ bool Object::setValue(const std::string &name, Referenced* value, Event& event)
 		if (_value_set)
 		{
 			if (!event.sender)
-				event.init(Event::EVENT_VALUE_CHANGING,
+				event.init(Event::EVENT_VALUE_CHANGED,
 					this, getValue(name), true);
 			result = _value_set->setValue(name, value, event);
 		}
@@ -496,7 +512,7 @@ bool Object::toggleValue(const std::string &name, bool &value, Event& event)
 	if (_value_set)
 	{
 		if (!event.sender)
-			event.init(Event::EVENT_VALUE_CHANGING,
+			event.init(Event::EVENT_VALUE_CHANGED,
 				this, getValue(name), true);
 		result = _value_set->toggleValue(name, value, event);
 	}

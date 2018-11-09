@@ -294,6 +294,8 @@ protected:
 
 	virtual void handleEvent(Event& event);
 
+	virtual void handleValueChanging(Event& event);
+
 	/** ID of an object is non-zero. */
 	unsigned int _id;
 	// object name

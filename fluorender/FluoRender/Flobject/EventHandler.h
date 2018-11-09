@@ -48,6 +48,7 @@ namespace FL
 		EventHandler() : Referenced(),
 			node_added_function_(0),
 			node_removed_function_(0),
+			default_value_changing_function_(0),
 			default_value_changed_function_(0) {}
 
 		virtual const char* className() const { return "EventHandler"; }
@@ -60,6 +61,11 @@ namespace FL
 		void setValueChangedFunction(const std::string &name, eventFunctionType func)
 		{
 			value_changed_functions_.insert(std::make_pair(name, func));
+		}
+
+		void setDefaultValueChangingFunction(eventFunctionType func)
+		{
+			default_value_changing_function_ = func;
 		}
 
 		void setDefaultValueChangedFunction(eventFunctionType func)
@@ -137,6 +143,7 @@ namespace FL
 	protected:
 		std::unordered_map<std::string, eventFunctionType> value_changing_functions_;
 		std::unordered_map<std::string, eventFunctionType> value_changed_functions_;
+		eventFunctionType default_value_changing_function_;
 		eventFunctionType default_value_changed_function_;
 		eventFunctionType node_added_function_;
 		eventFunctionType node_removed_function_;

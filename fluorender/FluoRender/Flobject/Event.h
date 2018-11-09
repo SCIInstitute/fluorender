@@ -76,7 +76,20 @@ namespace FL
 			m_limit(100),
 			m_terminated(false)
 		{}
-			
+		Event(const Event& event) :
+			id(event.id), type(event.type),
+			m_flags(event.m_flags),
+			sender(event.sender),
+			origin(event.origin),
+			value(event.value),
+			parent(event.parent),
+			child(event.child),
+			m_cur_level(0),
+			m_sum_level(0),
+			m_limit(event.m_limit),
+			m_terminated(false),
+			sender_chain(event.sender_chain)
+		{}
 		virtual ~Event() {}
 
 		//for delete, changing, changed (general)
