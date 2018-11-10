@@ -161,6 +161,7 @@ public:
 			changing_event.type = Event::EVENT_VALUE_CHANGING;
 			notifyObservers(changing_event);
 			_value = value;
+			event.type = Event::EVENT_VALUE_CHANGED;
 			notifyObservers(event);
 		}
 	}

@@ -87,9 +87,11 @@ namespace FL
 			m_cur_level(0),
 			m_sum_level(0),
 			m_limit(event.m_limit),
-			m_terminated(false),
-			sender_chain(event.sender_chain)
-		{}
+			m_terminated(false)
+		{
+			if (!event.sender_chain.empty())
+				sender_chain = event.sender_chain;
+		}
 		virtual ~Event() {}
 
 		//for delete, changing, changed (general)
