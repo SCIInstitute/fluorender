@@ -25,27 +25,23 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <Processor/Processor.h>
+#include <Renderer/Renderer.h>
 
-using namespace FL;
+using namespace FLR;
 
-Processor::Processor():
-	Object()
+Renderer::Renderer():
+	Processor()
 {
-	setupInputs();
-	setupOutputs();
 }
 
-Processor::Processor(const Processor& processor, const CopyOp& copyop, bool copy_values):
-	Object(processor, copyop, false)
+Renderer::Renderer(const Renderer& renderer, const FL::CopyOp& copyop, bool copy_values):
+	Processor(renderer, copyop, false)
 {
 	if (copy_values)
-		copyValues(processor, copyop);
-	inputs_ = processor.inputs_;
-	outputs_ = processor.outputs_;
+		copyValues(renderer, copyop);
 }
 
-Processor::~Processor()
+Renderer::~Renderer()
 {
 }
 

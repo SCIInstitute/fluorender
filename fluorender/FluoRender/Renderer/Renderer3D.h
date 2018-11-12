@@ -25,27 +25,26 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <Processor/Processor.h>
+#ifndef FL_RENDERER3D
+#define FL_RENDERER3D 1
 
-using namespace FL;
-
-Processor::Processor():
-	Object()
+#include <Renderer/Renderer.h>
+namespace FLR
 {
-	setupInputs();
-	setupOutputs();
-}
-
-Processor::Processor(const Processor& processor, const CopyOp& copyop, bool copy_values):
-	Object(processor, copyop, false)
+class Renderer3D : public Renderer
 {
-	if (copy_values)
-		copyValues(processor, copyop);
-	inputs_ = processor.inputs_;
-	outputs_ = processor.outputs_;
-}
+public:
 
-Processor::~Processor()
-{
-}
+	Renderer3D();
 
+	Renderer3D(const Renderer3D& renderer, const FL::CopyOp& copyop = FL::CopyOp::SHALLOW_COPY, bool copy_values = true);
+
+	virtual bool isSameKindAs(const Renderer3D*) const {return true;}
+
+	virtual const char* className() const { return "Renderer3D"; }
+
+protected:
+	~Renderer3D();
+};
+}
+#endif//FL_RENDERER3D

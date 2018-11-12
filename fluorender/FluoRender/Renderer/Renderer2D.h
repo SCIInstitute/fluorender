@@ -25,27 +25,28 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <Processor/Processor.h>
+#ifndef FL_RENDERER2D
+#define FL_RENDERER2D 1
 
-using namespace FL;
-
-Processor::Processor():
-	Object()
+#include <Renderer/Renderer.h>
+namespace FLR
 {
-	setupInputs();
-	setupOutputs();
-}
-
-Processor::Processor(const Processor& processor, const CopyOp& copyop, bool copy_values):
-	Object(processor, copyop, false)
+class Renderer2D : public Renderer
 {
-	if (copy_values)
-		copyValues(processor, copyop);
-	inputs_ = processor.inputs_;
-	outputs_ = processor.outputs_;
-}
+public:
 
-Processor::~Processor()
-{
-}
+	Renderer2D();
 
+	Renderer2D(const Renderer2D& renderer, const FL::CopyOp& copyop = FL::CopyOp::SHALLOW_COPY, bool copy_values = true);
+
+	virtual bool isSameKindAs(const Renderer2D*) const {return true;}
+
+	virtual const char* className() const { return "Renderer2D"; }
+
+	virtual bool render(FL::Event& event);
+
+protected:
+	~Renderer2D();
+};
+}
+#endif//FL_RENDERER2D

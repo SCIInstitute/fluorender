@@ -231,6 +231,8 @@ void VolumeFactory::createDefault()
 		vd->addValue("level", long(0));
 		vd->addValue("level num", long(1));
 
+		//tex transform
+		vd->addValue("tex transform", FLTYPE::Transform());
 	}
 }
 

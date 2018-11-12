@@ -85,6 +85,20 @@ namespace FL
 
 		void onValueChanging(const std::string &name, Event& event) const
 		{
+			if (_hold ||
+				!event.pass(const_cast<EventHandler*>(this)))
+				return;
+
+			if (default_value_changing_function_)
+			{
+				//default value changing function is always called here
+				//different from the value changed function
+				//this is to allow observers to a referenced value to be removed
+				//otherwise, there is no value-related function so far
+				event.push(const_cast<EventHandler*>(this));
+				default_value_changing_function_(event);
+				event.pop();
+			}
 			auto map_it = value_changing_functions_.find(name);
 			if (map_it != value_changing_functions_.end() && !_hold &&
 				event.pass(const_cast<EventHandler*>(this)))
@@ -114,6 +128,9 @@ namespace FL
 			}
 			else if (default_value_changed_function_)
 			{
+				//here, the default value changed function is used when
+				//any named value is changed, for example, when the render
+				//view needs update
 				event.push(const_cast<EventHandler*>(this));
 				default_value_changed_function_(event);
 				event.pop();

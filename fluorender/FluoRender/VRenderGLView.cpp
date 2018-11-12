@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Scenegraph/DrawVolumeVisitor.h>
 #include <Scenegraph/PopVolumeVisitor.h>
 #include <Scenegraph/SearchVisitor.h>
+#include <Types/Plane.h>
 #include <FLIVR/Point.h>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
@@ -784,7 +785,7 @@ void VRenderGLView::Draw()
 			DrawGrid();
 
 		if (m_draw_clip)
-			DrawClippingPlanes(false, BACK_FACE);
+			DrawClippingPlanes(false, FLTYPE::CPWBackFace);
 
 		//setup
 		glEnable(GL_BLEND);
@@ -795,7 +796,7 @@ void VRenderGLView::Draw()
 
 		//draw the clipping planes
 		if (m_draw_clip)
-			DrawClippingPlanes(true, FRONT_FACE);
+			DrawClippingPlanes(true, FLTYPE::CPWFrontFace);
 
 		if (m_draw_bounds)
 			DrawBounds();
@@ -858,7 +859,7 @@ void VRenderGLView::DrawDP()
 			DrawGrid();
 
 		if (m_draw_clip)
-			DrawClippingPlanes(true, BACK_FACE);
+			DrawClippingPlanes(true, FLTYPE::CPWBackFace);
 
 		//setup
 		glDisable(GL_BLEND);
@@ -1077,7 +1078,7 @@ void VRenderGLView::DrawDP()
 			DrawOLShadowsMesh(darkness);
 
 		if (m_draw_clip)
-			DrawClippingPlanes(false, FRONT_FACE);
+			DrawClippingPlanes(false, FLTYPE::CPWFrontFace);
 
 		if (m_draw_bounds)
 			DrawBounds();
@@ -8712,315 +8713,6 @@ void VRenderGLView::DrawBounds()
 
 void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 {
-	//int i;
-	//bool link = false;
-	//PLANE_MODES plane_mode = kNormal;
-	//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	//if (vr_frame && vr_frame->GetClippingView())
-	//{
-	//	link = vr_frame->GetClippingView()->GetChannLink();
-	//	plane_mode = vr_frame->GetClippingView()->GetPlaneMode();
-	//}
-
-	//if (plane_mode == kNone)
-	//	return;
-
-	//bool draw_plane = plane_mode != kFrame;
-	//if ((plane_mode == kLowTransBack ||
-	//	plane_mode == kNormalBack) &&
-	//	m_clip_mask == -1)
-	//{
-	//	glCullFace(GL_FRONT);
-	//	if (face_winding == BACK_FACE)
-	//		face_winding = FRONT_FACE;
-	//	else
-	//		draw_plane = false;
-	//}
-	//else
-	//	glCullFace(GL_BACK);
-
-	//if (!border && plane_mode == kFrame)
-	//	return;
-
-	//glDisable(GL_DEPTH_TEST);
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	//if (face_winding == FRONT_FACE)
-	//{
-	//	glEnable(GL_CULL_FACE);
-	//	glFrontFace(GL_CCW);
-	//}
-	//else if (face_winding == BACK_FACE)
-	//{
-	//	glEnable(GL_CULL_FACE);
-	//	glFrontFace(GL_CW);
-	//}
-	//else if (face_winding == CULL_OFF)
-	//	glDisable(GL_CULL_FACE);
-
-	//ShaderProgram* shader =
-	//	TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
-	//if (shader)
-	//{
-	//	if (!shader->valid())
-	//		shader->create();
-	//	shader->bind();
-	//}
-
-	//for (i = 0; i<GetDispVolumeNum(); i++)
-	//{
-	//	FL::VolumeData* vd = GetDispVolumeData(i);
-	//	if (!vd)
-	//		continue;
-
-	//	if (vd != m_cur_vol)
-	//		continue;
-
-	//	//VolumeRenderer *vr = vd->GetRenderer();
-	//	//if (!vr)
-	//	//	continue;
-
-	//	//vector<FLTYPE::Plane*> *planes = vr->get_planes();
-	//	FLTYPE::PlaneSet planes;
-	//	vd->getValue("clip planes", planes);
-	//	if (planes.GetSize() != 6)
-	//		continue;
-
-	//	//calculating planes
-	//	//get six planes
-	//	FLTYPE::Plane* px1 = &(planes[0]);
-	//	FLTYPE::Plane* px2 = &(planes[1]);
-	//	FLTYPE::Plane* py1 = &(planes[2]);
-	//	FLTYPE::Plane* py2 = &(planes[3]);
-	//	FLTYPE::Plane* pz1 = &(planes[4]);
-	//	FLTYPE::Plane* pz2 = &(planes[5]);
-
-	//	//calculate 4 lines
-	//	FLTYPE::Vector lv_x1z1, lv_x1z2, lv_x2z1, lv_x2z2;
-	//	FLTYPE::Point lp_x1z1, lp_x1z2, lp_x2z1, lp_x2z2;
-	//	//x1z1
-	//	if (!px1->Intersect(*pz1, lp_x1z1, lv_x1z1))
-	//		continue;
-	//	//x1z2
-	//	if (!px1->Intersect(*pz2, lp_x1z2, lv_x1z2))
-	//		continue;
-	//	//x2z1
-	//	if (!px2->Intersect(*pz1, lp_x2z1, lv_x2z1))
-	//		continue;
-	//	//x2z2
-	//	if (!px2->Intersect(*pz2, lp_x2z2, lv_x2z2))
-	//		continue;
-
-	//	//calculate 8 points
-	//	FLTYPE::Point pp[8];
-	//	//p0 = l_x1z1 * py1
-	//	if (!py1->Intersect(lp_x1z1, lv_x1z1, pp[0]))
-	//		continue;
-	//	//p1 = l_x1z2 * py1
-	//	if (!py1->Intersect(lp_x1z2, lv_x1z2, pp[1]))
-	//		continue;
-	//	//p2 = l_x2z1 *py1
-	//	if (!py1->Intersect(lp_x2z1, lv_x2z1, pp[2]))
-	//		continue;
-	//	//p3 = l_x2z2 * py1
-	//	if (!py1->Intersect(lp_x2z2, lv_x2z2, pp[3]))
-	//		continue;
-	//	//p4 = l_x1z1 * py2
-	//	if (!py2->Intersect(lp_x1z1, lv_x1z1, pp[4]))
-	//		continue;
-	//	//p5 = l_x1z2 * py2
-	//	if (!py2->Intersect(lp_x1z2, lv_x1z2, pp[5]))
-	//		continue;
-	//	//p6 = l_x2z1 * py2
-	//	if (!py2->Intersect(lp_x2z1, lv_x2z1, pp[6]))
-	//		continue;
-	//	//p7 = l_x2z2 * py2
-	//	if (!py2->Intersect(lp_x2z2, lv_x2z2, pp[7]))
-	//		continue;
-
-	//	//draw the six planes out of the eight points
-	//	//get color
-	//	FLTYPE::Color color(1.0, 1.0, 1.0);
-	//	double plane_trans = 0.0;
-	//	if (face_winding == BACK_FACE &&
-	//		(m_clip_mask == 3 ||
-	//			m_clip_mask == 12 ||
-	//			m_clip_mask == 48 ||
-	//			m_clip_mask == 1 ||
-	//			m_clip_mask == 2 ||
-	//			m_clip_mask == 4 ||
-	//			m_clip_mask == 8 ||
-	//			m_clip_mask == 16 ||
-	//			m_clip_mask == 32 ||
-	//			m_clip_mask == 64)
-	//		)
-	//		plane_trans = plane_mode == kLowTrans ||
-	//		plane_mode == kLowTransBack ? 0.1 : 0.3;
-
-	//	if (face_winding == FRONT_FACE)
-	//	{
-	//		plane_trans = plane_mode == kLowTrans ||
-	//			plane_mode == kLowTransBack ? 0.1 : 0.3;
-	//	}
-
-	//	if (plane_mode == kNormal ||
-	//		plane_mode == kNormalBack)
-	//	{
-	//		if (!link)
-	//			vd->getValue("color", color);
-	//	}
-	//	else
-	//		color = GetTextColor();
-
-	//	//transform
-	//	if (!vd->GetTexture())
-	//		continue;
-	//	Transform *tform = vd->GetTexture()->transform();
-	//	if (!tform)
-	//		continue;
-	//	double mvmat[16];
-	//	tform->get_trans(mvmat);
-	//	double sclx, scly, sclz;
-	//	//vd->GetScalings(sclx, scly, sclz);
-	//	vd->getValue("scale x", sclx);
-	//	vd->getValue("scale y", scly);
-	//	vd->getValue("scale z", sclz);
-	//	glm::mat4 mv_mat = glm::scale(m_mv_mat,
-	//		glm::vec3(float(sclx), float(scly), float(sclz)));
-	//	glm::mat4 mv_mat2 = glm::mat4(
-	//		mvmat[0], mvmat[4], mvmat[8], mvmat[12],
-	//		mvmat[1], mvmat[5], mvmat[9], mvmat[13],
-	//		mvmat[2], mvmat[6], mvmat[10], mvmat[14],
-	//		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
-	//	mv_mat = mv_mat * mv_mat2;
-	//	glm::mat4 matrix = m_proj_mat * mv_mat;
-	//	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
-
-	//	VertexArray* va_clipp =
-	//		TextureRenderer::vertex_array_manager_.vertex_array(VA_Clip_Planes);
-	//	if (!va_clipp)
-	//		return;
-	//	std::vector<FLTYPE::Point> clip_points(pp, pp+8);
-	//	va_clipp->set_param(clip_points);
-	//	va_clipp->draw_begin();
-	//	//draw
-	//	//x1 = (p4, p0, p1, p5)
-	//	if (m_clip_mask & 1)
-	//	{
-	//		if (draw_plane)
-	//		{
-	//			if (plane_mode == kNormal ||
-	//				plane_mode == kNormalBack)
-	//				shader->setLocalParam(0, 1.0, 0.5, 0.5, plane_trans);
-	//			else
-	//				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-	//			va_clipp->draw_clip_plane(0, false);
-	//		}
-	//		if (border)
-	//		{
-	//			shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-	//			va_clipp->draw_clip_plane(16, true);
-	//		}
-	//	}
-	//	//x2 = (p7, p3, p2, p6)
-	//	if (m_clip_mask & 2)
-	//	{
-	//		if (draw_plane)
-	//		{
-	//			if (plane_mode == kNormal ||
-	//				plane_mode == kNormalBack)
-	//				shader->setLocalParam(0, 1.0, 0.5, 1.0, plane_trans);
-	//			else
-	//				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-	//			va_clipp->draw_clip_plane(32, false);
-	//		}
-	//		if (border)
-	//		{
-	//			shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-	//			va_clipp->draw_clip_plane(48, true);
-	//		}
-	//	}
-	//	//y1 = (p1, p0, p2, p3)
-	//	if (m_clip_mask & 4)
-	//	{
-	//		if (draw_plane)
-	//		{
-	//			if (plane_mode == kNormal ||
-	//				plane_mode == kNormalBack)
-	//				shader->setLocalParam(0, 0.5, 1.0, 0.5, plane_trans);
-	//			else
-	//				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-	//			va_clipp->draw_clip_plane(64, false);
-	//		}
-	//		if (border)
-	//		{
-	//			shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-	//			va_clipp->draw_clip_plane(80, true);
-	//		}
-	//	}
-	//	//y2 = (p4, p5, p7, p6)
-	//	if (m_clip_mask & 8)
-	//	{
-	//		if (draw_plane)
-	//		{
-	//			if (plane_mode == kNormal ||
-	//				plane_mode == kNormalBack)
-	//				shader->setLocalParam(0, 1.0, 1.0, 0.5, plane_trans);
-	//			else
-	//				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-	//			va_clipp->draw_clip_plane(96, false);
-	//		}
-	//		if (border)
-	//		{
-	//			shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-	//			va_clipp->draw_clip_plane(112, true);
-	//		}
-	//	}
-	//	//z1 = (p0, p4, p6, p2)
-	//	if (m_clip_mask & 16)
-	//	{
-	//		if (draw_plane)
-	//		{
-	//			if (plane_mode == kNormal ||
-	//				plane_mode == kNormalBack)
-	//				shader->setLocalParam(0, 0.5, 0.5, 1.0, plane_trans);
-	//			else
-	//				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-	//			va_clipp->draw_clip_plane(128, false);
-	//		}
-	//		if (border)
-	//		{
-	//			shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-	//			va_clipp->draw_clip_plane(144, true);
-	//		}
-	//	}
-	//	//z2 = (p5, p1, p3, p7)
-	//	if (m_clip_mask & 32)
-	//	{
-	//		if (draw_plane)
-	//		{
-	//			if (plane_mode == kNormal ||
-	//				plane_mode == kNormalBack)
-	//				shader->setLocalParam(0, 0.5, 1.0, 1.0, plane_trans);
-	//			else
-	//				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-	//			va_clipp->draw_clip_plane(160, false);
-	//		}
-	//		if (border)
-	//		{
-	//			shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
-	//			va_clipp->draw_clip_plane(176, true);
-	//		}
-	//	}
-	//	va_clipp->draw_end();
-	//}
-
-	//if (shader && shader->valid())
-	//	shader->release();
-
-	//glFrontFace(GL_CCW);
-	//glCullFace(GL_BACK);
 }
 
 void VRenderGLView::DrawGrid()

@@ -80,17 +80,6 @@ namespace FUI
 		};
 
 	public:
-		//plane modes
-		enum PLANE_MODES
-		{
-			kNormal,
-			kFrame,
-			kLowTrans,
-			kLowTransBack,
-			kNormalBack,
-			kNone
-		};
-
 		ClipPlanePanel(wxWindow* frame,
 			wxWindow* parent,
 			wxWindowID id,
@@ -102,25 +91,25 @@ namespace FUI
 
 		void AssociateNode(FL::Node* node);
 
-		bool GetHoldPlanes()
-		{
-			return m_hold_planes;
-		}
-		void SetHoldPlanes(bool hold);
-		PLANE_MODES GetPlaneMode()
-		{
-			return m_plane_mode;
-		}
-		void SetPlaneMode(PLANE_MODES mode);
+		//bool GetHoldPlanes()
+		//{
+		//	return m_hold_planes;
+		//}
+		//void SetHoldPlanes(bool hold);
+		//PLANE_MODES GetPlaneMode()
+		//{
+		//	return m_plane_mode;
+		//}
+		//void SetPlaneMode(PLANE_MODES mode);
 
 	private:
 		wxWindow* m_frame;
 
 		ClipPlaneAgent* m_agent;
 
-		bool m_draw_clip;
-		bool m_hold_planes;
-		PLANE_MODES m_plane_mode;
+		//bool m_draw_clip;
+		//bool m_hold_planes;
+		//PLANE_MODES m_plane_mode;
 
 		//1st line
 		wxToolBar *m_toolbar;

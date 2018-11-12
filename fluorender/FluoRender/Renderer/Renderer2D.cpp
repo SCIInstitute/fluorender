@@ -25,27 +25,27 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <Processor/Processor.h>
+#include <Renderer/Renderer2D.h>
 
-using namespace FL;
+using namespace FLR;
 
-Processor::Processor():
-	Object()
+Renderer2D::Renderer2D():
+	Renderer()
 {
-	setupInputs();
-	setupOutputs();
 }
 
-Processor::Processor(const Processor& processor, const CopyOp& copyop, bool copy_values):
-	Object(processor, copyop, false)
+Renderer2D::Renderer2D(const Renderer2D& renderer, const FL::CopyOp& copyop, bool copy_values):
+	Renderer(renderer, copyop, false)
 {
 	if (copy_values)
-		copyValues(processor, copyop);
-	inputs_ = processor.inputs_;
-	outputs_ = processor.outputs_;
+		copyValues(renderer, copyop);
 }
 
-Processor::~Processor()
+Renderer2D::~Renderer2D()
 {
 }
 
+bool Renderer2D::render(FL::Event& event)
+{
+	return true;
+}

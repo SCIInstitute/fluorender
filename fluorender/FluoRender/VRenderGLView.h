@@ -84,18 +84,6 @@ DEALINGS IN THE SOFTWARE.
 #define INIT_ROTATE  8
 #define INIT_OBJ_TRANSL  16
 
-//clipping plane mask
-#define CLIP_X1  1
-#define CLIP_X2  2
-#define CLIP_Y1  4
-#define CLIP_Y2  8
-#define CLIP_Z1  16
-#define CLIP_Z2  32
-//clipping plane winding
-#define CULL_OFF  0
-#define FRONT_FACE  1
-#define BACK_FACE  2
-
 //information bits
 #define INFO_DISP	1
 #define INFO_POS	2

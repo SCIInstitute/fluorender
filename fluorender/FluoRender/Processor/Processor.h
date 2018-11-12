@@ -47,8 +47,17 @@ public:
 
 	virtual const char* className() const { return "Processor"; }
 
+	virtual bool run(Event& event = Event()) { return true; }
+
 protected:
 	~Processor();
+
+protected:
+	ValueCollection inputs_;
+	ValueCollection outputs_;
+
+	virtual void setupInputs() {}
+	virtual void setupOutputs() {}
 };
 }
 #endif//FL_PROCESSOR

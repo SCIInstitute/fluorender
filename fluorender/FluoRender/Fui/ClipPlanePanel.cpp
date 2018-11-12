@@ -84,10 +84,7 @@ ClipPlanePanel::ClipPlanePanel(wxWindow* frame,
 	long style,
 	const wxString& name) :
 	wxPanel(parent, id, pos, size, style, name),
-	m_frame(frame),
-	m_draw_clip(false),
-	m_hold_planes(false),
-	m_plane_mode(kNormal)
+	m_frame(frame)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -439,58 +436,58 @@ void ClipPlanePanel::AssociateNode(FL::Node* node)
 	m_agent->setObject(node);
 }
 
-void ClipPlanePanel::SetHoldPlanes(bool hold)
-{
-	m_hold_planes = hold;
-	m_toolbar->ToggleTool(ID_HoldPlanesBtn, hold);
-	if (hold)
-	{
-		//VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
-		//if (!vrender_frame)
-		//	return;
-		//vector <VRenderView*>* vrv_list = vrender_frame->GetViewList();
-		//for (int i = 0; i<(int)vrv_list->size(); i++)
-		//{
-		//	if ((*vrv_list)[i])
-		//	{
-		//		(*vrv_list)[i]->m_glview->m_draw_clip = true;
-		//		(*vrv_list)[i]->m_glview->m_clip_mask = -1;
-		//	}
-		//}
-	}
-}
+//void ClipPlanePanel::SetHoldPlanes(bool hold)
+//{
+	//m_hold_planes = hold;
+	//m_toolbar->ToggleTool(ID_HoldPlanesBtn, hold);
+	//if (hold)
+	//{
+	//	//VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
+	//	//if (!vrender_frame)
+	//	//	return;
+	//	//vector <VRenderView*>* vrv_list = vrender_frame->GetViewList();
+	//	//for (int i = 0; i<(int)vrv_list->size(); i++)
+	//	//{
+	//	//	if ((*vrv_list)[i])
+	//	//	{
+	//	//		(*vrv_list)[i]->m_glview->m_draw_clip = true;
+	//	//		(*vrv_list)[i]->m_glview->m_clip_mask = -1;
+	//	//	}
+	//	//}
+	//}
+//}
 
-void ClipPlanePanel::SetPlaneMode(PLANE_MODES mode)
-{
-	m_plane_mode = mode;
-	switch (m_plane_mode)
-	{
-	case kNormal:
-		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-			wxGetBitmapFromMemory(clip_normal));
-		break;
-	case kFrame:
-		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-			wxGetBitmapFromMemory(clip_frame));
-		break;
-	case kLowTrans:
-		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-			wxGetBitmapFromMemory(clip_low));
-		break;
-	case kLowTransBack:
-		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-			wxGetBitmapFromMemory(clip_low_back));
-		break;
-	case kNormalBack:
-		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-			wxGetBitmapFromMemory(clip_normal_back));
-		break;
-	case kNone:
-		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-			wxGetBitmapFromMemory(clip_none));
-		break;
-	}
-}
+//void ClipPlanePanel::SetPlaneMode(PLANE_MODES mode)
+//{
+	//m_plane_mode = mode;
+	//switch (m_plane_mode)
+	//{
+	//case kNormal:
+	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+	//		wxGetBitmapFromMemory(clip_normal));
+	//	break;
+	//case kFrame:
+	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+	//		wxGetBitmapFromMemory(clip_frame));
+	//	break;
+	//case kLowTrans:
+	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+	//		wxGetBitmapFromMemory(clip_low));
+	//	break;
+	//case kLowTransBack:
+	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+	//		wxGetBitmapFromMemory(clip_low_back));
+	//	break;
+	//case kNormalBack:
+	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+	//		wxGetBitmapFromMemory(clip_normal_back));
+	//	break;
+	//case kNone:
+	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+	//		wxGetBitmapFromMemory(clip_none));
+	//	break;
+	//}
+//}
 
 void ClipPlanePanel::OnLinkChannelsBtn(wxCommandEvent &event)
 {
@@ -523,44 +520,44 @@ void ClipPlanePanel::OnLinkChannelsBtn(wxCommandEvent &event)
 
 void ClipPlanePanel::OnHoldPlanesBtn(wxCommandEvent &event)
 {
-	m_hold_planes = m_toolbar->GetToolState(ID_HoldPlanesBtn);
+	//m_hold_planes = m_toolbar->GetToolState(ID_HoldPlanesBtn);
 }
 
 void ClipPlanePanel::OnPlaneModesBtn(wxCommandEvent &event)
 {
-	switch (m_plane_mode)
-	{
-	case kNormal:
-		m_plane_mode = kFrame;
-		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-			wxGetBitmapFromMemory(clip_frame));
-		break;
-	case kFrame:
-		m_plane_mode = kLowTrans;
-		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-			wxGetBitmapFromMemory(clip_low));
-		break;
-	case kLowTrans:
-		m_plane_mode = kLowTransBack;
-		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-			wxGetBitmapFromMemory(clip_low_back));
-		break;
-	case kLowTransBack:
-		m_plane_mode = kNormalBack;
-		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-			wxGetBitmapFromMemory(clip_normal_back));
-		break;
-	case kNormalBack:
-		m_plane_mode = kNone;
-		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-			wxGetBitmapFromMemory(clip_none));
-		break;
-	case kNone:
-		m_plane_mode = kNormal;
-		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-			wxGetBitmapFromMemory(clip_normal));
-		break;
-	}
+	//switch (m_plane_mode)
+	//{
+	//case kNormal:
+	//	m_plane_mode = kFrame;
+	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+	//		wxGetBitmapFromMemory(clip_frame));
+	//	break;
+	//case kFrame:
+	//	m_plane_mode = kLowTrans;
+	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+	//		wxGetBitmapFromMemory(clip_low));
+	//	break;
+	//case kLowTrans:
+	//	m_plane_mode = kLowTransBack;
+	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+	//		wxGetBitmapFromMemory(clip_low_back));
+	//	break;
+	//case kLowTransBack:
+	//	m_plane_mode = kNormalBack;
+	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+	//		wxGetBitmapFromMemory(clip_normal_back));
+	//	break;
+	//case kNormalBack:
+	//	m_plane_mode = kNone;
+	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+	//		wxGetBitmapFromMemory(clip_none));
+	//	break;
+	//case kNone:
+	//	m_plane_mode = kNormal;
+	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+	//		wxGetBitmapFromMemory(clip_normal));
+	//	break;
+	//}
 
 	//RefreshVRenderViews();
 }

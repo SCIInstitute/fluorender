@@ -352,6 +352,13 @@ file(GLOB prc_hdr fluorender/FluoRender/Processor/*.h)
 add_library(PROCESSOR_OBJ OBJECT
 	${prc_src} ${prc_hdr})
 
+# Renderer
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Renderer)
+file(GLOB rnd_src fluorender/FluoRender/Renderer/*.cpp)
+file(GLOB rnd_hdr fluorender/FluoRender/Renderer/*.h)
+add_library(RENDERER_OBJ OBJECT
+	${rnd_src} ${rnd_hdr})
+
 # NV
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/NV)
 file(GLOB nv_src fluorender/FluoRender/NV/*.cpp)
@@ -467,6 +474,7 @@ if(APPLE)
 		$<TARGET_OBJECTS:SCENEGRAPH_OBJ>
 		$<TARGET_OBJECTS:FUI_OBJ>
 		$<TARGET_OBJECTS:PROCESSOR_OBJ>
+		$<TARGET_OBJECTS:RENDERER_OBJ>
 		$<TARGET_OBJECTS:NV_OBJ>
 		$<TARGET_OBJECTS:FORMATS_OBJ>
 		$<TARGET_OBJECTS:VIDEO_OBJ>
@@ -492,6 +500,7 @@ elseif(UNIX OR MINGW)
 		$<TARGET_OBJECTS:SCENEGRAPH_OBJ>
 		$<TARGET_OBJECTS:FUI_OBJ>
 		$<TARGET_OBJECTS:PROCESSOR_OBJ>
+		$<TARGET_OBJECTS:RENDERER_OBJ>
 		$<TARGET_OBJECTS:NV_OBJ>
 		$<TARGET_OBJECTS:FORMATS_OBJ>
 		$<TARGET_OBJECTS:VIDEO_OBJ>
@@ -552,6 +561,7 @@ elseif(WIN32)
 			$<TARGET_OBJECTS:SCENEGRAPH_OBJ>
 			$<TARGET_OBJECTS:FUI_OBJ>
 			$<TARGET_OBJECTS:PROCESSOR_OBJ>
+			$<TARGET_OBJECTS:RENDERER_OBJ>
 			$<TARGET_OBJECTS:IMAGES_OBJ>
 			$<TARGET_OBJECTS:CONVERTERS_OBJ>
 			$<TARGET_OBJECTS:FLIVR_OBJ>
@@ -577,6 +587,7 @@ elseif(WIN32)
 #			$<TARGET_OBJECTS:SCENEGRAPH_OBJ>
 #			$<TARGET_OBJECTS:FUI_OBJ>
 #			$<TARGET_OBJECTS:PROCESSOR_OBJ>
+#			$<TARGET_OBJECTS:RENDERER_OBJ>
 #			$<TARGET_OBJECTS:IMAGES_OBJ>
 #			$<TARGET_OBJECTS:CONVERTERS_OBJ>
 #			$<TARGET_OBJECTS:FLIVR_OBJ>

@@ -34,6 +34,34 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FLTYPE
 {
+	//clipping plane mask
+	enum ClipPlaneMask
+	{
+		CLIP_X1 = 1 << 0,
+		CLIP_X2 = 1 << 1,
+		CLIP_Y1 = 1 << 2,
+		CLIP_Y2 = 1 << 3,
+		CLIP_Z1 = 1 << 4,
+		CLIP_Z2 = 1 << 5
+	};
+	//clipping plane winding
+	enum ClipPlaneWinding
+	{
+		CPWOff = 0,
+		CPWFrontFace = 1,
+		CPWBackFace = 2
+	};
+
+	//plane modes
+	enum PlaneRenderMode
+	{
+		PRMNormal,
+		PRMFrame,
+		PRMLowTrans,
+		PRMLowTransBack,
+		PRMNormalBack,
+		PRMNone
+	};
 
 	class Point;
 	class Quaternion;

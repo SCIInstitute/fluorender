@@ -25,27 +25,31 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <Processor/Processor.h>
+#ifndef _CLIPPLANERENDERER_H_
+#define _CLIPPLANERENDERER_H_
 
-using namespace FL;
-
-Processor::Processor():
-	Object()
+#include <Renderer/Renderer2D.h>
+namespace FLR
 {
-	setupInputs();
-	setupOutputs();
-}
-
-Processor::Processor(const Processor& processor, const CopyOp& copyop, bool copy_values):
-	Object(processor, copyop, false)
+class ClipPlaneRenderer : public Renderer2D
 {
-	if (copy_values)
-		copyValues(processor, copyop);
-	inputs_ = processor.inputs_;
-	outputs_ = processor.outputs_;
-}
+public:
 
-Processor::~Processor()
-{
-}
+	ClipPlaneRenderer();
 
+	ClipPlaneRenderer(const ClipPlaneRenderer& renderer, const FL::CopyOp& copyop = FL::CopyOp::SHALLOW_COPY, bool copy_values = true);
+
+	virtual bool isSameKindAs(const ClipPlaneRenderer*) const {return true;}
+
+	virtual const char* className() const { return "ClipPlaneRenderer"; }
+
+	virtual bool render(FL::Event& event);
+
+protected:
+	~ClipPlaneRenderer();
+
+	virtual void setupInputs();
+	virtual void setupOutputs();
+};
+}
+#endif//_CLIPPLANERENDERER_H_
