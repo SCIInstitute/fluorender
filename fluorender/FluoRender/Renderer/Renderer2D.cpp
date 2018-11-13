@@ -32,6 +32,8 @@ using namespace FLR;
 Renderer2D::Renderer2D():
 	Renderer()
 {
+	setupInputs();
+	setupOutputs();
 }
 
 Renderer2D::Renderer2D(const Renderer2D& renderer, const FL::CopyOp& copyop, bool copy_values):
@@ -43,6 +45,15 @@ Renderer2D::Renderer2D(const Renderer2D& renderer, const FL::CopyOp& copyop, boo
 
 Renderer2D::~Renderer2D()
 {
+}
+
+void Renderer2D::setupInputs()
+{
+}
+
+void Renderer2D::setupOutputs()
+{
+
 }
 
 bool Renderer2D::render(FL::Event& event)

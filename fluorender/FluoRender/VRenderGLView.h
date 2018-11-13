@@ -943,7 +943,7 @@ private:
 		wxString name, FLTYPE::Color color,
 		double font_height, bool hilighted = false);
 	void DrawFrame();
-	void DrawClippingPlanes(bool border, int face_winding);
+	void DrawClippingPlanes(bool border, long face_winding);
 	void SetColormapColors(int colormap);
 	void DrawColormap();
 	void DrawGradBg();

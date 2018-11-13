@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Scenegraph/DrawVolumeVisitor.h>
 #include <Scenegraph/PopVolumeVisitor.h>
 #include <Scenegraph/SearchVisitor.h>
+#include <Renderer/ClipPlaneRenderer.h>
 #include <Types/Plane.h>
 #include <FLIVR/Point.h>
 #include <FLIVR/Framebuffer.h>
@@ -104,7 +105,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_retain_finalbuffer(false),
 	m_draw_frame(false),
 	m_test_speed(false),
-	m_draw_clip(false),
+	m_draw_clip(true),
 	m_draw_legend(false),
 	m_mouse_focus(false),
 	m_test_wiref(false),
@@ -8711,8 +8712,22 @@ void VRenderGLView::DrawBounds()
 	glEnable(GL_BLEND);
 }
 
-void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
+void VRenderGLView::DrawClippingPlanes(bool border, long face_winding)
 {
+	FLR::ClipPlaneRenderer* renderer =
+		FL::Global::instance().getProcessorFactory().
+		getOrAddClipPlaneRenderer("clip plane renderer");
+	if (!renderer)
+		return;
+
+	FLTYPE::Transform tform;
+	tform.set(glm::value_ptr(m_mv_mat));
+	renderer->setValue("model view matrix", tform);
+	tform.set(glm::value_ptr(m_proj_mat));
+	renderer->setValue("projection matrix", tform);
+	renderer->setValue("border", border);
+	renderer->setValue("face winding", face_winding);
+	renderer->render(FL::Event(FL::Event::NOTIFY_NONE));
 }
 
 void VRenderGLView::DrawGrid()

@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Scenegraph/AnnotationFactory.h>
 #include <Fui/AgentFactory.h>
 #include <Fui/IconList.h>
+#include <Processor/ProcessorFactory.h>
 
 namespace FL
 {
@@ -112,6 +113,9 @@ namespace FL
 			annotation_factory_->addObserver(obsrvr);
 		}
 
+		ProcessorFactory& getProcessorFactory()
+		{ return *processor_factory_; }
+
 	private:
 		Global();
 
@@ -124,6 +128,9 @@ namespace FL
 
 		//list of agent
 		ref_ptr<FUI::AgentFactory> agent_factory_;
+
+		//list of processors
+		ref_ptr<ProcessorFactory> processor_factory_;
 
 		//icon list
 		FUI::IconList shown_icon_list_;

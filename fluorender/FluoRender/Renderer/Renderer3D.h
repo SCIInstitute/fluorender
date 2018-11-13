@@ -45,6 +45,9 @@ public:
 
 protected:
 	~Renderer3D();
+
+	virtual void setupInputs();
+	virtual void setupOutputs();
 };
 }
 #endif//FL_RENDERER3D

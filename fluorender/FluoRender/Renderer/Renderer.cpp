@@ -32,6 +32,8 @@ using namespace FLR;
 Renderer::Renderer():
 	Processor()
 {
+	setupInputs();
+	setupOutputs();
 }
 
 Renderer::Renderer(const Renderer& renderer, const FL::CopyOp& copyop, bool copy_values):
@@ -43,5 +45,18 @@ Renderer::Renderer(const Renderer& renderer, const FL::CopyOp& copyop, bool copy
 
 Renderer::~Renderer()
 {
+}
+
+void Renderer::setupInputs()
+{
+	addValue("model view matrix", FLTYPE::Transform());
+	addValue("projection matrix", FLTYPE::Transform());
+	inputs_.insert("model view matrix");
+	inputs_.insert("projection matrix");
+}
+
+void Renderer::setupOutputs()
+{
+
 }
 

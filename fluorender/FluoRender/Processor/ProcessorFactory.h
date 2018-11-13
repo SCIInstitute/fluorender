@@ -31,6 +31,10 @@ DEALINGS IN THE SOFTWARE.
 #include <Flobject/ObjectFactory.h>
 #include <Processor/Processor.h>
 
+namespace FLR
+{
+	class ClipPlaneRenderer;
+}
 namespace FL
 {
 	class ProcessorFactory : public ObjectFactory
@@ -43,7 +47,42 @@ namespace FL
 
 		virtual const char* className() const { return "ProcessorFactory"; }
 
-		virtual void createDefault();
+		virtual void createDefault() {}
+
+		virtual Processor* getDefault() { return 0; }
+
+		virtual Processor* build(const std::string &exp) { return 0; }
+
+		virtual Processor* clone(Processor*) { return 0; }
+
+		virtual Processor* clone(const unsigned int) { return 0; }
+
+		inline virtual Processor* get(size_t i)
+		{
+			return dynamic_cast<Processor*>(ObjectFactory::get(i));
+		}
+
+		inline virtual const Processor* get(size_t i) const
+		{
+			return dynamic_cast<Processor*>(const_cast<Object*>(ObjectFactory::get(i)));
+		}
+
+		inline virtual Processor* find(const unsigned int id)
+		{
+			return dynamic_cast<Processor*>(ObjectFactory::find(id));
+		}
+
+		inline virtual Processor* findFirst(const std::string &name)
+		{
+			return dynamic_cast<Processor*>(ObjectFactory::findFirst(name));
+		}
+
+		inline virtual Processor* findLast(const std::string &name)
+		{
+			return dynamic_cast<Processor*>(ObjectFactory::findLast(name));
+		}
+
+		FLR::ClipPlaneRenderer* getOrAddClipPlaneRenderer(const std::string &name);
 
 	protected:
 		virtual ~ProcessorFactory();

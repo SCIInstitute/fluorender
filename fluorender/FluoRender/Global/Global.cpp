@@ -68,4 +68,6 @@ Global::Global()
 	annotation_factory_ = ref_ptr<AnnotationFactory>(new AnnotationFactory());
 
 	agent_factory_ = ref_ptr<FUI::AgentFactory>(new FUI::AgentFactory());
+
+	processor_factory_ = ref_ptr<ProcessorFactory>(new ProcessorFactory());
 }

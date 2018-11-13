@@ -108,7 +108,6 @@ wxPanel(parent, id, pos, size, style),
 	m_default_saved(false),
 	m_frame(frame),
 	m_timer(this,ID_RotateTimer),
-	m_draw_clip(false), 
 	m_draw_scalebar(kOff),
 	m_pin_scale_thresh(10.0),
 	m_rot_slider(true),
@@ -2394,25 +2393,25 @@ void VRenderView::OnAovSldrIdle(wxIdleEvent& event)
 	wxPoint pos = wxGetMousePosition();
 	wxRect reg = m_aov_sldr->GetScreenRect();
 	wxWindow *window = wxWindow::FindFocus();
-	if (window && reg.Contains(pos))
-	{
-		if (!m_draw_clip)
-		{
-			m_glview->m_draw_clip = true;
-			m_glview->m_clip_mask = -1;
-			RefreshGL(true);
-			m_draw_clip = true;
-		}
-	}
-	else
-	{
-		if (m_draw_clip)
-		{
-			m_glview->m_draw_clip = false;
-			RefreshGL(true);
-			m_draw_clip = false;
-		}
-	}
+	//if (window && reg.Contains(pos))
+	//{
+	//	if (!m_draw_clip)
+	//	{
+	//		m_glview->m_draw_clip = true;
+	//		m_glview->m_clip_mask = -1;
+	//		RefreshGL(true);
+	//		m_draw_clip = true;
+	//	}
+	//}
+	//else
+	//{
+	//	if (m_draw_clip)
+	//	{
+	//		m_glview->m_draw_clip = false;
+	//		RefreshGL(true);
+	//		m_draw_clip = false;
+	//	}
+	//}
 	event.Skip();
 }
 

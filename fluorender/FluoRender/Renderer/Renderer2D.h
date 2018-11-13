@@ -47,6 +47,9 @@ public:
 
 protected:
 	~Renderer2D();
+
+	virtual void setupInputs();
+	virtual void setupOutputs();
 };
 }
 #endif//FL_RENDERER2D

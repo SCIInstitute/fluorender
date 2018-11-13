@@ -53,7 +53,7 @@ namespace FUI
 
 		virtual const char* className() const { return "AgentFactory"; }
 
-		virtual void createDefault() {};//no default agent
+		virtual void createDefault() {}//no default agent
 
 		virtual InterfaceAgent* getDefault() { return 0; }//no default agent
 

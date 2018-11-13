@@ -618,9 +618,6 @@ public:
 	wxToolBar *m_scale_reset_btn;
 	wxSpinButton* m_scale_factor_spin;
 
-	//draw clip
-	bool m_draw_clip;
-
 	//draw scalebar
 	enum SCALEBAR_STATE {
 		kOn,

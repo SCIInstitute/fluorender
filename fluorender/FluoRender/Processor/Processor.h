@@ -49,6 +49,54 @@ public:
 
 	virtual bool run(Event& event = Event()) { return true; }
 
+	inline void copyInputValues(Object& obj, const CopyOp& copyop = CopyOp::SHALLOW_COPY)
+	{
+		ValueCollection names = obj.getValueNames();
+		for (auto it = names.begin();
+			it != names.end(); ++it)
+		{
+			auto find_it = inputs_.find(*it);
+			if (find_it == inputs_.end())
+				continue;
+			Value* value = obj.getValue(*it);
+			Value* new_value = 0;
+			if (copyop.getCopyFlags() & CopyOp::DEEP_COPY_VALUES)
+				new_value = value->clone();
+			else
+				new_value = value;
+			if (new_value)
+			{
+				addValue(new_value);
+				//also observe the values
+				new_value->addObserver(this);
+			}
+		}
+	}
+
+	inline void copyOutputValues(Object& obj, const CopyOp& copyop = CopyOp::SHALLOW_COPY)
+	{
+		ValueCollection names = obj.getValueNames();
+		for (auto it = names.begin();
+			it != names.end(); ++it)
+		{
+			auto find_it = outputs_.find(*it);
+			if (find_it == outputs_.end())
+				continue;
+			Value* value = obj.getValue(*it);
+			Value* new_value = 0;
+			if (copyop.getCopyFlags() & CopyOp::DEEP_COPY_VALUES)
+				new_value = value->clone();
+			else
+				new_value = value;
+			if (new_value)
+			{
+				addValue(new_value);
+				//also observe the values
+				new_value->addObserver(this);
+			}
+		}
+	}
+
 protected:
 	~Processor();
 

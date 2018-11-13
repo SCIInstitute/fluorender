@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Processor/ProcessorFactory.h>
+#include <Renderer/ClipPlaneRenderer.h>
 
 using namespace FL;
 
@@ -41,7 +42,13 @@ ProcessorFactory::~ProcessorFactory()
 
 }
 
-void ProcessorFactory::createDefault()
+FLR::ClipPlaneRenderer* ProcessorFactory::getOrAddClipPlaneRenderer(const std::string &name)
 {
-}
+	Processor* result = findFirst(name);
+	if (result)
+		return dynamic_cast<FLR::ClipPlaneRenderer*>(result);
 
+	//not found
+	FLR::ClipPlaneRenderer* renderer = new FLR::ClipPlaneRenderer();
+	return renderer;
+}

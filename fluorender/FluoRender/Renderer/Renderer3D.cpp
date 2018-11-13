@@ -32,6 +32,8 @@ using namespace FLR;
 Renderer3D::Renderer3D():
 	Renderer()
 {
+	setupInputs();
+	setupOutputs();
 }
 
 Renderer3D::Renderer3D(const Renderer3D& renderer, const FL::CopyOp& copyop, bool copy_values):
@@ -43,5 +45,14 @@ Renderer3D::Renderer3D(const Renderer3D& renderer, const FL::CopyOp& copyop, boo
 
 Renderer3D::~Renderer3D()
 {
+}
+
+void Renderer3D::setupInputs()
+{
+}
+
+void Renderer3D::setupOutputs()
+{
+
 }
 

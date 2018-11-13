@@ -38,12 +38,14 @@ DEALINGS IN THE SOFTWARE.
 using namespace FLR;
 
 ClipPlaneRenderer::ClipPlaneRenderer():
-	Renderer2D()
+	Renderer3D()
 {
+	setupInputs();
+	setupOutputs();
 }
 
 ClipPlaneRenderer::ClipPlaneRenderer(const ClipPlaneRenderer& renderer, const FL::CopyOp& copyop, bool copy_values):
-	Renderer2D(renderer, copyop, false)
+	Renderer3D(renderer, copyop, false)
 {
 	if (copy_values)
 		copyValues(renderer, copyop);
@@ -55,12 +57,20 @@ ClipPlaneRenderer::~ClipPlaneRenderer()
 
 void ClipPlaneRenderer::setupInputs()
 {
-	//addValue("asset", (FL::Referenced*)(0));//volume, mesh, etc.
-	//addValue("render mode", long(FLTYPE::PRMNormal));
+	//direct inputs
 	addValue("border", bool(true));
 	addValue("face winding", long(1));//CULL_OFF:0; FRONT_FACE:1; BACK_FACE:2
-	addValue("model view matrix", FLTYPE::Transform());
-	addValue("projection matrix", FLTYPE::Transform());
+	inputs_.insert("border");
+	inputs_.insert("face winding");
+	//inputs from object
+	inputs_.insert("clip render mode");
+	inputs_.insert("clip mask");
+	inputs_.insert("clip planes");
+	inputs_.insert("color");
+	inputs_.insert("scale x");
+	inputs_.insert("scale y");
+	inputs_.insert("scale z");
+	inputs_.insert("tex transform");
 }
 
 void ClipPlaneRenderer::setupOutputs()
@@ -70,14 +80,14 @@ void ClipPlaneRenderer::setupOutputs()
 
 bool ClipPlaneRenderer::render(FL::Event& event)
 {
-	bool result = Renderer2D::render(event);
+	bool result = Renderer3D::render(event);
 
 	bool border;
 	getValue("border", border);
 	long face_winding;
 	getValue("face winding", face_winding);
 	long render_mode = FLTYPE::PRMNone;
-	getValue("render mode", render_mode);
+	getValue("clip render mode", render_mode);
 	if (render_mode == FLTYPE::PRMNone)
 		return false;
 

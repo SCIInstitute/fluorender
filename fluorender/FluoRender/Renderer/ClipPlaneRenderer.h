@@ -28,10 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _CLIPPLANERENDERER_H_
 #define _CLIPPLANERENDERER_H_
 
-#include <Renderer/Renderer2D.h>
+#include <Renderer/Renderer3D.h>
 namespace FLR
 {
-class ClipPlaneRenderer : public Renderer2D
+class ClipPlaneRenderer : public Renderer3D
 {
 public:
 

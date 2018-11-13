@@ -54,6 +54,9 @@ public:
 
 protected:
 	~Renderer();
+
+	virtual void setupInputs();
+	virtual void setupOutputs();
 };
 }
 #endif//FL_RENDERER
