@@ -87,13 +87,8 @@ public:
 				value = it->second->clone();
 			else
 				value = it->second.get();
-			if (value)
-			{
-				addValue(value);
-				//also observe the values
-				value->addObserver(this);
-				//value->notify();//not sure why it needs notification, removed
-			}
+			addValue(value);
+			//value->notify();//not sure why it needs notification, removed
 		}
 	}
 
@@ -243,8 +238,19 @@ public:
 	{
 		if (!value)
 			return false;
-		if (_value_set)
-			return _value_set->addValue(value);
+		if (_value_set && _value_set->addValue(value))
+		{
+			//also observe the values
+			if (value->isReferenced())
+			{
+				Referenced* refd;
+				getValue(value->getName(), &refd);
+				if (refd)
+					refd->addObserver(this);
+			}
+			value->addObserver(this);
+			return true;
+		}
 		else return false;
 	}
 
@@ -255,6 +261,44 @@ public:
 			return _value_set->findValue(name);
 		else
 			return 0;
+	}
+
+	bool removeValue(Value* value)
+	{
+		if (!value)
+			return false;
+		return removeValue(value->getName());
+	}
+
+	bool removeValue(const std::string &name)
+	{
+		if (!_value_set)
+			return false;
+		Value* value = _value_set->findValue(name);
+		if (value)
+		{
+			//remove observer
+			if (value->isReferenced())
+			{
+				Referenced* refd;
+				getValue(value->getName(), &refd);
+				if (refd)
+					refd->removeObserver(this);
+			}
+			value->removeObserver(this);
+			return _value_set->removeValue(value);
+		}
+		return false;
+	}
+
+	bool replaceValue(Value* value)
+	{
+		if (!value || !_value_set)
+			return false;
+		Value* old_value = _value_set->findValue(value->getName());
+		if (old_value && old_value != value)
+			removeValue(old_value);
+		return addValue(value);
 	}
 
 	ValueCollection getValueNames()

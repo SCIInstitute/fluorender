@@ -63,6 +63,8 @@ void ClipPlaneRenderer::setupInputs()
 	inputs_.insert("border");
 	inputs_.insert("face winding");
 	//inputs from object
+	inputs_.insert("clip display");
+	inputs_.insert("clip hold");
 	inputs_.insert("clip render mode");
 	inputs_.insert("clip mask");
 	inputs_.insert("clip planes");
@@ -81,6 +83,13 @@ void ClipPlaneRenderer::setupOutputs()
 bool ClipPlaneRenderer::render(FL::Event& event)
 {
 	bool result = Renderer3D::render(event);
+
+	bool display = false;
+	getValue("clip display", display);
+	bool hold = false;
+	getValue("clip hold", hold);
+	if (!display && !hold)
+		return false;
 
 	bool border;
 	getValue("border", border);
@@ -198,7 +207,9 @@ bool ClipPlaneRenderer::render(FL::Event& event)
 	//draw the six planes out of the eight points
 	//get color
 	FLTYPE::Color color(1.0, 1.0, 1.0);
-	getValue("color", color);
+	if (render_mode == FLTYPE::PRMNormal ||
+		render_mode == FLTYPE::PRMNormalBack)
+		getValue("color", color);
 	double plane_trans = 0.0;
 	if (face_winding == FLTYPE::CPWBackFace &&
 		(clip_mask == 3 ||

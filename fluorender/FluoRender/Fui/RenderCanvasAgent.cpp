@@ -50,7 +50,9 @@ FL::RenderView* RenderCanvasAgent::getObject()
 
 void RenderCanvasAgent::UpdateAllSettings()
 {
-
+	gl_view_.m_force_clear = true;
+	gl_view_.m_interactive = false;
+	gl_view_.RefreshGL(41);
 }
 
 VRenderGLView &RenderCanvasAgent::getView()

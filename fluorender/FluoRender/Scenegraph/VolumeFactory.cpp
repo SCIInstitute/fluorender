@@ -97,6 +97,11 @@ void VolumeFactory::createDefault()
 		vd->addValue("clip rot x", double(0));
 		vd->addValue("clip rot y", double(0));
 		vd->addValue("clip rot z", double(0));
+		//clip plane rendering
+		vd->addValue("clip display", bool(false));
+		vd->addValue("clip hold", bool(false));
+		vd->addValue("clip mask", long(-1));
+		vd->addValue("clip render mode", long(FLTYPE::PRMNormal));
 
 		vd->addValue("data path", std::wstring());//path to original file
 		vd->addValue("channel", long(0));//channel index of the original file

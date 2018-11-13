@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Scenegraph/VolumeGroup.h>
 #include <Scenegraph/MeshData.h>
 #include <Scenegraph/MeshGroup.h>
+#include <Renderer/ClipPlaneRenderer.h>
 #include "DragDrop.h"
 #include "Formats/png_resource.h"
 #include "Formats/msk_writer.h"
@@ -2153,6 +2154,14 @@ void VRenderFrame::OnSelection(FL::Node *node)
 		m_adjust_view->AssociateNode(node);
 	if (m_clip_view)
 		m_clip_view->AssociateNode(node);
+
+	//clip plane renderer
+	FLR::ClipPlaneRenderer* renderer =
+		FL::Global::instance().getProcessorFactory().
+		getOrAddClipPlaneRenderer("clip plane renderer");
+	if (renderer)
+		renderer->copyInputValues(*node);
+
 	//{
 	//	m_adjust_view->SetRenderView(vrv);
 	//	if (!vrv || vd)
@@ -2402,6 +2411,8 @@ void VRenderFrame::OnSelection(FL::Node *node)
 		m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
 		m_aui_mgr.Update();
 	}
+
+	RefreshVRenderViews();
 }
 
 void VRenderFrame::RefreshVRenderViews(bool tree, bool interactive)

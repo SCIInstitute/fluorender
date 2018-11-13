@@ -571,6 +571,14 @@ void VolumeData::OnSpacingChanged(Event& event)
 	setValue("base spc x", spc_x, event);
 	setValue("base spc y", spc_y, event);
 	setValue("base spc z", spc_z, event);
+
+	//tex transform
+	FLIVR::Transform *temp = m_tex->transform();
+	FLTYPE::Transform tform;
+	double tformarray[16];
+	temp->get(tformarray);
+	tform.set(tformarray);
+	setValue("tex transform", tform, Event(Event::NOTIFY_NONE));
 }
 
 void VolumeData::OnBaseSpacingChanged(Event& event)
@@ -590,6 +598,14 @@ void VolumeData::OnBaseSpacingChanged(Event& event)
 	setValue("spc x", spc_x, event);
 	setValue("spc y", spc_y, event);
 	setValue("spc z", spc_z, event);
+
+	//tex transform
+	FLIVR::Transform *temp = m_tex->transform();
+	FLTYPE::Transform tform;
+	double tformarray[16];
+	temp->get(tformarray);
+	tform.set(tformarray);
+	setValue("tex transform", tform, Event(Event::NOTIFY_NONE));
 }
 
 void VolumeData::OnSpacingScaleChanged(Event& event)
@@ -621,6 +637,14 @@ void VolumeData::OnLevelChanged(Event& event)
 	FLTYPE::BBox bounds(box_min, box_max);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
 	setValue("bounds", bounds, event);
+
+	//tex transform
+	FLIVR::Transform *temp = m_tex->transform();
+	FLTYPE::Transform tform;
+	double tformarray[16];
+	temp->get(tformarray);
+	tform.set(tformarray);
+	setValue("tex transform", tform, Event(Event::NOTIFY_NONE));
 }
 
 void VolumeData::OnDisplayChanged(Event& event)

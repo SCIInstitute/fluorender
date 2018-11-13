@@ -50,5 +50,10 @@ FLR::ClipPlaneRenderer* ProcessorFactory::getOrAddClipPlaneRenderer(const std::s
 
 	//not found
 	FLR::ClipPlaneRenderer* renderer = new FLR::ClipPlaneRenderer();
+	if (renderer)
+	{
+		renderer->setName(name);
+		objects_.push_front(renderer);
+	}
 	return renderer;
 }

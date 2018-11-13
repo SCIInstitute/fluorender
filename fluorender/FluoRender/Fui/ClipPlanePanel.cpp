@@ -436,63 +436,13 @@ void ClipPlanePanel::AssociateNode(FL::Node* node)
 	m_agent->setObject(node);
 }
 
-//void ClipPlanePanel::SetHoldPlanes(bool hold)
-//{
-	//m_hold_planes = hold;
-	//m_toolbar->ToggleTool(ID_HoldPlanesBtn, hold);
-	//if (hold)
-	//{
-	//	//VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
-	//	//if (!vrender_frame)
-	//	//	return;
-	//	//vector <VRenderView*>* vrv_list = vrender_frame->GetViewList();
-	//	//for (int i = 0; i<(int)vrv_list->size(); i++)
-	//	//{
-	//	//	if ((*vrv_list)[i])
-	//	//	{
-	//	//		(*vrv_list)[i]->m_glview->m_draw_clip = true;
-	//	//		(*vrv_list)[i]->m_glview->m_clip_mask = -1;
-	//	//	}
-	//	//}
-	//}
-//}
-
-//void ClipPlanePanel::SetPlaneMode(PLANE_MODES mode)
-//{
-	//m_plane_mode = mode;
-	//switch (m_plane_mode)
-	//{
-	//case kNormal:
-	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-	//		wxGetBitmapFromMemory(clip_normal));
-	//	break;
-	//case kFrame:
-	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-	//		wxGetBitmapFromMemory(clip_frame));
-	//	break;
-	//case kLowTrans:
-	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-	//		wxGetBitmapFromMemory(clip_low));
-	//	break;
-	//case kLowTransBack:
-	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-	//		wxGetBitmapFromMemory(clip_low_back));
-	//	break;
-	//case kNormalBack:
-	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-	//		wxGetBitmapFromMemory(clip_normal_back));
-	//	break;
-	//case kNone:
-	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-	//		wxGetBitmapFromMemory(clip_none));
-	//	break;
-	//}
-//}
-
 void ClipPlanePanel::OnLinkChannelsBtn(wxCommandEvent &event)
 {
 	bool sync = m_toolbar->GetToolState(ID_LinkChannelsBtn);
 	FL::ValueCollection names{
+		"clip hold",
+		"clip render mode",
+		"clip mask",
 		"clip dist x",
 		"clip dist y",
 		"clip dist z",
@@ -520,46 +470,49 @@ void ClipPlanePanel::OnLinkChannelsBtn(wxCommandEvent &event)
 
 void ClipPlanePanel::OnHoldPlanesBtn(wxCommandEvent &event)
 {
-	//m_hold_planes = m_toolbar->GetToolState(ID_HoldPlanesBtn);
+	bool bval = m_toolbar->GetToolState(ID_HoldPlanesBtn);
+	m_agent->setValue("clip hold", bval);
+	m_agent->setValue("clip mask", long(-1));
 }
 
 void ClipPlanePanel::OnPlaneModesBtn(wxCommandEvent &event)
 {
-	//switch (m_plane_mode)
-	//{
-	//case kNormal:
-	//	m_plane_mode = kFrame;
-	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-	//		wxGetBitmapFromMemory(clip_frame));
-	//	break;
-	//case kFrame:
-	//	m_plane_mode = kLowTrans;
-	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-	//		wxGetBitmapFromMemory(clip_low));
-	//	break;
-	//case kLowTrans:
-	//	m_plane_mode = kLowTransBack;
-	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-	//		wxGetBitmapFromMemory(clip_low_back));
-	//	break;
-	//case kLowTransBack:
-	//	m_plane_mode = kNormalBack;
-	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-	//		wxGetBitmapFromMemory(clip_normal_back));
-	//	break;
-	//case kNormalBack:
-	//	m_plane_mode = kNone;
-	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-	//		wxGetBitmapFromMemory(clip_none));
-	//	break;
-	//case kNone:
-	//	m_plane_mode = kNormal;
-	//	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-	//		wxGetBitmapFromMemory(clip_normal));
-	//	break;
-	//}
+	long render_mode;
+	m_agent->getValue("clip render mode", render_mode);
 
-	//RefreshVRenderViews();
+	switch (render_mode)
+	{
+	case FLTYPE::PRMNormal:
+		m_agent->setValue("clip render mode", long(FLTYPE::PRMFrame));
+		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_frame));
+		break;
+	case FLTYPE::PRMFrame:
+		m_agent->setValue("clip render mode", long(FLTYPE::PRMLowTrans));
+		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_low));
+		break;
+	case FLTYPE::PRMLowTrans:
+		m_agent->setValue("clip render mode", long(FLTYPE::PRMLowTransBack));
+		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_low_back));
+		break;
+	case FLTYPE::PRMLowTransBack:
+		m_agent->setValue("clip render mode", long(FLTYPE::PRMNormalBack));
+		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_normal_back));
+		break;
+	case FLTYPE::PRMNormalBack:
+		m_agent->setValue("clip render mode", long(FLTYPE::PRMNone));
+		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_none));
+		break;
+	case FLTYPE::PRMNone:
+		m_agent->setValue("clip render mode", long(FLTYPE::PRMNormal));
+		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_normal));
+		break;
+	}
 }
 
 void ClipPlanePanel::OnClipResetBtn(wxCommandEvent &event)
@@ -574,6 +527,8 @@ void ClipPlanePanel::OnClipResetBtn(wxCommandEvent &event)
 	m_agent->setValue("clip y2", double(1));
 	m_agent->setValue("clip z1", double(0));
 	m_agent->setValue("clip z2", double(1));
+
+	m_agent->setValue("clip mask", long(-1));
 }
 
 void ClipPlanePanel::OnX1ClipChange(wxScrollEvent &event)
@@ -603,6 +558,11 @@ void ClipPlanePanel::OnX1ClipEdit(wxCommandEvent &event)
 		m_x1_clip_sldr->SetValue(ival);
 		double dval = (double)ival / (double)resx;
 		m_agent->setValue("clip x1", dval);
+
+		if (clip_link)
+			m_agent->setValue("clip mask", long(3));
+		else
+			m_agent->setValue("clip mask", long(1));
 	}
 }
 
@@ -633,6 +593,11 @@ void ClipPlanePanel::OnX2ClipEdit(wxCommandEvent &event)
 		m_x2_clip_sldr->SetValue(ival);
 		double dval = (double)ival / (double)resx;
 		m_agent->setValue("clip x2", dval);
+
+		if (clip_link)
+			m_agent->setValue("clip mask", long(3));
+		else
+			m_agent->setValue("clip mask", long(2));
 	}
 }
 
@@ -663,6 +628,11 @@ void ClipPlanePanel::OnY1ClipEdit(wxCommandEvent &event)
 		m_y1_clip_sldr->SetValue(ival);
 		double dval = (double)ival / (double)resy;
 		m_agent->setValue("clip y1", dval);
+
+		if (clip_link)
+			m_agent->setValue("clip mask", long(12));
+		else
+			m_agent->setValue("clip mask", long(4));
 	}
 }
 
@@ -693,6 +663,11 @@ void ClipPlanePanel::OnY2ClipEdit(wxCommandEvent &event)
 		m_y2_clip_sldr->SetValue(ival);
 		double dval = (double)ival / (double)resy;
 		m_agent->setValue("clip y2", dval);
+
+		if (clip_link)
+			m_agent->setValue("clip mask", long(12));
+		else
+			m_agent->setValue("clip mask", long(8));
 	}
 }
 
@@ -723,6 +698,11 @@ void ClipPlanePanel::OnZ1ClipEdit(wxCommandEvent &event)
 		m_z1_clip_sldr->SetValue(ival);
 		double dval = (double)ival / (double)resz;
 		m_agent->setValue("clip z1", dval);
+
+		if (clip_link)
+			m_agent->setValue("clip mask", long(48));
+		else
+			m_agent->setValue("clip mask", long(16));
 	}
 }
 
@@ -753,6 +733,11 @@ void ClipPlanePanel::OnZ2ClipEdit(wxCommandEvent &event)
 		m_z2_clip_sldr->SetValue(ival);
 		double dval = (double)ival / (double)resz;
 		m_agent->setValue("clip z2", dval);
+
+		if (clip_link)
+			m_agent->setValue("clip mask", long(48));
+		else
+			m_agent->setValue("clip mask", long(32));
 	}
 }
 
@@ -802,12 +787,7 @@ void ClipPlanePanel::OnIdle(wxIdleEvent &event)
 	if (!IsShown())
 		return;
 
-	//if (m_hold_planes)
-	//{
-	//	m_draw_clip = true;
-	//	return;
-	//}
-
+	//hide clipping planes when in capture mode
 	//int i;
 	//VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
 	//if (!vrender_frame)
@@ -823,41 +803,16 @@ void ClipPlanePanel::OnIdle(wxIdleEvent &event)
 	//	}
 	//}
 
-	//wxPoint pos = wxGetMousePosition();
-	//wxRect reg = GetScreenRect();
-	//wxWindow *window = wxWindow::FindFocus();
-	//if (window && reg.Contains(pos))
-	//{
-	//	if (!m_draw_clip)
-	//	{
-	//		vector <VRenderView*>* vrv_list = vrender_frame->GetViewList();
-	//		for (i = 0; i<(int)vrv_list->size(); i++)
-	//		{
-	//			if ((*vrv_list)[i])
-	//			{
-	//				(*vrv_list)[i]->m_glview->m_draw_clip = true;
-	//				(*vrv_list)[i]->m_glview->m_clip_mask = -1;
-	//			}
-	//		}
-	//		RefreshVRenderViews();
-	//		m_draw_clip = true;
-	//	}
-	//}
-	//else
-	//{
-	//	if (m_draw_clip)
-	//	{
-	//		vector <VRenderView*>* vrv_list = vrender_frame->GetViewList();
-	//		for (i = 0; i<(int)vrv_list->size(); i++)
-	//		{
-	//			if ((*vrv_list)[i])
-	//				(*vrv_list)[i]->m_glview->m_draw_clip = false;
-	//		}
-	//		RefreshVRenderViews();
-	//		m_draw_clip = false;
-	//	}
-	//}
-
+	wxPoint pos = wxGetMousePosition();
+	wxRect reg = GetScreenRect();
+	wxWindow *window = wxWindow::FindFocus();
+	if (window && reg.Contains(pos))
+	{
+		if (m_agent->setValue("clip display", true))
+			m_agent->setValue("clip mask", long(-1));
+	}
+	else
+		m_agent->setValue("clip display", false);
 }
 
 void ClipPlanePanel::OnLinkXCheck(wxCommandEvent &event)
@@ -1021,6 +976,7 @@ void ClipPlanePanel::OnSliderRClick(wxCommandEvent& event)
 		m_agent->setValue("clip y2", double(1));
 		m_agent->setValue("clip z1", double(0));
 		m_agent->setValue("clip z2", double(1));
+		m_agent->setValue("clip mask", long(3));
 		break;
 	case ID_Y1ClipSldr:
 	case ID_Y2ClipSldr:
@@ -1032,6 +988,7 @@ void ClipPlanePanel::OnSliderRClick(wxCommandEvent& event)
 		m_agent->setValue("clip x2", double(1));
 		m_agent->setValue("clip z1", double(0));
 		m_agent->setValue("clip z2", double(1));
+		m_agent->setValue("clip mask", long(12));
 		break;
 	case ID_Z1ClipSldr:
 	case ID_Z2ClipSldr:
@@ -1043,6 +1000,7 @@ void ClipPlanePanel::OnSliderRClick(wxCommandEvent& event)
 		m_agent->setValue("clip x2", double(1));
 		m_agent->setValue("clip y1", double(0));
 		m_agent->setValue("clip y2", double(1));
+		m_agent->setValue("clip mask", long(48));
 		break;
 	}
 }

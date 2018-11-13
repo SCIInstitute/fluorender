@@ -65,6 +65,40 @@ void ClipPlaneAgent::UpdateAllSettings()
 	else
 		panel_.EnableAll();
 
+	//states
+	bool bval;
+	getValue("clip hold", bval);
+	panel_.m_toolbar->ToggleTool(panel_.ID_HoldPlanesBtn, bval);
+	long render_mode;
+	getValue("clip render mode", render_mode);
+	switch (render_mode)
+	{
+	case FLTYPE::PRMNormal:
+		panel_.m_toolbar->SetToolNormalBitmap(panel_.ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_normal));
+		break;
+	case FLTYPE::PRMFrame:
+		panel_.m_toolbar->SetToolNormalBitmap(panel_.ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_frame));
+		break;
+	case FLTYPE::PRMLowTrans:
+		panel_.m_toolbar->SetToolNormalBitmap(panel_.ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_low));
+		break;
+	case FLTYPE::PRMLowTransBack:
+		panel_.m_toolbar->SetToolNormalBitmap(panel_.ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_low_back));
+		break;
+	case FLTYPE::PRMNormalBack:
+		panel_.m_toolbar->SetToolNormalBitmap(panel_.ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_normal_back));
+		break;
+	case FLTYPE::PRMNone:
+		panel_.m_toolbar->SetToolNormalBitmap(panel_.ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_none));
+		break;
+	}
+
 	//ranges
 	long resx, resy, resz;
 	bool result = getValue("res x", resx);
