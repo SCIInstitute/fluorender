@@ -51,7 +51,7 @@ namespace FL
 
 			DrawVolumeGroupList(DrawVolumeGroupType type) :type(type) {}
 		};
-		DrawVolumeVisitor() : NodeVisitor(), m_quota_list(0)
+		DrawVolumeVisitor() : NodeVisitor(), m_quota_list(0), m_sort_method(0)
 		{
 			setTraversalMode(FL::NodeVisitor::TRAVERSE_ALL_CHILDREN);
 		}
@@ -60,6 +60,7 @@ namespace FL
 		{
 			m_quota_list = 0;
 			m_draw_list.clear();
+			m_sort_method = 0;
 		}
 
 		virtual void apply(FL::Node& node);
@@ -77,14 +78,39 @@ namespace FL
 		}
 		void setDrawMask(bool draw_mask) { m_draw_mask = draw_mask; }
 		void setQuotaList(std::vector<VolumeData*>* list) { m_quota_list = list; }
+		void setSortValue(const std::string &sort_value) { m_sort_value = sort_value; }
+		void setSortMethod(long sort_method) { m_sort_method = sort_method; }
 
-		std::vector<DrawVolumeGroupList> &getResult() { return m_draw_list; }
+		std::vector<DrawVolumeGroupList>& getResult()
+		{
+			if (m_sort_method > 0)
+			{
+				for (auto it = m_draw_list.begin();
+					it != m_draw_list.end(); ++it)
+				{
+					if (it->type == DVG_MASK ||
+						it->type == DVG_MULTI)
+						continue;
+					if (m_sort_value == "name")
+					{
+						if (m_sort_method == 1)
+							std::sort(it->group.begin(), it->group.end(), compare_name_asc);
+						else if (m_sort_method == 2)
+							std::sort(it->group.begin(), it->group.end(), compare_name_dsc);
+					}
+				}
+			}
+
+			return m_draw_list;
+		}
 
 	private:
 		long m_blend_mode;
 		bool m_draw_mask;
 		std::vector<DrawVolumeGroupList> m_draw_list;
 		std::vector<VolumeData*> *m_quota_list;
+		std::string m_sort_value;
+		long m_sort_method;
 
 		DrawVolumeGroupList& getLastList(DrawVolumeGroupType type)
 		{
@@ -117,6 +143,9 @@ namespace FL
 		}
 
 		void addVolume(DrawVolumeGroupType type, VolumeData* vd);
+
+		static bool compare_name_asc(VolumeData* vd1, VolumeData* vd2);
+		static bool compare_name_dsc(VolumeData* vd1, VolumeData* vd2);
 	};
 }
 #endif//_DRAWVOLUMEVISITOR_H_

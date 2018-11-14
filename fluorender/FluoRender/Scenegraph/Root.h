@@ -26,25 +26,49 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Scenegraph/RenderView.h>
-#include <Scenegraph/Root.h>
+#ifndef _ROOT_H_
+#define _ROOT_H_
 
-using namespace FL;
+#include <Scenegraph/Group.h>
 
-RenderView::RenderView()
+namespace FL
 {
-	addValue("sort value", std::string("name"));
-	addValue("sort method", long(SortNone));
+	enum SortMethod
+	{
+		SortNone = 0,//no sorting
+		SortAscend = 1,//ascending
+		SortDescend = 2//descending
+	};
+
+	class Root : public Group
+	{
+	public:
+		Root();
+		Root(const Root& root, const CopyOp& copyop = CopyOp::SHALLOW_COPY) {}
+
+		virtual Object* clone(const CopyOp& copyop) const
+		{
+			return 0;
+		}
+
+		virtual bool isSameKindAs(const Object* obj) const
+		{
+			return dynamic_cast<const Root*>(obj) != NULL;
+		}
+
+		virtual const char* className() const { return "Root"; }
+
+		virtual Root* asRoot() { return this; }
+		virtual const Root* asRoot() const { return this; }
+
+		virtual bool addChild(Node* child);
+		virtual bool insertChild(size_t index, Node* child);
+		virtual bool removeChildren(size_t pos, size_t num);
+		virtual bool setChild(size_t i, Node* node);
+
+	protected:
+		virtual ~Root() {}
+	};
 }
 
-RenderView::RenderView(const RenderView& view, const CopyOp& copyop) :
-	Group(view, copyop)
-{
-
-}
-
-RenderView::~RenderView()
-{
-
-}
-
+#endif//_ROOT_H_

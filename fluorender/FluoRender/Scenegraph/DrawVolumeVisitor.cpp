@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Scenegraph/Group.h>
 #include <Scenegraph/VolumeData.h>
 #include <Scenegraph/VolumeGroup.h>
+#include <cctype>
 
 using namespace FL;
 
@@ -80,4 +81,32 @@ void DrawVolumeVisitor::addVolume(DrawVolumeGroupType type, VolumeData* vd)
 		getLastList(type).group.push_back(vd);
 	else if (!m_quota_list->empty())
 		getLastList(type).group.push_back(vd);
+}
+
+bool DrawVolumeVisitor::compare_name_asc(VolumeData* vd1, VolumeData* vd2)
+{
+	if (!vd1 || !vd2)
+		return false;
+	std::string a = vd1->getName();
+	std::string b = vd2->getName();
+	for (size_t c = 0; c < a.size() && c < b.size(); c++)
+	{
+		if (std::tolower(a[c]) != std::tolower(b[c]))
+			return (std::tolower(a[c]) > std::tolower(b[c]));
+	}
+	return a.size() > b.size();
+}
+
+bool DrawVolumeVisitor::compare_name_dsc(VolumeData* vd1, VolumeData* vd2)
+{
+	if (!vd1 || !vd2)
+		return false;
+	std::string a = vd1->getName();
+	std::string b = vd2->getName();
+	for (size_t c = 0; c < a.size() && c < b.size(); c++)
+	{
+		if (std::tolower(a[c]) != std::tolower(b[c]))
+			return (std::tolower(a[c]) < std::tolower(b[c]));
+	}
+	return a.size() < b.size();
 }

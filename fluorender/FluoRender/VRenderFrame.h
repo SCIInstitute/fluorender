@@ -101,7 +101,7 @@ using namespace std;
 
 namespace FL
 {
-	class Group;
+	class Root;
 	class VolumeData;
 	class VolumeGroup;
 }
@@ -195,7 +195,7 @@ public:
 	DataManager* GetDataManager();
 
 	//scenegraph root
-	FL::Group* GetRoot() { return m_root.get(); }
+	FL::Root* GetRoot() { return m_root.get(); }
 	
 	//views
 	int GetViewNum();
@@ -441,7 +441,7 @@ private:
 	bool m_benchmark;
 
 	//root of scenegraph
-	FL::ref_ptr<FL::Group> m_root;//root of the scenegraph
+	FL::ref_ptr<FL::Root> m_root;//root of the scenegraph
 
 private:
 	//views

@@ -95,6 +95,7 @@ namespace FUI
 		void OnDropPossible(wxDataViewEvent &event);
 		void OnDrop(wxDataViewEvent &event);
 		void OnActivated(wxDataViewEvent &event);
+		void OnSorted(wxDataViewEvent &event);
 
 		DECLARE_EVENT_TABLE()
 	};

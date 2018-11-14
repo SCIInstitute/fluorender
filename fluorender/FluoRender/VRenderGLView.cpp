@@ -1366,7 +1366,15 @@ void VRenderGLView::DrawVolumes(int peel)
 			TextureRenderer::get_interactive())
 			visitor.setQuotaList(&quota_vd_list);
 		if (m_render_view.get())
+		{
+			std::string sort_value;
+			m_render_view->getValue("sort value", sort_value);
+			long sort_method;
+			m_render_view->getValue("sort method", sort_method);
+			visitor.setSortValue(sort_value);
+			visitor.setSortMethod(sort_method);
 			m_render_view->accept(visitor);
+		}
 		std::vector<FL::DrawVolumeVisitor::DrawVolumeGroupList> list =
 			visitor.getResult();
 		for (auto it = list.begin();

@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Fui/ClipPlanePanel.h>
 #include <Fui/MeshPropPanel.h>
 #include <Global/Global.h>
-#include <Scenegraph/Group.h>
+#include <Scenegraph/Root.h>
 #include <Scenegraph/VolumeData.h>
 #include <Scenegraph/VolumeGroup.h>
 #include <Scenegraph/MeshData.h>
@@ -178,7 +178,7 @@ VRenderFrame::VRenderFrame(
 	FL::Global::instance().getIconList(true).init(true);
 	FL::Global::instance().getIconList(false).init(false);
 	//create root node
-	m_root = FL::ref_ptr<FL::Group>(new FL::Group());
+	m_root = FL::ref_ptr<FL::Root>(new FL::Root());
 	std::string root_str = "Active Datasets";
 	m_root->setName(root_str);
 

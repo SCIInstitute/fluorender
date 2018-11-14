@@ -137,14 +137,14 @@ bool Group::setChild(size_t i, Node* node)
 {
 	if (i < m_children.size() && node != nullptr)
 	{
-		ref_ptr<Node> origNode = m_children[i];
+		Node* origNode = m_children[i].get();
 		origNode->removeParent(this);
 		//parent observes children
 		origNode->removeObserver(this);
 		//notify observers of change
 		Event event;
 		event.init(Event::EVENT_NODE_REMOVED,
-			this, origNode.get());
+			this, origNode);
 		notifyObservers(event);
 
 		m_children[i] = node;

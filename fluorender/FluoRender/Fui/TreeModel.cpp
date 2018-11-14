@@ -162,7 +162,7 @@ bool TreeModel::HasContainerColumns(const wxDataViewItem & item) const
 	if (!item.IsOk())
 		return wxDataViewItem(0);
 	FL::Referenced *refd = (FL::Referenced*)item.GetID();
-	if (refd->className() == std::string("Group"))
+	if (refd->className() == std::string("Root"))
 		return false;
 	else
 		return true;

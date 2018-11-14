@@ -44,6 +44,7 @@ EVT_DATAVIEW_ITEM_BEGIN_DRAG(ID_TreeCtrl, TreePanel::OnBeginDrag)
 EVT_DATAVIEW_ITEM_DROP_POSSIBLE(ID_TreeCtrl, TreePanel::OnDropPossible)
 EVT_DATAVIEW_ITEM_DROP(ID_TreeCtrl, TreePanel::OnDrop)
 EVT_DATAVIEW_ITEM_ACTIVATED(ID_TreeCtrl, TreePanel::OnActivated)
+EVT_DATAVIEW_COLUMN_SORTED(ID_TreeCtrl, TreePanel::OnSorted)
 END_EVENT_TABLE()
 
 TreePanel::TreePanel(wxWindow* frame,
@@ -342,3 +343,26 @@ void TreePanel::OnActivated(wxDataViewEvent &event)
 	break;
 	}
 }
+
+void TreePanel::OnSorted(wxDataViewEvent &event)
+{
+	wxDataViewColumn* col = event.GetDataViewColumn();
+	unsigned int pos = col->GetModelColumn();
+	bool is_sorted = col->IsSortable();
+	bool is_asc = col->IsSortOrderAscending();
+	std::string sort_value;
+	switch (pos)
+	{
+	case 0:
+		sort_value = "name";
+		break;
+	}
+	long sort_method;
+	if (is_sorted)
+		sort_method = is_asc ? 1 : 2;
+	else
+		sort_method = 0;
+	m_tree_model->setValue("sort value", sort_value);
+	m_tree_model->setValue("sort method", sort_method);
+}
+

@@ -46,6 +46,7 @@ namespace FL
 	class Node;
 	class NodeVisitor;
 	class RenderView;
+	class Root;
 
 	typedef std::vector<Node*> ParentList;
 	typedef std::vector<ref_ptr<Node>> NodeList;
@@ -86,6 +87,8 @@ namespace FL
 		virtual const Annotations* asAnnotations() const { return 0; }
 		virtual RenderView* asRenderView() { return 0; }
 		virtual const RenderView* asRenderView() const { return 0; }
+		virtual Root* asRoot() { return 0; }
+		virtual const Root* asRoot() const { return 0; }
 
 		virtual void accept(NodeVisitor& nv);
 		virtual void ascend(NodeVisitor& nv);
