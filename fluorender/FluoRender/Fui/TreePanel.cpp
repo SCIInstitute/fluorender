@@ -45,6 +45,7 @@ EVT_DATAVIEW_ITEM_DROP_POSSIBLE(ID_TreeCtrl, TreePanel::OnDropPossible)
 EVT_DATAVIEW_ITEM_DROP(ID_TreeCtrl, TreePanel::OnDrop)
 EVT_DATAVIEW_ITEM_ACTIVATED(ID_TreeCtrl, TreePanel::OnActivated)
 EVT_DATAVIEW_COLUMN_SORTED(ID_TreeCtrl, TreePanel::OnSorted)
+EVT_DATAVIEW_COLUMN_HEADER_RIGHT_CLICK(ID_TreeCtrl, TreePanel::OnHeaderRightClick)
 END_EVENT_TABLE()
 
 TreePanel::TreePanel(wxWindow* frame,
@@ -364,5 +365,11 @@ void TreePanel::OnSorted(wxDataViewEvent &event)
 		sort_method = 0;
 	m_tree_model->setValue("sort value", sort_value);
 	m_tree_model->setValue("sort method", sort_method);
+}
+
+void TreePanel::OnHeaderRightClick(wxDataViewEvent &event)
+{
+	m_tree_model->setValue("sort method", long(0));
+	event.Skip();
 }
 
