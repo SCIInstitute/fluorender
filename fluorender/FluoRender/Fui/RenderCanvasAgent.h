@@ -58,8 +58,8 @@ namespace FUI
 	protected:
 		VRenderGLView &gl_view_;
 
+		virtual void handleValueChanged(FL::Event& event);
 		void OnBoundsChanged(FL::Event& event);
-		void OnValueChanged(FL::Event& event);
 		void OnSceneChanged(FL::Event& event);
 	};
 }

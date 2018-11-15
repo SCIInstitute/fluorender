@@ -60,16 +60,17 @@ VRenderGLView &RenderCanvasAgent::getView()
 	return gl_view_;
 }
 
-void RenderCanvasAgent::OnBoundsChanged(FL::Event& event)
+void RenderCanvasAgent::handleValueChanged(FL::Event& event)
 {
-	gl_view_.InitView(INIT_BOUNDS | INIT_CENTER);
-}
-
-void RenderCanvasAgent::OnValueChanged(FL::Event& event)
-{
+	Object::handleValueChanged(event);
 	gl_view_.m_force_clear = true;
 	gl_view_.m_interactive = true;
 	gl_view_.RefreshGL(41);
+}
+
+void RenderCanvasAgent::OnBoundsChanged(FL::Event& event)
+{
+	gl_view_.InitView(INIT_BOUNDS | INIT_CENTER);
 }
 
 void RenderCanvasAgent::OnSceneChanged(FL::Event& event)

@@ -37,6 +37,9 @@ Object::Object():
 	setDefaultValueChangingFunction(
 		std::bind(&Object::handleValueChanging,
 			this, std::placeholders::_1));
+	setDefaultValueChangedFunction(
+		std::bind(&Object::handleValueChanged,
+			this, std::placeholders::_1));
 }
 
 Object::Object(const Object& obj, const CopyOp& copyop, bool copy_values):
@@ -49,6 +52,9 @@ Object::Object(const Object& obj, const CopyOp& copyop, bool copy_values):
 		copyValues(obj, copyop);
 	setDefaultValueChangingFunction(
 		std::bind(&Object::handleValueChanging,
+			this, std::placeholders::_1));
+	setDefaultValueChangedFunction(
+		std::bind(&Object::handleValueChanged,
 			this, std::placeholders::_1));
 }
 
@@ -114,7 +120,27 @@ void Object::handleValueChanging(Event& event)
 		return;
 	if (value->isReferenced() &&
 		containsValue(value))
-		value->removeObserver(this);
+	{
+		Referenced* refd =
+			(dynamic_cast<TemplateValue< Referenced * > *>(value))->getValue();
+		if (refd)
+			refd->removeObserver(this);
+	}
+}
+
+void Object::handleValueChanged(Event& event)
+{
+	Value* value = dynamic_cast<Value*>(event.sender);
+	if (!value)
+		return;
+	if (value->isReferenced() &&
+		containsValue(value))
+	{
+		Referenced* refd =
+			(dynamic_cast<TemplateValue< Referenced * > *>(value))->getValue();
+		if (refd)
+			refd->addObserver(this);
+	}
 }
 
 //add functions

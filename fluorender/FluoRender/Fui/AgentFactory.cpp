@@ -161,7 +161,7 @@ RenderCanvasAgent* AgentFactory::getOrAddRenderCanvasAgent(const std::string &na
 			std::bind(&RenderCanvasAgent::OnBoundsChanged,
 				render_canvas_agent, std::placeholders::_1));
 		render_canvas_agent->setDefaultValueChangedFunction(
-			std::bind(&RenderCanvasAgent::OnValueChanged,
+			std::bind(&RenderCanvasAgent::handleValueChanged,
 				render_canvas_agent, std::placeholders::_1));
 		render_canvas_agent->setNodeAddedFunction(
 			std::bind(&RenderCanvasAgent::OnSceneChanged,
