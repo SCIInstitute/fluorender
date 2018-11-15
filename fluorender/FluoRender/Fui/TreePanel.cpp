@@ -125,7 +125,7 @@ TreePanel::TreePanel(wxWindow* frame,
 			wxDATAVIEW_COL_REORDERABLE |
 			wxDATAVIEW_COL_RESIZABLE);
 	m_tree_ctrl->AppendColumn(column1);
-	m_tree_ctrl->AllowMultiColumnSort(true);
+	//m_tree_ctrl->AllowMultiColumnSort(true);
 
 	//organize positions
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
@@ -348,6 +348,8 @@ void TreePanel::OnActivated(wxDataViewEvent &event)
 void TreePanel::OnSorted(wxDataViewEvent &event)
 {
 	wxDataViewColumn* col = event.GetDataViewColumn();
+	if (!col)
+		return;
 	unsigned int pos = col->GetModelColumn();
 	bool is_sorted = col->IsSortable();
 	bool is_asc = col->IsSortOrderAscending();
@@ -369,6 +371,10 @@ void TreePanel::OnSorted(wxDataViewEvent &event)
 
 void TreePanel::OnHeaderRightClick(wxDataViewEvent &event)
 {
+	wxDataViewColumn* col = event.GetDataViewColumn();
+	if (!col)
+		return;
+	col->UnsetAsSortKey();
 	m_tree_model->setValue("sort method", long(0));
 	event.Skip();
 }
