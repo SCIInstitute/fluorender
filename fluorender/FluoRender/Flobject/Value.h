@@ -143,8 +143,6 @@ public:
 		auto it = _value_map.find(type);
 		if (it != _value_map.end())
 			_etype = it->second;
-		//if constexpr (_etype == vt_pReferenced && _value)
-		//	(reinterpret_cast<Referenced*>(_value))->addObserver(this);
 	}
 
 	TemplateValue<T>* clone()
@@ -162,15 +160,9 @@ public:
 			Event changing_event(event);
 			changing_event.type = Event::EVENT_VALUE_CHANGING;
 			notifyObservers(changing_event);
-			//if (_etype == vt_pReferenced &&
-			//	(reinterpret_cast<Referenced*>(&_value)) != 0)
-			//	(reinterpret_cast<Referenced*>(&_value))->removeObserver(this);
 			_value = value;
 			event.type = Event::EVENT_VALUE_CHANGED;
 			notifyObservers(event);
-			//if (_etype == vt_pReferenced &&
-			//	(reinterpret_cast<Referenced*>(&_value)) != 0)
-			//	(reinterpret_cast<Referenced*>(&_value))->addObserver(this);
 		}
 	}
 
@@ -182,6 +174,7 @@ public:
 			return _value == value;
 		else
 		{
+			//better not to create a new template value for comparison
 			ref_ptr<TemplateValue<T>> pvalue(new TemplateValue<T>(_name, _type, value));
 			return *this == *pvalue;
 		}
@@ -217,8 +210,6 @@ public:
 	bool addValue(Value* value);
 	bool removeValue(Value* value);
 	bool removeValue(const std::string &name);
-	//reset Referenced pointer to NULL
-	//bool resetRefPtr(Referenced* value);
 
 	//add value functions
 	bool addValue(ValueTuple&);

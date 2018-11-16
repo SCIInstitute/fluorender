@@ -66,9 +66,6 @@ Object::~Object()
 void Object::objectDeleted(Event& event)
 {
 	Referenced* refd = event.sender;
-	//if (refd)
-	//	_value_set->resetRefPtr(refd);
-
 	//remove observee
 	removeObservee(refd);
 }
@@ -83,8 +80,6 @@ void Object::handleEvent(Event& event)
 	std::string value_name;
 	if (value)
 		value_name = value->getName();
-	//else
-	//	value_name = event.value_name;
 
 	switch (event.type)
 	{
@@ -111,36 +106,6 @@ void Object::processNotification(Event& event)
 	if (event.type == Event::EVENT_VALUE_CHANGING)
 		return;
 	notifyObservers(event);
-}
-
-void Object::handleValueChanging(Event& event)
-{
-	//Value* value = dynamic_cast<Value*>(event.sender);
-	//if (!value)
-	//	return;
-	//if (value->isReferenced() &&
-	//	containsValue(value))
-	//{
-	//	Referenced* refd =
-	//		(dynamic_cast<TemplateValue< Referenced * > *>(value))->getValue();
-	//	if (refd)
-	//		refd->removeObserver(this);
-	//}
-}
-
-void Object::handleValueChanged(Event& event)
-{
-	//Value* value = dynamic_cast<Value*>(event.sender);
-	//if (!value)
-	//	return;
-	//if (value->isReferenced() &&
-	//	containsValue(value))
-	//{
-	//	Referenced* refd =
-	//		(dynamic_cast<TemplateValue< Referenced * > *>(value))->getValue();
-	//	if (refd)
-	//		refd->addObserver(this);
-	//}
 }
 
 //add functions
@@ -191,7 +156,6 @@ bool Object::addValue(ValueTuple &vt)
 //actual add functions
 bool Object::addValue(const std::string &name, Referenced* value)
 {
-	//if (value) value->addObserver(this);
 	OBJECT_ADD_VALUE_BODY;
 }
 

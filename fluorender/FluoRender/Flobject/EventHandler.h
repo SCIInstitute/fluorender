@@ -94,9 +94,7 @@ namespace FL
 				//default value changing function is always called here
 				//this is to allow observers to a referenced value to be removed
 				//otherwise, there is no value-related function so far
-				//event.push(const_cast<EventHandler*>(this));
 				default_value_changing_function_(event);
-				//event.pop();
 			}
 
 			auto map_it = value_changing_functions_.find(name);
@@ -105,9 +103,7 @@ namespace FL
 			{
 				auto map_val = map_it->second;
 				//return map_val(std::forward<Args>(args)...);
-				//event.push(const_cast<EventHandler*>(this));
 				map_val(event);
-				//event.pop();
 			}
 		}
 
@@ -122,9 +118,7 @@ namespace FL
 			{
 				auto map_val = map_it->second;
 				//return map_val(std::forward<Args>(args)...);
-				//event.push(const_cast<EventHandler*>(this));
 				map_val(event);
-				//event.pop();
 			}
 			
 			if (default_value_changed_function_)
@@ -132,9 +126,7 @@ namespace FL
 				//here, the default value changed function is used when
 				//any named value is changed, for example, when the render
 				//view needs update
-				//event.push(const_cast<EventHandler*>(this));
 				default_value_changed_function_(event);
-				//event.pop();
 			}
 		}
 
@@ -142,9 +134,7 @@ namespace FL
 		{
 			if (node_added_function_)
 			{
-				//event.push(const_cast<EventHandler*>(this));
 				node_added_function_(event);
-				//event.pop();
 			}
 		}
 
@@ -152,9 +142,7 @@ namespace FL
 		{
 			if (node_removed_function_)
 			{
-				//event.push(const_cast<EventHandler*>(this));
 				node_removed_function_(event);
-				//event.pop();
 			}
 		}
 

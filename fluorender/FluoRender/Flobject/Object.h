@@ -102,16 +102,7 @@ public:
 		{
 			Value * value = it->second.get();
 			if (value)
-			{
-				//if (value->isReferenced())
-				//{
-				//	Referenced* refd;
-				//	getValue(value->getName(), &refd);
-				//	if (refd)
-				//		refd->removeObserver(this);
-				//}
 				value->removeObserver(this);
-			}
 		}
 		_value_set->clear();
 	}
@@ -241,13 +232,6 @@ public:
 		if (_value_set && _value_set->addValue(value))
 		{
 			//also observe the values
-			//if (value->isReferenced())
-			//{
-			//	Referenced* refd;
-			//	getValue(value->getName(), &refd);
-			//	if (refd)
-			//		refd->addObserver(this);
-			//}
 			value->addObserver(this);
 			return true;
 		}
@@ -278,13 +262,6 @@ public:
 		if (value)
 		{
 			//remove observer
-			//if (value->isReferenced())
-			//{
-			//	Referenced* refd;
-			//	getValue(value->getName(), &refd);
-			//	if (refd)
-			//		refd->removeObserver(this);
-			//}
 			value->removeObserver(this);
 			return _value_set->removeValue(value);
 		}
@@ -338,8 +315,8 @@ protected:
 
 	virtual void handleEvent(Event& event);
 
-	virtual void handleValueChanging(Event& event);
-	virtual void handleValueChanged(Event& event);
+	virtual void handleValueChanging(Event& event) {};
+	virtual void handleValueChanged(Event& event) {};
 
 	/** ID of an object is non-zero. */
 	unsigned int _id;

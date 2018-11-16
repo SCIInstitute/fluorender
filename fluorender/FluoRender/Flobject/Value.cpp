@@ -205,24 +205,6 @@ bool ValueSet::removeValue(const std::string &name)
 		return false;
 }
 
-//reset Referenced pointer to NULL
-//bool ValueSet::resetRefPtr(Referenced* value)
-//{
-//	if (!value) return false;
-//	for (Values::iterator it=_values.begin();
-//		it!=_values.end(); ++it)
-//	{
-//		if (it->second->_etype == Value::vt_pReferenced &&
-//			(dynamic_cast<TemplateValue<Referenced*>*>(it->second.get()))->getValue() == value)
-//		{
-//			(dynamic_cast<TemplateValue<Referenced*>*>(it->second.get()))->setValue(0, Event(Event::NOTIFY_NONE));
-//			return true;
-//		}
-//	}
-//
-//	return false;
-//}
-
 //add value functions
 bool ValueSet::addValue(ValueTuple& vt)
 {
