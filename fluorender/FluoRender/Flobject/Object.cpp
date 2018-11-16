@@ -352,7 +352,10 @@ bool Object::setValue(ValueTuple &vt, Event& event)
 			if (!event.sender) \
 				event.init(Event::EVENT_VALUE_CHANGING, \
 					this, getValue(name), true); \
+			else \
+				event.push(this); \
 			result = _value_set->setValue(name, value, event); \
+			event.pop(); \
 		} \
 		return result; \
 	} \
@@ -364,17 +367,16 @@ bool Object::setValue(const std::string &name, Referenced* value, Event& event)
 	Referenced* old_value;
 	if (getValue(name, &old_value) && value != old_value)
 	{
-		//if (old_value)
-		//	old_value->removeObserver(this);
-		//if (value)
-		//	value->addObserver(this);
 		bool result = false;
 		if (_value_set)
 		{
 			if (!event.sender)
 				event.init(Event::EVENT_VALUE_CHANGING,
 					this, getValue(name), true);
+			else
+				event.push(this);
 			result = _value_set->setValue(name, value, event);
+			event.pop();
 		}
 		return result;
 	}
@@ -540,7 +542,10 @@ bool Object::toggleValue(const std::string &name, bool &value, Event& event)
 		if (!event.sender)
 			event.init(Event::EVENT_VALUE_CHANGING,
 				this, getValue(name), true);
+		else
+			event.push(this);
 		result = _value_set->toggleValue(name, value, event);
+		event.pop();
 	}
 	return result;
 }
