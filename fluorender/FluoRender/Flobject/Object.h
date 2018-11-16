@@ -103,13 +103,13 @@ public:
 			Value * value = it->second.get();
 			if (value)
 			{
-				if (value->isReferenced())
-				{
-					Referenced* refd;
-					getValue(value->getName(), &refd);
-					if (refd)
-						refd->removeObserver(this);
-				}
+				//if (value->isReferenced())
+				//{
+				//	Referenced* refd;
+				//	getValue(value->getName(), &refd);
+				//	if (refd)
+				//		refd->removeObserver(this);
+				//}
 				value->removeObserver(this);
 			}
 		}
@@ -241,13 +241,13 @@ public:
 		if (_value_set && _value_set->addValue(value))
 		{
 			//also observe the values
-			if (value->isReferenced())
-			{
-				Referenced* refd;
-				getValue(value->getName(), &refd);
-				if (refd)
-					refd->addObserver(this);
-			}
+			//if (value->isReferenced())
+			//{
+			//	Referenced* refd;
+			//	getValue(value->getName(), &refd);
+			//	if (refd)
+			//		refd->addObserver(this);
+			//}
 			value->addObserver(this);
 			return true;
 		}
@@ -278,13 +278,13 @@ public:
 		if (value)
 		{
 			//remove observer
-			if (value->isReferenced())
-			{
-				Referenced* refd;
-				getValue(value->getName(), &refd);
-				if (refd)
-					refd->removeObserver(this);
-			}
+			//if (value->isReferenced())
+			//{
+			//	Referenced* refd;
+			//	getValue(value->getName(), &refd);
+			//	if (refd)
+			//		refd->removeObserver(this);
+			//}
 			value->removeObserver(this);
 			return _value_set->removeValue(value);
 		}

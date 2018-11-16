@@ -143,6 +143,8 @@ public:
 		auto it = _value_map.find(type);
 		if (it != _value_map.end())
 			_etype = it->second;
+		//if constexpr (_etype == vt_pReferenced && _value)
+		//	(reinterpret_cast<Referenced*>(_value))->addObserver(this);
 	}
 
 	TemplateValue<T>* clone()
@@ -160,9 +162,15 @@ public:
 			Event changing_event(event);
 			changing_event.type = Event::EVENT_VALUE_CHANGING;
 			notifyObservers(changing_event);
+			//if (_etype == vt_pReferenced &&
+			//	(reinterpret_cast<Referenced*>(&_value)) != 0)
+			//	(reinterpret_cast<Referenced*>(&_value))->removeObserver(this);
 			_value = value;
 			event.type = Event::EVENT_VALUE_CHANGED;
 			notifyObservers(event);
+			//if (_etype == vt_pReferenced &&
+			//	(reinterpret_cast<Referenced*>(&_value)) != 0)
+			//	(reinterpret_cast<Referenced*>(&_value))->addObserver(this);
 		}
 	}
 
@@ -210,7 +218,7 @@ public:
 	bool removeValue(Value* value);
 	bool removeValue(const std::string &name);
 	//reset Referenced pointer to NULL
-	bool resetRefPtr(Referenced* value);
+	//bool resetRefPtr(Referenced* value);
 
 	//add value functions
 	bool addValue(ValueTuple&);
@@ -474,8 +482,15 @@ inline bool Value::sync(Event& event)
 	switch (_etype)
 	{
 	case vt_pReferenced:
-		dynamic_cast<TemplateValue<Referenced*>*>(this)->setValue(
-			dynamic_cast<TemplateValue<Referenced*>*>(value)->getValue(), event);
+	{
+		Referenced* old_refd = dynamic_cast<TemplateValue<Referenced*>*>(this)->getValue();
+		Referenced* refd = dynamic_cast<TemplateValue<Referenced*>*>(value)->getValue();
+		if (refd != old_refd && old_refd)
+			old_refd->removeObserver(this);
+		dynamic_cast<TemplateValue<Referenced*>*>(this)->setValue(refd, event);
+		if (refd != old_refd && refd)
+			refd->addObserver(this);
+	}
 		break;
 	case vt_bool:
 		dynamic_cast<TemplateValue<bool>*>(this)->setValue(

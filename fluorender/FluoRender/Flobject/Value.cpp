@@ -101,6 +101,13 @@ Value* Value::clone()
 void Value::objectDeleted(Event& event)
 {
 	Referenced* refd = event.sender;
+	if (refd && _etype == vt_pReferenced &&
+		(dynamic_cast<TemplateValue<Referenced*>*>(
+		this))->getValue() == refd)
+	{
+		refd->removeObserver(this);
+		(dynamic_cast<TemplateValue<Referenced*>*>(this))->setValue(0, Event(Event::NOTIFY_NONE));
+	}
 
 	//remove observee
 	removeObservee(refd);
@@ -112,14 +119,10 @@ void Value::processNotification(Event& event)
 	if (!refd)
 		return;
 
-	if (event.getNotifyFlags() & Event::NOTIFY_VALUE)
+	if (event.getNotifyFlags() & Event::NOTIFY_VALUE &&
+		event.type == Event::EVENT_VALUE_CHANGED)
 	{
-		switch (event.type)
-		{
-		case Event::EVENT_VALUE_CHANGED:
-			sync(event);
-			break;
-		}
+		sync(event);
 	}
 }
 
@@ -203,22 +206,22 @@ bool ValueSet::removeValue(const std::string &name)
 }
 
 //reset Referenced pointer to NULL
-bool ValueSet::resetRefPtr(Referenced* value)
-{
-	if (!value) return false;
-	for (Values::iterator it=_values.begin();
-		it!=_values.end(); ++it)
-	{
-		if (it->second->_etype == Value::vt_pReferenced &&
-			(dynamic_cast<TemplateValue<Referenced*>*>(it->second.get()))->getValue() == value)
-		{
-			(dynamic_cast<TemplateValue<Referenced*>*>(it->second.get()))->setValue(0, Event());
-			return true;
-		}
-	}
-
-	return false;
-}
+//bool ValueSet::resetRefPtr(Referenced* value)
+//{
+//	if (!value) return false;
+//	for (Values::iterator it=_values.begin();
+//		it!=_values.end(); ++it)
+//	{
+//		if (it->second->_etype == Value::vt_pReferenced &&
+//			(dynamic_cast<TemplateValue<Referenced*>*>(it->second.get()))->getValue() == value)
+//		{
+//			(dynamic_cast<TemplateValue<Referenced*>*>(it->second.get()))->setValue(0, Event(Event::NOTIFY_NONE));
+//			return true;
+//		}
+//	}
+//
+//	return false;
+//}
 
 //add value functions
 bool ValueSet::addValue(ValueTuple& vt)
@@ -397,6 +400,8 @@ bool ValueSet::addValue(const std::string &name, Referenced* value)
 	{
 		TemplateValue<Referenced*>* val = new TemplateValue<Referenced*>(
 			name, "Referenced*", value);
+		if (value)
+			value->addObserver(val);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
 	}
@@ -908,7 +913,12 @@ bool ValueSet::setValue(const std::string &name, Referenced* value, Event& event
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_pReferenced)
 	{
+		Referenced* old_refd = dynamic_cast<TemplateValue<Referenced*>*>(val)->getValue();
+		if (old_refd != value && old_refd)
+			old_refd->removeObserver(val);
 		(dynamic_cast<TemplateValue<Referenced*>*>(val))->setValue(value, event);
+		if (old_refd != value && value)
+			value->addObserver(val);
 		return true;
 	}
 	else

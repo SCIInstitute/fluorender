@@ -61,17 +61,20 @@ namespace FUI
 
 		virtual void setObject(FL::Object* obj)
 		{
-			FL::Object* old_obj;
+			FL::Object* old_obj = 0;
 			if (getValue("asset", (FL::Referenced**)&old_obj) &&
 				old_obj == obj)
 				return;
 
+			if (old_obj)
+				old_obj->removeObserver(this);
 			clearValues();
 			addValue("asset", obj);
 			if (obj)
 			{
 				copyValues(*obj);//shallow copy to share values
 				UpdateAllSettings();
+				obj->addObserver(this);
 			}
 		}
 		virtual FL::Object* getObject()

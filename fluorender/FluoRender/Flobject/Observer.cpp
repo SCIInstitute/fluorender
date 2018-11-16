@@ -112,10 +112,13 @@ Referenced* ObserverSet::addRefLock()
 
 void ObserverSet::signalObjectDeleted(Event& event)
 {
-	for (Observers::iterator itr = _observers.begin();
-		itr != _observers.end(); ++itr)
+	for (auto itr = _observers.rbegin();
+		itr != _observers.rend(); ++itr)
 	{
 		(*itr)->objectDeleted(event);
+		//because observers are also being removed
+		if (_observers.empty())
+			break;
 	}
 	_observers.clear();
 	_observedObject = 0;
@@ -123,6 +126,9 @@ void ObserverSet::signalObjectDeleted(Event& event)
 
 void ObserverSet::notifyObserver(Event& event)
 {
+	if (event.getNotifyFlags() == Event::NOTIFY_NONE)
+		return;
+
 	for (Observers::iterator itr = _observers.begin();
 		itr != _observers.end(); ++itr)
 	{

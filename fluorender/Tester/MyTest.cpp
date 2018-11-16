@@ -89,6 +89,7 @@ void MyTest()
 	obj1->setValue("value1", 5.0); cout << "obj1->setValue(\"value1\", 5.0);" << endl;
 	obj1->setValue("value3", 7.0); cout << "obj1->setValue(\"value3\", 7.0);" << endl;
 	obj2->setValue("value1", 8.0); cout << "obj2->setValue(\"value1\", 8.0);" << endl;
+	obj3->setValue("value2", 9.0); cout << "obj3->setValue(\"value2\", 9.0);" << endl;
 	group->accept(visitor);
 	cin.get();
 
@@ -98,8 +99,8 @@ void MyTest()
 	group->syncAllValues(obj1); cout << "group->syncAllValues(obj1);" << endl;
 	group->syncAllValues(obj2); cout << "group->syncAllValues(obj2);" << endl;
 	group->syncAllValues(obj3); cout << "group->syncAllValues(obj3);" << endl;
-	obj1->setValue("value1", 9.0); cout << "obj1->setValue(\"value1\", 9.0);" << endl;
-	obj3->setValue("value3", 11.0); cout << "obj1->setValue(\"value3\", 11.0);" << endl;
+	obj1->setValue("value1", 11.0); cout << "obj1->setValue(\"value1\", 11.0);" << endl;
+	obj3->setValue("value3", 10.0); cout << "obj1->setValue(\"value3\", 10.0);" << endl;
 	obj1->setValue("object", (Referenced*)obj2); cout << "obj1->setValue(\"object\", obj2);" << endl;
 	group->accept(visitor);
 	cin.get();
