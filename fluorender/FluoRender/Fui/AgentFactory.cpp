@@ -92,15 +92,18 @@ TreeModel* AgentFactory::getOrAddTreeModel(const std::string &name, wxWindow &wi
 	if (tree_model)
 	{
 		tree_model->setName(name);
-		tree_model->setValueChangedFunction("display",
+		tree_model->setDefaultValueChangedFunction(
 			std::bind(&TreeModel::OnDisplayChanged,
 				tree_model, std::placeholders::_1));
-		tree_model->setValueChangedFunction("color",
-			std::bind(&TreeModel::OnDisplayChanged,
-				tree_model, std::placeholders::_1));
-		tree_model->setValueChangedFunction("randomize color",
-			std::bind(&TreeModel::OnDisplayChanged,
-				tree_model, std::placeholders::_1));
+		//tree_model->setValueChangedFunction("display",
+		//	std::bind(&TreeModel::OnDisplayChanged,
+		//		tree_model, std::placeholders::_1));
+		//tree_model->setValueChangedFunction("color",
+		//	std::bind(&TreeModel::OnDisplayChanged,
+		//		tree_model, std::placeholders::_1));
+		//tree_model->setValueChangedFunction("randomize color",
+		//	std::bind(&TreeModel::OnDisplayChanged,
+		//		tree_model, std::placeholders::_1));
 		tree_model->setNodeAddedFunction(
 			std::bind(&TreeModel::OnItemAdded,
 				tree_model, std::placeholders::_1));
