@@ -122,6 +122,9 @@ void Value::processNotification(Event& event)
 	if (event.getNotifyFlags() & Event::NOTIFY_VALUE &&
 		event.type == Event::EVENT_VALUE_CHANGED)
 	{
+		//I have tried to notify the observers of the value
+		//but that is very dangerous, as an infinite loop may occur
+		//here value is used to stop notifications when no change is detected
 		sync(event);
 	}
 }

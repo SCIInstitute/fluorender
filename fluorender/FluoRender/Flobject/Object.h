@@ -88,7 +88,6 @@ public:
 			else
 				value = it->second.get();
 			addValue(value);
-			//value->notify();//not sure why it needs notification, removed
 		}
 	}
 
@@ -204,7 +203,7 @@ public:
 	bool getValue(const std::string &name, FLTYPE::GLint4 &value);
 
 	//sync value
-	//observer's value updates when this updates (this -> obj)
+	//observer's value updates when this changes (data flow is one-way: this -> obj)
 	bool syncValue(const std::string &name, Object* obj);
 	bool unsyncValue(const std::string &name, Object* obj);
 	bool syncValues(const ValueCollection &names, Object* obj);
