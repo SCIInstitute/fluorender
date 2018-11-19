@@ -621,6 +621,15 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 
 	group1->Add(10, 5);
 #ifdef _WIN32
+    st = new wxStaticText(page, 0, "Path to folder with \"ij.jar\" (e.g., \"ImageJ\\ij.jar\") or \"Fiji.app\\jars\\ij.jar\":");
+#else
+    st = new wxStaticText(page, 0, "Path to folder \"ImageJ.app\" or \"Fiji.app\" (e.g., \"ImageJ/ImageJ.app\" or \"Fiji.app\") :");
+#endif
+    group1->Add(st);
+    group1->Add(sizer1_2, 0, wxEXPAND);
+    group1->Add(10, 10);
+
+#ifdef _WIN32
 	st = new wxStaticText(page, 0, "Path to file \"jvm.dll\" (e.g., \"ImageJ\\jre\\bin\\server\\jvm.dll\"):");
 #else
 	st = new wxStaticText(page, 0, "Path to file \"libjvm.dylib\" (e.g., \"ImageJ/jre/lib/server/libjvm.dylib\"):");
@@ -628,14 +637,7 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 	group1->Add(st);
 	group1->Add(sizer1_1, 0, wxEXPAND);
 	group1->Add(10, 10);
-#ifdef _WIN32
-	st = new wxStaticText(page, 0, "Path to file \"ij.jar\" (e.g., \"ImageJ\\ij.jar\"):");
-#else
-	st = new wxStaticText(page, 0, "Path to file \"ImageJ.app\" (e.g., \"ImageJ/ImageJ.app\"):");
-#endif
-	group1->Add(st);
-	group1->Add(sizer1_2, 0, wxEXPAND);
-	group1->Add(10, 10);
+    
 #ifdef _WIN32
 	st = new wxStaticText(page, 0, "Path to file \"bioformats_package.jar\" (e.g., \"ImageJ\\plugins\\bioformats_package.jar\"):");
 #else
@@ -1037,8 +1039,17 @@ void SettingDlg::GetSettings()
 		m_java_jvm_text->SetValue(m_jvm_path);
 		m_java_ij_text->SetValue(m_ij_path);
 		m_java_bioformats_text->SetValue(m_bioformats_path);
-	}	
+	}
+    
+    //TODO: Modify these to test on mac.
+    //m_ij_path = "/Users/dev/Downloads/ImageJ/ImageJ.app";
+    //m_java_ij_text->SetValue(m_ij_path);
 
+    //m_jvm_path = "/Users/dev/Downloads/ImageJ/jre/lib/server/libjvm.dylib";
+    //m_java_jvm_text->SetValue(m_jvm_path.c_str());
+    
+    //m_bioformats_path = "/Users/dev/Downloads/ImageJ/plugins/bioformats_package.jar";
+    //m_java_bioformats_text->SetValue(m_bioformats_path.c_str());
 	UpdateUI();
 }
 
@@ -2081,7 +2092,7 @@ void SettingDlg::onJavaIJBrowse(wxCommandEvent &event)
 	{
 		wxString filename = fopendlg->GetPath();
 #ifdef _DARWIN
-        filename = filename + "/Contents/Java/ij.jar";
+        //filename = filename + "/Contents/Java/ij.jar";
 #endif
 		m_java_ij_text->SetValue(filename);
 	}

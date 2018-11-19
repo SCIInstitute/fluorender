@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <stdexcept>
 #include <algorithm>
 #include <stdint.h>
+#include <cmath>
 #include <string>
 
 #include "JVMInitializer.h"

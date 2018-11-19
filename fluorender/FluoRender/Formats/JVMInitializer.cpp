@@ -5,7 +5,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-static struct stat info;
 JVMInitializer* JVMInitializer::m_pJVMInstance = nullptr;
 JavaVM* JVMInitializer::m_pJvm = nullptr;
 JNIEnv* JVMInitializer::m_pEnv = nullptr;
@@ -55,16 +54,22 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
 		jvm_path = args[0]; //inp_settingDlg->getJVMPath();
 		ij_path = args[1]; //inp_settingDlg->getIJPath();
 		bioformats_path = args[2]; //inp_settingDlg->getBioformatsPath();
-
-		std::string name = ij_path;		
-		if(FILE *file = fopen((name + GETSLASH() +"ij.jar").c_str(), "r")) {			
+        std::string name = ij_path;
+        // For Mac: ij_path is going to be ij.app or fiji.app.
+        
+#ifdef _WIN32
+#else
+        name = name + GETSLASH() + "Contents" + GETSLASH() + "Java";
+#endif
+		if(FILE *file = fopen((name + GETSLASH() +"ij.jar").c_str(), "r")) {
+            std::cout << "Inside here.";
 			m_with_fiji = false;
-			jvm_ij_path = name + GETSLASH() + "ij.jar";
+			jvm_ij_path = name + GETSLASH() +"ij.jar";
 			jvm_bioformats_path = bioformats_path;
 			fclose(file);
 		}
-		else {			
-			name += GETSLASH() + std::string("jars") + GETSLASH() + std::string("bio-formats");
+		else {
+			name = ij_path + GETSLASH() + std::string("jars") + GETSLASH() + std::string("bio-formats");
 			wxDir dir(name);
 			if (!dir.IsOpened()) {
 				m_with_fiji = false;
@@ -118,10 +123,29 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
 					if (filename.Matches("bio-formats_plugins-*.jar"))
 						jvm_bioformats_path += getPathSeparator() + dir.GetNameWithSep() + filename;
 					cont = dir.GetNext(&filename);
-				}				
-			}			
+				}
+                //Checking for jvm path.
+                if(wxIsEmpty(jvm_path)){
+                    jvm_path = ij_path + GETSLASH() + "java" + GETSLASH() + "macosx";
+                    dir.Open(jvm_path);
+                    cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_DIRS);
+                    while (cont)
+                    {
+                        if (filename.Matches("jdk*")){
+                            jvm_path = dir.GetNameWithSep() + filename + GETSLASH();
+                        }
+                        cont = dir.GetNext(&filename);
+                    }
+                    jvm_path = jvm_path + "jre" + GETSLASH() + "Contents" + GETSLASH() + "HOME" + GETSLASH() + "lib" + GETSLASH() + "server" + GETSLASH() + "libjvm.dylib";
+                }
+			}
+            //std::cout << jvm_path << "\n";
+            //std::cout << jvm_ij_path;
+            //std::cout << jvm_bioformats_path;
 		}
 	}
+    
+    // The jvm lib is inside the fiji.app. So we actually need only the first path.
 
 	//Loading JVM library and methods.
 #ifdef _DARWIN
@@ -160,7 +184,13 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
         std::cout << "Err: " << error << std::endl;
 #endif
 
-	using namespace std;	
+    
+    std::cout << "\n";
+    std::cout << jvm_path << "JVM\n";
+    std::cout << jvm_ij_path << "IJ\n";
+    std::cout << jvm_bioformats_path << "BIO\n";
+    std::cout << "\n";
+	using namespace std;
 	JavaVMOption* options = new JavaVMOption[1];
 	//Geting absolute path to class file.
 	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
