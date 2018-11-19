@@ -2051,6 +2051,11 @@ void VRenderGLView::Set2dWeights()
 //segment volumes in current view
 void VRenderGLView::Segment()
 {
+	if (!m_cur_vol)
+		return;
+	else
+		m_selector.SetVolume(m_cur_vol);
+
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
