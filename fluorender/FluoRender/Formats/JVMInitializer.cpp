@@ -147,9 +147,6 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
 #endif
                 }
 			}
-            //std::cout << jvm_path << "\n";
-            //std::cout << jvm_ij_path;
-            //std::cout << jvm_bioformats_path;
 		}
 	}
     
