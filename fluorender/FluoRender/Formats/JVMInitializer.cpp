@@ -126,7 +126,11 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
 				}
                 //Checking for jvm path.
                 if(wxIsEmpty(jvm_path)){
+#ifdef _DARWIN
                     jvm_path = ij_path + GETSLASH() + "java" + GETSLASH() + "macosx";
+#else
+					jvm_path = ij_path + GETSLASH() + "java" + GETSLASH() + "win64";
+#endif
                     dir.Open(jvm_path);
                     cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_DIRS);
                     while (cont)
@@ -136,7 +140,11 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
                         }
                         cont = dir.GetNext(&filename);
                     }
+#ifdef _DARWIN
                     jvm_path = jvm_path + "jre" + GETSLASH() + "Contents" + GETSLASH() + "HOME" + GETSLASH() + "lib" + GETSLASH() + "server" + GETSLASH() + "libjvm.dylib";
+#else
+					jvm_path = jvm_path + "jre" + GETSLASH() + "bin" + GETSLASH() + "server" + GETSLASH() + "jvm.dll";
+#endif
                 }
 			}
             //std::cout << jvm_path << "\n";
@@ -199,9 +207,6 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
 	imageJPath.append(jvm_ij_path + getPathSeparator());
 	imageJPath.append(jvm_bioformats_path);
     
-    //imageJPath.append(exePath + GETSLASH() + "Java_Code" + GETSLASH() + "ij.jar" + getPathSeparator());
-    //imageJPath.append(exePath + GETSLASH() + "Java_Code" + GETSLASH() + "SlideBook6Reader.jar" + getPathSeparator());
-    //imageJPath.append(exePath + GETSLASH() + "Java_Code" + GETSLASH() + "bioformats_package.jar" + getPathSeparator());
     std::cout << imageJPath << std::endl;
     
 	options[0].optionString = const_cast<char*>(imageJPath.c_str());
