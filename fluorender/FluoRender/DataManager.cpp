@@ -4748,6 +4748,7 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 			vd->GetResolution(xres, yres, zres);
 			double zspcfac = (double)Max(xres, yres) / 256.0;
 			if (zspcfac < 1.0) zspcfac = 1.0;
+			double tester = reader->GetXSpc();
 			if (zres == 1) vd->SetBaseSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetXSpc()*zspcfac);
 			else vd->SetBaseSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetZSpc());
 			vd->SetSpcFromFile(valid_spc);

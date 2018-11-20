@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <stdexcept>
 #include <algorithm>
 #include <stdint.h>
+#include <cmath>
 #include <string>
 
 #include "JVMInitializer.h"
@@ -74,7 +75,7 @@ public:
 	int GetCurTime() {return m_cur_time;}
 	int GetTimeNum() {return m_time_num;}
 	int GetChanNum() {return m_chan_num;}
-	double GetExcitationWavelength(int chan) {return 0.0;}
+	double GetExcitationWavelength(int chan) {return m_excitation_wavelength[chan];}
 	int GetSliceNum() {return m_slice_num;}
 	int GetXSize() {return m_x_size;}
 	int GetYSize() {return m_y_size;}
@@ -87,6 +88,7 @@ public:
 	bool GetBatch() {return m_batch;}
 	int GetBatchNum() {return (int)m_batch_list.size();}
 	int GetCurBatch() {return m_cur_batch;}
+	bool double_equals(double a, double b) { return std::abs(a - b) < DBL_EPSILON; }
 
 private:
 	// ImageJ related variables.
@@ -94,8 +96,7 @@ private:
 	jclass m_imageJ_cls;
 	bool m_eight_bit;
 
-	wstring m_data_name;
-	
+	wstring m_data_name;	
 
 	bool m_slice_seq;
 	int m_time_num;
@@ -104,6 +105,7 @@ private:
 	int m_slice_num;
 	int m_x_size;
 	int m_y_size;
+	int* m_excitation_wavelength;
 	bool m_valid_spc;
 	double m_xspc;
 	double m_yspc;
