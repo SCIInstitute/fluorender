@@ -2317,7 +2317,7 @@ void VRenderView::OnScaleTextEditing(wxCommandEvent& event) {
 		break;
 	case 1:
 	default:
-		unit_text = "µm";
+		unit_text = L"\u03BCm";
 		break;
 	case 2:
 		unit_text = "mm";
@@ -2325,7 +2325,7 @@ void VRenderView::OnScaleTextEditing(wxCommandEvent& event) {
 	}
 	str += unit_text;
 	if (m_glview) {
-		m_glview->SetScaleBarLen(len);
+		//m_glview->SetScaleBarLen(len);
 		m_glview->SetSBText(str);
 		m_glview->SetScaleBarLen(len);
 		m_glview->m_sb_num = num_text;
