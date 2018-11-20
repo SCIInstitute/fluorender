@@ -31,6 +31,7 @@
 
 #include <string>
 #include <iosfwd>
+#include <iostream>
 #include <algorithm>
 
 namespace FLTYPE {
