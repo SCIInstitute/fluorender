@@ -32,6 +32,9 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <Flobject/CopyOp.h>
 #include <Flobject/Object.h>
+#if defined(__linux__)
+#include <algorithm>
+#endif
 
 namespace FL
 {

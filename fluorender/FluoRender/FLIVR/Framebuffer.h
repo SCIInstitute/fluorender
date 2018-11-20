@@ -30,6 +30,9 @@
 
 #include <string>
 #include <vector>
+#ifdef __linux__
+  #include <algorithm>
+#endif
 
 namespace FLIVR
 {
