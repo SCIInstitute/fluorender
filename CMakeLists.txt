@@ -256,7 +256,7 @@ elseif(APPLE)
 else()
   find_package(FFMPEG REQUIRED)
   #string(REPLACE "/usr/include/" "" FFMPEG_INCLUDE_DIR "${FFMPEG_INCLUDE_DIR}")
-  #include_directories(${FFMPEG_INCLUDE_DIR})
+  include_directories(${FFMPEG_INCLUDE_DIR})
 endif()
 
 # FluoRender
@@ -590,6 +590,8 @@ if(APPLE)
   string(REGEX REPLACE "/usr/local/lib/libfreetype.dylib" "/usr/local/lib/libfreetype.a;/usr/local/lib/libpng.a"
     FREETYPE_LIBRARIES ${FREETYPE_LIBRARIES})
   message(STATUS "${FREETYPE_LIBRARIES}")
+elseif(UNIX OR MINGW)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread -ldl")
 endif()
 
 target_compile_options(FluoRender PRIVATE "$<$<CONFIG:RELEASE>:${RELEASE_FLAGS}>")

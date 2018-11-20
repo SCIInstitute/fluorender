@@ -30,6 +30,13 @@ extern "C" {
 #include <libswresample/swresample.h>
 	}
 }
+
+// MC hack to add two missing defines from older FFMPEG versions
+#ifdef __linux__
+  #define CODEC_FLAG_GLOBAL_HEADER   0x00400000
+  #define AVFMT_RAWPICTURE   0x0020
+#endif
+
 #define STREAM_PIX_FMT    ffmpeg::AV_PIX_FMT_YUV420P /* default pix_fmt */
 #define SCALE_FLAGS SWS_BICUBIC
 
