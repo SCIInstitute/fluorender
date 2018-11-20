@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <iosfwd>
 #include <math.h>
+#include <iostream>
 #include <assert.h>
 #include <algorithm>
 

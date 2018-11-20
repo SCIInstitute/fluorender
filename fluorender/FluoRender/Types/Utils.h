@@ -31,6 +31,7 @@
 
 #include <vector>
 #include <iostream>
+#include <cmath>
 
 namespace FLTYPE
 {
@@ -253,7 +254,7 @@ inline double PiHalf()
 
 inline double Epsilon(int p=6)
 {
-	return pow(10.0, double(-p));
+    return std::pow(10.0, double(-p));
 }
 
 inline double d2r(double d)
@@ -271,8 +272,8 @@ inline void sinCos(double *returnSin, double *returnCos, double theta)
 	// For simplicity, we'll just use the normal trig functions.
 	// Note that on some platforms we may be able to do better
 
-	*returnSin = sin(theta);
-	*returnCos = cos(theta);
+    *returnSin = std::sin(theta);
+    *returnCos = std::cos(theta);
 }
 
 } // namespace FLTYPE

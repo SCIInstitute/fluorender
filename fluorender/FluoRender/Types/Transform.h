@@ -30,6 +30,7 @@
 #define _FLTRANSFORM_H_
 
 #include <string>
+#include <iostream>
 
 namespace FLTYPE
 {
