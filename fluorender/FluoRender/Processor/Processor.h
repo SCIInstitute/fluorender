@@ -31,6 +31,9 @@ DEALINGS IN THE SOFTWARE.
 #include <Flobject/Object.h>
 namespace FL
 {
+class Processor;
+typedef std::vector<Processor*> ProcessorList;
+
 class ProcessorFactory;
 
 class Processor : public Object
