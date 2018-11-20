@@ -230,8 +230,10 @@ void JVMInitializer::destroyJVM() {
 	if (m_pJvm)
 		m_pJvm->DestroyJavaVM();
 #ifdef _WIN32
-	FreeLibrary(m_jvm_dll);
+	if (m_jvm_dll)
+		FreeLibrary(m_jvm_dll);
 #else
-	dlclose(m_jvm_dll);
+	if (m_jvm_dll)
+		dlclose(m_jvm_dll);
 #endif
 }
