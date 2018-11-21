@@ -57,7 +57,7 @@ namespace FL
 
 		//sub processors
 		virtual bool addProcessor(Processor* processor);
-		//virtual bool insertProcessor
+		virtual bool insertProcessor(size_t index, Processor* processor);
 		inline bool removeProcessor(Processor* processor)
 		{
 			size_t pos = getProcessorIndex(processor);
@@ -73,6 +73,18 @@ namespace FL
 		{
 			return removeProcessors(0, getNumProcessors());
 		}
+		virtual bool removeProcessors(size_t pos, size_t num);
+		inline size_t getNumProcessors() const { return processors_.size(); }
+		inline size_t getProcessorIndex(const Processor* processor) const
+		{
+			for (size_t i = 0; i < processors_.size(); ++i)
+			{
+				if (processors_[i] == processor)
+					return i;
+			}
+			return processors_.size();
+		}
+
 
 	protected:
 		ProcessorList processors_;

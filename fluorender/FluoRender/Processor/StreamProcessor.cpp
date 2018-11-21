@@ -43,8 +43,8 @@ StreamProcessor::StreamProcessor(const StreamProcessor& processor, const CopyOp&
 		it != processor.processors_.end(); ++it)
 	{
 		//copy
-		Processor* proc = dynamic_cast<Processor*>(copyop(it->get()));
-		//if (proc) addProcessor(proc);
+		Processor* proc = dynamic_cast<Processor*>(copyop(*it));
+		if (proc) addProcessor(proc);
 	}
 	if (copy_values)
 		copyValues(processor, copyop);
@@ -54,5 +54,38 @@ StreamProcessor::StreamProcessor(const StreamProcessor& processor, const CopyOp&
 
 StreamProcessor::~StreamProcessor()
 {
+}
+
+bool StreamProcessor::addProcessor(Processor* processor)
+{
+	return insertProcessor(processors_.size(), processor);
+}
+
+bool StreamProcessor::insertProcessor(size_t index, Processor* processor)
+{
+	if (!processor)
+		return false;
+
+	if (index >= processors_.size())
+		processors_.push_back(processor);
+	else
+		processors_.insert(processors_.begin() + index, processor);
+
+	return true;
+}
+
+bool StreamProcessor::removeProcessors(size_t pos, size_t num)
+{
+	if (pos < processors_.size() && num > 0)
+	{
+		size_t end = pos + num;
+		if (end > processors_.size())
+			end = processors_.size();
+
+		processors_.erase(processors_.begin() + pos, processors_.begin() + end);
+
+		return true;
+	}
+	return false;
 }
 

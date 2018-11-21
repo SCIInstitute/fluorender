@@ -2317,7 +2317,7 @@ void VRenderView::OnScaleTextEditing(wxCommandEvent& event) {
 		break;
 	case 1:
 	default:
-		unit_text = "µm";
+		unit_text = L"\u03BCm";
 		break;
 	case 2:
 		unit_text = "mm";
