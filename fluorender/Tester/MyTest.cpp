@@ -1,4 +1,4 @@
-#include "tests.h"
+﻿#include "tests.h"
 #include "asserts.h"
 #include <Scenegraph/Group.h>
 #include <Scenegraph/InfoVisitor.h>
@@ -87,19 +87,15 @@ void MyTest()
 	obj1->setValue("value2", 2.0);							cout << "obj1->setValue(\"value2\", 2.0);" << endl;
 	obj1->setValue("value3", 3.0);							cout << "obj1->setValue(\"value3\", 3.0);" << endl;
 	obj1->setValue("object", obj1);							cout << "obj1->setValue(\"object\", obj1);" << endl;
-															cout << "Results:" << endl;
-	group->accept(visitor);
-															cout << "Press Enter to continue." << endl;
-															cin.get();
+	/*⇓*/													cout << "Results:" << endl;
+	group->accept(visitor);									cout << "Press Enter to continue." << endl; cin.get();
 
 	//Level 2: value syncing within object
 	obj2->syncValues("value2", "value3");					cout << "obj2->syncValues(\"value2\", \"value3\");" << endl;
 	obj3->syncValues("value3", "value2");					cout << "obj3->syncValues(\"value3\", \"value2\");" << endl;
 	obj1->setValue("value1", 4.0);							cout << "obj1->setValue(\"value1\", 4.0);" << endl;
-															cout << "Results:" << endl;
-	group->accept(visitor);
-															cout << "Press Enter to continue." << endl;
-															cin.get();
+	/*⇓*/													cout << "Results:" << endl;
+	group->accept(visitor);									cout << "Press Enter to continue." << endl;	cin.get();
 
 	//Level 3: unsync values
 	obj1->unsyncAllValues(obj2);							cout << "obj1->unsyncAllValues(obj2);" << endl;
@@ -110,10 +106,8 @@ void MyTest()
 	obj1->setValue("value3", 7.0);							cout << "obj1->setValue(\"value3\", 7.0);" << endl;
 	obj2->setValue("value1", 8.0);							cout << "obj2->setValue(\"value1\", 8.0);" << endl;
 	obj3->setValue("value2", 9.0);							cout << "obj3->setValue(\"value2\", 9.0);" << endl;
-															cout << "Results:" << endl;
-	group->accept(visitor);
-															cout << "Press Enter to continue." << endl;
-															cin.get();
+	/*⇓*/													cout << "Results:" << endl;
+	group->accept(visitor);									cout << "Press Enter to continue." << endl;	cin.get();
 
 	//Level 4: syncing values within a group
 	obj1->syncAllValues(group.get());						cout << "obj1->syncAllValues(group);" << endl;
@@ -125,40 +119,30 @@ void MyTest()
 	obj1->setValue("value1", 11.0);							cout << "obj1->setValue(\"value1\", 11.0);" << endl;
 	obj3->setValue("value3", 10.0);							cout << "obj1->setValue(\"value3\", 10.0);" << endl;
 	obj1->setValue("object", (Referenced*)obj2);			cout << "obj1->setValue(\"object\", obj2);" << endl;
-															cout << "Results:" << endl;
-	group->accept(visitor);
-															cout << "Press Enter to continue." << endl;
-															cin.get();
+	/*⇓*/													cout << "Results:" << endl;
+	group->accept(visitor);									cout << "Press Enter to continue." << endl;	cin.get();
 
 	//Level 5: warming up for next level
 	obj2->setValue("object", (Referenced*)obj1);			cout << "obj2->setValue(\"object\", obj1);" << endl;
-															cout << "Results:" << endl;
-	group->accept(visitor);
-															cout << "Press Enter to continue." << endl;
-															cin.get();
+	/*⇓*/													cout << "Results:" << endl;
+	group->accept(visitor);									cout << "Press Enter to continue." << endl;	cin.get();
 
 	//Level 6: child removal
 	group->removeChild(obj1);								cout << "group->removeChild(obj1);" << endl;
-															cout << "Results:" << endl;
-	group->accept(visitor);
-															cout << "Press Enter to continue." << endl;
-															cin.get();
+	/*⇓*/													cout << "Results:" << endl;
+	group->accept(visitor);									cout << "Press Enter to continue." << endl;	cin.get();
 
 	//Level 7: self referencing value
 	obj3->setValue("object", (Referenced*)obj3);			cout << "obj3->setValue(\"object\", obj3);" << endl;
 	obj3->setValue("value1", 12.0);							cout << "obj3->setValue(\"value1\", 12.0);" << endl;
-															cout << "Results:" << endl;
-	group->accept(visitor);
-															cout << "Press Enter to continue." << endl;
-															cin.get();
+	/*⇓*/													cout << "Results:" << endl;
+	group->accept(visitor);									cout << "Press Enter to continue." << endl;	cin.get();
 
 	//Level 8: self-referenced object removal
 	group->removeChild(obj3);								cout << "group->removeChild(obj3);" << endl;
-															cout << "Results:" << endl;
+	/*⇓*/													cout << "Results:" << endl;
 	group->accept(visitor);
-															cout << "Press Enter to continue." << endl;
-															cin.get();
-	//All done. Quit.
+	//All done. Quit after press Enter.
 	//hopefully it doesn't crash and no memory leak is detected
 }
 

@@ -89,8 +89,8 @@ namespace FL
 	protected:
 		ProcessorList processors_;
 
-		virtual void setupInputs();
-		virtual void setupOutputs();
+		virtual void setupInputs() {};
+		virtual void setupOutputs() {};
 
 	private:
 		~StreamProcessor();
