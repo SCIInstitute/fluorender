@@ -213,11 +213,16 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
 	m_VMargs.options = options;
 	m_VMargs.ignoreUnrecognized = false;     // invalid options make the JVM init fail
 
-	jint rc = m_createJVM_Ptr(&m_pJvm, (void**)&m_pEnv, &m_VMargs);
-	delete[] options;
-	if (rc != JNI_OK) {
-        std::cout << "Error while calling JNI_CreteJavaVM." << std::endl;
-		return false;
+	try {
+		jint rc = m_createJVM_Ptr(&m_pJvm, (void**)&m_pEnv, &m_VMargs);
+		delete[] options;
+		if (rc != JNI_OK) {
+			std::cout << "Error while calling JNI_CreteJavaVM." << std::endl;
+			return false;
+		}
+	}
+	catch (...) {
+		std::cout << "Excption while creating jvm. Nothing to worry about!";
 	}
     std::cout << "JVM created successfully." << std::endl;
     jint ver = m_pEnv->GetVersion();
