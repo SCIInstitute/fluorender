@@ -17,7 +17,7 @@ import ij.IJ;
 import javax.imageio.ImageIO;
 
 import loci.formats.FormatException;
-import loci.formats.ImageReader;
+//import loci.formats.ImageReader;
 import loci.formats.meta.IMetadata;
 import loci.formats.services.OMEXMLService;
 import loci.plugins.util.ImageProcessorReader;
@@ -28,8 +28,10 @@ import ome.units.quantity.Time;
 //TODO: Add threads to load the images fast.
 public class ImageJ_Reader {
     public static void main(String[] args) {
-        short[] test = getIntDataB(args, 0, 1);
+        //short[] test = getIntDataB(args, 0, 2);
         int[] test2 = getMetaData(args);
+        //getIntData2D(args, 0, 1);
+        getByteData2D(args, 0, 0);
         //byte[] test3 = getByteData(args, 0, 0);
         //byte[] test3 = getIntDataB(args, 0, 0);
     }
@@ -95,6 +97,7 @@ public class ImageJ_Reader {
 
     public static int[] getMetaData(String[] args) {
         String id = args[0];
+        //ImageReader ip_reader = new ImageReader();
         ImageProcessorReader ip_reader = new ImageProcessorReader(new ChannelSeparator(LociPrefs.makeImageReader()));
         try {
             // Setting up xml reading.
@@ -106,7 +109,7 @@ public class ImageJ_Reader {
             ip_reader.setId(id);
 
             // Reading the pixel level matadata.
-            int[] metadata = new int[11];
+            int[] metadata = new int[13+ip_reader.getSizeC()];
             metadata[0] = ip_reader.getImageCount();
             metadata[1] = ip_reader.getSizeX();
             metadata[2] = ip_reader.getSizeY();
@@ -126,15 +129,44 @@ public class ImageJ_Reader {
             Length physicalSizeZ = meta.getPixelsPhysicalSizeZ(0);
             Time timeIncrement = meta.getPixelsTimeIncrement(0);
 
-            int px = (int)(physicalSizeX.value().doubleValue() * 10000);
-            int py = (int)(physicalSizeY.value().doubleValue() * 10000);
-            int pz = (int)(physicalSizeZ.value().doubleValue() * 10000);
-            int pt = (int)(timeIncrement.value().doubleValue() * 10000);
+            if(physicalSizeX != null){
+                double px_d = physicalSizeX.value().doubleValue();
+                int px_1 = (int)px_d;
+                px_d = px_d - px_1;
+                int px_2 = (int)(px_d*10000);
+                metadata[7] = px_1;
+                metadata[8] = px_2;
+            }
 
-            metadata[7] = px;
-            metadata[8] = py;
-            metadata[9] = pz;
-            metadata[10] = pt;
+            if(physicalSizeY != null){
+                double py_d = physicalSizeY.value().doubleValue();
+                int py_1 = (int)py_d;
+                py_d = py_d - py_1;
+                int py_2 = (int)(py_d*10000);
+                metadata[9] = py_1;
+                metadata[10] = py_2;
+            }
+
+            if(physicalSizeZ != null){
+                double pz_d = physicalSizeZ.value().doubleValue();
+                int pz_1 = (int)pz_d;
+                pz_d = pz_d - pz_1;
+                int pz_2 = (int)(pz_d*10000);
+                metadata[11] = pz_1;
+                metadata[12] = pz_2;
+            }
+
+            int offset = 13;
+            for(int c =0; c < ip_reader.getSizeC(); ++c){
+                Length em_wavelength = meta.getChannelEmissionWavelength(0,c); //First image, First channel.
+                if(em_wavelength == null){
+                    metadata[offset] = -1;
+                    continue;
+                }
+                int em_val = em_wavelength.value().intValue();
+                metadata[offset] = em_val;
+                offset++;
+            }
 
             return metadata;
         } catch (FormatException exc) {
@@ -149,7 +181,7 @@ public class ImageJ_Reader {
             int[] test = new int[1];
             test[0] = 6;
             System.out.println(exc.getMessage());
-            if (exc.getMessage() == "Array size too big"){
+            if (exc.getMessage().equals("Array size too big")){
                 test[0] = 7;
             }
             return test;
@@ -269,8 +301,8 @@ public class ImageJ_Reader {
                         test_array[pixel_offset + (h * width) + w] = (short)temp_array[w][h];
                     }
                 }
-                //java.awt.image.BufferedImage awt_Ip = ip.getBufferedImage();
-                //ImageIO.write(awt_Ip, "jpg", new File("D:\\Dev_Environment\\Test_Files\\Test_Folder\\outNB" + Integer.toString(depth_offset) + ".jpg"));
+                java.awt.image.BufferedImage awt_Ip = ip.getBufferedImage();
+                ImageIO.write(awt_Ip, "jpg", new File("D:\\Dev_Environment\\Test_Files\\Test_Folder\\outNB" + Integer.toString(depth_offset) + ".jpg"));
             }
             return test_array;
         } catch (FormatException exc) {
@@ -284,6 +316,61 @@ public class ImageJ_Reader {
         } catch (Exception exc){
             short[] test = new short[1];
             test[0] = 3;
+            return test;
+        }
+    }
+
+    public static short[][] getIntData2D(String[] args, int time_id, int channel_id) {
+        String id = args[0];
+        ImageProcessorReader ip_reader = new ImageProcessorReader(new ChannelSeparator(LociPrefs.makeImageReader()));
+        try {
+            ip_reader.setId(id);
+            int num = ip_reader.getImageCount();
+            int width = ip_reader.getSizeX();
+            int height = ip_reader.getSizeY();
+            int channels = ip_reader.getSizeC();
+            int depth = ip_reader.getSizeZ();
+            int time_seq = ip_reader.getSizeT();
+
+            ImageStack stack = new ImageStack(width, height);
+            byte[][][] lookupTable = new byte[ip_reader.getSizeC()][][];
+
+            // Adding all the slices into a 2D array and returning those values.
+            int time_step = channels * depth;
+            //int offset = time_id * time_step + depth_id * channels;
+            int time_offset = time_id * time_step;
+
+            //short[] test_array = new short[width * height * depth];
+            short[][] test_array = new short[depth][width * height];
+
+            int pixel_offset = 0;
+            for (int d = 0; d < depth; ++d){
+                pixel_offset = d * width * height;
+                int depth_offset = time_offset + (d * channels);
+
+                ImageProcessor ip = ip_reader.openProcessors(depth_offset+channel_id)[0];
+                int[][] temp_array = ip.getIntArray();
+                for (int h = 0; h < height; h++) {
+                    for (int w = 0; w < width; w++) {
+                        test_array[d][(h * width) + w] = (short)temp_array[w][h];
+                        //test_array[pixel_offset + (h * width) + w] = (short)temp_array[w][h];
+                    }
+                }
+                //java.awt.image.BufferedImage awt_Ip = ip.getBufferedImage();
+                //ImageIO.write(awt_Ip, "jpg", new File("D:\\Dev_Environment\\Test_Files\\Test_Folder\\outNB" + Integer.toString(depth_offset) + ".jpg"));
+            }
+            return test_array;
+        } catch (FormatException exc) {
+            short[][] test = new short[1][1];
+            test[0][0] = 1;
+            return test;
+        } catch (IOException exc) {
+            short[][] test = new short[1][1];
+            test[0][0] = 2;
+            return test;
+        } catch (Exception exc){
+            short[][] test = new short[1][1];
+            test[0][0] = 3;
             return test;
         }
     }
@@ -338,6 +425,61 @@ public class ImageJ_Reader {
         } catch (Exception exc) {
             byte[] test = new byte[1];
             test[0] = 3;
+            return test;
+        }
+    }
+
+    public static byte[][] getByteData2D(String[] args, int time_id, int channel_id) {
+        String id = args[0];
+        //String id = "E:\\DATA\\Chinchun\\7.lsm";
+        ImageProcessorReader ip_reader = new ImageProcessorReader(new ChannelSeparator(LociPrefs.makeImageReader()));
+
+        try {
+            ip_reader.setId(id);
+            int num = ip_reader.getImageCount();
+            int width = ip_reader.getSizeX();
+            int height = ip_reader.getSizeY();
+            int channels = ip_reader.getSizeC();
+            int depth = ip_reader.getSizeZ();
+            int time_seq = ip_reader.getSizeT();
+
+            ImageStack stack = new ImageStack(width, height);
+            byte[][][] lookupTable = new byte[ip_reader.getSizeC()][][];
+
+            // Adding all the slices into a 2D array and returning those values.
+            int time_step = channels * depth;
+            //int offset = time_id * time_step + depth_id * channels;
+            int time_offset = time_id * time_step;
+
+            byte[][] test_array = new byte[depth][width * height];
+            int pixel_offset = 0;
+            for (int d = 0; d < depth; ++d){
+                pixel_offset = d * width * height;
+                int depth_offset = time_offset + (d * channels);
+
+                ImageProcessor ip = ip_reader.openProcessors(depth_offset+channel_id)[0];
+                int[][] temp_array = ip.getIntArray();
+                for (int h = 0; h < height; h++) {
+                    for (int w = 0; w < width; w++) {
+                        test_array[d][(h * width) + w] = (byte)temp_array[w][h];
+                        //test_array[pixel_offset + (h * width) + w] = (byte)temp_array[w][h];
+                    }
+                }
+                //java.awt.image.BufferedImage awt_Ip = ip.getBufferedImage();
+                //ImageIO.write(awt_Ip, "jpg", new File("D:\\Dev_Environment\\Test_Files\\Test_Folder\\outNB" + Integer.toString(depth_offset) + ".jpg"));
+            }
+            return test_array;
+        } catch (FormatException exc) {
+            byte[][] test = new byte[1][1];
+            test[0][0] = 1;
+            return test;
+        } catch (IOException exc) {
+            byte[][] test = new byte[1][1];
+            test[0][0] = 2;
+            return test;
+        } catch (Exception exc) {
+            byte[][] test = new byte[1][1];
+            test[0][0] = 3;
             return test;
         }
     }
