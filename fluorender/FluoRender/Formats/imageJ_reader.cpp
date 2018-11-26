@@ -389,7 +389,7 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 		{
 			int offset = 0;
 			for (int i = 0; i < len; i++) {
-				jshortArray inner_data = static_cast<jshortArray>(m_pJVMInstance->m_pEnv->GetObjectArrayElement(val, 0));
+				jshortArray inner_data = static_cast<jshortArray>(m_pJVMInstance->m_pEnv->GetObjectArrayElement(val, i));
 				jsize len2 = m_pJVMInstance->m_pEnv->GetArrayLength(inner_data);
 				offset = i*len2;
 				if (t_data == NULL)
