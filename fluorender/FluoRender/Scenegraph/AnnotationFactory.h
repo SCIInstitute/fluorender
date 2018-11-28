@@ -45,7 +45,7 @@ namespace FL
 
 		virtual const char* className() const { return "AnnotationFactory"; }
 
-		virtual Annotations* build(const std::string &exp);
+		virtual Annotations* build(Annotations* ann = 0);
 
 		virtual Annotations* clone(Annotations*);
 

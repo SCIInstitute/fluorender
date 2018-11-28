@@ -134,7 +134,7 @@ void MeshFactory::setEventHandler(MeshData* md)
 	ADD_AFTER_EVENT(md, "randomize color", OnRandomizeColor);
 }
 
-MeshData* MeshFactory::build(const std::string &exp)
+MeshData* MeshFactory::build(MeshData* md)
 {
 	unsigned int default_id = 0;
 	return clone(default_id);

@@ -51,7 +51,7 @@ namespace FL
 
 		virtual Processor* getDefault() { return 0; }
 
-		virtual Processor* build(const std::string &exp) { return 0; }
+		virtual Processor* build(Processor* processor = 0) { return 0; }
 
 		virtual Processor* clone(Processor*) { return 0; }
 

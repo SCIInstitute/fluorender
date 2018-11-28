@@ -52,7 +52,7 @@ namespace FL
 			return dynamic_cast<VolumeData*>(ObjectFactory::getDefault());
 		}
 
-		virtual VolumeData* build(const std::string &exp = "");
+		virtual VolumeData* build(VolumeData* vd = 0);
 
 		virtual VolumeData* clone(VolumeData*);
 

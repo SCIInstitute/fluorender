@@ -54,7 +54,7 @@ namespace FL
 			return dynamic_cast<MeshData*>(ObjectFactory::getDefault());
 		}
 
-		virtual MeshData* build(const std::string &exp = "");
+		virtual MeshData* build(MeshData* md = 0);
 
 		virtual MeshData* clone(MeshData*);
 

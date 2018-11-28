@@ -57,7 +57,7 @@ namespace FUI
 
 		virtual InterfaceAgent* getDefault() { return 0; }//no default agent
 
-		virtual InterfaceAgent* build(const std::string &exp) { return 0; }
+		virtual InterfaceAgent* build(InterfaceAgent* agent = 0) { return 0; }
 
 		virtual InterfaceAgent* clone(InterfaceAgent*) { return 0; }
 

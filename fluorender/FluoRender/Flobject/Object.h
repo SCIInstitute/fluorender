@@ -106,6 +106,32 @@ public:
 		_value_set->clear();
 	}
 
+	//compare by values
+	//vc: a subset of values to compare
+	inline bool cmpValues(const Object& obj, const ValueCollection& vc = {})
+	{
+		if (std::string(className()) != obj.className())
+			return false;
+		if (!_value_set || obj._value_set)
+			return false;
+		for (auto it = _value_set->getValues().begin();
+			it != _value_set->getValues().end(); ++it)
+		{
+			Value* value1 = it->second.get();
+			if (!value1)
+				continue;
+			if (!vc.empty() &&
+				vc.find(value1->getName()) == vc.end())
+				continue;
+			Value* value2 = const_cast<Object&>(obj).getValue(value1->getName());
+			if (!value2)
+				return false;
+			if (*value1 != *value2)
+				return false;
+		}
+		return true;
+	}
+
 	//add a value
 	bool addValue(ValueTuple& vt);
 	//generic types
@@ -202,8 +228,8 @@ public:
 	bool getValue(const std::string &name, FLTYPE::GLfloat4 &value);
 	bool getValue(const std::string &name, FLTYPE::GLint4 &value);
 
-	//sync value
-	//observer's value updates when this changes (data flow is one-way: this -> obj)
+	//sync value only sets a state but doesn't change values when called
+	//observer's value updates when the value of this changes (data flow is one-way: this -> obj)
 	bool syncValue(const std::string &name, Object* obj);
 	bool unsyncValue(const std::string &name, Object* obj);
 	bool syncValues(const ValueCollection &names, Object* obj);

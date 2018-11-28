@@ -293,10 +293,18 @@ void ObjectFactory::createDefault()
 	}
 }
 
-Object* ObjectFactory::build(const std::string &exp)
+Object* ObjectFactory::build(Object* obj)
 {
-	unsigned int default_id = 0;
-	return clone(default_id);
+	if (obj)
+	{
+		//not used in parent class
+		return 0;
+	}
+	else
+	{
+		unsigned int default_id = 0;
+		return clone(default_id);
+	}
 }
 
 Object* ObjectFactory::clone(Object* object)

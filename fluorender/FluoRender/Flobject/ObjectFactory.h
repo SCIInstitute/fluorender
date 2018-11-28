@@ -77,7 +77,9 @@ namespace FL
 		virtual Object* getDefault()
 		{ return findFirst(default_object_name_); }
 
-		virtual Object* build(const std::string &exp = "");
+		//to control how an object is built, provide a "prototype" object with values
+		//otherwise, it's default to null object and an object is cloned from the default object
+		virtual Object* build(Object* obj = 0);
 
 		virtual Object* clone(Object*);
 
@@ -203,6 +205,41 @@ namespace FL
 					result.push_back((*it).get());
 			}
 			return result;
+		}
+
+		//find by matching values of two objects
+		inline ObjectList findByValues(const Object& obj)
+		{
+			ObjectList result;
+			for (auto it = objects_.begin();
+				it != objects_.end(); ++it)
+			{
+				if (it->get()->cmpValues(obj))
+					result.push_back(it->get());
+			}
+			return result;
+		}
+
+		inline virtual Object* findFirstByValues(const Object& obj)
+		{
+			for (auto it = objects_.begin();
+				it != objects_.end(); ++it)
+			{
+				if (it->get()->cmpValues(obj))
+					return it->get();
+			}
+			return 0;
+		}
+
+		inline virtual Object* findLastByValues(const Object& obj)
+		{
+			for (auto it = objects_.rbegin();
+				it != objects_.rend(); ++it)
+			{
+				if (it->get()->cmpValues(obj))
+					return it->get();
+			}
+			return 0;
 		}
 
 		//if we want to resolve naming conflicts, more code is needed

@@ -319,7 +319,7 @@ void VolumeFactory::setEventHandler(VolumeData* vd)
 	ADD_AFTER_EVENT(vd, "randomize color", OnRandomizeColor);
 }
 
-VolumeData* VolumeFactory::build(const std::string &exp)
+VolumeData* VolumeFactory::build(VolumeData* vd)
 {
 	unsigned int default_id = 0;
 	return clone(default_id);
