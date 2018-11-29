@@ -7,7 +7,8 @@ using namespace std;
 using namespace FL;
 
 //define test classes
-//in fluorender's code, VolumeData and VolumeGroup are defined and more complex
+//Outline of inheritance: Object◁-Node◁-VolumeData
+//Object base class stores values and handles value change events
 class MyVolumeData : public Node
 {
 public:
@@ -34,6 +35,7 @@ protected:
 	}
 };
 
+//Outline of inheritance: Object◁-Node◁-Group◁-VolumeGroup
 class MyVolumeGroup : public Group
 {
 public:
@@ -55,7 +57,9 @@ void MyTest()
 	obj1->addValue("object", (Referenced*)(0));
 
 	//allocate memory for a group and add object as its child
-	ref_ptr<MyVolumeGroup> group(new MyVolumeGroup());
+	MyVolumeGroup* group = new MyVolumeGroup();
+	//use a referenced pointer to manage memory
+	ref_ptr<MyVolumeGroup> ref_group(group);
 	group->setName("group");
 	//add some values to group by copying from object
 	group->copyValues(*obj1, CopyOp::DEEP_COPY_ALL);
@@ -74,73 +78,71 @@ void MyTest()
 	group->addChild(obj3);
 	//now we print out the result
 	//it should be one group with 3 children, all values initialized to 0
-	cout << "Results:" << endl;
+	cout << "Initialization:" << endl;
 	group->accept(visitor);
-	cout << "Press Enter to continue." << endl;
-	cin.get();
+	cout << "Press Enter to continue." << endl; cin.get();
 
 	//test begins here
-	//Level 1: value syncing between objects
+	/*Level 1: sync values between objects*/				cout << "Level 1: sync values between objects" << endl;
 	obj1->syncAllValues(obj2);								cout << "obj1->syncAllValues(obj2);" << endl;
 	obj1->syncAllValues(obj3);								cout << "obj1->syncAllValues(obj3);" << endl;
 	obj1->setValue("value1", 1.0);							cout << "obj1->setValue(\"value1\", 1.0);" << endl;
 	obj1->setValue("value2", 2.0);							cout << "obj1->setValue(\"value2\", 2.0);" << endl;
 	obj1->setValue("value3", 3.0);							cout << "obj1->setValue(\"value3\", 3.0);" << endl;
 	obj1->setValue("object", obj1);							cout << "obj1->setValue(\"object\", obj1);" << endl;
-	/*⇓*/													cout << "Results:" << endl;
+	/*Results:*/											cout << "Results:" << endl;
 	group->accept(visitor);									cout << "Press Enter to continue." << endl; cin.get();
 
-	//Level 2: value syncing within object
+	/*Level 2: sync values within one object*/				cout << "Level 2: sync values within one object" << endl;
 	obj2->syncValues("value2", "value3");					cout << "obj2->syncValues(\"value2\", \"value3\");" << endl;
 	obj3->syncValues("value3", "value2");					cout << "obj3->syncValues(\"value3\", \"value2\");" << endl;
 	obj1->setValue("value1", 4.0);							cout << "obj1->setValue(\"value1\", 4.0);" << endl;
-	/*⇓*/													cout << "Results:" << endl;
+	/*Results:*/											cout << "Results:" << endl;
 	group->accept(visitor);									cout << "Press Enter to continue." << endl;	cin.get();
 
-	//Level 3: unsync values
+	/*Level 3: unsync values*/								cout << "Level 3: unsync values" << endl;
 	obj1->unsyncAllValues(obj2);							cout << "obj1->unsyncAllValues(obj2);" << endl;
 	obj1->unsyncAllValues(obj3);							cout << "obj1->unsyncAllValues(obj3);" << endl;
-	ValueCollection vc{ "value1", "value2", "value3" };		cout << "ValueCollection vc{ \"value1\", \"value2\", \"value3\" };" << endl;
-	obj1->unsyncValues(vc);									cout << "obj1->unsyncValues(vc);" << endl;
+	obj1->unsyncValues({ "value1", "value2", "value3" });	cout << "obj1->unsyncValues({ \"value1\", \"value2\", \"value3\" });" << endl;
 	obj1->setValue("value1", 5.0);							cout << "obj1->setValue(\"value1\", 5.0);" << endl;
 	obj1->setValue("value3", 7.0);							cout << "obj1->setValue(\"value3\", 7.0);" << endl;
 	obj2->setValue("value1", 8.0);							cout << "obj2->setValue(\"value1\", 8.0);" << endl;
 	obj3->setValue("value2", 9.0);							cout << "obj3->setValue(\"value2\", 9.0);" << endl;
-	/*⇓*/													cout << "Results:" << endl;
+	/*Results:*/											cout << "Results:" << endl;
 	group->accept(visitor);									cout << "Press Enter to continue." << endl;	cin.get();
 
-	//Level 4: syncing values within a group
-	obj1->syncAllValues(group.get());						cout << "obj1->syncAllValues(group);" << endl;
-	obj2->syncAllValues(group.get());						cout << "obj2->syncAllValues(group);" << endl;
-	obj3->syncAllValues(group.get());						cout << "obj3->syncAllValues(group);" << endl;
+	/*Level 4: sync values among objects in a group*/		cout << "Level 4: sync values among objects in a group" << endl;
+	obj1->syncAllValues(group);								cout << "obj1->syncAllValues(group);" << endl;
+	obj2->syncAllValues(group);								cout << "obj2->syncAllValues(group);" << endl;
+	obj3->syncAllValues(group);								cout << "obj3->syncAllValues(group);" << endl;
 	group->syncAllValues(obj1);								cout << "group->syncAllValues(obj1);" << endl;
 	group->syncAllValues(obj2);								cout << "group->syncAllValues(obj2);" << endl;
 	group->syncAllValues(obj3);								cout << "group->syncAllValues(obj3);" << endl;
 	obj1->setValue("value1", 11.0);							cout << "obj1->setValue(\"value1\", 11.0);" << endl;
 	obj3->setValue("value3", 10.0);							cout << "obj1->setValue(\"value3\", 10.0);" << endl;
-	obj1->setValue("object", (Referenced*)obj2);			cout << "obj1->setValue(\"object\", obj2);" << endl;
-	/*⇓*/													cout << "Results:" << endl;
+	obj1->setValue("object", obj2);							cout << "obj1->setValue(\"object\", obj2);" << endl;
+	/*Results:*/											cout << "Results:" << endl;
 	group->accept(visitor);									cout << "Press Enter to continue." << endl;	cin.get();
 
-	//Level 5: warming up for next level
-	obj2->setValue("object", (Referenced*)obj1);			cout << "obj2->setValue(\"object\", obj1);" << endl;
-	/*⇓*/													cout << "Results:" << endl;
+	/*Level 5: a bonus for going so far*/					cout << "Level 5: a bonus for going so far" << endl;
+	obj2->setValue("object", obj1);							cout << "obj2->setValue(\"object\", obj1);" << endl;
+	/*Results:*/											cout << "Results:" << endl;
 	group->accept(visitor);									cout << "Press Enter to continue." << endl;	cin.get();
 
-	//Level 6: child removal
+	/*Level 6: child removal*/								cout << "Level 6: child removal" << endl;
 	group->removeChild(obj1);								cout << "group->removeChild(obj1);" << endl;
-	/*⇓*/													cout << "Results:" << endl;
+	/*Results:*/											cout << "Results:" << endl;
 	group->accept(visitor);									cout << "Press Enter to continue." << endl;	cin.get();
 
-	//Level 7: self referencing value
-	obj3->setValue("object", (Referenced*)obj3);			cout << "obj3->setValue(\"object\", obj3);" << endl;
+	/*Level 7: directly set a self-referencing value!*/		cout << "Level 7: directly set a self-referencing value!" << endl;
+	obj3->setValue("object", obj3);							cout << "obj3->setValue(\"object\", obj3);" << endl;
 	obj3->setValue("value1", 12.0);							cout << "obj3->setValue(\"value1\", 12.0);" << endl;
-	/*⇓*/													cout << "Results:" << endl;
+	/*Results:*/											cout << "Results:" << endl;
 	group->accept(visitor);									cout << "Press Enter to continue." << endl;	cin.get();
 
-	//Level 8: self-referenced object removal
+	/*Level 8: self-referenced child removal*/				cout << "Level 8: self-referenced child removal" << endl;
 	group->removeChild(obj3);								cout << "group->removeChild(obj3);" << endl;
-	/*⇓*/													cout << "Results:" << endl;
+	/*Results:*/											cout << "Results:" << endl;
 	group->accept(visitor);
 	//All done. Quit after press Enter.
 	//hopefully it doesn't crash and no memory leak is detected

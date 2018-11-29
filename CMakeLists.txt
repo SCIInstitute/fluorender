@@ -70,11 +70,11 @@ endif()
 
 add_definitions(-DFLUORENDER_TITLE="FluoRender")
 
-add_definitions(-DVERSION_MAJOR=3)							# Be sure to update the Versions and Date for each release!!!!
-add_definitions(-DVERSION_MINOR=0)							# 
-add_definitions(-DVERSION_MAJOR_TAG="3")					# 
-add_definitions(-DVERSION_MINOR_TAG="0")					# 
-add_definitions(-DVERSION_COPYRIGHT="November 2018")		# Up to here!
+add_definitions(-DVERSION_MAJOR=2)							# Be sure to update the Versions and Date for each release!!!!
+add_definitions(-DVERSION_MINOR=23)							# 
+add_definitions(-DVERSION_MAJOR_TAG="2")					# 
+add_definitions(-DVERSION_MINOR_TAG="23")					# 
+add_definitions(-DVERSION_COPYRIGHT="August 2018")			# Up to here!
 
 #windows
 if(WIN32)
@@ -412,7 +412,7 @@ endif()
 file(GLOB src fluorender/FluoRender/*.cpp)
 file(GLOB hdr fluorender/FluoRender/*.h)
 file(GLOB rsc fluorender/FluoRender/img/*.xpm)
-#add_library(FLUORENDER_OBJ OBJECT  ${hdr} ${src})
+add_library(FLUORENDER_OBJ OBJECT  ${hdr} ${src})
 
 # SynthBB
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/SynthBB)
@@ -578,32 +578,32 @@ elseif(WIN32)
 			$<TARGET_OBJECTS:TEEM_OBJ>
 			$<TARGET_OBJECTS:WACUTILS_OBJ>
 			)
-#		add_executable(Tester
-#			${tester_hdr} ${tester_src}
-#			$<TARGET_OBJECTS:FLUORENDER_OBJ>
-#			$<TARGET_OBJECTS:GLOBAL_OBJ>
-#			$<TARGET_OBJECTS:TYPES_OBJ>
-#			$<TARGET_OBJECTS:FLOBJECT_OBJ>
-#			$<TARGET_OBJECTS:SCENEGRAPH_OBJ>
-#			$<TARGET_OBJECTS:FUI_OBJ>
-#			$<TARGET_OBJECTS:PROCESSOR_OBJ>
-#			$<TARGET_OBJECTS:RENDERER_OBJ>
-#			$<TARGET_OBJECTS:IMAGES_OBJ>
-#			$<TARGET_OBJECTS:CONVERTERS_OBJ>
-#			$<TARGET_OBJECTS:FLIVR_OBJ>
-#			$<TARGET_OBJECTS:ANIMATORS_OBJ>
-#			$<TARGET_OBJECTS:NV_OBJ>
-#			$<TARGET_OBJECTS:FORMATS_OBJ>
-#			$<TARGET_OBJECTS:VIDEO_OBJ>
-#			$<TARGET_OBJECTS:TRACKING_OBJ>
-#			$<TARGET_OBJECTS:COMPONENTS_OBJ>
-#			$<TARGET_OBJECTS:CLUSTER_OBJ>
-#			$<TARGET_OBJECTS:CALCULATE_OBJ>
-#			$<TARGET_OBJECTS:GLEW_OBJ>
-#			$<TARGET_OBJECTS:POLE_OBJ>
-#			$<TARGET_OBJECTS:TEEM_OBJ>
-#			$<TARGET_OBJECTS:WACUTILS_OBJ>
-#			)
+		add_executable(Tester
+			${tester_hdr} ${tester_src}
+			$<TARGET_OBJECTS:FLUORENDER_OBJ>
+			$<TARGET_OBJECTS:GLOBAL_OBJ>
+			$<TARGET_OBJECTS:TYPES_OBJ>
+			$<TARGET_OBJECTS:FLOBJECT_OBJ>
+			$<TARGET_OBJECTS:SCENEGRAPH_OBJ>
+			$<TARGET_OBJECTS:FUI_OBJ>
+			$<TARGET_OBJECTS:PROCESSOR_OBJ>
+			$<TARGET_OBJECTS:RENDERER_OBJ>
+			$<TARGET_OBJECTS:IMAGES_OBJ>
+			$<TARGET_OBJECTS:CONVERTERS_OBJ>
+			$<TARGET_OBJECTS:FLIVR_OBJ>
+			$<TARGET_OBJECTS:ANIMATORS_OBJ>
+			$<TARGET_OBJECTS:NV_OBJ>
+			$<TARGET_OBJECTS:FORMATS_OBJ>
+			$<TARGET_OBJECTS:VIDEO_OBJ>
+			$<TARGET_OBJECTS:TRACKING_OBJ>
+			$<TARGET_OBJECTS:COMPONENTS_OBJ>
+			$<TARGET_OBJECTS:CLUSTER_OBJ>
+			$<TARGET_OBJECTS:CALCULATE_OBJ>
+			$<TARGET_OBJECTS:GLEW_OBJ>
+			$<TARGET_OBJECTS:POLE_OBJ>
+			$<TARGET_OBJECTS:TEEM_OBJ>
+			$<TARGET_OBJECTS:WACUTILS_OBJ>
+			)
 	endif()
 endif()
 
@@ -663,15 +663,15 @@ elseif(WIN32)
 		${FREETYPE_LIBRARIES}
 		${wxWidgets_LIBRARIES}
 		)
-#	target_link_libraries(Tester
-#		secur32.lib
-#		${FFMPEG_LIBRARIES}
-#		${OPENGL_LIBRARIES}
-#		${Boost_LIBRARIES}
-#		${OpenCL_LIBRARIES}
-#		${FREETYPE_LIBRARIES}
-#		${wxWidgets_LIBRARIES}
-#		)
+	target_link_libraries(Tester
+		secur32.lib
+		${FFMPEG_LIBRARIES}
+		${OPENGL_LIBRARIES}
+		${Boost_LIBRARIES}
+		${OpenCL_LIBRARIES}
+		${FREETYPE_LIBRARIES}
+		${wxWidgets_LIBRARIES}
+		)
 endif()
 
 # copy Java code dir to the binary directory
