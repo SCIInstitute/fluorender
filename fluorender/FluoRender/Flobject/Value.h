@@ -56,6 +56,11 @@ namespace FL
 {
 //name, type, value
 typedef std::tuple<std::string, std::string, std::string> ValueTuple;
+//only value names
+typedef std::set<std::string> ValueCollection;
+//parameters are used to customize a processor
+typedef std::vector<ValueTuple> ParameterList;
+
 class Value : public Referenced, public Observer
 {
 public:
@@ -320,7 +325,6 @@ protected:
 };
 
 typedef std::vector<ref_ptr<ValueSet>> ValueSetStack;
-typedef std::set<std::string> ValueCollection;
 
 //A value cache canbe seen as a group of values with
 //temporary saving/restoring capabilities, i.e., the value set stack
