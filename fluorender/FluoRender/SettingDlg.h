@@ -110,7 +110,9 @@ class SettingDlg : public wxPanel
 		ID_JavaBioformatsText,
 		ID_JavaJvmBrowseBtn,
 		ID_JavaIJBrowseBtn,
-		ID_JavaBioformatsBrowseBtn
+		ID_JavaBioformatsBrowseBtn,
+		ID_RadioButtonImageJ,
+		ID_RadioButtonFiji
 	};
 
 public:
@@ -240,6 +242,9 @@ public:
 	wxString getIJPath();
 	wxString getBioformatsPath();
 	std::vector<std::string> GetJvmArgs();
+
+	bool getFijiStatus();
+	bool getImageJStatus();
 
 private:
 	wxWindow* m_frame;
@@ -398,6 +403,8 @@ private:
 	wxButton* m_browse_jvm_btn;
 	wxButton* m_browse_ij_btn;
 	wxButton* m_browse_bioformats_btn;
+	wxRadioButton* mp_radio_button_imagej;
+	wxRadioButton* mp_radio_button_fiji;
 
 	//save
 	wxButton *m_save_btn;
@@ -481,6 +488,8 @@ private:
 	void onJavaJvmBrowse(wxCommandEvent &event);
 	void onJavaIJBrowse(wxCommandEvent &event);
 	void onJavaBioformatsBrowse(wxCommandEvent &event);
+	void onJavaRadioButtonImageJ(wxCommandEvent &event);
+	void onJavaRadioButtonFiji(wxCommandEvent &event);
 
 	DECLARE_EVENT_TABLE()
 };

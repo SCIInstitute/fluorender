@@ -122,7 +122,7 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
 				{
 					if (filename.Matches("bio-formats_plugins-*.jar"))
 						jvm_bioformats_path += getPathSeparator() + dir.GetNameWithSep() + filename;
-					cont = dir.GetNext(&filename);
+					cont = dir.GetNext(&filename); 
 				}
                 //Checking for jvm path.
                 if(wxIsEmpty(jvm_path)){

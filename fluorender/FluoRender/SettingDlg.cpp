@@ -94,6 +94,8 @@ EVT_TEXT(ID_JavaBioformatsText, SettingDlg::OnJavaBioformatsEdit)
 EVT_BUTTON(ID_JavaJvmBrowseBtn, SettingDlg::onJavaJvmBrowse)
 EVT_BUTTON(ID_JavaIJBrowseBtn, SettingDlg::onJavaIJBrowse)
 EVT_BUTTON(ID_JavaBioformatsBrowseBtn, SettingDlg::onJavaBioformatsBrowse)
+EVT_BUTTON(ID_RadioButtonImageJ, SettingDlg::onJavaRadioButtonImageJ)
+EVT_BUTTON(ID_RadioButtonFiji, SettingDlg::onJavaRadioButtonFiji)
 
 //show
 EVT_SHOW(SettingDlg::OnShow)
@@ -598,12 +600,15 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 {
 	wxStaticText* st;
 	wxPanel *page = new wxPanel(parent);
+	
+
 
 	//JVM settings.	
 	wxBoxSizer *group1 = new wxStaticBoxSizer(new wxStaticBox(page, wxID_ANY, "Java Settings"), wxVERTICAL);
+	wxBoxSizer *sizer1_0 = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer *sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer *sizer1_2 = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer *sizer1_3 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer1_3 = new wxBoxSizer(wxHORIZONTAL);	
 
 	m_java_jvm_text = new wxTextCtrl(page, ID_JavaJVMText);
 	m_java_ij_text = new wxTextCtrl(page, ID_JavaIJText);
@@ -618,6 +623,19 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 	sizer1_2->Add(m_browse_ij_btn, 0, wxALIGN_CENTER);
 	sizer1_3->Add(m_java_bioformats_text, 1, wxEXPAND);
 	sizer1_3->Add(m_browse_bioformats_btn, 0, wxALIGN_CENTER);
+	
+	st = new wxStaticText(page, 0,
+		"You can either choose Fiji or imageJ. With Fiji you only need to select the fiji directory and leave the 2nd and 3rd option blank.");
+	group1->Add(st);
+	group1->Add(10, 5);
+
+	//Added the radio button	
+	mp_radio_button_imagej = new wxRadioButton(page, ID_RadioButtonImageJ, "ImajeJ", wxDefaultPosition);
+	mp_radio_button_fiji = new wxRadioButton(page, ID_RadioButtonFiji, "Fiji", wxDefaultPosition);
+	sizer1_0->Add(mp_radio_button_imagej);
+	sizer1_0->Add(mp_radio_button_fiji);
+	group1->Add(sizer1_0, 0, wxEXPAND);
+	mp_radio_button_imagej->SetValue(true);
 
 	group1->Add(10, 5);
 #ifdef _WIN32
@@ -646,6 +664,7 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 	group1->Add(st);
 	group1->Add(sizer1_3, 0, wxEXPAND);
 	group1->Add(10, 10);
+
 	st = new wxStaticText(page, 0,
 		"Note:\n"\
 		"Restart FluoRender for Java settings to take effect.\n");
@@ -2118,3 +2137,16 @@ void SettingDlg::onJavaBioformatsBrowse(wxCommandEvent &event)
 		delete fopendlg;
 }
 
+void SettingDlg::onJavaRadioButtonImageJ(wxCommandEvent &event) {
+	m_java_jvm_text->Enable(true);
+	m_java_bioformats_text->Enable(true);
+	m_browse_jvm_btn->Enable(true);
+	m_browse_bioformats_btn->Enable(true);
+}
+
+void SettingDlg::onJavaRadioButtonFiji(wxCommandEvent &event) {
+	m_java_jvm_text->Enable(false);	
+	m_java_bioformats_text->Enable(false);
+	m_browse_jvm_btn->Enable(false);
+	m_browse_bioformats_btn->Enable(false);
+}
