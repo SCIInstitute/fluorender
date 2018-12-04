@@ -18,6 +18,7 @@ import javax.imageio.ImageIO;
 
 import loci.formats.FormatException;
 //import loci.formats.ImageReader;
+import loci.formats.MinMaxCalculator;
 import loci.formats.meta.IMetadata;
 import loci.formats.services.OMEXMLService;
 import loci.plugins.util.ImageProcessorReader;
@@ -30,7 +31,7 @@ public class ImageJ_Reader {
     public static void main(String[] args) {
         //short[] test = getIntDataB(args, 0, 2);
         int[] test2 = getMetaData(args);
-        //getIntData2D(args, 0, 1);
+        //getIntData2D(args, 0, 0);
         getByteData2D(args, 0, 0);
         //byte[] test3 = getByteData(args, 0, 0);
         //byte[] test3 = getIntDataB(args, 0, 0);
@@ -118,7 +119,7 @@ public class ImageJ_Reader {
             metadata[5] = ip_reader.getSizeT();
             metadata[6] = ip_reader.getPixelType();
 
-            long totalsize = (long)metadata[1] * (long)metadata[2] * (long)metadata[3];
+            long totalsize = (long)metadata[1] * (long)metadata[2];
             if (totalsize > Integer.MAX_VALUE){
                 throw new Exception("Array size too big");
             }
@@ -157,8 +158,8 @@ public class ImageJ_Reader {
             }
 
             int offset = 13;
-            for(int c =0; c < ip_reader.getSizeC(); ++c){
-                Length em_wavelength = meta.getChannelEmissionWavelength(0,c); //First image, First channel.
+            for(int c =0; c < meta.getChannelCount(0); ++c){
+                Length em_wavelength = meta.getChannelExcitationWavelength(0,c); //First image, First channel.
                 if(em_wavelength == null){
                     metadata[offset] = -1;
                     continue;
@@ -167,6 +168,8 @@ public class ImageJ_Reader {
                 metadata[offset] = em_val;
                 offset++;
             }
+
+            MinMaxCalculator min_max_vals = new MinMaxCalculator(ip_reader);
 
             return metadata;
         } catch (FormatException exc) {
@@ -345,6 +348,8 @@ public class ImageJ_Reader {
 
             int pixel_offset = 0;
             for (int d = 0; d < depth; ++d){
+                int pmin = 65535;
+                int pmax = -1;
                 pixel_offset = d * width * height;
                 int depth_offset = time_offset + (d * channels);
 
@@ -354,10 +359,12 @@ public class ImageJ_Reader {
                     for (int w = 0; w < width; w++) {
                         test_array[d][(h * width) + w] = (short)temp_array[w][h];
                         //test_array[pixel_offset + (h * width) + w] = (short)temp_array[w][h];
+                        pmin = Math.min(pmin, temp_array[w][h]);
+                        pmax = Math.max(pmax, temp_array[w][h]);
                     }
                 }
-                //java.awt.image.BufferedImage awt_Ip = ip.getBufferedImage();
-                //ImageIO.write(awt_Ip, "jpg", new File("D:\\Dev_Environment\\Test_Files\\Test_Folder\\outNB" + Integer.toString(depth_offset) + ".jpg"));
+                java.awt.image.BufferedImage awt_Ip = ip.getBufferedImage();
+                ImageIO.write(awt_Ip, "jpg", new File("D:\\Dev_Environment\\Test_Files\\Test_Folder\\outNB" + Integer.toString(depth_offset) + ".jpg"));
             }
             return test_array;
         } catch (FormatException exc) {
@@ -465,8 +472,8 @@ public class ImageJ_Reader {
                         //test_array[pixel_offset + (h * width) + w] = (byte)temp_array[w][h];
                     }
                 }
-                //java.awt.image.BufferedImage awt_Ip = ip.getBufferedImage();
-                //ImageIO.write(awt_Ip, "jpg", new File("D:\\Dev_Environment\\Test_Files\\Test_Folder\\outNB" + Integer.toString(depth_offset) + ".jpg"));
+                java.awt.image.BufferedImage awt_Ip = ip.getBufferedImage();
+                ImageIO.write(awt_Ip, "jpg", new File("D:\\Dev_Environment\\Test_Files\\Test_Folder\\outNB" + Integer.toString(depth_offset) + ".jpg"));
             }
             return test_array;
         } catch (FormatException exc) {
