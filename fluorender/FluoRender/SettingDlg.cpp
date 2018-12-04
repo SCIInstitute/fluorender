@@ -94,8 +94,8 @@ EVT_TEXT(ID_JavaBioformatsText, SettingDlg::OnJavaBioformatsEdit)
 EVT_BUTTON(ID_JavaJvmBrowseBtn, SettingDlg::onJavaJvmBrowse)
 EVT_BUTTON(ID_JavaIJBrowseBtn, SettingDlg::onJavaIJBrowse)
 EVT_BUTTON(ID_JavaBioformatsBrowseBtn, SettingDlg::onJavaBioformatsBrowse)
-EVT_BUTTON(ID_RadioButtonImageJ, SettingDlg::onJavaRadioButtonImageJ)
-EVT_BUTTON(ID_RadioButtonFiji, SettingDlg::onJavaRadioButtonFiji)
+EVT_RADIOBUTTON(ID_RadioButtonImageJ, SettingDlg::onJavaRadioButtonImageJ)
+EVT_RADIOBUTTON(ID_RadioButtonFiji, SettingDlg::onJavaRadioButtonFiji)
 
 //show
 EVT_SHOW(SettingDlg::OnShow)
@@ -639,7 +639,7 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 
 	group1->Add(10, 5);
 #ifdef _WIN32
-    st = new wxStaticText(page, 0, "Path to folder with \"ij.jar\" (e.g., \"ImageJ\\ij.jar\") or \"Fiji.app\\jars\\ij.jar\":");
+    st = new wxStaticText(page, 0, "Path to the root folder of ImageJ or Fiji (e.g., \"ImageJ\" or \"Fiji.app\")");
 #else
     st = new wxStaticText(page, 0, "Path to folder \"ImageJ.app\" or \"Fiji.app\" (e.g., \"ImageJ/ImageJ.app\" or \"Fiji.app\") :");
 #endif

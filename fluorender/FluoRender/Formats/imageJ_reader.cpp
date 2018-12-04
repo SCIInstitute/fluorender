@@ -355,20 +355,20 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 		//}
 
 		jsize len = m_pJVMInstance->m_pEnv->GetArrayLength(val);
-		if (len > 1)
+		if (len >= 1)
 		{
-			int offset = 0;			
-			for (int i = 0; i < len; i++) {				
+			unsigned long long offset = 0;			
+			for (unsigned long long i = 0; i < len; i++) {
 				jbyteArray inner_data = static_cast<jbyteArray>(m_pJVMInstance->m_pEnv->GetObjectArrayElement(val, i));
 				jsize len2 = m_pJVMInstance->m_pEnv->GetArrayLength(inner_data);				
 				offset = i*len2;
 				if (t_data == NULL)
-					t_data = new unsigned char[len*len2];
+					t_data = new unsigned char[(unsigned long long)len*len2];
 
 				jbyte* body = (jbyte*)(m_pJVMInstance->m_pEnv->GetByteArrayElements(inner_data, 0));
-				for (int j = 0; j < len2; ++j) {
+				for (unsigned long long j = 0; j < len2; ++j) {
 					int test = *(body + j);					
-					*((unsigned char*)t_data + offset + j) = test;
+					((unsigned char*)t_data)[offset + j] = test;
 				}
 				m_pJVMInstance->m_pEnv->ReleaseByteArrayElements(inner_data, body, JNI_ABORT);						
 			}			
@@ -385,18 +385,19 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 		m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 0, m_pJVMInstance->m_pEnv->NewStringUTF(const_cast<char*>(path_name.c_str())));  // change an element		
 		jobjectArray val = (jobjectArray)(m_pJVMInstance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_id, arr, (jint)t, (jint)c));   // call the method with the arr as argument.
 		jsize len = m_pJVMInstance->m_pEnv->GetArrayLength(val);
-		if (len > 1)
+
+		if (len >= 1)
 		{
-			int offset = 0;
-			for (int i = 0; i < len; i++) {
+			unsigned long long offset = 0;
+			for (unsigned long long i = 0; i < len; i++) {
 				jshortArray inner_data = static_cast<jshortArray>(m_pJVMInstance->m_pEnv->GetObjectArrayElement(val, i));
 				jsize len2 = m_pJVMInstance->m_pEnv->GetArrayLength(inner_data);
 				offset = i*len2;
 				if (t_data == NULL)
-					t_data = t_data = new unsigned short int[len*len2];
+					t_data = t_data = new unsigned short int[(unsigned long long)len*len2];
 
 				jshort* body = (jshort*)(m_pJVMInstance->m_pEnv->GetShortArrayElements(inner_data, 0));
-				for (int j = 0; j < len2; ++j) {
+				for (unsigned long long j = 0; j < len2; ++j) {
 					int test = *(body + j);
 					*((unsigned short int*)t_data + offset + j) = test;
 				}
@@ -413,6 +414,13 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 			m_pJVMInstance->m_pEnv->ReleaseShortArrayElements(val, body, JNI_ABORT);
 			*/
 		}
+		else {
+			jshortArray inner_data = static_cast<jshortArray>(m_pJVMInstance->m_pEnv->GetObjectArrayElement(val, 0));
+			jshort* body = (jshort*)(m_pJVMInstance->m_pEnv->GetShortArrayElements(inner_data, 0));
+			int test = *(body);
+			cout << "Yes";
+		}
+		unsigned short int test = ((unsigned short int *)(t_data))[10*488 + 10];
 		m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);
 		m_pJVMInstance->m_pEnv->DeleteLocalRef(val);
 	}
