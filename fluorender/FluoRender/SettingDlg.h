@@ -243,8 +243,7 @@ public:
 	wxString getBioformatsPath();
 	std::vector<std::string> GetJvmArgs();
 
-	bool getFijiStatus();
-	bool getImageJStatus();
+	bool getIJMode() { return m_ij_mode; }
 
 private:
 	wxWindow* m_frame;
@@ -341,6 +340,7 @@ private:
 	wxString m_jvm_path;
 	wxString m_ij_path;
 	wxString m_bioformats_path;
+	int m_ij_mode;//0: imagej; 1: fiji
 
 private:
 	//save project

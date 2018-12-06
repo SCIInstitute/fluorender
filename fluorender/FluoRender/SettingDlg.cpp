@@ -624,15 +624,16 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 	sizer1_3->Add(m_java_bioformats_text, 1, wxEXPAND);
 	sizer1_3->Add(m_browse_bioformats_btn, 0, wxALIGN_CENTER);
 	
-	st = new wxStaticText(page, 0,
-		"You can either choose Fiji or imageJ. With Fiji you only need to select the fiji directory and leave the 2nd and 3rd option blank.");
-	group1->Add(st);
-	group1->Add(10, 5);
+	group1->Add(5, 5);
 
-	//Added the radio button	
-	mp_radio_button_imagej = new wxRadioButton(page, ID_RadioButtonImageJ, "ImajeJ", wxDefaultPosition);
+	//Added the radio button
+	st = new wxStaticText(page, 0, "Package:");
+	mp_radio_button_imagej = new wxRadioButton(page, ID_RadioButtonImageJ, "ImageJ", wxDefaultPosition);
 	mp_radio_button_fiji = new wxRadioButton(page, ID_RadioButtonFiji, "Fiji", wxDefaultPosition);
+	sizer1_0->Add(st);
+	sizer1_0->Add(5, 5);
 	sizer1_0->Add(mp_radio_button_imagej);
+	sizer1_0->Add(5, 5);
 	sizer1_0->Add(mp_radio_button_fiji);
 	group1->Add(sizer1_0, 0, wxEXPAND);
 	mp_radio_button_imagej->SetValue(true);
@@ -666,8 +667,9 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 	group1->Add(10, 10);
 
 	st = new wxStaticText(page, 0,
-		"Note:\n"\
-		"Restart FluoRender for Java settings to take effect.\n");
+		"Note:\n" \
+		"Restart FluoRender for Java settings to take effect.\n" \
+		"Bioformats and JVM are required when ImageJ is selected.");
 	group1->Add(st);
 	group1->Add(10, 5);
 
@@ -785,6 +787,7 @@ void SettingDlg::GetSettings()
 	m_use_max_texture_size = false;
 	m_max_texture_size = 2048;
 	m_plane_mode = 0;
+	m_ij_mode = 0;
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
@@ -1054,21 +1057,9 @@ void SettingDlg::GetSettings()
 		fconfig.Read("jvm_path", &m_jvm_path);
 		fconfig.Read("ij_path", &m_ij_path);
 		fconfig.Read("bioformats_path", &m_bioformats_path);
-
-		m_java_jvm_text->SetValue(m_jvm_path);
-		m_java_ij_text->SetValue(m_ij_path);
-		m_java_bioformats_text->SetValue(m_bioformats_path);
+		fconfig.Read("ij_mode", &m_ij_mode);
 	}
     
-    //TODO: Modify these to test on mac.
-    //m_ij_path = "/Users/dev/Downloads/ImageJ/ImageJ.app";
-    //m_java_ij_text->SetValue(m_ij_path);
-
-    //m_jvm_path = "/Users/dev/Downloads/ImageJ/jre/lib/server/libjvm.dylib";
-    //m_java_jvm_text->SetValue(m_jvm_path.c_str());
-    
-    //m_bioformats_path = "/Users/dev/Downloads/ImageJ/plugins/bioformats_package.jar";
-    //m_java_bioformats_text->SetValue(m_bioformats_path.c_str());
 	UpdateUI();
 }
 
@@ -1163,6 +1154,28 @@ void SettingDlg::UpdateUI()
 	m_response_time_sldr->SetValue(int(m_up_time / 10.0));
 	m_detail_level_offset_text->ChangeValue(wxString::Format("%d", -m_detail_level_offset));
 	m_detail_level_offset_sldr->SetValue(-m_detail_level_offset);
+
+	//java
+	m_java_jvm_text->SetValue(m_jvm_path);
+	m_java_ij_text->SetValue(m_ij_path);
+	m_java_bioformats_text->SetValue(m_bioformats_path);
+	switch (m_ij_mode)
+	{
+	case 0:
+		mp_radio_button_imagej->SetValue(true);
+		m_java_jvm_text->Enable(true);
+		m_java_bioformats_text->Enable(true);
+		m_browse_jvm_btn->Enable(true);
+		m_browse_bioformats_btn->Enable(true);
+		break;
+	case 1:
+		mp_radio_button_fiji->SetValue(true);
+		m_java_jvm_text->Enable(false);
+		m_java_bioformats_text->Enable(false);
+		m_browse_jvm_btn->Enable(false);
+		m_browse_bioformats_btn->Enable(false);
+		break;
+	}
 }
 
 void SettingDlg::SaveSettings()
@@ -1330,6 +1343,7 @@ void SettingDlg::SaveSettings()
  	fconfig.Write("jvm_path", getJVMPath());
 	fconfig.Write("ij_path", getIJPath());
 	fconfig.Write("bioformats_path", getBioformatsPath());
+	fconfig.Write("ij_mode", getIJMode());
 
 	//clipping plane mode
 	fconfig.SetPath("/clipping planes");
@@ -2142,6 +2156,7 @@ void SettingDlg::onJavaRadioButtonImageJ(wxCommandEvent &event) {
 	m_java_bioformats_text->Enable(true);
 	m_browse_jvm_btn->Enable(true);
 	m_browse_bioformats_btn->Enable(true);
+	m_ij_mode = 0;
 }
 
 void SettingDlg::onJavaRadioButtonFiji(wxCommandEvent &event) {
@@ -2149,4 +2164,5 @@ void SettingDlg::onJavaRadioButtonFiji(wxCommandEvent &event) {
 	m_java_bioformats_text->Enable(false);
 	m_browse_jvm_btn->Enable(false);
 	m_browse_bioformats_btn->Enable(false);
+	m_ij_mode = 1;
 }
