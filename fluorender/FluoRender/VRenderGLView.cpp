@@ -9600,7 +9600,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 			int val = fabs(abcd[3] * resz) + 0.499;
 
 			str = wxString::Format("Z: %.2f ", val * spcz);
-            str += L"\u03BCm";
+			str += L"\u03BCm";
 			wstr_temp = str.ToStdWstring();
 			if (m_draw_frame)
 			{
