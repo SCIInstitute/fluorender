@@ -95,6 +95,8 @@ EVT_TEXT(ID_JavaBioformatsText, SettingDlg::OnJavaBioformatsEdit)
 EVT_BUTTON(ID_JavaJvmBrowseBtn, SettingDlg::onJavaJvmBrowse)
 EVT_BUTTON(ID_JavaIJBrowseBtn, SettingDlg::onJavaIJBrowse)
 EVT_BUTTON(ID_JavaBioformatsBrowseBtn, SettingDlg::onJavaBioformatsBrowse)
+EVT_RADIOBUTTON(ID_RadioButtonImageJ, SettingDlg::onJavaRadioButtonImageJ)
+EVT_RADIOBUTTON(ID_RadioButtonFiji, SettingDlg::onJavaRadioButtonFiji)
 
 //show
 EVT_SHOW(SettingDlg::OnShow)
@@ -599,12 +601,15 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 {
 	wxStaticText* st;
 	wxPanel *page = new wxPanel(parent);
+	
+
 
 	//JVM settings.	
 	wxBoxSizer *group1 = new wxStaticBoxSizer(new wxStaticBox(page, wxID_ANY, "Java Settings"), wxVERTICAL);
+	wxBoxSizer *sizer1_0 = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer *sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer *sizer1_2 = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer *sizer1_3 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer1_3 = new wxBoxSizer(wxHORIZONTAL);	
 
 	m_java_jvm_text = new wxTextCtrl(page, ID_JavaJVMText);
 	m_java_ij_text = new wxTextCtrl(page, ID_JavaIJText);
@@ -619,8 +624,31 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 	sizer1_2->Add(m_browse_ij_btn, 0, wxALIGN_CENTER);
 	sizer1_3->Add(m_java_bioformats_text, 1, wxEXPAND);
 	sizer1_3->Add(m_browse_bioformats_btn, 0, wxALIGN_CENTER);
+	
+	group1->Add(5, 5);
+
+	//Added the radio button
+	st = new wxStaticText(page, 0, "Package:");
+	mp_radio_button_imagej = new wxRadioButton(page, ID_RadioButtonImageJ, "ImageJ", wxDefaultPosition);
+	mp_radio_button_fiji = new wxRadioButton(page, ID_RadioButtonFiji, "Fiji", wxDefaultPosition);
+	sizer1_0->Add(st);
+	sizer1_0->Add(5, 5);
+	sizer1_0->Add(mp_radio_button_imagej);
+	sizer1_0->Add(5, 5);
+	sizer1_0->Add(mp_radio_button_fiji);
+	group1->Add(sizer1_0, 0, wxEXPAND);
+	mp_radio_button_imagej->SetValue(true);
 
 	group1->Add(10, 5);
+#ifdef _WIN32
+    st = new wxStaticText(page, 0, "Path to the root folder of ImageJ or Fiji (e.g., \"ImageJ\" or \"Fiji.app\")");
+#else
+    st = new wxStaticText(page, 0, "Path to folder \"ImageJ.app\" or \"Fiji.app\" (e.g., \"ImageJ/ImageJ.app\" or \"Fiji.app\") :");
+#endif
+    group1->Add(st);
+    group1->Add(sizer1_2, 0, wxEXPAND);
+    group1->Add(10, 10);
+
 #ifdef _WIN32
 	st = new wxStaticText(page, 0, "Path to file \"jvm.dll\" (e.g., \"ImageJ\\jre\\bin\\server\\jvm.dll\"):");
 #else
@@ -629,14 +657,7 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 	group1->Add(st);
 	group1->Add(sizer1_1, 0, wxEXPAND);
 	group1->Add(10, 10);
-#ifdef _WIN32
-	st = new wxStaticText(page, 0, "Path to file \"ij.jar\" (e.g., \"ImageJ\\ij.jar\"):");
-#else
-	st = new wxStaticText(page, 0, "Path to file \"ImageJ.app\" (e.g., \"ImageJ/ImageJ.app\"):");
-#endif
-	group1->Add(st);
-	group1->Add(sizer1_2, 0, wxEXPAND);
-	group1->Add(10, 10);
+    
 #ifdef _WIN32
 	st = new wxStaticText(page, 0, "Path to file \"bioformats_package.jar\" (e.g., \"ImageJ\\plugins\\bioformats_package.jar\"):");
 #else
@@ -645,9 +666,11 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 	group1->Add(st);
 	group1->Add(sizer1_3, 0, wxEXPAND);
 	group1->Add(10, 10);
+
 	st = new wxStaticText(page, 0,
-		"Note:\n"\
-		"Restart FluoRender for Java settings to take effect.\n");
+		"Note:\n" \
+		"Restart FluoRender for Java settings to take effect.\n" \
+		"Bioformats and JVM are required when ImageJ is selected.");
 	group1->Add(st);
 	group1->Add(10, 5);
 
@@ -765,6 +788,7 @@ void SettingDlg::GetSettings()
 	m_use_max_texture_size = false;
 	m_max_texture_size = 2048;
 	m_plane_mode = 0;
+	m_ij_mode = 0;
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
@@ -1034,12 +1058,9 @@ void SettingDlg::GetSettings()
 		fconfig.Read("jvm_path", &m_jvm_path);
 		fconfig.Read("ij_path", &m_ij_path);
 		fconfig.Read("bioformats_path", &m_bioformats_path);
-
-		m_java_jvm_text->SetValue(m_jvm_path);
-		m_java_ij_text->SetValue(m_ij_path);
-		m_java_bioformats_text->SetValue(m_bioformats_path);
-	}	
-
+		fconfig.Read("ij_mode", &m_ij_mode);
+	}
+    
 	UpdateUI();
 }
 
@@ -1134,6 +1155,28 @@ void SettingDlg::UpdateUI()
 	m_response_time_sldr->SetValue(int(m_up_time / 10.0));
 	m_detail_level_offset_text->ChangeValue(wxString::Format("%d", -m_detail_level_offset));
 	m_detail_level_offset_sldr->SetValue(-m_detail_level_offset);
+
+	//java
+	m_java_jvm_text->SetValue(m_jvm_path);
+	m_java_ij_text->SetValue(m_ij_path);
+	m_java_bioformats_text->SetValue(m_bioformats_path);
+	switch (m_ij_mode)
+	{
+	case 0:
+		mp_radio_button_imagej->SetValue(true);
+		m_java_jvm_text->Enable(true);
+		m_java_bioformats_text->Enable(true);
+		m_browse_jvm_btn->Enable(true);
+		m_browse_bioformats_btn->Enable(true);
+		break;
+	case 1:
+		mp_radio_button_fiji->SetValue(true);
+		m_java_jvm_text->Enable(false);
+		m_java_bioformats_text->Enable(false);
+		m_browse_jvm_btn->Enable(false);
+		m_browse_bioformats_btn->Enable(false);
+		break;
+	}
 }
 
 void SettingDlg::SaveSettings()
@@ -1298,9 +1341,10 @@ void SettingDlg::SaveSettings()
 
 	// java paths
 	fconfig.SetPath("/Java");	
-	fconfig.Write("jvm_path", getJVMPath());
+ 	fconfig.Write("jvm_path", getJVMPath());
 	fconfig.Write("ij_path", getIJPath());
 	fconfig.Write("bioformats_path", getBioformatsPath());
+	fconfig.Write("ij_mode", getIJMode());
 
 	//clipping plane mode
 	fconfig.SetPath("/clipping planes");
@@ -1611,6 +1655,25 @@ void SettingDlg::OnGradBgCheck(wxCommandEvent &event)
 		}
 	}
 }
+
+// Get jvm paths.
+wxString SettingDlg::getJVMPath() {
+	return m_java_jvm_text->GetValue(); 
+}
+wxString SettingDlg::getIJPath() {
+	return m_java_ij_text->GetValue(); 
+}
+wxString SettingDlg::getBioformatsPath() {
+	return m_java_bioformats_text->GetValue(); 
+}
+std::vector<std::string> SettingDlg::GetJvmArgs() {
+	std::vector<std::string> args;
+	args.push_back(getJVMPath().ToStdString());
+	args.push_back(getIJPath().ToStdString());
+	args.push_back(getBioformatsPath().ToStdString());
+	return args;
+}
+
 
 //rot center anchor thresh
 void SettingDlg::OnPinThresholdChange(wxScrollEvent &event)
@@ -2045,13 +2108,16 @@ void SettingDlg::onJavaJvmBrowse(wxCommandEvent &event)
 
 void SettingDlg::onJavaIJBrowse(wxCommandEvent &event)
 {
-#ifdef _WIN32
-	wxFileDialog *fopendlg = new wxFileDialog(
-		m_frame, "Choose the imageJ jar",
-		"", "", "*.jar", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+#ifdef _WIN32	
+	//wxFileDialog *fopendlg = new wxFileDialog(
+	//	m_frame, "Choose the imageJ/fiji directory",
+	//	"", "", "*.jar", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+	wxDirDialog *fopendlg = new wxDirDialog(
+		m_frame, "Choose the imageJ/fiji directory",
+		"", wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
 #else
     wxFileDialog *fopendlg = new wxFileDialog(
-                                              m_frame, "Choose the imageJ app",
+                                              m_frame, "Choose the imageJ/fiji app",
                                               "", "", "*.app", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 #endif
 
@@ -2060,7 +2126,7 @@ void SettingDlg::onJavaIJBrowse(wxCommandEvent &event)
 	{
 		wxString filename = fopendlg->GetPath();
 #ifdef _DARWIN
-        filename = filename + "/Contents/Java/ij.jar";
+        //filename = filename + "/Contents/Java/ij.jar";
 #endif
 		m_java_ij_text->SetValue(filename);
 	}
@@ -2086,3 +2152,18 @@ void SettingDlg::onJavaBioformatsBrowse(wxCommandEvent &event)
 		delete fopendlg;
 }
 
+void SettingDlg::onJavaRadioButtonImageJ(wxCommandEvent &event) {
+	m_java_jvm_text->Enable(true);
+	m_java_bioformats_text->Enable(true);
+	m_browse_jvm_btn->Enable(true);
+	m_browse_bioformats_btn->Enable(true);
+	m_ij_mode = 0;
+}
+
+void SettingDlg::onJavaRadioButtonFiji(wxCommandEvent &event) {
+	m_java_jvm_text->Enable(false);	
+	m_java_bioformats_text->Enable(false);
+	m_browse_jvm_btn->Enable(false);
+	m_browse_bioformats_btn->Enable(false);
+	m_ij_mode = 1;
+}

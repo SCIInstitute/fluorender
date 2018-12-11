@@ -31,13 +31,17 @@ DEALINGS IN THE SOFTWARE.
 #include "../compatibility.h"
 //#include "VRenderFrame.h"
 
+#ifdef __linux__
+  #include <dlfcn.h>
+#endif
+
 #ifndef _JVMINITIALIZER_H_
 #define _JVMINITIALIZER_H_
 
 class SettingDlg;
 class JVMInitializer {
 	public:
-		static JVMInitializer* getInstance(SettingDlg* inp_settingDlg = 0);
+		static JVMInitializer* getInstance(std::vector<std::string> args = std::vector<std::string>());
 		static void destroyJVM();
 
 #ifdef _WIN32
@@ -65,7 +69,8 @@ class JVMInitializer {
 		JVMInitializer& operator=(JVMInitializer const&);
 
 		static char getPathSeparator();
-		bool static create_JVM(SettingDlg* inp_settingDlg);
+		bool static create_JVM(std::vector<std::string> args);
+		bool static m_with_fiji;
 };
 
 #endif //_JVMINITIALIZER_H_

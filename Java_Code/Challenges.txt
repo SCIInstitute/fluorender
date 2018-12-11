@@ -1,2 +1,4 @@
 1) The first challenge I faced was how to read integer, float arrays from java to C++. the code was working for integer, float variables.
 Solution: The solution is, since integer arrays in Java are java objects, call the method with return type object. Hence instead of using CallStaticIntMethod use CallStaticObjectMethod.
+
+2) Ther is sproblem with the physical size (voxel size) in X,Y. Filename: Oct22no10_3ch.tif

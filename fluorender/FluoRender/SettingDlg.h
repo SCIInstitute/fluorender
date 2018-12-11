@@ -110,7 +110,9 @@ class SettingDlg : public wxPanel
 		ID_JavaBioformatsText,
 		ID_JavaJvmBrowseBtn,
 		ID_JavaIJBrowseBtn,
-		ID_JavaBioformatsBrowseBtn
+		ID_JavaBioformatsBrowseBtn,
+		ID_RadioButtonImageJ,
+		ID_RadioButtonFiji
 	};
 
 public:
@@ -236,9 +238,12 @@ public:
 	int GetPlaneMode() { return m_plane_mode; }
 	
 	//Getting the java paths.
-	wxString getJVMPath() { return m_java_jvm_text->GetValue(); };
-	wxString getIJPath() { return m_java_ij_text->GetValue(); };
-	wxString getBioformatsPath() { return m_java_bioformats_text->GetValue(); };
+	wxString getJVMPath();
+	wxString getIJPath();
+	wxString getBioformatsPath();
+	std::vector<std::string> GetJvmArgs();
+
+	bool getIJMode() { return m_ij_mode; }
 
 private:
 	wxWindow* m_frame;
@@ -260,10 +265,10 @@ private:
 	double m_shadow_dir_x;	//x comp of shadow direction
 	double m_shadow_dir_y;	//y comp of shadow direction
 	bool m_mouse_int;		//enable lower sample rate for mouse interactions
-	long m_wav_color1;		//wavelength to color
-	long m_wav_color2;		//1-red; 2-green; 3-blue; 4-purple; 5-white
-	long m_wav_color3;
-	long m_wav_color4;
+	int m_wav_color1;		//wavelength to color
+	int m_wav_color2;		//1-red; 2-green; 3-blue; 4-purple; 5-white
+	int m_wav_color3;
+	int m_wav_color4;
 	wxString m_time_id;		//identfier for time sequence
 	bool m_grad_bg;
 	bool m_override_vox;
@@ -335,6 +340,7 @@ private:
 	wxString m_jvm_path;
 	wxString m_ij_path;
 	wxString m_bioformats_path;
+	int m_ij_mode;//0: imagej; 1: fiji
 
 private:
 	//save project
@@ -397,6 +403,8 @@ private:
 	wxButton* m_browse_jvm_btn;
 	wxButton* m_browse_ij_btn;
 	wxButton* m_browse_bioformats_btn;
+	wxRadioButton* mp_radio_button_imagej;
+	wxRadioButton* mp_radio_button_fiji;
 
 	//save
 	wxButton *m_save_btn;
@@ -480,6 +488,8 @@ private:
 	void onJavaJvmBrowse(wxCommandEvent &event);
 	void onJavaIJBrowse(wxCommandEvent &event);
 	void onJavaBioformatsBrowse(wxCommandEvent &event);
+	void onJavaRadioButtonImageJ(wxCommandEvent &event);
+	void onJavaRadioButtonFiji(wxCommandEvent &event);
 
 	DECLARE_EVENT_TABLE()
 };

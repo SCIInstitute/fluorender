@@ -2324,8 +2324,8 @@ void VRenderView::OnScaleTextEditing(wxCommandEvent& event) {
 		break;
 	}
 	str += unit_text;
-	if (m_glview) {
-		m_glview->SetScaleBarLen(len);
+	if (m_glview)
+	{
 		m_glview->SetSBText(str);
 		m_glview->SetScaleBarLen(len);
 		m_glview->m_sb_num = num_text;

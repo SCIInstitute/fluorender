@@ -64,14 +64,20 @@ namespace FLIVR
 			size_t *param_value_size_ret) = NULL;
 		myclGetGLContextInfoKHR = (P1)clGetExtensionFunctionAddress("clGetGLContextInfoKHR");
 #endif
-#ifdef _DARWIN
-		cl_context_properties properties[] =
-		{
-			CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE,
-			(cl_context_properties)CGLGetShareGroup(CGLGetCurrentContext()),
-			CL_CONTEXT_PLATFORM, (cl_context_properties)0,
-			0
-		};
+#if defined(_DARWIN) || defined(__linux__)
+	cl_context_properties properties[] =
+	{
+#if defined(_DARWIN) 
+		CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE,
+		(cl_context_properties)CGLGetShareGroup(CGLGetCurrentContext()),
+#elif defined(__linux__)
+		// https://www.codeproject.com/Articles/685281/OpenGL-OpenCL-Interoperability-A-Case-Study-Using
+		CL_GL_CONTEXT_KHR , (cl_context_properties)glXGetCurrentContext() ,
+		CL_GLX_DISPLAY_KHR , (cl_context_properties)glXGetCurrentDisplay() ,
+#endif
+		CL_CONTEXT_PLATFORM, (cl_context_properties)0,
+		0
+	};
 #endif
 
 		for (cl_uint i = 0; i<platform_num; ++i)
