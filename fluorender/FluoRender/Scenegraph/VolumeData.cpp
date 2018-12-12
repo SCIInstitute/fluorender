@@ -43,7 +43,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Formats/brkxml_reader.h>
 #include <Formats/imageJ_reader.h>
 #include <FLIVR/Plane.h>
-#include <Calculate/VolumeSampler.h>
+//#include <Calculate/VolumeSampler.h>
 #include <glm/gtc/matrix_transform.hpp>
 
 using namespace FL;
@@ -1381,7 +1381,9 @@ void VolumeData::LoadMask(Nrrd* mask)
 	if (!mask || !m_tex || !m_vr)
 		return;
 
-	int nx2, ny2, nz2;
+	//consider doing processing outside of the VolumeData class
+	//to reduce coupling
+/*	int nx2, ny2, nz2;
 	nx2 = mask->axis[0].size;
 	ny2 = mask->axis[1].size;
 	nz2 = mask->axis[2].size;
@@ -1405,7 +1407,7 @@ void VolumeData::LoadMask(Nrrd* mask)
 		sampler.Resize();
 		nrrdNuke(mask);
 		mask = sampler.GetResult();
-	}
+	}*/
 
 	//prepare the texture bricks for the mask
 	m_tex->add_empty_mask();
@@ -1482,7 +1484,9 @@ void VolumeData::LoadLabel(Nrrd* label)
 	if (!label || !m_tex || !m_vr)
 		return;
 
-	int nx2, ny2, nz2;
+	//consider doing processing outside of the VolumeData class
+	//to reduce coupling
+/*	int nx2, ny2, nz2;
 	nx2 = label->axis[0].size;
 	ny2 = label->axis[1].size;
 	nz2 = label->axis[2].size;
@@ -1504,7 +1508,7 @@ void VolumeData::LoadLabel(Nrrd* label)
 		sampler.Resize();
 		nrrdNuke(label);
 		label = sampler.GetResult();
-	}
+	}*/
 
 	m_tex->add_empty_label();
 	m_tex->set_nrrd(label, m_tex->nlabel());
@@ -1944,7 +1948,9 @@ void VolumeData::SaveData(std::wstring &filename, int mode, bool bake, bool comp
 			//delete prg_diag;
 		}
 
-		bool resize;
+		//consider doing processing outside of the VolumeData class
+		//to reduce coupling
+/*		bool resize;
 		getValue("resize", resize);
 		long resize_x, resize_y, resize_z;
 		getValue("resize x", resize_x);
@@ -1969,7 +1975,7 @@ void VolumeData::SaveData(std::wstring &filename, int mode, bool bake, bool comp
 			}
 			if (delete_data)
 				nrrdNuke(temp);
-		}
+		}*/
 
 		writer->SetData(data);
 		writer->SetSpacings(spcx, spcy, spcz);
@@ -2011,7 +2017,9 @@ void VolumeData::SaveMask(bool use_reader, long t, long c)
 		data = m_tex->get_nrrd(m_tex->nmask());
 		if (data)
 		{
-			bool resize;
+			//consider doing processing outside of the VolumeData class
+			//to reduce coupling
+/*			bool resize;
 			getValue("resize", resize);
 			long resize_x, resize_y, resize_z;
 			getValue("resize x", resize_x);
@@ -2034,7 +2042,7 @@ void VolumeData::SaveMask(bool use_reader, long t, long c)
 					spcz = data->axis[2].spacing;
 					delete_data = true;
 				}
-			}
+			}*/
 
 			MSKWriter msk_writer;
 			msk_writer.SetData(data);
@@ -2076,7 +2084,9 @@ void VolumeData::SaveLabel(bool use_reader, long t, long c)
 		data = m_tex->get_nrrd(m_tex->nlabel());
 		if (data)
 		{
-			bool resize;
+			//consider doing processing outside of the VolumeData class
+			//to reduce coupling
+/*			bool resize;
 			getValue("resize", resize);
 			long resize_x, resize_y, resize_z;
 			getValue("resize x", resize_x);
@@ -2097,7 +2107,7 @@ void VolumeData::SaveLabel(bool use_reader, long t, long c)
 					spcz = data->axis[2].spacing;
 					delete_data = true;
 				}
-			}
+			}*/
 
 			MSKWriter msk_writer;
 			msk_writer.SetData(data);
