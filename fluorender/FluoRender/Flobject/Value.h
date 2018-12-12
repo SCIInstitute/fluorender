@@ -126,8 +126,50 @@ protected:
 	std::string _name;
 	std::string _type;
 	ValueType _etype;
-	static bool _precise;//if equal is precise
-	static std::unordered_map<std::string, ValueType> _value_map;
+
+	//static bool _precise;//if equal is precise
+	//static std::unordered_map<std::string, ValueType> _value_map;
+	//use static functions instead of variables to make sure initialization
+	//https://isocpp.org/wiki/faq/ctors#construct-on-first-use-v2
+	static bool& precise()
+	{
+		static bool bval = false;
+		return bval;
+	}
+
+	static std::unordered_map<std::string, ValueType>& value_map()
+	{
+		static std::unordered_map<std::string, ValueType> mval
+		{
+			{"Referenced*", vt_pReferenced},
+			{"bool", vt_bool},
+			{"char", vt_char},
+			{"unsigned char", vt_unsigned_char},
+			{"short", vt_short},
+			{"unsigned short", vt_unsigned_short},
+			{"long", vt_long},
+			{"unsigned long", vt_unsigned_long},
+			{"long long", vt_long_long},
+			{"unsigned long long", vt_unsigned_long_long},
+			{"float", vt_float},
+			{"double", vt_double},
+			{"string", vt_string},
+			{"wstring", vt_wstring},
+			{"Point", vt_Point},
+			{"Vector", vt_Vector},
+			{"BBox", vt_BBox},
+			{"HSVColor", vt_HSVColor},
+			{"Color", vt_Color},
+			{"Plane", vt_Plane},
+			{"PlaneSet", vt_PlaneSet},
+			{"Quaternion", vt_Quaternion},
+			{"Ray", vt_Ray},
+			{"Transform", vt_Transform},
+			{"GLfloat4", vt_GLfloat4},
+			{"GLint4", vt_GLint4}
+		};
+		return mval;
+	}
 
 	friend class ValueSet;
 };
@@ -140,13 +182,13 @@ public:
 	TemplateValue(const std::string& name, const std::string& type, const T& value) :
 	Value(name,type), _value(value)
 	{
-		if (_value_map.empty())
+		if (value_map().empty())
 		{
 			_etype = vt_null;
 			return;
 		}
-		auto it = _value_map.find(type);
-		if (it != _value_map.end())
+		auto it = value_map().find(type);
+		if (it != value_map().end())
 			_etype = it->second;
 	}
 
@@ -175,7 +217,7 @@ public:
 
 	bool equal(const T& value) const
 	{
-		if (_precise)
+		if (precise())
 			return _value == value;
 		else
 		{
@@ -403,14 +445,14 @@ inline bool Value::operator == (const Value& v) const
 		return dynamic_cast<const TemplateValue<unsigned long long>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<unsigned long long>*>(&v)->getValue();
 	case vt_float:
-		if (_precise)
+		if (precise())
 			return dynamic_cast<const TemplateValue<float>*>(this)->getValue() ==
 				dynamic_cast<const TemplateValue<float>*>(&v)->getValue();
 		else
 			return fabs(dynamic_cast<const TemplateValue<float>*>(this)->getValue() -
 				dynamic_cast<const TemplateValue<float>*>(&v)->getValue()) < FLTYPE::Epslf();
 	case vt_double:
-		if (_precise)
+		if (precise())
 			return dynamic_cast<const TemplateValue<double>*>(this)->getValue() ==
 				dynamic_cast<const TemplateValue<double>*>(&v)->getValue();
 		else

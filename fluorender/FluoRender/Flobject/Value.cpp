@@ -217,8 +217,8 @@ bool ValueSet::addValue(ValueTuple& vt)
 	std::istringstream iss(value);
 
 	Value::ValueType etype(Value::vt_null);
-	auto it = Value::_value_map.find(type);
-	if (it != Value::_value_map.end())
+	auto it = Value::value_map().find(type);
+	if (it != Value::value_map().end())
 		etype = it->second;
 
 	switch (etype)
@@ -729,8 +729,8 @@ bool ValueSet::setValue(ValueTuple& vt, Event& event)
 	std::istringstream iss(value);
 
 	Value::ValueType etype(Value::vt_null);
-	auto it = Value::_value_map.find(type);
-	if (it != Value::_value_map.end())
+	auto it = Value::value_map().find(type);
+	if (it != Value::value_map().end())
 		etype = it->second;
 
 	switch (etype)

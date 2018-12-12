@@ -29,37 +29,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace FL;
 
-bool Value::_precise = false;
-std::unordered_map<std::string, Value::ValueType> Value::_value_map
-{
-	{"Referenced*", vt_pReferenced},
-	{"bool", vt_bool},
-	{"char", vt_char},
-	{"unsigned char", vt_unsigned_char},
-	{"short", vt_short},
-	{"unsigned short", vt_unsigned_short},
-	{"long", vt_long},
-	{"unsigned long", vt_unsigned_long},
-	{"long long", vt_long_long},
-	{"unsigned long long", vt_unsigned_long_long},
-	{"float", vt_float},
-	{"double", vt_double},
-	{"string", vt_string},
-	{"wstring", vt_wstring},
-	{"Point", vt_Point},
-	{"Vector", vt_Vector},
-	{"BBox", vt_BBox},
-	{"HSVColor", vt_HSVColor},
-	{"Color", vt_Color},
-	{"Plane", vt_Plane},
-	{"PlaneSet", vt_PlaneSet},
-	{"Quaternion", vt_Quaternion},
-	{"Ray", vt_Ray},
-	{"Transform", vt_Transform},
-	{"GLfloat4", vt_GLfloat4},
-	{"GLint4", vt_GLint4}
-};
-
 Global Global::instance_;
 Global::Global()
 {
