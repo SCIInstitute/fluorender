@@ -285,10 +285,10 @@ add_library(TRACKING_OBJ OBJECT
 
 # Components
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Components)
-file(GLOB cmp_src fluorender/FluoRender/Components/*.cpp)
-file(GLOB cmp_hdr fluorender/FluoRender/Components/*.h)
+file(GLOB cmpt_src fluorender/FluoRender/Components/*.cpp)
+file(GLOB cmpt_hdr fluorender/FluoRender/Components/*.h)
 add_library(COMPONENTS_OBJ OBJECT
-	${cmp_src} ${cmp_hdr})
+	${cmpt_src} ${cmpt_hdr})
 
 # Cluster
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Cluster)
@@ -310,6 +310,13 @@ file(GLOB ani_src fluorender/FluoRender/Animator/*.cpp)
 file(GLOB ani_hdr fluorender/FluoRender/Animator/*.h)
 add_library(ANIMATORS_OBJ OBJECT
 	${ani_src} ${ani_hdr})
+
+# Compare
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Compare)
+file(GLOB cmpr_src fluorender/FluoRender/Compare/*.cpp)
+file(GLOB cmpr_hdr fluorender/FluoRender/Compare/*.h)
+add_library(COMPARE_OBJ OBJECT
+	${cmpr_src} ${cmpr_hdr})
 
 # Flobject
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Flobject)
@@ -413,7 +420,6 @@ endif()
 file(GLOB src fluorender/FluoRender/*.cpp)
 file(GLOB hdr fluorender/FluoRender/*.h)
 file(GLOB rsc fluorender/FluoRender/img/*.xpm)
-#add_library(FLUORENDER_OBJ OBJECT  ${hdr} ${src})
 
 # SynthBB
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/SynthBB)
@@ -469,6 +475,7 @@ if(APPLE)
 		$<TARGET_OBJECTS:CONVERTERS_OBJ>
 		$<TARGET_OBJECTS:FLIVR_OBJ>
 		$<TARGET_OBJECTS:ANIMATORS_OBJ>
+		$<TARGET_OBJECTS:COMPARE_OBJ>
 		$<TARGET_OBJECTS:GLOBAL_OBJ>
 		$<TARGET_OBJECTS:TYPES_OBJ>
 		$<TARGET_OBJECTS:FLOBJECT_OBJ>
@@ -495,6 +502,7 @@ elseif(UNIX OR MINGW)
 		$<TARGET_OBJECTS:CONVERTERS_OBJ>
 		$<TARGET_OBJECTS:FLIVR_OBJ>
 		$<TARGET_OBJECTS:ANIMATORS_OBJ>
+		$<TARGET_OBJECTS:COMPARE_OBJ>
 		$<TARGET_OBJECTS:GLOBAL_OBJ>
 		$<TARGET_OBJECTS:TYPES_OBJ>
 		$<TARGET_OBJECTS:FLOBJECT_OBJ>
@@ -567,6 +575,7 @@ elseif(WIN32)
 			$<TARGET_OBJECTS:CONVERTERS_OBJ>
 			$<TARGET_OBJECTS:FLIVR_OBJ>
 			$<TARGET_OBJECTS:ANIMATORS_OBJ>
+			$<TARGET_OBJECTS:COMPARE_OBJ>
 			$<TARGET_OBJECTS:NV_OBJ>
 			$<TARGET_OBJECTS:FORMATS_OBJ>
 			$<TARGET_OBJECTS:VIDEO_OBJ>
@@ -581,7 +590,6 @@ elseif(WIN32)
 			)
 		add_executable(Tester
 			${tester_hdr} ${tester_src}
-#			$<TARGET_OBJECTS:FLUORENDER_OBJ>
 #			$<TARGET_OBJECTS:GLOBAL_OBJ>
 			$<TARGET_OBJECTS:TYPES_OBJ>
 			$<TARGET_OBJECTS:FLOBJECT_OBJ>
@@ -594,16 +602,7 @@ elseif(WIN32)
 			$<TARGET_OBJECTS:TEEM_OBJ>
 			$<TARGET_OBJECTS:POLE_OBJ>
 			$<TARGET_OBJECTS:FORMATS_OBJ>
-#			$<TARGET_OBJECTS:CALCULATE_OBJ>
 			$<TARGET_OBJECTS:IMAGES_OBJ>
-#			$<TARGET_OBJECTS:CONVERTERS_OBJ>
-#			$<TARGET_OBJECTS:ANIMATORS_OBJ>
-#			$<TARGET_OBJECTS:NV_OBJ>
-#			$<TARGET_OBJECTS:VIDEO_OBJ>
-#			$<TARGET_OBJECTS:TRACKING_OBJ>
-#			$<TARGET_OBJECTS:COMPONENTS_OBJ>
-#			$<TARGET_OBJECTS:CLUSTER_OBJ>
-#			$<TARGET_OBJECTS:WACUTILS_OBJ>
 			)
 	endif()
 endif()
