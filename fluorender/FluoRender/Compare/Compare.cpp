@@ -37,8 +37,8 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace FL;
 
-ChannelCompare::ChannelCompare(VolumeData* vd)
-	: m_vd(vd),
+ChannelCompare::ChannelCompare(VolumeData* vd1, VolumeData* vd2)
+	: m_vd1(vd1), m_vd2(vd2),
 	m_use_mask(false),
 	m_init(false)
 {
@@ -48,44 +48,22 @@ ChannelCompare::~ChannelCompare()
 {
 }
 
-#define GET_VOLDATA \
-	if (!m_vd) \
-		return; \
-	long nx, ny, nz; \
-	m_vd->getValue("res x", nx); \
-	m_vd->getValue("res y", ny); \
-	m_vd->getValue("res z", nz); \
-	Nrrd* nrrd_data = 0; \
-	if (m_use_mask) \
-		nrrd_data = m_vd->GetMask(true); \
-	if (!nrrd_data) \
-		nrrd_data = m_vd->GetData(false); \
-	if (!nrrd_data) \
-		return; \
-	Nrrd* nrrd_label = m_vd->GetLabel(false); \
-	if (!nrrd_data) \
-		return; \
-	unsigned char* val8 = 0; \
-	unsigned short* val16 = 0; \
-	int bits; \
-	if (nrrd_data->type == nrrdTypeUChar) \
-	{ \
-		bits = 8; \
-		val8 = (unsigned char*)(nrrd_data->data); \
-	} \
-	else if (nrrd_data->type == nrrdTypeUShort) \
-	{ \
-		bits = 16; \
-		val16 = (unsigned short*)(nrrd_data->data); \
-	} \
-	unsigned int* val32 = (unsigned int*)(nrrd_label->data);
-
-#define CHECK_BRICKS \
-	if (!m_vd || !m_vd->GetTexture()) \
-		return; \
-	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks(); \
-	if (!bricks || bricks->size() == 0) \
-		return;
+bool ChannelCompare::CheckBricks()
+{
+	if (!m_vd1)
+		return false;
+	if (!m_vd2)
+		return false;
+	if (!m_vd1->GetTexture())
+		return false;
+	if (!m_vd2->GetTexture())
+		return false;
+	int brick_num1 = m_vd1->GetTexture()->get_brick_num();
+	int brick_num2 = m_vd2->GetTexture()->get_brick_num();
+	if (!brick_num1 || !brick_num2 || brick_num1 != brick_num2)
+		return false;
+	return true;
+}
 
 #define GET_VOLDATA_STREAM \
 	long nx, ny, nz; \
@@ -195,4 +173,77 @@ ChannelCompare::~ChannelCompare()
 		if (val16) delete[] val16; \
 		if (val32) delete[] val32; \
 	}
+
+void ChannelCompare::Compare(float threshold)
+{
+	if (!CheckBricks())
+		return;
+
+	//create program and kernels
+	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+		vol_kernel_factory_.kernel(str_cl_chann_compare);
+	if (!kernel_prog)
+		return;
+	int kernel_index = -1;
+	string name = "kernel_0";
+	if (kernel_prog->valid())
+		kernel_index = kernel_prog->findKernel(name);
+	else
+		kernel_index = kernel_prog->createKernel(name);
+
+	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
+	for (size_t i = 0; i < brick_num; ++i)
+	{
+		GET_VOLDATA_STREAM
+
+			size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
+		size_t local_size[3] = { 1, 1, 1 };
+
+		//data
+		cl_image_format image_format;
+		image_format.image_channel_order = CL_R;
+		if (bits == 8)
+			image_format.image_channel_data_type = CL_UNORM_INT8;
+		else if (bits == 16)
+			image_format.image_channel_data_type = CL_UNORM_INT16;
+		cl_image_desc image_desc;
+		image_desc.image_type = CL_MEM_OBJECT_IMAGE3D;
+		image_desc.image_width = nx;
+		image_desc.image_height = ny;
+		image_desc.image_depth = nz;
+		image_desc.image_array_size = 0;
+		image_desc.image_row_pitch = 0;
+		image_desc.image_slice_pitch = 0;
+		image_desc.num_mip_levels = 0;
+		image_desc.num_samples = 0;
+		image_desc.buffer = 0;
+		//set
+		kernel_prog->setKernelArgImage(kernel_index, 0,
+			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+			image_format, image_desc,
+			bits == 8 ? (void*)(val8) : (void*)(val16));
+		kernel_prog->setKernelArgBuf(kernel_index, 1,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*nx*ny*nz, val32);
+		kernel_prog->setKernelArgConst(kernel_index, 2,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(kernel_index, 3,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(kernel_index, 4,
+			sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setKernelArgConst(kernel_index, 5,
+			sizeof(float), (void*)(&tol));
+
+		//execute
+		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
+		//read back
+		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
+
+		//release buffer
+		kernel_prog->releaseMemObject(kernel_index, 0, 0, 0);
+		kernel_prog->releaseMemObject(kernel_index, 1, sizeof(unsigned int)*nx*ny*nz, 0);
+
+		RELEASE_DATA_STREAM
+	}
+}
 

@@ -36,7 +36,7 @@ namespace FL
 	class ChannelCompare
 	{
 	public:
-		ChannelCompare(VolumeData* vd);
+		ChannelCompare(VolumeData* vd1, VolumeData* vd2);
 		~ChannelCompare();
 
 		void SetUseMask(bool use_mask)
@@ -44,11 +44,14 @@ namespace FL
 		bool GetUseMask()
 		{ return m_use_mask; }
 
+		void Compare(float);
+
 	private:
-		VolumeData *m_vd;
+		VolumeData *m_vd1, *m_vd2;
 		bool m_use_mask;//use mask instead of data
 		bool m_init;
 
+		bool CheckBricks();
 	};
 
 }
