@@ -30,6 +30,10 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
+namespace FLIVR
+{
+	class TextureBrick;
+}
 namespace FL
 {
 	class VolumeData;
@@ -52,6 +56,12 @@ namespace FL
 		bool m_init;
 
 		bool CheckBricks();
+		bool GetInfo(FLIVR::TextureBrick* b1, FLIVR::TextureBrick* b2,
+			long &bits, long &bits2,
+			long &nx, long &ny, long &nz);
+		void* GetVolDataBrick(FLIVR::TextureBrick* b);
+		void* GetVolData(VolumeData* vd);
+		void ReleaseData(void* val, long bits);
 	};
 
 }

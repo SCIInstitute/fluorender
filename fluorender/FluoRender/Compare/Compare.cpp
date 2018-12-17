@@ -65,114 +65,90 @@ bool ChannelCompare::CheckBricks()
 	return true;
 }
 
-#define GET_VOLDATA_STREAM \
-	long nx, ny, nz; \
-	unsigned char* val8 = 0; \
-	unsigned short* val16 = 0; \
-	int bits = 8; \
-	unsigned int* val32 = 0; \
-	FLIVR::TextureBrick* b = 0; \
-	int c = 0; \
-	int nb = 1; \
-	if (bricks->size() > 1) \
-	{ \
-		b = (*bricks)[i]; \
-		c = m_use_mask ? b->nmask() : 0; \
-		nb = b->nb(c); \
-		nx = b->nx(); \
-		ny = b->ny(); \
-		nz = b->nz(); \
-		bits = nb * 8; \
-		unsigned long long mem_size = (unsigned long long)nx* \
-		(unsigned long long)ny*(unsigned long long)nz*(unsigned long long)nb; \
-		unsigned char* temp = new unsigned char[mem_size]; \
-		unsigned char* tempp = temp; \
-		unsigned char* tp = (unsigned char*)(b->tex_data(c)); \
-		unsigned char* tp2; \
-		for (unsigned int k = 0; k < nz; ++k) \
-		{ \
-			tp2 = tp; \
-			for (unsigned int j = 0; j < ny; ++j) \
-			{ \
-				memcpy(tempp, tp2, nx*nb); \
-				tempp += nx*nb; \
-				tp2 += b->sx()*nb; \
-			} \
-			tp += b->sx()*b->sy()*nb; \
-		} \
-		if (bits == 8) \
-		val8 = temp; \
-		else if (bits == 16) \
-		val16 = (unsigned short*)temp; \
-		c = b->nlabel(); \
-		nb = b->nb(c); \
-		mem_size = (unsigned long long)nx* \
-		(unsigned long long)ny*(unsigned long long)nz*(unsigned long long)nb; \
-		temp = new unsigned char[mem_size]; \
-		tempp = temp; \
-		tp = (unsigned char*)(b->tex_data(c)); \
-		for (unsigned int k = 0; k < nz; ++k) \
-		{ \
-			tp2 = tp; \
-			for (unsigned int j = 0; j < ny; ++j) \
-			{ \
-				memcpy(tempp, tp2, nx*nb); \
-				tempp += nx*nb; \
-				tp2 += b->sx()*nb; \
-			} \
-			tp += b->sx()*b->sy()*nb; \
-		} \
-		val32 = (unsigned int*)temp; \
-	} \
-	else \
-	{ \
-		m_vd->getValue("res x", nx); \
-		m_vd->getValue("res y", ny); \
-		m_vd->getValue("res z", nz); \
-		Nrrd* nrrd_data = 0; \
-		if (m_use_mask) \
-			nrrd_data = m_vd->GetMask(false); \
-		if (!nrrd_data) \
-			nrrd_data = m_vd->GetData(false); \
-		if (!nrrd_data) \
-			return; \
-		Nrrd* nrrd_label = m_vd->GetLabel(false); \
-		if (!nrrd_data) \
-			return; \
-		if (nrrd_data->type == nrrdTypeUChar) \
-		{ \
-			bits = 8; \
-			val8 = (unsigned char*)(nrrd_data->data); \
-		} \
-		else if (nrrd_data->type == nrrdTypeUShort) \
-		{ \
-			bits = 16; \
-			val16 = (unsigned short*)(nrrd_data->data); \
-		} \
-		val32 = (unsigned int*)(nrrd_label->data); \
-	}
+bool ChannelCompare::GetInfo(
+	FLIVR::TextureBrick* b1, FLIVR::TextureBrick* b2,
+	long &bits1, long &bits2,
+	long &nx, long &ny, long &nz)
+{
+	bits1 = b1->nb(m_use_mask ? b1->nmask() : 0);
+	bits2 = b2->nb(m_use_mask ? b2->nmask() : 0);
+	long nx1 = b1->nx();
+	long nx2 = b2->nx();
+	long ny1 = b1->ny();
+	long ny2 = b2->ny();
+	long nz1 = b1->nz();
+	long nz2 = b2->nz();
+	if (nx1 != nx2 || ny1 != ny2 || nz1 != nz2)
+		return false;
+	nx = nx1; ny = ny1; nz = nz1;
+	return true;
+}
 
-#define RELEASE_DATA_STREAM \
-	if (bricks->size() > 1) \
-	{ \
-		unsigned char* tempp = (unsigned char*)val32; \
-		unsigned char* tp = (unsigned char*)(b->tex_data(c)); \
-		unsigned char* tp2; \
-		for (unsigned int k = 0; k < nz; ++k) \
-		{ \
-			tp2 = tp; \
-			for (unsigned int j = 0; j < ny; ++j) \
-			{ \
-				memcpy(tp2, tempp, nx*nb); \
-				tempp += nx*nb; \
-				tp2 += b->sx()*nb; \
-			} \
-			tp += b->sx()*b->sy()*nb; \
-		} \
-		if (val8) delete[] val8; \
-		if (val16) delete[] val16; \
-		if (val32) delete[] val32; \
+void* ChannelCompare::GetVolDataBrick(FLIVR::TextureBrick* b)
+{
+	if (!b)
+		return 0;
+
+	long nx, ny, nz;
+	int bits = 8;
+	int c = 0;
+	int nb = 1;
+
+	c = m_use_mask ? b->nmask() : 0;
+	nb = b->nb(c);
+	nx = b->nx();
+	ny = b->ny();
+	nz = b->nz();
+	bits = nb * 8;
+	unsigned long long mem_size = (unsigned long long)nx*
+		(unsigned long long)ny*(unsigned long long)nz*(unsigned long long)nb;
+	unsigned char* temp = new unsigned char[mem_size];
+	unsigned char* tempp = temp;
+	unsigned char* tp = (unsigned char*)(b->tex_data(c));
+	unsigned char* tp2;
+	for (unsigned int k = 0; k < nz; ++k)
+	{
+		tp2 = tp;
+		for (unsigned int j = 0; j < ny; ++j)
+		{
+			memcpy(tempp, tp2, nx*nb);
+			tempp += nx * nb;
+			tp2 += b->sx()*nb;
+		}
+		tp += b->sx()*b->sy()*nb;
 	}
+	return (void*)temp;
+}
+
+void* ChannelCompare::GetVolData(VolumeData* vd)
+{
+	long nx, ny, nz;
+	vd->getValue("res x", nx);
+	vd->getValue("res y", ny);
+	vd->getValue("res z", nz);
+	Nrrd* nrrd_data = 0;
+	if (m_use_mask)
+		nrrd_data = vd->GetMask(false);
+	if (!nrrd_data)
+		nrrd_data = vd->GetData(false);
+	if (!nrrd_data)
+		return 0;
+	return nrrd_data->data;
+}
+
+void ChannelCompare::ReleaseData(void* val, long bits)
+{
+	if (bits == 8)
+	{
+		unsigned char* temp = (unsigned char*)val;
+		delete[] temp;
+	}
+	else if (bits == 16)
+	{
+		unsigned short* temp = (unsigned short*)val;
+		delete[] temp;
+	}
+}
 
 void ChannelCompare::Compare(float threshold)
 {
@@ -192,21 +168,44 @@ void ChannelCompare::Compare(float threshold)
 		kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
+	vector<FLIVR::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
+	vector<FLIVR::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
+
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		GET_VOLDATA_STREAM
+		FLIVR::TextureBrick* b1 = (*bricks1)[i];
+		FLIVR::TextureBrick* b2 = (*bricks2)[i];
+		long nx, ny, nz, bits1, bits2;
+		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
+			continue;
 
-			size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
+		//get data
+		void* val1 = 0;
+		void* val2 = 0;
+		if (brick_num > 1)
+		{
+			val1 = GetVolDataBrick(b1);
+			val2 = GetVolDataBrick(b2);
+		}
+		else
+		{
+			val1 = GetVolData(m_vd1);
+			val2 = GetVolData(m_vd2);
+		}
+
+		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
-		//data
+		//set
+		unsigned int count = 0;
 		cl_image_format image_format;
-		image_format.image_channel_order = CL_R;
-		if (bits == 8)
-			image_format.image_channel_data_type = CL_UNORM_INT8;
-		else if (bits == 16)
-			image_format.image_channel_data_type = CL_UNORM_INT16;
 		cl_image_desc image_desc;
+		//channel1
+		image_format.image_channel_order = CL_R;
+		if (bits1 == 8)
+			image_format.image_channel_data_type = CL_UNORM_INT8;
+		else if (bits1 == 16)
+			image_format.image_channel_data_type = CL_UNORM_INT16;
 		image_desc.image_type = CL_MEM_OBJECT_IMAGE3D;
 		image_desc.image_width = nx;
 		image_desc.image_height = ny;
@@ -217,14 +216,17 @@ void ChannelCompare::Compare(float threshold)
 		image_desc.num_mip_levels = 0;
 		image_desc.num_samples = 0;
 		image_desc.buffer = 0;
-		//set
 		kernel_prog->setKernelArgImage(kernel_index, 0,
 			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			image_format, image_desc,
-			bits == 8 ? (void*)(val8) : (void*)(val16));
-		kernel_prog->setKernelArgBuf(kernel_index, 1,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny*nz, val32);
+			image_format, image_desc, val1);
+		//channel2
+		if (bits2 == 8)
+			image_format.image_channel_data_type = CL_UNORM_INT8;
+		else if (bits2 == 16)
+			image_format.image_channel_data_type = CL_UNORM_INT16;
+		kernel_prog->setKernelArgImage(kernel_index, 1,
+			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+			image_format, image_desc, val2);
 		kernel_prog->setKernelArgConst(kernel_index, 2,
 			sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(kernel_index, 3,
@@ -232,18 +234,26 @@ void ChannelCompare::Compare(float threshold)
 		kernel_prog->setKernelArgConst(kernel_index, 4,
 			sizeof(unsigned int), (void*)(&nz));
 		kernel_prog->setKernelArgConst(kernel_index, 5,
-			sizeof(float), (void*)(&tol));
+			sizeof(float), (void*)(&threshold));
+		kernel_prog->setKernelArgBuf(kernel_index, 6,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int), (void*)(&count));
 
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
+		kernel_prog->readBuffer(sizeof(unsigned int), &count, &count);
 
 		//release buffer
-		kernel_prog->releaseMemObject(kernel_index, 0, 0, 0);
-		kernel_prog->releaseMemObject(kernel_index, 1, sizeof(unsigned int)*nx*ny*nz, 0);
+		kernel_prog->releaseMemObject(0, val1);
+		kernel_prog->releaseMemObject(0, val2);
+		kernel_prog->releaseMemObject(sizeof(unsigned int), &count);
 
-		RELEASE_DATA_STREAM
+		if (brick_num > 1)
+		{
+			ReleaseData(val1, bits1);
+			ReleaseData(val2, bits2);
+		}
 	}
 }
 
