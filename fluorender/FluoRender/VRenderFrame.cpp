@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Fui/OutAdjustPanel.h>
 #include <Fui/ClipPlanePanel.h>
 #include <Fui/MeshPropPanel.h>
+#include <Fui/ColocalDlg.h>
 #include <Global/Global.h>
 #include <Scenegraph/Root.h>
 #include <Scenegraph/VolumeData.h>
@@ -153,7 +154,7 @@ VRenderFrame::VRenderFrame(
 	m_noise_cancelling_dlg(0),
 	m_counting_dlg(0),
 	m_convert_dlg(0),
-	m_colocalization_dlg(0),
+	m_colocal_dlg(0),
 	m_measure_dlg(0),
 	m_trace_dlg(0),
 	m_ocl_dlg(0),
@@ -515,7 +516,7 @@ VRenderFrame::VRenderFrame(
 	m_convert_dlg = new ConvertDlg(this, this);
 
 	//colocalization dialog
-	m_colocalization_dlg = new ColocalizationDlg(this, this);
+	m_colocal_dlg = new FUI::ColocalDlg(this, this);
 
 	//measure dialog
 	m_measure_dlg = new MeasureDlg(this, this);
@@ -610,12 +611,12 @@ VRenderFrame::VRenderFrame(
 	m_aui_mgr.GetPane(m_convert_dlg).Float();
 	m_aui_mgr.GetPane(m_convert_dlg).Hide();
 	//colocalization dialog
-	m_aui_mgr.AddPane(m_colocalization_dlg, wxAuiPaneInfo().
-		Name("m_colocalization_dlg").Caption("Colocalization").
-		Dockable(false).CloseButton(true).
+	m_aui_mgr.AddPane(m_colocal_dlg, wxAuiPaneInfo().
+		Name("m_colocal_dlg").Caption("Colocalization").
+		Dockable(true).CloseButton(true).
 		MaximizeButton(true));
-	m_aui_mgr.GetPane(m_colocalization_dlg).Float();
-	m_aui_mgr.GetPane(m_colocalization_dlg).Hide();
+	m_aui_mgr.GetPane(m_colocal_dlg).Float();
+	m_aui_mgr.GetPane(m_colocal_dlg).Hide();
 	//measure dialog
 	m_aui_mgr.AddPane(m_measure_dlg, wxAuiPaneInfo().
 		Name("m_measure_dlg").Caption("Measurement").
@@ -5096,8 +5097,8 @@ void VRenderFrame::ShowCountingDlg()
 
 void VRenderFrame::ShowColocalizationDlg()
 {
-	m_aui_mgr.GetPane(m_colocalization_dlg).Show();
-	m_aui_mgr.GetPane(m_colocalization_dlg).Float();
+	m_aui_mgr.GetPane(m_colocal_dlg).Show();
+	m_aui_mgr.GetPane(m_colocal_dlg).Float();
 	m_aui_mgr.Update();
 	if (m_setting_dlg)
 		m_setting_dlg->SetLastTool(TOOL_COLOCALIZATION);

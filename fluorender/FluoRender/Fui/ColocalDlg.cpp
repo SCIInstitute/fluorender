@@ -25,32 +25,29 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "ColocalizationDlg.h"
+#include "ColocalDlg.h"
 #include <VRenderFrame.h>
 #include <Scenegraph/VolumeData.h>
 #include <Global/Global.h>
 #include <wx/valnum.h>
 
-BEGIN_EVENT_TABLE(ColocalizationDlg, wxPanel)
-	EVT_BUTTON(ID_CalcLoadABtn, ColocalizationDlg::OnLoadA)
-	EVT_BUTTON(ID_CalcLoadBBtn, ColocalizationDlg::OnLoadB)
-	EVT_COMMAND_SCROLL(ID_MinSizeSldr, ColocalizationDlg::OnMinSizeChange)
-	EVT_TEXT(ID_MinSizeText, ColocalizationDlg::OnMinSizeText)
-	EVT_COMMAND_SCROLL(ID_MaxSizeSldr, ColocalizationDlg::OnMaxSizeChange)
-	EVT_TEXT(ID_MaxSizeText, ColocalizationDlg::OnMaxSizeText)
-	EVT_CHECKBOX(ID_BrushSelectBothChk, ColocalizationDlg::OnSelectBothChk)
-	EVT_BUTTON(ID_CalcColocalizationBtn, ColocalizationDlg::OnColocalizationBtn)
+using namespace FUI;
+
+BEGIN_EVENT_TABLE(ColocalDlg, wxPanel)
+	EVT_COMMAND_SCROLL(ID_MinSizeSldr, ColocalDlg::OnMinSizeChange)
+	EVT_TEXT(ID_MinSizeText, ColocalDlg::OnMinSizeText)
+	EVT_COMMAND_SCROLL(ID_MaxSizeSldr, ColocalDlg::OnMaxSizeChange)
+	EVT_TEXT(ID_MaxSizeText, ColocalDlg::OnMaxSizeText)
+	EVT_CHECKBOX(ID_BrushSelectBothChk, ColocalDlg::OnSelectBothChk)
+	EVT_BUTTON(ID_CalcColocalizationBtn, ColocalDlg::OnColocalizationBtn)
 END_EVENT_TABLE()
 
-ColocalizationDlg::ColocalizationDlg(wxWindow* frame,
+ColocalDlg::ColocalDlg(wxWindow* frame,
 	wxWindow* parent) :
 wxPanel(parent, wxID_ANY,
 wxDefaultPosition, wxSize(400, 165),
-0, "ColocalizationDlg"),
-m_frame(parent),
-m_view(0),
-m_vol_a(0),
-m_vol_b(0)
+0, "ColocalDlg"),
+m_frame(parent)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -140,83 +137,18 @@ m_vol_b(0)
 	Layout();
 }
 
-ColocalizationDlg::~ColocalizationDlg()
+ColocalDlg::~ColocalDlg()
 {
 }
 
-void ColocalizationDlg::GetSettings(VRenderView* vrv)
-{
-	m_view = vrv;
-
-	if (!m_view)
-		return;
-
-	bool bval;
-
-	bval = vrv->GetSelectBoth();
-	m_select_both_chk->SetValue(bval);
-
-}
-
-void ColocalizationDlg::SetVolumeA(FL::VolumeData* vd)
-{
-	if (!vd)
-		return;
-
-	m_vol_a = vd;
-	m_calc_a_text->SetValue(m_vol_a->getName());
-}
-
-void ColocalizationDlg::SetVolumeB(FL::VolumeData* vd)
-{
-	if (!vd)
-		return;
-
-	m_vol_b = vd;
-	m_calc_b_text->SetValue(m_vol_b->getName());
-
-	m_select_both_chk->SetValue(true);
-	wxCommandEvent event;
-	OnSelectBothChk(event);
-}
-
-void ColocalizationDlg::OnLoadA(wxCommandEvent &event)
-{
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		FL::Global::instance().getVolumeFactory().
-			getValue("current", (FL::Referenced**)&m_vol_a);
-		if (m_vol_a)
-			m_calc_a_text->SetValue(m_vol_a->getName());
-	}
-}
-
-void ColocalizationDlg::OnLoadB(wxCommandEvent &event)
-{
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		//m_vol_b = vr_frame->GetCurSelVol();
-		FL::Global::instance().getVolumeFactory().
-			getValue("current", (FL::Referenced**)&m_vol_b);
-		if (m_vol_b)
-			m_calc_b_text->SetValue(m_vol_b->getName());
-
-		m_select_both_chk->SetValue(true);
-		wxCommandEvent event;
-		OnSelectBothChk(event);
-	}
-}
-
-void ColocalizationDlg::OnMinSizeChange(wxScrollEvent &event)
+void ColocalDlg::OnMinSizeChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
 	m_min_size_text->SetValue(str);
 }
 
-void ColocalizationDlg::OnMinSizeText(wxCommandEvent &event)
+void ColocalDlg::OnMinSizeText(wxCommandEvent &event)
 {
 	wxString str = m_min_size_text->GetValue();
 	long ival;
@@ -224,7 +156,7 @@ void ColocalizationDlg::OnMinSizeText(wxCommandEvent &event)
 	m_min_size_sldr->SetValue(ival);
 }
 
-void ColocalizationDlg::OnMaxSizeChange(wxScrollEvent &event)
+void ColocalDlg::OnMaxSizeChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival*100);
@@ -233,7 +165,7 @@ void ColocalizationDlg::OnMaxSizeChange(wxScrollEvent &event)
 	m_max_size_text->SetValue(str);
 }
 
-void ColocalizationDlg::OnMaxSizeText(wxCommandEvent &event)
+void ColocalDlg::OnMaxSizeText(wxCommandEvent &event)
 {
 	wxString str = m_max_size_text->GetValue();
 	long ival;
@@ -244,24 +176,24 @@ void ColocalizationDlg::OnMaxSizeText(wxCommandEvent &event)
 	m_max_size_sldr->SetValue(ival/100);
 }
 
-void ColocalizationDlg::OnSelectBothChk(wxCommandEvent &event)
+void ColocalDlg::OnSelectBothChk(wxCommandEvent &event)
 {
 	bool select_both = m_select_both_chk->GetValue();
 
-	if (m_view)
-	{
-		m_view->SetSelectBoth(select_both);
-		if (select_both)
-		{
-			m_view->SetVolumeA(m_vol_a);
-			m_view->SetVolumeB(m_vol_b);
-		}
-	}
+	//if (m_view)
+	//{
+	//	m_view->SetSelectBoth(select_both);
+	//	if (select_both)
+	//	{
+	//		m_view->SetVolumeA(m_vol_a);
+	//		m_view->SetVolumeB(m_vol_b);
+	//	}
+	//}
 }
 
-void ColocalizationDlg::OnColocalizationBtn(wxCommandEvent &event)
+void ColocalDlg::OnColocalizationBtn(wxCommandEvent &event)
 {
-	if (!m_view || !m_vol_a || !m_vol_b)
+/*	if (!m_view || !m_vol_a || !m_vol_b)
 		return;
 
 	bool select = true;
@@ -308,5 +240,5 @@ void ColocalizationDlg::OnColocalizationBtn(wxCommandEvent &event)
 		m_view->GetVolumeSelector()->SetVolume(vd);
 		m_view->CompAnalysis(min_voxels, max_voxels, thresh, falloff, select, true, false);
 	}
-
+*/
 }

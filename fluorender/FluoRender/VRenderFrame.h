@@ -40,7 +40,6 @@ DEALINGS IN THE SOFTWARE.
 #include "NoiseCancellingDlg.h"
 #include "CountingDlg.h"
 #include "ConvertDlg.h"
-#include "ColocalizationDlg.h"
 #include "RecorderDlg.h"
 #include "MeasureDlg.h"
 #include "TraceDlg.h"
@@ -113,6 +112,7 @@ namespace FUI
 	class OutAdjustPanel;
 	class ClipPlanePanel;
 	class MeshPropPanel;
+	class ColocalDlg;
 }
 class VRenderFrame: public wxFrame
 {
@@ -232,6 +232,7 @@ public:
 	//tool views
 	FUI::VolumePropPanel* GetPropView()
 	{ return m_volume_prop; }
+
 	//movie view
 	VMovieView* GetMovieView()
 	{ return m_movie_view; }
@@ -256,8 +257,8 @@ public:
 	//convert dialog
 	ConvertDlg* GetConvertDlg()
 	{ return m_convert_dlg; }
-	ColocalizationDlg* GetColocalizationDlg()
-	{ return m_colocalization_dlg; }
+	FUI::ColocalDlg* GetColocalizationDlg()
+	{ return m_colocal_dlg; }
 	//recorder dialog
 	RecorderDlg* GetRecorderDlg()
 	{ return m_recorder_dlg; }
@@ -386,7 +387,7 @@ private:
 	NoiseCancellingDlg* m_noise_cancelling_dlg;
 	CountingDlg* m_counting_dlg;
 	ConvertDlg* m_convert_dlg;
-	ColocalizationDlg* m_colocalization_dlg;
+	FUI::ColocalDlg* m_colocal_dlg;
 	MeasureDlg* m_measure_dlg;
 	TraceDlg* m_trace_dlg;
 	OclDlg* m_ocl_dlg;
