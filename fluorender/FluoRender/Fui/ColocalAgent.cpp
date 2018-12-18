@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Fui/ColocalAgent.h>
 #include <Fui/ColocalDlg.h>
+#include <Compare/Compare.h>
 
 using namespace FUI;
 
@@ -38,17 +39,83 @@ ColocalAgent::ColocalAgent(ColocalDlg &dlg) :
 
 }
 
-void ColocalAgent::setObject(FL::Processor* processor)
+void ColocalAgent::setObject(FL::Root* root)
 {
-	InterfaceAgent::setObject(processor);
+	InterfaceAgent::setObject(root);
 }
 
-FL::Processor* ColocalAgent::getObject()
+FL::Root* ColocalAgent::getObject()
 {
-	return dynamic_cast<FL::Processor*>(InterfaceAgent::getObject());
+	return dynamic_cast<FL::Root*>(InterfaceAgent::getObject());
 }
 
 void ColocalAgent::UpdateAllSettings()
 {
 
+}
+
+void ColocalAgent::Run()
+{
+	FL::Root* root = getObject();
+	if (!root)
+		return;
+	//get selections
+	class SelRetriever : public FL::NodeVisitor
+	{
+	public:
+		SelRetriever() : NodeVisitor()
+		{
+			setTraversalMode(FL::NodeVisitor::TRAVERSE_ALL_CHILDREN);
+		}
+
+		virtual void reset()
+		{
+			nodes_.clear();
+		}
+
+		virtual void apply(FL::Node& node)
+		{
+			if (std::string("VolumeData") == node.className())
+			{
+				bool selected = false;
+				node.getValue("selected", selected);
+				if (selected)
+					nodes_.insert(&node);
+			}
+			traverse(node);
+		}
+
+		virtual void apply(FL::Group& group)
+		{
+			traverse(group);
+		}
+
+		FL::NodeSet &getResult()
+		{
+			return nodes_;
+		}
+
+	private:
+		FL::NodeSet nodes_;
+	};
+
+	SelRetriever retriever;
+	root->accept(retriever);
+	FL::NodeSet nodes = retriever.getResult();
+
+	if (nodes.size() < 2)
+		return;
+
+	for (auto it1 = nodes.begin();
+		it1 != nodes.end(); ++it1)
+	{
+		for (auto it2 = std::next(it1);
+			it2 != nodes.end(); ++it2)
+		{
+			FL::ChannelCompare compare(
+				(*it1)->asVolumeData(),
+				(*it2)->asVolumeData());
+			compare.Compare(0.5);
+		}
+	}
 }

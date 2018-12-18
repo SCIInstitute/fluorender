@@ -36,6 +36,7 @@ Node::Node() :
 	Object(),
 	m_node_mask(0xffffffff)
 {
+	addValue("selected", bool(false));
 }
 
 Node::Node(const Node& node, const CopyOp& copyop, bool copy_values) :
@@ -46,6 +47,7 @@ Node::Node(const Node& node, const CopyOp& copyop, bool copy_values) :
 	//copy
 	if (copy_values)
 		copyValues(node, copyop);
+	addValue("selected", bool(false));
 }
 
 Node::~Node()

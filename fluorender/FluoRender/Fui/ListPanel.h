@@ -48,7 +48,7 @@ namespace FUI
 			ID_Delete,
 			ID_DeleteAll
 		};
-		ListPanel(wxWindow* frame,
+		ListPanel(
 			wxWindow* parent,
 			wxWindowID id,
 			const wxPoint& pos = wxDefaultPosition,
@@ -58,7 +58,6 @@ namespace FUI
 		~ListPanel();
 
 	private:
-		wxWindow* m_frame;
 		wxToolBar* m_toolbar;
 
 		wxDataViewCtrl* m_list_ctrl;

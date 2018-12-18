@@ -83,12 +83,14 @@ namespace FUI
 
 		//operations
 		void MoveNode(const std::string &source, FL::Node* target);
+		void UpdateSelections(FL::NodeSet &nodes);
 
 		friend class AgentFactory;
 
 	protected:
 		TreePanel &panel_;
 
+		void OnSelectionChanged(FL::Event& event);
 		void OnItemAdded(FL::Event& event);
 		void OnItemRemoved(FL::Event& event);
 		void OnDisplayChanged(FL::Event& event);

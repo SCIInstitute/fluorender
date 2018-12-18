@@ -42,15 +42,18 @@ BEGIN_EVENT_TABLE(ColocalDlg, wxPanel)
 	EVT_BUTTON(ID_CalcColocalizationBtn, ColocalDlg::OnColocalizationBtn)
 END_EVENT_TABLE()
 
-ColocalDlg::ColocalDlg(wxWindow* frame,
+ColocalDlg::ColocalDlg(
 	wxWindow* parent) :
 wxPanel(parent, wxID_ANY,
 wxDefaultPosition, wxSize(400, 165),
-0, "ColocalDlg"),
-m_frame(parent)
+0, "ColocalDlg")
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+
+	m_agent =
+		FL::Global::instance().getAgentFactory().
+		getOrAddColocalAgent("ColocalDlg", *this);
 
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
@@ -193,6 +196,8 @@ void ColocalDlg::OnSelectBothChk(wxCommandEvent &event)
 
 void ColocalDlg::OnColocalizationBtn(wxCommandEvent &event)
 {
+
+	m_agent->Run();
 /*	if (!m_view || !m_vol_a || !m_vol_b)
 		return;
 

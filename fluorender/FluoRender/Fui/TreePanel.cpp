@@ -245,13 +245,26 @@ void TreePanel::BrushSolid(bool state)
 
 void TreePanel::OnSelectionChanged(wxDataViewEvent &event)
 {
+	wxDataViewItem evt_item = m_tree_ctrl->GetCurrentItem();//event item, could be selection or deselection
+	wxDataViewItem cur_item = m_tree_ctrl->GetSelection();//selected item, could be 0
+	wxDataViewItemArray items;//all selected items
+	int num = m_tree_ctrl->GetSelections(items);
+	if (!cur_item.GetID() && evt_item.GetID())
+		cur_item = evt_item;
+	FL::NodeSet nodes;
+	for (auto it = items.begin(); it != items.end(); ++it)
+	{
+		nodes.insert(static_cast<FL::Node*>(it->GetID()));
+	}
+	m_tree_model->UpdateSelections(nodes);
+
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 
 	if (!vr_frame)
 		return;
 
-	wxDataViewItem item = event.GetItem();
-	vr_frame->OnSelection(static_cast<FL::Node*>(item.GetID()));
+	vr_frame->OnSelection(static_cast<FL::Node*>(cur_item.GetID()));
+
 }
 
 void TreePanel::OnBeginDrag(wxDataViewEvent &event)

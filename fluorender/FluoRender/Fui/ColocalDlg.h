@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <wx/wx.h>
 #include <wx/panel.h>
+#include <Fui/ColocalAgent.h>
 
 namespace FUI
 {
@@ -52,12 +53,16 @@ namespace FUI
 		};
 
 	public:
-		ColocalDlg(wxWindow* frame,
-			wxWindow* parent);
+		ColocalDlg(wxWindow* parent);
 		~ColocalDlg();
 
+		void SetScenegraph(FL::Root* root)
+		{
+			m_agent->setObject(root);
+		}
+
 	private:
-		wxWindow* m_frame;
+		ColocalAgent* m_agent;
 
 		//interface
 		wxButton *m_calc_load_a_btn;

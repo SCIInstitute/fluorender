@@ -101,7 +101,7 @@ EVT_TOOL(ID_NRChk, VolumePropPanel::OnNRCheck)
 EVT_TOOL(ID_DepthChk, VolumePropPanel::OnDepthCheck)
 END_EVENT_TABLE()
 
-VolumePropPanel::VolumePropPanel(wxWindow* frame,
+VolumePropPanel::VolumePropPanel(
 	wxWindow* parent,
 	wxWindowID id,
 	const wxPoint& pos,
@@ -109,7 +109,6 @@ VolumePropPanel::VolumePropPanel(wxWindow* frame,
 	long style,
 	const wxString& name) :
 	wxPanel(parent, id, pos, size, style, name),
-	m_frame(frame),
 	m_max_val(255.0)
 {
 	// temporarily block events during constructor:

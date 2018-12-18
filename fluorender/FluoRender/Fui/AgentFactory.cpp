@@ -40,6 +40,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Fui/ClipPlanePanel.h>
 #include <Fui/MeshPropAgent.h>
 #include <Fui/MeshPropPanel.h>
+#include <Fui/ColocalAgent.h>
+#include <Fui/ColocalDlg.h>
 
 using namespace FUI;
 
@@ -310,4 +312,26 @@ MeshPropAgent* AgentFactory::getOrAddMeshPropAgent(const std::string &name, wxWi
 	}
 
 	return mesh_prop_agent;
+}
+
+ColocalAgent* AgentFactory::getOrAddColocalAgent(const std::string &name, wxWindow &window)
+{
+	InterfaceAgent* result = findFirst(name);
+	if (result)
+		return dynamic_cast<ColocalAgent*>(result);
+
+	//not found
+	ColocalAgent* colocal_agent =
+		new ColocalAgent(static_cast<ColocalDlg&>(window));
+	if (colocal_agent)
+	{
+		colocal_agent->setName(name);
+		objects_.push_front(colocal_agent);
+		FL::Event event;
+		event.init(FL::Event::EVENT_NODE_ADDED,
+			this, colocal_agent);
+		notifyObservers(event);
+	}
+
+	return colocal_agent;
 }

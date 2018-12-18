@@ -49,15 +49,14 @@ EVT_DATAVIEW_ITEM_DROP(ID_ListCtrl, ListPanel::OnDrop)
 EVT_DATAVIEW_COLUMN_SORTED(ID_ListCtrl, ListPanel::OnListSorted)
 END_EVENT_TABLE()
 
-ListPanel::ListPanel(wxWindow *frame,
+ListPanel::ListPanel(
 	wxWindow *parent,
 	wxWindowID id,
 	const wxPoint &pos,
 	const wxSize &size,
 	long style,
 	const wxString& name) :
-	wxPanel(parent, id, pos, size, style, name),
-	m_frame(frame)
+	wxPanel(parent, id, pos, size, style, name)
 {
 	//create tool bar
 	m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,

@@ -216,6 +216,48 @@ void TreeModel::MoveNode(const std::string &source, FL::Node* target)
 	FL::ObjectList* list = visitor.getResult();
 }
 
+void TreeModel::UpdateSelections(FL::NodeSet &nodes)
+{
+	class SelUpdater : public FL::NodeVisitor
+	{
+	public:
+		SelUpdater(FL::NodeSet &nodes) : NodeVisitor(), nodes_(nodes)
+		{
+			setTraversalMode(FL::NodeVisitor::TRAVERSE_ALL_CHILDREN);
+		}
+
+		virtual void reset() {}
+
+		virtual void apply(FL::Node& node)
+		{
+			bool selected = nodes_.find(&node) != nodes_.end();
+			node.setValue("selected", selected);
+			traverse(node);
+		}
+
+		virtual void apply(FL::Group& group)
+		{
+			bool selected = nodes_.find(&group) != nodes_.end();
+			group.setValue("selected", selected);
+			traverse(group);
+		}
+
+	private:
+		FL::NodeSet nodes_;
+	};
+
+	SelUpdater updater(nodes);
+	FL::Node* root = getObject();
+	if (!root)
+		return;
+	root->accept(updater);
+}
+
+void TreeModel::OnSelectionChanged(FL::Event& event)
+{
+
+}
+
 void TreeModel::OnItemAdded(FL::Event& event)
 {
 	if (event.parent && event.child)

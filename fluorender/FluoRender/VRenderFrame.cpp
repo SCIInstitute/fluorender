@@ -415,7 +415,7 @@ VRenderFrame::VRenderFrame(
 	m_vrv_list.push_back(vrv);
 
 	//create list view
-	m_list_panel = new FUI::ListPanel(this, this, wxID_ANY,
+	m_list_panel = new FUI::ListPanel(this, wxID_ANY,
 		wxDefaultPosition, wxSize(350, 300));
 
 	//create tree view
@@ -431,7 +431,7 @@ VRenderFrame::VRenderFrame(
 		wxDefaultPosition, wxDefaultSize, 0, "PropPanel");
 	//prop panel chidren
 	m_prop_sizer = new wxBoxSizer(wxHORIZONTAL);
-	m_volume_prop = new FUI::VolumePropPanel(this, m_prop_panel, wxID_ANY);
+	m_volume_prop = new FUI::VolumePropPanel(m_prop_panel, wxID_ANY);
 	m_mesh_prop = new FUI::MeshPropPanel(this, m_prop_panel, wxID_ANY);
 	m_mesh_manip = new MManipulator(this, m_prop_panel, wxID_ANY);
 	m_annotation_prop = new APropView(this, m_prop_panel, wxID_ANY);
@@ -516,7 +516,7 @@ VRenderFrame::VRenderFrame(
 	m_convert_dlg = new ConvertDlg(this, this);
 
 	//colocalization dialog
-	m_colocal_dlg = new FUI::ColocalDlg(this, this);
+	m_colocal_dlg = new FUI::ColocalDlg(this);
 
 	//measure dialog
 	m_measure_dlg = new MeasureDlg(this, this);
@@ -667,8 +667,9 @@ VRenderFrame::VRenderFrame(
 	m_aui_mgr.GetPane(m_help_dlg).Float();
 	m_aui_mgr.GetPane(m_help_dlg).Hide();
 
-
+	//for those who want to know root
 	m_tree_panel->SetScenegraph(m_root.get());
+	m_colocal_dlg->SetScenegraph(m_root.get());
 	m_root->addChild(vrv->m_glview->GetRenderView());
 	//UpdateTree();
 

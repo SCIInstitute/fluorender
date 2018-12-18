@@ -41,6 +41,7 @@ namespace FUI
 	class OutAdjustAgent;
 	class ClipPlaneAgent;
 	class MeshPropAgent;
+	class ColocalAgent;
 	class AgentFactory : public FL::ObjectFactory
 	{
 	public:
@@ -96,6 +97,7 @@ namespace FUI
 		OutAdjustAgent* getOrAddOutAdjustAgent(const std::string &name, wxWindow &window);
 		ClipPlaneAgent* getOrAddClipPlaneAgent(const std::string &name, wxWindow &window);
 		MeshPropAgent* getOrAddMeshPropAgent(const std::string &name, wxWindow &window);
+		ColocalAgent* getOrAddColocalAgent(const std::string &name, wxWindow &window);
 
 	protected:
 		virtual ~AgentFactory();

@@ -105,7 +105,7 @@ namespace FUI
 		};
 
 	public:
-		VolumePropPanel(wxWindow* frame, wxWindow* parent,
+		VolumePropPanel(wxWindow* parent,
 			wxWindowID id,
 			const wxPoint& pos = wxDefaultPosition,
 			const wxSize& size = wxDefaultSize,
@@ -116,8 +116,6 @@ namespace FUI
 		void AssociateVolumeData(FL::VolumeData* vd);
 
 	private:
-		wxWindow* m_frame;
-
 		VolumePropAgent* m_agent;
 
 		double m_max_val;

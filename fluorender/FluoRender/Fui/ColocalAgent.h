@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _COLOCALAGENT_H_
 
 #include <Fui/InterfaceAgent.h>
-#include <Processor/Processor.h>
+#include <Scenegraph/Root.h>
 
 namespace FUI
 {
@@ -47,10 +47,12 @@ namespace FUI
 
 		virtual const char* className() const { return "ColocalAgent"; }
 
-		virtual void setObject(FL::Processor*);
-		virtual FL::Processor* getObject();
+		virtual void setObject(FL::Root*);
+		virtual FL::Root* getObject();
 
 		virtual void UpdateAllSettings();
+
+		void Run();
 
 		friend class AgentFactory;
 
