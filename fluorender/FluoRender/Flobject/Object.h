@@ -82,11 +82,14 @@ public:
 		for (auto it = obj._value_set->getValues().begin();
 			it != obj._value_set->getValues().end(); ++it)
 		{
+			if (getValue(it->second->getName()))
+				continue;
 			Value* value = 0;
 			if (copyop.getCopyFlags() & CopyOp::DEEP_COPY_VALUES)
 				value = it->second->clone();
 			else
 				value = it->second.get();
+			ref_ptr<Value> pvalue(value);
 			addValue(value);
 		}
 	}
