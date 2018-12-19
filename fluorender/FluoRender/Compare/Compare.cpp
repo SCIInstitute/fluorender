@@ -70,8 +70,8 @@ bool ChannelCompare::GetInfo(
 	long &bits1, long &bits2,
 	long &nx, long &ny, long &nz)
 {
-	bits1 = b1->nb(m_use_mask ? b1->nmask() : 0);
-	bits2 = b2->nb(m_use_mask ? b2->nmask() : 0);
+	bits1 = b1->nb(m_use_mask ? b1->nmask() : 0)*8;
+	bits2 = b2->nb(m_use_mask ? b2->nmask() : 0)*8;
 	long nx1 = b1->nx();
 	long nx2 = b2->nx();
 	long ny1 = b1->ny();
@@ -152,6 +152,8 @@ void ChannelCompare::ReleaseData(void* val, long bits)
 
 void ChannelCompare::Compare(float threshold)
 {
+	m_result = 0.0;
+
 	if (!CheckBricks())
 		return;
 
@@ -248,6 +250,7 @@ void ChannelCompare::Compare(float threshold)
 		kernel_prog->releaseMemObject(0, val1);
 		kernel_prog->releaseMemObject(0, val2);
 		kernel_prog->releaseMemObject(sizeof(unsigned int), &count);
+		m_result += count;
 
 		if (brick_num > 1)
 		{

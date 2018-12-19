@@ -38,17 +38,8 @@ namespace FUI
 	{
 		enum
 		{
-			//operand A
-			ID_CalcLoadABtn = ID_COLOCALIZE,
-			ID_CalcAText,
-			//operand B
-			ID_CalcLoadBBtn,
-			ID_CalcBText,
-			ID_MinSizeSldr,
-			ID_MinSizeText,
-			ID_MaxSizeSldr,
-			ID_MaxSizeText,
-			ID_BrushSelectBothChk,
+			ID_OutputText = ID_COLOCALIZE,
+			ID_OutputBtn,
 			ID_CalcColocalizationBtn
 		};
 
@@ -63,32 +54,19 @@ namespace FUI
 
 	private:
 		ColocalAgent* m_agent;
+		wxString m_output_file;
 
 		//interface
-		wxButton *m_calc_load_a_btn;
-		wxTextCtrl *m_calc_a_text;
-		wxButton *m_calc_load_b_btn;
-		wxTextCtrl *m_calc_b_text;
-		//min size
-		wxSlider *m_min_size_sldr;
-		wxTextCtrl *m_min_size_text;
-		//max size
-		wxSlider *m_max_size_sldr;
-		wxTextCtrl *m_max_size_text;
-		//select both
-		wxCheckBox *m_select_both_chk;
+		//output
+		wxTextCtrl *m_output_text;
+		wxButton *m_output_btn;
 		//colocalization
 		wxButton *m_colocalization_btn;
 
 	private:
-		//min size
-		void OnMinSizeChange(wxScrollEvent &event);
-		void OnMinSizeText(wxCommandEvent &event);
-		//max size
-		void OnMaxSizeChange(wxScrollEvent &event);
-		void OnMaxSizeText(wxCommandEvent &event);
-		//select both
-		void OnSelectBothChk(wxCommandEvent &event);
+		//output
+		void OnOutputText(wxCommandEvent &event);
+		void OnOutputBtn(wxCommandEvent &event);
 		//calculate
 		void OnColocalizationBtn(wxCommandEvent &event);
 

@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Fui/ColocalAgent.h>
 #include <Fui/ColocalDlg.h>
 #include <Compare/Compare.h>
+#include <Scenegraph/VolumeData.h>
+#include <fstream>
 
 using namespace FUI;
 
@@ -42,6 +44,7 @@ ColocalAgent::ColocalAgent(ColocalDlg &dlg) :
 void ColocalAgent::setObject(FL::Root* root)
 {
 	InterfaceAgent::setObject(root);
+	addValue("output file", std::wstring(L"colocalization_result.txt"));
 }
 
 FL::Root* ColocalAgent::getObject()
@@ -103,19 +106,61 @@ void ColocalAgent::Run()
 	root->accept(retriever);
 	FL::NodeSet nodes = retriever.getResult();
 
-	if (nodes.size() < 2)
+	size_t num = nodes.size();
+	if (num < 2)
 		return;
 
+	//result
+	std::vector<std::vector<double>> rm;//result matrix
+	rm.reserve(num);
+	for (size_t i = 0; i < num; ++i)
+	{
+		rm.push_back(std::vector<double>());
+		rm[i].reserve(num);
+		for (size_t j = 0; j < num; ++j)
+			rm[i].push_back(0);
+	}
+
+	size_t x = 0, y = 0;
 	for (auto it1 = nodes.begin();
 		it1 != nodes.end(); ++it1)
 	{
+		y = x + 1;
 		for (auto it2 = std::next(it1);
 			it2 != nodes.end(); ++it2)
 		{
-			FL::ChannelCompare compare(
-				(*it1)->asVolumeData(),
-				(*it2)->asVolumeData());
-			compare.Compare(0.5);
+			FL::VolumeData* vd1 = (*it1)->asVolumeData();
+			FL::VolumeData* vd2 = (*it2)->asVolumeData();
+			if (!vd1 || !vd2)
+				continue;
+
+			FL::ChannelCompare compare(vd1, vd2);
+			//get threshold values
+			double th1, th2;
+			vd1->getValue("low threshold", th1);
+			vd2->getValue("low threshold", th2);
+			compare.Compare(float(std::max(th1, th2)));
+			rm[x][y] = compare.Result();
+			rm[y][x] = compare.Result();
+			y++;
 		}
+		x++;
 	}
+
+	//print
+	std::wstring filename;
+	getValue("output file", filename);
+	std::ofstream outfile;
+	outfile.open(filename, std::ofstream::out);
+	for (size_t i = 0; i < num; ++i)
+	{
+		for (size_t j = 0; j < num; ++j)
+		{
+			outfile << rm[i][j];
+			if (j < num - 1)
+				outfile << "\t";
+		}
+		outfile << "\n";
+	}
+	outfile.close();
 }

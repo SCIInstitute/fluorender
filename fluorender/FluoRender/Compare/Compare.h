@@ -49,11 +49,14 @@ namespace FL
 		{ return m_use_mask; }
 
 		void Compare(float);
+		double Result()
+		{ return m_result; }
 
 	private:
 		VolumeData *m_vd1, *m_vd2;
 		bool m_use_mask;//use mask instead of data
 		bool m_init;
+		double m_result;
 
 		bool CheckBricks();
 		bool GetInfo(FLIVR::TextureBrick* b1, FLIVR::TextureBrick* b2,

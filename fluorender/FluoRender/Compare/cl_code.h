@@ -44,7 +44,6 @@ const char* str_cl_chann_compare = \
 "	int3 coord = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
 "	unsigned int index = nx*ny*coord.z + nx*coord.y + coord.x;\n" \
-"	unsigned int label_v = label[index];\n" \
 "	float value1 = read_imagef(chann1, samp, (int4)(coord, 1)).x;\n" \
 "	float value2 = read_imagef(chann2, samp, (int4)(coord, 1)).x;\n" \
 "	if (value1 > threshold && value2 > threshold)\n" \

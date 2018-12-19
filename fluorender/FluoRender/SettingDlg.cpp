@@ -2087,14 +2087,14 @@ void SettingDlg::onJavaJvmBrowse(wxCommandEvent &event)
 {
 #ifdef _WIN32
 	wxFileDialog *fopendlg = new wxFileDialog(
-		m_frame, "Choose the jvm dll file",
+		this, "Choose the jvm dll file",
 		"", "", "*.dll", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 #else
-    wxFileDialog *fopendlg = new wxFileDialog(
-                                              m_frame, "Choose the libjvm.dylib file",
-                                              "", "", "*.*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+	wxFileDialog *fopendlg = new wxFileDialog(
+		this, "Choose the libjvm.dylib file",
+		"", "", "*.*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 #endif
-    
+
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
@@ -2113,21 +2113,18 @@ void SettingDlg::onJavaIJBrowse(wxCommandEvent &event)
 	//	m_frame, "Choose the imageJ/fiji directory",
 	//	"", "", "*.jar", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 	wxDirDialog *fopendlg = new wxDirDialog(
-		m_frame, "Choose the imageJ/fiji directory",
+		this, "Choose the imageJ/fiji directory",
 		"", wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
 #else
-    wxFileDialog *fopendlg = new wxFileDialog(
-                                              m_frame, "Choose the imageJ/fiji app",
-                                              "", "", "*.app", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+	wxFileDialog *fopendlg = new wxFileDialog(
+		this, "Choose the imageJ/fiji app",
+		"", "", "*.app", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 #endif
 
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
 		wxString filename = fopendlg->GetPath();
-#ifdef _DARWIN
-        //filename = filename + "/Contents/Java/ij.jar";
-#endif
 		m_java_ij_text->SetValue(filename);
 	}
 
@@ -2138,7 +2135,7 @@ void SettingDlg::onJavaIJBrowse(wxCommandEvent &event)
 void SettingDlg::onJavaBioformatsBrowse(wxCommandEvent &event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
-		m_frame, "Choose the bioformats jar",
+		this, "Choose the bioformats jar",
 		"", "", "*.jar", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 
 	int rval = fopendlg->ShowModal();
