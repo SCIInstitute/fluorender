@@ -112,13 +112,13 @@ Referenced* ObserverSet::addRefLock()
 
 void ObserverSet::signalObjectDeleted(Event& event)
 {
-	for (auto itr = _observers.rbegin();
-		itr != _observers.rend(); ++itr)
+	//duplicate the set to a vector
+	//because observet changes over the delete process
+	std::vector<Observer*> temp_obsvrs(_observers.begin(), _observers.end());
+	for (auto itr = temp_obsvrs.begin();
+		itr != temp_obsvrs.end(); ++itr)
 	{
 		(*itr)->objectDeleted(event);
-		//because observers are also being removed
-		if (_observers.empty())
-			break;
 	}
 	_observers.clear();
 	_observedObject = 0;
