@@ -46,7 +46,12 @@ public:
 	ref_ptr(const ref_ptr& rp) : _ptr(rp._ptr) { if (_ptr) _ptr->ref(); }
 	template<class Other> ref_ptr(const ref_ptr<Other>& rp) : _ptr(rp._ptr) { if (_ptr) _ptr->ref(); }
 	//ref_ptr(observer_ptr<T>& optr) : _ptr(0) { optr.lock(*this); }
-	~ref_ptr() { if (_ptr) _ptr->unref();  _ptr = 0; }
+	~ref_ptr()
+	{
+		if (_ptr)
+			_ptr->unref();
+		_ptr = 0;
+	}
 
 	ref_ptr& operator = (const ref_ptr& rp)
 	{
