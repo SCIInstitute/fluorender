@@ -108,6 +108,9 @@ void MeshFactory::createDefault()
 
 		//viewport
 		md->addValue("viewport", FLTYPE::GLint4());
+
+		//selected on the ui
+		md->addValue("selected", bool(false));
 	}
 }
 

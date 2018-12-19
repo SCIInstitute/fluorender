@@ -34,6 +34,7 @@ Root::Root()
 {
 	addValue("sort value", std::string("name"));
 	addValue("sort method", long(SortNone));
+	addValue("selected", bool(false));
 }
 
 bool Root::addChild(Node* child)

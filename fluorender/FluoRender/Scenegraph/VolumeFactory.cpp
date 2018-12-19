@@ -238,6 +238,9 @@ void VolumeFactory::createDefault()
 
 		//tex transform
 		vd->addValue("tex transform", FLTYPE::Transform());
+
+		//selected on the ui
+		vd->addValue("selected", bool(false));
 	}
 }
 

@@ -67,7 +67,9 @@ namespace FL
 		virtual bool setChild(size_t i, Node* node);
 
 	protected:
-		virtual ~Root() {}
+		virtual ~Root()
+		{
+		}
 	};
 }
 

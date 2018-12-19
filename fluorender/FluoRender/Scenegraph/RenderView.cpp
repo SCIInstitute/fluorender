@@ -35,6 +35,7 @@ RenderView::RenderView()
 {
 	addValue("sort value", std::string("name"));
 	addValue("sort method", long(SortNone));
+	addValue("selected", bool(false));
 }
 
 RenderView::RenderView(const RenderView& view, const CopyOp& copyop) :
