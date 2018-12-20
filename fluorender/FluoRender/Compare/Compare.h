@@ -48,7 +48,7 @@ namespace FL
 		bool GetUseMask()
 		{ return m_use_mask; }
 
-		void Compare(float);
+		void Compare(float, float);
 		double Result()
 		{ return m_result; }
 

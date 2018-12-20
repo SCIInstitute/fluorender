@@ -150,7 +150,7 @@ void ChannelCompare::ReleaseData(void* val, long bits)
 	}
 }
 
-void ChannelCompare::Compare(float threshold)
+void ChannelCompare::Compare(float th1, float th2)
 {
 	m_result = 0.0;
 
@@ -236,8 +236,10 @@ void ChannelCompare::Compare(float threshold)
 		kernel_prog->setKernelArgConst(kernel_index, 4,
 			sizeof(unsigned int), (void*)(&nz));
 		kernel_prog->setKernelArgConst(kernel_index, 5,
-			sizeof(float), (void*)(&threshold));
-		kernel_prog->setKernelArgBuf(kernel_index, 6,
+			sizeof(float), (void*)(&th1));
+		kernel_prog->setKernelArgConst(kernel_index, 6,
+			sizeof(float), (void*)(&th2));
+		kernel_prog->setKernelArgBuf(kernel_index, 7,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			sizeof(unsigned int), (void*)(&count));
 

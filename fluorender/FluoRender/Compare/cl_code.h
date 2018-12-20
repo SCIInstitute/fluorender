@@ -38,7 +38,8 @@ const char* str_cl_chann_compare = \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
 "	unsigned int nz,\n" \
-"	float threshold,\n" \
+"	float th1,\n" \
+"	float th2,\n" \
 "	__global unsigned int* count)\n" \
 "{\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
@@ -46,7 +47,7 @@ const char* str_cl_chann_compare = \
 "	unsigned int index = nx*ny*coord.z + nx*coord.y + coord.x;\n" \
 "	float value1 = read_imagef(chann1, samp, (int4)(coord, 1)).x;\n" \
 "	float value2 = read_imagef(chann2, samp, (int4)(coord, 1)).x;\n" \
-"	if (value1 > threshold && value2 > threshold)\n" \
+"	if (value1 > th1 && value2 > th2)\n" \
 "		atomic_inc(count);\n" \
 "}\n";
 

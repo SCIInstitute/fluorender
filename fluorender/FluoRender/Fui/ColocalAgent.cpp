@@ -139,7 +139,7 @@ void ColocalAgent::Run()
 			double th1, th2;
 			vd1->getValue("low threshold", th1);
 			vd2->getValue("low threshold", th2);
-			compare.Compare(float(std::max(th1, th2)));
+			compare.Compare(th1, th2);
 			rm[x][y] = compare.Result();
 			rm[y][x] = compare.Result();
 			y++;
