@@ -394,6 +394,12 @@ file(GLOB pngs_hdr fluorender/FluoRender/img/*.h)
 file(GLOB pngs_src fluorender/FluoRender/img/*.cpp)
 add_library(IMAGES_OBJ OBJECT  ${pngs_hdr} ${pngs_src})
 
+# VR
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/VR)
+file(GLOB vr_hdr fluorender/FluoRender/VR/*.h)
+file(GLOB vr_src fluorender/FluoRender/VR/*.cpp)
+add_library(VR_OBJ OBJECT  ${vr_hdr} ${vr_src})
+
 # OpenCL
 if(WIN32)
 	include_directories(${FluoRender_SOURCE_DIR}/fluorender/OpenCL/include)
@@ -414,6 +420,14 @@ if(WIN32)
 else()
 	find_package(Freetype REQUIRED)
 	include_directories(${FREETYPE_INCLUDE_DIRS})
+endif()
+
+# OpenVR
+if(WIN32)
+	include_directories(${FluoRender_SOURCE_DIR}/fluorender/OpenVR/headers)
+	if(${ARCHITECTURE} MATCHES 64)
+		file(GLOB OpenVR_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/OpenVR/lib/win64/*.lib)
+	endif()
 endif()
 
 # other sources
@@ -587,6 +601,7 @@ elseif(WIN32)
 			$<TARGET_OBJECTS:POLE_OBJ>
 			$<TARGET_OBJECTS:TEEM_OBJ>
 			$<TARGET_OBJECTS:WACUTILS_OBJ>
+			$<TARGET_OBJECTS:VR_OBJ>
 			)
 		add_executable(Tester
 			${tester_hdr} ${tester_src}
@@ -662,6 +677,7 @@ elseif(WIN32)
 		${OPENGL_LIBRARIES}
 		${Boost_LIBRARIES}
 		${OpenCL_LIBRARIES}
+		${OpenVR_LIBRARIES}
 		${FREETYPE_LIBRARIES}
 		${wxWidgets_LIBRARIES}
 		)

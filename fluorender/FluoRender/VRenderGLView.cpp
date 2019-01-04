@@ -48,6 +48,7 @@ DEALINGS IN THE SOFTWARE.
 #include "png_resource.h"
 #include "img/icons.h"
 #include <utility>
+#include <VR/VRUtils.h>
 
 bool VRenderGLView::m_linked_rot = false;
 VRenderGLView* VRenderGLView::m_master_linked_view = 0;
@@ -352,6 +353,16 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	else
 		m_enable_touch = false;
 #endif
+
+#ifdef _WIN32
+	//openvr initilization
+	if (LoadVR())
+	{
+		vr::EVRInitError vr_error;
+		vr::IVRSystem *vr_system = mVR_Init(&vr_error, vr::VRApplication_Scene, 0);
+	}
+#endif
+
 	LoadBrushSettings();
 
 	m_timer = new nv::Timer(10);
@@ -488,6 +499,12 @@ VRenderGLView::~VRenderGLView()
 		m_hTab = 0;
 		UnloadWintab();
 	}
+#endif
+
+#ifdef _WIN32
+	//vr shutdown
+	mVR_Shutdown();
+	UnloadVR();
 #endif
 
 	m_loader.StopAll();
