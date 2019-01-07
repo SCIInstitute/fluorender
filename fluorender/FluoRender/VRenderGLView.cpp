@@ -312,7 +312,8 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_ptr_id2(-1),
 	m_full_screen(false),
 	m_drawing(false),
-	m_refresh(false)
+	m_refresh(false),
+	m_enable_vr(false)
 {
 	//create root node
 	m_render_view = FL::ref_ptr<FL::RenderView>(new FL::RenderView());
@@ -360,6 +361,19 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	{
 		vr::EVRInitError vr_error;
 		vr::IVRSystem *vr_system = mVR_Init(&vr_error, vr::VRApplication_Scene, 0);
+		if (vr_error == vr::VRInitError_None)
+		{
+			//get render size
+			vr_system->GetRecommendedRenderTargetSize(&m_vr_size[0], &m_vr_size[1]);
+			//get eye offset
+			vr::HmdMatrix34_t eye_mat;
+			eye_mat = vr_system->GetEyeToHeadTransform(vr::Eye_Left);
+			double eye_x = eye_mat.m[0][3];
+			double eye_y = eye_mat.m[1][3];
+			double eye_z = eye_mat.m[2][3];
+			m_eye_offset = std::sqrt(eye_x*eye_x+eye_y*eye_y+eye_z*eye_z);
+			m_enable_vr = true;
+		}
 	}
 #endif
 
@@ -502,9 +516,12 @@ VRenderGLView::~VRenderGLView()
 #endif
 
 #ifdef _WIN32
-	//vr shutdown
-	mVR_Shutdown();
-	UnloadVR();
+	if (m_enable_vr)
+	{
+		//vr shutdown
+		mVR_Shutdown();
+		UnloadVR();
+	}
 #endif
 
 	m_loader.StopAll();

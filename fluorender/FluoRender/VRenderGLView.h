@@ -928,6 +928,11 @@ private:
 	//file path for script
 	wxString m_script_output;
 
+	//enable vr
+	bool m_enable_vr;
+	uint32_t m_vr_size[2];
+	double m_eye_offset;
+
 private:
 #ifdef _WIN32
 	//wacom tablet
