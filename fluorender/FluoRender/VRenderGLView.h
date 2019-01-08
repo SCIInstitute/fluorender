@@ -977,10 +977,17 @@ private:
 								   //5: same as 2 (15)
 								   //annotation layer
 	void DrawAnnotations();
+	//framebuffer
+	void BindRenderBuffer();
+	void GetRenderSize(int &nx, int &ny);
 	//draw out the framebuffer after composition
 	void PrepFinalBuffer();
 	void ClearFinalBuffer();
 	void DrawFinalBuffer();
+	//vr buffers
+	void PrepVRBuffer();
+	void ClearVRBuffer();
+	void DrawVRBuffer();
 	//different volume drawing modes
 	void DrawVolumesMulti(vector<FL::VolumeData*> &list, int peel = 0);
 	void DrawVolumesComp(vector<FL::VolumeData*> &list, bool mask = false, int peel = 0);

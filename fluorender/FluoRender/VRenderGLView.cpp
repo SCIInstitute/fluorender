@@ -659,7 +659,7 @@ void VRenderGLView::HandleProjection(int nx, int ny, bool vr)
 		if (m_use_openvr)
 			aspect = (double)m_vr_size[0] / (double)m_vr_size[1];
 		else
-			aspect = (double)nx / (double)ny / 2.0;
+			aspect = (double)nx / (double)ny;
 		double frustum_shift = (m_vr_eye_offset / 2.0) * m_near_clip / m_distance;
 		m_ortho_top = std::tan(m_aov / 2.0) * m_near_clip;
 		m_ortho_right = aspect * m_ortho_top + frustum_shift *
@@ -829,8 +829,8 @@ void VRenderGLView::CalcFogRange()
 //draw the volume data only
 void VRenderGLView::Draw()
 {
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 
 	// clear color and depth buffers
 	glClearDepth(1.0);
@@ -899,8 +899,8 @@ void VRenderGLView::Draw()
 void VRenderGLView::DrawDP()
 {
 	int i;
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 	string name;
 	Framebuffer* peel_buffer = 0;
 
@@ -985,7 +985,7 @@ void VRenderGLView::DrawDP()
 		}
 
 		//bind back the framebuffer
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		BindRenderBuffer();
 
 		//restore fog
 		m_use_fog = use_fog_save;
@@ -1181,8 +1181,8 @@ void VRenderGLView::DrawDP()
 //peel==true -- depth peeling
 void VRenderGLView::DrawMeshes(int peel)
 {
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 
 	FL::SearchVisitor visitor;
@@ -1260,8 +1260,8 @@ void VRenderGLView::DrawVolumes(int peel)
 
 	PrepFinalBuffer();
 
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 
 	//draw
 	if (m_load_update ||
@@ -1606,8 +1606,7 @@ void VRenderGLView::DrawVolumes(int peel)
 void VRenderGLView::DrawAnnotations()
 {
 	int nx, ny;
-	nx = GetGLSize().x;
-	ny = GetGLSize().y;
+	GetRenderSize(nx, ny);
 	float sx, sy;
 	sx = 2.0 / nx;
 	sy = 2.0 / ny;
@@ -1895,8 +1894,7 @@ void VRenderGLView::DrawBrush()
 	if (reg.Contains(pos1))
 	{
 		int nx, ny;
-		nx = GetGLSize().x;
-		ny = GetGLSize().y;
+		GetRenderSize(nx, ny);
 		float sx, sy;
 		sx = 2.0 / nx;
 		sy = 2.0 / ny;
@@ -1970,8 +1968,7 @@ void VRenderGLView::DrawBrush()
 void VRenderGLView::PaintStroke()
 {
 	int nx, ny;
-	nx = GetGLSize().x;
-	ny = GetGLSize().y;
+	GetRenderSize(nx, ny);
 
 	double pressure = m_use_press && m_pressure > 0.0 ?
 		1.0 + (m_pressure - 0.5)*0.4 : 1.0;
@@ -2076,7 +2073,7 @@ void VRenderGLView::PaintStroke()
 	}
 
 	//bind back the window frame buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	BindRenderBuffer();
 	glBlendEquation(GL_FUNC_ADD);
 	RefreshGL(3);
 }
@@ -3038,8 +3035,7 @@ void VRenderGLView::Calculate(int type, wxString prev_group, bool add)
 void VRenderGLView::PrepFinalBuffer()
 {
 	int nx, ny;
-	nx = GetGLSize().x;
-	ny = GetGLSize().y;
+	GetRenderSize(nx, ny);
 
 	//generate textures & buffer objects
 	glActiveTexture(GL_TEXTURE0);
@@ -3070,7 +3066,7 @@ void VRenderGLView::DrawFinalBuffer()
 		return;
 
 	//bind back the window frame buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	BindRenderBuffer();
 
 	//draw the final buffer to the windows buffer
 	glActiveTexture(GL_TEXTURE0);
@@ -3110,11 +3106,113 @@ void VRenderGLView::DrawFinalBuffer()
 		!m_free)
 	{
 		unsigned char pixel[4];
-		int nx = GetGLSize().x;
-		int ny = GetGLSize().y;
+		int nx, ny;
+		GetRenderSize(nx, ny);
 		glReadPixels(nx / 2, ny / 2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
 		m_pin_pick_thresh = 0.8 * double(pixel[3]) / 255.0;
 	}
+}
+
+//vr buffers
+void VRenderGLView::GetRenderSize(int &nx, int &ny)
+{
+	nx = GetGLSize().x;
+	ny = GetGLSize().y;
+	if (m_enable_vr)
+		nx /= 2;
+}
+
+void VRenderGLView::PrepVRBuffer()
+{
+	int nx, ny;
+	GetRenderSize(nx, ny);
+
+	//generate textures & buffer objects
+	glActiveTexture(GL_TEXTURE0);
+	//glEnable(GL_TEXTURE_2D);
+	//frame buffer for one eye
+	std::string vr_buf_name;
+	if (m_vr_eye_idx)
+		vr_buf_name = "vr right";
+	else
+		vr_buf_name = "vr left";
+
+	Framebuffer* vr_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer(
+			FB_Render_RGBA, nx, ny, vr_buf_name);
+	if (vr_buffer)
+		vr_buffer->protect();
+}
+
+void VRenderGLView::BindRenderBuffer()
+{
+	if (m_enable_vr)
+	{
+		std::string vr_buf_name;
+		if (m_vr_eye_idx)
+			vr_buf_name = "vr right";
+		else
+			vr_buf_name = "vr left";
+		Framebuffer* vr_buffer =
+			TextureRenderer::framebuffer_manager_.framebuffer(
+				vr_buf_name);
+		if (vr_buffer)
+			vr_buffer->bind();
+	}
+	else
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void VRenderGLView::ClearVRBuffer()
+{
+	BindRenderBuffer();
+	//clear color buffer to black for compositing
+	glClearDepth(1.0);
+	glClearColor(m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 0.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void VRenderGLView::DrawVRBuffer()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glDisable(GL_BLEND);
+	glDisable(GL_DEPTH_TEST);
+
+	ShaderProgram* img_shader =
+		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
+	if (img_shader)
+	{
+		if (!img_shader->valid())
+			img_shader->create();
+		img_shader->bind();
+	}
+	//left eye
+	Framebuffer* buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer(
+			"vr left");
+	if (buffer)
+		buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+	VertexArray* quad_va =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Left_Square);
+	if (quad_va)
+		quad_va->draw();
+	//right eye
+	buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer(
+			"vr right");
+	if (buffer)
+		buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+	quad_va =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Right_Square);
+	if (quad_va)
+		quad_va->draw();
+
+	if (img_shader && img_shader->valid())
+		img_shader->release();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glEnable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
 }
 
 //Draw the volmues with compositing
@@ -3145,8 +3243,7 @@ void VRenderGLView::DrawVolumesComp(vector<FL::VolumeData*> &list, bool mask, in
 		return;
 
 	int nx, ny;
-	nx = GetGLSize().x;
-	ny = GetGLSize().y;
+	GetRenderSize(nx, ny);
 
 	//generate textures & buffer objects
 	//frame buffer for each volume
@@ -3218,8 +3315,8 @@ void VRenderGLView::DrawVolumesComp(vector<FL::VolumeData*> &list, bool mask, in
 
 void VRenderGLView::DrawOVER(FL::VolumeData* vd, bool mask, int peel)
 {
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 	GLfloat clear_color[4] = { 0, 0, 0, 0 };
 
@@ -3434,8 +3531,8 @@ void VRenderGLView::DrawOVER(FL::VolumeData* vd, bool mask, int peel)
 
 void VRenderGLView::DrawMIP(FL::VolumeData* vd, int peel)
 {
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 	GLfloat clear_color[4] = { 0, 0, 0, 0 };
 
@@ -3724,8 +3821,8 @@ void VRenderGLView::DrawMIP(FL::VolumeData* vd, int peel)
 
 void VRenderGLView::DrawOLShading(FL::VolumeData* vd)
 {
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 
 	if (TextureRenderer::get_mem_swap() &&
 		TextureRenderer::get_start_update_loop() &&
@@ -3891,8 +3988,7 @@ bool VRenderGLView::GetMeshShadow(double &val)
 void VRenderGLView::DrawOLShadowsMesh(double darkness)
 {
 	int nx, ny;
-	nx = GetGLSize().x;
-	ny = GetGLSize().y;
+	GetRenderSize(nx, ny);
 
 	//shadow pass
 	//bind the fbo
@@ -3941,7 +4037,7 @@ void VRenderGLView::DrawOLShadowsMesh(double darkness)
 
 	//
 	//bind fbo for final composition
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	BindRenderBuffer();
 	glActiveTexture(GL_TEXTURE0);
 	if (overlay_buffer)
 	{
@@ -3994,8 +4090,8 @@ void VRenderGLView::DrawOLShadows(vector<FL::VolumeData*> &vlist)
 	if (vlist.empty())
 		return;
 
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 	GLfloat clear_color[4] = { 1, 1, 1, 1 };
 
@@ -4213,8 +4309,8 @@ void VRenderGLView::DrawVolumesMulti(vector<FL::VolumeData*> &list, int peel)
 	if (!m_mvr)
 		return;
 
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 	GLfloat clear_color[4] = { 0, 0, 0, 0 };
 
@@ -5837,7 +5933,7 @@ void VRenderGLView::PostDraw()
 		glPixelStorei(GL_PACK_ROW_LENGTH, 0);
 
 		if (m_enlarge)
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			BindRenderBuffer();
 
 		string str_fn = outputfilename.ToStdString();
 		TIFF *out = TIFFOpen(str_fn.c_str(), "wb");
@@ -6794,8 +6890,8 @@ void VRenderGLView::ForceDraw()
 	if (m_resize)
 		m_retain_finalbuffer = false;
 
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 
 	PopMeshList();
 	if (m_md_pop_list.size()>0)
@@ -6880,7 +6976,20 @@ void VRenderGLView::ForceDraw()
 //#endif
 	}
 
-	SwapBuffers();
+	//swap
+	if (m_enable_vr)
+	{
+		if (m_vr_eye_idx)
+		{
+			SwapBuffers();
+			m_vr_eye_idx = 0;
+		}
+		else
+			m_vr_eye_idx = 1;
+	}
+	else
+		SwapBuffers();
+
 	m_timer->sample();
 	m_drawing = false;
 #ifdef _DEBUG
@@ -6973,8 +7082,8 @@ double VRenderGLView::Get121ScaleFactor()
 {
 	double result = 1.0;
 
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 	double aspect = (double)nx / (double)ny;
 
 	double spc_x = 1.0;
@@ -8905,8 +9014,7 @@ void VRenderGLView::DrawCamCtr()
 void VRenderGLView::DrawFrame()
 {
 	int nx, ny;
-	nx = GetGLSize().x;
-	ny = GetGLSize().y;
+	GetRenderSize(nx, ny);
 	glm::mat4 proj_mat = glm::ortho(float(0), float(nx), float(0), float(ny));
 
 	VertexArray* va_frame =
@@ -8950,8 +9058,8 @@ void VRenderGLView::DrawScaleBar()
 	double offset = 0.0;
 	if (m_draw_legend)
 		offset = m_sb_height;
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 	float sx, sy;
 	sx = 2.0 / nx;
 	sy = 2.0 / ny;
@@ -9033,8 +9141,8 @@ void VRenderGLView::DrawLegend()
 	double font_height =
 		TextRenderer::text_texture_manager_.GetSize() + 3.0;
 
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 
 	double xoffset = 10.0;
 	double yoffset = 10.0;
@@ -9484,8 +9592,8 @@ void VRenderGLView::DrawColormap()
 	if (m_draw_legend)
 		offset = m_sb_height;
 
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 	float sx, sy;
 	sx = 2.0 / nx;
 	sy = 2.0 / ny;
@@ -10037,8 +10145,8 @@ void VRenderGLView::StartLoopUpdate()
 		else
 			TextureRenderer::active_view_ = m_vrv->m_id;
 
-		int nx = GetGLSize().x;
-		int ny = GetGLSize().y;
+		int nx, ny;
+		GetRenderSize(nx, ny);
 		//projection
 		HandleProjection(nx, ny, true);
 		//Transformation
@@ -12581,8 +12689,7 @@ void VRenderGLView::switchLevel(FL::VolumeData *vd)
 	if (!vd) return;
 
 	int nx, ny;
-	nx = GetSize().x;
-	ny = GetSize().y;
+	GetRenderSize(nx, ny);
 	if (m_enlarge)
 	{
 		nx = int(nx * m_enlarge_scale);

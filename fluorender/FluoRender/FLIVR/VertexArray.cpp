@@ -242,6 +242,8 @@ namespace FLIVR
 		switch (type_)
 		{
 		case VA_Norm_Square:
+		case VA_Left_Square:
+		case VA_Right_Square:
 		case VA_Text:
 		default:
 			break;
@@ -654,6 +656,32 @@ namespace FLIVR
 		{
 			//set param
 			va->set_param(0, 0.0);
+			//set attrib
+			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)0);
+			va->attrib_pointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)12);
+		}
+		else if (type == VA_Left_Square)
+		{
+			//assign data
+			float points[] = {
+				-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+				-1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+				0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f };
+			vb->data(sizeof(float) * 24, points, GL_STATIC_DRAW);
+			//set attrib
+			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)0);
+			va->attrib_pointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)12);
+		}
+		else if (type == VA_Right_Square)
+		{
+			//assign data
+			float points[] = {
+				0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+				1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+				0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+				1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f };
+			vb->data(sizeof(float) * 24, points, GL_STATIC_DRAW);
 			//set attrib
 			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)0);
 			va->attrib_pointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)12);
