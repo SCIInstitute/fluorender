@@ -313,7 +313,11 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_full_screen(false),
 	m_drawing(false),
 	m_refresh(false),
-	m_enable_vr(false)
+	//vr settings
+	m_enable_vr(false),
+	m_use_openvr(false),
+	m_vr_eye_offset(6.0),
+	m_vr_eye_idx(0)
 {
 	//create root node
 	m_render_view = FL::ref_ptr<FL::RenderView>(new FL::RenderView());
@@ -363,6 +367,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 		vr::IVRSystem *vr_system = mVR_Init(&vr_error, vr::VRApplication_Scene, 0);
 		if (vr_error == vr::VRInitError_None)
 		{
+			m_use_openvr = true;
 			//get render size
 			vr_system->GetRecommendedRenderTargetSize(&m_vr_size[0], &m_vr_size[1]);
 			//get eye offset
@@ -371,10 +376,9 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 			double eye_x = eye_mat.m[0][3];
 			double eye_y = eye_mat.m[1][3];
 			double eye_z = eye_mat.m[2][3];
-			m_eye_offset = std::sqrt(eye_x*eye_x+eye_y*eye_y+eye_z*eye_z);
-			m_enable_vr = true;
+			m_vr_eye_offset = std::sqrt(eye_x*eye_x+eye_y*eye_y+eye_z*eye_z);
 		}
-	}
+	}//otherwise use default settings
 #endif
 
 	LoadBrushSettings();
@@ -644,37 +648,61 @@ void VRenderGLView::Clear()
 	//m_layer_list.clear();
 }
 
-void VRenderGLView::HandleProjection(int nx, int ny)
+void VRenderGLView::HandleProjection(int nx, int ny, bool vr)
 {
-	double aspect = (double)nx / (double)ny;
 	if (!m_free)
 		m_distance = m_radius / tan(d2r(m_aov / 2.0)) / m_scale_factor;
-	if (aspect>1.0)
+
+	if (vr && m_enable_vr)
 	{
-		m_ortho_left = -m_radius*aspect / m_scale_factor;
-		m_ortho_right = -m_ortho_left;
-		m_ortho_bottom = -m_radius / m_scale_factor;
-		m_ortho_top = -m_ortho_bottom;
+		double aspect;
+		if (m_use_openvr)
+			aspect = (double)m_vr_size[0] / (double)m_vr_size[1];
+		else
+			aspect = (double)nx / (double)ny / 2.0;
+		double frustum_shift = (m_vr_eye_offset / 2.0) * m_near_clip / m_distance;
+		m_ortho_top = std::tan(m_aov / 2.0) * m_near_clip;
+		m_ortho_right = aspect * m_ortho_top + frustum_shift *
+			(m_vr_eye_idx ? -1.0 : 1.0);
+		m_ortho_left = -aspect * m_ortho_top + frustum_shift *
+			(m_vr_eye_idx ? 1.0 : -1.0);
+		m_ortho_bottom = -m_ortho_top;
+		m_proj_mat = glm::frustum(
+			m_ortho_left, m_ortho_right,
+			m_ortho_bottom, m_ortho_top,
+			m_near_clip, m_far_clip);
 	}
 	else
 	{
-		m_ortho_left = -m_radius / m_scale_factor;
-		m_ortho_right = -m_ortho_left;
-		m_ortho_bottom = -m_radius / aspect / m_scale_factor;
-		m_ortho_top = -m_ortho_bottom;
-	}
-	if (m_persp)
-	{
-		m_proj_mat = glm::perspective(glm::radians(m_aov), aspect, m_near_clip, m_far_clip);
-	}
-	else
-	{
-		m_proj_mat = glm::ortho(m_ortho_left, m_ortho_right, m_ortho_bottom, m_ortho_top,
-			-m_far_clip / 100.0, m_far_clip);
+		double aspect = (double)nx / (double)ny;
+		if (aspect>1.0)
+		{
+			m_ortho_left = -m_radius*aspect / m_scale_factor;
+			m_ortho_right = -m_ortho_left;
+			m_ortho_bottom = -m_radius / m_scale_factor;
+			m_ortho_top = -m_ortho_bottom;
+		}
+		else
+		{
+			m_ortho_left = -m_radius / m_scale_factor;
+			m_ortho_right = -m_ortho_left;
+			m_ortho_bottom = -m_radius / aspect / m_scale_factor;
+			m_ortho_top = -m_ortho_bottom;
+		}
+
+		if (m_persp)
+		{
+			m_proj_mat = glm::perspective(glm::radians(m_aov), aspect, m_near_clip, m_far_clip);
+		}
+		else
+		{
+			m_proj_mat = glm::ortho(m_ortho_left, m_ortho_right, m_ortho_bottom, m_ortho_top,
+				-m_far_clip / 100.0, m_far_clip);
+		}
 	}
 }
 
-void VRenderGLView::HandleCamera()
+void VRenderGLView::HandleCamera(bool vr)
 {
 	Vector pos(m_transx, m_transy, m_transz);
 	pos.normalize();
@@ -686,13 +714,31 @@ void VRenderGLView::HandleCamera()
 	m_transy = pos.y();
 	m_transz = pos.z();
 
+	glm::vec3 eye(m_transx, m_transy, m_transz);
+	glm::vec3 center(0.0);
+	glm::vec3 up(m_up.x(), m_up.y(), m_up.z());
+
 	if (m_free)
-		m_mv_mat = glm::lookAt(glm::vec3(m_transx + m_ctrx, m_transy + m_ctry, m_transz + m_ctrz),
-			glm::vec3(m_ctrx, m_ctry, m_ctrz),
-			glm::vec3(m_up.x(), m_up.y(), m_up.z()));
+	{
+		center = glm::vec3(m_ctrx, m_ctry, m_ctrz);
+		eye += center;
+		//m_mv_mat = glm::lookAt(glm::vec3(m_transx + m_ctrx, m_transy + m_ctry, m_transz + m_ctrz),
+		//	glm::vec3(m_ctrx, m_ctry, m_ctrz),
+		//	glm::vec3(m_up.x(), m_up.y(), m_up.z()));
+	}
+
+	if (vr && m_enable_vr)
+	{
+		glm::vec3 offset((m_vr_eye_idx ? -1.0 : 1.0) * m_vr_eye_offset / 2.0, 0.0, 0.0);
+		m_mv_mat = glm::lookAt(
+			eye + offset,
+			center + offset,
+			up);
+	}
 	else
-		m_mv_mat = glm::lookAt(glm::vec3(m_transx, m_transy, m_transz),
-			glm::vec3(0.0), glm::vec3(m_up.x(), m_up.y(), m_up.z()));
+	{
+		m_mv_mat = glm::lookAt(eye, center, up);
+	}
 }
 
 //depth buffer calculation
@@ -797,9 +843,9 @@ void VRenderGLView::Draw()
 		DrawGradBg();
 
 	//projection
-	HandleProjection(nx, ny);
+	HandleProjection(nx, ny, true);
 	//Transformation
-	HandleCamera();
+	HandleCamera(true);
 
 	if (m_draw_all)
 	{
@@ -870,9 +916,9 @@ void VRenderGLView::DrawDP()
 		DrawGradBg();
 
 	//projection
-	HandleProjection(nx, ny);
+	HandleProjection(nx, ny, true);
 	//Transformation
-	HandleCamera();
+	HandleCamera(true);
 
 	if (m_draw_all)
 	{
@@ -9994,9 +10040,9 @@ void VRenderGLView::StartLoopUpdate()
 		int nx = GetGLSize().x;
 		int ny = GetGLSize().y;
 		//projection
-		HandleProjection(nx, ny);
+		HandleProjection(nx, ny, true);
 		//Transformation
-		HandleCamera();
+		HandleCamera(true);
 		glm::mat4 mv_temp = m_mv_mat;
 		//translate object
 		m_mv_mat = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));

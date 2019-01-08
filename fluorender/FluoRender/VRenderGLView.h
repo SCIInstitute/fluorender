@@ -930,8 +930,10 @@ private:
 
 	//enable vr
 	bool m_enable_vr;
+	bool m_use_openvr;
 	uint32_t m_vr_size[2];
-	double m_eye_offset;
+	double m_vr_eye_offset;
+	int m_vr_eye_idx;//0: left; 1: right
 
 private:
 #ifdef _WIN32
@@ -1003,8 +1005,8 @@ private:
 	void DisplayStroke();
 
 	//handle camera
-	void HandleProjection(int nx, int ny);
-	void HandleCamera();
+	void HandleProjection(int nx, int ny, bool vr = false);
+	void HandleCamera(bool vr = false);
 	FLTYPE::Quaternion Trackball(int p1x, int p1y, int p2x, int p2y);
 	FLTYPE::Quaternion TrackballClip(int p1x, int p1y, int p2x, int p2y);
 	//sort bricks after the view has been changed
