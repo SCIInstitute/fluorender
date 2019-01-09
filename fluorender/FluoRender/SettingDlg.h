@@ -68,6 +68,10 @@ class SettingDlg : public wxPanel
 		ID_PinThreshText,
 		//link rotations
 		ID_RotLinkChk,
+		//stereo
+		ID_StereoChk,
+		ID_EyeDistSldr,
+		ID_EyeDistText,
 		//override vox
 		ID_OverrideVoxChk,
 		//component size
@@ -149,6 +153,9 @@ public:
 	void SetGradBg(bool val) {m_grad_bg = val;}
 	//rot center anchor thresh
 	double GetPinThreshold() { return m_pin_threshold; }
+	//stereo
+	bool GetStereo() { return m_stereo; }
+	double GetEyeDist() { return m_eye_dist; }
 	//override vox
 	bool GetOverrideVox() {return m_override_vox;}
 	void SetOverrideVox(bool val) {m_override_vox = val;}
@@ -273,6 +280,9 @@ private:
 	bool m_grad_bg;
 	bool m_override_vox;
 	double m_soft_threshold;
+	//stereo
+	bool m_stereo;
+	double m_eye_dist;
 	//script
 	bool m_run_script;
 	wxString m_script_file;
@@ -365,6 +375,10 @@ private:
 	wxTextCtrl *m_pin_threshold_text;
 	//rotations link
 	wxCheckBox *m_rot_link_chk;
+	//stereo
+	wxCheckBox *m_stereo_chk;
+	wxSlider *m_eye_dist_sldr;
+	wxTextCtrl *m_eye_dist_text;
 	//override vox
 	wxCheckBox *m_override_vox_chk;
 	//wavelength to color
@@ -451,6 +465,10 @@ private:
 	void OnPinThresholdEdit(wxCommandEvent &event);
 	//link rotations
 	void OnRotLink(wxCommandEvent& event);
+	//stereo
+	void OnStereoCheck(wxCommandEvent &event);
+	void OnEyeDistChange(wxScrollEvent &event);
+	void OnEyeDistEdit(wxCommandEvent &event);
 	//override vox
 	void OnOverrideVoxCheck(wxCommandEvent &event);
 	//wavelength color

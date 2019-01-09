@@ -542,6 +542,16 @@ public:
 		m_enlarge_scale = value;
 	}
 
+	//stereo/vr
+	void SetStereo(bool bval)
+	{
+		m_enable_vr = bval;
+	}
+	void SetEyeDist(double dval)
+	{
+		m_vr_eye_offset = dval / 2.0;
+	}
+
 public:
 	//set gl context
 	bool m_set_gl;

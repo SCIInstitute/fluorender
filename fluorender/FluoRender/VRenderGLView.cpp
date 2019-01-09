@@ -3175,6 +3175,7 @@ void VRenderGLView::ClearVRBuffer()
 void VRenderGLView::DrawVRBuffer()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, GetGLSize().x, GetGLSize().y);
 	glDisable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 
@@ -6902,6 +6903,12 @@ void VRenderGLView::ForceDraw()
 	m_drawing = true;
 	PreDraw();
 
+	if (m_enable_vr)
+	{
+		PrepVRBuffer();
+		BindRenderBuffer();
+	}
+
 	switch (m_draw_type)
 	{
 	case 1:  //draw volumes only
@@ -6981,11 +6988,15 @@ void VRenderGLView::ForceDraw()
 	{
 		if (m_vr_eye_idx)
 		{
+			DrawVRBuffer();
 			SwapBuffers();
 			m_vr_eye_idx = 0;
 		}
 		else
+		{
 			m_vr_eye_idx = 1;
+			RefreshGL(99);
+		}
 	}
 	else
 		SwapBuffers();
