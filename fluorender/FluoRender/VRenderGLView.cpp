@@ -520,7 +520,7 @@ VRenderGLView::~VRenderGLView()
 #endif
 
 #ifdef _WIN32
-	if (m_enable_vr)
+	if (m_enable_vr && m_use_openvr)
 	{
 		//vr shutdown
 		mVR_Shutdown();
@@ -3194,7 +3194,7 @@ void VRenderGLView::DrawVRBuffer()
 	if (buffer)
 		buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 	VertexArray* quad_va =
-		TextureRenderer::vertex_array_manager_.vertex_array(VA_Left_Square);
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Right_Square);
 	if (quad_va)
 		quad_va->draw();
 	//right eye
@@ -3204,7 +3204,7 @@ void VRenderGLView::DrawVRBuffer()
 	if (buffer)
 		buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 	quad_va =
-		TextureRenderer::vertex_array_manager_.vertex_array(VA_Right_Square);
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Left_Square);
 	if (quad_va)
 		quad_va->draw();
 

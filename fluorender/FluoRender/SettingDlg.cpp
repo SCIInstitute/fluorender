@@ -1265,6 +1265,10 @@ void SettingDlg::SaveSettings()
 	fconfig.SetPath("/pin threshold");
 	fconfig.Write("value", m_pin_threshold);
 
+	fconfig.SetPath("/stereo");
+	fconfig.Write("enable_stereo", m_stereo);
+	fconfig.Write("eye dist", m_eye_dist);
+
 	fconfig.SetPath("/test mode");
 	fconfig.Write("speed", m_test_speed);
 	fconfig.Write("param", m_test_param);
