@@ -34,6 +34,7 @@ HMODULE openvr_api = 0;
 
 funcVR_Init mVR_Init = 0;
 funcVR_Shutdown mVR_Shutdown = 0;
+funcVRCompositor mVRCompositor = 0;
 
 bool LoadVR()
 {
@@ -48,6 +49,10 @@ bool LoadVR()
 	mVR_Shutdown = reinterpret_cast<funcVR_Shutdown>(
 		GetProcAddress(openvr_api, "VR_Shutdown"));
 	if (!mVR_Shutdown)
+		return false;
+	mVRCompositor = reinterpret_cast<funcVRCompositor>(
+		GetProcAddress(openvr_api, "VRCompositor"));
+	if (!mVRCompositor)
 		return false;
 	return true;
 #else
@@ -66,4 +71,5 @@ void UnloadVR()
 #endif
 	mVR_Init = 0;
 	mVR_Shutdown = 0;
+	mVRCompositor = 0;
 }

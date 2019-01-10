@@ -39,6 +39,7 @@ using namespace vr;
 //defs
 typedef decltype(VR_Init)* funcVR_Init;
 typedef decltype(VR_Shutdown)* funcVR_Shutdown;
+typedef decltype(VRCompositor)* funcVRCompositor;
 
 //vars
 #ifdef _WIN32
@@ -46,6 +47,7 @@ extern HMODULE openvr_api;
 #endif
 extern funcVR_Init mVR_Init;
 extern funcVR_Shutdown mVR_Shutdown;
+extern funcVRCompositor mVRCompositor;
 
 bool LoadVR();
 void UnloadVR();

@@ -1,5 +1,5 @@
-ver_major=2
-ver_minor=23
+ver_major=3
+ver_minor=0
 [gm\ calculation]
 mode=2
 [peeling\ layers]
@@ -22,6 +22,9 @@ x=0.587785
 y=0.809017
 [pin\ threshold]
 value=10
+[stereo]
+enable_stereo=1
+eye\ dist=12
 [test\ mode]
 speed=0
 param=0
@@ -97,5 +100,10 @@ use_max_texture_size=0
 max_texture_size=2048
 [cl\ device]
 device_id=0
+[Java]
+jvm_path=
+ij_path=
+bioformats_path=
+ij_mode=0
 [clipping\ planes]
 mode=0

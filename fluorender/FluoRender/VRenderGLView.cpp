@@ -365,7 +365,8 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	{
 		vr::EVRInitError vr_error;
 		vr::IVRSystem *vr_system = mVR_Init(&vr_error, vr::VRApplication_Scene, 0);
-		if (vr_error == vr::VRInitError_None)
+		if (vr_error == vr::VRInitError_None &&
+			mVRCompositor())
 		{
 			m_use_openvr = true;
 			//get render size
@@ -3197,6 +3198,15 @@ void VRenderGLView::DrawVRBuffer()
 		TextureRenderer::vertex_array_manager_.vertex_array(VA_Right_Square);
 	if (quad_va)
 		quad_va->draw();
+	//openvr left eye
+	if (m_use_openvr)
+	{
+		vr::Texture_t left_eye = {};
+		left_eye.handle = reinterpret_cast<void*>(buffer->tex_id(GL_COLOR_ATTACHMENT0));
+		left_eye.eType = vr::TextureType_OpenGL;
+		left_eye.eColorSpace = vr::ColorSpace_Gamma;
+		mVRCompositor()->Submit(vr::Eye_Left, &left_eye, nullptr);
+	}
 	//right eye
 	buffer =
 		TextureRenderer::framebuffer_manager_.framebuffer(
@@ -3207,6 +3217,15 @@ void VRenderGLView::DrawVRBuffer()
 		TextureRenderer::vertex_array_manager_.vertex_array(VA_Left_Square);
 	if (quad_va)
 		quad_va->draw();
+	//openvr left eye
+	if (m_use_openvr)
+	{
+		vr::Texture_t right_eye = {};
+		right_eye.handle = reinterpret_cast<void*>(buffer->tex_id(GL_COLOR_ATTACHMENT0));
+		right_eye.eType = vr::TextureType_OpenGL;
+		right_eye.eColorSpace = vr::ColorSpace_Gamma;
+		mVRCompositor()->Submit(vr::Eye_Right, &right_eye, nullptr);
+	}
 
 	if (img_shader && img_shader->valid())
 		img_shader->release();
