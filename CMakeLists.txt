@@ -394,12 +394,6 @@ file(GLOB pngs_hdr fluorender/FluoRender/img/*.h)
 file(GLOB pngs_src fluorender/FluoRender/img/*.cpp)
 add_library(IMAGES_OBJ OBJECT  ${pngs_hdr} ${pngs_src})
 
-# VR
-include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/VR)
-file(GLOB vr_hdr fluorender/FluoRender/VR/*.h)
-file(GLOB vr_src fluorender/FluoRender/VR/*.cpp)
-add_library(VR_OBJ OBJECT  ${vr_hdr} ${vr_src})
-
 # OpenCL
 if(WIN32)
 	include_directories(${FluoRender_SOURCE_DIR}/fluorender/OpenCL/include)
@@ -601,7 +595,6 @@ elseif(WIN32)
 			$<TARGET_OBJECTS:POLE_OBJ>
 			$<TARGET_OBJECTS:TEEM_OBJ>
 			$<TARGET_OBJECTS:WACUTILS_OBJ>
-			$<TARGET_OBJECTS:VR_OBJ>
 			)
 		add_executable(Tester
 			${tester_hdr} ${tester_src}
@@ -733,6 +726,14 @@ add_custom_command(TARGET FluoRender POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_directory
 	"${FluoRender_SOURCE_DIR}/Benchmark"
 	"$<TARGET_FILE_DIR:FluoRender>")
+
+# openvr
+if(WIN32)
+add_custom_command(TARGET FluoRender POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy
+	"${FluoRender_SOURCE_DIR}/fluorender/OpenVR/lib/win64/openvr_api.dll"
+	"$<TARGET_FILE_DIR:FluoRender>")
+endif()
 
 # make the Executable dir
 if(WIN32)

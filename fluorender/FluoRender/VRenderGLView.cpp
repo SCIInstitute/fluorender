@@ -48,7 +48,7 @@ DEALINGS IN THE SOFTWARE.
 #include "png_resource.h"
 #include "img/icons.h"
 #include <utility>
-#include <VR/VRUtils.h>
+#include <openvr.h>
 
 bool VRenderGLView::m_linked_rot = false;
 VRenderGLView* VRenderGLView::m_master_linked_view = 0;
@@ -361,24 +361,21 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 
 #ifdef _WIN32
 	//openvr initilization
-	if (LoadVR())
+	vr::EVRInitError vr_error;
+	vr::IVRSystem *vr_system = vr::VR_Init(&vr_error, vr::VRApplication_Scene, 0);
+	if (vr_error == vr::VRInitError_None &&
+		vr::VRCompositor())
 	{
-		vr::EVRInitError vr_error;
-		vr::IVRSystem *vr_system = mVR_Init(&vr_error, vr::VRApplication_Scene, 0);
-		if (vr_error == vr::VRInitError_None &&
-			mVRCompositor())
-		{
-			m_use_openvr = true;
-			//get render size
-			vr_system->GetRecommendedRenderTargetSize(&m_vr_size[0], &m_vr_size[1]);
-			//get eye offset
-			vr::HmdMatrix34_t eye_mat;
-			eye_mat = vr_system->GetEyeToHeadTransform(vr::Eye_Left);
-			double eye_x = eye_mat.m[0][3];
-			double eye_y = eye_mat.m[1][3];
-			double eye_z = eye_mat.m[2][3];
-			m_vr_eye_offset = std::sqrt(eye_x*eye_x+eye_y*eye_y+eye_z*eye_z);
-		}
+		m_use_openvr = true;
+		//get render size
+		vr_system->GetRecommendedRenderTargetSize(&m_vr_size[0], &m_vr_size[1]);
+		//get eye offset
+		vr::HmdMatrix34_t eye_mat;
+		eye_mat = vr_system->GetEyeToHeadTransform(vr::Eye_Left);
+		double eye_x = eye_mat.m[0][3];
+		double eye_y = eye_mat.m[1][3];
+		double eye_z = eye_mat.m[2][3];
+		m_vr_eye_offset = std::sqrt(eye_x*eye_x+eye_y*eye_y+eye_z*eye_z)*100.0;
 	}//otherwise use default settings
 #endif
 
@@ -524,8 +521,8 @@ VRenderGLView::~VRenderGLView()
 	if (m_enable_vr && m_use_openvr)
 	{
 		//vr shutdown
-		mVR_Shutdown();
-		UnloadVR();
+		vr::VR_Shutdown();
+		//UnloadVR();
 	}
 #endif
 
@@ -664,9 +661,9 @@ void VRenderGLView::HandleProjection(int nx, int ny, bool vr)
 		double frustum_shift = (m_vr_eye_offset / 2.0) * m_near_clip / m_distance;
 		m_ortho_top = std::tan(m_aov / 2.0) * m_near_clip;
 		m_ortho_right = aspect * m_ortho_top + frustum_shift *
-			(m_vr_eye_idx ? -1.0 : 1.0);
-		m_ortho_left = -aspect * m_ortho_top + frustum_shift *
 			(m_vr_eye_idx ? 1.0 : -1.0);
+		m_ortho_left = -aspect * m_ortho_top + frustum_shift *
+			(m_vr_eye_idx ? -1.0 : 1.0);
 		m_ortho_bottom = -m_ortho_top;
 		m_proj_mat = glm::frustum(
 			m_ortho_left, m_ortho_right,
@@ -730,7 +727,7 @@ void VRenderGLView::HandleCamera(bool vr)
 
 	if (vr && m_enable_vr)
 	{
-		glm::vec3 offset((m_vr_eye_idx ? -1.0 : 1.0) * m_vr_eye_offset / 2.0, 0.0, 0.0);
+		glm::vec3 offset((m_vr_eye_idx ? 1.0 : -1.0) * m_vr_eye_offset / 2.0, 0.0, 0.0);
 		m_mv_mat = glm::lookAt(
 			eye + offset,
 			center + offset,
@@ -3125,6 +3122,12 @@ void VRenderGLView::GetRenderSize(int &nx, int &ny)
 
 void VRenderGLView::PrepVRBuffer()
 {
+	if (m_use_openvr)
+	{
+		std::array<vr::TrackedDevicePose_t, vr::k_unMaxTrackedDeviceCount> tracked_device_poses;
+		vr::VRCompositor()->WaitGetPoses(tracked_device_poses.data(), tracked_device_poses.size(), NULL, 0);
+	}
+
 	int nx, ny;
 	GetRenderSize(nx, ny);
 
@@ -3140,7 +3143,7 @@ void VRenderGLView::PrepVRBuffer()
 
 	Framebuffer* vr_buffer =
 		TextureRenderer::framebuffer_manager_.framebuffer(
-			FB_Render_RGBA, nx, ny, vr_buf_name);
+			FB_UChar_RGBA, nx, ny, vr_buf_name);
 	if (vr_buffer)
 		vr_buffer->protect();
 }
@@ -3195,7 +3198,7 @@ void VRenderGLView::DrawVRBuffer()
 	if (buffer)
 		buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 	VertexArray* quad_va =
-		TextureRenderer::vertex_array_manager_.vertex_array(VA_Right_Square);
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Left_Square);
 	if (quad_va)
 		quad_va->draw();
 	//openvr left eye
@@ -3205,7 +3208,7 @@ void VRenderGLView::DrawVRBuffer()
 		left_eye.handle = reinterpret_cast<void*>(buffer->tex_id(GL_COLOR_ATTACHMENT0));
 		left_eye.eType = vr::TextureType_OpenGL;
 		left_eye.eColorSpace = vr::ColorSpace_Gamma;
-		mVRCompositor()->Submit(vr::Eye_Left, &left_eye, nullptr);
+		vr::VRCompositor()->Submit(vr::Eye_Left, &left_eye, nullptr);
 	}
 	//right eye
 	buffer =
@@ -3214,7 +3217,7 @@ void VRenderGLView::DrawVRBuffer()
 	if (buffer)
 		buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 	quad_va =
-		TextureRenderer::vertex_array_manager_.vertex_array(VA_Left_Square);
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Right_Square);
 	if (quad_va)
 		quad_va->draw();
 	//openvr left eye
@@ -3224,7 +3227,7 @@ void VRenderGLView::DrawVRBuffer()
 		right_eye.handle = reinterpret_cast<void*>(buffer->tex_id(GL_COLOR_ATTACHMENT0));
 		right_eye.eType = vr::TextureType_OpenGL;
 		right_eye.eColorSpace = vr::ColorSpace_Gamma;
-		mVRCompositor()->Submit(vr::Eye_Right, &right_eye, nullptr);
+		vr::VRCompositor()->Submit(vr::Eye_Right, &right_eye, nullptr);
 	}
 
 	if (img_shader && img_shader->valid())
@@ -4820,6 +4823,12 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		if (TextureRenderer::get_mem_swap() &&
 			TextureRenderer::get_done_update_loop())
 			m_pre_draw = true;
+	}
+
+	if (m_use_openvr)
+	{
+		refresh = true;
+		m_retain_finalbuffer = true;
 	}
 
 	if (frame && frame->GetBenchmark())

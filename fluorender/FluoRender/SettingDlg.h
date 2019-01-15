@@ -179,7 +179,7 @@ public:
 	void SetTextColor(int text_color) { m_text_color = text_color; }
 	//full screen
 	bool GetStayTop() { return m_stay_top; }
-	bool GetShowCursor() { return m_show_cursor; }
+	bool GetShowCursor() { if (m_stereo) return false; else return m_show_cursor; }
 	//memory settings
 	bool GetMemSwap() {return m_mem_swap;}
 	void SetMemSwap(bool val) {m_mem_swap = val;}

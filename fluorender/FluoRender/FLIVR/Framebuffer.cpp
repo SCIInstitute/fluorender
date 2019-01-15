@@ -58,6 +58,14 @@ namespace FLIVR
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx_, ny_, 0,
 				GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
 			break;
+		case FBTex_UChar_RGBA:
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB8_ALPHA8, nx_, ny_, 0,
+				GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+			break;
 		case FBTex_Render_Int32:
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -176,46 +184,67 @@ namespace FLIVR
 		fb->create();
 		//add to lists
 		fb_list_.push_back(fb);
-		if (type == FB_Render_RGBA)
+
+		switch (type)
 		{
-			//create new texture
-			FramebufferTexture* tex =
-				new FramebufferTexture(FBTex_Render_RGBA, nx, ny);
-			tex->create();
-			//attach texture
-			fb->attach_texture(GL_COLOR_ATTACHMENT0, tex);
-			//add to lists
-			tex_list_.push_back(tex);
-			glBindTexture(GL_TEXTURE_2D, 0);
+		case FB_Render_RGBA:
+			{
+				//create new texture
+				FramebufferTexture* tex =
+					new FramebufferTexture(FBTex_Render_RGBA, nx, ny);
+				tex->create();
+				//attach texture
+				fb->attach_texture(GL_COLOR_ATTACHMENT0, tex);
+				//add to lists
+				tex_list_.push_back(tex);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			}
+			break;
+		case FB_UChar_RGBA:
+			{
+				//create new texture
+				FramebufferTexture* tex =
+					new FramebufferTexture(FBTex_UChar_RGBA, nx, ny);
+				tex->create();
+				//attach texture
+				fb->attach_texture(GL_COLOR_ATTACHMENT0, tex);
+				//add to lists
+				tex_list_.push_back(tex);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			}
+			break;
+		case FB_Pick_Int32_Float:
+			{
+				FramebufferTexture* tex_color =
+					new FramebufferTexture(FBTex_Render_Int32, nx, ny);
+				tex_color->create();
+				FramebufferTexture* tex_depth =
+					new FramebufferTexture(FBTex_Depth_Float, nx, ny);
+				tex_depth->create();
+				//attach textures
+				fb->attach_texture(GL_COLOR_ATTACHMENT0, tex_color);
+				fb->attach_texture(GL_DEPTH_ATTACHMENT, tex_depth);
+				//add to lists
+				tex_list_.push_back(tex_color);
+				tex_list_.push_back(tex_depth);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			}
+			break;
+		case FB_Depth_Float:
+			{
+				//create new texture
+				FramebufferTexture* tex =
+					new FramebufferTexture(FBTex_Depth_Float, nx, ny);
+				tex->create();
+				//attach texture
+				fb->attach_texture(GL_DEPTH_ATTACHMENT, tex);
+				//add to lists
+				tex_list_.push_back(tex);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			}
+			break;
 		}
-		else if (type == FB_Pick_Int32_Float)
-		{
-			FramebufferTexture* tex_color =
-				new FramebufferTexture(FBTex_Render_Int32, nx, ny);
-			tex_color->create();
-			FramebufferTexture* tex_depth =
-				new FramebufferTexture(FBTex_Depth_Float, nx, ny);
-			tex_depth->create();
-			//attach textures
-			fb->attach_texture(GL_COLOR_ATTACHMENT0, tex_color);
-			fb->attach_texture(GL_DEPTH_ATTACHMENT, tex_depth);
-			//add to lists
-			tex_list_.push_back(tex_color);
-			tex_list_.push_back(tex_depth);
-			glBindTexture(GL_TEXTURE_2D, 0);
-		}
-		else if (type == FB_Depth_Float)
-		{
-			//create new texture
-			FramebufferTexture* tex =
-				new FramebufferTexture(FBTex_Depth_Float, nx, ny);
-			tex->create();
-			//attach texture
-			fb->attach_texture(GL_DEPTH_ATTACHMENT, tex);
-			//add to lists
-			tex_list_.push_back(tex);
-			glBindTexture(GL_TEXTURE_2D, 0);
-		}
+
 		fb->set_name(name);
 		return fb;
 	}
@@ -240,6 +269,7 @@ namespace FLIVR
 		switch (type_)
 		{
 		case FB_Render_RGBA:
+		case FB_UChar_RGBA:
 		case FB_Pick_Int32_Float:
 		case FB_Depth_Float:
 		default:
