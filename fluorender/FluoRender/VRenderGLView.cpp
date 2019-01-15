@@ -4828,7 +4828,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 	if (m_use_openvr)
 	{
 		refresh = true;
-		m_retain_finalbuffer = true;
+		//m_retain_finalbuffer = true;
 	}
 
 	if (frame && frame->GetBenchmark())
@@ -6937,15 +6937,15 @@ void VRenderGLView::ForceDraw()
 		BindRenderBuffer();
 	}
 
-	switch (m_draw_type)
-	{
-	case 1:  //draw volumes only
-		Draw();
-		break;
-	case 2:  //draw volumes and meshes with depth peeling
-		DrawDP();
-		break;
-	}
+		switch (m_draw_type)
+		{
+		case 1:  //draw volumes only
+			Draw();
+			break;
+		case 2:  //draw volumes and meshes with depth peeling
+			DrawDP();
+			break;
+		}
 
 	if (m_draw_camctr)
 		DrawCamCtr();

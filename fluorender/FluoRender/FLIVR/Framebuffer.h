@@ -200,7 +200,7 @@ namespace FLIVR
 				break;
 			case FBTex_UChar_RGBA:
 				glBindTexture(GL_TEXTURE_2D, id_);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB8_ALPHA8, nx_, ny_, 0,
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, nx_, ny_, 0,
 					GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 				break;
 			case FBTex_Render_Int32:
