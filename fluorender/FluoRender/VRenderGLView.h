@@ -74,6 +74,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Wacom/Utils.h>
 #endif
 
+#include <openvr.h>
+
 #define VOL_METHOD_SEQ    1
 #define VOL_METHOD_MULTI  2
 #define VOL_METHOD_COMP    3
@@ -944,6 +946,7 @@ private:
 	uint32_t m_vr_size[2];
 	double m_vr_eye_offset;
 	int m_vr_eye_idx;//0: left; 1: right
+	vr::IVRSystem *m_vr_system;
 
 private:
 #ifdef _WIN32

@@ -48,7 +48,6 @@ DEALINGS IN THE SOFTWARE.
 #include "png_resource.h"
 #include "img/icons.h"
 #include <utility>
-#include <openvr.h>
 
 bool VRenderGLView::m_linked_rot = false;
 VRenderGLView* VRenderGLView::m_master_linked_view = 0;
@@ -362,13 +361,13 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 #ifdef _WIN32
 	//openvr initilization
 	vr::EVRInitError vr_error;
-	vr::IVRSystem *vr_system = vr::VR_Init(&vr_error, vr::VRApplication_Scene, 0);
+	m_vr_system = vr::VR_Init(&vr_error, vr::VRApplication_Scene, 0);
 	if (vr_error == vr::VRInitError_None &&
 		vr::VRCompositor())
 	{
 		m_use_openvr = true;
 		//get render size
-		vr_system->GetRecommendedRenderTargetSize(&m_vr_size[0], &m_vr_size[1]);
+		m_vr_system->GetRecommendedRenderTargetSize(&m_vr_size[0], &m_vr_size[1]);
 		//get eye offset
 		/*vr::HmdMatrix34_t eye_mat;
 		eye_mat = vr_system->GetEyeToHeadTransform(vr::Eye_Left);
@@ -653,22 +652,32 @@ void VRenderGLView::HandleProjection(int nx, int ny, bool vr)
 
 	if (vr && m_enable_vr)
 	{
-		double aspect;
 		if (m_use_openvr)
-			aspect = (double)m_vr_size[0] / (double)m_vr_size[1];
+		{
+			//get projection matrix
+			vr::EVREye eye = m_vr_eye_idx ? vr::Eye_Right : vr::Eye_Left;
+			auto proj_mat = m_vr_system->GetProjectionMatrix(eye, m_near_clip, m_far_clip);
+			for (int i = 0; i < 16; ++i)
+				glm::value_ptr(m_proj_mat)[i] =
+				(i % 4) == 2 ? -((float*)(proj_mat.m))[i] :
+				((float*)(proj_mat.m))[i];
+		}
 		else
+		{
+			double aspect;
 			aspect = (double)nx / (double)ny;
-		double frustum_shift = (m_vr_eye_offset / 2.0) * m_near_clip / m_distance;
-		m_ortho_top = std::tan(m_aov / 2.0) * m_near_clip;
-		m_ortho_right = aspect * m_ortho_top + frustum_shift *
-			(m_vr_eye_idx ? 1.0 : -1.0);
-		m_ortho_left = -aspect * m_ortho_top + frustum_shift *
-			(m_vr_eye_idx ? -1.0 : 1.0);
-		m_ortho_bottom = -m_ortho_top;
-		m_proj_mat = glm::frustum(
-			m_ortho_left, m_ortho_right,
-			m_ortho_bottom, m_ortho_top,
-			m_near_clip, m_far_clip);
+			double frustum_shift = (m_vr_eye_offset / 2.0) * m_near_clip / m_distance;
+			m_ortho_top = std::tan(m_aov / 2.0) * m_near_clip;
+			m_ortho_right = aspect * m_ortho_top + frustum_shift *
+				(m_vr_eye_idx ? 1.0 : -1.0);
+			m_ortho_left = -aspect * m_ortho_top + frustum_shift *
+				(m_vr_eye_idx ? -1.0 : 1.0);
+			m_ortho_bottom = -m_ortho_top;
+			m_proj_mat = glm::frustum(
+				m_ortho_left, m_ortho_right,
+				m_ortho_bottom, m_ortho_top,
+				m_near_clip, m_far_clip);
+		}
 	}
 	else
 	{
