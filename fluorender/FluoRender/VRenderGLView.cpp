@@ -370,12 +370,12 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 		//get render size
 		vr_system->GetRecommendedRenderTargetSize(&m_vr_size[0], &m_vr_size[1]);
 		//get eye offset
-		vr::HmdMatrix34_t eye_mat;
+		/*vr::HmdMatrix34_t eye_mat;
 		eye_mat = vr_system->GetEyeToHeadTransform(vr::Eye_Left);
 		double eye_x = eye_mat.m[0][3];
 		double eye_y = eye_mat.m[1][3];
 		double eye_z = eye_mat.m[2][3];
-		m_vr_eye_offset = std::sqrt(eye_x*eye_x+eye_y*eye_y+eye_z*eye_z)*100.0;
+		m_vr_eye_offset = std::sqrt(eye_x*eye_x+eye_y*eye_y+eye_z*eye_z)*100.0;*/
 	}//otherwise use default settings
 #endif
 
