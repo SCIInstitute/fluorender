@@ -360,22 +360,25 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 
 #ifdef _WIN32
 	//openvr initilization
-	vr::EVRInitError vr_error;
-	m_vr_system = vr::VR_Init(&vr_error, vr::VRApplication_Scene, 0);
-	if (vr_error == vr::VRInitError_None &&
-		vr::VRCompositor())
+	if (m_enable_vr)
 	{
-		m_use_openvr = true;
-		//get render size
-		m_vr_system->GetRecommendedRenderTargetSize(&m_vr_size[0], &m_vr_size[1]);
-		//get eye offset
-		/*vr::HmdMatrix34_t eye_mat;
-		eye_mat = vr_system->GetEyeToHeadTransform(vr::Eye_Left);
-		double eye_x = eye_mat.m[0][3];
-		double eye_y = eye_mat.m[1][3];
-		double eye_z = eye_mat.m[2][3];
-		m_vr_eye_offset = std::sqrt(eye_x*eye_x+eye_y*eye_y+eye_z*eye_z)*100.0;*/
-	}//otherwise use default settings
+		vr::EVRInitError vr_error;
+		m_vr_system = vr::VR_Init(&vr_error, vr::VRApplication_Scene, 0);
+		if (vr_error == vr::VRInitError_None &&
+			vr::VRCompositor())
+		{
+			m_use_openvr = true;
+			//get render size
+			m_vr_system->GetRecommendedRenderTargetSize(&m_vr_size[0], &m_vr_size[1]);
+			//get eye offset
+			/*vr::HmdMatrix34_t eye_mat;
+			eye_mat = vr_system->GetEyeToHeadTransform(vr::Eye_Left);
+			double eye_x = eye_mat.m[0][3];
+			double eye_y = eye_mat.m[1][3];
+			double eye_z = eye_mat.m[2][3];
+			m_vr_eye_offset = std::sqrt(eye_x*eye_x+eye_y*eye_y+eye_z*eye_z)*100.0;*/
+		}//otherwise use default settings
+	}
 #endif
 
 	LoadBrushSettings();

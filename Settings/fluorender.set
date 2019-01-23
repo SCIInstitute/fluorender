@@ -23,7 +23,7 @@ y=0.809017
 [pin\ threshold]
 value=10
 [stereo]
-enable_stereo=1
+enable_stereo=0
 eye\ dist=12
 [test\ mode]
 speed=0
