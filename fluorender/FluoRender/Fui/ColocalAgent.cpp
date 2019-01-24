@@ -147,10 +147,29 @@ void ColocalAgent::Run()
 		x++;
 	}
 
-	//print
+	//output
 	std::wstring filename;
 	getValue("output file", filename);
 	std::ofstream outfile;
+	//print names
+	size_t pos = filename.find_last_of(L".");
+	std::wstring filename_names = filename;
+	if (pos != std::wstring::npos)
+		filename_names.insert(pos, L"_names");
+	else
+		filename_names += L"_names";
+	outfile.open(filename_names, std::ofstream::out);
+	int counter = 1;//excel starts from 1
+	for (auto it = nodes.begin();
+		it != nodes.end(); ++it)
+	{
+		outfile << counter++;
+		outfile << "\t";
+		outfile << (*it)->getName();
+		outfile << "\n";
+	}
+	outfile.close();
+	//print adj matrix
 	outfile.open(filename, std::ofstream::out);
 	for (size_t i = 0; i < num; ++i)
 	{
