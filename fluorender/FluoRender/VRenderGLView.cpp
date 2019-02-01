@@ -358,29 +358,6 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 		m_enable_touch = false;
 #endif
 
-#ifdef _WIN32
-	//openvr initilization
-	if (m_enable_vr)
-	{
-		vr::EVRInitError vr_error;
-		m_vr_system = vr::VR_Init(&vr_error, vr::VRApplication_Scene, 0);
-		if (vr_error == vr::VRInitError_None &&
-			vr::VRCompositor())
-		{
-			m_use_openvr = true;
-			//get render size
-			m_vr_system->GetRecommendedRenderTargetSize(&m_vr_size[0], &m_vr_size[1]);
-			//get eye offset
-			/*vr::HmdMatrix34_t eye_mat;
-			eye_mat = vr_system->GetEyeToHeadTransform(vr::Eye_Left);
-			double eye_x = eye_mat.m[0][3];
-			double eye_y = eye_mat.m[1][3];
-			double eye_z = eye_mat.m[2][3];
-			m_vr_eye_offset = std::sqrt(eye_x*eye_x+eye_y*eye_y+eye_z*eye_z)*100.0;*/
-		}//otherwise use default settings
-	}
-#endif
-
 	LoadBrushSettings();
 
 	m_timer = new nv::Timer(10);
@@ -487,6 +464,29 @@ HCTX VRenderGLView::TabletInit(HWND hWnd, HINSTANCE hInst)
 	return hctx;
 }
 #endif
+
+void VRenderGLView::InitOpenVR()
+{
+#ifdef _WIN32
+	//openvr initilization
+	vr::EVRInitError vr_error;
+	m_vr_system = vr::VR_Init(&vr_error, vr::VRApplication_Scene, 0);
+	if (vr_error == vr::VRInitError_None &&
+		vr::VRCompositor())
+	{
+		m_use_openvr = true;
+		//get render size
+		m_vr_system->GetRecommendedRenderTargetSize(&m_vr_size[0], &m_vr_size[1]);
+		//get eye offset
+		/*vr::HmdMatrix34_t eye_mat;
+		eye_mat = vr_system->GetEyeToHeadTransform(vr::Eye_Left);
+		double eye_x = eye_mat.m[0][3];
+		double eye_y = eye_mat.m[1][3];
+		double eye_z = eye_mat.m[2][3];
+		m_vr_eye_offset = std::sqrt(eye_x*eye_x+eye_y*eye_y+eye_z*eye_z)*100.0;*/
+	}//otherwise use default settings
+#endif
+}
 
 VRenderGLView::~VRenderGLView()
 {
@@ -660,10 +660,23 @@ void VRenderGLView::HandleProjection(int nx, int ny, bool vr)
 			//get projection matrix
 			vr::EVREye eye = m_vr_eye_idx ? vr::Eye_Right : vr::Eye_Left;
 			auto proj_mat = m_vr_system->GetProjectionMatrix(eye, m_near_clip, m_far_clip);
-			for (int i = 0; i < 16; ++i)
-				glm::value_ptr(m_proj_mat)[i] =
-				(i % 4) == 2 ? -((float*)(proj_mat.m))[i] :
-				((float*)(proj_mat.m))[i];
+			//for (int i = 0; i < 16; ++i)
+			//	glm::value_ptr(m_proj_mat)[i] =
+			//	(i % 4) == 2 ? -((float*)(proj_mat.m))[i] :
+			//	((float*)(proj_mat.m))[i];
+			double aspect;
+			aspect = (double)nx / (double)ny;
+			double frustum_shift = (m_vr_eye_offset / 2.0) * m_near_clip / m_distance;
+			m_ortho_top = std::tan(m_aov / 2.0) * m_near_clip;
+			m_ortho_right = aspect * m_ortho_top + frustum_shift *
+				(m_vr_eye_idx ? 1.0 : -1.0);
+			m_ortho_left = -aspect * m_ortho_top + frustum_shift *
+				(m_vr_eye_idx ? -1.0 : 1.0);
+			m_ortho_bottom = -m_ortho_top;
+			m_proj_mat = glm::frustum(
+				m_ortho_left, m_ortho_right,
+				m_ortho_bottom, m_ortho_top,
+				m_near_clip, m_far_clip);
 		}
 		else
 		{

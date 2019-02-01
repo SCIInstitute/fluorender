@@ -563,6 +563,10 @@ public:
 	void SetFullScreen();
 
 	//stereo/vr
+	void InitOpenVR()
+	{
+		if (m_glview) m_glview->InitOpenVR();
+	}
 	void SetStereo(bool bval)
 	{
 		if (m_glview) m_glview->SetStereo(bval);

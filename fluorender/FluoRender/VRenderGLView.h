@@ -953,6 +953,7 @@ private:
 	//wacom tablet
 	HCTX TabletInit(HWND hWnd, HINSTANCE hInst);
 #endif
+	void InitOpenVR();
 
 	void DrawBounds();
 	void DrawGrid();
