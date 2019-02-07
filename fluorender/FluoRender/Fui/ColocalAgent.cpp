@@ -83,7 +83,7 @@ void ColocalAgent::Run()
 				bool selected = false;
 				node.getValue("selected", selected);
 				if (selected)
-					nodes_.insert(&node);
+					nodes_.push_back(&node);
 			}
 			traverse(node);
 		}
@@ -93,18 +93,18 @@ void ColocalAgent::Run()
 			traverse(group);
 		}
 
-		FL::NodeSet &getResult()
+		FL::NodePath &getResult()
 		{
 			return nodes_;
 		}
 
 	private:
-		FL::NodeSet nodes_;
+		FL::NodePath nodes_;
 	};
 
 	SelRetriever retriever;
 	root->accept(retriever);
-	FL::NodeSet nodes = retriever.getResult();
+	FL::NodePath nodes = retriever.getResult();
 
 	size_t num = nodes.size();
 	if (num < 2)
@@ -171,6 +171,42 @@ void ColocalAgent::Run()
 	outfile.close();
 	//print adj matrix
 	outfile.open(filename, std::ofstream::out);
+	for (size_t i = 0; i < num; ++i)
+	{
+		for (size_t j = 0; j < num; ++j)
+		{
+			outfile << rm[i][j];
+			if (j < num - 1)
+				outfile << "\t";
+		}
+		outfile << "\n";
+	}
+	outfile.close();
+
+	//nomralize
+	for (size_t i = 0; i < num; ++i)
+	{
+		//sum
+		double sum = 0;
+		for (size_t j = 0; j < num; ++j)
+		{
+			sum += rm[i][j];
+		}
+		//divide
+		if (sum < 1)
+			continue;
+		for (size_t j = 0; j < num; ++j)
+		{
+			rm[i][j] /= sum;
+		}
+	}
+	//output
+	std::wstring filename_markov = filename;
+	if (pos != std::wstring::npos)
+		filename_markov.insert(pos, L"_markov");
+	else
+		filename_markov += L"_markov";
+	outfile.open(filename_markov, std::ofstream::out);
 	for (size_t i = 0; i < num; ++i)
 	{
 		for (size_t j = 0; j < num; ++j)
