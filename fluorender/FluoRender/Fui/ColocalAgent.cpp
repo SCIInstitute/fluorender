@@ -125,8 +125,8 @@ void ColocalAgent::Run()
 	for (auto it1 = nodes.begin();
 		it1 != nodes.end(); ++it1)
 	{
-		y = x + 1;
-		for (auto it2 = std::next(it1);
+		y = x;
+		for (auto it2 = it1;
 			it2 != nodes.end(); ++it2)
 		{
 			FL::VolumeData* vd1 = (*it1)->asVolumeData();
