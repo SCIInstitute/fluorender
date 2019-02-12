@@ -24,7 +24,7 @@ y=0.809017
 value=10
 [stereo]
 enable_stereo=0
-eye\ dist=12
+eye\ dist=20
 [test\ mode]
 speed=0
 param=0

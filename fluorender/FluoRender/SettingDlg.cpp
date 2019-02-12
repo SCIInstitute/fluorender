@@ -321,9 +321,9 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	sizer6_1->Add(m_stereo_chk, 0, wxALIGN_CENTER);
 	wxBoxSizer *sizer6_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Eye distance");
-	m_eye_dist_sldr = new wxSlider(page, ID_EyeDistSldr, 120, 0, 200,
+	m_eye_dist_sldr = new wxSlider(page, ID_EyeDistSldr, 200, 0, 2000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_eye_dist_text = new wxTextCtrl(page, ID_EyeDistText, "12.0",
+	m_eye_dist_text = new wxTextCtrl(page, ID_EyeDistText, "20.0",
 		wxDefaultPosition, wxSize(40, 20), 0, vald_fp1);
 	sizer6_2->Add(st, 0, wxALIGN_CENTER);
 	sizer6_2->Add(m_eye_dist_sldr, 1, wxEXPAND);
@@ -777,7 +777,7 @@ void SettingDlg::GetSettings()
 	m_grad_bg = false;
 	m_pin_threshold = 10.0;
 	m_stereo = false;
-	m_eye_dist = 12.0;
+	m_eye_dist = 20.0;
 	m_override_vox = true;
 	m_soft_threshold = 0.0;
 	m_run_script = false;
@@ -896,7 +896,7 @@ void SettingDlg::GetSettings()
 	{
 		fconfig.SetPath("/stereo");
 		fconfig.Read("enable_stereo", &m_stereo, false);
-		fconfig.Read("eye dist", &m_eye_dist, 12.0);
+		fconfig.Read("eye dist", &m_eye_dist, 20.0);
 	}
 	//test mode
 	if (fconfig.Exists("/test mode"))

@@ -44,6 +44,7 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
+#include <glm/gtx/string_cast.hpp>
 #include <wx/stdpaths.h>
 #include "png_resource.h"
 #include "img/icons.h"
@@ -654,20 +655,17 @@ void VRenderGLView::HandleProjection(int nx, int ny, bool vr)
 	if (!m_free)
 		m_distance = m_radius / tan(d2r(m_aov / 2.0)) / m_scale_factor;
 
-	if (vr && m_enable_vr)
+	if (vr && m_use_openvr)
 	{
-		/*if (m_use_openvr)
-		{
-			//get projection matrix
-			vr::EVREye eye = m_vr_eye_idx ? vr::Eye_Right : vr::Eye_Left;
-			auto proj_mat = m_vr_system->GetProjectionMatrix(eye, m_near_clip, m_far_clip);
-			static int ti[] = {0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15};
-			for (int i = 0; i < 16; ++i)
-				glm::value_ptr(m_proj_mat)[i] =
-					((float*)(proj_mat.m))[ti[i]];
-		}
-		else*/
-		{
+		//get projection matrix
+		vr::EVREye eye = m_vr_eye_idx ? vr::Eye_Right : vr::Eye_Left;
+		auto proj_mat = m_vr_system->GetProjectionMatrix(eye, m_near_clip, m_far_clip);
+		static int ti[] = {0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15};
+		for (int i = 0; i < 16; ++i)
+			glm::value_ptr(m_proj_mat)[i] =
+				((float*)(proj_mat.m))[ti[i]];
+
+		/*{
 			double aspect;
 			aspect = (double)nx / (double)ny;
 			double frustum_shift = (m_vr_eye_offset / 2.0) * m_near_clip / m_distance;
@@ -681,25 +679,15 @@ void VRenderGLView::HandleProjection(int nx, int ny, bool vr)
 				m_ortho_left, m_ortho_right,
 				m_ortho_bottom, m_ortho_top,
 				m_near_clip, m_far_clip);
-		}
+		}*/
 	}
 	else
 	{
 		double aspect = (double)nx / (double)ny;
-		if (aspect>1.0)
-		{
-			m_ortho_left = -m_radius*aspect / m_scale_factor;
-			m_ortho_right = -m_ortho_left;
-			m_ortho_bottom = -m_radius / m_scale_factor;
-			m_ortho_top = -m_ortho_bottom;
-		}
-		else
-		{
-			m_ortho_left = -m_radius / m_scale_factor;
-			m_ortho_right = -m_ortho_left;
-			m_ortho_bottom = -m_radius / aspect / m_scale_factor;
-			m_ortho_top = -m_ortho_bottom;
-		}
+		m_ortho_left = -m_radius*aspect / m_scale_factor;
+		m_ortho_right = -m_ortho_left;
+		m_ortho_bottom = -m_radius / m_scale_factor;
+		m_ortho_top = -m_ortho_bottom;
 
 		if (m_persp)
 		{
@@ -7030,8 +7018,8 @@ void VRenderGLView::ForceDraw()
 		if (m_vr_eye_idx)
 		{
 			DrawVRBuffer();
-			SwapBuffers();
 			m_vr_eye_idx = 0;
+			SwapBuffers();
 		}
 		else
 		{
@@ -10648,14 +10636,6 @@ void VRenderGLView::HaltLoopUpdate()
 void VRenderGLView::RefreshGL(int debug_code, bool erase, bool start_loop)
 {
 	//for debugging refresh events
-//#ifdef _DEBUG
-//	std::wostringstream os;
-//	os << m_vrv->m_id << "\t" <<
-//		"refresh" << "\t" <<
-//		debug_code << "\t" <<
-//		m_interactive << "\n";
-//	OutputDebugString(os.str().c_str());
-//#endif
 	DBGPRINT(L"%d\trefresh\t%d\t%d\n", m_vrv->m_id, debug_code, m_interactive);
 	m_updating = true;
 	if (start_loop)
@@ -12488,6 +12468,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vr_frame && vr_frame->GetMovieView() &&
 			vr_frame->GetMovieView()->GetRunning())
+			return;
+		if (m_enable_vr)
 			return;
 
 		m_retain_finalbuffer = true;
