@@ -48,6 +48,7 @@ DEALINGS IN THE SOFTWARE.
 #include "png_resource.h"
 #include "img/icons.h"
 #include <utility>
+#include <Debug.h>
 
 bool VRenderGLView::m_linked_rot = false;
 VRenderGLView* VRenderGLView::m_master_linked_view = 0;
@@ -655,7 +656,7 @@ void VRenderGLView::HandleProjection(int nx, int ny, bool vr)
 
 	if (vr && m_enable_vr)
 	{
-		if (m_use_openvr)
+		/*if (m_use_openvr)
 		{
 			//get projection matrix
 			vr::EVREye eye = m_vr_eye_idx ? vr::Eye_Right : vr::Eye_Left;
@@ -665,7 +666,7 @@ void VRenderGLView::HandleProjection(int nx, int ny, bool vr)
 				glm::value_ptr(m_proj_mat)[i] =
 					((float*)(proj_mat.m))[ti[i]];
 		}
-		else
+		else*/
 		{
 			double aspect;
 			aspect = (double)nx / (double)ny;
@@ -7043,12 +7044,8 @@ void VRenderGLView::ForceDraw()
 
 	m_timer->sample();
 	m_drawing = false;
-#ifdef _DEBUG
-	std::wostringstream os;
-	os << "buffer swapped" << "\t" <<
-		m_interactive << "\n";
-	OutputDebugString(os.str().c_str());
-#endif
+
+	DBGPRINT(L"buffer swapped\t%d\n", m_interactive);
 
 	if (m_resize)
 		m_resize = false;
@@ -10651,14 +10648,15 @@ void VRenderGLView::HaltLoopUpdate()
 void VRenderGLView::RefreshGL(int debug_code, bool erase, bool start_loop)
 {
 	//for debugging refresh events
-#ifdef _DEBUG
-	std::wostringstream os;
-	os << m_vrv->m_id << "\t" <<
-		"refresh" << "\t" <<
-		debug_code << "\t" <<
-		m_interactive << "\n";
-	OutputDebugString(os.str().c_str());
-#endif
+//#ifdef _DEBUG
+//	std::wostringstream os;
+//	os << m_vrv->m_id << "\t" <<
+//		"refresh" << "\t" <<
+//		debug_code << "\t" <<
+//		m_interactive << "\n";
+//	OutputDebugString(os.str().c_str());
+//#endif
+	DBGPRINT(L"%d\trefresh\t%d\t%d\n", m_vrv->m_id, debug_code, m_interactive);
 	m_updating = true;
 	if (start_loop)
 		StartLoopUpdate();
