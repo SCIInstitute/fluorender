@@ -655,6 +655,12 @@ void VRenderGLView::HandleProjection(int nx, int ny, bool vr)
 	if (!m_free)
 		m_distance = m_radius / tan(d2r(m_aov / 2.0)) / m_scale_factor;
 
+	double aspect = (double)nx / (double)ny;
+	m_ortho_left = -m_radius*aspect / m_scale_factor;
+	m_ortho_right = -m_ortho_left;
+	m_ortho_bottom = -m_radius / m_scale_factor;
+	m_ortho_top = -m_ortho_bottom;
+
 	if (vr && m_use_openvr)
 	{
 		//get projection matrix
@@ -665,7 +671,7 @@ void VRenderGLView::HandleProjection(int nx, int ny, bool vr)
 			glm::value_ptr(m_proj_mat)[i] =
 				((float*)(proj_mat.m))[ti[i]];
 
-		/*{
+		/*{//not used
 			double aspect;
 			aspect = (double)nx / (double)ny;
 			double frustum_shift = (m_vr_eye_offset / 2.0) * m_near_clip / m_distance;
@@ -683,12 +689,6 @@ void VRenderGLView::HandleProjection(int nx, int ny, bool vr)
 	}
 	else
 	{
-		double aspect = (double)nx / (double)ny;
-		m_ortho_left = -m_radius*aspect / m_scale_factor;
-		m_ortho_right = -m_ortho_left;
-		m_ortho_bottom = -m_radius / m_scale_factor;
-		m_ortho_top = -m_ortho_bottom;
-
 		if (m_persp)
 		{
 			m_proj_mat = glm::perspective(glm::radians(m_aov), aspect, m_near_clip, m_far_clip);
