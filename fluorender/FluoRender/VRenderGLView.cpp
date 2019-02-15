@@ -5174,15 +5174,24 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 	//xinput controller
 	if (m_controller->IsConnected())
 	{
-		double dzone = 0.1;
-		double leftx = double(m_controller->GetState().Gamepad.sThumbLX) / 32767.0;
+		XINPUT_STATE xstate = m_controller->GetState();
+		double dzone = 0.2;
+		double sclr = 15.0;
+		double leftx = double(xstate.Gamepad.sThumbLX) / 32767.0;
 		if (leftx > -dzone && leftx < dzone) leftx = 0.0;
-		double lefty = double(m_controller->GetState().Gamepad.sThumbLY) / 32767.0;
+		double lefty = double(xstate.Gamepad.sThumbLY) / 32767.0;
 		if (lefty > -dzone && lefty < dzone) lefty = 0.0;
-		double rghtx = double(m_controller->GetState().Gamepad.sThumbRX) / 32767.0;
+		double rghtx = double(xstate.Gamepad.sThumbRX) / 32767.0;
 		if (rghtx > -dzone && rghtx < dzone) rghtx = 0.0;
-		double rghty = double(m_controller->GetState().Gamepad.sThumbRY) / 32767.0;
+		double rghty = double(xstate.Gamepad.sThumbRY) / 32767.0;
 		if (rghty > -dzone && rghty < dzone) rghty = 0.0;
+		int px = 0;
+		int py = 0;
+		int inc = 5;
+		if (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) py = -inc;
+		if (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) py = inc;
+		if (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) px = -inc;
+		if (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) px = inc;
 
 		int nx = GetGLSize().x;
 		int ny = GetGLSize().y;
@@ -5192,7 +5201,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			m_head = Vector(-m_transx, -m_transy, -m_transz);
 			m_head.normalize();
 			Vector side = Cross(m_up, m_head);
-			Vector trans = -side*(leftx*10.0*(m_ortho_right - m_ortho_left) / double(nx));
+			Vector trans = side*(leftx*sclr*(m_ortho_right - m_ortho_left) / double(nx));
 			m_obj_transx += trans.x();
 			m_obj_transy += trans.y();
 			m_obj_transz += trans.z();
@@ -5203,7 +5212,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		//zoom/dolly
 		if (lefty != 0.0)
 		{
-			double delta = lefty * 10.0 / (double)ny;
+			double delta = lefty * sclr / (double)ny;
 			m_scale_factor += m_scale_factor * delta;
 			m_vrv->UpdateScaleFactor(false);
 			if (m_free)
@@ -5222,7 +5231,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		//rotate
 		if (rghtx != 0.0 || rghty != 0.0)
 		{
-			FLTYPE::Quaternion q_delta = Trackball(rghtx*10.0, rghty*10.0);
+			FLTYPE::Quaternion q_delta = Trackball(rghtx*sclr, rghty*sclr);
 			m_q *= q_delta;
 			m_q.Normalize();
 			FLTYPE::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
@@ -5262,21 +5271,14 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			refresh = true;
 		}
 		//pan
-		int px = 0;
-		int py = 0;
-		int inc = 5;
-		if (m_controller->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) py = -inc;
-		if (m_controller->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) py = inc;
-		if (m_controller->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) px = -inc;
-		if (m_controller->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) px = inc;
 		if (px != 0 || py != 0)
 		{
 			m_head = Vector(-m_transx, -m_transy, -m_transz);
 			m_head.normalize();
 			Vector side = Cross(m_up, m_head);
-			Vector trans = -(
+			Vector trans =
 				side*(double(px)*(m_ortho_right - m_ortho_left) / double(nx)) +
-				m_up * (double(py)*(m_ortho_top - m_ortho_bottom) / double(ny)));
+				m_up * (double(py)*(m_ortho_top - m_ortho_bottom) / double(ny));
 			m_obj_transx += trans.x();
 			m_obj_transy += trans.y();
 			m_obj_transz += trans.z();
