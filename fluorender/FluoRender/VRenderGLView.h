@@ -72,6 +72,7 @@ DEALINGS IN THE SOFTWARE.
 #define PACKETMODE	PK_BUTTONS
 #include <PKTDEF.h>
 #include <Wacom/Utils.h>
+#include <XInput/XboxController.h>
 #endif
 
 #include <openvr.h>
@@ -947,6 +948,9 @@ private:
 	double m_vr_eye_offset;
 	int m_vr_eye_idx;//0: left; 1: right
 	vr::IVRSystem *m_vr_system;
+#ifdef _WIN32
+	XboxController* m_controller;
+#endif
 
 private:
 #ifdef _WIN32
@@ -1028,7 +1032,7 @@ private:
 	//handle camera
 	void HandleProjection(int nx, int ny, bool vr = false);
 	void HandleCamera(bool vr = false);
-	FLTYPE::Quaternion Trackball(int p1x, int p1y, int p2x, int p2y);
+	FLTYPE::Quaternion Trackball(double dx, double dy);
 	FLTYPE::Quaternion TrackballClip(int p1x, int p1y, int p2x, int p2y);
 	//sort bricks after the view has been changed
 	void SetSortBricks();

@@ -3,7 +3,7 @@
 # 
 # The MIT License
 # 
-# Copyright (c) 2018 Scientific Computing and Imaging Institute,
+# Copyright (c) 2019 Scientific Computing and Imaging Institute,
 # University of Utah.
 # 
 # 
@@ -424,6 +424,15 @@ if(WIN32)
 	endif()
 endif()
 
+#XInput
+if(WIN32)
+	include_directories(${FluoRender_SOURCE_DIR}/fluorender/XInput)
+	file(GLOB xip_src fluorender/XInput/*.cpp)
+	file(GLOB xip_hdr fluorender/XInput/*.h)
+	add_library(XINPUT_OBJ OBJECT
+		${xip_src} ${xip_hdr})
+endif()
+
 # other sources
 file(GLOB src fluorender/FluoRender/*.cpp)
 file(GLOB hdr fluorender/FluoRender/*.h)
@@ -595,6 +604,7 @@ elseif(WIN32)
 			$<TARGET_OBJECTS:POLE_OBJ>
 			$<TARGET_OBJECTS:TEEM_OBJ>
 			$<TARGET_OBJECTS:WACUTILS_OBJ>
+			$<TARGET_OBJECTS:XINPUT_OBJ>
 			)
 		add_executable(Tester
 			${tester_hdr} ${tester_src}
@@ -666,6 +676,7 @@ if(UNIX OR APPLE OR MINGW)
 elseif(WIN32)
 	target_link_libraries(FluoRender
 		secur32.lib
+		XInput.lib
 		${FFMPEG_LIBRARIES}
 		${OPENGL_LIBRARIES}
 		${Boost_LIBRARIES}

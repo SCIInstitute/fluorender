@@ -318,7 +318,10 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_enable_vr(false),
 	m_use_openvr(false),
 	m_vr_eye_offset(6.0),
-	m_vr_eye_idx(0)
+	m_vr_eye_idx(0),
+#ifdef _WIN32
+	m_controller(0)
+#endif
 {
 	//create root node
 	m_render_view = FL::ref_ptr<FL::RenderView>(new FL::RenderView());
@@ -337,6 +340,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_sharedRC = m_glRC ? true : false;
 
 	m_sb_num = "50";
+
 #ifdef _WIN32
 	//tablet initialization
 	if (m_use_press)
@@ -358,6 +362,9 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 		m_enable_touch = true;
 	else
 		m_enable_touch = false;
+
+	//xbox controller
+	m_controller = new XboxController(1);
 #endif
 
 	LoadBrushSettings();
@@ -5160,6 +5167,123 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			m_vrv->m_ortho_view_cmb->Select(5);
 		else
 			m_vrv->m_ortho_view_cmb->Select(6);
+	}
+#endif
+
+#ifdef _WIN32
+	//xinput controller
+	if (m_controller->IsConnected())
+	{
+		double dzone = 0.2;
+		double leftx = double(m_controller->GetState().Gamepad.sThumbLX) / 32767.0;
+		if (leftx > -dzone && leftx < dzone) leftx = 0.0;
+		double lefty = double(m_controller->GetState().Gamepad.sThumbLY) / 32767.0;
+		if (lefty > -dzone && lefty < dzone) lefty = 0.0;
+		double rghtx = double(m_controller->GetState().Gamepad.sThumbRX) / 32767.0;
+		if (rghtx > -dzone && rghtx < dzone) rghtx = 0.0;
+		double rghty = double(m_controller->GetState().Gamepad.sThumbRY) / 32767.0;
+		if (rghty > -dzone && rghty < dzone) rghty = 0.0;
+
+		int nx = GetGLSize().x;
+		int ny = GetGLSize().y;
+		//horizontal move
+		if (leftx != 0.0)
+		{
+			m_head = Vector(-m_transx, -m_transy, -m_transz);
+			m_head.normalize();
+			Vector side = Cross(m_up, m_head);
+			Vector trans = -side*(leftx*10.0*(m_ortho_right - m_ortho_left) / double(nx));
+			m_obj_transx += trans.x();
+			m_obj_transy += trans.y();
+			m_obj_transz += trans.z();
+			m_interactive = true;
+			m_rot_center_dirty = true;
+			refresh = true;
+		}
+		//zoom/dolly
+		if (lefty != 0.0)
+		{
+			double delta = lefty * 10.0 / (double)ny;
+			m_scale_factor += m_scale_factor * delta;
+			m_vrv->UpdateScaleFactor(false);
+			if (m_free)
+			{
+				Vector pos(m_transx, m_transy, m_transz);
+				pos.normalize();
+				Vector ctr(m_ctrx, m_ctry, m_ctrz);
+				ctr -= delta * pos * 1000;
+				m_ctrx = ctr.x();
+				m_ctry = ctr.y();
+				m_ctrz = ctr.z();
+			}
+			m_interactive = true;
+			refresh = true;
+		}
+		//rotate
+		if (rghtx != 0.0 || rghty != 0.0)
+		{
+			FLTYPE::Quaternion q_delta = Trackball(rghtx*10.0, rghty*10.0);
+			m_q *= q_delta;
+			m_q.Normalize();
+			FLTYPE::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
+			FLTYPE::Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
+			m_transx = cam_pos2.x;
+			m_transy = cam_pos2.y;
+			m_transz = cam_pos2.z;
+			FLTYPE::Quaternion up(0.0, 1.0, 0.0, 0.0);
+			FLTYPE::Quaternion up2 = (-m_q) * up * m_q;
+			m_up = Vector(up2.x, up2.y, up2.z);
+			m_q.ToEuler(m_rotx, m_roty, m_rotz);
+			if (m_roty > 360.0)
+				m_roty -= 360.0;
+			if (m_roty < 0.0)
+				m_roty += 360.0;
+			if (m_rotx > 360.0)
+				m_rotx -= 360.0;
+			if (m_rotx < 0.0)
+				m_rotx += 360.0;
+			if (m_rotz > 360.0)
+				m_rotz -= 360.0;
+			if (m_rotz < 0.0)
+				m_rotz += 360.0;
+			wxString str = wxString::Format("%.1f", m_rotx);
+			m_vrv->m_x_rot_text->ChangeValue(str);
+			str = wxString::Format("%.1f", m_roty);
+			m_vrv->m_y_rot_text->ChangeValue(str);
+			str = wxString::Format("%.1f", m_rotz);
+			m_vrv->m_z_rot_text->ChangeValue(str);
+			if (!m_vrv->m_rot_slider)
+			{
+				m_vrv->m_x_rot_sldr->SetThumbPosition(int(m_rotx));
+				m_vrv->m_y_rot_sldr->SetThumbPosition(int(m_roty));
+				m_vrv->m_z_rot_sldr->SetThumbPosition(int(m_rotz));
+			}
+			m_interactive = true;
+			refresh = true;
+		}
+		//pan
+		int px = 0;
+		int py = 0;
+		int inc = 5;
+		if (m_controller->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) py = -inc;
+		if (m_controller->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) py = inc;
+		if (m_controller->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) px = -inc;
+		if (m_controller->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) px = inc;
+		if (px != 0 || py != 0)
+		{
+			m_head = Vector(-m_transx, -m_transy, -m_transz);
+			m_head.normalize();
+			Vector side = Cross(m_up, m_head);
+			Vector trans = -(
+				side*(double(px)*(m_ortho_right - m_ortho_left) / double(nx)) +
+				m_up * (double(py)*(m_ortho_top - m_ortho_bottom) / double(ny)));
+			m_obj_transx += trans.x();
+			m_obj_transy += trans.y();
+			m_obj_transz += trans.z();
+			m_interactive = true;
+			m_rot_center_dirty = true;
+			refresh = true;
+		}
 	}
 #endif
 
@@ -9979,13 +10103,13 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	}
 }
 
-FLTYPE::Quaternion VRenderGLView::Trackball(int p1x, int p1y, int p2x, int p2y)
+FLTYPE::Quaternion VRenderGLView::Trackball(double dx, double dy)
 {
 	FLTYPE::Quaternion q;
 	FLTYPE::Vector a; /* Axis of rotation */
 	double phi;  /* how much to rotate about axis */
 
-	if (p1x == p2x && p1y == p2y)
+	if (dx == 0.0 && dy == 0.0)
 	{
 		/* Zero rotation */
 		return q;
@@ -9993,12 +10117,12 @@ FLTYPE::Quaternion VRenderGLView::Trackball(int p1x, int p1y, int p2x, int p2y)
 
 	if (m_rot_lock)
 	{
-		if (abs(p2x - p1x)<50 &&
-			abs(p2y - p1y)<50)
+		if (abs(dx)<50 &&
+			abs(dy)<50)
 			return q;
 	}
 
-	a = FLTYPE::Vector(p1y - p2y, p2x - p1x, 0.0);
+	a = FLTYPE::Vector(-dy, dx, 0.0);
 	phi = a.length() / 3.0;
 	a.normalize();
 	FLTYPE::Quaternion q_a(a);
@@ -12136,7 +12260,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			}
 			else
 			{
-				//				RefreshGL(27);
+				//RefreshGL(27);
 				return;
 			}
 		}
@@ -12180,15 +12304,15 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	if (event.MiddleUp())
 	{
 		//SetSortBricks();
-		//		RefreshGL(28);
+		//RefreshGL(28);
 		return;
 	}
 	if (event.RightUp())
 	{
 		if (m_int_mode == 1)
 		{
-			//			RefreshGL(27);
-			//			return;
+			//RefreshGL(27);
+			//return;
 		}
 		if (m_int_mode == 5 &&
 			!event.AltDown())
@@ -12237,7 +12361,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			{
 				if (event.LeftIsDown() && !event.ControlDown())
 				{
-					FLTYPE::Quaternion q_delta = Trackball(old_mouse_X, event.GetY(), event.GetX(), old_mouse_Y);
+					FLTYPE::Quaternion q_delta = Trackball(
+						event.GetX() - old_mouse_X, old_mouse_Y - event.GetY());
 					if (m_rot_lock && q_delta.IsIdentity())
 						hold_old = true;
 					m_q *= q_delta;
