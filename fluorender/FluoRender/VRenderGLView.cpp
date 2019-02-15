@@ -5174,7 +5174,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 	//xinput controller
 	if (m_controller->IsConnected())
 	{
-		double dzone = 0.2;
+		double dzone = 0.1;
 		double leftx = double(m_controller->GetState().Gamepad.sThumbLX) / 32767.0;
 		if (leftx > -dzone && leftx < dzone) leftx = 0.0;
 		double lefty = double(m_controller->GetState().Gamepad.sThumbLY) / 32767.0;
