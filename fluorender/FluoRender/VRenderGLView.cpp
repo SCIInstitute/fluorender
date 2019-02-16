@@ -3203,8 +3203,9 @@ void VRenderGLView::DrawVRBuffer()
 	GetRenderSize(vr_x, vr_y);
 	gl_x = GetGLSize().x;
 	gl_y = GetGLSize().y;
+	int vp_y = int((double)gl_x * vr_y / vr_x / 2.0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, gl_x, gl_y);
+	glViewport(0, 0, gl_x, vp_y);
 	glDisable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 
