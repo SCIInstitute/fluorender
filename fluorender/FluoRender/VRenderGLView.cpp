@@ -537,6 +537,11 @@ VRenderGLView::~VRenderGLView()
 	}
 #endif
 
+#ifdef _WIN32
+	if (m_controller)
+		delete m_controller;
+#endif
+
 	m_loader.StopAll();
 
 	int i;
