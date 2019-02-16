@@ -3127,10 +3127,18 @@ void VRenderGLView::DrawFinalBuffer()
 //vr buffers
 void VRenderGLView::GetRenderSize(int &nx, int &ny)
 {
-	nx = GetGLSize().x;
-	ny = GetGLSize().y;
-	if (m_enable_vr)
-		nx /= 2;
+	if (m_use_openvr)
+	{
+		nx = m_vr_size[0];
+		ny = m_vr_size[1];
+	}
+	else
+	{
+		nx = GetGLSize().x;
+		ny = GetGLSize().y;
+		if (m_enable_vr)
+			nx /= 2;
+	}
 }
 
 void VRenderGLView::PrepVRBuffer()
@@ -3191,13 +3199,17 @@ void VRenderGLView::ClearVRBuffer()
 
 void VRenderGLView::DrawVRBuffer()
 {
+	int vr_x, vr_y, gl_x, gl_y;
+	GetRenderSize(vr_x, vr_y);
+	gl_x = GetGLSize().x;
+	gl_y = GetGLSize().y;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, GetGLSize().x, GetGLSize().y);
+	glViewport(0, 0, gl_x, gl_y);
 	glDisable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 
 	ShaderProgram* img_shader =
-		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
+		TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
