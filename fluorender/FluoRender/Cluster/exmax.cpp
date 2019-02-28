@@ -28,6 +28,11 @@ DEALINGS IN THE SOFTWARE.
 #include "exmax.h"
 #include <algorithm>
 #include <fstream>
+#include <boost/qvm/mat_operations.hpp>
+#include <boost/qvm/vec_operations.hpp>
+#include <boost/qvm/vec_mat_operations.hpp>
+#include <boost/qvm/mat_access.hpp>
+#include <boost/qvm/vec_access.hpp>
 
 using namespace FL;
 
@@ -111,21 +116,28 @@ float ClusterExmax::GetProb()
 void ClusterExmax::Initialize()
 {
 	//use same tau and covar
-	FLIVR::Vector trace;
-	FLIVR::Vector mean;
-	FLIVR::Vector vec;
+	EmVec trace;
+	EmVec mean;
+	EmVec vec;
 	for (ClusterIter iter = m_data.begin();
 		iter != m_data.end(); ++iter)
-		mean += FLIVR::Vector((*iter)->center);
-	mean /= m_data.size();
+		mean += (*iter)->center;
+	mean /= double(m_data.size());
 	for (ClusterIter iter = m_data.begin();
 		iter != m_data.end(); ++iter)
 	{
-		vec = FLIVR::Vector((*iter)->center) - mean;
-		trace += vec * vec;
+		vec = (*iter)->center - mean;
+		EmVec temp;
+		boost::qvm::A0(temp) = boost::qvm::A0(vec) * boost::qvm::A0(vec);
+		boost::qvm::A1(temp) = boost::qvm::A1(vec) * boost::qvm::A1(vec);
+		boost::qvm::A2(temp) = boost::qvm::A2(vec) * boost::qvm::A2(vec);
+		trace += temp;
 	}
-	trace /= m_data.size() - 1;
-	FLIVR::Mat3 covar(trace);
+	trace /= double(m_data.size() - 1);
+	EmMat covar;
+	boost::qvm::A00(covar) = boost::qvm::A0(trace);
+	boost::qvm::A11(covar) = boost::qvm::A1(trace);
+	boost::qvm::A22(covar) = boost::qvm::A2(trace);
 	double tau = 1.0 / m_clnum;
 
 	//use similar method as k-means for means
@@ -165,9 +177,9 @@ void ClusterExmax::Initialize()
 				p = *iter;
 			else
 			{
-				FLIVR::Point pi_1 = m_params[i - 1].mean;
-				double d1 = (p->center - pi_1).length();
-				double d2 = ((*iter)->center - pi_1).length();
+				EmVec pi_1 = m_params[i - 1].mean;
+				double d1 = boost::qvm::mag(p->center - pi_1);
+				double d2 = boost::qvm::mag((*iter)->center - pi_1);
 				if (d2 > d1)
 					p = *iter;
 			}
@@ -216,20 +228,21 @@ void ClusterExmax::Expectation()
 	}
 }
 
-double ClusterExmax::Gaussian(FLIVR::Point &p, FLIVR::Point &m, FLIVR::Mat3 &s)
+double ClusterExmax::Gaussian(EmVec &p, EmVec &m, EmMat &s)
 {
+	using namespace boost::qvm;
 	double pi2_3 = 248.050213442399; //(2pi)^3
-	double det = s.det();
+	double det = determinant(s);
 	if (det == 0.0)
 	{
 		//perturb
-		s.mat[0][0] = s.mat[0][0] < 0.5 ? 0.5 : s.mat[0][0];
-		s.mat[1][1] = s.mat[1][1] < 0.5 ? 0.5 : s.mat[1][1];
-		s.mat[2][2] = s.mat[2][2] < 0.5 ? 0.5 : s.mat[2][2];
-		det = s.det();
+		A00(s) = A00(s) < 0.5 ? 0.5 : A00(s);
+		A11(s) = A11(s) < 0.5 ? 0.5 : A11(s);
+		A22(s) = A22(s) < 0.5 ? 0.5 : A22(s);
+		det = determinant(s);
 	}
-	FLIVR::Vector d = p - m;
-	return exp(-0.5 * FLIVR::Dot(d, s.inv() * d)) / sqrt(pi2_3 * det);
+	EmVec d = p - m;
+	return exp(-0.5 * dot(d, inverse(s) * d)) / sqrt(pi2_3 * det);
 }
 
 void ClusterExmax::Maximization()
@@ -247,7 +260,7 @@ void ClusterExmax::Maximization()
 
 		//mean
 		i = 0;
-		FLIVR::Point sum_p;
+		EmVec sum_p;
 		for (ClusterIter iter = m_data.begin();
 			iter != m_data.end(); ++iter)
 		{
@@ -258,12 +271,23 @@ void ClusterExmax::Maximization()
 
 		//covar/sigma
 		i = 0;
-		FLIVR::Mat3 sum_s(0);
+		EmMat sum_s;
 		for (ClusterIter iter = m_data.begin();
 			iter != m_data.end(); ++iter)
 		{
-			FLIVR::Vector d = (*iter)->center - m_params[j].mean;
-			sum_s += form(d, d) * m_mem_prob[j][i];
+			EmVec d = (*iter)->center - m_params[j].mean;
+			EmMat form;
+			using namespace boost::qvm;
+			A00(form) = A0(d) * A0(d);
+			A01(form) = A0(d) * A1(d);
+			A02(form) = A0(d) * A2(d);
+			A10(form) = A1(d) * A0(d);
+			A11(form) = A1(d) * A1(d);
+			A12(form) = A1(d) * A2(d);
+			A20(form) = A2(d) * A0(d);
+			A21(form) = A2(d) * A1(d);
+			A22(form) = A2(d) * A2(d);
+			sum_s += form * m_mem_prob[j][i];
 			i++;
 		}
 		m_params[j].covar = sum_s / sum_t;
@@ -282,9 +306,9 @@ bool ClusterExmax::Converge()
 		for (unsigned int j = 0; j < m_clnum; ++j)
 		{
 			l = log(m_params_prv[j].tau);
-			l -= 0.5 * log(m_params_prv[j].covar.det());
-			FLIVR::Vector d = (*iter)->center - m_params_prv[j].mean;
-			l -= 0.5 * FLIVR::Dot(d, m_params_prv[j].covar.inv() * d);
+			l -= 0.5 * log(boost::qvm::determinant(m_params_prv[j].covar));
+			EmVec d = (*iter)->center - m_params_prv[j].mean;
+			l -= 0.5 * boost::qvm::dot(d, boost::qvm::inverse(m_params_prv[j].covar) * d);
 			l -= c;
 			m_likelihood += l;
 		}
@@ -451,13 +475,13 @@ void ClusterExmax::GenerateNewColors(void* label,
 		//id = m_count[ii] * 10 + 1;
 		id = m_count[ii] * scale + 1;
 		ii++;
-		i = int((*iter)->center.x() + 0.5);
+		i = int(boost::qvm::A0((*iter)->center) + 0.5);
 		if (i < 0 || i >= nx)
 			continue;
-		j = int((*iter)->center.y() + 0.5);
+		j = int(boost::qvm::A1((*iter)->center) + 0.5);
 		if (j < 0 || j >= ny)
 			continue;
-		k = int((*iter)->center.z() + 0.5);
+		k = int(boost::qvm::A2((*iter)->center) + 0.5);
 		if (k < 0 || k >= nz)
 			continue;
 		index = nx*ny*k + nx*j + i;
@@ -500,13 +524,13 @@ void ClusterExmax::GenerateNewColors2(void* label,
 		if (index > -1)
 			id = (1.0 - max_mem_prob) * 700 + 1;
 		ii++;
-		i = int((*iter)->center.x() + 0.5);
+		i = int(boost::qvm::A0((*iter)->center) + 0.5);
 		if (i < 0 || i >= nx)
 			continue;
-		j = int((*iter)->center.y() + 0.5);
+		j = int(boost::qvm::A1((*iter)->center) + 0.5);
 		if (j < 0 || j >= ny)
 			continue;
-		k = int((*iter)->center.z() + 0.5);
+		k = int(boost::qvm::A2((*iter)->center) + 0.5);
 		if (k < 0 || k >= nz)
 			continue;
 		index = nx*ny*k + nx*j + i;

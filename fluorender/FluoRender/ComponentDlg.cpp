@@ -3519,8 +3519,9 @@ void ComponentDlg::Cluster()
 				data_value = ((unsigned char*)data_data)[index] / 255.0f;
 			else if (bits == 16)
 				data_value = ((unsigned short*)data_data)[index] * scale / 65535.0f;
+			FL::EmVec pnt = { i, j, k };
 			method->AddClusterPoint(
-				FLIVR::Point(i, j, k), data_value);
+				pnt, data_value);
 		}
 	}
 
