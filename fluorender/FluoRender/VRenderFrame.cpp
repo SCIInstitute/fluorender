@@ -3339,6 +3339,13 @@ void VRenderFrame::OpenProject(wxString& filename)
 	m_adjust_view->SetVolumeData(0);
 	m_adjust_view->SetGroup(0);
 	m_adjust_view->SetGroupLink(0);
+	m_vrv_list[0]->Clear();
+	for (i = m_vrv_list.size() - 1; i > 0; i--)
+		DeleteVRenderView(i);
+	//VRenderView::ResetID();
+	DataGroup::ResetID();
+	MeshGroup::ResetID();
+
 
 	wxFileInputStream is(filename);
 	if (!is.IsOk())
@@ -3889,13 +3896,6 @@ void VRenderFrame::OpenProject(wxString& filename)
 	{
 		fconfig.SetPath("/views");
 		int num = fconfig.Read("num", 0l);
-
-		m_vrv_list[0]->Clear();
-		for (i=m_vrv_list.size()-1; i>0; i--)
-			DeleteVRenderView(i);
-		//VRenderView::ResetID();
-		DataGroup::ResetID();
-		MeshGroup::ResetID();
 
 		for (i=0; i<num; i++)
 		{
