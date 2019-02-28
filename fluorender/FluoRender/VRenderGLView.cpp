@@ -2763,6 +2763,10 @@ void VRenderGLView::CalculateSingle(int type, wxString prev_group, bool add)
 					vd->SetSyncR(vd_a->GetSyncR());
 					vd->SetSyncG(vd_a->GetSyncG());
 					vd->SetSyncB(vd_a->GetSyncB());
+					//max
+					vd->SetScalarScale(vd_a->GetScalarScale());
+					vd->SetGMScale(vd_a->GetGMScale());
+					vd->SetMaxValue(vd_a->GetMaxValue());
 				}
 
 				if (add)
