@@ -184,38 +184,43 @@ void ColocalAgent::Run()
 	outfile.close();
 
 	//nomralize
-	for (size_t i = 0; i < num; ++i)
+	bool norm = false;
+	getValue("normalize", norm);
+	if (norm)
 	{
-		//sum
-		double sum = 0;
-		for (size_t j = 0; j < num; ++j)
+		for (size_t i = 0; i < num; ++i)
 		{
-			sum += rm[i][j];
+			//sum
+			double sum = 0;
+			for (size_t j = 0; j < num; ++j)
+			{
+				sum += rm[i][j];
+			}
+			//divide
+			if (sum < 1)
+				continue;
+			for (size_t j = 0; j < num; ++j)
+			{
+				rm[i][j] /= sum;
+			}
 		}
-		//divide
-		if (sum < 1)
-			continue;
-		for (size_t j = 0; j < num; ++j)
+		//output
+		std::wstring filename_markov = filename;
+		if (pos != std::wstring::npos)
+			filename_markov.insert(pos, L"_markov");
+		else
+			filename_markov += L"_markov";
+		outfile.open(filename_markov, std::ofstream::out);
+		for (size_t i = 0; i < num; ++i)
 		{
-			rm[i][j] /= sum;
+			for (size_t j = 0; j < num; ++j)
+			{
+				outfile << rm[i][j];
+				if (j < num - 1)
+					outfile << "\t";
+			}
+			outfile << "\n";
 		}
+		outfile.close();
 	}
-	//output
-	std::wstring filename_markov = filename;
-	if (pos != std::wstring::npos)
-		filename_markov.insert(pos, L"_markov");
-	else
-		filename_markov += L"_markov";
-	outfile.open(filename_markov, std::ofstream::out);
-	for (size_t i = 0; i < num; ++i)
-	{
-		for (size_t j = 0; j < num; ++j)
-		{
-			outfile << rm[i][j];
-			if (j < num - 1)
-				outfile << "\t";
-		}
-		outfile << "\n";
-	}
-	outfile.close();
 }
