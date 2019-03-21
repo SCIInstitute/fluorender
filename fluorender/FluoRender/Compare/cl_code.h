@@ -44,10 +44,43 @@ const char* str_cl_chann_compare = \
 "{\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
-"	unsigned int index = nx*ny*coord.z + nx*coord.y + coord.x;\n" \
+"	//unsigned int index = nx*ny*coord.z + nx*coord.y + coord.x;\n" \
 "	float value1 = read_imagef(chann1, samp, (int4)(coord, 1)).x;\n" \
 "	float value2 = read_imagef(chann2, samp, (int4)(coord, 1)).x;\n" \
 "	if (value1 > th1 && value2 > th2)\n" \
 "		atomic_inc(count);\n" \
 "}\n";
 
+const char* str_cl_chann_dotprod = \
+"const sampler_t samp =\n" \
+"CLK_NORMALIZED_COORDS_FALSE |\n" \
+"CLK_ADDRESS_CLAMP |\n" \
+"CLK_FILTER_NEAREST;\n" \
+"\n" \
+"__kernel void kernel_0(\n" \
+"	__read_only image3d_t chann1,\n" \
+"	__read_only image3d_t chann2,\n" \
+"	unsigned int ngx,\n" \
+"	unsigned int ngy,\n" \
+"	unsigned int ngz,\n" \
+"	unsigned int gsxy,\n" \
+"	unsigned int gsx,\n" \
+"	__global float* sum)\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
+"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
+"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
+"	float lsum = 0.0;\n" \
+"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"		for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"			for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"			{\n" \
+"				float v1 = read_imagef(chann1, samp, ijk).x;\n" \
+"				float v2 = read_imagef(chann2, samp, ijk).x;\n" \
+"				lsum += v1 * v2;\n" \
+"			}\n" \
+"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
+"	sum[index] = lsum;\n" \
+"}\n";

@@ -41,6 +41,9 @@ namespace FLIVR
 		bool executeKernel(std::string &name,
 			cl_uint, size_t*, size_t*);
 
+		//get info
+		bool getWorkGroupSize(int idex, size_t*);
+
 		//argument
 		typedef struct
 		{

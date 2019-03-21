@@ -349,6 +349,22 @@ namespace FLIVR
 		return executeKernel(index, dim, global_size, local_size);
 	}
 
+	bool KernelProgram::getWorkGroupSize(int index, size_t* wgsize)
+	{
+		if (!valid())
+			return false;
+		if (index < 0 || index >= kernels_.size())
+			return false;
+
+		cl_int err;
+		err = clGetKernelWorkGroupInfo(kernels_[index].kernel,
+			device_, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t),
+			wgsize, NULL);
+		if (err != CL_SUCCESS)
+			return false;
+		return true;
+	}
+
 	bool KernelProgram::matchArg(cl_mem buffer, unsigned int& arg_index)
 	{
 		for (unsigned int i = 0; i < arg_list_.size(); ++i)

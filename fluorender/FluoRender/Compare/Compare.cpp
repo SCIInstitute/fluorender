@@ -159,7 +159,7 @@ void ChannelCompare::Compare(float th1, float th2)
 
 	//create program and kernels
 	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_chann_compare);
+		vol_kernel_factory_.kernel(str_cl_chann_dotprod);
 	if (!kernel_prog)
 		return;
 	int kernel_index = -1;
@@ -180,87 +180,61 @@ void ChannelCompare::Compare(float th1, float th2)
 		long nx, ny, nz, bits1, bits2;
 		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
 			continue;
+		//get tex ids
 		GLint tid1 = m_vd1->GetRenderer()->load_brick(0, 0, bricks1, i);
 		GLint tid2 = m_vd2->GetRenderer()->load_brick(0, 0, bricks2, i);
 
-		//get data
-		/*void* val1 = 0;
-		void* val2 = 0;
-		if (brick_num > 1)
-		{
-			val1 = GetVolDataBrick(b1);
-			val2 = GetVolDataBrick(b2);
-		}
-		else
-		{
-			val1 = GetVolData(m_vd1);
-			val2 = GetVolData(m_vd2);
-		}*/
+		//compute workload
+		size_t ng;
+		kernel_prog->getWorkGroupSize(kernel_index, &ng);
 
-		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
+		long ngx = 64; long ngy = 64; long ngz = 44;
+		long gsx = nx / ngx + (nx%ngx ? 1 : 0);
+		long gsy = ny / ngy + (ny%ngy ? 1 : 0);
+		long gsz = nz / ngz + (nz%ngz ? 1 : 0);
+		long gsxyz = gsx * gsy * gsz;
+		long gsxy = gsx * gsy;
+
 		size_t local_size[3] = { 1, 1, 1 };
+		size_t global_size[3] = { size_t(gsx), size_t(gsy), size_t(gsz) };
 
 		//set
-		unsigned int count = 0;
-		cl_image_format image_format;
-		cl_image_desc image_desc;
-		//channel1
-		/*image_format.image_channel_order = CL_R;
-		if (bits1 == 8)
-			image_format.image_channel_data_type = CL_UNORM_INT8;
-		else if (bits1 == 16)
-			image_format.image_channel_data_type = CL_UNORM_INT16;
-		image_desc.image_type = CL_MEM_OBJECT_IMAGE3D;
-		image_desc.image_width = nx;
-		image_desc.image_height = ny;
-		image_desc.image_depth = nz;
-		image_desc.image_array_size = 0;
-		image_desc.image_row_pitch = 0;
-		image_desc.image_slice_pitch = 0;
-		image_desc.num_mip_levels = 0;
-		image_desc.num_samples = 0;
-		image_desc.buffer = 0;
-		kernel_prog->setKernelArgImage(kernel_index, 0,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			image_format, image_desc, val1);
-		//channel2
-		if (bits2 == 8)
-			image_format.image_channel_data_type = CL_UNORM_INT8;
-		else if (bits2 == 16)
-			image_format.image_channel_data_type = CL_UNORM_INT16;
-		kernel_prog->setKernelArgImage(kernel_index, 1,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			image_format, image_desc, val2);*/
+		//unsigned int count = 0;
+		float *sum = new float[gsxyz];
 		kernel_prog->setKernelArgTex3D(kernel_index, 0,
 			CL_MEM_READ_ONLY, tid1);
 		kernel_prog->setKernelArgTex3D(kernel_index, 1,
 			CL_MEM_READ_ONLY, tid2);
 		kernel_prog->setKernelArgConst(kernel_index, 2,
-			sizeof(unsigned int), (void*)(&nx));
+			sizeof(unsigned int), (void*)(&ngx));
 		kernel_prog->setKernelArgConst(kernel_index, 3,
-			sizeof(unsigned int), (void*)(&ny));
+			sizeof(unsigned int), (void*)(&ngy));
 		kernel_prog->setKernelArgConst(kernel_index, 4,
-			sizeof(unsigned int), (void*)(&nz));
+			sizeof(unsigned int), (void*)(&ngz));
 		kernel_prog->setKernelArgConst(kernel_index, 5,
-			sizeof(float), (void*)(&th1));
+			sizeof(unsigned int), (void*)(&gsxy));
 		kernel_prog->setKernelArgConst(kernel_index, 6,
-			sizeof(float), (void*)(&th2));
+			sizeof(unsigned int), (void*)(&gsx));
 		kernel_prog->setKernelArgBuf(kernel_index, 7,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int), (void*)(&count));
+			sizeof(float)*(gsxyz), (void*)(sum));
 
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int), &count, &count);
+		kernel_prog->readBuffer(sizeof(float)*(gsxyz), sum, sum);
 
 		//release buffer
 		//kernel_prog->releaseMemObject(0, val1);
 		//kernel_prog->releaseMemObject(0, val2);
 		kernel_prog->releaseMemObject(kernel_index, 0, 0, tid1);
 		kernel_prog->releaseMemObject(kernel_index, 1, 0, tid2);
-		kernel_prog->releaseMemObject(sizeof(unsigned int), &count);
-		m_result += count;
+		kernel_prog->releaseMemObject(sizeof(float)*(gsxyz), sum);
+
+		//sum
+		for (int i=0; i< gsxyz; ++i)
+			m_result += sum[i];
+		delete[] sum;
 
 		/*if (brick_num > 1)
 		{
