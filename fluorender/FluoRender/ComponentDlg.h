@@ -159,6 +159,8 @@ public:
 		ID_BasicDensityCheck,
 		ID_BasicDensitySldr,
 		ID_BasicDensityText,
+		ID_BasicDSizeSldr,
+		ID_BasicDSizeText,
 		//clean
 		ID_BasicCleanCheck,
 		ID_BasicCleanIterSldr,
@@ -319,6 +321,7 @@ private:
 	//density
 	bool m_basic_density;
 	double m_basic_density_vl;
+	int m_basic_dsize;
 	//clean
 	bool m_basic_clean;
 	int m_basic_clean_iter;
@@ -474,6 +477,8 @@ private:
 	wxCheckBox* m_basic_density_check;
 	wxSlider* m_basic_density_sldr;
 	wxTextCtrl* m_basic_density_text;
+	wxSlider* m_basic_dsize_sldr;
+	wxTextCtrl* m_basic_dsize_text;
 	//clean
 	wxCheckBox* m_basic_clean_check;
 	wxSlider* m_basic_clean_iter_sldr;
@@ -662,6 +667,8 @@ private:
 	void OnBasicDensityCheck(wxCommandEvent &event);
 	void OnBasicDensitySldr(wxScrollEvent &event);
 	void OnBasicDensityText(wxCommandEvent &event);
+	void OnBasicDSizeSldr(wxScrollEvent &event);
+	void OnBasicDSizeText(wxCommandEvent &event);
 	//clean
 	void EnableBasicClean(bool value);
 	void OnBasicCleanCheck(wxCommandEvent &event);

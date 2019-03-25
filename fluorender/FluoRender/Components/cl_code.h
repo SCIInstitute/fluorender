@@ -169,7 +169,8 @@ const char* str_cl_brainbow_3d = \
 "	float value_t,\n" \
 "	float value_f,\n" \
 "	float grad_f,\n" \
-"	float density)\n" \
+"	float density,\n" \
+"	int dsize)\n" \
 "{\n" \
 "	atomic_inc(rcnt);\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
@@ -179,8 +180,8 @@ const char* str_cl_brainbow_3d = \
 "	if (label_v == 0)\n" \
 "		return;\n" \
 "	//break if low density\n" \
-"	if (density > 0.0f &&\n" \
-"		get_2d_density(data, (int4)(coord, 1), 3) < density)\n" \
+"	if (density > 0.0f && dsize > 0 &&\n" \
+"		get_2d_density(data, (int4)(coord, 1), dsize) < density)\n" \
 "		return;\n" \
 "	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
 "	float grad = length(vol_grad_func(data, (int4)(coord, 1)));\n" \
@@ -448,7 +449,8 @@ const char* str_cl_brainbow_3d_sized = \
 "	float value_f,\n" \
 "	float grad_f,\n" \
 "	unsigned int thresh,\n" \
-"	float density)\n" \
+"	float density,\n" \
+"	int dsize)\n" \
 "{\n" \
 "	atomic_inc(rcnt);\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
@@ -458,8 +460,8 @@ const char* str_cl_brainbow_3d_sized = \
 "	if (mask[index] > thresh)\n" \
 "		return;\n" \
 "	//break if low density\n" \
-"	if (density > 0.0f &&\n" \
-"		get_2d_density(data, (int4)(coord, 1), 3) < density)\n" \
+"	if (density > 0.0f && dsize > 0 &&\n" \
+"		get_2d_density(data, (int4)(coord, 1), dsize) < density)\n" \
 "		return;\n" \
 "	unsigned int label_v = label[index];\n" \
 "	if (label_v == 0)\n" \
