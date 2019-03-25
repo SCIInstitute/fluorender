@@ -882,6 +882,8 @@ public:
 		return m_info_values;
 	}
 	wxString GetDelInfoValues(wxString del=",");
+	wxString GetPosValues();
+	wxString GetPosNames();
 
 	//profile
 	void SetInfoProfile(wxString &str)

@@ -346,6 +346,14 @@ void RulerListCtrl::Export(wxString filename)
 			tos << str << "\t";
 			tos << ruler->GetInfoValues() << "\n";
 
+			//export points
+			if (ruler->GetNumPoint() > 2)
+			{
+				tos << ruler->GetPosNames();
+				tos << ruler->GetPosValues();
+			}
+
+			//export profile
 			vector<ProfileBin>* profile = ruler->GetProfile();
 			if (profile && profile->size())
 			{
