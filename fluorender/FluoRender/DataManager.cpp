@@ -3483,7 +3483,7 @@ wxString Ruler::GetPosNames()
 
 	for (size_t i = 0; i < m_ruler.size(); ++i)
 	{
-		output += "Point" + std::to_string(i);
+		output += "Point" + std::to_string(i+1);
 		if (i == m_ruler.size() - 1)
 			output += "\n";
 		else
