@@ -3437,6 +3437,62 @@ wxString Ruler::GetDelInfoValues(wxString del)
 	return output;
 }
 
+wxString Ruler::GetPosValues()
+{
+	wxString output;
+
+	//x string
+	output += "x\t";
+	for (size_t i = 0; i < m_ruler.size(); ++i)
+	{
+		output += std::to_string(m_ruler[i].x());
+		if (i == m_ruler.size() - 1)
+			output += "\n";
+		else
+			output += "\t";
+	}
+	//y string
+	output += "y\t";
+	for (size_t i = 0; i < m_ruler.size(); ++i)
+	{
+		output += std::to_string(m_ruler[i].y());
+		if (i == m_ruler.size() - 1)
+			output += "\n";
+		else
+			output += "\t";
+	}
+	//z string
+	output += "z\t";
+	for (size_t i = 0; i < m_ruler.size(); ++i)
+	{
+		output += std::to_string(m_ruler[i].z());
+		if (i == m_ruler.size() - 1)
+			output += "\n";
+		else
+			output += "\t";
+	}
+
+	return output;
+}
+
+wxString Ruler::GetPosNames()
+{
+	wxString output;
+
+	output += "Coords\t";
+
+	for (size_t i = 0; i < m_ruler.size(); ++i)
+	{
+		output += "Point" + std::to_string(i);
+		if (i == m_ruler.size() - 1)
+			output += "\n";
+		else
+			output += "\t";
+	}
+
+	return output;
+}
+
 void Ruler::SaveProfile(wxString &filename)
 {
 }
