@@ -714,7 +714,7 @@ void ComponentGenerator::FillBorder2D(float tol)
 }
 
 void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float falloff,
-	float density, int clean_iter, int clean_size)
+	float density, int dsize, int clean_iter, int clean_size)
 {
 	CHECK_BRICKS
 
@@ -811,6 +811,8 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 			sizeof(float), (void*)(&grad_ff));
 		kernel_prog->setKernelArgConst(kernel_index0, 10,
 			sizeof(float), (void*)(&density));
+		kernel_prog->setKernelArgConst(kernel_index0, 11,
+			sizeof(int), (void*)(&dsize));
 
 		unsigned int* mask32 = 0;
 
@@ -934,7 +936,7 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 
 void ComponentGenerator::Grow3DSized(
 	bool diffuse, int iter, float tran, float falloff,
-	int size_lm, float density, int clean_iter, int clean_size)
+	int size_lm, float density, int dsize, int clean_iter, int clean_size)
 {
 	CHECK_BRICKS
 
@@ -1086,6 +1088,8 @@ void ComponentGenerator::Grow3DSized(
 			sizeof(unsigned int), (void*)(&size_lm));
 		kernel_prog->setKernelArgConst(kernel_index2, 12,
 			sizeof(float), (void*)(&density));
+		kernel_prog->setKernelArgConst(kernel_index2, 13,
+			sizeof(int), (void*)(&dsize));
 
 		//execute
 		for (int j = 0; j < iter; ++j)

@@ -147,6 +147,8 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_CHECKBOX(ID_BasicDensityCheck, ComponentDlg::OnBasicDensityCheck)
 	EVT_COMMAND_SCROLL(ID_BasicDensitySldr, ComponentDlg::OnBasicDensitySldr)
 	EVT_TEXT(ID_BasicDensityText, ComponentDlg::OnBasicDensityText)
+	EVT_COMMAND_SCROLL(ID_BasicDSizeSldr, ComponentDlg::OnBasicDSizeSldr)
+	EVT_TEXT(ID_BasicDSizeText, ComponentDlg::OnBasicDSizeText)
 	//clean
 	EVT_CHECKBOX(ID_BasicCleanCheck, ComponentDlg::OnBasicCleanCheck)
 	EVT_COMMAND_SCROLL(ID_BasicCleanIterSldr, ComponentDlg::OnBasicCleanIterSldr)
@@ -291,39 +293,51 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 	sizer8->Add(m_basic_density_sldr, 1, wxEXPAND);
 	sizer8->Add(m_basic_density_text, 0, wxALIGN_CENTER);
 	sizer8->Add(5, 5);
+	wxBoxSizer* sizer9 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Window Size:",
+		wxDefaultPosition, wxSize(100, 23));
+	m_basic_dsize_sldr = new wxSlider(page, ID_BasicDSizeSldr, 5, 1, 20,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_basic_dsize_text = new wxTextCtrl(page, ID_BasicDSizeText, "5",
+		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
+	sizer9->Add(5, 5);
+	sizer9->Add(st, 0, wxALIGN_CENTER);
+	sizer9->Add(m_basic_dsize_sldr, 1, wxEXPAND);
+	sizer9->Add(m_basic_dsize_text, 0, wxALIGN_CENTER);
+	sizer9->Add(5, 5);
 
 	//clean
-	wxBoxSizer* sizer9 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer10 = new wxBoxSizer(wxHORIZONTAL);
 	m_basic_clean_check = new wxCheckBox(page, ID_BasicCleanCheck, "Clean Up",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	sizer9->Add(5, 5);
-	sizer9->Add(m_basic_clean_check, 0, wxALIGN_CENTER);
+	sizer10->Add(5, 5);
+	sizer10->Add(m_basic_clean_check, 0, wxALIGN_CENTER);
 	//iterations
-	wxBoxSizer* sizer10 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer11 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Iterations:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_basic_clean_iter_sldr = new wxSlider(page, ID_BasicCleanIterSldr, 5, 0, 50,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_basic_clean_iter_text = new wxTextCtrl(page, ID_BasicCleanIterText, "5",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-	sizer10->Add(5, 5);
-	sizer10->Add(st, 0, wxALIGN_CENTER);
-	sizer10->Add(m_basic_clean_iter_sldr, 1, wxEXPAND);
-	sizer10->Add(m_basic_clean_iter_text, 0, wxALIGN_CENTER);
-	sizer10->Add(5, 5);
+	sizer11->Add(5, 5);
+	sizer11->Add(st, 0, wxALIGN_CENTER);
+	sizer11->Add(m_basic_clean_iter_sldr, 1, wxEXPAND);
+	sizer11->Add(m_basic_clean_iter_text, 0, wxALIGN_CENTER);
+	sizer11->Add(5, 5);
 	//iterations
-	wxBoxSizer* sizer11 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer12 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Size:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_basic_clean_limit_sldr = new wxSlider(page, ID_BasicCleanLimitSldr, 5, 0, 50,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_basic_clean_limit_text = new wxTextCtrl(page, ID_BasicCleanLimitText, "5",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-	sizer11->Add(5, 5);
-	sizer11->Add(st, 0, wxALIGN_CENTER);
-	sizer11->Add(m_basic_clean_limit_sldr, 1, wxEXPAND);
-	sizer11->Add(m_basic_clean_limit_text, 0, wxALIGN_CENTER);
-	sizer11->Add(5, 5);
+	sizer12->Add(5, 5);
+	sizer12->Add(st, 0, wxALIGN_CENTER);
+	sizer12->Add(m_basic_clean_limit_sldr, 1, wxEXPAND);
+	sizer12->Add(m_basic_clean_limit_text, 0, wxALIGN_CENTER);
+	sizer12->Add(5, 5);
 
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Advanced Settings"), wxVERTICAL);
@@ -345,6 +359,8 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 	group1->Add(sizer10, 0, wxEXPAND);
 	group1->Add(10, 10);
 	group1->Add(sizer11, 0, wxEXPAND);
+	group1->Add(10, 10);
+	group1->Add(sizer12, 0, wxEXPAND);
 	group1->Add(10, 10);
 
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
@@ -1351,6 +1367,7 @@ void ComponentDlg::Update()
 	EnableBasicDensity(m_basic_density);
 	m_basic_density_check->SetValue(m_basic_density);
 	m_basic_density_text->SetValue(wxString::Format("%.3f", m_basic_density_vl));
+	m_basic_dsize_text->SetValue(wxString::Format("%d", m_basic_dsize));
 	EnableBasicClean(m_basic_clean);
 	m_basic_clean_check->SetValue(m_basic_clean);
 	m_basic_clean_iter_text->SetValue(wxString::Format("%d", m_basic_clean_iter));
@@ -1453,6 +1470,7 @@ void ComponentDlg::GetSettings()
 	m_basic_size_lm = 100;
 	m_basic_density = false;
 	m_basic_density_vl = 0.5;
+	m_basic_dsize = 5;
 	m_basic_clean = false;
 	m_basic_clean_iter = 5;
 	m_basic_clean_size_vl = 5;
@@ -1566,6 +1584,7 @@ void ComponentDlg::LoadSettings(wxString filename)
 		fconfig.Read("basic_size_lm", &m_basic_size_lm);
 		fconfig.Read("basic_density", &m_basic_density);
 		fconfig.Read("basic_density_vl", &m_basic_density_vl);
+		fconfig.Read("basic_dsize", &m_basic_dsize);
 		fconfig.Read("basic_clean", &m_basic_clean);
 		fconfig.Read("basic_clean_iter", &m_basic_clean_iter);
 		fconfig.Read("basic_clean_size_vl", &m_basic_clean_size_vl);
@@ -1668,6 +1687,7 @@ void ComponentDlg::SaveSettings(wxString filename)
 	fconfig.Write("basic_size_lm", m_basic_size_lm);
 	fconfig.Write("basic_density", m_basic_density);
 	fconfig.Write("basic_density_vl", m_basic_density_vl);
+	fconfig.Write("basic_dsize", m_basic_dsize);
 	fconfig.Write("basic_clean", m_basic_clean);
 	fconfig.Write("basic_clean_iter", m_basic_clean_iter);
 	fconfig.Write("basic_clean_size_vl", m_basic_clean_size_vl);
@@ -2646,11 +2666,15 @@ void ComponentDlg::EnableBasicDensity(bool value)
 	{
 		m_basic_density_sldr->Enable();
 		m_basic_density_text->Enable();
+		m_basic_dsize_sldr->Enable();
+		m_basic_dsize_text->Enable();
 	}
 	else
 	{
 		m_basic_density_sldr->Disable();
 		m_basic_density_text->Disable();
+		m_basic_dsize_sldr->Disable();
+		m_basic_dsize_text->Disable();
 	}
 }
 
@@ -2671,6 +2695,20 @@ void ComponentDlg::OnBasicDensityText(wxCommandEvent &event)
 	m_basic_density_text->GetValue().ToDouble(&val);
 	m_basic_density_vl = val;
 	m_basic_density_sldr->SetValue(int(m_basic_density_vl * 1000.0 + 0.5));
+}
+
+void ComponentDlg::OnBasicDSizeSldr(wxScrollEvent &event)
+{
+	int val = event.GetPosition();
+	m_basic_dsize_text->SetValue(wxString::Format("%d", val));
+}
+
+void ComponentDlg::OnBasicDSizeText(wxCommandEvent &event)
+{
+	long val = 0;
+	m_basic_dsize_text->GetValue().ToLong(&val);
+	m_basic_dsize = val;
+	m_basic_dsize_sldr->SetValue(m_basic_dsize);
 }
 
 void ComponentDlg::EnableBasicClean(bool value)
@@ -3361,6 +3399,7 @@ void ComponentDlg::GenerateBsc(bool refine)
 	float density = m_basic_density_vl;
 	if (!m_basic_density)
 		density = 0.0f;
+	int dsize = m_basic_dsize;
 	int clean_iter = m_basic_clean_iter;
 	int clean_size = m_basic_clean_size_vl;
 	if (!m_basic_clean)
@@ -3401,13 +3440,13 @@ void ComponentDlg::GenerateBsc(bool refine)
 		cg.Grow3DSized(m_basic_diff, m_basic_iter,
 			float(m_basic_thresh / scale),
 			float(m_basic_falloff / scale2),
-			m_basic_size_lm, density,
+			m_basic_size_lm, density, dsize,
 			clean_iter, clean_size);
 	else
 		cg.Grow3D(m_basic_diff, m_basic_iter,
 			float(m_basic_thresh / scale),
 			float(m_basic_falloff / scale2),
-			density, clean_iter, clean_size);
+			density, dsize, clean_iter, clean_size);
 
 	if (bn > 1)
 		cg.FillBorder3D(0.1);
@@ -3598,6 +3637,7 @@ void ComponentDlg::GenerateComp(int type, int mode)
 			float density = m_basic_density_vl;
 			if (!m_basic_density)
 				density = 0.0f;
+			int dsize = m_basic_dsize;
 			int clean_iter = m_basic_clean_iter;
 			int clean_size = m_basic_clean_size_vl;
 			if (!m_basic_clean)
@@ -3610,13 +3650,13 @@ void ComponentDlg::GenerateComp(int type, int mode)
 				cg.Grow3DSized(m_basic_diff, m_basic_iter,
 					float(m_basic_thresh / scale),
 					float(m_basic_falloff / scale2),
-					m_basic_size_lm, density,
+					m_basic_size_lm, density, dsize,
 					clean_iter, clean_size);
 			else
 				cg.Grow3D(m_basic_diff, m_basic_iter,
 					float(m_basic_thresh / scale),
 					float(m_basic_falloff / scale2),
-					density, clean_iter, clean_size);
+					density, dsize, clean_iter, clean_size);
 
 			vd->GetVR()->clear_tex_current();
 			m_view->RefreshGL();
