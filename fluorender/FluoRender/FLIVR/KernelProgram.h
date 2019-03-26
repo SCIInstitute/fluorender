@@ -19,6 +19,16 @@
 namespace FLIVR
 {
 	class VolKernel;
+	//argument
+	typedef struct
+	{
+		int kernel_index;
+		cl_uint index;
+		size_t size;
+		GLuint texture;
+		cl_mem buffer;
+		void* orgn_addr;
+	} Argument;
 	class KernelProgram
 	{
 	public:
@@ -44,21 +54,13 @@ namespace FLIVR
 		//get info
 		bool getWorkGroupSize(int idex, size_t*);
 
-		//argument
-		typedef struct
-		{
-			int kernel_index;
-			cl_uint index;
-			size_t size;
-			GLuint texture;
-			cl_mem buffer;
-			void* orgn_addr;
-		} Argument;
 		bool matchArg(cl_mem, unsigned int&);//find buffer
 		bool matchArg(Argument*, unsigned int&);
 		bool matchArgTex(Argument*, unsigned int&);//use texture id to match
 		bool matchArgAddr(Argument*, unsigned int&);//use data address to match
 		//set argument
+		int setKernelArgument(Argument*);
+		Argument getKernelArgumnet(unsigned int ai);
 		void setKernelArgConst(int, int, size_t, void*);
 		void setKernelArgConst(std::string &name, int, size_t, void*);
 		cl_mem setKernelArgBuf(int, int, cl_mem_flags, size_t, void*);

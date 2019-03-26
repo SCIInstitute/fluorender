@@ -288,12 +288,82 @@ void ChannelCompare::Compare(float th1, float th2)
 		for (int i=0; i< gsxyz; ++i)
 			m_result += sum[i];
 		delete[] sum;
-
-		/*if (brick_num > 1)
-		{
-			ReleaseData(val1, bits1);
-			ReleaseData(val2, bits2);
-		}*/
 	}
 }
 
+void ChannelCompare::Average(float weight, FLIVR::Argument *avg)
+{
+	m_result = 0.0;
+
+	if (!CheckBricks())
+		return;
+
+	//create program and kernels
+	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+		vol_kernel_factory_.kernel(str_cl_chann_sum);
+	if (!kernel_prog)
+		return;
+	int kernel_index = -1;
+	string name = "kernel_0";
+	if (weight > 0.0)
+		name = "kernel_1";
+	if (kernel_prog->valid())
+		kernel_index = kernel_prog->findKernel(name);
+	else
+		kernel_index = kernel_prog->createKernel(name);
+
+	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
+	vector<FLIVR::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
+	vector<FLIVR::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
+
+	for (size_t i = 0; i < brick_num; ++i)
+	{
+		FLIVR::TextureBrick* b1 = (*bricks1)[i];
+		FLIVR::TextureBrick* b2 = (*bricks2)[i];
+		long nx, ny, nz, bits1, bits2;
+		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
+			continue;
+		//get tex ids
+		GLint tid1 = m_vd1->GetRenderer()->load_brick(0, 0, bricks1, i);
+		GLint tid2 = m_vd2->GetRenderer()->load_brick(0, 0, bricks2, i);
+
+		size_t local_size[3] = { 1, 1, 1 };
+		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
+
+		//set
+		//unsigned int count = 0;
+		float* sum = 0;
+		unsigned int nxyz = nx * ny * nz;
+		kernel_prog->setKernelArgTex3D(kernel_index, 0,
+			CL_MEM_READ_ONLY, tid1);
+		kernel_prog->setKernelArgTex3D(kernel_index, 1,
+			CL_MEM_READ_ONLY, tid2);
+		kernel_prog->setKernelArgConst(kernel_index, 2,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(kernel_index, 3,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(kernel_index, 4,
+			sizeof(unsigned int), (void*)(&nz));
+		if (!avg)
+		{
+			sum = new float[nxyz];
+			std::memset(sum, 0, sizeof sum);
+			kernel_prog->setKernelArgBuf(kernel_index, 5,
+				CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+				sizeof(float)*(nxyz), (void*)(sum));
+		}
+		else
+		{
+			avg->kernel_index = kernel_index;
+			avg->index = 5;
+			kernel_prog->setKernelArgument(avg);
+		}
+
+		//execute
+		kernel_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
+
+		//release buffer
+		kernel_prog->releaseMemObject(kernel_index, 0, 0, tid1);
+		kernel_prog->releaseMemObject(kernel_index, 1, 0, tid2);
+	}
+}

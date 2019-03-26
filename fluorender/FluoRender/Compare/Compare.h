@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Compare_h
 #define FL_Compare_h
 
+#include <FLIVR/KernelProgram.h>
+
 using namespace std;
 
 namespace FLIVR
@@ -49,6 +51,7 @@ namespace FL
 		{ return m_use_mask; }
 
 		void Compare(float, float);
+		void Average(float weight = 0.0, FLIVR::Argument* avg=0);
 		double Result()
 		{ return m_result; }
 

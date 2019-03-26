@@ -421,6 +421,31 @@ namespace FLIVR
 		return false;
 	}
 
+	int KernelProgram::setKernelArgument(Argument* arg)
+	{
+		if (!arg)
+			return -1;
+		unsigned int ai = -1;
+		if (!matchArg(arg->buffer, ai))
+		{
+			arg_list_.push_back(*arg);
+			ai = arg_list_.size() - 1;
+		}
+		cl_int err = clSetKernelArg(kernels_[arg->kernel_index].kernel,
+			arg->index, sizeof(cl_mem), &(arg->buffer));
+		return ai;
+	}
+
+	Argument KernelProgram::getKernelArgumnet(unsigned int ai)
+	{
+		if (ai < 0 || ai >= arg_list_.size())
+		{
+			Argument temp{ 0, 0, 0, 0, 0, 0 };
+			return temp;
+		}
+		return arg_list_[ai];
+	}
+
 	void KernelProgram::setKernelArgConst(int index, int i, size_t size, void* data)
 	{
 		cl_int err;
