@@ -150,6 +150,38 @@ void ChannelCompare::ReleaseData(void* val, long bits)
 	}
 }
 
+long ChannelCompare::OptimizeGroupSize(long nt, long target)
+{
+	long loj, hij, res, maxj;
+	//z
+	if (nt > target)
+	{
+		loj = std::max(long(1), (target+1) / 2);
+		hij = std::min(nt, target * 2);
+		res = 0; maxj = 0;
+		for (long j = loj; j < hij; ++j)
+		{
+			long rm = nt % j;
+			if (rm)
+			{
+				if (rm > res)
+				{
+					res = rm;
+					maxj = j;
+				}
+			}
+			else
+			{
+				return j;
+			}
+		}
+		if (maxj)
+			return maxj;
+	}
+
+	return target;
+}
+
 void ChannelCompare::Compare(float th1, float th2)
 {
 	m_result = 0.0;
@@ -187,8 +219,29 @@ void ChannelCompare::Compare(float th1, float th2)
 		//compute workload
 		size_t ng;
 		kernel_prog->getWorkGroupSize(kernel_index, &ng);
+		//try to make gsxyz equal to ng
+		//ngx*ngy*ngz = nx*ny*nz/ng
+		//z
+		long targetz = std::ceil(double(nz) / std::pow(double(ng), 1/3.0));
+		//optimize
+		long ngz = OptimizeGroupSize(nz, targetz);
+		//xy
+		long targetx;
+		long targety;
+		if (ngz == 1)
+		{
+			targetx = std::ceil(double(nx) / std::sqrt(double(ng)));
+			targety = std::ceil(double(ny) / std::sqrt(double(ng)));
+		}
+		else
+		{
+			targetx = std::ceil(double(nx) * targetz / nz);
+			targety = std::ceil(double(ny) * targetz / nz);
+		}
+		//optimize
+		long ngx = OptimizeGroupSize(nx, targetx);
+		long ngy = OptimizeGroupSize(ny, targety);
 
-		long ngx = 64; long ngy = 64; long ngz = 44;
 		long gsx = nx / ngx + (nx%ngx ? 1 : 0);
 		long gsy = ny / ngy + (ny%ngy ? 1 : 0);
 		long gsz = nz / ngz + (nz%ngz ? 1 : 0);
