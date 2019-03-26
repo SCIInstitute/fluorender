@@ -273,7 +273,7 @@ void ChannelCompare::Compare(float th1, float th2)
 			sizeof(float)*(gsxyz), (void*)(sum));
 
 		//execute
-		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
+		kernel_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
 		//read back
 		kernel_prog->readBuffer(sizeof(float)*(gsxyz), sum, sum);
 
