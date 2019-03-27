@@ -28,19 +28,24 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_ClusterMethod_h
 #define FL_ClusterMethod_h
 
-#include <FLIVR/Point.h>
+#include <boost/qvm/vec.hpp>
+#include <boost/qvm/mat.hpp>
+#include <boost/qvm/vec_operations.hpp>
 #include <boost/shared_ptr.hpp>
 #include <list>
 #include <vector>
 
 namespace FL
 {
+	typedef boost::qvm::vec<double, 3> EmVec;
+	typedef boost::qvm::mat<double, 3, 3> EmMat;
+
 	struct ClusterPoint
 	{
 		unsigned int id;
 		bool visited;
 		bool noise;
-		FLIVR::Point center;
+		EmVec center;
 		float intensity;
 	};
 
@@ -48,9 +53,9 @@ namespace FL
 
 	inline float Dist(const ClusterPoint &p1, const ClusterPoint &p2, float w)
 	{
-		FLIVR::Vector p1p2 = p1.center - p2.center;
+		EmVec p1p2 = p1.center - p2.center;
 		float int_diff = fabs(p1.intensity - p2.intensity);
-		return p1p2.length() + w * int_diff;
+		return boost::qvm::mag(p1p2) + w * int_diff;
 	}
 
 	class Cluster : public std::list<pClusterPoint>
@@ -141,7 +146,7 @@ namespace FL
 		{ return m_result.size(); }
 		void ResetIDCounter()
 		{ m_id_counter = 1; }
-		void AddClusterPoint(const FLIVR::Point &p, const float value);
+		void AddClusterPoint(const EmVec &p, const float value);
 		void GenerateNewIDs(unsigned int id, void* label,
 			size_t nx, size_t ny, size_t nz, unsigned int inc = 20);
 		bool FindId(void* label, unsigned int id,

@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define FL_Exmax_h
 
 #include "ClusterMethod.h"
-#include <FLIVR/Matrix.h>
 
 namespace FL
 {
@@ -65,12 +64,12 @@ namespace FL
 		size_t m_max_iter;
 
 		//parameters to estimate
-		typedef struct
+		struct Params
 		{
 			double tau;
-			FLIVR::Point mean;
-			FLIVR::Mat3 covar;
-		} Params;
+			EmVec mean;
+			EmMat covar;
+		};
 		//all paramters to estimate
 		std::vector<Params> m_params;
 		std::vector<Params> m_params_prv;
@@ -94,7 +93,7 @@ namespace FL
 	private:
 		void Initialize();
 		void Expectation();
-		double Gaussian(FLIVR::Point &p, FLIVR::Point &m, FLIVR::Mat3 &s);
+		double Gaussian(EmVec &p, EmVec &m, EmMat &s);
 		void Maximization();
 		bool Converge();
 		void GenResult();

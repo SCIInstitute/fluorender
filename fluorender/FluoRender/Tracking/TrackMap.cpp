@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <functional>
 #include <algorithm>
 #include <limits>
+#include <boost/qvm/vec_access.hpp>
 
 using namespace FL;
 
@@ -3565,8 +3566,9 @@ bool TrackMapProcessor::ClusterCellsMerge(CellList &list, size_t frame)
 					data_value = ((unsigned char*)data)[index] / 255.0f;
 				else if (m_map->m_data_bits == 16)
 					data_value = ((unsigned short*)data)[index] * m_map->m_scale / 65535.0f;
+				EmVec pnt = { i, j, k };
 				cs_processor.AddClusterPoint(
-					FLIVR::Point(i, j, k), data_value);
+					pnt, data_value);
 			}
 		}
 	}
@@ -3635,8 +3637,9 @@ bool TrackMapProcessor::ClusterCellsSplit(CellList &list, size_t frame,
 					data_value = ((unsigned char*)data)[index] / 255.0f;
 				else if (m_map->m_data_bits == 16)
 					data_value = ((unsigned short*)data)[index] * m_map->m_scale / 65535.0f;
+				EmVec pnt = { i, j, k };
 				cs_processor.AddClusterPoint(
-					FLIVR::Point(i, j, k), data_value);
+					pnt, data_value);
 			}
 		}
 	}
@@ -3666,9 +3669,9 @@ bool TrackMapProcessor::ClusterCellsSplit(CellList &list, size_t frame,
 			piter != points.end(); ++piter)
 		{
 			point = *piter;
-			i = size_t(point->center.x() + 0.5);
-			j = size_t(point->center.y() + 0.5);
-			k = size_t(point->center.z() + 0.5);
+			i = size_t(boost::qvm::A0(point->center) + 0.5);
+			j = size_t(boost::qvm::A1(point->center) + 0.5);
+			k = size_t(boost::qvm::A2(point->center) + 0.5);
 			index = nx*ny*k + nx*j + i;
 			id2 = ((unsigned int*)label)[index];
 			citer = listout.find(id2);
@@ -3733,8 +3736,9 @@ bool TrackMapProcessor::SegmentCells(
 					data_value = ((unsigned char*)data)[index] / 255.0f;
 				else if (m_map->m_data_bits == 16)
 					data_value = ((unsigned short*)data)[index] * m_map->m_scale / 65535.0f;
+				EmVec pnt = { i, j, k };
 				cs_processor.AddClusterPoint(
-					FLIVR::Point(i, j, k), data_value);
+					pnt, data_value);
 			}
 		}
 	}

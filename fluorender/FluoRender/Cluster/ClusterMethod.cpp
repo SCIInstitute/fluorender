@@ -26,10 +26,11 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "ClusterMethod.h"
+#include <boost/qvm/vec_access.hpp>
 
 using namespace FL;
 
-void ClusterMethod::AddClusterPoint(const FLIVR::Point &p, const float value)
+void ClusterMethod::AddClusterPoint(const EmVec &p, const float value)
 {
 	pClusterPoint pp(new ClusterPoint);
 	pp->id = m_id_counter++;
@@ -62,13 +63,13 @@ void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
 		for (ClusterIter iter = cluster.begin();
 			iter != cluster.end(); ++iter)
 		{
-			i = int((*iter)->center.x() + 0.5);
+			i = int(boost::qvm::A0((*iter)->center) + 0.5);
 			if (i <= 0 || i >= nx - 1)
 				continue;
-			j = int((*iter)->center.y() + 0.5);
+			j = int(boost::qvm::A1((*iter)->center) + 0.5);
 			if (j <= 0 || j >= ny - 1)
 				continue;
-			k = int((*iter)->center.z() + 0.5);
+			k = int(boost::qvm::A2((*iter)->center) + 0.5);
 			if (k < 0 || k > nz - 1)
 				continue;
 			index = nx*ny*k + nx*j + i;
