@@ -127,14 +127,14 @@ void ClusterExmax::Initialize()
 		iter != m_data.end(); ++iter)
 	{
 		vec = (*iter)->center - mean;
-		EmVec temp;
+		EmVec temp = { 0, 0, 0 };
 		boost::qvm::A0(temp) = boost::qvm::A0(vec) * boost::qvm::A0(vec);
 		boost::qvm::A1(temp) = boost::qvm::A1(vec) * boost::qvm::A1(vec);
 		boost::qvm::A2(temp) = boost::qvm::A2(vec) * boost::qvm::A2(vec);
 		trace += temp;
 	}
 	trace /= double(m_data.size() - 1);
-	EmMat covar;
+	EmMat covar = boost::qvm::zero_mat<double, 3, 3>();
 	boost::qvm::A00(covar) = boost::qvm::A0(trace);
 	boost::qvm::A11(covar) = boost::qvm::A1(trace);
 	boost::qvm::A22(covar) = boost::qvm::A2(trace);
@@ -271,7 +271,7 @@ void ClusterExmax::Maximization()
 
 		//covar/sigma
 		i = 0;
-		EmMat sum_s;
+		EmMat sum_s = boost::qvm::zero_mat<double, 3, 3>();
 		for (ClusterIter iter = m_data.begin();
 			iter != m_data.end(); ++iter)
 		{
