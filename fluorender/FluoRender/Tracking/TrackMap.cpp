@@ -3597,7 +3597,7 @@ bool TrackMapProcessor::ClusterCellsSplit(CellList &list, size_t frame,
 		return false;
 
 	//needs a way to choose processor
-	ClusterExmax cs_processor;
+	ClusterKmeans cs_processor;
 	size_t index;
 	size_t i, j, k;
 	size_t nx = m_map->m_size_x;
@@ -3702,7 +3702,7 @@ bool TrackMapProcessor::SegmentCells(
 	//unsigned int size = (unsigned int)m_size_thresh;
 	//cs_processor.SetSize(size);
 	//ClusterKmeans cs_processor;
-	ClusterExmax cs_processor;
+	ClusterKmeans cs_processor;
 
 	size_t index;
 	size_t i, j, k;
