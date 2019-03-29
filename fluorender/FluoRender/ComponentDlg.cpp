@@ -39,6 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <limits>
 #include <string>
 #include <cctype>
+#include <set>
 
 BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_COLLAPSIBLEPANE_CHANGED(wxID_ANY, ComponentDlg::OnPaneChange)
@@ -3533,13 +3534,58 @@ void ComponentDlg::Cluster()
 	//add cluster points
 	size_t i, j, k;
 	size_t index;
+	size_t nxyz = nx * ny * nz;
 	unsigned char mask_value;
 	float data_value;
+	unsigned int label_value;
+	bool use_init_cluster = false;
+	struct CmpCnt
+	{
+		unsigned int id;
+		unsigned int size;
+		bool operator<(const CmpCnt &cc) const
+		{
+			return size > cc.size;
+		}
+	};
+	std::unordered_map<unsigned int, CmpCnt> init_clusters;
+	std::set<CmpCnt> ordered_clusters;
+	if (m_cluster_method_exmax)
+	{
+		for (index = 0; index < nxyz; ++index)
+		{
+			mask_value = data_mask[index];
+			if (!mask_value)
+				continue;
+			label_value = data_label[index];
+			if (!label_value)
+				continue;
+			auto it = init_clusters.find(label_value);
+			if (it == init_clusters.end())
+			{
+				CmpCnt cc = { label_value, 1 };
+				init_clusters.insert(std::pair<unsigned int, CmpCnt>(
+					label_value, cc));
+			}
+			else
+			{
+				it->second.size++;
+			}
+		}
+		if (init_clusters.size() >= m_cluster_clnum)
+		{
+			for (auto it = init_clusters.begin();
+				it != init_clusters.end(); ++it)
+				ordered_clusters.insert(it->second);
+			use_init_cluster = true;
+		}
+	}
+
 	for (i = 0; i < nx; ++i)
 	for (j = 0; j < ny; ++j)
 	for (k = 0; k < nz; ++k)
 	{
-		index = nx*ny*k + nx*j + i;
+		index = nx * ny*k + nx * j + i;
 		mask_value = data_mask[index];
 		if (mask_value)
 		{
@@ -3548,8 +3594,27 @@ void ComponentDlg::Cluster()
 			else if (bits == 16)
 				data_value = ((unsigned short*)data_data)[index] * scale / 65535.0f;
 			FL::EmVec pnt = { i, j, k };
+			int cid = -1;
+			if (use_init_cluster)
+			{
+				label_value = data_label[index];
+				cid = 0;
+				bool found = false;
+				for (auto it = ordered_clusters.begin();
+					it != ordered_clusters.end(); ++it)
+				{
+					if (label_value == it->id)
+					{
+						found = true;
+						break;
+					}
+					cid++;
+				}
+				if (!found)
+					cid = -1;
+			}
 			method->AddClusterPoint(
-				pnt, data_value);
+				pnt, data_value, cid);
 		}
 	}
 

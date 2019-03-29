@@ -39,7 +39,7 @@ using namespace FL;
 ClusterExmax::ClusterExmax() :
 	m_clnum(2),
 	m_weak_result(false),
-	m_eps(1e-3),
+	m_eps(1e-6),
 	m_max_iter(200)
 {
 
@@ -114,6 +114,21 @@ float ClusterExmax::GetProb()
 }
 
 void ClusterExmax::Initialize()
+{
+	if (m_use_init_cluster)
+		Init2();
+	else
+		Init1();
+
+	//allocate membership probabilities
+	m_mem_prob.resize(m_clnum);
+	for (size_t i = 0; i < m_clnum; ++i)
+		m_mem_prob[i].resize(m_data.size(), 0);
+	m_mem_prob_prv.clear();
+	m_count.resize(m_data.size(), 0);
+}
+
+void ClusterExmax::Init1()
 {
 	//use same tau and covar
 	EmVec trace = { 0, 0, 0 };
@@ -194,13 +209,58 @@ void ClusterExmax::Initialize()
 			cluster.push_back(p);
 		}
 	}
+}
 
-	//allocate membership probabilities
-	m_mem_prob.resize(m_clnum);
-	for (size_t i = 0; i < m_clnum; ++i)
-		m_mem_prob[i].resize(m_data.size(), 0);
-	m_mem_prob_prv.clear();
-	m_count.resize(m_data.size(), 0);
+void ClusterExmax::Init2()
+{
+	//mixture coefficient
+	double tau = 1.0 / m_clnum;
+	for (int i = 0; i < m_clnum; ++i)
+	{
+		EmVec trace = { 0, 0, 0 };
+		EmVec mean = { 0, 0, 0 };
+		EmVec vec;
+		size_t count = 0;
+
+		//center
+		for (ClusterIter iter = m_data.begin();
+			iter != m_data.end(); ++iter)
+		{
+			if ((*iter)->cid != i)
+				continue;
+
+			mean += (*iter)->center;
+			count++;
+		}
+		mean /= double(count);
+
+		//covar
+		for (ClusterIter iter = m_data.begin();
+			iter != m_data.end(); ++iter)
+		{
+			if ((*iter)->cid != i)
+				continue;
+
+			vec = (*iter)->center - mean;
+			EmVec temp = { 0, 0, 0 };
+			boost::qvm::A0(temp) = boost::qvm::A0(vec) * boost::qvm::A0(vec);
+			boost::qvm::A1(temp) = boost::qvm::A1(vec) * boost::qvm::A1(vec);
+			boost::qvm::A2(temp) = boost::qvm::A2(vec) * boost::qvm::A2(vec);
+			trace += temp;
+		}
+		trace /= double(count - 1);
+		EmMat covar = boost::qvm::zero_mat<double, 3, 3>();
+		boost::qvm::A00(covar) = boost::qvm::A0(trace);
+		boost::qvm::A11(covar) = boost::qvm::A1(trace);
+		boost::qvm::A22(covar) = boost::qvm::A2(trace);
+
+		//add to init values
+		Params params;
+		params.tau = tau;
+		params.mean = mean;
+		params.covar = covar;
+		m_params.push_back(params);
+	}
 }
 
 void ClusterExmax::Expectation()
@@ -314,7 +374,7 @@ bool ClusterExmax::Converge()
 		}
 	}
 
-	if (fabs(m_likelihood - m_likelihood_prv) > m_eps)
+	if (fabs((m_likelihood - m_likelihood_prv)/ m_likelihood) > m_eps)
 		return false;
 	else
 		return true;
