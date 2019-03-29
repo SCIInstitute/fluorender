@@ -30,15 +30,18 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace FL;
 
-void ClusterMethod::AddClusterPoint(const EmVec &p, const float value)
+void ClusterMethod::AddClusterPoint(const EmVec &p, const float value, int cid)
 {
 	pClusterPoint pp(new ClusterPoint);
 	pp->id = m_id_counter++;
+	pp->cid = cid;
 	pp->visited = false;
 	pp->noise = true;
 	pp->center = p;
 	pp->intensity = value;
 	m_data.push_back(pp);
+	if (cid > -1)
+		m_use_init_cluster = true;
 }
 
 void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,

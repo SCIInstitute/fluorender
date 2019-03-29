@@ -92,6 +92,8 @@ namespace FL
 
 	private:
 		void Initialize();
+		void Init1();
+		void Init2();
 		void Expectation();
 		double Gaussian(EmVec &p, EmVec &m, EmMat &s);
 		void Maximization();

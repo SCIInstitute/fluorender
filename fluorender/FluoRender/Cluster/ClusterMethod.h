@@ -43,6 +43,7 @@ namespace FL
 	struct ClusterPoint
 	{
 		unsigned int id;
+		int cid;//cluster id at initialization
 		bool visited;
 		bool noise;
 		EmVec center;
@@ -133,7 +134,7 @@ namespace FL
 	{
 	public:
 		ClusterMethod() :
-			m_id_counter(1) {};
+			m_id_counter(1), m_use_init_cluster(false) {};
 		virtual ~ClusterMethod() {};
 
 		void SetData(Cluster &data)
@@ -146,7 +147,7 @@ namespace FL
 		{ return m_result.size(); }
 		void ResetIDCounter()
 		{ m_id_counter = 1; }
-		void AddClusterPoint(const EmVec &p, const float value);
+		void AddClusterPoint(const EmVec &p, const float value, int cid=-1);
 		void GenerateNewIDs(unsigned int id, void* label,
 			size_t nx, size_t ny, size_t nz, unsigned int inc = 20);
 		bool FindId(void* label, unsigned int id,
@@ -161,6 +162,7 @@ namespace FL
 		ClusterSet m_result;
 		unsigned int m_id_counter;
 		std::vector<unsigned int> m_id_list;
+		bool m_use_init_cluster;
 	};
 }
 #endif//FL_ClusterMethod_h
