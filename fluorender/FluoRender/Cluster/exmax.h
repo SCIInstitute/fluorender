@@ -42,10 +42,17 @@ namespace FL
 		{ m_clnum = num; }
 		void SetMaxiter(size_t num)
 		{ m_max_iter = num; }
-		bool Execute();
-		float GetProb();
 		void SetWeakResult(bool result = true)
 		{ m_weak_result = result; }
+		void SetProbTol(float val)
+		{
+			m_tol = val;
+			if (m_tol < 0.7f)
+				m_tol = 0.7f;
+		}
+
+		bool Execute();
+		float GetProb();
 
 		//for test
 		void GenerateNewColors(void* label,
@@ -62,6 +69,8 @@ namespace FL
 		float m_eps;
 		//maximum iteration number
 		size_t m_max_iter;
+		//prob tolerance
+		float m_tol;
 
 		//parameters to estimate
 		struct Params
