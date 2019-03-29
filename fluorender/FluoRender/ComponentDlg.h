@@ -177,6 +177,8 @@ public:
 		ID_ClusterClnumText,
 		ID_ClusterMaxIterSldr,
 		ID_ClusterMaxIterText,
+		ID_ClusterTolSldr,
+		ID_ClusterTolText,
 		ID_ClusterSizeSldr,
 		ID_ClusterSizeText,
 		ID_ClusterEpsSldr,
@@ -334,6 +336,7 @@ private:
 	//parameters
 	int m_cluster_clnum;
 	int m_cluster_maxiter;
+	float m_cluster_tol;
 	int m_cluster_size;
 	double m_cluster_eps;
 
@@ -495,6 +498,8 @@ private:
 	wxTextCtrl* m_cluster_clnum_text;
 	wxSlider* m_cluster_maxiter_sldr;
 	wxTextCtrl* m_cluster_maxiter_text;
+	wxSlider* m_cluster_tol_sldr;
+	wxTextCtrl* m_cluster_tol_text;
 	wxSlider* m_cluster_size_sldr;
 	wxTextCtrl* m_cluster_size_text;
 	wxSlider* m_cluster_eps_sldr;
@@ -687,6 +692,8 @@ private:
 	void OnClusterClnumText(wxCommandEvent &event);
 	void OnClusterMaxiterSldr(wxScrollEvent &event);
 	void OnClusterMaxiterText(wxCommandEvent &event);
+	void OnClusterTolSldr(wxScrollEvent &event);
+	void OnClusterTolText(wxCommandEvent &event);
 	void OnClusterSizeSldr(wxScrollEvent &event);
 	void OnClusterSizeText(wxCommandEvent &event);
 	void OnClusterEpsSldr(wxScrollEvent &event);
