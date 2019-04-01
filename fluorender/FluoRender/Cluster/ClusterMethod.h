@@ -46,7 +46,8 @@ namespace FL
 		int cid;//cluster id at initialization
 		bool visited;
 		bool noise;
-		EmVec center;
+		EmVec centeri;
+		EmVec centerf;
 		float intensity;
 	};
 
@@ -54,7 +55,7 @@ namespace FL
 
 	inline float Dist(const ClusterPoint &p1, const ClusterPoint &p2, float w)
 	{
-		EmVec p1p2 = p1.center - p2.center;
+		EmVec p1p2 = p1.centerf - p2.centerf;
 		float int_diff = fabs(p1.intensity - p2.intensity);
 		return boost::qvm::mag(p1p2) + w * int_diff;
 	}
@@ -134,7 +135,9 @@ namespace FL
 	{
 	public:
 		ClusterMethod() :
-			m_id_counter(1), m_use_init_cluster(false) {};
+			m_id_counter(1),
+			m_use_init_cluster(false),
+			m_spc({1, 1, 1}) {};
 		virtual ~ClusterMethod() {};
 
 		void SetData(Cluster &data)
@@ -147,6 +150,8 @@ namespace FL
 		{ return m_result.size(); }
 		void ResetIDCounter()
 		{ m_id_counter = 1; }
+		void SetSpacings(double spcx, double spcy, double spcz)
+		{ m_spc = {spcx, spcy, spcz}; }
 		void AddClusterPoint(const EmVec &p, const float value, int cid=-1);
 		void GenerateNewIDs(unsigned int id, void* label,
 			size_t nx, size_t ny, size_t nz, unsigned int inc = 20);
@@ -163,6 +168,7 @@ namespace FL
 		unsigned int m_id_counter;
 		std::vector<unsigned int> m_id_list;
 		bool m_use_init_cluster;
+		EmVec m_spc;//spacings
 	};
 }
 #endif//FL_ClusterMethod_h

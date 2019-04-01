@@ -3599,7 +3599,8 @@ bool TrackMapProcessor::ClusterCellsSplit(CellList &list, size_t frame,
 		return false;
 
 	//needs a way to choose processor
-	ClusterKmeans cs_processor;
+	//ClusterKmeans cs_processor;
+	ClusterExmax cs_processor;
 	size_t index;
 	size_t i, j, k;
 	size_t nx = m_map->m_size_x;
@@ -3669,9 +3670,9 @@ bool TrackMapProcessor::ClusterCellsSplit(CellList &list, size_t frame,
 			piter != points.end(); ++piter)
 		{
 			point = *piter;
-			i = size_t(boost::qvm::A0(point->center) + 0.5);
-			j = size_t(boost::qvm::A1(point->center) + 0.5);
-			k = size_t(boost::qvm::A2(point->center) + 0.5);
+			i = size_t(boost::qvm::A0(point->centeri) + 0.5);
+			j = size_t(boost::qvm::A1(point->centeri) + 0.5);
+			k = size_t(boost::qvm::A2(point->centeri) + 0.5);
 			index = nx*ny*k + nx*j + i;
 			id2 = ((unsigned int*)label)[index];
 			citer = listout.find(id2);
@@ -3701,11 +3702,8 @@ bool TrackMapProcessor::SegmentCells(
 	void* data, void* label,
 	CellList &list, size_t frame)
 {
-	//ClusterDbscan cs_processor;
-	//unsigned int size = (unsigned int)m_size_thresh;
-	//cs_processor.SetSize(size);
 	//ClusterKmeans cs_processor;
-	ClusterKmeans cs_processor;
+	ClusterExmax cs_processor;
 
 	size_t index;
 	size_t i, j, k;
