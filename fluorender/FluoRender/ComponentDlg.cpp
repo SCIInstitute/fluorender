@@ -465,11 +465,11 @@ wxWindow* ComponentDlg::CreateClusteringPage(wxWindow *parent)
 		"K-Means", wxDefaultPosition, wxDefaultSize);
 	sizer11->Add(5, 5);
 	sizer11->Add(st, 0, wxALIGN_CENTER);
+	sizer11->Add(m_cluster_method_kmeans_rd, 0, wxALIGN_CENTER);
+	sizer11->Add(10, 10);
 	sizer11->Add(m_cluster_method_exmax_rd, 0, wxALIGN_CENTER);
 	sizer11->Add(10, 10);
 	sizer11->Add(m_cluster_method_dbscan_rd, 0, wxALIGN_CENTER);
-	sizer11->Add(10, 10);
-	sizer11->Add(m_cluster_method_kmeans_rd, 0, wxALIGN_CENTER);
 	//
 	sizer1->Add(10, 10);
 	sizer1->Add(sizer11, 0, wxEXPAND);
@@ -1496,9 +1496,9 @@ void ComponentDlg::GetSettings()
 	m_basic_clean_size_vl = 5;
 
 	//cluster
-	m_cluster_method_exmax = true;
+	m_cluster_method_kmeans = true;
+	m_cluster_method_exmax = false;
 	m_cluster_method_dbscan = false;
-	m_cluster_method_kmeans = false;
 	m_cluster_clnum = 2;
 	m_cluster_maxiter = 200;
 	m_cluster_tol = 0.9f;
@@ -1611,9 +1611,9 @@ void ComponentDlg::LoadSettings(wxString filename)
 		fconfig.Read("basic_clean_size_vl", &m_basic_clean_size_vl);
 
 		//cluster
+		fconfig.Read("cluster_method_kmeans", &m_cluster_method_kmeans);
 		fconfig.Read("cluster_method_exmax", &m_cluster_method_exmax);
 		fconfig.Read("cluster_method_dbscan", &m_cluster_method_dbscan);
-		fconfig.Read("cluster_method_kmeans", &m_cluster_method_kmeans);
 		//parameters
 		fconfig.Read("cluster_clnum", &m_cluster_clnum);
 		fconfig.Read("cluster_maxiter", &m_cluster_maxiter);
@@ -1715,9 +1715,9 @@ void ComponentDlg::SaveSettings(wxString filename)
 	fconfig.Write("basic_clean_size_vl", m_basic_clean_size_vl);
 
 	//cluster
+	fconfig.Write("cluster_method_kmeans", m_cluster_method_kmeans);
 	fconfig.Write("cluster_method_exmax", m_cluster_method_exmax);
 	fconfig.Write("cluster_method_dbscan", m_cluster_method_dbscan);
-	fconfig.Write("cluster_method_kmeans", m_cluster_method_kmeans);
 	//parameters
 	fconfig.Write("cluster_clnum", m_cluster_clnum);
 	fconfig.Write("cluster_maxiter", m_cluster_maxiter);
@@ -3539,6 +3539,8 @@ void ComponentDlg::Cluster()
 	int nx, ny, nz;
 	vd->GetResolution(nx, ny, nz);
 	double scale = vd->GetScalarScale();
+	double spcx, spcy, spcz;
+	vd->GetSpacings(spcx, spcy, spcz);
 
 	FL::ClusterMethod* method = 0;
 	//switch method
@@ -3567,6 +3569,8 @@ void ComponentDlg::Cluster()
 
 	if (!method)
 		return;
+
+	method->SetSpacings(spcx, spcy, spcz);
 
 	//add cluster points
 	size_t i, j, k;

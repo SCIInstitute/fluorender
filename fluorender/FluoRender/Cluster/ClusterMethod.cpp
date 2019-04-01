@@ -37,7 +37,9 @@ void ClusterMethod::AddClusterPoint(const EmVec &p, const float value, int cid)
 	pp->cid = cid;
 	pp->visited = false;
 	pp->noise = true;
-	pp->center = p;
+	using namespace boost::qvm;
+	pp->centeri = p;
+	pp->centerf = { A0(p)*A0(m_spc), A1(p)*A1(m_spc), A2(p)*A2(m_spc) };
 	pp->intensity = value;
 	m_data.push_back(pp);
 	if (cid > -1)
@@ -66,13 +68,13 @@ void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
 		for (ClusterIter iter = cluster.begin();
 			iter != cluster.end(); ++iter)
 		{
-			i = int(boost::qvm::A0((*iter)->center) + 0.5);
+			i = int(boost::qvm::A0((*iter)->centeri) + 0.5);
 			if (i <= 0 || i >= nx - 1)
 				continue;
-			j = int(boost::qvm::A1((*iter)->center) + 0.5);
+			j = int(boost::qvm::A1((*iter)->centeri) + 0.5);
 			if (j <= 0 || j >= ny - 1)
 				continue;
-			k = int(boost::qvm::A2((*iter)->center) + 0.5);
+			k = int(boost::qvm::A2((*iter)->centeri) + 0.5);
 			if (k < 0 || k > nz - 1)
 				continue;
 			index = nx*ny*k + nx*j + i;

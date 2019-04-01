@@ -135,21 +135,26 @@ void ClusterExmax::Init1()
 	EmVec trace = { 0, 0, 0 };
 	EmVec mean = { 0, 0, 0 };
 	EmVec vec;
-	for (ClusterIter iter = m_data.begin();
-		iter != m_data.end(); ++iter)
-		mean += (*iter)->center;
-	mean /= double(m_data.size());
+	double count = 0;
 	for (ClusterIter iter = m_data.begin();
 		iter != m_data.end(); ++iter)
 	{
-		vec = (*iter)->center - mean;
+		mean += (*iter)->centerf * (*iter)->intensity;
+		count += (*iter)->intensity;
+	}
+	mean /= count;
+
+	for (ClusterIter iter = m_data.begin();
+		iter != m_data.end(); ++iter)
+	{
+		vec = (*iter)->centerf - mean;
 		EmVec temp = { 0, 0, 0 };
 		boost::qvm::A0(temp) = boost::qvm::A0(vec) * boost::qvm::A0(vec);
 		boost::qvm::A1(temp) = boost::qvm::A1(vec) * boost::qvm::A1(vec);
 		boost::qvm::A2(temp) = boost::qvm::A2(vec) * boost::qvm::A2(vec);
-		trace += temp;
+		trace += temp * (*iter)->intensity;
 	}
-	trace /= double(m_data.size() - 1);
+	trace /= count/*double(m_data.size() - 1)*/;
 	EmMat covar = boost::qvm::zero_mat<double, 3, 3>();
 	boost::qvm::A00(covar) = boost::qvm::A0(trace);
 	boost::qvm::A11(covar) = boost::qvm::A1(trace);
@@ -175,7 +180,7 @@ void ClusterExmax::Init1()
 	{
 		Params params;
 		params.tau = tau;
-		params.mean = p->center;
+		params.mean = p->centerf;
 		params.covar = covar;
 		m_params.push_back(params);
 		cluster.push_back(p);
@@ -194,8 +199,8 @@ void ClusterExmax::Init1()
 			else
 			{
 				EmVec pi_1 = m_params[i - 1].mean;
-				double d1 = boost::qvm::mag(p->center - pi_1);
-				double d2 = boost::qvm::mag((*iter)->center - pi_1);
+				double d1 = boost::qvm::mag(p->centerf - pi_1);
+				double d2 = boost::qvm::mag((*iter)->centerf - pi_1);
 				if (d2 > d1)
 					p = *iter;
 			}
@@ -204,7 +209,7 @@ void ClusterExmax::Init1()
 		{
 			Params params;
 			params.tau = tau;
-			params.mean = p->center;
+			params.mean = p->centerf;
 			params.covar = covar;
 			m_params.push_back(params);
 			cluster.push_back(p);
@@ -230,7 +235,7 @@ void ClusterExmax::Init2()
 			if ((*iter)->cid != i)
 				continue;
 
-			mean += (*iter)->center * (*iter)->intensity;
+			mean += (*iter)->centerf * (*iter)->intensity;
 			count += (*iter)->intensity;
 		}
 		mean /= count;
@@ -242,7 +247,7 @@ void ClusterExmax::Init2()
 			if ((*iter)->cid != i)
 				continue;
 
-			vec = (*iter)->center - mean;
+			vec = (*iter)->centerf - mean;
 			EmVec temp = { 0, 0, 0 };
 			boost::qvm::A0(temp) = boost::qvm::A0(vec) * boost::qvm::A0(vec);
 			boost::qvm::A1(temp) = boost::qvm::A1(vec) * boost::qvm::A1(vec);
@@ -273,14 +278,14 @@ void ClusterExmax::Expectation()
 		double sum = 0;
 		for (unsigned int j = 0; j < m_clnum; ++j)
 			sum += m_params_prv[j].tau *
-			Gaussian((*iter)->center,
+			Gaussian((*iter)->centerf,
 				m_params_prv[j].mean,
 				m_params_prv[j].covar) * (*iter)->intensity;
 		for (unsigned int j = 0; j < m_clnum; ++j)
 		{
 			if (sum > 0.0)
 				m_mem_prob[j][i] = m_params_prv[j].tau *
-				Gaussian((*iter)->center,
+				Gaussian((*iter)->centerf,
 					m_params_prv[j].mean,
 					m_params_prv[j].covar) * (*iter)->intensity / sum;
 			else
@@ -330,7 +335,7 @@ void ClusterExmax::Maximization()
 		for (ClusterIter iter = m_data.begin();
 			iter != m_data.end(); ++iter)
 		{
-			sum_p += (*iter)->center * (*iter)->intensity * m_mem_prob[j][i];
+			sum_p += (*iter)->centerf * (*iter)->intensity * m_mem_prob[j][i];
 			i++;
 		}
 		m_params[j].mean = sum_p / sum_t;
@@ -341,7 +346,7 @@ void ClusterExmax::Maximization()
 		for (ClusterIter iter = m_data.begin();
 			iter != m_data.end(); ++iter)
 		{
-			EmVec d = (*iter)->center - m_params[j].mean;
+			EmVec d = (*iter)->centerf - m_params[j].mean;
 			EmMat form;
 			using namespace boost::qvm;
 			A00(form) = A0(d) * A0(d);
@@ -373,7 +378,7 @@ bool ClusterExmax::Converge()
 		{
 			l = log(m_params_prv[j].tau);
 			l -= 0.5 * log(boost::qvm::determinant(m_params_prv[j].covar));
-			EmVec d = (*iter)->center - m_params_prv[j].mean;
+			EmVec d = (*iter)->centerf - m_params_prv[j].mean;
 			l -= 0.5 * boost::qvm::dot(d, boost::qvm::inverse(m_params_prv[j].covar) * d);
 			l -= c;
 			m_likelihood += l * (*iter)->intensity;
@@ -541,13 +546,13 @@ void ClusterExmax::GenerateNewColors(void* label,
 		//id = m_count[ii] * 10 + 1;
 		id = m_count[ii] * scale + 1;
 		ii++;
-		i = int(boost::qvm::A0((*iter)->center) + 0.5);
+		i = int(boost::qvm::A0((*iter)->centeri) + 0.5);
 		if (i < 0 || i >= nx)
 			continue;
-		j = int(boost::qvm::A1((*iter)->center) + 0.5);
+		j = int(boost::qvm::A1((*iter)->centeri) + 0.5);
 		if (j < 0 || j >= ny)
 			continue;
-		k = int(boost::qvm::A2((*iter)->center) + 0.5);
+		k = int(boost::qvm::A2((*iter)->centeri) + 0.5);
 		if (k < 0 || k >= nz)
 			continue;
 		index = nx*ny*k + nx*j + i;
@@ -590,13 +595,13 @@ void ClusterExmax::GenerateNewColors2(void* label,
 		if (index > -1)
 			id = (1.0 - max_mem_prob) * 700 + 1;
 		ii++;
-		i = int(boost::qvm::A0((*iter)->center) + 0.5);
+		i = int(boost::qvm::A0((*iter)->centeri) + 0.5);
 		if (i < 0 || i >= nx)
 			continue;
-		j = int(boost::qvm::A1((*iter)->center) + 0.5);
+		j = int(boost::qvm::A1((*iter)->centeri) + 0.5);
 		if (j < 0 || j >= ny)
 			continue;
-		k = int(boost::qvm::A2((*iter)->center) + 0.5);
+		k = int(boost::qvm::A2((*iter)->centeri) + 0.5);
 		if (k < 0 || k >= nz)
 			continue;
 		index = nx*ny*k + nx*j + i;
