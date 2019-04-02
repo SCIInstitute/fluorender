@@ -3599,8 +3599,11 @@ bool TrackMapProcessor::ClusterCellsSplit(CellList &list, size_t frame,
 		return false;
 
 	//needs a way to choose processor
-	//ClusterKmeans cs_processor;
-	ClusterExmax cs_processor;
+	ClusterKmeans cs_proc_km;
+	ClusterExmax cs_proc_em;
+	cs_proc_km.SetSpacings(m_map->m_spc_x, m_map->m_spc_y, m_map->m_spc_z);
+	cs_proc_em.SetSpacings(m_map->m_spc_x, m_map->m_spc_y, m_map->m_spc_z);
+
 	size_t index;
 	size_t i, j, k;
 	size_t nx = m_map->m_size_x;
@@ -3639,30 +3642,38 @@ bool TrackMapProcessor::ClusterCellsSplit(CellList &list, size_t frame,
 				else if (m_map->m_data_bits == 16)
 					data_value = ((unsigned short*)data)[index] * m_map->m_scale / 65535.0f;
 				EmVec pnt = { i, j, k };
-				cs_processor.AddClusterPoint(
+				cs_proc_km.AddClusterPoint(
 					pnt, data_value);
 			}
 		}
 	}
 
-	bool result = false;
-	for (size_t clnumi = clnum; clnumi > 1; --clnumi)
-	{
-		cs_processor.SetClnum(clnum);
-		if (cs_processor.Execute())
-		{
-			result = true;
-			break;
-		}
-	}
+	//bool result = false;
+	//for (size_t clnumi = clnum; clnumi > 1; --clnumi)
+	//{
+	//	cs_processor.SetClnum(clnum);
+	//	if (cs_processor.Execute())
+	//	{
+	//		result = true;
+	//		break;
+	//	}
+	//}
+	cs_proc_km.SetClnum(clnum);
+	cs_proc_km.Execute();
+	cs_proc_km.AddIDsToData();
+	cs_proc_em.SetClnum(clnum);
+	cs_proc_em.SetProbTol(0.7);
+	cs_proc_em.SetData(cs_proc_km.GetData());
+	cs_proc_em.SetUseInitCluster(true);
+	bool result = cs_proc_em.Execute();
 
 	if (result)
 	{
-		cs_processor.GenerateNewIDs(id, label,
+		cs_proc_em.GenerateNewIDs(id, label,
 			nx, ny, nz);
 		//generate output cell list
-		Cluster &points = cs_processor.GetData();
-		//std::vector<unsigned int> &ids = cs_processor.GetNewIDs();
+		Cluster &points = cs_proc_em.GetData();
+		//std::vector<unsigned int> &ids = cs_proc_em.GetNewIDs();
 		pClusterPoint point;
 		unsigned int id2;
 		CellListIter citer;
@@ -3702,8 +3713,8 @@ bool TrackMapProcessor::SegmentCells(
 	void* data, void* label,
 	CellList &list, size_t frame)
 {
-	//ClusterKmeans cs_processor;
-	ClusterExmax cs_processor;
+	ClusterKmeans cs_proc_km;
+	ClusterExmax cs_proc_em;
 
 	size_t index;
 	size_t i, j, k;
@@ -3735,16 +3746,17 @@ bool TrackMapProcessor::SegmentCells(
 				else if (m_map->m_data_bits == 16)
 					data_value = ((unsigned short*)data)[index] * m_map->m_scale / 65535.0f;
 				EmVec pnt = { i, j, k };
-				cs_processor.AddClusterPoint(
+				cs_proc_km.AddClusterPoint(
 					pnt, data_value);
 			}
 		}
 	}
 
 	//run clustering
-	cs_processor.Execute();
-	cs_processor.GenerateNewIDs(id, label, nx, ny, nz);
-	//cs_processor.GenerateNewColors2(label, nx, ny, nz);
+	cs_proc_km.Execute();
+	cs_proc_km.AddIDsToData();
+	cs_proc_em.SetData(cs_proc_km.GetData());
+	cs_proc_em.GenerateNewIDs(id, label, nx, ny, nz);
 
 	return true;
 }

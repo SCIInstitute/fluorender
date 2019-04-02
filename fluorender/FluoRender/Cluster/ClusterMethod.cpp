@@ -98,3 +98,15 @@ bool ClusterMethod::FindId(void* label, unsigned int id,
 	return false;
 }
 
+void ClusterMethod::AddIDsToData()
+{
+	for (size_t ii = 0; ii < m_result.size(); ++ii)
+	{
+		Cluster &cluster = m_result[ii];
+		for (auto iter = cluster.begin();
+			iter != cluster.end(); ++iter)
+		{
+			(*iter)->cid = ii;
+		}
+	}
+}
