@@ -144,6 +144,9 @@ namespace FL
 		{ m_data = data; }
 		Cluster &GetData()
 		{ return m_data; }
+		void AddIDsToData();
+		void SetUseInitCluster(bool val)
+		{ m_use_init_cluster = val; }
 		ClusterSet &GetResult()
 		{ return m_result; }
 		size_t GetCluterNum()
