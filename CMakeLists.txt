@@ -311,12 +311,12 @@ file(GLOB ani_hdr fluorender/FluoRender/Animator/*.h)
 add_library(ANIMATORS_OBJ OBJECT
 	${ani_src} ${ani_hdr})
 
-# Compare
-include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Compare)
-file(GLOB cmpr_src fluorender/FluoRender/Compare/*.cpp)
-file(GLOB cmpr_hdr fluorender/FluoRender/Compare/*.h)
-add_library(COMPARE_OBJ OBJECT
-	${cmpr_src} ${cmpr_hdr})
+# ImageProc
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/ImageProc)
+file(GLOB imgproc_src fluorender/FluoRender/ImageProc/*.cpp)
+file(GLOB imgproc_hdr fluorender/FluoRender/ImageProc/*.h)
+add_library(IMAGEPROC_OBJ OBJECT
+	${imgproc_src} ${imgproc_hdr})
 
 # Flobject
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Flobject)
@@ -492,7 +492,7 @@ if(APPLE)
 		$<TARGET_OBJECTS:CONVERTERS_OBJ>
 		$<TARGET_OBJECTS:FLIVR_OBJ>
 		$<TARGET_OBJECTS:ANIMATORS_OBJ>
-		$<TARGET_OBJECTS:COMPARE_OBJ>
+		$<TARGET_OBJECTS:IMAGEPROC_OBJ>
 		$<TARGET_OBJECTS:GLOBAL_OBJ>
 		$<TARGET_OBJECTS:TYPES_OBJ>
 		$<TARGET_OBJECTS:FLOBJECT_OBJ>
@@ -519,7 +519,7 @@ elseif(UNIX OR MINGW)
 		$<TARGET_OBJECTS:CONVERTERS_OBJ>
 		$<TARGET_OBJECTS:FLIVR_OBJ>
 		$<TARGET_OBJECTS:ANIMATORS_OBJ>
-		$<TARGET_OBJECTS:COMPARE_OBJ>
+		$<TARGET_OBJECTS:IMAGEPROC_OBJ>
 		$<TARGET_OBJECTS:GLOBAL_OBJ>
 		$<TARGET_OBJECTS:TYPES_OBJ>
 		$<TARGET_OBJECTS:FLOBJECT_OBJ>
@@ -592,7 +592,7 @@ elseif(WIN32)
 			$<TARGET_OBJECTS:CONVERTERS_OBJ>
 			$<TARGET_OBJECTS:FLIVR_OBJ>
 			$<TARGET_OBJECTS:ANIMATORS_OBJ>
-			$<TARGET_OBJECTS:COMPARE_OBJ>
+			$<TARGET_OBJECTS:IMAGEPROC_OBJ>
 			$<TARGET_OBJECTS:NV_OBJ>
 			$<TARGET_OBJECTS:FORMATS_OBJ>
 			$<TARGET_OBJECTS:VIDEO_OBJ>

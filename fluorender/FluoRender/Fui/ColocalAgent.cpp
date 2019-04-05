@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Fui/ColocalAgent.h>
 #include <Fui/ColocalDlg.h>
-#include <Compare/Compare.h>
+#include <ImageProc/Compare.h>
 #include <Scenegraph/VolumeData.h>
 #include <fstream>
 
