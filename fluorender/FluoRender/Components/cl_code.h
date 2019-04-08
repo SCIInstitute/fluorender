@@ -1127,3 +1127,52 @@ const char* str_cl_match_slices = \
 "			label2[sidx] = value_l1;\n" \
 "	}\n" \
 "}\n";
+
+const char* str_cl_dist_field_3d = \
+"const sampler_t samp =\n" \
+"	CLK_NORMALIZED_COORDS_FALSE|\n" \
+"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
+"	CLK_FILTER_NEAREST;\n" \
+"\n" \
+"bool border_func(unsigned int* label, int3 pos, unsigned int l2)\n" \
+"{\n" \
+"	float dval;\n" \
+"	dval = read_imagef(data, samp, pos+(int3)(1, 0, 0));" \
+"	return false;\n" \
+"}\n" \
+"\n" \
+"__kernel void kernel_0(\n" \
+"	__read_only image3d_t data,\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	float th)\n" \
+"{\n" \
+"	int3 ijk = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	float dval = read_imagef(data, samp, ijk).x;\n" \
+"	unsigned int index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
+"	if (dval > th)\n" \
+"		label[index] = 1;\n" \
+"	else\n" \
+"		label[index] = 0;\n" \
+"}\n" \
+"\n" \
+"__kernel void kernel_1(\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned int l1,\n" \
+"	unsigned int l2)\n" \
+"{\n" \
+"	int3 ijk = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	unsigned int index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
+"	if (label[index] == l1 &&\n" \
+"		border_func(label, ijk, l2))\n" \
+"		label[index] += 1;\n" \
+"}\n" \
+;
+
