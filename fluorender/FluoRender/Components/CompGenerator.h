@@ -80,6 +80,9 @@ namespace FL
 			unsigned int,
 			float, float, float);
 
+		//new segmentation
+		void DistField3D();
+
 		//update progress
 		boost::signals2::signal<void ()> m_sig_progress;
 
