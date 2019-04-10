@@ -1820,24 +1820,29 @@ void ComponentGenerator::MatchSlices_CPU(bool backwards, unsigned int size_thres
 	m_sig_progress();
 }
 
-void ComponentGenerator::DistField3D()
+void ComponentGenerator::DistField3D(int iter, float th)
 {
 	CHECK_BRICKS
 
 	//create program and kernels
 	KernelProgram* kernel_prog = VolumeRenderer::
-	vol_kernel_factory_.kernel(str_cl_shuffle_id_3d);
+		vol_kernel_factory_.kernel(str_cl_dist_field_3d);
 	if (!kernel_prog)
 		return;
-	int kernel_index = -1;
-	string name = "kernel_0";
+	int kernel_index0 = -1;
+	int kernel_index1 = -1;
+	string name0 = "kernel_0";
+	string name1 = "kernel_1";
 	if (kernel_prog->valid())
-		kernel_index = kernel_prog->findKernel(name);
+	{
+		kernel_index0 = kernel_prog->findKernel(name0);
+		kernel_index1 = kernel_prog->findKernel(name1);
+	}
 	else
-		kernel_index = kernel_prog->createKernel(name);
-
-	if (m_use_mask)
-		m_vd->GetVR()->return_mask();
+	{
+		kernel_index0 = kernel_prog->createKernel(name0);
+		kernel_index1 = kernel_prog->createKernel(name1);
+	}
 
 	for (size_t i = 0; i < bricks->size(); ++i)
 	{
@@ -1845,21 +1850,6 @@ void ComponentGenerator::DistField3D()
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
-		//bit length
-		unsigned int lenx = 0;
-		unsigned int r = Max(nx, ny);
-		while (r > 0)
-		{
-			r /= 2;
-			lenx++;
-		}
-		unsigned int lenz = 0;
-		r = nz;
-		while (r > 0)
-		{
-			r /= 2;
-			lenz++;
-		}
 
 		//data
 		cl_image_format image_format;
@@ -1870,9 +1860,9 @@ void ComponentGenerator::DistField3D()
 			image_format.image_channel_data_type = CL_UNORM_INT16;
 		cl_image_desc image_desc;
 		image_desc.image_type = CL_MEM_OBJECT_IMAGE3D;
-		image_desc.image_width = size_t(nx);
-		image_desc.image_height = size_t(ny);
-		image_desc.image_depth = size_t(nz);
+		image_desc.image_width = nx;
+		image_desc.image_height = ny;
+		image_desc.image_depth = nz;
 		image_desc.image_array_size = 0;
 		image_desc.image_row_pitch = 0;
 		image_desc.image_slice_pitch = 0;
@@ -1880,31 +1870,57 @@ void ComponentGenerator::DistField3D()
 		image_desc.num_samples = 0;
 		image_desc.buffer = 0;
 		//set
-		kernel_prog->setKernelArgImage(kernel_index, 0,
+		//kernel 0
+		kernel_prog->setKernelArgImage(kernel_index0, 0,
 			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 			image_format, image_desc,
 			bits == 8 ? (void*)(val8) : (void*)(val16));
-		kernel_prog->setKernelArgBuf(kernel_index, 1,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny*nz, val32);
-		kernel_prog->setKernelArgConst(kernel_index, 2,
+		kernel_prog->setKernelArgBuf(kernel_index0, 1,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*nx*ny*nz, (void*)(val32));
+		kernel_prog->setKernelArgConst(kernel_index0, 2,
 			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(kernel_index, 3,
+		kernel_prog->setKernelArgConst(kernel_index0, 3,
 			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(kernel_index, 4,
+		kernel_prog->setKernelArgConst(kernel_index0, 4,
 			sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setKernelArgConst(kernel_index, 5,
-			sizeof(unsigned int), (void*)(&lenx));
-		kernel_prog->setKernelArgConst(kernel_index, 6,
-			sizeof(unsigned int), (void*)(&lenz));
-		//execute
-		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
+		kernel_prog->setKernelArgConst(kernel_index0, 5,
+			sizeof(float), (void*)(&th));
+		//kernel 1
+		kernel_prog->setKernelArgBuf(kernel_index1, 0,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*nx*ny*nz, (void*)(val32));
+		kernel_prog->setKernelArgConst(kernel_index1, 1,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(kernel_index1, 2,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(kernel_index1, 3,
+			sizeof(unsigned int), (void*)(&nz));
+
+		//init
+		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
+		unsigned int nn, re;
+		for (int j = 0; j < iter; ++j)
+		{
+			nn = j == 0 ? 0 : j + 1;
+			re = j + 2;
+			//nn *= 20;
+			//re *= 20;
+			kernel_prog->setKernelArgConst(kernel_index1, 4,
+				sizeof(unsigned int), (void*)(&nn));
+			kernel_prog->setKernelArgConst(kernel_index1, 5,
+				sizeof(unsigned int), (void*)(&re));
+			kernel_prog->executeKernel(kernel_index1, 3, global_size, local_size);
+		}
+
 		//read back
 		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
 
 		//release buffer
-		kernel_prog->releaseMemObject(kernel_index, 0, 0, 0);
-		kernel_prog->releaseMemObject(kernel_index, 1, sizeof(unsigned int)*nx*ny*nz, 0);
+		kernel_prog->releaseMemObject(0,
+			bits == 8 ? (void*)(val8) : (void*)(val16));
+		kernel_prog->releaseMemObject(sizeof(unsigned int)*nx*ny*nz,
+			(void*)(val32));
 
 		m_sig_progress();
 

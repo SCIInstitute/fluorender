@@ -1134,13 +1134,6 @@ const char* str_cl_dist_field_3d = \
 "	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
 "	CLK_FILTER_NEAREST;\n" \
 "\n" \
-"bool border_func(unsigned int* label, int3 pos, unsigned int l2)\n" \
-"{\n" \
-"	float dval;\n" \
-"	dval = read_imagef(data, samp, pos+(int3)(1, 0, 0));" \
-"	return false;\n" \
-"}\n" \
-"\n" \
 "__kernel void kernel_0(\n" \
 "	__read_only image3d_t data,\n" \
 "	__global unsigned int* label,\n" \
@@ -1151,8 +1144,15 @@ const char* str_cl_dist_field_3d = \
 "{\n" \
 "	int3 ijk = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
-"	float dval = read_imagef(data, samp, ijk).x;\n" \
 "	unsigned int index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
+"	if (ijk.x == 0 || ijk.x == nx-1 ||\n" \
+"		ijk.y == 0 || ijk.y == ny-1 ||\n" \
+"		ijk.z == 0 || ijk.z == nz-1)\n" \
+"	{\n" \
+"		label[index] = 0;\n" \
+"		return;\n" \
+"	}\n" \
+"	float dval = read_imagef(data, samp, (int4)(ijk, 1)).x;\n" \
 "	if (dval > th)\n" \
 "		label[index] = 1;\n" \
 "	else\n" \
@@ -1164,15 +1164,26 @@ const char* str_cl_dist_field_3d = \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
 "	unsigned int nz,\n" \
-"	unsigned int l1,\n" \
-"	unsigned int l2)\n" \
+"	unsigned int nn,\n" \
+"	unsigned int re)\n" \
 "{\n" \
 "	int3 ijk = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
-"	unsigned int index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
-"	if (label[index] == l1 &&\n" \
-"		border_func(label, ijk, l2))\n" \
-"		label[index] += 1;\n" \
+"	unsigned int nxy = nx*ny;\n" \
+"	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
+"	if (label[index] == 1)\n" \
+"	{\n" \
+"		unsigned int v1 = label[nxy*ijk.z + nx*ijk.y + ijk.x - 1];\n" \
+"		unsigned int v2 = label[nxy*ijk.z + nx*ijk.y + ijk.x + 1];\n" \
+"		unsigned int v3 = label[nxy*ijk.z + nx*(ijk.y-1) + ijk.x];\n" \
+"		unsigned int v4 = label[nxy*ijk.z + nx*(ijk.y+1) + ijk.x];\n" \
+"		unsigned int v5 = label[nxy*(ijk.z-1) + nx*ijk.y + ijk.x];\n" \
+"		unsigned int v6 = label[nxy*(ijk.z+1) + nx*ijk.y + ijk.x];\n" \
+"		if (v1 == nn || v2 == nn ||\n" \
+"			v3 == nn || v4 == nn ||\n" \
+"			v5 == nn || v6 == nn)\n" \
+"			label[index] = re;\n" \
+"	}\n" \
 "}\n" \
 ;
 
