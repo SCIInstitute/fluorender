@@ -1187,3 +1187,33 @@ const char* str_cl_dist_field_3d = \
 "}\n" \
 ;
 
+const char* str_cl_density_field_3d = \
+"const sampler_t samp =\n" \
+"	CLK_NORMALIZED_COORDS_FALSE|\n" \
+"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
+"	CLK_FILTER_NEAREST;\n" \
+"\n" \
+"float get_2d_density(image3d_t image, int4 pos, int r)\n" \
+"{\n" \
+"	float sum = 0.0f;\n" \
+"	int d = 2*r+1;\n" \
+"	for (int i=-r; i<=r; ++i)\n" \
+"	for (int j=-r; j<=r; ++j)\n" \
+"		sum += read_imagef(image, samp, pos+(int4)(i, j, 0, 0)).x;\n" \
+"	return sum / (float)(d * d);\n" \
+"}\n" \
+"__kernel void kernel_0(\n" \
+"	__read_only image3d_t data,\n" \
+"	__global unsigned char* df,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	int dsize)\n" \
+"{\n" \
+"	int3 ijk = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	unsigned int index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
+"	float density = get_2d_density(data, (int4)(ijk, 1), dsize);\n" \
+"	df[index] = (unsigned char)(density * 255.0);\n" \
+"\n" \
+;
