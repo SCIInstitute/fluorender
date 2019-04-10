@@ -138,6 +138,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_TEXT(ID_BasicIterText, ComponentDlg::OnBasicIterText)
 	EVT_COMMAND_SCROLL(ID_BasicThreshSldr, ComponentDlg::OnBasicThreshSldr)
 	EVT_TEXT(ID_BasicThreshText, ComponentDlg::OnBasicThreshText)
+	EVT_CHECKBOX(ID_BasicUseDistFieldCheck, ComponentDlg::OnBasicUseDistFieldCheck)
 	EVT_CHECKBOX(ID_BasicDiffCheck, ComponentDlg::OnBasicDiffCheck)
 	EVT_COMMAND_SCROLL(ID_BasicFalloffSldr, ComponentDlg::OnBasicFalloffSldr)
 	EVT_TEXT(ID_BasicFalloffText, ComponentDlg::OnBasicFalloffText)
@@ -240,107 +241,115 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 	sizer2->Add(5, 5);
 
 	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
-	m_basic_diff_check = new wxCheckBox(page, ID_BasicDiffCheck, "Enable Diffusion",
+	m_use_dist_field_check = new wxCheckBox(page, ID_BasicUseDistFieldCheck, "Use Distance Field",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	sizer3->Add(5, 5);
-	sizer3->Add(m_basic_diff_check, 0, wxALIGN_CENTER);
+	sizer3->Add(m_use_dist_field_check, 0, wxALIGN_CENTER);
 
 	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
+	m_basic_diff_check = new wxCheckBox(page, ID_BasicDiffCheck, "Enable Diffusion",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+	sizer4->Add(5, 5);
+	sizer4->Add(m_basic_diff_check, 0, wxALIGN_CENTER);
+
+	wxBoxSizer* sizer5 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Falloff:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_basic_falloff_sldr = new wxSlider(page, ID_BasicFalloffSldr, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_basic_falloff_text = new wxTextCtrl(page, ID_BasicFalloffText, "0.000",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_fp3);
-	sizer4->Add(5, 5);
-	sizer4->Add(st, 0, wxALIGN_CENTER);
-	sizer4->Add(m_basic_falloff_sldr, 1, wxEXPAND);
-	sizer4->Add(m_basic_falloff_text, 0, wxALIGN_CENTER);
-	sizer4->Add(5, 5);
-
-	wxBoxSizer* sizer5 = new wxBoxSizer(wxHORIZONTAL);
-	m_basic_size_check = new wxCheckBox(page, ID_BasicSizeCheck, "Enable Size Limiter",
-		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	sizer5->Add(5, 5);
-	sizer5->Add(m_basic_size_check, 0, wxALIGN_CENTER);
+	sizer5->Add(st, 0, wxALIGN_CENTER);
+	sizer5->Add(m_basic_falloff_sldr, 1, wxEXPAND);
+	sizer5->Add(m_basic_falloff_text, 0, wxALIGN_CENTER);
+	sizer5->Add(5, 5);
 
 	wxBoxSizer* sizer6 = new wxBoxSizer(wxHORIZONTAL);
+	m_basic_size_check = new wxCheckBox(page, ID_BasicSizeCheck, "Enable Size Limiter",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+	sizer6->Add(5, 5);
+	sizer6->Add(m_basic_size_check, 0, wxALIGN_CENTER);
+
+	wxBoxSizer* sizer7 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Size:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_basic_size_sldr = new wxSlider(page, ID_BasicSizeSldr, 100, 0, 500,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_basic_size_text = new wxTextCtrl(page, ID_BasicSizeText, "100",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-	sizer6->Add(5, 5);
-	sizer6->Add(st, 0, wxALIGN_CENTER);
-	sizer6->Add(m_basic_size_sldr, 1, wxEXPAND);
-	sizer6->Add(m_basic_size_text, 0, wxALIGN_CENTER);
-	sizer6->Add(5, 5);
+	sizer7->Add(5, 5);
+	sizer7->Add(st, 0, wxALIGN_CENTER);
+	sizer7->Add(m_basic_size_sldr, 1, wxEXPAND);
+	sizer7->Add(m_basic_size_text, 0, wxALIGN_CENTER);
+	sizer7->Add(5, 5);
 
 	//density
-	wxBoxSizer* sizer7 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer8 = new wxBoxSizer(wxHORIZONTAL);
 	m_basic_density_check = new wxCheckBox(page, ID_BasicDensityCheck, "Enable Density Limiter",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	sizer7->Add(5, 5);
-	sizer7->Add(m_basic_density_check, 0, wxALIGN_CENTER);
+	sizer8->Add(5, 5);
+	sizer8->Add(m_basic_density_check, 0, wxALIGN_CENTER);
 	//
-	wxBoxSizer* sizer8 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer9 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Density Threshold:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_basic_density_sldr = new wxSlider(page, ID_BasicDensitySldr, 500, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_basic_density_text = new wxTextCtrl(page, ID_BasicDensityText, "0.5",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_fp3);
-	sizer8->Add(5, 5);
-	sizer8->Add(st, 0, wxALIGN_CENTER);
-	sizer8->Add(m_basic_density_sldr, 1, wxEXPAND);
-	sizer8->Add(m_basic_density_text, 0, wxALIGN_CENTER);
-	sizer8->Add(5, 5);
-	wxBoxSizer* sizer9 = new wxBoxSizer(wxHORIZONTAL);
+	sizer9->Add(5, 5);
+	sizer9->Add(st, 0, wxALIGN_CENTER);
+	sizer9->Add(m_basic_density_sldr, 1, wxEXPAND);
+	sizer9->Add(m_basic_density_text, 0, wxALIGN_CENTER);
+	sizer9->Add(5, 5);
+
+	wxBoxSizer* sizer10 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Window Size:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_basic_dsize_sldr = new wxSlider(page, ID_BasicDSizeSldr, 5, 1, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_basic_dsize_text = new wxTextCtrl(page, ID_BasicDSizeText, "5",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-	sizer9->Add(5, 5);
-	sizer9->Add(st, 0, wxALIGN_CENTER);
-	sizer9->Add(m_basic_dsize_sldr, 1, wxEXPAND);
-	sizer9->Add(m_basic_dsize_text, 0, wxALIGN_CENTER);
-	sizer9->Add(5, 5);
+	sizer10->Add(5, 5);
+	sizer10->Add(st, 0, wxALIGN_CENTER);
+	sizer10->Add(m_basic_dsize_sldr, 1, wxEXPAND);
+	sizer10->Add(m_basic_dsize_text, 0, wxALIGN_CENTER);
+	sizer10->Add(5, 5);
 
 	//clean
-	wxBoxSizer* sizer10 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer11 = new wxBoxSizer(wxHORIZONTAL);
 	m_basic_clean_check = new wxCheckBox(page, ID_BasicCleanCheck, "Clean Up",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	sizer10->Add(5, 5);
-	sizer10->Add(m_basic_clean_check, 0, wxALIGN_CENTER);
+	sizer11->Add(5, 5);
+	sizer11->Add(m_basic_clean_check, 0, wxALIGN_CENTER);
+
 	//iterations
-	wxBoxSizer* sizer11 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer12 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Iterations:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_basic_clean_iter_sldr = new wxSlider(page, ID_BasicCleanIterSldr, 5, 0, 50,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_basic_clean_iter_text = new wxTextCtrl(page, ID_BasicCleanIterText, "5",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-	sizer11->Add(5, 5);
-	sizer11->Add(st, 0, wxALIGN_CENTER);
-	sizer11->Add(m_basic_clean_iter_sldr, 1, wxEXPAND);
-	sizer11->Add(m_basic_clean_iter_text, 0, wxALIGN_CENTER);
-	sizer11->Add(5, 5);
+	sizer12->Add(5, 5);
+	sizer12->Add(st, 0, wxALIGN_CENTER);
+	sizer12->Add(m_basic_clean_iter_sldr, 1, wxEXPAND);
+	sizer12->Add(m_basic_clean_iter_text, 0, wxALIGN_CENTER);
+	sizer12->Add(5, 5);
 	//iterations
-	wxBoxSizer* sizer12 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer13 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Size:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_basic_clean_limit_sldr = new wxSlider(page, ID_BasicCleanLimitSldr, 5, 0, 50,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_basic_clean_limit_text = new wxTextCtrl(page, ID_BasicCleanLimitText, "5",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-	sizer12->Add(5, 5);
-	sizer12->Add(st, 0, wxALIGN_CENTER);
-	sizer12->Add(m_basic_clean_limit_sldr, 1, wxEXPAND);
-	sizer12->Add(m_basic_clean_limit_text, 0, wxALIGN_CENTER);
-	sizer12->Add(5, 5);
+	sizer13->Add(5, 5);
+	sizer13->Add(st, 0, wxALIGN_CENTER);
+	sizer13->Add(m_basic_clean_limit_sldr, 1, wxEXPAND);
+	sizer13->Add(m_basic_clean_limit_text, 0, wxALIGN_CENTER);
+	sizer13->Add(5, 5);
 
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Advanced Settings"), wxVERTICAL);
@@ -364,6 +373,8 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 	group1->Add(sizer11, 0, wxEXPAND);
 	group1->Add(10, 10);
 	group1->Add(sizer12, 0, wxEXPAND);
+	group1->Add(10, 10);
+	group1->Add(sizer13, 0, wxEXPAND);
 	group1->Add(10, 10);
 
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
@@ -1377,6 +1388,8 @@ void ComponentDlg::Update()
 	//basic page
 	m_basic_iter_text->SetValue(wxString::Format("%d", m_basic_iter));
 	m_basic_thresh_text->SetValue(wxString::Format("%.3f", m_basic_thresh));
+	m_use_dist_field_check->SetValue(m_use_dist_field);
+	EnableUseDistField(m_use_dist_field);
 	m_basic_diff_check->SetValue(m_basic_diff);
 	EnableBasicDiff(m_basic_diff);
 	m_basic_falloff_text->SetValue(wxString::Format("%.3f", m_basic_falloff));
@@ -1484,6 +1497,7 @@ void ComponentDlg::GetSettings()
 	//basic page
 	m_basic_iter = 50;
 	m_basic_thresh = 0.5;
+	m_use_dist_field = false;
 	m_basic_diff = false;
 	m_basic_falloff = 0.01;
 	m_basic_size = false;
@@ -1599,6 +1613,7 @@ void ComponentDlg::LoadSettings(wxString filename)
 		//
 		fconfig.Read("basic_iter", &m_basic_iter);
 		fconfig.Read("basic_thresh", &m_basic_thresh);
+		fconfig.Read("use_dist_field", &m_use_dist_field);
 		fconfig.Read("basic_diff", &m_basic_diff);
 		fconfig.Read("basic_falloff", &m_basic_falloff);
 		fconfig.Read("basic_size", &m_basic_size);
@@ -1703,6 +1718,7 @@ void ComponentDlg::SaveSettings(wxString filename)
 	//basic settings
 	fconfig.Write("basic_iter", m_basic_iter);
 	fconfig.Write("basic_thresh", m_basic_thresh);
+	fconfig.Write("use_dist_field", m_use_dist_field);
 	fconfig.Write("basic_diff", m_basic_diff);
 	fconfig.Write("basic_falloff", m_basic_falloff);
 	fconfig.Write("basic_size", m_basic_size);
@@ -2614,6 +2630,11 @@ void ComponentDlg::OnBasicThreshText(wxCommandEvent &event)
 	m_basic_thresh_sldr->SetValue(int(m_basic_thresh * 1000.0 + 0.5));
 }
 
+void ComponentDlg::EnableUseDistField(bool value)
+{
+	m_use_dist_field = value;
+}
+
 void ComponentDlg::EnableBasicDiff(bool value)
 {
 	m_basic_diff = value;
@@ -2627,6 +2648,11 @@ void ComponentDlg::EnableBasicDiff(bool value)
 		m_basic_falloff_sldr->Disable();
 		m_basic_falloff_text->Disable();
 	}
+}
+
+void ComponentDlg::OnBasicUseDistFieldCheck(wxCommandEvent &event)
+{
+	EnableUseDistField(m_use_dist_field_check->GetValue());
 }
 
 void ComponentDlg::OnBasicDiffCheck(wxCommandEvent &event)
@@ -3447,8 +3473,10 @@ void ComponentDlg::GenerateBsc(bool refine)
 
 	//get brick number
 	int bn = vd->GetAllBrickNum();
-	m_prog_bit = 97.0f / float(bn * 3);
+	double scale = vd->GetScalarScale();
+	double scale2 = scale * scale;
 
+	m_prog_bit = 97.0f / float(bn * 3);
 	m_prog = 0.0f;
 	m_generate_prg->SetValue(0);
 
@@ -3459,34 +3487,39 @@ void ComponentDlg::GenerateBsc(bool refine)
 
 	cg.SetUseMask(m_use_sel_chk->GetValue());
 
-	if (refine)
-	{
-		if (bn > 1)
-			cg.ClearBorders3D();
-	}
-	else
+	if (m_use_dist_field)
 	{
 		vd->AddEmptyLabel();
-		cg.ShuffleID_3D();
+		cg.DistField3D(m_basic_iter, float(m_basic_thresh / scale));
 	}
-
-	double scale = vd->GetScalarScale();
-	double scale2 = scale * scale;
-
-	if (m_basic_size)
-		cg.Grow3DSized(m_basic_diff, m_basic_iter,
-			float(m_basic_thresh / scale),
-			float(m_basic_falloff / scale2),
-			m_basic_size_lm, density, dsize,
-			clean_iter, clean_size);
 	else
-		cg.Grow3D(m_basic_diff, m_basic_iter,
-			float(m_basic_thresh / scale),
-			float(m_basic_falloff / scale2),
-			density, dsize, clean_iter, clean_size);
+	{
+		if (refine)
+		{
+			if (bn > 1)
+				cg.ClearBorders3D();
+		}
+		else
+		{
+			vd->AddEmptyLabel();
+			cg.ShuffleID_3D();
+		}
 
-	if (bn > 1)
-		cg.FillBorder3D(0.1);
+		if (m_basic_size)
+			cg.Grow3DSized(m_basic_diff, m_basic_iter,
+				float(m_basic_thresh / scale),
+				float(m_basic_falloff / scale2),
+				m_basic_size_lm, density, dsize,
+				clean_iter, clean_size);
+		else
+			cg.Grow3D(m_basic_diff, m_basic_iter,
+				float(m_basic_thresh / scale),
+				float(m_basic_falloff / scale2),
+				density, dsize, clean_iter, clean_size);
+
+		if (bn > 1)
+			cg.FillBorder3D(0.1);
+	}
 
 	vd->GetVR()->clear_tex_current();
 	m_view->RefreshGL();
