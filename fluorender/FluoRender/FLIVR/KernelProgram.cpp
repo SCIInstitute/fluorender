@@ -349,6 +349,22 @@ namespace FLIVR
 		return executeKernel(index, dim, global_size, local_size);
 	}
 
+	bool KernelProgram::getWorkGroupSize(int index, size_t* wgsize)
+	{
+		if (!valid())
+			return false;
+		if (index < 0 || index >= kernels_.size())
+			return false;
+
+		cl_int err;
+		err = clGetKernelWorkGroupInfo(kernels_[index].kernel,
+			device_, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t),
+			wgsize, NULL);
+		if (err != CL_SUCCESS)
+			return false;
+		return true;
+	}
+
 	bool KernelProgram::matchArg(cl_mem buffer, unsigned int& arg_index)
 	{
 		for (unsigned int i = 0; i < arg_list_.size(); ++i)
@@ -403,6 +419,31 @@ namespace FLIVR
 			}
 		}
 		return false;
+	}
+
+	int KernelProgram::setKernelArgument(Argument* arg)
+	{
+		if (!arg)
+			return -1;
+		unsigned int ai = -1;
+		if (!matchArg(arg->buffer, ai))
+		{
+			arg_list_.push_back(*arg);
+			ai = arg_list_.size() - 1;
+		}
+		cl_int err = clSetKernelArg(kernels_[arg->kernel_index].kernel,
+			arg->index, sizeof(cl_mem), &(arg->buffer));
+		return ai;
+	}
+
+	Argument KernelProgram::getKernelArgumnet(unsigned int ai)
+	{
+		if (ai < 0 || ai >= arg_list_.size())
+		{
+			Argument temp{ 0, 0, 0, 0, 0, 0 };
+			return temp;
+		}
+		return arg_list_[ai];
 	}
 
 	void KernelProgram::setKernelArgConst(int index, int i, size_t size, void* data)
