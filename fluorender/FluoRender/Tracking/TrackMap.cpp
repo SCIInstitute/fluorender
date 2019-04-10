@@ -418,6 +418,7 @@ bool TrackMapProcessor::LinkFrames(
 
 	//get data and label
 	VolCache cache = m_vol_cache.get(f1);
+	m_vol_cache.protect(f1);
 	void* data1 = cache.data;
 	void* label1 = cache.label;
 	if (!data1 || !label1)
@@ -482,6 +483,8 @@ bool TrackMapProcessor::LinkFrames(
 			f1, f2,
 			std::min(data_value1, data_value2));
 	}
+
+	m_vol_cache.unprotect(f1);
 
 	return true;
 }
@@ -3271,6 +3274,7 @@ bool TrackMapProcessor::LinkAddedCells(CellList &list, size_t f1, size_t f2)
 
 	//get data and label
 	VolCache cache = m_vol_cache.get(f1);
+	m_vol_cache.protect(f1);
 	void* data1 = cache.data;
 	void* label1 = cache.label;
 	if (!data1 || !label1)
@@ -3349,6 +3353,8 @@ bool TrackMapProcessor::LinkAddedCells(CellList &list, size_t f1, size_t f2)
 				std::min(data_value1, data_value2));
 		}
 	}
+
+	m_vol_cache.unprotect(f1);
 
 	return true;
 }
@@ -4174,6 +4180,7 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2)
 	//get data and label
 	m_vol_cache.set_max_size(2);
 	VolCache cache = m_vol_cache.get(f1);
+	m_vol_cache.protect(f1);
 	void* data1 = cache.data;
 	void* label1 = cache.label;
 	if (!data1 || !label1)
@@ -4263,5 +4270,6 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2)
 		}
 	}
 
+	m_vol_cache.unprotect(f1);
 	return true;
 }
