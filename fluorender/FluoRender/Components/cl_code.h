@@ -1215,5 +1215,80 @@ const char* str_cl_density_field_3d = \
 "	unsigned int index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
 "	float density = get_2d_density(data, (int4)(ijk, 1), dsize);\n" \
 "	df[index] = (unsigned char)(density * 255.0);\n" \
+"}\n" \
 "\n" \
+"__kernel void kernel_1(\n" \
+"	__global unsigned char* df,\n" \
+"	__global unsigned char* gavg,\n" \
+"	__global unsigned char* gvar,\n" \
+"	unsigned int ngx,\n" \
+"	unsigned int ngy,\n" \
+"	unsigned int ngz,\n" \
+"	unsigned int gsxy,\n" \
+"	unsigned int gsx,\n" \
+"	unsigned int nxy, \n" \
+"	unsigned int nx)\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
+"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
+"	int3 ijk = (int3)(0);\n" \
+"	float sum = 0.0;\n" \
+"	unsigned int index;\n" \
+"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"	{\n" \
+"		index = nxy*(ngz*gid.z+ijk.z) + nx*(ngy*gid.y+ijk.y) + ngx*gid.x+ijk.x\n" \
+"		sum += df[index];\n" \
+"	}\n" \
+"	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
+"	float avg = sum / (ngx*ngy*ngz);\n" \
+"	gavg[index] = avg;\n" \
+"	sum = 0.0;\n" \
+"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"	{\n" \
+"		index = nxy*(ngz*gid.z+ijk.z) + nx*(ngy*gid.y+ijk.y) + ngx*gid.x+ijk.x\n" \
+"		sum += (avg - df[index])*(avg - df[index]);\n" \
+"	}\n" \
+"	float var = sqrt(sum / (ngx*ngy*ngz));\n" \
+"	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
+"	gvar[index] = var;\n" \
+"}\n" \
+"\n" \
+"__kernel void kernel_2(\n" \
+"	__global unsigned char* data,\n" \
+"	__global unsigned char* gd,\n" \
+"	unsigned int ngx,\n" \
+"	unsigned int ngy,\n" \
+"	unsigned int ngz,\n" \
+"	unsigned int nsx,\n" \
+"	unsigned int nsy,\n" \
+"	unsigned int nsz,\n" \
+"	unsigned int nxy, \n" \
+"	unsigned int nx)\n" \
+"{\n" \
+"	int3 ijk = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	int3 gid;\n" \
+"	int3 gijk;\n" \
+"	gid = ijk / (int3)(ngx, ngy, ngz);\n" \
+"	gijk = ijk % (int3)(ngx, ngy, ngz);\n" \
+"	int3 result = (isequal(gid, (int3)(0)) &&\n" \
+"		isless(gijk, (int3)(ngx/2, ngy/2, ngz/2))) ||\n" \
+"		(isequal(gid, (int3)(nsx, nsy, nsz)) &&\n" \
+"		isgreater(gijk, (int3)(ngx/2, ngy/2, ngz/2));\n" \
+"	int sum = result.x + result.y + result.z;\n" \
+"	if (sum == 0)\n" \
+"		interp0();\n" \
+"	else if (sum == 1)\n" \
+"		interp1();\n" \
+"	else if (sum == 2)\n" \
+"		interp2();\n" \
+"	else\n" \
+"		interp3();\n" \
+"}\n" \
 ;
