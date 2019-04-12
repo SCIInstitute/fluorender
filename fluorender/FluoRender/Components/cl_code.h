@@ -1275,20 +1275,33 @@ const char* str_cl_density_field_3d = \
 "		get_global_id(1), get_global_id(2));\n" \
 "	int3 gid;\n" \
 "	int3 gijk;\n" \
-"	gid = ijk / (int3)(ngx, ngy, ngz);\n" \
 "	gijk = ijk % (int3)(ngx, ngy, ngz);\n" \
-"	int3 result = (isequal(gid, (int3)(0)) &&\n" \
-"		isless(gijk, (int3)(ngx/2, ngy/2, ngz/2))) ||\n" \
-"		(isequal(gid, (int3)(nsx, nsy, nsz)) &&\n" \
-"		isgreater(gijk, (int3)(ngx/2, ngy/2, ngz/2));\n" \
-"	int sum = result.x + result.y + result.z;\n" \
-"	if (sum == 0)\n" \
-"		interp0();\n" \
-"	else if (sum == 1)\n" \
-"		interp1();\n" \
-"	else if (sum == 2)\n" \
-"		interp2();\n" \
-"	else\n" \
-"		interp3();\n" \
+"	gid = ijk / (int3)(ngx, ngy, ngz);\n" \
+"	gid += isless(gijk, (int3)(ngx, ngy, ngz)/2);\n" \
+"	int3 gcrd = clamp(gid + (int3)(0, 0, 0), (int3)(0), (int3)(nsx, nsy, nsz));\n" \
+"	uchar c000 = gd[nsx*nsy*gcrd.z + nsx*gcrd.y + gcrd.x];\n" \
+"	gcrd = clamp(gid + (int3)(1, 0, 0), (int3)(0), (int3)(nsx, nsy, nsz));\n" \
+"	uchar c100 = gd[nsx*nsy*gcrd.z + nsx*gcrd.y + gcrd.x];\n" \
+"	gcrd = clamp(gid + (int3)(0, 1, 0), (int3)(0), (int3)(nsx, nsy, nsz));\n" \
+"	uchar c010 = gd[nsx*nsy*gcrd.z + nsx*gcrd.y + gcrd.x];\n" \
+"	gcrd = clamp(gid + (int3)(1, 1, 0), (int3)(0), (int3)(nsx, nsy, nsz));\n" \
+"	uchar c110 = gd[nsx*nsy*gcrd.z + nsx*gcrd.y + gcrd.x];\n" \
+"	gcrd = clamp(gid + (int3)(0, 0, 1), (int3)(0), (int3)(nsx, nsy, nsz));\n" \
+"	uchar c001 = gd[nsx*nsy*gcrd.z + nsx*gcrd.y + gcrd.x];\n" \
+"	gcrd = clamp(gid + (int3)(1, 0, 1), (int3)(0), (int3)(nsx, nsy, nsz));\n" \
+"	uchar c101 = gd[nsx*nsy*gcrd.z + nsx*gcrd.y + gcrd.x];\n" \
+"	gcrd = clamp(gid + (int3)(0, 1, 1), (int3)(0), (int3)(nsx, nsy, nsz));\n" \
+"	uchar c011 = gd[nsx*nsy*gcrd.z + nsx*gcrd.y + gcrd.x];\n" \
+"	gcrd = clamp(gid + (int3)(1, 1, 1), (int3)(0), (int3)(nsx, nsy, nsz));\n" \
+"	uchar c111 = gd[nsx*nsy*gcrd.z + nsx*gcrd.y + gcrd.x];\n" \
+"	float3 d = ((float3)(gijk) - (float3)(ngx, ngy, ngz)/2) / (float3)(ngx, ngy, ngz);\n" \
+"	d -= isless(d, (float3)(0));\n" \
+"	float c00 = (float)(c000)*(1.0-d.x) + (float)(c100)*d.x;\n" \
+"	float c01 = (float)(c001)*(1.0-d.x) + (float)(c101)*d.x;\n" \
+"	float c10 = (float)(c010)*(1.0-d.x) + (float)(c110)*d.x;\n" \
+"	float c11 = (float)(c011)*(1.0-d.x) + (float)(c111)*d.x;\n" \
+"	float c0 = c00*(1.0-d.y) + c10*d.y;\n" \
+"	float c1 = c01*(1.0-d.y) + c11*d.y;\n" \
+"	data[nxy* ijk.z + nx*ijk.y + ijk.x] = c0*(1.0-d.z) + c1*d.z;\n" \
 "}\n" \
 ;
