@@ -219,6 +219,7 @@ public:
 	int GetGLMinorVer() {return m_gl_minor_ver;}
 	int GetGLProfileMask() {return m_gl_profile_mask;}
 	//cl device
+	int GetCLPlatformID() { return m_cl_platform_id; }
 	int GetCLDeviceID() {return m_cl_device_id;}
 	//last tool
 	void SetLastTool(int tool) { m_last_tool = tool; }
@@ -316,6 +317,7 @@ private:
 	int m_gl_minor_ver;
 	int m_gl_profile_mask;
 	//cl device
+	int m_cl_platform_id;
 	int m_cl_device_id;
 	//paint history depth
 	int m_paint_hist_depth;

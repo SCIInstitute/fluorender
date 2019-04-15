@@ -8,6 +8,7 @@ namespace FLIVR
 	bool KernelProgram::init_ = false;
 	cl_device_id KernelProgram::device_ = 0;
 	cl_context KernelProgram::context_ = 0;
+	int KernelProgram::platform_id_ = 0;
 	int KernelProgram::device_id_ = 0;
 	std::string KernelProgram::device_name_;
 #ifdef _DARWIN
@@ -82,6 +83,8 @@ namespace FLIVR
 
 		for (cl_uint i = 0; i<platform_num; ++i)
 		{
+			if (i != platform_id_)
+				continue;
 #ifdef _WIN32
 			cl_device_id device = 0;
 #endif
@@ -101,7 +104,7 @@ namespace FLIVR
 #ifdef _WIN32
 			//get GL device
 			properties[5] = (cl_context_properties)(platforms[i]);
-			if (myclGetGLContextInfoKHR)
+			/*if (myclGetGLContextInfoKHR)
 			{
 				bool found = false;
 				err = myclGetGLContextInfoKHR(properties, CL_CURRENT_DEVICE_FOR_GL_CONTEXT_KHR,
@@ -127,7 +130,7 @@ namespace FLIVR
 				if (!found)
 					continue;
 			}
-			else
+			else*/
 			{
 				if (device_id_ >= 0 && device_id_ < device_num)
 					device_ = devices[device_id_];
@@ -168,6 +171,11 @@ namespace FLIVR
 	{
 		clReleaseContext(context_);
 		init_ = false;
+	}
+
+	void KernelProgram::set_platform_id(int id)
+	{
+		platform_id_ = id;
 	}
 
 	void KernelProgram::set_device_id(int id)
