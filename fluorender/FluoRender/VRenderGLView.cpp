@@ -540,8 +540,12 @@ void VRenderGLView::Init()
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		ShaderProgram::init_shaders_supported();
 		if (vr_frame && vr_frame->GetSettingDlg())
+		{
+			KernelProgram::set_platform_id(vr_frame->
+				GetSettingDlg()->GetCLPlatformID());
 			KernelProgram::set_device_id(vr_frame->
 				GetSettingDlg()->GetCLDeviceID());
+		}
 		KernelProgram::init_kernels_supported();
 #ifdef _DARWIN
 		CGLContextObj ctx = CGLGetCurrentContext();
