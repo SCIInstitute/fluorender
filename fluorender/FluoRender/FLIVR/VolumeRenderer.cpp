@@ -1606,7 +1606,8 @@ namespace FLIVR
 				vr_b ? vr_b->get_scalar_scale() : 1.0,
 				(vr_a&&vr_a->tex_&&vr_a->tex_->nmask() != -1) ? 1.0 : 0.0,
 				(vr_b&&vr_b->tex_&&vr_b->tex_->nmask() != -1) ? 1.0 : 0.0);
-		else if (type == 4)
+		else if (type == 4 ||
+			type == 5)
 			cal_shader->setLocalParam(0, 1.0, 1.0, 0.0, 0.0);
 		else
 			cal_shader->setLocalParam(0, vr_a?vr_a->get_scalar_scale():1.0,
