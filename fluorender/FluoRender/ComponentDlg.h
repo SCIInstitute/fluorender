@@ -208,6 +208,10 @@ public:
 		ID_OutputRandomBtn,
 		ID_OutputSizeBtn,
 		ID_OutputAnnBtn,
+		//Distance
+		ID_DistNeighborSldr,
+		ID_DistNeighborText,
+		ID_DistOutputBtn,
 
 		//execute
 		ID_Notebook,
@@ -357,6 +361,9 @@ private:
 	//options
 	bool m_consistent;
 	bool m_colocal;
+
+	//distance
+	int m_dist_neighbor;
 
 	//output
 	int m_output_type;//1-multi; 2-rgb;
@@ -538,6 +545,10 @@ private:
 	wxButton* m_output_random_btn;
 	wxButton* m_output_size_btn;
 	wxButton* m_output_ann_btn;
+	//distance
+	wxSlider* m_dist_neighbor_sldr;
+	wxTextCtrl* m_dist_neighbor_text;
+	wxButton* m_dist_output_btn;
 
 	//execute
 	wxGauge* m_generate_prg;
@@ -731,6 +742,10 @@ private:
 	void OutputRgb(int color_type);
 	void OnOutputChannels(wxCommandEvent &event);
 	void OnOutputAnn(wxCommandEvent &event);
+	//distance
+	void OnDistNeighborSldr(wxScrollEvent &event);
+	void OnDistNeighborText(wxCommandEvent &event);
+	void OnDistOutput(wxCommandEvent &event);
 
 	//execute
 	void EnableGenerate();

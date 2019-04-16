@@ -40,6 +40,7 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <cctype>
 #include <set>
+#include <fstream>
 
 BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_COLLAPSIBLEPANE_CHANGED(wxID_ANY, ComponentDlg::OnPaneChange)
@@ -195,6 +196,10 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_BUTTON(ID_OutputRandomBtn, ComponentDlg::OnOutputChannels)
 	EVT_BUTTON(ID_OutputSizeBtn, ComponentDlg::OnOutputChannels)
 	EVT_BUTTON(ID_OutputAnnBtn, ComponentDlg::OnOutputAnn)
+	//distance
+	EVT_COMMAND_SCROLL(ID_DistNeighborSldr, ComponentDlg::OnDistNeighborSldr)
+	EVT_TEXT(ID_DistNeighborText, ComponentDlg::OnDistNeighborText)
+	EVT_BUTTON(ID_DistOutputBtn, ComponentDlg::OnDistOutput)
 
 	//execute
 	EVT_NOTEBOOK_PAGE_CHANGED(ID_Notebook, ComponentDlg::OnNotebook)
@@ -597,6 +602,8 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 {
 	wxPanel *page = new wxPanel(parent);
 	wxStaticText *st = 0;
+	//validator: integer
+	wxIntegerValidator<unsigned int> vald_int;
 
 	//selection tools
 	wxBoxSizer *sizer1 = new wxStaticBoxSizer(
@@ -720,15 +727,40 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer3->Add(sizer32, 0, wxEXPAND);
 	sizer3->Add(10, 10);
 
-	//note
 	wxBoxSizer *sizer4 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "Distances"),
+		wxVERTICAL);
+	wxBoxSizer *sizer41 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Neighbors:",
+		wxDefaultPosition, wxSize(100, 20));
+	m_dist_neighbor_sldr = new wxSlider(page, ID_DistNeighborSldr, 1, 1, 20,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_dist_neighbor_text = new wxTextCtrl(page, ID_DistNeighborText, "1",
+		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
+	m_dist_output_btn = new wxButton(page, ID_DistOutputBtn, "Compute",
+		wxDefaultPosition, wxSize(60, 23));
+	sizer41->Add(5, 5);
+	sizer41->Add(st, 0, wxALIGN_CENTER);
+	sizer41->Add(m_dist_neighbor_sldr, 1, wxALIGN_CENTER);
+	sizer41->Add(5, 5);
+	sizer41->Add(m_dist_neighbor_text, 0, wxALIGN_CENTER);
+	sizer41->Add(5, 5);
+	sizer41->Add(m_dist_output_btn, 0, wxALIGN_CENTER);
+	sizer41->Add(5, 5);
+	//
+	sizer4->Add(10, 10);
+	sizer4->Add(sizer41, 0, wxEXPAND);
+	sizer4->Add(10, 10);
+
+	//note
+	wxBoxSizer *sizer5 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "N.B."),
 		wxVERTICAL);
 	st = new wxStaticText(page, 0,
 		"Enable 4D script in the settings to show component colors.");
-	sizer4->Add(10, 10);
-	sizer4->Add(st, 0);
-	sizer4->Add(10, 10);
+	sizer5->Add(10, 10);
+	sizer5->Add(st, 0);
+	sizer5->Add(10, 10);
 
 	//all
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
@@ -740,6 +772,8 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizerv->Add(sizer3, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 	sizerv->Add(sizer4, 0, wxEXPAND);
+	sizerv->Add(10, 10);
+	sizerv->Add(sizer5, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 
 	page->SetSizer(sizerv);
@@ -1527,6 +1561,9 @@ void ComponentDlg::GetSettings()
 	//colocalization
 	m_colocal = false;
 	m_consistent = false;
+
+	//distance
+	m_dist_neighbor = 1;
 
 	//output
 	m_output_type = 1;
@@ -3308,6 +3345,84 @@ void ComponentDlg::OnOutputAnn(wxCommandEvent &event)
 		}
 		m_view->RefreshGL();
 	}
+}
+
+//distance
+void ComponentDlg::OnDistNeighborSldr(wxScrollEvent &event)
+{
+	int val = event.GetPosition();
+	m_dist_neighbor_text->SetValue(wxString::Format("%d", val));
+}
+
+void ComponentDlg::OnDistNeighborText(wxCommandEvent &event)
+{
+	long val = 0;
+	m_dist_neighbor_text->GetValue().ToLong(&val);
+	m_dist_neighbor = (int)val;
+	m_dist_neighbor_sldr->SetValue(m_dist_neighbor);
+}
+
+void ComponentDlg::OnDistOutput(wxCommandEvent &event)
+{
+	FL::CompList* list = m_comp_analyzer.GetCompList();
+	if (!list || list->empty())
+		return;
+
+	int num = list->size();
+	//result
+	std::vector<std::vector<double>> rm;//result matrix
+	rm.reserve(num);
+	for (size_t i = 0; i < num; ++i)
+	{
+		rm.push_back(std::vector<double>());
+		rm[i].reserve(num);
+		for (size_t j = 0; j < num; ++j)
+			rm[i].push_back(0);
+	}
+	//compute
+	size_t x = 0, y = 0;
+	double dist = 0;
+	for (auto it1 = list->begin();
+		it1 != list->end(); ++it1)
+	{
+		y = x;
+		for (auto it2 = it1;
+			it2 != list->end(); ++it2)
+		{
+			dist = (it1->second->pos -
+				it2->second->pos).length();
+			rm[x][y] = dist;
+			rm[y][x] = dist;
+			y++;
+		}
+		x++;
+	}
+
+	wxFileDialog *fopendlg = new wxFileDialog(
+		this, "Save Analysis Data", "", "",
+		"Text file (*.txt)|*.txt",
+		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	int rval = fopendlg->ShowModal();
+	if (rval == wxID_OK)
+	{
+		wxString filename = fopendlg->GetPath();
+		string str = filename.ToStdString();
+		std::ofstream outfile;
+		outfile.open(str, std::ofstream::out);
+		for (size_t i = 0; i < num; ++i)
+		{
+			for (size_t j = 0; j < num; ++j)
+			{
+				outfile << rm[i][j];
+				if (j < num - 1)
+					outfile << "\t";
+			}
+			outfile << "\n";
+		}
+		outfile.close();
+	}
+	if (fopendlg)
+		delete fopendlg;
 }
 
 void ComponentDlg::OnNotebook(wxBookCtrlEvent &event)
