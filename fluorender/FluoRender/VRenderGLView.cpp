@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderGLView.h"
 #include "VRenderView.h"
 #include "VRenderFrame.h"
+#include <Components/CompAnalyzer.h>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -11610,6 +11611,53 @@ int VRenderGLView::RulerProfile(int index)
 	wxString str("Profile of volume ");
 	str = str + vd->GetName();
 	ruler->SetInfoProfile(str);
+	return 1;
+}
+
+int VRenderGLView::RulerDistance(int index)
+{
+	if (index < 0 ||
+		index >= m_ruler_list.size() ||
+		!m_cur_vol)
+		return 0;
+
+	Ruler* ruler = m_ruler_list[index];
+	if (ruler->GetRulerType() != 2 &&
+		ruler->GetRulerType() != 5)
+		return 0;
+	if (ruler->GetNumPoint() < 1)
+		return 0;
+
+	Point p = *(ruler->GetPoint(0));
+
+	FL::ComponentAnalyzer* analyzer =
+		((VRenderFrame*)m_frame)->GetComponentDlg()->GetAnalyzer();
+	FL::CompList* list = 0;
+	if (!analyzer)
+		return 0;
+
+	list = analyzer->GetCompList();
+	for (auto it = list->begin();
+		it != list->end(); ++it)
+	{
+		double dist = (p - it->second->pos).length();
+		it->second->dist = dist;
+	}
+
+	wxFileDialog *fopendlg = new wxFileDialog(
+		this, "Save Analysis Data", "", "",
+		"Text file (*.txt)|*.txt",
+		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	int rval = fopendlg->ShowModal();
+	if (rval == wxID_OK)
+	{
+		wxString filename = fopendlg->GetPath();
+		string str = filename.ToStdString();
+		analyzer->OutputCompListFile(str, 1);
+	}
+	if (fopendlg)
+		delete fopendlg;
+
 	return 1;
 }
 

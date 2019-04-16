@@ -107,6 +107,7 @@ namespace FL
 		double m2;
 		double min;
 		double max;
+		double dist;//distance to a point
 		FLIVR::Point pos;
 		std::vector<unsigned int> cosumi;
 		std::vector<double> cosumd;

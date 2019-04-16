@@ -916,7 +916,8 @@ public:
 
 private:
 	static int m_num;
-	int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe; 4: protractor
+	int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
+						//4: protractor; 5: ellipse
 	bool m_finished;
 	vector<Point> m_ruler;
 	bool m_disp;

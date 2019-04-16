@@ -284,6 +284,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 				info->m2 += delta * (value - info->mean);
 				info->min = value;
 				info->max = value;
+				info->dist = 0.0;
 				info->pos = FLIVR::Point(i+b->ox(), j+b->oy(), k+b->oz());
 				if (colocal)
 				{
@@ -673,7 +674,7 @@ void ComponentAnalyzer::OutputFormHeader(std::string &str)
 	if (m_vd && m_vd->GetAllBrickNum() > 1)
 		str = "BRICK_ID\t";
 
-	str += "ID\tPosX\tPosY\tPosZ\tSumN\tSumI\tSurfaceN\tSurfaceI\tMean\tSigma\tMin\tMax";
+	str += "ID\tPosX\tPosY\tPosZ\tSumN\tSumI\tSurfaceN\tSurfaceI\tMean\tSigma\tMin\tMax\tDist";
 
 	if (m_colocal)
 	{
@@ -750,7 +751,8 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 		stream << i->second->mean << "\t";
 		stream << i->second->var << "\t";
 		stream << i->second->min << "\t";
-		stream << i->second->max;
+		stream << i->second->max << "\t";
+		stream << i->second->dist;
 		if (m_colocal)
 		{
 			stream << "\t";

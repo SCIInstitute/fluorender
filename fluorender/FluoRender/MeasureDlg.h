@@ -108,8 +108,10 @@ public:
 		ID_ProtractorBtn,
 		ID_RulerBtn,
 		ID_RulerMPBtn,
+		ID_EllipseBtn,
 		ID_RulerEditBtn,
 		ID_ProfileBtn,
+		ID_DistanceBtn,
 		ID_DeleteBtn,
 		ID_DeleteAllBtn,
 		ID_ExportBtn,
@@ -137,7 +139,8 @@ private:
 	//list ctrl
 	RulerListCtrl *m_rulerlist;
 	//tool bar
-	wxToolBar *m_toolbar;
+	wxToolBar *m_toolbar1;
+	wxToolBar *m_toolbar2;
 	//options
 	wxRadioButton *m_view_plane_rd;
 	wxRadioButton *m_max_intensity_rd;
@@ -152,8 +155,10 @@ private:
 	void OnNewProtractor(wxCommandEvent& event);
 	void OnNewRuler(wxCommandEvent& event);
 	void OnNewRulerMP(wxCommandEvent& event);
+	void OnEllipse(wxCommandEvent& event);
 	void OnRulerEdit(wxCommandEvent& event);
 	void OnProfile(wxCommandEvent& event);
+	void OnDistance(wxCommandEvent& event);
 	void OnDelete(wxCommandEvent& event);
 	void OnDeleteAll(wxCommandEvent& event);
 	void OnExport(wxCommandEvent& event);
