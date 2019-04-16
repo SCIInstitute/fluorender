@@ -11231,7 +11231,7 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 	verts.reserve(vert_num * 10 * 3 * 2);
 
 	unsigned int num = 0;
-	Point p1, p2;
+	Point p1, p2, p3, p4;
 	Color c;
 	Color text_color = GetTextColor();
 	for (size_t i = 0; i<m_ruler_list.size(); i++)
@@ -11246,78 +11246,128 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 				c = ruler->GetColor();
 			else
 				c = text_color;
-			for (size_t j = 0; j<ruler->GetNumPoint(); ++j)
+			if (ruler->GetRulerType() == 5)
 			{
-				p2 = *(ruler->GetPoint(j));
-				p2 = mv.transform(p2);
-				p2 = p.transform(p2);
-				if ((m_persp && (p2.z() <= 0.0 || p2.z() >= 1.0)) ||
-					(!m_persp && (p2.z() >= 0.0 || p2.z() <= -1.0)))
-					continue;
-				px = (p2.x() + 1.0)*nx / 2.0;
-				py = (p2.y() + 1.0)*ny / 2.0;
-				verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
-				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-				verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
-				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-				verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
-				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-				verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
-				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-				verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
-				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-				verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
-				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-				verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
-				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-				verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
-				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-				num += 8;
-				if (j > 0)
+				int np = ruler->GetNumPoint();
+				if (np == 1)
 				{
-					p1 = *(ruler->GetPoint(j - 1));
+					//draw square
+					p1 = *(ruler->GetPoint(0));
 					p1 = mv.transform(p1);
 					p1 = p.transform(p1);
 					if ((m_persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
 						(!m_persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
 						continue;
-					verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 					px = (p1.x() + 1.0)*nx / 2.0;
 					py = (p1.y() + 1.0)*ny / 2.0;
-					verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+					verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
 					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					num += 2;
+					verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					num += 8;
 				}
-			}
-			if (ruler->GetRulerType() == 4 &&
-				ruler->GetNumPoint() >= 3)
-			{
-				Point center = *(ruler->GetPoint(1));
-				Vector v1 = *(ruler->GetPoint(0)) - center;
-				Vector v2 = *(ruler->GetPoint(2)) - center;
-				double len = Min(v1.length(), v2.length());
-				if (len > w)
+				else if (np == 4)
 				{
-					v1.normalize();
-					v2.normalize();
-					p1 = center + v1*w;
-					p1 = mv.transform(p1);
-					p1 = p.transform(p1);
-					px = (p1.x() + 1.0)*nx / 2.0;
-					py = (p1.y() + 1.0)*ny / 2.0;
-					verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					p1 = center + v2*w;
-					p1 = mv.transform(p1);
-					p1 = p.transform(p1);
-					px = (p1.x() + 1.0)*nx / 2.0;
-					py = (p1.y() + 1.0)*ny / 2.0;
-					verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					num += 2;
+					//draw ellipse
+					p1 = *(ruler->GetPoint(0));
+					p2 = *(ruler->GetPoint(1));
+					p3 = *(ruler->GetPoint(2));
+					p4 = *(ruler->GetPoint(3));
+					Point pc = (p1 + p2) / 2.0;
+					double ra, rb;
+					ra = (p1 - p2).length() / 2.0;
+					rb = (p3 - p4).length() / 2.0;
 				}
 			}
+			else
+			{
+
+				for (size_t j = 0; j < ruler->GetNumPoint(); ++j)
+				{
+					p2 = *(ruler->GetPoint(j));
+					p2 = mv.transform(p2);
+					p2 = p.transform(p2);
+					if ((m_persp && (p2.z() <= 0.0 || p2.z() >= 1.0)) ||
+						(!m_persp && (p2.z() >= 0.0 || p2.z() <= -1.0)))
+						continue;
+					px = (p2.x() + 1.0)*nx / 2.0;
+					py = (p2.y() + 1.0)*ny / 2.0;
+					verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					num += 8;
+					if (j > 0)
+					{
+						p1 = *(ruler->GetPoint(j - 1));
+						p1 = mv.transform(p1);
+						p1 = p.transform(p1);
+						if ((m_persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
+							(!m_persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
+							continue;
+						verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						px = (p1.x() + 1.0)*nx / 2.0;
+						py = (p1.y() + 1.0)*ny / 2.0;
+						verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						num += 2;
+					}
+				}
+				if (ruler->GetRulerType() == 4 &&
+					ruler->GetNumPoint() >= 3)
+				{
+					Point center = *(ruler->GetPoint(1));
+					Vector v1 = *(ruler->GetPoint(0)) - center;
+					Vector v2 = *(ruler->GetPoint(2)) - center;
+					double len = Min(v1.length(), v2.length());
+					if (len > w)
+					{
+						v1.normalize();
+						v2.normalize();
+						p1 = center + v1 * w;
+						p1 = mv.transform(p1);
+						p1 = p.transform(p1);
+						px = (p1.x() + 1.0)*nx / 2.0;
+						py = (p1.y() + 1.0)*ny / 2.0;
+						verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						p1 = center + v2 * w;
+						p1 = mv.transform(p1);
+						p1 = p.transform(p1);
+						px = (p1.x() + 1.0)*nx / 2.0;
+						py = (p1.y() + 1.0)*ny / 2.0;
+						verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						num += 2;
+					}
+				}
+			}
+
 		}
 	}
 
