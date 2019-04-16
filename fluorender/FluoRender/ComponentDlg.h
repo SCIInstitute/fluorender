@@ -251,6 +251,11 @@ public:
 	void GenerateComp(int type, int mode);
 	void SelectFullComp();
 
+	FL::ComponentAnalyzer* GetAnalyzer()
+	{
+		return &m_comp_analyzer;
+	}
+
 private:
 	wxWindow* m_frame;
 	VRenderView* m_view;
