@@ -84,6 +84,9 @@ wxListCtrl(parent, id, pos, size, style)//,
 	itemCol.SetText("Volumes");
 	this->InsertColumn(6, itemCol);
 	SetColumnWidth(6, wxLIST_AUTOSIZE_USEHEADER);
+	itemCol.SetText("Center");
+	this->InsertColumn(7, itemCol);
+	SetColumnWidth(7, wxLIST_AUTOSIZE_USEHEADER);
 
 	m_images = new wxImageList(16, 16, true);
 	wxIcon icon = wxIcon(ruler_xpm);
@@ -106,7 +109,7 @@ RulerListCtrl::~RulerListCtrl()
 }
 
 void RulerListCtrl::Append(unsigned int id, wxString name, wxString &color, double length, wxString &unit,
-	double angle, wxString &points, bool time_dep, int time, wxString extra)
+	double angle, wxString &points, bool time_dep, int time, wxString extra, wxString center)
 {
 	long tmp = InsertItem(GetItemCount(), name, 0);
 	SetItemData(tmp, long(id));
@@ -128,6 +131,8 @@ void RulerListCtrl::Append(unsigned int id, wxString name, wxString &color, doub
 	SetColumnWidth(5, wxLIST_AUTOSIZE_USEHEADER);
 	SetItem(tmp, 6, extra);
 	SetColumnWidth(6, wxLIST_AUTOSIZE_USEHEADER);
+	SetItem(tmp, 7, center);
+	SetColumnWidth(7, wxLIST_AUTOSIZE_USEHEADER);
 }
 
 void RulerListCtrl::UpdateRulers(VRenderView* vrv)
@@ -189,8 +194,13 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 			int(ruler->GetColor().b()*255));
 		else
 			color = "N/A";
+		wxString center;
+		Point cp = ruler->GetCenter();
+		center = wxString::Format("(%.2f, %.2f, %.2f)",
+			cp.x(), cp.y(), cp.z());
 		Append(ruler->Id(), ruler->GetName(), color, ruler->GetLength(), unit,
-			ruler->GetAngle(), points, ruler->GetTimeDep(), ruler->GetTime(), ruler->GetDelInfoValues(", "));
+			ruler->GetAngle(), points, ruler->GetTimeDep(), ruler->GetTime(),
+			ruler->GetDelInfoValues(", "), center);
 	}
 
 	TextureRenderer::vertex_array_manager_.set_dirty(VA_Rulers);

@@ -57,7 +57,7 @@ public:
 
 	void Append(unsigned int id, wxString name, wxString &color, double length, wxString &unit,
 		double angle, wxString &points, bool time_dep, int time,
-		wxString extra);
+		wxString extra, wxString center);
 	void UpdateRulers(VRenderView* vrv=0);
 
 	int GetCurrSelection();

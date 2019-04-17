@@ -914,6 +914,9 @@ public:
 	double GetBrushSize()
 	{ return m_brush_size; }
 
+	void FinishEllipse(Vector view);
+	Point GetCenter();
+
 private:
 	static int m_num;
 	int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
