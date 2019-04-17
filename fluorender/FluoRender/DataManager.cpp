@@ -39,6 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <algorithm>
 #include <set>
 #include <glm/gtc/matrix_transform.hpp>
+#include <FLIVR/Quaternion.h>
 
 #ifdef _WIN32
 #  undef min
@@ -3495,6 +3496,47 @@ wxString Ruler::GetPosNames()
 
 void Ruler::SaveProfile(wxString &filename)
 {
+}
+
+void Ruler::FinishEllipse(Vector view)
+{
+	if (m_ruler_type != 5 || m_ruler.size() != 2)
+		return;
+
+	view.normalize();
+	Point p0 = m_ruler[0];
+	Point p1 = m_ruler[1];
+	Vector p01 = p0 - p1;
+	p01.normalize();
+	Vector axis = Cross(p01, Cross(p01, view));
+	Point p2, p3, pc;
+	pc = Point((p0 + p1) / 2.0);
+	Quaternion q0(p0 - pc);
+	Quaternion q(90.0, axis);
+	q.Normalize();
+	Quaternion q2 = (-q) * q0 * q;
+	p2 = Point(q2.x, q2.y, q2.z);
+	p3 = -p2;
+	p2 = Point(pc + p2);
+	p3 = Point(pc + p3);
+	AddPoint(p2);
+	AddPoint(p3);
+
+	m_finished = true;
+}
+
+Point Ruler::GetCenter()
+{
+	Point result;
+	if (m_ruler.empty())
+		return result;
+	for (auto it = m_ruler.begin();
+		it != m_ruler.end(); ++it)
+	{
+		result += *it;
+	}
+	result /= m_ruler.size();
+	return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -11149,6 +11149,16 @@ void VRenderGLView::AddRulerPoint(int mx, int my)
 			{
 				ruler->AddPoint(p);
 				new_ruler = false;
+				if (m_ruler_type == 5)
+				{
+					//finish
+					//Transform mv;
+					//mv.set(glm::value_ptr(m_mv_mat));
+					//Point view(0, 0, 1);
+					//view = mv.unproject(view);
+					Vector view(m_mv_mat[2][0], -m_mv_mat[2][1], m_mv_mat[2][2]);
+					ruler->FinishEllipse(view);
+				}
 			}
 		}
 		if (new_ruler)
@@ -11231,7 +11241,7 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 	verts.reserve(vert_num * 10 * 3 * 2);
 
 	unsigned int num = 0;
-	Point p1, p2, p3, p4;
+	Point p1, p2;
 	Color c;
 	Color text_color = GetTextColor();
 	for (size_t i = 0; i<m_ruler_list.size(); i++)
@@ -11281,14 +11291,60 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 				else if (np == 4)
 				{
 					//draw ellipse
-					p1 = *(ruler->GetPoint(0));
-					p2 = *(ruler->GetPoint(1));
-					p3 = *(ruler->GetPoint(2));
-					p4 = *(ruler->GetPoint(3));
-					Point pc = (p1 + p2) / 2.0;
+					Point pps[4];
+					pps[0] = *(ruler->GetPoint(0));
+					pps[1] = *(ruler->GetPoint(1));
+					pps[2] = *(ruler->GetPoint(2));
+					pps[3] = *(ruler->GetPoint(3));
+					Point ppc = Point((pps[0] + pps[1]) / 2.0);
 					double ra, rb;
-					ra = (p1 - p2).length() / 2.0;
-					rb = (p3 - p4).length() / 2.0;
+					ra = (pps[0] - pps[1]).length() / 2.0;
+					rb = (pps[2] - pps[3]).length() / 2.0;
+					for (size_t j = 0; j < 4; ++j)
+					{
+						p1 = mv.transform(pps[j]);
+						p1 = p.transform(p1);
+						if ((m_persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
+							(!m_persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
+							continue;
+						px = (p1.x() + 1.0)*nx / 2.0;
+						py = (p1.y() + 1.0)*ny / 2.0;
+						verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						num += 8;
+					}
+					//draw center
+					p1 = ruler->GetCenter();
+					p1 = mv.transform(p1);
+					p1 = p.transform(p1);
+					if ((m_persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
+						(!m_persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
+						continue;
+					px = (p1.x() + 1.0)*nx / 2.0;
+					py = (p1.y() + 1.0)*ny / 2.0;
+					verts.push_back(px - w); verts.push_back(py); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px + w); verts.push_back(py); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px); verts.push_back(py - w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px); verts.push_back(py + w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					num += 4;
 				}
 			}
 			else
@@ -11672,13 +11728,10 @@ int VRenderGLView::RulerDistance(int index)
 		return 0;
 
 	Ruler* ruler = m_ruler_list[index];
-	if (ruler->GetRulerType() != 2 &&
-		ruler->GetRulerType() != 5)
-		return 0;
 	if (ruler->GetNumPoint() < 1)
 		return 0;
 
-	Point p = *(ruler->GetPoint(0));
+	Point p = ruler->GetCenter();
 
 	FL::ComponentAnalyzer* analyzer =
 		((VRenderFrame*)m_frame)->GetComponentDlg()->GetAnalyzer();
