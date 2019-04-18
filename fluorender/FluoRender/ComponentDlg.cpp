@@ -3368,6 +3368,10 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 	if (!list || list->empty())
 		return;
 
+	double sx = list->sx;
+	double sy = list->sy;
+	double sz = list->sz;
+
 	int num = list->size();
 	//result
 	std::vector<std::vector<double>> rm;//result matrix
@@ -3389,8 +3393,8 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 		for (auto it2 = it1;
 			it2 != list->end(); ++it2)
 		{
-			dist = (it1->second->pos -
-				it2->second->pos).length();
+			dist = (it1->second->GetPos(sx, sy, sz) -
+				it2->second->GetPos(sx, sy, sz)).length();
 			rm[x][y] = dist;
 			rm[y][x] = dist;
 			y++;

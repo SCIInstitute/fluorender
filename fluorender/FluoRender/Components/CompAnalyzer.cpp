@@ -101,6 +101,11 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 	m_comp_list.clear();
 	m_comp_list.min = std::numeric_limits<unsigned int>::max();
 	m_comp_list.max = 0;
+	double sx, sy, sz;
+	m_vd->GetSpacings(sx, sy, sz);
+	m_comp_list.sx = sx;
+	m_comp_list.sy = sy;
+	m_comp_list.sz = sz;
 	m_comp_graph.clear();
 	m_analyzed = false;
 
@@ -699,6 +704,10 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 		stream << header;
 	}
 
+	double sx = m_comp_list.sx;
+	double sy = m_comp_list.sy;
+	double sz = m_comp_list.sz;
+
 	m_comp_graph.ClearVisited();
 	for (auto i = m_comp_list.begin();
 		i != m_comp_list.end(); ++i)
@@ -741,9 +750,9 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 		if (bn > 1)
 			stream << brick_ids.front() << "\t";
 		stream << ids.front() << "\t";
-		stream << i->second->pos.x() << "\t";
-		stream << i->second->pos.y() << "\t";
-		stream << i->second->pos.z() << "\t";
+		stream << i->second->pos.x()*sx << "\t";
+		stream << i->second->pos.y()*sy << "\t";
+		stream << i->second->pos.z()*sz << "\t";
 		stream << i->second->sumi << "\t";
 		stream << i->second->sumd << "\t";
 		stream << i->second->ext_sumi << "\t";

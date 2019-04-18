@@ -11753,10 +11753,13 @@ int VRenderGLView::RulerDistance(int index)
 		return 0;
 
 	list = analyzer->GetCompList();
+	double sx = list->sx;
+	double sy = list->sy;
+	double sz = list->sz;
 	for (auto it = list->begin();
 		it != list->end(); ++it)
 	{
-		double dist = (p - it->second->pos).length();
+		double dist = (p - it->second->GetPos(sx, sy, sz)).length();
 		it->second->dist = dist;
 	}
 
