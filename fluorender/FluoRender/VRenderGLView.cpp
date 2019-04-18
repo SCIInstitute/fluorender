@@ -11154,10 +11154,23 @@ void VRenderGLView::AddRulerPoint(int mx, int my)
 					//finish
 					//Transform mv;
 					//mv.set(glm::value_ptr(m_mv_mat));
-					//Point view(0, 0, 1);
-					//view = mv.unproject(view);
-					Vector view(m_mv_mat[2][0], -m_mv_mat[2][1], m_mv_mat[2][2]);
-					ruler->FinishEllipse(view);
+					//Vector view(0, 0, -1);
+					//view = mv.project(view);
+					//Vector view(m_mv_mat[2][0], -m_mv_mat[2][1], m_mv_mat[2][2]);
+					//HandleCamera();
+					glm::mat4 mv_temp;
+					//translate object
+					//mv_temp = glm::translate(mv_temp, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
+					//rotate object
+					mv_temp = glm::rotate(m_mv_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
+					mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_roty + 180.0)), glm::vec3(0.0, 1.0, 0.0));
+					mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_rotz + 180.0)), glm::vec3(0.0, 0.0, 1.0));
+					//center object
+					//mv_temp = glm::translate(mv_temp, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+					//glm::vec4 axis(0, 0, -1, 0);
+					//axis = mv_temp * axis;
+					//ruler->FinishEllipse(Vector(axis[0], axis[1], axis[2]));
+					ruler->FinishEllipse(Vector(mv_temp[2][0], mv_temp[2][1], mv_temp[2][2]));
 				}
 			}
 		}
