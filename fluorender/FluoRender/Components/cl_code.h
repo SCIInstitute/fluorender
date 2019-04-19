@@ -1202,6 +1202,8 @@ const char* str_cl_density_field_3d = \
 "		sum += read_imagef(image, samp, pos+(int4)(i, j, 0, 0)).x;\n" \
 "	return sum / (float)(d * d);\n" \
 "}\n" \
+"\n" \
+"//generate density field\n" \
 "__kernel void kernel_0(\n" \
 "	__read_only image3d_t data,\n" \
 "	__global unsigned char* df,\n" \
@@ -1217,6 +1219,7 @@ const char* str_cl_density_field_3d = \
 "	df[index] = (unsigned char)(density * 255.0);\n" \
 "}\n" \
 "\n" \
+"//compute statistics on density field\n" \
 "__kernel void kernel_1(\n" \
 "	__global unsigned char* df,\n" \
 "	__global unsigned char* gavg,\n" \
@@ -1259,6 +1262,7 @@ const char* str_cl_density_field_3d = \
 "	gvar[index] = var;\n" \
 "}\n" \
 "\n" \
+"//interpolate statistics on density field\n" \
 "__kernel void kernel_2(\n" \
 "	__global unsigned char* data,\n" \
 "	__global unsigned char* gd,\n" \
