@@ -23,7 +23,7 @@ namespace FLIVR
 {
 	class VolKernel;
 	//argument
-	typedef struct
+	struct Argument
 	{
 		int kernel_index;
 		cl_uint index;
@@ -31,7 +31,16 @@ namespace FLIVR
 		GLuint texture;
 		cl_mem buffer;
 		void* orgn_addr;
-	} Argument;
+
+		Argument() :
+			kernel_index(0),
+			index(0),
+			size(0),
+			texture(0),
+			buffer(0),
+			orgn_addr(0) {}
+	};
+
 	class KernelProgram
 	{
 	public:
@@ -63,19 +72,18 @@ namespace FLIVR
 		bool matchArgAddr(Argument*, unsigned int&);//use data address to match
 		//set argument
 		int setKernelArgument(Argument*);
-		Argument getKernelArgumnet(unsigned int ai);
 		void setKernelArgConst(int, int, size_t, void*);
 		void setKernelArgConst(std::string &name, int, size_t, void*);
-		cl_mem setKernelArgBuf(int, int, cl_mem_flags, size_t, void*);
-		cl_mem setKernelArgBuf(std::string &name, int, cl_mem_flags, size_t, void*);
-		cl_mem setKernelArgBufWrite(int, int, cl_mem_flags, size_t, void*);
-		cl_mem setKernelArgBufWrite(std::string &name, int, cl_mem_flags, size_t, void*);
-		cl_mem setKernelArgTex2D(int, int, cl_mem_flags, GLuint);
-		cl_mem setKernelArgTex2D(std::string &name, int, cl_mem_flags, GLuint);
-		cl_mem setKernelArgTex3D(int, int, cl_mem_flags, GLuint);
-		cl_mem setKernelArgTex3D(std::string &name, int, cl_mem_flags, GLuint);
-		cl_mem setKernelArgImage(int, int, cl_mem_flags, cl_image_format, cl_image_desc, void*);
-		cl_mem setKernelArgImage(std::string &name, int, cl_mem_flags, cl_image_format, cl_image_desc, void*);
+		Argument setKernelArgBuf(int, int, cl_mem_flags, size_t, void*);
+		Argument setKernelArgBuf(std::string &name, int, cl_mem_flags, size_t, void*);
+		Argument setKernelArgBufWrite(int, int, cl_mem_flags, size_t, void*);
+		Argument setKernelArgBufWrite(std::string &name, int, cl_mem_flags, size_t, void*);
+		Argument setKernelArgTex2D(int, int, cl_mem_flags, GLuint);
+		Argument setKernelArgTex2D(std::string &name, int, cl_mem_flags, GLuint);
+		Argument setKernelArgTex3D(int, int, cl_mem_flags, GLuint);
+		Argument setKernelArgTex3D(std::string &name, int, cl_mem_flags, GLuint);
+		Argument setKernelArgImage(int, int, cl_mem_flags, cl_image_format, cl_image_desc, void*);
+		Argument setKernelArgImage(std::string &name, int, cl_mem_flags, cl_image_format, cl_image_desc, void*);
 
 		//read/write
 		void readBuffer(size_t size,
