@@ -3609,7 +3609,8 @@ void ComponentDlg::GenerateBsc(bool refine)
 	if (m_use_dist_field)
 	{
 		vd->AddEmptyLabel();
-		cg.DistField3D(m_basic_iter, float(m_basic_thresh / scale));
+		//cg.DistField3D(m_basic_iter, float(m_basic_thresh / scale));
+		cg.DensityField3D(5, 50);
 	}
 	else
 	{

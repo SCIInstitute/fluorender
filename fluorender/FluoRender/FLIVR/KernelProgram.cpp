@@ -472,8 +472,8 @@ namespace FLIVR
 		if (index < 0 || index >= kernels_.size())
 			return arg;
 
-		if (data)
-		{
+		//if (data)
+		//{
 			arg.kernel_index = index;
 			arg.index = i;
 			arg.size = size;
@@ -497,11 +497,11 @@ namespace FLIVR
 			err = clSetKernelArg(kernels_[index].kernel, i, sizeof(cl_mem), &(arg.buffer));
 			if (err != CL_SUCCESS)
 				return Argument();
-		}
-		else
-		{
-			err = clSetKernelArg(kernels_[index].kernel, i, size, NULL);
-		}
+		//}
+		//else
+		//{
+		//	err = clSetKernelArg(kernels_[index].kernel, i, size, NULL);
+		//}
 		return arg;
 	}
 

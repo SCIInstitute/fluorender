@@ -82,7 +82,7 @@ namespace FL
 
 		//new segmentation
 		void DistField3D(int iter, float th);
-		void DensityField3D(int dsize);
+		void DensityField3D(int dsize, int wsize);
 
 		//update progress
 		boost::signals2::signal<void ()> m_sig_progress;
