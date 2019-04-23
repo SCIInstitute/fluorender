@@ -66,12 +66,12 @@ namespace FLIVR
 		//get info
 		bool getWorkGroupSize(int idex, size_t*);
 
-		bool matchArg(cl_mem, unsigned int&);//find buffer
-		bool matchArg(Argument*, unsigned int&);
-		bool matchArgTex(Argument*, unsigned int&);//use texture id to match
-		bool matchArgAddr(Argument*, unsigned int&);//use data address to match
+		bool matchArg(Argument&, unsigned int&);
+		bool matchArgBuf(Argument&, unsigned int&);//find buffer
+		bool matchArgTex(Argument&, unsigned int&);//use texture id to match
+		bool matchArgAddr(Argument&, unsigned int&);//use data address to match
 		//set argument
-		int setKernelArgument(Argument*);
+		int setKernelArgument(Argument&);
 		void setKernelArgConst(int, int, size_t, void*);
 		void setKernelArgConst(std::string &name, int, size_t, void*);
 		Argument setKernelArgBuf(int, int, cl_mem_flags, size_t, void*);
@@ -88,17 +88,17 @@ namespace FLIVR
 		//read/write
 		void readBuffer(size_t size,
 			void* buf_data, void* data);
-		void readBuffer(cl_mem buffer, void* data);
+		void readBuffer(Argument& arg, void* data);
 		void writeBuffer(size_t size,
 			void* buf_data, void* data);
-		void writeBuffer(cl_mem buffer, void* data);
+		void writeBuffer(Argument& arg, void* data);
 		void writeImage(const size_t* origin, const size_t* region,
 			void* img_data, void* data);
 		void writeImage(const size_t* origin, const size_t* region,
-			cl_mem image, void* data);
+			Argument& arg, void* data);
 
 		//release mem obj
-		void releaseMemObject(cl_mem);
+		void releaseMemObject(Argument&);
 		void releaseMemObject(int, int, size_t, GLuint);
 		void releaseMemObject(size_t, void* orgn_addr);
 
