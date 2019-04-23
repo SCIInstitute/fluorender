@@ -1223,42 +1223,41 @@ const char* str_cl_density_field_3d = \
 "	__global unsigned char* df,\n" \
 "	__global unsigned char* gavg,\n" \
 "	__global unsigned char* gvar,\n" \
-"	unsigned int ngx,\n" \
-"	unsigned int ngy,\n" \
-"	unsigned int ngz,\n" \
-"	unsigned int gsxy,\n" \
 "	unsigned int gsx,\n" \
+"	unsigned int gsy,\n" \
+"	unsigned int gsz,\n" \
+"	unsigned int ngxy,\n" \
+"	unsigned int ngx,\n" \
 "	unsigned int dnxy, \n" \
 "	unsigned int dnx)\n" \
 "{\n" \
 "	int3 gid = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
-"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
-"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
+"	int3 lb = (int3)(gid.x*gsx, gid.y*gsy, gid.z*gsz);\n" \
+"	int3 ub = (int3)(lb.x + gsx, lb.y + gsy, lb.z + gsz);\n" \
 "	int3 ijk = (int3)(0);\n" \
 "	float sum = 0.0;\n" \
-"	unsigned int index;\n" \
+"	unsigned int index1;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		index = dnxy*(ngz*gid.z+ijk.z) + dnx*(ngy*gid.y+ijk.y) + ngx*gid.x+ijk.x;\n" \
-"		sum += df[index];\n" \
+"		index1 = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
+"		sum += df[index1];\n" \
 "	}\n" \
-"	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	float avg = sum / (ngx*ngy*ngz);\n" \
-"	gavg[index] = avg;\n" \
+"	unsigned int index2 = ngxy * gid.z + ngx * gid.y + gid.x;\n" \
+"	float avg = sum / (gsx*gsy*gsz);\n" \
+"	gavg[index2] = avg;\n" \
 "	sum = 0.0;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		index = dnxy*(ngz*gid.z+ijk.z) + dnx*(ngy*gid.y+ijk.y) + ngx*gid.x+ijk.x;\n" \
-"		sum += (avg - df[index])*(avg - df[index]);\n" \
+"		index1 = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
+"		sum += (avg - df[index1])*(avg - df[index1]);\n" \
 "	}\n" \
-"	float var = sqrt(sum / (ngx*ngy*ngz));\n" \
-"	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	gvar[index] = var;\n" \
+"	float var = sqrt(sum / (gsx*gsy*gsz));\n" \
+"	gvar[index2] = var;\n" \
 "}\n" \
 "\n" \
 "//interpolate statistics on density field\n" \

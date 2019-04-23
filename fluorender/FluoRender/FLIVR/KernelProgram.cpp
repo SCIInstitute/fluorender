@@ -373,11 +373,11 @@ namespace FLIVR
 		return true;
 	}
 
-	bool KernelProgram::matchArg(cl_mem buffer, unsigned int& arg_index)
+	bool KernelProgram::matchArgBuf(Argument& arg, unsigned int& arg_index)
 	{
 		for (unsigned int i = 0; i < arg_list_.size(); ++i)
 		{
-			if (arg_list_[i].buffer == buffer)
+			if (arg_list_[i].buffer == arg.buffer)
 			{
 				arg_index = i;
 				return true;
@@ -386,14 +386,14 @@ namespace FLIVR
 		return false;
 	}
 
-	bool KernelProgram::matchArg(Argument* arg, unsigned int& arg_index)
+	bool KernelProgram::matchArg(Argument& arg, unsigned int& arg_index)
 	{
 		for (unsigned int i=0; i<arg_list_.size(); ++i)
 		{
-			if (arg_list_[i].kernel_index == arg->kernel_index &&
-				arg_list_[i].index == arg->index &&
-				arg_list_[i].size == arg->size &&
-				arg_list_[i].texture == arg->texture)
+			if (arg_list_[i].kernel_index == arg.kernel_index &&
+				arg_list_[i].index == arg.index &&
+				arg_list_[i].size == arg.size &&
+				arg_list_[i].texture == arg.texture)
 			{
 				arg_index = i;
 				return true;
@@ -402,11 +402,11 @@ namespace FLIVR
 		return false;
 	}
 
-	bool KernelProgram::matchArgTex(Argument* arg, unsigned int& arg_index)
+	bool KernelProgram::matchArgTex(Argument& arg, unsigned int& arg_index)
 	{
 		for (unsigned int i = 0; i<arg_list_.size(); ++i)
 		{
-			if (arg_list_[i].texture == arg->texture)
+			if (arg_list_[i].texture == arg.texture)
 			{
 				arg_index = i;
 				return true;
@@ -415,12 +415,12 @@ namespace FLIVR
 		return false;
 	}
 
-	bool KernelProgram::matchArgAddr(Argument* arg, unsigned int& arg_index)
+	bool KernelProgram::matchArgAddr(Argument& arg, unsigned int& arg_index)
 	{
 		for (unsigned int i = 0; i<arg_list_.size(); ++i)
 		{
-			if (arg_list_[i].orgn_addr == arg->orgn_addr &&
-				arg_list_[i].size == arg->size)
+			if (arg_list_[i].orgn_addr == arg.orgn_addr &&
+				arg_list_[i].size == arg.size)
 			{
 				arg_index = i;
 				return true;
@@ -429,18 +429,16 @@ namespace FLIVR
 		return false;
 	}
 
-	int KernelProgram::setKernelArgument(Argument* arg)
+	int KernelProgram::setKernelArgument(Argument& arg)
 	{
-		if (!arg)
-			return -1;
 		unsigned int ai = -1;
-		if (!matchArg(arg->buffer, ai))
+		if (!matchArgBuf(arg, ai))
 		{
-			arg_list_.push_back(*arg);
+			arg_list_.push_back(arg);
 			ai = arg_list_.size() - 1;
 		}
-		cl_int err = clSetKernelArg(kernels_[arg->kernel_index].kernel,
-			arg->index, sizeof(cl_mem), &(arg->buffer));
+		cl_int err = clSetKernelArg(kernels_[arg.kernel_index].kernel,
+			arg.index, sizeof(cl_mem), &(arg.buffer));
 		return ai;
 	}
 
@@ -468,40 +466,36 @@ namespace FLIVR
 	{
 		Argument arg;
 		cl_int err;
-		cl_mem buffer = 0;
 		if (index < 0 || index >= kernels_.size())
 			return arg;
 
-		//if (data)
-		//{
-			arg.kernel_index = index;
-			arg.index = i;
-			arg.size = size;
-			arg.texture = 0;
-			arg.orgn_addr = data;
+		arg.kernel_index = index;
+		arg.index = i;
+		arg.size = size;
+		arg.texture = 0;
+		arg.orgn_addr = data;
 
-			unsigned int ai;
-			if (matchArgAddr(&arg, ai))
-			{
+		unsigned int ai;
+		bool found = false;
+		if (data)
+		{
+			found = matchArgAddr(arg, ai);
+			if (found)
 				arg.buffer = arg_list_[ai].buffer;
-				buffer = arg.buffer;
-			}
-			else
-			{
-				buffer = clCreateBuffer(context_, flag, size, data, &err);
-				if (err != CL_SUCCESS)
-					return Argument();
-				arg.buffer = buffer;
-				arg_list_.push_back(arg);
-			}
-			err = clSetKernelArg(kernels_[index].kernel, i, sizeof(cl_mem), &(arg.buffer));
+		}
+
+		if (!found)
+		{
+			arg.buffer = clCreateBuffer(context_, flag, size, data, &err);
 			if (err != CL_SUCCESS)
 				return Argument();
-		//}
-		//else
-		//{
-		//	err = clSetKernelArg(kernels_[index].kernel, i, size, NULL);
-		//}
+			arg_list_.push_back(arg);
+		}
+
+		err = clSetKernelArg(kernels_[index].kernel, i, sizeof(cl_mem), &(arg.buffer));
+		if (err != CL_SUCCESS)
+			return Argument();
+
 		return arg;
 	}
 
@@ -528,7 +522,7 @@ namespace FLIVR
 			arg.orgn_addr = data;
 
 			unsigned int ai;
-			if (matchArgAddr(&arg, ai))
+			if (matchArgAddr(arg, ai))
 			{
 				arg.buffer = arg_list_[ai].buffer;
 				clReleaseMemObject(arg_list_[ai].buffer);
@@ -578,7 +572,7 @@ namespace FLIVR
 		arg.orgn_addr = 0;
 
 		unsigned int ai;
-		if (matchArgTex(&arg, ai))
+		if (matchArgTex(arg, ai))
 		{
 			arg.buffer = arg_list_[ai].buffer;
 			buffer = arg.buffer;
@@ -618,7 +612,7 @@ namespace FLIVR
 		arg.orgn_addr = 0;
 
 		unsigned int ai;
-		if (matchArgTex(&arg, ai))
+		if (matchArgTex(arg, ai))
 		{
 			arg.buffer = arg_list_[ai].buffer;
 			buffer = arg.buffer;
@@ -658,7 +652,7 @@ namespace FLIVR
 		arg.orgn_addr = data;
 
 		unsigned int ai;
-		if (matchArgAddr(&arg, ai))
+		if (matchArgAddr(arg, ai))
 		{
 			arg.buffer = arg_list_[ai].buffer;
 			buffer = arg.buffer;
@@ -699,7 +693,7 @@ namespace FLIVR
 			arg.orgn_addr = buf_data;
 
 			unsigned int ai;
-			if (matchArgAddr(&arg, ai))
+			if (matchArgAddr(arg, ai))
 			{
 				arg.buffer = arg_list_[ai].buffer;
 				err = clEnqueueReadBuffer(
@@ -714,14 +708,14 @@ namespace FLIVR
 		}
 	}
 
-	void KernelProgram::readBuffer(cl_mem buffer, void* data)
+	void KernelProgram::readBuffer(Argument& arg, void* data)
 	{
 		cl_int err;
 		unsigned int ai;
-		if (matchArg(buffer, ai))
+		if (matchArgBuf(arg, ai))
 		{
 			err = clEnqueueReadBuffer(
-				queue_, buffer,
+				queue_, arg.buffer,
 				CL_TRUE, 0, arg_list_[ai].size,
 				data, 0, NULL, NULL);
 			if (err != CL_SUCCESS)
@@ -746,7 +740,7 @@ namespace FLIVR
 			arg.orgn_addr = buf_data;
 
 			unsigned int ai;
-			if (matchArgAddr(&arg, ai))
+			if (matchArgAddr(arg, ai))
 			{
 				arg.buffer = arg_list_[ai].buffer;
 				err = clEnqueueWriteBuffer(
@@ -761,14 +755,14 @@ namespace FLIVR
 		}
 	}
 
-	void KernelProgram::writeBuffer(cl_mem buffer, void* data)
+	void KernelProgram::writeBuffer(Argument& arg, void* data)
 	{
 		cl_int err;
 		unsigned int ai;
-		if (matchArg(buffer, ai))
+		if (matchArgBuf(arg, ai))
 		{
 			err = clEnqueueWriteBuffer(
-				queue_, buffer,
+				queue_, arg.buffer,
 				CL_TRUE, 0, arg_list_[ai].size,
 				data, 0, NULL, NULL);
 			if (err != CL_SUCCESS)
@@ -794,7 +788,7 @@ namespace FLIVR
 			arg.orgn_addr = img_data;
 
 			unsigned int ai;
-			if (matchArgAddr(&arg, ai))
+			if (matchArgAddr(arg, ai))
 			{
 				arg.buffer = arg_list_[ai].buffer;
 				err = clEnqueueWriteImage(
@@ -811,14 +805,14 @@ namespace FLIVR
 
 	void KernelProgram::writeImage(
 		const size_t* origin, const size_t* region,
-		cl_mem image, void* data)
+		Argument& arg, void* data)
 	{
 		cl_int err;
 		unsigned int ai;
-		if (matchArg(image, ai))
+		if (matchArgBuf(arg, ai))
 		{
 			err = clEnqueueWriteImage(
-				queue_, image,
+				queue_, arg.buffer,
 				CL_TRUE, origin, region,
 				0, 0, data, 0, NULL, NULL);
 			if (err != CL_SUCCESS)
@@ -829,12 +823,12 @@ namespace FLIVR
 	}
 
 	//release mem obj
-	void KernelProgram::releaseMemObject(cl_mem buffer)
+	void KernelProgram::releaseMemObject(Argument& arg)
 	{
 		unsigned int ai;
-		if (matchArg(buffer, ai))
+		if (matchArgBuf(arg, ai))
 		{
-			clReleaseMemObject(buffer);
+			clReleaseMemObject(arg.buffer);
 			arg_list_.erase(arg_list_.begin() + ai);
 		}
 	}
@@ -851,7 +845,7 @@ namespace FLIVR
 
 		if (texture)
 		{
-			if (matchArgTex(&arg, ai))
+			if (matchArgTex(arg, ai))
 			{
 				clReleaseMemObject(arg_list_[ai].buffer);
 				arg_list_.erase(arg_list_.begin() + ai);
@@ -859,7 +853,7 @@ namespace FLIVR
 		}
 		else
 		{
-			if (matchArg(&arg, ai))
+			if (matchArg(arg, ai))
 			{
 				clReleaseMemObject(arg_list_[ai].buffer);
 				arg_list_.erase(arg_list_.begin() + ai);
@@ -877,7 +871,7 @@ namespace FLIVR
 		arg.orgn_addr = orgn_addr;
 		unsigned int ai;
 
-		if (matchArgAddr(&arg, ai))
+		if (matchArgAddr(arg, ai))
 		{
 			clReleaseMemObject(arg_list_[ai].buffer);
 			arg_list_.erase(arg_list_.begin() + ai);

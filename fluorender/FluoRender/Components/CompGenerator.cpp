@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include "CompGenerator.h"
 #include "cl_code.h"
 #include <algorithm>
+#include <fstream>
 
 using namespace FL;
 
@@ -530,17 +531,17 @@ void ComponentGenerator::ClearBorders2D()
 		{
 			//update
 			if (i)
-				kernel_prog->writeBuffer(label_buffer.buffer, cur_page_label);
+				kernel_prog->writeBuffer(label_buffer, cur_page_label);
 			//execute
 			kernel_prog->executeKernel(kernel_index, 2, global_size, local_size);
 			//read back
-			kernel_prog->readBuffer(label_buffer.buffer, cur_page_label);
+			kernel_prog->readBuffer(label_buffer, cur_page_label);
 			//advance
 			cur_page_label += nx*ny;
 		}
 
 		//release buffer
-		kernel_prog->releaseMemObject(label_buffer.buffer);
+		kernel_prog->releaseMemObject(label_buffer);
 
 		m_sig_progress();
 
@@ -687,14 +688,14 @@ void ComponentGenerator::FillBorder2D(float tol)
 		{
 			if (i)
 			{
-				kernel_prog->writeImage(origin, region, data_buffer.buffer, img_data);
-				kernel_prog->writeBuffer(label_buffer.buffer, cur_page_label);
+				kernel_prog->writeImage(origin, region, data_buffer, img_data);
+				kernel_prog->writeBuffer(label_buffer, cur_page_label);
 			}
 
 			//execute
 			kernel_prog->executeKernel(kernel_index, 2, global_size, local_size);
 			//read back
-			kernel_prog->readBuffer(label_buffer.buffer, cur_page_label);
+			kernel_prog->readBuffer(label_buffer, cur_page_label);
 
 			if (bits == 8)
 				cur_page_data8 += nx*ny;
@@ -704,8 +705,8 @@ void ComponentGenerator::FillBorder2D(float tol)
 		}
 
 		//release buffer
-		kernel_prog->releaseMemObject(data_buffer.buffer);
-		kernel_prog->releaseMemObject(label_buffer.buffer);
+		kernel_prog->releaseMemObject(data_buffer);
+		kernel_prog->releaseMemObject(label_buffer);
 
 		m_sig_progress();
 
@@ -1243,8 +1244,8 @@ void ComponentGenerator::InitialGrow(bool param_tr, int iter,
 		{
 			if (i)
 			{
-				kernel_prog->writeImage(origin, region, data_buffer.buffer, img_data);
-				kernel_prog->writeBuffer(label_buffer.buffer, cur_page_label);
+				kernel_prog->writeImage(origin, region, data_buffer, img_data);
+				kernel_prog->writeBuffer(label_buffer, cur_page_label);
 			}
 
 			for (int j = 0; j < iter; ++j)
@@ -1277,7 +1278,7 @@ void ComponentGenerator::InitialGrow(bool param_tr, int iter,
 				}
 			}
 
-			kernel_prog->readBuffer(label_buffer.buffer, cur_page_label);
+			kernel_prog->readBuffer(label_buffer, cur_page_label);
 
 			if (bits == 8)
 				cur_page_data8 += nx*ny;
@@ -1286,8 +1287,8 @@ void ComponentGenerator::InitialGrow(bool param_tr, int iter,
 			cur_page_label += nx*ny;
 		}
 
-		kernel_prog->releaseMemObject(data_buffer.buffer);
-		kernel_prog->releaseMemObject(label_buffer.buffer);
+		kernel_prog->releaseMemObject(data_buffer);
+		kernel_prog->releaseMemObject(label_buffer);
 		kernel_prog->releaseMemObject(sizeof(unsigned int),
 			(void*)(&rcnt));
 
@@ -1446,13 +1447,13 @@ void ComponentGenerator::SizedGrow(bool param_tr, int iter,
 		{
 			if (i)
 			{
-				kernel_prog->writeImage(origin, region, data_buffer.buffer, img_data);
-				kernel_prog->writeBuffer(label_buffer.buffer, cur_page_label);
+				kernel_prog->writeImage(origin, region, data_buffer, img_data);
+				kernel_prog->writeBuffer(label_buffer, cur_page_label);
 			}
 
 			for (int j = 0; j<iter; ++j)
 			{
-				kernel_prog->writeBuffer(mask_buffer.buffer, mask32);
+				kernel_prog->writeBuffer(mask_buffer, mask32);
 				kernel_prog->executeKernel(kernel_index0, 2, global_size, local_size);
 				kernel_prog->executeKernel(kernel_index1, 2, global_size, local_size);
 
@@ -1486,7 +1487,7 @@ void ComponentGenerator::SizedGrow(bool param_tr, int iter,
 				}
 			}
 
-			kernel_prog->readBuffer(label_buffer.buffer, cur_page_label);
+			kernel_prog->readBuffer(label_buffer, cur_page_label);
 
 			if (bits == 8)
 				cur_page_data8 += nx*ny;
@@ -1495,9 +1496,9 @@ void ComponentGenerator::SizedGrow(bool param_tr, int iter,
 			cur_page_label += nx*ny;
 		}
 
-		kernel_prog->releaseMemObject(data_buffer.buffer);
-		kernel_prog->releaseMemObject(label_buffer.buffer);
-		kernel_prog->releaseMemObject(mask_buffer.buffer);
+		kernel_prog->releaseMemObject(data_buffer);
+		kernel_prog->releaseMemObject(label_buffer);
+		kernel_prog->releaseMemObject(mask_buffer);
 		kernel_prog->releaseMemObject(sizeof(unsigned int),
 			(void*)(&rcnt));
 		delete[] mask32;
@@ -1607,11 +1608,11 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 		for (size_t i = 0; i < nz; ++i)
 		{
 			if (i)
-				kernel_prog1->writeBuffer(label_buffer.buffer, cur_page_label);
+				kernel_prog1->writeBuffer(label_buffer, cur_page_label);
 
 			for (int j = 0; j < iter; ++j)
 			{
-				kernel_prog1->writeBuffer(mask_buffer.buffer, mask32);
+				kernel_prog1->writeBuffer(mask_buffer, mask32);
 				kernel_prog1->executeKernel(kernel_index0, 2, global_size, local_size);
 				kernel_prog1->executeKernel(kernel_index1, 2, global_size, local_size);
 				kernel_prog1->executeKernel(kernel_index2, 2, global_size, local_size);
@@ -1623,13 +1624,13 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 				}
 			}
 
-			kernel_prog1->readBuffer(label_buffer.buffer, cur_page_label);
+			kernel_prog1->readBuffer(label_buffer, cur_page_label);
 
 			cur_page_label += nx*ny;
 		}
 
-		kernel_prog1->releaseMemObject(label_buffer.buffer);
-		kernel_prog1->releaseMemObject(mask_buffer.buffer);
+		kernel_prog1->releaseMemObject(label_buffer);
+		kernel_prog1->releaseMemObject(mask_buffer);
 		delete[]mask32;
 
 		m_sig_progress();
@@ -2000,7 +2001,7 @@ void ComponentGenerator::DensityField3D(int dsize, int wsize)
 			bits == 8 ? (void*)(val8) : (void*)(val16));
 		Argument arg_df = kernel_prog->setKernelArgBuf(
 			kernel_index0, 1, CL_MEM_READ_WRITE |
-			CL_MEM_HOST_NO_ACCESS, sizeof(unsigned char)*dnx*dny*dnz, NULL);
+			CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		int dnxy = dnx * dny;
 		kernel_prog->setKernelArgConst(kernel_index0, 2,
 			sizeof(unsigned int), (void*)(&dnxy));
@@ -2011,24 +2012,24 @@ void ComponentGenerator::DensityField3D(int dsize, int wsize)
 		//kernel 1
 		arg_df.kernel_index = kernel_index1;
 		arg_df.index = 0;
-		kernel_prog->setKernelArgument(&arg_df);
+		kernel_prog->setKernelArgument(arg_df);
 		Argument arg_gavg = kernel_prog->setKernelArgBuf(
 			kernel_index1, 1, CL_MEM_READ_WRITE |
-			CL_MEM_HOST_NO_ACCESS, sizeof(unsigned char)*ngx*ngy*ngz, NULL);
+			CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*ngx*ngy*ngz, NULL);
 		Argument arg_gvar = kernel_prog->setKernelArgBuf(
 			kernel_index1, 2, CL_MEM_READ_WRITE |
-			CL_MEM_HOST_NO_ACCESS, sizeof(unsigned char)*ngx*ngy*ngz, NULL);
+			CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*ngx*ngy*ngz, NULL);
 		kernel_prog->setKernelArgConst(kernel_index1, 3,
-			sizeof(unsigned int), (void*)(&ngx));
-		kernel_prog->setKernelArgConst(kernel_index1, 4,
-			sizeof(unsigned int), (void*)(&ngy));
-		kernel_prog->setKernelArgConst(kernel_index1, 5,
-			sizeof(unsigned int), (void*)(&ngz));
-		int gsxy = gsx * gsy;
-		kernel_prog->setKernelArgConst(kernel_index1, 6,
-			sizeof(unsigned int), (void*)(&gsxy));
-		kernel_prog->setKernelArgConst(kernel_index1, 7,
 			sizeof(unsigned int), (void*)(&gsx));
+		kernel_prog->setKernelArgConst(kernel_index1, 4,
+			sizeof(unsigned int), (void*)(&gsy));
+		kernel_prog->setKernelArgConst(kernel_index1, 5,
+			sizeof(unsigned int), (void*)(&gsz));
+		int ngxy = ngy * ngx;
+		kernel_prog->setKernelArgConst(kernel_index1, 6,
+			sizeof(unsigned int), (void*)(&ngxy));
+		kernel_prog->setKernelArgConst(kernel_index1, 7,
+			sizeof(unsigned int), (void*)(&ngx));
 		kernel_prog->setKernelArgConst(kernel_index1, 8,
 			sizeof(unsigned int), (void*)(&dnxy));
 		kernel_prog->setKernelArgConst(kernel_index1, 9,
@@ -2060,21 +2061,30 @@ void ComponentGenerator::DensityField3D(int dsize, int wsize)
 		global_size[0] = size_t(ngx); global_size[1] = size_t(ngy); global_size[2] = size_t(ngz);
 		kernel_prog->executeKernel(kernel_index1, 3, global_size, local_size);
 		//compute avg
+		global_size[0] = size_t(nx); global_size[1] = size_t(ny); global_size[2] = size_t(nz);
 		Argument arg_avg = kernel_prog->setKernelArgBuf(
 			kernel_index2, 0, CL_MEM_READ_WRITE |
-			CL_MEM_HOST_NO_ACCESS, sizeof(unsigned char)*dnx*dny*dnz, NULL);
+			CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		arg_gavg.kernel_index = kernel_index2;
 		arg_gavg.index = 1;
-		kernel_prog->setKernelArgument(&arg_gavg);
+		kernel_prog->setKernelArgument(arg_gavg);
 		kernel_prog->executeKernel(kernel_index2, 3, global_size, local_size);
 		//compute var
 		Argument arg_var = kernel_prog->setKernelArgBuf(
 			kernel_index2, 0, CL_MEM_READ_WRITE |
-			CL_MEM_HOST_NO_ACCESS, sizeof(unsigned char)*dnx*dny*dnz, NULL);
+			CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		arg_gvar.kernel_index = kernel_index2;
 		arg_gvar.index = 1;
-		kernel_prog->setKernelArgument(&arg_gvar);
+		kernel_prog->setKernelArgument(arg_gvar);
 		kernel_prog->executeKernel(kernel_index2, 3, global_size, local_size);
+
+		//read back
+		unsigned char* val = new unsigned char[dnx*dny*dnz];
+		kernel_prog->readBuffer(arg_avg, val);
+		std::ofstream ofs("E:/DATA/Test/density_field/avg.bin", std::ios::out | std::ios::binary);
+		ofs.write((char*)val, dnx*dny*dnz);
+		delete[] val;
+		ofs.close();
 
 		//release buffer
 		kernel_prog->releaseMemObject(0,
