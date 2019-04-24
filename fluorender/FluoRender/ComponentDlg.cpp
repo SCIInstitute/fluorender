@@ -3609,15 +3609,13 @@ void ComponentDlg::GenerateBsc(bool refine)
 	if (m_use_dist_field)
 	{
 		vd->AddEmptyLabel();
-		//cg.DistField3D(m_basic_iter, float(m_basic_thresh / scale));
-		FLIVR::Argument arg_df, arg_avg, arg_var;
-		cg.DensityField3D(5, 50, arg_df, arg_avg, arg_var);
 		cg.ShuffleID_3D();
-		cg.DensityGrow3D(arg_df, arg_avg, arg_var,
+		//cg.DistField3D(m_basic_iter, float(m_basic_thresh / scale));
+		cg.DensityField3D(5, 50,
 			m_basic_diff, m_basic_iter,
 			float(m_basic_thresh / scale),
 			float(m_basic_falloff / scale2),
-			density, dsize, clean_iter, clean_size);
+			density);
 	}
 	else
 	{
