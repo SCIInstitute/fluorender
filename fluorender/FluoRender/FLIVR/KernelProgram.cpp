@@ -306,11 +306,13 @@ namespace FLIVR
 		for (size_t i = 0; i < kernels_.size(); ++i)
 			if (!kernels_[i].external)
 				clReleaseKernel(kernels_[i].kernel);
-		for (unsigned int i = 0; i < arg_list_.size(); ++i)
-		{
-			if (!arg_list_[i].protect_)
-				clReleaseMemObject(arg_list_[i].buffer);
-		}
+		//difficult to handle mem release here
+		//some may be still used after kernal prog
+		//for (unsigned int i = 0; i < arg_list_.size(); ++i)
+		//{
+		//	if (!arg_list_[i].protect_)
+		//		clReleaseMemObject(arg_list_[i].buffer);
+		//}
 		clReleaseCommandQueue(queue_);
 		clReleaseProgram(program_);
 	}
