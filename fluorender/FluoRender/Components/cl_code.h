@@ -1264,12 +1264,12 @@ const char* str_cl_density_field_3d = \
 "__kernel void kernel_2(\n" \
 "	__global unsigned char* idf,\n" \
 "	__global unsigned char* gd,\n" \
-"	unsigned int ngx,\n" \
-"	unsigned int ngy,\n" \
-"	unsigned int ngz,\n" \
 "	unsigned int gsx,\n" \
 "	unsigned int gsy,\n" \
 "	unsigned int gsz,\n" \
+"	unsigned int ngx,\n" \
+"	unsigned int ngy,\n" \
+"	unsigned int ngz,\n" \
 "	unsigned int dnxy, \n" \
 "	unsigned int dnx)\n" \
 "{\n" \
@@ -1277,26 +1277,26 @@ const char* str_cl_density_field_3d = \
 "		get_global_id(1), get_global_id(2));\n" \
 "	int3 gid;\n" \
 "	int3 gijk;\n" \
-"	gijk = ijk % (int3)(ngx, ngy, ngz);\n" \
-"	gid = ijk / (int3)(ngx, ngy, ngz);\n" \
-"	gid += isless((float3)(gijk.x, gijk.y, gijk.z), (float3)(ngx/2.0, ngy/2.0, ngz/2.0));\n" \
-"	int3 gcrd = clamp(gid + (int3)(0, 0, 0), (int3)(0), (int3)(gsx, gsy, gsz));\n" \
-"	uchar c000 = gd[gsx*gsy*gcrd.z + gsx*gcrd.y + gcrd.x];\n" \
-"	gcrd = clamp(gid + (int3)(1, 0, 0), (int3)(0), (int3)(gsx, gsy, gsz));\n" \
-"	uchar c100 = gd[gsx*gsy*gcrd.z + gsx*gcrd.y + gcrd.x];\n" \
-"	gcrd = clamp(gid + (int3)(0, 1, 0), (int3)(0), (int3)(gsx, gsy, gsz));\n" \
-"	uchar c010 = gd[gsx*gsy*gcrd.z + gsx*gcrd.y + gcrd.x];\n" \
-"	gcrd = clamp(gid + (int3)(1, 1, 0), (int3)(0), (int3)(gsx, gsy, gsz));\n" \
-"	uchar c110 = gd[gsx*gsy*gcrd.z + gsx*gcrd.y + gcrd.x];\n" \
-"	gcrd = clamp(gid + (int3)(0, 0, 1), (int3)(0), (int3)(gsx, gsy, gsz));\n" \
-"	uchar c001 = gd[gsx*gsy*gcrd.z + gsx*gcrd.y + gcrd.x];\n" \
-"	gcrd = clamp(gid + (int3)(1, 0, 1), (int3)(0), (int3)(gsx, gsy, gsz));\n" \
-"	uchar c101 = gd[gsx*gsy*gcrd.z + gsx*gcrd.y + gcrd.x];\n" \
-"	gcrd = clamp(gid + (int3)(0, 1, 1), (int3)(0), (int3)(gsx, gsy, gsz));\n" \
-"	uchar c011 = gd[gsx*gsy*gcrd.z + gsx*gcrd.y + gcrd.x];\n" \
-"	gcrd = clamp(gid + (int3)(1, 1, 1), (int3)(0), (int3)(gsx, gsy, gsz));\n" \
-"	uchar c111 = gd[gsx*gsy*gcrd.z + gsx*gcrd.y + gcrd.x];\n" \
-"	float3 d = ((float3)(gijk.x, gijk.y, gijk.z) - (float3)(ngx/2.0, ngy/2.0, ngz/2.0)) / (float3)(ngx, ngy, ngz);\n" \
+"	gijk = ijk % (int3)(gsx, gsy, gsz);\n" \
+"	gid = ijk / (int3)(gsx, gsy, gsz);\n" \
+"	gid += isless((float3)(gijk.x, gijk.y, gijk.z), (float3)(gsx/2.0, gsy/2.0, gsz/2.0));\n" \
+"	int3 gcrd = clamp(gid + (int3)(0, 0, 0), (int3)(0), (int3)(ngx-1, ngy-1, ngz-1));\n" \
+"	uchar c000 = gd[ngx*ngy*gcrd.z + ngx*gcrd.y + gcrd.x];\n" \
+"	gcrd = clamp(gid + (int3)(1, 0, 0), (int3)(0), (int3)(ngx-1, ngy-1, ngz-1));\n" \
+"	uchar c100 = gd[ngx*ngy*gcrd.z + ngx*gcrd.y + gcrd.x];\n" \
+"	gcrd = clamp(gid + (int3)(0, 1, 0), (int3)(0), (int3)(ngx-1, ngy-1, ngz-1));\n" \
+"	uchar c010 = gd[ngx*ngy*gcrd.z + ngx*gcrd.y + gcrd.x];\n" \
+"	gcrd = clamp(gid + (int3)(1, 1, 0), (int3)(0), (int3)(ngx-1, ngy-1, ngz-1));\n" \
+"	uchar c110 = gd[ngx*ngy*gcrd.z + ngx*gcrd.y + gcrd.x];\n" \
+"	gcrd = clamp(gid + (int3)(0, 0, 1), (int3)(0), (int3)(ngx-1, ngy-1, ngz-1));\n" \
+"	uchar c001 = gd[ngx*ngy*gcrd.z + ngx*gcrd.y + gcrd.x];\n" \
+"	gcrd = clamp(gid + (int3)(1, 0, 1), (int3)(0), (int3)(ngx-1, ngy-1, ngz-1));\n" \
+"	uchar c101 = gd[ngx*ngy*gcrd.z + ngx*gcrd.y + gcrd.x];\n" \
+"	gcrd = clamp(gid + (int3)(0, 1, 1), (int3)(0), (int3)(ngx-1, ngy-1, ngz-1));\n" \
+"	uchar c011 = gd[ngx*ngy*gcrd.z + ngx*gcrd.y + gcrd.x];\n" \
+"	gcrd = clamp(gid + (int3)(1, 1, 1), (int3)(0), (int3)(ngx-1, ngy-1, ngz-1));\n" \
+"	uchar c111 = gd[ngx*ngy*gcrd.z + ngx*gcrd.y + gcrd.x];\n" \
+"	float3 d = ((float3)(gijk.x, gijk.y, gijk.z) - (float3)(gsx/2.0, gsy/2.0, gsz/2.0)) / (float3)(gsx, gsy, gsz);\n" \
 "	int3 delta = isless(d, (float3)(0.0));\n" \
 "	d -= (float3)(delta.x, delta.y, delta.z);\n" \
 "	float c00 = (float)(c000)*(1.0-d.x) + (float)(c100)*d.x;\n" \

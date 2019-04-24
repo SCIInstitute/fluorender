@@ -25,6 +25,7 @@ namespace FLIVR
 	//argument
 	struct Argument
 	{
+		bool protect_;
 		int kernel_index;
 		cl_uint index;
 		size_t size;
@@ -33,12 +34,16 @@ namespace FLIVR
 		void* orgn_addr;
 
 		Argument() :
+			protect_(false),
 			kernel_index(0),
 			index(0),
 			size(0),
 			texture(0),
 			buffer(0),
 			orgn_addr(0) {}
+
+		void protect() { protect_ = true; }
+		void unprotect() { protect_ = false; }
 	};
 
 	class KernelProgram
