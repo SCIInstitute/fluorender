@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include "CompGenerator.h"
 #include "cl_code.h"
 #include <algorithm>
-//#include <fstream>
+#include <fstream>
 
 using namespace FL;
 
@@ -2073,18 +2073,18 @@ void ComponentGenerator::DensityField3D(int dsize, int wsize,
 		size_t local_size[3] = { 1, 1, 1 };
 
 		//debug
-		//unsigned char* val = 0;
-		//std::ofstream ofs;
+		unsigned char* val = 0;
+		std::ofstream ofs;
 
 		//init
 		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
 		//debug
-		//val = new unsigned char[dnx*dny*dnz];
-		//kernel_prog->readBuffer(arg_df, val);
-		//ofs.open("E:/DATA/Test/density_field/df.bin", std::ios::out | std::ios::binary);
-		//ofs.write((char*)val, dnx*dny*dnz);
-		//delete[] val;
-		//ofs.close();
+		val = new unsigned char[dnx*dny*dnz];
+		kernel_prog->readBuffer(arg_df, val);
+		ofs.open("E:/DATA/Test/density_field/df.bin", std::ios::out | std::ios::binary);
+		ofs.write((char*)val, dnx*dny*dnz);
+		delete[] val;
+		ofs.close();
 		//group avg and var
 		global_size[0] = size_t(ngx); global_size[1] = size_t(ngy); global_size[2] = size_t(ngz);
 		kernel_prog->executeKernel(kernel_index1, 3, global_size, local_size);
@@ -2168,13 +2168,17 @@ void ComponentGenerator::DensityField3D(int dsize, int wsize,
 			sizeof(unsigned int), (void*)(&ny));
 		kernel2_prog->setKernelArgConst(kernel2_index0, 9,
 			sizeof(unsigned int), (void*)(&nz));
-		kernel2_prog->setKernelArgConst(kernel2_index0, 7,
-			sizeof(float), (void*)(&tran));
-		kernel2_prog->setKernelArgConst(kernel2_index0, 8,
-			sizeof(float), (void*)(&scl_ff));
-		kernel2_prog->setKernelArgConst(kernel2_index0, 9,
-			sizeof(float), (void*)(&grad_ff));
 		kernel2_prog->setKernelArgConst(kernel2_index0, 10,
+			sizeof(unsigned int), (void*)(&dnxy));
+		kernel2_prog->setKernelArgConst(kernel2_index0, 11,
+			sizeof(unsigned int), (void*)(&dnx));
+		kernel2_prog->setKernelArgConst(kernel2_index0, 12,
+			sizeof(float), (void*)(&tran));
+		kernel2_prog->setKernelArgConst(kernel2_index0, 13,
+			sizeof(float), (void*)(&scl_ff));
+		kernel2_prog->setKernelArgConst(kernel2_index0, 14,
+			sizeof(float), (void*)(&grad_ff));
+		kernel2_prog->setKernelArgConst(kernel2_index0, 15,
 			sizeof(float), (void*)(&density));
 
 		//execute
