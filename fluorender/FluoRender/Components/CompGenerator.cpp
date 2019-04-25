@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include "CompGenerator.h"
 #include "cl_code.h"
 #include <algorithm>
-#include <fstream>
+//#include <fstream>
 
 using namespace FL;
 
@@ -2073,18 +2073,18 @@ void ComponentGenerator::DensityField3D(int dsize, int wsize,
 		size_t local_size[3] = { 1, 1, 1 };
 
 		//debug
-		unsigned char* val = 0;
-		std::ofstream ofs;
+		//unsigned char* val = 0;
+		//std::ofstream ofs;
 
 		//init
 		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
 		//debug
-		val = new unsigned char[dnx*dny*dnz];
-		kernel_prog->readBuffer(arg_df, val);
-		ofs.open("E:/DATA/Test/density_field/df.bin", std::ios::out | std::ios::binary);
-		ofs.write((char*)val, dnx*dny*dnz);
-		delete[] val;
-		ofs.close();
+		//val = new unsigned char[dnx*dny*dnz];
+		//kernel_prog->readBuffer(arg_df, val);
+		//ofs.open("E:/DATA/Test/density_field/df.bin", std::ios::out | std::ios::binary);
+		//ofs.write((char*)val, dnx*dny*dnz);
+		//delete[] val;
+		//ofs.close();
 		//group avg and var
 		global_size[0] = size_t(ngx); global_size[1] = size_t(ngy); global_size[2] = size_t(ngz);
 		kernel_prog->executeKernel(kernel_index1, 3, global_size, local_size);
@@ -2132,7 +2132,6 @@ void ComponentGenerator::DensityField3D(int dsize, int wsize,
 		//release buffer
 		kernel_prog->releaseMemObject(arg_gavg);
 		kernel_prog->releaseMemObject(arg_gvar);
-
 
 		//density grow
 		unsigned int rcnt = 0;
