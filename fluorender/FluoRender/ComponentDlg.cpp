@@ -301,9 +301,9 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 	wxBoxSizer* sizer9 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Density Threshold:",
 		wxDefaultPosition, wxSize(100, 23));
-	m_basic_density_sldr = new wxSlider(page, ID_BasicDensitySldr, 500, 0, 1000,
+	m_basic_density_sldr = new wxSlider(page, ID_BasicDensitySldr, 1000, 0, 2000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_basic_density_text = new wxTextCtrl(page, ID_BasicDensityText, "0.5",
+	m_basic_density_text = new wxTextCtrl(page, ID_BasicDensityText, "1.0",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_fp3);
 	sizer9->Add(5, 5);
 	sizer9->Add(st, 0, wxALIGN_CENTER);
@@ -1555,7 +1555,7 @@ void ComponentDlg::GetSettings()
 	m_basic_size = false;
 	m_basic_size_lm = 100;
 	m_basic_density = false;
-	m_basic_density_thresh = 0.5;
+	m_basic_density_thresh = 1.0;
 	m_basic_density_window_size = 5;
 	m_basic_density_stats_size = 15;
 	m_basic_clean = false;
