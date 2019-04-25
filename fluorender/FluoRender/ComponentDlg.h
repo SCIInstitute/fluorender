@@ -161,8 +161,10 @@ public:
 		ID_BasicDensityCheck,
 		ID_BasicDensitySldr,
 		ID_BasicDensityText,
-		ID_BasicDSizeSldr,
-		ID_BasicDSizeText,
+		ID_BasicDensityWindowSizeSldr,
+		ID_BasicDensityWindowsSizeText,
+		ID_BasicDensityStatsSizeSldr,
+		ID_BasicDensityStatsSizeText,
 		//clean
 		ID_BasicCleanCheck,
 		ID_BasicCleanIterSldr,
@@ -329,14 +331,16 @@ private:
 	double m_basic_thresh;
 	//distance field
 	bool m_use_dist_field;
+	//diffusion
 	bool m_basic_diff;
 	double m_basic_falloff;
 	bool m_basic_size;
 	int m_basic_size_lm;
 	//density
 	bool m_basic_density;
-	double m_basic_density_vl;
-	int m_basic_dsize;
+	double m_basic_density_thresh;
+	int m_basic_density_window_size;
+	int m_basic_density_stats_size;
 	//clean
 	bool m_basic_clean;
 	int m_basic_clean_iter;
@@ -486,7 +490,9 @@ private:
 	wxTextCtrl* m_basic_iter_text;
 	wxSlider* m_basic_thresh_sldr;
 	wxTextCtrl* m_basic_thresh_text;
+	//distance field
 	wxCheckBox* m_use_dist_field_check;
+	//diffusion
 	wxCheckBox* m_basic_diff_check;
 	wxSlider* m_basic_falloff_sldr;
 	wxTextCtrl* m_basic_falloff_text;
@@ -497,8 +503,10 @@ private:
 	wxCheckBox* m_basic_density_check;
 	wxSlider* m_basic_density_sldr;
 	wxTextCtrl* m_basic_density_text;
-	wxSlider* m_basic_dsize_sldr;
-	wxTextCtrl* m_basic_dsize_text;
+	wxSlider* m_basic_density_window_size_sldr;
+	wxTextCtrl* m_basic_density_window_size_text;
+	wxSlider* m_basic_density_stats_size_sldr;
+	wxTextCtrl* m_basic_density_stats_size_text;
 	//clean
 	wxCheckBox* m_basic_clean_check;
 	wxSlider* m_basic_clean_iter_sldr;
@@ -695,8 +703,10 @@ private:
 	void OnBasicDensityCheck(wxCommandEvent &event);
 	void OnBasicDensitySldr(wxScrollEvent &event);
 	void OnBasicDensityText(wxCommandEvent &event);
-	void OnBasicDSizeSldr(wxScrollEvent &event);
-	void OnBasicDSizeText(wxCommandEvent &event);
+	void OnBasicDensityWindowSizeSldr(wxScrollEvent &event);
+	void OnBasicDensityWindowSizeText(wxCommandEvent &event);
+	void OnBasicDensityStatsSizeSldr(wxScrollEvent &event);
+	void OnBasicDensityStatsSizeText(wxCommandEvent &event);
 	//clean
 	void EnableBasicClean(bool value);
 	void OnBasicCleanCheck(wxCommandEvent &event);
