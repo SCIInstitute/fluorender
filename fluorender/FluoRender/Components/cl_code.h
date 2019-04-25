@@ -1363,7 +1363,7 @@ const char* str_cl_density_grow_3d = \
 "	unsigned int ny,\n" \
 "	unsigned int nz,\n" \
 "	unsigned int dnxy,\n" \
-"	unsigned int dx,\n" \
+"	unsigned int dnx,\n" \
 "	float value_t,\n" \
 "	float value_f,\n" \
 "	float grad_f,\n" \
@@ -1380,7 +1380,10 @@ const char* str_cl_density_grow_3d = \
 "	if (density > 0.0f)\n" \
 "	{\n" \
 "		unsigned int index2 = dnxy*coord.z + dnx*coord.y + coord.x;\n" \
-"		if (df[index2] < density)\n" \
+"		unsigned char vdf = df[index2];\n" \
+"		unsigned char vavg = avg[index2];\n" \
+"		unsigned char vvar = var[index2];\n" \
+"		if (vdf < vavg - (1.0-density)*vvar)\n" \
 "			return;\n" \
 "	}\n" \
 "	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
@@ -1414,6 +1417,5 @@ const char* str_cl_density_grow_3d = \
 "	}\n" \
 "	label[index] = label_value;\n" \
 "}\n" \
-"}\n"
 ;
 

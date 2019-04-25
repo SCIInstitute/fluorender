@@ -3611,7 +3611,7 @@ void ComponentDlg::GenerateBsc(bool refine)
 		vd->AddEmptyLabel();
 		cg.ShuffleID_3D();
 		//cg.DistField3D(m_basic_iter, float(m_basic_thresh / scale));
-		cg.DensityField3D(5, 50,
+		cg.DensityField3D(5, 15,
 			m_basic_diff, m_basic_iter,
 			float(m_basic_thresh / scale),
 			float(m_basic_falloff / scale2),
