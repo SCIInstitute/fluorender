@@ -116,6 +116,141 @@ const char* str_cl_slice_brainbow = \
 "	label[index] = label_value;\n" \
 "}\n";
 
+const char* str_cl_cleanup_3d = \
+"const sampler_t samp =\n" \
+"	CLK_NORMALIZED_COORDS_FALSE|\n" \
+"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
+"	CLK_FILTER_NEAREST;\n" \
+"\n" \
+"unsigned int __attribute((always_inline)) reverse_bit(unsigned int val, unsigned int len)\n" \
+"{\n" \
+"	unsigned int res = val;\n" \
+"	int s = len - 1;\n" \
+"	for (val >>= 1; val; val >>= 1)\n" \
+"	{\n" \
+"		res <<= 1;\n" \
+"		res |= val & 1;\n" \
+"		s--;\n" \
+"	}\n" \
+"	res <<= s;\n" \
+"	res <<= 32-len;\n" \
+"	res >>= 32-len;\n" \
+"	return res;\n" \
+"}\n" \
+"__kernel void kernel_0(\n" \
+"	__global unsigned int* mask,\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned int lenx,\n" \
+"	unsigned int lenz)\n" \
+"{\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
+"	unsigned int index = nx*ny*k + nx*j + i;\n" \
+"	unsigned int value_l = label[index];\n" \
+"	if (value_l == 0)\n" \
+"		return;\n" \
+"	unsigned int res = nx*ny*nz - value_l;\n" \
+"	unsigned int x = 0;\n" \
+"	unsigned int y = 0;\n" \
+"	unsigned int z = 0;\n" \
+"	unsigned int ii;\n" \
+"	for (ii=0; ii<lenx; ++ii)\n" \
+"	{\n" \
+"		x |= (1<<(2*ii) & res)>>(ii);\n" \
+"		y |= (1<<(2*ii+1) & res)>>(ii+1);\n" \
+"	}\n" \
+"	z = res<<(32-lenx*2-lenz)>>(32-lenz);\n" \
+"	x = reverse_bit(x, lenx);\n" \
+"	y = reverse_bit(y, lenx);\n" \
+"	z = reverse_bit(z, lenz);\n" \
+"	index = nx*ny*z + nx*y + x;\n" \
+"	atomic_inc(&(mask[index]));\n" \
+"}\n" \
+"__kernel void kernel_1(\n" \
+"	__global unsigned int* mask,\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned int lenx,\n" \
+"	unsigned int lenz)\n" \
+"{\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
+"	unsigned int index = nx*ny*k + nx*j + i;\n" \
+"	unsigned int value_l = label[index];\n" \
+"	if (value_l == 0)\n" \
+"		return;\n" \
+"	unsigned int res = nx*ny*nz - value_l;\n" \
+"	unsigned int x = 0;\n" \
+"	unsigned int y = 0;\n" \
+"	unsigned int z = 0;\n" \
+"	unsigned int ii;\n" \
+"	for (ii=0; ii<lenx; ++ii)\n" \
+"	{\n" \
+"		x |= (1<<(2*ii) & res)>>(ii);\n" \
+"		y |= (1<<(2*ii+1) & res)>>(ii+1);\n" \
+"	}\n" \
+"	z = res<<(32-lenx*2-lenz)>>(32-lenz);\n" \
+"	x = reverse_bit(x, lenx);\n" \
+"	y = reverse_bit(y, lenx);\n" \
+"	z = reverse_bit(z, lenz);\n" \
+"	unsigned int index2 = nx*ny*z + nx*y + x;\n" \
+"	if (index != index2)\n" \
+"		mask[index] = mask[index2];\n" \
+"}\n" \
+"__kernel void kernel_2(\n" \
+"	__read_only image3d_t data,\n" \
+"	__global unsigned int* mask,\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned int thresh)\n" \
+"{\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
+"	unsigned int index = nx*ny*k + nx*j + i;\n" \
+"	//break if large enough\n" \
+"	if (label[index]==0 ||\n" \
+"		mask[index] > thresh)\n" \
+"		return;\n" \
+"	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
+"	unsigned int nb_index;\n" \
+"	unsigned int min_dist = 10;\n" \
+"	unsigned int dist;\n" \
+"	unsigned int max_nb_index;\n" \
+"	float nb_value;\n" \
+"	for (int ni=-1; ni<2; ++ni)\n" \
+"	for (int nj=-1; nj<2; ++nj)\n" \
+"	for (int nk=-1; nk<2; ++nk)\n" \
+"	{\n" \
+"		if ((k==0 && nk==-1) ||\n" \
+"			(k==nz-1 && nk==1))\n" \
+"			continue;\n" \
+"		nb_index = nx*ny*(k+nk) + nx*(j+nj) + i+ni;\n" \
+"		dist = abs(nk) + abs(nj) + abs(ni);\n" \
+"		if (mask[nb_index]>thresh &&\n" \
+"			dist < min_dist)\n" \
+"		{\n" \
+"			nb_value = read_imagef(data, samp, (int4)(i+ni, j+nj, k+nk, 1)).x;\n" \
+"			if (nb_value < value)\n" \
+"				continue;\n" \
+"			min_dist = dist;\n" \
+"			max_nb_index = nb_index;\n" \
+"		}\n" \
+"	}\n" \
+"	if (min_dist < 10)\n" \
+"		label[index] = label[max_nb_index];\n" \
+"}\n" \
+;
+
 const char* str_cl_brainbow_3d = \
 "const sampler_t samp =\n" \
 "	CLK_NORMALIZED_COORDS_FALSE|\n" \
@@ -134,21 +269,6 @@ const char* str_cl_brainbow_3d = \
 "	return grad;\n" \
 "}\n" \
 "\n" \
-"unsigned int __attribute((always_inline)) reverse_bit(unsigned int val, unsigned int len)\n" \
-"{\n" \
-"	unsigned int res = val;\n" \
-"	int s = len - 1;\n" \
-"	for (val >>= 1; val; val >>= 1)\n" \
-"	{\n" \
-"		res <<= 1;\n" \
-"		res |= val & 1;\n" \
-"		s--;\n" \
-"	}\n" \
-"	res <<= s;\n" \
-"	res <<= 32-len;\n" \
-"	res >>= 32-len;\n" \
-"	return res;\n" \
-"}\n" \
 "float get_2d_density(image3d_t image, int4 pos, int r)\n" \
 "{\n" \
 "	float sum = 0.0f;\n" \
@@ -214,118 +334,7 @@ const char* str_cl_brainbow_3d = \
 "	}\n" \
 "	label[index] = label_value;\n" \
 "}\n" \
-"__kernel void kernel_1(\n" \
-"	__global unsigned int* mask,\n" \
-"	__global unsigned int* label,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nz,\n" \
-"	unsigned int lenx,\n" \
-"	unsigned int lenz)\n" \
-"{\n" \
-"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
-"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
-"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
-"	unsigned int index = nx*ny*k + nx*j + i;\n" \
-"	unsigned int value_l = label[index];\n" \
-"	if (value_l == 0)\n" \
-"		return;\n" \
-"	unsigned int res = nx*ny*nz - value_l;\n" \
-"	unsigned int x = 0;\n" \
-"	unsigned int y = 0;\n" \
-"	unsigned int z = 0;\n" \
-"	unsigned int ii;\n" \
-"	for (ii=0; ii<lenx; ++ii)\n" \
-"	{\n" \
-"		x |= (1<<(2*ii) & res)>>(ii);\n" \
-"		y |= (1<<(2*ii+1) & res)>>(ii+1);\n" \
-"	}\n" \
-"	z = res<<(32-lenx*2-lenz)>>(32-lenz);\n" \
-"	x = reverse_bit(x, lenx);\n" \
-"	y = reverse_bit(y, lenx);\n" \
-"	z = reverse_bit(z, lenz);\n" \
-"	index = nx*ny*z + nx*y + x;\n" \
-"	atomic_inc(&(mask[index]));\n" \
-"}\n" \
-"__kernel void kernel_2(\n" \
-"	__global unsigned int* mask,\n" \
-"	__global unsigned int* label,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nz,\n" \
-"	unsigned int lenx,\n" \
-"	unsigned int lenz)\n" \
-"{\n" \
-"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
-"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
-"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
-"	unsigned int index = nx*ny*k + nx*j + i;\n" \
-"	unsigned int value_l = label[index];\n" \
-"	if (value_l == 0)\n" \
-"		return;\n" \
-"	unsigned int res = nx*ny*nz - value_l;\n" \
-"	unsigned int x = 0;\n" \
-"	unsigned int y = 0;\n" \
-"	unsigned int z = 0;\n" \
-"	unsigned int ii;\n" \
-"	for (ii=0; ii<lenx; ++ii)\n" \
-"	{\n" \
-"		x |= (1<<(2*ii) & res)>>(ii);\n" \
-"		y |= (1<<(2*ii+1) & res)>>(ii+1);\n" \
-"	}\n" \
-"	z = res<<(32-lenx*2-lenz)>>(32-lenz);\n" \
-"	x = reverse_bit(x, lenx);\n" \
-"	y = reverse_bit(y, lenx);\n" \
-"	z = reverse_bit(z, lenz);\n" \
-"	unsigned int index2 = nx*ny*z + nx*y + x;\n" \
-"	if (index != index2)\n" \
-"		mask[index] = mask[index2];\n" \
-"}\n" \
-"__kernel void kernel_3(\n" \
-"	__read_only image3d_t data,\n" \
-"	__global unsigned int* mask,\n" \
-"	__global unsigned int* label,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nz,\n" \
-"	unsigned int thresh)\n" \
-"{\n" \
-"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
-"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
-"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
-"	unsigned int index = nx*ny*k + nx*j + i;\n" \
-"	//break if large enough\n" \
-"	if (label[index]==0 ||\n" \
-"		mask[index] > thresh)\n" \
-"		return;\n" \
-"	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
-"	unsigned int nb_index;\n" \
-"	unsigned int min_dist = 10;\n" \
-"	unsigned int dist;\n" \
-"	unsigned int max_nb_index;\n" \
-"	float nb_value;\n" \
-"	for (int ni=-1; ni<2; ++ni)\n" \
-"	for (int nj=-1; nj<2; ++nj)\n" \
-"	for (int nk=-1; nk<2; ++nk)\n" \
-"	{\n" \
-"		if ((k==0 && nk==-1) ||\n" \
-"			(k==nz-1 && nk==1))\n" \
-"			continue;\n" \
-"		nb_index = nx*ny*(k+nk) + nx*(j+nj) + i+ni;\n" \
-"		dist = abs(nk) + abs(nj) + abs(ni);\n" \
-"		if (mask[nb_index]>thresh &&\n" \
-"			dist < min_dist)\n" \
-"		{\n" \
-"			nb_value = read_imagef(data, samp, (int4)(i+ni, j+nj, k+nk, 1)).x;\n" \
-"			if (nb_value < value)\n" \
-"				continue;\n" \
-"			min_dist = dist;\n" \
-"			max_nb_index = nb_index;\n" \
-"		}\n" \
-"	}\n" \
-"	if (min_dist < 10)\n" \
-"		label[index] = label[max_nb_index];\n" \
-"}\n";
+;
 
 const char* str_cl_brainbow_3d_sized = \
 "const sampler_t samp =\n" \
@@ -497,51 +506,7 @@ const char* str_cl_brainbow_3d_sized = \
 "	}\n" \
 "	label[index] = label_value;\n" \
 "}\n" \
-"__kernel void kernel_3(\n" \
-"	__read_only image3d_t data,\n" \
-"	__global unsigned int* mask,\n" \
-"	__global unsigned int* label,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nz,\n" \
-"	unsigned int thresh)\n" \
-"{\n" \
-"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
-"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
-"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
-"	unsigned int index = nx*ny*k + nx*j + i;\n" \
-"	//break if large enough\n" \
-"	if (label[index]==0 ||\n" \
-"		mask[index] > thresh)\n" \
-"		return;\n" \
-"	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
-"	unsigned int nb_index;\n" \
-"	unsigned int min_dist = 10;\n" \
-"	unsigned int dist;\n" \
-"	unsigned int max_nb_index;\n" \
-"	float nb_value;\n" \
-"	for (int ni=-1; ni<2; ++ni)\n" \
-"	for (int nj=-1; nj<2; ++nj)\n" \
-"	for (int nk=-1; nk<2; ++nk)\n" \
-"	{\n" \
-"		if ((k==0 && nk==-1) ||\n" \
-"			(k==nz-1 && nk==1))\n" \
-"			continue;\n" \
-"		nb_index = nx*ny*(k+nk) + nx*(j+nj) + i+ni;\n" \
-"		dist = abs(nk) + abs(nj) + abs(ni);\n" \
-"		if (mask[nb_index]>thresh &&\n" \
-"			dist < min_dist)\n" \
-"		{\n" \
-"			nb_value = read_imagef(data, samp, (int4)(i+ni, j+nj, k+nk, 1)).x;\n" \
-"			if (nb_value < value)\n" \
-"				continue;\n" \
-"			min_dist = dist;\n" \
-"			max_nb_index = nb_index;\n" \
-"		}\n" \
-"	}\n" \
-"	if (min_dist < 10)\n" \
-"		label[index] = label[max_nb_index];\n" \
-"}\n";
+;
 
 const char* str_cl_clear_borders_3d = \
 "const sampler_t samp =\n" \

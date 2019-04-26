@@ -272,24 +272,27 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 	sizer5->Add(m_basic_falloff_text, 0, wxALIGN_CENTER);
 	sizer5->Add(5, 5);
 
-	wxBoxSizer* sizer6 = new wxBoxSizer(wxHORIZONTAL);
+	//wxBoxSizer* sizer6 = new wxBoxSizer(wxHORIZONTAL);
 	m_basic_size_check = new wxCheckBox(page, ID_BasicSizeCheck, "Enable Size Limiter",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	sizer6->Add(5, 5);
-	sizer6->Add(m_basic_size_check, 0, wxALIGN_CENTER);
+	//sizer6->Add(5, 5);
+	//sizer6->Add(m_basic_size_check, 0, wxALIGN_CENTER);
+	m_basic_size_check->Hide();
 
-	wxBoxSizer* sizer7 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Size:",
-		wxDefaultPosition, wxSize(100, 23));
+	//wxBoxSizer* sizer7 = new wxBoxSizer(wxHORIZONTAL);
+	//st = new wxStaticText(page, 0, "Size:",
+	//	wxDefaultPosition, wxSize(100, 23));
 	m_basic_size_sldr = new wxSlider(page, ID_BasicSizeSldr, 100, 0, 500,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_basic_size_text = new wxTextCtrl(page, ID_BasicSizeText, "100",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-	sizer7->Add(5, 5);
-	sizer7->Add(st, 0, wxALIGN_CENTER);
-	sizer7->Add(m_basic_size_sldr, 1, wxEXPAND);
-	sizer7->Add(m_basic_size_text, 0, wxALIGN_CENTER);
-	sizer7->Add(5, 5);
+	//sizer7->Add(5, 5);
+	//sizer7->Add(st, 0, wxALIGN_CENTER);
+	//sizer7->Add(m_basic_size_sldr, 1, wxEXPAND);
+	//sizer7->Add(m_basic_size_text, 0, wxALIGN_CENTER);
+	//sizer7->Add(5, 5);
+	m_basic_size_sldr->Hide();
+	m_basic_size_text->Hide();
 
 	//density
 	wxBoxSizer* sizer8 = new wxBoxSizer(wxHORIZONTAL);
@@ -380,10 +383,10 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 	group1->Add(10, 10);
 	group1->Add(sizer5, 0, wxEXPAND);
 	group1->Add(10, 10);
-	group1->Add(sizer6, 0, wxEXPAND);
-	group1->Add(10, 10);
-	group1->Add(sizer7, 0, wxEXPAND);
-	group1->Add(10, 10);
+	//group1->Add(sizer6, 0, wxEXPAND);
+	//group1->Add(10, 10);
+	//group1->Add(sizer7, 0, wxEXPAND);
+	//group1->Add(10, 10);
 	group1->Add(sizer8, 0, wxEXPAND);
 	group1->Add(10, 10);
 	group1->Add(sizer9, 0, wxEXPAND);
@@ -3672,15 +3675,17 @@ void ComponentDlg::GenerateBsc(bool refine)
 			cg.Grow3DSized(m_basic_diff, m_basic_iter,
 				float(m_basic_thresh / scale),
 				float(m_basic_falloff / scale2),
-				m_basic_size_lm, density, dsize,
-				clean_iter, clean_size);
+				m_basic_size_lm, density, dsize);
 		else
 			cg.Grow3D(m_basic_diff, m_basic_iter,
 				float(m_basic_thresh / scale),
 				float(m_basic_falloff / scale2),
-				density, dsize, clean_iter, clean_size);
+				density, dsize);
 
 	}
+
+	if (clean_iter > 0)
+		cg.Cleanup3D(clean_iter, clean_size);
 
 	if (bn > 1)
 		cg.FillBorder3D(0.1);
@@ -3963,15 +3968,16 @@ void ComponentDlg::GenerateComp(int type, int mode)
 			cg.Grow3DSized(m_basic_diff, m_basic_iter,
 				float(m_basic_thresh / scale),
 				float(m_basic_falloff / scale2),
-				m_basic_size_lm, density, dsize,
-				clean_iter, clean_size);
+				m_basic_size_lm, density, dsize);
 		else
 			cg.Grow3D(m_basic_diff, m_basic_iter,
 				float(m_basic_thresh / scale),
 				float(m_basic_falloff / scale2),
-				density, dsize, clean_iter, clean_size);
-
+				density, dsize);
 	}
+
+	if (clean_iter > 0)
+		cg.Cleanup3D(clean_iter, clean_size);
 
 	if (bn > 1)
 		cg.FillBorder3D(0.1);
