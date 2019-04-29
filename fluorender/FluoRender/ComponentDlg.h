@@ -167,6 +167,7 @@ public:
 		ID_BasicDensityStatsSizeText,
 		//clean
 		ID_BasicCleanCheck,
+		ID_BasicCleanBtn,
 		ID_BasicCleanIterSldr,
 		ID_BasicCleanIterText,
 		ID_BasicCleanLimitSldr,
@@ -509,6 +510,7 @@ private:
 	wxTextCtrl* m_basic_density_stats_size_text;
 	//clean
 	wxCheckBox* m_basic_clean_check;
+	wxButton* m_basic_clean_btn;
 	wxSlider* m_basic_clean_iter_sldr;
 	wxTextCtrl* m_basic_clean_iter_text;
 	wxSlider* m_basic_clean_limit_sldr;
@@ -710,6 +712,7 @@ private:
 	//clean
 	void EnableBasicClean(bool value);
 	void OnBasicCleanCheck(wxCommandEvent &event);
+	void OnBasicCleanBtn(wxCommandEvent &event);
 	void OnBasicCleanIterSldr(wxScrollEvent &event);
 	void OnBasicCleanIterText(wxCommandEvent &event);
 	void OnBasicCleanLimitSldr(wxScrollEvent &event);

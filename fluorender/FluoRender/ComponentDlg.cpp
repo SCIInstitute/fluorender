@@ -156,6 +156,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_TEXT(ID_BasicDensityStatsSizeText, ComponentDlg::OnBasicDensityStatsSizeText)
 	//clean
 	EVT_CHECKBOX(ID_BasicCleanCheck, ComponentDlg::OnBasicCleanCheck)
+	EVT_BUTTON(ID_BasicCleanBtn, ComponentDlg::OnBasicCleanBtn)
 	EVT_COMMAND_SCROLL(ID_BasicCleanIterSldr, ComponentDlg::OnBasicCleanIterSldr)
 	EVT_TEXT(ID_BasicCleanIterText, ComponentDlg::OnBasicCleanIterText)
 	EVT_COMMAND_SCROLL(ID_BasicCleanLimitSldr, ComponentDlg::OnBasicCleanLimitSldr)
@@ -344,14 +345,19 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 	wxBoxSizer* sizer12 = new wxBoxSizer(wxHORIZONTAL);
 	m_basic_clean_check = new wxCheckBox(page, ID_BasicCleanCheck, "Clean Up",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+	m_basic_clean_btn = new wxButton(page, ID_BasicCleanBtn, "Grow",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	sizer12->Add(5, 5);
 	sizer12->Add(m_basic_clean_check, 0, wxALIGN_CENTER);
+	sizer12->AddStretchSpacer(1);
+	sizer12->Add(m_basic_clean_btn, 0, wxALIGN_CENTER);
+	sizer12->Add(5, 5);
 
 	//iterations
 	wxBoxSizer* sizer13 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Iterations:",
 		wxDefaultPosition, wxSize(100, 23));
-	m_basic_clean_iter_sldr = new wxSlider(page, ID_BasicCleanIterSldr, 5, 0, 50,
+	m_basic_clean_iter_sldr = new wxSlider(page, ID_BasicCleanIterSldr, 5, 1, 50,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_basic_clean_iter_text = new wxTextCtrl(page, ID_BasicCleanIterText, "5",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
@@ -364,7 +370,7 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 	wxBoxSizer* sizer14 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Size:",
 		wxDefaultPosition, wxSize(100, 23));
-	m_basic_clean_limit_sldr = new wxSlider(page, ID_BasicCleanLimitSldr, 5, 0, 50,
+	m_basic_clean_limit_sldr = new wxSlider(page, ID_BasicCleanLimitSldr, 5, 1, 50,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_basic_clean_limit_text = new wxTextCtrl(page, ID_BasicCleanLimitText, "5",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
@@ -375,7 +381,11 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 	sizer14->Add(5, 5);
 
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Advanced Settings"), wxVERTICAL);
+		new wxStaticBox(page, wxID_ANY, "ID Growth && Merge"), wxVERTICAL);
+	group1->Add(10, 10);
+	group1->Add(sizer1, 0, wxEXPAND);
+	group1->Add(10, 10);
+	group1->Add(sizer2, 0, wxEXPAND);
 	group1->Add(10, 10);
 	group1->Add(sizer3, 0, wxEXPAND);
 	group1->Add(10, 10);
@@ -395,20 +405,22 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 	group1->Add(10, 10);
 	group1->Add(sizer11, 0, wxEXPAND);
 	group1->Add(10, 10);
-	group1->Add(sizer12, 0, wxEXPAND);
-	group1->Add(10, 10);
-	group1->Add(sizer13, 0, wxEXPAND);
-	group1->Add(10, 10);
-	group1->Add(sizer14, 0, wxEXPAND);
-	group1->Add(10, 10);
+
+	wxBoxSizer *group2 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "Post Cleanup"), wxVERTICAL);
+	group2->Add(sizer12, 0, wxEXPAND);
+	group2->Add(10, 10);
+	group2->Add(sizer13, 0, wxEXPAND);
+	group2->Add(10, 10);
+	group2->Add(sizer14, 0, wxEXPAND);
+	group2->Add(10, 10);
 
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
 	sizerv->Add(10, 10);
-	sizerv->Add(sizer1, 0, wxEXPAND);
-	sizerv->Add(10, 10);
-	sizerv->Add(sizer2, 0, wxEXPAND);
-	sizerv->Add(10, 10);
 	sizerv->Add(group1, 0, wxEXPAND);
+	sizerv->Add(10, 10);
+	sizerv->Add(group2, 0, wxEXPAND);
+	sizerv->Add(10, 10);
 	page->SetSizer(sizerv);
 
 	return page;
@@ -1297,7 +1309,7 @@ wxCollapsiblePane* ComponentDlg::CreateMatchSlicesPane(wxWindow *parent)
 ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	: wxPanel(parent, wxID_ANY,
 		wxDefaultPosition,
-		wxSize(500, 650),
+		wxSize(500, 750),
 		0, "ComponentDlg"),
 	m_frame(parent),
 	m_view(0)
@@ -3683,6 +3695,58 @@ void ComponentDlg::GenerateBsc(bool refine)
 				density, dsize);
 
 	}
+
+	if (clean_iter > 0)
+		cg.Cleanup3D(clean_iter, clean_size);
+
+	if (bn > 1)
+		cg.FillBorder3D(0.1);
+
+	vd->GetVR()->clear_tex_current();
+	m_view->RefreshGL();
+
+	m_generate_prg->SetValue(100);
+	connection.disconnect();
+
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+	{
+		vr_frame->GetSettingDlg()->SetRunScript(true);
+		vr_frame->GetMovieView()->GetScriptSettings();
+	}
+}
+
+void ComponentDlg::OnBasicCleanBtn(wxCommandEvent &event)
+{
+	if (!m_view)
+		return;
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+	vd->AddEmptyMask(1);
+
+	int clean_iter = m_basic_clean_iter;
+	int clean_size = m_basic_clean_size_vl;
+	if (!m_basic_clean)
+	{
+		clean_iter = 0;
+		clean_size = 0;
+	}
+
+	//get brick number
+	int bn = vd->GetAllBrickNum();
+
+	m_generate_prg->SetValue(0);
+
+	FL::ComponentGenerator cg(vd);
+	boost::signals2::connection connection =
+		cg.m_sig_progress.connect(boost::bind(
+			&ComponentDlg::UpdateProgress, this));
+
+	cg.SetUseMask(m_use_sel_chk->GetValue());
+
+	if (bn > 1)
+		cg.ClearBorders3D();
 
 	if (clean_iter > 0)
 		cg.Cleanup3D(clean_iter, clean_size);
