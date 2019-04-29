@@ -303,9 +303,9 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 	sizer8->Add(m_basic_density_check, 0, wxALIGN_CENTER);
 	//
 	wxBoxSizer* sizer9 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Density Threshold:",
+	st = new wxStaticText(page, 0, "Density Control:",
 		wxDefaultPosition, wxSize(100, 23));
-	m_basic_density_sldr = new wxSlider(page, ID_BasicDensitySldr, 1000, 0, 2000,
+	m_basic_density_sldr = new wxSlider(page, ID_BasicDensitySldr, 1000, 0, 5000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_basic_density_text = new wxTextCtrl(page, ID_BasicDensityText, "1.0",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_fp3);
@@ -2856,6 +2856,7 @@ void ComponentDlg::EnableBasicClean(bool value)
 	m_basic_clean = value;
 	if (m_basic_clean)
 	{
+		m_basic_clean_btn->Enable();
 		m_basic_clean_iter_sldr->Enable();
 		m_basic_clean_iter_text->Enable();
 		m_basic_clean_limit_sldr->Enable();
@@ -2863,6 +2864,7 @@ void ComponentDlg::EnableBasicClean(bool value)
 	}
 	else
 	{
+		m_basic_clean_btn->Disable();
 		m_basic_clean_iter_sldr->Disable();
 		m_basic_clean_iter_text->Disable();
 		m_basic_clean_limit_sldr->Disable();
