@@ -1837,7 +1837,7 @@ void ComponentGenerator::DistField3D(int iter, float th)
 
 	//create program and kernels
 	KernelProgram* kernel_prog = VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_dist_field_3d);
+		vol_kernel_factory_.kernel(str_cl_dist_field_2d);
 	if (!kernel_prog)
 		return;
 	int kernel_index0 = -1;
