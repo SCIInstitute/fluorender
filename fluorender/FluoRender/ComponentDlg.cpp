@@ -3662,47 +3662,54 @@ void ComponentDlg::GenerateBsc(bool refine)
 			&ComponentDlg::UpdateProgress, this));
 
 	cg.SetUseMask(m_use_sel_chk->GetValue());
-	//cg.DistField3D(m_basic_iter, float(m_basic_thresh / scale));
 
-	if (refine)
-	{
-		if (bn > 1)
-			cg.ClearBorders3D();
-	}
-	else
+	if (m_use_dist_field)
 	{
 		vd->AddEmptyLabel();
-		cg.ShuffleID_3D();
-	}
-
-	if (m_basic_density)
-	{
-		cg.DensityField3D(dsize, stats_size,
-			m_basic_diff, m_basic_iter,
-			float(m_basic_thresh / scale),
-			float(m_basic_falloff / scale2),
-			density);
+		cg.DistField3D(m_basic_iter, float(m_basic_thresh / scale));
 	}
 	else
 	{
-		if (m_basic_size)
-			cg.Grow3DSized(m_basic_diff, m_basic_iter,
-				float(m_basic_thresh / scale),
-				float(m_basic_falloff / scale2),
-				m_basic_size_lm, density, dsize);
+		if (refine)
+		{
+			if (bn > 1)
+				cg.ClearBorders3D();
+		}
 		else
-			cg.Grow3D(m_basic_diff, m_basic_iter,
+		{
+			vd->AddEmptyLabel();
+			cg.ShuffleID_3D();
+		}
+
+		if (m_basic_density)
+		{
+			cg.DensityField3D(dsize, stats_size,
+				m_basic_diff, m_basic_iter,
 				float(m_basic_thresh / scale),
 				float(m_basic_falloff / scale2),
-				density, dsize);
+				density);
+		}
+		else
+		{
+			if (m_basic_size)
+				cg.Grow3DSized(m_basic_diff, m_basic_iter,
+					float(m_basic_thresh / scale),
+					float(m_basic_falloff / scale2),
+					m_basic_size_lm, density, dsize);
+			else
+				cg.Grow3D(m_basic_diff, m_basic_iter,
+					float(m_basic_thresh / scale),
+					float(m_basic_falloff / scale2),
+					density, dsize);
 
+		}
+
+		if (clean_iter > 0)
+			cg.Cleanup3D(clean_iter, clean_size);
+
+		if (bn > 1)
+			cg.FillBorder3D(0.1);
 	}
-
-	if (clean_iter > 0)
-		cg.Cleanup3D(clean_iter, clean_size);
-
-	if (bn > 1)
-		cg.FillBorder3D(0.1);
 
 	vd->GetVR()->clear_tex_current();
 	m_view->RefreshGL();
