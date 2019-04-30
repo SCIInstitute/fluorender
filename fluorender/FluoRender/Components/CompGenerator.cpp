@@ -1831,7 +1831,7 @@ void ComponentGenerator::MatchSlices_CPU(bool backwards, unsigned int size_thres
 	m_sig_progress();
 }
 
-void ComponentGenerator::DistField3D(int iter, float th)
+void ComponentGenerator::DistField3D(int max_dist, float th)
 {
 	CHECK_BRICKS
 
@@ -1886,9 +1886,9 @@ void ComponentGenerator::DistField3D(int iter, float th)
 			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 			image_format, image_desc,
 			bits == 8 ? (void*)(val8) : (void*)(val16));
-		kernel_prog->setKernelArgBuf(kernel_index0, 1,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny*nz, (void*)(val32));
+		Argument arg_df = kernel_prog->setKernelArgBuf(
+			kernel_index0, 1, CL_MEM_READ_WRITE |
+			CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*nx*ny*nz, NULL);
 		kernel_prog->setKernelArgConst(kernel_index0, 2,
 			sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(kernel_index0, 3,
@@ -1898,9 +1898,9 @@ void ComponentGenerator::DistField3D(int iter, float th)
 		kernel_prog->setKernelArgConst(kernel_index0, 5,
 			sizeof(float), (void*)(&th));
 		//kernel 1
-		kernel_prog->setKernelArgBuf(kernel_index1, 0,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny*nz, (void*)(val32));
+		arg_df.kernel_index = kernel_index1;
+		arg_df.index = 0;
+		kernel_prog->setKernelArgument(arg_df);
 		kernel_prog->setKernelArgConst(kernel_index1, 1,
 			sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(kernel_index1, 2,
@@ -1910,28 +1910,30 @@ void ComponentGenerator::DistField3D(int iter, float th)
 
 		//init
 		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
-		unsigned int nn, re;
-		for (int j = 0; j < iter; ++j)
+		unsigned char nn, re;
+		for (int j = 0; j < max_dist; ++j)
 		{
 			nn = j == 0 ? 0 : j + 1;
 			re = j + 2;
 			//nn *= 20;
 			//re *= 20;
 			kernel_prog->setKernelArgConst(kernel_index1, 4,
-				sizeof(unsigned int), (void*)(&nn));
+				sizeof(unsigned char), (void*)(&nn));
 			kernel_prog->setKernelArgConst(kernel_index1, 5,
-				sizeof(unsigned int), (void*)(&re));
+				sizeof(unsigned char), (void*)(&re));
 			kernel_prog->executeKernel(kernel_index1, 3, global_size, local_size);
 		}
 
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
+		kernel_prog->readBuffer(arg_df,
+			bits == 8 ? (void*)(val8) : (void*)(val16));
 
 		//release buffer
 		kernel_prog->releaseMemObject(0,
 			bits == 8 ? (void*)(val8) : (void*)(val16));
-		kernel_prog->releaseMemObject(sizeof(unsigned int)*nx*ny*nz,
-			(void*)(val32));
+		kernel_prog->releaseMemObject(arg_df);
+		//kernel_prog->releaseMemObject(sizeof(unsigned int)*nx*ny*nz,
+		//	(void*)(val32));
 
 		m_sig_progress();
 

@@ -149,6 +149,8 @@ public:
 		ID_BasicThreshText,
 		//distance field
 		ID_BasicUseDistFieldCheck,
+		ID_BasicMaxDistSldr,
+		ID_BasicMaxDistText,
 		//falloff
 		ID_BasicDiffCheck,
 		ID_BasicFalloffSldr,
@@ -332,6 +334,7 @@ private:
 	double m_basic_thresh;
 	//distance field
 	bool m_use_dist_field;
+	int m_basic_max_dist;
 	//diffusion
 	bool m_basic_diff;
 	double m_basic_falloff;
@@ -493,6 +496,8 @@ private:
 	wxTextCtrl* m_basic_thresh_text;
 	//distance field
 	wxCheckBox* m_use_dist_field_check;
+	wxSlider* m_basic_max_dist_sldr;
+	wxTextCtrl* m_basic_max_dist_text;
 	//diffusion
 	wxCheckBox* m_basic_diff_check;
 	wxSlider* m_basic_falloff_sldr;
@@ -692,6 +697,8 @@ private:
 	void OnBasicThreshText(wxCommandEvent &event);
 	void OnBasicUseDistFieldCheck(wxCommandEvent &event);
 	void EnableUseDistField(bool value);
+	void OnBasicMaxDistSldr(wxScrollEvent &event);
+	void OnBasicMaxDistText(wxCommandEvent &event);
 	void EnableBasicDiff(bool value);
 	void OnBasicDiffCheck(wxCommandEvent &event);
 	void OnBasicFalloffSldr(wxScrollEvent &event);
