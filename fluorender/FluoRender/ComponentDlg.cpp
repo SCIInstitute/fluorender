@@ -139,7 +139,11 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_TEXT(ID_BasicIterText, ComponentDlg::OnBasicIterText)
 	EVT_COMMAND_SCROLL(ID_BasicThreshSldr, ComponentDlg::OnBasicThreshSldr)
 	EVT_TEXT(ID_BasicThreshText, ComponentDlg::OnBasicThreshText)
+	//distance field
 	EVT_CHECKBOX(ID_BasicUseDistFieldCheck, ComponentDlg::OnBasicUseDistFieldCheck)
+	EVT_COMMAND_SCROLL(ID_BasicMaxDistSldr, ComponentDlg::OnBasicMaxDistSldr)
+	EVT_TEXT(ID_BasicMaxDistText, ComponentDlg::OnBasicMaxDistText)
+	//diffusion
 	EVT_CHECKBOX(ID_BasicDiffCheck, ComponentDlg::OnBasicDiffCheck)
 	EVT_COMMAND_SCROLL(ID_BasicFalloffSldr, ComponentDlg::OnBasicFalloffSldr)
 	EVT_TEXT(ID_BasicFalloffText, ComponentDlg::OnBasicFalloffText)
@@ -253,25 +257,37 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	sizer3->Add(5, 5);
 	sizer3->Add(m_use_dist_field_check, 0, wxALIGN_CENTER);
-
 	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
-	m_basic_diff_check = new wxCheckBox(page, ID_BasicDiffCheck, "Enable Diffusion",
-		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+	st = new wxStaticText(page, 0, "Max Distance",
+		wxDefaultPosition, wxSize(100, 23));
+	m_basic_max_dist_sldr = new wxSlider(page, ID_BasicMaxDistSldr, 30, 1, 255,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_basic_max_dist_text = new wxTextCtrl(page, ID_BasicMaxDistText, "30",
+		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
 	sizer4->Add(5, 5);
-	sizer4->Add(m_basic_diff_check, 0, wxALIGN_CENTER);
+	sizer4->Add(st, 0, wxALIGN_CENTER);
+	sizer4->Add(m_basic_max_dist_sldr, 1, wxEXPAND);
+	sizer4->Add(m_basic_max_dist_text, 0, wxALIGN_CENTER);
+	sizer4->Add(5, 5);
 
 	wxBoxSizer* sizer5 = new wxBoxSizer(wxHORIZONTAL);
+	m_basic_diff_check = new wxCheckBox(page, ID_BasicDiffCheck, "Enable Diffusion",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+	sizer5->Add(5, 5);
+	sizer5->Add(m_basic_diff_check, 0, wxALIGN_CENTER);
+
+	wxBoxSizer* sizer6 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Falloff:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_basic_falloff_sldr = new wxSlider(page, ID_BasicFalloffSldr, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_basic_falloff_text = new wxTextCtrl(page, ID_BasicFalloffText, "0.000",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_fp3);
-	sizer5->Add(5, 5);
-	sizer5->Add(st, 0, wxALIGN_CENTER);
-	sizer5->Add(m_basic_falloff_sldr, 1, wxEXPAND);
-	sizer5->Add(m_basic_falloff_text, 0, wxALIGN_CENTER);
-	sizer5->Add(5, 5);
+	sizer6->Add(5, 5);
+	sizer6->Add(st, 0, wxALIGN_CENTER);
+	sizer6->Add(m_basic_falloff_sldr, 1, wxEXPAND);
+	sizer6->Add(m_basic_falloff_text, 0, wxALIGN_CENTER);
+	sizer6->Add(5, 5);
 
 	//wxBoxSizer* sizer6 = new wxBoxSizer(wxHORIZONTAL);
 	m_basic_size_check = new wxCheckBox(page, ID_BasicSizeCheck, "Enable Size Limiter",
@@ -393,8 +409,8 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 	group1->Add(10, 10);
 	group1->Add(sizer5, 0, wxEXPAND);
 	group1->Add(10, 10);
-	//group1->Add(sizer6, 0, wxEXPAND);
-	//group1->Add(10, 10);
+	group1->Add(sizer6, 0, wxEXPAND);
+	group1->Add(10, 10);
 	//group1->Add(sizer7, 0, wxEXPAND);
 	//group1->Add(10, 10);
 	group1->Add(sizer8, 0, wxEXPAND);
@@ -1456,6 +1472,7 @@ void ComponentDlg::Update()
 	m_basic_thresh_text->SetValue(wxString::Format("%.3f", m_basic_thresh));
 	m_use_dist_field_check->SetValue(m_use_dist_field);
 	EnableUseDistField(m_use_dist_field);
+	m_basic_max_dist_text->SetValue(wxString::Format("%d", m_basic_max_dist));
 	m_basic_diff_check->SetValue(m_basic_diff);
 	EnableBasicDiff(m_basic_diff);
 	m_basic_falloff_text->SetValue(wxString::Format("%.3f", m_basic_falloff));
@@ -1565,6 +1582,7 @@ void ComponentDlg::GetSettings()
 	m_basic_iter = 50;
 	m_basic_thresh = 0.5;
 	m_use_dist_field = false;
+	m_basic_max_dist = 30;
 	m_basic_diff = false;
 	m_basic_falloff = 0.01;
 	m_basic_size = false;
@@ -1685,6 +1703,7 @@ void ComponentDlg::LoadSettings(wxString filename)
 		fconfig.Read("basic_iter", &m_basic_iter);
 		fconfig.Read("basic_thresh", &m_basic_thresh);
 		fconfig.Read("use_dist_field", &m_use_dist_field);
+		fconfig.Read("basic_max_dist", &m_basic_max_dist);
 		fconfig.Read("basic_diff", &m_basic_diff);
 		fconfig.Read("basic_falloff", &m_basic_falloff);
 		fconfig.Read("basic_size", &m_basic_size);
@@ -1791,6 +1810,7 @@ void ComponentDlg::SaveSettings(wxString filename)
 	fconfig.Write("basic_iter", m_basic_iter);
 	fconfig.Write("basic_thresh", m_basic_thresh);
 	fconfig.Write("use_dist_field", m_use_dist_field);
+	fconfig.Write("basic_max_dist", m_basic_max_dist);
 	fconfig.Write("basic_diff", m_basic_diff);
 	fconfig.Write("basic_falloff", m_basic_falloff);
 	fconfig.Write("basic_size", m_basic_size);
@@ -2706,6 +2726,16 @@ void ComponentDlg::OnBasicThreshText(wxCommandEvent &event)
 void ComponentDlg::EnableUseDistField(bool value)
 {
 	m_use_dist_field = value;
+	if (m_use_dist_field)
+	{
+		m_basic_max_dist_sldr->Enable();
+		m_basic_max_dist_text->Enable();
+	}
+	else
+	{
+		m_basic_max_dist_sldr->Disable();
+		m_basic_max_dist_text->Disable();
+	}
 }
 
 void ComponentDlg::EnableBasicDiff(bool value)
@@ -2726,6 +2756,22 @@ void ComponentDlg::EnableBasicDiff(bool value)
 void ComponentDlg::OnBasicUseDistFieldCheck(wxCommandEvent &event)
 {
 	EnableUseDistField(m_use_dist_field_check->GetValue());
+}
+
+void ComponentDlg::OnBasicMaxDistSldr(wxScrollEvent &event)
+{
+	int val = event.GetPosition();
+	m_basic_max_dist_text->SetValue(wxString::Format("%d", val));
+}
+
+void ComponentDlg::OnBasicMaxDistText(wxCommandEvent &event)
+{
+	long val = 1;
+	m_basic_max_dist_text->GetValue().ToLong(&val);
+	if (val > 255)
+		val = 255;
+	m_basic_max_dist = val;
+	m_basic_max_dist_sldr->SetValue(m_basic_max_dist);
 }
 
 void ComponentDlg::OnBasicDiffCheck(wxCommandEvent &event)
@@ -3666,7 +3712,7 @@ void ComponentDlg::GenerateBsc(bool refine)
 	if (m_use_dist_field)
 	{
 		vd->AddEmptyLabel();
-		cg.DistField3D(m_basic_iter, float(m_basic_thresh / scale));
+		cg.DistField3D(m_basic_max_dist, float(m_basic_thresh / scale));
 	}
 	else
 	{
