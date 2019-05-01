@@ -1862,6 +1862,8 @@ void ComponentGenerator::DistField3D(int max_dist, float th)
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
+		unsigned char ini = 1;
+
 		//data
 		cl_image_format image_format;
 		image_format.image_channel_order = CL_R;
@@ -1897,6 +1899,8 @@ void ComponentGenerator::DistField3D(int max_dist, float th)
 			sizeof(unsigned int), (void*)(&nz));
 		kernel_prog->setKernelArgConst(kernel_index0, 5,
 			sizeof(float), (void*)(&th));
+		kernel_prog->setKernelArgConst(kernel_index0, 6,
+			sizeof(unsigned char), (void*)(&ini));
 		//kernel 1
 		arg_df.kernel_index = kernel_index1;
 		arg_df.index = 0;
