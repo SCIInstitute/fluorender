@@ -1164,7 +1164,8 @@ const char* str_cl_dist_field_2d = \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
 "	unsigned int nz,\n" \
-"	float th)\n" \
+"	float th,\n" \
+"	unsigned char ini)\n" \
 "{\n" \
 "	int3 ijk = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
@@ -1177,7 +1178,7 @@ const char* str_cl_dist_field_2d = \
 "	}\n" \
 "	float dval = read_imagef(data, samp, (int4)(ijk, 1)).x;\n" \
 "	if (dval > th)\n" \
-"		df[index] = 1;\n" \
+"		df[index] = ini;\n" \
 "	else\n" \
 "		df[index] = 0;\n" \
 "}\n" \
