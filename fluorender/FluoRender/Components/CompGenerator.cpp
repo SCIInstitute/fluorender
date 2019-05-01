@@ -1911,19 +1911,19 @@ void ComponentGenerator::DistField3D(int max_dist, float th)
 			sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setKernelArgConst(kernel_index1, 3,
 			sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setKernelArgConst(kernel_index1, 4,
+			sizeof(unsigned char), (void*)(&ini));
 
 		//init
 		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
 		unsigned char nn, re;
 		for (int j = 0; j < max_dist; ++j)
 		{
-			nn = j == 0 ? 0 : j + 1;
-			re = j + 2;
-			//nn *= 20;
-			//re *= 20;
-			kernel_prog->setKernelArgConst(kernel_index1, 4,
-				sizeof(unsigned char), (void*)(&nn));
+			nn = j == 0 ? 0 : j + ini;
+			re = j + ini + 1;
 			kernel_prog->setKernelArgConst(kernel_index1, 5,
+				sizeof(unsigned char), (void*)(&nn));
+			kernel_prog->setKernelArgConst(kernel_index1, 6,
 				sizeof(unsigned char), (void*)(&re));
 			kernel_prog->executeKernel(kernel_index1, 3, global_size, local_size);
 		}

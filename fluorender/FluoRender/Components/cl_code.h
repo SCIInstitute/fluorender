@@ -1188,6 +1188,7 @@ const char* str_cl_dist_field_2d = \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
 "	unsigned int nz,\n" \
+"	unsigned char ini,\n" \
 "	unsigned char nn,\n" \
 "	unsigned char re)\n" \
 "{\n" \
@@ -1195,7 +1196,7 @@ const char* str_cl_dist_field_2d = \
 "		get_global_id(1), get_global_id(2));\n" \
 "	unsigned int nxy = nx*ny;\n" \
 "	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
-"	if (df[index] == 1)\n" \
+"	if (df[index] == ini)\n" \
 "	{\n" \
 "		unsigned char v1 = df[nxy*ijk.z + nx*ijk.y + ijk.x - 1];\n" \
 "		unsigned char v2 = df[nxy*ijk.z + nx*ijk.y + ijk.x + 1];\n" \
@@ -1205,6 +1206,21 @@ const char* str_cl_dist_field_2d = \
 "			v3 == nn || v4 == nn)\n" \
 "			df[index] = re;\n" \
 "	}\n" \
+"}\n" \
+"__kernel void kernel_2(\n" \
+"	__read_only image3d_t data,\n" \
+"	__global unsigned char* df,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	float maxd)\n" \
+"{\n" \
+"	int3 ijk = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	unsigned int nxy = nx*ny;\n" \
+"	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
+"	float dval = read_imagef(data, samp, (int4)(ijk, 1)).x;\n" \
+"	df[index] = (unsigned char)(dval * df[index] * 255.0 / maxd);\n" \
 "}\n" \
 ;
 
