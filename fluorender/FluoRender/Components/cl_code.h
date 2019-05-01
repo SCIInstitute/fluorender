@@ -1207,7 +1207,7 @@ const char* str_cl_dist_field_2d = \
 "			df[index] = re;\n" \
 "	}\n" \
 "}\n" \
-"__kernel void kernel_2(\n" \
+"__kernel void kernel_null(\n" \
 "	__read_only image3d_t data,\n" \
 "	__global unsigned char* df,\n" \
 "	unsigned int nx,\n" \
