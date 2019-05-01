@@ -3709,24 +3709,35 @@ void ComponentDlg::GenerateBsc(bool refine)
 
 	cg.SetUseMask(m_use_sel_chk->GetValue());
 
-	if (m_use_dist_field)
+	if (refine)
 	{
-		vd->AddEmptyLabel();
-		cg.DistField3D(m_basic_max_dist, float(m_basic_thresh / scale));
+		if (bn > 1)
+			cg.ClearBorders3D();
 	}
 	else
 	{
-		if (refine)
+		vd->AddEmptyLabel();
+		cg.ShuffleID_3D();
+	}
+
+	if (m_use_dist_field)
+	{
+		if (m_basic_density)
 		{
-			if (bn > 1)
-				cg.ClearBorders3D();
+			cg.DistDensityField3D(
+				m_basic_diff, m_basic_iter,
+				float(m_basic_thresh / scale),
+				float(m_basic_falloff / scale2),
+				m_basic_max_dist,
+				dsize, stats_size, density);
 		}
 		else
 		{
-			vd->AddEmptyLabel();
-			cg.ShuffleID_3D();
+			cg.DistField3D(m_basic_max_dist, float(m_basic_thresh / scale));
 		}
-
+	}
+	else
+	{
 		if (m_basic_density)
 		{
 			cg.DensityField3D(dsize, stats_size,
@@ -3747,15 +3758,14 @@ void ComponentDlg::GenerateBsc(bool refine)
 					float(m_basic_thresh / scale),
 					float(m_basic_falloff / scale2),
 					density, dsize);
-
 		}
-
-		if (clean_iter > 0)
-			cg.Cleanup3D(clean_iter, clean_size);
-
-		if (bn > 1)
-			cg.FillBorder3D(0.1);
 	}
+
+	if (clean_iter > 0)
+		cg.Cleanup3D(clean_iter, clean_size);
+
+	if (bn > 1)
+		cg.FillBorder3D(0.1);
 
 	vd->GetVR()->clear_tex_current();
 	m_view->RefreshGL();
