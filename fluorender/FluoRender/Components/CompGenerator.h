@@ -58,8 +58,7 @@ namespace FL
 		void ClearBorders2D();
 		void FillBorder3D(float);
 		void FillBorder2D(float);
-		void Grow3D(bool, int, float, float,
-			float, int);
+		void Grow3D(bool, int, float, float);
 		void Grow3DSized(bool, int, float, float,
 			int, float, int);
 		void Cleanup3D(int, unsigned int);

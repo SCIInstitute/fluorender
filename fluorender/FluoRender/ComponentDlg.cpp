@@ -3733,7 +3733,7 @@ void ComponentDlg::GenerateBsc(bool refine)
 		}
 		else
 		{
-			cg.DistField3D(m_basic_max_dist, float(m_basic_thresh / scale));
+			//cg.DistField3D(m_basic_max_dist, float(m_basic_thresh / scale));
 		}
 	}
 	else
@@ -3748,16 +3748,9 @@ void ComponentDlg::GenerateBsc(bool refine)
 		}
 		else
 		{
-			if (m_basic_size)
-				cg.Grow3DSized(m_basic_diff, m_basic_iter,
-					float(m_basic_thresh / scale),
-					float(m_basic_falloff / scale2),
-					m_basic_size_lm, density, dsize);
-			else
-				cg.Grow3D(m_basic_diff, m_basic_iter,
-					float(m_basic_thresh / scale),
-					float(m_basic_falloff / scale2),
-					density, dsize);
+			cg.Grow3D(m_basic_diff, m_basic_iter,
+				float(m_basic_thresh / scale),
+				float(m_basic_falloff / scale2));
 		}
 	}
 
@@ -4070,7 +4063,6 @@ void ComponentDlg::GenerateComp(int type, int mode)
 	FL::ComponentGenerator cg(vd);
 
 	cg.SetUseMask(m_use_sel_chk->GetValue());
-	//cg.DistField3D(m_basic_iter, float(m_basic_thresh / scale));
 
 	if (mode)
 	{
@@ -4083,26 +4075,38 @@ void ComponentDlg::GenerateComp(int type, int mode)
 		cg.ShuffleID_3D();
 	}
 
-	if (m_basic_density)
+	if (m_use_dist_field)
 	{
-		cg.DensityField3D(dsize, stats_size,
-			m_basic_diff, m_basic_iter,
-			float(m_basic_thresh / scale),
-			float(m_basic_falloff / scale2),
-			density);
+		if (m_basic_density)
+		{
+			cg.DistDensityField3D(
+				m_basic_diff, m_basic_iter,
+				float(m_basic_thresh / scale),
+				float(m_basic_falloff / scale2),
+				m_basic_max_dist,
+				dsize, stats_size, density);
+		}
+		else
+		{
+			//cg.DistField3D(m_basic_max_dist, float(m_basic_thresh / scale));
+		}
 	}
 	else
 	{
-		if (m_basic_size)
-			cg.Grow3DSized(m_basic_diff, m_basic_iter,
+		if (m_basic_density)
+		{
+			cg.DensityField3D(dsize, stats_size,
+				m_basic_diff, m_basic_iter,
 				float(m_basic_thresh / scale),
 				float(m_basic_falloff / scale2),
-				m_basic_size_lm, density, dsize);
+				density);
+		}
 		else
+		{
 			cg.Grow3D(m_basic_diff, m_basic_iter,
 				float(m_basic_thresh / scale),
-				float(m_basic_falloff / scale2),
-				density, dsize);
+				float(m_basic_falloff / scale2));
+		}
 	}
 
 	if (clean_iter > 0)
