@@ -269,15 +269,6 @@ const char* str_cl_brainbow_3d = \
 "	return grad;\n" \
 "}\n" \
 "\n" \
-"float get_2d_density(image3d_t image, int4 pos, int r)\n" \
-"{\n" \
-"	float sum = 0.0f;\n" \
-"	int d = 2*r+1;\n" \
-"	for (int i=-r; i<=r; ++i)\n" \
-"	for (int j=-r; j<=r; ++j)\n" \
-"		sum += read_imagef(image, samp, pos+(int4)(i, j, 0, 0)).x;\n" \
-"	return sum / (float)(d * d);\n" \
-"}\n" \
 "__kernel void kernel_0(\n" \
 "	__read_only image3d_t data,\n" \
 "	__global unsigned int* label,\n" \
@@ -288,9 +279,7 @@ const char* str_cl_brainbow_3d = \
 "	unsigned int seed,\n" \
 "	float value_t,\n" \
 "	float value_f,\n" \
-"	float grad_f,\n" \
-"	float density,\n" \
-"	int dsize)\n" \
+"	float grad_f)\n" \
 "{\n" \
 "	atomic_inc(rcnt);\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
@@ -298,10 +287,6 @@ const char* str_cl_brainbow_3d = \
 "	unsigned int index = nx*ny*coord.z + nx*coord.y + coord.x;\n" \
 "	unsigned int label_v = label[index];\n" \
 "	if (label_v == 0)\n" \
-"		return;\n" \
-"	//break if low density\n" \
-"	if (density > 0.0f && dsize > 0 &&\n" \
-"		get_2d_density(data, (int4)(coord, 1), dsize) < density)\n" \
 "		return;\n" \
 "	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
 "	float grad = length(vol_grad_func(data, (int4)(coord, 1)));\n" \
@@ -1253,6 +1238,135 @@ const char* str_cl_density_field_3d = \
 "	unsigned int index = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
 "	float density = get_2d_density(data, (int4)(ijk, 1), dsize);\n" \
 "	df[index] = (unsigned char)(density * 255.0);\n" \
+"}\n" \
+"\n" \
+"//compute statistics on density field\n" \
+"__kernel void kernel_1(\n" \
+"	__global unsigned char* df,\n" \
+"	__global unsigned char* gavg,\n" \
+"	__global unsigned char* gvar,\n" \
+"	unsigned int gsx,\n" \
+"	unsigned int gsy,\n" \
+"	unsigned int gsz,\n" \
+"	unsigned int ngxy,\n" \
+"	unsigned int ngx,\n" \
+"	unsigned int dnxy, \n" \
+"	unsigned int dnx)\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	int3 lb = (int3)(gid.x*gsx, gid.y*gsy, gid.z*gsz);\n" \
+"	int3 ub = (int3)(lb.x + gsx, lb.y + gsy, lb.z + gsz);\n" \
+"	int3 ijk = (int3)(0);\n" \
+"	float sum = 0.0;\n" \
+"	unsigned int index1;\n" \
+"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"	{\n" \
+"		index1 = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
+"		sum += df[index1];\n" \
+"	}\n" \
+"	unsigned int index2 = ngxy * gid.z + ngx * gid.y + gid.x;\n" \
+"	float avg = sum / (gsx*gsy*gsz);\n" \
+"	gavg[index2] = avg;\n" \
+"	sum = 0.0;\n" \
+"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"	{\n" \
+"		index1 = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
+"		sum += (avg - df[index1])*(avg - df[index1]);\n" \
+"	}\n" \
+"	float var = sqrt(sum / (gsx*gsy*gsz));\n" \
+"	gvar[index2] = var;\n" \
+"}\n" \
+"\n" \
+"//interpolate statistics on density field\n" \
+"__kernel void kernel_2(\n" \
+"	__global unsigned char* idf,\n" \
+"	__global unsigned char* gd,\n" \
+"	unsigned int gsx,\n" \
+"	unsigned int gsy,\n" \
+"	unsigned int gsz,\n" \
+"	unsigned int ngx,\n" \
+"	unsigned int ngy,\n" \
+"	unsigned int ngz,\n" \
+"	unsigned int dnxy, \n" \
+"	unsigned int dnx)\n" \
+"{\n" \
+"	int3 ijk = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	int3 gid;\n" \
+"	int3 gijk;\n" \
+"	gijk = ijk % (int3)(gsx, gsy, gsz);\n" \
+"	gid = ijk / (int3)(gsx, gsy, gsz);\n" \
+"	gid += isless((float3)(gijk.x, gijk.y, gijk.z), (float3)(gsx/2.0, gsy/2.0, gsz/2.0));\n" \
+"	int3 gcrd = clamp(gid + (int3)(0, 0, 0), (int3)(0), (int3)(ngx-1, ngy-1, ngz-1));\n" \
+"	uchar c000 = gd[ngx*ngy*gcrd.z + ngx*gcrd.y + gcrd.x];\n" \
+"	gcrd = clamp(gid + (int3)(1, 0, 0), (int3)(0), (int3)(ngx-1, ngy-1, ngz-1));\n" \
+"	uchar c100 = gd[ngx*ngy*gcrd.z + ngx*gcrd.y + gcrd.x];\n" \
+"	gcrd = clamp(gid + (int3)(0, 1, 0), (int3)(0), (int3)(ngx-1, ngy-1, ngz-1));\n" \
+"	uchar c010 = gd[ngx*ngy*gcrd.z + ngx*gcrd.y + gcrd.x];\n" \
+"	gcrd = clamp(gid + (int3)(1, 1, 0), (int3)(0), (int3)(ngx-1, ngy-1, ngz-1));\n" \
+"	uchar c110 = gd[ngx*ngy*gcrd.z + ngx*gcrd.y + gcrd.x];\n" \
+"	gcrd = clamp(gid + (int3)(0, 0, 1), (int3)(0), (int3)(ngx-1, ngy-1, ngz-1));\n" \
+"	uchar c001 = gd[ngx*ngy*gcrd.z + ngx*gcrd.y + gcrd.x];\n" \
+"	gcrd = clamp(gid + (int3)(1, 0, 1), (int3)(0), (int3)(ngx-1, ngy-1, ngz-1));\n" \
+"	uchar c101 = gd[ngx*ngy*gcrd.z + ngx*gcrd.y + gcrd.x];\n" \
+"	gcrd = clamp(gid + (int3)(0, 1, 1), (int3)(0), (int3)(ngx-1, ngy-1, ngz-1));\n" \
+"	uchar c011 = gd[ngx*ngy*gcrd.z + ngx*gcrd.y + gcrd.x];\n" \
+"	gcrd = clamp(gid + (int3)(1, 1, 1), (int3)(0), (int3)(ngx-1, ngy-1, ngz-1));\n" \
+"	uchar c111 = gd[ngx*ngy*gcrd.z + ngx*gcrd.y + gcrd.x];\n" \
+"	float3 d = ((float3)(gijk.x, gijk.y, gijk.z) - (float3)(gsx/2.0, gsy/2.0, gsz/2.0)) / (float3)(gsx, gsy, gsz);\n" \
+"	int3 delta = isless(d, (float3)(0.0));\n" \
+"	d -= (float3)(delta.x, delta.y, delta.z);\n" \
+"	float c00 = (float)(c000)*(1.0-d.x) + (float)(c100)*d.x;\n" \
+"	float c01 = (float)(c001)*(1.0-d.x) + (float)(c101)*d.x;\n" \
+"	float c10 = (float)(c010)*(1.0-d.x) + (float)(c110)*d.x;\n" \
+"	float c11 = (float)(c011)*(1.0-d.x) + (float)(c111)*d.x;\n" \
+"	float c0 = c00*(1.0-d.y) + c10*d.y;\n" \
+"	float c1 = c01*(1.0-d.y) + c11*d.y;\n" \
+"	idf[dnxy* ijk.z + dnx*ijk.y + ijk.x] = c0*(1.0-d.z) + c1*d.z;\n" \
+"}\n" \
+;
+
+const char* str_cl_distdens_field_3d = \
+"const sampler_t samp =\n" \
+"	CLK_NORMALIZED_COORDS_FALSE|\n" \
+"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
+"	CLK_FILTER_NEAREST;\n" \
+"\n" \
+"float get_2d_density(image3d_t image, int4 pos, int r)\n" \
+"{\n" \
+"	float sum = 0.0f;\n" \
+"	int d = 2*r+1;\n" \
+"	for (int i=-r; i<=r; ++i)\n" \
+"	for (int j=-r; j<=r; ++j)\n" \
+"		sum += read_imagef(image, samp, pos+(int4)(i, j, 0, 0)).x;\n" \
+"	return sum / (float)(d * d);\n" \
+"}\n" \
+"\n" \
+"//generate density field\n" \
+"__kernel void kernel_0(\n" \
+"	__read_only image3d_t data,\n" \
+"	__global unsigned char* distf,\n" \
+"	__global unsigned char* densf,\n" \
+"	unsigned int nxy,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int dnxy,\n" \
+"	unsigned int dnx,\n" \
+"	int dsize,\n" \
+"	float maxd)\n" \
+"{\n" \
+"	int3 ijk = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	float density = get_2d_density(data, (int4)(ijk, 1), dsize);\n" \
+"	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
+"	float distv = (maxd - distf[index]) * 255.0f / maxd;\n" \
+"	density = density * 255.0 - distv;\n" \
+"	index = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
+"	densf[index] = (unsigned char)(density<0.0?0.0:density);\n" \
 "}\n" \
 "\n" \
 "//compute statistics on density field\n" \
