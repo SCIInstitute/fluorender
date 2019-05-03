@@ -3733,7 +3733,10 @@ void ComponentDlg::GenerateBsc(bool refine)
 		}
 		else
 		{
-			//cg.DistField3D(m_basic_max_dist, float(m_basic_thresh / scale));
+			cg.DistGrow3D(m_basic_diff, m_basic_iter,
+				float(m_basic_thresh / scale),
+				float(m_basic_falloff / scale2),
+				m_basic_max_dist);
 		}
 	}
 	else
@@ -4088,7 +4091,10 @@ void ComponentDlg::GenerateComp(int type, int mode)
 		}
 		else
 		{
-			//cg.DistField3D(m_basic_max_dist, float(m_basic_thresh / scale));
+			cg.DistGrow3D(m_basic_diff, m_basic_iter,
+				float(m_basic_thresh / scale),
+				float(m_basic_falloff / scale2),
+				m_basic_max_dist);
 		}
 	}
 	else
