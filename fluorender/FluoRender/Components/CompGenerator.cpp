@@ -2570,3 +2570,189 @@ void ComponentGenerator::DistDensityField3D(
 	}
 }
 
+void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
+	float tran, float falloff, int max_dist)
+{
+	//debug
+#ifdef _DEBUG
+	unsigned char* val = 0;
+	std::ofstream ofs;
+#endif
+
+	CHECK_BRICKS;
+
+	//create program and kernels
+	//prog dist
+	KernelProgram* kernel_prog_dist = VolumeRenderer::
+		vol_kernel_factory_.kernel(str_cl_dist_field_2d);
+	if (!kernel_prog_dist)
+		return;
+	int kernel_dist_index0 = -1;
+	int kernel_dist_index1 = -1;
+	string name0 = "kernel_0";
+	string name1 = "kernel_1";
+	if (kernel_prog_dist->valid())
+	{
+		kernel_dist_index0 = kernel_prog_dist->findKernel(name0);
+		kernel_dist_index1 = kernel_prog_dist->findKernel(name1);
+	}
+	else
+	{
+		kernel_dist_index0 = kernel_prog_dist->createKernel(name0);
+		kernel_dist_index1 = kernel_prog_dist->createKernel(name1);
+	}
+	KernelProgram* kernel_prog = VolumeRenderer::
+		vol_kernel_factory_.kernel(str_cl_dist_grow_3d);
+	if (!kernel_prog)
+		return;
+	int kernel_index0 = -1;
+	if (kernel_prog->valid())
+	{
+		kernel_index0 = kernel_prog->findKernel(name0);
+	}
+	else
+	{
+		kernel_index0 = kernel_prog->createKernel(name0);
+	}
+
+	if (m_use_mask)
+		m_vd->GetVR()->return_mask();
+
+	for (size_t i = 0; i < bricks->size(); ++i)
+	{
+		GET_VOLDATA_STREAM
+
+		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
+		size_t local_size[3] = { 1, 1, 1 };
+
+		//generate distance field arg_distf
+		unsigned char ini = 1;
+		//data
+		cl_image_format image_format;
+		image_format.image_channel_order = CL_R;
+		if (bits == 8)
+			image_format.image_channel_data_type = CL_UNORM_INT8;
+		else if (bits == 16)
+			image_format.image_channel_data_type = CL_UNORM_INT16;
+		cl_image_desc image_desc;
+		image_desc.image_type = CL_MEM_OBJECT_IMAGE3D;
+		image_desc.image_width = nx;
+		image_desc.image_height = ny;
+		image_desc.image_depth = nz;
+		image_desc.image_array_size = 0;
+		image_desc.image_row_pitch = 0;
+		image_desc.image_slice_pitch = 0;
+		image_desc.num_mip_levels = 0;
+		image_desc.num_samples = 0;
+		image_desc.buffer = 0;
+		//set
+		//kernel 0
+		kernel_prog_dist->setKernelArgImage(kernel_dist_index0, 0,
+			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+			image_format, image_desc,
+			bits == 8 ? (void*)(val8) : (void*)(val16));
+		Argument arg_distf = kernel_prog_dist->setKernelArgBuf(
+			kernel_dist_index0, 1, CL_MEM_READ_WRITE |
+			CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*nx*ny*nz, NULL);
+		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 2,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 3,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 4,
+			sizeof(unsigned int), (void*)(&nz));
+		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 5,
+			sizeof(float), (void*)(&tran));
+		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 6,
+			sizeof(unsigned char), (void*)(&ini));
+		//kernel 1
+		arg_distf.kernel_index = kernel_dist_index1;
+		arg_distf.index = 0;
+		kernel_prog_dist->setKernelArgument(arg_distf);
+		kernel_prog_dist->setKernelArgConst(kernel_dist_index1, 1,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog_dist->setKernelArgConst(kernel_dist_index1, 2,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog_dist->setKernelArgConst(kernel_dist_index1, 3,
+			sizeof(unsigned int), (void*)(&nz));
+		kernel_prog_dist->setKernelArgConst(kernel_dist_index1, 4,
+			sizeof(unsigned char), (void*)(&ini));
+		//init
+		kernel_prog_dist->executeKernel(kernel_dist_index0, 3, global_size, local_size);
+		unsigned char nn, re;
+		for (int j = 0; j < max_dist; ++j)
+		{
+			nn = j == 0 ? 0 : j + ini;
+			re = j + ini + 1;
+			kernel_prog_dist->setKernelArgConst(kernel_dist_index1, 5,
+				sizeof(unsigned char), (void*)(&nn));
+			kernel_prog_dist->setKernelArgConst(kernel_dist_index1, 6,
+				sizeof(unsigned char), (void*)(&re));
+			kernel_prog_dist->executeKernel(kernel_dist_index1, 3, global_size, local_size);
+		}
+		//debug
+		//val = new unsigned char[nx*ny*nz];
+		//kernel_prog_dist->readBuffer(arg_distf, val);
+		//ofs.open("E:/DATA/Test/density_field/df.bin", std::ios::out | std::ios::binary);
+		//ofs.write((char*)val, nx*ny*nz);
+		//delete[] val;
+		//ofs.close();
+
+		//grow
+		unsigned int rcnt = 0;
+		unsigned int seed = iter > 10 ? iter : 11;
+		float scl_ff = diffuse ? falloff : 0.0f;
+		float grad_ff = diffuse ? falloff : 0.0f;
+		//set
+		kernel_prog->setKernelArgImage(kernel_index0, 0,
+			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+			image_format, image_desc,
+			bits == 8 ? (void*)(val8) : (void*)(val16));
+		kernel_prog->setKernelArgBuf(kernel_index0, 1,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*nx*ny*nz, (void*)(val32));
+		arg_distf.kernel_index = kernel_index0;
+		arg_distf.index = 2;
+		kernel_prog->setKernelArgument(arg_distf);
+		kernel_prog->setKernelArgConst(kernel_index0, 3,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(kernel_index0, 4,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(kernel_index0, 5,
+			sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setKernelArgBuf(kernel_index0, 6,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int), (void*)(&rcnt));
+		kernel_prog->setKernelArgConst(kernel_index0, 7,
+			sizeof(unsigned int), (void*)(&seed));
+		kernel_prog->setKernelArgConst(kernel_index0, 8,
+			sizeof(float), (void*)(&tran));
+		kernel_prog->setKernelArgConst(kernel_index0, 9,
+			sizeof(float), (void*)(&scl_ff));
+		kernel_prog->setKernelArgConst(kernel_index0, 10,
+			sizeof(float), (void*)(&grad_ff));
+		float maxd = max_dist;
+		kernel_prog->setKernelArgConst(kernel_index0, 11,
+			sizeof(float), (void*)(&maxd));
+
+		//execute
+		for (int j = 0; j < iter; ++j)
+			kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
+
+		//read back
+		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
+
+		//release buffer
+		kernel_prog->releaseMemObject(0,
+			bits == 8 ? (void*)(val8) : (void*)(val16));
+		kernel_prog->releaseMemObject(sizeof(unsigned int)*nx*ny*nz,
+			(void*)(val32));
+		kernel_prog->releaseMemObject(sizeof(unsigned int),
+			(void*)(&rcnt));
+		kernel_prog->releaseMemObject(arg_distf);
+
+		m_sig_progress();
+
+		RELEASE_DATA_STREAM
+	}
+}
+
