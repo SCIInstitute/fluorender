@@ -143,6 +143,8 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_CHECKBOX(ID_BasicUseDistFieldCheck, ComponentDlg::OnBasicUseDistFieldCheck)
 	EVT_COMMAND_SCROLL(ID_BasicMaxDistSldr, ComponentDlg::OnBasicMaxDistSldr)
 	EVT_TEXT(ID_BasicMaxDistText, ComponentDlg::OnBasicMaxDistText)
+	EVT_COMMAND_SCROLL(ID_BasicDistThreshSldr, ComponentDlg::OnBasicDistThreshSldr)
+	EVT_TEXT(ID_BasicDistThreshText, ComponentDlg::OnBasicDistThreshText)
 	//diffusion
 	EVT_CHECKBOX(ID_BasicDiffCheck, ComponentDlg::OnBasicDiffCheck)
 	EVT_COMMAND_SCROLL(ID_BasicFalloffSldr, ComponentDlg::OnBasicFalloffSldr)
@@ -346,45 +348,57 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 	sizer10->Add(m_basic_max_dist_sldr, 1, wxEXPAND);
 	sizer10->Add(m_basic_max_dist_text, 0, wxALIGN_CENTER);
 	sizer10->Add(5, 5);
+	wxBoxSizer* sizer11 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Threshold",
+		wxDefaultPosition, wxSize(100, 23));
+	m_basic_dist_thresh_sldr = new wxSlider(page, ID_BasicDistThreshSldr, 0, 0, 1000,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_basic_dist_thresh_text = new wxTextCtrl(page, ID_BasicDistThreshText, "0.000",
+		wxDefaultPosition, wxSize(60, 20), 0, vald_fp3);
+	sizer11->Add(5, 5);
+	sizer11->Add(st, 0, wxALIGN_CENTER);
+	sizer11->Add(m_basic_dist_thresh_sldr, 1, wxEXPAND);
+	sizer11->Add(m_basic_dist_thresh_text, 0, wxALIGN_CENTER);
+	sizer11->Add(5, 5);
 
 	//clean
-	wxBoxSizer* sizer11 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer12 = new wxBoxSizer(wxHORIZONTAL);
 	m_basic_clean_check = new wxCheckBox(page, ID_BasicCleanCheck, "Clean Up",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_basic_clean_btn = new wxButton(page, ID_BasicCleanBtn, "Clean",
 		wxDefaultPosition, wxSize(60, 20), wxALIGN_LEFT);
-	sizer11->Add(5, 5);
-	sizer11->Add(m_basic_clean_check, 0, wxALIGN_CENTER);
-	sizer11->AddStretchSpacer(1);
-	sizer11->Add(m_basic_clean_btn, 0, wxALIGN_CENTER);
-	sizer11->Add(5, 5);
+	sizer12->Add(5, 5);
+	sizer12->Add(m_basic_clean_check, 0, wxALIGN_CENTER);
+	sizer12->AddStretchSpacer(1);
+	sizer12->Add(m_basic_clean_btn, 0, wxALIGN_CENTER);
+	sizer12->Add(5, 5);
 
 	//iterations
-	wxBoxSizer* sizer12 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer13 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Iterations:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_basic_clean_iter_sldr = new wxSlider(page, ID_BasicCleanIterSldr, 5, 1, 50,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_basic_clean_iter_text = new wxTextCtrl(page, ID_BasicCleanIterText, "5",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-	sizer12->Add(5, 5);
-	sizer12->Add(st, 0, wxALIGN_CENTER);
-	sizer12->Add(m_basic_clean_iter_sldr, 1, wxEXPAND);
-	sizer12->Add(m_basic_clean_iter_text, 0, wxALIGN_CENTER);
-	sizer12->Add(5, 5);
+	sizer13->Add(5, 5);
+	sizer13->Add(st, 0, wxALIGN_CENTER);
+	sizer13->Add(m_basic_clean_iter_sldr, 1, wxEXPAND);
+	sizer13->Add(m_basic_clean_iter_text, 0, wxALIGN_CENTER);
+	sizer13->Add(5, 5);
 	//iterations
-	wxBoxSizer* sizer13 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer14 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Size:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_basic_clean_limit_sldr = new wxSlider(page, ID_BasicCleanLimitSldr, 5, 1, 50,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_basic_clean_limit_text = new wxTextCtrl(page, ID_BasicCleanLimitText, "5",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-	sizer13->Add(5, 5);
-	sizer13->Add(st, 0, wxALIGN_CENTER);
-	sizer13->Add(m_basic_clean_limit_sldr, 1, wxEXPAND);
-	sizer13->Add(m_basic_clean_limit_text, 0, wxALIGN_CENTER);
-	sizer13->Add(5, 5);
+	sizer14->Add(5, 5);
+	sizer14->Add(st, 0, wxALIGN_CENTER);
+	sizer14->Add(m_basic_clean_limit_sldr, 1, wxEXPAND);
+	sizer14->Add(m_basic_clean_limit_text, 0, wxALIGN_CENTER);
+	sizer14->Add(5, 5);
 
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "ID Growth && Merge"), wxVERTICAL);
@@ -409,14 +423,16 @@ wxWindow* ComponentDlg::Create3DAnalysisPage(wxWindow *parent)
 	group1->Add(10, 10);
 	group1->Add(sizer10, 0, wxEXPAND);
 	group1->Add(10, 10);
+	group1->Add(sizer11, 0, wxEXPAND);
+	group1->Add(10, 10);
 
 	wxBoxSizer *group2 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Post Cleanup"), wxVERTICAL);
-	group2->Add(sizer11, 0, wxEXPAND);
-	group2->Add(10, 10);
 	group2->Add(sizer12, 0, wxEXPAND);
 	group2->Add(10, 10);
 	group2->Add(sizer13, 0, wxEXPAND);
+	group2->Add(10, 10);
+	group2->Add(sizer14, 0, wxEXPAND);
 	group2->Add(10, 10);
 
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
@@ -1461,6 +1477,7 @@ void ComponentDlg::Update()
 	m_use_dist_field_check->SetValue(m_use_dist_field);
 	EnableUseDistField(m_use_dist_field);
 	m_basic_max_dist_text->SetValue(wxString::Format("%d", m_basic_max_dist));
+	m_basic_dist_thresh_text->SetValue(wxString::Format("%.3f", m_basic_dist_thresh));
 	m_basic_diff_check->SetValue(m_basic_diff);
 	EnableBasicDiff(m_basic_diff);
 	m_basic_falloff_text->SetValue(wxString::Format("%.3f", m_basic_falloff));
@@ -1571,6 +1588,7 @@ void ComponentDlg::GetSettings()
 	m_basic_thresh = 0.5;
 	m_use_dist_field = false;
 	m_basic_max_dist = 30;
+	m_basic_dist_thresh = 0.25;
 	m_basic_diff = false;
 	m_basic_falloff = 0.01;
 	m_basic_size = false;
@@ -1692,6 +1710,7 @@ void ComponentDlg::LoadSettings(wxString filename)
 		fconfig.Read("basic_thresh", &m_basic_thresh);
 		fconfig.Read("use_dist_field", &m_use_dist_field);
 		fconfig.Read("basic_max_dist", &m_basic_max_dist);
+		fconfig.Read("basic_dist_thresh", &m_basic_dist_thresh);
 		fconfig.Read("basic_diff", &m_basic_diff);
 		fconfig.Read("basic_falloff", &m_basic_falloff);
 		fconfig.Read("basic_size", &m_basic_size);
@@ -1799,6 +1818,7 @@ void ComponentDlg::SaveSettings(wxString filename)
 	fconfig.Write("basic_thresh", m_basic_thresh);
 	fconfig.Write("use_dist_field", m_use_dist_field);
 	fconfig.Write("basic_max_dist", m_basic_max_dist);
+	fconfig.Write("basic_dist_thresh", m_basic_dist_thresh);
 	fconfig.Write("basic_diff", m_basic_diff);
 	fconfig.Write("basic_falloff", m_basic_falloff);
 	fconfig.Write("basic_size", m_basic_size);
@@ -2718,11 +2738,15 @@ void ComponentDlg::EnableUseDistField(bool value)
 	{
 		m_basic_max_dist_sldr->Enable();
 		m_basic_max_dist_text->Enable();
+		m_basic_dist_thresh_sldr->Enable();
+		m_basic_dist_thresh_text->Enable();
 	}
 	else
 	{
 		m_basic_max_dist_sldr->Disable();
 		m_basic_max_dist_text->Disable();
+		m_basic_dist_thresh_sldr->Disable();
+		m_basic_dist_thresh_text->Disable();
 	}
 }
 
@@ -2760,6 +2784,20 @@ void ComponentDlg::OnBasicMaxDistText(wxCommandEvent &event)
 		val = 255;
 	m_basic_max_dist = val;
 	m_basic_max_dist_sldr->SetValue(m_basic_max_dist);
+}
+
+void ComponentDlg::OnBasicDistThreshSldr(wxScrollEvent &event)
+{
+	double val = (double)event.GetPosition() / 1000.0;
+	m_basic_dist_thresh_text->SetValue(wxString::Format("%.3f", val));
+}
+
+void ComponentDlg::OnBasicDistThreshText(wxCommandEvent &event)
+{
+	double val = 0.0;
+	m_basic_dist_thresh_text->GetValue().ToDouble(&val);
+	m_basic_dist_thresh = val;
+	m_basic_dist_thresh_sldr->SetValue(int(m_basic_dist_thresh * 1000.0 + 0.5));
 }
 
 void ComponentDlg::OnBasicDiffCheck(wxCommandEvent &event)
@@ -3716,7 +3754,7 @@ void ComponentDlg::GenerateBsc(bool refine)
 				m_basic_diff, m_basic_iter,
 				float(m_basic_thresh / scale),
 				float(m_basic_falloff / scale2),
-				m_basic_max_dist,
+				m_basic_max_dist, m_basic_dist_thresh,
 				dsize, stats_size, density);
 		}
 		else
@@ -3724,7 +3762,7 @@ void ComponentDlg::GenerateBsc(bool refine)
 			cg.DistGrow3D(m_basic_diff, m_basic_iter,
 				float(m_basic_thresh / scale),
 				float(m_basic_falloff / scale2),
-				m_basic_max_dist);
+				m_basic_max_dist, m_basic_dist_thresh);
 		}
 	}
 	else
@@ -4074,7 +4112,7 @@ void ComponentDlg::GenerateComp(int type, int mode)
 				m_basic_diff, m_basic_iter,
 				float(m_basic_thresh / scale),
 				float(m_basic_falloff / scale2),
-				m_basic_max_dist,
+				m_basic_max_dist, m_basic_dist_thresh,
 				dsize, stats_size, density);
 		}
 		else
@@ -4082,7 +4120,7 @@ void ComponentDlg::GenerateComp(int type, int mode)
 			cg.DistGrow3D(m_basic_diff, m_basic_iter,
 				float(m_basic_thresh / scale),
 				float(m_basic_falloff / scale2),
-				m_basic_max_dist);
+				m_basic_max_dist, m_basic_dist_thresh);
 		}
 	}
 	else
