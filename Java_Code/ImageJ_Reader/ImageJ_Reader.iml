@@ -11,6 +11,7 @@
     </content>
     <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="JavatoCDLL" level="project" />
     <orderEntry type="module-library">
       <library name="Maven: slidebook6reader:slidebook:1.0">
         <CLASSES>
@@ -21,9 +22,290 @@
       </library>
     </orderEntry>
     <orderEntry type="module-library">
-      <library name="Maven: bioformats5.7.3:bioformats:1.0">
+      <library name="Maven: formats:api:1.0">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/src/main/resources/bioformats_package.jar!/" />
+          <root url="jar://$MODULE_DIR$/src/main/resources/formats-api-5.7.3.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: formats:bsd:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/formats-bsd-5.7.3.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: formats:gpl:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/formats-gpl-5.7.3.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: formats:loci_common:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/ome-common-5.3.3.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:Logger_Api:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/slf4j-api-1.7.25.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:Logger1:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/logback-classic-1.2.3.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:Logger2:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/logback-core-1.2.3.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:Logger3:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/log4j-1.2.17.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:Guava:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/guava-21.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:objenesis:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/objenesis-2.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:HDF5:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/jhdf5-14.12.6.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:XMP:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/xmpcore-5.1.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:Jcommander:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/jcommander-1.48.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:metadata:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/metadata-extractor-2.6.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:Kyro:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/kryo-2.24.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:Minlog:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/minlog-1.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:Jgoodies_common:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/jgoodies-common-1.7.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:Jgoodies_forms:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/jgoodies-forms-1.7.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:commons_collections:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/commons-collections-3.2.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:commons_logging:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/commons-logging-1.0.4.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:commons_lang:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/commons-lang-2.4.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:netcdf:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/netcdf-4.3.22.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:xml_api_external:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/xml-apis-ext-1.3.04.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:Perf4j:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/perf4j-0.9.13.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:native_library:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/native-lib-loader-2.1.5.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:snake_yaml:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/snakeyaml-1.13.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:xerces_implementation:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/xercesImpl-2.8.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:ome_xml:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/ome-xml-5.6.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:joda_time:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/joda-time-2.9.9.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:turbo_jpeg:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/turbojpeg-5.7.3.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: commonfunctions:ome_codec:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/ome-codecs-0.2.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" name="Maven: org.apache.poi:poi:3.9" level="project" />
+    <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.5" level="project" />
+    <orderEntry type="module-library">
+      <library name="Maven: bioformats:bf_plugins:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/bio-formats_plugins-5.7.3.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

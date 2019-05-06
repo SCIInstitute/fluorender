@@ -9,13 +9,6 @@
     <version>1.0-SNAPSHOT</version>
 
     <dependencies>
-<!--        <dependency>
-            <groupId>ome</groupId>
-            <artifactId>formats-gpl</artifactId>
-            <version>5.7.0</version>
-            <scope>compile</scope>
-        </dependency>-->
-
         <dependency>
             <groupId>slidebook6reader</groupId>
             <artifactId>slidebook</artifactId>
@@ -25,12 +18,302 @@
         </dependency>
 
         <dependency>
+            <groupId>formats</groupId>
+            <artifactId>api</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/formats-api-5.7.3.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>formats</groupId>
+            <artifactId>bsd</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/formats-bsd-5.7.3.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>formats</groupId>
+            <artifactId>gpl</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/formats-gpl-5.7.3.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>formats</groupId>
+            <artifactId>loci_common</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/ome-common-5.3.3.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>Logger_Api</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/slf4j-api-1.7.25.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>Logger1</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/logback-classic-1.2.3.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>Logger2</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/logback-core-1.2.3.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>Logger3</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/log4j-1.2.17.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>Guava</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/guava-21.0.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>objenesis</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/objenesis-2.1.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>HDF5</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/jhdf5-14.12.6.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>XMP</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/xmpcore-5.1.2.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>Jcommander</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/jcommander-1.48.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>metadata</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/metadata-extractor-2.6.2.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>Kyro</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/kryo-2.24.0.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>Minlog</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/minlog-1.2.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>Jgoodies_common</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/jgoodies-common-1.7.0.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>Jgoodies_forms</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/jgoodies-forms-1.7.2.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>commons_collections</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/commons-collections-3.2.2.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>commons_logging</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/commons-logging-1.0.4.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>commons_lang</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/commons-lang-2.4.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>netcdf</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/netcdf-4.3.22.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>netcdf</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/joda-time-2.9.9.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>xml_api_external</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/xml-apis-ext-1.3.04.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>netcdf</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/netcdf-4.3.22.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>Perf4j</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/perf4j-0.9.13.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>native_library</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/native-lib-loader-2.1.5.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>snake_yaml</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/snakeyaml-1.13.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>snake_yaml</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/snakeyaml-1.13.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>xerces_implementation</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/xercesImpl-2.8.1.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>ome_xml</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/ome-xml-5.6.0.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>joda_time</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/joda-time-2.9.9.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>turbo_jpeg</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/turbojpeg-5.7.3.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>commonfunctions</groupId>
+            <artifactId>ome_codec</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/ome-codecs-0.2.0.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>3.9</version>
+        </dependency>
+
+        <dependency>
+            <groupId>bioformats</groupId>
+            <artifactId>bf_plugins</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/bio-formats_plugins-5.7.3.jar</systemPath>
+        </dependency>
+
+        <!-- Testing(AssumeNG) ApacheVelocity BeanShell Hamcrest -->
+
+        <!--
+        <dependency>
             <groupId>bioformats5.7.3</groupId>
             <artifactId>bioformats</artifactId>
             <version>1.0</version>
             <scope>system</scope>
             <systemPath>${basedir}/src/main/resources/bioformats_package.jar</systemPath>
         </dependency>
+        -->
 
         <dependency>
             <groupId>ij</groupId>
@@ -39,7 +322,46 @@
             <scope>system</scope>
             <systemPath>${basedir}/src/main/resources/ij.jar</systemPath>
         </dependency>
+
+        <dependency>
+            <groupId>callocator</groupId>
+            <artifactId>allocator</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/JavaToC.dll</systemPath>
+            <type>dll</type>
+        </dependency>
     </dependencies>
+
+    <build>
+    <resources>
+        <resource>
+            <directory>src/main/resources</directory>
+            <includes>
+                <include>*.dll</include>
+            </includes>
+        </resource>
+        <resource>
+            <directory>src/main/resources</directory>
+            <includes>
+                <include>*.dylib</include>
+            </includes>
+        </resource>
+        <resource>
+            <directory>src/main/resources</directory>
+            <includes>
+                <include>*.so</include>
+            </includes>
+        </resource>
+        <resource>
+            <directory>src/main/resources</directory>
+            <filtering>true</filtering>
+            <includes>
+                <include>alchemy-cdo-version.properties</include>
+            </includes>
+        </resource>
+    </resources>
+    </build>
 
 <!--    <build>
         <defaultGoal>clean install</defaultGoal>
