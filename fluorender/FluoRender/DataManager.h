@@ -882,6 +882,8 @@ public:
 		return m_info_values;
 	}
 	wxString GetDelInfoValues(wxString del=",");
+	wxString GetPosValues();
+	wxString GetPosNames();
 
 	//profile
 	void SetInfoProfile(wxString &str)
@@ -912,9 +914,13 @@ public:
 	double GetBrushSize()
 	{ return m_brush_size; }
 
+	void FinishEllipse(Vector view);
+	Point GetCenter();
+
 private:
 	static int m_num;
-	int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe; 4: protractor
+	int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
+						//4: protractor; 5: ellipse
 	bool m_finished;
 	vector<Point> m_ruler;
 	bool m_disp;

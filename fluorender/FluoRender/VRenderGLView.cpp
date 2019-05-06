@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderGLView.h"
 #include "VRenderView.h"
 #include "VRenderFrame.h"
+#include <Components/CompAnalyzer.h>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -540,8 +541,12 @@ void VRenderGLView::Init()
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		ShaderProgram::init_shaders_supported();
 		if (vr_frame && vr_frame->GetSettingDlg())
+		{
+			KernelProgram::set_platform_id(vr_frame->
+				GetSettingDlg()->GetCLPlatformID());
 			KernelProgram::set_device_id(vr_frame->
 				GetSettingDlg()->GetCLDeviceID());
+		}
 		KernelProgram::init_kernels_supported();
 #ifdef _DARWIN
 		CGLContextObj ctx = CGLGetCurrentContext();
@@ -2763,6 +2768,10 @@ void VRenderGLView::CalculateSingle(int type, wxString prev_group, bool add)
 					vd->SetSyncR(vd_a->GetSyncR());
 					vd->SetSyncG(vd_a->GetSyncG());
 					vd->SetSyncB(vd_a->GetSyncB());
+					//max
+					vd->SetScalarScale(vd_a->GetScalarScale());
+					vd->SetGMScale(vd_a->GetGMScale());
+					vd->SetMaxValue(vd_a->GetMaxValue());
 				}
 
 				if (add)
@@ -9599,7 +9608,8 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 			plane->get_copy(abcd);
 			int val = fabs(abcd[3] * resz) + 0.499;
 
-			str = wxString::Format("Z: %.2f µm", val * spcz);
+			str = wxString::Format("Z: %.2f ", val * spcz);
+			str += L"\u03BCm";
 			wstr_temp = str.ToStdWstring();
 			if (m_draw_frame)
 			{
@@ -11139,6 +11149,29 @@ void VRenderGLView::AddRulerPoint(int mx, int my)
 			{
 				ruler->AddPoint(p);
 				new_ruler = false;
+				if (m_ruler_type == 5)
+				{
+					//finish
+					//Transform mv;
+					//mv.set(glm::value_ptr(m_mv_mat));
+					//Vector view(0, 0, -1);
+					//view = mv.project(view);
+					//Vector view(m_mv_mat[2][0], -m_mv_mat[2][1], m_mv_mat[2][2]);
+					//HandleCamera();
+					glm::mat4 mv_temp;
+					//translate object
+					mv_temp = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
+					//rotate object
+					mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
+					mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_roty + 180.0)), glm::vec3(0.0, 1.0, 0.0));
+					mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_rotz + 180.0)), glm::vec3(0.0, 0.0, 1.0));
+					//center object
+					mv_temp = glm::translate(mv_temp, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+					glm::vec4 axis(0, 0, -1, 0);
+					axis = glm::transpose(mv_temp) * axis;
+					ruler->FinishEllipse(Vector(axis[0], axis[1], axis[2]));
+					//ruler->FinishEllipse(Vector(mv_temp[2][0], mv_temp[2][1], mv_temp[2][2]));
+				}
 			}
 		}
 		if (new_ruler)
@@ -11236,78 +11269,174 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 				c = ruler->GetColor();
 			else
 				c = text_color;
-			for (size_t j = 0; j<ruler->GetNumPoint(); ++j)
+			if (ruler->GetRulerType() == 5)
 			{
-				p2 = *(ruler->GetPoint(j));
-				p2 = mv.transform(p2);
-				p2 = p.transform(p2);
-				if ((m_persp && (p2.z() <= 0.0 || p2.z() >= 1.0)) ||
-					(!m_persp && (p2.z() >= 0.0 || p2.z() <= -1.0)))
-					continue;
-				px = (p2.x() + 1.0)*nx / 2.0;
-				py = (p2.y() + 1.0)*ny / 2.0;
-				verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
-				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-				verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
-				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-				verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
-				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-				verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
-				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-				verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
-				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-				verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
-				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-				verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
-				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-				verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
-				verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-				num += 8;
-				if (j > 0)
+				int np = ruler->GetNumPoint();
+				if (np == 1)
 				{
-					p1 = *(ruler->GetPoint(j - 1));
+					//draw square
+					p1 = *(ruler->GetPoint(0));
 					p1 = mv.transform(p1);
 					p1 = p.transform(p1);
 					if ((m_persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
 						(!m_persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
 						continue;
-					verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 					px = (p1.x() + 1.0)*nx / 2.0;
 					py = (p1.y() + 1.0)*ny / 2.0;
-					verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+					verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
 					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					num += 2;
+					verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					num += 8;
 				}
-			}
-			if (ruler->GetRulerType() == 4 &&
-				ruler->GetNumPoint() >= 3)
-			{
-				Point center = *(ruler->GetPoint(1));
-				Vector v1 = *(ruler->GetPoint(0)) - center;
-				Vector v2 = *(ruler->GetPoint(2)) - center;
-				double len = Min(v1.length(), v2.length());
-				if (len > w)
+				else if (np == 4)
 				{
-					v1.normalize();
-					v2.normalize();
-					p1 = center + v1*w;
+					//draw ellipse
+					Point pps[4];
+					pps[0] = *(ruler->GetPoint(0));
+					pps[1] = *(ruler->GetPoint(1));
+					pps[2] = *(ruler->GetPoint(2));
+					pps[3] = *(ruler->GetPoint(3));
+					Point ppc = Point((pps[0] + pps[1]) / 2.0);
+					double ra, rb;
+					ra = (pps[0] - pps[1]).length() / 2.0;
+					rb = (pps[2] - pps[3]).length() / 2.0;
+					for (size_t j = 0; j < 4; ++j)
+					{
+						p1 = mv.transform(pps[j]);
+						p1 = p.transform(p1);
+						if ((m_persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
+							(!m_persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
+							continue;
+						px = (p1.x() + 1.0)*nx / 2.0;
+						py = (p1.y() + 1.0)*ny / 2.0;
+						verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						num += 8;
+					}
+					//draw center
+					p1 = ruler->GetCenter();
 					p1 = mv.transform(p1);
 					p1 = p.transform(p1);
+					if ((m_persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
+						(!m_persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
+						continue;
 					px = (p1.x() + 1.0)*nx / 2.0;
 					py = (p1.y() + 1.0)*ny / 2.0;
-					verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+					verts.push_back(px - w); verts.push_back(py); verts.push_back(0.0);
 					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					p1 = center + v2*w;
-					p1 = mv.transform(p1);
-					p1 = p.transform(p1);
-					px = (p1.x() + 1.0)*nx / 2.0;
-					py = (p1.y() + 1.0)*ny / 2.0;
-					verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+					verts.push_back(px + w); verts.push_back(py); verts.push_back(0.0);
 					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					num += 2;
+					verts.push_back(px); verts.push_back(py - w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px); verts.push_back(py + w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					num += 4;
 				}
 			}
+			else
+			{
+
+				for (size_t j = 0; j < ruler->GetNumPoint(); ++j)
+				{
+					p2 = *(ruler->GetPoint(j));
+					p2 = mv.transform(p2);
+					p2 = p.transform(p2);
+					if ((m_persp && (p2.z() <= 0.0 || p2.z() >= 1.0)) ||
+						(!m_persp && (p2.z() >= 0.0 || p2.z() <= -1.0)))
+						continue;
+					px = (p2.x() + 1.0)*nx / 2.0;
+					py = (p2.y() + 1.0)*ny / 2.0;
+					verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
+					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					num += 8;
+					if (j > 0)
+					{
+						p1 = *(ruler->GetPoint(j - 1));
+						p1 = mv.transform(p1);
+						p1 = p.transform(p1);
+						if ((m_persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
+							(!m_persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
+							continue;
+						verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						px = (p1.x() + 1.0)*nx / 2.0;
+						py = (p1.y() + 1.0)*ny / 2.0;
+						verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						num += 2;
+					}
+				}
+				if (ruler->GetRulerType() == 4 &&
+					ruler->GetNumPoint() >= 3)
+				{
+					Point center = *(ruler->GetPoint(1));
+					Vector v1 = *(ruler->GetPoint(0)) - center;
+					Vector v2 = *(ruler->GetPoint(2)) - center;
+					double len = Min(v1.length(), v2.length());
+					if (len > w)
+					{
+						v1.normalize();
+						v2.normalize();
+						p1 = center + v1 * w;
+						p1 = mv.transform(p1);
+						p1 = p.transform(p1);
+						px = (p1.x() + 1.0)*nx / 2.0;
+						py = (p1.y() + 1.0)*ny / 2.0;
+						verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						p1 = center + v2 * w;
+						p1 = mv.transform(p1);
+						p1 = p.transform(p1);
+						px = (p1.x() + 1.0)*nx / 2.0;
+						py = (p1.y() + 1.0)*ny / 2.0;
+						verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						num += 2;
+					}
+				}
+			}
+
 		}
 	}
 
@@ -11601,6 +11730,53 @@ int VRenderGLView::RulerProfile(int index)
 	wxString str("Profile of volume ");
 	str = str + vd->GetName();
 	ruler->SetInfoProfile(str);
+	return 1;
+}
+
+int VRenderGLView::RulerDistance(int index)
+{
+	if (index < 0 ||
+		index >= m_ruler_list.size() ||
+		!m_cur_vol)
+		return 0;
+
+	Ruler* ruler = m_ruler_list[index];
+	if (ruler->GetNumPoint() < 1)
+		return 0;
+
+	Point p = ruler->GetCenter();
+
+	FL::ComponentAnalyzer* analyzer =
+		((VRenderFrame*)m_frame)->GetComponentDlg()->GetAnalyzer();
+	FL::CompList* list = 0;
+	if (!analyzer)
+		return 0;
+
+	list = analyzer->GetCompList();
+	double sx = list->sx;
+	double sy = list->sy;
+	double sz = list->sz;
+	for (auto it = list->begin();
+		it != list->end(); ++it)
+	{
+		double dist = (p - it->second->GetPos(sx, sy, sz)).length();
+		it->second->dist = dist;
+	}
+
+	wxFileDialog *fopendlg = new wxFileDialog(
+		this, "Save Analysis Data", "", "",
+		"Text file (*.txt)|*.txt",
+		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	int rval = fopendlg->ShowModal();
+	if (rval == wxID_OK)
+	{
+		wxString filename = fopendlg->GetPath();
+		string str = filename.ToStdString();
+		analyzer->OutputCompListFile(str, 1);
+	}
+	if (fopendlg)
+		delete fopendlg;
+
 	return 1;
 }
 

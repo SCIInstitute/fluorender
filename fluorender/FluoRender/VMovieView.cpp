@@ -1176,8 +1176,8 @@ void VMovieView::SetRendering(double pcnt) {
 			vrv->SetRotations(x, val, z);
 		else if (m_z_rd->GetValue())
 			vrv->SetRotations(x, y, val);
-		vrv->RefreshGL();
 	}
+	vrv->RefreshGL();
 }
 
 void VMovieView::OnTimeEnter(wxCommandEvent& event) {

@@ -89,7 +89,7 @@ void ClusterKmeans::Initialize()
 	}
 	if (p != nullptr)
 	{
-		m_means.push_back(p->center);
+		m_means.push_back(p->centerf);
 		cluster.push_back(p);
 	}
 	//search for the rest
@@ -105,15 +105,15 @@ void ClusterKmeans::Initialize()
 				p = *iter;
 			else
 			{
-				double d1 = (p->center - m_means[i - 1]).length();
-				double d2 = ((*iter)->center - m_means[i - 1]).length();
+				double d1 = boost::qvm::mag(p->centerf - m_means[i - 1]);
+				double d2 = boost::qvm::mag((*iter)->centerf - m_means[i - 1]);
 				if (d2 > d1)
 					p = *iter;
 			}
 		}
 		if (p != nullptr)
 		{
-			m_means.push_back(p->center);
+			m_means.push_back(p->centerf);
 			cluster.push_back(p);
 		}
 	}
@@ -130,7 +130,7 @@ void ClusterKmeans::Assign()
 		double mind;
 		for (int i = 0; i < m_clnum; ++i)
 		{
-			double d = ((*iter)->center - m_means[i]).length();
+			double d = boost::qvm::mag((*iter)->centerf - m_means[i]);
 			if (i == 0)
 			{
 				index = i;
@@ -157,11 +157,15 @@ void ClusterKmeans::Update()
 	{
 		if (m_result[i].size() == 0)
 			continue;
-		FLIVR::Point sum;
+		EmVec sum = { 0, 0, 0 };
+		double count = 0;
 		for (ClusterIter iter = m_result[i].begin();
 			iter != m_result[i].end(); ++iter)
-			sum += (*iter)->center;
-		m_means[i] = sum / double(m_result[i].size());
+		{
+			sum += (*iter)->centerf * (*iter)->intensity;
+			count += (*iter)->intensity;
+		}
+		m_means[i] = sum / count;
 	}
 }
 
@@ -169,7 +173,7 @@ bool ClusterKmeans::Converge()
 {
 	for (int i = 0; i < m_clnum; ++i)
 	{
-		double d = (m_means[i] - m_means_prv[i]).length();
+		double d = boost::qvm::mag(m_means[i] - m_means_prv[i]);
 		if (d > m_eps)
 			return false;
 	}

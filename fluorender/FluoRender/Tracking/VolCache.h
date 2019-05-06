@@ -42,7 +42,8 @@ namespace FL
 			label(0),
 			frame(0),
 			valid(false),
-			modified(false) {}
+			modified(false),
+			protect(false) {}
 
 		//manage memory externally
 		//don't care releasing here
@@ -55,6 +56,7 @@ namespace FL
 		size_t frame;
 		bool valid;
 		bool modified;
+		bool protect;
 	};
 
 	//queue with a max size
@@ -65,10 +67,13 @@ namespace FL
 		m_max_size(1) {};
 		~CacheQueue();
 
+		inline void protect(size_t frame);
+		inline void unprotect(size_t frame);
 		inline void clear();
 		inline void set_max_size(size_t size);
 		inline size_t get_max_size();
 		inline size_t size();
+		inline void pop_cache();
 		inline void push_back(const VolCache& val);
 		inline VolCache get(size_t frame);
 		inline void set_modified(size_t frame, bool value = true);
@@ -87,6 +92,32 @@ namespace FL
 		clear();
 	}
 
+	inline void CacheQueue::protect(size_t frame)
+	{
+		for (auto iter = m_queue.begin();
+			iter != m_queue.end(); ++iter)
+		{
+			if (iter->frame == frame)
+			{
+				iter->protect = true;
+				break;
+			}
+		}
+	}
+
+	inline void CacheQueue::unprotect(size_t frame)
+	{
+		for (auto iter = m_queue.begin();
+			iter != m_queue.end(); ++iter)
+		{
+			if (iter->frame == frame)
+			{
+				iter->protect = false;
+				break;
+			}
+		}
+	}
+
 	inline void CacheQueue::clear()
 	{
 		for (size_t i = 0; i < m_queue.size(); ++i)
@@ -100,10 +131,7 @@ namespace FL
 			return;
 		m_max_size = size;
 		while (m_queue.size() > m_max_size)
-		{
-			m_del_cache(m_queue.front());
-			m_queue.pop_front();
-		}
+			pop_cache();
 	}
 
 	inline size_t CacheQueue::get_max_size()
@@ -116,13 +144,32 @@ namespace FL
 		return m_queue.size();
 	}
 
-	inline void CacheQueue::push_back(const VolCache& val)
+	inline void CacheQueue::pop_cache()
 	{
-		while (m_queue.size() > m_max_size - 1)
+		if (m_queue.front().protect)
+		{
+			for (auto iter = m_queue.begin();
+				iter != m_queue.end(); ++iter)
+			{
+				if (!iter->protect)
+				{
+					m_del_cache(*iter);
+					m_queue.erase(iter);
+					break;
+				}
+			}
+		}
+		else
 		{
 			m_del_cache(m_queue.front());
 			m_queue.pop_front();
 		}
+	}
+
+	inline void CacheQueue::push_back(const VolCache& val)
+	{
+		while (m_queue.size() > m_max_size - 1)
+			pop_cache();
 		m_queue.push_back(val);
 	}
 

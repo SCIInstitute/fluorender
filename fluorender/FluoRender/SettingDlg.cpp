@@ -776,6 +776,7 @@ void SettingDlg::GetSettings()
 	m_gl_major_ver = 4;
 	m_gl_minor_ver = 4;
 	m_gl_profile_mask = 2;
+	m_cl_platform_id = 0;
 	m_cl_device_id = 0;
 	m_paint_hist_depth = 0;
 	m_stay_top = false;
@@ -1041,6 +1042,7 @@ void SettingDlg::GetSettings()
 	if (fconfig.Exists("/cl device"))
 	{
 		fconfig.SetPath("/cl device");
+		fconfig.Read("platform_id", &m_cl_platform_id);
 		fconfig.Read("device_id", &m_cl_device_id);
 	}
 	//clipping plane display mode
@@ -1336,6 +1338,7 @@ void SettingDlg::SaveSettings()
 
 	//cl device
 	fconfig.SetPath("/cl device");
+	fconfig.Write("platform_id", m_cl_platform_id);
 	fconfig.Write("device_id", m_cl_device_id);
 
 	// java paths

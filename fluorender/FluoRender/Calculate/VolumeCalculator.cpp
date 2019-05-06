@@ -118,9 +118,9 @@ void VolumeCalculator::CreateVolumeResult1()
 	m_vd_a->GetSpacings(spc_x, spc_y, spc_z);
 	int brick_size = m_vd_a->GetTexture()->get_build_max_tex_size();
 
-	//int bits = (m_vd_a->GetMaxValue()>255.0)?
-	//  16:8;
-	int bits = 8;  //it has an unknown problem with 16 bit data
+	int bits = (m_vd_a->GetMaxValue()>255.0)?
+	  16:8;
+	//int bits = 8;  //it has an unknown problem with 16 bit data
 
 	m_vd_r = new VolumeData();
 	m_vd_r->AddEmptyData(bits,
@@ -162,9 +162,9 @@ void VolumeCalculator::CreateVolumeResult2()
 	m_vd_b->GetSpacings(spc_x_b, spc_y_b, spc_z_b);
 	int brick_size = m_vd_a->GetTexture()->get_build_max_tex_size();
 
-	//int bits = (m_vd_a->GetMaxValue()>255.0||m_vd_b->GetMaxValue()>255.0)?
-	//  16:8;
-	int bits = 8;  //it has an unknown problem with 16 bit data
+	int bits = (m_vd_a->GetMaxValue()>255.0||m_vd_b->GetMaxValue()>255.0)?
+	  16:8;
+	//int bits = 8;  //it has an unknown problem with 16 bit data
 	int res_x, res_y, res_z;
 	double spc_x, spc_y, spc_z;
 

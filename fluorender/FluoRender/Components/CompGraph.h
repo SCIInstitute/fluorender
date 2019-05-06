@@ -52,6 +52,9 @@ namespace FL
 	public:
 		unsigned int min;
 		unsigned int max;
+		double sx;
+		double sy;
+		double sz;
 	};
 	typedef CompList::iterator CompListIter;
 
@@ -107,6 +110,7 @@ namespace FL
 		double m2;
 		double min;
 		double max;
+		double dist;//distance to a point
 		FLIVR::Point pos;
 		std::vector<unsigned int> cosumi;
 		std::vector<double> cosumd;
@@ -137,6 +141,11 @@ namespace FL
 		{
 			return (brick_id == info2.brick_id) &&
 				(id == info2.id);
+		}
+
+		FLIVR::Point GetPos(double sx, double sy, double sz)
+		{
+			return FLIVR::Point(pos.x()*sx, pos.y()*sy, pos.z()*sz);
 		}
 	};
 
