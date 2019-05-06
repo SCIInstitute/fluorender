@@ -213,7 +213,6 @@ int ImageJReader::Preprocess()
 								m_excitation_wavelength[i - 13] = test;
 						}						
 						break;
-					// TODO: What is m_max_value.
 					}
 				}
 			}
@@ -284,7 +283,7 @@ void ImageJReader::SetBatch(bool batch)
 	//	m_batch = true;
 	//}
 	//else
-		m_batch = false;
+	m_batch = false;
 }
 
 int ImageJReader::LoadBatch(int index)
@@ -323,9 +322,7 @@ Nrrd* ImageJReader::Convert(int t, int c, bool get_max)
 }
 
 Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {	
-	// ImageJ code to read the data.	
-	//char* path_cstr = new char[m_path_name.length() + 1];
-	//sprintf(path_cstr, "%ws", m_path_name.c_str());
+	// ImageJ code to read the data.
 	string path_name = ws2s(m_path_name);
 
 	jmethodID method_id = NULL;
@@ -373,6 +370,12 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 				m_pJVMInstance->m_pEnv->ReleaseByteArrayElements(inner_data, body, JNI_ABORT);						
 			}			
 		}
+		else {
+			jshortArray inner_data = static_cast<jshortArray>(m_pJVMInstance->m_pEnv->GetObjectArrayElement(val, 0));
+			jshort* body = (jshort*)(m_pJVMInstance->m_pEnv->GetShortArrayElements(inner_data, 0));
+			int test = *(body);
+			cout << "Error";
+		}
 		m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);
 		m_pJVMInstance->m_pEnv->DeleteLocalRef(val);
 	}
@@ -418,7 +421,7 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 			jshortArray inner_data = static_cast<jshortArray>(m_pJVMInstance->m_pEnv->GetObjectArrayElement(val, 0));
 			jshort* body = (jshort*)(m_pJVMInstance->m_pEnv->GetShortArrayElements(inner_data, 0));
 			int test = *(body);
-			cout << "Yes";
+			cout << "Error";
 		}
 		unsigned short int test = ((unsigned short int *)(t_data))[10*488 + 10];
 		m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);
