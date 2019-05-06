@@ -1,5 +1,7 @@
 import ij.process.ImageProcessor;
 import ij.process.LUT;
+import loci.common.ByteArrayHandle;
+import loci.common.Location;
 import loci.common.services.ServiceFactory;
 import loci.formats.ChannelSeparator;
 import loci.formats.IFormatReader;
@@ -7,10 +9,9 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.CompositeImage;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
 import ij.IJ;
 
@@ -27,39 +28,46 @@ import ome.units.quantity.Time;
 //TODO: Add threads to load the images fast.
 public class ImageJ_Reader {
     public static void main(String[] args) {
+        // Code to test the C++ native functions.
+        getMappedDataInt(args, 0,0);
+
+        // Code to test the data reading functions. Uncomment to test the respective function.
         //short[] test = getIntDataB(args, 0, 2);
-        int[] test2 = getMetaData(args);
+        //int[] test2 = getMetaData(args);
         //getIntData2D(args, 0, 0);
-        getByteData2D(args, 0, 0);
+        //getByteData2D(args, 0, 0);
         //byte[] test3 = getByteData(args, 0, 0);
         //byte[] test3 = getIntDataB(args, 0, 0);
     }
 
-    private static ImagePlus applyLookupTables(IFormatReader r, ImagePlus imp, byte[][][] lookupTable) {
-        // apply color lookup tables, if present
-        // this requires ImageJ v1.39 or higher
-        if (r.isIndexed()) {
-            CompositeImage composite =
-                    new CompositeImage(imp, CompositeImage.COLOR);
-            for (int c = 0; c < r.getSizeC(); c++) {
-                composite.setPosition(c + 1, 1, 1);
-                LUT lut = new LUT(lookupTable[c][0], lookupTable[c][1], lookupTable[c][2]);
-                composite.setChannelLut(lut);
-            }
-            composite.setPosition(1, 1, 1);
-            return composite;
-        }
-        return imp;
+    public static ByteBuffer allocateMemory(int capacity){
+        JavaToC javatoc = new JavaToC();
+        ByteBuffer memory = javatoc.allocateMemory(capacity);
+        System.out.println(memory.capacity() + "bytes of memory allocated on C++");
+        return memory;
     }
-/*
-    public static int[] getMetaDataN(String[] args) {
-        String id = args[0];
-        //ImageProcessorReader ip_reader = new ImageProcessorReader(new ChannelSeparator(LociPrefs.makeImageReader()));
-        ImageReader ip_reader = new ImageReader();
-        try {
-            ip_reader.setId(id);
 
-            int[] metadata = new int[7];
+    /* This Code is for allocating shared memory outside the JVM. Still a POC.
+       You will have to test this out before integrating this properly.
+     */
+    public static void getMappedDataInt(String[] args, int time_id, int channel_id) {
+        try {
+            RandomAccessFile aFile = new RandomAccessFile( args[0],"rw");
+            FileChannel inChannel = aFile.getChannel();
+            int fileSize = (int)inChannel.size();
+            ByteBuffer buffer = ByteBuffer.allocateDirect(fileSize);
+            inChannel.read(buffer);
+
+            String fileName = args[0];
+            int dot = fileName.lastIndexOf(".");
+            String suffix = dot < 0 ? "" : fileName.substring(dot);
+
+            // map input id string to input byte array
+            String id = "bytes_" + Integer.toString(time_id) + "_" + Integer.toString(channel_id) + suffix;
+            Location.mapFile(id, new ByteArrayHandle(buffer));
+            ImageProcessorReader ip_reader = new ImageProcessorReader(new ChannelSeparator(LociPrefs.makeImageReader()));
+            ip_reader.setId(id);
+            int[] metadata = new int[13+ip_reader.getSizeC()];
             metadata[0] = ip_reader.getImageCount();
             metadata[1] = ip_reader.getSizeX();
             metadata[2] = ip_reader.getSizeY();
@@ -68,31 +76,80 @@ public class ImageJ_Reader {
             metadata[5] = ip_reader.getSizeT();
             metadata[6] = ip_reader.getPixelType();
 
-            long totalsize = (long)metadata[1] * (long)metadata[2] * (long)metadata[3];
-            if (totalsize > Integer.MAX_VALUE){
-                throw new Exception("Array size too big");
+            JavaToC javatoc = new JavaToC();
+            System.out.println("Value before writing:" + (int)buffer.getChar(0));
+            javatoc.writeToMemory(buffer);
+            System.out.println("Value after writing:" + (int)buffer.getChar(0));
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public static byte[][] getMappedDataInt2D(String[] args, int time_id, int channel_id) {
+
+        try {
+            RandomAccessFile aFile = new RandomAccessFile( args[0],"rw");
+            FileChannel inChannel = aFile.getChannel();
+            int fileSize = (int)inChannel.size();
+            ByteBuffer buffer = ByteBuffer.allocateDirect(fileSize);
+            inChannel.read(buffer);
+            String fileName = args[0];
+            int dot = fileName.lastIndexOf(".");
+            String suffix = dot < 0 ? "" : fileName.substring(dot);
+            // map input id string to input byte array
+            String id = "bytes_" + Integer.toString(time_id) + "_" + Integer.toString(channel_id) + suffix;
+            Location.mapFile(id, new ByteArrayHandle(buffer));
+            ImageProcessorReader ip_reader = new ImageProcessorReader(new ChannelSeparator(LociPrefs.makeImageReader()));
+            ip_reader.setId(id);
+
+            int num = ip_reader.getImageCount();
+            int width = ip_reader.getSizeX();
+            int height = ip_reader.getSizeY();
+            int channels = ip_reader.getSizeC();
+            int depth = ip_reader.getSizeZ();
+            int time_seq = ip_reader.getSizeT();
+
+            byte[][][] lookupTable = new byte[ip_reader.getSizeC()][][];
+
+            // Adding all the slices into a 2D array and returning those values.
+            int time_step = channels * depth;
+            //int offset = time_id * time_step + depth_id * channels;
+            int time_offset = time_id * time_step;
+
+            byte[][] test_array = new byte[depth][width * height];
+            int pixel_offset = 0;
+            for (int d = 0; d < depth; ++d){
+                pixel_offset = d * width * height;
+                int depth_offset = time_offset + (d * channels);
+
+                ImageProcessor ip = ip_reader.openProcessors(depth_offset+channel_id)[0];
+                int[][] temp_array = ip.getIntArray();
+                for (int h = 0; h < height; h++) {
+                    for (int w = 0; w < width; w++) {
+                        test_array[d][(h * width) + w] = (byte)temp_array[w][h];
+                        //test_array[pixel_offset + (h * width) + w] = (byte)temp_array[w][h];
+                    }
+                }
+                // Code to debug the read file. Uncomment it to write the intermediate output to a directory.
+                //java.awt.image.BufferedImage awt_Ip = ip.getBufferedImage();
+                //ImageIO.write(awt_Ip, "jpg", new File("D:\\Dev_Environment\\Test_Files\\Test_Folder\\outNB" + Integer.toString(depth_offset) + ".jpg"));
             }
-            //int test = ip_reader.getPixelType();
-            return metadata;
+            return test_array;
         } catch (FormatException exc) {
-            int[] test = new int[1];
-            test[0] = 4;
+            byte[][] test = new byte[1][1];
+            test[0][0] = 1;
             return test;
         } catch (IOException exc) {
-            int[] test = new int[1];
-            test[0] = 5;
+            byte[][] test = new byte[1][1];
+            test[0][0] = 2;
             return test;
-        } catch (Exception exc){
-            int[] test = new int[1];
-            test[0] = 6;
-            System.out.println(exc.getMessage());
-            if (exc.getMessage() == "Array size too big"){
-                test[0] = 7;
-            }
+        } catch (Exception exc) {
+            byte[][] test = new byte[1][1];
+            test[0][0] = 3;
             return test;
         }
     }
-*/
 
     public static int[] getMetaData(String[] args) {
         String id = args[0];
@@ -186,6 +243,7 @@ public class ImageJ_Reader {
         }
     }
 
+    // Tester code to check if the Java is being called from C++.
     public static int[] getIntDataS(String[] args) {
         int[] test = new int[10];
         test[0] = 10;
@@ -200,70 +258,6 @@ public class ImageJ_Reader {
         test[9] = 10;
         return test;
     }
-
-/*
-    public static byte[] getIntDataB(String[] args, int time_id, int channel_id) {
-        String id = args[0];
-        //ImageProcessorReader ip_reader = new ImageProcessorReader(new ChannelSeparator(LociPrefs.makeImageReader()));
-        ImageReader ip_reader = new ImageReader();
-        try {
-            ip_reader.setId(id);
-            int num = ip_reader.getImageCount();
-            int width = ip_reader.getSizeX();
-            int height = ip_reader.getSizeY();
-            int channels = ip_reader.getSizeC();
-            int depth = ip_reader.getSizeZ();
-            int time_seq = ip_reader.getSizeT();
-
-            ImageStack stack = new ImageStack(width, height);
-            byte[][][] lookupTable = new byte[ip_reader.getSizeC()][][];
-
-            // Adding all the slices into a 2D array and returning those values.
-            int time_step = channels * depth;
-            //int offset = time_id * time_step + depth_id * channels;
-            int time_offset = time_id * time_step;
-
-            byte[] test_array = new byte[width * height * depth];
-
-            int pixel_offset = 0;
-            for (int d = 0; d < depth; ++d){
-                pixel_offset = d * width * height;
-                int depth_offset = time_offset + (d * channels);
-
-                byte[] slice = ip_reader.openBytes(d); //A slice contains n channels.
-                for (int h = 0; h < height; h++) {
-                    for (int w = 0; w < width; w++) {
-                        test_array[pixel_offset + (h * width) + w] = slice[(channel_id*height*width) + (h*width) + w];
-                    }
-                }
-
-//                ImageProcessor ip = ip_reader.openProcessors(depth_offset+channel_id)[0];
-//                int[][] temp_array = ip.getIntArray();
-//                for (int h = 0; h < height; h++) {
-//                    for (int w = 0; w < width; w++) {
-//                        test_array[pixel_offset + (h * width) + w] = (short)temp_array[w][h];
-//                    }
-//                }
-                //java.awt.image.BufferedImage awt_Ip = ip.getBufferedImage();
-                //ImageIO.write(awt_Ip, "jpg", new File("D:\\Dev_Environment\\Test_Files\\Test_Folder\\outNB" + Integer.toString(depth_offset) + ".jpg"));
-            }
-            return test_array;
-        } catch (FormatException exc) {
-            byte[] test = new byte[1];
-            test[0] = 1;
-            return test;
-        } catch (IOException exc) {
-            byte[] test = new byte[1];
-            test[0] = 2;
-            return test;
-        } catch (Exception exc){
-            byte[] test = new byte[1];
-            test[0] = 3;
-            return test;
-        }
-    }
-*/
-
 
     public static short[] getIntDataB(String[] args, int time_id, int channel_id) {
         String id = args[0];
@@ -480,4 +474,22 @@ public class ImageJ_Reader {
             return test;
         }
     }
+
+    private static ImagePlus applyLookupTables(IFormatReader r, ImagePlus imp, byte[][][] lookupTable) {
+        // apply color lookup tables, if present
+        // this requires ImageJ v1.39 or higher
+        if (r.isIndexed()) {
+            CompositeImage composite =
+                    new CompositeImage(imp, CompositeImage.COLOR);
+            for (int c = 0; c < r.getSizeC(); c++) {
+                composite.setPosition(c + 1, 1, 1);
+                LUT lut = new LUT(lookupTable[c][0], lookupTable[c][1], lookupTable[c][2]);
+                composite.setChannelLut(lut);
+            }
+            composite.setPosition(1, 1, 1);
+            return composite;
+        }
+        return imp;
+    }
+
 }
