@@ -58,10 +58,10 @@ namespace FL
 		void ClearBorders2D();
 		void FillBorder3D(float);
 		void FillBorder2D(float);
-		void Grow3D(bool, int, float, float,
-			float, int, int);
+		void Grow3D(bool, int, float, float);
 		void Grow3DSized(bool, int, float, float,
-			int, float, int, int);
+			int, float, int);
+		void Cleanup3D(int, unsigned int);
 		void InitialGrow(bool, int,
 			float, float,
 			float, float,
@@ -79,6 +79,17 @@ namespace FL
 		void MatchSlices_CPU(bool backwards,
 			unsigned int,
 			float, float, float);
+
+		//new segmentation
+		void DensityField3D(int dsize, int wsize,
+			bool diffuse, int iter, float tran, float falloff,
+			float density);
+		void DistField3D(int iter, float th);
+		void DistDensityField3D(
+			bool diffuse, int iter, float tran, float falloff,
+			int max_dist,
+			int dsize, int wsize, float density);
+		void DistGrow3D(bool, int, float, float, int);
 
 		//update progress
 		boost::signals2::signal<void ()> m_sig_progress;

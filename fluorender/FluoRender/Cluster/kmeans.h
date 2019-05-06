@@ -52,8 +52,8 @@ namespace FL
 		float m_eps;
 		//maximum iteration number
 		size_t m_max_iter;
-		std::vector<FLIVR::Point> m_means;
-		std::vector<FLIVR::Point> m_means_prv;
+		std::vector<EmVec> m_means;
+		std::vector<EmVec> m_means_prv;
 
 	private:
 		void Initialize();

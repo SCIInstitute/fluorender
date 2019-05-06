@@ -26,18 +26,24 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "ClusterMethod.h"
+#include <boost/qvm/vec_access.hpp>
 
 using namespace FL;
 
-void ClusterMethod::AddClusterPoint(const FLIVR::Point &p, const float value)
+void ClusterMethod::AddClusterPoint(const EmVec &p, const float value, int cid)
 {
 	pClusterPoint pp(new ClusterPoint);
 	pp->id = m_id_counter++;
+	pp->cid = cid;
 	pp->visited = false;
 	pp->noise = true;
-	pp->center = p;
+	using namespace boost::qvm;
+	pp->centeri = p;
+	pp->centerf = { A0(p)*A0(m_spc), A1(p)*A1(m_spc), A2(p)*A2(m_spc) };
 	pp->intensity = value;
 	m_data.push_back(pp);
+	if (cid > -1)
+		m_use_init_cluster = true;
 }
 
 void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
@@ -62,13 +68,13 @@ void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
 		for (ClusterIter iter = cluster.begin();
 			iter != cluster.end(); ++iter)
 		{
-			i = int((*iter)->center.x() + 0.5);
+			i = int(boost::qvm::A0((*iter)->centeri) + 0.5);
 			if (i <= 0 || i >= nx - 1)
 				continue;
-			j = int((*iter)->center.y() + 0.5);
+			j = int(boost::qvm::A1((*iter)->centeri) + 0.5);
 			if (j <= 0 || j >= ny - 1)
 				continue;
-			k = int((*iter)->center.z() + 0.5);
+			k = int(boost::qvm::A2((*iter)->centeri) + 0.5);
 			if (k < 0 || k > nz - 1)
 				continue;
 			index = nx*ny*k + nx*j + i;
@@ -92,3 +98,15 @@ bool ClusterMethod::FindId(void* label, unsigned int id,
 	return false;
 }
 
+void ClusterMethod::AddIDsToData()
+{
+	for (size_t ii = 0; ii < m_result.size(); ++ii)
+	{
+		Cluster &cluster = m_result[ii];
+		for (auto iter = cluster.begin();
+			iter != cluster.end(); ++iter)
+		{
+			(*iter)->cid = ii;
+		}
+	}
+}

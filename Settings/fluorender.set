@@ -1,5 +1,5 @@
 ver_major=2
-ver_minor=23
+ver_minor=23.2
 [gm\ calculation]
 mode=2
 [peeling\ layers]
@@ -96,6 +96,12 @@ gl_profile_mask=1
 use_max_texture_size=0
 max_texture_size=2048
 [cl\ device]
+platform_id=0
 device_id=0
+[Java]
+jvm_path=
+ij_path=
+bioformats_path=
+ij_mode=0
 [clipping\ planes]
 mode=0

@@ -525,6 +525,7 @@ public:
 	vector<Ruler*>* GetRulerList();
 	Ruler* GetRuler(unsigned int id);
 	int RulerProfile(int index);
+	int RulerDistance(int index);
 	//public mouse
 
 	void OnMouse(wxMouseEvent& event);

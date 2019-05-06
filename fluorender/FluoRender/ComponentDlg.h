@@ -147,6 +147,10 @@ public:
 		//threshold
 		ID_BasicThreshSldr,
 		ID_BasicThreshText,
+		//distance field
+		ID_BasicUseDistFieldCheck,
+		ID_BasicMaxDistSldr,
+		ID_BasicMaxDistText,
 		//falloff
 		ID_BasicDiffCheck,
 		ID_BasicFalloffSldr,
@@ -159,8 +163,13 @@ public:
 		ID_BasicDensityCheck,
 		ID_BasicDensitySldr,
 		ID_BasicDensityText,
+		ID_BasicDensityWindowSizeSldr,
+		ID_BasicDensityWindowsSizeText,
+		ID_BasicDensityStatsSizeSldr,
+		ID_BasicDensityStatsSizeText,
 		//clean
 		ID_BasicCleanCheck,
+		ID_BasicCleanBtn,
 		ID_BasicCleanIterSldr,
 		ID_BasicCleanIterText,
 		ID_BasicCleanLimitSldr,
@@ -175,6 +184,8 @@ public:
 		ID_ClusterClnumText,
 		ID_ClusterMaxIterSldr,
 		ID_ClusterMaxIterText,
+		ID_ClusterTolSldr,
+		ID_ClusterTolText,
 		ID_ClusterSizeSldr,
 		ID_ClusterSizeText,
 		ID_ClusterEpsSldr,
@@ -202,6 +213,10 @@ public:
 		ID_OutputRandomBtn,
 		ID_OutputSizeBtn,
 		ID_OutputAnnBtn,
+		//Distance
+		ID_DistNeighborSldr,
+		ID_DistNeighborText,
+		ID_DistOutputBtn,
 
 		//execute
 		ID_Notebook,
@@ -244,6 +259,11 @@ public:
 	//mode: 0-generate; 1-refine
 	void GenerateComp(int type, int mode);
 	void SelectFullComp();
+
+	FL::ComponentAnalyzer* GetAnalyzer()
+	{
+		return &m_comp_analyzer;
+	}
 
 private:
 	wxWindow* m_frame;
@@ -312,13 +332,19 @@ private:
 	//basic settings
 	int m_basic_iter;
 	double m_basic_thresh;
+	//distance field
+	bool m_use_dist_field;
+	int m_basic_max_dist;
+	//diffusion
 	bool m_basic_diff;
 	double m_basic_falloff;
 	bool m_basic_size;
 	int m_basic_size_lm;
 	//density
 	bool m_basic_density;
-	double m_basic_density_vl;
+	double m_basic_density_thresh;
+	int m_basic_density_window_size;
+	int m_basic_density_stats_size;
 	//clean
 	bool m_basic_clean;
 	int m_basic_clean_iter;
@@ -331,6 +357,7 @@ private:
 	//parameters
 	int m_cluster_clnum;
 	int m_cluster_maxiter;
+	float m_cluster_tol;
 	int m_cluster_size;
 	double m_cluster_eps;
 
@@ -342,6 +369,9 @@ private:
 	//options
 	bool m_consistent;
 	bool m_colocal;
+
+	//distance
+	int m_dist_neighbor;
 
 	//output
 	int m_output_type;//1-multi; 2-rgb;
@@ -464,6 +494,11 @@ private:
 	wxTextCtrl* m_basic_iter_text;
 	wxSlider* m_basic_thresh_sldr;
 	wxTextCtrl* m_basic_thresh_text;
+	//distance field
+	wxCheckBox* m_use_dist_field_check;
+	wxSlider* m_basic_max_dist_sldr;
+	wxTextCtrl* m_basic_max_dist_text;
+	//diffusion
 	wxCheckBox* m_basic_diff_check;
 	wxSlider* m_basic_falloff_sldr;
 	wxTextCtrl* m_basic_falloff_text;
@@ -474,8 +509,13 @@ private:
 	wxCheckBox* m_basic_density_check;
 	wxSlider* m_basic_density_sldr;
 	wxTextCtrl* m_basic_density_text;
+	wxSlider* m_basic_density_window_size_sldr;
+	wxTextCtrl* m_basic_density_window_size_text;
+	wxSlider* m_basic_density_stats_size_sldr;
+	wxTextCtrl* m_basic_density_stats_size_text;
 	//clean
 	wxCheckBox* m_basic_clean_check;
+	wxButton* m_basic_clean_btn;
 	wxSlider* m_basic_clean_iter_sldr;
 	wxTextCtrl* m_basic_clean_iter_text;
 	wxSlider* m_basic_clean_limit_sldr;
@@ -490,6 +530,8 @@ private:
 	wxTextCtrl* m_cluster_clnum_text;
 	wxSlider* m_cluster_maxiter_sldr;
 	wxTextCtrl* m_cluster_maxiter_text;
+	wxSlider* m_cluster_tol_sldr;
+	wxTextCtrl* m_cluster_tol_text;
 	wxSlider* m_cluster_size_sldr;
 	wxTextCtrl* m_cluster_size_text;
 	wxSlider* m_cluster_eps_sldr;
@@ -518,6 +560,10 @@ private:
 	wxButton* m_output_random_btn;
 	wxButton* m_output_size_btn;
 	wxButton* m_output_ann_btn;
+	//distance
+	wxSlider* m_dist_neighbor_sldr;
+	wxTextCtrl* m_dist_neighbor_text;
+	wxButton* m_dist_output_btn;
 
 	//execute
 	wxGauge* m_generate_prg;
@@ -649,6 +695,10 @@ private:
 	void OnBasicIterText(wxCommandEvent &event);
 	void OnBasicThreshSldr(wxScrollEvent &event);
 	void OnBasicThreshText(wxCommandEvent &event);
+	void OnBasicUseDistFieldCheck(wxCommandEvent &event);
+	void EnableUseDistField(bool value);
+	void OnBasicMaxDistSldr(wxScrollEvent &event);
+	void OnBasicMaxDistText(wxCommandEvent &event);
 	void EnableBasicDiff(bool value);
 	void OnBasicDiffCheck(wxCommandEvent &event);
 	void OnBasicFalloffSldr(wxScrollEvent &event);
@@ -662,9 +712,14 @@ private:
 	void OnBasicDensityCheck(wxCommandEvent &event);
 	void OnBasicDensitySldr(wxScrollEvent &event);
 	void OnBasicDensityText(wxCommandEvent &event);
+	void OnBasicDensityWindowSizeSldr(wxScrollEvent &event);
+	void OnBasicDensityWindowSizeText(wxCommandEvent &event);
+	void OnBasicDensityStatsSizeSldr(wxScrollEvent &event);
+	void OnBasicDensityStatsSizeText(wxCommandEvent &event);
 	//clean
 	void EnableBasicClean(bool value);
 	void OnBasicCleanCheck(wxCommandEvent &event);
+	void OnBasicCleanBtn(wxCommandEvent &event);
 	void OnBasicCleanIterSldr(wxScrollEvent &event);
 	void OnBasicCleanIterText(wxCommandEvent &event);
 	void OnBasicCleanLimitSldr(wxScrollEvent &event);
@@ -680,6 +735,8 @@ private:
 	void OnClusterClnumText(wxCommandEvent &event);
 	void OnClusterMaxiterSldr(wxScrollEvent &event);
 	void OnClusterMaxiterText(wxCommandEvent &event);
+	void OnClusterTolSldr(wxScrollEvent &event);
+	void OnClusterTolText(wxCommandEvent &event);
 	void OnClusterSizeSldr(wxScrollEvent &event);
 	void OnClusterSizeText(wxCommandEvent &event);
 	void OnClusterEpsSldr(wxScrollEvent &event);
@@ -705,6 +762,10 @@ private:
 	void OutputRgb(int color_type);
 	void OnOutputChannels(wxCommandEvent &event);
 	void OnOutputAnn(wxCommandEvent &event);
+	//distance
+	void OnDistNeighborSldr(wxScrollEvent &event);
+	void OnDistNeighborText(wxCommandEvent &event);
+	void OnDistOutput(wxCommandEvent &event);
 
 	//execute
 	void EnableGenerate();

@@ -22,6 +22,30 @@
 namespace FLIVR
 {
 	class VolKernel;
+	//argument
+	struct Argument
+	{
+		bool protect_;
+		int kernel_index;
+		cl_uint index;
+		size_t size;
+		GLuint texture;
+		cl_mem buffer;
+		void* orgn_addr;
+
+		Argument() :
+			protect_(false),
+			kernel_index(0),
+			index(0),
+			size(0),
+			texture(0),
+			buffer(0),
+			orgn_addr(0) {}
+
+		void protect() { protect_ = true; }
+		void unprotect() { protect_ = false; }
+	};
+
 	class KernelProgram
 	{
 	public:
@@ -44,48 +68,42 @@ namespace FLIVR
 		bool executeKernel(std::string &name,
 			cl_uint, size_t*, size_t*);
 
-		//argument
-		typedef struct
-		{
-			int kernel_index;
-			cl_uint index;
-			size_t size;
-			GLuint texture;
-			cl_mem buffer;
-			void* orgn_addr;
-		} Argument;
-		bool matchArg(cl_mem, unsigned int&);//find buffer
-		bool matchArg(Argument*, unsigned int&);
-		bool matchArgTex(Argument*, unsigned int&);//use texture id to match
-		bool matchArgAddr(Argument*, unsigned int&);//use data address to match
+		//get info
+		bool getWorkGroupSize(int idex, size_t*);
+
+		bool matchArg(Argument&, unsigned int&);
+		bool matchArgBuf(Argument&, unsigned int&);//find buffer
+		bool matchArgTex(Argument&, unsigned int&);//use texture id to match
+		bool matchArgAddr(Argument&, unsigned int&);//use data address to match
 		//set argument
+		int setKernelArgument(Argument&);
 		void setKernelArgConst(int, int, size_t, void*);
 		void setKernelArgConst(std::string &name, int, size_t, void*);
-		cl_mem setKernelArgBuf(int, int, cl_mem_flags, size_t, void*);
-		cl_mem setKernelArgBuf(std::string &name, int, cl_mem_flags, size_t, void*);
-		cl_mem setKernelArgBufWrite(int, int, cl_mem_flags, size_t, void*);
-		cl_mem setKernelArgBufWrite(std::string &name, int, cl_mem_flags, size_t, void*);
-		cl_mem setKernelArgTex2D(int, int, cl_mem_flags, GLuint);
-		cl_mem setKernelArgTex2D(std::string &name, int, cl_mem_flags, GLuint);
-		cl_mem setKernelArgTex3D(int, int, cl_mem_flags, GLuint);
-		cl_mem setKernelArgTex3D(std::string &name, int, cl_mem_flags, GLuint);
-		cl_mem setKernelArgImage(int, int, cl_mem_flags, cl_image_format, cl_image_desc, void*);
-		cl_mem setKernelArgImage(std::string &name, int, cl_mem_flags, cl_image_format, cl_image_desc, void*);
+		Argument setKernelArgBuf(int, int, cl_mem_flags, size_t, void*);
+		Argument setKernelArgBuf(std::string &name, int, cl_mem_flags, size_t, void*);
+		Argument setKernelArgBufWrite(int, int, cl_mem_flags, size_t, void*);
+		Argument setKernelArgBufWrite(std::string &name, int, cl_mem_flags, size_t, void*);
+		Argument setKernelArgTex2D(int, int, cl_mem_flags, GLuint);
+		Argument setKernelArgTex2D(std::string &name, int, cl_mem_flags, GLuint);
+		Argument setKernelArgTex3D(int, int, cl_mem_flags, GLuint);
+		Argument setKernelArgTex3D(std::string &name, int, cl_mem_flags, GLuint);
+		Argument setKernelArgImage(int, int, cl_mem_flags, cl_image_format, cl_image_desc, void*);
+		Argument setKernelArgImage(std::string &name, int, cl_mem_flags, cl_image_format, cl_image_desc, void*);
 
 		//read/write
 		void readBuffer(size_t size,
 			void* buf_data, void* data);
-		void readBuffer(cl_mem buffer, void* data);
+		void readBuffer(Argument& arg, void* data);
 		void writeBuffer(size_t size,
 			void* buf_data, void* data);
-		void writeBuffer(cl_mem buffer, void* data);
+		void writeBuffer(Argument& arg, void* data);
 		void writeImage(const size_t* origin, const size_t* region,
 			void* img_data, void* data);
 		void writeImage(const size_t* origin, const size_t* region,
-			cl_mem image, void* data);
+			Argument& arg, void* data);
 
 		//release mem obj
-		void releaseMemObject(cl_mem);
+		void releaseMemObject(Argument&);
 		void releaseMemObject(int, int, size_t, GLuint);
 		void releaseMemObject(size_t, void* orgn_addr);
 
@@ -93,6 +111,7 @@ namespace FLIVR
 		static void init_kernels_supported();
 		static bool init();
 		static void clear();
+		static void set_platform_id(int id);
 		static void set_device_id(int id);
 		static int get_device_id();
 		static std::string& get_device_name();
@@ -127,6 +146,7 @@ namespace FLIVR
 		static bool init_;
 		static cl_device_id device_;
 		static cl_context context_;
+		static int platform_id_;
 		static int device_id_;
 		static std::string device_name_;
 	};

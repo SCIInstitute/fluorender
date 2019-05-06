@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <functional>
 #include <algorithm>
 #include <limits>
+#include <boost/qvm/vec_access.hpp>
 
 using namespace FL;
 
@@ -417,6 +418,7 @@ bool TrackMapProcessor::LinkFrames(
 
 	//get data and label
 	VolCache cache = m_vol_cache.get(f1);
+	m_vol_cache.protect(f1);
 	void* data1 = cache.data;
 	void* label1 = cache.label;
 	if (!data1 || !label1)
@@ -481,6 +483,8 @@ bool TrackMapProcessor::LinkFrames(
 			f1, f2,
 			std::min(data_value1, data_value2));
 	}
+
+	m_vol_cache.unprotect(f1);
 
 	return true;
 }
@@ -3270,6 +3274,7 @@ bool TrackMapProcessor::LinkAddedCells(CellList &list, size_t f1, size_t f2)
 
 	//get data and label
 	VolCache cache = m_vol_cache.get(f1);
+	m_vol_cache.protect(f1);
 	void* data1 = cache.data;
 	void* label1 = cache.label;
 	if (!data1 || !label1)
@@ -3348,6 +3353,8 @@ bool TrackMapProcessor::LinkAddedCells(CellList &list, size_t f1, size_t f2)
 				std::min(data_value1, data_value2));
 		}
 	}
+
+	m_vol_cache.unprotect(f1);
 
 	return true;
 }
@@ -3565,8 +3572,9 @@ bool TrackMapProcessor::ClusterCellsMerge(CellList &list, size_t frame)
 					data_value = ((unsigned char*)data)[index] / 255.0f;
 				else if (m_map->m_data_bits == 16)
 					data_value = ((unsigned short*)data)[index] * m_map->m_scale / 65535.0f;
+				EmVec pnt = { i, j, k };
 				cs_processor.AddClusterPoint(
-					FLIVR::Point(i, j, k), data_value);
+					pnt, data_value);
 			}
 		}
 	}
@@ -3597,7 +3605,11 @@ bool TrackMapProcessor::ClusterCellsSplit(CellList &list, size_t frame,
 		return false;
 
 	//needs a way to choose processor
-	ClusterExmax cs_processor;
+	ClusterKmeans cs_proc_km;
+	ClusterExmax cs_proc_em;
+	cs_proc_km.SetSpacings(m_map->m_spc_x, m_map->m_spc_y, m_map->m_spc_z);
+	cs_proc_em.SetSpacings(m_map->m_spc_x, m_map->m_spc_y, m_map->m_spc_z);
+
 	size_t index;
 	size_t i, j, k;
 	size_t nx = m_map->m_size_x;
@@ -3635,30 +3647,39 @@ bool TrackMapProcessor::ClusterCellsSplit(CellList &list, size_t frame,
 					data_value = ((unsigned char*)data)[index] / 255.0f;
 				else if (m_map->m_data_bits == 16)
 					data_value = ((unsigned short*)data)[index] * m_map->m_scale / 65535.0f;
-				cs_processor.AddClusterPoint(
-					FLIVR::Point(i, j, k), data_value);
+				EmVec pnt = { i, j, k };
+				cs_proc_km.AddClusterPoint(
+					pnt, data_value);
 			}
 		}
 	}
 
-	bool result = false;
-	for (size_t clnumi = clnum; clnumi > 1; --clnumi)
-	{
-		cs_processor.SetClnum(clnum);
-		if (cs_processor.Execute())
-		{
-			result = true;
-			break;
-		}
-	}
+	//bool result = false;
+	//for (size_t clnumi = clnum; clnumi > 1; --clnumi)
+	//{
+	//	cs_processor.SetClnum(clnum);
+	//	if (cs_processor.Execute())
+	//	{
+	//		result = true;
+	//		break;
+	//	}
+	//}
+	cs_proc_km.SetClnum(clnum);
+	cs_proc_km.Execute();
+	cs_proc_km.AddIDsToData();
+	cs_proc_em.SetClnum(clnum);
+	cs_proc_em.SetProbTol(0.9);
+	cs_proc_em.SetData(cs_proc_km.GetData());
+	cs_proc_em.SetUseInitCluster(true);
+	bool result = cs_proc_em.Execute();
 
 	if (result)
 	{
-		cs_processor.GenerateNewIDs(id, label,
+		cs_proc_em.GenerateNewIDs(id, label,
 			nx, ny, nz);
 		//generate output cell list
-		Cluster &points = cs_processor.GetData();
-		//std::vector<unsigned int> &ids = cs_processor.GetNewIDs();
+		Cluster &points = cs_proc_em.GetData();
+		//std::vector<unsigned int> &ids = cs_proc_em.GetNewIDs();
 		pClusterPoint point;
 		unsigned int id2;
 		CellListIter citer;
@@ -3666,9 +3687,9 @@ bool TrackMapProcessor::ClusterCellsSplit(CellList &list, size_t frame,
 			piter != points.end(); ++piter)
 		{
 			point = *piter;
-			i = size_t(point->center.x() + 0.5);
-			j = size_t(point->center.y() + 0.5);
-			k = size_t(point->center.z() + 0.5);
+			i = size_t(boost::qvm::A0(point->centeri) + 0.5);
+			j = size_t(boost::qvm::A1(point->centeri) + 0.5);
+			k = size_t(boost::qvm::A2(point->centeri) + 0.5);
 			index = nx*ny*k + nx*j + i;
 			id2 = ((unsigned int*)label)[index];
 			citer = listout.find(id2);
@@ -3698,11 +3719,8 @@ bool TrackMapProcessor::SegmentCells(
 	void* data, void* label,
 	CellList &list, size_t frame)
 {
-	//ClusterDbscan cs_processor;
-	//unsigned int size = (unsigned int)m_size_thresh;
-	//cs_processor.SetSize(size);
-	//ClusterKmeans cs_processor;
-	ClusterExmax cs_processor;
+	ClusterKmeans cs_proc_km;
+	ClusterExmax cs_proc_em;
 
 	size_t index;
 	size_t i, j, k;
@@ -3733,16 +3751,18 @@ bool TrackMapProcessor::SegmentCells(
 					data_value = ((unsigned char*)data)[index] / 255.0f;
 				else if (m_map->m_data_bits == 16)
 					data_value = ((unsigned short*)data)[index] * m_map->m_scale / 65535.0f;
-				cs_processor.AddClusterPoint(
-					FLIVR::Point(i, j, k), data_value);
+				EmVec pnt = { i, j, k };
+				cs_proc_km.AddClusterPoint(
+					pnt, data_value);
 			}
 		}
 	}
 
 	//run clustering
-	cs_processor.Execute();
-	cs_processor.GenerateNewIDs(id, label, nx, ny, nz);
-	//cs_processor.GenerateNewColors2(label, nx, ny, nz);
+	cs_proc_km.Execute();
+	cs_proc_km.AddIDsToData();
+	cs_proc_em.SetData(cs_proc_km.GetData());
+	cs_proc_em.GenerateNewIDs(id, label, nx, ny, nz);
 
 	return true;
 }
@@ -4160,6 +4180,7 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2)
 	//get data and label
 	m_vol_cache.set_max_size(2);
 	VolCache cache = m_vol_cache.get(f1);
+	m_vol_cache.protect(f1);
 	void* data1 = cache.data;
 	void* label1 = cache.label;
 	if (!data1 || !label1)
@@ -4249,5 +4270,6 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2)
 		}
 	}
 
+	m_vol_cache.unprotect(f1);
 	return true;
 }

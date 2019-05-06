@@ -101,6 +101,11 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 	m_comp_list.clear();
 	m_comp_list.min = std::numeric_limits<unsigned int>::max();
 	m_comp_list.max = 0;
+	double sx, sy, sz;
+	m_vd->GetSpacings(sx, sy, sz);
+	m_comp_list.sx = sx;
+	m_comp_list.sy = sy;
+	m_comp_list.sz = sz;
 	m_comp_graph.clear();
 	m_analyzed = false;
 
@@ -284,6 +289,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 				info->m2 += delta * (value - info->mean);
 				info->min = value;
 				info->max = value;
+				info->dist = 0.0;
 				info->pos = FLIVR::Point(i+b->ox(), j+b->oy(), k+b->oz());
 				if (colocal)
 				{
@@ -673,7 +679,7 @@ void ComponentAnalyzer::OutputFormHeader(std::string &str)
 	if (m_vd && m_vd->GetAllBrickNum() > 1)
 		str = "BRICK_ID\t";
 
-	str += "ID\tPosX\tPosY\tPosZ\tSumN\tSumI\tSurfaceN\tSurfaceI\tMean\tSigma\tMin\tMax";
+	str += "ID\tPosX\tPosY\tPosZ\tSumN\tSumI\tSurfaceN\tSurfaceI\tMean\tSigma\tMin\tMax\tDist";
 
 	if (m_colocal)
 	{
@@ -697,6 +703,10 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 		OutputFormHeader(header);
 		stream << header;
 	}
+
+	double sx = m_comp_list.sx;
+	double sy = m_comp_list.sy;
+	double sz = m_comp_list.sz;
 
 	m_comp_graph.ClearVisited();
 	for (auto i = m_comp_list.begin();
@@ -740,9 +750,9 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 		if (bn > 1)
 			stream << brick_ids.front() << "\t";
 		stream << ids.front() << "\t";
-		stream << i->second->pos.x() << "\t";
-		stream << i->second->pos.y() << "\t";
-		stream << i->second->pos.z() << "\t";
+		stream << i->second->pos.x()*sx << "\t";
+		stream << i->second->pos.y()*sy << "\t";
+		stream << i->second->pos.z()*sz << "\t";
 		stream << i->second->sumi << "\t";
 		stream << i->second->sumd << "\t";
 		stream << i->second->ext_sumi << "\t";
@@ -750,7 +760,8 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 		stream << i->second->mean << "\t";
 		stream << i->second->var << "\t";
 		stream << i->second->min << "\t";
-		stream << i->second->max;
+		stream << i->second->max << "\t";
+		stream << i->second->dist;
 		if (m_colocal)
 		{
 			stream << "\t";

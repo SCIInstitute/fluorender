@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define FL_Exmax_h
 
 #include "ClusterMethod.h"
-#include <FLIVR/Matrix.h>
 
 namespace FL
 {
@@ -43,10 +42,17 @@ namespace FL
 		{ m_clnum = num; }
 		void SetMaxiter(size_t num)
 		{ m_max_iter = num; }
-		bool Execute();
-		float GetProb();
 		void SetWeakResult(bool result = true)
 		{ m_weak_result = result; }
+		void SetProbTol(float val)
+		{
+			m_tol = val;
+			if (m_tol < 0.7f)
+				m_tol = 0.7f;
+		}
+
+		bool Execute();
+		float GetProb();
 
 		//for test
 		void GenerateNewColors(void* label,
@@ -63,14 +69,16 @@ namespace FL
 		float m_eps;
 		//maximum iteration number
 		size_t m_max_iter;
+		//prob tolerance
+		float m_tol;
 
 		//parameters to estimate
-		typedef struct
+		struct Params
 		{
 			double tau;
-			FLIVR::Point mean;
-			FLIVR::Mat3 covar;
-		} Params;
+			EmVec mean;
+			EmMat covar;
+		};
 		//all paramters to estimate
 		std::vector<Params> m_params;
 		std::vector<Params> m_params_prv;
@@ -93,8 +101,10 @@ namespace FL
 
 	private:
 		void Initialize();
+		void Init1();
+		void Init2();
 		void Expectation();
-		double Gaussian(FLIVR::Point &p, FLIVR::Point &m, FLIVR::Mat3 &s);
+		double Gaussian(EmVec &p, EmVec &m, EmMat &s);
 		void Maximization();
 		bool Converge();
 		void GenResult();
