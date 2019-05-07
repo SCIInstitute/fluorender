@@ -213,7 +213,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	//execute
 	EVT_NOTEBOOK_PAGE_CHANGED(ID_Notebook, ComponentDlg::OnNotebook)
 	EVT_BUTTON(ID_GenerateBtn, ComponentDlg::OnGenerate)
-	EVT_BUTTON(ID_RefineBtn, ComponentDlg::OnRefine)
+	EVT_TOGGLEBUTTON(ID_AutoUpdateBtn, ComponentDlg::OnAutoUpdate)
 	EVT_BUTTON(ID_ClusterBtn, ComponentDlg::OnCluster)
 	EVT_BUTTON(ID_AnalyzeBtn, ComponentDlg::OnAnalyze)
 	EVT_BUTTON(ID_AnalyzeSelBtn, ComponentDlg::OnAnalyzeSel)
@@ -1351,7 +1351,7 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 		wxDefaultPosition, wxDefaultSize);
 	m_generate_btn = new wxButton(this, ID_GenerateBtn, "Generate",
 		wxDefaultPosition, wxSize(75, -1));
-	m_refine_btn = new wxButton(this, ID_RefineBtn, "Refine",
+	m_auto_update_btn = new wxToggleButton(this, ID_AutoUpdateBtn, "Auto Update",
 		wxDefaultPosition, wxSize(75, -1));
 	m_cluster_btn = new wxButton(this, ID_ClusterBtn, "Cluster",
 		wxDefaultPosition, wxSize(75, -1));
@@ -1364,7 +1364,7 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	sizer1->Add(10, 10);
 	sizer1->Add(m_use_sel_chk, 0, wxALIGN_CENTER);
 	sizer1->Add(m_generate_btn, 0, wxALIGN_CENTER);
-	sizer1->Add(m_refine_btn, 0, wxALIGN_CENTER);
+	sizer1->Add(m_auto_update_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_cluster_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_analyze_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_analyze_sel_btn, 0, wxALIGN_CENTER);
@@ -1622,6 +1622,8 @@ void ComponentDlg::GetSettings()
 
 	//distance
 	m_dist_neighbor = 1;
+
+	m_auto_update = false;
 
 	//output
 	m_output_type = 1;
@@ -2715,6 +2717,9 @@ void ComponentDlg::OnBasicIterText(wxCommandEvent &event)
 	m_basic_iter_text->GetValue().ToLong(&val);
 	m_basic_iter = val;
 	m_basic_iter_sldr->SetValue(m_basic_iter);
+
+	if (m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnBasicThreshSldr(wxScrollEvent &event)
@@ -2729,6 +2734,9 @@ void ComponentDlg::OnBasicThreshText(wxCommandEvent &event)
 	m_basic_thresh_text->GetValue().ToDouble(&val);
 	m_basic_thresh = val;
 	m_basic_thresh_sldr->SetValue(int(m_basic_thresh * 1000.0 + 0.5));
+
+	if (m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::EnableUseDistField(bool value)
@@ -2768,6 +2776,9 @@ void ComponentDlg::EnableBasicDiff(bool value)
 void ComponentDlg::OnBasicUseDistFieldCheck(wxCommandEvent &event)
 {
 	EnableUseDistField(m_use_dist_field_check->GetValue());
+
+	if (m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnBasicMaxDistSldr(wxScrollEvent &event)
@@ -2784,6 +2795,9 @@ void ComponentDlg::OnBasicMaxDistText(wxCommandEvent &event)
 		val = 255;
 	m_basic_max_dist = val;
 	m_basic_max_dist_sldr->SetValue(m_basic_max_dist);
+
+	if (m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnBasicDistThreshSldr(wxScrollEvent &event)
@@ -2798,11 +2812,17 @@ void ComponentDlg::OnBasicDistThreshText(wxCommandEvent &event)
 	m_basic_dist_thresh_text->GetValue().ToDouble(&val);
 	m_basic_dist_thresh = val;
 	m_basic_dist_thresh_sldr->SetValue(int(m_basic_dist_thresh * 1000.0 + 0.5));
+
+	if (m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnBasicDiffCheck(wxCommandEvent &event)
 {
 	EnableBasicDiff(m_basic_diff_check->GetValue());
+
+	if (m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnBasicFalloffSldr(wxScrollEvent &event)
@@ -2817,6 +2837,9 @@ void ComponentDlg::OnBasicFalloffText(wxCommandEvent &event)
 	m_basic_falloff_text->GetValue().ToDouble(&val);
 	m_basic_falloff = val;
 	m_basic_falloff_sldr->SetValue(int(m_basic_falloff * 1000.0 + 0.5));
+
+	if (m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::EnableBasicSize(bool value)
@@ -2879,6 +2902,9 @@ void ComponentDlg::EnableBasicDensity(bool value)
 void ComponentDlg::OnBasicDensityCheck(wxCommandEvent &event)
 {
 	EnableBasicDensity(m_basic_density_check->GetValue());
+
+	if (m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnBasicDensitySldr(wxScrollEvent &event)
@@ -2893,6 +2919,9 @@ void ComponentDlg::OnBasicDensityText(wxCommandEvent &event)
 	m_basic_density_text->GetValue().ToDouble(&val);
 	m_basic_density_thresh = val;
 	m_basic_density_sldr->SetValue(int(m_basic_density_thresh * 1000.0 + 0.5));
+
+	if (m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnBasicDensityWindowSizeSldr(wxScrollEvent &event)
@@ -2907,6 +2936,9 @@ void ComponentDlg::OnBasicDensityWindowSizeText(wxCommandEvent &event)
 	m_basic_density_window_size_text->GetValue().ToLong(&val);
 	m_basic_density_window_size = val;
 	m_basic_density_window_size_sldr->SetValue(m_basic_density_window_size);
+
+	if (m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnBasicDensityStatsSizeSldr(wxScrollEvent &event)
@@ -2921,6 +2953,9 @@ void ComponentDlg::OnBasicDensityStatsSizeText(wxCommandEvent &event)
 	m_basic_density_stats_size_text->GetValue().ToLong(&val);
 	m_basic_density_stats_size = val;
 	m_basic_density_stats_size_sldr->SetValue(m_basic_density_stats_size);
+
+	if (m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::EnableBasicClean(bool value)
@@ -2947,6 +2982,9 @@ void ComponentDlg::EnableBasicClean(bool value)
 void ComponentDlg::OnBasicCleanCheck(wxCommandEvent &event)
 {
 	EnableBasicClean(m_basic_clean_check->GetValue());
+
+	if (m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnBasicCleanIterSldr(wxScrollEvent &event)
@@ -2961,6 +2999,9 @@ void ComponentDlg::OnBasicCleanIterText(wxCommandEvent &event)
 	m_basic_clean_iter_text->GetValue().ToLong(&val);
 	m_basic_clean_iter = (int)val;
 	m_basic_clean_iter_sldr->SetValue(m_basic_clean_iter);
+
+	if (m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnBasicCleanLimitSldr(wxScrollEvent &event)
@@ -2975,6 +3016,9 @@ void ComponentDlg::OnBasicCleanLimitText(wxCommandEvent &event)
 	m_basic_clean_limit_text->GetValue().ToLong(&val);
 	m_basic_clean_size_vl = (int)val;
 	m_basic_clean_limit_sldr->SetValue(m_basic_clean_size_vl);
+
+	if (m_auto_update)
+		GenerateComp();
 }
 
 //clustering page
@@ -3301,7 +3345,7 @@ void ComponentDlg::EnableGenerate()
 	default:
 		m_use_sel_chk->Show();
 		m_generate_btn->Show();
-		m_refine_btn->Show();
+		m_auto_update_btn->Show();
 		m_cluster_btn->Hide();
 		m_analyze_btn->Hide();
 		m_analyze_sel_btn->Hide();
@@ -3309,7 +3353,7 @@ void ComponentDlg::EnableGenerate()
 	case 2:
 		m_use_sel_chk->Hide();
 		m_generate_btn->Hide();
-		m_refine_btn->Hide();
+		m_auto_update_btn->Hide();
 		m_cluster_btn->Show();
 		m_analyze_btn->Hide();
 		m_analyze_sel_btn->Hide();
@@ -3317,7 +3361,7 @@ void ComponentDlg::EnableGenerate()
 	case 3:
 		m_use_sel_chk->Hide();
 		m_generate_btn->Hide();
-		m_refine_btn->Hide();
+		m_auto_update_btn->Hide();
 		m_cluster_btn->Hide();
 		m_analyze_btn->Show();
 		m_analyze_sel_btn->Show();
@@ -3577,19 +3621,22 @@ void ComponentDlg::OnGenerate(wxCommandEvent &event)
 	}
 }
 
-void ComponentDlg::OnRefine(wxCommandEvent &event)
+void ComponentDlg::OnAutoUpdate(wxCommandEvent &event)
 {
-	int page = m_notebook->GetSelection();
-	switch (page)
-	{
-	case 0:
-	default:
-		GenerateBsc(true);
-		break;
-	case 1:
-		GenerateAdv(true);
-		break;
-	}
+	m_auto_update = m_auto_update_btn->GetValue();
+	if (m_auto_update)
+		GenerateComp();
+	//int page = m_notebook->GetSelection();
+	//switch (page)
+	//{
+	//case 0:
+	//default:
+	//	GenerateBsc(true);
+	//	break;
+	//case 1:
+	//	GenerateAdv(true);
+	//	break;
+	//}
 }
 
 void ComponentDlg::OnCluster(wxCommandEvent &event)
@@ -3699,108 +3746,7 @@ void ComponentDlg::GenerateAdv(bool refine)
 
 void ComponentDlg::GenerateBsc(bool refine)
 {
-	if (!m_view)
-		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	if (!vd)
-		return;
-	vd->AddEmptyMask(1);
-
-	float density = m_basic_density_thresh;
-	if (!m_basic_density)
-		density = 0.0f;
-	int dsize = m_basic_density_window_size;
-	int stats_size = m_basic_density_stats_size;
-	int clean_iter = m_basic_clean_iter;
-	int clean_size = m_basic_clean_size_vl;
-	if (!m_basic_clean)
-	{
-		clean_iter = 0;
-		clean_size = 0;
-	}
-
-	//get brick number
-	int bn = vd->GetAllBrickNum();
-	double scale = vd->GetScalarScale();
-	double scale2 = scale * scale;
-
-	m_prog_bit = 97.0f / float(bn * 3);
-	m_prog = 0.0f;
-	m_generate_prg->SetValue(0);
-
-	FL::ComponentGenerator cg(vd);
-	boost::signals2::connection connection =
-		cg.m_sig_progress.connect(boost::bind(
-			&ComponentDlg::UpdateProgress, this));
-
-	cg.SetUseMask(m_use_sel_chk->GetValue());
-
-	if (refine)
-	{
-		if (bn > 1)
-			cg.ClearBorders3D();
-	}
-	else
-	{
-		vd->AddEmptyLabel();
-		cg.ShuffleID_3D();
-	}
-
-	if (m_use_dist_field)
-	{
-		if (m_basic_density)
-		{
-			cg.DistDensityField3D(
-				m_basic_diff, m_basic_iter,
-				float(m_basic_thresh / scale),
-				float(m_basic_falloff / scale2),
-				m_basic_max_dist, m_basic_dist_thresh,
-				dsize, stats_size, density);
-		}
-		else
-		{
-			cg.DistGrow3D(m_basic_diff, m_basic_iter,
-				float(m_basic_thresh / scale),
-				float(m_basic_falloff / scale2),
-				m_basic_max_dist, m_basic_dist_thresh);
-		}
-	}
-	else
-	{
-		if (m_basic_density)
-		{
-			cg.DensityField3D(dsize, stats_size,
-				m_basic_diff, m_basic_iter,
-				float(m_basic_thresh / scale),
-				float(m_basic_falloff / scale2),
-				density);
-		}
-		else
-		{
-			cg.Grow3D(m_basic_diff, m_basic_iter,
-				float(m_basic_thresh / scale),
-				float(m_basic_falloff / scale2));
-		}
-	}
-
-	if (clean_iter > 0)
-		cg.Cleanup3D(clean_iter, clean_size);
-
-	if (bn > 1)
-		cg.FillBorder3D(0.1);
-
-	vd->GetVR()->clear_tex_current();
-	m_view->RefreshGL();
-
-	m_generate_prg->SetValue(100);
-	connection.disconnect();
-
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		vr_frame->GetSettingDlg()->SetRunScript(true);
-		vr_frame->GetMovieView()->GetScriptSettings();
-	}
+	GenerateComp();
 }
 
 void ComponentDlg::OnBasicCleanBtn(wxCommandEvent &event)
@@ -4058,7 +4004,7 @@ bool ComponentDlg::GetIds(std::string &str, unsigned int &id, int &brick_id)
 	return true;
 }
 
-void ComponentDlg::GenerateComp(int type, int mode)
+void ComponentDlg::GenerateComp()
 {
 	if (!m_view)
 		return;
@@ -4085,24 +4031,19 @@ void ComponentDlg::GenerateComp(int type, int mode)
 	double scale = vd->GetScalarScale();
 	double scale2 = scale * scale;
 
-	m_prog_bit = 97.0f / float(bn * 3);
-	m_prog = 0.0f;
+	//m_prog_bit = 97.0f / float(bn * 3);
+	//m_prog = 0.0f;
 	m_generate_prg->SetValue(0);
 
 	FL::ComponentGenerator cg(vd);
+	//boost::signals2::connection connection =
+	//	cg.m_sig_progress.connect(boost::bind(
+	//		&ComponentDlg::UpdateProgress, this));
 
 	cg.SetUseMask(m_use_sel_chk->GetValue());
 
-	if (mode)
-	{
-		if (bn > 1)
-			cg.ClearBorders3D();
-	}
-	else
-	{
-		vd->AddEmptyLabel();
-		cg.ShuffleID_3D();
-	}
+	vd->AddEmptyLabel();
+	cg.ShuffleID_3D();
 
 	if (m_use_dist_field)
 	{
@@ -4150,6 +4091,15 @@ void ComponentDlg::GenerateComp(int type, int mode)
 	vd->GetVR()->clear_tex_current();
 	m_view->RefreshGL();
 
+	m_generate_prg->SetValue(100);
+	//connection.disconnect();
+
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+	{
+		vr_frame->GetSettingDlg()->SetRunScript(true);
+		vr_frame->GetMovieView()->GetScriptSettings();
+	}
 }
 
 void ComponentDlg::SelectFullComp()

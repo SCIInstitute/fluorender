@@ -6248,7 +6248,7 @@ void VRenderGLView::RunGenerateComp(wxFileConfig &fconfig)
 
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetComponentDlg())
-		vr_frame->GetComponentDlg()->GenerateComp(type, mode);
+		vr_frame->GetComponentDlg()->GenerateComp();
 }
 
 void VRenderGLView::RunRulerProfile(wxFileConfig &fconfig)
