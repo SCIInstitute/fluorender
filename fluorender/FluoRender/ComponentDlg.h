@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/collpane.h>
 #include <wx/notebook.h>
 #include <wx/spinctrl.h>
+#include <wx/tglbtn.h>
 
 #ifndef _COMPONENTDLG_H_
 #define _COMPONENTDLG_H_
@@ -225,7 +226,7 @@ public:
 		ID_UseSelChk,
 		ID_GeneratePrg,
 		ID_GenerateBtn,
-		ID_RefineBtn,
+		ID_AutoUpdateBtn,
 		ID_ClusterBtn,
 		ID_AnalyzeBtn,
 		ID_AnalyzeSelBtn,
@@ -259,7 +260,7 @@ public:
 
 	//type: 0-basic; 1-advanced
 	//mode: 0-generate; 1-refine
-	void GenerateComp(int type, int mode);
+	void GenerateComp();
 	void SelectFullComp();
 
 	FL::ComponentAnalyzer* GetAnalyzer()
@@ -378,6 +379,9 @@ private:
 
 	//output
 	int m_output_type;//1-multi; 2-rgb;
+
+	//auto udate
+	bool m_auto_update;
 
 	FL::ComponentAnalyzer m_comp_analyzer;
 
@@ -574,7 +578,7 @@ private:
 	wxGauge* m_generate_prg;
 	wxCheckBox* m_use_sel_chk;
 	wxButton* m_generate_btn;
-	wxButton* m_refine_btn;
+	wxToggleButton* m_auto_update_btn;
 	wxButton* m_cluster_btn;
 	wxButton* m_analyze_btn;
 	wxButton* m_analyze_sel_btn;
@@ -778,7 +782,7 @@ private:
 	void EnableGenerate();
 	void OnNotebook(wxBookCtrlEvent &event);
 	void OnGenerate(wxCommandEvent &event);
-	void OnRefine(wxCommandEvent &event);
+	void OnAutoUpdate(wxCommandEvent &event);
 	void OnCluster(wxCommandEvent &event);
 	void OnAnalyze(wxCommandEvent &event);
 	void OnAnalyzeSel(wxCommandEvent &event);

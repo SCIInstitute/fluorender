@@ -1143,6 +1143,15 @@ const char* str_cl_dist_field_2d = \
 "	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
 "	CLK_FILTER_NEAREST;\n" \
 "\n" \
+"float get_2d_density(image3d_t image, int4 pos, int r)\n" \
+"{\n" \
+"	float sum = 0.0f;\n" \
+"	int d = 2*r+1;\n" \
+"	for (int i=-r; i<=r; ++i)\n" \
+"	for (int j=-r; j<=r; ++j)\n" \
+"		sum += read_imagef(image, samp, pos+(int4)(i, j, 0, 0)).x;\n" \
+"	return sum / (float)(d * d);\n" \
+"}\n" \
 "__kernel void kernel_0(\n" \
 "	__read_only image3d_t data,\n" \
 "	__global unsigned char* df,\n" \
@@ -1161,7 +1170,8 @@ const char* str_cl_dist_field_2d = \
 "		df[index] = 0;\n" \
 "		return;\n" \
 "	}\n" \
-"	float dval = read_imagef(data, samp, (int4)(ijk, 1)).x;\n" \
+"	//float dval = read_imagef(data, samp, (int4)(ijk, 1)).x;\n" \
+"	float dval = get_2d_density(data, (int4)(ijk, 1), 2);\n" \
 "	if (dval > th)\n" \
 "		df[index] = ini;\n" \
 "	else\n" \
