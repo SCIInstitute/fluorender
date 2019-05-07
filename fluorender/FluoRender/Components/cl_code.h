@@ -1241,13 +1241,14 @@ const char* str_cl_density_field_3d = \
 "	__global unsigned char* df,\n" \
 "	unsigned int dnxy,\n" \
 "	unsigned int dnx,\n" \
-"	int dsize)\n" \
+"	int dsize,\n" \
+"	float sscale)\n" \
 "{\n" \
 "	int3 ijk = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
 "	unsigned int index = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
 "	float density = get_2d_density(data, (int4)(ijk, 1), dsize);\n" \
-"	df[index] = (unsigned char)(density * 255.0);\n" \
+"	df[index] = (unsigned char)(density * sscale * 255.0);\n" \
 "}\n" \
 "\n" \
 "//compute statistics on density field\n" \
@@ -1367,14 +1368,16 @@ const char* str_cl_distdens_field_3d = \
 "	unsigned int dnxy,\n" \
 "	unsigned int dnx,\n" \
 "	int dsize,\n" \
-"	float maxd)\n" \
+"	float maxd,\n" \
+"	float sscale)\n" \
 "{\n" \
 "	int3 ijk = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
 "	float density = get_2d_density(data, (int4)(ijk, 1), dsize);\n" \
 "	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
 "	float distv = (maxd - distf[index]) * 255.0f / maxd;\n" \
-"	density = density * 255.0 - distv;\n" \
+"	//float distv = 0.0f;\n" \
+"	density = density * sscale * 255.0 - distv;\n" \
 "	index = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
 "	densf[index] = (unsigned char)(density<0.0?0.0:density);\n" \
 "}\n" \
@@ -1488,30 +1491,6 @@ const char* str_cl_density_grow_3d = \
 "	return grad;\n" \
 "}\n" \
 "\n" \
-"unsigned int __attribute((always_inline)) reverse_bit(unsigned int val, unsigned int len)\n" \
-"{\n" \
-"	unsigned int res = val;\n" \
-"	int s = len - 1;\n" \
-"	for (val >>= 1; val; val >>= 1)\n" \
-"	{\n" \
-"		res <<= 1;\n" \
-"		res |= val & 1;\n" \
-"		s--;\n" \
-"	}\n" \
-"	res <<= s;\n" \
-"	res <<= 32-len;\n" \
-"	res >>= 32-len;\n" \
-"	return res;\n" \
-"}\n" \
-"float get_2d_density(image3d_t image, int4 pos, int r)\n" \
-"{\n" \
-"	float sum = 0.0f;\n" \
-"	int d = 2*r+1;\n" \
-"	for (int i=-r; i<=r; ++i)\n" \
-"	for (int j=-r; j<=r; ++j)\n" \
-"		sum += read_imagef(image, samp, pos+(int4)(i, j, 0, 0)).x;\n" \
-"	return sum / (float)(d * d);\n" \
-"}\n" \
 "__kernel void kernel_0(\n" \
 "	__read_only image3d_t data,\n" \
 "	__global unsigned int* label,\n" \
@@ -1610,7 +1589,8 @@ const char* str_cl_dist_grow_3d = \
 "	float value_t,\n" \
 "	float value_f,\n" \
 "	float grad_f,\n" \
-"	float maxd)\n" \
+"	float maxd,\n" \
+"	float sscale)\n" \
 "{\n" \
 "	atomic_inc(rcnt);\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
@@ -1621,7 +1601,7 @@ const char* str_cl_dist_grow_3d = \
 "		return;\n" \
 "	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
 "	float distv = (maxd - distf[index]) / maxd;\n" \
-"	value -= distv;\n" \
+"	value -= distv / sscale;\n" \
 "	value = max(value, 0.0f);\n" \
 "	float grad = length(vol_grad_func(data, (int4)(coord, 1)));\n" \
 "	//stop function\n" \
