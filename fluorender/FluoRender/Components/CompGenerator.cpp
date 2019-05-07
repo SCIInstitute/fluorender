@@ -1942,7 +1942,7 @@ void ComponentGenerator::DistField3D(int max_dist, float th)
 
 void ComponentGenerator::DensityField3D(int dsize, int wsize,
 	bool diffuse, int iter, float tran, float falloff,
-	float density)
+	float density, float sscale)
 {
 	CHECK_BRICKS
 
@@ -2037,6 +2037,8 @@ void ComponentGenerator::DensityField3D(int dsize, int wsize,
 			sizeof(unsigned int), (void*)(&dnx));
 		kernel_prog->setKernelArgConst(kernel_index0, 4,
 			sizeof(int), (void*)(&dsize));
+		kernel_prog->setKernelArgConst(kernel_index0, 5,
+			sizeof(float), (void*)(&sscale));
 		//kernel 1
 		arg_df.kernel_index = kernel_index1;
 		arg_df.index = 0;
@@ -2218,7 +2220,7 @@ void ComponentGenerator::DensityField3D(int dsize, int wsize,
 void ComponentGenerator::DistDensityField3D(
 	bool diffuse, int iter, float tran, float falloff,
 	int max_dist, float dist_thresh,
-	int dsize, int wsize, float density)
+	int dsize, int wsize, float density, float sscale)
 {
 	//debug
 #ifdef _DEBUG
@@ -2356,6 +2358,13 @@ void ComponentGenerator::DistDensityField3D(
 				sizeof(unsigned char), (void*)(&re));
 			kernel_prog_dist->executeKernel(kernel_dist_index1, 3, global_size, local_size);
 		}
+		//debug
+		val = new unsigned char[nx*ny*nz];
+		kernel_prog_dist->readBuffer(arg_distf, val);
+		ofs.open("E:/DATA/Test/density_field/df.bin", std::ios::out | std::ios::binary);
+		ofs.write((char*)val, nx*ny*nz);
+		delete[] val;
+		ofs.close();
 
 		//generate density field arg_densf
 		//divide
@@ -2398,6 +2407,8 @@ void ComponentGenerator::DistDensityField3D(
 		float maxd = max_dist;
 		kernel_prog_dens->setKernelArgConst(kernel_dens_index0, 8,
 			sizeof(float), (void*)(&maxd));
+		kernel_prog_dens->setKernelArgConst(kernel_dens_index0, 9,
+			sizeof(float), (void*)(&sscale));
 		//kernel 1
 		arg_densf.kernel_index = kernel_dens_index1;
 		arg_densf.index = 0;
@@ -2571,7 +2582,8 @@ void ComponentGenerator::DistDensityField3D(
 }
 
 void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
-	float tran, float falloff, int max_dist, float dist_thresh)
+	float tran, float falloff, int max_dist, float dist_thresh,
+	float sscale)
 {
 	//debug
 #ifdef _DEBUG
@@ -2733,6 +2745,8 @@ void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
 		float maxd = max_dist;
 		kernel_prog->setKernelArgConst(kernel_index0, 11,
 			sizeof(float), (void*)(&maxd));
+		kernel_prog->setKernelArgConst(kernel_index0, 12,
+			sizeof(float), (void*)(&sscale));
 
 		//execute
 		for (int j = 0; j < iter; ++j)
