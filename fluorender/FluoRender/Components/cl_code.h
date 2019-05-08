@@ -1202,6 +1202,35 @@ const char* str_cl_dist_field_2d = \
 "			df[index] = re;\n" \
 "	}\n" \
 "}\n" \
+"__kernel void kernel_2(\n" \
+"	__global unsigned char* df,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned char ini,\n" \
+"	unsigned char nn,\n" \
+"	unsigned char re)\n" \
+"{\n" \
+"	int3 ijk = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	unsigned int nxy = nx*ny;\n" \
+"	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
+"	if (df[index] == ini)\n" \
+"	{\n" \
+"		short v1 = df[nxy*ijk.z + nx*ijk.y + ijk.x - 1];\n" \
+"		short v2 = df[nxy*ijk.z + nx*ijk.y + ijk.x + 1];\n" \
+"		short v3 = df[nxy*ijk.z + nx*(ijk.y-1) + ijk.x];\n" \
+"		short v4 = df[nxy*ijk.z + nx*(ijk.y+1) + ijk.x];\n" \
+"		short rre = (ijk.x % 13 + ijk.y % 17 - re % 3) % 4;\n" \
+"		v1 = rre == 0 ? -1 : v1;\n" \
+"		v2 = rre == 3 ? -1 : v2;\n" \
+"		v3 = rre == 1 ? -1 : v3;\n" \
+"		v4 = rre == 2 ? -1 : v4;\n" \
+"		if (v1 == nn || v2 == nn ||\n" \
+"			v3 == nn || v4 == nn)\n" \
+"			df[index] = re;\n" \
+"	}\n" \
+"}\n" \
 "__kernel void kernel_null(\n" \
 "	__read_only image3d_t data,\n" \
 "	__global unsigned char* df,\n" \
@@ -1589,8 +1618,8 @@ const char* str_cl_dist_grow_3d = \
 "	float value_t,\n" \
 "	float value_f,\n" \
 "	float grad_f,\n" \
-"	float maxd,\n" \
-"	float sscale)\n" \
+"	float sscale,\n" \
+"	float dist_strength)\n" \
 "{\n" \
 "	atomic_inc(rcnt);\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
@@ -1600,9 +1629,8 @@ const char* str_cl_dist_grow_3d = \
 "	if (label_v == 0)\n" \
 "		return;\n" \
 "	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
-"	float distv = (maxd - distf[index]) / 255.0;\n" \
-"	value -= distv / sscale;\n" \
-"	value = max(value, 0.0f);\n" \
+"	float distv = distf[index] / 255.0 / sscale;\n" \
+"	value = value * (1.0 - dist_strength) + distv * dist_strength;\n" \
 "	float grad = length(vol_grad_func(data, (int4)(coord, 1)));\n" \
 "	//stop function\n" \
 "	float stop =\n" \

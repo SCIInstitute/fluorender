@@ -150,6 +150,8 @@ public:
 		ID_BasicThreshText,
 		//distance field
 		ID_BasicUseDistFieldCheck,
+		ID_BasicDistStrengthSldr,
+		ID_BasicDistStrengthText,
 		ID_BasicMaxDistSldr,
 		ID_BasicMaxDistText,
 		ID_BasicDistThreshSldr,
@@ -337,6 +339,7 @@ private:
 	double m_basic_thresh;
 	//distance field
 	bool m_use_dist_field;
+	double m_basic_dist_strength;
 	int m_basic_max_dist;
 	double m_basic_dist_thresh;
 	//diffusion
@@ -503,6 +506,8 @@ private:
 	wxTextCtrl* m_basic_thresh_text;
 	//distance field
 	wxCheckBox* m_use_dist_field_check;
+	wxSlider* m_basic_dist_strength_sldr;
+	wxTextCtrl* m_basic_dist_strength_text;
 	wxSlider* m_basic_max_dist_sldr;
 	wxTextCtrl* m_basic_max_dist_text;
 	wxSlider* m_basic_dist_thresh_sldr;
@@ -706,6 +711,8 @@ private:
 	void OnBasicThreshText(wxCommandEvent &event);
 	void OnBasicUseDistFieldCheck(wxCommandEvent &event);
 	void EnableUseDistField(bool value);
+	void OnBasicDistStrengthSldr(wxScrollEvent &event);
+	void OnBasicDistStrengthText(wxCommandEvent &event);
 	void OnBasicMaxDistSldr(wxScrollEvent &event);
 	void OnBasicMaxDistText(wxCommandEvent &event);
 	void OnBasicDistThreshSldr(wxScrollEvent &event);
