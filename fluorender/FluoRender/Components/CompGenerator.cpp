@@ -2359,12 +2359,12 @@ void ComponentGenerator::DistDensityField3D(
 			kernel_prog_dist->executeKernel(kernel_dist_index1, 3, global_size, local_size);
 		}
 		//debug
-		val = new unsigned char[nx*ny*nz];
-		kernel_prog_dist->readBuffer(arg_distf, val);
-		ofs.open("E:/DATA/Test/density_field/df.bin", std::ios::out | std::ios::binary);
-		ofs.write((char*)val, nx*ny*nz);
-		delete[] val;
-		ofs.close();
+		//val = new unsigned char[nx*ny*nz];
+		//kernel_prog_dist->readBuffer(arg_distf, val);
+		//ofs.open("E:/DATA/Test/density_field/df.bin", std::ios::out | std::ios::binary);
+		//ofs.write((char*)val, nx*ny*nz);
+		//delete[] val;
+		//ofs.close();
 
 		//generate density field arg_densf
 		//divide
