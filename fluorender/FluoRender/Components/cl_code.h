@@ -1600,7 +1600,7 @@ const char* str_cl_dist_grow_3d = \
 "	if (label_v == 0)\n" \
 "		return;\n" \
 "	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
-"	float distv = (maxd - distf[index]) / maxd;\n" \
+"	float distv = (maxd - distf[index]) / 255.0;\n" \
 "	value -= distv / sscale;\n" \
 "	value = max(value, 0.0f);\n" \
 "	float grad = length(vol_grad_func(data, (int4)(coord, 1)));\n" \
