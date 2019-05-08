@@ -89,7 +89,7 @@ namespace FL
 			bool diffuse, int iter, float tran, float falloff,
 			int max_dist, float dist_thresh,
 			int dsize, int wsize, float density, float sscale);
-		void DistGrow3D(bool, int, float, float, int, float, float);
+		void DistGrow3D(bool, int, float, float, int, float, float, float);
 
 		//update progress
 		boost::signals2::signal<void ()> m_sig_progress;

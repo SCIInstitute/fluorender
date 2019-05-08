@@ -2583,7 +2583,7 @@ void ComponentGenerator::DistDensityField3D(
 
 void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
 	float tran, float falloff, int max_dist, float dist_thresh,
-	float sscale)
+	float sscale, float dist_strength)
 {
 	//debug
 #ifdef _DEBUG
@@ -2601,17 +2601,21 @@ void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
 		return;
 	int kernel_dist_index0 = -1;
 	int kernel_dist_index1 = -1;
+	int kernel_dist_index2 = -1;
 	string name0 = "kernel_0";
 	string name1 = "kernel_1";
+	string name2 = "kernel_2";
 	if (kernel_prog_dist->valid())
 	{
 		kernel_dist_index0 = kernel_prog_dist->findKernel(name0);
 		kernel_dist_index1 = kernel_prog_dist->findKernel(name1);
+		kernel_dist_index2 = kernel_prog_dist->findKernel(name2);
 	}
 	else
 	{
 		kernel_dist_index0 = kernel_prog_dist->createKernel(name0);
 		kernel_dist_index1 = kernel_prog_dist->createKernel(name1);
+		kernel_dist_index2 = kernel_prog_dist->createKernel(name2);
 	}
 	KernelProgram* kernel_prog = VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_dist_grow_3d);
@@ -2688,6 +2692,18 @@ void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
 			sizeof(unsigned int), (void*)(&nz));
 		kernel_prog_dist->setKernelArgConst(kernel_dist_index1, 4,
 			sizeof(unsigned char), (void*)(&ini));
+		//kernel 2
+		arg_distf.kernel_index = kernel_dist_index2;
+		arg_distf.index = 0;
+		kernel_prog_dist->setKernelArgument(arg_distf);
+		kernel_prog_dist->setKernelArgConst(kernel_dist_index2, 1,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog_dist->setKernelArgConst(kernel_dist_index2, 2,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog_dist->setKernelArgConst(kernel_dist_index2, 3,
+			sizeof(unsigned int), (void*)(&nz));
+		kernel_prog_dist->setKernelArgConst(kernel_dist_index2, 4,
+			sizeof(unsigned char), (void*)(&ini));
 		//init
 		kernel_prog_dist->executeKernel(kernel_dist_index0, 3, global_size, local_size);
 		unsigned char nn, re;
@@ -2695,11 +2711,16 @@ void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
 		{
 			nn = j == 0 ? 0 : j + ini;
 			re = j + ini + 1;
-			kernel_prog_dist->setKernelArgConst(kernel_dist_index1, 5,
+			//kernel_prog_dist->setKernelArgConst(kernel_dist_index1, 5,
+			//	sizeof(unsigned char), (void*)(&nn));
+			//kernel_prog_dist->setKernelArgConst(kernel_dist_index1, 6,
+			//	sizeof(unsigned char), (void*)(&re));
+			//kernel_prog_dist->executeKernel(kernel_dist_index1, 3, global_size, local_size);
+			kernel_prog_dist->setKernelArgConst(kernel_dist_index2, 5,
 				sizeof(unsigned char), (void*)(&nn));
-			kernel_prog_dist->setKernelArgConst(kernel_dist_index1, 6,
+			kernel_prog_dist->setKernelArgConst(kernel_dist_index2, 6,
 				sizeof(unsigned char), (void*)(&re));
-			kernel_prog_dist->executeKernel(kernel_dist_index1, 3, global_size, local_size);
+			kernel_prog_dist->executeKernel(kernel_dist_index2, 3, global_size, local_size);
 		}
 		//debug
 		//val = new unsigned char[nx*ny*nz];
@@ -2742,11 +2763,13 @@ void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
 			sizeof(float), (void*)(&scl_ff));
 		kernel_prog->setKernelArgConst(kernel_index0, 10,
 			sizeof(float), (void*)(&grad_ff));
-		float maxd = max_dist;
+		//float maxd = max_dist;
+		//kernel_prog->setKernelArgConst(kernel_index0, 11,
+		//	sizeof(float), (void*)(&maxd));
 		kernel_prog->setKernelArgConst(kernel_index0, 11,
-			sizeof(float), (void*)(&maxd));
-		kernel_prog->setKernelArgConst(kernel_index0, 12,
 			sizeof(float), (void*)(&sscale));
+		kernel_prog->setKernelArgConst(kernel_index0, 12,
+			sizeof(float), (void*)(&dist_strength));
 
 		//execute
 		for (int j = 0; j < iter; ++j)
