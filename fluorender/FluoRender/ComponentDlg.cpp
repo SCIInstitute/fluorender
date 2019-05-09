@@ -4093,6 +4093,7 @@ void ComponentDlg::GenerateComp()
 				float(m_basic_falloff / scale2),
 				m_basic_max_dist,
 				float(m_basic_dist_thresh / scale),
+				m_basic_dist_strength,
 				dsize, stats_size,
 				float(m_basic_density_thresh / scale),
 				scale);

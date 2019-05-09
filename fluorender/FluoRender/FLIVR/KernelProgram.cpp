@@ -240,7 +240,8 @@ namespace FLIVR
 				return -1;
 		}
 
-		if (findKernel(name) == -1)
+		int result = findKernel(name);
+		if (result == -1)
 		{
 			cl_kernel kernel = clCreateKernel(program_, name.c_str(), &err);
 			if (err != CL_SUCCESS)
@@ -256,7 +257,7 @@ namespace FLIVR
 			}
 		}
 
-		return -1;
+		return result;
 	}
 
 	int KernelProgram::findKernel(std::string &name)
@@ -828,6 +829,17 @@ namespace FLIVR
 	}
 
 	//release mem obj
+	void KernelProgram::releaseAll(bool del_mem)
+	{
+		for (auto it = arg_list_.begin();
+			it != arg_list_.end();)
+		{
+			if (del_mem)
+				clReleaseMemObject(it->buffer);
+			it = arg_list_.erase(it);
+		}
+	}
+
 	void KernelProgram::releaseMemObject(Argument& arg)
 	{
 		unsigned int ai;
