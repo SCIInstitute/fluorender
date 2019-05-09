@@ -57,8 +57,8 @@ namespace FLIVR
 
 		//create a kernel in the program
 		//return kernel index; -1 unsuccessful
-		int createKernel(std::string &name);
-		int findKernel(std::string &name);
+		int createKernel(const std::string &name);
+		int findKernel(const std::string &name);
 		//add a kernel from another program
 		//for sharing buffers...
 		int addKernel(KernelProgram*, int);

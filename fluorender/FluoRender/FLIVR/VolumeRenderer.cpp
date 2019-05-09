@@ -1505,11 +1505,10 @@ namespace FLIVR
 	{
 		double result = 0.0;
 		int kernel_index = -1;
-		string name = "hist_3d";
 		KernelProgram* kernel = vol_kernel_factory_.kernel(KERNEL_HIST_3D);
 		if (kernel)
 		{
-			kernel_index = kernel->createKernel(name);
+			kernel_index = kernel->createKernel("hist_3d");
 			kernel->setKernelArgTex3D(kernel_index, 0, CL_MEM_READ_ONLY, data_id);
 			kernel->setKernelArgTex3D(kernel_index, 1, CL_MEM_READ_ONLY, mask_id);
 			unsigned int hist_size = 64;

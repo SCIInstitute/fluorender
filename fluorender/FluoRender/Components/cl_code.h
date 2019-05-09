@@ -1221,7 +1221,7 @@ const char* str_cl_dist_field_2d = \
 "		short v2 = df[nxy*ijk.z + nx*ijk.y + ijk.x + 1];\n" \
 "		short v3 = df[nxy*ijk.z + nx*(ijk.y-1) + ijk.x];\n" \
 "		short v4 = df[nxy*ijk.z + nx*(ijk.y+1) + ijk.x];\n" \
-"		short rre = (ijk.x % 13 + ijk.y % 17 - re % 3) % 4;\n" \
+"		short rre = (ijk.x % 13 + ijk.y % 17) % 4;\n" \
 "		v1 = rre == 0 ? -1 : v1;\n" \
 "		v2 = rre == 3 ? -1 : v2;\n" \
 "		v3 = rre == 1 ? -1 : v3;\n" \

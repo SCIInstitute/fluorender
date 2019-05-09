@@ -308,8 +308,7 @@ bool KernelExecutor::ExecuteKernel(KernelProgram* kernel,
 	if (!kernel)
 		return false;
 
-	string name = "kernel_main";
-	int kernel_index = kernel->createKernel(name);
+	int kernel_index = kernel->createKernel("kernel_main");
 
 	//textures
 	kernel->setKernelArgTex3D(kernel_index, 0, CL_MEM_READ_ONLY, data_id);
