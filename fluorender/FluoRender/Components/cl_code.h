@@ -1402,15 +1402,12 @@ const char* str_cl_distdens_field_3d = \
 "{\n" \
 "	int3 ijk = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
-"	float density = get_2d_density(data, (int4)(ijk, 1), dsize);\n" \
+"	float density = get_2d_density(data, (int4)(ijk, 1), dsize) * sscale;\n" \
 "	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
-"	//float distv = (maxd - distf[index]) * 255.0f / maxd;\n" \
-"	//float distv = 0.0f;\n" \
-"	//density = density * sscale * 255.0 - distv;\n" \
-"	float distv = distf[index] / 255.0 / sscale;\n" \
+"	float distv = (float)(distf[index]) / 255.0;\n" \
 "	density = density * (1.0 - dist_strength) + distv * dist_strength;\n" \
 "	index = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
-"	densf[index] = (unsigned char)(density);\n" \
+"	densf[index] = (unsigned char)(density * 255.0);\n" \
 "}\n" \
 "\n" \
 "//compute statistics on density field\n" \
