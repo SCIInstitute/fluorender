@@ -200,7 +200,7 @@ namespace FLIVR
 
 	//create a kernel in the program
 	//return kernel index; -1 unsuccessful
-	int KernelProgram::createKernel(std::string &name)
+	int KernelProgram::createKernel(const std::string &name)
 	{
 		cl_int err;
 
@@ -260,7 +260,7 @@ namespace FLIVR
 		return result;
 	}
 
-	int KernelProgram::findKernel(std::string &name)
+	int KernelProgram::findKernel(const std::string &name)
 	{
 		for (size_t i = 0; i < kernels_.size(); ++i)
 		{

@@ -207,8 +207,7 @@ void ComponentGenerator::OrderID_2D()
 		vol_kernel_factory_.kernel(str_cl_order_id_2d);
 	if (!kernel_prog)
 		return;
-	string name = "kernel_0";
-	int kernel_index = kernel_prog->createKernel(name);
+	int kernel_index = kernel_prog->createKernel("kernel_0");
 
 	if (m_use_mask)
 		m_vd->GetVR()->return_mask();
@@ -275,8 +274,7 @@ void ComponentGenerator::ShuffleID_3D()
 		vol_kernel_factory_.kernel(str_cl_shuffle_id_3d);
 	if (!kernel_prog)
 		return;
-	string name = "kernel_0";
-	int kernel_index = kernel_prog->createKernel(name);
+	int kernel_index = kernel_prog->createKernel("kernel_0");
 
 	if (m_use_mask)
 		m_vd->GetVR()->return_mask();
@@ -362,8 +360,7 @@ void ComponentGenerator::ShuffleID_2D()
 		vol_kernel_factory_.kernel(str_cl_shuffle_id_2d);
 	if (!kernel_prog)
 		return;
-	string name = "kernel_0";
-	int kernel_index = kernel_prog->createKernel(name);
+	int kernel_index = kernel_prog->createKernel("kernel_0");
 
 	if (m_use_mask)
 		m_vd->GetVR()->return_mask();
@@ -439,8 +436,7 @@ void ComponentGenerator::ClearBorders3D()
 		vol_kernel_factory_.kernel(str_cl_clear_borders_3d);
 	if (!kernel_prog)
 		return;
-	string name = "kernel_0";
-	int kernel_index = kernel_prog->createKernel(name);
+	int kernel_index = kernel_prog->createKernel("kernel_0");
 
 	if (m_use_mask)
 		m_vd->GetVR()->return_mask();
@@ -484,8 +480,7 @@ void ComponentGenerator::ClearBorders2D()
 		vol_kernel_factory_.kernel(str_cl_clear_borders_2d);
 	if (!kernel_prog)
 		return;
-	string name = "kernel_0";
-	int kernel_index = kernel_prog->createKernel(name);
+	int kernel_index = kernel_prog->createKernel("kernel_0");
 
 	if (m_use_mask)
 		m_vd->GetVR()->return_mask();
@@ -537,8 +532,7 @@ void ComponentGenerator::FillBorder3D(float tol)
 		vol_kernel_factory_.kernel(str_cl_fill_borders_3d);
 	if (!kernel_prog)
 		return;
-	string name = "kernel_0";
-	int kernel_index = kernel_prog->createKernel(name);
+	int kernel_index = kernel_prog->createKernel("kernel_0");
 
 	for (size_t i = 0; i < bricks->size(); ++i)
 	{
@@ -605,8 +599,7 @@ void ComponentGenerator::FillBorder2D(float tol)
 		vol_kernel_factory_.kernel(str_cl_fill_borders_2d);
 	if (!kernel_prog)
 		return;
-	string name = "kernel_0";
-	int kernel_index = kernel_prog->createKernel(name);
+	int kernel_index = kernel_prog->createKernel("kernel_0");
 
 	for (size_t i = 0; i < bricks->size(); ++i)
 	{
@@ -692,8 +685,7 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 		vol_kernel_factory_.kernel(str_cl_brainbow_3d);
 	if (!kernel_prog)
 		return;
-	string name0 = "kernel_0";
-	int kernel_index0 = kernel_prog->createKernel(name0);
+	int kernel_index0 = kernel_prog->createKernel("kernel_0");
 
 	if (m_use_mask)
 		m_vd->GetVR()->return_mask();
@@ -780,12 +772,9 @@ void ComponentGenerator::Grow3DSized(
 		vol_kernel_factory_.kernel(str_cl_brainbow_3d_sized);
 	if (!kernel_prog)
 		return;
-	string name0 = "kernel_0";
-	string name1 = "kernel_1";
-	string name2 = "kernel_2";
-	int kernel_index0 = kernel_prog->createKernel(name0);
-	int kernel_index1 = kernel_prog->createKernel(name1);
-	int kernel_index2 = kernel_prog->createKernel(name2);
+	int kernel_index0 = kernel_prog->createKernel("kernel_0");
+	int kernel_index1 = kernel_prog->createKernel("kernel_1");
+	int kernel_index2 = kernel_prog->createKernel("kernel_2");
 
 	if (m_use_mask)
 		m_vd->GetVR()->return_mask();
@@ -938,12 +927,9 @@ void ComponentGenerator::Cleanup3D(int iter, unsigned int size_lm)
 		vol_kernel_factory_.kernel(str_cl_cleanup_3d);
 	if (!kernel_prog)
 		return;
-	string name0 = "kernel_0";
-	string name1 = "kernel_1";
-	string name2 = "kernel_2";
-	int kernel_index0 = kernel_prog->createKernel(name0);
-	int kernel_index1 = kernel_prog->createKernel(name1);
-	int kernel_index2 = kernel_prog->createKernel(name2);
+	int kernel_index0 = kernel_prog->createKernel("kernel_0");
+	int kernel_index1 = kernel_prog->createKernel("kernel_1");
+	int kernel_index2 = kernel_prog->createKernel("kernel_2");
 
 	if (m_use_mask)
 		m_vd->GetVR()->return_mask();
@@ -1088,8 +1074,7 @@ void ComponentGenerator::InitialGrow(bool param_tr, int iter,
 		vol_kernel_factory_.kernel(str_cl_slice_brainbow);
 	if (!kernel_prog)
 		return;
-	string name = "kernel_0";
-	int kernel_index = kernel_prog->createKernel(name);
+	int kernel_index = kernel_prog->createKernel("kernel_0");
 
 	if (m_use_mask)
 		m_vd->GetVR()->return_mask();
@@ -1228,12 +1213,9 @@ void ComponentGenerator::SizedGrow(bool param_tr, int iter,
 		vol_kernel_factory_.kernel(str_cl_grow_size);
 	if (!kernel_prog)
 		return;
-	string name0 = "kernel_0";
-	string name1 = "kernel_1";
-	string name2 = "kernel_2";
-	int kernel_index0 = kernel_prog->createKernel(name0);
-	int kernel_index1 = kernel_prog->createKernel(name1);
-	int kernel_index2 = kernel_prog->createKernel(name2);
+	int kernel_index0 = kernel_prog->createKernel("kernel_0");
+	int kernel_index1 = kernel_prog->createKernel("kernel_1");
+	int kernel_index2 = kernel_prog->createKernel("kernel_2");
 
 	if (m_use_mask)
 		m_vd->GetVR()->return_mask();
@@ -1420,17 +1402,14 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 		vol_kernel_factory_.kernel(str_cl_grow_size);
 	if (!kernel_prog1)
 		return;
-	string name0 = "kernel_0";
-	string name1 = "kernel_1";
-	int kernel_index0 = kernel_prog1->createKernel(name0);
-	int kernel_index1 = kernel_prog1->createKernel(name1);
+	int kernel_index0 = kernel_prog1->createKernel("kernel_0");
+	int kernel_index1 = kernel_prog1->createKernel("kernel_1");
 
 	KernelProgram* kernel_prog2 = VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_clean_up);
 	if (!kernel_prog2)
 		return;
-	string name2 = "kernel_0";
-	int kernel_index2 = kernel_prog2->createKernel(name2);
+	int kernel_index2 = kernel_prog2->createKernel("kernel_0");
 	kernel_index2 = kernel_prog1->addKernel(
 		kernel_prog2, kernel_index2);
 
@@ -1719,10 +1698,8 @@ void ComponentGenerator::DistField3D(int max_dist, float th)
 		vol_kernel_factory_.kernel(str_cl_dist_field_2d);
 	if (!kernel_prog)
 		return;
-	string name0 = "kernel_0";
-	string name1 = "kernel_1";
-	int kernel_index0 = kernel_prog->createKernel(name0);
-	int kernel_index1 = kernel_prog->createKernel(name1);
+	int kernel_index0 = kernel_prog->createKernel("kernel_0");
+	int kernel_index1 = kernel_prog->createKernel("kernel_1");
 
 	for (size_t i = 0; i < bricks->size(); ++i)
 	{
@@ -1824,19 +1801,16 @@ void ComponentGenerator::DensityField3D(int dsize, int wsize,
 		vol_kernel_factory_.kernel(str_cl_density_field_3d);
 	if (!kernel_prog)
 		return;
-	string name0 = "kernel_0";
-	string name1 = "kernel_1";
-	string name2 = "kernel_2";
 
-	int kernel_index0 = kernel_prog->createKernel(name0);
-	int kernel_index1 = kernel_prog->createKernel(name1);
-	int kernel_index2 = kernel_prog->createKernel(name2);
+	int kernel_index0 = kernel_prog->createKernel("kernel_0");
+	int kernel_index1 = kernel_prog->createKernel("kernel_1");
+	int kernel_index2 = kernel_prog->createKernel("kernel_2");
 
 	KernelProgram* kernel2_prog = VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_density_grow_3d);
 	if (!kernel2_prog)
 		return;
-	int kernel2_index0 = kernel2_prog->createKernel(name0);
+	int kernel2_index0 = kernel2_prog->createKernel("kernel_0");
 
 	for (size_t i = 0; i < bricks->size(); ++i)
 	{
@@ -2089,27 +2063,24 @@ void ComponentGenerator::DistDensityField3D(
 		vol_kernel_factory_.kernel(str_cl_dist_field_2d);
 	if (!kernel_prog_dist)
 		return;
-	string name0 = "kernel_0";
-	string name1 = "kernel_1";
-	int kernel_dist_index0 = kernel_prog_dist->createKernel(name0);
-	int kernel_dist_index1 = kernel_prog_dist->createKernel(name1);
+	int kernel_dist_index0 = kernel_prog_dist->createKernel("kernel_0");
+	int kernel_dist_index1 = kernel_prog_dist->createKernel("kernel_2");
 
 	//prog density
 	KernelProgram* kernel_prog_dens = VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_distdens_field_3d);
 	if (!kernel_prog_dens)
 		return;
-	string name2 = "kernel_2";
-	int kernel_dens_index0 = kernel_prog_dens->createKernel(name0);
-	int kernel_dens_index1 = kernel_prog_dens->createKernel(name1);
-	int kernel_dens_index2 = kernel_prog_dens->createKernel(name2);
+	int kernel_dens_index0 = kernel_prog_dens->createKernel("kernel_0");
+	int kernel_dens_index1 = kernel_prog_dens->createKernel("kernel_1");
+	int kernel_dens_index2 = kernel_prog_dens->createKernel("kernel_2");
 
 	//prog grow
 	KernelProgram* kernel_prog_grow = VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_density_grow_3d);
 	if (!kernel_prog_grow)
 		return;
-	int kernel_grow_index0 = kernel_prog_grow->createKernel(name0);
+	int kernel_grow_index0 = kernel_prog_grow->createKernel("kernel_0");
 
 	//processing by brick
 	for (size_t i = 0; i < bricks->size(); ++i)
@@ -2416,18 +2387,14 @@ void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
 		vol_kernel_factory_.kernel(str_cl_dist_field_2d);
 	if (!kernel_prog_dist)
 		return;
-	string name0 = "kernel_0";
-	string name1 = "kernel_1";
-	string name2 = "kernel_2";
-	int kernel_dist_index0 = kernel_prog_dist->createKernel(name0);
-	int kernel_dist_index1 = kernel_prog_dist->createKernel(name1);
-	int kernel_dist_index2 = kernel_prog_dist->createKernel(name2);
+	int kernel_dist_index0 = kernel_prog_dist->createKernel("kernel_0");
+	int kernel_dist_index1 = kernel_prog_dist->createKernel("kernel_2");
 
 	KernelProgram* kernel_prog = VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_dist_grow_3d);
 	if (!kernel_prog)
 		return;
-	int kernel_index0 = kernel_prog->createKernel(name0);
+	int kernel_index0 = kernel_prog->createKernel("kernel_0");
 
 	if (m_use_mask)
 		m_vd->GetVR()->return_mask();
@@ -2490,18 +2457,6 @@ void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
 			sizeof(unsigned int), (void*)(&nz));
 		kernel_prog_dist->setKernelArgConst(kernel_dist_index1, 4,
 			sizeof(unsigned char), (void*)(&ini));
-		//kernel 2
-		arg_distf.kernel_index = kernel_dist_index2;
-		arg_distf.index = 0;
-		kernel_prog_dist->setKernelArgument(arg_distf);
-		kernel_prog_dist->setKernelArgConst(kernel_dist_index2, 1,
-			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog_dist->setKernelArgConst(kernel_dist_index2, 2,
-			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog_dist->setKernelArgConst(kernel_dist_index2, 3,
-			sizeof(unsigned int), (void*)(&nz));
-		kernel_prog_dist->setKernelArgConst(kernel_dist_index2, 4,
-			sizeof(unsigned char), (void*)(&ini));
 		//init
 		kernel_prog_dist->executeKernel(kernel_dist_index0, 3, global_size, local_size);
 		unsigned char nn, re;
@@ -2509,16 +2464,11 @@ void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
 		{
 			nn = j == 0 ? 0 : j + ini;
 			re = j + ini + 1;
-			//kernel_prog_dist->setKernelArgConst(kernel_dist_index1, 5,
-			//	sizeof(unsigned char), (void*)(&nn));
-			//kernel_prog_dist->setKernelArgConst(kernel_dist_index1, 6,
-			//	sizeof(unsigned char), (void*)(&re));
-			//kernel_prog_dist->executeKernel(kernel_dist_index1, 3, global_size, local_size);
-			kernel_prog_dist->setKernelArgConst(kernel_dist_index2, 5,
+			kernel_prog_dist->setKernelArgConst(kernel_dist_index1, 5,
 				sizeof(unsigned char), (void*)(&nn));
-			kernel_prog_dist->setKernelArgConst(kernel_dist_index2, 6,
+			kernel_prog_dist->setKernelArgConst(kernel_dist_index1, 6,
 				sizeof(unsigned char), (void*)(&re));
-			kernel_prog_dist->executeKernel(kernel_dist_index2, 3, global_size, local_size);
+			kernel_prog_dist->executeKernel(kernel_dist_index1, 3, global_size, local_size);
 		}
 		//debug
 		//val = new unsigned char[nx*ny*nz];
