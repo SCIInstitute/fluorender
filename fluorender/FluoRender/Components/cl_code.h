@@ -1397,18 +1397,20 @@ const char* str_cl_distdens_field_3d = \
 "	unsigned int dnxy,\n" \
 "	unsigned int dnx,\n" \
 "	int dsize,\n" \
-"	float maxd,\n" \
-"	float sscale)\n" \
+"	float sscale,\n" \
+"	float dist_strength)\n" \
 "{\n" \
 "	int3 ijk = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
 "	float density = get_2d_density(data, (int4)(ijk, 1), dsize);\n" \
 "	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
-"	float distv = (maxd - distf[index]) * 255.0f / maxd;\n" \
+"	//float distv = (maxd - distf[index]) * 255.0f / maxd;\n" \
 "	//float distv = 0.0f;\n" \
-"	density = density * sscale * 255.0 - distv;\n" \
+"	//density = density * sscale * 255.0 - distv;\n" \
+"	float distv = distf[index] / 255.0 / sscale;\n" \
+"	density = density * (1.0 - dist_strength) + distv * dist_strength;\n" \
 "	index = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
-"	densf[index] = (unsigned char)(density<0.0?0.0:density);\n" \
+"	densf[index] = (unsigned char)(density);\n" \
 "}\n" \
 "\n" \
 "//compute statistics on density field\n" \

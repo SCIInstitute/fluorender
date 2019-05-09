@@ -103,6 +103,7 @@ namespace FLIVR
 			Argument& arg, void* data);
 
 		//release mem obj
+		void releaseAll(bool del_mem = true);
 		void releaseMemObject(Argument&);
 		void releaseMemObject(int, int, size_t, GLuint);
 		void releaseMemObject(size_t, void* orgn_addr);

@@ -87,7 +87,7 @@ namespace FL
 		void DistField3D(int iter, float th);
 		void DistDensityField3D(
 			bool diffuse, int iter, float tran, float falloff,
-			int max_dist, float dist_thresh,
+			int max_dist, float dist_thresh, float dist_strength,
 			int dsize, int wsize, float density, float sscale);
 		void DistGrow3D(bool, int, float, float, int, float, float, float);
 
