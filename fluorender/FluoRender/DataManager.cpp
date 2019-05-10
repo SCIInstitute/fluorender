@@ -168,6 +168,9 @@ VolumeData::VolumeData()
 
 	//valid brick number
 	m_brick_num = 0;
+
+	//save label
+	m_label_save = 0;
 }
 
 VolumeData::VolumeData(VolumeData &copy)
@@ -292,6 +295,9 @@ VolumeData::VolumeData(VolumeData &copy)
 
 	//valid brick number
 	m_brick_num = 0;
+
+	//save label
+	m_label_save = 0;
 }
 
 VolumeData::~VolumeData()
@@ -300,6 +306,8 @@ VolumeData::~VolumeData()
 		delete m_vr;
 	if (m_tex && !m_dup)
 		delete m_tex;
+	if (m_label_save)
+		delete[] m_label_save;
 }
 
 //set viewport
@@ -2257,6 +2265,47 @@ bool VolumeData::isBrxml()
 	if (!m_tex) return false;
 
 	return m_tex->isBrxml();
+}
+
+//save label
+void VolumeData::PushLabel(bool ret)
+{
+	if (ret && m_vr)
+		m_vr->return_label();
+	if (!m_tex)
+		return;
+	if (m_tex->nlabel() == -1)
+		return;
+
+	Nrrd* data = m_tex->get_nrrd(m_tex->nlabel());
+	if (!data || ! data->data)
+		return;
+	int nx, ny, nz;
+	GetResolution(nx, ny, nz);
+	unsigned long long size = (unsigned long long)nx * ny * nz;
+	if (!m_label_save)
+		m_label_save = new unsigned int[size];
+	memcpy(m_label_save, data->data, size * sizeof(unsigned int));
+}
+
+void VolumeData::PopLabel()
+{
+	delete[] m_label_save;
+	m_label_save = 0;
+}
+
+void VolumeData::LoadLabel2()
+{
+	if (m_label_save)
+	{
+		Nrrd* data = m_tex->get_nrrd(m_tex->nlabel());
+		if (!data || !data->data)
+			return;
+		int nx, ny, nz;
+		GetResolution(nx, ny, nz);
+		unsigned long long size = (unsigned long long)nx * ny * nz;
+		memcpy(data->data, m_label_save, size * sizeof(unsigned int));
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////

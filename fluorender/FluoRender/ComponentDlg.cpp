@@ -78,6 +78,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_TEXT(ID_DensityStatsSizeText, ComponentDlg::OnDensityStatsSizeText)
 	//fixate
 	EVT_CHECKBOX(ID_FixateCheck, ComponentDlg::OnFixateCheck)
+	EVT_BUTTON(ID_FixUpdateBtn, ComponentDlg::OnFixUpdateBtn)
 	//clean
 	EVT_CHECKBOX(ID_CleanCheck, ComponentDlg::OnCleanCheck)
 	EVT_BUTTON(ID_CleanBtn, ComponentDlg::OnCleanBtn)
@@ -369,8 +370,13 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	wxBoxSizer* sizer13 = new wxBoxSizer(wxHORIZONTAL);
 	m_fixate_check = new wxCheckBox(page, ID_FixateCheck, "Fixate Grown Regions",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+	m_fix_update_btn = new wxButton(page, ID_FixUpdateBtn, "Refix",
+		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
 	sizer13->Add(2, 2);
 	sizer13->Add(m_fixate_check, 0, wxALIGN_CENTER);
+	sizer13->AddStretchSpacer(1);
+	sizer13->Add(m_fix_update_btn, 0, wxALIGN_CENTER);
+	sizer13->Add(2, 2);
 
 	//clean
 	wxBoxSizer* sizer14 = new wxBoxSizer(wxHORIZONTAL);
@@ -816,6 +822,8 @@ void ComponentDlg::Update()
 	m_density_stats_size_text->SetValue(wxString::Format("%d", m_density_stats_size));
 	//fixate
 	m_fixate_check->SetValue(m_fixate);
+	EnableFixate(m_fixate);
+	//clean
 	EnableClean(m_clean);
 	m_clean_check->SetValue(m_clean);
 	m_clean_iter_text->SetValue(wxString::Format("%d", m_clean_iter));
@@ -1369,9 +1377,48 @@ void ComponentDlg::OnDensityStatsSizeText(wxCommandEvent &event)
 		GenerateComp();
 }
 
+void ComponentDlg::EnableFixate(bool value)
+{
+	if (value)
+	{
+		m_fix_update_btn->Enable();
+	}
+	else
+	{
+		m_fix_update_btn->Disable();
+	}
+}
+
 void ComponentDlg::OnFixateCheck(wxCommandEvent &event)
 {
 	m_fixate = m_fixate_check->GetValue();
+	EnableFixate(m_fixate);
+
+	if (m_fixate)
+	{
+		if (!m_view)
+			return;
+		VolumeData* vd = m_view->m_glview->m_cur_vol;
+		if (!vd)
+			return;
+		vd->PushLabel(true);
+	}
+
+	if (m_auto_update)
+		GenerateComp();
+}
+
+void ComponentDlg::OnFixUpdateBtn(wxCommandEvent &event)
+{
+	if (m_fixate)
+	{
+		if (!m_view)
+			return;
+		VolumeData* vd = m_view->m_glview->m_cur_vol;
+		if (!vd)
+			return;
+		vd->PushLabel(true);
+	}
 
 	if (m_auto_update)
 		GenerateComp();
@@ -2331,8 +2378,15 @@ void ComponentDlg::GenerateComp()
 
 	cg.SetUseMask(m_use_sel_chk->GetValue());
 
-	vd->AddEmptyLabel();
-	cg.ShuffleID_3D();
+	if (m_fixate)
+	{
+		vd->LoadLabel2();
+	}
+	else
+	{
+		vd->AddEmptyLabel();
+		cg.ShuffleID_3D();
+	}
 
 	if (m_use_dist_field)
 	{
