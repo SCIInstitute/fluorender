@@ -54,42 +54,44 @@ public:
 
 		//generate page
 		//iterations
-		ID_BasicIterSldr,
-		ID_BasicIterText,
+		ID_IterSldr,
+		ID_IterText,
 		//threshold
-		ID_BasicThreshSldr,
-		ID_BasicThreshText,
+		ID_ThreshSldr,
+		ID_ThreshText,
 		//distance field
-		ID_BasicUseDistFieldCheck,
-		ID_BasicDistStrengthSldr,
-		ID_BasicDistStrengthText,
-		ID_BasicMaxDistSldr,
-		ID_BasicMaxDistText,
-		ID_BasicDistThreshSldr,
-		ID_BasicDistThreshText,
+		ID_UseDistFieldCheck,
+		ID_DistStrengthSldr,
+		ID_DistStrengthText,
+		ID_MaxDistSldr,
+		ID_MaxDistText,
+		ID_DistThreshSldr,
+		ID_DistThreshText,
 		//falloff
-		ID_BasicDiffCheck,
-		ID_BasicFalloffSldr,
-		ID_BasicFalloffText,
+		ID_DiffCheck,
+		ID_FalloffSldr,
+		ID_FalloffText,
 		//size
-		ID_BasicSizeCheck,
-		ID_BasicSizeSldr,
-		ID_BasicSizeText,
+		ID_SizeCheck,
+		ID_SizeSldr,
+		ID_SizeText,
 		//density
-		ID_BasicDensityCheck,
-		ID_BasicDensitySldr,
-		ID_BasicDensityText,
-		ID_BasicDensityWindowSizeSldr,
-		ID_BasicDensityWindowsSizeText,
-		ID_BasicDensityStatsSizeSldr,
-		ID_BasicDensityStatsSizeText,
+		ID_DensityCheck,
+		ID_DensitySldr,
+		ID_DensityText,
+		ID_DensityWindowSizeSldr,
+		ID_DensityWindowsSizeText,
+		ID_DensityStatsSizeSldr,
+		ID_DensityStatsSizeText,
+		//fixate
+		ID_FixateCheck,
 		//clean
-		ID_BasicCleanCheck,
-		ID_BasicCleanBtn,
-		ID_BasicCleanIterSldr,
-		ID_BasicCleanIterText,
-		ID_BasicCleanLimitSldr,
-		ID_BasicCleanLimitText,
+		ID_CleanCheck,
+		ID_CleanBtn,
+		ID_CleanIterSldr,
+		ID_CleanIterText,
+		ID_CleanLimitSldr,
+		ID_CleanLimitText,
 
 		//clustering page
 		ID_ClusterMethodExmaxRd,
@@ -171,8 +173,6 @@ public:
 		wxGetApp().Yield();
 	}
 
-	//type: 0-basic; 1-advanced
-	//mode: 0-generate; 1-refine
 	void GenerateComp();
 	void SelectFullComp();
 
@@ -190,27 +190,29 @@ private:
 	float m_prog;
 
 	//generate settings
-	int m_basic_iter;
-	double m_basic_thresh;
+	int m_iter;
+	double m_thresh;
 	//distance field
 	bool m_use_dist_field;
-	double m_basic_dist_strength;
-	int m_basic_max_dist;
-	double m_basic_dist_thresh;
+	double m_dist_strength;
+	int m_max_dist;
+	double m_dist_thresh;
 	//diffusion
-	bool m_basic_diff;
-	double m_basic_falloff;
-	bool m_basic_size;
-	int m_basic_size_lm;
+	bool m_diff;
+	double m_falloff;
+	bool m_size;
+	int m_size_lm;
 	//density
-	bool m_basic_density;
-	double m_basic_density_thresh;
-	int m_basic_density_window_size;
-	int m_basic_density_stats_size;
+	bool m_density;
+	double m_density_thresh;
+	int m_density_window_size;
+	int m_density_stats_size;
+	//fixate
+	bool m_fixate;
 	//clean
-	bool m_basic_clean;
-	int m_basic_clean_iter;
-	int m_basic_clean_size_vl;
+	bool m_clean;
+	int m_clean_iter;
+	int m_clean_size_vl;
 
 	//cluster settings
 	bool m_cluster_method_exmax;
@@ -256,40 +258,42 @@ private:
 	//wxCollapsiblePane* m_initial_grow_pane;
 
 	//generate page
-	wxSlider* m_basic_iter_sldr;
-	wxTextCtrl* m_basic_iter_text;
-	wxSlider* m_basic_thresh_sldr;
-	wxTextCtrl* m_basic_thresh_text;
+	wxSlider* m_iter_sldr;
+	wxTextCtrl* m_iter_text;
+	wxSlider* m_thresh_sldr;
+	wxTextCtrl* m_thresh_text;
 	//distance field
 	wxCheckBox* m_use_dist_field_check;
-	wxSlider* m_basic_dist_strength_sldr;
-	wxTextCtrl* m_basic_dist_strength_text;
-	wxSlider* m_basic_max_dist_sldr;
-	wxTextCtrl* m_basic_max_dist_text;
-	wxSlider* m_basic_dist_thresh_sldr;
-	wxTextCtrl* m_basic_dist_thresh_text;
+	wxSlider* m_dist_strength_sldr;
+	wxTextCtrl* m_dist_strength_text;
+	wxSlider* m_max_dist_sldr;
+	wxTextCtrl* m_max_dist_text;
+	wxSlider* m_dist_thresh_sldr;
+	wxTextCtrl* m_dist_thresh_text;
 	//diffusion
-	wxCheckBox* m_basic_diff_check;
-	wxSlider* m_basic_falloff_sldr;
-	wxTextCtrl* m_basic_falloff_text;
-	wxCheckBox* m_basic_size_check;
-	wxSlider* m_basic_size_sldr;
-	wxTextCtrl* m_basic_size_text;
+	wxCheckBox* m_diff_check;
+	wxSlider* m_falloff_sldr;
+	wxTextCtrl* m_falloff_text;
+	wxCheckBox* m_size_check;
+	wxSlider* m_size_sldr;
+	wxTextCtrl* m_size_text;
 	//density
-	wxCheckBox* m_basic_density_check;
-	wxSlider* m_basic_density_sldr;
-	wxTextCtrl* m_basic_density_text;
-	wxSlider* m_basic_density_window_size_sldr;
-	wxTextCtrl* m_basic_density_window_size_text;
-	wxSlider* m_basic_density_stats_size_sldr;
-	wxTextCtrl* m_basic_density_stats_size_text;
+	wxCheckBox* m_density_check;
+	wxSlider* m_density_sldr;
+	wxTextCtrl* m_density_text;
+	wxSlider* m_density_window_size_sldr;
+	wxTextCtrl* m_density_window_size_text;
+	wxSlider* m_density_stats_size_sldr;
+	wxTextCtrl* m_density_stats_size_text;
+	//fixate
+	wxCheckBox* m_fixate_check;
 	//clean
-	wxCheckBox* m_basic_clean_check;
-	wxButton* m_basic_clean_btn;
-	wxSlider* m_basic_clean_iter_sldr;
-	wxTextCtrl* m_basic_clean_iter_text;
-	wxSlider* m_basic_clean_limit_sldr;
-	wxTextCtrl* m_basic_clean_limit_text;
+	wxCheckBox* m_clean_check;
+	wxButton* m_clean_btn;
+	wxSlider* m_clean_iter_sldr;
+	wxTextCtrl* m_clean_iter_text;
+	wxSlider* m_clean_limit_sldr;
+	wxTextCtrl* m_clean_limit_text;
 
 	//clustering page
 	wxRadioButton* m_cluster_method_exmax_rd;
@@ -363,43 +367,45 @@ private:
 	//wxCollapsiblePane* CreateInitialGrowPane(wxWindow *parent);
 
 	//comp generate page
-	void OnBasicIterSldr(wxScrollEvent &event);
-	void OnBasicIterText(wxCommandEvent &event);
-	void OnBasicThreshSldr(wxScrollEvent &event);
-	void OnBasicThreshText(wxCommandEvent &event);
-	void OnBasicUseDistFieldCheck(wxCommandEvent &event);
+	void OnIterSldr(wxScrollEvent &event);
+	void OnIterText(wxCommandEvent &event);
+	void OnThreshSldr(wxScrollEvent &event);
+	void OnThreshText(wxCommandEvent &event);
+	void OnUseDistFieldCheck(wxCommandEvent &event);
 	void EnableUseDistField(bool value);
-	void OnBasicDistStrengthSldr(wxScrollEvent &event);
-	void OnBasicDistStrengthText(wxCommandEvent &event);
-	void OnBasicMaxDistSldr(wxScrollEvent &event);
-	void OnBasicMaxDistText(wxCommandEvent &event);
-	void OnBasicDistThreshSldr(wxScrollEvent &event);
-	void OnBasicDistThreshText(wxCommandEvent &event);
-	void EnableBasicDiff(bool value);
-	void OnBasicDiffCheck(wxCommandEvent &event);
-	void OnBasicFalloffSldr(wxScrollEvent &event);
-	void OnBasicFalloffText(wxCommandEvent &event);
-	void EnableBasicSize(bool value);
-	void OnBasicSizeCheck(wxCommandEvent &event);
-	void OnBasicSizeSldr(wxScrollEvent &event);
-	void OnBasicSizeText(wxCommandEvent &event);
+	void OnDistStrengthSldr(wxScrollEvent &event);
+	void OnDistStrengthText(wxCommandEvent &event);
+	void OnMaxDistSldr(wxScrollEvent &event);
+	void OnMaxDistText(wxCommandEvent &event);
+	void OnDistThreshSldr(wxScrollEvent &event);
+	void OnDistThreshText(wxCommandEvent &event);
+	void EnableDiff(bool value);
+	void OnDiffCheck(wxCommandEvent &event);
+	void OnFalloffSldr(wxScrollEvent &event);
+	void OnFalloffText(wxCommandEvent &event);
+	void EnableSize(bool value);
+	void OnSizeCheck(wxCommandEvent &event);
+	void OnSizeSldr(wxScrollEvent &event);
+	void OnSizeText(wxCommandEvent &event);
 	//density
-	void EnableBasicDensity(bool value);
-	void OnBasicDensityCheck(wxCommandEvent &event);
-	void OnBasicDensitySldr(wxScrollEvent &event);
-	void OnBasicDensityText(wxCommandEvent &event);
-	void OnBasicDensityWindowSizeSldr(wxScrollEvent &event);
-	void OnBasicDensityWindowSizeText(wxCommandEvent &event);
-	void OnBasicDensityStatsSizeSldr(wxScrollEvent &event);
-	void OnBasicDensityStatsSizeText(wxCommandEvent &event);
+	void EnableDensity(bool value);
+	void OnDensityCheck(wxCommandEvent &event);
+	void OnDensitySldr(wxScrollEvent &event);
+	void OnDensityText(wxCommandEvent &event);
+	void OnDensityWindowSizeSldr(wxScrollEvent &event);
+	void OnDensityWindowSizeText(wxCommandEvent &event);
+	void OnDensityStatsSizeSldr(wxScrollEvent &event);
+	void OnDensityStatsSizeText(wxCommandEvent &event);
+	//fixate
+	void OnFixateCheck(wxCommandEvent &event);
 	//clean
-	void EnableBasicClean(bool value);
-	void OnBasicCleanCheck(wxCommandEvent &event);
-	void OnBasicCleanBtn(wxCommandEvent &event);
-	void OnBasicCleanIterSldr(wxScrollEvent &event);
-	void OnBasicCleanIterText(wxCommandEvent &event);
-	void OnBasicCleanLimitSldr(wxScrollEvent &event);
-	void OnBasicCleanLimitText(wxCommandEvent &event);
+	void EnableClean(bool value);
+	void OnCleanCheck(wxCommandEvent &event);
+	void OnCleanBtn(wxCommandEvent &event);
+	void OnCleanIterSldr(wxScrollEvent &event);
+	void OnCleanIterText(wxCommandEvent &event);
+	void OnCleanLimitSldr(wxScrollEvent &event);
+	void OnCleanLimitText(wxCommandEvent &event);
 
 	//clustering page
 	void UpdateClusterMethod();
