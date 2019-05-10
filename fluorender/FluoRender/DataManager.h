@@ -434,6 +434,11 @@ public:
 
 	bool isBrxml();
 
+	//save label
+	void PushLabel(bool ret);
+	void PopLabel();
+	void LoadLabel2();
+
 private:
 	//duplication indicator and counter
 	bool m_dup;
@@ -444,6 +449,8 @@ private:
 	BBox m_bounds;
 	VolumeRenderer *m_vr;
 	Texture *m_tex;
+	//save label
+	void* m_label_save;
 
 	int m_chan;	//channel index of the original file
 	int m_time;	//time index of the original file

@@ -85,6 +85,7 @@ public:
 		ID_DensityStatsSizeText,
 		//fixate
 		ID_FixateCheck,
+		ID_FixUpdateBtn,
 		//clean
 		ID_CleanCheck,
 		ID_CleanBtn,
@@ -287,6 +288,7 @@ private:
 	wxTextCtrl* m_density_stats_size_text;
 	//fixate
 	wxCheckBox* m_fixate_check;
+	wxButton* m_fix_update_btn;
 	//clean
 	wxCheckBox* m_clean_check;
 	wxButton* m_clean_btn;
@@ -398,6 +400,8 @@ private:
 	void OnDensityStatsSizeText(wxCommandEvent &event);
 	//fixate
 	void OnFixateCheck(wxCommandEvent &event);
+	void EnableFixate(bool value);
+	void OnFixUpdateBtn(wxCommandEvent &event);
 	//clean
 	void EnableClean(bool value);
 	void OnCleanCheck(wxCommandEvent &event);
