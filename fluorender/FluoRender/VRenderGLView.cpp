@@ -44,6 +44,7 @@ bool VRenderGLView::m_linked_rot = false;
 VRenderGLView* VRenderGLView::m_master_linked_view = 0;
 bool VRenderGLView::m_enlarge = false;
 double VRenderGLView::m_enlarge_scale = 1.0;
+unsigned int VRenderGLView::m_tsize = 14.0;
 #ifdef _WIN32
 HCTX VRenderGLView::m_hTab = 0;
 LOGCONTEXTA VRenderGLView::m_lc;
@@ -5564,8 +5565,6 @@ void VRenderGLView::PostDraw()
 				img_shader->release();
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, 0);
-
-			//TextRenderer::text_texture_manager_.SetSize(m_tsize);
 		}
 
 		int chann = VRenderFrame::GetSaveAlpha() ? 4 : 3;
@@ -5621,6 +5620,7 @@ void VRenderGLView::ResetEnlarge()
 		!TextureRenderer::get_done_update_loop())
 		return;
 	m_enlarge = false;
+	TextRenderer::text_texture_manager_.SetSize(m_tsize);
 	RefreshGL(19);
 }
 
@@ -6494,12 +6494,6 @@ void VRenderGLView::ForceDraw()
 
 	m_drawing = true;
 	PreDraw();
-
-	//if (m_enlarge)
-	//{
-	//	m_tsize = TextRenderer::text_texture_manager_.GetSize();
-	//	TextRenderer::text_texture_manager_.SetSize(m_tsize * m_enlarge_scale);
-	//}
 
 	switch (m_draw_type)
 	{
