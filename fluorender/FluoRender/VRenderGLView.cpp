@@ -5564,6 +5564,8 @@ void VRenderGLView::PostDraw()
 				img_shader->release();
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, 0);
+
+			//TextRenderer::text_texture_manager_.SetSize(m_tsize);
 		}
 
 		int chann = VRenderFrame::GetSaveAlpha() ? 4 : 3;
@@ -6492,6 +6494,12 @@ void VRenderGLView::ForceDraw()
 
 	m_drawing = true;
 	PreDraw();
+
+	//if (m_enlarge)
+	//{
+	//	m_tsize = TextRenderer::text_texture_manager_.GetSize();
+	//	TextRenderer::text_texture_manager_.SetSize(m_tsize * m_enlarge_scale);
+	//}
 
 	switch (m_draw_type)
 	{
@@ -8828,9 +8836,22 @@ void VRenderGLView::DrawScaleBar()
 	std::vector<std::pair<unsigned int, double>> params;
 	if (m_draw_frame)
 	{
-		px = (0.95*m_frame_w + m_frame_x) / nx;
-		py = (0.05*m_frame_h + m_frame_y + offset) / ny;
+		int framew = m_frame_w;
+		int frameh = m_frame_h;
+		int framex = m_frame_x;
+		int framey = m_frame_y;
+		if (m_enlarge)
+		{
+			framew *= m_enlarge_scale;
+			frameh *= m_enlarge_scale;
+			framex *= m_enlarge_scale;
+			framey *= m_enlarge_scale;
+		}
+		px = (0.95*framew + framex) / nx;
+		py = (0.05*frameh + framey + offset) / ny;
 		ph = 5.0 / ny;
+		if (m_enlarge)
+			ph *= m_enlarge_scale;
 		params.push_back(std::pair<unsigned int, double>(0, px));
 		params.push_back(std::pair<unsigned int, double>(1, py));
 		params.push_back(std::pair<unsigned int, double>(2, len));
@@ -8838,8 +8859,8 @@ void VRenderGLView::DrawScaleBar()
 
 		if (m_disp_scale_bar_text)
 		{
-			px = 0.95*m_frame_w + m_frame_x - (len*nx + textlen + nx) / 2.0;
-			py = ny / 2.0 - ny + 0.065*m_frame_h + m_frame_y + offset;
+			px = 0.95*framew + framex - (len*nx + textlen + nx) / 2.0;
+			py = ny / 2.0 - ny + 0.065*frameh + framey + offset;
 			m_text_renderer.RenderText(
 				wsb_text, text_color,
 				px*sx, py*sy, sx, sy);
@@ -8850,6 +8871,8 @@ void VRenderGLView::DrawScaleBar()
 		px = 0.95;
 		py = 0.05 + offset / ny;
 		ph = 5.0 / ny;
+		if (m_enlarge)
+			ph *= m_enlarge_scale;
 		params.push_back(std::pair<unsigned int, double>(0, px));
 		params.push_back(std::pair<unsigned int, double>(1, py));
 		params.push_back(std::pair<unsigned int, double>(2, len));
