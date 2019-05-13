@@ -2381,6 +2381,7 @@ void ComponentDlg::GenerateComp()
 	if (m_fixate)
 	{
 		vd->LoadLabel2();
+		cg.SetIDBit(m_iter);
 	}
 	else
 	{

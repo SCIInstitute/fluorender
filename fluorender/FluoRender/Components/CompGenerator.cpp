@@ -2535,3 +2535,134 @@ void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
 	}
 }
 
+void ComponentGenerator::SetIDBit(unsigned int limit)
+{
+	//debug
+#ifdef _DEBUG
+	unsigned int* val = 0;
+	std::ofstream ofs;
+#endif
+
+	CHECK_BRICKS;
+
+	//create program and kernels
+	KernelProgram* kernel_prog = VolumeRenderer::
+		vol_kernel_factory_.kernel(str_cl_set_bit_3d);
+	if (!kernel_prog)
+		return;
+	int kernel_index0 = kernel_prog->createKernel("kernel_0");
+	int kernel_index1 = kernel_prog->createKernel("kernel_1");
+	int kernel_index2 = kernel_prog->createKernel("kernel_2");
+
+	if (m_use_mask)
+		m_vd->GetVR()->return_mask();
+
+	for (size_t i = 0; i < bricks->size(); ++i)
+	{
+		GET_VOLDATA_STREAM;
+
+		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
+		size_t local_size[3] = { 1, 1, 1 };
+
+		//set
+		unsigned int* mask32 = 0;
+
+		//bit length
+		unsigned int lenx = 0;
+		unsigned int r = Max(nx, ny);
+		while (r > 0)
+		{
+			r /= 2;
+			lenx++;
+		}
+		unsigned int lenz = 0;
+		r = nz;
+		while (r > 0)
+		{
+			r /= 2;
+			lenz++;
+		}
+
+		unsigned long long data_size =
+			(unsigned long long)nx *
+			(unsigned long long)ny *
+			(unsigned long long)nz;
+		unsigned long long label_size = data_size * 4;
+		mask32 = new unsigned int[data_size];
+		memset(mask32, 0, label_size);
+
+		//set
+		//kernel 0
+		Argument arg_mask = kernel_prog->setKernelArgBuf(kernel_index0, 0,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			label_size, mask32);
+		Argument arg_label = kernel_prog->setKernelArgBuf(kernel_index0, 1,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*nx*ny*nz, val32);
+		kernel_prog->setKernelArgConst(kernel_index0, 2,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(kernel_index0, 3,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(kernel_index0, 4,
+			sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setKernelArgConst(kernel_index0, 5,
+			sizeof(unsigned int), (void*)(&lenx));
+		kernel_prog->setKernelArgConst(kernel_index0, 6,
+			sizeof(unsigned int), (void*)(&lenz));
+		//kernel 1
+		arg_mask.kernel_index = kernel_index1;
+		arg_mask.index = 0;
+		kernel_prog->setKernelArgument(arg_mask);
+		arg_label.kernel_index = kernel_index1;
+		arg_label.index = 1;
+		kernel_prog->setKernelArgument(arg_label);
+		kernel_prog->setKernelArgConst(kernel_index1, 2,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(kernel_index1, 3,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(kernel_index1, 4,
+			sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setKernelArgConst(kernel_index1, 5,
+			sizeof(unsigned int), (void*)(&lenx));
+		kernel_prog->setKernelArgConst(kernel_index1, 6,
+			sizeof(unsigned int), (void*)(&lenz));
+		//kernel 2
+		arg_mask.kernel_index = kernel_index2;
+		arg_mask.index = 0;
+		kernel_prog->setKernelArgument(arg_mask);
+		arg_label.kernel_index = kernel_index2;
+		arg_label.index = 1;
+		kernel_prog->setKernelArgument(arg_label);
+		kernel_prog->setKernelArgConst(kernel_index2, 2,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(kernel_index2, 3,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(kernel_index2, 4,
+			sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setKernelArgConst(kernel_index2, 5,
+			sizeof(unsigned int), (void*)(&limit));
+
+		//execute
+		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
+		kernel_prog->executeKernel(kernel_index1, 3, global_size, local_size);
+		kernel_prog->executeKernel(kernel_index2, 3, global_size, local_size);
+		//debug
+		//val = new unsigned int[nx*ny*nz];
+		//kernel_prog->readBuffer(arg_mask, val);
+		//ofs.open("E:/DATA/Test/density_field/df.bin", std::ios::out | std::ios::binary);
+		//ofs.write((char*)val, nx*ny*nz*sizeof(unsigned int));
+		//delete[] val;
+		//ofs.close();
+
+		//read back
+		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
+
+		//release buffer
+		kernel_prog->releaseAll();
+		delete[] mask32;
+
+		m_sig_progress();
+
+		RELEASE_DATA_STREAM
+	}
+}
