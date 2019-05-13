@@ -892,6 +892,7 @@ private:
 
 	//text renderer
 	FLIVR::TextRenderer m_text_renderer;
+	unsigned int m_tsize;
 
 	//starting frame for 4d script
 	bool m_sf_script;
