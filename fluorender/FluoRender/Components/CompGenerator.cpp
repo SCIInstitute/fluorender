@@ -2535,7 +2535,7 @@ void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
 	}
 }
 
-void ComponentGenerator::SetIDBit(unsigned int limit)
+void ComponentGenerator::SetIDBit(int iter)
 {
 	//debug
 #ifdef _DEBUG
@@ -2639,6 +2639,10 @@ void ComponentGenerator::SetIDBit(unsigned int limit)
 			sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setKernelArgConst(kernel_index2, 4,
 			sizeof(unsigned int), (void*)(&nz));
+		unsigned int limit = 1;
+		limit *= std::min(iter, nx);
+		//limit *= std::min(iter, ny);
+		limit *= std::min(iter, nz);
 		kernel_prog->setKernelArgConst(kernel_index2, 5,
 			sizeof(unsigned int), (void*)(&limit));
 
