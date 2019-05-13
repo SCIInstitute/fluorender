@@ -342,28 +342,28 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer10->Add(m_dist_strength_text, 0, wxALIGN_CENTER);
 	sizer10->Add(2, 2);
 	wxBoxSizer* sizer11 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Max Distance",
-		wxDefaultPosition, wxSize(100, 23));
-	m_max_dist_sldr = new wxSlider(page, ID_MaxDistSldr, 30, 1, 255,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_max_dist_text = new wxTextCtrl(page, ID_MaxDistText, "30",
-		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-	sizer11->Add(2, 2);
-	sizer11->Add(st, 0, wxALIGN_CENTER);
-	sizer11->Add(m_max_dist_sldr, 1, wxEXPAND);
-	sizer11->Add(m_max_dist_text, 0, wxALIGN_CENTER);
-	sizer11->Add(2, 2);
-	wxBoxSizer* sizer12 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Threshold",
 		wxDefaultPosition, wxSize(100, 23));
 	m_dist_thresh_sldr = new wxSlider(page, ID_DistThreshSldr, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_dist_thresh_text = new wxTextCtrl(page, ID_DistThreshText, "0.000",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_fp3);
+	sizer11->Add(2, 2);
+	sizer11->Add(st, 0, wxALIGN_CENTER);
+	sizer11->Add(m_dist_thresh_sldr, 1, wxEXPAND);
+	sizer11->Add(m_dist_thresh_text, 0, wxALIGN_CENTER);
+	sizer11->Add(2, 2);
+	wxBoxSizer* sizer12 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Max Distance",
+		wxDefaultPosition, wxSize(100, 23));
+	m_max_dist_sldr = new wxSlider(page, ID_MaxDistSldr, 30, 1, 255,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_max_dist_text = new wxTextCtrl(page, ID_MaxDistText, "30",
+		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
 	sizer12->Add(2, 2);
 	sizer12->Add(st, 0, wxALIGN_CENTER);
-	sizer12->Add(m_dist_thresh_sldr, 1, wxEXPAND);
-	sizer12->Add(m_dist_thresh_text, 0, wxALIGN_CENTER);
+	sizer12->Add(m_max_dist_sldr, 1, wxEXPAND);
+	sizer12->Add(m_max_dist_text, 0, wxALIGN_CENTER);
 	sizer12->Add(2, 2);
 
 	//fixate

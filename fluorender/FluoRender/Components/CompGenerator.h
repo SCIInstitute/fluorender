@@ -90,7 +90,7 @@ namespace FL
 			int max_dist, float dist_thresh, float dist_strength,
 			int dsize, int wsize, float density, float sscale);
 		void DistGrow3D(bool, int, float, float, int, float, float, float);
-		void SetIDBit(unsigned int);
+		void SetIDBit(int);
 
 		//update progress
 		boost::signals2::signal<void ()> m_sig_progress;
