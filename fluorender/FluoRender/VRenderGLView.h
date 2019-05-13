@@ -547,6 +547,11 @@ public:
 	static void SetEnlargeScale(double value)
 	{
 		m_enlarge_scale = value;
+		if (m_enlarge)
+		{
+			m_tsize = TextRenderer::text_texture_manager_.GetSize();
+			TextRenderer::text_texture_manager_.SetSize(m_tsize * m_enlarge_scale);
+		}
 	}
 
 public:
@@ -892,7 +897,7 @@ private:
 
 	//text renderer
 	FLIVR::TextRenderer m_text_renderer;
-	unsigned int m_tsize;
+	static unsigned int m_tsize;
 
 	//starting frame for 4d script
 	bool m_sf_script;
