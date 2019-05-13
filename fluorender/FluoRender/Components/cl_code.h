@@ -153,7 +153,7 @@ const char* str_cl_cleanup_3d = \
 "	unsigned int value_l = label[index];\n" \
 "	if (value_l == 0)\n" \
 "		return;\n" \
-"	unsigned int res = nx*ny*nz - value_l;\n" \
+"	unsigned int res = value_l - 1;\n" \
 "	unsigned int x = 0;\n" \
 "	unsigned int y = 0;\n" \
 "	unsigned int z = 0;\n" \
@@ -186,7 +186,7 @@ const char* str_cl_cleanup_3d = \
 "	unsigned int value_l = label[index];\n" \
 "	if (value_l == 0)\n" \
 "		return;\n" \
-"	unsigned int res = nx*ny*nz - value_l;\n" \
+"	unsigned int res = value_l - 1;\n" \
 "	unsigned int x = 0;\n" \
 "	unsigned int y = 0;\n" \
 "	unsigned int z = 0;\n" \
@@ -300,6 +300,8 @@ const char* str_cl_brainbow_3d = \
 "	if (stop < random)\n" \
 "		return;\n" \
 "	unsigned int label_value = label[index];\n" \
+"	if (label_value & 0x80000000)\n" \
+"		return;\n" \
 "	int3 nb_coord;\n" \
 "	unsigned int nb_index;\n" \
 "	unsigned int m;\n" \
@@ -379,7 +381,7 @@ const char* str_cl_brainbow_3d_sized = \
 "	unsigned int value_l = label[index];\n" \
 "	if (value_l == 0)\n" \
 "		return;\n" \
-"	unsigned int res = nx*ny*nz - value_l;\n" \
+"	unsigned int res = value_l - 1;\n" \
 "	unsigned int x = 0;\n" \
 "	unsigned int y = 0;\n" \
 "	unsigned int z = 0;\n" \
@@ -412,7 +414,7 @@ const char* str_cl_brainbow_3d_sized = \
 "	unsigned int value_l = label[index];\n" \
 "	if (value_l == 0)\n" \
 "		return;\n" \
-"	unsigned int res = nx*ny*nz - value_l;\n" \
+"	unsigned int res = value_l - 1;\n" \
 "	unsigned int x = 0;\n" \
 "	unsigned int y = 0;\n" \
 "	unsigned int z = 0;\n" \
@@ -684,7 +686,7 @@ const char* str_cl_shuffle_id_3d = \
 "			res |= (1<<ii & y)<<(ii+1);\n" \
 "		}\n" \
 "		res |= z<<lenx*2;\n" \
-"		label[index] = nx*ny*nz - res;\n" \
+"		label[index] = res + 1;\n" \
 "	}\n" \
 "}\n";
 
@@ -1566,6 +1568,8 @@ const char* str_cl_density_grow_3d = \
 "	if (stop < random)\n" \
 "		return;\n" \
 "	unsigned int label_value = label[index];\n" \
+"	if (label_value & 0x80000000)\n" \
+"		return;\n" \
 "	int3 nb_coord;\n" \
 "	unsigned int nb_index;\n" \
 "	unsigned int m;\n" \
@@ -1641,6 +1645,8 @@ const char* str_cl_dist_grow_3d = \
 "	if (stop < random)\n" \
 "		return;\n" \
 "	unsigned int label_value = label[index];\n" \
+"	if (label_value & 0x80000000)\n" \
+"		return;\n" \
 "	int3 nb_coord;\n" \
 "	unsigned int nb_index;\n" \
 "	unsigned int m;\n" \
@@ -1659,6 +1665,114 @@ const char* str_cl_dist_grow_3d = \
 "			label_value = m;\n" \
 "	}\n" \
 "	label[index] = label_value;\n" \
+"}\n" \
+;
+
+const char* str_cl_set_bit_3d = \
+"const sampler_t samp =\n" \
+"	CLK_NORMALIZED_COORDS_FALSE|\n" \
+"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
+"	CLK_FILTER_NEAREST;\n" \
+"\n" \
+"unsigned int __attribute((always_inline)) reverse_bit(unsigned int val, unsigned int len)\n" \
+"{\n" \
+"	unsigned int res = val;\n" \
+"	int s = len - 1;\n" \
+"	for (val >>= 1; val; val >>= 1)\n" \
+"	{\n" \
+"		res <<= 1;\n" \
+"		res |= val & 1;\n" \
+"		s--;\n" \
+"	}\n" \
+"	res <<= s;\n" \
+"	res <<= 32-len;\n" \
+"	res >>= 32-len;\n" \
+"	return res;\n" \
+"}\n" \
+"__kernel void kernel_0(\n" \
+"	__global unsigned int* mask,\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned int lenx,\n" \
+"	unsigned int lenz)\n" \
+"{\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
+"	unsigned int index = nx*ny*k + nx*j + i;\n" \
+"	unsigned int value_l = label[index];\n" \
+"	if (value_l == 0)\n" \
+"		return;\n" \
+"	unsigned int res = value_l - 1;\n" \
+"	unsigned int x = 0;\n" \
+"	unsigned int y = 0;\n" \
+"	unsigned int z = 0;\n" \
+"	unsigned int ii;\n" \
+"	for (ii=0; ii<lenx; ++ii)\n" \
+"	{\n" \
+"		x |= (1<<(2*ii) & res)>>(ii);\n" \
+"		y |= (1<<(2*ii+1) & res)>>(ii+1);\n" \
+"	}\n" \
+"	z = res<<(32-lenx*2-lenz)>>(32-lenz);\n" \
+"	x = reverse_bit(x, lenx);\n" \
+"	y = reverse_bit(y, lenx);\n" \
+"	z = reverse_bit(z, lenz);\n" \
+"	index = nx*ny*z + nx*y + x;\n" \
+"	atomic_inc(&(mask[index]));\n" \
+"}\n" \
+"__kernel void kernel_1(\n" \
+"	__global unsigned int* mask,\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned int lenx,\n" \
+"	unsigned int lenz)\n" \
+"{\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
+"	unsigned int index = nx*ny*k + nx*j + i;\n" \
+"	unsigned int value_l = label[index];\n" \
+"	if (value_l == 0)\n" \
+"		return;\n" \
+"	unsigned int res = value_l - 1;\n" \
+"	unsigned int x = 0;\n" \
+"	unsigned int y = 0;\n" \
+"	unsigned int z = 0;\n" \
+"	unsigned int ii;\n" \
+"	for (ii=0; ii<lenx; ++ii)\n" \
+"	{\n" \
+"		x |= (1<<(2*ii) & res)>>(ii);\n" \
+"		y |= (1<<(2*ii+1) & res)>>(ii+1);\n" \
+"	}\n" \
+"	z = res<<(32-lenx*2-lenz)>>(32-lenz);\n" \
+"	x = reverse_bit(x, lenx);\n" \
+"	y = reverse_bit(y, lenx);\n" \
+"	z = reverse_bit(z, lenz);\n" \
+"	unsigned int index2 = nx*ny*z + nx*y + x;\n" \
+"	if (index != index2)\n" \
+"		mask[index] = mask[index2];\n" \
+"}\n" \
+"__kernel void kernel_2(\n" \
+"	__global unsigned int* mask,\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned int limit)\n" \
+"{\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
+"	unsigned int index = nx*ny*k + nx*j + i;\n" \
+"	//break if too small\n" \
+"	if (label[index]==0 ||\n" \
+"		mask[index] < limit)\n" \
+"		return;\n" \
+"	label[index] = label[index] | 0x80000000;\n" \
 "}\n" \
 ;
 
