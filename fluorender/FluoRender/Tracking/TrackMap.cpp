@@ -3572,7 +3572,7 @@ bool TrackMapProcessor::ClusterCellsMerge(CellList &list, size_t frame)
 					data_value = ((unsigned char*)data)[index] / 255.0f;
 				else if (m_map->m_data_bits == 16)
 					data_value = ((unsigned short*)data)[index] * m_map->m_scale / 65535.0f;
-				EmVec pnt = { i, j, k };
+                EmVec pnt = { static_cast<double>(i), static_cast<double>(j), static_cast<double>(k) };
 				cs_processor.AddClusterPoint(
 					pnt, data_value);
 			}
@@ -3647,7 +3647,7 @@ bool TrackMapProcessor::ClusterCellsSplit(CellList &list, size_t frame,
 					data_value = ((unsigned char*)data)[index] / 255.0f;
 				else if (m_map->m_data_bits == 16)
 					data_value = ((unsigned short*)data)[index] * m_map->m_scale / 65535.0f;
-				EmVec pnt = { i, j, k };
+                EmVec pnt = { static_cast<double>(i), static_cast<double>(j), static_cast<double>(k) };
 				cs_proc_km.AddClusterPoint(
 					pnt, data_value);
 			}
@@ -3751,7 +3751,7 @@ bool TrackMapProcessor::SegmentCells(
 					data_value = ((unsigned char*)data)[index] / 255.0f;
 				else if (m_map->m_data_bits == 16)
 					data_value = ((unsigned short*)data)[index] * m_map->m_scale / 65535.0f;
-				EmVec pnt = { i, j, k };
+                EmVec pnt = { static_cast<double>(i), static_cast<double>(j), static_cast<double>(k) };
 				cs_proc_km.AddClusterPoint(
 					pnt, data_value);
 			}
