@@ -2365,7 +2365,6 @@ void ComponentDlg::GenerateComp()
 	//get brick number
 	int bn = vd->GetAllBrickNum();
 	double scale = vd->GetScalarScale();
-	double scale2 = scale * scale;
 
 	//m_prog_bit = 97.0f / float(bn * 3);
 	//m_prog = 0.0f;
@@ -2395,41 +2394,42 @@ void ComponentDlg::GenerateComp()
 		{
 			cg.DistDensityField3D(
 				m_diff, m_iter,
-				float(m_thresh / scale),
-				float(m_falloff / scale2),
+				m_thresh ,
+				m_falloff,
 				m_max_dist,
-				float(m_dist_thresh / scale),
+				m_dist_thresh,
 				m_dist_strength,
 				dsize, stats_size,
-				float(m_density_thresh / scale),
+				m_density_thresh,
 				scale);
 		}
 		else
 		{
-			cg.DistGrow3D(m_diff, m_iter,
-				float(m_thresh / scale),
-				float(m_falloff / scale2),
+			cg.DistGrow3D(
+				m_diff, m_iter,
+				m_thresh,
+				m_falloff ,
 				m_max_dist,
-				float(m_dist_thresh / scale),
-				scale, m_dist_strength);
+				m_dist_thresh,
+				scale,
+				m_dist_strength);
 		}
 	}
 	else
 	{
 		if (m_density)
 		{
-			cg.DensityField3D(dsize, stats_size,
+			cg.DensityField3D(
+				dsize, stats_size,
 				m_diff, m_iter,
-				float(m_thresh),
-				float(m_falloff),
-				float(m_density_thresh),
+				m_thresh,
+				m_falloff,
+				m_density_thresh,
 				scale);
 		}
 		else
 		{
-			cg.Grow3D(m_diff, m_iter,
-				float(m_thresh / scale),
-				float(m_falloff / scale2));
+			cg.Grow3D(m_diff, m_iter, m_thresh, m_falloff, scale);
 		}
 	}
 

@@ -676,7 +676,7 @@ void ComponentGenerator::FillBorder2D(float tol)
 	}
 }
 
-void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float falloff)
+void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float falloff, float sscale)
 {
 	CHECK_BRICKS
 
@@ -744,6 +744,8 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 			sizeof(float), (void*)(&scl_ff));
 		kernel_prog->setKernelArgConst(kernel_index0, 9,
 			sizeof(float), (void*)(&grad_ff));
+		kernel_prog->setKernelArgConst(kernel_index0, 10,
+			sizeof(float), (void*)(&sscale));
 
 		//execute
 		for (int j = 0; j < iter; ++j)
@@ -2123,6 +2125,8 @@ void ComponentGenerator::DistDensityField3D(
 		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 5,
 			sizeof(float), (void*)(&dist_thresh));
 		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 6,
+			sizeof(float), (void*)(&sscale));
+		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 7,
 			sizeof(unsigned char), (void*)(&ini));
 		//kernel 1
 		arg_distf.kernel_index = kernel_dist_index1;
@@ -2440,6 +2444,8 @@ void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
 		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 5,
 			sizeof(float), (void*)(&dist_thresh));
 		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 6,
+			sizeof(float), (void*)(&sscale));
+		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 7,
 			sizeof(unsigned char), (void*)(&ini));
 		//kernel 1
 		arg_distf.kernel_index = kernel_dist_index1;
@@ -2506,9 +2512,6 @@ void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
 			sizeof(float), (void*)(&scl_ff));
 		kernel_prog->setKernelArgConst(kernel_index0, 10,
 			sizeof(float), (void*)(&grad_ff));
-		//float maxd = max_dist;
-		//kernel_prog->setKernelArgConst(kernel_index0, 11,
-		//	sizeof(float), (void*)(&maxd));
 		kernel_prog->setKernelArgConst(kernel_index0, 11,
 			sizeof(float), (void*)(&sscale));
 		kernel_prog->setKernelArgConst(kernel_index0, 12,
