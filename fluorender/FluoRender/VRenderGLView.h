@@ -1030,7 +1030,6 @@ private:
 	void RunSparseTracking(wxFileConfig &fconfig);
 	void RunRandomColors(wxFileConfig &fconfig);
 	void RunSeparateChannels(wxFileConfig &fconfig);
-	void RunExternalExe(wxFileConfig &fconfig);
 	void RunFetchMask(wxFileConfig &fconfig);
 	void RunSaveMask(wxFileConfig &fconfig);
 	void RunSaveVolume(wxFileConfig &fconfig);

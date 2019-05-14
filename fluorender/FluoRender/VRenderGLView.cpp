@@ -26,7 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-//#include <boost/process.hpp>
 #include "VRenderGLView.h"
 #include "VRenderView.h"
 #include "VRenderFrame.h"
@@ -5679,8 +5678,6 @@ void VRenderGLView::Run4DScript(wxString &scriptname, VolumeData* vd)
 						RunRandomColors(fconfig);
 					else if (str == "separate_channels")
 						RunSeparateChannels(fconfig);
-					else if (str == "external_exe")
-						RunExternalExe(fconfig);
 					else if (str == "fetch_mask")
 						RunFetchMask(fconfig);
 					else if (str == "save_mask")
@@ -6010,30 +6007,6 @@ void VRenderGLView::RunSeparateChannels(wxFileConfig &fconfig)
 		str += wxString::Format(format, vd->GetCurChannel() + 1) + ".tif";
 		vd->Save(str, mode, bake, compression);
 	}
-}
-
-void VRenderGLView::RunExternalExe(wxFileConfig &fconfig)
-{
-/*#ifndef __linux__
-	wxString pathname;
-	fconfig.Read("exepath", &pathname);
-	if (!wxFileExists(pathname))
-		return;
-	VolumeData* vd = m_cur_vol;
-	if (!vd)
-		return;
-	BaseReader* reader = vd->GetReader();
-	if (!reader)
-		return;
-	wxString data_name = reader->GetCurDataName(m_tseq_cur_num, vd->GetCurChannel());
-
-	vector<string> args;
-	args.push_back(pathname.ToStdString());
-	args.push_back(data_name.ToStdString());
-	boost::process::child c(pathname.ToStdString(),
-		data_name.ToStdString());
-	c.wait();
-#endif*/
 }
 
 void VRenderGLView::RunFetchMask(wxFileConfig &fconfig)
