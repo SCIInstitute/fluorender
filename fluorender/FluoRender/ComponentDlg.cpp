@@ -2420,9 +2420,9 @@ void ComponentDlg::GenerateComp()
 		{
 			cg.DensityField3D(dsize, stats_size,
 				m_diff, m_iter,
-				float(m_thresh / scale),
-				float(m_falloff / scale2),
-				float(m_density_thresh / scale),
+				float(m_thresh),
+				float(m_falloff),
+				float(m_density_thresh),
 				scale);
 		}
 		else
