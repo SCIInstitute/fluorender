@@ -3560,7 +3560,8 @@ void Ruler::FinishEllipse(Vector view)
 	Vector axis = Cross(p01, Cross(p01, view));
 	Point p2, p3, pc;
 	pc = Point((p0 + p1) / 2.0);
-	Quaternion q0(p0 - pc);
+    Vector halfd = p0 - pc;
+	Quaternion q0(halfd);
 	Quaternion q(90.0, axis);
 	q.Normalize();
 	Quaternion q2 = (-q) * q0 * q;
