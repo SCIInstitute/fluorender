@@ -1794,6 +1794,11 @@ void ComponentGenerator::DensityField3D(int dsize, int wsize,
 	bool diffuse, int iter, float tran, float falloff,
 	float density, float sscale)
 {
+	//debug
+#ifdef _DEBUG
+	unsigned char* val = 0;
+	std::ofstream ofs;
+#endif
 	CHECK_BRICKS
 
 	//create program and kernels
@@ -1911,10 +1916,6 @@ void ComponentGenerator::DensityField3D(int dsize, int wsize,
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
-		//debug
-		//unsigned char* val = 0;
-		//std::ofstream ofs;
-
 		//init
 		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
 		//debug
@@ -2017,6 +2018,8 @@ void ComponentGenerator::DensityField3D(int dsize, int wsize,
 			sizeof(float), (void*)(&grad_ff));
 		kernel2_prog->setKernelArgConst(kernel2_index0, 15,
 			sizeof(float), (void*)(&density));
+		kernel2_prog->setKernelArgConst(kernel2_index0, 16,
+			sizeof(float), (void*)(&sscale));
 
 		//execute
 		for (int j = 0; j < iter; ++j)
@@ -2026,15 +2029,6 @@ void ComponentGenerator::DensityField3D(int dsize, int wsize,
 		kernel2_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
 
 		//release buffer
-		//kernel2_prog->releaseMemObject(0,
-		//	bits == 8 ? (void*)(val8) : (void*)(val16));
-		//kernel2_prog->releaseMemObject(sizeof(unsigned int)*nx*ny*nz,
-		//	(void*)(val32));
-		//kernel2_prog->releaseMemObject(sizeof(unsigned int),
-		//	(void*)(&rcnt));
-		//kernel2_prog->releaseMemObject(arg_df);
-		//kernel2_prog->releaseMemObject(arg_avg);
-		//kernel2_prog->releaseMemObject(arg_var);
 		kernel2_prog->releaseAll();
 		kernel_prog->releaseAll(false);
 
@@ -2350,6 +2344,8 @@ void ComponentGenerator::DistDensityField3D(
 			sizeof(float), (void*)(&grad_ff));
 		kernel_prog_grow->setKernelArgConst(kernel_grow_index0, 15,
 			sizeof(float), (void*)(&density));
+		kernel_prog_grow->setKernelArgConst(kernel_grow_index0, 16,
+			sizeof(float), (void*)(&sscale));
 
 		//execute
 		for (int j = 0; j < iter; ++j)

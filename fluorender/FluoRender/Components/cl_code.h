@@ -1537,7 +1537,8 @@ const char* str_cl_density_grow_3d = \
 "	float value_t,\n" \
 "	float value_f,\n" \
 "	float grad_f,\n" \
-"	float density)\n" \
+"	float density,\n" \
+"	float sscale)\n" \
 "{\n" \
 "	atomic_inc(rcnt);\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
@@ -1557,7 +1558,9 @@ const char* str_cl_density_grow_3d = \
 "			return;\n" \
 "	}\n" \
 "	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
+"	value *= sscale;\n" \
 "	float grad = length(vol_grad_func(data, (int4)(coord, 1)));\n" \
+"	grad *= sscale * sscale;\n" \
 "	//stop function\n" \
 "	float stop =\n" \
 "		(grad_f>0.0f?(grad>sqrt(grad_f)*2.12f?0.0f:exp(-grad*grad/grad_f)):1.0f)*\n" \
