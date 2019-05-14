@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <boost/process.hpp>
+//#include <boost/process.hpp>
 #include "VRenderGLView.h"
 #include "VRenderView.h"
 #include "VRenderFrame.h"
@@ -6014,7 +6014,7 @@ void VRenderGLView::RunSeparateChannels(wxFileConfig &fconfig)
 
 void VRenderGLView::RunExternalExe(wxFileConfig &fconfig)
 {
-#ifndef __linux__
+/*#ifndef __linux__
 	wxString pathname;
 	fconfig.Read("exepath", &pathname);
 	if (!wxFileExists(pathname))
@@ -6033,7 +6033,7 @@ void VRenderGLView::RunExternalExe(wxFileConfig &fconfig)
 	boost::process::child c(pathname.ToStdString(),
 		data_name.ToStdString());
 	c.wait();
-#endif
+#endif*/
 }
 
 void VRenderGLView::RunFetchMask(wxFileConfig &fconfig)

@@ -571,7 +571,9 @@ wxWindow* TraceDlg::CreateLinkPage(wxWindow *parent)
 		bitmap, wxNullBitmap,
 		"Automatically link selected IDs after each paint brush stroke",
 		"Automatically link selected IDs after each paint brush stroke");
+#ifdef _WIN32
 	m_manual_assist_check->SetBackgroundColour(m_notebook->GetThemeBackgroundColour());
+#endif
 	m_manual_assist_check->Realize();
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
@@ -648,7 +650,9 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 		bitmap, wxNullBitmap,
 		"Automatically assign an ID to selection after each paint brush stroke",
 		"Automatically assign an ID to selection after each paint brush stroke");
+#ifdef _WIN32
 	m_auto_id_chk->SetBackgroundColour(m_notebook->GetThemeBackgroundColour());
+#endif
 	m_auto_id_chk->Realize();
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);

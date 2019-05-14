@@ -20,6 +20,7 @@ THIS SOFTWARE IS PROVIDED BY COPYRIGHT HOLDERS ``AS IS'' AND ANY EXPRESS OR IMPL
 #include <stdint.h>
 #include <cstdio>
 #include <iostream>
+#include <cmath>
 
 extern "C" {
 	namespace ffmpeg {
