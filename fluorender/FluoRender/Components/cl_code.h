@@ -279,7 +279,8 @@ const char* str_cl_brainbow_3d = \
 "	unsigned int seed,\n" \
 "	float value_t,\n" \
 "	float value_f,\n" \
-"	float grad_f)\n" \
+"	float grad_f,\n" \
+"	float sscale)\n" \
 "{\n" \
 "	atomic_inc(rcnt);\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
@@ -289,7 +290,8 @@ const char* str_cl_brainbow_3d = \
 "	if (label_v == 0)\n" \
 "		return;\n" \
 "	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
-"	float grad = length(vol_grad_func(data, (int4)(coord, 1)));\n" \
+"	value *= sscale;\n" \
+"	float grad = length(sscale * vol_grad_func(data, (int4)(coord, 1)));\n" \
 "	//stop function\n" \
 "	float stop =\n" \
 "		(grad_f>0.0f?(grad>sqrt(grad_f)*2.12f?0.0f:exp(-grad*grad/grad_f)):1.0f)*\n" \
@@ -1092,7 +1094,8 @@ const char* str_cl_dist_field_3d = \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
 "	unsigned int nz,\n" \
-"	float th)\n" \
+"	float th,\n" \
+"	float sscale)\n" \
 "{\n" \
 "	int3 ijk = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
@@ -1105,6 +1108,7 @@ const char* str_cl_dist_field_3d = \
 "		return;\n" \
 "	}\n" \
 "	float dval = read_imagef(data, samp, (int4)(ijk, 1)).x;\n" \
+"	dval *= sscale;\n" \
 "	if (dval > th)\n" \
 "		df[index] = 1;\n" \
 "	else\n" \
@@ -1161,6 +1165,7 @@ const char* str_cl_dist_field_2d = \
 "	unsigned int ny,\n" \
 "	unsigned int nz,\n" \
 "	float th,\n" \
+"	float sscale,\n" \
 "	unsigned char ini)\n" \
 "{\n" \
 "	int3 ijk = (int3)(get_global_id(0),\n" \
@@ -1174,6 +1179,7 @@ const char* str_cl_dist_field_2d = \
 "	}\n" \
 "	//float dval = read_imagef(data, samp, (int4)(ijk, 1)).x;\n" \
 "	float dval = get_2d_density(data, (int4)(ijk, 1), 2);\n" \
+"	dval *= sscale;\n" \
 "	if (dval > th)\n" \
 "		df[index] = ini;\n" \
 "	else\n" \
@@ -1232,21 +1238,6 @@ const char* str_cl_dist_field_2d = \
 "			v3 == nn || v4 == nn)\n" \
 "			df[index] = re;\n" \
 "	}\n" \
-"}\n" \
-"__kernel void kernel_null(\n" \
-"	__read_only image3d_t data,\n" \
-"	__global unsigned char* df,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nz,\n" \
-"	float maxd)\n" \
-"{\n" \
-"	int3 ijk = (int3)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2));\n" \
-"	unsigned int nxy = nx*ny;\n" \
-"	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
-"	float dval = read_imagef(data, samp, (int4)(ijk, 1)).x;\n" \
-"	df[index] = (unsigned char)(dval * df[index] * 255.0 / maxd);\n" \
 "}\n" \
 ;
 
@@ -1559,8 +1550,7 @@ const char* str_cl_density_grow_3d = \
 "	}\n" \
 "	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
 "	value *= sscale;\n" \
-"	float grad = length(vol_grad_func(data, (int4)(coord, 1)));\n" \
-"	grad *= sscale * sscale;\n" \
+"	float grad = length(sscale * vol_grad_func(data, (int4)(coord, 1)));\n" \
 "	//stop function\n" \
 "	float stop =\n" \
 "		(grad_f>0.0f?(grad>sqrt(grad_f)*2.12f?0.0f:exp(-grad*grad/grad_f)):1.0f)*\n" \
@@ -1635,9 +1625,10 @@ const char* str_cl_dist_grow_3d = \
 "	if (label_v == 0)\n" \
 "		return;\n" \
 "	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
-"	float distv = distf[index] / 255.0 / sscale;\n" \
+"	value *= sscale;\n" \
+"	float distv = distf[index] / 255.0;\n" \
 "	value = value * (1.0 - dist_strength) + distv * dist_strength;\n" \
-"	float grad = length(vol_grad_func(data, (int4)(coord, 1)));\n" \
+"	float grad = length(sscale * vol_grad_func(data, (int4)(coord, 1)));\n" \
 "	//stop function\n" \
 "	float stop =\n" \
 "		(grad_f>0.0f?(grad>sqrt(grad_f)*2.12f?0.0f:exp(-grad*grad/grad_f)):1.0f)*\n" \
