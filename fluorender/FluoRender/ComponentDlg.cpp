@@ -2377,7 +2377,7 @@ void ComponentDlg::GenerateComp()
 
 	cg.SetUseMask(m_use_sel_chk->GetValue());
 
-	if (m_fixate)
+	if (m_fixate && vd->GetLabel(false))
 	{
 		vd->LoadLabel2();
 		cg.SetIDBit(m_iter);
