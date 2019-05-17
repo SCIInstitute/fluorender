@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valnum.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
+#include <wx/clipbrd.h>
 #include "Formats/png_resource.h"
 #include "ruler.xpm"
 
@@ -103,7 +104,7 @@ wxListCtrl(parent, id, pos, size, style)//,
 		NULL, this);
 	m_name_text->Hide();
 	m_center_text = new wxTextCtrl(this, ID_CenterText, "",
-		wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
+		wxDefaultPosition, wxDefaultSize);
 	m_center_text->Connect(ID_CenterText, wxEVT_LEFT_DCLICK,
 		wxCommandEventHandler(RulerListCtrl::OnTextFocus),
 		NULL, this);
@@ -432,6 +433,28 @@ void RulerListCtrl::OnKeyDown(wxKeyEvent& event)
 	if ( event.GetKeyCode() == WXK_DELETE ||
 		event.GetKeyCode() == WXK_BACK)
 		DeleteSelection();
+	if (event.GetKeyCode() == wxKeyCode('C') &&
+		wxGetKeyState(WXK_CONTROL))
+	{
+		long item = GetNextItem(-1,
+			wxLIST_NEXT_ALL,
+			wxLIST_STATE_SELECTED);
+		if (item != -1)
+		{
+			Ruler* ruler = m_view->GetRuler(GetItemData(item));
+			if (ruler)
+			{
+				Point cp = ruler->GetCenter();
+				wxString center = wxString::Format("%.2f\t%.2f\t%.2f",
+					cp.x(), cp.y(), cp.z());
+				if (wxTheClipboard->Open())
+				{
+					wxTheClipboard->SetData(new wxTextDataObject(center));
+					wxTheClipboard->Close();
+				}
+			}
+		}
+	}
 	event.Skip();
 }
 
@@ -543,11 +566,39 @@ void RulerListCtrl::OnCenterText(wxCommandEvent& event)
 	if (!ruler || ruler->GetRulerType() != 2) return;
 
 	wxString str = m_center_text->GetValue();
+	wxString old_str = GetText(m_editing_item, 4);
+	if (str == old_str)
+		return;
+
 	//get xyz
 	double x = 0, y = 0, z = 0;
-	std::string temp = str.c_str();
-	std::stringstream ss(temp);
-	ss >> x >> y >> z;
+	int count = 0;
+	std::string stemp = str.c_str();
+	if (stemp.empty())
+		return;
+	while (count < 3)
+	{
+		size_t read = 0;
+		try
+		{
+			if (count == 0)
+				x = std::stod(stemp, &read);
+			else if (count == 1)
+				y = std::stod(stemp, &read);
+			else if (count == 2)
+				z = std::stod(stemp, &read);
+			stemp = stemp.substr(read, stemp.size() - read);
+			count++;
+			if (count < 3 && stemp.empty())
+				return;
+		}
+		catch (std::invalid_argument)
+		{
+			stemp = stemp.substr(1, stemp.size() - 1);
+			if (stemp.empty())
+				return;
+		}
+	}
 	Point* pt = ruler->GetPoint(0);
 	if (!pt)
 		return;
