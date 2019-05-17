@@ -44,9 +44,11 @@ BEGIN_EVENT_TABLE(RulerListCtrl, wxListCtrl)
 	EVT_LIST_ITEM_SELECTED(wxID_ANY, RulerListCtrl::OnSelection)
 	EVT_LIST_ITEM_DESELECTED(wxID_ANY, RulerListCtrl::OnEndSelection)
 	EVT_TEXT(ID_NameText, RulerListCtrl::OnNameText)
+	EVT_TEXT(ID_CenterText, RulerListCtrl::OnCenterText)
 	EVT_COLOURPICKER_CHANGED(ID_ColorPicker, RulerListCtrl::OnColorChange)
 	EVT_SCROLLWIN(RulerListCtrl::OnScroll)
 	EVT_MOUSEWHEEL(RulerListCtrl::OnScroll)
+	EVT_LIST_ITEM_ACTIVATED(wxID_ANY, RulerListCtrl::OnAct)
 END_EVENT_TABLE()
 
 RulerListCtrl::RulerListCtrl(
@@ -75,16 +77,16 @@ wxListCtrl(parent, id, pos, size, style)//,
 	itemCol.SetText("Angle/Pitch");
 	this->InsertColumn(3, itemCol);
 	SetColumnWidth(3, wxLIST_AUTOSIZE_USEHEADER);
-	itemCol.SetText("Start/End Points (X, Y, Z)");
+	itemCol.SetText("Center");
 	this->InsertColumn(4, itemCol);
 	SetColumnWidth(4, wxLIST_AUTOSIZE_USEHEADER);
 	itemCol.SetText("Time");
 	this->InsertColumn(5, itemCol);
 	SetColumnWidth(5, wxLIST_AUTOSIZE_USEHEADER);
-	itemCol.SetText("Volumes");
+	itemCol.SetText("Start/End Points (X, Y, Z)");
 	this->InsertColumn(6, itemCol);
 	SetColumnWidth(6, wxLIST_AUTOSIZE_USEHEADER);
-	itemCol.SetText("Center");
+	itemCol.SetText("Volumes");
 	this->InsertColumn(7, itemCol);
 	SetColumnWidth(7, wxLIST_AUTOSIZE_USEHEADER);
 
@@ -96,8 +98,17 @@ wxListCtrl(parent, id, pos, size, style)//,
 	//frame edit
 	m_name_text = new wxTextCtrl(this, ID_NameText, "",
 		wxDefaultPosition, wxDefaultSize);
+	m_name_text->Connect(ID_NameText, wxEVT_LEFT_DCLICK,
+		wxCommandEventHandler(RulerListCtrl::OnTextFocus),
+		NULL, this);
 	m_name_text->Hide();
-	m_color_picker = new wxColourPickerCtrl(this, 
+	m_center_text = new wxTextCtrl(this, ID_CenterText, "",
+		wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
+	m_center_text->Connect(ID_CenterText, wxEVT_LEFT_DCLICK,
+		wxCommandEventHandler(RulerListCtrl::OnTextFocus),
+		NULL, this);
+	m_center_text->Hide();
+	m_color_picker = new wxColourPickerCtrl(this,
 		ID_ColorPicker);
 	m_color_picker->Hide();
 
@@ -108,8 +119,10 @@ RulerListCtrl::~RulerListCtrl()
 {
 }
 
-void RulerListCtrl::Append(unsigned int id, wxString name, wxString &color, double length, wxString &unit,
-	double angle, wxString &points, bool time_dep, int time, wxString extra, wxString center)
+void RulerListCtrl::Append(bool enable, unsigned int id, wxString name,
+	wxString &color, double length, wxString &unit,
+	double angle, wxString &center, bool time_dep,
+	int time, wxString &extra, wxString &points)
 {
 	long tmp = InsertItem(GetItemCount(), name, 0);
 	SetItemData(tmp, long(id));
@@ -122,22 +135,27 @@ void RulerListCtrl::Append(unsigned int id, wxString name, wxString &color, doub
 	str = wxString::Format("%.1f", angle) + "Deg";
 	SetItem(tmp, 3, str);
 	SetColumnWidth(3, wxLIST_AUTOSIZE);
-	SetItem(tmp, 4, points);
+	SetItem(tmp, 4, center);
+	SetColumnWidth(4, wxLIST_AUTOSIZE);
 	if (time_dep)
 		str = wxString::Format("%d", time);
 	else
 		str = "N/A";
 	SetItem(tmp, 5, str);
 	SetColumnWidth(5, wxLIST_AUTOSIZE_USEHEADER);
-	SetItem(tmp, 6, extra);
-	SetColumnWidth(6, wxLIST_AUTOSIZE_USEHEADER);
-	SetItem(tmp, 7, center);
+	SetItem(tmp, 6, points);
+	SetColumnWidth(6, wxLIST_AUTOSIZE);
+	SetItem(tmp, 7, extra);
 	SetColumnWidth(7, wxLIST_AUTOSIZE_USEHEADER);
+
+	if (!enable)
+		SetItemBackgroundColour(tmp, wxColour(200, 200, 200));
 }
 
 void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 {
 	m_name_text->Hide();
+	m_center_text->Hide();
 	m_color_picker->Hide();
 	if (vrv)
 		m_view = vrv;
@@ -198,9 +216,10 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 		Point cp = ruler->GetCenter();
 		center = wxString::Format("(%.2f, %.2f, %.2f)",
 			cp.x(), cp.y(), cp.z());
-		Append(ruler->Id(), ruler->GetName(), color, ruler->GetLength(), unit,
-			ruler->GetAngle(), points, ruler->GetTimeDep(), ruler->GetTime(),
-			ruler->GetDelInfoValues(", "), center);
+		Append(ruler->GetDisp(), ruler->Id(), ruler->GetName(),
+			color, ruler->GetLength(), unit,
+			ruler->GetAngle(), center, ruler->GetTimeDep(),
+			ruler->GetTime(), ruler->GetDelInfoValues(", "), points);
 	}
 
 	TextureRenderer::vertex_array_manager_.set_dirty(VA_Rulers);
@@ -443,37 +462,42 @@ void RulerListCtrl::OnSelection(wxListEvent &event)
 		wxLIST_NEXT_ALL,
 		wxLIST_STATE_SELECTED);
 	m_editing_item = item;
-	if (item != -1)
+	if (!m_view)
+		return;
+	Ruler* ruler = m_view->GetRuler(GetItemData(item));
+	if (!ruler || !ruler->GetDisp())
+		return;
+
+	wxRect rect;
+	wxString str;
+	//add frame text
+	GetSubItemRect(item, 0, rect);
+	str = GetText(item, 0);
+	m_name_text->SetPosition(rect.GetTopLeft());
+	m_name_text->SetSize(rect.GetSize());
+	m_name_text->SetValue(str);
+	m_name_text->Show();
+	//add color picker
+	GetSubItemRect(item, 1, rect);
+	m_color_picker->SetPosition(rect.GetTopLeft());
+	m_color_picker->SetSize(rect.GetSize());
+	if (ruler->GetRulerType() == 2)
 	{
-		wxRect rect;
-		wxString str;
-		//add frame text
-		GetSubItemRect(item, 0, rect);
-		str = GetText(item, 0);
-		m_name_text->SetPosition(rect.GetTopLeft());
-		m_name_text->SetSize(rect.GetSize());
-		m_name_text->SetValue(str);
-		m_name_text->Show();
-		//add color picker
-		GetSubItemRect(item, 1, rect);
-		m_color_picker->SetPosition(rect.GetTopLeft());
-		m_color_picker->SetSize(rect.GetSize());
-		if (m_view)
-		{
-			Ruler* ruler = m_view->GetRuler(GetItemData(item));
-			if (ruler)
-			{
-				Color color;
-				if (ruler->GetUseColor())
-				{
-					color = ruler->GetColor();
-					wxColor c(int(color.r()*255.0), int(color.g()*255.0), int(color.b()*255.0));
-					m_color_picker->SetColour(c);
-				}
-			}
-		}
-		m_color_picker->Show();
+		//locator
+		GetSubItemRect(item, 4, rect);
+		str = GetText(item, 4);
+		m_center_text->SetPosition(rect.GetTopLeft());
+		m_center_text->SetSize(rect.GetSize());
+		m_center_text->SetValue(str);
+		m_center_text->Show();
 	}
+	if (ruler->GetUseColor())
+	{
+		Color color = ruler->GetColor();
+		wxColor c(int(color.r()*255.0), int(color.g()*255.0), int(color.b()*255.0));
+		m_color_picker->SetColour(c);
+	}
+	m_color_picker->Show();
 }
 
 void RulerListCtrl::EndEdit(bool update)
@@ -481,6 +505,7 @@ void RulerListCtrl::EndEdit(bool update)
 	if (m_name_text->IsShown())
 	{
 		m_name_text->Hide();
+		m_center_text->Hide();
 		m_color_picker->Hide();
 		m_editing_item = -1;
 		if (update) UpdateRulers();
@@ -505,6 +530,34 @@ void RulerListCtrl::OnNameText(wxCommandEvent& event)
 	if (!ruler) return;
 	ruler->SetName(str);
 	SetText(m_editing_item, 0, str);
+	m_view->RefreshGL();
+}
+
+void RulerListCtrl::OnCenterText(wxCommandEvent& event)
+{
+	if (!m_view)
+		return;
+	if (m_editing_item == -1)
+		return;
+	Ruler* ruler = m_view->GetRuler(GetItemData(m_editing_item));
+	if (!ruler || ruler->GetRulerType() != 2) return;
+
+	wxString str = m_center_text->GetValue();
+	//get xyz
+	double x = 0, y = 0, z = 0;
+	std::string temp = str.c_str();
+	std::stringstream ss(temp);
+	ss >> x >> y >> z;
+	Point* pt = ruler->GetPoint(0);
+	if (!pt)
+		return;
+	pt->x(x);
+	pt->y(y);
+	pt->z(z);
+	str = wxString::Format("(%.2f, %.2f, %.2f)",
+		x, y, z);
+	SetText(m_editing_item, 4, str);
+	SetText(m_editing_item, 6, str);
 	m_view->RefreshGL();
 }
 
@@ -539,6 +592,35 @@ void RulerListCtrl::OnScroll(wxMouseEvent& event)
 {
 	EndEdit(false);
 	event.Skip(true);
+}
+
+void RulerListCtrl::OnTextFocus(wxCommandEvent& event)
+{
+	wxTextCtrl *object = (wxTextCtrl*)event.GetEventObject();
+	object->SetSelection(0, -1);
+}
+
+void RulerListCtrl::OnAct(wxListEvent &event)
+{
+	int index = 0;
+	long item = GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+	if (!m_view)
+		return;
+	Ruler* ruler = m_view->GetRuler(GetItemData(item));
+	if (!ruler) return;
+	ruler->ToggleDisp();
+	bool disp = ruler->GetDisp();
+	if (disp)
+		SetItemBackgroundColour(item, wxColour(255, 255, 255));
+	else
+		SetItemBackgroundColour(item, wxColour(200, 200, 200));
+	m_name_text->Hide();
+	m_center_text->Hide();
+	m_color_picker->Hide();
+	SetItemState(item, 0, wxLIST_STATE_SELECTED);
+	m_view->RefreshGL();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
