@@ -4369,6 +4369,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 										}
 									}
 								}
+								ruler->SetFinished();
 								vrv->GetRulerList()->push_back(ruler);
 							}
 						}

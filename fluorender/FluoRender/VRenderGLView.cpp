@@ -6291,6 +6291,7 @@ void VRenderGLView::RunRulerProfile(wxFileConfig &fconfig)
 		wxString str;
 		Ruler* ruler = m_ruler_list[i];
 		if (!ruler) continue;
+		if (!ruler->GetDisp()) continue;
 
 		vector<ProfileBin>* profile = ruler->GetProfile();
 		if (profile && profile->size())
@@ -11034,6 +11035,7 @@ Point* VRenderGLView::GetEditingRulerPoint(double mx, double my)
 	{
 		Ruler* ruler = m_ruler_list[i];
 		if (!ruler) continue;
+		if (!ruler->GetDisp()) continue;
 
 		for (j = 0; j<ruler->GetNumPoint(); j++)
 		{
@@ -11135,7 +11137,9 @@ void VRenderGLView::AddRulerPoint(int mx, int my)
 		if (m_ruler_list.size())
 		{
 			Ruler* ruler = m_ruler_list[m_ruler_list.size() - 1];
-			if (ruler && !ruler->GetFinished())
+			if (ruler &&
+				ruler->GetDisp() &&
+				!ruler->GetFinished())
 			{
 				ruler->AddPoint(p);
 				new_ruler = false;
@@ -11194,7 +11198,9 @@ void VRenderGLView::AddPaintRulerPoint()
 		if (m_ruler_list.size())
 		{
 			Ruler* ruler = m_ruler_list[m_ruler_list.size() - 1];
-			if (ruler && !ruler->GetFinished())
+			if (ruler &&
+				ruler->GetDisp() &&
+				!ruler->GetFinished())
 			{
 				ruler->AddPoint(center);
 				str = wxString::Format("\tv%d", ruler->GetNumPoint() - 1);
@@ -11239,7 +11245,8 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 	//estimate
 	int vert_num = 0;
 	for (size_t i = 0; i<m_ruler_list.size(); ++i)
-		if (m_ruler_list[i])
+		if (m_ruler_list[i] &&
+			m_ruler_list[i]->GetDisp())
 			vert_num += m_ruler_list[i]->GetNumPoint();
 	verts.reserve(vert_num * 10 * 3 * 2);
 
@@ -11251,6 +11258,7 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 	{
 		Ruler* ruler = m_ruler_list[i];
 		if (!ruler) continue;
+		if (!ruler->GetDisp()) continue;
 		if (!ruler->GetTimeDep() ||
 			(ruler->GetTimeDep() &&
 				ruler->GetTime() == m_tseq_cur_num))
@@ -11492,6 +11500,7 @@ void VRenderGLView::DrawRulers()
 	{
 		Ruler* ruler = m_ruler_list[i];
 		if (!ruler) continue;
+		if (!ruler->GetDisp()) continue;
 		if (!ruler->GetTimeDep() ||
 			(ruler->GetTimeDep() &&
 				ruler->GetTime() == m_tseq_cur_num))

@@ -43,6 +43,7 @@ class RulerListCtrl : public wxListCtrl
 	enum
 	{
 		ID_NameText = ID_MEASURE1,
+		ID_CenterText,
 		ID_ColorPicker
 	};
 
@@ -55,9 +56,10 @@ public:
 		long style=wxLC_REPORT|wxLC_SINGLE_SEL);
 	~RulerListCtrl();
 
-	void Append(unsigned int id, wxString name, wxString &color, double length, wxString &unit,
-		double angle, wxString &points, bool time_dep, int time,
-		wxString extra, wxString center);
+	void Append(bool enable, unsigned int id, wxString name,
+		wxString &color, double length, wxString &unit,
+		double angle, wxString &center, bool time_dep,
+		int time, wxString &extra, wxString &points);
 	void UpdateRulers(VRenderView* vrv=0);
 
 	int GetCurrSelection();
@@ -76,6 +78,7 @@ private:
 	VRenderView *m_view;
 	wxImageList *m_images;
 	wxTextCtrl *m_name_text;
+	wxTextCtrl *m_center_text;
 	wxColourPickerCtrl *m_color_picker;
 	long m_editing_item;
 	bool m_ruler_df_f;
@@ -86,9 +89,12 @@ private:
 	void OnSelection(wxListEvent &event);
 	void OnEndSelection(wxListEvent &event);
 	void OnNameText(wxCommandEvent& event);
+	void OnCenterText(wxCommandEvent& event);
 	void OnColorChange(wxColourPickerEvent& event);
 	void OnScroll(wxScrollWinEvent& event);
 	void OnScroll(wxMouseEvent& event);
+	void OnTextFocus(wxCommandEvent& event);
+	void OnAct(wxListEvent &event);
 
 	DECLARE_EVENT_TABLE()
 protected: //Possible TODO
