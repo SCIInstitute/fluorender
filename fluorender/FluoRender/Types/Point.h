@@ -120,10 +120,35 @@ namespace FLTYPE {
 		}
 		friend std::istream& operator >> (std::istream& is, Point& p)
 		{
-			double x, y, z;
-			char st;
-			is >> st >> x >> st >> y >> st >> z >> st;
-			p = Point(x, y, z);
+			//double x, y, z;
+			//char st;
+			//is >> st >> x >> st >> y >> st >> z >> st;
+			//p = Point(x, y, z);
+			std::string s(std::istreambuf_iterator<char>(is), {});
+			if (s.empty())
+				return is;
+			int tn = 3;
+			int count = 0;
+			double pi[3] = {p.x(), p.y(), p.z()};
+			while (count < tn)
+			{
+				size_t read = 0;
+				try
+				{
+					pi[count] = std::stod(s, &read);
+					s = s.substr(read, s.size() - read);
+					count++;
+					if (count < tn && s.empty())
+						break;
+				}
+				catch (std::invalid_argument)
+				{
+					s = s.substr(1, s.size() - 1);
+					if (s.empty())
+						break;
+				}
+			}
+			p = Point(pi[0], pi[1], pi[2]);
 			return is;
 		}
 
