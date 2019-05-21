@@ -40,6 +40,8 @@ using namespace std;
 class VolumeData;
 namespace FL
 {
+	typedef std::vector<std::string> CompCmdParams;
+	typedef std::vector<CompCmdParams> CompCommand;
 	class ComponentGenerator
 	{
 	public:
