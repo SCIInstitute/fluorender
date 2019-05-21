@@ -93,6 +93,12 @@ public:
 		ID_CleanIterText,
 		ID_CleanLimitSldr,
 		ID_CleanLimitText,
+		//record
+		ID_RecordCmdBtn,
+		ID_PlayCmdBtn,
+		ID_ResetCmdBtn,
+		ID_CmdFileText,
+		ID_SaveCmdBtn,
 
 		//clustering page
 		ID_ClusterMethodExmaxRd,
@@ -244,6 +250,10 @@ private:
 	//auto udate
 	bool m_auto_update;
 
+	//record
+	bool m_record_cmd;
+	FL::CompCommand m_command;
+
 	FL::ComponentAnalyzer m_comp_analyzer;
 
 	//tab control
@@ -296,6 +306,12 @@ private:
 	wxTextCtrl* m_clean_iter_text;
 	wxSlider* m_clean_limit_sldr;
 	wxTextCtrl* m_clean_limit_text;
+	//record
+	wxToggleButton* m_record_cmd_btn;
+	wxButton* m_play_cmd_btn;
+	wxButton* m_reset_cmd_btn;
+	wxTextCtrl* m_cmd_file_text;
+	wxButton* m_save_cmd_btn;
 
 	//clustering page
 	wxRadioButton* m_cluster_method_exmax_rd;
@@ -410,6 +426,11 @@ private:
 	void OnCleanIterText(wxCommandEvent &event);
 	void OnCleanLimitSldr(wxScrollEvent &event);
 	void OnCleanLimitText(wxCommandEvent &event);
+	//record
+	void OnRecordCmd(wxCommandEvent &event);
+	void OnPlayCmd(wxCommandEvent &event);
+	void OnResetCmd(wxCommandEvent &event);
+	void OnSaveCmd(wxCommandEvent &event);
 
 	//clustering page
 	void UpdateClusterMethod();

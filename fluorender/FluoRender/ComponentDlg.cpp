@@ -86,6 +86,11 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_TEXT(ID_CleanIterText, ComponentDlg::OnCleanIterText)
 	EVT_COMMAND_SCROLL(ID_CleanLimitSldr, ComponentDlg::OnCleanLimitSldr)
 	EVT_TEXT(ID_CleanLimitText, ComponentDlg::OnCleanLimitText)
+	//record
+	EVT_TOGGLEBUTTON(ID_RecordCmdBtn, ComponentDlg::OnRecordCmd)
+	EVT_BUTTON(ID_PlayCmdBtn, ComponentDlg::OnPlayCmd)
+	EVT_BUTTON(ID_ResetCmdBtn, ComponentDlg::OnResetCmd)
+	EVT_BUTTON(ID_SaveCmdBtn, ComponentDlg::OnSaveCmd)
 
 	//clustering page
 	EVT_RADIOBUTTON(ID_ClusterMethodExmaxRd, ComponentDlg::OnClusterMethodExmaxCheck)
@@ -417,6 +422,36 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer16->Add(m_clean_limit_text, 0, wxALIGN_CENTER);
 	sizer16->Add(2, 2);
 
+	//command record
+	wxBoxSizer* sizer17 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Recorder:",
+		wxDefaultPosition, wxSize(100, 23));
+	m_record_cmd_btn = new wxToggleButton(page, ID_RecordCmdBtn, "Record",
+		wxDefaultPosition, wxSize(75, -1));
+	m_play_cmd_btn = new wxButton(page, ID_PlayCmdBtn, "Play",
+		wxDefaultPosition, wxSize(75, -1));
+	m_reset_cmd_btn = new wxButton(page, ID_ResetCmdBtn, "Reset",
+		wxDefaultPosition, wxSize(75, -1));
+	sizer17->Add(2, 2);
+	sizer17->Add(st, 0, wxALIGN_CENTER);
+	sizer17->AddStretchSpacer();
+	sizer17->Add(m_record_cmd_btn, 0, wxALIGN_CENTER);
+	sizer17->Add(m_play_cmd_btn, 0, wxALIGN_CENTER);
+	sizer17->Add(m_reset_cmd_btn, 0, wxALIGN_CENTER);
+	sizer17->Add(2, 2);
+	wxBoxSizer* sizer18 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Save File:",
+		wxDefaultPosition, wxSize(100, 23));
+	m_cmd_file_text = new wxTextCtrl(page, ID_CmdFileText, "",
+		wxDefaultPosition, wxDefaultSize);
+	m_save_cmd_btn = new wxButton(page, ID_SaveCmdBtn, "Save",
+		wxDefaultPosition, wxSize(75, -1));
+	sizer18->Add(2, 2);
+	sizer18->Add(st, 0, wxALIGN_CENTER);
+	sizer18->Add(m_cmd_file_text, 1, wxALIGN_CENTER);
+	sizer18->Add(m_save_cmd_btn, 0, wxALIGN_CENTER);
+	sizer18->Add(2, 2);
+
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "ID Growth && Merge"), wxVERTICAL);
 	group1->Add(5, 5);
@@ -456,11 +491,20 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	group2->Add(sizer16, 0, wxEXPAND);
 	group2->Add(5, 5);
 
+	wxBoxSizer *group3 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "Macro Command"), wxVERTICAL);
+	group3->Add(sizer17, 0, wxEXPAND);
+	group3->Add(5, 5);
+	group3->Add(sizer18, 0, wxEXPAND);
+	group3->Add(5, 5);
+
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
 	sizerv->Add(10, 10);
 	sizerv->Add(group1, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 	sizerv->Add(group2, 0, wxEXPAND);
+	sizerv->Add(10, 10);
+	sizerv->Add(group3, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 	page->SetSizer(sizerv);
 	page->SetScrollRate(10, 10);
@@ -926,7 +970,11 @@ void ComponentDlg::GetSettings()
 	//distance
 	m_dist_neighbor = 1;
 
+	//update
 	m_auto_update = false;
+
+	//record
+	m_record_cmd = false;
 
 	//output
 	m_output_type = 1;
@@ -1485,6 +1533,27 @@ void ComponentDlg::OnCleanLimitText(wxCommandEvent &event)
 
 	if (m_auto_update)
 		GenerateComp();
+}
+
+//record
+void ComponentDlg::OnRecordCmd(wxCommandEvent &event)
+{
+	m_record_cmd = m_record_cmd_btn->GetValue();
+}
+
+void ComponentDlg::OnPlayCmd(wxCommandEvent &event)
+{
+
+}
+
+void ComponentDlg::OnResetCmd(wxCommandEvent &event)
+{
+
+}
+
+void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
+{
+
 }
 
 //clustering page
