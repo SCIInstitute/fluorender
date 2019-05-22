@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "Main.h"
 #include "DataManager.h"
+#include "Components/CompGenerator.h"
 #include "Components/CompAnalyzer.h"
 #include <wx/wx.h>
 #include <wx/collpane.h>
@@ -180,13 +181,19 @@ public:
 		wxGetApp().Yield();
 	}
 
-	void GenerateComp();
+	void GenerateComp(bool command=true);
+	void Fixate(bool command = true);
+	void Clean(bool command = true);
 	void SelectFullComp();
 
 	FL::ComponentAnalyzer* GetAnalyzer()
 	{
 		return &m_comp_analyzer;
 	}
+
+	void AddCmd(const std::string &type);
+	void ResetCmd();
+	void PlayCmd();
 
 private:
 	wxWindow* m_frame;

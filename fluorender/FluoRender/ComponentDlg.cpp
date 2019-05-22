@@ -27,7 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ComponentDlg.h"
 #include "VRenderFrame.h"
-#include "Components/CompGenerator.h"
 #include "Components/CompSelector.h"
 #include "Cluster/dbscan.h"
 #include "Cluster/kmeans.h"
@@ -1443,33 +1442,18 @@ void ComponentDlg::OnFixateCheck(wxCommandEvent &event)
 	EnableFixate(m_fixate);
 
 	if (m_fixate)
-	{
-		if (!m_view)
-			return;
-		VolumeData* vd = m_view->m_glview->m_cur_vol;
-		if (!vd)
-			return;
-		vd->PushLabel(true);
-	}
+		Fixate();
 
 	if (m_auto_update)
-		GenerateComp();
+		GenerateComp(false);
 }
 
 void ComponentDlg::OnFixUpdateBtn(wxCommandEvent &event)
 {
-	if (m_fixate)
-	{
-		if (!m_view)
-			return;
-		VolumeData* vd = m_view->m_glview->m_cur_vol;
-		if (!vd)
-			return;
-		vd->PushLabel(true);
-	}
+	Fixate();
 
 	if (m_auto_update)
-		GenerateComp();
+		GenerateComp(false);
 }
 
 void ComponentDlg::EnableClean(bool value)
@@ -1536,6 +1520,139 @@ void ComponentDlg::OnCleanLimitText(wxCommandEvent &event)
 }
 
 //record
+void ComponentDlg::AddCmd(const std::string &type)
+{
+	if (!m_command.empty())
+	{
+		FL::CompCmdParams &params = m_command.back();
+		if (!params.empty())
+		{
+			if ((params[0] == "generate" ||
+				params[0] == "fixate") &&
+				params[0] == type)
+			{
+				//replace
+				m_command.pop_back();
+			}
+			//else do nothing
+		}
+	}
+	//add
+	FL::CompCmdParams params;
+	if (type == "generate")
+	{
+		params.push_back("generate");
+		params.push_back("iter"); params.push_back(std::to_string(m_iter));
+		params.push_back("thresh"); params.push_back(std::to_string(m_thresh));
+		params.push_back("use_dist_field"); params.push_back(std::to_string(m_use_dist_field));
+		params.push_back("dist_strength"); params.push_back(std::to_string(m_dist_strength));
+		params.push_back("max_dist"); params.push_back(std::to_string(m_max_dist));
+		params.push_back("dist_thresh"); params.push_back(std::to_string(m_dist_thresh));
+		params.push_back("diff"); params.push_back(std::to_string(m_diff));
+		params.push_back("falloff"); params.push_back(std::to_string(m_falloff));
+		params.push_back("density"); params.push_back(std::to_string(m_density));
+		params.push_back("density_thresh"); params.push_back(std::to_string(m_density_thresh));
+		params.push_back("density_window_size"); params.push_back(std::to_string(m_density_window_size));
+		params.push_back("density_stats_size"); params.push_back(std::to_string(m_density_stats_size));
+		params.push_back("clean"); params.push_back(std::to_string(m_clean));
+		params.push_back("clean_iter"); params.push_back(std::to_string(m_clean_iter));
+		params.push_back("clean_size_vl"); params.push_back(std::to_string(m_clean_size_vl));
+	}
+	else if (type == "clean")
+	{
+		params.push_back("clean");
+		params.push_back("clean_iter"); params.push_back(std::to_string(m_clean_iter));
+		params.push_back("clean_size_vl"); params.push_back(std::to_string(m_clean_size_vl));
+	}
+	else if (type == "fixate")
+	{
+		params.push_back("fixate");
+	}
+	m_command.push_back(params);
+}
+
+void ComponentDlg::ResetCmd()
+{
+	m_command.clear();
+	m_record_cmd_btn->SetValue(false);
+	m_record_cmd = false;
+}
+
+void ComponentDlg::PlayCmd()
+{
+	if (m_command.empty())
+	{
+		GenerateComp(false);
+		return;
+	}
+
+	for (auto it = m_command.begin();
+		it != m_command.end(); ++it)
+	{
+		if (it->empty())
+			continue;
+		if ((*it)[0] == "generate")
+		{
+			for (auto it2 = it->begin();
+				it2 != it->end(); ++it2)
+			{
+				if (*it2 == "iter")
+					m_iter = std::stoi(*(++it2));
+				else if (*it2 == "thresh")
+					m_thresh = std::stod(*(++it2));
+				else if (*it2 == "use_dist_field")
+					m_use_dist_field = std::stoi(*(++it2));
+				else if (*it2 == "dist_strength")
+					m_dist_strength = std::stod(*(++it2));
+				else if (*it2 == "max_dist")
+					m_max_dist = std::stoi(*(++it2));
+				else if (*it2 == "dist_thresh")
+					m_dist_thresh = std::stod(*(++it2));
+				else if (*it2 == "diff")
+					m_diff = std::stoi(*(++it2));
+				else if (*it2 == "falloff")
+					m_falloff = std::stod(*(++it2));
+				else if (*it2 == "density")
+					m_density = std::stoi(*(++it2));
+				else if (*it2 == "density_thresh")
+					m_density_thresh = std::stod(*(++it2));
+				else if (*it2 == "density_window_size")
+					m_density_window_size = std::stoi(*(++it2));
+				else if (*it2 == "density_stats_size")
+					m_density_stats_size = std::stoi(*(++it2));
+				else if (*it2 == "clean")
+					m_clean = std::stoi(*(++it2));
+				else if (*it2 == "clean_iter")
+					m_clean_iter = std::stoi(*(++it2));
+				else if (*it2 == "clean_size_vl")
+					m_clean_size_vl = std::stoi(*(++it2));
+			}
+			GenerateComp(false);
+		}
+		else if ((*it)[0] == "clean")
+		{
+			m_clean = true;
+			for (auto it2 = it->begin();
+				it2 != it->end(); ++it2)
+			{
+				if (*it2 == "clean_iter")
+					m_clean_iter = std::stoi(*(++it2));
+				else if (*it2 == "clean_size_vl")
+					m_clean_size_vl = std::stoi(*(++it2));
+			}
+			Clean(false);
+		}
+		else if ((*it)[0] == "fixate")
+		{
+			m_fixate = true;
+			Fixate(false);
+			GenerateComp(false);
+			//return;
+		}
+	}
+	Update();
+}
+
 void ComponentDlg::OnRecordCmd(wxCommandEvent &event)
 {
 	m_record_cmd = m_record_cmd_btn->GetValue();
@@ -1543,12 +1660,12 @@ void ComponentDlg::OnRecordCmd(wxCommandEvent &event)
 
 void ComponentDlg::OnPlayCmd(wxCommandEvent &event)
 {
-
+	PlayCmd();
 }
 
 void ComponentDlg::OnResetCmd(wxCommandEvent &event)
 {
-
+	ResetCmd();
 }
 
 void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
@@ -2159,54 +2276,7 @@ void ComponentDlg::OnCluster(wxCommandEvent &event)
 
 void ComponentDlg::OnCleanBtn(wxCommandEvent &event)
 {
-	if (!m_view)
-		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	if (!vd)
-		return;
-	vd->AddEmptyMask(1);
-
-	int clean_iter = m_clean_iter;
-	int clean_size = m_clean_size_vl;
-	if (!m_clean)
-	{
-		clean_iter = 0;
-		clean_size = 0;
-	}
-
-	//get brick number
-	int bn = vd->GetAllBrickNum();
-
-	m_generate_prg->SetValue(0);
-
-	FL::ComponentGenerator cg(vd);
-	boost::signals2::connection connection =
-		cg.m_sig_progress.connect(boost::bind(
-			&ComponentDlg::UpdateProgress, this));
-
-	cg.SetUseMask(m_use_sel_chk->GetValue());
-
-	if (bn > 1)
-		cg.ClearBorders3D();
-
-	if (clean_iter > 0)
-		cg.Cleanup3D(clean_iter, clean_size);
-
-	if (bn > 1)
-		cg.FillBorder3D(0.1);
-
-	vd->GetVR()->clear_tex_current();
-	m_view->RefreshGL();
-
-	m_generate_prg->SetValue(100);
-	connection.disconnect();
-
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		vr_frame->GetSettingDlg()->SetRunScript(true);
-		vr_frame->GetMovieView()->GetScriptSettings();
-	}
+	Clean();
 }
 
 void ComponentDlg::Cluster()
@@ -2412,7 +2482,7 @@ bool ComponentDlg::GetIds(std::string &str, unsigned int &id, int &brick_id)
 	return true;
 }
 
-void ComponentDlg::GenerateComp()
+void ComponentDlg::GenerateComp(bool command)
 {
 	if (!m_view)
 		return;
@@ -2520,6 +2590,77 @@ void ComponentDlg::GenerateComp()
 		vr_frame->GetSettingDlg()->SetRunScript(true);
 		vr_frame->GetMovieView()->GetScriptSettings();
 	}
+
+	if (command && m_record_cmd)
+		AddCmd("generate");
+}
+
+void ComponentDlg::Fixate(bool command)
+{
+	if (!m_view)
+		return;
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+	vd->PushLabel(true);
+
+	if (command && m_record_cmd)
+		AddCmd("fixate");
+}
+
+void ComponentDlg::Clean(bool command)
+{
+	if (!m_view)
+		return;
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+	vd->AddEmptyMask(1);
+
+	int clean_iter = m_clean_iter;
+	int clean_size = m_clean_size_vl;
+	//if (!m_clean)
+	//{
+	//	clean_iter = 0;
+	//	clean_size = 0;
+	//}
+
+	//get brick number
+	int bn = vd->GetAllBrickNum();
+
+	m_generate_prg->SetValue(0);
+
+	FL::ComponentGenerator cg(vd);
+	boost::signals2::connection connection =
+		cg.m_sig_progress.connect(boost::bind(
+			&ComponentDlg::UpdateProgress, this));
+
+	cg.SetUseMask(m_use_sel_chk->GetValue());
+
+	if (bn > 1)
+		cg.ClearBorders3D();
+
+	if (clean_iter > 0)
+		cg.Cleanup3D(clean_iter, clean_size);
+
+	if (bn > 1)
+		cg.FillBorder3D(0.1);
+
+	vd->GetVR()->clear_tex_current();
+	m_view->RefreshGL();
+
+	m_generate_prg->SetValue(100);
+	connection.disconnect();
+
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame)
+	{
+		vr_frame->GetSettingDlg()->SetRunScript(true);
+		vr_frame->GetMovieView()->GetScriptSettings();
+	}
+
+	if (command && m_record_cmd)
+		AddCmd("clean");
 }
 
 void ComponentDlg::SelectFullComp()
