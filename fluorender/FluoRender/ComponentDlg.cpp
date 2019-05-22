@@ -90,6 +90,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_BUTTON(ID_PlayCmdBtn, ComponentDlg::OnPlayCmd)
 	EVT_BUTTON(ID_ResetCmdBtn, ComponentDlg::OnResetCmd)
 	EVT_BUTTON(ID_SaveCmdBtn, ComponentDlg::OnSaveCmd)
+	EVT_BUTTON(ID_LoadCmdBtn, ComponentDlg::OnLoadCmd)
 
 	//clustering page
 	EVT_RADIOBUTTON(ID_ClusterMethodExmaxRd, ComponentDlg::OnClusterMethodExmaxCheck)
@@ -443,11 +444,14 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(100, 23));
 	m_cmd_file_text = new wxTextCtrl(page, ID_CmdFileText, "",
 		wxDefaultPosition, wxDefaultSize);
+	m_load_cmd_btn = new wxButton(page, ID_LoadCmdBtn, "Load",
+		wxDefaultPosition, wxSize(75, -1));
 	m_save_cmd_btn = new wxButton(page, ID_SaveCmdBtn, "Save",
 		wxDefaultPosition, wxSize(75, -1));
 	sizer18->Add(2, 2);
 	sizer18->Add(st, 0, wxALIGN_CENTER);
 	sizer18->Add(m_cmd_file_text, 1, wxALIGN_CENTER);
+	sizer18->Add(m_load_cmd_btn, 0, wxALIGN_CENTER);
 	sizer18->Add(m_save_cmd_btn, 0, wxALIGN_CENTER);
 	sizer18->Add(2, 2);
 
@@ -1668,9 +1672,79 @@ void ComponentDlg::OnResetCmd(wxCommandEvent &event)
 	ResetCmd();
 }
 
-void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
+void ComponentDlg::OnLoadCmd(wxCommandEvent &event)
 {
 
+}
+
+void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
+{
+	if (m_command.empty())
+		return;
+
+	wxFileDialog *fopendlg = new wxFileDialog(
+		m_frame, "Save a FluoRender component generator macro command",
+		"", "", "*.txt", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	int rval = fopendlg->ShowModal();
+	if (rval != wxID_OK)
+	{
+		delete fopendlg;
+		return;
+	}
+	wxString app_name = "FluoRender " +
+		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
+	wxString vendor_name = "FluoRender";
+	wxString local_name = "macro_command.dft";
+	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
+		wxCONFIG_USE_LOCAL_FILE);
+
+	int cmd_count = 0;
+
+	for (auto it = m_command.begin();
+		it != m_command.end(); ++it)
+	{
+		if (it->empty())
+			continue;
+		if ((*it)[0] == "generate" ||
+			(*it)[0] == "clean" ||
+			(*it)[0] == "fixate")
+		{
+			std::string str = "cmd" + std::to_string(cmd_count++);
+			fconfig.SetPath(str);
+			str = (*it)[0];
+			fconfig.Write("type", wxString(str));
+		}
+		for (auto it2 = it->begin();
+			it2 != it->end(); ++it2)
+		{
+			if (*it2 == "iter" ||
+				*it2 == "use_dist_field" ||
+				*it2 == "max_dist" ||
+				*it2 == "diff" ||
+				*it2 == "density" ||
+				*it2 == "density_window_size" ||
+				*it2 == "density_stats_size" ||
+				*it2 == "clean" ||
+				*it2 == "clean_iter" ||
+				*it2 == "clean_size_vl")
+			{
+				fconfig.Write(*it2, std::stoi(*(++it2)));
+			}
+			else if (*it2 == "thresh" ||
+				*it2 == "dist_strength" ||
+				*it2 == "dist_thresh" ||
+				*it2 == "falloff" ||
+				*it2 == "density_thresh")
+			{
+				fconfig.Write(*it2, std::stod(*(++it2)));
+			}
+		}
+	}
+
+	wxString filename = fopendlg->GetPath();
+	wxFileOutputStream os(filename);
+	fconfig.Save(os);
+	m_cmd_file_text->SetValue(filename);
 }
 
 //clustering page

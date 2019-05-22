@@ -100,6 +100,7 @@ public:
 		ID_ResetCmdBtn,
 		ID_CmdFileText,
 		ID_SaveCmdBtn,
+		ID_LoadCmdBtn,
 
 		//clustering page
 		ID_ClusterMethodExmaxRd,
@@ -319,6 +320,7 @@ private:
 	wxButton* m_reset_cmd_btn;
 	wxTextCtrl* m_cmd_file_text;
 	wxButton* m_save_cmd_btn;
+	wxButton* m_load_cmd_btn;
 
 	//clustering page
 	wxRadioButton* m_cluster_method_exmax_rd;
@@ -438,6 +440,7 @@ private:
 	void OnPlayCmd(wxCommandEvent &event);
 	void OnResetCmd(wxCommandEvent &event);
 	void OnSaveCmd(wxCommandEvent &event);
+	void OnLoadCmd(wxCommandEvent &event);
 
 	//clustering page
 	void UpdateClusterMethod();
