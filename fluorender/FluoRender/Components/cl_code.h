@@ -690,7 +690,64 @@ const char* str_cl_shuffle_id_3d = \
 "		res |= z<<lenx*2;\n" \
 "		label[index] = res + 1;\n" \
 "	}\n" \
-"}\n";
+"}\n" \
+"__kernel void kernel_1(\n" \
+"	__read_only image3d_t data,\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned int lenx,\n" \
+"	unsigned int lenz,\n" \
+"	float4 p0,\n" \
+"	float4 p1,\n" \
+"	float4 p2,\n" \
+"	float4 p3,\n" \
+"	float4 p4,\n" \
+"	float4 p5,\n" \
+"	float3 scl,\n" \
+"	float3 trl)\n" \
+"{\n" \
+"	unsigned int res;\n" \
+"	unsigned int x, y, z, ii;\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
+"	unsigned int index = nx*ny*k + nx*j + i;\n" \
+"	float3 pt = (float3)((float)(i) / (float)(nx), (float)(j) / (float)(ny), (float)(k) / (float)(nz));\n" \
+"	pt = pt * scl + trl;\n" \
+"	if (dot(pt, p0.xyz)+p0.w < 0.0 ||\n" \
+"		dot(pt, p1.xyz)+p1.w < 0.0 ||\n" \
+"		dot(pt, p2.xyz)+p2.w < 0.0 ||\n" \
+"		dot(pt, p3.xyz)+p3.w < 0.0 ||\n" \
+"		dot(pt, p4.xyz)+p4.w < 0.0 ||\n" \
+"		dot(pt, p5.xyz)+p5.w < 0.0)\n" \
+"	{\n" \
+"		label[index] = 0;\n" \
+"		return;\n" \
+"	}\n" \
+"	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
+"	if (value < 0.001)\n" \
+"		label[index] = 0;\n" \
+"	else if (i<1 || i>nx-2 ||\n" \
+"			j<1 || j>ny-2)\n" \
+"		label[index] = 0;\n" \
+"	else\n" \
+"	{\n" \
+"		x = reverse_bit(i, lenx);\n" \
+"		y = reverse_bit(j, lenx);\n" \
+"		z = reverse_bit(k, lenz);\n" \
+"		res = 0;\n" \
+"		for (ii=0; ii<lenx; ++ii)\n" \
+"		{\n" \
+"			res |= (1<<ii & x)<<(ii);\n" \
+"			res |= (1<<ii & y)<<(ii+1);\n" \
+"		}\n" \
+"		res |= z<<lenx*2;\n" \
+"		label[index] = res + 1;\n" \
+"	}\n" \
+"}\n" \
+;
 
 const char* str_cl_order_id_2d = \
 "const sampler_t samp =\n" \
