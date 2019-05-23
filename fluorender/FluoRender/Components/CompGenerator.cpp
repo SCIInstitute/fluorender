@@ -152,6 +152,7 @@ void ComponentGenerator::OrderID_3D()
 	} \
 	else \
 	{ \
+		b = (*bricks)[0]; \
 		m_vd->GetResolution(nx, ny, nz); \
 		Nrrd* nrrd_data = 0; \
 		if (m_use_mask) \
@@ -274,10 +275,26 @@ void ComponentGenerator::ShuffleID_3D()
 		vol_kernel_factory_.kernel(str_cl_shuffle_id_3d);
 	if (!kernel_prog)
 		return;
-	int kernel_index = kernel_prog->createKernel("kernel_0");
+	int kernel_index = kernel_prog->createKernel("kernel_1");
 
 	if (m_use_mask)
 		m_vd->GetVR()->return_mask();
+
+	//clipping planes
+	cl_float4 p[6];
+	if (m_vd && m_vd->GetVR())
+	{
+		vector<Plane*> *planes = m_vd->GetVR()->get_planes();
+		double abcd[4];
+		for (size_t i = 0; i < 6; ++i)
+		{
+			(*planes)[i]->get(abcd);
+			p[i] = { float(abcd[0]),
+				float(abcd[1]),
+				float(abcd[2]),
+				float(abcd[3]) };
+		}
+	}
 
 	for (size_t i = 0; i < bricks->size(); ++i)
 	{
@@ -337,6 +354,32 @@ void ComponentGenerator::ShuffleID_3D()
 			sizeof(unsigned int), (void*)(&lenx));
 		kernel_prog->setKernelArgConst(kernel_index, 6,
 			sizeof(unsigned int), (void*)(&lenz));
+		kernel_prog->setKernelArgConst(kernel_index, 7,
+			sizeof(cl_float4), (void*)(p));
+		kernel_prog->setKernelArgConst(kernel_index, 8,
+			sizeof(cl_float4), (void*)(p+1));
+		kernel_prog->setKernelArgConst(kernel_index, 9,
+			sizeof(cl_float4), (void*)(p+2));
+		kernel_prog->setKernelArgConst(kernel_index, 10,
+			sizeof(cl_float4), (void*)(p+3));
+		kernel_prog->setKernelArgConst(kernel_index, 11,
+			sizeof(cl_float4), (void*)(p+4));
+		kernel_prog->setKernelArgConst(kernel_index, 12,
+			sizeof(cl_float4), (void*)(p+5));
+		//brick matrix
+		BBox bbx = b->dbox();
+		cl_float3 scl = {
+			float(bbx.max().x() - bbx.min().x()),
+			float(bbx.max().y() - bbx.min().y()),
+			float(bbx.max().z() - bbx.min().z()) };
+		cl_float3 trl ={
+			float(bbx.min().x()),
+			float(bbx.min().y()),
+			float(bbx.min().z())};
+		kernel_prog->setKernelArgConst(kernel_index, 13,
+			sizeof(cl_float3), (void*)(&scl));
+		kernel_prog->setKernelArgConst(kernel_index, 14,
+			sizeof(cl_float3), (void*)(&trl));
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
