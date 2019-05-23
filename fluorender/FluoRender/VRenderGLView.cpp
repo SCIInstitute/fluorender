@@ -6216,14 +6216,9 @@ void VRenderGLView::RunCompAnalysis(wxFileConfig &fconfig)
 
 void VRenderGLView::RunGenerateComp(wxFileConfig &fconfig)
 {
-	int type;
-	fconfig.Read("gentype", &type, 0);
-	int mode;
-	fconfig.Read("mode", &mode, 0);
-
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetComponentDlg())
-		vr_frame->GetComponentDlg()->GenerateComp();
+		vr_frame->GetComponentDlg()->PlayCmd();
 }
 
 void VRenderGLView::RunRulerProfile(wxFileConfig &fconfig)
