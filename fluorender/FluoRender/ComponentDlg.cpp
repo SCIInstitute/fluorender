@@ -426,6 +426,8 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	wxBoxSizer* sizer17 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Recorder:",
 		wxDefaultPosition, wxSize(100, 23));
+	m_cmd_count_text = new wxTextCtrl(page, ID_CmdCountText, "",
+		wxDefaultPosition, wxSize(75, -1), wxTE_READONLY);
 	m_record_cmd_btn = new wxToggleButton(page, ID_RecordCmdBtn, "Record",
 		wxDefaultPosition, wxSize(75, -1));
 	m_play_cmd_btn = new wxButton(page, ID_PlayCmdBtn, "Play",
@@ -435,6 +437,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer17->Add(2, 2);
 	sizer17->Add(st, 0, wxALIGN_CENTER);
 	sizer17->AddStretchSpacer();
+	sizer17->Add(m_cmd_count_text, 0, wxALIGN_CENTER);
 	sizer17->Add(m_record_cmd_btn, 0, wxALIGN_CENTER);
 	sizer17->Add(m_play_cmd_btn, 0, wxALIGN_CENTER);
 	sizer17->Add(m_reset_cmd_btn, 0, wxALIGN_CENTER);
@@ -875,6 +878,9 @@ void ComponentDlg::Update()
 	m_clean_check->SetValue(m_clean);
 	m_clean_iter_text->SetValue(wxString::Format("%d", m_clean_iter));
 	m_clean_limit_text->SetValue(wxString::Format("%d", m_clean_size_vl));
+	//record
+	int ival = m_command.size();
+	m_cmd_count_text->SetValue(wxString::Format("%d", ival));
 
 	//cluster page
 	m_cluster_method_exmax_rd->SetValue(m_cluster_method_exmax);
@@ -1558,7 +1564,7 @@ void ComponentDlg::AddCmd(const std::string &type)
 		params.push_back("density_thresh"); params.push_back(std::to_string(m_density_thresh));
 		params.push_back("density_window_size"); params.push_back(std::to_string(m_density_window_size));
 		params.push_back("density_stats_size"); params.push_back(std::to_string(m_density_stats_size));
-		params.push_back("clean"); params.push_back(std::to_string(m_clean));
+		params.push_back("cleanb"); params.push_back(std::to_string(m_clean));
 		params.push_back("clean_iter"); params.push_back(std::to_string(m_clean_iter));
 		params.push_back("clean_size_vl"); params.push_back(std::to_string(m_clean_size_vl));
 	}
@@ -1573,6 +1579,10 @@ void ComponentDlg::AddCmd(const std::string &type)
 		params.push_back("fixate");
 	}
 	m_command.push_back(params);
+
+	//record
+	int ival = m_command.size();
+	m_cmd_count_text->SetValue(wxString::Format("%d", ival));
 }
 
 void ComponentDlg::ResetCmd()
@@ -1580,6 +1590,9 @@ void ComponentDlg::ResetCmd()
 	m_command.clear();
 	m_record_cmd_btn->SetValue(false);
 	m_record_cmd = false;
+	//record
+	int ival = m_command.size();
+	m_cmd_count_text->SetValue(wxString::Format("%d", ival));
 }
 
 void ComponentDlg::PlayCmd()
@@ -1624,7 +1637,7 @@ void ComponentDlg::PlayCmd()
 					m_density_window_size = std::stoi(*(++it2));
 				else if (*it2 == "density_stats_size")
 					m_density_stats_size = std::stoi(*(++it2));
-				else if (*it2 == "clean")
+				else if (*it2 == "cleanb")
 					m_clean = std::stoi(*(++it2));
 				else if (*it2 == "clean_iter")
 					m_clean_iter = std::stoi(*(++it2));
@@ -1674,7 +1687,78 @@ void ComponentDlg::OnResetCmd(wxCommandEvent &event)
 
 void ComponentDlg::OnLoadCmd(wxCommandEvent &event)
 {
+	wxFileDialog *fopendlg = new wxFileDialog(
+		m_frame, "Choose a FluoRender component generator macro command",
+		"", "", "*.txt;*.dft", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+	int rval = fopendlg->ShowModal();
+	if (rval != wxID_OK)
+	{
+		delete fopendlg;
+		return;
+	}
+	wxString filename = fopendlg->GetPath();
+	delete fopendlg;
+	wxFileInputStream is(filename);
+	if (!is.IsOk())
+		return;
+	wxFileConfig fconfig(is);
+	m_cmd_file_text->SetValue(filename);
 
+	m_command.clear();
+	int cmd_count = 0;
+	wxString str;
+	std::string cmd_str = "/cmd" + std::to_string(cmd_count);
+	while (fconfig.Exists(cmd_str))
+	{
+		FL::CompCmdParams params;
+		fconfig.SetPath(cmd_str);
+		str = fconfig.Read("type", "");
+		if (str == "generate" ||
+			str == "clean" ||
+			str == "fixate")
+			params.push_back(str.ToStdString());
+		else
+			continue;
+		long lval;
+		if (fconfig.Read("iter", &lval))
+		{ params.push_back("iter"); params.push_back(std::to_string(lval)); }
+		if (fconfig.Read("use_dist_field", &lval))
+		{ params.push_back("use_dist_field"); params.push_back(std::to_string(lval)); }
+		if (fconfig.Read("max_dist", &lval))
+		{ params.push_back("max_dist"); params.push_back(std::to_string(lval)); }
+		if (fconfig.Read("diff", &lval))
+		{ params.push_back("diff"); params.push_back(std::to_string(lval)); }
+		if (fconfig.Read("density", &lval))
+		{ params.push_back("density"); params.push_back(std::to_string(lval)); }
+		if (fconfig.Read("density_window_size", &lval))
+		{ params.push_back("density_window_size"); params.push_back(std::to_string(lval)); }
+		if (fconfig.Read("density_stats_size", &lval))
+		{ params.push_back("density_stats_size"); params.push_back(std::to_string(lval)); }
+		if (fconfig.Read("cleanb", &lval))
+		{ params.push_back("cleanb"); params.push_back(std::to_string(lval)); }
+		if (fconfig.Read("clean_iter", &lval))
+		{ params.push_back("clean_iter"); params.push_back(std::to_string(lval)); }
+		if (fconfig.Read("clean_size_vl", &lval))
+		{ params.push_back("clean_size_vl"); params.push_back(std::to_string(lval)); }
+		double dval;
+		if (fconfig.Read("thresh", &dval))
+		{ params.push_back("thresh"); params.push_back(std::to_string(dval)); }
+		if (fconfig.Read("dist_strength", &dval))
+		{ params.push_back("dist_strength"); params.push_back(std::to_string(dval)); }
+		if (fconfig.Read("dist_thresh", &dval))
+		{ params.push_back("dist_thresh"); params.push_back(std::to_string(dval)); }
+		if (fconfig.Read("falloff", &dval))
+		{ params.push_back("falloff"); params.push_back(std::to_string(dval)); }
+		if (fconfig.Read("density_thresh", &dval))
+		{ params.push_back("density_thresh"); params.push_back(std::to_string(dval)); }
+
+		m_command.push_back(params);
+		cmd_count++;
+		cmd_str = "/cmd" + std::to_string(cmd_count);
+	}
+	//record
+	int ival = m_command.size();
+	m_cmd_count_text->SetValue(wxString::Format("%d", ival));
 }
 
 void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
@@ -1691,11 +1775,9 @@ void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
 		delete fopendlg;
 		return;
 	}
-	wxString app_name = "FluoRender " +
-		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
-	wxString vendor_name = "FluoRender";
-	wxString local_name = "macro_command.dft";
-	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
+	wxString filename = fopendlg->GetPath();
+	delete fopendlg;
+	wxFileConfig fconfig("", "", filename, "",
 		wxCONFIG_USE_LOCAL_FILE);
 
 	int cmd_count = 0;
@@ -1709,7 +1791,7 @@ void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
 			(*it)[0] == "clean" ||
 			(*it)[0] == "fixate")
 		{
-			std::string str = "cmd" + std::to_string(cmd_count++);
+			std::string str = "/cmd" + std::to_string(cmd_count++);
 			fconfig.SetPath(str);
 			str = (*it)[0];
 			fconfig.Write("type", wxString(str));
@@ -1724,7 +1806,7 @@ void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
 				*it2 == "density" ||
 				*it2 == "density_window_size" ||
 				*it2 == "density_stats_size" ||
-				*it2 == "clean" ||
+				*it2 == "cleanb" ||
 				*it2 == "clean_iter" ||
 				*it2 == "clean_size_vl")
 			{
@@ -1741,7 +1823,6 @@ void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
 		}
 	}
 
-	wxString filename = fopendlg->GetPath();
 	wxFileOutputStream os(filename);
 	fconfig.Save(os);
 	m_cmd_file_text->SetValue(filename);

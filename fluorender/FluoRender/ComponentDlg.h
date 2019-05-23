@@ -95,6 +95,7 @@ public:
 		ID_CleanLimitSldr,
 		ID_CleanLimitText,
 		//record
+		ID_CmdCountText,
 		ID_RecordCmdBtn,
 		ID_PlayCmdBtn,
 		ID_ResetCmdBtn,
@@ -315,6 +316,7 @@ private:
 	wxSlider* m_clean_limit_sldr;
 	wxTextCtrl* m_clean_limit_text;
 	//record
+	wxTextCtrl* m_cmd_count_text;
 	wxToggleButton* m_record_cmd_btn;
 	wxButton* m_play_cmd_btn;
 	wxButton* m_reset_cmd_btn;
