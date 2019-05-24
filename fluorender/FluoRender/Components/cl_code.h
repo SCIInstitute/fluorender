@@ -1775,6 +1775,19 @@ const char* str_cl_set_bit_3d = \
 "}\n" \
 "__kernel void kernel_1(\n" \
 "	__global unsigned int* mask,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	__global unsigned int* maxv)\n" \
+"{\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
+"	unsigned int index = nx*ny*k + nx*j + i;\n" \
+"	*maxv = max(mask[index], *maxv);\n" \
+"}\n" \
+"__kernel void kernel_2(\n" \
+"	__global unsigned int* mask,\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
@@ -1807,7 +1820,7 @@ const char* str_cl_set_bit_3d = \
 "	if (index != index2)\n" \
 "		mask[index] = mask[index2];\n" \
 "}\n" \
-"__kernel void kernel_2(\n" \
+"__kernel void kernel_3(\n" \
 "	__global unsigned int* mask,\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \

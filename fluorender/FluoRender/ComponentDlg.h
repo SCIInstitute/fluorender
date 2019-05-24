@@ -87,6 +87,8 @@ public:
 		//fixate
 		ID_FixateCheck,
 		ID_FixUpdateBtn,
+		ID_FixSizeSldr,
+		ID_FixSizeText,
 		//clean
 		ID_CleanCheck,
 		ID_CleanBtn,
@@ -225,6 +227,7 @@ private:
 	int m_density_stats_size;
 	//fixate
 	bool m_fixate;
+	int m_fix_size;
 	//clean
 	bool m_clean;
 	int m_clean_iter;
@@ -308,6 +311,8 @@ private:
 	//fixate
 	wxCheckBox* m_fixate_check;
 	wxButton* m_fix_update_btn;
+	wxSlider* m_fix_size_sldr;
+	wxTextCtrl* m_fix_size_text;
 	//clean
 	wxCheckBox* m_clean_check;
 	wxButton* m_clean_btn;
@@ -429,6 +434,8 @@ private:
 	void OnFixateCheck(wxCommandEvent &event);
 	void EnableFixate(bool value);
 	void OnFixUpdateBtn(wxCommandEvent &event);
+	void OnFixSizeSldr(wxScrollEvent &event);
+	void OnFixSizeText(wxCommandEvent &event);
 	//clean
 	void EnableClean(bool value);
 	void OnCleanCheck(wxCommandEvent &event);
