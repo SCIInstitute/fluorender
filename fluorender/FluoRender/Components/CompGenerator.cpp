@@ -2577,7 +2577,7 @@ void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
 	}
 }
 
-void ComponentGenerator::SetIDBit(int iter)
+void ComponentGenerator::SetIDBit(int psize)
 {
 	//debug
 #ifdef _DEBUG
@@ -2595,6 +2595,7 @@ void ComponentGenerator::SetIDBit(int iter)
 	int kernel_index0 = kernel_prog->createKernel("kernel_0");
 	int kernel_index1 = kernel_prog->createKernel("kernel_1");
 	int kernel_index2 = kernel_prog->createKernel("kernel_2");
+	int kernel_index3 = kernel_prog->createKernel("kernel_3");
 
 	if (m_use_mask)
 		m_vd->GetVR()->return_mask();
@@ -2651,23 +2652,21 @@ void ComponentGenerator::SetIDBit(int iter)
 			sizeof(unsigned int), (void*)(&lenx));
 		kernel_prog->setKernelArgConst(kernel_index0, 6,
 			sizeof(unsigned int), (void*)(&lenz));
-		//kernel 1
+		//kernel 1 ger max size
 		arg_mask.kernel_index = kernel_index1;
 		arg_mask.index = 0;
 		kernel_prog->setKernelArgument(arg_mask);
-		arg_label.kernel_index = kernel_index1;
-		arg_label.index = 1;
-		kernel_prog->setKernelArgument(arg_label);
-		kernel_prog->setKernelArgConst(kernel_index1, 2,
+		kernel_prog->setKernelArgConst(kernel_index1, 1,
 			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(kernel_index1, 3,
+		kernel_prog->setKernelArgConst(kernel_index1, 2,
 			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(kernel_index1, 4,
+		kernel_prog->setKernelArgConst(kernel_index1, 3,
 			sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setKernelArgConst(kernel_index1, 5,
-			sizeof(unsigned int), (void*)(&lenx));
-		kernel_prog->setKernelArgConst(kernel_index1, 6,
-			sizeof(unsigned int), (void*)(&lenz));
+		unsigned int maxv = 0;
+		Argument arg_maxv = kernel_prog->setKernelArgBuf(
+			kernel_index1, 4,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int), (void*)(&maxv));
 		//kernel 2
 		arg_mask.kernel_index = kernel_index2;
 		arg_mask.index = 0;
@@ -2681,17 +2680,44 @@ void ComponentGenerator::SetIDBit(int iter)
 			sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setKernelArgConst(kernel_index2, 4,
 			sizeof(unsigned int), (void*)(&nz));
-		unsigned int limit = 1;
-		limit *= std::min(iter, nx);
-		//limit *= std::min(iter, ny);
-		limit *= std::min(iter, nz);
 		kernel_prog->setKernelArgConst(kernel_index2, 5,
-			sizeof(unsigned int), (void*)(&limit));
+			sizeof(unsigned int), (void*)(&lenx));
+		kernel_prog->setKernelArgConst(kernel_index2, 6,
+			sizeof(unsigned int), (void*)(&lenz));
+		//kernel 3
+		arg_mask.kernel_index = kernel_index3;
+		arg_mask.index = 0;
+		kernel_prog->setKernelArgument(arg_mask);
+		arg_label.kernel_index = kernel_index3;
+		arg_label.index = 1;
+		kernel_prog->setKernelArgument(arg_label);
+		kernel_prog->setKernelArgConst(kernel_index3, 2,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(kernel_index3, 3,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(kernel_index3, 4,
+			sizeof(unsigned int), (void*)(&nz));
+		//unsigned int limit = 1;
+		//limit *= std::min(iter, nx);
+		////limit *= std::min(iter, ny);
+		//limit *= std::min(iter, nz);
+		kernel_prog->setKernelArgConst(kernel_index3, 5,
+			sizeof(unsigned int), (void*)(&psize));
 
 		//execute
 		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
-		kernel_prog->executeKernel(kernel_index1, 3, global_size, local_size);
 		kernel_prog->executeKernel(kernel_index2, 3, global_size, local_size);
+		//debug
+		//kernel_prog->readBuffer(arg_mask, mask32);
+		//ofs.open("E:/DATA/Test/density_field/size.bin", std::ios::out | std::ios::binary);
+		//ofs.write((char*)mask32, nx*ny*nz*sizeof(unsigned int));
+		//ofs.close();
+		//kernel_prog->executeKernel(kernel_index1, 3, global_size, local_size);
+		//kernel_prog->readBuffer(arg_maxv, &maxv);
+		//maxv = (unsigned int)(psize * maxv + 0.5);
+		//kernel_prog->setKernelArgConst(kernel_index3, 5,
+		//	sizeof(unsigned int), (void*)(&maxv));
+		kernel_prog->executeKernel(kernel_index3, 3, global_size, local_size);
 		//debug
 		//val = new unsigned int[nx*ny*nz];
 		//kernel_prog->readBuffer(arg_mask, val);

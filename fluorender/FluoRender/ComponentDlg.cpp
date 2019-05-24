@@ -78,6 +78,8 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	//fixate
 	EVT_CHECKBOX(ID_FixateCheck, ComponentDlg::OnFixateCheck)
 	EVT_BUTTON(ID_FixUpdateBtn, ComponentDlg::OnFixUpdateBtn)
+	EVT_COMMAND_SCROLL(ID_FixSizeSldr, ComponentDlg::OnFixSizeSldr)
+	EVT_TEXT(ID_FixSizeText, ComponentDlg::OnFixSizeText)
 	//clean
 	EVT_CHECKBOX(ID_CleanCheck, ComponentDlg::OnCleanCheck)
 	EVT_BUTTON(ID_CleanBtn, ComponentDlg::OnCleanBtn)
@@ -382,48 +384,60 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer13->AddStretchSpacer(1);
 	sizer13->Add(m_fix_update_btn, 0, wxALIGN_CENTER);
 	sizer13->Add(2, 2);
+	wxBoxSizer* sizer14 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Size Threshold",
+		wxDefaultPosition, wxSize(100, 23));
+	m_fix_size_sldr = new wxSlider(page, ID_FixSizeSldr, 50, 1, 200,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_fix_size_text = new wxTextCtrl(page, ID_FixSizeText, "50",
+		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
+	sizer14->Add(2, 2);
+	sizer14->Add(st, 0, wxALIGN_CENTER);
+	sizer14->Add(m_fix_size_sldr, 1, wxEXPAND);
+	sizer14->Add(m_fix_size_text, 0, wxALIGN_CENTER);
+	sizer14->Add(2, 2);
 
 	//clean
-	wxBoxSizer* sizer14 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer15 = new wxBoxSizer(wxHORIZONTAL);
 	m_clean_check = new wxCheckBox(page, ID_CleanCheck, "Clean Up",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_clean_btn = new wxButton(page, ID_CleanBtn, "Clean More",
 		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
-	sizer14->Add(2, 2);
-	sizer14->Add(m_clean_check, 0, wxALIGN_CENTER);
-	sizer14->AddStretchSpacer(1);
-	sizer14->Add(m_clean_btn, 0, wxALIGN_CENTER);
-	sizer14->Add(2, 2);
+	sizer15->Add(2, 2);
+	sizer15->Add(m_clean_check, 0, wxALIGN_CENTER);
+	sizer15->AddStretchSpacer(1);
+	sizer15->Add(m_clean_btn, 0, wxALIGN_CENTER);
+	sizer15->Add(2, 2);
 
 	//iterations
-	wxBoxSizer* sizer15 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer16 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Iterations:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_clean_iter_sldr = new wxSlider(page, ID_CleanIterSldr, 5, 1, 50,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_clean_iter_text = new wxTextCtrl(page, ID_CleanIterText, "5",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-	sizer15->Add(2, 2);
-	sizer15->Add(st, 0, wxALIGN_CENTER);
-	sizer15->Add(m_clean_iter_sldr, 1, wxEXPAND);
-	sizer15->Add(m_clean_iter_text, 0, wxALIGN_CENTER);
-	sizer15->Add(2, 2);
+	sizer16->Add(2, 2);
+	sizer16->Add(st, 0, wxALIGN_CENTER);
+	sizer16->Add(m_clean_iter_sldr, 1, wxEXPAND);
+	sizer16->Add(m_clean_iter_text, 0, wxALIGN_CENTER);
+	sizer16->Add(2, 2);
 	//iterations
-	wxBoxSizer* sizer16 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer17 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Size:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_clean_limit_sldr = new wxSlider(page, ID_CleanLimitSldr, 5, 1, 50,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_clean_limit_text = new wxTextCtrl(page, ID_CleanLimitText, "5",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-	sizer16->Add(2, 2);
-	sizer16->Add(st, 0, wxALIGN_CENTER);
-	sizer16->Add(m_clean_limit_sldr, 1, wxEXPAND);
-	sizer16->Add(m_clean_limit_text, 0, wxALIGN_CENTER);
-	sizer16->Add(2, 2);
+	sizer17->Add(2, 2);
+	sizer17->Add(st, 0, wxALIGN_CENTER);
+	sizer17->Add(m_clean_limit_sldr, 1, wxEXPAND);
+	sizer17->Add(m_clean_limit_text, 0, wxALIGN_CENTER);
+	sizer17->Add(2, 2);
 
 	//command record
-	wxBoxSizer* sizer17 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer18 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Recorder:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_cmd_count_text = new wxTextCtrl(page, ID_CmdCountText, "",
@@ -434,15 +448,15 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(75, -1));
 	m_reset_cmd_btn = new wxButton(page, ID_ResetCmdBtn, "Reset",
 		wxDefaultPosition, wxSize(75, -1));
-	sizer17->Add(2, 2);
-	sizer17->Add(st, 0, wxALIGN_CENTER);
-	sizer17->AddStretchSpacer();
-	sizer17->Add(m_cmd_count_text, 0, wxALIGN_CENTER);
-	sizer17->Add(m_record_cmd_btn, 0, wxALIGN_CENTER);
-	sizer17->Add(m_play_cmd_btn, 0, wxALIGN_CENTER);
-	sizer17->Add(m_reset_cmd_btn, 0, wxALIGN_CENTER);
-	sizer17->Add(2, 2);
-	wxBoxSizer* sizer18 = new wxBoxSizer(wxHORIZONTAL);
+	sizer18->Add(2, 2);
+	sizer18->Add(st, 0, wxALIGN_CENTER);
+	sizer18->AddStretchSpacer();
+	sizer18->Add(m_cmd_count_text, 0, wxALIGN_CENTER);
+	sizer18->Add(m_record_cmd_btn, 0, wxALIGN_CENTER);
+	sizer18->Add(m_play_cmd_btn, 0, wxALIGN_CENTER);
+	sizer18->Add(m_reset_cmd_btn, 0, wxALIGN_CENTER);
+	sizer18->Add(2, 2);
+	wxBoxSizer* sizer19 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Save File:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_cmd_file_text = new wxTextCtrl(page, ID_CmdFileText, "",
@@ -451,12 +465,12 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(75, -1));
 	m_save_cmd_btn = new wxButton(page, ID_SaveCmdBtn, "Save",
 		wxDefaultPosition, wxSize(75, -1));
-	sizer18->Add(2, 2);
-	sizer18->Add(st, 0, wxALIGN_CENTER);
-	sizer18->Add(m_cmd_file_text, 1, wxALIGN_CENTER);
-	sizer18->Add(m_load_cmd_btn, 0, wxALIGN_CENTER);
-	sizer18->Add(m_save_cmd_btn, 0, wxALIGN_CENTER);
-	sizer18->Add(2, 2);
+	sizer19->Add(2, 2);
+	sizer19->Add(st, 0, wxALIGN_CENTER);
+	sizer19->Add(m_cmd_file_text, 1, wxALIGN_CENTER);
+	sizer19->Add(m_load_cmd_btn, 0, wxALIGN_CENTER);
+	sizer19->Add(m_save_cmd_btn, 0, wxALIGN_CENTER);
+	sizer19->Add(2, 2);
 
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "ID Growth && Merge"), wxVERTICAL);
@@ -487,21 +501,23 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	group1->Add(5, 5);
 	group1->Add(sizer13, 0, wxEXPAND);
 	group1->Add(5, 5);
+	group1->Add(sizer14, 0, wxEXPAND);
+	group1->Add(5, 5);
 
 	wxBoxSizer *group2 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Post Cleanup"), wxVERTICAL);
-	group2->Add(sizer14, 0, wxEXPAND);
-	group2->Add(5, 5);
 	group2->Add(sizer15, 0, wxEXPAND);
 	group2->Add(5, 5);
 	group2->Add(sizer16, 0, wxEXPAND);
 	group2->Add(5, 5);
+	group2->Add(sizer17, 0, wxEXPAND);
+	group2->Add(5, 5);
 
 	wxBoxSizer *group3 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Macro Command"), wxVERTICAL);
-	group3->Add(sizer17, 0, wxEXPAND);
-	group3->Add(5, 5);
 	group3->Add(sizer18, 0, wxEXPAND);
+	group3->Add(5, 5);
+	group3->Add(sizer19, 0, wxEXPAND);
 	group3->Add(5, 5);
 
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
@@ -873,6 +889,7 @@ void ComponentDlg::Update()
 	//fixate
 	m_fixate_check->SetValue(m_fixate);
 	EnableFixate(m_fixate);
+	m_fix_size_text->SetValue(wxString::Format("%d", m_fix_size));
 	//clean
 	EnableClean(m_clean);
 	m_clean_check->SetValue(m_clean);
@@ -953,6 +970,7 @@ void ComponentDlg::GetSettings()
 	m_density_window_size = 5;
 	m_density_stats_size = 15;
 	m_fixate = false;
+	m_fix_size = 50;
 	m_clean = false;
 	m_clean_iter = 5;
 	m_clean_size_vl = 5;
@@ -1439,10 +1457,14 @@ void ComponentDlg::EnableFixate(bool value)
 	if (value)
 	{
 		m_fix_update_btn->Enable();
+		m_fix_size_sldr->Enable();
+		m_fix_size_text->Enable();
 	}
 	else
 	{
 		m_fix_update_btn->Disable();
+		m_fix_size_sldr->Disable();
+		m_fix_size_text->Disable();
 	}
 }
 
@@ -1464,6 +1486,25 @@ void ComponentDlg::OnFixUpdateBtn(wxCommandEvent &event)
 
 	if (m_auto_update)
 		GenerateComp(false);
+}
+
+void ComponentDlg::OnFixSizeSldr(wxScrollEvent &event)
+{
+	int val = event.GetPosition();
+	m_fix_size_text->SetValue(wxString::Format("%d", val));
+}
+
+void ComponentDlg::OnFixSizeText(wxCommandEvent &event)
+{
+	long val = 0;
+	m_fix_size_text->GetValue().ToLong(&val);
+	m_fix_size = val;
+	m_fix_size_sldr->SetValue(m_fix_size);
+
+	if (m_auto_update)
+		GenerateComp(false);
+	if (m_record_cmd)
+		AddCmd("fixate");
 }
 
 void ComponentDlg::EnableClean(bool value)
@@ -1577,6 +1618,7 @@ void ComponentDlg::AddCmd(const std::string &type)
 	else if (type == "fixate")
 	{
 		params.push_back("fixate");
+		params.push_back("fix_size"); params.push_back(std::to_string(m_fix_size));
 	}
 	m_command.push_back(params);
 
@@ -1662,8 +1704,14 @@ void ComponentDlg::PlayCmd()
 		else if ((*it)[0] == "fixate")
 		{
 			m_fixate = true;
-			Fixate(false);
+			for (auto it2 = it->begin();
+				it2 != it->end(); ++it2)
+			{
+				if (*it2 == "fix_size")
+					m_fix_size = std::stoi(*(++it2));
+			}
 			GenerateComp(false);
+			Fixate(false);
 			//return;
 		}
 	}
@@ -1740,6 +1788,8 @@ void ComponentDlg::OnLoadCmd(wxCommandEvent &event)
 		{ params.push_back("clean_iter"); params.push_back(std::to_string(lval)); }
 		if (fconfig.Read("clean_size_vl", &lval))
 		{ params.push_back("clean_size_vl"); params.push_back(std::to_string(lval)); }
+		if (fconfig.Read("fix_size", &lval))
+		{ params.push_back("fix_size"); params.push_back(std::to_string(lval)); }
 		double dval;
 		if (fconfig.Read("thresh", &dval))
 		{ params.push_back("thresh"); params.push_back(std::to_string(dval)); }
@@ -1764,7 +1814,9 @@ void ComponentDlg::OnLoadCmd(wxCommandEvent &event)
 void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
 {
 	if (m_command.empty())
-		return;
+	{
+		AddCmd("generate");
+	}
 
 	wxFileDialog *fopendlg = new wxFileDialog(
 		m_frame, "Save a FluoRender component generator macro command",
@@ -1779,6 +1831,7 @@ void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
 	delete fopendlg;
 	wxFileConfig fconfig("", "", filename, "",
 		wxCONFIG_USE_LOCAL_FILE);
+	fconfig.DeleteAll();
 
 	int cmd_count = 0;
 
@@ -1808,7 +1861,8 @@ void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
 				*it2 == "density_stats_size" ||
 				*it2 == "cleanb" ||
 				*it2 == "clean_iter" ||
-				*it2 == "clean_size_vl")
+				*it2 == "clean_size_vl" ||
+				*it2 == "fix_size")
 			{
 				fconfig.Write(*it2, std::stoi(*(++it2)));
 			}
@@ -2674,7 +2728,7 @@ void ComponentDlg::GenerateComp(bool command)
 	if (m_fixate && vd->GetLabel(false))
 	{
 		vd->LoadLabel2();
-		cg.SetIDBit(m_iter);
+		cg.SetIDBit(m_fix_size);
 	}
 	else
 	{
