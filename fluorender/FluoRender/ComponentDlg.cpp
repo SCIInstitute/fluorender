@@ -242,7 +242,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer1->Add(2, 2);
 
 	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Threshold:",
+	st = new wxStaticText(page, 0, "Int. Threshold:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_thresh_sldr = new wxSlider(page, ID_ThreshSldr, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
@@ -261,7 +261,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer3->Add(m_diff_check, 0, wxALIGN_CENTER);
 
 	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Falloff:",
+	st = new wxStaticText(page, 0, "Smoothness:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_falloff_sldr = new wxSlider(page, ID_FalloffSldr, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
@@ -292,7 +292,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer5->Add(m_density_check, 0, wxALIGN_CENTER);
 	//
 	wxBoxSizer* sizer6 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Density Control:",
+	st = new wxStaticText(page, 0, "Separation:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_density_sldr = new wxSlider(page, ID_DensitySldr, 1000, 0, 5000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
@@ -305,7 +305,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer6->Add(2, 2);
 
 	wxBoxSizer* sizer7 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Window Size:",
+	st = new wxStaticText(page, 0, "Filter:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_density_window_size_sldr = new wxSlider(page, ID_DensityWindowSizeSldr, 5, 1, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
@@ -318,7 +318,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer7->Add(2, 2);
 
 	wxBoxSizer* sizer8 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Stats Size:",
+	st = new wxStaticText(page, 0, "Feature Size:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_density_stats_size_sldr = new wxSlider(page, ID_DensityStatsSizeSldr, 15, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
@@ -337,7 +337,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer9->Add(2, 2);
 	sizer9->Add(m_use_dist_field_check, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer10 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Strength",
+	st = new wxStaticText(page, 0, "Strength:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_dist_strength_sldr = new wxSlider(page, ID_DistStrengthSldr, 500, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
@@ -349,7 +349,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer10->Add(m_dist_strength_text, 0, wxALIGN_CENTER);
 	sizer10->Add(2, 2);
 	wxBoxSizer* sizer11 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Threshold",
+	st = new wxStaticText(page, 0, "Perim. Value:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_dist_thresh_sldr = new wxSlider(page, ID_DistThreshSldr, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
@@ -361,7 +361,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer11->Add(m_dist_thresh_text, 0, wxALIGN_CENTER);
 	sizer11->Add(2, 2);
 	wxBoxSizer* sizer12 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Max Distance",
+	st = new wxStaticText(page, 0, "Max Distance:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_max_dist_sldr = new wxSlider(page, ID_MaxDistSldr, 30, 1, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
@@ -385,7 +385,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer13->Add(m_fix_update_btn, 0, wxALIGN_CENTER);
 	sizer13->Add(2, 2);
 	wxBoxSizer* sizer14 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Size Threshold",
+	st = new wxStaticText(page, 0, "Stop Size:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_fix_size_sldr = new wxSlider(page, ID_FixSizeSldr, 50, 1, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
@@ -424,7 +424,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer16->Add(2, 2);
 	//iterations
 	wxBoxSizer* sizer17 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Size:",
+	st = new wxStaticText(page, 0, "Stop Size:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_clean_limit_sldr = new wxSlider(page, ID_CleanLimitSldr, 5, 1, 50,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
@@ -473,7 +473,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer19->Add(2, 2);
 
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "ID Growth && Merge"), wxVERTICAL);
+		new wxStaticBox(page, wxID_ANY, "Region Growth && Merge"), wxVERTICAL);
 	group1->Add(5, 5);
 	group1->Add(sizer1, 0, wxEXPAND);
 	group1->Add(5, 5);
