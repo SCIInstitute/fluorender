@@ -36,7 +36,6 @@ const char* str_cl_slice_brainbow = \
 "	float vv_f,\n" \
 "	float av_f)\n" \
 "{\n" \
-"	atomic_inc(rcnt);\n" \
 "	int2 coord = (int2)(get_global_id(0),\n" \
 "		get_global_id(1));\n" \
 "	unsigned int index = nx*coord.y + coord.x;\n" \
@@ -86,6 +85,7 @@ const char* str_cl_slice_brainbow = \
 "		(av_f>0.0f?(angle_var>sqrt(av_f)*2.12f?0.0f:exp(-angle_var*angle_var/av_f)):1.0f);\n" \
 "	\n" \
 "	//max filter\n" \
+"	atomic_inc(rcnt);\n" \
 "	float random = (float)((*rcnt) % seed)/(float)(seed)+0.001f;\n" \
 "	if (stop < random)\n" \
 "		return;\n" \
@@ -282,13 +282,13 @@ const char* str_cl_brainbow_3d = \
 "	float grad_f,\n" \
 "	float sscale)\n" \
 "{\n" \
-"	atomic_inc(rcnt);\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
 "	unsigned int index = nx*ny*coord.z + nx*coord.y + coord.x;\n" \
 "	unsigned int label_v = label[index];\n" \
 "	if (label_v == 0)\n" \
 "		return;\n" \
+"	atomic_inc(rcnt);\n" \
 "	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
 "	value *= sscale;\n" \
 "	float grad = length(sscale * vol_grad_func(data, (int4)(coord, 1)));\n" \
@@ -450,7 +450,6 @@ const char* str_cl_brainbow_3d_sized = \
 "	float density,\n" \
 "	int dsize)\n" \
 "{\n" \
-"	atomic_inc(rcnt);\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
 "	unsigned int index = nx*ny*coord.z + nx*coord.y + coord.x;\n" \
@@ -472,6 +471,7 @@ const char* str_cl_brainbow_3d_sized = \
 "		(value>value_t?1.0f:(value_f>0.0f?(value<value_t-sqrt(value_f)*2.12f?0.0f:exp(-(value-value_t)*(value-value_t)/value_f)):0.0f));\n" \
 "	\n" \
 "	//max filter\n" \
+"	atomic_inc(rcnt);\n" \
 "	float random = (float)((*rcnt) % seed)/(float)(seed)+0.001f;\n" \
 "	if (stop < random)\n" \
 "		return;\n" \
@@ -943,16 +943,16 @@ const char* str_cl_grow_size = \
 "	float av_f,\n" \
 "	unsigned int thresh)\n" \
 "{\n" \
-"	atomic_inc(rcnt);\n" \
 "	int2 coord = (int2)(get_global_id(0),\n" \
 "		get_global_id(1));\n" \
 "	unsigned int index = nx*coord.y + coord.x;\n" \
-"	//break if large enough\n" \
-"	if (mask[index] > thresh)\n" \
-"		return;\n" \
 "	unsigned int label_v = label[index];\n" \
 "	if (label_v == 0)\n" \
 "		return;\n" \
+"	//break if large enough\n" \
+"	if (mask[index] > thresh)\n" \
+"		return;\n" \
+"	atomic_inc(rcnt);\n" \
 "	float value = read_imagef(data, samp, coord).x;\n" \
 "	float grad = length(vol_grad_func(data, coord));\n" \
 "	//measures\n" \
@@ -1588,7 +1588,6 @@ const char* str_cl_density_grow_3d = \
 "	float density,\n" \
 "	float sscale)\n" \
 "{\n" \
-"	atomic_inc(rcnt);\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
 "	unsigned int index = nx*ny*coord.z + nx*coord.y + coord.x;\n" \
@@ -1614,6 +1613,7 @@ const char* str_cl_density_grow_3d = \
 "		(value>value_t?1.0f:(value_f>0.0f?(value<value_t-sqrt(value_f)*2.12f?0.0f:exp(-(value-value_t)*(value-value_t)/value_f)):0.0f));\n" \
 "	\n" \
 "	//max filter\n" \
+"	atomic_inc(rcnt);\n" \
 "	float random = (float)((*rcnt) % seed)/(float)(seed)+0.001f;\n" \
 "	if (stop < random)\n" \
 "		return;\n" \
@@ -1674,13 +1674,13 @@ const char* str_cl_dist_grow_3d = \
 "	float sscale,\n" \
 "	float dist_strength)\n" \
 "{\n" \
-"	atomic_inc(rcnt);\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
 "	unsigned int index = nx*ny*coord.z + nx*coord.y + coord.x;\n" \
 "	unsigned int label_v = label[index];\n" \
 "	if (label_v == 0)\n" \
 "		return;\n" \
+"	atomic_inc(rcnt);\n" \
 "	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
 "	value *= sscale;\n" \
 "	float distv = distf[index] / 255.0;\n" \

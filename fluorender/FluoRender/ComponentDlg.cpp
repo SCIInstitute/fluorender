@@ -40,6 +40,9 @@ DEALINGS IN THE SOFTWARE.
 #include <cctype>
 #include <set>
 #include <fstream>
+#include <boost/chrono.hpp>
+
+using namespace boost::chrono;
 
 BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	//EVT_COLLAPSIBLEPANE_CHANGED(wxID_ANY, ComponentDlg::OnPaneChange)
@@ -2722,6 +2725,7 @@ void ComponentDlg::GenerateComp(bool command)
 	//boost::signals2::connection connection =
 	//	cg.m_sig_progress.connect(boost::bind(
 	//		&ComponentDlg::UpdateProgress, this));
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
 	cg.SetUseMask(m_use_sel_chk->GetValue());
 
@@ -2786,6 +2790,13 @@ void ComponentDlg::GenerateComp(bool command)
 
 	if (bn > 1)
 		cg.FillBorder3D(0.1);
+
+	high_resolution_clock::time_point t2 = high_resolution_clock::now();
+	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+	wxString str = "OpenCL time: ";
+	str += wxString::Format("%.4f", time_span.count());
+	str += " sec.\n";
+	m_stat_text->SetValue(str);
 
 	vd->GetVR()->clear_tex_current();
 	m_view->RefreshGL();
