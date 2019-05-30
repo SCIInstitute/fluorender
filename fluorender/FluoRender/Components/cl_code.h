@@ -89,7 +89,6 @@ const char* str_cl_slice_brainbow = \
 "	float random = (float)((*rcnt) % seed)/(float)(seed)+0.001f;\n" \
 "	if (stop < random)\n" \
 "		return;\n" \
-"	unsigned int label_value = label[index];\n" \
 "	int2 max_nb_coord = coord;\n" \
 "	unsigned int nb_index;\n" \
 "	unsigned int m;\n" \
@@ -99,9 +98,9 @@ const char* str_cl_slice_brainbow = \
 "		nb_coord = (int2)(coord.x+i, coord.y+j);\n" \
 "		nb_index = nx*nb_coord.y + nb_coord.x;\n" \
 "		m = label[nb_index];\n" \
-"		if (m > label_value)\n" \
+"		if (m > label_v)\n" \
 "		{\n" \
-"			label_value = m;\n" \
+"			label_v = m;\n" \
 "			max_nb_coord = nb_coord;\n" \
 "		}\n" \
 "	}\n" \
@@ -113,7 +112,7 @@ const char* str_cl_slice_brainbow = \
 "			return;\n" \
 "	}\n" \
 "\n" \
-"	label[index] = label_value;\n" \
+"	atomic_xchg(label+index, label_v);\n" \
 "}\n";
 
 const char* str_cl_cleanup_3d = \
@@ -168,7 +167,7 @@ const char* str_cl_cleanup_3d = \
 "	y = reverse_bit(y, lenx);\n" \
 "	z = reverse_bit(z, lenz);\n" \
 "	index = nx*ny*z + nx*y + x;\n" \
-"	atomic_inc(&(mask[index]));\n" \
+"	atomic_inc(mask+index);\n" \
 "}\n" \
 "__kernel void kernel_1(\n" \
 "	__global unsigned int* mask,\n" \
@@ -202,7 +201,7 @@ const char* str_cl_cleanup_3d = \
 "	z = reverse_bit(z, lenz);\n" \
 "	unsigned int index2 = nx*ny*z + nx*y + x;\n" \
 "	if (index != index2)\n" \
-"		mask[index] = mask[index2];\n" \
+"		atomic_xchg(mask+index, mask[index2]);\n" \
 "}\n" \
 "__kernel void kernel_2(\n" \
 "	__read_only image3d_t data,\n" \
@@ -247,7 +246,7 @@ const char* str_cl_cleanup_3d = \
 "		}\n" \
 "	}\n" \
 "	if (min_dist < 10)\n" \
-"		label[index] = label[max_nb_index];\n" \
+"		atomic_xchg(label+index, label[max_nb_index]);\n" \
 "}\n" \
 ;
 
@@ -286,7 +285,7 @@ const char* str_cl_brainbow_3d = \
 "		get_global_id(1), get_global_id(2));\n" \
 "	unsigned int index = nx*ny*coord.z + nx*coord.y + coord.x;\n" \
 "	unsigned int label_v = label[index];\n" \
-"	if (label_v == 0)\n" \
+"	if (label_v == 0 || label_v & 0x80000000)\n" \
 "		return;\n" \
 "	atomic_inc(rcnt);\n" \
 "	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
@@ -300,9 +299,6 @@ const char* str_cl_brainbow_3d = \
 "	//max filter\n" \
 "	float random = (float)((*rcnt) % seed)/(float)(seed)+0.001f;\n" \
 "	if (stop < random)\n" \
-"		return;\n" \
-"	unsigned int label_value = label[index];\n" \
-"	if (label_value & 0x80000000)\n" \
 "		return;\n" \
 "	int3 nb_coord;\n" \
 "	unsigned int nb_index;\n" \
@@ -318,10 +314,10 @@ const char* str_cl_brainbow_3d = \
 "			continue;\n" \
 "		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
 "		m = label[nb_index];\n" \
-"		if (m > label_value)\n" \
-"			label_value = m;\n" \
+"		if (m > label_v)\n" \
+"			label_v = m;\n" \
 "	}\n" \
-"	label[index] = label_value;\n" \
+"	atomic_xchg(label+index, label_v);\n" \
 "}\n" \
 ;
 
@@ -398,7 +394,7 @@ const char* str_cl_brainbow_3d_sized = \
 "	y = reverse_bit(y, lenx);\n" \
 "	z = reverse_bit(z, lenz);\n" \
 "	index = nx*ny*z + nx*y + x;\n" \
-"	atomic_inc(&(mask[index]));\n" \
+"	atomic_inc(mask+index);\n" \
 "}\n" \
 "__kernel void kernel_1(\n" \
 "	__global unsigned int* mask,\n" \
@@ -432,7 +428,7 @@ const char* str_cl_brainbow_3d_sized = \
 "	z = reverse_bit(z, lenz);\n" \
 "	unsigned int index2 = nx*ny*z + nx*y + x;\n" \
 "	if (index != index2)\n" \
-"		mask[index] = mask[index2];\n" \
+"		atomic_xchg(mask+index, mask[index2]);\n" \
 "}\n" \
 "__kernel void kernel_2(\n" \
 "	__read_only image3d_t data,\n" \
@@ -475,7 +471,6 @@ const char* str_cl_brainbow_3d_sized = \
 "	float random = (float)((*rcnt) % seed)/(float)(seed)+0.001f;\n" \
 "	if (stop < random)\n" \
 "		return;\n" \
-"	unsigned int label_value = label[index];\n" \
 "	int3 nb_coord;\n" \
 "	unsigned int nb_index;\n" \
 "	unsigned int m;\n" \
@@ -490,10 +485,10 @@ const char* str_cl_brainbow_3d_sized = \
 "			continue;\n" \
 "		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
 "		m = label[nb_index];\n" \
-"		if (m > label_value)\n" \
-"			label_value = m;\n" \
+"		if (m > label_v)\n" \
+"			label_v = m;\n" \
 "	}\n" \
-"	label[index] = label_value;\n" \
+"	atomic_xchg(label+index, label_v);\n" \
 "}\n" \
 ;
 
@@ -518,7 +513,7 @@ const char* str_cl_clear_borders_3d = \
 "	if (i == 0 || i == nx-1 ||\n" \
 "		j == 0 || j == ny-1 ||\n" \
 "		k == 0 || k == nz-1)\n" \
-"		label[index] = 0;\n" \
+"		atomic_xchg(label+index, 0);\n" \
 "}\n";
 
 const char* str_cl_clear_borders_2d = \
@@ -539,7 +534,7 @@ const char* str_cl_clear_borders_2d = \
 "	unsigned int index = nx*j + i;\n" \
 "	if (i == 0 || i == nx-1 ||\n" \
 "		j == 0 || j == ny-1)\n" \
-"		label[index] = 0;\n" \
+"		atomic_xchg(label+index, 0);\n" \
 "}\n";
 
 const char* str_cl_fill_borders_3d = \
@@ -567,7 +562,7 @@ const char* str_cl_fill_borders_3d = \
 "		{\n" \
 "			unsigned int index = nx*ny*k + nx*j + i;\n" \
 "			unsigned int nb_index = index + 1;\n" \
-"			label[index] = label[nb_index];\n" \
+"			atomic_xchg(label+index, label[nb_index]);\n" \
 "		}\n" \
 "	}\n" \
 "	if (j == 0)\n" \
@@ -578,7 +573,7 @@ const char* str_cl_fill_borders_3d = \
 "		{\n" \
 "			unsigned int index = nx*ny*k + nx*j + i;\n" \
 "			unsigned int nb_index = index + nx;\n" \
-"			label[index] = label[nb_index];\n" \
+"			atomic_xchg(label+index, label[nb_index]);\n" \
 "		}\n" \
 "	}\n" \
 "	if (k == 0)\n" \
@@ -589,7 +584,7 @@ const char* str_cl_fill_borders_3d = \
 "		{\n" \
 "			unsigned int index = nx*ny*k + nx*j + i;\n" \
 "			unsigned int nb_index = index + nx*ny;\n" \
-"			label[index] = label[nb_index];\n" \
+"			atomic_xchg(label+index, label[nb_index]);\n" \
 "		}\n" \
 "	}\n" \
 "}\n";
@@ -617,7 +612,7 @@ const char* str_cl_fill_borders_2d = \
 "		{\n" \
 "			unsigned int index = nx*j + i;\n" \
 "			unsigned int nb_index = index + 1;\n" \
-"			label[index] = label[nb_index];\n" \
+"			atomic_xchg(label+index, label[nb_index]);\n" \
 "		}\n" \
 "	}\n" \
 "	if (j == 0)\n" \
@@ -628,7 +623,7 @@ const char* str_cl_fill_borders_2d = \
 "		{\n" \
 "			unsigned int index = nx*j + i;\n" \
 "			unsigned int nb_index = index + nx;\n" \
-"			label[index] = label[nb_index];\n" \
+"			atomic_xchg(label+index, label[nb_index]);\n" \
 "		}\n" \
 "	}\n" \
 "}\n";
@@ -672,10 +667,10 @@ const char* str_cl_shuffle_id_3d = \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
 "	if (value < 0.001)\n" \
-"		label[index] = 0;\n" \
+"		atomic_xchg(label+index, 0);\n" \
 "	else if (i<1 || i>nx-2 ||\n" \
 "			j<1 || j>ny-2)\n" \
-"		label[index] = 0;\n" \
+"		atomic_xchg(label+index, 0);\n" \
 "	else\n" \
 "	{\n" \
 "		x = reverse_bit(i, lenx);\n" \
@@ -688,7 +683,7 @@ const char* str_cl_shuffle_id_3d = \
 "			res |= (1<<ii & y)<<(ii+1);\n" \
 "		}\n" \
 "		res |= z<<lenx*2;\n" \
-"		label[index] = res + 1;\n" \
+"		atomic_xchg(label+index, res + 1);\n" \
 "	}\n" \
 "}\n" \
 "__kernel void kernel_1(\n" \
@@ -723,15 +718,15 @@ const char* str_cl_shuffle_id_3d = \
 "		dot(pt, p4.xyz)+p4.w < 0.0 ||\n" \
 "		dot(pt, p5.xyz)+p5.w < 0.0)\n" \
 "	{\n" \
-"		label[index] = 0;\n" \
+"		atomic_xchg(label+index, 0);\n" \
 "		return;\n" \
 "	}\n" \
 "	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
 "	if (value < 0.001)\n" \
-"		label[index] = 0;\n" \
+"		atomic_xchg(label+index, 0);\n" \
 "	else if (i<1 || i>nx-2 ||\n" \
 "			j<1 || j>ny-2)\n" \
-"		label[index] = 0;\n" \
+"		atomic_xchg(label+index, 0);\n" \
 "	else\n" \
 "	{\n" \
 "		x = reverse_bit(i, lenx);\n" \
@@ -744,7 +739,7 @@ const char* str_cl_shuffle_id_3d = \
 "			res |= (1<<ii & y)<<(ii+1);\n" \
 "		}\n" \
 "		res |= z<<lenx*2;\n" \
-"		label[index] = res + 1;\n" \
+"		atomic_xchg(label+index, res + 1);\n" \
 "	}\n" \
 "}\n" \
 ;
@@ -769,12 +764,12 @@ const char* str_cl_order_id_2d = \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
 "	if (value < 0.001)\n" \
-"		label[index] = 0;\n" \
+"		atomic_xchg(label+index, 0);\n" \
 "	else if (i<1 || i>nx-2 ||\n" \
 "			j<1 || j>ny-2)\n" \
-"		label[index] = 0;\n" \
+"		atomic_xchg(label+index, 0);\n" \
 "	else\n" \
-"		label[index] = index + 1;\n" \
+"		atomic_xchg(label+index, index + 1);\n" \
 "}\n";
 
 const char* str_cl_shuffle_id_2d = \
@@ -814,10 +809,10 @@ const char* str_cl_shuffle_id_2d = \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
 "	if (value < 0.001)\n" \
-"		label[index] = 0;\n" \
+"		atomic_xchg(label+index, 0);\n" \
 "	else if (i<1 || i>nx-2 ||\n" \
 "			j<1 || j>ny-2)\n" \
-"		label[index] = 0;\n" \
+"		atomic_xchg(label+index, 0);\n" \
 "	else\n" \
 "	{\n" \
 "		x = reverse_bit(i, len);\n" \
@@ -829,7 +824,7 @@ const char* str_cl_shuffle_id_2d = \
 "			res |= (1<<ii & x)<<(ii);\n" \
 "			res |= (1<<ii & y)<<(ii+1);\n" \
 "		}\n" \
-"		label[index] = nx*ny - res;\n" \
+"		atomic_xchg(label+index, nx*ny - res);\n" \
 "	}\n" \
 "}\n";
 
@@ -898,7 +893,7 @@ const char* str_cl_grow_size = \
 "	x = reverse_bit(x, len);\n" \
 "	y = reverse_bit(y, len);\n" \
 "	index = nx*y + x;\n" \
-"	atomic_inc(&(mask[index]));\n" \
+"	atomic_inc(mask+index);\n" \
 "}\n" \
 "__kernel void kernel_1(\n" \
 "	__global unsigned int* mask,\n" \
@@ -926,7 +921,7 @@ const char* str_cl_grow_size = \
 "	y = reverse_bit(y, len);\n" \
 "	unsigned int index2 = nx*y + x;\n" \
 "	if (index != index2)\n" \
-"		mask[index] = mask[index2];\n" \
+"		atomic_xchg(mask+index, mask[index2]);\n" \
 "}\n" \
 "__kernel void kernel_2(\n" \
 "	__read_only image2d_t data,\n" \
@@ -999,7 +994,6 @@ const char* str_cl_grow_size = \
 "	float random = (float)((*rcnt) % seed)/(float)(seed)+0.001f;\n" \
 "	if (stop < random)\n" \
 "		return;\n" \
-"	unsigned int label_value = label[index];\n" \
 "	int2 max_nb_coord = coord;\n" \
 "	unsigned int nb_index;\n" \
 "	unsigned int m;\n" \
@@ -1009,9 +1003,9 @@ const char* str_cl_grow_size = \
 "		nb_coord = (int2)(coord.x+i, coord.y+j);\n" \
 "		nb_index = nx*nb_coord.y + nb_coord.x;\n" \
 "		m = label[nb_index];\n" \
-"		if (m > label_value)\n" \
+"		if (m > label_v)\n" \
 "		{\n" \
-"			label_value = m;\n" \
+"			label_v = m;\n" \
 "			max_nb_coord = nb_coord;\n" \
 "		}\n" \
 "	}\n" \
@@ -1023,7 +1017,7 @@ const char* str_cl_grow_size = \
 "			return;\n" \
 "	}\n" \
 "\n" \
-"	label[index] = label_value;\n" \
+"	atomic_xchg(label+index, label_v);\n" \
 "}\n";
 
 const char*str_cl_clean_up = \
@@ -1056,7 +1050,7 @@ const char*str_cl_clean_up = \
 "		}\n" \
 "	}\n" \
 "	if (max_size > 0)\n" \
-"		label[index] = label[max_nb_index];\n" \
+"		atomic_xchg(label+index, label[max_nb_index]);\n" \
 "}\n";
 
 const char* str_cl_match_slices = \
@@ -1592,7 +1586,7 @@ const char* str_cl_density_grow_3d = \
 "		get_global_id(1), get_global_id(2));\n" \
 "	unsigned int index = nx*ny*coord.z + nx*coord.y + coord.x;\n" \
 "	unsigned int label_v = label[index];\n" \
-"	if (label_v == 0)\n" \
+"	if (label_v == 0 || label_v & 0x80000000)\n" \
 "		return;\n" \
 "	//break if low density\n" \
 "	if (density > 0.0f)\n" \
@@ -1617,9 +1611,6 @@ const char* str_cl_density_grow_3d = \
 "	float random = (float)((*rcnt) % seed)/(float)(seed)+0.001f;\n" \
 "	if (stop < random)\n" \
 "		return;\n" \
-"	unsigned int label_value = label[index];\n" \
-"	if (label_value & 0x80000000)\n" \
-"		return;\n" \
 "	int3 nb_coord;\n" \
 "	unsigned int nb_index;\n" \
 "	unsigned int m;\n" \
@@ -1634,10 +1625,10 @@ const char* str_cl_density_grow_3d = \
 "			continue;\n" \
 "		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
 "		m = label[nb_index];\n" \
-"		if (m > label_value)\n" \
-"			label_value = m;\n" \
+"		if (m > label_v)\n" \
+"			label_v = m;\n" \
 "	}\n" \
-"	label[index] = label_value;\n" \
+"	atomic_xchg(label+index, label_v);\n" \
 "}\n" \
 ;
 
@@ -1678,7 +1669,7 @@ const char* str_cl_dist_grow_3d = \
 "		get_global_id(1), get_global_id(2));\n" \
 "	unsigned int index = nx*ny*coord.z + nx*coord.y + coord.x;\n" \
 "	unsigned int label_v = label[index];\n" \
-"	if (label_v == 0)\n" \
+"	if (label_v == 0 || label_v & 0x80000000)\n" \
 "		return;\n" \
 "	atomic_inc(rcnt);\n" \
 "	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
@@ -1695,9 +1686,6 @@ const char* str_cl_dist_grow_3d = \
 "	float random = (float)((*rcnt) % seed)/(float)(seed)+0.001f;\n" \
 "	if (stop < random)\n" \
 "		return;\n" \
-"	unsigned int label_value = label[index];\n" \
-"	if (label_value & 0x80000000)\n" \
-"		return;\n" \
 "	int3 nb_coord;\n" \
 "	unsigned int nb_index;\n" \
 "	unsigned int m;\n" \
@@ -1712,10 +1700,10 @@ const char* str_cl_dist_grow_3d = \
 "			continue;\n" \
 "		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
 "		m = label[nb_index];\n" \
-"		if (m > label_value)\n" \
-"			label_value = m;\n" \
+"		if (m > label_v)\n" \
+"			label_v = m;\n" \
 "	}\n" \
-"	label[index] = label_value;\n" \
+"	atomic_xchg(label+index, label_v);\n" \
 "}\n" \
 ;
 
@@ -1771,7 +1759,7 @@ const char* str_cl_set_bit_3d = \
 "	y = reverse_bit(y, lenx);\n" \
 "	z = reverse_bit(z, lenz);\n" \
 "	index = nx*ny*z + nx*y + x;\n" \
-"	atomic_inc(&(mask[index]));\n" \
+"	atomic_inc(mask+index);\n" \
 "}\n" \
 "__kernel void kernel_1(\n" \
 "	__global unsigned int* mask,\n" \
