@@ -1734,7 +1734,7 @@ void ComponentGenerator::MatchSlices_CPU(bool backwards, unsigned int size_thres
 	m_sig_progress();
 }
 
-void ComponentGenerator::DistField3D(int max_dist, float th)
+void ComponentGenerator::DistField3D(int max_dist, float th, int dsize, float sscale)
 {
 	CHECK_BRICKS
 
@@ -1789,8 +1789,12 @@ void ComponentGenerator::DistField3D(int max_dist, float th)
 		kernel_prog->setKernelArgConst(kernel_index0, 4,
 			sizeof(unsigned int), (void*)(&nz));
 		kernel_prog->setKernelArgConst(kernel_index0, 5,
-			sizeof(float), (void*)(&th));
+			sizeof(int), (void*)(&dsize));
 		kernel_prog->setKernelArgConst(kernel_index0, 6,
+			sizeof(float), (void*)(&th));
+		kernel_prog->setKernelArgConst(kernel_index0, 7,
+			sizeof(float), (void*)(&sscale));
+		kernel_prog->setKernelArgConst(kernel_index0, 8,
 			sizeof(unsigned char), (void*)(&ini));
 		//kernel 1
 		arg_df.kernel_index = kernel_index1;
@@ -2085,8 +2089,8 @@ void ComponentGenerator::DensityField3D(int dsize, int wsize,
 
 void ComponentGenerator::DistDensityField3D(
 	bool diffuse, int iter, float tran, float falloff,
-	int max_dist, float dist_thresh, float dist_strength,
-	int dsize, int wsize, float density, float sscale)
+	int dsize1, int max_dist, float dist_thresh, float dist_strength,
+	int dsize2, int wsize, float density, float sscale)
 {
 	//debug
 #ifdef _DEBUG
@@ -2166,10 +2170,12 @@ void ComponentGenerator::DistDensityField3D(
 		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 4,
 			sizeof(unsigned int), (void*)(&nz));
 		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 5,
-			sizeof(float), (void*)(&dist_thresh));
+			sizeof(int), (void*)(&dsize1));
 		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 6,
-			sizeof(float), (void*)(&sscale));
+			sizeof(float), (void*)(&dist_thresh));
 		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 7,
+			sizeof(float), (void*)(&sscale));
+		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 8,
 			sizeof(unsigned char), (void*)(&ini));
 		//kernel 1
 		arg_distf.kernel_index = kernel_dist_index1;
@@ -2240,7 +2246,7 @@ void ComponentGenerator::DistDensityField3D(
 		kernel_prog_dens->setKernelArgConst(kernel_dens_index0, 6,
 			sizeof(unsigned int), (void*)(&dnx));
 		kernel_prog_dens->setKernelArgConst(kernel_dens_index0, 7,
-			sizeof(int), (void*)(&dsize));
+			sizeof(int), (void*)(&dsize2));
 		kernel_prog_dens->setKernelArgConst(kernel_dens_index0, 8,
 			sizeof(float), (void*)(&sscale));
 		kernel_prog_dens->setKernelArgConst(kernel_dens_index0, 9,
@@ -2413,8 +2419,8 @@ void ComponentGenerator::DistDensityField3D(
 }
 
 void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
-	float tran, float falloff, int max_dist, float dist_thresh,
-	float sscale, float dist_strength)
+	float tran, float falloff, int dsize, int max_dist,
+	float dist_thresh, float sscale, float dist_strength)
 {
 	//debug
 #ifdef _DEBUG
@@ -2485,10 +2491,12 @@ void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
 		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 4,
 			sizeof(unsigned int), (void*)(&nz));
 		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 5,
-			sizeof(float), (void*)(&dist_thresh));
+			sizeof(int), (void*)(&dsize));
 		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 6,
-			sizeof(float), (void*)(&sscale));
+			sizeof(float), (void*)(&dist_thresh));
 		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 7,
+			sizeof(float), (void*)(&sscale));
+		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 8,
 			sizeof(unsigned char), (void*)(&ini));
 		//kernel 1
 		arg_distf.kernel_index = kernel_dist_index1;

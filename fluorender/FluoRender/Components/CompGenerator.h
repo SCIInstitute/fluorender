@@ -87,12 +87,13 @@ namespace FL
 		void DensityField3D(int dsize, int wsize,
 			bool diffuse, int iter, float tran, float falloff,
 			float density, float sscale);
-		void DistField3D(int iter, float th);
+		void DistField3D(int iter, float th, int dsize, float sscale);
 		void DistDensityField3D(
 			bool diffuse, int iter, float tran, float falloff,
-			int max_dist, float dist_thresh, float dist_strength,
-			int dsize, int wsize, float density, float sscale);
-		void DistGrow3D(bool, int, float, float, int, float, float, float);
+			int dsize1, int max_dist, float dist_thresh, float dist_strength,
+			int dsize2, int wsize, float density, float sscale);
+		void DistGrow3D(bool, int,
+			float, float, int, int, float, float, float);
 		void SetIDBit(int);
 
 		//update progress
