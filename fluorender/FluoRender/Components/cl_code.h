@@ -1215,6 +1215,7 @@ const char* str_cl_dist_field_2d = \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
 "	unsigned int nz,\n" \
+"	int dsize,\n" \
 "	float th,\n" \
 "	float sscale,\n" \
 "	unsigned char ini)\n" \
@@ -1229,7 +1230,7 @@ const char* str_cl_dist_field_2d = \
 "		return;\n" \
 "	}\n" \
 "	//float dval = read_imagef(data, samp, (int4)(ijk, 1)).x;\n" \
-"	float dval = get_2d_density(data, (int4)(ijk, 1), 2);\n" \
+"	float dval = get_2d_density(data, (int4)(ijk, 1), dsize);\n" \
 "	dval *= sscale;\n" \
 "	if (dval > th)\n" \
 "		df[index] = ini;\n" \

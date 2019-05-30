@@ -2746,8 +2746,9 @@ void ComponentDlg::GenerateComp(bool command)
 		{
 			cg.DistDensityField3D(
 				m_diff, m_iter,
-				m_thresh ,
+				m_thresh,
 				m_falloff,
+				dsize,
 				m_max_dist,
 				m_dist_thresh,
 				m_dist_strength,
@@ -2761,6 +2762,7 @@ void ComponentDlg::GenerateComp(bool command)
 				m_diff, m_iter,
 				m_thresh,
 				m_falloff ,
+				dsize,
 				m_max_dist,
 				m_dist_thresh,
 				scale,
