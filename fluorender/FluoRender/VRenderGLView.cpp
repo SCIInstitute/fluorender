@@ -11141,12 +11141,6 @@ void VRenderGLView::AddRulerPoint(int mx, int my)
 				if (m_ruler_type == 5)
 				{
 					//finish
-					//Transform mv;
-					//mv.set(glm::value_ptr(m_mv_mat));
-					//Vector view(0, 0, -1);
-					//view = mv.project(view);
-					//Vector view(m_mv_mat[2][0], -m_mv_mat[2][1], m_mv_mat[2][2]);
-					//HandleCamera();
 					glm::mat4 mv_temp;
 					//translate object
 					mv_temp = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
@@ -11159,7 +11153,6 @@ void VRenderGLView::AddRulerPoint(int mx, int my)
 					glm::vec4 axis(0, 0, -1, 0);
 					axis = glm::transpose(mv_temp) * axis;
 					ruler->FinishEllipse(Vector(axis[0], axis[1], axis[2]));
-					//ruler->FinishEllipse(Vector(mv_temp[2][0], mv_temp[2][1], mv_temp[2][2]));
 				}
 			}
 		}
@@ -11302,7 +11295,7 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 					pps[1] = *(ruler->GetPoint(1));
 					pps[2] = *(ruler->GetPoint(2));
 					pps[3] = *(ruler->GetPoint(3));
-					Point ppc = Point((pps[0] + pps[1]) / 2.0);
+					Point ppc = ruler->GetCenter();
 					double ra, rb;
 					ra = (pps[0] - pps[1]).length() / 2.0;
 					rb = (pps[2] - pps[3]).length() / 2.0;
@@ -11334,8 +11327,7 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 						num += 8;
 					}
 					//draw center
-					p1 = ruler->GetCenter();
-					p1 = mv.transform(p1);
+					p1 = mv.transform(ppc);
 					p1 = p.transform(p1);
 					if ((m_persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
 						(!m_persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
@@ -11351,11 +11343,57 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 					verts.push_back(px); verts.push_back(py + w); verts.push_back(0.0);
 					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 					num += 4;
+					//draw arcs
+					int sec = 20;
+					//arc 02
+					Vector v0 = pps[0] - ppc;
+					double lv0 = v0.length();
+					Vector v1 = pps[2] - ppc;
+					double lv1 = v1.length();
+					Vector axis = Cross(v0, v1);
+					axis.normalize();
+					Quaternion q0(v0);
+					p1 = pps[0];
+					for (int i = 1; i <= sec; ++i)
+					{
+						double theta = 90.0 * i / sec;
+						double rth = d2r(theta);
+						Quaternion q(theta, axis);
+						q.Normalize();
+						Quaternion q2 = (-q) * q0 * q;
+						Vector vp2 = Vector(q2.x, q2.y, q2.z);
+						vp2.normalize();
+						vp2 *= lv0 * lv1 / (sqrt(lv1*lv1*cos(rth)*cos(rth) + lv0 * lv0*sin(rth)*sin(rth)));
+						p2 = Point(vp2);
+						p2 = ppc + Vector(p2);
+						if (i == 1)
+						{
+							p1 = mv.transform(p1);
+							p1 = p.transform(p1);
+						}
+						if ((m_persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
+							(!m_persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
+							continue;
+						p2 = mv.transform(p2);
+						p2 = p.transform(p2);
+						if ((m_persp && (p2.z() <= 0.0 || p2.z() >= 1.0)) ||
+							(!m_persp && (p2.z() >= 0.0 || p2.z() <= -1.0)))
+							continue;
+						px = (p1.x() + 1.0)*nx / 2.0;
+						py = (p1.y() + 1.0)*ny / 2.0;
+						verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						px = (p2.x() + 1.0)*nx / 2.0;
+						py = (p2.y() + 1.0)*ny / 2.0;
+						verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						num += 2;
+						p1 = p2;
+					}
 				}
 			}
 			else
 			{
-
 				for (size_t j = 0; j < ruler->GetNumPoint(); ++j)
 				{
 					p2 = *(ruler->GetPoint(j));

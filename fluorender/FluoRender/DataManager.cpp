@@ -3552,15 +3552,16 @@ void Ruler::FinishEllipse(Vector view)
 	if (m_ruler_type != 5 || m_ruler.size() != 2)
 		return;
 
-	view.normalize();
 	Point p0 = m_ruler[0];
 	Point p1 = m_ruler[1];
 	Vector p01 = p0 - p1;
-	p01.normalize();
-	Vector axis = Cross(p01, Cross(p01, view));
+	Vector axis = Cross(p01, view);
+	axis.normalize();
+	axis = Cross(p01, axis);
+	axis.normalize();
 	Point p2, p3, pc;
 	pc = Point((p0 + p1) / 2.0);
-    Vector halfd = p0 - pc;
+	Vector halfd = p0 - pc;
 	Quaternion q0(halfd);
 	Quaternion q(90.0, axis);
 	q.Normalize();
