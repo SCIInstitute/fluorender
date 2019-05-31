@@ -1820,6 +1820,8 @@ void ComponentDlg::OnLoadCmd(wxCommandEvent &event)
 		{ params.push_back("iter"); params.push_back(std::to_string(lval)); }
 		if (fconfig.Read("use_dist_field", &lval))
 		{ params.push_back("use_dist_field"); params.push_back(std::to_string(lval)); }
+		if (fconfig.Read("dist_filter_size", &lval))
+		{ params.push_back("dist_filter_size"); params.push_back(std::to_string(lval)); }
 		if (fconfig.Read("max_dist", &lval))
 		{ params.push_back("max_dist"); params.push_back(std::to_string(lval)); }
 		if (fconfig.Read("diff", &lval))
@@ -1902,6 +1904,7 @@ void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
 		{
 			if (*it2 == "iter" ||
 				*it2 == "use_dist_field" ||
+				*it2 == "dist_filter_size" ||
 				*it2 == "max_dist" ||
 				*it2 == "diff" ||
 				*it2 == "density" ||
