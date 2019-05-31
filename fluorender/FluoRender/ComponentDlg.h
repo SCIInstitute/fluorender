@@ -64,6 +64,8 @@ public:
 		ID_UseDistFieldCheck,
 		ID_DistStrengthSldr,
 		ID_DistStrengthText,
+		ID_DistFilterSizeSldr,
+		ID_DistFilterSizeText,
 		ID_MaxDistSldr,
 		ID_MaxDistText,
 		ID_DistThreshSldr,
@@ -213,6 +215,7 @@ private:
 	//distance field
 	bool m_use_dist_field;
 	double m_dist_strength;
+	int m_dist_filter_size;
 	int m_max_dist;
 	double m_dist_thresh;
 	//diffusion
@@ -289,6 +292,8 @@ private:
 	wxCheckBox* m_use_dist_field_check;
 	wxSlider* m_dist_strength_sldr;
 	wxTextCtrl* m_dist_strength_text;
+	wxSlider* m_dist_filter_size_sldr;
+	wxTextCtrl* m_dist_filter_size_text;
 	wxSlider* m_max_dist_sldr;
 	wxTextCtrl* m_max_dist_text;
 	wxSlider* m_dist_thresh_sldr;
@@ -405,14 +410,18 @@ private:
 	void OnIterText(wxCommandEvent &event);
 	void OnThreshSldr(wxScrollEvent &event);
 	void OnThreshText(wxCommandEvent &event);
+	//dist field
 	void OnUseDistFieldCheck(wxCommandEvent &event);
 	void EnableUseDistField(bool value);
 	void OnDistStrengthSldr(wxScrollEvent &event);
 	void OnDistStrengthText(wxCommandEvent &event);
+	void OnDistFilterSizeSldr(wxScrollEvent &event);
+	void OnDistFitlerSizeText(wxCommandEvent &event);
 	void OnMaxDistSldr(wxScrollEvent &event);
 	void OnMaxDistText(wxCommandEvent &event);
 	void OnDistThreshSldr(wxScrollEvent &event);
 	void OnDistThreshText(wxCommandEvent &event);
+	//diff
 	void EnableDiff(bool value);
 	void OnDiffCheck(wxCommandEvent &event);
 	void OnFalloffSldr(wxScrollEvent &event);
