@@ -11218,6 +11218,63 @@ void VRenderGLView::AddPaintRulerPoint()
 	}
 }
 
+void VRenderGLView::DrawRulerArc(
+	Point & ppc, Point& pp0, Point& pp1,
+	Color &c, Transform& mv, Transform& p,
+	vector<float> &verts, unsigned int& num)
+{
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
+	float px, py;
+	Point p1, p2;
+	int sec = 20;
+	//arc 02
+	Vector v0 = pp0 - ppc;
+	double lv0 = v0.length();
+	Vector v1 = pp1 - ppc;
+	double lv1 = v1.length();
+	Vector axis = Cross(v0, v1);
+	axis.normalize();
+	Quaternion q0(v0);
+	p1 = pp0;
+	for (int i = 1; i <= sec; ++i)
+	{
+		double theta = 90.0 * i / sec;
+		double rth = d2r(theta);
+		Quaternion q(theta, axis);
+		q.Normalize();
+		Quaternion q2 = (-q) * q0 * q;
+		Vector vp2 = Vector(q2.x, q2.y, q2.z);
+		vp2.normalize();
+		vp2 *= lv0 * lv1 / (sqrt(lv1*lv1*cos(rth)*cos(rth) + lv0 * lv0*sin(rth)*sin(rth)));
+		p2 = Point(vp2);
+		p2 = ppc + Vector(p2);
+		if (i == 1)
+		{
+			p1 = mv.transform(p1);
+			p1 = p.transform(p1);
+		}
+		if ((m_persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
+			(!m_persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
+			continue;
+		p2 = mv.transform(p2);
+		p2 = p.transform(p2);
+		if ((m_persp && (p2.z() <= 0.0 || p2.z() >= 1.0)) ||
+			(!m_persp && (p2.z() >= 0.0 || p2.z() <= -1.0)))
+			continue;
+		px = (p1.x() + 1.0)*nx / 2.0;
+		py = (p1.y() + 1.0)*ny / 2.0;
+		verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		px = (p2.x() + 1.0)*nx / 2.0;
+		py = (p2.y() + 1.0)*ny / 2.0;
+		verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		num += 2;
+		p1 = p2;
+	}
+}
+
 unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 {
 	int nx = GetGLSize().x;
@@ -11344,52 +11401,10 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 					num += 4;
 					//draw arcs
-					int sec = 20;
-					//arc 02
-					Vector v0 = pps[0] - ppc;
-					double lv0 = v0.length();
-					Vector v1 = pps[2] - ppc;
-					double lv1 = v1.length();
-					Vector axis = Cross(v0, v1);
-					axis.normalize();
-					Quaternion q0(v0);
-					p1 = pps[0];
-					for (int i = 1; i <= sec; ++i)
-					{
-						double theta = 90.0 * i / sec;
-						double rth = d2r(theta);
-						Quaternion q(theta, axis);
-						q.Normalize();
-						Quaternion q2 = (-q) * q0 * q;
-						Vector vp2 = Vector(q2.x, q2.y, q2.z);
-						vp2.normalize();
-						vp2 *= lv0 * lv1 / (sqrt(lv1*lv1*cos(rth)*cos(rth) + lv0 * lv0*sin(rth)*sin(rth)));
-						p2 = Point(vp2);
-						p2 = ppc + Vector(p2);
-						if (i == 1)
-						{
-							p1 = mv.transform(p1);
-							p1 = p.transform(p1);
-						}
-						if ((m_persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
-							(!m_persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
-							continue;
-						p2 = mv.transform(p2);
-						p2 = p.transform(p2);
-						if ((m_persp && (p2.z() <= 0.0 || p2.z() >= 1.0)) ||
-							(!m_persp && (p2.z() >= 0.0 || p2.z() <= -1.0)))
-							continue;
-						px = (p1.x() + 1.0)*nx / 2.0;
-						py = (p1.y() + 1.0)*ny / 2.0;
-						verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						px = (p2.x() + 1.0)*nx / 2.0;
-						py = (p2.y() + 1.0)*ny / 2.0;
-						verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						num += 2;
-						p1 = p2;
-					}
+					DrawRulerArc(ppc, pps[0], pps[2], c, mv, p, verts, num);
+					DrawRulerArc(ppc, pps[2], pps[1], c, mv, p, verts, num);
+					DrawRulerArc(ppc, pps[1], pps[3], c, mv, p, verts, num);
+					DrawRulerArc(ppc, pps[3], pps[0], c, mv, p, verts, num);
 				}
 			}
 			else

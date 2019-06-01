@@ -520,6 +520,9 @@ public:
 	bool GetRulerFinished();
 	void AddRulerPoint(int mx, int my);
 	void AddPaintRulerPoint();
+	void DrawRulerArc(Point & ppc, Point& pp0, Point& pp1,
+		Color &c, Transform& mv, Transform& p,
+		vector<float> &verts, unsigned int& num);
 	unsigned int DrawRulersVerts(vector<float> &verts);
 	void DrawRulers();
 	vector<Ruler*>* GetRulerList();
