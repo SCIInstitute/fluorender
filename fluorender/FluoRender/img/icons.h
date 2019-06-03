@@ -262,6 +262,10 @@ public:
 	const static unsigned char protractor_png[1172];
 	/* ruler_edit.png - 828 bytes */
 	const static unsigned char ruler_edit_png[828];
+	/* average.png - 383 bytes */
+	const static unsigned char average_png[383];
+	/* ellipse.png - 687 bytes */
+	const static unsigned char ellipse_png[687];
 
 
 	//movie play export icons

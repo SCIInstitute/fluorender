@@ -732,7 +732,7 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	m_toolbar1->AddCheckTool(ID_RulerMPBtn, "2+pt Ruler",
 		bitmap, wxNullBitmap,
 		"Add a polyline ruler to the render view by clicking at its points");
-	//bitmap
+	bitmap = wxGetBitmapFromMemory(ellipse);
 	m_toolbar1->AddCheckTool(ID_EllipseBtn, "Ellipse",
 		bitmap, wxNullBitmap,
 		"Add an ellipse to the render view by clicking at its points");
