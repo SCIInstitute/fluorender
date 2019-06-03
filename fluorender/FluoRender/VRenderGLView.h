@@ -658,7 +658,10 @@ private:
 	//ruler list
 	int m_ruler_type;//0: 2point ruler; 1:multi-point ruler; 2:locator
 	vector <Ruler*> m_ruler_list;
-	Point* m_editing_ruler_point;
+	Point* m_p0;
+	Point* m_p1;
+	Point* m_p2;
+	Point* m_p3;
 	//traces
 	TraceGroup* m_trace_group;
 	//multivolume
@@ -1062,7 +1065,7 @@ private:
 	double GetPointVolumeBox(Point &mp, double mx, double my, VolumeData* vd, bool calc_mats = true);
 	double GetPointVolumeBox2(Point &p1, Point &p2, double mx, double my, VolumeData* vd);
 	double GetPointPlane(Point &mp, double mx, double my, Point *planep = 0, bool calc_mats = true);
-	Point* GetEditingRulerPoint(double mx, double my);
+	bool GetEditingRulerPoint(double mx, double my, Point** p0, Point** p1, Point** p2, Point** p3);
 
 	//brush sets
 	void ChangeBrushSetsIndex();
