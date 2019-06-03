@@ -136,7 +136,10 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_md_pop_dirty(true),
 	//ruler type
 	m_ruler_type(0),
-	m_editing_ruler_point(0),
+	m_p0(0),
+	m_p1(0),
+	m_p2(0),
+	m_p3(0),
 	//traces
 	m_trace_group(0),
 	//multivolume
@@ -1151,7 +1154,7 @@ void VRenderGLView::DrawVolumes(int peel)
 			m_int_mode == 4 ||
 			m_int_mode == 5 ||
 			(m_int_mode == 6 &&
-				!m_editing_ruler_point) ||
+				!m_p0) ||
 			m_int_mode == 8 ||
 			m_force_clear)))
 	{
@@ -10989,15 +10992,16 @@ double VRenderGLView::GetPointPlane(Point &mp, double mx, double my, Point* plan
 	return (mp - mp1).length();
 }
 
-Point* VRenderGLView::GetEditingRulerPoint(double mx, double my)
+bool VRenderGLView::GetEditingRulerPoint(double mx, double my,
+	Point** p0, Point** p1, Point** p2, Point** p3)
 {
-	Point* point = 0;
+	Point *point = 0;
 
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
 
 	if (nx <= 0 || ny <= 0)
-		return 0;
+		return false;
 
 	double x, y;
 	x = mx * 2.0 / double(nx) - 1.0;
@@ -11025,12 +11029,13 @@ Point* VRenderGLView::GetEditingRulerPoint(double mx, double my)
 
 	int i, j;
 	Point ptemp;
-	bool found = false;
-	for (i = 0; i<(int)m_ruler_list.size() && !found; i++)
+	for (i = 0; i<(int)m_ruler_list.size(); i++)
 	{
 		Ruler* ruler = m_ruler_list[i];
 		if (!ruler) continue;
 		if (!ruler->GetDisp()) continue;
+		bool get_p2 = ruler->GetRulerType() == 5
+			&& ruler->GetNumPoint() == 4;
 
 		for (j = 0; j<ruler->GetNumPoint(); j++)
 		{
@@ -11047,16 +11052,39 @@ Point* VRenderGLView::GetEditingRulerPoint(double mx, double my)
 				y<ptemp.y() + 0.01 &&
 				y>ptemp.y() - 0.01)
 			{
-				found = true;
-				break;
+				*p0 = point;
+				if (get_p2)
+				{
+					switch (j)
+					{
+					case 0:
+						*p1 = ruler->GetPoint(1);
+						*p2 = ruler->GetPoint(2);
+						*p3 = ruler->GetPoint(3);
+						break;
+					case 1:
+						*p1 = ruler->GetPoint(0);
+						*p2 = ruler->GetPoint(3);
+						*p3 = ruler->GetPoint(2);
+						break;
+					case 2:
+						*p1 = ruler->GetPoint(3);
+						*p2 = ruler->GetPoint(1);
+						*p3 = ruler->GetPoint(0);
+						break;
+					case 3:
+						*p1 = ruler->GetPoint(2);
+						*p2 = ruler->GetPoint(0);
+						*p3 = ruler->GetPoint(1);
+						break;
+					}
+				}
+				return true;
 			}
 		}
 	}
 
-	if (found)
-		return point;
-	else
-		return 0;
+	return false;
 }
 
 int VRenderGLView::GetRulerType()
@@ -12137,13 +12165,26 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	if (event.LeftDown())
 	{
 		if (m_int_mode == 6)
-			m_editing_ruler_point = GetEditingRulerPoint(event.GetX(), event.GetY());
+		{
+			Point *p0 = 0;
+			Point *p1 = 0;
+			Point *p2 = 0;
+			Point *p3 = 0;
+			if (GetEditingRulerPoint(event.GetX(), event.GetY(),
+				&p0, &p1, &p2, &p3))
+			{
+				m_p0 = p0;
+				m_p1 = p1;
+				m_p2 = p2;
+				m_p3 = p3;
+			}
+		}
 
 		if (m_int_mode == 1 ||
 			(m_int_mode == 5 &&
 				event.AltDown()) ||
 				(m_int_mode == 6 &&
-					m_editing_ruler_point == 0))
+					m_p0 == 0))
 		{
 			old_mouse_X = event.GetX();
 			old_mouse_Y = event.GetY();
@@ -12212,7 +12253,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		}
 		else if (m_int_mode == 6)
 		{
-			m_editing_ruler_point = 0;
+			m_p0 = 0;
 		}
 		else if (m_int_mode == 7)
 		{
@@ -12277,7 +12318,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			(m_int_mode == 5 &&
 				event.AltDown()) ||
 				(m_int_mode == 6 &&
-					m_editing_ruler_point == 0))
+					m_p0 == 0))
 		{
 			//disable picking
 			m_pick = false;
@@ -12406,7 +12447,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		else if (m_int_mode == 6)
 		{
 			if (event.LeftIsDown() &&
-				m_editing_ruler_point)
+				m_p0)
 			{
 				Point point;
 				bool failed = false;
@@ -12419,7 +12460,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					if (t <= 0.0)
 						t = GetPointPlane(point,
 							event.GetX(), event.GetY(),
-							m_editing_ruler_point);
+							m_p0);
 					if (t <= 0.0)
 						failed = true;
 				}
@@ -12427,15 +12468,33 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				{
 					double t = GetPointPlane(point,
 						event.GetX(), event.GetY(),
-						m_editing_ruler_point);
+						m_p0);
 					if (t <= 0.0)
 						failed = true;
 				}
 				if (!failed)
 				{
-					m_editing_ruler_point->x(point.x());
-					m_editing_ruler_point->y(point.y());
-					m_editing_ruler_point->z(point.z());
+					m_p0->x(point.x());
+					m_p0->y(point.y());
+					m_p0->z(point.z());
+					if (m_p1)
+					{
+						Point c = Point((*m_p0 + *m_p1 + *m_p2 + *m_p3) / 4.0);
+						Vector v0 = *m_p0 - c;
+						Vector v2 = *m_p2 - c;
+						Vector axis = Cross(v2, v0);
+						Vector a2 = Cross(v0, axis);
+						a2.normalize();
+						*m_p2 = Point(c + a2 * v2.length());
+						*m_p3 = Point(c - a2 * v2.length());
+						*m_p1 = c + (c - *m_p0);
+						//Vector v23 = *m_p2 - *m_p3;
+						//axis.normalize();
+						//axis = Cross(axis, v23);
+						//axis.normalize();
+						//*m_p0 = Point(c + axis * Dot(v0, axis));
+						//*m_p1 = c + (c - *m_p0);
+					}
 					RefreshGL(35);
 					VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 					if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
