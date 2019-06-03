@@ -12479,21 +12479,29 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					m_p0->z(point.z());
 					if (m_p1)
 					{
-						Point c = Point((*m_p0 + *m_p1 + *m_p2 + *m_p3) / 4.0);
-						Vector v0 = *m_p0 - c;
-						Vector v2 = *m_p2 - c;
-						Vector axis = Cross(v2, v0);
-						Vector a2 = Cross(v0, axis);
-						a2.normalize();
-						*m_p2 = Point(c + a2 * v2.length());
-						*m_p3 = Point(c - a2 * v2.length());
-						*m_p1 = c + (c - *m_p0);
-						//Vector v23 = *m_p2 - *m_p3;
-						//axis.normalize();
-						//axis = Cross(axis, v23);
-						//axis.normalize();
-						//*m_p0 = Point(c + axis * Dot(v0, axis));
-						//*m_p1 = c + (c - *m_p0);
+						if (event.AltDown())
+						{
+							Point c = Point((*m_p2 + *m_p3) / 2.0);
+							Vector v0 = *m_p0 - c;
+							Vector v2 = *m_p2 - c;
+							Vector axis = Cross(v2, v0);
+							axis = Cross(axis, v2);
+							axis.normalize();
+							*m_p0 = Point(c + axis * v0.length());
+							*m_p1 = c + (c - *m_p0);
+						}
+						else
+						{
+							Point c = Point((*m_p0 + *m_p1 + *m_p2 + *m_p3) / 4.0);
+							Vector v0 = *m_p0 - c;
+							Vector v2 = *m_p2 - c;
+							Vector axis = Cross(v2, v0);
+							Vector a2 = Cross(v0, axis);
+							a2.normalize();
+							*m_p2 = Point(c + a2 * v2.length());
+							*m_p3 = Point(c - a2 * v2.length());
+							*m_p1 = c + (c - *m_p0);
+						}
 					}
 					RefreshGL(35);
 					VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
