@@ -226,12 +226,21 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 	TextureRenderer::vertex_array_manager_.set_dirty(VA_Rulers);
 }
 
-int RulerListCtrl::GetCurrSelection()
+bool RulerListCtrl::GetCurrSelection(std::vector<int> &sel)
 {
-	long item = GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-	return int(item);
+	long item = -1;
+	for (;;)
+	{
+		item = GetNextItem(item,
+			wxLIST_NEXT_ALL,
+			wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		sel.push_back(int(item));
+	}
+	if (!sel.empty())
+		return true;
+	return false;
 }
 
 void RulerListCtrl::DeleteSelection()
@@ -683,6 +692,7 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	EVT_MENU(ID_RulerMPBtn, MeasureDlg::OnNewRulerMP)
 	EVT_MENU(ID_EllipseBtn, MeasureDlg::OnEllipse)
 	EVT_MENU(ID_RulerEditBtn, MeasureDlg::OnRulerEdit)
+	EVT_MENU(ID_RulerAvgBtn, MeasureDlg::OnRulerAvg)
 	EVT_MENU(ID_ProfileBtn, MeasureDlg::OnProfile)
 	EVT_MENU(ID_DistanceBtn, MeasureDlg::OnDistance)
 	EVT_MENU(ID_DeleteBtn, MeasureDlg::OnDelete)
@@ -747,6 +757,9 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	m_toolbar2->AddCheckTool(ID_RulerEditBtn, "Edit",
 		bitmap, wxNullBitmap,
 		"Select and move ruler points");
+	bitmap = wxGetBitmapFromMemory(average);
+	m_toolbar2->AddTool(ID_RulerAvgBtn, "Average", bitmap,
+		"Compute a center for selected rulers");
 	bitmap = wxGetBitmapFromMemory(profile);
 	m_toolbar2->AddTool(ID_ProfileBtn, "Profile", bitmap,
 		"Add intensity profile along curve. Use \"Export\" to view results");
@@ -803,7 +816,8 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	sizer_1->Add(sizer_12, 0, wxEXPAND);
 
 	//list
-	m_rulerlist = new RulerListCtrl(frame, this, wxID_ANY);
+	m_rulerlist = new RulerListCtrl(frame, this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
 
 	//notes
 	wxBoxSizer *sizer_2 = new wxStaticBoxSizer(
@@ -1081,15 +1095,66 @@ void MeasureDlg::OnRulerEdit(wxCommandEvent& event)
 		m_view->SetIntMode(1);
 }
 
+void MeasureDlg::OnRulerAvg(wxCommandEvent& event)
+{
+	if (!m_view)
+		return;
+
+	Point avg;
+	int count = 0;
+	std::vector<int> sel;
+	vector<Ruler*>* ruler_list = m_view->GetRulerList();
+	if (m_rulerlist->GetCurrSelection(sel))
+	{
+		for (size_t i = 0; i < sel.size(); ++i)
+		{
+			int index = sel[i];
+			if (0 > index || ruler_list->size() <= index)
+				continue;
+			Ruler* r = (*ruler_list)[index];
+			avg += r->GetCenter();
+			count++;
+		}
+	}
+	else
+	{
+		for (size_t i = 0; i < ruler_list->size(); ++i)
+		{
+			Ruler* r = (*ruler_list)[i];
+			avg += r->GetCenter();
+			count++;
+		}
+	}
+
+	if (count)
+	{
+		avg /= double(count);
+		Ruler* ruler = new Ruler();
+		ruler->SetRulerType(2);
+		ruler->SetName("Avrg");
+		ruler->AddPoint(avg);
+		ruler->SetTimeDep(m_view->m_glview->m_ruler_time_dep);
+		ruler->SetTime(m_view->m_glview->m_tseq_cur_num);
+		ruler_list->push_back(ruler);
+		m_view->RefreshGL();
+		GetSettings(m_view);
+	}
+}
+
 void MeasureDlg::OnProfile(wxCommandEvent& event)
 {
 	if (m_view)
 	{
-		int index = m_rulerlist->GetCurrSelection();
-		if (index > -1)
-			m_view->RulerProfile(index);
+		std::vector<int> sel;
+		if (m_rulerlist->GetCurrSelection(sel))
+		{
+			//export selected
+			for (size_t i = 0; i < sel.size(); ++i)
+				m_view->RulerProfile(sel[i]);
+		}
 		else
 		{
+			//export all
 			vector<Ruler*>* ruler_list = m_view->GetRulerList();
 			for (size_t i = 0; i < ruler_list->size(); ++i)
 				m_view->RulerProfile(i);
@@ -1101,9 +1166,13 @@ void MeasureDlg::OnDistance(wxCommandEvent& event)
 {
 	if (m_view)
 	{
-		int index = m_rulerlist->GetCurrSelection();
-		if (index > -1)
-			m_view->RulerDistance(index);
+		std::vector<int> sel;
+		if (m_rulerlist->GetCurrSelection(sel))
+		{
+			//export selected
+			for (size_t i = 0; i < sel.size(); ++i)
+				m_view->RulerDistance(sel[i]);
+		}
 		else
 		{
 			vector<Ruler*>* ruler_list = m_view->GetRulerList();

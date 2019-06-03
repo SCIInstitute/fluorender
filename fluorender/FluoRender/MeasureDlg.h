@@ -62,7 +62,7 @@ public:
 		int time, wxString &extra, wxString &points);
 	void UpdateRulers(VRenderView* vrv=0);
 
-	int GetCurrSelection();
+	bool GetCurrSelection(std::vector<int> &sel);
 	void DeleteSelection();
 	void DeleteAll(bool cur_time=false);
 
@@ -116,6 +116,7 @@ public:
 		ID_RulerMPBtn,
 		ID_EllipseBtn,
 		ID_RulerEditBtn,
+		ID_RulerAvgBtn,
 		ID_ProfileBtn,
 		ID_DistanceBtn,
 		ID_DeleteBtn,
@@ -163,6 +164,7 @@ private:
 	void OnNewRulerMP(wxCommandEvent& event);
 	void OnEllipse(wxCommandEvent& event);
 	void OnRulerEdit(wxCommandEvent& event);
+	void OnRulerAvg(wxCommandEvent& event);
 	void OnProfile(wxCommandEvent& event);
 	void OnDistance(wxCommandEvent& event);
 	void OnDelete(wxCommandEvent& event);
