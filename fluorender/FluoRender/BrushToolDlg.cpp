@@ -334,7 +334,7 @@ void BrushToolDlg::GetSettings(VRenderView* vrv)
 		sel_vol = vr_frame->GetCurSelVol();
 		vr_frame->GetNoiseCancellingDlg()->GetSettings(vrv);
 		vr_frame->GetCountingDlg()->GetSettings(vrv);
-		vr_frame->GetColocalizationDlg()->GetSettings(vrv);
+		//vr_frame->GetColocalizationDlg()->GetSettings(vrv);
 	}
 
 	m_cur_view = vrv;

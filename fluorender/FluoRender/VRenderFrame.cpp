@@ -2179,6 +2179,8 @@ void VRenderFrame::OnSelection(int type,
 			m_mesh_manip->Show(false);
 		if (m_annotation_prop)
 			m_annotation_prop->Show(false);
+		if (m_colocalization_dlg)
+			m_colocalization_dlg->SetGroup(0);
 		m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
 		m_aui_mgr.Update();
 		break;
@@ -2230,6 +2232,8 @@ void VRenderFrame::OnSelection(int type,
 			if (m_annotation_prop)
 				m_annotation_prop->Show(false);
 		}
+		if (m_colocalization_dlg)
+			m_colocalization_dlg->SetGroup(0);
 		break;
 	case 3:  //mesh
 		if (md)
@@ -2259,6 +2263,8 @@ void VRenderFrame::OnSelection(int type,
 			m_mesh_manip->Show(false);
 		if (m_annotation_prop)
 			m_annotation_prop->Show(false);
+		if (m_colocalization_dlg)
+			m_colocalization_dlg->SetGroup(0);
 		break;
 	case 4:  //annotations
 		if (ann)
@@ -2285,6 +2291,8 @@ void VRenderFrame::OnSelection(int type,
 			m_mesh_manip->Show(false);
 		if (m_annotation_prop && ann)
 			m_annotation_prop->Show(true);
+		if (m_colocalization_dlg)
+			m_colocalization_dlg->SetGroup(0);
 		break;
 	case 5:  //group
 		if (m_adjust_view)
@@ -2299,6 +2307,8 @@ void VRenderFrame::OnSelection(int type,
 			m_mesh_manip->Show(false);
 		if (m_annotation_prop)
 			m_annotation_prop->Show(false);
+		if (m_colocalization_dlg)
+			m_colocalization_dlg->SetGroup(group);
 		m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
 		m_aui_mgr.Update();
 		break;
@@ -2328,6 +2338,8 @@ void VRenderFrame::OnSelection(int type,
 			m_mesh_manip->Show(true);
 		if (m_annotation_prop)
 			m_annotation_prop->Show(false);
+		if (m_colocalization_dlg)
+			m_colocalization_dlg->SetGroup(0);
 		break;
 	default:
 		if (m_volume_prop)
@@ -2338,6 +2350,8 @@ void VRenderFrame::OnSelection(int type,
 			m_mesh_manip->Show(false);
 		if (m_annotation_prop)
 			m_annotation_prop->Show(false);
+		if (m_colocalization_dlg)
+			m_colocalization_dlg->SetGroup(0);
 		m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
 		m_aui_mgr.Update();
 	}

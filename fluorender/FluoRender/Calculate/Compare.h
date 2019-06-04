@@ -28,17 +28,15 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Compare_h
 #define FL_Compare_h
 
+#include "DataManager.h"
 #include <FLIVR/KernelProgram.h>
+#include <FLIVR/VolKernel.h>
 
 using namespace std;
 
-namespace FLIVR
-{
-	class TextureBrick;
-}
+class VolumeData;
 namespace FL
 {
-	class VolumeData;
 	class ChannelCompare
 	{
 	public:
@@ -51,7 +49,7 @@ namespace FL
 		{ return m_use_mask; }
 
 		void Compare(float, float);
-		void Average(float weight = 0.0, FLIVR::Argument* avg=0);
+		void Average(float weight, FLIVR::Argument& avg);
 		double Result()
 		{ return m_result; }
 

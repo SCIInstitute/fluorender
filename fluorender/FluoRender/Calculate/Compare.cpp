@@ -26,13 +26,12 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "Compare.h"
-#include <Scenegraph/VolumeData.h>
+#include "cl_code.h"
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
 #include <FLIVR/TextureBrick.h>
 #include <FLIVR/Texture.h>
-#include "cl_code.h"
 #include <algorithm>
 
 using namespace FL;
@@ -122,15 +121,13 @@ void* ChannelCompare::GetVolDataBrick(FLIVR::TextureBrick* b)
 
 void* ChannelCompare::GetVolData(VolumeData* vd)
 {
-	long nx, ny, nz;
-	vd->getValue("res x", nx);
-	vd->getValue("res y", ny);
-	vd->getValue("res z", nz);
+	int nx, ny, nz;
+	vd->GetResolution(nx, ny, nz);
 	Nrrd* nrrd_data = 0;
 	if (m_use_mask)
 		nrrd_data = vd->GetMask(false);
 	if (!nrrd_data)
-		nrrd_data = vd->GetData(false);
+		nrrd_data = vd->GetVolume(false);
 	if (!nrrd_data)
 		return 0;
 	return nrrd_data->data;
@@ -213,8 +210,8 @@ void ChannelCompare::Compare(float th1, float th2)
 		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid1 = m_vd1->GetRenderer()->load_brick(0, 0, bricks1, i);
-		GLint tid2 = m_vd2->GetRenderer()->load_brick(0, 0, bricks2, i);
+		GLint tid1 = m_vd1->GetVR()->load_brick(0, 0, bricks1, i);
+		GLint tid2 = m_vd2->GetVR()->load_brick(0, 0, bricks2, i);
 
 		//compute workload
 		size_t ng;
@@ -291,7 +288,7 @@ void ChannelCompare::Compare(float th1, float th2)
 	}
 }
 
-void ChannelCompare::Average(float weight, FLIVR::Argument *avg)
+void ChannelCompare::Average(float weight, FLIVR::Argument& avg)
 {
 	m_result = 0.0;
 
@@ -324,8 +321,8 @@ void ChannelCompare::Average(float weight, FLIVR::Argument *avg)
 		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid1 = m_vd1->GetRenderer()->load_brick(0, 0, bricks1, i);
-		GLint tid2 = m_vd2->GetRenderer()->load_brick(0, 0, bricks2, i);
+		GLint tid1 = m_vd1->GetVR()->load_brick(0, 0, bricks1, i);
+		GLint tid2 = m_vd2->GetVR()->load_brick(0, 0, bricks2, i);
 
 		size_t local_size[3] = { 1, 1, 1 };
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
@@ -344,7 +341,7 @@ void ChannelCompare::Average(float weight, FLIVR::Argument *avg)
 			sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setKernelArgConst(kernel_index, 4,
 			sizeof(unsigned int), (void*)(&nz));
-		if (!avg)
+		if (!avg.buffer)
 		{
 			sum = new float[nxyz];
 			std::memset(sum, 0, sizeof sum);
@@ -354,8 +351,8 @@ void ChannelCompare::Average(float weight, FLIVR::Argument *avg)
 		}
 		else
 		{
-			avg->kernel_index = kernel_index;
-			avg->index = 5;
+			avg.kernel_index = kernel_index;
+			avg.index = 5;
 			kernel_prog->setKernelArgument(avg);
 		}
 
