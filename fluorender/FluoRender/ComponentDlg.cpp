@@ -1685,6 +1685,8 @@ void ComponentDlg::ResetCmd()
 
 void ComponentDlg::PlayCmd()
 {
+	//disable first
+	m_fixate = false;
 	if (m_command.empty())
 	{
 		GenerateComp(false);
@@ -1758,7 +1760,7 @@ void ComponentDlg::PlayCmd()
 				if (*it2 == "fix_size")
 					m_fix_size = std::stoi(*(++it2));
 			}
-			GenerateComp(false);
+			//GenerateComp(false);
 			Fixate(false);
 			//return;
 		}
