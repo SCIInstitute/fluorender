@@ -93,7 +93,7 @@ const char* str_cl_chann_dotprod = \
 "				lsum += v1 * v2;\n" \
 "			}\n" \
 "	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	sum[index] = lsum;\n" \
+"	atomic_xchg(sum+index, lsum);\n" \
 "}\n";
 
 const char* str_cl_chann_sum = \
