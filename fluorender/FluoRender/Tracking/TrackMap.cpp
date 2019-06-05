@@ -139,6 +139,16 @@ bool TrackMapProcessor::InitializeFrame(size_t frame)
 		}
 	}
 
+	//temp prune
+	for (auto celli = cell_list.begin();
+		celli != cell_list.end(); )
+	{
+		if (celli->second->GetSizeF() < m_size_thresh)
+			celli = cell_list.erase(celli);
+		else
+			++celli;
+	}
+
 	//build intra graph
 	for (i = 0; i < nx; ++i)
 	for (j = 0; j < ny; ++j)
