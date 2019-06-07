@@ -11826,8 +11826,10 @@ int VRenderGLView::RulerDistance(int index)
 	FL::CompList* list = 0;
 	if (!analyzer)
 		return 0;
-
 	list = analyzer->GetCompList();
+	if (list->empty())
+		return 0;
+
 	double sx = list->sx;
 	double sy = list->sy;
 	double sz = list->sz;
