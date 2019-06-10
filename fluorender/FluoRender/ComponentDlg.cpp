@@ -137,6 +137,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_BUTTON(ID_OutputSizeBtn, ComponentDlg::OnOutputChannels)
 	EVT_BUTTON(ID_OutputAnnBtn, ComponentDlg::OnOutputAnn)
 	//distance
+	EVT_CHECKBOX(ID_DistNeighborCheck, ComponentDlg::OnDistNeighborCheck)
 	EVT_COMMAND_SCROLL(ID_DistNeighborSldr, ComponentDlg::OnDistNeighborSldr)
 	EVT_TEXT(ID_DistNeighborText, ComponentDlg::OnDistNeighborText)
 	EVT_BUTTON(ID_DistOutputBtn, ComponentDlg::OnDistOutput)
@@ -828,8 +829,8 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 		new wxStaticBox(page, wxID_ANY, "Distances"),
 		wxVERTICAL);
 	wxBoxSizer *sizer41 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Neighbors:",
-		wxDefaultPosition, wxSize(100, 20));
+	m_dist_neighbor_check = new wxCheckBox(page, ID_DistNeighborCheck, "Neighbors:",
+		wxDefaultPosition, wxSize(100, 20), wxALIGN_LEFT);
 	m_dist_neighbor_sldr = new wxSlider(page, ID_DistNeighborSldr, 1, 1, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_dist_neighbor_text = new wxTextCtrl(page, ID_DistNeighborText, "1",
@@ -837,7 +838,7 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	m_dist_output_btn = new wxButton(page, ID_DistOutputBtn, "Compute",
 		wxDefaultPosition, wxSize(60, 23));
 	sizer41->Add(5, 5);
-	sizer41->Add(st, 0, wxALIGN_CENTER);
+	sizer41->Add(m_dist_neighbor_check, 0, wxALIGN_CENTER);
 	sizer41->Add(m_dist_neighbor_sldr, 1, wxALIGN_CENTER);
 	sizer41->Add(5, 5);
 	sizer41->Add(m_dist_neighbor_text, 0, wxALIGN_CENTER);
@@ -968,6 +969,10 @@ void ComponentDlg::Update()
 	else if (m_output_type == 2)
 		m_output_rgb_rb->SetValue(true);
 
+	m_dist_neighbor_check->SetValue(m_use_dist_neighbor);
+	m_dist_neighbor_sldr->Enable(m_use_dist_neighbor);
+	m_dist_neighbor_text->Enable(m_use_dist_neighbor);
+
 	//generate
 	EnableGenerate();
 }
@@ -1017,6 +1022,7 @@ void ComponentDlg::GetSettings()
 	m_consistent = false;
 
 	//distance
+	m_use_dist_neighbor = false;
 	m_dist_neighbor = 1;
 
 	//update
@@ -2433,6 +2439,13 @@ void ComponentDlg::OnOutputAnn(wxCommandEvent &event)
 }
 
 //distance
+void ComponentDlg::OnDistNeighborCheck(wxCommandEvent &event)
+{
+	m_use_dist_neighbor = m_dist_neighbor_check->GetValue();
+	m_dist_neighbor_sldr->Enable(m_use_dist_neighbor);
+	m_dist_neighbor_text->Enable(m_use_dist_neighbor);
+}
+
 void ComponentDlg::OnDistNeighborSldr(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
@@ -2487,6 +2500,17 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 		x++;
 	}
 
+	bool bdist = m_use_dist_neighbor &&
+		m_dist_neighbor > 0 &&
+		m_dist_neighbor < num-1;
+	if (bdist)
+	{
+		for (size_t i = 0; i < num; ++i)
+		{
+			std::sort(rm[i].begin(), rm[i].end());
+		}
+	}
+
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Save Analysis Data", "", "",
 		"Text file (*.txt)|*.txt",
@@ -2500,10 +2524,11 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 		outfile.open(str, std::ofstream::out);
 		for (size_t i = 0; i < num; ++i)
 		{
-			for (size_t j = 0; j < num; ++j)
+			size_t dnum = bdist ? (m_dist_neighbor+1) : num;
+			for (size_t j = bdist?1:0; j < dnum; ++j)
 			{
 				outfile << rm[i][j];
-				if (j < num - 1)
+				if (j < dnum - 1)
 					outfile << "\t";
 			}
 			outfile << "\n";
