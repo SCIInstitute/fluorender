@@ -146,6 +146,7 @@ public:
 		ID_OutputSizeBtn,
 		ID_OutputAnnBtn,
 		//Distance
+		ID_DistNeighborCheck,
 		ID_DistNeighborSldr,
 		ID_DistNeighborText,
 		ID_DistOutputBtn,
@@ -257,6 +258,7 @@ private:
 	bool m_colocal;
 
 	//distance
+	bool m_use_dist_neighbor;
 	int m_dist_neighbor;
 
 	//output
@@ -374,6 +376,7 @@ private:
 	wxButton* m_output_size_btn;
 	wxButton* m_output_ann_btn;
 	//distance
+	wxCheckBox* m_dist_neighbor_check;
 	wxSlider* m_dist_neighbor_sldr;
 	wxTextCtrl* m_dist_neighbor_text;
 	wxButton* m_dist_output_btn;
@@ -498,6 +501,7 @@ private:
 	void OnOutputChannels(wxCommandEvent &event);
 	void OnOutputAnn(wxCommandEvent &event);
 	//distance
+	void OnDistNeighborCheck(wxCommandEvent &event);
 	void OnDistNeighborSldr(wxScrollEvent &event);
 	void OnDistNeighborText(wxCommandEvent &event);
 	void OnDistOutput(wxCommandEvent &event);
