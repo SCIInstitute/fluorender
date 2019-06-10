@@ -763,7 +763,7 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	bitmap = wxGetBitmapFromMemory(profile);
 	m_toolbar2->AddTool(ID_ProfileBtn, "Profile", bitmap,
 		"Add intensity profile along curve. Use \"Export\" to view results");
-	//bitmap
+	bitmap = wxGetBitmapFromMemory(tape);
 	m_toolbar2->AddTool(ID_DistanceBtn, "Distance", bitmap,
 		"Calculate distances");
 	bitmap = wxGetBitmapFromMemory(delet);

@@ -266,6 +266,8 @@ public:
 	const static unsigned char average_png[383];
 	/* ellipse.png - 687 bytes */
 	const static unsigned char ellipse_png[687];
+	/* tape.png - 1138 bytes */
+	const static unsigned char tape_png[1138];
 
 
 	//movie play export icons
