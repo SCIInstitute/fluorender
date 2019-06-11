@@ -1,5 +1,5 @@
 ver_major=2
-ver_minor=23.2
+ver_minor=23.3
 [gm\ calculation]
 mode=2
 [peeling\ layers]
@@ -82,6 +82,7 @@ value=0
 x=0
 y=0
 [pixel\ format]
+api_type=0
 red_bit=8
 green_bit=8
 blue_bit=8

@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
+#include <FLIVR/ShaderProgram.h>
 #include "VRenderView.h"
 #include "VRenderFrame.h"
 #include <tiffio.h>
@@ -33,7 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valnum.h>
 #include <algorithm>
 #include <limits>
-#include "GL/mywgl.h"
 #include "png_resource.h"
 #include "img/icons.h"
 #include <wx/stdpaths.h>
@@ -141,9 +141,11 @@ wxPanel(parent, id, pos, size, style),
 	int gl_major_ver = 4;
 	int gl_minor_ver = 4;
 	int gl_profile_mask = WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
+	int api_type = 0;
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetSettingDlg())
 	{
+		api_type = vr_frame->GetSettingDlg()->GetApiType();
 		red_bit = vr_frame->GetSettingDlg()->GetRedBit();
 		green_bit = vr_frame->GetSettingDlg()->GetGreenBit();
 		blue_bit = vr_frame->GetSettingDlg()->GetBlueBit();
@@ -156,13 +158,60 @@ wxPanel(parent, id, pos, size, style),
 	}
 
 	wxGLAttributes attriblist;
-	attriblist.PlatformDefaults().
-		MinRGBA(red_bit, green_bit, blue_bit, alpha_bit).
-		Depth(depth_bit).
-		DoubleBuffer().
-		SampleBuffers(1).
-		Samplers(samples).
-		EndList();
+#ifdef _WIN32
+	if ((red_bit >= 16 || green_bit >= 16 || blue_bit >= 16) &&
+		api_type)
+	{
+		if (api_type == 1)
+		{
+			attriblist.AddAttribute(WGL_SUPPORT_OPENGL_ARB);
+			attriblist.AddAttribute(GL_TRUE);
+			//attriblist.AddAttribute(WGL_DRAW_TO_PBUFFER_ARB);
+			//attriblist.AddAttribute(GL_TRUE);
+			attriblist.AddAttribute(WGL_PIXEL_TYPE_ARB);
+			attriblist.AddAttribute(WGL_TYPE_RGBA_FLOAT_ATI);
+			//attriblist.AddAttribute(GL_TRUE);
+		}
+		else if (api_type == 2)
+		{
+			//attriblist.AddAttribute(WGL_TYPE_RGBA_ARB);
+			attriblist.AddAttribute(WGL_FLOAT_COMPONENTS_NV);
+			attriblist.AddAttribute(GL_TRUE);
+			//attriblist.AddAttribute(WGL_BIND_TO_TEXTURE_RECTANGLE_FLOAT_RGBA_NV);
+			//attriblist.AddAttribute(GL_TRUE);
+		}
+		attriblist.AddAttribute(WGL_RED_BITS_ARB);
+		attriblist.AddAttribute(red_bit);
+		attriblist.AddAttribute(WGL_GREEN_BITS_ARB);
+		attriblist.AddAttribute(green_bit);
+		attriblist.AddAttribute(WGL_BLUE_BITS_ARB);
+		attriblist.AddAttribute(blue_bit);
+		attriblist.AddAttribute(WGL_ALPHA_BITS_ARB);
+		attriblist.AddAttribute(alpha_bit);
+		attriblist.AddAttribute(WGL_DEPTH_BITS_ARB);
+		attriblist.AddAttribute(depth_bit);
+		attriblist.AddAttribute(WGL_STENCIL_BITS_ARB);
+		attriblist.AddAttribute(8);
+		attriblist.DoubleBuffer();
+	}
+	else
+	{
+		attriblist.PlatformDefaults();
+		attriblist.MinRGBA(red_bit, green_bit, blue_bit, alpha_bit);
+		attriblist.Depth(depth_bit);
+		attriblist.DoubleBuffer();
+		attriblist.SampleBuffers(1);
+		attriblist.Samplers(samples);
+	}
+#else
+	attriblist.PlatformDefaults();
+	attriblist.MinRGBA(red_bit, green_bit, blue_bit, alpha_bit);
+	attriblist.Depth(depth_bit);
+	attriblist.DoubleBuffer();
+	attriblist.SampleBuffers(1);
+	attriblist.Samplers(samples);
+#endif
+	attriblist.EndList();
 	m_glview = new VRenderGLView(frame, this, wxID_ANY, attriblist, sharedContext);
 	if (!sharedContext)
 	{

@@ -208,6 +208,7 @@ public:
 	bool GetPvxmlFlipY() {return m_pvxml_flip_y;}
 	void SetPvxmlFlipY(bool flip) {m_pvxml_flip_y = flip;}
 	//pixel format
+	int GetApiType() { return m_api_type; }
 	int GetRedBit() {return m_red_bit;}
 	int GetGreenBit() {return m_green_bit;}
 	int GetBlueBit() {return m_blue_bit;}
@@ -306,6 +307,7 @@ private:
 	bool m_pvxml_flip_x;
 	bool m_pvxml_flip_y;
 	//pixel format
+	int m_api_type;//0-default; 1-amd; 2-nv
 	int m_red_bit;
 	int m_green_bit;
 	int m_blue_bit;
