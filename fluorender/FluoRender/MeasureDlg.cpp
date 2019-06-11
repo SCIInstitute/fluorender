@@ -217,10 +217,11 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 		Point cp = ruler->GetCenter();
 		center = wxString::Format("(%.2f, %.2f, %.2f)",
 			cp.x(), cp.y(), cp.z());
+        wxString str = ruler->GetDelInfoValues(", ");
 		Append(ruler->GetDisp(), ruler->Id(), ruler->GetName(),
 			color, ruler->GetLength(), unit,
 			ruler->GetAngle(), center, ruler->GetTimeDep(),
-			ruler->GetTime(), ruler->GetDelInfoValues(", "), points);
+			ruler->GetTime(), str, points);
 	}
 
 	TextureRenderer::vertex_array_manager_.set_dirty(VA_Rulers);
@@ -582,7 +583,7 @@ void RulerListCtrl::OnCenterText(wxCommandEvent& event)
 	//get xyz
 	double x = 0, y = 0, z = 0;
 	int count = 0;
-	std::string stemp = str.c_str();
+	std::string stemp = str.ToStdString();
 	if (stemp.empty())
 		return;
 	while (count < 3)
