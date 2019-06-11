@@ -2,6 +2,7 @@ iter=50
 thresh=0.5
 use_dist_field=0
 dist_strength=0.5
+dist_filter_size=3
 max_dist=30
 dist_thresh=0.25
 diff=0

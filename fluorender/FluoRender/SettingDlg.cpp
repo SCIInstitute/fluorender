@@ -767,6 +767,7 @@ void SettingDlg::GetSettings()
 	m_ruler_df_f = false;
 	m_pvxml_flip_x = false;
 	m_pvxml_flip_y = false;
+	m_api_type = 0;
 	m_red_bit = 8;
 	m_green_bit = 8;
 	m_blue_bit = 8;
@@ -1008,6 +1009,7 @@ void SettingDlg::GetSettings()
 	if (fconfig.Exists("/pixel format"))
 	{
 		fconfig.SetPath("/pixel format");
+		fconfig.Read("api_type", &m_api_type);
 		fconfig.Read("red_bit", &m_red_bit);
 		fconfig.Read("green_bit", &m_green_bit);
 		fconfig.Read("blue_bit", &m_blue_bit);
@@ -1318,6 +1320,7 @@ void SettingDlg::SaveSettings()
 
 	//pixel format
 	fconfig.SetPath("/pixel format");
+	fconfig.Write("api_type", m_api_type);
 	fconfig.Write("red_bit", m_red_bit);
 	fconfig.Write("green_bit", m_green_bit);
 	fconfig.Write("blue_bit", m_blue_bit);

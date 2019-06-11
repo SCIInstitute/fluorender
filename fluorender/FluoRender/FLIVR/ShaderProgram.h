@@ -29,6 +29,8 @@
 #ifndef ShaderProgram_h 
 #define ShaderProgram_h
 
+#include <GL/glew.h>
+#include <GL/wglew.h>
 #include <string>
 
 
