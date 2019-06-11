@@ -159,7 +159,7 @@ void ColocalizationDlg::OnColocalizationBtn(wxCommandEvent &event)
 	std::wstring filename = m_output_file.ToStdWstring();
 	std::ofstream outfile;
 	//print names
-	outfile.open(filename, std::ofstream::out);
+	outfile.open(ws2s(filename), std::ofstream::out);
 	outfile << "\t";
 	for (int i = 0; i < num; ++i)
 	{
