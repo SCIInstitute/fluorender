@@ -217,7 +217,7 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 		Point cp = ruler->GetCenter();
 		center = wxString::Format("(%.2f, %.2f, %.2f)",
 			cp.x(), cp.y(), cp.z());
-        wxString str = ruler->GetDelInfoValues(", ");
+		wxString str = ruler->GetDelInfoValues(", ");
 		Append(ruler->GetDisp(), ruler->Id(), ruler->GetName(),
 			color, ruler->GetLength(), unit,
 			ruler->GetAngle(), center, ruler->GetTimeDep(),
