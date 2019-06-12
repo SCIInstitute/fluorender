@@ -161,8 +161,6 @@ wxPanel(parent, id, pos, size, style),
 #ifdef _WIN32
 	if (red_bit >= 16 || green_bit >= 16 || blue_bit >= 16)
 	{
-		//attriblist.AddAttribute(WGL_DRAW_TO_WINDOW_ARB);
-		//attriblist.AddAttribute(GL_TRUE);
 		attriblist.AddAttribute(WGL_SUPPORT_OPENGL_ARB);
 		attriblist.AddAttribute(GL_TRUE);
 		attriblist.AddAttribute(WGL_ACCELERATION_ARB);
@@ -179,7 +177,7 @@ wxPanel(parent, id, pos, size, style),
 			//attriblist.AddAttribute(WGL_TYPE_RGBA_ARB);
 		}
 		attriblist.AddAttribute(WGL_COLOR_BITS_ARB);
-		attriblist.AddAttribute(red_bit+green_bit+blue_bit);
+		attriblist.AddAttribute(red_bit+green_bit+blue_bit+alpha_bit);
 		attriblist.AddAttribute(WGL_RED_BITS_ARB);
 		attriblist.AddAttribute(red_bit);
 		attriblist.AddAttribute(WGL_GREEN_BITS_ARB);
