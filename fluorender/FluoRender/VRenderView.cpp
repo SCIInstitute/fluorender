@@ -159,27 +159,27 @@ wxPanel(parent, id, pos, size, style),
 
 	wxGLAttributes attriblist;
 #ifdef _WIN32
-	if ((red_bit >= 16 || green_bit >= 16 || blue_bit >= 16) &&
-		api_type)
+	if (red_bit >= 16 || green_bit >= 16 || blue_bit >= 16)
 	{
-		if (api_type == 1)
+		//attriblist.AddAttribute(WGL_DRAW_TO_WINDOW_ARB);
+		//attriblist.AddAttribute(GL_TRUE);
+		attriblist.AddAttribute(WGL_SUPPORT_OPENGL_ARB);
+		attriblist.AddAttribute(GL_TRUE);
+		attriblist.AddAttribute(WGL_ACCELERATION_ARB);
+		attriblist.AddAttribute(WGL_FULL_ACCELERATION_ARB);
+		if (api_type == 2)
 		{
-			attriblist.AddAttribute(WGL_SUPPORT_OPENGL_ARB);
-			attriblist.AddAttribute(GL_TRUE);
-			//attriblist.AddAttribute(WGL_DRAW_TO_PBUFFER_ARB);
-			//attriblist.AddAttribute(GL_TRUE);
-			attriblist.AddAttribute(WGL_PIXEL_TYPE_ARB);
-			attriblist.AddAttribute(WGL_TYPE_RGBA_FLOAT_ATI);
-			//attriblist.AddAttribute(GL_TRUE);
-		}
-		else if (api_type == 2)
-		{
-			//attriblist.AddAttribute(WGL_TYPE_RGBA_ARB);
 			attriblist.AddAttribute(WGL_FLOAT_COMPONENTS_NV);
 			attriblist.AddAttribute(GL_TRUE);
-			//attriblist.AddAttribute(WGL_BIND_TO_TEXTURE_RECTANGLE_FLOAT_RGBA_NV);
-			//attriblist.AddAttribute(GL_TRUE);
 		}
+		else
+		{
+			attriblist.AddAttribute(WGL_PIXEL_TYPE_ARB);
+			attriblist.AddAttribute(WGL_TYPE_RGBA_FLOAT_ARB);
+			//attriblist.AddAttribute(WGL_TYPE_RGBA_ARB);
+		}
+		attriblist.AddAttribute(WGL_COLOR_BITS_ARB);
+		attriblist.AddAttribute(red_bit+green_bit+blue_bit);
 		attriblist.AddAttribute(WGL_RED_BITS_ARB);
 		attriblist.AddAttribute(red_bit);
 		attriblist.AddAttribute(WGL_GREEN_BITS_ARB);
@@ -192,14 +192,12 @@ wxPanel(parent, id, pos, size, style),
 		attriblist.AddAttribute(depth_bit);
 		attriblist.AddAttribute(WGL_STENCIL_BITS_ARB);
 		attriblist.AddAttribute(8);
-		attriblist.DoubleBuffer();
 	}
 	else
 	{
 		attriblist.PlatformDefaults();
 		attriblist.MinRGBA(red_bit, green_bit, blue_bit, alpha_bit);
 		attriblist.Depth(depth_bit);
-		attriblist.DoubleBuffer();
 		attriblist.SampleBuffers(1);
 		attriblist.Samplers(samples);
 	}
@@ -207,10 +205,10 @@ wxPanel(parent, id, pos, size, style),
 	attriblist.PlatformDefaults();
 	attriblist.MinRGBA(red_bit, green_bit, blue_bit, alpha_bit);
 	attriblist.Depth(depth_bit);
-	attriblist.DoubleBuffer();
 	attriblist.SampleBuffers(1);
 	attriblist.Samplers(samples);
 #endif
+	attriblist.DoubleBuffer();
 	attriblist.EndList();
 	m_glview = new VRenderGLView(frame, this, wxID_ANY, attriblist, sharedContext);
 	if (!sharedContext)
