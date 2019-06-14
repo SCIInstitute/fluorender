@@ -5491,6 +5491,91 @@ void VRenderGLView::PreDraw()
 	}
 }
 
+//read pixels
+void VRenderGLView::ReadPixels(
+	int chann, bool fp32,
+	int &x, int &y, int &w, int &h,
+	void** image)
+{
+	if (m_draw_frame)
+	{
+		if (m_enlarge)
+		{
+			x = m_frame_x * m_enlarge_scale;
+			y = m_frame_y * m_enlarge_scale;
+			w = m_frame_w * m_enlarge_scale;
+			h = m_frame_h * m_enlarge_scale;
+		}
+		else
+		{
+			x = m_frame_x;
+			y = m_frame_y;
+			w = m_frame_w;
+			h = m_frame_h;
+		}
+	}
+	else
+	{
+		x = 0;
+		y = 0;
+		w = GetGLSize().x;
+		h = GetGLSize().y;
+	}
+
+	if (m_enlarge || fp32)
+	{
+		glActiveTexture(GL_TEXTURE0);
+		Framebuffer* final_buffer =
+			TextureRenderer::framebuffer_manager_.framebuffer(
+				"final");
+		if (final_buffer)
+		{
+			//draw the final buffer to itself
+			final_buffer->bind();
+			final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+		}
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		glDisable(GL_DEPTH_TEST);
+
+		//2d adjustment
+		ShaderProgram* img_shader =
+			TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
+		if (img_shader)
+		{
+			if (!img_shader->valid())
+				img_shader->create();
+			img_shader->bind();
+		}
+		img_shader->setLocalParam(0, m_gamma.r(), m_gamma.g(), m_gamma.b(), 1.0);
+		img_shader->setLocalParam(1, m_brightness.r(), m_brightness.g(), m_brightness.b(), 1.0);
+		img_shader->setLocalParam(2, m_hdr.r(), m_hdr.g(), m_hdr.b(), 0.0);
+		//2d adjustment
+
+		DrawViewQuad();
+
+		if (img_shader && img_shader->valid())
+			img_shader->release();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	glPixelStorei(GL_PACK_ROW_LENGTH, w);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	if (fp32)
+		*image = new float[w*h*chann];
+	else
+		*image = new unsigned char[w*h*chann];
+	glReadBuffer(GL_BACK);
+	glReadPixels(x, y, w, h,
+		chann == 3 ? GL_RGB : GL_RGBA,
+		fp32 ? GL_FLOAT : GL_UNSIGNED_BYTE, *image);
+	glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+
+	if (m_enlarge || fp32)
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 void VRenderGLView::PostDraw()
 {
 	//skip if not done with loop
@@ -5504,89 +5589,12 @@ void VRenderGLView::PostDraw()
 	{
 		//capture
 		wxString outputfilename = m_cap_file;
-		int x, y, w, h;
-
-		if (m_draw_frame)
-		{
-			if (m_enlarge)
-			{
-				x = m_frame_x * m_enlarge_scale;
-				y = m_frame_y * m_enlarge_scale;
-				w = m_frame_w * m_enlarge_scale;
-				h = m_frame_h * m_enlarge_scale;
-			}
-			else
-			{
-				x = m_frame_x;
-				y = m_frame_y;
-				w = m_frame_w;
-				h = m_frame_h;
-			}
-		}
-		else
-		{
-			x = 0;
-			y = 0;
-			w = GetGLSize().x;
-			h = GetGLSize().y;
-		}
 
 		int chann = VRenderFrame::GetSaveAlpha() ? 4 : 3;
 		bool fp32 = VRenderFrame::GetSaveFloat();
-
-		if (m_enlarge || fp32)
-		{
-			glActiveTexture(GL_TEXTURE0);
-			Framebuffer* final_buffer =
-				TextureRenderer::framebuffer_manager_.framebuffer(
-				"final");
-			if (final_buffer)
-			{
-				//draw the final buffer to itself
-				final_buffer->bind();
-				final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-			}
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-			glDisable(GL_DEPTH_TEST);
-
-			//2d adjustment
-			ShaderProgram* img_shader =
-				TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
-			if (img_shader)
-			{
-				if (!img_shader->valid())
-					img_shader->create();
-				img_shader->bind();
-			}
-			img_shader->setLocalParam(0, m_gamma.r(), m_gamma.g(), m_gamma.b(), 1.0);
-			img_shader->setLocalParam(1, m_brightness.r(), m_brightness.g(), m_brightness.b(), 1.0);
-			img_shader->setLocalParam(2, m_hdr.r(), m_hdr.g(), m_hdr.b(), 0.0);
-			//2d adjustment
-
-			DrawViewQuad();
-
-			if (img_shader && img_shader->valid())
-				img_shader->release();
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, 0);
-		}
-
-		glPixelStorei(GL_PACK_ROW_LENGTH, w);
-		glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		int x, y, w, h;
 		void* image = 0;
-		if (fp32)
-			image = new float[w*h*chann];
-		else
-			image = new unsigned char[w*h*chann];
-		glReadBuffer(GL_BACK);
-		glReadPixels(x, y, w, h,
-			chann == 3 ? GL_RGB : GL_RGBA,
-			fp32 ? GL_FLOAT : GL_UNSIGNED_BYTE, image);
-		glPixelStorei(GL_PACK_ROW_LENGTH, 0);
-
-		if (m_enlarge || fp32)
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		ReadPixels(chann, fp32, x, y, w, h, &image);
 
 		string str_fn = outputfilename.ToStdString();
 		TIFF *out = TIFFOpen(str_fn.c_str(), "wb");
