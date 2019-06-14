@@ -1324,6 +1324,7 @@ void VMovieView::Run()
 	{
 		VRenderFrame::SetSaveProject(vr_frame->GetSettingDlg()->GetProjSave());
 		VRenderFrame::SetSaveAlpha(vr_frame->GetSettingDlg()->GetSaveAlpha());
+		VRenderFrame::SetSaveFloat(vr_frame->GetSettingDlg()->GetSaveFloat());
 	}
 	VRenderView* vrv = vr_frame->GetView(str);
 	if (!vrv) return;
@@ -1353,6 +1354,7 @@ void VMovieView::Run()
 	if (vr_frame && vr_frame->GetSettingDlg())
 	{
 		vr_frame->GetSettingDlg()->SetSaveAlpha(VRenderFrame::GetSaveAlpha());
+		vr_frame->GetSettingDlg()->SetSaveFloat(VRenderFrame::GetSaveFloat());
 		if (vr_frame->GetSettingDlg()->GetProjSave())
 		{
 			wxString new_folder;
@@ -1394,6 +1396,12 @@ void VMovieView::OnCh2Check(wxCommandEvent &event) {
 	if (ch2)
 		VRenderFrame::SetSaveAlpha(ch2->GetValue());
 }
+//ch3
+void VMovieView::OnCh3Check(wxCommandEvent &event) {
+	wxCheckBox* ch3 = (wxCheckBox*)event.GetEventObject();
+	if (ch3)
+		VRenderFrame::SetSaveFloat(ch3->GetValue());
+}
 //movie quality
 void VMovieView::OnMovieQuality(wxCommandEvent &event) {
 	m_Mbitrate = STOD(((wxTextCtrl*)event.GetEventObject())
@@ -1432,10 +1440,18 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent) {
 		wxCommandEventHandler(VMovieView::OnCh2Check), NULL, panel);
 	if (ch2)
 		ch2->SetValue(VRenderFrame::GetSaveAlpha());
+	wxCheckBox *ch3 = new wxCheckBox(panel, ID_SAVE_FLOAT,
+		"Save float");
+	ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(VMovieView::OnCh3Check), NULL, panel);
+	if (ch3)
+		ch3->SetValue(VRenderFrame::GetSaveFloat());
 	line1->Add(tiffopts, 0, wxALIGN_CENTER);
 	line1->Add(ch1, 0, wxALIGN_CENTER);
 	line1->Add(10, 10);
 	line1->Add(ch2, 0, wxALIGN_CENTER);
+	line1->Add(10, 10);
+	line1->Add(ch3, 0, wxALIGN_CENTER);
 	// movie quality
 	//bitrate
 	wxStaticText *MOVopts = new wxStaticText(panel, wxID_ANY, "MOV Options:",

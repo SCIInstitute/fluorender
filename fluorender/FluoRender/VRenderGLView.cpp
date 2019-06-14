@@ -5531,7 +5531,10 @@ void VRenderGLView::PostDraw()
 			h = GetGLSize().y;
 		}
 
-		if (m_enlarge)
+		int chann = VRenderFrame::GetSaveAlpha() ? 4 : 3;
+		bool fp32 = VRenderFrame::GetSaveFloat();
+
+		if (m_enlarge || fp32)
 		{
 			glActiveTexture(GL_TEXTURE0);
 			Framebuffer* final_buffer =
@@ -5569,15 +5572,20 @@ void VRenderGLView::PostDraw()
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
-		int chann = VRenderFrame::GetSaveAlpha() ? 4 : 3;
 		glPixelStorei(GL_PACK_ROW_LENGTH, w);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		unsigned char *image = new unsigned char[w*h*chann];
+		void* image = 0;
+		if (fp32)
+			image = new float[w*h*chann];
+		else
+			image = new unsigned char[w*h*chann];
 		glReadBuffer(GL_BACK);
-		glReadPixels(x, y, w, h, chann == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, image);
+		glReadPixels(x, y, w, h,
+			chann == 3 ? GL_RGB : GL_RGBA,
+			fp32 ? GL_FLOAT : GL_UNSIGNED_BYTE, image);
 		glPixelStorei(GL_PACK_ROW_LENGTH, 0);
 
-		if (m_enlarge)
+		if (m_enlarge || fp32)
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		string str_fn = outputfilename.ToStdString();
@@ -5587,20 +5595,38 @@ void VRenderGLView::PostDraw()
 		TIFFSetField(out, TIFFTAG_IMAGEWIDTH, w);
 		TIFFSetField(out, TIFFTAG_IMAGELENGTH, h);
 		TIFFSetField(out, TIFFTAG_SAMPLESPERPIXEL, chann);
-		TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, 8);
+		if (fp32)
+		{
+			TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, 32);
+			TIFFSetField(out, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
+		}
+		else
+		{
+			TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, 8);
+			//TIFFSetField(out, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
+		}
 		TIFFSetField(out, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
 		TIFFSetField(out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
 		TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
 		if (VRenderFrame::GetCompression())
 			TIFFSetField(out, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
 
-		tsize_t linebytes = chann * w;
-		unsigned char *buf = NULL;
-		buf = (unsigned char *)_TIFFmalloc(linebytes);
+		tsize_t linebytes = chann * w * (fp32?4:1);
+		void *buf = NULL;
+		buf = _TIFFmalloc(linebytes);
 		TIFFSetField(out, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(out, 0));
 		for (uint32 row = 0; row < (uint32)h; row++)
 		{
-			memcpy(buf, &image[(h - row - 1)*linebytes], linebytes);// check the index here, and figure out why not using h*linebytes
+			if (fp32)
+			{
+				float* line = ((float*)image) + (h - row - 1) * chann * w;
+				memcpy(buf, line, linebytes);
+			}
+			else
+			{// check the index here, and figure out why not using h*linebytes
+				unsigned char* line = ((unsigned char*)image) + (h - row - 1) * chann * w;
+				memcpy(buf, line, linebytes);
+			}
 			if (TIFFWriteScanline(out, buf, row, 0) < 0)
 				break;
 		}

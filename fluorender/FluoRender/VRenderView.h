@@ -658,6 +658,7 @@ private:
 	void OnVolumeMethodCheck(wxCommandEvent& event);
 	void OnCh1Check(wxCommandEvent &event);
 	void OnChAlphaCheck(wxCommandEvent &event);
+	void OnChFloatCheck(wxCommandEvent &event);
 	void OnChEmbedCheck(wxCommandEvent &event);
 	void OnChEnlargeCheck(wxCommandEvent &event);
 	void OnSlEnlargeScroll(wxScrollEvent &event);

@@ -1620,6 +1620,14 @@ void VRenderView::OnChAlphaCheck(wxCommandEvent &event)
 		VRenderFrame::SetSaveAlpha(ch_alpha->GetValue());
 }
 
+//save float
+void VRenderView::OnChFloatCheck(wxCommandEvent &event)
+{
+	wxCheckBox* ch_float = (wxCheckBox*)event.GetEventObject();
+	if (ch_float)
+		VRenderFrame::SetSaveFloat(ch_float->GetValue());
+}
+
 //embde project
 void VRenderView::OnChEmbedCheck(wxCommandEvent &event)
 {
@@ -1712,6 +1720,7 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 	if (ch1)
 		ch1->SetValue(VRenderFrame::GetCompression());
 
+	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	//save alpha
 	wxCheckBox* ch_alpha = new wxCheckBox(panel, ID_SAVE_ALPHA,
 		"Save alpha channel");
@@ -1719,9 +1728,19 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 		wxCommandEventHandler(VRenderView::OnChAlphaCheck), NULL, panel);
 	if (ch_alpha)
 		ch_alpha->SetValue(VRenderFrame::GetSaveAlpha());
+	//save float
+	wxCheckBox* ch_float = new wxCheckBox(panel, ID_SAVE_FLOAT,
+		"Save float channel");
+	ch_float->Connect(ch_float->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(VRenderView::OnChFloatCheck), NULL, panel);
+	if (ch_float)
+		ch_float->SetValue(VRenderFrame::GetSaveFloat());
+	sizer_1->Add(ch_alpha, 0, wxALIGN_CENTER);
+	sizer_1->Add(10, 10);
+	sizer_1->Add(ch_float, 0, wxALIGN_CENTER);
 
 	//enlarge
-	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	wxCheckBox* ch_enlarge = new wxCheckBox(panel, ID_ENLARGE_CHK,
 		"Enlarge output image");
 	ch_enlarge->Connect(ch_enlarge->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
@@ -1737,11 +1756,11 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 	tx_enlarge->Connect(tx_enlarge->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(VRenderView::OnTxEnlargeText), NULL, panel);
 	tx_enlarge->Disable();
-	sizer_1->Add(ch_enlarge, 0, wxALIGN_CENTER);
-	sizer_1->Add(10, 10);
-	sizer_1->Add(sl_enlarge, 1, wxEXPAND);
-	sizer_1->Add(10, 10);
-	sizer_1->Add(tx_enlarge, 0, wxALIGN_CENTER);
+	sizer_2->Add(ch_enlarge, 0, wxALIGN_CENTER);
+	sizer_2->Add(10, 10);
+	sizer_2->Add(sl_enlarge, 1, wxEXPAND);
+	sizer_2->Add(10, 10);
+	sizer_2->Add(tx_enlarge, 0, wxALIGN_CENTER);
 
 	//copy all files check box
 	wxCheckBox* ch_embed = 0;
@@ -1758,9 +1777,9 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 	group1->Add(10, 10);
 	group1->Add(ch1);
 	group1->Add(10, 10);
-	group1->Add(ch_alpha);
-	group1->Add(10, 10);
 	group1->Add(sizer_1);
+	group1->Add(10, 10);
+	group1->Add(sizer_2);
 	group1->Add(10, 10);
 	if (VRenderFrame::GetSaveProject() &&
 		ch_embed)
@@ -1787,6 +1806,7 @@ void VRenderView::OnCapture(wxCommandEvent& event)
 	{
 		VRenderFrame::SetSaveProject(vr_frame->GetSettingDlg()->GetProjSave());
 		VRenderFrame::SetSaveAlpha(vr_frame->GetSettingDlg()->GetSaveAlpha());
+		VRenderFrame::SetSaveFloat(vr_frame->GetSettingDlg()->GetSaveFloat());
 	}
 
 	wxFileDialog file_dlg(m_frame, "Save captured image", "", "", "*.tif", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
@@ -1809,6 +1829,7 @@ void VRenderView::OnCapture(wxCommandEvent& event)
 				vr_frame->SaveProject(prop_file);
 			}
 			vr_frame->GetSettingDlg()->SetSaveAlpha(VRenderFrame::GetSaveAlpha());
+			vr_frame->GetSettingDlg()->SetSaveFloat(VRenderFrame::GetSaveFloat());
 		}
 	}
 }
