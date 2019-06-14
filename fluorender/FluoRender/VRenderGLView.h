@@ -557,6 +557,12 @@ public:
 		}
 	}
 
+	//read pixels
+	void ReadPixels(
+		int chann, bool fp32,
+		int &x, int &y, int &w, int &h,
+		void** image);
+
 public:
 	//set gl context
 	bool m_set_gl;

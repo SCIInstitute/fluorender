@@ -1227,7 +1227,8 @@ void VMovieView::SetProgress(double pcnt) {
 	m_progress_text->ChangeValue(st);
 }
 
-void VMovieView::WriteFrameToFile(int total_frames) {
+void VMovieView::WriteFrameToFile(int total_frames)
+{
 	wxString str = m_views_cmb->GetValue();
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (!vr_frame) return;
@@ -1238,10 +1239,17 @@ void VMovieView::WriteFrameToFile(int total_frames) {
 	wxString format = wxString::Format("_%%0%dd", length);
 	wxString outputfilename = wxString::Format("%s" + format + "%s", m_filename,
 		m_last_frame, ".tif");
-	//capture
-	int x, y, w, h;
 
-	if (m_frame_chk->GetValue())
+	//capture
+	bool bmov = filetype_.IsSameAs(".mov");
+	int chann = VRenderFrame::GetSaveAlpha() ? 4 : 3;
+	bool fp32 = bmov?false:VRenderFrame::GetSaveFloat();
+	int x, y, w, h;
+	void* image = 0;
+	vrv->m_glview->ReadPixels(chann, fp32,
+		x, y, w, h, &image);
+
+	/*if (m_frame_chk->GetValue())
 		vrv->GetFrame(x, y, w, h);
 	else {
 		x = 0;
@@ -1249,56 +1257,77 @@ void VMovieView::WriteFrameToFile(int total_frames) {
 		w = vrv->GetGLSize().x;
 		h = vrv->GetGLSize().y;
 	}
-	int chann = VRenderFrame::GetSaveAlpha() ? 4 : 3;
+
 	glPixelStorei(GL_PACK_ROW_LENGTH, w);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	unsigned char *image = new unsigned char[w*h*chann];
 	glReadBuffer(GL_FRONT);
 	glReadPixels(x, y, w, h, chann == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, image);
-	glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+	glPixelStorei(GL_PACK_ROW_LENGTH, 0);*/
+
 	string str_fn = outputfilename.ToStdString();
-	if (filetype_.IsSameAs(".mov"))
+	if (bmov)
 	{
 		//flip vertically 
 		unsigned char *flip = new unsigned char[w*h * 3];
 		for (size_t yy = 0; yy < (size_t)h; yy++)
 			for (size_t xx = 0; xx < (size_t)w; xx++)
-				memcpy(flip + 3 * (w * yy + xx), image + chann * (w * (h - yy - 1) + xx), 3);
+				memcpy(flip + 3 * (w * yy + xx), (unsigned char*)image + chann * (w * (h - yy - 1) + xx), 3);
 		bool worked = encoder_.set_frame_rgb_data(flip);
 		worked = encoder_.write_video_frame(m_last_frame);
 		if (flip)
 			delete[]flip;
 		if (image)
 			delete[]image;
-		return;
 	}
-	TIFF *out = TIFFOpen(str_fn.c_str(), "wb");
-	if (!out) return;
-	TIFFSetField(out, TIFFTAG_IMAGEWIDTH, w);
-	TIFFSetField(out, TIFFTAG_IMAGELENGTH, h);
-	TIFFSetField(out, TIFFTAG_SAMPLESPERPIXEL, chann);
-	TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, 8);
-	TIFFSetField(out, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-	TIFFSetField(out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-	TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
-	if (VRenderFrame::GetCompression())
-		TIFFSetField(out, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
-
-	tsize_t linebytes = chann * w;
-	unsigned char *buf = NULL;
-	buf = (unsigned char *)_TIFFmalloc(linebytes);
-	TIFFSetField(out, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(out, 0));
-	for (uint32 row = 0; row < (uint32)h; row++)
+	else
 	{
-		memcpy(buf, &image[(h - row - 1)*linebytes], linebytes);// check the index here, and figure out why not using h*linebytes
-		if (TIFFWriteScanline(out, buf, row, 0) < 0)
-			break;
+		TIFF *out = TIFFOpen(str_fn.c_str(), "wb");
+		if (!out) return;
+		TIFFSetField(out, TIFFTAG_IMAGEWIDTH, w);
+		TIFFSetField(out, TIFFTAG_IMAGELENGTH, h);
+		TIFFSetField(out, TIFFTAG_SAMPLESPERPIXEL, chann);
+		if (fp32)
+		{
+			TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, 32);
+			TIFFSetField(out, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
+		}
+		else
+		{
+			TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, 8);
+			//TIFFSetField(out, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
+		}
+		TIFFSetField(out, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
+		TIFFSetField(out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+		TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+		if (VRenderFrame::GetCompression())
+			TIFFSetField(out, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
+
+		tsize_t linebytes = chann * w * (fp32 ? 4 : 1);
+		void *buf = NULL;
+		buf = _TIFFmalloc(linebytes);
+		TIFFSetField(out, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(out, 0));
+		for (uint32 row = 0; row < (uint32)h; row++)
+		{
+			if (fp32)
+			{
+				float* line = ((float*)image) + (h - row - 1) * chann * w;
+				memcpy(buf, line, linebytes);
+			}
+			else
+			{// check the index here, and figure out why not using h*linebytes
+				unsigned char* line = ((unsigned char*)image) + (h - row - 1) * chann * w;
+				memcpy(buf, line, linebytes);
+			}
+			if (TIFFWriteScanline(out, buf, row, 0) < 0)
+				break;
+		}
+		TIFFClose(out);
+		if (buf)
+			_TIFFfree(buf);
+		if (image)
+			delete[]image;
 	}
-	TIFFClose(out);
-	if (buf)
-		_TIFFfree(buf);
-	if (image)
-		delete[]image;
 }
 
 void VMovieView::OnUpFrame(wxCommandEvent& event) {
