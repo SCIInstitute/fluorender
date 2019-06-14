@@ -116,6 +116,7 @@ bool VRenderFrame::m_save_compress = true;
 bool VRenderFrame::m_vrp_embed = false;
 bool VRenderFrame::m_save_project = false;
 bool VRenderFrame::m_save_alpha = false;
+bool VRenderFrame::m_save_float = false;
 
 VRenderFrame::VRenderFrame(
 	wxFrame* frame,

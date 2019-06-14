@@ -315,6 +315,11 @@ public:
 	{ m_save_alpha = value; }
 	static bool GetSaveAlpha()
 	{ return m_save_alpha; }
+	//save flaot
+	static void SetSaveFloat(bool value)
+	{ m_save_float = value; }
+	static bool GetSaveFloat()
+	{ return m_save_float; }
 
 	//show dialogs
 	void ShowPaintTool();
@@ -425,6 +430,8 @@ private:
 	static bool m_save_project;
 	//save alpha
 	static bool m_save_alpha;
+	//save float
+	static bool m_save_float;
 
 	//mac address
 	wxString m_address;

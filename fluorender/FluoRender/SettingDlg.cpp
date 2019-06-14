@@ -728,6 +728,7 @@ void SettingDlg::GetSettings()
 	m_gmc_mode = 2;
 	m_prj_save = false;
 	m_save_alpha = false;
+	m_save_float = false;
 	m_realtime_compress = false;
 	m_skip_bricks = false;
 	m_test_speed = false;
@@ -828,6 +829,12 @@ void SettingDlg::GetSettings()
 	{
 		fconfig.SetPath("/save alpha");
 		fconfig.Read("mode", &m_save_alpha, false);
+	}
+	//save float
+	if (fconfig.Exists("/save float"))
+	{
+		fconfig.SetPath("/save float");
+		fconfig.Read("mode", &m_save_float, false);
 	}
 	//realtime compression
 	if (fconfig.Exists("/realtime compress"))
@@ -1208,6 +1215,9 @@ void SettingDlg::SaveSettings()
 
 	fconfig.SetPath("/save alpha");
 	fconfig.Write("mode", m_save_alpha);
+
+	fconfig.SetPath("/save float");
+	fconfig.Write("mode", m_save_float);
 
 	fconfig.SetPath("/realtime compress");
 	fconfig.Write("mode", m_realtime_compress);

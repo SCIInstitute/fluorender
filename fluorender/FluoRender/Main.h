@@ -52,7 +52,8 @@ private:
 	wxString m_mov_file;
 	double m_bitrate;
 	bool m_lzw;
-	bool m_alpha;
+	bool m_save_alpha;
+	bool m_save_float;
 	bool m_imagej;
 };
 
