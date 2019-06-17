@@ -212,9 +212,13 @@ public:
 	//pixel format
 	int GetApiType() { return m_api_type; }
 	int GetRedBit() {return m_red_bit;}
+	void SetRedBit(int ival) { m_red_bit = ival; }
 	int GetGreenBit() {return m_green_bit;}
+	void SetGreenBit(int ival) { m_green_bit = ival; }
 	int GetBlueBit() {return m_blue_bit;}
+	void SetBlueBit(int ival) { m_blue_bit = ival; }
 	int GetAlphaBit() {return m_alpha_bit;}
+	void SetAlphaBit(int ival) { m_alpha_bit = ival; }
 	int GetDepthBit() {return m_depth_bit;}
 	int GetSamples() {return m_samples;}
 	//context attrib

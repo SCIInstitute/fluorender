@@ -241,6 +241,15 @@ wxPanel(parent, id, pos, size, style),
 				"Graphics card error", wxOK | wxICON_ERROR, this);
 			delete sharedContext;
 			sharedContext = 0;
+			if (vr_frame && vr_frame->GetSettingDlg())
+			{
+				//could be that color bits are incorrectly set
+				vr_frame->GetSettingDlg()->SetRedBit(8);
+				vr_frame->GetSettingDlg()->SetGreenBit(8);
+				vr_frame->GetSettingDlg()->SetBlueBit(8);
+				vr_frame->GetSettingDlg()->SetAlphaBit(8);
+				vr_frame->GetSettingDlg()->SaveSettings();
+			}
 		}
 		if (sharedContext)
 		{
