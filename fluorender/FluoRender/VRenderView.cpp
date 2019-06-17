@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -140,7 +140,7 @@ wxPanel(parent, id, pos, size, style),
 	int samples = 0;
 	int gl_major_ver = 4;
 	int gl_minor_ver = 4;
-	int gl_profile_mask = WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
+	int gl_profile_mask = 1;
 	int api_type = 0;
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetSettingDlg())
@@ -214,10 +214,10 @@ wxPanel(parent, id, pos, size, style),
 		wxGLContextAttrs contextAttrs;
 		switch (gl_profile_mask)
 		{
-		case WGL_CONTEXT_CORE_PROFILE_BIT_ARB:
+		case 1:
 			contextAttrs.CoreProfile().EndList();
 			break;
-		case WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB:
+		case 2:
 			contextAttrs.CompatibilityProfile().EndList();
 			break;
 		}
