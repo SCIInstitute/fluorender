@@ -3738,15 +3738,20 @@ bool TrackMapProcessor::ClusterCellsSplit(CellList &list, size_t frame,
 }
 
 bool TrackMapProcessor::SegmentCells(
-	void* data, void* label,
 	CellList &list, size_t frame, int clnum)
 {
 	if (clnum < 2)
 		return false;
 
+	//get label and data from cache
+	VolCache cache = m_vol_cache.get(frame);
+	void* data = cache.data;
+	void* label = cache.label;
+	if (!data || !label)
+		return false;
+
 	ClusterKmeans cs_proc_km;
 	//ClusterExmax cs_proc_em;
-
 	size_t index;
 	size_t i, j, k;
 	size_t nx = m_map->m_size_x;
@@ -3799,6 +3804,8 @@ bool TrackMapProcessor::SegmentCells(
 	cs_proc_km.AddIDsToData();
 	//cs_proc_em.SetData(cs_proc_km.GetData());
 	cs_proc_km.GenerateNewIDs(id, label, nx, ny, nz);
+	//label modified, save before delete
+	m_vol_cache.set_modified(frame);
 
 	return true;
 }
