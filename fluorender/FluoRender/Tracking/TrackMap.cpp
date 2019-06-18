@@ -139,7 +139,7 @@ bool TrackMapProcessor::InitializeFrame(size_t frame)
 		}
 	}
 
-	//temp prune
+	//prune list
 	for (auto celli = cell_list.begin();
 		celli != cell_list.end(); )
 	{
@@ -148,6 +148,18 @@ bool TrackMapProcessor::InitializeFrame(size_t frame)
 		else
 			++celli;
 	}
+	//prune data
+	size_t tsize = nx * ny * nz;
+	for (index = 0; index < tsize; ++index)
+	{
+		label_value = ((unsigned int*)label)[index];
+		if (label_value &&
+			cell_list.find(label_value) ==
+			cell_list.end())
+			((unsigned int*)label)[index] = 0;
+	}
+	//label modified, save before delete
+	m_vol_cache.set_modified(frame);
 
 	//build intra graph
 	for (i = 0; i < nx; ++i)
@@ -3727,10 +3739,13 @@ bool TrackMapProcessor::ClusterCellsSplit(CellList &list, size_t frame,
 
 bool TrackMapProcessor::SegmentCells(
 	void* data, void* label,
-	CellList &list, size_t frame)
+	CellList &list, size_t frame, int clnum)
 {
+	if (clnum < 2)
+		return false;
+
 	ClusterKmeans cs_proc_km;
-	ClusterExmax cs_proc_em;
+	//ClusterExmax cs_proc_em;
 
 	size_t index;
 	size_t i, j, k;
@@ -3761,18 +3776,29 @@ bool TrackMapProcessor::SegmentCells(
 					data_value = ((unsigned char*)data)[index] / 255.0f;
 				else if (m_map->m_data_bits == 16)
 					data_value = ((unsigned short*)data)[index] * m_map->m_scale / 65535.0f;
-                EmVec pnt = { static_cast<double>(i), static_cast<double>(j), static_cast<double>(k) };
+				EmVec pnt = { static_cast<double>(i), static_cast<double>(j), static_cast<double>(k) };
 				cs_proc_km.AddClusterPoint(
 					pnt, data_value);
 			}
 		}
 	}
 
+	//int clnum = 0;
+	//GetCellUncertainty(list, frame);
+	//for (FL::CellListIter iter = list.begin();
+	//	iter != list.end(); ++iter)
+	//{
+	//	int size1 = iter->second->GetSizeUi();
+	//	int size2 = iter->second->GetExternalUi();
+	//	clnum += std::max(size1, size2);
+	//}
+
 	//run clustering
+	cs_proc_km.SetClnum(clnum);
 	cs_proc_km.Execute();
 	cs_proc_km.AddIDsToData();
-	cs_proc_em.SetData(cs_proc_km.GetData());
-	cs_proc_em.GenerateNewIDs(id, label, nx, ny, nz);
+	//cs_proc_em.SetData(cs_proc_km.GetData());
+	cs_proc_km.GenerateNewIDs(id, label, nx, ny, nz);
 
 	return true;
 }

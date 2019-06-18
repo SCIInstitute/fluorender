@@ -2698,7 +2698,7 @@ void ComponentDlg::Cluster()
 				data_value = ((unsigned char*)data_data)[index] / 255.0f;
 			else if (bits == 16)
 				data_value = ((unsigned short*)data_data)[index] * scale / 65535.0f;
-            FL::EmVec pnt = { static_cast<double>(i), static_cast<double>(j), static_cast<double>(k) };
+			FL::EmVec pnt = { static_cast<double>(i), static_cast<double>(j), static_cast<double>(k) };
 			int cid = -1;
 			if (use_init_cluster)
 			{

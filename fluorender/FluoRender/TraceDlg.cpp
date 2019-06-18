@@ -334,7 +334,8 @@ EVT_BUTTON(ID_CellAppendIDBtn, TraceDlg::OnCellAppendID)
 EVT_BUTTON(ID_CellReplaceIDBtn, TraceDlg::OnCellReplaceID)
 EVT_BUTTON(ID_CellCombineIDBtn, TraceDlg::OnCellCombineID)
 EVT_BUTTON(ID_CellSeparateBtn, TraceDlg::OnCellSeparateID)
-EVT_BUTTON(ID_CellDivideIDBtn, TraceDlg::OnCellDivideID)
+EVT_BUTTON(ID_CellSegBtn, TraceDlg::OnCellSegment)
+EVT_TEXT(ID_CellSegText, TraceDlg::OnCellSegText)
 //analysis page
 //conversion
 EVT_BUTTON(ID_ConvertToRulersBtn, TraceDlg::OnConvertToRulers)
@@ -683,12 +684,15 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(85, 23));
 	m_cell_separate_id_btn = new wxButton(page, ID_CellSeparateBtn, "Separate",
 		wxDefaultPosition, wxSize(85, 23));
-	m_cell_divide_id_btn = new wxButton(page, ID_CellDivideIDBtn, "Divide",
+	m_cell_segment_btn = new wxButton(page, ID_CellSegBtn, "Segment",
+		wxDefaultPosition, wxSize(85, 23));
+	m_cell_segment_text = new wxTextCtrl(page, ID_CellSegText, "2",
 		wxDefaultPosition, wxSize(85, 23));
 	sizer_3->AddStretchSpacer();
 	sizer_3->Add(m_cell_combine_id_btn, 0, wxALIGN_CENTER);
 	sizer_3->Add(m_cell_separate_id_btn, 0, wxALIGN_CENTER);
-	sizer_3->Add(m_cell_divide_id_btn, 0, wxALIGN_CENTER);
+	sizer_3->Add(m_cell_segment_btn, 0, wxALIGN_CENTER);
+	sizer_3->Add(m_cell_segment_text, 0, wxALIGN_CENTER);
 	sizer_3->AddStretchSpacer();
 
 	//vertical sizer
@@ -779,7 +783,8 @@ TraceDlg::TraceDlg(wxWindow* frame, wxWindow* parent)
 	m_cur_time(-1),
 	m_prv_time(-1),
 	m_manual_assist(false),
-	m_auto_id(false)
+	m_auto_id(false),
+	m_clnum(2)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -2768,8 +2773,18 @@ void TraceDlg::OnCellSeparateID(wxCommandEvent& event)
 
 }
 
-void TraceDlg::OnCellDivideID(wxCommandEvent& event)
+void TraceDlg::OnCellSegText(wxCommandEvent& event)
 {
+	wxString str = m_cell_segment_text->GetValue();
+	long ival = 0;
+	if (str.ToLong(&ival))
+		m_clnum = ival;
+}
+
+void TraceDlg::OnCellSegment(wxCommandEvent& event)
+{
+	if (m_clnum < 2)
+		return;
 	if (!m_view)
 		return;
 
@@ -2830,7 +2845,7 @@ void TraceDlg::OnCellDivideID(wxCommandEvent& event)
 	tm_processor.SetScale(vd->GetScalarScale());
 	tm_processor.SetSizes(resx, resy, resz);
 	tm_processor.SegmentCells(nrrd_data->data,
-		nrrd_label->data, list_cur, m_cur_time);
+		nrrd_label->data, list_cur, m_cur_time, m_clnum);
 
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_pool();
