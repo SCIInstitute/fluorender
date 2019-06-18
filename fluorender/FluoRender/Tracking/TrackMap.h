@@ -123,7 +123,8 @@ namespace FL
 		bool LinkAddedCells(CellList &list, size_t frame1, size_t frame2);
 		bool CombineCells(pCell &cell, CellList &list, size_t frame);
 		bool DivideCells(CellList &list, size_t frame);
-		bool SegmentCells(void* data, void* label, CellList &list, size_t frame);
+		bool SegmentCells(void* data, void* label, CellList &list,
+			size_t frame, int clnum = 2);
 		bool ReplaceCellID(unsigned int old_id,
 			unsigned int new_id, size_t frame);
 
