@@ -2844,8 +2844,7 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 	tm_processor.SetBits(vd->GetBits());
 	tm_processor.SetScale(vd->GetScalarScale());
 	tm_processor.SetSizes(resx, resy, resz);
-	tm_processor.SegmentCells(nrrd_data->data,
-		nrrd_label->data, list_cur, m_cur_time, m_clnum);
+	tm_processor.SegmentCells(list_cur, m_cur_time, m_clnum);
 
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_pool();
