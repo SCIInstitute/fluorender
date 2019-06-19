@@ -296,7 +296,7 @@ private:
 	wxButton* m_cell_combine_id_btn;
 	wxButton* m_cell_separate_id_btn;
 	wxButton* m_cell_segment_btn;
-	wxTextCtrl* m_cell_segment_text;
+	wxSpinCtrl* m_cell_segment_text;
 
 	//analysis page
 	//conversion
@@ -343,9 +343,12 @@ private:
 	void Test1();
 	void Test2(int type);
 
-	//read/delete volume cache
+	//read/delete volume cache from file
 	void ReadVolCache(FL::VolCache& vol_cache);
 	void DelVolCache(FL::VolCache& vol_cache);
+	//get existing volume data
+	void GetVolCache(FL::VolCache& vol_cache);
+	void ClrVolCache(FL::VolCache& vol_cache);
 
 private:
 	//map page
@@ -393,7 +396,7 @@ private:
 	void OnCellCombineID(wxCommandEvent& event);
 	void OnCellSeparateID(wxCommandEvent& event);
 	void OnCellSegment(wxCommandEvent& event);
-	void OnCellSegText(wxCommandEvent& event);
+	void OnCellSegText(wxSpinEvent& event);
 	//analysis page
 	//conversion
 	void OnConvertToRulers(wxCommandEvent &event);

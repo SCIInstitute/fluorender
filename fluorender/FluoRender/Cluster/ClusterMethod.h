@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <boost/shared_ptr.hpp>
 #include <list>
 #include <vector>
+#include <Tracking/CellList.h>
 
 namespace FL
 {
@@ -157,13 +158,17 @@ namespace FL
 		{ m_spc = {spcx, spcy, spcz}; }
 		void AddClusterPoint(const EmVec &p, const float value, int cid=-1);
 		void GenerateNewIDs(unsigned int id, void* label,
-			size_t nx, size_t ny, size_t nz, unsigned int inc = 20);
+			size_t nx, size_t ny, size_t nz,
+			bool out_cells = false, unsigned int inc = 42);
 		bool FindId(void* label, unsigned int id,
 			size_t nx, size_t ny, size_t nz);
 		std::vector<unsigned int> &GetNewIDs()
 		{ return m_id_list; }
 		virtual bool Execute() = 0;
 		virtual float GetProb() = 0;
+
+		CellList& GetCellList()
+		{ return m_out_cells; }
 
 	protected:
 		Cluster m_data;
@@ -172,6 +177,8 @@ namespace FL
 		std::vector<unsigned int> m_id_list;
 		bool m_use_init_cluster;
 		EmVec m_spc;//spacings
+		//output cells
+		CellList m_out_cells;
 	};
 }
 #endif//FL_ClusterMethod_h

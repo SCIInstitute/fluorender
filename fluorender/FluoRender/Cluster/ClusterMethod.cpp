@@ -47,13 +47,17 @@ void ClusterMethod::AddClusterPoint(const EmVec &p, const float value, int cid)
 }
 
 void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
-	size_t nx, size_t ny, size_t nz, unsigned int inc)
+	size_t nx, size_t ny, size_t nz,
+	bool out_cells, unsigned int inc)
 {
 	m_id_list.clear();
+	if (out_cells)
+		m_out_cells.clear();
 
 	unsigned int id2 = id;
 	unsigned long long index;
 	int i, j, k;
+	Cell* cell = 0;
 
 	for (size_t ii = 0; ii < m_result.size(); ++ii)
 	{
@@ -64,6 +68,9 @@ void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
 			if (id2 == id)
 				break;
 		} while (!id2 || FindId(label, id2, nx, ny, nz));
+
+		if (out_cells)
+			cell = new Cell(id2);
 
 		for (ClusterIter iter = cluster.begin();
 			iter != cluster.end(); ++iter)
@@ -79,8 +86,15 @@ void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
 				continue;
 			index = nx*ny*k + nx*j + i;
 			((unsigned int*)label)[index] = id2;
+
+			if (out_cells)
+				cell->Inc(i, j, k, (*iter)->intensity);
 		}
 		m_id_list.push_back(id2);
+
+		if (out_cells)
+			m_out_cells.insert(std::pair<unsigned int, pCell>
+				(id2, pCell(cell)));
 	}
 }
 

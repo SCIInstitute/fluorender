@@ -3288,6 +3288,39 @@ bool TrackMapProcessor::AddCells(CellList &list, size_t frame)
 	return true;
 }
 
+bool TrackMapProcessor::RemoveCells(CellList &list, size_t frame)
+{
+	//check validity
+	if (!m_map->ExtendFrameNum(frame))
+		return false;
+
+	CellList &cell_list = m_map->m_cells_list.at(frame);
+	VertexList &vert_list = m_map->m_vertices_list.at(frame);
+
+	for (CellListIter iter = list.begin();
+		iter != list.end(); ++iter)
+	{
+		pCell cell = iter->second;
+		CellListIter iter_old = cell_list.find(cell->Id());
+		if (iter_old == cell_list.end())
+			continue;
+
+		pCell old_cell = iter_old->second;
+		cell_list.erase(iter_old);
+		//vertex
+		pVertex vertex = old_cell->GetVertex().lock();
+		if (vertex)
+		{
+			vertex->RemoveCell(old_cell);
+			VertexListIter iter_vt = vert_list.find(vertex->Id());
+			if (iter_vt != vert_list.end())
+				vert_list.erase(iter_vt);
+		}
+	}
+
+	return true;
+}
+
 bool TrackMapProcessor::LinkAddedCells(CellList &list, size_t f1, size_t f2)
 {
 	size_t frame_num = m_map->m_frame_num;
@@ -3803,9 +3836,16 @@ bool TrackMapProcessor::SegmentCells(
 	cs_proc_km.Execute();
 	cs_proc_km.AddIDsToData();
 	//cs_proc_em.SetData(cs_proc_km.GetData());
-	cs_proc_km.GenerateNewIDs(id, label, nx, ny, nz);
+	cs_proc_km.GenerateNewIDs(id, label, nx, ny, nz, true);
 	//label modified, save before delete
 	m_vol_cache.set_modified(frame);
+
+	CellList out_cells = cs_proc_km.GetCellList();
+	//modify map
+	RemoveCells(list, frame);
+	AddCells(out_cells, frame);
+	LinkAddedCells(out_cells, frame, frame - 1);
+	LinkAddedCells(out_cells, frame, frame + 1);
 
 	return true;
 }
