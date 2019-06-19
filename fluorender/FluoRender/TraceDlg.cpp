@@ -335,7 +335,7 @@ EVT_BUTTON(ID_CellReplaceIDBtn, TraceDlg::OnCellReplaceID)
 EVT_BUTTON(ID_CellCombineIDBtn, TraceDlg::OnCellCombineID)
 EVT_BUTTON(ID_CellSeparateBtn, TraceDlg::OnCellSeparateID)
 EVT_BUTTON(ID_CellSegBtn, TraceDlg::OnCellSegment)
-EVT_TEXT(ID_CellSegText, TraceDlg::OnCellSegText)
+EVT_SPINCTRL(ID_CellSegText, TraceDlg::OnCellSegText)
 //analysis page
 //conversion
 EVT_BUTTON(ID_ConvertToRulersBtn, TraceDlg::OnConvertToRulers)
@@ -684,15 +684,16 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(85, 23));
 	m_cell_separate_id_btn = new wxButton(page, ID_CellSeparateBtn, "Separate",
 		wxDefaultPosition, wxSize(85, 23));
+	m_cell_segment_text = new wxSpinCtrl(page, ID_CellSegText, "2",
+		wxDefaultPosition, wxSize(40, 21));
 	m_cell_segment_btn = new wxButton(page, ID_CellSegBtn, "Segment",
-		wxDefaultPosition, wxSize(85, 23));
-	m_cell_segment_text = new wxTextCtrl(page, ID_CellSegText, "2",
-		wxDefaultPosition, wxSize(85, 23));
+		wxDefaultPosition, wxSize(65, 23));
 	sizer_3->AddStretchSpacer();
 	sizer_3->Add(m_cell_combine_id_btn, 0, wxALIGN_CENTER);
 	sizer_3->Add(m_cell_separate_id_btn, 0, wxALIGN_CENTER);
-	sizer_3->Add(m_cell_segment_btn, 0, wxALIGN_CENTER);
+	sizer_3->Add(10, 10);
 	sizer_3->Add(m_cell_segment_text, 0, wxALIGN_CENTER);
+	sizer_3->Add(m_cell_segment_btn, 0, wxALIGN_CENTER);
 	sizer_3->AddStretchSpacer();
 
 	//vertical sizer
@@ -2773,12 +2774,9 @@ void TraceDlg::OnCellSeparateID(wxCommandEvent& event)
 
 }
 
-void TraceDlg::OnCellSegText(wxCommandEvent& event)
+void TraceDlg::OnCellSegText(wxSpinEvent& event)
 {
-	wxString str = m_cell_segment_text->GetValue();
-	long ival = 0;
-	if (str.ToLong(&ival))
-		m_clnum = ival;
+	m_clnum = m_cell_segment_text->GetValue();
 }
 
 void TraceDlg::OnCellSegment(wxCommandEvent& event)
@@ -2828,13 +2826,6 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 	if (!tex)
 		return;
 
-	Nrrd* nrrd_data = tex->get_nrrd(0);
-	if (!nrrd_data)
-		return;
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
-		return;
-
 	TraceGroup *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
@@ -2844,13 +2835,16 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 	tm_processor.SetBits(vd->GetBits());
 	tm_processor.SetScale(vd->GetScalarScale());
 	tm_processor.SetSizes(resx, resy, resz);
+	//register file reading and deleteing functions
+	tm_processor.RegisterCacheQueueFuncs(
+		boost::bind(&TraceDlg::GetVolCache, this, _1),
+		boost::bind(&TraceDlg::ClrVolCache, this, _1));
+	tm_processor.SetVolCacheSize(1);
 	tm_processor.SegmentCells(list_cur, m_cur_time, m_clnum);
 
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_pool();
-	//save label mask to disk
-//	vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
-
+	//m_view->RefreshGL();
 	//update view
 	CellUpdate();
 }
@@ -3241,6 +3235,61 @@ void TraceDlg::DelVolCache(FL::VolCache& vol_cache)
 		vol_cache.label = 0;
 		vol_cache.nrrd_label = 0;
 	}
+}
+
+void TraceDlg::GetVolCache(FL::VolCache& vol_cache)
+{
+	//get volume, readers
+	if (!m_view || !m_view->m_glview)
+		return;
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+	Texture* tex = vd->GetTexture();
+	if (!tex)
+		return;
+
+	Nrrd* data = tex->get_nrrd(0);
+	vol_cache.nrrd_data = data;
+	vol_cache.data = data->data;
+	Nrrd* label = tex->get_nrrd(tex->nlabel());
+	vol_cache.nrrd_label = label;
+	vol_cache.label = label->data;
+	if (data && label)
+		vol_cache.valid = true;
+}
+
+void TraceDlg::ClrVolCache(FL::VolCache& vol_cache)
+{
+	while (vol_cache.valid && vol_cache.modified)
+	{
+		//save it first if modified
+		//assume that only label is modified
+		if (!m_view || !m_view->m_glview)
+			break;
+		VolumeData* vd = m_view->m_glview->m_cur_vol;
+		if (!vd)
+			break;
+		BaseReader* reader = vd->GetReader();
+		if (!reader)
+			break;
+		MSKWriter msk_writer;
+		msk_writer.SetData((Nrrd*)vol_cache.nrrd_label);
+		double spcx, spcy, spcz;
+		vd->GetSpacings(spcx, spcy, spcz);
+		msk_writer.SetSpacings(spcx, spcy, spcz);
+		int chan = vd->GetCurChannel();
+		int frame = vol_cache.frame;
+		wstring filename = reader->GetCurLabelName(frame, chan);
+		msk_writer.Save(filename, 1);
+		break;
+	}
+
+	vol_cache.valid = false;
+	vol_cache.data = 0;
+	vol_cache.nrrd_data = 0;
+	vol_cache.label = 0;
+	vol_cache.nrrd_label = 0;
 }
 
 void TraceDlg::OnCellPrev(wxCommandEvent &event)

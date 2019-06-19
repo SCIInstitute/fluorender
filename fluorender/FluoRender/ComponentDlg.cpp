@@ -2725,7 +2725,7 @@ void ComponentDlg::Cluster()
 
 	if (method->Execute())
 	{
-		method->GenerateNewIDs(0, (void*)data_label, nx, ny, nz, 60);
+		method->GenerateNewIDs(0, (void*)data_label, nx, ny, nz);
 		vd->GetVR()->clear_tex_pool();
 		m_view->RefreshGL();
 	}
