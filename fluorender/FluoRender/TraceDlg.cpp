@@ -2837,9 +2837,9 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 	tm_processor.SetSizes(resx, resy, resz);
 	//register file reading and deleteing functions
 	tm_processor.RegisterCacheQueueFuncs(
-		boost::bind(&TraceDlg::GetVolCache, this, _1),
-		boost::bind(&TraceDlg::ClrVolCache, this, _1));
-	tm_processor.SetVolCacheSize(1);
+		boost::bind(&TraceDlg::ReadVolCache, this, _1),
+		boost::bind(&TraceDlg::DelVolCache, this, _1));
+	tm_processor.SetVolCacheSize(3);
 	tm_processor.SegmentCells(list_cur, m_cur_time, m_clnum);
 
 	//invalidate label mask in gpu
@@ -3184,108 +3184,74 @@ void TraceDlg::ReadVolCache(FL::VolCache& vol_cache)
 	int chan = vd->GetCurChannel();
 	int frame = vol_cache.frame;
 
-	Nrrd* data = reader->Convert(frame, chan, true);
-	vol_cache.nrrd_data = data;
-	vol_cache.data = data->data;
-	wstring lblname = reader->GetCurLabelName(frame, chan);
-	lbl_reader.SetFile(lblname);
-	Nrrd* label = lbl_reader.Convert(frame, chan, true);
-	vol_cache.nrrd_label = label;
-	vol_cache.label = label->data;
-	if (data && label)
-		vol_cache.valid = true;
+	if (frame == m_view->m_glview->m_tseq_cur_num)
+	{
+		Texture* tex = vd->GetTexture();
+		if (!tex)
+			return;
+
+		Nrrd* data = tex->get_nrrd(0);
+		vol_cache.nrrd_data = data;
+		vol_cache.data = data->data;
+		Nrrd* label = tex->get_nrrd(tex->nlabel());
+		vol_cache.nrrd_label = label;
+		vol_cache.label = label->data;
+		if (data && label)
+			vol_cache.valid = true;
+	}
+	else
+	{
+		Nrrd* data = reader->Convert(frame, chan, true);
+		if (!data)
+			return;
+		vol_cache.nrrd_data = data;
+		vol_cache.data = data->data;
+		wstring lblname = reader->GetCurLabelName(frame, chan);
+		lbl_reader.SetFile(lblname);
+		Nrrd* label = lbl_reader.Convert(frame, chan, true);
+		if (!label)
+			return;
+		vol_cache.nrrd_label = label;
+		vol_cache.label = label->data;
+		if (data && label)
+			vol_cache.valid = true;
+	}
 }
 
 void TraceDlg::DelVolCache(FL::VolCache& vol_cache)
 {
-	while (vol_cache.valid && vol_cache.modified)
-	{
-		//save it first if modified
-		//assume that only label is modified
-		if (!m_view || !m_view->m_glview)
-			break;
-		VolumeData* vd = m_view->m_glview->m_cur_vol;
-		if (!vd)
-			break;
-		BaseReader* reader = vd->GetReader();
-		if (!reader)
-			break;
-		MSKWriter msk_writer;
-		msk_writer.SetData((Nrrd*)vol_cache.nrrd_label);
-		double spcx, spcy, spcz;
-		vd->GetSpacings(spcx, spcy, spcz);
-		msk_writer.SetSpacings(spcx, spcy, spcz);
-		int chan = vd->GetCurChannel();
-		int frame = vol_cache.frame;
-		wstring filename = reader->GetCurLabelName(frame, chan);
-		msk_writer.Save(filename, 1);
-		break;
-	}
-
-	vol_cache.valid = false;
-	if (vol_cache.data)
-	{
-		nrrdNuke((Nrrd*)vol_cache.nrrd_data);
-		vol_cache.data = 0;
-		vol_cache.nrrd_data = 0;
-	}
-	if (vol_cache.label)
-	{
-		nrrdNuke((Nrrd*)vol_cache.nrrd_label);
-		vol_cache.label = 0;
-		vol_cache.nrrd_label = 0;
-	}
-}
-
-void TraceDlg::GetVolCache(FL::VolCache& vol_cache)
-{
-	//get volume, readers
 	if (!m_view || !m_view->m_glview)
 		return;
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
 		return;
-	Texture* tex = vd->GetTexture();
-	if (!tex)
+	BaseReader* reader = vd->GetReader();
+	if (!reader)
 		return;
+	int chan = vd->GetCurChannel();
+	int frame = vol_cache.frame;
 
-	Nrrd* data = tex->get_nrrd(0);
-	vol_cache.nrrd_data = data;
-	vol_cache.data = data->data;
-	Nrrd* label = tex->get_nrrd(tex->nlabel());
-	vol_cache.nrrd_label = label;
-	vol_cache.label = label->data;
-	if (data && label)
-		vol_cache.valid = true;
-}
-
-void TraceDlg::ClrVolCache(FL::VolCache& vol_cache)
-{
-	while (vol_cache.valid && vol_cache.modified)
+	if (vol_cache.valid && vol_cache.modified)
 	{
 		//save it first if modified
 		//assume that only label is modified
-		if (!m_view || !m_view->m_glview)
-			break;
-		VolumeData* vd = m_view->m_glview->m_cur_vol;
-		if (!vd)
-			break;
-		BaseReader* reader = vd->GetReader();
-		if (!reader)
-			break;
 		MSKWriter msk_writer;
 		msk_writer.SetData((Nrrd*)vol_cache.nrrd_label);
 		double spcx, spcy, spcz;
 		vd->GetSpacings(spcx, spcy, spcz);
 		msk_writer.SetSpacings(spcx, spcy, spcz);
-		int chan = vd->GetCurChannel();
-		int frame = vol_cache.frame;
 		wstring filename = reader->GetCurLabelName(frame, chan);
 		msk_writer.Save(filename, 1);
-		break;
 	}
 
 	vol_cache.valid = false;
+	if (frame != m_view->m_glview->m_tseq_cur_num)
+	{
+		if (vol_cache.data)
+			nrrdNuke((Nrrd*)vol_cache.nrrd_data);
+		if (vol_cache.label)
+			nrrdNuke((Nrrd*)vol_cache.nrrd_label);
+	}
 	vol_cache.data = 0;
 	vol_cache.nrrd_data = 0;
 	vol_cache.label = 0;

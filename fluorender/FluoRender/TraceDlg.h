@@ -346,9 +346,6 @@ private:
 	//read/delete volume cache from file
 	void ReadVolCache(FL::VolCache& vol_cache);
 	void DelVolCache(FL::VolCache& vol_cache);
-	//get existing volume data
-	void GetVolCache(FL::VolCache& vol_cache);
-	void ClrVolCache(FL::VolCache& vol_cache);
 
 private:
 	//map page
