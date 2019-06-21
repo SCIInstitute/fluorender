@@ -1099,6 +1099,40 @@ bool TrackMapProcessor::UnlinkEdgeSize(InterGraph &graph, pVertex &vertex,
 	return false;
 }
 
+//unlink edge by count
+bool TrackMapProcessor::UnlinkEdgeCount(InterGraph &graph, pVertex &vertex,
+	std::vector<InterEdge> &edges)
+{
+	if (edges.size() < 2)
+		return false;
+
+	//sort edges
+	std::sort(edges.begin(), edges.end(),
+		std::bind(comp_edge_count, std::placeholders::_1,
+			std::placeholders::_2, graph));
+	//suppose we have more than 2 edges, find where to cut
+	//if 0 hasn't been linked/unlinked many times
+	for (size_t i = 1; i < edges.size(); ++i)
+	{
+		if (graph[edges[i]].count > graph[edges[0]].count)
+			unlink_edge(edges[i], graph);
+		return true;
+	}
+	//otherwise, it's uncertain
+	return false;
+}
+
+//unlink last edge
+bool TrackMapProcessor::UnlinkEdgeLast(InterGraph &graph, pVertex &vertex,
+	std::vector<InterEdge> &edges)
+{
+	if (edges.size() < 2)
+		return false;
+	size_t lasti = edges.size() - 1;
+	unlink_edge(edges[lasti], graph);
+	return true;
+}
+
 //unlink edge by extended alternating path
 bool TrackMapProcessor::UnlinkAlterPath(InterGraph &graph, pVertex &vertex,
 	bool calc_sim)
@@ -1475,9 +1509,13 @@ bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph,
 				result = UnlinkAlterPath(graph, vertex, calc_sim);
 		}
 		if (!result)
+			UnlinkEdgeCount(graph, vertex, linked_edges);
+		if (!result)
 			//segmentation
 			result = UnlinkSegment(graph, vertex, linked_edges,
 				calc_sim, seg_count_min < count, seg_count_min);
+		if (!result)
+			UnlinkEdgeLast(graph, vertex, linked_edges);
 	}
 
 	return result;
@@ -1487,6 +1525,12 @@ bool TrackMapProcessor::comp_edge_size(InterEdge &edge1,
 	InterEdge &edge2, InterGraph& graph)
 {
 	return graph[edge1].size_f > graph[edge2].size_f;
+}
+
+bool TrackMapProcessor::comp_edge_count(InterEdge &edge1,
+	InterEdge &edge2, InterGraph& graph)
+{
+	return graph[edge1].count > graph[edge2].count;
 }
 
 bool TrackMapProcessor::comp_path_size(Path &path1, Path &path2)

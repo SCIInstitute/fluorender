@@ -237,6 +237,12 @@ namespace FL
 		//unlink edge by size similarity
 		bool UnlinkEdgeSize(InterGraph &graph, pVertex &vertex,
 			std::vector<InterEdge> &edges, bool calc_sim);
+		//unlink edge by count
+		bool UnlinkEdgeCount(InterGraph &graph, pVertex &vertex,
+			std::vector<InterEdge> &edges);
+		//unlink last edge
+		bool UnlinkEdgeLast(InterGraph &graph, pVertex &vertex,
+			std::vector<InterEdge> &edges);
 		//unlink edge by extended alternating path
 		bool UnlinkAlterPath(InterGraph &graph, pVertex &vertex,
 			bool calc_sim);
@@ -275,6 +281,7 @@ namespace FL
 		bool unlink_alt_path(InterGraph &graph, PathList &paths);
 		bool merge_cell_size(IntraEdge &edge, pCell &cell1, pCell &cell2, IntraGraph& graph);
 		static bool comp_edge_size(InterEdge &edge1, InterEdge &edge2, InterGraph& graph);
+		static bool comp_edge_count(InterEdge &edge1, InterEdge &edge2, InterGraph& graph);
 		bool similar_edge_size(InterEdge &edge1, InterEdge &edge2, InterGraph& graph);
 		static bool comp_path_size(Path &path1, Path &path2);
 		static bool comp_path_mm(Path &path1, Path &path2);
