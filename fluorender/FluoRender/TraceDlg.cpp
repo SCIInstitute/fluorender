@@ -3407,7 +3407,7 @@ void TraceDlg::GenMap()
 
 	GetSettings(m_view);
 
-	CellUpdate();
+	//CellUpdate();
 }
 
 void TraceDlg::RefineMap(int t)
