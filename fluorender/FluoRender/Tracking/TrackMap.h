@@ -520,8 +520,11 @@ namespace FL
 		int c = graph.counter;
 		if (c < 4)
 			return true;
-		int r = c / 2 + rand() % c;
-		return count < r;
+		if (rand() % c < 10)
+			return true;
+		if (rand() % count < 10)
+			return true;
+		return false;
 	}
 
 	class TrackMap

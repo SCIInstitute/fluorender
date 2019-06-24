@@ -1508,14 +1508,14 @@ bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph,
 			if (!result)
 				result = UnlinkAlterPath(graph, vertex, calc_sim);
 		}
-		if (!result)
-			UnlinkEdgeCount(graph, vertex, linked_edges);
+		//if (!result)
+		//	UnlinkEdgeCount(graph, vertex, linked_edges);
 		if (!result)
 			//segmentation
 			result = UnlinkSegment(graph, vertex, linked_edges,
 				calc_sim, seg_count_min < count, seg_count_min);
-		if (!result)
-			UnlinkEdgeLast(graph, vertex, linked_edges);
+		//if (!result)
+		//	UnlinkEdgeLast(graph, vertex, linked_edges);
 	}
 
 	return result;
@@ -3454,6 +3454,9 @@ bool TrackMapProcessor::LinkAddedCells(CellList &list, size_t f1, size_t f2)
 	}
 
 	m_vol_cache.unprotect(f1);
+
+	//reset counter
+	inter_graph.counter = 0;
 
 	return true;
 }
