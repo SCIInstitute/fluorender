@@ -3406,6 +3406,8 @@ void TraceDlg::GenMap()
 	m_gen_map_prg->SetValue(100);
 
 	GetSettings(m_view);
+
+	CellUpdate();
 }
 
 void TraceDlg::RefineMap(int t)
@@ -3501,4 +3503,6 @@ void TraceDlg::RefineMap(int t)
 	(*m_stat_text) << wxString::Format("Wall clock time: %.4fs\n", time_span.count());
 
 	m_gen_map_prg->SetValue(100);
+
+	CellUpdate();
 }
