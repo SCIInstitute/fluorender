@@ -94,6 +94,9 @@ namespace FL
 		//find the maximum overlapping and set link flags on inter graph
 		bool ProcessFrames(size_t frame1, size_t frame2);
 
+		//clear counters
+		bool ClearCounters();
+
 		bool Export(std::string &filename);
 		bool Import(std::string &filename);
 

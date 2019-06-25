@@ -872,6 +872,27 @@ bool TrackMapProcessor::ProcessFrames(size_t frame1, size_t frame2)
 	return true;
 }
 
+//clear counters
+bool TrackMapProcessor::ClearCounters()
+{
+	size_t listsize = m_map->m_inter_graph_list.size();
+	for (size_t i = 0; i < listsize; ++i)
+	{
+		InterGraph &graph = m_map->m_inter_graph_list.at(i);
+		graph.counter = 0;
+
+		for (auto iv : boost::make_iterator_range(vertices(graph)))
+		{
+			graph[iv].count = 0;
+		}
+		for (auto ie : boost::make_iterator_range(edges(graph)))
+		{
+			graph[ie].count = 0;
+		}
+	}
+	return true;
+}
+
 //vertex matching routines
 //find out current valence of a vertex
 bool TrackMapProcessor::GetValence(pVertex &vertex, InterGraph &graph,
@@ -1508,14 +1529,14 @@ bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph,
 			if (!result)
 				result = UnlinkAlterPath(graph, vertex, calc_sim);
 		}
-		//if (!result)
-		//	UnlinkEdgeCount(graph, vertex, linked_edges);
+		if (!result && !calc_sim)
+			UnlinkEdgeCount(graph, vertex, linked_edges);
+		//if (!result && !calc_sim)
+		//	UnlinkEdgeLast(graph, vertex, linked_edges);
 		if (!result)
 			//segmentation
 			result = UnlinkSegment(graph, vertex, linked_edges,
 				calc_sim, seg_count_min < count, seg_count_min);
-		//if (!result)
-		//	UnlinkEdgeLast(graph, vertex, linked_edges);
 	}
 
 	return result;
