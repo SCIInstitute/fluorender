@@ -3444,12 +3444,14 @@ void TraceDlg::RefineMap(int t)
 	}
 
 	//start progress
+	bool clear_counters = false;
 	FL::pTrackMap track_map = trace_group->GetTrackMap();
 	int start_frame, end_frame;
 	if (t < 0)
 	{
 		start_frame = 0;
 		end_frame = track_map->GetFrameNum() - 1;
+		clear_counters = true;
 	}
 	else
 		start_frame = end_frame = t;
@@ -3483,6 +3485,8 @@ void TraceDlg::RefineMap(int t)
 
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
+	if (clear_counters)
+		tm_processor.ClearCounters();
 	//iterations
 	for (size_t iteri = 0; iteri < iter_num; ++iteri)
 	{
