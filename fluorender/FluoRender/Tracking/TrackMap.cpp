@@ -1741,6 +1741,8 @@ bool TrackMapProcessor::get_alter_path(InterGraph &graph, pVertex &vertex,
 		if (edge.second)
 		{
 			vertex1 = graph[v1].vertex.lock();
+			if (!vertex1)
+				continue;
 			if (visited.find(v1) ==
 				visited.end())
 			{
