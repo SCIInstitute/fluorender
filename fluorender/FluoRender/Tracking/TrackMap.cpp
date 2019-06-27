@@ -1135,7 +1135,7 @@ bool TrackMapProcessor::UnlinkEdgeCount(InterGraph &graph, pVertex &vertex,
 	//if 0 hasn't been linked/unlinked many times
 	for (size_t i = 1; i < edges.size(); ++i)
 	{
-		if (graph[edges[i]].count > graph[edges[0]].count)
+		if (graph[edges[i]].count < graph[edges[0]].count)
 			unlink_edge(edges[i], graph);
 		return true;
 	}
@@ -1529,12 +1529,11 @@ bool TrackMapProcessor::ProcessVertex(pVertex &vertex, InterGraph &graph,
 			if (!result)
 				result = UnlinkAlterPath(graph, vertex, calc_sim);
 		}
-		if (!result && !calc_sim)
-			UnlinkEdgeCount(graph, vertex, linked_edges);
-		//if (!result && !calc_sim)
-		//	UnlinkEdgeLast(graph, vertex, linked_edges);
+		if (!result && !calc_sim && !m_major_converge && !seg_count_min)
+			result = UnlinkEdgeCount(graph, vertex, linked_edges);
+
+		//segmentation
 		if (!result)
-			//segmentation
 			result = UnlinkSegment(graph, vertex, linked_edges,
 				calc_sim, seg_count_min < count, seg_count_min);
 	}
