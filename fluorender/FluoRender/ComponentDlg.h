@@ -202,6 +202,12 @@ public:
 	void ResetCmd();
 	void PlayCmd();
 
+	//in and out cell lists
+	FL::CellList &GetInCells()
+	{ return m_in_cells; }
+	FL::CellList &GetOutCells()
+	{ return m_out_cells; }
+
 private:
 	wxWindow* m_frame;
 	VRenderView* m_view;
@@ -272,6 +278,10 @@ private:
 	FL::CompCommand m_command;
 
 	FL::ComponentAnalyzer m_comp_analyzer;
+
+	//in and out cell lists for tracking
+	FL::CellList m_in_cells;
+	FL::CellList m_out_cells;
 
 	//tab control
 	wxNotebook *m_notebook;

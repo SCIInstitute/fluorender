@@ -3771,7 +3771,7 @@ bool TrackMapProcessor::ClusterCellsSplit(CellList &list, size_t frame,
 					data_value = ((unsigned char*)data)[index] / 255.0f;
 				else if (m_map->m_data_bits == 16)
 					data_value = ((unsigned short*)data)[index] * m_map->m_scale / 65535.0f;
-                EmVec pnt = { static_cast<double>(i), static_cast<double>(j), static_cast<double>(k) };
+				EmVec pnt = { static_cast<double>(i), static_cast<double>(j), static_cast<double>(k) };
 				cs_proc_km.AddClusterPoint(
 					pnt, data_value);
 			}
@@ -3800,9 +3800,10 @@ bool TrackMapProcessor::ClusterCellsSplit(CellList &list, size_t frame,
 	if (result)
 	{
 		cs_proc_em.GenerateNewIDs(id, label,
-			nx, ny, nz);
+			nx, ny, nz, true);
+		listout = cs_proc_em.GetCellList();
 		//generate output cell list
-		Cluster &points = cs_proc_em.GetData();
+/*		Cluster &points = cs_proc_em.GetData();
 		//std::vector<unsigned int> &ids = cs_proc_em.GetNewIDs();
 		pClusterPoint point;
 		unsigned int id2;
@@ -3828,7 +3829,7 @@ bool TrackMapProcessor::ClusterCellsSplit(CellList &list, size_t frame,
 				listout.insert(std::pair<unsigned int, pCell>
 					(id2, pCell(cell)));
 			}
-		}
+		}*/
 
 		//label modified, save before delete
 		m_vol_cache.set_modified(frame);
@@ -3917,6 +3918,18 @@ bool TrackMapProcessor::SegmentCells(
 	LinkAddedCells(out_cells, frame, frame + 1);
 
 	return true;
+}
+
+void TrackMapProcessor::RelinkCells(CellList &in, CellList& out, size_t frame)
+{
+	VolCache cache = m_vol_cache.get(frame);
+	bool result = false;
+	result |= RemoveCells(in, frame);
+	result |= AddCells(out, frame);
+	result |= LinkAddedCells(out, frame, frame - 1);
+	result |= LinkAddedCells(out, frame, frame + 1);
+	if (result)
+		m_vol_cache.set_modified(frame);
 }
 
 bool TrackMapProcessor::ReplaceCellID(

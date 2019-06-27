@@ -131,6 +131,9 @@ namespace FL
 		bool ReplaceCellID(unsigned int old_id,
 			unsigned int new_id, size_t frame);
 
+		//relink cells after segmentation
+		void RelinkCells(CellList &in, CellList& out, size_t frame);
+
 		//information
 		void GetLinkLists(size_t frame,
 			FL::VertexList &in_orphan_list,

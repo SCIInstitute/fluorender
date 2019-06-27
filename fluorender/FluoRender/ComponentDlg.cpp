@@ -2568,6 +2568,9 @@ void ComponentDlg::OnCleanBtn(wxCommandEvent &event)
 
 void ComponentDlg::Cluster()
 {
+	m_in_cells.clear();
+	m_out_cells.clear();
+
 	if (!m_view)
 		return;
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
@@ -2699,10 +2702,10 @@ void ComponentDlg::Cluster()
 			else if (bits == 16)
 				data_value = ((unsigned short*)data_data)[index] * scale / 65535.0f;
 			FL::EmVec pnt = { static_cast<double>(i), static_cast<double>(j), static_cast<double>(k) };
+			label_value = data_label[index];
 			int cid = -1;
 			if (use_init_cluster)
 			{
-				label_value = data_label[index];
 				cid = 0;
 				bool found = false;
 				for (auto it = ordered_clusters.begin();
@@ -2720,12 +2723,27 @@ void ComponentDlg::Cluster()
 			}
 			method->AddClusterPoint(
 				pnt, data_value, cid);
+
+			//add to list
+			auto iter = m_in_cells.find(label_value);
+			if (iter != m_in_cells.end())
+			{
+				iter->second->Inc(i, j, k, data_value);
+			}
+			else
+			{
+				FL::Cell* cell = new FL::Cell(label_value);
+				cell->Inc(i, j, k, data_value);
+				m_in_cells.insert(std::pair<unsigned int, FL::pCell>
+					(label_value, FL::pCell(cell)));
+			}
 		}
 	}
 
 	if (method->Execute())
 	{
-		method->GenerateNewIDs(0, (void*)data_label, nx, ny, nz);
+		method->GenerateNewIDs(0, (void*)data_label, nx, ny, nz, true);
+		m_out_cells = method->GetCellList();
 		vd->GetVR()->clear_tex_pool();
 		m_view->RefreshGL();
 	}
