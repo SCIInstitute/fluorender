@@ -3485,8 +3485,9 @@ void TraceDlg::RefineMap(int t)
 
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
-	if (clear_counters)
-		tm_processor.ClearCounters();
+	//not sure if counters need to be cleared for all refinement
+	//if (clear_counters)
+	//	tm_processor.ClearCounters();
 	//iterations
 	for (size_t iteri = 0; iteri < iter_num; ++iteri)
 	{
