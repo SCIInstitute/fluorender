@@ -318,6 +318,7 @@ EVT_TEXT_ENTER(ID_CompIDText2, TraceDlg::OnCompAppend)
 //ID link controls
 EVT_BUTTON(ID_CellExclusiveLinkBtn, TraceDlg::OnCellExclusiveLink)
 EVT_BUTTON(ID_CellLinkBtn, TraceDlg::OnCellLink)
+EVT_BUTTON(ID_CellLinkAllBtn, TraceDlg::OnCellLinkAll)
 EVT_BUTTON(ID_CellIsolateBtn, TraceDlg::OnCellIsolate)
 EVT_BUTTON(ID_CellUnlinkBtn, TraceDlg::OnCellUnlink)
 //manual assist
@@ -592,9 +593,12 @@ wxWindow* TraceDlg::CreateLinkPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(80, 23));
 	m_cell_link_btn = new wxButton(page, ID_CellLinkBtn, "Link IDs",
 		wxDefaultPosition, wxSize(80, 23));
+	m_cell_link_all_btn = new wxButton(page, ID_CellLinkAllBtn, "Link New IDs",
+		wxDefaultPosition, wxSize(80, 23));
 	sizer_2->AddStretchSpacer();
 	sizer_2->Add(m_cell_exclusive_link_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_link_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_cell_link_all_btn, 0, wxALIGN_CENTER);
 	sizer_2->AddStretchSpacer();
 
 	//ID unlink controls
@@ -2322,6 +2326,31 @@ void TraceDlg::CellLink(bool exclusive)
 void TraceDlg::OnCellLink(wxCommandEvent &event)
 {
 	CellLink(false);
+}
+
+void TraceDlg::OnCellLinkAll(wxCommandEvent &event)
+{
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (!vr_frame || !vr_frame->GetComponentDlg())
+		return;
+	if (!m_view)
+		return;
+	TraceGroup *trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+		return;
+
+	FL::pTrackMap track_map = trace_group->GetTrackMap();
+	FL::TrackMapProcessor tm_processor(track_map);
+	//register file reading and deleteing functions
+	tm_processor.RegisterCacheQueueFuncs(
+		boost::bind(&TraceDlg::ReadVolCache, this, _1),
+		boost::bind(&TraceDlg::DelVolCache, this, _1));
+	tm_processor.SetVolCacheSize(3);
+	FL::CellList in = vr_frame->GetComponentDlg()->GetInCells();
+	FL::CellList out = vr_frame->GetComponentDlg()->GetOutCells();
+	tm_processor.RelinkCells(in, out, m_cur_time);
+
+	CellUpdate();
 }
 
 void TraceDlg::OnCellExclusiveLink(wxCommandEvent &event)

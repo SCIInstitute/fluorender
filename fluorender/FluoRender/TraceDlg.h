@@ -135,6 +135,7 @@ public:
 		ID_CompIDText2,
 		ID_CellExclusiveLinkBtn,
 		ID_CellLinkBtn,
+		ID_CellLinkAllBtn,
 		ID_CellIsolateBtn,
 		ID_CellUnlinkBtn,
 		//assist
@@ -281,6 +282,7 @@ private:
 	//ID link controls
 	wxButton* m_cell_exclusive_link_btn;
 	wxButton* m_cell_link_btn;
+	wxButton* m_cell_link_all_btn;
 	wxButton* m_cell_isolate_btn;
 	wxButton* m_cell_unlink_btn;
 
@@ -378,6 +380,7 @@ private:
 	//ID lnik controls
 	void OnCellExclusiveLink(wxCommandEvent& event);
 	void OnCellLink(wxCommandEvent& event);
+	void OnCellLinkAll(wxCommandEvent& event);
 	void OnCellIsolate(wxCommandEvent& event);
 	void OnCellUnlink(wxCommandEvent& event);
 	//manual tracking assistant
