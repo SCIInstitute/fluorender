@@ -1613,8 +1613,8 @@ void TraceDlg::OnAnalyzeUncertainHist(wxCommandEvent &event)
 		{
 			wxString sid = wxString::Format("%u", iter->second->Id());
 			(*m_stat_text) << sid << "\t" <<
-				int(iter->second->GetSizeUi()) << "\t" <<
-				int(iter->second->GetExternalUi()) << "\n";
+				int(iter->second->GetCount0()) << "\t" <<
+				int(iter->second->GetCount1()) << "\n";
 		}
 	}
 }

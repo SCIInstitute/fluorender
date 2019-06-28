@@ -4163,7 +4163,7 @@ void TrackMapProcessor::GetCellUncertainty(
 					v0 = vertex->GetInterVert(inter_graph);
 					if (v0 == InterGraph::null_vertex())
 						continue;
-					cell_iter->second->SetSizeUi(
+					cell_iter->second->SetCount0(
 						inter_graph[v0].count);
 				}
 			}
@@ -4175,7 +4175,7 @@ void TrackMapProcessor::GetCellUncertainty(
 		for (cell_iter = list.begin();
 			cell_iter != list.end(); ++cell_iter)
 		{
-			cell_iter->second->SetSizeUi(0);
+			cell_iter->second->SetCount0(0);
 		}
 	}
 
@@ -4202,7 +4202,7 @@ void TrackMapProcessor::GetCellUncertainty(
 					v0 = vertex->GetInterVert(inter_graph);
 					if (v0 == InterGraph::null_vertex())
 						continue;
-					cell_iter->second->SetExternalUi(
+					cell_iter->second->SetCount1(
 						inter_graph[v0].count);
 				}
 			}
@@ -4214,7 +4214,7 @@ void TrackMapProcessor::GetCellUncertainty(
 		for (cell_iter = list.begin();
 		cell_iter != list.end(); ++cell_iter)
 		{
-			cell_iter->second->SetExternalUi(0);
+			cell_iter->second->SetCount1(0);
 		}
 	}
 }
