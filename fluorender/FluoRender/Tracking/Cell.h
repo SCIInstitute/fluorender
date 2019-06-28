@@ -77,6 +77,7 @@ namespace FL
 			m_id(id), m_brick_id(0),
 			m_size_ui(0), m_size_f(0.0f),
 			m_external_ui(0), m_external_f(0.0f),
+			m_count0(0), m_count1(0),
 			m_intra_vert(IntraGraph::null_vertex())
 		{}
 		~Cell() {}
@@ -110,6 +111,11 @@ namespace FL
 		void SetSizeF(float size_f);
 		void SetExternalUi(unsigned int external_ui);
 		void SetExternalF(float external_f);
+		//count
+		unsigned int GetCount0();
+		unsigned int GetCount1();
+		void SetCount0(unsigned int val);
+		void SetCount1(unsigned int val);
 
 	private:
 		unsigned int m_id;
@@ -122,6 +128,9 @@ namespace FL
 		//external size
 		unsigned int m_external_ui;
 		float m_external_f;
+		//count
+		unsigned int m_count0;
+		unsigned int m_count1;
 		IntraVert m_intra_vert;
 		pwVertex m_vertex;//parent
 	};
@@ -266,6 +275,27 @@ namespace FL
 	inline void Cell::SetExternalF(float external_f)
 	{
 		m_external_f = external_f;
+	}
+
+	//count
+	inline unsigned int Cell::GetCount0()
+	{
+		return m_count0;
+	}
+
+	inline unsigned int Cell::GetCount1()
+	{
+		return m_count1;
+	}
+
+	inline void Cell::SetCount0(unsigned int val)
+	{
+		m_count0 = val;
+	}
+
+	inline void Cell::SetCount1(unsigned int val)
+	{
+		m_count1 = val;
 	}
 
 }//namespace FL
