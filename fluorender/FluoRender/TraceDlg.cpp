@@ -2875,7 +2875,8 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 	vd->GetVR()->clear_tex_pool();
 	//m_view->RefreshGL();
 	//update view
-	CellUpdate();
+	//CellUpdate();
+	RefineMap(m_cur_time);
 }
 
 //magic
