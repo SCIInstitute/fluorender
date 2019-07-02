@@ -4077,13 +4077,137 @@ void TrackMapProcessor::GetCellsByUncertainty(
 	if (frame >= m_map->m_frame_num)
 		return;
 
-	VertexList &vertex_list = m_map->m_vertices_list.at(frame);
-	InterGraph &inter_graph = frame==m_map->m_frame_num-1?
-		m_map->m_inter_graph_list.at(frame-1):
-		m_map->m_inter_graph_list.at(frame);
 	bool filter = !(list_in.empty());
+	unsigned int count;
+	pVertex vertex;
+	pCell cell;
+	CellBinIter pwcell_iter;
+	CellListIter cell_iter;
+	//VertexList &vertex_list = m_map->m_vertices_list.at(frame);
+	if (frame > 0)
+	{
+		InterGraph &inter_graph = 
+			m_map->m_inter_graph_list.at(frame-1);
+		for (auto ie : boost::make_iterator_range(edges(inter_graph)))
+		{
+			count = inter_graph[ie].count;
+			if (count >= m_uncertain_low &&
+				count <= m_uncertain_high)
+			{
+				auto v0 = boost::source(ie, inter_graph);
+				if (inter_graph[v0].frame == frame)
+				{
+					vertex = inter_graph[v0].vertex.lock();
+					if (vertex)
+					{
+						for (pwcell_iter = vertex->GetCellsBegin();
+							pwcell_iter != vertex->GetCellsEnd();
+							++pwcell_iter)
+						{
+							cell = pwcell_iter->lock();
+							if (!cell)
+								continue;
+							if (filter)
+							{
+								cell_iter = list_in.find(cell->Id());
+								if (cell_iter == list_in.end())
+									continue;
+							}
+							list_out.insert(std::pair<unsigned int, pCell>
+								(cell->Id(), cell));
+						}
+					}
+				}
+				v0 = boost::target(ie, inter_graph);
+				if (inter_graph[v0].frame == frame)
+				{
+					vertex = inter_graph[v0].vertex.lock();
+					if (vertex)
+					{
+						for (pwcell_iter = vertex->GetCellsBegin();
+							pwcell_iter != vertex->GetCellsEnd();
+							++pwcell_iter)
+						{
+							cell = pwcell_iter->lock();
+							if (!cell)
+								continue;
+							if (filter)
+							{
+								cell_iter = list_in.find(cell->Id());
+								if (cell_iter == list_in.end())
+									continue;
+							}
+							list_out.insert(std::pair<unsigned int, pCell>
+								(cell->Id(), cell));
+						}
+					}
+				}
+			}
+		}
+	}
+	if (frame < m_map->m_frame_num - 1)
+	{
+		InterGraph &inter_graph =
+			m_map->m_inter_graph_list.at(frame);
+		for (auto ie : boost::make_iterator_range(edges(inter_graph)))
+		{
+			count = inter_graph[ie].count;
+			if (count >= m_uncertain_low &&
+				count <= m_uncertain_high)
+			{
+				auto v0 = boost::source(ie, inter_graph);
+				if (inter_graph[v0].frame == frame)
+				{
+					vertex = inter_graph[v0].vertex.lock();
+					if (vertex)
+					{
+						for (pwcell_iter = vertex->GetCellsBegin();
+							pwcell_iter != vertex->GetCellsEnd();
+							++pwcell_iter)
+						{
+							cell = pwcell_iter->lock();
+							if (!cell)
+								continue;
+							if (filter)
+							{
+								cell_iter = list_in.find(cell->Id());
+								if (cell_iter == list_in.end())
+									continue;
+							}
+							list_out.insert(std::pair<unsigned int, pCell>
+								(cell->Id(), cell));
+						}
+					}
+				}
+				v0 = boost::target(ie, inter_graph);
+				if (inter_graph[v0].frame == frame)
+				{
+					vertex = inter_graph[v0].vertex.lock();
+					if (vertex)
+					{
+						for (pwcell_iter = vertex->GetCellsBegin();
+							pwcell_iter != vertex->GetCellsEnd();
+							++pwcell_iter)
+						{
+							cell = pwcell_iter->lock();
+							if (!cell)
+								continue;
+							if (filter)
+							{
+								cell_iter = list_in.find(cell->Id());
+								if (cell_iter == list_in.end())
+									continue;
+							}
+							list_out.insert(std::pair<unsigned int, pCell>
+								(cell->Id(), cell));
+						}
+					}
+				}
+			}
+		}
+	}
 
-	InterVert v0;
+/*	InterVert v0;
 	unsigned int count;
 	pVertex vertex;
 	pCell cell;
@@ -4123,7 +4247,7 @@ void TrackMapProcessor::GetCellsByUncertainty(
 					(cell->Id(), cell));
 			}
 		}
-	}
+	}*/
 }
 
 void TrackMapProcessor::GetCellUncertainty(

@@ -799,10 +799,10 @@ TraceDlg::TraceDlg(wxWindow* frame, wxWindow* parent)
 
 	//notebook
 	m_notebook = new wxNotebook(this, wxID_ANY);
-	m_notebook->AddPage(CreateMapPage(m_notebook), L"Track Map \u21e8");
-	m_notebook->AddPage(CreateSelectPage(m_notebook), L"Selection \u21e8");
-	m_notebook->AddPage(CreateLinkPage(m_notebook), L"Linkage \u21e8");
-	m_notebook->AddPage(CreateModifyPage(m_notebook), L"Modify \u21e8");
+	m_notebook->AddPage(CreateMapPage(m_notebook), L"Track Map");
+	m_notebook->AddPage(CreateSelectPage(m_notebook), L"Selection");
+	m_notebook->AddPage(CreateModifyPage(m_notebook), L"Modify");
+	m_notebook->AddPage(CreateLinkPage(m_notebook), L"Linkage");
 	m_notebook->AddPage(CreateAnalysisPage(m_notebook), "Analysis");
 
 	wxStaticText *st = 0;
@@ -896,6 +896,7 @@ void TraceDlg::GetSettings(VRenderView* vrv)
 {
 	if (!vrv) return;
 	m_view = vrv;
+	m_cur_time = m_view->m_glview->m_tseq_cur_num;
 
 	TraceGroup* trace_group = m_view->GetTraceGroup();
 	if (trace_group)
@@ -922,7 +923,6 @@ void TraceDlg::GetSettings(VRenderView* vrv)
 	}
 	else
 	{
-		m_cur_time = m_view->m_glview->m_tseq_cur_num;
 		m_load_trace_text->SetValue("No Track map");
 	}
 
@@ -1019,8 +1019,8 @@ void TraceDlg::UpdateList()
 				else break;
 			}
 
-			m_cur_time = cur_time;
-			m_prv_time = prv_time;
+			if (cur_time >= 0) m_cur_time = cur_time;
+			if (prv_time >= 0) m_prv_time = prv_time;
 		}
 
 		//set tiem text
@@ -1177,7 +1177,7 @@ void TraceDlg::OnCellSizeText(wxCommandEvent &event)
 }
 
 //uncertainty filter
-void TraceDlg::OnCompUncertainBtn(wxCommandEvent &event)
+void TraceDlg::UncertainFilter(bool input)
 {
 	if (!m_view)
 		return;
@@ -1188,29 +1188,35 @@ void TraceDlg::OnCompUncertainBtn(wxCommandEvent &event)
 	if (!trace_group->GetTrackMap()->GetFrameNum())
 		return;
 	FL::CellList list_in, list_out;
+
 	//fill inlist
-	long item = -1;
-	while (true)
+	if (input)
 	{
-		item = m_trace_list_curr->GetNextItem(
-			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-		if (item == -1)
-			break;
-		else
-			AddLabel(item, m_trace_list_curr, list_in);
-	}
-	if (list_in.size() == 0)
-	{
-		item = -1;
+		long item = -1;
 		while (true)
 		{
 			item = m_trace_list_curr->GetNextItem(
-				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+				item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 			if (item == -1)
 				break;
 			else
 				AddLabel(item, m_trace_list_curr, list_in);
 		}
+		if (list_in.size() == 0)
+		{
+			item = -1;
+			while (true)
+			{
+				item = m_trace_list_curr->GetNextItem(
+					item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+				if (item == -1)
+					break;
+				else
+					AddLabel(item, m_trace_list_curr, list_in);
+			}
+		}
+		if (list_in.empty())
+			return;
 	}
 
 	FL::pTrackMap track_map = trace_group->GetTrackMap();
@@ -1237,6 +1243,11 @@ void TraceDlg::OnCompUncertainBtn(wxCommandEvent &event)
 		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
+void TraceDlg::OnCompUncertainBtn(wxCommandEvent &event)
+{
+	UncertainFilter();
+}
+
 void TraceDlg::OnCompUncertainLowChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
@@ -1259,6 +1270,8 @@ void TraceDlg::OnCompUncertainLowText(wxCommandEvent &event)
 			trace_group->SetUncertainLow(ival);
 		}
 	}
+
+	UncertainFilter(true);
 }
 
 void TraceDlg::OnCompUncertainHiChange(wxScrollEvent &event)
@@ -1283,6 +1296,8 @@ void TraceDlg::OnCompUncertainHiText(wxCommandEvent &event)
 			trace_group->SetUncertainHigh(ival);
 		}
 	}
+
+	UncertainFilter(true);
 }
 
 //auto tracking
