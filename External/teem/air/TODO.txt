@@ -1,0 +1,40 @@
+
+Things that would be good for a future airString or airBuffer
+ * string dynamically reallocated on write, with optional cap on
+   allowed size, maybe allowing control of whether reaching that size
+   is an error
+ * when reading from a file, allow the file to be gzip'd, so that
+   all the subsequent IO can be blind to whether the file was
+   compressed or not
+ * unify sprint'ing into string, or fwrite'ing to file
+ * unify reading from string, or from file
+ * when writing to string, should be remembering where last output is,
+   to avoid needless repeated calls to strlen
+ * should this be the thing that can make stdin fseek-able?
+ * could use one of these as wrapper around stderr for normal output of
+   unrrduCmds, but allowing it to be saved to string in case the command
+   is being invoked from C
+ * remember comment from nrrd/formatPNG.c:
+      /* Reading PNGs teaches Gordon that his scheme for parsing nrrd header
+         information is inappropriately specific to reading PNMs and NRRDs,
+         since in this case the text from which we parse a nrrd field
+         descriptor did NOT come from a line of text as read by
+         _nrrdOneLine */
+      nio->line = (char *)airFree(nio->line);
+      nio->line = airStrdup(txt[i].text);
+
+
+An OS-general means of:
+* generating a unique temp file name
+* removing a given file (for cleaning up temp file)
+
+Fix Windows implementation of airTime()
+
+fix airSinglePrintf to not put a space before double-type special values
+("%4s" hack has to go)
+
+complete fprintf/sprintf/printf stand-in: use trio?
+complete fscanf/sscanf stand-in
+
+Decide if air will have a general-purpose thread-safe progress indication
+scheme, or if this will be each library's responsibility
