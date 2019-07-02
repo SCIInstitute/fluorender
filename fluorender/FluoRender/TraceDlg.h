@@ -196,6 +196,8 @@ public:
 	void CellEraseID();
 	void CompDelete();
 	void CompClear();
+	//uncertain filtering
+	void UncertainFilter(bool input = false);
 
 	//measurement
 	void SaveOutputResult(wxString &filename);
