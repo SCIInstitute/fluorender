@@ -608,8 +608,8 @@ bool TrackMapProcessor::LinkOrphans(InterGraph& graph, pVertex &vertex)
 	//should be very close
 	FLIVR::BBox box = vertex->GetBox();
 	FLIVR::BBox box1 = v1_min->GetBox();
-	box.extend(0.1, 0.1, 0.1);
-	box1.extend(0.1, 0.1, 0.1);
+	box.extend_mul(1.0);
+	box1.extend_mul(1.0);
 	if (!box.intersect(box1))
 		return false;
 
