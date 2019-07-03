@@ -310,8 +310,6 @@ EVT_TEXT(ID_CellSizeText, TraceDlg::OnCellSizeText)
 EVT_BUTTON(ID_CompUncertainBtn, TraceDlg::OnCompUncertainBtn)
 EVT_COMMAND_SCROLL(ID_CompUncertainLowSldr, TraceDlg::OnCompUncertainLowChange)
 EVT_TEXT(ID_CompUncertainLowText, TraceDlg::OnCompUncertainLowText)
-EVT_COMMAND_SCROLL(ID_CompUncertainHiSldr, TraceDlg::OnCompUncertainHiChange)
-EVT_TEXT(ID_CompUncertainHiText, TraceDlg::OnCompUncertainHiText)
 //link page
 EVT_TEXT(ID_CompIDText2, TraceDlg::OnCompIDText)
 EVT_TEXT_ENTER(ID_CompIDText2, TraceDlg::OnCompAppend)
@@ -501,7 +499,7 @@ wxWindow* TraceDlg::CreateSelectPage(wxWindow *parent)
 	//cell size filter
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Component size:",
-		wxDefaultPosition, wxSize(130, 20));
+		wxDefaultPosition, wxSize(110, 20));
 	m_cell_size_sldr = new wxSlider(page, ID_CellSizeSldr, 20, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_cell_size_text = new wxTextCtrl(page, ID_CellSizeText, "20",
@@ -512,23 +510,17 @@ wxWindow* TraceDlg::CreateSelectPage(wxWindow *parent)
 	sizer_2->Add(m_cell_size_text, 0, wxALIGN_CENTER);
 	//uncertainty filter
 	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
-	m_comp_uncertain_btn = new wxButton(page, ID_CompUncertainBtn, "Uncertainty filter:",
-		wxDefaultPosition, wxSize(130, 23));
+	m_comp_uncertain_btn = new wxButton(page, ID_CompUncertainBtn, "Uncertainty",
+		wxDefaultPosition, wxSize(80, 23));
 	m_comp_uncertain_low_sldr = new wxSlider(page, ID_CompUncertainLowSldr, 0, 0, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_comp_uncertain_low_text = new wxTextCtrl(page, ID_CompUncertainLowText, "0",
 		wxDefaultPosition, wxSize(60, 23), 0, vald_int);
-	m_comp_uncertain_hi_sldr = new wxSlider(page, ID_CompUncertainHiSldr, 20, 0, 20,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_comp_uncertain_hi_text = new wxTextCtrl(page, ID_CompUncertainHiText, "20",
-		wxDefaultPosition, wxSize(60, 23), 0, vald_int);
 	sizer_3->Add(5, 5);
 	sizer_3->Add(m_comp_uncertain_btn, 0, wxALIGN_CENTER);
+	sizer_3->Add(30, 23);
 	sizer_3->Add(m_comp_uncertain_low_sldr, 1, wxEXPAND);
 	sizer_3->Add(m_comp_uncertain_low_text, 0, wxALIGN_CENTER);
-	sizer_3->Add(5, 5);
-	sizer_3->Add(m_comp_uncertain_hi_sldr, 1, wxEXPAND);
-	sizer_3->Add(m_comp_uncertain_hi_text, 0, wxALIGN_CENTER);
 
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
@@ -1225,9 +1217,6 @@ void TraceDlg::UncertainFilter(bool input)
 	long ival;
 	str.ToLong(&ival);
 	tm_processor.SetUncertainLow(ival);
-	str = m_comp_uncertain_hi_text->GetValue();
-	str.ToLong(&ival);
-	tm_processor.SetUncertainHigh(ival);
 	tm_processor.GetCellsByUncertainty(list_in, list_out, m_cur_time);
 
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
@@ -1268,32 +1257,6 @@ void TraceDlg::OnCompUncertainLowText(wxCommandEvent &event)
 		if (trace_group)
 		{
 			trace_group->SetUncertainLow(ival);
-		}
-	}
-
-	UncertainFilter(true);
-}
-
-void TraceDlg::OnCompUncertainHiChange(wxScrollEvent &event)
-{
-	int ival = event.GetPosition();
-	wxString str = wxString::Format("%d", ival);
-	m_comp_uncertain_hi_text->SetValue(str);
-}
-
-void TraceDlg::OnCompUncertainHiText(wxCommandEvent &event)
-{
-	wxString str = m_comp_uncertain_hi_text->GetValue();
-	long ival;
-	str.ToLong(&ival);
-	m_comp_uncertain_hi_sldr->SetValue(ival);
-
-	if (m_view)
-	{
-		TraceGroup* trace_group = m_view->GetTraceGroup();
-		if (trace_group)
-		{
-			trace_group->SetUncertainHigh(ival);
 		}
 	}
 

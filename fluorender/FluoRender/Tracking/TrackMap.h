@@ -74,7 +74,6 @@ namespace FL
 		void SetSimilarThresh(float value);
 		void SetLevelThresh(int level);
 		void SetUncertainLow(unsigned int value);
-		void SetUncertainHigh(unsigned int value);
 		void SetMerge(bool value);
 		void SetSplit(bool value);
 
@@ -164,7 +163,6 @@ namespace FL
 		bool m_split;
 		//uncertainty filter
 		unsigned int m_uncertain_low;
-		unsigned int m_uncertain_high;
 		//the trackmap
 		pTrackMap m_map;
 		//volume data cache
@@ -382,11 +380,6 @@ namespace FL
 	inline void TrackMapProcessor::SetUncertainLow(unsigned int value)
 	{
 		m_uncertain_low = value;
-	}
-
-	inline void TrackMapProcessor::SetUncertainHigh(unsigned int value)
-	{
-		m_uncertain_high = value;
 	}
 
 	inline void TrackMapProcessor::SetMerge(bool value)
