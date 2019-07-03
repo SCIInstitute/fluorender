@@ -4091,8 +4091,7 @@ void TrackMapProcessor::GetCellsByUncertainty(
 		for (auto ie : boost::make_iterator_range(edges(inter_graph)))
 		{
 			count = inter_graph[ie].count;
-			if (count >= m_uncertain_low &&
-				count <= m_uncertain_high)
+			if (count >= m_uncertain_low)
 			{
 				auto v0 = boost::source(ie, inter_graph);
 				if (inter_graph[v0].frame == frame)
@@ -4152,8 +4151,7 @@ void TrackMapProcessor::GetCellsByUncertainty(
 		for (auto ie : boost::make_iterator_range(edges(inter_graph)))
 		{
 			count = inter_graph[ie].count;
-			if (count >= m_uncertain_low &&
-				count <= m_uncertain_high)
+			if (count >= m_uncertain_low)
 			{
 				auto v0 = boost::source(ie, inter_graph);
 				if (inter_graph[v0].frame == frame)
@@ -4206,48 +4204,6 @@ void TrackMapProcessor::GetCellsByUncertainty(
 			}
 		}
 	}
-
-/*	InterVert v0;
-	unsigned int count;
-	pVertex vertex;
-	pCell cell;
-	CellBinIter pwcell_iter;
-	CellListIter cell_iter;
-	for (VertexListIter iter = vertex_list.begin();
-	iter != vertex_list.end(); ++iter)
-	{
-		if (!iter->second)
-			continue;
-		if (iter->second->GetSizeUi() < m_size_thresh)
-			continue;
-		v0 = iter->second->GetInterVert(inter_graph);
-		if (v0 == InterGraph::null_vertex())
-			continue;
-		count = inter_graph[v0].count;
-		if (count >= m_uncertain_low &&
-			count <= m_uncertain_high)
-		{
-			vertex = inter_graph[v0].vertex.lock();
-			if (!vertex)
-				continue;
-			for (pwcell_iter = vertex->GetCellsBegin();
-				pwcell_iter != vertex->GetCellsEnd();
-				++pwcell_iter)
-			{
-				cell = pwcell_iter->lock();
-				if (!cell)
-					continue;
-				if (filter)
-				{
-					cell_iter = list_in.find(cell->Id());
-					if (cell_iter == list_in.end())
-						continue;
-				}
-				list_out.insert(std::pair<unsigned int, pCell>
-					(cell->Id(), cell));
-			}
-		}
-	}*/
 }
 
 void TrackMapProcessor::GetCellUncertainty(
