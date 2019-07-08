@@ -84,6 +84,9 @@ EVT_TEXT(ID_DetailLevelOffsetText, SettingDlg::OnDetailLevelOffsetEdit)
 EVT_COMBOBOX(ID_FontCmb, SettingDlg::OnFontChange)
 EVT_COMBOBOX(ID_FontSizeCmb, SettingDlg::OnFontSizeChange)
 EVT_COMBOBOX(ID_TextColorCmb, SettingDlg::OnTextColorChange)
+//line width
+EVT_COMMAND_SCROLL(ID_LineWidthSldr, SettingDlg::OnLineWidthSldr)
+EVT_TEXT(ID_LineWidthText, SettingDlg::OnLineWidthText)
 //paint history depth
 EVT_COMMAND_SCROLL(ID_PaintHistDepthSldr, SettingDlg::OnPaintHistDepthChange)
 EVT_TEXT(ID_PaintHistDepthText, SettingDlg::OnPaintHistDepthEdit)
@@ -173,10 +176,24 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	group2->Add(st);
 	group2->Add(10, 5);
 
-	//paint history depth
+	//line width
 	wxBoxSizer *group3 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Paint History"), wxVERTICAL);
+		new wxStaticBox(page, wxID_ANY, "Line Width"), wxVERTICAL);
 	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
+	m_line_width_sldr = new wxSlider(page, ID_LineWidthSldr, 1, 1, 20,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_line_width_text = new wxTextCtrl(page, ID_LineWidthText, "1",
+		wxDefaultPosition, wxSize(40, -1), 0, vald_int);
+	sizer3_1->Add(m_line_width_sldr, 1, wxEXPAND);
+	sizer3_1->Add(m_line_width_text, 0, wxALIGN_CENTER);
+	group3->Add(10, 5);
+	group3->Add(sizer3_1, 0, wxEXPAND);
+	group3->Add(10, 5);
+
+	//paint history depth
+	wxBoxSizer *group4 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "Paint History"), wxVERTICAL);
+	wxBoxSizer *sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_paint_hist_depth_sldr = new wxSlider(page, ID_PaintHistDepthSldr, 0, 0, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_paint_hist_depth_text = new wxTextCtrl(page, ID_PaintHistDepthText, "0",
@@ -185,13 +202,13 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 		"The number of undo steps for paint brush selection.\n" \
 		"Set the value to 0 to disable history.\n" \
 		"A value greater than 0 slows down speed and increases memory usage.");
-	sizer3_1->Add(m_paint_hist_depth_sldr, 1, wxEXPAND);
-	sizer3_1->Add(m_paint_hist_depth_text, 0, wxALIGN_CENTER);
-	group3->Add(10, 5);
-	group3->Add(sizer3_1, 0, wxEXPAND);
-	group3->Add(10, 5);
-	group3->Add(st);
-	group3->Add(10, 5);
+	sizer4_1->Add(m_paint_hist_depth_sldr, 1, wxEXPAND);
+	sizer4_1->Add(m_paint_hist_depth_text, 0, wxALIGN_CENTER);
+	group4->Add(10, 5);
+	group4->Add(sizer4_1, 0, wxEXPAND);
+	group4->Add(10, 5);
+	group4->Add(st);
+	group4->Add(10, 5);
 
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(10, 10);
@@ -200,6 +217,8 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	sizerV->Add(group2, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 	sizerV->Add(group3, 0, wxEXPAND);
+	sizerV->Add(10, 10);
+	sizerV->Add(group4, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 
 	page->SetSizer(sizerV);
@@ -754,6 +773,7 @@ void SettingDlg::GetSettings()
 	m_text_size = 12;
 	m_text_color = 0;
 	m_font_file = "";
+	m_line_width = 5.0;
 	m_mem_swap = false;
 	m_graphics_mem = 1000.0;
 	m_large_data_size = 1000.0;
@@ -937,6 +957,12 @@ void SettingDlg::GetSettings()
 		fconfig.Read("file", &m_font_file);
 		fconfig.Read("value", &m_text_size);
 		fconfig.Read("color", &m_text_color);
+	}
+	//line width
+	if (fconfig.Exists("/line width"))
+	{
+		fconfig.SetPath("/line width");
+		fconfig.Read("value", &m_line_width);
 	}
 	//full screen
 	if (fconfig.Exists("/full screen"))
@@ -1148,6 +1174,9 @@ void SettingDlg::UpdateUI()
 			m_font_size_cmb->Select(i);
 	}
 	m_text_color_cmb->Select(m_text_color);
+	//line width
+	m_line_width_text->SetValue(wxString::Format("%.0f", m_line_width));
+	m_line_width_sldr->SetValue(int(m_line_width+0.5));
 	//paint history depth
 	m_paint_hist_depth_text->ChangeValue(wxString::Format("%d", m_paint_hist_depth));
 	m_paint_hist_depth_sldr->SetValue(m_paint_hist_depth);
@@ -1273,6 +1302,9 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("file", m_font_file);
 	fconfig.Write("value", m_text_size);
 	fconfig.Write("color", m_text_color);
+
+	fconfig.SetPath("/line width");
+	fconfig.Write("value", m_line_width);
 
 	//full screen
 	fconfig.SetPath("/full screen");
@@ -2037,6 +2069,35 @@ void SettingDlg::OnTextColorChange(wxCommandEvent &event)
 			VRenderView* vrv = (*vr_frame->GetViewList())[i];
 			if (vrv)
 				vrv->RefreshGL();
+		}
+	}
+}
+
+//line width
+void SettingDlg::OnLineWidthSldr(wxScrollEvent &event)
+{
+	int ival = event.GetPosition();
+	wxString str = wxString::Format("%d", ival);
+	m_line_width_text->SetValue(str);
+}
+
+void SettingDlg::OnLineWidthText(wxCommandEvent &event)
+{
+	wxString str = m_line_width_text->GetValue();
+	unsigned long ival;
+	if (str.ToULong(&ival))
+	{
+		m_line_width_sldr->SetValue(ival);
+		m_line_width = ival;
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame)
+		{
+			for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
+			{
+				VRenderView* vrv = (*vr_frame->GetViewList())[i];
+				if (vrv)
+					vrv->RefreshGL();
+			}
 		}
 	}
 }
