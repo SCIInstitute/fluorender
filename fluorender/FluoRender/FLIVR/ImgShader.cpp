@@ -32,6 +32,7 @@
 #include <FLIVR/ImgShader.h>
 #include <FLIVR/ShaderProgram.h>
 #include <FLIVR/VolShaderCode.h>
+#include <FLIVR/ImgShaderCode.h>
 
 using std::string;
 using std::vector;
@@ -613,10 +614,14 @@ namespace FLIVR
 	"}\n"
 
 	ImgShader::ImgShader(int type, int colormap) : 
-	type_(type),
-	colormap_(colormap),
-	program_(0)
-	{}
+		type_(type),
+		colormap_(colormap),
+		use_geom_shader_(false),
+		program_(0)
+	{
+		if (type_ == IMG_SHDR_DRAW_THICK_LINES)
+			use_geom_shader_ = true;
+	}
 
 	ImgShader::~ImgShader()
 	{
@@ -629,7 +634,14 @@ namespace FLIVR
 		if (emit_v(vs)) return true;
 		string fs;
 		if (emit_f(fs)) return true;
-		program_ = new ShaderProgram(vs, fs);
+		string gs;
+		if (use_geom_shader_)
+		{
+			if (emit_g(gs)) return true;
+			program_ = new ShaderProgram(vs, fs, gs);
+		}
+		else
+			program_ = new ShaderProgram(vs, fs);
 		return false;
 	}
 
@@ -644,6 +656,7 @@ namespace FLIVR
 			z << IMG_VTX_CODE_DRAW_GEOMETRY;
 			break;
 		case IMG_SHDR_DRAW_GEOMETRY_COLOR3:
+		case IMG_SHDR_DRAW_THICK_LINES:
 			z << IMG_VTX_CODE_DRAW_GEOMETRY_COLOR3;
 			break;
 		case IMG_SHDR_DRAW_GEOMETRY_COLOR4:
@@ -711,6 +724,9 @@ namespace FLIVR
 		case IMG_SHDR_DRAW_GEOMETRY_COLOR3:
 			z << IMG_FRG_CODE_DRAW_GEOMETRY_COLOR3;
 			break;
+		case IMG_SHDR_DRAW_THICK_LINES:
+			z << IMG_FRG_CODE_DRAW_THICKLINES;
+			break;
 		case IMG_SHDR_DRAW_GEOMETRY_COLOR4:
 			z << IMG_FRG_CODE_DRAW_GEOMETRY_COLOR4;
 			break;
@@ -776,6 +792,21 @@ namespace FLIVR
 		return false;
 	}
 
+	bool ImgShader::emit_g(std::string& s)
+	{
+		ostringstream z;
+
+		z << ShaderProgram::glsl_version_;
+		switch (type_)
+		{
+		case IMG_SHDR_DRAW_THICK_LINES:
+			z << IMG_SHDR_CODE_DRAW_THICK_LINES;
+			break;
+		}
+
+		s = z.str();
+		return false;
+	}
 
 	ImgShaderFactory::ImgShaderFactory()
 		: prev_shader_(-1)

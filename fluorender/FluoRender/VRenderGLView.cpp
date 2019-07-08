@@ -11933,7 +11933,7 @@ void VRenderGLView::DrawTraces()
 	if (m_cur_vol &&
 		m_trace_group)
 	{
-		glEnable(GL_LINE_SMOOTH);
+		//glEnable(GL_LINE_SMOOTH);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -11945,14 +11945,16 @@ void VRenderGLView::DrawTraces()
 		matrix = m_proj_mat*matrix;
 
 		ShaderProgram* shader =
-			TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR3);
+			TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_THICK_LINES);
 		if (shader)
 		{
 			if (!shader->valid())
 				shader->create();
 			shader->bind();
 		}
+		double width = 10.0;
 		shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+		shader->setLocalParam(0, GetSize().x, GetSize().y, width, 0.0);
 
 		VertexArray* va_traces =
 			TextureRenderer::vertex_array_manager_.vertex_array(VA_Traces);
@@ -11977,7 +11979,7 @@ void VRenderGLView::DrawTraces()
 
 		if (shader && shader->valid())
 			shader->release();
-		glDisable(GL_LINE_SMOOTH);
+		//glDisable(GL_LINE_SMOOTH);
 	}
 }
 
