@@ -51,7 +51,11 @@ namespace FLIVR
 	bool ShaderProgram::no_tex_unpack_ = false;
 
 	ShaderProgram::ShaderProgram(const string& frag_shader) :
-	id_(0), vert_shader_(""), frag_shader_(frag_shader), valid_(false)
+		id_(0),
+		vert_shader_(""),
+		frag_shader_(frag_shader),
+		valid_(false),
+		use_geom_shader_(false)
 	{
 		for (int i=0; i<MAX_SHADER_UNIFORMS; ++i)
 		{
@@ -60,10 +64,32 @@ namespace FLIVR
 			loc_mat4[i] = -1;
 		}
 	}
-	ShaderProgram::ShaderProgram(const string& vert_shader, const string& frag_shader) :
-	id_(0), vert_shader_(vert_shader), frag_shader_(frag_shader), valid_(false)
+	ShaderProgram::ShaderProgram(const string& vert_shader,
+		const string& frag_shader) :
+		id_(0),
+		vert_shader_(vert_shader),
+		frag_shader_(frag_shader),
+		valid_(false),
+		use_geom_shader_(false)
 	{
 		for (int i=0; i<MAX_SHADER_UNIFORMS; ++i)
+		{
+			loc_ui[i] = -1;
+			loc_vec4[i] = -1;
+			loc_mat4[i] = -1;
+		}
+	}
+	ShaderProgram::ShaderProgram(const string& vert_shader,
+		const string& frag_shader,
+		const string& geom_shader) :
+		id_(0),
+		vert_shader_(vert_shader),
+		frag_shader_(frag_shader),
+		geom_shader_(geom_shader),
+		valid_(false),
+		use_geom_shader_(true)
+	{
+		for (int i = 0; i < MAX_SHADER_UNIFORMS; ++i)
 		{
 			loc_ui[i] = -1;
 			loc_vec4[i] = -1;
@@ -175,25 +201,33 @@ namespace FLIVR
 			if (id_ == 0) return true;
 			valid_ = true;
 
-			GLuint v_shader, f_shader;
+			GLuint v_shader = 0;
+			GLuint f_shader = 0;
+			GLuint g_shader = 0;
+
 			v_shader = glCreateShader(GL_VERTEX_SHADER);
-
 			f_shader = glCreateShader(GL_FRAGMENT_SHADER);
-
 			if (v_shader == 0 || f_shader == 0) return true;
+			if (use_geom_shader_)
+			{
+				g_shader = glCreateShader(GL_GEOMETRY_SHADER);
+				if (g_shader == 0)
+					return true;
+			}
+
+			GLint shader_status[1];
+			char shader_log[1000];
+			GLint shader_length[1];
+			GLint lengths[1];
 
 			// set the source code and compile the shader // vertex
-			const char *v_source[1], *f_source[1];
+			const char *v_source[1];
 			v_source[0] = vert_shader_.c_str();
-			GLint lengths[1];
 			lengths[0] = (int)std::strlen(v_source[0]);
 			glShaderSource(v_shader, 1, v_source, lengths);
 			glCompileShader(v_shader);
 
 			// check the compilation of the shader
-			GLint shader_status[1];
-			char shader_log[1000];
-			GLint shader_length[1];
 			bool attach_vert = strcmp(*v_source,"") != 0;
 			glGetShaderiv(v_shader, GL_COMPILE_STATUS, shader_status);
 			if (shader_status[0] == GL_FALSE)
@@ -204,6 +238,7 @@ namespace FLIVR
 			}
 
 			// set the source code and compile the shader // fragment
+			const char *f_source[1];
 			f_source[0] = frag_shader_.c_str();
 			lengths[0] = (int)std::strlen(f_source[0]);
 			glShaderSource(f_shader, 1, f_source, lengths);
@@ -219,10 +254,33 @@ namespace FLIVR
 				attach_frag = false;
 			}
 
+			bool attach_geom = false;
+			if (use_geom_shader_)
+			{
+				// set the source code and compile the shader // geometry
+				const char *g_source[1];
+				g_source[0] = geom_shader_.c_str();
+				lengths[0] = (int)std::strlen(g_source[0]);
+				glShaderSource(g_shader, 1, g_source, lengths);
+				glCompileShader(g_shader);
+
+				// check the compilation of the shader
+				attach_geom = true;
+				glGetShaderiv(g_shader, GL_COMPILE_STATUS, shader_status);
+				if (shader_status[0] == GL_FALSE)
+				{
+					glGetShaderInfoLog(f_shader, sizeof(shader_log), shader_length, shader_log);
+					std::cerr << "Error compiling geometry shader: " << shader_log << std::endl;
+					attach_frag = false;
+				}
+			}
+
 			if (attach_vert)
 				glAttachShader(id_, v_shader);
 			if (attach_frag)
 				glAttachShader(id_, f_shader);
+			if (attach_geom)
+				glAttachShader(id_, g_shader);
 
 			//link time
 			glLinkProgram(id_);
@@ -239,8 +297,11 @@ namespace FLIVR
 				glDetachShader(id_, v_shader);
 			if (attach_frag)
 				glDetachShader(id_, f_shader);
+			if (attach_geom)
+				glDetachShader(id_, g_shader);
 			glDeleteShader(v_shader);
 			glDeleteShader(f_shader);
+			glDeleteShader(g_shader);
 
 			const char *loc_strings[] = {
 				"tex0", "tex1", "tex2", "tex3",

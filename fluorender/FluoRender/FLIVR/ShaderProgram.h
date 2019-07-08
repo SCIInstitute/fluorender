@@ -41,7 +41,11 @@ namespace FLIVR
 	class ShaderProgram
 	{
 	public:
-		ShaderProgram(const std::string& vert_shader,const std::string& frag_shader);
+		ShaderProgram(const std::string& vert_shader,
+			const std::string& frag_shader,
+			const std::string& geom_shader);
+		ShaderProgram(const std::string& vert_shader,
+			const std::string& frag_shader);
 		ShaderProgram(const std::string& frag_shader);
 		~ShaderProgram();
 
@@ -77,6 +81,8 @@ namespace FLIVR
 		unsigned int id_;
 		std::string  vert_shader_;
 		std::string  frag_shader_;
+		std::string geom_shader_;
+		bool use_geom_shader_;
 
 		//validation
 		bool valid_;

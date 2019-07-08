@@ -53,6 +53,7 @@ namespace FLIVR
 #define	IMG_SHDR_DRAW_GEOMETRY_COLOR4		16
 #define	IMG_SHDR_GRADIENT_PROJ_MAP			17
 #define IMG_SHDR_DRAW_TEXT					18
+#define IMG_SHDR_DRAW_THICK_LINES			19
 
 	class ShaderProgram;
 
@@ -86,10 +87,12 @@ namespace FLIVR
 	protected:
 		bool emit_v(std::string& s);
 		bool emit_f(std::string& s);
+		bool emit_g(std::string& s);
 		std::string get_colormap_code();
 
 		int type_;
 		int colormap_;
+		bool use_geom_shader_;
 
 		ShaderProgram* program_;
 	};
