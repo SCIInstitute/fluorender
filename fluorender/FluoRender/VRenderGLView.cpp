@@ -11555,12 +11555,17 @@ void VRenderGLView::DrawRulers()
 {
 	if (m_ruler_list.empty())
 		return;
-	glEnable(GL_LINE_SMOOTH);
+	double width = 1.0;
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (frame && frame->GetSettingDlg())
+		width = frame->GetSettingDlg()->GetLineWidth();
+
+	//glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	ShaderProgram* shader =
-		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR3);
+		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_THICK_LINES);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -11570,6 +11575,7 @@ void VRenderGLView::DrawRulers()
 	glm::mat4 matrix = glm::ortho(float(0),
 		float(GetGLSize().x), float(0), float(GetGLSize().y));
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+	shader->setLocalParam(0, GetSize().x, GetSize().y, width, 0.0);
 
 	VertexArray* va_rulers =
 		TextureRenderer::vertex_array_manager_.vertex_array(VA_Rulers);
@@ -11589,7 +11595,7 @@ void VRenderGLView::DrawRulers()
 
 	if (shader && shader->valid())
 		shader->release();
-	glDisable(GL_LINE_SMOOTH);
+	//glDisable(GL_LINE_SMOOTH);
 
 	//draw text
 	float w = TextRenderer::text_texture_manager_.GetSize() / 4.0f;
@@ -11933,6 +11939,11 @@ void VRenderGLView::DrawTraces()
 	if (m_cur_vol &&
 		m_trace_group)
 	{
+		double width = 1.0;
+		VRenderFrame* frame = (VRenderFrame*)m_frame;
+		if (frame && frame->GetSettingDlg())
+			width = frame->GetSettingDlg()->GetLineWidth();
+
 		//glEnable(GL_LINE_SMOOTH);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
@@ -11952,7 +11963,6 @@ void VRenderGLView::DrawTraces()
 				shader->create();
 			shader->bind();
 		}
-		double width = 10.0;
 		shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 		shader->setLocalParam(0, GetSize().x, GetSize().y, width, 0.0);
 

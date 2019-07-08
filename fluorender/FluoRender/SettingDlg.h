@@ -98,6 +98,9 @@ class SettingDlg : public wxPanel
 		ID_FontCmb,
 		ID_FontSizeCmb,
 		ID_TextColorCmb,
+		//line width
+		ID_LineWidthSldr,
+		ID_LineWidthText,
 		//paint history depth
 		ID_PaintHistDepthSldr,
 		ID_PaintHistDepthText,
@@ -172,6 +175,9 @@ public:
 	void SetTextSize(int size) {m_text_size = size;}
 	int GetTextColor() { return m_text_color; }
 	void SetTextColor(int text_color) { m_text_color = text_color; }
+	//line width
+	void SetLineWidth(double val) { m_line_width = val; }
+	double GetLineWidth() { return m_line_width; }
 	//full screen
 	bool GetStayTop() { return m_stay_top; }
 	bool GetShowCursor() { return m_show_cursor; }
@@ -289,6 +295,8 @@ private:
 	wxString m_font_file;	//font lib file in the Fonts folder
 	int m_text_size;		//text size in viewport
 	int m_text_color;		//text color: 0- contrast to bg; 1-same as bg; 2-volume sec color
+	//line width
+	double m_line_width;	//line width
 	//memory limit
 	bool m_mem_swap;		//enable memory swap
 	double m_graphics_mem;	//in MB
@@ -403,6 +411,9 @@ private:
 	wxComboBox *m_font_cmb;
 	wxComboBox *m_font_size_cmb;
 	wxComboBox *m_text_color_cmb;
+	//line width
+	wxSlider *m_line_width_sldr;
+	wxTextCtrl *m_line_width_text;
 	//history depth
 	wxSlider *m_paint_hist_depth_sldr;
 	wxTextCtrl *m_paint_hist_depth_text;
@@ -489,6 +500,9 @@ private:
 	void OnFontChange(wxCommandEvent &event);
 	void OnFontSizeChange(wxCommandEvent &event);
 	void OnTextColorChange(wxCommandEvent &event);
+	//line width
+	void OnLineWidthSldr(wxScrollEvent &event);
+	void OnLineWidthText(wxCommandEvent &event);
 	//paint history depth
 	void OnPaintHistDepthChange(wxScrollEvent &event);
 	void OnPaintHistDepthEdit(wxCommandEvent &event);
