@@ -180,9 +180,9 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	wxBoxSizer *group3 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Line Width"), wxVERTICAL);
 	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_line_width_sldr = new wxSlider(page, ID_LineWidthSldr, 1, 1, 20,
+	m_line_width_sldr = new wxSlider(page, ID_LineWidthSldr, 3, 1, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_line_width_text = new wxTextCtrl(page, ID_LineWidthText, "1",
+	m_line_width_text = new wxTextCtrl(page, ID_LineWidthText, "3",
 		wxDefaultPosition, wxSize(40, -1), 0, vald_int);
 	sizer3_1->Add(m_line_width_sldr, 1, wxEXPAND);
 	sizer3_1->Add(m_line_width_text, 0, wxALIGN_CENTER);
@@ -773,7 +773,7 @@ void SettingDlg::GetSettings()
 	m_text_size = 12;
 	m_text_color = 0;
 	m_font_file = "";
-	m_line_width = 5.0;
+	m_line_width = 3.0;
 	m_mem_swap = false;
 	m_graphics_mem = 1000.0;
 	m_large_data_size = 1000.0;
