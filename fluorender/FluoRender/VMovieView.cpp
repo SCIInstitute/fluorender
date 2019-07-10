@@ -552,12 +552,18 @@ void VMovieView::GetScriptSettings()
 			vr_frame->GetSettingDlg()->GetScriptFile());
 		if (run_script)
 		{
-			m_play_btn->SetBitmap(wxGetBitmapFromMemory(playscript));
+			if (m_running)
+				m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
+			else
+				m_play_btn->SetBitmap(wxGetBitmapFromMemory(playscript));
 			m_notebook->SetPageText(4, "4D Script (Enabled)");
 		}
 		else
 		{
-			m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
+			if (m_running)
+				m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
+			else
+				m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
 			m_notebook->SetPageText(4, "4D Script");
 		}
 	}
