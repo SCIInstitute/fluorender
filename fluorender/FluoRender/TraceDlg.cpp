@@ -412,6 +412,7 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 		wxDefaultPosition, wxDefaultSize);
 	m_map_size_spin = new wxSpinCtrl(page, ID_MapSizeSpin, "25",
 		wxDefaultPosition, wxSize(50, 23));
+	m_map_size_spin->SetRange(1, std::numeric_limits<int>::max());
 	sizer_3->AddStretchSpacer(1);
 	sizer_3->Add(st, 0, wxALIGN_CENTER);
 	sizer_3->Add(m_map_size_spin, 0, wxALIGN_CENTER);

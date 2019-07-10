@@ -1693,6 +1693,9 @@ void ComponentDlg::PlayCmd()
 {
 	//disable first
 	m_fixate = false;
+	m_auto_update = false;
+	m_auto_update_btn->SetValue(false);
+
 	if (m_command.empty())
 	{
 		GenerateComp(false);
