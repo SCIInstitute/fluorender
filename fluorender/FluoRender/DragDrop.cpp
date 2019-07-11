@@ -64,6 +64,8 @@ bool DnDFile::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString &filenames)
 				vr_frame->OpenProject(filename);
 			}
 			else if (suffix == ".nrrd" ||
+					 suffix == ".msk" ||
+					 suffix == ".lbl" ||
 					 suffix == ".tif" ||
 					 suffix == ".tiff" ||
 					 suffix == ".oib" ||

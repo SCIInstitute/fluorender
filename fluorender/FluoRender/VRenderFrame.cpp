@@ -1366,7 +1366,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 
 			if (withImageJ)
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_IMAGEJ, true); //The type of data doesnt matter.
-			else if (suffix == ".nrrd")
+			else if (suffix == ".nrrd" || suffix == ".msk" || suffix == ".lbl")
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_NRRD, false);
 			else if (suffix==".tif" || suffix==".tiff")
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_TIFF, false);
@@ -1483,6 +1483,8 @@ void VRenderFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imag
 			OpenProject(files[0]);
 		}
 		else if (suffix == ".nrrd" ||
+			suffix == ".msk" ||
+			suffix == ".lbl" ||
 			suffix == ".tif" ||
 			suffix == ".tiff" ||
 			suffix == ".oib" ||
@@ -3465,7 +3467,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 					wxString suffix = str.Mid(str.Find('.', true)).MakeLower();
 					if (reader_type == READER_IMAGEJ_TYPE)
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_IMAGEJ, true, cur_chan, cur_time);
-					else if (suffix == ".nrrd")
+					else if (suffix == ".nrrd" || suffix == ".msk" || suffix == ".lbl")
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_NRRD, false, cur_chan, cur_time);
 					else if (suffix == ".tif"||suffix == ".tiff")
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_TIFF, false, cur_chan, cur_time);
