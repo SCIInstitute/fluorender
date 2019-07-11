@@ -195,8 +195,6 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 	if (t<0 || t>=m_time_num)
 		return 0;
 
-	int i;
-
 	wstring str_name = m_4d_seq[t].filename;
 	m_data_name = GET_NAME(str_name);
 	FILE* nrrd_file = 0;
@@ -236,9 +234,14 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 		m_yspc = 1.0;
 		m_zspc = 1.0;
 	}
-	int data_size = m_slice_num * m_x_size * m_y_size;
+
+	unsigned long long data_size = (unsigned long long)(m_slice_num) * m_x_size * m_y_size;
+	unsigned long long nsize = data_size;
 	if (output->type == nrrdTypeUShort || output->type == nrrdTypeShort)
 		data_size *= 2;
+	else if (output->type == nrrdTypeInt ||
+		output->type == nrrdTypeUInt)
+		data_size *= 4;
 	output->data = new unsigned char[data_size];
 
 	if (nrrdRead(output, nrrd_file, NULL))
@@ -247,26 +250,29 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 		fclose(nrrd_file);
 		return 0;
 	}
+
+	m_max_value = 0.0;
 	// turn signed into unsigned
-	if (output->type == nrrdTypeChar) {
-		for (i=0; i<m_slice_num*m_x_size*m_y_size; i++) {
-			char val = ((char*)output->data)[i];
+	if (output->type == nrrdTypeChar)
+	{
+		for (unsigned long long idx=0; idx < nsize; ++idx)
+		{
+			char val = ((char*)output->data)[idx];
 			unsigned char n = val + 128;
-			((unsigned char*)output->data)[i] = n;
+			((unsigned char*)output->data)[idx] = n;
 		}
 		output->type = nrrdTypeUChar;
 	}
-	m_max_value = 0.0;
 	// turn signed into unsigned
 	unsigned short min_value, n;
 	if (output->type == nrrdTypeShort)
 	{
 		min_value = 32768;
-		for (i = 0; i < m_slice_num*m_x_size*m_y_size; i++)
+		for (unsigned long long idx = 0; idx < nsize; ++idx)
 		{
-			short val = ((short*)output->data)[i];
+			short val = ((short*)output->data)[idx];
 			n = val + 32768;
-			((unsigned short*)output->data)[i] = n;
+			((unsigned short*)output->data)[idx] = n;
 			min_value = (n < min_value) ? n : min_value;
 			if (get_max)
 				m_max_value = (n > m_max_value) ? n : m_max_value;
@@ -276,12 +282,41 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 	else if (output->type == nrrdTypeUShort)
 	{
 		min_value = 0;
-		for (i=0; i<m_slice_num*m_x_size*m_y_size; i++)
+		for (unsigned long long idx = 0; idx < nsize; ++idx)
 		{
-			n =  ((unsigned short*)output->data)[i];
+			n =  ((unsigned short*)output->data)[idx];
 			if (get_max)
 				m_max_value = (n > m_max_value)?n:m_max_value;
 		}
+	}
+	//compress int
+	if (output->type == nrrdTypeInt)
+	{
+		min_value = 32768;
+		for (unsigned long long idx = 0; idx < nsize; ++idx)
+		{
+			int val = ((int*)output->data)[idx];
+			val += 0x80000000;
+			n = (unsigned short)(val >> 8);
+			((unsigned short*)output->data)[idx] = n;
+			min_value = (n < min_value) ? n : min_value;
+			if (get_max)
+				m_max_value = (n > m_max_value) ? n : m_max_value;
+		}
+		output->type = nrrdTypeUShort;
+	}
+	else if (output->type == nrrdTypeUInt)
+	{
+		min_value = 0;
+		for (unsigned long long idx = 0; idx < nsize; ++idx)
+		{
+			int val = ((unsigned int*)output->data)[idx];
+			n = (unsigned short)(val >> 8);
+			((unsigned short*)output->data)[idx] = n;
+			if (get_max)
+				m_max_value = (n > m_max_value) ? n : m_max_value;
+		}
+		output->type = nrrdTypeUShort;
 	}
 	//find max value
 	if (output->type == nrrdTypeUChar)
@@ -292,11 +327,11 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 	}
 	else if (output->type == nrrdTypeUShort)
 	{
-		m_max_value -= min_value;
 		//16 bit
-		for (i=0; i<m_slice_num*m_x_size*m_y_size; i++) {
-			((unsigned short*)output->data)[i] =
-				((unsigned short*)output->data)[i] - min_value;
+		m_max_value -= min_value;
+		for (unsigned long long idx=0; idx < nsize; ++idx) {
+			((unsigned short*)output->data)[idx] =
+				((unsigned short*)output->data)[idx] - min_value;
 		}
 		if (m_max_value > 0.0)
 			m_scalar_scale = 65535.0 / m_max_value;
