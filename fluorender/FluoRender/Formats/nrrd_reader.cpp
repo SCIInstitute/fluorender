@@ -258,21 +258,30 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 	}
 	m_max_value = 0.0;
 	// turn signed into unsigned
-	unsigned short min_value = 32768, n;
-	if (output->type == nrrdTypeShort || output->type == nrrdTypeUShort) {
-		for (i=0; i<m_slice_num*m_x_size*m_y_size; i++) {
-			if (output->type == nrrdTypeShort) {
-				short val = ((short*)output->data)[i];
-				n = val + 32768;
-				((unsigned short*)output->data)[i] = n;
-				min_value = (n < min_value)?n:min_value;
-			} else {
-				n =  ((unsigned short*)output->data)[i];
-			}
+	unsigned short min_value, n;
+	if (output->type == nrrdTypeShort)
+	{
+		min_value = 32768;
+		for (i = 0; i < m_slice_num*m_x_size*m_y_size; i++)
+		{
+			short val = ((short*)output->data)[i];
+			n = val + 32768;
+			((unsigned short*)output->data)[i] = n;
+			min_value = (n < min_value) ? n : min_value;
+			if (get_max)
+				m_max_value = (n > m_max_value) ? n : m_max_value;
+		}
+		output->type = nrrdTypeUShort;
+	}
+	else if (output->type == nrrdTypeUShort)
+	{
+		min_value = 0;
+		for (i=0; i<m_slice_num*m_x_size*m_y_size; i++)
+		{
+			n =  ((unsigned short*)output->data)[i];
 			if (get_max)
 				m_max_value = (n > m_max_value)?n:m_max_value;
 		}
-		output->type = nrrdTypeUShort;
 	}
 	//find max value
 	if (output->type == nrrdTypeUChar)
