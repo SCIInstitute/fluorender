@@ -872,6 +872,36 @@ bool TrackMapProcessor::ProcessFrames(size_t frame1, size_t frame2)
 	return true;
 }
 
+//make id consistent
+bool TrackMapProcessor::MakeConsistent(size_t f1, size_t f2)
+{
+	if (f1 >= m_map->m_frame_num ||
+		f2 >= m_map->m_frame_num ||
+		f1 == f2)
+		return false;
+
+	//get data and label
+	VolCache cache = m_vol_cache.get(f1);
+	m_vol_cache.protect(f1);
+	void* data1 = cache.data;
+	void* label1 = cache.label;
+	if (!data1 || !label1)
+		return false;
+	cache = m_vol_cache.get(f2);
+	void* data2 = cache.data;
+	void* label2 = cache.label;
+	if (!data2 || !label2)
+		return false;
+
+	InterGraph &inter_graph = m_map->m_inter_graph_list.at(
+		f1 > f2 ? f2 : f1);
+	VertexList &vertex_list1 = m_map->m_vertices_list.at(f1);
+	VertexList &vertex_list2 = m_map->m_vertices_list.at(f2);
+	VertexListIter iter1, iter2;
+
+	return true;
+}
+
 //clear counters
 bool TrackMapProcessor::ClearCounters()
 {
