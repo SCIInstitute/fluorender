@@ -363,10 +363,6 @@ public:
 	//segment volumes in current view
 	void Segment()
 	{if (m_glview) m_glview->Segment();}
-	//label the volume in current view
-	void Label()
-	{if (m_glview) m_glview->Label();}
-	//remove noise
 
 	int CompAnalysis(double min_voxels, double max_voxels, double thresh, 
 		double falloff, bool select, bool gen_ann, bool size_map)
