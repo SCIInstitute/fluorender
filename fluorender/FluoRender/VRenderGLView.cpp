@@ -2140,23 +2140,6 @@ void VRenderGLView::Segment()
 	}
 }
 
-//label volumes in current view
-void VRenderGLView::Label()
-{
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
-	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
-	GLfloat clear_color[4] = { 0, 0, 0, 0 };
-
-	VolumeData* vd = m_selector.GetVolume();
-	if (vd)
-	{
-		vd->SetViewport(vp);
-		vd->SetClearColor(clear_color);
-		m_selector.Label(0);
-	}
-}
-
 //remove noise
 int VRenderGLView::CompAnalysis(double min_voxels, double max_voxels,
 	double thresh, double falloff, bool select, bool gen_ann, bool size_map)

@@ -422,8 +422,6 @@ public:
 	void Set2dWeights();
 	//segment volumes in current view
 	void Segment();
-	//label volumes in current view
-	void Label();
 	//noise removal
 	int CompAnalysis(double min_voxels, double max_voxels, double thresh, double falloff, bool select, bool gen_ann, bool size_map);
 	void CompExport(int mode, bool select);//mode: 0-multi channels; 1-random colors
