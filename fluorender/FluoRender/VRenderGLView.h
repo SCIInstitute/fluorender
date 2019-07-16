@@ -422,6 +422,7 @@ public:
 	void Set2dWeights();
 	//segment volumes in current view
 	void Segment();
+	void CountVoxels(unsigned int &sum, float &wsum);
 	//noise removal
 	int CompAnalysis(double min_voxels, double max_voxels, double thresh, double falloff, bool select, bool gen_ann, bool size_map);
 	void CompExport(int mode, bool select);//mode: 0-multi channels; 1-random colors
@@ -642,6 +643,8 @@ public:
 	//linked rotation
 	static bool m_linked_rot;
 	static VRenderGLView* m_master_linked_view;
+	//count after paint
+	bool m_count;
 
 private:
 	bool m_drawing;

@@ -49,10 +49,17 @@ namespace FL
 		{ return m_use_mask; }
 
 		void Count();
+		unsigned int GetSum()
+		{ return m_sum; }
+		float GetWeightedSum()
+		{ return m_wsum; }
 
 	private:
 		VolumeData *m_vd;
 		bool m_use_mask;//use mask instead of data
+		//result
+		unsigned int m_sum;
+		float m_wsum;
 
 		bool CheckBricks();
 		bool GetInfo(FLIVR::TextureBrick* b,
