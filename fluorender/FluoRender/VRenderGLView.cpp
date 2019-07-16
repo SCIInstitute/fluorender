@@ -310,7 +310,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_full_screen(false),
 	m_drawing(false),
 	m_refresh(false),
-	m_count(true)
+	m_count(false)
 {
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;

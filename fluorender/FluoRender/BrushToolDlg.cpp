@@ -304,6 +304,17 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	sizer2->Add(10, 10);
 	sizer2->Add(sizer2_1, 0, wxEXPAND);
 
+	//output
+	wxBoxSizer *sizer3 = new wxStaticBoxSizer(
+		new wxStaticBox(this, wxID_ANY, "Output"),
+		wxVERTICAL);
+	//grid
+	m_output_grid = new wxGrid(this, ID_OutputGrid);
+	wxGridTableBase* table = new OutputGridTable();
+	m_output_grid->SetTable(table, true);
+	m_output_grid->Fit();
+	sizer3->Add(m_output_grid, 0, wxEXPAND);
+
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	sizer_v->Add(10, 10);
@@ -312,6 +323,8 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	sizer_v->Add(sizer1, 0, wxEXPAND);
 	sizer_v->Add(10, 30);
 	sizer_v->Add(sizer2, 0, wxEXPAND);
+	sizer_v->Add(10, 30);
+	sizer_v->Add(sizer3, 0, wxEXPAND);
 	sizer_v->Add(10, 30);
 
 	SetSizer(sizer_v);
@@ -845,3 +858,183 @@ void BrushToolDlg::OnBrushSizeRelationCheck(wxCommandEvent& event)
 			m_cur_view->SetBrushSizeData(false);
 	}
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////
+wxString OutputGridTable::GetTypeName(int WXUNUSED(row), int col)
+{
+	switch (col)
+	{
+	case Col_VoxelSum:
+	case Col_VoxelWeightedSum:
+	case Col_Size:
+	case Col_WeightedSize:
+		return wxGRID_VALUE_NUMBER;
+	}
+
+	return wxEmptyString;
+}
+
+int OutputGridTable::GetNumberRows()
+{
+	return m_data.size();
+}
+
+int OutputGridTable::GetNumberCols()
+{
+	return Col_Max;
+}
+
+bool OutputGridTable::IsEmptyCell(int WXUNUSED(row), int WXUNUSED(col))
+{
+	return false;
+}
+
+wxString OutputGridTable::GetValue(int row, int col)
+{
+	const GridData& gd = m_data[row];
+
+	switch (col)
+	{
+	case Col_VoxelSum:
+		return wxString::Format("%d", gd.voxel_sum);
+
+	case Col_VoxelWeightedSum:
+		return wxString::Format("%f", gd.voxel_wsum);
+
+	case Col_Size:
+		return wxString::Format("%f", gd.size);
+
+	case Col_WeightedSize:
+		return wxString::Format("%f", gd.wsize);
+
+	}
+
+	return wxEmptyString;
+}
+
+void OutputGridTable::SetValue(int row, int col, const wxString& value)
+{
+	GridData& gd = m_data[row];
+
+}
+
+bool OutputGridTable::CanGetValueAs(
+	int WXUNUSED(row), int col,
+	const wxString& typeName)
+{
+	return true;
+}
+
+bool OutputGridTable::CanSetValueAs(int row, int col, const wxString& typeName)
+{
+	return CanGetValueAs(row, col, typeName);
+}
+
+long OutputGridTable::GetValueAsLong(int row, int col)
+{
+	const GridData& gd = m_data[row];
+
+	switch (col)
+	{
+	case Col_VoxelSum:
+		return gd.voxel_sum;
+
+	case Col_VoxelWeightedSum:
+		return long(gd.voxel_wsum+0.5);
+
+	case Col_Size:
+		return long(gd.size+0.5);
+
+	case Col_WeightedSize:
+		return long(gd.wsize+0.5);
+
+	default:
+		//wxFAIL_MSG("unexpected column");
+		return -1;
+	}
+}
+
+double OutputGridTable::GetValueAsDouble(int row, int col)
+{
+	const GridData& gd = m_data[row];
+
+	switch (col)
+	{
+	case Col_VoxelSum:
+		return double(gd.voxel_sum);
+
+	case Col_VoxelWeightedSum:
+		return gd.voxel_wsum;
+
+	case Col_Size:
+		return gd.size;
+
+	case Col_WeightedSize:
+		return gd.wsize;
+
+	default:
+		//wxFAIL_MSG("unexpected column");
+		return -1;
+	}
+}
+
+void OutputGridTable::SetValueAsLong(int row, int col, long value)
+{
+	GridData& gd = m_data[row];
+
+	switch (col)
+	{
+	case Col_VoxelSum:
+		gd.voxel_sum = value;
+		break;
+
+	case Col_VoxelWeightedSum:
+		gd.voxel_wsum = value;
+		break;
+
+	case Col_Size:
+		gd.size = value;
+		break;
+
+	case Col_WeightedSize:
+		gd.wsize = value;
+		break;
+
+	}
+}
+
+void OutputGridTable::SetValueAsDouble(int row, int col, double value)
+{
+	GridData& gd = m_data[row];
+
+	switch (col)
+	{
+	case Col_VoxelSum:
+		gd.voxel_sum = long(value+0.5);
+		break;
+
+	case Col_VoxelWeightedSum:
+		gd.voxel_wsum = value;
+		break;
+
+	case Col_Size:
+		gd.size = value;
+		break;
+
+	case Col_WeightedSize:
+		gd.wsize = value;
+		break;
+
+	}
+}
+
+wxString OutputGridTable::GetColLabelValue(int col)
+{
+	static const wxString headers[] = {
+		"Voxel Count",
+		"Voxel Count (Intensity Weighted)",
+		"Physical Size",
+		"Physical Size (Intesity Weighted)"};
+	return headers[col];
+}
+
