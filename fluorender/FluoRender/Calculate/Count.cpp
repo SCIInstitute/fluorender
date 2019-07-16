@@ -25,7 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "Compare.h"
+#include "Count.h"
 #include "cl_code.h"
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/KernelProgram.h>
@@ -36,54 +36,40 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace FL;
 
-ChannelCompare::ChannelCompare(VolumeData* vd1, VolumeData* vd2)
-	: m_vd1(vd1), m_vd2(vd2),
-	m_use_mask(false),
-	m_init(false)
+CountVoxels::CountVoxels(VolumeData* vd)
+	: m_vd(vd),
+	m_use_mask(false)
 {
 }
 
-ChannelCompare::~ChannelCompare()
+CountVoxels::~CountVoxels()
 {
 }
 
-bool ChannelCompare::CheckBricks()
+bool CountVoxels::CheckBricks()
 {
-	if (!m_vd1)
+	if (!m_vd)
 		return false;
-	if (!m_vd2)
+	if (!m_vd->GetTexture())
 		return false;
-	if (!m_vd1->GetTexture())
-		return false;
-	if (!m_vd2->GetTexture())
-		return false;
-	int brick_num1 = m_vd1->GetTexture()->get_brick_num();
-	int brick_num2 = m_vd2->GetTexture()->get_brick_num();
-	if (!brick_num1 || !brick_num2 || brick_num1 != brick_num2)
+	int brick_num = m_vd->GetTexture()->get_brick_num();
+	if (!brick_num)
 		return false;
 	return true;
 }
 
-bool ChannelCompare::GetInfo(
-	FLIVR::TextureBrick* b1, FLIVR::TextureBrick* b2,
-	long &bits1, long &bits2,
-	long &nx, long &ny, long &nz)
+bool CountVoxels::GetInfo(
+	FLIVR::TextureBrick* b,
+	long &bits, long &nx, long &ny, long &nz)
 {
-	bits1 = b1->nb(m_use_mask ? b1->nmask() : 0)*8;
-	bits2 = b2->nb(m_use_mask ? b2->nmask() : 0)*8;
-	long nx1 = b1->nx();
-	long nx2 = b2->nx();
-	long ny1 = b1->ny();
-	long ny2 = b2->ny();
-	long nz1 = b1->nz();
-	long nz2 = b2->nz();
-	if (nx1 != nx2 || ny1 != ny2 || nz1 != nz2)
-		return false;
-	nx = nx1; ny = ny1; nz = nz1;
+	bits = b->nb(m_use_mask ? b->nmask() : 0)*8;
+	long nx = b->nx();
+	long ny = b->ny();
+	long nz = b->nz();
 	return true;
 }
 
-void* ChannelCompare::GetVolDataBrick(FLIVR::TextureBrick* b)
+void* CountVoxels::GetVolDataBrick(FLIVR::TextureBrick* b)
 {
 	if (!b)
 		return 0;
@@ -119,7 +105,7 @@ void* ChannelCompare::GetVolDataBrick(FLIVR::TextureBrick* b)
 	return (void*)temp;
 }
 
-void* ChannelCompare::GetVolData(VolumeData* vd)
+void* CountVoxels::GetVolData(VolumeData* vd)
 {
 	int nx, ny, nz;
 	vd->GetResolution(nx, ny, nz);
@@ -133,7 +119,7 @@ void* ChannelCompare::GetVolData(VolumeData* vd)
 	return nrrd_data->data;
 }
 
-void ChannelCompare::ReleaseData(void* val, long bits)
+void CountVoxels::ReleaseData(void* val, long bits)
 {
 	if (bits == 8)
 	{
@@ -147,7 +133,7 @@ void ChannelCompare::ReleaseData(void* val, long bits)
 	}
 }
 
-long ChannelCompare::OptimizeGroupSize(long nt, long target)
+long CountVoxels::OptimizeGroupSize(long nt, long target)
 {
 	long loj, hij, res, maxj;
 	//z
@@ -179,10 +165,8 @@ long ChannelCompare::OptimizeGroupSize(long nt, long target)
 	return target;
 }
 
-void ChannelCompare::Compare(float th1, float th2)
+void CountVoxels::Count()
 {
-	m_result = 0.0;
-
 	if (!CheckBricks())
 		return;
 
@@ -288,79 +272,3 @@ void ChannelCompare::Compare(float th1, float th2)
 	}
 }
 
-void ChannelCompare::Average(float weight, FLIVR::Argument& avg)
-{
-	m_result = 0.0;
-
-	if (!CheckBricks())
-		return;
-
-	//create program and kernels
-	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_chann_sum);
-	if (!kernel_prog)
-		return;
-	int kernel_index = -1;
-	string name = "kernel_0";
-	if (weight > 0.0)
-		name = "kernel_1";
-	if (kernel_prog->valid())
-		kernel_index = kernel_prog->findKernel(name);
-	else
-		kernel_index = kernel_prog->createKernel(name);
-
-	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
-	vector<FLIVR::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
-	vector<FLIVR::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
-
-	for (size_t i = 0; i < brick_num; ++i)
-	{
-		FLIVR::TextureBrick* b1 = (*bricks1)[i];
-		FLIVR::TextureBrick* b2 = (*bricks2)[i];
-		long nx, ny, nz, bits1, bits2;
-		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
-			continue;
-		//get tex ids
-		GLint tid1 = m_vd1->GetVR()->load_brick(0, 0, bricks1, i);
-		GLint tid2 = m_vd2->GetVR()->load_brick(0, 0, bricks2, i);
-
-		size_t local_size[3] = { 1, 1, 1 };
-		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
-
-		//set
-		//unsigned int count = 0;
-		float* sum = 0;
-		unsigned int nxyz = nx * ny * nz;
-		kernel_prog->setKernelArgTex3D(kernel_index, 0,
-			CL_MEM_READ_ONLY, tid1);
-		kernel_prog->setKernelArgTex3D(kernel_index, 1,
-			CL_MEM_READ_ONLY, tid2);
-		kernel_prog->setKernelArgConst(kernel_index, 2,
-			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(kernel_index, 3,
-			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(kernel_index, 4,
-			sizeof(unsigned int), (void*)(&nz));
-		if (!avg.buffer)
-		{
-			sum = new float[nxyz];
-			std::memset(sum, 0, sizeof sum);
-			kernel_prog->setKernelArgBuf(kernel_index, 5,
-				CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-				sizeof(float)*(nxyz), (void*)(sum));
-		}
-		else
-		{
-			avg.kernel_index = kernel_index;
-			avg.index = 5;
-			kernel_prog->setKernelArgument(avg);
-		}
-
-		//execute
-		kernel_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
-
-		//release buffer
-		kernel_prog->releaseMemObject(kernel_index, 0, 0, tid1);
-		kernel_prog->releaseMemObject(kernel_index, 1, 0, tid2);
-	}
-}

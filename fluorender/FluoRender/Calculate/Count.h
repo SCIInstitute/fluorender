@@ -25,8 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef FL_Compare_h
-#define FL_Compare_h
+#ifndef FL_Count_h
+#define FL_Count_h
 
 #include "DataManager.h"
 #include <FLIVR/KernelProgram.h>
@@ -37,32 +37,26 @@ using namespace std;
 class VolumeData;
 namespace FL
 {
-	class ChannelCompare
+	class CountVoxels
 	{
 	public:
-		ChannelCompare(VolumeData* vd1, VolumeData* vd2);
-		~ChannelCompare();
+		CountVoxels(VolumeData* vd);
+		~CountVoxels();
 
 		void SetUseMask(bool use_mask)
 		{ m_use_mask = use_mask; }
 		bool GetUseMask()
 		{ return m_use_mask; }
 
-		void Compare(float, float);
-		void Average(float weight, FLIVR::Argument& avg);
-		double Result()
-		{ return m_result; }
+		void Count();
 
 	private:
-		VolumeData *m_vd1, *m_vd2;
+		VolumeData *m_vd;
 		bool m_use_mask;//use mask instead of data
-		bool m_init;
-		double m_result;
 
 		bool CheckBricks();
-		bool GetInfo(FLIVR::TextureBrick* b1, FLIVR::TextureBrick* b2,
-			long &bits, long &bits2,
-			long &nx, long &ny, long &nz);
+		bool GetInfo(FLIVR::TextureBrick* b,
+			long &bits, long &nx, long &ny, long &nz);
 		void* GetVolDataBrick(FLIVR::TextureBrick* b);
 		void* GetVolData(VolumeData* vd);
 		void ReleaseData(void* val, long bits);
@@ -70,4 +64,4 @@ namespace FL
 	};
 
 }
-#endif//FL_Compare_h
+#endif//FL_Count_h
