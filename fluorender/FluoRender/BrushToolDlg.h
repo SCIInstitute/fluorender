@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <wx/wx.h>
+#include <wx/grid.h>
 
 #ifndef _BRUSHTOOLDLG_H_
 #define _BRUSHTOOLDLG_H_
@@ -85,7 +86,9 @@ public:
 		ID_BrushIterSSRd,
 		//size relation
 		ID_BrushSizeDataRd,
-		ID_BrushSizeScreenRd
+		ID_BrushSizeScreenRd,
+		//output
+		ID_OutputGrid
 	};
 
 	BrushToolDlg(wxWindow* frame,
@@ -149,6 +152,9 @@ private:
 	wxRadioButton* m_brush_size_data_rb;
 	wxRadioButton* m_brush_size_screen_rb;
 
+	//output
+	wxGrid *m_output_grid;
+
 private:
 	//event handling
 	//paint tools
@@ -195,5 +201,50 @@ private:
 
 	DECLARE_EVENT_TABLE()
 };
+
+enum Columns
+{
+	Col_VoxelSum,
+	Col_VoxelWeightedSum,
+	Col_Size,
+	Col_WeightedSize,
+	Col_Max
+};
+
+struct GridData
+{
+	int voxel_sum;
+	double voxel_wsum;
+	double size;
+	double wsize;
+};
+
+class OutputGridTable : public wxGridTableBase
+{
+public:
+	OutputGridTable() { }
+
+	virtual int GetNumberRows() wxOVERRIDE;
+	virtual int GetNumberCols() wxOVERRIDE;
+	virtual bool IsEmptyCell(int row, int col) wxOVERRIDE;
+	virtual wxString GetValue(int row, int col) wxOVERRIDE;
+	virtual void SetValue(int row, int col, const wxString& value) wxOVERRIDE;
+
+	virtual wxString GetColLabelValue(int col) wxOVERRIDE;
+
+	virtual wxString GetTypeName(int row, int col) wxOVERRIDE;
+	virtual bool CanGetValueAs(int row, int col, const wxString& typeName) wxOVERRIDE;
+	virtual bool CanSetValueAs(int row, int col, const wxString& typeName) wxOVERRIDE;
+
+	virtual long GetValueAsLong(int row, int col) wxOVERRIDE;
+	virtual double GetValueAsDouble(int row, int col) wxOVERRIDE;
+
+	virtual void SetValueAsLong(int row, int col, long value) wxOVERRIDE;
+	virtual void SetValueAsDouble(int row, int col, double value) wxOVERRIDE;
+
+private:
+	std::vector<GridData> m_data;
+};
+
 
 #endif//_BRUSHTOOLDLG_H_
