@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderView.h"
 #include "VRenderFrame.h"
 #include <Components/CompAnalyzer.h>
+#include <Calculate/Count.h>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -308,7 +309,8 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_ptr_id2(-1),
 	m_full_screen(false),
 	m_drawing(false),
-	m_refresh(false)
+	m_refresh(false),
+	m_count(true)
 {
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;
@@ -2114,6 +2116,11 @@ void VRenderGLView::Segment()
 		m_selector.SetBrushSclTranslate(scl_translate_save);
 	}
 
+	unsigned int sum = 0;
+	float wsum = 0.0;
+	if (m_count)
+		CountVoxels(sum, wsum);
+
 	//update
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetTraceDlg())
@@ -2138,6 +2145,17 @@ void VRenderGLView::Segment()
 	{
 		vr_frame->GetBrushToolDlg()->GetSettings(m_vrv);
 	}
+}
+
+void VRenderGLView::CountVoxels(unsigned int &sum, float &wsum)
+{
+	if (!m_cur_vol)
+		return;
+	FL::CountVoxels counter(m_cur_vol);
+	counter.SetUseMask(true);
+	counter.Count();
+	sum = counter.GetSum();
+	wsum = counter.GetWeightedSum();
 }
 
 //remove noise

@@ -26,7 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "Count.h"
-#include "cl_code.h"
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
@@ -36,9 +35,52 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace FL;
 
+const char* str_cl_count_voxels = \
+"const sampler_t samp =\n" \
+"	CLK_NORMALIZED_COORDS_FALSE|\n" \
+"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
+"	CLK_FILTER_NEAREST;\n" \
+"\n" \
+"__kernel void kernel_0(\n" \
+"	__read_only image3d_t data,\n" \
+"	__read_only image3d_t mask,\n" \
+"	unsigned int ngx,\n" \
+"	unsigned int ngy,\n" \
+"	unsigned int ngz,\n" \
+"	unsigned int gsxy,\n" \
+"	unsigned int gsx,\n" \
+"	__global unsigned int* count,\n" \
+"	__global float* wcount)\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
+"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
+"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
+"	unsigned int lsum = 0;\n" \
+"	float lwsum = 0.0;\n" \
+"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"	{\n" \
+"		float v1 = read_imagef(data, samp, ijk).x;\n" \
+"		float v2 = read_imagef(mask, samp, ijk).x;\n" \
+"		if (v2 > 0.0)\n" \
+"		{\n" \
+"			lsum++;\n" \
+"			lwsum += v1;\n" \
+"		}\n" \
+"	}\n" \
+"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
+"	atomic_xchg(count+index, lsum);\n" \
+"	atomic_xchg(wcount+index, lwsum);\n" \
+"}\n";
+
 CountVoxels::CountVoxels(VolumeData* vd)
 	: m_vd(vd),
-	m_use_mask(false)
+	m_use_mask(false),
+	m_sum(0),
+	m_wsum(0.0)
 {
 }
 
@@ -62,10 +104,10 @@ bool CountVoxels::GetInfo(
 	FLIVR::TextureBrick* b,
 	long &bits, long &nx, long &ny, long &nz)
 {
-	bits = b->nb(m_use_mask ? b->nmask() : 0)*8;
-	long nx = b->nx();
-	long ny = b->ny();
-	long nz = b->nz();
+	bits = b->nb(0)*8;
+	nx = b->nx();
+	ny = b->ny();
+	nz = b->nz();
 	return true;
 }
 
@@ -172,7 +214,7 @@ void CountVoxels::Count()
 
 	//create program and kernels
 	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_chann_dotprod);
+		vol_kernel_factory_.kernel(str_cl_count_voxels);
 	if (!kernel_prog)
 		return;
 	int kernel_index = -1;
@@ -182,20 +224,19 @@ void CountVoxels::Count()
 	else
 		kernel_index = kernel_prog->createKernel(name);
 
-	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
-	vector<FLIVR::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
-	vector<FLIVR::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
+	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 
+	m_sum = 0; m_wsum = 0.0;
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		FLIVR::TextureBrick* b1 = (*bricks1)[i];
-		FLIVR::TextureBrick* b2 = (*bricks2)[i];
-		long nx, ny, nz, bits1, bits2;
-		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
+		FLIVR::TextureBrick* b = (*bricks)[i];
+		long nx, ny, nz, bits;
+		if (!GetInfo(b, bits, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid1 = m_vd1->GetVR()->load_brick(0, 0, bricks1, i);
-		GLint tid2 = m_vd2->GetVR()->load_brick(0, 0, bricks2, i);
+		GLint tid = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint mid = m_vd->GetVR()->load_brick_mask(bricks, i);
 
 		//compute workload
 		size_t ng;
@@ -233,12 +274,12 @@ void CountVoxels::Count()
 		size_t global_size[3] = { size_t(gsx), size_t(gsy), size_t(gsz) };
 
 		//set
-		//unsigned int count = 0;
-		float *sum = new float[gsxyz];
+		unsigned int* sum = new unsigned int[gsxyz];
+		float *wsum = new float[gsxyz];
 		kernel_prog->setKernelArgTex3D(kernel_index, 0,
-			CL_MEM_READ_ONLY, tid1);
+			CL_MEM_READ_ONLY, tid);
 		kernel_prog->setKernelArgTex3D(kernel_index, 1,
-			CL_MEM_READ_ONLY, tid2);
+			CL_MEM_READ_ONLY, mid);
 		kernel_prog->setKernelArgConst(kernel_index, 2,
 			sizeof(unsigned int), (void*)(&ngx));
 		kernel_prog->setKernelArgConst(kernel_index, 3,
@@ -251,24 +292,30 @@ void CountVoxels::Count()
 			sizeof(unsigned int), (void*)(&gsx));
 		kernel_prog->setKernelArgBuf(kernel_index, 7,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(float)*(gsxyz), (void*)(sum));
+			sizeof(unsigned int)*(gsxyz), (void*)(sum));
+		kernel_prog->setKernelArgBuf(kernel_index, 8,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(float)*(gsxyz), (void*)(wsum));
 
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
 		//read back
-		kernel_prog->readBuffer(sizeof(float)*(gsxyz), sum, sum);
+		kernel_prog->readBuffer(sizeof(unsigned int)*(gsxyz), sum, sum);
+		kernel_prog->readBuffer(sizeof(float)*(gsxyz), wsum, wsum);
 
 		//release buffer
-		//kernel_prog->releaseMemObject(0, val1);
-		//kernel_prog->releaseMemObject(0, val2);
-		kernel_prog->releaseMemObject(kernel_index, 0, 0, tid1);
-		kernel_prog->releaseMemObject(kernel_index, 1, 0, tid2);
-		kernel_prog->releaseMemObject(sizeof(float)*(gsxyz), sum);
+		kernel_prog->releaseMemObject(kernel_index, 0, 0, tid);
+		kernel_prog->releaseMemObject(sizeof(unsigned int)*(gsxyz), sum);
+		kernel_prog->releaseMemObject(sizeof(float)*(gsxyz), wsum);
 
 		//sum
-		for (int i=0; i< gsxyz; ++i)
-			m_result += sum[i];
+		for (int i = 0; i < gsxyz; ++i)
+		{
+			m_sum += sum[i];
+			m_wsum += wsum[i];
+		}
 		delete[] sum;
+		delete[] wsum;
 	}
 }
 
