@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "BrushToolDlg.h"
 #include "VRenderFrame.h"
+#include <Calculate/Count.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include "Formats/png_resource.h"
@@ -84,6 +85,8 @@ BEGIN_EVENT_TABLE(BrushToolDlg, wxPanel)
 	//output
 	EVT_BUTTON(ID_UpdateBtn, BrushToolDlg::OnUpdateBtn)
 	EVT_TOGGLEBUTTON(ID_AutoUpdateBtn, BrushToolDlg::OnAutoUpdateBtn)
+	EVT_CHECKBOX(ID_HistoryChk, BrushToolDlg::OnHistoryChk)
+	EVT_BUTTON(ID_ClearHistBtn, BrushToolDlg::OnClearHistBtn)
 END_EVENT_TABLE()
 
 BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
@@ -95,7 +98,8 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	m_cur_view(0),
 	m_max_value(255.0),
 	m_dft_gm_falloff(0.0),
-	m_dft_scl_translate(0.0)
+	m_dft_scl_translate(0.0),
+	m_hold_history(false)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -320,12 +324,23 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 		wxDefaultPosition, wxSize(75, -1));
 	m_auto_update_btn = new wxToggleButton(this, ID_AutoUpdateBtn,
 		"Auto Update", wxDefaultPosition, wxSize(75, -1));
+	m_history_chk = new wxCheckBox(this, ID_HistoryChk,
+		"Hold History", wxDefaultPosition, wxSize(85, 20), wxALIGN_LEFT);
+	m_clear_hist_btn = new wxButton(this, ID_ClearHistBtn,
+		"Clear History", wxDefaultPosition, wxSize(75, -1));
 	sizer3_1->Add(m_update_btn, 0, wxALIGN_CENTER);
 	sizer3_1->Add(m_auto_update_btn, 0, wxALIGN_CENTER);
+	sizer3_1->AddStretchSpacer(1);
+	sizer3_1->Add(m_history_chk, 0, wxALIGN_CENTER);
+	sizer3_1->Add(5, 5);
+	sizer3_1->Add(m_clear_hist_btn, 0, wxALIGN_CENTER);
 	//grid
 	m_output_grid = new wxGrid(this, ID_OutputGrid);
-	wxGridTableBase* table = new OutputGridTable();
-	m_output_grid->SetTable(table, true);
+	m_output_grid->CreateGrid(0, 4);
+	m_output_grid->SetColLabelValue(0, "Voxel Count");
+	m_output_grid->SetColLabelValue(1, "Voxel Count\n(Int. Weighted)");
+	m_output_grid->SetColLabelValue(2, "Physical Size");
+	m_output_grid->SetColLabelValue(3, "Physical Size\n(Int. Weighted)");
 	m_output_grid->Fit();
 	sizer3->Add(5, 5);
 	sizer3->Add(sizer3_1, 0, wxEXPAND);
@@ -471,6 +486,9 @@ void BrushToolDlg::GetSettings(VRenderView* vrv)
 		m_brush_size_data_rb->SetValue(false);
 		m_brush_size_screen_rb->SetValue(true);
 	}
+
+	//output
+	m_history_chk->SetValue(m_hold_history);
 
 	UpdateUndoRedo();
 }
@@ -878,9 +896,10 @@ void BrushToolDlg::OnBrushSizeRelationCheck(wxCommandEvent& event)
 }
 
 //output
-void BrushToolDlg::SetOutput(const GridData &data)
+void BrushToolDlg::SetOutput(const GridData &data, const wxString &unit)
 {
-	if (m_output_grid->GetNumberRows()==0)
+	if (m_output_grid->GetNumberRows()==0 ||
+		m_hold_history)
 	{
 		m_output_grid->InsertRows();
 	}
@@ -889,16 +908,54 @@ void BrushToolDlg::SetOutput(const GridData &data)
 	m_output_grid->SetCellValue(0, 1,
 		wxString::Format("%f", data.voxel_wsum));
 	m_output_grid->SetCellValue(0, 2,
-		wxString::Format("%f", data.size));
+		wxString::Format("%f", data.size) + unit);
 	m_output_grid->SetCellValue(0, 3,
-		wxString::Format("%f", data.wsize));
-	m_output_grid->ForceRefresh();
+		wxString::Format("%f", data.wsize) + unit);
+	//m_output_grid->Fit();
 }
 
 void BrushToolDlg::OnUpdateBtn(wxCommandEvent& event)
 {
-	GridData data = { 1, 2, 3, 4 };
-	SetOutput(data);
+	GridData data;
+	VolumeData* sel_vol = 0;
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (!vr_frame)
+		return;
+	sel_vol = vr_frame->GetCurSelVol();
+	if (!sel_vol)
+		return;
+
+	FL::CountVoxels counter(sel_vol);
+	counter.SetUseMask(true);
+	counter.Count();
+	data.voxel_sum = counter.GetSum();
+	double scale = sel_vol->GetScalarScale();
+	data.voxel_wsum = counter.GetWeightedSum() * scale;
+	double spcx, spcy, spcz;
+	sel_vol->GetSpacings(spcx, spcy, spcz);
+	double vvol = spcx * spcy * spcz;
+	vvol = vvol == 0.0 ? 1.0 : vvol;
+	data.size = data.voxel_sum * vvol;
+	data.wsize = data.voxel_wsum * vvol;
+	wxString unit;
+	if (m_cur_view)
+	{
+		switch (m_cur_view->m_glview->m_sb_unit)
+		{
+		case 0:
+			unit = L"nm\u00B3";
+			break;
+		case 1:
+		default:
+			unit = L"\u03BCm\u00B3";
+			break;
+		case 2:
+			unit = L"mm\u00B3";
+			break;
+		}
+	}
+
+	SetOutput(data, unit);
 }
 
 void BrushToolDlg::OnAutoUpdateBtn(wxCommandEvent& event)
@@ -907,238 +964,12 @@ void BrushToolDlg::OnAutoUpdateBtn(wxCommandEvent& event)
 		m_cur_view->m_glview->m_count = m_auto_update_btn->GetValue();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////
-wxString OutputGridTable::GetTypeName(int WXUNUSED(row), int col)
+void BrushToolDlg::OnHistoryChk(wxCommandEvent& event)
 {
-	switch (col)
-	{
-	case Col_VoxelSum:
-	case Col_VoxelWeightedSum:
-	case Col_Size:
-	case Col_WeightedSize:
-		return wxGRID_VALUE_NUMBER;
-	}
-
-	return wxEmptyString;
+	m_hold_history = m_history_chk->GetValue();
 }
 
-int OutputGridTable::GetNumberRows()
+void BrushToolDlg::OnClearHistBtn(wxCommandEvent& event)
 {
-	return m_data.size();
-}
-
-int OutputGridTable::GetNumberCols()
-{
-	return Col_Max;
-}
-
-bool OutputGridTable::IsEmptyCell(int WXUNUSED(row), int WXUNUSED(col))
-{
-	return false;
-}
-
-wxString OutputGridTable::GetValue(int row, int col)
-{
-	if (row < 0 || row >= m_data.size())
-		return wxEmptyString;
-
-	const GridData& gd = m_data[row];
-
-	switch (col)
-	{
-	case Col_VoxelSum:
-		return wxString::Format("%d", gd.voxel_sum);
-
-	case Col_VoxelWeightedSum:
-		return wxString::Format("%f", gd.voxel_wsum);
-
-	case Col_Size:
-		return wxString::Format("%f", gd.size);
-
-	case Col_WeightedSize:
-		return wxString::Format("%f", gd.wsize);
-
-	}
-
-	return wxEmptyString;
-}
-
-void OutputGridTable::SetValue(int row, int col, const wxString& value)
-{
-	if (row < 0 || row >= m_data.size())
-		return;
-
-	GridData& gd = m_data[row];
-	switch (col)
-	{
-	case Col_VoxelSum:
-	{
-		long lval;
-		if (value.ToLong(&lval))
-			gd.voxel_sum = lval;
-	}
-	break;
-	case Col_VoxelWeightedSum:
-	{
-		double dval;
-		if (value.ToDouble(&dval))
-			gd.voxel_wsum = dval;
-	}
-	break;
-	case Col_Size:
-	{
-		double dval;
-		if (value.ToDouble(&dval))
-			gd.size = dval;
-	}
-	break;
-	case Col_WeightedSize:
-	{
-		double dval;
-		if (value.ToDouble(&dval))
-			gd.wsize = dval;
-	}
-	break;
-	}
-}
-
-bool OutputGridTable::CanGetValueAs(
-	int WXUNUSED(row), int col,
-	const wxString& typeName)
-{
-	return true;
-}
-
-bool OutputGridTable::CanSetValueAs(int row, int col, const wxString& typeName)
-{
-	return CanGetValueAs(row, col, typeName);
-}
-
-long OutputGridTable::GetValueAsLong(int row, int col)
-{
-	if (row < 0 || row >= m_data.size())
-		return -1;
-
-	const GridData& gd = m_data[row];
-
-	switch (col)
-	{
-	case Col_VoxelSum:
-		return gd.voxel_sum;
-
-	case Col_VoxelWeightedSum:
-		return long(gd.voxel_wsum+0.5);
-
-	case Col_Size:
-		return long(gd.size+0.5);
-
-	case Col_WeightedSize:
-		return long(gd.wsize+0.5);
-
-	default:
-		//wxFAIL_MSG("unexpected column");
-		return -1;
-	}
-}
-
-double OutputGridTable::GetValueAsDouble(int row, int col)
-{
-	if (row < 0 || row >= m_data.size())
-		return -1;
-
-	const GridData& gd = m_data[row];
-
-	switch (col)
-	{
-	case Col_VoxelSum:
-		return double(gd.voxel_sum);
-
-	case Col_VoxelWeightedSum:
-		return gd.voxel_wsum;
-
-	case Col_Size:
-		return gd.size;
-
-	case Col_WeightedSize:
-		return gd.wsize;
-
-	default:
-		//wxFAIL_MSG("unexpected column");
-		return -1;
-	}
-}
-
-void OutputGridTable::SetValueAsLong(int row, int col, long value)
-{
-	if (row < 0 || row >= m_data.size())
-		return;
-
-	GridData& gd = m_data[row];
-
-	switch (col)
-	{
-	case Col_VoxelSum:
-		gd.voxel_sum = value;
-		break;
-
-	case Col_VoxelWeightedSum:
-		gd.voxel_wsum = value;
-		break;
-
-	case Col_Size:
-		gd.size = value;
-		break;
-
-	case Col_WeightedSize:
-		gd.wsize = value;
-		break;
-
-	}
-}
-
-void OutputGridTable::SetValueAsDouble(int row, int col, double value)
-{
-	if (row < 0 || row >= m_data.size())
-		return;
-
-	GridData& gd = m_data[row];
-
-	switch (col)
-	{
-	case Col_VoxelSum:
-		gd.voxel_sum = long(value+0.5);
-		break;
-
-	case Col_VoxelWeightedSum:
-		gd.voxel_wsum = value;
-		break;
-
-	case Col_Size:
-		gd.size = value;
-		break;
-
-	case Col_WeightedSize:
-		gd.wsize = value;
-		break;
-
-	}
-}
-
-wxString OutputGridTable::GetColLabelValue(int col)
-{
-	static const wxString headers[] = {
-		"Voxel Count",
-		"Voxel Count\n(Intensity Weighted)",
-		"Physical Size",
-		"Physical Size\n(Intesity Weighted)"};
-	return headers[col];
-}
-
-bool OutputGridTable::InsertRows(size_t pos, size_t numRows)
-{
-	GridData data = { 0, 0, 0, 0 };
-	if (pos >= 0 && (m_data.empty()?
-		pos == 0:pos < m_data.size()))
-		m_data.insert(m_data.begin() + pos, numRows, data);
-	return true;
+	m_output_grid->DeleteRows(0, m_output_grid->GetNumberRows());
 }

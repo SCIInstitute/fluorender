@@ -34,7 +34,14 @@ DEALINGS IN THE SOFTWARE.
 
 class VRenderView;
 class VolumeData;
-struct GridData;
+
+struct GridData
+{
+	int voxel_sum;
+	double voxel_wsum;
+	double size;
+	double wsize;
+};
 
 #define BRUSH_TOOL_ITER_WEAK	10
 #define BRUSH_TOOL_ITER_NORMAL	30
@@ -92,6 +99,8 @@ public:
 		//output
 		ID_UpdateBtn,
 		ID_AutoUpdateBtn,
+		ID_HistoryChk,
+		ID_ClearHistBtn,
 		ID_OutputGrid
 	};
 
@@ -107,7 +116,7 @@ public:
 	void UpdateUndoRedo();
 
 	//output
-	void SetOutput(const GridData &data);
+	void SetOutput(const GridData &data, const wxString &unit);
 
 private:
 	wxWindow* m_frame;
@@ -120,6 +129,8 @@ private:
 	//default brush properties
 	double m_dft_gm_falloff;
 	double m_dft_scl_translate;
+	//output
+	bool m_hold_history;
 
 	//paint tools
 	//toolbar
@@ -162,6 +173,8 @@ private:
 	//output
 	wxButton* m_update_btn;
 	wxToggleButton* m_auto_update_btn;
+	wxCheckBox* m_history_chk;
+	wxButton* m_clear_hist_btn;
 	wxGrid *m_output_grid;
 
 private:
@@ -210,54 +223,10 @@ private:
 	//output
 	void OnUpdateBtn(wxCommandEvent& event);
 	void OnAutoUpdateBtn(wxCommandEvent& event);
+	void OnHistoryChk(wxCommandEvent& event);
+	void OnClearHistBtn(wxCommandEvent& event);
 
 	DECLARE_EVENT_TABLE()
 };
-
-enum Columns
-{
-	Col_VoxelSum,
-	Col_VoxelWeightedSum,
-	Col_Size,
-	Col_WeightedSize,
-	Col_Max
-};
-
-struct GridData
-{
-	int voxel_sum;
-	double voxel_wsum;
-	double size;
-	double wsize;
-};
-
-class OutputGridTable : public wxGridTableBase
-{
-public:
-	OutputGridTable() { }
-
-	virtual int GetNumberRows() wxOVERRIDE;
-	virtual int GetNumberCols() wxOVERRIDE;
-	virtual bool IsEmptyCell(int row, int col) wxOVERRIDE;
-	virtual wxString GetValue(int row, int col) wxOVERRIDE;
-	virtual void SetValue(int row, int col, const wxString& value) wxOVERRIDE;
-
-	virtual wxString GetColLabelValue(int col) wxOVERRIDE;
-
-	virtual wxString GetTypeName(int row, int col) wxOVERRIDE;
-	virtual bool CanGetValueAs(int row, int col, const wxString& typeName) wxOVERRIDE;
-	virtual bool CanSetValueAs(int row, int col, const wxString& typeName) wxOVERRIDE;
-
-	virtual long GetValueAsLong(int row, int col) wxOVERRIDE;
-	virtual double GetValueAsDouble(int row, int col) wxOVERRIDE;
-
-	virtual void SetValueAsLong(int row, int col, long value) wxOVERRIDE;
-	virtual void SetValueAsDouble(int row, int col, double value) wxOVERRIDE;
-
-	virtual bool InsertRows(size_t pos, size_t numRows) wxOVERRIDE;
-
-	std::vector<GridData> m_data;
-};
-
 
 #endif//_BRUSHTOOLDLG_H_
