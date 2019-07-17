@@ -2144,6 +2144,38 @@ void VRenderGLView::Segment()
 	if (vr_frame && vr_frame->GetBrushToolDlg())
 	{
 		vr_frame->GetBrushToolDlg()->GetSettings(m_vrv);
+		if (m_count)
+		{
+			GridData data;
+			VolumeData* sel_vol = m_selector.GetVolume();
+			if (sel_vol)
+			{
+				data.voxel_sum = sum;
+				double scale = sel_vol->GetScalarScale();
+				data.voxel_wsum = wsum * scale;
+				double spcx, spcy, spcz;
+				sel_vol->GetSpacings(spcx, spcy, spcz);
+				double vvol = spcx * spcy * spcz;
+				vvol = vvol == 0.0 ? 1.0 : vvol;
+				data.size = data.voxel_sum * vvol;
+				data.wsize = data.voxel_wsum * vvol;
+				wxString unit;
+				switch (m_sb_unit)
+				{
+				case 0:
+					unit = L"nm\u00B3";
+					break;
+				case 1:
+				default:
+					unit = L"\u03BCm\u00B3";
+					break;
+				case 2:
+					unit = L"mm\u00B3";
+					break;
+				}
+				vr_frame->GetBrushToolDlg()->SetOutput(data, unit);
+			}
+		}
 	}
 }
 
