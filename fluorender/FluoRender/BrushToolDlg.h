@@ -27,12 +27,14 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <wx/wx.h>
 #include <wx/grid.h>
+#include <wx/tglbtn.h>
 
 #ifndef _BRUSHTOOLDLG_H_
 #define _BRUSHTOOLDLG_H_
 
 class VRenderView;
 class VolumeData;
+struct GridData;
 
 #define BRUSH_TOOL_ITER_WEAK	10
 #define BRUSH_TOOL_ITER_NORMAL	30
@@ -88,6 +90,8 @@ public:
 		ID_BrushSizeDataRd,
 		ID_BrushSizeScreenRd,
 		//output
+		ID_UpdateBtn,
+		ID_AutoUpdateBtn,
 		ID_OutputGrid
 	};
 
@@ -101,6 +105,9 @@ public:
 	void SelectBrush(int id);
 	//update undo status
 	void UpdateUndoRedo();
+
+	//output
+	void SetOutput(const GridData &data);
 
 private:
 	wxWindow* m_frame;
@@ -153,6 +160,8 @@ private:
 	wxRadioButton* m_brush_size_screen_rb;
 
 	//output
+	wxButton* m_update_btn;
+	wxToggleButton* m_auto_update_btn;
 	wxGrid *m_output_grid;
 
 private:
@@ -198,6 +207,9 @@ private:
 	void OnBrushIterCheck(wxCommandEvent& event);
 	//brush size relation
 	void OnBrushSizeRelationCheck(wxCommandEvent& event);
+	//output
+	void OnUpdateBtn(wxCommandEvent& event);
+	void OnAutoUpdateBtn(wxCommandEvent& event);
 
 	DECLARE_EVENT_TABLE()
 };
@@ -242,7 +254,8 @@ public:
 	virtual void SetValueAsLong(int row, int col, long value) wxOVERRIDE;
 	virtual void SetValueAsDouble(int row, int col, double value) wxOVERRIDE;
 
-private:
+	virtual bool InsertRows(size_t pos, size_t numRows) wxOVERRIDE;
+
 	std::vector<GridData> m_data;
 };
 

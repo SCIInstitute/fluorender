@@ -81,7 +81,10 @@ BEGIN_EVENT_TABLE(BrushToolDlg, wxPanel)
 	//brush size relation
 	EVT_RADIOBUTTON(ID_BrushSizeDataRd, BrushToolDlg::OnBrushSizeRelationCheck)
 	EVT_RADIOBUTTON(ID_BrushSizeScreenRd, BrushToolDlg::OnBrushSizeRelationCheck)
-	END_EVENT_TABLE()
+	//output
+	EVT_BUTTON(ID_UpdateBtn, BrushToolDlg::OnUpdateBtn)
+	EVT_TOGGLEBUTTON(ID_AutoUpdateBtn, BrushToolDlg::OnAutoUpdateBtn)
+END_EVENT_TABLE()
 
 BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	: wxPanel(parent, wxID_ANY,
@@ -213,12 +216,14 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	sizer1_4->Add(m_brush_2dinfl_text, 0, wxALIGN_CENTER);
 	sizer1_4->Add(15, 15);
 	//sizer1
+	sizer1->Add(5, 5);
 	sizer1->Add(sizer1_1, 0, wxEXPAND);
-	sizer1->Add(10, 10);
+	sizer1->Add(5, 5);
 	sizer1->Add(sizer1_2, 0, wxEXPAND);
 	sizer1->Add(sizer1_3, 0, wxEXPAND);
 	sizer1->Add(sizer1_4, 0, wxEXPAND);
 	sizer1->Hide(sizer1_4, true);
+	sizer1->Add(5, 5);
 
 	//Brush properties
 	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
@@ -295,37 +300,50 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	sizer2_5->Add(15, 15);
 	sizer2_5->Add(m_brush_size_screen_rb, 0, wxALIGN_CENTER);
 	//sizer2
+	sizer2->Add(5, 5);
 	sizer2->Add(sizer2_4, 0, wxEXPAND);
 	sizer2->Add(5, 5);
 	sizer2->Add(sizer2_5, 0, wxEXPAND);
-	sizer2->Add(10, 10);
+	sizer2->Add(5, 5);
 	sizer2->Add(sizer2_2, 0, wxEXPAND);
 	sizer2->Add(sizer2_3, 0, wxEXPAND);
-	sizer2->Add(10, 10);
+	sizer2->Add(5, 5);
 	sizer2->Add(sizer2_1, 0, wxEXPAND);
+	sizer2->Add(5, 5);
 
 	//output
 	wxBoxSizer *sizer3 = new wxStaticBoxSizer(
 		new wxStaticBox(this, wxID_ANY, "Output"),
 		wxVERTICAL);
+	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
+	m_update_btn = new wxButton(this, ID_UpdateBtn, "Get Sel. Size",
+		wxDefaultPosition, wxSize(75, -1));
+	m_auto_update_btn = new wxToggleButton(this, ID_AutoUpdateBtn,
+		"Auto Update", wxDefaultPosition, wxSize(75, -1));
+	sizer3_1->Add(m_update_btn, 0, wxALIGN_CENTER);
+	sizer3_1->Add(m_auto_update_btn, 0, wxALIGN_CENTER);
 	//grid
 	m_output_grid = new wxGrid(this, ID_OutputGrid);
 	wxGridTableBase* table = new OutputGridTable();
 	m_output_grid->SetTable(table, true);
 	m_output_grid->Fit();
-	sizer3->Add(m_output_grid, 0, wxEXPAND);
+	sizer3->Add(5, 5);
+	sizer3->Add(sizer3_1, 0, wxEXPAND);
+	sizer3->Add(5, 5);
+	sizer3->Add(m_output_grid, 1, wxEXPAND);
+	sizer3->Add(5, 5);
 
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	sizer_v->Add(10, 10);
 	sizer_v->Add(m_toolbar, 0, wxEXPAND);
-	sizer_v->Add(10, 30);
+	sizer_v->Add(10, 10);
 	sizer_v->Add(sizer1, 0, wxEXPAND);
-	sizer_v->Add(10, 30);
+	sizer_v->Add(10, 10);
 	sizer_v->Add(sizer2, 0, wxEXPAND);
-	sizer_v->Add(10, 30);
-	sizer_v->Add(sizer3, 0, wxEXPAND);
-	sizer_v->Add(10, 30);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer3, 1, wxEXPAND);
+	sizer_v->Add(10, 10);
 
 	SetSizer(sizer_v);
 	Layout();
@@ -859,6 +877,36 @@ void BrushToolDlg::OnBrushSizeRelationCheck(wxCommandEvent& event)
 	}
 }
 
+//output
+void BrushToolDlg::SetOutput(const GridData &data)
+{
+	if (m_output_grid->GetNumberRows()==0)
+	{
+		m_output_grid->InsertRows();
+	}
+	m_output_grid->SetCellValue(0, 0,
+		wxString::Format("%d", data.voxel_sum));
+	m_output_grid->SetCellValue(0, 1,
+		wxString::Format("%f", data.voxel_wsum));
+	m_output_grid->SetCellValue(0, 2,
+		wxString::Format("%f", data.size));
+	m_output_grid->SetCellValue(0, 3,
+		wxString::Format("%f", data.wsize));
+	m_output_grid->ForceRefresh();
+}
+
+void BrushToolDlg::OnUpdateBtn(wxCommandEvent& event)
+{
+	GridData data = { 1, 2, 3, 4 };
+	SetOutput(data);
+}
+
+void BrushToolDlg::OnAutoUpdateBtn(wxCommandEvent& event)
+{
+	if (m_cur_view)
+		m_cur_view->m_glview->m_count = m_auto_update_btn->GetValue();
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 wxString OutputGridTable::GetTypeName(int WXUNUSED(row), int col)
 {
@@ -891,6 +939,9 @@ bool OutputGridTable::IsEmptyCell(int WXUNUSED(row), int WXUNUSED(col))
 
 wxString OutputGridTable::GetValue(int row, int col)
 {
+	if (row < 0 || row >= m_data.size())
+		return wxEmptyString;
+
 	const GridData& gd = m_data[row];
 
 	switch (col)
@@ -914,8 +965,41 @@ wxString OutputGridTable::GetValue(int row, int col)
 
 void OutputGridTable::SetValue(int row, int col, const wxString& value)
 {
-	GridData& gd = m_data[row];
+	if (row < 0 || row >= m_data.size())
+		return;
 
+	GridData& gd = m_data[row];
+	switch (col)
+	{
+	case Col_VoxelSum:
+	{
+		long lval;
+		if (value.ToLong(&lval))
+			gd.voxel_sum = lval;
+	}
+	break;
+	case Col_VoxelWeightedSum:
+	{
+		double dval;
+		if (value.ToDouble(&dval))
+			gd.voxel_wsum = dval;
+	}
+	break;
+	case Col_Size:
+	{
+		double dval;
+		if (value.ToDouble(&dval))
+			gd.size = dval;
+	}
+	break;
+	case Col_WeightedSize:
+	{
+		double dval;
+		if (value.ToDouble(&dval))
+			gd.wsize = dval;
+	}
+	break;
+	}
 }
 
 bool OutputGridTable::CanGetValueAs(
@@ -932,6 +1016,9 @@ bool OutputGridTable::CanSetValueAs(int row, int col, const wxString& typeName)
 
 long OutputGridTable::GetValueAsLong(int row, int col)
 {
+	if (row < 0 || row >= m_data.size())
+		return -1;
+
 	const GridData& gd = m_data[row];
 
 	switch (col)
@@ -956,6 +1043,9 @@ long OutputGridTable::GetValueAsLong(int row, int col)
 
 double OutputGridTable::GetValueAsDouble(int row, int col)
 {
+	if (row < 0 || row >= m_data.size())
+		return -1;
+
 	const GridData& gd = m_data[row];
 
 	switch (col)
@@ -980,6 +1070,9 @@ double OutputGridTable::GetValueAsDouble(int row, int col)
 
 void OutputGridTable::SetValueAsLong(int row, int col, long value)
 {
+	if (row < 0 || row >= m_data.size())
+		return;
+
 	GridData& gd = m_data[row];
 
 	switch (col)
@@ -1005,6 +1098,9 @@ void OutputGridTable::SetValueAsLong(int row, int col, long value)
 
 void OutputGridTable::SetValueAsDouble(int row, int col, double value)
 {
+	if (row < 0 || row >= m_data.size())
+		return;
+
 	GridData& gd = m_data[row];
 
 	switch (col)
@@ -1032,9 +1128,17 @@ wxString OutputGridTable::GetColLabelValue(int col)
 {
 	static const wxString headers[] = {
 		"Voxel Count",
-		"Voxel Count (Intensity Weighted)",
+		"Voxel Count\n(Intensity Weighted)",
 		"Physical Size",
-		"Physical Size (Intesity Weighted)"};
+		"Physical Size\n(Intesity Weighted)"};
 	return headers[col];
 }
 
+bool OutputGridTable::InsertRows(size_t pos, size_t numRows)
+{
+	GridData data = { 0, 0, 0, 0 };
+	if (pos >= 0 && (m_data.empty()?
+		pos == 0:pos < m_data.size()))
+		m_data.insert(m_data.begin() + pos, numRows, data);
+	return true;
+}
