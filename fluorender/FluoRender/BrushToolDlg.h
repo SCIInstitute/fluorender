@@ -25,12 +25,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef _BRUSHTOOLDLG_H_
+#define _BRUSHTOOLDLG_H_
+
 #include <wx/wx.h>
 #include <wx/grid.h>
 #include <wx/tglbtn.h>
-
-#ifndef _BRUSHTOOLDLG_H_
-#define _BRUSHTOOLDLG_H_
+#include <wx/clipbrd.h>
 
 class VRenderView;
 class VolumeData;
@@ -117,6 +118,8 @@ public:
 
 	//output
 	void SetOutput(const GridData &data, const wxString &unit);
+	void CopyData();
+	void PasteData();
 
 private:
 	wxWindow* m_frame;
@@ -225,6 +228,8 @@ private:
 	void OnAutoUpdateBtn(wxCommandEvent& event);
 	void OnHistoryChk(wxCommandEvent& event);
 	void OnClearHistBtn(wxCommandEvent& event);
+	void OnKeyDown(wxKeyEvent& event);
+	void OnSelectCell(wxGridEvent& event);
 
 	DECLARE_EVENT_TABLE()
 };

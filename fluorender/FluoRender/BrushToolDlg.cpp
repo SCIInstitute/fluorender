@@ -87,6 +87,8 @@ BEGIN_EVENT_TABLE(BrushToolDlg, wxPanel)
 	EVT_TOGGLEBUTTON(ID_AutoUpdateBtn, BrushToolDlg::OnAutoUpdateBtn)
 	EVT_CHECKBOX(ID_HistoryChk, BrushToolDlg::OnHistoryChk)
 	EVT_BUTTON(ID_ClearHistBtn, BrushToolDlg::OnClearHistBtn)
+	EVT_KEY_DOWN(BrushToolDlg::OnKeyDown)
+	EVT_GRID_SELECT_CELL(BrushToolDlg::OnSelectCell)
 END_EVENT_TABLE()
 
 BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
@@ -165,7 +167,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 		wxVERTICAL);
 	//stop at boundary
 	wxBoxSizer *sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_estimate_thresh_chk = new wxCheckBox(this, ID_EstimateThreshChk, "Auto Thresh:",
+	m_estimate_thresh_chk = new wxCheckBox(this, ID_EstimateThreshChk, "Auto Clear:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 	m_edge_detect_chk = new wxCheckBox(this, ID_BrushEdgeDetectChk, "Edge Detect:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
@@ -972,4 +974,106 @@ void BrushToolDlg::OnHistoryChk(wxCommandEvent& event)
 void BrushToolDlg::OnClearHistBtn(wxCommandEvent& event)
 {
 	m_output_grid->DeleteRows(0, m_output_grid->GetNumberRows());
+}
+
+void BrushToolDlg::OnKeyDown(wxKeyEvent& event)
+{
+	if (wxGetKeyState(WXK_CONTROL))
+	{
+		if (event.GetKeyCode() == wxKeyCode('C'))
+			CopyData();
+		else if (event.GetKeyCode() == wxKeyCode('V'))
+			PasteData();
+	}
+	event.Skip();
+}
+
+void BrushToolDlg::OnSelectCell(wxGridEvent& event)
+{
+	int r = event.GetRow();
+	int c = event.GetCol();
+	m_output_grid->SelectBlock(r, c, r, c);
+}
+
+void BrushToolDlg::CopyData()
+{
+	int i, k;
+	wxString copy_data;
+	bool something_in_this_line;
+
+	copy_data.Clear();
+
+	bool t = m_output_grid->IsSelection();
+
+	for (i = 0; i < m_output_grid->GetNumberRows(); i++)
+	{
+		something_in_this_line = false;
+		for (k = 0; k < m_output_grid->GetNumberCols(); k++)
+		{
+			if (m_output_grid->IsInSelection(i, k))
+			{
+				if (something_in_this_line == false)
+				{  // first field in this line => may need a linefeed
+					if (copy_data.IsEmpty() == false)
+					{     // ... if it is not the very first field
+						copy_data = copy_data + wxT("\n");  // next LINE
+					}
+					something_in_this_line = true;
+				}
+				else
+				{
+					// if not the first field in this line we need a field seperator (TAB)
+					copy_data = copy_data + wxT("\t");  // next COLUMN
+				}
+				copy_data = copy_data + m_output_grid->GetCellValue(i, k);    // finally we need the field value :-)
+			}
+		}
+	}
+
+	if (wxTheClipboard->Open())
+	{
+		// This data objects are held by the clipboard,
+		// so do not delete them in the app.
+		wxTheClipboard->SetData(new wxTextDataObject(copy_data));
+		wxTheClipboard->Close();
+	}
+}
+
+void BrushToolDlg::PasteData()
+{
+/*	wxString copy_data;
+	wxString cur_field;
+	wxString cur_line;
+	int i, k, k2;
+
+	if (wxTheClipboard->Open())
+	{
+		if (wxTheClipboard->IsSupported(wxDF_TEXT))
+		{
+			wxTextDataObject data;
+			wxTheClipboard->GetData(data);
+			copy_data = data.GetText();
+		}
+		wxTheClipboard->Close();
+	}
+
+	i = m_output_grid->GetGridCursorRow();
+	k = m_output_grid->GetGridCursorCol();
+	k2 = k;
+
+	do
+	{
+		cur_line = copy_data.BeforeFirst('\n');
+		copy_data = copy_data.AfterFirst('\n');
+		do
+		{
+			cur_field = cur_line.BeforeFirst('\t');
+			cur_line = cur_line.AfterFirst('\t');
+			m_output_grid->SetCellValue(i, k, cur_field);
+			k++;
+		} while (cur_line.IsEmpty() == false);
+		i++;
+		k = k2;
+	} while (copy_data.IsEmpty() == false);
+*/
 }
