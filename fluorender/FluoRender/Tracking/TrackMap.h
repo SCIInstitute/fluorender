@@ -94,7 +94,8 @@ namespace FL
 		bool ProcessFrames(size_t frame1, size_t frame2);
 
 		//make id consistent
-		bool MakeConsistent(size_t frame1, size_t frame2);
+		bool MakeConsistent(size_t frame);//combine cells within vertex
+		bool MakeConsistent(size_t frame1, size_t frame2);//make mapped cells same color
 
 		//clear counters
 		bool ClearCounters();
@@ -103,6 +104,10 @@ namespace FL
 		bool Import(std::string &filename);
 
 		bool ResetVertexIDs();
+
+		//get
+		pCell GetCell(size_t frame, unsigned int id);
+		pVertex GetVertex(pCell &cell);
 
 		//get mapped cell
 		bool GetMappedID(unsigned int id_in, unsigned int& id_out,
@@ -624,6 +629,29 @@ namespace FL
 		m_data_bits = 8;
 		m_scale = 1.0f;
 		m_counter = 0;
+	}
+
+	//get
+	inline pCell TrackMapProcessor::GetCell(size_t frame, unsigned int id)
+	{
+		if (frame >= m_map->m_frame_num)
+			return nullptr;
+
+		CellList &clist = m_map->m_cells_list.at(frame);
+		CellListIter citer = clist.find(id);
+		if (citer == clist.end())
+			return nullptr;
+		else
+			return citer->second;
+	}
+
+	inline pVertex TrackMapProcessor::GetVertex(pCell &cell)
+	{
+		if (!cell)
+			return nullptr;
+
+		pwVertex pvert = cell->GetVertex();
+		return pvert.lock();
 	}
 
 }//namespace FL
