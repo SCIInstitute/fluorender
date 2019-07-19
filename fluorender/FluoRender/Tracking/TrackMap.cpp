@@ -891,23 +891,34 @@ bool TrackMapProcessor::MakeConsistent(size_t f)
 		(unsigned long long)ny * (unsigned long long)nz;
 	unsigned long long index;
 
+	CellIDMap id_map;
 	//scan label for cell ids
 	unsigned int lv;
 	for (index = 0; index < size; ++index)
 	{
 		lv = label[index];
-		pCell cell = GetCell(f, lv);
-		if (!cell)
-			continue;
-		pVertex vert = GetVertex(cell);
-		if (!vert)
-			continue;
-		if (vert->GetCellNum() > 1)
+		//find in id map
+		auto it = id_map.find(lv);
+		if (it != id_map.end())
 		{
-
+			//already processed
+			label[index] = it->second;
+		}
+		else
+		{
+			unsigned int id0 = GetUniCellID(f, lv);
+			if (id0 != lv)
+			{
+				unsigned int newid = GetNewCellID(f, id0);
+				ReplaceCellID(lv, newid, f);
+				label[index] = newid;
+				id_map.insert(std::pair<unsigned int,
+					unsigned int>(lv, newid));
+			}
 		}
 	}
 
+	m_vol_cache.set_modified(f);
 	return true;
 }
 
@@ -919,12 +930,9 @@ bool TrackMapProcessor::MakeConsistent(size_t f1, size_t f2)
 		return false;
 
 	//get label
-	VolCache cache = m_vol_cache.get(f1);
-	m_vol_cache.protect(f1);
-	void* label1 = cache.label;
-	cache = m_vol_cache.get(f2);
-	void* label2 = cache.label;
-	if (!label1 || !label2)
+	VolCache cache = m_vol_cache.get(f2);
+	unsigned int* label = (unsigned int*)(cache.label);
+	if (!label)
 		return false;
 	//size
 	size_t nx = m_map->m_size_x;
@@ -934,12 +942,36 @@ bool TrackMapProcessor::MakeConsistent(size_t f1, size_t f2)
 		(unsigned long long)ny * (unsigned long long)nz;
 	unsigned long long index;
 
-	InterGraph &inter_graph = m_map->m_inter_graph_list.at(
-		f1 > f2 ? f2 : f1);
+	//InterGraph &inter_graph = m_map->m_inter_graph_list.at(
+	//	f1 > f2 ? f2 : f1);
+	CellIDMap id_map;
+	//scan label for cell ids
+	unsigned int lv;
+	for (index = 0; index < size; ++index)
+	{
+		lv = label[index];
+		//find in id map
+		auto it = id_map.find(lv);
+		if (it != id_map.end())
+		{
+			//already processed
+			label[index] = it->second;
+		}
+		else
+		{
+			unsigned int id0 = GetTrackedID(f2, f1, lv);//track back
+			if (id0 != lv)
+			{
+				unsigned int newid = GetNewCellID(f2, id0);
+				ReplaceCellID(lv, newid, f2);
+				label[index] = newid;
+				id_map.insert(std::pair<unsigned int,
+					unsigned int>(lv, newid));
+			}
+		}
+	}
 
-
-
-	m_vol_cache.unprotect(f1);
+	m_vol_cache.set_modified(f2);
 
 	return true;
 }
@@ -2942,101 +2974,44 @@ bool TrackMapProcessor::AddInterEdge(InterGraph& graph,
 	return true;
 }
 
-bool TrackMapProcessor::GetMappedID(
-	unsigned int id_in, unsigned int& id_out,
-	size_t frame)
+unsigned int TrackMapProcessor::GetTrackedID(
+	size_t frame1, size_t frame2, unsigned int id)
 {
-	size_t frame_num = m_map->m_frame_num;
-	if (frame >= frame_num)
-		return false;
-
-	CellList &cell_list = m_map->m_cells_list.at(frame);
-
-	CellListIter cell_iter;
-	pVertex vertex;
-	cell_iter = cell_list.find(id_in);
-	if (cell_iter == cell_list.end())
-		return false;
-	vertex = cell_iter->second->GetVertex().lock();
-	if (!vertex)
-		return false;
-
-	pCell cell = (*vertex->GetCellsBegin()).lock();
-	if (!cell)
-		return false;
-
-	id_out = cell->Id();
-	return true;
-}
-
-bool TrackMapProcessor::GetMappedID(
-	unsigned int id_in, unsigned int& id_out,
-	size_t frame1, size_t frame2)
-{
-	bool result = false;
+	unsigned int rid = 0;
 	size_t frame_num = m_map->m_frame_num;
 	if (frame1 >= frame_num ||
 		frame2 >= frame_num ||
 		frame1 == frame2)
 		return false;
 
-	CellList &cell_list1 = m_map->m_cells_list.at(frame1);
 	InterGraph &inter_graph = m_map->m_inter_graph_list.at(
 		frame1 > frame2 ? frame2 : frame1);
-	CellListIter cell_iter;
-	pVertex vertex1, vertex2;
-	pCell cell;
-	InterVert v1, v2;
-	std::pair<InterAdjIter, InterAdjIter> adj_verts;
-	InterAdjIter inter_iter;
-	CellBinIter pwcell_iter;
-	std::pair<InterEdge, bool> inter_edge;
-	float in_size;
-	float out_size, min_diff;
 
-	cell_iter = cell_list1.find(id_in);
-	if (cell_iter == cell_list1.end())
-		return false;
-	vertex1 = cell_iter->second->GetVertex().lock();
-	if (!vertex1)
-		return false;
-	in_size = vertex1->GetSizeF();
-	v1 = vertex1->GetInterVert(inter_graph);
+	pCell cell = GetCell(frame1, id);
+	if (!cell)
+		return rid;
+	pVertex vert = GetVertex(cell);
+	if (!vert)
+		return rid;
+
+	InterVert v1 = vert->GetInterVert(inter_graph);
 	if (v1 == InterGraph::null_vertex())
-		return false;
+		return rid;
 
-	min_diff = std::numeric_limits<float>::max();
-	adj_verts = boost::adjacent_vertices(v1, inter_graph);
-	//for each adjacent vertex
-	for (inter_iter = adj_verts.first;
-	inter_iter != adj_verts.second;
-		++inter_iter)
-	{
-		v2 = *inter_iter;
-		//get edge
-		inter_edge = boost::edge(v1, v2, inter_graph);
-		if (!inter_edge.second)
-			continue;
-		else if (!inter_graph[inter_edge.first].link)
-			continue;
-		vertex2 = inter_graph[v2].vertex.lock();
-		if (!vertex2)
-			continue;
+	std::pair<InterAdjIter, InterAdjIter> adj_verts =
+		boost::adjacent_vertices(v1, inter_graph);
+	if (adj_verts.first == adj_verts.second)
+		return rid;
+	InterVert v2 = *(adj_verts.first);
+	pVertex vert2 = inter_graph[v2].vertex.lock();
+	if (!vert2)
+		return rid;
+	pCell cell2 = (*vert2->GetCellsBegin()).lock();
+	if (!cell)
+		return rid;
+	rid = cell->Id();
 
-		//find closest size
-		out_size = vertex2->GetSizeF();
-		if (fabs(out_size - in_size) < min_diff)
-		{
-			cell = (*vertex2->GetCellsBegin()).lock();
-			if (!cell)
-				continue;
-			id_out = cell->Id();
-			min_diff = fabs(out_size - in_size);
-			result = true;
-		}
-	}
-
-	return result;
+	return rid;
 }
 
 bool TrackMapProcessor::GetMappedCells(

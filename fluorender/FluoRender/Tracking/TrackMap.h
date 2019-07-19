@@ -108,12 +108,13 @@ namespace FL
 		//get
 		pCell GetCell(size_t frame, unsigned int id);
 		pVertex GetVertex(pCell &cell);
+		unsigned int GetUniCellID(size_t frame, unsigned int id);
+		unsigned int GetNewCellID(size_t frame, unsigned int id);
+		unsigned int GetTrackedID(size_t frame1, size_t frame2, unsigned int id);
 
 		//get mapped cell
-		bool GetMappedID(unsigned int id_in, unsigned int& id_out,
-			size_t frame);
-		bool GetMappedID(unsigned int id_in, unsigned int& id_out,
-			size_t frame1, size_t frame2);
+		//bool GetMappedID(unsigned int id_in, unsigned int& id_out,
+		//	size_t frame);
 		//get mapped cells
 		bool GetMappedCells(CellList &sel_list1, CellList &sel_list2,
 			size_t frame1, size_t frame2);
@@ -652,6 +653,32 @@ namespace FL
 
 		pwVertex pvert = cell->GetVertex();
 		return pvert.lock();
+	}
+
+	inline unsigned int TrackMapProcessor::GetUniCellID(size_t frame, unsigned int id)
+	{
+		unsigned int rid = 0;
+		pCell cell = GetCell(frame, id);
+		if (!cell)
+			return rid;
+		pVertex vert = GetVertex(cell);
+		if (!vert ||
+			vert->FindCell(cell) < 0)
+			return rid;
+		pCell cell0 = vert->GetCell(0);
+		rid = cell0->Id();
+		return rid;
+	}
+
+	//get new id
+	inline unsigned int TrackMapProcessor::GetNewCellID(size_t frame, unsigned int id)
+	{
+		//cell list
+		CellList &clist = m_map->m_cells_list.at(frame);
+		unsigned int newid = id+360;
+		while (clist.find(newid) != clist.end())
+			newid += 360;
+		return newid;
 	}
 
 }//namespace FL

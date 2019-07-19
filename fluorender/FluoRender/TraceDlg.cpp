@@ -1319,145 +1319,41 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
 		return;
-	BaseReader* reader = vd->GetReader();
-	if (!reader)
-		return;
-	LBLReader lbl_reader;
-	MSKWriter lbl_writer;
 	TraceGroup *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
 
-	wxDirDialog *dirdlg = new wxDirDialog(
-		m_frame, "Save labels in", "",
-		wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
-	int rval = dirdlg->ShowModal();
-	wxString out_dir;
-	if (rval == wxID_OK)
-	{
-		out_dir = dirdlg->GetPath();
-		delete dirdlg;
-	}
-	else
-	{
-		delete dirdlg;
-		return;
-	}
-
 	m_stat_text->SetValue("Generating consistent IDs in");
 	wxGetApp().Yield();
+
 	FL::pTrackMap track_map = trace_group->GetTrackMap();
 	FL::TrackMapProcessor tm_processor(track_map);
-	int chan = vd->GetCurChannel();
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
-	unsigned long long size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
-	unsigned long long index;
+	int resx, resy, resz;
+	vd->GetResolution(resx, resy, resz);
+	double spcx, spcy, spcz;
+	vd->GetSpacings(spcx, spcy, spcz);
+	tm_processor.SetBits(vd->GetBits());
+	tm_processor.SetScale(vd->GetScalarScale());
+	tm_processor.SetSizes(resx, resy, resz);
+	tm_processor.SetSpacings(spcx, spcy, spcz);
+	tm_processor.RegisterCacheQueueFuncs(
+		boost::bind(&TraceDlg::ReadVolCache, this, _1),
+		boost::bind(&TraceDlg::DelVolCache, this, _1));
+	tm_processor.SetVolCacheSize(2);
 
-	Nrrd* nrrd_label_in1 = 0;
-	Nrrd* nrrd_label_in2 = 0;
-	Nrrd* nrrd_label_out1 = 0;
-	Nrrd* nrrd_label_out2 = 0;
-	wstring lblname;
-
-	CellMap cell_map;
-	CellMapIter iter;
-	unsigned int label_in1, label_in2;
-
-	//read first frame
-	lblname = reader->GetCurLabelName(0, chan);
-	lbl_reader.SetFile(lblname);
-	nrrd_label_in1 = lbl_reader.Convert(0, chan, true);
-	(*m_stat_text) << wxString::Format("Label in 1 of frame %d read.\n", 0);
+	(*m_stat_text) << wxString::Format("Frame %d\n", 0);
 	wxGetApp().Yield();
-	//duplicate
-	nrrd_label_in2 = nrrdNew();
-	nrrdCopy(nrrd_label_in2, nrrd_label_in1);
-	for (index = 0; index < size; ++index)
-	{
-		label_in1 = ((unsigned int*)(nrrd_label_in1->data))[index];
-		iter = cell_map.find(label_in1);
-		if (iter != cell_map.end())
-		{
-			((unsigned int*)(nrrd_label_in2->data))[index] = iter->second;
-		}
-		else
-		{
-			if (tm_processor.GetMappedID(label_in1, label_in2, 0))
-			{
-				((unsigned int*)(nrrd_label_in2->data))[index] = label_in2;
-				cell_map.insert(pair<unsigned int, unsigned int>(label_in1, label_in2));
-			}
-		}
-	}
-	lblname = out_dir.ToStdWstring() + GET_NAME(lblname);
-	lbl_writer.SetData(nrrd_label_in2);
-	lbl_writer.Save(lblname, 1);
-	(*m_stat_text) << wxString::Format("Label in 2 of frame %d written.\n", 0);
-	wxGetApp().Yield();
+	tm_processor.MakeConsistent(0);
 
-	unsigned int label_out1, label_out2;
 	//remaining frames
 	for (size_t fi = 1; fi < track_map->GetFrameNum(); ++fi)
 	{
-		cell_map.clear();
-
-		//read fi frame
-		lblname = reader->GetCurLabelName(fi, chan);
-		lbl_reader.SetFile(lblname);
-		nrrd_label_out1 = lbl_reader.Convert(fi, chan, true);
-		(*m_stat_text) << wxString::Format("Label out 1 of frame %d read.\n", int(fi));
+		(*m_stat_text) << wxString::Format("Frame %d\n", int(fi));
 		wxGetApp().Yield();
-
-		//copy
-		nrrd_label_out2 = nrrdNew();
-		nrrdCopy(nrrd_label_out2, nrrd_label_out1);
-
-		for (index = 0; index < size; ++index)
-		{
-			label_out1 = ((unsigned int*)(nrrd_label_out1->data))[index];
-			iter = cell_map.find(label_out1);
-			if (iter != cell_map.end())
-			{
-				((unsigned int*)(nrrd_label_out2->data))[index] = iter->second;
-			}
-			else
-			{
-				if (tm_processor.GetMappedID(label_out1, label_in1, fi, fi - 1))
-				{
-					label_out2 = GetMappedID(label_in1,
-						(unsigned int*)(nrrd_label_in1->data),
-						(unsigned int*)(nrrd_label_in2->data),
-						size);
-					if (label_out2)
-					{
-						((unsigned int*)(nrrd_label_out2->data))[index] = label_out2;
-						cell_map.insert(pair<unsigned int, unsigned int>(label_out1, label_out2));
-					}
-				}
-			}
-		}
-
-		//save
-		lblname = out_dir.ToStdWstring() + GET_NAME(lblname);
-		lbl_writer.SetData(nrrd_label_out2);
-		lbl_writer.Save(lblname, 1);
-		(*m_stat_text) << wxString::Format("Label out 2 of frame %d written.\n", int(fi));
-		wxGetApp().Yield();
-
-		//swap
-		nrrdNuke(nrrd_label_in1);
-		nrrdNuke(nrrd_label_in2);
-		nrrd_label_in1 = nrrd_label_out1;
-		nrrd_label_in2 = nrrd_label_out2;
+		tm_processor.MakeConsistent(fi - 1, fi);
 	}
 
-	//release
-	nrrdNuke(nrrd_label_out1);
-	nrrdNuke(nrrd_label_out2);
-
-	(*m_stat_text) << "All done.\n";
+	CellUpdate();
 }
 
 void TraceDlg::OnAnalyzeComp(wxCommandEvent &event)
@@ -2889,16 +2785,6 @@ void TraceDlg::SaveOutputResult(wxString &filename)
 	str = m_stat_text->GetValue();
 
 	tos << str;
-}
-
-unsigned int TraceDlg::GetMappedID(
-	unsigned int id, unsigned int* data_label1,
-	unsigned int* data_label2, unsigned long long size)
-{
-	for (unsigned long long i = 0; i < size; ++i)
-		if (data_label1[i] == id)
-			return data_label2[i];
-	return 0;
 }
 
 void TraceDlg::Test1()
