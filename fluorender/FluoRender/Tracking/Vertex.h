@@ -271,7 +271,7 @@ namespace FL
 
 	inline void Vertex::AddCell(pCell &cell, bool inc)
 	{
-		if (FindCell(cell) < 0)
+		if (FindCell(cell) >= 0)
 			return;
 
 		if (inc)
