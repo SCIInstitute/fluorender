@@ -78,8 +78,7 @@ namespace FL
 			m_size_ui(0), m_size_f(0.0f),
 			m_external_ui(0), m_external_f(0.0f),
 			m_count0(0), m_count1(0),
-			m_intra_vert(IntraGraph::null_vertex()),
-			m_delete(false)
+			m_intra_vert(IntraGraph::null_vertex())
 		{}
 		~Cell() {}
 
@@ -136,8 +135,6 @@ namespace FL
 		unsigned int m_count1;
 		IntraVert m_intra_vert;
 		pwVertex m_vertex;//parent
-		//delete
-		bool m_delete;//marked for deletion
 	};
 
 	inline unsigned int Cell::Id()
@@ -247,11 +244,6 @@ namespace FL
 		return m_external_f;
 	}
 
-	inline bool Cell::GetDelete()
-	{
-		return m_delete;
-	}
-
 	inline void Cell::SetBrickId(unsigned int id)
 	{
 		m_brick_id = id;
@@ -285,11 +277,6 @@ namespace FL
 	inline void Cell::SetExternalF(float external_f)
 	{
 		m_external_f = external_f;
-	}
-
-	inline void Cell::SetDelete()
-	{
-		m_delete = true;
 	}
 
 	//count
