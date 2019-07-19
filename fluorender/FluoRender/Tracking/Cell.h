@@ -103,7 +103,6 @@ namespace FL
 		float GetSizeF();
 		unsigned int GetExternalUi();
 		float GetExternalF();
-		bool GetDelete();
 		//set
 		void SetBrickId(unsigned int id);
 		void SetCenter(const FLIVR::Point &center);
@@ -112,7 +111,6 @@ namespace FL
 		void SetSizeF(float size_f);
 		void SetExternalUi(unsigned int external_ui);
 		void SetExternalF(float external_f);
-		void SetDelete();
 		//count
 		unsigned int GetCount0();
 		unsigned int GetCount1();
