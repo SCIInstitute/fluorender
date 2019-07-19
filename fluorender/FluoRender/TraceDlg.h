@@ -213,9 +213,6 @@ private:
 		int contact_num;
 	} comp_info;
 
-	typedef boost::unordered_map<unsigned int, unsigned int> CellMap;
-	typedef boost::unordered_map<unsigned int, unsigned int>::iterator CellMapIter;
-
 	wxWindow* m_frame;
 	//current view
 	VRenderView* m_view;
@@ -337,8 +334,8 @@ private:
 	wxWindow* CreateModifyPage(wxWindow *parent);
 	wxWindow* CreateAnalysisPage(wxWindow *parent);
 
-	unsigned int GetMappedID(unsigned int id, unsigned int* data_label1,
-		unsigned int* data_label2, unsigned long long size);
+	//unsigned int GetMappedID(unsigned int id, unsigned int* data_label1,
+	//	unsigned int* data_label2, unsigned long long size);
 	//tests
 	void Test1();
 	void Test2(int type);

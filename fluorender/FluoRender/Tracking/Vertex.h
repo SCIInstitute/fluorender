@@ -85,6 +85,9 @@ namespace FL
 	typedef std::vector<pwCell> CellBin;
 	typedef CellBin::iterator CellBinIter;
 
+	typedef std::unordered_map<unsigned int, unsigned int> CellIDMap;
+	typedef std::unordered_map<unsigned int, unsigned int>::iterator CellIDMapIter;
+
 	class Vertex
 	{
 	public:
@@ -116,7 +119,8 @@ namespace FL
 
 		//cells
 		size_t GetCellNum();
-		bool FindCell(pCell &cell);
+		pCell GetCell(size_t idx);
+		int FindCell(pCell &cell);
 		void AddCell(pCell &cell, bool inc=false);
 		void RemoveCell(pCell &cell);
 		CellBinIter GetCellsBegin();
@@ -246,20 +250,28 @@ namespace FL
 		return m_cells.size();
 	}
 
-	inline bool Vertex::FindCell(pCell &cell)
+	inline pCell Vertex::GetCell(size_t idx)
+	{
+		if (idx >= m_cells.size())
+			return nullptr;
+		else
+			return m_cells[idx].lock();
+	}
+
+	inline int Vertex::FindCell(pCell &cell)
 	{
 		for (size_t i = 0; i < m_cells.size(); ++i)
 		{
 			pCell c = m_cells[i].lock();
 			if (c && c->Id() == cell->Id())
-				return true;
+				return i;
 		}
-		return false;
+		return -1;
 	}
 
 	inline void Vertex::AddCell(pCell &cell, bool inc)
 	{
-		if (FindCell(cell))
+		if (FindCell(cell) < 0)
 			return;
 
 		if (inc)
