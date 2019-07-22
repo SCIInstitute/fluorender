@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/listctrl.h>
 #include <wx/spinctrl.h>
 #include <wx/notebook.h>
+#include <wx/tglbtn.h>
 #include "teem/Nrrd/nrrd.h"
 #include <vector>
 
@@ -108,12 +109,14 @@ public:
 		ID_GenMapBtn,
 		ID_RefineTBtn,
 		ID_RefineAllBtn,
+		//settings
 		ID_MapIterSpin,
 		ID_MapSizeSpin,
-		ID_MapSimlrSpin,
-		ID_MapCntctSpin,
-		ID_MapMergeChk,
-		ID_MapSplitChk,
+		ID_MapConsistentBtn,
+		ID_MapMergeBtn,
+		ID_MapSplitBtn,
+		ID_MapSimilarSpin,
+		ID_MapContactSpin,
 		//selection page
 		//component tools
 		ID_CompIDText,
@@ -234,6 +237,15 @@ private:
 	//cluster number
 	int m_clnum;
 
+	//settings
+	size_t m_iter_num;
+	double m_size_thresh;
+	bool m_consistent_color;
+	bool m_try_merge;
+	bool m_try_split;
+	double m_similarity;
+	double m_contact_factor;
+
 	//map page
 	//load/save trace
 	wxTextCtrl* m_load_trace_text;
@@ -248,10 +260,11 @@ private:
 	//settings
 	wxSpinCtrl* m_map_iter_spin;
 	wxSpinCtrl* m_map_size_spin;
-	wxSpinCtrlDouble* m_map_simlr_spin;
-	wxSpinCtrlDouble* m_map_cntct_spin;
-	wxCheckBox* m_map_merge_chk;
-	wxCheckBox* m_map_split_chk;
+	wxToggleButton* m_map_consistent_btn;
+	wxToggleButton* m_map_merge_btn;
+	wxToggleButton* m_map_split_btn;
+	wxSpinCtrlDouble* m_map_similar_spin;
+	wxSpinCtrlDouble* m_map_contact_spin;
 
 	//selection page
 	//component tools
@@ -354,6 +367,14 @@ private:
 	void OnGenMapBtn(wxCommandEvent &event);
 	void OnRefineTBtn(wxCommandEvent &event);
 	void OnRefineAllBtn(wxCommandEvent &event);
+	//settings
+	void OnMapIterSpin(wxSpinEvent& event);
+	void OnMapSizeSpin(wxSpinEvent& event);
+	void OnMapConsistentBtn(wxCommandEvent& event);
+	void OnMapMergeBtn(wxCommandEvent& event);
+	void OnMapSplitBtn(wxCommandEvent& event);
+	void OnMapSimilarSpin(wxSpinEvent& event);
+	void OnMapContactSpin(wxSpinEvent& event);
 	//selection page
 	//component tools
 	void OnCompIDText(wxCommandEvent &event);
