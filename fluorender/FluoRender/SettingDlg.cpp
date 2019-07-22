@@ -804,7 +804,12 @@ void SettingDlg::GetSettings()
 	m_stay_top = false;
 	m_show_cursor = true;
 	m_last_tool = 0;
+	//tracking settings
+	m_track_iter = 3;
 	m_component_size = 25.0;
+	m_consistent_color = true;
+	m_try_merge = false;
+	m_try_split = false;
 	m_contact_factor = 0.6;
 	m_similarity = 0.5;
 	m_use_max_texture_size = false;
@@ -1050,11 +1055,15 @@ void SettingDlg::GetSettings()
 		fconfig.Read("depth_bit", &m_depth_bit);
 		fconfig.Read("samples", &m_samples);
 	}
-	//component size
-	if (fconfig.Exists("/components"))
+	//tracking settings
+	if (fconfig.Exists("/tracking"))
 	{
-		fconfig.SetPath("/components");
+		fconfig.SetPath("/tracking");
+		fconfig.Read("track_iter", &m_track_iter);
 		fconfig.Read("component_size", &m_component_size);
+		fconfig.Read("consistent_color", &m_consistent_color);
+		fconfig.Read("try_merge", &m_try_merge);
+		fconfig.Read("try_split", &m_try_split);
 		fconfig.Read("contact_factor", &m_contact_factor);
 		fconfig.Read("similarity", &m_similarity);
 	}
@@ -1316,8 +1325,12 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("value", m_last_tool);
 
 	//components
-	fconfig.SetPath("/components");
+	fconfig.SetPath("/tracking");
+	fconfig.Write("track_iter", m_track_iter);
 	fconfig.Write("component_size", m_component_size);
+	fconfig.Write("consistent_color", m_consistent_color);
+	fconfig.Write("try_merge", m_try_merge);
+	fconfig.Write("try_split", m_try_split);
 	fconfig.Write("contact_factor", m_contact_factor);
 	fconfig.Write("similarity", m_similarity);
 

@@ -1,5 +1,5 @@
 ver_major=2
-ver_minor=23.3
+ver_minor=23.4
 [gm\ calculation]
 mode=2
 [peeling\ layers]
@@ -9,6 +9,8 @@ mode=0
 [save\ project]
 mode=1
 [save\ alpha]
+mode=0
+[save\ float]
 mode=0
 [realtime\ compress]
 mode=0
@@ -50,13 +52,19 @@ value=1
 file=FreeSans.ttf
 value=14
 color=0
+[line\ width]
+value=3
 [full\ screen]
 stay\ top=1
 show\ cursor=1
 [last\ tool]
-value=1
-[components]
-component_size=25
+value=3
+[tracking]
+track_iter=3
+component_size=100
+consistent_color=1
+try_merge=0
+try_split=0
 contact_factor=0.6
 similarity=0.5
 [memory\ settings]

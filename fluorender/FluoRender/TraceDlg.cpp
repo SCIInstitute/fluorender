@@ -294,6 +294,14 @@ EVT_BUTTON(ID_SaveasTraceBtn, TraceDlg::OnSaveasTrace)
 EVT_BUTTON(ID_GenMapBtn, TraceDlg::OnGenMapBtn)
 EVT_BUTTON(ID_RefineTBtn, TraceDlg::OnRefineTBtn)
 EVT_BUTTON(ID_RefineAllBtn, TraceDlg::OnRefineAllBtn)
+//settings
+EVT_SPINCTRL(ID_MapIterSpin, TraceDlg::OnMapIterSpin)
+EVT_SPINCTRL(ID_MapSizeSpin, TraceDlg::OnMapSizeSpin)
+EVT_TOGGLEBUTTON(ID_MapConsistentBtn, TraceDlg::OnMapConsistentBtn)
+EVT_TOGGLEBUTTON(ID_MapMergeBtn, TraceDlg::OnMapMergeBtn)
+EVT_TOGGLEBUTTON(ID_MapSplitBtn, TraceDlg::OnMapSplitBtn)
+EVT_SPINCTRL(ID_MapSimilarSpin, TraceDlg::OnMapSimilarSpin)
+EVT_SPINCTRL(ID_MapContactSpin, TraceDlg::OnMapContactSpin)
 //selection page
 //component tools
 EVT_TEXT(ID_CompIDText, TraceDlg::OnCompIDText)
@@ -401,53 +409,59 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 
 	//settings
 	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Times:",
+	st = new wxStaticText(page, 0, "Iterations:",
 		wxDefaultPosition, wxDefaultSize);
 	m_map_iter_spin = new wxSpinCtrl(page, ID_MapIterSpin, "3",
 		wxDefaultPosition, wxSize(50, 23));
-	sizer_3->Add(5, 5);
+	sizer_3->AddStretchSpacer(1);
 	sizer_3->Add(st, 0, wxALIGN_CENTER);
 	sizer_3->Add(m_map_iter_spin, 0, wxALIGN_CENTER);
-	st = new wxStaticText(page, 0, "Size Thr.:",
+	st = new wxStaticText(page, 0, "Size Threshold:",
 		wxDefaultPosition, wxDefaultSize);
 	m_map_size_spin = new wxSpinCtrl(page, ID_MapSizeSpin, "25",
 		wxDefaultPosition, wxSize(50, 23));
 	m_map_size_spin->SetRange(1, std::numeric_limits<int>::max());
-	sizer_3->AddStretchSpacer(1);
+	sizer_3->Add(5, 5);
 	sizer_3->Add(st, 0, wxALIGN_CENTER);
 	sizer_3->Add(m_map_size_spin, 0, wxALIGN_CENTER);
-	st = new wxStaticText(page, 0, "Contact F.:",
-		wxDefaultPosition, wxDefaultSize);
-	m_map_cntct_spin = new wxSpinCtrlDouble(
-		page, ID_MapCntctSpin, "0.6",
-		wxDefaultPosition, wxSize(50, 23),
-		wxSP_ARROW_KEYS | wxSP_WRAP,
-		0, 1, 0.6, 0.01);
+	m_map_consistent_btn = new wxToggleButton(page, ID_MapConsistentBtn,
+		"Consistent Colors", wxDefaultPosition, wxSize(100, 23));
+	sizer_3->Add(5, 5);
+	sizer_3->Add(m_map_consistent_btn, 0, wxALIGN_CENTER);
 	sizer_3->AddStretchSpacer(1);
-	sizer_3->Add(st, 0, wxALIGN_CENTER);
-	sizer_3->Add(m_map_cntct_spin, 0, wxALIGN_CENTER);
+	//
+	wxBoxSizer* sizer_4 = new wxBoxSizer(wxHORIZONTAL);
+	m_map_merge_btn = new wxToggleButton(
+		page, ID_MapMergeBtn, "Try Merging",
+		wxDefaultPosition, wxSize(100, 23));
+	m_map_split_btn = new wxToggleButton(
+		page, ID_MapSplitBtn, "Try Spliting",
+		wxDefaultPosition, wxSize(100, 23));
+	sizer_4->AddStretchSpacer(1);
+	sizer_4->Add(m_map_merge_btn, 0, wxALIGN_CENTER);
+	sizer_4->Add(5, 5);
+	sizer_4->Add(m_map_split_btn, 0, wxALIGN_CENTER);
 	st = new wxStaticText(page, 0, "Similarity:",
 		wxDefaultPosition, wxDefaultSize);
-	m_map_simlr_spin = new wxSpinCtrlDouble(
-		page, ID_MapSimlrSpin, "0.2",
+	m_map_similar_spin = new wxSpinCtrlDouble(
+		page, ID_MapSimilarSpin, "0.2",
 		wxDefaultPosition, wxSize(50, 23),
 		wxSP_ARROW_KEYS| wxSP_WRAP,
 		0, 1, 0.2, 0.01);
-	sizer_3->AddStretchSpacer(1);
-	sizer_3->Add(st, 0, wxALIGN_CENTER);
-	sizer_3->Add(m_map_simlr_spin, 0, wxALIGN_CENTER);
-	sizer_3->Add(5, 5);
-	m_map_merge_chk = new wxCheckBox(
-		page, ID_MapMergeChk, "Merge",
-		wxDefaultPosition, wxDefaultSize,
-		wxALIGN_CENTER);
-	m_map_split_chk = new wxCheckBox(
-		page, ID_MapSplitChk, "Split",
-		wxDefaultPosition, wxDefaultSize,
-		wxALIGN_CENTER);
-	sizer_3->AddStretchSpacer(1);
-	sizer_3->Add(m_map_merge_chk, 0, wxALIGN_CENTER);
-	sizer_3->Add(m_map_split_chk, 0, wxALIGN_CENTER);
+	sizer_4->Add(5, 5);
+	sizer_4->Add(st, 0, wxALIGN_CENTER);
+	sizer_4->Add(m_map_similar_spin, 0, wxALIGN_CENTER);
+	st = new wxStaticText(page, 0, "Contact Factor:",
+		wxDefaultPosition, wxDefaultSize);
+	m_map_contact_spin = new wxSpinCtrlDouble(
+		page, ID_MapContactSpin, "0.6",
+		wxDefaultPosition, wxSize(50, 23),
+		wxSP_ARROW_KEYS | wxSP_WRAP,
+		0, 1, 0.6, 0.01);
+	sizer_4->Add(5, 5);
+	sizer_4->Add(st, 0, wxALIGN_CENTER);
+	sizer_4->Add(m_map_contact_spin, 0, wxALIGN_CENTER);
+	sizer_4->AddStretchSpacer(1);
 
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
@@ -457,6 +471,8 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 	sizer_v->Add(sizer_2, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 	sizer_v->Add(sizer_3, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer_4, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 
 	//set the page
@@ -782,7 +798,14 @@ TraceDlg::TraceDlg(wxWindow* frame, wxWindow* parent)
 	m_prv_time(-1),
 	m_manual_assist(false),
 	m_auto_id(false),
-	m_clnum(2)
+	m_clnum(2),
+	m_iter_num(3),
+	m_size_thresh(50.0),
+	m_consistent_color(true),
+	m_try_merge(false),
+	m_try_split(false),
+	m_similarity(0.2),
+	m_contact_factor(0.6)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -936,18 +959,32 @@ void TraceDlg::GetSettings(VRenderView* vrv)
 		m_auto_id_chk->SetToolNormalBitmap(
 			ID_AutoIDChk, wxGetBitmapFromMemory(auto_assign_off));
 
+	//settings for tracking
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetSettingDlg())
 	{
-		double size_thresh =
+		m_iter_num =
+			vr_frame->GetSettingDlg()->GetTrackIter();
+		m_size_thresh =
 			vr_frame->GetSettingDlg()->GetComponentSize();
-		double con_factor =
-			vr_frame->GetSettingDlg()->GetContactFactor();
-		double sim_thresh =
+		m_consistent_color =
+			vr_frame->GetSettingDlg()->GetConsistentColor();
+		m_try_merge =
+			vr_frame->GetSettingDlg()->GetTryMerge();
+		m_try_split =
+			vr_frame->GetSettingDlg()->GetTrySplit();
+		m_similarity =
 			vr_frame->GetSettingDlg()->GetSimilarity();
-		m_map_size_spin->SetValue(size_thresh);
-		m_map_cntct_spin->SetValue(con_factor);
-		m_map_simlr_spin->SetValue(sim_thresh);
+		m_contact_factor =
+			vr_frame->GetSettingDlg()->GetContactFactor();
+		//
+		m_map_iter_spin->SetValue(m_iter_num);
+		m_map_size_spin->SetValue(m_size_thresh);
+		m_map_consistent_btn->SetValue(m_consistent_color);
+		m_map_merge_btn->SetValue(m_try_merge);
+		m_map_split_btn->SetValue(m_try_split);
+		m_map_similar_spin->SetValue(m_similarity);
+		m_map_contact_spin->SetValue(m_contact_factor);
 	}
 }
 
@@ -971,50 +1008,47 @@ void TraceDlg::UpdateList()
 	{
 		int cur_time = trace_group->GetCurTime();
 		int prv_time = trace_group->GetPrvTime();
-		if (cur_time != m_cur_time)
+		wxString item_gtype;
+		wxString item_id;
+		wxString item_size;
+		wxString item_x;
+		wxString item_y;
+		wxString item_z;
+		unsigned long id;
+		double hue;
+		long size;
+		double x, y, z;
+		//copy current to previous
+		m_trace_list_prev->DeleteAllItems();
+		long item = -1;
+		for (;;)
 		{
-			wxString item_gtype;
-			wxString item_id;
-			wxString item_size;
-			wxString item_x;
-			wxString item_y;
-			wxString item_z;
-			unsigned long id;
-			double hue;
-			long size;
-			double x, y, z;
-			//copy current to previous
-			m_trace_list_prev->DeleteAllItems();
-			long item = -1;
-			for (;;)
+			item = m_trace_list_curr->GetNextItem(item,
+				wxLIST_NEXT_ALL,
+				wxLIST_STATE_DONTCARE);
+			if (item != -1)
 			{
-				item = m_trace_list_curr->GetNextItem(item,
-					wxLIST_NEXT_ALL,
-					wxLIST_STATE_DONTCARE);
-				if (item != -1)
-				{
-					item_gtype = m_trace_list_curr->GetText(item, 0);
-					item_id = m_trace_list_curr->GetText(item, 1);
-					item_size = m_trace_list_curr->GetText(item, 2);
-					item_x = m_trace_list_curr->GetText(item, 3);
-					item_y = m_trace_list_curr->GetText(item, 4);
-					item_z = m_trace_list_curr->GetText(item, 5);
-					item_id.ToULong(&id);
-					hue = id % 360;
-					Color c(HSVColor(hue, 1.0, 1.0));
-					wxColor color(c.r() * 255, c.g() * 255, c.b() * 255);
-					item_size.ToLong(&size);
-					item_x.ToDouble(&x);
-					item_y.ToDouble(&y);
-					item_z.ToDouble(&z);
-					m_trace_list_prev->Append(item_gtype, id, color, size, x, y, z);
-				}
-				else break;
+				item_gtype = m_trace_list_curr->GetText(item, 0);
+				item_id = m_trace_list_curr->GetText(item, 1);
+				item_size = m_trace_list_curr->GetText(item, 2);
+				item_x = m_trace_list_curr->GetText(item, 3);
+				item_y = m_trace_list_curr->GetText(item, 4);
+				item_z = m_trace_list_curr->GetText(item, 5);
+				item_id.ToULong(&id);
+				hue = id % 360;
+				Color c(HSVColor(hue, 1.0, 1.0));
+				wxColor color(c.r() * 255, c.g() * 255, c.b() * 255);
+				item_size.ToLong(&size);
+				item_x.ToDouble(&x);
+				item_y.ToDouble(&y);
+				item_z.ToDouble(&z);
+				m_trace_list_prev->Append(item_gtype, id, color, size, x, y, z);
 			}
-
-			if (cur_time >= 0) m_cur_time = cur_time;
-			if (prv_time >= 0) m_prv_time = prv_time;
+			else break;
 		}
+
+		if (cur_time >= 0) m_cur_time = cur_time;
+		if (prv_time >= 0) m_prv_time = prv_time;
 
 		//set tiem text
 		wxString str;
@@ -1279,6 +1313,71 @@ void TraceDlg::OnRefineAllBtn(wxCommandEvent &event)
 {
 	RefineMap();
 }
+
+//settings
+void TraceDlg::OnMapIterSpin(wxSpinEvent& event)
+{
+	m_iter_num = m_map_iter_spin->GetValue();
+	//save settings
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetSettingDlg())
+		vr_frame->GetSettingDlg()->SetTrackIter(m_iter_num);
+}
+
+void TraceDlg::OnMapSizeSpin(wxSpinEvent& event)
+{
+	m_size_thresh = m_map_size_spin->GetValue();
+	//save settings
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetSettingDlg())
+		vr_frame->GetSettingDlg()->SetComponentSize(m_size_thresh);
+}
+
+void TraceDlg::OnMapConsistentBtn(wxCommandEvent& event)
+{
+	m_consistent_color = m_map_consistent_btn->GetValue();
+	//save settings
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetSettingDlg())
+		vr_frame->GetSettingDlg()->SetConsistentColor(m_consistent_color);
+}
+
+void TraceDlg::OnMapMergeBtn(wxCommandEvent& event)
+{
+	m_try_merge = m_map_merge_btn->GetValue();
+	//save settings
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetSettingDlg())
+		vr_frame->GetSettingDlg()->SetTryMerge(m_try_merge);
+}
+
+void TraceDlg::OnMapSplitBtn(wxCommandEvent& event)
+{
+	m_try_split = m_map_split_btn->GetValue();
+	//save settings
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetSettingDlg())
+		vr_frame->GetSettingDlg()->SetTrySplit(m_try_split);
+}
+
+void TraceDlg::OnMapSimilarSpin(wxSpinEvent& event)
+{
+	m_similarity = m_map_similar_spin->GetValue();
+	//save settings
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetSettingDlg())
+		vr_frame->GetSettingDlg()->SetSimilarity(m_similarity);
+}
+
+void TraceDlg::OnMapContactSpin(wxSpinEvent& event)
+{
+	m_contact_factor = m_map_contact_spin->GetValue();
+	//save settings
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetSettingDlg())
+		vr_frame->GetSettingDlg()->SetContactFactor(m_contact_factor);
+}
+
 
 //analysis
 void TraceDlg::OnConvertToRulers(wxCommandEvent& event)
@@ -3186,25 +3285,11 @@ void TraceDlg::GenMap()
 	if (!reader)
 		return;
 
-	//get settings
-	size_t iter_num = (size_t)m_map_iter_spin->GetValue();
-	float size_thresh = m_map_size_spin->GetValue();
-	float sim_thresh = m_map_simlr_spin->GetValue();
-	float con_factor = m_map_cntct_spin->GetValue();
-	//save settings
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-	{
-		vr_frame->GetSettingDlg()->SetComponentSize(size_thresh);
-		vr_frame->GetSettingDlg()->SetContactFactor(con_factor);
-		vr_frame->GetSettingDlg()->SetSimilarity(sim_thresh);
-	}
-
 	//start progress
 	m_stat_text->SetValue("Generating track map.\n");
 	wxGetApp().Yield();
 	int frames = reader->GetTimeNum();
-	float prog_bit = 99.0f / float(frames * (4 + iter_num));
+	float prog_bit = 99.0f / float(frames * (4 + m_iter_num));
 	float prog = 0.0f;
 	m_gen_map_prg->SetValue(int(prog));
 
@@ -3219,17 +3304,17 @@ void TraceDlg::GenMap()
 	tm_processor.SetScale(vd->GetScalarScale());
 	tm_processor.SetSizes(resx, resy, resz);
 	tm_processor.SetSpacings(spcx, spcy, spcz);
-	tm_processor.SetSizeThresh(size_thresh);
-	tm_processor.SetContactThresh(con_factor);
-	tm_processor.SetSimilarThresh(sim_thresh);
+	tm_processor.SetSizeThresh(m_size_thresh);
+	tm_processor.SetContactThresh(m_contact_factor);
+	tm_processor.SetSimilarThresh(m_similarity);
 	//register file reading and deleteing functions
 	tm_processor.RegisterCacheQueueFuncs(
 		boost::bind(&TraceDlg::ReadVolCache, this, _1),
 		boost::bind(&TraceDlg::DelVolCache, this, _1));
 	tm_processor.SetVolCacheSize(4);
 	//merge/split
-	tm_processor.SetMerge(m_map_merge_chk->GetValue());
-	tm_processor.SetSplit(m_map_split_chk->GetValue());
+	tm_processor.SetMerge(m_try_merge);
+	tm_processor.SetSplit(m_try_split);
 
 	//start timing
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
@@ -3280,7 +3365,7 @@ void TraceDlg::GenMap()
 	wxGetApp().Yield();
 
 	//iterations
-	for (size_t iteri = 0; iteri < iter_num; ++iteri)
+	for (size_t iteri = 0; iteri < m_iter_num; ++iteri)
 	{
 		for (int i = 2; i <= frames; ++i)
 		{
@@ -3291,6 +3376,21 @@ void TraceDlg::GenMap()
 			m_gen_map_prg->SetValue(int(prog));
 			(*m_stat_text) << wxString::Format("Time point %d processed.\n", i - 1);
 			wxGetApp().Yield();
+		}
+	}
+
+	//consistent colors
+	if (m_consistent_color)
+	{
+		(*m_stat_text) << wxString::Format("Set colors for frame 0\n");
+		wxGetApp().Yield();
+		tm_processor.MakeConsistent(0);
+		//remaining frames
+		for (size_t fi = 1; fi < track_map->GetFrameNum(); ++fi)
+		{
+			(*m_stat_text) << wxString::Format("Set colors for frame %d\n", int(fi));
+			wxGetApp().Yield();
+			tm_processor.MakeConsistent(fi - 1, fi);
 		}
 	}
 
@@ -3324,20 +3424,6 @@ void TraceDlg::RefineMap(int t)
 			"Refining track map at time point %d.\n", t));
 	wxGetApp().Yield();
 
-	//get settings
-	size_t iter_num = (size_t)m_map_iter_spin->GetValue();
-	float size_thresh = m_map_size_spin->GetValue();
-	float sim_thresh = m_map_simlr_spin->GetValue();
-	float con_factor = m_map_cntct_spin->GetValue();
-	//save settings
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-	{
-		vr_frame->GetSettingDlg()->SetComponentSize(size_thresh);
-		vr_frame->GetSettingDlg()->SetContactFactor(con_factor);
-		vr_frame->GetSettingDlg()->SetSimilarity(sim_thresh);
-	}
-
 	//start progress
 	bool clear_counters = false;
 	FL::pTrackMap track_map = trace_group->GetTrackMap();
@@ -3352,7 +3438,7 @@ void TraceDlg::RefineMap(int t)
 		start_frame = end_frame = t;
 	float prog_bit = 99.0f / float(
 		(end_frame - start_frame + 1)
-		* (4 + iter_num));
+		* (4 + m_iter_num));
 	float prog = 0.0f;
 	m_gen_map_prg->SetValue(int(prog));
 
@@ -3366,17 +3452,17 @@ void TraceDlg::RefineMap(int t)
 	tm_processor.SetScale(vd->GetScalarScale());
 	tm_processor.SetSizes(resx, resy, resz);
 	tm_processor.SetSpacings(spcx, spcy, spcz);
-	tm_processor.SetSizeThresh(size_thresh);
-	tm_processor.SetContactThresh(con_factor);
-	tm_processor.SetSimilarThresh(sim_thresh);
+	tm_processor.SetSizeThresh(m_size_thresh);
+	tm_processor.SetContactThresh(m_contact_factor);
+	tm_processor.SetSimilarThresh(m_similarity);
 	//register file reading and deleteing functions
 	tm_processor.RegisterCacheQueueFuncs(
 		boost::bind(&TraceDlg::ReadVolCache, this, _1),
 		boost::bind(&TraceDlg::DelVolCache, this, _1));
 	tm_processor.SetVolCacheSize(4);
 	//merge/split
-	tm_processor.SetMerge(m_map_merge_chk->GetValue());
-	tm_processor.SetSplit(m_map_split_chk->GetValue());
+	tm_processor.SetMerge(m_try_merge);
+	tm_processor.SetSplit(m_try_split);
 
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
@@ -3384,7 +3470,7 @@ void TraceDlg::RefineMap(int t)
 	//if (clear_counters)
 	//	tm_processor.ClearCounters();
 	//iterations
-	for (size_t iteri = 0; iteri < iter_num; ++iteri)
+	for (size_t iteri = 0; iteri < m_iter_num; ++iteri)
 	{
 		for (int i = start_frame - 1; i <= end_frame; ++i)
 		{
@@ -3395,6 +3481,21 @@ void TraceDlg::RefineMap(int t)
 			m_gen_map_prg->SetValue(int(prog));
 			(*m_stat_text) << wxString::Format("Time point %d processed.\n", i + 1);
 			wxGetApp().Yield();
+		}
+	}
+
+	//consistent colors
+	if (m_consistent_color)
+	{
+		(*m_stat_text) << wxString::Format("Set colors for frame 0\n");
+		wxGetApp().Yield();
+		tm_processor.MakeConsistent(0);
+		//remaining frames
+		for (size_t fi = 1; fi < track_map->GetFrameNum(); ++fi)
+		{
+			(*m_stat_text) << wxString::Format("Set colors for frame %d\n", int(fi));
+			wxGetApp().Yield();
+			tm_processor.MakeConsistent(fi - 1, fi);
 		}
 	}
 

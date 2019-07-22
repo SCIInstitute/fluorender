@@ -897,6 +897,8 @@ bool TrackMapProcessor::MakeConsistent(size_t f)
 	for (index = 0; index < size; ++index)
 	{
 		lv = label[index];
+		if (!lv)
+			continue;
 		//find in id map
 		auto it = id_map.find(lv);
 		if (it != id_map.end())
@@ -909,7 +911,9 @@ bool TrackMapProcessor::MakeConsistent(size_t f)
 			unsigned int id0 = GetUniCellID(f, lv);
 			if (id0 != lv)
 			{
-				unsigned int newid = GetNewCellID(f, id0);
+				unsigned int newid = GetNewCellID(f, id0, true);//inc because its the same frame
+				if (!newid)
+					continue;
 				ReplaceCellID(lv, newid, f);
 				label[index] = newid;
 				id_map.insert(std::pair<unsigned int,
@@ -950,6 +954,8 @@ bool TrackMapProcessor::MakeConsistent(size_t f1, size_t f2)
 	for (index = 0; index < size; ++index)
 	{
 		lv = label[index];
+		if (!lv)
+			continue;
 		//find in id map
 		auto it = id_map.find(lv);
 		if (it != id_map.end())
@@ -963,6 +969,8 @@ bool TrackMapProcessor::MakeConsistent(size_t f1, size_t f2)
 			if (id0 != lv)
 			{
 				unsigned int newid = GetNewCellID(f2, id0);
+				if (!newid)
+					continue;
 				ReplaceCellID(lv, newid, f2);
 				label[index] = newid;
 				id_map.insert(std::pair<unsigned int,
@@ -3000,16 +3008,25 @@ unsigned int TrackMapProcessor::GetTrackedID(
 
 	std::pair<InterAdjIter, InterAdjIter> adj_verts =
 		boost::adjacent_vertices(v1, inter_graph);
-	if (adj_verts.first == adj_verts.second)
-		return rid;
-	InterVert v2 = *(adj_verts.first);
-	pVertex vert2 = inter_graph[v2].vertex.lock();
-	if (!vert2)
-		return rid;
-	pCell cell2 = (*vert2->GetCellsBegin()).lock();
-	if (!cell)
-		return rid;
-	rid = cell->Id();
+	InterVert v2;
+	pVertex vert2;
+	pCell cell2;
+	for (auto it = adj_verts.first;
+		it != adj_verts.second; ++it)
+	{
+		v2 = *it;
+		if (v2 == InterGraph::null_vertex() ||
+			v2 == v1)
+			continue;
+		vert2 = inter_graph[v2].vertex.lock();
+		if (!vert2)
+			continue;
+		cell2 = (*vert2->GetCellsBegin()).lock();
+		if (!cell2)
+			continue;
+		rid = cell2->Id();
+		break;
+	}
 
 	return rid;
 }

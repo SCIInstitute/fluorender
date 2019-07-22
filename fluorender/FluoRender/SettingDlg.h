@@ -237,9 +237,17 @@ public:
 	//last tool
 	void SetLastTool(int tool) { m_last_tool = tool; }
 	int GetLastTool() { return m_last_tool; }
-	//component size
+	//tracking settings
+	void SetTrackIter(int val) { m_track_iter = val; }
+	int GetTrackIter() { return m_track_iter; }
 	void SetComponentSize(double size) { m_component_size = size; }
 	double GetComponentSize() { return m_component_size; }
+	void SetConsistentColor(bool val) { m_consistent_color = val; }
+	bool GetConsistentColor() { return m_consistent_color; }
+	void SetTryMerge(bool val) { m_try_merge = val; }
+	bool GetTryMerge() { return m_try_merge; }
+	void SetTrySplit(bool val) { m_try_split = val; }
+	bool GetTrySplit() { return m_try_split; }
 	void SetContactFactor(double fact) { m_contact_factor = fact; }
 	double GetContactFactor() { return m_contact_factor; }
 	void SetSimilarity(double siml) { m_similarity = siml; }
@@ -343,8 +351,12 @@ private:
 	bool m_show_cursor;
 	//last tool
 	int m_last_tool;
-	//component size
+	//tracking settings
+	int m_track_iter;
 	double m_component_size;
+	bool m_consistent_color;
+	bool m_try_merge;
+	bool m_try_split;
 	double m_contact_factor;
 	double m_similarity;
 	//max texture size

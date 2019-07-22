@@ -109,7 +109,7 @@ namespace FL
 		pCell GetCell(size_t frame, unsigned int id);
 		pVertex GetVertex(pCell &cell);
 		unsigned int GetUniCellID(size_t frame, unsigned int id);
-		unsigned int GetNewCellID(size_t frame, unsigned int id);
+		unsigned int GetNewCellID(size_t frame, unsigned int id, bool inc=false);
 		unsigned int GetTrackedID(size_t frame1, size_t frame2, unsigned int id);
 
 		//get mapped cell
@@ -671,11 +671,11 @@ namespace FL
 	}
 
 	//get new id
-	inline unsigned int TrackMapProcessor::GetNewCellID(size_t frame, unsigned int id)
+	inline unsigned int TrackMapProcessor::GetNewCellID(size_t frame, unsigned int id, bool inc)
 	{
 		//cell list
 		CellList &clist = m_map->m_cells_list.at(frame);
-		unsigned int newid = id+360;
+		unsigned int newid = id+(inc?360:0);
 		while (clist.find(newid) != clist.end())
 			newid += 360;
 		return newid;
