@@ -415,18 +415,20 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(50, 23));
 	sizer_3->AddStretchSpacer(1);
 	sizer_3->Add(st, 0, wxALIGN_CENTER);
+	sizer_3->Add(5, 5);
 	sizer_3->Add(m_map_iter_spin, 0, wxALIGN_CENTER);
 	st = new wxStaticText(page, 0, "Size Threshold:",
 		wxDefaultPosition, wxDefaultSize);
-	m_map_size_spin = new wxSpinCtrl(page, ID_MapSizeSpin, "25",
+	m_map_size_spin = new wxSpinCtrl(page, ID_MapSizeSpin, "100",
 		wxDefaultPosition, wxSize(50, 23));
 	m_map_size_spin->SetRange(1, std::numeric_limits<int>::max());
-	sizer_3->Add(5, 5);
+	sizer_3->Add(10, 10);
 	sizer_3->Add(st, 0, wxALIGN_CENTER);
+	sizer_3->Add(5, 5);
 	sizer_3->Add(m_map_size_spin, 0, wxALIGN_CENTER);
 	m_map_consistent_btn = new wxToggleButton(page, ID_MapConsistentBtn,
 		"Consistent Colors", wxDefaultPosition, wxSize(100, 23));
-	sizer_3->Add(5, 5);
+	sizer_3->Add(10, 10);
 	sizer_3->Add(m_map_consistent_btn, 0, wxALIGN_CENTER);
 	sizer_3->AddStretchSpacer(1);
 	//
@@ -448,8 +450,9 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(50, 23),
 		wxSP_ARROW_KEYS| wxSP_WRAP,
 		0, 1, 0.2, 0.01);
-	sizer_4->Add(5, 5);
+	sizer_4->Add(10, 10);
 	sizer_4->Add(st, 0, wxALIGN_CENTER);
+	sizer_4->Add(5, 5);
 	sizer_4->Add(m_map_similar_spin, 0, wxALIGN_CENTER);
 	st = new wxStaticText(page, 0, "Contact Factor:",
 		wxDefaultPosition, wxDefaultSize);
@@ -458,8 +461,9 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(50, 23),
 		wxSP_ARROW_KEYS | wxSP_WRAP,
 		0, 1, 0.6, 0.01);
-	sizer_4->Add(5, 5);
+	sizer_4->Add(10, 10);
 	sizer_4->Add(st, 0, wxALIGN_CENTER);
+	sizer_4->Add(5, 5);
 	sizer_4->Add(m_map_contact_spin, 0, wxALIGN_CENTER);
 	sizer_4->AddStretchSpacer(1);
 
@@ -2784,8 +2788,13 @@ void TraceDlg::OnCellSegText(wxSpinEvent& event)
 
 void TraceDlg::OnCellSegment(wxCommandEvent& event)
 {
-	if (m_clnum < 2)
+	if (m_clnum < 1)
 		return;
+	else if (m_clnum == 1)
+	{
+		OnCellCombineID(event);
+		return;
+	}
 	if (!m_view)
 		return;
 

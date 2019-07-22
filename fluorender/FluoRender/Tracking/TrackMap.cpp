@@ -3011,12 +3011,17 @@ unsigned int TrackMapProcessor::GetTrackedID(
 	InterVert v2;
 	pVertex vert2;
 	pCell cell2;
+	std::pair<InterEdge, bool> edge;
 	for (auto it = adj_verts.first;
 		it != adj_verts.second; ++it)
 	{
 		v2 = *it;
 		if (v2 == InterGraph::null_vertex() ||
 			v2 == v1)
+			continue;
+		edge = boost::edge(v1, v2, inter_graph);
+		if (!edge.second ||
+			!inter_graph[edge.first].link)
 			continue;
 		vert2 = inter_graph[v2].vertex.lock();
 		if (!vert2)
