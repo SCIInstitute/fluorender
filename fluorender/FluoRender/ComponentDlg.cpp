@@ -149,6 +149,11 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_BUTTON(ID_ClusterBtn, ComponentDlg::OnCluster)
 	EVT_BUTTON(ID_AnalyzeBtn, ComponentDlg::OnAnalyze)
 	EVT_BUTTON(ID_AnalyzeSelBtn, ComponentDlg::OnAnalyzeSel)
+	//output
+	EVT_CHECKBOX(ID_HistoryChk, ComponentDlg::OnHistoryChk)
+	EVT_BUTTON(ID_ClearHistBtn, ComponentDlg::OnClearHistBtn)
+	EVT_KEY_DOWN(ComponentDlg::OnKeyDown)
+	EVT_GRID_SELECT_CELL(ComponentDlg::OnSelectCell)
 END_EVENT_TABLE()
 
 ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
@@ -157,7 +162,8 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 		wxSize(500, 720),
 		0, "ComponentDlg"),
 	m_frame(parent),
-	m_view(0)
+	m_view(0),
+	m_hold_history(false)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -198,11 +204,24 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
 		new wxStaticBox(this, wxID_ANY, "Output"),
 		wxVERTICAL);
-	m_stat_text = new wxTextCtrl(this, ID_StatText, "",
-		wxDefaultPosition, wxSize(-1, 150), wxTE_MULTILINE);
-	m_stat_text->SetEditable(false);
-	m_stat_text->Connect(wxID_ANY, wxEVT_KEY_DOWN, wxKeyEventHandler(ComponentDlg::OnKey), 0L, this);
-	sizer2->Add(m_stat_text, 1, wxEXPAND);
+	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
+	m_history_chk = new wxCheckBox(this, ID_HistoryChk,
+		"Hold History", wxDefaultPosition, wxSize(85, 20), wxALIGN_LEFT);
+	m_clear_hist_btn = new wxButton(this, ID_ClearHistBtn,
+		"Clear History", wxDefaultPosition, wxSize(75, -1));
+	sizer2_1->AddStretchSpacer(1);
+	sizer2_1->Add(m_history_chk, 0, wxALIGN_CENTER);
+	sizer2_1->Add(5, 5);
+	sizer2_1->Add(m_clear_hist_btn, 0, wxALIGN_CENTER);
+	//grid
+	m_output_grid = new wxGrid(this, ID_OutputGrid);
+	m_output_grid->CreateGrid(0, 1);
+	m_output_grid->Fit();
+	sizer2->Add(5, 5);
+	sizer2->Add(sizer2_1, 0, wxEXPAND);
+	sizer2->Add(5, 5);
+	sizer2->Add(m_output_grid, 1, wxEXPAND);
+	sizer2->Add(5, 5);
 
 	//all controls
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
@@ -975,6 +994,9 @@ void ComponentDlg::Update()
 
 	//generate
 	EnableGenerate();
+
+	//output
+	m_history_chk->SetValue(m_hold_history);
 }
 
 void ComponentDlg::GetSettings()
@@ -2891,10 +2913,11 @@ void ComponentDlg::GenerateComp(bool command)
 
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-	wxString str = "OpenCL time: ";
-	str += wxString::Format("%.4f", time_span.count());
-	str += " sec.\n";
-	m_stat_text->SetValue(str);
+	wxString titles, values;
+	titles = "OpenCL time\n";
+	values = wxString::Format("%.4f", time_span.count());
+	values += " sec.\n";
+	SetOutput(titles, values);
 
 	vd->GetVR()->clear_tex_current();
 	m_view->RefreshGL();
@@ -3083,29 +3106,168 @@ void ComponentDlg::Analyze(bool sel)
 	{
 		string str;
 		m_comp_analyzer.OutputCompListStr(str, 1);
-		m_stat_text->SetValue(str);
+		//m_stat_text->SetValue(str);
 	}
 
 	m_generate_prg->SetValue(100);
 	connection.disconnect();
 }
 
-void ComponentDlg::OnKey(wxKeyEvent &event)
+void ComponentDlg::SetOutput(wxString &titles, wxString &values)
 {
-	switch (event.GetKeyCode())
-	{
-	case wxKeyCode('a'):
-	case wxKeyCode('A'):
-		if (event.ControlDown())
-		{
-			m_stat_text->SetSelection(-1, -1);
-		}
-		else
-			event.Skip();
-		break;
+	wxString copy_data;
+	wxString cur_field;
+	wxString cur_line;
+	int i, k;
 
-	default:
-		event.Skip();
-		break;
+	k = 0;
+	cur_line = titles;
+	do
+	{
+		cur_field = cur_line.BeforeFirst('\t');
+		cur_line = cur_line.AfterFirst('\t');
+		if (m_output_grid->GetNumberCols() <= k)
+			m_output_grid->InsertCols(k);
+		m_output_grid->SetColLabelValue(k, cur_field);
+		++k;
+	} while (cur_line.IsEmpty() == false);
+
+	i = 0;
+	if (m_hold_history)
+		i = m_output_grid->GetNumberRows();
+	k = 0;
+	copy_data = values;
+	do
+	{
+		cur_line = copy_data.BeforeFirst('\n');
+		copy_data = copy_data.AfterFirst('\n');
+		if (m_output_grid->GetNumberRows() <= i)
+			m_output_grid->InsertRows(i);
+		do
+		{
+			cur_field = cur_line.BeforeFirst('\t');
+			cur_line = cur_line.AfterFirst('\t');
+			m_output_grid->SetCellValue(i, k, cur_field);
+			++k;
+		} while (cur_line.IsEmpty() == false);
+		++i;
+	} while (copy_data.IsEmpty() == false);
+
+	if (m_output_grid->GetNumberCols() > k)
+		m_output_grid->DeleteCols(k,
+			m_output_grid->GetNumberCols() - k);
+
+	m_output_grid->AutoSize();
+}
+
+void ComponentDlg::OnHistoryChk(wxCommandEvent& event)
+{
+	m_hold_history = m_history_chk->GetValue();
+}
+
+void ComponentDlg::OnClearHistBtn(wxCommandEvent& event)
+{
+	m_output_grid->DeleteRows(0, m_output_grid->GetNumberRows());
+}
+
+void ComponentDlg::OnKeyDown(wxKeyEvent& event)
+{
+	if (wxGetKeyState(WXK_CONTROL))
+	{
+		if (event.GetKeyCode() == wxKeyCode('C'))
+			CopyData();
+		else if (event.GetKeyCode() == wxKeyCode('V'))
+			PasteData();
 	}
+	event.Skip();
+}
+
+void ComponentDlg::OnSelectCell(wxGridEvent& event)
+{
+	int r = event.GetRow();
+	int c = event.GetCol();
+	m_output_grid->SelectBlock(r, c, r, c);
+}
+
+void ComponentDlg::CopyData()
+{
+	int i, k;
+	wxString copy_data;
+	bool something_in_this_line;
+
+	copy_data.Clear();
+
+	bool t = m_output_grid->IsSelection();
+
+	for (i = 0; i < m_output_grid->GetNumberRows(); i++)
+	{
+		something_in_this_line = false;
+		for (k = 0; k < m_output_grid->GetNumberCols(); k++)
+		{
+			if (m_output_grid->IsInSelection(i, k))
+			{
+				if (something_in_this_line == false)
+				{  // first field in this line => may need a linefeed
+					if (copy_data.IsEmpty() == false)
+					{     // ... if it is not the very first field
+						copy_data = copy_data + wxT("\n");  // next LINE
+					}
+					something_in_this_line = true;
+				}
+				else
+				{
+					// if not the first field in this line we need a field seperator (TAB)
+					copy_data = copy_data + wxT("\t");  // next COLUMN
+				}
+				copy_data = copy_data + m_output_grid->GetCellValue(i, k);    // finally we need the field value :-)
+			}
+		}
+	}
+
+	if (wxTheClipboard->Open())
+	{
+		// This data objects are held by the clipboard,
+		// so do not delete them in the app.
+		wxTheClipboard->SetData(new wxTextDataObject(copy_data));
+		wxTheClipboard->Close();
+	}
+}
+
+void ComponentDlg::PasteData()
+{
+	/*	wxString copy_data;
+		wxString cur_field;
+		wxString cur_line;
+		int i, k, k2;
+
+		if (wxTheClipboard->Open())
+		{
+			if (wxTheClipboard->IsSupported(wxDF_TEXT))
+			{
+				wxTextDataObject data;
+				wxTheClipboard->GetData(data);
+				copy_data = data.GetText();
+			}
+			wxTheClipboard->Close();
+		}
+
+		i = m_output_grid->GetGridCursorRow();
+		k = m_output_grid->GetGridCursorCol();
+		k2 = k;
+
+		do
+		{
+			cur_line = copy_data.BeforeFirst('\n');
+			copy_data = copy_data.AfterFirst('\n');
+			do
+			{
+				cur_field = cur_line.BeforeFirst('\t');
+				cur_line = cur_line.AfterFirst('\t');
+				m_output_grid->SetCellValue(i, k, cur_field);
+				k++;
+			} while (cur_line.IsEmpty() == false);
+			i++;
+			k = k2;
+		} while (copy_data.IsEmpty() == false);
+	*/
 }

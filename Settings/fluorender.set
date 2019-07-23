@@ -58,7 +58,7 @@ value=3
 stay\ top=1
 show\ cursor=1
 [last\ tool]
-value=3
+value=0
 [tracking]
 track_iter=3
 component_size=100
@@ -69,8 +69,8 @@ contact_factor=0.6
 similarity=0.5
 [memory\ settings]
 mem\ swap=1
-graphics\ mem=4000
-large\ data\ size=400
+graphics\ mem=6000
+large\ data\ size=500
 force\ brick\ size=256
 up\ time=200
 detail\ level\ offset=0
