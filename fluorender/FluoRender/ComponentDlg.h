@@ -25,6 +25,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef _COMPONENTDLG_H_
+#define _COMPONENTDLG_H_
+
 #include "Main.h"
 #include "DataManager.h"
 #include "Components/CompGenerator.h"
@@ -34,9 +37,8 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/notebook.h>
 #include <wx/spinctrl.h>
 #include <wx/tglbtn.h>
-
-#ifndef _COMPONENTDLG_H_
-#define _COMPONENTDLG_H_
+#include <wx/grid.h>
+#include <wx/clipbrd.h>
 
 class VRenderView;
 class VolumeData;
@@ -162,7 +164,9 @@ public:
 		ID_AnalyzeSelBtn,
 
 		//output
-		ID_StatText
+		ID_HistoryChk,
+		ID_ClearHistBtn,
+		ID_OutputGrid
 	};
 
 	ComponentDlg(wxWindow* frame,
@@ -207,6 +211,11 @@ public:
 	{ return m_in_cells; }
 	FL::CellList &GetOutCells()
 	{ return m_out_cells; }
+
+	//output
+	void SetOutput(wxString &titles, wxString &values);
+	void CopyData();
+	void PasteData();
 
 private:
 	wxWindow* m_frame;
@@ -282,6 +291,9 @@ private:
 	//in and out cell lists for tracking
 	FL::CellList m_in_cells;
 	FL::CellList m_out_cells;
+
+	//output
+	bool m_hold_history;
 
 	//tab control
 	wxNotebook *m_notebook;
@@ -401,7 +413,9 @@ private:
 	wxButton* m_analyze_sel_btn;
 
 	//output
-	wxTextCtrl* m_stat_text;
+	wxCheckBox* m_history_chk;
+	wxButton* m_clear_hist_btn;
+	wxGrid *m_output_grid;
 
 private:
 	void Cluster();
@@ -526,8 +540,11 @@ private:
 	void OnAnalyzeSel(wxCommandEvent &event);
 	void Analyze(bool sel);
 
-	//select output
-	void OnKey(wxKeyEvent &event);
+	//output
+	void OnHistoryChk(wxCommandEvent& event);
+	void OnClearHistBtn(wxCommandEvent& event);
+	void OnKeyDown(wxKeyEvent& event);
+	void OnSelectCell(wxGridEvent& event);
 
 	DECLARE_EVENT_TABLE()
 };
