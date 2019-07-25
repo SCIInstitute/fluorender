@@ -3104,9 +3104,10 @@ void ComponentDlg::Analyze(bool sel)
 	}
 	else
 	{
-		string str;
-		m_comp_analyzer.OutputCompListStr(str, 1);
-		//m_stat_text->SetValue(str);
+		string titles, values;
+		m_comp_analyzer.OutputFormHeader(titles);
+		m_comp_analyzer.OutputCompListStr(values, 0);
+		SetOutput(wxString(titles), wxString(values));
 	}
 
 	m_generate_prg->SetValue(100);
@@ -3133,15 +3134,14 @@ void ComponentDlg::SetOutput(wxString &titles, wxString &values)
 	} while (cur_line.IsEmpty() == false);
 
 	i = 0;
-	if (m_hold_history)
-		i = m_output_grid->GetNumberRows();
-	k = 0;
 	copy_data = values;
 	do
 	{
+		k = 0;
 		cur_line = copy_data.BeforeFirst('\n');
 		copy_data = copy_data.AfterFirst('\n');
-		if (m_output_grid->GetNumberRows() <= i)
+		if (m_output_grid->GetNumberRows() <= i ||
+			m_hold_history)
 			m_output_grid->InsertRows(i);
 		do
 		{
