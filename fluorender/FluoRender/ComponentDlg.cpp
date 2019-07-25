@@ -154,6 +154,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_BUTTON(ID_ClearHistBtn, ComponentDlg::OnClearHistBtn)
 	EVT_KEY_DOWN(ComponentDlg::OnKeyDown)
 	EVT_GRID_SELECT_CELL(ComponentDlg::OnSelectCell)
+	EVT_GRID_LABEL_LEFT_CLICK(ComponentDlg::OnGridLabelClick)
 END_EVENT_TABLE()
 
 ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
@@ -226,11 +227,11 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	//all controls
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
 	sizerv->Add(10, 10);
-	sizerv->Add(m_notebook, 1, wxEXPAND);
+	sizerv->Add(m_notebook, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 	sizerv->Add(sizer1, 0, wxEXPAND);
 	sizerv->Add(10, 10);
-	sizerv->Add(sizer2, 0, wxEXPAND);
+	sizerv->Add(sizer2, 1, wxEXPAND);
 	sizerv->Add(10, 10);
 
 	SetSizer(sizerv);
@@ -3157,7 +3158,7 @@ void ComponentDlg::SetOutput(wxString &titles, wxString &values)
 		m_output_grid->DeleteCols(k,
 			m_output_grid->GetNumberCols() - k);
 
-	m_output_grid->AutoSize();
+	m_output_grid->AutoSizeColumns();
 }
 
 void ComponentDlg::OnHistoryChk(wxCommandEvent& event)
@@ -3187,6 +3188,13 @@ void ComponentDlg::OnSelectCell(wxGridEvent& event)
 	int r = event.GetRow();
 	int c = event.GetCol();
 	m_output_grid->SelectBlock(r, c, r, c);
+	event.Skip();
+}
+
+void ComponentDlg::OnGridLabelClick(wxGridEvent& event)
+{
+	m_output_grid->SetFocus();
+	event.Skip();
 }
 
 void ComponentDlg::CopyData()

@@ -211,6 +211,8 @@ void CountVoxels::Count()
 {
 	if (!CheckBricks())
 		return;
+	if (!m_vd->GetMask(false))
+		return;
 
 	//create program and kernels
 	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::

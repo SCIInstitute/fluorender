@@ -545,6 +545,7 @@ private:
 	void OnClearHistBtn(wxCommandEvent& event);
 	void OnKeyDown(wxKeyEvent& event);
 	void OnSelectCell(wxGridEvent& event);
+	void OnGridLabelClick(wxGridEvent& event);
 
 	DECLARE_EVENT_TABLE()
 };
