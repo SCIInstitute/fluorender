@@ -149,9 +149,6 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	m_toolbar->AddCheckTool(ID_BrushDesel, "Unselect",
 		bitmap, wxNullBitmap,
 		"Reset highlighted structures by painting (hold X)");
-	bitmap = wxGetBitmapFromMemory(brush_clear);
-	m_toolbar->AddTool(ID_BrushClear, "Reset All",
-		bitmap, "Reset all highlighted structures");
 	m_toolbar->AddSeparator();
 	bitmap = wxGetBitmapFromMemory(brush_erase);
 	m_toolbar->AddTool(ID_BrushErase, "Erase",
@@ -159,6 +156,10 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	bitmap = wxGetBitmapFromMemory(brush_create);
 	m_toolbar->AddTool(ID_BrushCreate, "Extract",
 		bitmap, "Extract highlighted structures out and create a new volume");
+	bitmap = wxGetBitmapFromMemory(brush_clear);
+	m_toolbar->AddSeparator();
+	m_toolbar->AddTool(ID_BrushClear, "Reset All",
+		bitmap, "Reset all highlighted structures");
 	m_toolbar->Realize();
 
 	//Selection adjustment
