@@ -289,7 +289,7 @@ wxPanel(parent, id, pos, size, style),
 #endif
 	CreateBar();
 	if (m_glview) {
-		m_glview->SetSBText("50 µm");
+		m_glview->SetSBText(L"50 \u03BCm");
 		m_glview->SetScaleBarLen(1.);
 	}
 	LoadSettings();
