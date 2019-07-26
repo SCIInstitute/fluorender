@@ -163,6 +163,8 @@ VolShader::VolShader(
 			return string(VOL_COLORMAP_CALC5);
 		case 6:
 			return string(VOL_COLORMAP_CALC6);
+		case 7:
+			return string(VOL_COLORMAP_CALC7);
 		}
 		return string(VOL_COLORMAP_CALC0);
 	}
@@ -222,6 +224,8 @@ VolShader::VolShader(
 			break;
 		case 1://colormap
 			z << VOL_UNIFORMS_COLORMAP;
+			if (colormap_ == 7)
+				z << VOL_UNIFORMS_COLORMAP_PC;
 			break;
 		case 2://depth map
 			z << VOL_UNIFORMS_SIN_COLOR;
@@ -329,6 +333,9 @@ VolShader::VolShader(
 					z << get_colormap_proj();
 					z << get_colormap_code();
 					z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
+					if (colormap_ == 7)
+						z << VOL_TRANSFER_FUNCTION_COLORMAP_RESULT7;
+					else
 					z << VOL_TRANSFER_FUNCTION_COLORMAP_RESULT;
 				}
 				break;
@@ -387,7 +394,10 @@ VolShader::VolShader(
 						z << get_colormap_proj();
 						z << get_colormap_code();
 						z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
-						z << VOL_TRANSFER_FUNCTION_COLORMAP_RESULT;
+						if (colormap_ == 7)
+							z << VOL_TRANSFER_FUNCTION_COLORMAP_RESULT7;
+						else
+							z << VOL_TRANSFER_FUNCTION_COLORMAP_RESULT;
 					}
 					break;
 				case 2://depth map

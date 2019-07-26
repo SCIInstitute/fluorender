@@ -524,6 +524,7 @@ wxPanel(parent, id, pos, size,style, name),
 	colormap_list.push_back("Diverging");
 	colormap_list.push_back("Monochrome");
 	colormap_list.push_back("Reverse Mono");
+	colormap_list.push_back("Low White");
 	for (size_t i=0; i<colormap_list.size(); ++i)
 		m_colormap_combo->Append(colormap_list[i]);
 	m_colormap_combo2 = new wxComboBox(this, ID_ColormapCombo2, "",

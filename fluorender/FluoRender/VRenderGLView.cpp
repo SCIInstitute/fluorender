@@ -3466,6 +3466,9 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 			vd->GetColormapValues(lo, hi);
 			img_shader->setLocalParam(
 				0, lo, hi, hi - lo, enable_alpha ? 0.0 : 1.0);
+			Color c = vd->GetColor();
+			img_shader->setLocalParam(
+				9, c.r(), c.g(), c.b(), 0.0);
 			//2d adjustment
 		}
 		else
@@ -9244,7 +9247,7 @@ void VRenderGLView::DrawGradBg()
 	glEnable(GL_BLEND);
 }
 
-void VRenderGLView::SetColormapColors(int colormap)
+void VRenderGLView::SetColormapColors(int colormap, Color &c)
 {
 	switch (colormap)
 	{
@@ -9311,6 +9314,15 @@ void VRenderGLView::SetColormapColors(int colormap)
 		m_color_6 = Color(0.0, 0.0, 0.0);
 		m_color_7 = Color(0.0, 0.0, 0.0);
 		break;
+	case 7://low intensity white
+		m_color_1 = Color(1.0, 1.0, 1.0);
+		m_color_2 = Color(1.0, 1.0, 1.0);
+		m_color_3 = c*0.25 + Color(1.0, 1.0, 1.0)*0.75;
+		m_color_4 = (c + Color(1.0, 1.0, 1.0))*0.5;
+		m_color_5 = c * 0.75 + Color(1.0, 1.0, 1.0)*0.25;
+		m_color_6 = c;
+		m_color_7 = c;
+		break;
 	}
 }
 
@@ -9350,7 +9362,8 @@ void VRenderGLView::DrawColormap()
 			m_value_5 = (m_value_4 + high) / 2.0;
 			max_val = vd_view->GetMaxValue();
 			enable_alpha = vd_view->GetEnableAlpha();
-			SetColormapColors(vd_view->GetColormap());
+			SetColormapColors(vd_view->GetColormap(),
+				vd_view->GetColor());
 		}
 	}
 	else if (num > 1)
@@ -9375,7 +9388,8 @@ void VRenderGLView::DrawColormap()
 					m_value_5 = (m_value_4 + high) / 2.0;
 					max_val = vd_view->GetMaxValue();
 					enable_alpha = vd_view->GetEnableAlpha();
-					SetColormapColors(vd_view->GetColormap());
+					SetColormapColors(vd_view->GetColormap(),
+						vd_view->GetColor());
 				}
 			}
 		}
