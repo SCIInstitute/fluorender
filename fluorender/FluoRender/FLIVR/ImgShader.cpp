@@ -228,6 +228,7 @@ namespace FLIVR
 	"\n" \
 	"// IMG_SHADER_CODE_GRADIENT_MAP\n" \
 	"uniform vec4 loc0; //(lo, hi, hi-lo, alpha) \n" \
+	"uniform vec4 loc9; //(r, g, b, 0)\n" \
 	"uniform sampler2D tex0;\n" \
 	"\n" \
 	"void main()\n" \
@@ -252,6 +253,7 @@ namespace FLIVR
 	"\n" \
 	"// IMG_SHADER_CODE_GRADIENT_MAP\n" \
 	"uniform vec4 loc0; //(lo, hi, hi-lo, alpha) \n" \
+	"uniform vec4 loc9; //(r, g, b, 0)\n" \
 	"uniform sampler2D tex0;\n" \
 	"\n" \
 	"void main()\n" \
@@ -707,6 +709,8 @@ namespace FLIVR
 			return string(VOL_COLORMAP_CALC5);
 		case 6:
 			return string(VOL_COLORMAP_CALC6);
+		case 7:
+			return string(VOL_COLORMAP_CALC7);
 		}
 		return string(VOL_COLORMAP_CALC0);
 	}

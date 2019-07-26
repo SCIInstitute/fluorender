@@ -83,6 +83,11 @@ namespace FLIVR
 	"uniform vec4 loc8;//(int, start, end, 0.0)\n" \
 	"\n"
 
+#define VOL_UNIFORMS_COLORMAP_PC \
+	"//VOL_UNIFORMS_COLORMAP_PC\n" \
+	"uniform vec4 loc9;//(red, green, blue,0)\n" \
+	"\n"
+
 #define VOL_UNIFORMS_DP \
 	"//VOL_UNIFORMS_DP\n" \
 	"uniform sampler2D tex14;//depth texture 1\n" \
@@ -459,6 +464,10 @@ namespace FLIVR
 	"		//VOL_COLORMAP_CALC6\n" \
 	"		rb.rgb = vec3(1.0 - clamp(valu, 0.0, 1.0));\n"
 
+#define VOL_COLORMAP_CALC7 \
+	"		//VOL_COLORMAP_CALC6\n" \
+	"		rb.rgb = mix(vec3(1.0), loc9.rgb, valu);\n"
+
 #define VOL_TRANSFER_FUNCTION_COLORMAP \
 	"	//VOL_TRANSFER_FUNCTION_COLORMAP\n" \
 	"	vec4 c;\n" \
@@ -483,12 +492,12 @@ namespace FLIVR
 	"		float valu = (1.0-tt.z-loc6.x)/loc6.z;\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_VALU2 \
-	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_Z\n" \
+	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_Y\n" \
 	"		vec4 tt = matrix5 * t;\n" \
 	"		float valu = (1.0-tt.y-loc6.x)/loc6.z;\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_VALU3 \
-	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_Z\n" \
+	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_X\n" \
 	"		vec4 tt = matrix5 * t;\n" \
 	"		float valu = (1.0-tt.x-loc6.x)/loc6.z;\n"
 
@@ -515,6 +524,13 @@ namespace FLIVR
 	"		//VOL_TRANSFER_FUNCTION_COLORMAP_RESULT\n" \
 	"		float alpha = 1.0 - pow(1.0-tf_alp, loc4.w);\n" \
 	"		c = vec4(rb.rgb*alpha*tf_alp, alpha);\n" \
+	"	}\n" \
+	"\n"
+
+#define VOL_TRANSFER_FUNCTION_COLORMAP_RESULT7 \
+	"		//VOL_TRANSFER_FUNCTION_COLORMAP_RESULT7\n" \
+	"		float alpha = 1.0 - pow(1.0-tf_alp, loc4.w);\n" \
+	"		c = vec4(rb.rgb*alpha, alpha);\n" \
 	"	}\n" \
 	"\n"
 
