@@ -39,6 +39,7 @@ m_vd(0),
 	m_mode(0),
 	m_use2d(false),
 	m_size_map(false),
+	m_update_order(true),
 	m_ini_thresh(0.0),
 	m_gm_falloff(1.0),
 	m_scl_falloff(0.0),
@@ -172,7 +173,10 @@ void VolumeSelector::Select(double radius)
 		int div = iter / 3;
 		div = div ? div : 1;
 		for (int i=0; i<iter; i++)
-			m_vd->DrawMask(1, m_mode, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, i%div);
+			m_vd->DrawMask(1, m_mode, 0, ini_thresh,
+				gm_falloff, scl_falloff,
+				m_scl_translate, m_w2d, 0.0,
+				m_update_order?(i%div):0);
 	}
 
 	if (m_mode == 6)

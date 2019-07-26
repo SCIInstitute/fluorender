@@ -2395,6 +2395,9 @@ void VRenderGLView::LoadBrushSettings()
 	//select group
 	if (fconfig.Read("select_group", &bval))
 		m_selector.SetSelectGroup(bval);
+	//brick accuracy
+	if (fconfig.Read("accurate_bricks", &bval))
+		m_selector.SetUpdateOrder(bval);
 	//2d influence
 	if (fconfig.Read("brush_2dinfl", &val))
 		m_selector.SetW2d(val);
@@ -2507,6 +2510,9 @@ void VRenderGLView::SaveBrushSettings()
 	//select group
 	fconfig.Write("select_group",
 		m_selector.GetSelectGroup());
+	//brick acccuracy
+	fconfig.Write("accurate_bricks",
+		m_selector.GetUpdateOrder());
 	//2d influence
 	fconfig.Write("brush_2dinfl",
 		m_selector.GetW2d());
@@ -2722,6 +2728,17 @@ void VRenderGLView::SetEstimateThresh(bool value)
 bool VRenderGLView::GetEstimateThresh()
 {
 	return m_selector.GetEstimateThreshold();
+}
+
+//brick acuracy
+void VRenderGLView::SetAccurateBricks(bool value)
+{
+	m_selector.SetUpdateOrder(value);
+}
+
+bool VRenderGLView::GetAccurateBricks()
+{
+	return m_selector.GetUpdateOrder();
 }
 
 //select both

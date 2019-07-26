@@ -475,6 +475,9 @@ public:
 	//estimate threshold
 	void SetEstimateThresh(bool value);
 	bool GetEstimateThresh();
+	//brick acuracy
+	void SetAccurateBricks(bool value);
+	bool GetAccurateBricks();
 	//select both
 	void SetSelectBoth(bool value);
 	bool GetSelectBoth();

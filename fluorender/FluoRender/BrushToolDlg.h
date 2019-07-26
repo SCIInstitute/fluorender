@@ -82,6 +82,8 @@ public:
 		ID_BrushSelectGroupChk,
 		//estimate threshold
 		ID_EstimateThreshChk,
+		//brick accuracy
+		ID_AccurateBricksChk,
 		//brush properties
 		//brush size 1
 		ID_BrushSize1Sldr,
@@ -147,6 +149,8 @@ private:
 	wxCheckBox* m_select_group_chk;
 	//estimate threshold
 	wxCheckBox* m_estimate_thresh_chk;
+	//brick acuracy
+	wxCheckBox* m_accurate_bricks_chk;
 	//selection strength
 	//translate
 	wxSlider* m_brush_scl_translate_sldr;
@@ -205,6 +209,8 @@ private:
 	void OnEstimateThreshChk(wxCommandEvent &event);
 	//select group
 	void OnBrushSelectGroupChk(wxCommandEvent &event);
+	//brick accuracy
+	void OnAccurateBricksCheck(wxCommandEvent &event);
 	//translate
 	void OnBrushSclTranslateChange(wxScrollEvent &event);
 	void OnBrushSclTranslateText(wxCommandEvent &event);

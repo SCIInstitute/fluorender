@@ -67,6 +67,8 @@ BEGIN_EVENT_TABLE(BrushToolDlg, wxPanel)
 	EVT_CHECKBOX(ID_BrushSelectGroupChk, BrushToolDlg::OnBrushSelectGroupChk)
 	//estimate thresh
 	EVT_CHECKBOX(ID_EstimateThreshChk, BrushToolDlg::OnEstimateThreshChk)
+	//brick accuracy
+	EVT_CHECKBOX(ID_AccurateBricksChk, BrushToolDlg::OnAccurateBricksCheck)
 	//brush properties
 	//brush size 1
 	EVT_COMMAND_SCROLL(ID_BrushSize1Sldr, BrushToolDlg::OnBrushSize1Change)
@@ -176,11 +178,15 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 	m_select_group_chk = new wxCheckBox(this, ID_BrushSelectGroupChk, "Apply to Group:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+	m_accurate_bricks_chk = new wxCheckBox(this, ID_AccurateBricksChk, "Accurate Bricks:",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 	sizer1_1->Add(m_estimate_thresh_chk, 0, wxALIGN_CENTER);
 	sizer1_1->Add(5, 5);
 	sizer1_1->Add(m_edge_detect_chk, 0, wxALIGN_CENTER);
 	sizer1_1->Add(5, 5);
 	sizer1_1->Add(m_hidden_removal_chk, 0, wxALIGN_CENTER);
+	sizer1_1->Add(5, 5);
+	sizer1_1->Add(m_accurate_bricks_chk, 0, wxALIGN_CENTER);
 	sizer1_1->Add(5, 5);
 	sizer1_1->Add(m_select_group_chk, 0, wxALIGN_CENTER);
 	//threshold4
@@ -435,6 +441,9 @@ void BrushToolDlg::GetSettings(VRenderView* vrv)
 	//estimate threshold
 	bval = vrv->GetEstimateThresh();
 	m_estimate_thresh_chk->SetValue(bval);
+	//brick acuracy
+	bval = vrv->GetAccurateBricks();
+	m_accurate_bricks_chk->SetValue(bval);
 
 	//size1
 	dval = vrv->GetBrushSize1();
@@ -780,6 +789,16 @@ void BrushToolDlg::OnEstimateThreshChk(wxCommandEvent &event)
 	//
 	if (m_cur_view)
 		m_cur_view->SetEstimateThresh(value);
+}
+
+//brick accuracy
+void BrushToolDlg::OnAccurateBricksCheck(wxCommandEvent &event)
+{
+	bool value = m_accurate_bricks_chk->GetValue();
+
+	//
+	if (m_cur_view)
+		m_cur_view->SetAccurateBricks(value);
 }
 
 //brush size 1
