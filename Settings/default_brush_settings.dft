@@ -6,6 +6,7 @@ auto_thresh=0
 edge_detect=1
 hidden_removal=1
 select_group=0
+accurate_bricks=0
 brush_2dinfl=0
 brush_size1=5
 use_brush_size2=1

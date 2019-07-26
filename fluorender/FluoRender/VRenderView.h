@@ -456,6 +456,11 @@ public:
 	{ if (m_glview) m_glview->SetEstimateThresh(value);}
 	bool GetEstimateThresh()
 	{ if (m_glview) return m_glview->GetEstimateThresh(); else return false;}
+	//brick acuracy
+	void SetAccurateBricks(bool value)
+	{ if (m_glview) m_glview->SetAccurateBricks(value);}
+	bool GetAccurateBricks()
+	{ if (m_glview) return m_glview->GetAccurateBricks(); else return false;}
 	//select a and b
 	void SetSelectBoth(bool value)
 	{ if (m_glview) m_glview->SetSelectBoth(value); }

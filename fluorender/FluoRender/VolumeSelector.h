@@ -78,6 +78,9 @@ public:
 	//size map
 	void SetSizeMap(bool size_map) {m_size_map = size_map;}
 	bool GetSizeMap() {return m_size_map;}
+	//update order
+	void SetUpdateOrder(bool bval) { m_update_order = bval; }
+	bool GetUpdateOrder() { return m_update_order; }
 
 	//modes
 	void SetMode(int mode) {m_mode = mode;}
@@ -134,6 +137,8 @@ private:
 						//11-posterize
 	bool m_use2d;
 	bool m_size_map;
+
+	bool m_update_order;
 
 	//brush properties
 	double m_ini_thresh;
