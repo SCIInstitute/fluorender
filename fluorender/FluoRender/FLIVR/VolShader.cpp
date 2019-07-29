@@ -336,7 +336,7 @@ VolShader::VolShader(
 					if (colormap_ == 7)
 						z << VOL_TRANSFER_FUNCTION_COLORMAP_RESULT7;
 					else
-					z << VOL_TRANSFER_FUNCTION_COLORMAP_RESULT;
+						z << VOL_TRANSFER_FUNCTION_COLORMAP_RESULT;
 				}
 				break;
 			}
