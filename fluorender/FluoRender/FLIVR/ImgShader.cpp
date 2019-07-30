@@ -711,6 +711,8 @@ namespace FLIVR
 			return string(VOL_COLORMAP_CALC6);
 		case 7:
 			return string(VOL_COLORMAP_CALC7);
+		case 8:
+			return string(VOL_COLORMAP_CALC8);
 		}
 		return string(VOL_COLORMAP_CALC0);
 	}

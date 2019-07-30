@@ -9323,80 +9323,38 @@ void VRenderGLView::SetColormapColors(int colormap, Color &c)
 		m_color_6 = c;
 		m_color_7 = c;
 		break;
+	case 8://high intensity dark
+		m_color_1 = c;
+		m_color_2 = c;
+		m_color_3 = c * (0.025 + 0.75);
+		m_color_4 = c * 0.55;
+		m_color_5 = c * (0.075 + 0.25);
+		m_color_6 = c * 0.1;
+		m_color_7 = c * 0.1;
+		break;
 	}
 }
 
 void VRenderGLView::DrawColormap()
 {
-	bool draw = false;
-
-	int num = 0;
-	int vd_index;
 	double max_val = 255.0;
 	bool enable_alpha = false;
 
-	for (int i = 0; i<GetDispVolumeNum(); i++)
+	if (m_cur_vol)
 	{
-		VolumeData* vd = GetDispVolumeData(i);
-		if (vd && vd->GetColormapMode() && vd->GetDisp())
-		{
-			num++;
-			vd_index = i;
-		}
+		double low, high;
+		m_cur_vol->GetColormapValues(low, high);
+		m_value_2 = low;
+		m_value_6 = high;
+		m_value_4 = (low + high) / 2.0;
+		m_value_3 = (low + m_value_4) / 2.0;
+		m_value_5 = (m_value_4 + high) / 2.0;
+		max_val = m_cur_vol->GetMaxValue();
+		enable_alpha = m_cur_vol->GetEnableAlpha();
+		SetColormapColors(m_cur_vol->GetColormap(),
+			m_cur_vol->GetColor());
 	}
-
-	if (num == 0)
-		return;
-	else if (num == 1)
-	{
-		VolumeData* vd_view = GetDispVolumeData(vd_index);
-		if (vd_view)
-		{
-			draw = true;
-			double low, high;
-			vd_view->GetColormapValues(low, high);
-			m_value_2 = low;
-			m_value_6 = high;
-			m_value_4 = (low + high) / 2.0;
-			m_value_3 = (low + m_value_4) / 2.0;
-			m_value_5 = (m_value_4 + high) / 2.0;
-			max_val = vd_view->GetMaxValue();
-			enable_alpha = vd_view->GetEnableAlpha();
-			SetColormapColors(vd_view->GetColormap(),
-				vd_view->GetColor());
-		}
-	}
-	else if (num > 1)
-	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
-		{
-			VolumeData* vd = vr_frame->GetCurSelVol();
-			if (vd && vd->GetDisp())
-			{
-				wxString str = vd->GetName();
-				VolumeData* vd_view = GetVolumeData(str);
-				if (vd_view && vd_view->GetColormapDisp())
-				{
-					draw = true;
-					double low, high;
-					vd_view->GetColormapValues(low, high);
-					m_value_2 = low;
-					m_value_6 = high;
-					m_value_4 = (low + high) / 2.0;
-					m_value_3 = (low + m_value_4) / 2.0;
-					m_value_5 = (m_value_4 + high) / 2.0;
-					max_val = vd_view->GetMaxValue();
-					enable_alpha = vd_view->GetEnableAlpha();
-					SetColormapColors(vd_view->GetColormap(),
-						vd_view->GetColor());
-				}
-			}
-		}
-	}
-
-	if (!draw)
-		return;
+	else return;
 
 	double offset = 0.0;
 	if (m_draw_legend)

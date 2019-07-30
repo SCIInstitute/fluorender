@@ -736,7 +736,7 @@ namespace FLIVR
 			case 1://colormap
 				shader->setLocalParam(6, colormap_low_value_, colormap_hi_value_,
 					colormap_hi_value_-colormap_low_value_, 0.0);
-				if (colormap_ == 7)
+				if (colormap_ > 6)
 					shader->setLocalParam(9, color_.r(), color_.g(), color_.b(), 0.0);
 				break;
 			case 2://depth map
