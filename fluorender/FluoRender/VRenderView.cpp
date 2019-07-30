@@ -50,6 +50,7 @@ BEGIN_EVENT_TABLE(VRenderView, wxPanel)
 	EVT_TOOL(ID_VolumeCompRd, VRenderView::OnVolumeMethodCheck)
 	EVT_BUTTON(ID_CaptureBtn, VRenderView::OnCapture)
 	EVT_COLOURPICKER_CHANGED(ID_BgColorPicker, VRenderView::OnBgColorChange)
+	EVT_BUTTON(ID_BgInvBtn, VRenderView::OnBgInvBtn)
 	EVT_TOOL(ID_CamCtrChk, VRenderView::OnCamCtrCheck)
 	EVT_TOOL(ID_FpsChk, VRenderView::OnFpsCheck)
 	EVT_TOOL(ID_LegendChk, VRenderView::OnLegendCheck)
@@ -481,11 +482,12 @@ void VRenderView::CreateBar()
 	m_options_toolbar->AddSeparator();
 #endif
 	//background option
-	st1 = new wxStaticText(m_options_toolbar, wxID_ANY, "Background:  ");
 	m_bg_color_picker = new wxColourPickerCtrl(m_options_toolbar, 
 		ID_BgColorPicker);
-	m_options_toolbar->AddControl(st1);
+	m_bg_inv_btn = new wxButton(m_options_toolbar, ID_BgInvBtn, "X",
+		wxDefaultPosition, wxSize(20, 20));
 	m_options_toolbar->AddControl(m_bg_color_picker);
+	m_options_toolbar->AddControl(m_bg_inv_btn);
 
 	bitmap = wxGetBitmapFromMemory(save_settings);
 	m_options_toolbar->AddTool(
@@ -2353,6 +2355,14 @@ void VRenderView::OnBgColorChange(wxColourPickerEvent& event)
 	wxColor c = event.GetColour();
 	Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
 	SetBackgroundColor(color);
+	RefreshGL();
+}
+
+void VRenderView::OnBgInvBtn(wxCommandEvent& event)
+{
+	Color c = GetBackgroundColor();
+	c = Color(1.0, 1.0, 1.0) - c;
+	SetBackgroundColor(c);
 	RefreshGL();
 }
 
