@@ -41,6 +41,7 @@ public:
 		ID_VolumeCompRd,
 		ID_CaptureBtn,
 		ID_BgColorPicker,
+		ID_BgInvBtn,
 		ID_RotLinkChk,
 		ID_RotResetBtn,
 		ID_XRotText,
@@ -580,6 +581,7 @@ public:
 	//top bar///////////////////////////////////////////////////
 	wxPanel* m_panel_1;
 	wxColourPickerCtrl *m_bg_color_picker;
+	wxButton* m_bg_inv_btn;
 	wxSlider* m_aov_sldr;
 	wxTextCtrl* m_aov_text;
 	wxToolBar * m_options_toolbar;
@@ -667,6 +669,7 @@ private:
 	static wxWindow* CreateExtraCaptureControl(wxWindow* parent);
 	void OnCapture(wxCommandEvent& event);
 	void OnBgColorChange(wxColourPickerEvent& event);
+	void OnBgInvBtn(wxCommandEvent& event);
 	void OnCamCtrCheck(wxCommandEvent& event);
 	void OnFpsCheck(wxCommandEvent& event);
 	void OnLegendCheck(wxCommandEvent& event);

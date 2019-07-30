@@ -9340,7 +9340,8 @@ void VRenderGLView::DrawColormap()
 	double max_val = 255.0;
 	bool enable_alpha = false;
 
-	if (m_cur_vol)
+	if (m_cur_vol &&
+		m_cur_vol->GetColormapMode())
 	{
 		double low, high;
 		m_cur_vol->GetColormapValues(low, high);
