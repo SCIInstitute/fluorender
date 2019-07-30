@@ -466,7 +466,10 @@ namespace FLIVR
 
 #define VOL_COLORMAP_CALC7 \
 	"		//VOL_COLORMAP_CALC7\n" \
-	"		//rb.rgb = mix(loc9.rgb*0.4, loc9.rgb, valu);\n" \
+	"		rb.rgb = mix(vec3(1.0), loc9.rgb, valu);\n"
+
+#define VOL_COLORMAP_CALC8 \
+	"		//VOL_COLORMAP_CALC8\n" \
 	"		rb.rgb = mix(loc9.rgb, loc9.rgb*0.1, valu);\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP \
@@ -528,10 +531,11 @@ namespace FLIVR
 	"	}\n" \
 	"\n"
 
-#define VOL_TRANSFER_FUNCTION_COLORMAP_RESULT7 \
-	"		//VOL_TRANSFER_FUNCTION_COLORMAP_RESULT7\n" \
-	"		float alpha = 1.0 - pow(1.0-tf_alp, loc4.w);\n" \
-	"		c = vec4(rb.rgb*alpha, alpha*alpha);\n" \
+//square alpha to increase transparency for low intensity
+#define VOL_TRANSFER_FUNCTION_COLORMAP_RESULT_SA \
+	"		//VOL_TRANSFER_FUNCTION_COLORMAP_RESULT7_SA\n" \
+	"		float alpha = 1.0 - pow(1.0-tf_alp*tf_alp, loc4.w);\n" \
+	"		c = vec4(rb.rgb*alpha, alpha);\n" \
 	"	}\n" \
 	"\n"
 
