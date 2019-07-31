@@ -524,6 +524,7 @@ wxPanel(parent, id, pos, size,style, name),
 	colormap_list.push_back("Diverging");
 	colormap_list.push_back("Monochrome");
 	colormap_list.push_back("Reverse Mono");
+	colormap_list.push_back("Increased Transparency");
 	colormap_list.push_back("High-key");
 	colormap_list.push_back("Low-key");
 	for (size_t i=0; i<colormap_list.size(); ++i)
