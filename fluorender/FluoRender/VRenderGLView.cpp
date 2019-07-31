@@ -99,6 +99,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_test_speed(false),
 	m_draw_clip(false),
 	m_draw_legend(false),
+	m_draw_colormap(false),
 	m_mouse_focus(false),
 	m_test_wiref(false),
 	m_draw_rulers(true),
@@ -6571,7 +6572,8 @@ void VRenderGLView::ForceDraw()
 	if (m_disp_scale_bar)
 		DrawScaleBar();
 
-	DrawColormap();
+	if (m_draw_colormap)
+		DrawColormap();
 
 	PostDraw();
 

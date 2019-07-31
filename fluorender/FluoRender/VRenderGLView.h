@@ -603,6 +603,7 @@ public:
 	bool m_test_speed;
 	bool m_draw_clip;
 	bool m_draw_legend;
+	bool m_draw_colormap;
 	bool m_mouse_focus;
 	bool m_test_wiref;
 	bool m_draw_bounds;

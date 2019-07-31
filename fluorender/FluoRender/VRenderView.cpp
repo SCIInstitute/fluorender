@@ -54,6 +54,7 @@ BEGIN_EVENT_TABLE(VRenderView, wxPanel)
 	EVT_TOOL(ID_CamCtrChk, VRenderView::OnCamCtrCheck)
 	EVT_TOOL(ID_FpsChk, VRenderView::OnFpsCheck)
 	EVT_TOOL(ID_LegendChk, VRenderView::OnLegendCheck)
+	EVT_TOOL(ID_ColormapChk, VRenderView::OnColormapCheck)
 	//scale bar
 	EVT_TOOL(ID_ScaleBar, VRenderView::OnScaleBar)
 	EVT_TEXT(ID_ScaleText, VRenderView::OnScaleTextEditing)
@@ -414,6 +415,14 @@ void VRenderView::CreateBar()
 		"Toggle View of the Legend",
 		"Toggle View of the Legend");
 	m_options_toolbar->ToggleTool(ID_LegendChk,false);
+
+	bitmap = wxGetBitmapFromMemory(legend);
+	m_options_toolbar->AddCheckTool(
+		ID_ColormapChk, "Color Map",
+		bitmap, wxNullBitmap,
+		"Toggle View of the Colormap Sample",
+		"Toggle View of the Colormap Sample");
+	m_options_toolbar->ToggleTool(ID_ColormapChk, false);
 	m_options_toolbar->AddSeparator();
 #ifndef _DARWIN
 	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
@@ -2390,6 +2399,13 @@ void VRenderView::OnLegendCheck(wxCommandEvent& event)
 	RefreshGL();
 }
 
+void VRenderView::OnColormapCheck(wxCommandEvent& event)
+{
+	m_glview->m_draw_colormap =
+		m_options_toolbar->GetToolState(ID_ColormapChk);
+	RefreshGL();
+}
+
 void VRenderView::OnScaleTextEditing(wxCommandEvent& event) {
 	wxString str, num_text, unit_text;
 	num_text = m_scale_text->GetValue();
@@ -2719,6 +2735,12 @@ void VRenderView::SaveDefault(unsigned int mask)
 		str = wxString::Format("%f %f %f", x, y, z);
 		fconfig.Write("center", str);
 	}
+	//colormap
+	if (mask & 0x1000)
+	{
+		bVal = m_glview->m_draw_colormap;
+		fconfig.Write("colormap_chk", bVal);
+	}
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
 	wxString dft = expath + "/default_view_settings.dft";
@@ -2788,6 +2810,11 @@ void VRenderView::LoadSettings()
 	{
 		m_options_toolbar->ToggleTool(ID_LegendChk,bVal);
 		m_glview->m_draw_legend = bVal;
+	}
+	if (fconfig.Read("colormap_chk", &bVal))
+	{
+		m_options_toolbar->ToggleTool(ID_ColormapChk, bVal);
+		m_glview->m_draw_colormap = bVal;
 	}
 	if (fconfig.Read("mouse_focus", &bVal))
 	{
