@@ -70,6 +70,7 @@ public:
 		ID_CamCtrChk,
 		ID_FpsChk,
 		ID_LegendChk,
+		ID_ColormapChk,
 		ID_ScaleBar,
 		ID_ScaleText,
 		ID_ScaleCmb,
@@ -673,6 +674,7 @@ private:
 	void OnCamCtrCheck(wxCommandEvent& event);
 	void OnFpsCheck(wxCommandEvent& event);
 	void OnLegendCheck(wxCommandEvent& event);
+	void OnColormapCheck(wxCommandEvent& event);
 	void OnScaleBar(wxCommandEvent& event);
 	void OnScaleTextEditing(wxCommandEvent& event);
 	void OnScaleUnitSelected(wxCommandEvent& event);
