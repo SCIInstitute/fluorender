@@ -1847,20 +1847,20 @@ void VPropView::OnMIPCheck(wxCommandEvent &event)
 
 	if (val==1)
 	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
-		{
-			for (int i=0; i<(int)vr_frame->GetViewList()->size(); i++)
-			{
-				VRenderView *vrv = (*vr_frame->GetViewList())[i];
-				if (vrv && vrv->GetVolMethod()==VOL_METHOD_MULTI)
-				{
-					::wxMessageBox("MIP is not supported in Depth mode.");
-					m_options_toolbar->ToggleTool(ID_MipChk,false);
-					return;
-				}
-			}
-		}
+		//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		//if (vr_frame)
+		//{
+		//	for (int i=0; i<(int)vr_frame->GetViewList()->size(); i++)
+		//	{
+		//		VRenderView *vrv = (*vr_frame->GetViewList())[i];
+		//		if (vrv && vrv->GetVolMethod()==VOL_METHOD_MULTI)
+		//		{
+		//			::wxMessageBox("MIP is not supported in Depth mode.");
+		//			m_options_toolbar->ToggleTool(ID_MipChk,false);
+		//			return;
+		//		}
+		//	}
+		//}
 		EnableMip();
 		if (m_threh_st)
 			m_threh_st->SetLabel("Shade Threshold : ");

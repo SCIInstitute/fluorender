@@ -61,7 +61,6 @@ namespace FLIVR
 		irate_(1.0),
 		sampling_rate_(1.0),
 		num_slices_(0),
-		colormap_mode_(0),
 		va_slices_(0)
 	{
 	}
@@ -82,7 +81,6 @@ namespace FLIVR
 		irate_(copy.irate_),
 		sampling_rate_(copy.sampling_rate_),
 		num_slices_(0),
-		colormap_mode_(copy.colormap_mode_),
 		va_slices_(0)
 	{
 	}
@@ -123,38 +121,6 @@ namespace FLIVR
 	int MultiVolumeRenderer::get_slice_num()
 	{
 		return num_slices_;
-	}
-
-	void MultiVolumeRenderer::set_colormap_mode_single()
-	{
-		if (vr_list_.size() == 1)
-		{
-			colormap_mode_ = vr_list_[0]->colormap_mode_;
-			colormap_ = vr_list_[0]->colormap_;
-			colormap_proj_ = vr_list_[0]->colormap_proj_;
-		}
-		else
-		{
-			colormap_mode_ = 0;
-			colormap_ = 0;
-			colormap_proj_ = 0;
-		}
-	}
-
-	void MultiVolumeRenderer::set_colormap_mode_first()
-	{
-		if (!vr_list_.empty())
-		{
-			colormap_mode_ = vr_list_[0]->colormap_mode_;
-			colormap_ = vr_list_[0]->colormap_;
-			colormap_proj_ = vr_list_[0]->colormap_proj_;
-		}
-		else
-		{
-			colormap_mode_ = 0;
-			colormap_ = 0;
-			colormap_proj_ = 0;
-		}
 	}
 
 	//set matrices
@@ -244,12 +210,6 @@ namespace FLIVR
 		index.reserve(num_slices_*6);
 		size.reserve(num_slices_*6);
 
-		//--------------------------------------------------------------------------
-		bool use_shading = false;
-		for (size_t i=0; i<vr_list_.size(); ++i)
-			use_shading = use_shading || vr_list_[i]->shading_;
-		bool use_fog = vr_list_[0]->m_use_fog && colormap_mode_!=2;
-
 		// set up blending
 		glEnable(GL_BLEND);
 		switch(mode_)
@@ -311,48 +271,8 @@ namespace FLIVR
 		glDisable(GL_DEPTH_TEST);
 		glDepthMask(GL_FALSE);
 
-		int ml_mode = 0;
 		for (size_t i = 0; i < vr_list_.size(); ++i)
-		{
 			vr_list_[i]->eval_ml_mode();
-			ml_mode = vr_list_[i]->ml_mode_ > ml_mode ?
-				vr_list_[i]->ml_mode_ : ml_mode;
-		}
-
-		//--------------------------------------------------------------------------
-		// Set up shaders
-		ShaderProgram* shader = 0;
-		shader = VolumeRenderer::vol_shader_factory_.shader(
-			false,
-			vr_list_[0]->tex_->nc(),
-			use_shading, use_fog,
-			depth_peel_, true,
-			hiqual_, ml_mode, mode_==TextureRenderer::MODE_MIP,
-			colormap_mode_, colormap_, colormap_proj_,
-			false, 1);
-		if (shader)
-		{
-			if (!shader->valid())
-				shader->create();
-			shader->bind();
-		}
-
-		//setup depth peeling
-		if (depth_peel_ || colormap_mode_ == 2)
-			shader->setLocalParam(7, 1.0/double(w2), 1.0/double(h2), 0.0, 0.0);
-
-		//fog
-		if (use_fog)
-			shader->setLocalParam(8,
-			vr_list_[0]->m_fog_intensity,
-			vr_list_[0]->m_fog_start,
-			vr_list_[0]->m_fog_end, 0.0);
-
-		//--------------------------------------------------------------------------
-		// render bricks
-		shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat_));
-		shader->setLocalParamMatrix(1, glm::value_ptr(mv_mat2_));
-		shader->setLocalParamMatrix(5, glm::value_ptr(tex_mat_));
 
 		int quota_bricks_chan = vr_list_[0]->get_quota_bricks_chan();
 		vector<TextureBrick*> *bs = 0;
@@ -419,32 +339,9 @@ namespace FLIVR
 				size.clear();
 				b->compute_polygons(snapview, dt, vertex, index, size, multibricks);
 				if (vertex.size() == 0) { continue; }
-				shader->setLocalParam(4, 1.0/b->nx(), 1.0/b->ny(), 1.0/b->nz(), 1.0/rate);
 
-				//for brick transformation
-				float matrix[16];
-				BBox bbox = b->dbox();
-				matrix[0] = float(bbox.max().x()-bbox.min().x());
-				matrix[1] = 0.0f;
-				matrix[2] = 0.0f;
-				matrix[3] = 0.0f;
-				matrix[4] = 0.0f;
-				matrix[5] = float(bbox.max().y()-bbox.min().y());
-				matrix[6] = 0.0f;
-				matrix[7] = 0.0f;
-				matrix[8] = 0.0f;
-				matrix[9] = 0.0f;
-				matrix[10] = float(bbox.max().z()-bbox.min().z());
-				matrix[11] = 0.0f;
-				matrix[12] = float(bbox.min().x());
-				matrix[13] = float(bbox.min().y());
-				matrix[14] = float(bbox.min().z());
-				matrix[15] = 1.0f;
-				shader->setLocalParamMatrix(2, matrix);
-
-				draw_polygons_vol(vertex, index, size, use_fog, view_ray,
-					shader, i, orthographic_p, w2, h2, intp, quota_bricks_chan,
-					blend_buffer);
+				draw_polygons_vol(b, rate, vertex, index, size, view_ray,
+					i, orthographic_p, w2, h2, intp, quota_bricks_chan, blend_buffer);
 			}
 		}
 
@@ -471,10 +368,6 @@ namespace FLIVR
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 
-		// Release shader.
-		if (shader && shader->valid())
-			shader->release();
-
 		//release texture
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_3D, 0);
@@ -499,7 +392,7 @@ namespace FLIVR
 			ShaderProgram* img_shader = 0;
 
 			Framebuffer* filter_buffer = 0;
-			if (noise_red_ && colormap_mode_!=2)
+			if (noise_red_ /*&& colormap_mode_!=2*/)
 			{
 				//FILTERING/////////////////////////////////////////////////////////////////
 				filter_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
@@ -534,7 +427,7 @@ namespace FLIVR
 
 			glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 
-			if (noise_red_ && colormap_mode_!=2)
+			if (noise_red_ /*&& colormap_mode_!=2*/)
 				filter_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 			else
 				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
@@ -545,7 +438,7 @@ namespace FLIVR
 			else if (TextureRenderer::get_update_order() == 1)
 				glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
 
-			if (noise_red_ && colormap_mode_!=2)
+			if (noise_red_ /*&& colormap_mode_!=2*/)
 			{
 				img_shader = vr_list_[0]->
 					img_shader_factory_.shader(IMG_SHDR_FILTER_SHARPEN);
@@ -561,7 +454,7 @@ namespace FLIVR
 				img_shader->bind();
 			}
 
-			if (noise_red_ && colormap_mode_!=2)
+			if (noise_red_ /*&& colormap_mode_!=2*/)
 			{
 				filter_size_shp_ = vr_list_[0]->
 					CalcFilterSize(3, w, h, res_.x(), res_.y(), zoom, sfactor_);
@@ -586,12 +479,11 @@ namespace FLIVR
 	}
 
 	void MultiVolumeRenderer::draw_polygons_vol(
+		TextureBrick* b, double rate,
 		vector<float>& vertex,
 		vector<uint32_t>& index,
 		vector<uint32_t>& size,
-		bool fog,
 		Ray &view_ray,
-		ShaderProgram* shader,
 		int bi, bool orthographic_p,
 		int w, int h, bool intp,
 		int quota_bricks_chan,
@@ -602,7 +494,7 @@ namespace FLIVR
 			return;
 
 		Framebuffer* micro_blend_buffer = 0;
-		if (blend_slices_ && colormap_mode_!=2)
+		if (blend_slices_/* && colormap_mode_!=2*/)
 			micro_blend_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
 				FB_Render_RGBA, w, h);
 
@@ -641,8 +533,7 @@ namespace FLIVR
 		for(unsigned int i=0; i<size.size(); i++)
 		{
 			if (blend_slices_ &&
-				micro_blend_buffer &&
-				colormap_mode_!=2)
+				micro_blend_buffer /*&& colormap_mode_!=2*/)
 			{
 				//set blend buffer
 				micro_blend_buffer->bind();
@@ -651,8 +542,6 @@ namespace FLIVR
 				glEnable(GL_BLEND);
 				glBlendEquationSeparate(GL_FUNC_ADD, GL_MAX);
 				glBlendFunc(GL_ONE, GL_ONE);
-
-				glUseProgram(shader->id());
 			}
 
 			if (va_slices_)
@@ -661,6 +550,71 @@ namespace FLIVR
 			//draw a single slice
 			for (int tn=0 ; tn<(int)vr_list_.size() ; tn++)
 			{
+				//--------------------------------------------------------------------------
+				bool use_fog = vr_list_[tn]->m_use_fog &&
+					vr_list_[tn]->colormap_mode_ != 2;
+
+				// Set up shaders
+				ShaderProgram* shader = 0;
+				shader = VolumeRenderer::vol_shader_factory_.shader(
+					false,
+					vr_list_[tn]->tex_->nc(),
+					vr_list_[tn]->shading_, use_fog,
+					vr_list_[tn]->depth_peel_, true,
+					vr_list_[tn]->hiqual_,
+					vr_list_[tn]->ml_mode_,
+					vr_list_[tn]->mode_ == TextureRenderer::MODE_MIP,
+					vr_list_[tn]->colormap_mode_,
+					vr_list_[tn]->colormap_,
+					vr_list_[tn]->colormap_proj_,
+					vr_list_[tn]->solid_, 1);
+				if (shader)
+				{
+					if (!shader->valid())
+						shader->create();
+					shader->bind();
+				}
+
+				//setup depth peeling
+				if (depth_peel_ || vr_list_[tn]->colormap_mode_ == 2)
+					shader->setLocalParam(7, 1.0 / double(w), 1.0 / double(h), 0.0, 0.0);
+
+				//fog
+				if (use_fog)
+					shader->setLocalParam(8,
+						vr_list_[tn]->m_fog_intensity,
+						vr_list_[tn]->m_fog_start,
+						vr_list_[tn]->m_fog_end, 0.0);
+
+				//--------------------------------------------------------------------------
+				// render bricks
+				shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat_));
+				shader->setLocalParamMatrix(1, glm::value_ptr(mv_mat2_));
+				shader->setLocalParamMatrix(5, glm::value_ptr(tex_mat_));
+
+				shader->setLocalParam(4, 1.0 / b->nx(), 1.0 / b->ny(), 1.0 / b->nz(), 1.0 / rate);
+
+				//for brick transformation
+				float matrix[16];
+				BBox bbox = b->dbox();
+				matrix[0] = float(bbox.max().x() - bbox.min().x());
+				matrix[1] = 0.0f;
+				matrix[2] = 0.0f;
+				matrix[3] = 0.0f;
+				matrix[4] = 0.0f;
+				matrix[5] = float(bbox.max().y() - bbox.min().y());
+				matrix[6] = 0.0f;
+				matrix[7] = 0.0f;
+				matrix[8] = 0.0f;
+				matrix[9] = 0.0f;
+				matrix[10] = float(bbox.max().z() - bbox.min().z());
+				matrix[11] = 0.0f;
+				matrix[12] = float(bbox.min().x());
+				matrix[13] = float(bbox.min().y());
+				matrix[14] = float(bbox.min().z());
+				matrix[15] = 1.0f;
+				shader->setLocalParamMatrix(2, matrix);
+
 				// set shader parameters
 				light_pos_ = view_ray.direction();
 				light_pos_.safe_normalize();
@@ -683,7 +637,7 @@ namespace FLIVR
 				double spcx, spcy, spcz;
 				vr_list_[tn]->tex_->get_spacings(spcx, spcy, spcz);
 				shader->setLocalParam(5, spcx, spcy, spcz, 1.0);
-				switch (colormap_mode_)
+				switch (vr_list_[tn]->colormap_mode_)
 				{
 				case 0://normal
 					shader->setLocalParam(6, vr_list_[tn]->color_.r(),
@@ -694,7 +648,7 @@ namespace FLIVR
 					shader->setLocalParam(6, vr_list_[tn]->colormap_low_value_,
 						vr_list_[tn]->colormap_hi_value_,
 						vr_list_[tn]->colormap_hi_value_-vr_list_[tn]->colormap_low_value_, 0.0);
-					if (colormap_ > 6)
+					if (vr_list_[tn]->colormap_ > 6)
 						shader->setLocalParam(9, vr_list_[tn]->color_.r(),
 							vr_list_[tn]->color_.g(), vr_list_[tn]->color_.b(), 0.0);
 					break;
@@ -715,7 +669,7 @@ namespace FLIVR
 				shader->setLocalParam(15, abcd[0], abcd[1], abcd[2], abcd[3]);
 
 				//bind depth texture for rendering shadows
-				if (colormap_mode_ == 2 && blend_buffer)
+				if (vr_list_[tn]->colormap_mode_ == 2 && blend_buffer)
 					blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 
 				vector<TextureBrick*> *bs = 0;
@@ -763,7 +717,7 @@ namespace FLIVR
 						reinterpret_cast<const GLvoid*>((long long)(location)));
 
 				//release depth texture for rendering shadows
-				if (colormap_mode_ == 2)
+				if (vr_list_[tn]->colormap_mode_ == 2)
 					vr_list_[tn]->release_texture(4, GL_TEXTURE_2D);
 
 				if (TextureRenderer::mem_swap_ && i==0)
@@ -774,13 +728,16 @@ namespace FLIVR
 					vr_list_[tn]->release_texture((*bs)[0]->nmask(), GL_TEXTURE_3D);
 				if (vr_list_[tn]->label_)
 					vr_list_[tn]->release_texture((*bs)[0]->nlabel(), GL_TEXTURE_3D);
+				// Release shader.
+				if (shader && shader->valid())
+					shader->release();
 			}
 			location += idx_num*4;
 
 			if (va_slices_)
 				va_slices_->draw_end();
 
-			if (blend_slices_ && colormap_mode_!=2)
+			if (blend_slices_ /*&& colormap_mode_!=2*/)
 			{
 				glUseProgram(0);
 				//set buffer back

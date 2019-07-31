@@ -3929,14 +3929,12 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 				m_mvr->SetNoiseRed(vr->GetNoiseRed());
 			}
 		}
-		m_mvr->set_colormap_mode(2);
 		//draw
 		m_mvr->set_viewport(vp);
 		m_mvr->set_clear_color(clear_color);
 		m_mvr->set_cur_framebuffer(m_cur_framebuffer);
 		m_mvr->draw(m_test_wiref, m_adaptive, m_interactive, !m_persp, m_scale_factor, m_intp);
-		//restore
-		m_mvr->set_colormap_mode(0);
+
 		for (i = 0; i<list.size(); i++)
 		{
 			VolumeData* vd = list[i];
@@ -4088,7 +4086,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	if (m_mvr->get_vr_num() <= 0)
 		return;
 	m_mvr->set_depth_peel(peel);
-	m_mvr->set_colormap_mode_first();
+
 	// Set up transform
 	Transform *tform = m_vd_pop_list[0]->GetTexture()->transform();
 	float mvmat[16];
