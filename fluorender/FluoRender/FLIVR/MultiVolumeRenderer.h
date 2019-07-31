@@ -102,13 +102,6 @@ namespace FLIVR
 		void SetNoiseRed(bool nd) {noise_red_ = nd;}
 		bool GetNoiseRed() {return noise_red_;}
 
-		//colormap mode
-		void set_colormap_mode(int mode) {colormap_mode_ = mode;}
-		void set_colormap(int val) { colormap_ = val; }
-		void set_colormap_proj(int val) { colormap_proj_ = val; }
-		void set_colormap_mode_single();
-		void set_colormap_mode_first();
-
 		//soft threshold
 		static void set_soft_threshold(double val) {sw_ = val;}
 
@@ -161,23 +154,17 @@ namespace FLIVR
 		//light position
 		Vector light_pos_;
 
-		//colormap mode
-		int colormap_mode_;//0-normal; 1-rainbow; 2-depth
-		int colormap_;
-		int colormap_proj_;
-
 		//soft threshold
 		static double sw_;
 
 		//vertex array for rendering slices
 		VertexArray* va_slices_;
 		void draw_polygons_vol(
+			TextureBrick* b, double rate,
 			vector<float>& vertex,
 			vector<uint32_t>& index,
 			vector<uint32_t>& size,
-			bool fog,
 			Ray &view_ray,
-			ShaderProgram *shader,
 			int bi, bool orthographic_p,
 			int w, int h, bool intp,
 			int quota_bricks_chan,
