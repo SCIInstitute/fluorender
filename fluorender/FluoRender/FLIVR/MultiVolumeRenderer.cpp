@@ -141,6 +141,22 @@ namespace FLIVR
 		}
 	}
 
+	void MultiVolumeRenderer::set_colormap_mode_first()
+	{
+		if (!vr_list_.empty())
+		{
+			colormap_mode_ = vr_list_[0]->colormap_mode_;
+			colormap_ = vr_list_[0]->colormap_;
+			colormap_proj_ = vr_list_[0]->colormap_proj_;
+		}
+		else
+		{
+			colormap_mode_ = 0;
+			colormap_ = 0;
+			colormap_proj_ = 0;
+		}
+	}
+
 	//set matrices
 	void MultiVolumeRenderer::set_matrices(glm::mat4 &mv_mat2, glm::mat4 &proj_mat, glm::mat4 &tex_mat)
 	{
@@ -678,6 +694,9 @@ namespace FLIVR
 					shader->setLocalParam(6, vr_list_[tn]->colormap_low_value_,
 						vr_list_[tn]->colormap_hi_value_,
 						vr_list_[tn]->colormap_hi_value_-vr_list_[tn]->colormap_low_value_, 0.0);
+					if (colormap_ > 6)
+						shader->setLocalParam(9, vr_list_[tn]->color_.r(),
+							vr_list_[tn]->color_.g(), vr_list_[tn]->color_.b(), 0.0);
 					break;
 				}
 

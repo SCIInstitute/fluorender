@@ -104,7 +104,10 @@ namespace FLIVR
 
 		//colormap mode
 		void set_colormap_mode(int mode) {colormap_mode_ = mode;}
+		void set_colormap(int val) { colormap_ = val; }
+		void set_colormap_proj(int val) { colormap_proj_ = val; }
 		void set_colormap_mode_single();
+		void set_colormap_mode_first();
 
 		//soft threshold
 		static void set_soft_threshold(double val) {sw_ = val;}
