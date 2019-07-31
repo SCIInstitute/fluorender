@@ -466,11 +466,11 @@ namespace FLIVR
 
 #define VOL_COLORMAP_CALC7 \
 	"		//VOL_COLORMAP_CALC7\n" \
-	"		rb.rgb = mix(vec3(1.0), loc9.rgb, valu);\n"
+	"		rb.rgb = mix(vec3(1.0), loc9.rgb, clamp(valu, 0.0, 1.0));\n"
 
 #define VOL_COLORMAP_CALC8 \
 	"		//VOL_COLORMAP_CALC8\n" \
-	"		rb.rgb = mix(loc9.rgb, loc9.rgb*0.1, valu);\n"
+	"		rb.rgb = mix(loc9.rgb, loc9.rgb*0.1, clamp(valu, 0.0, 1.0));\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP \
 	"	//VOL_TRANSFER_FUNCTION_COLORMAP\n" \

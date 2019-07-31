@@ -484,8 +484,9 @@ void VRenderView::CreateBar()
 	//background option
 	m_bg_color_picker = new wxColourPickerCtrl(m_options_toolbar, 
 		ID_BgColorPicker);
+	wxSize bs = m_bg_color_picker->GetSize();
 	m_bg_inv_btn = new wxButton(m_options_toolbar, ID_BgInvBtn, "X",
-		wxDefaultPosition, wxSize(20, 20));
+		wxDefaultPosition, wxSize(bs.y, bs.y));
 	m_options_toolbar->AddControl(m_bg_color_picker);
 	m_options_toolbar->AddControl(m_bg_inv_btn);
 
@@ -496,14 +497,14 @@ void VRenderView::CreateBar()
 
 	m_options_toolbar->Realize();
 
-    m_full_screen_btn = new wxToolBar(this, wxID_ANY,
+	m_full_screen_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(full_view);
 	m_full_screen_btn->AddTool(
 		ID_FullScreenBtn, "Full Screen",
 		bitmap, "Show full screen");
 	m_full_screen_btn->Realize();
-    
+
 	//add the toolbars and other options in order
 	sizer_h_1->AddSpacer(40);
 	sizer_h_1->Add(m_options_toolbar,1,wxEXPAND);
