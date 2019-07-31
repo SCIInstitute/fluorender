@@ -4088,7 +4088,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	if (m_mvr->get_vr_num() <= 0)
 		return;
 	m_mvr->set_depth_peel(peel);
-	m_mvr->set_colormap_mode_single();
+	m_mvr->set_colormap_mode_first();
 	// Set up transform
 	Transform *tform = m_vd_pop_list[0]->GetTexture()->transform();
 	float mvmat[16];
