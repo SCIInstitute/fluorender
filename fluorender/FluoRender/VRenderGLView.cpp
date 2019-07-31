@@ -9312,7 +9312,16 @@ void VRenderGLView::SetColormapColors(int colormap, Color &c)
 		m_color_6 = Color(0.0, 0.0, 0.0);
 		m_color_7 = Color(0.0, 0.0, 0.0);
 		break;
-	case 7://low intensity white
+	case 7://high transparency mode
+		m_color_1 = Color(0.0, 0.0, 0.0);
+		m_color_2 = Color(0.0, 0.0, 0.0);
+		m_color_3 = c * 0.25 + Color(0.0, 0.0, 0.0)*0.75;
+		m_color_4 = (c + Color(0.0, 0.0, 0.0))*0.5;
+		m_color_5 = c * 0.75 + Color(0.0, 0.0, 0.0)*0.25;
+		m_color_6 = c;
+		m_color_7 = c;
+		break;
+	case 8://low intensity white
 		m_color_1 = Color(1.0, 1.0, 1.0);
 		m_color_2 = Color(1.0, 1.0, 1.0);
 		m_color_3 = c*0.25 + Color(1.0, 1.0, 1.0)*0.75;
@@ -9321,7 +9330,7 @@ void VRenderGLView::SetColormapColors(int colormap, Color &c)
 		m_color_6 = c;
 		m_color_7 = c;
 		break;
-	case 8://high intensity dark
+	case 9://high intensity dark
 		m_color_1 = c;
 		m_color_2 = c;
 		m_color_3 = c * (0.025 + 0.75);
