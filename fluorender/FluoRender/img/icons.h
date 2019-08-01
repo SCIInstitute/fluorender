@@ -160,8 +160,10 @@ public:
 	const static unsigned char gear_45_png[979];
 	/* gear_dark.png - 1018 bytes */
 	const static unsigned char gear_dark_png[1018];
-	/* legend.png - 1142 bytes */
-	const static unsigned char legend_png[1142];
+	/* legend.png - 998 bytes */
+	const static unsigned char legend_png[998];
+	/* colormap.png - 790 bytes */
+	const static unsigned char colormap_png[790];
 	/* pin.png - 881 bytes */
 	const static unsigned char pin_png[881];
 	/* anchor_dark.png - 828 bytes */
