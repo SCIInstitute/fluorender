@@ -361,13 +361,11 @@ void VRenderView::CreateBar()
 	m_options_toolbar->ToggleTool(ID_VolumeSeqRd,false);
 	m_options_toolbar->ToggleTool(ID_VolumeMultiRd,false);
 	m_options_toolbar->ToggleTool(ID_VolumeCompRd,false);
-	m_options_toolbar->AddSeparator();
 #ifndef _DARWIN
 	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
-		wxDefaultPosition, wxSize(1,tbs.y));
+		wxDefaultPosition, wxSize(1,tbs.y-2));
 	stb->SetBackgroundColour(wxColour(128,128,128));
 	m_options_toolbar->AddControl(stb);
-	m_options_toolbar->AddSeparator();
 #endif
 	switch (m_glview->GetVolMethod())
 	{
@@ -385,13 +383,11 @@ void VRenderView::CreateBar()
 	wxButton * cam = new wxButton(m_options_toolbar, ID_CaptureBtn, "Capture");
 	cam->SetBitmap(wxGetBitmapFromMemory(camera));
 	m_options_toolbar->AddControl(cam);
-	m_options_toolbar->AddSeparator();
 #ifndef _DARWIN
 	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
-		wxDefaultPosition, wxSize(1, tbs.y));
+		wxDefaultPosition, wxSize(1, tbs.y-2));
 	stb->SetBackgroundColour(wxColour(128,128,128));
 	m_options_toolbar->AddControl(stb);
-	m_options_toolbar->AddSeparator();
 #endif
 
 	bitmap = wxGetBitmapFromMemory(info);
@@ -425,13 +421,11 @@ void VRenderView::CreateBar()
 		"Toggle View of the Colormap Sample",
 		"Toggle View of the Colormap Sample");
 	m_options_toolbar->ToggleTool(ID_ColormapChk, false);
-	m_options_toolbar->AddSeparator();
 #ifndef _DARWIN
 	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
-		wxDefaultPosition, wxSize(1, tbs.y));
+		wxDefaultPosition, wxSize(1, tbs.y-2));
 	stb->SetBackgroundColour(wxColour(128,128,128));
 	m_options_toolbar->AddControl(stb);
-	m_options_toolbar->AddSeparator();
 #endif
 
 	//scale bar
@@ -469,10 +463,9 @@ void VRenderView::CreateBar()
 
 #ifndef _DARWIN
 	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
-		wxDefaultPosition, wxSize(1, tbs.y));
+		wxDefaultPosition, wxSize(1, tbs.y-2));
 	stb->SetBackgroundColour(wxColour(128, 128, 128));
 	m_options_toolbar->AddControl(stb);
-	m_options_toolbar->AddSeparator();
 #endif
 
 	//angle of view
@@ -502,14 +495,12 @@ void VRenderView::CreateBar()
 		m_options_toolbar->ToggleTool(ID_FreeChk,true);
 	else
 		m_options_toolbar->ToggleTool(ID_FreeChk,false);
-	m_options_toolbar->AddSeparator();
 
 #ifndef _DARWIN
 	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
-		wxDefaultPosition, wxSize(1, tbs.y));
+		wxDefaultPosition, wxSize(1, tbs.y-2));
 	stb->SetBackgroundColour(wxColour(128, 128, 128));
 	m_options_toolbar->AddControl(stb);
-	m_options_toolbar->AddSeparator();
 #endif
 
 	//save default
@@ -530,8 +521,7 @@ void VRenderView::CreateBar()
 
 	//add the toolbars and other options in order
 	sizer_h_1->AddSpacer(40);
-	sizer_h_1->Add(m_options_toolbar,1,wxEXPAND);
-	sizer_h_1->AddSpacer(35);
+	sizer_h_1->Add(m_options_toolbar,1, wxALIGN_CENTER);
 	sizer_h_1->Add(m_full_screen_btn, 0, wxALIGN_CENTER);
 
 	//bar left///////////////////////////////////////////////////
@@ -575,7 +565,6 @@ void VRenderView::CreateBar()
 
 	//bar right///////////////////////////////////////////////////
 	wxBoxSizer* sizer_v_4 = new wxBoxSizer(wxVERTICAL);
-	st1 = new wxStaticText(this, 0, " Zoom",wxDefaultPosition,wxSize(45,-1));
 	m_pin_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(anchor_dark);
@@ -618,9 +607,9 @@ void VRenderView::CreateBar()
 		bitmap, "Reset the Zoom");
 	m_scale_reset_btn->Realize();
 	m_scale_factor_text = new wxTextCtrl(this, ID_ScaleFactorText, "100",
-		wxDefaultPosition, wxSize(30, 20), 0, vald_int);
+		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
 	m_scale_factor_spin = new wxSpinButton(this, ID_ScaleFactorSpin,
-		wxDefaultPosition, wxSize(30, 20));
+		wxDefaultPosition, wxSize(40, 20));
 	m_scale_mode_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(zoom_view);
@@ -635,7 +624,6 @@ void VRenderView::CreateBar()
 	m_scale_mode_btn->ToggleTool(ID_ScaleModeBtn, true);
 	m_scale_mode_btn->Realize();
 	sizer_v_4->AddSpacer(50);
-	sizer_v_4->Add(st1, 0, wxALIGN_CENTER);
 	sizer_v_4->Add(m_pin_btn, 0, wxALIGN_CENTER);
 	sizer_v_4->Add(m_center_btn, 0, wxALIGN_CENTER);
 	sizer_v_4->Add(m_scale_121_btn, 0, wxALIGN_CENTER);
@@ -726,11 +714,8 @@ void VRenderView::CreateBar()
 	sizer_h_2->Add(5, 5, 0);
 	sizer_h_2->Add(m_lower_toolbar, 0, wxALIGN_CENTER);
 	sizer_h_2->AddSpacer(40);
-#ifndef _DARWIN
-	sizer_v->Add(sizer_h_1, 0, wxEXPAND|wxBOTTOM,3);
-#else
+
 	sizer_v->Add(sizer_h_1, 0, wxEXPAND);
-#endif
 	sizer_v->Add(sizer_m, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_2, 0, wxEXPAND);
 
