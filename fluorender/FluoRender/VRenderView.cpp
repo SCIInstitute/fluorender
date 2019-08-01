@@ -327,7 +327,9 @@ void VRenderView::CreateBar()
 	//toolbar 1
 	m_options_toolbar = new wxToolBar(this,wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	m_options_toolbar->SetDoubleBuffered(true);
 	wxBoxSizer* sizer_h_1 = new wxBoxSizer(wxHORIZONTAL);
+	wxSize tbs = m_options_toolbar->GetSize();
 #ifndef _DARWIN
 	//the spacer
 	wxStaticText * stb;
@@ -362,7 +364,7 @@ void VRenderView::CreateBar()
 	m_options_toolbar->AddSeparator();
 #ifndef _DARWIN
 	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
-		wxDefaultPosition, wxSize(5,5));
+		wxDefaultPosition, wxSize(1,tbs.y));
 	stb->SetBackgroundColour(wxColour(128,128,128));
 	m_options_toolbar->AddControl(stb);
 	m_options_toolbar->AddSeparator();
@@ -378,7 +380,7 @@ void VRenderView::CreateBar()
 	case VOL_METHOD_COMP:
 		m_options_toolbar->ToggleTool(ID_VolumeCompRd,true);
 		break;
-	}   
+	}
 	//camera
 	wxButton * cam = new wxButton(m_options_toolbar, ID_CaptureBtn, "Capture");
 	cam->SetBitmap(wxGetBitmapFromMemory(camera));
@@ -386,19 +388,11 @@ void VRenderView::CreateBar()
 	m_options_toolbar->AddSeparator();
 #ifndef _DARWIN
 	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
-		wxDefaultPosition, wxSize(5,5));
+		wxDefaultPosition, wxSize(1, tbs.y));
 	stb->SetBackgroundColour(wxColour(128,128,128));
 	m_options_toolbar->AddControl(stb);
 	m_options_toolbar->AddSeparator();
 #endif
-
-	bitmap = wxGetBitmapFromMemory(axis);
-	m_options_toolbar->AddCheckTool(
-		ID_CamCtrChk, "Axis",
-		bitmap, wxNullBitmap,
-		"Toggle View of the Center Axis",
-		"Toggle View of the Center Axis");
-	m_options_toolbar->ToggleTool(ID_CamCtrChk,false);
 
 	bitmap = wxGetBitmapFromMemory(info);
 	m_options_toolbar->AddCheckTool(
@@ -408,6 +402,14 @@ void VRenderView::CreateBar()
 		"Toggle View of FPS and Mouse Position");
 	m_options_toolbar->ToggleTool(ID_FpsChk,false);
 
+	bitmap = wxGetBitmapFromMemory(axis);
+	m_options_toolbar->AddCheckTool(
+		ID_CamCtrChk, "Axis",
+		bitmap, wxNullBitmap,
+		"Toggle View of the Center Axis",
+		"Toggle View of the Center Axis");
+	m_options_toolbar->ToggleTool(ID_CamCtrChk,false);
+
 	bitmap = wxGetBitmapFromMemory(legend);
 	m_options_toolbar->AddCheckTool(
 		ID_LegendChk, "Legend",
@@ -416,7 +418,7 @@ void VRenderView::CreateBar()
 		"Toggle View of the Legend");
 	m_options_toolbar->ToggleTool(ID_LegendChk,false);
 
-	bitmap = wxGetBitmapFromMemory(legend);
+	bitmap = wxGetBitmapFromMemory(colormap);
 	m_options_toolbar->AddCheckTool(
 		ID_ColormapChk, "Color Map",
 		bitmap, wxNullBitmap,
@@ -426,7 +428,7 @@ void VRenderView::CreateBar()
 	m_options_toolbar->AddSeparator();
 #ifndef _DARWIN
 	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
-		wxDefaultPosition, wxSize(5,5));
+		wxDefaultPosition, wxSize(1, tbs.y));
 	stb->SetBackgroundColour(wxColour(128,128,128));
 	m_options_toolbar->AddControl(stb);
 	m_options_toolbar->AddSeparator();
@@ -455,10 +457,28 @@ void VRenderView::CreateBar()
 #ifndef _DARWIN
 	m_options_toolbar->AddStretchableSpace();
 #endif
+
+	//background option
+	m_bg_color_picker = new wxColourPickerCtrl(m_options_toolbar,
+		ID_BgColorPicker);
+	wxSize bs = m_bg_color_picker->GetSize();
+	m_bg_inv_btn = new wxButton(m_options_toolbar, ID_BgInvBtn, "X",
+		wxDefaultPosition, wxSize(bs.y, bs.y));
+	m_options_toolbar->AddControl(m_bg_color_picker);
+	m_options_toolbar->AddControl(m_bg_inv_btn);
+
+#ifndef _DARWIN
+	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
+		wxDefaultPosition, wxSize(1, tbs.y));
+	stb->SetBackgroundColour(wxColour(128, 128, 128));
+	m_options_toolbar->AddControl(stb);
+	m_options_toolbar->AddSeparator();
+#endif
+
 	//angle of view
-	st2 = new wxStaticText(m_options_toolbar, wxID_ANY, "Perspective Angle:");
+	st2 = new wxStaticText(m_options_toolbar, wxID_ANY, "Projection:");
 	m_aov_sldr = new wxSlider(m_options_toolbar, ID_AovSldr, 45, 10, 100,
-		wxDefaultPosition, wxSize(200, 20), wxSL_HORIZONTAL);
+		wxDefaultPosition, wxSize(180, 20), wxSL_HORIZONTAL);
 	m_aov_sldr->SetValue(GetPersp()?GetAov():10);
 	m_aov_sldr->Connect(wxID_ANY, wxEVT_IDLE,
 		wxIdleEventHandler(VRenderView::OnAovSldrIdle),
@@ -483,22 +503,16 @@ void VRenderView::CreateBar()
 	else
 		m_options_toolbar->ToggleTool(ID_FreeChk,false);
 	m_options_toolbar->AddSeparator();
+
 #ifndef _DARWIN
 	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
-		wxDefaultPosition, wxSize(5,5));
-	stb->SetBackgroundColour(wxColour(128,128,128));
+		wxDefaultPosition, wxSize(1, tbs.y));
+	stb->SetBackgroundColour(wxColour(128, 128, 128));
 	m_options_toolbar->AddControl(stb);
 	m_options_toolbar->AddSeparator();
 #endif
-	//background option
-	m_bg_color_picker = new wxColourPickerCtrl(m_options_toolbar, 
-		ID_BgColorPicker);
-	wxSize bs = m_bg_color_picker->GetSize();
-	m_bg_inv_btn = new wxButton(m_options_toolbar, ID_BgInvBtn, "X",
-		wxDefaultPosition, wxSize(bs.y, bs.y));
-	m_options_toolbar->AddControl(m_bg_color_picker);
-	m_options_toolbar->AddControl(m_bg_inv_btn);
 
+	//save default
 	bitmap = wxGetBitmapFromMemory(save_settings);
 	m_options_toolbar->AddTool(
 		ID_DefaultBtn, "Save", bitmap,

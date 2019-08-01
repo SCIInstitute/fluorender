@@ -7464,6 +7464,9 @@ void VRenderGLView::RemoveVolumeDataDup(wxString &name)
 			++iter;
 		}
 		break;
+		default:
+			++iter;
+			break;
 		}
 	}
 }
