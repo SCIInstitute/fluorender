@@ -673,11 +673,25 @@ namespace FL
 	//get new id
 	inline unsigned int TrackMapProcessor::GetNewCellID(size_t frame, unsigned int id, bool inc)
 	{
+		bool wrap = false;
 		//cell list
 		CellList &clist = m_map->m_cells_list.at(frame);
 		unsigned int newid = id+(inc?360:0);
+		newid = newid < id ? (wrap = true, (id % 360)) : newid;
 		while (clist.find(newid) != clist.end())
+		{
 			newid += 360;
+			if (newid < newid - 360)
+			{
+				if (wrap)
+					break;
+				else
+				{
+					newid = id % 360;
+					wrap = true;
+				}
+			}
+		}
 		return newid;
 	}
 
