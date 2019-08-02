@@ -125,6 +125,7 @@ public:
 		ID_CompExclusiveBtn,
 		ID_CompAppendBtn,
 		ID_CompClearBtn,
+		ID_ShuffleBtn,
 		//comp size filter
 		ID_CellSizeSldr,
 		ID_CellSizeText,
@@ -274,6 +275,7 @@ private:
 	wxButton* m_comp_exclusive_btn;
 	wxButton* m_comp_append_btn;
 	wxButton* m_comp_clear_btn;
+	wxButton* m_shuffle_btn;
 	//cell size filter
 	wxSlider* m_cell_size_sldr;
 	wxTextCtrl* m_cell_size_text;
@@ -383,6 +385,7 @@ private:
 	void OnCompExclusive(wxCommandEvent &event);
 	void OnCompAppend(wxCommandEvent &event);
 	void OnCompClear(wxCommandEvent &event);
+	void OnShuffle(wxCommandEvent &event);
 	//cell size filter
 	void OnCellSizeChange(wxScrollEvent &event);
 	void OnCellSizeText(wxCommandEvent &event);

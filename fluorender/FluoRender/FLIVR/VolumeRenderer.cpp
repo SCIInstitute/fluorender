@@ -87,6 +87,8 @@ namespace FLIVR
 		colormap_hi_value_(1.0),
 		colormap_(0),
 		colormap_proj_(0),
+		//shuffling
+		shuffle_(0),
 		//solid
 		solid_(false),
 		//interpolate
@@ -148,6 +150,8 @@ namespace FLIVR
 		colormap_hi_value_(copy.colormap_hi_value_),
 		colormap_(copy.colormap_),
 		colormap_proj_(copy.colormap_proj_),
+		//shuffling
+		shuffle_(0),
 		//solid
 		solid_(copy.solid_),
 		//interpolate
@@ -714,7 +718,7 @@ namespace FLIVR
 		//spacings
 		double spcx, spcy, spcz;
 		tex_->get_spacings(spcx, spcy, spcz);
-		shader->setLocalParam(5, spcx, spcy, spcz, 1.0);
+		shader->setLocalParam(5, spcx, spcy, spcz, shuffle_);
 
 		//transfer function
 		shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
@@ -1204,7 +1208,7 @@ namespace FLIVR
 		//spacings
 		double spcx, spcy, spcz;
 		tex_->get_spacings(spcx, spcy, spcz);
-		seg_shader->setLocalParam(5, spcx, spcy, spcz, 1.0);
+		seg_shader->setLocalParam(5, spcx, spcy, spcz, shuffle_);
 
 		//transfer function
 		seg_shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
@@ -1421,7 +1425,7 @@ namespace FLIVR
 		//spacings
 		double spcx, spcy, spcz;
 		tex_->get_spacings(spcx, spcy, spcz);
-		seg_shader->setLocalParam(5, spcx, spcy, spcz, 1.0);
+		seg_shader->setLocalParam(5, spcx, spcy, spcz, shuffle_);
 
 		//transfer function
 		seg_shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);

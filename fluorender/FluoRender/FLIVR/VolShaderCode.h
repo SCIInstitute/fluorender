@@ -50,7 +50,7 @@ namespace FLIVR
 	"uniform vec4 loc2;//(scalar_scale, gm_scale, left_thresh, right_thresh)\n" \
 	"uniform vec4 loc3;//(gamma, gm_thresh, offset, sw)\n" \
 	"uniform vec4 loc4;//(1/nx, 1/ny, 1/nz, 1/sample_rate)\n" \
-	"uniform vec4 loc5;//(spcx, spcy, spcz, 1.0)\n" \
+	"uniform vec4 loc5;//(spcx, spcy, spcz, shuffle)\n" \
 	"\n" \
 	"uniform sampler3D tex0;//data volume\n" \
 	"uniform sampler3D tex1;//gm volume\n" \
@@ -85,7 +85,7 @@ namespace FLIVR
 
 #define VOL_UNIFORMS_COLORMAP_PC \
 	"//VOL_UNIFORMS_COLORMAP_PC\n" \
-	"uniform vec4 loc9;//(red, green, blue,0)\n" \
+	"uniform vec4 loc9;//(red, green, blue, 0)\n" \
 	"\n"
 
 #define VOL_UNIFORMS_DP \
@@ -690,7 +690,10 @@ namespace FLIVR
 	"	float hue, p2, p3;\n" \
 	"	if (label > uint(0))\n" \
 	"	{\n" \
-	"		hue = float(label%uint(360))/60.0;\n" \
+	"		uint cv = label % uint(0x100);\n" \
+	"		uint si = uint(loc5.w);\n" \
+	"		cv = (cv << si) | (cv >> (8 - si));\n" \
+	"		hue = float(cv)*3.0/128.0;\n" \
 	"		p2 = 1.0 - hue + floor(hue);\n" \
 	"		p3 = hue - floor(hue);\n" \
 	"		if (hue < 1.0)\n" \
@@ -726,7 +729,10 @@ namespace FLIVR
 	"	float hue, p2, p3;\n" \
 	"	if (label > uint(0))\n" \
 	"	{\n" \
-	"		hue = float(label%uint(360))/60.0;\n" \
+	"		uint cv = label % uint(0x100);\n" \
+	"		uint si = uint(loc5.w);\n" \
+	"		cv = (cv << si) | (cv >> (8 - si));\n" \
+	"		hue = float(cv)*3.0/128.0;\n" \
 	"		p2 = 1.0 - hue + floor(hue);\n" \
 	"		p3 = hue - floor(hue);\n" \
 	"		if (hue < 1.0)\n" \

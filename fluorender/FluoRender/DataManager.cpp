@@ -1984,6 +1984,7 @@ Color VolumeData::GetColorFromColormap(double value)
 	Color color;
 	double v = (value - m_colormap_low_value) /
 		(m_colormap_hi_value - m_colormap_low_value);
+	double cv = Clamp(v, 0.0, 1.0);
 	switch (m_colormap)
 	{
 	case 0:
@@ -2003,7 +2004,7 @@ Color VolumeData::GetColorFromColormap(double value)
 		color.b(Clamp(4.0*v - 3.0, 0.0, 1.0));
 		break;
 	case 3:
-		color.r(Clamp(v, 0.0, 1.0));
+		color.r(cv);
 		color.g(Clamp(1.0 - v, 0.0, 1.0));
 		color.b(1.0);
 		break;
@@ -2013,17 +2014,50 @@ Color VolumeData::GetColorFromColormap(double value)
 		color.b(Clamp(v<0.5 ? v*(-0.1) + 0.75 : (1.0 - v)*1.1 + 0.15, 0.0, 1.0));
 		break;
 	case 5:
-		color.r(Clamp(v, 0.0, 1.0));
-		color.g(Clamp(v, 0.0, 1.0));
-		color.b(Clamp(v, 0.0, 1.0));
+		color.r(cv);
+		color.g(cv);
+		color.b(cv);
 		break;
 	case 6:
-		color.r(1.0 - Clamp(v, 0.0, 1.0));
-		color.g(1.0 - Clamp(v, 0.0, 1.0));
-		color.b(1.0 - Clamp(v, 0.0, 1.0));
+		color.r(1.0 - cv);
+		color.g(1.0 - cv);
+		color.b(1.0 - cv);
+		break;
+	case 7:
+		color = m_color * cv;
+		break;
+	case 8:
+		color = Color(1.0, 1.0, 1.0) * (1 - cv) + m_color * cv;
+		break;
+	case 9:
+		color = m_color * (1 - cv * 0.9);
 		break;
 	}
 	return color;
+}
+
+void VolumeData::SetShuffle(int val)
+{
+	if (m_vr)
+		m_vr->set_shuffle(val);
+}
+
+int VolumeData::GetShuffle()
+{
+	if (m_vr)
+		return m_vr->get_shuffle();
+	else
+		return 0;
+}
+
+void VolumeData::IncShuffle()
+{
+	if (!m_vr)
+		return;
+	int ival = m_vr->get_shuffle();
+	++ival;
+	ival = ival >= 8 ? 0 : ival;
+	m_vr->set_shuffle(ival);
 }
 
 //resolution  scaling and spacing

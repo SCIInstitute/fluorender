@@ -128,6 +128,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_BUTTON(ID_CompAppendBtn, ComponentDlg::OnCompAppend)
 	EVT_BUTTON(ID_CompAllBtn, ComponentDlg::OnCompAll)
 	EVT_BUTTON(ID_CompClearBtn, ComponentDlg::OnCompClear)
+	EVT_BUTTON(ID_ShuffleBtn, ComponentDlg::OnShuffle)
 	EVT_CHECKBOX(ID_ConsistentCheck, ComponentDlg::OnConsistentCheck)
 	EVT_CHECKBOX(ID_ColocalCheck, ComponentDlg::OnColocalCheck)
 	//output
@@ -769,12 +770,15 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(65, 23));
 	m_comp_clear_btn = new wxButton(page, ID_CompClearBtn, "Clear",
 		wxDefaultPosition, wxSize(65, 23));
+	m_shuffle_btn = new wxButton(page, ID_ShuffleBtn, "Shuffle",
+		wxDefaultPosition, wxSize(65, 23));
 	sizer12->AddStretchSpacer();
 	sizer12->Add(m_comp_append_btn, 0, wxALIGN_CENTER);
 	sizer12->Add(m_comp_all_btn, 0, wxALIGN_CENTER);
 	sizer12->Add(m_comp_full_btn, 0, wxALIGN_CENTER);
 	sizer12->Add(m_comp_exclusive_btn, 0, wxALIGN_CENTER);
 	sizer12->Add(m_comp_clear_btn, 0, wxALIGN_CENTER);
+	sizer12->Add(m_shuffle_btn, 0, wxALIGN_CENTER);
 	sizer12->AddStretchSpacer();
 	//
 	sizer1->Add(10, 10);
@@ -2269,6 +2273,20 @@ void ComponentDlg::OnCompClear(wxCommandEvent &event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetBrushToolDlg())
 		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+}
+
+void ComponentDlg::OnShuffle(wxCommandEvent &event)
+{
+	if (!m_view)
+		return;
+
+	//get current vd
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+
+	vd->IncShuffle();
+	m_view->RefreshGL();
 }
 
 void ComponentDlg::OnConsistentCheck(wxCommandEvent &event)
