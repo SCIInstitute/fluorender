@@ -636,7 +636,7 @@ namespace FLIVR
 					sw_);
 				double spcx, spcy, spcz;
 				vr_list_[tn]->tex_->get_spacings(spcx, spcy, spcz);
-				shader->setLocalParam(5, spcx, spcy, spcz, 1.0);
+				shader->setLocalParam(5, spcx, spcy, spcz, vr_list_[tn]->shuffle_);
 				switch (vr_list_[tn]->colormap_mode_)
 				{
 				case 0://normal

@@ -110,6 +110,12 @@ namespace FLIVR
 		void set_colormap_proj(int value)
 		{colormap_proj_ = value;}
 
+		//label color shuffling
+		void set_shuffle(int val)
+		{ shuffle_ = val; }
+		int get_shuffle()
+		{ return shuffle_; }
+
 		//solid
 		void set_solid(bool mode)
 		{solid_ = mode;}
@@ -260,6 +266,7 @@ namespace FLIVR
 						//3-random color with label, 4-random color with label+mask
 		bool mask_;
 		bool label_;
+		int shuffle_;//for label color shuffling
 
 		//noise reduction
 		bool noise_red_;

@@ -311,6 +311,7 @@ EVT_BUTTON(ID_CompFullBtn, TraceDlg::OnCompFull)
 EVT_BUTTON(ID_CompExclusiveBtn, TraceDlg::OnCompExclusive)
 EVT_BUTTON(ID_CompAppendBtn, TraceDlg::OnCompAppend)
 EVT_BUTTON(ID_CompClearBtn, TraceDlg::OnCompClear)
+EVT_BUTTON(ID_ShuffleBtn, TraceDlg::OnShuffle)
 //cell size filter
 EVT_COMMAND_SCROLL(ID_CellSizeSldr, TraceDlg::OnCellSizeChange)
 EVT_TEXT(ID_CellSizeText, TraceDlg::OnCellSizeText)
@@ -501,13 +502,15 @@ wxWindow* TraceDlg::CreateSelectPage(wxWindow *parent)
 	m_comp_id_x_btn = new wxButton(page, ID_CompIDXBtn, "X",
 		wxDefaultPosition, wxSize(23, 23));
 	m_comp_full_btn = new wxButton(page, ID_CompFullBtn, "FullCompt",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, wxSize(64, 23));
 	m_comp_exclusive_btn = new wxButton(page, ID_CompExclusiveBtn, "Replace",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, wxSize(64, 23));
 	m_comp_append_btn = new wxButton(page, ID_CompAppendBtn, "Append",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, wxSize(64, 23));
 	m_comp_clear_btn = new wxButton(page, ID_CompClearBtn, "Clear",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, wxSize(64, 23));
+	m_shuffle_btn = new wxButton(page, ID_ShuffleBtn, "Shuffle",
+		wxDefaultPosition, wxSize(64, 23));
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_comp_id_text, 0, wxALIGN_CENTER);
@@ -517,6 +520,7 @@ wxWindow* TraceDlg::CreateSelectPage(wxWindow *parent)
 	sizer_1->Add(m_comp_exclusive_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_comp_append_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_comp_clear_btn, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_shuffle_btn, 0, wxALIGN_CENTER);
 	//cell size filter
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Component size:",
@@ -1793,6 +1797,20 @@ void TraceDlg::OnCompIDXBtn(wxCommandEvent &event)
 void TraceDlg::OnCompClear(wxCommandEvent &event)
 {
 	CompClear();
+}
+
+void TraceDlg::OnShuffle(wxCommandEvent &event)
+{
+	if (!m_view)
+		return;
+
+	//get current vd
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+
+	vd->IncShuffle();
+	m_view->RefreshGL();
 }
 
 void TraceDlg::OnCompFull(wxCommandEvent &event)

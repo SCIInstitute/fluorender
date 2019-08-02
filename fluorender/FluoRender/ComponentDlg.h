@@ -138,6 +138,7 @@ public:
 		ID_CompAppendBtn,
 		ID_CompAllBtn,
 		ID_CompClearBtn,
+		ID_ShuffleBtn,
 		//options
 		ID_ConsistentCheck,
 		ID_ColocalCheck,
@@ -383,6 +384,7 @@ private:
 	wxButton* m_comp_append_btn;
 	wxButton* m_comp_all_btn;
 	wxButton* m_comp_clear_btn;
+	wxButton* m_shuffle_btn;
 	//stats
 	wxCheckBox* m_analysis_min_check;
 	wxSpinCtrl* m_analysis_min_spin;
@@ -516,6 +518,7 @@ private:
 	void OnCompAppend(wxCommandEvent &event);
 	void OnCompAll(wxCommandEvent &event);
 	void OnCompClear(wxCommandEvent &event);
+	void OnShuffle(wxCommandEvent &event);
 	void OnConsistentCheck(wxCommandEvent &event);
 	void OnColocalCheck(wxCommandEvent &event);
 	//output

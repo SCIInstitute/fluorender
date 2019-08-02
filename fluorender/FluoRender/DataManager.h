@@ -341,6 +341,11 @@ public:
 	int GetColormapProj();
 	Color GetColorFromColormap(double value);
 
+	//shuffle
+	void SetShuffle(int val);
+	int GetShuffle();
+	void IncShuffle();
+
 	//resolution  scaling and spacing
 	void GetResolution(int &res_x, int &res_y, int &res_z, int lv = -1);
 	void SetScalings(double sclx, double scly, double sclz);
