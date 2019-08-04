@@ -690,7 +690,7 @@ namespace FLIVR
 	"	float hue, p2, p3;\n" \
 	"	if (label > uint(0))\n" \
 	"	{\n" \
-	"		uint cv = label % uint(0x100);\n" \
+	"		uint cv = label % uint(0xff);\n" \
 	"		uint si = uint(loc5.w);\n" \
 	"		cv = (cv << si) & 0xff | (cv >> (8 - si));\n" \
 	"		hue = float(cv)*3.0/128.0;\n" \
@@ -729,7 +729,7 @@ namespace FLIVR
 	"	float hue, p2, p3;\n" \
 	"	if (label > uint(0))\n" \
 	"	{\n" \
-	"		uint cv = label % uint(0x100);\n" \
+	"		uint cv = label % uint(0xff);\n" \
 	"		uint si = uint(loc5.w);\n" \
 	"		cv = (cv << si) & 0xff | (cv >> (8 - si));\n" \
 	"		hue = float(cv)*3.0/128.0;\n" \
