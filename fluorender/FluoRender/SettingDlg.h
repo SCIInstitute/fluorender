@@ -233,7 +233,9 @@ public:
 	int GetGLProfileMask() {return m_gl_profile_mask;}
 	//cl device
 	int GetCLPlatformID() { return m_cl_platform_id; }
+	void SetCLPlatformID(int val) { m_cl_platform_id = val; }
 	int GetCLDeviceID() {return m_cl_device_id;}
+	void SetCLDeviceID(int val) { m_cl_device_id = val; }
 	//last tool
 	void SetLastTool(int tool) { m_last_tool = tool; }
 	int GetLastTool() { return m_last_tool; }
