@@ -85,15 +85,15 @@ namespace FLIVR
 
 #define CAL_TEX_LOOKUP \
 	"	//CAL_TEX_LOOKUP\n" \
-	"	vec4 c1 = texture(tex1, t1.stp)*loc0.x;\n" \
-	"	vec4 c2 = texture(tex2, t2.stp)*loc0.y;\n" \
+	"	vec4 c1 = texture(tex1, t1.stp);\n" \
+	"	vec4 c2 = texture(tex2, t2.stp);\n" \
 	"\n"
 
 #define CAL_TEX_LOOKUP_WITH_MASK \
 	"	//CAL_TEX_LOOKUP_WITH_MASK\n" \
-	"	vec4 c1 = texture3D(tex1, t1.stp)*loc0.x;\n" \
+	"	vec4 c1 = texture3D(tex1, t1.stp);\n" \
 	"	vec4 m1 = loc0.z>0.0?texture(tex3, t1.stp):vec4(1.0);\n" \
-	"	vec4 c2 = texture(tex2, t2.stp)*loc0.y;\n" \
+	"	vec4 c2 = texture(tex2, t2.stp);\n" \
 	"	vec4 m2 = loc0.w>0.0?texture(tex4, t2.stp):vec4(1.0);\n" \
 	"\n"
 

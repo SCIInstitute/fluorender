@@ -1602,14 +1602,15 @@ namespace FLIVR
 		if (type == 1 ||
 			type == 2 ||
 			type == 3 ||
-			//type==4 ||
 			type == 8)
 			cal_shader->setLocalParam(0, vr_a ? vr_a->get_scalar_scale() : 1.0,
 				vr_b ? vr_b->get_scalar_scale() : 1.0,
 				(vr_a&&vr_a->tex_&&vr_a->tex_->nmask() != -1) ? 1.0 : 0.0,
 				(vr_b&&vr_b->tex_&&vr_b->tex_->nmask() != -1) ? 1.0 : 0.0);
 		else if (type == 4 ||
-			type == 5)
+			type == 5 ||
+			type == 6 ||
+			type == 7)
 			cal_shader->setLocalParam(0, 1.0, 1.0, 0.0, 0.0);
 		else
 			cal_shader->setLocalParam(0, vr_a?vr_a->get_scalar_scale():1.0,
