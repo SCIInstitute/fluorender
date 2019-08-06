@@ -921,6 +921,7 @@ void TraceDlg::GetSettings(VRenderView* vrv)
 	if (!vrv) return;
 	m_view = vrv;
 	m_cur_time = m_view->m_glview->m_tseq_cur_num;
+	m_prv_time = m_view->m_glview->m_tseq_prv_num;
 
 	TraceGroup* trace_group = m_view->GetTraceGroup();
 	if (trace_group)
@@ -1027,46 +1028,49 @@ void TraceDlg::UpdateList()
 		long size;
 		double x, y, z;
 		//copy current to previous
-		m_trace_list_prev->DeleteAllItems();
-		long item = -1;
-		for (;;)
+		if (cur_time != prv_time)
 		{
-			item = m_trace_list_curr->GetNextItem(item,
-				wxLIST_NEXT_ALL,
-				wxLIST_STATE_DONTCARE);
-			if (item != -1)
+			m_trace_list_prev->DeleteAllItems();
+			long item = -1;
+			for (;;)
 			{
-				item_gtype = m_trace_list_curr->GetText(item, 0);
-				item_id = m_trace_list_curr->GetText(item, 1);
-				item_size = m_trace_list_curr->GetText(item, 2);
-				item_x = m_trace_list_curr->GetText(item, 3);
-				item_y = m_trace_list_curr->GetText(item, 4);
-				item_z = m_trace_list_curr->GetText(item, 5);
-				item_id.ToULong(&id);
-				hue = id % 360;
-				Color c(HSVColor(hue, 1.0, 1.0));
-				wxColor color(c.r() * 255, c.g() * 255, c.b() * 255);
-				item_size.ToLong(&size);
-				item_x.ToDouble(&x);
-				item_y.ToDouble(&y);
-				item_z.ToDouble(&z);
-				m_trace_list_prev->Append(item_gtype, id, color, size, x, y, z);
+				item = m_trace_list_curr->GetNextItem(item,
+					wxLIST_NEXT_ALL,
+					wxLIST_STATE_DONTCARE);
+				if (item != -1)
+				{
+					item_gtype = m_trace_list_curr->GetText(item, 0);
+					item_id = m_trace_list_curr->GetText(item, 1);
+					item_size = m_trace_list_curr->GetText(item, 2);
+					item_x = m_trace_list_curr->GetText(item, 3);
+					item_y = m_trace_list_curr->GetText(item, 4);
+					item_z = m_trace_list_curr->GetText(item, 5);
+					item_id.ToULong(&id);
+					hue = id % 360;
+					Color c(HSVColor(hue, 1.0, 1.0));
+					wxColor color(c.r() * 255, c.g() * 255, c.b() * 255);
+					item_size.ToLong(&size);
+					item_x.ToDouble(&x);
+					item_y.ToDouble(&y);
+					item_z.ToDouble(&z);
+					m_trace_list_prev->Append(item_gtype, id, color, size, x, y, z);
+				}
+				else break;
 			}
-			else break;
+
+			if (cur_time >= 0) m_cur_time = cur_time;
+			if (prv_time >= 0) m_prv_time = prv_time;
+
+			//set tiem text
+			wxString str;
+			str = wxString::Format("\tCurrent T: %d", m_cur_time);
+			m_cell_time_curr_st->SetLabel(str);
+			if (m_prv_time != m_cur_time)
+				m_cell_time_prev_st->SetLabel(
+					wxString::Format("\tPrevious T: %d", m_prv_time));
+			else
+				m_cell_time_prev_st->SetLabel("\tPrevious T");
 		}
-
-		if (cur_time >= 0) m_cur_time = cur_time;
-		if (prv_time >= 0) m_prv_time = prv_time;
-
-		//set tiem text
-		wxString str;
-		str = wxString::Format("\tCurrent T: %d", m_cur_time);
-		m_cell_time_curr_st->SetLabel(str);
-		if (m_prv_time != m_cur_time)
-			m_cell_time_prev_st->SetLabel(
-				wxString::Format("\tPrevious T: %d", m_prv_time));
-		else
-			m_cell_time_prev_st->SetLabel("\tPrevious T");
 	}
 	m_trace_list_curr->UpdateTraces(m_view);
 	Layout();
