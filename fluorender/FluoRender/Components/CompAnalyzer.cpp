@@ -617,7 +617,7 @@ void ComponentAnalyzer::MakeColorConsistent()
 				iter != list.end(); ++iter)
 			{
 				unsigned int link_id = iter->second->id;
-				if ((link_id - base_id) % 360)
+				if ((link_id - base_id) % 253)
 				{
 					//color is different
 					//generate new_id
@@ -1344,7 +1344,7 @@ bool ComponentAnalyzer::GetColor(
 	{
 	case 1:
 	default:
-		color = FLIVR::Color(HSVColor(id % 360, 1.0, 1.0));
+		color = FLIVR::Color(id, vd->GetShuffle());
 		return true;
 	case 2:
 		if (vd)
@@ -1455,7 +1455,7 @@ unsigned int ComponentAnalyzer::GetNonconflictId(
 					if (lv == iid)
 					{
 						found = true;
-						iid += 360;
+						iid += 253;
 						break;
 					}
 				}

@@ -676,18 +676,18 @@ namespace FL
 		bool wrap = false;
 		//cell list
 		CellList &clist = m_map->m_cells_list.at(frame);
-		unsigned int newid = id+(inc?360:0);
-		newid = newid < id ? (wrap = true, (id % 360)) : newid;
+		unsigned int newid = id+(inc?253:0);
+		newid = newid < id ? (wrap = true, (id % 253)) : newid;
 		while (clist.find(newid) != clist.end())
 		{
-			newid += 360;
-			if (newid < newid - 360)
+			newid += 253;
+			if (newid < newid - 253)
 			{
 				if (wrap)
 					break;
 				else
 				{
-					newid = id % 360;
+					newid = id % 253;
 					wrap = true;
 				}
 			}

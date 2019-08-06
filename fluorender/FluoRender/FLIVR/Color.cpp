@@ -134,6 +134,14 @@ namespace FLIVR
 		}
 	}
 
+	Color::Color(unsigned int id, int shuffle)
+	{
+		unsigned int cv = id % 253;
+		cv = (cv << shuffle) & 0xff | (cv >> (8 - shuffle)) & 0xff;
+		HSVColor hsv(double(cv) / 45.0, 1.0, 1.0);
+		*this = Color(hsv);
+	}
+
 	HSVColor::HSVColor()
 	{
 	}

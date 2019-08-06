@@ -82,6 +82,7 @@ namespace FLIVR
 		Color(const Color&);
 		Color& operator=(const Color&);
 		Color(const HSVColor&);
+		Color(unsigned int id, int shuffle = 0);
 		~Color();
 
 		Color operator*(const Color&) const;
