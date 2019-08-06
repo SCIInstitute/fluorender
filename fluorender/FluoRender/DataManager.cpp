@@ -2056,7 +2056,7 @@ void VolumeData::IncShuffle()
 		return;
 	int ival = m_vr->get_shuffle();
 	++ival;
-	ival = ival >= 8 ? 0 : ival;
+	ival = ival >= 5 ? 0 : ival;
 	m_vr->set_shuffle(ival);
 }
 
