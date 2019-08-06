@@ -12077,6 +12077,7 @@ void VRenderGLView::GetTraces(bool update)
 	m_trace_group->SetCurTime(m_tseq_cur_num);
 	m_trace_group->SetPrvTime(m_tseq_cur_num);
 	m_trace_group->UpdateCellList(sel_labels);
+	//m_trace_group->SetPrvTime(m_tseq_prv_num);
 
 	//add traces to trace dialog
 	if (update)
