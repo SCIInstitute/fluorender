@@ -309,7 +309,10 @@ public:
 	const static unsigned char shade_png[350];
 	/* shadow.png - 358 bytes */
 	const static unsigned char shadow_png[358];
-
+	/* transphi.png - 950 bytes */
+	const static unsigned char transphi_png[950];
+	/* transplo.png - 473 bytes */
+	const static unsigned char transplo_png[473];
 
 	//tracking dialog icons
 	/* auto_assign_off.png - 2258 bytes */

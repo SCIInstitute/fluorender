@@ -25,6 +25,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef _VPROPVIEW_H_
+#define _VPROPVIEW_H_
+
 #include "DataManager.h"
 #include <wx/wx.h>
 #include <wx/panel.h>
@@ -38,9 +41,6 @@ DEALINGS IN THE SOFTWARE.
 #include "FLIVR/Point.h"
 #include "FLIVR/MultiVolumeRenderer.h"
 
-
-#ifndef _VPROPVIEW_H_
-#define _VPROPVIEW_H_
 
 using namespace std;
 
@@ -110,7 +110,8 @@ class VPropView: public wxPanel
 		ID_InvChk,
 		ID_MipChk,
 		ID_NRChk,
-		ID_DepthChk
+		ID_DepthChk,
+		ID_TranspChk,
 };
 
 public:
@@ -320,6 +321,8 @@ private:
 	//depth omde
 	void OnDepthCheck(wxCommandEvent &event);
 	void OnFluoRender(wxCommandEvent &event);
+	//transparency
+	void OnTranspChk(wxCommandEvent &event);
 
 	DECLARE_EVENT_TABLE()
 };

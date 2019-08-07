@@ -648,11 +648,11 @@ namespace FLIVR
 					shader->setLocalParam(6, vr_list_[tn]->colormap_low_value_,
 						vr_list_[tn]->colormap_hi_value_,
 						vr_list_[tn]->colormap_hi_value_-vr_list_[tn]->colormap_low_value_, 0.0);
-					if (vr_list_[tn]->colormap_ > 6)
-						shader->setLocalParam(9, vr_list_[tn]->color_.r(),
-							vr_list_[tn]->color_.g(), vr_list_[tn]->color_.b(), 0.0);
 					break;
 				}
+				shader->setLocalParam(9, vr_list_[tn]->color_.r(),
+					vr_list_[tn]->color_.g(), vr_list_[tn]->color_.b(),
+					vr_list_[tn]->alpha_power_);
 
 				double abcd[4];
 				vr_list_[tn]->planes_[0]->get(abcd);

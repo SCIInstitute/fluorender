@@ -51,6 +51,7 @@ namespace FLIVR
 	"uniform vec4 loc3;//(gamma, gm_thresh, offset, sw)\n" \
 	"uniform vec4 loc4;//(1/nx, 1/ny, 1/nz, 1/sample_rate)\n" \
 	"uniform vec4 loc5;//(spcx, spcy, spcz, shuffle)\n" \
+	"uniform vec4 loc9;//(red, green, blue, alpha_power)\n" \
 	"\n" \
 	"uniform sampler3D tex0;//data volume\n" \
 	"uniform sampler3D tex1;//gm volume\n" \
@@ -81,11 +82,6 @@ namespace FLIVR
 #define VOL_UNIFORMS_FOG_LOC \
 	"//VOL_UNIFORMS_FOG_LOC\n" \
 	"uniform vec4 loc8;//(int, start, end, 0.0)\n" \
-	"\n"
-
-#define VOL_UNIFORMS_COLORMAP_PC \
-	"//VOL_UNIFORMS_COLORMAP_PC\n" \
-	"uniform vec4 loc9;//(red, green, blue, 0)\n" \
 	"\n"
 
 #define VOL_UNIFORMS_DP \
@@ -355,7 +351,7 @@ namespace FLIVR
 	"		tf_alp = pow(clamp(v.x/loc3.z,\n" \
 	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0,\n" \
 	"			loc3.x>1.0?0.9999:1.0), loc3.x);\n" \
-	"		alpha = 1.0 - pow(clamp(1.0-tf_alp, 0.0, 1.0), loc4.w);\n" \
+	"		alpha = 1.0 - pow(1.0-pow(tf_alp, loc9.w), loc4.w);\n" \
 	"		c = vec4(loc6.rgb*alpha*tf_alp, alpha);\n" \
 	"	}\n" \
 	"\n"
@@ -530,16 +526,8 @@ namespace FLIVR
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_RESULT \
 	"		//VOL_TRANSFER_FUNCTION_COLORMAP_RESULT\n" \
-	"		float alpha = 1.0 - pow(1.0-tf_alp, loc4.w);\n" \
+	"		float alpha = 1.0 - pow(1.0-pow(tf_alp, loc9.w), loc4.w);\n" \
 	"		c = vec4(rb.rgb*alpha*tf_alp, alpha);\n" \
-	"	}\n" \
-	"\n"
-
-//square alpha to increase transparency for low intensity
-#define VOL_TRANSFER_FUNCTION_COLORMAP_RESULT_SA \
-	"		//VOL_TRANSFER_FUNCTION_COLORMAP_RESULT7_SA\n" \
-	"		float alpha = 1.0 - pow(1.0-tf_alp*tf_alp, loc4.w);\n" \
-	"		c = vec4(rb.rgb*alpha, alpha);\n" \
 	"	}\n" \
 	"\n"
 
