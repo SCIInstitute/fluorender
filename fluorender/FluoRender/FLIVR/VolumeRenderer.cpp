@@ -82,6 +82,7 @@ namespace FLIVR
 		specular_(1.0),
 		shine_(10.0),
 		//colormap mode
+		colormap_inv_(1.0),
 		colormap_mode_(0),
 		colormap_low_value_(0.0),
 		colormap_hi_value_(1.0),
@@ -146,6 +147,7 @@ namespace FLIVR
 		specular_(copy.specular_),
 		shine_(copy.shine_),
 		//colormap mode
+		colormap_inv_(copy.colormap_inv_),
 		colormap_mode_(copy.colormap_mode_),
 		colormap_low_value_(copy.colormap_low_value_),
 		colormap_hi_value_(copy.colormap_hi_value_),
@@ -728,7 +730,7 @@ namespace FLIVR
 		if (mode_==TextureRenderer::MODE_MIP &&
 			colormap_proj_)
 			shader->setLocalParam(6, colormap_low_value_, colormap_hi_value_,
-				colormap_hi_value_ - colormap_low_value_, 0.0);
+				colormap_hi_value_ - colormap_low_value_, colormap_inv_);
 		else
 		{
 			switch (colormap_mode_)
@@ -741,7 +743,7 @@ namespace FLIVR
 				break;
 			case 1://colormap
 				shader->setLocalParam(6, colormap_low_value_, colormap_hi_value_,
-					colormap_hi_value_-colormap_low_value_, 0.0);
+					colormap_hi_value_-colormap_low_value_, colormap_inv_);
 				break;
 			case 2://depth map
 				shader->setLocalParam(6, color_.r(), color_.g(), color_.b(), 0.0);

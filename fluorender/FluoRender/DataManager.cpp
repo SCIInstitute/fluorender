@@ -128,6 +128,7 @@ VolumeData::VolumeData()
 	m_test_wiref = false;
 
 	//colormap mode
+	m_colormap_inv = 1.0;
 	m_colormap_mode = 0;
 	m_colormap_disp = false;
 	m_colormap_low_value = 0.0;
@@ -254,6 +255,7 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_test_wiref = copy.m_test_wiref;
 
 	//colormap mode
+	m_colormap_inv = copy.m_colormap_inv;
 	m_colormap_mode = copy.m_colormap_mode;
 	m_colormap_disp = copy.m_colormap_disp;
 	m_colormap_low_value = copy.m_colormap_low_value;
@@ -1968,6 +1970,18 @@ void VolumeData::GetColormapValues(double &low, double &high)
 {
 	low = m_colormap_low_value;
 	high = m_colormap_hi_value;
+}
+
+void VolumeData::SetColormapInv(double val)
+{
+	m_colormap_inv = val;
+	if (m_vr)
+		m_vr->set_colormap_inv(val);
+}
+
+double VolumeData::GetColormapInv()
+{
+	return m_colormap_inv;
 }
 
 void VolumeData::SetColormap(int value)
@@ -4400,6 +4414,16 @@ void DataGroup::SetColormapValues(double low, double high)
 	}
 }
 
+void DataGroup::SetColormapInv(double val)
+{
+	for (int i = 0; i < GetVolumeNum(); i++)
+	{
+		VolumeData* vd = GetVolumeData(i);
+		if (vd)
+			vd->SetColormapInv(val);
+	}
+}
+
 void DataGroup::SetColormap(int value)
 {
 	for (int i=0; i<GetVolumeNum(); i++)
@@ -4576,6 +4600,7 @@ m_vol_exb(0.0),
 	m_vol_zsp(2.5),
 	m_vol_lum(1.0),
 	m_vol_cmm(0),
+	m_vol_cmi(false),
 	m_vol_cmp(0),
 	m_vol_cmj(0),
 	m_vol_lcm(0.0),
@@ -4633,6 +4658,9 @@ m_vol_exb(0.0),
 		m_vol_lum = val;
 	if (fconfig.Read("colormap_mode", &ival))
 		m_vol_cmm = ival;
+	bool bval;
+	if (fconfig.Read("colormap_inv", &bval))
+		m_vol_cmi = bval;
 	if (fconfig.Read("colormap", &ival))
 		m_vol_cmp = ival;
 	if (fconfig.Read("colormap_proj", &ival))
@@ -4643,7 +4671,6 @@ m_vol_exb(0.0),
 	if (fconfig.Read("colormap_hi", &val))
 		m_vol_hcm = val;
 
-	bool bval;
 	if (fconfig.Read("enable_alpha", &bval))
 		m_vol_eap = bval;
 	if (fconfig.Read("enable_shading", &bval))
@@ -4737,6 +4764,7 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 		if (!vd->GetSpcFromFile())
 			vd->SetBaseSpacings(m_vol_xsp, m_vol_ysp, m_vol_zsp);
 		vd->SetColormapMode(m_vol_cmm);
+		vd->SetColormapInv(m_vol_cmi?-1.0:1.0);
 		vd->SetColormap(m_vol_cmp);
 		vd->SetColormapProj(m_vol_cmj);
 		vd->SetColormapValues(m_vol_lcm, m_vol_hcm);

@@ -71,7 +71,7 @@ namespace FLIVR
 
 #define VOL_UNIFORMS_COLORMAP \
 	"//VOL_UNIFORMS_COLORMAP\n" \
-	"uniform vec4 loc6;//(low, hi, hi-lo, 0)\n" \
+	"uniform vec4 loc6;//(low, hi, hi-lo, inv)\n" \
 	"\n"
 
 #define VOL_UNIFORMS_2DMAP_LOC \
@@ -422,54 +422,59 @@ namespace FLIVR
 	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0,\n" \
 	"			loc3.x>1.0?0.9999:1.0), loc3.x);\n"
 
+//rainbow
 #define VOL_COLORMAP_CALC0 \
 	"		//VOL_COLORMAP_CALC0\n" \
-	"		rb.r = clamp(4.0*valu - 2.0, 0.0, 1.0);\n" \
+	"		rb.r = clamp((4.0*valu - 2.0)*loc6.w, 0.0, 1.0);\n" \
 	"		rb.g = clamp(valu<0.5 ? 4.0*valu : -4.0*valu+4.0, 0.0, 1.0);\n" \
-	"		rb.b = clamp(-4.0*valu+2.0, 0.0, 1.0);\n"
+	"		rb.b = clamp((2.0 - 4.0*valu)*loc6.w, 0.0, 1.0);\n"
 
+#define VOL_COLORMAP_DIFF_CALC0 \
+	"		//VOL_COLORMAP_DIFF_CALC0\n" \
+	"		rb.rgb = clamp(n.xyz*loc6.w, -1.0, 1.0) + vec3(1.0);\n" \
+
+//hot
 #define VOL_COLORMAP_CALC1 \
 	"		//VOL_COLORMAP_CALC1\n" \
-	"		rb.r = clamp(-4.0*valu+2.0, 0.0, 1.0);\n" \
-	"		rb.g = clamp(valu<0.5 ? 4.0*valu : -4.0*valu+4.0, 0.0, 1.0);\n" \
-	"		rb.b = clamp(4.0*valu - 2.0, 0.0, 1.0);\n"
-
-#define VOL_COLORMAP_CALC2 \
-	"		//VOL_COLORMAP_CALC2\n" \
 	"		rb.r = clamp(2.0*valu, 0.0, 1.0);\n" \
 	"		rb.g = clamp(4.0*valu - 2.0, 0.0, 1.0);\n" \
 	"		rb.b = clamp(4.0*valu - 3.0, 0.0, 1.0);\n"
 
-#define VOL_COLORMAP_CALC3 \
-	"		//VOL_COLORMAP_CALC3\n" \
+//cool
+#define VOL_COLORMAP_CALC2 \
+	"		//VOL_COLORMAP_CALC2\n" \
 	"		rb.r = clamp(valu, 0.0, 1.0);\n" \
 	"		rb.g = clamp(1.0-valu, 0.0, 1.0);\n" \
 	"		rb.b = 1.0;\n"
 
-#define VOL_COLORMAP_CALC4 \
-	"		//VOL_COLORMAP_CALC4\n" \
+//diverging
+#define VOL_COLORMAP_CALC3 \
+	"		//VOL_COLORMAP_CALC3\n" \
 	"		rb.r = clamp(valu<0.5?valu*0.9+0.25:0.7, 0.0, 1.0);\n" \
 	"		rb.g = clamp(valu<0.5?valu*0.8+0.3:(1.0-valu)*1.4, 0.0, 1.0);\n" \
 	"		rb.b = clamp(valu<0.5?valu*(-0.1)+0.75:(1.0-valu)*1.1+0.15, 0.0, 1.0);\n"
 
-#define VOL_COLORMAP_CALC5 \
-	"		//VOL_COLORMAP_CALC5\n" \
+//monochrome
+#define VOL_COLORMAP_CALC4 \
+	"		//VOL_COLORMAP_CALC4\n" \
 	"		rb.rgb = vec3(clamp(valu, 0.0, 1.0));\n"
 
-#define VOL_COLORMAP_CALC6 \
-	"		//VOL_COLORMAP_CALC6\n" \
-	"		rb.rgb = vec3(1.0 - clamp(valu, 0.0, 1.0));\n"
+//#define VOL_COLORMAP_CALC6 \
+//	"		//VOL_COLORMAP_CALC6\n" \
+//	"		rb.rgb = vec3(1.0 - clamp(valu, 0.0, 1.0));\n"
 
-#define VOL_COLORMAP_CALC7 \
-	"		//VOL_COLORMAP_CALC7\n" \
-	"		rb.rgb = mix(vec3(0.0), loc9.rgb, clamp(valu, 0.0, 1.0));\n"
+//#define VOL_COLORMAP_CALC7 \
+//	"		//VOL_COLORMAP_CALC7\n" \
+//	"		rb.rgb = mix(vec3(0.0), loc9.rgb, clamp(valu, 0.0, 1.0));\n"
 
-#define VOL_COLORMAP_CALC8 \
-	"		//VOL_COLORMAP_CALC8\n" \
+//high-key
+#define VOL_COLORMAP_CALC5 \
+	"		//VOL_COLORMAP_CALC5\n" \
 	"		rb.rgb = mix(vec3(1.0), loc9.rgb, clamp(valu, 0.0, 1.0));\n"
 
-#define VOL_COLORMAP_CALC9 \
-	"		//VOL_COLORMAP_CALC9\n" \
+//low-key
+#define VOL_COLORMAP_CALC6 \
+	"		//VOL_COLORMAP_CALC6\n" \
 	"		rb.rgb = mix(loc9.rgb, loc9.rgb*0.1, clamp(valu, 0.0, 1.0));\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP \
@@ -515,14 +520,6 @@ namespace FLIVR
 	"		float valu = dot(clamp(n.xyz, -1.0, 1.0), l.xyz/*vec3(1.0, 1.0, 0.0)*/);\n" \
 	"		valu = valu + 1.0;\n" \
 	"		valu = (valu-loc6.x)/loc6.z;\n"
-
-#define VOL_COLORMAP_DIFF_CALC0 \
-	"		//VOL_COLORMAP_DIFF_CALC0\n" \
-	"		rb.rgb = clamp(n.xyz, -1.0, 1.0) + vec3(1.0);\n" \
-
-#define VOL_COLORMAP_DIFF_CALC1 \
-	"		//VOL_COLORMAP_DIFF_CALC1\n" \
-	"		rb.rgb = clamp(-n.xyz, -1.0, 1.0) + vec3(1.0);\n" \
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_RESULT \
 	"		//VOL_TRANSFER_FUNCTION_COLORMAP_RESULT\n" \

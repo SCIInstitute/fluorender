@@ -647,7 +647,8 @@ namespace FLIVR
 				case 1://colormap
 					shader->setLocalParam(6, vr_list_[tn]->colormap_low_value_,
 						vr_list_[tn]->colormap_hi_value_,
-						vr_list_[tn]->colormap_hi_value_-vr_list_[tn]->colormap_low_value_, 0.0);
+						vr_list_[tn]->colormap_hi_value_-vr_list_[tn]->colormap_low_value_,
+						vr_list_[tn]->colormap_inv_);
 					break;
 				}
 				shader->setLocalParam(9, vr_list_[tn]->color_.r(),

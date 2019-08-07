@@ -77,6 +77,7 @@ BEGIN_EVENT_TABLE(VPropView, wxPanel)
 	EVT_TEXT(ID_ColormapHighValueText, VPropView::OnColormapHighValueText)
 	EVT_COMMAND_SCROLL(ID_ColormapLowValueSldr, VPropView::OnColormapLowValueChange)
 	EVT_TEXT(ID_ColormapLowValueText, VPropView::OnColormapLowValueText)
+	EVT_TOGGLEBUTTON(ID_ColormapInvBtn, VPropView::OnColormapInvBtn)
 	EVT_COMBOBOX(ID_ColormapCombo, VPropView::OnColormapCombo)
 	EVT_COMBOBOX(ID_ColormapCombo2, VPropView::OnColormapCombo2)
 	//6
@@ -522,19 +523,18 @@ wxPanel(parent, id, pos, size,style, name),
 	sizer_r4->Add(m_color2_text, 1, wxALIGN_CENTER, 0);
 	sizer_r4->Add(m_color2_btn, 1, wxALIGN_CENTER, 0);
 	// colormap chooser
-	st = new wxStaticText(this, 0, "Color Map: ",
+	st = new wxStaticText(this, 0, "Color Maps: ",
 		wxDefaultPosition, wxSize(70, -1), wxALIGN_RIGHT);
+	m_colormap_inv_btn = new wxToggleButton(this, ID_ColormapInvBtn,
+		"X", wxDefaultPosition, wxSize(20, 24));
 	m_colormap_combo = new wxComboBox(this, ID_ColormapCombo, "",
 		wxDefaultPosition, wxSize(85, 25), 0, NULL, wxCB_READONLY);
 	vector<string>colormap_list;
 	colormap_list.push_back("Rainbow");
-	colormap_list.push_back("Reverse Rainbow");
 	colormap_list.push_back("Hot");
 	colormap_list.push_back("Cool");
 	colormap_list.push_back("Diverging");
 	colormap_list.push_back("Monochrome");
-	colormap_list.push_back("Reverse Mono");
-	colormap_list.push_back("Primary Color");
 	colormap_list.push_back("High-key");
 	colormap_list.push_back("Low-key");
 	for (size_t i=0; i<colormap_list.size(); ++i)
@@ -552,6 +552,7 @@ wxPanel(parent, id, pos, size,style, name),
 		m_colormap_combo2->Append(colormap_list2[i]);
 	sizer_r5->Add(st, 0, wxALIGN_CENTER, 0);
 	sizer_r5->Add(5, 5, 0);
+	sizer_r5->Add(m_colormap_inv_btn, 0, wxALIGN_CENTER);
 	sizer_r5->Add(m_colormap_combo, 1, wxALIGN_CENTER, 0);
 	sizer_r5->Add(m_colormap_combo2, 1, wxALIGN_CENTER, 0);
 
@@ -772,6 +773,7 @@ void VPropView::GetSettings()
 	m_colormap_high_value_sldr->SetValue(ival);
 	m_colormap_high_value_text->ChangeValue(str);
 	//colormap
+	m_colormap_inv_btn->SetValue(m_vd->GetColormapInv()>0.0?false:true);
 	m_colormap_combo->SetSelection(m_vd->GetColormap());
 	m_colormap_combo2->SetSelection(m_vd->GetColormapProj());
 	//mode
@@ -1574,6 +1576,18 @@ void VPropView::OnColormapLowValueText(wxCommandEvent &event)
 		m_vd->GetColormapValues(low, high);
 		m_vd->SetColormapValues(val, high);
 	}
+
+	RefreshVRenderViews(false, true);
+}
+
+void VPropView::OnColormapInvBtn(wxCommandEvent &event)
+{
+	bool val = m_colormap_inv_btn->GetValue();
+
+	if (m_sync_group && m_group)
+		m_group->SetColormapInv(val ? -1.0 : 1.0);
+	else if (m_vd)
+		m_vd->SetColormapInv(val ? -1.0 : 1.0);
 
 	RefreshVRenderViews(false, true);
 }
@@ -2426,6 +2440,10 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
 	bool bval = m_colormap_tool->GetToolState(ID_ColormapEnableChk);
 	fconfig.Write("colormap_mode", bval);
 	mgr->m_vol_cmm = bval;
+	//colormap inv
+	bval = m_colormap_inv_btn->GetValue();
+	fconfig.Write("colormap_inv", bval);
+	mgr->m_vol_cmi = bval;
 	//colormap type
 	ival = m_colormap_combo->GetCurrentSelection();
 	fconfig.Write("colormap", ival);
@@ -2602,6 +2620,9 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 	m_vd->SetColormapMode(mgr->m_vol_cmm);
 	bool colormap = m_vd->GetColormapMode() == 1;
 	m_colormap_tool->ToggleTool(ID_ColormapEnableChk, colormap);
+	//colormap inv
+	m_colormap_inv_btn->SetValue(mgr->m_vol_cmi);
+	m_vd->SetColormapInv(mgr->m_vol_cmi?-1.0:1.0);
 	//colormap
 	m_colormap_combo->SetSelection(mgr->m_vol_cmp);
 	m_vd->SetColormap(mgr->m_vol_cmp);
