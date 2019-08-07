@@ -1040,7 +1040,7 @@ public:
 	bool Save(wxString &filename);
 
 	//draw
-	unsigned int Draw(vector<float> &verts);
+	unsigned int Draw(vector<float> &verts, int shuffle);
 
 	//pattern search
 /*	typedef struct
@@ -1070,7 +1070,8 @@ private:
 	unsigned int GetMappedEdges(
 		FL::CellList &sel_list1, FL::CellList &sel_list2,
 		std::vector<float> &verts,
-		size_t frame1, size_t frame2);
+		size_t frame1, size_t frame2,
+		int shuffle=0);
 	//rulers
 	bool GetMappedRulers(
 		FL::CellList &sel_list1, FL::CellList &sel_list2,

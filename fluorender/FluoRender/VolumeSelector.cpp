@@ -758,8 +758,14 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 							value = double(((unsigned short*)data_mvd)[index]) *
 							m_vd->GetScalarScale() / 65535.0;
 					}
-					double hue = HueCalculation(hmode, value_label);
-					Color color(HSVColor(hue, 1.0, 1.0));
+					Color color;
+					if (hmode == 0)
+						color = Color(value_label, m_vd->GetShuffle());
+					else
+					{
+						double hue = HueCalculation(hmode, value_label);
+						color = Color(HSVColor(hue, 1.0, 1.0));
+					}
 					//color
 					value = value>1.0?1.0:value;
 					data_vd_r[index] = (unsigned char)(color.r()*255.0*value);

@@ -120,6 +120,9 @@ void TraceListCtrl::UpdateTraces(VRenderView* vrv)
 	TraceGroup* traces = m_view->GetTraceGroup();
 	if (!traces)
 		return;
+	int shuffle = 0;
+	if (m_view->m_glview->m_cur_vol)
+		shuffle = m_view->m_glview->m_cur_vol->GetShuffle();
 
 	DeleteAllItems();
 
@@ -147,7 +150,7 @@ void TraceListCtrl::UpdateTraces(VRenderView* vrv)
 	{
 		id = cells[i]->Id();
 		vid = cells[i]->GetVertexId();
-		c = HSVColor(id % 360, 1.0, 1.0);
+		c = Color(id, shuffle);
 		wxColor color(c.r() * 255, c.g() * 255, c.b() * 255);
 		size = (int)(cells[i]->GetSizeUi());
 		center = cells[i]->GetCenter();
@@ -1012,6 +1015,9 @@ VRenderView* TraceDlg::GetView()
 void TraceDlg::UpdateList()
 {
 	if (!m_view) return;
+	int shuffle = 0;
+	if (m_view->m_glview->m_cur_vol)
+		shuffle = m_view->m_glview->m_cur_vol->GetShuffle();
 	TraceGroup* trace_group = m_view->GetTraceGroup();
 	if (trace_group)
 	{
@@ -1046,8 +1052,7 @@ void TraceDlg::UpdateList()
 					item_y = m_trace_list_curr->GetText(item, 4);
 					item_z = m_trace_list_curr->GetText(item, 5);
 					item_id.ToULong(&id);
-					hue = id % 360;
-					Color c(HSVColor(hue, 1.0, 1.0));
+					Color c(id, shuffle);
 					wxColor color(c.r() * 255, c.g() * 255, c.b() * 255);
 					item_size.ToLong(&size);
 					item_x.ToDouble(&x);
@@ -2089,7 +2094,7 @@ void TraceDlg::CellNewID(bool append)
 			if (m_auto_id)
 				inc = 0;
 			else
-				inc = 360;
+				inc = 253;
 		}
 		else
 		{
@@ -2485,6 +2490,9 @@ void TraceDlg::OnCellUnlink(wxCommandEvent &event)
 //ID edit controls
 void TraceDlg::OnCellNewIDText(wxCommandEvent &event)
 {
+	int shuffle = 0;
+	if (m_view && m_view->m_glview->m_cur_vol)
+		shuffle = m_view->m_glview->m_cur_vol->GetShuffle();
 	wxString str = m_cell_new_id_text->GetValue();
 	unsigned long id;
 	wxColor color(255, 255, 255);
@@ -2494,7 +2502,7 @@ void TraceDlg::OnCellNewIDText(wxCommandEvent &event)
 			color = wxColor(24, 167, 181);
 		else
 		{
-			Color c = HSVColor(id % 360, 1.0, 1.0);
+			Color c(id, shuffle);
 			color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
 		}
 		m_cell_new_id_text->SetBackgroundColour(color);
@@ -2634,7 +2642,7 @@ void TraceDlg::OnCellReplaceID(wxCommandEvent &event)
 		{
 			new_id = id;
 			while (vd->SearchLabel(new_id))
-				new_id += 360;
+				new_id += 253;
 			//add cell to list_rep
 			list_rep.insert(pair<unsigned int, unsigned int>
 				(old_id, new_id));

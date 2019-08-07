@@ -3851,7 +3851,8 @@ bool TraceGroup::GetMappedRulers(RulerList &rulers)
 unsigned int TraceGroup::GetMappedEdges(
 	FL::CellList & sel_list1, FL::CellList & sel_list2,
 	std::vector<float>& verts,
-	size_t frame1, size_t frame2)
+	size_t frame1, size_t frame2,
+	int shuffle)
 {
 	unsigned int result = 0;
 
@@ -3914,7 +3915,7 @@ unsigned int TraceGroup::GetMappedEdges(
 				sel_list2.insert(std::pair<unsigned int, FL::pCell>
 					(cell->Id(), cell));
 				//save to verts
-				c = FLIVR::HSVColor(cell->Id() % 360, 1.0, 0.9);
+				c = Color(cell->Id(), shuffle);
 				verts.push_back(vertex1->GetCenter().x());
 				verts.push_back(vertex1->GetCenter().y());
 				verts.push_back(vertex1->GetCenter().z());
@@ -4052,7 +4053,7 @@ bool TraceGroup::Save(wxString &filename)
 	return tm_processor.Export(str);
 }
 
-unsigned int TraceGroup::Draw(vector<float> &verts)
+unsigned int TraceGroup::Draw(vector<float> &verts, int shuffle)
 {
 	unsigned int result = 0;
 	size_t frame_num = m_track_map->GetFrameNum();
@@ -4084,7 +4085,7 @@ unsigned int TraceGroup::Draw(vector<float> &verts)
 		{
 			result += GetMappedEdges(
 				temp_sel_list1, temp_sel_list2,
-				verts, i, i + 1);
+				verts, i, i + 1, shuffle);
 			//swap
 			temp_sel_list1 = temp_sel_list2;
 			temp_sel_list2.clear();
@@ -4099,7 +4100,7 @@ unsigned int TraceGroup::Draw(vector<float> &verts)
 		{
 			result += GetMappedEdges(
 				temp_sel_list1, temp_sel_list2,
-				verts, i, i - 1);
+				verts, i, i - 1, shuffle);
 			//sawp
 			temp_sel_list1 = temp_sel_list2;
 			temp_sel_list2.clear();
