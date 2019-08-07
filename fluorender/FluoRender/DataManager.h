@@ -335,6 +335,8 @@ public:
 	bool GetColormapDisp();
 	void SetColormapValues(double low, double high);
 	void GetColormapValues(double &low, double &high);
+	void SetColormapInv(double val);
+	double GetColormapInv();
 	void SetColormap(int value);
 	void SetColormapProj(int value);
 	int GetColormap();
@@ -511,6 +513,7 @@ private:
 	bool m_test_wiref;
 
 	//color map mode
+	double m_colormap_inv;
 	int m_colormap_mode;	//0-normal; 1-rainbow
 	bool m_colormap_disp;	//true/false
 	double m_colormap_low_value;
@@ -1186,6 +1189,7 @@ public:
 	void SetColormapMode(int mode);
 	void SetColormapDisp(bool disp);
 	void SetColormapValues(double low, double high);
+	void SetColormapInv(double val);
 	void SetColormap(int value);
 	void SetColormapProj(int value);
 	void SetShading(bool shading);
@@ -1419,6 +1423,7 @@ public:
 	double m_vol_ysp;	//y_spacing
 	double m_vol_zsp;	//z_spacing
 	double m_vol_lum;	//luminance
+	bool m_vol_cmi;		//colormap inversion
 	int m_vol_cmp;		//colormap type (rainbow, warm, etc)
 	int m_vol_cmm;		//colormap mode (enable)
 	int m_vol_cmj;		//colormap projection

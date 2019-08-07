@@ -149,10 +149,7 @@ VolShader::VolShader(
 			else
 				return string(VOL_COLORMAP_CALC0);
 		case 1:
-			if (colormap_proj_ == 5)
-				return string(VOL_COLORMAP_DIFF_CALC1);
-			else
-				return string(VOL_COLORMAP_CALC1);
+			return string(VOL_COLORMAP_CALC1);
 		case 2:
 			return string(VOL_COLORMAP_CALC2);
 		case 3:
@@ -163,12 +160,6 @@ VolShader::VolShader(
 			return string(VOL_COLORMAP_CALC5);
 		case 6:
 			return string(VOL_COLORMAP_CALC6);
-		case 7:
-			return string(VOL_COLORMAP_CALC7);
-		case 8:
-			return string(VOL_COLORMAP_CALC8);
-		case 9:
-			return string(VOL_COLORMAP_CALC9);
 		}
 		return string(VOL_COLORMAP_CALC0);
 	}

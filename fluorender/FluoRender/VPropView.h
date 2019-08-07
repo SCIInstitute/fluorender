@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/glcanvas.h>
 #include <wx/clrpicker.h>
 #include <wx/slider.h>
+#include <wx/tglbtn.h>
 
 #include "FLIVR/Color.h"
 #include "FLIVR/VolumeRenderer.h"
@@ -105,6 +106,7 @@ class VPropView: public wxPanel
 		ID_SyncGroupChk,
 		ID_SaveDefault,
 		ID_ResetDefault,
+		ID_ColormapInvBtn,
 		ID_ColormapCombo,
 		ID_ColormapCombo2,
 		ID_InvChk,
@@ -214,6 +216,7 @@ private:
 	wxTextCtrl *m_space_x_text;
 	wxTextCtrl *m_space_y_text;
 	wxTextCtrl *m_space_z_text;
+	wxToggleButton *m_colormap_inv_btn;
 	wxComboBox *m_colormap_combo;
 	wxComboBox *m_colormap_combo2;
 
@@ -290,6 +293,7 @@ private:
 	void OnColormapLowValueText(wxCommandEvent &event);
 	
 	//others
+	void OnColormapInvBtn(wxCommandEvent &event);
 	void OnColormapCombo(wxCommandEvent &event);
 	void OnColormapCombo2(wxCommandEvent &event);
 	int GetColorString(wxString& str, wxColor& wxc);

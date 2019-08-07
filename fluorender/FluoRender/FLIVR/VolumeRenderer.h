@@ -101,6 +101,8 @@ namespace FLIVR
 		specular_ = spec; shine_ = shine; }
 
 		//colormap mode
+		void set_colormap_inv(double val)
+		{colormap_inv_ = val;}
 		void set_colormap_mode(int mode)
 		{colormap_mode_ = mode;}
 		void set_colormap_values(double low, double hi)
@@ -249,6 +251,7 @@ namespace FLIVR
 		bool shading_;
 		double ambient_, diffuse_, specular_, shine_;
 		//colormap mode
+		double colormap_inv_;
 		int colormap_mode_;//0-normal; 1-rainbow; 2-depth
 		double colormap_low_value_;
 		double colormap_hi_value_;
