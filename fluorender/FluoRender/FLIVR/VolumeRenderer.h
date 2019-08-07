@@ -198,6 +198,10 @@ namespace FLIVR
 		void set_inversion(bool mode) {inv_ = mode;}
 		bool get_inversion() {return inv_;}
 
+		//alpha power
+		void set_alpha_power(double val) { alpha_power_ = val; }
+		double get_alpha_power() { return alpha_power_; }
+
 		//compression
 		void set_compression(bool compression) {compression_ = compression;}
 
@@ -237,6 +241,7 @@ namespace FLIVR
 		double hi_thresh_;
 		Color color_;
 		Color mask_color_;
+		double alpha_power_;
 		bool mask_color_set_;
 		double mask_thresh_;
 		double alpha_;

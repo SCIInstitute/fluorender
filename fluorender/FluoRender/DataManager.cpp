@@ -1498,6 +1498,21 @@ void VolumeData::RestoreMode()
 	SetMode(m_saved_mode);
 }
 
+//transparency
+void VolumeData::SetAlphaPower(double val)
+{
+	if (m_vr)
+		m_vr->set_alpha_power(val);
+}
+
+double VolumeData::GetAlphaPower()
+{
+	if (m_vr)
+		return m_vr->get_alpha_power();
+	else
+		return 1.0;
+}
+
 //inversion
 void VolumeData::SetInvert(bool mode)
 {
@@ -4445,6 +4460,16 @@ void DataGroup::SetMode(int mode)
 	}
 }
 
+void DataGroup::SetAlphaPower(double val)
+{
+	for (int i = 0; i < GetVolumeNum(); i++)
+	{
+		VolumeData* vd = GetVolumeData(i);
+		if (vd)
+			vd->SetAlphaPower(val);
+	}
+}
+
 void DataGroup::SetNR(bool val)
 {
 	for (int i=0; i<GetVolumeNum(); i++)
@@ -4560,6 +4585,7 @@ m_vol_exb(0.0),
 	m_vol_interp(true),
 	m_vol_inv(false),
 	m_vol_mip(false),
+	m_vol_trp(false),
 	m_vol_nrd(false),
 	m_vol_shw(false),
 	m_vol_swi(0.0),
@@ -4628,6 +4654,8 @@ m_vol_exb(0.0),
 		m_vol_inv = bval;
 	if (fconfig.Read("enable_mip", &bval))
 		m_vol_mip = bval;
+	if (fconfig.Read("enable_trp", &bval))
+		m_vol_trp = bval;
 	if (fconfig.Read("noise_rd", &bval))
 		m_vol_nrd = bval;
 
@@ -4721,6 +4749,7 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 		else
 			vd->SetShading(false);
 		vd->SetMode(m_vol_mip?1:0);
+		vd->SetAlphaPower(m_vol_trp ? 2.0 : 1.0);
 		vd->SetNR(m_vol_nrd);
 		//inversion
 		vd->SetInterpolate(m_vol_interp);

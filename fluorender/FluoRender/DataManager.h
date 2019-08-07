@@ -384,6 +384,9 @@ public:
 	void SetMode(int mode);
 	int GetMode();
 	void RestoreMode();
+	//transparency
+	void SetAlphaPower(double val);
+	double GetAlphaPower();
 	//stream modes
 	void SetStreamMode(int mode) {m_stream_mode = mode;}
 	int GetStreamMode() {return m_stream_mode;}
@@ -1189,6 +1192,7 @@ public:
 	void SetShadow(bool shadow);
 	void SetShadowParams(double val);
 	void SetMode(int mode);
+	void SetAlphaPower(double val);
 	void SetNR(bool val);
 	void SetInterpolate(bool mode);
 	void SetInvert(bool mode);
@@ -1428,6 +1432,7 @@ public:
 	bool m_vol_nrd;		//noise reduction
 	bool m_vol_shw;		//enable shadow
 	double m_vol_swi;	//shadow intensity
+	bool m_vol_trp;		//hi transp
 
 	bool m_vol_test_wiref;		//wireframe mode
 

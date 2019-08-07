@@ -112,7 +112,8 @@ namespace FLIVR
 		filter_size_max_(0.0),
 		filter_size_shp_(0.0),
 		inv_(false),
-		compression_(false)
+		compression_(false),
+		alpha_power_(1.0)
 	{
 		//mode
 		mode_ = MODE_OVER;
@@ -173,7 +174,8 @@ namespace FLIVR
 		filter_size_max_(0.0),
 		filter_size_shp_(0.0),
 		inv_(copy.inv_),
-		compression_(copy.compression_)
+		compression_(copy.compression_),
+		alpha_power_(copy.alpha_power_)
 	{
 		//mode
 		mode_ = copy.mode_;
@@ -740,14 +742,14 @@ namespace FLIVR
 			case 1://colormap
 				shader->setLocalParam(6, colormap_low_value_, colormap_hi_value_,
 					colormap_hi_value_-colormap_low_value_, 0.0);
-				if (colormap_ > 6)
-					shader->setLocalParam(9, color_.r(), color_.g(), color_.b(), 0.0);
 				break;
 			case 2://depth map
 				shader->setLocalParam(6, color_.r(), color_.g(), color_.b(), 0.0);
 				break;
 			}
 		}
+		//color
+		shader->setLocalParam(9, color_.r(), color_.g(), color_.b(), alpha_power_);
 
 		//setup depth peeling
 		if (depth_peel_ || colormap_mode_ == 2)

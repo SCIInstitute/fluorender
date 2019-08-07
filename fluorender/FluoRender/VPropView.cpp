@@ -106,7 +106,9 @@ BEGIN_EVENT_TABLE(VPropView, wxPanel)
 	EVT_TOOL(ID_NRChk, VPropView::OnNRCheck)
 	//depth mode
 	EVT_TOOL(ID_DepthChk, VPropView::OnDepthCheck)
-	END_EVENT_TABLE()
+	//transp
+	EVT_TOOL(ID_TranspChk, VPropView::OnTranspChk)
+END_EVENT_TABLE()
 
 VPropView::VPropView(wxWindow* frame,
 wxWindow* parent,
@@ -396,11 +398,18 @@ wxPanel(parent, id, pos, size,style, name),
 	//right ///////////////////////////////////////////////////
 	m_options_toolbar = new wxToolBar(this,wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	//MIP
-	bitmap = wxGetBitmapFromMemory(mip);
+	bitmap = wxGetBitmapFromMemory(transplo);
 #ifdef _DARWIN
 	m_options_toolbar->SetToolBitmapSize(bitmap.GetSize());
 #endif
+	//transparency
+	m_options_toolbar->AddCheckTool(ID_TranspChk, "Increase Transpancy",
+		bitmap, wxNullBitmap,
+		"Enable High Tarnsparency.",
+		"Enable High Tarnsparency.");
+	m_options_toolbar->ToggleTool(ID_TranspChk, false);
+	//MIP
+	bitmap = wxGetBitmapFromMemory(mip);
 	m_options_toolbar->AddCheckTool(ID_MipChk, "MIP",
 		bitmap, wxNullBitmap,
 		"Enable Maximum Intensity Projection.",
@@ -790,6 +799,21 @@ void VPropView::GetSettings()
 		m_options_toolbar->ToggleTool(ID_MipChk,false);
 		if (m_threh_st)
 			m_threh_st->SetLabel("Threshold : ");
+	}
+
+	//transparency
+	double alpha_power = m_vd->GetAlphaPower();
+	if (alpha_power > 1.1)
+	{
+		m_options_toolbar->ToggleTool(ID_TranspChk, true);
+		m_options_toolbar->SetToolNormalBitmap(ID_TranspChk,
+			wxGetBitmapFromMemory(transphi));
+	}
+	else
+	{
+		m_options_toolbar->ToggleTool(ID_TranspChk, false);
+		m_options_toolbar->SetToolNormalBitmap(ID_TranspChk,
+			wxGetBitmapFromMemory(transplo));
 	}
 
 	//noise reduction
@@ -1878,6 +1902,31 @@ void VPropView::OnMIPCheck(wxCommandEvent &event)
 	RefreshVRenderViews(false, true);
 }
 
+void VPropView::OnTranspChk(wxCommandEvent &event)
+{
+	bool bval = m_options_toolbar->GetToolState(ID_TranspChk);
+	if (bval)
+	{
+		m_options_toolbar->SetToolNormalBitmap(ID_TranspChk,
+			wxGetBitmapFromMemory(transphi));
+		if (m_sync_group && m_group)
+			m_group->SetAlphaPower(2.0);
+		else if (m_vd)
+			m_vd->SetAlphaPower(2.0);
+	}
+	else
+	{
+		m_options_toolbar->SetToolNormalBitmap(ID_TranspChk,
+			wxGetBitmapFromMemory(transplo));
+		if (m_sync_group && m_group)
+			m_group->SetAlphaPower(1.0);
+		else if (m_vd)
+			m_vd->SetAlphaPower(1.0);
+	}
+
+	RefreshVRenderViews(false, true);
+}
+
 //noise reduction
 void VPropView::OnNRCheck(wxCommandEvent &event)
 {
@@ -2268,6 +2317,9 @@ void VPropView::OnSyncGroupCheck(wxCommandEvent& event)
 		//MIP
 		bVal = m_options_toolbar->GetToolState(ID_MipChk);
 		m_group->SetMode(bVal?1:0);
+		//transp
+		bVal = m_options_toolbar->GetToolState(ID_TranspChk);
+		m_group->SetAlphaPower(bVal ? 2.0 : 1.0);
 		//noise reduction
 		bVal = m_options_toolbar->GetToolState(ID_InvChk);
 		m_group->SetNR(bVal);
@@ -2412,6 +2464,10 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
 	bool mip = m_options_toolbar->GetToolState(ID_MipChk);
 	fconfig.Write("enable_mip", mip);
 	mgr->m_vol_mip = mip;
+	//enable hi transp
+	bool trp = m_options_toolbar->GetToolState(ID_TranspChk);
+	fconfig.Write("enable_trp", trp);
+	mgr->m_vol_trp = trp;
 	//noise reduction
 	bool nrd = m_options_toolbar->GetToolState(ID_NRChk);
 	fconfig.Write("noise_rd", nrd);
@@ -2599,6 +2655,13 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 		m_group->SetMode(bval?1:0);
 	else
 		m_vd->SetMode(bval?1:0);
+	//enable transp
+	bval = mgr->m_vol_trp;
+	m_options_toolbar->ToggleTool(ID_TranspChk, bval);
+	if (m_sync_group && m_group)
+		m_group->SetAlphaPower(bval ? 2.0 : 1.0);
+	else
+		m_vd->SetAlphaPower(bval ? 2.0 : 1.0);
 	//noise reduction
 	bval = mgr->m_vol_nrd;
 	m_options_toolbar->ToggleTool(ID_NRChk,bval);
