@@ -457,25 +457,17 @@ namespace FLIVR
 //monochrome
 #define VOL_COLORMAP_CALC4 \
 	"		//VOL_COLORMAP_CALC4\n" \
-	"		rb.rgb = vec3(clamp(valu, 0.0, 1.0));\n"
-
-//#define VOL_COLORMAP_CALC6 \
-//	"		//VOL_COLORMAP_CALC6\n" \
-//	"		rb.rgb = vec3(1.0 - clamp(valu, 0.0, 1.0));\n"
-
-//#define VOL_COLORMAP_CALC7 \
-//	"		//VOL_COLORMAP_CALC7\n" \
-//	"		rb.rgb = mix(vec3(0.0), loc9.rgb, clamp(valu, 0.0, 1.0));\n"
+	"		rb.rgb = vec3((loc6.w>0.0?0.0:1.0) + loc6.w*clamp(valu, 0.0, 1.0));\n"
 
 //high-key
 #define VOL_COLORMAP_CALC5 \
 	"		//VOL_COLORMAP_CALC5\n" \
-	"		rb.rgb = mix(vec3(1.0), loc9.rgb, clamp(valu, 0.0, 1.0));\n"
+	"		rb.rgb = mix(loc6.w>0.0?vec3(1.0):loc9.rgb, loc6.w>0.0?loc9.rgb:vec3(1.0), clamp(valu, 0.0, 1.0));\n"
 
 //low-key
 #define VOL_COLORMAP_CALC6 \
 	"		//VOL_COLORMAP_CALC6\n" \
-	"		rb.rgb = mix(loc9.rgb, loc9.rgb*0.1, clamp(valu, 0.0, 1.0));\n"
+	"		rb.rgb = mix(loc6.w>0.0?loc9.rgb:loc9.rgb*0.1, loc6.w>0.0?loc9.rgb*0.1:loc9.rgb, clamp(valu, 0.0, 1.0));\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP \
 	"	//VOL_TRANSFER_FUNCTION_COLORMAP\n" \
