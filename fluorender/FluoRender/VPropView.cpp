@@ -470,59 +470,60 @@ wxPanel(parent, id, pos, size,style, name),
 	m_options_toolbar->Realize();
 	//spacings
 	//x
-	st = new wxStaticText(this, 0, "Spacing");
+	st = new wxStaticText(this, 0, "Spacing: ",
+		wxDefaultPosition, wxSize(70, -1), wxALIGN_RIGHT);
 	m_space_x_text = new wxTextCtrl(this, ID_SpaceXText, "1.000",
-		wxDefaultPosition, wxSize(45, -1), 0, vald_fp3);
+		wxDefaultPosition, wxSize(50, -1), 0, vald_fp3);
 	sizer_r2->Add(st, 0, wxALIGN_CENTER);
-	sizer_r2->AddStretchSpacer();
-	st = new wxStaticText(this, 0, "X:");
+	//sizer_r2->AddStretchSpacer();
+	st = new wxStaticText(this, 0, "X ");
 	sizer_r2->Add(st, 0, wxALIGN_CENTER);
-	sizer_r2->Add(m_space_x_text, 0, wxALIGN_CENTER);
+	sizer_r2->Add(m_space_x_text, 1, wxALIGN_CENTER);
 	//y
-	st = new wxStaticText(this, 0, "Y:");
+	st = new wxStaticText(this, 0, "Y ");
 	m_space_y_text = new wxTextCtrl(this, ID_SpaceYText, "1.000",
-		wxDefaultPosition, wxSize(45, -1), 0, vald_fp3);
+		wxDefaultPosition, wxSize(50, -1), 0, vald_fp3);
 	sizer_r2->Add(3, 5, 0);
 	sizer_r2->Add(st, 0, wxALIGN_CENTER);
-	sizer_r2->Add(m_space_y_text, 0, wxALIGN_CENTER);
+	sizer_r2->Add(m_space_y_text, 1, wxALIGN_CENTER);
 	//z
-	st = new wxStaticText(this, 0, "Z:");
+	st = new wxStaticText(this, 0, "Z ");
 	m_space_z_text = new wxTextCtrl(this, ID_SpaceZText, "1.000",
-		wxDefaultPosition, wxSize(45, -1), 0, vald_fp3);
+		wxDefaultPosition, wxSize(50, -1), 0, vald_fp3);
 	sizer_r2->Add(3, 5, 0);
 	sizer_r2->Add(st, 0, wxALIGN_CENTER);
-	sizer_r2->Add(m_space_z_text, 0, wxALIGN_CENTER);
+	sizer_r2->Add(m_space_z_text, 1, wxALIGN_CENTER);
 	//color 1
-	st = new wxStaticText(this, 0, "Pri Color:",
-		wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER);
+	st = new wxStaticText(this, 0, "Pri Color: ",
+		wxDefaultPosition, wxSize(70, -1), wxALIGN_RIGHT);
 	m_color_text = new wxTextCtrl(this, ID_ColorText, "255 , 255 , 255",
-		wxDefaultPosition, wxSize(85, 20));
+		wxDefaultPosition, wxSize(50, 20));
 	m_color_text->Connect(ID_ColorText, wxEVT_LEFT_DCLICK,
 		wxCommandEventHandler(VPropView::OnColorTextFocus),
 		NULL, this);
-    m_color_btn = new wxColourPickerCtrl(this, ID_ColorBtn, *wxRED,
-                                         wxDefaultPosition, wxSize(50, 25));
+	m_color_btn = new wxColourPickerCtrl(this, ID_ColorBtn, *wxRED,
+		wxDefaultPosition, wxSize(50, 25));
 	sizer_r3->Add(st, 0, wxALIGN_CENTER, 0); 
 	sizer_r3->Add(5, 5, 0);
-	sizer_r3->Add(m_color_text, 0, wxALIGN_CENTER, 0);
+	sizer_r3->Add(m_color_text, 1, wxALIGN_CENTER, 0);
 	sizer_r3->Add(m_color_btn, 1, wxALIGN_CENTER, 0);
 	//color 2
-	st = new wxStaticText(this, 0, "Sec Color:",
-		wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER);
+	st = new wxStaticText(this, 0, "Sec Color: ",
+		wxDefaultPosition, wxSize(70, -1), wxALIGN_RIGHT);
 	m_color2_text = new wxTextCtrl(this, ID_Color2Text, "255 , 255 , 255",
-		wxDefaultPosition, wxSize(85, 20));
+		wxDefaultPosition, wxSize(50, 20));
 	m_color2_text->Connect(ID_Color2Text, wxEVT_LEFT_DCLICK,
 		wxCommandEventHandler(VPropView::OnColor2TextFocus),
 		NULL, this);
-    m_color2_btn = new wxColourPickerCtrl(this, ID_Color2Btn, *wxRED,
-                                          wxDefaultPosition, wxSize(50, 25));
+	m_color2_btn = new wxColourPickerCtrl(this, ID_Color2Btn, *wxRED,
+		wxDefaultPosition, wxSize(50, 25));
 	sizer_r4->Add(st, 0, wxALIGN_CENTER, 0); 
 	sizer_r4->Add(5, 5, 0);
-	sizer_r4->Add(m_color2_text, 0, wxALIGN_CENTER, 0);
+	sizer_r4->Add(m_color2_text, 1, wxALIGN_CENTER, 0);
 	sizer_r4->Add(m_color2_btn, 1, wxALIGN_CENTER, 0);
 	// colormap chooser
-	st = new wxStaticText(this, 0, "Color Map:",
-		wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER);
+	st = new wxStaticText(this, 0, "Color Map: ",
+		wxDefaultPosition, wxSize(70, -1), wxALIGN_RIGHT);
 	m_colormap_combo = new wxComboBox(this, ID_ColormapCombo, "",
 		wxDefaultPosition, wxSize(85, 25), 0, NULL, wxCB_READONLY);
 	vector<string>colormap_list;
@@ -533,7 +534,7 @@ wxPanel(parent, id, pos, size,style, name),
 	colormap_list.push_back("Diverging");
 	colormap_list.push_back("Monochrome");
 	colormap_list.push_back("Reverse Mono");
-	colormap_list.push_back("Increased Transparency");
+	colormap_list.push_back("Primary Color");
 	colormap_list.push_back("High-key");
 	colormap_list.push_back("Low-key");
 	for (size_t i=0; i<colormap_list.size(); ++i)
@@ -551,8 +552,8 @@ wxPanel(parent, id, pos, size,style, name),
 		m_colormap_combo2->Append(colormap_list2[i]);
 	sizer_r5->Add(st, 0, wxALIGN_CENTER, 0);
 	sizer_r5->Add(5, 5, 0);
-	sizer_r5->Add(m_colormap_combo, 0, wxALIGN_CENTER, 0);
-	sizer_r5->Add(m_colormap_combo2, 0, wxALIGN_CENTER, 0);
+	sizer_r5->Add(m_colormap_combo, 1, wxALIGN_CENTER, 0);
+	sizer_r5->Add(m_colormap_combo2, 1, wxALIGN_CENTER, 0);
 
 	//ADD COLUMNS//////////////////////////////////////
 	//left
@@ -569,6 +570,7 @@ wxPanel(parent, id, pos, size,style, name),
 	sizer_middle->Add(sizer_m5, 0, wxEXPAND);
 	//right
 	sizer_right->Add(sizer_r1, 0, wxEXPAND);
+	sizer_right->Add(-1, 3);
 	sizer_right->Add(sizer_r2, 0, wxEXPAND);
 	sizer_right->Add(sizer_r3, 0, wxEXPAND);
 	sizer_right->Add(sizer_r4, 0, wxEXPAND);
