@@ -12008,7 +12008,7 @@ void VRenderGLView::DrawTraces()
 			if (va_traces->get_dirty())
 			{
 				vector<float> verts;
-				unsigned int num = m_trace_group->Draw(verts);
+				unsigned int num = m_trace_group->Draw(verts, m_cur_vol->GetShuffle());
 				if (num)
 				{
 					va_traces->buffer_data(VABuf_Coord,

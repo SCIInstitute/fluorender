@@ -138,8 +138,21 @@ namespace FLIVR
 	{
 		unsigned int cv = id % 253;
 		cv = (cv << shuffle) & 0xff | (cv >> (8 - shuffle)) & 0xff;
-		HSVColor hsv(double(cv) / 45.0, 1.0, 1.0);
-		*this = Color(hsv);
+		double hue = double(cv) / 45.0;
+		double p2 = 1.0 - hue + floor(hue);
+		double p3 = hue - floor(hue);
+		if (hue < 1.0)
+			*this = Color(1.0, p3, 0.0);
+		else if (hue < 2.0)
+			*this = Color(p2, 1.0, 0.0);
+		else if (hue < 3.0)
+			*this = Color(0.0, 1.0, p3);
+		else if (hue < 4.0)
+			*this = Color(0.0, p2, 1.0);
+		else if (hue < 5.0)
+			*this = Color(p3, 0.0, 1.0);
+		else
+			*this = Color(1.0, 0.0, p2);
 	}
 
 	HSVColor::HSVColor()

@@ -2102,7 +2102,12 @@ void ComponentDlg::OnCompIdText(wxCommandEvent &event)
 			color = wxColor(24, 167, 181);
 		else
 		{
-			Color c = HSVColor(id % 360, 1.0, 1.0);
+			Color c;
+			if (m_view && m_view->m_glview->m_cur_vol)
+			{
+				VolumeData* vd = m_view->m_glview->m_cur_vol;
+				c = Color(id, vd->GetShuffle());
+			}
 			color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
 		}
 		m_comp_id_text->SetBackgroundColour(color);
