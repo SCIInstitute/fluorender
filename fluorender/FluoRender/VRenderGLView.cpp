@@ -9252,99 +9252,163 @@ void VRenderGLView::DrawGradBg()
 	glEnable(GL_BLEND);
 }
 
-void VRenderGLView::SetColormapColors(int colormap, Color &c)
+void VRenderGLView::SetColormapColors(int colormap, Color &c, double inv)
 {
 	switch (colormap)
 	{
 	case 0://rainbow
-		m_color_1 = Color(0.0, 0.0, 1.0);
-		m_color_2 = Color(0.0, 0.0, 1.0);
-		m_color_3 = Color(0.0, 1.0, 1.0);
-		m_color_4 = Color(0.0, 1.0, 0.0);
-		m_color_5 = Color(1.0, 1.0, 0.0);
-		m_color_6 = Color(1.0, 0.0, 0.0);
-		m_color_7 = Color(1.0, 0.0, 0.0);
+		if (inv > 0.0)
+		{
+			m_color_1 = Color(0.0, 0.0, 1.0);
+			m_color_2 = Color(0.0, 0.0, 1.0);
+			m_color_3 = Color(0.0, 1.0, 1.0);
+			m_color_4 = Color(0.0, 1.0, 0.0);
+			m_color_5 = Color(1.0, 1.0, 0.0);
+			m_color_6 = Color(1.0, 0.0, 0.0);
+			m_color_7 = Color(1.0, 0.0, 0.0);
+		}
+		else
+		{
+			m_color_1 = Color(1.0, 0.0, 0.0);
+			m_color_2 = Color(1.0, 0.0, 0.0);
+			m_color_3 = Color(1.0, 1.0, 0.0);
+			m_color_4 = Color(0.0, 1.0, 0.0);
+			m_color_5 = Color(0.0, 1.0, 1.0);
+			m_color_6 = Color(0.0, 0.0, 1.0);
+			m_color_7 = Color(0.0, 0.0, 1.0);
+		}
 		break;
-	case 1://reverse rainbow
-		m_color_1 = Color(1.0, 0.0, 0.0);
-		m_color_2 = Color(1.0, 0.0, 0.0);
-		m_color_3 = Color(1.0, 1.0, 0.0);
-		m_color_4 = Color(0.0, 1.0, 0.0);
-		m_color_5 = Color(0.0, 1.0, 1.0);
-		m_color_6 = Color(0.0, 0.0, 1.0);
-		m_color_7 = Color(0.0, 0.0, 1.0);
+	case 1://hot
+		if (inv > 0.0)
+		{
+			m_color_1 = Color(0.0, 0.0, 0.0);
+			m_color_2 = Color(0.0, 0.0, 0.0);
+			m_color_3 = Color(0.5, 0.0, 0.0);
+			m_color_4 = Color(1.0, 0.0, 0.0);
+			m_color_5 = Color(1.0, 1.0, 0.0);
+			m_color_6 = Color(1.0, 1.0, 1.0);
+			m_color_7 = Color(1.0, 1.0, 1.0);
+		}
+		else
+		{
+			m_color_1 = Color(1.0, 1.0, 1.0);
+			m_color_2 = Color(1.0, 1.0, 1.0);
+			m_color_3 = Color(1.0, 1.0, 0.0);
+			m_color_4 = Color(1.0, 0.0, 0.0);
+			m_color_5 = Color(0.5, 0.0, 0.0);
+			m_color_6 = Color(0.0, 0.0, 0.0);
+			m_color_7 = Color(0.0, 0.0, 0.0);
+		}
 		break;
-	case 2://hot
-		m_color_1 = Color(0.0, 0.0, 0.0);
-		m_color_2 = Color(0.0, 0.0, 0.0);
-		m_color_3 = Color(0.5, 0.0, 0.0);
-		m_color_4 = Color(1.0, 0.0, 0.0);
-		m_color_5 = Color(1.0, 1.0, 0.0);
-		m_color_6 = Color(1.0, 1.0, 1.0);
-		m_color_7 = Color(1.0, 1.0, 1.0);
+	case 2://cool
+		if (inv > 0.0)
+		{
+			m_color_1 = Color(0.0, 1.0, 1.0);
+			m_color_2 = Color(0.0, 1.0, 1.0);
+			m_color_3 = Color(0.25, 0.75, 1.0);
+			m_color_4 = Color(0.5, 0.5, 1.0);
+			m_color_5 = Color(0.75, 0.25, 1.0);
+			m_color_6 = Color(1.0, 0.0, 1.0);
+			m_color_7 = Color(1.0, 0.0, 1.0);
+		}
+		else
+		{
+			m_color_1 = Color(1.0, 0.0, 1.0);
+			m_color_2 = Color(1.0, 0.0, 1.0);
+			m_color_3 = Color(0.75, 0.25, 1.0);
+			m_color_4 = Color(0.5, 0.5, 1.0);
+			m_color_5 = Color(0.25, 0.75, 1.0);
+			m_color_6 = Color(0.0, 1.0, 1.0);
+			m_color_7 = Color(0.0, 1.0, 1.0);
+		}
 		break;
-	case 3://cool
-		m_color_1 = Color(0.0, 1.0, 1.0);
-		m_color_2 = Color(0.0, 1.0, 1.0);
-		m_color_3 = Color(0.25, 0.75, 1.0);
-		m_color_4 = Color(0.5, 0.5, 1.0);
-		m_color_5 = Color(0.75, 0.25, 1.0);
-		m_color_6 = Color(1.0, 0.0, 1.0);
-		m_color_7 = Color(1.0, 0.0, 1.0);
+	case 3://diverging
+		if (inv > 0.0)
+		{
+			m_color_1 = Color(0.25, 0.3, 0.75);
+			m_color_2 = Color(0.25, 0.3, 0.75);
+			m_color_3 = Color(0.475, 0.5, 0.725);
+			m_color_4 = Color(0.7, 0.7, 0.7);
+			m_color_5 = Color(0.7, 0.35, 0.425);
+			m_color_6 = Color(0.7, 0.0, 0.15);
+			m_color_7 = Color(0.7, 0.0, 0.15);
+		}
+		else
+		{
+			m_color_1 = Color(0.7, 0.0, 0.15);
+			m_color_2 = Color(0.7, 0.0, 0.15);
+			m_color_3 = Color(0.7, 0.35, 0.425);
+			m_color_4 = Color(0.7, 0.7, 0.7);
+			m_color_5 = Color(0.475, 0.5, 0.725);
+			m_color_6 = Color(0.25, 0.3, 0.75);
+			m_color_7 = Color(0.25, 0.3, 0.75);
+		}
 		break;
-	case 4://blue-red
-		m_color_1 = Color(0.25, 0.3, 0.75);
-		m_color_2 = Color(0.25, 0.3, 0.75);
-		m_color_3 = Color(0.475, 0.5, 0.725);
-		m_color_4 = Color(0.7, 0.7, 0.7);
-		m_color_5 = Color(0.7, 0.35, 0.425);
-		m_color_6 = Color(0.7, 0.0, 0.15);
-		m_color_7 = Color(0.7, 0.0, 0.15);
+	case 4://monochrome
+		if (inv > 0.0)
+		{
+			m_color_1 = Color(0.0, 0.0, 0.0);
+			m_color_2 = Color(0.0, 0.0, 0.0);
+			m_color_3 = Color(0.25, 0.25, 0.25);
+			m_color_4 = Color(0.5, 0.5, 0.5);
+			m_color_5 = Color(0.75, 0.75, 0.75);
+			m_color_6 = Color(1.0, 1.0, 1.0);
+			m_color_7 = Color(1.0, 1.0, 1.0);
+		}
+		else
+		{
+			m_color_1 = Color(1.0, 1.0, 1.0);
+			m_color_2 = Color(1.0, 1.0, 1.0);
+			m_color_3 = Color(0.75, 0.75, 0.75);
+			m_color_4 = Color(0.5, 0.5, 0.5);
+			m_color_5 = Color(0.25, 0.25, 0.25);
+			m_color_6 = Color(0.0, 0.0, 0.0);
+			m_color_7 = Color(0.0, 0.0, 0.0);
+		}
 		break;
-	case 5://monochrome
-		m_color_1 = Color(0.0, 0.0, 0.0);
-		m_color_2 = Color(0.0, 0.0, 0.0);
-		m_color_3 = Color(0.25, 0.25, 0.25);
-		m_color_4 = Color(0.5, 0.5, 0.5);
-		m_color_5 = Color(0.75, 0.75, 0.75);
-		m_color_6 = Color(1.0, 1.0, 1.0);
-		m_color_7 = Color(1.0, 1.0, 1.0);
+	case 5://high-key
+		if (inv > 0.0)
+		{
+			m_color_1 = Color(1.0, 1.0, 1.0);
+			m_color_2 = Color(1.0, 1.0, 1.0);
+			m_color_3 = c * 0.25 + Color(1.0, 1.0, 1.0)*0.75;
+			m_color_4 = (c + Color(1.0, 1.0, 1.0))*0.5;
+			m_color_5 = c * 0.75 + Color(1.0, 1.0, 1.0)*0.25;
+			m_color_6 = c;
+			m_color_7 = c;
+		}
+		else
+		{
+			m_color_1 = c;
+			m_color_2 = c;
+			m_color_3 = c * 0.75 + Color(1.0, 1.0, 1.0)*0.25;
+			m_color_4 = (c + Color(1.0, 1.0, 1.0))*0.5;
+			m_color_5 = c * 0.25 + Color(1.0, 1.0, 1.0)*0.75;
+			m_color_6 = Color(1.0, 1.0, 1.0);
+			m_color_7 = Color(1.0, 1.0, 1.0);
+		}
 		break;
-	case 6://reverse mono
-		m_color_1 = Color(1.0, 1.0, 1.0);
-		m_color_2 = Color(1.0, 1.0, 1.0);
-		m_color_3 = Color(0.75, 0.75, 0.75);
-		m_color_4 = Color(0.5, 0.5, 0.5);
-		m_color_5 = Color(0.25, 0.25, 0.25);
-		m_color_6 = Color(0.0, 0.0, 0.0);
-		m_color_7 = Color(0.0, 0.0, 0.0);
-		break;
-	case 7://high transparency mode
-		m_color_1 = Color(0.0, 0.0, 0.0);
-		m_color_2 = Color(0.0, 0.0, 0.0);
-		m_color_3 = c * 0.25 + Color(0.0, 0.0, 0.0)*0.75;
-		m_color_4 = (c + Color(0.0, 0.0, 0.0))*0.5;
-		m_color_5 = c * 0.75 + Color(0.0, 0.0, 0.0)*0.25;
-		m_color_6 = c;
-		m_color_7 = c;
-		break;
-	case 8://low intensity white
-		m_color_1 = Color(1.0, 1.0, 1.0);
-		m_color_2 = Color(1.0, 1.0, 1.0);
-		m_color_3 = c*0.25 + Color(1.0, 1.0, 1.0)*0.75;
-		m_color_4 = (c + Color(1.0, 1.0, 1.0))*0.5;
-		m_color_5 = c * 0.75 + Color(1.0, 1.0, 1.0)*0.25;
-		m_color_6 = c;
-		m_color_7 = c;
-		break;
-	case 9://high intensity dark
-		m_color_1 = c;
-		m_color_2 = c;
-		m_color_3 = c * (0.025 + 0.75);
-		m_color_4 = c * 0.55;
-		m_color_5 = c * (0.075 + 0.25);
-		m_color_6 = c * 0.1;
-		m_color_7 = c * 0.1;
+	case 6://low-key
+		if (inv > 0.0)
+		{
+			m_color_1 = c;
+			m_color_2 = c;
+			m_color_3 = c * (0.025 + 0.75);
+			m_color_4 = c * 0.55;
+			m_color_5 = c * (0.075 + 0.25);
+			m_color_6 = c * 0.1;
+			m_color_7 = c * 0.1;
+		}
+		else
+		{
+			m_color_1 = c * 0.1;
+			m_color_2 = c * 0.1;
+			m_color_3 = c * (0.075 + 0.25);
+			m_color_4 = c * 0.55;
+			m_color_5 = c * (0.025 + 0.75);
+			m_color_6 = c;
+			m_color_7 = c;
+		}
 		break;
 	}
 }
@@ -9367,7 +9431,7 @@ void VRenderGLView::DrawColormap()
 		max_val = m_cur_vol->GetMaxValue();
 		enable_alpha = m_cur_vol->GetEnableAlpha();
 		SetColormapColors(m_cur_vol->GetColormap(),
-			m_cur_vol->GetColor());
+			m_cur_vol->GetColor(), m_cur_vol->GetColormapInv());
 	}
 	else return;
 

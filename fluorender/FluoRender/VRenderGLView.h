@@ -972,7 +972,7 @@ private:
 		double font_height, bool hilighted = false);
 	void DrawFrame();
 	void DrawClippingPlanes(bool border, int face_winding);
-	void SetColormapColors(int colormap, Color &c);
+	void SetColormapColors(int colormap, Color &c, double inv);
 	void DrawColormap();
 	void DrawGradBg();
 	void DrawInfo(int nx, int ny);

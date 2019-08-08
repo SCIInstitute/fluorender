@@ -1431,20 +1431,29 @@ void VPropView::OnShadingEnable(wxCommandEvent &event)
 //colormap controls
 void VPropView::OnColormapSync(wxMouseEvent& event)
 {
-	bool bVal = m_colormap_tool->GetToolState(ID_ColormapEnableChk);
-	long iVal;
-	double dVal1, dVal2;
-	wxString str = m_colormap_low_value_text->GetValue();
-	str.ToLong(&iVal);
-	dVal1 = double(iVal) / m_max_val;
-	str = m_colormap_high_value_text->GetValue();
-	str.ToLong(&iVal);
-	dVal2 = double(iVal) / m_max_val;
 	if (m_group)
 	{
+		bool bVal = m_colormap_tool->GetToolState(ID_ColormapEnableChk);
 		m_group->SetColormapMode(bVal ? 1 : 0);
 		m_group->SetColormapDisp(bVal);
+		long iVal;
+		double dVal1, dVal2;
+		wxString str = m_colormap_low_value_text->GetValue();
+		str.ToLong(&iVal);
+		dVal1 = double(iVal) / m_max_val;
+		str = m_colormap_high_value_text->GetValue();
+		str.ToLong(&iVal);
+		dVal2 = double(iVal) / m_max_val;
 		m_group->SetColormapValues(dVal1, dVal2);
+		//colormap
+		iVal = m_colormap_combo->GetCurrentSelection();
+		m_group->SetColormap(iVal);
+		//colormap inv
+		bVal = m_colormap_inv_btn->GetValue();
+		m_group->SetColormapInv(bVal?-1.0:1.0);
+		//colormap proj
+		iVal = m_colormap_combo2->GetCurrentSelection();
+		m_group->SetColormapProj(iVal);
 	}
 	RefreshVRenderViews(false, true);
 }
@@ -2301,16 +2310,6 @@ void VPropView::OnSyncGroupCheck(wxCommandEvent& event)
 		str = m_low_shading_text->GetValue();
 		str.ToDouble(&dVal);
 		m_group->SetLowShading(dVal);
-		//colormap low
-		str = m_colormap_low_value_text->GetValue();
-		str.ToLong(&iVal);
-		dVal = double(iVal)/m_max_val;
-		m_group->SetColormapValues(dVal, -1);
-		//colormap high
-		str = m_colormap_high_value_text->GetValue();
-		str.ToLong(&iVal);
-		dVal = double(iVal)/m_max_val;
-		m_group->SetColormapValues(-1, dVal);
 		//inversion
 		bVal = m_options_toolbar->GetToolState(ID_InvChk);
 		m_group->SetInvert(bVal);
@@ -2328,6 +2327,28 @@ void VPropView::OnSyncGroupCheck(wxCommandEvent& event)
 		//noise reduction
 		bVal = m_options_toolbar->GetToolState(ID_InvChk);
 		m_group->SetNR(bVal);
+		//colormap low
+		str = m_colormap_low_value_text->GetValue();
+		str.ToLong(&iVal);
+		dVal = double(iVal) / m_max_val;
+		m_group->SetColormapValues(dVal, -1);
+		//colormap high
+		str = m_colormap_high_value_text->GetValue();
+		str.ToLong(&iVal);
+		dVal = double(iVal) / m_max_val;
+		m_group->SetColormapValues(-1, dVal);
+		//colormap mode
+		bVal = m_colormap_tool->GetToolState(ID_ColormapEnableChk);
+		m_group->SetColormapMode(bVal?1:0);
+		//colormap
+		iVal = m_colormap_combo->GetCurrentSelection();
+		m_group->SetColormap(iVal);
+		//colormap inv
+		bVal = m_colormap_inv_btn->GetValue();
+		m_group->SetColormapInv(bVal ? -1.0 : 1.0);
+		//colormap proj
+		iVal = m_colormap_combo2->GetCurrentSelection();
+		m_group->SetColormapProj(iVal);
 	}
 
 	RefreshVRenderViews(false, true);
@@ -2688,6 +2709,10 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 		m_group->SetShadow(bval);
 	else
 		m_vd->SetShadow(bval);
+	//colormap
+	bval = mgr->m_vol_cmm;
+	if (m_sync_group && m_group)
+		m_group->SetColormapMode(bval);
 
 	if (m_vd->GetEnableAlpha())
 		EnableAlpha();
