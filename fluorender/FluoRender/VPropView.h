@@ -175,10 +175,6 @@ private:
 	wxStaticText *m_luminance_st;
 	wxSlider *m_luminance_sldr;
 	wxTextCtrl* m_luminance_text;
-	//highlight
-	wxStaticText *m_hi_shading_st;
-	wxSlider *m_hi_shading_sldr;
-	wxTextCtrl *m_hi_shading_text;
 	//shadow
 	wxSlider *m_shadow_sldr;
 	wxTextCtrl *m_shadow_text;
@@ -195,6 +191,9 @@ private:
 	wxTextCtrl *m_sample_text;
 
 	//5th line
+	//highlight
+	wxSlider *m_hi_shading_sldr;
+	wxTextCtrl *m_hi_shading_text;
 	//shading
 	wxSlider *m_low_shading_sldr;
 	wxTextCtrl *m_low_shading_text;
@@ -263,7 +262,6 @@ private:
 	void OnLuminanceChange(wxScrollEvent &event);
 	void OnLuminanceText(wxCommandEvent &event);
 	//shading
-	void OnHiShadingSync(wxMouseEvent& event);
 	void OnHiShadingChange(wxScrollEvent &event);
 	void OnHiShadingText(wxCommandEvent &event);
 	//shadow

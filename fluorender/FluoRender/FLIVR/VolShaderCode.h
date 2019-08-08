@@ -436,23 +436,23 @@ namespace FLIVR
 //hot
 #define VOL_COLORMAP_CALC1 \
 	"		//VOL_COLORMAP_CALC1\n" \
-	"		rb.r = clamp(2.0*valu, 0.0, 1.0);\n" \
-	"		rb.g = clamp(4.0*valu - 2.0, 0.0, 1.0);\n" \
-	"		rb.b = clamp(4.0*valu - 3.0, 0.0, 1.0);\n"
+	"		rb.r = clamp(loc6.w*2.0*valu+(loc6.w>0.0?0.0:2.0), 0.0, 1.0);\n" \
+	"		rb.g = clamp(loc6.w*(4.0*valu - 2.0), 0.0, 1.0);\n" \
+	"		rb.b = clamp(loc6.w*4.0*valu+(loc6.w>0.0?-3.0:1.0), 0.0, 1.0);\n"
 
 //cool
 #define VOL_COLORMAP_CALC2 \
 	"		//VOL_COLORMAP_CALC2\n" \
-	"		rb.r = clamp(valu, 0.0, 1.0);\n" \
-	"		rb.g = clamp(1.0-valu, 0.0, 1.0);\n" \
+	"		rb.r = clamp(loc6.w>0.0?valu:(1.0-valu), 0.0, 1.0);\n" \
+	"		rb.g = clamp(loc6.w>0.0?(1.0-valu):valu, 0.0, 1.0);\n" \
 	"		rb.b = 1.0;\n"
 
 //diverging
 #define VOL_COLORMAP_CALC3 \
 	"		//VOL_COLORMAP_CALC3\n" \
-	"		rb.r = clamp(valu<0.5?valu*0.9+0.25:0.7, 0.0, 1.0);\n" \
-	"		rb.g = clamp(valu<0.5?valu*0.8+0.3:(1.0-valu)*1.4, 0.0, 1.0);\n" \
-	"		rb.b = clamp(valu<0.5?valu*(-0.1)+0.75:(1.0-valu)*1.1+0.15, 0.0, 1.0);\n"
+	"		rb.r = clamp(loc6.w>0.0?(valu<0.5?valu*0.9+0.25:0.7):(valu<0.5?0.7:-0.9*valu+1.15), 0.0, 1.0);\n" \
+	"		rb.g = clamp(loc6.w>0.0?(valu<0.5?valu*0.8+0.3:1.4-1.4*valu):(valu<0.5?1.4*valu:-0.8*valu+1.1), 0.0, 1.0);\n" \
+	"		rb.b = clamp(loc6.w>0.0?(valu<0.5?-0.1*valu+0.75:-1.1*valu+1.25):(valu<0.5?1.1*valu+0.15:0.1*valu+0.65), 0.0, 1.0);\n"
 
 //monochrome
 #define VOL_COLORMAP_CALC4 \
