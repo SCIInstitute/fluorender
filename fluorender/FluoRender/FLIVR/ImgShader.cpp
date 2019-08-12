@@ -483,14 +483,14 @@ namespace FLIVR
 	"	float ang;\n" \
 	"	float dist;\n" \
 	"	float dense;\n" \
-	"	for (int i=-15; i<15; i++)\n" \
-	"	for (int j=-15; j<15; j++)\n" \
+	"	for (int i=-25; i<25; i++)\n" \
+	"	for (int j=-25; j<25; j++)\n" \
 	"	{\n" \
 	"		delta = vec2(float(i)*d.x, float(j)*d.y);\n" \
 	"		nb = t.st + delta;\n" \
 	"		c_nb = texture(tex0, nb);\n" \
 	"		ang = dot(normalize(delta), normalize(c_nb.xy));\n" \
-	"		dist = pow(float(i)*float(i)+float(j)*float(j), 0.8);\n" \
+	"		dist = pow(float(i)*float(i)+float(j)*float(j), 0.54);\n" \
 	"		dist = dist==0.0?0.0:1.0/dist*clamp(loc0.z, 0.4, 3.0);\n" \
 	"		dense = clamp(0.02+(3.0-loc0.z)*0.015, 0.02, 0.05);\n" \
 	"		c += dense*(ang<-0.3?1.0:max(-ang+0.7, 0.0))*c_nb.z*dist;\n" \
@@ -711,6 +711,8 @@ namespace FLIVR
 			return string(VOL_COLORMAP_CALC5);
 		case 6:
 			return string(VOL_COLORMAP_CALC6);
+		case 7:
+			return string(VOL_COLORMAP_CALC7);
 		}
 		return string(VOL_COLORMAP_CALC0);
 	}

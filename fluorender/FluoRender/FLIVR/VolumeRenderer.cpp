@@ -722,7 +722,10 @@ namespace FLIVR
 		//spacings
 		double spcx, spcy, spcz;
 		tex_->get_spacings(spcx, spcy, spcz);
-		shader->setLocalParam(5, spcx, spcy, spcz, shuffle_);
+		shader->setLocalParam(5,
+			spcx==0.0?1.0:spcx,
+			spcy==0.0?1.0:spcy,
+			spcz==0.0?1.0:spcz, shuffle_);
 
 		//transfer function
 		shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);

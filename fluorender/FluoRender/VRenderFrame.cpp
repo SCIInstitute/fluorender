@@ -2863,6 +2863,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 
 			//colormap settings
 			fconfig.Write("colormap_mode", vd->GetColormapMode());
+			fconfig.Write("colormap_inv", vd->GetColormapInv());
 			fconfig.Write("colormap", vd->GetColormap());
 			fconfig.Write("colormap_proj", vd->GetColormapProj());
 			double low, high;
@@ -2870,6 +2871,8 @@ void VRenderFrame::SaveProject(wxString& filename)
 			fconfig.Write("colormap_lo_value", low);
 			fconfig.Write("colormap_hi_value", high);
 
+			//high transp
+			fconfig.Write("alpha_power", vd->GetAlphaPower());
 			//inversion
 			fconfig.Write("inv", vd->GetInvert());
 			//mip enable
@@ -3718,6 +3721,8 @@ void VRenderFrame::OpenProject(wxString& filename)
 						//colormap settings
 						if (fconfig.Read("colormap_mode", &iVal))
 							vd->SetColormapMode(iVal);
+						if (fconfig.Read("colormap_inv", &dval))
+							vd->SetColormapInv(dval);
 						if (fconfig.Read("colormap", &iVal))
 							vd->SetColormap(iVal);
 						if (fconfig.Read("colormap_proj", &iVal))
@@ -3729,6 +3734,9 @@ void VRenderFrame::OpenProject(wxString& filename)
 							vd->SetColormapValues(low, high);
 						}
 
+						//high transp
+						if (fconfig.Read("alpha_power", &dval))
+							vd->SetAlphaPower(dval);
 						//inversion
 						if (fconfig.Read("inv", &bVal))
 							vd->SetInvert(bVal);

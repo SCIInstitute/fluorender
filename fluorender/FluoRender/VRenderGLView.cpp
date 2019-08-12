@@ -9410,6 +9410,28 @@ void VRenderGLView::SetColormapColors(int colormap, Color &c, double inv)
 			m_color_7 = c;
 		}
 		break;
+	case 7://high transparency
+		if (inv > 0.0)
+		{
+			m_color_1 = Color(0.0, 0.0, 0.0);
+			m_color_2 = Color(0.0, 0.0, 0.0);
+			m_color_3 = c * 0.25 + Color(0.0, 0.0, 0.0) * 0.75;
+			m_color_4 = c * 0.5 + Color(0.0, 0.0, 0.0) * 0.5;
+			m_color_5 = c * 0.75 + Color(0.0, 0.0, 0.0) * 0.25;
+			m_color_6 = c;
+			m_color_7 = c;
+		}
+		else
+		{
+			m_color_1 = c;
+			m_color_2 = c;
+			m_color_3 = c * 0.75 + Color(0.0, 0.0, 0.0) * 0.25;
+			m_color_4 = c * 0.5 + Color(0.0, 0.0, 0.0) * 0.5;
+			m_color_5 = c * 0.25 + Color(0.0, 0.0, 0.0) * 0.75;
+			m_color_6 = Color(0.0, 0.0, 0.0);
+			m_color_7 = Color(0.0, 0.0, 0.0);
+		}
+		break;
 	}
 }
 

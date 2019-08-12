@@ -37,6 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/stdpaths.h>
 #include "img/icons.h"
 #include <FLIVR/VolShaderCode.h>
+#include <limits>
 
 using namespace FLIVR;
 
@@ -158,8 +159,6 @@ wxPanel(parent, id, pos, size,style, name),
 
 	wxStaticText* st = 0;
 
-	//validator: floating point 1
-	wxFloatingPointValidator<double> vald_fp1(1);
 	//validator: floating point 2
 	wxFloatingPointValidator<double> vald_fp2(2);
 	//validator: floating point 3
@@ -532,6 +531,7 @@ wxPanel(parent, id, pos, size,style, name),
 	colormap_list.push_back("Monochrome");
 	colormap_list.push_back("High-key");
 	colormap_list.push_back("Low-key");
+	colormap_list.push_back("Hi Transparency");
 	for (size_t i=0; i<colormap_list.size(); ++i)
 		m_colormap_combo->Append(colormap_list[i]);
 	m_colormap_combo2 = new wxComboBox(this, ID_ColormapCombo2, "",
@@ -1593,6 +1593,14 @@ void VPropView::OnColormapInvBtn(wxCommandEvent &event)
 void VPropView::OnColormapCombo(wxCommandEvent &event)
 {
 	int colormap = m_colormap_combo->GetCurrentSelection();
+
+	if (colormap >= 5)
+	{
+		m_colormap_tool->ToggleTool(ID_ColormapEnableChk, true);
+		OnEnableColormap(event);
+		m_options_toolbar->ToggleTool(ID_TranspChk, true);
+		OnTranspChk(event);
+	}
 
 	if (m_sync_group && m_group)
 		m_group->SetColormap(colormap);

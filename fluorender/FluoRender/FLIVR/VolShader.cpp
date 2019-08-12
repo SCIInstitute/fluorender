@@ -160,6 +160,8 @@ VolShader::VolShader(
 			return string(VOL_COLORMAP_CALC5);
 		case 6:
 			return string(VOL_COLORMAP_CALC6);
+		case 7:
+			return string(VOL_COLORMAP_CALC7);
 		}
 		return string(VOL_COLORMAP_CALC0);
 	}

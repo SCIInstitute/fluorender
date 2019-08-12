@@ -19,9 +19,9 @@ mode=0
 [mouse\ int]
 mode=1
 [dir\ shadow]
-mode=1
-x=0.587785
-y=0.809017
+mode=0
+x=0
+y=0
 [pin\ threshold]
 value=10
 [test\ mode]
