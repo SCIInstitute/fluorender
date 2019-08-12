@@ -196,8 +196,7 @@ namespace FLIVR
 #define VOL_HEAD_LIT \
 	"	//VOL_HEAD_LIT\n" \
 	"	vec4 l = loc0; // {lx, ly, lz, alpha}\n" \
-	"	vec4 k = loc1; // {ka, kd, ks, ns}\n" \
-	"	k.x = k.x>1.0?log2(3.0-k.x):k.x;\n" \
+	"	vec4 k = vec4(0.3, 0.7, loc1.z, loc1.w); // {ka, kd, ks, ns}\n" \
 	"	vec4 n, w;\n" \
 	"\n"
 
@@ -310,13 +309,16 @@ namespace FLIVR
 
 #define VOL_BODY_SHADING \
 	"	//VOL_BODY_SHADING\n" \
+	"	n.xyz *= loc5.xyz;\n" \
 	"	n.xyz = normalize(n.xyz);\n" \
-	"	n.w = dot(l.xyz, n.xyz); // calculate angle between light and normal. \n" \
-	"	n.w = clamp(abs(n.w), 0.0, 1.0); // two-sided lighting, n.w = abs(cos(angle))  \n" \
+	"	float lambert = dot(l.xyz, n.xyz); // calculate angle between light and normal. \n" \
+	"	lambert = clamp(abs(lambert), 0.0, 1.0); // two-sided lighting, n.w = abs(cos(angle))  \n" \
+	"	n.w = lambert;\n" \
 	"	w = k; // w.x = weight*ka, w.y = weight*kd, w.z = weight*ks \n" \
 	"	w.x = k.x - w.y; // w.x = ka - kd*weight \n" \
 	"	w.x = w.x + k.y; // w.x = ka + kd - kd*weight \n" \
 	"	n.z = pow(n.w, k.w); // n.z = abs(cos(angle))^ns \n" \
+	"	n.z = isnan(n.z)? 1.0:n.z;\n" \
 	"	n.w = (n.w * w.y) + w.x; // n.w = abs(cos(angle))*kd+ka\n" \
 	"	n.z = w.z * n.z; // n.z = weight*ks*abs(cos(angle))^ns \n" \
 	"\n"
@@ -469,6 +471,11 @@ namespace FLIVR
 	"		//VOL_COLORMAP_CALC6\n" \
 	"		rb.rgb = mix(loc6.w>0.0?loc9.rgb:loc9.rgb*0.1, loc6.w>0.0?loc9.rgb*0.1:loc9.rgb, clamp(valu, 0.0, 1.0));\n"
 
+//increased transp
+#define VOL_COLORMAP_CALC7 \
+	"		//VOL_COLORMAP_CALC7\n" \
+	"		rb.rgb = mix(loc6.w>0.0?vec3(0.0):loc9.rgb, loc6.w>0.0?loc9.rgb:vec3(0.0), clamp(valu, 0.0, 1.0));\n"
+
 #define VOL_TRANSFER_FUNCTION_COLORMAP \
 	"	//VOL_TRANSFER_FUNCTION_COLORMAP\n" \
 	"	vec4 c;\n" \
@@ -583,8 +590,9 @@ namespace FLIVR
 
 #define VOL_COLOR_OUTPUT \
 	"	//VOL_COLOR_OUTPUT\n" \
-	"	c.xyz = c.xyz*clamp(1.0-loc1.x, 0.0, 1.0) + loc1.x*c.xyz*(loc1.y > 0.0?(n.w + n.z):1.0);\n" \
-	"	c.xyz *= pow(1.0 - loc1.x/2.0, 2.0) + 1.0;\n" \
+	"	float shd = loc1.x < 1.0 ? (loc1.x*(n.w+n.z)+1.0-loc1.x) :\n" \
+	"		((loc1.x-1.0)*lambert+(2.0-loc1.x)*(n.w+n.z));\n" \
+	"	c.xyz *= loc1.y>0.0?shd:1.0;\n" \
 	"\n"
 
 #define VOL_FOG_BODY \
@@ -686,8 +694,10 @@ namespace FLIVR
 	"		else\n" \
 	"			sel = vec4(1.0, 1.0, p2, 1.0);\n" \
 	"	}\n" \
-	"	sel.xyz = sel.xyz*clamp(1.0-loc1.x, 0.0, 1.0) + loc1.x*sel.xyz*(loc1.y > 0.0?(n.w + n.z):1.0);\n" \
-	"	sel.xyz *= pow(1.0 - loc1.x / 2.0, 2.0) + 1.0;\n" \
+	"	//VOL_COLOR_OUTPUT\n" \
+	"	float shd = loc1.x < 1.0 ? (loc1.x*(n.w+n.z)+1.0-loc1.x) :\n" \
+	"		(n.w+n.z);\n" \
+	"	sel.xyz *= loc1.y>0.0?shd:1.0;\n" \
 	"	FragColor = sel*l.w;\n" \
 	"\n"
 
@@ -725,8 +735,10 @@ namespace FLIVR
 	"		else\n" \
 	"			sel = vec4(1.0, 0.0, p2, 1.0);\n" \
 	"	}\n" \
-	"	sel.xyz = sel.xyz*clamp(1.0-loc1.x, 0.0, 1.0) + loc1.x*sel.xyz*(loc1.y > 0.0?(n.w + n.z):1.0);\n" \
-	"	sel.xyz *= pow(1.0 - loc1.x / 2.0, 2.0) + 1.0;\n" \
+	"	//VOL_COLOR_OUTPUT\n" \
+	"	float shd = loc1.x < 1.0 ? (loc1.x*(n.w+n.z)+1.0-loc1.x) :\n" \
+	"		(n.w+n.z);\n" \
+	"	sel.xyz *= loc1.y>0.0?shd:1.0;\n" \
 	"	FragColor = sel*alpha*tf_alp*l.w;\n" \
 	"\n"
 
