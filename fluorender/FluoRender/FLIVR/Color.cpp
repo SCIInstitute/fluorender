@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <FLIVR/Color.h>
 #include <FLIVR/Utils.h>
+#include <cmath>
 
 namespace FLIVR
 {
@@ -139,8 +140,8 @@ namespace FLIVR
 		unsigned int cv = id % 253;
 		cv = (cv << shuffle) & 0xff | (cv >> (8 - shuffle)) & 0xff;
 		double hue = double(cv) / 45.0;
-		double p2 = 1.0 - hue + floor(hue);
-		double p3 = hue - floor(hue);
+        double p2 = 1.0 - hue + std::floor(hue);
+        double p3 = hue - std::floor(hue);
 		if (hue < 1.0)
 			*this = Color(1.0, p3, 0.0);
 		else if (hue < 2.0)
