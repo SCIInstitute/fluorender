@@ -3131,7 +3131,8 @@ void ComponentDlg::Analyze(bool sel)
 		string titles, values;
 		m_comp_analyzer.OutputFormHeader(titles);
 		m_comp_analyzer.OutputCompListStr(values, 0);
-		SetOutput(wxString(titles), wxString(values));
+		wxString str1(titles), str2(values);
+		SetOutput(str1, str2);
 	}
 
 	m_generate_prg->SetValue(100);

@@ -9452,8 +9452,9 @@ void VRenderGLView::DrawColormap()
 		m_value_5 = (m_value_4 + high) / 2.0;
 		max_val = m_cur_vol->GetMaxValue();
 		enable_alpha = m_cur_vol->GetEnableAlpha();
+        Color vd_color = m_cur_vol->GetColor();
 		SetColormapColors(m_cur_vol->GetColormap(),
-			m_cur_vol->GetColor(), m_cur_vol->GetColormapInv());
+			vd_color, m_cur_vol->GetColormapInv());
 	}
 	else return;
 
