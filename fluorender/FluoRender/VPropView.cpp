@@ -463,7 +463,7 @@ wxPanel(parent, id, pos, size,style, name),
 	m_options_toolbar->Realize();
 	//spacings
 	//x
-	st = new wxStaticText(this, 0, "Vx Spacings: ",
+	st = new wxStaticText(this, 0, "Voxel Size: ",
 		wxDefaultPosition, wxSize(70, -1), wxALIGN_RIGHT);
 	m_space_x_text = new wxTextCtrl(this, ID_SpaceXText, "1.000",
 		wxDefaultPosition, wxSize(50, -1), 0, vald_fp3);
@@ -515,7 +515,7 @@ wxPanel(parent, id, pos, size,style, name),
 	sizer_r4->Add(m_color2_text, 1, wxALIGN_CENTER, 0);
 	sizer_r4->Add(m_color2_btn, 1, wxALIGN_CENTER, 0);
 	// colormap chooser
-	st = new wxStaticText(this, 0, "Color Maps: ",
+	st = new wxStaticText(this, 0, "Effects: ",
 		wxDefaultPosition, wxSize(70, -1), wxALIGN_RIGHT);
 	m_colormap_inv_btn = new wxToggleButton(this, ID_ColormapInvBtn,
 		L"\u262f", wxDefaultPosition, wxSize(20, 24));
@@ -1582,6 +1582,9 @@ void VPropView::OnColormapInvBtn(wxCommandEvent &event)
 {
 	bool val = m_colormap_inv_btn->GetValue();
 
+	m_colormap_tool->ToggleTool(ID_ColormapEnableChk, true);
+	OnEnableColormap(event);
+
 	if (m_sync_group && m_group)
 		m_group->SetColormapInv(val ? -1.0 : 1.0);
 	else if (m_vd)
@@ -1594,10 +1597,10 @@ void VPropView::OnColormapCombo(wxCommandEvent &event)
 {
 	int colormap = m_colormap_combo->GetCurrentSelection();
 
+	m_colormap_tool->ToggleTool(ID_ColormapEnableChk, true);
+	OnEnableColormap(event);
 	if (colormap >= 5)
 	{
-		m_colormap_tool->ToggleTool(ID_ColormapEnableChk, true);
-		OnEnableColormap(event);
 		m_options_toolbar->ToggleTool(ID_TranspChk, true);
 		OnTranspChk(event);
 	}
@@ -1613,6 +1616,9 @@ void VPropView::OnColormapCombo(wxCommandEvent &event)
 void VPropView::OnColormapCombo2(wxCommandEvent &event)
 {
 	int colormap_proj = m_colormap_combo2->GetCurrentSelection();
+
+	m_colormap_tool->ToggleTool(ID_ColormapEnableChk, true);
+	OnEnableColormap(event);
 
 	if (m_sync_group && m_group)
 		m_group->SetColormapProj(colormap_proj);
