@@ -58,27 +58,11 @@ namespace FL
 		void ShuffleID_3D();
 		void ShuffleID_2D();
 		void ClearBorders3D();
-		void ClearBorders2D();
 		void FillBorder3D(float);
-		void FillBorder2D(float);
 		void Grow3D(bool, int, float, float, float);
 		void Grow3DSized(bool, int, float, float,
 			int, float, int);
 		void Cleanup3D(int, unsigned int);
-		void InitialGrow(bool, int,
-			float, float,
-			float, float,
-			float, float,
-			float, float,
-			float, float);
-		void SizedGrow(bool, int,
-			unsigned int, unsigned int,
-			float, float,
-			float, float,
-			float, float,
-			float, float,
-			float, float);
-		void Cleanup(int, unsigned int);
 		void MatchSlices_CPU(bool backwards,
 			unsigned int,
 			float, float, float);
@@ -135,6 +119,10 @@ namespace FL
 		typedef boost::unordered_map<unsigned int, Edge*>::iterator ReplaceListIter;
 
 	private:
+		bool CheckBricks();
+		void GetLabel(size_t brick_num, TextureBrick* b, void** val32);
+		void ReleaseLabel(void* val32, size_t brick_num, TextureBrick* b);
+
 		unsigned int reverse_bit(unsigned int val, unsigned int len);
 		void InitializeCellList(unsigned int* page, void* page_data,
 			int bits, float sscale, size_t nx, size_t ny,
