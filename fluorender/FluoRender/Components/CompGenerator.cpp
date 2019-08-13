@@ -54,154 +54,87 @@ void ComponentGenerator::OrderID_3D()
 	m_sig_progress();
 }
 
-#define GET_VOLDATA \
-	if (!m_vd) \
-		return; \
-	int nx, ny, nz; \
-	m_vd->GetResolution(nx, ny, nz); \
-	Nrrd* nrrd_data = 0; \
-	if (m_use_mask) \
-		nrrd_data = m_vd->GetMask(true); \
-	if (!nrrd_data) \
-		nrrd_data = m_vd->GetVolume(false); \
-	if (!nrrd_data) \
-		return; \
-	Nrrd* nrrd_label = m_vd->GetLabel(false); \
-	if (!nrrd_data) \
-		return; \
-	unsigned char* val8 = 0; \
-	unsigned short* val16 = 0; \
-	int bits; \
-	if (nrrd_data->type == nrrdTypeUChar) \
-	{ \
-		bits = 8; \
-		val8 = (unsigned char*)(nrrd_data->data); \
-	} \
-	else if (nrrd_data->type == nrrdTypeUShort) \
-	{ \
-		bits = 16; \
-		val16 = (unsigned short*)(nrrd_data->data); \
-	} \
-	unsigned int* val32 = (unsigned int*)(nrrd_label->data);
+bool ComponentGenerator::CheckBricks()
+{
+	if (!m_vd || !m_vd->GetTexture())
+		return false;
+	vector<TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	if (!bricks || bricks->size() == 0)
+		return false;
+	return true;
+}
 
-#define CHECK_BRICKS \
-	if (!m_vd || !m_vd->GetTexture()) \
-		return; \
-	vector<TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks(); \
-	if (!bricks || bricks->size() == 0) \
+void ComponentGenerator::GetLabel(size_t brick_num, TextureBrick* b, void** val32)
+{
+	if (!b)
 		return;
 
-#define GET_VOLDATA_STREAM \
-	int nx, ny, nz; \
-	unsigned char* val8 = 0; \
-	unsigned short* val16 = 0; \
-	int bits = 8; \
-	unsigned int* val32 = 0; \
-	TextureBrick* b = 0; \
-	int c = 0; \
-	int nb = 1; \
-	if (bricks->size() > 1) \
-	{ \
-		b = (*bricks)[i]; \
-		c = m_use_mask ? b->nmask() : 0; \
-		nb = b->nb(c); \
-		nx = b->nx(); \
-		ny = b->ny(); \
-		nz = b->nz(); \
-		bits = nb * 8; \
-		unsigned long long mem_size = (unsigned long long)nx* \
-		(unsigned long long)ny*(unsigned long long)nz*(unsigned long long)nb; \
-		unsigned char* temp = new unsigned char[mem_size]; \
-		unsigned char* tempp = temp; \
-		unsigned char* tp = (unsigned char*)(b->tex_data(c)); \
-		unsigned char* tp2; \
-		for (unsigned int k = 0; k < nz; ++k) \
-		{ \
-			tp2 = tp; \
-			for (unsigned int j = 0; j < ny; ++j) \
-			{ \
-				memcpy(tempp, tp2, nx*nb); \
-				tempp += nx*nb; \
-				tp2 += b->sx()*nb; \
-			} \
-			tp += b->sx()*b->sy()*nb; \
-		} \
-		if (bits == 8) \
-		val8 = temp; \
-		else if (bits == 16) \
-		val16 = (unsigned short*)temp; \
-		c = b->nlabel(); \
-		nb = b->nb(c); \
-		mem_size = (unsigned long long)nx* \
-		(unsigned long long)ny*(unsigned long long)nz*(unsigned long long)nb; \
-		temp = new unsigned char[mem_size]; \
-		tempp = temp; \
-		tp = (unsigned char*)(b->tex_data(c)); \
-		for (unsigned int k = 0; k < nz; ++k) \
-		{ \
-			tp2 = tp; \
-			for (unsigned int j = 0; j < ny; ++j) \
-			{ \
-				memcpy(tempp, tp2, nx*nb); \
-				tempp += nx*nb; \
-				tp2 += b->sx()*nb; \
-			} \
-			tp += b->sx()*b->sy()*nb; \
-		} \
-		val32 = (unsigned int*)temp; \
-	} \
-	else \
-	{ \
-		b = (*bricks)[0]; \
-		m_vd->GetResolution(nx, ny, nz); \
-		Nrrd* nrrd_data = 0; \
-		if (m_use_mask) \
-			nrrd_data = m_vd->GetMask(false); \
-		if (!nrrd_data) \
-			nrrd_data = m_vd->GetVolume(false); \
-		if (!nrrd_data) \
-			return; \
-		Nrrd* nrrd_label = m_vd->GetLabel(false); \
-		if (!nrrd_data) \
-			return; \
-		if (nrrd_data->type == nrrdTypeUChar) \
-		{ \
-			bits = 8; \
-			val8 = (unsigned char*)(nrrd_data->data); \
-		} \
-		else if (nrrd_data->type == nrrdTypeUShort) \
-		{ \
-			bits = 16; \
-			val16 = (unsigned short*)(nrrd_data->data); \
-		} \
-		val32 = (unsigned int*)(nrrd_label->data); \
+	if (brick_num > 1)
+	{
+		int c = b->nlabel();
+		int nb = b->nb(c);
+		int nx = b->nx();
+		int ny = b->ny();
+		int nz = b->nz();
+		unsigned long long mem_size = (unsigned long long)nx*
+			(unsigned long long)ny*(unsigned long long)nz*(unsigned long long)nb;
+		unsigned char* temp = new unsigned char[mem_size];
+		unsigned char* tempp = temp;
+		unsigned char* tp = (unsigned char*)(b->tex_data(c));
+		unsigned char* tp2;
+		for (unsigned int k = 0; k < nz; ++k)
+		{
+			tp2 = tp;
+			for (unsigned int j = 0; j < ny; ++j)
+			{
+				memcpy(tempp, tp2, nx*nb);
+				tempp += nx * nb;
+				tp2 += b->sx()*nb;
+			}
+				tp += b->sx()*b->sy()*nb;
+		}
+		*val32 = (void*)temp;
 	}
+	else
+	{
+		Nrrd* nrrd_label = m_vd->GetLabel(false);
+		if (!nrrd_label)
+			return;
+		*val32 = (void*)(nrrd_label->data);
+	}
+}
 
-#define RELEASE_DATA_STREAM \
-	if (bricks->size() > 1) \
-	{ \
-		unsigned char* tempp = (unsigned char*)val32; \
-		unsigned char* tp = (unsigned char*)(b->tex_data(c)); \
-		unsigned char* tp2; \
-		for (unsigned int k = 0; k < nz; ++k) \
-		{ \
-			tp2 = tp; \
-			for (unsigned int j = 0; j < ny; ++j) \
-			{ \
-				memcpy(tp2, tempp, nx*nb); \
-				tempp += nx*nb; \
-				tp2 += b->sx()*nb; \
-			} \
-			tp += b->sx()*b->sy()*nb; \
-		} \
-		if (val8) delete[] val8; \
-		if (val16) delete[] val16; \
-		if (val32) delete[] val32; \
+void ComponentGenerator::ReleaseLabel(void* val32, size_t brick_num, TextureBrick* b)
+{
+	if (!val32 || brick_num <= 1)
+		return;
+
+	unsigned char* tempp = (unsigned char*)val32;
+	int c = b->nlabel();
+	int nb = b->nb(c);
+	int nx = b->nx();
+	int ny = b->ny();
+	int nz = b->nz();
+	unsigned char* tp = (unsigned char*)(b->tex_data(c));
+	unsigned char* tp2;
+	for (unsigned int k = 0; k < nz; ++k)
+	{
+		tp2 = tp;
+		for (unsigned int j = 0; j < ny; ++j)
+		{
+			memcpy(tp2, tempp, nx*nb);
+			tempp += nx * nb;
+			tp2 += b->sx()*nb;
+		}
+		tp += b->sx()*b->sy()*nb;
 	}
+	delete[] val32;
+}
 
 void ComponentGenerator::OrderID_2D()
 {
-	CHECK_BRICKS
+	if (!CheckBricks())
+		return;
 
 	//create program and kernels
 	KernelProgram* kernel_prog = VolumeRenderer::
@@ -210,39 +143,28 @@ void ComponentGenerator::OrderID_2D()
 		return;
 	int kernel_index = kernel_prog->createKernel("kernel_0");
 
-	if (m_use_mask)
-		m_vd->GetVR()->return_mask();
-
-	for (size_t i = 0; i < bricks->size(); ++i)
+	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	for (size_t i = 0; i < brick_num; ++i)
 	{
-		GET_VOLDATA_STREAM
+		TextureBrick* b = (*bricks)[i];
+		int bits = b->nb(0) * 8;
+		int nx = b->nx();
+		int ny = b->ny();
+		int nz = b->nz();
+		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint mid = 0;
+		if (m_use_mask)
+			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+		void* val32 = 0;
+		GetLabel(brick_num, b, &val32);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
-		//data
-		cl_image_format image_format;
-		image_format.image_channel_order = CL_R;
-		if (bits == 8)
-			image_format.image_channel_data_type = CL_UNORM_INT8;
-		else if (bits == 16)
-			image_format.image_channel_data_type = CL_UNORM_INT16;
-		cl_image_desc image_desc;
-		image_desc.image_type = CL_MEM_OBJECT_IMAGE3D;
-		image_desc.image_width = nx;
-		image_desc.image_height = ny;
-		image_desc.image_depth = nz;
-		image_desc.image_array_size = 0;
-		image_desc.image_row_pitch = 0;
-		image_desc.image_slice_pitch = 0;
-		image_desc.num_mip_levels = 0;
-		image_desc.num_samples = 0;
-		image_desc.buffer = 0;
 		//set
-		kernel_prog->setKernelArgImage(kernel_index, 0,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			image_format, image_desc,
-			bits == 8 ? (void*)(val8) : (void*)(val16));
+		kernel_prog->setKernelArgTex3D(kernel_index, 0,
+			CL_MEM_READ_ONLY, did);
 		kernel_prog->setKernelArgBuf(kernel_index, 1,
 			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 			sizeof(unsigned int)*nx*ny*nz, val32);
@@ -259,16 +181,16 @@ void ComponentGenerator::OrderID_2D()
 
 		//release buffer
 		kernel_prog->releaseAll();
+		ReleaseLabel(val32, brick_num, b);
 
 		m_sig_progress();
-
-		RELEASE_DATA_STREAM
 	}
 }
 
 void ComponentGenerator::ShuffleID_3D()
 {
-	CHECK_BRICKS
+	if (!CheckBricks())
+		return;
 
 	//create program and kernels
 	KernelProgram* kernel_prog = VolumeRenderer::
@@ -276,9 +198,6 @@ void ComponentGenerator::ShuffleID_3D()
 	if (!kernel_prog)
 		return;
 	int kernel_index = kernel_prog->createKernel("kernel_1");
-
-	if (m_use_mask)
-		m_vd->GetVR()->return_mask();
 
 	//clipping planes
 	cl_float4 p[6];
@@ -296,9 +215,21 @@ void ComponentGenerator::ShuffleID_3D()
 		}
 	}
 
-	for (size_t i = 0; i < bricks->size(); ++i)
+	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	for (size_t i = 0; i < brick_num; ++i)
 	{
-		GET_VOLDATA_STREAM
+		TextureBrick* b = (*bricks)[i];
+		int bits = b->nb(0) * 8;
+		int nx = b->nx();
+		int ny = b->ny();
+		int nz = b->nz();
+		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint mid = 0;
+		if (m_use_mask)
+			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+		void* val32 = 0;
+		GetLabel(brick_num, b, &val32);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -318,29 +249,9 @@ void ComponentGenerator::ShuffleID_3D()
 			lenz++;
 		}
 
-		//data
-		cl_image_format image_format;
-		image_format.image_channel_order = CL_R;
-		if (bits == 8)
-			image_format.image_channel_data_type = CL_UNORM_INT8;
-		else if (bits == 16)
-			image_format.image_channel_data_type = CL_UNORM_INT16;
-		cl_image_desc image_desc;
-		image_desc.image_type = CL_MEM_OBJECT_IMAGE3D;
-		image_desc.image_width = size_t(nx);
-		image_desc.image_height = size_t(ny);
-		image_desc.image_depth = size_t(nz);
-		image_desc.image_array_size = 0;
-		image_desc.image_row_pitch = 0;
-		image_desc.image_slice_pitch = 0;
-		image_desc.num_mip_levels = 0;
-		image_desc.num_samples = 0;
-		image_desc.buffer = 0;
 		//set
-		kernel_prog->setKernelArgImage(kernel_index, 0,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			image_format, image_desc,
-			bits == 8 ? (void*)(val8) : (void*)(val16));
+		kernel_prog->setKernelArgTex3D(kernel_index, 0,
+			CL_MEM_READ_ONLY, did);
 		kernel_prog->setKernelArgBuf(kernel_index, 1,
 			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 			sizeof(unsigned int)*nx*ny*nz, val32);
@@ -387,16 +298,16 @@ void ComponentGenerator::ShuffleID_3D()
 
 		//release buffer
 		kernel_prog->releaseAll();
+		ReleaseLabel(val32, brick_num, b);
 
 		m_sig_progress();
-
-		RELEASE_DATA_STREAM
 	}
 }
 
 void ComponentGenerator::ShuffleID_2D()
 {
-	CHECK_BRICKS
+	if (!CheckBricks())
+		return;
 
 	//create program and kernels
 	KernelProgram* kernel_prog = VolumeRenderer::
@@ -405,12 +316,21 @@ void ComponentGenerator::ShuffleID_2D()
 		return;
 	int kernel_index = kernel_prog->createKernel("kernel_0");
 
-	if (m_use_mask)
-		m_vd->GetVR()->return_mask();
-
-	for (size_t i = 0; i < bricks->size(); ++i)
+	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	for (size_t i = 0; i < brick_num; ++i)
 	{
-		GET_VOLDATA_STREAM
+		TextureBrick* b = (*bricks)[i];
+		int bits = b->nb(0) * 8;
+		int nx = b->nx();
+		int ny = b->ny();
+		int nz = b->nz();
+		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint mid = 0;
+		if (m_use_mask)
+			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+		void* val32 = 0;
+		GetLabel(brick_num, b, &val32);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -422,29 +342,9 @@ void ComponentGenerator::ShuffleID_2D()
 			len++;
 		}
 
-		//data
-		cl_image_format image_format;
-		image_format.image_channel_order = CL_R;
-		if (bits == 8)
-			image_format.image_channel_data_type = CL_UNORM_INT8;
-		else if (bits == 16)
-			image_format.image_channel_data_type = CL_UNORM_INT16;
-		cl_image_desc image_desc;
-		image_desc.image_type = CL_MEM_OBJECT_IMAGE3D;
-		image_desc.image_width = nx;
-		image_desc.image_height = ny;
-		image_desc.image_depth = nz;
-		image_desc.image_array_size = 0;
-		image_desc.image_row_pitch = 0;
-		image_desc.image_slice_pitch = 0;
-		image_desc.num_mip_levels = 0;
-		image_desc.num_samples = 0;
-		image_desc.buffer = 0;
 		//set
-		kernel_prog->setKernelArgImage(kernel_index, 0,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			image_format, image_desc,
-			bits == 8 ? (void*)(val8) : (void*)(val16));
+		kernel_prog->setKernelArgTex3D(kernel_index, 0,
+			CL_MEM_READ_ONLY, did);
 		kernel_prog->setKernelArgBuf(kernel_index, 1,
 			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 			sizeof(unsigned int)*nx*ny*nz, val32);
@@ -463,16 +363,16 @@ void ComponentGenerator::ShuffleID_2D()
 
 		//release buffer
 		kernel_prog->releaseAll();
+		ReleaseLabel(val32, brick_num, b);
 
 		m_sig_progress();
-
-		RELEASE_DATA_STREAM
 	}
 }
 
 void ComponentGenerator::ClearBorders3D()
 {
-	CHECK_BRICKS
+	if (!CheckBricks())
+		return;
 
 	//create program and kernels
 	KernelProgram* kernel_prog = VolumeRenderer::
@@ -481,12 +381,20 @@ void ComponentGenerator::ClearBorders3D()
 		return;
 	int kernel_index = kernel_prog->createKernel("kernel_0");
 
-	if (m_use_mask)
-		m_vd->GetVR()->return_mask();
-
-	for (size_t i = 0; i < bricks->size(); ++i)
+	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	for (size_t i = 0; i < brick_num; ++i)
 	{
-		GET_VOLDATA_STREAM
+		TextureBrick* b = (*bricks)[i];
+		int bits = b->nb(0) * 8;
+		int nx = b->nx();
+		int ny = b->ny();
+		int nz = b->nz();
+		GLint mid = 0;
+		if (m_use_mask)
+			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+		void* val32 = 0;
+		GetLabel(brick_num, b, &val32);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -507,68 +415,16 @@ void ComponentGenerator::ClearBorders3D()
 
 		//release buffer
 		kernel_prog->releaseMemObject(kernel_index, 0, sizeof(unsigned int)*nx*ny*nz, 0);
+		ReleaseLabel(val32, brick_num, b);
 
 		m_sig_progress();
-
-		RELEASE_DATA_STREAM
-	}
-}
-
-void ComponentGenerator::ClearBorders2D()
-{
-	CHECK_BRICKS
-
-	//create program and kernels
-	KernelProgram* kernel_prog = VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_clear_borders_2d);
-	if (!kernel_prog)
-		return;
-	int kernel_index = kernel_prog->createKernel("kernel_0");
-
-	if (m_use_mask)
-		m_vd->GetVR()->return_mask();
-
-	for (size_t i = 0; i < bricks->size(); ++i)
-	{
-		GET_VOLDATA_STREAM
-
-		unsigned int* cur_page_label = val32;
-		size_t global_size[2] = { size_t(nx), size_t(ny) };
-		size_t local_size[2] = { 1, 1 };
-
-		Argument label_buffer = kernel_prog->setKernelArgBuf(kernel_index, 0,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny, cur_page_label);
-		kernel_prog->setKernelArgConst(kernel_index, 1,
-			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(kernel_index, 2,
-			sizeof(unsigned int), (void*)(&ny));
-
-		for (size_t i = 0; i < nz; ++i)
-		{
-			//update
-			if (i)
-				kernel_prog->writeBuffer(label_buffer, cur_page_label);
-			//execute
-			kernel_prog->executeKernel(kernel_index, 2, global_size, local_size);
-			//read back
-			kernel_prog->readBuffer(label_buffer, cur_page_label);
-			//advance
-			cur_page_label += nx*ny;
-		}
-
-		//release buffer
-		kernel_prog->releaseMemObject(label_buffer);
-
-		m_sig_progress();
-
-		RELEASE_DATA_STREAM
 	}
 }
 
 void ComponentGenerator::FillBorder3D(float tol)
 {
-	CHECK_BRICKS
+	if (!CheckBricks())
+		return;
 
 	//create program and kernels
 	KernelProgram* kernel_prog = VolumeRenderer::
@@ -577,36 +433,28 @@ void ComponentGenerator::FillBorder3D(float tol)
 		return;
 	int kernel_index = kernel_prog->createKernel("kernel_0");
 
-	for (size_t i = 0; i < bricks->size(); ++i)
+	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	for (size_t i = 0; i < brick_num; ++i)
 	{
-		GET_VOLDATA_STREAM
+		TextureBrick* b = (*bricks)[i];
+		int bits = b->nb(0) * 8;
+		int nx = b->nx();
+		int ny = b->ny();
+		int nz = b->nz();
+		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint mid = 0;
+		if (m_use_mask)
+			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+		void* val32 = 0;
+		GetLabel(brick_num, b, &val32);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
-		//data
-		cl_image_format image_format;
-		image_format.image_channel_order = CL_R;
-		if (bits == 8)
-			image_format.image_channel_data_type = CL_UNORM_INT8;
-		else if (bits == 16)
-			image_format.image_channel_data_type = CL_UNORM_INT16;
-		cl_image_desc image_desc;
-		image_desc.image_type = CL_MEM_OBJECT_IMAGE3D;
-		image_desc.image_width = nx;
-		image_desc.image_height = ny;
-		image_desc.image_depth = nz;
-		image_desc.image_array_size = 0;
-		image_desc.image_row_pitch = 0;
-		image_desc.image_slice_pitch = 0;
-		image_desc.num_mip_levels = 0;
-		image_desc.num_samples = 0;
-		image_desc.buffer = 0;
 		//set
-		kernel_prog->setKernelArgImage(kernel_index, 0,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			image_format, image_desc,
-			bits == 8 ? (void*)(val8) : (void*)(val16));
+		kernel_prog->setKernelArgTex3D(kernel_index, 0,
+			CL_MEM_READ_ONLY, did);
 		kernel_prog->setKernelArgBuf(kernel_index, 1,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			sizeof(unsigned int)*nx*ny*nz, val32);
@@ -626,102 +474,16 @@ void ComponentGenerator::FillBorder3D(float tol)
 
 		//release buffer
 		kernel_prog->releaseAll();
+		ReleaseLabel(val32, brick_num, b);
 
 		m_sig_progress();
-
-		RELEASE_DATA_STREAM
-	}
-}
-
-void ComponentGenerator::FillBorder2D(float tol)
-{
-	CHECK_BRICKS
-
-	//create program and kernels
-	KernelProgram* kernel_prog = VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_fill_borders_2d);
-	if (!kernel_prog)
-		return;
-	int kernel_index = kernel_prog->createKernel("kernel_0");
-
-	for (size_t i = 0; i < bricks->size(); ++i)
-	{
-		GET_VOLDATA_STREAM
-
-		unsigned char* cur_page_data8 = bits == 8 ? val8 : 0;
-		unsigned short* cur_page_data16 = bits == 16 ? val16 : 0;
-		unsigned int* cur_page_label = val32;
-		size_t global_size[2] = { size_t(nx), size_t(ny) };
-		size_t local_size[2] = { 1, 1 };
-
-		//data
-		cl_image_format image_format;
-		image_format.image_channel_order = CL_R;
-		if (bits == 8)
-			image_format.image_channel_data_type = CL_UNORM_INT8;
-		else if (bits == 16)
-			image_format.image_channel_data_type = CL_UNORM_INT16;
-		cl_image_desc image_desc;
-		image_desc.image_type = CL_MEM_OBJECT_IMAGE2D;
-		image_desc.image_width = nx;
-		image_desc.image_height = ny;
-		image_desc.image_depth = 0;
-		image_desc.image_array_size = 0;
-		image_desc.image_row_pitch = 0;
-		image_desc.image_slice_pitch = 0;
-		image_desc.num_mip_levels = 0;
-		image_desc.num_samples = 0;
-		image_desc.buffer = 0;
-		//set
-		Argument data_buffer = kernel_prog->setKernelArgImage(kernel_index, 0,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			image_format, image_desc,
-			bits == 8 ? (void*)(cur_page_data8) : (void*)(cur_page_data16));
-		Argument label_buffer = kernel_prog->setKernelArgBuf(kernel_index, 1,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny, cur_page_label);
-		kernel_prog->setKernelArgConst(kernel_index, 2,
-			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(kernel_index, 3,
-			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(kernel_index, 4,
-			sizeof(float), (void*)(&tol));
-
-		const size_t origin[] = { 0, 0, 0 };
-		const size_t region[] = { size_t(nx), size_t(ny), 1 };
-		void *img_data = bits == 8 ? (void*)(cur_page_data8) : (void*)(cur_page_data16);
-		for (size_t i = 0; i < nz; ++i)
-		{
-			if (i)
-			{
-				kernel_prog->writeImage(origin, region, data_buffer, img_data);
-				kernel_prog->writeBuffer(label_buffer, cur_page_label);
-			}
-
-			//execute
-			kernel_prog->executeKernel(kernel_index, 2, global_size, local_size);
-			//read back
-			kernel_prog->readBuffer(label_buffer, cur_page_label);
-
-			if (bits == 8)
-				cur_page_data8 += nx*ny;
-			else if (bits == 16)
-				cur_page_data16 += nx*ny;
-			cur_page_label += nx*ny;
-		}
-
-		//release buffer
-		kernel_prog->releaseAll();
-
-		m_sig_progress();
-
-		RELEASE_DATA_STREAM
 	}
 }
 
 void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float falloff, float sscale)
 {
-	CHECK_BRICKS
+	if (!CheckBricks())
+		return;
 
 	//create program and kernels
 	KernelProgram* kernel_prog = VolumeRenderer::
@@ -730,12 +492,22 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 		return;
 	int kernel_index0 = kernel_prog->createKernel("kernel_0");
 
-	if (m_use_mask)
-		m_vd->GetVR()->return_mask();
 
-	for (size_t i = 0; i < bricks->size(); ++i)
+	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	for (size_t i = 0; i < brick_num; ++i)
 	{
-		GET_VOLDATA_STREAM
+		TextureBrick* b = (*bricks)[i];
+		int bits = b->nb(0) * 8;
+		int nx = b->nx();
+		int ny = b->ny();
+		int nz = b->nz();
+		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint mid = 0;
+		if (m_use_mask)
+			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+		void* val32 = 0;
+		GetLabel(brick_num, b, &val32);
 
 		unsigned int rcnt = 0;
 		unsigned int seed = iter > 10 ? iter : 11;
@@ -744,29 +516,9 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 		float scl_ff = diffuse ? falloff : 0.0f;
 		float grad_ff = diffuse ? falloff : 0.0f;
 
-		//data
-		cl_image_format image_format;
-		image_format.image_channel_order = CL_R;
-		if (bits == 8)
-			image_format.image_channel_data_type = CL_UNORM_INT8;
-		else if (bits == 16)
-			image_format.image_channel_data_type = CL_UNORM_INT16;
-		cl_image_desc image_desc;
-		image_desc.image_type = CL_MEM_OBJECT_IMAGE3D;
-		image_desc.image_width = nx;
-		image_desc.image_height = ny;
-		image_desc.image_depth = nz;
-		image_desc.image_array_size = 0;
-		image_desc.image_row_pitch = 0;
-		image_desc.image_slice_pitch = 0;
-		image_desc.num_mip_levels = 0;
-		image_desc.num_samples = 0;
-		image_desc.buffer = 0;
 		//set
-		kernel_prog->setKernelArgImage(kernel_index0, 0,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			image_format, image_desc,
-			bits == 8 ? (void*)(val8) : (void*)(val16));
+		kernel_prog->setKernelArgTex3D(kernel_index0, 0,
+			CL_MEM_READ_ONLY, did);
 		kernel_prog->setKernelArgBuf(kernel_index0, 1,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			sizeof(unsigned int)*nx*ny*nz, (void*)(val32));
@@ -799,10 +551,9 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 
 		//release buffer
 		kernel_prog->releaseAll();
+		ReleaseLabel(val32, brick_num, b);
 
 		m_sig_progress();
-
-		RELEASE_DATA_STREAM
 	}
 }
 
@@ -810,7 +561,8 @@ void ComponentGenerator::Grow3DSized(
 	bool diffuse, int iter, float tran, float falloff,
 	int size_lm, float density, int dsize)
 {
-	CHECK_BRICKS
+	if (!CheckBricks())
+		return;
 
 	//create program and kernels
 	KernelProgram* kernel_prog = VolumeRenderer::
@@ -821,12 +573,21 @@ void ComponentGenerator::Grow3DSized(
 	int kernel_index1 = kernel_prog->createKernel("kernel_1");
 	int kernel_index2 = kernel_prog->createKernel("kernel_2");
 
-	if (m_use_mask)
-		m_vd->GetVR()->return_mask();
-
-	for (size_t i = 0; i < bricks->size(); ++i)
+	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	for (size_t i = 0; i < brick_num; ++i)
 	{
-		GET_VOLDATA_STREAM
+		TextureBrick* b = (*bricks)[i];
+		int bits = b->nb(0) * 8;
+		int nx = b->nx();
+		int ny = b->ny();
+		int nz = b->nz();
+		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint mid = 0;
+		if (m_use_mask)
+			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+		void* val32 = 0;
+		GetLabel(brick_num, b, &val32);
 
 		unsigned int* mask32 = new unsigned int[nx*ny*nz];
 		memset(mask32, 0, sizeof(unsigned int)*nx*ny*nz);
@@ -852,25 +613,6 @@ void ComponentGenerator::Grow3DSized(
 			r /= 2;
 			lenz++;
 		}
-
-		//data
-		cl_image_format image_format;
-		image_format.image_channel_order = CL_R;
-		if (bits == 8)
-			image_format.image_channel_data_type = CL_UNORM_INT8;
-		else if (bits == 16)
-			image_format.image_channel_data_type = CL_UNORM_INT16;
-		cl_image_desc image_desc;
-		image_desc.image_type = CL_MEM_OBJECT_IMAGE3D;
-		image_desc.image_width = nx;
-		image_desc.image_height = ny;
-		image_desc.image_depth = nz;
-		image_desc.image_array_size = 0;
-		image_desc.image_row_pitch = 0;
-		image_desc.image_slice_pitch = 0;
-		image_desc.num_mip_levels = 0;
-		image_desc.num_samples = 0;
-		image_desc.buffer = 0;
 
 		//set
 		//kernel 0
@@ -908,10 +650,8 @@ void ComponentGenerator::Grow3DSized(
 		kernel_prog->setKernelArgConst(kernel_index1, 6,
 			sizeof(unsigned int), (void*)(&lenz));
 		//kernel 2
-		kernel_prog->setKernelArgImage(kernel_index2, 0,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			image_format, image_desc,
-			bits == 8 ? (void*)(val8) : (void*)(val16));
+		kernel_prog->setKernelArgTex3D(kernel_index2, 0,
+			CL_MEM_READ_ONLY, did);
 		kernel_prog->setKernelArgBuf(kernel_index2, 1,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			sizeof(unsigned int)*nx*ny*nz, (void*)(mask32));
@@ -955,17 +695,17 @@ void ComponentGenerator::Grow3DSized(
 
 		//release buffer
 		kernel_prog->releaseAll();
+		ReleaseLabel(val32, brick_num, b);
 		delete[] mask32;
 
 		m_sig_progress();
-
-		RELEASE_DATA_STREAM
 	}
 }
 
 void ComponentGenerator::Cleanup3D(int iter, unsigned int size_lm)
 {
-	CHECK_BRICKS
+	if (!CheckBricks())
+		return;
 
 	//create program and kernels
 	KernelProgram* kernel_prog = VolumeRenderer::
@@ -976,34 +716,25 @@ void ComponentGenerator::Cleanup3D(int iter, unsigned int size_lm)
 	int kernel_index1 = kernel_prog->createKernel("kernel_1");
 	int kernel_index2 = kernel_prog->createKernel("kernel_2");
 
-	if (m_use_mask)
-		m_vd->GetVR()->return_mask();
-
-	for (size_t i = 0; i < bricks->size(); ++i)
+	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	for (size_t i = 0; i < brick_num; ++i)
 	{
-		GET_VOLDATA_STREAM
+		TextureBrick* b = (*bricks)[i];
+		int bits = b->nb(0) * 8;
+		int nx = b->nx();
+		int ny = b->ny();
+		int nz = b->nz();
+		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint mid = 0;
+		if (m_use_mask)
+			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+		void* val32 = 0;
+		GetLabel(brick_num, b, &val32);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
-		//data
-		cl_image_format image_format;
-		image_format.image_channel_order = CL_R;
-		if (bits == 8)
-			image_format.image_channel_data_type = CL_UNORM_INT8;
-		else if (bits == 16)
-			image_format.image_channel_data_type = CL_UNORM_INT16;
-		cl_image_desc image_desc;
-		image_desc.image_type = CL_MEM_OBJECT_IMAGE3D;
-		image_desc.image_width = nx;
-		image_desc.image_height = ny;
-		image_desc.image_depth = nz;
-		image_desc.image_array_size = 0;
-		image_desc.image_row_pitch = 0;
-		image_desc.image_slice_pitch = 0;
-		image_desc.num_mip_levels = 0;
-		image_desc.num_samples = 0;
-		image_desc.buffer = 0;
 		//set
 		unsigned int* mask32 = 0;
 
@@ -1067,10 +798,8 @@ void ComponentGenerator::Cleanup3D(int iter, unsigned int size_lm)
 		kernel_prog->setKernelArgConst(kernel_index1, 6,
 			sizeof(unsigned int), (void*)(&lenz));
 		//kernel 2
-		kernel_prog->setKernelArgImage(kernel_index2, 0,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			image_format, image_desc,
-			bits == 8 ? (void*)(val8) : (void*)(val16));
+		kernel_prog->setKernelArgTex3D(kernel_index2, 0,
+			CL_MEM_READ_ONLY, did);
 		kernel_prog->setKernelArgBuf(kernel_index2, 1,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			label_size, mask32);
@@ -1099,465 +828,44 @@ void ComponentGenerator::Cleanup3D(int iter, unsigned int size_lm)
 
 		//release buffer
 		kernel_prog->releaseAll();
+		ReleaseLabel(val32, brick_num, b);
 		delete[] mask32;
 
 		m_sig_progress();
-
-		RELEASE_DATA_STREAM
 	}
-}
-
-void ComponentGenerator::InitialGrow(bool param_tr, int iter,
-	float tran, float tran2, float scl_ff, float scl_ff2,
-	float grad_ff, float grad_ff2, float var_ff, float var_ff2,
-	float ang_ff, float ang_ff2)
-{
-	CHECK_BRICKS
-
-	//create program and kernels
-	KernelProgram* kernel_prog = VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_slice_brainbow);
-	if (!kernel_prog)
-		return;
-	int kernel_index = kernel_prog->createKernel("kernel_0");
-
-	if (m_use_mask)
-		m_vd->GetVR()->return_mask();
-
-	for (size_t i = 0; i < bricks->size(); ++i)
-	{
-		GET_VOLDATA_STREAM
-
-		unsigned char* cur_page_data8 = bits == 8 ? val8 : 0;
-		unsigned short* cur_page_data16 = bits == 16 ? val16 : 0;
-		unsigned int* cur_page_label = val32;
-		unsigned int rcnt = 0;
-		unsigned int seed = iter>10 ? iter : 11;
-		size_t global_size[2] = { size_t(nx), size_t(ny) };
-		size_t local_size[2] = { 1, 1 };
-		//trnsition params
-		float cur_tran, cur_scl_ff, cur_grad_ff, cur_var_ff, cur_ang_ff;
-
-		//data
-		cl_image_format image_format;
-		image_format.image_channel_order = CL_R;
-		if (bits == 8)
-			image_format.image_channel_data_type = CL_UNORM_INT8;
-		else if (bits == 16)
-			image_format.image_channel_data_type = CL_UNORM_INT16;
-		cl_image_desc image_desc;
-		image_desc.image_type = CL_MEM_OBJECT_IMAGE2D;
-		image_desc.image_width = nx;
-		image_desc.image_height = ny;
-		image_desc.image_depth = 0;
-		image_desc.image_array_size = 0;
-		image_desc.image_row_pitch = 0;
-		image_desc.image_slice_pitch = 0;
-		image_desc.num_mip_levels = 0;
-		image_desc.num_samples = 0;
-		image_desc.buffer = 0;
-		//set
-		Argument data_buffer = kernel_prog->setKernelArgImage(kernel_index, 0,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			image_format, image_desc,
-			bits == 8 ? (void*)(cur_page_data8) : (void*)(cur_page_data16));
-		Argument label_buffer = kernel_prog->setKernelArgBuf(kernel_index, 1,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny, cur_page_label);
-		kernel_prog->setKernelArgConst(kernel_index, 2,
-			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(kernel_index, 3,
-			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgBuf(kernel_index, 4,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int), (void*)(&rcnt));
-		kernel_prog->setKernelArgConst(kernel_index, 5,
-			sizeof(unsigned int), (void*)(&seed));
-		if (!param_tr)
-		{
-			kernel_prog->setKernelArgConst(kernel_index, 6,
-				sizeof(float), (void*)(&tran));
-			kernel_prog->setKernelArgConst(kernel_index, 7,
-				sizeof(float), (void*)(&scl_ff));
-			kernel_prog->setKernelArgConst(kernel_index, 8,
-				sizeof(float), (void*)(&grad_ff));
-			kernel_prog->setKernelArgConst(kernel_index, 9,
-				sizeof(float), (void*)(&var_ff));
-			kernel_prog->setKernelArgConst(kernel_index, 10,
-				sizeof(float), (void*)(&ang_ff));
-		}
-
-		const size_t origin[] = { 0, 0, 0 };
-		const size_t region[] = { size_t(nx), size_t(ny), 1 };
-		size_t count = 0;
-		void *img_data = bits == 8 ? (void*)(cur_page_data8) : (void*)(cur_page_data16);
-		for (size_t i = 0; i<nz; ++i)
-		{
-			if (i)
-			{
-				kernel_prog->writeImage(origin, region, data_buffer, img_data);
-				kernel_prog->writeBuffer(label_buffer, cur_page_label);
-			}
-
-			for (int j = 0; j < iter; ++j)
-			{
-				if (param_tr)
-				{
-					cur_tran = tran + (float)j*(tran2 - tran) / (float)(iter - 1);
-					cur_scl_ff = scl_ff + (float)j*(scl_ff2 - scl_ff) / (float)(iter - 1);
-					cur_grad_ff = grad_ff + (float)j*(grad_ff2 - grad_ff) / (float)(iter - 1);
-					cur_var_ff = var_ff + (float)j*(var_ff2 - var_ff) / (float)(iter - 1);
-					cur_ang_ff = ang_ff + (float)j*(ang_ff2 - ang_ff) / (float)(iter - 1);
-					kernel_prog->setKernelArgConst(kernel_index, 6,
-						sizeof(float), (void*)(&cur_tran));
-					kernel_prog->setKernelArgConst(kernel_index, 7,
-						sizeof(float), (void*)(&cur_scl_ff));
-					kernel_prog->setKernelArgConst(kernel_index, 8,
-						sizeof(float), (void*)(&cur_grad_ff));
-					kernel_prog->setKernelArgConst(kernel_index, 9,
-						sizeof(float), (void*)(&cur_var_ff));
-					kernel_prog->setKernelArgConst(kernel_index, 10,
-						sizeof(float), (void*)(&cur_ang_ff));
-				}
-
-				kernel_prog->executeKernel(kernel_index, 2, global_size, local_size);
-
-				count++;
-				if (count == nz - 1)
-				{
-					count = 0;
-				}
-			}
-
-			kernel_prog->readBuffer(label_buffer, cur_page_label);
-
-			if (bits == 8)
-				cur_page_data8 += nx*ny;
-			else if (bits == 16)
-				cur_page_data16 += nx*ny;
-			cur_page_label += nx*ny;
-		}
-
-		kernel_prog->releaseAll();
-
-		m_sig_progress();
-
-		RELEASE_DATA_STREAM
-	}
-}
-
-void ComponentGenerator::SizedGrow(bool param_tr, int iter,
-	unsigned int size_lm, unsigned int size_lm2, float tran, float tran2,
-	float scl_ff, float scl_ff2, float grad_ff, float grad_ff2,
-	float var_ff, float var_ff2, float ang_ff, float ang_ff2)
-{
-	CHECK_BRICKS
-
-	//create program and kernels
-	KernelProgram* kernel_prog = VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_grow_size);
-	if (!kernel_prog)
-		return;
-	int kernel_index0 = kernel_prog->createKernel("kernel_0");
-	int kernel_index1 = kernel_prog->createKernel("kernel_1");
-	int kernel_index2 = kernel_prog->createKernel("kernel_2");
-
-	if (m_use_mask)
-		m_vd->GetVR()->return_mask();
-
-	for (size_t i = 0; i < bricks->size(); ++i)
-	{
-		GET_VOLDATA_STREAM
-
-		unsigned int* mask32 = new unsigned int[nx*ny];
-		memset(mask32, 0, sizeof(unsigned int)*nx*ny);
-
-		unsigned char* cur_page_data8 = bits == 8 ? val8 : 0;
-		unsigned short* cur_page_data16 = bits == 16 ? val16 : 0;
-		unsigned int* cur_page_label = val32;
-		unsigned int rcnt = 0;
-		unsigned int seed = iter>10 ? iter : 11;
-		size_t global_size[2] = { size_t(nx), size_t(ny) };
-		size_t local_size[2] = { 1, 1 };
-		unsigned int len = 0;
-		unsigned int r = Max(nx, ny);
-		while (r > 0)
-		{
-			r /= 2;
-			len++;
-		}
-
-		//trnsition params
-		unsigned int cur_size_lm;
-		float cur_tran, cur_scl_ff, cur_grad_ff, cur_var_ff, cur_ang_ff;
-
-		//data
-		cl_image_format image_format;
-		image_format.image_channel_order = CL_R;
-		if (bits == 8)
-			image_format.image_channel_data_type = CL_UNORM_INT8;
-		else if (bits == 16)
-			image_format.image_channel_data_type = CL_UNORM_INT16;
-		cl_image_desc image_desc;
-		image_desc.image_type = CL_MEM_OBJECT_IMAGE2D;
-		image_desc.image_width = nx;
-		image_desc.image_height = ny;
-		image_desc.image_depth = 0;
-		image_desc.image_array_size = 0;
-		image_desc.image_row_pitch = 0;
-		image_desc.image_slice_pitch = 0;
-		image_desc.num_mip_levels = 0;
-		image_desc.num_samples = 0;
-		image_desc.buffer = 0;
-		//set
-		//kernel 0
-		Argument mask_buffer = kernel_prog->setKernelArgBuf(kernel_index0, 0,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny, mask32);
-		Argument label_buffer = kernel_prog->setKernelArgBuf(kernel_index0, 1,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny, cur_page_label);
-		kernel_prog->setKernelArgConst(kernel_index0, 2,
-			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(kernel_index0, 3,
-			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(kernel_index0, 4,
-			sizeof(unsigned int), (void*)(&len));
-		//kernel 1
-		mask_buffer = kernel_prog->setKernelArgBuf(kernel_index1, 0,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny, mask32);
-		label_buffer = kernel_prog->setKernelArgBuf(kernel_index1, 1,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny, cur_page_label);
-		kernel_prog->setKernelArgConst(kernel_index1, 2,
-			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(kernel_index1, 3,
-			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(kernel_index1, 4,
-			sizeof(unsigned int), (void*)(&len));
-		//kernel 2
-		Argument data_buffer = kernel_prog->setKernelArgImage(kernel_index2, 0,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			image_format, image_desc,
-			bits == 8 ? (void*)(cur_page_data8) : (void*)(cur_page_data16));
-		mask_buffer = kernel_prog->setKernelArgBuf(kernel_index2, 1,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny, mask32);
-		label_buffer = kernel_prog->setKernelArgBuf(kernel_index2, 2,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny, cur_page_label);
-		kernel_prog->setKernelArgConst(kernel_index2, 3,
-			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(kernel_index2, 4,
-			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgBuf(kernel_index2, 5,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int), (void*)(&rcnt));
-		kernel_prog->setKernelArgConst(kernel_index2, 6,
-			sizeof(unsigned int), (void*)(&seed));
-		if (!param_tr)
-		{
-			kernel_prog->setKernelArgConst(kernel_index2, 7,
-				sizeof(float), (void*)(&tran));
-			kernel_prog->setKernelArgConst(kernel_index2, 8,
-				sizeof(float), (void*)(&scl_ff));
-			kernel_prog->setKernelArgConst(kernel_index2, 9,
-				sizeof(float), (void*)(&grad_ff));
-			kernel_prog->setKernelArgConst(kernel_index2, 10,
-				sizeof(float), (void*)(&var_ff));
-			kernel_prog->setKernelArgConst(kernel_index2, 11,
-				sizeof(float), (void*)(&ang_ff));
-			kernel_prog->setKernelArgConst(kernel_index2, 12,
-				sizeof(float), (void*)(&size_lm));
-		}
-
-		const size_t origin[] = { 0, 0, 0 };
-		const size_t region[] = { size_t(nx), size_t(ny), 1 };
-		size_t count = 0;
-		void *img_data = bits == 8 ? (void*)(cur_page_data8) : (void*)(cur_page_data16);
-		for (size_t i = 0; i<nz; ++i)
-		{
-			if (i)
-			{
-				kernel_prog->writeImage(origin, region, data_buffer, img_data);
-				kernel_prog->writeBuffer(label_buffer, cur_page_label);
-			}
-
-			for (int j = 0; j<iter; ++j)
-			{
-				kernel_prog->writeBuffer(mask_buffer, mask32);
-				kernel_prog->executeKernel(kernel_index0, 2, global_size, local_size);
-				kernel_prog->executeKernel(kernel_index1, 2, global_size, local_size);
-
-				if (param_tr)
-				{
-					cur_size_lm = size_lm + (unsigned int)((float)j*(size_lm2 - size_lm) / (float)(iter - 1) + 0.5f);
-					cur_tran = tran + (float)j*(tran2 - tran) / (float)(iter - 1);
-					cur_scl_ff = scl_ff + (float)j*(scl_ff2 - scl_ff) / (float)(iter - 1);
-					cur_grad_ff = grad_ff + (float)j*(grad_ff2 - grad_ff) / (float)(iter - 1);
-					cur_var_ff = var_ff + (float)j*(var_ff2 - var_ff) / (float)(iter - 1);
-					cur_ang_ff = ang_ff + (float)j*(ang_ff2 - ang_ff) / (float)(iter - 1);
-					kernel_prog->setKernelArgConst(kernel_index2, 7,
-						sizeof(float), (void*)(&cur_tran));
-					kernel_prog->setKernelArgConst(kernel_index2, 8,
-						sizeof(float), (void*)(&cur_scl_ff));
-					kernel_prog->setKernelArgConst(kernel_index2, 9,
-						sizeof(float), (void*)(&cur_grad_ff));
-					kernel_prog->setKernelArgConst(kernel_index2, 10,
-						sizeof(float), (void*)(&cur_var_ff));
-					kernel_prog->setKernelArgConst(kernel_index2, 11,
-						sizeof(float), (void*)(&cur_ang_ff));
-					kernel_prog->setKernelArgConst(kernel_index2, 12,
-						sizeof(float), (void*)(&cur_size_lm));
-				}
-				kernel_prog->executeKernel(kernel_index2, 2, global_size, local_size);
-
-				count++;
-				if (count == nz - 1)
-				{
-					count = 0;
-				}
-			}
-
-			kernel_prog->readBuffer(label_buffer, cur_page_label);
-
-			if (bits == 8)
-				cur_page_data8 += nx*ny;
-			else if (bits == 16)
-				cur_page_data16 += nx*ny;
-			cur_page_label += nx*ny;
-		}
-
-		kernel_prog->releaseAll();
-		delete[] mask32;
-
-		m_sig_progress();
-
-		RELEASE_DATA_STREAM
-	}
-}
-
-void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
-{
-	CHECK_BRICKS
-
-	//create program and kernels
-	KernelProgram* kernel_prog1 = VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_grow_size);
-	if (!kernel_prog1)
-		return;
-	int kernel_index0 = kernel_prog1->createKernel("kernel_0");
-	int kernel_index1 = kernel_prog1->createKernel("kernel_1");
-
-	KernelProgram* kernel_prog2 = VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_clean_up);
-	if (!kernel_prog2)
-		return;
-	int kernel_index2 = kernel_prog2->createKernel("kernel_0");
-	kernel_index2 = kernel_prog1->addKernel(
-		kernel_prog2, kernel_index2);
-
-	for (size_t i = 0; i < bricks->size(); ++i)
-	{
-		GET_VOLDATA_STREAM
-
-		unsigned int* mask32 = new unsigned int[nx*ny];
-		memset(mask32, 0, sizeof(unsigned int)*nx*ny);
-
-		unsigned int* cur_page_label = val32;
-		size_t global_size[2] = { size_t(nx), size_t(ny) };
-		size_t local_size[2] = { 1, 1 };
-		unsigned int len = 0;
-		unsigned int r = Max(nx, ny);
-		while (r > 0)
-		{
-			r /= 2;
-			len++;
-		}
-
-		//set
-		//kernel 0
-		Argument mask_buffer = kernel_prog1->setKernelArgBuf(kernel_index0, 0,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny, mask32);
-		Argument label_buffer = kernel_prog1->setKernelArgBuf(kernel_index0, 1,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny, cur_page_label);
-		kernel_prog1->setKernelArgConst(kernel_index0, 2,
-			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog1->setKernelArgConst(kernel_index0, 3,
-			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog1->setKernelArgConst(kernel_index0, 4,
-			sizeof(unsigned int), (void*)(&len));
-		//kernel 1
-		mask_buffer = kernel_prog1->setKernelArgBuf(kernel_index1, 0,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny, mask32);
-		label_buffer = kernel_prog1->setKernelArgBuf(kernel_index1, 1,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny, cur_page_label);
-		kernel_prog1->setKernelArgConst(kernel_index1, 2,
-			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog1->setKernelArgConst(kernel_index1, 3,
-			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog1->setKernelArgConst(kernel_index1, 4,
-			sizeof(unsigned int), (void*)(&len));
-		//kernel 2
-		mask_buffer = kernel_prog1->setKernelArgBuf(kernel_index2, 0,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny, mask32);
-		label_buffer = kernel_prog1->setKernelArgBuf(kernel_index2, 1,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny, cur_page_label);
-		kernel_prog1->setKernelArgConst(kernel_index2, 2,
-			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog1->setKernelArgConst(kernel_index2, 3,
-			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog1->setKernelArgConst(kernel_index2, 4,
-			sizeof(unsigned int), (void*)(&size_lm));
-
-		size_t count = 0;
-		for (size_t i = 0; i < nz; ++i)
-		{
-			if (i)
-				kernel_prog1->writeBuffer(label_buffer, cur_page_label);
-
-			for (int j = 0; j < iter; ++j)
-			{
-				kernel_prog1->writeBuffer(mask_buffer, mask32);
-				kernel_prog1->executeKernel(kernel_index0, 2, global_size, local_size);
-				kernel_prog1->executeKernel(kernel_index1, 2, global_size, local_size);
-				kernel_prog1->executeKernel(kernel_index2, 2, global_size, local_size);
-
-				count++;
-				if (count == nz - 1)
-				{
-					count = 0;
-				}
-			}
-
-			kernel_prog1->readBuffer(label_buffer, cur_page_label);
-
-			cur_page_label += nx*ny;
-		}
-
-		kernel_prog1->releaseMemObject(label_buffer);
-		kernel_prog1->releaseMemObject(mask_buffer);
-		delete[]mask32;
-
-		m_sig_progress();
-
-		RELEASE_DATA_STREAM
-	}
-
-	kernel_prog1->removeExternalKernels();
 }
 
 void ComponentGenerator::MatchSlices_CPU(bool backwards, unsigned int size_thresh,
 	float size_ratio, float dist_thresh, float angle_thresh)
 {
-	GET_VOLDATA
+	if (!m_vd)
+		return;
+	int nx, ny, nz;
+	m_vd->GetResolution(nx, ny, nz);
+	Nrrd* nrrd_data = 0;
+	if (m_use_mask)
+		nrrd_data = m_vd->GetMask(true);
+	if (!nrrd_data)
+		nrrd_data = m_vd->GetVolume(false);
+	if (!nrrd_data)
+		return;
+	Nrrd* nrrd_label = m_vd->GetLabel(false);
+	if (!nrrd_data)
+		return;
+	unsigned char* val8 = 0;
+	unsigned short* val16 = 0;
+	int bits;
+	if (nrrd_data->type == nrrdTypeUChar)
+	{
+		bits = 8;
+		val8 = (unsigned char*)(nrrd_data->data);
+	}
+	else if (nrrd_data->type == nrrdTypeUShort)
+	{
+		bits = 16;
+		val16 = (unsigned short*)(nrrd_data->data);
+	}
+	unsigned int* val32 = (unsigned int*)(nrrd_label->data);
 
 	if (nz < 2) return;
 	float sscale = m_vd->GetScalarScale();
@@ -1736,7 +1044,8 @@ void ComponentGenerator::MatchSlices_CPU(bool backwards, unsigned int size_thres
 
 void ComponentGenerator::DistField3D(int max_dist, float th, int dsize, float sscale)
 {
-	CHECK_BRICKS
+	if (!CheckBricks())
+		return;
 
 	//create program and kernels
 	KernelProgram* kernel_prog = VolumeRenderer::
@@ -1746,39 +1055,31 @@ void ComponentGenerator::DistField3D(int max_dist, float th, int dsize, float ss
 	int kernel_index0 = kernel_prog->createKernel("kernel_0");
 	int kernel_index1 = kernel_prog->createKernel("kernel_1");
 
-	for (size_t i = 0; i < bricks->size(); ++i)
+	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	for (size_t i = 0; i < brick_num; ++i)
 	{
-		GET_VOLDATA_STREAM
+		TextureBrick* b = (*bricks)[i];
+		int bits = b->nb(0) * 8;
+		int nx = b->nx();
+		int ny = b->ny();
+		int nz = b->nz();
+		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint mid = 0;
+		if (m_use_mask)
+			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+		void* val32 = 0;
+		GetLabel(brick_num, b, &val32);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
 		unsigned char ini = 1;
 
-		//data
-		cl_image_format image_format;
-		image_format.image_channel_order = CL_R;
-		if (bits == 8)
-			image_format.image_channel_data_type = CL_UNORM_INT8;
-		else if (bits == 16)
-			image_format.image_channel_data_type = CL_UNORM_INT16;
-		cl_image_desc image_desc;
-		image_desc.image_type = CL_MEM_OBJECT_IMAGE3D;
-		image_desc.image_width = nx;
-		image_desc.image_height = ny;
-		image_desc.image_depth = nz;
-		image_desc.image_array_size = 0;
-		image_desc.image_row_pitch = 0;
-		image_desc.image_slice_pitch = 0;
-		image_desc.num_mip_levels = 0;
-		image_desc.num_samples = 0;
-		image_desc.buffer = 0;
 		//set
 		//kernel 0
-		kernel_prog->setKernelArgImage(kernel_index0, 0,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			image_format, image_desc,
-			bits == 8 ? (void*)(val8) : (void*)(val16));
+		kernel_prog->setKernelArgTex3D(kernel_index0, 0,
+			CL_MEM_READ_ONLY, did);
 		Argument arg_df = kernel_prog->setKernelArgBuf(
 			kernel_index0, 1, CL_MEM_READ_WRITE |
 			CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*nx*ny*nz, NULL);
@@ -1832,10 +1133,9 @@ void ComponentGenerator::DistField3D(int max_dist, float th, int dsize, float ss
 		//	bits == 8 ? (void*)(val8) : (void*)(val16));
 		//kernel_prog->releaseMemObject(arg_df);
 		kernel_prog->releaseAll();
+		ReleaseLabel(val32, brick_num, b);
 
 		m_sig_progress();
-
-		RELEASE_DATA_STREAM
 	}
 }
 
@@ -1848,7 +1148,8 @@ void ComponentGenerator::DensityField3D(int dsize, int wsize,
 	unsigned char* val = 0;
 	std::ofstream ofs;
 #endif
-	CHECK_BRICKS
+	if (!CheckBricks())
+		return;
 
 	//create program and kernels
 	KernelProgram* kernel_prog = VolumeRenderer::
@@ -1866,9 +1167,21 @@ void ComponentGenerator::DensityField3D(int dsize, int wsize,
 		return;
 	int kernel2_index0 = kernel2_prog->createKernel("kernel_0");
 
-	for (size_t i = 0; i < bricks->size(); ++i)
+	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	for (size_t i = 0; i < brick_num; ++i)
 	{
-		GET_VOLDATA_STREAM;
+		TextureBrick* b = (*bricks)[i];
+		int bits = b->nb(0) * 8;
+		int nx = b->nx();
+		int ny = b->ny();
+		int nz = b->nz();
+		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint mid = 0;
+		if (m_use_mask)
+			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+		void* val32 = 0;
+		GetLabel(brick_num, b, &val32);
 
 		//divide
 		unsigned int gsx, gsy, gsz;//pixel number in group
@@ -1883,30 +1196,10 @@ void ComponentGenerator::DensityField3D(int dsize, int wsize,
 		dnx = gsx * ngx;
 		dny = gsy * ngy;
 		dnz = gsz * ngz;
-		//data
-		cl_image_format image_format;
-		image_format.image_channel_order = CL_R;
-		if (bits == 8)
-			image_format.image_channel_data_type = CL_UNORM_INT8;
-		else if (bits == 16)
-			image_format.image_channel_data_type = CL_UNORM_INT16;
-		cl_image_desc image_desc;
-		image_desc.image_type = CL_MEM_OBJECT_IMAGE3D;
-		image_desc.image_width = nx;
-		image_desc.image_height = ny;
-		image_desc.image_depth = nz;
-		image_desc.image_array_size = 0;
-		image_desc.image_row_pitch = 0;
-		image_desc.image_slice_pitch = 0;
-		image_desc.num_mip_levels = 0;
-		image_desc.num_samples = 0;
-		image_desc.buffer = 0;
 		//set
 		//kernel 0
-		Argument arg_img = kernel_prog->setKernelArgImage(kernel_index0, 0,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			image_format, image_desc,
-			bits == 8 ? (void*)(val8) : (void*)(val16));
+		Argument arg_img = kernel_prog->setKernelArgTex3D(kernel_index0, 0,
+			CL_MEM_READ_ONLY, did);
 		Argument arg_df = kernel_prog->setKernelArgBuf(
 			kernel_index0, 1, CL_MEM_READ_WRITE |
 			CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
@@ -2080,10 +1373,9 @@ void ComponentGenerator::DensityField3D(int dsize, int wsize,
 		//release buffer
 		kernel2_prog->releaseAll();
 		kernel_prog->releaseAll(false);
+		ReleaseLabel(val32, brick_num, b);
 
 		m_sig_progress();
-
-		RELEASE_DATA_STREAM
 	}
 }
 
@@ -2098,7 +1390,8 @@ void ComponentGenerator::DistDensityField3D(
 	std::ofstream ofs;
 #endif
 
-	CHECK_BRICKS;
+	if (!CheckBricks())
+		return;;
 
 	//create program and kernels
 	//prog dist
@@ -2126,40 +1419,31 @@ void ComponentGenerator::DistDensityField3D(
 	int kernel_grow_index0 = kernel_prog_grow->createKernel("kernel_0");
 
 	//processing by brick
-	for (size_t i = 0; i < bricks->size(); ++i)
+	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	for (size_t i = 0; i < brick_num; ++i)
 	{
-		GET_VOLDATA_STREAM;
+		TextureBrick* b = (*bricks)[i];
+		int bits = b->nb(0) * 8;
+		int nx = b->nx();
+		int ny = b->ny();
+		int nz = b->nz();
+		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint mid = 0;
+		if (m_use_mask)
+			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+		void* val32 = 0;
+		GetLabel(brick_num, b, &val32);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
 		//generate distance field arg_distf
 		unsigned char ini = 1;
-		//data
-		cl_image_format image_format;
-		image_format.image_channel_order = CL_R;
-		if (bits == 8)
-			image_format.image_channel_data_type = CL_UNORM_INT8;
-		else if (bits == 16)
-			image_format.image_channel_data_type = CL_UNORM_INT16;
-		cl_image_desc image_desc;
-		image_desc.image_type = CL_MEM_OBJECT_IMAGE3D;
-		image_desc.image_width = nx;
-		image_desc.image_height = ny;
-		image_desc.image_depth = nz;
-		image_desc.image_array_size = 0;
-		image_desc.image_row_pitch = 0;
-		image_desc.image_slice_pitch = 0;
-		image_desc.num_mip_levels = 0;
-		image_desc.num_samples = 0;
-		image_desc.buffer = 0;
 		//set
 		//kernel 0
-		Argument arg_img = kernel_prog_dist->setKernelArgImage(
-			kernel_dist_index0, 0,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			image_format, image_desc,
-			bits == 8 ? (void*)(val8) : (void*)(val16));
+		Argument arg_img =kernel_prog_dist->setKernelArgTex3D(
+			kernel_dist_index0, 0, CL_MEM_READ_ONLY, did);
 		Argument arg_distf = kernel_prog_dist->setKernelArgBuf(
 			kernel_dist_index0, 1, CL_MEM_READ_WRITE |
 			CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*nx*ny*nz, NULL);
@@ -2411,10 +1695,9 @@ void ComponentGenerator::DistDensityField3D(
 		kernel_prog_grow->releaseAll();
 		kernel_prog_dist->releaseAll(false);
 		kernel_prog_dens->releaseAll(false);
+		ReleaseLabel(val32, brick_num, b);
 
 		m_sig_progress();
-
-		RELEASE_DATA_STREAM
 	}
 }
 
@@ -2428,7 +1711,8 @@ void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
 	std::ofstream ofs;
 #endif
 
-	CHECK_BRICKS;
+	if (!CheckBricks())
+		return;;
 
 	//create program and kernels
 	//prog dist
@@ -2448,39 +1732,31 @@ void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
 	if (m_use_mask)
 		m_vd->GetVR()->return_mask();
 
-	for (size_t i = 0; i < bricks->size(); ++i)
+	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	for (size_t i = 0; i < brick_num; ++i)
 	{
-		GET_VOLDATA_STREAM
+		TextureBrick* b = (*bricks)[i];
+		int bits = b->nb(0) * 8;
+		int nx = b->nx();
+		int ny = b->ny();
+		int nz = b->nz();
+		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint mid = 0;
+		if (m_use_mask)
+			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+		void* val32 = 0;
+		GetLabel(brick_num, b, &val32);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
 		//generate distance field arg_distf
 		unsigned char ini = 1;
-		//data
-		cl_image_format image_format;
-		image_format.image_channel_order = CL_R;
-		if (bits == 8)
-			image_format.image_channel_data_type = CL_UNORM_INT8;
-		else if (bits == 16)
-			image_format.image_channel_data_type = CL_UNORM_INT16;
-		cl_image_desc image_desc;
-		image_desc.image_type = CL_MEM_OBJECT_IMAGE3D;
-		image_desc.image_width = nx;
-		image_desc.image_height = ny;
-		image_desc.image_depth = nz;
-		image_desc.image_array_size = 0;
-		image_desc.image_row_pitch = 0;
-		image_desc.image_slice_pitch = 0;
-		image_desc.num_mip_levels = 0;
-		image_desc.num_samples = 0;
-		image_desc.buffer = 0;
 		//set
 		//kernel 0
-		Argument arg_img = kernel_prog_dist->setKernelArgImage(kernel_dist_index0, 0,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			image_format, image_desc,
-			bits == 8 ? (void*)(val8) : (void*)(val16));
+		Argument arg_img = kernel_prog_dist->setKernelArgTex3D(
+			kernel_dist_index0, 0, CL_MEM_READ_ONLY, did);
 		Argument arg_distf = kernel_prog_dist->setKernelArgBuf(
 			kernel_dist_index0, 1, CL_MEM_READ_WRITE |
 			CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*nx*ny*nz, NULL);
@@ -2581,7 +1857,7 @@ void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
 
 		m_sig_progress();
 
-		RELEASE_DATA_STREAM
+		ReleaseLabel(val32, brick_num, b);
 	}
 }
 
@@ -2593,7 +1869,8 @@ void ComponentGenerator::SetIDBit(int psize)
 	std::ofstream ofs;
 #endif
 
-	CHECK_BRICKS;
+	if (!CheckBricks())
+		return;;
 
 	//create program and kernels
 	KernelProgram* kernel_prog = VolumeRenderer::
@@ -2605,12 +1882,20 @@ void ComponentGenerator::SetIDBit(int psize)
 	int kernel_index2 = kernel_prog->createKernel("kernel_2");
 	int kernel_index3 = kernel_prog->createKernel("kernel_3");
 
-	if (m_use_mask)
-		m_vd->GetVR()->return_mask();
-
-	for (size_t i = 0; i < bricks->size(); ++i)
+	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	for (size_t i = 0; i < brick_num; ++i)
 	{
-		GET_VOLDATA_STREAM;
+		TextureBrick* b = (*bricks)[i];
+		int bits = b->nb(0) * 8;
+		int nx = b->nx();
+		int ny = b->ny();
+		int nz = b->nz();
+		GLint mid = 0;
+		if (m_use_mask)
+			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+		void* val32 = 0;
+		GetLabel(brick_num, b, &val32);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -2739,10 +2024,9 @@ void ComponentGenerator::SetIDBit(int psize)
 
 		//release buffer
 		kernel_prog->releaseAll();
+		ReleaseLabel(val32, brick_num, b);
 		delete[] mask32;
 
 		m_sig_progress();
-
-		RELEASE_DATA_STREAM
 	}
 }
