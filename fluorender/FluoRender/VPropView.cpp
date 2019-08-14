@@ -519,7 +519,11 @@ wxPanel(parent, id, pos, size,style, name),
 		wxDefaultPosition, wxSize(70, -1), wxALIGN_RIGHT);
 	m_colormap_inv_btn = new wxToggleButton(this, ID_ColormapInvBtn,
 		L"\u262f", wxDefaultPosition, wxSize(20, 24));
-	wxFont font(29, wxFONTFAMILY_DEFAULT, wxNORMAL, wxNORMAL);
+#ifdef _WIN32
+	wxFont font(28, wxFONTFAMILY_DEFAULT, wxNORMAL, wxNORMAL);
+#else
+	wxFont font(14, wxFONTFAMILY_DEFAULT, wxNORMAL, wxNORMAL);
+#endif
 	m_colormap_inv_btn->SetFont(font);
 	m_colormap_combo = new wxComboBox(this, ID_ColormapCombo, "",
 		wxDefaultPosition, wxSize(85, 25), 0, NULL, wxCB_READONLY);

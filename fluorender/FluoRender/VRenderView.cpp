@@ -458,7 +458,11 @@ void VRenderView::CreateBar()
 	wxSize bs = m_bg_color_picker->GetSize();
 	m_bg_inv_btn = new wxButton(m_options_toolbar, ID_BgInvBtn, L"\u262f",
 		wxDefaultPosition, wxSize(bs.y, bs.y));
+#ifdef _WIN32
 	wxFont font(34, wxFONTFAMILY_DEFAULT, wxNORMAL, wxNORMAL);
+#else
+	wxFont font(17, wxFONTFAMILY_DEFAULT, wxNORMAL, wxNORMAL);
+#endif
 	m_bg_inv_btn->SetFont(font);
 	m_options_toolbar->AddControl(m_bg_color_picker);
 	m_options_toolbar->AddControl(m_bg_inv_btn);
