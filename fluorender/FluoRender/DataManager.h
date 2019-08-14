@@ -224,7 +224,8 @@ public:
 	Nrrd* GetLabel(bool ret);
 	//empty label
 	//mode: 0-zeros;1-ordered; 2-shuffled
-	void AddEmptyLabel(int mode=0);
+	//change: whether changes label when it already exists
+	void AddEmptyLabel(int mode=0, bool change=true);
 	bool SearchLabel(unsigned int label);
 
 	//save

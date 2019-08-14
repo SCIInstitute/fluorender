@@ -2876,7 +2876,7 @@ void ComponentDlg::GenerateComp(bool command)
 	}
 	else
 	{
-		vd->AddEmptyLabel();
+		vd->AddEmptyLabel(0, !cg.GetUseMask());
 		cg.ShuffleID_3D();
 	}
 
@@ -2943,6 +2943,9 @@ void ComponentDlg::GenerateComp(bool command)
 	values += " sec.\n";
 	SetOutput(titles, values);
 
+	//update
+	if (cg.GetUseMask())
+		vd->GetMask(true);
 	vd->GetVR()->clear_tex_current();
 	m_view->RefreshGL();
 

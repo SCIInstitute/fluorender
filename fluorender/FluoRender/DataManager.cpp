@@ -786,13 +786,14 @@ void VolumeData::SetShuffledID(unsigned int* val)
 			}
 }
 
-void VolumeData::AddEmptyLabel(int mode)
+void VolumeData::AddEmptyLabel(int mode, bool change)
 {
 	if (!m_tex || !m_vr)
 		return;
 
 	Nrrd *nrrd_label = 0;
 	unsigned int *val32 = 0;
+	bool exist = false;
 	//prepare the texture bricks for the labeling mask
 	if (m_tex->add_empty_label())
 	{
@@ -821,22 +822,25 @@ void VolumeData::AddEmptyLabel(int mode)
 	{
 		nrrd_label = m_tex->get_nrrd(m_tex->nlabel());
 		val32 = (unsigned int*)nrrd_label->data;
+		exist = true;
 	}
 
 	//apply values
-	switch (mode)
+	if (!exist || change)
 	{
-	case 0://zeros
-		memset(val32, 0, sizeof(unsigned int)*m_res_x*m_res_y*m_res_z);
-		break;
-	case 1://ordered
-		SetOrderedID(val32);
-		break;
-	case 2://shuffled
-		SetShuffledID(val32);
-		break;
+		switch (mode)
+		{
+		case 0://zeros
+			memset(val32, 0, sizeof(unsigned int)*m_res_x*m_res_y*m_res_z);
+			break;
+		case 1://ordered
+			SetOrderedID(val32);
+			break;
+		case 2://shuffled
+			SetShuffledID(val32);
+			break;
+		}
 	}
-
 }
 
 bool VolumeData::SearchLabel(unsigned int label)
