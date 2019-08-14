@@ -2843,7 +2843,6 @@ void ComponentDlg::GenerateComp(bool command)
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
 		return;
-	vd->AddEmptyMask(1);
 
 	int clean_iter = m_clean_iter;
 	int clean_size = m_clean_size_vl;
@@ -2869,6 +2868,7 @@ void ComponentDlg::GenerateComp(bool command)
 
 	cg.SetUseMask(m_use_sel_chk->GetValue());
 
+	vd->AddEmptyMask(1, !cg.GetUseMask());//select all if no mask, otherwise keep
 	if (m_fixate && vd->GetLabel(false))
 	{
 		vd->LoadLabel2();
@@ -2983,7 +2983,6 @@ void ComponentDlg::Clean(bool command)
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
 		return;
-	vd->AddEmptyMask(1);
 
 	int clean_iter = m_clean_iter;
 	int clean_size = m_clean_size_vl;
@@ -3004,6 +3003,8 @@ void ComponentDlg::Clean(bool command)
 			&ComponentDlg::UpdateProgress, this));
 
 	cg.SetUseMask(m_use_sel_chk->GetValue());
+
+	vd->AddEmptyMask(1, !cg.GetUseMask());
 
 	if (bn > 1)
 		cg.ClearBorders3D();

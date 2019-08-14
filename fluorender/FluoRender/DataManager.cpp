@@ -657,7 +657,7 @@ void VolumeData::LoadMask(Nrrd* mask)
 	m_tex->set_nrrd(mask, m_tex->nmask());
 }
 
-void VolumeData::AddEmptyMask(int mode)
+void VolumeData::AddEmptyMask(int mode, bool change)
 {
 	if (!m_tex || !m_vr)
 		return;
@@ -694,16 +694,14 @@ void VolumeData::AddEmptyMask(int mode)
 		val8 = (uint8*)nrrd_mask->data;
 	}
 
-	if (mode == 0 || mode == 1)
+	if (empty || change)
 	{
-		if (val8)
-			memset((void*)val8, mode ?
-				255 : 0, mem_size*sizeof(uint8));
-	}
-	else if (mode == 2)
-	{
-		if (empty)
-			memset((void*)val8, 0, mem_size*sizeof(uint8));
+		if (mode == 0 || mode == 1)
+		{
+			if (val8)
+				memset((void*)val8, mode ?
+					255 : 0, mem_size * sizeof(uint8));
+		}
 	}
 }
 

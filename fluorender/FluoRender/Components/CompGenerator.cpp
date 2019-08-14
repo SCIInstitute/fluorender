@@ -1178,7 +1178,11 @@ void ComponentGenerator::DensityField3D(int dsize, int wsize,
 		vol_kernel_factory_.kernel(str_cl_density_grow_3d);
 	if (!kernel2_prog)
 		return;
-	int kernel2_index0 = kernel2_prog->createKernel("kernel_0");
+	int kernel2_index0;
+	if (m_use_mask)
+		kernel2_index0 = kernel2_prog->createKernel("kernel_1");
+	else
+		kernel2_index0 = kernel2_prog->createKernel("kernel_0");
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
 	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
@@ -1375,6 +1379,9 @@ void ComponentGenerator::DensityField3D(int dsize, int wsize,
 			sizeof(float), (void*)(&density));
 		kernel2_prog->setKernelArgConst(kernel2_index0, 16,
 			sizeof(float), (void*)(&sscale));
+		if (m_use_mask)
+			kernel2_prog->setKernelArgTex3D(kernel2_index0, 17,
+				CL_MEM_READ_ONLY, mid);
 
 		//execute
 		for (int j = 0; j < iter; ++j)
