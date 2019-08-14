@@ -197,7 +197,11 @@ void ComponentGenerator::ShuffleID_3D()
 		vol_kernel_factory_.kernel(str_cl_shuffle_id_3d);
 	if (!kernel_prog)
 		return;
-	int kernel_index = kernel_prog->createKernel("kernel_1");
+	int kernel_index;
+	if (m_use_mask)
+		kernel_index = kernel_prog->createKernel("kernel_1");
+	else
+		kernel_index = kernel_prog->createKernel("kernel_0");
 
 	//clipping planes
 	cl_float4 p[6];
@@ -291,6 +295,9 @@ void ComponentGenerator::ShuffleID_3D()
 			sizeof(cl_float3), (void*)(&scl));
 		kernel_prog->setKernelArgConst(kernel_index, 14,
 			sizeof(cl_float3), (void*)(&trl));
+		if (m_use_mask)
+			kernel_prog->setKernelArgTex3D(kernel_index, 15,
+				CL_MEM_READ_ONLY, mid);
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
@@ -490,8 +497,11 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 		vol_kernel_factory_.kernel(str_cl_brainbow_3d);
 	if (!kernel_prog)
 		return;
-	int kernel_index0 = kernel_prog->createKernel("kernel_0");
-
+	int kernel_index0;
+	if (m_use_mask)
+		kernel_index0 = kernel_prog->createKernel("kernel_1");
+	else
+		kernel_index0 = kernel_prog->createKernel("kernel_0");
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
 	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
@@ -541,6 +551,9 @@ void ComponentGenerator::Grow3D(bool diffuse, int iter, float tran, float fallof
 			sizeof(float), (void*)(&grad_ff));
 		kernel_prog->setKernelArgConst(kernel_index0, 10,
 			sizeof(float), (void*)(&sscale));
+		if (m_use_mask)
+			kernel_prog->setKernelArgTex3D(kernel_index0, 11,
+				CL_MEM_READ_ONLY, mid);
 
 		//execute
 		for (int j = 0; j < iter; ++j)
@@ -1877,10 +1890,24 @@ void ComponentGenerator::SetIDBit(int psize)
 		vol_kernel_factory_.kernel(str_cl_set_bit_3d);
 	if (!kernel_prog)
 		return;
-	int kernel_index0 = kernel_prog->createKernel("kernel_0");
-	int kernel_index1 = kernel_prog->createKernel("kernel_1");
-	int kernel_index2 = kernel_prog->createKernel("kernel_2");
-	int kernel_index3 = kernel_prog->createKernel("kernel_3");
+	int kernel_index0;
+	//int kernel_index1;
+	int kernel_index2;
+	int kernel_index3;
+	if (m_use_mask)
+	{
+		kernel_index0 = kernel_prog->createKernel("kernel_4");
+		//kernel_index1 = kernel_prog->createKernel("kernel_5");
+		kernel_index2 = kernel_prog->createKernel("kernel_6");
+		kernel_index3 = kernel_prog->createKernel("kernel_7");
+	}
+	else
+	{
+		kernel_index0 = kernel_prog->createKernel("kernel_0");
+		//kernel_index1 = kernel_prog->createKernel("kernel_1");
+		kernel_index2 = kernel_prog->createKernel("kernel_2");
+		kernel_index3 = kernel_prog->createKernel("kernel_3");
+	}
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
 	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
@@ -1900,8 +1927,8 @@ void ComponentGenerator::SetIDBit(int psize)
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
-		//set
-		unsigned int* mask32 = 0;
+		//size buffer
+		unsigned int* size_buffer = 0;
 
 		//bit length
 		unsigned int lenx = 0;
@@ -1924,14 +1951,14 @@ void ComponentGenerator::SetIDBit(int psize)
 			(unsigned long long)ny *
 			(unsigned long long)nz;
 		unsigned long long label_size = data_size * 4;
-		mask32 = new unsigned int[data_size];
-		memset(mask32, 0, label_size);
+		size_buffer = new unsigned int[data_size];
+		memset(size_buffer, 0, label_size);
 
 		//set
 		//kernel 0
-		Argument arg_mask = kernel_prog->setKernelArgBuf(kernel_index0, 0,
+		Argument arg_szbuf = kernel_prog->setKernelArgBuf(kernel_index0, 0,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			label_size, mask32);
+			label_size, size_buffer);
 		Argument arg_label = kernel_prog->setKernelArgBuf(kernel_index0, 1,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			sizeof(unsigned int)*nx*ny*nz, val32);
@@ -1945,10 +1972,13 @@ void ComponentGenerator::SetIDBit(int psize)
 			sizeof(unsigned int), (void*)(&lenx));
 		kernel_prog->setKernelArgConst(kernel_index0, 6,
 			sizeof(unsigned int), (void*)(&lenz));
+		if (m_use_mask)
+			kernel_prog->setKernelArgTex3D(kernel_index0, 7,
+				CL_MEM_READ_ONLY, mid);
 		//kernel 1 ger max size
-		arg_mask.kernel_index = kernel_index1;
-		arg_mask.index = 0;
-		kernel_prog->setKernelArgument(arg_mask);
+		/*arg_szbuf.kernel_index = kernel_index1;
+		arg_szbuf.index = 0;
+		kernel_prog->setKernelArgument(arg_szbuf);
 		kernel_prog->setKernelArgConst(kernel_index1, 1,
 			sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(kernel_index1, 2,
@@ -1960,10 +1990,13 @@ void ComponentGenerator::SetIDBit(int psize)
 			kernel_index1, 4,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			sizeof(unsigned int), (void*)(&maxv));
+		if (m_use_mask)
+			kernel_prog->setKernelArgTex3D(kernel_index1, 5,
+				CL_MEM_READ_ONLY, mid);*/
 		//kernel 2
-		arg_mask.kernel_index = kernel_index2;
-		arg_mask.index = 0;
-		kernel_prog->setKernelArgument(arg_mask);
+		arg_szbuf.kernel_index = kernel_index2;
+		arg_szbuf.index = 0;
+		kernel_prog->setKernelArgument(arg_szbuf);
 		arg_label.kernel_index = kernel_index2;
 		arg_label.index = 1;
 		kernel_prog->setKernelArgument(arg_label);
@@ -1977,10 +2010,13 @@ void ComponentGenerator::SetIDBit(int psize)
 			sizeof(unsigned int), (void*)(&lenx));
 		kernel_prog->setKernelArgConst(kernel_index2, 6,
 			sizeof(unsigned int), (void*)(&lenz));
+		if (m_use_mask)
+			kernel_prog->setKernelArgTex3D(kernel_index2, 7,
+				CL_MEM_READ_ONLY, mid);
 		//kernel 3
-		arg_mask.kernel_index = kernel_index3;
-		arg_mask.index = 0;
-		kernel_prog->setKernelArgument(arg_mask);
+		arg_szbuf.kernel_index = kernel_index3;
+		arg_szbuf.index = 0;
+		kernel_prog->setKernelArgument(arg_szbuf);
 		arg_label.kernel_index = kernel_index3;
 		arg_label.index = 1;
 		kernel_prog->setKernelArgument(arg_label);
@@ -1996,14 +2032,17 @@ void ComponentGenerator::SetIDBit(int psize)
 		//limit *= std::min(iter, nz);
 		kernel_prog->setKernelArgConst(kernel_index3, 5,
 			sizeof(unsigned int), (void*)(&psize));
+		if (m_use_mask)
+			kernel_prog->setKernelArgTex3D(kernel_index3, 6,
+				CL_MEM_READ_ONLY, mid);
 
 		//execute
 		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
 		kernel_prog->executeKernel(kernel_index2, 3, global_size, local_size);
 		//debug
-		//kernel_prog->readBuffer(arg_mask, mask32);
+		//kernel_prog->readBuffer(arg_szbuf, size_buffer);
 		//ofs.open("E:/DATA/Test/density_field/size.bin", std::ios::out | std::ios::binary);
-		//ofs.write((char*)mask32, nx*ny*nz*sizeof(unsigned int));
+		//ofs.write((char*)size_buffer, nx*ny*nz*sizeof(unsigned int));
 		//ofs.close();
 		//kernel_prog->executeKernel(kernel_index1, 3, global_size, local_size);
 		//kernel_prog->readBuffer(arg_maxv, &maxv);
@@ -2013,7 +2052,7 @@ void ComponentGenerator::SetIDBit(int psize)
 		kernel_prog->executeKernel(kernel_index3, 3, global_size, local_size);
 		//debug
 		//val = new unsigned int[nx*ny*nz];
-		//kernel_prog->readBuffer(arg_mask, val);
+		//kernel_prog->readBuffer(arg_szbuf, val);
 		//ofs.open("E:/DATA/Test/density_field/df.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, nx*ny*nz*sizeof(unsigned int));
 		//delete[] val;
@@ -2025,7 +2064,7 @@ void ComponentGenerator::SetIDBit(int psize)
 		//release buffer
 		kernel_prog->releaseAll();
 		ReleaseLabel(val32, brick_num, b);
-		delete[] mask32;
+		delete[] size_buffer;
 
 		m_sig_progress();
 	}

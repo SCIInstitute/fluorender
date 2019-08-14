@@ -319,6 +319,62 @@ const char* str_cl_brainbow_3d = \
 "	}\n" \
 "	atomic_xchg(label+index, label_v);\n" \
 "}\n" \
+"//grow only within mask\n" \
+"__kernel void kernel_1(\n" \
+"	__read_only image3d_t data,\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	__global unsigned int* rcnt,\n" \
+"	unsigned int seed,\n" \
+"	float value_t,\n" \
+"	float value_f,\n" \
+"	float grad_f,\n" \
+"	float sscale,\n" \
+"	__read_only image3d_t mask)\n" \
+"{\n" \
+"	int3 coord = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	float mask_value = read_imagef(mask, samp, (int4)(coord, 1)).x;\n" \
+"	if (mask_value < 1e-6)\n" \
+"		return;\n" \
+"	unsigned int index = nx*ny*coord.z + nx*coord.y + coord.x;\n" \
+"	unsigned int label_v = label[index];\n" \
+"	if (label_v == 0 || label_v & 0x80000000)\n" \
+"		return;\n" \
+"	atomic_inc(rcnt);\n" \
+"	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
+"	value *= sscale;\n" \
+"	float grad = length(sscale * vol_grad_func(data, (int4)(coord, 1)));\n" \
+"	//stop function\n" \
+"	float stop =\n" \
+"		(grad_f>0.0f?(grad>sqrt(grad_f)*2.12f?0.0f:exp(-grad*grad/grad_f)):1.0f)*\n" \
+"		(value>value_t?1.0f:(value_f>0.0f?(value<value_t-sqrt(value_f)*2.12f?0.0f:exp(-(value-value_t)*(value-value_t)/value_f)):0.0f));\n" \
+"	\n" \
+"	//max filter\n" \
+"	float random = (float)((*rcnt) % seed)/(float)(seed)+0.001f;\n" \
+"	if (stop < random)\n" \
+"		return;\n" \
+"	int3 nb_coord;\n" \
+"	unsigned int nb_index;\n" \
+"	unsigned int m;\n" \
+"	for (int i=-1; i<2; ++i)\n" \
+"	for (int j=-1; j<2; ++j)\n" \
+"	for (int k=-1; k<2; ++k)\n" \
+"	{\n" \
+"		nb_coord = (int3)(coord.x+i, coord.y+j, coord.z+k);\n" \
+"		if (nb_coord.x < 0 || nb_coord.x > nx-1 ||\n" \
+"			nb_coord.y < 0 || nb_coord.y > ny-1 ||\n" \
+"			nb_coord.z < 0 || nb_coord.z > nz-1)\n" \
+"			continue;\n" \
+"		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
+"		m = label[nb_index];\n" \
+"		if (m > label_v)\n" \
+"			label_v = m;\n" \
+"	}\n" \
+"	atomic_xchg(label+index, label_v);\n" \
+"}\n" \
 ;
 
 const char* str_cl_brainbow_3d_sized = \
@@ -650,43 +706,8 @@ const char* str_cl_shuffle_id_3d = \
 "	return res;\n" \
 "}\n" \
 "\n" \
+"//use clipping planes, no mask\n" \
 "__kernel void kernel_0(\n" \
-"	__read_only image3d_t data,\n" \
-"	__global unsigned int* label,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nz,\n" \
-"	unsigned int lenx,\n" \
-"	unsigned int lenz)\n" \
-"{\n" \
-"	unsigned int res;\n" \
-"	unsigned int x, y, z, ii;\n" \
-"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
-"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
-"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
-"	unsigned int index = nx*ny*k + nx*j + i;\n" \
-"	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (value < 0.001)\n" \
-"		atomic_xchg(label+index, 0);\n" \
-"	else if (i<1 || i>nx-2 ||\n" \
-"			j<1 || j>ny-2)\n" \
-"		atomic_xchg(label+index, 0);\n" \
-"	else\n" \
-"	{\n" \
-"		x = reverse_bit(i, lenx);\n" \
-"		y = reverse_bit(j, lenx);\n" \
-"		z = reverse_bit(k, lenz);\n" \
-"		res = 0;\n" \
-"		for (ii=0; ii<lenx; ++ii)\n" \
-"		{\n" \
-"			res |= (1<<ii & x)<<(ii);\n" \
-"			res |= (1<<ii & y)<<(ii+1);\n" \
-"		}\n" \
-"		res |= z<<lenx*2;\n" \
-"		atomic_xchg(label+index, res + 1);\n" \
-"	}\n" \
-"}\n" \
-"__kernel void kernel_1(\n" \
 "	__read_only image3d_t data,\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
@@ -721,6 +742,104 @@ const char* str_cl_shuffle_id_3d = \
 "		atomic_xchg(label+index, 0);\n" \
 "		return;\n" \
 "	}\n" \
+"	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
+"	if (value < 0.001)\n" \
+"		atomic_xchg(label+index, 0);\n" \
+"	else if (i<1 || i>nx-2 ||\n" \
+"			j<1 || j>ny-2)\n" \
+"		atomic_xchg(label+index, 0);\n" \
+"	else\n" \
+"	{\n" \
+"		x = reverse_bit(i, lenx);\n" \
+"		y = reverse_bit(j, lenx);\n" \
+"		z = reverse_bit(k, lenz);\n" \
+"		res = 0;\n" \
+"		for (ii=0; ii<lenx; ++ii)\n" \
+"		{\n" \
+"			res |= (1<<ii & x)<<(ii);\n" \
+"			res |= (1<<ii & y)<<(ii+1);\n" \
+"		}\n" \
+"		res |= z<<lenx*2;\n" \
+"		atomic_xchg(label+index, res + 1);\n" \
+"	}\n" \
+"}\n" \
+"//use clipping planes, use mask\n" \
+"__kernel void kernel_1(\n" \
+"	__read_only image3d_t data,\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned int lenx,\n" \
+"	unsigned int lenz,\n" \
+"	float4 p0,\n" \
+"	float4 p1,\n" \
+"	float4 p2,\n" \
+"	float4 p3,\n" \
+"	float4 p4,\n" \
+"	float4 p5,\n" \
+"	float3 scl,\n" \
+"	float3 trl,\n" \
+"	__read_only image3d_t mask)\n" \
+"{\n" \
+"	unsigned int res;\n" \
+"	unsigned int x, y, z, ii;\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
+"	float mask_value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
+"	if (mask_value < 1e-6)\n" \
+"		return;\n" \
+"	unsigned int index = nx*ny*k + nx*j + i;\n" \
+"	float3 pt = (float3)((float)(i) / (float)(nx), (float)(j) / (float)(ny), (float)(k) / (float)(nz));\n" \
+"	pt = pt * scl + trl;\n" \
+"	if (dot(pt, p0.xyz)+p0.w < 0.0 ||\n" \
+"		dot(pt, p1.xyz)+p1.w < 0.0 ||\n" \
+"		dot(pt, p2.xyz)+p2.w < 0.0 ||\n" \
+"		dot(pt, p3.xyz)+p3.w < 0.0 ||\n" \
+"		dot(pt, p4.xyz)+p4.w < 0.0 ||\n" \
+"		dot(pt, p5.xyz)+p5.w < 0.0)\n" \
+"	{\n" \
+"		atomic_xchg(label+index, 0);\n" \
+"		return;\n" \
+"	}\n" \
+"	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
+"	if (value < 0.001)\n" \
+"		atomic_xchg(label+index, 0);\n" \
+"	else if (i<1 || i>nx-2 ||\n" \
+"			j<1 || j>ny-2)\n" \
+"		atomic_xchg(label+index, 0);\n" \
+"	else\n" \
+"	{\n" \
+"		x = reverse_bit(i, lenx);\n" \
+"		y = reverse_bit(j, lenx);\n" \
+"		z = reverse_bit(k, lenz);\n" \
+"		res = 0;\n" \
+"		for (ii=0; ii<lenx; ++ii)\n" \
+"		{\n" \
+"			res |= (1<<ii & x)<<(ii);\n" \
+"			res |= (1<<ii & y)<<(ii+1);\n" \
+"		}\n" \
+"		res |= z<<lenx*2;\n" \
+"		atomic_xchg(label+index, res + 1);\n" \
+"	}\n" \
+"}\n" \
+"//not used\n" \
+"__kernel void kernel_null(\n" \
+"	__read_only image3d_t data,\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned int lenx,\n" \
+"	unsigned int lenz)\n" \
+"{\n" \
+"	unsigned int res;\n" \
+"	unsigned int x, y, z, ii;\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
+"	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
 "	if (value < 0.001)\n" \
 "		atomic_xchg(label+index, 0);\n" \
@@ -1729,8 +1848,9 @@ const char* str_cl_set_bit_3d = \
 "	res >>= 32-len;\n" \
 "	return res;\n" \
 "}\n" \
+"//increase count in size buffer\n" \
 "__kernel void kernel_0(\n" \
-"	__global unsigned int* mask,\n" \
+"	__global unsigned int* szbuf,\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
@@ -1760,10 +1880,11 @@ const char* str_cl_set_bit_3d = \
 "	y = reverse_bit(y, lenx);\n" \
 "	z = reverse_bit(z, lenz);\n" \
 "	index = nx*ny*z + nx*y + x;\n" \
-"	atomic_inc(mask+index);\n" \
+"	atomic_inc(szbuf+index);\n" \
 "}\n" \
+"//find max size for each component\n" \
 "__kernel void kernel_1(\n" \
-"	__global unsigned int* mask,\n" \
+"	__global unsigned int* szbuf,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
 "	unsigned int nz,\n" \
@@ -1773,10 +1894,11 @@ const char* str_cl_set_bit_3d = \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
-"	*maxv = max(mask[index], *maxv);\n" \
+"	*maxv = max(szbuf[index], *maxv);\n" \
 "}\n" \
+"//set all size to max\n" \
 "__kernel void kernel_2(\n" \
-"	__global unsigned int* mask,\n" \
+"	__global unsigned int* szbuf,\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
@@ -1807,10 +1929,11 @@ const char* str_cl_set_bit_3d = \
 "	z = reverse_bit(z, lenz);\n" \
 "	unsigned int index2 = nx*ny*z + nx*y + x;\n" \
 "	if (index != index2)\n" \
-"		mask[index] = mask[index2];\n" \
+"		szbuf[index] = szbuf[index2];\n" \
 "}\n" \
+"//fix id by size\n" \
 "__kernel void kernel_3(\n" \
-"	__global unsigned int* mask,\n" \
+"	__global unsigned int* szbuf,\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
@@ -1823,7 +1946,125 @@ const char* str_cl_set_bit_3d = \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	//break if too small\n" \
 "	if (label[index]==0 ||\n" \
-"		mask[index] < limit)\n" \
+"		szbuf[index] < limit)\n" \
+"		return;\n" \
+"	label[index] = label[index] | 0x80000000;\n" \
+"}\n" \
+"//increase count in size buffer\n" \
+"__kernel void kernel_4(\n" \
+"	__global unsigned int* szbuf,\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned int lenx,\n" \
+"	unsigned int lenz,\n" \
+"	__read_only image3d_t mask)\n" \
+"{\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
+"	float mask_value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
+"	if (mask_value < 1e-6)\n" \
+"		return;\n" \
+"	unsigned int index = nx*ny*k + nx*j + i;\n" \
+"	unsigned int value_l = label[index];\n" \
+"	if (value_l == 0)\n" \
+"		return;\n" \
+"	unsigned int res = value_l - 1;\n" \
+"	unsigned int x = 0;\n" \
+"	unsigned int y = 0;\n" \
+"	unsigned int z = 0;\n" \
+"	unsigned int ii;\n" \
+"	for (ii=0; ii<lenx; ++ii)\n" \
+"	{\n" \
+"		x |= (1<<(2*ii) & res)>>(ii);\n" \
+"		y |= (1<<(2*ii+1) & res)>>(ii+1);\n" \
+"	}\n" \
+"	z = res<<(32-lenx*2-lenz)>>(32-lenz);\n" \
+"	x = reverse_bit(x, lenx);\n" \
+"	y = reverse_bit(y, lenx);\n" \
+"	z = reverse_bit(z, lenz);\n" \
+"	index = nx*ny*z + nx*y + x;\n" \
+"	atomic_inc(szbuf+index);\n" \
+"}\n" \
+"//find max size for each component\n" \
+"__kernel void kernel_5(\n" \
+"	__global unsigned int* szbuf,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	__global unsigned int* maxv,\n" \
+"	__read_only image3d_t mask)\n" \
+"{\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
+"	float mask_value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
+"	if (mask_value < 1e-6)\n" \
+"		return;\n" \
+"	unsigned int index = nx*ny*k + nx*j + i;\n" \
+"	*maxv = max(szbuf[index], *maxv);\n" \
+"}\n" \
+"//set all size to max\n" \
+"__kernel void kernel_6(\n" \
+"	__global unsigned int* szbuf,\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned int lenx,\n" \
+"	unsigned int lenz,\n" \
+"	__read_only image3d_t mask)\n" \
+"{\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
+"	float mask_value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
+"	if (mask_value < 1e-6)\n" \
+"		return;\n" \
+"	unsigned int index = nx*ny*k + nx*j + i;\n" \
+"	unsigned int value_l = label[index];\n" \
+"	if (value_l == 0)\n" \
+"		return;\n" \
+"	unsigned int res = value_l - 1;\n" \
+"	unsigned int x = 0;\n" \
+"	unsigned int y = 0;\n" \
+"	unsigned int z = 0;\n" \
+"	unsigned int ii;\n" \
+"	for (ii=0; ii<lenx; ++ii)\n" \
+"	{\n" \
+"		x |= (1<<(2*ii) & res)>>(ii);\n" \
+"		y |= (1<<(2*ii+1) & res)>>(ii+1);\n" \
+"	}\n" \
+"	z = res<<(32-lenx*2-lenz)>>(32-lenz);\n" \
+"	x = reverse_bit(x, lenx);\n" \
+"	y = reverse_bit(y, lenx);\n" \
+"	z = reverse_bit(z, lenz);\n" \
+"	unsigned int index2 = nx*ny*z + nx*y + x;\n" \
+"	if (index != index2)\n" \
+"		szbuf[index] = szbuf[index2];\n" \
+"}\n" \
+"//fix id by size\n" \
+"__kernel void kernel_7(\n" \
+"	__global unsigned int* szbuf,\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned int limit,\n" \
+"	__read_only image3d_t mask)\n" \
+"{\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
+"	float mask_value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
+"	if (mask_value < 1e-6)\n" \
+"		return;\n" \
+"	unsigned int index = nx*ny*k + nx*j + i;\n" \
+"	//break if too small\n" \
+"	if (label[index]==0 ||\n" \
+"		szbuf[index] < limit)\n" \
 "		return;\n" \
 "	label[index] = label[index] | 0x80000000;\n" \
 "}\n" \
