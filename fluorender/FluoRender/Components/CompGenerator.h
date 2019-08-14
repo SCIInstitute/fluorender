@@ -53,32 +53,34 @@ namespace FL
 		{ m_use_mask = use_mask; }
 		bool GetUseMask()
 		{ return m_use_mask; }
-		void OrderID_3D();
-		void OrderID_2D();
-		void ShuffleID_3D();
-		void ShuffleID_2D();
-		void ClearBorders3D();
-		void FillBorder3D(float);
-		void Grow3D(bool, int, float, float, float);
-		void Grow3DSized(bool, int, float, float,
-			int, float, int);
-		void Cleanup3D(int, unsigned int);
-		void MatchSlices_CPU(bool backwards,
-			unsigned int,
-			float, float, float);
 
-		//new segmentation
-		void DensityField3D(int dsize, int wsize,
+		//segmentation functions
+		void ShuffleID();
+		void ClearBorders();
+		void FillBorders(float);
+		void Grow(bool, int, float, float, float);
+		void Cleanup(int, unsigned int);
+		void DensityField(int dsize, int wsize,
 			bool diffuse, int iter, float tran, float falloff,
 			float density, float sscale);
-		void DistField3D(int iter, float th, int dsize, float sscale);
-		void DistDensityField3D(
+		void DistDensityField(
 			bool diffuse, int iter, float tran, float falloff,
 			int dsize1, int max_dist, float dist_thresh, float dist_strength,
 			int dsize2, int wsize, float density, float sscale);
-		void DistGrow3D(bool, int,
+		void DistGrow(bool, int,
 			float, float, int, int, float, float, float);
 		void SetIDBit(int);
+
+		//unused
+		void OrderID_2D();
+		void OrderID_3D();
+		void ShuffleID_2D();
+		void Grow3DSized(bool, int, float, float,
+			int, float, int);
+		void MatchSlices(bool backwards,
+			unsigned int,
+			float, float, float);
+		void DistField(int iter, float th, int dsize, float sscale);
 
 		//update progress
 		boost::signals2::signal<void ()> m_sig_progress;
@@ -86,7 +88,6 @@ namespace FL
 	private:
 		VolumeData *m_vd;
 		bool m_use_mask;//use mask instead of data
-		bool m_init;
 
 		struct Cell;
 		struct Edge
