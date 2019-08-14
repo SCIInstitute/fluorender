@@ -1411,7 +1411,7 @@ void ComponentGenerator::DistDensityField3D(
 #endif
 
 	if (!CheckBricks())
-		return;;
+		return;
 
 	//create program and kernels
 	//prog dist
@@ -1732,7 +1732,7 @@ void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
 #endif
 
 	if (!CheckBricks())
-		return;;
+		return;
 
 	//create program and kernels
 	//prog dist
@@ -1740,17 +1740,28 @@ void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
 		vol_kernel_factory_.kernel(str_cl_dist_field_2d);
 	if (!kernel_prog_dist)
 		return;
-	int kernel_dist_index0 = kernel_prog_dist->createKernel("kernel_0");
-	int kernel_dist_index1 = kernel_prog_dist->createKernel("kernel_2");
+	int kernel_dist_index0;
+	int kernel_dist_index1;
+	if (m_use_mask)
+	{
+		kernel_dist_index0 = kernel_prog_dist->createKernel("kernel_3");
+		kernel_dist_index1 = kernel_prog_dist->createKernel("kernel_5");
+	}
+	else
+	{
+		kernel_dist_index0 = kernel_prog_dist->createKernel("kernel_0");
+		kernel_dist_index1 = kernel_prog_dist->createKernel("kernel_2");
+	}
 
 	KernelProgram* kernel_prog = VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_dist_grow_3d);
 	if (!kernel_prog)
 		return;
-	int kernel_index0 = kernel_prog->createKernel("kernel_0");
-
+	int kernel_index0;
 	if (m_use_mask)
-		m_vd->GetVR()->return_mask();
+		kernel_index0 = kernel_prog->createKernel("kernel_1");
+	else
+		kernel_index0 = kernel_prog->createKernel("kernel_0");
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
 	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
@@ -1794,6 +1805,9 @@ void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
 			sizeof(float), (void*)(&sscale));
 		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 8,
 			sizeof(unsigned char), (void*)(&ini));
+		if (m_use_mask)
+			kernel_prog_dist->setKernelArgTex3D(kernel_dist_index0, 9,
+				CL_MEM_READ_ONLY, mid);
 		//kernel 1
 		arg_distf.kernel_index = kernel_dist_index1;
 		arg_distf.index = 0;
@@ -1806,6 +1820,9 @@ void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
 			sizeof(unsigned int), (void*)(&nz));
 		kernel_prog_dist->setKernelArgConst(kernel_dist_index1, 4,
 			sizeof(unsigned char), (void*)(&ini));
+		if (m_use_mask)
+			kernel_prog_dist->setKernelArgTex3D(kernel_dist_index1, 7,
+				CL_MEM_READ_ONLY, mid);
 		//init
 		kernel_prog_dist->executeKernel(kernel_dist_index0, 3, global_size, local_size);
 		unsigned char nn, re;
@@ -1863,6 +1880,9 @@ void ComponentGenerator::DistGrow3D(bool diffuse, int iter,
 			sizeof(float), (void*)(&sscale));
 		kernel_prog->setKernelArgConst(kernel_index0, 12,
 			sizeof(float), (void*)(&dist_strength));
+		if (m_use_mask)
+			kernel_prog->setKernelArgTex3D(kernel_index0, 13,
+				CL_MEM_READ_ONLY, mid);
 
 		//execute
 		for (int j = 0; j < iter; ++j)
@@ -1890,7 +1910,7 @@ void ComponentGenerator::SetIDBit(int psize)
 #endif
 
 	if (!CheckBricks())
-		return;;
+		return;
 
 	//create program and kernels
 	KernelProgram* kernel_prog = VolumeRenderer::
