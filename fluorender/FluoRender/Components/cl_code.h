@@ -1410,6 +1410,105 @@ const char* str_cl_dist_field_2d = \
 "			df[index] = re;\n" \
 "	}\n" \
 "}\n" \
+"//compute dist field in mask\n" \
+"__kernel void kernel_3(\n" \
+"	__read_only image3d_t data,\n" \
+"	__global unsigned char* df,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	int dsize,\n" \
+"	float th,\n" \
+"	float sscale,\n" \
+"	unsigned char ini,\n" \
+"	__read_only image3d_t mask)\n" \
+"{\n" \
+"	int3 ijk = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	unsigned int index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
+"	float mask_value = read_imagef(mask, samp, (int4)(ijk, 1)).x;\n" \
+"	if (mask_value < 1e-6)\n" \
+"	{\n" \
+"		df[index] = 0;\n" \
+"		return;\n" \
+"	}\n" \
+"	if (ijk.x == 0 || ijk.x == nx-1 ||\n" \
+"		ijk.y == 0 || ijk.y == ny-1)\n" \
+"	{\n" \
+"		df[index] = 0;\n" \
+"		return;\n" \
+"	}\n" \
+"	//float dval = read_imagef(data, samp, (int4)(ijk, 1)).x;\n" \
+"	float dval = get_2d_density(data, (int4)(ijk, 1), dsize);\n" \
+"	dval *= sscale;\n" \
+"	if (dval > th)\n" \
+"		df[index] = ini;\n" \
+"	else\n" \
+"		df[index] = 0;\n" \
+"}\n" \
+"//compute dist field in mask\n" \
+"__kernel void kernel_4(\n" \
+"	__global unsigned char* df,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned char ini,\n" \
+"	unsigned char nn,\n" \
+"	unsigned char re,\n" \
+"	__read_only image3d_t mask)\n" \
+"{\n" \
+"	int3 ijk = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	float mask_value = read_imagef(mask, samp, (int4)(ijk, 1)).x;\n" \
+"	if (mask_value < 1e-6)\n" \
+"		return;\n" \
+"	unsigned int nxy = nx*ny;\n" \
+"	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
+"	if (df[index] == ini)\n" \
+"	{\n" \
+"		unsigned char v1 = df[nxy*ijk.z + nx*ijk.y + ijk.x - 1];\n" \
+"		unsigned char v2 = df[nxy*ijk.z + nx*ijk.y + ijk.x + 1];\n" \
+"		unsigned char v3 = df[nxy*ijk.z + nx*(ijk.y-1) + ijk.x];\n" \
+"		unsigned char v4 = df[nxy*ijk.z + nx*(ijk.y+1) + ijk.x];\n" \
+"		if (v1 == nn || v2 == nn ||\n" \
+"			v3 == nn || v4 == nn)\n" \
+"			df[index] = re;\n" \
+"	}\n" \
+"}\n" \
+"//compute dist field in mask\n" \
+"__kernel void kernel_5(\n" \
+"	__global unsigned char* df,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned char ini,\n" \
+"	unsigned char nn,\n" \
+"	unsigned char re,\n" \
+"	__read_only image3d_t mask)\n" \
+"{\n" \
+"	int3 ijk = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	float mask_value = read_imagef(mask, samp, (int4)(ijk, 1)).x;\n" \
+"	if (mask_value < 1e-6)\n" \
+"		return;\n" \
+"	unsigned int nxy = nx*ny;\n" \
+"	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
+"	if (df[index] == ini)\n" \
+"	{\n" \
+"		short v1 = df[nxy*ijk.z + nx*ijk.y + ijk.x - 1];\n" \
+"		short v2 = df[nxy*ijk.z + nx*ijk.y + ijk.x + 1];\n" \
+"		short v3 = df[nxy*ijk.z + nx*(ijk.y-1) + ijk.x];\n" \
+"		short v4 = df[nxy*ijk.z + nx*(ijk.y+1) + ijk.x];\n" \
+"		short rre = (ijk.x % 13 + ijk.y % 17) % 4;\n" \
+"		v1 = rre == 0 ? -1 : v1;\n" \
+"		v2 = rre == 3 ? -1 : v2;\n" \
+"		v3 = rre == 1 ? -1 : v3;\n" \
+"		v4 = rre == 2 ? -1 : v4;\n" \
+"		if (v1 == nn || v2 == nn ||\n" \
+"			v3 == nn || v4 == nn)\n" \
+"			df[index] = re;\n" \
+"	}\n" \
+"}\n" \
 ;
 
 const char* str_cl_density_field_3d = \
@@ -1859,6 +1958,66 @@ const char* str_cl_dist_grow_3d = \
 "{\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
+"	unsigned int index = nx*ny*coord.z + nx*coord.y + coord.x;\n" \
+"	unsigned int label_v = label[index];\n" \
+"	if (label_v == 0 || label_v & 0x80000000)\n" \
+"		return;\n" \
+"	atomic_inc(rcnt);\n" \
+"	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
+"	value *= sscale;\n" \
+"	float distv = distf[index] / 255.0;\n" \
+"	value = value * (1.0 - dist_strength) + distv * dist_strength;\n" \
+"	float grad = length(sscale * vol_grad_func(data, (int4)(coord, 1)));\n" \
+"	//stop function\n" \
+"	float stop =\n" \
+"		(grad_f>0.0f?(grad>sqrt(grad_f)*2.12f?0.0f:exp(-grad*grad/grad_f)):1.0f)*\n" \
+"		(value>value_t?1.0f:(value_f>0.0f?(value<value_t-sqrt(value_f)*2.12f?0.0f:exp(-(value-value_t)*(value-value_t)/value_f)):0.0f));\n" \
+"	\n" \
+"	//max filter\n" \
+"	float random = (float)((*rcnt) % seed)/(float)(seed)+0.001f;\n" \
+"	if (stop < random)\n" \
+"		return;\n" \
+"	int3 nb_coord;\n" \
+"	unsigned int nb_index;\n" \
+"	unsigned int m;\n" \
+"	for (int i=-1; i<2; ++i)\n" \
+"	for (int j=-1; j<2; ++j)\n" \
+"	for (int k=-1; k<2; ++k)\n" \
+"	{\n" \
+"		nb_coord = (int3)(coord.x+i, coord.y+j, coord.z+k);\n" \
+"		if (nb_coord.x < 0 || nb_coord.x > nx-1 ||\n" \
+"			nb_coord.y < 0 || nb_coord.y > ny-1 ||\n" \
+"			nb_coord.z < 0 || nb_coord.z > nz-1)\n" \
+"			continue;\n" \
+"		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
+"		m = label[nb_index];\n" \
+"		if (m > label_v)\n" \
+"			label_v = m;\n" \
+"	}\n" \
+"	atomic_xchg(label+index, label_v);\n" \
+"}\n" \
+"//only grow within mask\n" \
+"__kernel void kernel_1(\n" \
+"	__read_only image3d_t data,\n" \
+"	__global unsigned int* label,\n" \
+"	__global unsigned char* distf,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	__global unsigned int* rcnt,\n" \
+"	unsigned int seed,\n" \
+"	float value_t,\n" \
+"	float value_f,\n" \
+"	float grad_f,\n" \
+"	float sscale,\n" \
+"	float dist_strength,\n" \
+"	__read_only image3d_t mask)\n" \
+"{\n" \
+"	int3 coord = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	float mask_value = read_imagef(mask, samp, (int4)(coord, 1)).x;\n" \
+"	if (mask_value < 1e-6)\n" \
+"		return;\n" \
 "	unsigned int index = nx*ny*coord.z + nx*coord.y + coord.x;\n" \
 "	unsigned int label_v = label[index];\n" \
 "	if (label_v == 0 || label_v & 0x80000000)\n" \
