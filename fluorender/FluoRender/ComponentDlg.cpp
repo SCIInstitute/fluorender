@@ -2877,14 +2877,14 @@ void ComponentDlg::GenerateComp(bool command)
 	else
 	{
 		vd->AddEmptyLabel(0, !cg.GetUseMask());
-		cg.ShuffleID_3D();
+		cg.ShuffleID();
 	}
 
 	if (m_use_dist_field)
 	{
 		if (m_density)
 		{
-			cg.DistDensityField3D(
+			cg.DistDensityField(
 				m_diff, m_iter,
 				m_thresh,
 				m_falloff,
@@ -2899,7 +2899,7 @@ void ComponentDlg::GenerateComp(bool command)
 		}
 		else
 		{
-			cg.DistGrow3D(
+			cg.DistGrow(
 				m_diff, m_iter,
 				m_thresh,
 				m_falloff ,
@@ -2914,7 +2914,7 @@ void ComponentDlg::GenerateComp(bool command)
 	{
 		if (m_density)
 		{
-			cg.DensityField3D(
+			cg.DensityField(
 				m_density_window_size,
 				m_density_stats_size,
 				m_diff, m_iter,
@@ -2925,15 +2925,15 @@ void ComponentDlg::GenerateComp(bool command)
 		}
 		else
 		{
-			cg.Grow3D(m_diff, m_iter, m_thresh, m_falloff, scale);
+			cg.Grow(m_diff, m_iter, m_thresh, m_falloff, scale);
 		}
 	}
 
 	if (clean_iter > 0)
-		cg.Cleanup3D(clean_iter, clean_size);
+		cg.Cleanup(clean_iter, clean_size);
 
 	if (bn > 1)
-		cg.FillBorder3D(0.1);
+		cg.FillBorders(0.1);
 
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
@@ -2944,8 +2944,8 @@ void ComponentDlg::GenerateComp(bool command)
 	SetOutput(titles, values);
 
 	//update
-	if (cg.GetUseMask())
-		vd->GetMask(true);
+	//if (cg.GetUseMask())
+	//	vd->GetMask(true);
 	vd->GetVR()->clear_tex_current();
 	m_view->RefreshGL();
 
@@ -3007,13 +3007,13 @@ void ComponentDlg::Clean(bool command)
 	vd->AddEmptyMask(1, !cg.GetUseMask());
 
 	if (bn > 1)
-		cg.ClearBorders3D();
+		cg.ClearBorders();
 
 	if (clean_iter > 0)
-		cg.Cleanup3D(clean_iter, clean_size);
+		cg.Cleanup(clean_iter, clean_size);
 
 	if (bn > 1)
-		cg.FillBorder3D(0.1);
+		cg.FillBorders(0.1);
 
 	vd->GetVR()->clear_tex_current();
 	m_view->RefreshGL();
