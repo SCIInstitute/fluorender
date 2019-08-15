@@ -46,6 +46,7 @@ public:
 		ID_ThresholdText,
 		ID_VoxelSldr,
 		ID_VoxelText,
+		ID_CASelectOnlyChk,
 		ID_PreviewBtn,
 		ID_EraseBtn,
 		ID_EnhanceSelChk
@@ -64,10 +65,6 @@ private:
 
 	//current view
 	VRenderView *m_view;
-	//current group
-	//DataGroup *m_group;
-	//current volume
-	//VolumeData *m_vol;
 
 	//max volume value
 	double m_max_value;
@@ -80,6 +77,7 @@ private:
 	bool m_previewed;
 	Color m_hdr;
 
+	wxCheckBox *m_ca_select_only_chk;
 	//threshold
 	wxSlider *m_threshold_sldr;
 	wxTextCtrl *m_threshold_text;
