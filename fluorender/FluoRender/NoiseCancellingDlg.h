@@ -60,6 +60,8 @@ public:
 	void SetDftThresh(double thresh) {m_dft_thresh = thresh;}
 	void SetDftSize(double size) {m_dft_size = size;}
 
+	void Preview(bool select, double size, double thresh);
+
 private:
 	wxWindow* m_frame;
 

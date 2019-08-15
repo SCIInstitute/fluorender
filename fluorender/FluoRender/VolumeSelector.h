@@ -92,14 +92,10 @@ public:
 	void Select(double radius);
 	//mode: 0-nomral; 1-posterized
 	void Label(int mode=0);
-	int CompAnalysis(double min_voxels, double max_voxels, double thresh, double falloff, bool select, bool gen_ann);
 	int SetLabelBySize();
-	int NoiseAnalysis(double min_voxels, double max_voxels, double bins, double thresh);
 	int CompIslandCount(double min_voxels, double max_voxels);
 	void CompExportMultiChann(bool select);
 	void CompExportRandomColor(int hmode, VolumeData* vd_r, VolumeData* vd_g, VolumeData* vd_b, bool select, bool hide=true);
-	//mode: 0-no duplicate; 1-duplicate
-	void NoiseRemoval(int iter, double thresh, int mode=0);
 	vector<VolumeData*>* GetResultVols();
 	//process current selection
 	int ProcessSel(double thresh);

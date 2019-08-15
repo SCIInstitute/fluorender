@@ -366,23 +366,6 @@ public:
 	void Segment()
 	{if (m_glview) m_glview->Segment();}
 
-	int CompAnalysis(double min_voxels, double max_voxels, double thresh, 
-		double falloff, bool select, bool gen_ann, bool size_map)
-	{
-		if (m_glview) 
-			return m_glview->CompAnalysis(min_voxels, max_voxels, thresh, falloff, select, gen_ann, size_map); 
-		else 
-			return 0;
-	}
-	void CompExport(int mode, bool select)
-	{if (m_glview) m_glview->CompExport(mode, select);}
-	void ShowAnnotations()
-	{if (m_glview) m_glview->ShowAnnotations();}
-	int NoiseAnalysis(double min_voxels, double max_voxels, double thresh)
-	{if (m_glview) return m_glview->NoiseAnalysis(min_voxels, max_voxels, thresh); else return 0;}
-	void NoiseRemoval(int iter, double thresh)
-	{if (m_glview) m_glview->NoiseRemoval(iter, thresh);}
-
 	//calculations
 	void SetVolumeA(VolumeData* vd)
 	{if (m_glview) m_glview->SetVolumeA(vd);}
