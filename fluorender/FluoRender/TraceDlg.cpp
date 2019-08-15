@@ -196,8 +196,8 @@ void TraceListCtrl::DeleteSelection()
 		if (parent)
 		{
 			((TraceDlg*)parent)->CompDelete();
-			if (((TraceDlg*)parent)->GetManualAssist())
-				((TraceDlg*)parent)->CellLink(true);
+			//if (((TraceDlg*)parent)->GetManualAssist())
+			//	((TraceDlg*)parent)->CellLink(true);
 		}
 	}
 	else if (m_type == 1)
@@ -331,15 +331,12 @@ EVT_BUTTON(ID_CellLinkBtn, TraceDlg::OnCellLink)
 EVT_BUTTON(ID_CellLinkAllBtn, TraceDlg::OnCellLinkAll)
 EVT_BUTTON(ID_CellIsolateBtn, TraceDlg::OnCellIsolate)
 EVT_BUTTON(ID_CellUnlinkBtn, TraceDlg::OnCellUnlink)
-//manual assist
-EVT_TOOL(ID_ManualAssistCheck, TraceDlg::OnManualAssistCheck)
 //modify page
 //ID edit controls
 EVT_TEXT(ID_CellNewIDText, TraceDlg::OnCellNewIDText)
 EVT_TEXT_ENTER(ID_CellNewIDText, TraceDlg::OnCompAppend)
 EVT_BUTTON(ID_CellNewIDXBtn, TraceDlg::OnCellNewIDX)
 EVT_BUTTON(ID_CompAppend2Btn, TraceDlg::OnCompAppend)
-EVT_TOOL(ID_AutoIDChk, TraceDlg::OnAutoIDChk)
 EVT_BUTTON(ID_CellNewIDBtn, TraceDlg::OnCellNewID)
 EVT_BUTTON(ID_CellAppendIDBtn, TraceDlg::OnCellAppendID)
 EVT_BUTTON(ID_CellReplaceIDBtn, TraceDlg::OnCellReplaceID)
@@ -393,60 +390,38 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 	sizer_1->Add(m_saveas_trace_btn, 0, wxALIGN_CENTER);
 
 	//generate
-	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "New map:",
-		wxDefaultPosition, wxSize(70, 20));
-	m_gen_map_prg = new wxGauge(page, ID_GenMapPrg, 100,
-		wxDefaultPosition, wxSize(-1, 18));
-	m_gen_map_btn = new wxButton(page, ID_GenMapBtn, "Gen.",
-		wxDefaultPosition, wxSize(65, 23));
-	m_refine_t_btn = new wxButton(page, ID_RefineTBtn, "Ref. T",
-		wxDefaultPosition, wxSize(65, 23));
-	m_refine_all_btn = new wxButton(page, ID_RefineAllBtn, "Ref. All",
-		wxDefaultPosition, wxSize(65, 23));
-	sizer_2->Add(5, 5);
-	sizer_2->Add(st, 0, wxALIGN_CENTER);
-	sizer_2->Add(m_gen_map_prg, 1, wxEXPAND);
-	sizer_2->Add(m_gen_map_btn, 0, wxALIGN_CENTER);
-	sizer_2->Add(m_refine_t_btn, 0, wxALIGN_CENTER);
-	sizer_2->Add(m_refine_all_btn, 0, wxALIGN_CENTER);
-
 	//settings
-	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Iterations:",
 		wxDefaultPosition, wxDefaultSize);
 	m_map_iter_spin = new wxSpinCtrl(page, ID_MapIterSpin, "3",
 		wxDefaultPosition, wxSize(50, 23));
-	sizer_3->AddStretchSpacer(1);
-	sizer_3->Add(st, 0, wxALIGN_CENTER);
-	sizer_3->Add(5, 5);
-	sizer_3->Add(m_map_iter_spin, 0, wxALIGN_CENTER);
+	sizer_2->Add(5, 5);
+	sizer_2->Add(st, 0, wxALIGN_CENTER);
+	sizer_2->Add(5, 5);
+	sizer_2->Add(m_map_iter_spin, 0, wxALIGN_CENTER);
 	st = new wxStaticText(page, 0, "Size Threshold:",
 		wxDefaultPosition, wxDefaultSize);
 	m_map_size_spin = new wxSpinCtrl(page, ID_MapSizeSpin, "100",
 		wxDefaultPosition, wxSize(50, 23));
 	m_map_size_spin->SetRange(1, std::numeric_limits<int>::max());
-	sizer_3->Add(10, 10);
-	sizer_3->Add(st, 0, wxALIGN_CENTER);
-	sizer_3->Add(5, 5);
-	sizer_3->Add(m_map_size_spin, 0, wxALIGN_CENTER);
-	m_map_consistent_btn = new wxToggleButton(page, ID_MapConsistentBtn,
-		"Consistent Colors", wxDefaultPosition, wxSize(100, 23));
-	sizer_3->Add(10, 10);
-	sizer_3->Add(m_map_consistent_btn, 0, wxALIGN_CENTER);
-	sizer_3->AddStretchSpacer(1);
+	sizer_2->Add(5, 5);
+	sizer_2->Add(st, 0, wxALIGN_CENTER);
+	sizer_2->Add(5, 5);
+	sizer_2->Add(m_map_size_spin, 0, wxALIGN_CENTER);
+	m_gen_map_btn = new wxButton(page, ID_GenMapBtn, "Generate",
+		wxDefaultPosition, wxSize(100, 23));
+	m_refine_t_btn = new wxButton(page, ID_RefineTBtn, "Refine T",
+		wxDefaultPosition, wxSize(100, 23));
+	m_refine_all_btn = new wxButton(page, ID_RefineAllBtn, "Refine All",
+		wxDefaultPosition, wxSize(100, 23));
+	sizer_2->Add(5, 5);
+	sizer_2->Add(m_gen_map_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_refine_t_btn, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_refine_all_btn, 0, wxALIGN_CENTER);
+
 	//
-	wxBoxSizer* sizer_4 = new wxBoxSizer(wxHORIZONTAL);
-	m_map_merge_btn = new wxToggleButton(
-		page, ID_MapMergeBtn, "Try Merging",
-		wxDefaultPosition, wxSize(100, 23));
-	m_map_split_btn = new wxToggleButton(
-		page, ID_MapSplitBtn, "Try Spliting",
-		wxDefaultPosition, wxSize(100, 23));
-	sizer_4->AddStretchSpacer(1);
-	sizer_4->Add(m_map_merge_btn, 0, wxALIGN_CENTER);
-	sizer_4->Add(5, 5);
-	sizer_4->Add(m_map_split_btn, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Similarity:",
 		wxDefaultPosition, wxDefaultSize);
 	m_map_similar_spin = new wxSpinCtrlDouble(
@@ -454,10 +429,10 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(50, 23),
 		wxSP_ARROW_KEYS| wxSP_WRAP,
 		0, 1, 0.2, 0.01);
-	sizer_4->Add(10, 10);
-	sizer_4->Add(st, 0, wxALIGN_CENTER);
-	sizer_4->Add(5, 5);
-	sizer_4->Add(m_map_similar_spin, 0, wxALIGN_CENTER);
+	sizer_3->Add(5, 5);
+	sizer_3->Add(st, 0, wxALIGN_CENTER);
+	sizer_3->Add(5, 5);
+	sizer_3->Add(m_map_similar_spin, 0, wxALIGN_CENTER);
 	st = new wxStaticText(page, 0, "Contact Factor:",
 		wxDefaultPosition, wxDefaultSize);
 	m_map_contact_spin = new wxSpinCtrlDouble(
@@ -465,11 +440,22 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(50, 23),
 		wxSP_ARROW_KEYS | wxSP_WRAP,
 		0, 1, 0.6, 0.01);
-	sizer_4->Add(10, 10);
-	sizer_4->Add(st, 0, wxALIGN_CENTER);
-	sizer_4->Add(5, 5);
-	sizer_4->Add(m_map_contact_spin, 0, wxALIGN_CENTER);
-	sizer_4->AddStretchSpacer(1);
+	sizer_3->Add(5, 5);
+	sizer_3->Add(st, 0, wxALIGN_CENTER);
+	sizer_3->Add(5, 5);
+	sizer_3->Add(m_map_contact_spin, 0, wxALIGN_CENTER);
+	m_map_consistent_btn = new wxToggleButton(page, ID_MapConsistentBtn,
+		"Consistent Colors", wxDefaultPosition, wxSize(100, 23));
+	m_map_merge_btn = new wxToggleButton(
+		page, ID_MapMergeBtn, "Try Merging",
+		wxDefaultPosition, wxSize(100, 23));
+	m_map_split_btn = new wxToggleButton(
+		page, ID_MapSplitBtn, "Try Spliting",
+		wxDefaultPosition, wxSize(100, 23));
+	sizer_3->Add(5, 5);
+	sizer_3->Add(m_map_consistent_btn, 0, wxALIGN_CENTER);
+	sizer_3->Add(m_map_merge_btn, 0, wxALIGN_CENTER);
+	sizer_3->Add(m_map_split_btn, 0, wxALIGN_CENTER);
 
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
@@ -479,8 +465,6 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 	sizer_v->Add(sizer_2, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 	sizer_v->Add(sizer_3, 0, wxEXPAND);
-	sizer_v->Add(10, 10);
-	sizer_v->Add(sizer_4, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 
 	//set the page
@@ -583,20 +567,6 @@ wxWindow* TraceDlg::CreateLinkPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(80, 23));
 	m_comp_clear_btn = new wxButton(page, ID_CompClearBtn, "Clear",
 		wxDefaultPosition, wxSize(80, 23));
-	m_manual_assist_check = new wxToolBar(page, wxID_ANY,
-		wxDefaultPosition, wxSize(-1, 23), wxTB_NODIVIDER);
-	wxBitmap bitmap = wxGetBitmapFromMemory(auto_link_off);
-#ifdef _DARWIN
-	m_manual_assist_check->SetToolBitmapSize(bitmap.GetSize());
-#endif
-	m_manual_assist_check->AddCheckTool(ID_ManualAssistCheck, "Auto Link",
-		bitmap, wxNullBitmap,
-		"Automatically link selected IDs after each paint brush stroke",
-		"Automatically link selected IDs after each paint brush stroke");
-#ifdef _WIN32
-	m_manual_assist_check->SetBackgroundColour(m_notebook->GetThemeBackgroundColour());
-#endif
-	m_manual_assist_check->Realize();
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_comp_id_text2, 0, wxALIGN_CENTER);
@@ -605,7 +575,6 @@ wxWindow* TraceDlg::CreateLinkPage(wxWindow *parent)
 	sizer_1->Add(m_comp_append_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_comp_clear_btn, 0, wxALIGN_CENTER);
 	sizer_1->AddStretchSpacer();
-	sizer_1->Add(m_manual_assist_check, 0, wxALIGN_CENTER);
 
 	//ID link controls
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
@@ -665,20 +634,6 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(80, 23));
 	m_comp_clear_btn = new wxButton(page, ID_CompClearBtn, "Clear",
 		wxDefaultPosition, wxSize(80, 23));
-	m_auto_id_chk = new wxToolBar(page, wxID_ANY,
-		wxDefaultPosition, wxSize(-1, 23), wxTB_NODIVIDER);
-	wxBitmap bitmap = wxGetBitmapFromMemory(auto_assign_off);
-#ifdef _DARWIN
-	m_auto_id_chk->SetToolBitmapSize(bitmap.GetSize());
-#endif
-	m_auto_id_chk->AddCheckTool(ID_AutoIDChk, "Auto Assign ID",
-		bitmap, wxNullBitmap,
-		"Automatically assign an ID to selection after each paint brush stroke",
-		"Automatically assign an ID to selection after each paint brush stroke");
-#ifdef _WIN32
-	m_auto_id_chk->SetBackgroundColour(m_notebook->GetThemeBackgroundColour());
-#endif
-	m_auto_id_chk->Realize();
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_cell_new_id_text, 0, wxALIGN_CENTER);
@@ -687,7 +642,6 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 	sizer_1->Add(m_comp_append2_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_comp_clear_btn, 0, wxALIGN_CENTER);
 	sizer_1->AddStretchSpacer();
-	sizer_1->Add(m_auto_id_chk, 0, wxALIGN_CENTER);
 
 	//controls
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
@@ -807,8 +761,6 @@ TraceDlg::TraceDlg(wxWindow* frame, wxWindow* parent)
 	//m_mask(0),
 	m_cur_time(-1),
 	m_prv_time(-1),
-	m_manual_assist(false),
-	m_auto_id(false),
 	m_clnum(2),
 	m_iter_num(3),
 	m_size_thresh(50.0),
@@ -953,23 +905,6 @@ void TraceDlg::GetSettings(VRenderView* vrv)
 	{
 		m_load_trace_text->SetValue("No Track map");
 	}
-
-	//manual tracking assist
-	m_manual_assist_check->ToggleTool(ID_ManualAssistCheck, m_manual_assist);
-	if (m_manual_assist)
-		m_manual_assist_check->SetToolNormalBitmap(
-			ID_ManualAssistCheck, wxGetBitmapFromMemory(auto_link_on));
-	else
-		m_manual_assist_check->SetToolNormalBitmap(
-			ID_ManualAssistCheck, wxGetBitmapFromMemory(auto_link_off));
-	//auto id
-	m_auto_id_chk->ToggleTool(ID_AutoIDChk, m_auto_id);
-	if (m_auto_id)
-		m_auto_id_chk->SetToolNormalBitmap(
-			ID_AutoIDChk, wxGetBitmapFromMemory(auto_assign_on));
-	else
-		m_auto_id_chk->SetToolNormalBitmap(
-			ID_AutoIDChk, wxGetBitmapFromMemory(auto_assign_off));
 
 	//settings for tracking
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
@@ -1690,27 +1625,6 @@ void TraceDlg::OnSaveResult(wxCommandEvent &event)
 		delete fopendlg;
 }
 
-//manual tracking assist
-void TraceDlg::OnManualAssistCheck(wxCommandEvent &event)
-{
-	m_manual_assist = m_manual_assist_check->GetToolState(ID_ManualAssistCheck);
-	if (m_manual_assist)
-	{
-		m_manual_assist_check->SetToolNormalBitmap(
-			ID_ManualAssistCheck,
-			wxGetBitmapFromMemory(auto_link_on));
-		(*m_stat_text) << "Auto link enabled. Remember to turn it off after tracking!\n";
-	}
-	else
-	{
-		m_manual_assist_check->SetToolNormalBitmap(
-			ID_ManualAssistCheck,
-			wxGetBitmapFromMemory(auto_link_off));
-		if (!m_auto_id)
-			m_stat_text->Clear();
-	}
-}
-
 //Component tools
 void TraceDlg::CompDelete()
 {
@@ -2008,12 +1922,8 @@ void TraceDlg::CellNewID(bool append)
 	if (!vd)
 		return;
 	Nrrd* nrrd_mask = 0;
-	if (m_auto_id)
-		//get prev mask
-		nrrd_mask = vd->GetMask(false);
-	else
-		//get current mask
-		nrrd_mask = vd->GetMask(true);
+	//get current mask
+	nrrd_mask = vd->GetMask(true);
 	if (!nrrd_mask)
 	{
 		vd->AddEmptyMask(0);
@@ -2069,16 +1979,8 @@ void TraceDlg::CellNewID(bool append)
 	{
 		if (id_vol)
 		{
-			if (m_auto_id)
-			{
-				new_id = id_vol;
-				inc = 0;
-			}
-			else
-			{
-				new_id = id_vol + 10;
-				inc = 10;
-			}
+			new_id = id_vol + 10;
+			inc = 10;
 		}
 		else
 		{
@@ -2091,10 +1993,7 @@ void TraceDlg::CellNewID(bool append)
 		if (id_str)
 		{
 			new_id = id_str;
-			if (m_auto_id)
-				inc = 0;
-			else
-				inc = 253;
+			inc = 253;
 		}
 		else
 		{
@@ -2104,6 +2003,7 @@ void TraceDlg::CellNewID(bool append)
 	}
 	unsigned int stop_id = new_id;
 	if (inc)
+	{
 		while (vd->SearchLabel(new_id))
 		{
 			new_id += inc;
@@ -2115,13 +2015,6 @@ void TraceDlg::CellNewID(bool append)
 				return;
 			}
 		}
-
-	if (m_auto_id)
-	{
-		//get current mask
-		nrrd_mask = vd->GetMask(true);
-		if (!nrrd_mask)
-			return;
 	}
 
 	//update label volume, set mask region to the new ID
@@ -2130,28 +2023,19 @@ void TraceDlg::CellNewID(bool append)
 	if (new_id)
 		cell = FL::pCell(new FL::Cell(new_id));
 	for (i = 0; i < nx; ++i)
-		for (j = 0; j < ny; ++j)
-			for (k = 0; k < nz; ++k)
-			{
-				index = nx*ny*k + nx*j + i;
-				if (data_mask[index])
-				{
-					if (m_auto_id)
-					{
-						if (data_label[index] &&
-							data_label[index] != new_id)
-						{
-							data_mask[index] = 0;
-							continue;
-						}
-					}
-					else if (append && data_label[index])
-						continue;
-					data_label[index] = new_id;
-					if (new_id)
-						cell->Inc(i, j, k, 1.0f);
-				}
-			}
+	for (j = 0; j < ny; ++j)
+	for (k = 0; k < nz; ++k)
+	{
+		index = nx*ny*k + nx*j + i;
+		if (data_mask[index])
+		{
+			if (append && data_label[index])
+				continue;
+			data_label[index] = new_id;
+			if (new_id)
+				cell->Inc(i, j, k, 1.0f);
+		}
+	}
 
 	//save label mask to disk
 	vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
@@ -2515,26 +2399,6 @@ void TraceDlg::OnCellNewIDText(wxCommandEvent &event)
 void TraceDlg::OnCellNewIDX(wxCommandEvent &event)
 {
 	m_cell_new_id_text->Clear();
-}
-
-void TraceDlg::OnAutoIDChk(wxCommandEvent &event)
-{
-	m_auto_id = m_auto_id_chk->GetToolState(ID_AutoIDChk);
-	if (m_auto_id)
-	{
-		m_auto_id_chk->SetToolNormalBitmap(
-			ID_AutoIDChk,
-			wxGetBitmapFromMemory(auto_assign_on));
-		(*m_stat_text) << "Auto ID assignment enabled. Remember to turn it off after finish tracking!\n";
-	}
-	else
-	{
-		m_auto_id_chk->SetToolNormalBitmap(
-			ID_AutoIDChk,
-			wxGetBitmapFromMemory(auto_assign_off));
-		if (!m_manual_assist)
-			m_stat_text->Clear();
-	}
 }
 
 void TraceDlg::OnCellNewID(wxCommandEvent &event)

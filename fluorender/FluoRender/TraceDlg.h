@@ -140,14 +140,11 @@ public:
 		ID_CellLinkAllBtn,
 		ID_CellIsolateBtn,
 		ID_CellUnlinkBtn,
-		//assist
-		ID_ManualAssistCheck,
 		//modify page
 		//ID edit controls
 		ID_CellNewIDText,
 		ID_CellNewIDXBtn,
 		ID_CompAppend2Btn,
-		ID_AutoIDChk,
 		ID_CellNewIDBtn,
 		ID_CellAppendIDBtn,
 		ID_CellReplaceIDBtn,
@@ -186,10 +183,6 @@ public:
 	void UpdateList();
 	void SetCellSize(int size);
 
-	//manual assist
-	bool GetManualAssist() {return m_manual_assist;}
-	//auto id
-	bool GetAutoID() { return m_auto_id; }
 	//cell operations
 	void CellUpdate();
 	void CellFull();
@@ -223,17 +216,9 @@ private:
 	//tab control
 	wxNotebook *m_notebook;
 
-	//temporary mask
-	//Nrrd* m_mask;
-
 	//time sequence setting
 	int m_cur_time;
 	int m_prv_time;
-
-	//enable manual assist
-	bool m_manual_assist;
-	//auto id
-	bool m_auto_id;
 
 	//cluster number
 	int m_clnum;
@@ -287,8 +272,6 @@ private:
 	//link page
 	wxTextCtrl* m_comp_id_text2;
 	//same append button from selection page
-	//assist
-	wxToolBar* m_manual_assist_check;
 	//ID link controls
 	wxButton* m_cell_exclusive_link_btn;
 	wxButton* m_cell_link_btn;
@@ -301,7 +284,6 @@ private:
 	wxTextCtrl* m_cell_new_id_text;
 	wxButton* m_cell_new_id_x_btn;
 	wxButton* m_comp_append2_btn;
-	wxToolBar* m_auto_id_chk;
 	wxButton* m_cell_new_id_btn;
 	wxButton* m_cell_append_id_btn;
 	wxButton* m_cell_replace_id_btn;
@@ -400,13 +382,10 @@ private:
 	void OnCellLinkAll(wxCommandEvent& event);
 	void OnCellIsolate(wxCommandEvent& event);
 	void OnCellUnlink(wxCommandEvent& event);
-	//manual tracking assistant
-	void OnManualAssistCheck(wxCommandEvent &event);
 	//modify page
 	//ID edit controls
 	void OnCellNewIDText(wxCommandEvent &event);
 	void OnCellNewIDX(wxCommandEvent& event);
-	void OnAutoIDChk(wxCommandEvent& event);
 	void OnCellNewID(wxCommandEvent& event);
 	void OnCellAppendID(wxCommandEvent& event);
 	void OnCellReplaceID(wxCommandEvent& event);
