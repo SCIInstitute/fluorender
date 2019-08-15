@@ -166,6 +166,36 @@ void NoiseCancellingDlg::GetSettings(VRenderView* vrv)
 	}
 }
 
+void NoiseCancellingDlg::Preview(bool select, double size, double thresh)
+{
+	if (!m_view)
+		return;
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+
+	FL::ComponentGenerator cg(vd);
+	cg.SetUseMask(select);
+	vd->AddEmptyMask(1, !cg.GetUseMask());
+	vd->AddEmptyLabel(0, !cg.GetUseMask());
+	cg.ShuffleID();
+	double scale = vd->GetScalarScale();
+	cg.Grow(false, -1, thresh, 0.0, scale);
+
+	FL::ComponentAnalyzer ca(vd);
+	ca.Analyze(select, true, false);
+
+	FL::ComponentSelector comp_selector(vd);
+	//cell size filter
+	comp_selector.SetMinNum(false, 0);
+	comp_selector.SetMaxNum(true, size);
+	comp_selector.SetAnalyzer(&ca);
+	comp_selector.CompFull();
+
+	vd->GetVR()->clear_tex_pool();
+	m_view->RefreshGL();
+}
+
 //threshold
 void NoiseCancellingDlg::OnThresholdChange(wxScrollEvent &event)
 {
@@ -211,38 +241,10 @@ void NoiseCancellingDlg::OnVoxelText(wxCommandEvent &event)
 
 void NoiseCancellingDlg::OnPreviewBtn(wxCommandEvent &event)
 {
-	if (!m_view)
-		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	if (!vd)
-		return;
-
 	bool select = m_ca_select_only_chk->GetValue();
-
-	FL::ComponentGenerator cg(vd);
-	cg.SetUseMask(select);
-	vd->AddEmptyMask(1, !cg.GetUseMask());
-	vd->AddEmptyLabel(0, !cg.GetUseMask());
-	cg.ShuffleID();
-	double scale = vd->GetScalarScale();
-	cg.Grow(false, -1, m_dft_thresh, 0.0, scale);
-
-	FL::ComponentAnalyzer ca(vd);
-	ca.Analyze(select, true, false);
-
-	FL::ComponentSelector comp_selector(vd);
-	//cell size filter
-	comp_selector.SetMinNum(false, 0);
-	comp_selector.SetMaxNum(true, m_dft_size);
-	comp_selector.SetAnalyzer(&ca);
-	comp_selector.CompFull();
-
-	vd->GetVR()->clear_tex_pool();
-	m_view->RefreshGL();
-
+	Preview(select, m_dft_size, m_dft_thresh);
 	m_previewed = true;
 	OnEnhanceSelChk(event);
-
 }
 
 void NoiseCancellingDlg::OnEraseBtn(wxCommandEvent &event)
