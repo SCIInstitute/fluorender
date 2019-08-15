@@ -2134,24 +2134,6 @@ void VRenderGLView::Segment()
 
 	//update
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetTraceDlg())
-	{
-		if (vr_frame->GetTraceDlg()->GetAutoID())
-		{
-			if (m_selector.GetMode() == 1 ||
-				m_selector.GetMode() == 2 ||
-				m_selector.GetMode() == 4)
-				vr_frame->GetTraceDlg()->CellNewID(true);
-			else if (m_selector.GetMode() == 3)
-				vr_frame->GetTraceDlg()->CellEraseID();
-		}
-		if (vr_frame->GetTraceDlg()->GetManualAssist())
-		{
-			if (!vr_frame->GetTraceDlg()->GetAutoID())
-				vr_frame->GetTraceDlg()->CellUpdate();
-			vr_frame->GetTraceDlg()->CellLink(true);
-		}
-	}
 	if (vr_frame && vr_frame->GetBrushToolDlg())
 	{
 		vr_frame->GetBrushToolDlg()->GetSettings(m_vrv);
@@ -4029,10 +4011,7 @@ void VRenderGLView::SetBrush(int mode)
 {
 	m_prev_focus = FindFocus();
 	SetFocus();
-	bool autoid = false;
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetTraceDlg())
-		autoid = vr_frame->GetTraceDlg()->GetAutoID();
 
 	if (m_int_mode == 5 ||
 		m_int_mode == 7)
@@ -4053,10 +4032,7 @@ void VRenderGLView::SetBrush(int mode)
 	else
 	{
 		m_int_mode = 2;
-		if (autoid && mode == 2)
-			m_selector.SetMode(1);
-		else
-			m_selector.SetMode(mode);
+		m_selector.SetMode(mode);
 	}
 	m_paint_display = true;
 	m_draw_brush = true;
