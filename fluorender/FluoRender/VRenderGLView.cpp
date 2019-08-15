@@ -2117,9 +2117,19 @@ void VRenderGLView::Segment()
 		m_selector.SetBrushSclTranslate(scl_translate_save);
 	}
 
+	bool count = false;
 	unsigned int sum = 0;
 	float wsum = 0.0;
-	if (m_count)
+	if (m_count &&
+		(m_selector.GetMode() == 1 ||
+			m_selector.GetMode() == 2 ||
+			m_selector.GetMode() == 3 ||
+			m_selector.GetMode() == 4 ||
+			m_selector.GetMode() == 5 ||
+			m_selector.GetMode() == 7 ||
+			m_selector.GetMode() == 8))
+		count = true;
+	if (count)
 		CountVoxels(sum, wsum);
 
 	//update
@@ -2145,7 +2155,7 @@ void VRenderGLView::Segment()
 	if (vr_frame && vr_frame->GetBrushToolDlg())
 	{
 		vr_frame->GetBrushToolDlg()->GetSettings(m_vrv);
-		if (m_count)
+		if (count)
 		{
 			GridData data;
 			VolumeData* sel_vol = m_selector.GetVolume();

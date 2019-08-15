@@ -474,8 +474,13 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 		void* val32 = 0;
 		GetLabel(brick_num, b, &val32);
 
+		//auto iter
+		int biter = iter;
+		if (biter < 0)
+			biter = std::max(std::max(nx, ny), nz);
+
 		unsigned int rcnt = 0;
-		unsigned int seed = iter > 10 ? iter : 11;
+		unsigned int seed = biter > 10 ? biter : 11;
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
 		float scl_ff = diffuse ? falloff : 0.0f;
@@ -511,7 +516,7 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 				CL_MEM_READ_ONLY, mid);
 
 		//execute
-		for (int j = 0; j < iter; ++j)
+		for (int j = 0; j < biter; ++j)
 			kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
 
 		//read back

@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "NoiseCancellingDlg.h"
 #include "VRenderFrame.h"
+#include "Components/CompSelector.h"
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(NoiseCancellingDlg, wxPanel)
@@ -94,17 +95,23 @@ NoiseCancellingDlg::NoiseCancellingDlg(wxWindow *frame, wxWindow *parent)
 
 	//group3
 	wxBoxSizer *sizer3 = new wxBoxSizer(wxHORIZONTAL);
-	m_enhance_sel_chk = new wxCheckBox(this, ID_EnhanceSelChk, "Enhance selection",
-		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-	sizer3->Add(m_enhance_sel_chk, 0, wxALIGN_CENTER);
+	m_ca_select_only_chk = new wxCheckBox(this, ID_CASelectOnlyChk, "Selct. Only",
+		wxDefaultPosition, wxSize(95, 20));
+	sizer3->Add(m_ca_select_only_chk, 0, wxALIGN_CENTER);
 
 	//group4
 	wxBoxSizer *sizer4 = new wxBoxSizer(wxHORIZONTAL);
+	m_enhance_sel_chk = new wxCheckBox(this, ID_EnhanceSelChk, "Enhance selection",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+	sizer4->Add(m_enhance_sel_chk, 0, wxALIGN_CENTER);
+
+	//group5
+	wxBoxSizer *sizer5 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0,
 		"Check this option if selections are too dim. It is equivalent to\n"\
 		"adjusting the Equalization values in the Output Adjustment\n panel.",
 		wxDefaultPosition, wxDefaultSize);
-	sizer4->Add(st, 0, wxALIGN_CENTER);
+	sizer5->Add(st, 0, wxALIGN_CENTER);
 
 	//all controls
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
@@ -114,7 +121,10 @@ NoiseCancellingDlg::NoiseCancellingDlg(wxWindow *frame, wxWindow *parent)
 	sizerV->Add(sizer2, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 	sizerV->Add(sizer3, 0, wxEXPAND);
+	sizerV->Add(10, 10);
 	sizerV->Add(sizer4, 0, wxEXPAND);
+	sizerV->Add(10, 10);
+	sizerV->Add(sizer5, 0, wxEXPAND);
 
 	SetSizer(sizerV);
 	Layout();
@@ -201,22 +211,38 @@ void NoiseCancellingDlg::OnVoxelText(wxCommandEvent &event)
 
 void NoiseCancellingDlg::OnPreviewBtn(wxCommandEvent &event)
 {
-	if (m_view)
-	{
-		m_view->CompAnalysis(0.0, m_dft_size, m_dft_thresh, 1.0, false, false, false);
-		//m_view->GetVolumeSelector()->GetVolumeNum();
-		//change mask threshold
-		VolumeData* sel_vol = 0;
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
-			sel_vol = vr_frame->GetCurSelVol();
-		if (sel_vol)
-			sel_vol->SetUseMaskThreshold(true);
-		if (vr_frame)
-			vr_frame->RefreshVRenderViews();
-		m_previewed = true;
-		OnEnhanceSelChk(event);
-	}
+	if (!m_view)
+		return;
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+
+	bool select = m_ca_select_only_chk->GetValue();
+
+	FL::ComponentGenerator cg(vd);
+	cg.SetUseMask(select);
+	vd->AddEmptyMask(1, !cg.GetUseMask());
+	vd->AddEmptyLabel(0, !cg.GetUseMask());
+	cg.ShuffleID();
+	double scale = vd->GetScalarScale();
+	cg.Grow(false, -1, m_dft_thresh, 0.0, scale);
+
+	FL::ComponentAnalyzer ca(vd);
+	ca.Analyze(select, true, false);
+
+	FL::ComponentSelector comp_selector(vd);
+	//cell size filter
+	comp_selector.SetMinNum(false, 0);
+	comp_selector.SetMaxNum(true, m_dft_size);
+	comp_selector.SetAnalyzer(&ca);
+	comp_selector.CompFull();
+
+	vd->GetVR()->clear_tex_pool();
+	m_view->RefreshGL();
+
+	m_previewed = true;
+	OnEnhanceSelChk(event);
+
 }
 
 void NoiseCancellingDlg::OnEraseBtn(wxCommandEvent &event)
