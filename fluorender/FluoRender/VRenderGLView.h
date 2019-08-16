@@ -350,7 +350,7 @@ public:
 	//4d movie frame calculation
 	void Get4DSeqFrames(int &start_frame, int &end_frame, int &cur_frame);
 	void Set4DSeqFrame(int frame, bool run_script);
-	void Set4DSeqFrameVd(int frame, bool run_script,
+	void UpdateVolumeData(int frame, bool run_script,
 		VolumeData* vd, VRenderFrame* vframe);
 	//3d batch file calculation
 	void Get3DBatFrames(int &start_frame, int &end_frame, int &cur_frame);
@@ -502,7 +502,7 @@ public:
 	//run 4d script
 	void SetRun4DScript(bool runscript) { m_run_script = runscript; }
 	bool GetRun4DScript() { return m_run_script; }
-	void Run4DScript();
+	//void Run4DScript();
 
 	//start loop update
 	void StartLoopUpdate();
@@ -1035,20 +1035,21 @@ private:
 	void ResetEnlarge();
 
 	//run 4d script
-	void Run4DScript(wxString &scriptname, VolumeData* vd = 0);
-	void RunNoiseReduction(wxFileConfig &fconfig);
-	void RunSelectionTracking(wxFileConfig &fconfig);
-	void RunSparseTracking(wxFileConfig &fconfig);
-	void RunRandomColors(wxFileConfig &fconfig);
-	void RunSeparateChannels(wxFileConfig &fconfig);
-	void RunFetchMask(wxFileConfig &fconfig);
-	void RunSaveMask(wxFileConfig &fconfig);
-	void RunSaveVolume(wxFileConfig &fconfig);
-	void RunCalculation(wxFileConfig &fconfig);
-	void RunOpenCL(wxFileConfig &fconfig);
-	void RunCompAnalysis(wxFileConfig &fconfig);
-	void RunGenerateComp(wxFileConfig &fconfig);
-	void RunRulerProfile(wxFileConfig &fconfig);
+	//index: 0-pre-change; 1-post-change
+	void Run4DScript(int index, wxString &scriptname);
+	void RunNoiseReduction(int index, wxFileConfig &fconfig);
+	void RunSelectionTracking(int index, wxFileConfig &fconfig);
+	void RunSparseTracking(int index, wxFileConfig &fconfig);
+	void RunRandomColors(int index, wxFileConfig &fconfig);
+	void RunSeparateChannels(int index, wxFileConfig &fconfig);
+	void RunFetchMask(int index, wxFileConfig &fconfig);
+	void RunSaveMask(int index, wxFileConfig &fconfig);
+	void RunSaveVolume(int index, wxFileConfig &fconfig);
+	void RunCalculation(int index, wxFileConfig &fconfig);
+	void RunOpenCL(int index, wxFileConfig &fconfig);
+	void RunCompAnalysis(int index, wxFileConfig &fconfig);
+	void RunGenerateComp(int index, wxFileConfig &fconfig);
+	void RunRulerProfile(int index, wxFileConfig &fconfig);
 
 	//read/delete volume cache
 	//for sparse tracking
