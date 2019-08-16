@@ -5133,10 +5133,6 @@ void VRenderGLView::UpdateVolumeData(int frame, bool run_script,
 				if (vframe && vframe->GetMeasureDlg())
 					vframe->GetMeasureDlg()->UpdateList();
 
-				//run script
-				//if (run_script)
-				//	Run4DScript(1, m_script_file, vd);
-
 				clear_pool = true;
 			}
 		}
@@ -5148,6 +5144,20 @@ void VRenderGLView::UpdateVolumeData(int frame, bool run_script,
 
 void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 {
+	//compute frame number
+	int start_frame, end_frame, cur_frame;
+	Get4DSeqFrames(start_frame, end_frame, cur_frame);
+	m_begin_frame = start_frame;
+	m_end_frame = end_frame;
+	m_total_frames = std::abs(end_frame - start_frame + 1);
+	if (frame > end_frame)
+		frame = end_frame;
+	if (frame < start_frame)
+		frame = start_frame;
+	//skip if frame unchanged
+	if (m_tseq_cur_num == frame)
+		return;
+
 	//get settings
 	VRenderFrame* vframe = (VRenderFrame*)m_frame;
 	if (vframe && vframe->GetSettingDlg())
@@ -5161,19 +5171,9 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 
 	//run pre-change script
 	if (run_script)
-		Run4DScript(1, m_script_file);
+		Run4DScript(0, m_script_file);
 
-	//compute frame number
-	int start_frame, end_frame, cur_frame;
-	Get4DSeqFrames(start_frame, end_frame, cur_frame);
-	if (frame > end_frame)
-		frame = end_frame;
-	if (frame < start_frame)
-		frame = start_frame;
-	if (frame == start_frame)
-		m_sf_script = true;
-	else
-		m_sf_script = false;
+	//change time frame
 	m_tseq_prv_num = m_tseq_cur_num;
 	m_tseq_cur_num = frame;
 
@@ -5186,7 +5186,7 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 
 	//run post-change script
 	if (run_script)
-		Run4DScript(0, m_script_file);
+		Run4DScript(1, m_script_file);
 
 	//restore currently selected volume
 	m_cur_vol = cur_vd_save;
@@ -5621,8 +5621,15 @@ void VRenderGLView::RunNoiseReduction(int index, wxFileConfig &fconfig)
 {
 	int time_mode, chan_mode;
 	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
+	bool start_frame, end_frame;
+	fconfig.Read("start_frame", &start_frame, false);
+	fconfig.Read("end_frame", &end_frame, false);
 	if (time_mode != index)
+	{
+		if (!(start_frame && m_tseq_cur_num== m_begin_frame) &&
+			!(end_frame && m_tseq_cur_num==m_end_frame))
 		return;
+	}
 	fconfig.Read("chan_mode", &chan_mode, 0);//0-cur vol;1-every vol;...
 	double thresh, size;
 	fconfig.Read("threshold", &thresh, 0.0);
@@ -5656,6 +5663,7 @@ void VRenderGLView::RunNoiseReduction(int index, wxFileConfig &fconfig)
 				vlist.push_back(*i);
 		}
 	}
+	int chan_num = vlist.size();
 
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
@@ -5674,19 +5682,17 @@ void VRenderGLView::RunNoiseReduction(int index, wxFileConfig &fconfig)
 		//save
 		str = pathname;
 		//time
-		int time_num = vd->GetReader()->GetTimeNum();
-		wxString format = wxString::Format("%d", time_num);
+		wxString format = wxString::Format("%d", m_total_frames);
 		m_fr_length = format.Length();
 		format = wxString::Format("_T%%0%dd", m_fr_length);
 		str += wxString::Format(format, m_tseq_cur_num);
 		//channel
-		int chan_num = vd->GetReader()->GetChanNum();
 		if (chan_num > 1)
 		{
 			format = wxString::Format("%d", chan_num);
 			int ch_length = format.Length();
 			format = wxString::Format("_CH%%0%dd", ch_length + 1);
-			str += wxString::Format(format, vd->GetCurChannel() + 1);
+			str += wxString::Format(format, m_cur_vol->GetCurChannel() + 1);
 		}
 		str += ".tif";
 		vd->Save(str, mode, bake, compression);
@@ -5746,11 +5752,11 @@ void VRenderGLView::RunSelectionTracking(int index, wxFileConfig &fconfig)
 	FL::CellList sel_labels;
 	FL::CellListIter label_iter;
 	unsigned long long for_size = nx * ny * nz;
-	unsigned long long index;
-	for (index = 0; index < for_size; ++index)
+	unsigned long long idx;
+	for (idx = 0; idx < for_size; ++idx)
 	{
-		unsigned int label_value = label_data[index];
-		if (mask_data[index] && label_value)
+		unsigned int label_value = label_data[idx];
+		if (mask_data[idx] && label_value)
 		{
 			label_iter = sel_labels.find(label_value);
 			if (label_iter == sel_labels.end())
@@ -6141,10 +6147,11 @@ void VRenderGLView::RunCompAnalysis(int index, wxFileConfig &fconfig)
 	comp_analyzer.OutputCompListStr(result_str, verbose, comp_header);
 
 	//save append
-	wxFile file(pathname, m_sf_script ? wxFile::write : wxFile::write_append);
+	bool sf_script = m_tseq_cur_num == m_begin_frame;
+	wxFile file(pathname, sf_script ? wxFile::write : wxFile::write_append);
 	if (!file.IsOpened())
 		return;
-	if (m_sf_script && verbose == 0)
+	if (sf_script && verbose == 0)
 	{
 		string header;
 		comp_analyzer.OutputFormHeader(header);
@@ -6215,7 +6222,8 @@ void VRenderGLView::RunRulerProfile(int index, wxFileConfig &fconfig)
 	}
 
 	//save append
-	wxFile file(m_script_output, m_sf_script ? wxFile::write : wxFile::write_append);
+	bool sf_script = m_tseq_cur_num == m_begin_frame;
+	wxFile file(m_script_output, sf_script ? wxFile::write : wxFile::write_append);
 	if (!file.IsOpened())
 		return;
 
@@ -10028,23 +10036,6 @@ bool VRenderGLView::GetIntp()
 {
 	return m_intp;
 }
-
-//void VRenderGLView::Run4DScript()
-//{
-//	//save currently selected volume
-//	VolumeData* cur_vd_save = m_cur_vol;
-//	for (int i = 0; i < (int)m_vd_pop_list.size(); ++i)
-//	{
-//		VolumeData* vd = m_vd_pop_list[i];
-//		if (vd)
-//			Run4DScript(0, m_script_file, vd);
-//	}
-//	Run4DScript(0, m_script_file, 0);
-//	//restore currently selected volume
-//	m_cur_vol = cur_vd_save;
-//	m_selector.SetVolume(m_cur_vol);
-//	m_calculator.SetVolumeA(m_cur_vol);
-//}
 
 //start loop update
 void VRenderGLView::StartLoopUpdate()

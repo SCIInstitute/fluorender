@@ -502,7 +502,6 @@ public:
 	//run 4d script
 	void SetRun4DScript(bool runscript) { m_run_script = runscript; }
 	bool GetRun4DScript() { return m_run_script; }
-	//void Run4DScript();
 
 	//start loop update
 	void StartLoopUpdate();
@@ -909,9 +908,6 @@ private:
 	//text renderer
 	FLIVR::TextRenderer m_text_renderer;
 	static unsigned int m_tsize;
-
-	//starting frame for 4d script
-	bool m_sf_script;
 
 	//enlargement
 	static bool m_enlarge;

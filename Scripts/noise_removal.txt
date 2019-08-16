@@ -2,8 +2,12 @@
 tasknum=1
 [tasks/task0]
 type=noise_reduction
+time_mode=0
+start_frame=0
+end_frame=1
+chan_mode=0
 threshold=0.5
-voxelsize=500
+voxelsize=20
 format=0
 compress=0
-savepath=./DATA/NoNoise/FilenamePrefix
+savepath=./DATA/DeNoise/FilenamePrefix
