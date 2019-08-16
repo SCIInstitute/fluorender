@@ -768,9 +768,6 @@ void VMovieView::OnPrev(wxCommandEvent& event)
 	SetRendering(0.);
 	m_last_frame = 0;
 	m_timer.Start(int(1000.0 / double(fps) + 0.5));
-
-	//run script for current frame
-	//vrv->m_glview->Run4DScript();
 }
 
 void VMovieView::OnRun(wxCommandEvent& event)
@@ -1344,10 +1341,19 @@ void VMovieView::OnDownFrame(wxCommandEvent& event) {
 	DownFrame();
 }
 
-void VMovieView::SetCurrentTime(size_t t) {
+void VMovieView::SetCurrentTime(size_t t)
+{
 	m_time_current_text->ChangeValue(wxString::Format(wxT("%i"), (int)t));
-	wxCommandEvent e;
-	OnTimeText(e);
+	//wxCommandEvent e;
+	//OnTimeText(e);
+	int start_time = STOI(m_time_start_text->GetValue().fn_str());
+	int end_time = STOI(m_time_end_text->GetValue().fn_str());
+	int current_time = STOI(m_time_current_text->GetValue().fn_str());
+	if (current_time < start_time) current_time = end_time;
+	if (current_time > end_time) current_time = start_time;
+	int time = end_time - start_time + 1;
+	double pcnt = (double)current_time / (double)time;
+	SetProgress(pcnt);
 }
 
 void VMovieView::Run()
