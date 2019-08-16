@@ -6130,9 +6130,12 @@ void VRenderGLView::RunCompAnalysis(wxFileConfig &fconfig)
 
 void VRenderGLView::RunGenerateComp(wxFileConfig &fconfig)
 {
+	bool use_sel;
+	fconfig.Read("use_sel", &use_sel);
+
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetComponentDlg())
-		vr_frame->GetComponentDlg()->PlayCmd();
+		vr_frame->GetComponentDlg()->PlayCmd(use_sel);
 }
 
 void VRenderGLView::RunRulerProfile(wxFileConfig &fconfig)
