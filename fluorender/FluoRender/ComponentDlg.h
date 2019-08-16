@@ -193,9 +193,9 @@ public:
 		wxGetApp().Yield();
 	}
 
-	void GenerateComp(bool command=true);
+	void GenerateComp(bool use_sel, bool command=true);
 	void Fixate(bool command = true);
-	void Clean(bool command = true);
+	void Clean(bool use_sel, bool command = true);
 	void SelectFullComp();
 
 	FL::ComponentAnalyzer* GetAnalyzer()
@@ -205,7 +205,7 @@ public:
 
 	void AddCmd(const std::string &type);
 	void ResetCmd();
-	void PlayCmd();
+	void PlayCmd(bool use_sel);
 
 	//in and out cell lists
 	FL::CellList &GetInCells()
@@ -227,6 +227,7 @@ private:
 	float m_prog;
 
 	//generate settings
+	bool m_use_sel;
 	int m_iter;
 	double m_thresh;
 	//distance field
@@ -536,6 +537,7 @@ private:
 	//execute
 	void EnableGenerate();
 	void OnNotebook(wxBookCtrlEvent &event);
+	void OnUseSelChk(wxCommandEvent &event);
 	void OnGenerate(wxCommandEvent &event);
 	void OnAutoUpdate(wxCommandEvent &event);
 	void OnCluster(wxCommandEvent &event);

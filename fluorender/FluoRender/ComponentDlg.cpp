@@ -911,6 +911,7 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 void ComponentDlg::Update()
 {
 	//update ui
+	m_use_sel_chk->SetValue(m_use_sel);
 	//comp generate page
 	m_iter_text->SetValue(wxString::Format("%d", m_iter));
 	m_thresh_text->SetValue(wxString::Format("%.3f", m_thresh));
@@ -1008,6 +1009,7 @@ void ComponentDlg::GetSettings()
 {
 	//defaults
 	//comp generate page
+	m_use_sel = false;
 	m_iter = 50;
 	m_thresh = 0.5;
 	m_use_dist_field = false;
@@ -1082,6 +1084,7 @@ void ComponentDlg::LoadSettings(wxString filename)
 	wxFileConfig fconfig(is);
 
 	//basic settings
+	fconfig.Read("use_sel", &m_use_sel);
 	fconfig.Read("iter", &m_iter);
 	fconfig.Read("thresh", &m_thresh);
 	fconfig.Read("use_dist_field", &m_use_dist_field);
@@ -1135,6 +1138,7 @@ void ComponentDlg::SaveSettings(wxString filename)
 		wxCONFIG_USE_LOCAL_FILE);
 
 	//comp generate settings
+	fconfig.Write("use_sel", m_use_sel);
 	fconfig.Write("iter", m_iter);
 	fconfig.Write("thresh", m_thresh);
 	fconfig.Write("use_dist_field", m_use_dist_field);
@@ -1249,7 +1253,7 @@ void ComponentDlg::OnIterText(wxCommandEvent &event)
 	m_iter_sldr->SetValue(m_iter);
 
 	if (m_auto_update)
-		GenerateComp();
+		GenerateComp(m_use_sel);
 }
 
 void ComponentDlg::OnThreshSldr(wxScrollEvent &event)
@@ -1266,7 +1270,7 @@ void ComponentDlg::OnThreshText(wxCommandEvent &event)
 	m_thresh_sldr->SetValue(int(m_thresh * 1000.0 + 0.5));
 
 	if (m_auto_update)
-		GenerateComp();
+		GenerateComp(m_use_sel);
 }
 
 void ComponentDlg::EnableUseDistField(bool value)
@@ -1325,7 +1329,7 @@ void ComponentDlg::OnDistStrengthText(wxCommandEvent &event)
 	m_dist_strength_sldr->SetValue(int(m_dist_strength * 1000.0 + 0.5));
 
 	if (m_auto_update)
-		GenerateComp();
+		GenerateComp(m_use_sel);
 }
 
 void ComponentDlg::OnUseDistFieldCheck(wxCommandEvent &event)
@@ -1333,7 +1337,7 @@ void ComponentDlg::OnUseDistFieldCheck(wxCommandEvent &event)
 	EnableUseDistField(m_use_dist_field_check->GetValue());
 
 	if (m_auto_update)
-		GenerateComp();
+		GenerateComp(m_use_sel);
 }
 
 void ComponentDlg::OnDistFilterSizeSldr(wxScrollEvent &event)
@@ -1350,7 +1354,7 @@ void ComponentDlg::OnDistFitlerSizeText(wxCommandEvent &event)
 	m_dist_filter_size_sldr->SetValue(m_dist_filter_size);
 
 	if (m_auto_update)
-		GenerateComp();
+		GenerateComp(m_use_sel);
 }
 
 void ComponentDlg::OnMaxDistSldr(wxScrollEvent &event)
@@ -1369,7 +1373,7 @@ void ComponentDlg::OnMaxDistText(wxCommandEvent &event)
 	m_max_dist_sldr->SetValue(m_max_dist);
 
 	if (m_auto_update)
-		GenerateComp();
+		GenerateComp(m_use_sel);
 }
 
 void ComponentDlg::OnDistThreshSldr(wxScrollEvent &event)
@@ -1386,7 +1390,7 @@ void ComponentDlg::OnDistThreshText(wxCommandEvent &event)
 	m_dist_thresh_sldr->SetValue(int(m_dist_thresh * 1000.0 + 0.5));
 
 	if (m_auto_update)
-		GenerateComp();
+		GenerateComp(m_use_sel);
 }
 
 void ComponentDlg::OnDiffCheck(wxCommandEvent &event)
@@ -1394,7 +1398,7 @@ void ComponentDlg::OnDiffCheck(wxCommandEvent &event)
 	EnableDiff(m_diff_check->GetValue());
 
 	if (m_auto_update)
-		GenerateComp();
+		GenerateComp(m_use_sel);
 }
 
 void ComponentDlg::OnFalloffSldr(wxScrollEvent &event)
@@ -1411,7 +1415,7 @@ void ComponentDlg::OnFalloffText(wxCommandEvent &event)
 	m_falloff_sldr->SetValue(int(m_falloff * 1000.0 + 0.5));
 
 	if (m_auto_update)
-		GenerateComp();
+		GenerateComp(m_use_sel);
 }
 
 void ComponentDlg::EnableSize(bool value)
@@ -1476,7 +1480,7 @@ void ComponentDlg::OnDensityCheck(wxCommandEvent &event)
 	EnableDensity(m_density_check->GetValue());
 
 	if (m_auto_update)
-		GenerateComp();
+		GenerateComp(m_use_sel);
 }
 
 void ComponentDlg::OnDensitySldr(wxScrollEvent &event)
@@ -1493,7 +1497,7 @@ void ComponentDlg::OnDensityText(wxCommandEvent &event)
 	m_density_sldr->SetValue(int(m_density_thresh * 1000.0 + 0.5));
 
 	if (m_auto_update)
-		GenerateComp();
+		GenerateComp(m_use_sel);
 }
 
 void ComponentDlg::OnDensityWindowSizeSldr(wxScrollEvent &event)
@@ -1510,7 +1514,7 @@ void ComponentDlg::OnDensityWindowSizeText(wxCommandEvent &event)
 	m_density_window_size_sldr->SetValue(m_density_window_size);
 
 	if (m_auto_update)
-		GenerateComp();
+		GenerateComp(m_use_sel);
 }
 
 void ComponentDlg::OnDensityStatsSizeSldr(wxScrollEvent &event)
@@ -1527,7 +1531,7 @@ void ComponentDlg::OnDensityStatsSizeText(wxCommandEvent &event)
 	m_density_stats_size_sldr->SetValue(m_density_stats_size);
 
 	if (m_auto_update)
-		GenerateComp();
+		GenerateComp(m_use_sel);
 }
 
 void ComponentDlg::EnableFixate(bool value)
@@ -1555,7 +1559,7 @@ void ComponentDlg::OnFixateCheck(wxCommandEvent &event)
 		Fixate();
 
 	if (m_auto_update)
-		GenerateComp(false);
+		GenerateComp(m_use_sel, false);
 }
 
 void ComponentDlg::OnFixUpdateBtn(wxCommandEvent &event)
@@ -1563,7 +1567,7 @@ void ComponentDlg::OnFixUpdateBtn(wxCommandEvent &event)
 	Fixate();
 
 	if (m_auto_update)
-		GenerateComp(false);
+		GenerateComp(m_use_sel, false);
 }
 
 void ComponentDlg::OnFixSizeSldr(wxScrollEvent &event)
@@ -1580,7 +1584,7 @@ void ComponentDlg::OnFixSizeText(wxCommandEvent &event)
 	m_fix_size_sldr->SetValue(m_fix_size);
 
 	if (m_auto_update)
-		GenerateComp(false);
+		GenerateComp(m_use_sel, false);
 	if (m_record_cmd)
 		AddCmd("fixate");
 }
@@ -1611,7 +1615,7 @@ void ComponentDlg::OnCleanCheck(wxCommandEvent &event)
 	EnableClean(m_clean_check->GetValue());
 
 	if (m_auto_update)
-		GenerateComp();
+		GenerateComp(m_use_sel);
 }
 
 void ComponentDlg::OnCleanIterSldr(wxScrollEvent &event)
@@ -1628,7 +1632,7 @@ void ComponentDlg::OnCleanIterText(wxCommandEvent &event)
 	m_clean_iter_sldr->SetValue(m_clean_iter);
 
 	if (m_auto_update)
-		GenerateComp();
+		GenerateComp(m_use_sel);
 }
 
 void ComponentDlg::OnCleanLimitSldr(wxScrollEvent &event)
@@ -1645,7 +1649,7 @@ void ComponentDlg::OnCleanLimitText(wxCommandEvent &event)
 	m_clean_limit_sldr->SetValue(m_clean_size_vl);
 
 	if (m_auto_update)
-		GenerateComp();
+		GenerateComp(m_use_sel);
 }
 
 //record
@@ -1716,7 +1720,7 @@ void ComponentDlg::ResetCmd()
 	m_cmd_count_text->SetValue(wxString::Format("%d", ival));
 }
 
-void ComponentDlg::PlayCmd()
+void ComponentDlg::PlayCmd(bool use_sel)
 {
 	//disable first
 	m_fixate = false;
@@ -1725,7 +1729,7 @@ void ComponentDlg::PlayCmd()
 
 	if (m_command.empty())
 	{
-		GenerateComp(false);
+		GenerateComp(use_sel, false);
 		return;
 	}
 
@@ -1772,7 +1776,7 @@ void ComponentDlg::PlayCmd()
 				else if (*it2 == "clean_size_vl")
 					m_clean_size_vl = std::stoi(*(++it2));
 			}
-			GenerateComp(false);
+			GenerateComp(use_sel, false);
 		}
 		else if ((*it)[0] == "clean")
 		{
@@ -1785,7 +1789,7 @@ void ComponentDlg::PlayCmd()
 				else if (*it2 == "clean_size_vl")
 					m_clean_size_vl = std::stoi(*(++it2));
 			}
-			Clean(false);
+			Clean(use_sel, false);
 		}
 		else if ((*it)[0] == "fixate")
 		{
@@ -1811,7 +1815,7 @@ void ComponentDlg::OnRecordCmd(wxCommandEvent &event)
 
 void ComponentDlg::OnPlayCmd(wxCommandEvent &event)
 {
-	PlayCmd();
+	PlayCmd(m_use_sel);
 }
 
 void ComponentDlg::OnResetCmd(wxCommandEvent &event)
@@ -2593,16 +2597,21 @@ void ComponentDlg::OnNotebook(wxBookCtrlEvent &event)
 	EnableGenerate();
 }
 
+void ComponentDlg::OnUseSelChk(wxCommandEvent &event)
+{
+	m_use_sel = m_use_sel_chk->GetValue();
+}
+
 void ComponentDlg::OnGenerate(wxCommandEvent &event)
 {
-	GenerateComp();
+	GenerateComp(m_use_sel);
 }
 
 void ComponentDlg::OnAutoUpdate(wxCommandEvent &event)
 {
 	m_auto_update = m_auto_update_btn->GetValue();
 	if (m_auto_update)
-		GenerateComp();
+		GenerateComp(m_use_sel);
 }
 
 void ComponentDlg::OnCluster(wxCommandEvent &event)
@@ -2612,7 +2621,7 @@ void ComponentDlg::OnCluster(wxCommandEvent &event)
 
 void ComponentDlg::OnCleanBtn(wxCommandEvent &event)
 {
-	Clean();
+	Clean(m_use_sel);
 }
 
 void ComponentDlg::Cluster()
@@ -2836,7 +2845,7 @@ bool ComponentDlg::GetIds(std::string &str, unsigned int &id, int &brick_id)
 	return true;
 }
 
-void ComponentDlg::GenerateComp(bool command)
+void ComponentDlg::GenerateComp(bool use_sel, bool command)
 {
 	if (!m_view)
 		return;
@@ -2866,7 +2875,7 @@ void ComponentDlg::GenerateComp(bool command)
 	//		&ComponentDlg::UpdateProgress, this));
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
-	cg.SetUseMask(m_use_sel_chk->GetValue());
+	cg.SetUseMask(use_sel);
 
 	vd->AddEmptyMask(1, !cg.GetUseMask());//select all if no mask, otherwise keep
 	if (m_fixate && vd->GetLabel(false))
@@ -2876,7 +2885,7 @@ void ComponentDlg::GenerateComp(bool command)
 	}
 	else
 	{
-		vd->AddEmptyLabel(0, !cg.GetUseMask());
+		vd->AddEmptyLabel(0, !use_sel);
 		cg.ShuffleID();
 	}
 
@@ -2976,7 +2985,7 @@ void ComponentDlg::Fixate(bool command)
 		AddCmd("fixate");
 }
 
-void ComponentDlg::Clean(bool command)
+void ComponentDlg::Clean(bool use_sel, bool command)
 {
 	if (!m_view)
 		return;
@@ -3002,9 +3011,9 @@ void ComponentDlg::Clean(bool command)
 		cg.m_sig_progress.connect(boost::bind(
 			&ComponentDlg::UpdateProgress, this));
 
-	cg.SetUseMask(m_use_sel_chk->GetValue());
+	cg.SetUseMask(use_sel);
 
-	vd->AddEmptyMask(1, !cg.GetUseMask());
+	vd->AddEmptyMask(1, !use_sel);
 
 	if (bn > 1)
 		cg.ClearBorders();

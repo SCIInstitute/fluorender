@@ -4,6 +4,7 @@ tasknum=2
 type=generate_comp
 gentype=0
 mode=0
+use_sel=1
 [tasks/task1]
 type=save_mask
 toffset=1

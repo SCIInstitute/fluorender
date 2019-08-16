@@ -450,7 +450,7 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 		page, ID_MapMergeBtn, "Try Merging",
 		wxDefaultPosition, wxSize(100, 23));
 	m_map_split_btn = new wxToggleButton(
-		page, ID_MapSplitBtn, "Try Spliting",
+		page, ID_MapSplitBtn, "Try Splitting",
 		wxDefaultPosition, wxSize(100, 23));
 	sizer_3->Add(5, 5);
 	sizer_3->Add(m_map_consistent_btn, 0, wxALIGN_CENTER);

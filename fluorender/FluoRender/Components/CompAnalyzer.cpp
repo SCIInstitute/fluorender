@@ -707,6 +707,7 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 	double sx = m_comp_list.sx;
 	double sy = m_comp_list.sy;
 	double sz = m_comp_list.sz;
+	double scale = m_vd->GetScalarScale();
 
 	m_comp_graph.ClearVisited();
 	for (auto i = m_comp_list.begin();
@@ -754,9 +755,9 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 		stream << i->second->pos.y()*sy << "\t";
 		stream << i->second->pos.z()*sz << "\t";
 		stream << i->second->sumi << "\t";
-		stream << i->second->sumd << "\t";
+		stream << i->second->sumd * scale << "\t";
 		stream << i->second->ext_sumi << "\t";
-		stream << i->second->ext_sumd << "\t";
+		stream << i->second->ext_sumd * scale << "\t";
 		stream << i->second->mean << "\t";
 		stream << i->second->var << "\t";
 		stream << i->second->min << "\t";
