@@ -239,7 +239,6 @@ private:
 	wxButton* m_save_trace_btn;
 	wxButton* m_saveas_trace_btn;
 	//auto tracking
-	wxGauge* m_gen_map_prg;
 	wxButton* m_gen_map_btn;
 	wxButton* m_refine_t_btn;
 	wxButton* m_refine_all_btn;

@@ -3192,9 +3192,6 @@ void TraceDlg::GenMap()
 	m_stat_text->SetValue("Generating track map.\n");
 	wxGetApp().Yield();
 	int frames = reader->GetTimeNum();
-	float prog_bit = 99.0f / float(frames * (4 + m_iter_num));
-	float prog = 0.0f;
-	m_gen_map_prg->SetValue(int(prog));
 
 	//get and set parameters
 	FL::pTrackMap track_map = trace_group->GetTrackMap();
@@ -3225,8 +3222,6 @@ void TraceDlg::GenMap()
 	for (int i = 0; i < frames; ++i)
 	{
 		tm_processor.InitializeFrame(i);
-		prog += prog_bit;
-		m_gen_map_prg->SetValue(int(prog));
 		(*m_stat_text) << wxString::Format("Time point %d initialized.\n", i);
 		wxGetApp().Yield();
 
@@ -3235,16 +3230,12 @@ void TraceDlg::GenMap()
 
 		//link maps 1 and 2
 		tm_processor.LinkFrames(i - 1, i);
-		prog += prog_bit;
-		m_gen_map_prg->SetValue(int(prog));
 		(*m_stat_text) << wxString::Format("Time point %d linked.\n", i);
 		wxGetApp().Yield();
 
 		//check contacts and merge cells
 		tm_processor.ResolveGraph(i - 1, i);
 		tm_processor.ResolveGraph(i, i - 1);
-		prog += prog_bit;
-		m_gen_map_prg->SetValue(int(prog));
 		(*m_stat_text) << wxString::Format("Time point %d merged.\n", i - 1);
 		wxGetApp().Yield();
 
@@ -3254,16 +3245,12 @@ void TraceDlg::GenMap()
 		//further process
 		tm_processor.ProcessFrames(i - 2, i - 1);
 		tm_processor.ProcessFrames(i - 1, i - 2);
-		prog += prog_bit;
-		m_gen_map_prg->SetValue(int(prog));
 		(*m_stat_text) << wxString::Format("Time point %d processed.\n", i - 1);
 		wxGetApp().Yield();
 	}
 	//last frame
 	tm_processor.ProcessFrames(frames - 2, frames - 1);
 	tm_processor.ProcessFrames(frames - 1, frames - 2);
-	prog += prog_bit;
-	m_gen_map_prg->SetValue(int(prog));
 	(*m_stat_text) << wxString::Format("Time point %d processed.\n", frames - 1);
 	wxGetApp().Yield();
 
@@ -3275,8 +3262,6 @@ void TraceDlg::GenMap()
 			//further process
 			tm_processor.ProcessFrames(i - 2, i - 1);
 			tm_processor.ProcessFrames(i - 1, i - 2);
-			prog += prog_bit;
-			m_gen_map_prg->SetValue(int(prog));
 			(*m_stat_text) << wxString::Format("Time point %d processed.\n", i - 1);
 			wxGetApp().Yield();
 		}
@@ -3300,8 +3285,6 @@ void TraceDlg::GenMap()
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 	(*m_stat_text) << wxString::Format("Wall clock time: %.4fs\n", time_span.count());
-
-	m_gen_map_prg->SetValue(100);
 
 	GetSettings(m_view);
 
@@ -3339,11 +3322,6 @@ void TraceDlg::RefineMap(int t)
 	}
 	else
 		start_frame = end_frame = t;
-	float prog_bit = 99.0f / float(
-		(end_frame - start_frame + 1)
-		* (4 + m_iter_num));
-	float prog = 0.0f;
-	m_gen_map_prg->SetValue(int(prog));
 
 	//get and set parameters
 	FL::TrackMapProcessor tm_processor(track_map);
@@ -3380,8 +3358,6 @@ void TraceDlg::RefineMap(int t)
 			//further process
 			tm_processor.ProcessFrames(i, i + 1);
 			tm_processor.ProcessFrames(i + 1, i);
-			prog += prog_bit;
-			m_gen_map_prg->SetValue(int(prog));
 			(*m_stat_text) << wxString::Format("Time point %d processed.\n", i + 1);
 			wxGetApp().Yield();
 		}
@@ -3405,8 +3381,6 @@ void TraceDlg::RefineMap(int t)
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 	(*m_stat_text) << wxString::Format("Wall clock time: %.4fs\n", time_span.count());
-
-	m_gen_map_prg->SetValue(100);
 
 	CellUpdate();
 }
