@@ -1,6 +1,0 @@
-[tasks]
-tasknum=2
-[tasks/task0]
-type=sparse_tracking
-[tasks/task1]
-type=selection_tracking

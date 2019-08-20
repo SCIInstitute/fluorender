@@ -31,8 +31,7 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace FL;
 
-VolumeCalculator::VolumeCalculator()
-	: m_vd_r(0),
+VolumeCalculator::VolumeCalculator():
 	m_vd_a(0),
 	m_vd_b(0),
 	m_type(0)
@@ -65,13 +64,18 @@ VolumeData* VolumeCalculator::GetVolumeB()
 
 VolumeData* VolumeCalculator::GetResult()
 {
-	return m_vd_r;
+	VolumeData* vd = 0;
+	if (!m_vd_r.empty())
+	{
+		vd = m_vd_r.front();
+		m_vd_r.pop();
+	}
+	return vd;
 }
 
 void VolumeCalculator::Calculate(int type)
 {
 	m_type = type;
-	m_vd_r = 0;
 
 	switch (m_type)
 	{
@@ -80,29 +84,44 @@ void VolumeCalculator::Calculate(int type)
 	case 3:
 	case 4:
 	case 8://intersection with mask
+	{
 		CreateVolumeResult2();
-		if (!m_vd_r)
+		VolumeData* vd = 0;
+		if (!m_vd_r.empty())
+			vd = m_vd_r.front();
+		if (!vd)
 			return;
-		m_vd_r->Calculate(m_type, m_vd_a, m_vd_b);
+		vd->Calculate(m_type, m_vd_a, m_vd_b);
 		return;
+	}
 	case 5:
 	case 6:
 	case 7:
+	{
 		if (!m_vd_a || !m_vd_a->GetMask(false))
 			return;
 		CreateVolumeResult1();
-		if (!m_vd_r)
+		VolumeData* vd = 0;
+		if (!m_vd_r.empty())
+			vd = m_vd_r.front();
+		if (!vd)
 			return;
-		m_vd_r->Calculate(m_type, m_vd_a, 0);
+		vd->Calculate(m_type, m_vd_a, 0);
 		return;
+	}
 	case 9:
+	{
 		if (!m_vd_a)
 			return;
 		CreateVolumeResult1();
-		if (!m_vd_r)
+		VolumeData* vd = 0;
+		if (!m_vd_r.empty())
+			vd = m_vd_r.front();
+		if (!vd)
 			return;
 		FillHoles(m_threshold);
 		return;
+	}
 	}
 }
 
@@ -122,12 +141,14 @@ void VolumeCalculator::CreateVolumeResult1()
 	  16:8;
 	//int bits = 8;  //it has an unknown problem with 16 bit data
 
-	m_vd_r = new VolumeData();
-	m_vd_r->AddEmptyData(bits,
+	VolumeData* vd = new VolumeData();
+	vd->AddEmptyData(bits,
 		res_x, res_y, res_z,
 		spc_x, spc_y, spc_z,
 		brick_size);
-	m_vd_r->SetSpcFromFile(true);
+	vd->SetSpcFromFile(true);
+	vd->SetCurChannel(m_vd_a->GetCurChannel());
+	m_vd_r.push(vd);
 
 	wxString name = m_vd_a->GetName();
 	wxString str_type;
@@ -143,7 +164,7 @@ void VolumeCalculator::CreateVolumeResult1()
 		str_type = "_FILLED";
 		break;
 	}
-	m_vd_r->SetName(name + str_type);
+	vd->SetName(name + str_type);
 }
 
 void VolumeCalculator::CreateVolumeResult2()
@@ -175,12 +196,13 @@ void VolumeCalculator::CreateVolumeResult2()
 	spc_y = max(spc_y_a, spc_y_b);
 	spc_z = max(spc_z_a, spc_z_b);
 
-	m_vd_r = new VolumeData();
-	m_vd_r->AddEmptyData(bits,
+	VolumeData* vd = new VolumeData();
+	vd->AddEmptyData(bits,
 		res_x, res_y, res_z,
 		spc_x, spc_y, spc_z,
 		brick_size);
-	m_vd_r->SetSpcFromFile(true);
+	vd->SetSpcFromFile(true);
+	m_vd_r.push(vd);
 
 	wxString name_a = m_vd_a->GetName();
 	wxString name_b = m_vd_b->GetName();
@@ -206,13 +228,18 @@ void VolumeCalculator::CreateVolumeResult2()
 		break;
 	}
 	wxString name = name_a + str_type + name_b;
-	m_vd_r->SetName(name);
+	vd->SetName(name);
 }
 
 //fill holes
 void VolumeCalculator::FillHoles(double thresh)
 {
-	if (!m_vd_a || !m_vd_r)
+	if (!m_vd_a)
+		return;
+	VolumeData* vd = 0;
+	if (!m_vd_r.empty())
+		vd = m_vd_r.front();
+	if (!vd)
 		return;
 
 	Texture* tex_a = m_vd_a->GetTexture();
@@ -225,7 +252,7 @@ void VolumeCalculator::FillHoles(double thresh)
 	if (!data_a)
 		return;
 
-	Texture* tex_r = m_vd_r->GetTexture();
+	Texture* tex_r = vd->GetTexture();
 	if (!tex_r)
 		return;
 	Nrrd* nrrd_r = tex_r->get_nrrd(0);
