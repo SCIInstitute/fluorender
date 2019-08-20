@@ -1,6 +1,0 @@
-[tasks]
-tasknum=2
-[tasks/task0]
-type=save_mask
-[tasks/task1]
-type=fetch_mask

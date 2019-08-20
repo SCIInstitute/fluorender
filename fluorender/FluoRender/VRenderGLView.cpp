@@ -5663,7 +5663,6 @@ void VRenderGLView::RunNoiseReduction(int index, wxFileConfig &fconfig)
 				vlist.push_back(*i);
 		}
 	}
-	int chan_num = vlist.size();
 
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
@@ -5676,27 +5675,6 @@ void VRenderGLView::RunNoiseReduction(int index, wxFileConfig &fconfig)
 			vr_frame->GetNoiseCancellingDlg()->Preview(false, size, thresh);
 		//delete
 		Calculate(6, "", false);
-		VolumeData* vd = m_calculator.GetResult();
-		if (!vd)
-			return;
-		//save
-		str = pathname;
-		//time
-		wxString format = wxString::Format("%d", m_total_frames);
-		m_fr_length = format.Length();
-		format = wxString::Format("_T%%0%dd", m_fr_length);
-		str += wxString::Format(format, m_tseq_cur_num);
-		//channel
-		if (chan_num > 1)
-		{
-			format = wxString::Format("%d", chan_num);
-			int ch_length = format.Length();
-			format = wxString::Format("_CH%%0%dd", ch_length + 1);
-			str += wxString::Format(format, m_cur_vol->GetCurChannel() + 1);
-		}
-		str += ".tif";
-		vd->Save(str, mode, bake, compression);
-		delete vd;
 	}
 }
 
@@ -6021,6 +5999,19 @@ void VRenderGLView::RunSaveMask(int index, wxFileConfig &fconfig)
 
 void VRenderGLView::RunSaveVolume(int index, wxFileConfig &fconfig)
 {
+	int time_mode, chan_mode;
+	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
+	bool start_frame, end_frame;
+	fconfig.Read("start_frame", &start_frame, false);
+	fconfig.Read("end_frame", &end_frame, false);
+	if (time_mode != index)
+	{
+		if (!(start_frame && m_tseq_cur_num == m_begin_frame) &&
+			!(end_frame && m_tseq_cur_num == m_end_frame))
+			return;
+	}
+	fconfig.Read("chan_mode", &chan_mode, 0);//0-cur vol;1-every vol;...
+
 	int mode;
 	fconfig.Read("format", &mode, 0);
 	bool bake;
@@ -6034,26 +6025,52 @@ void VRenderGLView::RunSaveVolume(int index, wxFileConfig &fconfig)
 	str = wxPathOnly(pathname);
 	if (!wxDirExists(str))
 		wxFileName::Mkdir(str, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
-	if (wxDirExists(str))
+	if (!wxDirExists(str))
+		return;
+
+	if (!m_vd_pop_list[0])
+		return;
+	int time_num = m_vd_pop_list[0]->GetReader()->GetTimeNum();
+	std::vector<VolumeData*> vlist;
+	if (chan_mode == 0)
 	{
 		VolumeData* vd = m_calculator.GetResult();
-		if (!vd || !m_vd_pop_list[0])
-			return;
+		if (vd)
+			vlist.push_back(vd);
+	}
+	else
+	{
+		VolumeData* vd = 0;
+		while (vd = m_calculator.GetResult())
+			vlist.push_back(vd);
+	}
+	int chan_num = vlist.size();
 
+	for (auto i = vlist.begin();
+		i != vlist.end(); ++i)
+	{
 		str = pathname;
 		//time
-		int time_num = m_vd_pop_list[0]->GetReader()->GetTimeNum();
 		wxString format = wxString::Format("%d", time_num);
 		m_fr_length = format.Length();
 		format = wxString::Format("_T%%0%dd", m_fr_length);
 		str += wxString::Format(format, m_tseq_cur_num);
+		//channel
+		if (chan_num > 1)
+		{
+			format = wxString::Format("%d", chan_num);
+			int ch_length = format.Length();
+			format = wxString::Format("_CH%%0%dd", ch_length + 1);
+			str += wxString::Format(format, (*i)->GetCurChannel() + 1);
+		}
+		//ext
 		if (mode == 0 || mode == 1)
 			str += ".tif";
 		else if (mode == 2)
 			str += ".nrrd";
-		vd->Save(str, mode, bake, compression);
+		(*i)->Save(str, mode, bake, compression);
 		if (del_vol)
-			delete vd;
+			delete *i;
 	}
 }
 
