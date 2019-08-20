@@ -47,7 +47,7 @@ namespace FL
 
 		VolumeData* GetVolumeA();
 		VolumeData* GetVolumeB();
-		VolumeData* GetResult();
+		VolumeData* GetResult(bool pop);
 
 		void Calculate(int type);
 

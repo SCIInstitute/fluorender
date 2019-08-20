@@ -62,13 +62,14 @@ VolumeData* VolumeCalculator::GetVolumeB()
 	return m_vd_b;
 }
 
-VolumeData* VolumeCalculator::GetResult()
+VolumeData* VolumeCalculator::GetResult(bool pop)
 {
 	VolumeData* vd = 0;
 	if (!m_vd_r.empty())
 	{
 		vd = m_vd_r.front();
-		m_vd_r.pop();
+		if (pop)
+			m_vd_r.pop();
 	}
 	return vd;
 }

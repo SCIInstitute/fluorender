@@ -2595,7 +2595,7 @@ void VRenderGLView::SetVolumeB(VolumeData* vd)
 void VRenderGLView::CalculateSingle(int type, wxString prev_group, bool add)
 {
 	m_calculator.Calculate(type);
-	VolumeData* vd = m_calculator.GetResult();
+	VolumeData* vd = m_calculator.GetResult(add);
 	if (vd)
 	{
 		if (type == 1 ||
@@ -5634,19 +5634,6 @@ void VRenderGLView::RunNoiseReduction(int index, wxFileConfig &fconfig)
 	double thresh, size;
 	fconfig.Read("threshold", &thresh, 0.0);
 	fconfig.Read("voxelsize", &size, 0.0);
-	int mode;
-	fconfig.Read("format", &mode, 0);
-	bool bake;
-	fconfig.Read("bake", &bake, false);
-	bool compression;
-	fconfig.Read("compress", &compression, false);
-	wxString pathname;
-	fconfig.Read("savepath", &pathname, "");
-	wxString str = wxPathOnly(pathname);
-	if (!wxDirExists(str))
-		wxFileName::Mkdir(str, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
-	if (!wxDirExists(str))
-		return;
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 
 	std::vector<VolumeData*> vlist;
@@ -6034,14 +6021,14 @@ void VRenderGLView::RunSaveVolume(int index, wxFileConfig &fconfig)
 	std::vector<VolumeData*> vlist;
 	if (chan_mode == 0)
 	{
-		VolumeData* vd = m_calculator.GetResult();
+		VolumeData* vd = m_calculator.GetResult(true);
 		if (vd)
 			vlist.push_back(vd);
 	}
 	else
 	{
 		VolumeData* vd = 0;
-		while (vd = m_calculator.GetResult())
+		while (vd = m_calculator.GetResult(true))
 			vlist.push_back(vd);
 	}
 	int chan_num = vlist.size();
