@@ -5711,123 +5711,81 @@ void VRenderGLView::RunNoiseReduction(int index, wxFileConfig &fconfig)
 
 void VRenderGLView::RunSelectionTracking(int index, wxFileConfig &fconfig)
 {
-	//read the size threshold
-	int slimit;
-	fconfig.Read("size_limit", &slimit, 0);
-	//current state:
-	//new data has been loaded in system memory
-	//old data is in graphics memory
-	//old mask in system memory is obsolete
-	//new mask is in graphics memory
-	//old label is in system memory
-	//no label in graphics memory
-	//steps:
-	//int ii, jj, kk;
-	int nx, ny, nz;
-	//return current mask (into system memory)
+	int time_mode;
+	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
+	if (time_mode != index)
+		return;
+
 	if (!m_cur_vol)
-		UPDATE_TRACE_DLG_AND_RETURN
+		UPDATE_TRACE_DLG_AND_RETURN;
 
-		m_cur_vol->GetVR()->return_mask();
-	m_cur_vol->GetResolution(nx, ny, nz);
-	//find labels in the old that are selected by the current mask
-	Nrrd* mask_nrrd = m_cur_vol->GetMask(true);
-	if (!mask_nrrd)
+	static FL::CellList sel_labels;
+	if (time_mode == 0)
 	{
-		m_cur_vol->AddEmptyMask(0);
-		mask_nrrd = m_cur_vol->GetMask(false);
-	}
-	Nrrd* label_nrrd = m_cur_vol->GetLabel(false);
-	if (!label_nrrd)
-		UPDATE_TRACE_DLG_AND_RETURN
-
-		unsigned char* mask_data = (unsigned char*)(mask_nrrd->data);
-	if (!mask_data)
-		UPDATE_TRACE_DLG_AND_RETURN
-
-		unsigned int* label_data = (unsigned int*)(label_nrrd->data);
-	if (!label_data)
-		UPDATE_TRACE_DLG_AND_RETURN
-
-	FL::CellList sel_labels;
-	FL::CellListIter label_iter;
-	unsigned long long for_size = nx * ny * nz;
-	unsigned long long idx;
-	for (idx = 0; idx < for_size; ++idx)
-	{
-		unsigned int label_value = label_data[idx];
-		if (mask_data[idx] && label_value)
+		//read the size threshold
+		int slimit;
+		fconfig.Read("size_limit", &slimit, 0);
+		//before updating volume
+		FL::ComponentAnalyzer comp_analyzer(m_cur_vol);
+		comp_analyzer.Analyze(true, true);
+		FL::CompList* list = comp_analyzer.GetCompList();
+		sel_labels.clear();
+		for (auto it = list->begin();
+			it != list->end(); ++it)
 		{
-			label_iter = sel_labels.find(label_value);
-			if (label_iter == sel_labels.end())
+			if (it->second->sumi > slimit)
 			{
-				FL::pCell cell(new FL::Cell(label_value));
-				cell->SetSizeUi(1);
+				FL::pCell cell(new FL::Cell(it->second->id));
+				cell->SetSizeUi(it->second->sumi);
 				sel_labels.insert(pair<unsigned int, FL::pCell>
-					(label_value, cell));
+					(it->second->id, cell));
 			}
-			else
-				label_iter->second->Inc();
 		}
 	}
-	//clean label list according to the size limit
-	label_iter = sel_labels.begin();
-	while (label_iter != sel_labels.end())
+	else if (time_mode == 1)
 	{
-		if (label_iter->second->GetSizeUi() < (unsigned int)slimit)
-			label_iter = sel_labels.erase(label_iter);
-		else
-			++label_iter;
-	}
-	if (m_trace_group &&
-		m_trace_group->GetTrackMap()->GetFrameNum())
-	{
-		//create new id list
-		m_trace_group->SetCurTime(m_tseq_cur_num);
-		m_trace_group->SetPrvTime(m_tseq_prv_num);
-		m_trace_group->UpdateCellList(sel_labels);
-		TextureRenderer::vertex_array_manager_.set_dirty(VA_Traces);
-	}
-	//load and replace the label
-	BaseReader* reader = m_cur_vol->GetReader();
-	if (!reader)
-		UPDATE_TRACE_DLG_AND_RETURN
-
-	LBLReader lbl_reader;
-	wstring lblname = reader->GetCurLabelName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
-	lbl_reader.SetFile(lblname);
-	Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
-	if (!label_nrrd_new)
-	{
-		m_cur_vol->AddEmptyLabel();
-		label_nrrd_new = m_cur_vol->GetLabel(false);
-	}
-	else
-		m_cur_vol->LoadLabel(label_nrrd_new);
-	label_data = (unsigned int*)(label_nrrd_new->data);
-	if (!label_data)
-		UPDATE_TRACE_DLG_AND_RETURN
-
-	//update the mask according to the new label
-	memset((void*)mask_data, 0, sizeof(uint8)*nx*ny*nz);
-	for (index = 0; index < for_size; ++index)
-	{
-		unsigned int label_value = label_data[index];
+		//after updating volume
 		if (m_trace_group &&
 			m_trace_group->GetTrackMap()->GetFrameNum())
 		{
-			if (m_trace_group->FindCell(label_value))
-				mask_data[index] = 255;
+			//create new id list
+			m_trace_group->SetCurTime(m_tseq_cur_num);
+			m_trace_group->SetPrvTime(m_tseq_prv_num);
+			m_trace_group->UpdateCellList(sel_labels);
+			TextureRenderer::vertex_array_manager_.set_dirty(VA_Traces);
 		}
-		else
-		{
-			label_iter = sel_labels.find(label_value);
-			if (label_iter != sel_labels.end())
-				mask_data[index] = 255;
-		}
-	}
 
-	UPDATE_TRACE_DLG_AND_RETURN
+		Nrrd* mask_nrrd = m_cur_vol->GetMask(false);
+		Nrrd* label_nrrd = m_cur_vol->GetLabel(false);
+		if (!mask_nrrd || !label_nrrd)
+			UPDATE_TRACE_DLG_AND_RETURN;
+		unsigned char* mask_data = (unsigned char*)(mask_nrrd->data);
+		unsigned int* label_data = (unsigned int*)(label_nrrd->data);
+		if (!mask_data || !label_data)
+			UPDATE_TRACE_DLG_AND_RETURN;
+		int nx, ny, nz;
+		m_cur_vol->GetResolution(nx, ny, nz);
+		//update the mask according to the new label
+		unsigned long long for_size = nx * ny * nz;
+		memset((void*)mask_data, 0, sizeof(uint8)*for_size);
+		for (unsigned long long idx = 0;
+			idx < for_size; ++idx)
+		{
+			unsigned int label_value = label_data[idx];
+			if (m_trace_group &&
+				m_trace_group->GetTrackMap()->GetFrameNum())
+			{
+				if (m_trace_group->FindCell(label_value))
+					mask_data[idx] = 255;
+			}
+			else
+			{
+				if (sel_labels.find(label_value) != sel_labels.end())
+					mask_data[idx] = 255;
+			}
+		}
+		UPDATE_TRACE_DLG_AND_RETURN;
+	}
 }
 
 void VRenderGLView::RunSparseTracking(int index, wxFileConfig &fconfig)
@@ -5960,41 +5918,105 @@ void VRenderGLView::RunSeparateChannels(int index, wxFileConfig &fconfig)
 
 void VRenderGLView::RunFetchMask(int index, wxFileConfig &fconfig)
 {
-	//load and replace the mask
-	if (!m_cur_vol)
-		return;
-	BaseReader* reader = m_cur_vol->GetReader();
-	if (!reader)
-		return;
-	MSKReader msk_reader;
-	wstring mskname = reader->GetCurMaskName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
-	msk_reader.SetFile(mskname);
-	Nrrd* mask_nrrd_new = msk_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
-	if (mask_nrrd_new)
-		m_cur_vol->LoadMask(mask_nrrd_new);
+	int time_mode, chan_mode;
+	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
+	bool start_frame, end_frame;
+	fconfig.Read("start_frame", &start_frame, false);
+	fconfig.Read("end_frame", &end_frame, false);
+	if (time_mode != index)
+	{
+		if (!(start_frame && m_tseq_cur_num == m_begin_frame) &&
+			!(end_frame && m_tseq_cur_num == m_end_frame))
+			return;
+	}
+	fconfig.Read("chan_mode", &chan_mode, 0);//0-cur vol;1-every vol;...
+	std::vector<VolumeData*> vlist;
+	if (chan_mode == 0)
+	{
+		vlist.push_back(m_cur_vol);
+	}
+	else
+	{
+		for (auto i = m_vd_pop_list.begin();
+			i != m_vd_pop_list.end(); ++i)
+		{
+			if ((*i)->GetDisp())
+				vlist.push_back(*i);
+		}
+	}
+	bool bmask, blabel;
+	fconfig.Read("mask", &bmask, 1);
+	fconfig.Read("label", &blabel, 1);
 
-	//load and replace the label
-	LBLReader lbl_reader;
-	wstring lblname = reader->GetCurLabelName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
-	lbl_reader.SetFile(lblname);
-	Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
-	if (label_nrrd_new)
-		m_cur_vol->LoadLabel(label_nrrd_new);
+	for (auto i = vlist.begin();
+		i != vlist.end(); ++i)
+	{
+		BaseReader* reader = (*i)->GetReader();
+		if (!reader)
+			return;
+		//load and replace the mask
+		if (bmask)
+		{
+			MSKReader msk_reader;
+			wstring mskname = reader->GetCurMaskName(m_tseq_cur_num, (*i)->GetCurChannel());
+			msk_reader.SetFile(mskname);
+			Nrrd* mask_nrrd_new = msk_reader.Convert(m_tseq_cur_num, (*i)->GetCurChannel(), true);
+			if (mask_nrrd_new)
+				(*i)->LoadMask(mask_nrrd_new);
+		}
+		//load and replace the label
+		if (blabel)
+		{
+			LBLReader lbl_reader;
+			wstring lblname = reader->GetCurLabelName(m_tseq_cur_num, (*i)->GetCurChannel());
+			lbl_reader.SetFile(lblname);
+			Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, (*i)->GetCurChannel(), true);
+			if (label_nrrd_new)
+				(*i)->LoadLabel(label_nrrd_new);
+		}
+	}
 }
 
 void VRenderGLView::RunSaveMask(int index, wxFileConfig &fconfig)
 {
-	if (!m_cur_vol)
-		return;
-	int toffset;
-	fconfig.Read("toffset", &toffset, 0);
-	int time;
-	if (toffset)
-		time = m_tseq_cur_num;
+	int time_mode, chan_mode;
+	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
+	bool start_frame, end_frame;
+	fconfig.Read("start_frame", &start_frame, false);
+	fconfig.Read("end_frame", &end_frame, false);
+	if (time_mode != index)
+	{
+		if (!(start_frame && m_tseq_cur_num == m_begin_frame) &&
+			!(end_frame && m_tseq_cur_num == m_end_frame))
+			return;
+	}
+	fconfig.Read("chan_mode", &chan_mode, 0);//0-cur vol;1-every vol;...
+	std::vector<VolumeData*> vlist;
+	if (chan_mode == 0)
+	{
+		vlist.push_back(m_cur_vol);
+	}
 	else
-		time = m_tseq_prv_num;
-	m_cur_vol->SaveMask(true, time, m_cur_vol->GetCurChannel());
-	m_cur_vol->SaveLabel(true, time, m_cur_vol->GetCurChannel());
+	{
+		for (auto i = m_vd_pop_list.begin();
+			i != m_vd_pop_list.end(); ++i)
+		{
+			if ((*i)->GetDisp())
+				vlist.push_back(*i);
+		}
+	}
+	bool bmask, blabel;
+	fconfig.Read("mask", &bmask, 1);
+	fconfig.Read("label", &blabel, 1);
+
+	for (auto i = vlist.begin();
+		i != vlist.end(); ++i)
+	{
+		if (bmask)
+			(*i)->SaveMask(true, m_tseq_cur_num, (*i)->GetCurChannel());
+		if (blabel)
+			(*i)->SaveLabel(true, m_tseq_cur_num, (*i)->GetCurChannel());
+	}
 }
 
 void VRenderGLView::RunSaveVolume(int index, wxFileConfig &fconfig)
@@ -6166,12 +6188,45 @@ void VRenderGLView::RunCompAnalysis(int index, wxFileConfig &fconfig)
 
 void VRenderGLView::RunGenerateComp(int index, wxFileConfig &fconfig)
 {
+	int time_mode, chan_mode;
+	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
+	bool start_frame, end_frame;
+	fconfig.Read("start_frame", &start_frame, false);
+	fconfig.Read("end_frame", &end_frame, false);
+	if (time_mode != index)
+	{
+		if (!(start_frame && m_tseq_cur_num == m_begin_frame) &&
+			!(end_frame && m_tseq_cur_num == m_end_frame))
+			return;
+	}
+	fconfig.Read("chan_mode", &chan_mode, 0);//0-cur vol;1-every vol;...
 	bool use_sel;
 	fconfig.Read("use_sel", &use_sel);
+	std::vector<VolumeData*> vlist;
+	if (chan_mode == 0)
+	{
+		vlist.push_back(m_cur_vol);
+	}
+	else
+	{
+		for (auto i = m_vd_pop_list.begin();
+			i != m_vd_pop_list.end(); ++i)
+		{
+			if ((*i)->GetDisp())
+				vlist.push_back(*i);
+		}
+	}
 
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetComponentDlg())
+	if (!vr_frame || !(vr_frame->GetComponentDlg()))
+		return;
+
+	for (auto i = vlist.begin();
+		i != vlist.end(); ++i)
+	{
+		m_cur_vol = *i;
 		vr_frame->GetComponentDlg()->PlayCmd(use_sel);
+	}
 }
 
 void VRenderGLView::RunRulerProfile(int index, wxFileConfig &fconfig)

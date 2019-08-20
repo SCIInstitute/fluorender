@@ -1,4 +1,0 @@
-[tasks]
-tasknum=1
-[tasks/task0]
-type=fetch_mask
