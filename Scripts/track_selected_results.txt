@@ -1,0 +1,4 @@
+[tasks]
+tasknum=1
+[tasks/task0]
+type=selection_tracking
