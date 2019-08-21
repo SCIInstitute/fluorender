@@ -1,6 +1,0 @@
-[tasks]
-tasknum=1
-[tasks/task0]
-type=opencl
-clpath=./CL_code/copy.cl
-savepath=./DATA/filtered/FilenamePrefix

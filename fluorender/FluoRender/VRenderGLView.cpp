@@ -5985,6 +5985,12 @@ void VRenderGLView::RunSaveVolume(int index, wxFileConfig &fconfig)
 		while (vd = m_selector.GetResult(true))
 			vlist.push_back(vd);
 	}
+	else if (source == "executor")
+	{
+		VolumeData* vd = 0;
+		while (vd = m_kernel_executor.GetResult(true))
+			vlist.push_back(vd);
+	}
 	int chan_num = vlist.size();
 
 	for (auto i = vlist.begin();
@@ -6063,58 +6069,47 @@ void VRenderGLView::RunCalculate(int index, wxFileConfig &fconfig)
 
 void VRenderGLView::RunOpenCL(int index, wxFileConfig &fconfig)
 {
-	wxString str, clname, pathname;
+	int time_mode, chan_mode;
+	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
+	bool start_frame, end_frame;
+	fconfig.Read("start_frame", &start_frame, false);
+	fconfig.Read("end_frame", &end_frame, false);
+	if (time_mode != index)
+	{
+		if (!(start_frame && m_tseq_cur_num == m_begin_frame) &&
+			!(end_frame && m_tseq_cur_num == m_end_frame))
+			return;
+	}
+	fconfig.Read("chan_mode", &chan_mode, 0);//0-cur vol;1-every vol;...
+
+	wxString clname;
 	fconfig.Read("clpath", &clname, "");
 	if (!wxFileExists(clname))
 		return;
-	fconfig.Read("savepath", &pathname, "");
-	int mode;
-	fconfig.Read("format", &mode, 0);
-	bool bake;
-	fconfig.Read("bake", &bake, false);
-	bool compression;
-	fconfig.Read("compress", &compression, false);
 
-	str = wxPathOnly(pathname);
-	if (!wxDirExists(str))
-		wxFileName::Mkdir(str, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
-
-	if (wxDirExists(str))
+	std::vector<VolumeData*> vlist;
+	if (chan_mode == 0)
 	{
-		if (!m_cur_vol)
-			return;
-
-		VolumeData* vd = m_cur_vol;
-
-		m_cur_vol->GetVR()->clear_tex_current();
-		m_kernel_executor.LoadCode(clname);
-		m_kernel_executor.SetVolume(m_cur_vol);
-		m_kernel_executor.SetDuplicate(true);
-		bool result = m_kernel_executor.Execute();
-		VolumeData* vd_r = m_kernel_executor.GetResult();
-		if (!result || !vd_r)
-			return;
-
-		str = pathname;
-		//time
-		int time_num = vd->GetReader()->GetTimeNum();
-		wxString format = wxString::Format("%d", time_num);
-		m_fr_length = format.Length();
-		format = wxString::Format("_T%%0%dd", m_fr_length);
-		str += wxString::Format(format, m_tseq_cur_num);
-		//channel
-		int chan_num = vd->GetReader()->GetChanNum();
-		if (chan_num > 1)
+		vlist.push_back(m_cur_vol);
+	}
+	else
+	{
+		for (auto i = m_vd_pop_list.begin();
+			i != m_vd_pop_list.end(); ++i)
 		{
-			format = wxString::Format("%d", chan_num);
-			int ch_length = format.Length();
-			format = wxString::Format("_CH%%0%dd", ch_length + 1);
-			str += wxString::Format(format, vd->GetCurChannel() + 1);
+			if ((*i)->GetDisp())
+				vlist.push_back(*i);
 		}
-		str += ".tif";
-		vd_r->Save(str, mode, bake, compression);
+	}
 
-		m_kernel_executor.DeleteResult();
+	for (auto i = vlist.begin();
+		i != vlist.end(); ++i)
+	{
+		(*i)->GetVR()->clear_tex_current();
+		m_kernel_executor.LoadCode(clname);
+		m_kernel_executor.SetVolume(*i);
+		m_kernel_executor.SetDuplicate(true);
+		m_kernel_executor.Execute();
 	}
 }
 

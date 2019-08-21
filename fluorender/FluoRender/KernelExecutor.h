@@ -25,12 +25,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef _KERNELEXECUTOR_H_
+#define _KERNELEXECUTOR_H_
+
 #include "DataManager.h"
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
-
-#ifndef _KERNELEXECUTOR_H_
-#define _KERNELEXECUTOR_H_
+#include <vector>
 
 class KernelExecutor
 {
@@ -43,15 +44,14 @@ public:
 	void SetVolume(VolumeData *vd);
 	void SetDuplicate(bool dup);
 	VolumeData* GetVolume();
-	VolumeData* GetResult();
-	void DeleteResult();
+	VolumeData* GetResult(bool pop);
 	bool GetMessage(wxString &msg);
 
 	bool Execute();
 
 private:
 	VolumeData *m_vd;
-	VolumeData *m_vd_r;//result
+	std::vector<VolumeData*> m_vd_r;//result
 	bool m_duplicate;//whether duplicate the input volume
 
 	wxString m_code;
