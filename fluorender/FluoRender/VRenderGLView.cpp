@@ -5608,8 +5608,8 @@ void VRenderGLView::Run4DScript(int index, wxString &scriptname)
 					RunRulerProfile(index, fconfig);
 				else if (str == "save_volume")
 					RunSaveVolume(index, fconfig);
-				else if (str == "calculation")
-					RunCalculation(index, fconfig);
+				else if (str == "calculate")
+					RunCalculate(index, fconfig);
 			}
 		}
 	}
@@ -6015,8 +6015,20 @@ void VRenderGLView::RunSaveVolume(int index, wxFileConfig &fconfig)
 	}
 }
 
-void VRenderGLView::RunCalculation(int index, wxFileConfig &fconfig)
+void VRenderGLView::RunCalculate(int index, wxFileConfig &fconfig)
 {
+	int time_mode;
+	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
+	bool start_frame, end_frame;
+	fconfig.Read("start_frame", &start_frame, false);
+	fconfig.Read("end_frame", &end_frame, false);
+	if (time_mode != index)
+	{
+		if (!(start_frame && m_tseq_cur_num == m_begin_frame) &&
+			!(end_frame && m_tseq_cur_num == m_end_frame))
+			return;
+	}
+
 	int vol_a_index;
 	fconfig.Read("vol_a", &vol_a_index, 0);
 	int vol_b_index;
@@ -6031,6 +6043,9 @@ void VRenderGLView::RunCalculation(int index, wxFileConfig &fconfig)
 	VolumeData* vol_b = 0;
 	if (vol_b_index >= 0 && vol_b_index < (int)m_vd_pop_list.size())
 		vol_b = m_vd_pop_list[vol_b_index];
+	if (!vol_a && !vol_b)
+		return;
+
 	//calculate
 	SetVolumeA(vol_a);
 	SetVolumeB(vol_b);
