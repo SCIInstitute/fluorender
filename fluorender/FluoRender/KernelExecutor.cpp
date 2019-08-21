@@ -34,7 +34,6 @@ using namespace boost::chrono;
 
 KernelExecutor::KernelExecutor()
 	: m_vd(0),
-	m_vd_r(0),
 	m_duplicate(true)
 {
 }
@@ -89,16 +88,16 @@ VolumeData* KernelExecutor::GetVolume()
 	return m_vd;
 }
 
-VolumeData* KernelExecutor::GetResult()
+VolumeData* KernelExecutor::GetResult(bool pop)
 {
-	return m_vd_r;
-}
-
-void KernelExecutor::DeleteResult()
-{
-	if (m_vd_r)
-		delete m_vd_r;
-	m_vd_r = 0;
+	VolumeData* vd = 0;
+	if (!m_vd_r.empty())
+	{
+		vd = m_vd_r.back();
+		if (pop)
+			m_vd_r.pop_back();
+	}
+	return vd;
 }
 
 bool KernelExecutor::GetMessage(wxString &msg)
@@ -170,15 +169,16 @@ bool KernelExecutor::Execute()
 		//result
 		double spc_x, spc_y, spc_z;
 		m_vd->GetSpacings(spc_x, spc_y, spc_z);
-		m_vd_r = new VolumeData();
-		m_vd_r->AddEmptyData(8,
+		VolumeData* vd = new VolumeData();
+		m_vd_r.push_back(vd);
+		vd->AddEmptyData(8,
 			res_x, res_y, res_z,
 			spc_x, spc_y, spc_z,
 			brick_size);
-		m_vd_r->SetSpcFromFile(true);
+		vd->SetSpcFromFile(true);
 		wxString name = m_vd->GetName();
-		m_vd_r->SetName(name + "_CL");
-		Texture* tex_r = m_vd_r->GetTexture();
+		vd->SetName(name + "_CL");
+		Texture* tex_r = vd->GetTexture();
 		if (!tex_r)
 			return false;
 		Nrrd* nrrd_r = tex_r->get_nrrd(0);
@@ -197,39 +197,40 @@ bool KernelExecutor::Execute()
 		{
 			//clipping planes
 			vector<Plane*> *planes = m_vd->GetVR() ? m_vd->GetVR()->get_planes() : 0;
-			if (planes && m_vd_r->GetVR())
-				m_vd_r->GetVR()->set_planes(planes);
+			if (planes && vd->GetVR())
+				vd->GetVR()->set_planes(planes);
 			//transfer function
-			m_vd_r->Set3DGamma(m_vd->Get3DGamma());
-			m_vd_r->SetBoundary(m_vd->GetBoundary());
-			m_vd_r->SetOffset(m_vd->GetOffset());
-			m_vd_r->SetLeftThresh(m_vd->GetLeftThresh());
-			m_vd_r->SetRightThresh(m_vd->GetRightThresh());
+			vd->Set3DGamma(m_vd->Get3DGamma());
+			vd->SetBoundary(m_vd->GetBoundary());
+			vd->SetOffset(m_vd->GetOffset());
+			vd->SetLeftThresh(m_vd->GetLeftThresh());
+			vd->SetRightThresh(m_vd->GetRightThresh());
 			FLIVR::Color col = m_vd->GetColor();
-			m_vd_r->SetColor(col);
-			m_vd_r->SetAlpha(m_vd->GetAlpha());
+			vd->SetColor(col);
+			vd->SetAlpha(m_vd->GetAlpha());
 			//shading
-			m_vd_r->SetShading(m_vd->GetShading());
+			vd->SetShading(m_vd->GetShading());
 			double amb, diff, spec, shine;
 			m_vd->GetMaterial(amb, diff, spec, shine);
-			m_vd_r->SetMaterial(amb, diff, spec, shine);
+			vd->SetMaterial(amb, diff, spec, shine);
 			//shadow
-			m_vd_r->SetShadow(m_vd->GetShadow());
+			vd->SetShadow(m_vd->GetShadow());
 			double shadow;
 			m_vd->GetShadowParams(shadow);
-			m_vd_r->SetShadowParams(shadow);
+			vd->SetShadowParams(shadow);
 			//sample rate
-			m_vd_r->SetSampleRate(m_vd->GetSampleRate());
+			vd->SetSampleRate(m_vd->GetSampleRate());
 			//2d adjusts
 			col = m_vd->GetGamma();
-			m_vd_r->SetGamma(col);
+			vd->SetGamma(col);
 			col = m_vd->GetBrightness();
-			m_vd_r->SetBrightness(col);
+			vd->SetBrightness(col);
 			col = m_vd->GetHdr();
-			m_vd_r->SetHdr(col);
-			m_vd_r->SetSyncR(m_vd->GetSyncR());
-			m_vd_r->SetSyncG(m_vd->GetSyncG());
-			m_vd_r->SetSyncB(m_vd->GetSyncB());
+			vd->SetHdr(col);
+			vd->SetSyncR(m_vd->GetSyncR());
+			vd->SetSyncG(m_vd->GetSyncG());
+			vd->SetSyncB(m_vd->GetSyncB());
+			vd->SetCurChannel(m_vd->GetCurChannel());
 		}
 	}
 	else
@@ -288,9 +289,9 @@ bool KernelExecutor::Execute()
 
 	if (!kernel_exe)
 	{
-		if (m_duplicate && m_vd_r)
-			delete m_vd_r;
-		m_vd_r = 0;
+		if (m_duplicate && !m_vd_r.empty())
+			delete m_vd_r.back();
+		m_vd_r.pop_back();
 		return false;
 	}
 

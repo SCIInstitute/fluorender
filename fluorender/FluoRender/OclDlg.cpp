@@ -359,7 +359,7 @@ void OclDlg::Execute()
 	//add result for rendering
 	if (dup)
 	{
-		VolumeData* vd_r = executor->GetResult();
+		VolumeData* vd_r = executor->GetResult(true);
 		if (!vd_r)
 			return;
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
