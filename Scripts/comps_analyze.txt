@@ -1,0 +1,7 @@
+[tasks]
+tasknum=2
+[tasks/task0]
+type=comp_analysis
+savepath=./Analysis/output.txt
+[tasks/task1]
+type=selection_tracking
