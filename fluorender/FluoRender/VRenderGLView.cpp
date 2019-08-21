@@ -6115,43 +6115,85 @@ void VRenderGLView::RunOpenCL(int index, wxFileConfig &fconfig)
 
 void VRenderGLView::RunCompAnalysis(int index, wxFileConfig &fconfig)
 {
+	int time_mode, chan_mode;
+	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
+	bool start_frame, end_frame;
+	fconfig.Read("start_frame", &start_frame, false);
+	fconfig.Read("end_frame", &end_frame, false);
+	if (time_mode != index)
+	{
+		if (!(start_frame && m_tseq_cur_num == m_begin_frame) &&
+			!(end_frame && m_tseq_cur_num == m_end_frame))
+			return;
+	}
+	fconfig.Read("chan_mode", &chan_mode, 0);//0-cur vol;1-every vol;...
 	wxString str, pathname;
 	fconfig.Read("savepath", &pathname);
 	int verbose;
 	fconfig.Read("verbose", &verbose, 0);
 	bool consistent;
 	fconfig.Read("consistent", &consistent, true);
-
+	bool selected;
+	fconfig.Read("selected", &selected, false);
 
 	str = wxPathOnly(pathname);
 	if (!wxDirExists(str))
 		wxFileName::Mkdir(str, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
-
-	if (!m_cur_vol)
+	if (!wxDirExists(str))
 		return;
 
-	FL::ComponentAnalyzer comp_analyzer(m_cur_vol);
-	comp_analyzer.Analyze(true, consistent);
-	string result_str;
-	string comp_header = wxString::Format("%d", m_tseq_cur_num);
-	comp_analyzer.OutputCompListStr(result_str, verbose, comp_header);
-
-	//save append
-	bool sf_script = m_tseq_cur_num == m_begin_frame;
-	wxFile file(pathname, sf_script ? wxFile::write : wxFile::write_append);
-	if (!file.IsOpened())
-		return;
-	if (sf_script && verbose == 0)
+	std::vector<VolumeData*> vlist;
+	if (chan_mode == 0)
 	{
-		string header;
-		comp_analyzer.OutputFormHeader(header);
-		file.Write(wxString::Format("Time\t"));
-		file.Write(header);
+		vlist.push_back(m_cur_vol);
 	}
-	if (verbose == 1)
-		file.Write(wxString::Format("Time point: %d\n", m_tseq_cur_num));
-	file.Write(result_str);
-	file.Close();
+	else
+	{
+		for (auto i = m_vd_pop_list.begin();
+			i != m_vd_pop_list.end(); ++i)
+		{
+			if ((*i)->GetDisp())
+				vlist.push_back(*i);
+		}
+	}
+	int chan_num = vlist.size();
+
+	for (auto i = vlist.begin();
+		i != vlist.end(); ++i)
+	{
+		FL::ComponentAnalyzer comp_analyzer(*i);
+		comp_analyzer.Analyze(selected, consistent);
+		string result_str;
+		string comp_header = wxString::Format("%d", m_tseq_cur_num);
+		comp_analyzer.OutputCompListStr(result_str, verbose, comp_header);
+
+		//save append
+		bool sf_script = m_tseq_cur_num == m_begin_frame;
+		wxString filename = pathname;
+		//channel
+		if (chan_num > 1)
+		{
+			wxString format = wxString::Format("%d", chan_num);
+			int ch_length = format.Length();
+			format = wxString::Format("_CH%%0%dd", ch_length + 1);
+			filename += wxString::Format(format, (*i)->GetCurChannel() + 1);
+		}
+		filename += ".txt";
+		wxFile file(filename, sf_script ? wxFile::write : wxFile::write_append);
+		if (!file.IsOpened())
+			continue;
+		if (sf_script && verbose == 0)
+		{
+			string header;
+			comp_analyzer.OutputFormHeader(header);
+			file.Write(wxString::Format("Time\t"));
+			file.Write(header);
+		}
+		if (verbose == 1)
+			file.Write(wxString::Format("Time point: %d\n", m_tseq_cur_num));
+		file.Write(result_str);
+		file.Close();
+	}
 }
 
 void VRenderGLView::RunGenerateComp(int index, wxFileConfig &fconfig)
