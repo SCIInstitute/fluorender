@@ -1037,7 +1037,6 @@ private:
 	void RunSelectionTracking(int index, wxFileConfig &fconfig);
 	void RunSparseTracking(int index, wxFileConfig &fconfig);
 	void RunRandomColors(int index, wxFileConfig &fconfig);
-	void RunSeparateChannels(int index, wxFileConfig &fconfig);
 	void RunFetchMask(int index, wxFileConfig &fconfig);
 	void RunSaveMask(int index, wxFileConfig &fconfig);
 	void RunSaveVolume(int index, wxFileConfig &fconfig);

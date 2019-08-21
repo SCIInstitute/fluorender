@@ -17,4 +17,4 @@ source=calculator
 format=0
 compress=1
 delete=1
-savepath=./DATA/DeNoise/FilenamePrefix
+savepath=./DATA/Denoise/FilenamePrefix
