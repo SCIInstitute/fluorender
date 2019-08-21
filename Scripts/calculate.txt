@@ -1,0 +1,13 @@
+[tasks]
+tasknum=2
+[tasks/task0]
+type=calculation
+vol_a=1
+vol_b=0
+operand=subtract
+[tasks/task1]
+type=save_volume
+savepath=./DATA/Calculate/FilenamePrefix
+format=0
+compress=1
+delete=1
