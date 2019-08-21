@@ -6241,6 +6241,18 @@ void VRenderGLView::RunGenerateComp(int index, wxFileConfig &fconfig)
 
 void VRenderGLView::RunRulerProfile(int index, wxFileConfig &fconfig)
 {
+	int time_mode;
+	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
+	bool start_frame, end_frame;
+	fconfig.Read("start_frame", &start_frame, false);
+	fconfig.Read("end_frame", &end_frame, false);
+	if (time_mode != index)
+	{
+		if (!(start_frame && m_tseq_cur_num == m_begin_frame) &&
+			!(end_frame && m_tseq_cur_num == m_end_frame))
+			return;
+	}
+
 	if (m_ruler_list.empty())
 		return;
 
