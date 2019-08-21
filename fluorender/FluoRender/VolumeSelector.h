@@ -95,8 +95,8 @@ public:
 	int SetLabelBySize();
 	int CompIslandCount(double min_voxels, double max_voxels);
 	void CompExportMultiChann(bool select);
-	void CompExportRandomColor(int hmode, VolumeData* vd_r, VolumeData* vd_g, VolumeData* vd_b, bool select, bool hide=true);
-	vector<VolumeData*>* GetResultVols();
+	void CompExportRandomColor(int hmode, VolumeData* vd_r, VolumeData* vd_g, VolumeData* vd_b, bool select, bool hide);
+	VolumeData* GetResult(bool pop);
 	//process current selection
 	int ProcessSel(double thresh);
 	int GetCenter(Point& p);
@@ -166,7 +166,7 @@ private:
 	double m_min_voxels, m_max_voxels;
 
 	//exported volumes
-	vector<VolumeData*> m_result_vols;
+	std::vector<VolumeData*> m_result_vols;
 	//annotations
 	Annotations* m_annotations;
 

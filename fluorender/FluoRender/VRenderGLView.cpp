@@ -5785,61 +5785,43 @@ void VRenderGLView::RunSparseTracking(int index, wxFileConfig &fconfig)
 
 void VRenderGLView::RunRandomColors(int index, wxFileConfig &fconfig)
 {
+	int time_mode, chan_mode;
+	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
+	bool start_frame, end_frame;
+	fconfig.Read("start_frame", &start_frame, false);
+	fconfig.Read("end_frame", &end_frame, false);
+	if (time_mode != index)
+	{
+		if (!(start_frame && m_tseq_cur_num == m_begin_frame) &&
+			!(end_frame && m_tseq_cur_num == m_end_frame))
+			return;
+	}
+	fconfig.Read("chan_mode", &chan_mode, 0);//0-cur vol;1-every vol;...
+
 	int hmode;
 	fconfig.Read("huemode", &hmode, 1);
-	wxString str, pathname;
-	fconfig.Read("savepath", &pathname, "");
-	str = wxPathOnly(pathname);
-	if (!wxDirExists(str))
-		wxFileName::Mkdir(str, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 
-	if (wxDirExists(str))
+	std::vector<VolumeData*> vlist;
+	if (chan_mode == 0)
 	{
-		//current state: see selection_tracking
-		//steps:
-		//load and replace the label
-		if (!m_cur_vol)
-			return;
-		VolumeData* vd = m_cur_vol;
-		BaseReader* reader = vd->GetReader();
-		if (!reader)
-			return;
-		LBLReader lbl_reader;
-		wstring lblname = reader->GetCurLabelName(m_tseq_cur_num, m_cur_vol->GetCurChannel());
-		lbl_reader.SetFile(lblname);
-		Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, m_cur_vol->GetCurChannel(), true);
-		if (!label_nrrd_new)
-			return;
-		vd->LoadLabel(label_nrrd_new);
-		int time_num = reader->GetTimeNum();
-		//generate RGB volumes
-		m_selector.CompExportRandomColor(hmode, 0, 0, 0, false, false);
-		vector<VolumeData*> *vol_list = m_selector.GetResultVols();
-		for (int ii = 0; ii < (int)vol_list->size(); ii++)
+		vlist.push_back(m_cur_vol);
+	}
+	else
+	{
+		for (auto i = m_vd_pop_list.begin();
+			i != m_vd_pop_list.end(); ++i)
 		{
-			vd = (*vol_list)[ii];
-			if (!vd)
-				break;
-
-			//time
-			wxString format = wxString::Format("%d", time_num);
-			m_fr_length = format.Length();
-			format = wxString::Format("_T%%0%dd", m_fr_length);
-			str += wxString::Format(format, m_tseq_cur_num);
-			//channel
-			int chan_num = vd->GetReader()->GetChanNum();
-			if (chan_num > 1)
-			{
-				format = wxString::Format("%d", chan_num);
-				int ch_length = format.Length();
-				format = wxString::Format("_CH%%0%dd", ch_length + 1);
-				str += wxString::Format(format, vd->GetCurChannel() + 1);
-			}
-			//comp
-			str += wxString::Format("_COMP%d", ii + 1) + ".tif";
-			vd->Save(str);
-			delete vd;
+			if ((*i)->GetDisp())
+				vlist.push_back(*i);
 		}
+	}
+
+	for (auto i = vlist.begin();
+		i != vlist.end(); ++i)
+	{
+		//generate RGB volumes
+		m_selector.SetVolume(*i);
+		m_selector.CompExportRandomColor(hmode, 0, 0, 0, false, false);
 	}
 }
 
@@ -5999,6 +5981,8 @@ void VRenderGLView::RunSaveVolume(int index, wxFileConfig &fconfig)
 	}
 	fconfig.Read("chan_mode", &chan_mode, 0);//0-cur vol;1-every vol;...
 
+	wxString source;
+	fconfig.Read("source", &source);
 	int mode;
 	fconfig.Read("format", &mode, 0);
 	bool bake;
@@ -6019,16 +6003,17 @@ void VRenderGLView::RunSaveVolume(int index, wxFileConfig &fconfig)
 		return;
 	int time_num = m_vd_pop_list[0]->GetReader()->GetTimeNum();
 	std::vector<VolumeData*> vlist;
-	if (chan_mode == 0)
-	{
-		VolumeData* vd = m_calculator.GetResult(true);
-		if (vd)
-			vlist.push_back(vd);
-	}
-	else
+	if (source == "calculator" ||
+		source == "")
 	{
 		VolumeData* vd = 0;
 		while (vd = m_calculator.GetResult(true))
+			vlist.push_back(vd);
+	}
+	else if (source == "selector")
+	{
+		VolumeData* vd = 0;
+		while (vd = m_selector.GetResult(true))
 			vlist.push_back(vd);
 	}
 	int chan_num = vlist.size();

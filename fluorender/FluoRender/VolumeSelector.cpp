@@ -457,8 +457,6 @@ void VolumeSelector::CompExportMultiChann(bool select)
 		m_vd->GetTexture()->nlabel()==-1)
 		return;
 
-	m_result_vols.clear();
-
 	if (select)
 		m_vd->GetVR()->return_mask();
 
@@ -485,8 +483,10 @@ void VolumeSelector::CompExportMultiChann(bool select)
 	double amb, diff, spec, shine;
 	m_vd->GetMaterial(amb, diff, spec, shine);
 	int brick_size = m_vd->GetTexture()->get_build_max_tex_size();
+	unsigned long long for_size = (unsigned long long)(res_x)*res_y*res_z;
 
 	i = 1;
+	int chann = 1;
 	boost::unordered_map <unsigned int, Component> :: const_iterator comp_iter;
 	for (comp_iter=m_comps.begin(); comp_iter!=m_comps.end(); comp_iter++)
 	{
@@ -503,6 +503,7 @@ void VolumeSelector::CompExportMultiChann(bool select)
 		vd->SetSpcFromFile(true);
 		vd->SetName(m_vd->GetName() +
 			wxString::Format("_COMP%d_SIZE%d", i++, comp_iter->second.counter));
+		vd->SetCurChannel(chann++);
 
 		//populate the volume
 		//the actual data
@@ -513,57 +514,54 @@ void VolumeSelector::CompExportMultiChann(bool select)
 		unsigned char* data_vd = (unsigned char*)nrrd_vd->data;
 		if (!data_vd) continue;
 
-		int ii, jj, kk;
-		for (ii=0; ii<res_x; ii++)
-			for (jj=0; jj<res_y; jj++)
-				for (kk=0; kk<res_z; kk++)
+		unsigned long long idx;
+		for (idx = 0; idx < for_size; ++idx)
+		{
+			unsigned int value_label = data_mvd_label[idx];
+			if (value_label > 0 && value_label==comp_iter->second.id)
+			{
+				unsigned char value = 0;
+				if (nrrd_mvd->type == nrrdTypeUChar)
 				{
-					int index = res_x*res_y*kk + res_x*jj + ii;
-					unsigned int value_label = data_mvd_label[index];
-					if (value_label > 0 && value_label==comp_iter->second.id)
-					{
-						unsigned char value = 0;
-						if (nrrd_mvd->type == nrrdTypeUChar)
-						{
-							if (select)
-								value = (unsigned char)((double)(((unsigned char*)data_mvd)[index]) *
-								double(data_mvd_mask[index]) / 255.0);
-							else
-								value = ((unsigned char*)data_mvd)[index];
-						}
-						else if (nrrd_mvd->type == nrrdTypeUShort)
-						{
-							if (select)
-								value = (unsigned char)((double)(((unsigned short*)data_mvd)[index]) *
-								m_vd->GetScalarScale() * double(data_mvd_mask[index]) / 65535.0);
-							else
-								value = (unsigned char)((double)(((unsigned short*)data_mvd)[index]) *
-								m_vd->GetScalarScale() / 255.0);
-						}
-						data_vd[index] = value;
-					}
+					if (select)
+						value = (unsigned char)((double)(((unsigned char*)data_mvd)[idx]) *
+						double(data_mvd_mask[idx]) / 255.0);
+					else
+						value = ((unsigned char*)data_mvd)[idx];
 				}
-				int randv = 0;
-				while (randv < 100) randv = rand();
-				unsigned int rev_value_label = bit_reverse(comp_iter->second.id);
-				double hue = double(rev_value_label % randv) / double(randv) * 360.0;
-				Color color(HSVColor(hue, 1.0, 1.0));
-				vd->SetColor(color);
+				else if (nrrd_mvd->type == nrrdTypeUShort)
+				{
+					if (select)
+						value = (unsigned char)((double)(((unsigned short*)data_mvd)[idx]) *
+						m_vd->GetScalarScale() * double(data_mvd_mask[idx]) / 65535.0);
+					else
+						value = (unsigned char)((double)(((unsigned short*)data_mvd)[idx]) *
+						m_vd->GetScalarScale() / 255.0);
+				}
+				data_vd[idx] = value;
+			}
+		}
+		int randv = 0;
+		while (randv < 100) randv = rand();
+		unsigned int rev_value_label = bit_reverse(comp_iter->second.id);
+		double hue = double(rev_value_label % randv) / double(randv) * 360.0;
+		Color color(HSVColor(hue, 1.0, 1.0));
+		vd->SetColor(color);
 
-				vd->SetEnableAlpha(m_vd->GetEnableAlpha());
-				vd->SetShading(m_vd->GetShading());
-				vd->SetShadow(false);
-				//other settings
-				vd->Set3DGamma(m_vd->Get3DGamma());
-				vd->SetBoundary(m_vd->GetBoundary());
-				vd->SetOffset(m_vd->GetOffset());
-				vd->SetLeftThresh(m_vd->GetLeftThresh());
-				vd->SetRightThresh(m_vd->GetRightThresh());
-				vd->SetAlpha(m_vd->GetAlpha());
-				vd->SetSampleRate(m_vd->GetSampleRate());
-				vd->SetMaterial(amb, diff, spec, shine);
+		vd->SetEnableAlpha(m_vd->GetEnableAlpha());
+		vd->SetShading(m_vd->GetShading());
+		vd->SetShadow(false);
+		//other settings
+		vd->Set3DGamma(m_vd->Get3DGamma());
+		vd->SetBoundary(m_vd->GetBoundary());
+		vd->SetOffset(m_vd->GetOffset());
+		vd->SetLeftThresh(m_vd->GetLeftThresh());
+		vd->SetRightThresh(m_vd->GetRightThresh());
+		vd->SetAlpha(m_vd->GetAlpha());
+		vd->SetSampleRate(m_vd->GetSampleRate());
+		vd->SetMaterial(amb, diff, spec, shine);
 
-				m_result_vols.push_back(vd);
+		m_result_vols.push_back(vd);
 	}
 }
 
@@ -579,8 +577,6 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 	if (select)
 		m_vd->GetVR()->return_mask();
 
-	m_result_vols.clear();
-
 	//get all the data from original volume
 	Texture* tex_mvd = m_vd->GetTexture();
 	if (!tex_mvd) return;
@@ -591,7 +587,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 	Nrrd* nrrd_mvd_label = tex_mvd->get_nrrd(tex_mvd->nlabel());
 	if (!nrrd_mvd_label) return;
 	void* data_mvd = nrrd_mvd->data;
-	unsigned char* data_mvd_mask = (unsigned char*)nrrd_mvd_mask->data;
+	unsigned char* data_mvd_mask = select?(unsigned char*)nrrd_mvd_mask->data:0;
 	unsigned int* data_mvd_label = (unsigned int*)nrrd_mvd_label->data;
 	if (!data_mvd || (select&&!data_mvd_mask) || !data_mvd_label) return;
 
@@ -602,6 +598,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 	m_vd->GetResolution(res_x, res_y, res_z);
 	m_vd->GetSpacings(spc_x, spc_y, spc_z);
 	int brick_size = m_vd->GetTexture()->get_build_max_tex_size();
+	unsigned long long for_size = (unsigned long long)(res_x)*res_y*res_z;
 
 	bool push_new = true;
 	//red volume
@@ -616,6 +613,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 	vd_r->SetSpcFromFile(true);
 	vd_r->SetName(m_vd->GetName() +
 		wxString::Format("_COMP1"));
+	vd_r->SetCurChannel(0);
 	//green volume
 	if (!vd_g)
 		vd_g = new VolumeData();
@@ -626,6 +624,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 	vd_g->SetSpcFromFile(true);
 	vd_g->SetName(m_vd->GetName() +
 		wxString::Format("_COMP2"));
+	vd_g->SetCurChannel(1);
 	//blue volume
 	if (!vd_b)
 		vd_b = new VolumeData();
@@ -636,6 +635,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 	vd_b->SetSpcFromFile(true);
 	vd_b->SetName(m_vd->GetName() +
 		wxString::Format("_COMP3"));
+	vd_b->SetCurChannel(2);
 
 	//get new data
 	//red volume
@@ -663,111 +663,115 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 	if (hide)
 		m_randv = int((double)rand()/(RAND_MAX)*900+100);
 	//populate the data
-	int ii, jj, kk;
-	for (ii=0; ii<res_x; ii++)
-		for (jj=0; jj<res_y; jj++)
-			for (kk=0; kk<res_z; kk++)
+	unsigned long long idx;
+	for (idx = 0; idx < for_size; ++idx)
+	{
+		unsigned int value_label = data_mvd_label[idx];
+		if (value_label > 0)
+		{
+			//intensity value
+			double value = 0.0;
+			if (nrrd_mvd->type == nrrdTypeUChar)
 			{
-				int index = res_x*res_y*kk + res_x*jj + ii;
-				unsigned int value_label = data_mvd_label[index];
-				if (value_label > 0)
-				{
-					//intensity value
-					double value = 0.0;
-					if (nrrd_mvd->type == nrrdTypeUChar)
-					{
-						if (select)
-							value = double(((unsigned char*)data_mvd)[index]) *
-							double(data_mvd_mask[index]) / 65025.0;
-						else
-							value = double(((unsigned char*)data_mvd)[index]) / 255.0;
-					}
-					else if (nrrd_mvd->type == nrrdTypeUShort)
-					{
-						if (select)
-							value = double(((unsigned short*)data_mvd)[index]) *
-							m_vd->GetScalarScale() *
-							double(data_mvd_mask[index]) / 16581375.0;
-						else
-							value = double(((unsigned short*)data_mvd)[index]) *
-							m_vd->GetScalarScale() / 65535.0;
-					}
-					Color color;
-					if (hmode == 0)
-						color = Color(value_label, m_vd->GetShuffle());
-					else
-					{
-						double hue = HueCalculation(hmode, value_label);
-						color = Color(HSVColor(hue, 1.0, 1.0));
-					}
-					//color
-					value = value>1.0?1.0:value;
-					data_vd_r[index] = (unsigned char)(color.r()*255.0*value);
-					data_vd_g[index] = (unsigned char)(color.g()*255.0*value);
-					data_vd_b[index] = (unsigned char)(color.b()*255.0*value);
-				}
+				if (select)
+					value = double(((unsigned char*)data_mvd)[idx]) *
+					double(data_mvd_mask[idx]) / 65025.0;
+				else
+					value = double(((unsigned char*)data_mvd)[idx]) / 255.0;
 			}
-
-			FLIVR::Color red    = Color(1.0,0.0,0.0);
-			FLIVR::Color green  = Color(0.0,1.0,0.0);
-			FLIVR::Color blue   = Color(0.0,0.0,1.0);
-			vd_r->SetColor(red);
-			vd_g->SetColor(green);
-			vd_b->SetColor(blue);
-			bool bval = m_vd->GetEnableAlpha();
-			vd_r->SetEnableAlpha(bval);
-			vd_g->SetEnableAlpha(bval);
-			vd_b->SetEnableAlpha(bval);
-			bval = m_vd->GetShading();
-			vd_r->SetShading(bval);
-			vd_g->SetShading(bval);
-			vd_b->SetShading(bval);
-			vd_r->SetShadow(false);
-			vd_g->SetShadow(false);
-			vd_b->SetShadow(false);
-			//other settings
-			double amb, diff, spec, shine;
-			m_vd->GetMaterial(amb, diff, spec, shine);
-			vd_r->Set3DGamma(m_vd->Get3DGamma());
-			vd_r->SetBoundary(m_vd->GetBoundary());
-			vd_r->SetOffset(m_vd->GetOffset());
-			vd_r->SetLeftThresh(m_vd->GetLeftThresh());
-			vd_r->SetRightThresh(m_vd->GetRightThresh());
-			vd_r->SetAlpha(m_vd->GetAlpha());
-			vd_r->SetSampleRate(m_vd->GetSampleRate());
-			vd_r->SetMaterial(amb, diff, spec, shine);
-			vd_g->Set3DGamma(m_vd->Get3DGamma());
-			vd_g->SetBoundary(m_vd->GetBoundary());
-			vd_g->SetOffset(m_vd->GetOffset());
-			vd_g->SetLeftThresh(m_vd->GetLeftThresh());
-			vd_g->SetRightThresh(m_vd->GetRightThresh());
-			vd_g->SetAlpha(m_vd->GetAlpha());
-			vd_g->SetSampleRate(m_vd->GetSampleRate());
-			vd_g->SetMaterial(amb, diff, spec, shine);
-			vd_b->Set3DGamma(m_vd->Get3DGamma());
-			vd_b->SetBoundary(m_vd->GetBoundary());
-			vd_b->SetOffset(m_vd->GetOffset());
-			vd_b->SetLeftThresh(m_vd->GetLeftThresh());
-			vd_b->SetRightThresh(m_vd->GetRightThresh());
-			vd_b->SetAlpha(m_vd->GetAlpha());
-			vd_b->SetSampleRate(m_vd->GetSampleRate());
-			vd_b->SetMaterial(amb, diff, spec, shine);
-
-			if (push_new)
+			else if (nrrd_mvd->type == nrrdTypeUShort)
 			{
-				m_result_vols.push_back(vd_r);
-				m_result_vols.push_back(vd_g);
-				m_result_vols.push_back(vd_b);
+				if (select)
+					value = double(((unsigned short*)data_mvd)[idx]) *
+					m_vd->GetScalarScale() *
+					double(data_mvd_mask[idx]) / 16581375.0;
+				else
+					value = double(((unsigned short*)data_mvd)[idx]) *
+					m_vd->GetScalarScale() / 65535.0;
 			}
+			Color color;
+			if (hmode == 0)
+				color = Color(value_label, m_vd->GetShuffle());
+			else
+			{
+				double hue = HueCalculation(hmode, value_label);
+				color = Color(HSVColor(hue, 1.0, 1.0));
+			}
+			//color
+			value = value>1.0?1.0:value;
+			data_vd_r[idx] = (unsigned char)(color.r()*255.0*value);
+			data_vd_g[idx] = (unsigned char)(color.g()*255.0*value);
+			data_vd_b[idx] = (unsigned char)(color.b()*255.0*value);
+		}
+	}
 
-			//turn off m_vd
-			if (hide)
-				m_vd->SetDisp(false);
+	FLIVR::Color red    = Color(1.0,0.0,0.0);
+	FLIVR::Color green  = Color(0.0,1.0,0.0);
+	FLIVR::Color blue   = Color(0.0,0.0,1.0);
+	vd_r->SetColor(red);
+	vd_g->SetColor(green);
+	vd_b->SetColor(blue);
+	bool bval = m_vd->GetEnableAlpha();
+	vd_r->SetEnableAlpha(bval);
+	vd_g->SetEnableAlpha(bval);
+	vd_b->SetEnableAlpha(bval);
+	bval = m_vd->GetShading();
+	vd_r->SetShading(bval);
+	vd_g->SetShading(bval);
+	vd_b->SetShading(bval);
+	vd_r->SetShadow(false);
+	vd_g->SetShadow(false);
+	vd_b->SetShadow(false);
+	//other settings
+	double amb, diff, spec, shine;
+	m_vd->GetMaterial(amb, diff, spec, shine);
+	vd_r->Set3DGamma(m_vd->Get3DGamma());
+	vd_r->SetBoundary(m_vd->GetBoundary());
+	vd_r->SetOffset(m_vd->GetOffset());
+	vd_r->SetLeftThresh(m_vd->GetLeftThresh());
+	vd_r->SetRightThresh(m_vd->GetRightThresh());
+	vd_r->SetAlpha(m_vd->GetAlpha());
+	vd_r->SetSampleRate(m_vd->GetSampleRate());
+	vd_r->SetMaterial(amb, diff, spec, shine);
+	vd_g->Set3DGamma(m_vd->Get3DGamma());
+	vd_g->SetBoundary(m_vd->GetBoundary());
+	vd_g->SetOffset(m_vd->GetOffset());
+	vd_g->SetLeftThresh(m_vd->GetLeftThresh());
+	vd_g->SetRightThresh(m_vd->GetRightThresh());
+	vd_g->SetAlpha(m_vd->GetAlpha());
+	vd_g->SetSampleRate(m_vd->GetSampleRate());
+	vd_g->SetMaterial(amb, diff, spec, shine);
+	vd_b->Set3DGamma(m_vd->Get3DGamma());
+	vd_b->SetBoundary(m_vd->GetBoundary());
+	vd_b->SetOffset(m_vd->GetOffset());
+	vd_b->SetLeftThresh(m_vd->GetLeftThresh());
+	vd_b->SetRightThresh(m_vd->GetRightThresh());
+	vd_b->SetAlpha(m_vd->GetAlpha());
+	vd_b->SetSampleRate(m_vd->GetSampleRate());
+	vd_b->SetMaterial(amb, diff, spec, shine);
+
+	if (push_new)
+	{
+		m_result_vols.push_back(vd_r);
+		m_result_vols.push_back(vd_g);
+		m_result_vols.push_back(vd_b);
+	}
+
+	//turn off m_vd
+	if (hide)
+		m_vd->SetDisp(false);
 }
 
-vector<VolumeData*>* VolumeSelector::GetResultVols()
+VolumeData* VolumeSelector::GetResult(bool pop)
 {
-	return &m_result_vols;
+	VolumeData* vd = 0;
+	if (!m_result_vols.empty())
+	{
+		vd = m_result_vols.back();
+		if (pop)
+			m_result_vols.pop_back();
+	}
+	return vd;
 }
 
 //process current selection
