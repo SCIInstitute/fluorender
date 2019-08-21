@@ -5594,8 +5594,6 @@ void VRenderGLView::Run4DScript(int index, wxString &scriptname)
 					RunSparseTracking(index, fconfig);
 				else if (str == "random_colors")
 					RunRandomColors(index, fconfig);
-				else if (str == "separate_channels")
-					RunSeparateChannels(index, fconfig);
 				else if (str == "fetch_mask")
 					RunFetchMask(index, fconfig);
 				else if (str == "save_mask")
@@ -5825,44 +5823,6 @@ void VRenderGLView::RunRandomColors(int index, wxFileConfig &fconfig)
 	}
 }
 
-void VRenderGLView::RunSeparateChannels(int index, wxFileConfig &fconfig)
-{
-	wxString str, pathname;
-	int mode;
-	fconfig.Read("format", &mode, 0);
-	bool bake;
-	fconfig.Read("bake", &bake, false);
-	bool compression;
-	fconfig.Read("compress", &compression, false);
-	fconfig.Read("savepath", &pathname, "");
-	str = wxPathOnly(pathname);
-	if (!wxDirExists(str))
-		wxFileName::Mkdir(str, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
-
-	if (wxDirExists(str))
-	{
-		if (!m_cur_vol)
-			return;
-
-		VolumeData* vd = m_cur_vol;
-
-		str = pathname;
-		//time
-		int time_num = vd->GetReader()->GetTimeNum();
-		wxString format = wxString::Format("%d", time_num);
-		m_fr_length = format.Length();
-		format = wxString::Format("_T%%0%dd", m_fr_length);
-		str += wxString::Format(format, m_tseq_cur_num);
-		//channel
-		int chan_num = vd->GetReader()->GetChanNum();
-		format = wxString::Format("%d", chan_num);
-		int ch_length = format.Length();
-		format = wxString::Format("_CH%%0%dd", ch_length + 1);
-		str += wxString::Format(format, vd->GetCurChannel() + 1) + ".tif";
-		vd->Save(str, mode, bake, compression);
-	}
-}
-
 void VRenderGLView::RunFetchMask(int index, wxFileConfig &fconfig)
 {
 	int time_mode, chan_mode;
@@ -6003,8 +5963,17 @@ void VRenderGLView::RunSaveVolume(int index, wxFileConfig &fconfig)
 		return;
 	int time_num = m_vd_pop_list[0]->GetReader()->GetTimeNum();
 	std::vector<VolumeData*> vlist;
-	if (source == "calculator" ||
+	if (source == "channels" ||
 		source == "")
+	{
+		for (auto i = m_vd_pop_list.begin();
+			i != m_vd_pop_list.end(); ++i)
+		{
+			if ((*i)->GetDisp())
+				vlist.push_back(*i);
+		}
+	}
+	else if (source == "calculator")
 	{
 		VolumeData* vd = 0;
 		while (vd = m_calculator.GetResult(true))

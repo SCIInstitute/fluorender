@@ -1,7 +1,0 @@
-[tasks]
-tasknum=1
-[tasks/task0]
-type=separate_channels
-format=0
-compress=1
-savepath=./DATA/Channels/FilenamePrefix
