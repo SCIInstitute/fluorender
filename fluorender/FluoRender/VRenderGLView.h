@@ -1040,7 +1040,7 @@ private:
 	void RunFetchMask(int index, wxFileConfig &fconfig);
 	void RunSaveMask(int index, wxFileConfig &fconfig);
 	void RunSaveVolume(int index, wxFileConfig &fconfig);
-	void RunCalculation(int index, wxFileConfig &fconfig);
+	void RunCalculate(int index, wxFileConfig &fconfig);
 	void RunOpenCL(int index, wxFileConfig &fconfig);
 	void RunCompAnalysis(int index, wxFileConfig &fconfig);
 	void RunGenerateComp(int index, wxFileConfig &fconfig);
