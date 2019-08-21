@@ -67,9 +67,9 @@ VolumeData* VolumeCalculator::GetResult(bool pop)
 	VolumeData* vd = 0;
 	if (!m_vd_r.empty())
 	{
-		vd = m_vd_r.front();
+		vd = m_vd_r.back();
 		if (pop)
-			m_vd_r.pop();
+			m_vd_r.pop_back();
 	}
 	return vd;
 }
@@ -89,7 +89,7 @@ void VolumeCalculator::Calculate(int type)
 		CreateVolumeResult2();
 		VolumeData* vd = 0;
 		if (!m_vd_r.empty())
-			vd = m_vd_r.front();
+			vd = m_vd_r.back();
 		if (!vd)
 			return;
 		vd->Calculate(m_type, m_vd_a, m_vd_b);
@@ -104,7 +104,7 @@ void VolumeCalculator::Calculate(int type)
 		CreateVolumeResult1();
 		VolumeData* vd = 0;
 		if (!m_vd_r.empty())
-			vd = m_vd_r.front();
+			vd = m_vd_r.back();
 		if (!vd)
 			return;
 		vd->Calculate(m_type, m_vd_a, 0);
@@ -117,7 +117,7 @@ void VolumeCalculator::Calculate(int type)
 		CreateVolumeResult1();
 		VolumeData* vd = 0;
 		if (!m_vd_r.empty())
-			vd = m_vd_r.front();
+			vd = m_vd_r.back();
 		if (!vd)
 			return;
 		FillHoles(m_threshold);
@@ -149,7 +149,7 @@ void VolumeCalculator::CreateVolumeResult1()
 		brick_size);
 	vd->SetSpcFromFile(true);
 	vd->SetCurChannel(m_vd_a->GetCurChannel());
-	m_vd_r.push(vd);
+	m_vd_r.push_back(vd);
 
 	wxString name = m_vd_a->GetName();
 	wxString str_type;
@@ -203,7 +203,7 @@ void VolumeCalculator::CreateVolumeResult2()
 		spc_x, spc_y, spc_z,
 		brick_size);
 	vd->SetSpcFromFile(true);
-	m_vd_r.push(vd);
+	m_vd_r.push_back(vd);
 
 	wxString name_a = m_vd_a->GetName();
 	wxString name_b = m_vd_b->GetName();
@@ -239,7 +239,7 @@ void VolumeCalculator::FillHoles(double thresh)
 		return;
 	VolumeData* vd = 0;
 	if (!m_vd_r.empty())
-		vd = m_vd_r.front();
+		vd = m_vd_r.back();
 	if (!vd)
 		return;
 

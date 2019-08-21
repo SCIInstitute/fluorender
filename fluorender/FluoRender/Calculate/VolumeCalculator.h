@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VOLUMECALCULATOR_H_
 #define _VOLUMECALCULATOR_H_
 
-#include <queue>
+#include <vector>
 class VolumeData;
 
 namespace FL
@@ -52,7 +52,7 @@ namespace FL
 		void Calculate(int type);
 
 	private:
-		std::queue<VolumeData*> m_vd_r;//result volume data (stack)
+		std::vector<VolumeData*> m_vd_r;//result volume data (stack)
 
 		VolumeData *m_vd_a;	//volume data A
 		VolumeData *m_vd_b;	//volume data B
