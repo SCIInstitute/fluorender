@@ -5610,6 +5610,10 @@ void VRenderGLView::Run4DScript(int index, wxString &scriptname)
 					RunSaveVolume(index, fconfig);
 				else if (str == "calculate")
 					RunCalculate(index, fconfig);
+				else if (str == "add_cells")
+					RunAddCells(index, fconfig);
+				else if (str == "link_cells")
+					RunLinkCells(index, fconfig);
 			}
 		}
 	}
@@ -6362,6 +6366,14 @@ void VRenderGLView::RunRulerProfile(int index, wxFileConfig &fconfig)
 	}
 	file.Write("\n");
 	file.Close();
+}
+
+void VRenderGLView::RunAddCells(int index, wxFileConfig &fconfig)
+{
+}
+
+void VRenderGLView::RunLinkCells(int index, wxFileConfig &fconfig)
+{
 }
 
 //read/delete volume cache
