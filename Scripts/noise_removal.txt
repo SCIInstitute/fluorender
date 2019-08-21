@@ -13,6 +13,7 @@ type=save_volume
 time_mode=0
 start_frame=0
 end_frame=1
+source=calculator
 format=0
 compress=1
 delete=1
