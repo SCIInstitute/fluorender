@@ -1045,6 +1045,8 @@ private:
 	void RunCompAnalysis(int index, wxFileConfig &fconfig);
 	void RunGenerateComp(int index, wxFileConfig &fconfig);
 	void RunRulerProfile(int index, wxFileConfig &fconfig);
+	void RunAddCells(int index, wxFileConfig &fconfig);
+	void RunLinkCells(int index, wxFileConfig &fconfig);
 
 	//read/delete volume cache
 	//for sparse tracking
