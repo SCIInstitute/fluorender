@@ -37,6 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <boost/graph/adjacency_iterator.hpp>
 #include <FLIVR/Point.h>
 #include <FLIVR/Color.h>
+#include <FLIVR/BBox.h>
 
 namespace FL
 {
@@ -112,6 +113,7 @@ namespace FL
 		double max;
 		double dist;//distance to a point
 		FLIVR::Point pos;
+		FLIVR::BBox box;
 		std::vector<unsigned int> cosumi;
 		std::vector<double> cosumd;
 		CompVert v;

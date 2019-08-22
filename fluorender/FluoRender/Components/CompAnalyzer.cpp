@@ -291,6 +291,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 				info->max = value;
 				info->dist = 0.0;
 				info->pos = FLIVR::Point(i+b->ox(), j+b->oy(), k+b->oz());
+				info->box.extend(info->pos);
 				if (colocal)
 				{
 					info->cosumi = sumi;
@@ -303,6 +304,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 			{
 				iter->second->pos = FLIVR::Point((iter->second->pos * iter->second->sumi +
 					FLIVR::Point(i + b->ox(), j + b->oy(), k + b->oz())) / (iter->second->sumi + 1));
+				iter->second->box.extend(iter->second->pos);
 				//
 				iter->second->sumi++;
 				iter->second->sumd += value;
