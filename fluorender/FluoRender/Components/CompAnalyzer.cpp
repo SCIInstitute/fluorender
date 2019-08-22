@@ -302,9 +302,9 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 			}
 			else
 			{
+				iter->second->box.extend(FLIVR::Point(i + b->ox(), j + b->oy(), k + b->oz()));
 				iter->second->pos = FLIVR::Point((iter->second->pos * iter->second->sumi +
 					FLIVR::Point(i + b->ox(), j + b->oy(), k + b->oz())) / (iter->second->sumi + 1));
-				iter->second->box.extend(iter->second->pos);
 				//
 				iter->second->sumi++;
 				iter->second->sumd += value;
