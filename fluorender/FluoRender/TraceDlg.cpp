@@ -2756,6 +2756,34 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 	RefineMap(m_cur_time);
 }
 
+void TraceDlg::LinkAddedCells(FL::CellList &list)
+{
+	if (!m_view)
+		return;
+
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+	int resx, resy, resz;
+	vd->GetResolution(resx, resy, resz);
+	TraceGroup *trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+		return;
+
+	FL::pTrackMap track_map = trace_group->GetTrackMap();
+	FL::TrackMapProcessor tm_processor(track_map);
+	tm_processor.SetBits(vd->GetBits());
+	tm_processor.SetScale(vd->GetScalarScale());
+	tm_processor.SetSizes(resx, resy, resz);
+	//register file reading and deleteing functions
+	tm_processor.RegisterCacheQueueFuncs(
+		boost::bind(&TraceDlg::ReadVolCache, this, _1),
+		boost::bind(&TraceDlg::DelVolCache, this, _1));
+	tm_processor.SetVolCacheSize(3);
+	tm_processor.LinkAddedCells(list, m_cur_time, m_cur_time - 1);
+	tm_processor.LinkAddedCells(list, m_cur_time, m_cur_time + 1);
+	RefineMap(m_cur_time);
+}
 //magic
 /*void TraceDlg::OnCellMagic0Btn(wxCommandEvent &event)
 {

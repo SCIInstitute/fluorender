@@ -193,6 +193,8 @@ public:
 	void CompClear();
 	//uncertain filtering
 	void UncertainFilter(bool input = false);
+	//link for external call
+	void LinkAddedCells(FL::CellList &list);
 
 	//measurement
 	void SaveOutputResult(wxString &filename);

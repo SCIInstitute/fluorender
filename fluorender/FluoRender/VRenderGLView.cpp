@@ -5614,6 +5614,8 @@ void VRenderGLView::Run4DScript(int index, wxString &scriptname)
 					RunAddCells(index, fconfig);
 				else if (str == "link_cells")
 					RunLinkCells(index, fconfig);
+				else if (str == "unlink_cells")
+					RunUnlinkCells(index, fconfig);
 			}
 		}
 	}
@@ -5687,6 +5689,7 @@ void VRenderGLView::RunSelectionTracking(int index, wxFileConfig &fconfig)
 		UPDATE_TRACE_DLG_AND_RETURN;
 
 	static FL::CellList sel_labels;
+	sel_labels.clear();
 	if (time_mode == 0)
 	{
 		//read the size threshold
@@ -6370,10 +6373,60 @@ void VRenderGLView::RunRulerProfile(int index, wxFileConfig &fconfig)
 
 void VRenderGLView::RunAddCells(int index, wxFileConfig &fconfig)
 {
+	int time_mode;
+	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
+	if (time_mode != index)
+		return;
+
+	if (!m_trace_group || !m_cur_vol)
+		return;
+
+	static FL::CellList sel_labels;
+	FL::pTrackMap track_map = m_trace_group->GetTrackMap();
+	FL::TrackMapProcessor tm_processor(track_map);
+	tm_processor.SetBits(m_cur_vol->GetBits());
+	tm_processor.SetScale(m_cur_vol->GetScalarScale());
+	int resx, resy, resz;
+	m_cur_vol->GetResolution(resx, resy, resz);
+	tm_processor.SetSizes(resx, resy, resz);
+	tm_processor.AddCells(sel_labels, m_tseq_cur_num);
 }
 
 void VRenderGLView::RunLinkCells(int index, wxFileConfig &fconfig)
 {
+	int time_mode;
+	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
+	if (time_mode != index)
+		return;
+
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (!vr_frame || !vr_frame->GetTraceDlg())
+		return;
+
+	static FL::CellList sel_labels;
+	vr_frame->GetTraceDlg()->LinkAddedCells(sel_labels);
+	UPDATE_TRACE_DLG_AND_RETURN;
+}
+
+void VRenderGLView::RunUnlinkCells(int index, wxFileConfig &fconfig)
+{
+	int time_mode;
+	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
+	if (time_mode != index)
+		return;
+
+	if (!m_trace_group || !m_cur_vol)
+		return;
+
+	static FL::CellList sel_labels;
+	FL::pTrackMap track_map = m_trace_group->GetTrackMap();
+	FL::TrackMapProcessor tm_processor(track_map);
+	tm_processor.SetBits(m_cur_vol->GetBits());
+	tm_processor.SetScale(m_cur_vol->GetScalarScale());
+	int resx, resy, resz;
+	m_cur_vol->GetResolution(resx, resy, resz);
+	tm_processor.SetSizes(resx, resy, resz);
+	tm_processor.RemoveCells(sel_labels, m_tseq_cur_num);
 }
 
 //read/delete volume cache
