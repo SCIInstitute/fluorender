@@ -40,15 +40,21 @@ set(SOURCES Event/Event.cpp
             Types/Transform.cpp
             Types/Vector.cpp)
 
+set(FLObject_INCLUDES ${HEADER_FILES} CACHE INTERNAL "")
+
 add_library(FLObject STATIC ${HEADER_FILES} ${SOURCES}) 
+
 target_include_directories(FLObject PUBLIC Event
                                            EventHandler
-										   Object 
-										   Observer 
-										   Referenced 
-										   ReferencePtr
-										   Value
-										   Types)
+                                           Object
+                                           Observer
+                                           Referenced
+                                           ReferencePtr
+                                           Value
+                                           Types)
+
+add_dependencies(FLObject Boost_external_download)
+
 install(TARGETS FLObject
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
