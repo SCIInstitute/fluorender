@@ -3533,8 +3533,8 @@ bool TrackMapProcessor::LinkAddedCells(CellList &list, size_t f1, size_t f2)
 				iter2 == vertex_list2.end())
 				continue;
 
-			if (iter1->second->GetSizeF() < m_size_thresh ||
-				iter2->second->GetSizeF() < m_size_thresh)
+			if (iter1->second->GetSizeUi() < m_size_thresh ||
+				iter2->second->GetSizeUi() < m_size_thresh)
 				continue;
 
 			LinkVertices(inter_graph,

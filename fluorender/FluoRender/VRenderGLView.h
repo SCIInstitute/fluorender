@@ -945,6 +945,8 @@ private:
 
 	//file path for script
 	wxString m_script_output;
+	//selected labels
+	FL::CellList m_sel_labels;
 
 private:
 #ifdef _WIN32

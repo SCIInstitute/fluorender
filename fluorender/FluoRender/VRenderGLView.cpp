@@ -4686,6 +4686,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		m_clear_buffer = true;
 		m_updating = true;
 		RefreshGL(15, ref_stat, start_loop);
+		SetFocus();
 	}
 }
 
@@ -5688,8 +5689,6 @@ void VRenderGLView::RunSelectionTracking(int index, wxFileConfig &fconfig)
 	if (!m_cur_vol)
 		UPDATE_TRACE_DLG_AND_RETURN;
 
-	static FL::CellList sel_labels;
-	sel_labels.clear();
 	if (time_mode == 0)
 	{
 		//read the size threshold
@@ -5699,7 +5698,7 @@ void VRenderGLView::RunSelectionTracking(int index, wxFileConfig &fconfig)
 		FL::ComponentAnalyzer comp_analyzer(m_cur_vol);
 		comp_analyzer.Analyze(true, true);
 		FL::CompList* list = comp_analyzer.GetCompList();
-		sel_labels.clear();
+		m_sel_labels.clear();
 		for (auto it = list->begin();
 			it != list->end(); ++it)
 		{
@@ -5707,7 +5706,10 @@ void VRenderGLView::RunSelectionTracking(int index, wxFileConfig &fconfig)
 			{
 				FL::pCell cell(new FL::Cell(it->second->id));
 				cell->SetSizeUi(it->second->sumi);
-				sel_labels.insert(pair<unsigned int, FL::pCell>
+				cell->SetSizeF(it->second->sumd);
+				cell->SetCenter(it->second->pos);
+				cell->SetBox(it->second->box);
+				m_sel_labels.insert(pair<unsigned int, FL::pCell>
 					(it->second->id, cell));
 			}
 		}
@@ -5721,7 +5723,7 @@ void VRenderGLView::RunSelectionTracking(int index, wxFileConfig &fconfig)
 			//create new id list
 			m_trace_group->SetCurTime(m_tseq_cur_num);
 			m_trace_group->SetPrvTime(m_tseq_prv_num);
-			m_trace_group->UpdateCellList(sel_labels);
+			m_trace_group->UpdateCellList(m_sel_labels);
 			TextureRenderer::vertex_array_manager_.set_dirty(VA_Traces);
 		}
 
@@ -5750,7 +5752,7 @@ void VRenderGLView::RunSelectionTracking(int index, wxFileConfig &fconfig)
 			}
 			else
 			{
-				if (sel_labels.find(label_value) != sel_labels.end())
+				if (m_sel_labels.find(label_value) != m_sel_labels.end())
 					mask_data[idx] = 255;
 			}
 		}
@@ -5877,6 +5879,8 @@ void VRenderGLView::RunFetchMask(int index, wxFileConfig &fconfig)
 			Nrrd* mask_nrrd_new = msk_reader.Convert(m_tseq_cur_num, (*i)->GetCurChannel(), true);
 			if (mask_nrrd_new)
 				(*i)->LoadMask(mask_nrrd_new);
+			//else
+			//	(*i)->AddEmptyMask(0, true);
 		}
 		//load and replace the label
 		if (blabel)
@@ -5887,6 +5891,8 @@ void VRenderGLView::RunFetchMask(int index, wxFileConfig &fconfig)
 			Nrrd* label_nrrd_new = lbl_reader.Convert(m_tseq_cur_num, (*i)->GetCurChannel(), true);
 			if (label_nrrd_new)
 				(*i)->LoadLabel(label_nrrd_new);
+			else
+				(*i)->AddEmptyLabel(0, true);
 		}
 	}
 }
@@ -6378,10 +6384,11 @@ void VRenderGLView::RunAddCells(int index, wxFileConfig &fconfig)
 	if (time_mode != index)
 		return;
 
-	if (!m_trace_group || !m_cur_vol)
+	if (!m_cur_vol)
 		return;
+	if (!m_trace_group)
+		CreateTraceGroup();
 
-	static FL::CellList sel_labels;
 	FL::pTrackMap track_map = m_trace_group->GetTrackMap();
 	FL::TrackMapProcessor tm_processor(track_map);
 	tm_processor.SetBits(m_cur_vol->GetBits());
@@ -6389,7 +6396,7 @@ void VRenderGLView::RunAddCells(int index, wxFileConfig &fconfig)
 	int resx, resy, resz;
 	m_cur_vol->GetResolution(resx, resy, resz);
 	tm_processor.SetSizes(resx, resy, resz);
-	tm_processor.AddCells(sel_labels, m_tseq_cur_num);
+	tm_processor.AddCells(m_sel_labels, m_tseq_cur_num);
 }
 
 void VRenderGLView::RunLinkCells(int index, wxFileConfig &fconfig)
@@ -6403,9 +6410,7 @@ void VRenderGLView::RunLinkCells(int index, wxFileConfig &fconfig)
 	if (!vr_frame || !vr_frame->GetTraceDlg())
 		return;
 
-	static FL::CellList sel_labels;
-	vr_frame->GetTraceDlg()->LinkAddedCells(sel_labels);
-	UPDATE_TRACE_DLG_AND_RETURN;
+	vr_frame->GetTraceDlg()->LinkAddedCells(m_sel_labels);
 }
 
 void VRenderGLView::RunUnlinkCells(int index, wxFileConfig &fconfig)
@@ -6418,7 +6423,6 @@ void VRenderGLView::RunUnlinkCells(int index, wxFileConfig &fconfig)
 	if (!m_trace_group || !m_cur_vol)
 		return;
 
-	static FL::CellList sel_labels;
 	FL::pTrackMap track_map = m_trace_group->GetTrackMap();
 	FL::TrackMapProcessor tm_processor(track_map);
 	tm_processor.SetBits(m_cur_vol->GetBits());
@@ -6426,7 +6430,7 @@ void VRenderGLView::RunUnlinkCells(int index, wxFileConfig &fconfig)
 	int resx, resy, resz;
 	m_cur_vol->GetResolution(resx, resy, resz);
 	tm_processor.SetSizes(resx, resy, resz);
-	tm_processor.RemoveCells(sel_labels, m_tseq_cur_num);
+	tm_processor.RemoveCells(m_sel_labels, m_tseq_cur_num);
 }
 
 //read/delete volume cache
@@ -12128,27 +12132,27 @@ void VRenderGLView::GetTraces(bool update)
 	FL::CellList sel_labels;
 	FL::CellListIter label_iter;
 	for (ii = 0; ii<nx; ii++)
-		for (jj = 0; jj<ny; jj++)
-			for (kk = 0; kk<nz; kk++)
+	for (jj = 0; jj<ny; jj++)
+	for (kk = 0; kk<nz; kk++)
+	{
+		int index = nx*ny*kk + nx*jj + ii;
+		unsigned int label_value = label_data[index];
+		if (mask_data[index] && label_value)
+		{
+			label_iter = sel_labels.find(label_value);
+			if (label_iter == sel_labels.end())
 			{
-				int index = nx*ny*kk + nx*jj + ii;
-				unsigned int label_value = label_data[index];
-				if (mask_data[index] && label_value)
-				{
-					label_iter = sel_labels.find(label_value);
-					if (label_iter == sel_labels.end())
-					{
-						FL::pCell cell(new FL::Cell(label_value));
-						cell->Inc(ii, jj, kk, 1.0f);
-						sel_labels.insert(pair<unsigned int, FL::pCell>
-							(label_value, cell));
-					}
-					else
-					{
-						label_iter->second->Inc(ii, jj, kk, 1.0f);
-					}
-				}
+				FL::pCell cell(new FL::Cell(label_value));
+				cell->Inc(ii, jj, kk, 1.0f);
+				sel_labels.insert(pair<unsigned int, FL::pCell>
+					(label_value, cell));
 			}
+			else
+			{
+				label_iter->second->Inc(ii, jj, kk, 1.0f);
+			}
+		}
+	}
 
 	//create id list
 	m_trace_group->SetCurTime(m_tseq_cur_num);
