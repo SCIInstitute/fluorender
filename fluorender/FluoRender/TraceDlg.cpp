@@ -3394,15 +3394,23 @@ void TraceDlg::RefineMap(int t)
 	//consistent colors
 	if (m_consistent_color)
 	{
-		(*m_stat_text) << wxString::Format("Set colors for frame 0\n");
-		wxGetApp().Yield();
-		tm_processor.MakeConsistent(0);
-		//remaining frames
-		for (size_t fi = 1; fi < track_map->GetFrameNum(); ++fi)
+		if (t < 0)
 		{
-			(*m_stat_text) << wxString::Format("Set colors for frame %d\n", int(fi));
+			(*m_stat_text) << wxString::Format("Set colors for frame 0\n");
 			wxGetApp().Yield();
-			tm_processor.MakeConsistent(fi - 1, fi);
+			tm_processor.MakeConsistent(0);
+			//remaining frames
+			for (size_t fi = 1; fi < track_map->GetFrameNum(); ++fi)
+			{
+				(*m_stat_text) << wxString::Format("Set colors for frame %d\n", int(fi));
+				wxGetApp().Yield();
+				tm_processor.MakeConsistent(fi - 1, fi);
+			}
+		}
+		else
+		{
+			//tm_processor.MakeConsistent(t - 1, t);
+			//tm_processor.MakeConsistent(t, t + 1);
 		}
 	}
 
