@@ -463,9 +463,7 @@ bool TrackMapProcessor::LinkFrames(
 	size_t nz = m_map->m_size_z;
 	float data_value1, data_value2;
 	unsigned int label_value1, label_value2;
-	VertexList &vertex_list1 = m_map->m_vertices_list.at(f1);
-	VertexList &vertex_list2 = m_map->m_vertices_list.at(f2);
-	VertexListIter iter1, iter2;
+	pVertex v1, v2;
 
 	for (i = 0; i < nx; ++i)
 	for (j = 0; j < ny; ++j)
@@ -489,20 +487,17 @@ bool TrackMapProcessor::LinkFrames(
 			data_value2 = ((unsigned short*)data2)[index] * m_map->m_scale / 65535.0f;
 		}
 
-		iter1 = vertex_list1.find(label_value1);
-		iter2 = vertex_list2.find(label_value2);
-
-		if (iter1 == vertex_list1.end() ||
-			iter2 == vertex_list2.end())
+		v1 = GetVertex(GetCell(f1, label_value1));
+		v2 = GetVertex(GetCell(f2, label_value2));
+		if (!v1 || !v2)
 			continue;
 
-		if (iter1->second->GetSizeF() < m_size_thresh ||
-			iter2->second->GetSizeF() < m_size_thresh)
+		if (v1->GetSizeUi() < m_size_thresh ||
+			v2->GetSizeUi() < m_size_thresh)
 			continue;
 
 		LinkVertices(inter_graph,
-			iter1->second, iter2->second,
-			f1, f2,
+			v1, v2, f1, f2,
 			std::min(data_value1, data_value2));
 	}
 
@@ -958,7 +953,8 @@ bool TrackMapProcessor::MakeConsistent(size_t f1, size_t f2)
 			continue;
 		//find in id map
 		auto it = id_map.find(lv);
-		if (it != id_map.end())
+		if (it != id_map.end() &&
+			lv != it->second)
 		{
 			//already processed
 			label[index] = it->second;
@@ -966,13 +962,21 @@ bool TrackMapProcessor::MakeConsistent(size_t f1, size_t f2)
 		else
 		{
 			unsigned int id0 = GetTrackedID(f2, f1, lv);//track back
-			if (id0 != lv)
+			if (id0 == lv)
+			{
+				id_map.insert(std::pair<unsigned int,
+					unsigned int>(lv, id0));
+			}
+			else
 			{
 				unsigned int newid = GetNewCellID(f2, id0);
 				if (!newid)
 					continue;
-				ReplaceCellID(lv, newid, f2);
-				label[index] = newid;
+				if (newid != lv)
+				{
+					ReplaceCellID(lv, newid, f2);
+					label[index] = newid;
+				}
 				id_map.insert(std::pair<unsigned int,
 					unsigned int>(lv, newid));
 			}
@@ -3477,9 +3481,7 @@ bool TrackMapProcessor::LinkAddedCells(CellList &list, size_t f1, size_t f2)
 
 	InterGraph &inter_graph = m_map->m_inter_graph_list.at(
 		f1 > f2 ? f2 : f1);
-	VertexList &vertex_list1 = m_map->m_vertices_list.at(f1);
-	VertexList &vertex_list2 = m_map->m_vertices_list.at(f2);
-	VertexListIter iter1, iter2;
+	pVertex v1, v2;
 
 	size_t index;
 	size_t i, j, k;
@@ -3526,20 +3528,17 @@ bool TrackMapProcessor::LinkAddedCells(CellList &list, size_t f1, size_t f2)
 				data_value2 = ((unsigned short*)data2)[index] * m_map->m_scale / 65535.0f;
 			}
 
-			iter1 = vertex_list1.find(label_value1);
-			iter2 = vertex_list2.find(label_value2);
-
-			if (iter1 == vertex_list1.end() ||
-				iter2 == vertex_list2.end())
+			v1 = GetVertex(GetCell(f1, label_value1));
+			v2 = GetVertex(GetCell(f2, label_value2));
+			if (!v1 || !v2)
 				continue;
 
-			if (iter1->second->GetSizeUi() < m_size_thresh ||
-				iter2->second->GetSizeUi() < m_size_thresh)
+			if (v1->GetSizeUi() < m_size_thresh ||
+				v2->GetSizeUi() < m_size_thresh)
 				continue;
 
 			LinkVertices(inter_graph,
-				iter1->second, iter2->second,
-				f1, f2,
+				v1, v2, f1, f2,
 				std::min(data_value1, data_value2));
 		}
 	}

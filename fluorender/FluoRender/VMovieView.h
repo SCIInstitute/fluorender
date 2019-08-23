@@ -210,6 +210,7 @@ private:
 
 private:
 	void GetSettings(int view=0);
+	int GetScriptFiles(wxArrayString& list);
 	void AddScriptToList();
 
 	//set the renderview and progress bars/text
