@@ -1028,9 +1028,7 @@ void TraceDlg::OnLoadTrace(wxCommandEvent& event)
 	if (rval == wxID_OK)
 	{
 		wxString filename = fopendlg->GetPath();
-		rval = m_view->LoadTraceGroup(filename);
-		if (rval)
-			m_load_trace_text->SetValue(filename);
+		LoadTrackFile(filename);
 	}
 
 	if (fopendlg)
@@ -1066,9 +1064,7 @@ void TraceDlg::OnSaveasTrace(wxCommandEvent& event)
 	if (rval == wxID_OK)
 	{
 		wxString filename = fopendlg->GetPath();
-		rval = m_view->SaveTraceGroup(filename);
-		if (rval)
-			m_load_trace_text->SetValue(filename);
+		SaveTrackFile(filename);
 	}
 
 	if (fopendlg)
@@ -3399,4 +3395,51 @@ void TraceDlg::RefineMap(int t)
 	(*m_stat_text) << wxString::Format("Wall clock time: %.4fs\n", time_span.count());
 
 	CellUpdate();
+}
+
+int TraceDlg::GetTrackFileExist(bool save)
+{
+	if (!m_view) return 0;
+	TraceGroup* trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+		return 0;
+	wxString filename = trace_group->GetPath();
+	if (wxFileExists(filename))
+	{
+		if (save)
+		{
+			m_view->SaveTraceGroup(filename);
+			m_track_file = filename;
+		}
+		return 2;
+	}
+	else
+		return 1;
+}
+
+wxString TraceDlg::GetTrackFile()
+{
+	return m_track_file;
+}
+
+void TraceDlg::LoadTrackFile(wxString &file)
+{
+	if (!m_view) return;
+	int rval = m_view->LoadTraceGroup(file);
+	if (rval)
+	{
+		m_load_trace_text->SetValue(file);
+		m_track_file = file;
+	}
+}
+
+void TraceDlg::SaveTrackFile(wxString &file)
+{
+	if (!m_view) return;
+	int rval = m_view->SaveTraceGroup(file);
+	if (rval)
+	{
+		m_load_trace_text->SetValue(file);
+		m_track_file = file;
+	}
 }

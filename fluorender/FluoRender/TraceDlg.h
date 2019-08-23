@@ -203,6 +203,12 @@ public:
 	void GenMap();
 	void RefineMap(int t=-1);
 
+	//track map file
+	int GetTrackFileExist(bool save);//0:no trace group; 1:trace groups exists not saved; 2:saved
+	wxString GetTrackFile();
+	void LoadTrackFile(wxString &file);
+	void SaveTrackFile(wxString &file);
+
 private:
 	typedef struct
 	{
@@ -233,6 +239,8 @@ private:
 	bool m_try_split;
 	double m_similarity;
 	double m_contact_factor;
+
+	wxString m_track_file;
 
 	//map page
 	//load/save trace

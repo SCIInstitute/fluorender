@@ -3241,6 +3241,19 @@ void VRenderFrame::SaveProject(wxString& filename)
 	fconfig.Write("time_end_text", m_movie_view->m_time_end_text->GetValue());
 	fconfig.Write("run_script", m_setting_dlg->GetRunScript());
 	fconfig.Write("script_file", m_setting_dlg->GetScriptFile());
+	//tracking diag
+	fconfig.SetPath("/track_diag");
+	int ival = m_trace_dlg->GetTrackFileExist(true);
+	if (ival == 1)
+	{
+		wxString new_folder;
+		new_folder = filename + "_files";
+		wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+		std::wstring wstr = filename.ToStdWstring();
+		str = new_folder + GETSLASH() + GET_NAME(wstr) + ".track";
+		m_trace_dlg->SaveTrackFile(str);
+	}
+	fconfig.Write("track_file", m_trace_dlg->GetTrackFile());
 /*	//brushtool diag
 	fconfig.SetPath("/brush_diag");
 	fconfig.Write("ca_min", m_brush_tool_dlg->GetDftCAMin());
@@ -4567,7 +4580,18 @@ void VRenderFrame::OpenProject(wxString& filename)
 		m_movie_view->GetScriptSettings();
 	}
 
-/*	//brushtool diag
+	//tracking diag
+	if (fconfig.Exists("/track_diag"))
+	{
+		fconfig.SetPath("/track_diag");
+		wxString sVal;
+		if (fconfig.Read("track_file", &sVal))
+		{
+			m_trace_dlg->GetSettings(m_vrv_list[0]);
+			m_trace_dlg->LoadTrackFile(sVal);
+		}
+	}
+	/*	//brushtool diag
 	if (fconfig.Exists("/brush_diag"))
 	{
 		fconfig.SetPath("/brush_diag");
