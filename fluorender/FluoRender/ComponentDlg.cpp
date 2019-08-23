@@ -3158,6 +3158,7 @@ void ComponentDlg::SetOutput(wxString &titles, wxString &values)
 	wxString cur_field;
 	wxString cur_line;
 	int i, k;
+	int id_idx = -1;
 
 	k = 0;
 	cur_line = titles;
@@ -3168,8 +3169,17 @@ void ComponentDlg::SetOutput(wxString &titles, wxString &values)
 		if (m_output_grid->GetNumberCols() <= k)
 			m_output_grid->InsertCols(k);
 		m_output_grid->SetColLabelValue(k, cur_field);
+		if (cur_field == "ID")
+			id_idx = k;
 		++k;
 	} while (cur_line.IsEmpty() == false);
+
+	Color c;
+	VolumeData* vd = 0;
+	if (m_view && m_view->m_glview->m_cur_vol)
+		vd = m_view->m_glview->m_cur_vol;
+	long lval;
+	wxColor color;
 
 	i = 0;
 	copy_data = values;
@@ -3186,6 +3196,15 @@ void ComponentDlg::SetOutput(wxString &titles, wxString &values)
 			cur_field = cur_line.BeforeFirst('\t');
 			cur_line = cur_line.AfterFirst('\t');
 			m_output_grid->SetCellValue(i, k, cur_field);
+			if (k == id_idx && vd)
+			{
+				if (cur_field.ToLong(&lval))
+				{
+					c = Color(lval, vd->GetShuffle());
+					color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
+					m_output_grid->SetCellBackgroundColour(i, k, color);
+				}
+			}
 			++k;
 		} while (cur_line.IsEmpty() == false);
 		++i;
