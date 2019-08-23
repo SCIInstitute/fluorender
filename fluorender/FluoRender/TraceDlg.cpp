@@ -2784,25 +2784,6 @@ void TraceDlg::LinkAddedCells(FL::CellList &list)
 	tm_processor.LinkAddedCells(list, m_cur_time, m_cur_time + 1);
 	RefineMap(m_cur_time);
 }
-//magic
-/*void TraceDlg::OnCellMagic0Btn(wxCommandEvent &event)
-{
-}
-
-void TraceDlg::OnCellMagic1Btn(wxCommandEvent &event)
-{
-	Test2(1);
-}
-
-void TraceDlg::OnCellMagic2Btn(wxCommandEvent &event)
-{
-	Test2(2);
-}
-
-void TraceDlg::OnCellMagic3Btn(wxCommandEvent &event)
-{
-	Test1();
-}*/
 
 void TraceDlg::SaveOutputResult(wxString &filename)
 {
@@ -3409,8 +3390,7 @@ void TraceDlg::RefineMap(int t)
 		}
 		else
 		{
-			//tm_processor.MakeConsistent(t - 1, t);
-			//tm_processor.MakeConsistent(t, t + 1);
+			tm_processor.MakeConsistent(t - 1, t);
 		}
 	}
 

@@ -532,8 +532,8 @@ void VMovieView::GetSettings(int view)
 	else
 		m_frame_chk->SetValue(false);
 
-	GetScriptSettings();
 	AddScriptToList();
+	GetScriptSettings();
 
 	if (m_advanced_movie)
 		m_advanced_movie->GetSettings(vrv);
@@ -548,8 +548,32 @@ void VMovieView::GetScriptSettings()
 		bool run_script = vr_frame->GetSettingDlg()->GetRunScript();
 		m_run_script_chk->SetValue(
 			run_script);
-		m_script_file_text->SetValue(
-			vr_frame->GetSettingDlg()->GetScriptFile());
+		wxString script_file =
+			vr_frame->GetSettingDlg()->GetScriptFile();
+		m_script_file_text->SetValue(script_file);
+		//highlight if builtin
+		wxArrayString list;
+		if (GetScriptFiles(list))
+		{
+			int idx = -1;
+			for (size_t i = 0; i < list.GetCount(); ++i)
+			{
+				if (script_file == list[i])
+				{
+					idx = i;
+					break;
+				}
+			}
+			if (idx >= 0)
+			{
+				m_script_list->SetItemState(idx,
+					wxLIST_STATE_SELECTED,
+					wxLIST_STATE_SELECTED);
+				//wxSize ss = m_script_list->GetItemSpacing();
+				//m_script_list->ScrollList(0, ss.y*idx);
+			}
+		}
+		//change icon
 		if (run_script)
 		{
 			if (m_running)
@@ -575,21 +599,36 @@ void VMovieView::SetCurrentPage(int page)
 		m_notebook->SetSelection(page);
 }
 
-void VMovieView::AddScriptToList()
+int VMovieView::GetScriptFiles(wxArrayString& list)
 {
 	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
 	exePath = wxPathOnly(exePath);
-	m_script_list->DeleteAllItems();
 	wxString loc = exePath + GETSLASH() + "Scripts" +
 		GETSLASH() + "*.txt";
 	wxLogNull logNo;
 	wxString file = wxFindFirstFile(loc);
 	while (!file.empty())
 	{
-		file = wxFileNameFromPath(file);
-		file = file.BeforeLast('.');
-		m_script_list->InsertItem(m_script_list->GetItemCount(), file);
+		list.Add(file);
 		file = wxFindNextFile();
+	}
+	return list.GetCount();
+}
+
+void VMovieView::AddScriptToList()
+{
+	m_script_list->DeleteAllItems();
+	wxArrayString list;
+	wxString filename;
+	if (GetScriptFiles(list))
+	{
+		for (size_t i = 0; i < list.GetCount(); ++i)
+		{
+			filename = wxFileNameFromPath(list[i]);
+			filename = filename.BeforeLast('.');
+			m_script_list->InsertItem(
+				m_script_list->GetItemCount(), filename);
+		}
 	}
 }
 

@@ -6410,6 +6410,7 @@ void VRenderGLView::RunLinkCells(int index, wxFileConfig &fconfig)
 	if (!vr_frame || !vr_frame->GetTraceDlg())
 		return;
 
+	vr_frame->GetTraceDlg()->GetSettings(m_vrv);
 	vr_frame->GetTraceDlg()->LinkAddedCells(m_sel_labels);
 }
 
