@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #define LAYER_HPP
 
 
-#include <Groups/Group.hpp>
+#include <Group.hpp>
 
 namespace fluo
 {

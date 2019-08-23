@@ -27,11 +27,11 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "TextRenderer.h"
-#include <FLIVR/ShaderProgram.h>
-#include <FLIVR/ImgShader.h>
-#include <FLIVR/VertexArray.h>
-#include <FLIVR/TextureRenderer.h>
-#include <FLIVR/Color.h>
+#include "ShaderProgram.h"
+#include "ImgShader.h"
+#include "VertexArray.h"
+#include "TextureRenderer.h"
+#include "Color.h"
 
 namespace FLIVR
 {

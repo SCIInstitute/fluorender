@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <VolumeGroup.hpp>
-#include <Data/VolumeData/VolumeData.hpp>
+#include "VolumeGroup.hpp"
+#include <VolumeData/VolumeData.hpp>
 
 using namespace fluo;
 

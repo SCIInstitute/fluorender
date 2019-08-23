@@ -26,17 +26,17 @@
 //  DEALINGS IN THE SOFTWARE.
 //
 
-#include <FLIVR/VolumeRenderer.h>
-#include <FLIVR/VolShader.h>
-#include <FLIVR/SegShader.h>
-#include <FLIVR/VolCalShader.h>
-#include <FLIVR/ShaderProgram.h>
-#include <FLIVR/TextureBrick.h>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
-#include <FLIVR/Framebuffer.h>
-#include <FLIVR/VertexArray.h>
-#include "utility.h"
+#include "VolumeRenderer.h"
+#include "VolShader.h"
+#include "SegShader.h"
+#include "VolCalShader.h"
+#include "ShaderProgram.h"
+#include "TextureBrick.h"
+#include "KernelProgram.h"
+#include "VolKernel.h"
+#include "Framebuffer.h"
+#include "VertexArray.h"
+#include <Utilities/utility.h>
 #include <Utilities/compatibility.h>
 #include <fstream>
 #include <iostream>

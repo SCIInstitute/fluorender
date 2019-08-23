@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef DRAWVOLUMEVISITOR_HPP
 #define DRAWVOLUMEVISITOR_HPP
 
-#include <NodeVisitor/NodeVisitor.hpp>
+#include <NodeVisitor.hpp>
 
 namespace fluo
 {

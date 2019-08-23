@@ -26,7 +26,7 @@
    DEALINGS IN THE SOFTWARE.
  */
 
-#include <FLIVR/Ray.h>
+#include "Ray.h"
 
 namespace FLIVR
 {

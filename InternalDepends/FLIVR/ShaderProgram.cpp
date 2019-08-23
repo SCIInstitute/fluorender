@@ -28,7 +28,7 @@
 
 #include "GL/glew.h"
 #include "ShaderProgram.h"
-#include <FLIVR/Utils.h>
+#include "Utils.h"
 #include <Utilities/compatibility.h>
 #include <ctime>
 #include <cstdio>

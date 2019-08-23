@@ -29,9 +29,9 @@
 #include <string>
 #include <sstream>
 #include <iostream>
-#include <FLIVR/VolShader.h>
-#include <FLIVR/ShaderProgram.h>
-#include <FLIVR/VolShaderCode.h>
+#include "VolShader.h"
+#include "ShaderProgram.h"
+#include "VolShaderCode.h"
 
 using std::string;
 using std::vector;

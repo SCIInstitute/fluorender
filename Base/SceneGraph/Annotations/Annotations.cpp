@@ -26,9 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <SceneGraph/Annotations/Annotations.hpp>
-#include <SceneGraph/Data/VolumeData/VolumeData.hpp>
-
+#include "Annotations.hpp"
+#include <VolumeData/VolumeData.hpp>
 using namespace fluo;
 
 Annotations::Annotations()

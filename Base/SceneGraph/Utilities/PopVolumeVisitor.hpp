@@ -29,10 +29,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef POPVOLUMEVISITOR_HPP
 #define POPVOLUMEVISITOR_HPP
 
-#include <NodeVisitor/NodeVisitor.hpp>
-#include <Groups/Group.hpp>
-#include <Data/VolumeData/VolumeData.hpp>
-#include <Groups/Volume/VolumeGroup.hpp>
+#include <NodeVisitor.hpp>
+#include <Group.hpp>
+#include <VolumeData/VolumeData.hpp>
+#include <Volume/VolumeGroup.hpp>
 
 namespace fluo
 {

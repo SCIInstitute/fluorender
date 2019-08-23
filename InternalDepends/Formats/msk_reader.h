@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MSK_READER_H_
 #define _MSK_READER_H_
 
-#include <base_reader.h>
+#include "base_reader.h"
 
 using namespace std;
 

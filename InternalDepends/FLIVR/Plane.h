@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef SLIVR_Plane_h
 #define SLIVR_Plane_h
 
-#include <Vector.h>
+#include "Vector.h"
 #include <Plane.hpp>
 
 namespace FLIVR

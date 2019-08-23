@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef ANNOTATIONS_HPP
 #define ANNOTATIONS_HPP
 
-#include <SceneGraph/Node/Node.hpp>
+#include <Node.hpp>
 #include <string>
 #include <vector>
 

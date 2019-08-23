@@ -29,8 +29,8 @@
 #ifndef SLIVR_Ray_h
 #define SLIVR_Ray_h
 
-#include <Point.h>
-#include <Vector.h>
+#include "Point.h"
+#include "Vector.h"
 
 namespace FLIVR
 {

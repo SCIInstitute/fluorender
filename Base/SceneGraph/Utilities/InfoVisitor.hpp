@@ -29,8 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef INFOVISITOR_HPP
 #define INFOVISITOR_HPP
 
-#include <NodeVisitor/NodeVisitor.hpp>
-#include <Groups/Group.hpp>
+#include <NodeVisitor.hpp>
+#include <Group.hpp>
 
 #include <iostream>
 #include <string>

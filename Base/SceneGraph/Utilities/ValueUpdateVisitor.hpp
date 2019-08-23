@@ -29,8 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef VALUEUPDATEVISITOR_HPP
 #define VALUEUPDATEVISITOR_HPP
 
-#include <NodeVisitor/NodeVisitor.hpp>
-#include <Groups/Group.hpp>
+#include <NodeVisitor.hpp>
+#include <Group.hpp>
 
 namespace fluo
 {

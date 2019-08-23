@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef ROOT_HPP
 #define ROOT_HPP
 
-#include <Groups/Group.hpp>
+#include <Group.hpp>
 
 namespace fluo
 {

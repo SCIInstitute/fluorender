@@ -1,12 +1,9 @@
 project(FLIVR)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
 include_directories(${OpenCL_INCLUDE_DIRS})
 include_directories(${FLObject_INCLUDES})
 include_directories(${freetype_INCLUDE_DIR})
-
-message(STATUS ${FLObject_INCLUDES})
+include_directories(${CMAKE_SOURCE_DIR}/Base/FLObject)
 
 set(HEADER_FILES BBox.h
         Color.h
@@ -63,6 +60,11 @@ set(SOURCES BBox.cpp
 			VolShader.cpp
 			VolumeRenderer.cpp)
 
+
+set(FLIVR_INCLUDE_DIR ${HEADER_FILES} CACHE INTERNAL "")
+set(FLIVR_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE INTERNAL "")
+
+link_directories(${FLObject_LIBRARY_DIR})
 add_library(FLIVR STATIC ${HEADER_FILES} ${SOURCES}) 
 target_link_libraries(FLIVR FLObject ${OpenCL_LIBRARIES})
 add_dependencies(FLIVR FLObject freetype_external_download)

@@ -2,9 +2,9 @@
 #define _BRKXML_READER_H_
 
 #include <vector>
-#include <base_reader.h>
+#include "base_reader.h"
 #include <FLIVR/TextureBrick.h>
-#include <tinyxml2.h>
+#include "tinyxml2.h"
 
 using namespace std;
 

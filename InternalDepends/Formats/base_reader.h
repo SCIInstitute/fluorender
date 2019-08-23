@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _BASE_READER_H_
 
 #include <string>
-#include <nrrd.h>
+#include <teem/nrrd.h>
 #include <vector>
 #include <sstream>
 

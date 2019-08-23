@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <FLIVR/Vector.h>
-#include <FLIVR/Point.h>
+#include "Vector.h"
+#include "Point.h"
 #include <assert.h>
 #include <iostream>
 

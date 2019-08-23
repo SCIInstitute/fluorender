@@ -29,8 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <CopyOp.hpp>
 #include <Referenced.hpp>
 #include <CopyOp.hpp>
-#include <SceneGraph/Node/Node.hpp>
-
+#include <Node.hpp>
 
 using namespace fluo;
 

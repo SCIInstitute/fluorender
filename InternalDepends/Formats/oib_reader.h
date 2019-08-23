@@ -29,10 +29,11 @@ DEALINGS IN THE SOFTWARE.
 #define _OIB_READER_H_
 
 #include <stdio.h>
-#include "../compatibility.h"
+#include <Utilities/compatibility.h>
 #include <vector>
-#include "pole/pole.h"
+#include <pole.h>
 #include "base_reader.h"
+
 
 using namespace std;
 

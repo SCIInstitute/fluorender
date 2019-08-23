@@ -26,10 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <DrawVolumeVisitor.hpp>
-#include <Groups/Group.hpp>
-#include <Data/VolumeData/VolumeData.hpp>
-#include <Groups/Volume/VolumeGroup.hpp>
+#include "DrawVolumeVisitor.hpp"
+#include <Group.hpp>
+#include <VolumeData/VolumeData.hpp>
+#include <Volume/VolumeGroup.hpp>
 #include <cctype>
 
 using namespace fluo;

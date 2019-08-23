@@ -29,8 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef NODE_HPP
 #define NODE_HPP
 
-#include <FLObject/Object/CopyOp.hpp>
-#include <FLObject/Object/Object.hpp>
+#include <CopyOp.hpp>
+#include <Object.hpp>
 
 
 #include <vector>
@@ -84,7 +84,7 @@ namespace fluo
 		virtual const MeshData* asMeshData() const { return 0; }
 		virtual VolumeGroup* asVolumeGroup() { return 0; }
 		virtual const VolumeGroup* asVolumeGroup() const { return 0; }
-		virtual MeshGroup* asMeshGroup() { return 0; }
+        virtual MeshGroup* asMeshGroup() { return 0; }
 		virtual const MeshGroup* asMeshGroup() const { return 0; }
 		virtual Annotations* asAnnotations() { return 0; }
 		virtual const Annotations* asAnnotations() const { return 0; }

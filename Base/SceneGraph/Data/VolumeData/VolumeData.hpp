@@ -29,10 +29,11 @@ DEALINGS IN THE SOFTWARE.
 #ifndef VOLUMEDATA_HPP
 #define VOLUMEDATA_HPP
 
-#include <SceneGraph/Node/Node.hpp>
-#include <teem/nrrd/nrrd.h>
-#include <GLM/glm.hpp>
+#include <Node.hpp>
+#include <teem/nrrd.h>
+#include <glm/glm.hpp>
 #include <vector>
+
 
 namespace FLIVR
 {

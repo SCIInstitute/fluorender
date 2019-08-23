@@ -26,10 +26,10 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#include <FLIVR/ShaderProgram.h>
-#include <FLIVR/Texture.h>
-#include <FLIVR/TextureRenderer.h>
-#include <FLIVR/Utils.h>
+#include "ShaderProgram.h"
+#include "Texture.h"
+#include "TextureRenderer.h"
+#include "Utils.h"
 #include <algorithm>
 #include <inttypes.h>
 #include <glm/gtc/type_ptr.hpp>

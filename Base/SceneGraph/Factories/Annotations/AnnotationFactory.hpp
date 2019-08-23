@@ -28,8 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef ANNOTATIONFACTORY_HPP
 #define ANNOTATIONFACTORY_HPP
 
-#include <../FLObject/Object/ObjectFactory.hpp>
-#include <Annotations/Annotations.hpp>
+#include <ObjectFactory.hpp>
+#include <Annotations.hpp>
 
 namespace fluo
 {

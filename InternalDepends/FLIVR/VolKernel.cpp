@@ -1,8 +1,8 @@
 #include <string>
 #include <sstream>
 #include <iostream>
-#include <FLIVR/VolKernel.h>
-#include <FLIVR/KernelProgram.h>
+#include "VolKernel.h"
+#include "KernelProgram.h"
 
 using std::string;
 using std::vector;

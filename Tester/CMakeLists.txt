@@ -4,8 +4,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 #find_package(FLObject)
 
-#include_directories(${CMAKE_SOURCE_DIR}/Base/FLObject)
-include_directories(${FLObject_INCLUDES})
+include_directories(${CMAKE_SOURCE_DIR}/Base/FLObject)
+#include_directories(${FLObject_INCLUDES})
+
+link_directories(${FLObject_LIBRARY_DIR})
 
 add_executable(Test main.cpp objecttest.cpp asserts.hpp tests.hpp)
 add_dependencies(Test FLObject)

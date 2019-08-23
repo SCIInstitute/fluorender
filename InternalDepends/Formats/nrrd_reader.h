@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _NRRD_READER_H_
 #define _NRRD_READER_H_
 
-#include <base_reader.h>
+#include "base_reader.h"
 #include <stdio.h>
 //#include <windows.h>
 #include <vector>

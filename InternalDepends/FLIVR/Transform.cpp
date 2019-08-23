@@ -26,9 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <FLIVR/Transform.h>
-#include <FLIVR/Point.h>
-#include <FLIVR/Plane.h>
+#include "Transform.h"
+#include "Point.h"
+#include "Plane.h"
 #include <cstring>
 #include <iostream>
 

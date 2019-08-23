@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _LSM_READER_H_
 #define _LSM_READER_H_
 
-#include <base_reader.h>
+#include "base_reader.h"
 #include <vector>
 
 using namespace std;

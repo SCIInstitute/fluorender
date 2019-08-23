@@ -29,14 +29,14 @@ DEALINGS IN THE SOFTWARE.
 #ifndef SEARCHVISITOR_HPP
 #define SEARCHVISITOR_HPP
 
-#include <NodeVisitor/NodeVisitor.hpp>
-#include <Groups/Group.hpp>
-#include <Data/VolumeData/VolumeData.hpp>
-#include <Groups/Volume/VolumeGroup.hpp>
-#include <Data/MeshData/MeshData.hpp>
-#include <Groups/Mesh/MeshGroup.hpp>
-#include <Annotations/Annotations.hpp>
-#include <RenderView/RenderView.hpp>
+#include <NodeVisitor.hpp>
+#include <Group.hpp>
+#include <VolumeData/VolumeData.hpp>
+#include <Volume/VolumeGroup.hpp>
+#include <MeshData/MeshData.hpp>
+#include <Mesh/MeshGroup.hpp>
+#include <Annotations.hpp>
+#include <RenderView.hpp>
 
 #include <iostream>
 #include <string>

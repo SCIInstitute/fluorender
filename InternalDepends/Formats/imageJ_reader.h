@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _IMAGEJ_READER_H_
 #define _IMAGEJ_READER_H_
 
-#include <base_reader.h>
+#include "base_reader.h"
 #include <cstdio>
 #include <vector>
 #include <fstream>

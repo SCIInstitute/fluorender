@@ -27,7 +27,7 @@
 //  
 
 #include "VertexArray.h"
-#include "utility.h"
+#include <Utilities/utility.h>
 
 namespace FLIVR
 {

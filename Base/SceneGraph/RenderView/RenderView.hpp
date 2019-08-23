@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef RENDERVIEW_HPP
 #define RENDERVIEW_HPP
 
-#include <Groups/Group.hpp>
+#include <Group.hpp>
 
 namespace fluo
 {

@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Node.hpp>
-#include <NodeVisitor/NodeVisitor.hpp>
+#include "Node.hpp"
+#include <NodeVisitor.hpp>
 
 #include <algorithm>
 

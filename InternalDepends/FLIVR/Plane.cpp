@@ -26,10 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <FLIVR/Plane.h>
-#include <FLIVR/Point.h>
-#include <FLIVR/Vector.h>
-#include <FLIVR/Quaternion.h>
+#include "Plane.h"
+#include "Point.h"
+#include "Vector.h"
+#include "Quaternion.h"
 #include <iostream>
 
 namespace FLIVR

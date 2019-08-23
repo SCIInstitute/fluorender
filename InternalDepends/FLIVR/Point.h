@@ -29,7 +29,7 @@
 #ifndef SLIVR_Point_h
 #define SLIVR_Point_h
 
-#include <Utils.h>
+#include "Utils.h"
 #include <Point.hpp>
 
 #include <string>
@@ -140,7 +140,7 @@ std::istream& operator>>(std::istream& os, Point& p);
 } // End namespace FLIVR
 
 // This cannot be above due to circular dependencies
-#include <Vector.h>
+#include "Vector.h"
 
 namespace FLIVR {
 

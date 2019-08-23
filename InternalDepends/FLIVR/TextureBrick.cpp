@@ -28,9 +28,9 @@
 
 #include <Utilities/compatibility.h>
 #include <math.h>
-#include <FLIVR/TextureBrick.h>
-#include <FLIVR/TextureRenderer.h>
-#include <FLIVR/Utils.h>
+#include "TextureBrick.h"
+#include "TextureRenderer.h"
+#include "FLIVR/Utils.h"
 #include <utility>
 #include <iostream>
 #include <fstream>

@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <FLIVR/Color.h>
-#include <FLIVR/Utils.h>
+#include "Color.h"
+#include "Utils.h"
 
 namespace FLIVR
 {

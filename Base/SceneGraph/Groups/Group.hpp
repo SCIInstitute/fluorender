@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef GROUP_HPP
 #define GROUP_HPP
 
-#include <Node/Node.hpp>
+#include <Node.hpp>
 
 namespace fluo
 {

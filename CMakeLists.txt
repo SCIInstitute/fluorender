@@ -24,6 +24,8 @@ if(WIN32)
   include(getCompiler.cmake)
 endif()
 
+include(setPreSuffix.cmake)
+
 # Required packages
 find_package(OpenGL REQUIRED)
 find_package(OpenCL REQUIRED)

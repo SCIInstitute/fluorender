@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MSK_WRITER_H_
 #define _MSK_WRITER_H_
 
-#include <base_writer.h>
+#include "base_writer.h"
 
 class MSKWriter : public BaseWriter
 {

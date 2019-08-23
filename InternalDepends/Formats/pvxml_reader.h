@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _PVXML_READER_H_
 
 #include <vector>
-#include <base_reader.h>
+#include "base_reader.h"
 
 using namespace std;
 class wxXmlNode;

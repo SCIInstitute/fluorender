@@ -28,8 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VOLUMEFACTORY_H_
 #define _VOLUMEFACTORY_H_
 
-#include <../FLObject/Object/ObjectFactory.hpp>
-#include <Data/VolumeData/VolumeData.hpp>
+#include <ObjectFactory.hpp>
+#include <VolumeData/VolumeData.hpp>
 
 namespace fluo
 {

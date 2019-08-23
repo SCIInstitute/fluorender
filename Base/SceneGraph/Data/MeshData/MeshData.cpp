@@ -26,11 +26,11 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <SceneGraph/Data/MeshData/MeshData.hpp>
+#include "MeshData.hpp"
 
 #include <FLIVR/MeshRenderer.h>
 #include <FLIVR/glm.h>
-#include <GLM/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 using namespace fluo;
 

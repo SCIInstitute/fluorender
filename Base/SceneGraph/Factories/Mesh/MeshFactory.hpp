@@ -28,8 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef MESHFACTORY_HPP
 #define MESHFACTORY_HPP
 
-#include <../FLObject/Object/ObjectFactory.hpp>
-#include <Data/MeshData/MeshData.hpp>
+#include <ObjectFactory.hpp>
+#include <MeshData/MeshData.hpp>
 
 namespace fluo
 {

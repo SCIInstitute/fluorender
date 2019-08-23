@@ -2,7 +2,7 @@ project(FLObject)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-
+include_directories(${SceneGraph_INCLUDES})
 
 set(HEADER_FILES Event/Event.hpp
                  EventHandler/EventHandler.hpp
@@ -41,6 +41,7 @@ set(SOURCES Event/Event.cpp
             Types/Vector.cpp)
 
 set(FLObject_INCLUDES ${HEADER_FILES} CACHE INTERNAL "")
+set(FLObject_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE INTERNAL "")
 
 add_library(FLObject STATIC ${HEADER_FILES} ${SOURCES}) 
 
@@ -54,6 +55,8 @@ target_include_directories(FLObject PUBLIC Event
                                            Types)
 
 add_dependencies(FLObject Boost_external_download)
+
+target_link_libraries(FLObject SceneGraph)
 
 install(TARGETS FLObject
         LIBRARY DESTINATION lib

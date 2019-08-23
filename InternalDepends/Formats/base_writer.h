@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _BASE_WRITER_H_
 
 #include <string>
-#include <nrrd.h>
+#include <teem/nrrd.h>
 
 using namespace std;
 

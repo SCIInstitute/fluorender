@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef NODEVISITOR_HPP
 #define NODEVISITOR_HPP
 
-#include <Node/Node.hpp>
+#include <Node.hpp>
 
 #include <algorithm>
 

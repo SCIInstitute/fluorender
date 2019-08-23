@@ -29,8 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef MESHDATA_HPP
 #define MESHDATA_HPP
 
-#include <SceneGraph/Node/Node.hpp>
-#include <GLM/glm.hpp>
+#include <Node.hpp>
+#include <glm/glm.hpp>
 
 struct _GLMmodel;
 typedef _GLMmodel GLMmodel;

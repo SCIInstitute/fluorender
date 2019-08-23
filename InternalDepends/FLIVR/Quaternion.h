@@ -29,7 +29,7 @@
 #ifndef _QUATERNION_H_
 #define _QUATERNION_H_
 
-#include <Vector.h>
+#include "Vector.h"
 #include <Utilities/utility.h>
 #include <math.h>
 

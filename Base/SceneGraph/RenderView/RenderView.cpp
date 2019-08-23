@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <RenderView.hpp>
-#include <Root/Root.hpp>
+#include "RenderView.hpp"
+#include <Root.hpp>
 
 using namespace fluo;
 

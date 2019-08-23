@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <MeshFactory.hpp>
-#include <Groups/Mesh/MeshGroup.hpp>
+#include "MeshFactory.hpp"
+#include <Mesh/MeshGroup.hpp>
 
 using namespace fluo;
 

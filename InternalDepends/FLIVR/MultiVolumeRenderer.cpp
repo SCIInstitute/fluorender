@@ -29,8 +29,8 @@
 #include "MultiVolumeRenderer.h"
 #include "VolShader.h"
 #include "ShaderProgram.h"
-#include <FLIVR/Framebuffer.h>
-#include <FLIVR/VertexArray.h>
+#include "Framebuffer.h"
+#include "VertexArray.h"
 #include <Utilities/compatibility.h>
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>

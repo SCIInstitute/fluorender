@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef SLIVR_BBox_h
 #define SLIVR_BBox_h
 
-#include <Point.h>
+#include "Point.h"
 #include <BBox.hpp>
 #include <iostream>
 

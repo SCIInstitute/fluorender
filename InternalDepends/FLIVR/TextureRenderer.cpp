@@ -27,20 +27,19 @@
 //  
 
 #include <GL/glew.h>
-#include <FLIVR/TextureBrick.h>
-#include <FLIVR/TextureRenderer.h>
-#include <FLIVR/Color.h>
-#include <FLIVR/Utils.h>
-#include <FLIVR/ShaderProgram.h>
-#include <FLIVR/VolShader.h>
-#include <FLIVR/SegShader.h>
-#include <FLIVR/VolCalShader.h>
-#include <FLIVR/Framebuffer.h>
-#include <FLIVR/VertexArray.h>
+#include "TextureBrick.h"
+#include "TextureRenderer.h"
+#include "Color.h"
+#include "Utils.h"
+#include "ShaderProgram.h"
+#include "VolShader.h"
+#include "SegShader.h"
+#include "VolCalShader.h"
+#include "Framebuffer.h"
+#include "VertexArray.h"
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
-#include "compatibility.h"
-//#include <wx/utils.h>
+#include <Utilities/compatibility.h>
 #include <chrono>
 #include <thread>
 
@@ -1366,7 +1365,6 @@ namespace FLIVR
 		del_id = 0;
 	}
 
-	//Texture‚ÖˆÚ“®—\’è
 	void TextureRenderer::clear_brick_buf()
 	{
 		if (!tex_)
@@ -1383,7 +1381,7 @@ namespace FLIVR
 					(*bs)[i]->freeBrkData();
 				}
 			}
-			rearrangeLoadedBrkVec();//tex_‚Åload‚µ‚½‚à‚Ì‚¾‚¯‚ðÁ‚·
+			rearrangeLoadedBrkVec();
 		}
 		tex_->setLevel(cur_lv);
 	}
